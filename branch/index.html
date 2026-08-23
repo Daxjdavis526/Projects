@@ -92,7 +92,6 @@ kbd{font:inherit; color:var(--plasma); opacity:.75}
 .btn:focus-visible,.tog:focus-visible,.gate-rf:focus-within{outline:1px solid var(--hair-lit); outline-offset:2px}
 .btn svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round}
 .btn svg.solid{fill:currentColor; stroke:none}
-#bSink{display:none}
 .grp{display:contents}
 .sep{width:1px; height:18px; background:var(--hair); margin:0 6px}
 .field{display:flex; align-items:center; gap:7px; padding:0 6px}
@@ -145,7 +144,6 @@ input[type=range]::-moz-range-thumb{width:7px; height:7px; border:0; border-radi
   .sep{display:none}
   #trackName{display:none}
   .grp{display:flex; width:100%; justify-content:center; align-items:center; gap:5px}
-  #bSink{display:inline-block}
   .btn{width:44px; height:40px}
   .btn svg{width:18px; height:18px}
   .tog{padding:.78rem .6rem; font-size:.56rem; letter-spacing:.12em; min-height:40px}
@@ -203,11 +201,9 @@ input[type=range]::-moz-range-thumb{width:7px; height:7px; border:0; border-radi
     <button class="tog" id="bTab" title="Listen to a browser tab — Spotify, YouTube, anything (C)">Tab</button>
     <button class="tog" id="bMic" title="Listen to music from a separate speaker. On a phone this pauses audio playing on the phone itself (M)">Mic</button>
     <button class="tog" id="bBeat" aria-pressed="false" title="Tap the beat of music playing elsewhere (B)">Tap beat</button>
-    <button class="tog" id="bSink" aria-pressed="false" title="Alternate audio route — try this if a phone stays silent">Sound fix</button>
     <input type="file" id="fInput" accept="audio/*" hidden>
     <span id="trackName">—</span>
     <div class="sep"></div>
-    <button class="tog" id="bFlash" aria-pressed="false" title="Reduced flashing (X)">Reduced flash</button>
     <button class="btn" id="bFull" title="Fullscreen (F)" aria-label="Fullscreen">
       <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
     </button>
@@ -245,7 +241,7 @@ const mtof  = m => 440 * Math.pow(2, (m - 69) / 12);
 const AUDIO = {
   ctx:null, mix:null, comp:null, ana:null, vol:null, verb:null, duck:null,
   freq:null, sr:44100, ready:false, source:'', mode:'synth', el:null, elSrc:null,
-  stream:null, streamSrc:null, streamGain:null, sink:null, sinkDest:null
+  stream:null, streamSrc:null, streamGain:null
 };
 
 function initAudio(){
@@ -844,37 +840,6 @@ async function keepAwake(on){
       const w = wakeLock; wakeLock = null; await w.release();
     }
   }catch(e){ wakeLock = null; }   // unsupported, or refused in the background
-}
-
-/* ---------- iOS: route the mix through a media element ---------- */
-function mediaRoute(on){
-  const A = AUDIO;
-  if (!A.ctx) return false;
-  if (on && !A.sink){
-    try{
-      const dest = A.ctx.createMediaStreamDestination();
-      A.vol.disconnect();
-      A.vol.connect(dest);
-      const el = document.createElement('audio');
-      el.srcObject = dest.stream;
-      el.playsInline = true; el.autoplay = true; el.volume = 1;
-      A.sink = el; A.sinkDest = dest;
-      el.play().catch(() => { mediaRoute(false); ui.toast('this browser will not route that way'); });
-      return true;
-    }catch(e){
-      try{ A.vol.disconnect(); }catch(_){}
-      A.vol.connect(A.ctx.destination);
-      A.sink = null;
-      return false;
-    }
-  }
-  if (!on && A.sink){
-    try{ A.sink.pause(); A.sink.srcObject = null; }catch(e){}
-    try{ A.vol.disconnect(); }catch(e){}
-    A.vol.connect(A.ctx.destination);
-    A.sink = null; A.sinkDest = null;
-  }
-  return false;
 }
 
 /* ---------- playing a supplied file instead ---------- */
@@ -1832,7 +1797,6 @@ function toggleFull(){
 }
 function setReduced(v){
   P.reduced = v;
-  $('#bFlash').setAttribute('aria-pressed', String(v));
   const g = $('#gateRF');
   if (g) g.checked = v;          // the title card is gone once playback starts
 }
@@ -1942,19 +1906,12 @@ function boot(){
   $('#bPlay').onclick = () => setPaused(!paused);
   $('#bRestart').onclick = restart;
   $('#bFull').onclick = toggleFull;
-  $('#bFlash').onclick = () => setReduced(!P.reduced);
   $('#bTrack').onclick = () => {
     if (AUDIO.mode === 'file'){ useSynth(0); ui.toast(TRACKS[0].title); }
     else { useSynth(SEQ.track + 1); ui.toast(TRACKS[SEQ.track].title); }
   };
   $('#bFile').onclick = () => $('#fInput').click();
   $('#bBeat').onclick = tapBeat;
-  $('#bSink').onclick = () => {
-    const on = $('#bSink').getAttribute('aria-pressed') !== 'true';
-    mediaRoute(on);
-    $('#bSink').setAttribute('aria-pressed', String(on));
-    ui.toast(on ? 'alternate audio route on' : 'normal audio route');
-  };
   $('#bTab').onclick = listenToTab;
   $('#bMic').onclick = listenToMic;
   $('#fInput').onchange = e => { const f = e.target.files[0]; if (f) loadFile(f); e.target.value = ''; };

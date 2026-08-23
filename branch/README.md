@@ -122,42 +122,11 @@ page rather than inside anyone's frame.
 A file opened from the Files app on iOS runs in a restricted preview where
 scripts may not execute; a phone needs the page served over http(s).
 
-## Tap tempo
-
-**Tap beat** (or `B`) drives the growth from a tempo you tap in, with no audio
-at all — for watching alongside music playing in an app the page cannot reach,
-which on a phone is every streaming service.
-
-Tap the beat four times to start; the tempo is the median-filtered average of
-your intervals. Our own audio stops so it is not competing. Tap again any time
-to re-sync — phase re-aligns to the newest tap and the tempo estimate refines.
-Press **Track** to go back to real audio.
-
-It is a metronome, not listening: it holds time because it runs at the same
-speed and started on the same beat. So it drifts (about half a second a minute
-for a 1% tempo error), knows nothing about drops or timbre, and has no idea
-when a song ends. Tapping more times before it locks averages out your error.
-
-## If a phone stays silent
-
-iOS routes Web Audio through the *ambient* audio category, which the physical
-ring/silent switch mutes — even at full volume, and even though the page is
-producing sound. Media elements play through the *media* category, which the
-switch does not mute. The **Sound fix** button, shown only on touch devices,
-re-routes the mix through a media element for that reason. MediaStream
-playback is uneven across Safari versions, so it is opt-in and reverts by
-itself if the browser refuses.
-
-Quick way to tell what is wrong: if the branches are pulsing in time with the
-music, sound *is* being generated and the device is muting it — check the ring
-switch, then Sound fix. If they are not reacting at all, playback never
-started.
-
 ## Photosensitivity
 
-The visualisation flashes in time with major musical events. **Reduced
-flashing** is available on the title screen before anything starts, in the
-control bar, and on the `X` key. It cuts flash strength to about a sixth and
+The visualisation flashes in time with major musical events. **Reduced flashing**
+is set on the title screen before anything starts, and can be toggled at any
+time with the `X` key. It cuts flash strength to about a sixth and
 removes the bright wash entirely.
 
 ## How it works
