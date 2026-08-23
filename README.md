@@ -12,3 +12,14 @@ Live: https://daxjdavis526.github.io/Projects/branch/
 Open it in Safari on an iPhone and use Share → Add to Home Screen to install it
 as a full-screen app. See [branch/README.md](branch/README.md) for the controls
 and how it works.
+
+## helios/
+
+**HELIOS** — a first-person spaceship flight sandbox through the real solar
+system. Cockpit view, warp speeds up to 1000× light, planet autopilot, a dive
+through Saturn's rings, and the occasional dogfight. Desktop only (keyboard +
+mouse).
+
+Live: https://daxjdavis526.github.io/Projects/helios/
+
+See [helios/README.md](helios/README.md) for the controls.

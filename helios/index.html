@@ -1,0 +1,1233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HELIOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cyan:#7fd8ff; --amber:#ffc26e; --red:#ff5f6b; --dim:#4a6a7a;
+    --hud: rgba(127,216,255,.92);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--hud);
+    font-family:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    -webkit-user-select:none;user-select:none}
+  canvas#view{position:fixed;inset:0;display:block}
+
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .6s}
+  #hud.on{opacity:1}
+  .panel{position:absolute;padding:10px 14px;background:rgba(4,14,20,.42);
+    border:1px solid rgba(127,216,255,.22);border-radius:6px;backdrop-filter:blur(2px);
+    font-size:12px;line-height:1.55;letter-spacing:.04em}
+  .panel b{font-weight:600}
+  .lbl{color:var(--dim);font-size:10px;letter-spacing:.18em}
+  #pSpeed{left:18px;top:16px;min-width:215px}
+  #speedBig{font-family:Michroma,'IBM Plex Mono',monospace;font-size:24px;color:#dff4ff;
+    letter-spacing:.04em;margin:2px 0 4px}
+  #speedC{color:var(--amber);font-size:12px}
+  .bar{height:5px;background:rgba(127,216,255,.14);border-radius:3px;margin:5px 0 2px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0%;background:var(--cyan);border-radius:3px;transition:width .08s linear}
+  #bThr>i{background:linear-gradient(90deg,#3fa9d8,#7fd8ff)}
+  #bThr.rev>i{background:#c98bff}
+  #pTarget{right:18px;top:16px;min-width:225px;text-align:right}
+  #tName{font-family:Michroma,monospace;font-size:16px;color:#fff;margin:2px 0 3px}
+  #tAuto{color:var(--amber)}
+  #tAuto.on{color:#8bffb0}
+  #pShip{left:18px;bottom:16px;min-width:215px}
+  #bHull>i{background:linear-gradient(90deg,#37d98a,#8bffb0)}
+  #bHull.low>i{background:var(--red)}
+  #bHeat>i{background:linear-gradient(90deg,#ffb36e,#ff5f6b)}
+  #wpnTxt{font-size:11px}
+  #hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+    color:var(--dim);font-size:11px;letter-spacing:.14em;text-align:center}
+  #msg{position:absolute;top:20%;left:50%;transform:translateX(-50%);
+    font-family:Michroma,monospace;font-size:15px;letter-spacing:.3em;color:#fff;
+    text-shadow:0 0 18px rgba(127,216,255,.8);opacity:0;transition:opacity .4s;text-align:center;white-space:nowrap}
+
+  /* crosshair + target markers */
+  #cross{position:absolute;left:50%;top:50%;width:26px;height:26px;transform:translate(-50%,-50%)}
+  #cross:before,#cross:after{content:'';position:absolute;background:rgba(127,216,255,.85)}
+  #cross:before{left:50%;top:0;width:1px;height:100%;transform:translateX(-.5px)}
+  #cross:after{top:50%;left:0;height:1px;width:100%;transform:translateY(-.5px)}
+  #cross i{position:absolute;left:50%;top:50%;width:8px;height:8px;border:1px solid rgba(127,216,255,.85);
+    border-radius:50%;transform:translate(-50%,-50%)}
+  #tgtBox{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;display:none}
+  #tgtBox span{position:absolute;width:12px;height:12px;border:0 solid var(--amber)}
+  #tgtBox span:nth-child(1){left:0;top:0;border-left-width:1.5px;border-top-width:1.5px}
+  #tgtBox span:nth-child(2){right:0;top:0;border-right-width:1.5px;border-top-width:1.5px}
+  #tgtBox span:nth-child(3){left:0;bottom:0;border-left-width:1.5px;border-bottom-width:1.5px}
+  #tgtBox span:nth-child(4){right:0;bottom:0;border-right-width:1.5px;border-bottom-width:1.5px}
+  #tgtBox.enemy span{border-color:var(--red)}
+  #tgtArrow{position:absolute;display:none;width:0;height:0;
+    border-left:7px solid transparent;border-right:7px solid transparent;
+    border-bottom:13px solid var(--amber);margin:-6px 0 0 -7px;filter:drop-shadow(0 0 4px rgba(255,194,110,.7))}
+  #tgtLbl{position:absolute;display:none;font-size:10px;color:var(--amber);letter-spacing:.12em;white-space:nowrap;
+    transform:translate(-50%,26px)}
+  #pip{position:absolute;display:none;width:12px;height:12px;margin:-6px 0 0 -6px;
+    border:1.5px solid var(--red);border-radius:50%;box-shadow:0 0 6px rgba(255,95,107,.8)}
+
+  /* damage flash */
+  #dmg{position:fixed;inset:0;pointer-events:none;opacity:0;
+    background:radial-gradient(ellipse at center,transparent 40%,rgba(255,40,50,.45) 100%)}
+
+  /* ---------- help ---------- */
+  #help{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:30;
+    background:rgba(3,10,16,.92);border:1px solid rgba(127,216,255,.3);border-radius:10px;
+    padding:26px 34px;font-size:12.5px;line-height:2;display:none;pointer-events:none;min-width:430px}
+  #help h2{font-family:Michroma,monospace;font-size:13px;letter-spacing:.3em;color:#fff;margin-bottom:12px}
+  #help td{padding:0 8px}
+  #help td:first-child{color:var(--amber);text-align:right;white-space:nowrap}
+  #help .foot{margin-top:12px;color:var(--dim);font-size:11px}
+
+  /* ---------- title ---------- */
+  #title{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;background:radial-gradient(ellipse at 50% 42%,#08141d 0%,#010409 65%,#000 100%);
+    cursor:pointer;transition:opacity .8s}
+  #title.gone{opacity:0;pointer-events:none}
+  #title h1{font-family:Michroma,monospace;font-size:clamp(38px,8vw,86px);letter-spacing:.42em;
+    color:#eef8ff;text-indent:.42em;text-shadow:0 0 34px rgba(127,216,255,.55),0 0 90px rgba(127,216,255,.25)}
+  #title .sub{margin-top:10px;color:var(--dim);letter-spacing:.32em;font-size:12px}
+  #title .go{margin-top:52px;color:var(--cyan);letter-spacing:.3em;font-size:14px;animation:pulse 2.2s infinite}
+  #title .keys{margin-top:30px;color:#33505e;font-size:11px;letter-spacing:.12em;line-height:1.9;text-align:center}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  #warnMob{display:none;margin-top:24px;color:var(--amber);font-size:12px;text-align:center;line-height:1.7}
+  @media (pointer:coarse){ #warnMob{display:block} }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="hud">
+  <div class="panel" id="pSpeed">
+    <div class="lbl">VELOCITY</div>
+    <div id="speedBig">0 km/s</div>
+    <div id="speedC">0.000 c</div>
+    <div class="lbl" style="margin-top:7px">THROTTLE</div>
+    <div class="bar" id="bThr"><i></i></div>
+    <div class="lbl" style="margin-top:7px">SPEED LIMIT <span id="maxTxt" style="color:var(--cyan)"></span></div>
+  </div>
+  <div class="panel" id="pTarget">
+    <div class="lbl">TARGET &nbsp;·&nbsp; TAB / 1–9</div>
+    <div id="tName">—</div>
+    <div id="tDist">&nbsp;</div>
+    <div id="tEta">&nbsp;</div>
+    <div id="tAuto">AUTOPILOT OFF — F</div>
+  </div>
+  <div class="panel" id="pShip">
+    <div class="lbl">HULL</div>
+    <div class="bar" id="bHull"><i style="width:100%"></i></div>
+    <div class="lbl" style="margin-top:7px">CANNONS</div>
+    <div class="bar" id="bHeat"><i></i></div>
+    <div id="wpnTxt">READY</div>
+  </div>
+  <div id="cross"><i></i></div>
+  <div id="tgtBox"><span></span><span></span><span></span><span></span></div>
+  <div id="tgtArrow"></div>
+  <div id="tgtLbl"></div>
+  <div id="pip"></div>
+  <div id="hint">H — CONTROLS &nbsp;·&nbsp; V — CAMERA &nbsp;·&nbsp; F — AUTOPILOT</div>
+  <div id="msg"></div>
+</div>
+<div id="dmg"></div>
+
+<div id="help">
+  <h2>FLIGHT CONTROLS</h2>
+  <table>
+    <tr><td>MOUSE</td><td>pitch / yaw</td></tr>
+    <tr><td>A / D</td><td>roll</td></tr>
+    <tr><td>W / S</td><td>throttle up / down (S past zero = reverse)</td></tr>
+    <tr><td>X</td><td>full stop</td></tr>
+    <tr><td>SHIFT / CTRL &nbsp;or&nbsp; WHEEL</td><td>raise / lower speed limit (up to 1000 c)</td></tr>
+    <tr><td>TAB &nbsp;or&nbsp; 1 – 9, 0</td><td>select target planet</td></tr>
+    <tr><td>F</td><td>autopilot to target</td></tr>
+    <tr><td>CLICK / SPACE</td><td>fire cannons</td></tr>
+    <tr><td>V</td><td>cockpit / exterior camera</td></tr>
+    <tr><td>HOLD RIGHT MOUSE</td><td>look around freely</td></tr>
+    <tr><td>M</td><td>mute &nbsp;&nbsp;·&nbsp;&nbsp; H&nbsp;&nbsp;close this panel</td></tr>
+  </table>
+  <div class="foot">ESC releases the mouse — click the screen to take control again.</div>
+</div>
+
+<div id="title">
+  <h1>HELIOS</h1>
+  <div class="sub">SOLAR&nbsp;FLIGHT&nbsp;SANDBOX</div>
+  <div class="go">CLICK&nbsp;TO&nbsp;LAUNCH</div>
+  <div class="keys">W&nbsp;THROTTLE&nbsp;&nbsp;·&nbsp;&nbsp;MOUSE&nbsp;STEER&nbsp;&nbsp;·&nbsp;&nbsp;TAB&nbsp;TARGET&nbsp;&nbsp;·&nbsp;&nbsp;F&nbsp;AUTOPILOT&nbsp;&nbsp;·&nbsp;&nbsp;SHIFT&nbsp;FASTER&nbsp;&nbsp;·&nbsp;&nbsp;H&nbsp;HELP</div>
+  <div id="warnMob">This is a keyboard + mouse game — best played on a computer.</div>
+</div>
+
+<script src="three.min.js"></script>
+<script>
+'use strict';
+/* ============================================================================
+   HELIOS — a lightweight solar-system flight sandbox.
+   One file. Sections: 1 CORE  2 WORLD  3 SHIP  4 EFFECTS  5 COMBAT
+                       6 CONTROL  7 HUD  8 LOOP
+   Units: 1 unit = 1 km. Ship is the floating origin: true positions live in
+   JS doubles, the GPU only ever sees positions relative to the ship.
+   ========================================================================= */
+
+/* ------------------------------ 1. CORE ---------------------------------- */
+const C_LIGHT = 299792.458;                 // km/s
+const AU      = 1.496e8;                    // km
+const clamp = (v,a,b)=>v<a?a:v>b?b:v;
+const lerp  = (a,b,t)=>a+(b-a)*t;
+const dampF = (rate,dt)=>1-Math.exp(-rate*dt);   // framerate-independent easing
+const TAU = Math.PI*2;
+const $ = s=>document.querySelector(s);
+
+// deterministic pseudo-random (so the same universe greets you every launch)
+let _seed = 1234567;
+function rnd(){ _seed=(_seed*1103515245+12345)&0x7fffffff; return _seed/0x7fffffff; }
+
+/* --- audio: tiny procedural synth, no files ------------------------------ */
+const SND = { ctx:null, master:null, engine:null, engGain:null, muted:false };
+function initSound(){
+  if (SND.ctx) return;
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const master = ctx.createGain(); master.gain.value = 0.5; master.connect(ctx.destination);
+  // engine hum: two detuned saws through a lowpass, gain follows throttle
+  const o1=ctx.createOscillator(), o2=ctx.createOscillator();
+  o1.type='sawtooth'; o2.type='sawtooth'; o1.frequency.value=42; o2.frequency.value=42.7;
+  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=220; lp.Q.value=2;
+  const eg=ctx.createGain(); eg.gain.value=0;
+  o1.connect(lp); o2.connect(lp); lp.connect(eg); eg.connect(master);
+  o1.start(); o2.start();
+  SND.ctx=ctx; SND.master=master; SND.engine=lp; SND.engGain=eg;
+}
+function sndEngine(throttle, speedFrac){
+  if(!SND.ctx||SND.muted) return;
+  const t=SND.ctx.currentTime;
+  SND.engGain.gain.setTargetAtTime(0.05+Math.abs(throttle)*0.10, t, .1);
+  SND.engine.frequency.setTargetAtTime(160+Math.abs(throttle)*480+speedFrac*380, t, .15);
+}
+function blip(freq,dur,type,vol,slide){         // generic one-shot
+  if(!SND.ctx||SND.muted) return;
+  const c=SND.ctx,t=c.currentTime,o=c.createOscillator(),g=c.createGain();
+  o.type=type||'square'; o.frequency.setValueAtTime(freq,t);
+  if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*slide),t+dur);
+  g.gain.setValueAtTime(vol||.16,t); g.gain.exponentialRampToValueAtTime(.0008,t+dur);
+  o.connect(g); g.connect(SND.master); o.start(t); o.stop(t+dur+.02);
+}
+function noiseHit(dur,vol,lpf){                 // impact / explosion
+  if(!SND.ctx||SND.muted) return;
+  const c=SND.ctx,t=c.currentTime,n=Math.floor(c.sampleRate*dur);
+  const buf=c.createBuffer(1,n,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n)*(1-i/n);
+  const src=c.createBufferSource(); src.buffer=buf;
+  const f=c.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lpf||900;
+  const g=c.createGain(); g.gain.value=vol||.4;
+  src.connect(f); f.connect(g); g.connect(SND.master); src.start(t);
+}
+const sndFire   =()=>blip(920,.09,'square',.10,.28);
+const sndEFire  =()=>blip(430,.12,'square',.07,.5);
+const sndImpact =()=>noiseHit(.14,.30,1400);
+const sndBoom   =()=>{ noiseHit(.9,.65,420); blip(70,.7,'sine',.4,.4); };
+const sndBeep   =()=>blip(1180,.07,'sine',.12);
+const sndWarn   =()=>{ blip(300,.16,'sawtooth',.14); setTimeout(()=>blip(300,.16,'sawtooth',.14),200); };
+</script>
+<script>
+/* ------------------------------ 2. WORLD --------------------------------- */
+const renderer = new THREE.WebGLRenderer({ canvas:$('#view'), antialias:true,
+  logarithmicDepthBuffer:true, powerPreference:'high-performance' });
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.autoClear = false;
+const scene   = new THREE.Scene();                 // the universe (ship-relative)
+const cockScene = new THREE.Scene();               // cockpit, rendered on top (metres)
+let W=innerWidth, H=innerHeight;
+const cam = new THREE.PerspectiveCamera(62, W/H, 0.002, 2e10);   // world km
+const cockCam = new THREE.PerspectiveCamera(62, W/H, .04, 40);   // cockpit m
+function resize(){
+  W=innerWidth; H=innerHeight;
+  renderer.setSize(W,H); renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  cam.aspect=cockCam.aspect=W/H; cam.updateProjectionMatrix(); cockCam.updateProjectionMatrix();
+}
+addEventListener('resize',resize); resize();
+
+/* --- procedural texture kit ---------------------------------------------- */
+// periodic value noise so equirect textures wrap seamlessly around a sphere
+function makeNoise(period){
+  const g=new Float32Array(period*period);
+  for(let i=0;i<g.length;i++) g[i]=rnd();
+  const at=(x,y)=>g[((y%period+period)%period)*period+((x%period+period)%period)];
+  return (x,y)=>{
+    const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;
+    const sx=xf*xf*(3-2*xf), sy=yf*yf*(3-2*yf);
+    return lerp(lerp(at(xi,yi),at(xi+1,yi),sx), lerp(at(xi,yi+1),at(xi+1,yi+1),sx), sy);
+  };
+}
+const noise = makeNoise(64);
+function fbm(x,y,oct){ let v=0,a=.5,f=1; for(let i=0;i<oct;i++){ v+=a*noise(x*f,y*f); f*=2; a*=.5; } return v; }
+
+function canvasTex(w,h,paint){
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d'); paint(x,w,h);
+  const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding;
+  t.wrapS=THREE.RepeatWrapping; t.anisotropy=4; return t;
+}
+// paint an equirect planet map pixel-by-pixel from a colour function
+function planetTex(w,h,colFn){
+  return canvasTex(w,h,(x)=>{
+    const img=x.createImageData(w,h), d=img.data;
+    for(let j=0;j<h;j++) for(let i=0;i<w;i++){
+      const u=i/w, v=j/h, k=(j*w+i)*4;
+      const c=colFn(u,v);
+      d[k]=c[0]; d[k+1]=c[1]; d[k+2]=c[2]; d[k+3]=255;
+    }
+    x.putImageData(img,0,0);
+  });
+}
+const mixc=(a,b,t)=>[lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2],t)];
+
+const TEXPAINT = {
+  mercury:(u,v)=>{ const n=fbm(u*10,v*5,4), cr=fbm(u*26+9,v*13,3);
+    let g=88+n*70; if(cr>.62) g-=40*(cr-.62)/.38; return [g,g*.97,g*.92]; },
+  venus:(u,v)=>{ const n=fbm(u*6+fbm(u*3,v*3,2)*1.6, v*3, 4);
+    return mixc([224,190,130],[176,138,88], n); },
+  earth:(u,v)=>{ const lat=Math.abs(v-.5)*2;
+    const n=fbm(u*7,v*3.5,5)+fbm(u*20,v*10,3)*.28;
+    let c; if(n>.685) c=mixc([70,102,48],[128,116,74],fbm(u*30,v*15,2));   // land
+    else if(n>.665) c=[188,178,140];                                       // coast
+    else c=mixc([14,42,92],[24,74,138],fbm(u*12,v*6,3));                   // ocean
+    if(lat>.82) c=mixc(c,[235,240,245],clamp((lat-.82)/.1,0,1));           // ice caps
+    return c; },
+  mars:(u,v)=>{ const lat=Math.abs(v-.5)*2, n=fbm(u*8,v*4,5);
+    let c=mixc([154,84,48],[196,120,70],n);
+    if(fbm(u*15+4,v*8,3)>.66) c=mixc(c,[92,54,36],.55);
+    if(lat>.9) c=mixc(c,[232,228,222],clamp((lat-.9)/.06,0,1));
+    return c; },
+  jupiter:(u,v)=>{ const w=fbm(u*9,v*22,4)*.10;
+    const band=Math.sin((v+w)*26)+Math.sin((v+w)*11+1.7)*.5;
+    let c=mixc([206,168,120],[150,104,70],band*.5+.5);
+    c=mixc(c,[236,222,196],fbm(u*16,v*40,3)*.35);
+    const dx=(u-.68)*2.8,dy=(v-.66)*7;                       // great red spot
+    const spot=Math.exp(-(dx*dx+dy*dy)*3.2);
+    return mixc(c,[190,84,52],spot*.85); },
+  saturn:(u,v)=>{ const w=fbm(u*7,v*18,3)*.07;
+    const band=Math.sin((v+w)*20)+Math.sin((v+w)*8+.8)*.6;
+    let c=mixc([226,204,158],[184,158,116],band*.5+.5);
+    return mixc(c,[240,230,204],fbm(u*12,v*30,3)*.3); },
+  uranus:(u,v)=>{ const band=Math.sin(v*9+fbm(u*5,v*8,3)*.5)*.5+.5;
+    return mixc([158,214,222],[128,190,206],band); },
+  neptune:(u,v)=>{ const band=Math.sin(v*11+fbm(u*6,v*9,3)*.8)*.5+.5;
+    let c=mixc([46,84,196],[30,56,150],band);
+    const dx=(u-.4)*4,dy=(v-.42)*9, spot=Math.exp(-(dx*dx+dy*dy)*3);
+    return mixc(c,[16,28,92],spot*.8); },
+  pluto:(u,v)=>{ const n=fbm(u*7,v*4,4);
+    let c=mixc([172,140,112],[120,92,74],n);
+    const dx=(u-.55)*3.2,dy=(v-.55)*5.2, heart=Math.exp(-(dx*dx+dy*dy)*2.4);
+    return mixc(c,[226,214,198],heart*.8); },
+  moon:(u,v)=>{ const n=fbm(u*9,v*5,4), cr=fbm(u*30+3,v*16,3);
+    let g=132+n*46; if(cr>.6) g-=44*(cr-.6)/.4;
+    if(fbm(u*5+8,v*3,3)>.62) g-=26;                          // maria
+    return [g,g,g*1.02]; },
+};
+
+// soft radial glow sprite texture (sun halo, engine glow, muzzle flash…)
+function glowTex(inner,outer){
+  return canvasTex(128,128,(x,w,h)=>{
+    const g=x.createRadialGradient(64,64,2,64,64,62);
+    g.addColorStop(0,inner); g.addColorStop(.35,outer); g.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g; x.fillRect(0,0,w,h);
+  });
+}
+</script>
+<script>
+/* --- the solar system ----------------------------------------------------- */
+// Real radii and orbit distances (km). Planets are drawn 10x their real radius
+// (5x for the Sun) so they read as huge at gameplay ranges; distances are real.
+const VIS_P=10, VIS_S=5;
+const BODIES=[
+ {name:'SUN',    r:696000,vs:VIS_S,a:0,      per:1,     ang:0,  tex:null,      key:'0'},
+ {name:'MERCURY',r:2440,  vs:VIS_P,a:5.79e7, per:88,    ang:40, tex:'mercury', key:'1'},
+ {name:'VENUS',  r:6052,  vs:VIS_P,a:1.082e8,per:225,   ang:200,tex:'venus',   key:'2', atmo:0xd8b070},
+ {name:'EARTH',  r:6371,  vs:VIS_P,a:1.496e8,per:365,   ang:0,  tex:'earth',   key:'3', atmo:0x5588ff, clouds:true},
+ {name:'MOON',   r:1737,  vs:VIS_P,a:3.844e5,per:27.3,  ang:60, tex:'moon',    key:'4', parent:'EARTH'},
+ {name:'MARS',   r:3390,  vs:VIS_P,a:2.279e8,per:687,   ang:45, tex:'mars',    key:'5', atmo:0xcc7744},
+ {name:'JUPITER',r:69911, vs:VIS_P,a:7.786e8,per:4333,  ang:130,tex:'jupiter', key:'6', atmo:0xc0a070},
+ {name:'SATURN', r:58232, vs:VIS_P,a:1.4335e9,per:10759,ang:310,tex:'saturn',  key:'7', atmo:0xd8c090, rings:true},
+ {name:'URANUS', r:25362, vs:VIS_P,a:2.8725e9,per:30687,ang:80, tex:'uranus',  key:'8', atmo:0x9fd4dd},
+ {name:'NEPTUNE',r:24622, vs:VIS_P,a:4.4951e9,per:60190,ang:250,tex:'neptune', key:'9', atmo:0x3355cc},
+ {name:'PLUTO',  r:1188,  vs:VIS_P,a:5.9064e9,per:90560,ang:175,tex:'pluto',   key:''},
+];
+const fresnelMat=(hex)=>new THREE.ShaderMaterial({    // thin additive rim glow
+  uniforms:{ c:{value:new THREE.Color(hex)} },
+  vertexShader:`varying float vI; void main(){
+    vec3 n=normalize(normalMatrix*normal);
+    vec3 e=normalize((modelViewMatrix*vec4(position,1.)).xyz);
+    vI=pow(1.05+dot(n,e),3.0);
+    gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+  fragmentShader:`uniform vec3 c; varying float vI;
+    void main(){ gl_FragColor=vec4(c,1.)*vI*.5; }`,
+  transparent:true, blending:THREE.AdditiveBlending, side:THREE.BackSide, depthWrite:false,
+});
+const sunHalo = glowTex('rgba(255,244,214,1)','rgba(255,170,60,.55)');
+
+for(const b of BODIES){
+  b.R  = b.r*b.vs;                              // visual radius, km
+  b.pos= new THREE.Vector3();                   // true world position (JS doubles)
+  b.w  = TAU/(b.per*86400);                     // real angular speed, rad/s
+  b.a0 = b.ang*Math.PI/180;
+  const geo=new THREE.SphereGeometry(b.R, b.name==='SUN'?48:64, b.name==='SUN'?24:32);
+  if(b.name==='SUN'){
+    b.mesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xfff2cc}));
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:sunHalo,color:0xffddaa,
+      blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+    sp.scale.setScalar(b.R*7); b.mesh.add(sp);
+    const light=new THREE.PointLight(0xfff4e0, 1.6, 0, 0); b.mesh.add(light);
+  }else{
+    b.mesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({map:planetTex(512,256,TEXPAINT[b.tex])}));
+    b.mesh.rotation.z = b.name==='URANUS' ? 1.7 : (rnd()-.5)*.15;   // Uranus rolls on its side
+    if(b.atmo){ const at=new THREE.Mesh(new THREE.SphereGeometry(b.R*1.035,48,24),fresnelMat(b.atmo));
+      b.mesh.add(at); }
+    if(b.clouds){
+      const cvs=document.createElement('canvas'); cvs.width=512; cvs.height=256;
+      const cx=cvs.getContext('2d'), img=cx.createImageData(512,256);
+      for(let j=0;j<256;j++)for(let i=0;i<512;i++){ const u=i/512,v=j/256,k=(j*512+i)*4;
+        const n=fbm(u*9+2,v*4.5,5)+fbm(u*24,v*12,3)*.3;
+        img.data[k]=img.data[k+1]=img.data[k+2]=255; img.data[k+3]=clamp((n-.60)*4.2,0,1)*230; }
+      cx.putImageData(img,0,0);
+      const tex=new THREE.CanvasTexture(cvs); tex.encoding=THREE.sRGBEncoding; tex.wrapS=THREE.RepeatWrapping;
+      b.cloudMesh=new THREE.Mesh(new THREE.SphereGeometry(b.R*1.018,48,24),
+        new THREE.MeshLambertMaterial({map:tex,transparent:true,depthWrite:false}));
+      b.mesh.add(b.cloudMesh);
+    }
+    if(b.rings){
+      // ring disc: radial texture remapped onto a RingGeometry
+      b.ringIn=74500*VIS_P; b.ringOut=137000*VIS_P;
+      const rg=new THREE.RingGeometry(b.ringIn,b.ringOut,160,1);
+      const p=rg.attributes.position, uv=rg.attributes.uv, v3=new THREE.Vector3();
+      for(let i=0;i<p.count;i++){ v3.fromBufferAttribute(p,i);
+        uv.setXY(i,(v3.length()-b.ringIn)/(b.ringOut-b.ringIn),0.5); }
+      const rt=canvasTex(512,8,(x,w,h)=>{
+        for(let i=0;i<w;i++){ const f=i/w;
+          const n=fbm(f*26,0.5,4), gap=(f>.55&&f<.62)?.12:1;    // Cassini division
+          const al=clamp((n*.9+.25)*gap,0,1)*.62*(f<.04?f/.04:1)*(f>.96?(1-f)/.04:1);
+          const c=196+n*44;
+          x.fillStyle=`rgba(${c},${c*.94},${c*.82},${al})`; x.fillRect(i,0,1,h); } });
+      b.ringMesh=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({map:rt,transparent:true,
+        opacity:.95,side:THREE.DoubleSide,depthWrite:false}));
+      b.ringMesh.rotation.x=Math.PI/2;
+      b.mesh.add(b.ringMesh);
+      b.mesh.rotation.z=0.35; b.mesh.rotation.x=0.20;   // pleasing ring tilt
+    }
+  }
+  scene.add(b.mesh);
+}
+const BY={}; BODIES.forEach(b=>BY[b.name]=b);
+const EPOCH=1.756e9;
+function orbitStep(t){                     // true positions from time (seconds)
+  for(const b of BODIES){
+    if(b.name==='SUN'){ b.pos.set(0,0,0); continue; }
+    const a=b.a0+b.w*t;
+    b.pos.set(Math.cos(a)*b.a,0,Math.sin(a)*b.a);
+    if(b.parent) b.pos.add(BY[b.parent].pos);
+    if(b.name==='PLUTO') b.pos.y=Math.sin(a)*b.a*.15;  // a nod to its tilted orbit
+  }
+}
+const spinRate={EARTH:7.3e-5,MARS:7.1e-5,JUPITER:1.76e-4,SATURN:1.65e-4,URANUS:1.0e-4,NEPTUNE:1.08e-4,VENUS:-3e-7,MERCURY:1.2e-6,MOON:2.7e-6,PLUTO:1.1e-5,SUN:2.9e-6};
+
+/* --- starfield ------------------------------------------------------------ */
+{
+  const N=9000, pos=new Float32Array(N*3), col=new Float32Array(N*3);
+  const bandAxis=new THREE.Vector3(.4,1,.25).normalize();   // "milky way" plane
+  for(let i=0;i<N;i++){
+    const v=new THREE.Vector3(rnd()*2-1,rnd()*2-1,rnd()*2-1).normalize();
+    if(i<N*.45){ const d=v.dot(bandAxis); v.addScaledVector(bandAxis,-d*.82).normalize(); } // squash into band
+    v.multiplyScalar(8e9);
+    pos.set([v.x,v.y,v.z],i*3);
+    const m=.35+Math.pow(rnd(),3)*.65, tint=rnd();
+    col.set([m*(tint<.12?1:.92), m*.94, m*(tint>.82?1.0:.9)],i*3);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const stars=new THREE.Points(g,new THREE.PointsMaterial({size:1.7,sizeAttenuation:false,
+    vertexColors:true,depthWrite:false,depthTest:false}));
+  stars.renderOrder=-10; stars.frustumCulled=false; scene.add(stars);
+}
+scene.add(new THREE.AmbientLight(0x46586c,.6));
+</script>
+<script>
+/* ------------------------------- 3. SHIP --------------------------------- */
+const ship={
+  pos:new THREE.Vector3(),            // true world position, km (doubles)
+  quat:new THREE.Quaternion(),
+  speed:0, throttle:0,
+  maxSpeed:50,                        // adjustable ceiling, km/s (up to 1000c)
+  hull:100, heat:0, overheated:false,
+  alive:true, auto:false, freeLook:false,
+  pitchRate:0, yawRate:0, rollRate:0,
+};
+const FWD=new THREE.Vector3(), UPV=new THREE.Vector3(), RGT=new THREE.Vector3();
+function shipAxes(){
+  FWD.set(0,0,-1).applyQuaternion(ship.quat);
+  UPV.set(0,1,0).applyQuaternion(ship.quat);
+  RGT.set(1,0,0).applyQuaternion(ship.quat);
+}
+
+/* --- exterior model (primitives only) ------------------------------------ */
+const SHIP_SCALE=0.012;               // model built in ~metre units, ship ≈ 24 m long
+const shipGrp=new THREE.Group();
+{
+  const hullMat=new THREE.MeshStandardMaterial({color:0x9aa6b2,metalness:.75,roughness:.38});
+  const darkMat=new THREE.MeshStandardMaterial({color:0x3a4048,metalness:.6,roughness:.5});
+  const accMat =new THREE.MeshStandardMaterial({color:0x28455a,metalness:.5,roughness:.4});
+  const add=(geo,mat,x,y,z,rx,ry,rz,sx,sy,sz)=>{ const m=new THREE.Mesh(geo,mat);
+    m.position.set(x,y,z); m.rotation.set(rx||0,ry||0,rz||0); if(sx)m.scale.set(sx,sy,sz);
+    shipGrp.add(m); return m; };
+  add(new THREE.CylinderGeometry(.9,1.15,7,10),hullMat,0,0,-1, -Math.PI/2);        // fuselage
+  add(new THREE.ConeGeometry(.9,3.4,10),hullMat,0,0,-6.2, -Math.PI/2);             // nose
+  add(new THREE.SphereGeometry(.78,16,10),new THREE.MeshStandardMaterial(
+    {color:0x0c1620,metalness:.9,roughness:.15}),0,.62,-2.9,0,0,0,1,.62,1.35);     // canopy
+  add(new THREE.BoxGeometry(9.5,.16,2.6),accMat,0,-.1,.6,0,0,0);                   // wings
+  add(new THREE.BoxGeometry(.14,1.9,2.2),accMat,0,1.0,1.6,.22);                    // fin
+  for(const s of[-1,1]){
+    add(new THREE.CylinderGeometry(.55,.66,3.2,10),darkMat,s*2.9,-.1,1.6,-Math.PI/2); // nacelles
+    add(new THREE.CylinderGeometry(.09,.09,2.6,6),darkMat,s*.55,-.28,-5.6,-Math.PI/2); // gun barrels
+    add(new THREE.BoxGeometry(.5,.3,1.2),darkMat,s*.55,-.34,-4.4);                    // gun mounts
+  }
+  // engine glow: two additive sprites, scaled by throttle each frame
+  const gt=glowTex('rgba(180,230,255,1)','rgba(60,140,255,.6)');
+  ship.glows=[-1,1].map(s=>{ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,
+    color:0x88ccff,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+    sp.position.set(s*2.9,-.1,3.4); sp.scale.setScalar(.01); shipGrp.add(sp); return sp; });
+  shipGrp.scale.setScalar(SHIP_SCALE/10);   // model units→km (24 m ship)
+  scene.add(shipGrp);
+}
+
+/* --- cockpit (own scene, metres) ----------------------------------------- */
+let dashCanvas,dashCtx,dashTex;                       // live instrument screen
+{
+  const cs=cockScene;
+  const dk =new THREE.MeshStandardMaterial({color:0x171d24,metalness:.25,roughness:.8});
+  const dk2=new THREE.MeshStandardMaterial({color:0x0d1116,metalness:.2,roughness:.9});
+  const trim=new THREE.MeshBasicMaterial({color:0x1f4f63});
+  const put=(geo,mat,x,y,z,rx,ry,rz)=>{ const m=new THREE.Mesh(geo,mat);
+    m.position.set(x,y,z); m.rotation.set(rx||0,ry||0,rz||0); cs.add(m); return m; };
+  const strut=(ax,ay,az,bx,by,bz,r,mat)=>{
+    const a=new THREE.Vector3(ax,ay,az), d=new THREE.Vector3(bx,by,bz).sub(a), l=d.length();
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,l,10),mat);
+    m.position.copy(a).addScaledVector(d,.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());
+    cs.add(m); return m; };
+  // nose cowl — the sloping hull you see over the dash
+  put(new THREE.BoxGeometry(3.6,.08,2.2),dk2, 0,-.86,-1.75,-.30);
+  // dashboard panel, tilted toward the pilot
+  put(new THREE.BoxGeometry(2.0,.46,.13),dk, 0,-.56,-1.02,-.42);
+  // glare shield strip along the dash top
+  put(new THREE.BoxGeometry(2.06,.045,.30),dk2, 0,-.375,-.99,-.10);
+  put(new THREE.BoxGeometry(2.06,.014,.02),trim, 0,-.352,-.93);
+  // side consoles
+  put(new THREE.BoxGeometry(.62,.30,1.5),dk,  1.02,-.80,-.35,-.06,0,-.24);
+  put(new THREE.BoxGeometry(.62,.30,1.5),dk, -1.02,-.80,-.35,-.06,0,.24);
+  put(new THREE.BoxGeometry(.5,.012,1.2),trim,  1.03,-.648,-.35,-.06,0,-.24);
+  put(new THREE.BoxGeometry(.5,.012,1.2),trim, -1.03,-.648,-.35,-.06,0,.24);
+  // canopy frame: A-pillars + header
+  const frameMat=new THREE.MeshStandardMaterial({color:0x232c36,metalness:.5,roughness:.6});
+  strut( 1.30,-.42,-.78,  .78,1.02,.30,.045,frameMat);
+  strut(-1.30,-.42,-.78, -.78,1.02,.30,.045,frameMat);
+  strut(-.80,1.03,.28,  .80,1.03,.28,.04,frameMat);
+  strut( 1.34,-.44,-.74,  1.30,-.9,.9,.05,frameMat);
+  strut(-1.34,-.44,-.74, -1.30,-.9,.9,.05,frameMat);
+  // throttle lever + control stick, decorative
+  put(new THREE.CylinderGeometry(.028,.028,.26,8),frameMat,-.62,-.72,-.42,-.6);
+  put(new THREE.SphereGeometry(.045,10,8),new THREE.MeshStandardMaterial({color:0xb03434,roughness:.4}),-.62,-.585,-.49);
+  put(new THREE.CylinderGeometry(.022,.032,.26,8),frameMat,.52,-.76,-.42,-.3);
+  put(new THREE.SphereGeometry(.04,10,8),dk,.52,-.63,-.46);
+  // live instrument screen (canvas texture repainted a few times a second)
+  dashCanvas=document.createElement('canvas'); dashCanvas.width=512; dashCanvas.height=192;
+  dashCtx=dashCanvas.getContext('2d');
+  dashTex=new THREE.CanvasTexture(dashCanvas);
+  put(new THREE.PlaneGeometry(1.14,.42),new THREE.MeshBasicMaterial({map:dashTex}),0,-.545,-.947,-.42);
+  // two small static side screens
+  const side=canvasTex(256,128,(x,w,h)=>{ x.fillStyle='#04131c'; x.fillRect(0,0,w,h);
+    x.strokeStyle='rgba(90,190,230,.5)'; x.lineWidth=2;
+    for(let i=0;i<5;i++){ x.beginPath();
+      for(let px=0;px<w;px+=6) x.lineTo(px, h*.5+Math.sin(px*.05+i*2)*14*(1+i*.2));
+      x.stroke(); }});
+  put(new THREE.PlaneGeometry(.4,.22),new THREE.MeshBasicMaterial({map:side}), .99,-.63,-.30,-.35,-.24);
+  put(new THREE.PlaneGeometry(.4,.22),new THREE.MeshBasicMaterial({map:side}),-.99,-.63,-.30,-.35,.24);
+  cs.add(new THREE.AmbientLight(0x46586a,.55));
+  ship.cockSun=new THREE.DirectionalLight(0xfff2dd,1.1); cs.add(ship.cockSun);
+  ship.cockGlow=new THREE.PointLight(0x3388cc,.6,6); ship.cockGlow.position.set(0,-.3,-.8); cs.add(ship.cockGlow);
+}
+function paintDash(){
+  const x=dashCtx,w=512,h=192;
+  x.fillStyle='#03111a'; x.fillRect(0,0,w,h);
+  x.strokeStyle='rgba(70,160,200,.35)'; x.strokeRect(3,3,w-6,h-6);
+  x.fillStyle='#7fd8ff'; x.font='600 30px "IBM Plex Mono",monospace';
+  x.fillText(fmtSpeed(Math.abs(ship.speed)),22,46);
+  x.font='15px "IBM Plex Mono",monospace'; x.fillStyle='#3f6a7d';
+  x.fillText('VEL',22,70); x.fillText('HULL',22,102); x.fillText('TGT',22,152);
+  x.fillStyle=ship.hull>30?'#37d98a':'#ff5f6b'; x.fillRect(80,90,ship.hull*1.6,12);
+  x.strokeStyle='rgba(70,160,200,.5)'; x.strokeRect(80,90,160,12);
+  x.fillStyle='#ffc26e'; x.font='600 20px "IBM Plex Mono",monospace';
+  x.fillText(target?target.name:'—',80,154);
+  // mini radar: target + enemy bearing, ship-relative
+  const cxp=430,cyp=96,R=72;
+  x.strokeStyle='rgba(70,160,200,.4)'; x.beginPath(); x.arc(cxp,cyp,R,0,TAU); x.stroke();
+  x.beginPath(); x.arc(cxp,cyp,R*.5,0,TAU); x.stroke();
+  const plot=(world,color,size)=>{ const v=world.clone().sub(ship.pos).normalize();
+    const lx=v.dot(RGT), lz=v.dot(FWD);        // project onto ship plane
+    x.fillStyle=color; x.beginPath(); x.arc(cxp+lx*R*.9, cyp-lz*R*.9, size,0,TAU); x.fill(); };
+  if(target) plot(target.pos,'#ffc26e',4);
+  if(enemy&&enemy.alive) plot(enemy.pos,'#ff5f6b',3.5);
+  x.fillStyle='#7fd8ff'; x.fillRect(cxp-1.5,cyp-1.5,3,3);
+  dashTex.needsUpdate=true;
+}
+</script>
+<script>
+/* ------------------------------ 4. EFFECTS ------------------------------- */
+const wrapAxis=(v,half)=>{ const m=half*2; v=(v+half)%m; if(v<0)v+=m; return v-half; };
+/* speed streaks: line segments around the camera, stretched along velocity */
+const STREAK_N=420;
+const streaks={ offs:[], geo:null, mesh:null };
+{
+  const pos=new Float32Array(STREAK_N*6);
+  for(let i=0;i<STREAK_N;i++){
+    streaks.offs.push(new THREE.Vector3((rnd()*2-1),(rnd()*2-1),(rnd()*2-1)).multiplyScalar(30));
+  }
+  streaks.geo=new THREE.BufferGeometry();
+  streaks.geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  streaks.mesh=new THREE.LineSegments(streaks.geo,new THREE.LineBasicMaterial({
+    color:0xbfe6ff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+  streaks.mesh.frustumCulled=false; scene.add(streaks.mesh);
+}
+function updateStreaks(dt){
+  const sp=Math.abs(ship.speed);
+  const f=clamp((Math.log10(sp+1)-3.2)/2.6,0,1);          // fades in above ~2000 km/s
+  streaks.mesh.material.opacity=f*.75;
+  if(f<=0) return;
+  const BOX=30+f*40;                                       // km bubble around ship
+  const vel=FWD.clone().multiplyScalar(Math.sign(ship.speed)||1);
+  const len=Math.min(sp*dt*1.5, BOX*1.2)*(.3+f);
+  const p=streaks.geo.attributes.position.array;
+  for(let i=0;i<STREAK_N;i++){
+    const o=streaks.offs[i];
+    o.addScaledVector(vel,-sp*dt*.9);                      // drift past the ship
+    // wrap into the bubble (modulo — survives light-speed overshoot)
+    o.x=wrapAxis(o.x,BOX); o.y=wrapAxis(o.y,BOX); o.z=wrapAxis(o.z,BOX);
+    p[i*6]=o.x; p[i*6+1]=o.y; p[i*6+2]=o.z;
+    p[i*6+3]=o.x+vel.x*len; p[i*6+4]=o.y+vel.y*len; p[i*6+5]=o.z+vel.z*len;
+  }
+  streaks.geo.attributes.position.needsUpdate=true;
+}
+
+/* spark pool: shared by muzzle flashes, impacts, explosions */
+const sparkTex=glowTex('rgba(255,240,210,1)','rgba(255,150,60,.5)');
+const sparks=[];
+for(let i=0;i<70;i++){
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:sparkTex,color:0xffcc88,
+    blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+  sp.visible=false; scene.add(sp);
+  sparks.push({sp, pos:new THREE.Vector3(), vel:new THREE.Vector3(), life:0, ttl:1, size:1});
+}
+function spawnSparks(worldPos, n, speed, size, color){
+  let placed=0;
+  for(const s of sparks){
+    if(s.life>0) continue;
+    s.pos.copy(worldPos);
+    s.vel.set(rnd()*2-1,rnd()*2-1,rnd()*2-1).normalize().multiplyScalar(speed*(.3+rnd()));
+    s.ttl=s.life=.5+rnd()*.7; s.size=size*(.5+rnd());
+    s.sp.material.color.setHex(color||0xffcc88); s.sp.visible=true;
+    if(++placed>=n) break;
+  }
+}
+function updateSparks(dt){
+  for(const s of sparks){
+    if(s.life<=0) continue;
+    s.life-=dt;
+    if(s.life<=0){ s.sp.visible=false; continue; }
+    s.pos.addScaledVector(s.vel,dt);
+    s.sp.position.copy(s.pos).sub(ship.pos);
+    const k=s.life/s.ttl;
+    s.sp.scale.setScalar(s.size*(0.4+k)); s.sp.material.opacity=k;
+  }
+}
+
+/* asteroids: instanced rocks recycled through a bubble around the ship.
+   Density jumps inside the main belt (2.1–3.4 AU from the Sun). */
+const AST={ N:220, list:[], mesh:null, dummy:new THREE.Object3D() };
+{
+  const g=new THREE.IcosahedronGeometry(1,1);
+  const pv=g.attributes.position;                      // lump it so it reads as rock
+  for(let i=0;i<pv.count;i++){ const m=.75+rnd()*.5;
+    pv.setXYZ(i,pv.getX(i)*m,pv.getY(i)*m,pv.getZ(i)*m); }
+  g.computeVertexNormals();
+  AST.mesh=new THREE.InstancedMesh(g,new THREE.MeshStandardMaterial({color:0x8a8177,roughness:.95,metalness:.05}),AST.N);
+  AST.mesh.frustumCulled=false; scene.add(AST.mesh);
+  for(let i=0;i<AST.N;i++) AST.list.push({
+    off:new THREE.Vector3((rnd()*2-1),(rnd()*2-1)*.4,(rnd()*2-1)).multiplyScalar(900),
+    r:(2+rnd()*rnd()*26), spin:new THREE.Vector3(rnd(),rnd(),rnd()).multiplyScalar(.4),
+    rot:new THREE.Euler(rnd()*6,rnd()*6,rnd()*6),
+    vel:new THREE.Vector3(rnd()*2-1,(rnd()*2-1)*.2,rnd()*2-1).multiplyScalar(3+rnd()*14),
+    alive:true, deadFor:0,
+  });
+}
+function updateAsteroids(dt){
+  const sunDist=ship.pos.length();
+  const inBelt=sunDist>2.1*AU && sunDist<3.4*AU;
+  const activeN=inBelt?AST.N:Math.floor(AST.N*.07);
+  const BOX=900, sp=Math.abs(ship.speed);
+  const drift=FWD.clone().multiplyScalar(ship.speed*dt);
+  for(let i=0;i<AST.N;i++){
+    const a=AST.list[i];
+    a.off.sub(drift).addScaledVector(a.vel,dt);
+    const ox=a.off.x;
+    a.off.x=wrapAxis(a.off.x,BOX); a.off.y=wrapAxis(a.off.y,BOX); a.off.z=wrapAxis(a.off.z,BOX);
+    if(a.off.x!==ox) a.alive=true;                      // shot rocks come back as "new" ones
+    a.rot.x+=a.spin.x*dt; a.rot.y+=a.spin.y*dt;
+    AST.dummy.position.copy(a.off);
+    AST.dummy.rotation.copy(a.rot);
+    const vis=a.alive && i<activeN && sp<C_LIGHT*2;     // past 2c they're just streaks anyway
+    AST.dummy.scale.setScalar(vis?a.r:.0001);
+    AST.dummy.updateMatrix();
+    AST.mesh.setMatrixAt(i,AST.dummy.matrix);
+    // gentle collision: bump + scrape damage when we clip one
+    if(vis && sp<80){ const d=a.off.length();
+      if(d<a.r+.02){ damagePlayer(4,'asteroid'); a.alive=false; spawnSparks(ship.pos.clone().add(a.off),8,6,3.2); sndImpact(); } }
+  }
+  AST.mesh.instanceMatrix.needsUpdate=true;
+}
+
+/* Saturn ring fly-through: dense instanced ice/rock chunks near the ship,
+   only while we're inside the ring volume. Same recycling trick. */
+const RING={ N:2600, mesh:null, list:[], dummy:new THREE.Object3D(), on:false };
+{
+  const g=new THREE.IcosahedronGeometry(1,0);
+  RING.mesh=new THREE.InstancedMesh(g,new THREE.MeshStandardMaterial({
+    color:0xcfd8de,roughness:.6,metalness:.1}),RING.N);
+  RING.mesh.frustumCulled=false; RING.mesh.visible=false; scene.add(RING.mesh);
+  for(let i=0;i<RING.N;i++) RING.list.push({
+    off:new THREE.Vector3((rnd()*2-1)*9,(rnd()*2-1)*1.6,(rnd()*2-1)*9),
+    r:.005+rnd()*rnd()*.09,                             // 8 m – 120 m chunks
+    rot:new THREE.Euler(rnd()*6,rnd()*6,rnd()*6),
+    spin:(rnd()-.5)*.8, ice:rnd()<.7,
+  });
+}
+function updateRingField(dt){
+  const sat=BY.SATURN;
+  const rel=ship.pos.clone().sub(sat.pos);
+  // ring plane basis from Saturn's mesh orientation
+  const q=sat.mesh.quaternion;
+  const nUp=new THREE.Vector3(0,1,0).applyQuaternion(q);
+  const y=rel.dot(nUp);
+  const radial=Math.sqrt(Math.max(rel.lengthSq()-y*y,0));
+  const inside=radial>sat.ringIn*.94 && radial<sat.ringOut*1.06 && Math.abs(y)<160;
+  RING.on=inside; RING.mesh.visible=inside;
+  sat.ringMesh.material.opacity += ((inside?.30:.95)-sat.ringMesh.material.opacity)*dampF(2.5,dt);
+  if(!inside) return;
+  const BOX=9, BOXY=1.6;
+  const drift=FWD.clone().multiplyScalar(ship.speed*dt);
+  const depth=clamp(1-Math.abs(y)/140,0,1);             // thicker in the mid-plane
+  const activeN=Math.floor(RING.N*(.25+.75*depth));
+  for(let i=0;i<RING.N;i++){
+    const c=RING.list[i];
+    c.off.sub(drift);
+    c.off.x=wrapAxis(c.off.x,BOX); c.off.z=wrapAxis(c.off.z,BOX);
+    c.off.y=wrapAxis(c.off.y,BOXY);
+    c.rot.y+=c.spin*dt;
+    RING.dummy.position.copy(c.off);
+    RING.dummy.rotation.copy(c.rot);
+    RING.dummy.scale.setScalar(i<activeN?c.r:.00001);
+    RING.dummy.updateMatrix();
+    RING.mesh.setMatrixAt(i,RING.dummy.matrix);
+  }
+  RING.mesh.instanceMatrix.needsUpdate=true;
+}
+</script>
+<script>
+/* ------------------------------ 5. COMBAT -------------------------------- */
+const SHOTS=[];
+{
+  const g=new THREE.BoxGeometry(.006,.006,.30);           // 300 m tracer bolt
+  for(let i=0;i<48;i++){
+    const owner=i<32?'player':'enemy';
+    const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({
+      color:owner==='player'?0x9fe8ff:0xff7060}));
+    m.visible=false; scene.add(m);
+    SHOTS.push({m, owner, pos:new THREE.Vector3(), vel:new THREE.Vector3(), life:0});
+  }
+}
+const SHOT_SPEED=32;                                       // km/s — dogfight scale
+let gunSide=1, fireCooldown=0;
+function fireShot(owner, from, dir, spread){
+  for(const s of SHOTS){
+    if(s.life>0 || s.owner!==owner) continue;
+    s.pos.copy(from);
+    s.vel.copy(dir);
+    if(spread) s.vel.add(new THREE.Vector3(rnd()-.5,rnd()-.5,rnd()-.5).multiplyScalar(spread)).normalize();
+    s.vel.multiplyScalar(SHOT_SPEED);
+    if(owner==='player') s.vel.addScaledVector(FWD,ship.speed*(Math.abs(ship.speed)<200?1:0)); // inherit at sane speeds
+    s.life=2.2;
+    s.m.visible=true;
+    s.m.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),dir.clone().normalize());
+    return true;
+  }
+  return false;
+}
+function playerFire(dt){
+  if(!ship.alive||ship.overheated) return;
+  fireCooldown-=dt;
+  if(fireCooldown>0) return;
+  fireCooldown=.13;
+  gunSide=-gunSide;
+  shipAxes();
+  const muzzle=ship.pos.clone().addScaledVector(RGT,gunSide*.007).addScaledVector(UPV,-.004).addScaledVector(FWD,.08);
+  fireShot('player',muzzle,FWD.clone(),.004);
+  spawnSparks(muzzle,1,.5,.35,0xaaddff);
+  ship.heat=Math.min(1,ship.heat+.055);
+  if(ship.heat>=1){ ship.overheated=true; sndWarn(); }
+  sndFire();
+}
+// distance from point c to the segment [p0,p1] — shots move km per frame,
+// so we must test the swept path or they tunnel straight through targets
+const _sd=new THREE.Vector3(), _sp=new THREE.Vector3();
+function segDist(p0,p1,c){
+  _sd.copy(p1).sub(p0); const L2=_sd.lengthSq();
+  const t=L2>0?clamp(_sp.copy(c).sub(p0).dot(_sd)/L2,0,1):0;
+  return _sp.copy(p0).addScaledVector(_sd,t).distanceTo(c);
+}
+const _prev=new THREE.Vector3();
+function updateShots(dt){
+  for(const s of SHOTS){
+    if(s.life<=0) continue;
+    s.life-=dt;
+    if(s.life<=0){ s.m.visible=false; continue; }
+    _prev.copy(s.pos);
+    s.pos.addScaledVector(s.vel,dt);
+    s.m.position.copy(s.pos).sub(ship.pos);
+    // hits
+    if(s.owner==='player'){
+      if(enemy&&enemy.alive && segDist(_prev,s.pos,enemy.pos)<.5){
+        s.life=0; s.m.visible=false;
+        enemy.hp--; spawnSparks(s.pos,6,4,1.6); sndImpact();
+        if(enemy.hp<=0) killEnemy();
+        continue;
+      }
+      // asteroids near the shot
+      for(const a of AST.list){ if(!a.alive) continue;
+        const ap=ship.pos.clone().add(a.off);
+        if(segDist(_prev,s.pos,ap)<a.r+.15){ a.alive=false; s.life=0; s.m.visible=false;
+          spawnSparks(ap,10,8,a.r*.5||2); noiseHit(.3,.35,700); break; }
+      }
+    }else if(ship.alive && segDist(_prev,s.pos,ship.pos)<.12){
+      s.life=0; s.m.visible=false;
+      damagePlayer(6,'enemy fire'); spawnSparks(ship.pos.clone(),5,3,.8,0xff8866);
+    }
+  }
+}
+
+/* --- hostile ship --------------------------------------------------------- */
+let enemy=null, enemyTimer=90+rnd()*90;
+function buildEnemyMesh(){
+  const grp=new THREE.Group();
+  const mat=new THREE.MeshStandardMaterial({color:0x5a2f34,metalness:.7,roughness:.4});
+  const dark=new THREE.MeshStandardMaterial({color:0x22181a,metalness:.6,roughness:.5});
+  const body=new THREE.Mesh(new THREE.ConeGeometry(1.2,6,6),mat); body.rotation.x=-Math.PI/2; grp.add(body);
+  const wing=new THREE.Mesh(new THREE.BoxGeometry(7,.15,2),dark); wing.position.z=1.2; grp.add(wing);
+  for(const s of[-1,1]){ const f=new THREE.Mesh(new THREE.BoxGeometry(.12,1.6,1.6),dark);
+    f.position.set(s*3.4,.6,1.4); grp.add(f); }
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex('rgba(255,120,90,1)','rgba(255,60,40,.5)'),
+    blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+  glow.position.z=3.2; glow.scale.setScalar(2.4); grp.add(glow);
+  grp.scale.setScalar(.0016);                             // ~10 m fighter
+  return grp;
+}
+function spawnEnemy(){
+  shipAxes();
+  const dir=FWD.clone().applyAxisAngle(UPV,(rnd()-.5)*1.6).applyAxisAngle(RGT,(rnd()-.5)*.8);
+  enemy={ pos:ship.pos.clone().addScaledVector(dir,50+rnd()*40),
+    vel:new THREE.Vector3(), hp:12, alive:true, mesh:buildEnemyMesh(),
+    state:'approach', strafeAxis:new THREE.Vector3(rnd()-.5,rnd()-.5,rnd()-.5).normalize(),
+    fireT:0, burst:0, gone:0 };
+  scene.add(enemy.mesh);
+  hudMsg('⚠ HOSTILE CONTACT');
+  sndWarn();
+}
+function killEnemy(){
+  enemy.alive=false;
+  spawnSparks(enemy.pos,26,10,3.5,0xffaa66);
+  spawnSparks(enemy.pos,14,4,6,0xff6644);
+  sndBoom();
+  scene.remove(enemy.mesh);
+  hudMsg('HOSTILE DESTROYED');
+  enemyTimer=180+rnd()*240;
+}
+function updateEnemy(dt){
+  if(!enemy||!enemy.alive){
+    if(ship.alive && Math.abs(ship.speed)<C_LIGHT*.5){
+      enemyTimer-=dt;
+      if(enemyTimer<=0) spawnEnemy();
+    }
+    return;
+  }
+  const toP=ship.pos.clone().sub(enemy.pos), dist=toP.length(); toP.normalize();
+  // lose interest if the player warps away
+  if(dist>400){ enemy.gone+=dt; if(enemy.gone>12){ scene.remove(enemy.mesh); enemy=null;
+    enemyTimer=150+rnd()*200; hudMsg('HOSTILE LOST CONTACT'); return; } }
+  else enemy.gone=0;
+  const MAXV=9;
+  let want;
+  if(dist>28){ enemy.state='approach'; want=toP.clone().multiplyScalar(MAXV); }
+  else{ enemy.state='strafe';
+    const tang=toP.clone().cross(enemy.strafeAxis).normalize();
+    want=tang.multiplyScalar(MAXV*.8).addScaledVector(toP,(dist<10?-1:.25)*MAXV*.4);
+    if(rnd()<dt*.15) enemy.strafeAxis.set(rnd()-.5,rnd()-.5,rnd()-.5).normalize();
+  }
+  enemy.vel.lerp(want, dampF(1.4,dt));
+  enemy.pos.addScaledVector(enemy.vel,dt);
+  enemy.mesh.position.copy(enemy.pos).sub(ship.pos);
+  const faceDir=dist<30?toP:(enemy.vel.lengthSq()>.01?enemy.vel.clone().normalize():toP);
+  const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,-1),faceDir);
+  enemy.mesh.quaternion.slerp(q, dampF(3,dt));
+  // shoot in bursts when roughly facing the player
+  enemy.fireT-=dt;
+  if(dist<50 && enemy.fireT<=0 && ship.alive){
+    if(enemy.burst<=0) enemy.burst=3+Math.floor(rnd()*3);
+    const aim=ship.pos.clone().addScaledVector(FWD,ship.speed*dist/SHOT_SPEED*.5)
+      .sub(enemy.pos).normalize();
+    fireShot('enemy',enemy.pos.clone(),aim,.005);
+    sndEFire();
+    enemy.burst--;
+    enemy.fireT=enemy.burst>0?.22:1.4+rnd()*1.6;
+  }
+}
+let lastHitAt=-99, deadOverlayT=0;
+function damagePlayer(n,src){
+  if(!ship.alive) return;
+  ship.hull-=n; lastHitAt=simT;
+  $('#dmg').style.opacity=.9;
+  if(ship.hull<=0){ ship.hull=0; ship.alive=false; ship.auto=false; ship.throttle=0;
+    spawnSparks(ship.pos.clone(),30,8,3,0xffaa66); sndBoom();
+    hudMsg('SHIP DESTROYED — PRESS R', true);
+  }
+}
+</script>
+<script>
+/* ------------------------------ 6. CONTROL ------------------------------- */
+const keys={};
+let started=false, firstPerson=true, mouseDown=false;
+let target=null, lookYaw=0, lookPitch=0;
+const MAXLIM=C_LIGHT*1000;
+
+addEventListener('keydown',e=>{
+  if(!started) return;
+  const k=e.key.toLowerCase();
+  keys[k]=true; keys[e.code]=true;
+  if(e.code==='Tab'){ e.preventDefault(); cycleTarget(1); }
+  if(k==='f') toggleAuto();
+  if(k==='v'){ firstPerson=!firstPerson; hudMsg(firstPerson?'COCKPIT VIEW':'EXTERIOR VIEW'); }
+  if(k==='h') $('#help').style.display=$('#help').style.display==='block'?'none':'block';
+  if(k==='m'){ SND.muted=!SND.muted; if(SND.master)SND.master.gain.value=SND.muted?0:.5;
+    hudMsg(SND.muted?'MUTED':'SOUND ON'); }
+  if(k==='x'){ ship.throttle=0; ship.auto=false; }
+  if(k==='r'&&!ship.alive) respawn();
+  const num='0123456789'.indexOf(e.key);
+  if(num>=0){ const b=BODIES.find(x=>x.key===e.key); if(b) setTarget(b); }
+});
+addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; keys[e.code]=false; });
+addEventListener('mousedown',e=>{
+  if(!started) return;
+  if(e.button===2){ ship.freeLook=true; return; }
+  if(document.pointerLockElement!==document.body){ document.body.requestPointerLock(); return; }
+  if(e.button===0) mouseDown=true;
+});
+addEventListener('mouseup',e=>{ if(e.button===0)mouseDown=false; if(e.button===2)ship.freeLook=false; });
+addEventListener('contextmenu',e=>e.preventDefault());
+addEventListener('mousemove',e=>{
+  if(!started||document.pointerLockElement!==document.body) return;
+  const mx=e.movementX||0,my=e.movementY||0;
+  if(ship.freeLook){ lookYaw=clamp(lookYaw-mx*.0022,-2.4,2.4); lookPitch=clamp(lookPitch-my*.0022,-1.1,1.2); }
+  else{ ship.yawRate  =clamp(ship.yawRate -mx*.00016,-.9,.9);
+        ship.pitchRate=clamp(ship.pitchRate-my*.00016,-.9,.9); }
+});
+addEventListener('wheel',e=>{ if(!started)return;
+  ship.maxSpeed=clamp(ship.maxSpeed*Math.pow(1.25,-Math.sign(e.deltaY)),1,MAXLIM); },{passive:true});
+
+function cycleTarget(dir){
+  const sel=BODIES.filter(b=>b.name!=='SUN');
+  let i=target?sel.indexOf(target):-1;
+  i=(i+dir+sel.length)%sel.length;
+  setTarget(sel[i]);
+}
+function setTarget(b){ target=b; ship.auto=false; sndBeep();
+  $('#tName').textContent=b.name; }
+function toggleAuto(){
+  if(!target){ hudMsg('SELECT A TARGET FIRST — TAB'); return; }
+  ship.auto=!ship.auto;
+  hudMsg(ship.auto?('AUTOPILOT → '+target.name):'AUTOPILOT OFF');
+  if(ship.auto) sndBeep();
+}
+function respawn(){
+  ship.hull=100; ship.alive=true; ship.speed=0; ship.throttle=0; ship.heat=0; ship.overheated=false;
+  placeNearEarth();
+  hudMsg('SYSTEMS RESTORED');
+}
+function placeNearEarth(){
+  orbitStep(EPOCH+simT);
+  const e=BY.EARTH;
+  const out=e.pos.clone().normalize();                    // sunward side, Earth in view
+  ship.pos.copy(e.pos).addScaledVector(out,-e.R*6).add(new THREE.Vector3(0,e.R*1.2,0));
+  const m=new THREE.Matrix4().lookAt(ship.pos,e.pos,new THREE.Vector3(0,1,0));
+  ship.quat.setFromRotationMatrix(m);
+}
+
+/* flight integration + planet collision ----------------------------------- */
+function updateFlight(dt){
+  shipAxes();
+  if(ship.alive){
+    // throttle from keys (W/S), speed-limit trim from Shift/Ctrl
+    if(keys['w']) { ship.throttle=clamp(ship.throttle+dt*.65,-.18,1); ship.auto=false; }
+    if(keys['s']) { ship.throttle=clamp(ship.throttle-dt*.65,-.18,1); ship.auto=false; }
+    if(keys['ShiftLeft']||keys['ShiftRight']) ship.maxSpeed=clamp(ship.maxSpeed*Math.pow(6,dt),1,MAXLIM);
+    if(keys['ControlLeft']||keys['ControlRight']) ship.maxSpeed=clamp(ship.maxSpeed*Math.pow(6,-dt),1,MAXLIM);
+    if(keys['a']) ship.rollRate=clamp(ship.rollRate+dt*4,-1.6,1.6);
+    if(keys['d']) ship.rollRate=clamp(ship.rollRate-dt*4,-1.6,1.6);
+    if(mouseDown||keys[' ']||keys['Space']) playerFire(dt);
+  }
+  // rotation: rates decay toward zero for a stable, damped feel
+  const q=new THREE.Quaternion();
+  q.setFromAxisAngle(RGT,ship.pitchRate*dt*2.2).multiply(ship.quat); ship.quat.copy(q).normalize();
+  q.setFromAxisAngle(UPV,ship.yawRate*dt*2.2).multiply(ship.quat);   ship.quat.copy(q).normalize();
+  q.setFromAxisAngle(FWD,ship.rollRate*dt*1.4).multiply(ship.quat);  ship.quat.copy(q).normalize();
+  ship.pitchRate*=Math.exp(-dt*3.4); ship.yawRate*=Math.exp(-dt*3.4); ship.rollRate*=Math.exp(-dt*3.2);
+
+  if(ship.auto && target) runAutopilot(dt);
+
+  // speed chases throttle×limit
+  if(!ship.auto){
+    const tgtSpeed=ship.alive?ship.throttle*ship.maxSpeed:ship.speed*.2;
+    ship.speed+=(tgtSpeed-ship.speed)*dampF(1.9,dt);
+  }
+  if(Math.abs(ship.speed)<.001&&ship.throttle===0) ship.speed=0;
+  shipAxes();
+  ship.pos.addScaledVector(FWD,ship.speed*dt);
+
+  // planet collision: a hard floor just above each surface
+  for(const b of BODIES){
+    const d=ship.pos.distanceTo(b.pos), min=b.R*1.05;
+    if(d<min){
+      const out=ship.pos.clone().sub(b.pos).normalize();
+      ship.pos.copy(b.pos).addScaledVector(out,min);
+      const inward=-out.dot(FWD)*ship.speed;
+      if(inward>0){ ship.speed*=.15; ship.throttle=Math.min(ship.throttle,.05); }
+      if(ship.auto){ ship.auto=false; hudMsg('AUTOPILOT DISENGAGED — SURFACE PROXIMITY'); }
+    }
+  }
+  // weapons heat
+  ship.heat=Math.max(0,ship.heat-dt*(ship.overheated?.45:.25));
+  if(ship.overheated&&ship.heat<=.25) ship.overheated=false;
+  // hull regen a while after last hit
+  if(ship.alive&&ship.hull<100&&simT-lastHitAt>10) ship.hull=Math.min(100,ship.hull+dt*2.5);
+}
+
+function runAutopilot(dt){
+  const to=target.pos.clone().sub(ship.pos), dist=to.length(); to.normalize();
+  // face the target
+  const m=new THREE.Matrix4().lookAt(new THREE.Vector3(), to, UPV);
+  const want=new THREE.Quaternion().setFromRotationMatrix(m);
+  ship.quat.rotateTowards(want, dt*1.1);
+  const aligned=FWD.dot(to)>.995;
+  // speed plan: cover remaining distance in ~5 s, brake to a cinematic flyby
+  const stop=target.R*3+400;
+  const remain=Math.max(dist-stop,0);
+  if(remain<=Math.max(target.R*.05,50)){
+    ship.auto=false; ship.throttle=0; ship.speed=Math.min(ship.speed,8);
+    hudMsg('ARRIVED — '+target.name); sndBeep(); return;
+  }
+  const desired=clamp(remain/3.2, 25, C_LIGHT*800);
+  const spd=aligned?desired:Math.min(desired,ship.speed);
+  ship.speed+=(spd-ship.speed)*dampF(2.2,dt);
+  ship.throttle=clamp(ship.speed/Math.max(ship.maxSpeed,1),0,1);
+}
+</script>
+<script>
+/* -------------------------------- 7. HUD --------------------------------- */
+function fmtSpeed(v){
+  if(v>=C_LIGHT*.01) return (v/C_LIGHT).toFixed(v>=C_LIGHT*10?0:2)+' c';
+  if(v>=1000) return (v/1000).toFixed(1)+'k km/s';
+  return v.toFixed(v<10?1:0)+' km/s';
+}
+function fmtDist(d){
+  if(d>=AU*.05) return (d/AU).toFixed(2)+' AU';
+  if(d>=1e6) return (d/1e6).toFixed(2)+'M km';
+  return Math.round(d).toLocaleString()+' km';
+}
+function fmtEta(s){
+  if(!isFinite(s)||s>86400*99) return '—';
+  if(s>=3600) return (s/3600).toFixed(1)+' h';
+  if(s>=90) return (s/60).toFixed(1)+' min';
+  return s.toFixed(0)+' s';
+}
+let msgT=0;
+function hudMsg(t,stick){
+  $('#msg').textContent=t; $('#msg').style.opacity=1;
+  msgT=stick?1e9:2.6;
+}
+const V2=new THREE.Vector3();
+function updateHUD(dt){
+  $('#speedBig').textContent=fmtSpeed(Math.abs(ship.speed));
+  $('#speedC').textContent=(Math.abs(ship.speed)/C_LIGHT).toFixed(3)+' c'
+    +(ship.speed<0?'  ·  REVERSE':'');
+  $('#maxTxt').textContent=fmtSpeed(ship.maxSpeed);
+  const thr=$('#bThr'); thr.classList.toggle('rev',ship.throttle<0);
+  thr.firstElementChild.style.width=(Math.abs(ship.throttle)*100)+'%';
+  const hb=$('#bHull'); hb.classList.toggle('low',ship.hull<32);
+  hb.firstElementChild.style.width=ship.hull+'%';
+  $('#bHeat').firstElementChild.style.width=(ship.heat*100)+'%';
+  $('#wpnTxt').textContent=ship.overheated?'OVERHEATED':'READY';
+  $('#wpnTxt').style.color=ship.overheated?'var(--red)':'var(--hud)';
+  // target readout
+  if(target){
+    const d=ship.pos.distanceTo(target.pos);
+    $('#tDist').textContent=fmtDist(d);
+    $('#tEta').textContent='ETA '+fmtEta(d/Math.max(Math.abs(ship.speed),.001));
+  } else { $('#tDist').innerHTML='&nbsp;'; $('#tEta').innerHTML='&nbsp;'; }
+  const ta=$('#tAuto');
+  ta.textContent=ship.auto?'AUTOPILOT ENGAGED':'AUTOPILOT OFF — F';
+  ta.classList.toggle('on',ship.auto);
+  // target bracket / offscreen arrow (screen-space projection)
+  const mark=(world, box, arrow, lbl, name)=>{
+    V2.copy(world).sub(ship.pos);
+    const dist=V2.length();
+    V2.applyQuaternion(cam.quaternion.clone().invert());
+    const infront=V2.z<0;
+    const v=new THREE.Vector3().copy(world).sub(ship.pos).project(cam);
+    if(infront && Math.abs(v.x)<1 && Math.abs(v.y)<1){
+      const sx=(v.x*.5+.5)*W, sy=(-v.y*.5+.5)*H;
+      box.style.display='block'; box.style.left=sx+'px'; box.style.top=sy+'px';
+      arrow.style.display='none';
+      if(lbl){ lbl.style.display='block'; lbl.style.left=sx+'px'; lbl.style.top=sy+'px';
+        lbl.textContent=name+' · '+fmtDist(dist); }
+    }else{
+      box.style.display='none'; if(lbl)lbl.style.display='none';
+      // point along the screen edge toward the target
+      let ang=Math.atan2(V2.y, V2.x); if(!infront) ang=Math.PI-ang+Math.PI;
+      const ex=Math.cos(ang), ey=Math.sin(ang);
+      const rad=Math.min(W,H)*.42;
+      arrow.style.display='block';
+      arrow.style.left=(W/2+ex*rad)+'px'; arrow.style.top=(H/2-ey*rad)+'px';
+      arrow.style.transform=`rotate(${(-ang*180/Math.PI)+90}deg)`;
+    }
+  };
+  if(target) mark(target.pos,$('#tgtBox'),$('#tgtArrow'),$('#tgtLbl'),target.name);
+  else { $('#tgtBox').style.display=$('#tgtArrow').style.display=$('#tgtLbl').style.display='none'; }
+  // aim-lead pip for the hostile: shoot at the ring, not at the ship
+  const pip=$('#pip');
+  if(enemy&&enemy.alive){
+    const d=enemy.pos.distanceTo(ship.pos);
+    let shown=false;
+    if(d<90){
+      const tof=d/SHOT_SPEED;
+      const aimAt=enemy.pos.clone().addScaledVector(enemy.vel,tof).sub(ship.pos).project(cam);
+      if(aimAt.z<1&&Math.abs(aimAt.x)<1&&Math.abs(aimAt.y)<1){
+        pip.style.display='block'; shown=true;
+        pip.style.left=((aimAt.x*.5+.5)*W)+'px'; pip.style.top=((-aimAt.y*.5+.5)*H)+'px';
+      }
+    }
+    if(!shown) pip.style.display='none';
+  } else pip.style.display='none';
+  $('#tgtBox').classList.remove('enemy');
+  // messages + damage vignette fade
+  if(msgT<1e8){ msgT-=dt; if(msgT<=0) $('#msg').style.opacity=0; }
+  const dmg=$('#dmg');
+  const o=parseFloat(dmg.style.opacity||0);
+  if(o>0) dmg.style.opacity=Math.max(0,o-dt*1.4);
+}
+
+/* ------------------------------- 8. LOOP --------------------------------- */
+let simT=0, dashClock=0, camShake=0;
+const camPosSm=new THREE.Vector3(), camQSm=new THREE.Quaternion();
+function updateCamera(dt){
+  shipAxes();
+  // free-look eases back to centre when released
+  if(!ship.freeLook){ lookYaw*=Math.exp(-dt*6); lookPitch*=Math.exp(-dt*6); }
+  const look=new THREE.Quaternion().setFromEuler(new THREE.Euler(lookPitch,lookYaw,0,'YXZ'));
+  const spFrac=clamp(Math.log10(Math.abs(ship.speed)+1)/6,0,1);
+  const baseFov=firstPerson?64:58;
+  cam.fov=baseFov+spFrac*16; cam.updateProjectionMatrix();
+  cockCam.fov=cam.fov; cockCam.updateProjectionMatrix();
+  if(firstPerson){
+    cam.position.set(0,0,0);
+    cam.quaternion.copy(ship.quat).multiply(look);
+    shipGrp.visible=false;
+  }else{
+    shipGrp.visible=true;
+    const behind=new THREE.Vector3(0,.014,.052).applyQuaternion(ship.quat);
+    camPosSm.lerp(behind, dampF(7,dt));
+    cam.position.copy(camPosSm);
+    camQSm.slerp(ship.quat.clone().multiply(look), dampF(9,dt));
+    cam.quaternion.copy(camQSm);
+  }
+  // cockpit camera: rotation-only mirror of the view + a touch of sway
+  const sway=new THREE.Quaternion().setFromEuler(new THREE.Euler(
+    ship.pitchRate*.06, ship.yawRate*.06, ship.rollRate*.05));
+  cockCam.position.set(0,0,0);
+  cockCam.quaternion.copy(look).multiply(sway);
+  // cockpit sun light follows the real sun direction, in ship-local frame
+  const sunDir=BY.SUN.pos.clone().sub(ship.pos).normalize()
+    .applyQuaternion(ship.quat.clone().invert());
+  ship.cockSun.position.copy(sunDir.multiplyScalar(10));
+}
+function syncWorld(){
+  // the floating origin: everything is drawn relative to the ship
+  for(const b of BODIES){
+    b.mesh.position.copy(b.pos).sub(ship.pos);
+    b.mesh.rotation.y+=0;   // spin applied in tick
+  }
+  shipGrp.position.set(0,0,0);
+  shipGrp.quaternion.copy(ship.quat);
+}
+let last=performance.now();
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt=Math.min((now-last)/1000,.1); last=now;
+  if(!started) { renderer.clear(); renderer.render(scene,cam); return; }
+  simT+=dt;
+  orbitStep(EPOCH+simT);                 // epoch offset picks the start layout
+  for(const b of BODIES){ b.mesh.rotation.y+=(spinRate[b.name]||0)*dt*40;
+    if(b.cloudMesh) b.cloudMesh.rotation.y+=1.2e-3*dt; }
+  updateFlight(dt);
+  updateCamera(dt);
+  syncWorld();
+  updateStreaks(dt);
+  updateSparks(dt);
+  updateAsteroids(dt);
+  updateRingField(dt);
+  updateShots(dt);
+  updateEnemy(dt);
+  updateHUD(dt);
+  sndEngine(ship.throttle, clamp(Math.abs(ship.speed)/C_LIGHT,0,1));
+  for(const g of ship.glows){ const s=.0022+Math.abs(ship.throttle)*.011;
+    g.scale.setScalar(s*(1+Math.sin(now*.02)*.15));
+    g.material.opacity=.25+Math.abs(ship.throttle)*.75; }
+  dashClock-=dt; if(dashClock<=0){ dashClock=.2; paintDash(); }
+  renderer.clear();
+  renderer.render(scene,cam);
+  if(firstPerson){ renderer.clearDepth(); renderer.render(cockScene,cockCam); }
+}
+
+/* --- launch --------------------------------------------------------------- */
+placeNearEarth();
+setTargetInit();
+function setTargetInit(){ target=BY.EARTH; $('#tName').textContent='EARTH'; }
+$('#title').addEventListener('click',()=>{
+  if(started) return;
+  started=true;
+  initSound();
+  if(SND.ctx&&SND.ctx.state==='suspended') SND.ctx.resume();
+  $('#title').classList.add('gone');
+  $('#hud').classList.add('on');
+  document.body.requestPointerLock&&document.body.requestPointerLock();
+  hudMsg('WELCOME ABOARD — W TO FLY, H FOR HELP');
+});
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
