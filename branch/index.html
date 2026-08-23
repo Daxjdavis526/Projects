@@ -1,0 +1,1884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BRANCH">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Branch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@300;400;500&display=swap">
+<style>
+/* ------------------------------------------------------------------
+   BRANCH — a generative lightning/vascular growth system driven by audio.
+   Single-theme by design: the subject is a black void, so the page
+   commits to one visual world and paints every colour explicitly.
+   ------------------------------------------------------------------ */
+:root{
+  --void:#000000;
+  --core:#ffffff;
+  --plasma:#bfe9ff;
+  --ion:#2e7bff;
+  --ember:#ff3b6b;
+  --ash:#8b96ad;
+  --ash-dim:#48506444;
+  --hair:rgba(150,180,220,.20);
+  --hair-lit:rgba(190,233,255,.55);
+  --f-display:'Michroma','Trebuchet MS',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--void); color:var(--ash);
+  font-family:var(--f-mono); overflow:hidden; overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased; -webkit-user-select:none; user-select:none;
+}
+#stage{position:fixed; inset:0; background:var(--void); overflow:hidden;
+  touch-action:none; -webkit-tap-highlight-color:transparent}
+#view{position:absolute; inset:0; width:100%; height:100%; display:block}
+
+/* ---------- title gate ---------- */
+#gate{
+  position:absolute; inset:0; display:grid; place-items:center;
+  background:radial-gradient(120% 90% at 50% 50%, rgba(0,0,0,.35) 0%, rgba(0,0,0,.74) 70%);
+  cursor:pointer; z-index:20; transition:opacity .9s ease, filter .9s ease;
+}
+#gate.gone{opacity:0; pointer-events:none; filter:blur(6px)}
+.plate{display:flex; flex-direction:column; align-items:center; gap:1.6rem; padding:0 1.5rem; text-align:center}
+h1{
+  margin:0; font-family:var(--f-display); font-weight:400;
+  font-size:clamp(2.4rem,9.5vw,6.4rem); letter-spacing:.34em; text-indent:.34em;
+  color:var(--core);
+  text-shadow:0 0 28px rgba(191,233,255,.55), 0 0 70px rgba(46,123,255,.35);
+  animation:breathe 5.5s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{opacity:.93}50%{opacity:1}}
+.rule{width:min(60vw,420px); height:1px; background:linear-gradient(90deg,transparent,var(--hair-lit),transparent)}
+.sub{margin:0; font-size:.82rem; letter-spacing:.42em; text-indent:.42em; text-transform:uppercase; color:var(--plasma); opacity:.8}
+.gate-foot{display:contents}
+.gate-note{margin:0; font-size:.66rem; line-height:1.9; letter-spacing:.1em; color:var(--ash); opacity:.55; max-width:46ch}
+.gate-rf{
+  display:inline-flex; align-items:center; gap:.6rem; cursor:pointer;
+  font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ash);
+  border:1px solid var(--hair); padding:.55rem .9rem; border-radius:2px;
+}
+.gate-rf:hover{border-color:var(--hair-lit); color:var(--plasma)}
+.gate-rf input{accent-color:var(--ion); width:13px; height:13px; margin:0}
+kbd{font:inherit; color:var(--plasma); opacity:.75}
+
+/* ---------- control strip ---------- */
+#bar{
+  position:absolute; left:50%; bottom:22px; transform:translateX(-50%) translateY(8px);
+  display:flex; align-items:center; gap:2px; z-index:30;
+  padding:6px; border:1px solid var(--hair); border-radius:3px;
+  background:rgba(4,7,12,.66); backdrop-filter:blur(14px);
+  opacity:0; pointer-events:none; transition:opacity .35s ease, transform .35s ease;
+  width:max-content; max-width:calc(100vw - 24px); flex-wrap:wrap; justify-content:center;
+}
+#bar.show{opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0)}
+#bar.hidden{display:none}
+.btn{
+  appearance:none; border:0; background:transparent; color:var(--ash);
+  width:34px; height:30px; display:grid; place-items:center; cursor:pointer;
+  border-radius:2px; transition:color .18s ease, background .18s ease;
+}
+.btn:hover{color:var(--core); background:rgba(191,233,255,.08)}
+.btn:focus-visible,.tog:focus-visible,.gate-rf:focus-within{outline:1px solid var(--hair-lit); outline-offset:2px}
+.btn svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round}
+.btn svg.solid{fill:currentColor; stroke:none}
+#bSink{display:none}
+.grp{display:contents}
+.sep{width:1px; height:18px; background:var(--hair); margin:0 6px}
+.field{display:flex; align-items:center; gap:7px; padding:0 6px}
+.field span{font-size:.55rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ash); opacity:.7}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; width:66px; height:14px; background:transparent; cursor:pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{height:1px; background:var(--hair)}
+input[type=range]::-moz-range-track{height:1px; background:var(--hair)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:7px; height:7px; margin-top:-3px; border-radius:50%; background:var(--plasma)}
+input[type=range]::-moz-range-thumb{width:7px; height:7px; border:0; border-radius:50%; background:var(--plasma)}
+.tog{
+  appearance:none; border:1px solid var(--hair); background:transparent; cursor:pointer;
+  color:var(--ash); font:inherit; font-size:.55rem; letter-spacing:.16em; text-transform:uppercase;
+  padding:.42rem .6rem; border-radius:2px; transition:.18s ease; white-space:nowrap;
+}
+.tog:hover{color:var(--plasma); border-color:var(--hair-lit)}
+.tog[aria-pressed=true]{color:var(--void); background:var(--plasma); border-color:var(--plasma)}
+#trackName{
+  font-size:.55rem; letter-spacing:.16em; text-transform:uppercase; color:var(--plasma);
+  opacity:.75; padding:0 8px; max-width:16ch; flex:0 1 auto; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---------- transient readouts ---------- */
+#toast{
+  position:absolute; left:50%; bottom:76px; transform:translateX(-50%);
+  z-index:30; font-size:.6rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--plasma); opacity:0; transition:opacity .3s ease; pointer-events:none; text-align:center;
+}
+#toast.show{opacity:.85}
+#drop{
+  position:absolute; inset:0; z-index:40; display:none; place-items:center;
+  background:rgba(0,0,0,.82); border:1px dashed var(--hair-lit);
+  font-size:.72rem; letter-spacing:.3em; text-transform:uppercase; color:var(--plasma);
+}
+#drop.on{display:grid}
+@media (prefers-reduced-motion:reduce){h1{animation:none}}
+/* Phones: the bar is absolutely positioned, so on a narrow screen it
+   shrink-wrapped to a tall narrow column. Pin it to both edges instead and
+   let it wrap into two tidy rows, with targets big enough to hit. */
+@media (max-width:620px){
+  #bar{
+    left:10px; right:10px; width:auto; bottom:10px;
+    transform:translateY(8px);
+    justify-content:center; gap:5px; padding:8px;
+    padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+  #bar.show{transform:translateY(0)}
+  .sep{display:none}
+  #trackName{display:none}
+  .grp{display:flex; width:100%; justify-content:center; align-items:center; gap:5px}
+  #bSink{display:inline-block}
+  .btn{width:44px; height:40px}
+  .btn svg{width:18px; height:18px}
+  .tog{padding:.78rem .6rem; font-size:.56rem; letter-spacing:.12em; min-height:40px}
+  .field{padding:0 2px; gap:5px}
+  .field span{font-size:.5rem}
+  input[type=range]{width:74px; height:26px}
+  input[type=range]::-webkit-slider-thumb{width:11px; height:11px; margin-top:-5px}
+  input[type=range]::-moz-range-thumb{width:11px; height:11px}
+  #toast{bottom:calc(96px + env(safe-area-inset-bottom, 0px))}
+  .gate-note{font-size:.62rem; line-height:1.8}
+  .plate{gap:1.3rem; padding-bottom:34vh}
+  .gate-foot{
+    position:absolute; left:0; right:0;
+    bottom:calc(26px + env(safe-area-inset-bottom, 0px));
+    display:flex; flex-direction:column; align-items:center; gap:1rem; padding:0 1.4rem;
+  }
+  .gate-rf{padding:.8rem 1.1rem}
+}
+</style>
+
+</head>
+<body>
+<div id="stage">
+  <canvas id="view"></canvas>
+
+  <section id="gate">
+    <div class="plate">
+      <h1>BRANCH</h1>
+      <div class="rule"></div>
+      <p class="sub" id="subHint">Click to begin</p>
+      <div class="gate-foot">
+        <label class="gate-rf"><input type="checkbox" id="gateRF"> Reduced flashing</label>
+        <p class="gate-note">
+          Contains flashing light synchronised to music. Drop any audio file onto the
+          window at any time to grow the system to your own track.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div id="bar" class="hidden">
+    <div class="grp">
+      <button class="btn" id="bPlay" title="Play / pause (space)" aria-label="Play or pause"></button>
+      <button class="btn" id="bRestart" title="Restart (R)" aria-label="Restart">
+        <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/></svg>
+      </button>
+      <div class="sep"></div>
+      <div class="field"><span>Vol</span><input type="range" id="rVol" min="0" max="100" value="82" aria-label="Volume"></div>
+      <div class="field"><span>Force</span><input type="range" id="rInt" min="20" max="200" value="100" aria-label="Intensity"></div>
+    </div>
+    <div class="grp">
+    <div class="sep"></div>
+    <button class="tog" id="bTrack" title="Change built-in track (T)">Track</button>
+    <button class="tog" id="bFile" title="Play your own audio file (L)">Load</button>
+    <button class="tog" id="bTab" title="Listen to a browser tab — Spotify, YouTube, anything (C)">Tab</button>
+    <button class="tog" id="bMic" title="Listen through the microphone (M)">Mic</button>
+    <button class="tog" id="bSink" aria-pressed="false" title="Alternate audio route — try this if a phone stays silent">Sound fix</button>
+    <input type="file" id="fInput" accept="audio/*" hidden>
+    <span id="trackName">—</span>
+    <div class="sep"></div>
+    <button class="tog" id="bFlash" aria-pressed="false" title="Reduced flashing (X)">Reduced flash</button>
+    <button class="btn" id="bFull" title="Fullscreen (F)" aria-label="Fullscreen">
+      <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <div id="drop">Release to load track</div>
+</div>
+
+<script>
+"use strict";
+/* ==================================================================
+   BRANCH
+   1. AUDIO      — original synthesised EDM + live spectral analysis
+   2. GROWTH     — space-colonisation / dielectric-breakdown hybrid
+   3. RENDER     — additive canvas layers + cheap bloom
+   4. INTERFACE  — minimal, auto-hiding
+   ================================================================== */
+
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const lerp  = (a, b, t) => a + (b - a) * t;
+const rnd   = (a = 1, b = 0) => b + Math.random() * (a - b);
+const mtof  = m => 440 * Math.pow(2, (m - 69) / 12);
+
+/* ==================================================================
+   1. AUDIO
+   ------------------------------------------------------------------
+   Everything the visualiser knows about the music comes from an
+   AnalyserNode reading the master bus. That means the built-in tracks
+   and any file you drop in are treated identically: no timestamps,
+   no hard-coded cues, just spectrum in -> physics out.
+   ================================================================== */
+const AUDIO = {
+  ctx:null, mix:null, comp:null, ana:null, vol:null, verb:null, duck:null,
+  freq:null, sr:44100, ready:false, source:'', mode:'synth', el:null, elSrc:null,
+  stream:null, streamSrc:null, streamGain:null, sink:null, sinkDest:null
+};
+
+function initAudio(){
+  if (AUDIO.ctx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ctx = new AC();
+  AUDIO.ctx = ctx; AUDIO.sr = ctx.sampleRate;
+
+  // mix -> glue compressor -> analyser -> volume -> speakers.
+  // The analyser sits before the volume fader so turning the music
+  // down never starves the visuals.
+  const mix = ctx.createGain();  mix.gain.value = 0.9;
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -14; comp.knee.value = 22; comp.ratio.value = 5;
+  comp.attack.value = 0.004;  comp.release.value = 0.18;
+  const ana = ctx.createAnalyser();
+  ana.fftSize = 2048; ana.smoothingTimeConstant = 0.62; ana.minDecibels = -95; ana.maxDecibels = -12;
+  const vol = ctx.createGain(); vol.gain.value = 0.82;
+
+  mix.connect(comp);
+  comp.connect(vol); vol.connect(ctx.destination);   // what you hear
+  comp.connect(ana);                                 // what the visuals measure
+
+  // Convolution reverb from a synthesised impulse: cheap, no assets.
+  const verb = ctx.createConvolver();
+  const len = Math.floor(ctx.sampleRate * 2.6), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++){
+    const d = ir.getChannelData(c);
+    for (let i = 0; i < len; i++){
+      const t = i / len;
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 2.8) * (1 - t * 0.2);
+    }
+  }
+  verb.buffer = ir;
+  const verbGain = ctx.createGain(); verbGain.gain.value = 0.5;
+  verb.connect(verbGain); verbGain.connect(mix);
+
+  // Sidechain bus: bass and pads duck under every kick.
+  const duck = ctx.createGain(); duck.gain.value = 1; duck.connect(mix);
+
+  AUDIO.mix = mix; AUDIO.comp = comp; AUDIO.ana = ana; AUDIO.vol = vol;
+  AUDIO.verb = verb; AUDIO.duck = duck;
+  AUDIO.freq = new Uint8Array(ana.frequencyBinCount);
+
+  // One shared white-noise buffer for every percussive/air sound.
+  const nlen = Math.floor(ctx.sampleRate * 2), nb = ctx.createBuffer(1, nlen, ctx.sampleRate);
+  const nd = nb.getChannelData(0);
+  for (let i = 0; i < nlen; i++) nd[i] = Math.random() * 2 - 1;
+  AUDIO.noise = nb;
+  AUDIO.ready = true;
+}
+
+/* ---------- instrument voices ---------- */
+function noiseSrc(){ const s = AUDIO.ctx.createBufferSource(); s.buffer = AUDIO.noise; s.loop = true; return s; }
+function env(g, t, peak, atk, dec){
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t + atk);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + atk + dec);
+}
+function send(node, amt){ const g = AUDIO.ctx.createGain(); g.gain.value = amt; node.connect(g); g.connect(AUDIO.verb); }
+
+/* Soft-clipping curve — this is what turns a clean sawtooth into a
+   distorted guitar. Everything above the knee gets squashed rather than
+   cut off, which is the difference between "overdriven" and "broken". */
+function makeDistCurve(amount){
+  const n = 1024, c = new Float32Array(n);
+  for (let i = 0; i < n; i++){
+    const x = i * 2 / n - 1;
+    c[i] = (1 + amount) * x / (1 + amount * Math.abs(x));
+  }
+  return c;
+}
+const DIST = makeDistCurve(48);
+
+function vGuitar(t, midis, dur, gain){
+  const c = AUDIO.ctx, sum = c.createGain();
+  sum.gain.value = 0.44;
+  midis.forEach((m, i) => {
+    [-7, 7].forEach(det => {
+      const o = c.createOscillator(); o.type = 'sawtooth';
+      o.frequency.value = mtof(m) * Math.pow(2, det / 1200);
+      const g = c.createGain(); g.gain.value = i === 0 ? 0.62 : 0.42;
+      o.connect(g); g.connect(sum); o.start(t); o.stop(t + dur + 0.08);
+    });
+  });
+  const ws = c.createWaveShaper(); ws.curve = DIST; ws.oversample = '2x';
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3000; lp.Q.value = 0.8;
+  const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 105;
+  const g2 = c.createGain();
+  env(g2, t, gain, 0.004, dur);
+  sum.connect(ws); ws.connect(lp); lp.connect(hp); hp.connect(g2);
+  g2.connect(AUDIO.duck); send(g2, 0.13);
+}
+function vPluck(t, midi, dur, gain){
+  const c = AUDIO.ctx, f = c.createBiquadFilter(), g = c.createGain();
+  const hz = mtof(midi);
+  f.type = 'bandpass'; f.Q.value = 2.6;
+  f.frequency.setValueAtTime(hz * 3.4, t);
+  f.frequency.exponentialRampToValueAtTime(hz * 1.4, t + dur);
+  const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = hz;
+  const o2 = c.createOscillator(); o2.type = 'square'; o2.frequency.value = hz * 2.001;
+  const mix2 = c.createGain(); mix2.gain.value = 0.28;
+  o.connect(f); o2.connect(mix2); mix2.connect(f);
+  env(g, t, gain, 0.003, dur);
+  f.connect(g); g.connect(AUDIO.duck); send(g, 0.28);
+  o.start(t); o.stop(t + dur + 0.06); o2.start(t); o2.stop(t + dur + 0.06);
+}
+function vCrash(t, gain){
+  const c = AUDIO.ctx, n = noiseSrc(), f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'highpass'; f.frequency.value = 4200;
+  env(g, t, gain, 0.002, 1.35);
+  n.connect(f); f.connect(g); g.connect(AUDIO.mix); send(g, 0.42);
+  n.start(t); n.stop(t + 1.6);
+}
+
+function vKick(t, gain, tune){
+  const c = AUDIO.ctx, o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(tune * 3.4, t);
+  o.frequency.exponentialRampToValueAtTime(tune, t + 0.075);
+  g.gain.setValueAtTime(gain, t);
+  g.gain.exponentialRampToValueAtTime(0.0008, t + 0.42);
+  o.connect(g); g.connect(AUDIO.mix); o.start(t); o.stop(t + 0.45);
+  // transient click so the onset detector has something crisp to find
+  const n = noiseSrc(), nf = c.createBiquadFilter(), ng = c.createGain();
+  nf.type = 'highpass'; nf.frequency.value = 1400;
+  env(ng, t, gain * 0.55, 0.001, 0.028);
+  n.connect(nf); nf.connect(ng); ng.connect(AUDIO.mix); n.start(t); n.stop(t + 0.06);
+  // sidechain pump
+  const d = AUDIO.duck.gain;
+  d.cancelScheduledValues(t); d.setValueAtTime(0.28, t);
+  d.linearRampToValueAtTime(1, t + 0.19);
+}
+function vSnare(t, gain, tone){
+  const c = AUDIO.ctx;
+  const n = noiseSrc(), f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'bandpass'; f.frequency.value = tone; f.Q.value = 0.8;
+  env(g, t, gain, 0.002, 0.13);
+  n.connect(f); f.connect(g); g.connect(AUDIO.mix); send(g, 0.22); n.start(t); n.stop(t + 0.2);
+  const o = c.createOscillator(), og = c.createGain();
+  o.type = 'triangle'; o.frequency.setValueAtTime(210, t);
+  o.frequency.exponentialRampToValueAtTime(120, t + 0.08);
+  env(og, t, gain * 0.5, 0.001, 0.07);
+  o.connect(og); og.connect(AUDIO.mix); o.start(t); o.stop(t + 0.12);
+}
+function vClap(t, gain){
+  for (let i = 0; i < 3; i++){
+    const c = AUDIO.ctx, n = noiseSrc(), f = c.createBiquadFilter(), g = c.createGain();
+    f.type = 'bandpass'; f.frequency.value = 1750; f.Q.value = 1.1;
+    const tt = t + i * 0.011;
+    env(g, tt, gain * (i === 2 ? 1 : 0.5), 0.001, i === 2 ? 0.17 : 0.03);
+    n.connect(f); f.connect(g); g.connect(AUDIO.mix); if (i === 2) send(g, 0.3);
+    n.start(tt); n.stop(tt + 0.2);
+  }
+}
+function vHat(t, gain, open){
+  const c = AUDIO.ctx, n = noiseSrc(), f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'highpass'; f.frequency.value = open ? 6200 : 8200;
+  env(g, t, gain, 0.001, open ? 0.16 : 0.035);
+  n.connect(f); f.connect(g); g.connect(AUDIO.mix); n.start(t); n.stop(t + 0.25);
+}
+function vBass(t, midi, dur, gain, cut){
+  const c = AUDIO.ctx, g = c.createGain(), f = c.createBiquadFilter();
+  f.type = 'lowpass'; f.Q.value = 6;
+  f.frequency.setValueAtTime(cut * 1.7, t);
+  f.frequency.exponentialRampToValueAtTime(cut, t + dur * 0.7);
+  const hz = mtof(midi);
+  ['sine','sawtooth'].forEach((w, i) => {
+    const o = c.createOscillator(); o.type = w;
+    o.frequency.value = hz * (i ? 1.002 : 1);
+    const og = c.createGain(); og.gain.value = i ? 0.32 : 1;
+    o.connect(og); og.connect(f); o.start(t); o.stop(t + dur + 0.1);
+  });
+  env(g, t, gain, 0.006, dur);
+  f.connect(g); g.connect(AUDIO.duck);
+}
+function vStab(t, midis, dur, gain, cut){
+  const c = AUDIO.ctx, f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'lowpass'; f.Q.value = 9;
+  f.frequency.setValueAtTime(cut * 2.2, t);
+  f.frequency.exponentialRampToValueAtTime(cut * 0.7, t + dur);
+  midis.forEach(m => {
+    [-7, 0, 7].forEach(det => {
+      const o = c.createOscillator(); o.type = 'sawtooth';
+      o.frequency.value = mtof(m) * Math.pow(2, det / 1200);
+      const og = c.createGain(); og.gain.value = 0.26;
+      o.connect(og); og.connect(f); o.start(t); o.stop(t + dur + 0.12);
+    });
+  });
+  env(g, t, gain, 0.004, dur);
+  f.connect(g); g.connect(AUDIO.duck); send(g, 0.2);
+}
+function vPad(t, midis, dur, gain, cut){
+  const c = AUDIO.ctx, f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'lowpass'; f.Q.value = 2;
+  f.frequency.setValueAtTime(cut * 0.55, t);
+  f.frequency.linearRampToValueAtTime(cut * 1.5, t + dur * 0.6);
+  f.frequency.linearRampToValueAtTime(cut * 0.5, t + dur);
+  midis.forEach(m => {
+    [-9, 5].forEach(det => {
+      const o = c.createOscillator(); o.type = 'sawtooth';
+      o.frequency.value = mtof(m) * Math.pow(2, det / 1200);
+      const og = c.createGain(); og.gain.value = 0.14;
+      o.connect(og); og.connect(f); o.start(t); o.stop(t + dur + 0.5);
+    });
+  });
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(gain, t + dur * 0.35);
+  g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  f.connect(g); g.connect(AUDIO.duck); send(g, 0.55);
+}
+function vLead(t, midi, dur, gain){
+  const c = AUDIO.ctx, f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'lowpass'; f.Q.value = 7;
+  f.frequency.setValueAtTime(5200, t);
+  f.frequency.exponentialRampToValueAtTime(1200, t + dur);
+  [0, -11, 12].forEach((det, i) => {
+    const o = c.createOscillator(); o.type = i === 2 ? 'square' : 'sawtooth';
+    o.frequency.value = mtof(midi) * Math.pow(2, det / 1200);
+    const og = c.createGain(); og.gain.value = i === 2 ? 0.16 : 0.4;
+    o.connect(og); og.connect(f); o.start(t); o.stop(t + dur + 0.1);
+  });
+  env(g, t, gain, 0.005, dur);
+  f.connect(g); g.connect(AUDIO.duck); send(g, 0.35);
+}
+function vRiser(t, dur, gain){
+  const c = AUDIO.ctx, g = c.createGain();
+  const o = c.createOscillator(); o.type = 'sawtooth';
+  o.frequency.setValueAtTime(70, t);
+  o.frequency.exponentialRampToValueAtTime(1500, t + dur);
+  const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 3;
+  f.frequency.setValueAtTime(300, t);
+  f.frequency.exponentialRampToValueAtTime(6000, t + dur);
+  const n = noiseSrc(), nf = c.createBiquadFilter(), ng = c.createGain();
+  nf.type = 'highpass';
+  nf.frequency.setValueAtTime(400, t);
+  nf.frequency.exponentialRampToValueAtTime(9000, t + dur);
+  ng.gain.setValueAtTime(0.0001, t);
+  ng.gain.exponentialRampToValueAtTime(gain * 0.5, t + dur);
+  ng.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.25);
+  n.connect(nf); nf.connect(ng); ng.connect(AUDIO.mix); send(ng, 0.3);
+  n.start(t); n.stop(t + dur + 0.3);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(gain, t + dur);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.18);
+  o.connect(f); f.connect(g); g.connect(AUDIO.mix);
+  o.start(t); o.stop(t + dur + 0.2);
+}
+function vImpact(t, gain){
+  const c = AUDIO.ctx;
+  const n = noiseSrc(), f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'lowpass'; f.frequency.setValueAtTime(9000, t);
+  f.frequency.exponentialRampToValueAtTime(400, t + 1.6);
+  env(g, t, gain, 0.003, 1.7);
+  n.connect(f); f.connect(g); g.connect(AUDIO.mix); send(g, 0.85);
+  n.start(t); n.stop(t + 2);
+  const o = c.createOscillator(), og = c.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(90, t);
+  o.frequency.exponentialRampToValueAtTime(28, t + 1.1);
+  env(og, t, gain * 1.1, 0.004, 1.2);
+  o.connect(og); og.connect(AUDIO.mix); o.start(t); o.stop(t + 1.4);
+}
+
+/* ------------------------------------------------------------------
+   Arrangements. Two original instrumentals, both built from the same
+   nine-section shape: intro -> rise -> build -> drop -> mid -> build
+   -> bigger drop -> outro. Nothing here is a recording; every note is
+   scheduled sample-accurately by the browser at play time.
+   ------------------------------------------------------------------ */
+const SECTIONS = [
+  {name:'intro',  bar:0,  e:0.10},
+  {name:'rise',   bar:8,  e:0.35},
+  {name:'rise2',  bar:16, e:0.55},
+  {name:'build1', bar:24, e:0.70},
+  {name:'drop1',  bar:32, e:1.00},
+  {name:'mid',    bar:48, e:0.65},
+  {name:'build2', bar:56, e:0.78},
+  {name:'drop2',  bar:64, e:1.10},
+  {name:'outro',  bar:84, e:0.22},
+  {name:'end',    bar:92, e:0}
+];
+function sectionAt(bar){
+  for (let i = SECTIONS.length - 2; i >= 0; i--) if (bar >= SECTIONS[i].bar) return SECTIONS[i];
+  return SECTIONS[0];
+}
+
+// Scale degrees of the natural minor, as semitone offsets from the root.
+const MINOR = [0, 2, 3, 5, 7, 8, 10];
+const DORIAN = [0, 2, 3, 5, 7, 9, 10];   // minor with a lifted 6th: brighter, still not major
+
+const TRACKS = [
+  {
+    id:'obsidian', title:'Obsidian Dawn', bpm:126, swing:0, root:29, // F1
+    style:'four', tune:44, chords:[0, -4, 3, -2],                    // i - VI - III - VII
+    voicing:[[0,3,7],[0,4,7],[0,4,7],[0,3,7]], trim:0.90
+  },
+  {
+    id:'catacomb', title:'Catacomb', bpm:112, swing:0.14, root:26,   // D1
+    style:'break', tune:41, chords:[0, 5, -4, -2],
+    voicing:[[0,3,7],[0,3,7],[0,4,7],[0,3,7]], trim:1.00
+  },
+  {
+    // Reggaeton / moombahton. The dembow rhythm does the work here:
+    // kick on the downbeat and the "and" of two, snare on every
+    // fourth sixteenth. Anthemic i-VI-III-VII loop over the top.
+    id:'kuduro', title:'Solar Kuduro', bpm:104, swing:0, root:33,     // A1
+    style:'dembow', tune:47, chords:[0, -4, 3, -2],
+    voicing:[[0,3,7],[0,4,7],[0,4,7],[0,4,7]], scale:DORIAN, trim:1.10
+  },
+  {
+    // Half-time heavy rock: distorted power chords, wide backbeat.
+    id:'ironlung', title:'Iron Lung', bpm:92, swing:0, root:26,       // D1
+    style:'rock', tune:49, chords:[0, 0, 5, 3],
+    voicing:[[0,7,12],[0,7,12],[0,7,12],[0,7,12]], scale:MINOR, trim:1.30
+  }
+];
+
+const SEQ = {
+  track:0, playing:false, startTime:0, nextStep:0, step:0, timer:null, out:null, lenBars:92
+};
+
+// 16-step drum grids. 1 = hit, 2 = accent.
+const GRID = {
+  four: {
+    kick:[2,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+    clap:[0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+    hat: [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0],
+    hat16:[1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    bass:[0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1]
+  },
+  break: {
+    kick:[2,0,0,0, 0,0,1,0, 0,0,1,0, 0,0,0,1],
+    clap:[0,0,0,0, 2,0,0,0, 0,0,0,0, 2,0,1,0],
+    hat: [1,0,1,0, 0,1,1,0, 1,0,1,0, 0,1,1,0],
+    hat16:[1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    bass:[1,0,0,0, 0,0,1,0, 0,1,0,0, 1,0,0,0]
+  },
+  dembow: {
+    kick:[2,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0],
+    clap:[0,0,0,1, 0,0,0,1, 0,0,0,1, 0,0,0,1],
+    hat: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+    hat16:[1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    bass:[1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0],
+    lead:[1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,1,0]
+  },
+  rock: {
+    kick:[2,0,0,1, 0,0,0,0, 1,0,1,0, 0,0,0,0],
+    clap:[0,0,0,0, 2,0,0,0, 0,0,0,0, 2,0,0,0],
+    hat: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+    hat16:[1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+    bass:[1,0,0,1, 0,0,0,0, 1,0,1,0, 0,0,0,0],
+    riff:[1,1,0,1, 0,1,1,0, 1,1,0,1, 0,1,0,1]
+  }
+};
+
+function scheduleStep(absStep, t){
+  const T = TRACKS[SEQ.track];
+  const bar = Math.floor(absStep / 16) % SEQ.lenBars;
+  const s   = absStep % 16;
+  const sec = sectionAt(bar).name;
+  const barInSec = bar - sectionAt(bar).bar;
+  const G = GRID[T.style];
+  const SC = T.scale || MINOR;
+  const isRock = T.style === 'rock', isDem = T.style === 'dembow';
+  const beat = 60 / T.bpm, stepDur = beat / 4;
+  const chordIdx = bar % 4;
+  const rootMidi = T.root + T.chords[chordIdx];
+  const chord = T.voicing[chordIdx].map(iv => rootMidi + iv + 36);
+
+  const isBuild = sec === 'build1' || sec === 'build2';
+  const heavy   = sec === 'drop1' || sec === 'drop2';
+  const drums   = sec !== 'intro' && !(isBuild && barInSec >= 6);
+  const full16  = heavy || sec === 'rise2' || sec === 'mid';
+  const bassOn  = sec === 'rise2' || heavy || sec === 'mid' || (isBuild && barInSec < 4);
+
+  /* --- drums --- */
+  if (drums){
+    const k = G.kick[s];
+    if (k && (sec !== 'rise' || s % 4 === 0)) vKick(t, k === 2 ? 0.98 : 0.8, T.tune);
+    if (G.clap[s] && sec !== 'rise'){
+      if (isRock)            vSnare(t, 0.78, 1450);      // wide, room-y backbeat
+      else if (isDem)        vSnare(t, 0.30, 2700);      // tight rim, the dembow "ch"
+      else if (T.style === 'break') vSnare(t, 0.5, 1900);
+      else                   vClap(t, 0.44);
+    }
+    const hg = full16 ? G.hat16 : G.hat;
+    if (hg[s]) vHat(t, (s % 4 === 2 ? 0.16 : 0.09) * (heavy ? 1.25 : 0.85), s % 8 === 6);
+    if (isRock && s === 0 && barInSec % 4 === 0 && (heavy || sec === 'mid')) vCrash(t, 0.3);
+  }
+
+  /* --- bass --- */
+  if (bassOn && G.bass[s]){
+    const oct = heavy ? 12 : 0;
+    vBass(t, rootMidi + 12 + (s === 10 && !isRock ? 3 : 0),
+          stepDur * (heavy ? 1.6 : 1.2),
+          heavy ? (isRock ? 0.5 : 0.55) : 0.3,
+          (isRock ? 150 : 220) + (heavy ? 260 : 60) + oct);
+  }
+  if (sec === 'intro' && s === 0 && bar % 2 === 0) vBass(t, T.root + 12, beat * 2.2, 0.34, 150);
+
+  /* --- pads: one long chord every two bars --- */
+  if (s === 0 && bar % 2 === 0 && sec !== 'end'){
+    const lvl = sec === 'intro' ? 0.2 : heavy ? 0.13 : sec === 'outro' ? 0.22 :
+                (isBuild && barInSec >= 4) ? 0.10 : 0.16;
+    vPad(t, chord.map(m => m - 12), beat * 8, isRock ? lvl * 0.55 : lvl,
+         sec === 'intro' ? 700 : 1600);
+  }
+
+  /* --- riffs, stabs, leads: each style carries the tune differently --- */
+  if (isRock){
+    // Palm-muted power-chord chugs. They ride the riff grid rather than
+    // the stab grid, which is what makes it read as a guitar part.
+    const riffOn = heavy || sec === 'rise2' || sec === 'mid' || (isBuild && barInSec < 4);
+    if (riffOn && drums && G.riff[s]){
+      const accent = s === 0 || s === 8;
+      vGuitar(t, [rootMidi + 24, rootMidi + 31, rootMidi + 36],
+              stepDur * (accent ? 1.5 : 0.85), heavy ? (accent ? 0.50 : 0.36) : 0.22);
+    }
+    if (sec === 'drop2' && s % 4 === 0){
+      const deg = SC[(bar * 2 + (s >> 2)) % 7];
+      vGuitar(t, [T.root + 48 + deg], stepDur * 3.2, 0.24);
+    }
+    if (sec === 'outro' && s === 0 && bar % 2 === 0)
+      vLead(t, T.root + 36 + SC[bar % 7], beat * 1.5, 0.09);
+  } else if (isDem){
+    // Bright plucked hook over the dembow, plus offbeat chord stabs.
+    const hookOn = heavy || sec === 'mid' || sec === 'rise2';
+    if (hookOn && G.lead[s]){
+      const deg = SC[(bar * 3 + s * 2) % 7];
+      vPluck(t, T.root + 48 + deg + ((bar % 4) === 3 ? 12 : 0),
+             stepDur * 1.6, heavy ? 0.32 : 0.20);
+    }
+    if (heavy && (s === 3 || s === 7 || s === 11 || s === 15))
+      vStab(t, chord, stepDur * 1.5, 0.23, 2300);
+    if (sec === 'outro' && s === 0 && bar % 2 === 0)
+      vPluck(t, T.root + 48 + SC[bar % 7], beat * 1.2, 0.14);
+  } else {
+    if (heavy){
+      const stabSteps = T.style === 'four' ? [2, 6, 10, 11, 14] : [2, 7, 11, 14];
+      if (stabSteps.includes(s)) vStab(t, chord, stepDur * 1.8, 0.20, 1500);
+      if (sec === 'drop2' && s % 2 === 0){
+        const deg = SC[(Math.floor(absStep / 2) * 3 + bar) % 7];
+        vLead(t, T.root + 36 + deg + (s === 8 ? 12 : 0), stepDur * 1.7, 0.15);
+      }
+    }
+    if (sec === 'outro' && s === 0 && bar % 2 === 0)
+      vLead(t, T.root + 36 + SC[bar % 7], beat * 1.5, 0.09);
+  }
+  if (sec === 'mid' && s % 2 === 0 && !isRock && !isDem){
+    const deg = SC[(absStep * 5 + 3) % 7];
+    vLead(t, T.root + 24 + deg + ((absStep >> 3) % 2 ? 12 : 0), stepDur * 1.5, 0.13);
+  }
+
+  /* --- build machinery --- */
+  if (isBuild){
+    if (barInSec === 0 && s === 0) vRiser(t, beat * 4 * 8, sec === 'build2' ? 0.22 : 0.17);
+    // snare roll that doubles in rate through the last four bars
+    const div = barInSec < 4 ? 0 : barInSec === 4 ? 4 : barInSec === 5 ? 2 : 1;
+    if (div && s % div === 0){
+      const p = (barInSec - 4 + s / 16) / 4;
+      vSnare(t, 0.13 + p * 0.4, 1500 + p * 1400);
+    }
+  }
+  if ((sec === 'drop1' || sec === 'drop2') && barInSec === 0 && s === 0) vImpact(t, 0.75);
+  if (sec === 'intro' && s === 0 && bar === 0) vImpact(t, 0.35);
+}
+
+function seqTick(){
+  const ctx = AUDIO.ctx;
+  if (!ctx || !SEQ.playing) return;
+  const T = TRACKS[SEQ.track];
+  const stepDur = (60 / T.bpm) / 4;
+  while (SEQ.startTime + SEQ.nextStep * stepDur < ctx.currentTime + 0.22){
+    const swing = (SEQ.nextStep % 2) ? T.swing * stepDur : 0;
+    const t = SEQ.startTime + SEQ.nextStep * stepDur + swing;
+    if (t > ctx.currentTime - 0.05) scheduleStep(SEQ.nextStep, t);
+    SEQ.nextStep++;
+    if (SEQ.nextStep >= SEQ.lenBars * 16){ SEQ.nextStep = 0; SEQ.startTime += SEQ.lenBars * 16 * stepDur; }
+  }
+}
+
+function synthStart(){
+  initAudio();
+  M.lastDrop = tNow;            // ignore the start-up transient
+  SEQ.playing = true;
+  SEQ.startTime = AUDIO.ctx.currentTime + 0.12;
+  SEQ.nextStep = 0;
+  if (!SEQ.timer) SEQ.timer = setInterval(seqTick, 25);
+  seqTick();
+}
+function synthStop(){ SEQ.playing = false; }
+
+/* ---------- iOS: route the mix through a media element ---------- */
+function mediaRoute(on){
+  const A = AUDIO;
+  if (!A.ctx) return false;
+  if (on && !A.sink){
+    try{
+      const dest = A.ctx.createMediaStreamDestination();
+      A.vol.disconnect();
+      A.vol.connect(dest);
+      const el = document.createElement('audio');
+      el.srcObject = dest.stream;
+      el.playsInline = true; el.autoplay = true; el.volume = 1;
+      A.sink = el; A.sinkDest = dest;
+      el.play().catch(() => { mediaRoute(false); ui.toast('this browser will not route that way'); });
+      return true;
+    }catch(e){
+      try{ A.vol.disconnect(); }catch(_){}
+      A.vol.connect(A.ctx.destination);
+      A.sink = null;
+      return false;
+    }
+  }
+  if (!on && A.sink){
+    try{ A.sink.pause(); A.sink.srcObject = null; }catch(e){}
+    try{ A.vol.disconnect(); }catch(e){}
+    A.vol.connect(A.ctx.destination);
+    A.sink = null; A.sinkDest = null;
+  }
+  return false;
+}
+
+/* ---------- playing a supplied file instead ---------- */
+function useFile(url, label){
+  initAudio();
+  M.lastDrop = tNow;
+  stopCapture();
+  synthStop();
+  if (AUDIO.el){ AUDIO.el.pause(); }
+  const el = new Audio();
+  el.src = url; el.loop = true; el.crossOrigin = 'anonymous';
+  AUDIO.el = el;
+  const src = AUDIO.ctx.createMediaElementSource(el);
+  src.connect(AUDIO.mix);
+  AUDIO.elSrc = src;
+  AUDIO.mode = 'file'; AUDIO.source = label;
+  AUDIO.mix.gain.value = 0.9;
+  M.quiet = 0; M.quietWarned = false;
+  el.play().catch(() => ui.toast('tap the screen to start the track'));
+  ui.setTrackName(label);
+}
+function useSynth(i){
+  initAudio();
+  stopCapture();
+  if (AUDIO.el){ AUDIO.el.pause(); AUDIO.el = null; }
+  AUDIO.mode = 'synth';
+  M.quiet = 0; M.quietWarned = false;
+  SEQ.track = ((i % TRACKS.length) + TRACKS.length) % TRACKS.length;
+  AUDIO.mix.gain.value = 0.9 * (TRACKS[SEQ.track].trim || 1);
+  synthStart();
+  ui.setTrackName(TRACKS[SEQ.track].title);
+}
+
+/* ------------------------------------------------------------------
+   Listening to audio this page does not own: a shared browser tab, or
+   the microphone. Nothing is routed to the speakers — the captured
+   signal only reaches the analyser, so there is no echo and no
+   feedback loop. This is how Spotify, Apple Music, YouTube or a phone
+   on a speaker can drive the visuals.
+   ------------------------------------------------------------------ */
+function stopCapture(){
+  if (AUDIO.stream){ AUDIO.stream.getTracks().forEach(t => t.stop()); AUDIO.stream = null; }
+  if (AUDIO.streamSrc){ try{ AUDIO.streamSrc.disconnect(); }catch(e){} AUDIO.streamSrc = null; }
+}
+function attachStream(stream, label, gain){
+  synthStop();
+  if (AUDIO.el){ AUDIO.el.pause(); AUDIO.el = null; }
+  stopCapture();
+  AUDIO.stream = stream;
+  const g = AUDIO.ctx.createGain(); g.gain.value = gain;
+  const src = AUDIO.ctx.createMediaStreamSource(stream);
+  src.connect(g); g.connect(AUDIO.ana);       // analysis only, never to output
+  AUDIO.streamSrc = src; AUDIO.streamGain = g;
+  AUDIO.mode = 'listen'; AUDIO.source = label;
+  M.lastDrop = tNow;
+  // a capture can end on its own (you stop sharing, or unplug the mic)
+  stream.getAudioTracks().forEach(tr => tr.addEventListener('ended', () => {
+    if (AUDIO.mode === 'listen'){ ui.toast('capture ended'); useSynth(SEQ.track); }
+  }));
+  ui.setTrackName(label);
+}
+async function listenToTab(){
+  initAudio();
+  await AUDIO.ctx.resume().catch(() => {});
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+    ui.toast('tab audio not supported in this browser'); return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:true });
+    if (!stream.getAudioTracks().length){
+      stream.getTracks().forEach(t => t.stop());
+      ui.toast('no audio shared — tick "also share tab audio"'); return;
+    }
+    stream.getVideoTracks().forEach(t => t.stop());   // picture not needed
+    attachStream(stream, 'tab audio', 1.6);
+    ui.toast('listening to shared tab');
+  }catch(e){
+    ui.toast(e && e.name === 'NotAllowedError' ? 'tab capture blocked here — try the downloaded copy'
+                                               : 'could not capture tab audio');
+  }
+}
+async function listenToMic(){
+  initAudio();
+  await AUDIO.ctx.resume().catch(() => {});
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    ui.toast('microphone not supported in this browser'); return;
+  }
+  try{
+    // every clean-up feature off: they fight music and flatten the beat
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:{
+      echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
+    attachStream(stream, 'microphone', 5);
+    ui.toast('listening through the microphone');
+  }catch(e){
+    ui.toast(e && e.name === 'NotAllowedError' ? 'microphone blocked — allow access, or use the downloaded copy'
+                                               : 'could not open the microphone');
+  }
+}
+
+/* Auto-load audio/track.mp3 (or .wav/.ogg/.m4a) if the project ships one. */
+async function tryProjectTrack(){
+  for (const name of ['audio/track.mp3','audio/track.wav']){
+    try{
+      const r = await fetch(name, {cache:'no-store'});
+      if (r.ok && (r.headers.get('content-type') || '').indexOf('audio') === 0){
+        const b = await r.blob();
+        return {url:URL.createObjectURL(b), name:name.split('/').pop()};
+      }
+    }catch(e){ /* not present — fall back to the built-in track */ }
+  }
+  return null;
+}
+
+/* ------------------------------------------------------------------
+   Live analysis. Six bands, an onset detector for the kick, and a
+   slow/fast energy pair that spots build-ups and drops. All of it is
+   derived from the spectrum, so a track it has never seen behaves the
+   same as the built-in ones.
+   ------------------------------------------------------------------ */
+const M = {
+  sub:0, bass:0, lowmid:0, mid:0, high:0, air:0, amp:0,
+  kick:0, kickHit:0, hat:0, drop:0, dropHit:0, build:0, buildPeak:0, energy:0,
+  centroid:0.35, flat:0.3, sustain:0, perc:0,
+  lowDom:1, lowDomAvg:1, susAvg:0.4, flatAvg:0.3, cenAvg:0.35,
+  char:0, charScore:[1, 0, 0], lowMin:1, ampMin:1, lowLag:0.5, ampLag:0.5,
+  quiet:0, quietWarned:false,
+  nLowS:0.5, nAmpS:0.5,
+  n:{bass:0.5, mid:0.5, high:0.5, amp:0.5, low:0.5, sus:0.5, cen:0.5, flat:0.5, hold:0.5},
+  hold:0.3,
+  rng:{ bass:{}, mid:{}, high:{}, amp:{}, low:{}, sus:{}, cen:{}, flat:{}, hold:{} },
+  lowHist:new Float32Array(150), ampHist:new Float32Array(150), lowIdx:0,
+  fluxHist:new Float32Array(48), fluxIdx:0, prev:null,
+  lastKick:0, lastDrop:-99, fastE:0, slowE:0, fastL:0, slowL:0, riseAcc:0, hatPrev:0
+};
+
+function bandLevel(f1, f2){
+  const n = AUDIO.freq.length, hzPerBin = (AUDIO.sr / 2) / n;
+  let a = Math.max(1, Math.floor(f1 / hzPerBin)), b = Math.min(n - 1, Math.ceil(f2 / hzPerBin));
+  let s = 0;
+  for (let i = a; i <= b; i++) s += AUDIO.freq[i];
+  return (s / (b - a + 1)) / 255;
+}
+
+function analyse(now, dtA){
+  if (!AUDIO.ready){ return; }
+  dtA = dtA || 0.016;
+  AUDIO.ana.getByteFrequencyData(AUDIO.freq);
+  const f = AUDIO.freq;
+
+  const sub = bandLevel(20, 62), bass = bandLevel(62, 170), lowmid = bandLevel(170, 520);
+  const mid = bandLevel(520, 2000), high = bandLevel(2000, 7000), air = bandLevel(7000, 15000);
+  let amp = 0; for (let i = 0; i < f.length; i++) amp += f[i];
+  amp = (amp / f.length) / 255;
+
+  // fast attack, slow release keeps the visuals from flickering out
+  const smooth = (cur, nv, up, down) => nv > cur ? lerp(cur, nv, up) : lerp(cur, nv, down);
+  M.sub = smooth(M.sub, sub, 0.6, 0.13); M.bass = smooth(M.bass, bass, 0.55, 0.12);
+  M.lowmid = smooth(M.lowmid, lowmid, 0.5, 0.14); M.mid = smooth(M.mid, mid, 0.5, 0.14);
+  M.high = smooth(M.high, high, 0.7, 0.16); M.air = smooth(M.air, air, 0.7, 0.18);
+  M.amp = smooth(M.amp, amp, 0.5, 0.1);
+
+  // --- timbre: what KIND of sound is this, not just how loud ---
+  // centroid = the spectrum's centre of mass, i.e. brightness.
+  // flatness = geometric mean over arithmetic mean: near 1 for noise
+  // (cymbals, distortion), near 0 for a clear pitched tone.
+  let num = 0, den = 0, logSum = 0, lin = 0, cnt = 0;
+  for (let i = 2; i < f.length; i += 4){
+    const v = f[i] / 255;
+    num += i * v; den += v;
+    lin += v; logSum += Math.log(v + 1e-4); cnt++;
+  }
+  const hzPerBin = (AUDIO.sr / 2) / f.length;
+  const cen = den > 0.02 ? clamp((num / den) * hzPerBin / 6000, 0, 1) : M.centroid;
+  const ari = lin / cnt, geo = Math.exp(logSum / cnt);
+  const flt = ari > 0.02 ? clamp(geo / ari, 0, 1) : 0;
+  M.centroid = lerp(M.centroid, cen, 0.16);
+  M.flat = lerp(M.flat, flt, 0.16);
+
+  // how long tonal material has been holding — pads and sustained
+  // chords build this up, percussion never does
+  const tonal = M.lowmid * 0.5 + M.mid * 0.5;
+  if (tonal > 0.16 && M.flat < 0.55) M.sustain = Math.min(2.5, M.sustain + dtA);
+  else M.sustain = Math.max(0, M.sustain - dtA * 2.2);
+
+  // Each track sets its own normal. These slow averages are what the
+  // character test compares against, so "unusually low" or "unusually
+  // sustained" means unusual *for this song* — which keeps the accent
+  // colours rare no matter what genre is playing.
+  const low = M.sub * 0.55 + M.bass * 0.45;
+  M.lowDom = (M.sub + M.bass) / (M.mid + M.high + 0.12);
+  M.lowDomAvg = lerp(M.lowDomAvg, M.lowDom, 0.004);
+  M.susAvg    = lerp(M.susAvg, M.sustain, 0.004);
+  M.flatAvg   = lerp(M.flatAvg, M.flat, 0.004);
+  M.cenAvg    = lerp(M.cenAvg, M.centroid, 0.004);
+
+  // ---- adaptive range normalisation ----
+  // Commercial masters are compressed nearly flat, so absolute thresholds
+  // never trip on them. Instead each feature is measured against the range
+  // that THIS track actually uses: the running low and high expand instantly
+  // on a new extreme and relax back over ~30s. A song with 2 dB of variation
+  // and one with 20 dB both end up driving the full visual range.
+  const nz = (st, v) => {
+    st.m = st.m === undefined ? v : lerp(st.m, v, 0.0025);          // ~7s centre
+    const dev = Math.abs(v - st.m);
+    st.d = st.d === undefined ? dev : lerp(st.d, dev, 0.0025);      // typical swing
+    const spread = Math.max(0.010, st.d * 2.4);
+    return clamp(0.5 + (v - st.m) / (2 * spread), 0, 1);
+  };
+  const RG = M.rng, n = M.n;
+  n.bass = nz(RG.bass, M.bass); n.mid = nz(RG.mid, M.mid);
+  n.high = nz(RG.high, M.high); n.amp = nz(RG.amp, M.amp);
+  n.low  = nz(RG.low, low);     n.sus = nz(RG.sus, M.sustain);
+  n.cen  = nz(RG.cen, M.centroid); n.flat = nz(RG.flat, M.flat);
+  n.hold = nz(RG.hold, M.hold);
+
+  // rolling 2.5s minimum of the low band — a drop is the low end coming
+  // back after having gone away, which is measurable even in a flat master
+  // Drop detection needs the section-level envelope, not the beat-level one:
+  // unsmoothed, the normalised low band swings top-to-bottom on every kick,
+  // so any short-window comparison trips continuously.
+  M.nLowS = lerp(M.nLowS, n.low, 0.035);
+  M.nAmpS = lerp(M.nAmpS, n.amp, 0.035);
+  M.lowHist[M.lowIdx = (M.lowIdx + 1) % M.lowHist.length] = M.nLowS;
+  let lowMin = 1, ampMin = 1;
+  for (let i = 0; i < M.lowHist.length; i++) if (M.lowHist[i] < lowMin) lowMin = M.lowHist[i];
+  M.ampHist[M.lowIdx % M.ampHist.length] = M.nAmpS;
+  for (let i = 0; i < M.ampHist.length; i++) if (M.ampHist[i] < ampMin) ampMin = M.ampHist[i];
+  M.lowMin = lowMin; M.ampMin = ampMin;
+  // value from ~0.4s ago, so a drop can be identified by the moment of the
+  // rise rather than by any later frame where the level is merely still high
+  const LAG = 48, L = M.lowHist.length;
+  M.lowLag = M.lowHist[(M.lowIdx - LAG + L) % L];
+  M.ampLag = M.ampHist[(M.lowIdx - LAG + L) % L];
+
+  const raw = rawCharacter();
+  for (let i = 0; i < 3; i++) M.charScore[i] = lerp(M.charScore[i], raw === i ? 1 : 0, 0.035);
+  M.char = M.charScore[0] >= M.charScore[1]
+    ? (M.charScore[0] >= M.charScore[2] ? 0 : 2)
+    : (M.charScore[1] >= M.charScore[2] ? 1 : 2);
+
+  // --- onset detection: spectral flux restricted to the low end ---
+  const nBins = 46;
+  if (!M.prev) M.prev = new Float32Array(nBins);
+  let flux = 0;
+  for (let i = 1; i < nBins; i++){
+    const v = f[i] / 255, d = v - M.prev[i];
+    if (d > 0) flux += d;
+    M.prev[i] = v;
+  }
+  M.fluxHist[M.fluxIdx = (M.fluxIdx + 1) % M.fluxHist.length] = flux;
+  let mean = 0; for (let i = 0; i < M.fluxHist.length; i++) mean += M.fluxHist[i];
+  mean /= M.fluxHist.length;
+  M.kickHit = 0;
+  const thr = mean * 1.7 + 0.35;
+  if (flux > thr && now - M.lastKick > 0.115 && M.bass + M.sub > 0.14){
+    M.lastKick = now;
+    M.kickHit = clamp(flux / (thr + 0.001) - 0.6, 0.35, 2.2);
+  }
+  M.kick = Math.max(M.kick * 0.86, M.kickHit ? clamp(M.kickHit, 0, 1.4) : 0);
+
+  // hi-hat / detail onsets, used for the small electrical flicks
+  const hatNow = high * 0.6 + air;
+  M.hat = Math.max(M.hat * 0.8, clamp((hatNow - M.hatPrev) * 3.2, 0, 1));
+  M.perc = clamp(flux / (mean * 1.2 + 0.5), 0, 2);
+  if (started && AUDIO.mode !== 'listen'){
+    if (amp < 0.002) M.quiet += dtA; else M.quiet = 0;
+    if (M.quiet > 6 && !M.quietWarned){
+      M.quietWarned = true;
+      ui.toast(AUDIO.ctx.state !== 'running' ? 'audio blocked — tap the screen'
+                                             : 'no sound? check the silent switch');
+    }
+  }
+  // smooth tonal presence: tonal AND not being hit
+  M.hold = lerp(M.hold, (1 - clamp(M.perc * 0.7, 0, 1)) * (1 - M.flat), 0.05);
+  M.hatPrev = lerp(M.hatPrev, hatNow, 0.35);
+
+  // --- drop / build detection ---
+  // A drop is a low-end event: the bottom drops out through the build,
+  // then returns much louder than the running average. Tracking sub+bass
+  // separately from overall level makes that unmistakable.
+  const e = bass * 0.55 + sub * 0.25 + amp * 0.5;
+  M.energy = e;
+  M.fastE = lerp(M.fastE, e, 0.22);
+  M.slowE = lerp(M.slowE, e, 0.010);
+  M.fastL = lerp(M.fastL, low, 0.38);
+  M.slowL = lerp(M.slowL, low, 0.012);
+  M.dropHit = 0;
+  // A drop needs both halves of the gesture: a low end that surges well
+  // above its running average, and evidence of a build shortly before.
+  // The build envelope has usually decayed by the time the drop lands,
+  // so what is tested is its recent peak, which fades over ~6 seconds.
+  // Works on a flat master too: what identifies a drop is the low end
+  // returning after a dip, measured within the track's own range.
+  // Two detectors, because no single rule covers both cases well.
+  // Relative: the low end rises sharply within the track's own range after a
+  //   dip. Catches drops in compressed material, where absolute levels barely
+  //   move at all.
+  // Absolute: the low end jumps far above its own running average. Precise on
+  //   dynamic material, where a build genuinely empties the bottom out.
+  // Either one can fire; the refractory keeps the pair from double-triggering.
+  const surgeRel = (M.nLowS - M.lowLag > 0.22 && M.nLowS > 0.60 && M.lowMin < 0.42) ||
+                   (M.nAmpS - M.ampLag > 0.22 && M.nAmpS > 0.66 && M.ampMin < 0.46);
+  const primedRel = M.buildPeak > 0.25 || M.nLowS > 0.72 || M.nAmpS > 0.78;
+  const surgeAbs = M.fastL > M.slowL * 1.34 + 0.07 && M.fastL > 0.34;
+  const primedAbs = M.buildPeak > 0.30 || M.fastL > M.slowL * 1.75;
+  if (((surgeRel && primedRel) || (surgeAbs && primedAbs)) && now - M.lastDrop > 9){
+    M.lastDrop = now; M.drop = 1; M.dropHit = 1;
+  }
+  M.drop = Math.max(0, M.drop - 0.0075);
+  // a build reads as sustained rise in the top end while the bottom stays put
+  const rising = (M.n.high * 0.6 + M.n.cen * 0.4) - M.n.low;
+  M.riseAcc = clamp(lerp(M.riseAcc, rising > 0.12 ? 1 : 0, 0.030), 0, 1);
+  M.build = M.riseAcc;
+  M.buildPeak = Math.max(M.build, M.buildPeak * 0.998);
+}
+
+/* ==================================================================
+   2. GROWTH
+   ------------------------------------------------------------------
+   Each growth tip picks its next direction from four competing terms:
+
+     next = normalize( attraction + persistence + noise + fieldBias )
+
+   attraction  space colonisation: the averaged pull of nearby
+               attractor points, which are consumed on arrival.
+               This is the angiogenesis / root-foraging behaviour.
+   persistence the tip's current heading, so branches curve instead of
+               turning on a dime.
+   noise       per-step angular jitter plus rare sharp kinks — the
+               probabilistic path selection of a dielectric breakdown.
+   fieldBias   a slow global flow field that gives whole regions of the
+               screen a grain, like a growth medium.
+
+   The music scales every one of those weights, plus branching
+   probability, growth speed, thickness and how many tips may live.
+   ================================================================== */
+const SIM = {
+  tips:[], nets:0, cap:14000, budget:5200, aN:0, ax:null, ay:null, aOn:null,
+  cell:96, cols:0, rows:0, start:null, items:null, counts:null,
+  occ:null, occNet:null, occW:0, occH:0, occCell:8,
+  ring:new Float32Array(1536), ringN:0, ringI:0
+};
+
+function allocSim(W, H){
+  if (!SIM.ax){
+    SIM.ax = new Float32Array(SIM.cap); SIM.ay = new Float32Array(SIM.cap);
+    SIM.aOn = new Uint8Array(SIM.cap); SIM.items = new Int32Array(SIM.cap);
+  }
+  SIM.occCell = 8;
+  SIM.occW = Math.ceil(W / SIM.occCell) + 1;
+  SIM.occH = Math.ceil(H / SIM.occCell) + 1;
+  SIM.occ = new Uint8Array(SIM.occW * SIM.occH);
+  SIM.occNet = new Uint8Array(SIM.occW * SIM.occH);
+  SIM.cols = Math.ceil(W / SIM.cell) + 1;
+  SIM.rows = Math.ceil(H / SIM.cell) + 1;
+  SIM.counts = new Int32Array(SIM.cols * SIM.rows);
+  SIM.start = new Int32Array(SIM.cols * SIM.rows + 1);
+}
+
+/* Rebuild the attractor lookup grid, compacting out consumed points. */
+function rebuildGrid(){
+  let n = 0;
+  for (let i = 0; i < SIM.aN; i++){
+    if (SIM.aOn[i]){ SIM.ax[n] = SIM.ax[i]; SIM.ay[n] = SIM.ay[i]; SIM.aOn[n] = 1; n++; }
+  }
+  // Points are appended in birth order, so the front of the array is
+  // the oldest food. Retiring it starves stale regions back to black.
+  if (n > SIM.budget){
+    const drop = n - SIM.budget;
+    SIM.ax.copyWithin(0, drop, n); SIM.ay.copyWithin(0, drop, n);
+    n = SIM.budget;
+  }
+  SIM.aN = n;
+  SIM.counts.fill(0);
+  const C = SIM.cell;
+  for (let i = 0; i < n; i++){
+    const cx = clamp(SIM.ax[i] / C | 0, 0, SIM.cols - 1);
+    const cy = clamp(SIM.ay[i] / C | 0, 0, SIM.rows - 1);
+    SIM.counts[cy * SIM.cols + cx]++;
+  }
+  let acc = 0;
+  for (let i = 0; i < SIM.counts.length; i++){ SIM.start[i] = acc; acc += SIM.counts[i]; }
+  SIM.start[SIM.counts.length] = acc;
+  if (!SIM.off || SIM.off.length !== SIM.counts.length) SIM.off = new Int32Array(SIM.counts.length);
+  const off = SIM.off; off.fill(0);
+  for (let i = 0; i < n; i++){
+    const cx = clamp(SIM.ax[i] / C | 0, 0, SIM.cols - 1);
+    const cy = clamp(SIM.ay[i] / C | 0, 0, SIM.rows - 1);
+    const c = cy * SIM.cols + cx;
+    SIM.items[SIM.start[c] + off[c]++] = i;
+  }
+}
+
+function addAttractor(x, y){
+  if (SIM.aN >= SIM.cap) return;
+  SIM.ax[SIM.aN] = x; SIM.ay[SIM.aN] = y; SIM.aOn[SIM.aN] = 1; SIM.aN++;
+}
+
+/* Which of the three characters is the music showing right now?
+   Nothing here tries to name instruments — that isn't possible live in a
+   browser. It reads the shape of the sound instead: where its energy
+   sits, how noisy it is, and whether it is holding or hitting. */
+function rawCharacter(){
+  const n = M.n;
+  // Ember: the low end is high in this track's own range, and being struck.
+  if (n.low > 0.72 && M.kick > 0.16) return 2;
+  // Jade: tonal and not being struck — pads, strings, held chords.
+  if (n.hold > 0.66 && n.cen < 0.50) return 1;
+  return 0;                                                    // the default look
+}
+/* Each character's score rises while it is the reading and decays while it
+   is not, so what a new network adopts is the sound's settled character
+   over the last half-second — not a single frame's snapshot. */
+function characterNow(){
+  const sc = M.charScore;
+  const w0 = Math.pow(sc[0] + 0.05, 1.7), w1 = Math.pow(sc[1] + 0.05, 1.7),
+        w2 = Math.pow(sc[2] + 0.05, 1.7);
+  let r = Math.random() * (w0 + w1 + w2);
+  if ((r -= w0) <= 0) return 0;
+  if ((r -= w1) <= 0) return 1;
+  return 2;
+}
+
+/* Per-character growth manner. Same equation, different weights — which
+   is why a pad grows like a vine and a kick grows like an artery. */
+const CHAR = [
+  {jit:1.35, wide:0.92, life:0.95, size:1.00, name:'ice'},
+  {jit:0.42, wide:1.02, life:1.60, size:1.35, name:'jade'},
+  {jit:0.72, wide:1.38, life:1.10, size:1.10, name:'ember'}
+];
+
+/* A network = one attractor cloud plus the tips seeded to eat it. */
+function spawnNetwork(kind, W, H){
+  const net = (SIM.nets = (SIM.nets + 1) % 200) + 1;
+  const ch = characterNow();
+  const CH = CHAR[ch];
+  const hot = Math.random() < 0.14;       // a few burn much brighter
+  // loudness sets how big the structure gets; how long the sound has been
+  // holding sets how long it keeps growing
+  const loud = clamp(0.72 + M.n.amp * 0.75 + M.n.bass * 0.45, 0.78, 1.6) * CH.size;
+  const held = 1 + M.n.sus * 0.75;
+  let cx, cy, R, count, tips = [], baseDir = 0, w0;
+
+  if (kind === 'edge'){
+    const side = (Math.random() * 4) | 0;
+    if (side === 0){ cx = rnd(W); cy = -10; baseDir = Math.PI / 2; }
+    else if (side === 1){ cx = W + 10; cy = rnd(H); baseDir = Math.PI; }
+    else if (side === 2){ cx = rnd(W); cy = H + 10; baseDir = -Math.PI / 2; }
+    else { cx = -10; cy = rnd(H); baseDir = 0; }
+    R = Math.min(W, H) * rnd(0.85, 0.45) * loud;
+    count = (480 + (Math.random() * 420 | 0)) * loud | 0;
+    w0 = rnd(3.9, 2.5);
+    tips.push({x:cx, y:cy, a:baseDir + rnd(0.4, -0.4)});
+    if (Math.random() < 0.5) tips.push({x:cx, y:cy, a:baseDir + rnd(0.9, -0.9)});
+  } else if (kind === 'mega'){
+    cx = rnd(W * 0.85, W * 0.15); cy = rnd(H * 0.85, H * 0.15);
+    R = Math.min(W, H) * rnd(1.05, 0.7) * loud;
+    count = (900 + (Math.random() * 500 | 0)) * loud | 0;
+    w0 = rnd(5.6, 3.9);
+    const k = 3 + (Math.random() * 3 | 0);
+    for (let i = 0; i < k; i++) tips.push({x:cx, y:cy, a:rnd(TAU)});
+  } else {
+    cx = rnd(W * 0.9, W * 0.1); cy = rnd(H * 0.9, H * 0.1);
+    R = Math.min(W, H) * rnd(0.42, 0.18) * loud;
+    count = (220 + (Math.random() * 260 | 0)) * loud | 0;
+    w0 = rnd(2.5, 1.4);
+    const k = 2 + (Math.random() * 3 | 0);
+    for (let i = 0; i < k; i++) tips.push({x:cx, y:cy, a:rnd(TAU)});
+  }
+
+  // Clumped cloud: a handful of sub-centres keeps it organic rather
+  // than a perfectly even disc.
+  const lobes = 2 + (Math.random() * 4 | 0), lx = [], ly = [];
+  for (let i = 0; i < lobes; i++){
+    const a = kind === 'edge' ? baseDir + rnd(1.1, -1.1) : rnd(TAU);
+    const d = R * rnd(0.8, 0.15);
+    lx.push(cx + Math.cos(a) * d); ly.push(cy + Math.sin(a) * d);
+  }
+  for (let i = 0; i < count; i++){
+    const l = (Math.random() * lobes) | 0;
+    const a = rnd(TAU), r = R * 0.55 * Math.pow(Math.random(), 0.62);
+    const x = lx[l] + Math.cos(a) * r, y = ly[l] + Math.sin(a) * r;
+    if (x < -60 || y < -60 || x > W + 60 || y > H + 60) continue;
+    addAttractor(x, y);
+  }
+  for (const t of tips){
+    SIM.tips.push({
+      x:t.x, y:t.y, dx:Math.cos(t.a), dy:Math.sin(t.a),
+      w:(hot ? w0 * 1.25 : w0) * CH.wide, gen:0, net, life:0,
+      max:rnd(1150, 560) * CH.life * held,
+      ch, jit:CH.jit, heat:(hot ? 1.9 : 1) * (0.85 + M.perc * 0.35), curl:0
+    });
+  }
+}
+
+/* ==================================================================
+   3. RENDER — three additive layers over pure black
+   ------------------------------------------------------------------
+   trail  every segment ever drawn, fading slowly (this is also how old
+          geometry is cleaned up: no arrays to sweep, the fade does it)
+   trunk  only the thick primary branches, kept on their own layer so a
+          kick can re-light the whole vascular tree with one drawImage
+   bloom  two downsampled copies of the trail, drawn back magnified —
+          a cheap, convincing glow
+   ================================================================== */
+const R = {
+  view:null, ctx:null, trail:null, tctx:null, trunk:null, kctx:null,
+  b1:null, b1c:null, b2:null, b2c:null, W:0, H:0, dpr:1
+};
+
+// Pre-quantised colour strings: building rgba() per segment would churn
+// the garbage collector at a few thousand segments a frame.
+const STEPS = 20;
+/* Three characters, one per kind of sound:
+     0 ICE   bright, noisy, percussive — hats, snares, transients (lightning)
+     1 JADE  sustained and tonal — pads, held chords, sustained leads (roots)
+     2 EMBER low and heavy — kick and bass dominance (vessels)
+   Ice stays the dominant look; the other two are accents. */
+const PALS = [
+  {c:[232,248,255], g:[ 70,150,255], gm:0.50},
+  {c:[228,255,244], g:[ 26,224,152], gm:0.46},
+  {c:[255,236,240], g:[255, 59,107], gm:0.45}
+].map(d => {
+  const core = [], glow = [];
+  for (let i = 0; i < STEPS; i++){
+    const a = (i + 1) / STEPS;
+    core.push('rgba(' + d.c.join(',') + ',' + a.toFixed(3) + ')');
+    glow.push('rgba(' + d.g.join(',') + ',' + (a * d.gm).toFixed(3) + ')');
+  }
+  return {core, glow};
+});
+const qi = v => clamp((v * STEPS) | 0, 0, STEPS - 1);
+
+function resize(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const W = Math.round(window.innerWidth * dpr), H = Math.round(window.innerHeight * dpr);
+  R.dpr = dpr; R.W = W; R.H = H;
+  R.view.width = W; R.view.height = H;
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  R.trail = mk(W, H); R.tctx = R.trail.getContext('2d');
+  R.trunk = mk(W, H); R.kctx = R.trunk.getContext('2d');
+  R.b1 = mk(Math.max(2, W >> 2), Math.max(2, H >> 2)); R.b1c = R.b1.getContext('2d');
+  R.b2 = mk(Math.max(2, W >> 4), Math.max(2, H >> 4)); R.b2c = R.b2.getContext('2d');
+  [R.tctx, R.kctx].forEach(c => {
+    c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+    c.lineCap = 'round'; c.globalCompositeOperation = 'lighter';
+  });
+  R.ctx = R.view.getContext('2d');
+  allocSim(W, H);
+  SIM.tips.length = 0; SIM.aN = 0;
+}
+
+function drawSeg(x0, y0, x1, y1, w, bright, ch){
+  const pal = PALS[ch] || PALS[0], core = pal.core, glow = pal.glow;
+  const c = R.tctx;
+  // Segments overlap heavily on an additive layer, so alpha is scaled
+  // down as width goes up — otherwise every trunk clips to flat white.
+  const fade = clamp(1.35 / (0.7 + w * 0.42), 0.34, 1);
+  if (w > 0.8){
+    c.strokeStyle = glow[qi(bright * fade * 0.9)];
+    c.lineWidth = w * 3.8;
+    c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+  }
+  c.strokeStyle = core[qi(bright * fade)];
+  c.lineWidth = Math.max(0.4, w * 0.9);
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+
+  if (w >= 2.0){                     // remember the trunks for kick pulses
+    const k = R.kctx;
+    k.strokeStyle = glow[qi(0.45)];
+    k.lineWidth = w * 3.0;
+    k.beginPath(); k.moveTo(x0, y0); k.lineTo(x1, y1); k.stroke();
+    k.strokeStyle = core[qi(0.5)];
+    k.lineWidth = w * 0.8;
+    k.beginPath(); k.moveTo(x0, y0); k.lineTo(x1, y1); k.stroke();
+    const r = SIM.ring;                // ring buffer of recent trunk points
+    r[SIM.ringI * 3] = x1; r[SIM.ringI * 3 + 1] = y1; r[SIM.ringI * 3 + 2] = w;
+    SIM.ringI = (SIM.ringI + 1) % (r.length / 3 | 0);
+    if (SIM.ringN < r.length / 3) SIM.ringN++;
+  }
+}
+
+/* A short jagged bolt, used for hi-hat detail and for the moment two
+   networks touch. */
+function bolt(x0, y0, x1, y1, w, bright, ch){
+  const n = 4;
+  let px = x0, py = y0;
+  for (let i = 1; i <= n; i++){
+    const t = i / n;
+    const nx = lerp(x0, x1, t) + rnd(4, -4), ny = lerp(y0, y1, t) + rnd(4, -4);
+    drawSeg(px, py, nx, ny, w, bright, ch);
+    px = nx; py = ny;
+  }
+}
+
+/* The slow global grain the branches grow along. */
+function field(x, y, t){
+  return Math.sin(x * 0.0031 + t * 0.11) * 1.7
+       + Math.cos(y * 0.0037 - t * 0.08) * 1.7
+       + Math.sin((x + y) * 0.0019 + t * 0.05) * 1.3;
+}
+
+const P = {  // music-driven parameters, recomputed every frame
+  speed:1, branch:0.012, noise:0.12, glow:0.4, bright:0.6, load:0,
+  maxTips:110, pulse:0, flash:0, intensity:1, reduced:false
+};
+
+function stepTip(tp, t, W, H){
+  const infl = 92, kill = 13;
+  let axs = 0, ays = 0, found = 0, sx = 0, sy = 0;
+  const C = SIM.cell;
+  const cx = clamp(tp.x / C | 0, 0, SIM.cols - 1), cy = clamp(tp.y / C | 0, 0, SIM.rows - 1);
+  for (let gy = cy - 1; gy <= cy + 1; gy++){
+    if (gy < 0 || gy >= SIM.rows) continue;
+    for (let gx = cx - 1; gx <= cx + 1; gx++){
+      if (gx < 0 || gx >= SIM.cols) continue;
+      const c = gy * SIM.cols + gx;
+      for (let k = SIM.start[c]; k < SIM.start[c + 1]; k++){
+        const i = SIM.items[k];
+        if (!SIM.aOn[i]) continue;
+        const dx = SIM.ax[i] - tp.x, dy = SIM.ay[i] - tp.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > infl * infl) continue;
+        if (d2 < kill * kill){ SIM.aOn[i] = 0; continue; }
+        const d = Math.sqrt(d2), ux = dx / d, uy = dy / d;
+        if (ux * tp.dx + uy * tp.dy < 0.2) continue;   // forward cone only
+        axs += ux; ays += uy; found++;
+        sx += ux; sy += uy;
+      }
+    }
+  }
+
+  // --- the direction equation ---
+  // Persistence dominates: a growth tip is a projectile that gets
+  // steered, not a particle that chases. That is what stops the
+  // branches curling back into spirals.
+  let nx = tp.dx * 2.4, ny = tp.dy * 2.4;                         // persistence
+  if (found){
+    const l = Math.hypot(axs, ays) || 1;
+    nx += (axs / l) * 1.7; ny += (ays / l) * 1.7;                 // attraction
+  }
+  const fa = field(tp.x, tp.y, t);
+  nx += Math.cos(fa) * 0.13; ny += Math.sin(fa) * 0.13;           // field bias
+  // Noise is applied every few steps rather than continuously, so a
+  // branch travels in straight leader runs and changes direction at
+  // discrete points — the signature of a breakdown path.
+  let rx = nx, ry = ny;
+  if (tp.life % 3 === 0){
+    const jitter = P.noise * (0.5 + (1 - clamp(tp.w / 5, 0, 1)) * 1.4) * tp.jit;
+    const ja = rnd(jitter, -jitter);
+    const c2 = Math.cos(ja), s2 = Math.sin(ja);
+    rx = nx * c2 - ny * s2; ry = nx * s2 + ny * c2;               // noise
+  }
+  let kick = 0;
+  if (Math.random() < (0.028 + P.noise * 0.10) * tp.jit){          // lightning kink
+    kick = rnd(0.95, 0.30) * (Math.random() < 0.5 ? -1 : 1);
+  }
+  // Turn-rate limit. Thin twigs are allowed to whip around; thick
+  // trunks can only bend gently, which reads as lightning rather than
+  // as smoke.
+  const want = Math.atan2(ry, rx) + kick;
+  const cur = Math.atan2(tp.dy, tp.dx);
+  let d = want - cur;
+  while (d > Math.PI) d -= TAU;
+  while (d < -Math.PI) d += TAU;
+  d -= tp.curl * 0.34;                    // anti-curl
+  const maxTurn = (0.10 + 0.24 / (0.55 + tp.w)) * (0.55 + tp.jit * 0.55) + Math.abs(kick);
+  if (d > maxTurn) d = maxTurn; else if (d < -maxTurn) d = -maxTurn;
+  tp.curl = tp.curl * 0.90 + d * 0.10;
+  const na = cur + d;
+  tp.dx = Math.cos(na); tp.dy = Math.sin(na);
+
+  const step = (1.4 + tp.w * 0.6) * P.speed;
+  const px = tp.x, py = tp.y;
+  tp.x += tp.dx * step; tp.y += tp.dy * step;
+  tp.life++;
+
+  // occupancy: keeps branches from piling into the same space, and
+  // detects when one network reaches another
+  const ox = (tp.x / SIM.occCell) | 0, oy = (tp.y / SIM.occCell) | 0;
+  let dead = false, touch = false;
+  if (ox >= 0 && oy >= 0 && ox < SIM.occW && oy < SIM.occH){
+    const oi = oy * SIM.occW + ox;
+    const other = SIM.occNet[oi];
+    if (other && other !== tp.net && tp.life > 40 && Math.random() < 0.5){ touch = true; }
+    if (SIM.occ[oi] > 5 + tp.w * 2.2) dead = true;
+    SIM.occ[oi] = Math.min(255, SIM.occ[oi] + 1);
+    SIM.occNet[oi] = tp.net;
+  }
+
+  const bright = clamp(P.bright * (0.5 + tp.heat * 0.7) * (tp.w > 2 ? 1.2 : 0.9), 0.05, 1);
+  drawSeg(px, py, tp.x, tp.y, tp.w, bright, tp.ch);
+  tp.heat *= 0.9985;
+
+  if (touch){
+    bolt(px, py, tp.x + rnd(26, -26), tp.y + rnd(26, -26), Math.max(1.2, tp.w), 1, tp.ch);
+    P.flash = Math.max(P.flash, 0.06);
+    dead = true;
+  }
+
+  // --- branching ---
+  const spread = found > 1 ? 1 - Math.hypot(sx, sy) / found : 0;   // attractors pulling apart
+  const pBranch = P.branch * (1 + spread * 3.2) * clamp(tp.w * 0.8, 0.18, 2.6);
+  if (SIM.tips.length < P.maxTips && tp.w > 0.42 && Math.random() < pBranch){
+    const a = rnd(1.05, 0.42) * (Math.random() < 0.5 ? -1 : 1);
+    const c3 = Math.cos(a), s3 = Math.sin(a);
+    SIM.tips.push({
+      x:tp.x, y:tp.y, dx:tp.dx * c3 - tp.dy * s3, dy:tp.dx * s3 + tp.dy * c3,
+      w:tp.w * rnd(0.78, 0.58), gen:tp.gen + 1, net:tp.net, life:0,
+      max:tp.max * 0.72, ch:tp.ch, jit:tp.jit, heat:tp.heat * 0.95, curl:0
+    });
+    tp.w *= 0.90;
+  }
+  // hi-hat twigs: very short-lived hairline splits
+  if (M.hat > 0.35 && tp.w > 0.8 && SIM.tips.length < P.maxTips + 60 && Math.random() < M.hat * 0.05){
+    const a = rnd(1.5, 0.6) * (Math.random() < 0.5 ? -1 : 1);
+    const c4 = Math.cos(a), s4 = Math.sin(a);
+    SIM.tips.push({
+      x:tp.x, y:tp.y, dx:tp.dx * c4 - tp.dy * s4, dy:tp.dx * s4 + tp.dy * c4,
+      w:0.55, gen:tp.gen + 2, net:tp.net, life:0, max:rnd(60, 20),
+      ch:tp.ch, jit:tp.jit, heat:1.3, curl:0
+    });
+  }
+
+  tp.w *= 0.9991 - tp.gen * 0.00010;
+  if (dead || tp.w < 0.3 || tp.life > tp.max ||
+      tp.x < -80 || tp.y < -80 || tp.x > W + 80 || tp.y > H + 80) return false;
+  return true;
+}
+
+/* ------------------------------------------------------------------
+   The frame: read the music, translate it into physics, grow, compose.
+   ------------------------------------------------------------------ */
+let started = false, paused = false, tPrev = 0, tNow = 0, frame = 0, decayTick = 0;
+const PERF = {ms:16, q:1};
+
+function musicToPhysics(){
+  const I = P.intensity;
+  const idle = !started || AUDIO.mode === 'none';
+  // Blend raw level with the range-normalised reading. The raw part keeps
+  // genuinely quiet passages quiet; the normalised part guarantees that a
+  // compressed track still swings across the full visual range.
+  const N = M.n;
+  const bass = 0.30 * M.bass + 0.70 * N.bass;
+  const mid  = 0.30 * M.mid  + 0.70 * N.mid;
+  const hi   = 0.30 * M.high + 0.70 * N.high;
+  const amp  = 0.35 * M.amp  + 0.65 * N.amp;
+  const drop = M.drop;
+
+  P.speed    = (0.55 + bass * 2.1 + M.kick * 1.1 + drop * 2.4 + amp * 0.5) * I;
+  P.branch   = (0.010 + mid * 0.034 + drop * 0.022) * I;
+  P.noise    = 0.07 + hi * 0.42 + M.air * 0.2 + drop * 0.1;
+  P.bright   = clamp(0.42 + amp * 0.55 + M.kick * 0.5 + drop * 0.35, 0.2, 1);
+  P.glow     = clamp(0.30 + bass * 0.85 + drop * 0.55 + M.kick * 0.25, 0.2, 1.5);
+  P.maxTips  = Math.round((85 + mid * 150 + bass * 60 + drop * 190) * clamp(I, 0.4, 1.6));
+  P.pulse    = Math.max(P.pulse * 0.80, M.kick * 0.55);
+  P.glow     = Math.min(P.glow, 1.0);
+  // load = how crowded the canvas currently is
+  P.load     = clamp(SIM.tips.length / 160, 0, 2.2);
+  P.speed   *= clamp(1.10 / (0.42 + P.load * 0.72), 0.38, 1);
+  P.bright  *= clamp(1.15 / (0.55 + P.load * 0.62), 0.42, 1);
+  P.glow    *= clamp(1.1 / (0.5 + P.load * 0.72), 0.4, 1);
+
+  if (idle){ P.speed = 0.6; P.branch = 0.016; P.noise = 0.12; P.bright = 0.45; P.glow = 0.4; P.maxTips = 95; }
+
+  // Flashes: only for real events, never every beat.
+  if (M.kickHit > 1.05) P.flash = Math.max(P.flash, clamp((M.kickHit - 1) * 0.10, 0, 0.10));
+  if (M.dropHit)        P.flash = Math.max(P.flash, 0.30);
+  P.flash *= 0.82;
+}
+
+function spawnLogic(W, H){
+  const want = started ? Math.round(3 + M.bass * 3 + M.mid * 2 + M.drop * 4) : 2;
+  const live = new Set();
+  for (const t of SIM.tips) live.add(t.net);
+  const room = SIM.tips.length < P.maxTips * 0.8;
+  if (live.size < want && room && (M.kickHit || frame % 22 === 0 || SIM.tips.length < 14)){
+    spawnNetwork(Math.random() < 0.55 ? 'edge' : 'seed', W, H);
+  }
+  if (!started && SIM.tips.length < 48 && frame % 24 === 0) spawnNetwork(Math.random() < 0.4 ? 'edge' : 'seed', W, H);
+  if (started && SIM.tips.length === 0 && frame % 20 === 0) spawnNetwork('edge', W, H);
+  // A drop tears several huge structures across the screen at once.
+  if (M.dropHit){
+    const n = 2 + (Math.random() * 3 | 0);
+    for (let i = 0; i < n; i++) spawnNetwork(i % 2 ? 'mega' : 'edge', W, H);
+  }
+  if (M.build > 0.55 && Math.random() < M.build * 0.03) spawnNetwork('seed', W, H);
+}
+
+function loop(ms){
+  requestAnimationFrame(loop);
+  const t = ms / 1000;
+  const dt = Math.min(0.05, t - tPrev || 0.016);
+  tPrev = t; tNow = t; frame++;
+  if (paused) return;
+
+  PERF.ms = lerp(PERF.ms, dt * 1000, 0.06);
+  if (PERF.ms > 26) PERF.q = Math.max(0.5, PERF.q - 0.006);
+  else if (PERF.ms < 18) PERF.q = Math.min(1, PERF.q + 0.010);
+
+  analyse(t, dt);
+  musicToPhysics();
+  P.maxTips = Math.round(P.maxTips * PERF.q);
+
+  const W = R.W, H = R.H;
+  const dpr = R.dpr;
+  spawnLogic(W, H);
+  rebuildGrid();
+
+  // Fade the persistent layers. Everything composites additively over
+  // black, so fading toward black *is* the cleanup pass.
+  R.tctx.globalCompositeOperation = 'source-over';
+  R.tctx.fillStyle = 'rgba(0,0,0,' + (0.028 + P.load * 0.022 + M.drop * 0.020).toFixed(3) + ')';
+  R.tctx.fillRect(0, 0, W, H);
+  R.tctx.globalCompositeOperation = 'lighter';
+  R.kctx.globalCompositeOperation = 'source-over';
+  R.kctx.fillStyle = 'rgba(0,0,0,' + (0.018 + P.load * 0.012).toFixed(3) + ')';
+  R.kctx.fillRect(0, 0, W, H);
+  R.kctx.globalCompositeOperation = 'lighter';
+
+  // Let the occupancy map forget, so the screen can be regrown.
+  if ((decayTick = (decayTick + 1) % 90) === 0){
+    const o = SIM.occ;
+    for (let i = 0; i < o.length; i++) if (o[i]) o[i] >>= 1;
+  }
+
+  // Growth. Sub-steps keep fast growth smooth instead of dashed.
+  const subs = clamp(Math.round(P.speed * dpr * 0.8), 1, P.load > 1.2 ? 2 : 3);
+  const budget = 900;
+  for (let s = 0; s < subs; s++){
+    const tips = SIM.tips;
+    for (let i = tips.length - 1; i >= 0; i--){
+      if (!stepTip(tips[i], t, W, H)) tips.splice(i, 1);
+    }
+    if (tips.length > budget) tips.length = budget;
+  }
+
+  // Hi-hat detail: brief electrical flicks along existing trunks.
+  if (M.hat > 0.42 && SIM.ringN > 8){
+    const n = 1 + (M.hat * 3 | 0);
+    for (let i = 0; i < n; i++){
+      const k = (Math.random() * SIM.ringN | 0) * 3;
+      const x = SIM.ring[k], y = SIM.ring[k + 1];
+      const a = rnd(TAU), len = rnd(17, 6) * dpr;
+      bolt(x, y, x + Math.cos(a) * len, y + Math.sin(a) * len, 0.45, 0.7, 0);
+    }
+  }
+
+  /* ---- composite ---- */
+  const c = R.ctx;
+  c.globalCompositeOperation = 'source-over';
+  c.fillStyle = '#000';
+  c.fillRect(0, 0, W, H);
+  c.drawImage(R.trail, 0, 0);
+
+  c.globalCompositeOperation = 'lighter';
+  if (P.pulse > 0.02){                      // kick re-lights the trunks
+    c.globalAlpha = clamp(P.pulse, 0, 0.85);
+    c.drawImage(R.trunk, 0, 0);
+    c.globalAlpha = 1;
+  }
+  // two-tap bloom
+  R.b1c.globalCompositeOperation = 'source-over';
+  R.b1c.drawImage(R.trail, 0, 0, R.b1.width, R.b1.height);
+  R.b2c.drawImage(R.b1, 0, 0, R.b2.width, R.b2.height);
+  if (PERF.q > 0.6){
+    c.globalAlpha = clamp(P.glow * 0.34, 0, 0.55);
+    c.drawImage(R.b1, 0, 0, W, H);
+  }
+  c.globalAlpha = clamp(P.glow * 0.58, 0, 0.8);
+  c.drawImage(R.b2, 0, 0, W, H);
+  c.globalAlpha = 1;
+
+  // Distant-lightning flash: a soft off-centre wash, not a white screen.
+  const fl = P.reduced ? P.flash * 0.16 : P.flash;
+  if (fl > 0.004){
+    const gx = W * (0.5 + Math.sin(t * 1.7) * 0.28), gy = H * (0.35 + Math.cos(t * 1.3) * 0.2);
+    const g = c.createRadialGradient(gx, gy, 0, gx, gy, Math.max(W, H) * 0.85);
+    g.addColorStop(0, 'rgba(190,225,255,' + (fl * 0.9).toFixed(3) + ')');
+    g.addColorStop(0.45, 'rgba(70,120,220,' + (fl * 0.32).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+  }
+
+  c.globalCompositeOperation = 'source-over';
+}
+
+/* ==================================================================
+   4. INTERFACE
+   ================================================================== */
+const $ = s => document.querySelector(s);
+const ICON_PLAY  = '<svg viewBox="0 0 24 24" class="solid"><path d="M7 4l13 8-13 8z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" class="solid"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+
+const ui = {
+  bar:null, idle:0,
+  setTrackName(n){ if (this.name) this.name.textContent = n; },
+  toast(msg){
+    const el = $('#toast'); el.textContent = msg; el.classList.add('show');
+    clearTimeout(this._tt); this._tt = setTimeout(() => el.classList.remove('show'), 1700);
+  }
+};
+
+function setPaused(v){
+  paused = v;
+  $('#bPlay').innerHTML = v ? ICON_PLAY : ICON_PAUSE;
+  if (!AUDIO.ctx) return;
+  if (v){ AUDIO.ctx.suspend(); if (AUDIO.el) AUDIO.el.pause(); }
+  else { AUDIO.ctx.resume(); if (AUDIO.el) AUDIO.el.play().catch(() => {}); }
+}
+function restart(){
+  if (AUDIO.mode === 'listen'){        // nothing of ours is playing; just clear the canvas
+    SIM.tips.length = 0; SIM.aN = 0;
+    SIM.occ.fill(0); SIM.occNet.fill(0); SIM.ringN = 0; SIM.ringI = 0;
+    [R.tctx, R.kctx].forEach(x => {
+      x.globalCompositeOperation = 'source-over';
+      x.fillStyle = '#000'; x.fillRect(0, 0, R.W, R.H);
+      x.globalCompositeOperation = 'lighter';
+    });
+    ui.toast('cleared'); return;
+  }
+  SIM.tips.length = 0; SIM.aN = 0;
+  SIM.occ.fill(0); SIM.occNet.fill(0); SIM.ringN = 0; SIM.ringI = 0;
+  [R.tctx, R.kctx].forEach(x => {
+    x.globalCompositeOperation = 'source-over';
+    x.fillStyle = '#000'; x.fillRect(0, 0, R.W, R.H);
+    x.globalCompositeOperation = 'lighter';
+  });
+  M.lastDrop = -99; M.drop = 0;
+  if (AUDIO.mode === 'file' && AUDIO.el){ AUDIO.el.currentTime = 0; AUDIO.el.play().catch(() => {}); }
+  else useSynth(SEQ.track);
+  if (paused) setPaused(false);
+  ui.toast('restarted');
+}
+function toggleFull(){
+  const el = document.documentElement;
+  if (!document.fullscreenElement){
+    (el.requestFullscreen ? el.requestFullscreen() : Promise.reject()).catch(() => ui.toast('fullscreen blocked here'));
+  } else document.exitFullscreen();
+}
+function setReduced(v){
+  P.reduced = v;
+  $('#bFlash').setAttribute('aria-pressed', String(v));
+  const g = $('#gateRF');
+  if (g) g.checked = v;          // the title card is gone once playback starts
+}
+
+function showBar(){
+  ui.bar.classList.add('show');
+  document.body.style.cursor = 'default';
+  clearTimeout(ui.idle);
+  ui.idle = setTimeout(() => {
+    ui.bar.classList.remove('show');
+    if (started) document.body.style.cursor = 'none';
+  }, 2600);
+}
+
+/* iOS will only let audio begin from inside a user gesture, and an `await`
+   ends that gesture even when it resolves immediately. Playing a one-sample
+   silent buffer is the accepted way to unlock the context, and it has to
+   happen synchronously in the tap. */
+function unlockAudio(){
+  const c = AUDIO.ctx;
+  if (!c) return;
+  try{
+    const src = c.createBufferSource();
+    src.buffer = c.createBuffer(1, 1, c.sampleRate);
+    src.connect(c.destination);
+    src.start(0);
+  }catch(e){ /* already unlocked */ }
+  if (c.state !== 'running') c.resume().catch(() => {});
+}
+
+function begin(){
+  if (started) return;
+  started = true;
+  $('#gate').classList.add('gone');
+  ui.bar.classList.remove('hidden');
+  setTimeout(() => { const g = $('#gate'); if (g) g.remove(); }, 1000);
+
+  // Every audio call below is synchronous, inside the tap. The project-track
+  // probe used to run before the first note — a network fetch, two awaits deep
+  // — which is exactly why phones stayed silent.
+  initAudio();
+  unlockAudio();
+  useSynth(0);
+  $('#bPlay').innerHTML = ICON_PAUSE;
+  showBar();
+
+  // Only now, off the gesture, look for a track shipped with the project.
+  tryProjectTrack().then(f => {
+    if (f && started && AUDIO.mode === 'synth') useFile(f.url, f.name);
+  }).catch(() => {});
+}
+
+function loadFile(file){
+  if (!file || file.type.indexOf('audio') !== 0){ ui.toast('not an audio file'); return; }
+  initAudio();
+  useFile(URL.createObjectURL(file), file.name.replace(/\.[^.]+$/, ''));
+  if (paused) setPaused(false);
+  ui.toast('playing ' + file.name);
+}
+
+function boot(){
+  if (window.matchMedia && matchMedia('(pointer: coarse)').matches)
+    document.getElementById('subHint').textContent = 'Tap to begin';
+  R.view = $('#view');
+  ui.bar = $('#bar');
+  ui.name = $('#trackName');
+  resize();
+  // Mobile browsers fire resize continuously as the address bar hides and
+  // shows. A real resize reallocates every canvas and clears the artwork, so
+  // on touch devices a height-only change small enough to be browser chrome is
+  // ignored — the canvas simply scales to fit until something real changes.
+  const COARSE = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+  let rw = window.innerWidth, rh = window.innerHeight, rTimer = null;
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    if (COARSE && w === rw && Math.abs(h - rh) < 140) return;
+    clearTimeout(rTimer);
+    rTimer = setTimeout(() => { rw = window.innerWidth; rh = window.innerHeight; resize(); }, 220);
+  });
+  window.addEventListener('orientationchange', () => {
+    clearTimeout(rTimer);
+    rTimer = setTimeout(() => { rw = window.innerWidth; rh = window.innerHeight; resize(); }, 320);
+  });
+
+  // Hide controls the device cannot honour rather than letting them fail.
+  if (COARSE || !navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia)
+    $('#bTab').style.display = 'none';          // no tab-audio capture on phones
+  if (!document.documentElement.requestFullscreen)
+    $('#bFull').style.display = 'none';         // iOS Safari has no element fullscreen
+
+  const startFromGate = e => {
+    if (e.target.closest('.gate-rf')) return;   // that control has its own job
+    begin();                                    // guarded against running twice
+  };
+  const gate = $('#gate');
+  gate.addEventListener('click', startFromGate);
+  gate.addEventListener('pointerup', startFromGate);
+  $('#gateRF').addEventListener('change', e => {
+    setReduced(e.target.checked);
+    // Tapping the toggle deliberately does not start the experience, so say
+    // what to do next rather than appearing to do nothing.
+    ui.toast('reduced flashing ' + (e.target.checked ? 'on' : 'off') + ' — tap anywhere to begin');
+  });
+
+  $('#bPlay').innerHTML = ICON_PLAY;
+  $('#bPlay').onclick = () => setPaused(!paused);
+  $('#bRestart').onclick = restart;
+  $('#bFull').onclick = toggleFull;
+  $('#bFlash').onclick = () => setReduced(!P.reduced);
+  $('#bTrack').onclick = () => {
+    if (AUDIO.mode === 'file'){ useSynth(0); ui.toast(TRACKS[0].title); }
+    else { useSynth(SEQ.track + 1); ui.toast(TRACKS[SEQ.track].title); }
+  };
+  $('#bFile').onclick = () => $('#fInput').click();
+  $('#bSink').onclick = () => {
+    const on = $('#bSink').getAttribute('aria-pressed') !== 'true';
+    mediaRoute(on);
+    $('#bSink').setAttribute('aria-pressed', String(on));
+    ui.toast(on ? 'alternate audio route on' : 'normal audio route');
+  };
+  $('#bTab').onclick = listenToTab;
+  $('#bMic').onclick = listenToMic;
+  $('#fInput').onchange = e => { const f = e.target.files[0]; if (f) loadFile(f); e.target.value = ''; };
+  $('#rVol').oninput = e => { if (AUDIO.vol) AUDIO.vol.gain.value = Math.pow(e.target.value / 100, 1.6); };
+  $('#rInt').oninput = e => { P.intensity = e.target.value / 100; };
+
+  addEventListener('pointerdown', () => {
+    if (!AUDIO.ctx) return;
+    if (AUDIO.ctx.state !== 'running') AUDIO.ctx.resume().catch(() => {});
+    if (!paused && AUDIO.mode === 'file' && AUDIO.el && AUDIO.el.paused)
+      AUDIO.el.play().catch(() => {});
+  }, {passive:true});
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && !paused && AUDIO.ctx && AUDIO.ctx.state !== 'running')
+      AUDIO.ctx.resume().catch(() => {});
+  });
+  addEventListener('mousemove', showBar);
+  addEventListener('touchstart', showBar, {passive:true});
+  addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' && e.key !== 'Escape') return;
+    const k = e.key.toLowerCase();
+    if (k === ' '){ e.preventDefault(); started ? setPaused(!paused) : begin(); }
+    else if (k === 'r' && started) restart();
+    else if (k === 'f') toggleFull();
+    else if (k === 'x') setReduced(!P.reduced);
+    else if (k === 't' && started) $('#bTrack').click();
+    else if (k === 'l') $('#bFile').click();
+    else if (k === 'c') listenToTab();
+    else if (k === 'm') listenToMic();
+    else if (k === 'enter' && !started) begin();
+    else return;
+    showBar();
+  });
+
+  // drop any audio file, any time
+  const dz = $('#drop');
+  addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('on'); });
+  addEventListener('dragleave', e => { if (e.relatedTarget === null) dz.classList.remove('on'); });
+  addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('on');
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f){ if (!started) begin(); loadFile(f); }
+  });
+
+  // seed a quiet idle system behind the title card
+  for (let i = 0; i < 4; i++) spawnNetwork(i < 2 ? 'seed' : 'edge', R.W, R.H);
+  requestAnimationFrame(loop);
+}
+boot();
+</script>
+</body>
+</html>
