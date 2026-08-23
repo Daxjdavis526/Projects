@@ -122,6 +122,22 @@ page rather than inside anyone's frame.
 A file opened from the Files app on iOS runs in a restricted preview where
 scripts may not execute; a phone needs the page served over http(s).
 
+## Tap tempo
+
+**Tap beat** (or `B`) drives the growth from a tempo you tap in, with no audio
+at all — for watching alongside music playing in an app the page cannot reach,
+which on a phone is every streaming service.
+
+Tap the beat four times to start; the tempo is the median-filtered average of
+your intervals. Our own audio stops so it is not competing. Tap again any time
+to re-sync — phase re-aligns to the newest tap and the tempo estimate refines.
+Press **Track** to go back to real audio.
+
+It is a metronome, not listening: it holds time because it runs at the same
+speed and started on the same beat. So it drifts (about half a second a minute
+for a 1% tempo error), knows nothing about drops or timbre, and has no idea
+when a song ends. Tapping more times before it locks averages out your error.
+
 ## If a phone stays silent
 
 iOS routes Web Audio through the *ambient* audio category, which the physical

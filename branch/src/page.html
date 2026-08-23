@@ -189,6 +189,7 @@ input[type=range]::-moz-range-thumb{width:7px; height:7px; border:0; border-radi
     <button class="tog" id="bFile" title="Play your own audio file (L)">Load</button>
     <button class="tog" id="bTab" title="Listen to a browser tab — Spotify, YouTube, anything (C)">Tab</button>
     <button class="tog" id="bMic" title="Listen to music from a separate speaker. On a phone this pauses audio playing on the phone itself (M)">Mic</button>
+    <button class="tog" id="bBeat" aria-pressed="false" title="Tap the beat of music playing elsewhere (B)">Tap beat</button>
     <button class="tog" id="bSink" aria-pressed="false" title="Alternate audio route — try this if a phone stays silent">Sound fix</button>
     <input type="file" id="fInput" accept="audio/*" hidden>
     <span id="trackName">—</span>
@@ -724,6 +725,101 @@ function synthStart(){
 }
 function synthStop(){ SEQ.playing = false; }
 
+/* ==================================================================
+   TAP TEMPO
+   ------------------------------------------------------------------
+   The page never hears the music here — you are the sensor. Tapping the
+   beat gives a tempo, and a metronome runs from it, driving the same
+   physics that audio normally drives. It stays with a song because it
+   runs at the same speed and started on the same beat, not because it
+   is listening. So it drifts, and knows nothing about drops, timbre or
+   a track ending. Tap again any time to pull it back into line.
+   ================================================================== */
+const BEAT = { on:false, bpm:120, t0:0, taps:[], lastBeat:-1, lastDropBeat:-999 };
+
+function tapBeat(){
+  const B = BEAT, now = performance.now() / 1000;   // not the frame clock
+  if (B.taps.length && now - B.taps[B.taps.length - 1] > 2.5) B.taps.length = 0;
+  B.taps.push(now);
+  if (B.taps.length > 8) B.taps.shift();
+  B.t0 = now; B.lastBeat = -1;            // phase re-aligns to the newest tap
+
+  if (B.taps.length >= 2){
+    const iv = [];
+    for (let i = 1; i < B.taps.length; i++) iv.push(B.taps[i] - B.taps[i - 1]);
+    const sorted = iv.slice().sort((a, b) => a - b);
+    const med = sorted[sorted.length >> 1];
+    // drop taps that were plainly a stumble before averaging the rest
+    const keep = iv.filter(v => v > med * 0.6 && v < med * 1.6);
+    const avg = keep.reduce((a, b) => a + b, 0) / (keep.length || 1);
+    if (avg > 0.24 && avg < 2.2) B.bpm = clamp(60 / avg, 40, 220);
+  }
+  if (B.taps.length >= 4 && !B.on) enterBeat();
+  ui.toast(B.on ? Math.round(B.bpm) + ' bpm — tap again to re-sync'
+                : 'keep tapping the beat  ' + B.taps.length + '/4');
+}
+
+function enterBeat(){
+  synthStop(); stopCapture();
+  if (AUDIO.el){ AUDIO.el.pause(); AUDIO.el = null; }
+  BEAT.on = true; BEAT.lastDropBeat = -999;
+  AUDIO.mode = 'beat'; AUDIO.source = 'tap tempo';
+  const btn = document.getElementById('bBeat');
+  if (btn) btn.setAttribute('aria-pressed', 'true');
+  ui.setTrackName(Math.round(BEAT.bpm) + ' bpm');
+  keepAwake(true);
+}
+function exitBeat(){
+  BEAT.on = false; BEAT.taps.length = 0;
+  const btn = document.getElementById('bBeat');
+  if (btn) btn.setAttribute('aria-pressed', 'false');
+}
+
+/* Stand in for the analyser: a metronome plus a plausible shape around it. */
+function beatAnalyse(now){
+  const B = BEAT, spb = 60 / B.bpm;
+  const pos = (now - B.t0) / spb;
+  const idx = Math.floor(pos);
+  const ph = pos - idx;                     // 0..1 through the current beat
+  const env = Math.exp(-ph * 4.5);          // each beat decays away
+
+  M.kickHit = 0; M.dropHit = 0;
+  if (idx !== B.lastBeat){
+    B.lastBeat = idx;
+    const strong = (((idx % 4) + 4) % 4) === 0;
+    M.kickHit = strong ? 1.5 : 1.1;
+    M.kick = strong ? 1.2 : 0.85;
+    if (idx - B.lastDropBeat >= 64){ B.lastDropBeat = idx; M.dropHit = 1; M.drop = 1; }
+  }
+  M.kick *= 0.86;
+  M.drop = Math.max(0, M.drop - 0.0075);
+  const since = idx - B.lastDropBeat;
+  M.build = clamp((since - 48) / 16, 0, 1); // ramps through the 16 beats before one
+  M.buildPeak = M.build;
+
+  M.sub = 0.12 + 0.55 * env;   M.bass = 0.16 + 0.6 * env;
+  M.lowmid = 0.32 + 0.12 * Math.sin(now * 0.7);
+  M.mid = 0.38 + 0.16 * Math.sin(now * 0.31);
+  M.high = 0.12 + ((idx % 2) ? 0.3 : 0.16) * (1 - ph);
+  M.air = M.high * 0.7;
+  M.amp = 0.3 + 0.28 * env;
+  M.hat = ph < 0.12 ? 0.5 : M.hat * 0.8;
+  M.perc = 0.4 + env; M.centroid = 0.45; M.flat = 0.4; M.sustain = 1;
+
+  const n = M.n;
+  n.bass = clamp(0.15 + 0.8 * env, 0, 1);  n.low = n.bass;
+  n.mid  = 0.45 + 0.22 * Math.sin(now * 0.37);
+  n.high = 0.28 + 0.32 * (1 - ph);
+  n.amp  = clamp(0.32 + 0.5 * env, 0, 1);
+  n.hold = 0.36 + 0.28 * Math.sin(now * 0.11);
+  n.cen = 0.5; n.flat = 0.42; n.sus = 0.5;
+
+  // no timbre to read, so hold a fixed blend that still shows all three
+  M.charScore[0] = 0.62;
+  M.charScore[1] = 0.16 + 0.12 * Math.sin(now * 0.09);
+  M.charScore[2] = 0.18 + 0.22 * env;
+}
+
 /* ---------- keep the screen alive ---------- */
 let wakeLock = null;
 async function keepAwake(on){
@@ -773,6 +869,7 @@ function useFile(url, label){
   initAudio();
   M.lastDrop = tNow;
   stopCapture();
+  exitBeat();
   synthStop();
   if (AUDIO.el){ AUDIO.el.pause(); }
   const el = new Audio();
@@ -790,6 +887,7 @@ function useFile(url, label){
 function useSynth(i){
   initAudio();
   stopCapture();
+  exitBeat();
   if (AUDIO.el){ AUDIO.el.pause(); AUDIO.el = null; }
   AUDIO.mode = 'synth';
   M.quiet = 0; M.quietWarned = false;
@@ -811,6 +909,7 @@ function stopCapture(){
   if (AUDIO.streamSrc){ try{ AUDIO.streamSrc.disconnect(); }catch(e){} AUDIO.streamSrc = null; }
 }
 function attachStream(stream, label, gain){
+  exitBeat();
   synthStop();
   if (AUDIO.el){ AUDIO.el.pause(); AUDIO.el = null; }
   stopCapture();
@@ -1577,7 +1676,7 @@ function loop(ms){
   if (PERF.ms > 26) PERF.q = Math.max(0.5, PERF.q - 0.006);
   else if (PERF.ms < 18) PERF.q = Math.min(1, PERF.q + 0.010);
 
-  analyse(t, dt);
+  if (BEAT.on) beatAnalyse(t); else analyse(t, dt);
   musicToPhysics();
   P.maxTips = Math.round(P.maxTips * PERF.q);
 
@@ -1836,6 +1935,7 @@ function boot(){
     else { useSynth(SEQ.track + 1); ui.toast(TRACKS[SEQ.track].title); }
   };
   $('#bFile').onclick = () => $('#fInput').click();
+  $('#bBeat').onclick = tapBeat;
   $('#bSink').onclick = () => {
     const on = $('#bSink').getAttribute('aria-pressed') !== 'true';
     mediaRoute(on);
@@ -1873,6 +1973,7 @@ function boot(){
     else if (k === 'l') $('#bFile').click();
     else if (k === 'c') listenToTab();
     else if (k === 'm') listenToMic();
+    else if (k === 'b') tapBeat();
     else if (k === 'enter' && !started) begin();
     else return;
     showBar();
