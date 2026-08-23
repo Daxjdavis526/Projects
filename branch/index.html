@@ -179,8 +179,8 @@ input[type=range]::-moz-range-thumb{width:7px; height:7px; border:0; border-radi
       <div class="gate-foot">
         <label class="gate-rf"><input type="checkbox" id="gateRF"> Reduced flashing</label>
         <p class="gate-note">
-          Contains flashing light synchronised to music. Drop any audio file onto the
-          window at any time to grow the system to your own track.
+          Contains flashing light synchronised to music. Load an audio file, or tap
+          <b>Mic</b> to listen to a track playing on a separate speaker.
         </p>
       </div>
     </div>
@@ -201,7 +201,7 @@ input[type=range]::-moz-range-thumb{width:7px; height:7px; border:0; border-radi
     <button class="tog" id="bTrack" title="Change built-in track (T)">Track</button>
     <button class="tog" id="bFile" title="Play your own audio file (L)">Load</button>
     <button class="tog" id="bTab" title="Listen to a browser tab — Spotify, YouTube, anything (C)">Tab</button>
-    <button class="tog" id="bMic" title="Listen through the microphone (M)">Mic</button>
+    <button class="tog" id="bMic" title="Listen to music from a separate speaker. On a phone this pauses audio playing on the phone itself (M)">Mic</button>
     <button class="tog" id="bSink" aria-pressed="false" title="Alternate audio route — try this if a phone stays silent">Sound fix</button>
     <input type="file" id="fInput" accept="audio/*" hidden>
     <span id="trackName">—</span>
@@ -737,6 +737,19 @@ function synthStart(){
 }
 function synthStop(){ SEQ.playing = false; }
 
+/* ---------- keep the screen alive ---------- */
+let wakeLock = null;
+async function keepAwake(on){
+  try{
+    if (on && !wakeLock && navigator.wakeLock){
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } else if (!on && wakeLock){
+      const w = wakeLock; wakeLock = null; await w.release();
+    }
+  }catch(e){ wakeLock = null; }   // unsupported, or refused in the background
+}
+
 /* ---------- iOS: route the mix through a media element ---------- */
 function mediaRoute(on){
   const A = AUDIO;
@@ -858,7 +871,10 @@ async function listenToMic(){
     const stream = await navigator.mediaDevices.getUserMedia({ audio:{
       echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
     attachStream(stream, 'microphone', 5);
-    ui.toast('listening through the microphone');
+    keepAwake(true);
+    const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    ui.toast(coarse ? 'listening — needs a separate speaker; this pauses audio on this phone'
+                    : 'listening through the microphone');
   }catch(e){
     ui.toast(e && e.name === 'NotAllowedError' ? 'microphone blocked — allow access, or use the downloaded copy'
                                                : 'could not open the microphone');
@@ -1300,20 +1316,28 @@ const PALS = [
 const qi = v => clamp((v * STEPS) | 0, 0, STEPS - 1);
 
 function resize(){
+  // Two densities: the simulation runs in a 1.5x space (everything is tuned
+  // there), while the pixels are laid down at the display's real density.
+  // On a phone that is 3x, so drawing at 1.5x and letting CSS stretch it is
+  // what made the strokes look soft.
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  const out = Math.min(window.devicePixelRatio || 1, 3);
+  const k = out / dpr;
   const W = Math.round(window.innerWidth * dpr), H = Math.round(window.innerHeight * dpr);
-  R.dpr = dpr; R.W = W; R.H = H;
-  R.view.width = W; R.view.height = H;
+  const BW = Math.round(W * k), BH = Math.round(H * k);
+  R.dpr = dpr; R.k = k; R.W = W; R.H = H;
+  R.view.width = BW; R.view.height = BH;
   const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
-  R.trail = mk(W, H); R.tctx = R.trail.getContext('2d');
-  R.trunk = mk(W, H); R.kctx = R.trunk.getContext('2d');
-  R.b1 = mk(Math.max(2, W >> 2), Math.max(2, H >> 2)); R.b1c = R.b1.getContext('2d');
-  R.b2 = mk(Math.max(2, W >> 4), Math.max(2, H >> 4)); R.b2c = R.b2.getContext('2d');
+  R.trail = mk(BW, BH); R.tctx = R.trail.getContext('2d');
+  R.trunk = mk(BW, BH); R.kctx = R.trunk.getContext('2d');
+  R.b1 = mk(Math.max(2, BW >> 2), Math.max(2, BH >> 2)); R.b1c = R.b1.getContext('2d');
+  R.b2 = mk(Math.max(2, BW >> 4), Math.max(2, BH >> 4)); R.b2c = R.b2.getContext('2d');
+  R.ctx = R.view.getContext('2d');
+  [R.tctx, R.kctx, R.ctx].forEach(c => c.setTransform(k, 0, 0, k, 0, 0));
   [R.tctx, R.kctx].forEach(c => {
     c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
     c.lineCap = 'round'; c.globalCompositeOperation = 'lighter';
   });
-  R.ctx = R.view.getContext('2d');
   allocSim(W, H);
   SIM.tips.length = 0; SIM.aN = 0;
 }
@@ -1619,12 +1643,12 @@ function loop(ms){
   c.globalCompositeOperation = 'source-over';
   c.fillStyle = '#000';
   c.fillRect(0, 0, W, H);
-  c.drawImage(R.trail, 0, 0);
+  c.drawImage(R.trail, 0, 0, W, H);
 
   c.globalCompositeOperation = 'lighter';
   if (P.pulse > 0.02){                      // kick re-lights the trunks
     c.globalAlpha = clamp(P.pulse, 0, 0.85);
-    c.drawImage(R.trunk, 0, 0);
+    c.drawImage(R.trunk, 0, 0, W, H);
     c.globalAlpha = 1;
   }
   // two-tap bloom
@@ -1753,6 +1777,7 @@ function begin(){
   initAudio();
   unlockAudio();
   useSynth(0);
+  keepAwake(true);
   $('#bPlay').innerHTML = ICON_PAUSE;
   showBar();
 
@@ -1843,7 +1868,9 @@ function boot(){
       AUDIO.el.play().catch(() => {});
   }, {passive:true});
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && !paused && AUDIO.ctx && AUDIO.ctx.state !== 'running')
+    if (document.hidden) return;
+    if (started && !paused) keepAwake(true);   // a wake lock is dropped on backgrounding
+    if (!paused && AUDIO.ctx && AUDIO.ctx.state !== 'running')
       AUDIO.ctx.resume().catch(() => {});
   });
   addEventListener('mousemove', showBar);
