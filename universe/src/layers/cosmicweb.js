@@ -37,7 +37,8 @@ const WEB_VERT = /* glsl */`
   void main() {
     vec3 p = mix(position, aPrim, uEarly) * uScaleA;
     vec3 rel = (p - uFocusLocal) * uL2R;
-    float trueDist = length(rel) * uS + 1.0;
+    vec4 mvT = modelViewMatrix * vec4(rel, 1.0);
+    float trueDist = length(mvT.xyz) * uS + 1.0;  // camera distance, pre-compression
     float shrink;
     vec3 relC = compressPos(rel, shrink);
     vec4 mv = modelViewMatrix * vec4(relC, 1.0);

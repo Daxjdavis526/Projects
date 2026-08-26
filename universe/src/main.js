@@ -286,8 +286,16 @@ function frame(now) {
     o._px = (2 * (o.radius / S) * k / camDist) * ctx.pxPerUnitCSS;
     if (o.lum > 0 && !o._behind) {
       const meshFade = clamp((o._px - 2.5) / 3, 0, 1);   // mesh takes over
-      const lum = o.lum * (1 - meshFade);
-      if (lum > 0) beacons.add(cx, cy, cz, o.color, lum);
+      let lum = o.lum * (1 - meshFade);
+      if (lum > 0) {
+        // the beacon shader (shared star shader) will read the camera
+        // distance of the COMPRESSED position; rescale luminosity so the
+        // flux comes out right for the TRUE camera distance
+        const trueCam = Math.hypot(rx - cd[0], ry - cd[1], rz - cd[2]) * S;
+        const shaderCam = Math.hypot(cx - cd[0], cy - cd[1], cz - cd[2]) * S;
+        lum *= (shaderCam * shaderCam) / (trueCam * trueCam);
+        beacons.add(cx, cy, cz, o.color, lum);
+      }
     }
   }
   beacons.commit(ctx);

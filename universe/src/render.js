@@ -78,7 +78,10 @@ const STAR_VERT = /* glsl */`
   ${GLSL_COMPRESS}
   void main() {
     vec3 rel = (position - uFocusLocal) * uL2R;
-    float trueDist = length(rel) * uS + 1.0;      // meters
+    // true camera distance BEFORE compression — flux must be measured from
+    // the camera, not the focus (they differ hugely when zoomed far out)
+    vec4 mvT = modelViewMatrix * vec4(rel, 1.0);
+    float trueDist = length(mvT.xyz) * uS + 1.0;  // meters
     float shrink;
     vec3 relC = compressPos(rel, shrink);
     vec4 mv = modelViewMatrix * vec4(relC, 1.0);
