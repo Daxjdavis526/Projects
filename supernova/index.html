@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SUPERNOVA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --hot:#fff6ec;          /* white-hot inner regions */
+  --fe:#ffb347;           /* iron / silicon burning, warm amber */
+  --nu:#7fe6ff;           /* neutrino cyan */
+  --uv:#b79bff;           /* shock-heated violet */
+  --ink:#d7d3cc;          /* primary text */
+  --dim:#7c7770;          /* secondary text */
+  --faint:#403c37;        /* rules, inactive */
+  --panel:rgba(8,8,10,.62);
+  --edge:rgba(215,211,204,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+body{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;
+  font-weight:300;color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  cursor:default;
+}
+canvas{display:block;position:fixed;inset:0}
+
+/* ---- generic panel chrome ---------------------------------------------- */
+.panel{
+  position:fixed;background:var(--panel);
+  border:1px solid var(--edge);border-radius:2px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding:11px 13px;font-size:11px;line-height:1.55;
+  letter-spacing:.02em;pointer-events:auto;
+}
+.panel h2{
+  font-family:Michroma,sans-serif;font-size:8.5px;font-weight:400;
+  letter-spacing:.22em;color:var(--dim);margin:0 0 8px;
+  text-transform:uppercase;
+}
+.row{display:flex;justify-content:space-between;gap:18px;white-space:nowrap}
+.row .k{color:var(--dim)}
+.row .v{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:400}
+.est{color:var(--faint);font-size:9px;letter-spacing:.06em}
+
+/* ---- HUD layer ---------------------------------------------------------- */
+#ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+#ui > *{pointer-events:auto}
+
+#stats{top:14px;left:14px;min-width:186px}
+#stats .row .v{color:var(--nu)}
+
+/* ---- title gate --------------------------------------------------------- */
+#title{
+  position:fixed;inset:0;z-index:40;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+  padding:0 0 8vh 7vw;text-align:left;
+  background:linear-gradient(to top,rgba(0,0,0,.86) 0%,rgba(0,0,0,.5) 26%,transparent 52%),
+             radial-gradient(ellipse at center,transparent 48%,rgba(0,0,0,.6) 100%);
+  transition:opacity .9s ease;
+}
+#title.gone{opacity:0;pointer-events:none}
+#title .name{
+  font-family:Michroma,sans-serif;font-size:clamp(26px,4.6vw,56px);
+  letter-spacing:.32em;margin-left:.32em;color:var(--hot);
+  text-shadow:0 0 46px rgba(255,180,90,.35),0 2px 20px #000;
+}
+#title .sub{
+  margin-top:14px;font-size:11.5px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--fe);text-shadow:0 1px 14px #000;
+}
+#title .desc{
+  margin-top:9px;font-size:11.5px;letter-spacing:.05em;color:#b4aea4;
+  max-width:40ch;line-height:1.75;text-shadow:0 1px 14px #000;
+}
+#begin{
+  margin-top:30px;font-family:Michroma,sans-serif;font-size:10.5px;
+  letter-spacing:.26em;color:var(--hot);
+  background:rgba(6,5,4,.55);
+  border:1px solid rgba(255,179,71,.55);border-radius:2px;
+  padding:15px 30px;cursor:pointer;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  transition:background .3s,border-color .3s,box-shadow .3s;
+}
+#begin:hover{
+  background:rgba(255,179,71,.13);border-color:var(--fe);
+  box-shadow:0 0 30px rgba(255,179,71,.22);
+}
+#hint{
+  margin-top:22px;font-size:10px;letter-spacing:.16em;color:#7e786f;
+  text-shadow:0 1px 12px #000;
+}
+
+/* ---- boot error --------------------------------------------------------- */
+#fatal{
+  position:fixed;inset:0;z-index:90;display:none;
+  align-items:center;justify-content:center;padding:40px;
+  background:#000;color:#ff8f7a;font-size:12px;line-height:1.8;
+  white-space:pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+  <div class="panel" id="stats">
+    <h2>Render</h2>
+    <div class="row"><span class="k">fps</span><span class="v" id="s-fps">—</span></div>
+    <div class="row"><span class="k">draw calls</span><span class="v" id="s-calls">—</span></div>
+    <div class="row"><span class="k">triangles</span><span class="v" id="s-tris">—</span></div>
+    <div class="row"><span class="k">quality</span><span class="v" id="s-q">—</span></div>
+    <div class="row"><span class="k">cam speed</span><span class="v" id="s-spd">—</span></div>
+  </div>
+</div>
+
+<div id="title">
+  <div class="name">SUPERNOVA</div>
+  <div class="sub">Massive red supergiant</div>
+  <div class="desc">Final moments before core collapse.</div>
+  <button id="begin">BEGIN CORE COLLAPSE</button>
+  <div id="hint">click to fly &middot; WASD move &middot; Q/E up/down &middot; shift boost &middot; esc release</div>
+</div>
+
+<div id="fatal"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.js",
+    "three/addons/": "./vendor/three/jsm/"
+  }
+}
+</script>
+<script type="module">
+  window.addEventListener('error', e => {
+    const el = document.getElementById('fatal');
+    el.style.display = 'flex';
+    el.textContent = 'SUPERNOVA failed to start\n\n' + (e.error?.stack || e.message);
+  });
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
