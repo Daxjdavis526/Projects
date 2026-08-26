@@ -19,6 +19,8 @@ import { MODELS, DEFAULT_MODEL } from './physics/models.js';
 import { SimClock } from './time/clock.js';
 import { Engine } from './physics/engine.js';
 import { Hud } from './ui/hud.js';
+import { Profiles } from './render/profiles.js';
+import { Interior, VIEW } from './render/interior.js';
 import { Timeline } from './ui/timeline.js';
 import { QUALITY, KM } from './config.js';
 import * as fmt from './ui/format.js';
@@ -49,6 +51,18 @@ const engine = new Engine(model, clock);
 const hud = new Hud(model);
 const timeline = new Timeline(clock, engine, () => { /* seek: engine follows in the loop */ });
 let snap = engine.snapshot();
+
+/* --- physics -> GPU bridge + interior view -------------------------------- */
+const profiles = new Profiles();
+const interior = new Interior(stage, profiles, quality);
+
+const viewButtons = { 'view-ext': VIEW.EXTERIOR, 'view-cut': VIEW.CUTAWAY, 'view-int': VIEW.INTERIOR };
+for (const [id, mode] of Object.entries(viewButtons)) {
+  $(id)?.addEventListener('click', () => {
+    interior.setMode(mode, star, renderer);
+    for (const other of Object.keys(viewButtons)) $(other)?.classList.toggle('on', other === id);
+  });
+}
 
 /* --- title gate ----------------------------------------------------------- */
 $('begin').addEventListener('click', () => {
@@ -89,13 +103,15 @@ function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.1);
   last = now;
 
-  /* clock -> physics -> snapshot */
+  /* clock -> physics -> snapshot -> gpu */
   const tTarget = clock.advance(dt);
   engine.stepTo(tTarget);
   snap = engine.snapshot();
+  profiles.upload(snap);
 
   rig.update(dt, snap.R_star * KM);
   star.update(dt, snap.t, snap);
+  interior.update(dt, snap, star.group.position);
 
   hud.update(snap, clock);
   timeline.update();
@@ -108,4 +124,4 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 /* Expose for the screenshot harness and for poking at in the console. */
-window.SN = { renderer, stage, rig, star, model, clock, engine, THREE };
+window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, THREE };

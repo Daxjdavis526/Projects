@@ -95,6 +95,11 @@ canvas{display:block;position:fixed;inset:0}
   text-shadow:0 1px 12px #000;
 }
 
+/* ---- view modes ---------------------------------------------------------- */
+#views{position:fixed;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+#views .tl-btn{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;padding:0 12px}
+#views .tl-btn.on{border-color:var(--fe);color:var(--fe);background:rgba(255,179,71,.08)}
+
 /* ---- data panel --------------------------------------------------------- */
 #panel{top:14px;right:14px;width:272px}
 #panel .row{margin:1px 0}
@@ -170,6 +175,16 @@ canvas{display:block;position:fixed;inset:0}
       <div class="row"><span class="k">E radiated (light)</span><span class="v" id="e-em">—</span></div>
       <div class="est">estimates from a reduced-order model</div>
     </div>
+  </div>
+
+  <div id="views">
+    <button class="tl-btn on" id="view-ext">Exterior</button>
+    <button class="tl-btn" id="view-cut">Cutaway</button>
+    <button class="tl-btn" id="view-int">Interior</button>
+  </div>
+  <div id="view-note" style="display:none;position:fixed;top:46px;left:50%;transform:translateX(-50%);
+    font-size:9px;letter-spacing:.1em;color:var(--dim);text-shadow:0 1px 8px #000">
+    cutaway radius shows the mass structure — at true scale the iron core is ~10⁻⁶ of the stellar radius
   </div>
 
   <div id="timeline">

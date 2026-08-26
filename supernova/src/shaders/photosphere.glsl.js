@@ -34,6 +34,7 @@ varying vec3  vDir;         // unit direction in star-local space
 
 #include <common>
 #include <logdepthbuf_pars_vertex>
+#include <clipping_planes_pars_vertex>
 
 void main(){
   vDir = normalize(position);
@@ -47,7 +48,9 @@ void main(){
   vView   = -mv.xyz;
   vNormal = normalize(normalMatrix * normalize(p));
   gl_Position = projectionMatrix * mv;
+  vec4 mvPosition = mv;                    // name the clipping chunk expects
   #include <logdepthbuf_vertex>
+  #include <clipping_planes_vertex>
 }
 `;
 
@@ -98,8 +101,10 @@ varying vec3  vView;
 varying vec3  vDir;
 
 #include <logdepthbuf_pars_fragment>
+#include <clipping_planes_pars_fragment>
 
 void main(){
+  #include <clipping_planes_fragment>
   #include <logdepthbuf_fragment>
   vec3 N = normalize(vNormal);
   vec3 V = normalize(vView);

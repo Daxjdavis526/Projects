@@ -99,9 +99,9 @@ export class Star {
       const targetFade = isStar ? 1 : 0;
       this._fade = this._fade === undefined ? 1 : this._fade + (targetFade - this._fade) * Math.min(dt * 6.0, 1);
       const on = this._fade > 0.004;
-      this.photosphere.visible = on;
-      this.halo.visible = on;
-      this.wind.visible = on;
+      this.photosphere.visible = on && this.surfaceAllowed !== false;
+      this.halo.visible = on && this.haloAllowed !== false;
+      this.wind.visible = on && this.windAllowed !== false;
       this.uniforms.uIntensity.value = 0.55 * this._fade;
       this.haloUniforms.uIntensity.value = 1.05 * this._fade;
     }
