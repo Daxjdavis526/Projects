@@ -42,7 +42,8 @@
   #status .row{display:flex;justify-content:space-between;gap:18px}
 
   /* data panel: left */
-  #data{left:20px;top:88px;width:264px;display:none}
+  #data{left:20px;top:88px;width:264px;display:none;max-height:calc(100% - 300px);overflow-y:auto}
+  #data::-webkit-scrollbar{width:4px} #data::-webkit-scrollbar-thumb{background:var(--line)}
   #data .row{display:flex;justify-content:space-between;gap:12px}
   #data hr{border:0;border-top:1px solid var(--line);margin:8px 0}
 
@@ -83,6 +84,22 @@
     color:#fbb;padding:10px;font:12px monospace;white-space:pre-wrap;display:none;pointer-events:auto}
 
   .kbd{color:var(--accent)}
+  .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px}
+  .btnrow button{width:auto;font-size:10.5px;padding:5px 4px}
+  #orbitCtl,#fallCtl{margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+  #orbitWarn{color:#ffb08a;font-size:10.5px;line-height:1.4;margin-top:4px}
+  .frow{display:flex;justify-content:space-between;margin-top:2px}
+
+  #modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;
+    align-items:center;justify-content:center;z-index:50;pointer-events:auto}
+  #modal .inner{max-width:600px;max-height:80vh;overflow-y:auto;background:rgba(8,13,17,.97);
+    border:1px solid var(--line);border-radius:10px;padding:26px 30px;font-size:12.5px;
+    line-height:1.75;font-weight:300;color:#c4d2da}
+  #modal h2{font-size:13px;font-weight:500;letter-spacing:.25em;color:#fff;margin-bottom:12px}
+  #modal h3{font-size:10.5px;font-weight:500;letter-spacing:.2em;color:var(--accent);
+    margin:16px 0 4px;text-transform:uppercase}
+  #modal .close{float:right;background:none;border:0;color:var(--dim);font-size:18px;cursor:pointer}
+  #modal .close:hover{color:#fff}
 </style>
 </head>
 <body>
@@ -109,7 +126,7 @@
     <div class="row"><span class="lbl">Mass</span><span class="val" id="dMass">—</span></div>
     <div class="row"><span class="lbl">Spin a/M</span><span class="val" id="dSpin">—</span></div>
     <div class="row"><span class="lbl">r_g = GM/c²</span><span class="val" id="dRg">—</span></div>
-    <div class="row"><span class="lbl">Event horizon</span><span class="val" id="dRh">—</span></div>
+    <div class="row"><span class="lbl">Horizon</span><span class="val" id="dRh">—</span></div>
     <div class="row"><span class="lbl">ISCO</span><span class="val" id="dIsco">—</span></div>
     <div class="row"><span class="lbl">Photon orbit</span><span class="val" id="dPh">—</span></div>
     <hr>
@@ -121,6 +138,39 @@
   </div>
 
   <div class="panel" id="controls">
+    <div class="grp"><span class="lbl">Movement</span>
+      <select id="selMove">
+        <option value="free" selected>Free flight</option>
+        <option value="orbit">Orbit the black hole</option>
+        <option value="fall">Free fall</option>
+      </select>
+      <div id="orbitCtl" style="display:none">
+        <span class="lbl">Inclination</span><span class="rangeVal" id="vIncl">20°</span>
+        <input type="range" id="rIncl" min="0" max="88" step="1" value="20">
+        <span class="lbl">Orbit rate · nav</span><span class="rangeVal" id="vORate">4°/s</span>
+        <input type="range" id="rORate" min="0.5" max="20" step="0.5" value="4">
+        <label class="ck"><input type="checkbox" id="ckRetro"> Retrograde</label>
+        <div id="orbitWarn"></div>
+      </div>
+      <div id="fallCtl" style="display:none">
+        <button class="act" id="btnFall">Begin free fall</button>
+        <div class="frow"><span class="lbl">Radius</span><span class="val" id="fR">—</span></div>
+        <div class="frow"><span class="lbl">Local speed</span><span class="val" id="fV">—</span></div>
+        <div class="frow"><span class="lbl" style="text-transform:none">τ observer</span><span class="val" id="fTau">—</span></div>
+        <div class="frow"><span class="lbl">Far clock</span><span class="val" id="fFar">—</span></div>
+      </div>
+    </div>
+    <div class="grp"><span class="lbl">Camera</span>
+      <div class="btnrow">
+        <button class="act" data-cam="far">Far view</button>
+        <button class="act" data-cam="edge">Disk edge</button>
+        <button class="act" data-cam="pole">Above pole</button>
+        <button class="act" data-cam="photon">Photon ring</button>
+        <button class="act" data-cam="isco">ISCO</button>
+        <button class="act" data-cam="horizon">Horizon</button>
+      </div>
+      <button class="act" id="btnTour" style="margin-top:6px">Guided tour&nbsp;(T)</button>
+    </div>
     <div class="grp"><span class="lbl">Preset</span>
       <select id="selPreset">
         <option value="smbh" selected>Supermassive · 4.3×10⁶ M☉</option>
@@ -146,7 +196,47 @@
     <div class="grp"><span class="lbl">Disk time-lapse</span><span class="rangeVal" id="vTL">×1000</span>
       <input type="range" id="rTL" min="0" max="3" step="0.05" value="1"></div>
     <div class="grp"><button class="act" id="btnPause">Pause disk&nbsp;(P)</button></div>
+    <div class="grp"><button class="act" id="btnModel">Model &amp; assumptions</button></div>
   </div>
+
+  <div id="modal"><div class="inner">
+    <button class="close" id="modalClose">×</button>
+    <h2>MODEL &amp; ASSUMPTIONS</h2>
+    <h3>Spacetime</h3>
+    <p>The gravitational field is an exact Kerr black hole in Cartesian
+    Kerr–Schild coordinates (Schwarzschild when spin&nbsp;a&nbsp;=&nbsp;0). Every pixel is a
+    null geodesic integrated numerically on the GPU with a 4th-order Runge–Kutta
+    scheme and adaptive step size. Gravitational lensing, the shadow, the photon
+    ring and higher-order disk images emerge from this integration — nothing is
+    painted in. Outside ~140&nbsp;GM/c² light propagation is treated as straight
+    (with an analytic weak-field deflection for rays that never enter that region).</p>
+    <h3>Accretion disk</h3>
+    <p>A geometrically thin, opaque equatorial disk between the innermost stable
+    circular orbit (ISCO) and 24&nbsp;r_g. Gas follows circular Kerr geodesics with
+    Ω&nbsp;=&nbsp;(r^{3/2}&nbsp;+&nbsp;a)⁻¹. Each disk pixel is shaded with the
+    relativistic factor g&nbsp;=&nbsp;ν_obs/ν_emit computed from the photon momentum
+    and the local orbital four-velocity: Doppler boosting, relativistic beaming and
+    gravitational redshift all come from this single quantity (intensity&nbsp;∝&nbsp;g³,
+    color from a blackbody at g·T). The radial temperature profile follows a
+    Shakura–Sunyaev-like law T&nbsp;∝&nbsp;r^{-3/4} with an ISCO cutoff.</p>
+    <h3>Simplifications (honest list)</h3>
+    <p>· Radiative transfer is simplified: an opaque blackbody proxy with procedural
+    turbulence, no scattering, no light travel-time delay (the scene is a snapshot).<br>
+    · Display temperatures are shifted into the visible band — a real disk at these
+    accretion rates peaks in the UV/X-ray.<br>
+    · Disk rotation is shown time-lapsed (real orbital periods near a 4×10⁶ M☉
+    black hole are tens of minutes to hours). Physics readouts always show true values.<br>
+    · The camera is a stationary observer; navigation speed is a convenience and does
+    not produce aberration or Doppler shift of the sky.<br>
+    · Free fall uses the Schwarzschild radial-infall solution even when spin ≠ 0.<br>
+    · The g-factor is clamped (0.05–3.2) to keep extreme beaming displayable.<br>
+    · No interior physics is depicted: rays ending on the horizon render black.</p>
+    <h3>Scale</h3>
+    <p>1 simulation unit = 1 gravitational radius r_g = GM/c². All distances,
+    times and tidal values in the interface are derived from the selected mass
+    and spin. The visible shadow is larger than the horizon — its edge is set by
+    photon capture, ≈&nbsp;√27&nbsp;r_g&nbsp;≈&nbsp;5.2&nbsp;r_g in radius for a=0.</p>
+  </div></div>
 
   <div class="panel" id="hint">
     <span class="kbd">WASD</span> move &nbsp; <span class="kbd">MOUSE</span> look &nbsp;
@@ -728,9 +818,14 @@ function fAtJS(x,y,z){
   const r = ksRJS(x,y,z), a2 = PHYS.a*PHYS.a;
   return 2*r*r*r/(r*r*r*r + a2*z*z);
 }
+function sci(x){
+  const e = Math.floor(Math.log10(Math.abs(x)));
+  return (x/10**e).toPrecision(3) + '×10' + sup(e);
+}
 function fmtLen(m){
+  if(m < 1e4) return m.toPrecision(3) + ' m';
   if(m < 1e7) return (m/1e3).toPrecision(3) + ' km';
-  if(m < 0.1*AUm) return (m/1e6).toPrecision(3) + '×10³ km';
+  if(m < 0.15*AUm) return sci(m/1e3) + ' km';
   if(m < 0.5*LY) return (m/AUm).toPrecision(3) + ' AU';
   return (m/LY).toPrecision(3) + ' ly';
 }
@@ -763,17 +858,20 @@ function sup(n){
 const cam = {
   pos: [-27.5, 2.0, 3.4],   // units of r_g
   yaw: 0, pitch: 0,
+  offYaw: 0, offPitch: 0,    // manual look offset in guided modes
   vel: [0,0,0],
   navSpeed: 2.0,             // r_g per second
   fov: 60 * Math.PI/180,
 };
-function aimAtOrigin(){
+function aimAtOrigin(oy, op){
   const d = [-cam.pos[0], -cam.pos[1], -cam.pos[2]];
   const L = Math.hypot(...d);
-  cam.yaw = Math.atan2(d[1], d[0]) + 0.05;
-  cam.pitch = Math.asin(d[2]/L) - 0.01;
+  cam.yaw = Math.atan2(d[1], d[0]) + (oy||0) + cam.offYaw;
+  cam.pitch = Math.max(-1.55, Math.min(1.55,
+    Math.asin(d[2]/L) + (op||0) + cam.offPitch));
 }
-aimAtOrigin();
+aimAtOrigin(0.05, -0.01);
+cam.offYaw = 0.05; cam.offPitch = -0.01;   // keep initial framing if a mode engages
 function camBasis(){
   const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
   const cy = Math.cos(cam.yaw),  sy = Math.sin(cam.yaw);
@@ -788,20 +886,141 @@ addEventListener('keydown', e => {
   keys[e.code] = true;
   if(e.code === 'KeyH') toggleUI();
   if(e.code === 'KeyP') togglePause();
+  if(e.code === 'KeyT') startTour();
+  if(e.code === 'Escape'){
+    if(tour) endTour();
+    else if(move.mode !== 'free'){
+      stopFall(); move.anim = null; move.mode = 'free';
+      $('selMove').value = 'free'; setMove('free');
+    }
+  }
 });
 addEventListener('keyup', e => keys[e.code] = false);
 canvas.addEventListener('click', () => { if(!TEST) canvas.requestPointerLock(); });
 addEventListener('mousemove', e => {
   if(document.pointerLockElement !== canvas) return;
-  cam.yaw   -= e.movementX * 0.0022;
-  cam.pitch -= e.movementY * 0.0022;
-  cam.pitch = Math.max(-1.55, Math.min(1.55, cam.pitch));
+  const dx = -e.movementX * 0.0022, dy = -e.movementY * 0.0022;
+  if(move.mode === 'free'){
+    cam.yaw += dx;
+    cam.pitch = Math.max(-1.55, Math.min(1.55, cam.pitch + dy));
+  } else {
+    cam.offYaw += dx;
+    cam.offPitch = Math.max(-1.2, Math.min(1.2, cam.offPitch + dy));
+  }
   hideHint();
 });
 addEventListener('wheel', e => {
   cam.navSpeed *= Math.exp(-Math.sign(e.deltaY) * 0.28);
   cam.navSpeed = Math.max(1e-6, Math.min(8e3, cam.navSpeed));
 }, {passive:true});
+
+/* ---------- movement mode machine ---------- */
+const move = {
+  mode: 'free',                       // free | orbit | fall | anim | hold
+  orbit: {ang: 0, R: 28},
+  fall: null,
+  anim: null,
+};
+function timelapseFactor(){ return Math.pow(10, state.timelapse-1) * 2.4; }  // M-units / s
+
+function startAnim(target, dur, then){
+  move.anim = {p0: cam.pos.slice(), p1: target.slice(), t: 0, dur, then: then||null};
+  move.mode = 'anim';
+  cam.offYaw = 0; cam.offPitch = 0;
+}
+function stepAnim(dt){
+  const a = move.anim;
+  a.t += dt;
+  let s = Math.min(a.t/a.dur, 1);
+  s = s*s*(3-2*s);
+  const r0 = Math.hypot(...a.p0), r1 = Math.hypot(...a.p1);
+  const d0 = a.p0.map(v=>v/r0), d1 = a.p1.map(v=>v/r1);
+  const dot = Math.max(-1, Math.min(1, d0[0]*d1[0]+d0[1]*d1[1]+d0[2]*d1[2]));
+  const th = Math.acos(dot);
+  let dir;
+  if(th < 1e-4) dir = d1;
+  else {
+    const s0 = Math.sin((1-s)*th)/Math.sin(th), s1 = Math.sin(s*th)/Math.sin(th);
+    dir = [d0[0]*s0+d1[0]*s1, d0[1]*s0+d1[1]*s1, d0[2]*s0+d1[2]*s1];
+    const L = Math.hypot(...dir);
+    dir = dir.map(v=>v/L);
+  }
+  const r = Math.exp((1-s)*Math.log(r0) + s*Math.log(r1));
+  cam.pos = dir.map(v=>v*r);
+  aimAtOrigin();
+  if(s >= 1){
+    const then = a.then;
+    move.anim = null;
+    move.mode = 'free';
+    if(then) then();
+  }
+}
+function stepOrbit(dt){
+  const o = move.orbit;
+  const rate = (+$('rORate').value)*Math.PI/180 * ($('ckRetro').checked ? -1 : 1);
+  o.ang += rate*dt;
+  if(keys.KeyW) o.R *= Math.exp(-dt*0.5);
+  if(keys.KeyS) o.R *= Math.exp( dt*0.5);
+  o.R = Math.max(PHYS.rhor*1.25, Math.min(5e3, o.R));
+  const i = (+$('rIncl').value)*Math.PI/180;
+  const ci = Math.cos(i), si = Math.sin(i);
+  cam.pos = [ o.R*Math.cos(o.ang)*ci, o.R*Math.sin(o.ang), -o.R*Math.cos(o.ang)*si ];
+  aimAtOrigin();
+  const w = $('orbitWarn');
+  if(o.R < PHYS.risco)
+    w.textContent = 'Inside the ISCO — no stable circular orbit exists here; this camera orbit is navigational, not a geodesic.';
+  else if(o.R < PHYS.rphoton*1.3)
+    w.textContent = 'Near the photon region — real orbits here are unstable.';
+  else w.textContent = '';
+}
+function beginFall(){
+  if(move.fall){ stopFall(); return; }
+  const r0 = ksRJS(...cam.pos);
+  if(r0 < 2.3){ caption('Move outside r = 2.3 r_g to start a free fall.', 3500); return; }
+  const rr = Math.hypot(...cam.pos);
+  move.fall = {r0, r: r0, tau: 0, tfar: 0, dir: cam.pos.map(v=>v/rr)};
+  move.mode = 'fall';
+  cam.offYaw = 0; cam.offPitch = 0;
+  $('btnFall').textContent = 'Stop free fall';
+  caption('Falling freely from rest at ' + r0.toFixed(1) +
+    ' r_g. Proper time runs normally for you; a distant observer sees your fall slow and redden.', 7000);
+}
+function stopFall(){
+  move.fall = null;
+  if(move.mode === 'fall') move.mode = 'free';
+  $('btnFall').textContent = 'Begin free fall';
+}
+function stepFall(dt){
+  const f = move.fall;
+  const dtau = dt * timelapseFactor();
+  const rs = 2;                               // Schwarzschild radial infall (see Model panel)
+  const E = Math.sqrt(Math.max(1 - rs/f.r0, 1e-9));
+  const vr = Math.sqrt(Math.max(rs/f.r - rs/f.r0, 0));
+  f.r = Math.max(f.r - vr*dtau, 2.03);
+  f.tau += dtau;
+  f.tfar += dtau * E/Math.max(1 - rs/f.r, 1e-4);
+  cam.pos = f.dir.map(v=>v*f.r);
+  aimAtOrigin();
+  const vloc = Math.sqrt(Math.max((rs/f.r - rs/f.r0)/Math.max(1 - rs/f.r0,1e-9), 0));
+  $('fR').textContent = f.r.toFixed(2)+' r_g';
+  $('fV').textContent = Math.min(vloc, 0.999).toFixed(3)+' c';
+  $('fTau').textContent = fmtTime(f.tau*PHYS.tg_s);
+  $('fFar').textContent = fmtTime(f.tfar*PHYS.tg_s);
+  if(f.r <= 2.031){
+    stopFall();
+    caption('Horizon reached. Locally nothing marks this surface — your clock ticks on — while for a distant observer your image red-shifts and freezes. The interior is not modeled here.', 10000);
+  }
+}
+
+let capT = null;
+function caption(text, ms){
+  const c = $('caption');
+  if(capT) clearTimeout(capT);
+  if(!text){ c.style.display = 'none'; return; }
+  c.textContent = text;
+  c.style.display = 'block';
+  if(ms) capT = setTimeout(()=>{ c.style.display='none'; }, ms);
+}
 
 function stepCamera(dt){
   const {fwd, rt, up} = camBasis();
@@ -852,11 +1071,11 @@ const QUALITY = [
   {scale:0.5,  steps:110, sky: 768},
   {scale:0.72, steps:170, sky:1024},
   {scale:1.0,  steps:260, sky:2048},
-  {scale:1.0,  steps:400, sky:2048},
+  {scale:1.35, steps:400, sky:2048},   // Ultra: supersampled
 ];
 if(TEST){ QUALITY[0] = {scale:0.4, steps:90, sky:512}; }
 
-const DISK = { rin: 0, rout: 24.0, tmax: 6400, gain: 3.4 };
+const DISK = { rin: 0, rout: 24.0, tmax: 6100, gain: 2.7 };
 
 const PRESETS = {
   smbh:    {M:4.3e6, a:0.6,  name:'SUPERMASSIVE · 4.3×10⁶ M☉'},
@@ -875,12 +1094,13 @@ function onPhysChanged(){
   recomputePhysics();
   DISK.rin = PHYS.risco;
   updateDataPanel();
+  updateTLLabel();
 }
 function updateDataPanel(){
   $('dMass').textContent = fmtMass(PHYS.M);
   $('dSpin').textContent = PHYS.a.toFixed(3);
   $('dRg').textContent = fmtLen(PHYS.rg_m);
-  $('dRh').textContent = PHYS.rhor.toFixed(3)+' r_g = '+fmtLen(PHYS.rhor*PHYS.rg_m);
+  $('dRh').textContent = PHYS.rhor.toFixed(3)+' r_g · '+fmtLen(PHYS.rhor*PHYS.rg_m);
   $('dIsco').textContent = PHYS.risco.toFixed(3)+' r_g';
   $('dPh').textContent = PHYS.rphoton.toFixed(3)+' r_g';
 }
@@ -906,8 +1126,14 @@ $('rExp').addEventListener('input', e => {
 });
 $('rTL').addEventListener('input', e => {
   state.timelapse = +e.target.value;
-  $('vTL').textContent = '×' + Math.round(1000*Math.pow(10, state.timelapse-1));
+  updateTLLabel();
 });
+function updateTLLabel(){
+  // true speed-up of displayed disk motion vs. real time, from t_g of the chosen mass
+  const f = timelapseFactor() * PHYS.tg_s;
+  $('vTL').textContent = '×' + (f >= 10 ? Math.round(f).toLocaleString('en-US')
+    : f >= 0.01 ? f.toPrecision(2) : sci(f));
+}
 $('btnPause').addEventListener('click', togglePause);
 function togglePause(){
   state.paused = !state.paused;
@@ -922,8 +1148,118 @@ function setMode(m){
     b.classList.toggle('on', b.dataset.mode === m));
   $('data').style.display = (m === 'physics' || m === 'disk') ? 'block' : 'none';
   if(m === 'physics'){ $('ovH').checked = true; $('ovI').checked = true; }
+  if(m === 'disk'){ $('ovI').checked = true; $('ovP').checked = true; $('ovH').checked = false; }
   if(m === 'cinematic'){ ['ovH','ovE','ovI','ovP'].forEach(id => $(id).checked = false); }
 }
+/* ---------- movement select / camera presets / tour ---------- */
+$('selMove').addEventListener('change', e => setMove(e.target.value));
+function setMove(m){
+  $('orbitCtl').style.display = m==='orbit' ? 'block' : 'none';
+  $('fallCtl').style.display  = m==='fall'  ? 'block' : 'none';
+  if(m !== 'fall') stopFall();
+  cam.offYaw = 0; cam.offPitch = 0;
+  if(m === 'free'){ move.mode = 'free'; }
+  if(m === 'orbit'){
+    const o = move.orbit;
+    o.R = Math.max(PHYS.rhor*1.3, ksRJS(...cam.pos));
+    o.ang = Math.atan2(cam.pos[1], cam.pos[0]);
+    const i = (+$('rIncl').value)*Math.PI/180;
+    const start = [o.R*Math.cos(o.ang)*Math.cos(i), o.R*Math.sin(o.ang), -o.R*Math.cos(o.ang)*Math.sin(i)];
+    startAnim(start, 1.6, () => { move.mode = 'orbit'; });
+  }
+  if(m === 'fall'){ move.mode = 'free'; }
+}
+$('rIncl').addEventListener('input', e => $('vIncl').textContent = e.target.value+'°');
+$('rORate').addEventListener('input', e => $('vORate').textContent = e.target.value+'°/s');
+$('btnFall').addEventListener('click', beginFall);
+
+const CAMPRESETS = {
+  far:    () => [-60, 9, 13],
+  edge:   () => [-33, 3, 1.1],
+  pole:   () => [2, 5, 40],
+  photon: () => [-(PHYS.rphoton+3.2), 0.7, 1.0],
+  isco:   () => [-(PHYS.risco*1.9), 1.2, 0.9],
+  horizon:() => [-(PHYS.rhor+1.5), 0.5, 0.45],
+};
+document.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => {
+  $('selMove').value = 'free'; setMove('free');
+  startAnim(CAMPRESETS[b.dataset.cam](), 3.5);
+}));
+
+/* ---------- guided tour ---------- */
+const TOUR = [
+  { p: () => [-64, 10, 13], dur: 6, hold: 5,
+    cap: 'A black hole. What you see is not a surface — it is light, bent by gravity. ' +
+         'The dark center is the shadow: the set of directions from which no light can reach you.' },
+  { p: () => [-30, -52, 9], dur: 9, hold: 4,
+    cap: 'Every pixel here is a light ray traced backwards through curved Kerr spacetime. ' +
+         'As you circle the hole, watch the background stars shear and stream around the shadow.' },
+  { p: () => [-40, 3, 1.4], dur: 8, hold: 5,
+    cap: 'Edge-on, the disk seems to wrap over and under the hole. Light from the far side is ' +
+         'bent above and below the shadow, so you see the disk’s back — twice.' },
+  { p: () => [2, 5, 42], dur: 9, hold: 5,
+    cap: 'From above the pole the disk is a simple annulus, and the shadow is round: its edge is ' +
+         'set by photon capture, about 2.6 horizon radii across for a slowly spinning hole.' },
+  { p: () => [-17, -9, 2.4], dur: 8, hold: 4,
+    cap: 'Closer in, the gas orbits faster — the innermost material circles at a large fraction ' +
+         'of the speed of light.' },
+  { p: () => [-24, 4, 2.0], dur: 6, hold: 6,
+    cap: 'The disk is not equally bright on both sides. Material rushing toward you is Doppler-boosted ' +
+         'and brightened; the receding side is dimmed and reddened. This asymmetry is real, not painted.' },
+  { p: () => [-(PHYS.rphoton+3.4), 0.6, 1.1], dur: 8, hold: 6,
+    cap: 'Near r ≈ 3 GM/c², light itself can circle the black hole. The thin bright rim hugging the ' +
+         'shadow is the photon ring — light that made one or more half-orbits before escaping.' },
+  { p: () => [-(PHYS.rhor+2.2), 0.7, 0.7], dur: 7, hold: 6,
+    on: () => { $('ovH').checked = true; },
+    cap: 'The wireframe marks the event horizon — smaller than the shadow, and not itself luminous. ' +
+         'It is a one-way boundary in spacetime, not a physical surface.' },
+  { p: () => [-(PHYS.rhor+1.6), 0.5, 0.5], dur: 6, hold: 6,
+    cap: () => 'This close, a static clock runs at ' +
+      (Math.sqrt(Math.max(1-fAtJS(...cam.pos),0))*100).toFixed(0) +
+      '% of far-away time. Fall freely instead, and your own clock would tick on normally.' },
+  { p: () => [-30, 4, 4.2], dur: 9, hold: 4,
+    on: () => { $('ovH').checked = false; },
+    cap: 'Total darkness, extreme light, and a geometry that bends the sky around it. ' +
+         'Fly free — the controls are yours.' },
+];
+let tour = null;
+function startTour(){
+  if(tour){ endTour(); return; }
+  setMode('cinematic');
+  $('selMove').value = 'free'; setMove('free');
+  tour = {i: -1, hold: null};
+  $('btnTour').textContent = 'Stop tour (T)';
+  nextTourStep();
+}
+function nextTourStep(){
+  tour.i++;
+  if(tour.i >= TOUR.length){ endTour(); return; }
+  const s = TOUR[tour.i];
+  if(s.on) s.on();
+  startAnim(s.p(), s.dur, () => {
+    if(!tour) return;
+    const capText = typeof s.cap === 'function' ? s.cap() : s.cap;
+    caption(capText, (s.hold+1)*1000);
+    move.mode = 'hold';
+    tour.hold = setTimeout(nextTourStep, s.hold*1000);
+  });
+  const capText = typeof s.cap === 'function' ? '' : s.cap;
+  if(capText) caption(capText, (s.dur + s.hold)*1000);
+}
+function endTour(){
+  if(tour && tour.hold) clearTimeout(tour.hold);
+  tour = null;
+  $('btnTour').textContent = 'Guided tour (T)';
+  caption('', 0);
+  if(move.mode === 'hold' || move.mode === 'anim'){ move.anim = null; move.mode = 'free'; }
+}
+$('btnTour').addEventListener('click', startTour);
+
+/* ---------- modal ---------- */
+$('btnModel').addEventListener('click', () => $('modal').style.display = 'flex');
+$('modalClose').addEventListener('click', () => $('modal').style.display = 'none');
+$('modal').addEventListener('click', e => { if(e.target === $('modal')) $('modal').style.display = 'none'; });
+
 function toggleUI(){
   state.uiHidden = !state.uiHidden;
   ['brand','tabs','status','controls','data'].forEach(id => {
@@ -974,17 +1310,31 @@ function updateStatus(){
   }
 }
 
-let lastT = 0, statusT = 0;
+let lastT = 0, statusT = 0, perfAcc = 0, perfN = 0, perfWarned = TEST;
+function checkPerf(dt){
+  perfAcc += dt; perfN++;
+  if(perfN >= 120){
+    if(!perfWarned && perfAcc/perfN > 0.07 && state.quality >= 2){
+      perfWarned = true;
+      caption('Frame rate is low on this GPU — try Quality: Medium in the panel on the right.', 7000);
+    }
+    perfAcc = 0; perfN = 0;
+  }
+}
 function frame(tms){
   const t = tms*0.001;
   const dt = Math.min(t - lastT, 0.05) || 0.016;
   lastT = t;
   resize(false);
-  stepCamera(dt);
+  if(move.mode === 'free') stepCamera(dt);
+  else if(move.mode === 'orbit') stepOrbit(dt);
+  else if(move.mode === 'fall') stepFall(dt);
+  else if(move.mode === 'anim') stepAnim(dt);
   if(!state.paused){
-    state.diskPhase += dt * Math.pow(10, state.timelapse-1) * 2.4;
+    state.diskPhase += dt * timelapseFactor();
   }
   if(t - statusT > 0.12){ statusT = t; updateStatus(); }
+  checkPerf(dt);
 
   const q = QUALITY[state.quality];
   const {fwd, rt, up} = camBasis();
@@ -1077,9 +1427,12 @@ if(QP.has('cx')){
   cam.pos = [+QP.get('cx'), +(QP.get('cy')||0), +(QP.get('cz')||0)];
   aimAtOrigin();
 }
+if(QP.has('ov')){ setMode('physics'); ['ovH','ovE','ovI','ovP'].forEach(id => $(id).checked = true); }
+if(QP.has('grid')){ state.skyMode = 1; $('selSky').value = '1'; }
+if(QP.has('nodisk')){ state.diskOn = false; $('ckDisk').checked = false; }
+if(QP.has('tour')) setTimeout(startTour, 800);
 resize(true);
-buildSky(0, QUALITY[state.quality].sky);
-$('vTL').textContent = '×1000';
+buildSky(state.skyMode, QUALITY[state.quality].sky);
 requestAnimationFrame(frame);
 </script>
 </body>
