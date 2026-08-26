@@ -61,7 +61,7 @@ export function starPSFTexture(size = 128) {
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const dx = (x + 0.5) / size - 0.5, dy = (y + 0.5) / size - 0.5;
     const r = Math.hypot(dx, dy) * 2;               // 0..1 at edge
-    let v = Math.exp(-r * r * 42) + 0.10 / (1 + Math.pow(r * 9, 2.6));
+    let v = Math.exp(-r * r * 14) + 0.16 / (1 + Math.pow(r * 6.5, 2.5));
     v *= Math.max(0, 1 - r * r);                     // hard-zero the corners
     const i = (y * size + x) * 4;
     const b = Math.min(255, v * 255);
@@ -81,7 +81,7 @@ export function spikePSFTexture(size = 256) {
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const dx = (x + 0.5) / size - 0.5, dy = (y + 0.5) / size - 0.5;
     const r = Math.hypot(dx, dy) * 2;
-    let v = Math.exp(-r * r * 60) + 0.10 / (1 + Math.pow(r * 10, 2.6));
+    let v = Math.exp(-r * r * 22) + 0.14 / (1 + Math.pow(r * 8, 2.5));
     const ax = Math.abs(dx), ay = Math.abs(dy);
     v += 0.42 * (Math.exp(-ax * 55) * Math.exp(-ay * 6.5)
                + Math.exp(-ay * 55) * Math.exp(-ax * 6.5));

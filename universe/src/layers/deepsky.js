@@ -43,7 +43,7 @@ function puffTexture(seed, size = 256) {
     const r = Math.hypot(dx, dy) * 2;
     let n = 0, a = 0.55, f = 3;
     for (let o = 0; o < 5; o++) { n += a * noise(u * f * P / 16, v * f * P / 16); f *= 2.1; a *= 0.55; }
-    let val = Math.pow(Math.max(0, n - 0.18), 1.5) * 1.6;
+    let val = Math.pow(Math.max(0, n - 0.08), 1.35) * 1.9;
     val *= Math.max(0, 1 - r * r * (0.9 + 0.4 * noise(u * 8, v * 8)));
     const i = (y * size + x) * 4;
     const b = Math.min(255, val * 255);
