@@ -137,6 +137,11 @@ canvas{display:block;position:fixed;inset:0}
 #tl-jumps{display:flex;gap:6px;justify-content:center;margin-top:14px}
 #tl-jumps .tl-btn{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;padding:0 10px}
 
+/* ---- light curve --------------------------------------------------------- */
+#lightcurve{left:14px;bottom:96px;padding:8px 10px 6px}
+#lightcurve h2{margin-bottom:5px}
+#lc-canvas{display:block;width:236px;height:92px}
+
 /* ---- boot error --------------------------------------------------------- */
 #fatal{
   position:fixed;inset:0;z-index:90;display:none;
@@ -206,6 +211,11 @@ canvas{display:block;position:fixed;inset:0}
       <button class="tl-btn" id="jump-explosion">explosion</button>
       <button class="tl-btn" id="jump-remnant">remnant</button>
     </div>
+  </div>
+
+  <div class="panel" id="lightcurve">
+    <h2>Light curve</h2>
+    <canvas id="lc-canvas"></canvas>
   </div>
 
   <div class="panel" id="stats">

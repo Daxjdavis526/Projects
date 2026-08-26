@@ -23,6 +23,8 @@ import { Profiles } from './render/profiles.js';
 import { Interior, VIEW } from './render/interior.js';
 import { Core } from './render/core.js';
 import { Shock } from './render/shock.js';
+import { Ejecta } from './render/ejecta.js';
+import { LightCurve } from './ui/lightcurve.js';
 import { Score } from './audio/audio.js';
 import { Timeline } from './ui/timeline.js';
 import { QUALITY, KM } from './config.js';
@@ -53,6 +55,7 @@ const clock = new SimClock(model);
 const engine = new Engine(model, clock);
 const hud = new Hud(model);
 const timeline = new Timeline(clock, engine, () => { /* seek: engine follows in the loop */ });
+const lightcurve = new LightCurve(clock);
 let snap = engine.snapshot();
 
 /* --- physics -> GPU bridge + interior view -------------------------------- */
@@ -60,6 +63,7 @@ const profiles = new Profiles();
 const interior = new Interior(stage, profiles, quality);
 const core = new Core(stage);
 const shock = new Shock(stage, quality);
+const ejecta = new Ejecta(stage, quality);
 const score = new Score();
 
 /* --- focus targets --------------------------------------------------------
@@ -122,6 +126,7 @@ function updateStats(dt) {
 
 /* --- loop ----------------------------------------------------------------- */
 let last = performance.now();
+let frameN = 0;
 
 /* the rig's adaptive speed keys off whatever the camera is nearest to */
 function focusRadius(s) {
@@ -135,6 +140,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - last) / 1000, 0.1);
   last = now;
+  frameN++;
 
   /* clock -> physics -> snapshot -> gpu */
   const tTarget = clock.advance(dt);
@@ -142,17 +148,37 @@ function frame(now) {
   snap = engine.snapshot();
   profiles.upload(snap);
 
+  /* Swallow guard: if the expanding ejecta overtake a parked orbit camera,
+     ease it back out so the explosion is seen, not sat inside of. Flying in
+     deliberately (free mode) is untouched — that trip is a feature. */
+  if (rig.mode === 'orbit') {
+    const R = snap.R_star * KM;
+    if (rig.orbitDist < R * 1.12) rig._pushOut = true;          // swallowed
+    if (rig._pushOut) {
+      const target = R * 2.6;
+      rig.orbitDist += (target - rig.orbitDist) * Math.min(dt * 1.4, 1);
+      if (rig.orbitDist > target * 0.96) rig._pushOut = false;  // done
+    }
+  }
   rig.update(dt, focusRadius(snap));
   star.update(dt, snap.t, snap);
   interior.update(dt, snap, star.group.position);
   core.update(dt, snap);
   shock.update(dt, snap);
+  ejecta.update(dt, snap);
   score.update(snap, dt);
+  lightcurve.push(snap);
+  if ((frameN & 3) === 0) lightcurve.draw();   // 15 Hz is plenty for a plot
 
   /* Exposure kick at bounce, decaying — brightness through the tone mapper,
      never through emissive values. */
   if (snap.phase === 'bounce' && snap.t < 0.004) renderer.exposure = 1.7;
   else renderer.exposure += (1.0 - renderer.exposure) * Math.min(dt * 1.5, 1);
+
+  /* The breakout flash illuminates the circumstellar medium — the wind the
+     star spent its last ten thousand years shedding. */
+  const csmU = star.csm.material.uniforms;
+  csmU.uBoost.value = 1 + Math.min(Math.max(Math.log10(snap.L_em / 1e41), 0), 4) * 0.45;
 
   /* Inside the photosphere the surface fades to a ghost — an x-ray view;
      otherwise the camera would stare at the inside of an opaque ball. */
@@ -170,4 +196,4 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 /* Expose for the screenshot harness and for poking at in the console. */
-window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, shock, score, THREE };
+window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, shock, ejecta, score, THREE };

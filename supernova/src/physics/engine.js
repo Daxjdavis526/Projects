@@ -87,7 +87,7 @@ export class Engine {
   snapshot() {
     const st = this.state;
     return {
-      t: st.t, phase: st.phase,
+      t: st.t, phase: st.phase, phaseT: st.phaseT,
       /* references, not copies — profiles.js consumes them read-only */
       m: st.m, r: st.r, v: st.v, rho: st.rho, T: st.T, X: st.X,
       a: st.a, rtAmp: st.rtAmp, kick: st.kick,

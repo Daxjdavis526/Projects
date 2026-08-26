@@ -85,8 +85,18 @@ export class Star {
          PHOTOSPHERE: it stops meaning anything once the envelope is blown
          off, so from the explosion onward it fades and never scales past
          breakout — the ejecta take over as a different representation. */
+      /* The surface has no idea what happened at the core until the shock
+         physically arrives — light from inside cannot outrun it. The star
+         looks perfectly normal through collapse, bounce, stall, and all but
+         the last hour of the shock's day-long climb through the envelope. */
+      const brokeOut = snap.R_shock >= snap.R_star * 0.995
+        || !['progenitor', 'collapse', 'bounce', 'stall', 'explosion',
+             'deflagration', 'detonation'].includes(snap.phase);
+      if (brokeOut) this._brokeLatch = true;
+      if (snap.phase === 'progenitor') this._brokeLatch = false;   // reset/rewind
       const isStar = ['progenitor', 'collapse', 'bounce', 'stall',
-                      'deflagration', 'detonation'].includes(snap.phase);
+                      'deflagration'].includes(snap.phase)
+        || (snap.phase === 'explosion' && !brokeOut);
       const rCap = this.R * 1.05;
       const r = Math.min(snap.R_star * KM, rCap);
       this.photosphere.scale.setScalar(r / this.R);
@@ -102,7 +112,8 @@ export class Star {
       const on = this._fade > 0.004;
       this.photosphere.visible = on && this.surfaceAllowed !== false;
       this.halo.visible = on && this.haloAllowed !== false;
-      this.wind.visible = on && this.windAllowed !== false;
+      /* the wind is stellar weather: once the envelope is gone, so is it */
+      this.wind.visible = on && this.windAllowed !== false && !this._brokeLatch;
       this.uniforms.uIntensity.value = 0.55 * this._fade;
       this.haloUniforms.uIntensity.value = 1.05 * this._fade;
     }
