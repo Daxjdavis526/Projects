@@ -1,0 +1,2110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SCRIPTURE UNIVERSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ot:#ffb84d; --nt:#5aa2ff; --bofm:#ff6b5e; --dc:#c07bff; --pgp:#3fd6a7;
+    --ink:#cfe4f2; --dim:#5a7484; --faint:#31424e; --hair:rgba(160,200,230,.16);
+    --panel:rgba(5,12,18,.82); --panel2:rgba(8,18,26,.94);
+    --f-disp:Michroma,'IBM Plex Mono',monospace;
+    --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+    --f-text:'IBM Plex Serif',Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--ink);
+    font-family:var(--f-mono);font-size:13px;-webkit-user-select:none;user-select:none;
+    -webkit-tap-highlight-color:transparent}
+  canvas#gl,canvas#lab{position:fixed;inset:0;display:block;touch-action:none}
+  canvas#lab{pointer-events:none}
+
+  /* ---------- shared chrome ---------- */
+  .panel{position:fixed;background:var(--panel);border:1px solid var(--hair);border-radius:8px;
+    backdrop-filter:blur(6px);padding:12px 14px;line-height:1.55;z-index:20}
+  .lbl{color:var(--dim);font-size:9.5px;letter-spacing:.2em;margin-bottom:6px}
+  .btn{display:inline-block;padding:4px 9px;border:1px solid var(--hair);border-radius:5px;
+    color:var(--dim);cursor:pointer;font-size:11px;letter-spacing:.08em;background:transparent}
+  .btn:hover{color:var(--ink);border-color:rgba(160,200,230,.4)}
+  .btn.on{color:#fff;border-color:rgba(190,225,255,.65);background:rgba(120,180,230,.12)}
+  .chip{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;letter-spacing:.05em;
+    border:1px solid var(--hair);color:var(--dim);margin:1px 2px 1px 0}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;
+    background:var(--faint);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:11px;height:11px;
+    border-radius:50%;background:var(--ink);cursor:pointer}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:var(--faint);border-radius:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  /* ---------- top bar ---------- */
+  #topbar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:30;display:flex;
+    gap:8px;align-items:center}
+  #searchWrap{position:relative}
+  #search{width:min(340px,58vw);padding:7px 12px;background:var(--panel);border:1px solid var(--hair);
+    border-radius:7px;color:var(--ink);font-family:var(--f-mono);font-size:12.5px;outline:none;
+    backdrop-filter:blur(6px)}
+  #search:focus{border-color:rgba(160,200,230,.45)}
+  #search::placeholder{color:var(--faint)}
+  #results{position:absolute;top:36px;left:0;right:0;background:var(--panel2);border:1px solid var(--hair);
+    border-radius:7px;max-height:46vh;overflow-y:auto;display:none;z-index:31}
+  #results .row{padding:6px 12px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+  #results .row:hover,#results .row.sel{background:rgba(120,180,230,.12)}
+  #results .row .k{color:var(--dim);font-size:10px}
+  #viewBtns{display:flex;gap:4px}
+
+  /* ---------- legend / filters (left) ---------- */
+  #legend{left:12px;top:64px;width:238px;max-height:calc(100vh - 90px);overflow-y:auto}
+  #legend .trow{display:flex;align-items:center;gap:8px;cursor:pointer;padding:1.5px 0;color:var(--dim)}
+  #legend .trow.on{color:var(--ink)}
+  #legend .trow svg{flex:0 0 44px}
+  #legend .trow .n{margin-left:auto;font-size:10px;color:var(--faint)}
+  #confRow{margin:10px 0 4px}
+  #matrix{display:grid;grid-template-columns:auto repeat(5,1fr);gap:2px;margin-top:6px;font-size:9px}
+  #matrix .cell{aspect-ratio:1.4;border:1px solid var(--hair);border-radius:3px;cursor:pointer;opacity:.28}
+  #matrix .cell.on{opacity:1}
+  #matrix .hd{color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:8.5px}
+  #presets{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  #edgeCount{margin-top:9px;color:var(--dim);font-size:10.5px}
+
+  /* ---------- hover card ---------- */
+  #card{position:fixed;display:none;max-width:330px;z-index:40;pointer-events:none;
+    background:var(--panel2);border:1px solid var(--hair);border-radius:8px;padding:11px 13px;line-height:1.5}
+  #card .refs{font-family:var(--f-disp);font-size:11.5px;letter-spacing:.05em;color:#fff;margin-bottom:5px}
+  #card .snip{font-family:var(--f-text);font-size:12px;color:var(--ink);margin:5px 0;font-style:italic}
+  #card .why{color:var(--dim);font-size:11px;margin-top:5px}
+  .confpill{display:inline-block;padding:0 7px;border-radius:8px;font-size:9.5px;letter-spacing:.1em}
+  .conf0{background:rgba(139,255,176,.14);color:#8bffb0}
+  .conf1{background:rgba(127,216,255,.13);color:#7fd8ff}
+  .conf2{background:rgba(255,194,110,.13);color:#ffc26e}
+  .conf3{background:rgba(255,255,255,.08);color:#9ab}
+
+  /* ---------- side panel (right): focus / compare / explorer ---------- */
+  #side{right:12px;top:64px;width:344px;max-height:calc(100vh - 90px);overflow-y:auto;display:none}
+  #side h3{font-family:var(--f-disp);font-size:12px;letter-spacing:.08em;color:#fff;font-weight:400;
+    margin-bottom:4px;padding-right:20px}
+  #side .x,#dash .x,#coverage .x,#help .x{position:absolute;top:9px;right:12px;cursor:pointer;
+    color:var(--dim);font-size:14px;z-index:2}
+  #side .x:hover{color:#fff}
+  #side .vtext{font-family:var(--f-text);font-size:13.5px;line-height:1.65;color:var(--ink);
+    -webkit-user-select:text;user-select:text;margin:6px 0}
+  #side .vtext .hl{background:rgba(127,216,255,.22);border-radius:2px}
+  #side .vtext .hl2{background:rgba(127,216,255,.10);border-radius:2px}
+  #side .conn{padding:5px 8px;margin:3px 0;border:1px solid transparent;border-radius:6px;cursor:pointer;
+    display:flex;align-items:baseline;gap:8px}
+  #side .conn:hover{border-color:var(--hair);background:rgba(120,180,230,.07)}
+  #side .conn .r{white-space:nowrap}
+  #side .conn .t{color:var(--dim);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #side .conn .w{margin-left:auto;color:var(--faint);font-size:10px}
+  #side .meta{color:var(--dim);font-size:11px;margin:6px 0}
+  #side .cmp2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  #side .cmp2 .hd{font-family:var(--f-disp);font-size:10px;letter-spacing:.06em;margin-bottom:4px}
+  #side .note{font-size:11.5px;color:var(--ink);border-left:2px solid var(--faint);padding-left:9px;
+    margin:7px 0;line-height:1.5}
+  #side .bar{height:4px;background:var(--faint);border-radius:2px;overflow:hidden;flex:1}
+  #side .bar>i{display:block;height:100%;border-radius:2px}
+  #side .exprow{display:flex;align-items:center;gap:9px;padding:4px 0;cursor:pointer}
+  #side .exprow:hover .r{color:#fff}
+
+  /* ---------- overlays: dashboard / coverage / help ---------- */
+  .overlay{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50;
+    width:min(680px,92vw);max-height:84vh;overflow-y:auto;display:none;
+    background:var(--panel2);border:1px solid var(--hair);border-radius:10px;padding:22px 26px}
+  .overlay h2{font-family:var(--f-disp);font-size:14px;letter-spacing:.2em;color:#fff;font-weight:400;
+    margin-bottom:14px}
+  .overlay h4{color:var(--dim);font-size:10px;letter-spacing:.18em;margin:14px 0 6px;font-weight:400}
+  .overlay table{border-collapse:collapse;width:100%;font-size:11.5px}
+  .overlay td,.overlay th{padding:3px 8px;text-align:left;border-bottom:1px solid rgba(160,200,230,.07)}
+  .overlay th{color:var(--dim);font-size:9.5px;letter-spacing:.14em;font-weight:400}
+  .overlay .num{text-align:right;font-variant-numeric:tabular-nums}
+  .overlay tr.click{cursor:pointer}
+  .overlay tr.click:hover td{color:#fff}
+  .overlay .foot{color:var(--dim);font-size:10.5px;margin-top:12px;line-height:1.6}
+  #help td:first-child{color:var(--dim);text-align:right;white-space:nowrap;letter-spacing:.05em}
+
+  /* ---------- toast + tour caption ---------- */
+  #toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:60;
+    background:var(--panel2);border:1px solid var(--hair);border-radius:7px;padding:8px 16px;
+    font-size:12px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+  #toast.show{opacity:1}
+  #tourCap{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:45;display:none;
+    max-width:min(620px,90vw);text-align:center;background:var(--panel2);border:1px solid var(--hair);
+    border-radius:9px;padding:12px 20px;line-height:1.6;font-size:12.5px}
+  #tourCap .stop{color:var(--dim);font-size:10px;letter-spacing:.18em;margin-bottom:3px}
+
+  /* ---------- title splash ---------- */
+  #title{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;cursor:pointer;transition:opacity 1s;
+    background:radial-gradient(ellipse at 50% 44%,rgba(10,20,30,.55) 0%,rgba(0,0,0,.82) 70%,#000 100%)}
+  #title.gone{opacity:0;pointer-events:none}
+  #title h1{font-family:var(--f-disp);font-size:clamp(19px,4.4vw,46px);letter-spacing:.34em;
+    text-indent:.34em;color:#eef6ff;text-align:center;font-weight:400;
+    text-shadow:0 0 34px rgba(127,196,255,.5),0 0 90px rgba(127,196,255,.22)}
+  #title .sub{margin-top:14px;color:#7d97a8;letter-spacing:.26em;font-size:clamp(8px,1.4vw,12px);
+    text-indent:.26em;text-align:center}
+  #title .go{margin-top:46px;color:#9fd0f0;letter-spacing:.3em;font-size:12px;animation:pulse 2.4s infinite}
+  #title .fine{margin-top:26px;color:#3d5563;font-size:10.5px;letter-spacing:.1em;line-height:1.9;
+    text-align:center;max-width:82vw}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  #loadState{margin-top:10px;color:#33505e;font-size:10px;letter-spacing:.14em}
+
+  @media (max-width:820px){
+    #legend{display:none}
+    #side{left:12px;right:12px;width:auto;top:auto;bottom:12px;max-height:46vh}
+    #topbar{width:calc(100vw - 20px)}
+    #search{width:100%}
+    .hidemob{display:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<canvas id="lab"></canvas>
+
+<div id="topbar">
+  <div id="searchWrap">
+    <input id="search" placeholder="Search — Isaiah 53 · 3 Nephi 12 · baptism · Melchizedek" autocomplete="off" spellcheck="false">
+    <div id="results"></div>
+  </div>
+  <div id="viewBtns">
+    <span class="btn on" id="vb0" title="Canonical ribbon (1)">RIBBON</span>
+    <span class="btn" id="vb1" title="Chord (2)">CHORD</span>
+    <span class="btn" id="vb2" title="Network (3)">NET</span>
+  </div>
+  <span class="btn hidemob" id="bTour">TOUR</span>
+  <span class="btn hidemob" id="bDash">STATS</span>
+  <span class="btn" id="bData">DATA</span>
+  <span class="btn hidemob" id="bPng">PNG</span>
+  <span class="btn" id="bHelp">?</span>
+</div>
+
+<div class="panel" id="legend">
+  <div class="lbl">RELATIONSHIP TYPES — LEGEND IS THE FILTER</div>
+  <div id="typeRows"></div>
+  <div id="confRow">
+    <div class="lbl">CONFIDENCE ≤ <span id="confName" style="color:var(--ink)">POSSIBLE</span></div>
+    <input type="range" id="confSlider" min="0" max="3" value="3" step="1" style="width:100%">
+  </div>
+  <div class="lbl" style="margin-top:10px">CANON PAIRS</div>
+  <div id="matrix"></div>
+  <div id="presets">
+    <span class="btn" id="pAll">ALL</span>
+    <span class="btn" id="pBR">BIBLE ↔ RESTORATION</span>
+    <span class="btn" id="pX">CROSS-CANON</span>
+    <span class="btn" id="pInt">INTERNAL</span>
+  </div>
+  <div id="edgeCount"></div>
+</div>
+
+<div id="card"></div>
+
+<div class="panel" id="side"><span class="x" id="sideX">✕</span><div id="sideBody"></div></div>
+
+<div class="overlay" id="dash"><span class="x" id="dashX">✕</span><div id="dashBody"></div></div>
+<div class="overlay" id="coverage"><span class="x" id="covX">✕</span><div id="covBody"></div></div>
+<div class="overlay" id="help"><span class="x" id="helpX">✕</span>
+  <h2>SCRIPTURE UNIVERSE</h2>
+  <table>
+    <tr><td>1 / 2 / 3</td><td>ribbon · chord · network view</td></tr>
+    <tr><td>scroll / pinch</td><td>zoom — canon → book → chapter → verse</td></tr>
+    <tr><td>drag</td><td>pan</td></tr>
+    <tr><td>hover</td><td>relationship card</td></tr>
+    <tr><td>click verse</td><td>focus its constellation; click again to travel</td></tr>
+    <tr><td>click connection</td><td>side-by-side comparison</td></tr>
+    <tr><td>F</td><td>search</td></tr>
+    <tr><td>T</td><td>guided tour of famous connections</td></tr>
+    <tr><td>Esc</td><td>clear focus / close panels</td></tr>
+    <tr><td>H or ?</td><td>this help</td></tr>
+  </table>
+  <div class="foot">Every line is a documented relationship: an official Gospel Library footnote
+  cross-reference, a machine-detected textual parallel between the public-domain texts, or a curated
+  famous connection — typed, confidence-rated, and traceable to its source. Machine-detected lines are
+  dashed and never shown as confirmed. See DATA for exact coverage.</div>
+</div>
+
+<div id="toast"></div>
+<div id="tourCap"><div class="stop"></div><div class="cap"></div></div>
+
+<div id="title">
+  <h1>SCRIPTURE UNIVERSE</h1>
+  <div class="sub">EVERY DOCUMENTED CROSS-REFERENCE ACROSS THE STANDARD WORKS</div>
+  <div class="go">CLICK TO ENTER</div>
+  <div class="fine">Old Testament · New Testament · Book of Mormon · Doctrine &amp; Covenants · Pearl of Great Price<br>
+  zoom from the whole canon to a single verse — every connection typed, rated, and sourced</div>
+  <div id="loadState">LOADING DATA…</div>
+</div>
+
+<script>
+/* ------------------------------ 1. CORE ---------------------------------- */
+/* Singletons: DATA (corpus + graph), CAM (camera), GLR (WebGL), SETS (visible
+   instance sets), FILT (filters), SEL (hover/focus/selection), MODES, TOUR.
+   Node identity is "seq": verses in canonical order, then chapter pseudo-nodes,
+   then book pseudo-nodes. vid = (book<<20)|(chapter<<8)|verse, verse 0 = whole
+   chapter. All positions live in one RG32F texture the shaders read. */
+'use strict';
+const $ = s => document.querySelector(s);
+const TAU = Math.PI*2;
+const clamp = (v,a,b) => v<a?a:v>b?b:v;
+const lerp = (a,b,t) => a+(b-a)*t;
+const ease = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const CANON_HEX = ['#ffb84d','#5aa2ff','#ff6b5e','#c07bff','#3fd6a7'];
+const CANON_RGB = CANON_HEX.map(h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16)/255));
+const CONF_NAMES = ['CONFIRMED','STRONG','PROBABLE','POSSIBLE'];
+// visual style per type bit, chosen by highest-priority set bit.
+// [priority, width(px), alpha, dash(0|1), glow]
+const TYPE_STYLE = [
+  [4, 1.0, .40, 0, .5],   // 0 official footnote
+  [9, 2.2, .85, 0, 1.0],  // 1 direct quotation
+  [8, 1.7, .70, 0, .8],   // 2 explicit citation
+  [6, 1.3, .48, 1, .5],   // 3 close textual parallel
+  [2, 0.9, .30, 1, .3],   // 4 shared phrase
+  [7, 1.6, .62, 0, .7],   // 5 prophecy / fulfillment
+  [3, 1.0, .38, 0, .4],   // 6 shared event
+  [3, 1.0, .38, 0, .4],   // 7 shared person
+  [3, 1.1, .40, 0, .4],   // 8 shared teaching
+  [5, 1.2, .45, 1, .5],   // 9 typology
+  [5, 1.2, .45, 0, .5],   // 10 narrative parallel
+  [4, 1.0, .40, 1, .4],   // 11 intertextual allusion
+  [1, 0.8, .25, 1, .2],   // 12 shared topic (derived)
+];
+
+const STATE = { booted:false, view:0, viewBlend:0, viewFrom:0, tweenT:1,
+                reveal:0, introT0:0, dirty:true, labDirty:true };
+const SEL = { hoverEdge:-1, hoverNode:-1, focusSeq:-1, selEdge:-1, pathSeqs:null, pathEdges:null };
+const FILT = { types:(1<<13)-1, conf:3, canon:Array.from({length:5},()=>[1,1,1,1,1]),
+               topicPost:null, personPost:null, prophecy:false };
+
+</script>
+<script>
+/* ------------------------------ 2. DATA ---------------------------------- */
+const DATA = {
+  meta:null, manifest:null, agg:null, stats:null, coverage:null, topics:null, persons:null,
+  E:0, src:null, dst:null, mask:null, flags:null, prov:null, w:null, ext:null, evi:null,
+  V:0, NCH:0, NB:0, N:0,
+  seqBook:null, seqCh:null, seqV:null, vidToSeq:null, chSeq:null, bookSeq:null,
+  csrOff:null, csrEdge:null,
+  chAgg:null,           // chapter-pair rollup for LOD1
+  bookAgg:null,         // book-pair rollup for LOD0
+  text:new Map(), textPending:new Map(), evCache:new Map(),
+};
+
+async function jget(u){ const r = await fetch('data/'+u); if(!r.ok) throw new Error(u+' '+r.status); return r.json(); }
+
+async function bootData(){
+  const [meta, manifest, agg, binBuf] = await Promise.all([
+    jget('verses-meta.json'), jget('manifest.json'), jget('agg.json'),
+    fetch('data/edges.bin').then(r => { if(!r.ok) throw new Error('edges.bin'); return r.arrayBuffer(); }),
+  ]);
+  DATA.meta = meta; DATA.manifest = manifest; DATA.agg = agg;
+
+  // ---- seq mapping ----
+  const B = meta.books;
+  let seq = 0;
+  const vidToSeq = new Map();
+  B.forEach((bk, bi) => bk.vc.forEach((n, ci) => {
+    for (let v = 1; v <= n; v++) vidToSeq.set((bi<<20)|((ci+1)<<8)|v, seq++); }));
+  DATA.V = seq;
+  const chSeq = B.map(bk => new Array(bk.vc.length));
+  B.forEach((bk, bi) => { for (let c = 1; c <= bk.vc.length; c++){
+    chSeq[bi][c-1] = seq; vidToSeq.set((bi<<20)|(c<<8), seq++); } });
+  DATA.NCH = seq - DATA.V;
+  const bookSeq = B.map((bk, bi) => { vidToSeq.set(bi<<20, seq); return seq++; });
+  DATA.N = seq; DATA.NB = B.length;
+  DATA.vidToSeq = vidToSeq; DATA.chSeq = chSeq; DATA.bookSeq = bookSeq;
+  const seqBook = new Uint8Array(seq), seqCh = new Uint16Array(seq), seqV = new Uint16Array(seq);
+  { let s = 0;
+    B.forEach((bk, bi) => bk.vc.forEach((n, ci) => {
+      for (let v = 1; v <= n; v++){ seqBook[s]=bi; seqCh[s]=ci+1; seqV[s]=v; s++; } }));
+    B.forEach((bk, bi) => { for (let c = 1; c <= bk.vc.length; c++){ seqBook[s]=bi; seqCh[s]=c; s++; } });
+    B.forEach((bk, bi) => { seqBook[s]=bi; s++; });
+  }
+  DATA.seqBook = seqBook; DATA.seqCh = seqCh; DATA.seqV = seqV;
+  if (DATA.V !== manifest.counts.verses) throw new Error('verse count mismatch — data out of sync');
+
+  // ---- edges ----
+  const dv = new DataView(binBuf);
+  const E = binBuf.byteLength / 12 | 0;
+  DATA.E = E;
+  const src = new Uint16Array(E), dst = new Uint16Array(E), mask = new Uint16Array(E),
+        flags = new Uint8Array(E), prov = new Uint8Array(E), w = new Uint8Array(E),
+        ext = new Uint8Array(E), evi = new Uint16Array(E);
+  for (let i = 0; i < E; i++){ const o = i*12;
+    src[i]=dv.getUint16(o,true); dst[i]=dv.getUint16(o+2,true); mask[i]=dv.getUint16(o+4,true);
+    flags[i]=dv.getUint8(o+6); prov[i]=dv.getUint8(o+7); w[i]=dv.getUint8(o+8);
+    ext[i]=dv.getUint8(o+9); evi[i]=dv.getUint16(o+10,true);
+  }
+  Object.assign(DATA, { src, dst, mask, flags, prov, w, ext, evi });
+
+  // ---- CSR adjacency (one O(E) pass) ----
+  const deg = new Uint32Array(DATA.N);
+  for (let i = 0; i < E; i++){ deg[src[i]]++; deg[dst[i]]++; }
+  const off = new Uint32Array(DATA.N + 1);
+  for (let s = 0; s < DATA.N; s++) off[s+1] = off[s] + deg[s];
+  const fill = off.slice(0, DATA.N);
+  const csrE = new Uint32Array(E * 2);
+  for (let i = 0; i < E; i++){ csrE[fill[src[i]]++] = i; csrE[fill[dst[i]]++] = i; }
+  DATA.csrOff = off; DATA.csrEdge = csrE;
+
+  // ---- chapter rollup for LOD1 (verse edges gathered to chapter pairs) ----
+  const chMap = new Map();
+  const chNodeOf = s => s < DATA.V ? chSeq[seqBook[s]][seqCh[s]-1]
+                      : s < DATA.V + DATA.NCH ? s : -1;
+  for (let i = 0; i < E; i++){
+    const a = chNodeOf(src[i]), z = chNodeOf(dst[i]);
+    if (a < 0 || z < 0 || a === z) continue;
+    const key = Math.min(a,z) * 65536 + Math.max(a,z);
+    let r = chMap.get(key);
+    if (!r) chMap.set(key, r = { a:Math.min(a,z), z:Math.max(a,z), n:0, mask:0, prov:0,
+                                 conf:3, w:0, cross:(flags[i]>>4)&1, e1:i });
+    r.n++; r.mask |= mask[i]; r.prov |= prov[i];
+    r.conf = Math.min(r.conf, flags[i]&3); r.w = Math.max(r.w, w[i]);
+  }
+  DATA.chAgg = [...chMap.values()];
+
+  // ---- book rollup for LOD0 (precomputed in agg.json) ----
+  DATA.bookAgg = agg.bookPairs.map(p => {
+    let m = 0; p.byType.forEach((n, t) => { if (n) m |= 1<<t; });
+    let conf = 3; for (let c2 = 0; c2 < 4; c2++) if (p.byConf[c2]){ conf = c2; break; }
+    return { a: bookSeq[p.a], z: bookSeq[p.b], ba:p.a, bb:p.b, n:p.n, mask:m, conf,
+             byType:p.byType, byConf:p.byConf,
+             cross: B[p.a].c !== B[p.b].c ? 1 : 0, w: Math.min(255, 40 + Math.log2(1+p.n)*22) };
+  });
+}
+
+// ---- reference formatting ----
+function bookName(bi){ return DATA.meta.books[bi].n; }
+function refOfSeq(s, short){
+  const bi = DATA.seqBook[s], bk = DATA.meta.books[bi];
+  const nm = short && bk.ab.length ? bk.ab[0] : bk.n;
+  if (s >= DATA.V + DATA.NCH) return nm;
+  const c = DATA.seqCh[s];
+  if (s >= DATA.V) return bi === DATA.meta.odBook ? `${nm} ${c}` : `${nm} ${c}`;
+  const v = DATA.seqV[s];
+  if (bi === DATA.meta.odBook){
+    const orig = (DATA.meta.odNums[c-1]||[])[v-1];
+    return `${nm} ${c}, ¶${orig || v}`;
+  }
+  return `${nm} ${c}:${v}`;
+}
+function canonOfSeq(s){ return DATA.meta.books[DATA.seqBook[s]].c; }
+
+// ---- lazy text ----
+function bookFile(bi){ const bk = DATA.meta.books[bi];
+  return `text/${String(bi).padStart(2,'0')}-${bk.s}.json`; }
+function loadBookText(bi){
+  if (DATA.text.has(bi)) return Promise.resolve(DATA.text.get(bi));
+  if (DATA.textPending.has(bi)) return DATA.textPending.get(bi);
+  const p = jget(bookFile(bi)).then(t => { DATA.text.set(bi, t); DATA.textPending.delete(bi); return t; });
+  DATA.textPending.set(bi, p);
+  return p;
+}
+async function verseText(s){
+  if (s >= DATA.V) return null;
+  const t = await loadBookText(DATA.seqBook[s]);
+  return t.chapters[DATA.seqCh[s]-1][DATA.seqV[s]-1];
+}
+function prefetchAllText(){
+  let bi = 0;
+  const step = () => { if (bi >= DATA.NB) return;
+    loadBookText(bi++).finally(() => setTimeout(step, 120)); };
+  setTimeout(step, 2500);
+}
+
+// ---- lazy evidence ----
+async function evidenceOf(i){
+  const idx = DATA.evi[i];
+  if (idx === 0xFFFF) return null;
+  const c = idx >> 8;
+  if (!DATA.evCache.has(c)) DATA.evCache.set(c, jget(`evidence/ev-${String(c).padStart(3,'0')}.json`));
+  const chunk = await DATA.evCache.get(c);
+  return chunk[idx & 255] || null;
+}
+const lazyJson = {};
+function lazy(name){ return lazyJson[name] || (lazyJson[name] = jget(name+'.json')); }
+
+</script>
+<script>
+/* ------------------------------ 3. LAYOUT + CAMERA ------------------------ */
+/* Three layouts write target positions for every node (verse, chapter, book)
+   into Float32Arrays; the active positions are tweened between them and
+   uploaded to one RG32F texture the shaders fetch. World space is [0,1]². */
+const LAY = { ribbon:null, chord:null, network:null, cur:null, from:null, to:null,
+              verseX:null, canonRange:[], bookRange:[] };
+const CAM = { cx:.5, cy:.5, sx:0, sy:0, minSx:0, maxSx:0,
+              fly:null, W:0, H:0, dpr:1 };
+
+function buildLayouts(){
+  const N = DATA.N, V = DATA.V, B = DATA.meta.books;
+  const GUT = DATA.V * .015;                       // inter-canon gutter, verse units
+  // ---- ribbon ----
+  const rib = new Float32Array(N*2);
+  const verseX = new Float32Array(V);
+  let x = 0, lastCanon = 0;
+  LAY.canonRange = []; LAY.bookRange = [];
+  { let s = 0;
+    B.forEach((bk, bi) => {
+      if (bk.c !== lastCanon){ x += GUT; lastCanon = bk.c; }
+      const b0 = x;
+      bk.vc.forEach(n => { for (let v = 0; v < n; v++) verseX[s++] = x++; });
+      LAY.bookRange.push([b0, x]);
+      if (!LAY.canonRange[bk.c]) LAY.canonRange[bk.c] = [b0, x];
+      LAY.canonRange[bk.c][1] = x;
+    });
+  }
+  const total = x;
+  const BASE = .64, CHY = .654, BKY = .672;
+  for (let s = 0; s < V; s++){ rib[s*2] = verseX[s]/total; rib[s*2+1] = BASE; }
+  DATA.meta.books.forEach((bk, bi) => {
+    for (let c = 1; c <= bk.vc.length; c++){
+      const cs = DATA.chSeq[bi][c-1];
+      // chapter x = midpoint of its verses
+      const first = DATA.vidToSeq.get((bi<<20)|(c<<8)|1);
+      const n = bk.vc[c-1];
+      rib[cs*2] = (verseX[first] + n/2)/total; rib[cs*2+1] = CHY;
+    }
+    const bs = DATA.bookSeq[bi], [b0,b1] = LAY.bookRange[bi];
+    rib[bs*2] = (b0+b1)/2/total; rib[bs*2+1] = BKY;
+  });
+  LAY.verseX = verseX; LAY.total = total;
+  // ---- chord ----
+  const cho = new Float32Array(N*2);
+  const R = .355, CX = .5, CY = .52;
+  const angOf = wx => -Math.PI/2 + wx * TAU * .96 + TAU*.02;
+  for (let s = 0; s < V; s++){
+    const a = angOf(rib[s*2]);
+    cho[s*2] = CX + Math.cos(a)*R; cho[s*2+1] = CY + Math.sin(a)*R;
+  }
+  for (let s = V; s < N; s++){
+    const a = angOf(rib[s*2]);
+    const rr = s < V + DATA.NCH ? R + .007 : R + .018;
+    cho[s*2] = CX + Math.cos(a)*rr; cho[s*2+1] = CY + Math.sin(a)*rr;
+  }
+  // ---- network ----
+  const net = new Float32Array(N*2);
+  { const L = DATA.agg.netLayout;                  // per-chapter [x,y] u16
+    let ci = 0;
+    const chPos = [];
+    B.forEach((bk, bi) => { chPos.push([]); for (let c = 0; c < bk.vc.length; c++){
+      const [qx, qy] = L[ci++];
+      chPos[bi].push([.09 + qx/65535*.82, .09 + qy/65535*.82]); } });
+    for (let s = 0; s < V; s++){
+      const [px, py] = chPos[DATA.seqBook[s]][DATA.seqCh[s]-1];
+      const k = DATA.seqV[s];
+      const r = .0035 * Math.sqrt(k), th = k * 2.39996;
+      net[s*2] = px + Math.cos(th)*r; net[s*2+1] = py + Math.sin(th)*r;
+    }
+    B.forEach((bk, bi) => {
+      let mx = 0, my = 0;
+      for (let c = 0; c < bk.vc.length; c++){
+        const cs = DATA.chSeq[bi][c];
+        net[cs*2] = chPos[bi][c][0]; net[cs*2+1] = chPos[bi][c][1];
+        mx += chPos[bi][c][0]; my += chPos[bi][c][1];
+      }
+      const bs = DATA.bookSeq[bi];
+      net[bs*2] = mx/bk.vc.length; net[bs*2+1] = my/bk.vc.length;
+    });
+  }
+  LAY.ribbon = rib; LAY.chord = cho; LAY.network = net;
+  LAY.cur = new Float32Array(rib);
+}
+const layoutOf = v => [LAY.ribbon, LAY.chord, LAY.network][v];
+
+function setView(v){
+  if (v === STATE.view && STATE.tweenT >= 1) return;
+  STATE.viewFrom = STATE.view; STATE.view = v;
+  LAY.from = new Float32Array(LAY.cur); LAY.to = layoutOf(v);
+  STATE.tweenT = 0; STATE.tween0 = performance.now();
+  STATE.dirty = true; STATE.labDirty = true;
+  [0,1,2].forEach(i => $('#vb'+i).classList.toggle('on', i === v));
+  fitHome(v);
+}
+function updateTween(dt){
+  if (STATE.tweenT >= 1) return;
+  STATE.tweenT = Math.min(1, (performance.now() - STATE.tween0) / 900);
+  const t = ease(STATE.tweenT);
+  const f = LAY.from, to = LAY.to, cur = LAY.cur;
+  for (let i = 0; i < cur.length; i++) cur[i] = f[i] + (to[i]-f[i])*t;
+  GLR.posDirty = true; STATE.labDirty = true;
+  if (STATE.tweenT >= 1) STATE.dirty = true;
+}
+
+// ---- camera ----
+function resize(){
+  CAM.dpr = Math.min(devicePixelRatio||1, window.matchMedia('(pointer:coarse)').matches ? 2 : 2);
+  const W = innerWidth, H = innerHeight;
+  CAM.W = W; CAM.H = H;
+  for (const id of ['gl','lab']){ const c = $('#'+id);
+    c.width = W*CAM.dpr; c.height = H*CAM.dpr;
+    c.style.width = W+'px'; c.style.height = H+'px'; }
+  CAM.minSx = (STATE.view === 0 ? W : Math.min(W, H)) * .92;
+  CAM.maxSx = W * DATA.V / 26;   // ~26 verses on screen max zoom
+  if (!CAM.sx) fitHome(0);
+  STATE.dirty = true; STATE.labDirty = true;
+  if (GLR.gl) GLR.gl.viewport(0, 0, W*CAM.dpr, H*CAM.dpr);
+}
+function syArc(){ // ribbon compresses y gently as x zooms; chord/net stay uniform
+  const arc = CAM.H * .92 * Math.pow(CAM.sx/(CAM.W*.92), .38);
+  if (STATE.view !== 0) return CAM.sx;
+  if (STATE.tweenT < 1) return lerp(CAM.sx, arc, ease(STATE.tweenT));
+  return arc;
+}
+function zoomAt(px, py, f){
+  const wx = (px - CAM.W/2)/CAM.sx + CAM.cx, wy = (py - CAM.H/2)/CAM.sy + CAM.cy;
+  CAM.sx = clamp(CAM.sx * f, CAM.minSx, CAM.maxSx);
+  CAM.sy = syArc();
+  CAM.cx = wx - (px - CAM.W/2)/CAM.sx; CAM.cy = wy - (py - CAM.H/2)/CAM.sy;
+  clampCam(); STATE.labDirty = true; markLodDirty();
+}
+function clampCam(){
+  const hw = CAM.W/2/CAM.sx, hh = CAM.H/2/CAM.sy;
+  CAM.cx = clamp(CAM.cx, hw*.2, 1 - hw*.2);
+  CAM.cy = clamp(CAM.cy, hh*.2, 1 - hh*.2);
+}
+function fitHome(v){
+  CAM.minSx = (v === 0 ? CAM.W : Math.min(CAM.W, CAM.H)) * .92;
+  CAM.sx = CAM.minSx; CAM.sy = syArc();
+  CAM.cx = .5; CAM.cy = STATE.view === 0 ? .48 : .5;
+  CAM.fly = null; STATE.labDirty = true; markLodDirty();
+}
+function flyTo(cx, cy, sx, dur){
+  CAM.fly = { t:0, dur:dur||.9, cx0:CAM.cx, cy0:CAM.cy, sx0:CAM.sx,
+              cx1:clamp(cx,0,1), cy1:clamp(cy,0,1), sx1:clamp(sx,CAM.minSx,CAM.maxSx) };
+}
+function updateFly(dt){
+  const f = CAM.fly; if (!f) return;
+  f.t = Math.min(1, f.t + dt/f.dur);
+  const t = ease(f.t);
+  CAM.cx = lerp(f.cx0,f.cx1,t); CAM.cy = lerp(f.cy0,f.cy1,t);
+  CAM.sx = Math.exp(lerp(Math.log(f.sx0), Math.log(f.sx1), t));
+  CAM.sy = syArc(); clampCam();
+  STATE.labDirty = true; markLodDirty();
+  if (f.t >= 1) CAM.fly = null;
+}
+function seqCenter(s){ return [LAY.cur[s*2], LAY.cur[s*2+1]]; }
+function flyToSeq(s, versesOnScreen){
+  const [x, y] = seqCenter(s);
+  flyTo(x, y, CAM.W * DATA.V / (versesOnScreen||120) / (LAY.total/DATA.V), 1.1);
+}
+function lodLevel(){
+  const vpp = DATA.V / CAM.sx * (LAY.total/DATA.V);  // verses per px incl. gutters
+  return vpp > 24 ? 0 : vpp > 1.6 ? 1 : 2;
+}
+let lastLod = -1, lastCull = [0,0];
+function markLodDirty(){
+  const l = lodLevel();
+  if (l !== lastLod){ lastLod = l; STATE.dirty = true; return; }
+  if (l === 2 && STATE.view === 0){
+    const r = visVerseRange(1.3);
+    if (r[0] < lastCull[0] || r[1] > lastCull[1]) STATE.dirty = true;
+  }
+}
+function visVerseRange(marginF){
+  const hw = CAM.W/2/CAM.sx * (marginF||1);
+  const x0 = CAM.cx - hw, x1 = CAM.cx + hw;
+  // invert verseX (monotonic): binary search
+  const vx = LAY.verseX, T = LAY.total;
+  let lo = 0, hi = DATA.V-1;
+  const find = target => { let a=0, b=DATA.V-1;
+    while (a < b){ const m = (a+b)>>1; (vx[m]/T < target) ? a = m+1 : b = m; } return a; };
+  return [find(x0), Math.min(DATA.V-1, find(x1)+1)];
+}
+
+/* ------------------------------ 4. GL ------------------------------------- */
+const GLR = { gl:null, posTex:null, canonTex:null, posDirty:true,
+              edgeProg:null, nodeProg:null, pickProg:null, pickNodeProg:null,
+              edgeVAO:null, nodeVAO:null, pickFBO:null, pickTex:null,
+              edgeBuf:null, nodeBuf:null, edgeCount:0, nodeCount:0,
+              edgeData:null, nodeData:null, frameMs:[] };
+
+function glInit(){
+  const gl = GLR.gl = $('#gl').getContext('webgl2', { alpha:false, antialias:false,
+    preserveDrawingBuffer:false });
+  if (!gl){ $('#loadState').textContent = 'WEBGL2 UNAVAILABLE'; throw new Error('no webgl2'); }
+
+  const VS_EDGE = `#version 300 es
+  precision highp float; precision highp int;
+  layout(location=0) in uvec4 aEnds;    // src, dst, anc1, anc2
+  layout(location=1) in uvec4 aStyle;   // styleBits(w|dash|dir), typeStyle, wByte, hl
+  uniform sampler2D uPos; uniform sampler2D uCanon;
+  uniform vec2 uCam, uScale, uHalf;     // world center, px/world, half-viewport px
+  uniform float uBeta, uChordAmt, uLiftK, uLiftMax, uReveal, uTime, uDim, uWidthMul, uAlphaMul;
+  uniform vec2 uCenter;
+  out vec3 vCol; out float vAlpha; out float vSide; out float vArc; out float vDashOn; out float vFlow;
+  vec2 P(uint s){ return texelFetch(uPos, ivec2(int(s&255u), int(s>>8)), 0).xy; }
+  float canon(uint s){ return texelFetch(uCanon, ivec2(int(s&255u), int(s>>8)), 0).r * 255.0; }
+  uniform vec3 uPal[5];
+  float hash(float n){ return fract(sin(n*127.1)*43758.5453); }
+  void main(){
+    int vi = gl_VertexID; int seg = vi >> 1; float side = float(vi & 1) * 2.0 - 1.0;
+    float t = float(seg) / 16.0;
+    vec2 p0 = P(aEnds.x), p3 = P(aEnds.y);
+    vec2 a1 = P(aEnds.z), a2 = P(aEnds.w);
+    float span = distance(p0, p3);
+    vec2 c1 = mix(p0, a1, uBeta), c2 = mix(p3, a2, uBeta);
+    vec2 lift = vec2(0.0, -min(span * uLiftK, uLiftMax));
+    vec2 c1r = c1 + lift, c2r = c2 + lift;
+    vec2 c1c = mix(c1, uCenter, min(span*2.2, .85)), c2c = mix(c2, uCenter, min(span*2.2, .85));
+    c1 = mix(c1r, c1c, uChordAmt); c2 = mix(c2r, c2c, uChordAmt);
+    float u = 1.0 - t;
+    vec2 pos = u*u*u*p0 + 3.0*u*u*t*c1 + 3.0*u*t*t*c2 + t*t*t*p3;
+    vec2 dp = 3.0*u*u*(c1-p0) + 6.0*u*t*(c2-c1) + 3.0*t*t*(p3-c2);
+    vec2 sp = (pos - uCam) * uScale + uHalf;
+    vec2 sd = normalize(dp * uScale + vec2(1e-6));
+    vec2 nrm = vec2(-sd.y, sd.x);
+    float wpx = float(aStyle.x & 63u) * 0.25 * uWidthMul;
+    sp += nrm * side * (wpx * 0.5 + 0.75);
+    gl_Position = vec4(sp.x/uHalf.x - 1.0, 1.0 - sp.y/uHalf.y, 0.0, 1.0);
+    int ca = int(canon(aEnds.x)), cb = int(canon(aEnds.y));
+    vCol = mix(uPal[ca], uPal[cb], t);
+    float alpha = float(aStyle.y) / 255.0 * (0.25 + 0.75*float(aStyle.z)/255.0) * uAlphaMul;
+    float hl = float(aStyle.w & 3u);
+    float dim = (hl > 0.5) ? 1.0 : uDim;
+    if (hl > 0.5){ alpha = min(1.0, alpha * 2.2 + 0.25); vCol = mix(vCol, vec3(1.0), 0.25); }
+    // intro reveal: staggered draw-in along the curve
+    float h = hash(float(gl_InstanceID));
+    float tc = clamp((uReveal*1.25 - h)/0.25, 0.0, 1.0);
+    if (t > tc) alpha = 0.0;
+    vAlpha = alpha * dim;
+    vSide = side;
+    float spanPx = distance(p0*uScale, p3*uScale);
+    vArc = t * spanPx;
+    vDashOn = float((aStyle.x >> 6) & 1u);
+    float dir = float((aStyle.w >> 2) & 1u);   // 1 = animate flow
+    float rev = float((aStyle.w >> 3) & 1u);
+    vFlow = dir * (rev > 0.5 ? -1.0 : 1.0);
+  }`;
+  const FS_EDGE = `#version 300 es
+  precision highp float;
+  in vec3 vCol; in float vAlpha; in float vSide; in float vArc; in float vDashOn; in float vFlow;
+  uniform float uTime;
+  out vec4 o;
+  void main(){
+    float a = vAlpha * (1.0 - smoothstep(0.45, 1.0, abs(vSide)));
+    if (vDashOn > 0.5){
+      float ph = vArc - vFlow * uTime * 26.0;
+      a *= 0.35 + 0.65 * smoothstep(0.45, 0.55, fract(ph / 13.0));
+    } else if (vFlow != 0.0){
+      float ph = vArc - vFlow * uTime * 30.0;
+      a *= 0.55 + 0.45 * smoothstep(0.3, 0.7, fract(ph / 26.0));
+    }
+    o = vec4(vCol * a, 1.0);
+  }`;
+  const FS_PICK = `#version 300 es
+  precision highp float;
+  in vec3 vCol; in float vAlpha; in float vSide; in float vArc; in float vDashOn; in float vFlow;
+  uniform vec3 uId; uniform float uTime;
+  out vec4 o;
+  void main(){ if (vAlpha <= 0.001) discard; o = vec4(vCol, 1.0); }`;
+  // pick variant encodes the id per instance in vCol via a texture-less trick:
+  // we re-run the edge VS but with uPal set so color = id — instead we use a
+  // separate VS that outputs an id color from gl_InstanceID + uIdBase.
+  const VS_PICK = VS_EDGE
+    .replace('vCol = mix(uPal[ca], uPal[cb], t);',
+      `float fid = float(gl_InstanceID) + uIdBase;
+       vCol = vec3(mod(fid,256.0)/255.0, mod(floor(fid/256.0),256.0)/255.0, floor(fid/65536.0)/255.0);`)
+    .replace('uniform vec3 uPal[5];', 'uniform vec3 uPal[5]; uniform float uIdBase;')
+    .replace('sp += nrm * side * (wpx * 0.5 + 0.75);', 'wpx = max(wpx, 7.0); sp += nrm * side * (wpx * 0.5 + 0.75);');
+
+  const VS_NODE = `#version 300 es
+  precision highp float; precision highp int;
+  layout(location=0) in uvec2 aN0;     // seq, pad
+  layout(location=1) in uvec4 aN1;     // kind, size, hl, pad
+  uniform sampler2D uPos; uniform sampler2D uCanon;
+  uniform vec2 uCam, uScale, uHalf;
+  uniform vec3 uPal[5];
+  uniform float uDim, uReveal;
+  out vec3 vCol; out vec2 vQ; out float vAlpha; out float vKind;
+  vec2 P(uint s){ return texelFetch(uPos, ivec2(int(s&255u), int(s>>8)), 0).xy; }
+  float canon(uint s){ return texelFetch(uCanon, ivec2(int(s&255u), int(s>>8)), 0).r * 255.0; }
+  void main(){
+    int vi = gl_VertexID;
+    vec2 q = vec2(float(vi & 1)*2.0-1.0, float((vi>>1)&1)*2.0-1.0);
+    vec2 sp = (P(aN0.x) - uCam) * uScale + uHalf;
+    float r = float(aN1.y) * 0.25;
+    float hl = float(aN1.z);
+    if (hl > 0.5) r *= 1.6;
+    sp += q * (r + 2.0);
+    gl_Position = vec4(sp.x/uHalf.x - 1.0, 1.0 - sp.y/uHalf.y, 0.0, 1.0);
+    vCol = uPal[int(canon(aN0.x))];
+    if (hl > 0.5) vCol = mix(vCol, vec3(1.0), 0.45);
+    vAlpha = (hl > 0.5 ? 1.0 : uDim) * min(1.0, uReveal*2.0);
+    vQ = q; vKind = float(aN1.x);
+  }`;
+  const FS_NODE = `#version 300 es
+  precision highp float;
+  in vec3 vCol; in vec2 vQ; in float vAlpha; in float vKind;
+  out vec4 o;
+  void main(){
+    float d = length(vQ);
+    if (d > 1.0) discard;
+    float core = 1.0 - smoothstep(0.0, 0.32, d);
+    float glow = pow(max(0.0, 1.0 - d), 2.2) * 0.5;
+    float a = (core + glow) * vAlpha;
+    o = vec4(mix(vCol, vec3(1.0), core*0.55) * a, 1.0);
+  }`;
+  const VS_PICKNODE = VS_NODE
+    .replace('vCol = uPal[int(canon(aN0.x))];',
+      `float fid = float(gl_InstanceID) + uIdBase;
+       vCol = vec3(mod(fid,256.0)/255.0, mod(floor(fid/256.0),256.0)/255.0, floor(fid/65536.0)/255.0);`)
+    .replace('uniform vec3 uPal[5];', 'uniform vec3 uPal[5]; uniform float uIdBase;')
+    .replace('sp += q * (r + 2.0);', 'sp += q * (max(r,6.0) + 2.0);');
+  const FS_PICKNODE = `#version 300 es
+  precision highp float;
+  in vec3 vCol; in vec2 vQ; in float vAlpha; in float vKind;
+  out vec4 o;
+  void main(){ if (length(vQ) > 1.0) discard; o = vec4(vCol, 1.0); }`;
+
+  function prog(vs, fs){
+    const p = gl.createProgram();
+    for (const [t, s] of [[gl.VERTEX_SHADER, vs],[gl.FRAGMENT_SHADER, fs]]){
+      const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS))
+        throw new Error('shader: ' + gl.getShaderInfoLog(sh));
+      gl.attachShader(p, sh);
+    }
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    return p;
+  }
+  GLR.edgeProg = prog(VS_EDGE, FS_EDGE);
+  GLR.pickProg = prog(VS_PICK, FS_PICK);
+  GLR.nodeProg = prog(VS_NODE, FS_NODE);
+  GLR.pickNodeProg = prog(VS_PICKNODE, FS_PICKNODE);
+
+  // position + canon textures (256×256 covers 65k seq slots)
+  GLR.posTex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, GLR.posTex);
+  gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RG32F, 256, 256);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  GLR.posScratch = new Float32Array(256*256*2);
+  GLR.canonTex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, GLR.canonTex);
+  gl.texStorage2D(gl.TEXTURE_2D, 1, gl.R8, 256, 256);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  { const c = new Uint8Array(256*256);
+    for (let s = 0; s < DATA.N; s++) c[s] = canonOfSeq(s);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 256, gl.RED, gl.UNSIGNED_BYTE, c); }
+
+  // instance buffers (edges: 12 B/inst; nodes: 8 B/inst)
+  const maxInst = DATA.E + DATA.chAgg.length + DATA.bookAgg.length + 64;
+  GLR.edgeData = new ArrayBuffer(maxInst * 12);
+  GLR.edgeU16 = new Uint16Array(GLR.edgeData);
+  GLR.edgeU8 = new Uint8Array(GLR.edgeData);
+  GLR.edgeBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, GLR.edgeBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, GLR.edgeData.byteLength, gl.DYNAMIC_DRAW);
+  GLR.edgeVAO = gl.createVertexArray();
+  gl.bindVertexArray(GLR.edgeVAO);
+  gl.bindBuffer(gl.ARRAY_BUFFER, GLR.edgeBuf);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribIPointer(0, 4, gl.UNSIGNED_SHORT, 12, 0);
+  gl.vertexAttribDivisor(0, 1);
+  gl.enableVertexAttribArray(1);
+  gl.vertexAttribIPointer(1, 4, gl.UNSIGNED_BYTE, 12, 8);
+  gl.vertexAttribDivisor(1, 1);
+
+  const maxNodes = 8192;
+  GLR.nodeData = new ArrayBuffer(maxNodes * 8);
+  GLR.nodeU16 = new Uint16Array(GLR.nodeData);
+  GLR.nodeU8 = new Uint8Array(GLR.nodeData);
+  GLR.nodeBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, GLR.nodeBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, GLR.nodeData.byteLength, gl.DYNAMIC_DRAW);
+  GLR.nodeVAO = gl.createVertexArray();
+  gl.bindVertexArray(GLR.nodeVAO);
+  gl.bindBuffer(gl.ARRAY_BUFFER, GLR.nodeBuf);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribIPointer(0, 2, gl.UNSIGNED_SHORT, 8, 0);
+  gl.vertexAttribDivisor(0, 1);
+  gl.enableVertexAttribArray(1);
+  gl.vertexAttribIPointer(1, 4, gl.UNSIGNED_BYTE, 8, 4);
+  gl.vertexAttribDivisor(1, 1);
+  gl.bindVertexArray(null);
+
+  // pick FBO (quarter resolution)
+  GLR.pickTex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, GLR.pickTex);
+  GLR.pickW = 0; GLR.pickH = 0;
+  GLR.pickFBO = gl.createFramebuffer();
+
+  gl.disable(gl.DEPTH_TEST);
+  gl.enable(gl.BLEND);
+}
+
+function uploadPositions(){
+  GLR.posScratch.set(LAY.cur);
+  const gl = GLR.gl;
+  gl.bindTexture(gl.TEXTURE_2D, GLR.posTex);
+  gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 256, gl.RG, gl.FLOAT, GLR.posScratch);
+  GLR.posDirty = false;
+}
+
+function setCommonUniforms(gl, p, widthMul, alphaMul){
+  gl.useProgram(p);
+  const U = n => gl.getUniformLocation(p, n);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, GLR.posTex);
+  gl.uniform1i(U('uPos'), 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, GLR.canonTex);
+  const uc = U('uCanon'); if (uc) gl.uniform1i(uc, 1);
+  gl.uniform2f(U('uCam'), CAM.cx, CAM.cy);
+  gl.uniform2f(U('uScale'), CAM.sx, CAM.sy);
+  gl.uniform2f(U('uHalf'), CAM.W/2, CAM.H/2);
+  const pal = U('uPal');
+  if (pal) gl.uniform3fv(pal, CANON_RGB.flat());
+  const lod = lastLod;
+  const beta = U('uBeta');
+  if (beta){
+    gl.uniform1f(beta, lod === 2 ? .35 : lod === 1 ? .5 : .28);
+    gl.uniform1f(U('uChordAmt'), STATE.chordAmt || 0);
+    gl.uniform1f(U('uLiftK'), .42);
+    gl.uniform1f(U('uLiftMax'), .30);
+    gl.uniform2f(U('uCenter'), .5, .52);
+    gl.uniform1f(U('uWidthMul'), widthMul || 1);
+    const am = U('uAlphaMul'); if (am) gl.uniform1f(am, alphaMul || 1);
+    gl.uniform1f(U('uTime'), performance.now()/1000 % 3600);
+  }
+  const rev = U('uReveal'); if (rev) gl.uniform1f(rev, STATE.reveal);
+  const dim = U('uDim');
+  if (dim) gl.uniform1f(dim, (SEL.focusSeq >= 0 || SEL.pathSeqs || FILT.topicPost || FILT.personPost) ? .10 : 1);
+  return U;
+}
+
+function drawScene(){
+  const gl = GLR.gl;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, CAM.W*CAM.dpr, CAM.H*CAM.dpr);
+  gl.clearColor(0, 0, 0, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.blendFunc(gl.ONE, gl.ONE);
+  if (GLR.edgeCount){
+    const ex = [.42, .7, 1][lastLod] || 1;             // exposure by granularity
+    gl.bindVertexArray(GLR.edgeVAO);
+    if (!GLR.noGlow){
+      setCommonUniforms(gl, GLR.edgeProg, 3.6, .11 * ex);   // halo pass
+      gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 34, GLR.edgeCount);
+    }
+    setCommonUniforms(gl, GLR.edgeProg, 1, ex);        // core pass
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 34, GLR.edgeCount);
+  }
+  if (GLR.nodeCount){
+    gl.bindVertexArray(GLR.nodeVAO);
+    setCommonUniforms(gl, GLR.nodeProg, 1, 1);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, GLR.nodeCount);
+  }
+  gl.bindVertexArray(null);
+}
+
+</script>
+<script>
+/* ------------------------------ 5. VISIBLE SETS --------------------------- */
+/* Rebuilt only when LOD / filters / focus / view / cull-window change. Style
+   is resolved CPU-side from the highest-priority *enabled* type bit via a
+   8192-entry lookup rebuilt when the type filter changes. */
+const SETS = { styleBits:new Uint8Array(8192), styleAlpha:new Uint8Array(8192), styleDirty:true };
+
+function rebuildStyleTable(){
+  for (let m = 0; m < 8192; m++){
+    const em = m & FILT.types;
+    if (!em){ SETS.styleBits[m] = 0; SETS.styleAlpha[m] = 0; continue; }
+    let best = -1, bp = -1;
+    for (let t = 0; t < 13; t++) if (em & (1<<t)) if (TYPE_STYLE[t][0] > bp){ bp = TYPE_STYLE[t][0]; best = t; }
+    const [, wpx, al, dash] = TYPE_STYLE[best];
+    SETS.styleBits[m] = Math.min(63, Math.round(wpx*4)) | (dash?64:0);
+    SETS.styleAlpha[m] = Math.round(al*255);
+  }
+  SETS.styleDirty = false;
+}
+const anchorOf = s => s < DATA.V ? DATA.chSeq[DATA.seqBook[s]][DATA.seqCh[s]-1]
+                    : s < DATA.V + DATA.NCH ? DATA.bookSeq[DATA.seqBook[s]] : s;
+const canonPairOn = (ba, bb) => {
+  const ca = DATA.meta.books[ba].c, cb = DATA.meta.books[bb].c;
+  return FILT.canon[Math.min(ca,cb)][Math.max(ca,cb)];
+};
+function edgeVisible(i){
+  const m = DATA.mask[i] & FILT.types;
+  if (!m) return false;
+  if ((DATA.flags[i]&3) > FILT.conf) return false;
+  if (!canonPairOn(DATA.seqBook[DATA.src[i]], DATA.seqBook[DATA.dst[i]])) return false;
+  if (FILT.prophecy && !(DATA.mask[i] & 32)) return false;
+  return true;
+}
+function seqInVRange(s, v0, v1){
+  if (s < DATA.V) return s >= v0 && s <= v1;
+  if (s < DATA.V + DATA.NCH){
+    const b = DATA.seqBook[s], c = DATA.seqCh[s];
+    const fs = DATA.vidToSeq.get((b<<20)|(c<<8)|1);
+    return fs !== undefined && fs <= v1 && fs + DATA.meta.books[b].vc[c-1] >= v0;
+  }
+  return false;
+}
+
+function buildSets(){
+  if (SETS.styleDirty) rebuildStyleTable();
+  const lod = lodLevel(); lastLod = lod;
+  const U16 = GLR.edgeU16, U8 = GLR.edgeU8;
+  let n = 0;
+  const put = (a, z, a1, a2, sb, al, wB, hl) => {
+    const o6 = n*6, o12 = n*12;
+    U16[o6]=a; U16[o6+1]=z; U16[o6+2]=a1; U16[o6+3]=a2;
+    U8[o12+8]=sb; U8[o12+9]=al; U8[o12+10]=wB; U8[o12+11]=hl; n++;
+  };
+  const modePost = FILT.topicPost || FILT.personPost;
+  const dirBits = i => {
+    if (!FILT.prophecy || !(DATA.flags[i]&4)) return 0;
+    return 4 | (DATA.flags[i]&32 ? 8 : 0);
+  };
+
+  if (modePost){
+    // thematic subnetwork: verse edges touching the posting set
+    for (let i = 0; i < DATA.E; i++){
+      if (!edgeVisible(i)) continue;
+      const a = DATA.src[i], z = DATA.dst[i];
+      const ia = modePost.has(a), iz = modePost.has(z);
+      if (!ia && !iz) continue;
+      const m = DATA.mask[i] & FILT.types;
+      put(a, z, anchorOf(a), anchorOf(z), SETS.styleBits[m], SETS.styleAlpha[m],
+          DATA.w[i], (ia && iz ? 1 : 0) | dirBits(i));
+    }
+  } else if (lod === 0){
+    for (const p of DATA.bookAgg){
+      const m = p.mask & FILT.types;
+      if (!m || p.conf > FILT.conf || !canonPairOn(p.ba, p.bb)) continue;
+      if (FILT.prophecy && !(p.mask & 32)) continue;
+      put(p.a, p.z, p.a, p.z, SETS.styleBits[m], SETS.styleAlpha[m], p.w, 0);
+    }
+  } else if (lod === 1 || STATE.view !== 0){
+    for (const r of DATA.chAgg){
+      const m = r.mask & FILT.types;
+      if (!m || r.conf > FILT.conf) continue;
+      if (!canonPairOn(DATA.seqBook[r.a], DATA.seqBook[r.z])) continue;
+      if (FILT.prophecy && !(r.mask & 32)) continue;
+      put(r.a, r.z, DATA.bookSeq[DATA.seqBook[r.a]], DATA.bookSeq[DATA.seqBook[r.z]],
+          SETS.styleBits[m], SETS.styleAlpha[m], r.w, 0);
+    }
+  } else {
+    const [v0, v1] = visVerseRange(1.5);
+    lastCull = [v0, v1];
+    for (let i = 0; i < DATA.E; i++){
+      if (!edgeVisible(i)) continue;
+      const a = DATA.src[i], z = DATA.dst[i];
+      if (!seqInVRange(a, v0, v1) && !seqInVRange(z, v0, v1)) continue;
+      const m = DATA.mask[i] & FILT.types;
+      put(a, z, anchorOf(a), anchorOf(z), SETS.styleBits[m], SETS.styleAlpha[m],
+          DATA.w[i], dirBits(i));
+    }
+  }
+
+  // focus constellation / selected edge / path — drawn on top, highlighted
+  if (SEL.pathEdges){
+    for (const i of SEL.pathEdges){
+      const a = DATA.src[i], z = DATA.dst[i];
+      const m = DATA.mask[i] || 1;
+      put(a, z, anchorOf(a), anchorOf(z), SETS.styleBits[m]||10, 255, 255, 1);
+    }
+  } else if (SEL.focusSeq >= 0){
+    const s0 = DATA.csrOff[SEL.focusSeq], s1 = DATA.csrOff[SEL.focusSeq+1];
+    for (let k = s0; k < s1; k++){
+      const i = DATA.csrEdge[k];
+      if (!edgeVisible(i)) continue;
+      const a = DATA.src[i], z = DATA.dst[i];
+      const m = DATA.mask[i] & FILT.types;
+      put(a, z, anchorOf(a), anchorOf(z), SETS.styleBits[m], SETS.styleAlpha[m], DATA.w[i], 1 | dirBits(i));
+    }
+  } else if (SEL.selEdge >= 0){
+    const i = SEL.selEdge, a = DATA.src[i], z = DATA.dst[i];
+    put(a, z, anchorOf(a), anchorOf(z), SETS.styleBits[DATA.mask[i]&8191]||10, 255, DATA.w[i], 1);
+  }
+  GLR.edgeCount = n;
+  GLR.edgeOrder = null;
+  const gl = GLR.gl;
+  gl.bindBuffer(gl.ARRAY_BUFFER, GLR.edgeBuf);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, U8.subarray(0, Math.max(12, n*12)));
+
+  // ---- nodes ----
+  const N16 = GLR.nodeU16, N8 = GLR.nodeU8;
+  let k = 0;
+  const putN = (s, kind, size, hl) => {
+    if (k >= 8191) return;
+    N16[k*4] = s; N8[k*8+4] = kind; N8[k*8+5] = size; N8[k*8+6] = hl; k++;
+  };
+  for (let b = 0; b < DATA.NB; b++) putN(DATA.bookSeq[b], 2, 18, 0);
+  if (lod >= 1 || STATE.view === 2)
+    for (let b = 0; b < DATA.NB; b++)
+      for (let c = 0; c < DATA.meta.books[b].vc.length; c++) putN(DATA.chSeq[b][c], 1, 9, 0);
+  if (lod === 2 && STATE.view === 0 && !modePost){
+    const [v0, v1] = visVerseRange(1.2);
+    for (let s = v0; s <= v1 && s < DATA.V; s++) putN(s, 0, 6, 0);
+  }
+  if (modePost) for (const s of modePost) if (s < DATA.V) putN(s, 0, 7, 1);
+  if (SEL.focusSeq >= 0 && SEL.focusSeq < DATA.V){
+    putN(SEL.focusSeq, 0, 10, 1);
+    const s0 = DATA.csrOff[SEL.focusSeq], s1 = DATA.csrOff[SEL.focusSeq+1];
+    for (let q = s0; q < s1; q++){
+      const i = DATA.csrEdge[q];
+      if (!edgeVisible(i)) continue;
+      const o = DATA.src[i] === SEL.focusSeq ? DATA.dst[i] : DATA.src[i];
+      putN(o, 0, 7, 1);
+    }
+  }
+  if (SEL.pathSeqs) for (const s of SEL.pathSeqs) putN(s, 0, 9, 1);
+  GLR.nodeCount = k;
+  gl.bindBuffer(gl.ARRAY_BUFFER, GLR.nodeBuf);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, N8.subarray(0, Math.max(8, k*8)));
+
+  STATE.dirty = false;
+  updateEdgeCountLabel(lod);
+}
+function updateEdgeCountLabel(lod){
+  const g = ['book ↔ book flows','chapter ↔ chapter flows','verse-level connections'][lod];
+  const el = $('#edgeCount');
+  if (el) el.textContent = `${GLR.edgeCount.toLocaleString()} ${FILT.topicPost||FILT.personPost ? 'mode connections' : g} drawn`;
+}
+
+/* ---- picking (GPU color-pick at quarter resolution) ---- */
+function ensurePickTarget(){
+  const gl = GLR.gl;
+  const w = Math.max(2, CAM.W >> 2), h = Math.max(2, CAM.H >> 2);
+  if (GLR.pickW === w && GLR.pickH === h) return;
+  GLR.pickW = w; GLR.pickH = h;
+  gl.bindTexture(gl.TEXTURE_2D, GLR.pickTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, GLR.pickFBO);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, GLR.pickTex, 0);
+}
+function pickAt(px, py){
+  const gl = GLR.gl;
+  ensurePickTarget();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, GLR.pickFBO);
+  gl.viewport(0, 0, GLR.pickW, GLR.pickH);
+  gl.clearColor(1, 1, 1, 1);            // 0xFFFFFF = miss
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.disable(gl.BLEND);
+  if (GLR.edgeCount){
+    gl.bindVertexArray(GLR.edgeVAO);
+    const U = setCommonUniforms(gl, GLR.pickProg, 1, 1);
+    gl.uniform1f(U('uIdBase'), 0);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 34, GLR.edgeCount);
+  }
+  if (GLR.nodeCount){
+    gl.bindVertexArray(GLR.nodeVAO);
+    const U = setCommonUniforms(gl, GLR.pickNodeProg, 1, 1);
+    gl.uniform1f(U('uIdBase'), 8000000);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, GLR.nodeCount);
+  }
+  gl.enable(gl.BLEND);
+  const buf = new Uint8Array(4);
+  gl.readPixels(Math.round(px/4), GLR.pickH - 1 - Math.round(py/4), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, CAM.W*CAM.dpr, CAM.H*CAM.dpr);
+  const id = buf[0] + buf[1]*256 + buf[2]*65536;
+  if (id >= 16777215) return { kind:'none' };
+  if (id >= 8000000){
+    const inst = id - 8000000;
+    if (inst >= GLR.nodeCount) return { kind:'none' };
+    return { kind:'node', seq: GLR.nodeU16[inst*4] };
+  }
+  if (id >= GLR.edgeCount) return { kind:'none' };
+  // map instance back to a real edge index when possible
+  const a = GLR.edgeU16[id*6], z = GLR.edgeU16[id*6+1];
+  return { kind:'edge', inst:id, a, z, edge: findEdge(a, z) };
+}
+function findEdge(a, z){
+  // binary search in (src,dst)-sorted edge list
+  const lo = Math.min(a,z), hi = Math.max(a,z);
+  let x = 0, y = DATA.E;
+  while (x < y){ const m = (x+y)>>1;
+    (DATA.src[m] < lo || (DATA.src[m] === lo && DATA.dst[m] < hi)) ? x = m+1 : y = m; }
+  return (x < DATA.E && DATA.src[x] === lo && DATA.dst[x] === hi) ? x : -1;
+}
+
+</script>
+<script>
+/* ------------------------------ 6. LABELS --------------------------------- */
+/* One 2D canvas, redrawn only when the camera / LOD / focus / tween changes.
+   No per-label DOM. */
+let labCtx = null;
+const sxOf = wx => (wx - CAM.cx) * CAM.sx + CAM.W/2;
+const syOf = wy => (wy - CAM.cy) * CAM.sy + CAM.H/2;
+
+function drawLabels(){
+  if (!labCtx){ labCtx = $('#lab').getContext('2d'); }
+  const ctx = labCtx;
+  ctx.setTransform(CAM.dpr, 0, 0, CAM.dpr, 0, 0);
+  ctx.clearRect(0, 0, CAM.W, CAM.H);
+  const A = Math.min(1, STATE.reveal * 1.6);
+  if (A <= 0){ STATE.labDirty = false; return; }
+  const lod = lastLod;
+  const B = DATA.meta.books;
+
+  const bookLabel = bi => {
+    const bk = B[bi];
+    return bk.ab && bk.ab.length && bk.n.length > 10 ? bk.ab[0] : bk.n;
+  };
+
+  if (STATE.view === 0 && STATE.tweenT >= 1){
+    // canon banners
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    DATA.meta.canons.forEach((cn, ci) => {
+      const [u0, u1] = LAY.canonRange[ci];
+      const x0 = sxOf(u0/LAY.total), x1 = sxOf(u1/LAY.total);
+      if (x1 < 40 || x0 > CAM.W-40) return;
+      const mid = clamp((x0+x1)/2, 90, CAM.W-90);
+      ctx.font = '10px Michroma';
+      ctx.fillStyle = CANON_HEX[ci];
+      ctx.globalAlpha = A * .85;
+      const nm = (x1-x0) > 190 ? cn.name.toUpperCase() : cn.short;
+      ctx.fillText(nm.split('').join(' '), mid, syOf(.775));
+    });
+    // book labels
+    B.forEach((bk, bi) => {
+      const [u0, u1] = LAY.bookRange[bi];
+      const x0 = sxOf(u0/LAY.total), x1 = sxOf(u1/LAY.total);
+      const wpx = x1 - x0;
+      if (wpx < 26 || x1 < 0 || x0 > CAM.W) return;
+      const y = syOf(.672) + 16;
+      ctx.font = wpx > 130 ? '10px "IBM Plex Mono"' : '9px "IBM Plex Mono"';
+      ctx.fillStyle = '#8fa8b8';
+      ctx.globalAlpha = A * clamp((wpx-26)/40, .35, .9);
+      let nm = wpx > 95 ? bk.n : bookLabel(bi);
+      if (bi === DATA.meta.odBook) nm = 'OD';
+      if (ctx.measureText(nm).width > wpx + 14) nm = bk.s.toUpperCase();
+      if (ctx.measureText(nm).width < wpx + 20) ctx.fillText(nm, (x0+x1)/2, y);
+    });
+    // chapter numbers at verse zoom
+    if (lod === 2){
+      ctx.font = '9px "IBM Plex Mono"'; ctx.fillStyle = '#5a7484';
+      const [v0, v1] = visVerseRange(1);
+      let lastX = -100;
+      const seen = new Set();
+      for (let s = v0; s <= v1 && s < DATA.V; s++){
+        const bi = DATA.seqBook[s], c = DATA.seqCh[s];
+        const key = bi*4096+c;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const cs = DATA.chSeq[bi][c-1];
+        const x = sxOf(LAY.cur[cs*2]);
+        if (x - lastX < 26) continue;
+        lastX = x;
+        ctx.globalAlpha = A * .8;
+        ctx.fillText(String(c), x, syOf(LAY.cur[cs*2+1]) + 14);
+      }
+      // verse numbers when extremely close
+      const pxPerVerse = CAM.sx / LAY.total;
+      if (pxPerVerse > 30){
+        ctx.font = '8.5px "IBM Plex Mono"'; ctx.fillStyle = '#44606f';
+        for (let s = v0; s <= v1 && s < DATA.V; s++){
+          ctx.globalAlpha = A * .8;
+          ctx.fillText(String(DATA.seqV[s]), sxOf(LAY.cur[s*2]), syOf(LAY.cur[s*2+1]) + 12);
+        }
+      }
+    }
+  } else if (STATE.view === 1 && STATE.tweenT >= 1){
+    // chord: book labels around the ring
+    B.forEach((bk, bi) => {
+      const bs = DATA.bookSeq[bi];
+      const x = LAY.cur[bs*2], y = LAY.cur[bs*2+1];
+      const [u0, u1] = LAY.bookRange[bi];
+      const frac = (u1-u0)/LAY.total;
+      const spanPx = frac * TAU * .96 * .355 * CAM.sy;
+      if (spanPx < 9 && !['isa','ps','matt','1-ne','dc','moses'].includes(bk.s)) return;
+      const a = Math.atan2(y-.52, x-.5);
+      const sx = sxOf(.5 + Math.cos(a)*.40), sy = syOf(.52 + Math.sin(a)*.40);
+      ctx.save();
+      ctx.translate(sx, sy);
+      const flip = Math.cos(a) < 0;
+      ctx.rotate(a + (flip ? Math.PI : 0));
+      ctx.textAlign = flip ? 'right' : 'left';
+      ctx.textBaseline = 'middle';
+      ctx.font = '9px "IBM Plex Mono"';
+      ctx.fillStyle = CANON_HEX[bk.c];
+      ctx.globalAlpha = A * clamp(spanPx/26, .35, .92);
+      ctx.fillText((flip?'':'  ') + bookLabel(bi) + (flip?'  ':''), 0, 0);
+      ctx.restore();
+    });
+  } else if (STATE.view === 2 && STATE.tweenT >= 1){
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    B.forEach((bk, bi) => {
+      const bs = DATA.bookSeq[bi];
+      ctx.font = '9.5px "IBM Plex Mono"';
+      ctx.fillStyle = CANON_HEX[bk.c];
+      ctx.globalAlpha = A * .8;
+      ctx.fillText(bookLabel(bi), sxOf(LAY.cur[bs*2]), syOf(LAY.cur[bs*2+1]) - 10);
+    });
+  }
+
+  // focus ref label
+  if (SEL.focusSeq >= 0){
+    const s = SEL.focusSeq;
+    ctx.textAlign = 'center';
+    ctx.font = '11px "IBM Plex Mono"';
+    ctx.fillStyle = '#fff';
+    ctx.globalAlpha = .95;
+    ctx.fillText(refOfSeq(s, true), sxOf(LAY.cur[s*2]), syOf(LAY.cur[s*2+1]) - 13);
+  }
+  ctx.globalAlpha = 1;
+  STATE.labDirty = false;
+}
+
+</script>
+<script>
+/* ------------------------------ 7. UI ------------------------------------- */
+const TYPE_NAMES = () => DATA.meta.types;
+const PROV_NAMES = ['official footnote (on first passage)','official footnote (on second passage)',
+                    'text-matching algorithm','curated','derived from shared Topical Guide topics'];
+function provText(p){
+  const parts = [];
+  if (p & 3) parts.push('official Gospel Library footnote cross-reference');
+  if (p & 4) parts.push('machine-detected textual parallel');
+  if (p & 8) parts.push('curated');
+  if (p & 16) parts.push('shared Topical Guide topics');
+  return parts.join(' · ');
+}
+function toast(msg, ms){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), ms||2600);
+}
+const markDirty = () => { STATE.dirty = true; STATE.labDirty = true; };
+
+/* ---- legend ---- */
+function buildLegend(){
+  const holder = $('#typeRows');
+  holder.innerHTML = TYPE_NAMES().map((n, t) => {
+    const [, w, al, dash] = TYPE_STYLE[t];
+    const cnt = DATA.agg ? null : null;
+    return `<div class="trow on" data-t="${t}">
+      <svg width="44" height="10"><path d="M2 8 Q 22 ${8-10*Math.min(1,w)} 42 8" fill="none"
+        stroke="#9fd0f0" stroke-width="${Math.max(.8,w)}" stroke-opacity="${(al*1.4).toFixed(2)}"
+        ${dash ? 'stroke-dasharray="4 3"' : ''}/></svg>
+      <span style="font-size:10.5px">${esc(n)}</span>
+      <span class="n">${(lazyStats?.byType?.[t] ?? '').toLocaleString?.() ?? ''}</span></div>`;
+  }).join('');
+  holder.querySelectorAll('.trow').forEach(el => el.onclick = () => {
+    const t = +el.dataset.t;
+    FILT.types ^= 1 << t;
+    el.classList.toggle('on', !!(FILT.types & (1<<t)));
+    SETS.styleDirty = true; markDirty();
+  });
+  lazy('stats').then(s => { lazyStats = s;
+    holder.querySelectorAll('.trow').forEach(el => {
+      el.querySelector('.n').textContent = (s.byType[+el.dataset.t]||0).toLocaleString(); }); });
+
+  $('#confSlider').oninput = e => {
+    FILT.conf = +e.target.value;
+    $('#confName').textContent = CONF_NAMES[FILT.conf];
+    markDirty();
+  };
+
+  // canon matrix
+  const M = $('#matrix');
+  const short = DATA.meta.canons.map(c => c.short);
+  let html = '<div></div>' + short.map(s => `<div class="hd">${s}</div>`).join('');
+  for (let a = 0; a < 5; a++){
+    html += `<div class="hd">${short[a]}</div>`;
+    for (let b = 0; b < 5; b++){
+      const lo = Math.min(a,b), hi = Math.max(a,b);
+      const grad = `linear-gradient(90deg,${CANON_HEX[lo]},${CANON_HEX[hi]})`;
+      html += `<div class="cell on" data-a="${lo}" data-b="${hi}" style="background:${grad}"></div>`;
+    }
+  }
+  M.innerHTML = html;
+  const syncCells = () => M.querySelectorAll('.cell').forEach(c =>
+    c.classList.toggle('on', !!FILT.canon[+c.dataset.a][+c.dataset.b]));
+  M.querySelectorAll('.cell').forEach(c => c.onclick = () => {
+    const a = +c.dataset.a, b = +c.dataset.b;
+    FILT.canon[a][b] = FILT.canon[a][b] ? 0 : 1;
+    syncCells(); markDirty();
+  });
+  const setMatrix = fn => { for (let a = 0; a < 5; a++) for (let b = a; b < 5; b++)
+    FILT.canon[a][b] = fn(a,b) ? 1 : 0; syncCells(); markDirty(); };
+  $('#pAll').onclick = () => setMatrix(() => true);
+  $('#pBR').onclick = () => { setMatrix((a,b) => a <= 1 && b >= 2); toast('Bible ↔ Restoration scripture'); };
+  $('#pX').onclick = () => setMatrix((a,b) => a !== b);
+  $('#pInt').onclick = () => setMatrix((a,b) => a === b);
+}
+let lazyStats = null;
+
+/* ---- pointer interaction ---- */
+function initPointer(){
+  const cv = $('#gl');
+  const pts = new Map();
+  let moved = 0, pinch0 = 0, sx0 = 0, downId = -1;
+  cv.addEventListener('pointerdown', e => {
+    cv.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 1){ moved = 0; downId = e.pointerId; }
+    if (pts.size === 2){
+      const [a, b] = [...pts.values()];
+      pinch0 = Math.hypot(a[0]-b[0], a[1]-b[1]); sx0 = CAM.sx;
+    }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)){ hoverMove(e.clientX, e.clientY); return; }
+    const prev = pts.get(e.pointerId);
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 1){
+      const dx = e.clientX - prev[0], dy = e.clientY - prev[1];
+      moved += Math.abs(dx) + Math.abs(dy);
+      if (moved > 3){
+        CAM.cx -= dx / CAM.sx; CAM.cy -= dy / CAM.sy;
+        CAM.fly = null; clampCam(); STATE.labDirty = true; markLodDirty();
+      }
+    } else if (pts.size === 2){
+      const [a, b] = [...pts.values()];
+      const d = Math.hypot(a[0]-b[0], a[1]-b[1]);
+      if (pinch0 > 0){
+        const cxpx = (a[0]+b[0])/2, cypx = (a[1]+b[1])/2;
+        const f = (d / pinch0) * sx0 / CAM.sx;
+        zoomAt(cxpx, cypx, f);
+      }
+      moved = 99;
+    }
+  });
+  const up = e => {
+    if (pts.has(e.pointerId) && e.pointerId === downId && moved <= 3)
+      clickAt(e.clientX, e.clientY);
+    pts.delete(e.pointerId);
+  };
+  cv.addEventListener('pointerup', up);
+  cv.addEventListener('pointercancel', e => pts.delete(e.pointerId));
+  cv.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * .0016));
+  }, { passive:false });
+  cv.addEventListener('dblclick', e => zoomAt(e.clientX, e.clientY, 2.6));
+}
+let hoverT = 0;
+function hoverMove(x, y){
+  const now = performance.now();
+  if (now - hoverT < 50) return;
+  hoverT = now;
+  if (!STATE.booted || STATE.tweenT < 1) return;
+  const hit = pickAt(x, y);
+  const cv = $('#gl');
+  if (hit.kind === 'edge'){ showCard(hit, x, y); cv.style.cursor = 'pointer'; }
+  else if (hit.kind === 'node'){ showNodeCard(hit.seq, x, y); cv.style.cursor = 'pointer'; }
+  else { hideCard(); cv.style.cursor = 'default'; }
+}
+function clickAt(x, y){
+  if (!STATE.booted) return;
+  if (TOUR.on){ tourStop(); return; }
+  const hit = pickAt(x, y);
+  if (hit.kind === 'node'){
+    const s = hit.seq;
+    if (s < DATA.V){ focusSeq(s); }
+    else if (s < DATA.V + DATA.NCH){
+      const bi = DATA.seqBook[s], c = DATA.seqCh[s];
+      const first = DATA.vidToSeq.get((bi<<20)|(c<<8)|1);
+      flyToSeq(first + (DATA.meta.books[bi].vc[c-1]>>1), DATA.meta.books[bi].vc[c-1]*2.4);
+    } else explorer(DATA.seqBook[s]);
+  } else if (hit.kind === 'edge'){
+    if (hit.edge >= 0) compare(hit.edge);
+    else {
+      // aggregate line — dive toward the pair
+      const bi = DATA.seqBook[hit.a], bj = DATA.seqBook[hit.z];
+      explorer(bi, bj);
+    }
+  } else clearFocus(false);
+}
+function focusSeq(s, noFly){
+  SEL.selEdge = -1; SEL.pathSeqs = SEL.pathEdges = null;
+  SEL.focusSeq = s; markDirty();
+  focusPanel(s);
+  if (!noFly) flyToSeq(s, 140);
+}
+function clearFocus(closePanel){
+  SEL.focusSeq = -1; SEL.selEdge = -1; SEL.pathSeqs = SEL.pathEdges = null;
+  if (closePanel !== false){ $('#side').style.display = 'none'; }
+  markDirty();
+}
+
+/* ---- hover card ---- */
+async function showCard(hit, x, y){
+  const c = $('#card');
+  const place = () => { c.style.left = Math.min(x+16, CAM.W-346)+'px';
+                        c.style.top = Math.min(y+14, CAM.H-190)+'px'; };
+  if (hit.edge >= 0){
+    const i = hit.edge;
+    const conf = DATA.flags[i]&3;
+    const types = TYPE_NAMES().filter((_, t) => DATA.mask[i] & (1<<t));
+    c.innerHTML = `<div class="refs">${esc(refOfSeq(hit.a,true))} ⟷ ${esc(refOfSeq(hit.z,true))}</div>
+      <div>${types.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}
+      <span class="confpill conf${conf}">${CONF_NAMES[conf]}</span></div>
+      <div class="snip" id="cardSnip"></div>
+      <div class="why">${esc(provText(DATA.prov[i]))}${DATA.ext[i] > 2 && (DATA.prov[i]&4) ?
+        ` · ${DATA.ext[i]}-word parallel` : ''}<br>click to compare side-by-side</div>`;
+    c.style.display = 'block'; place();
+    const [ta, tz] = await Promise.all([verseText(hit.a), verseText(hit.z)]);
+    const el = $('#cardSnip');
+    if (el && ta) el.innerHTML = `“${esc(ta.slice(0, 120))}${ta.length>120?'…':''}”`;
+  } else {
+    const ba = DATA.seqBook[hit.a], bz = DATA.seqBook[hit.z];
+    const pair = DATA.bookAgg.find(p => (p.ba===ba&&p.bb===bz)||(p.ba===bz&&p.bb===ba));
+    c.innerHTML = `<div class="refs">${esc(bookName(ba))} ⟷ ${esc(bookName(bz))}</div>
+      <div class="why">${pair ? pair.n.toLocaleString()+' connections — click to explore' : 'aggregate flow'}</div>`;
+    c.style.display = 'block'; place();
+  }
+}
+async function showNodeCard(s, x, y){
+  const c = $('#card');
+  const deg = DATA.csrOff[s+1] - DATA.csrOff[s];
+  c.innerHTML = `<div class="refs">${esc(refOfSeq(s))}</div>
+    <div class="snip" id="cardSnip"></div>
+    <div class="why">${deg.toLocaleString()} mapped connection${deg===1?'':'s'} — click to focus</div>`;
+  c.style.display = 'block';
+  c.style.left = Math.min(x+16, CAM.W-346)+'px';
+  c.style.top = Math.min(y+14, CAM.H-190)+'px';
+  if (s < DATA.V){
+    const t = await verseText(s);
+    const el = $('#cardSnip');
+    if (el && t) el.innerHTML = `“${esc(t.slice(0, 150))}${t.length>150?'…':''}”`;
+  }
+}
+function hideCard(){ $('#card').style.display = 'none'; }
+
+/* ---- word-level match highlighting (token LCS) ---- */
+function lcsHighlight(a, b){
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g,'');
+  const ta = a.split(/\s+/), tb = b.split(/\s+/);
+  const na = ta.map(norm), nb = tb.map(norm);
+  const n = Math.min(na.length, 600), m = Math.min(nb.length, 600);
+  const dp = new Uint16Array((n+1)*(m+1));
+  for (let i = n-1; i >= 0; i--) for (let j = m-1; j >= 0; j--)
+    dp[i*(m+1)+j] = na[i] === nb[j] && na[i] ? dp[(i+1)*(m+1)+j+1] + 1
+                  : Math.max(dp[(i+1)*(m+1)+j], dp[i*(m+1)+j+1]);
+  const ma = new Uint8Array(n), mb = new Uint8Array(m);
+  let i = 0, j = 0;
+  while (i < n && j < m){
+    if (na[i] === nb[j] && na[i]){ ma[i]=1; mb[j]=1; i++; j++; }
+    else if (dp[(i+1)*(m+1)+j] >= dp[i*(m+1)+j+1]) i++; else j++;
+  }
+  // only highlight runs of >= 2 matched tokens; >= 3 gets the strong class
+  const render = (toks, mk) => {
+    let out = [], run = [];
+    const flush = () => { if (!run.length) return;
+      const cls = run.length >= 3 ? 'hl' : run.length >= 2 ? 'hl2' : null;
+      out.push(cls ? `<span class="${cls}">${esc(run.join(' '))}</span>` : esc(run.join(' ')));
+      run = []; };
+    for (let k = 0; k < toks.length; k++){
+      const isM = k < mk.length && mk[k];
+      if (isM) run.push(toks[k]);
+      else { flush(); out.push(esc(toks[k])); }
+    }
+    flush();
+    return out.join(' ');
+  };
+  return [render(ta, ma), render(tb, mb)];
+}
+
+/* ---- side panel: focus / compare / explorer ---- */
+function openSide(html){ $('#sideBody').innerHTML = html; $('#side').style.display = 'block'; }
+async function focusPanel(s){
+  const deg = DATA.csrOff[s+1] - DATA.csrOff[s];
+  const conns = [];
+  for (let k = DATA.csrOff[s]; k < DATA.csrOff[s+1]; k++){
+    const i = DATA.csrEdge[k];
+    if (!edgeVisible(i)) continue;
+    conns.push({ i, o: DATA.src[i] === s ? DATA.dst[i] : DATA.src[i], w: DATA.w[i] });
+  }
+  conns.sort((a,b) => b.w - a.w);
+  openSide(`<h3>${esc(refOfSeq(s))}</h3>
+    <div class="vtext" id="focusText">…</div>
+    <div class="lbl">CONNECTED SCRIPTURES — ${conns.length}${conns.length !== deg ?
+      ` OF ${deg} (FILTERED)` : ''}</div>
+    <div id="connList">${conns.slice(0, 160).map(c => {
+      const conf = DATA.flags[c.i]&3;
+      let tn = ''; for (let t = 0; t < 13; t++) if (DATA.mask[c.i] & (1<<t)){ tn = TYPE_NAMES()[t]; break; }
+      return `<div class="conn" data-i="${c.i}" data-o="${c.o}">
+        <span class="r">${esc(refOfSeq(c.o, true))}</span>
+        <span class="t">${esc(tn)}</span>
+        <span class="w confpill conf${conf}" style="font-size:8.5px">${CONF_NAMES[conf][0]}</span></div>`;
+    }).join('')}</div>`);
+  $('#connList').querySelectorAll('.conn').forEach(el => {
+    el.onclick = ev => { ev.stopPropagation(); compare(+el.dataset.i); };
+  });
+  const t = await verseText(s);
+  const ft = $('#focusText');
+  if (ft) ft.textContent = t ? '“'+t+'”' : '(chapter-level node)';
+}
+async function compare(i){
+  SEL.selEdge = i; SEL.pathSeqs = SEL.pathEdges = null;
+  if (SEL.focusSeq < 0) markDirty(); else markDirty();
+  const a = DATA.src[i], z = DATA.dst[i];
+  const conf = DATA.flags[i]&3;
+  const types = TYPE_NAMES().filter((_, t) => DATA.mask[i] & (1<<t));
+  openSide(`<h3>${esc(refOfSeq(a,true))} ⟷ ${esc(refOfSeq(z,true))}</h3>
+    <div>${types.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}
+      <span class="confpill conf${conf}">${CONF_NAMES[conf]}</span></div>
+    <div class="meta">${esc(provText(DATA.prov[i]))}${(DATA.prov[i]&4) && DATA.ext[i] > 2 ?
+      ` · ${DATA.ext[i]}-word matched run` : ''}</div>
+    <div id="cmpNotes"></div>
+    <div class="cmp2" id="cmpTexts">
+      <div><div class="hd" style="color:${CANON_HEX[canonOfSeq(a)]}">${esc(refOfSeq(a,true))}</div>
+        <div class="vtext" id="cmpA">…</div></div>
+      <div><div class="hd" style="color:${CANON_HEX[canonOfSeq(z)]}">${esc(refOfSeq(z,true))}</div>
+        <div class="vtext" id="cmpB">…</div></div>
+    </div>
+    <div style="margin-top:10px">
+      <span class="btn" id="cFa">FOCUS ${esc(refOfSeq(a,true))}</span>
+      <span class="btn" id="cFb">FOCUS ${esc(refOfSeq(z,true))}</span>
+      <span class="btn" id="cRoute">ROUTE</span>
+    </div>`);
+  $('#cFa').onclick = () => focusSeq(a);
+  $('#cFb').onclick = () => focusSeq(z);
+  $('#cRoute').onclick = () => findRoute(a, z, i);
+  // evidence
+  evidenceOf(i).then(ev => {
+    const el = $('#cmpNotes'); if (!el || !ev) return;
+    let h = '';
+    (ev.x||[]).forEach(x => h += `<div class="note">${esc(x)}</div>`);
+    if (ev.q && ev.q.t) h += `<div class="meta">matched text: “${esc(ev.q.t)}${ev.q.eff>14?'…':''}”</div>`;
+    if (ev.pr && ev.pr.length) h += `<div class="meta">footnote reference: ${ev.pr.map(esc).join(' · ')}</div>`;
+    el.innerHTML = h;
+  });
+  // texts (chapter-level endpoints show the chapter synopsis instead)
+  const textOf = async s => {
+    if (s < DATA.V) return verseText(s);
+    const bi = DATA.seqBook[s], c = DATA.seqCh[s];
+    const bt = await loadBookText(bi);
+    const head = bt.heads && bt.heads[c-1];
+    return (head && (head.s || head.i)) || '(whole chapter)';
+  };
+  const [ta, tb] = await Promise.all([textOf(a), textOf(z)]);
+  const ea = $('#cmpA'), eb = $('#cmpB');
+  if (!ea || !eb) return;
+  if (ta && tb && a < DATA.V && z < DATA.V){
+    const [ha, hb] = lcsHighlight(ta, tb);
+    ea.innerHTML = ha; eb.innerHTML = hb;
+  } else { ea.textContent = ta || ''; eb.textContent = tb || ''; }
+}
+function explorer(bi, toBook){
+  lazy('stats');
+  const pairs = DATA.bookAgg.filter(p => p.ba === bi || p.bb === bi)
+    .map(p => ({ o: p.ba === bi ? p.bb : p.ba, n: p.n, cross: p.cross }))
+    .sort((a,b) => b.n - a.n);
+  const max = pairs.length ? pairs[0].n : 1;
+  openSide(`<h3>${esc(bookName(bi))}</h3>
+    <div class="meta">${pairs.reduce((s,p)=>s+p.n,0).toLocaleString()} connections with ${pairs.length} books</div>
+    <div class="lbl">CONNECTED BOOKS — RANKED</div>
+    ${pairs.slice(0, 40).map(p => `<div class="exprow" data-o="${p.o}">
+      <span class="r" style="min-width:110px">${esc(bookName(p.o))}</span>
+      <span class="bar"><i style="width:${(p.n/max*100).toFixed(1)}%;
+        background:${CANON_HEX[DATA.meta.books[p.o].c]}"></i></span>
+      <span style="color:var(--dim);font-size:10px;min-width:38px;text-align:right">${p.n.toLocaleString()}</span>
+      </div>`).join('')}`);
+  $('#sideBody').querySelectorAll('.exprow').forEach(el => {
+    el.onclick = () => {
+      const o = +el.dataset.o;
+      // isolate this pair in the matrix and frame both books
+      const ca = DATA.meta.books[bi].c, cb = DATA.meta.books[o].c;
+      for (let x = 0; x < 5; x++) for (let y2 = x; y2 < 5; y2++)
+        FILT.canon[x][y2] = (x === Math.min(ca,cb) && y2 === Math.max(ca,cb)) ? 1 : 0;
+      buildLegendMatrixSync();
+      frameBooks(bi, o);
+      markDirty();
+    };
+  });
+  if (STATE.view === 0){
+    const [u0,u1] = LAY.bookRange[bi];
+    flyTo((u0+u1)/2/LAY.total, .55, CAM.W / ((u1-u0)/LAY.total) * .25, 1);
+  }
+}
+function buildLegendMatrixSync(){
+  $('#matrix').querySelectorAll('.cell').forEach(c =>
+    c.classList.toggle('on', !!FILT.canon[+c.dataset.a][+c.dataset.b]));
+}
+function frameBooks(b1, b2){
+  const [a0,a1] = LAY.bookRange[b1], [c0,c1] = LAY.bookRange[b2];
+  const lo = Math.min(a0,c0)/LAY.total, hi = Math.max(a1,c1)/LAY.total;
+  flyTo((lo+hi)/2, .5, CAM.W / (hi-lo) * .8, 1.1);
+}
+
+/* ---- pathfinding ---- */
+function findRoute(a, z, excl){
+  const parent = new Int32Array(DATA.N).fill(-1);
+  const pedge = new Int32Array(DATA.N).fill(-1);
+  parent[a] = a;
+  let frontier = [a], found = false;
+  for (let depth = 0; depth < 9 && frontier.length && !found; depth++){
+    const next = [];
+    for (const s of frontier){
+      for (let k = DATA.csrOff[s]; k < DATA.csrOff[s+1]; k++){
+        const i = DATA.csrEdge[k];
+        if (i === excl || !edgeVisible(i)) continue;
+        const o = DATA.src[i] === s ? DATA.dst[i] : DATA.src[i];
+        if (parent[o] >= 0) continue;
+        parent[o] = s; pedge[o] = i;
+        if (o === z){ found = true; break; }
+        next.push(o);
+      }
+      if (found) break;
+    }
+    frontier = next;
+  }
+  if (!found){ toast('no alternative path within 9 steps'); return; }
+  const seqs = [], edges = [];
+  let cur = z;
+  while (cur !== a){ seqs.push(cur); edges.push(pedge[cur]); cur = parent[cur]; }
+  seqs.push(a);
+  SEL.pathSeqs = seqs; SEL.pathEdges = edges; SEL.focusSeq = -1; SEL.selEdge = -1;
+  markDirty();
+  toast(`${edges.length}-step path: ${seqs.slice().reverse().map(s=>refOfSeq(s,true)).join(' → ')}`, 6000);
+}
+
+/* ---- search ---- */
+const SEARCH = { aliases:[], results:[], sel:0 };
+function buildSearchIndex(){
+  DATA.meta.books.forEach((bk, bi) => {
+    const names = [bk.n, ...(bk.ab||[])];
+    if (bi === DATA.meta.odBook) names.push('od','official declaration');
+    for (const nm of names)
+      SEARCH.aliases.push([nm.toLowerCase().replace(/[.—-]/g,' ').replace(/\s+/g,' ').trim(), bi]);
+  });
+  SEARCH.aliases.sort((x,y) => y[0].length - x[0].length);
+}
+function parseRef(q){
+  const s = q.toLowerCase().replace(/[.—-]/g,' ').replace(/&/g,'&').replace(/\s+/g,' ').trim();
+  for (const [al, bi] of SEARCH.aliases){
+    if (!s.startsWith(al)) continue;
+    const rest = s.slice(al.length).trim();
+    if (!rest) return { bi };
+    const m = rest.match(/^(\d+)(?:\s*[:v]\s*(\d+))?$/);
+    if (m){
+      const c = +m[1], v = m[2] ? +m[2] : 0;
+      const bk = DATA.meta.books[bi];
+      if (c >= 1 && c <= bk.vc.length && v <= bk.vc[c-1]) return { bi, c, v };
+    }
+  }
+  return null;
+}
+async function runSearch(q){
+  const out = [];
+  if (!q.trim()){ renderResults([]); return; }
+  const ref = parseRef(q);
+  if (ref){
+    if (ref.v) out.push({ k:'verse', label:refOfSeq(DATA.vidToSeq.get((ref.bi<<20)|(ref.c<<8)|ref.v)),
+                          kind:'verse', seq:DATA.vidToSeq.get((ref.bi<<20)|(ref.c<<8)|ref.v) });
+    else if (ref.c) out.push({ k:'chapter', label:`${bookName(ref.bi)} ${ref.c}`,
+                               kind:'chapter', bi:ref.bi, c:ref.c });
+    else out.push({ k:'book', label:bookName(ref.bi), kind:'book', bi:ref.bi });
+  }
+  const ql = q.toLowerCase().trim();
+  if (ql.length >= 3){
+    const [topics, persons] = await Promise.all([lazy('topics'), lazy('persons')]);
+    for (const t of topics.top)
+      if (t.slug.replace(/-/g,' ').includes(ql) && out.length < 14)
+        out.push({ k:'topic', label:t.slug.replace(/-/g,' '), kind:'topic', t, n:t.n });
+    for (const p of persons)
+      if (p.name.toLowerCase().includes(ql) && out.length < 16)
+        out.push({ k:'person', label:p.name, kind:'person', p, n:p.n });
+    // phrase search over loaded books
+    if (out.length < 12){
+      let hits = 0;
+      for (const [bi, bt] of DATA.text){
+        for (let c = 0; c < bt.chapters.length && hits < 8; c++)
+          for (let v = 0; v < bt.chapters[c].length && hits < 8; v++){
+            const tx = bt.chapters[c][v];
+            if (tx && tx.toLowerCase().includes(ql)){
+              hits++;
+              out.push({ k:'text', label:refOfSeq(DATA.vidToSeq.get((bi<<20)|((c+1)<<8)|(v+1)), true),
+                         kind:'verse', seq:DATA.vidToSeq.get((bi<<20)|((c+1)<<8)|(v+1)),
+                         sub: tx.slice(0, 60)+'…' });
+            }
+          }
+      }
+      if (hits && DATA.text.size < DATA.NB)
+        out.push({ k:'note', label:`phrase search covers ${DATA.text.size}/${DATA.NB} loaded books so far`, kind:'none' });
+    }
+  }
+  renderResults(out.slice(0, 18));
+}
+function renderResults(rs){
+  SEARCH.results = rs; SEARCH.sel = 0;
+  const el = $('#results');
+  if (!rs.length){ el.style.display = 'none'; return; }
+  el.innerHTML = rs.map((r, i) => `<div class="row${i===0?' sel':''}" data-i="${i}">
+    <span>${esc(r.label)}${r.sub ? ` <span style="color:var(--faint);font-size:10px">${esc(r.sub)}</span>` : ''}</span>
+    <span class="k">${r.k}${r.n ? ' · '+r.n : ''}</span></div>`).join('');
+  el.style.display = 'block';
+  el.querySelectorAll('.row').forEach(row => row.onclick = () => activateResult(+row.dataset.i));
+}
+async function activateResult(i){
+  const r = SEARCH.results[i];
+  if (!r || r.kind === 'none') return;
+  $('#results').style.display = 'none';
+  $('#search').blur();
+  if (r.kind === 'verse'){ focusSeq(r.seq); }
+  else if (r.kind === 'chapter'){
+    const first = DATA.vidToSeq.get((r.bi<<20)|(r.c<<8)|1);
+    const n = DATA.meta.books[r.bi].vc[r.c-1];
+    if (STATE.view !== 0) setView(0);
+    flyToSeq(first + (n>>1), n*2.6);
+  }
+  else if (r.kind === 'book') explorer(r.bi);
+  else if (r.kind === 'topic') applyTopicMode(r.t);
+  else if (r.kind === 'person') applyPersonMode(r.p);
+}
+function initSearch(){
+  const inp = $('#search');
+  let deb = 0;
+  inp.addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(() => runSearch(inp.value), 160); });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') activateResult(SEARCH.sel);
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      e.preventDefault();
+      const n = SEARCH.results.length; if (!n) return;
+      SEARCH.sel = (SEARCH.sel + (e.key === 'ArrowDown' ? 1 : n-1)) % n;
+      $('#results').querySelectorAll('.row').forEach((r, i) =>
+        r.classList.toggle('sel', i === SEARCH.sel));
+    } else if (e.key === 'Escape'){ $('#results').style.display = 'none'; inp.blur(); }
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#searchWrap')) $('#results').style.display = 'none';
+  });
+}
+
+/* ---- dashboard / coverage overlays ---- */
+async function openDash(){
+  const s = await lazy('stats');
+  const T = TYPE_NAMES();
+  const canonNames = DATA.meta.canons.map(c => c.short);
+  const seqOfVid = v => DATA.vidToSeq.get(v);
+  $('#dashBody').innerHTML = `<h2>THE GRAPH, MEASURED</h2>
+    <div class="foot" style="margin-top:0">${s.edges.toLocaleString()} relationships ·
+      ${s.crossCanon.toLocaleString()} cross-canon · every number computed from the packed dataset</div>
+    <h4>BY RELATIONSHIP TYPE</h4>
+    <table>${T.map((t, i) => `<tr><td>${esc(t)}</td>
+      <td class="num">${(s.byType[i]||0).toLocaleString()}</td></tr>`).join('')}</table>
+    <h4>BY CONFIDENCE</h4>
+    <table><tr>${CONF_NAMES.map(c=>`<th>${c}</th>`).join('')}</tr>
+      <tr>${s.byConf.map(n=>`<td class="num">${n.toLocaleString()}</td>`).join('')}</tr></table>
+    <h4>CANON ↔ CANON</h4>
+    <table><tr><th></th>${canonNames.map(c=>`<th>${c}</th>`).join('')}</tr>
+      ${canonNames.map((cn, a) => `<tr><th>${cn}</th>${canonNames.map((_, b) => {
+        const n = a <= b ? s.canonMatrix[a][b] : s.canonMatrix[b][a];
+        return `<td class="num">${n ? n.toLocaleString() : '·'}</td>`; }).join('')}</tr>`).join('')}</table>
+    <h4>MOST CONNECTED BOOKS</h4>
+    <table>${s.topBooks.slice(0,12).map(r => `<tr class="click" data-b="${r.b}">
+      <td>${esc(bookName(r.b))}</td><td class="num">${r.n.toLocaleString()}</td></tr>`).join('')}</table>
+    <h4>MOST CONNECTED CHAPTERS</h4>
+    <table>${s.topChapters.slice(0,10).map(r => `<tr class="click" data-ch="${r.b}_${r.c}">
+      <td>${esc(bookName(r.b))} ${r.c}</td><td class="num">${r.n.toLocaleString()}</td></tr>`).join('')}</table>
+    <h4>MOST CONNECTED VERSES</h4>
+    <table>${s.topVerses.slice(0,10).map(r => { const sq = seqOfVid(r.v);
+      return `<tr class="click" data-s="${sq}">
+      <td>${esc(refOfSeq(sq))}</td><td class="num">${r.n.toLocaleString()}</td></tr>`; }).join('')}</table>`;
+  $('#dash').style.display = 'block';
+  $('#dashBody').querySelectorAll('tr.click').forEach(tr => tr.onclick = () => {
+    $('#dash').style.display = 'none';
+    if (tr.dataset.s) focusSeq(+tr.dataset.s);
+    else if (tr.dataset.b) explorer(+tr.dataset.b);
+    else if (tr.dataset.ch){ const [b, c] = tr.dataset.ch.split('_').map(Number);
+      const first = DATA.vidToSeq.get((b<<20)|(c<<8)|1);
+      if (STATE.view !== 0) setView(0);
+      flyToSeq(first + (DATA.meta.books[b].vc[c-1]>>1), DATA.meta.books[b].vc[c-1]*2.6); }
+  });
+}
+async function openCoverage(){
+  const cv = await lazy('coverage');
+  const g = cv.sources.gospelLibraryFootnotes, ta = cv.sources.textualAnalysis, cu = cv.sources.curated;
+  $('#covBody').innerHTML = `<h2>DATASET COVERAGE</h2>
+    <div class="foot" style="margin-top:0">Built ${cv.built ? new Date(cv.built).toISOString().slice(0,10) : '—'} ·
+      dataset v${cv.version} · ${cv.totals.edges.toLocaleString()} relationships,
+      ${cv.totals.evidenceRecords.toLocaleString()} carrying written evidence</div>
+    <h4>SOURCE 1 — OFFICIAL FOOTNOTE CROSS-REFERENCES</h4>
+    <div class="foot">${esc(g.what)}</div>
+    <table><tr><td>chapters parsed</td><td class="num">${g.chaptersFetched.toLocaleString()}</td></tr>
+    <tr><td>cross-reference targets</td><td class="num">${g.crossRefTargets.toLocaleString()}</td></tr>
+    <tr><td>Topical Guide tags (kept as topic tags, never edges)</td><td class="num">${g.tgTagsAsTopics.toLocaleString()}</td></tr></table>
+    <h4>SOURCE 2 — TEXTUAL ANALYSIS</h4>
+    <div class="foot">${esc(ta.what)}</div>
+    <table><tr><td>candidate seed pairs</td><td class="num">${ta.candidates.toLocaleString()}</td></tr>
+    <tr><td>kept as parallels</td><td class="num">${ta.kept.toLocaleString()}</td></tr>
+    <tr><td>discarded — below threshold</td><td class="num">${ta.discarded.belowThreshold.toLocaleString()}</td></tr>
+    <tr><td>discarded — stock formulae only ("and it came to pass" …)</td>
+      <td class="num">${ta.discarded.stopPhraseOnly.toLocaleString()}</td></tr>
+    <tr><td>discarded — same chapter</td><td class="num">${ta.discarded.sameChapter.toLocaleString()}</td></tr></table>
+    <div class="foot">parameters: ${ta.params.N}-gram seeds, frequency cap ${ta.params.FREQ_CAP},
+      min effective length ${ta.params.MIN_EFF_CROSS} cross-canon / ${ta.params.MIN_EFF_INTRA} intra-canon,
+      ${ta.params.stopPhrases} stop phrases, ${ta.params.archaicMap}-entry archaic-spelling map</div>
+    <h4>SOURCE 3 — CURATED</h4>
+    <div class="foot">${esc(cu.what)} ${cu.rows} rows.</div>
+    <h4>COUNTED BUT NOT MAPPED</h4>
+    <table>${Object.entries(cv.skipped.targetBuckets).map(([k, n]) =>
+      `<tr><td>${esc(k)}</td><td class="num">${n.toLocaleString()}</td></tr>`).join('')}</table>
+    <h4>NOT INCLUDED IN THIS BUILD</h4>
+    <div class="foot">${cv.notIncluded.map(esc).join('<br>')}</div>
+    <h4>READING THE GRAPH HONESTLY</h4>
+    <div class="foot">This visualization maps textual and referential relationships. A line is never a claim
+    about authorship, historical dependence, or divine origin — those are interpretive questions the graph
+    deliberately leaves open. Machine-detected parallels are dashed, capped below “confirmed”, and labeled;
+    typings derived from shared Topical Guide topics are marked as derived. The KJV text and the underlying
+    Restoration works are public domain; from the current Gospel Library edition only the footnote
+    reference pairs (facts) and Topical Guide topic labels are extracted — footnote prose, study helps, and
+    chapter headings are not reproduced.</div>`;
+  $('#coverage').style.display = 'block';
+}
+
+/* ---- export ---- */
+function exportPNG(){
+  STATE.wantShot = true;
+  toast('rendering PNG…');
+}
+function takeShot(){
+  STATE.wantShot = false;
+  const out = document.createElement('canvas');
+  out.width = CAM.W * CAM.dpr; out.height = CAM.H * CAM.dpr;
+  const cx = out.getContext('2d');
+  cx.fillStyle = '#000'; cx.fillRect(0, 0, out.width, out.height);
+  cx.drawImage($('#gl'), 0, 0);
+  cx.drawImage($('#lab'), 0, 0);
+  out.toBlob(b => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'scripture-universe.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  });
+}
+function exportCSV(){
+  const rows = ['source,target,types,confidence,provenance,weight,extent'];
+  for (let i = 0; i < DATA.E && rows.length < 30001; i++){
+    if (!edgeVisible(i)) continue;
+    const types = TYPE_NAMES().filter((_, t) => DATA.mask[i] & (1<<t)).join('; ');
+    rows.push([`"${refOfSeq(DATA.src[i],true)}"`,`"${refOfSeq(DATA.dst[i],true)}"`,
+      `"${types}"`, CONF_NAMES[DATA.flags[i]&3], `"${provText(DATA.prov[i])}"`,
+      DATA.w[i], DATA.ext[i]].join(','));
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
+  a.download = 'scripture-universe-edges.csv';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast(`${(rows.length-1).toLocaleString()} filtered relationships exported`);
+}
+
+</script>
+<script>
+/* ------------------------------ 8. MODES + TOUR --------------------------- */
+function postToSeqs(deltas){
+  const set = new Set();
+  let v = 0;
+  for (const d of deltas){ v += d;
+    const s = DATA.vidToSeq.get(v);
+    if (s !== undefined) set.add(s); }
+  return set;
+}
+let modeChip = null;
+function setModeChip(label){
+  clearModeChip();
+  modeChip = document.createElement('span');
+  modeChip.className = 'btn on';
+  modeChip.textContent = label + ' ✕';
+  modeChip.onclick = clearMode;
+  $('#presets').appendChild(modeChip);
+}
+function clearModeChip(){ if (modeChip){ modeChip.remove(); modeChip = null; } }
+function applyTopicMode(t){
+  FILT.topicPost = postToSeqs(t.p); FILT.personPost = null;
+  setModeChip('TOPIC: ' + t.slug.replace(/-/g,' ').toUpperCase());
+  toast(`${t.n} passages tagged “${t.slug.replace(/-/g,' ')}” — connections between them highlighted`);
+  markDirty();
+}
+function applyPersonMode(p){
+  FILT.personPost = postToSeqs(p.p); FILT.topicPost = null;
+  setModeChip('PERSON: ' + p.name.toUpperCase());
+  toast(`${p.n} passages naming or tagged for ${p.name}`);
+  markDirty();
+}
+function clearMode(){
+  FILT.topicPost = FILT.personPost = null;
+  if (FILT.prophecy){ FILT.prophecy = false; $('#pProph')?.classList.remove('on'); }
+  clearModeChip(); markDirty();
+}
+
+/* ---- guided tour ---- */
+const TOUR = { on:false, i:0, timer:0 };
+const TOUR_STOPS = [
+  { a:['ot/isa',53,5], z:['bofm/mosiah',14,5], cap:'Abinadi recites Isaiah 53 before King Noah’s court — Mosiah 14 carries the suffering-servant chapter west across the ocean, word for word.' },
+  { a:['nt/matt',5,3], z:['bofm/3-ne',12,3], cap:'The Sermon on the Mount and the Sermon at the Temple: Matthew 5–7 and 3 Nephi 12–14 run in parallel, beatitude by beatitude.' },
+  { a:['ot/mal',3,1], z:['bofm/3-ne',24,1], cap:'“Behold, I will send my messenger” — the risen Christ gives the Nephites Malachi 3–4, chapters their ancestors left Jerusalem too early to carry.' },
+  { a:['nt/matt',24,0], z:['pgp/js-m',1,0], cap:'Joseph Smith—Matthew reworks the Olivet discourse of Matthew 24 — the densest chapter-to-book bridge between the New Testament and the Pearl of Great Price.' },
+  { a:['ot/gen',1,1], z:['pgp/moses',2,1], cap:'Genesis 1 and Moses 2: the same creation account in two canons, verse against verse, with the Moses text expanding the frame.' },
+  { a:['ot/isa',2,2], z:['bofm/2-ne',12,2], cap:'“The mountain of the Lord’s house” — 2 Nephi 12–24 reproduces thirteen consecutive chapters of Isaiah, the largest block quotation in the canon.' },
+  { a:['nt/james',1,5], z:['pgp/js-h',1,11], cap:'“If any of you lack wisdom, let him ask of God” — the single verse of James that, by Joseph Smith’s own account, sent him into the grove.' },
+  { a:['nt/1-cor',15,0], z:['dc-testament/dc',76,0], cap:'Paul’s bodies celestial and terrestrial, glory of sun, moon, and stars — D&C 76 unfolds 1 Corinthians 15 into the vision of the three degrees.' },
+];
+const BOOK_BY_SLUG = {};   // "ot/gen" → book index, filled at boot
+function tourSeq(spec){
+  const [uri, c, v] = spec;
+  const bi = BOOK_BY_SLUG[uri];
+  return DATA.vidToSeq.get((bi<<20)|(c<<8)|v);
+}
+function tourStart(){
+  if (TOUR.on){ tourStop(); return; }
+  if (STATE.view !== 0) setView(0);
+  clearMode(); clearFocus();
+  TOUR.on = true; TOUR.i = 0;
+  $('#bTour').classList.add('on');
+  tourStep();
+}
+function tourStep(){
+  if (!TOUR.on) return;
+  const st = TOUR_STOPS[TOUR.i % TOUR_STOPS.length];
+  const a = tourSeq(st.a), z = tourSeq(st.z);
+  if (a === undefined || z === undefined){ TOUR.i++; tourStep(); return; }
+  SEL.focusSeq = -1; SEL.pathSeqs = SEL.pathEdges = null;
+  SEL.selEdge = findEdge(Math.min(a,z), Math.max(a,z));
+  markDirty();
+  const xa = LAY.ribbon[a*2], xz = LAY.ribbon[z*2];
+  const lo = Math.min(xa,xz), hi = Math.max(xa,xz);
+  flyTo((lo+hi)/2, .5, CAM.W / Math.max(.02, (hi-lo)) * .62, 1.6);
+  const cap = $('#tourCap');
+  cap.style.display = 'block';
+  cap.querySelector('.stop').textContent =
+    `STOP ${ (TOUR.i % TOUR_STOPS.length) + 1 } / ${TOUR_STOPS.length} — CLICK FOR NEXT · ESC TO EXIT`;
+  cap.querySelector('.cap').textContent = st.cap;
+  TOUR.i++;
+  clearTimeout(TOUR.timer);
+  TOUR.timer = setTimeout(tourStep, 9000);
+}
+function tourStop(){
+  TOUR.on = false; clearTimeout(TOUR.timer);
+  $('#tourCap').style.display = 'none';
+  $('#bTour').classList.remove('on');
+  SEL.selEdge = -1; markDirty();
+}
+$('#tourCap').addEventListener('click', () => { clearTimeout(TOUR.timer); tourStep(); });
+
+</script>
+<script>
+/* ------------------------------ 9. BOOT + LOOP ---------------------------- */
+function wireUI(){
+  [0,1,2].forEach(v => $('#vb'+v).onclick = () => setView(v));
+  $('#bTour').onclick = tourStart;
+  $('#bDash').onclick = openDash;
+  $('#bData').onclick = openCoverage;
+  $('#bPng').onclick = exportPNG;
+  $('#bHelp').onclick = () => { const h = $('#help');
+    h.style.display = h.style.display === 'block' ? 'none' : 'block'; };
+  $('#sideX').onclick = () => clearFocus(true);
+  $('#dashX').onclick = () => $('#dash').style.display = 'none';
+  $('#covX').onclick = () => $('#coverage').style.display = 'none';
+  $('#helpX').onclick = () => $('#help').style.display = 'none';
+  // prophecy mode + CSV live in the legend footer
+  const pr = document.createElement('span');
+  pr.className = 'btn'; pr.id = 'pProph'; pr.textContent = 'PROPHECY FLOW';
+  pr.title = 'only prophecy/fulfilment links, animated in the direction of fulfilment';
+  pr.onclick = () => { FILT.prophecy = !FILT.prophecy;
+    pr.classList.toggle('on', FILT.prophecy); markDirty(); };
+  $('#presets').appendChild(pr);
+  const cs = document.createElement('span');
+  cs.className = 'btn'; cs.textContent = 'CSV';
+  cs.title = 'export the currently filtered relationships';
+  cs.onclick = exportCSV;
+  $('#presets').appendChild(cs);
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === '1') setView(0);
+    else if (e.key === '2') setView(1);
+    else if (e.key === '3') setView(2);
+    else if (e.key === 'f' || e.key === 'F'){ e.preventDefault(); $('#search').focus(); }
+    else if (e.key === 't' || e.key === 'T') tourStart();
+    else if (e.key === 'h' || e.key === 'H' || e.key === '?') $('#bHelp').onclick();
+    else if (e.key === 'Home') fitHome(STATE.view);
+    else if (e.key === 'Escape'){
+      if (TOUR.on) tourStop();
+      else if ($('#dash').style.display === 'block') $('#dash').style.display = 'none';
+      else if ($('#coverage').style.display === 'block') $('#coverage').style.display = 'none';
+      else if ($('#help').style.display === 'block') $('#help').style.display = 'none';
+      else if (FILT.topicPost || FILT.personPost || FILT.prophecy) clearMode();
+      else clearFocus(true);
+    }
+  });
+}
+
+async function boot(){
+  try {
+    await bootData();
+    const canonUri = ['ot','nt','bofm','dc-testament','pgp'];
+    DATA.meta.books.forEach((bk, bi) => BOOK_BY_SLUG[canonUri[bk.c]+'/'+bk.s] = bi);
+    buildLayouts();
+    glInit();
+    GLR.noGlow = matchMedia('(pointer:coarse)').matches;
+    resize();
+    buildLegend(); buildSearchIndex(); initSearch(); initPointer(); wireUI();
+    STATE.booted = true;
+    STATE.introT0 = performance.now() + 400;
+    $('#loadState').textContent =
+      `${DATA.E.toLocaleString()} RELATIONSHIPS · ${DATA.V.toLocaleString()} VERSES · LOADED`;
+    prefetchAllText();
+    requestAnimationFrame(tick);
+  } catch (e){
+    $('#loadState').textContent = 'FAILED TO LOAD — ' + e.message;
+    console.error(e);
+  }
+}
+window.addEventListener('resize', () => { if (STATE.booted) resize(); });
+$('#title').addEventListener('click', () => $('#title').classList.add('gone'));
+
+let lastT = 0;
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt = Math.min((now - lastT)/1000 || .016, .1); lastT = now;
+  const t0 = performance.now();
+  const rev = clamp((now - STATE.introT0) / 4200, 0, 1);
+  if (rev !== STATE.reveal){ STATE.reveal = rev; STATE.labDirty = true; }
+  updateTween(dt); updateFly(dt);
+  const amtOf = v => v === 1 ? 1 : 0;
+  STATE.chordAmt = lerp(amtOf(STATE.viewFrom), amtOf(STATE.view), ease(STATE.tweenT));
+  if (STATE.dirty) buildSets();
+  if (GLR.posDirty) uploadPositions();
+  drawScene();
+  if (STATE.wantShot) takeShot();
+  if (STATE.labDirty) drawLabels();
+  const ms = performance.now() - t0;
+  GLR.frameMs.push(ms);
+  if (GLR.frameMs.length > 240) GLR.frameMs.shift();
+}
+
+/* scripted-test hooks */
+window.API = {
+  lookAt(ref){
+    const r = parseRef(ref);
+    if (!r) return null;
+    if (r.v){ const s = DATA.vidToSeq.get((r.bi<<20)|(r.c<<8)|r.v); focusSeq(s); return refOfSeq(s); }
+    if (r.c){ const first = DATA.vidToSeq.get((r.bi<<20)|(r.c<<8)|1);
+      flyToSeq(first + (DATA.meta.books[r.bi].vc[r.c-1]>>1), DATA.meta.books[r.bi].vc[r.c-1]*2.6);
+      return `${bookName(r.bi)} ${r.c}`; }
+    explorer(r.bi); return bookName(r.bi);
+  },
+  setView, pick: pickAt, findEdge, compare,
+  seqOf(ref){ const r = parseRef(ref); return r && r.v ? DATA.vidToSeq.get((r.bi<<20)|(r.c<<8)|r.v) : null; },
+  screenOf(s){ return [sxOf(LAY.cur[s*2]), syOf(LAY.cur[s*2+1])]; },
+  frameStats(){
+    const a = GLR.frameMs;
+    return { avg: a.reduce((x,y)=>x+y,0)/Math.max(1,a.length),
+             max: Math.max(...a, 0), edges: GLR.edgeCount, nodes: GLR.nodeCount,
+             lod: lastLod, view: STATE.view, E: DATA.E, V: DATA.V };
+  },
+  settle(ms){ return new Promise(r => setTimeout(r, ms||1600)); },
+  enter(){ $('#title').classList.add('gone'); STATE.introT0 = performance.now() - 99000; },
+  state: STATE, sel: SEL, filt: FILT, cam: CAM,
+};
+
+boot();
+
+</script>
+</body>
+</html>
