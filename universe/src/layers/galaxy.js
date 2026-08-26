@@ -194,7 +194,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
       const rr = warm[0] * heat + cool[0] * (1 - heat);
       const gg = warm[1] * heat + cool[1] * (1 - heat);
       const bb = warm[2] * heat + cool[2] * (1 - heat);
-      const A = Math.min(1, L);
+      const A = Math.sqrt(Math.min(1, L));
       d[i]   = Math.min(255, 255 * rr * L);
       d[i+1] = Math.min(255, 255 * gg * L);
       d[i+2] = Math.min(255, 255 * bb * L);

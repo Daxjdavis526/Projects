@@ -64,8 +64,8 @@ export function starPSFTexture(size = 128) {
     let v = Math.exp(-r * r * 14) + 0.16 / (1 + Math.pow(r * 6.5, 2.5));
     v *= Math.max(0, 1 - r * r);                     // hard-zero the corners
     const i = (y * size + x) * 4;
-    const b = Math.min(255, v * 255);
-    d[i] = d[i+1] = d[i+2] = b; d[i+3] = b;
+    d[i] = d[i+1] = d[i+2] = 255;
+    d[i+3] = Math.min(255, v * 255);
   }
   g.putImageData(img, 0, 0);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
@@ -87,8 +87,8 @@ export function spikePSFTexture(size = 256) {
                + Math.exp(-ay * 55) * Math.exp(-ax * 6.5));
     v *= Math.max(0, 1 - r * r * 0.96);
     const i = (y * size + x) * 4;
-    const b = Math.min(255, v * 240);
-    d[i] = d[i+1] = d[i+2] = b; d[i+3] = b;
+    d[i] = d[i+1] = d[i+2] = 255;
+    d[i+3] = Math.min(255, v * 240);
   }
   g.putImageData(img, 0, 0);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;

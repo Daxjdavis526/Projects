@@ -46,8 +46,8 @@ function puffTexture(seed, size = 256) {
     let val = Math.pow(Math.max(0, n - 0.08), 1.35) * 1.9;
     val *= Math.max(0, 1 - r * r * (0.9 + 0.4 * noise(u * 8, v * 8)));
     const i = (y * size + x) * 4;
-    const b = Math.min(255, val * 255);
-    d[i] = d[i+1] = d[i+2] = b; d[i+3] = b;
+    d[i] = d[i+1] = d[i+2] = 255;
+    d[i+3] = Math.min(255, val * 255);
   }
   g.putImageData(img, 0, 0);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
@@ -102,7 +102,7 @@ function galaxyImpostorTexture(kind, seed, size = 256) {
     d[i]   = Math.min(255, 255 * (warm[0] * heat + cool[0] * (1 - heat)) * L);
     d[i+1] = Math.min(255, 255 * (warm[1] * heat + cool[1] * (1 - heat)) * L);
     d[i+2] = Math.min(255, 255 * (warm[2] * heat + cool[2] * (1 - heat)) * L);
-    d[i+3] = Math.min(255, 255 * Math.min(1, L));
+    d[i+3] = Math.min(255, 255 * Math.sqrt(Math.min(1, L)));
   }
   g.putImageData(img, 0, 0);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
