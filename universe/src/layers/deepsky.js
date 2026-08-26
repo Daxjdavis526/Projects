@@ -132,7 +132,7 @@ export async function buildDeepSkyLayer(scene, registry, ctx0) {
         color: new THREE.Color(...tints[k % tints.length]),
         transparent: true, depthWrite: false,
         blending: dark ? THREE.NormalBlending : THREE.AdditiveBlending,
-        opacity: dark ? 0.65 : 0.5,
+        opacity: dark ? 0.65 : 0.72,
         rotation: rnd() * Math.PI * 2,
       }));
       sp.userData.rscale = 0.55 + 0.5 * rnd();
@@ -191,7 +191,7 @@ export async function buildDeepSkyLayer(scene, registry, ctx0) {
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
     geo.setAttribute('aLum', new THREE.BufferAttribute(lum, 1));
-    const mat = starMaterial({ fluxScale: 1.3e6, maxPx: 7 });
+    const mat = starMaterial({ fluxScale: 5.5e6, maxPx: 7 });
     const pts = new THREE.Points(geo, mat);
     pts.frustumCulled = false; pts.renderOrder = 2;
     group.add(pts);
@@ -321,7 +321,7 @@ export async function buildDeepSkyLayer(scene, registry, ctx0) {
           `Orbits ${ex.name} every ${pl.period_days < 1000 ? pl.period_days.toPrecision(3) + ' days' : (pl.period_days / 365.25).toPrecision(3) + ' years'} at ${pl.a_au.toPrecision(2)} AU. Position along its real orbit is schematic.`,
         radius: (pl.radius_re ?? 1.5) * 6.371e6, aM, period: pl.period_days,
         color: new THREE.Color(0x9fd8c8),
-        lum: 0,
+        lum: 5e18 * (pl.radius_re ?? 1.5) ** 2,
         pos: (c) => {
           const t = (c ?? window.__ctx).T * 36525;
           const ang = (t / pl.period_days + phase) * Math.PI * 2;
@@ -380,7 +380,7 @@ export async function buildDeepSkyLayer(scene, registry, ctx0) {
           const o2 = sp.userData.off;
           sp.position.set(o2[0]*sc, o2[1]*sc, o2[2]*sc);
           sp.scale.setScalar(sc * sp.userData.rscale);
-          sp.material.opacity = (sp.material.blending === THREE.NormalBlending ? 0.65 : 0.5) * vis;
+          sp.material.opacity = (sp.material.blending === THREE.NormalBlending ? 0.65 : 0.72) * vis;
         });
       } else {
         sub.scale.setScalar(sc / 2);

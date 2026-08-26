@@ -94,7 +94,7 @@ export async function buildStarsLayer(scene, registry, ctx0) {
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
     geo.setAttribute('aLum', new THREE.BufferAttribute(lum, 1));
-    const mat = starMaterial({ fluxScale: 1.3e6, maxPx, map: tex });
+    const mat = starMaterial({ fluxScale: 5.5e6, maxPx, map: tex });
     const pts = new THREE.Points(geo, mat);
     pts.frustumCulled = false; pts.renderOrder = 2;
     group.add(pts);
@@ -125,7 +125,7 @@ export async function buildStarsLayer(scene, registry, ctx0) {
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
     geo.setAttribute('aLum', new THREE.BufferAttribute(lum, 1));
-    const mat = starMaterial({ fluxScale: 6e5, maxPx: 6, map: starPSFTexture() });
+    const mat = starMaterial({ fluxScale: 2.4e6, maxPx: 6, map: starPSFTexture() });
     const pts = new THREE.Points(geo, mat);
     pts.frustumCulled = false; pts.renderOrder = 2;
     const b = galacticBasis();
