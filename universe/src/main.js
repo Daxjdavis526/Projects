@@ -56,7 +56,7 @@ function buildComposer() {
     { type: THREE.HalfFloatType, samples: 4 });
   composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
-  bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.32, 0.5, 0.92);
+  bloom = new UnrealBloomPass(new THREE.Vector2(size.x * 2, size.y * 2), 0.3, 0.45, 0.95);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 }
@@ -317,4 +317,5 @@ resize();
 requestAnimationFrame(frame);
 window.__rig = rig;                 // debug / automation hook
 window.__registry = registry;
+window.__layers = { solar, stars, galaxy, localgroup, clusters, web, beacons };
 setTimeout(() => $('#loading').classList.add('off'), 900);

@@ -48,7 +48,7 @@ export function buildClustersLayer(scene, registry, ctx0) {
   geo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(sc, 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(sl, 1));
-  const mat = starMaterial({ fluxScale: 2.6e8, maxPx: 4 });
+  const mat = starMaterial({ fluxScale: 2.6e8, maxPx: 4, mCap: -3.6 });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false; pts.renderOrder = 2;
   group.add(pts);

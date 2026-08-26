@@ -73,6 +73,7 @@ const STAR_VERT = /* glsl */`
   uniform float uFluxScale;      // layer brightness tuning
   uniform float uMaxPx;
   uniform float uOpacity;
+  uniform float uMCap;           // upper bound on pseudo-magnitude (anti-bloom-clump)
   uniform float uPhysMode;       // 0: flux-sized star point · 1: aLum = radius (m)
   ${GLSL_COMPRESS}
   void main() {
@@ -90,7 +91,7 @@ const STAR_VERT = /* glsl */`
       vAlpha = uOpacity;
     } else {
       // flux -> size & alpha, computed in log2 space (f32-safe at any distance)
-      float m = 0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist));
+      float m = min(0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist)), uMCap);
       px = clamp(m * 0.9 + 8.0, 0.0, uMaxPx);
       vAlpha = clamp(m * 0.13 + 1.05, 0.0, 1.0) * uOpacity;
       if (px < 1.0) { vAlpha *= px * px; px = 1.0; }  // sub-pixel -> dim, not shrink
@@ -122,6 +123,7 @@ export function starMaterial(opts = {}) {
       uFluxScale:  { value: opts.fluxScale ?? 1 },
       uMaxPx:      { value: opts.maxPx ?? 14 },
       uOpacity:    { value: 1 },
+      uMCap:       { value: opts.mCap ?? 100 },
       uPhysMode:   { value: opts.physMode ? 1 : 0 },
       uMap:        { value: opts.map ?? _discTex },
     },

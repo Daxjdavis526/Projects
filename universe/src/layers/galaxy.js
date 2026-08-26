@@ -99,7 +99,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(lum, 1));
-  const mat = starMaterial({ fluxScale: 500, maxPx: 6 });
+  const mat = starMaterial({ fluxScale: 500, maxPx: 6, mCap: -2.8 });
   const points = new THREE.Points(geo, mat);
   points.frustumCulled = false;
   points.renderOrder = 2;
