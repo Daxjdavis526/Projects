@@ -294,12 +294,24 @@ const DATA = {
   text:new Map(), textPending:new Map(), evCache:new Map(),
 };
 
-async function jget(u){ const r = await fetch('data/'+u); if(!r.ok) throw new Error(u+' '+r.status); return r.json(); }
+// Data comes from data/ over the network, or — in the single-file offline
+// build made by pipeline/bundle.js — from an inlined window.EMBED, so the
+// page works when opened straight off disk with no server.
+async function jget(u){
+  if (window.EMBED && EMBED[u] !== undefined) return EMBED[u];
+  const r = await fetch('data/'+u); if(!r.ok) throw new Error(u+' '+r.status); return r.json();
+}
+function b64buf(s){
+  const bin = atob(s), n = bin.length, a = new Uint8Array(n);
+  for (let i = 0; i < n; i++) a[i] = bin.charCodeAt(i);
+  return a.buffer;
+}
 
 async function bootData(){
   const [meta, manifest, agg, binBuf] = await Promise.all([
     jget('verses-meta.json'), jget('manifest.json'), jget('agg.json'),
-    fetch('data/edges.bin').then(r => { if(!r.ok) throw new Error('edges.bin'); return r.arrayBuffer(); }),
+    window.EMBED ? b64buf(EMBED['edges.bin'])
+      : fetch('data/edges.bin').then(r => { if(!r.ok) throw new Error('edges.bin'); return r.arrayBuffer(); }),
   ]);
   DATA.meta = meta; DATA.manifest = manifest; DATA.agg = agg;
 

@@ -28,6 +28,11 @@ static files into `../data/`.
                    totals, known pairs, structural invariants, coverage
                    honesty; exits non-zero on any failure
 
+Not part of `run-all.js`:
+
+    bundle.js      inline ../data/ into ../dist/scripture-universe.html —
+                   the single-file offline copy that opens from disk
+
 Determinism: the network layout uses a seeded PRNG and pack.js writes with
 stable ordering, so a rebuild from the same cache diffs cleanly. The one
 intentionally variable byte is the fetch date recorded into coverage.

@@ -106,6 +106,16 @@ assertions (Isaiah 53:5 ↔ Mosiah 14:5 with a ≥15-word run, Malachi 3:1 ↔
 3 Nephi 24:1, ≥20 Matthew 24 ↔ JS—Matthew verse pairs, …) and recomputes
 every number in the coverage report. See [pipeline/README.md](pipeline/README.md).
 
+## An offline copy
+
+    node pipeline/bundle.js
+
+writes `dist/scripture-universe.html` (~9 MB): the app with the entire
+dataset inlined as `window.EMBED`, so it opens by double-click with no
+server and no network — useful for keeping a copy, or for sharing one file.
+Offline it falls back from the web fonts to the local monospace and serif
+stacks; everything else is identical. `dist/` is not committed.
+
 ## Files
 
     index.html        the app — renderer, UI, everything (no dependencies)
