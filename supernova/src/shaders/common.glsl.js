@@ -136,3 +136,50 @@ float limbDarken(float mu, float u1, float u2){
 `;
 
 export const NOISE_KIT = HASH + SIMPLEX + FBM;
+
+/* --- real spherical harmonics, l = 1..4 ------------------------------------
+   Hard-coded Cartesian polynomial forms on the unit sphere, real (tesseral)
+   basis, orthonormalised. 24 functions, matching the coefficient layout in
+   physics/state.js: [l1: m=-1,0,1 | l2: m=-2..2 | l3: m=-3..3 | l4: m=-4..4].
+   Used for the SASI / explosion asymmetry field zeta(n) = sum a_k Y_k(n).   */
+export const SPHERICAL_HARMONICS = /* glsl */`
+float zetaSH(vec3 n, float a[24]){
+  float x = n.x, y = n.y, z = n.z;
+  float x2 = x*x, y2 = y*y, z2 = z*z;
+  float s = 0.0;
+
+  /* l = 1  (0.4886 = sqrt(3/4pi)) */
+  s += a[0] * 0.4886 * y;
+  s += a[1] * 0.4886 * z;
+  s += a[2] * 0.4886 * x;
+
+  /* l = 2 */
+  s += a[3] * 1.0925 * x * y;
+  s += a[4] * 1.0925 * y * z;
+  s += a[5] * 0.3154 * (3.0 * z2 - 1.0);
+  s += a[6] * 1.0925 * x * z;
+  s += a[7] * 0.5463 * (x2 - y2);
+
+  /* l = 3 */
+  s += a[8]  * 0.5900 * y * (3.0 * x2 - y2);
+  s += a[9]  * 2.8906 * x * y * z;
+  s += a[10] * 0.4570 * y * (5.0 * z2 - 1.0);
+  s += a[11] * 0.3732 * z * (5.0 * z2 - 3.0);
+  s += a[12] * 0.4570 * x * (5.0 * z2 - 1.0);
+  s += a[13] * 1.4453 * z * (x2 - y2);
+  s += a[14] * 0.5900 * x * (x2 - 3.0 * y2);
+
+  /* l = 4 */
+  s += a[15] * 2.5033 * x * y * (x2 - y2);
+  s += a[16] * 1.7701 * y * z * (3.0 * x2 - y2);
+  s += a[17] * 0.9462 * x * y * (7.0 * z2 - 1.0);
+  s += a[18] * 0.6690 * y * z * (7.0 * z2 - 3.0);
+  s += a[19] * 0.1058 * (35.0 * z2 * z2 - 30.0 * z2 + 3.0);
+  s += a[20] * 0.6690 * x * z * (7.0 * z2 - 3.0);
+  s += a[21] * 0.4731 * (x2 - y2) * (7.0 * z2 - 1.0);
+  s += a[22] * 1.7701 * x * z * (x2 - 3.0 * y2);
+  s += a[23] * 0.6258 * (x2 * (x2 - 3.0 * y2) - y2 * (3.0 * x2 - y2));
+
+  return s;
+}
+`;

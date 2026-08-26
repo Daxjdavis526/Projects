@@ -258,7 +258,7 @@ function growSASI(st, model, t, dt) {
   const sig = model.sasi.sigma, om1 = model.sasi.omega_1;
   let k = 0;
   for (let l = 1; l <= 4; l++) {
-    const sat = 0.45 / Math.sqrt(2 * l + 1);
+    const sat = 0.62 / Math.pow(2 * l + 1, 0.35);
     for (let mm = -l; mm <= l; mm++, k++) {
       const gain = Math.tanh(0.002 * Math.exp(sig[l] * Math.min(t, 0.6)));
       const osc = Math.cos(om1 * t / Math.sqrt(l) + st._phases[k]);

@@ -22,6 +22,7 @@ import { Hud } from './ui/hud.js';
 import { Profiles } from './render/profiles.js';
 import { Interior, VIEW } from './render/interior.js';
 import { Core } from './render/core.js';
+import { Shock } from './render/shock.js';
 import { Score } from './audio/audio.js';
 import { Timeline } from './ui/timeline.js';
 import { QUALITY, KM } from './config.js';
@@ -58,6 +59,7 @@ let snap = engine.snapshot();
 const profiles = new Profiles();
 const interior = new Interior(stage, profiles, quality);
 const core = new Core(stage);
+const shock = new Shock(stage, quality);
 const score = new Score();
 
 /* --- focus targets --------------------------------------------------------
@@ -144,6 +146,7 @@ function frame(now) {
   star.update(dt, snap.t, snap);
   interior.update(dt, snap, star.group.position);
   core.update(dt, snap);
+  shock.update(dt, snap);
   score.update(snap, dt);
 
   /* Exposure kick at bounce, decaying — brightness through the tone mapper,
@@ -167,4 +170,4 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 /* Expose for the screenshot harness and for poking at in the console. */
-window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, score, THREE };
+window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, shock, score, THREE };
