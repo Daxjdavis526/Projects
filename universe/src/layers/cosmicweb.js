@@ -195,7 +195,7 @@ export function buildCosmicWebLayer(scene, registry, ctx0) {
     group.visible = f > 0.01;
     if (!group.visible) return;
     const t = smoothstep(24.5, 26.6, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(6e7, 5e9, t * t);
+    mat.uniforms.uFluxScale.value = lerp(2.7e9, 5.5e11, t * t);
     mat.uniforms.uOpacity.value = f;
     mat.uniforms.uEarly.value = early;
     mat.uniforms.uScaleA.value = a;

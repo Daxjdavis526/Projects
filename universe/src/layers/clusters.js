@@ -48,7 +48,7 @@ export function buildClustersLayer(scene, registry, ctx0) {
   geo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(sc, 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(sl, 1));
-  const mat = starMaterial({ fluxScale: 80, maxPx: 4 });
+  const mat = starMaterial({ fluxScale: 2.6e8, maxPx: 4 });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false; pts.renderOrder = 2;
   group.add(pts);
@@ -117,7 +117,7 @@ export function buildClustersLayer(scene, registry, ctx0) {
     group.visible = f > 0.01;
     if (!group.visible) return;
     const t = smoothstep(23.0, 25.3, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(80, 2.5e3, t);
+    mat.uniforms.uFluxScale.value = lerp(2.6e8, 1.0e9, t);
     mat.uniforms.uOpacity.value = f * (ctx.timeMode ? 1 - ctx.timeEarly : 1);
     updateStarUniforms(mat, ctx, [0, 0, 0], null, MPC);
     const lf = bandFade(ctx.logS, 24.0, 25.6, 0.5);

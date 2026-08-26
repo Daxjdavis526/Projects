@@ -79,7 +79,7 @@ export function buildStarsLayer(scene, registry, ctx0) {
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(lum, 1));
-  const mat = starMaterial({ fluxScale: 9e5, maxPx: 9 });
+  const mat = starMaterial({ fluxScale: 1.3e6, maxPx: 9 });
   const points = new THREE.Points(geo, mat);
   points.frustumCulled = false;
   points.renderOrder = 2;

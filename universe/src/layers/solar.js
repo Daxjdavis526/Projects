@@ -393,10 +393,10 @@ export function buildSolarLayer(scene, registry, ctx0) {
   const nScale = ctx0.quality.points;
   const asteroids = beltPoints(Math.floor(22000 * nScale), 2.1 * AU, 3.3 * AU, 0.10,
     r => [0.62, 0.58, 0.53], 4e17, 11);
-  asteroids.material.uniforms.uFluxScale.value = 30;
+  asteroids.material.uniforms.uFluxScale.value = 13;
   const kuiper = beltPoints(Math.floor(26000 * nScale), 30 * AU, 50 * AU, 0.09,
     r => [0.55, 0.60, 0.68], 3e20, 12);
-  kuiper.material.uniforms.uFluxScale.value = 10;
+  kuiper.material.uniforms.uFluxScale.value = 5;
   group.add(asteroids); group.add(kuiper);
 
   // Oort cloud: spherical shell, log-ish radial distribution
@@ -418,7 +418,7 @@ export function buildSolarLayer(scene, registry, ctx0) {
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
     g.setAttribute('aLum', new THREE.BufferAttribute(lu, 1));
-    const p = new THREE.Points(g, starMaterial({ fluxScale: 0.5, maxPx: 2.5 }));
+    const p = new THREE.Points(g, starMaterial({ fluxScale: 440, maxPx: 2.5 }));
     p.frustumCulled = false;
     return p;
   })();
