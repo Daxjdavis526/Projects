@@ -36,3 +36,18 @@ mouse).
 Live: https://daxjdavis526.github.io/Projects/helios/
 
 See [helios/README.md](helios/README.md) for the controls.
+
+## universe/
+
+**HORIZON** — an observable universe explorer. One continuous zoom from Earth
+orbit to the cosmic microwave background: the real solar system for today's
+date, the nearest stars, the Milky Way from inside and out, the Local Group,
+the great clusters, and a statistical cosmic web out to the horizon —
+21 orders of magnitude with real scale logic, a guided tour, and a
+conceptual cosmic-time slider.
+
+Live: https://daxjdavis526.github.io/Projects/universe/
+
+Desktop recommended (scroll + drag + click); basic touch works. See
+[universe/README.md](universe/README.md) for controls, architecture, and
+exactly what is physically accurate versus artistically approximated.
