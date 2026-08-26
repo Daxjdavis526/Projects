@@ -25,6 +25,10 @@ import { Core } from './render/core.js';
 import { Shock } from './render/shock.js';
 import { Ejecta } from './render/ejecta.js';
 import { LightCurve } from './ui/lightcurve.js';
+import { Annotations } from './ui/annotations.js';
+import { Modals } from './ui/modals.js';
+import { Refs } from './render/refs.js';
+import { ELEMENTS, ELEMENT_COLOR } from './config.js';
 import { Score } from './audio/audio.js';
 import { Timeline } from './ui/timeline.js';
 import { QUALITY, KM } from './config.js';
@@ -33,7 +37,10 @@ import * as fmt from './ui/format.js';
 const $ = id => document.getElementById(id);
 
 /* --- boot ----------------------------------------------------------------- */
-const qualityName = autoQuality();
+const qualityName = (() => {
+  try { const q = localStorage.getItem('sn-quality'); if (q && QUALITY[q]) return q; } catch {}
+  return autoQuality();
+})();
 const quality = QUALITY[qualityName];
 
 const renderer = new Renderer(qualityName);
@@ -56,6 +63,7 @@ const engine = new Engine(model, clock);
 const hud = new Hud(model);
 const timeline = new Timeline(clock, engine, () => { /* seek: engine follows in the loop */ });
 const lightcurve = new LightCurve(clock);
+const annotations = new Annotations();
 let snap = engine.snapshot();
 
 /* --- physics -> GPU bridge + interior view -------------------------------- */
@@ -96,6 +104,59 @@ $('begin').addEventListener('click', () => {
   clock.seekU(0.128);
   clock.play('narrative');
 });
+
+const refs = new Refs(stage);
+const modals = new Modals(rig, renderer);
+
+$('btn-refs')?.addEventListener('click', () => {
+  const on = refs.toggle();
+  $('btn-refs').classList.toggle('on', on);
+});
+
+/* --- visualisation modes + legend ------------------------------------------ */
+const legend = $('legend');
+function setViz(v) {
+  interior.setViz(v);
+  document.querySelectorAll('#vizbar .tl-btn').forEach(b =>
+    b.classList.toggle('on', +b.dataset.viz === v));
+  if (v === 0) { legend.style.display = 'none'; return; }
+  legend.style.display = 'block';
+  if (v === 1) {
+    legend.innerHTML = '<h2>Elements</h2>' + ELEMENTS.map(e => {
+      const c = ELEMENT_COLOR[e];
+      const css = `rgb(${c.map(x => Math.round(x * 235)).join(',')})`;
+      return `<div class="lg-row"><span class="lg-sw" style="background:${css}"></span>${e}</div>`;
+    }).join('');
+  } else if (v === 2) {
+    legend.innerHTML = `<h2>Density</h2>
+      <div class="lg-bar" style="background:linear-gradient(90deg,#1a0b2e,#7a2d8c,#e05c5c,#ffd27f,#fff)"></div>
+      <div class="lg-cap"><span>10⁻⁸</span><span>g/cm³</span><span>10¹⁵</span></div>`;
+  } else if (v === 3) {
+    legend.innerHTML = `<h2>Temperature</h2>
+      <div class="lg-bar" style="background:linear-gradient(90deg,#ff9d4a,#ffd9a0,#fff,#cfe0ff,#9db8ff)"></div>
+      <div class="lg-cap"><span>10³</span><span>K</span><span>10¹²</span></div>`;
+  } else if (v === 4) {
+    legend.innerHTML = `<h2>Radial velocity</h2>
+      <div class="lg-bar" style="background:linear-gradient(90deg,#4a8cff,#fff,#ff4a2e)"></div>
+      <div class="lg-cap"><span>infall</span><span>0</span><span>outflow</span></div>`;
+  }
+}
+document.querySelectorAll('#vizbar .tl-btn').forEach(b =>
+  b.addEventListener('click', () => setViz(+b.dataset.viz)));
+
+/* --- physical-time presets -------------------------------------------------- */
+document.querySelectorAll('#speeds .tl-btn').forEach(b =>
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#speeds .tl-btn').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    if (b.dataset.rate === 'narrative') {
+      clock.mode = 'narrative';
+    } else {
+      clock.mode = 'physical';
+      clock.physRate = parseFloat(b.dataset.rate);
+    }
+    if (!clock.playing) clock.play(clock.mode);
+  }));
 
 $('mute')?.addEventListener('click', () => {
   score.setMuted(score.enabled);
@@ -187,6 +248,8 @@ function frame(now) {
 
   hud.update(snap, clock);
   timeline.update();
+  annotations.update(snap, dt);
+  refs.update(snap);
 
   stage.sync();
   updateStats(dt);
@@ -196,4 +259,4 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 /* Expose for the screenshot harness and for poking at in the console. */
-window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, shock, ejecta, score, THREE };
+window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, shock, ejecta, score, refs, modals, THREE };

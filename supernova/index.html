@@ -142,6 +142,74 @@ canvas{display:block;position:fixed;inset:0}
 #lightcurve h2{margin-bottom:5px}
 #lc-canvas{display:block;width:236px;height:92px}
 
+/* ---- annotation ---------------------------------------------------------- */
+#annotation{
+  position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(8px);
+  max-width:62ch;text-align:center;font-size:12px;line-height:1.7;color:#cfc9c0;
+  letter-spacing:.03em;text-shadow:0 1px 12px #000,0 0 4px #000;
+  opacity:0;transition:opacity .6s ease,transform .6s ease;pointer-events:none;
+}
+#annotation.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---- scale bar ------------------------------------------------------------ */
+#scalebar{
+  position:fixed;right:20px;bottom:96px;text-align:right;pointer-events:none;
+}
+#scalebar-line{
+  height:2px;background:var(--ink);opacity:.75;margin-left:auto;
+  box-shadow:0 0 6px rgba(0,0,0,.9);
+  border-left:1px solid var(--ink);border-right:1px solid var(--ink);
+  padding-top:3px;background-clip:content-box;
+}
+#scalebar-label{font-size:10px;color:var(--dim);letter-spacing:.08em;margin-top:4px}
+
+/* ---- viz modes + legend --------------------------------------------------- */
+#vizbar{position:fixed;right:14px;top:440px;display:flex;flex-direction:column;gap:5px}
+#vizbar .tl-btn{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;text-align:right;padding:0 10px}
+#legend{position:fixed;right:14px;top:600px;width:150px;display:none}
+#legend .lg-row{display:flex;align-items:center;gap:7px;font-size:9.5px;color:var(--dim);margin:2px 0}
+#legend .lg-sw{width:11px;height:11px;border-radius:2px;flex:none}
+#legend .lg-bar{height:10px;border-radius:2px;margin:4px 0 2px}
+#legend .lg-cap{display:flex;justify-content:space-between;font-size:8.5px;color:var(--faint)}
+
+/* ---- modal ---------------------------------------------------------------- */
+#modal{
+  position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.66);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+#modal.open{display:flex}
+#modal-card{
+  width:min(620px,92vw);max-height:82vh;overflow:auto;
+  background:rgba(10,9,8,.92);border:1px solid var(--edge);border-radius:3px;
+  padding:26px 30px;font-size:12px;line-height:1.75;color:#c9c3ba;
+}
+#modal-card h3{font-family:Michroma,sans-serif;font-size:11px;letter-spacing:.2em;
+  color:var(--fe);text-transform:uppercase;margin:18px 0 10px}
+#modal-card h3:first-child{margin-top:0}
+#modal-card table{border-collapse:collapse;margin:6px 0}
+#modal-card td{padding:2px 14px 2px 0;vertical-align:top}
+#modal-card td:first-child{color:var(--nu);white-space:nowrap;font-weight:500}
+#modal-card ul{padding-left:18px;margin:6px 0}
+#modal-card li{margin:7px 0}
+#modal-card b{color:var(--ink);font-weight:500}
+#modal-card .note{color:var(--fe);font-size:11px}
+#modal-card .qrow{display:flex;gap:8px;margin-top:12px}
+#modal-close{
+  position:absolute;top:14px;right:18px;font-size:20px;color:var(--dim);
+  background:none;border:none;cursor:pointer;
+}
+#modal-close:hover{color:var(--hot)}
+#modal-inner{position:relative}
+
+/* ---- top-right utility row ------------------------------------------------ */
+#utils{position:fixed;top:14px;right:300px;display:flex;gap:6px}
+#utils .tl-btn{font-size:10px;min-width:30px}
+
+/* ---- physical-time presets ------------------------------------------------ */
+#speeds{display:flex;gap:4px;align-items:center}
+#speeds .tl-btn{font-size:8.5px;min-width:0;padding:0 8px}
+#speeds .tl-btn.on{border-color:var(--nu);color:var(--nu)}
+
 /* ---- boot error --------------------------------------------------------- */
 #fatal{
   position:fixed;inset:0;z-index:90;display:none;
@@ -207,11 +275,42 @@ canvas{display:block;position:fixed;inset:0}
       </div>
     </div>
     <div id="tl-jumps">
+      <span id="speeds">
+        <button class="tl-btn on" data-rate="narrative">story</button>
+        <button class="tl-btn" data-rate="1">1×</button>
+        <button class="tl-btn" data-rate="100">100×</button>
+        <button class="tl-btn" data-rate="10000">10⁴×</button>
+        <button class="tl-btn" data-rate="31557600">1yr/s</button>
+      </span>
+      <span style="width:14px"></span>
       <button class="tl-btn" id="jump-collapse">collapse</button>
       <button class="tl-btn" id="jump-explosion">explosion</button>
       <button class="tl-btn" id="jump-remnant">remnant</button>
     </div>
   </div>
+
+  <div id="annotation"></div>
+
+  <div id="scalebar">
+    <div id="scalebar-line" style="width:140px"></div>
+    <div id="scalebar-label">—</div>
+  </div>
+
+  <div id="utils">
+    <button class="tl-btn" id="btn-refs" title="scale references">⊕</button>
+    <button class="tl-btn" id="btn-quality" title="quality">◧</button>
+    <button class="tl-btn" id="btn-assume" title="scientific assumptions">Σ</button>
+    <button class="tl-btn" id="btn-help" title="help (H)">?</button>
+  </div>
+
+  <div id="vizbar">
+    <button class="tl-btn on" data-viz="0">Cinematic</button>
+    <button class="tl-btn" data-viz="1">Elements</button>
+    <button class="tl-btn" data-viz="2">Density</button>
+    <button class="tl-btn" data-viz="3">Temperature</button>
+    <button class="tl-btn" data-viz="4">Velocity</button>
+  </div>
+  <div class="panel" id="legend"></div>
 
   <div class="panel" id="lightcurve">
     <h2>Light curve</h2>
@@ -234,6 +333,15 @@ canvas{display:block;position:fixed;inset:0}
   <div class="desc">Final moments before core collapse.</div>
   <button id="begin">BEGIN CORE COLLAPSE</button>
   <div id="hint">click to fly &middot; WASD move &middot; Q/E up/down &middot; shift boost &middot; esc release</div>
+</div>
+
+<div id="modal">
+  <div id="modal-card">
+    <div id="modal-inner">
+      <button id="modal-close">×</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
 </div>
 
 <div id="fatal"></div>
