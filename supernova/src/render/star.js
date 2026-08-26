@@ -96,7 +96,8 @@ export class Star {
       this.uniforms.uTeff.value = snap.T_eff;
       this.haloUniforms.uTeff.value = snap.T_eff;
 
-      const targetFade = isStar ? 1 : 0;
+      let targetFade = isStar ? 1 : 0;
+      if (this.xray) targetFade *= 0.035;     // ghost shell from inside
       this._fade = this._fade === undefined ? 1 : this._fade + (targetFade - this._fade) * Math.min(dt * 6.0, 1);
       const on = this._fade > 0.004;
       this.photosphere.visible = on && this.surfaceAllowed !== false;
