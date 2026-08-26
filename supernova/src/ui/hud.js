@@ -49,7 +49,10 @@ export class Hud {
   }
 
   update(snap, clock) {
-    this._set('p-phase', PHASE_LABEL[snap.phase] ?? snap.phase);
+    const label = snap.bhFormed
+      ? (snap.t < 86400 ? 'FALLBACK — no revival' : 'THE STAR GOES DARK')
+      : (PHASE_LABEL[snap.phase] ?? snap.phase);
+    this._set('p-phase', label);
     this._set('p-time', (snap.t < 0 ? 'T−' : 'T+') + fmt.time(Math.abs(snap.t)).replace('−', ''));
     this._set('p-warp', clock.playing ? fmt.warpFactor(Math.abs(clock.dtdwall)) : 'paused');
 

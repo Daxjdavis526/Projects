@@ -292,6 +292,27 @@ const explosion = {
   step(st, model, t0, t1) {
     const dt = t1 - t0, t = t1, te = t - st._tRev;
 
+    /* Failed supernova: the black hole formed during the stall, the shock
+       never revived, and there is nothing to explode. The envelope falls
+       back over hours; the star simply goes dark — the "disappearing star"
+       transients (N6946-BH1) are exactly this. */
+    if (st.bhFormed) {
+      st.E_expl = 0;
+      st.M_ni = 0;
+      st.R_shock = Math.max(st.R_shock * Math.exp(-dt / 20), 1e6);
+      st.v_shock = 0;
+      st.L_nu = 0;
+      /* envelope accretes; the horizon grows */
+      const Mdot_fb = 0.5 * M_SUN / 3.15e7;             // ~0.5 Msun/yr fallback
+      st.M_bh = Math.min(st.M_bh + Mdot_fb * dt, model.M_star);
+      st.R_pns = 2 * G * st.M_bh / (C * C);
+      st.M_pns = st.M_bh;
+      /* the photosphere cools and dims as support vanishes */
+      st.L_em = model.L_star * 3.828e33 * Math.exp(-t / (30 * 86400));
+      st.T_eff = Math.max(model.T_eff * Math.exp(-t / (60 * 86400)), 3000);
+      return;
+    }
+
     /* Energy ramp, saturating at the model's explosion energy. */
     st.E_expl = model.E_expl * (1 - Math.exp(-te / 0.7));
 
@@ -351,6 +372,7 @@ const explosion = {
 const light = {
   enter(st, model) {
     st._t0 = st.t;
+    if (st.bhFormed) return;
     /* freeze per-shell homologous velocities: v = r / t at entry */
     for (let i = 0; i < N_SHELL; i++) {
       if (st.m[i] > model.M_remnant) st.v[i] = Math.max(st.v[i], st.r[i] / Math.max(st.t, 1));
@@ -359,6 +381,17 @@ const light = {
   },
   step(st, model, t0, t1) {
     const t = t1;
+    if (st.bhFormed) {
+      /* the fallback transient: dim red decline into nothing */
+      st.L_em = model.L_star * 3.828e33 * Math.exp(-t / (30 * 86400));
+      st.T_eff = Math.max(3000 * Math.exp(-t / (2 * 3.15e7)), 1200);
+      const Mdot_fb = 0.5 * M_SUN / 3.15e7;
+      st.M_bh = Math.min(st.M_bh + Mdot_fb * (t1 - t0), model.M_star);
+      st.M_pns = st.M_bh;
+      st.R_pns = 2 * G * st.M_bh / (C * C);
+      st.R_star = Math.max(st.R_star * Math.pow(0.5, (t1 - t0) / (5 * 3.15e7)), 1e11);
+      return;
+    }
     homologous(st, model, t0, t1);
 
     /* Radioactive chain, exact solution. */
@@ -394,6 +427,17 @@ const freeExp = {
   },
   step(st, model, t0, t1) {
     const t = t1;
+    if (st.bhFormed) {
+      /* the fallback transient: dim red decline into nothing */
+      st.L_em = model.L_star * 3.828e33 * Math.exp(-t / (30 * 86400));
+      st.T_eff = Math.max(3000 * Math.exp(-t / (2 * 3.15e7)), 1200);
+      const Mdot_fb = 0.5 * M_SUN / 3.15e7;
+      st.M_bh = Math.min(st.M_bh + Mdot_fb * (t1 - t0), model.M_star);
+      st.M_pns = st.M_bh;
+      st.R_pns = 2 * G * st.M_bh / (C * C);
+      st.R_star = Math.max(st.R_star * Math.pow(0.5, (t1 - t0) / (5 * 3.15e7)), 1e11);
+      return;
+    }
     homologous(st, model, t0, t1);
     st.R_fwd = st._vej * t;
     st.R_cd = st.R_fwd * 0.85;
@@ -426,6 +470,7 @@ const sedov = {
   },
   step(st, model, t0, t1) {
     const t = t1;
+    if (st.bhFormed) { blackHoleQuiet(st, model, t0, t1); return; }
     /* R ∝ t^(2/3) matched continuously to the free-expansion radius */
     st.R_fwd = st._RS * Math.pow(t / st._tS, 2 / 3);
     st.v_shock = (2 / 3) * st.R_fwd / t;
@@ -452,6 +497,18 @@ const sedov = {
     /* (position integrated by the renderer from st.kick and t) */
   },
 };
+
+/* After a failed supernova there is no remnant to evolve: a black hole sits
+   where the star was, finishing its meal. */
+function blackHoleQuiet(st, model, t0, t1) {
+  st.L_em = 0; st.L_nu = 0;
+  st.R_shock = 0; st.R_fwd = 0; st.R_rev = 0;
+  st.M_bh = Math.min(st.M_bh + 0.1 * M_SUN / 3.15e7 * (t1 - t0), model.M_star);
+  st.M_pns = st.M_bh;
+  st.R_pns = 2 * G * st.M_bh / (C * C);
+  st.R_star = Math.max(st.R_star * 0.99, 1e10);
+  st.T_eff = 1200;
+}
 
 /* --------------------------------------------------------------------------- */
 function homologous(st, model, t0, t1) {

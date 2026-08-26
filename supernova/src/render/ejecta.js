@@ -34,8 +34,18 @@ const GROUPS = [
   { f: 0.36, v0: 8600,  v1: 13500, col: [1.00, 0.66, 0.62], gain: 0.38, late: 0.22 }, // H
 ];
 
+/* Type Ia ash: over half a solar mass of radioactive nickel, silicon-group
+   material, unburned carbon/oxygen at the edges — and no hydrogen at all. */
+const GROUPS_IA = [
+  { f: 0.42, v0: 6000,  v1: 11000, col: [1.00, 0.80, 0.38], gain: 1.6,  late: 0.85 }, // Ni/Fe
+  { f: 0.30, v0: 9500,  v1: 14500, col: [1.00, 0.55, 0.28], gain: 1.0,  late: 0.95 }, // Si/S
+  { f: 0.16, v0: 13000, v1: 19000, col: [0.30, 0.95, 0.85], gain: 0.7,  late: 1.1 },  // O
+  { f: 0.12, v0: 16000, v1: 23000, col: [0.62, 0.66, 0.72], gain: 0.5,  late: 0.6 },  // C
+];
+
 export class Ejecta {
-  constructor(stage, quality) {
+  constructor(stage, quality, model) {
+    this.groups = model?.id === 'ia' ? GROUPS_IA : GROUPS;
     this.stage = stage;
     this.count = quality.knots;
     this._built = false;
@@ -189,11 +199,12 @@ export class Ejecta {
     const late = new Float32Array(this.count);
 
     /* group boundaries by cumulative fraction */
-    let gi = 0, gAcc = GROUPS[0].f;
+    const GS = this.groups;
+    let gi = 0, gAcc = GS[0].f;
     for (let i = 0; i < this.count; i++) {
       const u = i / this.count;
-      while (u > gAcc && gi < GROUPS.length - 1) { gi++; gAcc += GROUPS[gi].f; }
-      const G = GROUPS[gi];
+      while (u > gAcc && gi < GS.length - 1) { gi++; gAcc += GS[gi].f; }
+      const G = GS[gi];
 
       /* accept-reject against (1 + zeta)^2.2 — knots go where the lobes go */
       let n, w, tries = 0;
@@ -232,7 +243,7 @@ export class Ejecta {
 
   update(dt, snap) {
     const active = ['explosion', 'light', 'free', 'sedov', 'detonation', 'fireball', 'tail']
-      .includes(snap.phase) && snap.t > 0;
+      .includes(snap.phase) && snap.t > 0 && !snap.bhFormed;
     this.mesh.visible = active;
     this.glow.visible = active && snap.phase === 'explosion';
     if (!active) return;

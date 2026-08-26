@@ -141,6 +141,50 @@ export class Core {
     this.burst.visible = false;
     this.group.add(this.burst);
 
+    /* --- black hole --------------------------------------------------------
+       For the failed-supernova track. Drawn honestly small (the horizon of a
+       15 Msun hole is 44 km): a disc of true black with a thin photon-ring
+       halo so there is something to find at the centre of the absence. */
+    this.bhGroup = new THREE.Group();
+    this.bhGroup.visible = false;
+    this.bh = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 48, 24),
+      new THREE.MeshBasicMaterial({ color: 0x000000 }),
+    );
+    this.bhGroup.add(this.bh);
+    this.bhRing = new THREE.Mesh(
+      new THREE.SphereGeometry(1.5, 48, 24),
+      new THREE.ShaderMaterial({
+        uniforms: { uAlpha: { value: 0.6 } },
+        vertexShader: /* glsl */`
+          varying vec3 vN; varying vec3 vV;
+          #include <common>
+          #include <logdepthbuf_pars_vertex>
+          void main(){
+            vec4 mv = modelViewMatrix * vec4(position, 1.0);
+            vV = -mv.xyz; vN = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * mv;
+            #include <logdepthbuf_vertex>
+          }`,
+        fragmentShader: /* glsl */`
+          uniform float uAlpha;
+          varying vec3 vN; varying vec3 vV;
+          #include <logdepthbuf_pars_fragment>
+          void main(){
+            #include <logdepthbuf_fragment>
+            float mu = abs(dot(normalize(vN), normalize(vV)));
+            /* a narrow bright annulus near the limb — the lensed photon ring,
+               impressionistically */
+            float ring = smoothstep(0.30, 0.05, abs(mu - 0.18));
+            gl_FragColor = vec4(vec3(1.0, 0.85, 0.6) * ring * uAlpha, ring * uAlpha);
+          }`,
+        transparent: true, blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    );
+    this.bhGroup.add(this.bhRing);
+    this.group.add(this.bhGroup);
+
     /* --- infall streaks ---------------------------------------------------
        The outer core raining onto the PNS at up to a quarter of light speed.
        Instanced elongated prisms, stretched along their velocity; recycled
@@ -204,6 +248,13 @@ export class Core {
         this.burstUniforms.uTime.value += dt;
       }
     } else this.burst.visible = false;
+
+    /* black hole, when the story went that way */
+    this.bhGroup.visible = snap.bhFormed;
+    if (snap.bhFormed) {
+      const rH = Math.max(snap.R_pns * KM, 20);   // horizon radius, km
+      this.bhGroup.scale.setScalar(rH);
+    }
 
     /* infall streaks: only while there is infall to show */
     const infOn = inCollapse || (post && snap.M_dot_acc > 1e31);

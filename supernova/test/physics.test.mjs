@@ -92,6 +92,13 @@ const check = (label, cond, detail = '') => {
   check('BH forms', formed, 't = ' + tForm.toFixed(2) + ' s');
   check('neutrino signal truncates at horizon', LnuAfter !== null && LnuAfter < LnuBefore * 1e-3,
         LnuAfter === null ? 'no sample' : (LnuAfter / LnuBefore).toExponential(1));
+  /* a failed supernova must actually fail */
+  const sEnd = eng.snapshot();
+  check('failed SN: no explosion energy', sEnd.E_expl < 1e49, sEnd.E_expl.toExponential(1));
+  check('failed SN: no nickel', sEnd.M_ni < 1e30);
+  check('failed SN: the star goes dark', sEnd.L_em < 1e38, sEnd.L_em.toExponential(1));
+  check('failed SN: black hole grows past the remnant mass', sEnd.M_bh > 5 * M_SUN,
+        (sEnd.M_bh / M_SUN).toFixed(1) + ' Msun');
 }
 
 /* ---- Type Ia ---- */

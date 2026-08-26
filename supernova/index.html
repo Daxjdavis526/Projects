@@ -77,8 +77,11 @@ canvas{display:block;position:fixed;inset:0}
   margin-top:9px;font-size:11.5px;letter-spacing:.05em;color:#b4aea4;
   max-width:40ch;line-height:1.75;text-shadow:0 1px 14px #000;
 }
+#scenarios{display:flex;gap:7px;margin-top:26px}
+#scenarios .tl-btn{font-size:9px;letter-spacing:.1em;padding:0 12px;height:28px;background:rgba(6,5,4,.55)}
+#scenarios .tl-btn.on{border-color:var(--fe);color:var(--fe)}
 #begin{
-  margin-top:30px;font-family:Michroma,sans-serif;font-size:10.5px;
+  margin-top:16px;font-family:Michroma,sans-serif;font-size:10.5px;
   letter-spacing:.26em;color:var(--hot);
   background:rgba(6,5,4,.55);
   border:1px solid rgba(255,179,71,.55);border-radius:2px;
@@ -258,6 +261,7 @@ canvas{display:block;position:fixed;inset:0}
     <button class="tl-btn on" id="focus-star">Focus Star</button>
     <button class="tl-btn" id="focus-core">Focus Core</button>
     <button class="tl-btn" id="mute" title="cinematic audio — sound does not propagate in vacuum">♪</button>
+    <button class="tl-btn" id="btn-cine" title="documentary camera — any input returns control">CINEMA</button>
   </div>
   <div id="view-note" style="display:none;position:fixed;top:46px;left:50%;transform:translateX(-50%);
     font-size:9px;letter-spacing:.1em;color:var(--dim);text-shadow:0 1px 8px #000">
@@ -331,6 +335,11 @@ canvas{display:block;position:fixed;inset:0}
   <div class="name">SUPERNOVA</div>
   <div class="sub">Massive red supergiant</div>
   <div class="desc">Final moments before core collapse.</div>
+  <div id="scenarios">
+    <button class="tl-btn sc" data-m="ccsn15">Core collapse · 15 M☉</button>
+    <button class="tl-btn sc" data-m="ccsn40bh">Black hole · 40 M☉</button>
+    <button class="tl-btn sc" data-m="ia">Type Ia · white dwarf</button>
+  </div>
   <button id="begin">BEGIN CORE COLLAPSE</button>
   <div id="hint">click to fly &middot; WASD move &middot; Q/E up/down &middot; shift boost &middot; esc release</div>
 </div>

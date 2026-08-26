@@ -28,6 +28,7 @@ import { LightCurve } from './ui/lightcurve.js';
 import { Annotations } from './ui/annotations.js';
 import { Modals } from './ui/modals.js';
 import { Refs } from './render/refs.js';
+import { Cinematic } from './camera/cinematic.js';
 import { ELEMENTS, ELEMENT_COLOR } from './config.js';
 import { Score } from './audio/audio.js';
 import { Timeline } from './ui/timeline.js';
@@ -51,7 +52,12 @@ renderer.attach(gl => stage.draw(gl), stage.near, stage.camera);
 renderer.onResize = (w, h) => stage.resize(w, h);
 
 /* --- progenitor ---------------------------------------------------------- */
-const model = MODELS[DEFAULT_MODEL];
+const modelId = (() => {
+  const q = new URLSearchParams(location.search).get('m');
+  if (q && MODELS[q]) return q;
+  return DEFAULT_MODEL;
+})();
+const model = MODELS[modelId];
 const star = new Star(stage, quality, model);
 const R_STAR_KM = model.R_star * KM;         // 4.17e8 km
 
@@ -63,7 +69,7 @@ const engine = new Engine(model, clock);
 const hud = new Hud(model);
 const timeline = new Timeline(clock, engine, () => { /* seek: engine follows in the loop */ });
 const lightcurve = new LightCurve(clock);
-const annotations = new Annotations();
+const annotations = new Annotations(model.id === 'ia' ? 'ia' : 'cc');
 let snap = engine.snapshot();
 
 /* --- physics -> GPU bridge + interior view -------------------------------- */
@@ -71,7 +77,7 @@ const profiles = new Profiles();
 const interior = new Interior(stage, profiles, quality);
 const core = new Core(stage);
 const shock = new Shock(stage, quality);
-const ejecta = new Ejecta(stage, quality);
+const ejecta = new Ejecta(stage, quality, model);
 const score = new Score();
 
 /* --- focus targets --------------------------------------------------------
@@ -100,13 +106,30 @@ $('begin').addEventListener('click', () => {
   $('title').classList.add('gone');
   setTimeout(() => $('title').style.display = 'none', 950);
   score.init();                       // needs the user gesture
-  /* Jump the story to the last seconds before instability and let it run. */
+  /* Jump the story to the last seconds before instability and let it run,
+     with the documentary camera until the user takes over. */
   clock.seekU(0.128);
   clock.play('narrative');
+  cinema.start();
 });
 
 const refs = new Refs(stage);
 const modals = new Modals(rig, renderer);
+const cinema = new Cinematic(rig, clock);
+
+$('btn-cine')?.addEventListener('click', () => {
+  cinema.active ? cinema.stop() : cinema.start();
+});
+
+/* scenario picker on the title screen */
+document.querySelectorAll('#scenarios .sc').forEach(b => {
+  b.addEventListener('click', e => {
+    e.stopPropagation();
+    const m = b.dataset.m;
+    if (m !== modelId) location.search = '?m=' + m;
+  });
+  b.classList.toggle('on', b.dataset.m === modelId);
+});
 
 $('btn-refs')?.addEventListener('click', () => {
   const on = refs.toggle();
@@ -250,6 +273,7 @@ function frame(now) {
   timeline.update();
   annotations.update(snap, dt);
   refs.update(snap);
+  cinema.update(dt, snap);
 
   stage.sync();
   updateStats(dt);
@@ -259,4 +283,17 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 /* Expose for the screenshot harness and for poking at in the console. */
-window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, shock, ejecta, score, refs, modals, THREE };
+{
+  const sub = document.querySelector('#title .sub');
+  const desc = document.querySelector('#title .desc');
+  if (model.id === 'ccsn40bh') {
+    sub.textContent = '40 M☉ stripped supergiant';
+    desc.textContent = 'A core so massive the shock never escapes. Final moments before collapse to a black hole.';
+  } else if (model.id === 'ia') {
+    sub.textContent = 'White dwarf at the Chandrasekhar limit';
+    desc.textContent = 'Degenerate carbon about to ignite. No core, no collapse — and no survivor.';
+    document.getElementById('begin').textContent = 'IGNITE CARBON FUSION';
+  }
+}
+
+window.SN = { renderer, stage, rig, star, model, clock, engine, interior, profiles, core, shock, ejecta, score, refs, modals, cinema, THREE };
