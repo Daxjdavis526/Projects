@@ -58,20 +58,20 @@ export function buildLocalGroupLayer(scene, registry, ctx0) {
       C.setRGB(0.95, 0.86 + warm * 0.08, 0.72 + warm * 0.2);
       if (big && Math.hypot(x, y) > R * 0.45 && rnd() < 0.35) C.setRGB(0.75, 0.82, 1.0);
       sc[i*3] = C.r; sc[i*3+1] = C.g; sc[i*3+2] = C.b;
-      sl[i] = 6e32 * (0.5 + rnd() * 2) * (big ? 3 : 1);
+      sl[i] = Math.log2(6e32 * (0.5 + rnd() * 2) * (big ? 3 : 1));
       i++;
     }
     // core glow, physically sized
     gp.push(g.p[0] / LY, g.p[1] / LY, g.p[2] / LY);
     C.setRGB(1.0, 0.93, 0.8);
     gc.push(C.r, C.g, C.b);
-    gl.push(g.diam * 0.33 * LY);
+    gl.push(Math.log2(g.diam * 0.33 * LY));
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(sp.slice(0, i * 3), 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(sc.slice(0, i * 3), 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(sl.slice(0, i), 1));
-  const mat = starMaterial({ fluxScale: 6e4, maxPx: 4.5 });
+  const mat = starMaterial({ fluxScale: 3e7, maxPx: 4.5 });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false; pts.renderOrder = 2;
   group.add(pts);
@@ -94,7 +94,7 @@ export function buildLocalGroupLayer(scene, registry, ctx0) {
       radius: g.diam / 2 * LY, distLy: g.distLy,
       color: new THREE.Color(0xf2e2c4), lum: 0,
       pos: () => g.p,
-      labelBand: g.diam > 30e3 ? [20.6, 24.2] : [21.6, 23.4],
+      labelBand: g.diam > 30e3 ? [20.6, 24.2] : [22.0, 23.4],
       focusD: g.diam * LY * 1.6, kind: 'galaxy',
       priority: g.diam > 30e3 ? 8 : 3,
     });

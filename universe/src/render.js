@@ -63,7 +63,7 @@ export function placeBody(obj, p, radiusMeters, ctx) {
 // -------------------------------------------------- star point shader
 const STAR_VERT = /* glsl */`
   attribute vec3 aColor;
-  attribute float aLum;          // luminosity, arbitrary consistent units
+  attribute float aLum;          // log2(luminosity) — log-space avoids f32 overflow
   varying vec3 vColor;
   varying float vAlpha;
   uniform vec3 uFocusLocal;      // focus position, in this layer's local units
@@ -82,18 +82,17 @@ const STAR_VERT = /* glsl */`
     vec3 relC = compressPos(rel, shrink);
     vec4 mv = modelViewMatrix * vec4(relC, 1.0);
     gl_Position = projectionMatrix * mv;
-    float px; 
+    float px;
     if (uPhysMode > 0.5) {
       // physically-sized blob (dust clumps, HII regions, dwarf galaxies)
       float viewDist = max(length(mv.xyz), 1e-9);
-      px = clamp(uPxPerUnit * 2.0 * (aLum / uS) * shrink / viewDist, 0.75, uMaxPx);
+      px = clamp(uPxPerUnit * 2.0 * (exp2(aLum) / uS) * shrink / viewDist, 0.75, uMaxPx);
       vAlpha = uOpacity;
     } else {
-      // flux -> apparent size & alpha (log response, like the eye)
-      float flux = aLum * uFluxScale / (trueDist * trueDist);
-      float m = log2(flux + 1e-30) * 0.5;         // pseudo-magnitude
+      // flux -> size & alpha, computed in log2 space (f32-safe at any distance)
+      float m = 0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist));
       px = clamp(m * 0.9 + 8.0, 0.0, uMaxPx);
-      vAlpha = clamp(m * 0.16 + 1.15, 0.0, 1.0) * uOpacity;
+      vAlpha = clamp(m * 0.13 + 1.05, 0.0, 1.0) * uOpacity;
       if (px < 1.0) { vAlpha *= px * px; px = 1.0; }  // sub-pixel -> dim, not shrink
     }
     gl_PointSize = px;
@@ -178,7 +177,7 @@ export class Beacons {
     const i = this.n++;
     this.pos[i*3] = rx; this.pos[i*3+1] = ry; this.pos[i*3+2] = rz;
     this.col[i*3] = color.r; this.col[i*3+1] = color.g; this.col[i*3+2] = color.b;
-    this.lum[i] = lum;
+    this.lum[i] = Math.log2(lum);
   }
   commit(ctx) {
     this.geo.setDrawRange(0, this.n);

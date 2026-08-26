@@ -281,11 +281,12 @@ export function buildSolarLayer(scene, registry, ctx0) {
     if (p.id === 'saturn') {
       const ringTex = fbmTexture(1024, 8, (u, v, fbm) => {
         const r = u;
-        let a = 0.75 * (0.55 + 0.45 * Math.sin(r * 60) * fbm(r * 30, 0.5, 3));
+        let a = 0.55 + 0.45 * Math.sin(r * 60) * fbm(r * 30, 0.5, 3);
         if (r > 0.28 && r < 0.34) a *= 0.12;         // Cassini division
-        if (r < 0.1) a *= r * 8;
+        if (r < 0.06) a *= r / 0.06;                 // soft inner edge
+        if (r > 0.97) a *= (1 - r) / 0.03;           // soft outer edge
         const c = mix(190, 230, fbm(r * 22, 0.2, 3));
-        return [c, c * 0.94, c * 0.82];
+        return [c * a, c * 0.94 * a, c * 0.82 * a];
       });
       ringTex.rotation = 0;
       const rg = new THREE.RingGeometry(1.24, 2.27, 128, 1);
@@ -378,7 +379,7 @@ export function buildSolarLayer(scene, registry, ctx0) {
       pos[i*3] = x / GM; pos[i*3+1] = y / GM; pos[i*3+2] = z / GM;
       const c = colorFn(rnd);
       col[i*3] = c[0]; col[i*3+1] = c[1]; col[i*3+2] = c[2];
-      lu[i] = lum * (0.3 + rnd());
+      lu[i] = Math.log2(lum * (0.3 + rnd()));
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -392,8 +393,10 @@ export function buildSolarLayer(scene, registry, ctx0) {
   const nScale = ctx0.quality.points;
   const asteroids = beltPoints(Math.floor(22000 * nScale), 2.1 * AU, 3.3 * AU, 0.10,
     r => [0.62, 0.58, 0.53], 4e17, 11);
+  asteroids.material.uniforms.uFluxScale.value = 30;
   const kuiper = beltPoints(Math.floor(26000 * nScale), 30 * AU, 50 * AU, 0.09,
     r => [0.55, 0.60, 0.68], 3e20, 12);
+  kuiper.material.uniforms.uFluxScale.value = 10;
   group.add(asteroids); group.add(kuiper);
 
   // Oort cloud: spherical shell, log-ish radial distribution
@@ -409,13 +412,13 @@ export function buildSolarLayer(scene, registry, ctx0) {
       pos[i*3+1] = r * u / GM;
       pos[i*3+2] = r * s * Math.sin(th) / GM;
       col[i*3] = 0.55; col[i*3+1] = 0.62; col[i*3+2] = 0.75;
-      lu[i] = 2e24 * (0.3 + rnd());
+      lu[i] = Math.log2(2e24 * (0.3 + rnd()));
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
     g.setAttribute('aLum', new THREE.BufferAttribute(lu, 1));
-    const p = new THREE.Points(g, starMaterial({ fluxScale: 1, maxPx: 2.5 }));
+    const p = new THREE.Points(g, starMaterial({ fluxScale: 0.5, maxPx: 2.5 }));
     p.frustumCulled = false;
     return p;
   })();

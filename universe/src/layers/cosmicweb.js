@@ -42,10 +42,9 @@ const WEB_VERT = /* glsl */`
     vec3 relC = compressPos(rel, shrink);
     vec4 mv = modelViewMatrix * vec4(relC, 1.0);
     gl_Position = projectionMatrix * mv;
-    float flux = aLum * uFluxScale / (trueDist * trueDist);
-    float m = log2(flux + 1e-30) * 0.5;
+    float m = 0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist));
     float px = clamp(m * 0.9 + 8.0, 0.0, uMaxPx);
-    vAlpha = clamp(m * 0.16 + 1.15, 0.0, 1.0) * uOpacity;
+    vAlpha = clamp(m * 0.13 + 1.05, 0.0, 1.0) * uOpacity;
     if (px < 1.0) { vAlpha *= px * px; px = 1.0; }
     gl_PointSize = px;
     vColor = mix(aColor, uHot, uEarly * 0.85);
@@ -106,7 +105,7 @@ export function buildCosmicWebLayer(scene, registry, ctx0) {
       C.setRGB(0.62 + t * 0.2, 0.70 + t * 0.16, 0.95);
     }
     col[i*3] = C.r; col[i*3+1] = C.g; col[i*3+2] = C.b;
-    lum[i] = L * (0.3 + rnd() * 2.2);
+    lum[i] = Math.log2(L * (0.3 + rnd() * 2.2));
     i++;
   };
   for (const n of nodes) {
@@ -195,8 +194,8 @@ export function buildCosmicWebLayer(scene, registry, ctx0) {
     const f = bandFade(ctx.logS, 24.7, 27.4, 0.9);
     group.visible = f > 0.01;
     if (!group.visible) return;
-    const t = smoothstep(24.0, 26.0, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(7e2, 2.2e4, t);
+    const t = smoothstep(24.5, 26.6, ctx.logS);
+    mat.uniforms.uFluxScale.value = lerp(6e7, 5e9, t * t);
     mat.uniforms.uOpacity.value = f;
     mat.uniforms.uEarly.value = early;
     mat.uniforms.uScaleA.value = a;

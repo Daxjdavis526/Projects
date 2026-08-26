@@ -55,7 +55,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
     const j = 0.8 + rnd() * jit;
     pos[i*3] = x; pos[i*3+1] = y; pos[i*3+2] = z;
     col[i*3] = C.r * j; col[i*3+1] = C.g * j; col[i*3+2] = C.b * j;
-    lum[i] = L * (0.4 + rnd() * 1.3);
+    lum[i] = Math.log2(L * (0.4 + rnd() * 1.3));
     i++;
   };
   const L0 = 6e32;                                  // ~1e6 L☉ per point
@@ -120,7 +120,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
     dpos[k*3] = r * Math.cos(th); dpos[k*3+1] = r * Math.sin(th); dpos[k*3+2] = z;
     const t = rnd2() * 0.35;
     dcol[k*3] = 0.10 + t * 0.09; dcol[k*3+1] = 0.07 + t * 0.05; dcol[k*3+2] = 0.055 + t * 0.03;
-    dlum[k] = (90 + rnd2() * 200) * PC;              // physical radius
+    dlum[k] = Math.log2((90 + rnd2() * 200) * PC);   // log2 physical radius
     k++;
   }
   const dgeo = new THREE.BufferGeometry();
@@ -147,7 +147,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
     hpos[h*3] = r * Math.cos(th); hpos[h*3+1] = r * Math.sin(th); hpos[h*3+2] = gauss(rnd3) * 80;
     const warm = rnd3();
     hcol[h*3] = 0.9; hcol[h*3+1] = 0.35 + warm * 0.2; hcol[h*3+2] = 0.5 + warm * 0.25;
-    hlum[h] = (120 + rnd3() * 260) * PC;
+    hlum[h] = Math.log2((120 + rnd3() * 260) * PC);
     h++;
   }
   const hgeo = new THREE.BufferGeometry();
@@ -170,7 +170,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
   });
   registry.push({
     id: 'sgra', name: SGRA.name, cls: SGRA.cls, blurb: SGRA.blurb,
-    radius: SGRA.radius, color: new THREE.Color(0xffc890), lum: 3e31,
+    radius: SGRA.radius, color: new THREE.Color(0xffc890), lum: 1e34,
     pos: () => GC, labelBand: [17.5, 21.2], focusD: 5e17,
     kind: 'blackhole', priority: 8,
   });
@@ -183,7 +183,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
     // flux scale as real stars become unresolvable so the ensemble keeps
     // the correct integrated brightness.
     const t = smoothstep(18.0, 21.5, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(500, 4.5e4, t * t);
+    mat.uniforms.uFluxScale.value = lerp(200, 4.5e6, t * t);
     mat.uniforms.uOpacity.value = f;
     dmat.uniforms.uOpacity.value = f * (0.16 + 0.22 * t);
     hmat.uniforms.uOpacity.value = f * 0.5;

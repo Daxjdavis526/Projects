@@ -40,7 +40,7 @@ export function buildClustersLayer(scene, registry, ctx0) {
       else if (w < 0.85) C.setRGB(0.9, 0.9, 0.95);
       else C.setRGB(0.72, 0.8, 1.0);                 // spirals: blue
       sc[i*3] = C.r; sc[i*3+1] = C.g; sc[i*3+2] = C.b;
-      sl[i] = 6e36 * (0.3 + rnd() * 2.4);            // ~1e10 L☉ galaxies
+      sl[i] = Math.log2(6e36 * (0.3 + rnd() * 2.4)); // ~1e10 L☉ galaxies
       i++;
     }
   });
@@ -48,7 +48,7 @@ export function buildClustersLayer(scene, registry, ctx0) {
   geo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(sc, 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(sl, 1));
-  const mat = starMaterial({ fluxScale: 1.2e3, maxPx: 4 });
+  const mat = starMaterial({ fluxScale: 80, maxPx: 4 });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false; pts.renderOrder = 2;
   group.add(pts);
@@ -78,7 +78,7 @@ export function buildClustersLayer(scene, registry, ctx0) {
   const lmat = new THREE.ShaderMaterial({
     uniforms: { uOp: { value: 0.16 } },
     vertexShader: `varying vec3 vN; varying vec3 vP;
-      void main(){ vN = normalize(mat3(modelMatrix)*normal);
+      void main(){ vN = normalize(mat3(modelMatrix)*normalize(position));  // radial: smooth on a blob
       vec4 w = modelMatrix*vec4(position,1.0); vP = w.xyz;
       gl_Position = projectionMatrix*viewMatrix*w; }`,
     fragmentShader: `varying vec3 vN; varying vec3 vP; uniform float uOp;
@@ -116,8 +116,8 @@ export function buildClustersLayer(scene, registry, ctx0) {
     const f = bandFade(ctx.logS, 22.4, 26.4, 0.8);
     group.visible = f > 0.01;
     if (!group.visible) return;
-    const t = smoothstep(23.0, 25.0, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(1.2e3, 4e4, t);
+    const t = smoothstep(23.0, 25.3, ctx.logS);
+    mat.uniforms.uFluxScale.value = lerp(80, 2.5e3, t);
     mat.uniforms.uOpacity.value = f * (ctx.timeMode ? 1 - ctx.timeEarly : 1);
     updateStarUniforms(mat, ctx, [0, 0, 0], null, MPC);
     const lf = bandFade(ctx.logS, 24.0, 25.6, 0.5);

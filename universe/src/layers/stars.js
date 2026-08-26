@@ -73,13 +73,13 @@ export function buildStarsLayer(scene, registry, ctx0) {
     C.set(cls[3]);
     const jitter = 0.85 + rnd() * 0.3;
     col[i*3] = C.r * jitter; col[i*3+1] = C.g * jitter; col[i*3+2] = C.b * jitter;
-    lum[i] = cls[2] * (0.4 + rnd() * 1.4) * L_SUN;
+    lum[i] = Math.log2(cls[2] * (0.4 + rnd() * 1.4) * L_SUN);
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(lum, 1));
-  const mat = starMaterial({ fluxScale: 2600, maxPx: 9 });
+  const mat = starMaterial({ fluxScale: 9e5, maxPx: 9 });
   const points = new THREE.Points(geo, mat);
   points.frustumCulled = false;
   points.renderOrder = 2;
