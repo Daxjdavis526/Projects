@@ -78,7 +78,7 @@ See the in-app **Model & assumptions** panel for the full honest list. Key
 points: simplified radiative transfer (opaque blackbody proxy + procedural
 turbulence, no scattering, snapshot light-travel time); display temperatures
 shifted into the visible band; disk motion time-lapsed (readouts show true
-values — near a 4.3×10⁶ M☉ hole the ISCO period is ~29 minutes); free fall
+values — near a 4.3×10⁶ M☉ hole the ISCO period is ~18 minutes); free fall
 uses the Schwarzschild radial solution; g-factor clamped to a displayable
 range; no interior physics.
 

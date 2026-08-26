@@ -1382,7 +1382,7 @@ function frame(tms){
     gl.bindTexture(gl.TEXTURE_2D, srcTex);
     gl.uniform1i(downProg.u.uT, 0);
     gl.uniform2f(downProg.u.uTexel, 1/sw, 1/sh);
-    gl.uniform1f(downProg.u.uThresh, i===0 ? 1.0 : -1.0);
+    gl.uniform1f(downProg.u.uThresh, i===0 ? 1.4 : -1.0);
     draw();
   }
   gl.enable(gl.BLEND);
@@ -1411,7 +1411,7 @@ function frame(tms){
   gl.uniform1i(compProg.u.uBloom, 1);
   gl.uniform2f(compProg.u.uRes, canvas.width, canvas.height);
   gl.uniform1f(compProg.u.uExposure, state.exposure);
-  gl.uniform1f(compProg.u.uBloomI, 0.12);
+  gl.uniform1f(compProg.u.uBloomI, 0.07);
   draw();
 
   window.__frames++;
