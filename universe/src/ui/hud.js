@@ -17,8 +17,12 @@ export class Hud {
     this._lastCrumb = '';
   }
   update(ctx, focusLabel) {
-    // context ladder
-    let idx = CONTEXTS.findIndex(c => ctx.S < c.upTo);
+    // context ladder: governed by zoom or by true distance from Earth,
+    // whichever is larger (visiting Sirius up close is still 'Solar Neighborhood')
+    const e = ctx.earthPos, cp = ctx.camPos;
+    const dE = Math.hypot(cp[0]-e[0], cp[1]-e[1], cp[2]-e[2]);
+    const ctxD = Math.max(ctx.S, dE * 0.6);
+    let idx = CONTEXTS.findIndex(c => ctxD < c.upTo);
     if (idx < 0) idx = CONTEXTS.length - 1;
     const trail = [];
     if (idx < CONTEXTS.length - 1) trail.push(CONTEXTS[idx + 1].name);
@@ -28,9 +32,11 @@ export class Hud {
       (trail.length ? `<span class="sep">›</span><span class="trail" style="opacity:.45">${trail[0]}</span>` : '');
     if (html !== this._lastCrumb) { this.crumb.innerHTML = html; this._lastCrumb = html; }
 
-    // focus + camera distance
+    // focus + camera distance (or speed, in free flight)
     this.focusName.textContent = focusLabel.toUpperCase();
-    this.focusDist.textContent = 'camera · ' + fmtLen(ctx.S) + ' out';
+    this.focusDist.textContent = ctx.mode === 'fly'
+      ? 'speed · ' + fmtLen(ctx.S) + ' per second'
+      : 'camera · ' + fmtLen(ctx.S) + ' out';
 
     // ruler: meters per CSS pixel at the focus plane
     const mpp = ctx.S / ctx.pxPerUnitCSS;

@@ -6,7 +6,9 @@ const $ = s => document.querySelector(s);
 const BOOKMARKS = [
   ['Earth', 'earth'], ['Moon', 'moon'], ['Solar System', 'sun'],
   ['Heliopause', 'heliopause'], ['Oort Cloud', 'oort'],
-  ['Nearest Stars', 'star:Proxima Centauri'], ['Milky Way', 'milkyway'],
+  ['Nearest Stars', 'star:Proxima Centauri'], ['Orion Nebula', 'neb:Orion Nebula (M42)'],
+  ['Pleiades', 'cl2:Pleiades (M45)'], ['TRAPPIST-1', 'star:TRAPPIST-1'],
+  ['Milky Way', 'milkyway'],
   ['Galactic Center', 'sgra'], ['Andromeda', 'lg:Andromeda Galaxy (M31)'],
   ['Local Group', 'localgroup'], ['Virgo Cluster', 'cl:Virgo Cluster'],
   ['Laniakea', 'laniakea'], ['Cosmic Web', 'cosmicweb'],

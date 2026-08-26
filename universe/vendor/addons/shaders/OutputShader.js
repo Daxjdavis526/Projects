@@ -42,6 +42,10 @@ const OutputShader = {
 
 			gl_FragColor = texture2D( tDiffuse, vUv );
 
+			// HORIZON patch: never let Inf/NaN reach tone mapping
+			gl_FragColor = clamp( gl_FragColor, vec4( 0.0 ), vec4( 1024.0 ) );
+			if ( gl_FragColor.r != gl_FragColor.r ) gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+
 			// tone mapping
 
 			#ifdef LINEAR_TONE_MAPPING

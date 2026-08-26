@@ -39,6 +39,62 @@ export function glowTexture(size = 128) {
   return t;
 }
 
+/** Blackbody temperature (K) -> linear-ish RGB, tuned for star rendering */
+export function kelvinToRGB(k) {
+  const t = Math.max(1000, Math.min(k, 40000)) / 100;
+  let r, g, b;
+  if (t <= 66) { r = 255; g = 99.47 * Math.log(t) - 161.12; }
+  else { r = 329.7 * Math.pow(t - 60, -0.1332); g = 288.12 * Math.pow(t - 60, -0.0755); }
+  if (t >= 66) b = 255;
+  else if (t <= 19) b = 0;
+  else b = 138.52 * Math.log(t - 10) - 305.04;
+  const c = v => Math.max(0, Math.min(255, v)) / 255;
+  return [c(r), c(g), c(b)];
+}
+
+/** Soft stellar PSF: gaussian core + inverse-power halo. */
+export function starPSFTexture(size = 128) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d');
+  const img = g.createImageData(size, size);
+  const d = img.data;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const dx = (x + 0.5) / size - 0.5, dy = (y + 0.5) / size - 0.5;
+    const r = Math.hypot(dx, dy) * 2;               // 0..1 at edge
+    let v = Math.exp(-r * r * 14) + 0.16 / (1 + Math.pow(r * 6.5, 2.5));
+    v *= Math.max(0, 1 - r * r);                     // hard-zero the corners
+    const i = (y * size + x) * 4;
+    d[i] = d[i+1] = d[i+2] = 255;
+    d[i+3] = Math.min(255, v * 255);
+  }
+  g.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/** Bright-star PSF: soft core + 4-point diffraction spikes. */
+export function spikePSFTexture(size = 256) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d');
+  const img = g.createImageData(size, size);
+  const d = img.data;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const dx = (x + 0.5) / size - 0.5, dy = (y + 0.5) / size - 0.5;
+    const r = Math.hypot(dx, dy) * 2;
+    let v = Math.exp(-r * r * 22) + 0.14 / (1 + Math.pow(r * 8, 2.5));
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    v += 0.42 * (Math.exp(-ax * 55) * Math.exp(-ay * 6.5)
+               + Math.exp(-ay * 55) * Math.exp(-ax * 6.5));
+    v *= Math.max(0, 1 - r * r * 0.96);
+    const i = (y * size + x) * 4;
+    d[i] = d[i+1] = d[i+2] = 255;
+    d[i+3] = Math.min(255, v * 240);
+  }
+  g.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
 // ------------------------------------------------- CPU body placement
 /**
  * Position a mesh for this frame. p = universe coords (doubles), ctx from main.
@@ -95,7 +151,7 @@ const STAR_VERT = /* glsl */`
     } else {
       // flux -> size & alpha, computed in log2 space (f32-safe at any distance)
       float m = min(0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist)), uMCap);
-      px = clamp(m * 0.9 + 8.0, 0.0, uMaxPx);
+      px = clamp(m * 0.8 + 7.4, 0.0, uMaxPx);
       vAlpha = clamp(m * 0.13 + 1.05, 0.0, 1.0) * uOpacity;
       if (px < 1.0) { vAlpha *= px * px; px = 1.0; }  // sub-pixel -> dim, not shrink
     }
@@ -110,7 +166,8 @@ const STAR_FRAG = /* glsl */`
   uniform sampler2D uMap;
   void main() {
     vec4 t = texture2D(uMap, gl_PointCoord);
-    gl_FragColor = vec4(vColor, 1.0) * t * vAlpha;
+    vec4 c = vec4(vColor, 1.0) * t * vAlpha;
+    gl_FragColor = vec4(min(c.rgb, vec3(16.0)), min(c.a, 1.0));
   }
 `;
 

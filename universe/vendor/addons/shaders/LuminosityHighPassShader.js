@@ -49,6 +49,11 @@ const LuminosityHighPassShader = {
 
 			vec4 texel = texture2D( tDiffuse, vUv );
 
+		// HORIZON patch: half-float additive stacking can reach Inf; Inf/NaN
+		// entering the blur mips smears black rectangles over the frame.
+		texel = clamp( texel, vec4( 0.0 ), vec4( 1024.0 ) );
+		if ( texel.r != texel.r || texel.g != texel.g || texel.b != texel.b ) texel = vec4( 0.0 );
+
 			float v = luminance( texel.xyz );
 
 			vec4 outputColor = vec4( defaultColor.rgb, defaultOpacity );
