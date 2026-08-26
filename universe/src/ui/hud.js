@@ -28,9 +28,11 @@ export class Hud {
       (trail.length ? `<span class="sep">›</span><span class="trail" style="opacity:.45">${trail[0]}</span>` : '');
     if (html !== this._lastCrumb) { this.crumb.innerHTML = html; this._lastCrumb = html; }
 
-    // focus + camera distance
+    // focus + camera distance (or speed, in free flight)
     this.focusName.textContent = focusLabel.toUpperCase();
-    this.focusDist.textContent = 'camera · ' + fmtLen(ctx.S) + ' out';
+    this.focusDist.textContent = ctx.mode === 'fly'
+      ? 'speed · ' + fmtLen(ctx.S) + ' per second'
+      : 'camera · ' + fmtLen(ctx.S) + ' out';
 
     // ruler: meters per CSS pixel at the focus plane
     const mpp = ctx.S / ctx.pxPerUnitCSS;

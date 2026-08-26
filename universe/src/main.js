@@ -28,6 +28,8 @@ import { Search } from './ui/search.js';
 import { Hud } from './ui/hud.js';
 import { loadSettings, QUALITY, initSettingsUI } from './ui/settings.js';
 import { Tour } from './tour.js';
+import { Voyage } from './voyage.js';
+import { NavDock } from './ui/nav.js';
 import { TimeMode } from './timemode.js';
 import { Ambient } from './audio.js';
 
@@ -82,13 +84,20 @@ const ctx = {
 window.__ctx = ctx;                 // read by pos() closures + debug tooling
 
 const solar = buildSolarLayer(scene, registry, ctx);
-const stars = buildStarsLayer(scene, registry, ctx);
 const galaxy = buildGalaxyLayer(scene, registry, ctx);
 const localgroup = buildLocalGroupLayer(scene, registry, ctx);
 const clusters = buildClustersLayer(scene, registry, ctx);
 const web = buildCosmicWebLayer(scene, registry, ctx);
-const layers = [solar, stars, galaxy, localgroup, clusters, web];
-const beacons = new Beacons(scene, 384);
+const layers = [solar, galaxy, localgroup, clusters, web];
+const beacons = new Beacons(scene, 768);
+const stars = await buildStarsLayer(scene, registry, ctx);
+layers.splice(1, 0, stars);
+// deep-sky catalog layer arrives as data; degrade gracefully without it
+try {
+  const { buildDeepSkyLayer } = await import('./layers/deepsky.js');
+  const deepsky = await buildDeepSkyLayer(scene, registry, ctx);
+  if (deepsky) layers.push(deepsky);
+} catch (e) { console.warn('deep-sky layer unavailable:', e.message); }
 
 const byId = id => registry.find(o => o.id === id);
 const earthObj = byId('earth');
@@ -122,6 +131,20 @@ const tour = new Tour(rig, registry, {
   onStop: () => $('#bTour').classList.remove('on'),
 });
 const search = new Search(registry, o => { select(o); flyToObj(o); });
+const voyage = new Voyage(rig, registry, {
+  onStart: () => { tour.stop(); panel.hide(); ambient.swell(); },
+  onStop: () => {},
+  onArrive: () => {},
+});
+const nav = new NavDock(registry, o => { select(o); flyToObj(o); });
+rig.onLockedInput = () => { tour.stop(); voyage.stop(); };
+rig.onModeChange = mode => {
+  $('#flybox').classList.toggle('on', mode === 'fly');
+  $('#bFly').classList.toggle('on', mode === 'fly');
+  if (mode === 'fly') { tour.stop(); voyage.stop(); panel.hide(); }
+};
+$('#bFly').onclick = () => rig.toggleFly();
+$('#bVoyage').onclick = () => voyage.active ? voyage.stop() : voyage.start(ctx);
 
 let selected = null;
 function select(o) {
@@ -194,19 +217,35 @@ canvas.addEventListener('dblclick', e => {
 canvas.addEventListener('wheel', () => onboardTick('zoom'), { passive: true });
 canvas.addEventListener('pointermove', () => { if (moved) onboardTick('drag'); });
 
+const FLYKEYS = { w:'f', W:'f', s:'b', S:'b', a:'l', A:'l', d:'r', D:'r', ' ':'u', c:'d', C:'d' };
 window.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') {
     if (e.key === 'Escape') { search.close(); closeModals(); }
     return;
   }
+  if (rig.mode === 'fly') {
+    const k = FLYKEYS[e.key];
+    if (k) { rig.keys[k] = 1; e.preventDefault(); }
+    rig.keys.boost = e.shiftKey ? 1 : rig.keys.boost;
+    rig.keys.slow = e.ctrlKey ? 1 : rig.keys.slow;
+  }
   switch (e.key) {
     case 't': case 'T': tour.active ? tour.stop() : tour.start(); break;
+    case 'f': case 'F': if (!rig.keys.f) rig.toggleFly(); break;
+    case 'v': case 'V': voyage.active ? voyage.stop() : voyage.start(ctx); break;
+    case 'n': case 'N': {
+      const star = nav.nearest(ctx, 'star', rig.focusObj);
+      if (star) { select(star); flyToObj(star); }
+      break;
+    }
     case 'm': case 'M': $('#bAudio').onclick(); break;
     case 'h': case 'H': case '?': toggleModal('#helpbox'); break;
     case '/': e.preventDefault(); closeModals(); search.open(); break;
     case '0': case 'Home': returnToEarth(); break;
     case 'Escape':
-      if (tour.active) tour.stop();
+      if (voyage.active) voyage.stop();
+      else if (tour.active) tour.stop();
+      else if (rig.mode === 'fly') rig.exitFly();
       else if (search.isOpen) search.close();
       else if (timeMode.active) timeMode.deactivate();
       else { closeModals(); select(null); }
@@ -214,6 +253,12 @@ window.addEventListener('keydown', e => {
     case '+': case '=': rig.tLogD = clamp(rig.tLogD - 0.5, rig.minLogD, rig.maxLogD); break;
     case '-': case '_': rig.tLogD = clamp(rig.tLogD + 0.5, rig.minLogD, rig.maxLogD); break;
   }
+});
+window.addEventListener('keyup', e => {
+  const k = FLYKEYS[e.key];
+  if (k) rig.keys[k] = 0;
+  if (e.key === 'Shift') rig.keys.boost = 0;
+  if (e.key === 'Control') rig.keys.slow = 0;
 });
 
 // ------------------------------------------------------- onboarding
@@ -238,11 +283,12 @@ function frame(now) {
 
   // solid bodies guard the zoom floor; abstract regions don't
   const fo = rig.focusObj;
-  rig.minLogD = (fo && ['planet', 'moon', 'star', 'sun'].includes(fo.kind))
+  rig.minLogD = (rig.mode !== 'fly' && fo && ['planet', 'moon', 'star', 'sun'].includes(fo.kind))
     ? Math.max(6.2, Math.log10(fo.radius * 1.55)) : 6.2;
 
   rig.update(dt);
   tour.update(dt);
+  voyage.update(dt);
 
   // ---- frame context
   ctx.frame++;
@@ -251,7 +297,7 @@ function frame(now) {
   ctx.S = rig.dist; ctx.logS = rig.logD;
   ctx.focus = rig.focus;
   ctx.camPos = rig.camPos();
-  const cd = rig.camDir();
+  const cd = rig.mode === 'fly' ? [0, 0, 0] : rig.camDir();
   ctx.camRender = cd;
   ctx.camRenderV.set(cd[0], cd[1], cd[2]);
   ctx.cssW = window.innerWidth; ctx.cssH = window.innerHeight;
@@ -301,7 +347,10 @@ function frame(now) {
   beacons.commit(ctx);
 
   labels.update(ctx, registry, dt);
-  hud.update(ctx, rig.focusObj ? rig.focusObj.name
+  ctx.mode = rig.mode;
+  nav.update(ctx, dt, rig.focusObj);
+  hud.update(ctx, rig.mode === 'fly' ? 'Free flight'
+    : rig.focusObj ? rig.focusObj.name
     : (selected ? selected.name : 'Deep space'));
   ambient.update(ctx);
 

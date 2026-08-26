@@ -22,6 +22,8 @@ const STOPS = [
     'A trillion sleeping comets, reaching a substantial fraction of the way to the next star. The Sun’s light here is just another bright star.', 6],
   ['sun', 17.9, 'The Solar Neighborhood',
     'Every star you have ever seen with your own eyes lives within this view — our few thousand nearest neighbors.', 7],
+  ['neb:Orion Nebula (M42)', 17.6, 'The Orion Nebula',
+    'A stellar nursery 1,300 light-years away: a cavern of glowing gas where a thousand new stars are switching on.', 7],
   ['milkyway', 21.4, 'The Milky Way',
     'Our galaxy: hundreds of billions of stars in a slow 230-million-year rotation. The Sun is one point of light, two-thirds of the way out.', 9],
   ['localgroup', 23.4, 'The Local Group',

@@ -161,6 +161,60 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
   hii.quaternion.copy(quat);
   group.add(hii);
 
+  // ---- painted underlay: a photographic smooth-light image computed from
+  //      the same structural model the points sample, drawn as a plane under
+  //      the point cloud. Points give texture and parallax; the painting
+  //      gives the continuous glow a real galaxy photo has.
+  function paintGalaxy(size, opts) {
+    const { Rmax = 21000, coreR = 900, barA = 25 * Math.PI / 180,
+            warm = [1.0, 0.86, 0.62], cool = [0.62, 0.72, 1.0], armGlow = 1.0 } = opts ?? {};
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const g = c.getContext('2d');
+    const img = g.createImageData(size, size);
+    const d = img.data;
+    const rnd2 = mulberry32(808);
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const u = (x + 0.5) / size * 2 - 1, v = (y + 0.5) / size * 2 - 1;
+      const r = Math.hypot(u, v) * Rmax;
+      const i = (y * size + x) * 4;
+      if (r > Rmax) { d[i+3] = 0; continue; }
+      const th = Math.atan2(v, u);
+      const w = armW(r, th);
+      const wDust = armW(r, th + 0.10);
+      let disk = Math.exp(-r / 2600) * (0.26 + 0.74 * w * armGlow);
+      disk *= 1 - 0.52 * Math.exp(-((wDust - 1) * (wDust - 1)) * 2.2) * smoothstep(2600, 4200, r);
+      const bulge = 1.35 * Math.exp(-((r / coreR) ** 1.4));
+      // bar
+      const bx = Math.cos(-barA) * u * Rmax - Math.sin(-barA) * v * Rmax;
+      const by = Math.sin(-barA) * u * Rmax + Math.cos(-barA) * v * Rmax;
+      const bar = 0.75 * Math.exp(-((bx / 2100) ** 2 + (by / 750) ** 2));
+      const heat = Math.min(1, bulge * 0.9 + bar * 0.8 + 0.30);   // warm core -> cool rim
+      let L = disk + bulge + bar;
+      L *= 0.92 + 0.16 * rnd2();
+      const rr = warm[0] * heat + cool[0] * (1 - heat);
+      const gg = warm[1] * heat + cool[1] * (1 - heat);
+      const bb = warm[2] * heat + cool[2] * (1 - heat);
+      const A = Math.min(1, L);
+      d[i]   = Math.min(255, 255 * rr * L);
+      d[i+1] = Math.min(255, 255 * gg * L);
+      d[i+2] = Math.min(255, 255 * bb * L);
+      d[i+3] = Math.min(255, 255 * A);
+    }
+    g.putImageData(img, 0, 0);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  }
+  const paintTex = paintGalaxy(768, {});
+  const paint = new THREE.Mesh(new THREE.PlaneGeometry(2, 2),
+    new THREE.MeshBasicMaterial({ map: paintTex, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+      opacity: 0.0 }));
+  paint.renderOrder = 1;                       // beneath the points
+  // plane lies in galactic XY: rotate plane's local Z to galactic Z, then into render frame
+  paint.quaternion.copy(quat);
+  group.add(paint);
+
   // ---- registry: the galaxy itself, its heart, and our place in it
   registry.push({
     id: 'milkyway', name: MILKYWAY.name, cls: MILKYWAY.cls, blurb: MILKYWAY.blurb,
@@ -190,6 +244,19 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
     updateStarUniforms(mat, ctx, GC, invQuat, PC);
     updateStarUniforms(dmat, ctx, GC, invQuat, PC);
     updateStarUniforms(hmat, ctx, GC, invQuat, PC);
+
+    // painted underlay: photographic from outside, gone from inside
+    const pf = smoothstep(20.3, 21.5, ctx.logS) * f;
+    paint.visible = pf > 0.01;
+    if (paint.visible) {
+      const S = ctx.S, fc = ctx.focus;
+      const rx = (GC[0]-fc[0])/S, ry = (GC[1]-fc[1])/S, rz = (GC[2]-fc[2])/S;
+      const L = Math.hypot(rx, ry, rz);
+      const k = L > 1e4 ? (1e4 * (1 + Math.log10(L / 1e4))) / L : 1;
+      paint.position.set(rx*k, ry*k, rz*k);
+      paint.scale.setScalar(21000 * PC / S * k);
+      paint.material.opacity = 0.62 * pf;
+    }
   }
   return { group, update, GC };
 }
