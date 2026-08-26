@@ -42,7 +42,7 @@ const WEB_VERT = /* glsl */`
     vec3 relC = compressPos(rel, shrink);
     vec4 mv = modelViewMatrix * vec4(relC, 1.0);
     gl_Position = projectionMatrix * mv;
-    float m = 0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist));
+    float m = min(0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist)), -4.2);
     float px = clamp(m * 0.9 + 8.0, 0.0, uMaxPx);
     vAlpha = clamp(m * 0.13 + 1.05, 0.0, 1.0) * uOpacity;
     if (px < 1.0) { vAlpha *= px * px; px = 1.0; }

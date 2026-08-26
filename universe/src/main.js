@@ -56,7 +56,7 @@ function buildComposer() {
     { type: THREE.HalfFloatType, samples: 4 });
   composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
-  bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.38, 0.5, 0.88);
+  bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.32, 0.5, 0.92);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 }

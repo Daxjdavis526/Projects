@@ -77,18 +77,18 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
     const x0 = gauss(rnd) * 1900, y0 = gauss(rnd) * 620, z = gauss(rnd) * 420;
     if (Math.abs(x0) > 4600) continue;
     put(x0 * Math.cos(a) - y0 * Math.sin(a), x0 * Math.sin(a) + y0 * Math.cos(a), z,
-        0xffe0ae, 0.35, L0 * 1.2);
+        0xffe0ae, 0.35, L0 * 0.9);
   }
   while (i < N * 0.92) {                            // bulge
     const r = Math.abs(gauss(rnd)) * 900 + 60;
     if (r > 3200) continue;
     const u = rnd() * 2 - 1, th = rnd() * Math.PI * 2, s = Math.sqrt(1 - u * u);
-    put(r * s * Math.cos(th), r * s * Math.sin(th), r * u * 0.72, 0xffd9a0, 0.3, L0 * 1.5);
+    put(r * s * Math.cos(th), r * s * Math.sin(th), r * u * 0.72, 0xffd9a0, 0.3, L0 * 1.0);
   }
   while (i < N - 160) {                             // halo
     const r = 4000 * Math.pow(60000 / 4000, rnd() * rnd());
     const u = rnd() * 2 - 1, th = rnd() * Math.PI * 2, s = Math.sqrt(1 - u * u);
-    put(r * s * Math.cos(th), r * s * Math.sin(th), r * u, 0xffd8b0, 0.3, L0 * 0.25);
+    put(r * s * Math.cos(th), r * s * Math.sin(th), r * u, 0xffd8b0, 0.3, L0 * 0.2);
   }
   while (i < N) {                                   // globular clusters
     const r = 2000 * Math.pow(20, rnd());

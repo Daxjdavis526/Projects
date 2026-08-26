@@ -61,7 +61,7 @@ export function buildStarsLayer(scene, registry, ctx0) {
   const C = new THREE.Color();
   for (let i = 0; i < N; i++) {
     // disk around the Sun: radial ~ uniform to 2.2 kpc, vertical exp 140 pc
-    const r = 2200 * Math.sqrt(rnd());
+    const r = 12 + 2190 * Math.pow(rnd(), 2.1);   // dense near the Sun
     const th = rnd() * Math.PI * 2;
     const z = gauss(rnd) * 140 * (0.4 + 0.6 * rnd());
     pos[i*3]   = r * Math.cos(th);
