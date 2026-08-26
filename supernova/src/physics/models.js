@@ -153,6 +153,8 @@ export const IA = {
 
   Mdot:   1.0e-8 * M_SUN / YEAR,
   v_wind: 20e5,
+  t_plateau: 8 * 86400,   // no hydrogen -> no recombination plateau...
+  L_plateau: 0,           // ...the light curve is pure radioactivity
   sasi:   { sigma: [0, 6, 9, 7, 5], omega_1: 2 * Math.PI / 0.35 },
   type:   'Ia',
 };

@@ -81,14 +81,29 @@ export class Star {
     wu.uTime.value += dt;
 
     if (snap) {
-      /* Radius and temperature are driven by the physics once it exists. */
-      const r = snap.R_star * KM;
+      /* Radius and temperature are driven by the physics. The mesh is a
+         PHOTOSPHERE: it stops meaning anything once the envelope is blown
+         off, so from the explosion onward it fades and never scales past
+         breakout — the ejecta take over as a different representation. */
+      const isStar = ['progenitor', 'collapse', 'bounce', 'stall',
+                      'deflagration', 'detonation'].includes(snap.phase);
+      const rCap = this.R * 1.05;
+      const r = Math.min(snap.R_star * KM, rCap);
       this.photosphere.scale.setScalar(r / this.R);
       this.halo.scale.setScalar(r / this.R);
       this.haloUniforms.uRstar.value  = r * 0.975;
       this.haloUniforms.uScaleH.value = r * 0.14;
       this.uniforms.uTeff.value = snap.T_eff;
       this.haloUniforms.uTeff.value = snap.T_eff;
+
+      const targetFade = isStar ? 1 : 0;
+      this._fade = this._fade === undefined ? 1 : this._fade + (targetFade - this._fade) * Math.min(dt * 6.0, 1);
+      const on = this._fade > 0.004;
+      this.photosphere.visible = on;
+      this.halo.visible = on;
+      this.wind.visible = on;
+      this.uniforms.uIntensity.value = 0.55 * this._fade;
+      this.haloUniforms.uIntensity.value = 1.05 * this._fade;
     }
 
     /* Floating origin — the star sits at the world origin, so it only needs

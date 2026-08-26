@@ -16,6 +16,10 @@ import { Stage } from './render/scene.js';
 import { Rig, MODE } from './camera/rig.js';
 import { Star } from './render/star.js';
 import { MODELS, DEFAULT_MODEL } from './physics/models.js';
+import { SimClock } from './time/clock.js';
+import { Engine } from './physics/engine.js';
+import { Hud } from './ui/hud.js';
+import { Timeline } from './ui/timeline.js';
 import { QUALITY, KM } from './config.js';
 import * as fmt from './ui/format.js';
 
@@ -39,10 +43,24 @@ const R_STAR_KM = model.R_star * KM;         // 4.17e8 km
 
 rig.focusOn(0, 0, 0, R_STAR_KM * 5.0);
 
+/* --- physics -------------------------------------------------------------- */
+const clock = new SimClock(model);
+const engine = new Engine(model, clock);
+const hud = new Hud(model);
+const timeline = new Timeline(clock, engine, () => { /* seek: engine follows in the loop */ });
+let snap = engine.snapshot();
+
 /* --- title gate ----------------------------------------------------------- */
 $('begin').addEventListener('click', () => {
   $('title').classList.add('gone');
   setTimeout(() => $('title').style.display = 'none', 950);
+  /* Jump the story to the last seconds before instability and let it run. */
+  clock.seekU(0.128);
+  clock.play('narrative');
+});
+
+addEventListener('keydown', e => {
+  if (e.code === 'Space' && !rig.suspended) { e.preventDefault(); timeline.toggle(); }
 });
 
 /* --- stats ---------------------------------------------------------------- */
@@ -71,8 +89,16 @@ function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.1);
   last = now;
 
-  rig.update(dt, R_STAR_KM);
-  star.update(dt, 0, null);
+  /* clock -> physics -> snapshot */
+  const tTarget = clock.advance(dt);
+  engine.stepTo(tTarget);
+  snap = engine.snapshot();
+
+  rig.update(dt, snap.R_star * KM);
+  star.update(dt, snap.t, snap);
+
+  hud.update(snap, clock);
+  timeline.update();
 
   stage.sync();
   updateStats(dt);
@@ -82,4 +108,4 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 /* Expose for the screenshot harness and for poking at in the console. */
-window.SN = { renderer, stage, rig, star, model, THREE };
+window.SN = { renderer, stage, rig, star, model, clock, engine, THREE };
