@@ -1,0 +1,75 @@
+{
+ "version": 1,
+ "built": "2026-08-26T06:03:39.355Z",
+ "sources": {
+  "gospelLibraryFootnotes": {
+   "what": "Official footnote cross-references of the Gospel Library edition — reference pairs only; footnote prose, study helps, and chapter headings are not reproduced.",
+   "chaptersFetched": 1584,
+   "notesCategories": {
+    "tg": 18616,
+    "cross-ref": 27452,
+    "trn": 2504,
+    "or": 1300,
+    "ie": 925,
+    "jst": 553,
+    "bd": 41,
+    "triple-index": 5
+   },
+   "crossRefTargets": 48448,
+   "tgTagsAsTopics": 22352
+  },
+  "textualAnalysis": {
+   "what": "Machine-detected textual parallels between the public-domain texts (never shown as confirmed; the machine cannot know dependency direction).",
+   "params": {
+    "N": 5,
+    "FREQ_CAP": 200,
+    "GAP": 3,
+    "MIN_EFF_CROSS": 8,
+    "MIN_EFF_INTRA": 12,
+    "stopPhrases": 29,
+    "archaicMap": 16
+   },
+   "candidates": 777897,
+   "kept": 5781,
+   "discarded": {
+    "belowThreshold": 460755,
+    "stopPhraseOnly": 71316,
+    "sameChapter": 57682,
+    "frequencyCappedGrams": 8
+   }
+  },
+  "curated": {
+   "what": "Hand-curated table of famous, well-established relationships, each with a short neutral explanation.",
+   "rows": 100
+  }
+ },
+ "skipped": {
+  "targetBuckets": {
+   "trn:ref": 145,
+   "cross-ref:book-only": 3,
+   "jst:jst": 171,
+   "ie:ref": 136,
+   "cross-ref:jst": 44,
+   "or:ref": 123,
+   "bd:bd": 41,
+   "jst:ref": 15,
+   "cross-ref:other-scripture": 11,
+   "cross-ref:bad-id": 2,
+   "triple-index:nonscripture": 5,
+   "ie:book-only": 1
+  },
+  "uncategorizedAnchors": 0,
+  "odRefsUnresolved": 0
+ },
+ "notIncluded": [
+  "OpenBible.info Bible-internal cross-reference dataset (Bible↔Bible official footnotes already cover this layer; possible future merge with CC-BY attribution)",
+  "Joseph Smith Translation appendix references",
+  "Bible Dictionary and Guide to the Scriptures entries",
+  "Topical Guide entries beyond the top-500 by tag count (all tags counted, long tail not shipped)"
+ ],
+ "totals": {
+  "edges": 39149,
+  "evidenceRecords": 18322,
+  "topicDerivedTypings": 2155
+ }
+}

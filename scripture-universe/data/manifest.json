@@ -1,0 +1,681 @@
+{
+ "version": 1,
+ "built": "2026-08-26T06:03:39.355Z",
+ "counts": {
+  "verses": 42033,
+  "chapterNodes": 1584,
+  "bookNodes": 88,
+  "edges": 39149,
+  "evidence": 18322
+ },
+ "files": {
+  "agg.json": {
+   "bytes": 195702,
+   "sha1": "9d351ba355a7"
+  },
+  "coverage.json": {
+   "bytes": 2075,
+   "sha1": "12941a8c0d68"
+  },
+  "edges.bin": {
+   "bytes": 469788,
+   "sha1": "80a3c0edf364"
+  },
+  "evidence/ev-000.json": {
+   "bytes": 21864,
+   "sha1": "4b2dd099608f"
+  },
+  "evidence/ev-001.json": {
+   "bytes": 17389,
+   "sha1": "6bc3ee23bafe"
+  },
+  "evidence/ev-002.json": {
+   "bytes": 14317,
+   "sha1": "0a41e650aaa1"
+  },
+  "evidence/ev-003.json": {
+   "bytes": 13192,
+   "sha1": "34debd767828"
+  },
+  "evidence/ev-004.json": {
+   "bytes": 14280,
+   "sha1": "12756a191a6a"
+  },
+  "evidence/ev-005.json": {
+   "bytes": 14179,
+   "sha1": "6176066b73ce"
+  },
+  "evidence/ev-006.json": {
+   "bytes": 15818,
+   "sha1": "43c63ab2329e"
+  },
+  "evidence/ev-007.json": {
+   "bytes": 18510,
+   "sha1": "b4d336c2a2a1"
+  },
+  "evidence/ev-008.json": {
+   "bytes": 14775,
+   "sha1": "35d8ed989fe9"
+  },
+  "evidence/ev-009.json": {
+   "bytes": 14329,
+   "sha1": "1b5a607606d9"
+  },
+  "evidence/ev-010.json": {
+   "bytes": 17297,
+   "sha1": "b91cb5006051"
+  },
+  "evidence/ev-011.json": {
+   "bytes": 15296,
+   "sha1": "4ada3688593e"
+  },
+  "evidence/ev-012.json": {
+   "bytes": 14768,
+   "sha1": "09c03c512c4c"
+  },
+  "evidence/ev-013.json": {
+   "bytes": 18372,
+   "sha1": "8c2d78a78def"
+  },
+  "evidence/ev-014.json": {
+   "bytes": 23374,
+   "sha1": "988f48cd10e4"
+  },
+  "evidence/ev-015.json": {
+   "bytes": 25555,
+   "sha1": "74bae89bee35"
+  },
+  "evidence/ev-016.json": {
+   "bytes": 25138,
+   "sha1": "b1be99ab0759"
+  },
+  "evidence/ev-017.json": {
+   "bytes": 27091,
+   "sha1": "fc5ea435b8a4"
+  },
+  "evidence/ev-018.json": {
+   "bytes": 23727,
+   "sha1": "1c26c748978a"
+  },
+  "evidence/ev-019.json": {
+   "bytes": 24687,
+   "sha1": "ad8260957d88"
+  },
+  "evidence/ev-020.json": {
+   "bytes": 19187,
+   "sha1": "8e6bd6d520cc"
+  },
+  "evidence/ev-021.json": {
+   "bytes": 17825,
+   "sha1": "6b33b240eea9"
+  },
+  "evidence/ev-022.json": {
+   "bytes": 13134,
+   "sha1": "f6838df0e920"
+  },
+  "evidence/ev-023.json": {
+   "bytes": 14128,
+   "sha1": "f114d2ba3d5b"
+  },
+  "evidence/ev-024.json": {
+   "bytes": 14106,
+   "sha1": "dc3d1caf322d"
+  },
+  "evidence/ev-025.json": {
+   "bytes": 17234,
+   "sha1": "b911604b73a1"
+  },
+  "evidence/ev-026.json": {
+   "bytes": 25072,
+   "sha1": "7f56e504401c"
+  },
+  "evidence/ev-027.json": {
+   "bytes": 19232,
+   "sha1": "65ae6fc50db9"
+  },
+  "evidence/ev-028.json": {
+   "bytes": 21051,
+   "sha1": "b2d1c67a53eb"
+  },
+  "evidence/ev-029.json": {
+   "bytes": 15840,
+   "sha1": "35ee129592bf"
+  },
+  "evidence/ev-030.json": {
+   "bytes": 17612,
+   "sha1": "4eba11a722f8"
+  },
+  "evidence/ev-031.json": {
+   "bytes": 14059,
+   "sha1": "63c185544489"
+  },
+  "evidence/ev-032.json": {
+   "bytes": 14315,
+   "sha1": "e3343a47241a"
+  },
+  "evidence/ev-033.json": {
+   "bytes": 15097,
+   "sha1": "86b78e4825f6"
+  },
+  "evidence/ev-034.json": {
+   "bytes": 18178,
+   "sha1": "ce7142a0d345"
+  },
+  "evidence/ev-035.json": {
+   "bytes": 20908,
+   "sha1": "6f174b2f8b52"
+  },
+  "evidence/ev-036.json": {
+   "bytes": 16931,
+   "sha1": "cb866f420e76"
+  },
+  "evidence/ev-037.json": {
+   "bytes": 20093,
+   "sha1": "c7b9d75d0e86"
+  },
+  "evidence/ev-038.json": {
+   "bytes": 17038,
+   "sha1": "963c89fff3a9"
+  },
+  "evidence/ev-039.json": {
+   "bytes": 14939,
+   "sha1": "6ab2041e57a2"
+  },
+  "evidence/ev-040.json": {
+   "bytes": 15481,
+   "sha1": "5c37d369307e"
+  },
+  "evidence/ev-041.json": {
+   "bytes": 13791,
+   "sha1": "2021d583f15f"
+  },
+  "evidence/ev-042.json": {
+   "bytes": 14604,
+   "sha1": "e0459d477a20"
+  },
+  "evidence/ev-043.json": {
+   "bytes": 12570,
+   "sha1": "0b8f729fbc42"
+  },
+  "evidence/ev-044.json": {
+   "bytes": 13682,
+   "sha1": "a6a3924d6264"
+  },
+  "evidence/ev-045.json": {
+   "bytes": 13817,
+   "sha1": "a5bd22f2a0ef"
+  },
+  "evidence/ev-046.json": {
+   "bytes": 14005,
+   "sha1": "b63cfaacf069"
+  },
+  "evidence/ev-047.json": {
+   "bytes": 14268,
+   "sha1": "41f881ac0683"
+  },
+  "evidence/ev-048.json": {
+   "bytes": 14342,
+   "sha1": "81cf90f4491e"
+  },
+  "evidence/ev-049.json": {
+   "bytes": 13228,
+   "sha1": "1ae673a1bb6b"
+  },
+  "evidence/ev-050.json": {
+   "bytes": 13589,
+   "sha1": "0a7029da86b9"
+  },
+  "evidence/ev-051.json": {
+   "bytes": 13606,
+   "sha1": "dedbd5b11163"
+  },
+  "evidence/ev-052.json": {
+   "bytes": 13373,
+   "sha1": "e01df88a8c6b"
+  },
+  "evidence/ev-053.json": {
+   "bytes": 13558,
+   "sha1": "ff4c0e7c6c07"
+  },
+  "evidence/ev-054.json": {
+   "bytes": 15039,
+   "sha1": "43e8f463242c"
+  },
+  "evidence/ev-055.json": {
+   "bytes": 15789,
+   "sha1": "eaaa3905ddfc"
+  },
+  "evidence/ev-056.json": {
+   "bytes": 23316,
+   "sha1": "c677173f0a1e"
+  },
+  "evidence/ev-057.json": {
+   "bytes": 18955,
+   "sha1": "c53be2adda39"
+  },
+  "evidence/ev-058.json": {
+   "bytes": 19446,
+   "sha1": "351832dd5bc0"
+  },
+  "evidence/ev-059.json": {
+   "bytes": 19023,
+   "sha1": "e29970ed20cc"
+  },
+  "evidence/ev-060.json": {
+   "bytes": 23146,
+   "sha1": "95e7506d94b8"
+  },
+  "evidence/ev-061.json": {
+   "bytes": 24708,
+   "sha1": "20f985e02e03"
+  },
+  "evidence/ev-062.json": {
+   "bytes": 19226,
+   "sha1": "c8e954886d19"
+  },
+  "evidence/ev-063.json": {
+   "bytes": 16001,
+   "sha1": "afa0753265f2"
+  },
+  "evidence/ev-064.json": {
+   "bytes": 16181,
+   "sha1": "bf62dac3a507"
+  },
+  "evidence/ev-065.json": {
+   "bytes": 13877,
+   "sha1": "c1884f903ebb"
+  },
+  "evidence/ev-066.json": {
+   "bytes": 16013,
+   "sha1": "9cc2bc413bfd"
+  },
+  "evidence/ev-067.json": {
+   "bytes": 12846,
+   "sha1": "f16d11bfe3af"
+  },
+  "evidence/ev-068.json": {
+   "bytes": 12654,
+   "sha1": "6cbca499b2ab"
+  },
+  "evidence/ev-069.json": {
+   "bytes": 12673,
+   "sha1": "d859abf9944f"
+  },
+  "evidence/ev-070.json": {
+   "bytes": 13797,
+   "sha1": "e7f74c49b1a9"
+  },
+  "evidence/ev-071.json": {
+   "bytes": 13042,
+   "sha1": "3b48806305d8"
+  },
+  "persons.json": {
+   "bytes": 21135,
+   "sha1": "99d7eb57e321"
+  },
+  "stats.json": {
+   "bytes": 2837,
+   "sha1": "6e32bb77f2db"
+  },
+  "text/00-gen.json": {
+   "bytes": 213030,
+   "sha1": "81a865cdeb8a"
+  },
+  "text/01-ex.json": {
+   "bytes": 181867,
+   "sha1": "a30eddeef3a7"
+  },
+  "text/02-lev.json": {
+   "bytes": 134522,
+   "sha1": "b5884f1ab5a2"
+  },
+  "text/03-num.json": {
+   "bytes": 186586,
+   "sha1": "101aba0cd6f6"
+  },
+  "text/04-deut.json": {
+   "bytes": 157101,
+   "sha1": "d345d20fa469"
+  },
+  "text/05-josh.json": {
+   "bytes": 105721,
+   "sha1": "1548dfcc57f4"
+  },
+  "text/06-judg.json": {
+   "bytes": 104493,
+   "sha1": "d6f114316e81"
+  },
+  "text/07-ruth.json": {
+   "bytes": 13831,
+   "sha1": "70c0401f452a"
+  },
+  "text/08-1-sam.json": {
+   "bytes": 136934,
+   "sha1": "a170ca8ec89f"
+  },
+  "text/09-2-sam.json": {
+   "bytes": 112632,
+   "sha1": "e5a4a0ed96ef"
+  },
+  "text/10-1-kgs.json": {
+   "bytes": 134237,
+   "sha1": "0f40b68e1b54"
+  },
+  "text/11-2-kgs.json": {
+   "bytes": 128719,
+   "sha1": "1b8cb0272b03"
+  },
+  "text/12-1-chr.json": {
+   "bytes": 117507,
+   "sha1": "385ddae33eb0"
+  },
+  "text/13-2-chr.json": {
+   "bytes": 147696,
+   "sha1": "d6e57bb41e08"
+  },
+  "text/14-ezra.json": {
+   "bytes": 42794,
+   "sha1": "9601403f1bf4"
+  },
+  "text/15-neh.json": {
+   "bytes": 60120,
+   "sha1": "2931259e37c2"
+  },
+  "text/16-esth.json": {
+   "bytes": 32037,
+   "sha1": "01206d90909d"
+  },
+  "text/17-job.json": {
+   "bytes": 102659,
+   "sha1": "33524cfa92f1"
+  },
+  "text/18-ps.json": {
+   "bytes": 248579,
+   "sha1": "46bb556001d8"
+  },
+  "text/19-prov.json": {
+   "bytes": 86360,
+   "sha1": "a6f1e98c24b3"
+  },
+  "text/20-eccl.json": {
+   "bytes": 30629,
+   "sha1": "d9b3b8df20d2"
+  },
+  "text/21-song.json": {
+   "bytes": 14420,
+   "sha1": "76ed553f2a48"
+  },
+  "text/22-isa.json": {
+   "bytes": 208515,
+   "sha1": "21b38a39b5a4"
+  },
+  "text/23-jer.json": {
+   "bytes": 235452,
+   "sha1": "f000072ac4d6"
+  },
+  "text/24-lam.json": {
+   "bytes": 18944,
+   "sha1": "aa11a286f59c"
+  },
+  "text/25-ezek.json": {
+   "bytes": 215952,
+   "sha1": "897ee704046c"
+  },
+  "text/26-dan.json": {
+   "bytes": 65302,
+   "sha1": "bfdabf59e750"
+  },
+  "text/27-hosea.json": {
+   "bytes": 29416,
+   "sha1": "b12370052fc4"
+  },
+  "text/28-joel.json": {
+   "bytes": 11408,
+   "sha1": "8f5504c9254f"
+  },
+  "text/29-amos.json": {
+   "bytes": 23509,
+   "sha1": "2c008ad2e061"
+  },
+  "text/30-obad.json": {
+   "bytes": 3762,
+   "sha1": "b86be481ca1d"
+  },
+  "text/31-jonah.json": {
+   "bytes": 7217,
+   "sha1": "8ff95261e955"
+  },
+  "text/32-micah.json": {
+   "bytes": 17573,
+   "sha1": "2fe69bad18c8"
+  },
+  "text/33-nahum.json": {
+   "bytes": 7314,
+   "sha1": "76c6696a6610"
+  },
+  "text/34-hab.json": {
+   "bytes": 8504,
+   "sha1": "27dbfdb07dc6"
+  },
+  "text/35-zeph.json": {
+   "bytes": 9142,
+   "sha1": "078a8bf94df8"
+  },
+  "text/36-hag.json": {
+   "bytes": 6070,
+   "sha1": "0b1612a26c60"
+  },
+  "text/37-zech.json": {
+   "bytes": 35692,
+   "sha1": "7191173febae"
+  },
+  "text/38-mal.json": {
+   "bytes": 10132,
+   "sha1": "0d8bfe714819"
+  },
+  "text/39-matt.json": {
+   "bytes": 132526,
+   "sha1": "05a719db4e42"
+  },
+  "text/40-mark.json": {
+   "bytes": 83702,
+   "sha1": "9114e852732a"
+  },
+  "text/41-luke.json": {
+   "bytes": 142461,
+   "sha1": "af59f930807d"
+  },
+  "text/42-john.json": {
+   "bytes": 104574,
+   "sha1": "55b920d310f9"
+  },
+  "text/43-acts.json": {
+   "bytes": 137680,
+   "sha1": "0f6b8cfbce5b"
+  },
+  "text/44-rom.json": {
+   "bytes": 54177,
+   "sha1": "f387c6c7c8c0"
+  },
+  "text/45-1-cor.json": {
+   "bytes": 52602,
+   "sha1": "8eb724be98e1"
+  },
+  "text/46-2-cor.json": {
+   "bytes": 34195,
+   "sha1": "d1cb7a434460"
+  },
+  "text/47-gal.json": {
+   "bytes": 17540,
+   "sha1": "e610dfb93321"
+  },
+  "text/48-eph.json": {
+   "bytes": 17637,
+   "sha1": "54ab19f1cc5d"
+  },
+  "text/49-philip.json": {
+   "bytes": 12291,
+   "sha1": "4219f939a02c"
+  },
+  "text/50-col.json": {
+   "bytes": 11527,
+   "sha1": "aa09f8e41a4c"
+  },
+  "text/51-1-thes.json": {
+   "bytes": 10447,
+   "sha1": "0d8dfd95c31b"
+  },
+  "text/52-2-thes.json": {
+   "bytes": 5883,
+   "sha1": "7b29407f43b6"
+  },
+  "text/53-1-tim.json": {
+   "bytes": 13790,
+   "sha1": "54719a999b93"
+  },
+  "text/54-2-tim.json": {
+   "bytes": 9881,
+   "sha1": "86c0ceff88ef"
+  },
+  "text/55-titus.json": {
+   "bytes": 5568,
+   "sha1": "d8e44e571983"
+  },
+  "text/56-philem.json": {
+   "bytes": 2462,
+   "sha1": "a2dcc9dff654"
+  },
+  "text/57-heb.json": {
+   "bytes": 40116,
+   "sha1": "501af427c2b4"
+  },
+  "text/58-james.json": {
+   "bytes": 13127,
+   "sha1": "62dcbb944464"
+  },
+  "text/59-1-pet.json": {
+   "bytes": 14487,
+   "sha1": "f0d79249668d"
+  },
+  "text/60-2-pet.json": {
+   "bytes": 9253,
+   "sha1": "67fbe0b69217"
+  },
+  "text/61-1-jn.json": {
+   "bytes": 13713,
+   "sha1": "555bc5ae5a1b"
+  },
+  "text/62-2-jn.json": {
+   "bytes": 1703,
+   "sha1": "adddb41a889c"
+  },
+  "text/63-3-jn.json": {
+   "bytes": 1728,
+   "sha1": "9c20c565f10c"
+  },
+  "text/64-jude.json": {
+   "bytes": 3821,
+   "sha1": "dbfebdf52ddc"
+  },
+  "text/65-rev.json": {
+   "bytes": 66106,
+   "sha1": "028a2f34f18b"
+  },
+  "text/66-1-ne.json": {
+   "bytes": 138871,
+   "sha1": "bb7627259e4e"
+  },
+  "text/67-2-ne.json": {
+   "bytes": 164371,
+   "sha1": "2a308ed8bb6b"
+  },
+  "text/68-jacob.json": {
+   "bytes": 50908,
+   "sha1": "28f1f08ac488"
+  },
+  "text/69-enos.json": {
+   "bytes": 6423,
+   "sha1": "973150ee1a63"
+  },
+  "text/70-jarom.json": {
+   "bytes": 4263,
+   "sha1": "a8ff74497f91"
+  },
+  "text/71-omni.json": {
+   "bytes": 8037,
+   "sha1": "29391845115d"
+  },
+  "text/72-w-of-m.json": {
+   "bytes": 4918,
+   "sha1": "e70c1cd7be70"
+  },
+  "text/73-mosiah.json": {
+   "bytes": 174209,
+   "sha1": "534b51e09dbe"
+  },
+  "text/74-alma.json": {
+   "bytes": 475480,
+   "sha1": "dadbde96d05c"
+  },
+  "text/75-hel.json": {
+   "bytes": 114476,
+   "sha1": "15141697086c"
+  },
+  "text/76-3-ne.json": {
+   "bytes": 160397,
+   "sha1": "925eecfd338c"
+  },
+  "text/77-4-ne.json": {
+   "bytes": 11006,
+   "sha1": "377516daa2e3"
+  },
+  "text/78-morm.json": {
+   "bytes": 52746,
+   "sha1": "00f4c8dd5231"
+  },
+  "text/79-ether.json": {
+   "bytes": 91222,
+   "sha1": "f492a9fba34d"
+  },
+  "text/80-moro.json": {
+   "bytes": 34762,
+   "sha1": "52e86fbe4766"
+  },
+  "text/81-dc.json": {
+   "bytes": 709752,
+   "sha1": "ace5869e896a"
+  },
+  "text/82-od.json": {
+   "bytes": 12804,
+   "sha1": "9f597a27e366"
+  },
+  "text/83-moses.json": {
+   "bytes": 67481,
+   "sha1": "2f0b13f810ee"
+  },
+  "text/84-abr.json": {
+   "bytes": 30149,
+   "sha1": "91ab329bfb77"
+  },
+  "text/85-js-m.json": {
+   "bytes": 8494,
+   "sha1": "739c8690b95b"
+  },
+  "text/86-js-h.json": {
+   "bytes": 35185,
+   "sha1": "ede6e0873435"
+  },
+  "text/87-a-of-f.json": {
+   "bytes": 2366,
+   "sha1": "959bcc6ae14b"
+  },
+  "topics.json": {
+   "bytes": 141622,
+   "sha1": "223b66f8eb92"
+  },
+  "verses-meta.json": {
+   "bytes": 10442,
+   "sha1": "3252e0dc3fa4"
+  }
+ }
+}
