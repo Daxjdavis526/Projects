@@ -117,7 +117,7 @@ export function buildClustersLayer(scene, registry, ctx0) {
     group.visible = f > 0.01;
     if (!group.visible) return;
     const t = smoothstep(23.0, 25.3, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(2.6e8, 1.0e9, t);
+    mat.uniforms.uFluxScale.value = lerp(6e8, 2.5e9, t);
     mat.uniforms.uOpacity.value = f * (ctx.timeMode ? 1 - ctx.timeEarly : 1);
     updateStarUniforms(mat, ctx, [0, 0, 0], null, MPC);
     const lf = bandFade(ctx.logS, 24.0, 25.6, 0.5);

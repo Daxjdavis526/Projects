@@ -71,7 +71,7 @@ export function buildLocalGroupLayer(scene, registry, ctx0) {
   geo.setAttribute('position', new THREE.BufferAttribute(sp.slice(0, i * 3), 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(sc.slice(0, i * 3), 3));
   geo.setAttribute('aLum', new THREE.BufferAttribute(sl.slice(0, i), 1));
-  const mat = starMaterial({ fluxScale: 2e7, maxPx: 4.5, mCap: -3.6 });
+  const mat = starMaterial({ fluxScale: 6e7, maxPx: 4.5, mCap: -3.6 });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false; pts.renderOrder = 2;
   group.add(pts);

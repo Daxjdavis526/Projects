@@ -43,7 +43,7 @@ const WEB_VERT = /* glsl */`
     vec3 relC = compressPos(rel, shrink);
     vec4 mv = modelViewMatrix * vec4(relC, 1.0);
     gl_Position = projectionMatrix * mv;
-    float m = min(0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist)), -4.2);
+    float m = min(0.5 * (aLum + log2(uFluxScale) - 2.0 * log2(trueDist)), -3.4);
     float px = clamp(m * 0.9 + 8.0, 0.0, uMaxPx);
     vAlpha = clamp(m * 0.13 + 1.05, 0.0, 1.0) * uOpacity;
     if (px < 1.0) { vAlpha *= px * px; px = 1.0; }
@@ -196,7 +196,7 @@ export function buildCosmicWebLayer(scene, registry, ctx0) {
     group.visible = f > 0.01;
     if (!group.visible) return;
     const t = smoothstep(24.5, 26.6, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(2.7e9, 5.5e11, t * t);
+    mat.uniforms.uFluxScale.value = lerp(8e9, 1.6e12, t * t);
     mat.uniforms.uOpacity.value = f;
     mat.uniforms.uEarly.value = early;
     mat.uniforms.uScaleA.value = a;
