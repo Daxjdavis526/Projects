@@ -181,7 +181,7 @@ export class Sky {
     const up = Math.max(0, this.sunDir.y);
     const civil = Math.max(0, Math.min(1, (this.sunDir.y + 0.10) / 0.20));
     this.sunLight.position.copy(this.sunDir).multiplyScalar(1000);
-    this.sunLight.intensity = 3.4 * Math.pow(up, 0.45) * (1 - 0.55 * (weather ? weather.overcast : 0));
+    this.sunLight.intensity = 3.4 * Math.pow(up, 0.40) * (1 - 0.55 * (weather ? weather.overcast : 0));
     // warm the sunlight as it drops toward the horizon
     const warm = Math.pow(1 - Math.min(1, up * 3), 2);
     this.sunLight.color.setRGB(1, 0.96 - warm * 0.30, 0.90 - warm * 0.62);
@@ -189,8 +189,11 @@ export class Sky {
     this.moonLight.position.copy(this.moonDir).multiplyScalar(1000);
     this.moonLight.intensity = 0.22 * Math.max(0, this.moonDir.y) * (1 - civil);
 
-    const ambDay = 0.10 + 0.85 * Math.pow(up, 0.5);
-    this.ambient.intensity = ambDay + 0.05;
+    // Ambient never goes to nothing: at dusk the sky itself is still a very
+    // large, very bright light source, and ground that reads as pure black
+    // against a lit sky looks broken rather than dark.
+    const ambDay = 0.34 + 0.75 * Math.pow(up, 0.5);
+    this.ambient.intensity = ambDay * (1 - 0.25 * (weather ? weather.overcast : 0));
     this.ambient.color.setRGB(0.45 + 0.35 * civil, 0.58 + 0.28 * civil, 0.80 + 0.15 * civil);
     this.ambient.groundColor.setRGB(0.20 + 0.20 * civil, 0.18 + 0.18 * civil, 0.15 + 0.14 * civil);
 

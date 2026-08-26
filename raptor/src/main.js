@@ -113,6 +113,9 @@ function placeOnRunway(a, airborne = false) {
   effects.clearTrails();
   rig.groundPos = null;
   rig.flybyPos = null;
+  // a reposition is a teleport: rebuild the rings before the next frame, or
+  // the first thing the player sees is the gap where the terrain isn't yet
+  terrain.prime(p, 14);
 }
 placeOnRunway(AIRPORTS[0]);
 nav.center.set(fm.position.x, fm.position.z);
@@ -396,10 +399,10 @@ function frame(now) {
   }
 
   // ---- streaming ----
-  terrain.update(camWorld, real, fps < 40 ? 1 : 3);
+  terrain.update(camWorld, real, fps < 30 ? 1 : fps < 50 ? 3 : 5);
   scenery.update(camWorld, sky.isNight);
   clouds.update(real, camWorld, sky, weather);
-  water.update(real, camWorld, sky, weather);
+  water.update(real, camWorld, sky, weather, scene.fog.color, scene.fog.near, scene.fog.far);
 
   // ---- sky & lighting ----
   sky.update(sim.timeOfDay, worldToGeo(fm.position.x, fm.position.z).lat,

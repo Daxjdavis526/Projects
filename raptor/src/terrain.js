@@ -48,9 +48,11 @@ const RANGE_SPEC = [
   [38.60, -119.60, 37.20, -117.90, 1600, 26000],   // White Mountains / Inyo
   [35.60, -111.60, 34.90, -111.55, 1600, 9000],    // San Francisco Peaks
 ];
+// Real Basin-and-Range mountains rise a couple of kilometres over five, not
+// over thirty; narrow the profiles so the ranges have flanks you can fly along.
 const RANGES = RANGE_SPEC.map(([la0, lo0, la1, lo1, h, w]) => {
   const a = geoToWorld(la0, lo0), b = geoToWorld(la1, lo1);
-  return [a.x, a.z, b.x, b.z, h, w];
+  return [a.x, a.z, b.x, b.z, h * 1.15, w * 0.5];
 });
 
 // Broad uplifted plateaus: [lat, lon, radius m, lift m]
@@ -76,7 +78,9 @@ function ridgeInfluence(x, z) {
     if (d > w * 2.6) continue;
     // taper toward both ends so ranges do not stop dead
     const cap = Math.sin(Math.PI * Math.min(1, Math.max(0, s * 1.12)));
-    const f = Math.exp(-(d * d) / (2 * w * w)) * h * (0.30 + 0.70 * cap);
+    // a sharper-than-Gaussian profile: steep flanks, a defined crest line
+    const u = d / w;
+    const f = Math.exp(-u * u * 0.85) * (1 - 0.35 * Math.min(1, u)) * h * (0.30 + 0.70 * cap);
     if (f > best) best = f;
   }
   return best;
@@ -117,7 +121,7 @@ export function heightAt(x, z) {
   // range crests carry their own ridge texture, so they read as a range of
   // peaks rather than one smooth whaleback
   h += range * (0.35 + 0.95 * rough) * (0.55 + 0.75 * rough2);
-  h += Math.pow(rough, 1.5) * 1750 * mountainMask;
+  h += Math.pow(rough, 1.35) * 2050 * mountainMask;
   h += Math.pow(rough2, 2.0) * 520 * mountainMask;
 
   // --- basins: broad depressions that make the Basin and Range read right ---
@@ -162,7 +166,9 @@ export function heightAt(x, z) {
     if (d > 2600) continue;
     const t = Math.min(1, Math.max(0, (d - 600) / 2000));
     const s = t * t * (3 - 2 * t);
-    h = a.elev * (1 - s) + h * s;
+    // The paved surfaces are drawn a little proud of the terrain so they do
+    // not z-fight with it at range; the ground the wheels roll on matches.
+    h = (a.elev + 0.80) * (1 - s) + h * s;
   }
 
   return h;
@@ -199,7 +205,12 @@ const _c = [0, 0, 0], _c2 = [0, 0, 0];
 
 function colorAt(x, z, h, slope, out) {
   const moisture = fbm(x * 4e-6 + 91.2, z * 4e-6 - 13.8, 3) * 0.5 + 0.5;
-  const variation = fbm(x * 2.2e-4, z * 2.2e-4, 2) * 0.10;
+  // several scales of tonal variation: without them a desert reads as one flat
+  // sheet of brown from any altitude
+  const variation = fbm(x * 2.2e-4, z * 2.2e-4, 2) * 0.085
+    + fbm(x * 2.6e-5 + 5.5, z * 2.6e-5 - 2.2, 3) * 0.075
+    + fbm(x * 1.1e-3, z * 1.1e-3, 2) * 0.030;
+  const hue = fbm(x * 1.7e-5 - 61.3, z * 1.7e-5 + 44.9, 2);
 
   if (h < 2) { mix(C.shore, C.sand, 0.4, out); }
   else if (h < 60) mix(C.shore, moisture > 0.55 ? C.grass : C.desert, Math.min(1, h / 60), out);
@@ -217,9 +228,9 @@ function colorAt(x, z, h, slope, out) {
   const steep = Math.min(1, Math.max(0, (slope - 0.42) / 0.35));
   mix(out, h > 2600 ? C.scree : C.rock, steep * 0.85, out);
 
-  out[0] = Math.min(1, Math.max(0, out[0] + variation));
-  out[1] = Math.min(1, Math.max(0, out[1] + variation));
-  out[2] = Math.min(1, Math.max(0, out[2] + variation * 0.7));
+  out[0] = Math.min(1, Math.max(0, out[0] + variation + hue * 0.055));
+  out[1] = Math.min(1, Math.max(0, out[1] + variation + hue * 0.012));
+  out[2] = Math.min(1, Math.max(0, out[2] + variation * 0.7 - hue * 0.040));
   return out;
 }
 
@@ -247,7 +258,11 @@ class Tile {
     geo.setIndex(Tile.indices(n));
     this.geometry = geo;
     this.mesh = new THREE.Mesh(geo, null);
-    this.mesh.frustumCulled = true;
+    // Curvature is applied in the vertex shader, which can drop a distant tile
+    // by kilometres — more than enough to push its CPU-side bounding sphere
+    // out of the frustum and cull ground that is plainly in view. There are
+    // only ~90 of these, so cull nothing and let the GPU sort it out.
+    this.mesh.frustumCulled = false;
     this.mesh.matrixAutoUpdate = false;
     this.mesh.visible = false;
   }
@@ -314,8 +329,11 @@ class Tile {
       }
     }
 
-    // skirt vertices: copy each edge vertex and drop it
-    const drop = Math.max(60, this.size * 0.05);
+    // Skirt vertices: copies of the edge ring, dropped just far enough to
+    // cover the crack against a coarser neighbour. Long skirts show up as a
+    // wall of dark cliffs along every LOD seam, so keep them short and give
+    // them the same colour as the edge they hang from.
+    const drop = Math.min(400, Math.max(14, this.size * 0.004));
     const base = n * n;
     const edges = [
       i => i, i => (n - 1) * n + i, i => i * n, i => i * n + (n - 1),
@@ -325,7 +343,7 @@ class Tile {
       for (let i = 0; i < n; i++) {
         const src = e(i) * 3, dst = (s + i) * 3;
         pos[dst] = pos[src]; pos[dst + 1] = pos[src + 1] - drop; pos[dst + 2] = pos[src + 2];
-        col[dst] = col[src] * 0.75; col[dst + 1] = col[src + 1] * 0.75; col[dst + 2] = col[src + 2] * 0.75;
+        col[dst] = col[src]; col[dst + 1] = col[src + 1]; col[dst + 2] = col[src + 2];
         nrm[dst] = nrm[src]; nrm[dst + 1] = nrm[src + 1]; nrm[dst + 2] = nrm[src + 2];
       }
       s += n;
@@ -377,7 +395,7 @@ export class Terrain {
     this.queue = [];
     this.pool = [];
     for (let l = 0; l < LEVELS; l++) {
-      const count = l === 0 ? 16 : 12;
+      const count = 16;
       for (let i = 0; i < count; i++) {
         const t = new Tile(l);
         t.mesh.material = this.material;
@@ -391,16 +409,30 @@ export class Terrain {
   /** Rebuild the ring layout around the camera and queue any new tiles. */
   update(camWorld, dt, budget = this.buildBudget) {
     const wanted = new Map();
+    // Each level covers a 4x4 block of its own tiles, snapped to its own grid.
+    // The inner tiles are skipped only where the *previous* level actually
+    // covers them — the two grids snap independently, so assuming the inner
+    // 2x2 is covered leaves gaps you can see straight through.
+    let covered = null;
     for (let l = 0; l < LEVELS; l++) {
       const size = BASE_TILE * (1 << l);
       const cx = Math.floor(camWorld.x / size), cz = Math.floor(camWorld.z / size);
+      let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
       for (let j = -2; j <= 1; j++) {
         for (let i = -2; i <= 1; i++) {
-          if (l > 0 && i >= -1 && i <= 0 && j >= -1 && j <= 0) continue;  // inner 2x2 handled by l-1
           const tx = (cx + i) * size, tz = (cz + j) * size;
+          if (tx < minX) minX = tx;
+          if (tx + size > maxX) maxX = tx + size;
+          if (tz < minZ) minZ = tz;
+          if (tz + size > maxZ) maxZ = tz + size;
+          const inside = covered &&
+            tx >= covered.minX && tx + size <= covered.maxX &&
+            tz >= covered.minZ && tz + size <= covered.maxZ;
+          if (inside) continue;
           wanted.set(`${l}:${cx + i}:${cz + j}`, { l, tx, tz, size });
         }
       }
+      covered = { minX, maxX, minZ, maxZ };
     }
 
     // release tiles no longer wanted

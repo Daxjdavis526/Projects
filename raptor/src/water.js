@@ -16,6 +16,9 @@ export class Water {
         uWind: { value: 0.4 },
         uOrigin: { value: new THREE.Vector2(0, 0) },
         uCurveR: { value: 6371000 },
+        uFogColor: { value: new THREE.Color(0.6, 0.7, 0.8) },
+        uFogNear: { value: 3000 },
+        uFogFar: { value: 90000 },
       },
       vertexShader: `
         varying vec3 vWorld; varying vec2 vXZ;
@@ -36,6 +39,7 @@ export class Water {
         varying vec3 vWorld; varying vec2 vXZ;
         uniform float uTime; uniform vec3 uSun; uniform vec3 uSunColor;
         uniform vec3 uDeep; uniform vec3 uShallow; uniform float uWind;
+        uniform vec3 uFogColor; uniform float uFogNear; uniform float uFogFar;
         float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
         float n2(vec2 p){
           vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
@@ -56,6 +60,11 @@ export class Water {
           float glint = pow(max(dot(refl, uSun), 0.0), 12.0) * 0.12;
           col += uSunColor * (spec * 3.2 + glint) * max(uSun.y, 0.0);
           col += uSunColor * 0.05 * max(uSun.y, 0.0);
+          // The sea runs far past the terrain's outermost tiles, so without
+          // the same aerial perspective the land gets it reads as a hard blue
+          // band along the horizon.
+          float d = length(cameraPosition - vWorld);
+          col = mix(col, uFogColor, smoothstep(uFogNear, uFogFar, d));
           gl_FragColor = vec4(col, 1.0);
         }`,
       side: THREE.FrontSide,
@@ -68,15 +77,20 @@ export class Water {
     scene.add(this.mesh);
   }
 
-  update(dt, camWorld, sky, weather) {
+  update(dt, camWorld, sky, weather, sceneFogColor, fogNear, fogFar) {
     this.mat.uniforms.uTime.value += dt;
     this.mat.uniforms.uSun.value.copy(sky.sunDir);
     this.mat.uniforms.uWind.value = 0.25 + (weather ? weather.windSpeed / 30 : 0.3);
     const up = Math.max(0.02, sky.sunDir.y);
     this.mat.uniforms.uSunColor.value.setRGB(Math.pow(up, 0.3), 0.95 * Math.pow(up, 0.45), 0.9 * Math.pow(up, 0.6));
+    this.mat.uniforms.uFogColor.value.copy(sceneFogColor || this.mat.uniforms.uFogColor.value);
     this.mesh.position.x = camWorld.x - origin.x;
     this.mesh.position.z = camWorld.z - origin.z;
     this.mesh.position.y = -origin.y - 0.4;
     this.mat.uniforms.uOrigin.value.set(origin.x, origin.z);
+    if (fogNear !== undefined) {
+      this.mat.uniforms.uFogNear.value = fogNear;
+      this.mat.uniforms.uFogFar.value = fogFar;
+    }
   }
 }

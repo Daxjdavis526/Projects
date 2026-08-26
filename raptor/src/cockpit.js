@@ -64,17 +64,19 @@ export class Cockpit {
     seat.position.set(0, -0.62, 0.58);
     this.group.add(seat);
 
-    const coaming = new THREE.Mesh(new THREE.BoxGeometry(1.02, 0.14, 0.30), dark);
-    coaming.position.set(0, -0.40, -1.00);
-    coaming.rotation.x = -12 * D;
+    // Glareshield: a thin lip well forward, so it shades the panel without
+    // hiding it from the pilot's eye position.
+    const coaming = new THREE.Mesh(new THREE.BoxGeometry(1.00, 0.075, 0.26), dark);
+    coaming.position.set(0, -0.29, -1.20);
+    coaming.rotation.x = -14 * D;
     this.group.add(coaming);
 
     // main instrument panel, canted back, low enough to see over
     const ip = new THREE.Group();
-    ip.position.set(0, -0.80, -1.00);
-    ip.rotation.x = 26 * D;
+    ip.position.set(0, -0.50, -0.90);
+    ip.rotation.x = 30 * D;
     this.group.add(ip);
-    const ipBody = new THREE.Mesh(new THREE.BoxGeometry(0.90, 0.52, 0.06), panel);
+    const ipBody = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.56, 0.06), panel);
     ip.add(ipBody);
 
     // ---- three MFDs ----
@@ -88,14 +90,14 @@ export class Cockpit {
       ip.add(bez);
       return m;
     };
-    mk(this.mfds.center, 0.30, 0.30, 0, -0.02);
-    mk(this.mfds.left, 0.22, 0.22, -0.33, 0.02);
-    mk(this.mfds.right, 0.22, 0.22, 0.33, 0.02);
+    mk(this.mfds.center, 0.31, 0.31, 0, -0.05);
+    mk(this.mfds.left, 0.23, 0.23, -0.32, -0.01);
+    mk(this.mfds.right, 0.23, 0.23, 0.32, -0.01);
 
     // up-front controls strip
     for (let i = 0; i < 8; i++) {
       const b = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.03, 0.02), grey);
-      b.position.set(-0.24 + i * 0.068, -0.25, 0.04);
+      b.position.set(-0.24 + i * 0.068, 0.24, 0.04);
       ip.add(b);
     }
 
@@ -106,11 +108,11 @@ export class Cockpit {
         color: 0x88ffcc, transparent: true, opacity: 0.022,
         roughness: 0.05, metalness: 0, side: THREE.DoubleSide,
       }));
-    glass.position.set(0, -0.10, -0.66);
+    glass.position.set(0, -0.03, -0.66);
     glass.rotation.x = -10 * D;
     this.group.add(glass);
     const frame = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.010, 0.016), grey);
-    frame.position.set(0, 0.055, -0.66);
+    frame.position.set(0, 0.125, -0.66);
     this.group.add(frame);
 
     // ---- control stick (centre-mounted) ----
@@ -156,9 +158,9 @@ export class Cockpit {
     this.lamps = {};
     const lampMat = (c) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.10 });
     const lampSpecs = [
-      ['master', 0xff3322, -0.34, 0.24], ['stall', 0xffaa22, -0.205, 0.24],
-      ['fuel', 0xffaa22, -0.07, 0.24], ['gear', 0x33ff66, 0.07, 0.24],
-      ['ab', 0xff8833, 0.205, 0.24], ['brake', 0xffcc33, 0.34, 0.24],
+      ['master', 0xff3322, -0.34, -0.24], ['stall', 0xffaa22, -0.205, -0.24],
+      ['fuel', 0xffaa22, -0.07, -0.24], ['gear', 0x33ff66, 0.07, -0.24],
+      ['ab', 0xff8833, 0.205, -0.24], ['brake', 0xffcc33, 0.34, -0.24],
     ];
     for (const [k, c, x, y] of lampSpecs) {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(0.075, 0.032), lampMat(c));

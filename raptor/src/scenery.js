@@ -75,7 +75,7 @@ class Airfield {
     // elevation, so every one of these surfaces would be coplanar with it.
     // Lift them clear — a few centimetres nobody will ever notice, and no
     // z-fighting.
-    rwy.position.y = 0.30;
+    rwy.position.y = 0.80;
     this.group.add(rwy);
 
     // overrun aprons
@@ -86,7 +86,7 @@ class Airfield {
         polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
       }));
     apron.rotation.x = -90 * D;
-    apron.position.set(W * 2.6, 0.18, 0);
+    apron.position.set(W * 2.6, 0.62, 0);
     this.group.add(apron);
 
     // parallel taxiway
@@ -97,7 +97,7 @@ class Airfield {
         polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
       }));
     taxi.rotation.x = -90 * D;
-    taxi.position.set(W * 1.5, 0.22, 0);
+    taxi.position.set(W * 1.5, 0.70, 0);
     this.group.add(taxi);
 
     // ---- lighting ----
@@ -275,7 +275,7 @@ export class Scenery {
   update(camWorld, night) {
     for (const a of AIRPORTS) {
       const d = Math.hypot(a.x - camWorld.x, a.z - camWorld.z);
-      const want = d < 70000;
+      const want = d < 32000;
       const have = this.fields.has(a.icao);
       if (want && !have) {
         const f = new Airfield(a);
