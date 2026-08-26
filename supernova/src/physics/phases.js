@@ -248,6 +248,15 @@ const stall = {
     if (!st._revived && !st.bhFormed && st.L_nu > Lcrit && t > 0.1) {
       st._revived = true;
       st.aFrozen = true;               // the lobes are imprinted forever
+
+      /* Momentum conservation: the ejecta go preferentially one way, the
+         neutron star goes the other. The kick is antiparallel to the frozen
+         l=1 dipole, 200-600 km/s depending on its amplitude — which is why
+         real pulsars are found displaced from their remnant centres. */
+      const d = [st.a[2], st.a[0], st.a[1]];              // (x, y, z) dipole
+      const mag = Math.hypot(...d) + 1e-9;
+      const v = (2.0e7 + 4.0e7 * Math.min(mag / 0.3, 1)); // cm/s
+      st.kick = [-d[0] / mag * v, -d[1] / mag * v, -d[2] / mag * v];
     }
     st.L_em = model.L_star * 3.828e33;
   },

@@ -45,15 +45,55 @@ export class Shock {
     this.mesh.renderOrder = 6;
     stage.near.add(this.mesh);
 
+    /* Reverse shock: same displaced-shell shader, its own uniforms, warmer
+       and fainter. Born when the swept CSM starts decelerating the blast;
+       heats the INNER ejecta — the reason Cas A's interior glows at all. */
+    this.revUniforms = {
+      uA:     { value: new Float32Array(24) },
+      uR:     { value: 100 },
+      uRT:    { value: 0 },
+      uTime:  { value: 0 },
+      uHeat:  { value: 0.35 },
+      uAlpha: { value: 0.12 },
+      uDebugZeta: { value: 0 },
+    };
+    this.rev = new THREE.Mesh(
+      this.mesh.geometry,
+      new THREE.ShaderMaterial({
+        uniforms: this.revUniforms,
+        vertexShader: shockVert,
+        fragmentShader: shockFrag,
+        transparent: true, blending: THREE.AdditiveBlending,
+        depthWrite: false, side: THREE.DoubleSide,
+      }),
+    );
+    this.rev.visible = false;
+    this.rev.frustumCulled = false;
+    this.rev.renderOrder = 6;
+    stage.near.add(this.rev);
+
     addEventListener('keydown', e => {
       if (e.code === 'KeyZ') this.uniforms.uDebugZeta.value = 1 - this.uniforms.uDebugZeta.value;
     });
   }
 
   update(dt, snap) {
-    const show = ['bounce', 'stall', 'explosion'].includes(snap.phase)
+    const remnant = ['free', 'sedov'].includes(snap.phase);
+    const show = (['bounce', 'stall', 'explosion'].includes(snap.phase) || remnant)
       && snap.R_shock > 0 && !snap.bhFormed;
     this.mesh.visible = show;
+
+    /* reverse shock only once it has detached from the forward one */
+    const revShow = remnant && snap.R_rev > 0 && snap.R_rev < snap.R_fwd * 0.92;
+    this.rev.visible = revShow;
+    if (revShow) {
+      const o = this.stage.origin;
+      this.rev.position.set(-o.x, -o.y, -o.z);
+      this.revUniforms.uTime.value += dt;
+      this.revUniforms.uR.value = snap.R_rev * KM;
+      this.revUniforms.uA.value.set(snap.a);
+      this.revUniforms.uRT.value = snap.rtAmp * 0.35;
+    }
     if (!show) return;
 
     const o = this.stage.origin;
@@ -68,10 +108,17 @@ export class Shock {
     /* heating indicator: neutrino luminosity against the stall's scale */
     this.uniforms.uHeat.value = Math.min(Math.max(Math.log10(Math.max(snap.L_nu, 1) / 3e51) / 2, 0), 1);
 
-    /* the shell thins as it expands through the envelope */
+    /* the shell thins as it expands through the envelope, and settles to a
+       faint cool skin around the mature remnant */
     const Rkm = snap.R_shock * KM;
-    this.uniforms.uAlpha.value = snap.phase === 'explosion'
-      ? Math.max(0.25, 0.9 - 0.3 * Math.log10(Math.max(Rkm / 300, 1)))
-      : 0.9;
+    if (remnant) {
+      this.uniforms.uAlpha.value = 0.16;
+      this.uniforms.uHeat.value = 0.15;
+      this.uniforms.uRT.value = snap.rtAmp * 0.55;
+    } else {
+      this.uniforms.uAlpha.value = snap.phase === 'explosion'
+        ? Math.max(0.25, 0.9 - 0.3 * Math.log10(Math.max(Rkm / 300, 1)))
+        : 0.9;
+    }
   }
 }

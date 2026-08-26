@@ -156,6 +156,16 @@ export class Core {
     const o = this.stage.origin;
     g.position.set(-o.x, -o.y, -o.z);
 
+    /* The kick: the neutron star has been drifting since revival, and by the
+       mature remnant it is visibly off-centre — as real pulsars are. */
+    if (snap.t > 0 && (snap.kick[0] || snap.kick[1] || snap.kick[2])) {
+      const KMS = KM;   // cm -> km
+      this.pns.position.set(
+        snap.kick[0] * snap.t * KMS,
+        snap.kick[1] * snap.t * KMS,
+        snap.kick[2] * snap.t * KMS);
+    } else this.pns.position.set(0, 0, 0);
+
     const post = snap.t >= 0;
     const inCollapse = snap.phase === 'collapse';
     const coreR = (post ? snap.R_pns : snap.R_core) * KM;   // km
@@ -169,7 +179,10 @@ export class Core {
       this.pnsUniforms.uTemp.value = snap.T_c;
       /* glow ramps with central density through collapse, full after bounce */
       const prog = Math.min(Math.log10(Math.max(snap.rho_c / 3e9, 1)) / 5.0, 1);
-      this.pnsUniforms.uGlow.value = post ? 1 : 0.15 + 0.85 * prog;
+      /* the neutron star cools: brilliant at birth, an ember at 3000 yr */
+      const YR = 3.15576e7;
+      const cool = post ? 1 / (1 + Math.max(snap.t, 0) / (150 * YR)) : 1;
+      this.pnsUniforms.uGlow.value = (post ? 1 : 0.15 + 0.85 * prog) * cool;
     }
 
     /* neutrinosphere */

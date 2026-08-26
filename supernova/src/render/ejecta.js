@@ -27,11 +27,11 @@ import { SPHERICAL_HARMONICS, NOISE_KIT } from '../shaders/common.glsl.js';
 
 /* composition groups: fraction of knots, speed band (km/s), colour, gain */
 const GROUPS = [
-  { f: 0.10, v0: 2200,  v1: 4200,  col: [1.00, 0.80, 0.38], gain: 1.55 }, // Ni/Fe
-  { f: 0.14, v0: 3800,  v1: 6000,  col: [1.00, 0.55, 0.28], gain: 1.05 }, // Si
-  { f: 0.22, v0: 5200,  v1: 8200,  col: [0.30, 0.95, 0.85], gain: 0.85 }, // O
-  { f: 0.18, v0: 7400,  v1: 9600,  col: [1.00, 0.88, 0.55], gain: 0.55 }, // He
-  { f: 0.36, v0: 8600,  v1: 13500, col: [1.00, 0.66, 0.62], gain: 0.38 }, // H
+  { f: 0.10, v0: 2200,  v1: 4200,  col: [1.00, 0.80, 0.38], gain: 1.55, late: 0.85 }, // Ni/Fe
+  { f: 0.14, v0: 3800,  v1: 6000,  col: [1.00, 0.55, 0.28], gain: 1.05, late: 0.95 }, // Si
+  { f: 0.22, v0: 5200,  v1: 8200,  col: [0.30, 0.95, 0.85], gain: 0.85, late: 1.25 }, // O
+  { f: 0.18, v0: 7400,  v1: 9600,  col: [1.00, 0.88, 0.55], gain: 0.55, late: 0.40 }, // He
+  { f: 0.36, v0: 8600,  v1: 13500, col: [1.00, 0.66, 0.62], gain: 0.38, late: 0.22 }, // H
 ];
 
 export class Ejecta {
@@ -48,6 +48,8 @@ export class Ejecta {
       uT:    { value: 0 },                 // seconds since bounce
       uTime: { value: 0 },
       uFade: { value: 0 },
+      uRcap: { value: 1e30 },              // forward-shock pile-up radius, km
+      uAge:  { value: 0 },                 // 0 young -> 1 mature remnant
     };
 
     const mat = new THREE.ShaderMaterial({
@@ -59,14 +61,18 @@ export class Ejecta {
         attribute float aGain;
         attribute float aSeed;
         attribute float aStretch;
+        attribute float aLate;             // survival into the mature remnant
         uniform float uT;
+        uniform float uRcap;
+        uniform float uAge;
         varying vec3 vCol;
         varying float vGlow;
         #include <common>
         #include <logdepthbuf_pars_vertex>
         void main(){
-          /* homologous: the knot IS at r = v t, stretched along its motion */
-          float r = aV * uT;
+          /* homologous: the knot IS at r = v t, stretched along its motion —
+             until the forward shock, where the fastest material piles up */
+          float r = min(aV * uT, uRcap * (0.82 + 0.15 * aSeed));
           /* Homologous flow shears a knot by its own internal velocity
              spread — a few per cent of its radius, no more. Anything bigger
              turns the debris field into warp streaks. */
@@ -86,7 +92,9 @@ export class Ejecta {
           vec3 p = aDir * r + local;
 
           vCol = aCol;
-          vGlow = aGain;
+          /* aging: hydrogen recombines and dims; the O/Si/Fe filaments keep
+             shining (shock-heated) — which is why Cas A looks the way it does */
+          vGlow = aGain * mix(1.0, aLate, uAge);
           vec4 mv = modelViewMatrix * vec4(p, 1.0);
           gl_Position = projectionMatrix * mv;
           #include <logdepthbuf_vertex>
@@ -178,6 +186,7 @@ export class Ejecta {
     const gain = new Float32Array(this.count);
     const sd = new Float32Array(this.count);
     const str = new Float32Array(this.count);
+    const late = new Float32Array(this.count);
 
     /* group boundaries by cumulative fraction */
     let gi = 0, gAcc = GROUPS[0].f;
@@ -202,6 +211,7 @@ export class Ejecta {
       gain[i] = G.gain * (0.6 + 0.8 * rnd());
       sd[i] = rnd();
       str[i] = 0.7 + 1.6 * rnd();
+      late[i] = G.late * (0.5 + rnd());
     }
 
     const g = this.mesh.geometry;
@@ -211,6 +221,7 @@ export class Ejecta {
     g.setAttribute('aGain', new THREE.InstancedBufferAttribute(gain, 1));
     g.setAttribute('aSeed', new THREE.InstancedBufferAttribute(sd, 1));
     g.setAttribute('aStretch', new THREE.InstancedBufferAttribute(str, 1));
+    g.setAttribute('aLate', new THREE.InstancedBufferAttribute(late, 1));
     /* identity instance matrices — position work happens in the shader */
     const m = new THREE.Matrix4();
     for (let i = 0; i < this.count; i++) this.mesh.setMatrixAt(i, m);
@@ -234,6 +245,11 @@ export class Ejecta {
 
     /* knots ride slightly behind the shock's leading edge */
     this.uniforms.uT.value = snap.t * 0.92;          // km/s * s -> km, slightly behind the shock
+    this.uniforms.uRcap.value = ['free', 'sedov'].includes(snap.phase)
+      ? snap.R_fwd * KM : 1e30;
+    /* age on a log clock: 2 yr is young, 3000 yr is old */
+    const YR = 3.15576e7;
+    this.uniforms.uAge.value = Math.min(Math.max(Math.log10(Math.max(snap.t / YR, 0.1)) / 3.4, 0), 1);
     this.uniforms.uTime.value += dt;
 
     /* fade in through the explosion, hold, dim slowly in the remnant as the
