@@ -68,7 +68,7 @@ export class Labels {
         st.el = el;
       }
       st.el.style.opacity = st.o.toFixed(2);
-      st.el.style.left = (o._sx + 9) + 'px';
+      st.el.style.left = o._sx + 'px';
       st.el.style.top = o._sy + 'px';
       st.el.classList.toggle('sel', o === this.selected);
     }

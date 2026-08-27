@@ -237,7 +237,7 @@ export function buildGalaxyLayer(scene, registry, ctx0) {
     // flux scale as real stars become unresolvable so the ensemble keeps
     // the correct integrated brightness.
     const t = smoothstep(18.0, 21.5, ctx.logS);
-    mat.uniforms.uFluxScale.value = lerp(400, 2.4e6, t * t);
+    mat.uniforms.uFluxScale.value = lerp(8e3, 2.4e6, t * t);
     mat.uniforms.uOpacity.value = f;
     dmat.uniforms.uOpacity.value = f * (0.16 + 0.22 * t);
     hmat.uniforms.uOpacity.value = f * 0.5;
