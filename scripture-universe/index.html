@@ -211,7 +211,8 @@
   <table>
     <tr><td>1 / 2 / 3</td><td>ribbon · chord · network view</td></tr>
     <tr><td>scroll / pinch</td><td>zoom — canon → book → chapter → verse</td></tr>
-    <tr><td>drag</td><td>pan</td></tr>
+    <tr><td>drag</td><td>pan — or orbit the graph in NET view</td></tr>
+    <tr><td>shift + drag</td><td>pan while in NET view</td></tr>
     <tr><td>hover</td><td>relationship card</td></tr>
     <tr><td>click verse</td><td>focus its constellation; click again to travel</td></tr>
     <tr><td>click connection</td><td>side-by-side comparison</td></tr>
@@ -275,7 +276,8 @@ const TYPE_STYLE = [
 ];
 
 const STATE = { booted:false, view:0, viewBlend:0, viewFrom:0, tweenT:1,
-                reveal:0, introT0:0, dirty:true, labDirty:true };
+                reveal:0, introT0:0, dirty:true, labDirty:true,
+                chordAmt:0, net3D:0 };
 const SEL = { hoverEdge:-1, hoverNode:-1, focusSeq:-1, selEdge:-1, pathSeqs:null, pathEdges:null };
 const FILT = { types:(1<<13)-1, conf:3, canon:Array.from({length:5},()=>[1,1,1,1,1]),
                topicPost:null, personPost:null, prophecy:false };
@@ -446,16 +448,19 @@ function lazy(name){ return lazyJson[name] || (lazyJson[name] = jget(name+'.json
 /* Three layouts write target positions for every node (verse, chapter, book)
    into Float32Arrays; the active positions are tweened between them and
    uploaded to one RG32F texture the shaders fetch. World space is [0,1]². */
+// Positions are xyz: ribbon and chord live on the z = 0 plane, the network
+// fills a volume you can orbit.
 const LAY = { ribbon:null, chord:null, network:null, cur:null, from:null, to:null,
-              verseX:null, canonRange:[], bookRange:[] };
+              verseX:null, canonRange:[], bookRange:[], netMid:[.5,.5,0] };
 const CAM = { cx:.5, cy:.5, sx:0, sy:0, minSx:0, maxSx:0,
-              fly:null, W:0, H:0, dpr:1 };
+              fly:null, W:0, H:0, dpr:1,
+              yaw:.6, pitch:.35, vYaw:0, vPitch:0 };
 
 function buildLayouts(){
   const N = DATA.N, V = DATA.V, B = DATA.meta.books;
   const GUT = DATA.V * .015;                       // inter-canon gutter, verse units
   // ---- ribbon ----
-  const rib = new Float32Array(N*2);
+  const rib = new Float32Array(N*3);
   const verseX = new Float32Array(V);
   let x = 0, lastCanon = 0;
   LAY.canonRange = []; LAY.bookRange = [];
@@ -471,56 +476,62 @@ function buildLayouts(){
   }
   const total = x;
   const BASE = .64, CHY = .654, BKY = .672;
-  for (let s = 0; s < V; s++){ rib[s*2] = verseX[s]/total; rib[s*2+1] = BASE; }
+  for (let s = 0; s < V; s++){ rib[s*3] = verseX[s]/total; rib[s*3+1] = BASE; }
   DATA.meta.books.forEach((bk, bi) => {
     for (let c = 1; c <= bk.vc.length; c++){
       const cs = DATA.chSeq[bi][c-1];
       // chapter x = midpoint of its verses
       const first = DATA.vidToSeq.get((bi<<20)|(c<<8)|1);
       const n = bk.vc[c-1];
-      rib[cs*2] = (verseX[first] + n/2)/total; rib[cs*2+1] = CHY;
+      rib[cs*3] = (verseX[first] + n/2)/total; rib[cs*3+1] = CHY;
     }
     const bs = DATA.bookSeq[bi], [b0,b1] = LAY.bookRange[bi];
-    rib[bs*2] = (b0+b1)/2/total; rib[bs*2+1] = BKY;
+    rib[bs*3] = (b0+b1)/2/total; rib[bs*3+1] = BKY;
   });
   LAY.verseX = verseX; LAY.total = total;
   // ---- chord ----
-  const cho = new Float32Array(N*2);
+  const cho = new Float32Array(N*3);
   const R = .355, CX = .5, CY = .52;
   const angOf = wx => -Math.PI/2 + wx * TAU * .96 + TAU*.02;
   for (let s = 0; s < V; s++){
-    const a = angOf(rib[s*2]);
-    cho[s*2] = CX + Math.cos(a)*R; cho[s*2+1] = CY + Math.sin(a)*R;
+    const a = angOf(rib[s*3]);
+    cho[s*3] = CX + Math.cos(a)*R; cho[s*3+1] = CY + Math.sin(a)*R;
   }
   for (let s = V; s < N; s++){
-    const a = angOf(rib[s*2]);
+    const a = angOf(rib[s*3]);
     const rr = s < V + DATA.NCH ? R + .007 : R + .018;
-    cho[s*2] = CX + Math.cos(a)*rr; cho[s*2+1] = CY + Math.sin(a)*rr;
+    cho[s*3] = CX + Math.cos(a)*rr; cho[s*3+1] = CY + Math.sin(a)*rr;
   }
   // ---- network ----
-  const net = new Float32Array(N*2);
-  { const L = DATA.agg.netLayout;                  // per-chapter [x,y] u16
+  const net = new Float32Array(N*3);
+  { const L = DATA.agg.netLayout;                  // per-chapter [x,y,z] u16
+    const d3 = DATA.agg.netDims === 3;
     let ci = 0;
     const chPos = [];
     B.forEach((bk, bi) => { chPos.push([]); for (let c = 0; c < bk.vc.length; c++){
-      const [qx, qy] = L[ci++];
-      chPos[bi].push([.09 + qx/65535*.82, .09 + qy/65535*.82]); } });
+      const q = L[ci++];
+      chPos[bi].push([.09 + q[0]/65535*.82, .09 + q[1]/65535*.82,
+                      d3 ? (q[2]/65535 - .5) * .82 : 0]); } });
     for (let s = 0; s < V; s++){
-      const [px, py] = chPos[DATA.seqBook[s]][DATA.seqCh[s]-1];
+      const [px, py, pz] = chPos[DATA.seqBook[s]][DATA.seqCh[s]-1];
       const k = DATA.seqV[s];
       const r = .0035 * Math.sqrt(k), th = k * 2.39996;
-      net[s*2] = px + Math.cos(th)*r; net[s*2+1] = py + Math.sin(th)*r;
+      net[s*3] = px + Math.cos(th)*r; net[s*3+1] = py + Math.sin(th)*r;
+      net[s*3+2] = pz + Math.cos(th*1.7) * r * .6;
     }
+    let sx3 = 0, sy3 = 0, sz3 = 0;
     B.forEach((bk, bi) => {
-      let mx = 0, my = 0;
+      let mx = 0, my = 0, mz = 0;
       for (let c = 0; c < bk.vc.length; c++){
         const cs = DATA.chSeq[bi][c];
-        net[cs*2] = chPos[bi][c][0]; net[cs*2+1] = chPos[bi][c][1];
-        mx += chPos[bi][c][0]; my += chPos[bi][c][1];
+        net[cs*3] = chPos[bi][c][0]; net[cs*3+1] = chPos[bi][c][1]; net[cs*3+2] = chPos[bi][c][2];
+        mx += chPos[bi][c][0]; my += chPos[bi][c][1]; mz += chPos[bi][c][2];
       }
-      const bs = DATA.bookSeq[bi];
-      net[bs*2] = mx/bk.vc.length; net[bs*2+1] = my/bk.vc.length;
+      const bs = DATA.bookSeq[bi], n = bk.vc.length;
+      net[bs*3] = mx/n; net[bs*3+1] = my/n; net[bs*3+2] = mz/n;
+      sx3 += mx/n; sy3 += my/n; sz3 += mz/n;
     });
+    LAY.netMid = [sx3/B.length, sy3/B.length, sz3/B.length];
   }
   LAY.ribbon = rib; LAY.chord = cho; LAY.network = net;
   LAY.cur = new Float32Array(rib);
@@ -574,6 +585,7 @@ function zoomAt(px, py, f){
   clampCam(); STATE.labDirty = true; markLodDirty();
 }
 function clampCam(){
+  if (STATE.view === 2) return;      // the orbiting cloud has no fixed bounds
   const hw = CAM.W/2/CAM.sx, hh = CAM.H/2/CAM.sy;
   CAM.cx = clamp(CAM.cx, hw*.2, 1 - hw*.2);
   CAM.cy = clamp(CAM.cy, hh*.2, 1 - hh*.2);
@@ -581,8 +593,31 @@ function clampCam(){
 function fitHome(v){
   CAM.minSx = (v === 0 ? CAM.W : Math.min(CAM.W, CAM.H)) * .92;
   CAM.sx = CAM.minSx; CAM.sy = syArc();
-  CAM.cx = .5; CAM.cy = STATE.view === 0 ? .48 : .5;
+  CAM.cx = .5; CAM.cy = v === 0 ? .48 : .5;
+  if (v === 2) frameNet();
   CAM.fly = null; STATE.labDirty = true; markLodDirty();
+}
+// Fit the camera to the cloud as it actually projects at the current angle,
+// so the network fills the view instead of drifting off to one side.
+function frameNet(){
+  const L = LAY.network, m = LAY.netMid;
+  const cy2 = Math.cos(CAM.yaw), sy2 = Math.sin(CAM.yaw);
+  const cp = Math.cos(CAM.pitch), sp = Math.sin(CAM.pitch);
+  let mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9;
+  for (let b = 0; b < DATA.NB; b++){
+    const o = DATA.bookSeq[b]*3;
+    const dx = L[o]-m[0], dy = L[o+1]-m[1], dz = L[o+2]-m[2];
+    const rx = dx*cy2 + dz*sy2; let rz = -dx*sy2 + dz*cy2;
+    const ry = dy*cp - rz*sp; rz = dy*sp + rz*cp;
+    const pe = 1 / (1 + rz * PERSP);
+    const px = m[0] + rx*pe, py = m[1] + ry*pe;
+    mnx = Math.min(mnx, px); mxx = Math.max(mxx, px);
+    mny = Math.min(mny, py); mxy = Math.max(mxy, py);
+  }
+  CAM.cx = (mnx+mxx)/2; CAM.cy = (mny+mxy)/2;
+  const fit = Math.min(CAM.W / Math.max(.05, mxx-mnx), CAM.H / Math.max(.05, mxy-mny)) * .78;
+  CAM.sx = clamp(fit, CAM.minSx * .5, CAM.maxSx);
+  CAM.sy = CAM.sx;
 }
 function flyTo(cx, cy, sx, dur){
   CAM.fly = { t:0, dur:dur||.9, cx0:CAM.cx, cy0:CAM.cy, sx0:CAM.sx,
@@ -598,22 +633,74 @@ function updateFly(dt){
   STATE.labDirty = true; markLodDirty();
   if (f.t >= 1) CAM.fly = null;
 }
-function seqCenter(s){ return [LAY.cur[s*2], LAY.cur[s*2+1]]; }
+// Orbit inertia: a flick keeps turning briefly, then settles. No idle spin —
+// the graph moves when you move it.
+function updateOrbit(dt){
+  if (STATE.view !== 2 && STATE.net3D < .001) return;
+  if (Math.abs(CAM.vYaw) < 1e-5 && Math.abs(CAM.vPitch) < 1e-5) return;
+  CAM.yaw += CAM.vYaw * dt; CAM.pitch += CAM.vPitch * dt;
+  CAM.pitch = clamp(CAM.pitch, -1.45, 1.45);
+  const damp = Math.pow(.0016, dt);
+  CAM.vYaw *= damp; CAM.vPitch *= damp;
+  if (Math.abs(CAM.vYaw) < 1e-5) CAM.vYaw = 0;
+  if (Math.abs(CAM.vPitch) < 1e-5) CAM.vPitch = 0;
+  STATE.labDirty = true;
+}
+function orbitBy(dx, dy, dt){
+  CAM.yaw += dx; CAM.pitch = clamp(CAM.pitch + dy, -1.45, 1.45);
+  if (dt > 0){ CAM.vYaw = dx/dt; CAM.vPitch = dy/dt; }
+  STATE.labDirty = true;
+}
+function seqCenter(s){ return [LAY.cur[s*3], LAY.cur[s*3+1], LAY.cur[s*3+2]]; }
+// Mirror of the vertex shader's transform, for labels, picking targets and the
+// scripted API. Returns screen pixels.
+function projectSeq(s){
+  const o = s*3;
+  return projectWorld(LAY.cur[o], LAY.cur[o+1], LAY.cur[o+2]);
+}
+function projectWorld(x, y, z){
+  const n3 = STATE.net3D;
+  if (n3 > .001){
+    const m = LAY.netMid;
+    let dx = x-m[0], dy = y-m[1], dz = z-m[2];
+    const cy2 = Math.cos(CAM.yaw), sy2 = Math.sin(CAM.yaw);
+    let rx = dx*cy2 + dz*sy2, rz = -dx*sy2 + dz*cy2;
+    const cp = Math.cos(CAM.pitch), sp = Math.sin(CAM.pitch);
+    let ry = dy*cp - rz*sp; rz = dy*sp + rz*cp;
+    const persp = 1 / (1 + rz * PERSP);
+    const px = m[0] + lerp(dx, rx*persp, n3), py = m[1] + lerp(dy, ry*persp, n3);
+    return [(px - CAM.cx)*CAM.sx + CAM.W/2, (py - CAM.cy)*CAM.sy + CAM.H/2, rz];
+  }
+  return [(x - CAM.cx)*CAM.sx + CAM.W/2, (y - CAM.cy)*CAM.sy + CAM.H/2, 0];
+}
+const PERSP = .85;
 function flyToSeq(s, versesOnScreen){
   const [x, y] = seqCenter(s);
   flyTo(x, y, CAM.W * DATA.V / (versesOnScreen||120) / (LAY.total/DATA.V), 1.1);
 }
 function lodLevel(){
   const vpp = DATA.V / CAM.sx * (LAY.total/DATA.V);  // verses per px incl. gutters
-  return vpp > 24 ? 0 : vpp > 1.6 ? 1 : 2;
+  // Chapter flows only once chapters are big enough to read as chapters; a
+  // whole-book view is still a book-flow view, not 22k chapter arcs.
+  return vpp > 9 ? 0 : vpp > 2.2 ? 1 : 2;
 }
 let lastLod = -1, lastCull = [0,0];
 function markLodDirty(){
   const l = lodLevel();
   if (l !== lastLod){ lastLod = l; STATE.dirty = true; return; }
-  if (l === 2 && STATE.view === 0){
+  // Both culled levels — chapter and verse — must rebuild when the camera
+  // moves past the window their instance set was built for, and also when it
+  // zooms well inside it, or a set built for the whole canon is never pruned.
+  if (STATE.view === 2){
+    const want = CAM.sx >= CAM.minSx * 2.2;
+    if (want !== !!STATE.netCh){ STATE.netCh = want; STATE.dirty = true; }
+    return;
+  }
+  if (l >= 1 && STATE.view === 0){
     const r = visVerseRange(1.3);
-    if (r[0] < lastCull[0] || r[1] > lastCull[1]) STATE.dirty = true;
+    const built = lastCull[1] - lastCull[0];
+    if (r[0] < lastCull[0] || r[1] > lastCull[1] ||
+        (r[1] - r[0]) < built * .6) STATE.dirty = true;
   }
 }
 function visVerseRange(marginF){
@@ -648,7 +735,23 @@ function glInit(){
   uniform float uBeta, uChordAmt, uLiftK, uLiftMax, uReveal, uTime, uDim, uWidthMul, uAlphaMul;
   uniform vec2 uCenter;
   out vec3 vCol; out float vAlpha; out float vSide; out float vArc; out float vDashOn; out float vFlow;
-  vec2 P(uint s){ return texelFetch(uPos, ivec2(int(s&255u), int(s>>8)), 0).xy; }
+  vec3 Praw(uint s){ return texelFetch(uPos, ivec2(int(s&255u), int(s>>8)), 0).xyz; }
+  uniform float uNet3D, uPersp; uniform vec2 uYawPitch; uniform vec3 uMid;
+  // Orbit: rotate about the layout centroid, then a gentle perspective. At
+  // uNet3D = 0 this is exactly the old flat projection, so ribbon and chord
+  // are untouched and the view tween interpolates through it.
+  vec3 orbit(vec3 w){
+    if (uNet3D < 0.001) return vec3(w.xy, 0.0);
+    vec3 d = w - uMid;
+    float cy = cos(uYawPitch.x), sy = sin(uYawPitch.x);
+    float rx = d.x*cy + d.z*sy, rz = -d.x*sy + d.z*cy;
+    float cp = cos(uYawPitch.y), sp = sin(uYawPitch.y);
+    float ry = d.y*cp - rz*sp; rz = d.y*sp + rz*cp;
+    float persp = 1.0 / (1.0 + rz * uPersp);
+    return vec3(uMid.xy + mix(d.xy, vec2(rx, ry)*persp, uNet3D), rz);
+  }
+  vec2 P(uint s){ return orbit(Praw(s)).xy; }
+  float Pdepth(uint s){ return orbit(Praw(s)).z; }
   float canon(uint s){ return texelFetch(uCanon, ivec2(int(s&255u), int(s>>8)), 0).r * 255.0; }
   uniform vec3 uPal[5];
   float hash(float n){ return fract(sin(n*127.1)*43758.5453); }
@@ -659,7 +762,7 @@ function glInit(){
     vec2 a1 = P(aEnds.z), a2 = P(aEnds.w);
     float span = distance(p0, p3);
     vec2 c1 = mix(p0, a1, uBeta), c2 = mix(p3, a2, uBeta);
-    vec2 lift = vec2(0.0, -min(span * uLiftK, uLiftMax));
+    vec2 lift = vec2(0.0, -min(span * uLiftK, uLiftMax) * (1.0 - uNet3D));
     vec2 c1r = c1 + lift, c2r = c2 + lift;
     vec2 c1c = mix(c1, uCenter, min(span*2.2, .85)), c2c = mix(c2, uCenter, min(span*2.2, .85));
     c1 = mix(c1r, c1c, uChordAmt); c2 = mix(c2r, c2c, uChordAmt);
@@ -682,7 +785,9 @@ function glInit(){
     float h = hash(float(gl_InstanceID));
     float tc = clamp((uReveal*1.25 - h)/0.25, 0.0, 1.0);
     if (t > tc) alpha = 0.0;
-    vAlpha = alpha * dim;
+    float depth = mix(0.0, (Pdepth(aEnds.x) + Pdepth(aEnds.y)) * 0.5, uNet3D);
+    float dfade = 1.0 - clamp(depth * 1.15 + 0.25, 0.0, 0.72);   // far = dimmer
+    vAlpha = alpha * dim * mix(1.0, dfade, uNet3D);
     vSide = side;
     float spanPx = distance(p0*uScale, p3*uScale);
     vArc = t * spanPx;
@@ -732,7 +837,23 @@ function glInit(){
   uniform vec3 uPal[5];
   uniform float uDim, uReveal;
   out vec3 vCol; out vec2 vQ; out float vAlpha; out float vKind;
-  vec2 P(uint s){ return texelFetch(uPos, ivec2(int(s&255u), int(s>>8)), 0).xy; }
+  vec3 Praw(uint s){ return texelFetch(uPos, ivec2(int(s&255u), int(s>>8)), 0).xyz; }
+  uniform float uNet3D, uPersp; uniform vec2 uYawPitch; uniform vec3 uMid;
+  // Orbit: rotate about the layout centroid, then a gentle perspective. At
+  // uNet3D = 0 this is exactly the old flat projection, so ribbon and chord
+  // are untouched and the view tween interpolates through it.
+  vec3 orbit(vec3 w){
+    if (uNet3D < 0.001) return vec3(w.xy, 0.0);
+    vec3 d = w - uMid;
+    float cy = cos(uYawPitch.x), sy = sin(uYawPitch.x);
+    float rx = d.x*cy + d.z*sy, rz = -d.x*sy + d.z*cy;
+    float cp = cos(uYawPitch.y), sp = sin(uYawPitch.y);
+    float ry = d.y*cp - rz*sp; rz = d.y*sp + rz*cp;
+    float persp = 1.0 / (1.0 + rz * uPersp);
+    return vec3(uMid.xy + mix(d.xy, vec2(rx, ry)*persp, uNet3D), rz);
+  }
+  vec2 P(uint s){ return orbit(Praw(s)).xy; }
+  float Pdepth(uint s){ return orbit(Praw(s)).z; }
   float canon(uint s){ return texelFetch(uCanon, ivec2(int(s&255u), int(s>>8)), 0).r * 255.0; }
   void main(){
     int vi = gl_VertexID;
@@ -745,7 +866,9 @@ function glInit(){
     gl_Position = vec4(sp.x/uHalf.x - 1.0, 1.0 - sp.y/uHalf.y, 0.0, 1.0);
     vCol = uPal[int(canon(aN0.x))];
     if (hl > 0.5) vCol = mix(vCol, vec3(1.0), 0.45);
-    vAlpha = (hl > 0.5 ? 1.0 : uDim) * min(1.0, uReveal*2.0);
+    float ndepth = mix(0.0, Pdepth(aN0.x), uNet3D);
+    float nfade = 1.0 - clamp(ndepth * 1.15 + 0.25, 0.0, 0.68);
+    vAlpha = (hl > 0.5 ? 1.0 : uDim) * min(1.0, uReveal*2.0) * mix(1.0, nfade, uNet3D);
     vQ = q; vKind = float(aN1.x);
   }`;
   const FS_NODE = `#version 300 es
@@ -792,10 +915,10 @@ function glInit(){
   // position + canon textures (256×256 covers 65k seq slots)
   GLR.posTex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, GLR.posTex);
-  gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RG32F, 256, 256);
+  gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA32F, 256, 256);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  GLR.posScratch = new Float32Array(256*256*2);
+  GLR.posScratch = new Float32Array(256*256*4);
   GLR.canonTex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, GLR.canonTex);
   gl.texStorage2D(gl.TEXTURE_2D, 1, gl.R8, 256, 256);
@@ -848,15 +971,63 @@ function glInit(){
   GLR.pickW = 0; GLR.pickH = 0;
   GLR.pickFBO = gl.createFramebuffer();
 
+  // HDR target: edges accumulate additively into a float buffer, then a
+  // fullscreen pass tone-maps them. Without this, dense regions clip to flat
+  // white; with it, density rolls off into colour and stays readable.
+  GLR.hdrOK = !!(gl.getExtension('EXT_color_buffer_float') ||
+                 gl.getExtension('EXT_color_buffer_half_float'));
+  if (GLR.hdrOK){
+    GLR.hdrTex = gl.createTexture();
+    GLR.hdrFBO = gl.createFramebuffer();
+    GLR.hdrW = GLR.hdrH = 0;
+    GLR.compProg = prog(`#version 300 es
+      precision highp float;
+      out vec2 vUv;
+      void main(){
+        vec2 q = vec2(float(gl_VertexID & 1), float((gl_VertexID >> 1) & 1));
+        vUv = q;
+        gl_Position = vec4(q * 2.0 - 1.0, 0.0, 1.0);
+      }`, `#version 300 es
+      precision highp float;
+      in vec2 vUv; uniform sampler2D uHdr; uniform float uExp, uGamma;
+      out vec4 o;
+      void main(){
+        vec3 h = texture(uHdr, vUv).rgb * uExp;
+        vec3 c = vec3(1.0) - exp(-h);              // filmic-ish rolloff
+        c = pow(max(c, 0.0), vec3(uGamma));        // <1 lifts threads, >1 crushes haze
+        o = vec4(c, 1.0);
+      }`);
+  }
+
   gl.disable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND);
 }
 
+function ensureHdrTarget(){
+  const gl = GLR.gl;
+  const w = Math.max(2, Math.round(CAM.W*CAM.dpr)), h = Math.max(2, Math.round(CAM.H*CAM.dpr));
+  if (GLR.hdrW === w && GLR.hdrH === h) return;
+  GLR.hdrW = w; GLR.hdrH = h;
+  gl.bindTexture(gl.TEXTURE_2D, GLR.hdrTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, GLR.hdrFBO);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, GLR.hdrTex, 0);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) GLR.hdrOK = false;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
 function uploadPositions(){
-  GLR.posScratch.set(LAY.cur);
+  const p = GLR.posScratch, c = LAY.cur;
+  for (let i = 0, n = DATA.N; i < n; i++){
+    p[i*4] = c[i*3]; p[i*4+1] = c[i*3+1]; p[i*4+2] = c[i*3+2];
+  }
   const gl = GLR.gl;
   gl.bindTexture(gl.TEXTURE_2D, GLR.posTex);
-  gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 256, gl.RG, gl.FLOAT, GLR.posScratch);
+  gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 256, gl.RGBA, gl.FLOAT, p);
   GLR.posDirty = false;
 }
 
@@ -878,33 +1049,66 @@ function setCommonUniforms(gl, p, widthMul, alphaMul){
     gl.uniform1f(beta, lod === 2 ? .35 : lod === 1 ? .5 : .28);
     gl.uniform1f(U('uChordAmt'), STATE.chordAmt || 0);
     gl.uniform1f(U('uLiftK'), .42);
-    gl.uniform1f(U('uLiftMax'), .30);
+    // In world units the arc height is fixed, so zooming in turns every long
+    // connection into a sheet across the screen. Capping the rise in pixels
+    // keeps the arcs a compact band above the verse line at any zoom.
+    gl.uniform1f(U('uLiftMax'), Math.min(.30, CAM.H * .34 / Math.max(1, CAM.sy)));
     gl.uniform2f(U('uCenter'), .5, .52);
     gl.uniform1f(U('uWidthMul'), widthMul || 1);
     const am = U('uAlphaMul'); if (am) gl.uniform1f(am, alphaMul || 1);
     gl.uniform1f(U('uTime'), performance.now()/1000 % 3600);
   }
   const rev = U('uReveal'); if (rev) gl.uniform1f(rev, STATE.reveal);
+  const n3 = U('uNet3D');
+  if (n3){
+    gl.uniform1f(n3, STATE.net3D);
+    gl.uniform1f(U('uPersp'), PERSP);
+    gl.uniform2f(U('uYawPitch'), CAM.yaw, CAM.pitch);
+    gl.uniform3f(U('uMid'), LAY.netMid[0], LAY.netMid[1], LAY.netMid[2]);
+  }
   const dim = U('uDim');
   if (dim) gl.uniform1f(dim, (SEL.focusSeq >= 0 || SEL.pathSeqs || FILT.topicPost || FILT.personPost) ? .10 : 1);
   return U;
 }
 
+// The tone curve needs to know how much light is being poured into it: ten
+// thousand overlapping arcs and a hundred should both land mid-range.
+function autoExposure(){
+  const n = Math.max(500, GLR.edgeCount + GLR.nodeCount * .25);
+  return clamp(Math.pow(2500 / n, .5), .26, 1.15);
+}
+// Thin the stroke as the set grows: at a few hundred edges a 2 px line reads
+// as a thread, at ten thousand it reads as fog.
+function densityWidth(){
+  return GLR.edgeCount > 3000 ? clamp(Math.pow(3000 / GLR.edgeCount, .35), .55, 1) : 1;
+}
+
 function drawScene(){
   const gl = GLR.gl;
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  const hdr = GLR.hdrOK;
+  if (hdr){
+    ensureHdrTarget();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, GLR.hdrFBO);
+  } else {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
   gl.viewport(0, 0, CAM.W*CAM.dpr, CAM.H*CAM.dpr);
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.blendFunc(gl.ONE, gl.ONE);
+  // Into the HDR buffer the passes run hot and the tone curve tames them;
+  // on the direct fallback path they must stay inside 0..1 themselves.
+  const ex = hdr ? [.55, .8, 1.05][lastLod] || 1 : [.42, .7, 1][lastLod] || 1;
   if (GLR.edgeCount){
-    const ex = [.42, .7, 1][lastLod] || 1;             // exposure by granularity
     gl.bindVertexArray(GLR.edgeVAO);
-    if (!GLR.noGlow){
-      setCommonUniforms(gl, GLR.edgeProg, 3.6, .11 * ex);   // halo pass
+    // The halo is a wide, expensive pass. It makes a sparse view glow; in a
+    // dense one it only adds fill and haze, and the tone curve already gives
+    // the bloom, so it is skipped once the set gets big.
+    if (!GLR.noGlow && GLR.edgeCount < 6000){
+      setCommonUniforms(gl, GLR.edgeProg, 3.6, .10 * ex);   // halo pass
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 34, GLR.edgeCount);
     }
-    setCommonUniforms(gl, GLR.edgeProg, 1, ex);        // core pass
+    setCommonUniforms(gl, GLR.edgeProg, densityWidth(), ex); // core pass
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 34, GLR.edgeCount);
   }
   if (GLR.nodeCount){
@@ -913,6 +1117,22 @@ function drawScene(){
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, GLR.nodeCount);
   }
   gl.bindVertexArray(null);
+  if (hdr){
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, CAM.W*CAM.dpr, CAM.H*CAM.dpr);
+    gl.disable(gl.BLEND);
+    gl.useProgram(GLR.compProg);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, GLR.hdrTex);
+    gl.uniform1i(gl.getUniformLocation(GLR.compProg, 'uHdr'), 0);
+    gl.uniform1f(gl.getUniformLocation(GLR.compProg, 'uExp'), autoExposure());
+    // Sparse views want their faint threads lifted; dense ones want the haze
+    // between the threads pushed back down so individual arcs stay readable.
+    gl.uniform1f(gl.getUniformLocation(GLR.compProg, 'uGamma'),
+      clamp(.9 + (GLR.edgeCount - 1500) / 9000 * .45, .9, 1.35));
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.enable(gl.BLEND);
+  }
 }
 
 </script>
@@ -951,12 +1171,34 @@ function edgeVisible(i){
 }
 function seqInVRange(s, v0, v1){
   if (s < DATA.V) return s >= v0 && s <= v1;
-  if (s < DATA.V + DATA.NCH){
-    const b = DATA.seqBook[s], c = DATA.seqCh[s];
-    const fs = DATA.vidToSeq.get((b<<20)|(c<<8)|1);
-    return fs !== undefined && fs <= v1 && fs + DATA.meta.books[b].vc[c-1] >= v0;
-  }
+  if (s < DATA.V + DATA.NCH) return chInVRange(s, v0, v1);
   return false;
+}
+// a chapter pseudo-node is "visible" when its verse span meets the window
+function chInVRange(s, v0, v1){
+  const b = DATA.seqBook[s], c = DATA.seqCh[s];
+  const fs = DATA.vidToSeq.get((b<<20)|(c<<8)|1);
+  return fs !== undefined && fs <= v1 && fs + DATA.meta.books[b].vc[c-1] >= v0;
+}
+// How much of an edge is worth drawing. An arc with BOTH ends outside the
+// viewport crosses the screen as a streak with no readable end — hundreds of
+// those stack into the haze that made zooming in useless. Only a narrow band
+// of near-misses is kept, faint, as a hint that the span continues.
+const OFF_BAND = .3;                       // window-widths of grace
+function offscreenFade(a, z, v0, v1, vw){
+  if (seqInVRange(a, v0, v1) || seqInVRange(z, v0, v1)) return 255;
+  const d = Math.min(distOut(a, v0, v1), distOut(z, v0, v1)) / Math.max(1, vw);
+  if (d > OFF_BAND) return 0;
+  return Math.round(255 * lerp(.55, .12, d / OFF_BAND));
+}
+function distOut(s, v0, v1){
+  let lo = s, hi = s;
+  if (s >= DATA.V && s < DATA.V + DATA.NCH){
+    const b = DATA.seqBook[s], c = DATA.seqCh[s];
+    lo = DATA.vidToSeq.get((b<<20)|(c<<8)|1) ?? s;
+    hi = lo + DATA.meta.books[b].vc[c-1];
+  } else if (s >= DATA.V + DATA.NCH) return 0;
+  return lo > v1 ? lo - v1 : hi < v0 ? v0 - hi : 0;
 }
 
 function buildSets(){
@@ -986,7 +1228,7 @@ function buildSets(){
       put(a, z, anchorOf(a), anchorOf(z), SETS.styleBits[m], SETS.styleAlpha[m],
           DATA.w[i], (ia && iz ? 1 : 0) | dirBits(i));
     }
-  } else if (lod === 0){
+  } else if (lod === 0 || (STATE.view === 2 && CAM.sx < CAM.minSx * 2.2)){
     for (const p of DATA.bookAgg){
       const m = p.mask & FILT.types;
       if (!m || p.conf > FILT.conf || !canonPairOn(p.ba, p.bb)) continue;
@@ -994,21 +1236,38 @@ function buildSets(){
       put(p.a, p.z, p.a, p.z, SETS.styleBits[m], SETS.styleAlpha[m], p.w, 0);
     }
   } else if (lod === 1 || STATE.view !== 0){
+    // In the ribbon the chapter rollup is culled to the visible span — drawing
+    // all 22,608 at once buried the view in overlapping streaks. Chord and
+    // network keep the full set: there, everything is on screen anyway.
+    const cull = STATE.view === 0 && STATE.tweenT >= 1;
+    const [v0, v1] = cull ? visVerseRange(1.5) : [0, DATA.V - 1];
+    const vw = v1 - v0;
+    if (cull) lastCull = [v0, v1];
     for (const r of DATA.chAgg){
       const m = r.mask & FILT.types;
       if (!m || r.conf > FILT.conf) continue;
       if (!canonPairOn(DATA.seqBook[r.a], DATA.seqBook[r.z])) continue;
       if (FILT.prophecy && !(r.mask & 32)) continue;
+      let al = SETS.styleAlpha[m];
+      if (cull){
+        if (!chInVRange(r.a, v0, v1) && !chInVRange(r.z, v0, v1)){
+          const f = offscreenFade(r.a, r.z, v0, v1, vw);
+          if (f <= 0) continue;
+          al = al * f / 255;
+        }
+      }
       put(r.a, r.z, DATA.bookSeq[DATA.seqBook[r.a]], DATA.bookSeq[DATA.seqBook[r.z]],
-          SETS.styleBits[m], SETS.styleAlpha[m], r.w, 0);
+          SETS.styleBits[m], al, r.w, 0);
     }
   } else {
     const [v0, v1] = visVerseRange(1.5);
     lastCull = [v0, v1];
+    const vw = v1 - v0;
     for (let i = 0; i < DATA.E; i++){
       if (!edgeVisible(i)) continue;
       const a = DATA.src[i], z = DATA.dst[i];
-      if (!seqInVRange(a, v0, v1) && !seqInVRange(z, v0, v1)) continue;
+      const onA = seqInVRange(a, v0, v1), onZ = seqInVRange(z, v0, v1);
+      if (!onA && !onZ) continue;
       const m = DATA.mask[i] & FILT.types;
       put(a, z, anchorOf(a), anchorOf(z), SETS.styleBits[m], SETS.styleAlpha[m],
           DATA.w[i], dirBits(i));
@@ -1049,7 +1308,8 @@ function buildSets(){
     N16[k*4] = s; N8[k*8+4] = kind; N8[k*8+5] = size; N8[k*8+6] = hl; k++;
   };
   for (let b = 0; b < DATA.NB; b++) putN(DATA.bookSeq[b], 2, 18, 0);
-  if (lod >= 1 || STATE.view === 2)
+  const netChapters = STATE.view === 2 && CAM.sx >= CAM.minSx * 2.2;
+  if ((lod >= 1 && STATE.view !== 2) || netChapters)
     for (let b = 0; b < DATA.NB; b++)
       for (let c = 0; c < DATA.meta.books[b].vc.length; c++) putN(DATA.chSeq[b][c], 1, 9, 0);
   if (lod === 2 && STATE.view === 0 && !modePost){
@@ -1205,11 +1465,11 @@ function drawLabels(){
         if (seen.has(key)) continue;
         seen.add(key);
         const cs = DATA.chSeq[bi][c-1];
-        const x = sxOf(LAY.cur[cs*2]);
+        const x = projectSeq(cs)[0];
         if (x - lastX < 26) continue;
         lastX = x;
         ctx.globalAlpha = A * .8;
-        ctx.fillText(String(c), x, syOf(LAY.cur[cs*2+1]) + 14);
+        ctx.fillText(String(c), x, projectSeq(cs)[1] + 14);
       }
       // verse numbers when extremely close
       const pxPerVerse = CAM.sx / LAY.total;
@@ -1217,7 +1477,7 @@ function drawLabels(){
         ctx.font = '8.5px "IBM Plex Mono"'; ctx.fillStyle = '#44606f';
         for (let s = v0; s <= v1 && s < DATA.V; s++){
           ctx.globalAlpha = A * .8;
-          ctx.fillText(String(DATA.seqV[s]), sxOf(LAY.cur[s*2]), syOf(LAY.cur[s*2+1]) + 12);
+          { const q = projectSeq(s); ctx.fillText(String(DATA.seqV[s]), q[0], q[1] + 12); }
         }
       }
     }
@@ -1225,7 +1485,7 @@ function drawLabels(){
     // chord: book labels around the ring
     B.forEach((bk, bi) => {
       const bs = DATA.bookSeq[bi];
-      const x = LAY.cur[bs*2], y = LAY.cur[bs*2+1];
+      const x = LAY.cur[bs*3], y = LAY.cur[bs*3+1];
       const [u0, u1] = LAY.bookRange[bi];
       const frac = (u1-u0)/LAY.total;
       const spanPx = frac * TAU * .96 * .355 * CAM.sy;
@@ -1246,13 +1506,17 @@ function drawLabels(){
     });
   } else if (STATE.view === 2 && STATE.tweenT >= 1){
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    B.forEach((bk, bi) => {
-      const bs = DATA.bookSeq[bi];
-      ctx.font = '9.5px "IBM Plex Mono"';
+    // back-to-front, fading with depth: the far side of the cloud recedes
+    const order = [];
+    B.forEach((bk, bi) => { const q = projectSeq(DATA.bookSeq[bi]); order.push([q, bi, bk]); });
+    order.sort((a, b2) => b2[0][2] - a[0][2]);
+    for (const [q, bi, bk] of order){
+      const near = clamp(.5 - q[2] * 1.2, 0, 1);          // 0 far … 1 near
+      ctx.font = (9 + near*1.6).toFixed(1) + 'px "IBM Plex Mono"';
       ctx.fillStyle = CANON_HEX[bk.c];
-      ctx.globalAlpha = A * .8;
-      ctx.fillText(bookLabel(bi), sxOf(LAY.cur[bs*2]), syOf(LAY.cur[bs*2+1]) - 10);
-    });
+      ctx.globalAlpha = A * lerp(.22, .95, near);
+      ctx.fillText(bookLabel(bi), q[0], q[1] - 10);
+    }
   }
 
   // focus ref label
@@ -1262,7 +1526,7 @@ function drawLabels(){
     ctx.font = '11px "IBM Plex Mono"';
     ctx.fillStyle = '#fff';
     ctx.globalAlpha = .95;
-    ctx.fillText(refOfSeq(s, true), sxOf(LAY.cur[s*2]), syOf(LAY.cur[s*2+1]) - 13);
+    { const q = projectSeq(s); ctx.fillText(refOfSeq(s, true), q[0], q[1] - 13); }
   }
   ctx.globalAlpha = 1;
   STATE.labDirty = false;
@@ -1350,11 +1614,12 @@ let lazyStats = null;
 function initPointer(){
   const cv = $('#gl');
   const pts = new Map();
-  let moved = 0, pinch0 = 0, sx0 = 0, downId = -1;
+  let moved = 0, pinch0 = 0, sx0 = 0, downId = -1, dragT = 0;
   cv.addEventListener('pointerdown', e => {
     cv.setPointerCapture(e.pointerId);
     pts.set(e.pointerId, [e.clientX, e.clientY]);
-    if (pts.size === 1){ moved = 0; downId = e.pointerId; }
+    if (pts.size === 1){ moved = 0; downId = e.pointerId; dragT = performance.now();
+      CAM.vYaw = CAM.vPitch = 0; }
     if (pts.size === 2){
       const [a, b] = [...pts.values()];
       pinch0 = Math.hypot(a[0]-b[0], a[1]-b[1]); sx0 = CAM.sx;
@@ -1368,8 +1633,15 @@ function initPointer(){
       const dx = e.clientX - prev[0], dy = e.clientY - prev[1];
       moved += Math.abs(dx) + Math.abs(dy);
       if (moved > 3){
-        CAM.cx -= dx / CAM.sx; CAM.cy -= dy / CAM.sy;
-        CAM.fly = null; clampCam(); STATE.labDirty = true; markLodDirty();
+        const now = performance.now();
+        const dt = Math.max(.001, (now - (dragT || now)) / 1000); dragT = now;
+        if (STATE.view === 2 && !e.shiftKey){
+          orbitBy(dx * .0075, -dy * .0075, dt);   // drag orbits the 3D graph
+          CAM.fly = null;
+        } else {
+          CAM.cx -= dx / CAM.sx; CAM.cy -= dy / CAM.sy;
+          CAM.fly = null; clampCam(); STATE.labDirty = true; markLodDirty();
+        }
       }
     } else if (pts.size === 2){
       const [a, b] = [...pts.values()];
@@ -1978,7 +2250,7 @@ function tourStep(){
   SEL.focusSeq = -1; SEL.pathSeqs = SEL.pathEdges = null;
   SEL.selEdge = findEdge(Math.min(a,z), Math.max(a,z));
   markDirty();
-  const xa = LAY.ribbon[a*2], xz = LAY.ribbon[z*2];
+  const xa = LAY.ribbon[a*3], xz = LAY.ribbon[z*3];
   const lo = Math.min(xa,xz), hi = Math.max(xa,xz);
   flyTo((lo+hi)/2, .5, CAM.W / Math.max(.02, (hi-lo)) * .62, 1.6);
   const cap = $('#tourCap');
@@ -2079,7 +2351,12 @@ function tick(now){
   if (rev !== STATE.reveal){ STATE.reveal = rev; STATE.labDirty = true; }
   updateTween(dt); updateFly(dt);
   const amtOf = v => v === 1 ? 1 : 0;
-  STATE.chordAmt = lerp(amtOf(STATE.viewFrom), amtOf(STATE.view), ease(STATE.tweenT));
+  const netOf = v => v === 2 ? 1 : 0;
+  const te = ease(STATE.tweenT);
+  STATE.chordAmt = lerp(amtOf(STATE.viewFrom), amtOf(STATE.view), te);
+  const n3 = lerp(netOf(STATE.viewFrom), netOf(STATE.view), te);
+  if (n3 !== STATE.net3D){ STATE.net3D = n3; STATE.labDirty = true; }
+  updateOrbit(dt);
   if (STATE.dirty) buildSets();
   if (GLR.posDirty) uploadPositions();
   drawScene();
@@ -2103,7 +2380,7 @@ window.API = {
   },
   setView, pick: pickAt, findEdge, compare,
   seqOf(ref){ const r = parseRef(ref); return r && r.v ? DATA.vidToSeq.get((r.bi<<20)|(r.c<<8)|r.v) : null; },
-  screenOf(s){ return [sxOf(LAY.cur[s*2]), syOf(LAY.cur[s*2+1])]; },
+  screenOf(s){ const q = projectSeq(s); return [q[0], q[1]]; },
   frameStats(){
     const a = GLR.frameMs;
     return { avg: a.reduce((x,y)=>x+y,0)/Math.max(1,a.length),

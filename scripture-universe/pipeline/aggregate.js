@@ -58,53 +58,67 @@ function main(){
   const springs = [...chPair.entries()].map(([k, w]) => {
     const [i, j] = k.split('_').map(Number); return { i, j, w }; });
 
-  // ---- deterministic force layout -----------------------------------------
+  // ---- deterministic 3D force layout ---------------------------------------
+  // Three dimensions, so the network view can be orbited: the five canons get
+  // gravity wells spread over a sphere instead of around a ring, and the graph
+  // relaxes into a volume rather than a disc.
   const rand = rng(0x5EED);
-  const px = new Float64Array(N), py = new Float64Array(N);
-  const cx = new Float64Array(CANONS.length), cy = new Float64Array(CANONS.length);
-  CANONS.forEach((_, ci) => {          // canon gravity wells on a ring
-    const ang = -Math.PI/2 + ci * 2*Math.PI/CANONS.length;
-    cx[ci] = Math.cos(ang) * .55; cy[ci] = Math.sin(ang) * .55; });
+  const px = new Float64Array(N), py = new Float64Array(N), pz = new Float64Array(N);
+  const cx = new Float64Array(CANONS.length), cy = new Float64Array(CANONS.length),
+        cz = new Float64Array(CANONS.length);
+  CANONS.forEach((_, ci) => {          // wells on a Fibonacci sphere
+    const k = (ci + .5) / CANONS.length;
+    const phi = Math.acos(1 - 2*k), th = Math.PI * (1 + Math.sqrt(5)) * ci;
+    cx[ci] = Math.cos(th) * Math.sin(phi) * .5;
+    cy[ci] = Math.sin(th) * Math.sin(phi) * .5;
+    cz[ci] = Math.cos(phi) * .5;
+  });
   chList.forEach((ch, i) => {
     const ci = BOOKS[ch.b].canon;
-    px[i] = cx[ci] + (rand()-.5)*.4; py[i] = cy[ci] + (rand()-.5)*.4; });
+    px[i] = cx[ci] + (rand()-.5)*.4; py[i] = cy[ci] + (rand()-.5)*.4;
+    pz[i] = cz[ci] + (rand()-.5)*.4; });
 
-  const ITER = 300, fx = new Float64Array(N), fy = new Float64Array(N);
+  const ITER = 300, fx = new Float64Array(N), fy = new Float64Array(N), fz = new Float64Array(N);
   for (let it = 0; it < ITER; it++){
     const cool = 1 - it/ITER;
-    fx.fill(0); fy.fill(0);
+    fx.fill(0); fy.fill(0); fz.fill(0);
     for (let i = 0; i < N; i++)                      // O(N^2) repulsion — fine offline
       for (let j = i+1; j < N; j++){
-        let dx = px[i]-px[j], dy = py[i]-py[j];
-        let d2 = dx*dx + dy*dy + 1e-5;
+        let dx = px[i]-px[j], dy = py[i]-py[j], dz = pz[i]-pz[j];
+        const d2 = dx*dx + dy*dy + dz*dz + 1e-5;
         const f = .00002 / d2;
-        dx *= f; dy *= f;
-        fx[i] += dx; fy[i] += dy; fx[j] -= dx; fy[j] -= dy;
+        dx *= f; dy *= f; dz *= f;
+        fx[i] += dx; fy[i] += dy; fz[i] += dz;
+        fx[j] -= dx; fy[j] -= dy; fz[j] -= dz;
       }
     for (const s of springs){                        // weighted attraction
-      let dx = px[s.j]-px[s.i], dy = py[s.j]-py[s.i];
-      const d = Math.sqrt(dx*dx+dy*dy) + 1e-9;
+      let dx = px[s.j]-px[s.i], dy = py[s.j]-py[s.i], dz = pz[s.j]-pz[s.i];
+      const d = Math.sqrt(dx*dx+dy*dy+dz*dz) + 1e-9;
       const f = Math.min(.05, .004 * Math.log2(1+s.w)) * d;
-      dx = dx/d*f; dy = dy/d*f;
-      fx[s.i] += dx; fy[s.i] += dy; fx[s.j] -= dx; fy[s.j] -= dy;
+      dx = dx/d*f; dy = dy/d*f; dz = dz/d*f;
+      fx[s.i] += dx; fy[s.i] += dy; fz[s.i] += dz;
+      fx[s.j] -= dx; fy[s.j] -= dy; fz[s.j] -= dz;
     }
     for (let i = 0; i < N; i++){                     // canon gravity + integrate
       const ci = BOOKS[chList[i].b].canon;
       fx[i] += (cx[ci]-px[i]) * .02; fy[i] += (cy[ci]-py[i]) * .02;
+      fz[i] += (cz[ci]-pz[i]) * .02;
       const cap = .05 * cool + .002;
       px[i] += Math.max(-cap, Math.min(cap, fx[i]));
       py[i] += Math.max(-cap, Math.min(cap, fy[i]));
+      pz[i] += Math.max(-cap, Math.min(cap, fz[i]));
     }
   }
-  // quantize to u16 in a padded unit box
-  let mnx=1e9, mxx=-1e9, mny=1e9, mxy=-1e9;
-  for (let i = 0; i < N; i++){ mnx=Math.min(mnx,px[i]); mxx=Math.max(mxx,px[i]);
-                               mny=Math.min(mny,py[i]); mxy=Math.max(mxy,py[i]); }
+  // quantize to u16 on a shared cubic extent, so the cloud is not distorted
+  let mn = 1e9, mx = -1e9;
+  for (const a of [px, py, pz]) for (let i = 0; i < N; i++){
+    mn = Math.min(mn, a[i]); mx = Math.max(mx, a[i]); }
+  const q = v => Math.max(0, Math.min(65535, Math.round((v - mn)/(mx - mn)*65535)));
   const layout = new Array(N);
-  for (let i = 0; i < N; i++)
-    layout[i] = [ Math.round((px[i]-mnx)/(mxx-mnx)*65535), Math.round((py[i]-mny)/(mxy-mny)*65535) ];
+  for (let i = 0; i < N; i++) layout[i] = [ q(px[i]), q(py[i]), q(pz[i]) ];
 
-  fs.writeFileSync(path.join(BUILD,'agg.json'), JSON.stringify({ bookPairs, netLayout: layout }));
+  fs.writeFileSync(path.join(BUILD,'agg.json'),
+    JSON.stringify({ bookPairs, netLayout: layout, netDims: 3 }));
 
   // ---- dashboard stats (all computed) -------------------------------------
   const byType = new Array(TYPES.length).fill(0), byConf = [0,0,0,0];
