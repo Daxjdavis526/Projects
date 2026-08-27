@@ -33,6 +33,7 @@ works too.
 | `V` | **voyage** — auto-hop object to object, ever outward, to the horizon (or homeward from far out); dwell time adjustable live |
 | `F` | **free flight** — WASD + Space/C, Shift boost, Ctrl creep, scroll sets speed (from m/s to Gpc/s), drag looks |
 | `N` | jump to the nearest star |
+| `G` | **night sky** — stand over Earth's dark side under the real constellations, then fly anywhere |
 | `0` / `Home` | return to Earth |
 | `M` | ambient sound on/off |
 | `Esc` | end voyage/tour/flight · close panels |
