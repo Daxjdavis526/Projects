@@ -12,6 +12,16 @@ beyond a vendored copy of Three.js.
 
 ---
 
+## Learning to fly it
+
+There is a guided tutorial: press <kbd>F2</kbd>, or the TUTORIAL button in the
+top bar. It opens by itself the first time you visit.
+
+Twelve steps, from looking around the cockpit to landing, each one watching the
+live flight model until you have actually done the thing — the checks read the
+same state the HUD does, so nothing is scripted or faked. Skip forward and back
+with the buttons if you already know a step.
+
 ## Getting airborne
 
 You start lined up on runway 03 at Nellis AFB, north-east of Las Vegas.

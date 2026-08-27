@@ -103,8 +103,16 @@ export class CameraRig {
     this.setMode(MODES[(i + dir + MODES.length) % MODES.length].id, fm);
   }
 
-  /** Drop a ground observer roughly under the aircraft, offset to the side. */
-  placeGround(fm, ahead = 900, side = 260) {
+  /**
+   * Drop a ground observer out in front of the aircraft, far enough ahead and
+   * offset far enough to the side that the jet flies *toward* the camera and
+   * past it. A close, arbitrary spot beside the aeroplane is the one thing
+   * that makes this mode useless.
+   */
+  placeGround(fm, ahead = null, side = null) {
+    const V = Math.max(fm.tas, 60);
+    if (ahead === null) ahead = clamp(V * 9, 1400, 11000);
+    if (side === null) side = (Math.random() < 0.5 ? -1 : 1) * clamp(V * 0.75, 200, 900);
     const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(fm.quaternion).setY(0).normalize();
     const right = new THREE.Vector3(fwd.z, 0, -fwd.x);
     const p = fm.position.clone()
@@ -166,7 +174,7 @@ export class CameraRig {
     switch (this.mode) {
       case 'cockpit': {
         target.copy(fm.position).addScaledVector(rightA, 0)
-          .addScaledVector(upA, 0.78).addScaledVector(fwd, 4.95);
+          .addScaledVector(upA, 0.86).addScaledVector(fwd, 4.95);
         hard = true;
         fov = st.fov;
         break;
@@ -188,7 +196,7 @@ export class CameraRig {
         break;
       }
       case 'chase': case 'chaseClose': case 'chaseFar': {
-        const base = this.mode === 'chaseClose' ? 26 : this.mode === 'chaseFar' ? 120 : 48;
+        const base = this.mode === 'chaseClose' ? 24 : this.mode === 'chaseFar' ? 110 : 38;
         const dist = base * st.chaseDistance;
         // blend between an aircraft-fixed and a velocity-aligned offset so
         // that loops and rolls stay readable
@@ -210,7 +218,7 @@ export class CameraRig {
         lagVec.clampLength(0, dist * 0.4);
 
         target.copy(fm.position).add(off).add(lagVec)
-          .addScaledVector(upA, dist * 0.10);
+          .addScaledVector(upA, dist * 0.13);
         lookAt.copy(fm.position).addScaledVector(fwd, dist * 0.16);
         // roll with the aircraft, but only partly, so the horizon stays legible
         desiredUp.copy(upA).lerp(new THREE.Vector3(0, 1, 0), 0.45).normalize();

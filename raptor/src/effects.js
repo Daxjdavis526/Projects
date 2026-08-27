@@ -232,8 +232,8 @@ export class Effects {
     // --- trails in world space ---
     this.vortexL = new Trail(scene, 90, 0.35, 0xdfeaff, 0.55);
     this.vortexR = new Trail(scene, 90, 0.35, 0xdfeaff, 0.55);
-    this.contrailL = new Trail(scene, 260, 1.6, 0xffffff, 0.42);
-    this.contrailR = new Trail(scene, 260, 1.6, 0xffffff, 0.42);
+    this.contrailL = new Trail(scene, 300, 2.4, 0xffffff, 0.5);
+    this.contrailR = new Trail(scene, 300, 2.4, 0xffffff, 0.5);
     this._emitAcc = 0;
 
     // --- Mach cone ---
@@ -311,7 +311,7 @@ export class Effects {
     // --- world-space trails ---
     this._emitAcc += dt;
     const speed = fm.tas;
-    const emitInterval = clamp(18 / Math.max(speed, 20), 0.012, 0.12);
+    const emitInterval = clamp(12 / Math.max(speed, 20), 0.010, 0.10);
     const q = fm.quaternion;
     this._right.set(1, 0, 0).applyQuaternion(q);
 
@@ -329,7 +329,7 @@ export class Effects {
       }
       for (const [tip, trail] of [[-0.92, this.contrailL], [0.92, this.contrailR]]) {
         this._tmp.set(tip, -0.05, 10.5).applyQuaternion(q).add(fm.position);
-        trail.emit(this._tmp, this._right, contrailAmt, 1.1);
+        trail.emit(this._tmp, this._right, contrailAmt, 1.8);
       }
     }
     this.vortexL.update(dt, 0.55); this.vortexR.update(dt, 0.55);
