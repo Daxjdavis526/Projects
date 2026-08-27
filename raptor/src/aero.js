@@ -123,6 +123,16 @@ export class FlightModel {
   }
   get verticalSpeed() { return this.velocity.y; }
 
+  /**
+   * Vertical component of the aircraft's own up axis: +1 upright, 0 knife
+   * edge, -1 inverted. Any control term that reasons about the *world* has to
+   * be scaled by this, or it inverts along with the aeroplane.
+   */
+  get upDot() {
+    const q = this.quaternion;
+    return 1 - 2 * (q.x * q.x + q.z * q.z);
+  }
+
   // -------------------------------------------------------------------------
   // Fly-by-wire. The pilot commands a load factor and a roll rate; the control
   // laws work out the surface deflections and blend in thrust vectoring when
@@ -183,14 +193,21 @@ export class FlightModel {
 
     let err = errA * (1 - gBlend) + errG * gBlend;
 
-    // Flight-path hold. A pure load-factor command is happy to sit in a
-    // steady descent forever, because a steady descent is also one g. Real
-    // control laws add a path term; so does this one, captured the moment the
-    // stick comes back to centre.
+    // Flight-path hold. A pure load-factor command is happy to sit in a steady
+    // descent forever, because a steady descent is also one g. Real control
+    // laws add a path term; so does this one, captured the moment the stick
+    // comes back to centre.
+    //
+    // It is the one term in here that reasons about the world rather than the
+    // aeroplane, so it is scaled by the aircraft's own up axis: inverted, pull
+    // pushes the flight path down, and a hold term that did not know that
+    // would drive the stabilators the wrong way and tumble you out of the roll.
+    // Near knife edge it has no authority at all and switches itself off.
     const gamma = V > 20 ? Math.asin(clamp(this.velocity.y / V, -1, 1)) : 0;
-    if (Math.abs(inp.pitch) < 0.04 && !this.onGround) {
+    const upY = this.upDot;
+    if (Math.abs(inp.pitch) < 0.04 && !this.onGround && Math.abs(upY) > 0.30) {
       if (this._gammaHold === null || this._gammaHold === undefined) this._gammaHold = gamma;
-      err += clamp((this._gammaHold - gamma) * 1.1, -0.30, 0.30);
+      err += clamp((this._gammaHold - gamma) * 1.1 * upY, -0.30, 0.30);
     } else {
       this._gammaHold = null;
     }
@@ -213,7 +230,11 @@ export class FlightModel {
     const maxRoll = (2.6 - 1.9 * clamp((this.alpha - 0.25) / 0.5, 0, 1)) * clamp(V / 160, 0.25, 1);
     // with the stick centred the law holds the bank angle, the way a modern
     // fly-by-wire jet does — a pure rate command would drift into a spiral
+    // Bank hold only wings-level-ish and only right way up: rolled past 80
+    // degrees or inverted, neutral stick holds the attitude you left it in,
+    // which is what lets you fly upside down at all.
     const bankHold = Math.abs(inp.roll) < 0.04 && Math.abs(this.bankAngle) < 80 * Math.PI / 180
+      && this.upDot > 0.2
       ? clamp(-this.bankAngle * 2.4, -1.2, 1.2) : 0;
     const rollErr = inp.roll * maxRoll + bankHold - p;
     let ail = clamp(rollErr * 1.1, -1, 1);

@@ -77,6 +77,22 @@
   button:hover{color:var(--ink);background:rgba(120,160,190,.16);border-color:rgba(120,160,190,.32)}
   button:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
 
+  /* ---------- tutorial ---------- */
+  #tutorial{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;
+    width:min(560px,90vw);padding:16px 18px 14px;display:none;z-index:12}
+  #tutorial.open{display:block}
+  #tutorial.done{border-color:rgba(77,255,154,.55);box-shadow:0 0 24px rgba(77,255,154,.18)}
+  #tutHead{display:flex;align-items:baseline;gap:10px;margin-bottom:7px}
+  #tutTitle{font-family:var(--mono);font-size:13px;letter-spacing:.10em;color:var(--accent);
+    text-transform:uppercase}
+  #tutCount{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-left:auto}
+  #tutText{font-size:13.5px;line-height:1.55;color:var(--ink)}
+  #tutHint{font-size:11.5px;line-height:1.5;color:var(--dim);margin-top:6px;font-style:italic}
+  #tutBar{height:2px;background:rgba(120,160,190,.16);border-radius:2px;margin-top:11px;overflow:hidden}
+  #tutBar i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+  #tutFoot{display:flex;gap:8px;margin-top:10px;align-items:center}
+  #tutFoot .sp{flex:1}
+
   /* ---------- hint & loading ---------- */
   #hint{position:fixed;left:24px;bottom:24px;font-family:var(--mono);font-size:11px;
     color:var(--faint);pointer-events:none;z-index:4}
@@ -105,12 +121,29 @@
     <div class="chip glass">CAM <b id="cameraName">Cockpit</b></div>
     <div class="chip glass">WX <b id="weatherName">Few clouds</b></div>
     <div class="chip glass"><b id="clock">14:12</b> <span id="timeRate"></span></div>
+    <button id="tutStart">TUTORIAL</button>
     <button onclick="document.getElementById('settings').classList.toggle('open')">SETTINGS</button>
     <button onclick="document.getElementById('help').classList.toggle('open')">CONTROLS</button>
   </div>
 </div>
 
 <div id="toast" class="glass"></div>
+
+<div id="tutorial" class="glass">
+  <div id="tutHead">
+    <div id="tutTitle">Look around</div>
+    <div id="tutCount">1 / 12</div>
+  </div>
+  <div id="tutText"></div>
+  <div id="tutHint"></div>
+  <div id="tutBar"><i id="tutProgress"></i></div>
+  <div id="tutFoot">
+    <button id="tutBack">◀ BACK</button>
+    <button id="tutSkip">SKIP ▶</button>
+    <span class="sp"></span>
+    <button id="tutQuit">END TUTORIAL</button>
+  </div>
+</div>
 
 <div id="hint">Press <b>/</b> for controls &nbsp;·&nbsp; <b>C</b> next camera &nbsp;·&nbsp; <b>`</b> cockpit ⇄ chase &nbsp;·&nbsp; <b>M</b> map</div>
 
@@ -155,6 +188,7 @@
   <div class="row"><span>Audio on / off</span><span><kbd>U</kbd></span></div>
   <div class="row"><span>Reset on runway / airborne</span><span><kbd>R</kbd><kbd>Y</kbd></span></div>
   <div class="row"><span>Settings</span><span><kbd>Tab</kbd></span></div>
+  <div class="row"><span>Tutorial</span><span><kbd>F2</kbd></span></div>
 </div>
 
 <div id="settings" class="panel glass">

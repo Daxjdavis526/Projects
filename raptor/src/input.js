@@ -128,7 +128,7 @@ export class Input {
 
     // ---- throttle ----
     let dThr = (this.held('throttleUp') ? 1 : 0) - (this.held('throttleDown') ? 1 : 0);
-    this.axes.throttle = clamp(this.axes.throttle + dThr * 0.55 * dt, 0, 1.5);
+    this.axes.throttle = clamp(this.axes.throttle + dThr * 0.85 * dt, 0, 1.5);
 
     // ---- gamepad overrides when it is actually being moved ----
     const gp = this.gamepadIndex !== null ? navigator.getGamepads()[this.gamepadIndex] : null;

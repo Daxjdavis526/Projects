@@ -69,13 +69,14 @@ export class AudioEngine {
   constructor() {
     this.ready = false;
     this.enabled = true;
-    this.masterVolume = 0.75;
+    this.masterVolume = 0.42;
     this.mode = 'cockpit';       // 'cockpit' | 'exterior'
     this._history = [];          // {t, x,y,z, vx,vy,vz, mach}
     this._time = 0;
     this._lastF = 1;
     this._boomCooldown = 0;
     this._warn = null;
+    this.onBoom = null;        // set by the sim, for the tutorial
   }
 
   init() {
@@ -84,9 +85,20 @@ export class AudioEngine {
     this.ctx = new AC();
     const ctx = this.ctx;
 
+    // Everything meets a limiter before the speakers. Synthesised engine noise
+    // has a very wide dynamic range — an afterburner pass close to the camera
+    // will otherwise clip hard and sound like tearing paper.
+    this.limiter = ctx.createDynamicsCompressor();
+    this.limiter.threshold.value = -10;
+    this.limiter.knee.value = 6;
+    this.limiter.ratio.value = 12;
+    this.limiter.attack.value = 0.004;
+    this.limiter.release.value = 0.18;
+    this.limiter.connect(ctx.destination);
+
     this.master = ctx.createGain();
     this.master.gain.value = this.masterVolume;
-    this.master.connect(ctx.destination);
+    this.master.connect(this.limiter);
 
     // Propagation chain: delay (finite speed of sound) -> distance gain ->
     // air absorption lowpass -> stereo pan -> master.
@@ -134,14 +146,20 @@ export class AudioEngine {
     this.abSrc.connect(this.abFilter).connect(this.abShaper).connect(this.abGain).connect(this.engineBus);
     this.abSrc.start();
 
-    // turbine: blade-passing tones, a few harmonics
+    // Turbine: blade-passing tones. Raw sawtooth and square waves up at a few
+    // kilohertz are what made this sound like an angry wasp rather than a jet,
+    // so the bright partials are sine and the one saw goes through a lowpass.
     this.turbGain = ctx.createGain(); this.turbGain.gain.value = 0;
-    this.turbGain.connect(this.engineBus);
+    this.turbTone = ctx.createBiquadFilter();
+    this.turbTone.type = 'lowpass';
+    this.turbTone.frequency.value = 2600;
+    this.turbTone.Q.value = 0.7;
+    this.turbGain.connect(this.turbTone).connect(this.engineBus);
     this.turbines = [
-      new Osc(ctx, 'sawtooth', 900, 0.06, this.turbGain),
-      new Osc(ctx, 'square', 1800, 0.025, this.turbGain),
-      new Osc(ctx, 'sine', 2700, 0.02, this.turbGain),
-      new Osc(ctx, 'sine', 320, 0.10, this.turbGain),
+      new Osc(ctx, 'sawtooth', 900, 0.022, this.turbGain),
+      new Osc(ctx, 'sine', 1800, 0.010, this.turbGain),
+      new Osc(ctx, 'sine', 2700, 0.006, this.turbGain),
+      new Osc(ctx, 'sine', 320, 0.075, this.turbGain),
     ];
 
     // --- airframe / cockpit bus, never delayed (you are in the cockpit) ---
@@ -284,7 +302,7 @@ export class AudioEngine {
     src.buffer = this.boomBuf;
     src.playbackRate.value = 0.85 + Math.random() * 0.2;
     const g = ctx.createGain();
-    g.gain.value = clamp(intensity, 0, 1.4) * 0.9;
+    g.gain.value = clamp(intensity, 0, 1.4) * 0.55;
     const f = ctx.createBiquadFilter();
     f.type = 'lowpass';
     f.frequency.value = 400 + 2600 * clamp(intensity, 0, 1);
@@ -315,7 +333,7 @@ export class AudioEngine {
     const f = ctx.createBiquadFilter();
     f.type = 'lowpass'; f.frequency.value = 180;
     const g = ctx.createGain();
-    g.gain.setValueAtTime(clamp(intensity, 0, 1) * 0.7, t);
+    g.gain.setValueAtTime(clamp(intensity, 0, 1) * 0.45, t);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
     src.connect(f).connect(g).connect(this.master);
     src.start(t); src.stop(t + 0.4);
@@ -368,13 +386,14 @@ export class AudioEngine {
     this.turbines[1].set(fan * 31.2, 0.008 + 0.020 * spool, now);
     this.turbines[2].set(fan * 46.0, 0.004 + 0.012 * spool * (1 - ab * 0.5), now);
     this.turbines[3].set(fan * 2.0, 0.030 + 0.070 * spool, now);
-    at(this.turbGain.gain, 0.55, now, 0.1);
+    at(this.turbGain.gain, 0.34 + 0.22 * spool, now, 0.12);
+    at(this.turbTone.frequency, 1500 + 2200 * spool, now, 0.2);
 
     at(this.rumbleFilter.frequency, 110 + n1 * 260 + ab * 240, now, 0.15);
-    at(this.rumbleGain.gain, 0.22 + 0.55 * spool, now, 0.12);
+    at(this.rumbleGain.gain, 0.20 + 0.42 * spool, now, 0.12);
 
     at(this.abFilter.frequency, 300 + ab * 900, now, 0.1);
-    at(this.abGain.gain, ab * 1.15, now, 0.12);
+    at(this.abGain.gain, ab * 0.62, now, 0.12);
 
     // --- propagation to the listener ---
     const lp = listener.position;
@@ -392,7 +411,9 @@ export class AudioEngine {
       if (ret) {
         at(this.delay.delayTime, ret.delay, now, 0.08);
         // inverse distance with a near-field floor
-        const gain = clamp(90 / Math.max(ret.distance, 12), 0.0, 2.4);
+        // inverse distance with a near-field floor, and no boost above unity:
+        // a close pass should be loud, not painful
+        const gain = clamp(70 / Math.max(ret.distance, 25), 0.0, 1.15);
         at(this.distGain.gain, gain, now, 0.10);
 
         // Doppler from the source's motion along the line of sight at emission
@@ -415,7 +436,10 @@ export class AudioEngine {
         at(this.panner.pan, -pan * 0.85, now, 0.15);
       }
       const boom = this._checkBoom(lp, now);
-      if (boom > 0) this.playBoom(boom);
+      if (boom > 0) {
+        this.playBoom(boom);
+        if (this.onBoom) this.onBoom(boom);
+      }
     }
 
     // --- local (cockpit) layers ---

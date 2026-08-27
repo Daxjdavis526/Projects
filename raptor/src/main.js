@@ -20,6 +20,7 @@ import { Cockpit } from './cockpit.js';
 import { Nav } from './nav.js';
 import { Input } from './input.js';
 import { AudioEngine } from './audio.js';
+import { Tutorial } from './tutorial.js';
 import { origin, updateOrigin, toRender, AIRPORTS, CITIES, nearestAirport, worldToGeo } from './world.js';
 
 const D = Math.PI / 180;
@@ -39,6 +40,15 @@ const ui = {
   loading: document.getElementById('loading'),
   loadingText: document.getElementById('loadingText'),
   weather: document.getElementById('weatherName'),
+  tut: {
+    panel: document.getElementById('tutorial'),
+    card: document.getElementById('tutorial'),
+    title: document.getElementById('tutTitle'),
+    text: document.getElementById('tutText'),
+    hint: document.getElementById('tutHint'),
+    count: document.getElementById('tutCount'),
+    progress: document.getElementById('tutProgress'),
+  },
   clock: document.getElementById('clock'),
   timeRate: document.getElementById('timeRate'),
 };
@@ -58,6 +68,50 @@ renderer.toneMappingExposure = 1.06;
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x9fb5cf, 4000, 60000);
 
+// A cheap environment map so metal on the aeroplane actually reflects a sky
+// instead of reading as flat plastic. Regenerated when the light changes
+// enough to matter, not every frame.
+const pmrem = new THREE.PMREMGenerator(renderer);
+pmrem.compileEquirectangularShader();
+const envScene = new THREE.Scene();
+{
+  const g = new THREE.SphereGeometry(1, 16, 12);
+  const m = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: { uTop: { value: new THREE.Color(0.32, 0.48, 0.78) },
+      uBot: { value: new THREE.Color(0.30, 0.26, 0.20) },
+      uSun: { value: new THREE.Color(1.6, 1.5, 1.35) },
+      uSunDir: { value: new THREE.Vector3(0, 1, 0) } },
+    vertexShader: `varying vec3 vD; void main(){ vD = normalize(position);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying vec3 vD; uniform vec3 uTop, uBot, uSun; uniform vec3 uSunDir;
+      void main(){
+        float t = smoothstep(-0.15, 0.35, vD.y);
+        vec3 c = mix(uBot, uTop, t);
+        c += uSun * pow(max(dot(vD, uSunDir), 0.0), 24.0);
+        gl_FragColor = vec4(c, 1.0);
+      }`,
+  });
+  envScene.add(new THREE.Mesh(g, m));
+  envScene.userData.mat = m;
+}
+let envTarget = null;
+let envKey = -99;
+function refreshEnvironment(sunDir, exposureLike) {
+  const key = Math.round(sunDir.y * 8);
+  if (key === envKey) return;
+  envKey = key;
+  const m = envScene.userData.mat;
+  const up = Math.max(0.02, sunDir.y);
+  m.uniforms.uSunDir.value.copy(sunDir);
+  m.uniforms.uTop.value.setRGB(0.30 * up + 0.02, 0.46 * up + 0.03, 0.80 * up + 0.05);
+  m.uniforms.uBot.value.setRGB(0.34 * up + 0.02, 0.30 * up + 0.02, 0.24 * up + 0.02);
+  m.uniforms.uSun.value.setRGB(2.2 * up, 2.0 * up, 1.7 * up);
+  if (envTarget) envTarget.dispose();
+  envTarget = pmrem.fromScene(envScene, 0.04);
+  scene.environment = envTarget.texture;
+}
+
 const wind = new Wind();
 const terrain = new Terrain(scene);
 const sky = new Sky(scene);
@@ -76,6 +130,8 @@ const hud = new HUD(hudCanvas);
 const nav = new Nav(mapCanvas);
 const input = new Input(view);
 const audio = new AudioEngine();
+const tutorial = new Tutorial(ui.tut);
+audio.onBoom = () => tutorial.noteBoom();
 
 const sim = {
   paused: false,
@@ -151,6 +207,7 @@ function setCamera(id) {
   const m = MODES.find(x => x.id === id);
   ui.camera.textContent = m.name;
   toast(`Camera — ${m.name}`);
+  tutorial.noteCamera(id);
 }
 
 // ---------------------------------------------------------------------------
@@ -166,8 +223,8 @@ input.on('key', (code, e) => {
   audio.resume();
   if (CAM_KEYS[code]) { setCamera(CAM_KEYS[code]); return; }
   switch (code) {
-    case 'KeyC': rig.cycle(1, fm); ui.camera.textContent = rig.info.name; toast(`Camera — ${rig.info.name}`); break;
-    case 'KeyV': rig.cycle(-1, fm); ui.camera.textContent = rig.info.name; toast(`Camera — ${rig.info.name}`); break;
+    case 'KeyC': rig.cycle(1, fm); ui.camera.textContent = rig.info.name; toast(`Camera — ${rig.info.name}`); tutorial.noteCamera(rig.mode); break;
+    case 'KeyV': rig.cycle(-1, fm); ui.camera.textContent = rig.info.name; toast(`Camera — ${rig.info.name}`); tutorial.noteCamera(rig.mode); break;
     case 'Backquote': setCamera(rig.isCockpit ? 'chase' : 'cockpit'); break;
     case 'KeyG':
       fm.gearDown = !fm.gearDown;
@@ -198,7 +255,7 @@ input.on('key', (code, e) => {
       break;
     case 'KeyR': placeOnRunway(nearestAirport(fm.position.x, fm.position.z).airport); toast('Repositioned on the runway'); break;
     case 'KeyY': placeOnRunway(nearestAirport(fm.position.x, fm.position.z).airport, true); toast('Airborne restart'); break;
-    case 'KeyO': rig.placeGround(fm); setCamera('ground'); toast('Ground observer placed ahead of the jet'); break;
+    case 'KeyO': rig.placeGround(fm); setCamera('ground'); toast('Ground observer placed ahead — fly past it'); break;
     case 'KeyU': audio.toggle(); toast(`Audio ${audio.enabled ? 'on' : 'off'}`); break;
     case 'KeyF': {
       nav.autopilot.on = !nav.autopilot.on;
@@ -225,6 +282,9 @@ input.on('key', (code, e) => {
       break;
     case 'Tab':
       ui.settings.classList.toggle('open');
+      break;
+    case 'F2':
+      if (tutorial.active) tutorial.stop(); else tutorial.start(0);
       break;
   }
 });
@@ -258,6 +318,7 @@ input.on('click', (e) => {
     }
     if (best) { nav.setWaypointAirport(best); toast(`Waypoint — ${best.icao} ${best.name}`); }
     else { nav.setWaypoint(w.x, w.z, 'WPT'); toast('Waypoint set'); }
+    tutorial.noteWaypoint();
     return;
   }
   if (rig.mode === 'ground') return;
@@ -380,6 +441,7 @@ function frame(now) {
   if (fm.onGround && !prevOnGround) {
     const impact = clamp(-fm.velocity.y / 6, 0.05, 1.4);
     audio.thump(impact);
+    if (fm.gearPos > 0.5) tutorial.noteLanding();
     if (impact > 0.5) toast(`Touchdown — ${(fm.velocity.y * M_TO_FT * 60).toFixed(0)} fpm`);
   }
   prevOnGround = fm.onGround;
@@ -408,6 +470,8 @@ function frame(now) {
   sky.update(sim.timeOfDay, worldToGeo(fm.position.x, fm.position.z).lat,
     sim.dayOfYear, camWorld.y, weather, now / 1000);
   sky.follow(rig.camera);
+  terrain.setSun(sky.sunDir);
+  refreshEnvironment(sky.sunDir);
   sky.sunLight.target.position.copy(rig.camera.position);
   sky.sunLight.target.updateMatrixWorld();
 
@@ -452,6 +516,8 @@ function frame(now) {
   hud.draw({ fm, prop, camera: rig.camera, nav, cockpit: cockpitView, weather });
   nav.draw(fm, weather, sim.timeOfDay);
 
+  tutorial.update(real, fm, prop, nav);
+
   // ---- status line ----
   if ((sim.frame++ & 7) === 0) updateStatus();
   if (toastTimer > 0) {
@@ -487,6 +553,20 @@ terrain.prime(fm.position, 10);
 scenery.update(fm.position, false);
 clouds.update(0, fm.position, sky, weather);
 requestAnimationFrame(frame);
+
+// ---- tutorial wiring ----
+document.getElementById('tutStart').addEventListener('click', () => {
+  if (tutorial.active) tutorial.stop(); else tutorial.start(0);
+});
+document.getElementById('tutSkip').addEventListener('click', () => tutorial.next());
+document.getElementById('tutBack').addEventListener('click', () => tutorial.back());
+document.getElementById('tutQuit').addEventListener('click', () => tutorial.stop());
+// offer it once, to anyone who has not been through it
+try {
+  if (!localStorage.getItem('raptor.tutorialDone')) {
+    setTimeout(() => { if (!tutorial.active) tutorial.start(0); }, 2500);
+  }
+} catch (e) { /* private browsing */ }
 
 // let people start the audio context with any interaction
 addEventListener('pointerdown', () => audio.resume(), { once: true });

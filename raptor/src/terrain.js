@@ -371,20 +371,65 @@ class Tile {
 
 export class Terrain {
   constructor(scene) {
+    // Lambert, with procedural surface detail injected per pixel. Lambert
+    // shades per vertex, so at a 64 m grid the ground is one flat matte sheet
+    // however much relief the height field has. Rather than pay for a
+    // per-pixel material, the detail below modulates the albedo *and* fakes
+    // the relief lighting from the noise gradient — cheap, and it is what
+    // stops open desert reading as painted card.
     this.material = new THREE.MeshLambertMaterial({
       vertexColors: true, side: THREE.FrontSide,
     });
     this.material.onBeforeCompile = (sh) => {
-      // Earth curvature: bend distant ground down away from the camera.
       sh.uniforms.uCurveR = { value: 6371000 };
+      sh.uniforms.uSunXZ = this.sunXZ = { value: new THREE.Vector2(0.5, 0.5) };
       sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nuniform float uCurveR;')
+        .replace('#include <common>', `#include <common>
+          uniform float uCurveR;
+          varying vec3 vWPos;`)
         .replace('#include <begin_vertex>', `
           vec3 transformed = vec3( position );
           vec3 wp = (modelMatrix * vec4(transformed,1.0)).xyz;
           float d2 = wp.x*wp.x + wp.z*wp.z;
           transformed.y -= d2 / (2.0 * uCurveR);
+          vWPos = (modelMatrix * vec4(transformed,1.0)).xyz;
         `);
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', `#include <common>
+          varying vec3 vWPos;
+          uniform vec2 uSunXZ;
+          float rhash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+          float rnoise(vec2 p){
+            vec2 i = floor(p), f = fract(p);
+            f = f*f*(3.0-2.0*f);
+            return mix(mix(rhash(i), rhash(i+vec2(1,0)), f.x),
+                       mix(rhash(i+vec2(0,1)), rhash(i+vec2(1,1)), f.x), f.y);
+          }
+          float rfbm(vec2 p){
+            return rnoise(p) * 0.55 + rnoise(p * 2.17) * 0.28 + rnoise(p * 4.83) * 0.17;
+          }`)
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          {
+            float dist = length(vWPos - cameraPosition);
+            // two bands of detail: fine relief close in, broad mottling far out
+            float kNear = 1.0 - smoothstep(150.0, 2600.0, dist);
+            float kFar = 1.0 - smoothstep(3000.0, 30000.0, dist);
+            if (kFar > 0.004) {
+              vec2 q = vWPos.xz * 0.0115;
+              float g = rfbm(q) * 0.55 + rfbm(q * 0.13) * 0.45;
+              diffuseColor.rgb *= 1.0 + (g - 0.5) * 0.30 * kFar;
+            }
+            if (kNear > 0.004) {
+              vec2 q = vWPos.xz * 0.075;
+              float h0 = rfbm(q);
+              float hx = rfbm(q + vec2(0.09, 0.0));
+              float hz = rfbm(q + vec2(0.0, 0.09));
+              // gradient dotted with the sun's ground track: fake relief light
+              float rel = ((h0 - hx) * uSunXZ.x + (h0 - hz) * uSunXZ.y) * 3.4;
+              diffuseColor.rgb *= clamp(1.0 + rel * kNear, 0.62, 1.42);
+              diffuseColor.rgb *= 1.0 + (h0 - 0.5) * 0.16 * kNear;
+            }
+          }`);
     };
     this.group = new THREE.Group();
     this.group.matrixAutoUpdate = false;
@@ -468,6 +513,13 @@ export class Terrain {
   /** Build everything the camera can see right now (used once at startup). */
   prime(camWorld, passes = 12) {
     for (let i = 0; i < passes; i++) this.update(camWorld, 0, 64);
+  }
+
+  /** Keep the fake relief lighting pointing the same way as the real sun. */
+  setSun(dir) {
+    if (!this.sunXZ) return;
+    const l = Math.hypot(dir.x, dir.z) || 1;
+    this.sunXZ.value.set(dir.x / l, dir.z / l);
   }
 
   heightAt(x, z) { return heightAt(x, z); }
