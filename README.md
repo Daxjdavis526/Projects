@@ -51,3 +51,31 @@ Live: https://daxjdavis526.github.io/Projects/universe/
 Desktop recommended (scroll + drag + click); basic touch works. See
 [universe/README.md](universe/README.md) for controls, architecture, and
 exactly what is physically accurate versus artistically approximated.
+
+## supernova/
+
+**SUPERNOVA** — an interactive, scientifically grounded visualisation of the
+death of a massive star: a red supergiant's final minutes, iron-core
+collapse, the neutrino burst, a lopsided shock revival, and three thousand
+years of remnant evolution. Three scenarios — core collapse, failed
+supernova (black hole), Type Ia — on one reduced-order engine that is honest
+about its approximations. Desktop only (keyboard + mouse).
+
+Live: https://daxjdavis526.github.io/Projects/supernova/
+
+See [supernova/README.md](supernova/README.md) for controls and how the
+physics works.
+
+## raptor/
+
+**RAPTOR** — an F-22A flight simulator with a six-degree-of-freedom flight
+model, fly-by-wire control laws, thrust vectoring, and a streamed world at
+true Earth scale. Eleven camera modes, first person and third person equally
+playable. Exterior sound is solved through the retarded-time equation, so the
+jet outruns its own noise and sonic booms reach ground observers as a moving
+Mach cone. Desktop only (keyboard + mouse or gamepad).
+
+Live: https://daxjdavis526.github.io/Projects/raptor/
+
+See [raptor/README.md](raptor/README.md) for controls and what is actually
+simulated versus approximated.
