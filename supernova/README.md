@@ -110,7 +110,7 @@ requiring transport, a nuclear EOS or 3D turbulence is a calibrated stand-in.
 
 ## How the rendering works
 
-Modern three.js (r180, vendored, importmap — still zero-build) with an HDR
+Modern three.js (r180, vendored minified, importmap — still zero-build) with an HDR
 pipeline: linear-light rendering into half-float targets, UnrealBloom, ACES
 filmic tone mapping last. The photosphere is a vector-warped low-frequency
 granulation field — chained domain warping produces marble, not convection,
@@ -141,5 +141,6 @@ not propagate through vacuum; the score is cinema, and is labelled as such.
 - `src/camera/` — free-flight/orbit rig, documentary director
 - `src/ui/` — panel, timeline, light curve, annotations, modals, formatters
 - `src/audio/audio.js` — the score
-- `vendor/three/` — three.js r180 + the ten addon files, pinned and local
+- `vendor/three/` — three.js r180 (minified, 12 lines) + the ten addon
+  files, pinned and local
 - `test/physics.test.mjs` — the headless validation suite

@@ -1,0 +1,11 @@
+# Vendored third-party libraries. These are downloaded, not authored here.
+#
+# linguist-vendored keeps them out of GitHub's language statistics, and
+# -diff collapses them in pull requests — a minified bundle is one 340 KB
+# "line", and rendering it in a diff view helps nobody.
+
+*/vendor/**                 linguist-vendored linguist-generated -diff
+helios/three.min.js         linguist-vendored linguist-generated -diff
+
+# Minified bundles are not meaningfully diffable or mergeable.
+*.min.js                    -diff -merge
