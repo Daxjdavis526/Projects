@@ -25,6 +25,7 @@ export class Labels {
       let f = bandFade(ctx.logS, o.labelBand[0], o.labelBand[1], 0.35);
       if (this.selected === o && !o._behind) f = Math.max(f, 1);
       if (f < 0.02 || o._behind) { this._target(o, 0); continue; }
+      if (o.labelGate && !o.labelGate(ctx)) { this._target(o, 0); continue; }
       if (o._sx < -40 || o._sx > W + 40 || o._sy < -20 || o._sy > H + 20) { this._target(o, 0); continue; }
       cands.push([o, f]);
     }

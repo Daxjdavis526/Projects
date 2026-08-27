@@ -42,7 +42,7 @@ const quality = QUALITY[settings.quality];
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
-const DPR = Math.min(window.devicePixelRatio || 1, quality.pixelRatio);
+let DPR = Math.min(window.devicePixelRatio || 1, quality.pixelRatio);
 renderer.setPixelRatio(DPR);
 
 const scene = new THREE.Scene();
@@ -58,18 +58,31 @@ function buildComposer() {
     { type: THREE.HalfFloatType, samples: 4 });
   composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
-  bloom = new UnrealBloomPass(new THREE.Vector2(size.x * 2, size.y * 2), 0.3, 0.45, 0.95);
+  bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.3, 0.45, 0.95);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 }
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
-  renderer.setSize(w, h, false);
+  // devicePixelRatio changes when the user zooms the browser or moves the
+  // window between displays — re-read it or the canvas ends up a different
+  // size than the viewport (labels then drift off their objects).
+  DPR = Math.min(window.devicePixelRatio || 1, quality.pixelRatio);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(w, h, true);          // true: also set the canvas CSS size
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   if (settings.post) buildComposer();
 }
 window.addEventListener('resize', resize);
+// browser zoom fires no resize event on some platforms; watch DPR directly
+if (window.matchMedia) {
+  const watchDPR = () => {
+    const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    mq.addEventListener('change', () => { resize(); watchDPR(); }, { once: true });
+  };
+  watchDPR();
+}
 
 // -------------------------------------------------------- world build
 const registry = [];
@@ -303,6 +316,7 @@ const selring = $('#selring');
 const projV = new THREE.Vector3();
 let last = performance.now();
 
+let flyScale = 0, flyNear = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min((now - last) / 1000, 0.1);
@@ -321,13 +335,36 @@ function frame(now) {
   ctx.frame++;
   ctx.dt = dt; ctx.time += dt;
   ctx.T = daysSinceJ2000() / 36525;
-  ctx.S = rig.dist; ctx.logS = rig.logD;
+  if (rig.mode === 'fly') {
+    // visibility follows WHERE you are, not how fast you are going
+    if (ctx.frame % 6 === 0 || !flyNear) {
+      const q = rig.camPos();
+      let dn = Infinity;
+      for (const o of registry) {
+        if (!o.pos) continue;
+        const p = o.pos(ctx);
+        const d = Math.hypot(p[0]-q[0], p[1]-q[1], p[2]-q[2]);
+        const ref = Math.max(d, (o.radius ?? 0) * 3);
+        if (ref < dn) dn = ref;
+      }
+      flyNear = isFinite(dn) ? dn : rig.dist;
+    }
+    const dn = flyNear;
+    flyScale = flyScale > 0 ? flyScale * 0.90 + dn * 0.10 : dn;   // smooth
+    ctx.S = Math.max(flyScale, 1e6);
+    ctx.logS = Math.log10(ctx.S);
+  } else {
+    flyScale = 0;
+    ctx.S = rig.dist; ctx.logS = rig.logD;
+  }
   ctx.focus = rig.focus;
   ctx.camPos = rig.camPos();
   const cd = rig.mode === 'fly' ? [0, 0, 0] : rig.camDir();
   ctx.camRender = cd;
   ctx.camRenderV.set(cd[0], cd[1], cd[2]);
-  ctx.cssW = window.innerWidth; ctx.cssH = window.innerHeight;
+  const vr = canvas.getBoundingClientRect();
+  ctx.cssW = vr.width || window.innerWidth;
+  ctx.cssH = vr.height || window.innerHeight;
   const halfTan = Math.tan(FOV * Math.PI / 360);
   ctx.pxPerUnitCSS = (ctx.cssH / 2) / halfTan;
   ctx.pxPerUnit = ctx.pxPerUnitCSS * DPR;

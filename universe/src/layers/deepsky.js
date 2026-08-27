@@ -12,7 +12,7 @@
    ========================================================================== */
 import * as THREE from 'three';
 import { AU, LY, PC, MPC, clamp, smoothstep, bandFade, mulberry32, gauss,
-         radecToXYZ } from '../scale.js';
+         radecToXYZ, compressLen } from '../scale.js';
 import { starMaterial, updateStarUniforms, glowTexture, kelvinToRGB,
          placeBody } from '../render.js';
 import { starRadius } from './stars.js';
@@ -328,6 +328,10 @@ export async function buildDeepSkyLayer(scene, registry, ctx0) {
           return [hp[0] + aM * Math.cos(ang), hp[1], hp[2] - aM * Math.sin(ang)];
         },
         labelBand: [Math.log10(aM * 0.02), Math.log10(aM * 30)],
+        labelGate: (c) => {
+          const h = host.pos(c), q = c.camPos;
+          return Math.hypot(h[0]-q[0], h[1]-q[1], h[2]-q[2]) < aM * 4000;
+        },
         focusD: Math.max((pl.radius_re ?? 1.5) * 6.371e6 * 30, aM * 0.02),
         kind: 'exoplanet', priority: 5,
       };
@@ -416,12 +420,16 @@ export async function buildDeepSkyLayer(scene, registry, ctx0) {
     // exoplanet systems: rings + host proximity
     for (const sys of systems) {
       const hp = sys.host.pos(ctx);
-      const show = ctx.S < sys.aMaxM * 900;
+      // only when the camera is genuinely inside this system's neighborhood
+      const dCam = Math.hypot(hp[0]-cp[0], hp[1]-cp[1], hp[2]-cp[2]);
+      const show = ctx.S < sys.aMaxM * 900 && dCam < sys.aMaxM * 4000;
       sys.ringGroup.visible = show;
       if (show) {
         const rx = (hp[0]-fc[0])/S, ry = (hp[1]-fc[1])/S, rz = (hp[2]-fc[2])/S;
-        sys.ringGroup.position.set(rx, ry, rz);
-        sys.ringGroup.scale.setScalar(AU / S);
+        const L = Math.hypot(rx, ry, rz);
+        const k = L > 0 ? compressLen(L) / L : 1;    // same compression as labels/meshes
+        sys.ringGroup.position.set(rx*k, ry*k, rz*k);
+        sys.ringGroup.scale.setScalar(AU / S * k);
         const op = 0.35 * smoothstep(Math.log10(sys.aMaxM * 900), Math.log10(sys.aMaxM * 40), ctx.logS);
         sys.ringGroup.children.forEach(l => l.material.opacity = op);
       }
