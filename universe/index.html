@@ -100,7 +100,7 @@
   /* ---------- labels ---------- */
   #labels{position:absolute;inset:0;overflow:hidden}
   .lbl{position:absolute;display:flex;align-items:center;gap:6px;pointer-events:auto;
-    cursor:pointer;white-space:nowrap;opacity:0;transform:translate(10px,-50%);
+    cursor:pointer;white-space:nowrap;opacity:0;transform:translate(-3px,-50%);
     font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
     text-shadow:0 1px 4px rgba(0,0,0,.9);transition:color .2s;will-change:opacity,left,top}
   .lbl i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.8;flex:none}
@@ -226,6 +226,7 @@
     <div id="actions">
       <button id="bSearch" title="Search & bookmarks [/]">Search</button>
       <button id="bTour" title="Guided tour [T]">Tour</button>
+      <button id="bSky" title="The night sky as seen from Earth [G]">Sky</button>
       <button id="bVoyage" title="Voyage: auto-hop object to object, outward to the horizon [V]">Voyage</button>
       <button id="bFly" title="Free flight [F]">Fly</button>
       <button id="bTime" title="Cosmic time (at large scales)">Time</button>
@@ -325,6 +326,7 @@
       <tr><td>V</td><td>voyage — auto-hop outward, object to object, to the horizon</td></tr>
       <tr><td>F</td><td>free flight (WASD + Space/C, Shift boost, scroll = speed)</td></tr>
       <tr><td>N</td><td>jump to the nearest star</td></tr>
+      <tr><td>G</td><td>night sky from Earth — the real constellations, then fly anywhere</td></tr>
       <tr><td>0 or Home</td><td>return to Earth</td></tr>
       <tr><td>M</td><td>toggle ambient sound</td></tr>
       <tr><td>Esc</td><td>close panels · end tour</td></tr>

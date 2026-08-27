@@ -144,6 +144,32 @@ rig.onModeChange = mode => {
   if (mode === 'fly') { tour.stop(); voyage.stop(); panel.hide(); }
 };
 $('#bFly').onclick = () => rig.toggleFly();
+function skyView() {
+  tour.stop(); voyage.stop(); panel.hide();
+  const earth = registry.find(o => o.id === 'earth');
+  const e = earth.pos(ctx);
+  const el = Math.hypot(e[0], e[1], e[2]);
+  const n = [e[0]/el, e[1]/el, e[2]/el];        // zenith on the midnight side
+  if (rig.mode !== 'fly') rig.enterFly();
+  rig.focus = [e[0] + n[0]*earth.radius*2.2, e[1] + n[1]*earth.radius*2.2,
+               e[2] + n[2]*earth.radius*2.2];
+  // open facing the heart of the Milky Way — the most striking stretch of sky
+  const sgr = registry.find(o => o.id === 'sgra');
+  const q = sgr ? sgr.pos() : [n[0]*1e20, n[1]*1e20, n[2]*1e20];
+  const cp = rig.focus;
+  const v = [q[0]-cp[0], q[1]-cp[1], q[2]-cp[2]];
+  const vl = Math.hypot(v[0], v[1], v[2]);
+  const d = [v[0]/vl, v[1]/vl, v[2]/vl];
+  rig.pitch = rig.tPitch = Math.asin(Math.max(-1, Math.min(1, d[1])));
+  rig.yaw = rig.tYaw = Math.atan2(d[0], -d[2]);
+  rig.logD = rig.tLogD = 6.7;                    // gentle starting speed
+  hudMsgSky();
+}
+function hudMsgSky() {
+  const m = $('#flybox');
+  m.classList.add('on');
+}
+$('#bSky').onclick = skyView;
 $('#bVoyage').onclick = () => voyage.active ? voyage.stop() : voyage.start(ctx);
 
 let selected = null;
@@ -233,6 +259,7 @@ window.addEventListener('keydown', e => {
     case 't': case 'T': tour.active ? tour.stop() : tour.start(); break;
     case 'f': case 'F': if (!rig.keys.f) rig.toggleFly(); break;
     case 'v': case 'V': voyage.active ? voyage.stop() : voyage.start(ctx); break;
+    case 'g': case 'G': skyView(); break;
     case 'n': case 'N': {
       const star = nav.nearest(ctx, 'star', rig.focusObj);
       if (star) { select(star); flyToObj(star); }

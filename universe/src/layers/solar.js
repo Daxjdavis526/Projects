@@ -310,7 +310,7 @@ export function buildSolarLayer(scene, registry, ctx0) {
       radius: p.radius, color: new THREE.Color(beaconColors[p.id]),
       lum: p.radius * p.radius * 4e6 / (AU * AU) * 7.5e19, // reflected-light proxy
       pos: (c) => bodyPos(p.id, c ?? window.__ctx),
-      labelBand: [7.5, 13.8], focusD: p.radius * 4.2,
+      labelBand: [6.3, 13.8], focusD: p.radius * 4.2,
       kind: 'planet', priority: 8, mesh, body: entry,
     });
   }
