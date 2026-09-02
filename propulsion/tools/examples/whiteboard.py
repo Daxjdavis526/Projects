@@ -84,6 +84,33 @@ Arithmetic that deliberately has NO library entry
 
 * **P26 gas-generator Isp penalty.**  4% of the flow leaving at ~40% of main
   Isp costs 0.04*(1-0.40) = 2.4%, i.e. 8.4 s on a 350 s vacuum engine.
+
+* **P3 oxidiser/fuel split.**  mdot = 26.9925 kg/s, 400 s -> 10,797 kg.  At
+  MR = 2.3 that is 7,525 kg LOX + 3,272 kg RP-1; at MR = 2.7, 7,879 + 2,918;
+  at MR = 3.6 (methalox), 8,450 + 2,347.  Two divisions, no library entry.
+
+* **P12 optimal split.**  Maximising lambda1*lambda2 over the dv split pushes
+  stage-1 dv down to ~1.9 km/s (lambda = 0.0539) because the 450 s stage is
+  always the cheaper place to put dv.  That optimum is not buildable — stage 1
+  must lift the stack and clear the atmosphere — so the key quotes the stated
+  4.0/5.4 split and names the constraint.  Scan only; no library entry.
+
+* **P22 acoustic yardstick.**  With a_chamber = 1277.75 m/s (registered below),
+  the first tangential mode of a 300 mm chamber is 1.841 a/(pi D) = 2.50 kHz and
+  the first longitudinal of a 0.5 m chamber is a/2L = 1.28 kHz.  120 Hz is an
+  order of magnitude below both: it is a feed-system chug, not an acoustic mode.
+  A 3 m propellant line at c ~ 1300 m/s has a quarter-wave at 108 Hz, which is
+  the right neighbourhood.
+
+* **P30 chamber geometry.**  Ac = 2.5 At = 0.0365120 m^2 -> Dc = 215.6 mm, and
+  Lc = Vc/Ac = 0.01460482/0.0365120 = 0.400 m at L* = 1.0 m.  Chamber gas
+  density rho_c = p0/(R T0) = 9e6/(415.723*3500) = 6.1854 kg/m^3, and mdot =
+  p0 At/c*_delivered = 72.719 kg/s; both feed the registered residence time.
+
+* **P15 coolant-side film drop.**  Dittus-Boelter is registered below at
+  k = 0.14 W/(m K), D_h = 2.0 mm, Re = 74,074, Pr = mu cp/k = 21.43 (RP-1,
+  assumed properties [A]): h_c = 4.31e4 W/(m^2 K), so a 40 MW/m^2 flux needs a
+  927 K film drop.  That is the second, independent reason the channel fails.
 """
 
 import math
@@ -123,6 +150,16 @@ EXAMPLES = [
     {"id": "WB.P1d", "fn": "schmucker_separation",
      "args": {"pa": 101325.0, "Me": 3.912769},
      "expect": 31022.6, "tol": 0.002},
+    # pe = 1e7 / 262.862 = 38.04 kPa; Isp at the delivered LOX/RP-1 c*
+    {"id": "WB.P1e", "fn": "p0_over_p",
+     "args": {"gamma": 1.20, "Mach": 3.912769},
+     "expect": 262.862, "tol": 0.002},
+    {"id": "WB.P1f", "fn": "isp_from_c",
+     "args": {"c_eff": 1726.6221680805486 * 1.842383},
+     "expect": 324.382, "tol": 0.0005},
+    {"id": "WB.P1g", "fn": "isp_from_c",
+     "args": {"c_eff": 1726.6221680805486 * 1.589071},
+     "expect": 279.782, "tol": 0.0005},
 
     # --- P2: 500 kN vacuum at 80 bar -------------------------------------
     # The candidate's assumed Cf = 1.80 gives At = 0.034722 m^2 (Dt 210.3 mm);
@@ -158,6 +195,17 @@ EXAMPLES = [
     {"id": "WB.P16d", "fn": "p0_over_p",
      "args": {"gamma": 1.16, "Mach": 4.019137},
      "expect": 409.2, "tol": 0.002},
+    # 73.31 kPa exit against a Schmucker separation pressure of 30.41 kPa
+    {"id": "WB.P16e", "fn": "schmucker_separation",
+     "args": {"pa": 101325.0, "Me": 4.019137},
+     "expect": 30413.7, "tol": 0.002},
+    # Isp at the delivered methalox c* of 0.96 * 1882.857 = 1807.54 m/s
+    {"id": "WB.P16f", "fn": "isp_from_c",
+     "args": {"c_eff": 0.96 * 1882.857 * 1.929420},
+     "expect": 355.627, "tol": 0.0005},
+    {"id": "WB.P16g", "fn": "isp_from_c",
+     "args": {"c_eff": 0.96 * 1882.857 * 1.794320},
+     "expect": 330.726, "tol": 0.0005},
 
     # --- P17: 1.8 MN SL at 110 bar, sea-level-optimum nozzle -------------
     {"id": "WB.P17a", "fn": "optimum_eps_for_pa",
@@ -172,6 +220,12 @@ EXAMPLES = [
     {"id": "WB.P17d", "fn": "Cf",
      "args": {"gamma": 1.20, "eps": 12.63794, "p0": 1.1e7, "pa": 0.0},
      "expect": 1.770591, "tol": 0.0005},
+    {"id": "WB.P17e", "fn": "isp_from_c",
+     "args": {"c_eff": 1726.6221680805486 * 1.654178},
+     "expect": 291.245, "tol": 0.0005},
+    {"id": "WB.P17f", "fn": "isp_from_c",
+     "args": {"c_eff": 1726.6221680805486 * 1.770591},
+     "expect": 311.742, "tol": 0.0005},
 
     # --- P18: 7.6 MN at Isp_SL 282 s -------------------------------------
     # mdot = 2748.17 kg/s; 400 t / 2748.17 = 145.6 s
@@ -205,6 +259,16 @@ EXAMPLES = [
     {"id": "WB.P4f", "fn": "schmucker_separation",
      "args": {"pa": 101325.0, "Me": 4.524495},
      "expect": 27890.3, "tol": 0.002},
+    # the three Isp values the sketch needs, at the delivered LOX/RP-1 c*
+    {"id": "WB.P4g", "fn": "isp_from_c",
+     "args": {"c_eff": 1726.6221680805486 * 1.634960},
+     "expect": 287.862, "tol": 0.0005},
+    {"id": "WB.P4h", "fn": "isp_from_c",
+     "args": {"c_eff": 1726.6221680805486 * 1.797080},
+     "expect": 316.406, "tol": 0.0005},
+    {"id": "WB.P4i", "fn": "isp_from_c",
+     "args": {"c_eff": 1726.6221680805486 * 1.916358},
+     "expect": 337.406, "tol": 0.0005},
 
     # --- P5: eps = 150 upper stage at 60 bar, tested at sea level --------
     {"id": "WB.P5a", "fn": "mach_from_area_ratio",
@@ -298,6 +362,12 @@ EXAMPLES = [
     {"id": "WB.P15c", "fn": "coolant_bulk_rise",
      "args": {"Q": 15.0e6, "mdot": 50.0, "cp": 2000.0},
      "expect": 150.0, "tol": 1e-6},
+    # coolant-side film coefficient, RP-1 properties assumed [A]:
+    # k = 0.14 W/(m K), cp = 2000 J/(kg K), mu = 1.5e-3 Pa s -> Pr = 21.43
+    {"id": "WB.P15d", "fn": "dittus_boelter",
+     "args": {"k": 0.14, "D": 2.0e-3, "Re": 74074.07, "Pr": 21.4286,
+              "n": 0.4},
+     "expect": 43147.6, "tol": 0.001},
 
     # =====================================================================
     # Block D — propellant and cycle choice
@@ -311,6 +381,16 @@ EXAMPLES = [
      "args": {"rho": 1030.0, "isp": 340.0}, "expect": 350200.0, "tol": 1e-9},
     {"id": "WB.P7d", "fn": "density_isp",
      "args": {"rho": 1180.0, "isp": 330.0}, "expect": 389400.0, "tol": 1e-9},
+
+    # =====================================================================
+    # Block E — injector diagnosis
+    # =====================================================================
+    # --- P22: is 120 Hz an acoustic mode? --------------------------------
+    # chamber speed of sound sets the yardstick; 1T of a 300 mm chamber is
+    # 1.841 a/(pi D) = 2.50 kHz, twenty times the observed 120 Hz.
+    {"id": "WB.P22", "fn": "a_sound",
+     "args": {"gamma": 1.20, "R": 377.93, "T": 3600.0},
+     "expect": 1277.755, "tol": 0.0005},
 
     # =====================================================================
     # Block F — cold gas
@@ -407,6 +487,9 @@ EXAMPLES = [
     {"id": "WB.P13c", "fn": "pump_head",
      "args": {"dp": 1.665e7, "rho": 810.0},
      "expect": 2096.08, "tol": 0.001},
+    {"id": "WB.P13d", "fn": "pump_head",
+     "args": {"dp": 1.665e7, "rho": 1140.0},
+     "expect": 1489.32, "tol": 0.001},
 
     # --- P14: NPSH on the LOX pump ---------------------------------------
     # p_tank 3.5 bar, p_vap 1.0 bar (LOX near its 90.2 K NBP), rho 1140,
@@ -466,4 +549,9 @@ EXAMPLES = [
     {"id": "WB.P30f", "fn": "chamber_volume_from_Lstar",
      "args": {"Lstar": 1.0, "At": 0.014604818378826967},
      "expect": 0.01460482, "tol": 1e-6},
+    # rho_c = 9e6/(415.723*3500) = 6.1854 kg/m^3, mdot = 72.719 kg/s
+    {"id": "WB.P30g", "fn": "residence_time",
+     "args": {"Vc": 0.014604818378826967, "rho_c": 6.185437349938714,
+              "mdot": 72.71935757914082},
+     "expect": 1.24227e-3, "tol": 0.001},
 ]

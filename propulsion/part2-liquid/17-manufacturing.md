@@ -1700,7 +1700,7 @@ $\pm 0.075$ mm ($3\sigma$, so $\sigma_d = 0.025$ mm) and a $C_d$ scatter of
 $$\frac{\sigma_{A_f}}{A_f} = 2\times\frac{0.025}{1.60} = 3.125\ \%,\qquad
 \frac{\sigma_{A_o}}{A_o} = 2\times\frac{0.025}{2.23} = 2.242\ \%$$
 $$\frac{\sigma_{\dot m_f}}{\dot m_f} = \sqrt{3.125^2+3^2} = 4.33\ \%,\qquad
-\frac{\sigma_{\dot m_o}}{\dot m_o} = \sqrt{2.242^2+3^2} = 3.83\ \%$$
+\frac{\sigma_{\dot m_o}}{\dot m_o} = \sqrt{2.242^2+3^2} = 3.75\ \%$$
 $$\frac{\sigma_{MR}}{MR} = \sqrt{4.33^2+3.83^2} = 5.78\ \%
 \;\Rightarrow\; \sigma_{MR} = 0.133,\quad MR \in [1.91,\ 2.70]\ \text{at } \pm3\sigma$$
 **2.33 times worse than drilled.** This is the quantitative reason that printed

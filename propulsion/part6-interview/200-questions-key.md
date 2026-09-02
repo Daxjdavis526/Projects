@@ -858,3 +858,1039 @@ transients, not the steady thrust.
 and what would that cost?"
 
 ---
+
+## Intermediate (51–110)
+
+### 51. [M04, M01]
+Frozen composition holds the chamber's chemical makeup fixed all the way down
+the nozzle; shifting equilibrium lets the mixture re-equilibrate continuously
+as temperature and pressure fall. Shifting always predicts more because the
+chamber gas is significantly dissociated — H, OH, O, CO at a few percent each
+in a hot LOX/LH2 or LOX/RP-1 chamber — and recombination is exothermic, so
+letting those radicals recombine on the way down pours chemical energy back
+into the flow as thermal energy that the nozzle then converts to velocity.
+[F] The gap is typically 1–4 % of $I_{sp}$, largest for the hottest, most
+dissociated systems and for high chamber pressures where dissociation is
+suppressed less than you would like. A real engine lands closer to shifting —
+commonly 80–95 % of the way from frozen to shifting — because the residence
+time in a large nozzle is long compared with recombination times at high
+pressure; the shortfall is exactly what the industry calls the kinetic loss.
+[A] Small thrusters and very high area ratios freeze earlier and sit closer to
+the frozen number, which is one of the reasons small engines under-deliver
+against CEA. [CEA][RP-1311]
+
+**Probing:** whether you understand that the two predictions are bounds on a
+rate problem, not two opinions.
+**Follow-up:** "Where in the nozzle does the flow actually freeze, and what
+controls it?"
+
+### 52. [M02, M09, M33]
+$I_{sp} \propto C_f$ at fixed $c^*$, and $C_f$ approaches an asymptote because
+the exhaust velocity approaches the limiting value
+$v_{max} = \sqrt{2\gamma R T_0/(\gamma-1)}$: each extra unit of area ratio
+expands a gas that has already given up most of its enthalpy. For
+$\gamma = 1.20$, $p_c = 100$ bar, $c^* = 2300$ m/s in vacuum, the ideal
+$I_{sp}$ runs 427.0 s at $\varepsilon = 20$, 441.9 s at 40, 454.3 s at 80 and
+464.7 s at 160 — each doubling of area buys 14.9 s, then 12.4 s, then 10.4 s,
+while nozzle wall area and mass roughly double every time. [F] You stop where
+the derivative of stage $\Delta v$ with respect to nozzle mass goes through
+zero, which is a vehicle-level calculation, not a nozzle one, and which lands
+around $\varepsilon = 40$–80 for a hydrocarbon upper stage and 200–300 for a
+hydrogen one. Three other things stop you first in practice: the interstage
+diameter, the gimbal envelope, and — for a stage that must fire at sea level —
+flow separation.
+
+**Probing:** whether you convert "diminishing returns" into an actual number
+and then into a vehicle-level trade.
+**Follow-up:** "Which of those three constraints stopped the RL10B-2, and what
+did they do about it?"
+
+### 53. [M02]
+Supersonic root of the area–Mach relation at $A/A^* = 4.0$ with
+$\gamma = 1.20$: $M_1 = \mathbf{2.62}$. Normal-shock static pressure ratio
+$p_2/p_1 = 1 + \frac{2\gamma}{\gamma+1}(M_1^2-1) = 1 + 1.0909\times(6.862-1)
+= \mathbf{7.39}$. Downstream Mach
+$M_2 = \sqrt{\dfrac{1 + \frac{\gamma-1}{2}M_1^2}{\gamma M_1^2 -
+\frac{\gamma-1}{2}}} = \mathbf{0.455}$. [F] Note the upstream static pressure
+is only 4.4 % of chamber pressure, so even a 7.4× jump leaves the post-shock
+gas at about 32 % of $p_c$ — which is why a shock this far down a nozzle is
+always accompanied by separation rather than a clean normal shock spanning the
+duct. The low $\gamma$ matters: at $\gamma = 1.4$ the same area ratio gives a
+lower $M_1$ and a weaker shock.
+
+**Probing:** whether you can run the isentropic and shock relations back to
+back without confusing static and stagnation quantities.
+**Follow-up:** "Is a normal shock the right model here at all?"
+
+### 54. [M03, M18]
+$\eta_{c^*} = c^*_{meas}/c^*_{ideal}$ and
+$\eta_{C_f} = C_{f,meas}/C_{f,ideal}$, with $c^*_{meas} = p_c A_t/\dot m$ and
+$C_{f,meas} = F/(p_c A_t)$. Everything upstream of the throat lands in
+$\eta_{c^*}$: incomplete mixing, incomplete vaporisation, finite residence
+time, heat lost to the walls, and any real chemistry that did not reach
+equilibrium in the chamber. Everything downstream lands in $\eta_{C_f}$:
+divergence, boundary-layer drag and displacement, kinetic freezing in the
+expansion, two-phase lag, and — if you are at sea level — separation. [F] A
+diagnostic engineer separates them because the fixes live in different
+hardware: a low $\eta_{c^*}$ sends you to the injector and the chamber length,
+a low $\eta_{C_f}$ sends you to the contour and the film-cooling budget.
+Lumping them into one $I_{sp}$ efficiency destroys exactly the information you
+went to the test stand to get. [M]
+
+**Probing:** whether you have ever actually reduced test data, or only read
+about it.
+**Follow-up:** "Your $\eta_{c^*}$ is 0.96 and your $\eta_{C_f}$ is 0.99. Which
+one do you chase?"
+
+### 55. [M03, M09]
+$C_f$ ideal at $\gamma = 1.19$, $\varepsilon = 69$, $p_c = 206$ bar, $p_a = 0$:
+the exit Mach number is 4.55, giving $p_e = 22.6$ kPa, and
+$C_f = \mathbf{1.939}$. With $c^* = 2330$ m/s,
+$I_{sp} = c^* C_f/g_0 = 2330 \times 1.939/9.80665 = \mathbf{460.8\ s}$ against
+the published **452.3 s**, so the engine delivers about 98.2 % of this ideal —
+a completely normal overall efficiency for a large hydrogen engine once
+divergence, boundary layer, kinetics and film cooling are paid for. [F][A]
+Carry the caveat: the RS-25's expansion ratio is **contested — 69:1, 77.5:1
+and 78:1 all appear in the literature**, and the 206.4 bar figure is
+injector-face stagnation at 109 % power level. Redo the sum at
+$\varepsilon = 77.5$ and the ideal rises, which would make the implied
+efficiency lower; that sensitivity is precisely why you quote the expansion
+ratio you assumed.
+
+**Probing:** whether you flag the contested $\varepsilon$ instead of quoting
+"69" as fact, and whether an implied efficiency of 98 % strikes you as
+plausible rather than suspicious.
+**Follow-up:** "Which of the loss terms is biggest on an engine like that?"
+
+### 56. [M03, M18]
+$c^*_{meas} = p_c A_t/\dot m = 5.5\times10^6 \times 0.0080/26.0 =
+\mathbf{1692\ m/s}$, so $\eta_{c^*} = 1692/1755 = \mathbf{0.964}$.
+$C_{f,meas} = F/(p_c A_t) = 65.0\times10^3/(5.5\times10^6\times0.0080) =
+\mathbf{1.477}$, so $\eta_{C_f} = 1.477/1.52 = \mathbf{0.972}$. Delivered
+$I_{sp} = c^* C_f/g_0 = \mathbf{255\ s}$ at sea level. [F] A 3.6 % $c^*$
+shortfall is a mixing or vaporisation problem in the injector, not a
+measurement artefact, and is worth chasing; the 2.8 % $C_f$ shortfall is about
+what a sea-level nozzle with divergence and boundary-layer losses should show,
+so I would leave it alone until the injector is fixed. Before believing either
+number I would confirm $A_t$ was measured on this hardware after the test and
+that $p_c$ is the injector-face tap.
+
+**Probing:** whether you split the efficiencies and then act differently on
+each.
+**Follow-up:** "How much of that 3.6 % could a throat that eroded during the
+test explain?"
+
+### 57. [M04, M05]
+$c^* \propto \sqrt{T_0/\mathcal{M}}$, and moving fuel-rich of stoichiometric
+lowers $T_0$ but lowers the mean molar mass faster, so the ratio improves —
+that is the first mechanism, and it is pure thermodynamics. The second is that
+peak temperature is where dissociation is worst: near stoichiometric a large
+fraction of the released energy is locked into H, OH and O rather than raising
+enthalpy you can convert, so the true peak of $I_{sp}$ sits fuel-rich of the
+peak of $T_0$ regardless of the molar-mass argument. [F] The two effects are
+enormous for hydrogen — LOX/LH2 stoichiometric is O/F 8, engines run 5.5–6.0 —
+and modest for kerosene, where O/F peaks around 2.7 stoichiometric and engines
+run 2.2–2.4. There is a third, non-performance reason that often decides the
+last few tenths: a cooler, fuel-rich chamber and a fuel-rich boundary layer are
+what make the wall survivable and keep free oxygen away from hot metal. [J]
+
+**Probing:** whether you give the molar-mass argument, the dissociation
+argument and the wall argument, not just the first one.
+**Follow-up:** "So why does the RS-25 run 6.03 and not 4.5, if lower O/F is
+even better on $I_{sp}$?"
+
+### 58. [M03, M04, M05]
+$R = R_u/\mathcal{M}$: hydrogen case $8314.46/13.5 = 615.9$ J/(kg·K), kerosene
+case $8314.46/23.0 = 361.5$ J/(kg·K). With
+$c^* = \sqrt{R T_0}/\Gamma(\gamma)$ and $\Gamma(1.20) = 0.6485$:
+LOX/LH2 $c^* = \mathbf{2296\ m/s}$, LOX/RP-1 $c^* = \mathbf{1776\ m/s}$, a
+ratio of **1.29**. [F] Almost the whole advantage is molar mass — the two
+flame temperatures are within 2 % of each other, and the hydrogen case is
+actually the *cooler* of the two. That is the single most important number in
+propellant selection, and it is also why the comparison reverses when you
+divide by density: the same hydrogen that wins 29 % on $c^*$ loses a factor of
+about three on bulk density.
+
+**Probing:** whether you attribute the hydrogen advantage to molar mass rather
+than to "hydrogen burns hotter", which it does not.
+**Follow-up:** "Now do it per unit tank volume."
+
+### 59. [M05, M32, M33]
+Density impulse is $\rho_{bulk} I_{sp}$ (units kg·s/m³, or $\rho I_{sp} g_0$ in
+N·s/m³ if you want impulse per unit volume directly), where $\rho_{bulk}$ is
+the mixture-ratio-weighted mean density of the loaded propellants. It is the
+right figure of merit whenever tank volume, not propellant mass, is the thing
+that costs you: first stages and boosters, where tank structure and aerodynamic
+drag scale with volume; volume-constrained upper stages inside a fixed fairing;
+missiles and any airframe with a fixed outer mould line; and essentially every
+CubeSat. [F][J] $I_{sp}$ is the right figure of merit when the mass ratio
+dominates and volume is nearly free — deep-space stages, kick stages, on-orbit
+propulsion. The clean way to say it in a review: $I_{sp}$ buys you $\Delta v$
+per kilogram of propellant, density impulse buys you $\Delta v$ per litre of
+vehicle, and only one of those two is the binding constraint on any given
+design.
+
+**Probing:** whether you can name the constraint that makes each metric the
+correct one, rather than reciting that "density impulse matters for first
+stages".
+**Follow-up:** "Which metric decides for a solid-fuelled tactical missile, and
+why is it neither of the ones you just described?"
+
+### 60. [M05, M32]
+LOX/LH2: $\rho I_{sp} = 360 \times 450 = \mathbf{1.62\times10^{5}}$ kg·s/m³.
+LOX/RP-1: $1030 \times 340 = \mathbf{3.50\times10^{5}}$ kg·s/m³. The kerosene
+combination wins by a factor of **2.16** despite giving up 110 s of $I_{sp}$.
+[F] For a first stage that means the hydrogen version needs roughly twice the
+tank volume for the same total impulse, and tank volume buys you dry mass,
+insulation area, boil-off, drag and a taller vehicle — which is why hydrogen
+first stages are rare and are always accompanied by solid boosters that supply
+the thrust and the impulse density the core cannot. The counter-argument is
+that the hydrogen stage still wins on $\Delta v$ per kilogram, so the answer
+depends entirely on whether you are volume-limited or mass-limited, and a first
+stage is volume-limited.
+
+**Probing:** whether you get the direction right and can immediately say what
+tank volume costs, which is the actual content of the number.
+**Follow-up:** "Delta IV flew a hydrogen first stage anyway. What did that cost
+them?"
+
+### 61. [M06]
+The contraction ratio $A_c/A_t$ sets the chamber Mach number, and through it
+three things: the stagnation-pressure loss from Rayleigh heat addition in a
+moving stream, the injector face area available for elements, and the gas
+velocity past the wall that drives convective heat transfer. Too small (below
+about 1.5–2 for a large engine) and the chamber Mach number climbs past 0.2–0.3,
+so you lose measurable $p_c$ to Rayleigh losses, the injector face is cramped,
+and the wall heat flux in the chamber rises toward throat values. [F][E] Too
+large and you are carrying chamber wall mass and cooled surface area for nothing,
+the residence time distribution gets worse rather than better because the flow
+recirculates in the corners, and you have made a large-volume acoustic cavity
+that is easier to excite. Typical practice is 2–3 for big engines and up to 4–8
+for small ones, where the injector face area rather than the flow sets it.
+
+**Probing:** whether you know it is a Mach-number choice at heart, not a
+geometry preference.
+**Follow-up:** "Which end of that range does a 500 N thruster sit at, and why?"
+
+### 62. [M06]
+$V_c = L^* A_t = 1.0 \times 0.0125 = \mathbf{0.0125\ m^3}$ (12.5 litres).
+Chamber gas density $\rho_c = p_c/(R T_0) = 8\times10^6/(370\times3500) =
+\mathbf{6.18\ kg/m^3}$. Residence time
+$t_s = V_c \rho_c/\dot m = 0.0125\times6.18/30 = \mathbf{2.57\times10^{-3}\ s}$
+= 2.6 ms. [F][E] That is in the normal band — a few milliseconds is what a
+well-mixed hydrocarbon or hydrogen chamber needs — and it is worth
+saying out loud that $L^*$ is a proxy for this residence time, not a physical
+length: the same $L^*$ at a different chamber pressure gives a different
+residence time, because $\rho_c$ scales with $p_c$. That is why $L^*$
+correlations from 1960s engines at 40 bar do not transfer cleanly to a 200 bar
+modern engine, and why the number people should be comparing is $t_s$.
+
+**Probing:** whether you understand that $L^*$ is an empirical stand-in and can
+say what it stands in for.
+**Follow-up:** "So does a 200 bar engine need a bigger or a smaller $L^*$ than
+a 40 bar one for the same mixing quality?"
+
+### 63. [M07]
+The impinging doublet (like-on-like or unlike) atomises by collision: two jets
+meet, form a fan, and the fan breaks into ligaments and drops. It suits
+storable and kerosene combinations where both fluids are liquid at injection —
+F-1, most hypergolic engines — and it is the element type with the longest data
+record and the worst reputation for driving transverse instability, because the
+spray pattern is periodic around the face. [H] The coaxial shear element
+atomises by aerodynamic shear: a slow central liquid oxygen post inside a fast
+annular gas-hydrogen stream, with the velocity ratio doing the work. It suits
+LOX/LH2 and any combination where one side is gaseous or supercritical at
+injection — RS-25, Vulcain, RL10. The pintle atomises by impinging a radial
+sheet against an axial one at a single central element, which suits deep
+throttling and rough-and-ready combinations (LMDE, Merlin) because the element
+geometry moves with flow rate rather than being fixed. [M]
+
+**Probing:** whether you can attach an atomisation mechanism, not just a
+picture, to each element.
+**Follow-up:** "Which of the three would you pick for a LOX/methane engine that
+must throttle 5:1, and what does that cost you at full thrust?"
+
+### 64. [M07]
+$A = \dfrac{\dot m}{C_d\sqrt{2\rho\Delta p}} =
+\dfrac{0.085}{0.75\sqrt{2\times1140\times1.8\times10^{6}}} =
+\mathbf{1.77\times10^{-6}\ m^2}$, so
+$d = \sqrt{4A/\pi} = \mathbf{1.50\ mm}$.
+Injection velocity $v = C_d\sqrt{2\Delta p/\rho} = 0.75\times56.2 =
+\mathbf{42.1\ m/s}$ (the ideal, loss-free velocity would be 56.2 m/s). [F]
+A 1.5 mm LOX orifice is a manufacturable size but it is small enough that
+contamination is now a system-level requirement: a 200 μm particle is 13 % of
+the diameter and will change both $C_d$ and the spray pattern of that one
+element permanently. The $\Delta p$ of 1.8 MPa is also a stability statement,
+not just a flow statement — as a fraction of $p_c$ it is what decouples the
+feed system from chamber oscillation.
+
+**Probing:** whether you convert the orifice diameter into a cleanliness and
+tolerance requirement without being asked.
+**Follow-up:** "What injector $\Delta p$ as a fraction of $p_c$ would you
+insist on, and where does that rule come from?"
+
+### 65. [M07, M15]
+The total momentum ratio is $\dot m_o v_o/(\dot m_f v_f)$ — the ratio of the
+momentum fluxes the two streams bring to the element, not of their masses.
+Designers care about it because mixing at the element scale is a momentum
+problem: the resultant direction of the combined stream, the penetration depth
+of one jet into the other, and the fineness of the resulting spray are all set
+by how the momenta balance, and an element with the correct mass ratio but a
+badly wrong momentum ratio will produce local zones far from the intended O/F
+even though the chamber-average mixture ratio is exactly right. [F][E] Those
+local zones are where you get hot streaks on the wall and where the local
+combustion response is fastest, which is the link to instability: the
+element-scale momentum ratio, not the global O/F, is what sets whether the flame
+sits close to the face where it can couple to acoustics. Typical target values
+run near unity for impinging elements and much higher for shear coaxials, where
+the whole point is that the gas has most of the momentum.
+
+**Probing:** whether you connect an injector-design number to a stability
+outcome.
+**Follow-up:** "You throttle to 50 %. What happens to that momentum ratio on a
+fixed-geometry element?"
+
+### 66. [M08]
+Pyrotechnic: single shot, so no restart; extremely well-evidenced reliability
+from decades of use and a simple lot-acceptance model; light; and if it fails
+you get either no ignition, which is safe, or a delayed ignition into an
+accumulated propellant charge, which is not. Hypergolic slug (TEA-TEB or a
+cartridge): as many restarts as you carry slugs — typically one to three —
+adds a plumbing and toxic-fluid handling burden, moderate mass, and its failure
+mode is a clean no-start because the fluid either arrived or it did not. [H][M]
+Torch (augmented spark igniter): unlimited restarts, needs a spark system, its
+own small propellant feed and its own igniter-out detection; heaviest in
+hardware and complexity; and if it fails you can detect it in milliseconds and
+close the main valves before the chamber fills. That last property — that the
+failure is detectable *before* the main event — is why every reusable and
+every deep-space restartable engine has converged on torch or spark ignition,
+and why the mass penalty is accepted.
+
+**Probing:** whether "what happens if it fails" is a category you think in, or
+an afterthought.
+**Follow-up:** "How do you actually detect an igniter-out in 10 ms?"
+
+### 67. [M08, M14, M15]
+The oxidiser valve reached full open 10 ms before the fuel valve, so the chamber
+saw an oxidiser-lead sequence, and the 60 ms delay to the spike says propellant
+accumulated in the chamber and downstream dribble volumes before a light-off
+propagated through it — the textbook hard start. [F][H] The pressure spike is
+the accumulated charge burning in far less than the design residence time; on
+an oxidiser-lead in a hydrocarbon engine you also get free oxygen against hot
+metal, which is a second, worse failure mechanism. The first thing I would
+change is the sequence: fuel lead by 30–50 ms, with a verified igniter
+established before either main valve cracks. Then I would attack the cause of
+the delay rather than the symptom — check that the igniter was actually lit
+(chamber pressure or igniter thermocouple as a permissive rather than a
+timer), and measure the dribble volume downstream of each valve, because that
+volume is the size of the charge available for the next spike.
+
+**Probing:** whether you read the valve traces as a sequence problem and reach
+for a permissive rather than a longer timer.
+**Follow-up:** "Fuel lead in a LOX/LH2 engine is standard. Is it still right in
+LOX/RP-1?"
+
+### 68. [M09]
+A bell (Rao parabolic or truncated-ideal) contour turns the flow back toward
+axial before the exit, so the divergence loss falls from the roughly 1.7 % of a
+15° cone ($\lambda = (1+\cos15°)/2 = 0.983$) to a few tenths of a percent, and
+it does that in 70–85 % of the length of the equivalent cone — which is the
+bigger prize, because nozzle length is nozzle mass and vehicle length. [F][E]
+What it costs: the contour must be designed by method of characteristics for a
+specific $\gamma$ and area ratio, so it is not scalable by eye; the rapid
+turn just after the throat produces a steeper adverse pressure gradient and an
+internal compression wave that can coalesce into a weak shock; and the wall
+pressure distribution is less forgiving at off-design, which matters for
+separation at sea level. [Rao58][Rao60] Manufacturing is also harder — a cone
+is a rolled sheet, a bell is a formed or machined contour.
+
+**Probing:** whether you know length, not divergence angle, is the main win.
+**Follow-up:** "How much length can you actually remove before you start losing
+more than you gain?"
+
+### 69. [M09, M02]
+At $\varepsilon = 25$ and $\gamma = 1.20$, $M_e = \mathbf{3.91}$ and
+$p_e = p_c/(p_0/p)_e = 60\times10^{5}/262.9 = \mathbf{22.8\ kPa}$. Schmucker:
+$p_{sep} = p_a(1.88M_e - 1)^{-0.64} = 101325\times(6.356)^{-0.64} =
+\mathbf{31.0\ kPa}$. Since $p_e = 22.8$ kPa $< 31.0$ kPa, **the flow is
+separated** at sea level. [E] The cruder Summerfield rule ($p_e < 0.4p_a$, i.e.
+below 40.5 kPa) says the same thing more emphatically. The practical
+consequence is that this nozzle cannot be static-fired at sea level as designed
+without either accepting separated flow — which means side loads, not just
+performance loss — or truncating the nozzle for the sea-level test campaign,
+which is what programmes routinely do.
+
+**Probing:** whether you use a separation criterion at all rather than just
+comparing $p_e$ to $p_a$, and whether you mention side loads.
+**Follow-up:** "The two criteria disagree by 30 %. Which one do you design
+with?"
+
+### 70. [M10]
+The dominant grouping is $(p_c/c^*)^{0.8}$ — the mass-flux term — multiplied by
+$(A_t/A)^{0.9}$, which localises it to the throat, with a weak
+$D_t^{-0.2}$ scale dependence. In plain terms $h_g$ scales almost linearly with
+chamber pressure and is maximum at the throat, falling off fast in both
+directions; that is why the throat is where the cooling problem lives and why
+doubling $p_c$ costs you roughly 74 % more heat flux. [E][Bartz57] What it gets
+badly wrong: it is a turbulent pipe-flow analogy with a property correction, so
+it knows nothing about the injector — it cannot see streaks, unmixed zones or
+a hot core, which are exactly what burn real hardware — and it assumes an
+equilibrium boundary layer, which is false in the sharply accelerating throat
+region. It is also blind to film cooling, to surface roughness, and to
+chemistry in the boundary layer. Quoted accuracy is ±20–30 % at the throat and
+worse elsewhere; treat it as a sizing tool and put the margin in the test plan,
+not in the correlation.
+
+**Probing:** whether you can state the error bar and, more importantly, what
+the correlation is structurally incapable of seeing.
+**Follow-up:** "Your test article burned through 40 mm downstream of the
+injector, not at the throat. What does Bartz tell you about that?"
+
+### 71. [M10, M11]
+Bartz with $A/A_t = 1$ at the throat:
+$h_g = \dfrac{0.026}{D_t^{0.2}}\left(\dfrac{\mu_0^{0.2}c_{p0}}{Pr_0^{0.6}}\right)
+\left(\dfrac{p_c}{c^*}\right)^{0.8}\left(\dfrac{D_t}{r_c}\right)^{0.1}\sigma
+= \mathbf{1.71\times10^{4}\ W/(m^2K)}$.
+Heat flux $q = h_g(T_{aw}-T_{wg}) = 17{,}053\times(3300-800) =
+\mathbf{4.26\times10^{7}\ W/m^2} = 42.6$ MW/m². [E][Bartz57] That is a
+thoroughly normal throat flux for a 10 MPa engine — the RS-25 throat runs
+higher — and it is the number that decides the whole cooling architecture:
+42.6 MW/m² through a 0.8 mm copper wall is a 107 K drop through the wall alone,
+so you are committed to a high-conductivity liner and a high-velocity coolant.
+Quote it with the ±20–30 % Bartz band attached, and remember $T_{aw}$ of 3300 K
+already assumes a recovery factor you chose.
+
+**Probing:** whether you carry the correlation's uncertainty into the design
+statement instead of treating 42.6 MW/m² as exact.
+**Follow-up:** "Where would you put the margin — wall thickness, coolant flow,
+or film cooling?"
+
+### 72. [M11, M17]
+The throat is where the gas-side flux peaks, so it needs the highest coolant-side
+$h$ and the shortest thermal path. Narrowing the channel at fixed total flow
+raises the coolant velocity, and $h \propto Re^{0.8}/D_h$ means both terms push
+the same way; making it tall recovers the flow area you just lost and adds fin
+surface, so the land between channels conducts heat sideways into a larger
+wetted area. [F][E] The limits are four. Pressure drop scales as
+$v^2 L/D_h$, so a high-aspect-ratio throat section is expensive in pump
+discharge pressure, which is expensive in turbine power. Fin efficiency falls as
+the land gets taller, so past a point the extra height conducts nothing. The
+closeout — brazed, electroformed or printed — has to bridge a narrow slot
+without slumping into it, which is the manufacturing limit and is why aspect
+ratios of 4–8 were classic and 10–15 became reachable with additive
+manufacturing. And the narrow hot-wall land is where low-cycle thermal fatigue
+concentrates, so the geometry that cools best also fails first. [M][GradlAM]
+
+**Probing:** whether "why not make it 30:1" gets four independent answers.
+**Follow-up:** "Which of those limits moved when programmes went to laser
+powder-bed fusion?"
+
+### 73. [M11, M10]
+Bulk rise: $\Delta T = Q/(\dot m c_p) = 12\times10^{6}/(28\times2100) =
+\mathbf{204\ K}$. Wall drop: $\Delta T = qt/k =
+60\times10^{6}\times8\times10^{-4}/320 = \mathbf{150\ K}$. [F] Both numbers are
+alarming in the right way. A 204 K bulk rise on RP-1 entering near 290 K puts
+the outlet near 500 K, which is into the coking regime for kerosene — around
+420–480 K wall-side film temperature is where deposits start — so this circuit
+needs either more flow, a split-flow or counterflow routing, or a fuel that
+tolerates it. The 150 K drop across the wall means the gas-side face sits 150 K
+above the coolant-side face, which is what drives the through-thickness thermal
+strain that eventually fails the liner by low-cycle fatigue. Neither number is
+improved by thinking harder about the correlation; they are architecture
+statements.
+
+**Probing:** whether you recognise 500 K RP-1 as a coking problem without being
+prompted.
+**Follow-up:** "Would methane change that answer, and by how much?"
+
+### 74. [M12]
+NPSH available is what the system delivers at the pump inlet:
+$(p_{tank}-p_{vap}-\Delta p_{line})/\rho g_0$ plus the acceleration head, all
+expressed in metres of the fluid. NPSH required is what the pump needs at that
+flow and speed before cavitation degrades head by an agreed amount — usually
+3 % — and it is a property of the pump, measured, not derived. [F] The inducer
+exists because NPSHr for a high-speed centrifugal impeller is far above what a
+launch vehicle can afford: raising tank pressure to satisfy it would put mass
+into every square metre of tank wall, and tank mass is the one thing a stage
+cannot spend. The inducer is a low-solidity axial stage that is *permitted to
+cavitate* — it runs with an attached vapour cavity on the blade suction side by
+design — and its job is to raise the static pressure enough that the main
+impeller, which is not permitted to cavitate, sees a clean liquid inlet. That
+trade is why suction specific speed is quoted for the inducer and specific
+speed for the stage.
+
+**Probing:** whether you know the inducer is a designed-cavitating component,
+which is the whole trick.
+**Follow-up:** "What limits how much cavitation the inducer can tolerate?"
+
+### 75. [M12]
+$P = \dot m \Delta p/(\rho\eta) = 250\times28\times10^{6}/(1140\times0.70) =
+\mathbf{8.77\ MW}$. Equivalent head is
+$\Delta p/(\rho g_0) = \mathbf{2505\ m}$ of liquid oxygen. [F] Two sanity
+statements go with that: 8.8 MW is 11,800 hp from a pump that will fit inside a
+metre, which is why turbopump power density is the extreme engineering in a
+rocket engine; and every point of pump efficiency is worth 125 kW of turbine
+gas, which at gas-generator $I_{sp}$ is real vehicle performance. The 30 %
+inefficiency does not vanish — it goes into the fluid as heat, which raises the
+LOX temperature toward saturation and eats NPSH margin at the next stage inlet.
+
+**Probing:** whether the number means anything to you once you have it.
+**Follow-up:** "Where does that 2.6 MW of loss actually go, and does it matter?"
+
+### 76. [M12]
+$\mathrm{NPSH}_a = \dfrac{p_{tank}-p_{vap}-\Delta p_{line}}{\rho g_0} +
+z\dfrac{a}{g_0} = \dfrac{3.5\times10^{5}-1.0\times10^{5}-0.4\times10^{5}}
+{1140\times9.80665} + 4.0\times1.3 = 18.78 + 5.20 = \mathbf{24.0\ m}$. [F]
+Note how the two terms compare: the ullage margin over vapour pressure is worth
+19 m and the 4 m column under 1.3 g is worth 5 m, so tank pressure is doing
+most of the work — and that is the term that costs tank wall thickness. The
+number to worry about is that the acceleration head disappears in coast and
+reverses in a tumble, so an engine that must restart on orbit cannot count on
+it at all; that is why restartable stages settle propellant with ullage
+thrusters before spinning the pump.
+
+**Probing:** whether you split the two contributions and notice one of them is
+mission-phase dependent.
+**Follow-up:** "The LOX has been sitting in a warm tank for an hour. What
+happened to your 24 m?"
+
+### 77. [M13, M11]
+A closed expander has exactly one power source: the heat the chamber and nozzle
+put into the coolant. That heat is an integral of flux over wetted area, and
+with Bartz $h_g \propto D_t^{-0.2}$, the pickup scales roughly as $D_t^{1.8}$ —
+call it thrust$^{0.9}$ — while the pump power the cycle has to produce scales
+as $\dot m \Delta p$, i.e. thrust times chamber pressure, so it scales faster
+than the supply does in both directions. [F] Grow the engine and the ratio of
+available to required power falls; raise $p_c$ to compensate and it falls
+faster, because pump power goes as $p_c^2$ at fixed thrust while heat pickup
+goes as roughly $p_c^{0.8}$. The practical ceiling has historically sat in the
+low hundreds of kN — RL10 at about 110 kN, Vinci at about 180 kN — with
+chamber pressures under about 70 bar. The two standard escapes are to open the
+cycle (expander bleed: dump the turbine exhaust overboard at low $I_{sp}$, as
+LE-5B and BE-3U do, which removes the back-pressure constraint) or to buy more
+heat-transfer area at fixed thrust — longer chambers, ribbed or roughened
+channels, dual-pass circuits — which is a bounded improvement, not a
+solution.
+
+**Probing:** whether you produce a scaling argument rather than the memorised
+sentence "expanders don't scale".
+**Follow-up:** "Which escape would you pick for a 400 kN hydrogen upper stage,
+and what does it cost in $I_{sp}$?"
+
+### 78. [M13, M16, M35]
+The Soviet programme had no hydrogen infrastructure and committed to getting
+hydrogen-class staged-combustion performance out of kerosene. With kerosene you
+cannot run a fuel-rich preburner: at preburner temperatures a fuel-rich
+kerosene mixture cokes, laying carbon down on turbine blades and in the
+injector, so the only staged-combustion architecture available is
+oxidiser-rich. [H] The United States looked at oxidiser-rich staged combustion
+and concluded that hot, high-pressure oxygen-rich gas would burn any structural
+metal that took a scratch, which is a correct statement of the risk. The single
+technology that made it survivable was materials: burn-resistant nickel-base
+alloys plus protective enamel and metallic coatings on every surface wetted by
+the oxidiser-rich gas, developed and qualified over decades of Soviet work, and
+backed by process control on cleanliness and inspection that is at least as
+important as the coating chemistry. When the RD-180 came to the US in the 1990s
+the hardware was believed only after test; the metallurgy was the transferred
+asset. [M]
+
+**Probing:** whether you name the coking constraint as the *reason* for
+oxidiser-rich, not just an incidental fact.
+**Follow-up:** "So why is full-flow staged combustion possible with methane
+where it was not with kerosene?"
+
+### 79. [M12, M13]
+$P = \eta\dot m c_p T_{in}\left[1-pr^{-(\gamma-1)/\gamma}\right] =
+0.65\times18\times2800\times900\times\left[1-16^{-0.2308}\right]$.
+$16^{-0.2308} = 0.5271$, so the bracket is 0.4729 and
+$P = \mathbf{13.9\ MW}$. [F] Sanity: that is 18 kg/s doing 774 kJ/kg of
+specific work, which is a reasonable single- or two-stage turbine duty at these
+temperatures, and it is enough to drive a pump of roughly the size in question
+75. Note how hard the pressure ratio works — going from 16 to 8 would cost
+about 22 % of the power — which is why turbine back-pressure is such a fought-over
+number in a staged-combustion power balance, where the exhaust must still be
+above chamber pressure.
+
+**Probing:** whether you get the exponent right and then say something about
+sensitivity.
+**Follow-up:** "In a staged-combustion engine, what sets the minimum turbine
+back-pressure?"
+
+### 80. [M14, M33]
+An expendable engine fires once, so a pyrotechnic valve — a squib that cuts a
+diaphragm or drives a piston — is the lightest, cheapest, most leak-tight and
+most reliable way to get a single unambiguous open or close: no actuator, no
+pneumatic supply, no position feedback, and a hermetic seal until the moment it
+fires. [H] A reusable engine must open and close the same valve hundreds of
+times, must be able to abort and re-arm, and must be checkable on the pad, so
+it needs an actuated valve with position feedback, which brings an actuation
+system with it. That decision propagates a long way: pyrotechnics require a
+vehicle-level ordnance system with its own safe-and-arm devices, range-safety
+paperwork, handling procedures and personnel exclusion zones, while actuated
+valves require a helium or hydraulic supply, controllers, and the electrical
+power and harness to run them — and they make the whole vehicle testable in a
+way an ordnance-based one is not. [J][M] The second-order consequence is
+operational: you can wet-dress-rehearse and abort an actuated vehicle
+repeatedly; every abort on an ordnance-heavy design risks consuming
+single-shot devices.
+
+**Probing:** whether you follow the decision out of the engine and into ground
+operations, which is where its real cost lives.
+**Follow-up:** "You are designing a reusable stage but the customer wants
+pyrotechnic isolation valves for safety. What do you say?"
+
+### 81. [M15, M06]
+Longitudinal modes are standing waves along the chamber axis, with a wavelength
+set by chamber length and frequencies typically in the hundreds of hertz;
+tangential modes run around the circumference, with the first tangential at
+$f_{1T} = 1.8412\,a/(\pi D)$; radial modes stand between the axis and the wall,
+the first at $f_{1R} = 3.8317\,a/(\pi D)$. [F] The first tangential is usually
+the destructive one: it is the lowest-frequency transverse mode, it is the
+easiest to excite because the injector face is full of elements at different
+radii that can drive it, and its pressure antinode sits on the wall, where the
+oscillating velocity scrubs the boundary layer and multiplies wall heat flux
+several-fold. Engines have been destroyed by 1T in well under a second.
+Hardware: radial baffles on the injector face break the transverse modes by
+splitting the chamber into sectors whose individual 1T frequencies are far
+higher; acoustic cavities or Helmholtz resonators at the injector face are
+tuned absorbers for 1T and 1R; longitudinal modes and chug are attacked
+upstream instead, with injector pressure drop and feed-system compliance, since
+they couple to the feed system rather than to the transverse acoustics. [H][M]
+
+**Probing:** whether you know why 1T is the killer — the wall antinode — and
+match each suppression device to the mode it actually addresses.
+**Follow-up:** "Baffles cost you injector face area and cooling. When would
+you accept resonators instead?"
+
+### 82. [M15, M07, M10]
+A discrete, growing 2.8 kHz tone with the heat concentrated at the injector
+periphery is a transverse acoustic instability — almost certainly first
+tangential — coupling to the outer ring of elements. Sanity check the
+identification: $f_{1T} = 1.8412a/(\pi D)$ gives 2.8 kHz for a chamber diameter
+of about 0.24 m at a burnt-gas sound speed of 1150 m/s, so if the chamber is
+roughly that size, 1T fits and you should not go looking for a feed-system
+explanation. [F] The growth to 8 % of $p_c$ over two seconds says the driving
+exceeds the damping and that the margin is negative, not marginal; the
+peripheral heating says the mode's wall antinode is scrubbing the boundary
+layer, and it is also the clue to what is driving it — the outer elements sit
+where the tangential mode's velocity oscillation is largest, so their mixing
+responds to the wave. My first two fixes: re-time the outer ring so it is no
+longer the strongest responder — bias it fuel-rich, change its momentum ratio,
+or recess the elements — and add tuned acoustic cavities at the face sized for
+1T. If those fail, radial baffles, at a known cost in face area and cooling.
+[M][J] I would also stop testing at that condition until a bomb test
+establishes the damping time, because the next unit may not survive to two
+seconds.
+
+**Probing:** whether you identify the mode from the frequency and the heating
+pattern together, and whether you propose a driving-side fix before a
+damping-side one.
+**Follow-up:** "You add cavities and the tone moves to 4.4 kHz. What
+happened?"
+
+### 83. [M16, M11]
+Hydrogen embrittlement is a driver in LOX/LH2 engines because hydrogen is
+everywhere at high pressure and, in several forms — high-pressure gaseous
+environmental embrittlement, internal embrittlement from dissolved hydrogen,
+and hydrogen reaction embrittlement — it reduces ductility and fracture
+toughness in exactly the alloys you want for turbopumps and hot-gas manifolds:
+high-strength steels, nickel-base superalloys, titanium. [F] Kerolox and
+methalox engines have hydrogen present only as a combustion product in the
+burnt gas, at low partial pressure and generally on the wrong side of a wall
+from the load-bearing structure, so the mechanism has no time or concentration
+to work. Standard mitigations: choose alloys with low susceptibility (many
+austenitic stainless steels, copper alloys, aluminium bronzes); plate or coat
+the exposed surface with copper, gold or nickel to keep hydrogen out of the
+substrate; reduce sustained stress and eliminate notch-like stress raisers,
+since the mechanism is stress-assisted; control heat treatment to avoid
+susceptible microstructures; and test in the actual environment rather than
+inferring from air data — the standard practice is to derate allowables from
+hydrogen-environment testing. [M][MMPDS]
+
+**Probing:** whether you name a mechanism and an alloy class, not just the
+phrase.
+**Follow-up:** "Which does more damage in an RS-25 turbopump: hydrogen or
+thermal fatigue?"
+
+### 84. [M17, M16, M36]
+The new problem is that in additive manufacturing the material and the part are
+made at the same time, so material properties are an output of the build rather
+than an input from a certified mill. Two nominally identical parts from
+different machines, different powder lots, or different positions on the same
+build plate can have different porosity, different residual stress, different
+grain morphology and therefore different fatigue lives — and the defects that
+matter most are internal, where conventional surface NDE cannot see them. [M]
+Programmes address it on four fronts: freeze the process, not just the drawing
+— machine, parameter set, powder specification, recoater, atmosphere, build
+orientation — and treat a change to any of them as a change to the part;
+build witness coupons on every plate and test them; use volumetric NDE, mainly
+computed tomography, with an explicit statement of the smallest defect the
+scan can detect at that wall thickness; and use post-processing to close the
+gap where it can — hot isostatic pressing for internal porosity, heat treatment
+for residual stress and microstructure, machining or abrasive flow for surface
+roughness in flow passages. The residual and honest problem is statistical
+allowables: there is no MMPDS-equivalent database for most AM alloy-process
+combinations, so programmes generate their own, which is slow and is the real
+schedule cost of AM. [GradlAM][RAMPT]
+
+**Probing:** whether you say "the process is the material" in some form.
+**Follow-up:** "Your supplier wants to move the part to a different machine of
+the same model. Do you requalify?"
+
+### 85. [M18]
+$c^* = p_c A_t/\dot m$ is a product of independent measurements, so relative
+uncertainties combine in quadrature:
+$\sqrt{0.005^2 + 0.008^2 + 0.012^2} = \mathbf{0.0153}$, i.e. **±1.53 %**. [F]
+The mass-flow term dominates: it contributes $0.012^2 = 1.44\times10^{-4}$ of
+the total $2.33\times10^{-4}$, about 62 % of the variance, and halving it alone
+would take the combined figure to 1.03 %. So $\dot m$ is what I would attack —
+usually by moving from a turbine or venturi flow measurement to a calibrated
+Coriolis meter, or by cross-checking with tank-level rate. Worth saying out
+loud: at ±1.53 % you cannot resolve a 1 % $c^*$ efficiency change between two
+injectors on single tests, which is exactly the comparison programmes most want
+to make, so either you improve the instrument or you buy resolution with
+repeats.
+
+**Probing:** whether you convert the uncertainty into a statement about what
+the test can and cannot decide.
+**Follow-up:** "How many repeat tests would let you resolve 1 % at 95 %
+confidence?"
+
+### 86. [M18, M03, M24]
+$c^*_{meas} = p_c A_t/\dot m$ is only defined against a stated throat area, and
+the throat grew 1.5 % over the series. If the reduction used the original
+$A_t$, then as the real throat opened, $p_c$ fell at fixed $\dot m$ and the
+computed $c^*$ fell with it — an artefact, not a combustion change. [F] But do
+the arithmetic before concluding: 0.97 to 0.93 is a 4.1 % relative fall, and
+1.5 % of throat area accounts for only about a third of it. So there are two
+things happening: a measurement bookkeeping error worth 1.5 points, and a real
+2.5-point degradation that needs an explanation — injector face erosion,
+element blockage from coking or contamination, or a shifting mixture ratio
+that the instrumentation is not resolving. The $c^*$ number is meaningful only
+if you re-measure $A_t$ after every test and use the test-average area, and
+even then it is a chamber-plus-throat number, so the right next step is to
+inspect the injector face and the throat separately and to plot $c^*$ against
+measured area rather than against test number.
+
+**Probing:** whether you check whether the artefact explains the whole effect,
+rather than stopping at "it's the throat".
+**Follow-up:** "What is eroding the throat on a liquid engine at all?"
+
+### 87. [M19, M20, M24]
+Aluminium is loaded at 16–19 % because that is close to the optimum of the
+performance curve: it raises the flame temperature substantially and it raises
+propellant density, so both $I_{sp}$ and density impulse improve, and past
+about 20 % the extra condensed-phase mass costs more in two-phase loss and
+molar mass than the added energy returns. [E][Davenas] Three penalties come
+with it. First, two-phase flow loss: molten and solidified Al₂O₃ particles lag
+the gas in velocity and temperature through the nozzle, and that lag is a
+direct $I_{sp}$ loss of typically 1–3 %, worse in small motors and at high
+expansion ratios. Second, slag and erosion: liquid alumina collects in the aft
+dome and pools, adding inert mass that is expelled unpredictably at burnout,
+and the particle-laden flow is far more erosive on the throat insert and the
+nozzle than clean gas. Third, the exhaust: alumina makes the plume opaque, a
+strong infrared and radar-attenuating smoke, which for a defence application is
+a signature problem and for any application is a range-safety and environmental
+consideration alongside the HCl from the ammonium perchlorate. There is a
+fourth that people forget: the particles are also a strong acoustic damper, so
+removing aluminium to fix the plume can hand you a combustion-stability
+problem. [J]
+
+**Probing:** whether you name particle damping — the penalty that is also a
+benefit.
+**Follow-up:** "You need a reduced-smoke motor. What do you lose?"
+
+### 88. [M20, M21]
+Erosive burning is the augmentation of the local burn rate by high-velocity
+cross-flow of combustion gas over the propellant surface: the flow thins the
+thermal and reaction layer above the surface and increases convective heat
+feedback, so $r$ exceeds $a p^n$ by a factor that can reach 1.5–3 locally.
+[E][F] The governing group is the local mass flux over the surface — Lenoir and
+Robert correlate the augmentation against $G$ — which in practice is expressed
+as the local port Mach number, with onset typically above about $M \approx
+0.2$–0.3, or equivalently as the port-to-throat area ratio $J = A_p/A_t$, where
+values falling toward unity are the warning. It shows up first at the *aft* end
+of a long grain, because mass flux accumulates along the port: every square
+metre of upstream burning surface adds to the gas flowing past the downstream
+surface. The consequences are a pressure spike early in the burn when the port
+is smallest, a locally deeper web consumption at the aft end that can burn
+through the insulation before the rest of the grain is done, and a mismatch
+between the predicted and delivered thrust trace in exactly the first second,
+where a motor is most highly loaded.
+
+**Probing:** whether you get the location right and say *why* it is the aft
+end.
+**Follow-up:** "How would you design it out without changing propellant?"
+
+### 89. [M20, M27]
+Burn-rate ratio between the two conditioning temperatures:
+$r_{322}/r_{244} = \exp\left[\sigma_p(T_2-T_1)\right] = \exp(0.0025\times78) =
+\mathbf{1.215}$ — the hot motor burns 21.5 % faster than the cold one.
+Pressure sensitivity $\pi_K = \sigma_p/(1-n) = 0.0025/0.65 =
+\mathbf{3.85\times10^{-3}\ K^{-1}}$, so over the same 78 K span the chamber
+pressure ratio is $\exp(0.003846\times78) = \mathbf{1.35}$. [F][E] That 35 %
+pressure swing across the qualification temperature range is the single most
+important number in solid-motor design: the case, the nozzle and the grain
+structure must survive the hot-day MEOP while the vehicle must still fly on the
+cold-day thrust and the longer, lower burn. It is also why $n$ matters twice —
+once for stability and once here, because $1/(1-n)$ amplifies the burn-rate
+sensitivity into a pressure sensitivity.
+
+**Probing:** whether you go from burn rate to pressure through $1/(1-n)$
+instead of quoting the same number twice.
+**Follow-up:** "What does that do to the delivered total impulse — is it the
+same on a hot and a cold day?"
+
+### 90. [M21]
+A BATES cylindrical grain (a set of cylindrical segments burning on the bore
+and both ends) gives a nearly neutral trace, because the growing bore area is
+offset by the shrinking end area; it is the standard research and
+characterisation geometry, cheap to make and easy to model, and you accept its
+modest volumetric loading because you are buying analytical clarity. An
+11-point star burns regressive-to-neutral with a large initial surface area,
+which is what you want when you need high initial thrust from a short motor —
+and its penalty is the sliver, the propellant left in the star points at
+burnout, which burns at falling area and produces a long, weak tail-off you
+must either accept or pay to remove. [F][E] A finocyl — a cylindrical bore with
+fins at one end — gives a progressive-then-neutral trace with a high volumetric
+loading and, crucially, a burn-back that can be tuned almost arbitrarily by
+fin count, depth and length; it is the modern upper-stage and tactical choice,
+and you accept a harder manufacturing and structural analysis problem
+(three-dimensional burn-back, stress concentrations at the fin roots) in
+exchange for the trace and the loading. [M] The choice is a vehicle question:
+neutral for a simple $\Delta v$ stage, progressive where you want to build
+thrust as the vehicle lightens, regressive where max-q or a launcher's
+structural limit caps early thrust.
+
+**Probing:** whether "sliver" and "web fraction" are costs you can name and
+price, not vocabulary.
+**Follow-up:** "Which of the three would you pick for a booster that must
+limit max-q, and what happens to your burn time?"
+
+### 91. [M21, M20]
+Ignoring the ends, the burning surface of a cylindrical-bore grain is the port
+wall: $A_b = \pi D_p L = \pi\times1.6\times25 = \mathbf{125.7\ m^2}$, so
+$K_n = A_b/A_t = 125.7/0.62 = \mathbf{203}$. [F] Two comments belong with the
+number. First, $K_n \approx 200$ is a normal booster value — it is the ratio
+that, with the propellant's $a$, $n$, $\rho_p$ and $c^*$, fixes chamber
+pressure — and it will *rise* as the bore opens, so this grain is progressive
+and the initial pressure is the low point, not the high point. Second, the port
+is 1.6 m in a 3.2 m case, so the port area is a quarter of the case area and
+the web is 0.8 m; check the port-to-throat area ratio
+$J = A_p/A_t = 2.01/0.62 = 3.2$, which is comfortably clear of erosive burning
+at ignition. A real grain would have shaped ends and a taper, which is why this
+is a first-cut number.
+
+**Probing:** whether you immediately say which way $K_n$ moves and check the
+port for erosive burning.
+**Follow-up:** "What is $K_n$ at burnout, and what does that do to the trace?"
+
+### 92. [M22]
+Design pressure is $\mathrm{MEOP}\times$ burst factor $= 7.0\times1.5 =
+10.5$ MPa. Thin-wall hoop: $t = pr/\sigma =
+10.5\times10^{6}\times1.5/1400\times10^{6} = \mathbf{0.01125\ m} = 11.3$ mm.
+[F][A] The real layup is thicker for reasons that have nothing to do with this
+equation. A filament-wound case is not an isotropic shell: the hoop plies carry
+hoop load, the helical plies carry the axial load and wrap the domes, and the
+helical layer contributes only $\cos^2\alpha$ of its strength in the hoop
+direction, so the total wall must include both families. The 1400 MPa allowable
+is a fibre-direction number that must be knocked down for translation
+efficiency (fibre misalignment, waviness, void content — typically 10–20 %),
+for the dome and boss discontinuities where the geodesic path forces a build-up,
+for the skirt-attachment and joint regions, and for handling and pressure-cycle
+damage tolerance. And the case must also survive axial loads, bending during
+transport, and — for a booster — the vehicle's flight loads, none of which
+appear in the hoop equation. [J]
+
+**Probing:** whether you know a filament-wound wall is two ply families and the
+hoop formula sizes only one of them.
+**Follow-up:** "What winding angle would you use for the helicals, and where
+does that number come from?"
+
+### 93. [M22, M16]
+Netting analysis assumes the fibres carry all the load, the matrix carries
+none, and the fibres are perfectly aligned along their winding paths — a
+truss made of strings. It survives because for a filament-wound pressure vessel
+that assumption is nearly true where it matters: the composite is 60 %-plus
+fibre by volume with a modulus ratio of order 20:1, so at burst the matrix
+really is a spectator, and netting gives you the hoop/helical thickness balance
+and the classic geodesic angle in about three lines of algebra with no
+stiffness data. [E][H] It misleads you everywhere the load path is not pure
+membrane tension: it predicts zero matrix stress, so it cannot see matrix
+cracking, interlaminar shear failure at ply drops, or delamination — which are
+the actual failure modes in service and in handling damage. It says nothing
+about stiffness or deflection, so it cannot predict joint rotation or the strain
+compatibility at the dome-to-cylinder transition or at the metal boss. It has no
+concept of fatigue, of residual cure stress, or of the pressure-cycle
+degradation that governs a reusable or a long-stored case. Use it to size, then
+use finite element analysis with real ply properties to check everything it
+cannot see.
+
+**Probing:** whether you can say precisely which assumption fails and which
+failure mode that hides.
+**Follow-up:** "Where on a motor case is netting analysis most wrong?"
+
+### 94. [M23, M24]
+Through the thickness, from the flame side inward: a receding surface where
+mechanical erosion and oxidation remove char; a porous char layer of mostly
+carbon left behind by the decomposed resin; a pyrolysis (reaction) zone a few
+millimetres thick where the resin is actively decomposing and evolving gas at
+some hundreds of degrees; and virgin material at essentially the initial
+temperature. [F][E][SP-8115] The char does the insulating — it is porous
+carbon, its conductivity is low, and it is thick — but the pyrolysis gases are
+doing at least as much work by a different mechanism: they percolate outward
+through the char and blow into the boundary layer, thickening it and cutting
+the convective heat transfer to the surface, which is transpiration cooling by
+another name. That is why an ablator's performance is not simply "a low
+conductivity material": you are paying for the endothermic decomposition, the
+blowing, and the insulation together, and it is why a char that spalls off is a
+much worse failure than the erosion number suggests, since you lose the
+insulation and the gas source at once.
+
+**Probing:** whether you credit the blowing, not just the char conductivity.
+**Follow-up:** "What makes a char spall, and how do you design against it?"
+
+### 95. [M24, M25]
+Carbon–carbon erodes very little — often a few tenths of a millimetre over a
+burn — is dimensionally stable, so the throat area and therefore the pressure
+trace stay where you designed them, and it is stiff and strong hot. It is
+expensive and slow: a dense C–C billet takes many chemical-vapour-infiltration
+or pitch-impregnation cycles over months, and its failure mode is bad —
+it is brittle, so a manufacturing flaw or a thermal-shock crack can take the
+insert out abruptly rather than gracefully. Carbon-phenolic erodes far more —
+a fraction of a millimetre per second — but it does so predictably, it is far
+cheaper, its supply chain is mature, and its failure mode is progressive
+erosion and ply lift rather than fracture. [E][M] For a 130 s first-stage burn
+I would take carbon-phenolic and design the throat for the erosion: the burn is
+long, so a C–C insert would have to survive a very large total heat load
+without a crack, the throat is large, so a C–C billet is expensive and
+schedule-driving, and the pressure trace change from a known erosion rate is
+something the grain design can absorb. I would reserve C–C for small,
+short-burn, high-precision throats where a shifting throat area is what breaks
+the mission. [J] The Vega-C VV22 failure is the cautionary counterexample about
+assuming a carbon–carbon insert's erosion behaviour transfers across a supplier
+change.
+
+**Probing:** whether you pick on burn duration and throat size, and whether you
+mention failure mode, not just erosion rate.
+**Follow-up:** "How much throat erosion can your pressure trace tolerate before
+the case is in trouble?"
+
+### 96. [M24, M20]
+At equilibrium $p_c \propto (A_b/A_t)^{1/(1-n)}$, so at fixed burning area a
+6 % throat-area growth gives
+$p_c'/p_c = 1.06^{-1/0.65} = 1.06^{-1.5385} = \mathbf{0.914}$ —
+an **8.6 % pressure drop**, from 6.2 MPa to **5.67 MPa**. [F] The exponent is
+the whole story again: erosion is amplified, not attenuated, by the internal
+ballistics. Consequences are mixed. Thrust does not fall by 8.6 %, because the
+larger throat raises the mass flow coefficient at the lower pressure and the
+thrust coefficient changes too — thrust falls much less, which is why designers
+tolerate erosion at all — but burn time lengthens because a lower pressure
+means a lower burn rate ($r = ap^n$), and the delivered $I_{sp}$ falls slightly
+with the expansion ratio, which the growing throat has just reduced. In a
+motor sized against a max-q or a thrust-tail requirement, the burn-time change
+is often what actually bites.
+
+**Probing:** whether you use $1/(1-n)$ and then resist saying thrust falls by
+the same 8.6 %.
+**Follow-up:** "So what happens to total impulse?"
+
+### 97. [M25, M21]
+Voids and porosity from entrapped air during mix or cast: extra burning surface
+when the flame reaches them, so an unexplained pressure rise or a spike, and
+they are found by radiography at accept. Cracks in the grain, from cure
+shrinkage, thermal cycling or rough handling: the same signature but worse,
+because a crack presents a large area at once and can raise pressure through
+MEOP in milliseconds — this is the classic ignition-spike-then-case-failure
+sequence, and it is why grain structural analysis and cold-conditioning
+qualification exist. Debonds at the liner-to-insulation or
+insulation-to-propellant interface: these do not add burning area at first, but
+they let hot gas track along the interface toward the case wall, so the
+signature is a *late* pressure or thermal anomaly and a burnthrough, and they
+are found by ultrasonic inspection, tap test and radiography. [E][M] Fourth,
+non-uniform cure or mis-proportioned mix — poor propellant properties or a
+burn-rate off-nominal batch — which shows up not as a discrete feature but as a
+whole-motor shift: the pressure trace is the right shape at the wrong level,
+and the evidence is in the cure witness samples and strand-burner lot
+acceptance data rather than in the radiograph.
+
+**Probing:** whether you match each defect to *when* in the trace it appears —
+that is the diagnostic skill.
+**Follow-up:** "You see a 3 % pressure rise at 40 % of burn. Which of those is
+it?"
+
+### 98. [M25, M23, M33]
+None of the three is answerable from the geometry alone; the answer is a
+disposition process, and I would say so. The 40 mm interface unbond is a hot-gas
+path to the case wall, and it is 300 mm from the aft end, which is where the
+gas is hottest and fastest and where the exposure time after the flame front
+reaches it is longest — the worst place for it. [J] What decides: does the
+motor's structural and thermal analysis show the unbond growing under
+pressurisation and thermal load, or arresting? Is 40 mm within the flaw size
+the insulation design was qualified to tolerate, with a stated margin, or is it
+outside the qualification basis? And is there a repair with an equal-or-better
+qualification record — some liner repairs are qualified processes, most are
+not. My default is: if the flaw is outside the qualified tolerance envelope and
+no qualified repair exists, it does not fly, because the failure mode is case
+burnthrough on a motor you cannot shut down. If the analysis shows arrest with
+margin and there is a qualified repair, repair and re-inspect. The wrong answer
+is to fly it on the argument that similar flaws have flown before, because that
+is precisely the reasoning that normalised the Shuttle field-joint erosion.
+[M34]
+
+**Probing:** whether you refuse to answer without the qualification basis, and
+whether you name normalisation of deviance without being led there.
+**Follow-up:** "Your programme is two weeks from a launch commitment. Does that
+change your answer?"
+
+### 99. [M26, M22, M34]
+At ignition the case pressurises in about half a second and the cylindrical
+segments balloon; because the tang-and-clevis field joint is stiffer than the
+membrane either side of it, the joint *rotates* — the clevis opens away from
+the tang — and the O-ring gap grows in the first tens of milliseconds, exactly
+when the pressure driving gas into the joint is rising fastest. [F][H] The seal
+survives that only if the elastomer can extrude into the growing gap faster
+than the gap opens, and elastomer response is strongly rate- and
+temperature-dependent: cold O-rings are stiffer and slower, so below roughly
+12 °C the primary seal could not follow the joint rotation, and on the 31 °F
+launch morning it did not. Hot gas past the primary seal then eroded the
+secondary, and the resulting flame path impinged on the external tank
+attachment. [Rogers86] The redesign changed three things: a capture feature on
+the tang that mechanically limits joint rotation, a third O-ring plus a
+J-seal/insulation change that prevents gas from reaching the seals in the first
+place, and joint heaters plus a launch-temperature constraint so the elastomer
+is never cold. The deeper change was procedural — the erosion had been observed
+on prior flights and accepted as within experience, and the redesign was
+accompanied by a rule that flight-observed anomalies are not evidence of
+safety.
+
+**Probing:** whether you say "joint rotation" and "rate-dependent seal
+response" — the two mechanical facts — before you say "cold O-ring".
+**Follow-up:** "The P120C has no field joints at all. Is that a real safety
+argument or an accident of size?"
+
+### 100. [M27, M24]
+Jet vanes and jetavators put a refractory surface into the exhaust and turned
+the whole plume: simple, fast-responding, works from the first millisecond of
+the burn, and available with a fixed nozzle — which is why the V-2 and early
+tactical missiles used vanes. The cost is a permanent axial thrust loss of a
+few percent whether you are steering or not, plus a vane that must survive an
+aluminised exhaust for the whole burn. [H] Liquid injection TVC (LITVC) injects
+a fluid — Freon, N₂O₄, or strontium perchlorate solution — into the divergent
+section to make an oblique shock and a side force: no moving structural joint,
+no thrust loss when not steering, and it was the Titan and early Minuteman
+answer. It costs you a tank of injectant, a distribution manifold and valves,
+mass that is dead once the burn is over, and a side force that is nonlinear and
+limited to a few degrees equivalent. [H] The flexseal gimballed nozzle — a
+laminated elastomer-and-shim bearing that lets the whole nozzle vector on
+electromechanical or hydraulic actuators — gives large, linear, essentially
+loss-free vector angles and is the modern standard on RSRM, P120C, S200 and
+every large motor built since. It costs a structurally demanding joint that
+must seal 6–10 MPa while moving, significant actuator power, and a hot-gas
+sealing and insulation problem right at the flexseal. [M] Each step traded
+hardware complexity for the elimination of a continuous performance penalty.
+
+**Probing:** whether you frame the evolution as trading a standing loss for a
+harder joint, rather than reciting three names.
+**Follow-up:** "For a small tactical motor with a 4 s burn, which would you
+pick today?"

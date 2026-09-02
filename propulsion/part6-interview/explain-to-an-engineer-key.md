@@ -1395,3 +1395,1238 @@ tolerate. For copper chambers that is fuel, always.
 **Follow-up:** *"What sets the length of the lead?"*
 
 ---
+
+## H. Nozzles
+
+### 47. Why does a bell beat a cone at the same $\varepsilon$ and the same length? `[M09]`
+
+**Physics.** Thrust is the axial component of exit momentum, so any radial
+velocity left in the exhaust is thrust you paid for and did not collect.
+
+**Mechanism.** A 15° cone turns the flow outward at the throat and never turns
+it back, so every streamline leaves at roughly the half-angle. A Rao bell turns
+the flow sharply just downstream of the throat — 25–35° — and then contours the
+wall to turn it back toward axial, so the exit flow is nearly parallel
+[Rao58][Rao60]. The bell does this with the same wall length because the fast
+initial expansion buys area early; the contour is the solution to "maximum
+thrust for a given length and exit area", which is a calculus-of-variations
+problem Rao solved in 1958.
+
+**Quantitative hook.** Divergence efficiency is $\lambda = (1+\cos\alpha)/2$ for
+a cone: 15° gives 0.9830, 20° gives 0.9698. An 80% bell recovers most of that
+1.7–3.0%, so the bell is worth roughly 1–2% of $C_F$ — one to five seconds of
+Isp on a large engine, for free, at equal length and mass. Nearly every flown
+engine is a bell; the F-1's 16:1 and the RS-25's 69:1 both are
+[_verify-liquid, F-1 and RS-25 blocks].
+
+**Trade-off.** The bell's fast initial turn creates an internal shock structure
+and a stronger wall pressure gradient near the throat, and the contour is only
+optimal at one length and one $\varepsilon$. Truncate it or scale it and you are
+no longer on Rao's curve. It is also harder to manufacture than a cone, which is
+exactly why cones survive on small thrusters and ablative motors.
+
+**Follow-up:** *"What does 80% bell mean, 80% of what?"*
+
+---
+
+### 48. Why is there an optimum expansion ratio for a first stage, and why is it lower than students expect? `[M09][M03]`
+
+**Physics.** Ideal expansion means $p_e = p_a$, and a first stage flies through
+an ambient pressure that falls by five orders of magnitude — so there is no
+single ideal, only a trajectory-weighted compromise.
+
+**Mechanism.** Below the optimum you throw away expansion you could have had;
+above it the exit pressure falls below ambient and the last part of the nozzle
+generates *negative* net pressure force at sea level. Because the vehicle spends
+its highest-thrust, highest-drag, most gravity-loss-sensitive seconds low down,
+the trajectory weighting pulls the optimum toward the sea-level value — and then
+separation risk pulls it lower still, because you must not separate at liftoff.
+
+**Quantitative hook.** At $p_c = 100$ bar, $\gamma = 1.20$, the sea-level-matched
+$\varepsilon$ is 11.75 `[EX 48.a]`. Going to $\varepsilon = 25$ costs sea-level
+$C_F$ 1.6430 → 1.5891, i.e. 3.3%, and buys vacuum $C_F$ 1.7620 → 1.8424, 4.6%
+`[EX 48.b–e]`. Real first stages sit near the low end: F-1 $\varepsilon = 16$ at
+70 bar, Merlin 1D 16:1 at ~97 bar (a SpaceX claim), RD-180 36.87:1 at 267 bar
+[_verify-liquid, F-1, Merlin and RD-180 blocks]. The high-$p_c$ engines carry
+more $\varepsilon$ because the *pressure ratio* is what matters, not the area
+ratio alone.
+
+**Trade-off.** A bigger nozzle is also longer, heavier and more expensive, and
+on a booster it eats into gimbal clearance and base-heating margin. The RS-27 →
+RS-27A change is the clean case: $\varepsilon$ 8 → 12 cost sea-level thrust
+(971 → 890 kN) and Isp (264 → 255 s) to buy vacuum Isp (295 → 302 s)
+[_verify-liquid, RS-27A block].
+
+**Follow-up:** *"Would you make the same choice on a Falcon-style booster that
+comes back?"*
+
+---
+
+### 49. What happens when a nozzle is overexpanded enough to separate, and why is that not automatically a failure? `[M09][M16]`
+
+**Physics.** When the wall pressure falls far enough below ambient, the boundary
+layer cannot negotiate the adverse gradient, so it detaches and a shock system
+moves in from the exit; the separated region then sits at roughly ambient
+pressure instead of at the low wall pressure.
+
+**Mechanism.** Separation actually *recovers* thrust relative to fully attached
+overexpanded flow, because the part of the wall downstream of the separation
+point stops pushing backwards. That is why an overexpanded nozzle is
+self-limiting rather than catastrophic. The danger is not the loss — it is that
+the separation line is unsteady and can be asymmetric, which puts a large lateral
+force and bending moment on the nozzle and the gimbal.
+
+**Quantitative hook.** Two criteria, both empirical [E]: Summerfield says expect
+separation when wall pressure drops below about $0.4\,p_a$, i.e. 40.5 kPa at sea
+level `[EX 49.b]`; Schmucker's correlation gives 27.8 kPa at $M_e = 4.55$
+`[EX 49.c]` [SFS54][Schmucker73]. The RS-25 at $\varepsilon = 69$ and 206.4 bar
+has an exit static pressure of 22.6 kPa `[EX 49.a]` — below both. It is separated
+on the pad, every launch, by design.
+
+**Trade-off / exception.** You accept it only if you can carry the side loads.
+The LE-7A's start-transient side loads damaged gimbal actuators and forced a
+nozzle redesign [_verify-liquid, LE-7A block, A.5.3], and the RS-25 needs a
+specific start sequence to move the separation through the nozzle quickly.
+
+**Follow-up:** *"How would you instrument a nozzle to find the separation line
+on a hot fire?"*
+
+---
+
+### 50. Why do start-up side loads damage gimbal actuators, and what did the LE-7A do about it? `[M09][M16][M18]`
+
+**Physics.** During the start transient the chamber pressure sweeps from zero to
+full, so the separation line sweeps down the nozzle — and while it does, the
+pressure distribution on the wall is neither steady nor axisymmetric.
+
+**Mechanism.** An asymmetric separation line produces a net lateral force whose
+line of action is well downstream of the gimbal bearing, so the moment arm is
+long. The load is also broadband and transient — it arrives in tens of
+milliseconds, at frequencies that can couple with the nozzle's shell modes and
+with the actuator's hydraulic stiffness. Actuators are sized for slow steering
+commands, not for an impulsive lateral kick, so they take the damage first,
+along with the nozzle-to-chamber joint.
+
+**Quantitative hook.** The LE-7A is the best-documented case: the nozzle
+extension's start-up side loads damaged gimbal actuators, and the redesigned
+nozzle on the operational LE-7A was specifically to fix it
+[_verify-liquid, LE-7A block, note A.5.3]. Note the engine was already being
+de-rated for margin at the same time — 127 bar on the LE-7 to 120 bar on the
+LE-7A — after the H-II Flight 8 LH2 turbopump inducer failure.
+
+**Trade-off.** The fixes all cost something: a shorter or differently contoured
+nozzle costs vacuum Isp; a stiffer nozzle and heavier actuators cost mass; a
+slower start sequence costs you the ability to abort on the pad after the engines
+have committed. Altitude-compensating contours (dual-bell) trade a fixed
+performance penalty for a controlled separation location.
+
+**Follow-up:** *"What would you measure on the stand to bound the side load
+before you fly it?"*
+
+---
+
+### 51. Why bother with an extendible nozzle instead of a longer fixed one? `[M09][M33]`
+
+**Physics.** Vacuum $C_F$ keeps rising with expansion ratio, but stage length is
+fixed by the interstage — so the constraint is packaging, not aerodynamics.
+
+**Mechanism.** An extendible exit cone rides retracted around the engine during
+ascent and is deployed once, on orbit, by a screwjack or a pyrotechnic-released
+mechanism. The retracted engine fits an interstage sized for a much smaller
+nozzle; the deployed engine has the area ratio of a much longer one. Carbon–carbon
+makes it work, because the extension is radiatively cooled and does not need a
+coolant circuit crossing a moving joint.
+
+**Quantitative hook.** The RL10B-2 goes from $\varepsilon = 77$ retracted to 285
+deployed [_verify-liquid, RL10B-2 block; note A.2.7 records 280 as a rounding
+that circulates]. That is $C_F$ 1.9474 → 2.0299 `[EX 51.a–b]`, about 4.2%, and
+the engine delivers 465.5 s vacuum — the highest flown. The same idea appears on
+Vinci (240:1 deployable), the IUS Orbus motors, the M-34b, and on Peacekeeper
+stages 2 and 3, where the constraint is silo length rather than interstage length
+[_verify-solid-coldgas / engine-database B.7].
+
+**Trade-off.** You have added a single-point failure with no abort mode: if the
+extension does not deploy you fly at $\varepsilon = 77$, and if it deploys
+crookedly you may lose the engine. The nozzle is also most of the engine's mass —
+about 70% on Vinci, ~550 kg total against 160 kg without it
+[_verify-liquid, Vinci block].
+
+**Follow-up:** *"How would you qualify a mechanism that only has to work once?"*
+
+---
+
+### 52. Why do two credible sources give the RS-25's $\varepsilon$ as 69 and as 77.5? `[M09][M03]`
+
+**Physics.** "Expansion ratio" is not one quantity: geometric exit area over
+geometric throat area is not the same as an area ratio referred to an effective
+or aerodynamic throat.
+
+**Mechanism.** L3Harris — the manufacturer — publishes 69:1 as the area ratio of
+the bell as built, and Wikipedia's infobox agrees. NASA/Rocketdyne SSME training
+material and much of the nozzle-flow literature use ~77.5:1, most plausibly
+against a different throat definition; Wikipedia's body text says 78:1
+[engine-database A.2.3]. All three are in print, and none of the three sources
+says which convention it is using. That is the actual lesson: published engine
+parameters carry unstated conventions, exactly as chamber pressure does
+(injector-face versus nozzle-stagnation, `inj` versus `noz`).
+
+**Quantitative hook.** It matters less than it looks. At $p_c = 206.4$ bar and
+$\gamma = 1.19$, vacuum $C_F$ is 1.9393 at $\varepsilon = 69$ and 1.9479 at 77.5
+`[EX 52.a–b]` — 0.45%, about 2 s of Isp. Size a throat from published thrust with
+the wrong one and your $A_t$ is 0.45% off, which is inside the scatter of the
+published thrust figures anyway.
+
+**Trade-off / exception.** It does not stay small. On a high-$\varepsilon$ upper
+stage the same ambiguity is worth 4% `[EX 51.a–b]`. The rule is to quote the
+manufacturer's geometric figure, name the alternative, and never mix a
+$C_F$ computed at one $\varepsilon$ with a throat area derived at another.
+
+**Follow-up:** *"Which number would you use to compute $c^*$ from a test, and
+why does it not matter?"*
+
+---
+
+### 53. What happens to performance if the throat erodes by 2%? `[M09][M24][M03]`
+
+**Physics.** The throat is the flow meter, so a change in $A_t$ changes mass
+flow directly; in a solid it also changes the equilibrium chamber pressure,
+which is the far larger effect.
+
+**Mechanism.** In a liquid engine the pumps hold $\dot m$ and $p_c$ roughly
+fixed, so a 2% larger throat mostly means a 2% smaller $\varepsilon$ and a
+slightly lower $C_F$ — a small Isp loss. In a solid the chamber pressure is set
+by the balance $p_c \propto (K_n)^{1/(1-n)}$ with $K_n = A_b/A_t$; grow $A_t$ and
+the balance point falls, with the exponent $1/(1-n)$ amplifying it.
+
+**Quantitative hook.** Solid, $n = 0.35$: a 2% throat-area growth drops chamber
+pressure from 62.2 to 60.3 bar, i.e. **3.0%** `[EX 53.a–b]` — the burn stretches
+and the trace droops. Liquid, RS-25 numbers: $\varepsilon$ 69 → 67.65 moves
+vacuum $C_F$ 1.93925 → 1.93776 `[EX 53.c]`, under 0.1%, while thrust rises ~2%
+because $F = C_F p_c A_t$. Two-percent erosion is a rounding error in one
+architecture and a visible trace change in the other.
+
+**Trade-off / exception.** The dangerous case is that you compute $c^*$ with the
+pre-fire throat and blame the propellant or the injector. Vega-C VV22 is the
+warning: unexpected erosion of a carbon–carbon throat insert, traced to a
+supplier change, under-pressured the Zefiro 40 and lost the vehicle
+[engine-database B.3.3, confidence C on the attribution detail].
+
+**Follow-up:** *"How would you separate throat erosion from a $c^*$ shortfall in
+the data?"*
+
+---
+
+### 54. Why does divergence angle cost you thrust, and how much? `[M09]`
+
+**Physics.** Only the axial component of exit momentum produces thrust; a
+conical exhaust leaves with a spread of flow directions, and the transverse
+components cancel in pairs while contributing nothing.
+
+**Mechanism.** For a conical nozzle of half-angle $\alpha$ with a source-flow
+exit, integrating $\cos\theta$ over the exit gives the divergence efficiency
+$\lambda = (1+\cos\alpha)/2$ [F]. Shrink $\alpha$ and $\lambda$ approaches 1, but
+the nozzle gets longer for the same $\varepsilon$ — length is mass, and mass is
+worth more than a fraction of a percent of $C_F$ on most stages. That tension is
+exactly what the Rao contour resolves: turn hard, then turn back.
+
+**Quantitative hook.** $\lambda$ = 0.9891 at 12°, 0.9830 at 15°, 0.9698 at 20°.
+So the classical 15° cone gives away 1.7% of momentum thrust — roughly 5 s on a
+300 s engine, 8 s on a 450 s one. A well-designed 80% bell recovers most of it,
+which is why the ~1–2% is quoted as the bell's advantage rather than the full
+1.7–3.0%.
+
+**Trade-off / exception.** Divergence loss is only one of the loss terms, and on
+a real engine it is usually not the biggest: boundary-layer drag, chemical
+freezing and injector-driven $c^*$ shortfall are all in the same one-to-three
+percent band, and $c^*$ efficiency is typically the largest single term. Do not
+optimise $\lambda$ to a tenth of a percent while carrying a 3% mixing loss.
+
+**Follow-up:** *"Rank the loss terms for an engine you know, biggest first."*
+
+---
+
+## I. Heat transfer and cooling
+
+### 55. Why does regenerative cooling complicate engine design? `[M11][M12][M13]` — *seed*
+
+**Physics.** Regenerative cooling routes the fuel through the chamber wall
+before burning it, which means the cooling circuit, the feed system and the
+injector are one coupled hydraulic and thermal problem rather than three.
+
+**Mechanism.** The coolant's pressure drop through hundreds of small channels
+adds directly to the pump discharge pressure the turbopump must produce, on top
+of chamber pressure and injector $\Delta p$. Its temperature rise changes the
+fuel's density and, for a hydrocarbon, its coking margin, which changes what the
+injector sees. Channel geometry is set by the *local* heat flux, so the channels
+must neck down at the throat, which raises velocity, which raises $\Delta p$
+again. Change the chamber pressure and every one of those couplings moves.
+
+**Quantitative hook.** The RS-25 is the reference: 390 milled channels in a
+NARloy-Z liner with an electroformed-nickel closeout, a 1,080-tube brazed nozzle,
+and an HPFTP delivering ~7,000 psi discharge at 35,360 rpm and 53 MW
+[_verify-liquid, RS-25 block]. The pump is that large partly because the cooling
+jacket sits between it and the chamber.
+
+**Trade-off.** You get a wall that survives indefinitely and no coolant expended,
+which is why every long-burn reusable engine uses it. You pay in pump power,
+manufacturing difficulty, and a low-cycle fatigue life limit at the throat. The
+alternatives buy simplicity for burn time: the RS-68A's ablative nozzle and the
+LR91's ablative skirt put each cooling technology where it is cheapest
+[_verify-liquid, RS-68A block; engine-database Part D §5].
+
+**Follow-up:** *"So what actually sets your minimum channel width?"*
+
+---
+
+### 56. Why is the throat the hottest place, and what sets the heat flux there? `[M10][M09]`
+
+**Physics.** The gas-side heat-transfer coefficient scales with the local mass
+flux, and mass flux per unit area is maximum at the throat by construction.
+
+**Mechanism.** Bartz writes $h_g \propto (p_c/c^*)^{0.8} D_t^{-0.2}
+(A_t/A)^{0.9}\sigma$ [E][Bartz57]. The $(A_t/A)^{0.9}$ term is the whole story:
+it is 1 at the throat and falls fast in both directions, so even though the
+recovery temperature is *higher* in the chamber — the gas there is nearly
+stagnant, so $T_{aw}$ is close to $T_0$ — the coefficient at the throat wins by
+much more than the temperature difference loses. The throat also has the thinnest
+practical wall and the tightest curvature, so it is simultaneously the highest
+flux and the least forgiving geometry.
+
+**Quantitative hook.** For a 70-bar kerolox chamber, $D_t = 0.30$ m: Bartz gives
+$h_g \approx 9{,}330\ \mathrm{W/(m^2 K)}$ and $T_{aw} = 3{,}567$ K, so with an
+800 K gas-side wall the flux is about **26 MW/m²** `[EX 57.b–c]`. Chamber and
+nozzle-exit fluxes are typically a third to a tenth of that.
+
+**Trade-off / exception.** Bartz is ±20–30% at the throat and worse elsewhere
+[E], so it sizes a design and does not qualify one. It also assumes an attached
+turbulent boundary layer with no film cooling and no soot layer — and an RP-1
+engine builds a carbon deposit that can cut flux substantially and unpredictably.
+
+**Follow-up:** *"Where is the second-hottest place, and why do people forget
+it?"*
+
+---
+
+### 57. What does raising $p_c$ from 70 to 300 bar do to your cooling problem? `[M10][M11]`
+
+**Physics.** Gas-side heat flux scales as $p_c^{0.8}$ while the wall area
+available to reject it *shrinks* as $p_c$ rises at fixed thrust — the two effects
+compound.
+
+**Mechanism.** Bartz's $(p_c/c^*)^{0.8}$ term comes from the mass flux through
+the throat. Meanwhile $A_t = F/(p_c C_F)$, so at fixed thrust a 4.3× pressure
+rise shrinks the throat area by about the same factor and the chamber with it.
+So total heat load rises somewhat, but heat load *per unit area* rises a lot, and
+the coolant has less wetted length in which to absorb it — while its own pressure
+drop is going up because the channels are narrower.
+
+**Quantitative hook.** Same chamber, same $D_t$: $h_g$ goes 9,330 → 29,888
+W/(m²·K) from 70 to 300 bar, a **3.20×** increase `[EX 35.a][EX 57.a]`, exactly
+$(300/70)^{0.8}$. At an 800 K wall that is 26 MW/m² → 83 MW/m². For scale, the
+RS-25 runs 206.4 bar with hydrogen — the best coolant available — and still needs
+390 milled channels and a copper-alloy liner [_verify-liquid, RS-25 block].
+
+**Trade-off.** This is the real reason high chamber pressure means staged
+combustion and an exotic coolant, not just a bigger pump. It is also why BE-4 is
+stated to run ORSC deliberately *low* at 140 bar, described by Blue Origin as a
+life-and-reusability choice rather than a limitation
+[_verify-liquid, BE-4 block, company claim]. Raptor's claimed 300–330 bar has
+never been independently verified [_verify-liquid, Raptor block].
+
+**Follow-up:** *"At what point would you give up and go to transpiration
+cooling?"*
+
+---
+
+### 58. Why does film cooling cost Isp, and when is that the right trade? `[M11][M03]`
+
+**Physics.** Film cooling deliberately runs a fuel-rich, cooler layer along the
+wall, so part of your propellant is burned at the wrong mixture ratio — or not
+burned at all.
+
+**Mechanism.** The film absorbs heat by evaporating and by being the cool gas the
+wall actually sees, but it also mixes slowly into the core, so the near-wall
+stream contributes exhaust at a lower local $c^*$. The delivered Isp is the
+flow-weighted average, so the penalty is roughly the diverted fraction times the
+fractional performance shortfall of the film stream [E]. Because mixing continues
+downstream, a longer chamber recovers some of it — which is why the penalty is
+smaller than the naive "10% of the fuel is wasted" estimate.
+
+**Quantitative hook.** A 3–10% film fraction typically costs on the order of 1–3
+s of Isp. The V-2 used four film-cooling rings taking about **10% of the fuel**,
+on top of water-diluted alcohol, and delivered ~239 s vacuum
+[_verify-liquid, V-2 block]. The R-4D's materials history is the counter-example
+run backwards: molybdenum → silicide-coated niobium → iridium-lined rhenium raised
+allowable wall temperature enough to *cut* the film fraction and buy ~10 s of Isp
+[_verify-liquid, R-4D block].
+
+**Trade-off.** It is the right trade whenever the alternative is a wall that does
+not survive, or a chamber that cannot be built: injector-face and
+combustion-zone protection, ablative-limited engines, and any hypergolic thruster
+too small for channels. Vulcain 2 added film cooling of the lower nozzle,
+injecting turbine exhaust, when the higher $p_c$ and richer mixture raised wall
+flux [_verify-liquid, Vulcain 2 block].
+
+**Follow-up:** *"How would you measure the film's effectiveness on a hot fire?"*
+
+---
+
+### 59. Why use copper when it melts at 1,356 K and the gas is at 3,600 K? `[M11][M16]`
+
+**Physics.** The wall temperature is not set by the gas temperature; it is set by
+the balance between the heat arriving on the gas side and the heat leaving into
+the coolant, and copper's job is to make the second one easy.
+
+**Mechanism.** At steady state the gas-side wall temperature is
+$T_{wg} = T_{coolant} + q(t/k + 1/h_c)$. A high-conductivity liner keeps the
+temperature *drop across the wall* small, so the hot face sits close to the
+coolant-side face — which the coolant is holding down near its own bulk
+temperature. Copper does not resist the heat; it refuses to hold a gradient. That
+is why the liner is thin, and why the copper is alloyed (NARloy-Z, Cu–Ag–Zr;
+GRCop-84) to recover strength and creep resistance without losing much
+conductivity [GRCop].
+
+**Quantitative hook.** Push 26 MW/m² through 0.7 mm of NARloy-Z ($k \approx 350$
+W/(m·K)): the drop across the wall is **52 K** `[EX 59.a]`. Push the same flux
+through 0.7 mm of a nickel superalloy ($k \approx 20$): **904 K** `[EX 59.b]` —
+which puts the hot face straight through the material's useful range. That factor
+of seventeen is the entire argument.
+
+**Trade-off.** Copper is weak, creeps, oxidises, and cannot take the pressure
+load — so it is closed out with electroformed nickel that carries the hoop stress
+[_verify-liquid, RS-25 block]. And the thin, high-conductivity liner is precisely
+the geometry that fails by low-cycle thermal fatigue, "doghouse" bulging at the
+throat, after tens to hundreds of cycles.
+
+**Follow-up:** *"So what actually kills the liner in the end?"*
+
+---
+
+### 60. Why does an ablative chamber have a burn-time limit and a regen chamber a cycle limit? `[M11][M16]`
+
+**Physics.** Ablation is a consumable: the wall protects itself by pyrolysing and
+receding, so the clock runs on total burn seconds. Regenerative cooling is not
+consumed at all, so its wall fails by fatigue — the clock runs on start-stop
+cycles.
+
+**Mechanism.** In an ablative, the char layer insulates and the pyrolysis gases
+blow into the boundary layer, but the virgin material behind is being eaten at a
+roughly steady rate. When the remaining thickness cannot hold the temperature
+gradient, the structure goes. In a regen chamber the hot face is hundreds of
+kelvin above the cold face on every firing, so each start-shutdown is a full
+thermal strain cycle in a thin, constrained liner: plastic strain accumulates,
+the wall thins and bulges into the channel, and it cracks.
+
+**Quantitative hook.** RS-68A: a regen H₂-cooled main chamber with an ablative
+silica/carbon-phenolic nozzle that chars and erodes through the burn — the bright
+orange plume is that carbon burning in air [_verify-liquid, RS-68A block]. The
+LMDE's ablative chamber came with an operating restriction: the 60–100% throttle
+band was *prohibited* because of nozzle erosion [_verify-liquid, LMDE block]. On
+the other side, the RS-25 was designed for 55 reuses and the AJ10-190 OMS engine
+was rated for 100 missions, 1,000 starts and 15 hours cumulative burn
+[_verify-liquid, RS-25 and AJ10-190 blocks].
+
+**Trade-off / exception.** Ablative is cheap, needs no pump head and no channel
+manufacturing — perfect for one-shot, short-burn, low-cost applications. Regen is
+the only way to fly the same hardware many times, and it is the reason
+between-flight inspection, not the engine itself, ended the Shuttle's reusability
+premise.
+
+**Follow-up:** *"How would you life-limit each one in a qualification
+programme?"*
+
+---
+
+### 61. What happens if a coolant channel goes two-phase? `[M11][M05]`
+
+**Physics.** Once the coolant boils, the heat-transfer coefficient stops being a
+smooth function of flow rate — and past critical heat flux it collapses, so the
+wall temperature runs away in milliseconds.
+
+**Mechanism.** Nucleate boiling is actually excellent: bubbles scrub the wall and
+$h_c$ rises. But when bubble generation outruns removal the bubbles coalesce into
+a vapour film, the wall is insulated by its own coolant, and you are in film
+boiling. Worse, vapour has a fraction of the density, so the same mass flow needs
+far more volume: the channel chokes, pressure drop rises, flow *redistributes to
+other channels*, and the starved channel gets hotter still. That positive feedback
+is why the failure is local and sudden rather than gradual.
+
+**Quantitative hook.** This is the argument for supercritical operation. Hydrogen
+is run above its critical pressure (13 bar) in every regen hydrogen engine, so
+there is no phase boundary to cross at all — a chamber at 100–200 bar is far
+supercritical. Methane's critical pressure is ~46 bar, which any modern methalox
+chamber clears easily; that is one of the quiet reasons methane is a comfortable
+coolant [_verify-liquid, Raptor and BE-4 blocks note methane cooling].
+
+**Trade-off / exception.** RP-1's problem is the opposite one: it does not boil,
+it *cokes*, laying down carbon that insulates the wall and narrows the channel.
+Both failure modes are local, self-reinforcing and invisible until the wall
+temperature spikes — which is why coolant outlet temperature and channel
+$\Delta p$ are the instrumentation you never delete.
+
+**Follow-up:** *"What would you see in the test data one second before it let
+go?"*
+
+---
+
+### 62. Why can a coolant with excellent heat capacity still fail you? `[M11][M12]`
+
+**Physics.** What the wall needs is a high *heat-transfer coefficient* at the
+wall and a bulk temperature rise you can live with; specific heat is only one
+factor in either, and it is not the binding one.
+
+**Mechanism.** For turbulent internal flow, Dittus–Boelter gives
+$h_c \propto (k/D)\,Re^{0.8} Pr^{0.4}$ [E], so thermal conductivity, density,
+viscosity and velocity all enter — a fluid with a huge $c_p$ but poor
+conductivity or low density delivers a mediocre $h_c$. And the coolant must also
+survive its own trip: it must not decompose, not coke, not boil, and not arrive
+at the injector so hot or so low in density that the injector's $\Delta p$ and
+atomisation fall apart. Finally, every improvement in $h_c$ bought with velocity
+is paid for in pump discharge pressure.
+
+**Quantitative hook.** Hydrogen is the counter-example that proves the rule: it
+has a very high $c_p$ *and* good conductivity *and* it is supercritical
+throughout, which is why hydrogen engines cool at 206 bar. RP-1 has adequate
+$c_p$ but a wall-temperature ceiling commonly stated at 600–700 K set by coking,
+and that ceiling — not the copper — sets the allowable flux `[EX 57.b]`.
+
+**Trade-off / exception.** When the fuel is simply not a coolant, you carry
+something else and accept the mass: Viking pumped a **dedicated water tank**
+through a third coaxial pump on the same shaft, the only production launcher
+engine ever to do so [_verify-liquid, Viking block, note A.4.4]. The water is
+dead mass; the engine flew 958 units with 2 failures.
+
+**Follow-up:** *"What coolant would you pick for a methalox engine, and why not
+the oxidiser?"*
+
+---
+
+## J. Feed systems and turbopumps
+
+### 63. Why does a pressure-fed engine have low $p_c$, and what sets the ceiling? `[M12][M13]`
+
+**Physics.** With no pump, the tank must sit above chamber pressure by the whole
+feed-system loss — so tank wall thickness, and therefore tank mass, scales
+directly with the chamber pressure you want.
+
+**Mechanism.** The tank has to supply $p_c$ plus injector $\Delta p$ (15–20% of
+$p_c$) plus line, valve and cooling-jacket losses, with margin. A cylindrical
+tank's wall mass goes as $pRL/\sigma$, so doubling $p_c$ roughly doubles the mass
+of the largest structure in the stage — and the pressurant system with it,
+because you need gas at high pressure to displace the propellant as it leaves.
+The ceiling is therefore economic, not physical: it is where tank plus pressurant
+mass eats the payload the higher $p_c$ was supposed to buy.
+
+**Quantitative hook.** Aestus runs $p_c = 11$ bar and 324 s vacuum
+[_verify-liquid, Aestus block]; the Apollo SPS about 6.9 bar; the LM ascent
+engine 8.3 bar; the Shuttle OMS 8.6 bar
+[_verify-liquid, SPS, APS and AJ10-190 blocks — note the SPS's $p_c$ is
+low-confidence and flagged for verification]. SuperDraco is the outlier at 69 bar,
+and the price is visible: "exceptionally high for pressure-fed, hence the
+substantial helium system" [_verify-liquid, SuperDraco block].
+
+**Trade-off.** You delete the turbopump — the single most complex, most
+schedule-driving, most failure-prone assembly in a liquid engine. For a
+spacecraft that must ignite reliably after years in vacuum, that is worth 100 s
+of Isp. The Apollo SPS is the canonical case: reliability by *removing
+mechanisms* — no igniter, no turbopump, no valve that must move more than once.
+
+**Follow-up:** *"At what stage size does the pump start paying for itself?"*
+
+---
+
+### 64. Why do rocket pumps need an inducer? `[M12]`
+
+**Physics.** A centrifugal impeller can only raise pressure if the flow arriving
+at its blades has not already flashed to vapour — and the local static pressure
+at an impeller leading edge is well below tank pressure.
+
+**Mechanism.** The inducer is a low-blade-angle axial stage in front of the
+impeller whose job is not head but *suction performance*: it raises the static
+pressure a modest amount over a large flow area with very low incidence, so the
+main impeller sees a comfortable inlet. This lets the pump run at a much higher
+speed for a given tank pressure — and speed is what buys head, and head is what
+buys chamber pressure. Without an inducer, the required tank pressure to avoid
+cavitation would drag you back toward pressure-fed tank masses.
+
+**Quantitative hook.** The metric is suction specific speed
+$S = \omega\sqrt{Q}/(g_0\,\mathrm{NPSH})^{0.75}$; inducers move rocket pumps into
+a regime that industrial pumps do not reach. Every large engine has one: the
+RS-25 carries *separate low-pressure* boost pumps ahead of the high-pressure
+units (LPFTP ~16,185 rpm feeding an HPFTP at 35,360 rpm)
+[_verify-liquid, RS-25 block]. The counter-example is the warning: the H-II
+Flight 8 loss in 1999 was an **LH2 turbopump inducer** failure, and the LE-7A
+that replaced the LE-7 was de-rated 127 → 120 bar for margin
+[_verify-liquid, LE-7/LE-7A blocks].
+
+**Trade-off.** Inducers are permitted to cavitate a little, and that is where
+rotating cavitation and cavitation surge live — self-excited instabilities that
+have destroyed inducers on test. You have bought tank mass with a component that
+operates deliberately close to a nonlinear boundary.
+
+**Follow-up:** *"What is the difference between cavitation and rotating
+cavitation?"*
+
+---
+
+### 65. How does NPSH available connect to the mass of the propellant tank? `[M12][M33]`
+
+**Physics.** NPSH available is the margin between the pressure at the pump inlet
+and the propellant's vapour pressure, expressed as a head — and the only ways to
+raise it are to raise tank pressure or to lower vapour pressure.
+
+**Mechanism.** $\mathrm{NPSH}_a = (p_{tank} - p_{vap} - \Delta p_{line})/(\rho
+g_0) + z\,a/g_0$. Tank pressure is bought with wall thickness and pressurant mass;
+static head is bought with vehicle acceleration, which you do not control at
+start-up. Lower the vapour pressure instead — by subcooling the propellant — and
+you get the same margin from a *lighter* tank. That is the whole argument for
+subcooled loading, and it also increases the thermal margin before two-phase flow
+appears anywhere in the feed system.
+
+**Quantitative hook.** LOX at a 3 bar tank with 1 bar vapour pressure gives
+17.9 m of NPSH `[EX 65.a]`. Subcool until the vapour pressure is 0.3 bar and the
+*same* tank gives 24.1 m `[EX 65.b]` — a 35% margin increase for zero structural
+mass. SpaceX describes Raptor's propellants as subcooled by design, "integral to
+the design, not an option" [_verify-liquid, Raptor block, company claim].
+
+**Trade-off.** Subcooling costs ground infrastructure, load time and boil-off
+management, and it makes the load state a flight-critical variable that has to be
+measured, not assumed. It also densifies the propellant, which is a second,
+independent win — more mass in the same tank — and one reason the argument is
+made on density and NPSH together.
+
+**Follow-up:** *"What happens to your NPSH margin during a throttle-down?"*
+
+---
+
+### 66. Why does the F-1 turbopump need 41 MW — can you get that from the flows? `[M12][M03]`
+
+**Physics.** Pump shaft power is $\dot m \Delta p/(\rho\eta)$ — mass flow times
+pressure rise over density and efficiency — and the F-1's mass flow is enormous.
+
+**Mechanism.** The pump must lift both propellants from a few bar of tank
+pressure to above chamber pressure plus injector drop plus jacket loss, which for
+a ~70 bar chamber means roughly 110 bar of discharge. Because power goes as
+$\dot m \Delta p/\rho$, the *fuel* costs disproportionately: RP-1 is 30% less
+dense than LOX, so each kilogram takes more work per bar.
+
+**Quantitative hook.** From the published flows — 1,789 kg/s LOX and 788 kg/s
+RP-1, 2,577 kg/s total [_verify-liquid, F-1 block] — at 110 bar rise and 75% pump
+efficiency [J]: 23.0 MW on the LOX side `[EX 66.a]` and 14.3 MW on the fuel side
+`[EX 66.b]`, **37.3 MW** total, against the published **41 MW (55,000 bhp) at
+5,488 rpm** [_verify-liquid, F-1 block]. Nine percent low, and the gap is the
+efficiency and discharge-pressure assumptions, not the method.
+
+**Trade-off / exception.** The estimate degrades where the assumptions do: a
+staged-combustion engine's pumps must also cover the preburner pressure, which is
+*above* chamber pressure, so 110 bar discharge for a 70 bar chamber is a
+gas-generator rule of thumb and nothing more. The RD-170's single turbopump is
+quoted at 170 MW in one place and 192 MW in another, inside a single article —
+quote "approximately 170–190 MW" [engine-database A.6.1].
+
+**Follow-up:** *"Now do the turbine side — what flow does 41 MW cost you?"*
+
+---
+
+### 67. Why do rocket turbopumps run so fast, and what stops them? `[M12][M16]`
+
+**Physics.** Head rises with the square of tip speed, so for a given head a
+faster pump is a smaller and lighter pump — and engine T/W is what the vehicle
+buys.
+
+**Mechanism.** $H \propto u^2/g_0$ means doubling speed quadruples head, or lets
+you quarter the impeller area for the same head. Since the pump, turbine, shaft,
+bearings and housing all scale with diameter, speed is the single most effective
+lever on turbomachinery mass. Four things stop you: impeller tip stress, which
+goes as $\rho u^2$ and eventually exceeds what any alloy holds; suction
+performance, since NPSH required rises with speed and the inducer cavitates;
+rotordynamics, because the shaft must be run below or safely between critical
+speeds; and bearing and seal life, which is what actually limits a reusable
+engine.
+
+**Quantitative hook.** RS-25 HPFTP: 35,360 rpm, 53 MW, ~7,000 psi discharge, from
+a three-stage centrifugal pump [_verify-liquid, RS-25 block]. The record is the
+RD-0146's fuel turbopump at **over 120,000 rpm** — the highest published rocket
+turbopump speed, on an engine that has never flown [_verify-liquid, RD-0146 block,
+med confidence on the rpm]. At the other end, the V-2's steam turbine ran 4,000
+rpm for 430 kW [_verify-liquid, V-2 block].
+
+**Trade-off.** Speed and life trade directly. BE-4 is stated to use **hydrostatic
+bearings rather than rolling-element** — explicitly a life-driven choice for reuse
+[_verify-liquid, BE-4 block, company claim] — and the NK-33 requires subcooled
+LOX for bearing cooling, which constrains ground operations forever after.
+
+**Follow-up:** *"Which critical speed would you rather run above?"*
+
+---
+
+### 68. What breaks first when you throttle a turbopump-fed engine deeply? `[M12][M13]`
+
+**Physics.** Chamber pressure falls roughly with flow, but the injector's
+$\Delta p$ falls with flow *squared* — so the ratio that guarantees stability
+collapses faster than the thrust does.
+
+**Mechanism.** At 40% flow a fixed-orifice injector has 16% of its design
+$\Delta p$, so $\Delta p/p_c$ drops from a healthy 20% toward 8% and the chamber
+starts talking back to the feed system: chug. Simultaneously the injection
+velocity halves, the Weber number falls fourfold, droplets get coarse and $c^*$
+efficiency drops. Meanwhile the turbopump is off-design — lower head, worse
+efficiency, and less NPSH margin — and the turbine inlet temperature and preburner
+mixture ratio have to be re-scheduled to keep the shaft where the controller
+wants it.
+
+**Quantitative hook.** Published deep-throttle ranges cluster where the injector
+allows it: RS-25 67–109%, Merlin 1D 40–100% (originally 70–100%), MVac 39–100%,
+BE-4 40–100%, RD-191 27–105%, BE-3PM 18–100%
+[_verify-liquid, respective blocks; Blue Origin and SpaceX figures are company
+claims]. The variable-area pintle escapes the trap: the LMDE held injection
+quality across a **10:1 chamber-pressure turndown**, 7.6 bar to 0.76 bar
+[_verify-liquid, LMDE block].
+
+**Trade-off / exception.** Even the LMDE had a forbidden band — 60–100% was
+prohibited in operation because of nozzle erosion. Deep throttling is never free
+of a second-order limit somewhere else in the engine.
+
+**Follow-up:** *"Which do you fix first, the injector or the pump?"*
+
+---
+
+### 69. Why did Rutherford use electric pumps, and where does the argument stop? `[M12][M33]`
+
+**Physics.** An electric motor replaces the turbine, so no propellant is diverted
+to drive the pump at all — the power-cycle loss goes to zero, and the price is
+that the energy is carried as battery mass instead.
+
+**Mechanism.** Two brushless DC motors on lithium-polymer packs drive the LOX and
+RP-1 pumps directly. That deletes the gas generator, its igniter, its valves, its
+turbine, and the entire hot-gas path — the parts that make small engines
+disproportionately expensive — and it makes thrust a directly commanded electrical
+quantity rather than a consequence of a thermodynamic balance. It also scales
+downward beautifully, which is exactly where turbines scale badly.
+
+**Quantitative hook.** Rutherford: 24.9 kN sea level, 311 s, two 37 kW motors at
+40,000 rpm, with the stage-1 pack supplying over 1 MW for nine engines; chamber,
+injectors, pumps and main valves are all printed; 369 engines flown across 47
+Electron flights by April 2024 [_verify-liquid, Rutherford block].
+
+**Trade-off.** Battery mass is parasitic and does not shrink with burn time — it
+scales with power × duration, so it grows linearly with engine size *and* with how
+long you burn. Rocket Lab jettisons part of the pack in flight, which tells you
+how badly it hurts. And the company's "~95% versus ~50% efficiency" claim compares
+electrical-to-hydraulic efficiency against thermodynamic cycle efficiency — two
+different quantities, and it should not be repeated uncritically
+[engine-database A.3.7]. The decisive evidence is Rocket Lab's own: Neutron's
+Archimedes is oxidizer-rich staged combustion, not electric.
+
+**Follow-up:** *"Size the battery for a Merlin and tell me what happens."*
+
+---
+
+## K. Engine cycles
+
+### 70. Why does the gas generator cycle cost you Isp, and how much? `[M13][M03]`
+
+**Physics.** In an open cycle the turbine drive gas is dumped overboard after
+doing shaft work, and it leaves through a low-expansion duct at a fraction of the
+main nozzle's exhaust velocity — so a few percent of your propellant is spent at
+roughly half the Isp.
+
+**Mechanism.** The turbine must run cool enough for its blades, so the gas
+generator burns very fuel-rich (or ox-rich), which already gives poor $c^*$; then
+that gas expands through a short dump duct or a nozzle-wall dumpport instead of
+the full $\varepsilon$. Delivered Isp is the flow-weighted average of the two
+streams, so with a turbine flow fraction $f$ at about half the main Isp, the
+penalty is roughly $f/2$.
+
+**Quantitative hook.** For $f = 3\text{–}5\%$ that is **1.5–2.5%**, i.e. 5–10 s.
+Compare like with like at the same propellants: RS-68A (GG, 102.6 bar) delivers
+411.9 s vacuum where RS-25 (staged combustion, 206.4 bar) delivers 452.3 s — but
+most of that 40 s gap is chamber pressure and expansion ratio (21.5 vs 69), not
+the cycle alone [_verify-liquid, RS-68A and RS-25 blocks]. The F-1 recovered part
+of its dump loss by routing GG exhaust into the nozzle extension as a film-cooling
+curtain [_verify-liquid, F-1 block].
+
+**Trade-off.** You buy an enormous amount: the pumps are decoupled from chamber
+pressure, the turbine sees benign gas, start-up is simple, and part count and cost
+fall. RS-68A was chosen explicitly over staged combustion for cost — about 80%
+fewer parts than the RS-25 — and it has the lowest T/W of any modern large booster
+engine, deliberately.
+
+**Follow-up:** *"How would you split that 40-second gap into its terms?"*
+
+---
+
+### 71. Why does the closed expander cycle have a thrust ceiling? `[M13][M11]`
+
+**Physics.** In a closed expander the only energy driving the turbine is the heat
+picked up in the cooling jacket — and heat pickup scales with wall *area* while
+the power demand scales with the engine's throat area and chamber pressure.
+
+**Mechanism.** Chamber and nozzle wall area grows roughly as $D^2$, but so does
+throat area — the killer is that required pump power grows as $\dot m\,\Delta p
+\propto A_t p_c$, i.e. faster than the *useful* heat pickup, because heat flux
+per unit area rises only as $p_c^{0.8}$ and the surface-to-throat area ratio
+falls as the engine gets bigger. Push chamber pressure and the wall gets hotter
+but the coolant has less relative area; push size and the jacket cannot keep up.
+So the cycle self-limits at modest $p_c$.
+
+**Quantitative hook.** The flown closed expanders sit exactly where the argument
+predicts: RL10A-3-3A at 32.8 bar and 73.4 kN; RL10C-1 at 101.8 kN; Vinci at
+**60 bar and 180 kN**, the highest-thrust closed expander ever flown; RD-0146 at
+59 bar and 68.6 kN, never flown [_verify-liquid, respective blocks; RL10C-1's
+$p_c$ is not published by the manufacturer — do not guess it]. Sixty-plus years of
+RL10 production and the cycle never grew past ~180 kN.
+
+**Trade-off / exception.** What you get is the best Isp in the business — RL10B-2
+465.5 s flown, RD-0146 470 s on a test stand — with no preburner, no gas generator
+and nothing dumped [_verify-liquid, RL10B-2 and RD-0146 blocks; the 470 s is
+low-confidence and unflown]. It is also the safest cycle: there is no hot-gas
+path to fail.
+
+**Follow-up:** *"So how does the LE-9 reach 1,471 kN on an expander?"*
+
+---
+
+### 72. How does expander bleed escape that ceiling, and what does it pay? `[M13][M11]`
+
+**Physics.** In an expander *bleed*, only part of the fuel goes through the
+jacket and the turbine, and that part is dumped overboard rather than injected —
+so the turbine is no longer required to swallow the whole fuel flow.
+
+**Mechanism.** In the closed expander every kilogram of fuel must pass the
+turbine, so turbine pressure ratio is capped by what the injector still needs
+downstream — that coupling is the ceiling. Break it by bleeding a small heated
+fraction, expanding it hard through the turbine and venting it, and the turbine
+can take whatever pressure ratio it likes. The cost is that the bled flow leaves
+at low Isp, exactly like a gas generator, but the fraction is small because the
+gas is hydrogen and hydrogen turbines are efficient.
+
+**Quantitative hook.** Japan invented and proved it. LE-5A was the world's first
+operational expander bleed (452 s, 121.5 kN); LE-5B simplified further by
+dropping the nozzle from the heat-exchange circuit, costing Isp — 446.8 s against
+452 s — for cost and reliability; LE-9 reaches **1,471 kN at 100 bar**, by a wide
+margin the largest engine of the expander family ever flown, against the RL10's
+110 kN and Vinci's 180 kN [_verify-liquid, LE-5A/5B/LE-9 blocks; engine-database
+A.5.1]. BE-3U is the American adoption of the same idea (445 s, company figure).
+
+**Trade-off.** LE-9 delivers 426 s vacuum — well below what staged combustion
+would give at that size — and the development was not free: chamber-wall cracks
+and turbine-blade fatigue cracks found in 2020 cost about two years
+[_verify-liquid, LE-9 block].
+
+**Follow-up:** *"Where does the bleed flow actually go on the vehicle?"*
+
+---
+
+### 73. Why did the West avoid oxidizer-rich staged combustion for thirty years? `[M13][M16]`
+
+**Physics.** Hot, dense, oxygen-rich gas at hundreds of bar will burn the metals
+that contain it — nickel alloys included — so the cycle is a materials problem
+before it is a thermodynamics problem.
+
+**Mechanism.** In ORSC the preburner runs oxidiser-rich so the turbine gas is
+dense and cool, which is what makes the turbomachinery small for the power. But
+that gas then flows through manifolds, turbine blades and ducts, and any local hot
+spot, particle impact or fresh metal surface can start a self-sustaining metal
+fire. Western practice concluded the risk was unmanageable and went fuel-rich
+(RS-25) or open-cycle (F-1, RS-68) instead. Energomash solved it with process
+control and, decisively, an **inert enamel coating on every metal surface in
+contact with the hot oxygen-rich gas** [_verify-liquid, RD-180 block].
+
+**Quantitative hook.** The gap is stark. RD-253 flew ORSC at **147 bar in 1965**;
+American engines did not reach that chamber pressure until the SSME fifteen years
+later [_verify-liquid, RD-253 block]. The payoff shows in T/W: RD-253 156:1,
+NK-33 137:1 — the number that made Western engineers disbelieve the engine was
+real in 1993 [_verify-liquid, NK-33 block].
+
+**Trade-off / exception.** It ended: BE-4 is the first US-designed ORSC engine to
+fly, at 140 bar — deliberately low, stated by Blue Origin as a life-and-
+reusability choice — and Archimedes is ORSC too
+[_verify-liquid, BE-4 and Archimedes blocks, company claims]. The thirty-year gap
+was a judgment about acceptable risk, not a law of nature.
+
+**Follow-up:** *"What would you inspect on an ox-rich turbine between flights?"*
+
+---
+
+### 74. What does full-flow staged combustion buy that ORSC does not? `[M13][M16]`
+
+**Physics.** In FFSC there are two preburners — one fuel-rich, one
+oxidiser-rich — each driving its own pump, and *both* exhausts enter the main
+chamber, so nothing is dumped and no propellant crosses between the two turbine
+circuits.
+
+**Mechanism.** Three consequences follow. First, complete shaft-power decoupling:
+each pump is driven by gas of its own propellant, so there is no
+fuel-in-the-ox-turbine interpropellant seal — historically one of the most
+dangerous single points in a staged-combustion engine. Second, both propellants
+arrive at the injector as *gas*, which mixes and burns far more readily than a
+liquid–gas pair and relaxes the atomisation problem. Third, turbine inlet
+temperatures can be lower for the same power because the total turbine mass flow
+is larger, which is a life argument for reuse.
+
+**Quantitative hook.** Raptor is the **first FFSC engine ever flown** — only the
+Soviet RD-270 (never flown) and the American Integrated Powerhead Demonstrator
+(test only) preceded it. That fact does not depend on any contested number. Its
+claimed 300–330 bar would exceed the RS-25's 206 bar and the RD-180's 267 bar
+*if the claims hold*; there is no independent verification of Raptor chamber
+pressure, Isp, dry mass or T/W at all [engine-database A.3.5–A.3.6].
+
+**Trade-off.** Two preburners, two turbines, two ignition paths and a much harder
+start and shutdown sequence to schedule — you have bought life and margin with
+complexity. The cycle also carries all the ORSC materials problems, plus a
+fuel-rich hot-gas path as well.
+
+**Follow-up:** *"What does the start sequence look like with two preburners?"*
+
+---
+
+### 75. Why is the tap-off cycle attractive, and why is it so rare? `[M13][M08]`
+
+**Physics.** Tap-off bleeds hot gas directly from the main combustion chamber to
+drive the turbine — so there is no preburner and no gas generator at all, and no
+separate combustion device to light or control.
+
+**Mechanism.** You delete an entire subsystem: the GG's injector, igniter, valves,
+and its own mixture-ratio control. The turbine gas is whatever the chamber is
+already producing, tapped near the wall where it is coolest. That is beautifully
+simple. The difficulties are equally direct. The tapped gas is at chamber
+temperature and its composition is set by the main chamber, so you cannot schedule
+turbine inlet temperature independently — the wall-region gas that is cool enough
+is also the least uniform. And at start-up there is no chamber gas yet, so the
+turbine has nothing to run on: the engine needs a separate spin-start or a
+tank-head start to bootstrap itself.
+
+**Quantitative hook.** Two engines, sixty years apart: the J-2S, tested 1965–72,
+1,138.5 kN and 436 s vacuum — **never flown**, so keep it out of any table of
+flight values — and the BE-3PM, effectively the only tap-off engine in regular
+service, 490 kN full power with an 18–100% throttle range
+[_verify-liquid, J-2S and BE-3PM blocks; most of BE-3PM's parameter set is
+genuinely not published].
+
+**Trade-off / exception.** Note that BE-3U, despite the shared name, is *expander
+bleed*, not tap-off — the two share a name and very little else in the power cycle
+[_verify-liquid, BE-3U block]. Getting that wrong in an interview is a fast way to
+show you read a table rather than a datasheet.
+
+**Follow-up:** *"How would you start a tap-off engine in vacuum?"*
+
+---
+
+### 76. Why would a company deliberately choose a lower-performing cycle? `[M13][M33]`
+
+**Physics.** Isp is one term in the rocket equation and the rocket equation is one
+constraint in a business — cost per kilogram to orbit, schedule, and reliability
+are the others, and a cycle choice moves all four.
+
+**Mechanism.** Staged combustion buys 10–40 s of Isp and charges for it in part
+count, development time, materials qualification, and inspection. If the mission
+can absorb the Isp — a first stage flying a shallow trajectory, or a vehicle that
+can simply be larger — then the cheaper cycle wins on the metric the company is
+actually optimising. This is a systems judgment [J], and the honest version of it
+names the number that got traded away.
+
+**Quantitative hook.** Three examples with their numbers attached. RS-68A: gas
+generator chosen explicitly over staged combustion for cost, ~80% fewer parts
+than the RS-25, an ablative nozzle, $\varepsilon = 21.5$ and a T/W of 47.4:1 — the
+lowest of any modern large booster engine, deliberately
+[_verify-liquid, RS-68A block]. Vulcain 1/2: Europe did not attempt staged
+combustion for Ariane 5 at all. Prometheus: a gas generator again, for a
+reusability demonstrator, with a stated target of about €1 M per engine — one
+tenth of Vulcain 2 — where the *cost* target, not performance, is the programme's
+stated purpose [_verify-liquid, Prometheus block; every figure is a claim for an
+unflown engine].
+
+**Trade-off.** You lose payload, and on an upper stage that is expensive because
+the Isp acts through the full exponential. It is a first-stage argument far more
+often than an upper-stage one.
+
+**Follow-up:** *"Where would you refuse to make that trade?"*
+
+---
+
+## L. Valves and plumbing
+
+### 77. Why does a main valve's opening rate matter as much as its flow area? `[M14][M08]`
+
+**Physics.** The valve's opening schedule *is* the propellant lead-lag schedule,
+and the mixture ratio during the first hundred milliseconds is what decides
+whether you get an ignition or an explosion.
+
+**Mechanism.** During the start transient the chamber is filling, the injector is
+priming and the igniter has a finite window in which the local mixture ratio must
+be inside flammability limits. Open too fast and you dump propellant into a
+chamber that has not lit, so when it does light the accumulated mass detonates —
+a hard start. Open too slowly and you sit in a low-$\Delta p$, low-velocity
+regime where the injector is unstable and the chamber can chug, or the igniter
+window closes before mainstage. The valve's *rate* is therefore a designed
+quantity, controlled by actuator sizing, orifice restrictors in the pneumatic
+line, or a cam profile.
+
+**Quantitative hook.** The consequences are visible from outside the vehicle: the
+RS-68 runs a deliberate fuel lead and lights the accumulated hydrogen — the
+"hydrogen burnoff" that scorches the booster [_verify-liquid, RS-68A block]. On
+the other side, the Apollo SPS was designed so that *no valve has to move more
+than once*, with redundant series-parallel valve trains, because the mission had
+no abort mode [_verify-liquid, SPS block].
+
+**Trade-off / exception.** A rate you can control on the pad you may not control
+in flight: valve opening rate depends on actuator supply pressure, temperature and
+seal friction, all of which drift. That is why start-transient valve position and
+chamber pressure rise are recorded at high sample rate on every test.
+
+**Follow-up:** *"How tight does the sequence tolerance have to be?"*
+
+---
+
+### 78. Why is water hammer a real design load in a rocket feed line? `[M14][M12]`
+
+**Physics.** Stopping a moving column of liquid quickly converts its momentum
+into a pressure wave — Joukowsky, $\Delta p = \rho a \Delta v$ — and rocket lines
+carry dense propellant at high velocity in stiff metal ducts, so $a$ is over 1,000
+m/s.
+
+**Mechanism.** A valve closing in less than the line's round-trip acoustic time
+$2L/a$ produces the full Joukowsky pressure, which then reflects up and down the
+duct. The same thing happens on *opening*, in the form of priming surge: liquid
+accelerating into an evacuated line slams into the closed downstream end or into
+the injector face. Cryogenic lines add a second mechanism, geysering, where a
+boiling column ejects and then the liquid falls back.
+
+**Quantitative hook.** With LOX ($\rho = 1141$ kg/m³, $a \approx 1{,}000$ m/s), a
+10 m/s velocity change gives $\Delta p \approx 114$ bar — comparable with or above
+chamber pressure in most engines, from a valve action alone. That is why the
+design fixes are structural and hydraulic together: slower valve schedules,
+accumulators, orifices, and pre-chilled, pre-primed lines.
+
+**Trade-off / exception.** Everything that softens water hammer also slows the
+start, and a slow start is its own hazard. And you cannot design it away entirely
+on a shutdown, where the valve must close fast to stop the burn accurately — the
+impulse repeatability of a spacecraft engine depends on it.
+
+**Follow-up:** *"How would you find a hammer problem in test data?"*
+
+---
+
+### 79. What happens if a check valve lets oxidizer back into a helium line? `[M14][M34]`
+
+**Physics.** A pressurant line is not designed for propellant. Put a strong
+oxidiser in contact with the wrong material at the wrong pressure and you have a
+chemical reaction inside a component nobody analysed as a combustion device.
+
+**Mechanism.** Check valves in a pressurisation system exist to stop exactly this,
+but they are soft-seated, they see contamination, and they leak. Once oxidiser
+migrates upstream it can accumulate in dead legs, react with valve elastomers or
+lubricants, or — with a hypergolic oxidiser — meet fuel vapour that has arrived by
+the same route. The failure is then a detonation in the pressurisation system,
+which is upstream of every isolation valve you have.
+
+**Quantitative hook.** This is not hypothetical. SuperDraco's original propulsive-
+landing application was dropped after an **April 2019 ground-test explosion traced
+to NTO leaking past a check valve into a helium line**
+[engine-database A.3.9]. A test article, on a stand, with no vehicle in flight —
+and it ended a capability.
+
+**Trade-off / exception.** The mitigations are all mundane and all expensive:
+burst discs as a second barrier, redundant check valves in series (which doubles
+the leak paths you must test), material compatibility qualification for every
+wetted part, and cleanliness procedures. The Redstone lesson runs the other way
+and is worth quoting: its pneumatic system was cut from 31 components to 10 by
+*deleting* check valves and consolidating regulators — reliability from fewer
+parts, not more redundancy [engine-database Part D §3].
+
+**Follow-up:** *"So do you add a second check valve or delete the first?"*
+
+---
+
+### 80. Why use burst discs and pyrotechnic devices where a valve would seem more sensible? `[M14][M08]`
+
+**Physics.** A one-shot device has no leak path and no mechanism to fail before
+it is needed — its reliability is a property of the material, not of an actuator,
+a seal and a control signal.
+
+**Mechanism.** A valve that must hold for years and then open once is being asked
+to do the hardest job in the system: stay leak-tight through vibration, thermal
+cycling and vacuum, then actuate on command with no rehearsal. A burst disc holds
+by simply being a wall, and opens when the pressure differential exceeds its rated
+value; a pyrovalve opens or closes by deforming metal with a cartridge. Both have
+essentially zero standby leak and no moving parts to gall or freeze.
+
+**Quantitative hook.** The pattern shows up everywhere reliability outranks
+reusability: the H-1's TEA pyrophoric slug lived in a **burst-diaphragm cartridge**
+and is the direct ancestor of Merlin's TEA-TEB
+[_verify-liquid, H-1 and Merlin blocks]; the Minuteman third stage terminates
+thrust with **shaped charges** opening ports in the forward dome
+[engine-database B.7]; and the F-1's ignition was a one-shot TEA/TEB cartridge —
+which is exactly why the F-1 was never restarted
+[_verify-liquid, F-1 block].
+
+**Trade-off.** One shot means no test of the flight article, no abort after
+firing, and no reuse. You have exchanged the risk of a mechanism failing for the
+risk of an unverifiable component — so qualification is by lot sampling and
+statistics, which is a different and sometimes harder argument to make.
+
+**Follow-up:** *"How do you qualify a device you cannot test on the flight
+unit?"*
+
+---
+
+## M. Combustion instability
+
+### 81. Why does combustion instability appear suddenly rather than growing gradually? `[M15]`
+
+**Physics.** It is a feedback loop with a gain that crosses unity: below the
+threshold every disturbance decays, above it every disturbance grows
+exponentially. There is no gentle middle.
+
+**Mechanism.** Combustion instability couples an acoustic mode of the chamber to
+the unsteady heat release. Rayleigh's criterion says the coupling adds energy when
+heat release is in phase with the pressure oscillation. Whether it is in phase
+depends on the time lag between injection and burning relative to the mode period —
+Crocco's $n$–$\tau$ model [CC56]. Change chamber pressure, mixture ratio or
+injection velocity a few percent and $\tau$ shifts; if that shift pushes the phase
+into the driving half-cycle while damping is unchanged, the loop goes unstable
+*at that operating point* and not at the one 2% away.
+
+**Quantitative hook.** This is why engines are mapped, not sampled: the F-1
+programme ran roughly **2,000 tests across 210 injector designs**, and the
+acceptance test was to detonate a bomb in a running chamber and require damping
+within **45 ms** [_verify-liquid, F-1 block; engine-database Part D §7].
+
+**Trade-off / exception.** The suddenness cuts both ways: a small, cheap fix —
+baffles, an acoustic cavity, an injector element change — can move the threshold
+entirely out of your operating box. And the same nonlinearity means an engine can
+be linearly stable but *triggerable* by a large enough disturbance, which is
+exactly what the bomb test probes.
+
+**Follow-up:** *"What would you change first on an engine that just went
+unstable?"*
+
+---
+
+### 82. What is the difference between chug, buzz and screech, and what fixes each? `[M15][M07]`
+
+**Physics.** They are three different resonators: chug is the feed system talking
+to the chamber, buzz is a longitudinal chamber mode, screech is a transverse
+chamber mode. Frequency tells you which one you have.
+
+**Mechanism.** *Chug* (tens to a few hundred Hz) is a low-frequency coupling
+between injector $\Delta p$ and chamber pressure — the chamber and the feed line
+form a Helmholtz-like system. Fix it with injector $\Delta p$: more drop decouples
+the flow from chamber pressure fluctuations, and cavitating venturis decouple it
+absolutely. *Buzz* (hundreds of Hz to ~1 kHz) is a longitudinal mode in the
+chamber, driven by the combustion-distribution axial profile; fix it with $L^*$,
+injector distribution, or chamber acoustics. *Screech* (kHz and up) is
+tangential or radial and is the destructive one — it scrubs the wall with high
+gas velocity and burns through liners in seconds. Fix it with baffles and
+acoustic cavities.
+
+**Quantitative hook.** The classical rule for chug margin is
+$\Delta p/p_c \geq 15\text{–}20\%$ [E]; at 5% drop the injection velocity has
+halved and the Weber number quartered `[EX 36.a–b]`. For screech, the RS-25 uses
+**acoustic-resonator cavities in the injector face** with 600 coaxial elements,
+while the RD-0120 reportedly achieved stability without them
+[_verify-liquid, RS-25 and RD-0120 blocks; the comparative claim comes from a
+single source, engine-database A.6.2].
+
+**Trade-off / exception.** Fixes are not interchangeable. Raising $\Delta p$ to
+kill chug costs pump power and does nothing for screech; baffles kill screech and
+cost you injector face area, cooling and $c^*$.
+
+**Follow-up:** *"You see 3.2 kHz on the transducer. What is your first
+hypothesis?"*
+
+---
+
+### 83. Why do baffles work, and what do they cost you? `[M15][M07]`
+
+**Physics.** A baffle is a physical obstruction that breaks up the transverse
+acoustic mode it is designed against — it moves the mode's frequency, adds
+viscous damping at its surfaces, and denies the wave a continuous circumferential
+path.
+
+**Mechanism.** Radial blades and a hub divide the injector-face region into
+compartments smaller than half the wavelength of the first tangential mode. The
+mode either cannot form in a compartment or forms at a much higher frequency where
+combustion response is weaker. Baffles also decouple neighbouring injector
+elements, so a local heat-release fluctuation cannot organise itself
+circumferentially. They work best near the injector face, which is where the
+sensitive time lag lives — deeper in the chamber they buy much less.
+
+**Quantitative hook.** The F-1's answer to instability at 1.5 Mlbf in one chamber
+was a **copper baffle assembly dividing the face into 13 compartments**, with the
+"5U(f)" injector pattern, and the demonstrated 45 ms damping after a bomb
+[_verify-liquid, F-1 block]. The H-1 also flew a flat-face impinging injector with
+baffles [_verify-liquid, H-1 block].
+
+**Trade-off.** The baffles sit in the hottest gas in the engine with fuel-cooled
+roots, so they need their own cooling flow — which is Isp — and they occupy face
+area that is no longer injecting. They add mass at the point of highest thermal
+stress, and they are a fatigue item. Acoustic cavities are the modern preference
+where they suffice, because they perturb the flow much less.
+
+**Follow-up:** *"When would you choose cavities over baffles?"*
+
+---
+
+### 84. Why would you detonate a bomb inside a working engine? `[M15][M18]`
+
+**Physics.** Linear stability is not enough: a chamber can be stable to small
+disturbances and unstable to large ones, so the only honest test is to apply a
+large disturbance and measure the recovery.
+
+**Mechanism.** A small explosive charge — typically a few grains of RDX in a case
+mounted through the chamber wall — is fired during steady-state operation. It
+produces a pressure pulse of the order of the chamber pressure itself, exciting
+all the modes at once. High-response transducers then record whether the resulting
+oscillation decays, and how fast. The decay rate is the damping you actually have,
+under real gas conditions, with real combustion — none of which a cold-flow or
+linear model gives you.
+
+**Quantitative hook.** The F-1 standard was **damping within 45 ms** of the bomb,
+and it was reached only after roughly 2,000 tests across 210 injector designs
+[_verify-liquid, F-1 block]. That criterion — recover within a stated time, from a
+stated pulse magnitude — remains the shape of the requirement.
+
+**Trade-off / exception.** You are deliberately risking a development engine and a
+test stand, and the pulse is not a perfect stand-in for whatever the flight
+disturbance turns out to be. It also cannot prove stability across the whole
+operating box: the pulse is applied at discrete conditions, so the map still has to
+be walked. It is evidence, not a proof.
+
+**Follow-up:** *"What damping criterion would you write into the spec, and why
+that number?"*
+
+---
+
+### 85. Why does the RS-25 need acoustic cavities when the RD-0120 apparently did not? `[M15][M16]`
+
+**Physics.** Stability is a property of the whole engine — injector element type
+and count, chamber geometry, mixture ratio, and the resulting time lag — so two
+engines with the same propellants and similar performance can sit on opposite
+sides of the threshold.
+
+**Mechanism.** The RS-25 uses 600 coaxial shear elements on a dual-preburner,
+dual-shaft architecture at 206.4 bar and MR 6.03, with acoustic-resonator cavities
+in the injector face for high-frequency stability. The RD-0120 is a single-shaft
+fuel-rich staged-combustion engine at 219 bar and MR 6.0, and the available source
+says it achieved stability **without** resonance cavities
+[_verify-liquid, RS-25 and RD-0120 blocks]. Different injector geometry, different
+chamber acoustics, different development history — and the Soviet engine was
+expendable, where the RS-25 had to survive 55 flights, which changes what margin
+you insist on.
+
+**Quantitative hook.** RD-0120: 455 s vacuum at 219 bar, 1,961 kN, two flights
+only, 1987–88. RS-25: 452.3 s at 206.4 bar, 2,279 kN, designed for reuse
+[_verify-liquid, both blocks].
+
+**Trade-off / exception.** Say the caveat out loud: the comparative claims about
+resonance cavities *and* about cost come from the same single source and should be
+corroborated before being asserted as fact [engine-database A.6.2]. The safe
+version of the answer is that it demonstrates the RS-25's dual-shaft complexity
+was a design choice rather than a necessity — and that stability hardware is
+specific to an injector, not to a propellant combination.
+
+**Follow-up:** *"What would you need to see to believe the RD-0120 claim?"*
+
+---
