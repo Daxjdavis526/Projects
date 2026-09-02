@@ -531,211 +531,6 @@ number, it is a rumour.**
 
 ---
 
-## K3. Trade-study reference solution
-
-### P21 — 12U technology demonstrator: propellant selection
-
-**Reference assumptions** (a strong answer states its own and they need not
-match these exactly, but they must be stated):
-
-- Spacecraft wet mass 14 kg; treat it as constant for Δv purposes and use the
-  rocket equation with $m_f = 14$ kg (conservative).
-- Realized $I_{sp}$: N₂ 69 s, n-butane 65 s, R-236fa 40 s, R-134a warm 82 s
-  (§4.1).
-- Minimum impulse bit: 0.33 mN·s for a conventional solenoid (WE2 class);
-  0.05 mN·s for a microvalve module of the VACCO/GomSpace class. This
-  distinction matters more than the propellant choice, and a strong answer says
-  so.
-- Tank volume allocation: about 2000 cm³ of the 3000 cm³ envelope, the rest
-  being valves, plenum, electronics and structure.
-- Mission 2 years; $\theta_{db} = 0.5° = 8.727\times10^{-3}$ rad;
-  $I = 0.35$ kg·m²; $L = 0.11$ m.
-
-**Step 1 — Option (a), GN₂ at 12 bar, dies immediately on the pressure cap.**
-
-$$\rho_s = \frac{p}{ZRT} = \frac{12\times10^{5}}{1.0\times296.8\times293} = 13.8\ \mathrm{kg/m^3}$$
-
-The entire 2000 cm³ allocation holds **27.6 g** of nitrogen, worth
-**18.7 N·s** of total impulse. The Δv requirement alone needs about 357 N·s.
-Option (a) is short by a factor of nineteen. Gaseous storage is viable only at
-150–300 bar, and the rideshare provider has forbidden that without a COPV
-qualification the schedule cannot absorb. **Rejected: the binding constraint is
-the 12-bar cap, and it is fatal, not marginal.**
-
-This is the most important single result of the trade and a strong answer leads
-with it. The pressure cap does not disadvantage gaseous storage; it eliminates
-it.
-
-**Step 2 — The attitude-control requirement as written cannot be met by cold gas
-at all, and the correct response is to challenge it.**
-
-Taking the 1.5 μN·m as fully secular on all three axes for 2 years (Eq. 3.16):
-
-$$H = 1.5\times10^{-6}\times6.311\times10^{7} = 94.7\ \mathrm{N\cdot m\cdot s\ per\ axis}$$
-
-$$I_t = \frac{2H}{2L}\times2 = \frac{H}{L}\times... = 861\ \mathrm{N\cdot s\ per\ axis} \Rightarrow \mathbf{2582\ N\cdot s\ for\ three\ axes}$$
-
-At butane's 65 s that is **4.05 kg of propellant, 7100 cm³** — more than twice
-the entire 3U propulsion allocation, before a single metre per second of Δv.
-**No propellant on the table closes this**; R-236fa would need 6.6 kg and
-4800 cm³, and the warm R-134a option 3.2 kg and 2700 cm³ with a power budget it
-does not have.
-
-The correct engineering response is not to pick the least-bad propellant. It is
-to observe that **a 550 km sun-synchronous orbit has a magnetic field**, and that
-magnetorquers dump secular momentum at zero propellant cost, which is why
-essentially every LEO CubeSat carries them. It is also to observe that the
-dominant component of a 1.5 μN·m disturbance on a nadir- or sun-pointing 12U is
-gravity-gradient and aerodynamic, both of which are largely *cyclic* over an
-orbit and therefore do not accumulate secularly at all — so 1.5 μN·m is almost
-certainly a peak, not a secular mean, and budgeting it as secular over-sizes the
-system by an order of magnitude.
-
-**A recommendation that does not raise this point should not receive more than
-half marks on the trade study, regardless of how well the arithmetic is done.**
-
-**Step 3 — Re-budget with magnetorquers handling secular momentum.**
-
-Cold gas is then responsible for the Δv and the limit cycle.
-
-*Δv, 25 m/s against $m_f = 14$ kg* (`propellant_for_dv`):
-
-| option | $I_{sp}$ (s) | $m_p$ (kg) | $\rho_s$ (kg/m³) | volume (cm³) |
-|---|---|---|---|---|
-| (b) n-butane | 65 | 0.560 | 570 | 982 |
-| (c) R-236fa | 40 | 0.921 | 1360 | 677 |
-| (d) R-134a warm | 82 | 0.442 | 1190 | 371 |
-
-*Limit cycle, 3 axes, 2 years* (Eq. 3.15), microvalve MIB 0.05 mN·s:
-$\omega_{lc} = 1.571\times10^{-5}$ rad/s, $t_{cycle} = 1111$ s,
-5.68 × 10⁴ pulses per axis over two years:
-
-- at 65 s: 0.027 kg for three axes
-- at 40 s: 0.043 kg for three axes
-
-Negligible. But **with a conventional solenoid at 0.33 mN·s the same calculation
-gives 1.17 kg** — twice the Δv propellant — because Eq. 3.15 is quadratic in the
-impulse bit. Valve selection, not propellant selection, decides whether the
-limit-cycle line matters.
-
-*Totals:*
-
-| option | propellant (kg) | volume (cm³) | fits 2000 cm³? | binding constraint |
-|---|---|---|---|---|
-| (a) GN₂ 12 bar | — | 25,900 for Δv alone | **no, by 13×** | storage pressure cap |
-| (b) n-butane | 0.587 | 1029 | **yes**, 51 % fill | flammability review |
-| (c) R-236fa | 0.964 | 709 | **yes**, 35 % fill | $I_{sp}$ (mass) |
-| (d) R-134a warm | ~0.49 | ~412 | **yes**, 21 % fill | electrical power |
-
-**Step 4 — Option (d) fails on power, and it fails in an instructive way.**
-
-15 W during firing against a 12 W average / 20 W peak bus is not a hard
-violation — you can fire within the 20 W peak if the payload is off and the burn
-is short. But three things kill it. (i) The Δv manoeuvre is a continuous burn of
-several minutes at 15 W, which exceeds the *average* available power and must
-therefore be drawn from the battery and segmented, negating much of the
-efficiency gain in operations. (ii) A resistojet has a warm-up transient of
-seconds; every attitude-control pulse would either be cold (giving ~45 s, not
-82 s) or would require pre-heating, which multiplies the energy cost per pulse by
-orders of magnitude. In practice a warm-gas module is used *warm for Δv and cold
-for attitude control*, so the 82 s applies to only the Δv line. (iii) It adds a
-heater, a controller, thermal isolation and a qualification programme, on a
-technology demonstrator whose schedule is already the driving constraint.
-
-Recomputing (d) honestly — 82 s for Δv, ~45 s cold for the limit cycle — gives
-0.442 + 0.039 = 0.48 kg, saving 0.11 kg over butane, for 15 W and a new
-subsystem. **Rejected on power and complexity, not on performance.**
-
-### Recommendation
-
-**Recommend (b), n-butane, self-pressurizing at ~2.6 bar, with a microvalve
-thruster module and magnetorquers for secular momentum management.**
-
-Justification:
-
-1. It satisfies the 12-bar cap with a factor-of-four margin, so the pressure
-   vessel is a low-pressure welded can and there is no COPV qualification and no
-   schedule risk. This is the constraint that killed option (a) and it is the
-   constraint the mission is actually built around.
-2. It has the best $I_{sp}$ of any option compatible with that cap, so it carries
-   the largest Δv reserve for a fixed volume: 0.587 kg in 1029 cm³ leaves nearly
-   1000 cm³ of the tank allocation spare, which at 570 kg/m³ is another 0.57 kg
-   and roughly 25 m/s of growth margin — real insurance on a technology
-   demonstrator whose Δv requirement will grow.
-3. Self-pressurizing feed means constant thrust with no regulator, no relief
-   valve and no high-pressure isolation valve — three components, three failure
-   modes and roughly half a kilogram removed.
-4. It is flight-proven at this exact scale and architecture (GomSpace NanoProp on
-   TW-1 in 2015 and GOMX-4B in 2018), which for a technology demonstrator on a
-   fixed schedule is worth more than any of the above.
-
-**Against the runner-up, (c) R-236fa.** R-236fa is denser and non-flammable, and
-its 709 cm³ leaves more volume margin. It loses on propellant mass — 0.964 kg
-against 0.587 kg, i.e. 2.7 % of the spacecraft's wet mass given away — and, more
-importantly, on *growth*: at 40 s, the spare tank volume converts to Δv at only
-60 % of butane's rate. For a mission whose stated requirement is a 25 m/s phasing
-manoeuvre, i.e. a mission with a real Δv line, the higher $I_{sp}$ is the right
-purchase.
-
-**What would change the recommendation.**
-
-- **If the rideshare provider or the primary payload objects to a flammable
-  propellant**, switch to (c) immediately. This is a review-schedule question, not
-  a technical one, and it is exactly the question MarCO answered in favour of
-  R-236fa. Ask it in the first week, not the last.
-- **If the volume allocation drops below about 1200 cm³** for the tank, butane no
-  longer fits with useful margin and (c) becomes the only option that does.
-- **If the Δv requirement grows beyond about 45 m/s**, no low-pressure
-  liquefiable propellant closes in 3U and the trade reopens as
-  "warm gas versus a COPV waiver versus a green monopropellant."
-- **If magnetorquers cannot be accommodated** — an unlikely but not impossible
-  outcome for a magnetically sensitive payload — then no cold-gas option closes
-  and the propulsion system cannot meet the attitude requirement as written. The
-  requirement must be renegotiated or reaction wheels added.
-- **If the selected thruster module's MIB is solenoid-class rather than
-  microvalve-class**, the limit-cycle line jumps from 0.03 kg to 1.17 kg and
-  butane's volume margin evaporates. Verify the MIB with the supplier before
-  committing; do not take it from a datasheet's "typical" column.
-
-### Rubric
-
-**A strong answer must contain:**
-
-- The observation that option (a) is eliminated by the 12-bar cap, with the
-  storage-density arithmetic that shows it is eliminated by an order of
-  magnitude, not marginally (20 marks).
-- Correct rocket-equation propellant masses and correct volumes from the storage
-  densities, for at least three options (20 marks).
-- A limit-cycle calculation using Eq. 3.15, with an explicitly stated assumed
-  MIB, and the observation that the result is quadratic in the MIB (15 marks).
-- The challenge to the disturbance-torque requirement — recognizing that
-  rejecting 1.5 μN·m secularly on three axes for two years is beyond any
-  cold-gas system in this volume, and naming magnetorquers and/or the
-  cyclic-versus-secular distinction as the resolution (20 marks).
-- A defensible recommendation with an explicit comparison against the runner-up
-  and at least three named conditions that would change it (15 marks).
-- Correct units throughout, and every $I_{sp}$ figure tagged as ideal or realized
-  (10 marks).
-
-**Loses marks for:**
-
-- Recommending helium or any gaseous propellant without addressing the pressure
-  cap (automatic fail of the volume analysis).
-- Selecting on $I_{sp}$ alone, i.e. reproducing the ranking of §4.1 and choosing
-  the top entry that is liquefiable, without computing volumes.
-- Budgeting the 1.5 μN·m disturbance without comment, arriving at a number that
-  does not fit, and then declaring the mission infeasible without proposing the
-  standard resolution.
-- Using ideal $I_{sp}$ values from §4.1 without the realization discount (a
-  systematic 10 % optimism throughout).
-- Quoting a Δv without stating the mass it was computed against.
-- Choosing (d) without a power-profile analysis; the option is not
-  *technically* infeasible, and an answer that rejects it purely on "15 > 12"
-  has not engaged with peak versus average power or with the cold-pulse /
-  warm-burn split that real warm-gas modules use.
-
----
-
 ## K2. Quiz answers
 
 **Q1 (8) — (b) $\sqrt{T_0/M}$.**
@@ -923,6 +718,215 @@ you have paid for both systems. The judgment: **wheels are bought for pointing
 performance and agility first, and propellant second; a programme that justifies
 them on propellant alone usually finds the payback period is longer than the
 mission.**
+
+---
+
+## K3. Trade-study reference solution
+
+### P21 — 12U technology demonstrator: propellant selection
+
+**Reference assumptions** (a strong answer states its own and they need not
+match these exactly, but they must be stated):
+
+- Spacecraft wet mass 14 kg; treat it as constant for Δv purposes and use the
+  rocket equation with $m_f = 14$ kg (conservative).
+- Realized $I_{sp}$: N₂ 69 s, n-butane 65 s, R-236fa 40 s, R-134a warm 82 s
+  (§4.1).
+- Minimum impulse bit: 0.33 mN·s for a conventional solenoid (WE2 class);
+  0.05 mN·s for a microvalve module of the VACCO/GomSpace class. This
+  distinction matters more than the propellant choice, and a strong answer says
+  so.
+- Tank volume allocation: about 2000 cm³ of the 3000 cm³ envelope, the rest
+  being valves, plenum, electronics and structure.
+- Mission 2 years; $\theta_{db} = 0.5° = 8.727\times10^{-3}$ rad;
+  $I = 0.35$ kg·m²; $L = 0.11$ m.
+
+**Step 1 — Option (a), GN₂ at 12 bar, dies immediately on the pressure cap.**
+
+$$\rho_s = \frac{p}{ZRT} = \frac{12\times10^{5}}{1.0\times296.8\times293} = 13.8\ \mathrm{kg/m^3}$$
+
+The entire 2000 cm³ allocation holds **27.6 g** of nitrogen, worth
+**18.7 N·s** of total impulse. The Δv requirement alone needs about 357 N·s.
+Option (a) is short by a factor of nineteen. Gaseous storage is viable only at
+150–300 bar, and the rideshare provider has forbidden that without a COPV
+qualification the schedule cannot absorb. **Rejected: the binding constraint is
+the 12-bar cap, and it is fatal, not marginal.**
+
+This is the most important single result of the trade and a strong answer leads
+with it. The pressure cap does not disadvantage gaseous storage; it eliminates
+it.
+
+**Step 2 — The attitude-control requirement as written cannot be met by cold gas
+at all, and the correct response is to challenge it.**
+
+Taking the 1.5 μN·m as fully secular on all three axes for 2 years (Eq. 3.16):
+
+$$H = 1.5\times10^{-6}\times6.311\times10^{7} = 94.7\ \mathrm{N\cdot m\cdot s\ per\ axis}$$
+
+A couple delivers torque impulse $2I_{th}L$, so the impulse required *per
+thruster* is $I_{th} = H/(2L)$ and the total propellant impulse, summed over both
+thrusters of the pair, is
+
+$$I_t = 2I_{th} = \frac{H}{L} = \frac{94.7}{0.11} = 861\ \mathrm{N\cdot s\ per\ axis} \Rightarrow \mathbf{2582\ N\cdot s\ for\ three\ axes}$$
+
+At butane's 65 s that is **4.05 kg of propellant, 7100 cm³** — more than twice
+the entire 3U propulsion allocation, before a single metre per second of Δv.
+**No propellant on the table closes this**; R-236fa would need 6.6 kg and
+4800 cm³, and the warm R-134a option 3.2 kg and 2700 cm³ with a power budget it
+does not have.
+
+The correct engineering response is not to pick the least-bad propellant. It is
+to observe that **a 550 km sun-synchronous orbit has a magnetic field**, and that
+magnetorquers dump secular momentum at zero propellant cost, which is why
+essentially every LEO CubeSat carries them. It is also to observe that the
+dominant component of a 1.5 μN·m disturbance on a nadir- or sun-pointing 12U is
+gravity-gradient and aerodynamic, both of which are largely *cyclic* over an
+orbit and therefore do not accumulate secularly at all — so 1.5 μN·m is almost
+certainly a peak, not a secular mean, and budgeting it as secular over-sizes the
+system by an order of magnitude.
+
+**A recommendation that does not raise this point should not receive more than
+half marks on the trade study, regardless of how well the arithmetic is done.**
+
+**Step 3 — Re-budget with magnetorquers handling secular momentum.**
+
+Cold gas is then responsible for the Δv and the limit cycle.
+
+*Δv, 25 m/s against $m_f = 14$ kg* (`propellant_for_dv`):
+
+| option | $I_{sp}$ (s) | $m_p$ (kg) | $\rho_s$ (kg/m³) | volume (cm³) |
+|---|---|---|---|---|
+| (b) n-butane | 65 | 0.560 | 570 | 982 |
+| (c) R-236fa | 40 | 0.921 | 1360 | 677 |
+| (d) R-134a warm | 82 | 0.442 | 1190 | 371 |
+
+*Limit cycle, 3 axes, 2 years* (Eq. 3.15), microvalve MIB 0.05 mN·s:
+$\omega_{lc} = 1.571\times10^{-5}$ rad/s, $t_{cycle} = 1111$ s,
+5.68 × 10⁴ pulses per axis over two years:
+
+- at 65 s: 0.027 kg for three axes
+- at 40 s: 0.043 kg for three axes
+
+Negligible. But **with a conventional solenoid at 0.33 mN·s the same calculation
+gives 1.17 kg** — twice the Δv propellant — because Eq. 3.15 is quadratic in the
+impulse bit. Valve selection, not propellant selection, decides whether the
+limit-cycle line matters.
+
+*Totals:*
+
+| option | propellant (kg) | volume (cm³) | fits 2000 cm³? | binding constraint |
+|---|---|---|---|---|
+| (a) GN₂ 12 bar | — | 25,900 for Δv alone | **no, by 13×** | storage pressure cap |
+| (b) n-butane | 0.587 | 1029 | **yes**, 51 % fill | flammability review |
+| (c) R-236fa | 0.964 | 709 | **yes**, 35 % fill | $I_{sp}$ (mass) |
+| (d) R-134a warm | ~0.49 | ~412 | **yes**, 21 % fill | electrical power |
+
+**Step 4 — Option (d) fails on power, and it fails in an instructive way.**
+
+15 W during firing against a 12 W average / 20 W peak bus is not a hard
+violation — you can fire within the 20 W peak if the payload is off and the burn
+is short. But three things kill it. (i) The Δv manoeuvre is a continuous burn of
+several minutes at 15 W, which exceeds the *average* available power and must
+therefore be drawn from the battery and segmented, negating much of the
+efficiency gain in operations. (ii) A resistojet has a warm-up transient of
+seconds; every attitude-control pulse would either be cold (giving ~45 s, not
+82 s) or would require pre-heating, which multiplies the energy cost per pulse by
+orders of magnitude. In practice a warm-gas module is used *warm for Δv and cold
+for attitude control*, so the 82 s applies to only the Δv line. (iii) It adds a
+heater, a controller, thermal isolation and a qualification programme, on a
+technology demonstrator whose schedule is already the driving constraint.
+
+Recomputing (d) honestly — 82 s for Δv, ~45 s cold for the limit cycle — gives
+0.442 + 0.039 = 0.48 kg, saving 0.11 kg over butane, for 15 W and a new
+subsystem. **Rejected on power and complexity, not on performance.**
+
+### Recommendation
+
+**Recommend (b), n-butane, self-pressurizing at ~2.6 bar, with a microvalve
+thruster module and magnetorquers for secular momentum management.**
+
+Justification:
+
+1. It satisfies the 12-bar cap with a factor-of-four margin, so the pressure
+   vessel is a low-pressure welded can and there is no COPV qualification and no
+   schedule risk. This is the constraint that killed option (a) and it is the
+   constraint the mission is actually built around.
+2. It has the best $I_{sp}$ of any option compatible with that cap, so it carries
+   the largest Δv reserve for a fixed volume: 0.587 kg in 1029 cm³ leaves nearly
+   1000 cm³ of the tank allocation spare, which at 570 kg/m³ is another 0.57 kg
+   and roughly 25 m/s of growth margin — real insurance on a technology
+   demonstrator whose Δv requirement will grow.
+3. Self-pressurizing feed means constant thrust with no regulator, no relief
+   valve and no high-pressure isolation valve — three components, three failure
+   modes and roughly half a kilogram removed.
+4. It is flight-proven at this exact scale and architecture (GomSpace NanoProp on
+   TW-1 in 2015 and GOMX-4B in 2018), which for a technology demonstrator on a
+   fixed schedule is worth more than any of the above.
+
+**Against the runner-up, (c) R-236fa.** R-236fa is denser and non-flammable, and
+its 709 cm³ leaves more volume margin. It loses on propellant mass — 0.964 kg
+against 0.587 kg, i.e. 2.7 % of the spacecraft's wet mass given away — and, more
+importantly, on *growth*: at 40 s, the spare tank volume converts to Δv at only
+60 % of butane's rate. For a mission whose stated requirement is a 25 m/s phasing
+manoeuvre, i.e. a mission with a real Δv line, the higher $I_{sp}$ is the right
+purchase.
+
+**What would change the recommendation.**
+
+- **If the rideshare provider or the primary payload objects to a flammable
+  propellant**, switch to (c) immediately. This is a review-schedule question, not
+  a technical one, and it is exactly the question MarCO answered in favour of
+  R-236fa. Ask it in the first week, not the last.
+- **If the volume allocation drops below about 1200 cm³** for the tank, butane no
+  longer fits with useful margin and (c) becomes the only option that does.
+- **If the Δv requirement grows beyond about 45 m/s**, no low-pressure
+  liquefiable propellant closes in 3U and the trade reopens as
+  "warm gas versus a COPV waiver versus a green monopropellant."
+- **If magnetorquers cannot be accommodated** — an unlikely but not impossible
+  outcome for a magnetically sensitive payload — then no cold-gas option closes
+  and the propulsion system cannot meet the attitude requirement as written. The
+  requirement must be renegotiated or reaction wheels added.
+- **If the selected thruster module's MIB is solenoid-class rather than
+  microvalve-class**, the limit-cycle line jumps from 0.03 kg to 1.17 kg and
+  butane's volume margin evaporates. Verify the MIB with the supplier before
+  committing; do not take it from a datasheet's "typical" column.
+
+### Rubric
+
+**A strong answer must contain:**
+
+- The observation that option (a) is eliminated by the 12-bar cap, with the
+  storage-density arithmetic that shows it is eliminated by an order of
+  magnitude, not marginally (20 marks).
+- Correct rocket-equation propellant masses and correct volumes from the storage
+  densities, for at least three options (20 marks).
+- A limit-cycle calculation using Eq. 3.15, with an explicitly stated assumed
+  MIB, and the observation that the result is quadratic in the MIB (15 marks).
+- The challenge to the disturbance-torque requirement — recognizing that
+  rejecting 1.5 μN·m secularly on three axes for two years is beyond any
+  cold-gas system in this volume, and naming magnetorquers and/or the
+  cyclic-versus-secular distinction as the resolution (20 marks).
+- A defensible recommendation with an explicit comparison against the runner-up
+  and at least three named conditions that would change it (15 marks).
+- Correct units throughout, and every $I_{sp}$ figure tagged as ideal or realized
+  (10 marks).
+
+**Loses marks for:**
+
+- Recommending helium or any gaseous propellant without addressing the pressure
+  cap (automatic fail of the volume analysis).
+- Selecting on $I_{sp}$ alone, i.e. reproducing the ranking of §4.1 and choosing
+  the top entry that is liquefiable, without computing volumes.
+- Budgeting the 1.5 μN·m disturbance without comment, arriving at a number that
+  does not fit, and then declaring the mission infeasible without proposing the
+  standard resolution.
+- Using ideal $I_{sp}$ values from §4.1 without the realization discount (a
+  systematic 10 % optimism throughout).
+- Quoting a Δv without stating the mass it was computed against.
+- Choosing (d) without a power-profile analysis; the option is not
+  *technically* infeasible, and an answer that rejects it purely on "15 > 12"
+  has not engaged with peak versus average power or with the cold-pulse /
+  warm-burn split that real warm-gas modules use.
 
 ---
 

@@ -25,13 +25,13 @@ EXAMPLES = [
 
     # Lot 2.0 % high in a -> p_c up by (1.02)^(1/(1-n)) = 1.03093, i.e. +3.09 %.
     {"id": "25.WE2c", "fn": "solid_equilibrium_pressure",
-     "args": {"a": 3.690156e-5, "n": 0.35, "rho_p": 1770.0,
+     "args": {"a": 3.690207e-5, "n": 0.35, "rho_p": 1770.0,
               "Ab": 232.31, "At": 1.0, "c_star_val": 1520.0},
      "expect": 5.1547e6, "tol": 0.005},
 
     # Burn rate at the new equilibrium tracks pressure exactly: 8.247 mm/s.
     {"id": "25.WE2d", "fn": "vieille_burn_rate",
-     "args": {"a": 3.690156e-5, "p": 5.1547e6, "n": 0.35},
+     "args": {"a": 3.690207e-5, "p": 5.1547e6, "n": 0.35},
      "expect": 0.008247, "tol": 0.003},
 
     # WE2(c): temperature sensitivity.  sigma_p = 0.0020 /K, dT = +20 K.
