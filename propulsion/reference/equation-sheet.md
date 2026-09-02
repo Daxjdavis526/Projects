@@ -4638,3 +4638,543 @@ $$m_{tank} \approx \frac{p V}{g_0\,(pV/W)}$$
 - **Alias** — 12-3.6, 30-3.2.
 
 ---
+
+# Part V — Cross-system (modules 32–36)
+
+## Module 32 — Liquid vs Solid vs Cold Gas
+
+### 32-3.1 — Specific impulse factorisation
+
+$$I_{sp} = \frac{c^{*}C_F}{g_0},\qquad c^{*}=\frac{\sqrt{R T_c}}{\Gamma}
+= \frac{1}{\Gamma}\sqrt{\frac{R_u T_c}{\mathcal{M}}}$$
+
+- **Variables** — $c^*$ [m/s]; $C_F$ [—]; $T_c$ chamber temperature [K]; $\mathcal{M}$ exhaust molar mass [kg/kmol]; $R_u = 8314.46$ J/(kmol·K); $\Gamma$ [—].
+- **Meaning** — everything the propellant contributes enters through $\sqrt{T_c/\mathcal{M}}$; everything the nozzle contributes enters through $C_F$. This one equation explains the whole liquid/solid/cold-gas $I_{sp}$ ranking: 450 s, 265 s, 70 s.
+- **Assumes** — 1-D flow; chemically frozen or shifting equilibrium as declared; calorically perfect; no condensed phase.
+- **Fails when** — the exhaust carries a condensed phase (solids); the gas is not calorically perfect (cold refrigerants near saturation); boundary layers are a large fraction of the throat (µN thrusters).
+- **Tag** [F] · **Code** `c_star(...)`, `Cf(...)`, `isp_from_c(c_eff(...))`
+- **Alias** — 03-3.10, 04-3.1, 19-3.4, 28-3.11.
+
+### 32-3.2 — Thrust
+
+$$F = C_F\,p_c A_t = \dot m\, c$$
+
+- **Variables** — $F$ [N]; $C_F$ [—]; $p_c$ [Pa]; $A_t$ [m²]; $\dot m$ [kg/s]; $c$ effective exhaust velocity [m/s].
+- **Meaning** — thrust is a pressure–area product, or equivalently a momentum flux. Both readings are needed: the first explains why solids scale to meganewtons cheaply, the second why cold gas cannot.
+- **Assumes** — choked throat; quasi-1-D flow.
+- **Fails when** — the transitional and slip-flow regimes where $Re_t \lesssim 10^3$; unchoked operation at end-of-blowdown.
+- **Tag** [F] · **Code** `thrust(...)`, `Cf(...)`
+
+### 32-3.3 — Density impulse (volumetric form)
+
+$$I_v = \rho_b\,I_{sp}\,g_0 \quad[\mathrm{N\,s/m^3}]$$
+
+- **Variables** — $\rho_b$ bulk propellant density at the flight mixture ratio [kg/m³]; $I_{sp}$ [s]; $g_0 = 9.80665$ m/s².
+- **Meaning** — total impulse obtainable from one cubic metre of propellant; the metric on which solids beat liquids and butane beats nitrogen.
+- **Assumes** — the tank volume is dominated by propellant — false for cold gas, where the tank *wall* is the mass.
+- **Fails when** — tank mass, not propellant mass, closes the design.
+- **Tag** [F] · **Code** `density_isp(rho, isp)` (differs by $g_0$)
+- **Alias** — 05-3.3 and 19-3.5 omit $g_0$; 28-3.18, 29-3.4, 31-3.4 include it. State which.
+
+### 32-3.4 — Bulk density of a propellant pair
+
+$$\rho_b = \frac{1+O\!/\!F}{\dfrac{O\!/\!F}{\rho_{ox}}+\dfrac{1}{\rho_{f}}}$$
+
+- **Variables** — $O\!/\!F$ mixture ratio [—]; $\rho_{ox}$, $\rho_f$ densities at storage temperature [kg/m³].
+- **Meaning** — the density of the propellant *pair* as loaded, which is what sizes tanks.
+- **Assumes** — no ullage; no residuals.
+- **Fails when** — the tanks are not sized to the flight mixture ratio (deliberate propellant bias).
+- **Tag** [F] · **Code** —
+- **Alias** — 05-3.2, identical with $r$ for $O\!/\!F$.
+
+### 32-3.5 — Tank mass from the performance factor
+
+$$m_{tank} = \frac{pV}{g_0\,(pV/W)}$$
+
+- **Variables** — $p$ operating pressure [Pa]; $V$ internal volume [m³]; $pV/W$ tank performance factor [m], 5 000 m for a conservative metallic vessel to 15 000 m for a flight COPV.
+- **Meaning** — tank mass is proportional to stored *energy*, not to stored mass.
+- **Assumes** — membrane-mode stress; no boss or mount mass.
+- **Fails when** — small tanks, where minimum gauge and boss mass dominate.
+- **Tag** [E] · **Code** —
+- **Alias** — 12-3.6, 22-3.10, 30-3.2, 31-5.1.
+
+### 32-3.6 — Solid-motor equilibrium pressure
+
+$$p_c = \left(a\,\rho_p\,c^{*}\,K_n\right)^{1/(1-n)},\qquad K_n = A_b/A_t$$
+
+- **Variables** — as 19-3.3.
+- **Meaning** — restated in the comparison context because it is the reason a solid cannot be throttled or shut down: pressure is fixed by geometry that is itself being consumed.
+- **Assumes** — $n < 1$ for stable equilibrium; quasi-steady burning; no erosive burning.
+- **Fails when** — during the ignition transient; erosive burning at high port Mach number; near burnout with slivers.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(...)`
+
+### 32-3.7 — Zero-failure reliability lower bound
+
+$$p_L = \alpha^{1/n}\qquad(f=0)$$
+
+- **Variables** — $\alpha = 1 -$ confidence [—]; $n$ trials [—]; $p_L$ reliability lower bound [—].
+- **Meaning** — the smallest reliability consistent with observing $n$ consecutive successes at the stated confidence. It is why "0.999 reliability" claims for low-flight-count systems are assertions, not demonstrations.
+- **Assumes** — independent, identically distributed trials with a single binary outcome.
+- **Fails when** — trials are not independent (a common-cause manufacturing lot); the configuration changed mid-record; "success" is defined after the fact.
+- **Tag** [F] · **Code** —
+- **Alias** — 27-3.7, identical with $C = 1-\alpha$ and $N = n$.
+
+### 32-3.8 — Propellant mass with a mass-model closure
+
+$$m_p = \frac{(m_{pay}+m_{fix})\left(e^{\Delta v/c}-1\right)}{1-k\left(e^{\Delta v/c}-1\right)}$$
+
+- **Variables** — $m_{pay}$ everything that is not the propulsion system [kg]; $m_{fix}$ fixed inert mass [kg]; $k$ variable inert fraction [—]; $c = I_{sp}g_0$ [m/s]; $\Delta v$ [m/s].
+- **Meaning** — solves the rocket equation and the mass-model equation simultaneously; the only honest way to compare propulsion classes.
+- **Assumes** — a single impulsive burn; $k$ constant with scale.
+- **Fails when** — **$k(e^{\Delta v/c}-1) \ge 1$: the denominator goes to zero or negative and no finite propellant mass closes the design.** That is a physical statement, not an algebra artefact — each extra kilogram of propellant drags in more than a kilogram of tank.
+- **Tag** [F] · **Code** —
+
+### 32-3.9 — $\Delta v$ ceiling of a propulsion class
+
+$$\Delta v_{max} = c\,\ln\!\left(1+\frac{1}{k}\right)$$
+
+- **Variables** — $c = I_{sp}g_0$ [m/s]; $k$ variable inert fraction [—].
+- **Meaning** — the asymptotic $\Delta v$ ceiling of a propulsion class at infinite mass; the hard boundary that 32-3.8 approaches.
+- **Assumes** — $m_{fix}$ negligible.
+- **Fails when** — used as a design target. Approaching it means an absurd mass; the practical ceiling is far below.
+- **Tag** [F] · **Code** —
+
+### 32-3.10 — Break-even total impulse between two classes
+
+$$I_t^{*} = \frac{m_{fix,2}-m_{fix,1}}{\dfrac{1+k_1}{I_{sp,1}g_0}-\dfrac{1+k_2}{I_{sp,2}g_0}}$$
+
+- **Variables** — subscript 1 the lighter-fixed-mass, lower-$I_{sp}$ class (cold gas); 2 the heavier-fixed-mass, higher-$I_{sp}$ class (monopropellant); $I_t^*$ [N·s].
+- **Meaning** — the total impulse at which the higher-performing class's fixed mass is paid back. Below it, cold gas wins on mass; above it, it does not.
+- **Assumes** — both $k$ values scale-independent; both classes can meet the non-mass requirements.
+- **Fails when** — the fixed masses are themselves functions of total impulse, which is true at the extremes.
+- **Tag** [F] · **Code** —
+
+---
+
+## Module 33 — Systems Engineering for Propulsion
+
+### 33-3.1 — Gimbal control moment and lateral force
+
+$$M_c = F\,L\,\sin\delta \qquad\text{and}\qquad F_{lat} = F\sin\delta$$
+
+- **Variables** — $M_c$ control moment about the vehicle cg [N·m]; $F$ engine thrust [N]; $L$ distance from gimbal plane to cg [m]; $\delta$ gimbal angle [rad]; $F_{lat}$ lateral force at the gimbal plane [N].
+- **Meaning** — gimballing converts a fraction of thrust into a control moment, and the thrust structure must react the lateral component. $F_{lat}$, not $M_c$, sizes the thrust structure.
+- **Assumes** — rigid vehicle; thrust line through the gimbal point; single engine or symmetric cluster.
+- **Fails when** — the vehicle is flexible enough that a bending mode couples with the control loop (the classic TVC/bending interaction); the engine's own centre-of-mass offset from the gimbal point adds an inertial term during rapid gimballing.
+- **Tag** [F] · **Code** —
+- **Alias** — 24-3.16 for the axial-loss counterpart.
+
+### 33-3.2 — Feed-system resonance (pogo)
+
+$$f_{feed} = \frac{1}{2\pi}\sqrt{\frac{1}{I\,C}}, \qquad I = \frac{\rho \ell}{A}$$
+
+- **Variables** — $f_{feed}$ [Hz]; $I$ line inertance [kg/m⁴]; $C$ compliance [m³/Pa]; $\rho$ propellant density [kg/m³]; $\ell$ line length [m]; $A$ line flow area [m²].
+- **Meaning** — the feed line is a mass–spring system whose "mass" is the propellant column and whose "spring" is whatever is compressible — trapped gas, line elasticity, or a deliberate accumulator. The pogo fix is to *detune* it by adding compliance.
+- **Assumes** — lumped parameters; a single dominant compliance; incompressible liquid elsewhere; no distributed wave effects.
+- **Fails when** — line length approaches a quarter acoustic wavelength; the pump inducer cavitates (cavitation compliance is nonlinear and flow-dependent); two lines interact.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 15-3.7, identical.
+
+### 33-3.3 — Gimbal authority requirement
+
+$$F\,L\,\sin\delta_{req} \ge M_{dist} = F\,e + M_{aero} + M_{misc}$$
+
+- **Variables** — $\delta_{req}$ required gimbal angle [rad]; $L$ gimbal-plane-to-cg arm [m]; $e$ effective thrust misalignment [m]; $M_{aero}$ aerodynamic moment from angle of attack and wind [N·m]; $M_{misc}$ engine-out asymmetry, slosh, cg lateral offset [N·m].
+- **Meaning** — **gimbal authority is sized by disturbances, not by steering.** Note the thrust cancels in the misalignment term: a bigger engine does not help against its own misalignment.
+- **Assumes** — rigid body; a single gimballed engine; small angles.
+- **Fails when** — multiple engines share the load unequally; the vehicle is flexible (bending modes need extra authority and rate); the disturbance is dynamic rather than quasi-static.
+- **Tag** [F] [J] · **Code** —
+
+### 33-3.4 — Impulse bit, rate change, limit-cycle period
+
+$$I_{bit} = F\,t_{min}, \qquad \Delta\omega = \frac{I_{bit}\,r}{J}, \qquad
+T_{limit} = \frac{4\,\theta_{db}}{\Delta\omega}$$
+
+- **Variables** — $I_{bit}$ [N·s]; $F$ [N]; $t_{min}$ minimum on-time [s]; $\Delta\omega$ rate change per pulse [rad/s]; $J$ inertia about the control axis [kg·m²]; $r$ moment arm [m]; $\theta_{db}$ half-width of the attitude deadband [rad]; $T_{limit}$ limit-cycle period [s].
+- **Meaning** — the impulse bit sets how finely the controller can hold attitude and therefore how much propellant a limit cycle costs per orbit.
+- **Assumes** — pure couple; rigid body; no external torque; symmetric deadband; pulse duration negligible against the limit cycle.
+- **Fails when** — external torques (gravity gradient, drag, solar pressure) dominate, in which case propellant use is set by the torque, not the deadband; the pulse is so short the thruster never reaches steady state and $I_{bit}$ is neither $Ft_{min}$ nor repeatable.
+- **Tag** [F] · **Code** `impulse_bit(F, t_on, t_rise, t_fall)`
+- **Alias** — 28-3.15 gives the propellant-consumption form.
+
+### 33-3.5 — NPSH requirement with margin
+
+$$\mathrm{NPSH}_a = \frac{p_t - p_v - \Delta p_{line}}{\rho\,g_0} + \frac{z\,a}{g_0}
+\ge k_{NPSH}\,\mathrm{NPSH}_r$$
+
+- **Variables** — as 12-3.15, plus $k_{NPSH}$ the required margin factor [—], typically 1.5 on head or an equivalent absolute margin.
+- **Meaning** — the pump inlet must sit a stated head above the point at which propellant boils. This inequality is the tank–engine interface requirement: it sets tank ullage pressure and hence tank mass.
+- **Assumes** — steady flow; uniform bulk temperature; no vapour ingestion; no thermal stratification.
+- **Fails when** — the surface layer is warmer than the bulk (stratification raises the effective $p_v$ at the surface, but the relevant $p_v$ is at the *inlet* temperature — get this backwards and you will over- or under-pressurise the tank); sloshing uncovers the outlet; the acceleration is not aligned with $z$.
+- **Tag** [F] [J] · **Code** `npsh_available(...)`, `suction_specific_speed_SI(...)`
+- **Alias** — 05-3.9, 12-3.15.
+
+### 33-3.6 — First slosh mode frequency
+
+$$\omega_1^2 = \frac{1.841\,a}{R}\tanh\!\left(\frac{1.841\,h}{R}\right)$$
+
+- **Variables** — $\omega_1$ first slosh mode angular frequency [rad/s]; $a$ axial acceleration [m/s²]; $R$ tank radius [m]; $h$ liquid depth [m]; 1.841 is the first zero of $J_1'$ [—].
+- **Meaning** — the free surface behaves as a pendulum whose frequency scales as $\sqrt{a/R}$. If it lands near a control-loop or bending frequency, the vehicle can go unstable.
+- **Assumes** — right circular cylinder; inviscid liquid; small amplitude; flat-bottomed geometry; no baffles.
+- **Fails when** — amplitude is large (the mode goes nonlinear and can rotate); the tank is a sphere or has a domed bottom; baffles are present — which is the point of baffles, since they add damping without much changing frequency.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — the 1.841 (or 1.8412) Bessel root also appears in 06-3.15, 15-3.9, 18-3.14, 20-3.13 for the 1T acoustic mode.
+
+### 33-3.7 — Weighted trade-study score
+
+$$S_j = \sum_{i=1}^{n} w_i\,s_{ij}, \qquad \sum_i w_i = 100$$
+
+- **Variables** — $S_j$ total score of option $j$ [—]; $w_i$ weight of criterion $i$ [—]; $s_{ij}$ score of option $j$ on criterion $i$, relative to the datum [—].
+- **Meaning** — a linear scalarisation of a multi-objective problem.
+- **Assumes** — criteria are independent; preferences are linear in each score; trade-offs between criteria are constant (one point of mass is always worth the same amount of schedule).
+- **Fails when** — any of those is false, which is usually — and especially when one criterion has a hard threshold, in which case **it is a constraint and does not belong in the sum.**
+- **Tag** [J] · **Code** —
+
+### 33-3.8 — $\Delta v$ sensitivity to $I_{sp}$
+
+$$\frac{\partial \Delta v}{\partial I_{sp}} = g_0\ln\frac{m_0}{m_f} = \frac{\Delta v}{I_{sp}}
+\quad\Longrightarrow\quad \frac{\delta(\Delta v)}{\Delta v} = \frac{\delta I_{sp}}{I_{sp}}$$
+
+- **Variables** — $m_0$, $m_f$ initial and final mass [kg]; $I_{sp}$ [s]; $\Delta v$ [m/s].
+- **Meaning** — **$\Delta v$ is exactly as sensitive to specific impulse in relative terms as it is possible to be**: a 1 % $I_{sp}$ shortfall is a 1 % $\Delta v$ shortfall, always, at any mass ratio.
+- **Assumes** — the propellant load is fixed (a real vehicle whose tanks are already full).
+- **Fails when** — the comparison is made at fixed $\Delta v$ instead; a lower $I_{sp}$ then demands exponentially more propellant and the sensitivity is much worse than 1:1.
+- **Tag** [F] · **Code** —
+
+### 33-3.9 — $\Delta v$ sensitivity to dry mass
+
+$$\frac{\partial \Delta v}{\partial m_d} = c\left(\frac{1}{m_0}-\frac{1}{m_f}\right) = -\,c\,\frac{m_p}{m_0\,m_f}$$
+
+- **Variables** — $c = I_{sp}g_0$ [m/s]; $m_p = m_0 - m_f$ usable propellant [kg]; $m_d$ dry mass [kg].
+- **Meaning** — added inert mass costs $\Delta v$ in proportion to the propellant mass fraction: brutal on a stage with a large mass ratio, mild on one with a small ratio.
+- **Assumes** — propellant load fixed.
+- **Fails when** — the added mass forces a propellant offload (volume-limited stage), which makes it worse; the stage is resized around it, which is a different calculation entirely.
+- **Tag** [F] · **Code** —
+
+### 33-3.10 — $\Delta v$ sensitivity to residuals
+
+$$\frac{\partial \Delta v}{\partial m_{res}} = -\frac{c}{m_f}$$
+
+- **Variables** — $m_{res}$ unusable residual propellant [kg]; $c$ [m/s]; $m_f$ [kg].
+- **Meaning** — a kilogram left in the tank costs strictly more than a kilogram of dry mass, because it was carried the whole way and delivered no impulse.
+- **Assumes** — $m_0$ fixed (the propellant was loaded).
+- **Fails when** — the residual is known in advance and simply not loaded, in which case it behaves like 33-3.9.
+- **Tag** [F] · **Code** —
+
+### 33-3.11 — $\Delta v$ uncertainty propagation
+
+$$\sigma_{\Delta v} = \sqrt{\sum_k \left(\frac{\partial \Delta v}{\partial x_k}\right)^2 \sigma_{x_k}^2}$$
+
+- **Variables** — $\sigma_{x_k}$ standard deviation of input $k$; $\sigma_{\Delta v}$ [m/s].
+- **Meaning** — first-order propagation of independent uncertainties, using the sensitivities of 33-3.8 to 33-3.10.
+- **Assumes** — independence; small perturbations so the model is locally linear; inputs meaningfully described by a standard deviation.
+- **Fails when** — inputs are correlated ($I_{sp}$ and mixture ratio are; dry mass and residuals often are, because a heavier stage has more line volume); the distribution is skewed or bounded (**mass growth is one-sided — hardware rarely comes in light**); a term is large enough that curvature matters.
+- **Tag** [F] [J] · **Code** `rss(*terms)`
+- **Alias** — 18-3.19.
+
+---
+
+## Module 34 — Failure Case Studies
+
+### 34-3.1 — WLF time–temperature shift factor
+
+$$\log_{10} a_T = \frac{-C_1 (T - T_g)}{C_2 + (T - T_g)} , \qquad \tau(T) = a_T\,\tau(T_{\text{ref}})$$
+
+- **Variables** — $a_T$ shift factor [—]; $T$ [K]; $T_g$ glass transition temperature [K]; $C_1 \approx 17.44$, $C_2 \approx 51.6$ K the "universal" WLF constants referenced to $T_g$.
+- **Meaning** — every viscoelastic response time of a polymer scales by the same factor $a_T$, so **a seal that recovers in seconds at room temperature can take hours 25 K colder.** This is the quantitative heart of the Challenger O-ring failure and of every cold-temperature elastomer problem in this course.
+- **Assumes** — amorphous polymer; thermorheological simplicity; $T_g < T < T_g + 100$ K.
+- **Fails when** — the polymer crystallises, is highly filled, or is chemically aged; outside that temperature window, where $a_T$ diverges unphysically. The universal constants are a fallback — a real material is fitted.
+- **Tag** [E] · **Code** —
+- **Alias** — the physics behind 22-3.7 and 24-3.17.
+
+### 34-5.1 — Pressure signature of an area fault
+
+$$\frac{p_2}{p_1} = \left(\frac{A_{b,2}/A_{b,1}}{A_{t,2}/A_{t,1}}\right)^{1/(1-n)},
+\qquad \frac{1}{1-n} = \frac{1}{0.65} = 1.5385$$
+
+- **Variables** — $A_b$ burning area [m²]; $A_t$ throat area [m²]; $n$ [—]; $p$ [Pa].
+- **Meaning** — area errors are amplified by $1/(1-n)$ in pressure; reading a pressure–time trace backwards is how solid-motor faults are diagnosed. A grain crack raises $A_b$; a nozzle washout raises $A_t$; the two move pressure in opposite directions.
+- **Assumes** — quasi-steady; unchanged $c^*$; choked nozzle.
+- **Fails when** — the area change is faster than the chamber filling time $V_c/(c^*A_t)$, typically 10–50 ms, in which case the transient overshoots.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(...)` at both states
+- **Alias** — 20-3.14, 23-3.6, 24-3.10.
+
+### 34-5.2 — Stored energy of a burst vessel
+
+$$E = \frac{pV}{\gamma-1}\left[1 - \left(\frac{p_a}{p}\right)^{(\gamma-1)/\gamma}\right]$$
+
+- **Variables** — $E$ available work [J]; $p$, $V$ vessel pressure [Pa] and volume [m³]; $\gamma$ [—]; $p_a$ ambient pressure [Pa].
+- **Meaning** — the mechanical work a burst vessel can do on its surroundings; the number behind COPV hazard analysis and pad keep-out zones.
+- **Assumes** — ideal gas; isentropic; no heat transfer during the burst.
+- **Fails when** — $Z \neq 1$ (helium at 380 bar and 90 K has $Z \approx 1.2$, so this *underestimates* the mass and hence the energy by roughly that factor); the burst is slow enough to be near-isothermal, which gives more energy.
+- **Tag** [A] · **Code** —
+- **Alias** — 18-3.3, identical.
+
+### 34-5.3 — Rotating-cavitation excitation frequency
+
+$$f_{\text{exc}} = (\lambda - 1)\,\Omega$$
+
+- **Variables** — $\lambda$ propagation ratio [—]; $\Omega$ shaft frequency [Hz]; $f_{\text{exc}}$ blade excitation frequency [Hz].
+- **Meaning** — super-synchronous rotating cavitation loads the blade at the *difference* frequency, which is small compared with shaft speed but still hundreds of hertz — enough to accumulate millions of high-cycle-fatigue cycles in a short burn.
+- **Assumes** — a single dominant propagating cell.
+- **Fails when** — multiple cells or cavitation surge (an axial, roughly system-synchronous mode) dominate instead.
+- **Tag** [F] · **Code** —
+
+---
+
+## Module 35 — Historical Evolution
+
+### 35-5.1 — Exponential chamber-pressure trend
+
+$$\ln p_c = a + k\,t,\qquad k = 0.04725\ \mathrm{yr^{-1}},\qquad t_{2} = \frac{\ln 2}{k} = 14.7\ \mathrm{yr}$$
+
+- **Variables** — $p_c$ chamber pressure [bar]; $t$ calendar year; $k$ fitted exponential rate [1/yr]; $t_2$ doubling time [yr].
+- **Meaning** — the frontier chamber pressure of flown engines has doubled roughly every 15 years, from the V-2's 15 bar to the RD-170's 250 bar.
+- **Assumes** — the frontier is a single exponential process.
+- **Fails when** — the process is bounded, which it is: material temperature capability, cooling, and turbomachinery power all impose ceilings, and the trend has visibly flattened since the 1980s. **A fitted exponential extrapolated past its physical limit is the standard way historical trend analysis lies.**
+- **Tag** [E] [J] · **Code** —
+
+### 35-5.2 — Thrust coefficient (for the $I_{sp}$ decomposition)
+
+$$C_F = \sqrt{\frac{2\gamma^2}{\gamma-1}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{\gamma-1}}\left[1-\left(\frac{p_e}{p_c}\right)^{\frac{\gamma-1}{\gamma}}\right]} + \frac{p_e-p_a}{p_c}\varepsilon$$
+
+- **Variables** — $c^*$ [m/s]; $R$ specific gas constant [J/(kg·K)]; $T_0$ chamber stagnation temperature [K]; $\mathcal{M}$ molar mass [kg/kmol]; $\gamma$ [—]; $\varepsilon = A_e/A_t$ [—]; $p_a$ [Pa]; $\eta$ lumped $c^*$ efficiency [—].
+- **Meaning** — used with $c^* = \sqrt{RT_0}/\Gamma$ to decompose the V-2 → RD-180 specific-impulse gain into its causes: propellant chemistry, chamber pressure, expansion ratio, and combustion efficiency. The answer is that most of the gain came from $\varepsilon$ and $p_c$, not from chemistry.
+- **Assumes** — calorically perfect gas; frozen composition; isentropic attached flow; 1-D exit.
+- **Fails when** — the exit is separated; real-gas effects are understated. Use CEA for design.
+- **Tag** [F] [A] · **Code** `Cf(gamma, eps, p0, pa)`, `c_star(gamma, R, T0)`
+- **Alias** — 03-3.9, 29-3.10.
+
+### 35-5.3 — Solid-motor mass fraction versus year
+
+$$\zeta = b_0 + b_1 t,\qquad b_1 = 3.98\times10^{-4}\ \mathrm{yr^{-1}} = 0.004\ \text{per decade},\qquad R^2 = 0.059$$
+
+- **Variables** — $\zeta$ propellant mass fraction [—]; $t$ calendar year; $b_1$ slope [1/yr]; $R^2$ coefficient of determination [—].
+- **Meaning** — ordinary least squares on flown motors. **$R^2 = 0.059$ says the year explains 5.9 % of the variance — essentially none.** Solid mass fraction is set by motor size and mission class, not by date; this is the module's negative result and it is deliberate.
+- **Assumes** — year is the explanatory variable.
+- **Fails when** — read as a trend at all. Quote the $R^2$ whenever you quote the slope; a slope without its $R^2$ is an assertion.
+- **Tag** [E] [J] · **Code** —
+
+---
+
+## Module 36 — Modern Engineering Methods
+
+### 36-3.1 — Grid convergence index
+
+$$\mathrm{GCI}_{\text{fine}} = \frac{F_s\,\lvert \epsilon_{21}\rvert}{r^{\,p}-1},\qquad \epsilon_{21}=\frac{\phi_2-\phi_1}{\phi_1},\qquad r=\frac{h_2}{h_1}$$
+
+- **Variables** — $\phi_1, \phi_2$ the quantity of interest on the fine and coarse grids [any unit]; $h$ representative cell size [m]; $r$ refinement ratio [—]; $p$ observed order of accuracy [—]; $F_s$ safety factor [—], 1.25 with three grids, 3 with two.
+- **Meaning** — an error band on the fine-grid answer expressed as a percentage; the standard way to report that a CFD result is grid-converged.
+- **Assumes** — the grids are in the **asymptotic range**, i.e. the error is already dominated by the leading truncation term; the solution is smooth; the refinement is uniform.
+- **Fails when** — the three grid answers are not monotone (very common in separated or reacting flow); the observed $p$ comes out negative or far above the scheme's formal order; limiters and shock capturing make the scheme locally first-order.
+- **Tag** [F] for the estimator, [J] for the safety factor · **Code** —
+
+### 36-3.2 — Constrained Gibbs minimisation
+
+$$\min_{n_j}\ G=\sum_j n_j\left(\mu_j^\circ(T)+R_uT\ln\frac{n_j p}{n_{\text{tot}}p^\circ}\right)\quad\text{s.t.}\quad \sum_j a_{ij}n_j=b_i$$
+
+- **Variables** — $n_j$ moles of species $j$ [kmol]; $\mu_j^\circ$ standard chemical potential [J/kmol] from the NASA polynomial fits; $a_{ij}$ atoms of element $i$ in species $j$ [—]; $b_i$ total moles of element $i$ [kmol]; $R_u = 8314.46$ J/(kmol·K); $p^\circ$ standard pressure.
+- **Meaning** — chemical equilibrium is the composition of lowest free energy consistent with the atoms you put in. **This is literally what CEA solves.**
+- **Assumes** — ideal-gas mixture (with optional condensed phases); infinite residence time; uniform state; and critically, that every relevant species is *in the species list*.
+- **Fails when** — chemistry is slow relative to the flow (recombination freeze in a nozzle); the mixture is not uniform (every real injector); real-gas effects matter (dense LOX near the injector); a species that should have been included was not.
+- **Tag** [F] · **Code** —
+- **Alias** — 01-3.14, 04-3.5 for the polynomial.
+
+### 36-3.3 — Engine balance, quasi-steady form
+
+$$\dot m_{\text{total}} = \frac{p_c A_t}{c^*(r,p_c)}$$
+
+- **Variables** — as Modules 12–13; $H$ pump head [m]; $N$ shaft speed [rad/s]; $\eta_p$, $\eta_t$ efficiencies [—]; $\Pi$ turbine pressure ratio [—]; $c^*$ [m/s] interpolated from an equilibrium table; $r$ mixture ratio [—].
+- **Meaning** — the engine's operating point is the simultaneous solution of "everything that must add up": choked-throat flow, pump and turbine maps, line and injector resistances, and the cycle power balance of 13-3.3.
+- **Assumes** — quasi-steady flow; lumped components; incompressible pumps; no distributed dynamics; maps valid at the operating point.
+- **Fails when** — any element is choked in a way the map does not represent; two-phase flow appears (chill-down, cavitation, coolant boiling); the pump operates far off its map; any transient faster than the component filling times.
+- **Tag** [F] for the conservation statements, [E] for the maps · **Code** `choked_mdot`, `pump_power`, `turbine_power`
+
+### 36-3.4 — Transient lumped-parameter model
+
+$$L\frac{d\dot m}{dt} = A\,(p_1-p_2) - \Delta p_{\text{loss}},\qquad I\frac{dN}{dt}=\frac{P_{\text{turb}}-P_{\text{pump}}}{N}$$
+
+- **Variables** — $V$ lumped volume [m³]; $\rho$ [kg/m³]; $e$ specific internal energy [J/kg]; $L = \ell/A$ line inertance [1/m]; $I$ rotor polar inertia [kg·m²]; $N$ shaft speed [rad/s]; $P$ powers [W].
+- **Meaning** — mass, energy and momentum storage in every volume and line, plus rotor spin-up: the model that predicts a start transient.
+- **Assumes** — 1-D lines; lumped volumes small compared with the acoustic wavelength of interest; a valid equation of state (usually REFPROP/NIST for cryogens).
+- **Fails when** — acoustic behaviour matters (this model cannot represent a chamber acoustic mode); the volume is not well-mixed; two-phase flow needs a real slip model rather than homogeneous equilibrium.
+- **Tag** [F] · **Code** —
+
+### 36-3.5 — Marched regenerative-channel model
+
+$$q = \frac{T_{aw}-T_{c}}{\dfrac{1}{h_g}+\dfrac{t_w}{k_w}+\dfrac{1}{\eta_f h_c}},\qquad \dot m_c c_p \frac{dT_c}{dx}=q\,P_{\text{heated}},\qquad \frac{dp_c}{dx}=-f\frac{\rho u^2}{2D_h}$$
+
+- **Variables** — $t_w$ wall thickness [m]; $k_w$ wall conductivity [W/(m·K)]; $h_c$ coolant-side coefficient [W/(m²·K)] from a Dittus–Boelter-type correlation; $\eta_f$ fin efficiency of the channel rib [—]; $P_{\text{heated}}$ heated perimeter per unit length [m]; $f$ Darcy friction factor [—]; $D_h$ [m]; $T_c$ coolant bulk temperature [K].
+- **Meaning** — a series thermal resistance at every axial station, marched downstream with the coolant's energy and momentum equations. This is how every regenerative jacket is actually sized.
+- **Assumes** — 1-D conduction through the wall; circumferentially uniform gas-side flux; fully developed single-phase coolant; correlations valid at the local state.
+- **Fails when** — the coolant is near-critical (methane at 100–200 bar is *not* near-critical, hydrogen at 40 bar is); there is a circumferential streak; curvature or secondary flows matter; the channel is not straight; nucleate or film boiling appears.
+- **Tag** [F] for the resistance network, [E] for every correlation in it · **Code** `heat_flux`, `wall_dT`, `dittus_boelter`, `coolant_bulk_rise`
+- **Alias** — 10-3.6, 11-3.4/3.6/3.7/3.10.
+
+### 36-3.6 — Reacting species transport
+
+$$\frac{\partial(\rho Y_k)}{\partial t}+\nabla\!\cdot(\rho\mathbf{u}Y_k)=\nabla\!\cdot(\rho D_k\nabla Y_k)+\dot\omega_k$$
+
+- **Variables** — $\rho$ [kg/m³]; $\mathbf{u}$ [m/s]; $p$ [Pa]; $\boldsymbol{\tau}$ viscous stress [Pa]; $Y_k$ mass fraction of species $k$ [—]; $D_k$ diffusivity [m²/s]; $\dot\omega_k$ net chemical production rate [kg/(m³·s)].
+- **Meaning** — the Navier–Stokes equations with reacting species; the governing system every combustion CFD code discretises.
+- **Assumes** — continuum ($Kn \ll 1$ — true everywhere in a chamber, not true in the far plume of a cold-gas thruster); Newtonian fluid; Fickian diffusion.
+- **Fails when** — the equation of state is wrong (dense supercritical injection); radiation is a significant energy path (soot-forming propellants); the species set is inadequate.
+- **Tag** [F] · **Code** —
+
+### 36-3.7 — DNS cell-count scaling
+
+$$N_{\text{cells}}\sim\left(\frac{L}{\eta_K}\right)^{3}\sim Re_L^{9/4}$$
+
+- **Variables** — $L$ integral length scale [m]; $\eta_K$ Kolmogorov length [m]; $Re_L = uL/\nu$ [—].
+- **Meaning** — resolving every eddy costs the cube of the scale separation. This is why DNS of a full rocket chamber is and will remain impossible, and why turbulence modelling exists.
+- **Assumes** — homogeneous isotropic turbulence scaling; a wall-bounded flow is worse.
+- **Fails when** — combustion adds a flame thickness smaller than $\eta_K$, which it often does; the estimate is then not even a bound.
+- **Tag** [F] · **Code** —
+
+### 36-3.8 — Boussinesq hypothesis and the SST eddy viscosity
+
+$$-\overline{\rho u_i'u_j'} = \mu_t\left(\frac{\partial \bar u_i}{\partial x_j}+\frac{\partial \bar u_j}{\partial x_i}-\frac{2}{3}\frac{\partial \bar u_k}{\partial x_k}\delta_{ij}\right)-\frac{2}{3}\rho k\,\delta_{ij},\qquad \mu_t=\frac{\rho a_1 k}{\max(a_1\omega,\;S F_2)}$$
+
+- **Variables** — $\mu_t$ turbulent viscosity [Pa·s]; $k$ turbulent kinetic energy [m²/s²]; $\omega$ specific dissipation rate [1/s]; $S$ strain-rate magnitude [1/s]; $a_1 = 0.31$ [—]; $F_2$ blending function [—].
+- **Meaning** — turbulent momentum transport is represented as a large extra viscosity aligned with the mean strain.
+- **Assumes** — local equilibrium of turbulence production and dissipation; alignment of the Reynolds stress tensor with the mean strain tensor.
+- **Fails when** — the flow has strong streamline curvature, strong swirl, significant rotation, large separated regions, or strong density gradients — **i.e. in every one of the flows a rocket injector produces.**
+- **Tag** [E] [J] — a *calibrated* model, not a derived one · **Code** —
+
+### 36-3.9 — Presumed-PDF flamelet closure
+
+$$\tilde\phi = \int\!\!\int \phi(Z,C)\,\tilde P(Z)\,\tilde P(C)\,dZ\,dC$$
+
+- **Variables** — $\phi$ any thermochemical quantity; $Z$ mixture fraction [—]; $C$ progress variable [—]; $\tilde P$ presumed sub-filter PDFs (usually a beta function for $Z$, a delta or beta for $C$).
+- **Meaning** — replaces an expensive chemistry integration with a table lookup and a presumed-PDF convolution; the reason combustion CFD is affordable at all.
+- **Assumes** — thin flame ($Ka < 1$); unity-ish Lewis numbers; statistical independence of $Z$ and $C$; equilibrium of the flame structure with local strain.
+- **Fails when** — the flame is thickened by turbulence ($Ka > 1$); during ignition and extinction (transient flamelets); for partially premixed and multi-stream problems — **a staged-combustion chamber has *three* streams (main oxidiser, main fuel, preburner gas) and a single $Z$ cannot describe three streams**; and near walls.
+- **Tag** [E] [A] · **Code** —
+
+### 36-3.10 — Lagrangian droplet drag and evaporation
+
+$$m_d\frac{d\mathbf{u}_d}{dt}=\frac{1}{2}C_D\rho_g A_d\lvert\mathbf{u}_g-\mathbf{u}_d\rvert(\mathbf{u}_g-\mathbf{u}_d)+m_d\mathbf{g},\qquad \frac{dm_d}{dt}=-\pi d\,\rho_g D\,\mathrm{Sh}\,\ln(1+B_M)$$
+
+- **Variables** — $m_d$ droplet mass [kg]; $d$ diameter [m]; $C_D$ drag coefficient [—]; $A_d$ frontal area [m²]; Sh Sherwood number [—]; $B_M$ Spalding mass-transfer number [—]; $D$ diffusivity [m²/s].
+- **Meaning** — a droplet is a point that feels drag and evaporates, exchanging mass, momentum and energy with the gas cell it occupies. The $\ln(1+B_M)$ is the same Spalding factor as the $d^2$ law of 07-3.14.
+- **Assumes** — dilute spray (droplets do not see each other); spherical drops much smaller than the cell; a subcritical droplet with a distinct surface; a known initial droplet size distribution.
+- **Fails when** — the spray is dense near the injector — **it always is, and the region where breakup actually happens is precisely where the dilute assumption is invalid**; the drop is supercritical (no surface, no latent heat — the whole formulation collapses); the cell size is comparable to the drop.
+- **Tag** [E] [A] · **Code** —
+- **Alias** — 07-3.14, 07-3.15.
+
+### 36-3.11 — Method of characteristics compatibility relation
+
+$$\theta \pm \nu(M) = \text{const along } C_\mp,\qquad \nu(M)=\sqrt{\frac{\gamma+1}{\gamma-1}}\arctan\!\sqrt{\frac{\gamma-1}{\gamma+1}(M^2-1)}-\arctan\!\sqrt{M^2-1}$$
+
+- **Variables** — $\theta$ flow angle [rad]; $\nu$ Prandtl–Meyer function [rad]; $M$ [—]; $\gamma$ [—].
+- **Meaning** — in supersonic irrotational flow, $\theta \pm \nu$ is constant along characteristic lines, which turns contour design into a marching algebra problem. It is still the right tool for a nozzle contour; RANS is for checking it.
+- **Assumes** — steady; supersonic throughout; irrotational; isentropic; calorically perfect (or a corrected $\gamma$); no viscosity.
+- **Fails when** — shocks appear inside the nozzle; the transonic throat region (handled by a separate transonic start line); the flow separates; the boundary layer is thick.
+- **Tag** [F] · **Code** —
+- **Alias** — 02-3.19 gives $\nu(M)$ alone.
+
+### 36-3.12 — Conjugate heat transfer interface conditions
+
+$$T_{g,\text{wall}}=T_{s,\text{wall}},\qquad -k_g\left.\frac{\partial T}{\partial n}\right|_g=-k_s\left.\frac{\partial T}{\partial n}\right|_s$$
+
+- **Variables** — $k_g$, $k_s$ gas and solid conductivity [W/(m·K)]; $n$ wall-normal coordinate [m].
+- **Meaning** — **the wall temperature is an *output* of the coupled problem, not an input to a decoupled one.** This is the modern replacement for guessing $T_{wg}$ and iterating.
+- **Assumes** — no contact resistance (a real issue at braze joints and AM part-to-part interfaces); all three domains resolved adequately.
+- **Fails when** — the thermal time constants of the three domains differ by orders of magnitude and the coupling scheme is not designed for it (gas-side response microseconds, wall conduction milliseconds, coolant bulk tens of milliseconds); the coupling is under-relaxed to the point of a converged-looking but unconverged answer.
+- **Tag** [F] · **Code** —
+
+### 36-3.13 — Bartz correlation (as a CFD sanity check)
+
+$$h_g=\frac{0.026}{D_t^{0.2}}\left(\frac{\mu^{0.2}c_p}{Pr^{0.6}}\right)_0\left(\frac{p_c}{c^*}\right)^{0.8}\left(\frac{D_t}{r_c}\right)^{0.1}\left(\frac{A_t}{A}\right)^{0.9}\sigma$$
+
+- **Variables** — as 10-3.4; $\sigma$ property-variation correction [—].
+- **Meaning** — a Dittus–Boelter-type turbulent pipe correlation reshaped for a nozzle. Its role in a modern workflow is as the **order-of-magnitude check on a conjugate-CFD result**: if the CFD disagrees with Bartz by more than a factor of ~1.5 at the throat, suspect the CFD.
+- **Assumes** — attached turbulent boundary layer; chamber-stagnation properties; no film cooling; no injector-driven maldistribution.
+- **Fails when** — those hold poorly. The original paper calls it a *rapid estimate*; the honest band is ±20–30 % at the throat and worse elsewhere.
+- **Tag** [E] · **Code** `bartz_hg(...)`, `bartz_sigma(...)`
+- **Alias** — 10-3.4, 24-3.3.
+
+### 36-3.14 — Elastic thermal stress (as a plasticity index)
+
+$$\sigma_{\text{th}}=\frac{E\,\alpha\,\Delta T}{2(1-\nu)}$$
+
+- **Variables** — $E$ [Pa]; $\alpha$ [1/K]; $\Delta T$ through-thickness temperature drop [K]; $\nu$ [—].
+- **Meaning** — a fully constrained wall with a linear through-thickness gradient. In a modern workflow its only use is to tell you *how far* into plasticity you are before running the nonlinear analysis.
+- **Assumes** — elastic; fully constrained; linear gradient; temperature-independent properties.
+- **Fails when** — immediately: for a copper liner at a 250 K gradient it predicts stresses far above yield, so the real answer is plastic.
+- **Tag** [F] as a bound, [A] as an answer · **Code** `thermal_stress_hoop(E, alpha, dT, nu)`
+- **Alias** — 10-3.8, 11-3.14, 16-3.2.
+
+### 36-3.15 — Coffin–Manson low-cycle fatigue
+
+$$\frac{\Delta\varepsilon_p}{2}=\varepsilon_f'\,(2N_f)^{c}$$
+
+- **Variables** — $\Delta\varepsilon_p$ plastic strain range [—]; $\varepsilon_f'$ fatigue ductility coefficient [—]; $c$ fatigue ductility exponent [—], typically −0.5 to −0.7; $N_f$ cycles to failure [—].
+- **Meaning** — log-linear relation between plastic strain amplitude and life; the acceptance criterion for a reusable chamber liner.
+- **Assumes** — isothermal, uniaxial, fully reversed cycling on the material the coefficients were measured on; no creep, no environment, no mean stress.
+- **Fails when** — the cycle is thermomechanical rather than isothermal (TMF is materially worse at the same strain range); hold-time creep interacts; the environment attacks the surface — **hydrogen blanching of copper liners is precisely this**; the material is not the coupon material, which for an AM liner it is not.
+- **Tag** [E] · **Code** —
+- **Alias** — 16-3.6, identical.
+
+### 36-3.16 — Multidisciplinary design optimisation statement
+
+$$\min_{\mathbf{x}}\ f(\mathbf{x},\mathbf{y})\quad\text{s.t.}\quad \mathbf{g}(\mathbf{x},\mathbf{y})\le0,\quad \mathbf{h}(\mathbf{x},\mathbf{y})=0,\quad \mathbf{y}=\mathbf{Y}(\mathbf{x},\mathbf{y})$$
+
+- **Variables** — $\mathbf{x}$ design variables; $\mathbf{y}$ coupling variables (outputs of one discipline that are inputs to another); $\mathbf{g}$, $\mathbf{h}$ inequality and equality constraints.
+- **Meaning** — the last equation is what makes it *multidisciplinary*: the coupling variables must be self-consistent, a fixed-point problem nested inside the optimisation.
+- **Assumes** — disciplinary analyses are deterministic, reasonably smooth, and cheap enough to call many times.
+- **Fails when** — an analysis is noisy (CFD with a convergence tolerance is a noisy function); discontinuous (a design change that switches which constraint is active); or takes hours, in which case surrogates are needed.
+- **Tag** [F] as a statement, [J] as a practice · **Code** —
+
+### 36-3.17 — Topology optimisation (SIMP compliance minimisation)
+
+$$\min_{\boldsymbol\rho}\ C=\mathbf{u}^\mathsf{T}\mathbf{K}(\boldsymbol\rho)\mathbf{u}\quad\text{s.t.}\quad \mathbf{K}(\boldsymbol\rho)\mathbf{u}=\mathbf{f},\quad \sum_e \rho_e v_e \le V^{*}$$
+
+- **Variables** — $\rho_e$ element pseudo-density [—]; $p$ penalisation exponent [—]; $C$ compliance [J]; $v_e$ element volume [m³]; $V^*$ volume budget [m³].
+- **Meaning** — penalisation makes intermediate densities structurally inefficient, so the optimiser drives elements to 0 or 1 and a discrete shape emerges. This is what produces the organic-looking AM brackets and manifolds.
+- **Assumes** — linear elasticity; a single load case (or a weighted set); stiffness as the objective.
+- **Fails when** — the real driver is strength, buckling, fatigue or a thermal gradient rather than stiffness. Compliance minimisation will happily produce thin members that buckle or notch-sensitive junctions that crack. Also mesh-dependent and prone to checkerboarding without a density filter of radius $r_{\min}$, which then sets the minimum feature size.
+- **Tag** [F] [E] · **Code** —
+
+### 36-3.18 — Gaussian-process surrogate
+
+$$\hat\mu(\mathbf{x}_*)=\mathbf{k}_*^\mathsf{T}(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf{y},\qquad \hat\sigma^2(\mathbf{x}_*)=k(\mathbf{x}_*,\mathbf{x}_*)-\mathbf{k}_*^\mathsf{T}(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf{k}_*$$
+
+- **Variables** — $\mathbf{K}$ the $n\times n$ covariance matrix of training inputs; $\mathbf{k}_*$ covariance vector between $\mathbf{x}_*$ and the training points; $\sigma_n^2$ observation noise; $\mathbf{y}$ training outputs.
+- **Meaning** — the prediction is a weighted average of nearby observations, and the variance grows as you move away from data — which is what makes it usable for design-of-experiments and Bayesian optimisation.
+- **Assumes** — the chosen kernel's smoothness and stationarity are appropriate; the data is noise-consistent.
+- **Fails when** — the function has a discontinuity or sharp regime change (a stationary kernel cannot represent it); dimensionality is high (>15–20 without structure); and importantly, **the variance estimate is only valid *under the assumed kernel*, so a confidently wrong kernel gives confidently wrong error bars.** Cost is $O(n^3)$ to fit.
+- **Tag** [F] [E] · **Code** —
+
+### 36-3.19 — Monte Carlo estimator and its standard error
+
+$$\hat\mu=\frac{1}{N}\sum_{i=1}^{N}f(\mathbf{x}_i),\qquad \mathrm{SE}(\hat\mu)=\frac{\hat\sigma}{\sqrt{N}}$$
+
+- **Variables** — $N$ sample count [—]; $\hat\sigma$ sample standard deviation of the output.
+- **Meaning** — the estimate's own error falls as $N^{-1/2}$ **independent of dimension**, which is why Monte Carlo beats quadrature above about five uncertain inputs.
+- **Assumes** — independent samples from a correctly specified joint input distribution; the model deterministic and defined everywhere in the sample space.
+- **Fails when** — the input distributions are guessed, the usual case — **the answer's credibility is capped by the inputs' credibility**; inputs are correlated and the correlation is ignored; the quantity of interest is a far-tail probability, where $N^{-1/2}$ is ruinously slow and importance sampling or a limit-state method is needed.
+- **Tag** [F] · **Code** —
+
+### 36-3.20 — Logarithmic sensitivity propagation
+
+$$\left(\frac{\sigma_f}{f}\right)^2\approx\sum_i\left(\frac{\partial \ln f}{\partial \ln x_i}\right)^2\left(\frac{\sigma_{x_i}}{x_i}\right)^2$$
+
+- **Variables** — logarithmic sensitivities $\partial\ln f/\partial\ln x_i$ [—], which for a product of powers are just the exponents.
+- **Meaning** — for a product-of-powers relationship, relative uncertainties add in quadrature weighted by the exponents.
+- **Assumes** — linear response over the uncertainty range; independent inputs; an approximately normal output distribution.
+- **Fails when** — the model is nonlinear over the input range (an engine balance near a constraint boundary certainly is); a constraint activates; the output distribution is skewed — and it can never produce the tail shape, only a variance.
+- **Tag** [F] · **Code** `rel_unc_product(*rel)`, `rel_unc_power(rel, exponent)`
+- **Alias** — 18-3.20, identical.
+
+### 36-3.21 — Sobol sensitivity indices
+
+$$S_i=\frac{\mathrm{Var}_{x_i}\!\left(\mathbb{E}[f\mid x_i]\right)}{\mathrm{Var}(f)},\qquad S_{Ti}=1-\frac{\mathrm{Var}_{\mathbf{x}_{\sim i}}\!\left(\mathbb{E}[f\mid \mathbf{x}_{\sim i}]\right)}{\mathrm{Var}(f)}$$
+
+- **Variables** — $\mathbf{x}_{\sim i}$ all inputs except $i$; $S_i$ first-order index [—]; $S_{Ti}$ total index [—].
+- **Meaning** — $S_i$ is the fraction of output variance removed by learning $x_i$ exactly; $S_{Ti}$ additionally includes $x_i$'s interactions, so $S_{Ti}-S_i$ measures interaction. This is how you decide which measurement to improve.
+- **Assumes** — independent inputs; correlated inputs need a generalised decomposition.
+- **Fails when** — inputs are strongly correlated; the indices are then not interpretable.
+- **Tag** [F] · **Code** —
+
+---
