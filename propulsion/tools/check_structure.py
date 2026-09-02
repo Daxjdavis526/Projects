@@ -91,7 +91,7 @@ def main() -> int:
     src_path = os.path.join(ROOT, "reference", "sources.md")
     if os.path.exists(src_path):
         src = read(src_path)
-        defined = set(re.findall(r"`\[([^\]`]+)\]`", src))
+        defined = set(re.findall(r"\*\*\[([^\]]+)\]\*\*", src)) | set(re.findall(r"`\[([^\]`]+)\]`", src))
         if defined:
             for d in sorted(part_dirs) + ["exams", "part6-interview"]:
                 full = os.path.join(ROOT, d)
@@ -101,13 +101,20 @@ def main() -> int:
                     if not fn.endswith(".md"):
                         continue
                     text = read(os.path.join(full, fn))
+                    # drop fenced code (Mermaid node labels look like tags) and math
+                    text = re.sub(r"```.*?```", "", text, flags=re.S)
+                    text = re.sub(r"\$\$.*?\$\$", "", text, flags=re.S)
+                    text = re.sub(r"\$[^$\n]*\$", "", text)
                     used = set()
                     for t in TAG_RE.findall(text):
                         base = re.split(r"[\s,;§]", t)[0]
                         used.add(base)
                     # ignore epistemic tags and obvious non-citations
                     skip = {"F", "E", "H", "M", "R", "A", "J", "SI", "K1", "K2", "K3", "K4"}
+                    unitlike = re.compile(r"^(Pa|K|N|W|J|m|s|kg|MPa|kPa|bar|psi|Hz|mm|cm|V|A|C|kN|MN|GPa|MW|kW|dB|ppm|rad|deg|K⁻¹|N·s|N·m|N·m·s|mN|µm|μm)$")
                     for u in sorted(used - skip):
+                        if unitlike.match(u) or "/" in u or "·" in u or "^" in u:
+                            continue
                         if u not in defined and not any(u == dd.split()[0] for dd in defined):
                             failures.append(f"{d}/{fn}: citation tag [{u}] not in sources.md")
     else:

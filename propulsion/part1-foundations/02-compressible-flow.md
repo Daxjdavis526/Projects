@@ -1002,7 +1002,7 @@ with $M_e = 3.604$: $p_{sep}/p_a = (1.88\times3.604-1)^{-0.64} = 0.278$, i.e.
 full at sea level, comfortably. That is exactly why $\varepsilon = 16$ was
 chosen (§6.2).
 
-**Sanity check.** Published F-1 total flow is 2577 kg/s [_verify-liquid, F-1].
+**Sanity check.** Published F-1 total flow is 2577 kg/s (reference/_verify-liquid.md, F-1 entry).
 We computed 2405 kg/s, 6.7% low. The gap is not an error in Eq. 3.10; it is the
 chamber pressure. The F-1's $p_c$ is quoted at 965, 982, 1015 and 1125 psia in
 different sources, and $\dot m \propto p_0$: at 1125 psia (77.6 bar) the same
@@ -1376,10 +1376,10 @@ the throat, where $dA/dx$ is largest and a manufacturing deviation moves the
 sonic line; it matters less far downstream, where $dM/d(A/A_t)$ is small (§3.7).
 This is why throat inserts are ground and the exit cone is not.
 
-**Testing.** What is measured: chamber pressure (injector-end and, if you are
-careful, throat-stagnation — the two differ by a few percent and half the
-literature's disagreements come from which one was quoted [_verify-liquid, §18]);
-wall static pressure at a series of area ratios; thrust on a calibrated stand;
+**Testing.** What is measured: chamber pressure — injector-end and, if you are
+careful, throat-stagnation, which differ by a few percent and are the source of
+half the literature's disagreements about $p_c$ (see `reference/_verify-liquid.md`,
+contested figure 18); wall static pressure at a series of area ratios; thrust on a calibrated stand;
 nozzle strain and actuator loads for side loads; and high-speed video of the
 plume. What the data looks like when it is wrong: a wall static tap reading
 close to ambient where the isentropic solution says it should read a fifth of

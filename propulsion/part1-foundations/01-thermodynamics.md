@@ -1044,8 +1044,8 @@ $$c_v = c_p - R = 3742.1 - 600.5 = 3141.5\ \mathrm{J/(kg\,K)}$$
 $$\gamma = \frac{c_p}{c_v} = \frac{3742.1}{3141.5} = \mathbf{1.1912}$$
 
 **Step 5 — characteristic velocity.**
-$$\Gamma(\gamma) = \sqrt{\gamma}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}} = 0.6413$$
-$$c^*_{ideal} = \frac{\sqrt{RT_0}}{\Gamma} = \frac{\sqrt{600.54\times3600}}{0.6413} = \frac{1470.4}{0.6413} = 2273\ \mathrm{m/s}$$
+$$\Gamma(\gamma) = \sqrt{\gamma}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}} = 0.6468$$
+$$c^*_{ideal} = \frac{\sqrt{RT_0}}{\Gamma} = \frac{\sqrt{600.54\times3600}}{0.6468} = \frac{1470.4}{0.6468} = 2273\ \mathrm{m/s}$$
 
 **Sanity check.** Published $\gamma$ for LOX/LH₂ chamber gas is 1.19–1.20 and
 $\mathcal{M}$ is quoted between 13.5 and 13.9 depending on the source and the

@@ -247,9 +247,9 @@ per unit propellant *mass* in the other, and the two conventions are the
 single most common unit error in this field.
 
 $$
-I_{sp} \;=\; \frac{F}{\dot m\, g_0} \;=\; \frac{c}{g_0} \quad [\mathrm{s}]
+I_{sp} \;=\; \frac{F}{\dot m\, g_0} \;=\; \frac{c}{g_0} \quad (\mathrm{s})
 \qquad\qquad
-I_{sp,m} \;=\; \frac{F}{\dot m} \;=\; c \quad [\mathrm{N\,s/kg} = \mathrm{m/s}]
+I_{sp,m} \;=\; \frac{F}{\dot m} \;=\; c \quad (\mathrm{N\,s/kg} = \mathrm{m/s})
 $$
 
 > **Eq. 3.5** — variables: $g_0 = 9.80665$ m/s² exactly, a *defined* constant.
@@ -302,8 +302,7 @@ The group $\sqrt{RT_0} = \sqrt{R_u T_0/\mathcal{M}}$ is the whole propellant
 selection argument in one expression: **you want a hot chamber and, more
 strongly, light exhaust products.** $\mathcal{M}$ appears under a square root
 in the denominator, and hydrogen-rich exhaust ($\mathcal{M} \approx 13.5$
-kg/kmol for LOX/LH2 at $MR = 6$) beats kerosene exhaust ($\mathcal{M}\approx
-23$ kg/kmol) by $\sqrt{23/13.5} = 1.31$ on that factor alone, even though
+kg/kmol for LOX/LH2 at $MR = 6$) beats kerosene exhaust ($\mathcal{M}\approx 23$ kg/kmol) by $\sqrt{23/13.5} = 1.31$ on that factor alone, even though
 kerolox burns *hotter*. That is why the RS-25 makes 452 s and the F-1 made
 304 s.
 
@@ -926,8 +925,7 @@ $$c = c^* C_f = 1689 \times 1.602 = 2\,706\ \mathrm{m/s} \quad\Rightarrow\quad I
 Vacuum: $C_{f,vac,ideal} = 1.7971$, $C_{f,vac} = 1.761$, so
 $I_{sp,vac} = 1689\times1.761/9.80665 = 303.3$ s and
 $F_{vac} = \dot m c_{vac} = 184.8 \times 2974 = 549.6$ kN. Note the vacuum
-thrust is 9.9 % above sea level, exactly $p_a A_e / F_{SL} = 101\,325\times
-0.4993/500\,000 = 10.1$ % less the small $C_f$ bookkeeping — a good internal
+thrust is 9.9 % above sea level, exactly $p_a A_e / F_{SL} = 101\,325\times 0.4993/500\,000 = 10.1$ % less the small $C_f$ bookkeeping — a good internal
 check.
 
 **Step 11 — chamber.** LOX/RP-1, take $L^* = 1.1$ m [E]:
@@ -1043,8 +1041,7 @@ you should be suspicious of the agreement rather than pleased by it.
 - But the constant-$\gamma$, calorically perfect, chemically frozen model
   *under*predicts the exhaust velocity of a real LOX/LH2 nozzle, because real
   expansion is closer to shifting equilibrium: dissociated H and OH recombine
-  downstream and release heat that a frozen model throws away. At $\varepsilon
-  = 69$ that recovery is worth several per cent.
+  downstream and release heat that a frozen model throws away. At $\varepsilon = 69$ that recovery is worth several per cent.
 
 The two errors are of similar size and opposite sign. This is the standard
 trap: **a single-$\gamma$ model can land within 1 % of a real hydrogen engine
@@ -1089,8 +1086,7 @@ $\gamma$ and $p_e/p_c$) is 1.68875. Then:
 $$C_{f,SL} = 1.68875 + \frac{65\,672 - 101\,325}{9.7\times10^6}\times16 = 1.68875 - 0.05881 = \mathbf{1.6299}$$
 $$C_{f,vac} = 1.68875 + \frac{65\,672 - 0}{9.7\times10^6}\times16 = 1.68875 + 0.10833 = \mathbf{1.7971}$$
 
-The difference between them is exactly $p_a\varepsilon/p_c = 101\,325\times16/9.7\times10^6
-= 0.16714$, which is the check to run before trusting either number.
+The difference between them is exactly $p_a\varepsilon/p_c = 101\,325\times16/9.7\times10^6 = 0.16714$, which is the check to run before trusting either number.
 
 $$\frac{C_{f,vac}}{C_{f,SL}} = \frac{1.7971}{1.6299} = 1.1025$$
 
@@ -1174,8 +1170,7 @@ $c^* = 421\times9.80665/1.851 = 2\,230$ m/s against an ideal ~2 300 —
 $\eta_{ov} \approx 0.97$, excellent for 1965.
 
 **Why only $\varepsilon = 27.5$ on a vacuum-only engine?** Because the S-IVB
-interstage was that wide. The verification file is explicit: "$\varepsilon =
-27.5$ is small for a vacuum engine because the S-IVB interstage constrained the
+interstage was that wide. The verification file is explicit: "$\varepsilon = 27.5$ is small for a vacuum engine because the S-IVB interstage constrained the
 nozzle." Going to $\varepsilon = 60$ would have bought roughly 15 s. The
 alternatives in 1962 were an extendible nozzle (unproven, and the deployment
 mechanism is a single-point failure ahead of translunar injection — nobody was

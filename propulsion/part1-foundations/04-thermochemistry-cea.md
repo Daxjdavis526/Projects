@@ -410,9 +410,9 @@ When someone quotes "the optimum mixture ratio," ask them: optimum in $c^*$, in
 sea-level $I_{sp}$, or in vacuum $I_{sp}$ at what $\varepsilon$?
 
 **(c) Both optima are far fuel-rich of stoichiometric.** $r_{st} = 7.94$; the vacuum
-$I_{sp}$ optimum is near 5.0; flying engines sit at 5.0–6.1. Running stoichiometric
-would cost about 16 s of vacuum $I_{sp}$ against the optimum, and would raise $T_0$ by
-140 K into a wall-heat-flux regime nobody wants.
+$I_{sp}$ optimum is near 5.0; flying engines sit at 5.0–6.1. Running stoichiometric would
+cost about 16 s of vacuum $I_{sp}$ against the optimum, and would raise $T_0$ by nearly
+400 K into a wall-heat-flux regime nobody wants.
 
 For kerolox the same argument runs with different numbers: $r_{st} = 3.41$, the
 theoretical $I_{sp}$ optimum sits near $r \approx 2.6$–2.8, and flying engines sit at
@@ -994,11 +994,14 @@ $$A = 2(42.88) + 0.6453(28.43) = 85.76 + 18.35 = 104.11\ \mathrm{kJ/K}$$
 $$B = 2(4.414\times10^{-3}) + 0.6453(2.861\times10^{-3}) = 1.0674\times10^{-2}\ \mathrm{kJ/K^2}$$
 
 $$A(T-1000) + \tfrac{B}{2}(T^2 - 10^6) = 418{,}347$$
-$$5.337\times10^{-3}\,T^2 + 104.11\,T - 490{,}971 - 36{,}819= 0 \quad\Rightarrow\quad
-5.337\times10^{-3}\,T^2 + 104.11\,T - 527{,}790 = 0$$
 
-$$T = \frac{-104.11 + \sqrt{104.11^2 + 4(5.337\times10^{-3})(527{,}790)}}{2(5.337\times10^{-3})}
-= \frac{-104.11 + 148.68}{1.0674\times10^{-2}} = \boxed{4176\ \mathrm{K}}$$
+Expanding, $104.11\,T - 104{,}110 + 5.337\times10^{-3}T^2 - 5{,}337 = 418{,}347$, so
+
+$$5.337\times10^{-3}\,T^2 + 104.11\,T - 527{,}794 = 0$$
+
+$$T = \frac{-104.11 + \sqrt{104.11^2 + 4(5.337\times10^{-3})(527{,}794)}}{2(5.337\times10^{-3})}
+= \frac{-104.11 + \sqrt{10{,}839 + 11{,}267}}{1.0674\times10^{-2}}
+= \frac{44.57}{1.0674\times10^{-2}} = \boxed{4176\ \mathrm{K}}$$
 
 (Integrating the full NASA polynomials rather than the linear fits gives 4203 K; the
 27 K is the fit error, which is the honest size of a hand calculation.)
@@ -1011,8 +1014,8 @@ That enthalpy deficit must be made up out of the same heat release, so the produ
 absorb $483{,}652 - 36{,}819 = 446{,}833$ kJ, of which $446{,}833 - 65{,}305 = 381{,}528$
 kJ goes above 1000 K:
 
-$$5.337\times10^{-3}\,T^2 + 104.11\,T - 490{,}971 = 0$$
-$$T = \frac{-104.11 + \sqrt{10{,}838 + 10{,}482}}{1.0674\times10^{-2}} = \frac{-104.11+146.01}{1.0674\times10^{-2}} = \boxed{3926\ \mathrm{K}}$$
+$$5.337\times10^{-3}\,T^2 + 104.11\,T - 490{,}975 = 0$$
+$$T = \frac{-104.11 + \sqrt{10{,}839 + 10{,}482}}{1.0674\times10^{-2}} = \frac{41.90}{1.0674\times10^{-2}} = \boxed{3926\ \mathrm{K}}$$
 
 (Full polynomials: 3952 K.) **The cryogens cost 250 K.** That is the first thing the
 freshman-chemistry calculation gets wrong.
@@ -1033,8 +1036,8 @@ released, and at a frozen $c_p$ of 3.80 kJ/(kg·K) that is 340 K. ✓
 **Sanity check and consequences.** Propagate both answers through $c^* \propto
 \sqrt{T_0/\mathcal{M}}$: the hand calculation gives
 $\sqrt{3926/14.112} = 16.68$ against $\sqrt{3602/13.619} = 16.26$, i.e. **2.6 % high on
-$c^*$** — about 60 s of $I_{sp}$ if you were foolish enough to carry it all the way
-through, though in practice the $\gamma$ error partly cancels it. The temperature error
+$c^*$** — about 12 s of $I_{sp}$ if you carried it all the way through, and the
+$\gamma$ error partly cancels even that. The temperature error
 is much worse than the $c^*$ error, because $\mathcal{M}$ moved the same way as $T_0$.
 And a 324 K error in $T_0$ is a 10 % error in the driving temperature difference of every
 heat-transfer calculation in Modules 10 and 11. **Never size a cooling jacket off a
@@ -1060,18 +1063,18 @@ identify the optimum. Stoichiometric is 7.936.
 
 **Step 2 — $c^*$ from Eq. 3.1.** For $r = 6$, $\gamma = 1.1473$:
 
-$$\Gamma = \sqrt{1.1473}\left(\frac{2}{2.1473}\right)^{\frac{2.1473}{2(0.1473)}} = 1.0711 \times (0.93140)^{7.2892} = 0.6472$$
+$$\Gamma = \sqrt{1.1473}\left(\frac{2}{2.1473}\right)^{\frac{2.1473}{2(0.1473)}} = 1.07112 \times (0.931403)^{7.28887} = 1.07112 \times 0.59578 = 0.63815$$
 
-$$c^* = \frac{\sqrt{610.50 \times 3601.60}}{0.6472} = \frac{\sqrt{2{,}198{,}789}}{0.6472} = \frac{1482.8}{0.6472} = 2291\ \mathrm{m/s}$$
+$$c^* = \frac{\sqrt{610.50 \times 3601.60}}{0.63815} = \frac{\sqrt{2{,}198{,}777}}{0.63815} = \frac{1482.8}{0.63815} = 2323.7\ \mathrm{m/s}$$
 
-Carrying full precision through `rocket.c_star` gives 2323.8 m/s (the hand $\Gamma$ above
-is rounded). The three results:
+`rocket.c_star(1.1473, 610.504, 3601.6)` returns 2323.8 m/s; the 0.1 m/s is rounding in
+the hand $\Gamma$. The three results:
 
 | $r$ | $\Gamma$ | $\sqrt{RT_0}$ (m/s) | $c^*$ (m/s) |
 |---|---|---|---|
-| 4.0 | 0.6529 | 1582.5 | **2424.0** |
-| 6.0 | 0.6472 | 1503.9 | **2323.8** |
-| 8.0 | 0.6457 | 1400.4 | **2169.0** |
+| 4.0 | 0.64792 | 1570.5 | **2424.0** |
+| 6.0 | 0.63815 | 1482.8 | **2323.8** |
+| 8.0 | 0.63553 | 1378.4 | **2169.0** |
 
 **Step 3 — $C_F$ and $I_{sp}$ at $\varepsilon = 77.5$, $p_a = 0$.** Using
 `rocket.Cf(gamma, eps, p0, pa)`:
@@ -1085,13 +1088,16 @@ is rounded). The three results:
 **Step 4 — read the result.**
 
 - From $r=4$ to $r=8$, $T_0$ rises 26 % but $\mathcal{M}$ rises 63 %. $T_0/\mathcal{M}$
-  falls from 296.7 to 228.5 — a 23 % fall — and $c^*$ falls with its square root,
-  by 10.5 %. **$\mathcal{M}$ beats $T_0$.**
+  falls from 296.7 to 228.5 — a 23 % fall — so $\sqrt{T_0/\mathcal{M}}$ falls 12.2 %.
+  $\Gamma$ falls 1.9 % over the same span, giving 1.9 % back, and the net fall in $c^*$
+  is 10.5 %. **$\mathcal{M}$ beats $T_0$.**
 - $C_F$ moves the *other* way (2.03 versus 1.94) because the hotter, higher-$\mathcal{M}$
   exhaust has a lower $\gamma$, but the effect is only 4.6 % against $c^*$'s 10.5 %, so
   $c^*$ wins the product.
-- $I_{sp}$ therefore peaks fuel-rich. Running stoichiometric ($r = 7.94$) would cost
-  about 27 s against $r=4$ — 6 % of the mission $\Delta V$ budget's exponent.
+- $I_{sp}$ therefore peaks fuel-rich. Net: $-10.5\,\% + 4.6\,\% = -6.4\,\%$ from $r=4$ to
+  $r=8$, which is the 479.3 → 448.5 s in the table. Running near-stoichiometric costs
+  about 31 s against $r=4$ in this constant-$\gamma$ estimate, and about 16 s against the
+  true optimum in the full equilibrium calculation of §3.6.
 
 **Step 5 — but where exactly is the optimum?** These three points bracket it but do not
 locate it. A finer sweep (§3.6) puts the vacuum $I_{sp}$ maximum at $r \approx 5.0$ at

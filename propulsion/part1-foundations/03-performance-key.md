@@ -261,8 +261,7 @@ The bigger nozzle gains **4.02 %** in vacuum.
 | $\varepsilon = 16$ | 1.66612 | 1.76206 | **1.74288** |
 
 $\varepsilon = 16$ wins by **2.84 %** on the burn-time-weighted average, and
-it wins at *both* altitudes, not just the high one. **Recommend $\varepsilon =
-16$.**
+it wins at *both* altitudes, not just the high one. **Recommend $\varepsilon = 16$.**
 
 Separation check at sea level:
 - $\varepsilon = 8.797$: $p_e = p_a$ by construction, ratio 1.0 — no risk.
@@ -518,8 +517,7 @@ $$C_{f,vac} = 1.73136 + (4.4840\times10^{-3})(22) = \mathbf{1.83000}$$
 $$C_{f,SL} = 1.83000 - \frac{101\,325 \times 22}{1.20\times10^7} = 1.83000 - 0.18576 = \mathbf{1.64424}$$
 $$\frac{F_{vac}}{F_{SL}} = \frac{1.83000}{1.64424} = 1.1130 \Rightarrow \mathbf{+11.30\%}$$
 
-Note that the increase is exactly $p_a A_e/F_{SL} = p_a\varepsilon/(C_{f,SL}p_c)
-= 0.18576/1.64424 = 11.30$ %, which is the check every student should do.
+Note that the increase is exactly $p_a A_e/F_{SL} = p_a\varepsilon/(C_{f,SL}p_c) = 0.18576/1.64424 = 11.30$ %, which is the check every student should do.
 
 **Q5 (12).** $p_c A_t = 9.0\times10^6 \times 0.0125 = 112\,500$ N.
 $$c^*_{meas} = \frac{112\,500}{62.0} = \mathbf{1\,814.5\ m/s}, \qquad
@@ -546,8 +544,7 @@ The maximum possible $C_f$ for a given $\gamma$ is the vacuum,
 infinite-expansion limit $C_{f,max} = \sqrt{\frac{2\gamma^2}{\gamma-1}(\frac{2}{\gamma+1})^{\frac{\gamma+1}{\gamma-1}}}$
 — 2.2466 at $\gamma = 1.2$ — which no finite nozzle at finite $p_a$ reaches.
 
-(c) **True, to first order** — with a caveat that earns the marks. $F = C_f p_c
-A_t$, and $C_f$ depends only on $\gamma$, $\varepsilon$ and $p_a/p_c$, so at
+(c) **True, to first order** — with a caveat that earns the marks. $F = C_f p_c A_t$, and $C_f$ depends only on $\gamma$, $\varepsilon$ and $p_a/p_c$, so at
 fixed $p_c$ and fixed $\varepsilon$ (i.e. $A_e$ doubles too) thrust doubles
 exactly. If $A_e$ is held fixed while $A_t$ doubles, $\varepsilon$ halves and
 $C_f$ falls, so thrust less than doubles. And holding $p_c$ fixed while

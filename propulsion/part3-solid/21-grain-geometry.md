@@ -156,6 +156,16 @@ and $n = 0.35$, $\pi_K = 0.0034$ K⁻¹, so a motor conditioned 30 K warmer runs
 to leave room for it: **the neutral trace you draw is the mean of a family of
 traces, and the case is sized against the hot end of the family.**
 
+One scaling that is constantly got wrong: under a *temperature* change the
+coefficient $a$ moves, and since $p_c \propto a^{1/(1-n)}$ and
+$r = a p_c^{\,n}$, the rate scales as $r \propto a^{1/(1-n)} \propto p_c$ —
+**rate and pressure move together, one for one.** Burn time therefore scales
+as $1/p_c$, and $\bar p_c\,t_b$ is invariant, as it must be because the
+propellant mass and $A_t$ have not changed. A hot/cold firing pair that shows
++12 % pressure must show −10.7 % duration; if it does not, something other
+than temperature is also moving. (Contrast a change in $A_b$ at fixed
+propellant, where $a$ is unchanged and $r \propto p_c^{\,n}$ only.) [F]
+
 **The design statement.** Grain design is the inverse problem: given a
 required $F(t)$, an envelope, a propellant, and a case, find a solid shape
 whose parallel-offset family of surfaces has the burning area history
@@ -1758,10 +1768,11 @@ flanks vanish exactly at tip contact, compute $R_p$, the web at the tip, and
 $s_0$.
 
 **Q7 (10).** A grain design meets its neutrality specification on the first
-static firing but the second motor, from the same lot, runs 4 % higher and
-1.5 % shorter. The two motors were conditioned at 18 °C and 30 °C. Is this
-consistent with the propellant's $\sigma_p = 0.0022$ K⁻¹ at $n = 0.35$?
-Show the calculation and answer yes or no.
+static firing but the second motor, from the same lot, runs 4.1 % higher in
+pressure and 3.9 % shorter in action time. The two motors were conditioned at
+18 °C and 30 °C. Is this consistent with the propellant's
+$\sigma_p = 0.0022$ K⁻¹ at $n = 0.35$? Show both calculations — the pressure
+and the duration — and answer yes or no.
 
 **Q8 (10).** Which statement about slivers is correct?
 (a) sliver propellant is not burned and is expelled unburnt
