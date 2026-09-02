@@ -173,7 +173,7 @@ point, vacuum:
 | mean molar mass | $\mathcal{M}$ | 21.0 kg/kmol |
 | $c^*$ efficiency | $\eta_{c^*}$ | 0.960 |
 | stagnation viscosity | $\mu_0$ | $9.50\times10^{-5}$ Pa·s |
-| throat radius of curvature | $R_u$ | $1.50\,R_t$ |
+| throat radius of curvature (upstream) | $r_{cu}$ | $1.50\,R_t$ |
 
 Take $c_{p0}=\gamma R/(\gamma-1)$ and $\mathrm{Pr}_0 = 4\gamma/(9\gamma-5)$.
 
@@ -385,8 +385,10 @@ facility, instrumentation calibration and ambient conditions did not change.
 | post-test borescope | clean | radial streaking on the fuel side of 6 injector elements |
 
 **(a)** (3 pts) Reduce both runs: compute $p_{c,ns}$, the delivered $c^*$, the
-$c^*$ efficiency, the vacuum-corrected $C_F$ at sea level, and the delivered
-$I_{sp}$. State how much of the thrust loss is $c^*$ and how much is $C_F$.
+$c^*$ efficiency, the **measured** thrust coefficient
+$C_{F} = F/(p_{c,ns}A_t)$ together with its efficiency against the ideal
+sea-level $C_F$ at that $p_{c,ns}$, and the delivered $I_{sp}$. Then state how
+much of the thrust loss is $c^*$ and how much is $C_F$.
 
 **(b)** (2 pts) At constant fuel flow and constant density, compute the
 fractional change in the fuel injector's effective flow area $C_dA$ implied by
@@ -462,9 +464,9 @@ which of the three is invisible on a head-end pressure transducer.
 
 # Section D — Design and trade (20 points)
 
-## D1 (20 points) — Propulsion architecture for the KESTREL-G mission
+## D1 (20 points) — Propulsion architecture for the AURELIA-G mission
 
-**Mission.** KESTREL-G is a fictional 620 kg (dry, excluding all propulsion
+**Mission.** AURELIA-G is a fictional 620 kg (dry, excluding all propulsion
 hardware and propellant) communications demonstrator. It rides to GTO as a
 rideshare and must:
 
@@ -501,8 +503,10 @@ accelerate everything the monopropellant system will later carry. Report for
 each: propellant mass, inert mass, total propulsion system mass, and total wet
 mass at separation from the rideshare. Check each against R-3.
 
-**(c)** (4 pts) Build a **Pugh matrix** with **B as the datum**, scoring A, C
-and D as $+$, $0$ or $-$ against at least **eight** criteria. Your criteria
+**(c)** (4 pts) Build a **Pugh matrix** with **B as the datum**, scoring the
+candidates that survive your part-(a) screen as $+$, $0$ or $-$ against at
+least **eight** criteria. Say explicitly what you did with any candidate that
+did not survive, and why. Your criteria
 must include, at minimum: wet mass, compliance with R-1 (multi-burn),
 compliance with R-2 (minimum impulse bit), single-fault tolerance (R-5),
 development schedule against R-4, technology readiness, ground handling and

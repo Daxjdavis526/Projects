@@ -224,7 +224,7 @@ $B = 1+\tfrac{\gamma-1}{2} = 1.08$, $A = \tfrac12(0.22222\times1.08)+\tfrac12
 = 0.62$, $\sigma = A^{-0.68}B^{-0.12} = \mathbf{1.37140}$.
 
 $$h_g = \frac{0.026}{D_t^{0.2}}\left(\frac{\mu_0^{0.2}c_{p0}}{\mathrm{Pr}_0^{0.6}}\right)
-\left(\frac{p_c}{c^*}\right)^{0.8}\left(\frac{D_t}{R_u}\right)^{0.1}
+\left(\frac{p_c}{c^*}\right)^{0.8}\left(\frac{D_t}{r_{cu}}\right)^{0.1}
 \left(\frac{A_t}{A}\right)^{0.9}\sigma = \mathbf{5.318\times10^{4}\ W/(m^2K)}$$
 
 $$T_{aw} = T_0\frac{1+r\frac{\gamma-1}{2}M^2}{1+\frac{\gamma-1}{2}M^2}
@@ -1073,7 +1073,7 @@ precisely why lateral load cells and post-fire nozzle metrology exist.
 
 ---
 
-# Section D — Design and trade: KESTREL-G (20 points)
+# Section D — Design and trade: AURELIA-G (20 points)
 
 ## (a) The closure condition and architecture D (3 pts)
 
@@ -1235,10 +1235,13 @@ has margin but not much; the remaining two are weighted 1. Total weight 17.
   schedule risk that has actually killed comparable programmes.
 
 > *Rubric (4):* 1 for at least eight criteria including all four requirement
-> rows; 1 for a **stated** weighting scheme (an unweighted matrix scores half
-> of the whole part, per the question); 1 for correct and defensible $+/0/-$
-> assignments; 1 for identifying R-1 as a *compliance* failure for A rather
-> than a scoring penalty. Any consistent weighting is acceptable — the graded
+> rows **and** an explicit statement that D was screened out rather than
+> scored; 1 for a **stated** weighting scheme (an unweighted matrix scores
+> half of the whole part, per the question); 1 for correct and defensible
+> $+/0/-$ assignments; 1 for identifying R-1 as a *compliance* failure for A
+> rather than a scoring penalty. A student who scores D anyway loses no more
+> than half of the first mark provided they note that it cannot fly the
+> mission. Any consistent weighting is acceptable — the graded
 > object is that it is stated and applied, not its particular numbers.
 
 ## (d) Sensitivity (4 pts)

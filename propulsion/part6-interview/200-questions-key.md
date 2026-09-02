@@ -3347,3 +3347,684 @@ say why the range exists.
 **Probing:** whether you bracket the answer rather than reporting 17.7 m/s as
 if it were measured.
 **Follow-up:** "The requirement is 20 m/s. What is the cheapest change?"
+
+### 161. [M30, M29, M33]
+Work in rates. One minimum impulse bit gives an angular impulse
+$I_{bit}L = 2\times10^{-3}\times0.8 = 1.6\times10^{-3}$ N·m·s, so the rate
+change is $\Delta\omega = 1.6\times10^{-3}/150 = \mathbf{1.07\times10^{-5}}$
+rad/s $= 6.1\times10^{-4}$ °/s. The deadband half-width is
+$0.02° = 3.49\times10^{-4}$ rad, so after one pulse the vehicle takes
+$2\times3.49\times10^{-4}/1.07\times10^{-5} = \mathbf{65\ s}$ to drift across
+the full deadband, and in a one-second control interval it moves 0.0006°, which
+is **3 % of the deadband**. [F] So yes, it closes on resolution, with about a
+factor of 30 in hand — the impulse bit is far too small to overshoot, which is
+the failure mode you are checking for. The 15 % repeatability does not change
+that conclusion: it perturbs the post-pulse rate by ±15 %, i.e. by 0.5 % of the
+deadband per pulse, and its real effect is a slow random walk in the limit-cycle
+phase plus a torque bias if opposing thrusters are mismatched, both of which the
+controller absorbs. What does *not* close comfortably is propellant. A minimum
+limit cycle at this impulse bit is about 1,320 pulses per day per axis, and
+that is 964 N·s per axis-year of total impulse — so the question to take back to
+the systems engineer is not "does the thruster resolve the deadband" but "what
+is the mission duration and the disturbance-torque environment", because those
+set the tankage. [J]
+
+**Probing:** whether you check resolution *and* then notice the binding
+constraint is propellant, not pointing.
+**Follow-up:** "How would you cut that 964 N·s by an order of magnitude?"
+
+### 162. [M31, M32]
+The booster's return needs attitude control in a regime where nothing else
+works well. It is outside the atmosphere for the flip and much of the boostback,
+so aerodynamic surfaces have no authority; the grid fins only work once dynamic
+pressure builds. It needs many short, precise, bidirectional pulses to flip a
+long slender body and hold it, which is a pulse-count and repeatability problem
+rather than a total-impulse problem. And the total impulse required is genuinely
+small — reorienting a stage against no external torque takes only enough impulse
+to start and stop the rotation, so a low $I_{sp}$ costs little absolute mass.
+[J][F] Against that, cold gas brings decisive advantages for a *reusable*
+stage: nitrogen is inert, non-toxic and non-corrosive, so ground crews can
+service the vehicle immediately after landing without a hazardous-commodity
+operation, and there is no residual to purge or decontaminate; the system is
+simple, restartable indefinitely, and has no ignition to fail during a
+one-chance recovery; and it shares a commodity the vehicle already carries for
+purges and pressurisation. A hypergolic system would be higher $I_{sp}$ and
+much worse on all of those; a monopropellant system adds a catalyst bed with
+preheat requirements and a toxic commodity. SpaceX publishes no numbers for it,
+so any specific performance claim is unsupported — but the architecture
+argument does not need them. [M]
+
+**Probing:** whether you reason from the mission profile and the ground
+operation, since there is no data to reason from.
+**Follow-up:** "What would you instrument to find out whether they sized it
+right?"
+
+### 163. [M32, M29, M21]
+Propellant masses from $m_p = I_{tot}/(I_{sp}g_0)$:
+cold gas at 70 s → **14.57 kg**; solid at 280 s → **3.64 kg**; hydrazine at
+220 s → **4.64 kg**. [F] Now the containment, with the model stated. Cold gas:
+nitrogen at 300 bar and 300 K with $Z = 1.12$ is 301 kg/m³, so the tank is
+48.4 litres, and at a COPV performance factor $pV/W = 2.0\times10^{4}$ m the
+vessel is **7.4 kg** — total **≈ 22 kg**. Solid: the inert fraction is given as
+0.10, so the motor is $3.64/0.9 = $ **4.05 kg** all in. Hydrazine: a blowdown
+titanium tank at 24 bar runs about 12 % of propellant mass, so **≈ 5.2 kg**
+plus valves and a catalyst bed, call it 6 kg with the feed system. Ranking on
+wet mass: **solid 4.0 kg < hydrazine ≈ 5–6 kg ≪ cold gas ≈ 22 kg**, a factor of
+five between the ends. [A][J] The ranking is not the decision, though: the
+solid delivers its 10 kN·s once, on an uncontrollable schedule, and cannot be
+throttled, tested or stopped; the hydrazine is restartable and throttleable but
+brings toxicity, a catalyst bed with a cold-start limit, and a much longer
+qualification; the cold gas is inert, restartable thousands of times, and
+resolvable to millinewton-seconds. If the 10 kN·s is one burn, take the solid.
+If it is ten thousand pulses, the cold gas is the only one of the three that can
+do it at all, and its 22 kg is the price of that capability.
+
+**Probing:** whether you state your tank model explicitly and then refuse to
+let mass alone decide.
+**Follow-up:** "Halve the cold-gas number without changing $I_{sp}$."
+
+### 164. [M33, M03, M22]
+You do not resolve it inside propulsion, and you do not resolve it by arguing
+about $I_{sp}$ — you resolve it with the vehicle's payload sensitivity
+derivatives. The number that decides is $\partial m_{payload}/\partial m_{inert}$
+against $\partial m_{payload}/\partial I_{sp}$ for this stage on this mission,
+which the trajectory and mass-properties group owns and which is a standard
+product. [J][M33] Multiply through: a 2 s $I_{sp}$ loss on a 340 s stage is
+0.6 %, worth some number of kilograms of payload; the tank wall saving is some
+number of kilograms of inert mass, worth another; whichever is larger wins, and
+the argument is over in an hour if the exchange rates exist. Two things a good
+answer adds. First, the 4 % thrust loss is not a payload term in the same way —
+it changes the trajectory, the gravity losses, and possibly the thrust-to-weight
+at liftoff or the max-q profile, so it has to go through the trajectory model
+rather than being traded linearly. Second, chamber pressure is not a free
+variable: dropping it 10 % changes the throat area, the nozzle expansion ratio
+if you keep the exit fixed, the injector $\Delta p$ ratio and therefore
+stability margin, the heat flux (down, which helps), and the pump discharge
+requirement (down, which helps a lot). So the honest response is "let me price
+the whole change, not the two numbers you quoted", and it is entirely possible
+the answer is yes.
+
+**Probing:** whether you reach for exchange rates rather than defending your
+subsystem.
+**Follow-up:** "The exchange rates say it is a wash. Now what decides?"
+
+### 165. [M34, M18, M25]
+**Design errors:** the Challenger field joint and the hard start from a slow
+oxidiser valve. The field joint's failure was in the design itself — joint
+rotation opened the seal gap under exactly the loading the joint was there to
+withstand, and the seal's rate- and temperature-dependent response was not
+accounted for in the design; the redesign changed the *hardware*, which is the
+test. [Rogers86] The slow oxidiser valve is a sequencing design error: if the
+valve met its specification and the engine still hard-started, the sequence and
+the permissive logic were wrong, and no amount of process control would have
+saved it. **Process errors:** the turbopump bearing failure from a contaminated
+LOX line and the Vega-C throat insert. Contamination is the definitive process
+failure — the design assumed a cleanliness level that the process failed to
+deliver. [J] The Vega-C insert is the interesting one and I would flag the
+split as arguable: the *proximate* cause was a material change that the
+qualification did not cover, which is a process and change-control failure; but
+the *reason* it was fatal is that the qualification plan was written in a way
+that let an uninspectable, rate-governed property change without triggering
+requalification, and writing that plan is design work. I would put it in
+"process" and immediately say that the design-level lesson is that
+qualification plans must name the properties that cannot be inspected.
+**Why the split matters:** design errors are fixed by changing hardware or
+requirements and they recur across the fleet; process errors are fixed by
+controls, training and inspection and they recur randomly, unit to unit. The
+corrective actions are different, and misclassifying one as the other is how a
+programme installs an inspection to fix a design flaw and gets a second failure.
+
+**Probing:** whether you contest the classification of at least one of them.
+**Follow-up:** "Which of the four is most likely to happen to you again next
+year?"
+
+---
+
+## Very advanced (166–200)
+
+### 166. [M03, M04, M10]
+Three mechanisms, and they all come from the same geometric fact: surface area
+scales as the square of a length while mass flow scales with throat area, so
+everything that happens at a wall gets relatively larger as you shrink.
+First, viscous loss — the boundary layer occupies a larger fraction of the
+throat and exit area at small scale and low Reynolds number, cutting the
+discharge coefficient and the effective expansion, and at very small scale the
+core flow is never truly inviscid. Second, heat loss — a small chamber loses a
+much larger fraction of its energy release to the walls, so the actual $T_0$ is
+below the CEA value and $c^*$ falls with it; a radiation-cooled 10 N thruster
+can lose several percent of its enthalpy this way. Third, mixing and residence
+time — a small chamber has a short $L^*$ in absolute terms and fewer injector
+elements, often just one, so vaporisation and mixing are less complete, and
+chemistry freezes earlier because the residence time is shorter. [F][E] Below
+100 N the first two dominate and they trade places as you go down: at 50–100 N
+the heat loss and the mixing shortfall are comparable, while below about 10 N
+the viscous/low-Reynolds-number loss takes over decisively, which is why
+micro-thrusters deliver 50–70 % of theoretical rather than 90 %. That ordering
+is also why the standard fixes are different at each scale: better mixing and a
+longer chamber help at 100 N, and nothing but a bigger throat helps at 1 N.
+
+**Probing:** whether you rank the mechanisms rather than listing them, and
+whether the surface-to-volume argument is explicit.
+**Follow-up:** "You need 5 N at 250 s. What technology are you now looking at?"
+
+### 167. [M09, M02, M03]
+The standard terms, with realistic magnitudes for a large, well-designed nozzle:
+**divergence** 0.3–1.0 % — the exit flow is not purely axial, so the radial
+momentum is wasted; a 15° cone is 1.7 %, a good bell is a few tenths.
+**Boundary layer / friction** 0.5–1.5 % — wall shear plus the displacement
+effect that makes the effective area ratio smaller than the geometric one;
+scales inversely with size, so it is the term that punishes small engines.
+**Kinetic (finite-rate chemistry)** 0.3–1.5 % — recombination that equilibrium
+predicts but the flow is too fast to complete; largest for hydrogen and at high
+area ratio.
+**Mixing / energy release** 1–3 % — incomplete mixing and vaporisation, which
+strictly is a $c^*$ loss rather than a nozzle loss but always appears in the
+same budget.
+**Film / barrier cooling** 0.5–2 % — the cost of the cool peripheral layer,
+much less than the diverted mass fraction (question 129).
+**Two-phase flow** 0–3 % — zero for a liquid engine, 1–3 % for an aluminised
+solid, from particle velocity and thermal lag.
+**Nozzle roughness, joints and erosion** 0.1–0.5 %, and for a solid, throat
+erosion changes the area ratio during the burn.
+[E][A][SP-8039] Two things a strong answer adds: the terms are efficiencies and
+multiply rather than add (question 168), and the budget is a *design tool* —
+you allocate it before you have hardware, then reconcile it against measured
+$\eta_{c^*}$ and $\eta_{C_f}$ after test, and the reconciliation is where you
+find out which term you got wrong.
+
+**Probing:** whether the magnitudes are right — a candidate who quotes 5 % for
+divergence has never seen a real budget.
+**Follow-up:** "Which of those terms would you attack on an engine already in
+production?"
+
+### 168. [M03, M09, M11]
+Multiplicative:
+$366\times0.994\times0.991\times0.993\times0.986\times0.989 =
+366\times0.95386 = \mathbf{349.1\ s}$.
+Additive: $366\times(1-0.047) = \mathbf{348.8\ s}$.
+The difference is **0.31 s**. [F] Multiplicative is right: each loss is an
+efficiency acting on what survives the previous one, so they compound —
+subtracting the fractions treats every loss as if it acted on the full
+theoretical value, which double-counts. The difference is only 0.3 s here
+because the losses are small, and that is exactly why the distinction matters:
+it is tempting to conclude the two methods are equivalent, and then someone
+applies the same additive shortcut to a small thruster with 15 % of total loss,
+where the two methods differ by more than a second and a half, or to a
+sensitivity study where the second-order terms are the answer. Say which
+convention you used, always — the interviewer's real question is whether you
+know these are efficiencies and not subtractions.
+
+**Probing:** whether you can articulate *why* multiplicative is correct rather
+than just asserting it.
+**Follow-up:** "Where does the additive convention come from, then?"
+
+### 169. [M04, M05, M35]
+**Beryllium** as a metal fuel additive gives outstanding theoretical $I_{sp}$ —
+low product molar mass, high heat of combustion — and it was seriously
+developed in the 1960s. It is not used because BeO in the exhaust is acutely
+toxic and a chronic carcinogen at the microgram level, which makes test,
+production and flight downwind an unmanageable exposure problem; the
+non-toxicity argument against it is that beryllium is scarce, brutally
+expensive, and the powder handling and machining are hazardous and
+capital-intensive on their own. [H][J]
+**Fluorine** as an oxidiser genuinely outperforms oxygen and was flown in
+research programmes. Its disqualifying property is not only toxicity but
+*reactivity*: it ignites on contact with almost everything including many
+metals and their oxides, so every material choice, every valve, every weld and
+every cleaning procedure is constrained, and a leak is not a hazard to be
+contained but a fire that propagates through the hardware. Ground infrastructure
+and cleanliness costs alone would exceed the performance benefit.
+**OF₂** shares fluorine's reactivity, adds cryogenic storage and a narrower
+liquid range, is expensive to make, and gains relatively little over LOX/LH2 or
+LOX/CH4 once you account for the density and the real engine losses.
+The argument that is *not* toxicity, and that applies to all three: the
+performance gain is a few percent of $I_{sp}$, while the cost is a complete
+rebuild of the materials, ground systems, safety and supply chain — and
+propulsion history says that a few percent never buys a new infrastructure.
+[M35] The same logic explains why nobody is flying tripropellants either.
+
+**Probing:** whether you produce the infrastructure/systems argument, which is
+the one an interviewer is fishing for.
+**Follow-up:** "What performance gain *would* justify a new propellant
+infrastructure?"
+
+### 170. [M13, M18, M33]
+In priority order. **1. What is the 164 measuring?** Thrust-to-weight is a
+ratio of two numbers with no standard definition: vacuum or sea-level thrust,
+and dry engine mass with or without the gimbal, the harness, the controller,
+the ignition system, the nozzle extension and the propellant trapped in the
+engine at shutdown. I would demand the mass breakdown to the component level
+and the thrust condition, because the definition alone can move that number by
+20 %. **2. Hot-fire data, not a data sheet:** measured chamber pressure at the
+injector face (with the tap station stated), measured thrust with the stand's
+calibration and uncertainty, and measured propellant flows — enough to
+reconstruct $c^*$ and $C_f$ independently, on multiple units, with the raw
+uncertainty analysis. **3. Duration and repeatability:** how many seconds, over
+how many starts, on how many engines, and how much of that is at 330 bar rather
+than at a derated condition. **4. Inspection evidence after those runs:**
+throat dimensional, injector face, turbine blades, bearing condition — a
+thrust-to-weight of 164 usually means very little structural margin, and the
+question is whether it survives its own duty cycle. **5. The failure record**,
+including the tests that ended early. [J][M33] Until I have 1–3 I would model
+the vehicle with a conservative derate and carry the difference as risk, and I
+would say so explicitly in the review — because the evidentiary situation for
+modern commercial engines is that most published figures originate from press
+material, several have changed silently over time, and none are in the
+peer-reviewed or government-report literature. That is not a slight; it is the
+reason a chief engineer asks for data instead of a number.
+
+**Probing:** whether "define the number" is your first item rather than your
+last.
+**Follow-up:** "They give you all five and it checks out. What is left?"
+
+### 171. [M12, M13]
+Pump: $P = \dot m\Delta p/(\rho\eta) = 45\times45\times10^{6}/(71\times0.75) =
+\mathbf{38.0\ MW}$ — for one pump, on a 300 kg/s engine, which is the right
+order for a large hydrogen staged-combustion machine. To close the balance the
+turbine must produce the same 38.0 MW from 45 kg/s at 850 K:
+$P = \eta\dot m c_p T_{in}[1-pr^{-(\gamma-1)/\gamma}]$, so the bracket must be
+$38.0\times10^{6}/(0.78\times45\times6000\times850) = 0.2124$, giving
+$pr^{-0.2647} = 0.7876$ and $pr = \mathbf{2.46}$. [F] Now say what the number
+means. A pressure ratio of 2.46 is small — that is characteristic of staged
+combustion, where the turbine exhaust must still be above chamber pressure, and
+it is why staged-combustion turbines are high-flow, low-expansion machines
+while gas-generator turbines run pressure ratios of 15–25. But check the
+consistency: with $p_c = 25$ MPa the turbine must discharge above about 30 MPa
+including injector drop, so the preburner sits near 74 MPa — and the fuel pump
+was specified to raise the hydrogen by only 45 MPa. The numbers as given do not
+close geometrically, which means either a boost pump upstream, a higher pump
+rise than stated, or a lower preburner pressure than my assumption. Flagging
+that is the actual answer; a candidate who reports 2.46 and stops has not
+checked whether the cycle exists.
+
+**Probing:** whether you close the *pressure* balance as well as the power
+balance, and notice they disagree.
+**Follow-up:** "Assume the 45 MPa is right. What must the chamber pressure
+actually be?"
+
+### 172. [M15, M18]
+Linear stability analysis asks whether an infinitesimal disturbance grows, which
+answers the wrong question for a rocket chamber. Real chambers are strongly
+nonlinear: the combustion response saturates at large amplitude, the acoustic
+losses through nozzle radiation and through the boundary layer change with
+amplitude, and droplet breakup and mixing are themselves amplitude-dependent —
+so a chamber can be linearly stable (small disturbances decay) and still
+possess a stable large-amplitude limit cycle that a *finite* disturbance will
+jump it into. [F][Culick68] That is triggered, or nonlinear, instability: the
+engine runs perfectly for a hundred tests and then one start transient, one
+pressure spike, one piece of debris or one off-nominal ignition puts in a
+disturbance big enough to cross the threshold, and the engine destroys itself
+at an operating point that was previously demonstrated. The consequence for
+testing is severe and it is why the industry does what it does: you cannot
+demonstrate stability by running the engine and observing that it is smooth.
+You must *provoke* it — explosive bombs of stated charge size, pulse guns,
+directed gas pulses — at every operating point in the box, at more than one
+amplitude, and show that the disturbance decays within a specified time in
+every case. [CPIA-246][M] A single bomb size proves only that the threshold is
+above that amplitude; the amplitude dependence of the decay time is the actual
+evidence about how far you are from the trigger.
+
+**Probing:** whether you say "linearly stable and nonlinearly unstable at the
+same time", which is the crux.
+**Follow-up:** "How do you choose the bomb size?"
+
+### 173. [M36, M15]
+Honestly: simulation can now do a great deal of useful work and still cannot
+certify an injector. What high-fidelity CFD — large-eddy simulation with
+detailed or reduced chemistry, at real-fluid (transcritical) thermodynamics —
+delivers today is a credible picture of the *flame structure and the mixing
+field* of a single element or a small cluster, the ability to compare two
+designs and rank them, and, with forced-response methods, an estimate of the
+flame's transfer function (the "$n$" and "$\tau$" of the classical model) for a
+given element at a given condition. That is a genuine advance: it turns an
+empirical correlation into a computed quantity, and it lets you screen concepts
+before cutting metal. [R][M36] What it cannot currently deliver: a full-chamber,
+full-duration LES with all elements at flight conditions is not routine — the
+cost is prohibitive and the results are sensitive to sub-grid and chemistry
+models in ways that are not yet fully validated; the acoustic damping terms
+(nozzle admittance, boundary-layer losses, absorber performance) are
+approximated; and, crucially, nonlinear triggering thresholds — the thing you
+most want to know — depend on physics at amplitudes and timescales that current
+models represent poorly. So the state of the art is: use simulation to rank
+designs, to size cavities and baffles, and to explain a phenomenon you have
+already observed; do not use it as a substitute for bomb testing, and do not
+accept a stability margin whose only evidence is computational. Anyone who tells
+you otherwise is selling something.
+
+**Probing:** whether you can be specific about what is and is not routine, and
+whether you resist both hype and dismissal.
+**Follow-up:** "What single validation experiment would move that boundary
+most?"
+
+### 174. [M10, M18, M33]
+Thrust at fixed $p_c$ goes with throat *area*, and a 0.15 % diameter growth per
+flight is a **0.30 % area growth per flight**, so the 1.5 % thrust limit is
+reached after **5 flights**. [F] That is the nominal number and it is not the
+interval. I would set inspection at every flight for the first units until the
+growth rate is confirmed on this hardware — 0.15 % is a mean from somewhere and
+the scatter matters more than the mean — then relax to every second flight once
+the population rate and its dispersion are established, with a hard retirement
+at **4 flights** on the nominal rate, i.e. one flight of margin against the
+limit. If the measured growth on an individual unit runs high, that unit
+retires earlier: this is a per-unit disposition against a measured dimension,
+not a fleet-average calendar. For the field measurement I want something a
+technician can do on the pad or in a hangar without disassembly: a mechanical
+bore gauge or air gauge at the throat plane is the traditional answer and is
+accurate to well inside 0.1 %; a structured-light or laser profile scan through
+the nozzle gives the whole contour and is better if the geometry allows access.
+[J][M] I would also cross-check the dimensional measurement against flight data
+— the $p_c$-versus-flow relation is a direct measurement of $c^*A_t$, so a
+drifting throat shows up in the engine's own telemetry — because a measurement
+you get for free every flight is worth more than one that depends on a
+technician being available.
+
+**Probing:** whether you convert diameter to area, and whether you set the
+interval from the *dispersion* rather than the mean.
+**Follow-up:** "Two units grow at 0.15 % and one at 0.4 %. What have you
+learned?"
+
+### 175. [M16, M17, M13]
+The requirement is that *every* surface wetted by hot oxygen-rich gas carries an
+intact protective coating, because bare nickel alloy in that environment ignites
+where it is scratched, contaminated or locally hot. Additive manufacturing
+produces internal passages that are, by construction, the hardest possible
+coating substrate: the as-built surface is rough at tens of micrometres with
+partially-fused powder, the passages are non-line-of-sight and often
+serpentine, and you cannot see inside to inspect the result. [M][J] So the
+interaction is threefold. Coating processes that need line of sight — thermal
+spray, PVD — simply cannot reach the internal surface. Processes that do not,
+like chemical vapour deposition or electroless plating, must produce a uniform,
+adherent, pinhole-free layer over a rough surface with high aspect-ratio
+features, and roughness both increases the area to cover and makes complete
+coverage harder to verify. And verification is the killer: you cannot borescope
+every passage, and a coating defect is a single-point ignition source in an
+engine where ignition means loss of vehicle. What I would do: first, design the
+passages so they can be finished — larger radii, no dead ends, access for
+abrasive-flow machining or chemical polishing, and where possible split the
+part so the critical surfaces are line-of-sight before joining. Second, use a
+conformal, non-line-of-sight deposition process and qualify it on
+representative geometry, not on coupons. Third, build coating-quality witness
+articles with the same passages on every build and section them. Fourth — and
+this is the honest engineering answer — keep the oxidiser-rich hot gas out of
+additively manufactured internal passages wherever the architecture allows, and
+use conventional wrought or cast parts with accessible surfaces there. The
+manufacturing method is not worth the ignition risk on that particular flow
+path.
+
+**Probing:** whether you are willing to say "do not use AM here", which is the
+mature answer.
+**Follow-up:** "Your programme has already committed to an AM preburner
+manifold. Give me a mitigation plan."
+
+### 176. [M11, M10, M16]
+Hydrogen's critical point is about 33 K and 1.3 MPa, so at 8 MPa and 60 K it is
+a supercritical fluid well above critical pressure but close enough to the
+pseudo-critical line that its properties vary violently with temperature:
+density, specific heat, conductivity and viscosity all change by large factors
+across the thermal boundary layer, and $c_p$ has a peak. Dittus–Boelter is a
+constant-property correlation fitted to modest temperature differences — it
+evaluates everything at the bulk temperature and assumes the film behaves like
+the bulk, which is precisely the assumption that fails here. [E][F] The sign of
+the error is the important part: with strong heating, the fluid next to the wall
+becomes much less dense and the resulting buoyancy and acceleration effects,
+together with the collapse of $c_p$ above the pseudo-critical temperature,
+produce *heat transfer deterioration* — the real $h$ falls below the
+constant-property prediction, often by a factor of 1.5–2 in the worst
+combination of high heat flux and low mass flux. So Dittus–Boelter is
+optimistic, and it is optimistic exactly where the engine is most highly
+loaded, which is the dangerous direction: you predict a wall temperature and
+get a hotter one. What to use instead: a variable-property correlation of the
+Nusselt form with a wall-to-bulk temperature ratio correction — the family that
+NASA developed for supercritical hydrogen cooling channels is the standard
+starting point — evaluated with real-fluid properties from a
+reference-equation-of-state package rather than an ideal-gas fit, and validated
+against heated-tube data at the actual pressure, flux and geometry. [M][NIST-WB]
+
+**Probing:** whether you get the sign right — most candidates assume the
+correlation is conservative.
+**Follow-up:** "What would you actually measure in a heated-tube test to
+calibrate this?"
+
+### 177. [M09, M02, M03]
+Divergence efficiency $\lambda = (1+\cos\alpha)/2 = (1+\cos15°)/2 =
+\mathbf{0.9830}$, a 1.70 % loss.
+Ideal sea-level $C_f$ at $\gamma = 1.20$, $\varepsilon = 16$, $p_c = 100$ bar:
+$\mathbf{1.6350}$.
+Delivered $C_f = 1.6350\times0.9830\times0.992 = \mathbf{1.5942}$ — the two
+losses together take 2.5 %. [F][A] At the sea-level-optimum expansion ratio,
+$\varepsilon = 11.75$, the ideal $C_f$ is $\mathbf{1.6430}$, and applying the
+same two losses gives $\mathbf{1.6020}$. So the optimum-expansion nozzle is
+worth only **0.5 %** more than the $\varepsilon = 16$ nozzle at sea level — a
+tiny margin — while the $\varepsilon = 16$ nozzle is worth 2.2 % more in
+vacuum (1.797 versus 1.762 ideal). That is the whole logic of deliberate
+overexpansion on a first stage: you give up a fraction of a percent at
+liftoff to gain a couple of percent for the rest of the burn, and the flatness
+of the $C_f$ curve near its sea-level optimum is what makes the trade cheap.
+The number to check before committing is separation: at $\varepsilon = 16$,
+$p_e = 67.7$ kPa, comfortably above any separation criterion, so the
+overexpansion is safe.
+
+**Probing:** whether you notice how flat the optimum is, which is the actual
+insight.
+**Follow-up:** "How far could you push $\varepsilon$ before the sea-level
+penalty stops being cheap?"
+
+### 178. [M20, M21, M15]
+In a segmented motor the flow past the inhibited segment faces and past the
+step at each joint separates and rolls up, shedding vortices at a frequency set
+by the shear-layer instability and the local geometry — Strouhal-like behaviour,
+so $f \approx St\,U/L$ with $L$ the step or cavity dimension. Those vortices
+convect downstream and impinge on the next obstacle or on the nozzle inlet,
+producing a pressure pulse once per vortex; if that impingement frequency
+coincides with a longitudinal acoustic mode of the port, the mode locks on and
+you get a strong discrete tone with almost no growth in the mean pressure. [F][E]
+It is a *fluid-dynamic* feedback loop — vortex shedding, impingement, acoustic
+feedback that re-phases the shedding — rather than a combustion-response loop,
+and that is what distinguishes it. The diagnostic signatures: the frequency
+tracks the port geometry and the gas velocity, so it *shifts* as the port opens
+during the burn and it appears and disappears at particular times rather than
+growing monotonically; it is usually a longitudinal mode, at hundreds of hertz
+in a large motor, not a transverse one; the amplitude is often modest
+(fractions of a percent to a few percent of $p_c$) but sustained; and it scales
+with the geometric discontinuities, so it changes when you change the inhibitor
+or the segment length, not when you change the propellant. Propellant-response
+instability, by contrast, is tied to the pressure-coupled response function of
+the formulation, is sensitive to burn rate and aluminium loading (particle
+damping), and does not care where the joints are. Ariane 5's P230 and the
+Shuttle SRB both showed this class of oscillation, at levels the vehicle had to
+be designed to tolerate. [H][M]
+
+**Probing:** whether you name the frequency-tracks-geometry test that
+distinguishes the two mechanisms.
+**Follow-up:** "You cannot change the segmentation. How would you break the
+loop?"
+
+### 179. [M21, M20, M25]
+Mass to accumulate: $m = \Delta p V/(RT_0) =
+(6.0-0.1)\times10^{6}\times6.0/(320\times3300) = \mathbf{33.5\ kg}$ of hot gas.
+Filling time constant: $\tau = V/(c^*A_t) = 6.0/(1550\times0.62) =
+\mathbf{6.24\times10^{-3}\ s}$ = 6.2 ms. [F][A] That $\tau$ is the *chamber's*
+response time — how fast the volume would fill if gas generation were
+instantaneous — and it is far shorter than any real ignition transient, which
+is the point of computing it. What actually sets the rise time is flame
+spreading: the igniter must heat the exposed grain surface to its ignition
+temperature and the flame must propagate over tens of square metres of port
+surface, and that takes tens to a couple of hundred milliseconds in a large
+motor. So the rise time is governed by igniter mass flow and energy, igniter
+plume geometry (does it wash the whole port, or only the head end?), the
+propellant's ignition temperature and thermal diffusivity, and the pressure
+feedback that accelerates the spread once the port starts to pressurise. The
+0.62 m² throat matters too — it sets how much gas escapes while you are filling
+— but only through $\tau$. The practical consequence is that igniter sizing is
+a flame-spreading problem, and an igniter sized only to supply the 33.5 kg will
+give you a slow, ragged, and potentially hazardous ignition.
+
+**Probing:** whether you say $\tau$ is not the rise time and then name flame
+spreading.
+**Follow-up:** "What goes wrong if the igniter is too energetic?"
+
+### 180. [M22, M16]
+MEOP is the maximum expected operating pressure — the highest pressure the case
+will see in service including all the dispersions (hot-day conditioning, lot
+burn-rate scatter, throat tolerance), and it is a *requirement*, not a test
+condition. Proof pressure is an acceptance test applied to every flight article,
+typically 1.1–1.25 × MEOP, whose purpose is to screen gross defects without
+damaging the article. Burst is the design ultimate, typically 1.4–1.5 × MEOP for
+a composite case, demonstrated on qualification articles to destruction. [M][J]
+The failure modes differ in kind. A steel case is a ductile metal shell: it
+yields before it bursts, so it gives visible warning through permanent
+deformation, it tolerates a scratch or a small flaw because the material blunts
+the crack tip by yielding, its failure is a single tearing rupture whose
+location can usually be traced to a defect, and its residual strength after
+proof is well predicted by fracture mechanics with an established flaw-growth
+database. A filament-wound composite case is a bundle of brittle fibres in a
+polymer: it does not yield, so there is no warning deformation; failure is a
+progressive accumulation of individual fibre breaks that reaches a critical
+cluster and then releases catastrophically in milliseconds; its strength is
+statistical (a Weibull distribution of fibre strengths) rather than a
+deterministic allowable; it is sensitive to impact damage that leaves no visible
+mark on the surface while breaking fibres beneath; and it exhibits stress
+rupture — a case held at high pressure or stored under load can fail later at a
+pressure it previously survived, which has no steel analogue. That last property
+is why proof testing a composite is a genuinely different decision: the proof
+test itself consumes life.
+
+**Probing:** whether stress rupture and "proof consumes life" appear — that is
+the discriminating knowledge.
+**Follow-up:** "So do you proof-test composite cases or not?"
+
+### 181. [M27, M25, M33]
+Architecture level, the campaign has four legs. **Define the environment
+first:** you cannot age against "uncontrolled" — you need a measured or
+specified thermal history (diurnal and seasonal cycling ranges, extremes,
+humidity, vibration from transport and carriage), because the acceleration
+factor is only meaningful against a stated duty cycle. **Age the things whose
+properties govern function:** the propellant grain (tensile strength, modulus,
+strain capacity, bond strength at the liner interface, burn rate), the
+elastomers and adhesives (seals, inhibitors, liner, flexseal bearing), the
+igniter and its pyrotechnics, and any electronics or ordnance in the TVC and
+safe-arm chain. Those are separate ageing programmes with separate mechanisms.
+**Prove the acceleration factor rather than assuming it:** run isothermal
+ageing at several elevated temperatures, measure the property of interest as a
+function of time at each, fit an Arrhenius (or time–temperature superposition)
+model, and — this is the step programmes skip — *validate* it by predicting the
+property at a lower temperature and longer time and then measuring it. An
+acceleration factor with one temperature and no validation point is an
+assumption. Critically, you must also show that the elevated temperature does
+not activate a mechanism that does not occur at storage temperature, which is
+the classic way accelerated ageing lies. **Back it with real-time
+surveillance:** age articles at the real condition in parallel, pull and test
+them on a schedule, and static-fire motors drawn from the stored fleet at
+intervals — the fleet firing is the only test that exercises everything at once,
+and thirty-year programmes have always relied on it. [M][J][M27] The
+deliverable is not a certificate but a continuing measurement, with the
+service-life claim revised as the surveillance data accumulate.
+
+**Probing:** whether you insist on validating the acceleration factor, and
+whether real-time surveillance appears alongside accelerated testing.
+**Follow-up:** "Your accelerated data say 40 years and your real-time data at
+year 12 disagree. Which do you believe?"
+
+### 182. [M26, M22, M25]
+The real reasons are industrial, and they are stronger than the mass argument.
+The Shuttle-heritage segments already exist as physical hardware — SLS flies
+refurbished D6AC steel cases — so the marginal cost of another flight set is a
+refurbishment, not a new production line, and no composite case can compete with
+hardware that is already paid for. The tooling, the casting pits, the transport
+fixtures, the handling equipment and the launch-site stacking infrastructure are
+all sized and qualified for those segments, and changing the case changes all of
+it. The qualification and flight record is an asset: dozens of flights of
+demonstrated behaviour, a mature grain design, an understood failure history,
+and — after the redesign — a joint that has never failed again. And casting a
+monolithic 700 t-class motor requires a facility that does not exist and a
+transport route from it to the pad. [J][M] The mass-fraction penalty is real but
+it is on a booster that separates early, where inert mass is carried to a
+relatively low velocity, so its payload exchange rate is much softer than the
+same mass on an upper stage. Monolithic composite loses when: the motor is too
+large to cast, cure and move in one piece; the casting facility is not near the
+launch site; the case must survive water recovery or rough handling; the
+programme needs an existing qualified design on a short schedule; or the total
+buy is small enough that the composite's up-front tooling and qualification
+never amortise. It wins when you are building many, at a size you can cast in
+one piece, close to where you launch — which is exactly the P120C's situation.
+
+**Probing:** whether you can state the conditions under which the modern answer
+is the wrong one.
+**Follow-up:** "BOLE is a composite five-segment case. What does that tell you
+about my argument?"
+
+### 183. [M28, M29, M30]
+$Kn = \lambda/D_t = 0.04\times10^{-6}/0.15\times10^{-3} =
+\mathbf{2.7\times10^{-4}}$.
+Throat area $A_t = \pi D_t^2/4 = 1.767\times10^{-8}$ m²; choked mass flow with
+$\gamma = 1.4$, $R = 296.8$ J/(kg·K), $T_0 = 300$ K, $p_0 = 2.0$ bar is
+$\dot m = \mathbf{8.11\times10^{-6}\ kg/s}$ (8.1 mg/s). Throat Reynolds number
+$Re = 4\dot m/(\pi D_t\mu) = \mathbf{4.4\times10^{3}}$ taking
+$\mu \approx 1.55\times10^{-5}$ Pa·s at the throat static temperature of about
+250 K. [F][A] Regime: $Kn \ll 0.01$, so this is **continuum flow** — the
+Navier–Stokes equations are valid and no slip correction is needed at the
+throat, which is the useful conclusion, because people reach for
+direct-simulation Monte Carlo far too early on micro-nozzles. But $Re = 4400$
+is low: the boundary layer occupies a significant fraction of the throat, the
+flow is likely laminar or transitional rather than turbulent, and the
+*divergent* section is where the Knudsen number climbs, because density falls
+by orders of magnitude while the length scale grows only linearly — so the exit
+region of this nozzle may well be in slip flow even though the throat is not.
+The honest answer names the regime *at each station*, not for the nozzle.
+
+**Probing:** whether you check the Knudsen number downstream as well as at the
+throat.
+**Follow-up:** "At what area ratio does this nozzle leave the continuum
+regime?"
+
+### 184. [M30, M29]
+The boundary layer displaces the core flow, so the effective throat is smaller
+than the geometric one, and the standard viscous estimate is
+$C_d \approx 1 - C/\sqrt{Re_t}$ with $C$ an order-unity-to-few constant from
+the laminar boundary-layer solution. At $Re_t = 4.4\times10^{3}$ that gives
+$C_d \approx \mathbf{0.94}$–$\mathbf{0.97}$ across the usual range of $C$
+(2–4) — so **3–6 % of your mass flow is lost to the boundary layer at the
+throat**, before any nozzle-efficiency loss downstream. [E][A] The scaling is
+the point. $Re_t \propto \dot m/(D_t\mu) \propto p_0 D_t/\mu$, so at fixed
+chamber pressure and gas, $Re_t$ falls linearly with throat diameter — shrink
+the thruster by ten and $Re$ falls by ten, so the $1/\sqrt{Re}$ deficit grows by
+about a factor of three. Meanwhile the divergent-section boundary layer, which
+costs you exit momentum rather than mass flow, grows in the same way and
+faster, because it has the whole nozzle length to develop in a flow whose
+Reynolds number is falling as it expands. Net: $I_{sp}$ efficiency falls
+roughly as $1-k/\sqrt{Re}$ with $k$ several times larger than the discharge
+constant, which is why realised cold-gas $I_{sp}$ goes from ~90 % of ideal at
+millinewton-to-newton scale to 50–70 % for micro-thrusters, and why there is a
+practical floor on how small a useful nozzle can be. The escape is to raise
+$p_0$ (raising $Re$ at fixed size), which is why micro-thrusters run higher
+chamber pressures than their thrust would suggest.
+
+**Probing:** whether you produce the $1/\sqrt{Re}$ scaling and then convert it
+into a design lever.
+**Follow-up:** "So why not run the micro-thruster at 20 bar?"
+
+### 185. [M31, M29, M28]
+Do the arithmetic both ways. Against the *combined* mass of the MMU and a
+suited astronaut, roughly 340 kg, spending 11.8 kg gives
+$\ln(340/328.2) = 0.0353$, so 110–130 ft/s (33.5–39.6 m/s) implies
+$I_{sp} = \mathbf{97}$–$\mathbf{114\ s}$ — impossible, since ideal cold
+nitrogen at a generous area ratio is under 80 s and a real thruster delivers
+65–70 s. Against the MMU's own 148 kg, $\ln(148/136.2) = 0.0831$ and the same
+$\Delta v$ implies $\mathbf{41}$–$\mathbf{49\ s}$ — low, but entirely credible
+for short pulses through a low-area-ratio nozzle. Conversely, at a realistic
+70 s the 11.8 kg buys only **24 m/s** against 340 kg, and 57 m/s against 148 kg.
+[F][A] So the reconciliation is that the published Δv was computed against a
+reference mass that excludes the crew member, and the figure is a capability
+of the unit rather than of the unit plus its payload. Which figure do I trust:
+the **propellant mass (11.8 kg, two tanks of 5.9 kg) and the measured
+translational acceleration (0.091 m/s²)**, both of which are primary-sourced
+and internally consistent; I would treat the Δv as a derived number of
+uncertain provenance and would not use MMU as a worked example at all. The
+engine database says exactly this and recommends SAFER instead, whose ~40 s
+implied $I_{sp}$ closes against its own published mass and impulse. [MMU
+entry, note C.2.1; SAFER95]
+
+**Probing:** whether you test the hypothesis by re-running the sum with a
+different reference mass, rather than declaring the numbers wrong.
+**Follow-up:** "Where else does a published $\Delta v$ hide its reference
+mass?"

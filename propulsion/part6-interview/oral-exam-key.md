@@ -2149,9 +2149,9 @@ points, more ports, a longer motor), which raises $K_n$ and therefore chamber
 pressure — so the case gets heavier. Total impulse is fixed, so you are trading
 burn time against inert mass. Say that explicitly.
 
-**F4 — doubling p_c at fixed impulse and envelope.** Burn rate rises as $p^n$
-(15 % for a doubling at n = 0.35, since $2^{0.35} = 1.27$ — actually 27 %), so
-burn time falls; $K_n$ must rise as $p^{1-n}$, so either burning area goes up or
+**F4 — doubling p_c at fixed impulse and envelope.** Burn rate rises as $p^n$,
+so at n = 0.35 a doubling gives $2^{0.35} =$ **1.27**, a 27 % faster regression
+and a correspondingly shorter burn; $K_n$ must rise as $p^{1-n}$, so either burning area goes up or
 throat area comes down; the case wall thickness scales linearly with pressure, so
 case mass rises; and the nozzle throat gets smaller and hotter. In a fixed
 envelope the usual outcome is a heavier motor with a shorter, punchier trace —
@@ -2358,11 +2358,13 @@ where the real exposure is longest.
 **F1 — 6 % throat growth.** Pressure falls as
 $(A_{t1}/A_{t2})^{1/(1-n)} = (1/1.06)^{1/0.65} =$ **0.9143**, an 8.6 % drop.
 Thrust: $F = C_F p_c A_t$, and $p_c A_t$ has fallen by
-$0.9143\times1.06 = 0.9692$, so thrust falls about 3 % — less than pressure,
-because the bigger throat partly compensates. $C_F$ also improves slightly as ε
-falls... no: ε falls when the throat grows at fixed exit area, so $C_F$ gets
-*worse* in vacuum and better at sea level. Working that sign correctly is what
-the follow-up is for.
+$0.9143\times1.06 =$ **0.9692**, so thrust falls about **3 %** — less than
+pressure, because the larger throat partly compensates for the lower pressure.
+Then the sign the follow-up is really testing: at a fixed exit area a 6 % larger
+throat means ε has fallen by 6 %, so $C_F^{vac}$ falls slightly too and the
+vacuum thrust loss is a little more than 3 %, while at sea level the smaller ε
+reduces the overexpansion penalty and partly offsets it. Getting that sign right
+is the point.
 
 **F2 — the throat insert trade.** Bulk graphite: cheap, isotropic, machinable,
 moderate erosion, brittle and thermal-shock-sensitive. Carbon–carbon: lowest
@@ -2568,3 +2570,840 @@ it could keep up."
 **Classic wrong turn.** Reducing STS-51-L to "the O-rings got cold". Temperature
 was the trigger; the design flaw was a pressure-actuated joint that opened, and a
 programme that had normalised blow-by observed on earlier flights.
+
+---
+
+# Block D — Cold-gas systems (items 47–52)
+
+## Item 47 — Cold-gas fundamentals `[M28]`
+
+**What a strong answer contains**
+
+- The whole difference is $T_0$. $c^{*} = \sqrt{RT_0}/\Gamma$, so a 300 K gas
+  against a 3,500 K flame gives $\sqrt{300/3500} = 0.29$ before molecular
+  weight is considered — and nitrogen's M = 28 is worse than a hydrolox
+  exhaust's 13.5, so the two penalties compound. [F]
+- The arithmetic: R(N₂) = **296.797 J/(kg·K)**, γ = 1.40, T₀ = 300 K gives
+  $c^{*} =$ **435.78 m/s**; at ε = 50 the ideal vacuum Isp is **76.84 s**.
+- Real systems deliver **65–73 s** for GN₂ `[engine-database C.1]`, so the
+  realised efficiency is ~85–95 % and falls at small scale.
+- The honest framing: cold gas is not an Isp technology. It is chosen for
+  minimum impulse bit, contamination, simplicity and cost.
+
+**F1 — the ε = 50 computation.** As above, on the board:
+$R = R_u/M = 8314.46/28.014$, then $\Gamma$, then $c^{*}$, then $C_F^{vac}$ at
+ε = 50, then $I_{sp} = c^{*}C_F/g_0 =$ **76.84 s**.
+
+**F2 — ε = 20 and 100.** **75.10 s** and **77.76 s**. A factor of five in area
+ratio moves Isp by 3.5 %. The reason is that the pressure ratio is already large
+enough that most of the available enthalpy has been extracted; the remaining
+$C_F$ gain is asymptotic. The design conclusion: do not spend mass, volume or
+manufacturing difficulty on a large nozzle — spend it on valve leakage, on
+minimum impulse bit repeatability, and on the tank. That redirection is the
+whole point of the follow-up.
+
+**F3 — where the 10 % goes, and what dominates below 1 N.** Boundary-layer and
+viscous losses (the dominant term at small scale, because the throat Reynolds
+number is low and the boundary layer occupies a significant fraction of the
+throat), divergence, non-ideal gas behaviour near saturation, heat transfer to
+the (relatively enormous) thruster body, and unsteady losses in the rise and
+fall of each pulse. Below ~1 N the **viscous throat loss** dominates and it gets
+worse as thrust falls: the discharge coefficient itself drops.
+
+**F4 — tank cooling 300 → 250 K.** Isp falls as $\sqrt{T_0}$:
+$\sqrt{250/300} = 0.913$, and the library gives **70.14 s** at ε = 50 against
+76.84 s — a 8.7 % loss. Thrust falls further, because ṁ also carries a
+$1/\sqrt{T_0}$ and the tank pressure has dropped with temperature too. This is
+why long burns on a blowdown cold-gas system underperform the datasheet, and why
+a thermal model is part of the propulsion model.
+
+**Ends the line early.** "Cold gas is a $\sqrt{T_0}$ problem, and the ε
+insensitivity means the nozzle is the one part I should stop optimising."
+
+**Classic wrong turn.** Comparing a published cold-gas Isp to another one
+without asking for $T_0$ and ε. The database says it flatly: any published
+cold-gas Isp is meaningless without both `[engine-database C.1]`.
+
+## Item 48 — Gas selection `[M28, M29]`
+
+**What a strong answer contains**
+
+- The candidate set with their real figures of merit: GN₂ (76.8 s ideal at
+  ε = 50, ~65–73 s realised, needs a high-pressure COPV), helium (178.1 s
+  ideal, ~150–165 s realised, but ~0.04 g/cm³ stored), butane (69.2 s ideal,
+  ~60–70 s realised, self-pressurising at ~2.6 bar, ~0.57 g/cm³ liquid),
+  R-236fa (43.2 s ideal, ~40 s realised, self-pressurising at ~2.7 bar,
+  ~1.36 g/cm³ liquid) `[engine-database C.1]`.
+- The choice for a 6U CubeSat: a **self-pressurising saturated liquid** —
+  R-236fa or butane — because the deciding constraint is tank mass and volume
+  inside a 6U envelope, not Isp. MarCO flew R-236fa to Mars on exactly this
+  reasoning `[engine-database C.2]`.
+- The key figure of merit named: **impulse per unit stored volume**,
+  $\rho I_{sp} g_0$.
+
+**F1 — why not helium.** Its stored density at 241 bar is about 0.04 g/cm³, so
+despite an Isp two and a half times nitrogen's it delivers roughly
+**0.059–0.065 N·s/cm³** of stored propellant against R-236fa's
+**0.53–0.57** — an order of magnitude worse per unit volume
+`[engine-database C.1, C.1.1]`. Add that helium leaks through seals and even
+through some materials in a way heavier molecules do not, which is fatal for a
+multi-year mission.
+
+**F2 — self-pressurising saturated liquid.** The propellant is stored as a
+liquid in equilibrium with its own vapour; drawing vapour off drops the pressure
+slightly, more liquid evaporates, and the tank pressure returns to the vapour
+pressure at the current temperature. What it removes: the high-pressure COPV,
+the regulator, the pressurant, and the whole high-pressure section of the
+system. MarCO's MiPS is a **single all-welded aluminium module** with no
+regulator and no high-pressure COPV, at ~2.7 bar `[engine-database C.2]`. What
+it adds: strong temperature dependence (tank pressure *is* a thermometer), and
+a two-phase feed problem in microgravity that has to be managed.
+
+**F3 — the impulse-density comparison and the classic error.** The numbers are
+above: helium ≈0.06, R-236fa ≈0.55 N·s/cm³, a factor of nine in R-236fa's
+favour. The classic arithmetic error is in the course's own verification
+worksheet and the database corrects it explicitly: the worksheet claimed
+"~7.1 N·s/cm³ for helium and ~5.8 for R-236fa — nearly the same" and it is
+**wrong by roughly two orders of magnitude and in the wrong direction**
+`[engine-database C.1.1]`. The worksheet's *conclusion* — that the tank, not the
+propellant, decides the trade — happens to be right, which is exactly why the
+error survived. A candidate who quotes the corrected numbers and notes that a
+right conclusion from wrong arithmetic is still a defect has demonstrated the
+habit the course is trying to build.
+
+**F4 — an infrared instrument.** Yes, it changes the answer. Condensable
+propellants deposit on cold optics and radiators; a refrigerant with a vapour
+pressure of a few bar at ambient will condense on a 100 K surface. Plume impingement
+modelling and thruster placement become requirements, and an inert,
+non-condensable gas (GN₂) becomes attractive again despite the volume penalty.
+This is the contamination argument that decides many real spacecraft.
+
+**Ends the line early.** "Inside a 6U envelope the constraint is volume and tank
+mass, so the figure of merit is impulse per cubic centimetre of stored
+propellant — and on that measure helium loses to a refrigerant by nine to one."
+
+**Classic wrong turn.** Selecting on Isp and choosing helium or nitrogen for a
+volume-limited CubeSat. It is the exact error the impulse-density calculation
+exists to prevent.
+
+## Item 49 — Blowdown modelling `[M29]`
+
+**What a strong answer contains**
+
+- The model stated with its assumptions: ideal (or real, with Z) gas in a fixed
+  volume, a polytropic expansion $p = p_i(V_i/V)^n$ for the *ullage* or
+  $p V^n$ = const for the gas mass remaining, n = 1 isothermal and n = γ
+  adiabatic, plus a thruster flow model that is choked throughout.
+- The recognition that the real system is neither: the tank exchanges heat with
+  the spacecraft on a timescale between a single pulse (adiabatic) and the
+  mission (isothermal), so duty cycle determines which bound applies.
+- Numbers: an initial 300 bar in a 0.10 m³ ullage expanding to 0.40 m³
+  isothermally gives **75 bar**; the usable mass fraction between 300 bar and a
+  50 bar minimum inlet pressure is **0.8333** isothermally; a 10 L bottle at
+  300 bar and 293 K with Z = 1.05 holds **3.285 kg** of nitrogen.
+
+**F1 — which bound is conservative.** Adiabatic gives a *lower* pressure and
+temperature at any given expelled mass, so it is conservative for **end-of-life
+thrust and usable propellant**; isothermal gives the optimistic answer. But
+adiabatic is optimistic for **thermal** predictions and for tank structural
+temperature. Real systems: individual pulses are near-adiabatic, and the tank
+re-warms between them, so a long mission tracks the isothermal line while any
+single long burn droops below it and recovers.
+
+**F2 — the usable fraction.** Isothermally the gas mass is proportional to
+pressure, so $1 - p_f/p_i = 1 - 50/300 =$ **0.8333**. State the assumption that
+50 bar is the regulator or thruster minimum inlet pressure, not zero — the
+"unusable" 17 % is residual gas above that floor, and lowering the floor is the
+cheapest way to buy propellant.
+
+**F3 — thrust falling by six.** Thrust is proportional to feed pressure for a
+choked thruster, so a 300 → 50 bar blowdown drops thrust 6:1. Consequences: the
+ACS control law must be gain-scheduled on tank pressure or be robust across the
+range; the minimum impulse bit changes by the same factor, so pointing
+resolution *improves* as the mission proceeds while slew authority degrades; and
+the failure case is end-of-life, where a saturated axis may no longer be
+recoverable. The design answer is to size for end-of-life authority and accept
+being over-powered at the start.
+
+**F4 — adding a regulator.** Gained: constant thrust and constant impulse bit
+across the mission, a simpler control law, and full use of the tank down to the
+regulator's dropout. Paid: the regulator's mass and volume, a new single-point
+failure (regulators fail open — hence relief valves — and fail closed), the
+lock-up and droop behaviour that must be characterised, additional leakage
+paths, and cost. On a CubeSat the answer is usually no, which is why MarCO used
+self-pressurising blowdown with no regulator at all `[engine-database C.2]`.
+`[SP-8080]`
+
+**Ends the line early.** "Isothermal and adiabatic are the two bounds and the
+duty cycle picks which one you are near — so the model needs a thermal node, not
+a better polytropic exponent."
+
+**Classic wrong turn.** Using the isothermal usable fraction for the *thrust*
+prediction during a long burn. It overpredicts end-of-burn thrust exactly when
+the mission needs it.
+
+## Item 50 — Cold-gas hardware `[M30]`
+
+**What a strong answer contains**
+
+- The chain: tank (COPV or all-welded metal module) → fill/drain and pressure
+  transducer → filter → regulator or nothing (blowdown) → latch valve →
+  manifold → thruster solenoid valves → nozzle. Plus relief, and often a
+  redundant isolation path.
+- The component that keeps engineers awake: the **valves** — specifically their
+  leakage over years, their minimum reliable pulse width, and their cycle life
+  (VACCO quotes up to 880,000 firings for a 0.3U MiPS and 1,860,000 for the
+  0.25U `[engine-database C.2]`, which is the real requirement).
+- The awareness that at this scale the *system* dry mass, not the propellant,
+  dominates: MarCO's MiPS is 3,490 g wet carrying under 2 kg of propellant
+  `[engine-database C.2]`.
+
+**F1 — minimum impulse bit.** $I_{bit}$ is the total impulse of the shortest
+commanded pulse. Trapezoidal model:
+$I_{bit} = F(t_{on} - t_{rise}/2 + t_{fall}/2)$; for F = 1 N, $t_{on}$ = 20 ms,
+$t_{rise}$ = 4 ms, $t_{fall}$ = 6 ms this is **0.021 N·s**. What limits it:
+valve opening and closing time (and their *repeatability*, which is what
+actually sets the usable minimum), the manifold volume between valve and throat
+which must fill and empty, and the electronics' timing resolution. The
+repeatability, not the mean, is the specification that matters for fine pointing.
+
+**F2 — leakage.** For a three-year mission the budget is set by how much
+propellant you can afford to lose: losing 5 % of 1.4 kg over 3 years is
+~0.7 mg/s, i.e. of order 10⁻³ std·cm³/s of helium equivalent per seal — a hard
+but achievable number that drives all-welded construction and hermetic seals
+rather than threaded fittings. Verification: helium mass-spectrometer leak
+testing at component and system level, plus a long-duration pressure-decay test
+on the integrated system with a temperature-compensated model, because a
+pressure decay test on a self-pressurising tank measures temperature as much as
+leakage.
+
+**F3 — low Reynolds number at the throat.** At millinewton thrust the throat is
+tens to hundreds of micrometres and the throat Reynolds number can fall to
+10²–10³. The boundary layer then occupies an appreciable fraction of the throat
+area, the effective throat is smaller than the geometric one, and the discharge
+coefficient falls — commonly correlated as $C_d \approx 1 - k/\sqrt{Re}$. The
+consequences: measured thrust below prediction, a thrust that depends on feed
+temperature through viscosity, and a nozzle whose real area ratio is not its
+drawn one. `[NASA-SOA]`, `[engine-database C.1]`
+
+**F4 — COPV or welded module, for a CubeSat.** Welded module with a
+self-pressurising propellant, for most CubeSats: it deletes the high-pressure
+system, satisfies launch-provider pressure-vessel requirements far more easily
+(a low-pressure tank is a much smaller safety case than a 300 bar COPV riding as
+a secondary payload), and integrates the whole system into one testable box —
+which is exactly what VACCO's MiPS is `[engine-database C.2]`,
+`[AIAA-S-081]`. A COPV is right when the mission needs a non-condensable gas or
+a large impulse in a small volume and can carry the safety-case burden.
+
+**Ends the line early.** "The propellant is cheap and the valves are the
+mission — leakage over years and pulse repeatability are the two specifications
+everything else serves."
+
+**Classic wrong turn.** Optimising the nozzle. Item 47 showed the ε
+insensitivity; at this scale the nozzle's real problem is a viscous discharge
+coefficient, not its contour.
+
+## Item 51 — Flown systems `[M31]`
+
+**What a strong answer contains**
+
+- MarCO described accurately: two 6U CubeSats, the first interplanetary ones,
+  launched with InSight 2018-05-05 and flying past Mars 2018-11-26; VACCO MiPS
+  with **8 thrusters** (4 canted for attitude control, 4 axial for TCMs),
+  **R-236fa** stored as a self-pressurising saturated liquid at ~2.7 bar, a
+  single all-welded aluminium module with ChEMS micro-valves, **755 N·s** total
+  impulse, ~**40 s** Isp, **3,490 g** wet, **>40 m/s** of Δv
+  `[engine-database C.2]`.
+- Why cold gas was right there: the spacecraft is a 6U bus with a
+  hard volume and a hard safety-case constraint riding as a secondary payload;
+  the Δv requirement is tens of m/s, not hundreds; the mission is months, not
+  years; and a propulsion failure must not endanger InSight. Simplicity and a
+  low-pressure, non-hazardous, single-box system beat performance.
+
+**F1 — the MarCO closure.** $m = I_t/(I_{sp}g_0) = 755/(40\times9.80665) =$
+**1.925 kg**; at ~1.36 g/cm³ for liquid R-236fa that is ~**1,415 cm³**
+`[engine-database C.1]`. Against a 3,490 g wet module, the propellant is 55 % of
+the wet mass and the dry system is 1.57 kg — which closes, and which makes the
+point that at this scale the tank and valves are half the system.
+
+**F2 — SAFER, then MMU.** SAFER: 1.4 kg of GN₂, 37.7 kg system, published
+3.05 m/s `[engine-database C.2]`. Take a suited crew member plus SAFER at
+~180 kg: $\Delta v = I_{sp}g_0\ln(180/178.6)$ requires
+$I_{sp} \approx$ **40 s** to give **3.06 m/s** — below the 65–73 s a real GN₂
+system achieves, so the published figure is a *usable, reserved* Δv, not the
+propellant's capability. Credible, and the database says so `[C.2.2]`.
+MMU: 11.8 kg of GN₂, ~340 kg combined mass, published 33.5–39.6 m/s. At a
+realistic 70 s that same arithmetic gives only **24.2 m/s**, and the total
+impulse is 11.8 × 70 × 9.80665 ≈ **8,100 N·s**. To reach 33.5 m/s you need an
+implied Isp near **97 s**, which GN₂ cannot deliver. **The MMU set does not
+close** `[engine-database C.2.1]`, and the correct answer is to say so and to
+name the candidate resolutions — a lower combined mass than 340 kg, a Δv figure
+that includes on-orbit recharges, or a mis-stated propellant load — rather than
+to force one.
+
+**F3 — doubling MarCO's Δv.** Δv is $I_{sp}g_0\ln(m_0/m_f)$ and at 40 s with a
+3.49 kg vehicle you are already at a large propellant fraction, so doubling Δv
+means roughly doubling propellant — which does not fit in 6U alongside the
+payload. The realistic answers are: raise Isp by heating the gas (item 52), or
+change technology to a monopropellant or electric system, or reduce dry mass.
+Saying "add propellant" without checking the volume is the failure here.
+
+**F4 — when cold gas stops being the answer.** When the required total impulse
+divided by the available volume exceeds what ~0.5 N·s/cm³ can supply; when the
+mission needs hundreds of m/s; when the duty cycle demands continuous thrust
+rather than pulses. What replaces it: warm gas/resistojet (a factor of two on
+Isp for a power budget), hydrazine or green monopropellant (~220–230 s), or
+electric propulsion (thousands of seconds, at the cost of power and thrust).
+`[NASA-SOA]`
+
+**Ends the line early.** "MarCO's whole argument is that a 6U secondary payload
+cannot carry a high-pressure or hazardous system, so the propulsion had to be a
+single low-pressure welded box — and 40 s of Isp was enough for 40 m/s."
+
+**Classic wrong turn.** Accepting the MMU's published Δv and propellant load
+together without checking that they close. They do not, and the candidate who
+notices is demonstrating precisely the skill the course is built around.
+
+## Item 52 — Warm gas and the boundary `[M31, M28]`
+
+**What a strong answer contains**
+
+- Why heating is the only lever: at fixed propellant, $I_{sp}\propto\sqrt{T_0}$
+  and nothing else in the nozzle can move it more than a few percent (item 47's
+  ε insensitivity). Doubling $T_0$ buys 41 %; quadrupling buys 100 %.
+- The boundary: once you add energy from an external source you have a
+  **resistojet** — an electrothermal thruster — and the figure of merit becomes
+  N·s per joule as well as per gram. "Cold gas" properly means no energy added.
+- The database's framing: the NASA small-spacecraft envelope of 10 μN–3.6 N and
+  **40–110 s** has its top only reachable with warm gas, not true cold gas
+  `[engine-database C.2, NASA-SOA]`.
+
+**F1 — CHIPS's factor.** 82 s against a ~43 s cold ideal for R-236fa is a factor
+of **1.9**, which by $\sqrt{T_0}$ implies a chamber temperature about
+**3.6×** the cold value — roughly 300 K → ~1,080 K. Real resistojets do not run
+that hot, so part of the factor is that the ideal 43 s was computed at ε = 50
+and 300 K, and the realised warm-gas figure benefits from both heating and a
+different operating point. The strong answer does the $\sqrt{T_0}$ arithmetic,
+gets a temperature, and then says the temperature looks high — which is the
+right level of scepticism about a single quoted number `[engine-database C.2]`.
+
+**F2 — the power budget.** Power is $\dot m c_p \Delta T/\eta$. For a 30 mN
+thruster at 82 s, $\dot m = F/(I_{sp}g_0) = 0.030/(82\times9.80665) =$
+37 mg/s; heating that by ~700 K at $c_p \approx 800$ J/(kg·K) is ~21 W before
+losses, so tens of watts. On a 6U CubeSat with a few tens of watts of orbit-
+average power, that means the thruster cannot run continuously — it duty-cycles
+against the power system, and the propulsion system's performance becomes a
+*power* allocation question. That coupling is the real mission-design impact.
+
+**F3 — against monopropellant and electric.** Hydrazine or a green
+monopropellant gives ~220–230 s with no electrical power for the thrust itself,
+at the cost of a catalyst bed, preheating, toxicity or high decomposition
+temperature, and a much larger safety case. Electric (ion, Hall, or a subliming
+iodine device like ThrustMe's I2T5 `[engine-database C.2]`) gives thousands of
+seconds at micronewtons and needs hundreds of watts. Warm gas sits exactly in
+between and is chosen when the bus has spare watts, cannot host a hazardous
+propellant, and needs a factor of two — not a factor of fifty — on Isp.
+
+**Ends the line early.** "Isp goes as √T₀ and nothing else is available, so the
+moment you want more than about 70 seconds you are buying it with watts and you
+are no longer doing cold gas."
+
+**Classic wrong turn.** Quoting the 110 s top of the published small-spacecraft
+Isp band as a cold-gas capability. It is a warm-gas number, and the database
+flags it explicitly `[engine-database C.2]`.
+
+---
+
+# Block E — Cross-system engineering (items 53–60)
+
+## Item 53 — The architecture trade `[M32]`
+
+**What a strong answer contains**
+
+- The candidates framed by their inert-mass and operability signatures, not by
+  Isp alone: a pump-fed liquid (best Isp, worst inert fraction at this size,
+  restartable), a pressure-fed storable (moderate Isp, simple, restartable,
+  long-coast capable), a solid (best mass fraction, no restart, no throttle),
+  and a hybrid (restartable and throttleable in principle, immature, poor
+  regression-rate scaling).
+- The arithmetic done, not asserted: for Δv = 3,000 m/s,
+  $m_p = m_f(e^{\Delta v/(I_{sp}g_0)}-1)$. A liquid at 340 s with 400 kg of
+  inert plus payload needs **583.6 kg** of propellant; a solid at 290 s whose
+  higher mass fraction still leaves 600 kg of final mass needs **1,123.0 kg**.
+  The comparison only means something once the inert masses are stated, which is
+  the point of F2.
+- A recommendation with a named condition under which it flips.
+
+**F1 — what would change the recommendation fastest.** The **restart and coast
+requirement**, because it eliminates the solid outright; then the **inert-mass
+fraction achievable at this scale**, because it dominates the mass ratio; then
+cost and schedule. Δv itself and Isp are the least sensitive inputs, which
+surprises candidates.
+
+**F2 — where the inert assumption dominates.** Redo the arithmetic with the
+inert mass moved ±20 % and show that it moves propellant mass more than a 20 s
+Isp change does. At these Δv levels the exponential is not steep enough for Isp
+to dominate; the mass ratio is. A candidate who shows this with two numbers has
+answered the whole item.
+
+**F3 — restartable, three burns over 14 days.** Solids are out (one burn, and
+thrust termination is not a restart). Cryogenic liquids need boil-off management
+and a settling/ullage strategy for each restart — possible, and done, but it
+adds mass and complexity over 14 days. Storable pressure-fed survives trivially.
+The requirement has quietly selected the architecture, and saying so is the
+answer.
+
+**F4 — cost, not mass.** The ranking inverts: a solid or a simple pressure-fed
+storable, both with low part counts, no turbomachinery and no cryogenic ground
+system, beat a pump-fed cryogenic stage on unit cost — and at low flight rates
+the non-recurring development cost dominates everything, which favours whatever
+already exists. The strong answer names *which* cost (non-recurring, unit
+recurring, or operations) because the three give different answers.
+
+**Ends the line early.** "At 3 km/s from a two-tonne stage the exponential is
+shallow, so this trade is decided by inert mass and by the restart requirement,
+not by Isp."
+
+**Classic wrong turn.** Comparing propellant masses at different Isp while
+holding the *same* inert mass for all architectures. Solids have far better mass
+fractions and liquids far better Isp, and a comparison that ignores the first
+is rigged.
+
+## Item 54 — Requirements and margins `[M33]`
+
+**What a strong answer contains**
+
+- The flowdown: mission Δv and duty cycle → stage propellant and thrust profile
+  → engine thrust, Isp, throttle range, restart count and life → subsystem
+  specifications (pump discharge pressure, injector Δp, wall temperature limit)
+  → component drawings and acceptance criteria. Each level adds margin and each
+  margin has an owner.
+- The distinction, stated crisply: **factor of safety** is a structural
+  multiplier on load, owned by the structures discipline and set by standards
+  (`[STD-5001]`, `[AIAA-S-080]`); **margin** is design headroom against a
+  requirement, owned by the subsystem; **contingency** is unallocated reserve
+  held at the system or programme level against growth, owned by the programme.
+  Confusing the three is how margin gets spent three times.
+- The habit of asking what a requirement is *for* before agreeing to it.
+
+**F1 — the three, and their owners.** As above. Add the failure mode: if the
+subsystem holds margin, the system holds contingency, and the structure holds a
+factor of safety, all against the same uncertainty, the vehicle is
+over-designed; if none of them does, it is under-designed. The programme's job
+is to know which uncertainty each is covering.
+
+**F2 — allocating Δv margin.** With ±1.5 % on Isp and ±5 % on inert mass, RSS
+gives $\sqrt{0.015^2+0.05^2} =$ **5.2 %** on the mass-ratio-driven Δv term to
+first order — so a Δv margin of order 5 % covers the propulsion uncertainties at
+1σ, and a programme wanting 3σ needs far more or needs to reduce the inert-mass
+uncertainty. The insight the examiner wants: **inert mass dominates the
+combination**, so buying Isp accuracy is the wrong investment; buying mass
+knowledge is the right one.
+
+**F3 — a requirement to push back on.** Good answers are specific: an Isp
+requirement stated without an area ratio or an operating point; a throttle range
+that no mission phase actually uses; a restart count inherited from a previous
+programme; a vibration requirement enveloped from a different launch vehicle. The
+argument is always the same shape: trace the requirement to the mission need,
+show the need is met with a weaker requirement, and quantify what the weaker one
+buys. `[SMC-S-016]`, `[STD-7001]`
+
+**F4 — single-string for 12 kg.** The process: identify the failure mode the
+redundancy was covering, estimate its probability and consequence, check whether
+the failure is detectable and whether there is a workaround, check whether the
+component can instead be made more reliable (screening, derating, qualification
+margin), and then decide against the programme's stated reliability allocation.
+The answer is a *process*, not a yes or no — and the strong candidate says that
+12 kg is not the unit of the decision; probability of loss of mission is.
+
+**Ends the line early.** "The RSS is dominated by the inert-mass uncertainty, so
+the money goes into mass knowledge, not into Isp accuracy."
+
+**Classic wrong turn.** Adding the margins linearly and calling the result
+conservative. It is conservative in the wrong place and hides which uncertainty
+actually drives the number.
+
+## Item 55 — Verification and qualification `[M33, M18]`
+
+**What a strong answer contains**
+
+- Testing generates data; **verification** demonstrates that a requirement is
+  met, by test, analysis, inspection or similarity; **qualification**
+  demonstrates that the *design* meets requirements with margin, on hardware
+  built to the flight process, at levels above flight.
+- The three unit classes: **qualification** unit tested to qual levels and not
+  flown; **acceptance** testing at flight levels on every flight unit;
+  **protoflight**, a single unit tested at qual levels for acceptance durations
+  and then flown. `[SMC-S-016]`, `[STD-7001]`
+- The point that qualification is about the *process* as much as the design —
+  which is why qual hardware must be built on the flight production line.
+
+**F1 — the three, and when protoflight.** Protoflight when the programme is
+building very few units and the cost of a dedicated qual article is prohibitive,
+and when the qual-level exposure is demonstrably not life-consuming for the
+hardware. It is a risk trade: you fly hardware that has seen qual levels, so you
+have spent some of its fatigue life and you have no margin demonstration beyond
+the unit you are flying.
+
+**F2 — untestable failure modes.** Options, in order of preference: test at
+subscale with validated scaling; test the mechanism rather than the article
+(heated-tube rigs for coking, bomb tests for stability, subscale burst tests for
+cases); test to failure on a cheaper article to locate the boundary; verify by
+analysis with a model validated on adjacent test data; and, last, accept the
+risk explicitly with a named owner. What is not acceptable is verifying by
+analysis with an unvalidated model and not saying so.
+
+**F3 — model validation versus demonstration.** The ratio has moved
+substantially toward validation over thirty years, because computation got
+cheap and testing did not — but it has moved least where the physics is least
+predictable, which is exactly combustion stability, two-phase flow and
+turbopump dynamics. So the modern campaign analyses far more and tests the same
+critical few things. `[LRTC]`, `[GradlAM]`
+
+**F4 — failing at 1.4× when the requirement is 1.25×.** It is a pass on the
+requirement — but the interesting engineering question is where it failed and
+whether that mode was the predicted one. If the article failed at the predicted
+location at the predicted load, the model is validated and the margin is
+understood. If it failed somewhere unexpected, the requirement was met by luck
+and the model is wrong, which is a finding even though the test passed. Saying
+"pass, and here is what I would still investigate" is the complete answer.
+
+**Ends the line early.** "Qualification demonstrates the design *and the
+production process* with margin — which is why the qual article has to come off
+the flight line."
+
+**Classic wrong turn.** Treating qualification as a bigger acceptance test.
+Acceptance screens workmanship on a unit; qualification proves a design, and
+they answer different questions.
+
+## Item 56 — Failure analysis: the SRB joint `[M34, M22, M23]`
+
+**What a strong answer contains**
+
+- The chain, stated as engineering causation: ambient ~2 °C, far outside prior
+  launch experience → O-ring elastomer stiffened, its resilience and response
+  rate reduced → at ignition, chamber pressure rose in milliseconds and the
+  tang-and-clevis field joint **rotated**, opening the extrusion gap the primary
+  seal had to follow → the stiffened seal could not track the gap → hot gas
+  blow-by and O-ring erosion → an initial plume, temporarily plugged by
+  combustion products and slag → that plug failed at ~58 s → a growing flame
+  plume impinged on the External Tank aft attachment and the tank → structural
+  failure and vehicle break-up `[Rogers86]`.
+- The organisational half: blow-by and erosion had been observed on previous
+  flights, correlated with temperature, and had been accepted as within
+  experience — the normalisation of an out-of-family observation.
+
+**F1 — rotation over temperature.** Temperature alone would have been survivable
+if the seal had not been asked to move. Joint rotation is a *design* feature of a
+tang-and-clevis joint under internal pressure: the case wall deflects outward,
+the clevis opens relative to the tang, and the gap the seal must fill grows at
+the worst possible moment. Cold reduced the seal's ability to follow; rotation
+created the thing it had to follow. Remove either and the failure does not occur
+— which is why the fix addressed rotation, structurally.
+
+**F2 — trace and film.** As in item 46 F2: a small divergence between the two
+boosters' chamber-pressure traces (the failing one running marginally low), and
+imagery showing black smoke puffs from the aft field joint within the first
+second, a quiescent period, then a flame plume from around 58 s that grew and
+was deflected onto the ET. The order matters because it establishes that the
+seal failed at *ignition*, not at max-Q — a conclusion the pressure data alone
+could not support.
+
+**F3 — the general lesson.** Never put a seal in a joint that opens under the
+pressure it seals. If the architecture requires it, the seal must be
+mechanically constrained so the gap cannot grow (the RSRM capture feature), or
+the joint must be deleted (P120C's monolithic case), or the hot gas must be kept
+away from the seal entirely by insulation design. Redundant seals in the same
+opening gap are not redundancy — they share the common cause.
+
+**F4 — a second programme with the same class of mistake.** Columbia STS-107 is
+the canonical pairing: foam shedding was repeatedly observed, repeatedly
+accepted, and the out-of-family observation was normalised until it was fatal.
+Within propulsion, the RS-25's early turbopump blade and bearing anomalies were
+managed by inspection intervals rather than redesign for a long period
+`[Biggs89]`. The transferable point is that the failure mode here is an
+*organisational* one — a data trend accepted because it had not yet caused a
+loss — and it recurs independently of the technology.
+
+**Ends the line early.** "The seal had to chase a gap that the pressure itself
+was opening; the cold only decided whether it could keep up."
+
+**Classic wrong turn.** Stopping at "cold O-rings". It gets the trigger and
+misses both the design flaw and the organisational one, and it produces the
+wrong fix — a better elastomer instead of a joint that does not open.
+
+## Item 57 — Failure analysis: turbomachinery and cycles `[M34, M12]`
+
+**What a strong answer contains**
+
+- The failure modes, roughly by share of the historical record: **bearing
+  failure** (loads, cooling, lubrication by the propellant itself, DN limits),
+  **blade high-cycle fatigue** (resonance with nozzle-passing frequencies,
+  flutter), **rotordynamic instability** (subsynchronous whirl driven by seals
+  and bearings), **cavitation-driven instabilities** (rotating cavitation,
+  surge), **seal failure and interpropellant leakage** (the LOX-side fire
+  mechanism), and **foreign object damage / contamination**.
+- The recognition that these interact: a bearing degradation changes clearances,
+  which changes seal behaviour, which changes rotordynamics.
+- Instrumentation named with what it catches. `[SP-8107]`, `[SP-8109]`,
+  `[SP-8110]`, `[Brennen-Pumps]`
+
+**F1 — one mechanism in depth.** Subsynchronous whirl: the rotor precesses at a
+frequency below shaft speed, driven by destabilising cross-coupled stiffness
+from seals, bearings or the impeller's fluid forces; the whirl frequency locks
+near a rotor natural frequency and does not track speed proportionally, and
+amplitude grows once shaft speed exceeds roughly twice that frequency. Caught
+by: proximity probes or accelerometers with an order-tracked spectrum — the
+signature is a persistent non-synchronous line whose frequency stays near the
+natural frequency while the 1× line moves with speed. Fixes: damper seals,
+squeeze-film dampers, changed bearing preload, stiffer rotor.
+
+**F2 — ox-rich fires.** In a fuel-rich turbine, a rub or a particle generates
+heat and possibly a local fire that runs out of oxidiser almost immediately. In
+an ox-rich turbine, the working fluid is the oxidiser: any ignition source —
+rub, particle impact, contamination — can ignite the *structure itself*, and the
+fire propagates as long as flow continues. This is why ox-rich staged combustion
+demands burn-resistant alloys, coatings, rigorous cleanliness, and particulate
+control, and why the Soviet mastery of it (RD-170 family, RD-180 at 267 bar
+`noz`†) is a materials achievement `[engine-database A.6]`.
+
+**F3 — RS-25 turbopump life.** The programme found that turbopump life was the
+binding constraint on reuse, not the chamber: blade cracking, bearing wear and
+inspection findings drove between-flight inspection and replacement intervals,
+and the response was a combination of design changes (the Block II Pratt &
+Whitney high-pressure turbopumps) and flight rules that limited exposure. The
+lesson generalised: on a reusable engine the *life-limited rotating parts* set
+the maintenance model, and they must be designed with inspection access in mind
+from the start `[Biggs89]`, `[engine-database A.2]`.
+
+**F4 — a 40 Hz non-synchronous line growing with speed.** First hypothesis:
+rotordynamic instability — subsynchronous whirl — because it is non-synchronous
+and amplitude-growing. Immediate discriminators: does the frequency track speed
+proportionally (then it is an order, so a blade-pass or bearing defect
+frequency) or stay roughly fixed (then it is a natural frequency, so whirl);
+does it appear above a threshold speed; is it present on both ends of the rotor
+with a phase relationship consistent with a precessing mode. Second hypothesis,
+which must be excluded: rotating cavitation at the inducer, which is also
+non-synchronous and speed-dependent and is discriminated by its sensitivity to
+inlet pressure.
+
+**Ends the line early.** "Non-synchronous and growing means rotordynamics or
+cavitation, and the discriminator is whether the frequency tracks speed or
+tracks a natural frequency — one measurement separates them."
+
+**Classic wrong turn.** Diagnosing every vibration line as imbalance. Imbalance
+is synchronous by definition, and calling a subsynchronous line imbalance leads
+to a balancing campaign that cannot possibly fix it.
+
+## Item 58 — Why chamber pressure climbed `[M35]`
+
+**What a strong answer contains**
+
+- The trajectory with anchors: V-2 at **15.2 bar** `inj`† (1942), Redstone A-7
+  at **21.9 bar**, F-1 at ≈**70 bar** `inj` (contested), RS-25 at **206.4 bar**
+  `inj` @109 %, RD-180 at **267 bar** `noz`†, Raptor 3 at **330 bar**
+  operational — a **claim** `[engine-database A.1, A.2, A.3, A.6]`. Note the
+  station flags: comparing 267 `noz` to 206 `inj` overstates the gap slightly,
+  and the database says so explicitly.
+- The argument, not the chronology: higher $p_c$ raises thrust per unit throat
+  area, so the engine shrinks for the same thrust; it improves $C_F$ against a
+  fixed ambient; and it permits a larger area ratio within a given exit
+  diameter. Those are the real gains.
+
+**F1 — real gains versus asserted ones.** Real: thrust density (a smaller,
+lighter engine for the same thrust, so better T/W and a smaller base area);
+better $C_F$ at sea level — from the library, γ = 1.20 at ε = 34.34 gives
+$C_F^{SL} =$ **1.6393** at 150 bar and **1.7553** at 300 bar, a **7 %** gain;
+and more area ratio inside the same exit diameter. Asserted but weak: a large
+c\* or Isp gain from the chemistry — c\* is nearly pressure-independent, and
+item 4 makes the point. A candidate who claims chamber pressure buys Isp
+directly through combustion has the mechanism wrong.
+
+**F2 — what had to exist at each step.** Turbopumps able to make the discharge
+pressure (materials, bearings, inducers for suction performance); regenerative
+cooling that survives $p_c^{0.8}$ heat flux (copper alloys, milled channels,
+electroformed close-outs); combustion stability understanding, because higher
+pressure raises the energy available to an oscillation; staged combustion, to
+stop wasting pump work on dumped flow; and manufacturing able to make the
+chamber at all — brazed tube walls, then milled channels, then additive.
+
+**F3 — 150 → 300 bar, what gets qualitatively harder.** Local heat flux rises
+74 % ($2^{0.8}$) while total load falls slightly (item 22) — the throat becomes
+a different problem, not a bigger one. Pump discharge pressure and turbine
+power rise more than proportionally, so the turbomachinery moves into a
+different materials régime. Chamber wall stress and low-cycle fatigue life
+degrade, so a reusable engine's life model changes. Injector Δp doubles in
+absolute terms, so pump work rises again. And stability margin must be
+re-established because the combustion time lag has moved. Every one of those is
+a change in kind, not degree.
+
+**F4 — a ceiling.** Argue for one and defend it. A defensible position: the
+practical ceiling for a regeneratively cooled, reusable engine is set by
+low-cycle fatigue life of the hot wall at the throat, which degrades with flux,
+and by the pump discharge pressure the turbomachinery can make — putting it
+somewhere in the 300–400 bar region for current copper alloys and current
+turbomachinery, with the caveat that every previous stated ceiling has been
+exceeded. Raptor's 330 bar is a **claim**, not a verified figure
+`[engine-database A.3]`.
+
+**Ends the line early.** "Higher chamber pressure buys thrust density and $C_F$,
+not combustion efficiency — c\* is nearly pressure-independent, so the whole
+history is a turbomachinery and cooling story."
+
+**Classic wrong turn.** Quoting the RD-180's 267 bar against the RS-25's 206 bar
+as a straight 30 % advantage. They are different pressure stations — `noz`†
+versus `inj` — and the database flags this as the single largest recurring
+source of apparent disagreement in the file.
+
+## Item 59 — Modern methods `[M36]`
+
+**What a strong answer contains**
+
+- What changed: additive manufacturing (part count, lead time, geometric
+  freedom, and a different qualification model based on process control);
+  computational capability (LES of injector flows, conjugate heat transfer,
+  full-engine transient system models); rapid iteration enabled by cheaper
+  hardware; and instrumentation and data handling that make every test yield far
+  more. `[GradlAM]`, `[Gradl18]`, `[RAMPT]`
+- What did not: the need to hot-fire; combustion stability clearance by
+  demonstration; the physics of two-phase flow, atomisation and rotordynamics
+  remaining hard to predict; and the fact that qualification is still about
+  process control.
+
+**F1 — CFD for injectors.** Reliable today: mean flow fields, mixing trends
+between candidate geometries, wall heat flux distributions when calibrated,
+gas-gas injection (which is why FFSC engines are relatively tractable), and
+ranking designs. Still unreliable: primary atomisation of a liquid jet at
+supercritical pressure, the **combustion response function** that governs
+stability, soot formation, and anything requiring quantitative prediction of a
+transient limit cycle. So CFD screens and explains; it does not clear.
+`[LRTC]`, `[OY93]`
+
+**F2 — did AM change the design.** Yes, with an example: channel geometries and
+integrated manifolds that could not be brazed or milled at all; injector
+elements printed as single pieces with internal passages that would have been
+multi-part assemblies; and GRCop-42 chambers where the alloy itself is only
+practical in a powder-bed process `[GradlAM]`, `[GRCop]`. The deeper change is
+that part-count reduction removes joints, and joints are where engines leak and
+crack — so AM changed the *failure mode distribution*, not just the cost.
+
+**F3 — test-heavy versus analyse-first.** The F-1 is the test-heavy archetype:
+roughly 2,000 full-scale tests to stabilise combustion, because the analysis did
+not exist `[SP-4206]`. A modern programme analyses far more before cutting metal
+and tests fewer articles harder. Which is cheaper depends on the **cost ratio of
+a test article to an engineering month** and on how predictive the physics is:
+where models are good (structures, steady thermal, cycle balance) analysis wins;
+where they are not (stability, atomisation, transients) hardware still wins, and
+a programme that analyses those to death spends money without retiring risk.
+
+**F4 — trusting simulation for stability clearance.** You would need: the
+simulation to have predicted, blind, the stability boundary of several existing
+engines including at least one that was unstable; a demonstrated ability to
+predict the *combustion response function* against measured data, not just the
+acoustic modes; validated behaviour under finite-amplitude perturbation, since
+dynamic stability is the criterion; and quantified uncertainty on the
+prediction. Until then bomb testing is the acceptance criterion, and saying so
+is the professional answer.
+
+**Ends the line early.** "Simulation has changed how many designs I can screen,
+not what I am allowed to accept on — stability is still cleared by bombing a
+real chamber."
+
+**Classic wrong turn.** Claiming AM's main benefit is cost. Its main benefit is
+geometric freedom and joint elimination; the cost story is real but secondary,
+and it comes with a new and expensive qualification burden.
+
+## Item 60 — Design it in front of me `[M01–M36]`
+
+**What a strong answer contains**
+
+- A stated starting point and a reason for it. The strong opening is
+  **requirements**: vacuum start means no ambient pressure term and no
+  separation constraint, so area ratio is limited by envelope and mass, not by
+  physics; upper stage means Isp is worth a lot and thrust-to-weight is worth
+  little.
+- The design walked through in a defensible order — propellants and mixture
+  ratio → chamber pressure → throat and exit → cycle → cooling → injector →
+  the risk list — with each choice foreclosing something, said out loud.
+- The complete arithmetic, done live. For γ = 1.16, M = 20.5 kg/kmol
+  (LOX/CH₄ near O/F ≈ 3.4), T₀ = 3550 K: R = **405.583 J/(kg·K)**,
+  $c^{*} =$ **1873.0 m/s**. At $p_c$ = 100 bar and ε = 80,
+  $C_F^{vac} =$ **1.99202**, so $A_t = F/(C_F p_c) =$ **0.012550 m²**
+  (**D_t = 126.4 mm**), $A_e =$ **1.0040 m²** (**D_e = 1.131 m**),
+  $c = c^{*}C_F =$ 3731 m/s and $I_{sp}^{vac} =$ **380.5 s** ideal.
+- The sanity check volunteered: 380 s ideal against Vinci's 457.2 s (hydrolox,
+  ε = 240) and Raptor Vacuum's claimed ~380 s at ε ≈ 80 — the number is in the
+  right place for methalox at this area ratio `[engine-database A.3, A.4]`.
+
+**F1 — sizing, with the justifications.** $p_c$ = 100 bar: high enough for a
+compact chamber and good $C_F$, low enough that a gas-generator or expander-bleed
+cycle closes and that the cooling problem is tractable. ε = 80: vacuum start
+removes the separation limit, and $C_F$ is flattening — from item 5, going to
+240 would buy under 1 % more $C_F$ for a 1.9 m exit diameter. So ε is set by the
+stage's diameter and the interstage, and 80 gives a 1.13 m exit that fits.
+
+**F2 — cycle and cooling, and what each forecloses.** Cycle: expander bleed or
+gas generator. Expander bleed is attractive at 100 bar and this size (methane is
+a good coolant), gives benign turbine temperatures, and is restartable with a
+tank-head start — but it forecloses much higher chamber pressure later (item
+29's scaling) and it constrains the chamber's surface area, so the chamber
+length is now a *cycle* variable, not just an L\* variable. Cooling:
+regenerative with methane, which forecloses ablative simplicity but is required
+for restart and for any reuse; a radiatively cooled niobium or C–C extension
+from ε ≈ 20 outward saves jacket Δp and mass and forecloses a cooled skirt.
+
+**F3 — growing to 320 kN, in order.** (i) Raise $p_c$ to ~128 bar at the same
+throat: cheapest change, no new geometry, and $C_F$ barely moves in vacuum — but
+heat flux rises by $1.28^{0.8}$ = 22 % and the pump discharge rises by 28 %.
+(ii) Or open the throat 28 % in area (D_t 126 → 143 mm) at constant $p_c$, which
+keeps the thermal problem the same but reduces ε at fixed exit diameter from 80
+to 62.5, costing ~1 % of $C_F$. What breaks first: the **cycle**, if it is an
+expander bleed — available heat scales with wall area while required pump power
+scales with $p_c \dot m$, so the bleed cycle runs out of power before the
+structure runs out of margin. Naming the cycle as the first thing to break is
+the Level 3 answer.
+
+**F4 — the largest risk and the first test.** Defensible answers: ignition and
+restart reliability in vacuum after a cold coast (test: an altitude-cell ignition
+campaign across the conditioned temperature and inlet-pressure box, with the
+igniter and main valve sequence as the variables); or combustion stability at
+this element density (test: a subscale bomb-test campaign on the injector
+pattern before the full-scale chamber exists). What matters is that the test is
+matched to the risk and is cheaper than the article it protects.
+
+**F5 — the least confident number.** The honest answers are $\eta_{c^*}$
+(everything above assumes ideal c\*, and a real engine delivers 95–98 %),
+$T_0$ and γ (taken from a CEA run that assumes perfect mixing at an O/F the
+injector may not actually deliver uniformly), and the inert mass. Bounding
+$\eta_{c^*}$: bracket it from published engines of similar element type and
+chamber pressure, then carry 380.5 s × 0.96 ≈ **365 s** as the working
+prediction and design the stage to close at that. A candidate who quotes the
+ideal 380.5 s as the engine's Isp has ignored every loss item in Block A.
+
+**Ends the line early.** "Vacuum start deletes the separation constraint, so my
+area ratio is set by the interstage diameter and my chamber pressure by which
+cycle I can close — those two decisions determine everything else on the board."
+
+**Classic wrong turn.** Starting with the chamber pressure because it is the
+number engineers like quoting, and discovering forty minutes later that the
+cycle cannot close at it. Requirements first, then the cycle, then the pressure
+the cycle can support.
+
+---
+
+## How the examiner scores the sitting
+
+Not by counting correct facts. By answering four questions, in this order:
+
+| question | what earns a yes |
+|---|---|
+| **Is the physics yours?** | derivations rather than recall; correct signs and exponents produced without hedging; the ability to re-derive a rule of thumb when pushed |
+| **Do you know what you do not know?** | assumptions stated as they are used; contested and claimed figures flagged (`[engine-database]` confidence labels carried across); bounds given instead of guesses |
+| **Can you reason about unfamiliar hardware?** | a defensible answer to the follow-up the course never covered, with the reasoning visible |
+| **Would you be safe with a subsystem?** | you say what you would measure, what would change your mind, and what would make you stop |
+
+A candidate who answers every opening cleanly and stalls on every third
+follow-up has Level 2 mastery and will be told exactly that. Level 3 lives in
+the follow-ups, and in the three sentences under **Ends the line early** for
+each item — which is where an examiner stops pushing because there is nothing
+left to find.

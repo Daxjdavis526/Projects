@@ -375,3 +375,66 @@ EXAMPLES += [
      "args": {"isp": 68.0, "m0": 12.0, "mf": 11.685},
      "expect": 17.7387, "tol": 0.001},
 ]
+
+# --- Q161-165 -------------------------------------------------------------
+# Q161 dw = Ibit*L/I = 2e-3*0.8/150 = 1.0667e-5 rad/s = 6.112e-4 deg/s;
+#   deadband half-width 0.02 deg = 3.4907e-4 rad; full-deadband traverse
+#   2*3.4907e-4/1.0667e-5 = 65.4 s; 1320 pulses/axis/day; 964 N*s/axis/year.
+# Q163 mp = Itot/(Isp g0): 14.567 kg (70 s), 3.642 kg (280 s), 4.635 kg
+#   (220 s).  N2 at 300 bar, 300 K, Z = 1.12 -> 300.8 kg/m^3 -> 48.42 L;
+#   COPV at pV/W = 2.0e4 m -> 7.41 kg; solid 3.642/0.9 = 4.05 kg;
+#   hydrazine tank at 12 % of propellant -> 5.19 kg.
+EXAMPLES += [
+    {"id": "q200.163a", "fn": "stored_gas_mass",
+     "args": {"p": 300e5, "V": 0.0484238, "R": 296.797, "T": 300.0,
+              "Z": 1.12},
+     "expect": 14.5674, "tol": 0.001},
+]
+
+# --- Q166-175 -------------------------------------------------------------
+# Q168 multiplicative product 0.994*0.991*0.993*0.986*0.989 = 0.953855, so
+#   366*0.953855 = 349.11 s; additive 366*0.953 = 348.80 s; difference 0.31 s.
+# Q171 pump 38.028 MW; turbine bracket 0.21244 -> pr = 2.465; with pc = 25 MPa
+#   and ~30 MPa turbine discharge the preburner would need ~74 MPa against a
+#   45 MPa pump rise, so the stated numbers do not close on pressure.
+# Q174 0.15 % diameter growth = 0.30 % area growth per flight; 1.5/0.30 = 5
+#   flights to the limit.
+EXAMPLES += [
+    {"id": "q200.171a", "fn": "pump_power",
+     "args": {"mdot": 45.0, "dp": 45.0e6, "rho": 71.0, "eta": 0.75},
+     "expect": 3.80282e7, "tol": 0.001},
+    {"id": "q200.171b", "fn": "turbine_power",
+     "args": {"mdot": 45.0, "cp": 6000.0, "T_in": 850.0, "pr": 2.464955,
+              "gamma": 1.36, "eta": 0.78},
+     "expect": 3.80282e7, "tol": 0.001},
+]
+
+# --- Q176-185 -------------------------------------------------------------
+# Q177 lambda = (1+cos 15 deg)/2 = 0.98296; Cf ideal SL eps 16 = 1.63496 ->
+#   delivered 1.63496*0.98296*0.992 = 1.59425; at the SL-optimum eps 11.7527
+#   ideal 1.64296 -> delivered 1.60205 (only 0.49 % better).
+# Q179 m = (6.0-0.1)e6*6.0/(320*3300) = 33.52 kg; tau = 6.0/(1550*0.62) =
+#   6.243 ms.
+# Q183 At = 1.7671e-8 m^2; Kn = 0.04e-6/0.15e-3 = 2.667e-4;
+#   Re = 4*mdot/(pi*Dt*mu) = 4441 at mu = 1.55e-5 Pa*s.
+# Q184 Cd = 1 - C/sqrt(4441): 0.970 (C=2), 0.964 (C=2.4), 0.940 (C=4).
+# Q185 ln(340/328.2) = 0.035322 -> Isp 96.7-114.3 s for 33.5-39.6 m/s;
+#   ln(148/136.2) = 0.083088 -> Isp 41.1-48.6 s.  At 70 s the same 11.8 kg
+#   gives 24.2 m/s against 340 kg and 57.0 m/s against 148 kg.
+EXAMPLES += [
+    {"id": "q200.183a", "fn": "choked_mdot",
+     "args": {"gamma": 1.40, "R": 296.797, "T0": 300.0, "p0": 2.0e5,
+              "At": 1.76715e-8},
+     "expect": 8.1102e-6, "tol": 0.001},
+    {"id": "q200.183b", "fn": "reynolds",
+     # rho v Dt / mu written as 4 mdot/(pi Dt mu): rho*v = mdot/At
+     "args": {"rho": 8.1102e-6 / 1.76715e-8, "v": 1.0, "L": 1.5e-4,
+              "mu": 1.55e-5},
+     "expect": 4441.4, "tol": 0.001},
+    {"id": "q200.185a", "fn": "tsiolkovsky_dv",
+     "args": {"isp": 70.0, "m0": 340.0, "mf": 328.2},
+     "expect": 24.2476, "tol": 0.001},
+    {"id": "q200.185b", "fn": "tsiolkovsky_dv",
+     "args": {"isp": 70.0, "m0": 148.0, "mf": 136.2},
+     "expect": 57.0370, "tol": 0.001},
+]

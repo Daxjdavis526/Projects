@@ -3978,3 +3978,663 @@ $$\dot m_f = \rho_f\,\pi D L\,\dot r = \rho_f \pi D L\, a \left(\frac{4\dot m_{o
 - **Tag** [F] given 27-3.10 · **Code** —
 
 ---
+
+# Part IV — Cold-gas thrusters (modules 28–31)
+
+## Module 28 — Cold-Gas Principles
+
+### 28-3.1 — Stagnation enthalpy conversion
+
+$$h_0 = h_e + \tfrac{1}{2}v_e^2$$
+
+- **Variables** — $h_0$, $h_e$ specific stagnation and exit static enthalpy [J/kg]; $v_e$ exit velocity [m/s].
+- **Meaning** — all the kinetic energy at the exit was enthalpy in the plenum. A cold-gas thruster is a *stored-enthalpy* device with no chemistry at all.
+- **Assumes** — adiabatic; no shaft work; no body forces; steady flow; single phase.
+- **Fails when** — the flow condenses in the nozzle (a real risk for CO₂ and refrigerants); the thruster is pulsing so fast the flow is not quasi-steady; wall heat transfer is comparable to the enthalpy flux — which for a small cold-gas nozzle it can be, because the gas is cold and the wall is not.
+- **Tag** [F] · **Code** —
+- **Alias** — 01-3.4, 02-3.1.
+
+### 28-3.2 — Ideal exit velocity
+
+$$v_e = \sqrt{\frac{2\gamma}{\gamma-1}RT_0\left[1-\left(\frac{p_e}{p_0}\right)^{\frac{\gamma-1}{\gamma}}\right]}$$
+
+- **Variables** — $R = R_u/M$ [J/(kg·K)]; $T_0$ [K]; $p_e/p_0$ exit-to-plenum static pressure ratio [—]; $\gamma$ [—].
+- **Meaning** — the nozzle converts $c_pT_0$ into $\tfrac12 v_e^2$ with an efficiency set by the pressure ratio. Identical in form to the hot-chamber result of Module 02.
+- **Assumes** — isentropic, calorically perfect, frozen composition (trivially true — nothing reacts), attached flow.
+- **Fails when** — $\gamma$ varies significantly over the expansion (polyatomic refrigerants); the boundary layer occupies a large fraction of the throat — Reynolds numbers here are $10^3$–$10^4$, not $10^6$; condensation releases latent heat and breaks the isentrope.
+- **Tag** [F] · **Code** `exit_velocity(gamma, R, T0, p0, pe)`
+- **Alias** — 03-3.6, 29-3.8.
+
+### 28-3.3 — The $\sqrt{T_0/M}$ ceiling
+
+$$c_{max} = \sqrt{\frac{2\gamma}{\gamma-1}\cdot\frac{R_u T_0}{M}}, \qquad I_{sp}^{max} = \frac{c_{max}}{g_0}$$
+
+- **Variables** — $R_u = 8314.46$ J/(kmol·K); $T_0$ [K]; $M$ molar mass [kg/kmol]; $c_{max}$ [m/s].
+- **Meaning** — the absolute upper bound on specific impulse for a given gas at a given stagnation temperature, achievable only with an infinitely large nozzle in perfect vacuum. Helium 179 s, nitrogen 77 s, butane 68 s at 300 K.
+- **Assumes** — everything 28-3.2 assumes, plus complete expansion.
+- **Fails when** — the gas liquefies or solidifies before reaching that state — which it always does. Treat it as an asymptote you approach, never reach.
+- **Tag** [F] · **Code** `ideal_isp_vac(gamma, R, T0, eps)` for the finite-$\varepsilon$ value
+
+### 28-3.4 — Real-gas storage density
+
+$$pV = Z\,m\,R\,T \qquad\Longleftrightarrow\qquad \rho_s = \frac{p}{Z R T}$$
+
+- **Variables** — $p$ tank pressure [Pa]; $V$ tank internal volume [m³]; $m$ stored mass [kg]; $Z$ compressibility factor [—]; $T$ [K]; $\rho_s$ storage density [kg/m³].
+- **Meaning** — $Z$ is the correction between what the ideal gas law says you loaded and what you actually loaded; for N₂ at 240 bar $Z \approx 1.13$, a 13 % error if ignored.
+- **Assumes** — single phase; thermal equilibrium.
+- **Fails when** — the gas is near or below its critical point, where $Z$ is a strong function of both $p$ and $T$ and a single number is meaningless.
+- **Tag** [F] [A] · **Code** `stored_gas_mass(p, V, R, T, Z)`
+- **Alias** — 29-3.2, 29-3.3.
+
+### 28-3.5 — Spherical tank mass
+
+$$m_{tank} = \frac{3}{2}\,\frac{\rho_m}{\sigma_{allow}}\,p\,V$$
+
+- **Variables** — $\rho_m$ tank material density [kg/m³]; $\sigma_{allow}$ allowable membrane stress [Pa], ultimate strength over burst factor; $p$ [Pa]; $V$ [m³].
+- **Meaning** — pressure-vessel mass is proportional to the *stored $pV$ product*, not to pressure or volume separately, with the constant being the inverse of specific strength.
+- **Assumes** — thin wall ($t/r \lesssim 0.1$); spherical; membrane-stress-limited; no bosses, liner or minimum gauge.
+- **Fails when** — the design is governed by minimum manufacturable gauge (low-pressure tanks), by fracture control, or by boss and mounting hardware, which for a small tank can exceed the membrane mass.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 12-3.2, 22-3.10, 30-3.2.
+
+### 28-3.6 — Tank mass per unit propellant is pressure-independent
+
+$$\frac{m_{tank}}{m_p} = \frac{3}{2}\,\frac{\rho_m}{\sigma_{allow}}\,Z R T = \frac{3}{2}\,\frac{\rho_m}{\sigma_{allow}}\,\frac{Z R_u T}{M}$$
+
+- **Variables** — as 28-3.4 and 28-3.5; $m_p$ stored propellant mass [kg].
+- **Meaning** — **tank mass per kilogram of propellant depends on the gas only through $ZR_uT/M$ and is completely independent of storage pressure.** Raising pressure buys volume, not mass. This is the central result of cold-gas system design and the reason heavy gases win on mass as well as volume.
+- **Assumes** — everything in 28-3.5, plus that the tank is stress-limited rather than gauge-limited.
+- **Fails when** — minimum gauge governs; the pressure is high enough that $Z$ becomes a strong function of $p$ (above ~400 bar for N₂ this matters).
+- **Tag** [F] · **Code** —
+
+### 28-3.7 — Joule–Thomson coefficient
+
+$$\mu_{JT} \equiv \left(\frac{\partial T}{\partial p}\right)_h = \frac{1}{c_p}\left[T\left(\frac{\partial v}{\partial T}\right)_p - v\right]$$
+
+- **Variables** — $\mu_{JT}$ [K/Pa]; $c_p$ [J/(kg·K)]; $v$ specific volume [m³/kg]; $T$ [K].
+- **Meaning** — throttling cools the gas if $\mu_{JT} > 0$ and warms it if $\mu_{JT} < 0$. Nitrogen chills its regulator; helium (inversion temperature ~45 K) warms slightly.
+- **Assumes** — adiabatic throttle; no kinetic-energy change across the restriction (true for a regulator, *not* for a nozzle).
+- **Fails when** — the process is not adiabatic (long lines, small flows); two phases are present.
+- **Tag** [F] · **Code** —
+- **Alias** — 29-3.22.
+
+### 28-3.8 — Blowdown usable-mass bounds
+
+$$\text{isothermal: } \frac{m_f}{m_i} = \frac{p_f}{p_i}, \qquad \text{adiabatic: } \frac{m_f}{m_i} = \left(\frac{p_f}{p_i}\right)^{1/\gamma},\quad \frac{T_f}{T_i} = \left(\frac{p_f}{p_i}\right)^{\frac{\gamma-1}{\gamma}}$$
+
+- **Variables** — subscripts $i$, $f$ initial and final tank state; $\gamma$ [—].
+- **Meaning** — the usable mass fraction of a blowdown tank between two pressures, bounded by perfect wall heat transfer (isothermal, best case) and none (adiabatic, worst case).
+- **Assumes** — ideal gas ($Z = 1$; a real high-pressure blowdown must be integrated with $Z(p,T)$); uniform tank state; no residual heating.
+- **Fails when** — the gas liquefies; the discharge is fast compared with the tank's thermal time constant. The real case is always between the bounds and usually much closer to isothermal for a metal tank emptying over hours.
+- **Tag** [F] [A] · **Code** `usable_fraction(p_i, p_f, isothermal, gamma)`
+- **Alias** — 12-3.9, 29-3.17, 29-3.19.
+
+### 28-3.9 — Clausius–Clapeyron and tank self-cooling
+
+$$\frac{d\ln p_{vap}}{dT} = \frac{\Delta h_{vap}}{R T^2}, \qquad \Delta T \approx -\frac{m_{vap}\,\Delta h_{vap}}{m_{liq}c_{liq} + m_{tank}c_{tank}}$$
+
+- **Variables** — $p_{vap}$ [Pa]; $\Delta h_{vap}$ latent heat [J/kg]; $m_{vap}$ mass evaporated in the burn [kg]; $c$ specific heat capacity [J/(kg·K)]; $R$ [J/(kg·K)].
+- **Meaning** — for a saturated-liquid propellant (butane, R-236fa) a long continuous burn cools the tank and drops the feed pressure; a short pulse followed by a long coast does not, because the tank re-warms from the spacecraft.
+- **Assumes** — uniform tank temperature; ideal vapour; $\Delta h_{vap}$ constant over the interval; no heater.
+- **Fails when** — the burn is long enough that a thermal gradient forms in the liquid (stratification); the liquid runs low and the vapour space dominates.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 30-3.10 writes it on a molar basis.
+
+### 28-3.10 — Choked mass flow
+
+$$\dot m = \Gamma\,\frac{p_0 A_t}{\sqrt{R T_0}}, \qquad \Gamma = \sqrt{\gamma}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+- **Variables** — $\dot m$ [kg/s]; $p_0$ [Pa]; $A_t$ [m²]; $R$ [J/(kg·K)]; $T_0$ [K]; $\Gamma$ [—] — 0.6847 for $\gamma = 1.4$, 0.7268 for $\gamma = 5/3$, 0.6247 for $\gamma = 1.08$.
+- **Meaning** — mass flow is set by upstream *stagnation* conditions and throat area alone; downstream pressure has no influence once choked.
+- **Assumes** — choked, inviscid, 1-D, calorically perfect.
+- **Fails when** — the throat Reynolds number is low enough that the boundary layer occupies an appreciable fraction of the throat — which for a 0.2 mm throat at 3 bar it does. Real cold-gas throats have $C_d$ of 0.85–0.98, small ones at the bottom. **Multiply by $C_d$.**
+- **Tag** [F] · **Code** `choked_mdot(gamma, R, T0, p0, At)`
+- **Alias** — 02-3.10, 03-3.7, 19-3.2, 29-3.7.
+
+### 28-3.11 — $c^*$, $C_F$ factorisation for cold gas
+
+$$c^* = \frac{\sqrt{R T_0}}{\Gamma}, \qquad F = C_F\,p_0 A_t = \dot m\, c^* C_F = \dot m\, I_{sp}\,g_0$$
+
+- **Variables** — $c^*$ [m/s]; $C_F$ [—] at the nozzle's $\varepsilon$ and ambient pressure; $F$ [N]; $I_{sp}$ [s].
+- **Meaning** — the clean separation of gas properties ($c^*$) from nozzle geometry ($C_F$) established in Module 03 holds unchanged for cold gas.
+- **Assumes** — as 28-3.10, plus attached, isentropic nozzle flow.
+- **Fails when** — the nozzle is separated — only an issue for sea-level testing of a vacuum-optimised cold-gas nozzle, and a real issue, because $\varepsilon = 50$ against 1 bar separates violently.
+- **Tag** [F] · **Code** `c_star(...)`, `Cf(...)`, `c_eff(...)`
+- **Alias** — 03-3.10.
+
+### 28-3.12 — The 0.90 rule
+
+$$I_{sp}^{real} \approx 0.90 \times I_{sp}^{ideal}$$
+
+- **Variables** — $I_{sp}$ [s].
+- **Meaning** — about 10 % of the ideal impulse is lost. Valid for continuous firing of a well-made cold-gas thruster with $\varepsilon$ between 20 and 100 at $T_0 \approx 300$ K.
+- **Assumes** — steady operation.
+- **Fails when** — **badly, for pulsed operation**, where realised $I_{sp}$ can fall to 50–70 % of ideal because a large fraction of every pulse is spent in the valve transient. SAFER's implied ~40 s against a 77 s ideal is exactly this effect.
+- **Tag** [E] · **Code** —
+- **Alias** — 31-3.5, identical.
+
+### 28-3.13 — Impulse bit
+
+$$I_{bit} \approx F_{ss}\left(t_{on} - \tfrac{t_r}{2} + \tfrac{t_f}{2}\right) + m_d\,c$$
+
+- **Variables** — $F_{ss}$ steady-state thrust [N]; $t_{on}$ commanded on-time [s]; $t_r$, $t_f$ rise and fall times [s]; $m_d$ gas mass resident in the dead volume between valve seat and throat [kg]; $c = I_{sp}g_0$ effective exhaust velocity [m/s].
+- **Meaning** — the impulse bit is the commanded on-time corrected for the two transients plus the tail from blowing down the dead volume. Minimising dead volume is the single biggest lever on MIB.
+- **Assumes** — linear rise and fall (real traces are S-shaped but the trapezoid integral is within a few percent); $t_{on} > t_r$; quasi-steady nozzle flow.
+- **Fails when** — $t_{on} \lesssim t_r$: the valve never reaches full lift, thrust never reaches $F_{ss}$, and the impulse bit becomes a strongly nonlinear, poorly repeatable function of $t_{on}$. **This is the regime the MIB definition exists to keep you out of.**
+- **Tag** [E] [A] · **Code** `impulse_bit(F, t_on, t_rise, t_fall)`
+- **Alias** — 29-3.20 (first-order form), 31-3.6.
+
+### 28-3.14 — Couple torque and angular acceleration
+
+$$\tau = 2FL, \qquad \alpha = \frac{\tau}{I}$$
+
+- **Variables** — $\tau$ torque [N·m]; $F$ thrust per thruster [N]; $L$ moment arm from centre of mass to each thruster's line of action [m]; $I$ moment of inertia [kg·m²]; $\alpha$ angular acceleration [rad/s²].
+- **Meaning** — a couple rotates without translating, which is why attitude-control thrusters come in pairs.
+- **Assumes** — rigid body; thrusters aligned; centre of mass known.
+- **Fails when** — the c.m. moves as propellant depletes (it does); thrust mismatch leaves a residual force (5 % mismatch on a 50 mN pair is 2.5 mN net, which over a year is 79 N·s of unwanted $\Delta v$); the alignment tolerance is comparable to $L$/length.
+- **Tag** [F] · **Code** —
+
+### 28-3.15 — Limit-cycle propellant consumption
+
+$$\omega_{lc} = \frac{I_{bit}L}{I}, \qquad t_{cycle} = \frac{2\theta_{db}}{\omega_{lc}}, \qquad \dot m_{lc} = \frac{I_{bit}^2 L}{I\,\theta_{db}\,I_{sp}g_0}$$
+
+- **Variables** — $\omega_{lc}$ limit-cycle rate [rad/s]; $\theta_{db}$ deadband half-width [rad]; $t_{cycle}$ time to drift across the full deadband [s]; $\dot m_{lc}$ time-averaged propellant consumption for one axis [kg/s]; $I_{bit}$ [N·s]; $I$ [kg·m²]; $L$ [m].
+- **Meaning** — the propellant cost of holding attitude with no external disturbance. Note $\dot m_{lc} \propto I_{bit}^2$: **halving the minimum impulse bit quarters the limit-cycle propellant.**
+- **Assumes** — no disturbance torque; rate-reversal control law; one pair firing per boundary crossing; repeatable $I_{bit}$.
+- **Fails when** — a disturbance torque is present (use 28-3.16 instead; the two regimes are different, not simply additive); sensor noise exceeds the deadband, in which case the controller fires on noise and consumption is set by the noise, not the physics.
+- **Tag** [F] · **Code** —
+
+### 28-3.16 — Secular-disturbance impulse budget
+
+$$H = \tau_d\,t, \qquad I_{t,required} = \frac{2\tau_d t}{L}$$
+
+- **Variables** — $H$ accumulated angular momentum [N·m·s]; $\tau_d$ secular disturbance torque [N·m]; $t$ mission duration [s]; $L$ moment arm [m]; $I_{t,required}$ total *propellant* impulse summed over both thrusters of the pair [N·s].
+- **Meaning** — a constant-direction disturbance costs propellant at a fixed rate and the deadband does not help.
+- **Assumes** — the disturbance is genuinely secular.
+- **Fails when** — the disturbance is cyclic. A gravity-gradient torque on a nadir-pointing spacecraft averages to nearly zero over an orbit, so budgeting it as secular over-sizes the system by orders of magnitude. **Deciding which components of $\tau_d$ are secular is the hardest judgment in the whole budget.**
+- **Tag** [F] [J] · **Code** —
+
+### 28-3.17 — Slew impulse cost
+
+$$\alpha = \frac{4\theta}{t_s^2}, \qquad H_{slew} = \frac{4I\theta}{t_s}, \qquad I_{t,slew} = \frac{4I\theta}{L\,t_s}$$
+
+- **Variables** — $\theta$ slew angle [rad]; $t_s$ slew duration [s]; $I$ [kg·m²]; $L$ [m]; $I_{t,slew}$ propellant impulse summed over the pair, per slew [N·s].
+- **Meaning** — the cost of a slew scales linearly with angle and inversely with the time allowed: **fast slews are expensive.**
+- **Assumes** — rigid body; bang-bang profile; no coasting phase; thrust much larger than disturbances.
+- **Fails when** — the slew is long enough that a coast phase is used (which reduces cost, so this is conservative); flexible modes force a shaped command profile.
+- **Tag** [F] [J] · **Code** —
+
+### 28-3.18 — Impulse density
+
+$$\Lambda = \rho_s\,I_{sp}\,g_0$$
+
+- **Variables** — $\rho_s$ storage density [kg/m³]; $I_{sp}$ [s]; $\Lambda$ [N·s/m³].
+- **Meaning** — how much impulse fits in a litre of tank; the figure of merit that makes butane beat nitrogen at CubeSat scale despite a lower $I_{sp}$.
+- **Assumes** — tank internal volume is the binding constraint; tank wall thickness ignored.
+- **Fails when** — mass, not volume, is the constraint; use $I_{sp}$ directly then.
+- **Tag** [F] · **Code** `density_isp(rho, isp)` (differs by $g_0$)
+- **Alias** — 05-3.3 and 19-3.5 write $I_d = \rho I_{sp}$ without the $g_0$; 29-3.4 and 31-3.4 use this form. ⚠ Check whether a quoted "density impulse" carries $g_0$.
+
+---
+
+## Module 29 — Cold-Gas Performance Modeling
+
+### 29-3.1 — Ideal-gas tank mass
+
+$$m = \frac{p V}{R T}, \qquad R = \frac{R_u}{\mathcal{M}}$$
+
+- **Variables** — $m$ [kg]; $p$ [Pa]; $V$ [m³]; $R$ [J/(kg·K)]; $T$ [K]; $\mathcal{M}$ [kg/kmol].
+- **Meaning** — mass of gas stored in a fixed volume at a measured pressure and temperature.
+- **Assumes** — point-like molecules; no intermolecular forces.
+- **Fails when** — the molar volume approaches the molecular co-volume — in practice above ~50 bar for any gas, and at any pressure within ~50 K of the critical temperature. At 240 bar the error is ~15 %.
+- **Tag** [F] · **Code** `stored_gas_mass(p, V, R, T, Z=1.0)`
+
+### 29-3.2 — Real-gas tank mass
+
+$$m = \frac{p V}{Z\,R\,T}, \qquad Z \equiv \frac{p v}{R T}$$
+
+- **Variables** — $Z$ compressibility factor [—]; $v$ specific volume [m³/kg].
+- **Meaning** — $Z$ is the factor by which the real gas departs from ideal at that $(p,T)$.
+- **Assumes** — single phase; equilibrium.
+- **Fails when** — two-phase; there is then no single $Z$ and a saturation table must be used.
+- **Tag** [F] · **Code** `stored_gas_mass(p, V, R, T, Z)`
+
+### 29-3.3 — Storage density
+
+$$\rho = \frac{p}{Z R T}$$
+
+- **Variables** — $\rho$ [kg/m³]; other symbols as 29-3.2.
+- **Meaning** — propellant packing density; the number that decides whether a cold-gas system fits in a CubeSat.
+- **Assumes** — as 29-3.2.
+- **Fails when** — as 29-3.2.
+- **Tag** [F] · **Code** —
+
+### 29-3.4 — Impulse density and impulse per wet mass
+
+$$\frac{I_{tot}}{V_{prop}} = \rho\, I_{sp}\, g_0
+\qquad
+\frac{I_{tot}}{m_{prop}+m_{tank}+m_{dry}}$$
+
+- **Variables** — impulse density [N·s/m³, often quoted N·s/cm³]; impulse per wet mass [N·s/kg]; $\rho$ [kg/m³]; $I_{sp}$ [s].
+- **Meaning** — the first is volume-limited packaging, the second mass-limited. A cold-gas system is almost always one or the other, rarely both.
+- **Assumes** — $I_{sp}$ constant over the discharge.
+- **Fails when** — a blowdown system's $I_{sp}$ falls with tank temperature; use the integral of 29-3.18 then.
+- **Tag** [F] · **Code** `density_isp(rho, isp)`
+- **Alias** — 28-3.18, 31-3.4.
+
+### 29-3.5 — Polytropic exponent for tank blowdown
+
+$$n = 1 + \kappa(\gamma-1)$$
+
+- **Variables** — $n$ [—]; $\kappa$ the fraction of expansion work *not* made up by wall heat transfer [—]; $\gamma$ [—]. $\kappa = 0$ gives isothermal, $\kappa = 1$ adiabatic.
+- **Meaning** — a one-parameter interpolation between isothermal and adiabatic tank behaviour, which is what real tanks do.
+- **Assumes** — $\kappa$ constant through the discharge; perfect gas; spatially uniform tank gas.
+- **Fails when** — the discharge is long enough that $\kappa$ drifts (early in a fast blowdown the gas is near-adiabatic, late in it the wall has caught up); the tank gas stratifies, which it does in any tank taller than it is wide in microgravity with no convection.
+- **Tag** [A] · **Code** `blowdown_pressure(p_i, V_i, V, n)`
+
+### 29-3.6 — Tank state along a polytrope
+
+$$\frac{T_t}{T_i}=\left(\frac{p_t}{p_i}\right)^{\frac{n-1}{n}},
+\qquad
+\frac{\rho_t}{\rho_i}=\left(\frac{p_t}{p_i}\right)^{1/n}$$
+
+- **Variables** — subscripts $t$, $i$ instantaneous and initial; $n$ [—].
+- **Meaning** — tank temperature and density as functions of tank pressure alone, once $n$ is chosen.
+- **Assumes** — ideal gas; uniform tank.
+- **Fails when** — $Z \neq 1$ (at 200 bar the exponent that fits real nitrogen is not exactly $\gamma$); the propellant is a saturated liquid, in which case tank pressure is the vapour pressure and this is replaced by the saturation curve.
+- **Tag** [F] [A] · **Code** —
+
+### 29-3.7 — Choked mass flow
+
+$$\dot m = \Gamma\,\frac{p_0 A_t}{\sqrt{R T_0}},\qquad
+\Gamma = \sqrt{\gamma}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+- **Variables** — as 28-3.10.
+- **Meaning** — with the throat choked, mass flow is set by upstream stagnation state and throat area and is completely independent of anything downstream.
+- **Assumes** — choked ($p_0/p_a$ above ~1.9); 1-D; isentropic to the throat; calorically perfect; inviscid.
+- **Fails when** — the nozzle unchokes (a cold-gas thruster firing in atmosphere at low plenum pressure); $Re_t \lesssim 10^3$, where the boundary layer blocks enough of the throat that a discharge coefficient is mandatory.
+- **Tag** [F] · **Code** `choked_mdot(gamma, R, T0, p0, At)`
+
+### 29-3.8 — Exit velocity
+
+$$v_e = \sqrt{2c_pT_0\left(1-\frac{T_e}{T_0}\right)}
+= \sqrt{\frac{2\gamma}{\gamma-1}RT_0\left[1-\left(\frac{p_e}{p_0}\right)^{\frac{\gamma-1}{\gamma}}\right]}$$
+
+- **Variables** — $c_p$ [J/(kg·K)]; $T_0$, $T_e$ [K]; $R$ [J/(kg·K)]; $p_e/p_0$ [—]; $v_e$ [m/s].
+- **Meaning** — all the enthalpy you convert becomes kinetic energy.
+- **Assumes** — isentropic; calorically perfect; 1-D; no heat loss; exit flow fully expanded and attached.
+- **Fails when** — the gas condenses in the nozzle (a real risk for CO₂ and refrigerants); $\gamma$ varies enough across the 250 K temperature drop to matter, which it does for polyatomics.
+- **Tag** [F] · **Code** `exit_velocity(gamma, R, T0, p0, pe)`
+
+### 29-3.9 — Thrust
+
+$$F = \dot m v_e + (p_e-p_a)A_e$$
+
+- **Variables** — $F$ [N]; $\dot m$ [kg/s]; $v_e$ [m/s]; $p_e$, $p_a$ [Pa]; $A_e$ [m²].
+- **Meaning** — rate of momentum leaving the control volume plus the unbalanced pressure force on the exit plane.
+- **Assumes** — steady; uniform exit profile; axial flow.
+- **Fails when** — the flow separates inside the nozzle (only in atmospheric testing of a high-$\varepsilon$ cold-gas nozzle — a 50:1 nitrogen nozzle at 20 bar will separate violently on a sea-level stand); the exit profile is non-uniform, which at low $Re$ it always is.
+- **Tag** [F] · **Code** `thrust(mdot, ve, pe, pa, Ae)`
+- **Alias** — 01-3.2, 02-3.23, 03-3.2.
+
+### 29-3.10 — Thrust coefficient
+
+$$C_F \equiv \frac{F}{p_0A_t}
+=\sqrt{\frac{2\gamma^2}{\gamma-1}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{\gamma-1}}
+\left[1-\left(\frac{p_e}{p_0}\right)^{\frac{\gamma-1}{\gamma}}\right]}
++\frac{p_e-p_a}{p_0}\varepsilon$$
+
+- **Variables** — $C_F$ [—]; $\varepsilon = A_e/A_t$ [—]; other symbols as above.
+- **Meaning** — how much thrust the nozzle gets out of a given throat and plenum pressure; the nozzle's own figure of merit, cleanly separated from the propellant's ($c^*$).
+- **Assumes** — as 29-3.8, plus $p_e$ obtained from $\varepsilon$ by the isentropic area–Mach relation.
+- **Fails when** — viscous blockage changes the effective $\varepsilon$, which is the entire subject of 29-3.11 to 29-3.13.
+- **Tag** [F] · **Code** `Cf(gamma, eps, p0, pa, pe=None)`
+- **Alias** — 03-3.9, identical.
+
+### 29-3.11 — Throat Reynolds number
+
+$$Re_t = \frac{\rho^* a^* D_t}{\mu^*} = \frac{4\dot m}{\pi D_t \mu^*}$$
+
+- **Variables** — $Re_t$ [—]; $\mu^*$ [Pa·s] evaluated at the throat static temperature $T^* = 2T_0/(\gamma+1)$; $D_t$ [m]; $\dot m$ [kg/s]. The second form follows from $\dot m = \rho^*a^*\pi D_t^2/4$ and is the one to use, because $\dot m$ is usually what you know.
+- **Meaning** — ratio of inertial to viscous forces at the smallest section; the single number that decides whether a micronozzle works.
+- **Assumes** — choked flow.
+- **Fails when** — the flow is rarefied enough that the continuum assumption goes (Knudsen number above ~0.01 — reached in micronozzles below ~20 µm throat, or at plenum pressures below ~0.1 bar).
+- **Tag** [F] · **Code** `reynolds(rho, v, L, mu)`
+- **Alias** — 30-3.9, identical.
+
+### 29-3.12 — Viscous discharge and efficiency corrections
+
+$$C_d \approx 1 - \frac{a}{\sqrt{Re_t}},\qquad
+\eta_{visc} \approx 1 - \frac{b}{\sqrt{Re_t}}$$
+
+- **Variables** — $C_d$, $\eta_{visc}$ [—]; $a \approx 5$, $b \approx 10$ for a conical nozzle of $\varepsilon \approx 50$ and 15° half-angle.
+- **Meaning** — laminar boundary-layer blockage at the throat ($C_d$) and momentum-deficit plus friction loss over the whole nozzle ($\eta_{visc}$). At $Re_t = 10^4$ that is a 5 % flow loss and a 10 % impulse loss.
+- **Assumes** — laminar, attached, continuum flow; a cold wall not far from the recovery temperature.
+- **Fails when** — $Re_t \lesssim 500$, where the boundary layers merge and the loss grows faster than $Re^{-1/2}$; above $Re_t \sim 10^5$, where transition puts you on a different curve. Accuracy ±0.05 on $\eta_{visc}$; fitted to a trend, not to a single data set. **Re-read the source figures before using this for a flight prediction.**
+- **Tag** [E] · **Code** —
+
+### 29-3.12a — $\varepsilon$-dependence of the viscous constant
+
+$$b(\varepsilon) \approx 10\sqrt{\varepsilon/50}$$
+
+- **Variables** — $b$ [—]; $\varepsilon$ [—].
+- **Meaning** — a heuristic, not a fit, calibrated so the $\varepsilon$-dependence of $\eta_{visc}$ crosses that of ideal $C_F$ at around $Re_t \sim 10^4$ — where the published data put the crossover. It exists so the $\varepsilon$ trade can be made quantitatively on the back of an envelope.
+- **Assumes** — the geometry family of 29-3.12.
+- **Fails when** — outside $20 \le \varepsilon \le 100$. **Do not present it to a customer as a correlation.**
+- **Tag** [A] [J] · **Code** —
+
+### 29-3.13 — Assembled small-nozzle performance
+
+$$\lambda = \frac{1+\cos\alpha}{2}, \qquad
+\eta_I = \lambda\,\eta_{visc}, \qquad
+I_{sp} = \eta_I\,I_{sp,\text{ideal}}, \qquad
+F = C_d\,\dot m_{ideal}\,\eta_I\,I_{sp,\text{ideal}}\,g_0$$
+
+- **Variables** — $\lambda$ divergence efficiency [—], 0.983 at $\alpha = 15°$; $\eta_I$ overall impulse efficiency [—].
+- **Meaning** — the axial component of a radially diverging exhaust, times the viscous survival fraction. This chain is how a cold-gas thruster's real $I_{sp}$ is predicted.
+- **Assumes** — uniform source flow.
+- **Fails when** — the exit profile is viscous-dominated, at which point $\lambda$ and $\eta_{visc}$ are no longer separable and only the measured $C_F$ means anything.
+- **Tag** [A] [E] · **Code** —
+- **Alias** — 09-3.6, 24-3.14 for $\lambda$.
+
+### 29-3.14 — Isothermal blowdown pressure decay
+
+$$p_t(t) = p_i\,e^{-t/\tau},\qquad
+\tau = \frac{V}{\Gamma A_t\sqrt{RT_i}} = \frac{V\,c^*}{A_t R T_i}$$
+
+- **Variables** — $\tau$ [s]; $V$ tank volume [m³]; $A_t$ [m²]; $R$ [J/(kg·K)]; $T_i$ [K]; $\Gamma$ [—].
+- **Meaning** — an unregulated fixed-throat gas tank is an RC circuit: the "capacitance" is $V/RT$ and the "conductance" is the choked orifice. $\tau$ is also exactly $m_i/\dot m_i$ — the time to empty the tank at the *initial* flow rate.
+- **Assumes** — isothermal tank; choked throat throughout; ideal gas; no regulator.
+- **Fails when** — the throat unchokes near the end (in vacuum it never does; on the bench it does when $p_t < 1.9\,p_a$); the discharge is fast enough to be non-isothermal.
+- **Tag** [F] · **Code** —
+
+### 29-3.15 — Adiabatic blowdown
+
+$$x(t) = \left[1+\frac{\gamma-1}{2}\frac{t}{\tau_i}\right]^{-\frac{2}{\gamma-1}},
+\quad
+\frac{p_t}{p_i}=x^\gamma,
+\quad
+\frac{T_t}{T_i}=x^{\gamma-1}=\left[1+\frac{\gamma-1}{2}\frac{t}{\tau_i}\right]^{-2}$$
+
+- **Variables** — $x$ density ratio [—]; $\tau_i$ initial time constant [s]; $\gamma$ [—]. For $\gamma = 1.4$: $p_t/p_i = (1+0.2\,t/\tau_i)^{-7}$.
+- **Meaning** — an adiabatic blowdown is *algebraic*, not exponential: it starts faster than the isothermal case and then hangs on with a long cold tail.
+- **Assumes** — reversible adiabatic expansion of the retained gas; ideal gas; choked throat.
+- **Fails when** — the wall supplies heat (it always supplies some); the gas condenses in the tank — nitrogen at 20 bar saturates at 114 K, so a deep adiabatic blowdown from 200 bar can in principle reach the two-phase region.
+- **Tag** [F] · **Code** —
+
+### 29-3.16 — Regulated (constant-flow) tank decay
+
+$$p_t(t) = p_i - \frac{\dot m R T_i}{V}\,t \quad (\text{isothermal tank})$$
+
+- **Variables** — $\dot m$ constant regulated flow [kg/s]; $V$ [m³]; $R$ [J/(kg·K)]; $T_i$ [K].
+- **Meaning** — constant thrust, constant flow, linear tank decay, until the tank falls to the regulator dropout pressure $p_{lock} \approx p_{reg} + \Delta p_{reg}$ (typically 1–2 bar of droop plus line loss). Below that the system reverts to blowdown.
+- **Assumes** — regulator in regulation; isothermal tank.
+- **Fails when** — the regulator locks up, at which point 29-3.14 takes over.
+- **Tag** [F] · **Code** —
+
+### 29-3.17 — Total impulse, isothermal
+
+$$I_{tot} = C_F\,c^*\,(m_i-m_f) = I_{sp}g_0\,\phi\,m_i,
+\qquad \phi_{iso}=1-\frac{p_f}{p_i}$$
+
+- **Variables** — $I_{tot}$ [N·s]; $\phi$ usable mass fraction [—]; $m_i$, $m_f$ [kg].
+- **Meaning** — at constant temperature the usable fraction is just the pressure fraction you throw away.
+- **Assumes** — isothermal; ideal gas; constant $C_F$.
+- **Fails when** — $Z$ varies over the pressure range ($Z$ is 1.13 at 240 bar and 1.00 at 20 bar, so $\phi_{iso}$ from pressures alone is optimistic by a few percent); the thruster's minimum operating pressure is set by $Re_t$ rather than by choking.
+- **Tag** [F] · **Code** `usable_fraction(p_i, p_f, isothermal=True)`
+
+### 29-3.18 — Total impulse, adiabatic
+
+$$I_{tot}=C_F\frac{\sqrt{RT_i}}{\Gamma}\int_{m_f}^{m_i}\left(\frac{m}{m_i}\right)^{\frac{\gamma-1}{2}}dm
+= C_F c^*_i\,m_i\,\frac{2}{\gamma+1}\left[1-\left(\frac{m_f}{m_i}\right)^{\frac{\gamma+1}{2}}\right]$$
+
+- **Variables** — $c^*_i$ initial characteristic velocity [m/s]; $m_i$, $m_f$ [kg]; $\gamma$ [—]. For $\gamma = 1.4$ the bracket exponent is 1.2 and the prefactor 0.833.
+- **Meaning** — closed-form total impulse for an adiabatic blowdown, with the $2/(\gamma+1)$ factor carrying the $I_{sp}$ decay as the tank cools.
+- **Assumes** — adiabatic tank; constant $C_F$; ideal gas.
+- **Fails when** — the nozzle's $Re_t$ collapses as $\dot m$ falls, which it does; the cold tail of an adiabatic blowdown is delivered at a *lower* $I_{sp}$ than even this predicts.
+- **Tag** [F] · **Code** —
+
+### 29-3.19 — Usable mass fraction, adiabatic
+
+$$\phi_{adiab} = 1-\left(\frac{p_f}{p_i}\right)^{1/\gamma}$$
+
+- **Variables** — $\phi$ [—]; $p_f/p_i$ [—]; $\gamma$ [—].
+- **Meaning** — usable mass fraction when the tank cools. It is *smaller* than the isothermal value because at a given cutoff pressure the cold gas is **denser**, so more mass is stranded. For $p_f/p_i = 0.2$ and $\gamma = 1.4$: $\phi_{iso} = 0.800$ but $\phi_{adiab} = 0.683$. You lose 15 % of the propellant *and* what you do expel comes out at a declining $I_{sp}$ — both penalties, same cause.
+- **Assumes** — adiabatic; ideal gas; same cutoff pressure.
+- **Fails when** — the tank exchanges heat, which it does; the real answer sits between 29-3.17 and this.
+- **Tag** [F] · **Code** `usable_fraction(p_i, p_f, isothermal=False, gamma=...)`
+
+### 29-3.20 — Impulse bit from first-order plenum dynamics
+
+$$I_{bit}=F\big[t_{on}+(\tau_e-\tau_f)k\big]$$
+
+- **Variables** — $I_{bit}$ [N·s]; $F$ steady thrust [N]; $t_{on}$ [s]; $\tau_f$ fill time constant [s]; $\tau_e$ empty (tail-off) time constant [s]; $k$ a factor of order 1 from the exponential integrals [—].
+- **Meaning** — **if $\tau_e = \tau_f$ the impulse bit is exactly $Ft_{on}$, for any pulse width.** A symmetric first-order thruster has no impulse-bit bias at all; all the bias comes from asymmetry. Real thrusters are asymmetric, because the valve opens against an orifice much larger than the throat but closes into a plenum that can only drain through the throat, so $\tau_e > \tau_f$ and short pulses deliver *more* than $Ft_{on}$.
+- **Assumes** — linear first-order plenum; valve motion fast compared with $\tau_f$; choked throughout.
+- **Fails when** — $t_{on}$ is comparable to the valve's mechanical dead time $t_d$ (subtract $t_d$ from $t_{on}$; the scatter in $t_d$ then dominates repeatability); the plenum unchokes during the tail.
+- **Tag** [A] · **Code** `impulse_bit(F, t_on, t_rise, t_fall)` implements the trapezoidal equivalent, which agrees to a few percent for $t_{on} \gtrsim 3\tau_f$ and diverges below that
+- **Alias** — 28-3.13, 31-3.6.
+
+### 29-3.21 — Leakage mass over mission life
+
+$$m_{leak} = Q_L\,t_{mission}\,\frac{p_{std}\,(10^{-6}\ \mathrm{m^3})}{R\,T_{std}}$$
+
+- **Variables** — $m_{leak}$ [kg]; $Q_L$ [std cm³/s]; $t_{mission}$ [s]; $p_{std}$, $T_{std}$ standard conditions. One std cm³ is $1.786\times10^{-7}$ kg of helium and $1.250\times10^{-6}$ kg of nitrogen.
+- **Meaning** — turns a leak specification into grams; for a multi-year mission the leak budget often exceeds the manoeuvre budget.
+- **Assumes** — constant $Q_L$ over life (optimistic — seals relax and elastomers cold-flow); leak measured at the service $\Delta p$.
+- **Fails when** — the specification was taken at 1 bar $\Delta p$ and the system runs at 200 bar. Viscous leaks scale roughly as $\Delta p^2$, molecular leaks as $\Delta p$.
+- **Tag** [F] [E] · **Code** —
+
+### 29-3.22 — Joule–Thomson temperature change
+
+$$\Delta T = \int_{p_1}^{p_2}\mu_{JT}\,dp \approx \mu_{JT}\,(p_2-p_1)$$
+
+- **Variables** — $\mu_{JT} = (\partial T/\partial p)_h$ [K/Pa]; $\Delta T$ [K].
+- **Meaning** — throttling a real gas changes its temperature even though no work is done and no heat added, because internal energy contains a configurational term. This is what freezes regulators and seats.
+- **Assumes** — $\mu_{JT}$ constant over the pressure drop (it is not — it falls with pressure); steady flow; adiabatic throttle.
+- **Fails when** — the gas is near saturation, where throttling can condense it.
+- **Tag** [F] [E] · **Code** —
+- **Alias** — 28-3.7.
+
+---
+
+## Module 30 — Cold-Gas Hardware
+
+### 30-3.1 — Spherical membrane stress
+
+$$\sigma = \frac{p r}{2 t}, \qquad t = \frac{p r}{2\sigma}$$
+
+- **Variables** — $\sigma$ membrane stress [Pa]; $p$ internal pressure [Pa]; $r$ internal radius [m]; $t$ wall thickness [m].
+- **Meaning** — a sphere carries pressure in pure biaxial membrane tension, equal in every direction — half the hoop stress of a cylinder at the same radius, which is why gas bottles are spheres.
+- **Assumes** — $t/r \ll 1$ (below ~1/10 the peak-stress error is under 5 %); no bending; no discontinuity; uniform material.
+- **Fails when** — at the boss, the girth weld, and any thickness step — which is where real tanks actually fail, and why the NASA monograph spends most of its length on discontinuity stresses rather than on this equation.
+- **Tag** [F] · **Code** —
+- **Alias** — 22-3.1/3.2 for the cylinder.
+
+### 30-3.2 — Vessel performance factor
+
+$$\frac{PV}{W} = \frac{p_\mathrm{MEOP} V}{m g_0}$$
+
+- **Variables** — $p_\mathrm{MEOP}$ [Pa]; $V$ internal volume [m³]; $m$ vessel mass [kg]; $g_0 = 9.80665$ m/s²; $PV/W$ [m].
+- **Meaning** — stored pressure–volume energy per unit weight; dimensionally a length, quoted in metres or inches. It collapses material choice, construction type and geometry into one comparable number.
+- **Assumes** — nothing; it is a definition.
+- **Fails when** — volume, not mass, is the binding constraint — which at CubeSat scale it usually is.
+- **Tag** [F] · **Code** —
+- **Alias** — 12-3.6, 22-3.10, 31-5.1.
+
+### 30-3.3 — Leak-before-burst condition
+
+$$K_{Ic} > \sigma_\mathrm{op}\sqrt{\pi t}\,\cdot C$$
+
+- **Variables** — $K_{Ic}$ plane-strain fracture toughness [Pa·m$^{1/2}$]; $\sigma_\mathrm{op}$ operating membrane stress [Pa]; $t$ wall thickness [m]; $C$ geometry factor of order unity for a through-thickness flaw [—].
+- **Meaning** — a through-wall crack of length comparable to the wall thickness must remain stable, so the tank leaks harmlessly rather than bursting. LBB favours **thin walls in tough materials at moderate stress**: titanium and 2219/6061 aluminium give it, very high-strength steels do not. **A COPV cannot claim LBB at all** — its failure mode is composite stress rupture, which has no growing inspectable flaw.
+- **Assumes** — LEFM validity; plane strain; a specific flaw shape. The real assessment is a full damage-tolerance analysis with a proof-test-screened initial flaw size, not this inequality.
+- **Fails when** — the material is thick enough to be genuinely plane-strain and tough enough that LEFM under-predicts; the flaw is in a weld heat-affected zone with different properties from the parent.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 16-3.8, 22-3.6.
+
+### 30-3.4 — Steady-state permeation through a liner
+
+$$\dot{n} = \frac{P_\mathrm{perm} A \,\Delta p}{t_\mathrm{lin}}$$
+
+- **Variables** — $\dot n$ permeation rate [mol/s or scc/s]; $P_\mathrm{perm}$ permeability of the liner material to the gas [mol·m/(m²·s·Pa)]; $A$ liner area [m²]; $\Delta p$ partial-pressure difference [Pa]; $t_\mathrm{lin}$ liner thickness [m].
+- **Meaning** — solution-diffusion transport of gas through a solid wall: **a true leak with no hole in it.** It is why spaceflight COPVs are metal-lined (Type III) and not polymer-lined (Type IV) — helium permeation through a polymer is irrelevant over a 5-minute automotive cycle and fatal over a five-year mission.
+- **Assumes** — steady state; Fickian diffusion; no liner damage.
+- **Fails when** — the liner has microcracked (exactly what a buckled liner produces), in which case transport is through cracks and the permeability model does not apply.
+- **Tag** [F] · **Code** —
+
+### 30-3.5 — Regulator force balance
+
+$$p_\mathrm{out} A_s = F_0 - k x \pm p_\mathrm{in} A_\mathrm{seat}$$
+
+- **Variables** — $p_\mathrm{out}$, $p_\mathrm{in}$ outlet and inlet pressures [Pa]; $A_s$ sensing area [m²]; $F_0$ spring preload at zero lift [N]; $k$ spring rate [N/m]; $x$ poppet lift [m]; $A_\mathrm{seat}$ unbalanced seat area [m²].
+- **Meaning** — a quasi-static force balance on the moving assembly; the sign on the last term depends on whether the poppet opens with or against inlet pressure.
+- **Assumes** — quasi-static (no dynamics); frictionless; no flow-induced force; diaphragm effective area constant with deflection.
+- **Fails when** — the regulator is oscillating (a dynamic problem this tells you nothing about); the diaphragm effective area changes appreciably with stroke.
+- **Tag** [F] · **Code** —
+- **Alias** — 14-3.10 with the flow-force term shown explicitly.
+
+### 30-3.6 — Regulator droop
+
+$$\Delta p_\mathrm{droop} = \frac{k\,\dot m \sqrt{R T}}{A_s\,C_d\,\pi d_s\,\Gamma\, p_\mathrm{in}}$$
+
+- **Variables** — $\dot m$ mass flow [kg/s]; $\Gamma$ [—]; $R$ [J/(kg·K)]; $T$ [K]; $C_d$ seat discharge coefficient [—]; $d_s$ seat diameter [m]; $k$ [N/m]; $A_s$ [m²]; $p_\mathrm{in}$ [Pa].
+- **Meaning** — droop is proportional to demanded flow and inversely proportional to inlet pressure, sensing area and seat circumference. A regulator droops most at high flow and *end of mission*, when inlet pressure is lowest.
+- **Assumes** — the seat annulus is choked (true whenever $p_\mathrm{in}/p_\mathrm{out} > \sim 2$); lift small compared with $d_s/4$, so the annulus and not the seat bore is the throat.
+- **Fails when** — lift approaches full open (the bore chokes instead and droop saturates); at low pressure ratio.
+- **Tag** [F] [A] · **Code** —
+
+### 30-3.7 — Solenoid magnetic force
+
+$$F_\mathrm{mag} = \frac{\mu_0 N^2 I^2 A_p}{2 g^2}$$
+
+- **Variables** — $\mu_0 = 4\pi\times10^{-7}$ H/m; $N$ turns [—]; $I$ coil current [A]; $A_p$ pole face area [m²]; $g$ air gap [m]; $F_\mathrm{mag}$ [N].
+- **Meaning** — force is the gradient of stored magnetic energy with gap; it goes as the square of ampere-turns and inversely as the square of the gap — which is why a solenoid valve snaps closed and why pull-in is the hard part, not hold.
+- **Assumes** — all reluctance in the air gap (iron infinitely permeable); no saturation; no fringing; a single gap.
+- **Fails when** — the iron saturates. Above roughly 1.5–2.0 T in soft magnetic iron or 430F stainless the force stops rising as $I^2$ and goes nearly linear — **why brute-forcing a marginal valve with more current stops working.**
+- **Tag** [F] [A] · **Code** —
+
+### 30-3.8 — Solenoid electrical rise time
+
+$$t_\mathrm{elec} = \tau \ln\!\left(\frac{1}{1 - I_\mathrm{pi}R/V}\right)$$
+
+- **Variables** — $\tau = L/R$ [s]; $L$ coil inductance [H]; $R$ coil resistance [Ω]; $V$ drive voltage [V]; $I_\mathrm{pi}$ pull-in current [A].
+- **Meaning** — first-order electrical rise of a series R–L circuit; the first term of the valve's total response time, before any mechanical motion.
+- **Assumes** — constant $L$ — which is false, because $L$ depends on the gap and therefore changes as the armature moves; the honest treatment solves the coupled electromechanical problem.
+- **Fails when** — $I_\mathrm{pi}R \ge V$ (the valve never pulls in); eddy currents in a solid magnetic circuit slow the flux rise appreciably beyond $L/R$.
+- **Tag** [F] [A] · **Code** —
+
+### 30-3.9 — Throat Reynolds number
+
+$$Re_t = \frac{\rho^{*} a^{*} D_t}{\mu^{*}}$$
+
+- **Variables** — $\rho^*$, $a^*$, $\mu^*$ density [kg/m³], sonic velocity [m/s] and dynamic viscosity [Pa·s] at throat conditions; $D_t$ [m].
+- **Meaning** — the ratio of inertial to viscous transport at the throat; it sets boundary-layer thickness as a fraction of throat radius.
+- **Assumes** — choked flow; throat properties from isentropic relations.
+- **Fails when** — the flow is not choked; the gas is not adequately ideal (a saturated refrigerant near its vapour dome is not).
+- **Tag** [F] · **Code** `reynolds(rho, v, L, mu)`
+- **Alias** — 29-3.11.
+
+### 30-3.9b — Micronozzle discharge coefficient
+
+$$C_d \approx 1 - \frac{C}{\sqrt{Re_t}}, \qquad C \approx 2.5\!-\!3.5$$
+
+- **Variables** — $C_d$ [—]; $Re_t$ [—]; $C$ an empirical constant depending on throat radius-of-curvature ratio and wall temperature [—].
+- **Meaning** — the displacement thickness of the throat boundary layer shrinks the effective flow area. This is the same functional form ISO 9300 uses for critical-flow venturi nozzles.
+- **Assumes** — laminar throat boundary layer; smooth wall; axisymmetric throat.
+- **Fails when** — the throat boundary layer transitions (higher $Re_t$, rough wall); $Re_t \lesssim 300$, where the whole flow is viscous-dominated and no boundary-layer decomposition is valid.
+- **Tag** [E] [A] · **Code** —
+- **Alias** — 29-3.12 uses $a \approx 5$ for the same form; the constants differ because the geometries differ. Pick one and say which.
+
+### 30-3.10 — Vapour-pressure sensitivity
+
+$$\frac{d \ln p_v}{dT} = \frac{\Delta H_\mathrm{vap}}{R T^2} \quad\Rightarrow\quad \frac{\Delta p_v}{p_v} \approx \frac{\Delta H_\mathrm{vap}}{R T}\,\frac{\Delta T}{T}$$
+
+- **Variables** — $p_v$ vapour pressure [Pa]; $\Delta H_\mathrm{vap}$ molar enthalpy of vaporisation [J/mol]; $R = 8.31446$ J/(mol·K); $T$ [K].
+- **Meaning** — vapour pressure is exponential in temperature, with sensitivity set by the latent heat. For a saturated-liquid cold-gas system the feed pressure *is* the vapour pressure, so a few kelvin of spacecraft temperature swing is a large thrust swing.
+- **Assumes** — $\Delta H_\mathrm{vap}$ constant over the interval; ideal vapour; incompressible liquid.
+- **Fails when** — near the critical point, where $\Delta H_\mathrm{vap} \to 0$ and the relation collapses. Relevant for CO₂ (critical 304.1 K) and xenon (289.7 K), both of which are **supercritical or nearly so at room temperature** and must not be modelled as saturated liquids there.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 28-3.9 on a mass basis with $R$ in J/(kg·K).
+
+---
+
+## Module 31 — Real Cold-Gas Systems
+
+### 31-3.1 — Total impulse and Tsiolkovsky
+
+$$I_t = I_{sp}\, g_0\, m_p \qquad\text{and}\qquad \Delta v = I_{sp}\, g_0 \ln\!\frac{m_0}{m_0-m_p}$$
+
+- **Variables** — $I_t$ total impulse [N·s]; $I_{sp}$ [s]; $g_0 = 9.80665$ m/s²; $m_p$ expelled propellant mass [kg]; $m_0$ initial total mass of everything being accelerated [kg]; $\Delta v$ [m/s].
+- **Meaning** — the first is the definition of $I_{sp}$; the second is Tsiolkovsky. Together they are the five-line audit of any published cold-gas specification.
+- **Assumes** — a single impulsive burn; constant $I_{sp}$; no external forces; and — the assumption that actually breaks — that $m_0$ is *the mass the published $\Delta v$ referred to*.
+- **Fails when** — the manoeuvre is a long low-thrust burn against gravity gradient or drag; $I_{sp}$ varies over a blowdown (it does, by 5–15 %); the thrusters fire in opposing pairs for attitude control, consuming propellant with zero net $\Delta v$.
+- **Tag** [F] [A] · **Code** `tsiolkovsky_dv(isp, m0, mf)`, `propellant_for_dv(isp, m_final, dv)`
+- **Alias** — 05-3.1, 26-3.1, 26-3.3.
+
+### 31-3.2 — Small-mass-ratio $\Delta v$
+
+$$\Delta v \approx \frac{I_t}{m_0} = \frac{I_{sp}\,g_0\,m_p}{m_0}$$
+
+- **Variables** — as 31-3.1.
+- **Meaning** — for small mass ratios, $\Delta v$ is just total impulse divided by the mass being pushed — a mental-arithmetic first pass.
+- **Assumes** — $m_p/m_0 \ll 1$.
+- **Fails when** — $m_p/m_0 \gtrsim 0.2$, where it under-predicts by more than 10 %. For every system in this module $m_p/m_0 < 0.15$, so it is good to a few percent. **Use it for the first pass and 31-3.1 when writing the number down.**
+- **Tag** [A] [J] · **Code** —
+
+### 31-3.3 — $I_{sp}$ scales as $\sqrt{T_0/M}$
+
+$$I_{sp} \propto \sqrt{\frac{T_0}{M}}$$
+
+- **Variables** — $T_0$ plenum stagnation temperature [K]; $M$ molar mass [kg/kmol].
+- **Meaning** — a cold-gas thruster's performance is set almost entirely by what the gas weighs, because $T_0$ is fixed at whatever the spacecraft happens to be.
+- **Assumes** — ideal gas; frozen flow; same $\gamma$ and same $\varepsilon$ across the comparison.
+- **Fails when** — $\gamma$ differs substantially — polyatomic refrigerants at $\gamma \approx 1.08$ have a noticeably higher $C_F$ than diatomics at 1.40, clawing back part of the molar-mass penalty; the gas is heated, which breaks the "cold" in cold gas.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 04-3.2 for the hot-gas version.
+
+### 31-3.4 — Impulse per unit propellant volume
+
+$$\frac{I_t}{V} = \rho\, I_{sp}\, g_0$$
+
+- **Variables** — $I_t/V$ [N·s/m³]; $\rho$ stored density at the storage state [kg/m³]; $I_{sp}$ [s].
+- **Meaning** — this, not $I_{sp}$, is the figure of merit for a volume-limited vehicle.
+- **Assumes** — the whole stored mass is usable (it is not; multiply by $\eta_u$); the tank volume equals the propellant volume (it does not — wall, boss and mounting add volume and, more importantly, mass).
+- **Fails when** — tank mass is comparable to propellant mass, which for high-pressure gas at CubeSat scale it always is.
+- **Tag** [F] [A] · **Code** `density_isp(rho, isp)`
+- **Alias** — 28-3.18, 29-3.4.
+
+### 31-3.5 — The 0.90 rule
+
+$$I_{sp,\ \mathrm{real}} \approx 0.90\; I_{sp,\ \mathrm{ideal}}$$
+
+- **Variables** — $I_{sp}$ [s].
+- **Meaning** — a well-designed steady-flow cold-gas thruster delivers about 90 % of its frozen-ideal specific impulse.
+- **Assumes** — steady flow; a nozzle large enough that the boundary layer does not dominate the throat; a plenum at ambient spacecraft temperature.
+- **Fails when** — **the thruster is pulsed. This is the single most important caveat in the chapter** — pulsed delivery can fall to half the ideal.
+- **Tag** [E] · **Code** —
+- **Alias** — 28-3.12.
+
+### 31-3.6 — Trapezoidal impulse bit
+
+$$I_{bit} \approx F\left(t_{on} - \tfrac{1}{2}t_{rise} + \tfrac{1}{2}t_{fall}\right)$$
+
+- **Variables** — $I_{bit}$ [N·s]; $F$ steady thrust [N]; $t_{on}$ commanded valve-open time [s]; $t_{rise}$, $t_{fall}$ valve opening and closing transient durations [s].
+- **Meaning** — the trapezoidal approximation to a pulse.
+- **Assumes** — the thruster reaches steady flow within the pulse, i.e. $t_{on} \gg t_{rise}$.
+- **Fails when** — $t_{on}$ approaches $t_{rise}$ — precisely the regime micronewton-resolution systems operate in. There the impulse bit is dominated by the transient and **must be characterised by test, not computed.**
+- **Tag** [A] [J] · **Code** `impulse_bit(F, t_on, t_rise, t_fall)`
+- **Alias** — 28-3.13, 29-3.20.
+
+### 31-5.1 — Tank mass from the performance factor
+
+$$m_{tank} \approx \frac{p V}{g_0\,(pV/W)}$$
+
+- **Variables** — $m_{tank}$ [kg]; $p$ design pressure [Pa]; $V$ internal volume [m³]; $pV/W$ tank performance factor [m]; $g_0$ [m/s²].
+- **Meaning** — for a membrane pressure vessel, wall mass scales with the stored $pV$ product, so $pV/W$ is nearly constant across sizes for a given material and design.
+- **Assumes** — membrane-dominated design at the stated burst factor.
+- **Fails when** — **at small scale**, where minimum gauge, the boss and the liner dominate and the achieved $pV/W$ collapses — exactly the CubeSat regime.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 12-3.6, 30-3.2.
+
+---

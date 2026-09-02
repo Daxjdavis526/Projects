@@ -894,7 +894,7 @@ case material, nozzle materials, and the production route.
 | C1.1 | Total impulse, vacuum | **≥ 155 kN·s** |
 | C1.2 | Action time (web burn) at +21 °C | **7.0–9.0 s** |
 | C1.3 | Thrust-time shape | neutral to slightly progressive; **max/mean thrust ≤ 1.30** across the conditioned temperature range |
-| C1.4 | Peak vehicle axial acceleration, all temperatures, with a 45 kg payload | **≤ 15 g** |
+| C1.4 | Peak vehicle axial acceleration, all temperatures, on the reference vehicle of C-G9 | **≤ 22 g** |
 | C1.5 | Motor outside diameter | **≤ 280 mm** |
 | C1.6 | Motor overall length, aft closure to forward attachment | **≤ 1,200 mm** |
 | C1.7 | Propellant mass fraction, $m_p/m_{motor}$ | **≥ 0.85** |
@@ -920,7 +920,7 @@ case material, nozzle materials, and the production route.
 | HTPB fuel grain with N₂O (hybrid) | 930 grain / 745 ox | 1560 | 0.92 | — | regression ~ $a G_{ox}^{0.6}$ [E] | — |
 
 Chamber gas for nozzle work [A]: aluminized $\mathcal{M} = 27.5$,
-$T_0 = 3300$ K, $\gamma = 1.18$; reduced-smoke $\mathcal{M} = 24.5$,
+$T_0 = 3300$ K, $\gamma = 1.18$; reduced-smoke $\mathcal{M} = 25.9$,
 $T_0 = 2950$ K, $\gamma = 1.20$.
 
 The aluminized $\mathcal{M}$ and $\eta_{c^*}$ both carry the condensed-phase
@@ -978,6 +978,14 @@ rate-limiting steps are mix-batch size, cast-and-cure cycle time and cure oven
 capacity; for a filament-wound case it is mandrel count and winding time
 [P120C gives the scale of the latter for a much larger motor — scale it and
 say how you scaled]. Produce a takt-time argument, not an assertion.
+
+**C-G9 — Reference vehicle for C1.4.** Acceleration is a vehicle property, not
+a motor property, so the requirement is written against a stated vehicle:
+**45 kg payload + 40 kg of airframe, fins, recovery system and interstage**,
+plus your motor. Peak axial acceleration occurs at *burnout*, not at ignition,
+because the vehicle has lost the propellant; compute it there, at the hot
+conditioning limit, and remember that whatever your throat has eroded to by
+then is part of the answer.
 
 ## Candidate architectures — evaluate at least four of these five
 

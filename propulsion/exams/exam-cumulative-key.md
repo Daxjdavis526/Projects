@@ -264,10 +264,6 @@ is the right direction and the right size.
 > powers and the turbine power. Forgetting to divide by $\eta_m$ (or
 > multiplying) loses half of the second mark.
 
-*(Note: a script that reads the oxidiser injector drop as 20 bar rather than
-15 bar gets $P_o = 3.771$ MW and $P_t = 7.098$ MW; accept with the working
-shown, but the question states $\Delta p_o/p_c = 0.15$.)*
-
 ## (f) (2 points) — Gas generator and its price
 
 Specific turbine work:
@@ -993,3 +989,525 @@ recur, because nothing has changed about how the next one is built.
 > of statement, plus the confirming test. 1 pt the corrective action
 > distinguishing article repair from process fix. Naming the class without
 > argument earns 0.
+
+---
+
+# Problem 5 — Cross-system selection for a lunar kick stage (15 points)
+
+## (a) (4 points) — Sizing with a $k$-model inert mass
+
+**Derivation (three lines).** Let $m_{pl}$ be the payload, $m_p$ the
+propellant, and $m_{inert} = km_p + m_{fixed}$. Then
+
+$$m_f = m_{pl}+m_{fixed}+km_p,\qquad m_0 = m_f+m_p = \mu m_f
+\ \ \text{with}\ \ \mu = e^{\Delta v/(I_{sp}g_0)}$$
+
+$$\Rightarrow\ m_p = (\mu-1)m_f = (\mu-1)\left(m_{pl}+m_{fixed}+km_p\right)
+\ \Rightarrow\ m_p\left[1-k(\mu-1)\right] = (\mu-1)(m_{pl}+m_{fixed})$$
+
+$$\boxed{\,m_p = \frac{(\mu-1)(m_{pl}+m_{fixed})}{1-k(\mu-1)}\,}$$
+
+**At $\Delta v = 1750$ m/s, $m_{pl} = 450$ kg:**
+
+| | $I_{sp}$ | $\mu$ | $k(\mu-1)$ | $m_p$ (kg) | $m_{inert}$ (kg) | stage wet (kg) | $\zeta$ |
+|---|---|---|---|---|---|---|---|
+| **A** solid | 293 | 1.8387 | 0.1006 | **433.6** | **67.0** | **500.7** | 0.8661 |
+| **B** storable PF | 322 | 1.7405 | 0.1777 | **436.8** | **139.8** | **576.6** | 0.7575 |
+| **C** monoprop | 228 | 2.1873 | 0.3562 | **876.0** | **287.8** | **1163.8** | 0.7527 |
+| **D** methalox pump | 365 | 1.6305 | 0.1261 | **368.0** | **133.6** | **501.6** | 0.7336 |
+
+**Note that B, C and D must also deliver REQ-2's 40 m/s with the same
+engine**, so their honest sizing is at $\Delta v = 1790$ m/s:
+
+| | $\mu$ | $m_p$ (kg) | $m_{inert}$ (kg) | stage wet (kg) |
+|---|---|---|---|---|
+| **B** | 1.7627 | 452.8 | 143.7 | **596.5** |
+| **C** | 2.2268 | 922.1 | 301.6 | **1223.7** |
+| **D** | 1.6489 | 380.3 | 136.1 | **516.3** |
+
+**What $k(\mu-1)\ge 1$ means.** The denominator vanishes: adding propellant
+adds inert mass faster than it adds $\Delta v$, so **no finite stage of that
+architecture can meet the requirement**, at any size. It is not a "heavy"
+answer, it is an infeasible one, and it is worth checking before sizing
+anything. C is at 0.356–0.368 — closer to the wall than the others by a
+factor of two, which is the arithmetic behind the intuition that a
+low-$I_{sp}$ architecture is punished twice.
+
+> **Rubric (4).** 2 pts the derivation, shown, in the requested three steps.
+> 1 pt the 1750 m/s table. 1 pt the $k(\mu-1)$ column with the infeasibility
+> statement. **Bonus consideration, not extra marks:** a script that notices
+> B/C/D must also cover REQ-2 and re-sizes at 1790 m/s is doing the
+> engineering; note it in the margin and credit it in (b).
+
+## (b) (3 points) — Screening against the requirements
+
+**Constraints first, scores later.** REQ-4 is a *hard* mass cap, so it is a
+screen, not a criterion.
+
+| | REQ-1 (Δv) | REQ-2 (≥4 midcourse burns) | REQ-3 (6-month coast) | REQ-4 (≤1100 kg) | REQ-5 (rideshare) | survives? |
+|---|---|---|---|---|---|---|
+| **A** solid | ✓ | ✗ alone — no restart, no throttle; needs a separate RCS | ✓ (storage is a solid's strength; thermal conditioning needed) | ✓ once the RCS is added | ⚠ energetic mass, hazard classification, transport | **yes, with an added RCS** |
+| **B** storable PF | ✓ | ✓ unlimited restarts | ✓ 10–20 yr storable | ✓ 596.5 kg | ⚠ hypergol loading at the pad | **yes** |
+| **C** monoprop | ✓ | ✓ | ✓ | **✗ 1224 kg > 1100 kg** | ⚠ toxic loading | **no — eliminated by REQ-4** |
+| **D** methalox pump | ✓ | ✓ | ⚠ boil-off and no flight heritage for a 6-month cryogenic coast + restart | ✓ 516.3 kg | ✓ non-toxic, but cryogenic loading on a rideshare is hard | **yes, with the highest risk** |
+
+**C is eliminated by REQ-4** — and it fails at 1750 m/s too (1164 kg), so the
+elimination does not depend on how REQ-2 is allocated. Nothing else is
+screened out; D's cryogenic-coast problem is *risk*, not a violated
+requirement as written, and it must therefore be scored, not screened. Saying
+so explicitly is part of the answer: the commonest systems-engineering error
+is to quietly kill an option in the screen because you dislike it.
+
+**Sizing A's RCS module** ($\Delta v = 40$ m/s, $I_{sp} = 220$ s, $k = 0.35$,
+$m_{fixed} = 8$ kg, acting on 450 kg payload + 67.0 kg spent motor inert):
+
+$$\mu = e^{40/(220\times9.80665)} = 1.018717$$
+
+$$m_p = \frac{0.018717\times(517.0+8)}{1-0.35\times0.018717} = \frac{9.8264}{0.993449}
+= \mathbf{9.89\ kg},\qquad m_{inert} = 0.35\times9.89+8 = \mathbf{11.46\ kg}$$
+
+$$m_{RCS} = \mathbf{21.35\ kg}\;\Rightarrow\;
+\text{A stage wet} = 500.7+21.4 = \mathbf{522.1\ kg}$$
+
+*(Strictly the RCS is carried through the main burn and therefore belongs in
+the motor's payload; iterating gives motor propellant 453.5 kg, motor inert
+69.4 kg, total 544.3 kg. The question's simplification is stated and is worth
+about 4 %; a script that performs and reports the iteration should be
+credited, not penalised.)*
+
+> **Rubric (3).** 1 pt a screen table that treats REQ-4 as a constraint and
+> eliminates C on it. 1 pt for **not** screening D out on REQ-3, with the
+> reason. 1 pt the RCS sizing and A's revised wet mass.
+
+## (c) (5 points) — Pugh matrix, datum B
+
+Survivors: **A**, **B** (datum), **D**. Scores on $-2\ldots+2$:
+
+| criterion | $w$ | **A** | **B** | **D** | one-line justification |
+|---|---|---|---|---|---|
+| performance / mass margin vs REQ-4 | 25 | **+1** | 0 | **+1** | A 522 kg and D 516 kg against B's 597 kg — both leave ~575 kg of margin against B's 503 kg; the difference is real but not decisive |
+| development and schedule risk | 25 | **+1** | 0 | **−2** | A is a re-scale of a well-understood class; B has a qualified lineage; D is a new cryogenic pump-fed engine *and* a 6-month cryogenic coast with no flight precedent |
+| long-coast and restart (REQ-2, REQ-3) | 20 | **−2** | 0 | **−1** | A has zero restarts and no midcourse authority of its own; D restarts freely but must survive 6 months of boil-off and then chill down and light |
+| recurring cost | 15 | **+1** | 0 | **−1** | solid motors are cheap in production; a pump-fed cryogenic stage is not |
+| ground / range ops, rideshare (REQ-5) | 10 | **−1** | 0 | **0** | A is an energetic article with a hazard classification and transport constraints; D trades hypergol toxicity for cryogenic loading on a rideshare manifest — roughly a wash against the datum |
+| single-point-failure count | 5 | **+1** | 0 | **−2** | A: an igniter and a case. D: turbomachinery, two propellant circuits, an ignition system and a chill-down sequence |
+
+$$S_A = 25(+1)+25(+1)+20(-2)+15(+1)+10(-1)+5(+1) = \mathbf{+20}$$
+$$S_B = \mathbf{0}\ \text{(datum)},\qquad
+S_D = 25(+1)+25(-2)+20(-1)+15(-1)+10(0)+5(-2) = \mathbf{-70}$$
+
+**Ranking: A > B > D.**
+
+**Weight sweep.** Let $w$ be the risk weight and scale the other five by
+$(100-w)/75$ so the weights still sum to 100. The non-risk sums are
+$-5$ for A and $-20$ for D, so
+
+$$S_A(w) = w - 5\frac{100-w}{75} = 1.0667w - 6.667,\qquad
+S_D(w) = -2w - 20\frac{100-w}{75} = -1.7333w - 26.667$$
+
+| $w$ | 10 | 20 | 25 | 30 | 40 |
+|---|---|---|---|---|---|
+| $S_A$ | +4.0 | +14.7 | +20.0 | +25.3 | +36.0 |
+| $S_B$ | 0 | 0 | 0 | 0 | 0 |
+| $S_D$ | −44.0 | −61.3 | −70.0 | −78.7 | −96.0 |
+
+**The ranking A > B > D survives the entire 10–40 sweep.** The A/B crossover
+is at $S_A = 0$, i.e. $w = 500/80 = \mathbf{6.25}$ — *outside* the swept range.
+So the recommendation is not an artefact of the weighting: only if
+development risk were weighted below ~6 out of 100 would B overtake A, and
+nobody weights schedule risk that low on a programme that has to buy a stage.
+D never comes within 40 points of the datum at any weight in range.
+
+> **Rubric (5).** 2 pts a completed matrix with **every** score justified in
+> one line (unjustified scores earn nothing, however plausible). 1 pt correct
+> weighted totals. 2 pts the sweep done algebraically or tabulated at ≥4
+> weights, with an explicit statement of whether the ranking survives and
+> where the crossover is. A sweep that only reports "the answer did not
+> change" without a number caps at 1 of those 2.
+
+## (d) (3 points) — Recommendation (≈240 words)
+
+> **Recommend architecture A: a monolithic composite-cased solid kick motor
+> with a small hydrazine RCS module. Runner-up: B, the storable pressure-fed
+> stage.**
+>
+> The deciding number is **stage wet mass at separation, 522 kg against a
+> 1100 kg cap — 578 kg of margin**, obtained while also being the lowest
+> development risk and the lowest recurring cost of the three survivors. A
+> beats B by 74 kg with a simpler, cheaper article; D beats B on mass by a
+> comparable margin but buys that with a new cryogenic engine and an
+> unprecedented six-month cryogenic coast, and the Pugh sweep shows it never
+> approaches the datum at any defensible weighting.
+>
+> A's weakness is real and must be stated: it has **no restart and no thrust
+> authority after ignition**, so all midcourse capability, all abort
+> retargeting and all injection-error correction live in the 21 kg RCS
+> module. If the mission's injection dispersion turns out to demand more than
+> the 40 m/s allocated, A degrades badly while B absorbs it for free.
+>
+> **The one thing to obtain this quarter:** the actual **injection-accuracy
+> dispersion** of the GTO drop-off, as a 3σ $\Delta v$. If it exceeds roughly
+> 80 m/s, A's fixed impulse and growing RCS stop being competitive and the
+> recommendation flips to B.
+>
+> **If REQ-3 relaxed from 6 months to 6 days:** the case against D collapses —
+> boil-off and long-coast chill-down were most of its risk score. At a 6-day
+> coast D is the lightest option with the highest $I_{sp}$ and full restart
+> capability, and I would recommend **D**, with B as the low-risk fallback.
+
+> **Rubric (3).** 1 pt winner and runner-up with the deciding number stated
+> as a *number*. 1 pt the named information item **and the direction it would
+> push** — "more data would help" earns nothing. 1 pt the REQ-3 counterfactual
+> with a reason tied to the score that changes. Over 250 words: cap at 2 of 3.
+
+---
+
+# Problem 6 — Short answer (10 × 2 = 20 points)
+
+## 6.1 (2 points) — Separation on the Problem 2 motor at sea level
+
+At $\gamma = 1.15$, $\varepsilon = 11.0$:
+$M_e = \mathbf{3.1972}$, and
+
+$$p_e = \frac{p_c}{\left(1+\frac{\gamma-1}{2}M_e^2\right)^{\gamma/(\gamma-1)}}
+= \frac{6.3055\times10^{6}}{78.49} = \mathbf{8.033\times10^{4}\ Pa} = 0.803\ \mathrm{bar}$$
+
+- **Summerfield:** separation when $p_e < 0.4p_a = \mathbf{4.053\times10^{4}}$ Pa.
+- **Schmucker:** $p_{sep} = p_a(1.88M_e-1)^{-0.64}
+  = 101\,325\times(5.0108)^{-0.64} = \mathbf{3.612\times10^{4}}$ Pa.
+
+$p_e = 80.3$ kPa exceeds both by a factor of ~2, so **the nozzle flows full**
+at sea level with a large margin — as it must, since a strap-on ignites at
+sea level and $\varepsilon = 11$ was chosen for exactly that. **Summerfield is
+the conservative criterion here**: it predicts separation at the higher wall
+pressure, i.e. sooner. The two disagree by
+$(40\,530-36\,123)/36\,123 = \mathbf{12.2\ \%}$ in separation pressure, which
+is the honest size of the disagreement in this literature and why a design
+that depends on the difference is a design in trouble.
+
+> **Rubric.** 1 pt $M_e$ and $p_e$. 1 pt both criteria, the verdict, which is
+> conservative, and the percentage.
+
+## 6.2 (2 points) — Frozen and equilibrium
+
+**Equilibrium (shifting) bounds the delivered $I_{sp}$ from above; frozen
+bounds it from below.** Equilibrium lets recombination reactions
+($\mathrm{H+OH\to H_2O}$, $\mathrm{CO+\tfrac12O_2\to CO_2}$) release their
+energy as the gas cools through the nozzle, converting chemical energy back
+into directed kinetic energy; frozen forbids it entirely and carries the
+dissociation energy out of the nozzle. The real nozzle sits between, because
+recombination is finite-rate: fast near the throat where density is high,
+effectively quenched in the far divergent where it is low.
+
+**Gap sizes.** LOX/LH₂ ≈ **3–5 %** (10–20 s at 450 s) — a highly dissociated,
+low-molar-mass exhaust with much to recombine. A metallised solid ≈
+**1–2 %**, and it sits **nearer the frozen limit**, because a large fraction
+of the exhaust enthalpy is carried by condensed Al₂O₃ particles. Those
+particles do not chemically recombine, they lag the gas in both velocity and
+temperature, and they set the two-phase flow loss instead — the same physical
+feature that puts a solid near frozen also costs it 1–3 % in $I_{sp}$ on its
+own account.
+
+> **Rubric.** 1 pt the two bounds with the recombination mechanism. 1 pt both
+> gap sizes and the condensed-phase argument. Reversing the bounds is a fatal
+> error and scores 0.
+
+## 6.3 (2 points) — The RP-1 coking limit
+
+**Mechanism.** Above roughly **560–600 K wall temperature**, RP-1 in the
+boundary layer of the channel pyrolyses and the heavy aromatics polymerise on
+the hot surface, laying down a carbonaceous deposit. It is a *wall
+temperature* phenomenon, not a bulk temperature phenomenon: the bulk can be
+400 K while the film next to the wall is coking.
+
+**Two things go wrong once a deposit forms, and they compound.** (1) The
+deposit is a thermal resistance in series on the coolant side, so the wall
+runs hotter for the same flux, which accelerates further deposition —
+positive feedback. (2) It reduces the channel flow area and roughens it, so
+the jacket pressure drop rises, which the pump must pay for, and the flow
+distribution between channels drifts.
+
+**Why it caps chamber pressure.** Gas-side flux scales as
+$q''\propto p_c^{0.8}$ (Bartz), so the coolant-side wall temperature required
+to reject it rises with $p_c$ while the coking limit does not move. The wall
+therefore hits the coking limit long before the copper hits its strength or
+creep limit — **the chemistry of the coolant, not the metallurgy of the wall,
+is what caps $p_c$ for RP-1 regenerative cooling.** The **F-1** is the direct
+consequence: ~70 bar (`inj`, contested — the database flags 1,015 psia as low
+confidence), 178 brazed tubes, *and* a gas-generator film curtain over the
+extension. The alternatives a modern programme takes are to burn methane,
+which does not coke in this range, or to accept film cooling and its
+$I_{sp}$ penalty.
+
+> **Rubric.** 1 pt mechanism plus the temperature. 1 pt the two consequences
+> and the $p_c$-cap argument with an engine named. An answer that says
+> "RP-1 cannot cool a hot engine" without the wall-temperature number and the
+> $p_c^{0.8}$ scaling caps at 1.
+
+## 6.4 (2 points) — Fuel lead or oxidiser lead
+
+**LOX/LH₂: fuel (hydrogen) lead.** Hydrogen has a very wide flammability
+range and a very low minimum ignition energy, so a hydrogen-rich start lights
+reliably and burns at a mixture ratio far off the wall-destroying optimum.
+More importantly, a hydrogen lead guarantees the chamber and injector face
+never see a LOX-rich environment while hot, which would attack a copper liner
+and any organic seal. The cost is a brief unburnt-hydrogen accumulation, which
+is why the sequence is purge → chilldown → igniter-verified → fuel lead →
+main ox valve.
+
+**LOX/RP-1: oxidiser lead is common, and is the right choice for a
+hypergolically-started kerolox engine.** Kerosene is hard to ignite, and a
+fuel-lead start pools liquid RP-1 in the chamber that then detonates when the
+oxidiser arrives — the classic hard start. Leading the oxidiser means the
+TEA-TEB slug or the torch meets an oxidising environment and lights
+immediately, and any accumulation is of the *less* energetic constituent.
+A kerolox chamber's copper is protected by the fuel film, not by the lead
+order, so the wall argument that decides the hydrogen case does not bind here.
+
+**The weakest assumption in the constant-volume hard-start calculation** is
+that the accumulated propellant is **fully mixed at a burnable mixture ratio
+and burns instantaneously at constant volume**. It is not: real accumulations
+are stratified pools and films, only part of the mass participates, and the
+burn takes long enough that the throat vents a significant fraction. The
+calculation therefore *over*-predicts peak pressure, often by a large factor —
+which is comfortable, until someone uses the same model to justify a longer
+permissible ignition delay.
+
+> **Rubric.** ½ pt each for the two leads *with* a reason, ½ pt for the
+> wall/accumulation argument being different in the two cases, ½ pt for the
+> assumption with its direction of error.
+
+## 6.5 (2 points) — Water hammer in a LOX line
+
+$$\Delta p_J = \rho a\Delta v = 1140\times1100\times8.00
+= \mathbf{1.003\times10^{7}\ Pa} = \mathbf{100.3\ bar}$$
+
+$$T_{pipe} = \frac{2L}{a} = \frac{2\times4.50}{1100} = \mathbf{8.18\ ms}$$
+
+The closure takes 40 ms $> T_{pipe}$, so it is a **slow (gradual) closure**:
+the reflected expansion wave returns to the valve before it is shut and
+relieves part of the rise. To first order the surge developed is
+
+$$\Delta p \approx \Delta p_J\frac{T_{pipe}}{t_c} = 100.3\times\frac{8.18}{40}
+= \mathbf{20.5\ bar}$$
+
+**What you would still check in a cryogenic line.** **Column separation.** If
+the transient drops the local pressure to the propellant's vapour pressure —
+which is close to the operating pressure for a saturated cryogen, unlike an
+ambient hydraulic fluid — the liquid column tears and a vapour cavity forms.
+Its collapse on the rebound produces a *second* peak that can exceed the
+Joukowsky value, and the two-phase content changes the wave speed itself, so
+the linear estimate above stops applying at exactly the moment it matters.
+
+> **Rubric.** 1 pt both numbers with the classification. 1 pt the slow-closure
+> estimate and column separation named with its mechanism. Answering "cavitation"
+> without saying that the collapse can exceed the Joukowsky peak earns half.
+
+## 6.6 (2 points) — Chamber acoustics
+
+$$f_{1T} = \frac{\alpha_{1,1}c}{\pi D_c} = \frac{1.8412\times1150}{\pi\times0.39958}
+= \mathbf{1687\ Hz}$$
+
+**Who sees it.** A **flush-mounted, close-coupled high-frequency pressure
+transducer** (piezoelectric or piezoresistive) on the chamber wall sees it,
+and so does a chamber-mounted accelerometer at the same frequency. A
+transducer on a **sense line** does not: the line's own quarter-wave or
+Helmholtz resonance and its viscous attenuation sit far below 1.7 kHz, and the
+line acts as a low-pass filter that both destroys the amplitude and adds phase
+— which is why "we saw no instability" from a sense-line channel is not
+evidence of anything.
+
+**Digitisation.** Sample at **≥ 20 kHz** (≥ 10× the mode, not the Nyquist
+minimum of 3.4 kHz — you need waveform shape and the harmonics, not just the
+frequency), with an **anti-alias corner near 8–10 kHz** and at least 60 dB of
+attenuation by the Nyquist frequency. State the filter's phase lag at 1.7 kHz
+when you correlate this channel against another; a low-pass filter that is
+flat in amplitude at 1.7 kHz is not flat in phase.
+
+> **Rubric.** 1 pt the frequency. 1 pt sense-line versus flush-mounted, plus
+> sample rate and anti-alias corner with a justification beyond Nyquist.
+
+## 6.7 (2 points) — Uncertainty budget
+
+$$I_{sp} = \frac{F}{\dot mg_0}\;\Rightarrow\;
+\frac{\partial I_{sp}}{\partial F} = \frac{1}{\dot mg_0} = \frac{I_{sp}}{F},
+\qquad
+\frac{\partial I_{sp}}{\partial \dot m} = -\frac{F}{\dot m^2g_0} = -\frac{I_{sp}}{\dot m}$$
+
+Both sensitivities are unity in *relative* terms, so
+
+$$\frac{u_{I_{sp}}}{I_{sp}} = \sqrt{\left(\frac{u_F}{F}\right)^2+\left(\frac{u_{\dot m}}{\dot m}\right)^2}
+= \sqrt{0.30^2+0.25^2} = \mathbf{0.3905\ \%}$$
+
+$$u_{I_{sp}} = 0.003905\times272.1 = \mathbf{\pm1.06\ s}\ (1\sigma)$$
+
+**Why averaging helps only part of it.** Averaging $n$ samples of a stationary
+steady segment reduces the **random (precision)** component as $1/\sqrt n$ —
+electrical noise, turbulence-driven fluctuation, quantisation. It does
+**nothing** to the **systematic (bias)** component — calibration error of the
+load cell, flowmeter calibration on a different fluid, thermal zero shift,
+thrust-stand tare and tie-down restraint. Quoting "±0.30 % on thrust" without
+splitting it into the two is the reason two organisations can report the same
+engine's $I_{sp}$ 1.5 % apart with neither making an arithmetic error.
+
+> **Rubric.** 1 pt the two derivatives and the RSS in per cent. 1 pt the value
+> in seconds and the random/systematic split. An answer that says averaging
+> reduces "the uncertainty" without the split caps at 1.
+
+## 6.8 (2 points) — Insulation
+
+- **Char rate** $\dot c$: the speed at which the pyrolysis front advances into
+  virgin elastomer, converting it to char. It measures material *decomposition*.
+- **Erosion rate** $\dot e$: the speed at which the char layer is mechanically
+  and chemically removed by the gas — shear from the local mass flux and
+  particle impingement from the condensed Al₂O₃.
+- **Surface recession rate** $\dot s$: the net motion of the exposed surface,
+  the sum of what the gas takes away. Char and erosion are *not* additive in
+  general: the char layer that erosion removes is the same layer that
+  insulates and slows charring.
+
+**Sizing uses the char rate**, plus a residual-virgin-layer requirement and a
+safety factor — because what matters is that the **bond line never sees
+pyrolysis**, not that some thickness of char survives. A design that sizes on
+recession alone can end the burn with a fully charred, structurally worthless
+wall that has technically not receded.
+
+**Why exposure time is a function of station.** A station is only exposed once
+the grain has burned back past it. Under a case-bonded internal-burning grain
+the aft end is exposed almost from ignition, while a station under a thick web
+is not exposed until late in the burn — and the local mass flux and particle
+loading also grow toward the aft end. **In the Problem 2 motor the aft end,
+just upstream of the nozzle entry, sizes the insulation**: it has the longest
+exposure, the highest mass flux and the heaviest particle impingement, and it
+is where the taper must be thickest.
+
+> **Rubric.** 1 pt the three definitions distinguished, with which one sizes.
+> 1 pt the exposure-time argument and the correct station named.
+
+## 6.9 (2 points) — Reading a published solid-motor figure
+
+**Four tags required before that figure is usable:**
+
+1. **`/motor` or `/vehicle`** — one motor, or all of them summed.
+2. **`SL` or `vac`** — sea level or vacuum.
+3. **`max` or `avg`** — peak or burn-averaged.
+4. **the $p_c$ station or, for $I_{sp}$, the $\varepsilon$ and whether the
+   figure is delivered or theoretical** — and, always, the confidence label
+   and source.
+
+**The factor-of-two arithmetic.** Suppose the 14.2 MN is per *vehicle* with
+two boosters. Total impulse per motor is then
+$\tfrac12\times14.2\times10^{6}\times128 = 9.09\times10^{8}$ N·s, and
+
+$$m_p = \frac{I_{tot}}{I_{sp}g_0} = \frac{9.09\times10^{8}}{286\times9.80665}
+= 3.24\times10^{5}\ \mathrm{kg}$$
+
+Read as per-motor it is $6.49\times10^{5}$ kg — **exactly twice**, and a
+booster sized on the wrong one is either half a vehicle or twice a factory.
+(The database's `max`/`avg` warning bites the same way: the LVM3 S200 has
+max/avg = 1.44, so a "thrust" used as an average when it is a peak
+over-states total impulse by 44 %.)
+
+**Case-material progression.** Steel → glass filament wound → Kevlar/epoxy →
+carbon/epoxy bought roughly **six to ten points of propellant mass fraction**
+end to end, each step raising $PV/W$ and so shrinking the case mass at fixed
+burst pressure; on a kick stage that is hundreds of metres per second of
+$\Delta v$. **Segmented steel persisted anyway** because the binding
+constraints were not materials constraints: a 3.7 m, 500 t motor cannot be
+cast in one piece at an inland plant and shipped by rail, steel is
+inspectable, repairable and re-usable in a way a wound composite is not, and
+the field-joint architecture that segmentation forces was — until 1986 —
+believed to be a solved problem.
+
+> **Rubric.** 1 pt all four tags. 1 pt the arithmetic shown *with a number*,
+> plus the progression and at least one non-materials reason for segmentation.
+
+## 6.10 (2 points) — Believing the CFD or believing Bartz
+
+**Believe the CFD when:**
+1. It has passed a **grid-convergence study** with a computed observed order
+   of accuracy and a Richardson-extrapolated value, not three runs that
+   "look converged".
+2. It has been **validated on a calorimeter chamber of similar propellant,
+   $p_c$ and contour**, with the comparison published, not merely verified
+   against an analytical solution.
+3. There is a **physical reason Bartz should fail here** — a soot or film
+   layer, strong curvature, a non-attached boundary layer, a coolant-side
+   coupling — and the CFD resolves the mechanism that Bartz's flat-plate pipe
+   analogy cannot represent.
+
+**Believe Bartz when:**
+1. The CFD used a **wall function** on a mesh whose $y^+$ is outside that
+   function's validity, or an unresolved near-wall layer.
+2. Its **combustion model** is a flamelet/FGM formulation in a chamber that
+   violates the fast-chemistry, thin-flame assumption — near the injector,
+   or with a supercritical LOX jet.
+3. It reports a **single deterministic number with no uncertainty**, and the
+   35 % discrepancy is comfortably inside Bartz's own ±20–30 % *and* inside
+   the propagated uncertainty of the CFD's own boundary conditions.
+
+**On the NASA-STD-7009 ladder** the result as delivered is **verified at
+best** — the code solves the equations it claims to solve. It becomes
+**validated** only against experimental data from a relevantly similar
+configuration with a stated comparison metric and uncertainty, and
+**qualified** only when that validation covers the specific application domain
+and is accepted for the decision being made. To move it one rung, you need a
+**calorimeter-chamber hot fire** at this $p_c$ and contour with measured
+segment heat fluxes, and a documented validation comparison — not more mesh.
+
+> **Rubric.** 1 pt three-and-three, each a specific technical condition rather
+> than "it looks right". 1 pt the correct rung with the reason and the named
+> action that moves it. "Trust the CFD, it is newer" scores 0.
+
+---
+
+# Common wrong answers
+
+These are the mistakes this paper is built to catch. Each one reveals
+something.
+
+1. **Assuming the wall temperature and reporting the flux that follows
+   (1d).** $T_{wg}$ is an *output* of the resistance chain, not an input. A
+   script that reports 61 MW/m² and moves on has learned Bartz as a formula
+   rather than as one resistance in series with two others, and would sign off
+   a chamber that cannot be cooled.
+2. **Halving or doubling the couple (3b).** Computing $H/d$ instead of $2H/d$
+   halves the desaturation budget and therefore the tank. The error reveals a
+   habit of reaching for a formula before drawing the free body.
+3. **Using one $I_{sp}$ for a monopropellant (3d).** Hydrazine's pulse-mode
+   $I_{sp}$ is far below its steady value because the catalyst bed and the
+   chamber are re-heated on every pulse. Using 220 s throughout under-sizes the
+   propellant by 40 % and makes the wrong architecture look better.
+4. **Reading $\eta_{c^*}$ up as good news (4a).** The efficiency moving in the
+   *unexpected* direction is the diagnosis. A script that notes 0.977 > 0.960
+   and congratulates the injector has stopped reading the data as a system.
+5. **Ruling out coke in the channels because "coke makes things hotter"
+   (4d).** It makes the *wall* hotter and the *coolant* cooler. Getting the
+   sign of a thermal-resistance argument wrong is the commonest analysis error
+   in cooling problems.
+6. **Declaring the cracked grain certain (2e).** Temperature, burn-rate lot and
+   burning area are degenerate in $p_c$ and $t_b$, and $\int p_c\,dt$ is
+   invariant under all three. Certainty here is not confidence, it is a
+   failure to check whether the data can support the claim — which is exactly
+   the investigation pathology module 34 exists to teach.
+7. **Using $r_{t0} = D_{t0}$ in the erosion formula (2d).** A factor of two in
+   the erosion parameter. Always ask what the symbol is before using the
+   number next to it.
+8. **Scoring a hard constraint in the Pugh matrix (5b, 5c).** REQ-4 is a cap.
+   An option that violates it does not get a $-2$; it gets eliminated. Mixing
+   constraints into a weighted sum lets a high score on something else buy back
+   an infeasible design — the single most damaging systems-engineering habit
+   this course tries to break.
+9. **Quoting a company claim as fact.** Merlin's 97 bar, Raptor's 300 bar and
+   the F-1's 1,015 psia are all flagged in the engine database. Using them is
+   fine; using them without the tag is not, and it costs marks in 1(a), 1(d)
+   and 6.3.
+10. **Applying a pressure-unit conversion without raising it to $n$ (2a).**
+    $a$'s units are $r/p^n$. This error is out by $10^{6(1-n)}$ and produces a
+    motor that never lights.
+11. **Reporting a cycle penalty as a percentage of flow rather than in seconds
+    (1f).** The vehicle pays in $I_{sp}$. A trade study denominated in the
+    wrong currency cannot be compared with anything.
+12. **Answering "more data would help" (5d).** Name the measurement, say which
+    way it would push the answer, and say what threshold flips it. Anything
+    else is not a recommendation.
