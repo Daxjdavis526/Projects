@@ -1057,7 +1057,7 @@ optimistic side, as a membrane estimate should.
 
 ---
 
-## 6. Real motors — why did they design it that way?
+## 6. Real engines and motors — why did they design it that way?
 
 ### 6.1 RSRM / Space Shuttle SRB — D6AC steel, segmented (historical)
 
