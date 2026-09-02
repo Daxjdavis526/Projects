@@ -29,7 +29,10 @@ absolute flux.
 
 ARITHMETIC NOT REGISTERED (single expressions, quoted inline in the key):
 
-  12.c   ambient term pa*Ae/F_SL = 101325*16*At/(1.5580*70e5*At) = 14.9%
+  12.c   ambient term pa*Ae/F_SL = 101325*16*At/(1.5580*70e5*At) = 14.9%.
+         It is a ratio of the two registered values 12.a and 12.b
+         (1.78960/1.55800 - 1 = 0.1487), so there is no single call to
+         register; check 12.a and 12.b and the ratio follows.
   54     divergence loss lambda = (1+cos alpha)/2: 15 deg -> 0.9830 (-1.7%),
          20 deg -> 0.9698 (-3.0%), 12 deg -> 0.9891 (-1.1%)
   58     film-cooling penalty: a fuel fraction f diverted to the wall burns at

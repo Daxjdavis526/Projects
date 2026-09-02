@@ -3582,7 +3582,7 @@ attitude-control pulses.
 
 **Quantitative hook.** Nitrogen at $\varepsilon = 50$: **76.8 s at 300 K** and
 **108.7 s at 600 K** `[EX 111.a][EX 116.a]`, exactly $\sqrt{2}$. The flown example
-is CHIPS: the same refrigerant class taken from a ~43 s cold ideal to **82 s** —
+is CHIPS: the same refrigerant class taken from a ~43 s cold ideal `[EX 112.a]` to **82 s** —
 which *is* the entire argument for a resistojet, and also the boundary of what
 "cold gas" means [engine-database C.2]. NASA's small-spacecraft envelope quotes the
 class as 40–110 s and says explicitly that the top of that band is reachable only
