@@ -3529,3 +3529,452 @@ $$\frac{p_2}{p_1} = \left(\frac{A_{b,2}}{A_{b,1}}\right)^{\!1/(1-n)}$$
 - **Alias** — 20-3.14, 21-3.4 in ratio form.
 
 ---
+
+## Module 24 — Solid Rocket Nozzles
+
+### 24-3.1 — Motor mass fraction
+
+$$\lambda_m = \frac{m_p}{m_p + m_{inert}}$$
+
+- **Variables** — $m_p$ propellant mass [kg]; $m_{inert}$ everything else [kg]; $\lambda_m$ [—].
+- **Meaning** — the fraction of stage mass that is useful; the nozzle is often 10–20 % of $m_{inert}$, which is why solid nozzle mass matters so much.
+- **Assumes** — single-stage accounting with no residuals.
+- **Fails when** — comparing stages of very different $I_{sp}$; use $\Delta v$ then.
+- **Tag** [F] [J] · **Code** —
+- **Alias** — 22-3.12 writes it $\zeta$.
+
+### 24-3.2 — Adiabatic wall temperature
+
+$$T_{aw} = T_c\,\frac{1 + r\,\frac{\gamma-1}{2}M^2}{1 + \frac{\gamma-1}{2}M^2},
+\qquad r \approx \mathrm{Pr}^{1/3} \approx 0.9$$
+
+- **Variables** — $T_c$ chamber (flame) temperature [K]; $M$ local Mach number [—]; $r$ recovery factor [—]; $\gamma$ [—].
+- **Meaning** — the temperature an insulated wall reaches in a high-speed boundary layer; the driving potential for nozzle heating.
+- **Assumes** — calorically perfect gas; turbulent boundary layer.
+- **Fails when** — the boundary layer is strongly two-phase: particle impacts deposit energy this expression does not contain, and the effective $\gamma$ and Pr of the mixture are not those of the gas.
+- **Tag** [F] [A] · **Code** `adiabatic_wall_T(T0, gamma, Mach, r=0.9)`
+- **Alias** — 10-3.2, identical.
+
+### 24-3.3 — Bartz correlation (solid-motor form)
+
+$$h_g = \frac{0.026}{D_t^{0.2}}\left(\frac{\mu^{0.2}c_p}{\mathrm{Pr}^{0.6}}\right)_0
+\left(\frac{p_c}{c^*}\right)^{0.8}\left(\frac{D_t}{r_c}\right)^{0.1}
+\left(\frac{A_t}{A}\right)^{0.9}\sigma$$
+
+- **Variables** — $D_t$ throat diameter [m]; $r_c$ throat longitudinal radius of curvature [m]; $\sigma$ property-variation factor [—]; subscript 0 = chamber stagnation; $p_c$ [Pa]; $c^*$ [m/s].
+- **Meaning** — turbulent pipe-flow correlation adapted to a nozzle; the same equation as 10-3.4 with $r_c$ written for the curvature radius.
+- **Assumes** — single-phase gas; attached turbulent boundary layer; no particles.
+- **Fails when** — accuracy is ±20–30 % at the throat and worse elsewhere; **in a metallized solid it is worse still**, because the particle-laden boundary layer is not the gas it assumes.
+- **Tag** [E] · **Code** `bartz_hg(Dt, mu0, cp0, Pr0, p0, c_star_val, rc, A_ratio, sigma)`
+- **Alias** — 10-3.4; Module 10 calls the curvature radius $R_u$, Module 24 calls it $r_c$ (the `rocket.py` name).
+
+### 24-3.4 — Radiation from the particle cloud
+
+$$q_{rad} = \epsilon_r\,\sigma_{SB}\left(T_g^4 - T_w^4\right)$$
+
+- **Variables** — $\epsilon_r$ effective cloud emissivity [—]; $\sigma_{SB} = 5.670\times10^{-8}$ W/(m²·K⁴); $T_g$ radiating gas/particle temperature [K]; $T_w$ wall temperature [K].
+- **Meaning** — net radiant exchange between an optically thick alumina cloud and the wall. In a metallized motor radiation is 10–30 % of chamber heat load, far more than in a liquid engine.
+- **Assumes** — grey, optically thick, uniform-temperature cloud; grey wall.
+- **Fails when** — in the exit cone, where the cloud thins and cools and optical thickness drops below unity; at low aluminium loading. $\epsilon_r$ is commonly taken as 0.3–0.9 and **is the weakest number in the analysis**.
+- **Tag** [A] · **Code** —
+- **Alias** — 10-3.11, 11-3.3.
+
+### 24-3.5 — Particle Stokes number
+
+$$\mathrm{Stk} = \frac{\tau_v\,u}{L_c},\qquad
+\tau_v = \frac{\rho_{Al_2O_3}\,d_p^2}{18\,\mu}$$
+
+- **Variables** — Stk [—]; $\tau_v$ particle velocity relaxation time [s]; $u$ local gas speed [m/s]; $L_c$ characteristic turning length [m]; $\rho_{Al_2O_3} \approx 3000$ kg/m³ for molten alumina; $d_p$ particle diameter [m]; $\mu$ gas viscosity [Pa·s].
+- **Meaning** — ratio of particle response time to flow time. $\mathrm{Stk} \ll 1$: particles follow the gas. $\mathrm{Stk} \gtrsim 1$: they fly straight and hit the wall — the mechanism behind submerged-nozzle nose erosion and slag accumulation.
+- **Assumes** — Stokes drag, which requires particle Reynolds number $\lesssim 1$.
+- **Fails when** — at nozzle conditions $\mathrm{Re}_p$ is 5–30, so $\tau_v$ must be corrected; for agglomerates and for particles that shatter on impact.
+- **Tag** [F] [A] · **Code** —
+
+### 24-3.6 — Transient conduction into a semi-infinite liner
+
+$$\frac{T(x,t)-T_i}{T_s-T_i} = \mathrm{erfc}\!\left(\frac{x}{2\sqrt{\alpha t}}\right)$$
+
+- **Variables** — $T_i$ initial temperature [K]; $T_s$ imposed surface temperature [K]; $x$ depth [m]; $\alpha = k/(\rho c)$ thermal diffusivity [m²/s]; $t$ [s].
+- **Meaning** — how deep the heat has got; the right *sizing* tool for liner thickness.
+- **Assumes** — constant properties; a step change in surface temperature; no ablation; no internal decomposition; semi-infinite body.
+- **Fails when** — the thermal penetration depth approaches the liner thickness (use a finite-slab or numerical solution); quantitatively in a charring ablator, where pyrolysis-gas blowing and the moving surface both matter.
+- **Tag** [A] · **Code** —
+- **Alias** — 10-3.9 is the constant-flux counterpart; 23-3.3 the char-depth version.
+
+### 24-3.7 — Carbon-throat gasification reactions
+
+$$\mathrm{C(s)} + \mathrm{OH} \rightarrow \mathrm{CO} + \mathrm{H}$$
+
+- **Variables** — reaction with H₂O, CO₂ and OH as the attacking species; $\chi_{ox}$ their combined mole fraction [—].
+- **Meaning** — the throat is not "melting" or "burning" in the O₂ sense; it is being **gasified by steam and carbon dioxide**. Both principal reactions are strongly endothermic, which is a partial self-limitation — the reaction cools the surface it attacks.
+- **Assumes** — carbon is the surface material; the local gas has the chamber-equilibrium composition.
+- **Fails when** — the surface is silica or a metal; at the low-temperature limit where kinetics rather than transport control the rate.
+- **Tag** [F] · **Code** —
+
+### 24-3.8 — Throat erosion rate scaling
+
+$$\dot s \propto p_c^{0.8}\,D_t^{-0.2}\,\chi_{ox}$$
+
+- **Variables** — $\dot s$ radial recession rate [m/s]; $p_c$ [Pa]; $D_t$ throat diameter [m]; $\chi_{ox}$ combined mole fraction of oxidising species (H₂O + CO₂ + OH) [—].
+- **Meaning** — erosion is a transport-limited surface reaction, so it inherits Bartz's pressure scaling. This is why fuel-rich formulations and lower $p_c$ both reduce erosion.
+- **Assumes** — diffusion control (surface above ~2500 K); a carbon surface; no particle contribution.
+- **Fails when** — at low pressure and low temperature (kinetics-controlled, much weaker pressure dependence); in the entrance region of a submerged nozzle where impingement dominates. Reported exponents run 0.6–0.9; 0.8 is the standard engineering value.
+- **Tag** [E] [J] · **Code** —
+
+### 24-3.9 — Equilibrium chamber pressure
+
+$$p_c = \left(a\,\rho_p\,c^*\,K_n\right)^{\frac{1}{1-n}},\qquad K_n = \frac{A_b}{A_t}$$
+
+- **Variables** — as 19-3.3.
+- **Meaning** — repeated here because throat erosion enters ballistics only through $A_t$ in $K_n$.
+- **Assumes** — quasi-steady operation; $n < 1$; uniform $p_c$; no erosive burning.
+- **Fails when** — during ignition and tail-off transients; $n \to 1$.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(...)`
+
+### 24-3.10 — Master rate equation for $p_c$
+
+$$\frac{1}{p_c}\frac{dp_c}{dt} = \frac{1}{1-n}\left[\frac{1}{A_b}\frac{dA_b}{dt} - \frac{1}{A_t}\frac{dA_t}{dt}\right]$$
+
+- **Variables** — fractional rates [1/s]; $n$ [—].
+- **Meaning** — fractional chamber-pressure rate is the difference of the fractional burning-area rate and the fractional throat-area rate, amplified by $1/(1-n)$. For APCP at $n = 0.35$ the factor is 1.54; at $n = 0.6$ it is 2.5. **This is why the pressure exponent is a nozzle designer's problem, not only a chemist's.**
+- **Assumes** — 24-3.9's assumptions.
+- **Fails when** — 24-3.9 fails.
+- **Tag** [F] · **Code** —
+- **Alias** — the differential form of 20-3.14.
+
+### 24-3.11 — Pressure decay with a constant-rate eroding throat
+
+$$\frac{p_c(t)}{p_c(0)} = \left(1 + \frac{\dot s\,t}{r_{t0}}\right)^{-\frac{2}{1-n}}$$
+
+- **Variables** — $\dot s$ recession rate [m/s]; $r_{t0}$ initial throat radius [m]; $n$ [—]; $t$ [s].
+- **Meaning** — closed-form pressure decay of a neutral-grain motor with a constant-rate eroding throat; explains the characteristic regressive tail of a long-burning solid.
+- **Assumes** — neutral grain; constant $\dot s$; circular throat; quasi-steady $p_c$; constant $c^*$.
+- **Fails when** — erosion is pressure-dependent (24-3.8); the grain is not neutral (superpose the $A_b$ term of 24-3.10); the insert is breached.
+- **Tag** [F] [A] · **Code** —
+
+### 24-3.12 — Thrust with an eroding throat
+
+$$\frac{F(t)}{F(0)} = \left(1+\frac{\dot s t}{r_{t0}}\right)^{2}\left(1+\frac{\dot s t}{r_{t0}}\right)^{-\frac{2}{1-n}}
+= \left(1+\frac{\dot s t}{r_{t0}}\right)^{-\frac{2n}{1-n}}$$
+
+- **Variables** — as 24-3.11.
+- **Meaning** — the throat grows (raising thrust for a given pressure) while pressure falls, and the two partly cancel. The surviving exponent is $-2n/(1-n)$, which vanishes as $n \to 0$: **a zero-exponent propellant would hold thrust perfectly constant under throat erosion.** One more reason low-$n$ propellants are prized, quite apart from stability.
+- **Assumes** — constant $C_F$; it ignores the small $C_F$ loss from falling $\varepsilon = A_e/A_t$.
+- **Fails when** — the $C_F$ change is not negligible (high-$\varepsilon$ upper-stage motors); erosion is not constant-rate.
+- **Tag** [F] [A] · **Code** —
+
+### 24-3.13 — Volumetric loading efficiency
+
+$$\eta_V = \frac{V_p}{V_{env}}$$
+
+- **Variables** — $V_p$ propellant volume [m³]; $V_{env}$ cylindrical envelope volume the stage may occupy [m³]; $\eta_V$ [—].
+- **Meaning** — how much of the space you were given contains propellant; the metric that justifies a submerged nozzle.
+- **Assumes** — a defined envelope.
+- **Fails when** — the envelope is not the binding constraint (a strap-on limited by attach-point loads, for instance).
+- **Tag** [F] [J] · **Code** —
+
+### 24-3.14 — Conical divergence loss
+
+$$\lambda_d = \frac{1+\cos\alpha}{2}$$
+
+- **Variables** — $\alpha$ cone half-angle [rad]; $\lambda_d$ [—].
+- **Meaning** — the fraction of momentum flux that is axial. For $\alpha = 15°$, $\lambda_d = 0.983$ — the classic 1.7 % loss.
+- **Assumes** — conical nozzle with uniform-magnitude exit velocity on a spherical cap; no boundary layer; no particles.
+- **Fails when** — contoured (bell) nozzles, for which $\lambda_d$ must be computed from the actual exit-plane flow-angle distribution; it fails to capture two-phase effects entirely, and in a metallized motor the particle lag loss is larger than the divergence loss.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 09-3.6, identical.
+
+### 24-3.15 — Extendable exit cone payoff
+
+$$\Delta I_{sp} = \frac{c^*}{g_0}\left[C_F(\varepsilon_2) - C_F(\varepsilon_1)\right]$$
+
+- **Variables** — $c^*$ [m/s]; $C_F$ vacuum thrust coefficient at each area ratio [—]; $g_0 = 9.80665$ m/s²; $\Delta I_{sp}$ [s].
+- **Meaning** — the specific-impulse payoff of deploying an extension; typically 10–20 s for a doubling of $\varepsilon$ on an upper-stage motor.
+- **Assumes** — vacuum operation; ideal 1-D expansion; the same $c^*$; and that the deployed cone achieves its ideal $C_F$, which for two-phase flow it does not.
+- **Fails when** — the extension is deployed at non-negligible ambient pressure.
+- **Tag** [F] [A] · **Code** `Cf(gamma, eps, p0, 0.0)` at each $\varepsilon$
+
+### 24-3.16 — Gimbal side force and axial loss
+
+$$F_s = F\sin\delta \approx F\delta, \qquad
+\Delta F_{axial} = -F(1-\cos\delta) \approx -\tfrac{1}{2}F\delta^2$$
+
+- **Variables** — $F$ axial thrust [N]; $\delta$ deflection [rad]; $F_s$ side force [N].
+- **Meaning** — gimballing trades a *second-order* axial loss for a *first-order* side force. At $\delta = 8°$ the axial loss is 1.0 %; at 3° it is 0.14 %. **Gimballing is cheap in $I_{sp}$**, which is why it wins whenever the mechanism can be built.
+- **Assumes** — the whole exhaust momentum vector rotates rigidly with the nozzle; the flow stays attached.
+- **Fails when** — at large $\delta$, where the internal flow field is genuinely asymmetric.
+- **Tag** [F] [A] · **Code** —
+
+### 24-3.17 — Flexseal actuator torque
+
+$$M_{act} = k_s\,\delta + c\,\dot\delta + M_{offset}(p_c)$$
+
+- **Variables** — $M_{act}$ actuator torque [N·m]; $k_s$ bearing spring rate [N·m/rad]; $c$ damping [N·m·s/rad]; $\delta$ [rad]; $\dot\delta$ [rad/s]; $M_{offset}$ pressure-dependent offset torque, arising because the bearing's centre of rotation and the pressure-load centroid do not coincide [N·m].
+- **Meaning** — the actuator fights a spring, a damper, and a pressure bias; sizing it requires all three.
+- **Assumes** — small deflections; a linear elastomer.
+- **Fails when** — at low temperature, where elastomer stiffness rises sharply (the same temperature-dependent-elastomer physics that destroyed *Challenger*, in a different component); at high rates where the elastomer is viscoelastic.
+- **Tag** [F] [E] · **Code** —
+
+### 24-3.18 — Liquid injection TVC amplification
+
+$$F_s = K_A\,\dot m_i\,u_i, \qquad K_A \approx 1.5-3$$
+
+- **Variables** — $K_A$ amplification factor [—]; $\dot m_i$ injectant mass flow [kg/s]; $u_i$ injectant velocity [m/s]; $F_s$ side force [N].
+- **Meaning** — the shock-induced wall pressure field does most of the work, not the injectant's own momentum — hence $K_A > 1$.
+- **Assumes** — injection into supersonic flow at an area ratio where the shock stays inside the nozzle.
+- **Fails when** — the injection port is too far aft (the shock exits the nozzle and amplification collapses) or too far forward (interaction with the throat). $K_A$ is determined by test; published values vary widely with injectant and geometry.
+- **Tag** [E] · **Code** —
+
+---
+
+## Module 25 — Solid Rocket Manufacturing
+
+### 25-3.1 — Batches per motor
+
+$$N_b = \left\lceil \frac{M_p}{m_b} \right\rceil$$
+
+- **Variables** — $N_b$ batches per motor [—]; $M_p$ propellant mass per motor [kg]; $m_b$ mixer working batch mass [kg].
+- **Meaning** — the number of independent mixes that must be blended into one grain; each is a separate source of ballistic variation.
+- **Assumes** — each batch is fully discharged; no batch shared between motors.
+- **Fails when** — the plant deliberately splits a batch across articles (tactical rate production does exactly this, and the lot structure is then inverted — one mix, many motors).
+- **Tag** [F] [J] · **Code** —
+
+### 25-3.2 — Mixers required by pot life
+
+$$N_{\rm mixers} \ge \left\lceil \frac{N_b}{\left\lfloor t_{\rm pot}/t_{\rm mix} \right\rfloor} \right\rceil$$
+
+- **Variables** — $N_{\rm mixers}$ mixers running in parallel [—]; $N_b$ [—]; $t_{\rm pot}$ propellant working life [s]; $t_{\rm mix}$ mix cycle time per batch per mixer [s].
+- **Meaning** — the cast window is bounded by the working life of the *first* batch, so the plant must produce all $N_b$ batches within $t_{\rm pot}$. This is why a large-motor plant is a batch of mixers, not one big one.
+- **Assumes** — identical mixers, staggered starts, and a casting fixture that can accept batches as fast as they arrive.
+- **Fails when** — the cast rate rather than the mix rate is limiting (very large motors); the working life is temperature-dependent enough that a hot day changes $N_{\rm mixers}$.
+- **Tag** [F] [J] · **Code** —
+
+### 25-3.3 — Cure shrinkage plus thermal strain
+
+$$\varepsilon_f = \alpha\,\Delta T + \tfrac{1}{3}\,\varepsilon_{\rm chem,vol}$$
+
+- **Variables** — $\varepsilon_f$ imposed isotropic free (stress-free) linear strain [—]; $\alpha$ propellant linear CTE [1/K]; $\Delta T = T_{sf} - T_{\rm use}$ [K]; $\varepsilon_{\rm chem,vol}$ volumetric cure shrinkage [—]; with $\varepsilon_\theta$ bore hoop strain [—], $b$ grain outer radius [m], $a_i$ bore radius [m].
+- **Meaning** — all the shrinkage a case-bonded grain wants to do shows up as strain at the bore, amplified by roughly the square of the web-to-bore ratio. Cure shrinkage adds directly to thermal shrinkage and is often the larger term.
+- **Assumes** — rigid case; incompressible propellant; long cylinder (plane strain, no end effects); linear elasticity; uniform temperature.
+- **Fails when** — at the grain ends and at any slot or fin (finite elements and a stress-concentration factor needed); for a compliant composite case (which relieves some strain); over long hold times where viscoelastic stress relaxes but strain does not; for thin-web grains where $b/a_i \to 1$ and the formula correctly but uselessly returns almost zero.
+- **Tag** [A] · **Code** —
+- **Alias** — 23-3.5, 27-3.2 are the same physics with different groupings.
+
+### 25-3.4 — Radiographic contrast
+
+$$\frac{\Delta I}{I} \simeq \mu\,\Delta x \qquad (\mu\,\Delta x \ll 1)$$
+
+- **Variables** — $I$, $I_0$ transmitted and incident intensity [W/m² or counts]; $\mu$ linear attenuation coefficient [1/m]; $\mu/\rho$ mass attenuation coefficient [m²/kg]; $\rho$ [kg/m³]; $x$ path length through material [m]; $\Delta x$ path length of material replaced by void [m].
+- **Meaning** — radiographic contrast is proportional to the *missing material along the beam*, not to the flaw's volume. A planar unbond parallel to the beam is invisible; the same unbond edge-on is obvious. This is why radiography and ultrasonics are complementary.
+- **Assumes** — a narrow monoenergetic beam; no scatter; a linear detector response.
+- **Fails when** — thick sections, where Compton scatter build-up fills in the shadow and reduces real contrast well below $\mu\Delta x$; polyenergetic sources, where beam hardening changes $\mu$ along the path.
+- **Tag** [F] [A] · **Code** —
+
+### 25-3.5 — Arrhenius aging acceleration
+
+$$\frac{t_2}{t_1} = \exp\!\left[\frac{E_a}{R_u}\left(\frac{1}{T_2} - \frac{1}{T_1}\right)\right]$$
+
+- **Variables** — $t_1, t_2$ times to reach the same extent of degradation at $T_1, T_2$ [s]; $E_a$ apparent activation energy [J/mol]; $R_u = 8.31446$ J/(mol·K) — note the **per-mole** value here; $T$ [K].
+- **Meaning** — the acceleration factor between an oven-aged coupon and a stored motor; the whole basis of accelerated-aging surveillance.
+- **Assumes** — a *single* rate-limiting mechanism with Arrhenius temperature dependence, and no change of mechanism over the range.
+- **Fails when** — aging is controlled by more than one mechanism with different $E_a$, which for a composite propellant is essentially always. Raising the temperature reweights the mechanisms, **so the oven ages the coupon by a route the magazine never takes.** This is the main event, not a footnote.
+- **Tag** [E] [A] · **Code** —
+- **Alias** — 27-3.3, identical with $R_u$ in J/(kmol·K) and $E_a$ in J/kmol. ⚠ Check which molar basis a quoted $E_a$ uses.
+
+### 25-3.6 — Production line rate
+
+$$\dot N = \eta_a \cdot \min_s \left(\frac{N_s}{t_s}\right)$$
+
+- **Variables** — $\dot N$ motors per unit time [1/s or 1/month]; $\eta_a$ line availability [—]; $N_s$ parallel units at station $s$ [—]; $t_s$ occupancy of one unit at station $s$ per motor [s].
+- **Meaning** — a serial line runs at the rate of its tightest station; adding capacity anywhere else changes nothing. This is why solid-motor lead times are 12–36 months and cannot be shortened by money alone.
+- **Assumes** — stations independent; buffers between them; one motor occupies one unit.
+- **Fails when** — stations are *coupled*: the mix–cast pair is coupled by pot life (25-3.2), so mixers and the casting pit cannot be sized independently; and when the product mix is not uniform.
+- **Tag** [F] [J] · **Code** —
+
+### 25-3.7 — Equilibrium pressure (production context)
+
+$$p_c = \left(a\,\rho_p\,c^*\,K_n\right)^{\frac{1}{1-n}}, \qquad K_n = \frac{A_b}{A_t}$$
+
+- **Variables** — as 19-3.3.
+- **Meaning** — restated because $a$, $\rho_p$ and $c^*$ are all *manufactured* quantities with lot-to-lot scatter.
+- **Assumes** — quasi-steady operation; uniform pressure; no erosive burning; $n < 1$; constant $c^*$ and $\rho_p$.
+- **Fails when** — during ignition and tail-off; with significant throat erosion (which lowers $K_n$ through $A_t$ during the burn); $n \to 1$.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(...)`
+
+### 25-3.8 — Manufacturing variation amplification
+
+$$\frac{\delta p_c}{p_c} = \frac{1}{1-n}\left(\frac{\delta a}{a} + \frac{\delta \rho_p}{\rho_p} + \frac{\delta c^*}{c^*} + \frac{\delta K_n}{K_n}\right)$$
+
+- **Variables** — small fractional perturbations [—]; $n$ [—].
+- **Meaning** — **every manufacturing variation is amplified by $1/(1-n)$ when it reaches chamber pressure.** For $n = 0.35$ that factor is 1.54; at $n = 0.6$ it is 2.5. This is the quantitative case for process control.
+- **Assumes** — small, independent perturbations.
+- **Fails when** — excursions are large (this is a linearisation of a power law); variations are correlated — a mix off in $a$ is often off in $\rho_p$ too, and the errors then do not combine in quadrature.
+- **Tag** [F] · **Code** `rss(*terms)` for the independent case
+- **Alias** — 20-3.14, 21-3.4.
+
+### 25-3.9 — Soak-temperature effect on burn rate and pressure
+
+$$\frac{r(T_i)}{r(T_{i,\rm ref})} = \exp\!\left[\sigma_p\,(T_i - T_{i,\rm ref})\right],
+\qquad \pi_K = \frac{\sigma_p}{1-n}$$
+
+- **Variables** — $T_i$ initial bulk propellant temperature [K]; $\sigma_p$ [1/K]; $\pi_K$ [1/K]; $n$ [—].
+- **Meaning** — the propellant's bulk temperature before ignition shifts the whole burn-rate curve, and the shift is amplified into pressure.
+- **Assumes** — $\sigma_p$ constant over the range; the grain thermally soaked to uniform $T_i$.
+- **Fails when** — the grain has a thermal gradient (a motor pulled from cold storage onto a hot pad is not at one temperature); outside the calibrated range.
+- **Tag** [E] [J] · **Code** `temperature_sensitivity_pressure(sigma_p, dT)`, `pressure_sensitivity_pi_K(sigma_p, n)`
+- **Alias** — 20-3.9, 20-3.10, 27-3.5, 27-3.6.
+
+---
+
+## Module 26 — Historical Large Solid Motors
+
+### 26-3.1 — Tsiolkovsky rocket equation (stage form)
+
+$$\Delta v = I_{sp}\,g_0 \ln\!\frac{m_p+m_i+m_u}{m_i+m_u}$$
+
+- **Variables** — $I_{sp}$ [s]; $g_0 = 9.80665$ m/s²; $m_p$ propellant mass [kg]; $m_i$ motor inert mass [kg]; $m_u$ everything above the stage [kg].
+- **Meaning** — the ideal velocity increment from burning $m_p$; the only fair basis for comparing motor architectures.
+- **Assumes** — constant $I_{sp}$; no gravity or drag losses; all of $m_i$ carried to burnout.
+- **Fails when** — the stage is a strap-on jettisoned before burnout; $I_{sp}$ varies strongly through the trajectory — for a first-stage solid it runs from SL to near-vacuum values, so use a flight average and label it an approximation.
+- **Tag** [F], [A] with a flight-average $I_{sp}$ · **Code** `tsiolkovsky_dv(isp, m0, mf)`
+- **Alias** — 05-3.1 solved for $m_p$ instead.
+
+### 26-3.2 — $\Delta v$ in terms of mass fraction
+
+$$\Delta v = I_{sp}\,g_0 \ln\!\frac{m_p/\zeta + m_u}{m_p(1/\zeta - 1) + m_u}$$
+
+- **Variables** — as 26-3.1 plus $\zeta = m_p/(m_p+m_i)$ propellant mass fraction [—].
+- **Meaning** — $\Delta v$ in terms of the two numbers a case designer actually controls: $m_p$ and $\zeta$. Segmentation costs perhaps 1–2 points of $\zeta$; this converts that into velocity.
+- **Assumes** — everything in 26-3.1.
+- **Fails when** — $m_i$ contains items that are not case — TVC injectant tanks, recovery parachutes, separation motors — which is exactly the PSLV S139 and Shuttle RSRM situation. **$\zeta$ is a *stage* property, not a case property.**
+- **Tag** [F] · **Code** `tsiolkovsky_dv(isp, m0, mf)`
+
+### 26-3.3 — Total impulse
+
+$$I_t = m_p I_{sp} g_0$$
+
+- **Variables** — $I_t$ total impulse [N·s]; $m_p$ propellant mass [kg]; $I_{sp}$ [s]; $g_0$ [m/s²].
+- **Meaning** — specific impulse *is* impulse per unit weight of propellant, so this is a definition, not a model. It is the standard way to reconstruct an average thrust from published motor data ($\bar F = I_t/t_b$).
+- **Assumes** — all propellant is consumed; $I_{sp}$ is the delivered, mission-average value on the stated pressure basis.
+- **Fails when** — there is significant slag or unburned sliver residual; the quoted $I_{sp}$ is theoretical rather than delivered.
+- **Tag** [F] · **Code** —
+
+---
+
+## Module 27 — Modern Defense Propulsion Engineering
+
+### 27-3.1 — Equilibrium chamber pressure
+
+$$p_c = \left( a\,\rho_p\, c^*\, K_n \right)^{\frac{1}{1-n}} , \qquad K_n = \frac{A_b}{A_t}$$
+
+- **Variables** — as 19-3.3.
+- **Meaning** — mass generated at the burning surface equals mass discharged through the choked throat. Tactical and strategic motors obey exactly the same equation as boosters; requirements, not physics, separate them.
+- **Assumes** — quasi-steady operation (chamber filling time $\ll$ burn time); spatially uniform $p_c$; no erosive burning; $c^*$ independent of pressure; $n < 1$.
+- **Fails when** — in the ignition transient or tail-off; the port Mach number drives erosive burning; $n \to 1$, at which point the equilibrium is unstable.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(...)`
+
+### 27-3.2 — Bore strain from CTE mismatch (scaling form)
+
+$$\varepsilon_{\theta,\text{bore}} \approx (\alpha_p - \alpha_c)\,\Delta T \cdot f\!\left(\frac{b}{a}, \nu_p\right)$$
+
+- **Variables** — $\alpha_p$, $\alpha_c$ propellant and case CTE [1/K]; $\Delta T$ excursion from the stress-free (cure) temperature [K]; $b/a$ outer/inner radius ratio [—]; $\nu_p$ propellant Poisson ratio [—], ≈ 0.4995 (nearly incompressible); $f$ geometry factor of order 1–3 that grows as the web thickens and the bore shrinks.
+- **Meaning** — cooling a case-bonded grain puts the bore in tension because the propellant wants to shrink and the case will not let it. The determinant of the low-temperature end of the storage envelope.
+- **Assumes** — linear elasticity; plane strain; perfect bond; no stress relaxation.
+- **Fails when** — viscoelastic relaxation is significant (i.e. always, for slow cooldowns); near $T_g$, where the modulus changes by orders of magnitude; at any geometric discontinuity — slots, fins, star points — where finite elements are needed. **Use for scaling arguments only.**
+- **Tag** [A] · **Code** —
+- **Alias** — 23-3.5, 25-3.3.
+
+### 27-3.3 — Accelerated aging transfer
+
+$$t_{\text{field}} = t_{\text{oven}}\,\exp\!\left[\frac{E_a}{R_u}\left(\frac{1}{T_{\text{field}}}-\frac{1}{T_{\text{oven}}}\right)\right]$$
+
+- **Variables** — $t$ [s]; $E_a$ apparent activation energy of the property change being tracked [J/kmol]; $R_u = 8314.46$ J/(kmol·K); $T$ [K].
+- **Meaning** — one dominant thermally activated process controls the property, so time and temperature trade logarithmically.
+- **Assumes** — a single mechanism with temperature-independent $E_a$; no change of mechanism over the interval; no diffusion limitation.
+- **Fails when** — the oven temperature crosses a phase or glass transition; migration (a diffusion process with different temperature dependence) rather than crosslinking controls; the acceleration factor is large enough that a slow field mechanism never expresses itself in the oven. **Treat a large extrapolation factor as a hypothesis to be checked against real-time data, never as a substitute for it.**
+- **Tag** [E] [A] [J] · **Code** —
+- **Alias** — 25-3.5. ⚠ Note the molar basis: J/kmol with $R_u = 8314.46$ here, J/mol with $R_u = 8.31446$ in Module 25.
+
+### 27-3.4 — Chamber fill time
+
+$$t_{\text{fill}} \sim \frac{V_c}{ c^*\!A_t } \ln\!\frac{p_{c}}{p_{0}}$$
+
+- **Variables** — $V_c$ free chamber volume at ignition [m³]; $A_t$ [m²]; $c^*$ [m/s]; $p_0$ ambient [Pa]; $p_c$ target [Pa].
+- **Meaning** — the chamber is a plenum filled by the burning surface and drained by a choked throat; the time constant is the ratio of volume to the throat's volumetric discharge capability. It sets the minimum achievable ignition-to-full-thrust time, which for a tactical missile is a top-level requirement.
+- **Assumes** — the whole grain surface ignites promptly; constant $c^*$; no heat loss; ideal gas.
+- **Fails when** — flame spreading over the grain is slow compared with filling (long thin ports, low-flux igniters, cold grain) — precisely the tactical cold-start case.
+- **Tag** [A] · **Code** —
+- **Alias** — the same group $V_c/(c^*A_t) = L^*/c^*$ appears as $\tau_{fill}$ in 20-3.8 and $\tau_c$ in 15-3.4.
+
+### 27-3.5 — Burn rate with soak temperature
+
+$$r(T_i,p_c) = a_0\,e^{\sigma_p (T_i-T_{\text{ref}})}\;p_c^{\,n}$$
+
+- **Variables** — $\sigma_p$ [1/K]; $T_i$ bulk propellant soak temperature [K]; $T_{\text{ref}}$ the reference temperature at which $a_0$ was measured [K]; $a_0$ [m·s⁻¹·Pa⁻ⁿ]; $n$ [—].
+- **Meaning** — a hotter grain starts closer to its surface reaction temperature, so less of the flame's heat feedback is spent warming the solid and the surface regresses faster.
+- **Assumes** — $\sigma_p$ constant over the range (it is not exactly — it usually grows slightly at cold); uniform bulk temperature; no change of combustion mechanism.
+- **Fails when** — the grain is not thermally soaked (a large motor takes days to equilibrate; a partial soak gives a *radially varying* burn rate); below $T_g$, where the propellant's physical state has changed.
+- **Tag** [E] · **Code** `vieille_burn_rate(a, p, n)` with $a = a_0 e^{\sigma_p\Delta T}$
+
+### 27-3.6 — Hot-day / cold-day pressure ratio
+
+$$\pi_K \equiv \left(\frac{\partial \ln p_c}{\partial T_i}\right)_{K_n} = \frac{\sigma_p}{1-n}, \qquad \frac{p_{c,2}}{p_{c,1}} = \exp\!\left[\frac{\sigma_p\,\Delta T}{1-n}\right]$$
+
+- **Variables** — $\pi_K$ [1/K]; $\sigma_p$ [1/K]; $n$ [—]; $\Delta T$ [K].
+- **Meaning** — the burn-rate shift feeds back through the pressure–burn-rate coupling and is *amplified* by $1/(1-n)$. Over the military −54 °C to +71 °C envelope this is a factor of 1.5–2 in chamber pressure, and it sizes the case.
+- **Assumes** — 27-3.1's assumptions plus constant $A_t$ (no significant throat erosion) and constant $c^*$.
+- **Fails when** — $n$ is large (the amplification becomes violent); the nozzle erodes appreciably during the burn, lowering effective $K_n$ and partially offsetting the hot-day rise.
+- **Tag** [F] given [E] inputs · **Code** `pressure_sensitivity_pi_K(sigma_p, n)`, `temperature_sensitivity_pressure(sigma_p, dT)`
+
+### 27-3.7 — Zero-failure reliability demonstration
+
+$$R_{\text{LB}} = (1-C)^{1/N}, \qquad N = \frac{\ln(1-C)}{\ln R_{\text{LB}}}$$
+
+- **Variables** — $N$ number of independent successful trials [—]; $C$ confidence level [—]; $R_{\text{LB}}$ demonstrated lower bound on reliability [—].
+- **Meaning** — with zero failures the binomial likelihood is $R^N$, and the $C$-level bound is the $R$ that would have produced this run with probability $1-C$. Demonstrating $R = 0.999$ at 90 % confidence needs 2302 successes — which is why nobody demonstrates it that way.
+- **Assumes** — independent, identically distributed trials from the population you are making claims about; no failures at all; the tested article representative of the fielded one.
+- **Fails when** — motors are *not* iid, the usual reality: a lot shares a propellant mix, a liner batch and an operator. A correlated failure mechanism inside one lot makes $N$ an overstatement of the true information content.
+- **Tag** [F] statistics, [J] on the independence caveat · **Code** —
+
+### 27-3.8 — Boost–sustain thrust ratio
+
+$$\frac{F_{b}}{F_{s}} = \frac{p_{c,b}}{p_{c,s}} = \left[\frac{a_b A_{b,b}}{a_s A_{b,s}}\right]^{\frac{1}{1-n}}$$
+
+- **Variables** — subscripts $b$ boost, $s$ sustain; $a$ burn-rate coefficients of the two propellants (equal if one propellant is used) [m·s⁻¹·Pa⁻ⁿ]; $A_b$ burning areas [m²]; $n$ [—].
+- **Meaning** — with a shared choked throat, thrust ratio is pressure ratio, and pressure ratio is the (area × rate) ratio raised to $1/(1-n)$. Boost/sustain ratios of 5–10 come from area ratios of only 3–5.
+- **Assumes** — same $c^*$, $\rho_p$ and $C_F$ for both phases; negligible throat erosion between phases; quasi-steady operation in each.
+- **Fails when** — the two propellants have materially different $c^*$ (carry it explicitly then); the sustain pressure falls below the propellant's stable-combustion limit, at which point 27-3.1 stops describing anything real.
+- **Tag** [F] given [E] inputs · **Code** —
+
+### 27-3.9 — Throttling a solid by throat area
+
+$$p_c \propto A_t^{-\frac{1}{1-n}}, \qquad F = C_F\,p_c\,A_t \propto A_t^{-\frac{n}{1-n}}$$
+
+- **Variables** — $A_t$ instantaneous throat area [m²]; $n$ [—].
+- **Meaning** — closing the throat raises chamber pressure and, provided $n > 0$, raises thrust — but thrust sensitivity is governed by $n/(1-n)$, which is *small* for the low-exponent propellants everybody uses for stability. At $n = 0.35$ a two-to-one throat closure changes thrust by only $2^{0.538} = 1.45$ while chamber pressure changes by $2^{1.538} = 2.9$. **You pay a lot of pressure for a little thrust modulation.**
+- **Assumes** — quasi-steady operation (the throat moves slowly compared with chamber fill time); no change in $c^*$ or $C_F$ with pressure; no erosive burning.
+- **Fails when** — actuation is fast enough to excite the chamber's $L^*$ dynamics; the pressure excursion takes the motor outside its stable combustion band.
+- **Tag** [F] given [E] inputs · **Code** —
+
+### 27-3.10 — Hybrid regression rate
+
+$$\dot r = a\,G_{ox}^{\,n}$$
+
+- **Variables** — $\dot r$ regression rate [m/s]; $G_{ox} = \dot m_{ox}/A_{port}$ oxidiser mass flux [kg/(m²·s)]; $a$ [SI units that make the law dimensional]; $n \approx 0.5$–0.8 for classical polymeric fuels [—]. Often carries a weak $x^{-m}$ axial term.
+- **Meaning** — regression is set by convective heat transfer through a turbulent boundary layer, so it follows the **mass flux, not the chamber pressure** — the defining difference between a hybrid and a solid.
+- **Assumes** — diffusion-limited turbulent combustion; no radiation-dominated regime; no melting/entrainment mechanism; fully developed flow.
+- **Fails when** — the fuel is a *liquefying* fuel such as paraffin, where a melt layer is entrained as droplets and regression rates several times the classical value are observed; at very low flux, where radiation and chemical kinetics take over; near the port entrance, where the boundary layer is still developing.
+- **Tag** [E] · **Code** —
+- **Alias** — ⚠ $a$ and $n$ here are *not* the Vieille constants of 20-3.4; the independent variable is flux, not pressure.
+
+### 27-3.11 — Hybrid fuel flow and the $n = 0.5$ crossover
+
+$$\dot m_f = \rho_f\,\pi D L\,\dot r = \rho_f \pi D L\, a \left(\frac{4\dot m_{ox}}{\pi D^2}\right)^{n} \propto D^{\,1-2n}$$
+
+- **Variables** — $\rho_f$ fuel density [kg/m³]; $D$ port diameter [m]; $L$ port length [m]; $\dot m_{ox}$ [kg/s]; $n$ [—].
+- **Meaning** — as the port opens, its area grows faster than its perimeter, so flux and regression rate fall; **whether the fuel flow rises or falls depends entirely on whether $n$ is below or above 0.5.** This is why hybrid O/F shift is a first-order design problem.
+- **Assumes** — single circular port; uniform regression; $G$ evaluated on oxidiser only; constant $\dot m_{ox}$.
+- **Fails when** — fuel mass flow is a significant part of the total flux (use $G_{tot}$, which flattens the shift); the oxidiser feed is blowdown rather than regulated; multi-port or non-circular geometry.
+- **Tag** [F] given 27-3.10 · **Code** —
+
+---

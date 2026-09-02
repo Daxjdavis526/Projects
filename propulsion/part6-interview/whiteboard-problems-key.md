@@ -290,7 +290,8 @@ statements, several of them Musk posts, and **there is no independent
 verification of Raptor chamber pressure, $I_{sp}$, dry mass or T/W at all**
 [engine-database §A.3.5]. The only independent corroboration is of thrust, and
 only indirectly, through FAA licensing and environmental documents and
-third-party telemetry analysis [FAA-SS].
+third-party telemetry analysis (FAA licensing and environmental record, tagged
+`FAA-SS` in engine-database Part E).
 
 ### What a mediocre answer looks like
 
@@ -599,7 +600,8 @@ for. You do not get delivered $I_{sp}$, and you should not claim it.
 Vinci: $\varepsilon = 240$, deployable extension, 60 bar, 180 kN, 457.2 s
 [engine-database §A.4]. RL10B-2: $\varepsilon = 285$ deployed / 77 retracted,
 with a 2.5 m carbon-carbon extension that translates into place after stage
-separation [§A.2.7], [RL10B2-CC]. Both are precisely our problem — a very large
+separation [§A.2.7], and the carbon-carbon nozzle-extension test literature
+tagged `RL10B2-CC` in engine-database Part E. Both are precisely our problem — a very large
 area ratio that cannot exist at sea level — and both solve it with a nozzle
 that is physically shorter on the ground. Meanwhile the RS-25 has
 $\varepsilon = 69$ **because** it starts at sea level [§A.2.3].
@@ -680,7 +682,8 @@ in the critical path of the mission.
 RL10B-2 bought its $\varepsilon = 285$ with a 2.5 m translating carbon-carbon
 extension (NOVOLTEX®/SEPCARB® 3D C–C), worth **~30 s** of $I_{sp}$, reaching
 **465.5 s — the highest $I_{sp}$ of any flown chemical rocket engine**
-[engine-database §A.2], [RL10B2-CC]. Vinci does the same at $\varepsilon = 240$
+[engine-database §A.2] (extension testing tagged `RL10B2-CC` in Part E).
+Vinci does the same at $\varepsilon = 240$
 for 457.2 s, and its nozzle is **~70 % of engine mass** (~550 kg total, 160 kg
 excluding the nozzle) [§A.4]. That 70 % figure is the single best answer to
 "what does it cost."
@@ -1192,12 +1195,14 @@ you do not need 200 bar to make 100 kN.
 ### Sanity check
 
 **RL10C-1: 101.8 kN vacuum, 449.7 s, closed expander** [engine-database §A.2],
-[L3H]. That is the requirement, at the requirement's thrust, with the
+(L3Harris datasheet, tagged `L3H` in engine-database Part E). That is the
+requirement, at the requirement's thrust, with the
 requirement's $I_{sp}$, flying since 2014. **Vinci** answers the restart half
 directly: 180 kN, 457.2 s, $\varepsilon$ 240, **up to 900 s burn and up to 3
 restarts**, with an **auxiliary propulsion unit using a 3D-printed gas
 generator** to heat propellant, repressurise the tanks and provide settling and
-orbital-adjust thrust [§A.4], [EUCASS-2019-481]. The APU is arguably more novel
+orbital-adjust thrust [§A.4] (EUCASS 2019-481, tagged in engine-database
+Part E). The APU is arguably more novel
 than the engine, and it exists precisely because of the six-hours-and-three-
 restarts problem.
 
@@ -1391,7 +1396,8 @@ NARloy-Z on that axis while staying printable.
 ### Sanity check
 
 RS-25: **NARloy-Z liner, 390 milled channels, electroformed nickel closeout, at
-206 bar with hydrogen coolant** [engine-database §A.2], [Biggs89], [L3H].
+206 bar with hydrogen coolant** [engine-database §A.2, L3Harris datasheet],
+[Biggs89].
 Modern NASA additive-manufacturing chambers use GRCop-42/84 [Gradl18], [RAMPT].
 Raptor is described only as "regen, methane-cooled milled channels" — **the
 liner material is not published** [§A.3]; do not claim it uses GRCop.
@@ -1800,7 +1806,8 @@ really a constant — the database labels those $\gamma$ values confidence **C**
 in 2018:** R-236fa stored as a self-pressurising saturated liquid,
 **8 thrusters, 755 N·s total impulse, 3,490 g wet, >40 m/s of TCM $\Delta v$**,
 single all-welded aluminium module, **no regulator and no high-pressure COPV**
-[engine-database §C.2], [MarCO], [VACCO]. Confidence **A**.
+[engine-database §C.2], [MarCO] (VACCO data sheets are tagged `VACCO` in
+engine-database Part E). Confidence **A**.
 
 Our requirement is $12\ \mathrm{kg} \times 25\ \mathrm{m/s} \approx 300$ N·s —
 comfortably inside MarCO's envelope, on a spacecraft of the same form factor,
@@ -1894,7 +1901,8 @@ impulse bit.
 VACCO catalogue CubeSat modules: **Standard MiPS, 44 N·s in up to 880,000
 firings** → mean bit $5.0\times10^{-5}$ N·s; **Micro MiPS, 93 N·s in up to
 1,860,000 firings** → the same $5.0\times10^{-5}$ N·s
-[engine-database §C.2], [VACCO]. GomSpace NanoProp CGP3: **1 mN thrusters with
+[engine-database §C.2, VACCO data sheets]. GomSpace NanoProp CGP3: **1 mN
+thrusters with
 5 μN resolution**, flown on TW-1 [§C.2].
 
 So real CubeSat cold-gas hardware delivers bits **an order of magnitude
@@ -1905,7 +1913,8 @@ the answer to the second half of the question.
 **Caveats:** the firing counts are catalogue figures (confidence **B**), the
 mean bit is derived by division, not published, and the general cold-gas
 envelope quoted by NASA is **10 μN – 3.6 N thrust, 40–110 s $I_{sp}$**, with the
-top of that $I_{sp}$ band reachable only with warm gas [§C.2], [NASA-SOA].
+top of that $I_{sp}$ band reachable only with warm gas [§C.2, NASA *State of
+the Art of Small Spacecraft Technology*, ch. 4].
 
 ### What a mediocre answer looks like
 
@@ -2260,7 +2269,8 @@ impeller is no longer viable.
 The RS-25 carries a **low-pressure oxidiser turbopump at ~5,150 rpm whose sole
 purpose is to raise the inlet pressure of the high-pressure oxidiser turbopump
 at ~28,120 rpm**, and a low-pressure fuel turbopump at ~16,185 rpm ahead of the
-35,360 rpm HPFTP [engine-database §A.2], [L3H]. That two-stage architecture is
+35,360 rpm HPFTP [engine-database §A.2, L3Harris datasheet]. That two-stage
+architecture is
 the field's standard answer to exactly this problem. The **NK-33 requires
 subcooled LOX for bearing cooling**, which constrains ground operations
 [§A.6] — a related reminder that propellant temperature is a systems
@@ -2672,7 +2682,9 @@ mean.**
 | 77.5:1 | NASA/Rocketdyne SSME training material; widely repeated in the nozzle-flow literature |
 | 78:1 | Wikipedia body text |
 
-[engine-database §A.2.3], [L3H], [NASA-SSME-OR]
+[engine-database §A.2.3; the L3Harris datasheet and the Rocketdyne *SSME
+Orientation* training document are tagged `L3H` and `NASA-SSME-OR` in
+engine-database Part E]
 
 69:1 is the **geometric** exit-area-over-throat-area of the bell as built. The
 ~77.5 figures come from a different reference — most plausibly a different
@@ -2863,7 +2875,8 @@ for the principle that **$I_{sp}$ is a property of the motor *and* its nozzle,
 not of the propellant** [§B.4.1].
 
 **But do not conclude that all disagreements are like this.** The same motor
-has an inert mass quoted as **28 kg** `[JM-LV]` and **126 kg** `[EA]` — and
+has an inert mass quoted as **28 kg** (McDowell's catalogue) and **126 kg**
+(Encyclopedia Astronautica) — and
 those cannot both be right. The arithmetic settles it: $2{,}137 - 2{,}009 =
 \mathbf{128}$ kg, so **the 28 kg figure is almost certainly a dropped digit**,
 and the correct value is ≈128 kg with a mass fraction of ≈0.94 [§B.4.1].
@@ -2954,13 +2967,15 @@ steady-state hours. For a reusable engine that is the design driver.
    [§A.3].
 3. **They have completely different evidentiary status.** The RS-25 figure is
    published by the manufacturer and NASA and agreed exactly between
-   independent sources [L3H]. The RD-180 figure is high confidence.
+   independent sources (L3Harris datasheet). The RD-180 figure is high
+   confidence.
    **Raptor's chamber pressure is a SpaceX claim with no independent
    verification of any kind.** The database is blunt: "There is no independent
    verification of Raptor chamber pressure, $I_{sp}$, dry mass or T/W at all,"
    and the only corroboration of *anything* about Raptor is thrust, indirectly,
    via FAA licensing and environmental documents and third-party analysis of
-   flight telemetry and acoustics [§A.3.5], [FAA-SS]. Several Raptor figures
+   flight telemetry and acoustics [§A.3.5, FAA licensing and environmental
+   record]. Several Raptor figures
    trace to executive posts on Twitter/X.
 4. **Chamber pressure is not a figure of merit.** It is an *input* to a design,
    not an output you maximise. Higher $p_c$ buys a smaller, lighter engine for

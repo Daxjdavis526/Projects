@@ -606,3 +606,486 @@ correlation with a ±25 % band.
     it is where the high-$p_c$ candidates quietly win. A report that mentions it
     in one sentence at the end has left marks on the table and, more
     importantly, has missed a genuine argument for its own recommendation.
+
+---
+---
+
+# Mission B — reference solution
+
+## B.1 The sizing chain
+
+### B.1.1 The Δv budget and the mass chain
+
+Total Δv from the requirements: 100 (TCM/trim) + 1,050 (MOI) + 90 (deorbit) +
+620 (descent, hazard avoidance, divert) = **1,860 m/s**, plus the 5 %
+performance reserve of B1.6 applied to the propellant, not to the Δv.
+
+The chain has **three legs and one jettison**, and getting the jettison on the
+wrong side of a leg is the most expensive arithmetic error available in this
+mission:
+
+```
+                                     arrival wet mass
+   leg 1  TCM + MOI + trim   1,150 m/s   (aeroshell attached)
+                                     ↓
+   leg 2  deorbit               90 m/s   (aeroshell attached)
+                                     ↓
+          JETTISON aeroshell + backshell  −550 kg   (B1.17)
+                                     ↓
+   leg 3  powered descent      620 m/s   (aeroshell gone)
+                                     ↓
+                             1,200 kg landed (B1.1)
+```
+
+Work backwards from 1,200 kg with
+`propellant_for_dv(Isp, m_final, dv)` on each leg. The 550 kg of aeroshell is
+carried by legs 1 and 2 and not by leg 3, so it is *added* to the leg-3 start
+mass before leg 2 is sized. Students who subtract it at the wrong point, or who
+apply the 620 m/s to a stack that still includes it, are typically 60–90 kg out.
+
+### B.1.2 Delivered performance of the candidates
+
+MON-3/MMH at $r = 1.65$, $p_c = 10$ bar: $\mathcal{M} = 21.2$, $T_0 = 3120$ K,
+$\gamma = 1.24$, so $R = 392.19$ J/(kg·K) and
+
+$$c^*_{ideal} = \frac{\sqrt{392.19 \times 3120}}{\Gamma(1.24)} = 1685.8\ \mathrm{m/s}, \qquad c^* = 0.975 \times 1685.8 = 1643.6\ \mathrm{m/s}$$
+
+| $\varepsilon$ | $C_{F,vac}$ | $I_{sp,vac}$ (s) with $\eta_n = 0.98$ |
+|---|---|---|
+| 28.9 | 1.8199 | 298.9 |
+| 60 | 1.8712 | 307.4 |
+| 100 | 1.9012 | 312.3 |
+| 120 | 1.9110 | 313.9 |
+| 150 | 1.9220 | 315.7 |
+| 200 | 1.9355 | 317.9 |
+
+Sanity check: the LMDE delivered 311 s at $\varepsilon = 47.5$ on
+N₂O₄/Aerozine 50 at 7.6 bar `inj` [database, LMDE entry — one of the best
+documented blocks in the file]. 307–316 s on MON-3/MMH at 10 bar and higher
+$\varepsilon$ is the right neighbourhood.
+
+Note how flat the column is: going from $\varepsilon = 60$ to 200 buys 10.5 s,
+3.4 %. **Area ratio is cheap performance right up to the moment it becomes an
+envelope problem, and on this mission it becomes one.**
+
+### B.1.3 The constraint that decides Mission B
+
+B1.10 requires $T/W \ge 2.2$ at the start of powered descent. Descent start
+mass is 1,200 kg + descent propellant. At $I_{sp} = 307$ s the descent
+propellant is 274.1 kg, so the descent starts at **1,474.1 kg**, weighing
+$1474.1 \times 3.721 = 5{,}485$ N on Mars. Therefore
+
+$$F_{descent} \ge 2.2 \times 5485 = 12{,}070\ \mathrm{N}$$
+
+B1.12 requires any engine firing below 30 m to have $D_e \le 500$ mm. For a
+single engine delivering 12.07 kN at $p_c = 10$ bar, the largest area ratio
+that fits is found by solving $D_t\sqrt{\varepsilon} = 0.5$ m with
+$A_t = F/(p_c C_F \eta_n)$:
+
+$$\varepsilon_{max} = 28.9, \qquad I_{sp} = 298.9\ \mathrm{s}$$
+
+**A single-engine architecture is forced down to $\varepsilon \approx 29$ by two
+requirements that never mention the nozzle**, and it pays that penalty on the
+1,050 m/s orbit insertion as well as on the landing, because it is the same
+engine. That is the whole Mission B trade in one paragraph, and it is invisible
+to anyone who sizes the engine for $I_{sp}$ and checks the envelope afterwards.
+
+Raising $p_c$ to 20 bar restores $\varepsilon_{max}$ to 59.5 and $I_{sp}$ to
+307.3 s — at the cost of a pressure-fed tank system designed to about 26 bar
+MEOP instead of 16, which is roughly 60 % more tank and pressurant mass on a
+1.2 m³ propellant volume. Price it; do not wave at it.
+
+### B.1.4 Mass closure, all five candidates
+
+Legs as above; 5 % performance reserve; arrival wet mass compared with the
+B1.14 ceiling of 3,200 kg.
+
+| candidate | $I_{sp}$ used (s) | descent (kg) | deorbit (kg) | MOI+TCM (kg) | total (kg) | +5 % reserve | **arrival wet (kg)** | vs B1.14 |
+|---|---|---|---|---|---|---|---|---|
+| **B1** single engine, $\varepsilon = 28.9$ | 298.9 / 298.9 | 288.6 | 63.6 | 1,003.5 | 1,355.7 | 1,423.5 | **3,173.5** | passes by **0.8 %** |
+| **B2** split, $\varepsilon = 60$ / 120 | 307.4 / 313.9 | 274.1 | 60.1 | 944.1 | 1,278.2 | 1,342.1 | **3,092.1** | passes by 3.4 % |
+| **B3** hydrazine monoprop | 232 | 375.9 | 85.8 | 1,454.7 | 1,916.4 | 2,012.3 | **3,762.3** | **fails by 17.6 %** |
+| **B4** LOX/CH₄ pump-fed | 369.8 | 223.7 | 49.6 | 754.9 | 1,028.2 | 1,079.6 | **2,829.6** | passes by 11.6 % |
+| **B5** LMP-103S class | 253 | 340.7 | 77.2 | 1,278.3 | 1,696.2 | 1,781.0 | **3,531.0** | **fails by 10.3 %** |
+
+**B3 and B5 are eliminated here, on arithmetic, before any judgment is
+applied.** This is the Mission B version of the lesson: 232 s of hydrazine
+against 307 s of hypergolic bipropellant is 660 kg of extra propellant on a
+mission with a 3,200 kg arrival ceiling, and no amount of simplicity argument
+recovers that. The green monopropellant closes the gap by a third and it is not
+enough. **Size before you argue** — both of these candidates have real
+advocates and both are dead on the first page of arithmetic.
+
+The B4 result is the interesting one: LOX/CH₄ is 262 kg lighter at arrival than
+the recommended architecture. It loses this mission somewhere other than the Δv
+budget, and finding *where* is D2/D5/D12 work, not D10 work.
+
+### B.1.5 The landing cluster, and why B1.11 is easy for B2 and moot for B1
+
+B2's descent set: **four engines of 3.5 kN at $\varepsilon = 60$**,
+$D_t = 49.3$ mm, $D_e = 381.8$ mm each — comfortably inside B1.12.
+
+| condition | mass (kg) | Mars weight (N) | available thrust (N) | T/W |
+|---|---|---|---|---|
+| descent start, four engines | 1,474.1 | 5,485 | 14,000 | **2.55** ✓ (B1.10) |
+| descent start, one engine failed | 1,474.1 | 5,485 | 10,500 | **1.91** ✓ |
+| touchdown, four engines | 1,225.6 | 4,560 | 14,000 | 3.07 |
+| touchdown, one engine failed | 1,225.6 | 4,560 | 10,500 | **2.30** ✓ (B1.11) |
+
+Hover at touchdown mass needs **32.6 %** of the four-engine cluster — a 3.07:1
+turndown, inside the 4:1 of B1.9 with room for the divert authority. B1.11 is
+satisfied by inspection because losing one of four engines still leaves
+T/W = 2.30 at touchdown; note that it also leaves a thrust asymmetry, so the
+gimbal or differential-throttle authority to trim it is a real design item and
+belongs in the report.
+
+For B1, B1.11's wording ("if the architecture is multi-engine") exempts the
+single-engine case. That exemption is a gift and the report should say what it
+costs: the single engine is a **non-removable single-point failure on the only
+propulsion event that cannot be retried**, which is exactly the Apollo SPS
+situation, and the SPS answer was to remove mechanisms rather than to add
+redundancy [SLPRE]. B1 can make that argument honestly. It cannot make the
+argument that the failure does not exist.
+
+### B.1.6 MOI: the finite-burn check
+
+At 12 kN on a 3,092 kg stack, $a = 3.88$ m/s² and the 1,150 m/s of leg 1 takes
+**296 s**. A five-minute burn at the periapsis of a Mars capture orbit is not
+impulsive; the finite-burn (gravity) loss is of order 1–2 % of the burn, so add
+**≈ 20 m/s** to leg 1 and re-close. The reference chain above does not include
+it, deliberately, so that you can see the effect: adding 20 m/s adds about
+17 kg of propellant and reduces B1's already thin margin to 0.3 %.
+
+At 6 kN the same burn takes 592 s and the loss roughly doubles. **This is a
+second, independent reason the MOI thrust level cannot be chosen for
+convenience**, and a report that sizes MOI thrust only from "the burn should
+not take too long" has stated the right conclusion without the mechanism.
+
+### B.1.7 Feed system, B2
+
+Propellant loaded 1,342.1 kg at $r = 1.65$: fuel 506.5 kg MMH (0.5795 m³ at
+874 kg/m³), oxidizer 835.7 kg MON-3 (0.5791 m³ at 1443 kg/m³). The volumes are
+within 0.1 % of each other, which is a pleasant property of this pair and means
+four identical tanks rather than two sizes. Tank volume with 5 % ullage:
+**1.2165 m³**.
+
+Pressure budget: $p_c$ 10 bar + injector $\Delta p$ 2.5 bar + lines and valves
+1.5 bar + regulator droop and margin 2.0 bar → **tank pressure 16 bar**,
+regulated. Helium at 290 K:
+
+$$m_{He} = \frac{p V}{R_{He} T} = \frac{16\times10^5 \times 1.2165}{2077.1 \times 290} = 3.23\ \mathrm{kg}$$
+
+stored at 310 bar in **0.0628 m³** — a 493 mm sphere. That is the ideal
+isothermal number and it is optimistic in both directions at once: the gas
+cools as it expands out of the storage bottle (raising the mass needed) and
+warms as it is compressed into the ullage (lowering it), and a real regulated
+system with a 9-month dormancy carries 20–30 % more helium than this [J].
+Say which way you corrected and why.
+
+**Regulated versus blowdown.** Blowdown from 310 to 20 bar has an isothermal
+usable fraction of 0.935, which sounds like a reason to delete the regulator.
+It is not: in blowdown the chamber pressure falls with the tank, so the engine
+that must deliver 12 kN at the start of descent delivers far less at the end,
+and the throttle authority of B1.9 is consumed by the blowdown instead of by
+the guidance law. Regulated, with the regulator as a named single-point failure
+mitigated by a redundant parallel leg with series-redundant latch valves.
+
+### B.1.8 Propulsion dry mass, B2 and B4 — where B4 actually loses
+
+**B2**, maturity-based MGA per G4:
+
+| item | basic (kg) | MGA | predicted (kg) |
+|---|---|---|---|
+| MOI engine, 12 kN, $\varepsilon = 120$ | 14 | 15 % | 16.1 |
+| 4 × landing engine, 3.5 kN, $\varepsilon = 60$ | 22 | 15 % | 25.3 |
+| propellant tanks (4 × Ti, 1.22 m³, 16 bar, with diaphragms) | 42 | 10 % | 46.2 |
+| He COPV + 3.23 kg He | 22 | 5 % | 23.1 |
+| regulator, latch and isolation valves, lines, filters | 28 | 10 % | 30.8 |
+| ACS, 8 × 22 N, integrated on main propellant | 14 | 5 % | 14.7 |
+| structure, mounts, gimbals | 58 | 15 % | 66.7 |
+| thermal: MLI, heaters, thermostats, catbed heaters | 22 | 15 % | 25.3 |
+| harness, transducers | 10 | 10 % | 11.0 |
+| **subtotal** | **232** | | **259.2** |
+| system margin, 15 % | | | 38.9 |
+| **predicted total** | | | **298.1** |
+
+Against B1.13's 340 kg ceiling: **passes with 12 % margin.** Residuals and
+trapped propellant: 2 % of the load, **26.8 kg**, stated as a separate line and
+*not* counted as usable — this is the line item most often missing and it is
+worth about 8 m/s of Δv you do not have.
+
+**B4** on the same policy — and this is where the cryogenic candidate dies:
+
+| item | basic (kg) | MGA | predicted (kg) |
+|---|---|---|---|
+| main engine, 12 kN pump-fed LOX/CH₄ | 32 | 25 % | 40.0 |
+| 4 × landing engine + feed | 30 | 25 % | 37.5 |
+| turbopump and drive | 26 | 25 % | 32.5 |
+| cryogenic tanks, 1.33 m³, Al-Li | 62 | 15 % | 71.3 |
+| MLI, vapour-cooled shield, supports | 30 | 25 % | 37.5 |
+| cryocooler + radiator (~90 W input) | 48 | 35 % | 64.8 |
+| valves, chilldown lines, vents | 34 | 15 % | 39.1 |
+| ACS, separate (main system not restartable cold on demand) | 22 | 15 % | 25.3 |
+| structure, mounts | 62 | 15 % | 71.3 |
+| harness, transducers | 12 | 10 % | 13.2 |
+| **subtotal** | **358** | | **432.5** |
+| system margin, 15 % | | | 64.9 |
+| **predicted total** | | | **497.4** |
+
+**B4 exceeds B1.13 by 46 %**, and independently exceeds B1.15's 25 W
+orbit-average cruise power allocation by a factor of about 3.6 with the
+cryocooler alone. It wins the Δv budget by 262 kg and loses the dry-mass budget
+by 157 kg and the power budget outright. **The candidate with the best $I_{sp}$
+loses this mission on the propulsion system's own dry mass**, which is the
+single most useful thing Mission B teaches, and it is invisible to anybody who
+stops at D10.
+
+### B.1.9 Contamination, quantified against the datum
+
+B-G6 asks for a mechanistic ranking, not a CFD model. Three axes:
+
+**(i) Plume species.** MON-3/MMH combustion products are H₂O, CO, CO₂, N₂ and
+H₂ with residual NO$_x$ and, under deep throttling and during the start and
+shutdown transients, **unburned MMH and nitrosamine-forming species** — which
+is precisely the class of nitrogen-bearing organic compound the payload is
+looking for in the regolith. This is the datum's fundamental weakness and it is
+not fixable by nozzle design. Hydrazine and LMP-103S have the same problem in
+different proportions. **LOX/CH₄ has no nitrogen and no hydrazine derivative
+anywhere in the system**, and its unburned residue is methane, which the
+instrument can be blind to by design. On this axis the ranking is
+B4 ≫ B1 ≈ B2 ≈ B3 ≈ B5, and the gap is qualitative, not incremental.
+
+**(ii) Plume–surface interaction.** Take the surface loading as thrust divided
+by total exit area as a first-order proxy [A] — crude, but it scales correctly
+with what matters:
+
+| | thrust at touchdown (N) | total $A_e$ (m²) | proxy loading (kPa) |
+|---|---|---|---|
+| B1, one engine, $D_e = 492$ mm | 4,560 | 0.1901 | **24.0** |
+| B2, four engines, $D_e = 382$ mm each | 4,560 | 0.4580 | **10.0** |
+
+B2 more than halves the surface loading, which is the direct driver of regolith
+excavation and hence of debris re-deposition on the sampling site. **But** four
+plumes impinging on a flat surface under a vehicle interact, and the
+interaction produces a stagnation region under the vehicle centre that a single
+plume does not — which is exactly where the sampling arm goes. A report that
+claims the four-engine layout is unambiguously cleaner has over-claimed; the
+honest statement is that it reduces peak loading and introduces a new,
+less well characterised flow feature, and that the retirement for that risk is
+a subscale plume-impingement test in a vacuum chamber over Mars-simulant
+regolith.
+
+**(iii) Deposition during coast.** ACS thruster plumes fire thousands of times
+over nine months, and an integrated ACS on MMH deposits fuel-derived species on
+every surface with line of sight. A separate cold-gas ACS eliminates that at
+the cost of a second system. This axis is the one that most often decides the
+real version of this argument and it is the one students never mention.
+
+## B.2 Recommended architecture and the strongest alternative
+
+### Recommended: **B2 — MON-3/MMH pressure-fed, split: one 12 kN $\varepsilon = 120$ MOI/deorbit engine, four 3.5 kN $\varepsilon = 60$ throttleable landing engines**
+
+1. **It is the only candidate that meets B1.10, B1.11 and B1.12 without
+   forcing a performance penalty onto the orbit-insertion burn.** The MOI
+   engine never fires near the ground, so it keeps the area ratio it wants
+   (313.9 s); the landing engines never need a high area ratio, so they fit
+   inside the 500 mm envelope with 24 % to spare.
+2. **3.4 % arrival-mass margin against B1.14 and 12 % dry-mass margin against
+   B1.13**, on a mass budget built with maturity-based MGA and a 15 % system
+   margin. B1 has 0.8 % and 0.3 % once the finite-burn loss is included.
+3. **Hypergolic ignition means no ignition consumable and therefore no restart
+   count.** B1.8 asks for eight restarts including one after a 90-day coast;
+   for a hypergolic pressure-fed system the answer is "the valve cycles are the
+   limit, and they are qualified in the thousands". Every other candidate has
+   to argue this.
+4. **Nine-month storage is the flight-proven case for this propellant pair.**
+   MMH freezes at −52 °C, well below the −30 °C floor of B1.15; MON-3's
+   additive exists partly to depress the N₂O₄ freezing point near −11 °C, and
+   the oxidizer, not the fuel, sets the heater budget [SB, Clark]. Sizing the
+   heaters against the oxidizer and saying so is worth marks.
+
+**What it costs, and the memo must name it:**
+
+- **48 kg of landed science mass** against B1, from the heavier propulsion
+  system (298 kg vs ~250 kg predicted), inside a fixed 1,200 kg landed mass.
+  That is a real number the payload team will feel and it must appear in the
+  memo, not in an appendix.
+- **Two engine qualifications instead of one**, plus a thrust-asymmetry trim
+  problem that B1 does not have.
+- **Contamination**: it is the datum. It does not beat anything on nitrogen
+  chemistry, and its four-plume interaction is a new unknown.
+- **Part count**: five engines, ten propellant valves in the thrust path
+  against B1's two.
+
+### Strongest alternative: **B1 — the single-engine LMDE architecture**
+
+It is genuinely strong and the report must treat it that way. Fewest parts of
+any candidate, one qualification, the simplest possible start sequence, the
+lowest dry mass, 48 kg more science, and sixty years of heritage on almost
+exactly this problem. It closes the mission.
+
+It closes it by **0.8 %**, falling to **0.3 %** once the finite-burn loss of
+§B.1.6 is included, and it does so with an engine forced to $\varepsilon = 28.9$
+by two requirements that have nothing to do with propulsion performance. That
+margin will not survive contact with a real spacecraft. The recovery paths are
+real and should be named: raise $p_c$ to 20 bar (buys 8.4 s of $I_{sp}$, costs
+tank and pressurant mass — compute it, it is close), or negotiate B1.12 from
+500 mm to 620 mm, or accept 1,150 kg landed instead of 1,200.
+
+**A report that recommends B1, states the 0.3 % margin honestly, and names the
+$p_c = 20$ bar recovery path scores as highly as one that recommends B2.** A
+report that recommends B1 without discovering the $\varepsilon \le 28.9$
+constraint has not done the mission.
+
+**B4 deserves a paragraph in the memo even though it loses**, because it wins
+the criterion the science team cares most about by a margin nothing else
+approaches, and because its failure is not fundamental — it is a 157 kg dry
+mass overrun and a power budget. If this mission flew ten years later, with a
+lighter cryocooler or a passive zero-boil-off scheme, B4 would be the
+recommendation. Say so. That is D12 question 3, and it is worth 4 marks nobody
+collects.
+
+## B.3 Pugh matrix
+
+Datum: **B1**, the single-engine architecture. Scoring −2 to +2.
+
+| criterion | weight | justification (tied to this mission) |
+|---|---|---|
+| Landing controllability | 16 | B1.9–B1.12 are four requirements describing one thing, and the last 30 seconds of this mission cannot be retried or aborted. |
+| Mass closure and margin | 15 | Two candidates fail B1.14 outright and one passes it by 0.8 %; margin here is compliance, not comfort. |
+| Reliability | 14 | Every propulsion event is single-string in the sense that matters; there is one vehicle and one window. |
+| Contamination / science compatibility | 12 | The payload's primary measurement is organics in regolith taken from under the lander; a contaminated site is a failed mission with a healthy spacecraft. |
+| Storage and dormancy robustness | 12 | Nine months, B1.7, with a 25 W heater allocation and a 90-day coast before a required restart. |
+| Performance ($I_{sp}$, propellant mass) | 9 | Real, but largely already priced through Mass closure. |
+| Complexity | 7 | Part count drives both qualification cost and the FMEA length on a single-string vehicle. |
+| Manufacturability and cost | 7 | One vehicle; NRI dominates and heritage hardware is the lever. |
+| Mission fit | 8 | Interfaces to aeroshell, ACS, power and the sampling system; B1.15's power allocation is a propulsion requirement in disguise. |
+| **total** | **100** | |
+
+| criterion | w | **B1 datum** | **B2** | B3 N₂H₄ | B4 LOX/CH₄ | B5 LMP-103S |
+|---|---|---|---|---|---|---|
+| Landing controllability | 16 | 0 *(ε forced to 28.9; 24.0 kPa plume; no engine-out)* | **+2** *(2.55 T/W, 3.07:1 turndown, 10.0 kPa, engine-out at 2.30)* | −1 *(monoprop throttling is poorer)* | +1 *(deep throttle easy; cryo start transients)* | −1 |
+| Mass closure and margin | 15 | −1 *(0.8 %, 0.3 % with finite burn)* | **+1** *(3.4 % arrival, 12 % dry)* | −2 *(fails B1.14 by 17.6 %)* | **−2** *(fails B1.13 by 46 %, B1.15 by 3.6×)* | −2 *(fails B1.14 by 10.3 %)* |
+| Reliability | 14 | 0 *(2 valves in thrust path; one non-removable SPF)* | **−1** *(5 engines, 10 valves; SPF removed, count tripled)* | +1 *(catbed, no MR control)* | −2 *(turbopump start after 90-day cold soak)* | 0 |
+| Contamination | 12 | 0 *(datum)* | **+1** *(halves surface loading; same chemistry)* | −1 *(NH₃, N₂ and unreacted N₂H₄)* | **+2** *(no nitrogen, no hydrazine derivative anywhere)* | 0 |
+| Storage / dormancy | 12 | 0 *(flight-proven pair, oxidizer sets heater)* | **0** *(same)* | +1 *(single fluid, simplest)* | **−2** *(boil-off, cryocooler, 9 months)* | +1 |
+| Performance | 9 | 0 *(298.9 s)* | **+1** *(307/314 s)* | −2 *(232 s)* | +2 *(369.8 s)* | −1 *(253 s)* |
+| Complexity | 7 | 0 | **−1** | +1 | −2 | +1 |
+| Manufacturability / cost | 7 | 0 | **−1** *(two quals)* | +1 | −2 | 0 |
+| Mission fit | 8 | 0 | **+1** *(engine-out satisfies the reviewers, ACS integrated)* | 0 | −1 *(power budget, chilldown GSE, no Mars heritage)* | 0 |
+| **weighted total** | | **0** | **+34** | **−22** | **−26** | **−22** |
+
+B2 wins, and it wins by enough that the raw result is not in doubt. The
+sensitivity is therefore about *how* it wins, not whether.
+
+### B.3.1 Sensitivity and the flip
+
+| weight varied ±50 % | flips? | at what value |
+|---|---|---|
+| Landing controllability | **yes** | below **7** (from 16) the winner becomes B1 |
+| Mass closure and margin | no | — |
+| Contamination | no within ±50 %; at **> 30** B4's compliance failures still block it | — |
+| Reliability | no | — |
+| all others | no | — |
+
+**Two-criterion perturbation.** Landing controllability 16 → 9 together with
+Complexity 7 → 14 — the trade a programme makes when the reviewer who worries
+about part count is louder than the reviewer who worries about touchdown —
+brings B2 down to +9 and B1 to 0. B2 still wins but the margin has gone from
+decisive to arguable, and that is the honest way to report it.
+
+**Input perturbation, and this is the important one.** The B4 dry-mass estimate
+is the softest number in the study: the cryocooler line carries a 35 % MGA
+because it is a new design with a new process and no analysis, and the whole
+subtotal rests on a mass model, not on hardware. **Reduce B4's cryogenic
+overhead (cooler + MLI + chilldown) by 40 %** — which is roughly what a decade
+of development in passive zero-boil-off would deliver — and B4's predicted dry
+mass falls to about 380 kg. It still fails B1.13's 340 kg. **Reduce it by 55 %
+and B4 complies, and with +2 on contamination and +2 on performance it becomes
+the winner.** That is the single most useful sensitivity in Mission B: the
+recommendation is not "hypergolics are better", it is "hypergolics are better
+*at this dry-mass technology level*", and the report should name the number
+(a ~55 % reduction in cryogenic thermal-management mass) at which the answer
+changes. A trigger stated that precisely is what a chief engineer can act on.
+
+## B.4 Risk register (10)
+
+| # | risk (if–then) | L | C | score | mitigation | retires at |
+|---|---|---|---|---|---|---|
+| B-R1 | **If** the four landing plumes interact to produce a stagnation region under the vehicle centre, **then** regolith is excavated and re-deposited exactly on the sampling site and the primary measurement is compromised. | 3 | 5 | 15 | Subscale four-plume impingement test over Mars-simulant regolith in a vacuum chamber; if confirmed, cant the engines outboard and re-check gimbal trim. | Impingement test complete — PDR + 6 months. |
+| B-R2 | **If** MON-3 freezes in a line or a valve during a cold excursion, **then** the deorbit or descent burn does not start and the mission ends. | 2 | 5 | 10 | Heater sizing against the oxidizer, not the fuel; two-string thermostats; line trace heaters on every run inside the coldest zone; thermal-vacuum cycling of the full feed system at the B1.15 floor. | System-level TVAC at −30 °C — CDR + 4 months. |
+| B-R3 | **If** the helium regulator drifts or fails open during the 9-month dormancy, **then** tanks over-pressurise or the engine runs off-mixture through the most important burn. | 2 | 5 | 10 | Redundant parallel regulator legs with series latch valves; tank burst margin against full upstream pressure; long-duration regulator life test at flight duty cycle. | 12-month regulator life test — CDR + 12 months. |
+| B-R4 | **If** delivered $I_{sp}$ is 5 s below the assumed 307/314 s, **then** the 3.4 % arrival margin falls to 1.6 % and B1.14 is at risk. | 3 | 3 | 9 | Engine acceptance-test $I_{sp}$ measured on every flight unit at altitude; hold a 20 kg propellant offload and a landed-mass renegotiation as recovery. | Engine qualification hot fire — CDR + 8 months. |
+| B-R5 | **If** the landing engines cannot hold stable combustion at 33 % thrust, **then** the terminal descent guidance loses authority in the last 30 seconds. | 3 | 5 | 15 | Variable-area pintle or fixed-area with a stated minimum-$\Delta p$ floor; stability rating by bomb test at minimum throttle, not just at rated; the LMDE precedent of a *prohibited* throttle band is the model for how to report the result honestly [database, LMDE]. | Throttle-envelope hot fire with stability rating — CDR + 8 months. |
+| B-R6 | **If** the MOI burn's finite-burn loss exceeds the 20 m/s allowed, **then** the capture orbit is wrong and the deorbit budget absorbs the error. | 2 | 4 | 8 | Trajectory-integrated burn simulation rather than an impulsive assumption, at PDR; keep the 5 % reserve unallocated until after that analysis. | PDR trajectory closure. |
+| B-R7 | *(non-technical)* **If** MON-3 or MMH supply, transport or launch-site handling approval slips, **then** the launch window is missed and the mission waits 26 months. | 2 | 5 | 10 | Propellant procurement and range approvals started at PDR, not at shipment; identify the single approval with the longest lead and track it as a programme milestone. | Range handling approval — L−12 months. |
+| B-R8 | *(non-technical)* **If** the science team re-weights contamination after PDR, **then** the architecture is challenged with no time to change it. | 3 | 3 | 9 | Get the contamination requirement B1.16 written as a number with a datum *before* PDR; the analysis in §B.1.9 exists to force that conversation early. | B1.16 quantified and baselined — PDR. |
+| B-R9 | *(created by the recommendation)* **If** one landing engine fails off-nominally in the last 15 seconds, **then** the thrust asymmetry must be trimmed within the control bandwidth — a failure mode the single-engine B1 does not have at all. | 2 | 5 | 10 | Differential-throttle authority sized for one-out at touchdown; demonstrate the trim in a hardware-in-the-loop descent simulation; consider engine cant to reduce the moment arm. | HWIL one-out descent case — CDR + 10 months. |
+| B-R10 | **If** the 90-day-coast restart (B1.8) finds propellant migrated or vapour locked in the feed lines, **then** the descent burn starts on gas. | 2 | 5 | 10 | Diaphragm or vane-managed tanks qualified for the coast; settling burn on ACS before every main-engine start; a 90-day dormancy included in the qualification duty cycle, not simulated by a shorter one. | Qualification duty cycle with a 90-day dwell — CDR + 14 months. |
+
+## B.5 What distinguishes an A from a C on Mission B
+
+**A C-grade report** builds the Δv budget, applies the rocket equation, sizes
+one engine, notes that hydrazine has a low $I_{sp}$, produces a mass budget with
+a flat margin, and recommends hypergolic bipropellant because that is what
+Mars landers use. It is not wrong. It also never discovers the constraint that
+actually decides the mission. 55–66.
+
+**A B-grade report** gets the three-leg chain and the jettison right, sizes all
+five candidates, eliminates B3 and B5 on arithmetic, computes the descent T/W,
+and builds a matrix with justified weights. It usually treats B1.12 as a
+checkbox rather than as a driver, and it usually treats B4 as "too hard"
+without producing the dry-mass table that shows *why*. 72–84.
+
+**An A-grade report** does five things:
+
+1. **It finds that B1.10 and B1.12 together cap $\varepsilon$ at 28.9** and
+   therefore that a single-engine architecture pays a 9 s $I_{sp}$ penalty on
+   orbit insertion for a requirement about ground clearance. This is the
+   mission's central insight and it is available to anyone who checks the exit
+   diameter *before* choosing the area ratio.
+2. **It kills B4 with a dry-mass table, not with an adjective**, and then says
+   what would resurrect it, with a number.
+3. **It puts the finite-burn loss into the closure** and shows what it does to
+   B1's margin.
+4. **It quantifies contamination on three axes** including the ACS-plume axis
+   nobody mentions, and it admits that the four-engine layout trades peak
+   loading for a less well characterised interaction.
+5. **It states the landed-science cost of its own recommendation in kilograms**
+   in the memo. 88–96.
+
+## B.6 The ten most common errors on Mission B
+
+1. **Putting the aeroshell jettison on the wrong side of a leg.** Typically
+   60–90 kg of error, always in the flattering direction, and it propagates
+   into every subsequent number.
+2. **Choosing $\varepsilon$ for $I_{sp}$ and checking $D_e$ afterwards — or
+   not at all.** B1.12 is a hard requirement and it is the one that decides the
+   architecture. Reports that quote a 780 mm bell on a lander with 500 mm of
+   ground clearance have not read their own requirements table.
+3. **Not sizing B3 and B5 because "monopropellant is obviously worse".** It is
+   obviously worse *here*, by 17.6 % and 10.3 % of arrival mass, and the marks
+   are for showing it. Automatic −10 for a candidate without sizing.
+4. **Assuming MOI is impulsive.** A 296 s burn is not, and the loss eats the
+   margin of the candidate that has least of it.
+5. **Omitting residuals and trapped propellant.** 2 % of 1,342 kg is 26.8 kg —
+   more than the entire arrival-mass margin of the single-engine candidate.
+6. **Costing the cryogenic candidate only in boil-off.** Boil-off is the
+   headline and the cryocooler, MLI, vapour-cooled shield, chilldown lines and
+   the power to run them are the actual mass. The B4 dry-mass table is the
+   deliverable, and B1.15's 25 W allocation is a propulsion requirement.
+7. **Treating "contamination" as a word.** B1.16 asks for a quantification
+   against a stated datum. Three axes, a proxy number for surface loading, and
+   an honest statement of what the multi-engine layout makes worse is a
+   complete answer; "hypergolics are dirty" is not.
+8. **Claiming the four-engine cluster removes the single-point failure without
+   pricing the asymmetry.** It removes one failure mode and creates another,
+   and the new one is a control problem in the last fifteen seconds.
+9. **Sizing the heater budget against the fuel.** MMH freezes at −52 °C and
+   MON-3 near −11 °C. The oxidizer sets the budget. Getting this backwards is a
+   tell that the storage section was written from memory.
+10. **A memo that does not state what the recommendation costs in landed science
+    mass.** 48 kg out of a 1,200 kg lander is 4 % of everything the mission
+    exists to do, and it is exactly the number the person reading the memo
+    needs. Leaving it in an appendix is the difference between a report and a
+    decision.

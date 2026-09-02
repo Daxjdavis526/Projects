@@ -3336,7 +3336,7 @@ Total impulse $= m I_{sp} g_0 = 0.315\times68\times9.80665 =
 $\Delta v = I_{sp}g_0\ln\!\left(\dfrac{12}{12-0.315}\right) =
 666.9\times\ln(1.0270) = \mathbf{17.7\ m/s}$. [F] Three caveats belong with it.
 The isothermal assumption is optimistic — an adiabatic blowdown gives
-$1-(0.1)^{1/1.4} = 0.80$, so 0.28 kg and about 15.7 m/s, and reality lies
+$1-(0.1)^{1/1.4} = 0.807$, so 0.282 kg and about 15.9 m/s, and reality lies
 between and depends on the duty cycle. The 68 s is a *realised* $I_{sp}$ at
 some nominal condition, and it droops as the tank cools and the pressure falls,
 so the delivered figure is lower again. And the 12 kg is the initial mass, so a

@@ -636,3 +636,360 @@ not for 8 s.
 > the ballistics** and that the tie is broken by lot history, the conditioning
 > record and the 40 Hz transient — a script that declares "cracked grain,
 > certain" caps at 3 of 4 however good the arithmetic.
+
+---
+
+# Problem 3 — Cold gas against a monopropellant (15 points)
+
+## (a) (3 points) — Cold-gas performance
+
+$$R = \frac{8314.46}{28.014} = \mathbf{296.80\ J/(kg\,K)},\qquad
+\Gamma(1.400) = \mathbf{0.68473}$$
+
+$$c^* = \frac{\sqrt{RT_0}}{\Gamma} = \frac{\sqrt{296.80\times293.15}}{0.68473}
+= \frac{294.98}{0.68473} = \mathbf{430.78\ m/s}$$
+
+$$C_{F,vac}(\varepsilon = 50) = \mathbf{1.7292}
+\;\Rightarrow\;I_{sp}^{ideal} = \frac{430.78\times1.7292}{9.80665} = \mathbf{75.96\ s}$$
+
+$$I_{sp}^{real} = 0.90\times75.96 = \mathbf{68.36\ s}\qquad(c = 670.4\ \mathrm{m/s})$$
+
+**Against the database.** Part C of the engine database gives N₂ at
+$\varepsilon = 50$ an ideal $I_{sp}$ of **76.8 s** — but at $T_0 = 300$ K.
+Since $I_{sp}\propto\sqrt{T_0}$ for a frozen ideal expansion,
+$76.8\sqrt{293.15/300} = 75.9$ s. The two agree to 0.1 %; **the whole
+difference is the reference temperature**, which is exactly why the database
+insists that a published cold-gas $I_{sp}$ without $T_0$ and $\varepsilon$ is
+meaningless. The 0.90 factor is the database's own C.1.3 realization
+discount, drawn from the ~0.91 measured/theoretical ratio across the
+published cold-gas table.
+
+**What the two assumptions cost.** *Isothermal blowdown* assumes the tank wall
+and structure supply the expansion work; a fast continuous discharge is
+nearer adiabatic, which would leave more gas in the tank at the cut-off
+pressure and reduce the usable fraction (adiabatic:
+$1-(p_f/p_i)^{1/\gamma} = 0.855$ against 0.920). At a 5 % duty cycle over
+years the metal-walled tank is firmly in the isothermal limit, so the
+assumption is good here. *Ideal gas* at 250 bar is worth several per cent in
+stored mass; real N₂ near 250 bar is less dense than the ideal-gas value, so
+the true loaded mass is **lower** than computed and the volume needed is
+**larger**. Both are the database's own C.1.2 caveat.
+
+> **Rubric (3).** 1 pt $R$, $\Gamma$, $c^*$. 1 pt $C_F$, both $I_{sp}$.
+> 1 pt the database reconciliation *with* the $\sqrt{T_0}$ scaling and one
+> honest sentence on each assumption.
+
+## (b) (3 points) — Impulse budget
+
+**Desaturation.** A pure couple of separation $d = 0.450$ m: torque
+$= Fd$, so the stored momentum $H = 0.800$ N·m·s costs
+$Ft = H/d = 1.7778$ N·s **per thruster**, and both thrusters fire, so the
+propellant impulse is
+
+$$I_{des,1} = \frac{2H}{d} = \frac{2\times0.800}{0.450} = \mathbf{3.5556\ N\cdot s}$$
+
+$$N = 3\times52\times5.00 = 780\ \text{events}
+\;\Rightarrow\;I_{des} = 780\times3.5556 = \mathbf{2773\ N\cdot s}$$
+
+**Drag make-up.**
+
+$$m_p = m_f\left(e^{\Delta v/(I_{sp}g_0)}-1\right)
+= 165\left(e^{14.0/670.4}-1\right) = 165\times0.021103 = \mathbf{3.482\ kg}$$
+
+$$I_{drag} = 3.482\times670.4 = \mathbf{2334\ N\cdot s}$$
+
+**Total.**
+
+$$I_{tot} = 2773 + 2334 + 200 = \mathbf{5308\ N\cdot s}
+\;\Rightarrow\;m_{prop,usable} = \frac{5308}{670.4} = \mathbf{7.917\ kg}$$
+
+*Comment:* the desaturation and drag terms are within 20 % of each other,
+which is typical and is why an ACS propellant budget cannot be written from
+$\Delta v$ alone.
+
+> **Rubric (3).** 1 pt the factor of 2 for the couple — an answer of
+> 1387 N·s (one thruster) is the single most common error and loses this
+> mark, though the rest of the chain is then marked on its own terms.
+> 1 pt the drag term via the rocket equation. 1 pt the total and the usable
+> mass.
+
+## (c) (3 points) — Tank and thruster
+
+$$\phi_{iso} = 1-\frac{p_f}{p_i} = 1-\frac{20.0}{250} = \mathbf{0.9200}
+\;\Rightarrow\;m_{load} = \frac{7.917}{0.920} = \mathbf{8.606\ kg}$$
+
+$$V = \frac{m_{load}RT}{p_i} = \frac{8.606\times296.80\times293.15}{250\times10^{5}}
+= \mathbf{2.995\times10^{-2}\ m^3} = \mathbf{29.95\ L}$$
+
+$$m_{tank} = \frac{p_iV}{(PV/W)g_0} = \frac{250\times10^{5}\times2.995\times10^{-2}}{25.0\times10^{3}\times9.80665}
+= \mathbf{3.054\ kg}$$
+
+**Thruster.** Sizing on the *ideal* $C_F$ gives the ideal thrust; to deliver
+50.0 mN with the 0.90 realization the throat must be 11 % larger:
+
+$$A_t^{ideal} = \frac{F}{p_{plenum}C_F} = \frac{0.0500}{5.00\times10^{5}\times1.7292}
+= 5.783\times10^{-8}\ \mathrm{m^2}\;(D_t = 0.2714\ \mathrm{mm})$$
+
+$$A_t^{delivered} = \frac{A_t^{ideal}}{0.90} = \mathbf{6.426\times10^{-8}\ m^2}
+\;\Rightarrow\;D_t = \mathbf{0.2860\ mm},\qquad
+\dot m = \frac{\Gamma p_0A_t}{\sqrt{RT_0}} = \mathbf{7.458\times10^{-5}\ kg/s}$$
+
+$$I_{bit} = F\left(t_{on}-\tfrac{t_r}{2}+\tfrac{t_f}{2}\right)
+= 0.0500(0.00500-0.00200+0.00150) = \mathbf{2.25\times10^{-4}\ N\cdot s}
+= \mathbf{0.225\ mN\cdot s}$$
+
+**Requirement met** — 0.225 mN·s against a 1 mN·s ceiling, with a factor of
+4.4 in hand. Caveat worth a mark: with a 4.0 ms rise on a 5.0 ms command the
+valve barely reaches full lift, so the trapezoid is a *model*, not a
+measurement; the real minimum bit and its scatter must be measured on a
+micro-thrust balance, and in this regime the scatter, not the mean, is what
+the ACS designer cares about.
+
+> **Rubric (3).** 1 pt $\phi$, $m_{load}$, $V$. 1 pt tank mass and both
+> throat areas — the 1/0.90 correction is worth half of this mark. 1 pt the
+> impulse bit, the verdict, and the caveat.
+
+## (d) (3 points) — The monopropellant alternative
+
+$$m_{drag} = 165\left(e^{14.0/(220\times9.80665)}-1\right) = \mathbf{1.074\ kg}$$
+
+$$m_{des} = \frac{2773}{140\times9.80665} = \mathbf{2.020\ kg},\qquad
+m_{det} = \frac{200}{1372.9} = \mathbf{0.146\ kg}$$
+
+$$m_{prop} = \mathbf{3.240\ kg},\qquad
+V = \frac{3.240}{1004}\times1.10 = \mathbf{3.550\ L}$$
+
+**System-mass comparison** (the "everything else" column is the candidate's
+own; these are defensible values and must be *stated*, not assumed silently):
+
+| item | cold gas GN₂ | monopropellant N₂H₄ |
+|---|---|---|
+| propellant | 8.606 kg | 3.240 kg |
+| tank | 3.054 kg (30 L COPV at 250 bar) | 1.40 kg (3.6 L Ti with a PMD, MEOP 24 bar) |
+| regulator, latch valve, filter, transducers, lines | 1.50 kg | 1.00 kg |
+| thrusters and valves | 0.80 kg (8 micro-solenoids) | 1.80 kg (4 thrusters with catalyst beds and heaters) |
+| structure, brackets, harness | 1.20 kg | 1.20 kg |
+| **dry** | **6.55 kg** | **5.40 kg** |
+| **wet** | **15.16 kg** | **8.64 kg** |
+
+**The monopropellant is 6.5 kg lighter — 43 % — on a 165 kg spacecraft.**
+The cold-gas tank alone (3.05 kg for 30 litres of COPV) very nearly equals the
+entire monopropellant propellant load, which is module 28's point restated:
+*for a stored gas, the tank is the system*.
+
+> **Rubric (3).** 1 pt the two-$I_{sp}$ split — using 220 s for the
+> desaturation pulses is the trap and loses it. 1 pt propellant mass and
+> volume. 1 pt a two-column table with stated, defended "everything else"
+> numbers and a mass difference. A table with unstated assumptions caps at
+> 2 of 3.
+
+## (e) (3 points) — Leak budget and recommendation
+
+$$m_{leak} = 0.020\times8.606 = 0.1721\ \mathrm{kg}\ \text{over}\ 5.00\ \mathrm{yr}
+= 43\,800\ \mathrm{h}$$
+
+$$\dot m_{leak} = \frac{0.1721}{43\,800} = 3.930\times10^{-6}\ \mathrm{kg/h}
+= \mathbf{3.93\ mg/h}$$
+
+$$\dot V_{std} = \frac{3.930\ \mathrm{mg/h}}{1.2504\times10^{-3}\ \mathrm{g/cm^3}}
+= \mathbf{3.14\ scc/h\ GN_2}\ \text{(whole system)}$$
+
+**Helium conversion, both limits.**
+
+- **Molecular (Knudsen) flow**, rate $\propto 1/\sqrt{\mathcal{M}}$:
+  $\dot V_{He} = 3.14\sqrt{28.014/4.003} = 3.14\times2.6455
+  = \mathbf{8.31\ scc/h}$.
+- **Viscous (laminar) flow**, rate $\propto 1/\mu$:
+  $\dot V_{He} = 3.14\times(1.78/1.96) = \mathbf{2.85\ scc/h}$.
+
+**Which goes in the procurement specification: 2.85 scc/h GHe.** You do not
+know which regime a given leak path is in, and the two differ by a factor of
+2.9 in opposite directions. Specifying the molecular number would pass a
+viscous leak whose nitrogen rate is $8.31/0.908 = 9.15$ scc/h — nearly three
+times the budget. **Always write the specification against the limit that
+makes the acceptance test the hardest**, and say in the specification which
+conversion was assumed, so a supplier cannot re-derive it the flattering way.
+
+**Recommendation (≈190 words).**
+
+> Fly the **cold-gas system**, and accept the 6.5 kg penalty.
+>
+> The criterion is **minimum impulse bit**, not mass. The ACS requires better
+> than 1 mN·s; the cold-gas thruster delivers 0.225 mN·s and the hydrazine
+> thruster 20 mN·s — a factor of 89. That is not a margin the ACS can trade
+> against, because a 20 mN·s bit on this vehicle over-corrects the deadband
+> and forces a limit cycle whose own propellant cost eats the mass saving,
+> while leaving the residual-momentum trim uncontrollable at the required
+> pointing. It is a requirement, not a preference, and it belongs in the
+> screening step, not in a weighted score.
+>
+> Two supporting arguments. The payload is an imaging instrument: hydrazine
+> exhaust deposits ammonia and decomposition products on cold optical
+> surfaces, and 780 desaturation events over five years is a long
+> contamination exposure. And 40 W of continuous catalyst-bed heater power on
+> a 165 kg bus is a real power-budget line, whereas cold gas needs none.
+>
+> The counter-argument is honest: 30 litres of 250 bar COPV is a large,
+> awkward, stored-energy item on an ESPA-class bus, and if the pointing
+> requirement were relaxed to 20 mN·s the hydrazine system wins outright.
+
+> **Rubric (3).** 1 pt mass, rate and the scc/h GN₂ figure. 1 pt both helium
+> conversions **and** a reasoned choice between them. 1 pt a recommendation
+> that names a non-mass criterion and defends it; a recommendation resting on
+> mass contradicts the question and scores 0 for this mark.
+
+---
+
+# Problem 4 — Failure diagnosis (15 points)
+
+## (a) (3 points) — Reduce the data
+
+$$A_{t,meas} = \frac{\pi}{4}(0.2834)^2 = \mathbf{6.3080\times10^{-2}\ m^2},
+\qquad \frac{A_{t,meas}}{A_{t,built}} = \frac{6.3080}{6.2699} = \mathbf{1.00607}$$
+
+$$c^*_{meas} = \frac{p_cA_t}{\dot m} = \frac{101.2\times10^{5}\times6.3080\times10^{-2}}{374.8}
+= \mathbf{1703.1\ m/s}$$
+
+$$\eta_{c^*} = \frac{1703.1}{1742.5} = \mathbf{0.9774}\qquad(\text{design }0.960)$$
+
+$$\varepsilon_{eff} = \frac{A_e}{A_{t,meas}} = \frac{16.0}{1.00607} = \mathbf{15.903}$$
+
+$$C_{f,SL}^{ideal}(\varepsilon_{eff}, p_c = 101.2\ \mathrm{bar}) = \mathbf{1.6297}$$
+
+$$C_{f,meas} = \frac{F}{p_cA_t} = \frac{1.008\times10^{6}}{101.2\times10^{5}\times6.3080\times10^{-2}}
+= \mathbf{1.5790},\qquad \eta_{C_f} = \frac{1.5790}{1.6297} = \mathbf{0.9689}$$
+
+$$I_{sp,SL} = \frac{F}{\dot mg_0} = \frac{1.008\times10^{6}}{374.8\times9.80665} = \mathbf{274.2\ s}$$
+
+**The unexpected mover is $\eta_{c^*}$, and it moved *up*: 0.977 against a
+design 0.960, +1.8 %.** $\eta_{C_f}$ is 0.969 against 0.980, down 1.1 %, which
+is what a slightly enlarged throat and a slightly eroded contour do. An engine
+that is *hurting itself* does not normally combust better. That single
+inconsistency is the whole diagnosis: something has stopped diverting fuel
+away from the core and put it into the flame.
+
+> **Rubric (3).** 1 pt $A_t$ ratio and $c^*$/$\eta_{c^*}$. 1 pt
+> $\varepsilon_{eff}$, both $C_f$, $\eta_{C_f}$, $I_{sp}$. 1 pt naming
+> $\eta_{c^*}$ as the anomalous mover **and** saying which way it moved. A
+> script that computes $\eta_{c^*}$ against the *as-built* throat area rather
+> than the measured one gets 1691 m/s and loses half of the first mark.
+
+## (b) (3 points) — Where the fuel went
+
+The main injector's $C_dA$ is unchanged, so
+$\dot m \propto \sqrt{\Delta p}$:
+
+$$\frac{\dot m_{core,meas}}{\dot m_{core,design}} = \sqrt{\frac{22.4}{20.0}} = \mathbf{1.0583}$$
+
+$$\dot m_{core,design} = 0.940\times111.89 = 105.17\ \mathrm{kg/s}
+\;\Rightarrow\;\dot m_{core,meas} = 1.0583\times105.17 = \mathbf{111.30\ kg/s}$$
+
+$$\dot m_{film} = 111.89-111.30 = 0.58\ \mathrm{kg/s}
+\;\Rightarrow\;\text{film fraction} = \frac{0.58}{111.89} = \mathbf{0.52\ \%}$$
+
+against a design 6.00 %. **Ninety-one per cent of the film-cooling flow has
+stopped.** Note that the *total* fuel flow is nominal — the flow did not
+disappear, it was re-routed into the core, which is exactly why $\eta_{c^*}$
+rose.
+
+> **Rubric (3).** 1 pt the $\sqrt{\Delta p}$ scaling with $C_dA$ held.
+> 1 pt the core flow. 1 pt the film fraction to two decimals plus the
+> observation that total fuel flow is conserved.
+
+## (c) (3 points) — Heat load
+
+$$Q_{meas} = \dot m_fc_p\Delta T_{bulk} = 111.89\times2100\times(441-300)
+= \mathbf{33.13\ MW}$$
+
+$$\frac{Q_{meas}}{Q_{pred}} = \frac{33.13}{25.0} = \mathbf{1.325}\quad(+32.5\ \%)$$
+
+From Problem 1(d), removing **both** the film and the soot layer takes the
+throat-local flux from 21.80 to 45.55 MW/m²:
+
+$$\frac{q''_{no\ film,\ no\ soot}}{q''_{film+soot}} = \frac{45.55}{21.80} = \mathbf{2.089}$$
+
+**Why the integrated number is much smaller, and why they are consistent.**
+The 2.09× is a *point* ratio at the single hottest station. The jacket
+integrates flux over the whole wetted surface — barrel, convergent, throat and
+the divergent out to $\varepsilon = 16$ — and the film curtain is laid down at
+the injector rim, so its protection is strongest in the barrel and has already
+been largely consumed by mixing before the throat. Removing it therefore
+multiplies the flux by ~2 over a small fraction of the area and by much less
+over most of it. The post-test hardware confirms the geometry of the loss
+directly: the barrel's *last* 150 mm and the convergent are bare and bright
+(no film, no soot), while the upstream barrel still carries its deposit. A
+33 % rise in the integrated load with a 2× rise at the throat is entirely
+consistent, and the two together bracket the axial extent of the failure.
+
+> **Rubric (3).** 1 pt $Q_{meas}$ and the ratio. 1 pt the throat-local ratio
+> taken correctly from 1(d). 1 pt an explanation that distinguishes point flux
+> from integrated load and uses the bare/dull boundary as evidence. Declaring
+> the two ratios "inconsistent" and stopping loses the third mark.
+
+## (d) (3 points) — Diagnosis
+
+**Diagnosis (one sentence).** *The rim film-cooling manifold has partially
+plugged — most plausibly by coke or by scale carried from the jacket outlet —
+so 91 % of the film flow has been re-routed through the main injector, raising
+combustion efficiency, stripping the protective soot and film layers from the
+downstream barrel, convergent and throat, and driving the throat-local heat
+flux and wall temperature past the liner's limit.*
+
+| candidate | verdict | evidence |
+|---|---|---|
+| (i) over-size main injector orifices | **out** | over-size orifices give a **lower** $\Delta p$ at the same flow. The measured $\Delta p_f$ went **up** by 12 %, and the total fuel flow is nominal. This candidate has the sign of the injector evidence backwards. |
+| (ii) coke inside the cooling channels | **out as the primary cause** | a channel deposit would reduce flow area (jacket $\Delta p$ up ✓) but **insulate** the coolant from the gas, so the coolant would absorb *less* heat and run *cooler*, not 35 K hotter. The 13 % jacket $\Delta p$ rise is fully explained by the density drop of a hotter coolant ($\Delta p\propto\dot m^2/\rho$: an 8 % density fall gives ~8 %, with the balance from surface roughening). Coke is a *consequence* here, not a cause — and it is the likely plugging agent in the rim manifold. |
+| (iii) **loss of film cooling through the rim manifold** | **in** | it is the only candidate that explains all five independent observations with one mechanism: $\eta_{c^*}$ **up**, main-injector $\Delta p$ **up** by exactly the $\sqrt{1.06^2}$ the re-routed flow demands, integrated heat load **up 33 %**, the bare/bright downstream barrel and convergent, the blanched band and throat growth — and the under-size rim orifices with grey scale found on inspection. |
+| (iv) combustion instability driving the wall | **out** | the dynamic-pressure record shows broadband only, with no discrete tone and no chug. A wall-driving transverse mode leaves a *circumferentially periodic* damage pattern (streaks at the mode's pressure antinodes); the observed damage is an axially banded, circumferentially uniform pattern, which is a film/boundary-layer signature, not an acoustic one. |
+
+> **Rubric (3).** 1 pt a single-sentence diagnosis naming film-cooling loss.
+> 2 pts for the four candidates, ½ pt each, awarded only when the *evidence*
+> is cited rather than the conclusion asserted. Ruling out (ii) on the ground
+> that "coke would make things hotter" earns nothing — the sign of the coolant
+> temperature is the argument.
+
+## (e) (3 points) — Class, causes, confirmation, corrective action
+
+**Failure class (module 34):** **manufacturing / process escape.** The design
+was correct and the operating environment was nominal; a manufacturing or
+process condition — contamination carried into the rim manifold, or a
+cleanliness escape in the jacket circuit that fed it — produced hardware that
+did not match the drawing. It is *not* a design-margin failure: the design
+margin was adequate for the design flow, and it is not operations/environment:
+nothing about the test was off-nominal.
+
+**Proximate cause:** partial blockage of the rim film-cooling orifices, which
+removed the film and the soot layer from the downstream chamber and throat and
+raised the local wall temperature past the liner limit.
+
+**Root cause:** the process that allowed a blocking agent into the film
+circuit and the absence of a verification that would have caught it — a
+missing or inadequate **rim-circuit flow acceptance test** and filtration
+specification at the jacket-to-manifold interface. Note the distinction: the
+proximate cause is a fact about *this* engine; the root cause is a fact about
+the *process*, and only the second one generalises.
+
+**One confirming measurement or inspection:** a **cold-flow test of the rim
+manifold alone** against its as-built acceptance curve — flow versus
+$\Delta p$, orifice by orifice — before and after cleaning, plus analysis of
+the grey scale to identify whether it is RP-1 coke (implicating jacket
+temperature) or a metallic or oxide particulate (implicating cleanliness and
+filtration). That single test distinguishes the two root-cause branches, which
+demand different fixes.
+
+**Corrective action the class demands — which is not the fix for this
+engine.** Fixing *this* engine means cleaning or replacing the manifold. What
+the **manufacturing/process-escape** class demands is different and larger:
+find every article built under the same process, determine whether the escape
+is present in them, and add a *verifiable* screen — a per-circuit flow
+acceptance test with a recorded curve, a filtration specification with a
+stated micron rating at the manifold inlet, and a jacket-outlet temperature
+redline that prevents the coking that produces the scale in the first place.
+A process escape that is answered only by repairing the affected article will
+recur, because nothing has changed about how the next one is built.
+
+> **Rubric (3).** 1 pt the class with a justification that rejects at least
+> one other class. 1 pt proximate versus root stated as two different *kinds*
+> of statement, plus the confirming test. 1 pt the corrective action
+> distinguishing article repair from process fix. Naming the class without
+> argument earns 0.

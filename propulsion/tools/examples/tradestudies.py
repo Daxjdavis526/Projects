@@ -205,10 +205,10 @@ EXAMPLES = [
     # the nozzle is diameter-limited) and eps = 120 for the pump-fed ones.
     {"id": "P2.11", "fn": "Cf",
      "args": {"gamma": 1.20, "eps": 40.0, "p0": 1.92e6, "pa": 0.0},
-     "expect": 1.81232, "tol": 0.002},
+     "expect": 1.88427, "tol": 0.002},
     {"id": "P2.12", "fn": "Cf",
      "args": {"gamma": 1.20, "eps": 120.0, "p0": 6.0e6, "pa": 0.0},
-     "expect": 1.91116, "tol": 0.002},
+     "expect": 1.96395, "tol": 0.002},
 
     # P2.13  c* for the kerolox gas model, used with P2.11/P2.12 to check that
     # the project's assumed Isp values are internally consistent.
@@ -357,13 +357,13 @@ EXAMPLES = [
     # powerhead); rho_bulk = 833.12 kg/m^3; eta_pump = 0.70.  mdot is
     # F/(Isp_SL g0) at the Isp computed from P4.6-P4.9.
     {"id": "P4.14.p100", "fn": "pump_power",
-     "args": {"mdot": 800.97, "dp": 141.0e5, "rho": 833.12, "eta": 0.70},
+     "args": {"mdot": 801.19, "dp": 141.0e5, "rho": 833.12, "eta": 0.70},
      "expect": 19.368e6, "tol": 0.005},
     {"id": "P4.15.p150", "fn": "pump_power",
-     "args": {"mdot": 776.49, "dp": 213.5e5, "rho": 833.12, "eta": 0.70},
+     "args": {"mdot": 776.39, "dp": 213.5e5, "rho": 833.12, "eta": 0.70},
      "expect": 28.427e6, "tol": 0.005},
     {"id": "P4.16.p200", "fn": "pump_power",
-     "args": {"mdot": 761.02, "dp": 286.0e5, "rho": 833.12, "eta": 0.70},
+     "args": {"mdot": 761.10, "dp": 286.0e5, "rho": 833.12, "eta": 0.70},
      "expect": 37.317e6, "tol": 0.005},
     {"id": "P4.17.p300", "fn": "pump_power",
      "args": {"mdot": 741.71, "dp": 431.0e5, "rho": 833.12, "eta": 0.70},
@@ -372,63 +372,63 @@ EXAMPLES = [
     # P4.18  Bartz property-variation factor at the throat, Twg/T0 = 800/3550.
     {"id": "P4.18", "fn": "bartz_sigma",
      "args": {"gamma": 1.16, "Mach": 1.0, "Tw_over_T0": 0.225352},
-     "expect": 1.14567, "tol": 0.003},
+     "expect": 1.36886, "tol": 0.003},
 
     # P4.19  Adiabatic wall temperature at the throat, r = 0.9.
     {"id": "P4.19", "fn": "adiabatic_wall_T",
      "args": {"T0": 3550.0, "gamma": 1.16, "Mach": 1.0, "r": 0.9},
-     "expect": 3523.5, "tol": 0.003},
+     "expect": 3523.70, "tol": 0.003},
 
     # P4.20-P4.23  Bartz gas-side coefficient at the throat for the four
     # chamber pressures.  cp0 = 1.16*405.583/0.16 = 2940.5 J/(kg K);
-    # Pr0 = 4*1.16/(9*1.16-5) = 0.81690; mu0 = 1.0e-4 Pa s; c* used is the
+    # Pr0 = 4*1.16/(9*1.16-5) = 0.85294; mu0 = 1.0e-4 Pa s; c* used is the
     # delivered 0.97*1872.99 = 1816.80 m/s; rc = 1.5 * throat radius.
     {"id": "P4.20.hg100", "fn": "bartz_hg",
-     "args": {"Dt": 0.43050, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.816901,
+     "args": {"Dt": 0.43050, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.852941,
               "p0": 100.0e5, "c_star_val": 1816.80, "rc": 0.322875,
-              "A_ratio": 1.0, "sigma": 1.14567},
-     "expect": 21_852.0, "tol": 0.01},
+              "A_ratio": 1.0, "sigma": 1.36886},
+     "expect": 21_850.0, "tol": 0.01},
     {"id": "P4.21.hg150", "fn": "bartz_hg",
-     "args": {"Dt": 0.34600, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.816901,
+     "args": {"Dt": 0.34600, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.852941,
               "p0": 150.0e5, "c_star_val": 1816.80, "rc": 0.259500,
-              "A_ratio": 1.0, "sigma": 1.14567},
-     "expect": 31_580.0, "tol": 0.01},
+              "A_ratio": 1.0, "sigma": 1.36886},
+     "expect": 31_572.0, "tol": 0.01},
     {"id": "P4.22.hg200", "fn": "bartz_hg",
-     "args": {"Dt": 0.29670, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.816901,
+     "args": {"Dt": 0.29670, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.852941,
               "p0": 200.0e5, "c_star_val": 1816.80, "rc": 0.222525,
-              "A_ratio": 1.0, "sigma": 1.14567},
-     "expect": 40_990.0, "tol": 0.01},
+              "A_ratio": 1.0, "sigma": 1.36886},
+     "expect": 40_983.0, "tol": 0.01},
     {"id": "P4.23.hg300", "fn": "bartz_hg",
-     "args": {"Dt": 0.23910, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.816901,
+     "args": {"Dt": 0.23910, "mu0": 1.0e-4, "cp0": 2940.48, "Pr0": 0.852941,
               "p0": 300.0e5, "c_star_val": 1816.80, "rc": 0.179325,
-              "A_ratio": 1.0, "sigma": 1.14567},
-     "expect": 59_200.0, "tol": 0.01},
+              "A_ratio": 1.0, "sigma": 1.36886},
+     "expect": 59_185.0, "tol": 0.01},
 
     # P4.24-P4.27  Throat heat flux, q = hg (Taw - Twg), Twg = 800 K.
     {"id": "P4.24.q100", "fn": "heat_flux",
-     "args": {"hg": 21_852.0, "Taw": 3523.5, "Twg": 800.0},
+     "args": {"hg": 21_850.0, "Taw": 3523.70, "Twg": 800.0},
      "expect": 59.51e6, "tol": 0.01},
     {"id": "P4.25.q150", "fn": "heat_flux",
-     "args": {"hg": 31_580.0, "Taw": 3523.5, "Twg": 800.0},
-     "expect": 86.00e6, "tol": 0.01},
+     "args": {"hg": 31_572.0, "Taw": 3523.70, "Twg": 800.0},
+     "expect": 85.99e6, "tol": 0.01},
     {"id": "P4.26.q200", "fn": "heat_flux",
-     "args": {"hg": 40_990.0, "Taw": 3523.5, "Twg": 800.0},
+     "args": {"hg": 40_983.0, "Taw": 3523.70, "Twg": 800.0},
      "expect": 111.63e6, "tol": 0.01},
     {"id": "P4.27.q300", "fn": "heat_flux",
-     "args": {"hg": 59_200.0, "Taw": 3523.5, "Twg": 800.0},
-     "expect": 161.23e6, "tol": 0.01},
+     "args": {"hg": 59_185.0, "Taw": 3523.70, "Twg": 800.0},
+     "expect": 161.20e6, "tol": 0.01},
 
     # P4.28  Through-thickness dT in a 0.8 mm GRCop-class liner (k = 300
     # W/(m K)) at the 150 bar heat flux — the number that drives low-cycle
     # fatigue and therefore R4.6/R4.7.
     {"id": "P4.28", "fn": "wall_dT",
-     "args": {"q": 86.00e6, "t": 0.0008, "k": 300.0},
+     "args": {"q": 85.99e6, "t": 0.0008, "k": 300.0},
      "expect": 229.3, "tol": 0.005},
 
     # P4.29  And at 300 bar, where the same wall runs 200 K hotter through
     # thickness and the fatigue life falls with the square of the strain range.
     {"id": "P4.29", "fn": "wall_dT",
-     "args": {"q": 161.23e6, "t": 0.0008, "k": 300.0},
+     "args": {"q": 161.20e6, "t": 0.0008, "k": 300.0},
      "expect": 429.9, "tol": 0.005},
 
     # P4.30  Coolant bulk temperature rise: 15% of the methane flow taking the
@@ -441,10 +441,10 @@ EXAMPLES = [
     # sea level, Me from eps = 28.80.
     {"id": "P4.31", "fn": "mach_from_area_ratio",
      "args": {"gamma": 1.16, "eps": 28.80, "supersonic": True},
-     "expect": 3.6924, "tol": 0.003},
+     "expect": 3.81928, "tol": 0.003},
     {"id": "P4.32", "fn": "schmucker_separation",
-     "args": {"pa": 101325.0, "Me": 3.6924},
-     "expect": 33_050.0, "tol": 0.01},
+     "args": {"pa": 101325.0, "Me": 3.81928},
+     "expect": 31_584.0, "tol": 0.01},
 
     # ==================================================================
     # PROJECT 5 — strap-on booster for an existing core
@@ -478,14 +478,14 @@ EXAMPLES = [
     {"id": "P5.5", "fn": "solid_equilibrium_pressure",
      "args": {"a": 3.394197e-05, "n": 0.35, "rho_p": 1800.0,
               "Ab": 15.2380, "At": 0.0489060, "c_star_val": 1580.0},
-     "expect": 78.02e5, "tol": 0.005},
+     "expect": 77.55e5, "tol": 0.005},
 
     # P5.6  End-of-fin-burnout Kn: Ab = 12.20 m^2 gives 55 bar, a 30% pressure
     # roll-off and (with Cf) a 32% thrust roll-off.
     {"id": "P5.6", "fn": "solid_equilibrium_pressure",
      "args": {"a": 3.394197e-05, "n": 0.35, "rho_p": 1800.0,
               "Ab": 12.2000, "At": 0.0489060, "c_star_val": 1580.0},
-     "expect": 55.02e5, "tol": 0.005},
+     "expect": 55.08e5, "tol": 0.005},
 
     # P5.7  Burn rate at the 60 bar equilibrium point: 8.0 mm/s by construction.
     {"id": "P5.7", "fn": "vieille_burn_rate",
@@ -511,7 +511,7 @@ EXAMPLES = [
     # R5.2: pc_peak x 1.06348 = 82.97 bar.
     {"id": "P5.11", "fn": "Cf",
      "args": {"gamma": 1.18, "eps": 12.0, "p0": 82.97e5, "pa": 101325.0},
-     "expect": 1.73178, "tol": 0.003},
+     "expect": 1.63148, "tol": 0.003},
 
     # P5.12  Candidate C, the liquid strap-on: burn time at the RD-107A's
     # 839 kN would be 71.5 s, outside the 90-140 s window of R5.3.  Registered
@@ -578,10 +578,10 @@ EXAMPLES = [
     # and 90 bar.
     {"id": "P6.8", "fn": "Cf",
      "args": {"gamma": 1.18, "eps": 8.0, "p0": 90.0e5, "pa": 101325.0},
-     "expect": 1.58080, "tol": 0.003},
+     "expect": 1.63386, "tol": 0.003},
     {"id": "P6.9", "fn": "throat_area_from_thrust",
-     "args": {"F": 1.0e6, "p0": 90.0e5, "Cf_val": 1.58080},
-     "expect": 0.070284, "tol": 0.003},
+     "args": {"F": 1.0e6, "p0": 90.0e5, "Cf_val": 1.63386},
+     "expect": 0.068005, "tol": 0.003},
 
     # P6.10  Uncertainty roll-up for the demonstrated-reliability argument:
     # the RSS of the four independent contributors the key lists.

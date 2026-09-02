@@ -1834,3 +1834,737 @@ risk; if I cannot name the risk, the test is schedule, not engineering."
 **Classic wrong turn.** Listing instrumentation without sample rates and
 without saying what phenomenon each channel resolves. It is the single easiest
 way to reveal that the candidate has never had to interpret a trace.
+
+---
+
+# Block C — Solid rocket motors (items 34–46)
+
+## Item 34 — Why solids `[M19, M32]`
+
+**What a strong answer contains**
+
+- The affirmative case, in the order that actually decides procurements:
+  **thrust density and volumetric impulse** (impulse per unit envelope, which is
+  what a launch tube or a strap-on bay constrains), **readiness** (no
+  propellant loading, no cryogens, seconds from command to launch),
+  **storability** (years in a sealed container across a wide temperature band),
+  **simplicity in operation** (no feed system, no valves, no turbomachinery,
+  nothing to fail during the coast), and **cost per unit impulse at high
+  production rate**.
+- The quantitative anchor: density impulse **474,360 kg·s/m³** for a 1,770 kg/m³
+  propellant at 268 s, against **320,330 kg·s/m³** for LOX/RP-1 at 1,030 kg/m³
+  and 311 s — 48 % more impulse per litre despite 14 % less Isp
+  `[engine-database B.1, A.3]`.
+- Mass fraction: P120C carries 141,400 kg of propellant in a 153,000 kg gross
+  motor, **0.924** `CALC`; the Shuttle SRB ≈ **0.85** `CALC`
+  `[engine-database B.1, B.3]`.
+
+**F1 — ranking by what actually decides.** For a strategic or tactical missile:
+readiness and storability, first and second, with everything else distant. For a
+launch-vehicle strap-on: cost per unit impulse and thrust density. For an
+apogee-kick motor: mass fraction and total-impulse repeatability. Isp is rarely
+the deciding term for any of them, which is the point.
+
+**F2 — mass fraction, and why solids win it on short burns.** The case is the
+pressure vessel *and* the structure, so there is no separate tank; there is no
+feed system, no turbopump, no cryogenic insulation and no ullage. On a short
+burn the inert mass does not grow with burn time the way a liquid's does. Quote
+P120C at 0.924 and Star 48B at ≈0.94 `[engine-database B.3, B.4]` — and note the
+database's warning that Star 48B's inert mass is ≈128 kg, **not** the widely
+repeated 28 kg `[engine-database B.4.1]`, which is exactly the kind of number
+this course exists to catch.
+
+**F3 — where "cannot be shut down" breaks.** Thrust termination ports: the
+UA1205 carried pyrotechnic termination ports in the forward dome, retained for
+the crewed MOL/Titan IIIM configurations `[engine-database B.2]`. Blowing ports
+drops chamber pressure and effectively ends thrust. It is a real capability with
+a real cost (structure, pyrotechnics, a catastrophic failure mode of its own),
+and it was built because a crewed vehicle needed it.
+
+**F4 — solids on a crewed vehicle.** Both answers are historically defensible.
+Yes: the Shuttle flew 135 times on two SRBs; SLS flies five-segment boosters
+today `[engine-database B.1]`. No: you cannot shut them down, you cannot test
+the flight article, the failure mode is fast, and STS-51-L is what that looks
+like. A strong answer takes a side and states the mitigations the side requires
+— for "yes", that means abort systems that outrun the failure, process control
+as the primary reliability mechanism, and joint designs that do not depend on a
+single seal.
+
+**Ends the line early.** "Solids sell on impulse per litre and on readiness, not
+on Isp — and the number that shows it is density impulse, where they beat
+kerolox by half."
+
+**Classic wrong turn.** Arguing the case on cost alone. Large solids are not
+obviously cheap per unit impulse at low rate; the case is readiness, density and
+operational simplicity.
+
+## Item 35 — Propellant families `[M19]`
+
+**What a strong answer contains**
+
+- The constituents and their roles: **oxidiser** (ammonium perchlorate, usually
+  60–70 % by mass, in a bimodal particle-size distribution to reach high solids
+  loading), **metal fuel** (aluminium, 16–20 %, for energy and density),
+  **polymeric binder** (HTPB or the older PBAN, 10–14 %, which is both the fuel
+  and the structural matrix), **curative** (epoxy or isocyanate), and small
+  additives — **burn-rate catalyst** (iron oxide), plasticiser, and bonding
+  agent.
+- Real compositions from the public record: Shuttle SRB PBAN-bound —
+  **AP 69.6 %, Al 16 %, Fe₂O₃ 0.4 %, PBAN 12.04 %, epoxy 1.96 %** (a competing
+  published figure is AP 69.8 / Fe₂O₃ 0.2, differing only in catalyst loading)
+  `[engine-database B.1.1]`; Ariane 5 EAP HTPB-bound, ESA-published
+  **AP 68 %, Al 18 %, HTPB 14 %**; Vega/Ariane "HTPB 1912" is 19 % Al, 12 %
+  binder `[engine-database B.1, B.3]`.
+- The scope discipline: these are published fact-sheet compositions, and the
+  course does not go beyond them.
+
+**F1 — what aluminium costs.** It raises flame temperature and lowers mean
+molecular weight of the *gas* less than it adds mass, so the real gain is
+density and energy per unit volume. The cost is **two-phase flow loss**:
+condensed Al₂O₃ particles do not expand in the nozzle, lag the gas in both
+velocity and temperature, and typically cost 1–3 % of Isp; molten alumina also
+attacks insulation and the nozzle throat, and the slag can accumulate in the aft
+dome. [E] `[SP-8039]`, `[Davenas]`
+
+**F2 — PBAN versus HTPB.** HTPB has better mechanical properties (higher strain
+capability, so a more robust grain), better processing, and generally higher
+solids loading capability, and it became the standard from the 1970s. The
+Shuttle programme did not switch because the motor was qualified on PBAN and a
+binder change requalifies the entire internal ballistics, grain structural
+analysis, ageing model and production process for a human-rated system — the
+change is never worth it once flying. SLS's boosters still use PBAN; BOLE
+switches to HTPB precisely because it is a new motor with new composite cases
+`[engine-database B.1]`.
+
+**F3 — double-base, composite, CMDB.** Double-base (nitrocellulose/
+nitroglycerine) is smokeless and clean-burning, used where plume signature or
+minimum smoke matters; composite (AP/Al/binder) gives the highest performance
+and density and dominates large motors; composite-modified double-base combines
+them for intermediate performance with reduced smoke. Signature, not Isp, is
+usually what selects among them for tactical applications. `[Kubota]`
+
+**F4 — the solids-loading ceiling.** Around 86–89 % by mass. Above it the
+mixture cannot be processed: viscosity rises past the point where it can be
+cast and can flow into the grain, and there is not enough binder to wet the
+particle surfaces, so mechanical properties collapse and the grain cracks. The
+limit is why particle-size distributions are bimodal or trimodal — packing
+efficiency is the whole game. The cost of stopping there is the Isp and density
+you leave on the table. `[SP-8064]`, `[SP-8075]`
+
+**Ends the line early.** "The binder is structural *and* fuel, which is why the
+solids-loading limit is a rheology problem rather than a chemistry one."
+
+**Classic wrong turn.** Describing the binder as inert filler. It is a fuel and
+it is the grain's structural material, and a candidate who treats it as filler
+cannot explain why the loading limit exists.
+
+## Item 36 — Burn rate and the pressure exponent `[M20]`
+
+**What a strong answer contains**
+
+- $r = a p^n$ (Saint-Robert / Vieille), with $r$ in m/s, $p$ in Pa, $n$
+  dimensionless, and $a$ carrying whatever units make the equation balance —
+  m·s⁻¹·Pa⁻ⁿ. The units of $a$ are the first thing an examiner checks. [E]
+  `[SB §12.2]`, `[SP-8076]`
+- The physical meaning of $n$: the sensitivity of the surface regression rate
+  to pressure, arising from how the flame stand-off distance shrinks as
+  pressure rises (the gas-phase reaction zone moves closer to the surface, so
+  the conductive feedback grows). Typical modern composites: n = 0.2–0.5.
+  `[BDP70]`
+- The worked case: a = 3.5×10⁻⁵ SI, n = 0.35, ρ_p = 1,770 kg/m³,
+  c\* = 1,550 m/s, $A_b$ = 5.0 m², $A_t$ = 0.020 m² (K_n = 250) gives
+  $p_c = (a\rho_p c^{*}K_n)^{1/(1-n)} =$ **5.482 MPa (54.8 bar)**, at which
+  $r =$ **7.99 mm/s**. Sanity: the Shuttle SRB runs ≈62.5 bar average
+  `[engine-database B.1]`, so the example sits in the right neighbourhood.
+
+**F1 — proving n < 1.** At equilibrium, mass generated equals mass discharged:
+$\rho_p A_b a p^n = p A_t/c^{*}$. Perturb $p$. The generation term scales as
+$p^n$, the discharge term as $p^1$. If $n < 1$, a pressure rise increases
+discharge faster than generation and the perturbation decays — stable. If
+$n > 1$, generation outruns discharge and the pressure runs away to burst. The
+argument must be made as a *rate comparison*, not asserted. [F]
+
+**F2 — the 10 % burning-area step.** $p \propto K_n^{1/(1-n)}$, so
+$1.1^{1/0.65} =$ **1.1579**: 54.8 bar becomes **63.5 bar**, a 15.8 % pressure
+rise from a 10 % area change. The exponent amplifies everything, which is the
+lesson.
+
+**F3 — the same step at n = 0.6.** $1.1^{1/0.4} =$ **1.2691**, a 26.9 % rise —
+nearly double the sensitivity. (The *absolute* equilibrium pressure at n = 0.6
+with this coefficient is physically absurd, ~10¹¹ Pa, because $a$ and $n$ are
+not independent — a real n = 0.6 propellant has a very different $a$. Say so;
+quoting the absurd number without noticing is the trap.) The design lesson:
+low-n propellants are forgiving of area and throat-area errors, ageing, and
+temperature; high-n propellants amplify every one of them, and that is why
+large motors use n ≈ 0.3.
+
+**F4 — measuring n.** Strand burner (Crawford bomb) at several pressures gives
+a and n for the *chemistry*; small ballistic test motors give the values that
+actually apply to the motor. They disagree — typically the motor burns faster —
+because of erosive burning, grain-surface roughness, initial-temperature
+differences, and the strand's one-dimensional geometry. The correction is
+sometimes called a burn-rate scale factor and it is determined per propellant
+per motor family. [E] `[SP-8064]`
+
+**Ends the line early.** "n < 1 is a rate-comparison argument, and everything
+else in solid internal ballistics is $1/(1-n)$ amplifying whatever went wrong."
+
+**Classic wrong turn.** Quoting $a$ without units or without a pressure unit
+convention. The same propellant has wildly different $a$ in SI, in
+in/s·psi⁻ⁿ and in mm/s·bar⁻ⁿ, and mixing them is the most common numerical
+error in the whole subject.
+
+## Item 37 — Erosive burning `[M20, M21]`
+
+**What a strong answer contains**
+
+- The mechanism: high-velocity gas flowing parallel to the burning surface
+  thins the thermal and reaction layer above it, raising convective heat
+  feedback and therefore the regression rate above the $ap^n$ value. It is a
+  *local* augmentation that depends on local mass flux, not on chamber pressure.
+  [E] `[LR57]`, `[SP-8039]`
+- Where and when: in the aft port of a long, low-port-to-throat-area motor,
+  early in the burn when the port is smallest — exactly where mass flux peaks.
+- The trace signature: an early pressure hump above the equilibrium value,
+  decaying as the port opens up.
+
+**F1 — the group and the threshold.** The correlating parameter is the
+port mass flux $G = \dot m/A_{port}$, often normalised as a threshold
+velocity or a ratio $J = G/G_{th}$; Lenoir–Robillard writes the augmentation as
+an additive convective term $r = ap^n + \alpha G^{0.8}D^{-0.2}e^{-\beta\rho_p r/G}$.
+Onset is typically quoted around a port Mach number of 0.2–0.3 or a threshold
+mass flux of a few hundred kg/(m²·s), propellant-dependent. [E]
+
+**F2 — worst location, and long thin motors.** Worst at the aft end, because
+mass flux accumulates along the port. In a long, thin motor the port-to-throat
+area ratio is small and the effect is large, so designs compensate by tapering
+the port (larger cross-section aft), by using a shorter web aft, or by
+progressive grain design that puts less burning area forward early on.
+
+**F3 — structural, performance, or both.** Both, and they are not equally
+important. Performance: the impulse is not lost — the propellant still burns —
+but the trace shape changes and the *predicted* trace is wrong, which matters
+for guidance and staging. Structural: the early pressure hump is a real
+overpressure the case and the grain must be designed for, and it arrives at the
+moment of maximum grain stress. The structural consequence is the one that
+sizes hardware.
+
+**F4 — suppression.** Increase port area (lower loading fraction — a direct
+performance cost), taper the port aft, use a lower-n and less
+erosion-sensitive propellant, add an inhibitor on the aft surfaces, or split the
+grain so no single port carries the full flux. All of them cost either
+propellant mass or complexity.
+
+**Ends the line early.** "It is driven by local mass flux, not chamber pressure,
+which is why it appears at the aft end early in the burn and disappears as the
+port opens."
+
+**Classic wrong turn.** Treating erosive burning as a chamber-pressure effect
+and trying to design it out by changing throat area. Changing $A_t$ changes
+$K_n$ and the whole trace, and does nothing about the local flux that causes it.
+
+## Item 38 — Temperature sensitivity `[M20]`
+
+**What a strong answer contains**
+
+- Two coefficients, and the distinction between them:
+  $\sigma_p = (\partial \ln r/\partial T_i)_p$, the burn-rate sensitivity at
+  constant pressure (typical 0.001–0.004 K⁻¹), and
+  $\pi_K = (\partial \ln p_c/\partial T_i)_{K_n} = \sigma_p/(1-n)$, the chamber
+  pressure sensitivity at constant $K_n$ — the one the case designer cares
+  about. [E] `[SB §12.3]`, `[SP-8039]`
+- The physical origin: the propellant's initial temperature sets the enthalpy
+  the conductive feedback has to supply to bring the surface to pyrolysis
+  temperature, so a warmer grain regresses faster for the same heat flux.
+- Numbers: with σ_p = 0.002 K⁻¹ and n = 0.35, $\pi_K =$ **0.003077 K⁻¹**. Over
+  a 40 K swing the burn rate changes by $e^{0.002\times40}-1 =$ **8.3 %** and
+  the chamber pressure by $e^{0.003077\times40}-1 =$ **13.1 %**.
+
+**F1 — the computation.** As above, with the two numbers kept distinct. A
+candidate who applies σ_p to pressure has made the error the item exists to
+find.
+
+**F2 — why high n amplifies.** Directly from $\pi_K = \sigma_p/(1-n)$: at
+n = 0.35 the divisor is 0.65; at n = 0.6 it is 0.4, so the same burn-rate
+sensitivity produces 1.6× the pressure swing. Same amplification factor as item
+36, from the same place.
+
+**F3 — consequences for design and qualification.** The case must be designed to
+the **maximum expected operating pressure** at the hot conditioning limit with
+the safety factor applied on top, so temperature sensitivity directly buys case
+mass. The qualification matrix must include hot- and cold-conditioned firings
+at the specification temperature limits — typically something like 233 K and
+311 K — and the cold end matters for ignition and grain strain as well as for
+performance. `[SP-8025]`, `[SMC-S-016]`
+
+**F4 — buying sensitivity down.** Formulation: catalysts and oxidiser particle
+size affect σ_p; a lower-n propellant reduces the amplification. Design: thermal
+conditioning and insulated storage narrow the temperature range the motor sees,
+which is often cheaper than reformulating. On tactical systems, conditioning is
+frequently the real answer.
+
+**Ends the line early.** "σ_p is the burn-rate coefficient and π_K = σ_p/(1−n)
+is the pressure one — and it is π_K, not σ_p, that sizes the case."
+
+**Classic wrong turn.** Quoting one coefficient for both, or quoting π_K as a
+propellant property. π_K depends on n and therefore on how the motor is
+operated, not on the chemistry alone.
+
+## Item 39 — Grain geometry `[M21]`
+
+**What a strong answer contains**
+
+- The chain: required $F(t)$ → required $p_c(t)$ given a fixed throat →
+  required $K_n(t) = A_b(t)/A_t$ → required burning-area history → a
+  cross-section whose perimeter evolves that way as the surface regresses
+  normal to itself. [F] `[SP-8076]`
+- The vocabulary used correctly: **progressive** (area rises), **neutral**
+  (constant), **regressive** (falls); **web** (the burn distance to
+  breakthrough); **sliver** (unburnt propellant left when parts of the grain
+  break through before others).
+- Real examples: the Shuttle SRB's **11-point star forward segment** with
+  **double-truncated-cone aft segments**, giving a head-end regressive-then-
+  neutral trace `[engine-database B.1]`.
+
+**F1 — three geometries and the sliver.** A simple cylindrical bore is strongly
+progressive (perimeter grows with radius). A star is initially regressive as the
+points burn back, then neutralises — the classic way to make a neutral trace.
+A wagon-wheel achieves a high initial area in a short motor. The sliver problem:
+when the star points break through to the insulation before the bore does, the
+remaining propellant between points burns with a rapidly changing, uncontrolled
+area, producing a ragged tail-off and carrying dead mass. Sliver fraction is a
+design metric, usually a few percent.
+
+**F2 — why the SRB's combination.** The forward star produces a regressive early
+trace that reduces thrust through **max-Q**, limiting aerodynamic loads on the
+stack, while the aft double-truncated cones keep the overall trace near-neutral
+for the rest of the burn `[engine-database B.1]`. The constraint that drove it is
+a vehicle load constraint, not a propulsion one — which is the systems-engineering
+point the examiner is fishing for.
+
+**F3 — web and burn time.** $t_b = w/\bar r$. At $\bar r$ = 8.0 mm/s (item 36's
+equilibrium point), a 0.42 m web burns for **52.5 s**. To shorten burn time at
+fixed total impulse: reduce the web and increase the burning area (more star
+points, more ports, a longer motor), which raises $K_n$ and therefore chamber
+pressure — so the case gets heavier. Total impulse is fixed, so you are trading
+burn time against inert mass. Say that explicitly.
+
+**F4 — doubling p_c at fixed impulse and envelope.** Burn rate rises as $p^n$
+(15 % for a doubling at n = 0.35, since $2^{0.35} = 1.27$ — actually 27 %), so
+burn time falls; $K_n$ must rise as $p^{1-n}$, so either burning area goes up or
+throat area comes down; the case wall thickness scales linearly with pressure, so
+case mass rises; and the nozzle throat gets smaller and hotter. In a fixed
+envelope the usual outcome is a heavier motor with a shorter, punchier trace —
+which is sometimes exactly what a tactical requirement wants and almost never
+what a launch vehicle wants.
+
+**Ends the line early.** "The grain is a geometry problem whose objective
+function is $A_b(t)$, and every named shape is just a way of making the
+perimeter evolve the way the trajectory needs."
+
+**Classic wrong turn.** Designing the cross-section for the initial thrust and
+never checking the area history, then discovering a large sliver and a ragged
+tail-off.
+
+## Item 40 — Grain structural integrity `[M21, M23]`
+
+**What a strong answer contains**
+
+- The load cases, all before ignition: **cure shrinkage and thermal cool-down**
+  from cure temperature (the dominant one — the propellant shrinks against a
+  stiff case and the bore goes into tension), **storage thermal cycling**,
+  **gravity slump** for a large horizontal motor, **transport and handling
+  vibration**, **ignition pressurisation** (bore strain as the case expands),
+  and **flight acceleration and vibration**.
+- The material reality: propellant is a filled elastomer with a strain
+  capability of a few tens of percent that *falls* with age and with low
+  temperature, and its modulus is strongly rate- and temperature-dependent —
+  so the analysis is viscoelastic, not elastic. `[SP-8073]`
+- The bond lines — propellant-to-liner and liner-to-insulation — as the usual
+  failure location.
+
+**F1 — cure shrinkage.** Highest strain at the **bore surface**, and especially
+at stress concentrations: star-point fillets and the ends of the grain where it
+meets the case. The failure is a bore crack or a debond at the case wall, and
+star-point radii exist to manage exactly this. Cold conditioning makes it worse,
+because the propellant is stiffer and less compliant when cold, which is why
+cold is the critical structural case and hot is the critical ballistic one.
+
+**F2 — a bore crack.** It adds burning area, instantly and unpredictably. From
+item 36's amplification, a 10 % area increase is a 16 % pressure rise; a large
+crack can be much more, and the pressure rise further opens the crack. The
+signature is a pressure trace above prediction from ignition, sometimes with a
+sharp early spike, and in the worst case case burst within the first seconds.
+It is fast — a crack is not a slow degradation.
+
+**F3 — verifying without cutting.** Non-destructive evaluation: X-ray or
+computed tomography for voids and cracks, ultrasonic C-scan for the bond lines,
+and — for large motors — a proof of the *structure* rather than the grain
+(hydroproof of the case) plus process controls on the cast. Add periodic
+surveillance of stored units, including instrumented ageing specimens cast from
+the same batch. `[SP-8075]`, `[SP-8073]`
+
+**F4 — ageing.** Continued cure and cross-linking stiffens the binder;
+plasticiser migrates; oxidative degradation at surfaces; and the bond lines
+weaken. The surveilled property is the **mechanical property set** — modulus,
+maximum stress, and above all **strain capability**, because the failure mode is
+strain-driven — measured on witness samples and on cut-up units from the same
+production lots, correlated to age and storage temperature history.
+
+**Ends the line early.** "The critical case is cold, and it is cure shrinkage
+plus thermal contraction against a stiff case, which puts the bore surface into
+tension — everything else is a smaller number on top of that."
+
+**Classic wrong turn.** Analysing the grain elastically. Propellant is
+viscoelastic; its modulus depends on rate and temperature, and an elastic
+analysis is wrong in both directions depending on the load case.
+
+## Item 41 — Motor cases `[M22]`
+
+**What a strong answer contains**
+
+- The trade axes: **mass** (composite wins decisively — specific strength is
+  several times steel's), **cost and rate** (steel is cheaper at low rate;
+  filament winding is capital-intensive but scales), **reusability** (the
+  Shuttle SRB's steel cases were recovered and reflown; composite is generally
+  not), **segmentation** (steel segments can be transported and joined;
+  monolithic composite must be built and shipped whole), and **damage
+  tolerance and inspection** (steel's failure modes are understood and
+  inspectable; composite delamination is neither).
+- The real examples in tension: Shuttle SRB, **D6AC steel, ~12.7 mm nominal
+  membrane, 11 casting segments assembled into 4 flight segments with 3 field
+  joints** `[engine-database B.1]`; P120C, **carbon-fibre filament-wound,
+  monolithic, one piece, no field joints**, 13.5 m × 3.4 m, ≈3,500 km of fibre
+  wound over ≈33 days `[engine-database B.1]`; SRMU, graphite/epoxy in 3
+  segments `[engine-database B.2]`; BOLE moving SLS boosters from refurbished
+  steel to composite `[engine-database B.1]`.
+
+**F1 — the membrane calculation and what it ignores.** Thin-wall hoop:
+$t = p r\,SF/\sigma = 6.5\times10^6 \times 1.7 \times 1.4/1400\times10^6 =$
+**11.05 mm**. What it ignores: the domes (which are not membrane-simple and are
+where the mass actually concentrates), the joints, the polar bosses and
+attachment hardware, the insulation and liner inside it, the buckling case under
+external or bending load, discontinuity stresses where thickness changes, and
+fracture-mechanics-based thickness for a flaw-tolerant design — which for a
+high-strength steel like D6AC is often the *governing* criterion rather than
+yield. `[SP-8025]`, `[STD-5001]`, `[AIAA-S-080]`
+
+**F2 — P120C monolithic versus SRB segmented.** The SRB was segmented because it
+was too large to transport assembled from Utah to Florida and had to be cast in
+manageable pieces — a logistics constraint that created the field joints that
+destroyed Challenger. P120C is built at the launch site region (Kourou/Colleferro)
+and is small enough to go monolithic, so it simply deletes the field joint and
+its failure mode `[engine-database B.1]`. The general lesson: the joint existed
+for a manufacturing and transport reason, and removing the reason removed the
+joint.
+
+**F3 — segment joints.** Failure mode: **joint rotation** under internal
+pressure opens the gap the seal must bridge, at high rate, at ignition. Design
+features that address it: the capture feature added in the RSRM redesign (which
+mechanically limits rotation), a third O-ring, joint heaters to keep elastomer
+above its glass-transition-limited response temperature, and improved insulation
+that keeps hot gas away from the seal entirely `[engine-database B.1]`,
+`[Rogers86]`.
+
+**F4 — the real mass driver.** Not the membrane. At large diameter the domes,
+the joints, the polar bosses, the skirt and attachment structure, and the
+insulation dominate. A candidate who computes a membrane thickness and reports a
+case mass from it will be off by a large factor, and the examiner is checking
+whether they know that.
+
+**Ends the line early.** "The membrane is the easy part and it is not where the
+mass is — the domes, the joints and the insulation are, and the joint is where
+the reliability is too."
+
+**Classic wrong turn.** Choosing composite purely on specific strength. The
+Shuttle chose steel partly because it was recoverable and reflyable, and the
+inspection story for a recovered composite case is much worse.
+
+## Item 42 — Insulation and liners `[M23]`
+
+**What a strong answer contains**
+
+- The distinction: **insulation** is the thermal barrier between the combustion
+  gas and the case, sized by ablation and heat-soak over the burn plus a margin;
+  the **liner** is the thin adhesive layer that bonds propellant to insulation
+  and provides a controlled, inhibited burning interface. Different materials,
+  different functions, different failure modes.
+- What each survives: insulation sees a several-thousand-kelvin gas, particle
+  impingement, and shear; the liner mainly has to maintain a bond under grain
+  strain for the whole storage life.
+- Materials: NBR- or EPDM-based rubber with silica, asbestos-replacement fibres
+  or carbon fillers for insulation; the liner is typically a filled version of
+  the binder chemistry so it bonds to both sides. `[SP-8115]`, `[Davenas]`
+
+**F1 — sizing insulation.** By local ablation rate integrated over the local
+**exposure time**, plus a heat-soak allowance so the case never exceeds its
+strength-limited temperature, plus a margin — commonly a factor of 1.5–2 on
+thickness. The key subtlety is exposure time: propellant covers most of the
+insulation for most of the burn, so the aft dome (exposed from ignition) needs
+far more than the forward cylinder (exposed only at the end). Design margin
+protects mainly against **exposure-time uncertainty** — grain regression that
+does not go quite as predicted — more than against the ablation rate itself.
+
+**F2 — molten alumina.** Al₂O₃ condenses at around 2,300 K and is liquid in the
+chamber; it is centrifuged and deposited where the flow turns and slows —
+the aft dome and the nozzle entry region — where it forms **slag**. Slag
+accumulation attacks insulation mechanically as well as thermally, changes the
+mass balance, and in a submerged nozzle can pool in the annular cavity. This is
+why aft-dome and nozzle-entry insulation is the thickest and most carefully
+qualified in the motor.
+
+**F3 — insulation as a fraction of inert mass.** It is commonly 20–40 % of the
+inert mass of a large motor, because it lines almost the entire internal surface
+and the aft regions are thick. Newcomers expect the case to dominate; on a
+composite-case motor especially, the insulation can outweigh the structure.
+
+**F4 — an insulation failure.** In the trace: usually nothing until the very end
+— insulation failures are burn-through events that appear late, when the
+insulation has been exposed longest, and they show as a pressure drop (if the
+case breaches) or nothing at all (if the case survives). In hardware: a local
+char depth approaching or exceeding the design, a hot spot on the case exterior,
+or paint discolouration and case metallurgy changes found in post-flight
+inspection of a recovered motor. Recovered Shuttle SRB hardware is the classic
+data source for exactly this.
+
+**Ends the line early.** "Insulation is sized by *local exposure time*, not by
+burn time, and that is why the aft dome is an order of magnitude thicker than
+the forward cylinder."
+
+**Classic wrong turn.** Sizing insulation uniformly for the full burn duration.
+It produces a motor that is far too heavy and still misses the local hot spots
+where the real exposure is longest.
+
+## Item 43 — Solid nozzles and throat erosion `[M24]`
+
+**What a strong answer contains**
+
+- Why ablative: there is no coolant. A solid motor has no propellant flowing
+  through a jacket, so the wall must survive by ablating (endothermic
+  pyrolysis and a char layer that insulates and blows gas into the boundary
+  layer) or by being a refractory that erodes slowly.
+- The design drivers: throat erosion rate (which changes $A_t$ and therefore the
+  whole ballistic prediction), char depth in the exit cone, structural integrity
+  of the char, and particle impingement from alumina.
+- The materials: carbon-phenolic and silica-phenolic ablatives on a structural
+  shell, with a **carbon–carbon** or bulk-graphite throat insert where erosion
+  must be minimised — Vega's P80FW uses a carbon-phenolic nozzle with a
+  carbon–carbon throat insert `[engine-database B.3]`.
+- The vacuum/sea-level $C_F$ contrast at the SRB's area ratio: γ = 1.14,
+  ε = 7.72, p_c = 62.5 bar gives $C_F^{SL} =$ **1.6160** and
+  $C_F^{vac} =$ **1.7411** — an 8 % altitude gain on a motor whose ε is small
+  precisely because it must work at sea level `[engine-database B.1]`.
+
+**F1 — 6 % throat growth.** Pressure falls as
+$(A_{t1}/A_{t2})^{1/(1-n)} = (1/1.06)^{1/0.65} =$ **0.9143**, an 8.6 % drop.
+Thrust: $F = C_F p_c A_t$, and $p_c A_t$ has fallen by
+$0.9143\times1.06 = 0.9692$, so thrust falls about 3 % — less than pressure,
+because the bigger throat partly compensates. $C_F$ also improves slightly as ε
+falls... no: ε falls when the throat grows at fixed exit area, so $C_F$ gets
+*worse* in vacuum and better at sea level. Working that sign correctly is what
+the follow-up is for.
+
+**F2 — the throat insert trade.** Bulk graphite: cheap, isotropic, machinable,
+moderate erosion, brittle and thermal-shock-sensitive. Carbon–carbon: lowest
+erosion, excellent thermal shock resistance, very expensive and long lead.
+Carbon-phenolic: cheapest, ablates by design, acceptable where erosion tolerance
+is loose (large motors with low-n propellant and short burns). The choice is set
+by how much $A_t$ change the ballistic prediction can tolerate — which is
+$1/(1-n)$ again.
+
+**F3 — submerged nozzles.** The nozzle entry is pushed forward inside the case,
+shortening the overall motor length for a given expansion — valuable when the
+stage length is constrained. Costs: an annular cavity where slag collects, a
+more complex and heavier nozzle structure, additional insulation in the cavity,
+and a more difficult flow field at the entry. The Shuttle SRB uses a submerged
+flexseal nozzle `[engine-database B.1]`.
+
+**F4 — why particles change everything.** A liquid engine's nozzle sees a clean
+gas; a metallised solid's sees a two-phase flow with molten alumina droplets
+that impinge, especially where the flow turns. That adds mechanical erosion on
+top of thermochemical ablation, concentrates damage at the throat entry and on
+any surface facing the flow, and makes erosion rate depend on motor geometry and
+particle size distribution rather than on gas properties alone. It also puts a
+two-phase Isp loss into the performance prediction.
+
+**Ends the line early.** "There is no coolant, so the wall is consumed by
+design — and the number that matters is how much $A_t$ growth the ballistic
+prediction can absorb, amplified by $1/(1-n)$."
+
+**Classic wrong turn.** Treating throat erosion as a performance loss only. Its
+first-order effect is on chamber pressure and therefore on the whole trace and
+on the case's design pressure.
+
+## Item 44 — Thrust vector control `[M24]`
+
+**What a strong answer contains**
+
+- **Flexseal (flexible bearing) gimballing**: the nozzle pivots on a laminated
+  elastomer-and-shim bearing that carries the axial pressure load while allowing
+  a few degrees of rotation. Efficient (all the thrust is vectored), no
+  consumables, but it needs actuators sized against the bearing's torsional
+  stiffness plus the aerodynamic and pressure moments — and that stiffness rises
+  with pressure.
+- **LITVC**: a liquid (N₂O₄ on the Titan UA120 family) injected through ports in
+  the exit cone creates an oblique shock and an asymmetric wall pressure field,
+  giving side force with no moving nozzle. Simple, fast, no bearing — but it
+  carries a consumable, its side-force efficiency is modest, and the injectant
+  tanks and valves are dead mass after the burn.
+- The real examples: Shuttle SRB **submerged flexseal, ±8° pitch and yaw**, two
+  hydraulic actuators per booster fed by hydrazine APUs `[engine-database B.1]`;
+  Ariane 5 EAP flexseal, hydraulic, up to 7.3°; P120C and the Vega family
+  flexseal with **electromechanical** actuators `[engine-database B.1, B.3]`;
+  UA1205/1206/1207 LITVC with no moving nozzle `[engine-database B.2]`.
+
+**F1 — actuator power for a flexseal.** Set by the moment required: the bearing's
+torsional stiffness (which increases with the pressure load it must carry, hence
+with chamber pressure and nozzle size), plus the offset pressure moment, plus
+aerodynamic loads on the exit cone, all times the required slew rate. Power
+scales roughly with moment × angular rate, so a higher-pressure motor with the
+same deflection requirement needs a stiffer, more powerful actuation system — a
+real mass and power penalty of raising p_c that candidates rarely mention.
+
+**F2 — LITVC efficiency and the mass budget.** Side-force amplification (side
+force per unit injectant momentum) is typically 1.5–3, so it does better than a
+cold jet, but the injectant is consumed continuously whenever vectoring is
+commanded. Over a 100+ second burn with an active guidance loop the injectant
+and its tankage become a significant inert mass, and — the operational problem —
+the budget is *duty-cycle dependent*, so a dispersion-heavy flight can exhaust
+it.
+
+**F3 — why Titan switched.** The UA120 family used LITVC; the SRMU that replaced
+it on Titan IV-B used a **gimballed nozzle** `[engine-database B.2]`. What
+changed: flexible-bearing technology matured and was proven at scale (the
+Shuttle SRB flew it from 1981), composite cases and higher performance made the
+LITVC injectant mass relatively more expensive, and the toxic N₂O₄ injectant
+system was an operational burden. Also the SRMU was a new motor, so the
+requalification cost that normally blocks such a change did not apply.
+
+**F4 — electromechanical versus hydraulic today.** Electromechanical, for most
+new designs: no hydraulic fluid, no APU or hot-gas power unit, better health
+monitoring, cleaner ground operations, and power electronics have caught up on
+force density. Hydraulic retains the advantage at the very largest forces and
+has decades of qualification heritage. Vega/P120C uses EMA; the Shuttle used
+hydraulic with hydrazine APUs; SLS BOLE moves to electric TVC
+`[engine-database B.1, B.3]`.
+
+**Ends the line early.** "Flexseal vectors all the thrust and carries no
+consumable; LITVC carries a consumable whose budget depends on the flight's
+dispersions — that asymmetry is the whole trade."
+
+**Classic wrong turn.** Comparing them on deflection angle. The comparison is
+consumable-versus-actuator-power, and the maximum angle is a requirement both
+can be designed to meet.
+
+## Item 45 — Solid motor manufacturing `[M25]`
+
+**What a strong answer contains**
+
+- The sequence: case preparation and insulation layup → liner application →
+  propellant mixing (oxidiser grinding and classification, binder and curative,
+  vacuum mixing) → casting into the case around a mandrel, under vacuum, with
+  controlled flow → cure at elevated temperature for days → mandrel extraction →
+  machining of the bore ends and inhibitor application → NDE → nozzle and
+  igniter installation. `[SP-8075]`
+- Where the risk concentrates: the **bond lines** (insulation-to-case,
+  liner-to-insulation, propellant-to-liner), **voids** introduced during casting,
+  and the **cure profile**, because it sets both the mechanical properties and
+  the residual stress state.
+- The scope boundary observed: process *science* and quality logic, not
+  procedures or formulations.
+
+**F1 — the mixing and casting hazard.** An energetic mixture under mechanical
+work: the controls are remote operation behind barricades, temperature and
+torque monitoring with automatic shutdown, conductive/grounded equipment and
+controlled humidity against electrostatic initiation, limits on batch size so
+that a worst-case event is bounded, and vacuum casting that avoids trapped gas.
+The design principle is that the process is arranged so no credible single
+failure puts a person in the hazard volume.
+
+**F2 — voids and unbonds.** Found by X-ray/CT for volumetric defects and
+ultrasonic C-scan for bond lines, with the accept criterion derived from
+**fracture and ballistic analysis**: a void is acceptable if the resulting local
+stress concentration keeps grain strain below capability with margin, and if the
+added burning area from a surface-connected void is within the ballistic
+tolerance. The criterion is analysis-based, not "no defects" — that is the part
+candidates get wrong.
+
+**F3 — why process dominates reliability.** Because the design is simple and
+static and the failure modes are almost all introduced during manufacture: a
+void, an unbond, a contaminated bond line, a cure excursion, an insulation
+thickness shortfall. There is no functional test of the flight article — you
+cannot hot-fire it and then fly it — so the only evidence you will ever have that
+this specific motor is good is the process record and the NDE. That is a
+qualitatively different reliability argument from a liquid engine's, where the
+flight article can be acceptance-fired.
+
+**F4 — a lot 3 % high on burn rate.** Do: characterise it (strand and ballistic
+test motors from that lot), determine whether the resulting pressure — amplified
+to ~4.7 % by $1/(1-n)$ at n = 0.35 — stays within the qualified MEOP and within
+the trajectory's tolerance, adjust the **throat diameter** for motors made from
+that lot if the design allows it (this is standard practice: throat sizing is
+the ballistic trim), and document. Do **not**: accept it on the argument that
+3 % is small, blend lots without requalifying, or adjust the ballistic
+prediction to match without understanding why the lot moved.
+
+**Ends the line early.** "The flight article is never functionally tested, so
+the process record *is* the reliability argument — which is why solids are a
+manufacturing discipline more than a design one."
+
+**Classic wrong turn.** Treating NDE accept criteria as "find and remove all
+defects". They are analysis-derived limits, and a programme that cannot state
+the analysis behind its criteria cannot defend a disposition.
+
+## Item 46 — Historical motors and the lessons `[M26, M34]`
+
+**What a strong answer contains**
+
+- A programme chosen and a specific transferable lesson, not a narrative.
+  Defensible picks: the Shuttle SRB (field joints, and the organisational
+  handling of an out-of-family observation), Minuteman (mass production and
+  ageing surveillance of a fielded fleet), Polaris/Poseidon/Trident (packaging
+  and the move to composite cases), Titan UA120/SRMU (LITVC to gimbal, PBAN to
+  HTPB, steel to composite), P120C (monolithic composite deleting the joint).
+- Evidence handled with the database's cautions attached.
+
+**F1 — the Challenger field joint.** The chain: cold ambient (about 2 °C at
+launch, far below prior experience) stiffened the O-ring elastomer and slowed its
+response; at ignition, internal pressure caused **joint rotation** — the tang and
+clevis deflect apart, opening the gap the seal must follow — and the stiffened
+primary O-ring could not extrude into the gap fast enough; hot gas blew by,
+eroded the seal, and produced a plume from the aft field joint that impinged on
+the External Tank attachment structure and the tank itself, leading to structural
+failure of the stack `[Rogers86]`. Both parts matter: temperature set the seal's
+response *rate*, and joint rotation set the *demand* on it.
+
+**F2 — trace and film order.** The chamber-pressure traces of the two boosters
+diverged slightly (the failing booster running marginally low as gas escaped);
+the film shows a puff of black smoke from the aft field joint region within the
+first second, then nothing for most of a minute, then a growing flame plume
+around 58 s that grew and impinged. The sequence — early blow-by, temporary
+sealing by combustion products, then failure of that plug — is the part that is
+hard to reconstruct from pressure data alone and is why the imagery mattered.
+
+**F3 — the general lesson about seals.** A seal in a joint that **opens under
+the load it is sealing against** is a fundamentally bad architecture: the seal
+must chase a moving gap at exactly the moment of highest pressure. The fix is
+structural, not elastomeric — limit the rotation (the RSRM capture feature),
+or delete the joint (P120C's monolithic case). Adding a third O-ring is
+mitigation, not a fix.
+
+**F4 — the most-often-wrong number.** `/vehicle` versus `/motor` thrust. The
+database flags it repeatedly: Wikipedia's UA1207 figure of 14,234 kN is the
+two-booster Titan IV total, not one motor (≈7,100 kN each); the SRMU's 15,120 kN
+is likewise per vehicle (≈7,600 kN per motor) `[engine-database B.2.1]`. Catch it
+by dividing by the motor count and checking against the propellant mass and burn
+time: $\bar F \approx m_p g_0 I_{sp}/t_b$ must close, and if it is out by exactly
+a factor of two you have found it. Also watch `max` versus `avg` — the LVM3 S200
+has max/avg = 1.44 `[engine-database, thrust tags]`.
+
+**Ends the line early.** "The joint rotated under the pressure it was sealing,
+so the seal had to chase a moving gap — the temperature only determined whether
+it could keep up."
+
+**Classic wrong turn.** Reducing STS-51-L to "the O-rings got cold". Temperature
+was the trigger; the design flaw was a pressure-actuated joint that opened, and a
+programme that had normalised blow-by observed on earlier flights.

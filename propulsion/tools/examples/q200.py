@@ -339,3 +339,39 @@ EXAMPLES += [
      "args": {"a": 2.66371e-6, "p": 7.0e6, "n": 0.529955},
      "expect": 11.3e-3, "tol": 0.002},
 ]
+
+# --- Q151-160 -------------------------------------------------------------
+# Q151 tb = 0.42/0.0095 = 44.21 s; peak at 0.3*web = 13.26 s; area-weighted
+#   mean Ab = 9.27 m^2 gives mp = 1800*9.27*0.42 = 7008 kg.
+# Q153 case mass = pi*3.4*13.5*0.012*1580 = 2734.0 kg; inert 5134.0 kg;
+#   PMF = 141400/146534 = 0.9650 against P120C's published 0.924, which needs
+#   an inert mass of 141400*(1/0.924 - 1) = 11630 kg -- 6496 kg unaccounted.
+# Q155 rt 0.200 -> 0.2144 m, At 0.125664 -> 0.144411 m^2 (+14.92 %);
+#   Cf(1.18, eps 16 -> 13.923) at 6 MPa SL rises 1.5424 -> 1.5611;
+#   pc ratio 1.149184**(-1/0.65) = 0.8074; net SL thrust ratio 0.939.
+# Q160 total impulse 0.315*68*9.80665 = 210.06 N*s; adiabatic alternative
+#   usable fraction 1-(0.1)**(1/1.4) = 0.80693 -> 0.2824 kg -> 188.3 N*s.
+EXAMPLES += [
+    {"id": "q200.155a", "fn": "Cf",
+     "args": {"gamma": 1.18, "eps": 16.0, "p0": 6.0e6, "pa": 101325.0},
+     "expect": 1.54243, "tol": 0.001},
+    {"id": "q200.155b", "fn": "Cf",
+     "args": {"gamma": 1.18, "eps": 13.9229, "p0": 6.0e6, "pa": 101325.0},
+     "expect": 1.56114, "tol": 0.001},
+    {"id": "q200.159a", "fn": "stored_gas_mass",
+     "args": {"p": 300e5, "V": 4.0e-3, "R": 296.797, "T": 300.0, "Z": 1.0},
+     "expect": 1.34772, "tol": 0.001},
+    {"id": "q200.159b", "fn": "stored_gas_mass",
+     "args": {"p": 300e5, "V": 4.0e-3, "R": 296.797, "T": 300.0, "Z": 1.12},
+     "expect": 1.20333, "tol": 0.001},
+    {"id": "q200.160a", "fn": "usable_fraction",
+     "args": {"p_i": 200.0, "p_f": 20.0, "isothermal": True},
+     "expect": 0.90, "tol": 0.001},
+    {"id": "q200.160b", "fn": "usable_fraction",
+     "args": {"p_i": 200.0, "p_f": 20.0, "isothermal": False,
+              "gamma": 1.4},
+     "expect": 0.80693, "tol": 0.001},
+    {"id": "q200.160c", "fn": "tsiolkovsky_dv",
+     "args": {"isp": 68.0, "m0": 12.0, "mf": 11.685},
+     "expect": 17.7387, "tol": 0.001},
+]

@@ -1070,3 +1070,326 @@ precisely why lateral load cells and post-fire nozzle metrology exist.
 > anomaly. Naming the insulation *or* the gouge as the refusal both earn full
 > marks if argued on margin-unknown grounds; refusing on the erosive hump does
 > not — it is the one anomaly that is fully explained.
+
+---
+
+# Section D — Design and trade: KESTREL-G (20 points)
+
+## (a) The closure condition and architecture D (3 pts)
+
+**Statement.** With $m_{inert} = k\,m_p$ and $c = I_{sp}g_0$, the rocket
+equation gives $m_p = m_{final}\left(e^{\Delta v/c}-1\right)$ where
+$m_{final}$ includes the inert mass. Substituting and solving, the stage
+exists only if
+
+$$\boxed{\;k\left(e^{\Delta v/c}-1\right) < 1\;}$$
+
+**Physical meaning.** Every kilogram of propellant drags $k$ kilograms of tank,
+structure and plumbing to burnout with it. As $\Delta v/c$ grows, the
+propellant required per kilogram of payload grows exponentially — and so does
+the inert mass it brings. When $k(e^{\Delta v/c}-1)$ reaches unity, the extra
+inert mass exactly consumes the extra propellant's capability, and no finite
+propellant load reaches the target $\Delta v$. The stage does not become
+*heavy*; it becomes *impossible*, and no amount of engineering inside the
+architecture rescues it.
+
+**Architecture D against 1,570 m/s:**
+
+$$c = 68\times9.80665 = 666.85\ \mathrm{m/s},\qquad
+e^{1570/666.85}-1 = e^{2.3543}-1 = 9.5312$$
+$$k\left(e^{\Delta v/c}-1\right) = 0.55\times9.5312 = \mathbf{5.24} \gg 1$$
+
+**Architecture D is infeasible.** It is not "heavy" or "unattractive" — it does
+not exist. Screen it out *before* sizing, and do not put it in the trade
+matrix; an option that fails a hard screen contaminates a Pugh matrix by
+scoring well on schedule and safety.
+
+**D for R-2 alone (120 m/s), to make the point quantitatively:**
+$k(e^{\Delta v/c}-1) = 0.55\times0.1971 = 0.108 < 1$, so it closes, and
+
+$$m_p = \frac{(620+6)\times0.1971}{1-0.108} = \mathbf{138.4\ kg},
+\qquad m_{inert} = \mathbf{82.1\ kg},\qquad \text{system} = \mathbf{220.6\ kg}$$
+
+220 kg of propulsion to deliver 120 m/s to a 620 kg spacecraft — 36 % of the
+dry mass — against 49 kg for the hydrazine system that does the same job. Cold
+gas is a *sub-100 m/s, sub-1,000 N·s* technology and this shows why.
+
+> *Rubric (3):* 1 for the condition stated and explained in terms of inert
+> mass consuming capability; 1 for the arithmetic and the word *infeasible*;
+> 1 for the R-2-only demonstration. A student who sizes D anyway and reports
+> a negative or enormous mass without recognising the screen loses the third
+> mark: the point of the condition is to save the sizing effort.
+
+## (b) Sizing A, B and C (6 pts)
+
+For each stage, $m_p = \dfrac{(m_{after}+m_{fixed})\left(e^{\Delta v/c}-1\right)}
+{1-k\left(e^{\Delta v/c}-1\right)}$, sized **backwards** from the end of the
+mission.
+
+### Architecture A — solid kick + hydrazine monopropellant
+
+*Monopropellant stage first* (it is the last to fire, so it carries only the
+spacecraft):
+$c = 225\times9.80665 = 2206.5$ m/s; $e^{120/2206.5}-1 = 0.055857$;
+$k(e^{\Delta v/c}-1) = 0.28\times0.055857 = 0.01564 < 1$ ✓
+
+$$m_{p,mono} = \frac{(620+4.0)\times0.055857}{1-0.01564} = \mathbf{35.43\ kg},
+\qquad m_{inert,mono} = 4.0+0.28\times35.43 = \mathbf{13.92\ kg}$$
+
+Mass the solid must accelerate at its own burnout:
+$620+13.92+35.43 = \mathbf{669.35\ kg}$.
+
+*Solid stage:* $c = 289\times9.80665 = 2834.1$ m/s;
+$e^{1450/2834.1}-1 = 0.66790$; $k(\cdot) = 0.099\times0.66790 = 0.06612 < 1$ ✓
+
+$$m_{p,solid} = \frac{(669.35+3.0)\times0.66790}{1-0.06612} = \mathbf{480.93\ kg},
+\qquad m_{inert,solid} = 3.0+0.099\times480.93 = \mathbf{50.61\ kg}$$
+
+$$\Sigma m_p = 516.36\ \mathrm{kg},\quad \Sigma m_{inert} = 64.53\ \mathrm{kg},
+\quad \text{propulsion total} = 580.89\ \mathrm{kg}$$
+$$\boxed{m_{wet,A} = 1200.9\ \mathrm{kg}}\qquad\text{R-3 (≤1,250 kg): PASS, 49 kg margin}$$
+
+### Architecture B — pressure-fed NTO/MMH, both jobs
+
+$c = 315\times9.80665 = 3089.1$ m/s; $\Delta v = 1570$ m/s;
+$e^{1570/3089.1}-1 = 0.66234$; $k(\cdot) = 0.20\times0.66234 = 0.13247 < 1$ ✓
+
+$$m_p = \frac{(620+14.0)\times0.66234}{1-0.13247} = \mathbf{484.06\ kg},
+\qquad m_{inert} = 14.0+0.20\times484.06 = \mathbf{110.81\ kg}$$
+
+$$\text{propulsion total} = 594.87\ \mathrm{kg},\qquad
+\boxed{m_{wet,B} = 1214.9\ \mathrm{kg}}\qquad\text{R-3: PASS, 35 kg margin}$$
+
+### Architecture C — electric-pump-fed NTO/MMH, both jobs
+
+$c = 322\times9.80665 = 3157.7$ m/s; $e^{1570/3157.7}-1 = 0.64562$;
+$k(\cdot) = 0.135\times0.64562 = 0.08716 < 1$ ✓
+
+$$m_p = \frac{(620+26.0)\times0.64562}{1-0.08716} = \mathbf{455.71\ kg},
+\qquad m_{inert} = 26.0+0.135\times455.71 = \mathbf{87.52\ kg}$$
+
+$$\text{propulsion total} = 543.23\ \mathrm{kg},\qquad
+\boxed{m_{wet,C} = 1163.2\ \mathrm{kg}}\qquad\text{R-3: PASS, 87 kg margin}$$
+
+### Summary
+
+| | $m_p$ (kg) | $m_{inert}$ (kg) | propulsion (kg) | wet (kg) | R-3 margin |
+|---|---|---|---|---|---|
+| **A** solid + monoprop | 516.4 | 64.5 | 580.9 | **1200.9** | 49.1 kg |
+| **B** pressure-fed bipropellant | 484.1 | 110.8 | 594.9 | **1214.9** | 35.1 kg |
+| **C** electric-pump bipropellant | 455.7 | 87.5 | 543.2 | **1163.2** | 86.8 kg |
+| **D** cold gas | — | — | — | infeasible | — |
+
+**The three feasible options span 52 kg, or 4.3 %.** Mass does **not** decide
+this trade, and any answer that recommends on mass alone has missed the
+problem.
+
+> *Rubric (6):* 2 for architecture A sized in the right order (sizing the
+> solid first, against 620 kg, is the classic error — it under-sizes the kick
+> motor by the 49 kg of monopropellant system it must also accelerate; lose
+> 1 of the 2); 2 for B and C (1 each); 1 for the closure check appearing on
+> each; 1 for the summary table with R-3 checked. Losing the $m_{fixed}$ term
+> in the numerator costs half a mark per architecture.
+
+## (c) Pugh matrix, B as datum (4 pts)
+
+**Screening first.** D is eliminated by (a) and does **not** enter the matrix.
+Recording it as a screened row is good practice; scoring it is not, because it
+would collect $+$s on schedule, cost and safety for an architecture that
+cannot fly the mission.
+
+**Weighting scheme (stated, as required).** Hard requirements are weighted 3;
+the two programme risks that historically kill smallsat missions — schedule
+and technology readiness — are weighted 2; wet mass is weighted 2 because R-3
+has margin but not much; the remaining two are weighted 1. Total weight 17.
+
+| criterion | wt | **B** (datum) | **A** | **C** | D |
+|---|---|---|---|---|---|
+| Wet mass against R-3 | 2 | 0 | $+$ (−14 kg) | $+$ (−52 kg) | screened |
+| **R-1** three burns over 40 days | 3 | 0 | $-$ | 0 | screened |
+| **R-2** ≥400 pulses, MIB ≤ 5 N·s | 3 | 0 | 0 | 0 | screened |
+| **R-5** single-fault tolerance after burn 1 | 3 | 0 | $-$ | 0 | screened |
+| **R-4** schedule, 26 months ATP to launch | 2 | 0 | $-$ | $-$ | screened |
+| Technology readiness | 2 | 0 | $+$ | $-$ | screened |
+| Ground handling and range safety | 1 | 0 | $-$ | 0 | screened |
+| Recurring cost | 1 | 0 | 0 | $-$ | screened |
+| **weighted total** | | **0** | **−5** | **−3** | — |
+
+**The two rows that decide it.**
+
+- **R-1 kills A.** A conventional solid kick motor fires **once**. The
+  requirement is at least three burns spread over 40 days with a burn
+  commanded after a 30-day coast. A dual-pulse motor buys two, not three, and
+  a 30-day inter-pulse coast with a pyrotechnically separated barrier is not a
+  qualified capability on this schedule. **A is non-compliant, not merely
+  worse** — and a Pugh matrix is the wrong tool for a non-compliance; the
+  honest treatment is to screen A out on R-1 and record the score only to show
+  it would not have won anyway.
+- **R-5 also penalises A.** After the first solid burn there is nothing left
+  to be tolerant *with*: the failure of the single motor is loss of mission,
+  and you cannot make a single-shot solid single-fault tolerant without flying
+  two of them.
+- **R-4 penalises C.** An electric-pump-fed storable system means new pumps,
+  new motors, a battery with a 40-day-coast thermal and state-of-charge
+  problem, and a qualification campaign, inside 26 months. That is the
+  schedule risk that has actually killed comparable programmes.
+
+> *Rubric (4):* 1 for at least eight criteria including all four requirement
+> rows; 1 for a **stated** weighting scheme (an unweighted matrix scores half
+> of the whole part, per the question); 1 for correct and defensible $+/0/-$
+> assignments; 1 for identifying R-1 as a *compliance* failure for A rather
+> than a scoring penalty. Any consistent weighting is acceptable — the graded
+> object is that it is stated and applied, not its particular numbers.
+
+## (d) Sensitivity (4 pts)
+
+Recommended architecture: **B**. Base wet mass 1,214.9 kg.
+
+| parameter | perturbation | wet mass (kg) | $\Delta$ (kg) | sensitivity |
+|---|---|---|---|---|
+| $\Delta v_1$ | $+100$ m/s | 1,270.9 | $+56.0$ | **$+0.56$ kg per m/s** |
+| | $-100$ m/s | 1,162.0 | $-52.9$ | $-0.53$ kg per m/s |
+| $k$ | $+0.03$ | 1,243.4 | $+28.5$ | **$+950$ kg per unit $k$** (9.5 kg per 0.01) |
+| | $-0.03$ | 1,187.7 | $-27.2$ | $-907$ kg per unit $k$ |
+| $I_{sp}$ | $-10$ s | 1,243.3 | $+28.4$ | **$-2.8$ kg per second of $I_{sp}$** |
+| | $+10$ s | 1,189.0 | $-25.9$ | $-2.6$ kg per second |
+
+**Ranked by the mass swing over the plausible uncertainty in each:**
+$\Delta v_1$ ($\pm 53$–56 kg) $>$ $k$ ($\pm 27$–28 kg) $\approx$ $I_{sp}$
+($\pm 26$–28 kg).
+
+**Which one flips the recommendation, and to what.**
+
+**$\Delta v_1$, and it flips to C.** B has only 35.1 kg of margin against the
+1,250 kg allocation. Solving for the transfer $\Delta v$ at which B reaches
+1,250 kg:
+
+$$\Delta v_{total} = 1{,}633\ \mathrm{m/s} \quad\Rightarrow\quad
+\Delta v_1 = 1{,}513\ \mathrm{m/s},\ \text{i.e. only}\ \mathbf{+63\ m/s}$$
+
+A 63 m/s growth in the transfer $\Delta v$ — a routine outcome of a rideshare
+drop-off dispersion, a longer-than-planned phasing, or a plane-change
+allowance that nobody costed — **busts R-3 for architecture B**. The same
+calculation for C gives 1,751 m/s total, i.e. **+181 m/s of headroom**. So the
+recommendation is only robust if the mission analysis can commit to
+$\Delta v_1$ within about $+60$ m/s; if it cannot, C is the correct answer
+despite its schedule risk, and the schedule risk must then be bought down
+with money and early long-lead procurement.
+
+Neither of the other two flips it: $I_{sp}$ $-10$ s leaves B at 1,243 kg
+(still compliant, 7 kg margin — uncomfortably thin but compliant), and
+$k+0.03$ leaves it at 1,243 kg likewise. Note that these two *stack*: $-10$ s
+**and** $k+0.03$ together bust R-3 on their own. The honest statement to the
+programme is that B's 2.8 % mass margin is not enough to absorb the normal
+first-year growth in any two of the three parameters.
+
+> *Rubric (4):* 2 for the six perturbed masses with correct signs and
+> per-unit sensitivities (⅓ each); 1 for the ranking; 1 for identifying
+> $\Delta v_1$ with the break-even quantified and naming C as the alternative.
+> A student who names $I_{sp}$ as the flipping parameter has not compared the
+> swing against the *margin*, which is the entire skill being tested — no
+> mark for that part.
+
+## (e) The decision memo (3 pts)
+
+A full-marks answer contains all six elements. Model:
+
+> **Recommendation.** Adopt **Architecture B**, a single pressure-fed NTO/MMH
+> bipropellant system sized for the full 1,570 m/s, for both the GEO transfer
+> and eight years of station-keeping.
+>
+> **Two strongest reasons.** (1) It is the only candidate that meets every
+> hard requirement without new development: multi-burn over 40 days,
+> sub-5 N·s impulse bits from the same tanks, and a redundant thruster string
+> that makes R-5 achievable. (2) Its technology readiness matches the 26-month
+> schedule — every component is a catalogue item with GEO flight heritage,
+> which is where the programme's real risk lies.
+>
+> **Strongest argument against.** It is the heaviest feasible option and it
+> holds only 35 kg (2.8 %) of margin against the 1,250 kg rideshare
+> allocation. A 63 m/s growth in transfer $\Delta v$, or any two of
+> {$-10$ s $I_{sp}$, $+0.03$ in $k$, $+60$ m/s}, breaks R-3.
+>
+> **Evidence to get before freeze.** A committed transfer $\Delta v$ from
+> mission analysis with its dispersion — specifically the 99th-percentile
+> rideshare drop-off state and the phasing allowance — expressed as a single
+> number with a stated confidence, not a nominal.
+>
+> **Decision date.** It must arrive before tank and propellant-load
+> procurement is released, i.e. at PDR minus the tank long-lead time; on a
+> 26-month programme that is roughly month 6. After that the tank volume is
+> committed and a $\Delta v$ growth can only be paid for in payload.
+>
+> **A programme that chose the other way.** Many GEO comsat buses of the
+> 1980s–2000s flew a **solid apogee kick motor** plus a separate hydrazine
+> system — architecture A — and were right to, because their requirement was
+> a *single* apogee burn at a fixed epoch, with no 40-day multi-burn
+> constraint and no single-fault-tolerance requirement on the insertion. When
+> the industry moved to bipropellant unified propulsion systems, the driver
+> was exactly the requirement that decides this trade: the flexibility to
+> re-plan the transfer in multiple burns and to use the same propellant for
+> station-keeping.
+
+> *Rubric (3):* ½ mark each for architecture, two reasons, counter-argument,
+> evidence, decision date, historical comparison. A memo that omits the
+> decision date, or gives a counter-argument that is not the one its own
+> sensitivity analysis identified, cannot score above 2.
+
+---
+
+# Common wrong answers, and what they reveal
+
+1. **Using $c^*_{ideal}$ in $\dot m = p_cA_t/c^*$ (B1a) and then in Bartz
+   (B1b).** Reveals that $c^*$ is being treated as a propellant property
+   rather than as a *measured* engine performance parameter defined by
+   $c^* \equiv p_cA_t/\dot m$. The 4 % error propagates as 3.4 % into $h_g$
+   and it is always in the optimistic direction.
+
+2. **Expanding the staged-combustion turbine to ambient (B2b).** Gives
+   $\pi_t \approx 240$ instead of 1.66 and a cycle with enormous false margin.
+   Reveals that the student has memorised "staged combustion is better"
+   without understanding *why* it is harder: the turbine back-pressure is the
+   chamber.
+
+3. **Evaluating the erosive term once (B3c).** Gives 7.56 MPa instead of
+   8.11 MPa. Reveals that the feedback loop $r\uparrow \to \dot m\uparrow \to
+   p_c\uparrow \to G\uparrow$ has not been internalised. It is the same error
+   as computing a regeneratively cooled wall temperature without iterating on
+   $\sigma$.
+
+4. **Inverting the $p_c$–$K_n$ exponent (C2a).** Using $1/(1-n) = 1.538$ where
+   $1-n = 0.65$ is required, or vice versa. Gives 1.271 instead of 1.106 for
+   the hump multiplier. The check that catches it: a burning-area change must
+   always produce a *larger* fractional pressure change, never smaller.
+
+5. **Omitting $Z$ in the cold-gas tank (B4a).** A 4.8 % volume error at
+   200 bar, always in the direction of an under-sized tank. Reveals that the
+   ideal-gas law is being applied where the course explicitly says it fails.
+
+6. **Confusing the isothermal and adiabatic usable fractions (B4a/c).** The
+   two differ by 10 percentage points here. Reveals no physical picture of
+   *why* the gas cools, and therefore no way to decide which bound a real
+   system approaches.
+
+7. **Sizing the solid before the monopropellant in D(b).** Under-sizes the
+   kick motor because it does not carry the 49 kg station-keeping system to
+   GEO. Reveals staging arithmetic done forwards instead of backwards.
+
+8. **A Pugh matrix with no weights, or with a non-compliant option scored
+   rather than screened.** Reveals trade-study process not understood: a
+   requirement is a gate, not a criterion, and an unweighted matrix silently
+   asserts that ground handling matters as much as mission success.
+
+9. **Recommending on wet mass in Section D.** The three feasible options span
+   4.3 %. Reveals the habit of optimising the quantity that is easiest to
+   compute rather than the one that decides the programme.
+
+10. **Diagnosing without ruling anything out (C1d, C2e).** An answer that
+    names the right cause and no alternatives is indistinguishable from a
+    guess, and it is graded as one.
+
+---
+
+*End of key. Every registered computation is in
+`tools/examples/exam-final.py`; run `python3 tools/check_examples.py` to
+verify.*
