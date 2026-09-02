@@ -1475,3 +1475,655 @@ The extension wins by **154 m/s** even after paying for itself in mass — and i
 wins by more on a stage with a higher mass ratio, which is where high-$\varepsilon$
 upper stages live. That is why programmes accept a single-point-failure
 mechanism with no abort mode.
+
+---
+
+## 6. Real engines: why did they design it that way?
+
+### 6.1 Rocketdyne F-1 — $\varepsilon = 16$ on the largest engine ever flown [H]
+
+**The choice.** A bell nozzle at $\varepsilon = 16$ including the nozzle
+extension, with $p_c \approx 70$ bar (1,015 psia injector-end; the figure is
+contested across 965–1,125 psia, contested item 1), giving 263 s SL / 304 s
+vacuum and 6,770 kN / 7,770 kN [_verify-liquid, F-1 block].
+
+**Why 16 and not more.** Three constraints, all binding at once:
+
+1. **Separation.** At $p_c = 70$ bar and $\varepsilon = 16$, $p_e/p_a$ at
+   lift-off is roughly 0.5 — comfortably attached by both criteria. Pushing to
+   $\varepsilon = 25$ would have taken $p_e/p_a$ to about 0.28, into the region
+   where §5.2 shows the criteria stop agreeing. In 1962, with no CFD and a
+   nozzle 3.7 m across, that was not a risk anyone was going to take on the
+   engine that had to work five times simultaneously.
+2. **Base area.** Five F-1s in a 10 m stage base. The exit diameter is set by
+   packaging as much as by aerodynamics, and enlarging it means either a bigger
+   stage or engines that cannot be gimballed without colliding.
+3. **The trajectory.** The S-IC staged at about 67 km but burned only 165 s,
+   most of it at low altitude, and it is the stage whose $I_{sp}$ is worth the
+   least in payload terms. Vacuum $I_{sp}$ was not what the F-1 was for.
+
+**The alternatives available in 1962.** A longer bell (rejected on 1 and 2); a
+conical nozzle (rejected — the bell was already standard practice after
+`[Rao58]`); a higher $p_c$ to allow more $\varepsilon$ at the same $p_e$ (this
+is the interesting one, and it was rejected because 70 bar was already
+described as an "unprecedented chamber pressure" for the injector and cooling
+technology of the day, and because pushing $p_c$ makes the combustion-stability
+problem — which cost 2,000 tests and 210 injector designs — worse).
+
+**Would a modern engineer choose the same?** [J] Yes on $\varepsilon$, no on
+almost everything else. $\varepsilon = 16$ at 70 bar is still the right answer
+for a sea-level kerolox booster; Merlin 1D picked exactly 16 fifty years later
+at 97 bar. What a modern engineer would change is the *construction*: 178
+brazed tubes and a separate GG-exhaust film-cooled extension would today be a
+milled-channel or additively-manufactured wall, and the F-1's own limitation
+statement — "$\varepsilon = 16$ and $p_c \approx 70$ bar are modest; the F-1 is
+a *big* engine, not an efficient one" — is the reference file's own verdict and
+it is fair.
+
+### 6.2 RS-25 — $\varepsilon = 69$ or 77.5, and why the disagreement is the lesson [H]/[M]
+
+**The dispute.** Three numbers circulate for the same nozzle
+[_verify-liquid, contested item 2]:
+
+| value | source |
+|---|---|
+| **69:1** | **L3Harris (manufacturer) datasheet, labelled "area ratio"**; Wikipedia infobox |
+| 77.5:1 | NASA/Rocketdyne SSME training material; most of the nozzle-flow literature |
+| 78:1 | Wikipedia body text |
+
+**Use both, and here is what changes.** Module 03 WE3 worked the performance
+side: at $\gamma = 1.19$, $\varepsilon = 69$ gives $C_{F,vac} = 1.9393$ and a
+reconstructed 455.4 s; $\varepsilon = 77.5$ gives 1.9479 and 457.4 s. A **12 %
+change in area ratio moves $I_{sp}$ by 0.44 %** — inside the model's own error
+against the published 452.3 s. §5.3 showed the side-load estimate moves by
+under 10 %. **No performance or loads measurement can distinguish them.**
+
+What *does* distinguish them is geometry, and this is where §3.3 pays off. For
+a fixed 2.4 m exit diameter, the two area ratios imply
+
+$$D_t = \sqrt{\frac{4A_e}{\pi\varepsilon}}:\qquad
+\varepsilon = 77.5 \Rightarrow D_t = 272.6\ \mathrm{mm};\qquad
+\varepsilon = 69 \Rightarrow D_t = 288.9\ \mathrm{mm}$$
+
+a **6 % difference in throat diameter**. A tape measure across the throat
+settles in thirty seconds what sixty years of secondary sources have not.
+
+**The most plausible explanation, and why it matters generally.** §3.3
+established that "throat area" is at least three quantities: geometric minimum
+area, effective sonic area $C_d A_t$, and whatever a given analysis used. A
+$C_d$ of 0.99 is a 1 % area difference — not 12 %. So $C_d$ alone does not
+explain it. The likelier story is that 69 is the *geometric* exit-to-throat
+ratio of the bell as built, while the ~77.5 figures come from an analysis using
+a different reference station (for instance, the area ratio of the
+aerodynamic contour excluding a chamber-side reference, or a value carried over
+from a design iteration). The reference file's recommendation, which this
+course follows, is: **print 69:1 as the geometric area ratio citing L3Harris,
+note that ~77.5:1 is widely quoted, and do not silently pick one.**
+
+**The general lesson, which is the reason this engine is in this module.**
+"Expansion ratio" is not a single unambiguous quantity, and a table of engine
+data that prints one value per engine to three significant figures is teaching
+students something false. When you read $\varepsilon$ off a datasheet, ask:
+exit area over *which* throat area, measured where, at what temperature (a
+hydrogen-cooled throat is not the same diameter hot as cold), and by whom.
+
+**Would a modern engineer choose 69?** [J] For a sustainer that burns 8.5
+minutes and is ideally expanded at 12 km, yes — the ambient penalty is paid for
+about a minute and the vacuum gain for seven. What they would do differently is
+the *contour and the transient*: the RS-25's thrust-optimised contour is exactly
+the class that produces restricted shock separation and the start-transient side
+loads that drove nozzle stiffening. A modern design would trade a few tenths of
+a per cent of $C_F$ for a contour with a weaker internal shock, precisely
+because §5.3 shows the topology, not the contour's steady efficiency, is what
+sizes the structure.
+
+### 6.3 Merlin 1D Vacuum — a niobium skirt instead of a cooled nozzle [M]
+
+**The choice.** MVac takes the same 97 bar gas-generator engine from
+$\varepsilon = 16$ to $\varepsilon = 165$ by bolting on a **radiatively cooled
+niobium-alloy extension**, reaching 348 s vacuum — the highest of any American
+hydrocarbon engine flown [_verify-liquid, Merlin block]. The skirt glows
+cherry-red in flight.
+
+**The alternatives.** (a) Extend the regenerative circuit — impossible: the
+RP-1 coolant flow and pressure budget will not push through five times the
+channel length, and RP-1 cokes above roughly 700 K, so you cannot simply run it
+hotter. (b) Ablative — heavy, and the MVac has to restart and burn for hundreds
+of seconds. (c) Carbon–carbon — lighter and better, but expensive, long lead
+time, and requiring oxidation protection. (d) Radiatively cooled niobium —
+heavier than C–C, but cheap, formable, weldable, repeatable, and with a mature
+supply chain.
+
+**Why (d) won.** SpaceX's binding constraint is production rate and unit cost,
+not $I_{sp}$; the whole Merlin is a gas-generator engine at 97 bar precisely
+because it is optimised for cost, restart and reuse. At $\varepsilon = 165$ and
+a kerolox flame temperature the far nozzle heat flux is low enough for
+radiative equilibrium at a coated-niobium wall temperature, so the expensive
+option buys nothing the mission needs.
+
+**Would a modern engineer choose the same?** [J] Yes for an expendable upper
+stage flown at high cadence. For a reusable upper stage, no: the coated-niobium
+skirt's life limit is the silicide coating, which does not survive many
+re-entries, and carbon–carbon or an actively cooled design becomes the argument
+again.
+
+### 6.4 RL10B-2 — the extendable carbon–carbon nozzle [M]
+
+**The choice.** Fly with $\varepsilon = 77$ stowed and translate a 2.5 m 3D
+carbon–carbon extension into place after stage separation, reaching
+$\varepsilon = 285$ and 465.5 s — the flown $I_{sp}$ record
+[_verify-liquid, RL10B-2 block].
+
+**The constraint that produced it.** Not aerodynamics — packaging. A fixed
+285:1 nozzle on a 110 kN engine is 2.1 m in diameter and around 3 m long
+(§5.4 Step 4). The Delta III second stage's interstage would not hold it. The
+choice was therefore between a fixed ~130:1 nozzle (which is what the RL10C-1
+does, at 449.7 s) and a mechanism.
+
+**What it costs.** §5.4: about 17 s of $I_{sp}$ gained, worth ~150 m/s on a
+representative stage even after the mass. Against that: a deployment mechanism
+that must work exactly once, in vacuum, after launch vibration and thermal
+cycling, with **no abort mode** — the reference file names this as the engine's
+major limitation, and it is right to. The RL10C-1 exists partly because
+consolidating onto a fixed 130:1 nozzle removes that mechanism and one whole
+production line, at a cost of ~16 s.
+
+**Would a modern engineer choose the same?** [J] It depends entirely on whether
+the interstage is already fixed. For a clean-sheet stage, size the interstage
+for the nozzle and skip the mechanism. For an existing vehicle where the
+interstage is tooled — which is the normal situation, and the failure described
+in this module's opening paragraph — the extendable nozzle is the only way to
+buy the $I_{sp}$, and that is why both the RL10B-2 and Vinci have one.
+
+### 6.5 Raptor Vacuum — claims, and how to read them [M]
+
+**What is claimed.** SpaceX quotes Raptor sea-level variants at $\varepsilon
+\approx 34.3$ and a vacuum variant at $\varepsilon \approx 80$, with $p_c$ of
+300 bar (Raptor 2) to 330 bar (Raptor 3) and $I_{sp}$ around 347–350 s SL
+[_verify-liquid, Raptor block]. **Every one of those figures is a company
+claim.** Independent corroboration exists only for thrust, and only indirectly
+through FAA licensing documents and third-party telemetry analysis; there is no
+independent verification of chamber pressure, $I_{sp}$, dry mass or T/W at all,
+and several figures trace to social-media posts rather than any document.
+
+**What the nozzle numbers imply, if true.** $\varepsilon = 34.3$ at
+$p_c = 300$ bar gives $p_e \approx 300\times10^5/\,$(the isentropic ratio at
+$M_e$ for methalox $\gamma\approx1.16$) — a sea-level exit pressure well above
+the separation threshold, so a 34:1 sea-level nozzle at 300 bar is
+aerodynamically unremarkable. **The high chamber pressure is what buys the high
+area ratio**, which is the general rule: $p_e/p_a = (p_e/p_c)(p_c/p_a)$, so
+tripling $p_c$ lets you roughly triple $\varepsilon$ at the same separation
+margin. That is the single most useful thing to take from the Raptor
+architecture and it does not depend on believing any specific number.
+
+**What to say in an interview.** [J] "Raptor's sea-level area ratio of about 34
+is unusually high for a booster engine, and the reason is the claimed 300 bar
+chamber pressure: separation margin scales with $p_c/p_a$, so a
+staged-combustion engine at 300 bar can carry twice the area ratio of a
+gas-generator engine at 100 bar at the same $p_e/p_a$. I would want to see an
+independent measurement of that chamber pressure before quoting the $I_{sp}$,
+because the published figures are unaudited company statements." That answer
+demonstrates the physics *and* the epistemic hygiene, and the second half is
+what separates a good candidate from a fluent one.
+
+---
+
+## 7. Design trade-offs, failure modes, materials, manufacturing, testing
+
+### 7.1 The trade-offs as they are actually argued
+
+| decision | argued between | what settles it |
+|---|---|---|
+| $\varepsilon$ | performance (trajectory office) vs structures (side loads) vs vehicle layout (base area) | usually **base area or interstage diameter**, which is a geometric fact nobody can argue with |
+| percentage bell length | $I_{sp}$ vs mass vs cooling pressure drop | on a regen booster, the **coolant $\Delta p$ budget**; on a vacuum stage, mass |
+| contour type (TOC vs truncated ideal) | steady $C_F$ vs start-transient side loads | subscale cold-flow test results |
+| construction | performance/mass vs unit cost vs production rate | **production rate**, increasingly — Vulcain 2.1 accepted slightly lower thrust for 90 % fewer parts |
+| where the regen circuit ends | coolant enthalpy budget vs skirt material cost | the coolant outlet temperature limit (RP-1 coking, hydrogen turbine inlet requirement) |
+| fixed vs extendable | $I_{sp}$ vs a single-point-failure mechanism | whether the interstage is already tooled |
+
+### 7.2 Failure modes
+
+**Flow separation and side loads.** *Mechanism:* boundary layer separates under
+the adverse gradient of an overexpanded plume; asymmetric or transitioning
+separation produces a lateral force (§3.12, §5.3). *Symptom:* lateral
+acceleration spikes during start and shutdown; nozzle shell strain; gimbal
+actuator load spikes; in the worst case, buckling of the exit cone or failure
+of the nozzle-to-chamber joint. *Evidence:* strain gauges around the nozzle
+circumference, accelerometers on the gimbal block, wall static taps whose
+pressure traces show the separation plateau sweeping downstream. *Fix:* start
+sequencing, stiffening rings, contour change, or truncation.
+
+**Coolant channel or tube burnout.** *Mechanism:* local loss of coolant flow (a
+blocked tube, a braze void, a channel closed out by weld penetration) or a
+local heat-flux spike (an injector streak impinging on the wall, Module 07).
+*Symptom:* a hole, usually in the throat region, usually axially aligned with a
+single injector element. *Evidence:* post-test borescope; a wall thermocouple
+running hot in one circumferential position; a coolant outlet temperature
+higher than predicted. *Fix:* injector rework, film-cooling addition, channel
+geometry change — the nozzle is usually the victim, not the culprit.
+
+**Braze joint failure in a tube-wall nozzle.** *Mechanism:* a void or an
+incomplete fillet in one of hundreds of braze joints, opened by thermal
+cycling. *Symptom:* a coolant leak into the exhaust, which on a hydrogen engine
+is a fire and on a kerosene engine is a plume brightness change. *Evidence:*
+proof and leak test before every acceptance; helium mass-spectrometer leak
+check. *Fix:* this is a manufacturing problem, and it is a large part of why
+tube-wall is being replaced (§3.14).
+
+**Refractory-metal skirt coating breach.** *Mechanism:* handling damage or
+thermal cycling cracks the silicide coating on a niobium extension; the exposed
+niobium oxidises rapidly. *Symptom:* localised burn-through of a radiatively
+cooled skirt on a subsequent firing. *Evidence:* visual and dye-penetrant
+inspection; the failure is progressive and visible. *Fix:* handling procedures
+and re-coat; this is why coated skirts ship in dedicated fixtures.
+
+**Ablative liner over-recession.** *Mechanism:* char recession faster than
+predicted, usually because the duty cycle exceeded the design (LMDE's forbidden
+60–100 % throttle band is exactly this, and the reference file is explicit that
+it was a *nozzle erosion* limit). *Symptom:* throat area growth and therefore
+chamber pressure decay; in the extreme, bond-line temperature exceeded and
+structural failure. *Evidence:* $p_c$ trace sag at constant commanded flow;
+post-test throat measurement. *Fix:* thicker liner, duty-cycle restriction, or
+a different cooling architecture.
+
+**Deployment failure of an extendable nozzle.** *Mechanism:* mechanism jam from
+thermal distortion, contamination, or launch loads. *Symptom:* the stage flies
+at the retracted area ratio, losing ~17 s of $I_{sp}$ (§5.4) — usually mission
+loss for a performance-marginal injection. *Evidence:* deployment
+microswitches; the $I_{sp}$ shortfall is visible in the burn duration. *Fix:*
+there is none in flight; this is a qualification-by-test problem.
+
+### 7.3 Materials — why these, in one line each
+
+- **Nickel-alloy tubing (Inconel X-750, Hastelloy)** — formable into tapered
+  tubes, brazeable, strong hot, and compatible with both RP-1 and hydrogen.
+- **NARloy-Z (Cu–Ag–Zr)** — very high thermal conductivity so the gas-side wall
+  runs cool at high flux; used for the *chamber* liner, not the nozzle, because
+  its strength at temperature does not justify the mass over a long nozzle.
+- **Electroformed nickel** — a closeout that bonds metallurgically to a milled
+  copper liner with no braze alloy and no joint, at the cost of a very slow
+  deposition process.
+- **Niobium alloy C-103 (Nb–10Hf–1Ti)** with silicide coating — the standard
+  radiatively cooled skirt material: formable, weldable, good to ~1,300–1,600 K,
+  and utterly dependent on its coating.
+- **3D carbon–carbon (NOVOLTEX/SEPCARB class)** — strength rises with
+  temperature, density ~1.8 g/cm³, radiates well; brittle, expensive, weeks of
+  densification, and needs oxidation protection outside vacuum.
+- **Silica- and carbon-phenolic ablatives** — no coolant circuit required at
+  all, which is decisive for pressure-fed engines; single-use and heavy.
+
+### 7.4 Manufacturing, and what it limits
+
+**Tube-wall** limits you to a production rate set by how fast skilled people
+can form, fit and braze hundreds of tubes per engine, with every joint an
+inspection item. It gives the lightest regen wall and the worst unit cost.
+
+**Milled channel** limits you by machining time on the liner and by the
+closeout process — electroforming is slow, brazing needs a furnace cycle,
+laser-welded sandwich construction is fast and is what Vulcain 2.1 moved to for
+its 40 % cost reduction.
+
+**Additive manufacturing** is changing this fastest at the chamber and
+injector; for large nozzles the constraint is build volume, and the current
+practice is directed-energy-deposition of the jacket over a machined liner
+rather than printing the whole nozzle `[GradlAM]`, `[RAMPT]`.
+
+**Carbon–carbon** limits you by densification time (weeks per part) and by the
+fact that a 2.1 m diameter 3D preform is a specialist product from a very small
+number of suppliers worldwide.
+
+**Contour tolerance.** The contour must be held to a fraction of a per cent in
+area, because $\varepsilon$ error propagates directly into $C_F$. In practice
+the throat is the tight tolerance — a 0.5 % throat area error is a 0.5 % thrust
+error at fixed $p_c$ — and the exit is comparatively loose because $C_F$ is
+flat there.
+
+### 7.5 Testing — what is measured and what a bad result looks like
+
+- **Cold-flow subscale.** A scale model of the exact contour blown with air or
+  nitrogen, with wall static taps and (usually) schlieren. What you are looking
+  for is the wall-pressure plateau that marks separation and, crucially, the
+  NPR at which the pattern flips FSS↔RSS. **This is the only way to find the
+  RSS transition before hot fire**, and skipping it is how programmes discover
+  side loads on a stand.
+- **Wall static pressure taps** along the divergent on hot-fire development
+  hardware. Healthy: pressure falls monotonically along the isentropic
+  prediction to the exit. Separated: a sharp rise to a plateau at ~0.3–0.4
+  $p_a$, with the rise station moving as $p_c$ changes. RSS: a rise *above*
+  ambient downstream of reattachment — the diagnostic signature.
+- **Circumferential strain gauges and nozzle accelerometers** for side loads.
+  The signature of the FSS/RSS flip is a large, short, broadband lateral
+  transient during start, at a level that does not recur at mainstage.
+- **Throat diameter, cold, before and after.** In a liquid engine this should
+  not change. If it does you have erosion, and you have a much bigger problem
+  than nozzle performance.
+- **$C_F$ reduction.** Measure $F$, $p_c$ and $A_t$; compute $C_F = F/(p_cA_t)$;
+  compare to the ideal at the measured $\varepsilon$ and $\gamma$. Module 03 WE2
+  does this. If $\eta_{C_f}$ comes out below ~0.95 on a nozzle that should be
+  attached, suspect separation or a $p_c$ measurement-station error before you
+  suspect the contour.
+
+---
+
+## 8. Misconceptions and what engineers actually care about
+
+**"A bigger nozzle always gives more thrust."** Only in vacuum. At sea level,
+Eq. 3.11 says thrust falls by $p_a A_e$, so a bigger exit *costs* thrust until
+you get above the break-even altitude — 5.5 km in §5.2. The RS-27 → RS-27A
+change lost 81 kN of sea-level thrust to gain 7 s of vacuum $I_{sp}$, in flight
+hardware, deliberately.
+
+**"The nozzle should be sized for optimum expansion at sea level."** Only if the
+stage burns out at sea level, which nothing does. Optimum expansion at lift-off
+throws away the vacuum performance of the remaining 80–90 % of the burn. Every
+first stage flies overexpanded on purpose.
+
+**"Exit pressure depends on ambient pressure."** For attached flow it does not.
+$p_e$ is fixed by $\varepsilon$ and $\gamma$ (Eq. 3.5). The only mechanism by
+which ambient pressure reaches inside the nozzle is separation.
+
+**"The 15° cone angle is an optimum."** It is not an optimum of anything;
+Eq. 3.6 is monotonic in $\alpha$. It is a knee in a trade between divergence
+loss and length, and it has been a convention since the 1950s.
+
+**"An 80 % bell is 80 % as long as the full-length optimum contour."** No — it
+is 80 % as long as a **15° cone of the same $\varepsilon$ and $r_t$**. That is
+the convention, and different books use slightly different cone references,
+which shifts the number by a point or two.
+
+**"Aerospikes are better and industry is just conservative."** The
+aerodynamics is genuinely better; the thermal problem is genuinely worse. A
+plug's expansion surface sits in the hottest, highest-flux part of the flow and
+must be cooled over essentially all of it, which is a far larger cooled area per
+unit thrust than a bell's. That is why sixty years of programmes — J-2T,
+XRS-2200/X-33 — have built and fired them and none has flown.
+
+**"Flow separation is what causes side loads."** Separation is necessary but
+not sufficient. §5.3 shows that separation-line wander within free shock
+separation produces ~8 kN on an RS-25-class nozzle, two orders of magnitude
+below the measured loads. The loads come from the **FSS↔RSS topology
+transition**, which is a property of thrust-optimised contours specifically.
+
+**"Expansion ratio is a single well-defined number."** It is exit area divided
+by *a* throat area, and there are at least three defensible throat areas
+(geometric, effective/sonic, and whatever an analysis assumed). The RS-25's
+69-versus-77.5 dispute (§6.2) is what this looks like in the wild.
+
+### What engineers in this area actually spend their day on
+
+1. **Where the regenerative circuit ends, and what the skirt is made of.** This
+   is the real nozzle design decision on most programmes, and it is a coolant
+   enthalpy and pressure-drop argument (Modules 10, 11), not an aerodynamic one.
+2. **The exit diameter against the vehicle interface.** Base area, interstage
+   diameter, gimbal clearance, plume impingement on neighbouring engines. This
+   is what actually caps $\varepsilon$ far more often than separation does.
+3. **The start transient.** Chamber pressure ramp rate, the NPR window where
+   FSS↔RSS lives, and whether the structure survives it. This is where nozzle
+   engineers and start-sequence engineers argue.
+4. **The loss budget, item by item, defended to a customer.** $\lambda$,
+   $\eta_f$, $\eta_{kin}$, each with a basis, because the contractual $I_{sp}$
+   is the product of them and a 0.5 % argument is worth real money.
+5. **Manufacturability at rate.** Braze joints per engine, machining hours per
+   liner, densification weeks per carbon–carbon part. Vulcain 2.1 is the
+   documented case where this drove the entire redesign.
+
+---
+
+## 9. Mastery levels
+
+**Level 1 — Familiarity.**
+Explain in plain language why a nozzle has a converging and a diverging
+section, what expansion ratio means, and why a first-stage nozzle is smaller
+than an upper-stage one. Sketch the thrust-versus-altitude trend for two
+different area ratios and identify the crossover. Name a conical, a bell, an
+aerospike and an extendable nozzle, and name a real engine using each of the
+first, second and fourth. State that a 15° cone loses about 1.7 % to divergence
+and that a bell recovers most of it in less length.
+
+**Level 2 — Working engineering knowledge.**
+Size a throat from $\dot m$ and $c^*$ and cross-check it from $F$, $p_c$ and
+$C_F$. Compute conical length, divergence efficiency, 80 % bell length, and
+construct a Rao parabolic contour from $\theta_n$, $\theta_e$ and the throat
+arc. Quote from memory: $R_u = 1.5\,r_t$, $R_d = 0.382\,r_t$, $\beta = 20$–45°,
+$\alpha = 15°$, $\varepsilon_c = 2$–3 for large engines, $\eta_n = 0.96$–0.98.
+Apply Summerfield and Schmucker to a real contour and state where they
+disagree. Derive the break-even altitude between two area ratios. Build a loss
+budget and say which term dominates for a given engine class. Read a wall-static
+-pressure trace and identify separation, and read a $C_F$ reduction and say
+whether the nozzle or the chamber is underperforming.
+
+**Level 3 — Interview mastery.**
+Given an unfamiliar engine and its stage, defend an expansion ratio from the
+trajectory, the separation limit and the vehicle base area, and say which of
+the three is binding. Argue both sides of an extendable versus fixed nozzle for
+a stated interstage. Explain FSS versus RSS from the internal shock structure,
+predict which contour class is at risk, and put an order-of-magnitude number on
+the resulting side load with a stated model. Diagnose a nozzle from a described
+data set (wall pressures, strain gauges, a $p_c$ trace, a post-test borescope)
+and distinguish separation from a coolant failure from injector streaking.
+Explain why the RS-25's expansion ratio is disputed, what measurement would
+settle it, and why no performance data can. Argue why aerospikes have not
+flown without either dismissing them or being credulous about them.
+
+---
+
+## 10. Problems
+
+### Conceptual
+
+**C1.** A nozzle is tested in a vacuum chamber and then on a sea-level stand at
+the same chamber pressure. State which of the following change and which do
+not, with a one-line reason each: $\dot m$, $c^*$, $p_e$, $M_e$, $C_F$, $I_{sp}$.
+
+**C2.** Explain why the downstream throat radius of curvature is much smaller
+than the upstream one, and what would go wrong if you swapped them.
+
+**C3.** Two engines have the same $\varepsilon$ and the same $\gamma$, but one
+runs at 100 bar and one at 300 bar. Which has more separation margin at sea
+level, and why? Express the answer as a scaling.
+
+**C4.** An 80 % bell has 80 % of the length of the reference cone but 87 % of
+its wetted area. Explain geometrically why the wetted area does not fall in
+proportion to the length, and say when this matters more than the mass saving.
+
+**C5.** Why is $\lambda = (1+\cos\alpha)/2$ not a valid estimate of divergence
+efficiency for a bell nozzle? What would you need in order to compute
+$\lambda$ for a bell properly?
+
+**C6.** A colleague proposes raising an upper-stage engine's area ratio from
+130 to 285 by adding a fixed extension. List, in order of how likely each is to
+be the blocking constraint, the four things you would check first.
+
+**C7.** Explain the physical mechanism by which restricted shock separation
+produces wall pressures *above* ambient, and why that sign matters more for
+side loads than the magnitude of the separation pressure itself.
+
+**C8.** Every flown nozzle above about $\varepsilon = 100$ ends its
+regenerative circuit partway down. Explain why, in terms of coolant enthalpy
+and coolant pressure drop, and name two different ways the remainder is handled
+with a real engine for each.
+
+### Calculation
+
+**P1.** A LOX/LH2 upper-stage engine delivers $F_{vac} = 180$ kN with
+$c^* = 2\,290$ m/s at $p_c = 60$ bar, $\gamma = 1.20$. Compute $A_t$, $D_t$,
+and then $A_e$ and $D_e$ for $\varepsilon = 240$. Compute the length of a 15°
+cone to that area ratio and of an 80 % bell.
+
+**P2.** For the engine in P1, compute $C_{F,vac}$ and $I_{sp,vac}$ assuming
+$\eta_n = 0.975$. Compare with the value in the engine database for the engine
+this describes and comment on the difference.
+
+**P3.** A sea-level kerolox engine runs $p_c = 70$ bar, $\gamma = 1.20$. Find
+the largest $\varepsilon$ that keeps $p_e \ge 0.4\,p_a$ at sea level
+(Summerfield), and the largest that satisfies Schmucker. State the two answers
+and the percentage difference between them.
+
+**P4.** Take the $\varepsilon = 16$ contour of §5.1 and rebuild it as a 60 %
+bell. Using $\theta_n = 26°$ and $\theta_e = 16°$ (typical 60 % values),
+compute the inflection point, the control point, and the resulting exit wall
+angle check. Comment on whether the parabola remains well-behaved.
+
+**P5.** An engine has $p_c = 100$ bar, $\gamma = 1.20$, $A_t = 0.02$ m². Compute
+the break-even altitude between $\varepsilon = 20$ and $\varepsilon = 40$, and
+the thrust difference at sea level and at 30 km.
+
+**P6.** A 2.1 m exit-diameter nozzle experiences an FSS/RSS split over an axial
+band of 0.6 m at a mean radius of 0.95 m, with $p_{RSS} = 1.15\,p_a$ and
+$p_{FSS} = 0.30\,p_a$. Compute the side load. If the nozzle's first bending mode
+is at 35 Hz and the transient lasts 40 ms, comment on whether resonant
+amplification is a concern.
+
+**P7.** Using the engine database, tabulate $\varepsilon$, $p_c$ and $p_e$ for
+the F-1, Merlin 1D, RS-25 and RS-68A ($\gamma = 1.20$ throughout). Rank them by
+$p_e/p_a$ at sea level and comment on which is closest to separation.
+
+**P8.** An ablatively cooled nozzle recesses 0.4 mm at the throat over a 500 s
+burn on a throat of initial radius 60 mm. Compute the change in $A_t$,
+$\varepsilon$, $p_c$ (at constant $\dot m$) and $C_{F,vac}$. Is this a liquid
+engine you would accept?
+
+### Engineering reasoning
+
+**R1.** A development engine shows $\eta_{C_f} = 0.93$ on a nozzle predicted to
+be attached, while $\eta_{c^*}$ is a healthy 0.97. Wall static taps at 60 %, 80 %
+and 95 % of the divergent length read 41, 39 and 40 kPa on a sea-level stand.
+Diagnose, and state what you would do next.
+
+**R2.** Two nozzles with identical contours are built, one by a supplier using
+$R_u/r_t = 1.5$ and one using $R_u/r_t = 0.6$ because of a drawing
+misinterpretation. Both are measured for throat *geometric* diameter and found
+identical. Predict what the hot-fire data will show and how you would confirm
+the cause.
+
+**R3.** A programme proposes replacing a tube-wall nozzle with a laser-welded
+sandwich nozzle at slightly lower engine thrust, citing 90 % fewer parts. Argue
+for and against from the programme's point of view, and say what information
+would settle it. (Vulcain 2 → 2.1 is the real case; do not just describe it,
+argue it.)
+
+**R4.** An upper stage's interstage diameter is fixed at 2.6 m. The engine
+currently flies $\varepsilon = 130$ with a fixed nozzle. Marketing wants the
+$I_{sp}$ of a 285:1 engine. Lay out the options, estimate the $I_{sp}$ of each,
+and make a recommendation.
+
+**R5.** During a sea-level start of a large bell engine, circumferential strain
+gauges show a 180 kN equivalent lateral transient lasting 30 ms at 22 % of full
+chamber pressure, which does not recur at mainstage and does not recur at all
+on the next unit. Give three candidate explanations, say how you would
+discriminate between them, and state which you would bet on.
+
+### Mini trade study
+
+**T1.** You are choosing the nozzle for a **methalox upper-stage engine**:
+$F_{vac} = 250$ kN, $p_c = 120$ bar, $\gamma = 1.16$, $c^* = 1\,850$ m/s
+delivered, restartable, up to 600 s cumulative burn. The stage's interstage
+inner diameter is **2.2 m** and the available axial envelope below the tank dome
+is **2.4 m**. The programme flies 12 times a year and unit cost matters.
+
+Options:
+
+- **A.** Fixed bell, $\varepsilon = 100$, regeneratively cooled to
+  $\varepsilon = 25$ then radiatively cooled C-103 skirt.
+- **B.** Fixed bell, $\varepsilon = 150$, regen to 25 then carbon–carbon skirt.
+- **C.** Extendable, $\varepsilon = 90$ stowed / $\varepsilon = 260$ deployed,
+  carbon–carbon extension on a translating mechanism.
+- **D.** Fixed bell, $\varepsilon = 60$, fully regeneratively cooled, 70 % bell.
+
+Compute the vacuum $I_{sp}$ of each (state your $\eta_n$ and justify it),
+estimate the envelope each requires, and recommend one. Justify against the
+stated constraints — including the 12 flights per year — and say what single
+piece of missing information would most change your answer.
+
+---
+
+## 11. Quiz (100 points)
+
+**Q1 (6).** An "80 % bell" nozzle is 80 % of the length of:
+(a) the full-length Rao optimum contour of the same $\varepsilon$;
+(b) a 15° conical nozzle of the same $\varepsilon$ and throat radius;
+(c) a 15° conical nozzle of the same exit diameter;
+(d) the chamber-to-exit length of the engine.
+
+**Q2 (6).** The standard downstream throat radius of curvature for a bell
+nozzle is:
+(a) $0.382\,r_t$; (b) $1.5\,r_t$; (c) $0.5\,r_e$; (d) whatever makes the
+contour tangent at $\theta_e$.
+
+**Q3 (8).** For attached flow, which of the following changes when the same
+nozzle is moved from sea level to vacuum? (Select all.)
+(a) $M_e$; (b) $p_e$; (c) $C_F$; (d) $\dot m$; (e) $I_{sp}$; (f) $c^*$.
+
+**Q4 (12, calculation).** A nozzle has $\gamma = 1.20$, $\varepsilon = 36$,
+$p_c = 80$ bar. Compute $M_e$, $p_e$, $C_{F,vac}$, and the sea-level $C_F$.
+State whether Summerfield predicts attached flow at sea level.
+
+**Q5 (12, calculation).** Two nozzles on the same engine ($p_c = 90$ bar,
+$\gamma = 1.20$) have $\varepsilon = 12$ and $\varepsilon = 22$. Compute the
+break-even ambient pressure and the corresponding altitude in the 1976 US
+Standard Atmosphere.
+
+**Q6 (10, calculation).** A 15° conical nozzle has $r_t = 80$ mm and
+$\varepsilon = 40$. Compute its length, its divergence efficiency, and the
+length of a 75 % bell of the same area ratio.
+
+**Q7 (10).** Explain in three or four sentences why the divergence efficiency
+of a bell nozzle cannot be obtained from $(1+\cos\theta_e)/2$, and state whether
+that expression is an upper or a lower bound on the true value, with a reason.
+
+**Q8 (12, judgment).** A vacuum engine's expansion ratio is quoted as 285:1 in
+one source and 280:1 in another, and its chamber pressure is not published at
+all. You are asked for the engine's vacuum $I_{sp}$ at a *third* area ratio,
+77:1. Explain how much of this you can answer and how much you cannot, and why.
+
+**Q9 (12, judgment).** A booster engine's nozzle is being lengthened from 70 %
+to 85 % bell at fixed $\varepsilon$ to recover $I_{sp}$. Name three things you
+would insist on re-checking before approving the change, and for each say what
+result would make you reject it.
+
+**Q10 (12).** Two large bell nozzles of the same $\varepsilon$ are tested at sea
+level. Nozzle A is a truncated ideal contour; nozzle B is an aggressive
+thrust-optimised contour. B measures 0.4 % higher $C_F$ at mainstage but shows
+a start-transient side load four times larger. Explain the mechanism behind
+both observations, and say which you would fly on a first stage and why.
+
+---
+
+## 12. Further reading
+
+- `[SP-8120]` *Liquid Rocket Engine Nozzles* (NASA SP-8120, 1976). **Read this
+  one first.** It is the design-practice bridge between `[Rao58]` and the
+  separation literature: contour design, the loss budget item by item,
+  extension design, and separation/side-load considerations, all stated as
+  recommended practice with the reasons attached.
+- `[Rao58]` — the variational formulation and the method-of-characteristics
+  solution for the maximum-thrust contour. Read it for what was actually
+  optimised (thrust at fixed length and ambient pressure) and what was assumed
+  away (viscosity, chemistry).
+- `[Rao60]` — the one-page note that made `[Rao58]` usable. Read it for the
+  parabolic approximation and, importantly, to see how thin the original
+  statement of the "$\theta_n$, $\theta_e$, percentage length" method is
+  compared to how confidently later textbooks reproduce it.
+- `[SB §3.4]` — Sutton & Biblarz's nozzle chapter: the divergence factor, the
+  bell/cone comparison, the $\theta_n$/$\theta_e$ charts, and worked geometry.
+  The best single starting point if `[SP-8120]` is too dense.
+- `[HH §4.4]` — Huzel & Huang on thrust-chamber geometry: the curvature
+  conventions ($R_u = 1.5r_t$, $R_d = 0.382r_t$), contraction ratios,
+  convergence angles, and the drawings a design office actually works from.
+- `[OMK05]` — Östlund & Muhammad-Klingmann's review. Read it before choosing a
+  separation criterion for real hardware: FSS versus RSS, the transition, side
+  -load mechanisms, and a critical comparison of every criterion in circulation.
+- `[Ostlund02]` — the full thesis behind the review, free and open access, with
+  the experimental detail on start-transient side loads that the review
+  compresses. The best single document on why overexpanded nozzles shake.
+- `[Schmucker73]` — the survey of separation criteria with their scatter shown
+  honestly. Read it to understand *why* Summerfield and Schmucker disagree, not
+  just that they do.
+- `[SFS54]` — Summerfield's original criterion. Two pages; read it for the
+  historical baseline and to see how little it claimed.
+- `[ZH Vol. 2]` — Zucrow & Hoffman on the method of characteristics for
+  axisymmetric nozzles. This is what is actually underneath `[Rao58]`; go here
+  when you need to build a contour rather than read one off a chart.
+- `[SP-8124]` — self-cooled (ablative, radiation-cooled, refractory) chambers
+  and nozzles: the architecture of nearly every small storable engine and every
+  radiatively cooled skirt.

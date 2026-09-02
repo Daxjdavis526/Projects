@@ -522,3 +522,318 @@ usually a nuisance rather than a killer — amplitudes of 2–10 % of $p_c$ — 
 fatigues injector hardware and it is a reliable precursor: a chamber that buzzes
 at one operating point frequently screeches at another.
 
+### 3.8 High frequency: the chamber as an acoustic cavity
+
+#### The eigenvalue problem
+
+Idealise the chamber as a rigid-walled cylinder of radius $R_c = D_c/2$ and
+length $L_{cyl}$, closed at both ends, filled with uniform gas at sound speed
+$c$. The wave equation $\nabla^2 p' = c^{-2}\partial^2 p'/\partial t^2$ separates
+in cylindrical coordinates, and the solutions are
+
+$$p'(r,\theta,z,t) = \hat p\; J_m\!\left(\alpha_{mn}\frac{r}{R_c}\right)\cos(m\theta)\;\cos\!\left(\frac{q\pi z}{L_{cyl}}\right)e^{i\omega t}$$
+
+with the rigid-wall condition $\partial p'/\partial r = 0$ at $r = R_c$ requiring
+$J_m'(\alpha_{mn}) = 0$. The frequency follows from the dispersion relation:
+
+$$f_{mnq} = \frac{c}{2\pi}\sqrt{\left(\frac{\alpha_{mn}}{R_c}\right)^{\!2} + \left(\frac{q\pi}{L_{cyl}}\right)^{\!2}}$$
+
+> **Eq. 3.9** — variables: $m$ azimuthal (tangential) order, the number of nodal
+> diameters [—]; $n$ radial order [—]; $q$ longitudinal order [—];
+> $\alpha_{mn}$ the $n$-th non-trivial root of $J_m'(x)=0$ [—]; $R_c$ chamber
+> radius [m]; $L_{cyl}$ barrel length [m]; $c$ speed of sound in the chamber gas
+> [m/s]. Meaning: the natural resonant frequencies of the gas column. Assumes:
+> rigid walls, uniform gas, no mean flow, a hard-walled closed end at the nozzle.
+> Fails when: (i) the nozzle end is not rigid — it is a partially transmitting
+> boundary that radiates energy away, which shifts frequencies down by a few
+> percent and provides the dominant damping; (ii) the chamber has a strong axial
+> temperature gradient (it does — the first 20 % of the chamber is far cooler
+> than the burned gas), which lowers the effective $c$ near the face; (iii) the
+> chamber is not a plain cylinder. **Expect the measured mode within 10–20 % of
+> Eq. 3.9** [A][SP-194 §3.6][LRECI].
+
+Two limits are worth writing out. Pure **longitudinal** modes ($m = n = 0$):
+
+$$f_{00q} = \frac{q\,c}{2L_{cyl}}$$
+
+Pure **transverse** modes ($q = 0$), which are the dangerous ones in large
+engines:
+
+$$f_{mn0} = \frac{\alpha_{mn}\,c}{2\pi R_c} = \frac{\alpha_{mn}\,c}{\pi D_c}$$
+
+and a combined mode is the Pythagorean sum, $f = \sqrt{f_{mn0}^2 + f_{00q}^2}$.
+
+#### The Bessel-root table
+
+| mode | name | $m$ | $n$ | $\alpha_{mn}$ | pressure pattern |
+|---|---|---|---|---|---|
+| 1T | first tangential | 1 | 1 | **1.8412** | one nodal diameter; max at wall, opposite signs across the chamber |
+| 2T | second tangential | 2 | 1 | **3.0542** | two nodal diameters (a "cloverleaf") |
+| 3T | third tangential | 3 | 1 | 4.2012 | three nodal diameters |
+| 1R | first radial | 0 | 2 | **3.8317** | one nodal circle; axisymmetric "breathing" |
+| 4T | fourth tangential | 4 | 1 | 5.3176 | four nodal diameters |
+| 1T1R | combined | 1 | 2 | 5.3314 | one nodal diameter and one nodal circle |
+| 2R | second radial | 0 | 3 | 7.0156 | two nodal circles |
+
+($\alpha_{01} = 0$ is the trivial uniform mode; the radial modes are the zeros of
+$J_0' = -J_1$, hence 3.8317 and 7.0156, the familiar $J_1$ zeros.)
+
+The ordering — **1T below 2T below 1R** — is universal and is the reason the
+first tangential mode is the one every stability programme fights: it is the
+lowest-frequency transverse mode, it is therefore the closest to the combustion
+response peak, and it is the least damped.
+
+#### Standing versus spinning tangential modes
+
+$\cos m\theta$ and $\sin m\theta$ are degenerate — same frequency, orthogonal
+orientation. Any combination is also a solution, including the travelling
+combination $\cos(m\theta - \omega t)$, a **spinning** tangential mode in which
+the pressure maximum rotates around the chamber at $\omega/m$. Real chambers show
+both, and often a standing mode that slowly precesses. This matters for two
+practical reasons: a spinning 1T concentrates its heat-flux damage in a rotating
+band that scours the *whole* circumference (rather than two opposite stripes),
+and the diagnostic is a **phase measurement between two circumferentially spaced
+transducers** — a constant 180° phase between diametrically opposite transducers
+means a standing 1T oriented across them, while a phase that ramps linearly with
+azimuth means a spinning mode.
+
+#### Real-engine scale
+
+**Reference chamber** ($D_c = 0.50$ m, $L_{cyl} = 0.50$ m, $c = 1200$ m/s):
+1L 1200 Hz, 1T 1407 Hz, 1T1L 1849 Hz, 2T 2333 Hz, 1R 2927 Hz. Worked in full in
+WE1.
+
+**F-1 scale.** The F-1's throat diameter follows from its published thrust,
+$p_c$ and $\varepsilon$ as $D_t \approx 0.891$ m (Module 06 §6.3), and for
+plausible contraction ratios of 1.4–1.8 the barrel is $D_c \approx 1.05$–1.20 m
+[A] — the verification file does not publish a chamber diameter, so this is a
+derived estimate, not a quoted dimension. With fully burned LOX/RP-1 gas
+($\gamma = 1.22$, $M = 23.3$ kg/kmol, $T_c = 3600$ K, $c = 1252$ m/s) that gives
+
+$$f_{1T} \approx \frac{1.8412 \times 1252}{\pi \times 1.13} \approx 650\ \mathrm{Hz}$$
+
+with a plausible range of 610–700 Hz. The gas near the injector face, where the
+mode is driven, is neither fully burned nor at $T_c$; with an effective sound
+speed of 800–1000 m/s the same geometry gives **415–520 Hz**. That bracket
+straddles the several-hundred-hertz band in which the F-1's instability was
+actually reported [OY93], and it makes the pedagogically important point: the
+F-1's first tangential mode sat at a frequency that a naive classification would
+call "intermediate". Large chambers have low acoustic frequencies, and the
+frequency bands in §3.2 are conventions about mechanism, not about hertz.
+
+**RS-25 scale.** From 2,279 kN vacuum at 206.4 bar with $\varepsilon = 69$ and
+$\gamma = 1.20$, $C_{F,vac} = 1.927$ and $A_t = 0.0573$ m², so $D_t = 0.270$ m;
+with a contraction ratio near 2.5–3.2, $D_c \approx 0.43$–0.48 m [A]. LOX/LH₂ at
+$M = 13.5$ kg/kmol and $T_c = 3550$ K gives $c = 1620$ m/s — **35 % higher than a
+kerosene engine's**, purely because of the low molar mass. Hence
+
+$$f_{1T} \approx \frac{1.8412 \times 1620}{\pi \times 0.465} \approx 2000\ \mathrm{Hz}$$
+
+**Two structural facts fall out of this comparison and they explain most of
+engine stability history [F]:**
+
+1. **Bigger chamber → lower frequency.** $f_{1T} \propto 1/D_c$. Scaling an
+   engine up moves its transverse modes *down*, toward the frequencies at which
+   atomization and vaporization respond most strongly (roughly the inverse of the
+   droplet lifetime, order 1–5 kHz). This is why instability is a big-engine
+   problem, and why it appeared on the F-1 and not on the H-1 that preceded it.
+2. **Hydrogen → higher frequency.** A LOX/LH₂ chamber of the same diameter has
+   modes 30–40 % higher than a kerosene chamber, and hydrogen's combustion
+   response is fast and its droplets nonexistent. Hydrogen engines are not immune
+   — the RS-25 carries acoustic cavities for good reason — but their problems are
+   different: LOX-post-driven and higher in frequency.
+
+### 3.9 The Crocco–Cheng sensitive time-lag model
+
+#### The idea
+
+Crocco and Cheng's 1956 model [CC56] is still the analytical framework the field
+argues in, and its virtue is that it compresses everything unknowable about the
+combustion — atomization, droplet heating, vaporization, mixing, chemical
+kinetics — into **two numbers**.
+
+Split the total time from injection to heat release into an *insensitive* part
+(during which nothing that happens depends on chamber pressure) and a
+**sensitive time lag** $\tau$, during which the rate of the pressure-sensitive
+processes scales as some power of pressure. Formally, a fluid element injected at
+$t-\tau_{tot}$ burns when the accumulated "preparation" reaches a threshold:
+
+$$\int_{t-\tau}^{t} f\big(p(t')\big)\,dt' = \text{const}$$
+
+Perturb: $f \propto p^n$, so $f'/\bar f = n\,p'/\bar p$, and the requirement that
+the integral stay constant makes the *lag itself* fluctuate. Working through the
+perturbation of the burning rate gives the central result:
+
+$$\frac{\dot m_b'(t)}{\bar{\dot m}_b} \;=\; n\left[\frac{p'(t)}{\bar p} - \frac{p'(t-\tau)}{\bar p}\right]$$
+
+> **Eq. 3.10 (the $n$–$\tau$ law)** — variables: $\dot m_b'$ perturbation of the
+> rate at which propellant is converted to hot gas [kg/s]; $n$ **interaction
+> index**, the pressure sensitivity exponent of the rate-controlling process
+> [—]; $\tau$ **sensitive time lag** [s]. Meaning: the combustion responds to the
+> *difference* between pressure now and pressure one lag ago — the response is a
+> pure differencing operator, and it is exactly this differencing that produces
+> the strong frequency dependence. Assumes: a single lag common to all elements,
+> a single sensitivity exponent, small perturbations, no velocity coupling.
+> Fails when: velocity coupling matters (transverse velocity shredding a spray
+> is a first-order effect in real transverse instability, and it is *not* in this
+> model), when there is a spread of lags across the face (there always is, and it
+> is stabilising), or at limit-cycle amplitudes where the response saturates.
+
+In the frequency domain, with $p' \propto e^{i\omega t}$, the response function is
+
+$$R(\omega) = \frac{\dot m_b'/\bar{\dot m}_b}{p'/\bar p} = n\left(1 - e^{-i\omega\tau}\right) = 2n\sin\!\left(\frac{\omega\tau}{2}\right)e^{\,i(\pi-\omega\tau)/2}$$
+
+which is the useful form: **magnitude $2n|\sin(\omega\tau/2)|$, maximum at
+$\omega\tau = \pi$** — i.e. when the lag is exactly half a period of the mode.
+That is the sentence to remember. A mode is most strongly driven when
+$\tau \approx T/2 = 1/(2f)$. For $\tau = 1$ ms the worst mode is at 500 Hz; for a
+hydrogen engine with $\tau = 0.25$ ms it is at 2 kHz. **The combination of the
+chamber's mode frequencies and the propellant's lag decides which mode you get
+into trouble with**, and it is the reason changing the propellant, the element
+size or the chamber diameter can each independently fix or cause an instability.
+
+#### The neutral-stability boundary and the stability map
+
+Close the loop for the lumped (low-frequency) chamber: substitute the $n$–$\tau$
+response into the chamber capacitance equation of §3.4, replacing the injector
+feedback with combustion feedback:
+
+$$\tau_c\,\dot p' + p' = n\big[p'(t) - p'(t-\tau)\big]$$
+
+Setting $p' = \hat p e^{i\omega t}$ and separating real and imaginary parts:
+
+$$1 = n\,(1-\cos\omega\tau), \qquad \omega\tau_c = n\sin\omega\tau$$
+
+Dividing the second by the first and using the half-angle identities gives a
+remarkably clean pair:
+
+$$\boxed{\ \omega\tau_c = \cot\!\left(\frac{\omega\tau}{2}\right), \qquad n_{crit} = \frac{1}{1-\cos\omega\tau} = \frac{1}{2\sin^2(\omega\tau/2)}\ }$$
+
+> **Eq. 3.11** — variables as above. Meaning: solve the first for $\omega$ given
+> $\tau$ and $\tau_c$, then evaluate the second; if the propellant's actual $n$
+> exceeds $n_{crit}$ the chamber is linearly unstable at that frequency.
+> Assumes: lumped chamber (valid only for modes whose wavelength exceeds the
+> chamber dimensions — chug and $L^*$ modes, not acoustics), constant $n$ and
+> $\tau$. Fails when: applied to an acoustic mode, where the correct treatment
+> distributes the response over the mode shape and adds nozzle and wall damping.
+
+The limiting case is famous. As $\tau_c \to 0$, $\omega\tau \to \pi$ and
+$n_{crit} \to 1/2$: **a chamber with negligible capacitance is unstable whenever
+$n > 1/2$**, and since measured interaction indices for storable and kerosene
+propellants are typically 0.3–1.0 [SP-194 §4][LRECI], the margin is genuinely
+thin. For the reference chamber ($\tau_c = 1.48$ ms):
+
+| $\tau$ (ms) | $f$ (Hz) | $\omega\tau$ (rad) | $n_{crit}$ |
+|---|---|---|---|
+| 0.8 | 198 | 0.996 | 2.19 |
+| 1.2 | 158 | 1.194 | 1.58 |
+| 2.0 | 118 | 1.481 | 1.10 |
+
+The chamber's capacitance is doing a great deal of work: it raises the required
+$n$ from 0.5 to 1.1–2.2.
+
+**The stability map.** Plot the neutral curve in the $(\tau, n)$ plane — or, more
+usually, $(\omega\tau, n)$ — for each acoustic mode of interest. Each mode
+contributes a U-shaped curve with a minimum near $\omega\tau = \pi$; the region
+above the lowest curve is unstable. An engine is a *point* on that plane
+(its propellant fixes $n$, its element design fixes $\tau$), and the design
+question is how far below the lowest curve that point sits. Three moves are
+available: **lower $n$** (change propellant or element type — the least
+controllable), **shift $\tau$** (element size, impingement distance, recess —
+moving the point horizontally out from under a mode's minimum), and **push the
+curves up** (add damping — resonators and baffles raise $n_{crit}$ for the mode
+they attack). The last is the only one that reliably works on a mature design,
+which is why the hardware of §3.13 exists.
+
+**What the map cannot do.** It is a linear theory. It tells you whether an
+infinitesimal disturbance grows; it says nothing about the limit-cycle
+amplitude, nothing about the threshold amplitude for a nonlinearly unstable
+chamber, and $n$ and $\tau$ are not predicted from first principles — they are
+fitted to test data from the very engine you are trying to certify. That is not
+a reason to discard it; it is a reason to treat it as a framework for
+*organising* test data rather than as a predictor. Every honest account of the
+model says so, including [CC56] itself.
+
+### 3.10 Mechanisms of coupling: what actually responds
+
+The $n$–$\tau$ model hides the mechanism. Here is what is inside it, roughly in
+order of importance for high-frequency transverse instability [SP-194 §2][LRECI]
+[OY93]:
+
+**Atomization response.** A transverse acoustic mode produces a gas *velocity*
+oscillation of amplitude $u' = p'/(\rho c)$, which at 10 % of a 100-bar chamber
+pressure with $\rho = 8$ kg/m³ and $c = 1200$ m/s is $u' \approx 100$ m/s
+transverse — comparable to the injection velocity. That oscillating cross-flow
+periodically strips and re-forms the liquid sheets and jets, modulating the drop
+size at the acoustic frequency. Because vaporization rate goes roughly as
+$1/d^2$, a modest drop-size modulation is a large heat-release modulation. This
+is **velocity coupling** and it is why transverse modes are so much more
+dangerous than longitudinal ones: a longitudinal mode's velocity antinode is at
+the nozzle end, far from the spray, whereas a transverse mode's is right across
+the injector face.
+
+**The Klystron effect.** Named by analogy with the microwave tube. The
+oscillating pressure at the injector face modulates the injection *velocity* of
+each jet — faster during the low-pressure part of the cycle, slower during the
+high-pressure part. Droplets injected at different times therefore travel at
+different speeds, and downstream they **bunch**: fast drops catch slow ones, so
+a smooth velocity modulation at the face becomes a strong *density* modulation
+some distance downstream, with a delay equal to the bunching distance over the
+mean velocity. The heat release is then modulated at the acoustic frequency at
+precisely the axial station where the bunching is tightest. It is a mechanism
+that converts a small perturbation at the face into a large one downstream, and
+its delay is geometric — you can move it by changing injection velocity or
+element length **[F]**, [SP-194 §2.3].
+
+**Hydrodynamic instability of impinging fans.** Two impinging jets produce a
+liquid sheet that is already unstable — it flaps, with a natural frequency set by
+the jet velocity, orifice diameter and impingement angle (Module 07 §3.5). If
+that natural flapping frequency lands near a chamber acoustic mode, the sheet
+locks to it, and the whole element becomes a phase-locked, high-gain oscillator
+converting steady flow into pulsed heat release. This is the single best
+explanation of why the F-1's large like-on-like doublets were so troublesome:
+element hydrodynamic frequencies scale roughly as $v_{inj}/d_{orifice}$, so
+**bigger orifices flap slower**, and the F-1's big orifices flapped in the same
+band as its low-frequency 1T mode **[E]/[J]**, [OY93][LRECI].
+
+**Vaporization response.** The rate-controlling step for kerosene and storables.
+Droplet vaporization rate depends on pressure through gas density, on temperature
+through the driving $\Delta T$, and on relative velocity through the convective
+correction. The response has a characteristic time equal to the droplet lifetime
+(0.5–3 ms for 100–200 μm kerosene drops), and it peaks — like everything else —
+when the acoustic period is about twice that. Hydrogen is the exception: above
+its critical pressure there is no droplet and no latent heat, the LOX jet
+undergoes a continuous transcritical density change, and the "vaporization
+response" is really a turbulent mixing response, faster and less pressure
+sensitive.
+
+**Mixing response.** Even with drop size and vaporization fixed, the local
+mixture ratio can oscillate — the acoustic velocity displaces the oxidizer and
+fuel sprays differently because their momenta differ. Since $T_c$ near
+stoichiometric is a steep function of mixture ratio, a mixture-ratio oscillation
+is a heat-release oscillation with essentially zero delay. This is the mechanism
+that makes *unlike*-impinging elements more responsive than *like*-impinging
+ones, and it is one of the few arguments in favour of like-on-like patterns.
+
+### 3.11 Element type and stability
+
+The design conclusion of §3.10 is that stability is largely decided by the
+injector element, and specifically by **how much of the heat release sits close
+to the face and how fast it can respond**. [J]/[H], and this is the practical
+knowledge that separates a first design from a second one.
+
+| element | why it behaves as it does | stability reputation |
+|---|---|---|
+| **Like-on-like doublet, large elements** | Coarse sprays, long vaporization lag, self-impinging fans with a hydrodynamic flapping frequency that scales as $v/d$ and lands low for large orifices. Heat release concentrated a short distance from the face. | Poor at large scale — the F-1 problem. Acceptable at small scale where $d$ is small and $f_{1T}$ is high. |
+| **Unlike doublet / triplet** | Mixes faster (good for $\eta_{c^*}$), but mixture ratio is directly modulated by transverse velocity, so the mixing response is strong and nearly instantaneous. | Poor-to-moderate; almost always requires baffles at booster scale (Titan LR87/LR91, [_verify-liquid]). |
+| **Shear coaxial (LOX post + fuel annulus)** | Heat release distributed over a long axial development length; the LOX core takes time to break up. But the posts themselves are slender cantilevers in a transverse acoustic field and can fail by high-cycle fatigue, and the recess depth changes the lag by tens of percent. | Moderate. The RS-25 needed acoustic cavities; the J-2 lineage was manageable. Hydrogen's short lag pushes the trouble to higher frequency. |
+| **Swirl coaxial** | The propellant leaves as a thin conical *sheet* with a large surface area and a wide spray angle. Break-up is dominated by the sheet's own centrifugal dynamics rather than by the ambient gas, so an imposed transverse gas velocity perturbs it much less. Heat release is spread over a large volume. | Good. This is the Soviet/Russian standard practice — RD-253, RD-170 family, RD-180, and by SpaceX's account Raptor 2 onward [_verify-liquid]. |
+| **Pintle** | One element. There is no element-to-element coupling, no fan-to-fan phasing, and no periodic face pattern for a tangential mode to lock onto. The spray is a single radial sheet intercepting an axial annular flow, and much of the heat release is well downstream and near the wall — where a 1T mode has high pressure but the mixing is comparatively insensitive. Additionally the pintle's radial sheet is a strong acoustic obstruction near the face. | Very good. TRW fired a large family of pintle engines without encountering a high-frequency instability, and reports no dedicated stabilisation devices on the LMDE [Dressler00]. This claim comes from the vendor; treat "inherently stable" as strongly supported by service history and weakly supported by theory. |
+
+Two qualifications on the pintle, because it is the most over-claimed item in the
+table. First, pintles are not immune to *chug* — a single element still has an
+injector $\Delta p$ and a combustion lag, and pintle engines throttle deeply,
+which is exactly the regime where $\Delta p/p_c$ collapses (Module 07 §3.4).
+Second, "inherently stable" is a statement about *high-frequency transverse*
+modes, which is where the historical evidence is.
+

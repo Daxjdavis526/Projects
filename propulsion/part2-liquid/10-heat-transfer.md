@@ -238,18 +238,25 @@ Two consequences worth internalising:
 - **[F] In the chamber, $T_{aw}\approx T_0$.** At $M=0.3$, $r=0.9$, $\gamma=1.2$,
   Eq. 3.2 gives $T_{aw}/T_0 = 0.9990$. The recovery correction is a tenth of a
   percent. Anyone who tells you the chamber wall "sees 3600 K" is right.
-- **[F] At the exit of a large nozzle, $T_{aw}$ is much less than $T_0$ but much
-  more than $T_\infty$.** At $M=3.6$, $\gamma=1.2$: $T_\infty/T_0=0.278$, but
-  $T_{aw}/T_0 = 0.350$. The wall of a nozzle extension sees 1260 K where the
-  gas static temperature is 1000 K. The 26 % difference is what keeps the
-  bottom of a regenerative circuit busy.
+- **[F] Deep in a nozzle, $T_{aw}$ is still close to $T_0$ and far above
+  $T_\infty$ — and this surprises people.** At $\varepsilon=16$, $\gamma=1.2$:
+  $M=3.60$, $T_\infty/T_0=0.435$, but $T_{aw}/T_0 = \mathbf{0.944}$. With
+  $T_0=3600$ K the free-stream gas is at 1566 K while the wall's driving
+  potential is 3397 K. The recovery factor recovers 90 % of the *kinetic*
+  energy, so the adiabatic wall temperature never falls far below the chamber
+  stagnation temperature anywhere in the nozzle. **What saves a nozzle
+  extension is not a low $T_{aw}$; it is a collapsed $h_g$.** Anyone who
+  designs a skirt by assuming the wall "only sees the static temperature" will
+  under-predict the flux by a factor of two.
 
 ### 3.4 Where the heat flux peaks, and why it is not at the throat
 
 Take Eq. 3.3 and look at the two factors along the engine axis:
 
-- $T_{aw}$ falls monotonically from the injector to the exit, slowly at first
-  ($T_{aw}/T_0 = 0.999$ at $M=0.3$, $0.991$ at $M=1$) then quickly.
+- $T_{aw}$ falls monotonically from the injector to the exit, and **slowly**:
+  $T_{aw}/T_0 = 0.999$ at $M=0.3$, $0.991$ at $M=1$, $0.956$ at
+  $\varepsilon=5$, $0.944$ at $\varepsilon=16$. Over the whole engine it moves
+  by about 6 %.
 - $h_g$ rises steeply through the convergent section, because it scales with
   local mass flux $\rho u = \dot m/A$, and $A$ collapses by the contraction
   ratio (typically 2–3) over a distance of a few throat radii.
@@ -767,7 +774,8 @@ Useful values at $T_g=3600$ K, where $\sigma_{SB}T_g^4 = 9.52$ MW/m²:
 | Chamber-barrel flux / throat flux | 0.4–0.7 | — | — |
 | Recovery factor $r$ (turbulent) | 0.89–0.93 | — | — |
 | $T_{aw}$ / $T_c$, chamber | 0.998–1.000 | — | — |
-| $T_{aw}$ / $T_c$, $\varepsilon=16$ exit | 0.32–0.38 | — | — |
+| $T_{aw}$ / $T_c$, $\varepsilon=16$ exit | 0.93–0.95 | — | — |
+| $T_\infty$ / $T_c$, $\varepsilon=16$ exit | 0.42–0.45 | — | — |
 | Bartz $\sigma$ (cold wall) | 1.1–1.45 | supersonic, hot wall | chamber, cold copper wall |
 | Gas-side wall temperature $T_{wg}$, copper liner | 700–900 K | conservative long-life design | short-life / expendable |
 | $T_{wg}$, nickel-alloy tube wall | 900–1100 K | — | F-1 tube crown |
@@ -1128,11 +1136,21 @@ fuel-rich, well-organised outer flow that shields the wall, which is one of the
 under-advertised virtues of the pintle and part of why SpaceX inherited it from
 the TRW/LM-descent lineage.
 
-**The niobium skirt** is the other half of the answer. Beyond about
-$\varepsilon=25$, the flux (WE1: 11 MW/m² at $\varepsilon=5$, and falling as
-$A^{-0.9}$) drops below 1 MW/m², at which point a bare refractory metal
-radiating at 1500 K balances the load with no coolant at all. Radiation cooling
-becomes viable exactly where regenerative cooling becomes pointless.
+**The niobium skirt** is the other half of the answer, and the arithmetic is
+worth doing because it is counter-intuitive. $T_{aw}$ barely falls down the
+nozzle (3443 K at $\varepsilon=5$, 3382 K at $\varepsilon=25$), so the wall's
+driving potential is essentially undiminished. What collapses is $h_g$: with
+$(A_t/A)^{0.9}$, Bartz gives $h_g\approx3.7\times10^{3}$ W/(m²·K) at
+$\varepsilon=5$ and $7.4\times10^{2}$ at $\varepsilon=25$, so at a wall
+temperature of 1500 K the flux falls from 7.1 to 1.4 MW/m². A C-103 niobium
+skirt radiating from both faces at $\varepsilon_w\approx0.8$ balances only
+0.23 MW/m² at 1500 K and 0.34 MW/m² at 1650 K. Bartz alone would therefore put
+the radiation-cooling transition beyond $\varepsilon\approx60$ — but Bartz
+over-predicts by 30–50 % that far downstream (§3.7), and the real transition on
+flight hardware sits nearer $\varepsilon=25$–40. **This is a station where you
+do not design on Bartz; you design on the measured skirt temperature.**
+Radiation cooling becomes viable where $h_g$ has collapsed, not where the gas
+has cooled.
 
 **Modern verdict.** Yes — and this is now the default for a reusable kerolox
 booster engine.
@@ -1292,10 +1310,13 @@ gap and no contact resistance.
 
 ## 8. Misconceptions and what engineers actually care about
 
-**"The wall sees the chamber temperature, 3600 K."** In the chamber, very
-nearly true ($T_{aw}/T_0=0.999$). In the nozzle, badly false: at $\varepsilon=16$,
-$T_{aw}\approx0.35T_0$. The driving potential is $T_{aw}$, not $T_0$, and the
-difference is the entire reason nozzle extensions can be radiation-cooled.
+**"Deep in the nozzle the wall only sees the static temperature, so it is
+cool."** No. The recovery factor recovers 90 % of the kinetic energy, so at
+$\varepsilon=16$ the free stream is at $0.44T_0$ but $T_{aw}=0.944T_0$ — 3397 K
+for a 3600 K chamber. Nozzle extensions survive because $h_g\propto(A_t/A)^{0.9}$
+has collapsed by a factor of twenty, not because the driving potential has
+fallen. Use $T_{aw}$, and get it from Eq. 3.2, not from a static-temperature
+table.
 
 **"The throat is hottest because the gas is hottest there."** The gas is
 *coolest* along the flow path so far — 300–400 K below the chamber. The throat
@@ -1387,9 +1408,10 @@ uprate — and say what they did.
 ### Conceptual
 
 **C1.** A colleague computes the wall heat flux in a nozzle at $\varepsilon=25$
-using $q''=h_g(T_c-T_{wg})$ with $T_c=3500$ K. Estimate the factor by which
-they have over-predicted the flux, for $\gamma=1.20$, and explain the physical
-error in one sentence.
+using $q''=h_g(T_c-T_{wg})$ with $T_c=3500$ K and $T_{wg}=800$ K, instead of
+using $T_{aw}$. For $\gamma=1.20$, compute the factor by which they have
+over-predicted the flux. Is the error large? What does your answer say about
+where the real uncertainty in a nozzle heat-transfer calculation lives?
 
 **C2.** Why does the *measured* peak heat flux sit upstream of the geometric
 throat when quasi-1-D Bartz places it exactly at the throat? Give two distinct
