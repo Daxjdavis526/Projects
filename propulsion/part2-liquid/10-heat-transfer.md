@@ -1591,7 +1591,7 @@ bulged toward the gas and thinned by 0.3 mm, with no melting anywhere. Name the
 failure mode, name the governing material property group, and state which
 single design change would most improve life.
 
-**Q10 (8 pts).** [Judgment] You have a Bartz prediction of 70 MW/m² at the
+**Q10 (8 pts).** [J] You have a Bartz prediction of 70 MW/m² at the
 throat of a new kerolox engine and no test data. Your design must close before
 a calorimeter chamber can be built. State the flux you would design the cooling
 circuit to, justify the margin in both directions, and name the one measurement

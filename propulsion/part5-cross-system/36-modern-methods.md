@@ -850,3 +850,696 @@ function that was never intended for a 3000 K gradient; radiation switched
 off in a soot-forming flame; a mesh that is fine in the chamber and coarse
 through the throat because that is where the geometry generator put the
 cells. Worked Example 2 (§5.2) runs the check numerically.
+
+### 3.8 Finite element analysis in propulsion
+
+FEA discretises a continuum into elements, assembles a stiffness matrix, and
+solves $\mathbf{K}\mathbf{u}=\mathbf{f}$ (statics), $\mathbf{K}\boldsymbol\phi_i=
+\omega_i^2\mathbf{M}\boldsymbol\phi_i$ (modes), or a time-marched
+$\mathbf{M}\ddot{\mathbf{u}}+\mathbf{C}\dot{\mathbf{u}}+\mathbf{K}\mathbf{u}=
+\mathbf{f}(t)$ (dynamics). The method is mature; what distinguishes
+propulsion FEA is the **loads**, which are usually the least certain part of
+the analysis, and the **material behaviour**, which is nonlinear,
+rate-dependent and cyclic.
+
+#### 3.8.1 Thermostructural analysis of a cooled liner, and LCF
+
+This is the canonical hard problem. A regeneratively cooled liner runs with
+its hot wall near 800–900 K and its cold wall near 200–500 K across
+0.7–1.5 mm of copper alloy. The hot wall wants to expand, the surrounding
+structure will not let it, so it goes into **compressive plastic strain** at
+temperature; on shutdown, the reverse. That is a fully-reversed plastic
+cycle and it is why chamber liners fail by **low-cycle fatigue** with the
+characteristic "doghouse" thinning and eventual rupture of the channel land
+[Quentmeyer77].
+
+The elastic thermal stress bound is the one from Module 16:
+
+$$\sigma_{\text{th}}=\frac{E\,\alpha\,\Delta T}{2(1-\nu)}$$
+
+> **Eq. 3.14** — variables: $E$ Young's modulus [Pa], $\alpha$ coefficient of
+> thermal expansion [1/K], $\Delta T$ through-thickness temperature drop [K],
+> $\nu$ Poisson's ratio [—]. Meaning: a fully constrained wall with a linear
+> through-thickness gradient. Assumes: elastic, fully constrained, linear
+> gradient, temperature-independent properties. Fails: immediately — for a
+> copper liner at 250 K gradient this predicts stresses far above yield, so
+> the real answer is plastic and the equation's only use is to tell you *how
+> far* into plasticity you are. [F] as a bound, [A] as an answer.
+
+For copper at $\Delta T\approx200$–300 K the elastic prediction is several
+times yield, so the analysis must be **elastic–plastic with kinematic
+hardening** (to capture the Bauschinger effect and ratcheting), with
+temperature-dependent properties, and cycled for several load cycles until
+the response shakes down or is shown to ratchet. This is the analysis, and
+it is expensive and delicate. The life estimate then comes from
+Coffin–Manson:
+
+$$\frac{\Delta\varepsilon_p}{2}=\varepsilon_f'\,(2N_f)^{c}$$
+
+> **Eq. 3.15** — variables: $\Delta\varepsilon_p$ plastic strain range [—],
+> $\varepsilon_f'$ fatigue ductility coefficient [—], $c$ fatigue ductility
+> exponent (typically $-0.5$ to $-0.7$) [—], $N_f$ cycles to failure [—].
+> Meaning: log-linear relation between plastic strain amplitude and life.
+> Assumes: isothermal, uniaxial, fully reversed cycling on the material the
+> coefficients were measured on; no creep, no environment, no mean stress.
+> Fails when: the cycle is thermomechanical rather than isothermal (TMF is
+> materially worse than isothermal LCF at the same strain range), when
+> hold-time creep interacts, when the environment attacks the surface
+> (**hydrogen blanching** of copper liners is precisely this), and when the
+> material is not the coupon material — which for an AM liner it is not.
+> [E]; see [GRCop] for the alloy data and Module 16.
+
+**Why liner LCF predictions are systematically optimistic**, and you should
+assume yours is: (i) the thermal load used is a mean, not a streak;
+(ii) the coupon data is isothermal and the hardware is TMF; (iii) blanching
+and oxidation are not in the coefficients; (iv) AM material has different
+ductility, anisotropy and defect population than the wrought coupon; and
+(v) the analysis usually assumes the channel geometry as designed, while the
+hardware has the as-built geometry with its own tolerance stack. Programmes
+that treat a 300-cycle prediction as 300 cycles get a surprise; programmes
+that treat it as an *ordering* tool — design A lasts twice as long as design
+B — get value from it.
+
+#### 3.8.2 Pump rotordynamics
+
+A rocket turbopump is a lightly damped, high-speed rotor in a fluid
+environment that supplies most of both the stiffness and the destabilising
+forces. The eigenvalue problem is
+
+$$\left(\mathbf{K}+\mathbf{K}_{\text{fluid}}(N)+i\,\Omega\,\mathbf{C}_{\text{fluid}}(N)-\omega^2\mathbf{M}\right)\boldsymbol\phi=0$$
+
+and it is solved repeatedly across the speed range to produce a **Campbell
+diagram**: natural frequencies versus shaft speed, with engine-order lines
+(1×, 2×, blade-pass) overlaid. Crossings are potential resonances.
+
+The propulsion-specific content is not the FEA; it is the fluid coefficients.
+Seal and impeller-clearance forces supply cross-coupled stiffness that can
+drive **subsynchronous whirl**, and the cross-coupling grows with the
+pressure rise and the swirl entering the seal. This is the mechanism behind
+the Shuttle-era high-pressure fuel turbopump's subsynchronous whirl
+difficulties [Biggs89], and the reason modern designs use swirl brakes,
+damper (honeycomb) seals, and — as on the BE-4 — hydrostatic bearings, which
+buy stiffness and damping at the cost of a high-pressure supply circuit
+[Brennen-Pumps]. Validation is by **whirl-rig testing** and by
+accelerometer/proximity-probe data on the real pump; the fluid coefficients
+are calibrated to that data, not predicted from first principles.
+
+#### 3.8.3 Modal analysis for instability hardware
+
+Acoustic and structural modal analysis supports two different jobs.
+**Chamber acoustics**: solve the Helmholtz equation
+$\nabla^2\hat p+ (\omega/a)^2\hat p=0$ in the chamber volume with the correct
+speed-of-sound field and end conditions to get the longitudinal, tangential
+and radial mode frequencies. This is cheap, it is the basis of Module 15's
+mode identification, and it is how acoustic **cavity/resonator** dimensions
+are set — a quarter-wave or Helmholtz absorber must be tuned to the mode you
+intend to damp, and the tuning depends on the *hot* speed of sound in the
+cavity, which depends on what gas is in it. The RS-25's injector-face
+resonator cavities are the standard example. **Baffle** design is the other
+half: a baffle's job is to raise the frequency of, and add loss to, the
+tangential modes near the injector, and its length is chosen against the
+computed mode shape [SP-8113].
+
+**Structural modes** matter for feedlines and for POGO: the coupled
+structure/feedline/engine dynamics that destroyed the ride quality of more
+than one vehicle. That analysis is a low-order transfer-function model of
+the pump, line and tank, plus an FEA of the vehicle structure — again, a ROM
+plus an FEA, not a CFD.
+
+#### 3.8.4 Hot-fire strain validation
+
+The closing of the loop. Thermostructural models are validated against
+hardware by:
+
+- **Strain gauges** on the outside of the jacket (the hot wall is
+  inaccessible), which measure the structural response the model must
+  reproduce, though not the quantity of interest directly;
+- **Thermocouples** in the wall and in the coolant, plugged into machined
+  pockets at known depths — these give the temperature field the model must
+  match before any stress result is credible;
+- **Post-test metrology**: channel-wall thinning measured by CMM or CT
+  between hot fires, which is the direct measurement of the ratcheting the
+  model predicts;
+- **Cut-ups**: sectioning a fired chamber and measuring the plastic
+  deformation and crack initiation directly. Destructive, expensive, and the
+  only unambiguous data.
+
+[J] Instrument for what validates the model, not for what is easy to
+instrument. A thermocouple 0.5 mm from the hot wall, correctly located and
+correctly corrected for the disturbance it causes, is worth ten strain
+gauges on the jacket.
+
+### 3.9 Multidisciplinary design optimisation
+
+**What it computes.** The best design in a space where the disciplines are
+coupled: a change to chamber pressure changes the cycle balance, which
+changes the pump discharge pressure, which changes the pump mass and the
+turbine flow, which changes the $I_{sp}$, which changes the propellant mass,
+which changes the tank mass and the vehicle. Optimising any one discipline
+alone gets the wrong answer, and the classic evidence is that
+single-discipline optima are usually *infeasible* in the coupled problem.
+
+The general statement:
+
+$$\min_{\mathbf{x}}\ f(\mathbf{x},\mathbf{y})\quad\text{s.t.}\quad \mathbf{g}(\mathbf{x},\mathbf{y})\le0,\quad \mathbf{h}(\mathbf{x},\mathbf{y})=0,\quad \mathbf{y}=\mathbf{Y}(\mathbf{x},\mathbf{y})$$
+
+> **Eq. 3.16** — variables: $\mathbf{x}$ design variables, $\mathbf{y}$
+> coupling variables (outputs of one discipline that are inputs to another),
+> $\mathbf{g},\mathbf{h}$ inequality and equality constraints. Meaning: the
+> last equation is what makes it *multidisciplinary* — the coupling variables
+> must be self-consistent, which is a fixed-point problem nested inside the
+> optimisation. Assumes: the disciplinary analyses are deterministic,
+> reasonably smooth, and cheap enough to be called many times. Fails when:
+> a disciplinary analysis is noisy (CFD with a convergence tolerance is a
+> noisy function), when it is discontinuous (a design change that switches
+> which constraint is active), or when it takes hours (then you need
+> surrogates, §3.15). [F] as a statement, [M] as a practice; see
+> [Martins13, Martins].
+
+**Architectures.** Monolithic (MDF — converge the multidisciplinary analysis
+at every optimiser iteration; IDF — let the optimiser enforce consistency
+with equality constraints) versus distributed (collaborative optimisation,
+BLISS, ATC), which exist mainly to let separate organisations own separate
+disciplines. In propulsion the practical answer is nearly always MDF with a
+fast ROM as the analysis, because the cycle balance converges in
+milliseconds and the whole point is to run 10⁵ designs.
+
+**What the objective actually is.** Rarely $I_{sp}$. In real programmes the
+objective is a mission-level or business-level scalar: payload to a reference
+orbit, $/kg to orbit, or a weighted combination including development cost
+and schedule risk. Getting the objective right is a bigger lever than the
+optimisation algorithm, and it is a systems-engineering decision (Module 33),
+not a numerical one.
+
+**Pareto fronts.** With two or more objectives — say $I_{sp}$ and engine
+dry mass, or performance and unit cost — there is no single optimum. The
+Pareto front is the set of non-dominated designs, and its value is
+*diagnostic*: the shape tells you the exchange rate. A front with a sharp
+knee says there is a natural design point and small deviations are cheap; a
+flat, nearly straight front says the choice is a pure management preference
+and the engineering cannot settle it. [J] The single most useful output of
+an MDO study is usually not the optimum but the local gradient at the
+chosen point: "each additional bar of chamber pressure buys 0.09 s of
+$I_{sp}$ and costs 1.4 kg of pump and 2 % of turbine life."
+
+**Where MDO misleads.** It optimises the model, not the engine. Any physics
+absent from the model is free, so the optimiser will exploit it: if the
+model has no combustion-stability constraint, the optimiser will happily
+shrink $L^*$ and raise the injector element density until it produces an
+engine that cannot be made stable. Every MDO result must be examined for
+*which constraint is active* — if the optimum sits on a bound that is an
+artefact (a variable range you typed in), the answer is meaningless.
+
+### 3.10 Topology optimisation
+
+**What it computes.** Not the size of a member — the *existence* of it. Given
+a design domain, loads, supports and a material budget, topology optimisation
+decides where material should be.
+
+The dominant formulation is **SIMP** (Solid Isotropic Material with
+Penalisation) [Bendsoe]: assign each element a pseudo-density $\rho_e\in
+[\rho_{\min},1]$, interpolate stiffness as
+
+$$E_e = \rho_e^{\,p}\,E_0,\qquad p\approx3$$
+
+and minimise compliance subject to a volume fraction:
+
+$$\min_{\boldsymbol\rho}\ C=\mathbf{u}^\mathsf{T}\mathbf{K}(\boldsymbol\rho)\mathbf{u}\quad\text{s.t.}\quad \mathbf{K}(\boldsymbol\rho)\mathbf{u}=\mathbf{f},\quad \sum_e \rho_e v_e \le V^{*}$$
+
+> **Eq. 3.17** — variables: $\rho_e$ element pseudo-density [—], $p$
+> penalisation exponent [—], $C$ compliance [J], $v_e$ element volume [m³],
+> $V^*$ volume budget [m³]. Meaning: the penalisation makes intermediate
+> densities structurally inefficient, so the optimiser drives elements to 0
+> or 1 and a discrete shape emerges. Assumes: linear elasticity, a single
+> load case (or a weighted set), stiffness as the objective. Fails when:
+> the real driver is strength, buckling, fatigue or a thermal gradient
+> rather than stiffness — compliance minimisation will happily produce thin
+> members that buckle or notch-sensitive junctions that crack. Also
+> mesh-dependent and prone to checkerboarding without a density filter of
+> radius $r_{\min}$, which then sets the minimum feature size. [F]/[E].
+
+**Where it is genuinely valuable in propulsion.**
+
+- **Brackets, mounts, gimbal fittings, thrust structure lugs.** Stiffness- or
+  frequency-driven, single-load-path, non-pressure-containing, and now
+  cheaply printable. Mass reductions of 30–60 % against a conventionally
+  designed machined part are routinely reported, and the parts are usually
+  *also* cheaper because they replace an assembly of several machined pieces
+  and fasteners. This is the least controversial win in the whole module.
+- **Manifolds and flow paths.** Here the objective is fluid, not structural:
+  minimise pressure drop or equalise flow split across $N$ outlets. The
+  method is the same idea with a fluid (Darcy-penalised Stokes/Navier-Stokes)
+  formulation, and the outputs are the organic-looking manifolds now common
+  on AM engines.
+- **Injector internal passages.** Combining the two: an element body that
+  must hold pressure, distribute flow evenly and survive thermal cycling.
+  In practice this is done as *parametric* shape optimisation of a
+  hand-chosen topology far more often than as true topology optimisation,
+  because the manufacturing and inspection constraints are so restrictive.
+
+**Where it fails or misleads.**
+
+1. **Compliance is not the requirement.** Almost no propulsion part fails by
+   being insufficiently stiff. They fail by yielding, buckling, cracking, or
+   melting. A compliance-optimised result is a *starting shape*, and it must
+   then be re-analysed against the real failure modes, which usually adds
+   material back.
+2. **Manufacturability constraints change the answer, not just the shape.**
+   Overhang angle limits, minimum wall thickness, powder-removal access for
+   internal voids, and support-structure accessibility are hard constraints
+   in AM. An unconstrained topology result is frequently unbuildable, and a
+   build-orientation-constrained one is a genuinely different, heavier
+   design.
+3. **Surface finish and fatigue.** Topology-optimised parts have organic,
+   often un-machinable surfaces. As-built AM surface roughness ($R_a$ of
+   order 10–25 µm before finishing) is a fatigue-life multiplier of 2–10×
+   *reduction* against machined surfaces. If the part is fatigue-critical,
+   either the surfaces must be finished (often impossible in internal
+   passages) or the allowable must be knocked down hard.
+4. **Inspectability.** A lattice or a bio-organic bracket cannot be
+   ultrasonically inspected in any conventional way, and CT has a
+   part-size/resolution ceiling. "It is 45 % lighter and we cannot inspect
+   it" is not a win on a human-rated vehicle.
+
+Worked Example 3 (§5.3) derives the beam-theory *lower bound* on what
+topology optimisation can achieve for a stiffness-driven bracket, which is
+the number to have in your head before someone shows you a result.
+
+### 3.11 Additive manufacturing as a design method
+
+Module 17 covered AM as a process. This section is about AM as a *method*:
+the way it changes what you are allowed to draw.
+
+**Design for AM (DfAM).** The classical design vocabulary is a set of
+subtractive constraints — a tool must reach it, a drill must be straight, a
+braze joint must be accessible, a casting must draw. AM removes most of
+those and imposes different ones:
+
+| AM constraint | typical value | design consequence |
+|---|---|---|
+| Minimum printable wall (L-PBF) | 0.3–0.5 mm | sets thinnest liner, channel rib and lattice strut |
+| Minimum unsupported overhang | ~45° from build plate | internal channels become teardrop/diamond, not round |
+| Minimum internal channel for powder removal | ~0.5–1.0 mm, with a drain path | every internal void needs an escape route |
+| Build-volume limit (L-PBF) | typically ≲0.5 m | drives to DED, or to split-and-join, at chamber scale |
+| Anisotropy (build vs transverse) | commonly 5–15 % in strength, more in ductility | build orientation is a *structural* decision |
+| As-built roughness $R_a$ | ~10–25 µm | fatigue knockdown; heat-transfer *enhancement* in channels |
+| Residual stress | high, distortion-driving | needs stress-relief cycle, sometimes on the build plate |
+
+**The four things AM actually buys a propulsion designer.** [M]
+
+1. **Integrated cooling channels without a braze or a closeout.** Historically
+   a regen chamber was 178 brazed tubes (F-1) or 390 milled channels with an
+   electroformed nickel closeout (RS-25). Both are multi-month, high-scrap
+   processes. Printing the liner with the channels *in* it removes the entire
+   closeout operation. This is the single largest schedule and cost effect
+   of AM in combustion devices [Gradl18, GradlAM].
+2. **Part-count collapse.** An injector that was 100+ machined and brazed
+   pieces becomes one or a few prints. Every joint removed is a leak path,
+   a failure mode and an inspection removed. Rutherford is the extreme public
+   case — chamber, injector, pumps and main valves all printed — and it is
+   why Rocket Lab could iterate engine hardware at a cadence no
+   conventionally-manufactured programme matches.
+3. **Geometries that were previously undrawable.** Variable-cross-section
+   channels that follow the heat-flux profile rather than a constant
+   geometry; conformal manifolds; lattice-cored structures; graded-density
+   regions. This is where topology optimisation and AM meet, and it is real
+   value, not marketing.
+4. **Scale, via directed energy deposition.** L-PBF caps out below a metre.
+   Blown-powder DED and related processes print channel-wall nozzles and
+   chambers at booster scale, which is the point of NASA's RAMPT project
+   [RAMPT]. The deposition rates are orders of magnitude higher and the
+   resolution correspondingly coarser, so DED is for the large, thick,
+   channel-wall structure and L-PBF for the small, fine, injector-scale
+   parts.
+
+**Build orientation as a design variable.** This is the DfAM point students
+most often miss. Orientation simultaneously sets: which surfaces need
+support (and therefore which internal surfaces will be rough or damaged on
+support removal), the direction of the anisotropy relative to the principal
+stress, the residual-stress and distortion pattern, the build time (and
+therefore cost), and the defect population (lack-of-fusion defects have an
+orientation-dependent projected area under a given stress). Two identical
+CAD files built at different orientations are, for qualification purposes,
+**two different materials**. This is why the AM qualification frameworks
+require the build orientation to be part of the frozen process definition,
+witness coupons to be built in the same orientation and the same build as the
+part, and a re-qualification if the orientation changes [GradlAM].
+
+**Lattices.** Useful for stiffness-per-mass in non-pressure, non-thermal
+structure, and for tailored energy absorption. Widely oversold. In a
+propulsion context the honest assessment is: they are excellent in brackets
+and secondary structure, they are attractive in heat exchangers (huge
+surface-area density), and they are very hard to qualify anywhere fatigue or
+NDE matters, because a lattice is a dense forest of stress concentrations
+each with its own defect probability, and you cannot inspect it. [J]
+
+### 3.12 Digital engineering and MBSE
+
+**What it is.** Model-Based Systems Engineering replaces the document as the
+authoritative artefact with a **model** — a linked, queryable structure of
+requirements, functions, logical and physical architecture, interfaces,
+behaviour and verification, usually expressed in **SysML** and held in a
+repository. The US Department of Defense's Digital Engineering Strategy
+(2018) and NASA's parallel push made it a contractual expectation on many
+programmes rather than an option [DoD-DES, NASA-SE].
+
+**What a propulsion MBSE model actually contains.** Requirements with unique
+identifiers and traceable parent/child links; interface definitions (the
+engine-to-stage mechanical, fluid, electrical and data interfaces, each with
+owner and verification method); a functional decomposition; a physical
+breakdown structure that matches the parts list; behaviour models (state
+machines for start/shutdown sequencing, activity diagrams for operational
+modes); and a verification matrix mapping every requirement to a test,
+analysis, inspection or demonstration.
+
+**What it genuinely fixes.** Four things, all of them real:
+
+1. **Requirements traceability.** "Why is the LOX inlet pressure requirement
+   34.5 bar?" becomes answerable by query rather than by archaeology, and a
+   change to a parent requirement flags every child automatically. On a
+   programme with 5,000 requirements this is not a convenience, it is the
+   difference between a coherent design and a pile of unlinked assertions.
+2. **Interface control.** The single largest source of integration failure in
+   propulsion systems is an interface that two organisations understood
+   differently. A model with a single authoritative interface definition,
+   owned by one party, removes the most common version of that failure.
+3. **Change impact analysis.** Which tests, analyses and documents are
+   invalidated by moving the gimbal ring 8 mm? A linked model answers in
+   minutes.
+4. **Verification bookkeeping.** Nothing flies with an unverified
+   requirement, and knowing *which* requirements are unverified, at any
+   moment, is a genuine management need that spreadsheets do badly.
+
+**What it does not fix, and what it can make worse.** [J]
+
+- It does not make the design right. A perfectly traced requirement can be
+  physically wrong. MBSE has no physics in it; the physics is in the
+  analyses the model *points at*.
+- It does not remove the need for the analyses. A digital thread that links
+  a requirement to a CFD result does not tell you the CFD was any good — that
+  is what NASA-STD-7009 credibility scoring is for, and the two are
+  complementary, not substitutes.
+- It has a real cost, and the cost lands early. Modelling effort front-loads;
+  a small programme can spend a significant fraction of its early engineering
+  capacity building a model whose value only appears at integration.
+- It can create false confidence through completeness. A green verification
+  matrix means every requirement has an *assigned* method, not that the
+  hardware works. The Challenger and Columbia reports are, among other
+  things, studies in processes that were formally complete and
+  substantively broken [Rogers86].
+
+The correct posture: MBSE is a bookkeeping and communication technology of
+substantial value on any programme above a certain complexity, and it is
+orthogonal to whether the engineering is correct. Treat it as the filing
+system, not as the engineering.
+
+### 3.13 Automated geometry generation
+
+An underrated method that quietly enables all the others. If a nozzle
+contour, chamber profile or injector element is generated by a **script**
+from a small parameter set, then:
+
+- The optimiser (§3.9) can vary the geometry, which it cannot do if the
+  geometry is a hand-built CAD model.
+- The mesh can be regenerated automatically, which is the actual bottleneck
+  in any CFD-in-the-loop process.
+- The geometry is reproducible and version-controlled — you can diff two
+  designs.
+- The link from the ROM's outputs (throat area, expansion ratio, contraction
+  ratio, $L^*$) to a solid model is automatic and cannot be transcribed
+  wrongly.
+
+**What such a generator contains, concretely, for a thrust chamber:** an
+input block ($F$, $p_c$, $r$, $\varepsilon$, $L^*$, contraction ratio,
+throat radius-of-curvature ratios); a CEA call for $c^*$ and $\gamma$; throat
+sizing from Eq. 3.3e; a converging section (usually a circular arc plus a
+conical or spline section); an MOC/Rao supersonic contour with the Rao
+initial and exit wall angles; a channel-geometry routine that lays $N$
+channels of specified width/height/land distribution along the contour;
+and an output stage that writes a STEP/IGES solid, a mesh definition or a
+build file directly.
+
+The engineering caution is [J]: a parametric generator makes it trivially
+easy to produce a geometry that is *valid* and *stupid* — a contraction
+ratio of 1.4 with an $L^*$ of 1.5 m, a channel aspect ratio of 12 with a
+0.2 mm land. Parameter ranges must carry their own sanity bounds, and the
+generator must refuse, not silently produce. Every automated design chain
+that has embarrassed a programme did so by producing something nobody looked
+at.
+
+### 3.14 Digital twins
+
+**The definition matters, because the word is abused.** A digital twin is a
+model of a **specific, serial-numbered physical article**, kept current with
+that article's own measured data over its life. A model of the *design* is
+not a twin; it is a model. If the model does not change when engine S/N 0037
+runs a hot fire, it is not S/N 0037's twin [Glaessgen12, Grieves].
+
+**What an engine twin actually contains.** In practice, and stripped of
+marketing:
+
+1. **As-built geometry and configuration.** Which part serial numbers are
+   installed, the measured throat area (it is never exactly nominal), the
+   measured channel dimensions where they were inspected, the build
+   orientation and build ID of every AM part, the actual braze/weld records.
+2. **A calibrated ROM.** The lumped engine balance of §3.4, with its
+   component maps adjusted so it reproduces *this engine's* acceptance-test
+   data: this pump's head-flow, this turbine's efficiency, this injector's
+   $C_d$, this chamber's $\eta_{c^*}$.
+3. **A load and life accumulator.** Every start, every second at each power
+   level, every thermal cycle, integrated into a damage state: LCF cycles
+   consumed on the liner, bearing DN-hours, seal cycles, turbine creep-rupture
+   time at temperature.
+4. **Anomaly and maintenance history.** What was found, what was replaced,
+   what was re-torqued.
+5. **A parameter-estimation layer.** Something — a Kalman filter, a Bayesian
+   update, or a plain least-squares recalibration — that turns new test data
+   into updated model parameters and, importantly, updated *uncertainties* on
+   those parameters.
+
+**How test data updates it.** The honest version is Bayesian: prior
+parameter distributions from the design and the fleet, likelihood from this
+engine's measurements, posterior parameters that are narrower and shifted.
+In production practice it is usually simpler — a regression of the
+acceptance-test data onto a small set of adjustable model parameters — but
+the logic is the same, and the valuable output is the same: **a model of this
+engine whose residuals against this engine's data are small and stationary.**
+Once you have that, the twin's real job becomes possible: **detecting when
+the residuals stop being stationary.** A pump efficiency drifting 0.4 % over
+five flights is invisible in raw data and obvious in a twin's parameter
+history.
+
+**What a twin genuinely buys.**
+
+- Condition-based rather than calendar-based maintenance, which is the
+  economic case for reusable engines. If you can show that this engine's
+  liner has consumed 41 % of its LCF life rather than assuming the fleet
+  worst case, you fly it again instead of scrapping it.
+- Anomaly detection with a physical rather than statistical basis. "The
+  measured chamber pressure is 1.2 % below the twin's prediction at the same
+  inlet conditions" is a much stronger signal than "chamber pressure is
+  within the fleet band."
+- Better test planning: the twin predicts what a test will show, so a test
+  that disagrees is informative.
+
+**Limits, and they are severe.**
+
+1. **A twin can only track what is instrumented.** Turbine blade metal
+   temperature, hot-wall liner temperature, and internal channel flow split
+   are the quantities that actually determine life, and none of them is
+   measured on a flight engine. The twin infers them through a model, and
+   the inference carries the model's error.
+2. **It cannot predict a mechanism it does not contain.** A twin calibrated
+   on nominal operation has no term for a crack initiating at a lack-of-fusion
+   defect in a printed manifold. It will show nothing until the failure is
+   already expressed in a measurable variable, at which point the useful
+   warning time may be a fraction of a second.
+3. **It extrapolates badly, like every calibrated model.** Calibrating on
+   90–100 % power does not license a prediction at 40 %.
+4. **Data volume is not fidelity.** Streaming 10⁴ channels at 10 kHz into a
+   database is a data-management achievement, not a physics achievement.
+5. **Configuration control becomes the hard problem.** A twin that does not
+   match the article — because a part was swapped and the record was not
+   updated — is worse than no twin, because it is trusted.
+
+[J] The realistic assessment: engine twins are genuinely valuable for
+**reusable** hardware, where the economic question ("can this engine fly
+again?") is exactly the question a calibrated, life-accumulating model can
+help answer. For expendable engines the case is much weaker and mostly
+reduces to acceptance-test screening, which programmes have done since the
+1960s under a different name.
+
+### 3.15 Surrogate models and machine learning
+
+**What a surrogate is.** A cheap function $\hat f(\mathbf{x})$ fitted to a
+set of expensive evaluations $\{(\mathbf{x}_i,f_i)\}$ — from CFD, FEA, or
+test — used in place of the expensive model inside an optimisation loop, a
+Monte Carlo, or a real-time controller.
+
+**Gaussian processes (kriging).** The most defensible choice for small
+propulsion data sets, because it returns an uncertainty as well as a value.
+Model the function as a realisation of a Gaussian process with mean $m$ and
+covariance kernel $k$; the posterior at a new point $\mathbf{x}_*$ is
+
+$$\hat\mu(\mathbf{x}_*)=\mathbf{k}_*^\mathsf{T}(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf{y},\qquad \hat\sigma^2(\mathbf{x}_*)=k(\mathbf{x}_*,\mathbf{x}_*)-\mathbf{k}_*^\mathsf{T}(\mathbf{K}+\sigma_n^2\mathbf{I})^{-1}\mathbf{k}_*$$
+
+> **Eq. 3.18** — variables: $\mathbf{K}$ the $n\times n$ covariance matrix of
+> the training inputs [—], $\mathbf{k}_*$ the covariance vector between
+> $\mathbf{x}_*$ and the training points, $\sigma_n^2$ observation noise,
+> $\mathbf{y}$ the training outputs. Meaning: the prediction is a weighted
+> average of nearby observations, and the variance grows as you move away
+> from data. Assumes: the chosen kernel's smoothness and stationarity are
+> appropriate; the data is noise-consistent. Fails when: the function has a
+> discontinuity or a sharp regime change (a stationary kernel cannot
+> represent it), when dimensionality is high (>15–20 without structure), and
+> — importantly — the variance estimate is only valid *under the assumed
+> kernel*, so a confidently wrong kernel gives confidently wrong error bars.
+> Cost is $O(n^3)$ to fit. [F]/[E]; [Rasmussen06], [Forrester08].
+
+The property that makes GPs worth the trouble is that $\hat\sigma$ supports
+**adaptive sampling**: run the next expensive CFD case where the surrogate is
+most uncertain, or where expected improvement is greatest. That turns a
+50-case CFD budget into something like a 200-case design space.
+
+**Neural surrogates.** Feed-forward or convolutional networks trained on
+large CFD databases to predict a field (a wall-flux distribution, a mixing
+field) rather than a scalar. Genuinely useful where the training set can be
+generated cheaply and densely — parametric families of nozzle contours,
+channel geometries, injector element spacings — and where the goal is
+*interpolation within a family*. Physics-informed variants add the PDE
+residual to the loss, which helps with data efficiency and does *not* make
+the result a solution of the PDE. [R]
+
+**The risks, and they are the whole story.**
+
+1. **Extrapolation.** A surrogate has no physics. Outside the convex hull of
+   its training data it produces a smooth, confident, meaningless number.
+   Every surrogate deployment must include an explicit in-domain test, and
+   the answer must be refused, not extrapolated, when the query is outside.
+   A GP at least tells you (variance explodes); a neural network typically
+   does not.
+2. **It inherits every error of its trainer.** A network trained on RANS
+   results is a fast RANS emulator, including RANS's model-form error. It is
+   not a fast experiment. Programmes forget this within about six months of
+   deploying one.
+3. **Training-set design matters more than architecture.** A Latin hypercube
+   or Sobol sequence over the *right* variables with the *right* ranges beats
+   a bigger network on a lazily sampled set, every time.
+4. **Optimising against a surrogate finds the surrogate's errors.** The
+   optimiser is an adversary: it will drive to the region where the
+   surrogate most over-predicts performance, which is exactly where it is
+   least accurate. The fix is the standard one — validate the optimum with
+   the real model, add it to the training set, refit, repeat.
+5. **Nothing about ML changes validation.** A neural surrogate used in a
+   flight decision needs the same NASA-STD-7009 treatment as any other
+   model, and it scores badly on most of the factors because its use history
+   is short and its results-robustness is hard to argue.
+
+[J] Use surrogates for search and for uncertainty propagation. Do not use
+them for the final number. The final number comes from the high-fidelity
+model, or from a test.
+
+### 3.16 Uncertainty quantification
+
+**The problem.** Every input to every model above is uncertain, and the
+traditional way of handling that — apply a margin to each input, stack the
+worst cases — produces designs whose actual risk is unknown and usually
+absurdly conservative, because the joint probability of every input being
+simultaneously at its worst is negligible.
+
+**Forward propagation by Monte Carlo.** Assign a distribution to each
+uncertain input, sample the joint distribution $N$ times, evaluate the model
+each time, and characterise the output distribution:
+
+$$\hat\mu=\frac{1}{N}\sum_{i=1}^{N}f(\mathbf{x}_i),\qquad \mathrm{SE}(\hat\mu)=\frac{\hat\sigma}{\sqrt{N}}$$
+
+> **Eq. 3.19** — variables: $N$ sample count [—], $\hat\sigma$ sample standard
+> deviation of the output. Meaning: the estimate's own error falls as
+> $N^{-1/2}$, independent of dimension — which is why Monte Carlo beats
+> quadrature above about five uncertain inputs. Assumes: independent samples
+> from a correctly specified joint input distribution; the model is
+> deterministic and defined everywhere in the sample space. Fails when: the
+> input distributions are guessed (the usual case — the answer's credibility
+> is capped by the inputs' credibility), when inputs are correlated and the
+> correlation is ignored, and when the quantity of interest is a far tail
+> probability, where $N^{-1/2}$ is ruinously slow and importance sampling or
+> a limit-state method is needed instead. [F].
+
+For a smooth model and small relative uncertainties, the first-order
+propagation formula (Module 18) gives the same answer far more cheaply:
+
+$$\left(\frac{\sigma_f}{f}\right)^2\approx\sum_i\left(\frac{\partial \ln f}{\partial \ln x_i}\right)^2\left(\frac{\sigma_{x_i}}{x_i}\right)^2$$
+
+> **Eq. 3.20** — variables: logarithmic sensitivities $\partial\ln f/\partial
+> \ln x_i$ [—]. Meaning: for a product-of-powers relationship, relative
+> uncertainties add in quadrature weighted by the exponents. Assumes: linear
+> response over the uncertainty range, independent inputs, and that the
+> output distribution is approximately normal. Fails when: the model is
+> nonlinear over the input range (an engine balance near a constraint
+> boundary certainly is), when a constraint activates, or when the output
+> distribution is skewed — and it can never produce the tail shape, only a
+> variance. [F].
+
+Worked Example 1 (§5.1) does both, on the $I_{sp}$ chain, and they agree to
+within 0.01 percentage points — which is the point: **when they agree, use
+the cheap one; when they disagree, the disagreement is telling you the model
+is nonlinear over your uncertainty range, which is itself the useful
+result.**
+
+**Sensitivity analysis.** Once you have samples, decompose the variance.
+The first-order **Sobol index** is
+
+$$S_i=\frac{\mathrm{Var}_{x_i}\!\left(\mathbb{E}[f\mid x_i]\right)}{\mathrm{Var}(f)},\qquad S_{Ti}=1-\frac{\mathrm{Var}_{\mathbf{x}_{\sim i}}\!\left(\mathbb{E}[f\mid \mathbf{x}_{\sim i}]\right)}{\mathrm{Var}(f)}$$
+
+> **Eq. 3.21** — variables: $\mathbf{x}_{\sim i}$ all inputs except $i$.
+> Meaning: $S_i$ is the fraction of output variance removed by learning
+> $x_i$ exactly; $S_{Ti}$ additionally includes $x_i$'s interactions, so
+> $S_{Ti}-S_i$ measures interaction. Assumes: independent inputs (correlated
+> inputs need a generalised decomposition). Fails to be interpretable when
+> inputs are strongly correlated. [F]; [Sobol01], [Saltelli08].
+
+This is the output that changes programme decisions, because it says **where
+to spend money**. If 51 % of the $I_{sp}$ variance comes from $\eta_{c^*}$,
+then a better injector characterisation campaign is worth more than any
+amount of nozzle contour refinement. That is a budget argument made with
+numbers, and it is the most valuable thing UQ produces.
+
+**Margin policy versus UQ.** The classical approach (Module 33, [STD-5001])
+is deterministic: define a worst-case load, apply a factor of safety, show
+positive margin. It is auditable, cheap, and has flown everything. Its
+weaknesses: the actual reliability is unknown, the conservatism is
+unquantified and uneven, and stacking independent worst cases can produce
+combined margins of 3–5× where the requirement was 1.4×, with all the mass
+that implies.
+
+Probabilistic design instead states a **reliability target** and demonstrates
+it: $P(\text{capability} < \text{load}) < 10^{-4}$, say. Its weaknesses are
+equally real: the answer depends on the *tails* of the input distributions,
+which are exactly what nobody has data for; a lognormal versus a Weibull
+assumption on a material allowable can move a $10^{-4}$ answer by an order of
+magnitude; and it is much harder to audit.
+
+[J] The mature practice is both. Keep the deterministic factors as the
+requirement — they are the traceable, certifiable floor — and run UQ
+alongside to answer the questions the factors cannot: which margins are
+doing work, which are free, where the real risk sits, and how much a
+proposed test would reduce the uncertainty. When UQ says a design that
+passes the deterministic checks has a 12 % chance of missing the $I_{sp}$
+requirement, that is a programme-level fact the factors of safety never
+would have surfaced.
+
+**How UQ changes qualification.** Three concrete ways, all visible in current
+practice [M]:
+
+1. **Test count justification.** "How many hot fires before flight?" becomes
+   answerable: run the qualification decision through the model with the
+   remaining uncertainty, and show what each additional test buys. It also
+   exposes tests that buy nothing.
+2. **Analysis in place of test, with a stated basis.** Where a model is
+   validated and its uncertainty is quantified, some qualification credit can
+   be taken by analysis. This is precisely what NASA-STD-7009 credibility
+   scoring exists to gate: no credibility assessment, no analysis credit.
+3. **Acceptance limits with a probabilistic basis.** Acceptance-test
+   red-lines set from a propagated model plus measurement uncertainty, rather
+   than from a fleet-percentile rule of thumb, catch more real anomalies and
+   scrap fewer good engines.

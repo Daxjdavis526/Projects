@@ -1328,3 +1328,1069 @@ confidence labels carried:
 | Turbine flow fraction (GG cycle) | **2–4 %** of total | 2 % on a well-optimised engine | 5 %+ on early or low-$\eta_t$ designs |
 | Pump power per unit thrust | **5–8 W/N** at $p_c\approx100$ bar | 1 W/N at 20 bar | 20+ W/N at 300 bar staged combustion |
 
+---
+
+## 5. Worked examples
+
+Two reference machines are used. **PF-20** is a fictional pressure-fed
+storable upper-stage engine. **RE-500** is the Module 03 reference engine as
+carried forward in Modules 06 and 07:
+
+| RE-500 parameter | value |
+|---|---|
+| Propellants / $MR$ | LOX / RP-1, 2.35 |
+| Nozzle-stagnation $p_c$ | 100 bar |
+| Injector-end $p_{c,\text{inj}}$ | 103 bar |
+| Total flow $\dot m$ | 170.03 kg/s |
+| Oxidiser flow | 119.27 kg/s |
+| Fuel flow | 50.76 kg/s |
+| $\rho_{\text{LOX}}$ / $\rho_{\text{RP-1}}$ | 1 140 / 810 kg/m³ |
+| $I_{sp}$ vac | 303.3 s |
+
+Every number below is reproduced by `tools/examples/12.py`.
+
+---
+
+### WE1 — Tank pressure and pressurant mass for a 20 kN storable engine (PF-20)
+
+**Requirement.** $F_{\text{vac}} = 20$ kN, $I_{sp,\text{vac}} = 320$ s,
+NTO/MMH at $MR = 1.65$, $p_c = 12$ bar at the injector face, burn time
+$t_b = 400$ s, regeneratively (fuel) cooled chamber. Helium pressurisation,
+regulated, bottle at 31 MPa (310 bar) and 293 K.
+
+**Step 1 — flows and volumes.**
+
+$$\dot m = \frac{F}{I_{sp}g_0} = \frac{20\,000}{320\times9.80665} = 6.373\ \mathrm{kg/s}$$
+
+$$\dot m_{ox} = \frac{1.65}{2.65}\times6.373 = 3.968\ \mathrm{kg/s},\qquad
+\dot m_f = 2.405\ \mathrm{kg/s}$$
+
+Over 400 s: $m_{ox} = 1\,587$ kg, $m_f = 962.0$ kg, total 2 549 kg.
+With $\rho_{\mathrm{NTO}} = 1\,443$ kg/m³ and $\rho_{\mathrm{MMH}} = 874$
+kg/m³ (Module 05):
+
+$$V_{ox} = 1.100\ \mathrm{m^3},\qquad V_f = 1.101\ \mathrm{m^3},\qquad V = 2.201\ \mathrm{m^3}$$
+
+(The near-equality of the two volumes at $MR\approx1.65$ is not a
+coincidence; it is why NTO/MMH stages get two identical tanks. Bulk density
+$= 2\,549/2.201 = 1\,158$ kg/m³.)
+
+**Step 2 — tank pressure budget** (from §3.2):
+
+fuel side $= 12.0 + 3.0 + 2.0 + 1.0 + 0.5 = \mathbf{18.5}$ bar;
+oxidiser side $= 12.0 + 3.0 + 1.0 + 0.5 = \mathbf{16.5}$ bar.
+Regulate both at 18.5 bar and trim the oxidiser with a fixed orifice.
+
+**Step 3 — ideal pressurant mass** (Eq. 3.3), $R_{\mathrm{He}} =
+8314.46/4.0026 = 2\,077.3$ J/(kg·K), $T_g = 293$ K:
+
+$$m_{g,\text{ideal}} = \frac{p_t V}{R_g T_g} = \frac{1.85\times10^6 \times 2.201}{2077.3\times293}
+= \frac{4.072\times10^6}{608\,650} = 6.689\ \mathrm{kg}$$
+
+**Step 4 — collapse factor.** Warm helium into ambient-temperature storables
+over a 400 s burn: take $Z_c = 1.35$ [E], [SP-8112]:
+
+$$m_{g} = 1.35\times6.689 = \mathbf{9.03\ kg}$$
+
+**Step 5 — bottle.** Blow down from 31 MPa to a regulator lockup floor of
+2.1 MPa, isothermal at 293 K, with real-gas compressibility $Z_i = 1.17$ at
+310 bar and $Z_f = 1.01$ (Eq. 3.5):
+
+$$\frac{m_{\text{del}}}{V_b} = \frac{1}{R_gT}\left(\frac{p_i}{Z_i}-\frac{p_f}{Z_f}\right)
+= \frac{2.650\times10^7 - 2.079\times10^6}{608\,650} = 40.12\ \mathrm{kg/m^3}$$
+
+$$V_b = \frac{9.03}{40.12} = 0.2251\ \mathrm{m^3} = \mathbf{225\ L}$$
+
+Note the penalty for ignoring real-gas behaviour: with $Z=1$ throughout you
+would size a 190 L bottle and run out of helium 16 % early. Note also that
+a *fast* blowdown is adiabatic, the bottle gas cools, and you deliver less
+still — flight systems are sized on the adiabatic case.
+
+**Step 6 — hardware mass.** COPV at $pV/W = 1.5\times10^4$ m (Eq. 3.6):
+
+$$m_{\text{bottle}} = \frac{3.1\times10^7\times0.2251}{9.80665\times1.5\times10^4} = \mathbf{47.4\ kg}$$
+
+Propellant tanks, aluminium 2219, $\sigma/\rho = 1.408\times10^5$ J/kg,
+$k_tj = 2.25$ (Eq. 3.2):
+
+$$m_{\text{tank}} = 2.25\times\frac{1.85\times10^6\times2.201}{1.408\times10^5} = \mathbf{65.0\ kg}$$
+
+**Total pressurisation package: 9.0 + 47.4 + 65.0 = 121.4 kg**, against
+2 549 kg of propellant — **4.8 %**. That is the honest cost of pressure
+feeding at 12 bar. Repeat the arithmetic at $p_c = 50$ bar and it becomes
+20 %.
+
+**Step 7 — blowdown variant.** Delete the bottle and regulator; load the
+tanks with ullage and let them decay to 18.5 bar at burnout, $BR = 4$,
+isothermal ($n=1$, Eq. 3.9):
+
+$$\frac{V_{u,i}}{V_{u,i}+V} = \frac{1}{BR} = 0.25 \Rightarrow V_{u,i} = \frac{0.25}{0.75}\times2.201 = 0.734\ \mathrm{m^3}$$
+
+so the tanks must be 2.934 m³ — **33 % larger** than the propellant — and
+designed for $p_i = 4\times18.5 = \mathbf{74\ bar}$. Check with
+`blowdown_pressure(7.4e6, 0.7336, 2.9342, 1.0) = 1.85\times10^6$ Pa. ✓
+
+Tank mass now scales with the *initial* pressure and the *larger* volume:
+$2.25\times(7.4\times10^6\times2.934)/1.408\times10^5 = \mathbf{347\ kg}$,
+nearly triple the entire regulated package — and thrust would fall by 75 %
+across the burn. **For this engine, blowdown is not a candidate.** It becomes
+one only when the propellant load is small enough that 33 % extra tank volume
+is cheap, which is why you find it on RCS and monopropellant systems and not
+on main engines.
+
+**Sanity check.** The Apollo SPS carried 1.11 m³ (39.2 ft³) of helium at
+25 MPa for a stage of roughly 18 500 kg of propellant [_verify-liquid]. Our
+225 L for 2 549 kg scales to about 1.6 m³ for the SPS load — the same order,
+and the SPS does better because its chamber pressure is roughly half ours and
+it uses heated helium. The comparison is consistent.
+
+---
+
+### WE2 — Head and power for the RE-500 fuel and LOX pumps
+
+**Step 1 — discharge pressure budgets** (Eq. 3.1). Cooling-jacket drop
+35 bar (Module 11, kerosene-cooled milled channels at 100 bar); injector drop
+20 bar (20 % of $p_c$, Module 07); line and valve losses 5 bar. Tank
+pressures 3.0 bar (fuel) and 3.5 bar (LOX).
+
+| | fuel (RP-1) | oxidiser (LOX) |
+|---|---|---|
+| $p_{c,\text{inj}}$ | 103 bar | 103 bar |
+| injector $\Delta p$ | 20 | 20 |
+| jacket $\Delta p$ | 35 | — |
+| line + valve | 5 | 5 |
+| **pump discharge** | **163 bar** | **128 bar** |
+| pump inlet | 3.0 | 3.5 |
+| **$\Delta p_p$** | **160 bar** | **124.5 bar** |
+
+**Step 2 — head** (`pump_head`):
+
+$$H_f = \frac{1.60\times10^7}{810\times9.80665} = \mathbf{2\,014\ m},\qquad
+H_o = \frac{1.245\times10^7}{1140\times9.80665} = \mathbf{1\,114\ m}$$
+
+The fuel pump makes **80 % more head** than the oxidiser pump while moving
+**43 % of the mass** — entirely because RP-1 is 29 % less dense *and* carries
+the cooling jacket. This asymmetry is the reason single-shaft pumps are hard
+and dual-shaft pumps exist.
+
+**Step 3 — volumetric flow and power** (`pump_power`), $\eta_f = 0.70$ (low
+specific speed), $\eta_o = 0.75$:
+
+$$Q_f = \frac{50.76}{810} = 0.06266\ \mathrm{m^3/s}, \qquad Q_o = \frac{119.27}{1140} = 0.10463\ \mathrm{m^3/s}$$
+
+$$P_f = \frac{50.76\times1.60\times10^7}{810\times0.70} = \mathbf{1.432\ MW},\qquad
+P_o = \frac{119.27\times1.245\times10^7}{1140\times0.75} = \mathbf{1.737\ MW}$$
+
+**Total shaft power 3.169 MW** for a 500 kN engine — **6.34 W per newton of
+thrust.**
+
+**Step 4 — specific speed** (`specific_speed_SI`) at a single-shaft
+$N = 20\,000$ rpm ($\omega = 2\,094.4$ rad/s):
+
+$$N_{s,f} = \frac{2094.4\sqrt{0.06266}}{(9.80665\times2014)^{3/4}} = \frac{524.2}{1665.7} = \mathbf{0.315}$$
+
+$$N_{s,o} = \frac{2094.4\sqrt{0.10463}}{(9.80665\times1114)^{3/4}} = \frac{677.5}{1067.0} = \mathbf{0.634}$$
+
+The LOX pump at $N_s = 0.63$ is a comfortable single-stage radial machine.
+**The fuel pump at $N_s = 0.315$ is at the bottom of the usable band** —
+narrow passages, high disc friction, and the 0.70 efficiency assumed above is
+generous. Splitting it into two stages raises $N_s$ by $2^{3/4} = 1.68$ to
+**0.53**, which is why real high-head fuel pumps are staged.
+
+**Step 5 — geometry from the head coefficient.** Take $\psi = 0.50$:
+
+$$u_{2,o} = \sqrt{\frac{9.80665\times1114}{0.50}} = 147.8\ \mathrm{m/s}
+\quad\Rightarrow\quad D_{2,o} = \frac{2u_2}{\omega} = \mathbf{141\ mm}$$
+
+$$u_{2,f} = \sqrt{\frac{9.80665\times2014}{0.50}} = 198.8\ \mathrm{m/s}
+\quad\Rightarrow\quad D_{2,f} = \mathbf{190\ mm}$$
+
+Both tip speeds are well inside the 150–250 m/s band for LOX and kerosene
+service (§3.14).
+
+**Step 6 — Euler cross-check on the LOX impeller.** With $b_2 = 12$ mm,
+$\beta_2 = 25°$, slip factor $\sigma = 0.85$ (Eq. 3.12):
+
+$$c_{m2} = \frac{Q}{\pi D_2 b_2} = \frac{0.10463}{\pi\times0.141\times0.012} = 19.7\ \mathrm{m/s}
+\qquad (\phi = 19.7/147.8 = 0.13\ \checkmark)$$
+
+$$c_{u2} = 0.85\times147.8 - \frac{19.7}{\tan 25°} = 125.6 - 42.2 = 83.4\ \mathrm{m/s}$$
+
+$$H_{\text{Euler}} = \frac{u_2 c_{u2}}{g_0} = \frac{147.8\times83.4}{9.80665} = 1\,258\ \mathrm{m}$$
+
+$$\eta_h = \frac{1\,114}{1\,258} = \mathbf{0.886}$$
+
+An 88.6 % hydraulic efficiency with an overall 75 % is exactly the right
+relationship: the remaining 12 % is leakage past the wear rings and disc
+friction on the impeller back face. If the arithmetic had demanded
+$\eta_h > 1$, the design would be infeasible and the response would be more
+tip speed or less backsweep.
+
+**Sanity check.** F-1: 41 MW at 6 770 kN sea level = 6.06 W/N at $p_c\approx70$
+bar. Merlin 1D: ~7.5 MW at 845 kN = 8.9 W/N at 97 bar (company figures).
+RE-500's 6.34 W/N at 100 bar sits between them. ✓
+
+---
+
+### WE3 — NPSH check for the RE-500 LOX pump, and whether it needs an inducer
+
+**Given.** LOX tank at $p_t = 2.5$ bar; liquid at its normal boiling point,
+90.2 K, so $p_v = 1.013$ bar [NIST]; suction line loss 0.35 bar; liquid
+surface 8.0 m above the pump inlet; vehicle at 1 $g_0$ at ignition.
+
+**Step 1 — NPSH available** (`npsh_available`, Eq. 3.15):
+
+$$\mathrm{NPSH_a} = \frac{2.5\times10^5 - 1.013\times10^5 - 0.35\times10^5}{1140\times9.80665} + 8.0\times\frac{g_0}{g_0}
+= 10.17 + 8.00 = \mathbf{18.17\ m}$$
+
+**The tank pressure buys only 10.2 m.** The static column buys 8.0 m and
+disappears as the tank empties. Note also the worst case: if the tank were
+**self-pressurised** with GOX so $p_t = p_v$, the whole first term would be
+$-0.35\times10^5/(1140 g_0) = -3.13$ m and NPSHa would be **4.87 m**. That
+single line is the argument for helium over autogenous pressurisation on a
+suction-critical circuit.
+
+**Step 2 — NPSH required at 20 000 rpm** (Eq. 3.16), $\omega\sqrt{Q} =
+2094.4\times\sqrt{0.10463} = 677.5$:
+
+| architecture | $N_{ss}$ | $\mathrm{NPSH_r}$ |
+|---|---|---|
+| plain impeller, no inducer | 2.5 | **178.8 m** |
+| impeller + modest inducer | 4.0 | 95.6 m |
+| impeller + good rocket inducer | 8.0 | **37.9 m** |
+| aggressive LH₂-class inducer | 10.0 | 28.2 m |
+
+**Every option fails against 18.17 m available.** Even the best inducer needs
+twice the NPSH the vehicle can supply. The pump cannot run at 20 000 rpm off
+a 2.5 bar tank. This is not a marginal call.
+
+**Step 3 — the three fixes, quantified.**
+
+*(a) Slow the pump down.* Invert Eq. 3.16 at $N_{ss} = 8$:
+
+$$\omega_{\max} = \frac{N_{ss}\,(g_0\,\mathrm{NPSH_a})^{3/4}}{\sqrt{Q}}
+= \frac{8\times(9.80665\times18.17)^{3/4}}{0.3235} = \frac{8\times48.77}{0.3235} = 1\,206\ \mathrm{rad/s}$$
+
+$$N_{\max} = \mathbf{11\,519\ rpm}$$
+
+At that speed $u_2$ is unchanged (still 147.8 m/s) so $D_2$ must grow to
+$2\times147.8/1206 = \mathbf{245\ mm}$ — a 74 % larger, substantially heavier
+impeller, and a shaft speed that no longer matches the fuel pump's needs. On
+one shaft, the fuel pump would also drop to 11 519 rpm, its $N_s$ would fall
+to 0.181, and it would need three or four stages. **This is precisely the
+argument that produces a gearbox or a second turbopump.**
+
+*(b) Raise tank pressure.* Keep 20 000 rpm and $N_{ss}=8$, so
+$\mathrm{NPSH_r} = 37.92$ m. Solve Eq. 3.15 for $p_t$:
+
+$$p_t = (37.92 - 8.00)\times1140\times9.80665 + 1.013\times10^5 + 0.35\times10^5 = \mathbf{4.71\ bar}$$
+
+Nearly double the tank pressure. On a booster stage with, say, 25 m³ of LOX,
+that is $2.2\times10^5$ Pa extra $\times$ 25 m³ $\times 1.6\times10^{-5}$
+kg/J $\approx 88$ kg of tank — cheap compared with a gearbox, which is why
+**modestly raising tank pressure is the first thing anyone tries**, and why
+booster LOX tanks run 3–5 bar rather than 2.
+
+*(c) Add a boost pump.* A low-pressure stage at, say, 4 000 rpm and
+$N_{ss}=8$ requires only
+$\mathrm{NPSH_r} = [(419\times0.3235)/8]^{4/3}/g_0 = 4.9$ m — comfortably
+inside 18.17 m — and delivers 5–8 bar to the main pump inlet, which then has
+$\mathrm{NPSH_a}$ of 45–70 m and can run at 20 000 rpm or faster. **This is
+the RS-25's architecture, derived from first principles in four lines.**
+
+**Step 4 — the thermodynamic credit.** LOX gives about **0.75 m of TSH per
+kelvin** of local cooling (§3.13.5), so a couple of kelvin of evaporative
+suppression is worth 1–2 m — real, but not enough to change any decision
+here. Run the same calculation on **liquid hydrogen** and the credit is
+**10.5 m/K**, which does change decisions, and is why LH₂ inducers routinely
+achieve suction performance that would be impossible on water.
+
+**Sanity check.** The RS-25 does exactly what this analysis recommends: a
+5 150 rpm LPOTP feeding a 28 120 rpm HPOTP, a ratio of 5.5, against the
+ratio of $20\,000/11\,519 = 1.74$ this example needs at a far lower chamber
+pressure. The requirement scales the way the equations say it does. ✓
+
+---
+
+### WE4 — Turbine flow to drive the RE-500 pumps from a gas generator at 900 K
+
+**Given.** Pump shaft power 3.169 MW (WE2), plus 5 % for bearing, seal and
+balance-piston parasitics: $P_t = 3.328$ MW required at the turbine shaft.
+Fuel-rich LOX/RP-1 gas generator at $MR_{gg} = 0.35$, turbine inlet
+temperature 900 K, inlet pressure 62 bar, exhaust to a dump nozzle at
+1.8 bar. Two-row velocity-compounded impulse turbine, $\eta_t = 0.60$.
+
+**Step 1 — gas properties.** Fuel-rich kerolox GG products at 900 K:
+$\mathcal{M} \approx 16.0$ kg/kmol, $\gamma \approx 1.25$ (Module 04, frozen).
+
+$$R = \frac{8314.46}{16.0} = 519.7\ \mathrm{J/(kg\,K)},\qquad
+c_p = \frac{\gamma R}{\gamma-1} = \frac{1.25\times519.7}{0.25} = 2\,598\ \mathrm{J/(kg\,K)}$$
+
+**Step 2 — pressure ratio and available work.**
+
+$$\pi_t = \frac{62}{1.8} = 34.44,\qquad
+\pi_t^{-(\gamma-1)/\gamma} = 34.44^{-0.20} = 0.4928$$
+
+$$\Delta h_{\text{is}} = c_p T_{\text{in}}\left[1-0.4928\right] = 2598\times900\times0.5072 = 1.186\ \mathrm{MJ/kg}$$
+
+**Step 3 — flow** (`turbine_power`, Eq. 3.20 inverted):
+
+$$\dot m_t = \frac{P_t}{\eta_t\,\Delta h_{\text{is}}} = \frac{3.328\times10^6}{0.60\times1.186\times10^6} = \mathbf{4.675\ kg/s}$$
+
+That is **2.75 % of the 170.03 kg/s main flow** (2.68 % of the engine's
+174.7 kg/s total).
+
+**Step 4 — gas-generator propellant split.** At $MR_{gg} = 0.35$:
+$\dot m_{ox,gg} = 1.212$ kg/s, $\dot m_{f,gg} = 3.463$ kg/s. Note that the
+gas generator burns **more fuel than the whole PF-20 engine of WE1**, and
+throws it away.
+
+**Step 5 — $I_{sp}$ penalty.** The turbine exhaust does produce some thrust
+through its dump nozzle; take $I_{sp,gg} \approx 95$ s [J] (low $T$, poor
+expansion, high molar mass relative to the main flow):
+
+$$I_{sp,\text{eff}} = \frac{170.03\times303.3 + 4.675\times95}{174.71} = \mathbf{297.7\ s}$$
+
+**A loss of 5.6 s, or 1.8 %.** That number — a couple of percent of flow, a
+couple of percent of $I_{sp}$ — is the entire open-cycle penalty, and it is
+what a staged-combustion cycle spends its complexity to recover (Module 13).
+
+**Step 6 — what happens if you get greedy.** Raise the turbine inlet
+temperature to 1 100 K and the required flow falls to 3.82 kg/s, saving 1.0 s
+of $I_{sp}$. Raise it to 1 400 K and you save another 0.9 s — and you are now
+above the uncooled-blade limit for any reasonable superalloy, and the
+gas-generator mixture ratio is high enough that free oxygen begins attacking
+the turbine. This is why GG inlet temperature sits at 900–1 200 K: the
+$I_{sp}$ available above it is small and the metallurgical cost is not.
+
+**Sanity check.** The J-2's gas generator consumed "~2–3 % of propellant"
+[_verify-liquid]. The F-1 dumped its GG exhaust as film cooling for the
+nozzle extension, recovering part of the loss. Our 2.75 % is squarely in the
+historical band. ✓
+
+---
+
+### WE5 — Affinity-law scaling of the RE-500 pumps to a 100 kN engine
+
+**Given.** Same propellants, same chamber pressure, same $\Delta p$ budget,
+same $N_s$ (i.e. geometrically similar impellers), thrust scaled by
+$s = 0.2$. All flows scale by $s$; **all heads are unchanged** because every
+term in Eq. 3.1 is unchanged.
+
+**Step 1 — shaft speed.** Hold $N_s = \omega\sqrt{Q}/(g_0H)^{3/4}$ with $H$
+fixed:
+
+$$\frac{\omega_2}{\omega_1} = \sqrt{\frac{Q_1}{Q_2}} = \frac{1}{\sqrt{0.2}} = 2.236$$
+
+$$N_2 = 2.236\times20\,000 = \mathbf{44\,721\ rpm}$$
+
+**Step 2 — diameter.** From $H \propto N^2D^2$ at constant $H$:
+
+$$\frac{D_2}{D_1} = \frac{\omega_1}{\omega_2} = 0.4472$$
+
+LOX impeller: 141 mm → **63 mm**. Fuel impeller: 190 mm → **81 mm**.
+
+**Step 3 — tip speed.** $u_2 = \omega D/2$ is **unchanged**: 147.8 m/s (LOX)
+and 198.8 m/s (fuel). It has to be — the head did not change and $\psi$ did
+not change. **The small engine is not more highly stressed at the rim.**
+
+**Step 4 — power.** $P \propto \dot m$ at fixed head and efficiency, so
+$P_2 = 0.2P_1$: **0.286 MW fuel, 0.347 MW LOX, 0.634 MW total.** (Check
+against the affinity form: $\rho N^3D^5 \Rightarrow 2.236^3\times0.4472^5 =
+11.18\times0.01789 = 0.200$ ✓.)
+
+In practice you will *not* achieve the same efficiency: tip clearances do not
+scale, surface roughness does not scale, and the Reynolds number falls.
+Expect 3–6 points of efficiency loss, so the real power is 5–10 % higher than
+the affinity laws promise. [E]
+
+**Step 5 — the result that matters.** Suction specific speed depends on
+$\omega\sqrt{Q}$:
+
+$$\omega_2\sqrt{Q_2} = 2.236\,\omega_1 \times \sqrt{0.2\,Q_1} = 2.236\times0.4472\,\omega_1\sqrt{Q_1} = \omega_1\sqrt{Q_1}$$
+
+**Exactly unchanged: 677.5 in both cases.** Therefore $\mathrm{NPSH_r}$ is
+identical — 37.9 m at $N_{ss} = 8$ for both the 500 kN and the 100 kN engine.
+
+**The 100 kN engine needs exactly the same tank pressure as the 500 kN
+engine.** Pressurisation requirements, boost-pump requirements and NPSH
+margins do not shrink when the vehicle does. On a small launcher those fixed
+requirements are a larger fraction of a smaller stage, which is one of the
+structural reasons small launch vehicles have worse mass fractions than
+large ones — and one of the reasons Rocket Lab put **electric motors** on
+Rutherford, which decouples pump speed from any turbine and lets the
+designer choose 40 000 rpm freely.
+
+**Sanity check.** Merlin 1D at 845 kN runs ~36 000 rpm; RD-0146 at 68.6 kN
+runs >120 000 rpm [_verify-liquid]. The ratio of thrusts is 12.3; the
+$s^{-1/2}$ rule predicts a speed ratio of 3.5, giving 126 000 rpm from
+Merlin's 36 000. The published figure is >120 000. For a scaling law with no
+fitted constants, applied across two unrelated engines on different
+propellants and different cycles, that is a remarkably good result. ✓
+
+---
+
+## 6. Real engines: why did they design it that way?
+
+### 6.1 RL10 — the gearbox (1962, historical, still in production)
+
+**The choice.** A single turbine on a high-speed shaft carries a two-stage
+centrifugal hydrogen pump at ~31 000 rpm and drives a single-stage
+centrifugal LOX pump through a **reduction gearbox** on a slower shaft
+[_verify-liquid].
+
+**Why.** LH₂ and LOX differ in density by a factor of **16**. From Eq. 3.11,
+the head required for a given pressure rise is $\Delta p/(\rho g_0)$: at the
+RL10's 32.8 bar chamber pressure the hydrogen pump needs roughly 6 000 m of
+head and the oxygen pump about 400 m. From $u_2 = \sqrt{g_0H/\psi}$ the tip
+speeds differ by a factor of four, and from $N_s$ the desired shaft speeds
+differ by rather more. Put them on one shaft and either the hydrogen pump is
+too slow (needing four or five stages and an enormous rotor) or the LOX pump
+is far too fast (cavitating hopelessly — WE3's problem, magnified).
+
+**Alternatives available in 1958.** (i) Two independent turbopumps — chosen
+later by the J-2 and RS-25, but it means two turbines and two bearing sets on
+an engine whose entire mass budget is 136 kg. (ii) One shaft, accept the
+mismatch — impossible for LOX suction. (iii) Gears. In 1958, gearing was
+mature aircraft-accessory technology and turbopump-on-turbopump integration
+was not.
+
+**Would a modern engineer choose it?** For an engine of this size and this
+propellant combination, **yes, and they do** — the RL10 is still in
+production sixty-four years later and the gearbox is described in the
+literature as one of its most-copied features. Gears cap power (which is why
+no large engine is geared) and add a torsional mode and a lubrication
+problem, but at 73 kN they are lighter than a second turbine. The relevant
+design reference, [SP-8100], exists because of this engine and its H-1 and
+MB-3 contemporaries.
+
+### 6.2 J-2 — the 7-stage axial fuel pump (1966, historical)
+
+**The choice.** A **7-stage axial** LH₂ pump at 27 000 rpm and a single-stage
+centrifugal LOX pump at 8 600 rpm, on **separate shafts**, with the gas
+generator exhaust passing through the fuel turbine and *then* the oxidiser
+turbine in series [_verify-liquid].
+
+**Why axial.** Hydrogen's density of 70.8 kg/m³ makes its *volumetric* flow
+enormous — at the J-2's flow the LH₂ side moves several times the volume the
+LOX side does, at a fifth of the mass. That drives $N_s$ into the axial band
+(§3.11–3.12), where an axial cascade is more efficient and packages into a
+slender diameter. Seven stages because axial $\psi$ is only 0.15–0.3.
+
+**Why series turbines.** It gives mixture-ratio self-regulation for free: the
+fuel turbine takes its work first, and any excess speed on the fuel side
+reduces the energy available to the oxidiser side, pushing the ratio back.
+On an engine that had to shift mixture ratio between 4.5:1 and 5.5:1 with a
+propellant-utilisation valve, self-regulation was worth having.
+
+**Would a modern engineer choose it?** **No, and the programme itself said
+so.** The J-2X explicitly replaced the axial fuel pump with a **centrifugal**
+one and listed the change as one of its four principal design deltas
+[_verify-liquid]. The reasons are rotordynamic and mechanical: a 7-stage
+axial rotor is long, its first bending critical speed is low, and every stage
+is a stall risk and a stack of tolerances. The RS-25 kept axial only for the
+*low-pressure* boost stage, where $N_s$ genuinely demands it. The verdict of
+sixty years is that axial pumps in rocket service belong in the boost stage,
+not the main stage.
+
+### 6.3 RS-25 — four pumps, two of them boost pumps (1981, historical/modern)
+
+**The choice.** LPFTP (axial, 16 185 rpm, hydraulic-turbine driven), HPFTP
+(3-stage centrifugal, 35 360 rpm, 53.05 MW), LPOTP (5 150 rpm), HPOTP
+(2-stage centrifugal, 28 120 rpm, 17.34 MW). Two separate preburners
+[_verify-liquid], [SSME-Orient].
+
+**Why.** WE3 is the whole argument. At 206 bar chamber pressure the high-
+pressure pumps must run at 28 000–35 000 rpm; at those speeds Eq. 3.16 puts
+$\mathrm{NPSH_r}$ far beyond anything the External Tank could supply at a
+tolerable ullage pressure. The alternative to boost pumps was to pressurise
+the ET harder, and on the Shuttle the ET's mass was on the critical path for
+the whole system. Four turbopumps were cheaper in mass than a heavier tank.
+
+Two further consequences worth noticing:
+- **The boost turbines are hydraulic, not hot-gas.** The LPFTP is driven by
+  liquid hydrogen tapped from HPFTP discharge; the LPOTP by liquid oxygen.
+  No new hot-gas circuit, no new seal problem.
+- **The dual-shaft layout eliminates the interpropellant seal on the fuel
+  side entirely** — but creates the hardest seal on the engine on the HPOTP,
+  where fuel-rich hot gas drives a liquid-oxygen pump. That seal has three
+  elements and two purged, drained cavities, and it is the most instrumented
+  interface on the vehicle.
+
+**Would a modern engineer choose it?** For a reusable 206 bar hydrogen
+engine, something very like it is forced. But note that the **RD-0120**
+achieved 219 bar and 455 s with a **single-shaft** turbopump driving both
+pumps [_verify-liquid] — proof that the RS-25's dual-shaft complexity was a
+choice and not a necessity, and a control experiment worth arguing about.
+
+### 6.4 F-1 — one shaft, no gearbox, 5 488 rpm (1967, historical)
+
+**The choice.** A two-stage impulse turbine and one single-stage centrifugal
+impeller per propellant, all on one shaft at 5 488 rpm, 41 MW
+[_verify-liquid].
+
+**Why it works here and not on the RL10.** LOX (1 141 kg/m³) and RP-1
+(810 kg/m³) differ in density by only 40 %, so the head requirements differ
+by only 40 % and one shaft speed suits both. And at 2 577 kg/s the flows are
+so large that $N_s$ is high even at 5 488 rpm — the machine is enormous, so
+it does not need to spin. From §3.14, $\omega\propto s^{-1/2}$: an engine
+this size *should* run at a few thousand rpm, and it does.
+
+**The alternatives.** Gears at 41 MW were not credible in 1960 and are not
+credible now — [SP-8100] does not contemplate that power. Two turbopumps
+would have doubled the seals, bearings and turbine count on a component
+already at the edge of what could be manufactured.
+
+**Would a modern engineer choose it?** For a kerolox engine of any size,
+**yes**. Merlin, RD-107, RD-180, RD-0120 and BE-4 are all single-shaft. The
+propellant density ratio is what decides, and for everything except hydrogen
+it favours a single shaft.
+
+### 6.5 Merlin 1D — single shaft, dual impeller, ~36 000 rpm (2013, modern)
+
+**The choice.** One shaft carries the LOX impeller, the RP-1 impeller and the
+turbine; ~36 000 rpm, ~7.5 MW; gas-generator cycle (company figures
+[_verify-liquid]).
+
+**Why.** Same density argument as the F-1, applied to an engine one-eighth
+the thrust — and §3.14 says the speed should therefore be about $\sqrt8=2.8$
+times higher. 5 488 × 2.8 = 15 400; Merlin runs at 36 000, higher still,
+because it also runs 97 bar against the F-1's ~70 bar (more head, more tip
+speed, more rpm at similar diameter).
+
+**The design signature is what SpaceX did with the pressure they had.** The
+TVC actuators run on **RP-1 tapped from the pump discharge and returned to
+the pump inlet** — no separate hydraulic system, no hydraulic fluid to run
+out. That is a feed-system decision, not an actuator decision, and it removed
+a failure mode that has ended other vehicles.
+
+**Would a modern engineer choose it?** It *is* the modern choice. What is
+notable is what SpaceX did **not** do: no boost pumps, no gearbox, no staged
+combustion. The engine is optimised for cost and production rate, and
+accepts 97 bar and a GG cycle as the price. Hundreds of engines a year is a
+performance metric too.
+
+### 6.6 RD-180 — single shaft, oxidiser-rich (2000, modern)
+
+**The choice.** One shaft, one **oxygen-rich preburner**, two combustion
+chambers, 267 bar chamber pressure, 47–100 % throttle [_verify-liquid].
+
+**Why oxidiser-rich.** In a *fuel*-rich staged-combustion engine the turbine
+gas is fuel-rich, so a single-shaft layout puts hot fuel-rich gas within
+millimetres of liquid oxygen and needs the seal architecture the RS-25 HPOTP
+has. Go **oxidiser**-rich and the turbine gas is chemically the same species
+family as the pumped oxidiser: **the interpropellant problem on the turbine
+end simply does not exist.** That is what makes a single shaft viable at
+267 bar.
+
+**What it costs.** Everything in the hot oxygen path — turbine blades,
+manifolds, ducts, injector faces — must survive oxygen at 500+ K and high
+pressure, where most alloys will ignite if they are scratched. The Russian
+solution is an **inert enamel coating on every wetted metal surface**
+[_verify-liquid]. It is the single technology that made the cycle possible
+and the reason Western programmes spent three decades believing ORSC was
+impossible: they were solving the wrong problem (seals) instead of the right
+one (coatings).
+
+**Would a modern engineer choose it?** They have: **BE-4 is oxidiser-rich
+staged combustion with a single ox-rich preburner driving both pumps**, and
+it is the first US-designed ORSC engine to fly [_verify-liquid]. Note that
+Blue Origin deliberately chose **140 bar**, half the RD-180's chamber
+pressure, and **hydrostatic bearings**, both for life rather than for
+performance — the clearest example in the record of a turbopump designed
+around reuse.
+
+### 6.7 Raptor — the full-flow pair (2026, modern, all figures claimed)
+
+**The choice.** Two mechanically independent turbopumps: an oxidiser-rich
+preburner drives the LOX pump, a fuel-rich preburner drives the CH₄ pump, and
+both preburner exhausts enter the main chamber. Every gram of propellant
+passes through a turbine [_verify-liquid].
+
+**Why.** It is the only architecture in which *neither* shaft has a
+fuel/oxidiser interface: each turbine runs in gas made from the propellant
+its pump is pumping. The interpropellant seal — the component this module has
+returned to four times — is deleted. Because both turbines pass the full
+flow, each can make its power at a low pressure ratio and a modest
+temperature, which extends turbine life.
+
+**What it costs.** Two preburners, two full-flow turbines, and a start
+sequence in which two independent hot-gas loops must light, spin up and
+converge on a mixture ratio without either running away. Only the never-flown
+Soviet RD-270 and the ground-test Integrated Powerhead Demonstrator preceded
+it; Raptor is the first FFSC engine ever flown.
+
+**Honesty note.** SpaceX has published **neither turbopump speed nor shaft
+power** for any Raptor variant, and the chamber pressure, $I_{sp}$, dry mass
+and thrust-to-weight figures are company claims with no independent
+verification — several first stated on social media rather than in any
+document [_verify-liquid §4]. Present the architecture as fact; present the
+numbers as claims.
+
+---
+
+## 7. Trade-offs, failure modes, materials, manufacturing, testing
+
+### 7.1 The trade-offs, compactly
+
+| decision | in favour | against | who decides |
+|---|---|---|---|
+| Pressure-fed vs pump-fed | simplicity, reliability, restart count, no start transient, low cost | tank + pressurant mass scaling as $p_cV$; hard $p_c$ ceiling | total impulse (Eq. 3.10), not thrust |
+| Regulated vs blowdown | flat thrust, smaller tanks | one more active component whose failure modes are severe | total impulse and thrust tolerance |
+| He vs N₂ | 7× less mass | leaks, costs, real-gas sizing | how far it flies |
+| Stored vs autogenous | stored works before start; autogenous deletes the bottle | autogenous needs hot gas and a heat exchanger | whether there is an engine running |
+| Single shaft vs dual | one turbine, one bearing set, fewer parts | needs matched speeds; needs an interpropellant seal | propellant density ratio |
+| Geared vs separate turbopumps | one turbine at two speeds | power ceiling, lubrication, torsional mode | engine size |
+| Inducer vs boost pump vs tank pressure | inducer is cheapest; boost pump is most capable | inducer brings rotating cavitation; boost pump brings a whole extra machine | how far NPSHr exceeds NPSHa |
+| Rolling vs hydrostatic bearings | rolling is simple and proven | hydrostatic needs a supply circuit but has no wear at speed | expendable vs reusable |
+| Impulse vs reaction turbine | impulse tolerates huge $\pi_t$ and partial admission | reaction is more efficient at low $\pi_t$ | the engine cycle |
+
+### 7.2 Failure modes
+
+| failure | mechanism | symptom | evidence | fix |
+|---|---|---|---|---|
+| **Cavitation head breakdown** | inlet static pressure reaches $p_v$; vapour blocks the impeller eye | pump discharge pressure collapses in <100 ms; chamber pressure follows; engine shuts down or runs rough | pump $\Delta p$ falls while speed holds; inlet pressure at or below $p_v$; suction-side leading-edge pitting at teardown | raise tank pressure; add or re-profile the inducer; reduce speed; add a boost pump |
+| **Rotating cavitation** | cavity pattern propagates around the inducer blade row at ~1.1–1.3× or ~0.5–0.9× shaft speed | blade high-cycle fatigue; a discrete non-synchronous line in the accelerometer spectrum | strain gauges on inducer blades; a spectral line at a non-integer multiple of $N$ | tip clearance control; blade angle and sweep redesign; raise NPSH; [SP-8052], [Brennen-Pumps]. **The LE-7 H-II Flight 8 loss was an inducer failure** |
+| **Subsynchronous whirl** | fluid cross-coupling in seals and impellers exceeds damping | orbit grows at 0.4–0.9× $N$ above a power threshold; rub, then destruction | proximity probes showing a growing non-synchronous orbit; onset tied to power level not to speed alone | damping (honeycomb) seals; squeeze-film dampers; stiffer bearing carriers. **The RS-25 HPFTP history** [Biggs89] |
+| **Bearing distress** | propellant is a poor lubricant; cage transfer film wears out | rising bearing temperature and vibration; metallic debris in drain | post-test borescope; spectrometric analysis of the drain; DN and load history | reduce DN; hybrid ceramic balls; coolant-flow redesign; **go hydrostatic** |
+| **Interpropellant seal leakage** | dynamic seal wear, or thermal distortion of the housing | purge-cavity pressure rise or drain flow increase; in the worst case, fuel and oxidiser meeting inside the pump | purge and drain instrumentation on every test | never operate without purge; monitor drain flow as a redline; separate shafts, or go FFSC |
+| **Turbine blade failure** | thermal fatigue from start transients, HCF from partial-admission or nozzle-passing excitation, creep at temperature | speed excursion, unbalance, secondary damage | blade-count-order lines in the spectrum; metallurgical section | reduce $T_{\text{in}}$; full admission; damping features; directionally solidified or single-crystal alloys |
+| **Regulator failure open** | poppet hangs or seat erodes | tank overpressure → relief valve or tank rupture | tank pressure above setpoint with flow demand unchanged | series redundancy; burst disc plus relief; the SPS philosophy |
+| **Filter blockage** | debris accumulation | slowly rising $\Delta p$ across a test series, then flow starvation | trend the filter $\Delta p$ across every test, not just this one | cleanliness control; larger element; upstream screens |
+| **Water hammer** | fast valve closure on a moving liquid column | pressure spike $\rho a\Delta V$; bellows squirm; line rupture | high-response transducers near the valve | controlled closure rate; accumulators; [SP-8123] |
+| **POGO** | cavitation compliance couples the feed line to the vehicle longitudinal mode | 5–25 Hz vehicle oscillation, thrust modulation | vehicle accelerometers plus pump inlet pressure | suction-line accumulator; NPSH management. Module 15 |
+
+### 7.3 Materials
+
+- **Impellers:** Inconel 718 for strength and cryogenic toughness, and
+  because it is not ignition-sensitive in oxygen. **Titanium 6Al-4V is
+  attractive for its 25 % better specific strength and is forbidden in LOX**
+  (impact-sensitive; a rub is an ignition). Aluminium 7075 and A356 on
+  low-duty and low-temperature pumps. Monel and copper alloys where oxygen
+  compatibility dominates over strength.
+- **Housings:** cast or forged Inconel, stainless 347/321, or aluminium for
+  low-pressure boost stages. Hydrogen-wetted parts must be screened for
+  **hydrogen environment embrittlement**, which can halve the usable strength
+  of high-strength nickel alloys (Module 16).
+- **Turbine blades:** cast nickel superalloys, directionally solidified on
+  the more demanding engines; the RS-25's turbine blades are among the most
+  highly stressed non-cooled blades in any machine. Oxidiser-rich turbines
+  (RD-180, BE-4) require the **inert enamel coating** discussed in §6.6.
+- **Bearing cages:** glass-fibre-reinforced PTFE (Armalon and relatives), for
+  transfer-film lubrication. **Balls:** 440C stainless historically, silicon
+  nitride (hybrid bearings) increasingly.
+- **Tanks:** aluminium 2219 and 2195 (Al-Li) for propellant tanks; titanium
+  6Al-4V liners with carbon overwrap for helium bottles. Note that the
+  material choice for a *pressurant* bottle is governed by stress rupture
+  over the mission life, not by short-term burst.
+
+### 7.4 Manufacturing
+
+- **Impellers** are 5-axis milled from forged billet, or investment cast,
+  or — increasingly — **printed and then finish-machined**. Additive
+  manufacturing has changed rocket turbomachinery more than almost any other
+  component, because a shrouded impeller with curved internal passages is
+  close to unmakeable any other way and closed shrouds are worth several
+  points of efficiency [Gradl22]. Vulcain's programme used
+  **powder-metallurgy turbopump impellers** decades before the current wave
+  [_verify-liquid].
+- **Balance** is the whole game on a 36 000 rpm rotor. Components are
+  individually balanced, the stack is balanced as assembled, and the
+  assembly sequence is recorded so it can be reproduced. Residual unbalance
+  of a few gram-millimetres is the target.
+- **Clearances** are set by the difference between thermal growth of a
+  30 K rotor and a 300 K housing during chilldown, plus dynamic deflection,
+  plus manufacturing tolerance. This is why tip clearance cannot be scaled
+  down with the pump (WE5), and why small pumps are less efficient.
+- **Cleanliness** is a manufacturing requirement, not a housekeeping one.
+  Particulate that would be irrelevant in a hydraulic system is an ignition
+  source in a LOX pump and a blockage in a 0.5 mm injector orifice. The
+  Antares Orb-3 loss was traced to an AJ26 turbopump with corrosion and
+  **manufacturing debris** in a forty-year-old engine [_verify-liquid].
+
+### 7.5 Testing
+
+| what | instrument | what "wrong" looks like |
+|---|---|---|
+| Pump $\Delta p$ vs $Q$ vs $N$ | inlet/outlet static pressure, turbine flowmeter or venturi, magnetic speed pickup | the $H$–$Q$ curve does not overlay the water-flow calibration; a flat or rising region at low flow means stall |
+| Suction performance | throttle the inlet valve at constant $N$ and $Q$ and plot head vs NPSH | the "knee" where head drops 2–3 %; a knee at higher NPSH than predicted means the inducer is not performing |
+| Rotordynamics | two proximity probes 90° apart at each bearing; casing accelerometers | a growing orbit at a non-integer fraction of $N$, appearing above a power threshold — whirl, not unbalance |
+| Blade and inducer loads | strain gauges through a slip ring or telemetry; often only in development | spectral content at non-synchronous frequencies, or at blade-passing orders |
+| Seal integrity | purge-cavity pressure, drain-line flow and temperature | any rise in drain flow. This is a redline, not a trend |
+| Bearing health | bearing race and coolant temperatures, casing accelerometer band energy | temperature rising test over test at constant duty |
+| Turbine | inlet gas temperature (multiple thermocouples — the GG stratifies), inlet/outlet pressure, speed | a temperature spread across the annulus greater than ~50 K means bad GG mixing and blade-life problems |
+| Feed system dynamics | high-response (>2 kHz) pressure transducers at pump inlet, injector manifold, chamber | coherent oscillation between line and chamber = chug or POGO precursor |
+| Tank and pressurant | ullage pressure and temperature at several heights, bottle pressure and temperature | ullage temperature far below the model = higher collapse factor than assumed; you will run out of helium |
+
+**Water flow is where a pump is characterised.** It is cheap, safe and
+instrumentable, and $H$–$Q$–$N$ scales by the affinity laws. What water flow
+**cannot** tell you: suction performance in a cryogen (thermodynamic
+suppression head means the cryogenic pump does better, and by an amount you
+must quantify rather than assume — §3.13.5), bearing behaviour in the real
+fluid, seal behaviour at cryogenic temperature, and anything about the
+turbine. Those need a real propellant and, eventually, a real engine.
+
+---
+
+## 8. Misconceptions, and what engineers actually care about
+
+**"Pressure-fed engines are low-performance."** No — they are *low chamber
+pressure*, which is a different statement. Aestus makes **324 s at 11 bar**
+because in vacuum you can buy back the performance with an 84:1 nozzle
+[_verify-liquid]. What pressure feeding actually costs is *sea-level*
+performance (you cannot run a large area ratio at sea level) and *stage mass
+fraction* (tanks and pressurant). Vacuum $I_{sp}$ is barely affected.
+
+**"A pump raises pressure."** A pump raises **head**. $H = \Delta p/(\rho
+g_0)$, and Euler's equation (Eq. 3.11) contains no density at all. The same
+impeller at the same speed produces the same head on hydrogen as on oxygen —
+and therefore **one-sixteenth the pressure rise**. Every architectural
+difference between hydrogen and hydrocarbon turbopumps descends from this
+one sentence.
+
+**"NPSH is about pressure."** NPSH is about the **margin between local
+pressure and the propellant's vapour pressure at its actual temperature**. A
+tank at 5 bar full of saturated LOX has less usable NPSH than a tank at
+2.5 bar full of LOX subcooled by 5 K. Self-pressurised tanks are the trap:
+$p_t = p_v$ and the pressure term vanishes entirely.
+
+**"An inducer prevents cavitation."** An inducer is **designed to cavitate**.
+It tolerates a stable attached cavity that a highly loaded main impeller
+could not, and delivers enough head to keep the main impeller out of trouble.
+Its own failure modes — rotating cavitation, auto-oscillation — are
+cavitation phenomena, and they broke the LE-7.
+
+**"Smaller engines have smaller, gentler turbopumps."** They have *faster*
+ones. $\omega\propto F^{-1/2}$ at constant chamber pressure (WE5). RD-0146,
+at 68.6 kN, runs its fuel pump above **120 000 rpm** — the highest published
+rocket turbopump speed [_verify-liquid]. And their NPSH requirement does not
+shrink at all.
+
+**"The gas generator wastes 2 % of the propellant, so it costs 2 % of
+$I_{sp}$."** Slightly pessimistic: the turbine exhaust produces *some*
+thrust, so WE4's 2.75 % of flow costs 1.8 % of $I_{sp}$. The F-1 did better
+still by dumping the exhaust into the nozzle extension as film cooling,
+which converts part of the loss into a cooling function it would otherwise
+have paid for separately.
+
+**"Helium is helium; use the ideal gas law."** At 310 bar and 293 K helium's
+compressibility factor is about **1.17** — it is 17 % *less* dense than ideal.
+Size a bottle on $Z=1$ and you will be 16 % short of gas (WE1). Meanwhile the
+gas in the propellant tank ullage needs a **collapse factor** of 1.3–1.6 for
+storables and 2–4 for hydrogen. Both corrections go the same way: you need
+more helium than the textbook equation says.
+
+**"Reliability favours pressure feeding, so more reliable vehicles should use
+it."** It favours pressure feeding *at small total impulse*. A booster stage
+pressure-fed to 100 bar would carry so much tank and helium mass (WE-style
+arithmetic gives roughly **9.8 t of tankage and pressurant for a 160 s
+RE-500 burn**) that it could not reach orbit at all. There is no reliability
+benefit in a vehicle that does not fly.
+
+### What engineers in this area actually spend their day on
+
+1. **NPSH margin across the whole flight box**, not at the design point:
+   start transient, throttle steps, slosh, propellant thermal stratification,
+   burnout. It is the constraint that most often forces a change.
+2. **The pressure budget closing at the worst corner.** End of burn, lowest
+   tank pressure, highest flow, hottest coolant, with the regulator drooping.
+   Everyone's budget closes at the nominal point.
+3. **Rotordynamic margin**, expressed as the separation between running speed
+   and every critical speed, and as the log-decrement of every mode over the
+   power range. Not "does it run" but "how much damping do I have".
+4. **Seal and purge integrity**, because it is the only failure mode that
+   loses the vehicle in under a second.
+5. **Turbine inlet temperature and its spread**, because blade life is
+   exponential in temperature and the gas generator does not mix perfectly.
+6. **Mass**, constantly: every kilogram in a pressurisation system or a
+   turbopump comes off the payload one-for-one on an upper stage.
+
+---
+
+## 9. Mastery levels
+
+**Level 1 — Familiarity.** Explain in plain language why a pressure-fed
+engine has a low chamber pressure and a pump-fed one does not; name the parts
+of a turbopump (inducer, impeller, volute/diffuser, turbine, bearings, seals)
+and say what each does; state what cavitation is and why it matters; name
+two pressure-fed and two pump-fed engines and their approximate chamber
+pressures; sketch which way head, flow and power move when shaft speed rises.
+
+**Level 2 — Working engineering knowledge.** Build a tank-to-injector
+pressure budget and size a helium system including collapse factor, real-gas
+correction and bottle mass; compute pump head, flow, power, specific speed
+and tip speed for a stated engine; compute NPSHa from a tank state and NPSHr
+from a suction specific speed and say whether the design closes; apply the
+affinity laws to scale a pump and state what does *not* scale; size turbine
+flow from a stated inlet temperature and pressure ratio and convert it to an
+$I_{sp}$ penalty; quote the ranges in §4 from memory to within a factor
+appropriate to each; read a pump $H$–$Q$ curve or a suction-performance
+knee and say what is wrong.
+
+**Level 3 — Interview mastery.** Given an unfamiliar engine's propellants,
+thrust, chamber pressure and mission, propose a feed-system architecture —
+pressure-fed or pumped, single-shaft or dual, geared or not, inducer or boost
+pump — and defend every branch with a number; given a described failure
+(a discharge-pressure collapse, a non-synchronous vibration line, a rising
+bearing temperature, a purge-cavity pressure rise) name the two most likely
+mechanisms, the measurement that would distinguish them, and the historical
+programme that has been there; argue both sides of the RS-25-vs-RD-0120
+dual-shaft question, the RL10 gearbox, and the pressure-fed Aestus decision,
+and say which way you would go and what would change your mind.
+
+---
+
+## 10. Problems
+
+### Conceptual
+
+**C1.** A colleague proposes eliminating the injector pressure drop on a
+pressure-fed engine to reduce tank pressure by 25 % of $p_c$. Give two
+independent reasons this is a bad idea, one from Module 07 and one from this
+module.
+
+**C2.** Explain, using Euler's equation and nothing else, why a hydrogen
+turbopump and an oxygen turbopump for the same engine want radically
+different shaft speeds. Then explain the two architectures that resolve the
+conflict and name an engine that uses each.
+
+**C3.** A tank is pressurised with its own propellant vapour (autogenous,
+saturated). Its ullage pressure is 4 bar — higher than a neighbouring
+helium-pressurised tank at 2.5 bar. Which pump has more NPSH available, and
+why? What single additional piece of information would settle it definitively?
+
+**C4.** Why is an inducer's blade angle at the tip only 6–12° from
+tangential, when a main impeller's exit blade angle is 20–35°? Answer in
+terms of what each blade row is trying to do.
+
+**C5.** State two reasons a gas-generator turbine runs at a blade speed ratio
+of 0.2–0.3 when its peak efficiency would occur near 0.45, and explain why a
+staged-combustion turbine does not have this problem.
+
+**C6.** The RD-180 puts both pumps and an oxidiser-rich turbine on one shaft
+at 267 bar. Explain why this is *easier* than putting both pumps and a
+fuel-rich turbine on one shaft, and name the technology that makes it
+possible.
+
+**C7.** Rotating cavitation and subsynchronous whirl both show up as
+non-synchronous lines in a vibration spectrum. Describe two measurements or
+observations that would let you tell them apart on a test stand.
+
+**C8.** A pressure-fed system and a pump-fed system are compared purely on
+mass and the pump wins by a wide margin. Give three reasons a real programme
+might still choose pressure feeding, and name a flown engine for each.
+
+### Calculation
+
+**N1.** A storable pressure-fed engine runs $p_c = 10$ bar at the injector
+face with a 22 % injector drop, a 1.5 bar cooling jacket on the fuel side,
+0.8 bar of line and valve loss, and 0.4 bar of acceleration reserve. Compute
+the required fuel-side and oxidiser-side ullage pressures, and the ratio
+$p_t/p_c$ on each side.
+
+**N2.** The same engine carries 3.4 m³ of propellant and is pressurised with
+helium at 300 K, collapse factor 1.4. Compute (a) the ideal pressurant mass,
+(b) the actual mass required, (c) the mass required if nitrogen were used
+instead, and (d) the mass required if the helium were heated to 500 K
+before entering the ullage.
+
+**N3.** A blowdown system must deliver 14 bar at burnout with $BR = 2.5$,
+isothermal, carrying 0.8 m³ of propellant. Compute the initial ullage
+volume, the total tank volume, the initial tank pressure, and the ratio of
+initial to final thrust.
+
+**N4.** An engine's fuel pump must raise 42 kg/s of RP-1
+($\rho = 810$ kg/m³) from 3.2 bar to 172 bar at $\eta_p = 0.68$. Compute the
+head, the volumetric flow, the shaft power, and the specific speed at
+24 000 rpm. State whether one stage is appropriate and justify it.
+
+**N5.** For the pump of N4, take $\psi = 0.52$ and compute the impeller tip
+speed and exit diameter. Then, with $b_2 = 6$ mm, $\beta_2 = 28°$ and
+$\sigma = 0.86$, compute the Euler head and the implied hydraulic efficiency.
+Comment on whether the design is feasible.
+
+**N6.** A LOX pump runs at 26 000 rpm passing 0.085 m³/s. The tank is at
+3.2 bar, LOX is subcooled to 88 K ($p_v = 0.74$ bar [NIST]), the suction line
+loses 0.30 bar, and the liquid surface is 4.5 m above the inlet at 2.0 $g_0$.
+Compute NPSHa, and the suction specific speed the pump would have to achieve.
+Is that achievable with an inducer? If not, compute the maximum shaft speed
+that is.
+
+**N7.** A gas generator supplies 1 050 K gas with $\mathcal{M} = 15.5$ kg/kmol
+and $\gamma = 1.26$ to a turbine at 55 bar, exhausting at 2.2 bar with
+$\eta_t = 0.58$. The turbine must deliver 8.4 MW. Compute the gas flow, and
+the fraction of a 320 kg/s engine flow it represents.
+
+**N8.** Scale the pump of N4 to an engine of one-third the thrust at the same
+chamber pressure. Compute the new shaft speed, impeller diameter, tip speed,
+shaft power, and NPSH required relative to the original. State which of these
+five quantities are unchanged and why.
+
+**N9.** Using the engine database entries for the F-1, the RS-25 HPFTP and
+the Merlin 1D, compute the shaft power per unit sea-level thrust (W/N) for
+each. Comment on the ordering and relate it to each engine's chamber
+pressure and cycle.
+
+### Engineering reasoning
+
+**R1.** A development engine shows the following across a test series: pump
+discharge pressure normal, chamber pressure normal, but the pump inlet
+pressure transducer shows a growing 180 Hz oscillation whose amplitude scales
+with power level, and the shaft runs at 21 600 rpm. Identify the two most
+likely mechanisms, say which frequency ratio each would produce, and state
+the one measurement that would settle it.
+
+**R2.** A vacuum upper-stage engine is being designed for 30 kN and 900 s of
+cumulative burn across eight restarts. The customer asks for pressure feeding
+"for reliability". Using Eq. 3.10 with sensible coefficients, compute the
+crossover burn time and present the mass case. Then present the reliability
+case honestly, including at least one argument the mass case cannot address.
+
+**R3.** A pump's suction-performance test in water shows a 3 % head-loss knee
+at NPSH = 24 m. In liquid hydrogen, the same pump at the same $\omega\sqrt Q$
+shows the knee at 11 m. Explain the mechanism, estimate the local temperature
+depression implied, and say why you would nevertheless not certify the pump
+on the 11 m figure without further test.
+
+**R4.** An engine team has a fuel pump at $N_s = 0.19$ and an efficiency of
+0.58. They propose to fix it by raising shaft speed 40 %. Evaluate that
+proposal: what happens to $N_s$, to NPSHr, to tip speed, and to the LOX pump
+if it is on the same shaft? Propose an alternative and justify it.
+
+**R5.** The LE-7 was lost to an LH₂ turbopump inducer failure, and the LE-7A
+that replaced it runs at *lower* chamber pressure (12.0 vs 12.7 MPa)
+[_verify-liquid]. Explain the chain of reasoning from "inducer failed" to
+"reduce chamber pressure", using the equations of §3.13 to say what
+quantities changed and by how much, qualitatively.
+
+### Mini trade study
+
+**T1.** You are designing the feed system for a **reusable** 400 kN methalox
+booster engine at $p_c = 150$ bar, required to fly 50 times with inspection
+but no overhaul, and to restart in flight for landing. LOX and LCH₄ densities
+differ by only ~2.7×. Choose between:
+
+- **(A)** single-shaft, gas-generator cycle, rolling-element bearings,
+  inducers on both pumps, helium-pressurised tanks;
+- **(B)** single-shaft, oxidiser-rich staged combustion, hydrostatic
+  bearings, autogenous pressurisation with a helium start bottle;
+- **(C)** dual-shaft full-flow staged combustion, hydrostatic bearings,
+  autogenous pressurisation;
+- **(D)** single-shaft gas generator with electric-motor-driven boost pumps
+  and autogenous pressurisation.
+
+Constraints: dry mass target 900 kg; 50-flight life with the bearings and
+seals as the life-limiting items; restart capability without a consumable
+igniter fluid; development schedule of five years. Recommend one, state the
+three quantities you would compute first to defend it, and name the single
+risk most likely to defeat your choice.
+
+---
+
+## 11. Quiz (100 points)
+
+**Q1 (8 pts).** A pump develops 1 800 m of head. Compute the pressure rise
+for (a) liquid hydrogen at 70.8 kg/m³ and (b) liquid oxygen at 1 140 kg/m³.
+State in one sentence what this implies about single-shaft LOX/LH₂
+turbopumps.
+
+**Q2 (8 pts).** Multiple choice. A tank is pressurised with the propellant's
+own saturated vapour. NPSH available at the pump inlet is:
+(a) larger than with helium at the same tank pressure, because the gas is
+compatible; (b) equal, because NPSH depends only on tank pressure;
+(c) determined almost entirely by the liquid column and acceleration, because
+$p_t - p_v \approx 0$; (d) undefined. Explain your answer.
+
+**Q3 (12 pts).** A helium system must displace 5.0 m³ at 22 bar. Gas enters
+the ullage at 320 K with a collapse factor of 1.45. Compute the required
+helium mass. Then compute the bottle volume if it is charged to 27.5 MPa
+($Z = 1.15$) and regulated down until lockup at 2.6 MPa ($Z = 1.01$), at
+290 K.
+
+**Q4 (10 pts).** Multiple choice, with justification. The dominant reason
+rocket gas-generator turbines run at $\eta_t \approx 0.6$ rather than 0.85
+is: (a) hot-gas leakage past the shroud; (b) the blade speed ratio $U/C_0$ is
+far below optimum because the pressure ratio is very high; (c) partial
+admission losses; (d) the gas is chemically reacting through the stage.
+
+**Q5 (12 pts).** A LOX pump passes 0.062 m³/s at 32 000 rpm. The tank is at
+2.8 bar, $p_v = 1.05$ bar, $\rho = 1\,140$ kg/m³, suction line loss 0.25 bar,
+liquid 3.0 m above the inlet at 1.4 $g_0$. Compute NPSHa and the required
+$N_{ss}$. State whether the design is feasible and what you would change.
+
+**Q6 (10 pts).** Explain in no more than five sentences why the RS-25 needs
+two low-pressure turbopumps but the F-1 needs none, referring to at least two
+equations from this module by number.
+
+**Q7 (10 pts).** An engine is scaled from 800 kN to 200 kN at constant
+chamber pressure and constant specific speed. State what happens to each of:
+shaft speed, impeller diameter, tip speed, shaft power, NPSH required, and
+required tank pressure. Give the scaling factor for each.
+
+**Q8 (10 pts).** A turbopump shows a vibration line at 0.62× shaft speed that
+appears only above 85 % power and grows with power. Name the phenomenon,
+state the physical mechanism in one sentence, name the historical engine
+whose development is the standard case study, and give two fixes.
+
+**Q9 (10 pts).** Engineering judgment. A pressure-fed 25 kN storable engine
+with a 600 s burn is proposed for a satellite servicing vehicle that must be
+storable for five years and restart 40 times. Eq. 3.10 says a turbopump would
+be lighter. Give the strongest argument for pressure feeding anyway, and the
+strongest argument against it, and say which you would act on.
+
+**Q10 (10 pts).** From the data table in §3.20, the RD-170's turbopump power
+is given as either ~170 MW or 192 MW. (a) State how the course requires you
+to present a contested figure like this. (b) Using the lower figure and the
+RD-170's 7 900 kN sea-level thrust, compute the shaft power per newton and
+compare it to the RE-500 value from WE2. (c) Explain the difference in terms
+of chamber pressure and cycle.
+
+---
+
+## 12. Further reading
+
+- **[SP-8107]** *Turbopump Systems for Liquid Rocket Engines* — start here.
+  Architecture selection, shaft arrangement, axial thrust balance, seals and
+  bearings, and how the turbopump talks to the engine cycle. Read it before
+  any of the component monographs.
+- **[SP-8052]** Jakobsen & Keller, *Liquid Rocket Engine Turbopump Inducers* —
+  the design rules for inducers: blade angles, tip clearance, suction
+  performance, and rotating cavitation. Pair with Brennen.
+- **[Brennen-Pumps]** Brennen, *Hydrodynamics of Pumps* — the physics behind
+  SP-8052. Cavitation, thermodynamic effects, rotordynamic forces and
+  cavitation-induced instability, by someone who worked on rocket pumps.
+  **Free full text from the author.** Chapters 2–8 are this module's
+  §§3.10–3.18 done properly.
+- **[SP-8109]** *Liquid Rocket Engine Centrifugal Flow Turbopumps* — impeller
+  and diffuser sizing, head–flow prediction, off-design and stall, and
+  material choice for LOX and LH₂ service. The design manual for §3.10.
+- **[SP-8125]** Scheer et al., *Liquid Rocket Engine Axial-Flow Turbopumps* —
+  narrow but definitive on multistage axial LH₂ pumps; the J-2 fuel pump's
+  design world.
+- **[SP-8110]** *Liquid Rocket Engine Turbines* — turbine design for the
+  partial-admission, very-high-pressure-ratio regime that the gas-turbine
+  literature does not cover. Blade stress and thermal issues included.
+- **[SP-8112]** *Pressurization Systems for Liquid Rockets* — the reference
+  for §§3.4–3.5. Stored-gas, autogenous and chemical pressurisation, gas
+  requirement calculation, collapse factors, and the ullage heat-and-mass
+  transfer problem done honestly rather than with a coefficient.
+- **[SP-8080]** *Liquid Rocket Pressure Regulators, Relief Valves, Check
+  Valves, Burst Disks, and Explosive Valves* — the components of §3.6 and
+  their failure modes. Read alongside [SP-8094] and [SP-8097] (Module 14).
+- **[SP-8123]** *Liquid Rocket Lines, Bellows, Flexible Hoses, and Filters* —
+  line sizing, flow-induced vibration, bellows fatigue and squirm, and
+  filtration. Directly relevant to water hammer and POGO.
+- **[SP-8100]** *Liquid Rocket Engine Turbopump Gears* and **[SP-8101]**
+  *Shafts and Couplings* — the RL10 gearbox and the rotordynamics of §3.17,
+  in period language. Use SP-8101 with Brennen; its rotordynamics is
+  pre-modern.
+- **[Biggs89]** "Space Shuttle Main Engine: The First Ten Years" — the
+  insider narrative of turbopump bearings, subsynchronous whirl and the
+  test-stand incidents. **Free full text.** The best account anywhere of what
+  it actually costs to develop a staged-combustion turbopump.
+- **[SSME-Orient]** *Space Shuttle Main Engine Orientation* — the clearest
+  diagrams of a four-turbopump staged-combustion powerhead, valve by valve.
+- **[Japikse]** Japikse, Marscher & Furst, *Centrifugal Pump Design and
+  Performance* — impeller and diffuser loss models, slip factors, and the
+  mechanical integration. Written for industrial pumps: translate the
+  specific-speed ranges before applying them to a LOX pump.

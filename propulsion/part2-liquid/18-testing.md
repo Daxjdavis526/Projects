@@ -1353,30 +1353,37 @@ $$T_{true} - T_i \to \dot R\,\tau = 400\times0.35 = 140\ \mathrm{K}$$
 The indicated temperature is 140 K low, permanently, for the duration of the
 ramp.
 
-**Step 2 — when does the redline actually fire?** The sensor reads 900 K when
-$$700 + 400(t-0.35) = 900 \Rightarrow t = 0.85\ \mathrm{s}$$
-(using the asymptotic form; the exact solution gives $t = 0.850$ s to three
-figures, since $e^{-0.85/0.35} = 0.088$ contributes only 12 K, which we should
-in fact keep: solving exactly gives $t = 0.88$ s). At that moment the true
-wall temperature is
-$$T_{true} = 700 + 400\times0.88 = 1052\ \mathrm{K}$$
+**Step 2 — when does the redline actually fire?** Solve
+$700 + 400\left[t - 0.35(1-e^{-t/0.35})\right] = 900$, i.e.
+$t + 0.35e^{-t/0.35} = 0.85$. The asymptotic form ($t = 0.85$ s) is a little
+late because the lag has not fully developed; iterating gives
+$$t = 0.816\ \mathrm{s}$$
+At that moment the true wall temperature is
+$$T_{true} = 700 + 400\times0.816 = 1026\ \mathrm{K}$$
+The sensor says 900 K. The wall is at 1026 K.
 
-**Step 3 — add the rest of the latency.** Filter 20 ms, sampling and
-3-sample persistence at 100 Hz = 30 ms, logic 10 ms, main-valve stroke 120 ms:
-$t_{lat,extra} = 0.18$ s. The wall gains a further $400\times0.18 = 72$ K, and
-the chamber pressure does not fall instantly after that.
-$$T_{true,\ at\ valve\ close} \approx 1052 + 72 = 1124\ \mathrm{K}$$
+**Step 3 — add the rest of the latency.** Filter 20 ms, sampling with a
+3-sample persistence requirement at 100 Hz = 30 ms, logic 10 ms, main-valve
+stroke 120 ms: $t_{lat,extra} = 0.18$ s. The wall gains a further
+$400\times0.18 = 72$ K, and chamber pressure does not fall instantly after
+that either.
+$$T_{true,\ \text{at valve close}} \approx 1026 + 72 = 1098\ \mathrm{K}$$
 against a 900 K redline and a 1350 K melt point. The margin that looked like
-450 K is actually 226 K, and 226 K at 400 K/s is 0.57 s.
+450 K on the display is actually 252 K of real wall temperature, and 252 K at
+400 K/s is 0.63 s. The redline is doing something, but it is not "protecting"
+anything — it is spending most of its apparent margin on its own latency.
 
-**Step 4 — the compensated reading.** If instead the reduction (or the
-controller) computes $T_{true} = T_i + \tau\,dT_i/dt$: with the sensor reading
-810 K and rising at 260 K/s,
-$$T_{true} = 810 + 0.35\times260 = 901\ \mathrm{K}$$
-recovering the 91 K the sensor was hiding at that instant. The cost is that
-differentiating a noisy channel amplifies the noise by $\tau/\Delta t$ per
-sample, so this belongs in post-test reduction and in a carefully filtered
-control law, not naively in a redline comparator.
+**Step 4 — the compensated reading.** Since $T_{true} = T_i + \tau\,dT_i/dt$,
+the lag is recoverable in real time from the sensor's own derivative. Take the
+instant $t = 0.55$ s in the same event: the sensor reads
+$T_i = 700 + 400[0.55 - 0.35(1-e^{-1.571})] = 809$ K and is rising at
+$dT_i/dt = 400(1 - e^{-1.571}) = 317$ K/s. Then
+$$T_{true} = 809 + 0.35\times317 = 920\ \mathrm{K}$$
+which is exactly $700 + 400\times0.55$. The compensation recovers all 111 K the
+sensor was hiding at that instant. The cost is that differentiating a noisy
+channel amplifies its noise by roughly $\tau/\Delta t$ per sample, so this
+belongs in post-test reduction and in a carefully filtered control law, never
+naively in a redline comparator.
 
 **Sanity check.** The whole result turns on $\tau$, which is a property of
 *this installation* — bead size, sheath, contact, local $h$ — and not of the
@@ -1811,8 +1818,8 @@ entrance, the ratio $p_{c,ns}/p_{c,inj}$, and $p_{c,ns}$. By how many percent
 would $\eta_{c^*}$ be overstated if the correction were omitted?
 
 **N2.** A hot fire gives $F = 245.0$ kN, $p_{c,ns} = 9.800$ MPa,
-$\dot m_o = 63.5$ kg/s, $\dot m_f = 27.6$ kg/s, $A_t = 1.960\times10^{-2}$ m²,
-$\varepsilon = 22$, $p_a = 101\,325$ Pa. Compute MR, $c^*_{meas}$,
+$\dot m_o = 63.5$ kg/s, $\dot m_f = 27.6$ kg/s, $A_t = 1.580\times10^{-2}$ m²,
+$\varepsilon = 16$, $p_a = 101\,325$ Pa. Compute MR, $c^*_{meas}$,
 $C_{f,meas}$, and $I_{sp,meas}$. Using $\gamma = 1.20$,
 $\mathcal{M} = 23.0$ kg/kmol and $T_c = 3700$ K as the reference, compute
 $\eta_{c^*}$ and $\eta_{C_f}$. Comment on which one you would attack first.

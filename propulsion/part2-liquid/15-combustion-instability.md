@@ -1383,3 +1383,646 @@ designs.
 > three. Doubling compartments does not double the frequency, which is why
 > baffle counts saturate around 10–15 and other measures take over.
 
+---
+
+## 6. Real engines — why did they design it that way?
+
+### 6.1 F-1 (Rocketdyne, 1959–1973) — the programme that defined the discipline
+
+**The choice.** A flat-face impinging injector with a mixed doublet-and-triplet
+pattern, in the final **"5U(f)"** configuration, with a **copper baffle assembly
+dividing the face into 13 compartments**, fuel-cooled, and a qualification
+requirement of recovery from a bomb detonated near the injector centre at full
+thrust within **45 ms** [_verify-liquid, F-1 block][OY93].
+
+**Why the F-1 had the problem at all.** Three factors compounded, and every one of
+them is a scaling argument from this module.
+
+1. **The chamber is enormous, so the modes are low.** $D_c \approx 1.1$ m puts
+   $f_{1T}$ at 450–700 Hz depending on where in the chamber you evaluate the
+   sound speed (§3.8). That is the low end of the acoustic band and the *high*
+   end of where coarse kerosene sprays respond.
+2. **The elements are large, so $\tau$ is long and the sprays are coarse.**
+   2,577 kg/s through a face about a metre across means large orifices and
+   correspondingly coarse drops (Module 06 §6.3, Module 07). Response peaks near
+   $f = 1/(2\tau)$; with $\tau$ of 1–2 ms that is 250–500 Hz. **The chamber's 1T
+   frequency and the combustion's response peak were on top of each other.**
+   That coincidence, not any single design error, is the F-1 story.
+3. **Like-on-like and unlike doublets with large orifices flap slowly** (§3.10),
+   putting a hydrodynamic element frequency in the same band.
+
+**What they did about it: 1962–1965.** The verification file records roughly
+**2,000 tests across 210 injector designs, 15 baffle designs and 14 injector
+configurations** in a concentrated effort between 1962 and 1964
+[_verify-liquid, F-1 block] — the effort recorded there as "Project Go" and
+generally referred to in the Apollo literature as "Project First"; the naming is
+not consistent across sources and the course does not resolve it. [OY93] is the
+definitive technical account. What matters is the *method*, because it is the
+method that survived:
+
+- **Instrument everything, at bandwidth.** High-frequency dynamic-pressure
+  transducers in the chamber wall at several azimuths, plus accelerometers, at
+  sample rates that resolve the modes. Without phase between azimuthally spaced
+  transducers you cannot tell a 1T from a 1L, and much early testing was wasted
+  because of it.
+- **Force the instability rather than wait for it.** The bomb turned a
+  statistical question ("will it go unstable in service?") into a deterministic
+  one ("does it recover in 45 ms?").
+- **Iterate the pattern *and* the baffle together.** The 13-compartment baffle
+  was arrived at by testing progressively more compartments; each increment
+  raised the lowest supportable transverse frequency (§3.13, WE4), and they
+  stopped when recovery times met the criterion with margin.
+- **Accept the performance loss.** The final pattern was a deliberately detuned,
+  compromised performer. Rocketdyne traded $c^*$ efficiency for stability
+  knowingly.
+
+**Alternatives available in 1962.** Acoustic cavities were understood in
+principle but a cavity for a 500 Hz mode needs ~370 mm of depth (WE3) — not
+available in an injector. Smaller elements in much greater number would have
+raised the response frequency but were a manufacturing reach for a 1 m face in
+1962. Multiple smaller chambers — the Soviet answer — was rejected early as a
+vehicle-integration and plumbing problem. Given the constraints, **baffles were
+the only tool of the right size.**
+
+**Would a modern engineer do the same?** They would run a Helmholtz solver and an
+LES campaign first, they would take the element size down, and they would
+seriously consider a pintle. They would still baffle it, and they would still
+bomb-test it. Nothing has replaced the bomb.
+
+### 6.2 RS-25 (Rocketdyne, 1972–present) — cavities, not baffles
+
+**The choice.** Coaxial shear injector, 600 main elements, an augmented spark
+igniter at the centre, and **acoustic-resonator cavities in the injector face**
+— and no baffles [_verify-liquid, RS-25 block].
+
+**Why.** Hydrogen moves the whole problem up in frequency. The RS-25's 1T sits
+near 2 kHz (§3.8), where (i) an absorber of practical depth (~90 mm at 1200 K) is
+tunable, (ii) the spray response of a hydrogen shear element is weaker than a
+coarse kerosene spray's, and (iii) baffles would sit in a 206 bar hydrogen-oxygen
+environment with a wall heat flux that makes cooling them a genuine problem. Add
+that the main injector is also the exit of two fuel-rich preburners — the RS-25's
+main injector receives hot hydrogen-rich gas, not liquid, on the fuel side, which
+changes the response entirely.
+
+**What it did not fix.** The RS-25's development instability problems were
+substantially *LOX post* problems — slender posts in a high-velocity crossflow,
+failing by high-cycle fatigue — and preburner and turbopump dynamics, not classic
+1T screech [Biggs89]. That is an instructive distinction: at high chamber
+pressure with hydrogen, the dominant unsteady-flow failure mode moves from
+"the chamber sings" to "a component fatigues in a high-frequency flow field."
+The fix was structural (post design, shields), not acoustic.
+
+**Would a modern engineer do the same?** Yes — and they do: face-mounted
+resonators are standard on modern hydrogen engines. The design lesson to carry is
+that the choice between baffle and cavity is decided by the mode frequency and
+the available depth, not by preference.
+
+### 6.3 Titan LR87 / LR91 (Aerojet, 1955–2005) — baffles on a storable
+
+**The choice.** Unlike-impinging doublets on hypergolic N₂O₄/Aerozine 50, with
+**baffled injectors** on both stages [_verify-liquid, LR87 and LR91 blocks].
+
+**Why.** Hypergolic propellants ignite on contact, which removes the ignition
+problem and does *nothing* for stability — arguably it makes stability harder,
+because the reaction begins in the liquid phase very close to the face, which is
+precisely where the transverse modes have their pressure antinode. Unlike
+doublets also couple mixture ratio directly to transverse velocity (§3.10). Both
+stages needed baffles, and the Titan family carried them unchanged for forty
+years.
+
+**The cautionary case in the same propellant family** is the Apollo **Lunar
+Module Ascent Engine**: Bell could not solve its combustion instability, and the
+flight injector was supplied by Rocketdyne [_verify-liquid, APS block]. An engine
+with no igniter, no pumps, no gimbal, no redundancy and one job still needed a
+second contractor's injector to be stable. **Hypergolic does not mean stable.**
+
+### 6.4 RD-170 family and Soviet practice (Glushko, 1976 onward) — solve it with geometry
+
+**The choice.** Oxidizer-rich staged combustion with **four combustion chambers
+fed by a single turbopump** (RD-170/171), two chambers (RD-180), one chamber
+(RD-191), all using **coaxial swirl** injection [_verify-liquid].
+
+**Why this is a stability architecture as much as a packaging one [J].** The
+RD-170 delivers 7.25 MN sea level — more than the F-1 — but no chamber in it is
+larger than an RD-191's. Four smaller chambers means four *smaller diameters*
+means transverse mode frequencies roughly $\sqrt{4} = 2$ times higher than a
+single chamber of the same total area would have, moving them away from the
+response peak. Combine that with swirl elements, whose sheet breakup is
+comparatively insensitive to imposed transverse gas velocity (§3.11), and the
+architecture attacks the problem from both sides — geometry and element type.
+It is the mirror image of the American approach, which took the single big
+chamber and fixed it with hardware.
+
+**The costs are real and the file states them:** four chambers where one would be
+preferable, enormous complexity, and a single turbopump failure loses all thrust.
+The comparison is a genuinely open engineering argument, not a settled one.
+Western practice went to the single large chamber and paid for it in development;
+Soviet practice avoided the development cost and paid for it in parts count and
+mass for the life of the programme.
+
+### 6.5 LMDE and Merlin (TRW 1964, SpaceX 2011) — one element
+
+**The choice.** A single central pintle element: LMDE with a **variable-area**
+pintle for 10:1 throttling, Merlin 1D with a fixed-geometry pintle
+[_verify-liquid][Dressler00].
+
+**Why it is stable [J].** Everything in §3.10 that makes a multi-element face
+dangerous requires *elements*: element-to-element phasing, a periodic pattern for
+a tangential mode to lock onto, spray fans with a hydrodynamic frequency. A
+pintle has one element, a radial sheet that intersects an axial flow well away
+from the face, and heat release distributed over a large volume near the wall.
+TRW's own account is that pintle engines were fired across a wide range of sizes
+and propellants without encountering high-frequency instability and without
+stabilisation devices. It is vendor testimony backed by a long service record —
+strong evidence, weak theory.
+
+**What it does not fix.** Chug. The LMDE ran 110 psia at full thrust and
+**11 psia at 10 %** — a 10:1 chamber-pressure turndown — and holding
+$\Delta p_{inj}/p_c$ across that range is exactly why the pintle had to be
+variable-area (Module 07 §3.10, [Casiano10]). The Merlin's throttle range is
+narrower for the same reason.
+
+**Would a modern engineer choose it?** For a throttling lander or a
+cost-and-cadence-driven booster, yes, and SpaceX did. For a large hydrogen
+staged-combustion engine, no — the pintle's mixing is not competitive with a
+coaxial face at high $\eta_{c^*}$ requirements.
+
+### 6.6 Raptor (SpaceX, 2016–present) — claims
+
+**The claim.** Coaxial swirl injection from Raptor 2 onward, at 300–330 bar,
+with SpaceX reporting stable operation across the throttle range
+[_verify-liquid, Raptor block; all figures are company claims].
+
+**What can be said.** The element choice is consistent with the Soviet/Russian
+practice that has the best public stability record for hydrocarbon
+staged-combustion engines, and methane's vaporization behaviour at 300 bar is
+supercritical — no droplets, a mixing-controlled response, which shifts the
+problem toward higher frequency and away from the classical spray-response
+mechanisms. The chamber is small (Raptor's thrust per chamber is a third of the
+F-1's at four times the pressure), so its transverse modes are high.
+
+**What cannot be said.** There is no public PSD, no published bomb-test result,
+no damping rate, no mode identification. Treat "Raptor is stable" as a claim,
+plausible on mechanism, unverified in data. This is the course's standard
+position on Raptor and it applies with particular force here, because stability
+is exactly the kind of property a programme discovers late and does not announce.
+
+---
+
+## 7. Design trade-offs, failure modes, materials, manufacturing, testing
+
+### 7.1 The standing trade-offs
+
+| move | helps | hurts |
+|---|---|---|
+| ↑ $\Delta p_{inj}$ | chug margin (quadratically in $k$), shorter $\tau$ | pump power, turbine flow, $\eta$ of the cycle; nothing for screech |
+| ↑ $L^*$ | chug margin (bigger $\tau_c$) | mass, cooled area, $L^*$ instability, *lowers* nothing in the acoustic band |
+| ↑ $\varepsilon_c$ (bigger $D_c$) | Rayleigh loss, wall flux, face area | **lowers all transverse mode frequencies** toward the response peak |
+| finer atomization | $\eta_{c^*}$, shorter chamber | *raises* combustion response and *reduces* droplet damping — a double stability penalty |
+| baffles | kills 1T outright | cooling, $\eta_{c^*}$, mass, a new failure mode |
+| acoustic cavities | tunable damping, no pattern disturbance | face volume, purge flow, tuning uncertainty, only works in a band |
+| pintle / swirl elements | inherent high-frequency margin | mixing performance, and for pintles a hard throttling-vs-chug coupling |
+| smaller multiple chambers | raises all transverse frequencies | parts count, mass, plumbing, common-mode turbopump risk |
+
+The single most important structural fact is in row 4: **the things that make an
+injector perform well make it less stable.** Every stability fix in §3.13 is
+buying back margin that performance optimisation spent.
+
+### 7.2 Failure modes
+
+**Wall burn-through under a transverse mode.**
+*Mechanism:* the acoustic transverse velocity ($u' = p'/\rho c$, of order
+100 m/s at 10 % amplitude) destroys the thermal boundary layer and strips film
+cooling; gas-side heat flux multiplies by 2–10.
+*Symptom:* a longitudinal streak or a circumferential band of erosion,
+melted-through channel or tube walls, coolant into the chamber, immediate
+$p_c$ loss.
+*Evidence:* the damage is *azimuthally patterned* — two opposite stripes for a
+standing 1T, a uniform band for a spinning 1T or a radial mode. Undamaged
+hardware between the stripes is diagnostic; a uniform overheat is a cooling
+failure, not an instability.
+*Fix:* stabilise. Adding cooling to survive an instability is not a fix and does
+not work.
+
+**Injector-face burnout.**
+*Mechanism:* the same scrubbing, applied to the face's own film or transpiration
+cooling, plus the recirculation an acoustic field sets up between elements.
+*Symptom:* melted face, eroded orifice lands, elements merged into craters,
+often worst near the outer row or at a baffle root.
+*Evidence:* face damage with an $m$-fold symmetry; the F-1 and LMAE programmes
+both saw this.
+*Fix:* baffles or cavities; more face cooling as a palliative.
+
+**Baffle blade failure.**
+*Mechanism:* thermal fatigue and coolant starvation at the blade tip, which is a
+thin copper fin in the highest-flux region.
+*Symptom:* a missing or eroded blade found post-test; and — the reason it
+matters — **the instability returns** once the compartment is opened.
+*Evidence:* correlate blade condition with a rise in dynamic-pressure amplitude
+during the run.
+*Fix:* cool the blades from the fuel circuit, keep the tip thick, accept the
+$\eta_{c^*}$ penalty.
+
+**LOX post fatigue (coaxial injectors).**
+*Mechanism:* slender posts in a transverse acoustic velocity field are
+cantilevers in cross-flow; vortex shedding or acoustic excitation near a post
+bending mode gives high-cycle fatigue in seconds.
+*Symptom:* cracked or liberated posts, downstream damage.
+*Evidence:* the RS-25 development history [Biggs89].
+*Fix:* structural — shields, post stiffening, tip geometry — not acoustic.
+
+**Pump-side and cavitation coupling.**
+*Mechanism:* an inducer's cavitation compliance changes the feed-line dynamics,
+coupling to chug or POGO; rotating cavitation adds its own excitation at a
+fraction of shaft speed.
+*Symptom:* an oscillation whose frequency tracks NPSH or shaft speed rather than
+chamber conditions.
+*Evidence:* frequency scales with pump rpm — the diagnostic that distinguishes it
+from everything else in this module.
+*Fix:* NPSH margin, inducer redesign, accumulator ([Brennen-Pumps][SP-8052]).
+
+### 7.3 Materials
+
+Stabilisation hardware lives in the worst thermal environment in the engine.
+Baffles are **copper alloys** (the F-1's are copper) for the same reason chamber
+liners are: conductivity, not strength — the blade must conduct heat to its
+coolant faster than the gas delivers it, and its yield strength at temperature
+is almost irrelevant compared with its ability to stay cool (Module 10, 16).
+Acoustic cavity walls are part of the injector body — usually a nickel alloy or
+stainless — and their failure mode is *erosion of the neck*, which detunes the
+resonator progressively over a service life. Additive manufacturing has changed
+this area substantially: resonator cavities and internal purge passages that were
+impossible to braze are now printed as part of the injector body [Gradl18]
+[GradlAM], which makes multi-depth cavity arrays cheap and is one of the few
+unambiguous stability wins of the last decade [M].
+
+### 7.4 Manufacturing
+
+Two manufacturing facts drive stability outcomes. First, **element-to-element
+dimensional scatter is stabilising**, because it spreads $\tau$ across the face
+(§3.13) — a perfectly uniform injector is, other things equal, a more coherent
+oscillator than a slightly scattered one. This is not an argument for sloppy
+manufacturing (scatter also costs mixture-ratio uniformity and therefore
+$\eta_{c^*}$ and wall compatibility), but it is a real effect and it is why
+"we tightened the tolerances and it went unstable" is a story that has actually
+happened **[J]**. Second, baffles and their coolant passages are among the
+hardest features to braze or weld into an injector face, and a baffle
+retrofitted late is expensive in a way that a designed-in one is not — which is
+an argument for building the first injector with baffle *provisions* even if the
+first design omits them.
+
+### 7.5 Testing
+
+**What is measured.**
+
+- **High-frequency dynamic pressure** — piezoelectric transducers, flush or
+  recess-mounted through cooled adapters, in the chamber wall at **at least three
+  azimuths** and preferably at two axial stations. Bandwidth to at least 3× the
+  highest mode of interest; 20–50 kHz sampling is normal.
+- **Static $p_c$** on a conventional low-frequency transducer. This is the trap:
+  it is heavily damped and pneumatically low-passed, and a chamber in a 30 %
+  limit cycle can show only a few percent DC shift on the static gauge. **Never
+  clear a chamber for stability on static instrumentation.**
+- **Accelerometers** on the chamber, injector dome and thrust structure — they
+  see 1T well, 2T and 1R poorly (WE1).
+- **Feed-line dynamic pressure** upstream and downstream of the pump, to separate
+  chamber-driven from feed-driven oscillation.
+
+**What the data looks like when it is wrong.**
+
+- **PSD:** a discrete, narrow peak rising 20–40 dB above the broadband
+  combustion-noise floor, at a frequency that matches a computed mode. Broadband
+  roughness is a raised floor with no peak — a different problem.
+- **Phase between azimuthal transducers:** 180° at diametrically opposite ports →
+  standing 1T; a linear ramp with azimuth → spinning 1T; in-phase everywhere →
+  a radial or longitudinal mode.
+- **Frequency behaviour with operating point:** an acoustic mode scales with
+  $\sqrt{T_c}$, so it moves modestly with mixture ratio and barely at all with
+  $p_c$. Chug moves strongly with $\Delta p_{inj}$ and $p_c$. An entropy mode
+  moves with chamber length over gas velocity. A pump-coupled mode tracks shaft
+  speed. **Frequency-versus-operating-point is the most powerful diagnostic you
+  have** and it costs nothing but a throttle sweep.
+- **The trap:** $c^*$ efficiency often *rises* during an instability, because the
+  oscillation mixes violently. A performance improvement accompanied by a new
+  discrete tone is not good news.
+
+**Bomb and pulse-gun procedure at the level this course covers:** disturb at
+steady state, at more than one operating point and more than one location,
+record the band-pass-filtered envelope of the dynamic pressure, fit an
+exponential to it, and report the damping rate against the requirement
+(Eq. 3.15). Repeat enough times to have a statistic. Details of charge design and
+handling are outside this course's scope boundary.
+
+---
+
+## 8. Misconceptions and what engineers actually care about
+
+**"Instability means the engine is burning badly."** No — an unstable engine is
+frequently burning *better*, in the sense of higher $c^*$ efficiency, because a
+violent oscillation is a superb mixer. Instability is about the *phase* of heat
+release relative to pressure, not about the amount.
+
+**"A high injector pressure drop fixes combustion instability."** It fixes
+*chug*. It does essentially nothing for high-frequency transverse modes, which
+are driven by the atomization and mixing response to acoustic pressure and
+velocity in the chamber, not by feed-system coupling. Programmes have lost months
+raising $\Delta p$ against a screech problem.
+
+**"Bigger chambers are safer because they have more damping."** Bigger chambers
+have *lower* transverse mode frequencies, which moves them toward the combustion
+response peak, and a lower surface-to-volume ratio, which reduces boundary-layer
+damping. Instability is a big-engine problem.
+
+**"Hypergolic propellants are stable because they ignite instantly."** Instant
+ignition puts the heat release right at the injector face — a pressure antinode
+for every mode. The Titan engines and the LM ascent engine all needed
+stabilisation work.
+
+**"If the static chamber-pressure trace is smooth, the engine is stable."** The
+static transducer is low-passed by its sense line and its own dynamics. A 25 %
+peak-to-peak 2 kHz oscillation can look like a 2 % ripple on it. This
+misconception has destroyed hardware.
+
+**"The $n$–$\tau$ model predicts instability."** It predicts whether a mode is
+linearly driven, given $n$ and $\tau$ that were fitted to test data from a
+similar engine. It says nothing about limit-cycle amplitude, nothing about the
+threshold for a nonlinearly unstable chamber, and it contains no velocity
+coupling. It is a framework for organising data, not a design tool you can trust
+unsupervised.
+
+**"Baffles absorb acoustic energy."** Mostly they don't. They change the
+boundary conditions so that the dangerous low-order transverse modes cannot exist
+in the region where they would be driven. Absorption at the blade edges is a
+second-order bonus.
+
+**"An engine that ran 500 seconds without incident is stable."** It is stable to
+whatever disturbances happened to occur. Nonlinear instability requires a finite
+trigger; the trigger in service may be a start transient, a throttle step, or a
+piece of debris. This is why dynamic stability is *rated*, not observed.
+
+### What engineers actually care about
+
+1. **Where are my modes, and where is my combustion response?** The distance
+   between the 1T frequency and $1/(2\tau)$ is the single number that predicts
+   trouble, and both ends of it are estimable before hardware exists.
+2. **What is my damping rate after a pulse, in milliseconds?** This is the number
+   in the requirement, the number in the test report, and the number a programme
+   manager can act on. Everything else is a means to it.
+3. **How much $\Delta p_{inj}$ margin do I have at the *worst* operating point?**
+   Not at nominal — at minimum throttle, at off-nominal mixture ratio, at the
+   coldest propellant temperature.
+4. **What does my dynamic-pressure PSD look like across the whole operating box?**
+   Trend it. A tone that appears at one corner of the box at 3 % amplitude is a
+   tone that will be at 30 % somewhere you have not tested.
+5. **What is the earliest point at which I could still add baffles or
+   resonators?** Because the answer determines whether an instability found in
+   development is a six-month problem or a two-year one.
+
+---
+
+## 9. Mastery levels
+
+**Level 1 — Familiarity.** Explain in plain language why heat release in phase
+with pressure drives an oscillation. Name the three frequency bands, their
+approximate ranges, and one fix for each. State that $f_{1T} \propto c/D_c$ and
+that bigger chambers have lower modes. Name two engines whose stability solution
+you can describe in a sentence (F-1 baffles, RS-25 cavities).
+
+**Level 2 — Working engineering knowledge.** Compute the 1L, 1T, 2T and 1R
+frequencies of a given chamber from the Bessel-root table and $c=\sqrt{\gamma R
+T_c}$. Derive $\tau_c = L^*/(\Gamma^2 c^*)$ and evaluate the chug criterion for a
+given $\tau$ and $\Delta p/p_c$, including whether a marginal case meets a stated
+damping-rate requirement. Size a quarter-wave cavity including the cavity gas
+temperature effect, and choose a baffle count for a target frequency. State the
+$n$–$\tau$ response function and where it peaks. Read a PSD and an
+azimuthal-phase plot and identify the mode. Quote typical ranges for $\tau$, $n$,
+$\Delta p/p_c$, amplitude thresholds and damping rates from memory.
+
+**Level 3 — Interview mastery.** Given an unfamiliar engine's geometry,
+propellant and a described anomaly, produce a ranked hypothesis list with the
+frequency estimates that justify the ranking, say what measurement would
+discriminate between the top two, and propose fixes with their costs in
+performance, mass and schedule. Argue both sides of baffles versus cavities for a
+specific engine and say what decides it. Explain why the F-1's problem was a
+coincidence of two frequencies rather than a design error, and why the Soviet
+multi-chamber architecture attacks the same problem differently. State honestly
+what modern CFD can and cannot predict, and defend why the bomb test survives.
+
+---
+
+## 10. Problems
+
+### Conceptual
+
+**C1.** An engine shows a 2.4 kHz tone. Two dynamic-pressure transducers 180°
+apart on the chamber wall read in phase; a third at 90° reads in phase with both.
+A lateral accelerometer on the chamber shows nothing at 2.4 kHz. Which mode is
+it, and what does the accelerometer result rule out?
+
+**C2.** Explain, using the Rayleigh criterion, why heat release concentrated near
+the injector face is worse for a longitudinal mode than the same heat release
+concentrated at mid-chamber. Then explain why the injector face is a bad place
+for heat release for a *transverse* mode as well, for a different reason.
+
+**C3.** A colleague proposes fixing a 3 kHz screech by increasing the injector
+pressure drop from 18 % to 28 % of $p_c$. State what will actually happen and
+why, and what the change will cost.
+
+**C4.** Why does improving atomization (finer drops) hurt stability twice?
+
+**C5.** An engine is linearly stable but nonlinearly unstable. Describe an
+experiment that would reveal this and one that would not, and explain why the
+distinction determines the entire structure of a stability-rating programme.
+
+**C6.** The $n$–$\tau$ response function has magnitude $2n|\sin(\omega\tau/2)|$.
+Explain physically why the response is *zero* at $\omega\tau = 2\pi$, and what
+design action that suggests for a chamber whose problematic mode is known.
+
+**C7.** Give three measurements that distinguish an entropy-wave (convective)
+oscillation from an acoustic longitudinal mode at the same frequency.
+
+**C8.** Why is a spinning tangential mode often more damaging to a chamber wall
+than a standing one of the same amplitude, even though the peak pressure is the
+same?
+
+### Calculation
+
+**N1.** A LOX/LH₂ chamber has $D_c = 0.34$ m, $L_{cyl} = 0.28$ m, $T_c = 3500$ K,
+$M = 13.0$ kg/kmol, $\gamma = 1.19$. Compute $c$, and the 1L, 1T, 2T, 1R and
+1T1L frequencies.
+
+**N2.** For a chamber with $L^* = 0.9$ m, $\gamma = 1.22$ and $c^* = 1780$ m/s,
+compute $\tau_c$. Then, for $\tau = 1.0$ ms, find the neutral chug frequency, the
+critical gain, and the minimum $\Delta p_{inj}/p_c$.
+
+**N3.** Using the engine of N2 with a design $\Delta p_{inj}/p_c = 0.22$, find
+the complex root of $\tau_c s + 1 + k e^{-s\tau} = 0$ nearest the neutral
+frequency, and state the time for a disturbance to decay to 10 % of its peak.
+Does the engine meet a 30 ms dynamic-stability requirement?
+
+**N4.** A quarter-wave cavity must absorb a 2,050 Hz 1T mode. The cavity gas is
+estimated at $T_{cav} = 1400 \pm 400$ K with $\gamma = 1.26$ and
+$R = 600$ J/(kg·K) (hydrogen-rich). Compute the design depth and the depths that
+would be correct at the two extremes of the temperature estimate. What fractional
+tuning error results from the temperature uncertainty?
+
+**N5.** A chamber has $D_c = 0.62$ m and $c = 1150$ m/s. How many baffle
+compartments are required to place the lowest transverse mode above 2,600 Hz?
+Give the resulting frequency and the ratio to the unbaffled 1T.
+
+**N6.** A vehicle's first longitudinal structural mode is at 9 Hz. A LOX feed
+line has $\ell = 18$ m, $A = 0.038$ m², $\rho = 1140$ kg/m³. Compute the line
+inertance, and the accumulator gas volume required to place the feed-line
+resonance at 3.5 Hz, assuming helium at 4 bar with $n = 1.4$.
+
+**N7.** Using the F-1 figures in `reference/_verify-liquid.md` (thrust, $p_c$,
+$\varepsilon$) and Module 06's derived $D_t = 0.891$ m, estimate $f_{1T}$ for
+contraction ratios of 1.5 and 1.75 with $c = 1250$ m/s. Then repeat with an
+effective near-face sound speed of 900 m/s and comment on the spread.
+
+**N8.** An engine's dynamic-pressure trace after a bomb shows a 1T tone whose
+band-passed envelope falls from 42 bar peak to 6.5 bar in 12 ms. Compute the
+damping rate, the damping ratio at $f = 1350$ Hz, the quality factor, and the
+time to reach 10 % of peak. Does it meet a 45 ms requirement?
+
+### Engineering reasoning
+
+**R1.** A new 1.2 MN LOX/RP-1 engine runs smoothly at 100 % thrust and develops a
+480 Hz oscillation at 12 % of $p_c$ when throttled to 65 %. At 65 % the chamber
+pressure is 65 bar and the injector $\Delta p$ has fallen from 20 bar to 8.5 bar.
+Diagnose it, state the two measurements that would confirm your diagnosis, and
+propose a fix with its cost.
+
+**R2.** Two engines of identical thrust and chamber pressure — one LOX/RP-1 with
+a 0.95 m chamber, one LOX/LH₂ with a 0.40 m chamber — are both found unstable at
+the 1T mode. Explain why the two programmes will end up with different hardware
+solutions, and predict what each will be.
+
+**R3.** You are shown a PSD from a hot-fire test: a broadband floor rising
+smoothly from 100 Hz to 10 kHz, plus one sharp peak at 1,880 Hz that is 28 dB
+above the floor, plus a small peak at 3,760 Hz. A second test at 8 % higher
+mixture ratio shows the peaks at 1,915 Hz and 3,830 Hz. What are the peaks, and
+what does the frequency shift tell you about the mechanism?
+
+**R4.** An injector is redesigned to raise $\eta_{c^*}$ from 0.955 to 0.975 by
+halving the element size and doubling the element count. Argue, using specific
+mechanisms from §3.10 and §3.12, what this does to stability, and say what you
+would do to protect the programme before the first hot fire.
+
+**R5.** A baffle blade is found half burned away after an otherwise successful
+120 s test, and the dynamic-pressure amplitude at 1T rose from 1.5 % to 6 % of
+$p_c$ over the last 30 s of the run. Reconstruct the sequence of events and say
+what you would change.
+
+### Mini trade study
+
+**T1.** You are the stability lead on a new 1.5 MN LOX/methane booster engine.
+Chamber: $D_c = 0.46$ m, $L_{cyl} = 0.42$ m, $p_c = 150$ bar, $T_c = 3550$ K,
+$M = 21.5$ kg/kmol, $\gamma = 1.19$. The injector is a 350-element shear coaxial
+face. The first hot-fire series produces a 3 %-amplitude tone at the 1T
+frequency at nominal conditions and 14 % at the low-mixture-ratio corner of the
+operating box, with a post-bomb recovery time of 68 ms against a 40 ms
+requirement.
+
+Four options are on the table, with the programme 14 months from first flight:
+
+- **A.** Add a 5-compartment baffle to the existing injector.
+- **B.** Add an array of Helmholtz resonators around the injector periphery.
+- **C.** Redesign the injector to 600 smaller elements with 25 % higher
+  $\Delta p$ and increased LOX-post recess.
+- **D.** Increase the contraction ratio by 15 % (a new chamber) to move the 1T
+  mode, keeping the injector.
+
+Constraints: no more than 1.5 % $\eta_{c^*}$ loss; no more than 8 months of
+schedule; the chamber liner and cooling design is already qualified and
+requalifying it costs 6 months; the injector is additively manufactured, so a
+new injector build is 10 weeks.
+
+Compute the relevant frequencies for the baseline and for option D. Recommend
+one option (or a combination), justify it quantitatively, and state what test
+would confirm the fix and what you would do if it failed.
+
+---
+
+## 11. Quiz (100 points)
+
+**Q1 (8).** The first tangential mode of a cylindrical chamber has $f =
+\alpha c/(\pi D_c)$. What is $\alpha$, and what mathematical condition defines
+it?
+
+**Q2 (8).** Multiple choice. A chamber's transverse modes are found to be 30 %
+higher in frequency than predicted. The most likely cause is:
+(a) the chamber is shorter than assumed; (b) the assumed chamber temperature was
+too low; (c) the injector $\Delta p$ is higher than assumed; (d) the nozzle is
+not choked.
+
+**Q3 (12).** For a chamber with $L^* = 1.15$ m, $\gamma = 1.21$, $c^* = 1750$
+m/s: compute $\Gamma$, then $\tau_c$. For $\tau = 1.3$ ms compute the neutral
+chug frequency and the minimum $\Delta p_{inj}/p_c$.
+
+**Q4 (10).** State the Rayleigh criterion in words and in an integral form, and
+say what phase relationship between $p'$ and $q'$ marks the boundary between
+driving and damping.
+
+**Q5 (10).** Multiple choice. An engine passes a 60-second hot fire with a smooth
+static $p_c$ trace, then fails on its next test with wall burn-through in 80 ms.
+The most likely explanation is:
+(a) a manufacturing defect in the chamber wall; (b) the engine was nonlinearly
+unstable and the second test contained a trigger; (c) the coolant flow rate was
+low on the second test; (d) the static transducer failed on the first test.
+
+**Q6 (12).** A 1,650 Hz mode must be absorbed by quarter-wave cavities. The
+cavity gas is at 1,100 K with $\gamma = 1.24$, $R = 380$ J/(kg·K). Compute the
+sound speed and the required depth. If the cavity actually runs at 1,600 K, to
+what frequency is that hardware tuned?
+
+**Q7 (10).** Why does the $n$–$\tau$ response function peak at $\omega\tau =
+\pi$? Answer with the physical argument, not the algebra.
+
+**Q8 (10).** A chamber with $D_c = 0.55$ m and $c = 1180$ m/s needs its lowest
+transverse mode above 2,800 Hz. How many baffle compartments? Show the eigenvalue
+you needed and the compartment count that delivers it.
+
+**Q9 (10).** Name three mechanisms by which an acoustic oscillation modulates the
+heat release in a liquid engine, and for each say whether it responds to acoustic
+*pressure* or acoustic *velocity*.
+
+**Q10 (10).** An acceptance criterion requires decay to 10 % of the peak
+disturbance within 25 ms. Compute the required damping rate. At a mode frequency
+of 900 Hz, what damping ratio and quality factor does that correspond to, and is
+that a heavily or lightly damped system?
+
+---
+
+## 12. Further reading
+
+- **[SP-194]** Harrje & Reardon, *Liquid Propellant Rocket Combustion
+  Instability* — the foundational compendium. Read §2 for mechanisms, §3 for the
+  low- and intermediate-frequency analyses, §8 for damping. Free on NTRS. Its
+  analysis is linear; read it knowing the nonlinear picture came later.
+- **[LRECI]** Yang & Anderson, *Liquid Rocket Engine Combustion Instability* —
+  the modern successor. Read the engine case studies first; they make the theory
+  legible in a way the analysis chapters do not.
+- **[OY93]** Oefelein & Yang, "Comprehensive Review of Liquid-Propellant
+  Combustion Instabilities in F-1 Engines" — the single best case study in the
+  field, and honest that the fix was achieved by testing rather than theory.
+- **[SP-8113]** *Liquid Rocket Engine Combustion Stabilization Devices* — how to
+  size baffles and absorbers, what they cost, and the dynamic-stability
+  definition. The hardware complement to [SP-194].
+- **[CC56]** Crocco & Cheng, *Theory of Combustion Instability in Liquid
+  Propellant Rocket Motors* — the origin of $n$ and $\tau$. Read it for the
+  structure of the argument and for its own statement of its limits.
+- **[SP-8089]** Gill & Nurick, *Liquid Rocket Engine Injectors* — the design
+  rules for elements and manifolds that this module treats as given.
+- **[Culick68]** Culick's review of unsteady solid-propellant burning — for the
+  response-function formalism and, in his later work, the acoustic mode expansion
+  that underlies modern stability analysis in both liquid and solid systems.
+- **[Biggs89]** "Space Shuttle Main Engine: The First Ten Years" — for what
+  high-frequency flow-induced failures actually look like on a real programme
+  when they are structural rather than acoustic.
+- **[Dressler00]** TRW pintle engine heritage — the open-literature basis for the
+  pintle stability claim. Vendor testimony; read it as such.
+- **[Casiano10]** Throttling review — for why $\Delta p/p_c$ collapses under
+  throttling and the full catalogue of mitigations.
+- **[LRTC]** *Liquid Rocket Thrust Chambers* — for the modern modelling chapters,
+  including real-fluid effects at supercritical pressure.
