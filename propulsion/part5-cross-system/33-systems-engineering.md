@@ -258,7 +258,8 @@ chamber pressure, not at start. [E] [SP-8123]
 
 The interface requirement that comes out of this is a pair of numbers the
 guidance engineer will ask for on day one: **maximum gimbal angle** (typically
-±5° to ±10.5° for a launch vehicle main engine, ±3° to ±6° for an upper stage)
+the RD-253 gimbals 7.5° in a single plane and the RD-191 up to 8° [SB];
+upper-stage engines are commonly ±3° to ±6°)
 and **maximum gimbal rate** (typically 5–30 °/s). Both are control-authority
 numbers, not engine numbers, and both cost mass — actuator, hydraulic or
 electromechanical power, and the envelope the deflected nozzle sweeps.
@@ -468,8 +469,9 @@ problem (§3.7).
 
 **5. Throttle profile.** Two constraints usually shape it. Near maximum
 dynamic pressure the vehicle throttles down to limit aerodynamic loads on the
-structure — the Shuttle's "throttle bucket" to 67 % around max-Q is the
-canonical case [SSME-Orient] — and late in a burn the vehicle throttles down
+structure — the Shuttle's "throttle bucket", which took the RS-25 back toward the
+67 % bottom of its 67–109 % range around max-Q, is the canonical case
+[SSME-Orient] — and late in a burn the vehicle throttles down
 to limit axial acceleration, either for structural reasons or for crew or
 payload g-limits, typically 3 g for crew and 4–6 g for structures. The engine
 requirement that falls out is a throttle *range*, a throttle *rate* (%/s), and
@@ -1279,7 +1281,7 @@ an engineer who brings SRR material to CDR has a programme in trouble. [J]
 
 | quantity | typical range | extremes and who sits there |
 |---|---|---|
-| gimbal angle, launch vehicle main engine | ±5° to ±10.5° | RS-25 gimbals ±10.5° in pitch and yaw; upper-stage engines often ±3–4° |
+| gimbal angle, launch vehicle main engine | ±4° to ±8° | the RD-253 gimbals 7.5° in a single plane and the RD-191 up to 8°; upper-stage engines often ±3–4° |
 | gimbal rate | 5–30 °/s | rate limits are set by the first bending mode and actuator power |
 | thrust tolerance, engine specification | ±2 % to ±3 % of nominal | tight tolerances cost acceptance-test rejections and buy residual margin |
 | Isp margin held at concept | 1–2 % | retired progressively as test evidence arrives |
