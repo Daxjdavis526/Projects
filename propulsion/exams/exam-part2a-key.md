@@ -482,12 +482,30 @@ mixture-ratio gradient across it. That is a mixing loss ($E_m$ falls, and with
 it $\eta_{c^*}$), and — because the deflection is a *fixed* geometric bias — an
 outer-row element deflected outward is a wall-streak mechanism.
 
-This result is not an accident of the numbers. At equal $\Delta p$ and equal
-$C_d$, $V \propto \rho^{-1/2}$ and $d \propto (\dot m/(\rho V))^{1/2}$, so
-$R_u = \mathrm{MR}\,(V_o/V_f)(d_o/d_f)^{... }$ reduces to a function of the
-mixture ratio and the density ratio only; at LOX/hydrocarbon mixture ratios the
-oxidiser **always** carries the excess momentum. That is why the O–F–O triplet
-is the naturally balanced arrangement and F–O–F is not.
+This result is not an accident of the numbers, and the general case is worth
+deriving in two lines. At equal $\Delta p$ and equal $C_d$ on both circuits,
+$V = C_d\sqrt{2\Delta p/\rho}$, so the **momentum flux is the same on both
+sides**:
+
+$$\rho V^2 = 2C_d^2\Delta p \quad\text{(independent of }\rho\text{)}
+\qquad\Longrightarrow\qquad R_u = \frac{d_o}{d_f}$$
+
+and since $d \propto (\dot m/\rho V)^{1/2} \propto \dot m^{1/2}\rho^{-1/4}$,
+
+$$\boxed{\;R_u = \sqrt{\mathrm{MR}}\left(\frac{\rho_f}{\rho_o}\right)^{1/4},
+\qquad \mathrm{TMR} = \mathrm{MR}\left(\frac{\rho_f}{\rho_o}\right)^{1/2}\;}$$
+
+Check: $\sqrt{3.45}\,(423/1141)^{1/4} = 1.857\times0.7803 = 1.449$ ✓ and
+$3.45\times(0.3707)^{1/2} = 2.101$ ✓. **At equal pressure drop the Rupe
+parameter depends on nothing but the mixture ratio and the density ratio**, and
+for every LOX/hydrocarbon pair ($\mathrm{MR} > 1$ and $\rho_o > \rho_f$, but
+with the mixture ratio winning because it enters as a square root against a
+fourth root) the oxidiser carries the excess momentum. That is why the O–F–O
+triplet is the naturally balanced arrangement for these propellants and F–O–F is
+not — and, as Module 07 WE3 notes, F–O–F was nevertheless chosen historically
+because a locally fuel-rich element is thermally forgiving and shields the
+central oxidiser jet from the wall. The momentum criterion is a design *input*,
+not a design *answer*.
 
 ### (c) The two fixes (2)
 

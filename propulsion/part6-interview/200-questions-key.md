@@ -2603,3 +2603,259 @@ fluid. 6 m/s is also on the low side for a throat channel — most designs run
 just evaluating it.
 **Follow-up:** "Raise the velocity to 20 m/s. What happens to $h$, and what
 happens to your pump discharge pressure?"
+
+### 131. [M11, M10, M18]
+The coolant bulk rise is an integral of the whole heat load, and it matches — so
+the total heat into the circuit is right and the coolant flow rate is right. The
+error is therefore local, and it is one of two things: the *distribution* of
+gas-side flux is wrong (the model spread the same total load differently, with
+too little at the throat), or the thermal resistance between the gas and the
+thermocouple is wrong — a thicker deposit, a coating, a bond line, or a
+thermocouple installed at a different depth than the model assumes. [F][J] It is
+almost never the coolant-side correlation, because that would move the bulk rise
+too. To prove which: first, check the instrument — pull the thermocouple
+installation drawing, confirm the junction depth and the bonding, and compare
+two thermocouples at the same axial station but different depths, since the
+through-wall gradient is 100–200 K/mm here and a 0.2 mm depth error is a 30 K
+error. Second, get the flux profile rather than the total: segment the coolant
+circuit and measure the temperature rise station by station, which turns the
+circuit into a calorimeter and tells you directly whether the throat band is
+taking more of the load than modelled. Third, if the profile confirms it, the
+fix is in the Bartz $\sigma$ and $(A_t/A)^{0.9}$ representation of the throat
+region — which is exactly where the correlation is known to be weakest, because
+the boundary layer there is not in equilibrium.
+
+**Probing:** whether you use the matching bulk rise as the decisive clue rather
+than a reassurance.
+**Follow-up:** "Both thermocouples agree and the profile matches. Now what?"
+
+### 132. [M12, M14, M34]
+POGO is a closed loop between the vehicle's structure and its propulsion system.
+A longitudinal structural oscillation accelerates the propellant column in the
+feed line; that acceleration changes the pressure at the pump inlet; the pump
+converts an inlet pressure perturbation into a much larger discharge pressure
+and flow perturbation, because a pump's gain is high and its response includes
+the compliance of the cavitating region on the inducer; the changed flow
+changes chamber pressure and therefore thrust; and thrust is the force driving
+the structural mode. If the phase around that loop is right, it grows — and the
+famous cases (Titan II, Apollo Saturn V second stage) shook vehicles hard
+enough to be a crew-safety issue. [F][H][M34] The pump is essential because it
+is the amplifier: without it, a feed-line pressure fluctuation produces a
+proportional and small flow change, but a cavitating inducer has a large and
+strongly nonlinear transfer function between inlet pressure and discharge flow,
+plus a cavitation compliance that acts as a variable spring in the line. That
+compliance is also the cure. A POGO accumulator is a deliberate gas volume
+(helium-charged, or a trapped gas bubble) installed near the pump inlet: it
+adds a large, *known* compliance that detunes the feed-line resonance away from
+the structural mode and damps it, converting an uncontrolled variable into a
+designed one.
+
+**Probing:** whether you name the pump as the gain element and the accumulator
+as a detuning device rather than a shock absorber.
+**Follow-up:** "How would you show, before flight, that your accumulator is
+sized correctly?"
+
+### 133. [M12]
+$\omega = 36{,}000\times2\pi/60 = 3770$ rad/s.
+$N_s = \omega\sqrt{Q}/(g_0H)^{0.75} =
+3770\times\sqrt{0.070}/(9.80665\times22{,}000)^{0.75} = \mathbf{0.0996}$.
+$N_{ss} = \omega\sqrt{Q}/(g_0\,\mathrm{NPSH})^{0.75} =
+3770\times\sqrt{0.070}/(9.80665\times300)^{0.75} = \mathbf{2.50}$. [F]
+$N_s \approx 0.1$ is a very low specific speed — high head, low volumetric flow
+— which says this must be a multi-stage, narrow, high-head-coefficient
+centrifugal machine, and it is; a single stage at that specific speed would have
+absurdly narrow passages and poor efficiency. $N_{ss} \approx 2.5$ is very
+high: conventional industrial pumps live near 0.5–1.0 in these units, and
+getting to 2.5 means the inlet is running with substantial vapour present, which
+is only possible with a designed-to-cavitate inducer. Together the two numbers
+say exactly what a hydrogen turbopump is: a machine that survives at the
+cavitation limit at the inlet so the rest of it can spin fast enough to make the
+head in a few stages.
+
+**Probing:** whether each number produces a statement about hardware rather than
+a value.
+**Follow-up:** "Push the speed to 45,000 rpm. Which of the two numbers stops
+you?"
+
+### 134. [M12, M16]
+Because they are the only components that must transmit load or contain fluid
+while *moving*, in liquid oxygen, at speeds where the surface velocity is tens
+of metres per second, with no lubricant that survives the environment.
+Hydrocarbon lubricants are prohibited — they are the ignition source — so LOX
+bearings run either dry with a self-lubricating cage (PTFE-based transfer film)
+or lubricated by the LOX itself, which is a poor lubricant and a coolant that
+boils. The result is that surface distress, cage wear and eventual spalling are
+life-limiting, and any rub in an oxygen environment is a potential ignition
+event rather than merely wear. [F][M] Dynamic seals have the same problem plus
+a harder one: they must separate the oxidiser from the fuel-rich turbine gas
+across a shaft, which is why the interpropellant seal with its helium purge
+between two seal faces exists — a leak there is an engine loss, not a
+maintenance item. The architectural ways around it: separate the fuel and
+oxidiser turbopumps entirely so no shaft crosses between the two fluids (the
+RS-25 approach, at the cost of two complete machines); hydrostatic or
+hydrodynamic bearings fed with high-pressure propellant, which have no rolling
+contact to spall and can in principle be life-unlimited; magnetic bearings,
+which remove contact entirely but bring power, control and failure-mode
+complexity; and full-flow staged combustion, where both turbines run on gas
+that is *not* the wrong fluid for their pump, so the interpropellant seal
+problem largely disappears.
+
+**Probing:** whether you connect the seal argument to full-flow staged
+combustion without being prompted.
+**Follow-up:** "Hydrostatic bearings sound like a free win. Why is anyone still
+using rolling elements?"
+
+### 135. [M13, M32, M33]
+Gas generator: simplest, lowest development risk, well understood, and it loses
+2–3 % of $I_{sp}$ overboard plus it caps chamber pressure at the level a
+turbine exhaust dump can support — for a 2 MN booster stage where sea-level
+$I_{sp}$ is not the dominant term in the payload equation, that is a defensible
+trade and it is what Merlin does. Staged combustion: recovers the turbine flow,
+supports higher chamber pressure and therefore a smaller, lighter engine at the
+same thrust, at the cost of a hot-gas manifold, a preburner, an
+interpropellant seal, and a far harder start and throttle transient. Full-flow
+staged combustion: both propellants are fully gasified before the main
+injector, both turbines run cooler for the same power, there is no
+interpropellant seal, and the injector sees gas-gas mixing which is excellent
+for both efficiency and stability — but it is two preburners, two complete
+turbopump trains, and the hardest start sequence in the business. [M][J]
+For 2 MN sea level, methalox, 25 flights, I commit to **staged combustion**,
+fuel-rich, and I would seriously evaluate full-flow if the programme has the
+development budget. The deciding argument is the 25 flights: reusability makes
+engine dry mass and inspection burden matter far more than they do on an
+expendable, and it makes the gas generator's overboard dump — which is also a
+soot source and an inspection item — less attractive than its simplicity
+suggests. Methane makes the choice available in a way kerosene did not, because
+a fuel-rich methane preburner does not coke. Against my own answer: if the
+programme's real constraint is time-to-first-flight, gas generator is right and
+I would say so.
+
+**Probing:** whether you commit, and whether the deciding factor is the 25
+flights rather than $I_{sp}$.
+**Follow-up:** "Your development schedule just got cut in half. Do you change
+your answer?"
+
+### 136. [M13, M03]
+Mass-weighted: $I_{sp} = 0.968\times340 + 0.032\times130 =
+329.1 + 4.16 = \mathbf{333.3\ s}$. The penalty against a closed cycle
+delivering 340 s on all the flow is $\mathbf{6.7\ s}$, or **2.0 %**. [F] That
+is the standard gas-generator number and it is worth keeping in your head,
+because it is the entire performance case for staged combustion — and it is
+smaller than most people expect, which is why gas generators are still built.
+Two refinements a good answer adds: the comparison is not quite fair, because
+the closed cycle would also be running at a higher chamber pressure and thus a
+slightly higher $C_f$, so the real gap is larger than 2 %; and the turbine
+exhaust's 130 s is not free of design attention — programmes route it into the
+nozzle extension or use it for roll control precisely to recover some of that
+4.2 s.
+
+**Probing:** whether you do the mass-weighted average correctly and then say
+the comparison understates the gap.
+**Follow-up:** "How would you get some of that 6.7 s back without changing
+cycle?"
+
+### 137. [M13, M16, M35]
+Beyond chamber pressure, at least four. First, no interpropellant seal: each
+turbopump's turbine is driven by gas rich in the same propellant that pump
+handles, so no shaft ever separates fuel from oxidiser and the single most
+life-limiting sealing problem in a staged-combustion engine disappears — which
+is a reusability argument, not a performance one. Second, both turbines run
+cooler for the same shaft power, because the full propellant flow passes
+through them, so turbine inlet temperature can be low while the mass flow is
+high; cooler turbines mean longer life and cheaper materials. Third, the main
+injector receives gas on both sides, and gas–gas injection mixes faster and more
+uniformly than gas–liquid or liquid–liquid, which raises $\eta_{c^*}$ and
+generally improves high-frequency stability. Fourth, the engine is far more
+throttleable and controllable, because you have two independent preburners as
+control authorities rather than one. [M][J] Why it took until Raptor: it needs
+two preburners, two turbopump trains and a start sequence in which four flows
+must be brought up in the right order with no way to purge a mistake — a
+control problem that is much easier with modern actuation and closed-loop
+engine control than it was in 1975 — and it wants a propellant whose fuel-rich
+preburner does not coke, which methane provides and kerosene does not. Note
+that the RD-270 flew this cycle on paper in the 1960s and the US ran the
+Integrated Powerhead Demonstrator without an operational engine, so the concept
+is old; the execution is what was hard. [H] Carry the caveat that Raptor's
+published performance figures are **company claims** with no independent
+confirmation.
+
+**Probing:** whether the no-interpropellant-seal argument appears, and whether
+you flag Raptor's numbers as claims.
+**Follow-up:** "Which of those four advantages would you give up first to
+simplify the engine?"
+
+### 138. [M14, M12]
+Priming is the process of filling an initially empty (and, in a cryogenic
+system, warm) line with liquid. Water hammer is the pressure transient when
+that column is stopped or started rapidly:
+$\Delta p = \rho a \Delta v$ for a full stop, which for LOX at
+$\rho = 1140$ kg/m³, $a \approx 1000$ m/s and $\Delta v = 5$ m/s is about
+57 bar — far above any operating pressure in the line. [F] It is worst on the
+first fill because the line is warm, so the incoming cryogen flashes and the
+line contains a compressible two-phase mixture with slugs of liquid separated
+by vapour pockets; those slugs accelerate down an essentially empty pipe,
+reaching velocities the steady-state design never sees, and then arrive at a
+closed valve or a bend. Subsequent fills into an already-cold, liquid-full line
+are far gentler. The hardware that controls it: chilldown flow paths and bleed
+valves that let a controlled small flow cool the line before the main valve is
+asked to do anything; orifices or a slow-opening (two-position or ramped)
+main valve so $\Delta v$ is never established suddenly; accumulators or surge
+volumes to absorb the transient; and vent paths that stop vapour from being
+trapped and compressed ahead of the liquid front. Procedurally, the chilldown
+sequence with its temperature permissives is as much a part of the design as
+the valves. [M]
+
+**Probing:** whether you produce the Joukowsky estimate and then explain why the
+*first* fill is different.
+**Follow-up:** "How do you know the line is cold enough to open the main
+valve?"
+
+### 139. [M14, M12, M30]
+That is a regulator limit cycle — the regulator hunting against the compliance
+of the volume downstream of it. At very low flow demand the poppet is nearly on
+its seat, where the regulator's gain is highest and its effective damping
+lowest; the downstream volume acts as a capacitance and the poppet mass and
+spring as an inertia and stiffness, giving a low-frequency oscillator, and 6 Hz
+with 0.8 bar amplitude is exactly the signature. [F][M] It disappears when the
+downstream valve is fully open because the flow demand moves the poppet well
+off its seat into the part of its characteristic where gain is lower and the
+flow itself provides damping — the classic evidence that the problem is
+operating-point-dependent regulator stability, not a leak, a blockage or a
+thermal effect. The fixes are all standard: add a restriction (a fixed orifice)
+downstream so the regulator always sees a minimum flow, add damping to the
+poppet, change the sensing-line length or add a snubber, add a small
+accumulator to move the volume's resonance, or re-select a regulator whose
+stable flow range covers the chilldown demand. What you must not do is ignore
+it: an 0.8 bar oscillation on a helium regulator is a fatigue driver on
+everything downstream and it will be worse on the flight article, where the
+volumes differ.
+
+**Probing:** whether the "disappears when fully open" clue immediately means
+low-flow instability to you.
+**Follow-up:** "You add a bleed orifice. What did that cost you?"
+
+### 140. [M15]
+Rayleigh's criterion: an oscillation is driven when heat is added in phase with
+the pressure fluctuation — formally, when $\oint p'q'\,dt > 0$ over a cycle,
+integrated over the volume, and it grows if that driving exceeds the acoustic
+losses. [F][Culick68] Applied to an injector: the injector's job is to deliver
+propellant, and if its delivery rate responds to chamber pressure — because
+the injector $\Delta p$ is a small fraction of $p_c$, so a chamber pressure
+rise materially reduces the flow — then the heat release also responds to
+chamber pressure, with a phase set by the injection-to-combustion time lag. If
+that lag is close to half the acoustic period (or an odd multiple of it), the
+heat release peaks when pressure peaks and the criterion is satisfied: the
+combustion is pumping the acoustic mode. That is the entire content of the
+classical $n$–$\tau$ sensitive time-lag model, and it is why the two oldest
+rules in injector design are to keep the injector pressure drop high enough
+(15–25 % of $p_c$) that the feed is stiff against chamber oscillation, and to
+avoid a time lag that resonates with the chamber's modes. It is also why the
+cures split into two families: reduce the driving (injector $\Delta p$, element
+pattern, propellant temperature, atomisation) or increase the damping (baffles,
+acoustic cavities, particle loading in a solid).
+
+**Probing:** whether you state the criterion as an integral with a phase
+condition, not as "heat and pressure in phase" alone, and then connect it to
+injector $\Delta p$.
+**Follow-up:** "Injector $\Delta p$ of 20 % of $p_c$ is expensive in pump work.
+What would let you go lower safely?"

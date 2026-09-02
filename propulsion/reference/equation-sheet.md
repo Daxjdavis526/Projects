@@ -2398,3 +2398,604 @@ $$f_H = \frac{c}{2\pi}\sqrt{\frac{A}{V L_{eff}}}$$
 - **Tag** [F] · **Code** —
 
 ---
+
+## Module 15 — Combustion Instability
+
+### 15-3.1 — Linearised acoustic equations with heat release
+
+$$\bar\rho\, \frac{\partial \mathbf{u}'}{\partial t} + \nabla p' = 0$$
+
+- **Variables** — $p'$ pressure perturbation [Pa]; $\mathbf u'$ velocity perturbation [m/s]; $q'$ heat-release-rate perturbation per unit volume [W/m³]; $\bar p$ mean pressure [Pa]; $\bar\rho$ mean density [kg/m³]; $\gamma$ [—].
+- **Meaning** — the momentum equation for a fluid element, paired with a pressure equation in which compressing the gas *or* adding heat to it raises the pressure. Together they are the foundation of all acoustic instability analysis.
+- **Assumes** — small perturbations; zero mean flow; uniform mean state; no viscosity; no body force; ideal gas.
+- **Fails when** — the mean-flow Mach number is not small (a rocket chamber runs at Ma ≈ 0.2–0.35, so mean-flow terms are a real 20–35 % effect); the mean temperature varies strongly along the chamber, which it does.
+- **Tag** [F] [A] · **Code** —
+
+### 15-3.2 — Acoustic energy equation
+
+$$\frac{\partial}{\partial t}\underbrace{\left[\frac{p'^2}{2\gamma\bar p} + \frac{\bar\rho\,|\mathbf u'|^2}{2}\right]}_{E} + \nabla\!\cdot(p'\mathbf u') = \frac{\gamma-1}{\gamma\bar p}\,p'q'$$
+
+- **Variables** — $E$ acoustic energy density [J/m³], the sum of a compression term and a kinetic term; $p'\mathbf u'$ acoustic intensity [W/m²]; $q'$ [W/m³].
+- **Meaning** — acoustic energy in a volume changes only by flux through its boundary or by the source term $p'q'$.
+- **Assumes** — everything in 15-3.1.
+- **Fails when** — mean flow carries energy across the boundary. In a rocket the nozzle is exactly such a boundary and is the single largest damping term.
+- **Tag** [F] [A] · **Code** —
+
+### 15-3.3 — Rayleigh criterion, energy form
+
+$$\underbrace{\frac{\gamma-1}{\gamma\bar p}\oint_T\!\!\int_V p'\,q'\;dV\,dt}_{\text{driving}} = \underbrace{\oint_T\!\!\oint_S p'\,\mathbf u'\!\cdot\!\mathbf n\;dS\,dt + \mathcal{D}}_{\text{damping}}$$
+
+- **Variables** — $S$ chamber boundary [m²]; $\mathbf n$ outward normal [—]; $\mathcal D$ all dissipative losses the linear inviscid model omits (viscous and thermal boundary layers, droplet drag, relative-motion losses, mass and momentum exchange with the spray) [W].
+- **Meaning** — a mode grows if heat release does net positive work on it over a cycle faster than the boundaries and dissipation remove energy. Heat added *in phase with* pressure drives; heat added out of phase damps.
+- **Assumes** — periodic oscillation; linear acoustics; small mean flow.
+- **Fails when** — the amplitude is large enough that the acoustics are nonlinear (steepened, shock-like fronts are normal at limit-cycle amplitudes of 20–50 % of $p_c$). The energy balance still holds conceptually but $q'$ and $\mathcal D$ both become amplitude-dependent — which is the entire reason limit cycles exist.
+- **Tag** [F] · **Code** —
+
+### 15-3.4 — Chamber fill (stay) time
+
+$$\tau_c = \frac{V_c}{R T_c}\cdot\frac{c^*}{A_t} = \frac{L^*\,c^*}{R T_c} = \frac{L^*}{\Gamma^2\,c^*}$$
+
+- **Variables** — $\tau_c$ chamber fill time [s]; $L^* = V_c/A_t$ [m]; $c^*$ [m/s]; $R$ [J/(kg·K)]; $T_c$ [K]; $\Gamma$ Vandenkerckhove function [—]. The last form uses $c^* = \sqrt{RT_c}/\Gamma$, so $RT_c = (\Gamma c^*)^2$.
+- **Meaning** — the time constant with which chamber pressure responds to a flow imbalance: the RC time of the chamber treated as a capacitance drained through a fixed conductance.
+- **Assumes** — uniform chamber gas properties; choked throat; ideal gas; all injected mass instantly in the gas phase.
+- **Fails when** — a substantial fraction of the chamber volume holds liquid and unburned spray, exactly the case near the injector. $\tau_c$ is an *upper bound* on true gas residence time, typically by 10–30 % in a kerosene engine.
+- **Tag** [F] [A] · **Code** `residence_time(Vc, rho_c, mdot)`
+- **Alias** — 06-3.5, 07-3.6.
+
+### 15-3.5 — Chug feedback equation
+
+$$\tau_c\,\dot p'(t) + p'(t) + k\,p'(t-\tau) = 0$$
+
+- **Variables** — $k$ dimensionless injector feedback gain [—]; $\tau$ combustion time lag [s]; $\tau_c$ [s]; $p'$ [Pa].
+- **Meaning** — the chamber is a first-order lag closed by a delayed feedback whose strength is set by how soft the injector is.
+- **Assumes** — one lumped chamber mode (chug, not screech); a stiff feed system with no line inertance and no manifold compliance; a constant lag $\tau$ that does not respond to pressure; non-cavitating orifices.
+- **Fails when** — feed-line inertance is significant (it usually is, and it makes things worse); the orifices cavitate, so $\dot m$ is independent of $p_c$, $k \to 0$, and the mode disappears; $\tau$ responds to pressure — the Crocco generalisation, 15-3.10.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 07-3.7, identical with $t_s$ for $\tau_c$.
+
+### 15-3.6 — Chug stability criterion
+
+$$\text{stable if}\quad \frac{\Delta p_{inj}}{p_c} > \frac{1}{2\sqrt{1+(\omega\tau_c)^2}}$$
+
+- **Variables** — $\omega$ neutral-mode angular frequency [rad/s], from the transcendental phase condition; $\Delta p_{inj}$ [Pa]; $p_c$ [Pa]; $\tau_c$ [s].
+- **Meaning** — given a chamber capacitance and a combustion lag, there is a maximum injector softness the loop tolerates. This is the derivation of the 15–25 % injector-stiffness rule.
+- **Assumes** — as 15-3.5.
+- **Fails when** — the feed system contributes its own resonance, adding a second oscillator that can produce a *lower* critical gain at a different frequency — the usual reason a chamber that passes this check chugs anyway.
+- **Tag** [F] [E] · **Code** —
+- **Alias** — 07-3.8 gives the same result as $k_{crit}$.
+
+### 15-3.7 — Feed-line (inertance–compliance) resonance
+
+$$f_{feed} = \frac{1}{2\pi\sqrt{IC}}$$
+
+- **Variables** — $f_{feed}$ [Hz]; $I$ inertance [kg/m⁴] ($I = \rho\ell/A$); $C$ compliance [m⁵/N]; $\ell$ line length [m]; $A$ line flow area [m²].
+- **Meaning** — the fluid column in the feed line, sprung on whatever compressibility exists downstream, is a mass–spring resonator; if its frequency is near the chug frequency the two lock together and the margin from 15-3.6 evaporates.
+- **Assumes** — lumped line; a single dominant compliance.
+- **Fails when** — the line is long enough that distributed (organ-pipe) behaviour matters, i.e. $\ell$ exceeds about a tenth of an acoustic wavelength in the liquid.
+- **Tag** [F] · **Code** —
+
+### 15-3.8 — Entropy-wave (convective-acoustic) period
+
+$$T_{ent} = \frac{L_{cyl}}{\bar u} + \frac{L_{cyl}}{c-\bar u}$$
+
+- **Variables** — $T_{ent}$ [s]; $L_{cyl}$ chamber length [m]; $\bar u$ mean chamber gas velocity [m/s]; $c$ speed of sound [m/s].
+- **Meaning** — the period of the convective-acoustic loop that couples the injector to the nozzle: a hot spot convects down, converts to pressure at the nozzle, and the wave returns upstream.
+- **Assumes** — a compact nozzle that converts entropy to pressure at one station; negligible diffusion of the entropy spot; uniform $\bar u$.
+- **Fails when** — the spot diffuses or is destroyed by turbulence over the chamber length, which it partly does — why entropy modes are weak in long chambers.
+- **Tag** [F] [A] · **Code** —
+
+### 15-3.9 — Chamber acoustic eigenfrequencies
+
+$$f_{mnq} = \frac{c}{2\pi}\sqrt{\left(\frac{\alpha_{mn}}{R_c}\right)^{\!2} + \left(\frac{q\pi}{L_{cyl}}\right)^{\!2}}$$
+
+- **Variables** — $m$ azimuthal (tangential) order, number of nodal diameters [—]; $n$ radial order [—]; $q$ longitudinal order [—]; $\alpha_{mn}$ the $n$-th non-trivial root of $J_m'(x)=0$ [—]; $R_c$ chamber radius [m]; $L_{cyl}$ barrel length [m]; $c$ [m/s].
+- **Meaning** — the natural resonant frequencies of the gas column; 1T ($m{=}1,n{=}1,q{=}0$) is almost always the dangerous one.
+- **Assumes** — rigid walls; uniform gas; no mean flow; a hard-walled closed end at the nozzle.
+- **Fails when** — (i) the nozzle end is not rigid — it is a partially transmitting boundary that radiates energy away, shifting frequencies down a few percent and providing dominant damping; (ii) the chamber has a strong axial temperature gradient (the first 20 % is far cooler), lowering effective $c$ near the face; (iii) the chamber is not a plain cylinder. Expect the measured mode within 10–20 %.
+- **Tag** [F] [A] · **Code** `a_sound(gamma, R, T)`
+- **Alias** — 06-3.15 and 18-3.14 are the $m{=}1$, $n{=}1$, $q{=}0$ special case, $f_{1T} = 1.8412c/(\pi D_c)$.
+
+### 15-3.10 — Crocco $n$–$\tau$ combustion response
+
+$$\frac{\dot m_b'(t)}{\bar{\dot m}_b} = n\left[\frac{p'(t)}{\bar p} - \frac{p'(t-\tau)}{\bar p}\right]$$
+
+- **Variables** — $\dot m_b'$ perturbation of the rate at which propellant is converted to hot gas [kg/s]; $n$ **interaction index**, the pressure sensitivity of the rate-controlling process [—]; $\tau$ **sensitive time lag** [s].
+- **Meaning** — combustion responds to the *difference* between pressure now and pressure one lag ago; this pure differencing operator is what produces the strong frequency dependence.
+- **Assumes** — a single lag common to all elements; a single sensitivity exponent; small perturbations; no velocity coupling.
+- **Fails when** — velocity coupling matters (transverse velocity shredding a spray is a first-order effect in real transverse instability and is *not* in this model); there is a spread of lags across the face (there always is, and it is stabilising); at limit-cycle amplitudes where the response saturates.
+- **Tag** [E] [A] · **Code** —
+
+### 15-3.11 — Neutral stability boundary
+
+$$\omega\tau_c = \cot\!\left(\frac{\omega\tau}{2}\right), \qquad n_{crit} = \frac{1}{1-\cos\omega\tau} = \frac{1}{2\sin^2(\omega\tau/2)}$$
+
+- **Variables** — $\omega$ [rad/s]; $\tau_c$ [s]; $\tau$ [s]; $n_{crit}$ [—].
+- **Meaning** — solve the first for $\omega$ given $\tau$ and $\tau_c$, then evaluate the second; if the propellant's actual $n$ exceeds $n_{crit}$ the chamber is linearly unstable at that frequency. This generates the classic Crocco stability map.
+- **Assumes** — a lumped chamber, valid only for modes whose wavelength exceeds the chamber dimensions (chug and $L^*$ modes, not acoustics); constant $n$ and $\tau$.
+- **Fails when** — applied to an acoustic mode, where the correct treatment distributes the response over the mode shape and adds nozzle and wall damping.
+- **Tag** [F] [A] · **Code** —
+
+### 15-3.12 — Baffled lowest transverse mode
+
+$$f_{1T}^{baffled} = \frac{\alpha_{N/2,1}\;c}{\pi D_c}$$
+
+- **Variables** — $N$ number of baffle compartments [—]; $\alpha_{\nu,1}$ first non-trivial root of $J_\nu'(x)=0$ for possibly non-integer order $\nu = N/2$ [—], well approximated by $\alpha_{\nu,1} \approx \nu + 0.8086\nu^{1/3} + 0.0725\nu^{-1/3} - 0.0510\nu^{-1}$ (0.1 % for $\nu \ge 1$); $c$ [m/s]; $D_c$ [m].
+- **Meaning** — radial blades divide the chamber into sectors that cannot support $m=1$; the lowest admissible order becomes $m = N/2$, raising the lowest transverse mode by the factor $\alpha_{N/2,1}/1.8412$.
+- **Assumes** — blades running the full radius, acoustically rigid, extending far enough axially to cover the region where the mode is driven.
+- **Fails when** — the blades are too short: beyond the blade tips the full unbaffled mode reappears, so a short baffle simply moves the problem downstream.
+- **Tag** [F] [A] · **Code** —
+
+### 15-3.13 — Quarter-wave cavity tuning
+
+$$f_{cav} = \frac{c_{cav}}{4\,L_{eff}}, \qquad L_{eff} = L_{cav} + \Delta L$$
+
+- **Variables** — $c_{cav}$ speed of sound in the *cavity* gas [m/s]; $L_{cav}$ geometric depth [m]; $\Delta L$ end correction, ≈ 0.4–0.8 times the aperture's characteristic dimension [m].
+- **Meaning** — at this frequency the aperture sees a velocity antinode and the absorber is maximally effective.
+- **Assumes** — plane waves in the tube; uniform cavity gas; an aperture small compared with the wavelength.
+- **Fails when** — the cavity gas temperature is not what you assumed — and it never is. Cavity gas temperature is the dominant uncertainty in acoustic-cavity design.
+- **Tag** [F] [J] · **Code** —
+
+### 15-3.14 — Helmholtz absorber tuning
+
+$$f_{H} = \frac{c_{cav}}{2\pi}\sqrt{\frac{A_n}{V\,L_{eff}}}$$
+
+- **Variables** — $V$ cavity volume [m³]; $A_n$ total neck area [m²]; $L_{eff}$ neck length plus end corrections [m]; $c_{cav}$ [m/s].
+- **Meaning** — the gas plug in the neck is the mass, the gas in the cavity the spring.
+- **Assumes** — $V$ small compared with $(\lambda/2\pi)^3$ so cavity pressure is uniform; linear amplitudes.
+- **Fails when** — the acoustic particle velocity in the neck becomes large enough for jetting and separation — normal at instability amplitudes, and it *increases* damping while lowering the effective tuning. Nonlinear absorbers are more forgiving than linear theory suggests.
+- **Tag** [F] · **Code** —
+- **Alias** — 14-3.18, 18-3.13 (same Helmholtz formula for instrumentation cavities).
+
+### 15-3.15 — Damping rate from a decay trace
+
+$$\alpha_d = \frac{\ln(\hat p_0/\hat p)}{t}, \qquad \text{“10 \% in } t_{10}\text{”} \Rightarrow \alpha_d = \frac{\ln 10}{t_{10}} = \frac{2.303}{t_{10}}$$
+
+- **Variables** — $\alpha_d$ damping rate [1/s]; $\hat p$ envelope amplitude [Pa]; $t_{10}$ time to decay to 10 % of peak [s].
+- **Meaning** — converts a stability-rating acceptance criterion ("recovers within 40 ms of a bomb") into the quantity an analysis produces.
+- **Assumes** — a single mode decaying exponentially. Read the envelope of the band-pass-filtered dynamic pressure, not the raw trace.
+- **Fails when** — two modes with different decay rates are present (the envelope has a knee); the response is a decaying *limit cycle*, which decays much more slowly than exponentially near the end.
+- **Tag** [E] [J] · **Code** —
+
+---
+
+## Module 16 — Structures and Materials
+
+### 16-3.1 — Through-wall temperature drop
+
+$$\Delta T_w = T_{wg} - T_{wc} = \frac{q''\, t}{k}$$
+
+- **Variables** — $\Delta T_w$ [K]; $q''$ gas-side heat flux [W/m²]; $t$ wall thickness [m]; $k$ thermal conductivity [W/(m·K)].
+- **Meaning** — how much temperature difference the wall must carry to pass the flux; the input to every thermal-stress calculation.
+- **Assumes** — 1-D conduction; constant $k$; no internal heat generation; thin wall relative to radius.
+- **Fails when** — the land between channels is comparable in width to its thickness (2-D fin effects, 10–30 % errors); $k$ varies strongly across the gradient; in a coating where contact resistance dominates.
+- **Tag** [F] · **Code** `wall_dT(q, t, k)`
+- **Alias** — 10-3.7, 11-3.5.
+
+### 16-3.2 — Thermal stress in a restrained plate
+
+$$\sigma_{th} = \frac{E\,\alpha\,\Delta T_w}{2\,(1-\nu)}$$
+
+- **Variables** — $\sigma_{th}$ [Pa]; $E$ modulus at the local temperature [Pa]; $\alpha$ CTE [1/K]; $\Delta T_w$ [K]; $\nu$ [—].
+- **Meaning** — the in-plane stress produced purely by the temperature gradient in a fully restrained flat plate.
+- **Assumes** — full biaxial in-plane restraint; linear gradient; elastic response; temperature-independent properties.
+- **Fails when** — the computed stress exceeds yield, which for a copper liner it always does. It is then not a stress but an *indicator* that the wall is cycling plastically, and a strain-based life method is required.
+- **Tag** [F] [A] · **Code** `thermal_stress_hoop(E, alpha, dT, nu)`
+- **Alias** — 10-3.8, 11-3.14.
+
+### 16-3.3 — Thermal-stress figure of merit
+
+$$M_{ts} = \frac{k\,F_{ty}\,(1-\nu)}{E\,\alpha}\qquad [\mathrm{W/m}]$$
+
+- **Variables** — $M_{ts}$ [W/m]; $k$ [W/(m·K)]; $F_{ty}$ tensile yield strength [Pa]; $\nu$ [—]; $E$ [Pa]; $\alpha$ [1/K].
+- **Meaning** — proportional to the heat flux a restrained wall of unit thickness can carry before first yield; a single number that ranks materials for cooled-wall service and explains why copper alloys dominate.
+- **Assumes** — yield-limited failure; elastic up to yield; restrained plate.
+- **Fails when** — ranked at room temperature for a wall that runs at 800 K (evaluate it hot); temperature capability rather than thermal stress is the limit (2219 aluminium scores brilliantly and melts at 900 K); the failure mode is oxidation, blanching or creep rather than yield.
+- **Tag** [E] [J] · **Code** —
+
+### 16-3.4 — Larson–Miller parameter
+
+$$P_{LM} = T\left(C + \log_{10} t_r\right)$$
+
+- **Variables** — $T$ absolute temperature [K]; $t_r$ time to rupture [h]; $C$ material constant [—], conventionally 20 for most superalloys; $P_{LM}$ [K], almost always quoted divided by 1000.
+- **Meaning** — rupture life at a given stress depends on temperature and time only through this combination, so one master curve of stress versus $P_{LM}$ replaces a family of stress–time curves.
+- **Assumes** — a single dominant creep mechanism over the fitted range; $C$ appropriate to the alloy (values 15–25 are used; the fitted $C$ and the data must come from the same source).
+- **Fails when** — extrapolated far outside the tested range. The classic error is extrapolating past a microstructural instability — for Inconel 718, γ″ overaging above about 925 K. The equation cannot know the alloy has changed.
+- **Tag** [E] · **Code** —
+
+### 16-3.5 — Basquin high-cycle fatigue law
+
+$$\sigma_a = \sigma'_f \,(2N_f)^{b}$$
+
+- **Variables** — $\sigma_a$ stress amplitude [Pa]; $\sigma'_f$ fatigue strength coefficient [Pa], roughly $F_{tu}$ for many alloys; $2N_f$ reversals to failure [—]; $b$ Basquin exponent [—], typically −0.05 to −0.12.
+- **Meaning** — the elastic branch of the life curve.
+- **Assumes** — fully reversed loading; no mean stress; no environment effect; smooth specimen.
+- **Fails when** — a mean stress is present (use Goodman or Morrow); there is a notch (use $K_f$); a hydrogen environment, which can remove the endurance limit entirely.
+- **Tag** [E] · **Code** —
+
+### 16-3.6 — Coffin–Manson low-cycle fatigue law
+
+$$\frac{\Delta\varepsilon_p}{2} = \varepsilon'_f\,(2N_f)^{c}$$
+
+- **Variables** — $\Delta\varepsilon_p$ plastic strain range [—]; $\varepsilon'_f$ fatigue ductility coefficient [—], of the order of true fracture ductility; $c$ [—], typically −0.5 to −0.7.
+- **Meaning** — in the plastic regime, life is bought with ductility, not with strength. This is why annealed high-conductivity copper outlives a stronger, less ductile alloy in a regen liner.
+- **Assumes** — isothermal; stable hysteresis loop; no environmental interaction; no creep hold time.
+- **Fails when** — the cycle has a hold at temperature (creep–fatigue interaction shortens life, sometimes by 10×); the temperature varies within the cycle (thermomechanical fatigue, worse still); oxidation attacks the crack tip.
+- **Tag** [E] · **Code** —
+
+### 16-3.7 — Combined strain–life curve
+
+$$\frac{\Delta\varepsilon_t}{2} = \frac{\sigma'_f}{E}\,(2N_f)^{b} + \varepsilon'_f\,(2N_f)^{c}$$
+
+- **Variables** — as 16-3.5 and 16-3.6; $\Delta\varepsilon_t$ total (elastic plus plastic) strain range per cycle [—]; $E$ [Pa].
+- **Meaning** — one curve from $10^0$ to $10^8$ cycles, plastic term dominating on the left and elastic on the right; they cross at the *transition life*, a few thousand reversals for copper alloys.
+- **Assumes** — the four constants come from tests at the operating temperature, in the operating environment.
+- **Fails when** — they do not. Hydrogen, oxygen, hold time and mean stress each move the curve, and the constants are not transferable between temperatures. Solve for $N_f$ by iteration; there is no closed form.
+- **Tag** [E] · **Code** —
+
+### 16-3.8 — Stress intensity factor
+
+$$K = Y\,\sigma\,\sqrt{\pi a}$$
+
+- **Variables** — $K$ [Pa·√m]; $Y$ geometry factor of order 1 [—] (1.12 for a surface flaw in a plate); $\sigma$ remote stress [Pa]; $a$ crack depth [m].
+- **Meaning** — the amplitude of the crack-tip stress field; the crack runs when $K$ reaches $K_{Ic}$. The basis of all fracture control on pressure vessels.
+- **Assumes** — linear-elastic behaviour; small-scale yielding (plastic zone small compared with $a$ and with the ligament); plane strain.
+- **Fails when** — the material is very tough and thin (use $J$ or CTOD); the plastic zone is large.
+- **Tag** [F] · **Code** —
+
+### 16-3.9 — Paris crack-growth law
+
+$$\frac{da}{dN} = C\,(\Delta K)^{m}$$
+
+- **Variables** — $da/dN$ [m/cycle]; $\Delta K$ stress-intensity range [Pa·√m]; $C$, $m$ material constants [—]; $m \approx 3$ for steels and nickel alloys.
+- **Meaning** — the middle, log-linear part of the crack-growth curve; integrating it gives safe-life inspection intervals.
+- **Assumes** — constant amplitude; $\Delta K$ above threshold and below the fast-fracture regime; no environmental acceleration.
+- **Fails when** — spectacularly, in hydrogen: gaseous hydrogen can raise $da/dN$ by one to two orders of magnitude in susceptible alloys at the same $\Delta K$.
+- **Tag** [E] · **Code** —
+
+### 16-3.10 — Thermal strain range per cycle
+
+$$\Delta\varepsilon_{grad} = \frac{\alpha}{2(1-\nu)}\cdot\frac{q''\,t}{k}$$
+
+- **Variables** — as 16-3.1 and 16-3.2; $\Delta\varepsilon_{grad}$ [—].
+- **Meaning** — the strain range delivered per cycle by the through-thickness gradient alone in a fully restrained wall. The *strain* is kinematic even though the stress is not elastic, which is why the strain form survives yielding and the stress form does not.
+- **Assumes** — linear gradient; full restraint; elastic-equivalent kinematics.
+- **Fails when** — used as a complete answer. It omits the mean-temperature term, pressure-induced strain, the channel-geometry stress concentration, and any ratcheting. A real liner's total strain range is typically 1.5–3× this, and comes from a nonlinear thermal-structural FE analysis.
+- **Tag** [A] [J] · **Code** —
+
+---
+
+## Module 17 — Manufacturing
+
+### 17-3.1 — Cutting-tool deflection
+
+$$\delta_{tip} = \frac{F_c L^3}{3EI},\qquad I = \frac{\pi d^4}{64}$$
+
+- **Variables** — $\delta_{tip}$ tool tip deflection [m]; $F_c$ lateral cutting force [N]; $L$ unsupported tool length [m]; $E$ tool Young's modulus [Pa], ≈ 600 GPa for tungsten carbide; $I$ second moment of area [m⁴]; $d$ tool diameter [m].
+- **Meaning** — the cutter bends away from the cut, so the machined wall is thicker than programmed and tapers with depth. The $L^3$ and $d^4$ dependences are why deep, narrow cooling channels are hard.
+- **Assumes** — a solid cylindrical cantilever with a point load; elastic response; rigid holder.
+- **Fails when** — the tool is fluted (real $I$ is 60–80 % of the solid value); holder or spindle compliance dominates; chatter makes the problem dynamic rather than static.
+- **Tag** [F] [A] · **Code** —
+
+### 17-3.2 — Orifice tolerance propagation
+
+$$\frac{\delta \dot m}{\dot m} = \frac{\delta C_d}{C_d} + 2\frac{\delta d}{d}$$
+
+- **Variables** — $\dot m$ orifice mass flow [kg/s]; $C_d$ [—]; $d$ orifice diameter [m].
+- **Meaning** — a diameter error is *doubled* in the flow error, and the edge-condition error enters directly. This is why injector orifice tolerances are so tight.
+- **Assumes** — incompressible single-phase flow at fixed $\Delta p$ and $\rho$; $C_d$ independent of $d$ over the tolerance band.
+- **Fails when** — the orifice cavitates or hydraulically flips (then $C_d$ jumps discontinuously); the flow is two-phase.
+- **Tag** [F] · **Code** `rel_unc_power(rel, exponent)`, `rel_unc_product(*rel)`
+
+### 17-3.3 — Capillary driving pressure in a braze joint
+
+$$\Delta p_{cap} = \frac{2\sigma\cos\theta}{\delta}$$
+
+- **Variables** — $\Delta p_{cap}$ [Pa]; $\sigma$ liquid filler surface tension [N/m], ~1–1.9 N/m for molten braze alloys; $\theta$ contact angle of the filler on the base metal [rad]; $\delta$ joint clearance [m].
+- **Meaning** — the narrower the gap, the harder the filler is pulled in; this is why braze clearances are specified in tens of microns.
+- **Assumes** — parallel surfaces; clean and wettable; filler fully molten and free of oxide skin.
+- **Fails when** — $\theta > 90°$ (no wetting: the filler balls up and does not enter at all); the gap is so small that viscous resistance stalls the flow; the joint is not vented and trapped gas blocks the fill.
+- **Tag** [F] [E] · **Code** —
+
+### 17-3.4 — Faraday electroforming law
+
+$$m = \frac{M\, I\, t\, \eta_c}{n F},\qquad
+s = \frac{M\, j\, t\, \eta_c}{n F \rho}$$
+
+- **Variables** — $m$ deposited mass [kg]; $M$ molar mass of the deposited metal [kg/mol], 0.05869 for Ni; $I$ current [A]; $j$ current density [A/m²]; $t$ time [s]; $\eta_c$ cathode current efficiency [—], ~0.95–1.0 for nickel sulphamate; $n$ electrons per ion [—], 2 for Ni²⁺; $F$ Faraday constant 96 485 [C/mol]; $\rho$ deposit density [kg/m³], 8900 for Ni; $s$ thickness [m].
+- **Meaning** — deposition rate is set by current density alone; this is how tubular-wall chamber closeouts and electroformed nickel jackets are built.
+- **Assumes** — uniform current distribution; no side reactions; steady bath chemistry.
+- **Fails when** — the current distribution is non-uniform (it always is — throwing power); hydrogen evolution takes part of the current; mass transport of Ni²⁺ to the surface limits the rate.
+- **Tag** [F] · **Code** —
+
+### 17-3.5 — Shear-forming sine law
+
+$$t_f = t_0 \sin\alpha$$
+
+- **Variables** — $t_f$ formed wall thickness [m]; $t_0$ blank thickness [m]; $\alpha$ angle between the mandrel wall and the plane of the original blank [rad].
+- **Meaning** — in single-pass shear forming the wall thins exactly as the sine of that angle, so a mandrel wall at 30° halves the wall thickness. It lets you compute the blank from the finished part.
+- **Assumes** — single-pass shear spinning of a flat blank over a conical mandrel; no circumferential strain; no thinning from the roller path itself.
+- **Fails when** — multiple passes redistribute material; the part is not conical; the material's formability is exceeded and it tears or wrinkles.
+- **Tag** [F] [A] · **Code** —
+
+### 17-3.6 — Volumetric energy density (laser powder bed fusion)
+
+$$E_v = \frac{P_\ell}{v_s\, h_s\, t_\ell}$$
+
+- **Variables** — $E_v$ [J/m³]; $P_\ell$ laser power [W]; $v_s$ scan speed [m/s]; $h_s$ hatch spacing [m]; $t_\ell$ layer thickness [m].
+- **Meaning** — energy deposited per unit volume of powder processed; the single most useful lumped process parameter for LPBF.
+- **Assumes** — constant absorptivity and a stable melt pool; ignores beam diameter, spot shape, scan strategy, preheat and gas flow, all of which matter.
+- **Fails when** — comparing different machines or alloys. $E_v$ is not transferable, and two parameter sets with the same $E_v$ can give completely different microstructures.
+- **Tag** [E] [F] · **Code** —
+
+### 17-3.7 — Colebrook friction factor for AM channel roughness
+
+$$\frac{1}{\sqrt{f}} = -2\log_{10}\!\left(\frac{k_s/D_h}{3.7} + \frac{2.51}{\mathrm{Re}\sqrt{f}}\right)$$
+
+- **Variables** — $f$ Darcy friction factor [—]; $k_s$ equivalent sand-grain roughness [m]; $D_h$ [m]; Re [—].
+- **Meaning** — implicit relation for turbulent friction in a rough pipe, spanning smooth to fully rough. As-built AM channels have $k_s$ of 20–50 µm, which in a 1 mm channel is a fully-rough regime.
+- **Assumes** — fully developed turbulent flow in a circular duct with uniform sand-grain roughness.
+- **Fails when** — the flow is developing (the entrance region is much of a rocket channel); the duct is a high-aspect-ratio rectangle (use $D_h$ and accept a few percent); curvature induces secondary flow; the coolant is supercritical with strong property variation — all true in a real regenerative channel.
+- **Tag** [E] [A] · **Code** —
+- **Alias** — 11-3.11 (Haaland explicit form), 12-3.7.
+
+### 17-3.8 — Rough-wall heat-transfer enhancement
+
+$$\frac{\mathrm{Nu}}{\mathrm{Nu}_{smooth}} = \left(\frac{f}{f_{smooth}}\right)^{n},
+\qquad n = 0.68\,\mathrm{Pr}^{0.215}$$
+
+- **Variables** — Nu rough-wall Nusselt number [—]; $\mathrm{Nu}_{smooth}$ smooth-wall value from Dittus–Boelter or Gnielinski [—]; $f$, $f_{smooth}$ friction factors [—]; Pr [—].
+- **Meaning** — heat transfer rises with roughness, but sublinearly in $f$ once form drag dominates: AM roughness buys some cooling and costs more pressure drop.
+- **Assumes** — $f/f_{smooth} \le 3$; beyond that the enhancement saturates.
+- **Fails when** — the roughness is not sand-grain-like (AM roughness is irregular and partly re-entrant); high-aspect-ratio channels where only part of the perimeter is rough.
+- **Tag** [E] [J] · **Code** —
+
+---
+
+## Module 18 — Engine Testing and Instrumentation
+
+### 18-3.1 — Life margin
+
+$$t_{qual} \ge k_{life}\, t_{flight}$$
+
+- **Variables** — $t$ accumulated operating time or cycles [s or cycles]; $k_{life}$ life factor [—], 1.2 to 4 depending on agency and criticality.
+- **Meaning** — the demonstrated-life rule that governs how much ground testing an engine must accumulate.
+- **Assumes** — damage accumulates monotonically with the demonstrated variable (time, cycles, thermal excursions).
+- **Fails when** — the damage mechanism is not the one you accelerated. A coking limit is not demonstrated by a cryogenic cycle count, and LCF life demonstrated on 100 s firings tells you little about a 480 s firing whose wall reaches a different steady temperature.
+- **Tag** [J] · **Code** —
+
+### 18-3.2 — Proof and burst pressure factors
+
+$$p_{proof} = k_p\,\mathrm{MEOP}, \qquad p_{burst} \ge k_b\,\mathrm{MEOP}$$
+
+- **Variables** — $p_{proof}$, $p_{burst}$ [Pa]; $k_p$, $k_b$ [—]. Typical metallic values $k_p \approx 1.1$–1.5, $k_b \approx 1.5$–2.0; exact numbers are set by the governing standard and *have changed between revisions*, so quote the revision.
+- **Meaning** — proof pressure produces a stress below yield in the intended design and above yield only in a local defect, so a defective part deforms or leaks visibly while a good one is unaffected.
+- **Assumes** — that stress relationship holds.
+- **Fails when** — the flaw is a fatigue-critical crack too small to grow at proof pressure. Proof testing screens gross defects and is not a substitute for fracture control.
+- **Tag** [J] · **Code** —
+- **Alias** — 14-3.11 relates MEOP to MDP through relief-device tolerance.
+
+### 18-3.3 — Stored energy of a pressurised gas volume
+
+$$E = \frac{p V}{\gamma - 1}\left[1 - \left(\frac{p_a}{p}\right)^{(\gamma-1)/\gamma}\right]$$
+
+- **Variables** — $p$ vessel pressure [Pa]; $V$ internal volume [m³]; $\gamma$ [—]; $p_a$ ambient [Pa]; $E$ [J].
+- **Meaning** — the hazard number for a pneumatic system. A 50 L bottle at 30 MPa holds $E \approx 3.7$ MJ ≈ 0.8 kg TNT equivalent (1 kg TNT ≈ 4.6 MJ); the same 50 L of *water* at 30 MPa holds under 20 kJ. This is the whole argument for hydrostatic rather than pneumatic proof testing.
+- **Assumes** — ideal gas; isentropic; instantaneous release; no fragment kinetic energy accounted.
+- **Fails when** — used as an upper bound in the direction that matters: fragments carry additional energy and the real hazard is fragment throw, not overpressure.
+- **Tag** [F] [A] · **Code** —
+
+### 18-3.4 — Discharge coefficient from cold flow
+
+$$C_d = \frac{\dot m}{A\sqrt{2\rho\,\Delta p}}$$
+
+- **Variables** — $\dot m$ [kg/s]; $A$ geometric orifice area [m²]; $\rho$ liquid density [kg/m³]; $\Delta p$ static pressure drop across the element [Pa].
+- **Meaning** — 07-3.1 rearranged as the measurement that actually produces $C_d$.
+- **Assumes** — incompressible, single-phase, steady flow; $\Delta p$ measured manifold-static to receiver-static.
+- **Fails when** — the orifice cavitates (then $C_d \approx 0.61\sqrt{K}$ with $K$ the cavitation number) or hydraulically flips, at which point $C_d$ drops discontinuously and no smooth correlation applies.
+- **Tag** [F] · **Code** `orifice_mdot(Cd, A, rho, dp)` inverted
+
+### 18-3.5 — Cold-flow simulant similarity
+
+$$V_{sim} = V_{prop}\sqrt{\frac{\rho_{prop}\sigma_{sim}}{\rho_{sim}\sigma_{prop}}}\ \ (\text{match We}),
+\qquad
+\frac{\nu_{sim}}{\nu_{prop}} = \frac{V_{sim}}{V_{prop}}\ \ (\text{match Re})$$
+
+- **Variables** — $\mathrm{We} = \rho V^2 d/\sigma$; $\mathrm{Re} = \rho V d/\mu$; $\nu = \mu/\rho$ kinematic viscosity [m²/s]; $V$ [m/s]; $\sigma$ [N/m]; $\rho$ [kg/m³]; $d$ fixed by geometry [m].
+- **Meaning** — two similarity conditions, one free variable. You cannot match both.
+- **Assumes** — geometric similarity; isothermal, single-phase injection.
+- **Fails when** — always, in the sense above; you choose which to match. Standard practice is to match We (breakup is surface-tension-limited), accept the Re mismatch, then bound the error by testing at two Re values.
+- **Tag** [A] [J] · **Code** `weber(...)`, `reynolds(...)`
+
+### 18-3.6 — Slug calorimeter
+
+$$q'' = \rho c_p \delta \frac{dT}{dt}$$
+
+- **Variables** — $q''$ local heat flux [W/m²]; $\rho$ [kg/m³], $c_p$ [J/(kg·K)], $\delta$ [m] density, specific heat and thickness of the isolated slug; $dT/dt$ measured [K/s].
+- **Meaning** — the standard direct measurement of local wall heat flux in a hot fire.
+- **Assumes** — the slug is thermally isolated from its surroundings (a machined gap or low-conductivity mount); lumped ($Bi \ll 0.1$); the measurement taken early enough that the back face is still cold.
+- **Fails when** — lateral conduction is not blocked; the slug's temperature rise changes the gas-side driving potential $(T_{aw}-T_{wg})$ appreciably — use the early, nearly linear part of the trace.
+- **Tag** [F] · **Code** —
+
+### 18-3.7 — Measured characteristic velocity
+
+$$c^*_{meas} = \frac{p_{c,ns} A_t}{\dot m}$$
+
+- **Variables** — $p_{c,ns}$ nozzle-entrance stagnation pressure [Pa]; $A_t$ **hot** throat area [m²]; $\dot m = \dot m_o + \dot m_f$ [kg/s].
+- **Meaning** — the primary reduced quantity from every hot fire.
+- **Assumes** — a choked throat (always true above a few bar); 1-D flow at the throat; $\dot m$ is the *total* flow through the throat — excluding any film coolant or turbine exhaust that bypasses the chamber, excluding nothing that enters it.
+- **Fails when** — the wrong pressure station is used; the error is silent and several percent.
+- **Tag** [F] · **Code** `c_star(...)` for the ideal comparison
+- **Alias** — 01-3.18, 06-3.14.
+
+### 18-3.8 — Measured thrust coefficient and specific impulse
+
+$$C_{f,meas} = \frac{F}{p_{c,ns} A_t}, \qquad
+I_{sp,meas} = \frac{F}{\dot m g_0} = \frac{c^*_{meas}\,C_{f,meas}}{g_0}$$
+
+- **Variables** — $F$ measured axial thrust at the stand's ambient pressure [N]; other symbols as 18-3.7.
+- **Meaning** — the nozzle half of the reduction, and the identity that ties the two together.
+- **Assumes** — $F$ is corrected for tare and for the momentum and pressure reactions of every line crossing the thrust-measuring boundary.
+- **Fails when** — the reported $F$ is a raw load-cell reading. Uncorrected line reactions are a percent-level error that looks like real performance.
+- **Tag** [F] · **Code** `isp_from_c(c_eff)`, `c_eff(c_star_val, Cf_val)`
+
+### 18-3.9 — Efficiencies against a stated reference
+
+$$\eta_{c^*} = \frac{c^*_{meas}}{c^*_{ideal}}, \qquad \eta_{C_f} = \frac{C_{f,meas}}{C_{f,ideal}}$$
+
+- **Variables** — ideal values computed for the *measured* mixture ratio, chamber pressure, area ratio and ambient pressure. All [—].
+- **Meaning** — the standard efficiency pair, with the essential caveat attached.
+- **Assumes** — the reference is stated. One-dimensional equilibrium (ODE) is the JANNAF convention; a number quoted against a frozen or kinetic reference is a different number.
+- **Fails when** — compared between programmes without a stated reference, which is most of the time. **A quoted "$c^*$ efficiency" without its reference method is not a number.**
+- **Tag** [F] [J] · **Code** —
+- **Alias** — 03-3.15, 06-3.14.
+
+### 18-3.10 — Injector-face to nozzle-entrance pressure correction
+
+$$\frac{p_{c,ns}}{p_{c,inj}} = \frac{\left(1+\frac{\gamma-1}{2}M_c^2\right)^{\gamma/(\gamma-1)}}{1+\gamma M_c^2}$$
+
+- **Variables** — $M_c$ Mach number at the nozzle entrance, from inverting the subsonic branch of the area relation at $\varepsilon_c = A_c/A_t$ [—]; $\gamma$ [—].
+- **Meaning** — the correction that reconciles a measured injector-face pressure with the stagnation pressure $c^*$ is defined against. The correction is 1–2 % for $\varepsilon_c \ge 3$ and grows sharply below $\varepsilon_c = 2$.
+- **Assumes** — constant-area frictionless heat addition from face to nozzle entrance; uniform 1-D properties; combustion complete at the nozzle entrance.
+- **Fails when** — the chamber is highly convergent from the face (not constant-area); combustion continues into the nozzle, which pushes the real loss further.
+- **Tag** [F] · **Code** —
+- **Alias** — 01-3.8, 06-3.9.
+
+### 18-3.11 — Hot throat area
+
+$$A_t(T) = A_{t,0}\,[1 + \alpha (T - T_0)]^2$$
+
+- **Variables** — $A_t(T)$ hot throat area [m²]; $A_{t,0}$ cold area [m²]; $\alpha$ linear CTE [1/K]; $T - T_0$ throat wall temperature rise [K].
+- **Meaning** — the throat you measured cold is not the throat that flowed. For a copper-alloy throat at 700 K rise, $\alpha \approx 17\times10^{-6}$ K⁻¹ gives a **2.4 %** area increase — larger than most people's entire uncertainty budget.
+- **Assumes** — uniform temperature around the throat; free expansion; no erosion.
+- **Fails when** — ablative and graphite throats, which erode monotonically; regeneratively cooled throats under hoop restraint, which cannot expand freely.
+- **Tag** [F] [A] · **Code** —
+
+### 18-3.12 — Quarter-wave resonance of a pressure line
+
+$$f_{1/4} = \frac{a}{4L}$$
+
+- **Variables** — $a$ speed of sound in the fluid filling the line [m/s]; $L$ line length [m].
+- **Meaning** — a long sense line is an organ pipe; it amplifies at $f_{1/4}$ and lies about everything above it.
+- **Assumes** — uniform line; closed at the transducer, open (to the chamber) at the other end; negligible damping.
+- **Fails when** — the line is long enough that viscous attenuation dominates before the resonance builds; the line contains a two-phase or stratified fluid, in which case $a$ is neither known nor constant.
+- **Tag** [F] · **Code** —
+
+### 18-3.13 — Helmholtz resonance of a transducer cavity
+
+$$f_H = \frac{a}{2\pi}\sqrt{\frac{A}{V L_{eff}}}, \qquad L_{eff} = L + 0.6\,r$$
+
+- **Variables** — $A$ passage cross-sectional area [m²]; $L_{eff}$ passage length with end correction [m]; $r$ passage radius [m]; $V$ cavity volume [m³]; $a$ [m/s].
+- **Meaning** — the short-passage counterpart of 18-3.12; the lumped model that applies when all dimensions are much less than a wavelength.
+- **Assumes** — lumped acoustic system; rigid walls; no mean flow.
+- **Fails when** — the passage is long relative to a wavelength, at which point 18-3.12 is the right model.
+- **Tag** [F] · **Code** —
+- **Alias** — 14-3.18, 15-3.14.
+
+### 18-3.14 — First tangential mode (instrumentation planning)
+
+$$f_{1T} = \frac{1.8412\,a_c}{\pi D_c}$$
+
+- **Variables** — $a_c$ chamber sound speed [m/s]; $D_c$ chamber diameter [m]; 1.8412 the first zero of $J_1'$ [—].
+- **Meaning** — tells you which decade to instrument and filter for.
+- **Assumes** — cylindrical chamber; uniform temperature; hard walls.
+- **Fails when** — real chambers, by 10–20 %, because temperature and hence $a_c$ vary axially and radially. Use it to know *which decade* to look in, not to identify a mode by frequency alone.
+- **Tag** [F] [A] · **Code** `a_sound(gamma, R, T)`
+- **Alias** — 06-3.15, 15-3.9.
+
+### 18-3.15 — Thermocouple first-order response
+
+$$\tau\frac{dT_i}{dt} + T_i = T_{true}, \qquad \tau = \frac{\rho c_p V}{h A} \approx \frac{\rho c_p d}{6h}$$
+
+- **Variables** — $T_i$ indicated temperature [K]; $T_{true}$ true temperature [K]; $\tau$ time constant [s]; $h$ local convective coefficient [W/(m²·K)]; $d$ bead diameter [m]; $\rho$ [kg/m³]; $c_p$ [J/(kg·K)].
+- **Meaning** — a thermocouple is a first-order lag; the bead diameter sets the bandwidth.
+- **Assumes** — lumped junction ($Bi \ll 0.1$); a single dominant heat path; constant properties.
+- **Fails when** — the junction also radiates (hot gas, cold walls: it reads low by up to hundreds of kelvin); conduction down the leads is significant (stem loss — why sheathed TCs are inserted at least 10 sheath diameters); a protective sheath adds its own much larger $\tau$.
+- **Tag** [F] · **Code** —
+
+### 18-3.16 — Accelerometer usable bandwidth
+
+$$f \le \frac{f_{mount}}{3}$$
+
+- **Variables** — $f_{mount}$ mounted resonance frequency [Hz].
+- **Meaning** — the usable band of a mounted accelerometer. Stud mounting gives $f_{mount}$ of 30–50 kHz; adhesive 10–20 kHz; a magnet 2–7 kHz; a handheld probe under 1 kHz.
+- **Assumes** — a rigid structure under the mount.
+- **Fails when** — the *structure* resonates below the mount. Bracket-mounted accelerometers routinely report the bracket, not the engine.
+- **Tag** [E] [J] · **Code** —
+
+### 18-3.17 — Nyquist sampling criterion
+
+$$f_s > 2 f_{max}$$
+
+- **Variables** — $f_s$ sample rate [Hz]; $f_{max}$ highest frequency of interest [Hz].
+- **Meaning** — energy above $f_s/2$ **aliases** down to $|f - n f_s|$ and is indistinguishable from real low-frequency content. Anti-alias filter before you sample, always.
+- **Assumes** — ideal sampling.
+- **Fails when** — treated as a *sufficient* condition. 2× is the theoretical minimum for reconstruction; practical measurement uses 5–10× for waveform fidelity and 2.56× as the standard for spectral analysis.
+- **Tag** [F] · **Code** —
+
+### 18-3.18 — Quantization error
+
+$$q = \frac{\mathrm{FS}}{2^N}, \qquad \varepsilon_{RMS} = \frac{q}{\sqrt{12}}$$
+
+- **Variables** — FS converter full-scale span [in engineering units]; $N$ bits [—]; $q$ code width; $\varepsilon_{RMS}$ RMS quantization noise.
+- **Meaning** — usually negligible: a 16-bit converter on a 0–10 MPa channel has $q = 153$ Pa and 44 Pa RMS noise, against a 0.25 % FS transducer error of 25 kPa. **The lesson is ranging, not bits**: a 70 bar transducer on a 5 bar signal wastes 14 of 16 bits, and the FS error term scales with the range, not the reading.
+- **Assumes** — the signal spans many codes.
+- **Fails when** — a small signal sits on a large range; quantization noise is then correlated with the signal and shows up as distortion.
+- **Tag** [F] · **Code** —
+
+### 18-3.19 — General uncertainty propagation
+
+$$u_y^2 = \sum_i \left(\frac{\partial f}{\partial x_i}\right)^2 u_{x_i}^2$$
+
+- **Variables** — $u$ standard uncertainty in the units of the quantity; $y = f(x_1,\dots,x_n)$.
+- **Meaning** — the root-sum-square combination of independent contributions.
+- **Assumes** — independence (no shared systematic error); local linearity over the range $\pm u$.
+- **Fails when** — two channels share a calibration standard or a common temperature error. Correlated errors add *linearly*, not in quadrature, and can be much larger than the RSS suggests. This is the single most common way an uncertainty budget lies.
+- **Tag** [F] · **Code** `rss(*terms)`
+
+### 18-3.20 — Relative uncertainty of a power-law product
+
+$$\frac{u_y}{y} = \sqrt{\sum_i a_i^2 \left(\frac{u_{x_i}}{x_i}\right)^2}$$
+
+- **Variables** — $a_i$ the exponent of $x_i$ in $y = \prod x_i^{a_i}$ [—].
+- **Meaning** — a quantity depending on the square of a measured diameter inherits *twice* that diameter's relative uncertainty. Note the essential asymmetry: **products combine relative uncertainties; sums combine absolute ones.**
+- **Assumes** — independence.
+- **Fails when** — inputs are correlated, as in 18-3.19.
+- **Tag** [F] · **Code** `rel_unc_product(*rel)`, `rel_unc_power(rel, exponent)`
+
+### 18-3.21 — $I_{sp}$ uncertainty
+
+$$\frac{\partial I_{sp}}{\partial F} = \frac{I_{sp}}{F},
+\quad
+\frac{\partial I_{sp}}{\partial \dot m} = -\frac{I_{sp}}{\dot m}
+\quad\Rightarrow\quad
+\frac{u_{I_{sp}}}{I_{sp}} = \sqrt{\left(\frac{u_F}{F}\right)^2 + \left(\frac{u_{\dot m}}{\dot m}\right)^2}$$
+
+- **Variables** — $F$ [N]; $\dot m$ [kg/s]; $u$ standard uncertainties; $g_0$ is a defined constant and contributes nothing.
+- **Meaning** — specific-impulse uncertainty is the quadrature sum of thrust and flow uncertainty, and nothing else.
+- **Assumes** — $F$ and $\dot m$ independently measured.
+- **Fails when** — that is *false*: if the reduction used a flow computed from $p_c$ and $c^*$, the two are perfectly correlated and this formula understates the uncertainty badly. Common in hobbyist and early-programme data.
+- **Tag** [F] · **Code** `rss(*terms)`
+
+### 18-3.22 — Quantity–distance scaling
+
+$$R = K\,W^{1/3}$$
+
+- **Variables** — $R$ required separation [m]; $W$ net explosive weight or propellant TNT equivalent [kg]; $K$ scaling constant set by the protection level required (personnel, inhabited building, public traffic route) [m/kg$^{1/3}$].
+- **Meaning** — blast overpressure scales with the cube root of energy, so separation distance does too.
+- **Assumes** — an idealised free-field blast and a stated equivalence factor for the propellant combination; LOX/hydrocarbon and LOX/LH₂ have very different published factors and the numbers are facility-specific.
+- **Fails when** — fragment throw governs, which it frequently does at large $W$; cryogenic vapour-cloud drift governs the downwind hazard rather than blast.
+- **Tag** [E] [J] · **Code** —
+
+### 18-3.23 — Redline setting with latency
+
+$$\text{redline} = \text{limit} - \underbrace{\dot X\, t_{lat}}_{\text{latency}} - \underbrace{k\,u_X}_{\text{measurement}} - \underbrace{\Delta X_{scatter}}_{\text{normal variation}}$$
+
+$$t_{lat} = \tau_{sensor} + t_{filter} + t_{sample} + t_{logic} + t_{valve}$$
+
+- **Variables** — $\dot X$ rate of change of the monitored parameter [unit/s]; $t_{lat}$ total detection-to-action latency [s]; $u_X$ measurement uncertainty; $k$ coverage factor [—]; $\Delta X_{scatter}$ normal engine-to-engine and run-to-run variation.
+- **Meaning** — a redline must be set far enough below the limit that the system can act in time. Typical magnitudes: $\tau_{sensor}$ 1–500 ms (a sheathed thermocouple is the worst offender by two orders of magnitude); $t_{filter}$ 1–50 ms; $t_{sample}$ 1–2 intervals plus the $N$-consecutive-samples persistence requirement (a deliberate purchase of latency to avoid nuisance shutdowns); $t_{logic}$ 1–20 ms including any two-out-of-three voting; $t_{valve}$ 20–200 ms plus chamber blowdown.
+- **Assumes** — each stage is serial.
+- **Fails when** — the sensor is not measuring the failing thing at all: a wall thermocouple 30 mm from a burn-through sees it late or never.
+- **Tag** [J] · **Code** —
+
+---

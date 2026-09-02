@@ -295,3 +295,16 @@ EXAMPLES += [
               "n": 0.4},
      "expect": 7723.77, "tol": 0.001},
 ]
+
+# --- Q131-140 -------------------------------------------------------------
+# Q136 mass-weighted Isp = 0.968*340 + 0.032*130 = 333.28 s; penalty 6.72 s
+#   (1.98 % of 340 s); the turbine flow contributes 4.16 s of that total.
+# Q138 Joukowsky estimate dp = rho a dv = 1140*1000*5 = 5.7e6 Pa = 57 bar.
+EXAMPLES += [
+    {"id": "q200.133a", "fn": "specific_speed_SI",
+     "args": {"omega": 3769.911, "Q": 0.070, "H": 22000.0},
+     "expect": 0.099637, "tol": 0.001},
+    {"id": "q200.133b", "fn": "suction_specific_speed_SI",
+     "args": {"omega": 3769.911, "Q": 0.070, "NPSH": 300.0},
+     "expect": 2.49689, "tol": 0.001},
+]

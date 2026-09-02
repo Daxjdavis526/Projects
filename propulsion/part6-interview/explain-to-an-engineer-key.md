@@ -1817,14 +1817,13 @@ kelvin above the cold face on every firing, so each start-shutdown is a full
 thermal strain cycle in a thin, constrained liner: plastic strain accumulates,
 the wall thins and bulges into the channel, and it cracks.
 
-**Quantitative hook.** RS-68A: a regen H₂-cooled main chamber with an ablative
-silica/carbon-phenolic nozzle that chars and erodes through the burn — the bright
-orange plume is that carbon burning in air [_verify-liquid, RS-68A block]. The
-LMDE's ablative chamber came with an operating restriction: the 60–100% throttle
-band was *prohibited* because of nozzle erosion [_verify-liquid, LMDE block]. On
-the other side, the RS-25 was designed for 55 reuses and the AJ10-190 OMS engine
-was rated for 100 missions, 1,000 starts and 15 hours cumulative burn
-[_verify-liquid, RS-25 and AJ10-190 blocks].
+**Quantitative hook.** RS-68A: a regen H₂-cooled chamber with an ablative
+silica/carbon-phenolic nozzle that chars through the burn — the bright orange plume
+is that carbon burning in air [_verify-liquid, RS-68A block]. The LMDE's ablative
+chamber came with an operating restriction: the 60–100% throttle band was
+*prohibited* because of nozzle erosion [_verify-liquid, LMDE block]. On the other
+side, the AJ10-190 OMS engine was rated for 100 missions, 1,000 starts and 15 hours
+cumulative burn [_verify-liquid, AJ10-190 block].
 
 **Trade-off / exception.** Ablative is cheap, needs no pump head and no channel
 manufacturing — perfect for one-shot, short-burn, low-cost applications. Regen is
@@ -2162,13 +2161,12 @@ engine, deliberately.
 picked up in the cooling jacket — and heat pickup scales with wall *area* while
 the power demand scales with the engine's throat area and chamber pressure.
 
-**Mechanism.** Chamber and nozzle wall area grows roughly as $D^2$, but so does
-throat area — the killer is that required pump power grows as $\dot m\,\Delta p
-\propto A_t p_c$, i.e. faster than the *useful* heat pickup, because heat flux
-per unit area rises only as $p_c^{0.8}$ and the surface-to-throat area ratio
-falls as the engine gets bigger. Push chamber pressure and the wall gets hotter
-but the coolant has less relative area; push size and the jacket cannot keep up.
-So the cycle self-limits at modest $p_c$.
+**Mechanism.** Required pump power grows as $\dot m\,\Delta p \propto A_t p_c$,
+faster than the *useful* heat pickup, because flux per unit area rises only as
+$p_c^{0.8}$ and the surface-to-throat area ratio falls as the engine gets bigger.
+Push chamber pressure and the wall gets hotter but the coolant has less relative
+area; push size and the jacket cannot keep up. So the cycle self-limits at modest
+$p_c$.
 
 **Quantitative hook.** The flown closed expanders sit exactly where the argument
 predicts: RL10A-3-3A at 32.8 bar and 73.4 kN; RL10C-1 at 101.8 kN; Vinci at
@@ -3026,13 +3024,12 @@ $\varepsilon = 69$ nozzle at 206.4 bar has an exit static pressure around 22.6 k
 $\varepsilon = 285$ RL10B-2 needs far less, which is why upper-stage engines are the
 ones that most need the facility [_verify-liquid, RL10B-2 block].
 
-**Trade-off / exception.** You can skip it when you can get what you need another
-way: test the chamber and injector at sea level with a truncated nozzle, verify the
-nozzle contour separately by analysis and cold flow, and take the full-$\varepsilon$
-demonstration on the first flight — which is a programme risk decision, not a
-technical one [J]. First stages generally do not need it at all, because they start
-at sea level; the RS-25 is fired sea-level on the stand with its flight nozzle,
-separated, every time.
+**Trade-off / exception.** You can skip it when another route gives what you
+need: test the chamber and injector at sea level with a truncated nozzle, verify
+the contour by analysis and cold flow, and take the full-$\varepsilon$
+demonstration on the first flight — a programme risk decision, not a technical one
+[J]. First stages rarely need it; the RS-25 is fired at sea level on the stand with
+its flight nozzle, separated, every time.
 
 **Follow-up:** *"What would you accept as evidence instead of an altitude test?"*
 
@@ -3330,13 +3327,13 @@ put a surface in the exhaust: simple, but lossy and consumed. **Liquid injection
 carries pressure while allowing a few degrees of deflection; efficient, and now
 standard, but the joint must survive storage, temperature and the burn.
 
-**Quantitative hook.** Shuttle SRB: submerged flexseal, **±8° pitch and yaw**, two
-hydraulic actuators fed by hydrazine APUs per booster. Ariane 5 EAP: flexseal to
-**7.3°** (6° is quoted in places; use 7.3° per B.1.5). Titan's UA120 family used
-**LITVC with N₂O₄** and no moving nozzle; the SRMU that replaced it went to a
-gimballed nozzle. PSLV's S139 uses **SITVC with aqueous strontium perchlorate** —
-LITVC with a dense, cheap, non-toxic injectant, letting a very large motor keep a
-fixed nozzle [engine-database B.1, B.2, B.5.3].
+**Quantitative hook.** Shuttle SRB: submerged flexseal, **±8° pitch and yaw**,
+two hydraulic actuators per booster. Ariane 5 EAP: flexseal to **7.3°** (6° is
+quoted in places; use 7.3° per B.1.5). Titan's UA120 family used **LITVC with
+N₂O₄**; the SRMU that replaced it went to a gimballed nozzle. PSLV's S139 uses
+**SITVC with aqueous strontium perchlorate** — a dense, cheap, non-toxic injectant
+that lets a very large motor keep a fixed nozzle
+[engine-database B.1, B.2, B.5.3].
 
 **Trade-off.** Flexseal wins on efficiency and mass but needs an elastomeric joint
 qualified for years of storage; LITVC wins on simplicity and storage but carries
@@ -3388,12 +3385,11 @@ matters — so a fraction of a percent by mass changes $a$ in $r = ap^n$ by seve
 percent, and the $1/(1-n)$ amplification carries it into chamber pressure and the
 whole thrust trace.
 
-**Mechanism.** Fe₂O₃ catalyses AP decomposition in the condensed phase and the
-near-surface gas phase, raising the regression rate at a given pressure. Because the
-motor then finds a new equilibrium at higher $K_n$-equivalent burning, the effect is
-not a small perturbation on thrust — it is a shift of the whole operating point.
-This is why catalyst loading is a controlled, lot-tested parameter and why every
-propellant batch is strand-burned before it is cast.
+**Mechanism.** Fe₂O₃ catalyses AP decomposition in the condensed phase and near
+the surface, raising the regression rate at a given pressure. The motor then finds a
+new equilibrium, so the effect is not a small perturbation on thrust — it is a shift
+of the whole operating point. That is why catalyst loading is a controlled,
+lot-tested parameter and every batch is strand-burned before casting.
 
 **Quantitative hook.** The Shuttle SRB's published composition appears two ways:
 **AP 69.6 / Al 16.0 / Fe₂O₃ 0.4 / PBAN 12.04 / epoxy 1.96** (NASA fact sheet) and a
@@ -3572,12 +3568,11 @@ build, not of a design — which makes it a process and inspection problem.
 cold-gas performance that does not require changing propellant — and it is a
 square-root lever, so it takes a lot of heat to buy a little Isp.
 
-**Mechanism.** A resistojet puts an electrical heater in the plenum or the throat
-region, raising stagnation temperature before expansion. Nothing else in the system
-changes: same propellant, same tank, same valves. Doubling $T_0$ buys 41%. But the
-power comes from the spacecraft bus, it must be supplied *while* thrusting, and the
-heater's thermal time constant means short pulses do not reach the design
-temperature at all — so the gain is real for long burns and largely illusory for
+**Mechanism.** A resistojet puts an electrical heater in the plenum, raising
+stagnation temperature before expansion. Nothing else changes: same propellant, same
+tank, same valves. But the power comes from the bus, it must be supplied *while*
+thrusting, and the heater's thermal time constant means short pulses never reach the
+design temperature — so the gain is real for long burns and largely illusory for
 attitude-control pulses.
 
 **Quantitative hook.** Nitrogen at $\varepsilon = 50$: **76.8 s at 300 K** and
@@ -3672,16 +3667,14 @@ scale with the number of parts, joints and operations, and no amount of stress
 margin removes them. Deleting a component deletes its entire failure tree, including
 the branches nobody enumerated.
 
-**Quantitative hook.** At $R = 0.9999$ per part, 100 parts give 0.990 and 500 parts
-give 0.951 — a fivefold increase in loss rate from part count alone. The historical
-evidence points the same way: the **Redstone A-7 was man-rated by subtraction**, its
-pneumatic system cut from 31 components to 10 by deleting check valves and
-consolidating regulators [engine-database Part D §3]. The **Apollo SPS** removed
-mechanisms rather than adding redundancy — pressure-fed, hypergolic, no igniter, no
-turbopump, no valve that must move more than once — and flew every lunar orbit
-insertion and trans-Earth injection without a failure. **Viking**: 2 failures in 958
-engines across 144 launches [engine-database A.4.5]. **Gamma**: 128 engines, 26
-launches, zero failures [engine-database A.9.2].
+**Quantitative hook.** At $R = 0.9999$ per part, 100 parts give 0.990 and 500
+give 0.951 — a fivefold increase in loss rate from part count alone. The history
+agrees: the **Redstone A-7 was man-rated by subtraction**, its pneumatic system cut
+from 31 components to 10 [engine-database Part D §3]; the **Apollo SPS** removed
+mechanisms rather than adding redundancy and flew every lunar orbit insertion and
+trans-Earth injection without a failure; **Viking**, 2 failures in 958 engines
+across 144 launches [A.4.5]; **Gamma**, 128 engines, 26 launches, zero failures
+[A.9.2].
 
 **Trade-off / exception.** Redundancy genuinely helps where failures are
 independent and detectable — dual spark plugs, dual O-rings, parallel valve trains.
@@ -3774,16 +3767,14 @@ because by the time the engine is qualified the vehicle it was designed for has
 changed or been cancelled — and a qualified engine is a snapshot of a supply chain
 and a workforce, both of which decay.
 
-**Quantitative hook.** The file is full of them. **J-2X**: announced 2007, hot-fired
-2011–13, idle after 2014, **never flown**, with its intended applications (Ares I,
-Ares V EDS, early SLS upper stages) all cancelled or changed
-[_verify-liquid, J-2X block]. **RD-0146**: concept 1988, project start 1999, first
+**Quantitative hook.** The file is full of them. **J-2X**: announced 2007,
+hot-fired 2011–13, idle after 2014, **never flown**, its intended applications all
+cancelled or changed [_verify-liquid, J-2X block]. **RD-0146**: concept 1988, first
 firing 2001, still in development as of 2022, never flown — and holding the highest
-Isp figure ever claimed, 470 s [_verify-liquid, RD-0146 block, low confidence].
-**Aestus II / RS-72**: built, tested, never flew [engine-database A.4.6]. **J-2S**:
-tested 1965–72 at 436 s, never flown. Against that: **Vinci** took 26 years from
-1998 to first flight in 2024 — and flew, because Ariane 6 eventually committed
-[_verify-liquid, Vinci block].
+Isp ever claimed, 470 s [_verify-liquid, RD-0146 block, low confidence]. **Aestus II
+/ RS-72**: built, tested, never flew [A.4.6]. **J-2S**: 436 s, never flown. Against
+that, **Vinci** took 26 years to first flight in 2024 — and flew, because Ariane 6
+committed [_verify-liquid, Vinci block].
 
 **Trade-off / exception.** The counter-argument is real: technology programmes with
 no vehicle produced ORSC, expander bleed and full-flow staged combustion. The
@@ -3805,11 +3796,9 @@ government-report literature. Raptor's thrust, chamber pressure, Isp, dry mass a
 T/W all originate from company statements, several of them **Musk posts on
 Twitter/X** — the Raptor 2 thrust figures trace to an August 2020 post — and several
 have changed silently over time. Independent corroboration exists **only for
-thrust**, and only indirectly, through FAA licensing and environmental documents and
-third-party analysis of flight telemetry and acoustics. There is **no independent
-verification of Raptor chamber pressure, Isp, dry mass or T/W at all**
-[engine-database A.3.5]. The same treatment applies to BE-3U, BE-4, Archimedes,
-Prometheus and BOLE.
+thrust**, and only indirectly. There is **no independent verification of Raptor
+chamber pressure, Isp, dry mass or T/W at all** [engine-database A.3.5]. The same
+applies to BE-3U, BE-4, Archimedes, Prometheus and BOLE.
 
 **Quantitative hook.** State the claim and its status together: "Raptor 2 is claimed
 at 2,256 kN sea level and 300 bar, Raptor 3 at 2,452 kN and 330 bar — company
