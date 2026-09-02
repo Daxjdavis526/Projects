@@ -1930,7 +1930,8 @@ non-isentropic expansion through the valve and plenum, and heat leak. So expect
 about 65–70 s of realised $I_{sp}$ for nitrogen and 150–165 s for helium, and
 note that published MarCO-class refrigerant systems land near 40 s against a
 40–43 s cold ideal — that is a ~90 % efficiency and it is the honest number to
-carry. [E][MarCO][VACCO]
+carry. [E][MarCO] (and the VACCO MiPS data sheets behind the engine
+database's cold-gas table)
 
 **Probing:** whether you attach a realisation factor rather than quoting the
 ideal as if it flew.
@@ -2028,7 +2029,7 @@ about 2.7 bar, which means no COPV, no high-pressure regulator, no pyro valve
 and no high-pressure joint anywhere in the module — so the whole thing is an
 all-welded aluminium block that a launch provider's safety panel will accept as
 a secondary payload next to a flagship spacecraft, and it fits in a fraction of
-a 6U bus. [MarCO][VACCO] The propellant's own vapour pressure does the
+a 6U bus. [MarCO] The propellant's own vapour pressure does the
 pressurisation, so the feed pressure is nearly constant while liquid remains
 rather than blowing down, which also removes the regulator's failure modes. What
 it gave up: specific impulse, about 40 s against 60–70 s for nitrogen and far
@@ -4021,8 +4022,8 @@ translational acceleration (0.091 m/s²)**, both of which are primary-sourced
 and internally consistent; I would treat the Δv as a derived number of
 uncertain provenance and would not use MMU as a worked example at all. The
 engine database says exactly this and recommends SAFER instead, whose ~40 s
-implied $I_{sp}$ closes against its own published mass and impulse. [MMU
-entry, note C.2.1; SAFER95]
+implied $I_{sp}$ closes against its own published mass and impulse.
+(Engine database note C.2.1.) [SAFER95]
 
 **Probing:** whether you test the hypothesis by re-running the sum with a
 different reference mass, rather than declaring the numbers wrong.
@@ -4043,7 +4044,7 @@ greater than the gas it holds and whose external volume exceeds the internal
 volume by the wall thickness — while the R-236fa sits at its 2.7 bar vapour
 pressure in a thin welded aluminium can that adds a few percent. Include the
 vessel and the gap widens to something like an order of magnitude on both mass
-and envelope. [MarCO][VACCO] Two caveats worth carrying: the stored-density
+and envelope. [MarCO] Two caveats worth carrying: the stored-density
 figures in the literature for compressed gases are frequently ideal-gas
 computed and internally inconsistent, so treat 0.04 g/cm³ as approximate; and
 the comparison reverses completely if the mission is mass-limited rather than
@@ -4314,7 +4315,7 @@ about 1.19, predicting roughly **2×** the RS-25's total pump power, or about
 140 MW; the published figures are **contested at 170 versus 192 MW**, which is
 the right order and larger than the simple scaling, as you would expect once
 the preburner discharge pressure and the four-chamber manifold losses are
-included. [A.6.1] The lesson: the RD-170 needs three and a half times the thrust
+included. (Engine database note A.6.1.) The lesson: the RD-170 needs three and a half times the thrust
 of the RS-25 but only about 2.5–2.7 times the pump power, because dense
 propellants are cheap to pump.
 
