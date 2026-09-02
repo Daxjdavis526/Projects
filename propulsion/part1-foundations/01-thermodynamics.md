@@ -896,7 +896,7 @@ apparent $c^*$. **Always state the reference model alongside an efficiency.**
 | exhaust molar mass $\mathcal{M}$ | 9–30 kg/kmol | LOX/LH₂ at low MR (~9–12) | LOX/RP-1 (~21–23), N₂O₄/MMH (~21–24) |
 | $\gamma$ (frozen, chamber) | 1.14–1.28 | AP/HTPB solid with Al₂O₃, ~1.15 | hydrazine products ~1.27–1.34; GN₂ cold gas 1.40 |
 | specific gas constant $R$ | 280–900 J/(kg·K) | kerolox ~370–400 | LOX/LH₂ ~600–700 |
-| chamber pressure $p_c$ | 5–270 bar | AJ10 SPS Apollo service module, ~6.9 bar; R-4D ~7 bar | RD-180 267 bar; RS-25 206.4 bar at 109 % [F-1 ≈70 bar] |
+| chamber pressure $p_c$ | 5–270 bar | AJ10 SPS Apollo service module, ~6.9 bar; R-4D ~7 bar | RD-180 267 bar; RS-25 206.4 bar at 109 %; F-1 ≈70 bar |
 | contraction ratio $\varepsilon_c$ | 1.5–10 | large boosters, 2–3 | small thrusters, 5–10 |
 | injector-face to throat-stagnation $p_0$ loss | 1–9 % | $\varepsilon_c \ge 4$: <1.5 % | $\varepsilon_c = 1.5$: >9 % |
 | $c^*$ (ideal) | 1500–2400 m/s | solid AP/HTPB ~1550–1600 | LOX/LH₂ ~2280–2380 |
@@ -1050,7 +1050,11 @@ $$c^*_{ideal} = \frac{\sqrt{RT_0}}{\Gamma} = \frac{\sqrt{600.54\times3600}}{0.64
 **Sanity check.** Published $\gamma$ for LOX/LH₂ chamber gas is 1.19–1.20 and
 $\mathcal{M}$ is quoted between 13.5 and 13.9 depending on the source and the
 exact MR and pressure; $c^*$ for the RS-25 is usually quoted near 2300 m/s. All
-three land where they should. **The caveat that matters:** this $\gamma = 1.1912$
+three land where they should. Later modules use the round figure
+$\mathcal{M} \approx 13.5$ kg/kmol for LOX/LH₂ where a single representative
+number is wanted; the 13.845 here is what *this particular* composition gives,
+and the 2.5 % spread between them is an honest measure of how much the answer
+moves with the assumed mixture ratio and pressure. [A] **The caveat that matters:** this $\gamma = 1.1912$
 is the **frozen** ratio of specific heats — the mixture treated as chemically
 inert. CEA also reports an *isentropic exponent* for the equilibrium mixture that
 is lower (typically 1.13–1.15 for this gas) because re-equilibration adds an

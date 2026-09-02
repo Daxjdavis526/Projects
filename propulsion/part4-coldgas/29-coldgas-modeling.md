@@ -202,10 +202,14 @@ $$\text{impulse density} \equiv \frac{I_{tot}}{V_{prop}} = \rho\, I_{sp}\, g_0
 > Fails when: a blowdown system's $I_{sp}$ falls with tank temperature —
 > then use the integral of §3.9. [F]
 
-Helium and R-236fa land within ~20 % of each other on impulse density
-(≈7.1 and ≈5.8 N·s per cm³ of propellant respectively) and a factor of
-several apart on impulse per wet mass, because the helium needs a 241 bar
-COPV around it and the R-236fa needs a 2.7 bar can. That single fact is why
+Helium at 241 bar and 300 K stores only ≈0.06–0.07 N·s per cm³ of tank
+volume, while liquid R-236fa at its own ≈2.7 bar vapour pressure stores
+≈0.53–0.58 N·s/cm³: the refrigerant wins on impulse density by roughly
+eight to one despite its lower $I_{sp}$ (Modules 28 and 31 work the
+arithmetic; an earlier draft of the reference worksheet mis-stated these
+as 7.1 and 5.8 N·s/cm³). On impulse per wet mass the gap narrows but
+does not reverse, because the helium needs a 241 bar COPV around it and
+the R-236fa needs a 2.7 bar can. That single fact is why
 every flown CubeSat cold-gas module uses a liquefiable propellant and no
 launch vehicle uses one. [M] `[NASA-SOA]`, `[MarCO]`
 
@@ -331,7 +335,7 @@ against 1780 m/s for LOX/LH₂. That single ratio is the whole story of why
 cold gas is a 70-second propellant.
 
 $\Gamma$ is weakly dependent on $\gamma$: 0.6847 at $\gamma=1.40$ (N₂),
-0.7262 at $\gamma=1.667$ (He), 0.6338 at $\gamma=1.08$ (R-236fa). A 20 %
+0.7262 at $\gamma=1.667$ (He), 0.6241 at $\gamma=1.08$ (R-236fa). A 20 %
 change in $\gamma$ moves $\Gamma$ by 6 %. [F]
 
 ### 3.6 Exit velocity, thrust, $C_F$
@@ -352,9 +356,9 @@ v_e = \sqrt{2c_pT_0\left(1-\frac{T_e}{T_0}\right)}
 > (it does for polyatomics). [F] `rocket.exit_velocity`.
 
 Note the limiting velocity: as $p_e/p_0\to0$,
-$v_{max}=\sqrt{2\gamma RT_0/(\gamma-1)}$, which for N₂ at 293 K is 782 m/s.
-No area ratio will ever get a room-temperature nitrogen thruster past
-$782/9.80665 = 79.7$ s of momentum $I_{sp}$. Every design argument about
+$v_{max}=\sqrt{2\gamma RT_0/(\gamma-1)}$, which for N₂ at 293.15 K is
+780.4 m/s. No area ratio will ever get a room-temperature nitrogen thruster
+past $780.4/9.80665 = 79.6$ s of momentum $I_{sp}$. Every design argument about
 expansion ratio in a cold-gas system is an argument about how close to that
 asymptote you can afford to get.
 
@@ -388,12 +392,12 @@ $$C_F \equiv \frac{F}{p_0A_t}
 and $F = C_F\,c^*\,\dot m$, $c = c^*C_F$, $I_{sp}=c/g_0$.
 
 **Cold-gas $C_F$ is high and boring.** In vacuum with $\gamma=1.4$ and
-$\varepsilon=50$, $C_F=1.729$; at $\varepsilon=20$ it is 1.710 and at
-$\varepsilon=100$ it is 1.771. Going from 20:1 to 100:1 — five times the
-nozzle length and a large increase in wetted area — buys 3.6 % of ideal
+$\varepsilon=50$, $C_F=1.7292$; at $\varepsilon=20$ it is 1.6899 and at
+$\varepsilon=100$ it is 1.7498. Going from 20:1 to 100:1 — five times the
+nozzle length and a large increase in wetted area — buys 3.5 % of ideal
 thrust coefficient. On a *chemical* engine that trade is often worth it
 because the absolute $I_{sp}$ gain is 10 s. On a cold-gas thruster it is
-2.6 s and it comes with a viscous penalty that at small scale exceeds the
+2.6 s (74.23 → 76.87 s at 293.15 K) and it comes with a viscous penalty that at small scale exceeds the
 gain. This is the first place where cold-gas design departs from
 liquid-engine intuition. [J]
 
@@ -737,8 +741,7 @@ with a warm bus is a free performance improvement, because $c^*\propto
 is $\sqrt{313/273}=1.071$ — 7 % more $I_{sp}$ for no propellant. It is also
 a free performance *penalty* if the tank is cold-biased: a 253 K tank gives
 $\sqrt{253/293}=0.930$. [F] The gradient is worth quantifying for the
-review board: **$\partial I_{sp}/\partial T_0 = I_{sp}/(2T_0)$, i.e. about
-0.13 s per kelvin for a 76 s nitrogen thruster at 293 K.** A 20 K thermal
+review board: **$\partial I_{sp}/\partial T_0 = I_{sp}/(2T_0)$, i.e. 0.130 s per kelvin for a 76 s nitrogen thruster at 293.15 K.** A 20 K thermal
 uncertainty is a 2.6 s $I_{sp}$ uncertainty, comparable to the entire
 $\varepsilon$ 20→100 trade.
 

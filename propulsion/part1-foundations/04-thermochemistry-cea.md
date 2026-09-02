@@ -1553,10 +1553,11 @@ numerically that $c^*$ tracks $\sqrt{T_0/\mathcal{M}}$.
 of pure steam at 3000 K and 100 bar. Compare with the 3600 K, 100 bar case and explain
 which of temperature or pressure has more leverage over this range.
 
-**N6.** A LOX/RP-1 engine has measured injector-end $p_c = 68.0$ bar, throat area
-$0.1250$ m², LOX flow 850 kg/s and RP-1 flow 340 kg/s. Theoretical $c^*$ at that mixture
+**N6.** A LOX/RP-1 engine has measured injector-end $p_c = 68.0$ bar, hot throat area
+$0.3050$ m², LOX flow 850 kg/s and RP-1 flow 340 kg/s. Theoretical $c^*$ at that mixture
 ratio and pressure is 1795 m/s. Compute the mixture ratio, the delivered $c^*$ and
-$\eta_{c^*}$, and say whether this injector is acceptable.
+$\eta_{c^*}$, and say whether this injector is acceptable. Then state what happens to
+your answer if you had used the cold throat area, which is 0.7 % smaller.
 
 **N7.** From the CEA table in §5.4, find the area ratio at which the sea-level $I_{sp}$
 is maximum, and the exit pressure there. Compare that exit pressure with ambient and
