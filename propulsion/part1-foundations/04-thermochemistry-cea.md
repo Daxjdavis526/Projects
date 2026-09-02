@@ -752,7 +752,7 @@ i.e. $v_e$, which is the correct effective exhaust velocity when the nozzle is p
 expanded ($p_a = p_e$). It is **not** the sea-level $I_{sp}$ and it is **not** the vacuum
 $I_{sp}$. At the exit, 4398.2 m/s = 448.5 s. At the throat it equals `SON VEL`, which is
 a useful sanity check on both. To get $I_{sp}$ at an ambient pressure $p_a$, use
-$I_{sp} = [I_{vac} - p_a A_e/\dot m]/g_0 = [I_{vac} - p_a \varepsilon c^*/p_0]/g_0$.
+$I_{sp} = \left(I_{vac} - p_a A_e/\dot m\right)/g_0 = \left(I_{vac} - p_a \varepsilon c^*/p_0\right)/g_0$.
 
 **`MOLE FRACTIONS`** — the composition. Read the OH and H rows: 3.5 % and 2.6 % in the
 chamber, essentially zero at the exit. Those species carried 1293 kJ/kg of chemical

@@ -1021,3 +1021,457 @@ stiffening rings, a stiff throat-region attachment, and — on any engine that
 starts at sea level with a high area ratio — a structural qualification against
 a transient side load that is *larger than any steady load the nozzle ever
 sees*.
+
+---
+
+## 4. Typical engineering ranges
+
+| quantity | typical range | low end | high end |
+|---|---|---|---|
+| Expansion ratio $\varepsilon$, sea-level booster | 8–25 | RS-27 8:1 | Raptor SL ~34.3 (claim) |
+| Expansion ratio $\varepsilon$, sustainer / core | 25–70 | Vulcain 1 45.1 | RS-25 69 (or 77.5) |
+| Expansion ratio $\varepsilon$, vacuum upper stage | 40–285 | J-2 27.5 (interstage-limited) | RL10B-2 285 |
+| Contraction ratio $\varepsilon_c$ | 1.5–10 | large boosters ≈ 2 | small thrusters > 5 |
+| Convergence half-angle $\beta$ | 20–45° | — | 30° is the default |
+| Divergence half-angle $\alpha$ (conical) | 12–20° | — | 15° is the default |
+| $R_u/r_t$ (upstream) | 0.5–2.0 | — | 1.5 is the default |
+| $R_d/r_t$ (downstream) | 0.382 (bell); 0.5–1.5 (cone) | — | — |
+| Initial wall angle $\theta_n$ (80 % bell) | 20–30° | low $\varepsilon$ | high $\varepsilon$ |
+| Exit wall angle $\theta_e$ (80 % bell) | 5–15° | high $\varepsilon$ | low $\varepsilon$ |
+| Percentage bell length | 60–100 % | short booster nozzles | vacuum upper stages |
+| Divergence efficiency $\lambda$ | 0.98–0.995 | 15° cone 0.983 | long bell ≈ 0.995 |
+| Friction efficiency $\eta_f$ | 0.95–0.995 | small thrusters | large boosters |
+| Kinetic efficiency $\eta_{kin}$ | 0.97–0.995 | high-$\varepsilon$ low-$p_c$ hydrogen | high-$p_c$ storable |
+| Overall nozzle efficiency $\eta_n$ | 0.96–0.98 | — | — |
+| Throat discharge coefficient $C_d$ | 0.97–0.995 | $R_u/r_t = 0.5$ | $R_u/r_t \ge 1.5$ |
+| $p_e/p_a$ at lift-off, first stage | 0.3–0.8 | RS-25 0.18 (sustainer) | RS-27A ≈ 0.9 |
+| Nozzle mass fraction of engine dry mass | 15–70 % | booster engines | Vinci ≈ 70 % |
+| Start-transient side load, large bell | $10^1$–$10^2$ kN | small nozzles, FSS wander only | RS-25 / Vulcain FSS↔RSS flip |
+
+### Real nozzle designs compared
+
+All figures from `reference/_verify-liquid.md`; carry its confidence labels.
+**Percentage bell length is almost never published** — programmes treat the
+contour as proprietary — so that column is honest about what is and is not
+known, and "bell" without a percentage means the contour type is documented but
+the length ratio is not.
+
+| engine | $\varepsilon$ | contour | length % | cooling of the divergent | material |
+|---|---|---|---|---|---|
+| F-1 | 16 | bell + extension | not published | regen tube-wall to the extension joint; **GG-exhaust film cooling** of the extension | 178 brazed nickel-alloy tubes, Inconel jacket |
+| J-2 | 27.5 | bell | not published | regenerative, fuel-cooled | brazed tube-wall |
+| RS-25 | **69 geometric (L3Harris); 77.5 widely quoted** | thrust-optimised bell (RSS-prone) | not published | regenerative, hydrogen-cooled | **1,080-tube brazed tube-wall** (chamber is 390 milled channels, NARloy-Z) |
+| RS-68A | 21.5 | bell | not published | **ablative** (chamber is regen) | silica/carbon-phenolic |
+| RS-27A | 12 (RS-27: 8) | bell | not published | regenerative, fuel-cooled | tube-wall, H-1 heritage |
+| Merlin 1D (SL) | 16 | bell | not published | regenerative, RP-1 cooled | **milled channel** |
+| Merlin 1D Vacuum | 165 | bell + skirt | not published | regen to the joint, then **radiative** | milled-channel + **niobium-alloy skirt** |
+| RL10A-3-3A | 61 | bell | not published | regenerative (the cooling circuit *is* the power cycle) | brazed stainless tube-wall |
+| RL10B-2 | **285 deployed / 77 retracted** | bell + **extendable** extension | not published | regen tube-wall, then **uncooled radiative** | **3D carbon–carbon (NOVOLTEX/SEPCARB)** |
+| RL10C-1 | 130 | bell, fixed | not published | regenerative | tube-wall |
+| Vulcain 2 | 58.2 | bell | not published | regen tube-wall + **turbine-exhaust film cooling of the lower nozzle** | tube-wall |
+| Vulcain 2.1 | not separately published | bell | not published | regenerative | **laser-welded sandwich**, 90 % fewer parts |
+| Vinci | 240 | bell + **deployable** extension | not published | regen (milled channels) + extension | nozzle ≈ 70 % of the 550 kg engine mass |
+| LE-5B / HM7B class upper stages | 110 / 83 class | bell | not published | see reference file | — |
+| LMDE (Apollo LM descent) | 47.5 (Apollo ≤14) / 53.6 (≥15) | bell | not published | **ablative** chamber + radiative skirt | ablative + radiative skirt |
+| Apollo SPS (AJ10-137) | 62.5 *(flagged: verify)* | bell, 3.882 m long, 2.501 m exit | not published | **ablative** chamber + radiative extension | ablative + niobium/titanium *(flagged)* |
+| Raptor 2/3 (SL) | ~34.3 — **company claim** | bell | not published | regen, methane-cooled milled channels | milled channel |
+| Raptor Vacuum | ~80 — **company claim** | bell | not published | regen + extension | not published |
+
+Two observations to take from that table. First, **every flown high-$\varepsilon$
+nozzle solves the cooling problem by ending the regenerative circuit partway
+down and letting the rest run hot** — radiatively (Merlin Vac, RL10B-2),
+ablatively (RS-68, LMDE, SPS), or with a dumped film (F-1, Vulcain 2). Nobody
+regeneratively cools a 285:1 nozzle, because there is not enough coolant
+enthalpy and not enough coolant pressure to push it through that much channel
+length. Second, **the modern trend is unambiguously away from tube-wall**:
+Merlin, Vinci and Vulcain 2.1 are all channel or sandwich constructions, and
+the reason is production rate and part count, not performance.
+
+---
+
+## 5. Worked examples
+
+Worked Examples 1 and 2 build directly on the 500 kN LOX/RP-1 engine sized in
+Module 03 WE1; its parameters are repeated where used. The library calls are
+registered in `tools/examples/09.py`.
+
+### 5.1 Full nozzle geometry for the Module 03 500 kN engine
+
+**Given** [Module 03 §5 WE1]: $F_{SL} = 500$ kN, $p_c = 10.0$ MPa (100 bar),
+LOX/RP-1 at $MR = 2.35$, $\gamma = 1.20$, $c^* = 1\,689$ m/s delivered,
+$\dot m = 184.8$ kg/s, $\varepsilon = 16$, contraction ratio
+$\varepsilon_c = 2.5$.
+
+**Step 1 — throat area, both routes.**
+
+Route 1 (Eq. 3.1):
+$$A_t = \frac{\dot m\,c^*}{p_c} = \frac{184.8 \times 1689}{1.000\times10^{7}} = 0.031213\ \mathrm{m^2}$$
+
+Route 2 (Eq. 3.2), with $C_F = 1.602$ at sea level from Module 03:
+$$A_t = \frac{F}{p_c C_F} = \frac{500\,000}{1.602\times10^{7}} = 0.031206\ \mathrm{m^2}$$
+
+The two agree to 0.02 %, which is the internal-consistency check of §3.2 and
+tells us $c^*$, $C_F$ and $\dot m$ are mutually compatible. Take
+$A_t = 0.031206$ m².
+
+$$r_t = \sqrt{A_t/\pi} = \sqrt{0.031206/\pi} = 0.099665\ \mathrm{m}
+\quad\Rightarrow\quad D_t = 199.3\ \mathrm{mm}\ (7.85\ \mathrm{in})$$
+
+**Step 2 — exit.**
+$$A_e = \varepsilon A_t = 16 \times 0.031206 = 0.49930\ \mathrm{m^2},\qquad
+r_e = 0.39866\ \mathrm{m},\qquad D_e = 797.3\ \mathrm{mm}\ (31.4\ \mathrm{in})$$
+
+**Step 3 — throat curvature (§3.3).**
+$$R_u = 1.5\,r_t = 149.5\ \mathrm{mm},\qquad R_d = 0.382\,r_t = 38.07\ \mathrm{mm}$$
+
+**Step 4 — the converging section.** With $\varepsilon_c = 2.5$,
+$A_c = 0.078015$ m², $r_c = 157.6$ mm ($D_c = 315.2$ mm — matching Module 03's
+chamber sizing). Take $\beta = 30°$. The convergent is the upstream throat arc
+turning from $\beta$ to 0, plus a straight cone:
+
+*Arc:* radial rise $R_u(1-\cos 30°) = 0.14950 \times 0.13397 = 20.03$ mm;
+axial extent $R_u\sin 30° = 74.75$ mm; radius at the arc's upstream end
+$= 99.67 + 20.03 = 119.69$ mm.
+
+*Cone:* radial rise $157.6 - 119.7 = 37.83$ mm; axial extent
+$37.83/\tan 30° = 65.53$ mm.
+
+$$L_{conv} = 74.75 + 65.53 = 140.3\ \mathrm{mm}$$
+
+The whole converging section is 140 mm against a divergent that will be 900+
+mm. That ratio — roughly 1:6 — is typical and is why nobody optimises the
+convergent.
+
+**Step 5 — conical nozzle, 15° (Eq. 3.7).**
+$$L_{cone} = \frac{r_t(\sqrt{\varepsilon}-1) + 1.5\,r_t(\sec 15° - 1)}{\tan 15°}
+= \frac{0.099665(3) + 0.149498(0.035276)}{0.267949}$$
+$$= \frac{0.298996 + 0.005274}{0.267949} = \boxed{1.1356\ \mathrm{m}}$$
+
+Divergence efficiency, Eq. 3.6:
+$$\lambda = \frac{1+\cos 15°}{2} = \frac{1+0.965926}{2} = \boxed{0.98296}$$
+— the classic **1.70 % divergence loss**.
+
+**Step 6 — 80 % bell length.** By the convention of §3.7:
+$$L_{80} = 0.80 \times 1.1356 = \boxed{0.9084\ \mathrm{m}}$$
+
+We have saved **227 mm of engine length** and, from the wetted-area table in
+§3.8, **13 % of the divergent's surface area**.
+
+**Step 7 — construct the contour (Eq. 3.3 and 3.8).** From the $\theta$ table
+in §3.7 at $\varepsilon = 16$, 80 % bell: $\theta_n \approx 22°$,
+$\theta_e \approx 11°$.
+
+Inflection point (Eq. 3.3):
+$$x_N = R_d\sin 22° = 0.038072 \times 0.374607 = 0.014262\ \mathrm{m}$$
+$$r_N = r_t + R_d(1-\cos 22°) = 0.099665 + 0.038072(0.072763) = 0.102438\ \mathrm{m}$$
+
+Exit point: $E = (0.90844,\ 0.398661)$ m. Slopes $\tan 22° = 0.404026$ and
+$\tan 11° = 0.194380$. Intersecting the two tangent lines:
+$$x_Q = \frac{(r_e - m_e L) - (r_N - m_n x_N)}{m_n - m_e}
+= \frac{(0.398661 - 0.176555) - (0.102438 - 0.005762)}{0.404026-0.194380} = 0.59817\ \mathrm{m}$$
+$$r_Q = r_N + m_n(x_Q - x_N) = 0.102438 + 0.404026(0.583908) = 0.33835\ \mathrm{m}$$
+
+So the contour is the quadratic Bézier through
+$N(0.01426,\,0.10244)$ — $Q(0.59817,\,0.33835)$ — $E(0.90844,\,0.39866)$, all
+in metres from the throat plane. At the curve midpoint $t=0.5$ the contour is
+at $x = 0.5298$ m, $r = 0.2944$ m, i.e. a **local area ratio of 8.7 at 58 % of
+the length** — the bell has done more than half its expansion in the first
+half of its length, which is the whole point of Rao's contour.
+
+```
+   r
+0.40 |                                    ,-·-·-·-·-· E (0.908, 0.399)  θe=11°
+     |                            ,-·-·''
+0.30 |                    ,-·-·''
+     |             ,-··''
+0.20 |       ,-·''             (80 % bell, Rao parabola)
+     |   ,·''
+0.10 |_,N (0.014, 0.102)  θn=22°
+     |( throat, r_t = 0.0997
+     +------------------------------------------------- x
+     0        0.2       0.4       0.6       0.8      0.91
+```
+
+**Step 8 — divergence efficiency of the bell.** Eq. 3.6 does **not** apply to a
+bell (see its callout). A bound is available: if every streamline left at the
+exit wall angle, $\lambda$ would be $(1+\cos 11°)/2 = 0.9908$; since the core
+flow is very nearly axial and only the outer flow is turned, the true value is
+higher. Design practice `[SB §3.4]`, `[SP-8120 §3.2]` puts an 80 % bell at
+$\lambda \approx 0.99$, against 0.983 for the 15° cone. **The bell recovers
+about 0.7 % of thrust while being 20 % shorter.** [E]
+
+$$\Delta I_{sp} \approx 0.007 \times 276\ \mathrm{s} \approx 1.9\ \mathrm{s\ (sea\ level)},
+\qquad \approx 0.007\times303 \approx 2.1\ \mathrm{s\ (vacuum)}$$
+
+**Sanity check.** A 500 kN kerolox engine with a 199 mm throat, a 797 mm exit,
+a 908 mm divergent and a 140 mm convergent is about 1.1 m from injector face to
+exit plane with the chamber included. Merlin 1D — 845 kN, $p_c = 97$ bar,
+$\varepsilon = 16$ — is a comparable machine, and this geometry scales to it by
+$\sqrt{845/500} = 1.30$ in every linear dimension. Nothing here is the wrong
+size. The 1.70 % conical divergence loss also reproduces the $\eta_{C_f} =
+0.98$ that Module 03 assumed as a judgement call, which is the point of doing
+the geometry: the assumption is now a calculation.
+
+### 5.2 Break-even altitude: $\varepsilon = 16$ versus $\varepsilon = 25$
+
+**The question.** Same 500 kN engine, same throat, same $p_c = 10$ MPa. Should
+the first stage fly $\varepsilon = 16$ or $\varepsilon = 25$?
+
+**Step 1 — exit conditions for both.** Invert the area–Mach relation
+($\gamma = 1.20$) and apply Eq. 3.5:
+
+| $\varepsilon$ | $M_e$ | $p_e$ (kPa) | $p_e/p_a$ at SL | $A_e$ (m²) | $C_{F,vac}$ | $C_{F,SL}$ |
+|---|---|---|---|---|---|---|
+| 16 | 3.6044 | 67.70 | 0.668 | 0.4993 | 1.7971 | 1.6350 |
+| 25 | 3.9128 | 38.04 | 0.375 | 0.7802 | 1.8424 | 1.5891 |
+
+**Step 2 — check separation before believing either column.** At
+$\varepsilon = 25$, Schmucker (Eq. 3.13) at $M_e = 3.9128$ gives
+$$p_{sep} = 101\,325\,(1.88\times3.9128 - 1)^{-0.64} = 31.0\ \mathrm{kPa}$$
+and $p_e = 38.0$ kPa $> 31.0$ kPa, so Schmucker says **attached**, by a margin
+of 23 %.
+
+Summerfield gives $p_{sep} = 0.4 \times 101\,325 = 40.5$ kPa, and
+$p_e = 38.0$ kPa $< 40.5$ kPa, so Summerfield says **separated**.
+
+**The two criteria disagree about the answer, not merely about the number.**
+For $\varepsilon = 16$ both agree it is attached ($p_e = 67.7$ kPa against
+33.0 kPa Schmucker and 40.5 kPa Summerfield). [J] At $\varepsilon = 25$ you
+would not proceed on either criterion alone: you would run the contour in a
+cold-flow subscale test, or you would treat 25 as the upper bound and design to
+20–22 with margin. This is the real reason booster expansion ratios cluster
+where they do — not because 25 is impossible but because the criteria stop
+being trustworthy right there.
+
+**Step 3 — break-even ambient pressure (Eq. 3.12).**
+$$p_{a,BE} = p_c\,\frac{C_{F,vac}(25)-C_{F,vac}(16)}{25-16}
+= 1.000\times10^{7}\times\frac{1.8424 - 1.7971}{9} = 1.000\times10^{7}\times\frac{0.045303}{9}$$
+$$p_{a,BE} = 50.34\ \mathrm{kPa}$$
+
+**Step 4 — convert to altitude.** In the 1976 US Standard Atmosphere
+troposphere ($T_0 = 288.15$ K, $L = 6.5$ K/km, $R_{air} = 287.05$ J/(kg K)):
+$$h = \frac{T_0}{L}\left[1-\left(\frac{p_a}{p_0}\right)^{\frac{R_{air}L}{g_0}}\right]
+= \frac{288.15}{0.0065}\left[1-\left(\frac{50\,337}{101\,325}\right)^{0.19026}\right]$$
+$$\boxed{h_{BE} = 5.52\ \mathrm{km}}$$
+
+**Step 5 — the thrust histories.**
+
+| $h$ (km) | $p_a$ (kPa) | $F_{16}$ (kN) | $F_{25}$ (kN) | $F_{25}-F_{16}$ (kN) |
+|---|---|---|---|---|
+| 0 | 101.33 | 510.2 | 495.9 | **−14.3** |
+| 2 | 79.50 | 521.1 | 512.9 | −8.2 |
+| 4 | 61.64 | 530.0 | 526.9 | −3.2 |
+| **5.52** | **50.34** | **532.8** | **532.8** | **0.0** |
+| 8 | 35.60 | 543.0 | 547.2 | +4.1 |
+| 12 | 19.33 | 551.2 | 559.9 | +8.7 |
+| 20 | 5.47 | 558.1 | 570.7 | **+12.6** |
+
+In $I_{sp}$ terms: $\varepsilon = 25$ gives **317.3 s vacuum against 309.5 s**
+(+7.8 s) and **273.7 s sea level against 281.6 s** (−7.9 s).
+
+**Step 6 — decide.** A kerolox first stage burning for ~160 s passes 5.5 km at
+roughly T+70 s if it is a typical booster trajectory, so it spends about 40 %
+of its burn below break-even and 60 % above. The integrated impulse gain is
+therefore **positive but small**, and it is bought with 56 % more exit area
+(0.780 m² against 0.499 m²), 25 % more divergent length, more nozzle mass, and
+a separation margin that two respectable criteria disagree about.
+
+[J] **Recommendation: $\varepsilon = 16$**, which is also what the F-1 and
+Merlin 1D chose at the same $p_e/p_a$. The exception is a stage that separates
+high — an Atlas-style sustainer, or a booster whose first stage burns to 70 km
+— where the impulse integral swings decisively the other way. Note also that
+the *vehicle* answer differs from the *engine* answer: if the stage is
+thrust-limited off the pad (T/W barely above 1.2), the 14 kN per engine you
+lose at lift-off costs gravity loss immediately, and that alone can settle it.
+
+**Sanity check.** The RS-27 → RS-27A change is exactly this trade run in
+reverse and in flight hardware: enlarging the nozzle from $\varepsilon = 8$ to
+12 *lowered* sea-level thrust from 971 kN to 890 kN and sea-level $I_{sp}$ from
+264 s to 255 s, while raising vacuum $I_{sp}$ from 295 s to 302 s
+[_verify-liquid, RS-27A block]. Delta II flew the version with less sea-level
+thrust on purpose. Our numbers say that is the right sign and the right
+magnitude.
+
+### 5.3 RS-25 at sea level: separation station and side-load magnitude
+
+**Given** [_verify-liquid, RS-25 block]: $p_c = 20.64$ MPa (2,994 psia) at
+109 % power level, $\varepsilon = 77.5$ (the aerodynamics-literature value; the
+L3Harris geometric value is 69 — see §6.2, and Step 5 below repeats the
+calculation there). Exit diameter taken as 2.4 m, so
+$A_e = \pi(1.2)^2 = 4.524$ m² and $A_t = 4.524/77.5 = 0.05837$ m²
+($D_t = 272.6$ mm). $\gamma = 1.20$, $p_a = 101.325$ kPa.
+
+**Step 1 — full-power separation station.** Solve Eq. 3.13 simultaneously with
+the isentropic wall-pressure relation:
+$$\frac{p_c}{\left(1+0.1\,M^2\right)^{6}} = p_a\left(1.88M-1\right)^{-0.64}$$
+Bisection between $M = 1.05$ and $M_e = 4.7066$ gives
+$$M_{sep} = 4.4762,\quad \frac{A_{sep}}{A_t} = 56.04,\quad
+p_{wall} = 28.11\ \mathrm{kPa},\quad \frac{p_{sep}}{p_a} = 0.277$$
+$$r_{sep} = r_t\sqrt{56.04} = 0.13631\times7.486 = 1.0204\ \mathrm{m},\qquad
+\frac{r_{sep}}{r_e} = 0.850$$
+
+**Step 2 — the start transient, which is where the trouble lives.** Repeat at
+fractions of full chamber pressure:
+
+| $p_c$ (% FPL) | $p_c$ (MPa) | $M_{sep}$ | $A_{sep}/A_t$ | $r_{sep}/r_e$ | $p_{wall}$ (kPa) | $p_a - p_{wall}$ (kPa) |
+|---|---|---|---|---|---|---|
+| 10 | 2.06 | 3.089 | 7.63 | 0.314 | 37.10 | 64.2 |
+| 20 | 4.13 | 3.505 | 13.87 | 0.423 | 33.68 | 67.7 |
+| 30 | 6.19 | 3.748 | 19.69 | 0.504 | 32.03 | 69.3 |
+| 50 | 10.32 | 4.054 | 30.67 | 0.629 | 30.22 | 71.1 |
+| 80 | 16.51 | 4.340 | 46.15 | 0.772 | 28.75 | 72.6 |
+| 100 | 20.64 | 4.476 | 56.04 | 0.850 | 28.11 | 73.2 |
+
+The separation point sweeps from 31 % to 85 % of the exit radius as the engine
+comes up. **That sweep is the side-load problem**: a moving separation front
+traverses most of the nozzle in a few hundred milliseconds.
+
+**Step 3 — side load, case A: separation-line wander within FSS.** Cold-flow
+measurements show the separation line is not a perfect circle; it wanders
+axially by a few per cent of the local radius. Take an asymmetry extent
+$\Delta x = 0.05\,r_{sep} = 51$ mm with $\Delta p = p_a - p_{wall} = 73.2$ kPa
+and $\bar r = r_{sep} = 1.020$ m. Eq. 3.14:
+$$F_{side} = 2 \times 73\,216 \times 1.020 \times 0.051 = \boxed{7.6\ \mathrm{kN}}$$
+
+Even taking $\Delta x = 0.10\,r_{sep}$ this is only 15 kN — on a nozzle whose
+axial thrust is 1.75 MN, under 1 %. **Wander alone does not explain the
+observed loads.**
+
+**Step 4 — side load, case B: an FSS/RSS split.** Now let one half of the
+circumference be in RSS (wall pressure downstream of reattachment
+$\approx 1.2\,p_a = 121.6$ kPa) and the other in FSS ($28.1$ kPa), over the
+region from the separation station to the exit. Model that region as a
+truncated cone from $r_{sep} = 1.020$ m to $r_e = 1.200$ m with a local wall
+angle of 12°:
+$$\Delta x = \frac{1.200-1.020}{\tan 12°} = \frac{0.180}{0.21256} = 0.847\ \mathrm{m},
+\qquad \bar r = 1.110\ \mathrm{m}$$
+$$\Delta p = 121\,590 - 28\,108 = 93.5\ \mathrm{kPa}$$
+$$F_{side} = 2 \times 93\,482 \times 1.110 \times 0.847 = \boxed{176\ \mathrm{kN}}$$
+
+**Step 5 — repeat with $\varepsilon = 69$.** The separation *station* is
+identical in Mach number and wall pressure — Eq. 3.13 does not know the exit
+area — but the throat is larger ($D_t = 288.9$ mm) so $A_{sep}/A_t = 56.04$
+maps to $r_{sep} = 1.081$ m, i.e. $r_{sep}/r_e = 0.90$. The FSS wander case
+rises to 8.6 kN and the FSS/RSS case falls slightly because the remaining band
+is shorter. **The 69-versus-77.5 dispute moves the side-load estimate by under
+10 %** — another reason it cannot be settled with performance or loads data
+(§6.2).
+
+**Step 6 — read the result.** Two orders of magnitude separate the two
+mechanisms: **~8 kN for separation-line wander, ~180 kN for a topology flip.**
+The measured start-transient side loads on large bell nozzles are in the
+hundreds of kN `[OMK05]`, `[Ostlund02]`, which is case B, not case A.
+
+The engineering conclusions follow immediately and are the reason to do this
+calculation at all:
+
+1. A separation *criterion* tells you where the flow leaves the wall. It tells
+   you almost nothing about the load, because the load is set by the
+   *topology*, which the criteria do not model.
+2. Mitigation should target the FSS↔RSS transition — contour shaping, start
+   sequencing to cross the window fast — not the separation point itself.
+3. The nozzle must be structurally qualified against a transient load that is
+   ~10 % of its own axial thrust and lasts tens of milliseconds. That is what
+   the stiffening rings and the gimbal-bearing sizing are for.
+
+**Sanity check, and an honest caveat.** Both criteria predict the RS-25 should
+be separated at sea level at full power ($p_e = 18.7$ kPa against $p_{sep} =
+28.1$ kPa), yet the engine is observed to flow full at mainstage. The
+resolution, as Module 02 §5.3 says, is that both criteria were fitted to
+conical nozzles in FSS and the RS-25 is a thrust-optimised contour operating in
+RSS, where "separated" and "flowing full" are not exclusive. The criteria are
+still telling you something true: this nozzle lives at the edge, and the
+transient is where it bites. [J] Treat Eq. 3.14 as a way to compare mechanisms
+and bracket magnitudes, not as a load specification — a real side-load
+prediction needs unsteady CFD validated against subscale cold flow, which is
+exactly what `[Ostlund02]` is about.
+
+### 5.4 RL10B-2: what the extendable extension is worth
+
+**The question.** The RL10B-2 deploys a carbon–carbon extension that takes it
+from $\varepsilon = 77$ retracted to $\varepsilon = 285$ deployed
+[_verify-liquid, RL10B-2 block]. How many seconds of $I_{sp}$ is that?
+
+**Step 1 — note what we do not need to know.** The RL10B-2's chamber pressure
+is **not reliably published**; the reference file gives ~44 bar from a
+secondary source and explicitly says not to print it as fact. This would be
+fatal for most performance questions. It is not fatal here, because of §3.5:
+**vacuum $C_F$ depends only on $\gamma$ and $\varepsilon$.** Set $p_a = 0$ and
+$p_c$ cancels out of the ratio entirely. Verify it numerically at the end.
+
+**Step 2 — vacuum thrust coefficients.** With $\gamma = 1.20$
+(LOX/LH2, frozen; see Step 5 for the sensitivity):
+
+| $\varepsilon$ | $M_e$ | $p_e/p_c$ | $C_{F,vac}$ |
+|---|---|---|---|
+| 77 | 4.7020 | $9.12\times10^{-4}$ | 1.9345 |
+| 85 | 4.7729 | $8.06\times10^{-4}$ | 1.9413 |
+| 285 | 5.6696 | $1.784\times10^{-4}$ | 2.0129 |
+
+**Step 3 — the ratio, and the $I_{sp}$ gain.** Anchor on the published
+$I_{sp,vac} = 465.5$ s at $\varepsilon = 285$ — the highest of any flown
+chemical engine — rather than trying to predict it, since Module 03 WE3 showed
+a single-$\gamma$ model reproduces hydrogen $I_{sp}$ only by cancelling errors.
+
+$$I_{sp}(\varepsilon_1) = I_{sp}(285)\,\frac{C_{F,vac}(\varepsilon_1)}{C_{F,vac}(285)}$$
+
+$$I_{sp}(77) = 465.5\times\frac{1.9345}{2.0129} = 447.4\ \mathrm{s}
+\quad\Rightarrow\quad \boxed{\Delta I_{sp} = +18.1\ \mathrm{s}}$$
+
+$$I_{sp}(85) = 465.5\times\frac{1.9413}{2.0129} = 448.9\ \mathrm{s}
+\quad\Rightarrow\quad \boxed{\Delta I_{sp} = +16.6\ \mathrm{s}}$$
+
+(The 85:1 case is included because some secondary tables quote a retracted
+ratio in the low 80s rather than the 77 the SEP/AIAA nozzle literature gives;
+the answer moves by 1.5 s, which is smaller than the disagreement between
+sources.)
+
+**Step 4 — geometric cross-check.** The extension's published exit diameter is
+just over 2.1 m [_verify-liquid]. At $\varepsilon = 285$ that implies
+$$A_e = \pi(1.05)^2 = 3.464\ \mathrm{m^2},\qquad A_t = \frac{3.464}{285} = 0.012153\ \mathrm{m^2},
+\qquad D_t = 124.4\ \mathrm{mm}$$
+and a 15° cone to that area ratio would be
+$L = [r_t(\sqrt{285}-1) + 1.5r_t(\sec15°-1)]/\tan 15° = 3.70$ m, of which an
+80 % bell would be **2.96 m** — against a published extension length of ~2.5 m
+sitting downstream of the fixed section. The numbers close. A 124 mm throat
+passing 110.1 kN of thrust is also consistent: $C_{F,vac} = 2.013$ implies
+$p_c = F/(C_F A_t) = 110\,100/(2.013\times0.012153) = 45.0$ bar, which lands on
+top of the ~44 bar the reference file flags as low-confidence. **That is a
+useful outcome: the geometry and thrust are self-consistent with ~45 bar, which
+is corroboration, not a source.** Do not promote it to a published figure.
+
+**Step 5 — sensitivity, honestly.** The one real weakness is $\gamma$:
+
+| $\gamma$ | $\Delta I_{sp}$, 77 → 285 | $\Delta I_{sp}$, 85 → 285 |
+|---|---|---|
+| 1.14 | +23.2 s | +21.3 s |
+| 1.18 | +19.7 s | +18.0 s |
+| **1.20** | **+18.1 s** | **+16.6 s** |
+| 1.25 | +14.7 s | +13.3 s |
+
+**Step 6 — compare with the published record, and disagree with it.** The
+reference file's RL10B-2 block states the extension "is worth ~30 s of Isp".
+The gas dynamics does not support that at any plausible $\gamma$. The
+manufacturer's own family table is the better check: RL10A-4-2 at 451.0 s
+versus RL10B-2 at 465.5 s is a **14.5 s** step, and the nozzle is the dominant
+difference between them [_verify-liquid, RL10C-1 block, L3Harris table].
+**14.5 s measured, 16.6–18.1 s computed, "~30 s" asserted.** The first two
+agree within the model's error; the third is an unsourced round number that has
+propagated. [J] Quote 15–18 s.
+
+**Sanity check — is 17 s worth a deployment mechanism?** Put it against the
+mass it costs. The extension is a large share of a 301 kg engine, and Vinci's
+nozzle is ~70 % of its engine mass [_verify-liquid], so call the extension plus
+its mechanism 150 kg. Take an upper stage with 20,000 kg of propellant and
+5,000 kg burnout mass including the deployed nozzle:
+
+- **Deployed, $\varepsilon = 285$, $I_{sp} = 465.5$ s:**
+  $\Delta v = 465.5\times9.80665\times\ln(25\,000/5\,000) = 7\,347$ m/s.
+- **Fixed short nozzle, $\varepsilon = 77$, $I_{sp} = 448.9$ s, and 150 kg
+  lighter:** $\Delta v = 448.9\times9.80665\times\ln(24\,850/4\,850) =
+  7\,193$ m/s.
+
+The extension wins by **154 m/s** even after paying for itself in mass — and it
+wins by more on a stage with a higher mass ratio, which is where high-$\varepsilon$
+upper stages live. That is why programmes accept a single-point-failure
+mechanism with no abort mode.
