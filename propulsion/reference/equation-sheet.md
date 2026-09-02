@@ -1887,3 +1887,514 @@ $$\varepsilon_{em}\sigma_{SB}T_w^4 = h_g(T_{aw} - T_w)$$
 - **Tag** [F] · **Code** —
 
 ---
+
+## Module 12 — Feed Systems and Turbopumps
+
+### 12-3.1 — Feed-system pressure budget
+
+$$p_{\text{supply}} = p_{c,\text{inj}} + \Delta p_{\text{inj}} + \Delta p_{\text{cool}} + \Delta p_{\text{line}} + \Delta p_{\text{valve}} \pm \Delta p_{\text{accel}} \pm \Delta p_{\text{dyn}}$$
+
+- **Variables** — $p_{\text{supply}}$ tank ullage pressure (pressure-fed) or pump discharge pressure (pump-fed) [Pa]; $p_{c,\text{inj}}$ chamber pressure at the injector face [Pa]; $\Delta p_{\text{inj}}$ injector drop [Pa]; $\Delta p_{\text{cool}}$ regenerative-jacket drop [Pa], zero on the oxidiser side of almost every engine; $\Delta p_{\text{line}}$, $\Delta p_{\text{valve}}$ distributed and lumped losses [Pa]; $\Delta p_{\text{accel}} = \rho a z$ head from vehicle acceleration over height $z$ [Pa]; $\Delta p_{\text{dyn}} = \tfrac12\rho V^2$ dynamic head at the injector inlet [Pa].
+- **Meaning** — everything the feed system must produce, itemised. The first sheet of paper on any engine.
+- **Assumes** — steady flow; single phase; no significant density change along the path.
+- **Fails when** — the coolant goes supercritical and expands (the RS-25 hydrogen jacket density falls threefold between inlet and outlet, so $\Delta p_{\text{cool}}$ is not a simple friction term); the propellant flashes in the line.
+- **Tag** [F] · **Code** —
+- **Alias** — 06-3.13, 11-3.12, 13-3.1, 14-3.5 are the same budget at different levels of detail.
+
+### 12-3.2 — Tank wall mass
+
+$$m_{\text{tank}} \approx k_t\,j\,\frac{p_t V}{\sigma/\rho}
+\qquad k_t \approx 1.5\ (\text{sphere}) \to 2.0\ (\text{cylinder})$$
+
+- **Variables** — $m_{\text{tank}}$ tank wall mass [kg]; $p_t$ tank pressure [Pa]; $V$ enclosed volume [m³]; $\sigma/\rho$ material specific strength [J/kg]; $j$ design factor, 1.25–1.5 on yield for flight tanks [—]; $k_t$ shape factor [—].
+- **Meaning** — tank mass is proportional to $p_t V$ over specific strength; this is why pressure-fed chamber pressure stops at 2–3 MPa.
+- **Assumes** — membrane (thin-wall) behaviour; pressure-dominated design; no buckling or launch-load case governing.
+- **Fails when** — the tank is stability-critical rather than strength-critical (a large, lightly pressurised booster tank is sized by compressive buckling, and this then *underestimates* mass badly); for COPVs, where the liner carries no load and the figure of merit is $pV/W$ instead.
+- **Tag** [F] [E] · **Code** —
+- **Alias** — 13-3.6 writes it as $m_{tank} \approx p_{tank}V\rho_s\Phi/\sigma$ with $\Phi \approx 2$–3.
+
+### 12-3.3 — Ideal pressurant mass
+
+$$m_g = \frac{p_t V}{R_g T_g},\qquad R_g = \frac{R_u}{\mathcal{M}_g}$$
+
+- **Variables** — $m_g$ pressurant mass [kg]; $p_t$ tank pressure [Pa]; $V$ volume to be displaced [m³]; $R_g$ specific gas constant of the pressurant [J/(kg·K)]; $T_g$ gas temperature in the tank [K]; $\mathcal{M}_g$ [kg/kmol].
+- **Meaning** — the ideal-gas pressurant inventory; helium's low $\mathcal{M}$ is exactly why it is used despite the cost.
+- **Assumes** — ideal gas; uniform ullage temperature; gas fills exactly the propellant volume; no dissolution.
+- **Fails when** — the gas is cold and dense (helium at 300 bar is 17 % denser than ideal); the ullage stratifies (it always does); the gas dissolves in the liquid (helium in LOX and NTO is a real loss, order 1–3 %).
+- **Tag** [F] [A] · **Code** `pressurant_mass(p_tank, V_prop, R_g, T_g)`
+
+### 12-3.4 — Pressurant with collapse factor
+
+$$m_{g,\text{req}} = Z_c\,\frac{p_t V}{R_g T_{g,\text{in}}}$$
+
+- **Variables** — $Z_c$ collapse factor [—]; $T_{g,\text{in}}$ temperature of the gas as delivered to the tank [K]; others as 12-3.3.
+- **Meaning** — the real inventory, after the ullage gas cools against cold walls and cold liquid. Typical $Z_c$: 1.0–1.2 for a small, fast-emptying tank with warm gas into a storable; 1.3–1.6 for a large storable tank over a long burn; **2–4 for helium into liquid hydrogen**, where the wall and liquid sit at 20 K and the incoming helium is at 250 K or more.
+- **Assumes** — $Z_c$ is calibrated for the tank geometry, fill fraction, ramp rate and propellant.
+- **Fails when** — used outside the geometry it was fitted to. The honest replacement is a two-dimensional transient heat-and-mass-transfer analysis, not a coefficient.
+- **Tag** [E] [J] · **Code** —
+
+### 12-3.5 — Deliverable mass from a blowdown bottle
+
+$$m_{\text{delivered}} = \frac{V_b}{R_g T_b}\left(\frac{p_i}{Z_i} - \frac{p_f}{Z_f}\right)$$
+
+- **Variables** — $V_b$ bottle volume [m³]; $p_i, p_f$ initial and final bottle pressure [Pa]; $Z_i, Z_f$ compressibility factors [—]; $T_b$ bottle gas temperature [K]; $R_g$ [J/(kg·K)].
+- **Meaning** — how much gas a high-pressure bottle actually gives up between two pressures.
+- **Assumes** — isothermal blowdown, i.e. the bottle has time to re-absorb heat from its surroundings.
+- **Fails when** — the blowdown is fast. Adiabatic blowdown of helium from 300 bar drops the bottle gas temperature by well over 100 K; the residual gas is denser than the isothermal calculation says and you deliver **less** than predicted. Real systems sit between and are usually sized on the adiabatic case with the isothermal case as the optimistic bound.
+- **Tag** [F] [A] · **Code** `stored_gas_mass(p, V, R, T, Z)`
+
+### 12-3.6 — Pressurant bottle mass
+
+$$m_{\text{bottle}} = \frac{p_i V_b}{g_0\,(pV/W)}$$
+
+- **Variables** — $m_{\text{bottle}}$ [kg]; $p_i$ initial pressure [Pa]; $V_b$ [m³]; $pV/W$ vessel performance factor [m]; $g_0$ [m/s²].
+- **Meaning** — the mass of the pressure vessel itself, from a single figure of merit that spans metal and composite tanks.
+- **Assumes** — burst-pressure-governed design with the standard COPV factors of safety.
+- **Fails when** — stress rupture, impact damage tolerance or liner buckling govern instead — which for long-duration missions they frequently do, and the achievable $pV/W$ drops.
+- **Tag** [E] [J] · **Code** —
+
+### 12-3.7 — Line friction loss and Colebrook friction factor
+
+$$\Delta p_f = f\,\frac{L}{D}\,\frac{1}{2}\rho V^2, \qquad
+\frac{1}{\sqrt f} = -2\log_{10}\!\left(\frac{\varepsilon/D}{3.7} + \frac{2.51}{Re\sqrt f}\right)$$
+
+- **Variables** — $f$ Darcy friction factor [—]; $L$ line length [m]; $D$ internal diameter [m]; $\rho$ [kg/m³]; $V$ bulk velocity [m/s]; $\varepsilon$ absolute roughness [m] (1.5 µm drawn stainless, 45 µm commercial steel); $Re = \rho V D/\mu$ [—].
+- **Meaning** — distributed friction in a feed line. Colebrook is implicit; the explicit Swamee–Jain form $f = 0.25/[\log_{10}(\varepsilon/3.7D + 5.74/Re^{0.9})]^2$ is within 1 % over $5\times10^3 < Re < 10^8$ and is what the worked examples use.
+- **Assumes** — fully developed, single-phase, incompressible, steady flow in a straight round pipe.
+- **Fails when** — the line is short relative to its entrance length (rocket feed lines usually are, $L/D$ of 10–20, and friction is then small compared with fittings); two-phase flow; a supercritical coolant whose density changes.
+- **Tag** [F] [E] · **Code** —
+- **Alias** — 11-3.10/3.11 use Darcy–Weisbach with Haaland instead of Colebrook.
+
+### 12-3.8 — Minor (fitting) losses
+
+$$\Delta p_m = \left(\sum K_i\right)\frac{1}{2}\rho V^2$$
+
+- **Variables** — $K_i$ loss coefficients [—]; $\rho$ [kg/m³]; $V$ [m/s].
+- **Meaning** — the losses that actually dominate a short rocket feed line. Typical $K$: sharp-edged tank outlet 0.5; well-rounded inlet 0.05; 90° long-radius elbow 0.2–0.3; mitre bend 1.1; open ball valve 0.05–0.1; open globe/poppet main valve 3–10; sudden expansion $(1-A_1/A_2)^2$; bellows 2–4 per convolution set; filter 5–30 depending on mesh and cleanliness.
+- **Assumes** — turbulent flow; components far enough apart not to interact.
+- **Fails when** — fittings are adjacent (a bend immediately downstream of a valve can be much worse than the sum); a filter loads with debris — the failure that shows up as a slowly rising $\Delta p$ across a test series and ends with a starved engine.
+- **Tag** [E] · **Code** —
+
+### 12-3.9 — Polytropic blowdown of a tank ullage
+
+$$p = p_i\left(\frac{V_{u,i}}{V_u}\right)^n, \qquad
+BR \equiv \frac{p_i}{p_f} = \left(\frac{V_{u,f}}{V_{u,i}}\right)^n$$
+
+- **Variables** — $p_i, p_f$ initial and final ullage pressure [Pa]; $V_{u,i}, V_{u,f}$ initial and final ullage volume [m³]; $n$ polytropic exponent [—]; $BR$ blowdown ratio [—].
+- **Meaning** — how tank pressure decays as propellant leaves. $n = 1$ isothermal (slow burn, good heat transfer — the usual assumption for long storable burns); $n = \gamma$ adiabatic (1.67 helium, 1.40 N₂ — the right bound for a fast burn).
+- **Assumes** — uniform ullage; no condensation; no gas dissolving.
+- **Fails when** — the burn is long enough that the tank exchanges significant heat with the environment (then $n < 1$ is possible); propellant vapour contributes to ullage pressure, which for a volatile propellant it does.
+- **Tag** [F] [A] · **Code** `blowdown_pressure(p_i, V_i, V, n)`
+- **Alias** — 28/29 use the same law for cold-gas tanks; `usable_fraction` derives from it.
+
+### 12-3.10 — Pressure-fed / pump-fed crossover burn time
+
+$$t_{b,\text{crit}} = \frac{\rho\,m_0}{C_p\,\Delta p_t\,\dot m} + \frac{k_{TP}}{C_p\,\eta_p}$$
+
+- **Variables** — $t_{b,\text{crit}}$ burn time at which the two architectures weigh the same [s]; $\rho$ bulk propellant density [kg/m³]; $m_0$ turbopump fixed mass [kg]; $C_p$ pressurisation penalty coefficient [kg/J]; $\Delta p_t$ pressure the feed system must generate [Pa]; $\dot m$ total propellant flow [kg/s]; $k_{TP}$ turbopump marginal mass [kg/W]; $\eta_p$ [—].
+- **Meaning** — short burns favour pressure-fed, long burns favour pumps, and this is where the line sits.
+- **Assumes** — mass is the only currency; tanks are strength-critical; both architectures deliver the same $\Delta p$; turbine propellant consumption and gas-generator plumbing are inside $m_0$ and $k_{TP}$.
+- **Fails when** — reliability, restart count, development cost or schedule dominate, which is often. Treat the result as the *mass* answer, not the *design* answer.
+- **Tag** [J] · **Code** —
+
+### 12-3.11 — Euler turbomachine equation
+
+$$H_{\text{Euler}} = \frac{u_2 c_{u2}}{g_0}$$
+
+- **Variables** — $H_{\text{Euler}}$ ideal head rise [m]; $u_2 = \omega D_2/2$ impeller tip speed [m/s]; $c_{u2}$ absolute tangential velocity of fluid leaving the impeller [m/s]; $g_0$ [m/s²].
+- **Meaning** — **notice what is absent: the fluid.** Euler head depends only on velocities. A pump develops the same *head* on hydrogen as on LOX at the same speed — and therefore fourteen times less *pressure*. The single most important sentence in turbopump design.
+- **Assumes** — steady, axisymmetric, uniform flow at inlet and exit; no pre-whirl; all shaft work goes into angular momentum of the through-flow.
+- **Fails when** — there is significant disc friction or recirculation (both real, and why actual head is 10–20 % below Euler head even before the diffuser); leakage past the front shroud recirculates flow.
+- **Tag** [F] · **Code** `pump_head(dp, rho)` for the inverse relation
+
+### 12-3.12 — Slip and the exit velocity triangle
+
+$$c_{u2} = \sigma u_2 - \frac{c_{m2}}{\tan\beta_2},
+\qquad c_{m2} = \frac{Q}{\pi D_2 b_2}$$
+
+- **Variables** — $\sigma$ slip factor [—]; $\beta_2$ blade exit angle from tangential [rad or °]; $c_{m2}$ meridional velocity at impeller exit [m/s]; $b_2$ exit blade width [m]; $Q$ volumetric flow [m³/s]; $D_2$ [m].
+- **Meaning** — the real tangential velocity is less than blade speed because the flow slips; backswept blades ($\beta_2 < 90°$) trade head for a stable, rising head–flow curve.
+- **Assumes** — full blade passages; no blockage correction (real blades block 5–10 % of the area — include it or you will over-predict $c_{m2}$).
+- **Fails when** — at very low flow the passage stalls and the whole velocity-triangle picture breaks down.
+- **Tag** [F] [E] · **Code** —
+
+### 12-3.13 — Pump shaft power and efficiency chain
+
+$$P_{\text{shaft}} = \frac{\dot m\,\Delta p_p}{\rho\,\eta_p}
+= \frac{\dot m\,g_0 H}{\eta_p}, \qquad
+\eta_p = \eta_h\,\eta_v\,\eta_m$$
+
+- **Variables** — $P_{\text{shaft}}$ [W]; $\dot m$ [kg/s]; $\Delta p_p$ pump pressure rise [Pa]; $\rho$ [kg/m³]; $H$ head [m]; $\eta_h$ hydraulic (blade and diffuser losses), $\eta_v$ volumetric (seal and balance-piston leakage), $\eta_m$ mechanical (disc friction, bearing and seal drag) [—].
+- **Meaning** — the power one pump absorbs, and where it is lost. Typical rocket values: $\eta_p = 0.55$–0.65 for small or low-specific-speed stages, 0.70–0.80 for well-matched large stages. Terrestrial process pumps reach 0.88; rocket pumps trade efficiency for mass and suction performance.
+- **Assumes** — incompressible flow.
+- **Fails when** — hydrogen at high pressure ratio, where the density rise through the pump is 10–20 % and $\int dp/\rho$ must be integrated instead.
+- **Tag** [F] [E] · **Code** `pump_power(mdot, dp, rho, eta)`, `pump_head(dp, rho)`
+- **Alias** — 13-3.2, identical.
+
+### 12-3.14 — Specific speed
+
+$$N_s = \frac{\omega\sqrt{Q}}{(g_0 H)^{3/4}}$$
+
+- **Variables** — $N_s$ [—, dimensionless SI form]; $\omega$ [rad/s]; $Q$ volumetric flow through one stage, one flow path [m³/s]; $H$ head rise *per stage* [m]; $g_0$ [m/s²].
+- **Meaning** — the one number that picks the machine type: low $N_s$ → radial centrifugal, high $N_s$ → axial.
+- **Assumes** — geometric similarity; single stage; single suction.
+- **Fails when** — the machine is far off its best efficiency point. **⚠ Units:** US practice uses $N_s = N\sqrt{Q}/H^{3/4}$ with $N$ in rpm, $Q$ in US gpm, $H$ in feet, which is larger than the SI dimensionless value by a factor of **2733**. The NASA monographs use the US form; a number near 1 is dimensionless, a number near 2000 is US. Never mix them.
+- **Tag** [F] · **Code** `specific_speed_SI(omega, Q, H)`
+
+### 12-3.15 — Available NPSH
+
+$$\mathrm{NPSH_a} = \frac{p_t - p_v - \Delta p_{\text{line}}}{\rho g_0} + z\,\frac{a}{g_0}$$
+
+- **Variables** — $\mathrm{NPSH_a}$ [m]; $p_t$ tank ullage pressure [Pa]; $p_v$ propellant vapour pressure **at the local bulk temperature** [Pa]; $\Delta p_{\text{line}}$ suction-line loss [Pa]; $\rho$ [kg/m³]; $z$ height of liquid surface above the pump inlet [m]; $a$ axial acceleration [m/s²].
+- **Meaning** — the head margin above vaporisation available at the impeller eye.
+- **Assumes** — steady flow; uniform liquid temperature; no entrained vapour.
+- **Fails when** — the propellant is stratified (a cryogen warms at the surface and the *bulk* is colder than saturation, which helps; but a self-pressurised tank's liquid at the outlet may be at saturation, the worst case); during transients — a throttle step, stage separation, or the start of a slosh cycle can take NPSH away for a few hundred milliseconds.
+- **Tag** [F] · **Code** `npsh_available(p_tank, p_vapor, rho, z, dp_line, accel)`
+- **Alias** — 05-3.9, identical.
+
+### 12-3.16 — Suction specific speed and required NPSH
+
+$$N_{ss} = \frac{\omega\sqrt{Q}}{(g_0\,\mathrm{NPSH})^{3/4}}
+\qquad\Longrightarrow\qquad
+\mathrm{NPSH_r} = \frac{1}{g_0}\left(\frac{\omega\sqrt{Q}}{N_{ss}}\right)^{4/3}$$
+
+- **Variables** — $N_{ss}$ [—, SI dimensionless; multiply by 2733 for the US rpm–gpm–ft form]; $\mathrm{NPSH_r}$ the NPSH at which the stage loses a defined amount of head, conventionally 2 % or 3 % [m].
+- **Meaning** — how hard a given inducer can suck. Typical attainable $N_{ss}$: **2–3** plain centrifugal impeller with no inducer; **4–6** with a modest inducer; **7–10** a well-designed rocket inducer; **>10** claimed on some hydrogen inducers exploiting thermodynamic effects.
+- **Assumes** — geometric and cavitation similarity; a fixed definition of "required".
+- **Fails when** — the criterion changes. NPSH at 3 % head loss is not NPSH at incipient cavitation (which can be 2–3× higher), and is not NPSH free of rotating cavitation (higher still). Suppressing head loss and suppressing cavitation instability are different requirements.
+- **Tag** [F] [E] · **Code** `suction_specific_speed_SI(omega, Q, NPSH)`
+
+### 12-3.17 — Thermodynamic suppression head
+
+$$B \sim \frac{\rho_l}{\rho_v}\cdot\frac{c_{p,l}\,\Delta T}{h_{fg}},
+\qquad
+\mathrm{TSH} \approx \frac{1}{\rho_l g_0}\frac{dp_v}{dT}\,\Delta T$$
+
+- **Variables** — $B$ thermodynamic parameter [—]; $\rho_l, \rho_v$ liquid and vapour density [kg/m³]; $c_{p,l}$ [J/(kg·K)]; $h_{fg}$ latent heat [J/kg]; $\Delta T$ local temperature depression [K]; $dp_v/dT$ slope of the vapour-pressure curve [Pa/K]; TSH [m].
+- **Meaning** — why cryogens cheat: vaporising a little liquid cools the surroundings, lowering local $p_v$ and suppressing further cavitation. Hydrogen benefits enormously, water and storables barely at all.
+- **Assumes** — thermal equilibrium between cavity and surrounding liquid, a strong assumption at high speed.
+- **Fails when** — used predictively. TSH is taken as a *credit* validated by test, never as a design margin taken on faith.
+- **Tag** [E] [J] · **Code** —
+
+### 12-3.18 — Pump affinity laws
+
+$$\frac{Q_2}{Q_1} = \frac{N_2}{N_1}\left(\frac{D_2}{D_1}\right)^3,\qquad
+\frac{H_2}{H_1} = \left(\frac{N_2}{N_1}\right)^2\left(\frac{D_2}{D_1}\right)^2,\qquad
+\frac{P_2}{P_1} = \frac{\rho_2}{\rho_1}\left(\frac{N_2}{N_1}\right)^3\left(\frac{D_2}{D_1}\right)^5$$
+
+- **Variables** — $Q$ [m³/s]; $H$ [m]; $P$ [W]; $N$ rotational speed [rpm or rad/s, consistently]; $D$ impeller diameter [m]; $\rho$ [kg/m³].
+- **Meaning** — how a geometrically similar pump scales with speed and size.
+- **Assumes** — geometric similarity; equal efficiency; equal flow coefficient; no cavitation; incompressible flow.
+- **Fails when** — Reynolds number changes enough to move efficiency (small pumps are less efficient — the "size effect"); tip clearance does not scale (it never does — clearances are set by tolerance and thermal growth, so small pumps have proportionally larger clearances and lose more); cavitation intervenes.
+- **Tag** [F] [A] · **Code** —
+
+### 12-3.19 — Tip-speed limit from material strength
+
+$$u_{2,\max} \approx \sqrt{\frac{\sigma_{\text{allow}}}{k\,\rho_{\text{mat}}}}$$
+
+- **Variables** — $u_{2,\max}$ [m/s]; $\sigma_{\text{allow}}$ allowable stress at temperature after knockdowns for low-cycle fatigue and any LOX ignition-sensitivity constraint [Pa]; $\rho_{\text{mat}}$ material density [kg/m³]; $k$ geometry factor [—].
+- **Meaning** — the hard ceiling on impeller tip speed, and therefore on head per stage; specific strength is the whole story.
+- **Assumes** — elastic; isothermal; no stress concentration.
+- **Fails when** — at blade roots and the eye fillet, where the concentration factor and low-cycle-fatigue life actually govern; for hydrogen-wetted parts, where hydrogen environment embrittlement can halve the usable strength of a nickel alloy (Module 16).
+- **Tag** [F] [A] · **Code** —
+
+### 12-3.20 — Turbine shaft power
+
+$$P_t = \eta_t\,\dot m_t\,c_p\,T_{t,\text{in}}\left[1 - \pi_t^{-(\gamma-1)/\gamma}\right]$$
+
+- **Variables** — $P_t$ [W]; $\eta_t$ turbine total-to-static efficiency [—]; $\dot m_t$ turbine gas flow [kg/s]; $c_p$ [J/(kg·K)]; $T_{t,\text{in}}$ turbine inlet stagnation temperature [K]; $\pi_t$ total-to-static pressure ratio [—]; $\gamma$ [—].
+- **Meaning** — the power available from expanding drive gas; the supply side of every cycle balance.
+- **Assumes** — calorically perfect gas; adiabatic; no chemical change through the turbine.
+- **Fails when** — the gas recombines or reacts across the stage (fuel-rich kerolox gas contains unburned species and soot, and effective $c_p$ is not the frozen value); the flow is choked in a way that fixes $\dot m$ independent of pressure ratio.
+- **Tag** [F] · **Code** `turbine_power(mdot, cp, T_in, pr, gamma, eta)`
+- **Alias** — 05-3.10, 13-3.3.
+
+---
+
+## Module 13 — Engine Cycles
+
+### 13-3.1 — Pump discharge requirement
+
+$$p_d = p_c + \Delta p_{inj} + \Delta p_j + \Delta p_{lines} + \Delta p_{valves}$$
+
+- **Variables** — all pressures [Pa]; $p_d$ pump discharge; $\Delta p_j$ jacket drop.
+- **Meaning** — the pump (or the tank) must supply chamber pressure plus every downstream loss. The demand side of the cycle balance.
+- **Assumes** — steady state; no significant dynamic-head recovery at the injector.
+- **Fails when** — the coolant is a two-phase or supercritical fluid whose density changes so much through the jacket that "a pressure drop" is not a single well-defined number; a turbine sits in the middle of the circuit, in which case its drop appears here too.
+- **Tag** [F] · **Code** —
+- **Alias** — 06-3.13, 11-3.12, 12-3.1, 14-3.5.
+
+### 13-3.2 — Pump power (per pump)
+
+$$P_{pump,j} = \frac{\dot m_{p,j}\,\Delta p_{p,j}}{\rho_j\,\eta_{p,j}}$$
+
+- **Variables** — $\dot m_p$ [kg/s]; $\Delta p_p$ [Pa]; $\rho$ [kg/m³]; $\eta_p$ [—]; $P$ [W].
+- **Meaning** — shaft power absorbed by one pump.
+- **Assumes** — incompressible liquid; single phase; no leakage or axial-thrust-balance flow charged elsewhere.
+- **Fails when** — the fluid is compressible over the pressure rise (liquid hydrogen at 500 bar genuinely is, a few percent error); balance-piston and bearing-coolant bleeds are a significant fraction of the flow, which they are on hydrogen pumps.
+- **Tag** [F] · **Code** `pump_power(mdot, dp, rho, eta)`
+- **Alias** — 12-3.13, 07-3.9.
+
+### 13-3.3 — The cycle equation
+
+$$\eta_t\,\dot m_t\,c_p\,T_t\left[1-\pi_t^{-\frac{\gamma_t-1}{\gamma_t}}\right] = \frac{1}{\eta_m}\sum_j \frac{\dot m_{p,j}\,\Delta p_{p,j}}{\rho_j\,\eta_{p,j}}$$
+
+- **Variables** — $\eta_t$ turbine efficiency [—]; $\dot m_t$ turbine drive flow [kg/s]; $c_p$ [J/(kg·K)] and $\gamma_t$ [—] of the drive gas; $T_t$ turbine inlet stagnation temperature [K]; $\pi_t$ turbine pressure ratio [—]; $\eta_m$ mechanical efficiency [—]; one term per pump on the right. Both sides [W].
+- **Meaning** — **this single equation determines every cycle.** Turbine supply equals pump demand; the architecture is whatever makes both sides balance at the desired $p_c$.
+- **Assumes** — steady state; calorically perfect drive gas; adiabatic turbine; one shaft (apply per shaft for multi-shaft engines).
+- **Fails when** — the drive gas condenses or reacts across the turbine (hot fuel-rich gas keeps reacting, raising effective $c_p$ by several percent); $\gamma_t$ and $c_p$ vary strongly across the expansion (they do for hydrogen-rich gas); a gearbox loss is large enough that $\eta_m$ is not near unity (the RL10's gearbox runs 0.96–0.97).
+- **Tag** [F] · **Code** `turbine_power(...)` = $\sum$ `pump_power(...)`
+
+### 13-3.4 — Gas-generator flow fraction
+
+$$f_{gg} \approx \frac{K\,p_c}{\bar\rho\;\eta_t\eta_m\eta_p\, c_p T_t\left[1-\pi_t^{-(\gamma_t-1)/\gamma_t}\right]}$$
+
+- **Variables** — $f_{gg}$ fraction of total flow sent to the gas generator [—]; $K \approx 1.4$–1.6 the dimensionless factor by which pump discharge exceeds $p_c$ [—]; $\bar\rho$ mean propellant density [kg/m³]; efficiencies [—]; $c_p$ [J/(kg·K)]; $T_t$ [K]; $\pi_t$ [—].
+- **Meaning** — **the fraction of propellant an open cycle must throw away is directly proportional to chamber pressure and inversely proportional to propellant density.** This is why open-cycle hydrogen engines pay so much and open-cycle kerolox engines less.
+- **Assumes** — both pumps at similar $\Delta p$; one turbine.
+- **Fails when** — the two circuits have very different discharge pressures (hydrogen engines, where the fuel jacket adds tens of bar); use the full sum then.
+- **Tag** [F] · **Code** —
+
+### 13-3.5 — Closed vs open chamber-pressure ratio
+
+$$\frac{p_{c,\text{closed}}}{p_{c,\text{open}}} \sim \frac{\dot m_{t,c}\,T_{t,c}\left[1-\pi_{t,c}^{-\kappa}\right]}{\dot m_{t,o}\,T_{t,o}\left[1-\pi_{t,o}^{-\kappa}\right]},\qquad \kappa=\frac{\gamma_t-1}{\gamma_t}$$
+
+- **Variables** — subscripts $c$, $o$ closed and open cycle; $\dot m_t$ [kg/s]; $T_t$ [K]; $\pi_t$ [—]; $\kappa$ [—].
+- **Meaning** — the chamber pressure a cycle can reach scales as the total turbine power it can generate; a closed cycle runs *all* the propellant through the turbine, so $\dot m_t$ is an order of magnitude larger.
+- **Assumes** — same propellants; same efficiencies; pump discharge dominated by $p_c$.
+- **Fails when** — the structural or thermal limit binds before the power limit does — the BE-4's 140 bar is a choice, not a capability ceiling.
+- **Tag** [J] · **Code** —
+
+### 13-3.6 — Pressure-fed tank mass
+
+$$m_{tank} \approx \frac{p_{tank}\,V\,\rho_s}{\sigma}\cdot\Phi$$
+
+- **Variables** — $m_{tank}$ [kg]; $p_{tank}$ [Pa]; $V$ tank volume [m³]; $\rho_s$ material density [kg/m³]; $\sigma$ allowable stress [Pa]; $\Phi \approx 2$–3 shape and safety-factor multiplier [—].
+- **Meaning** — **tank mass is proportional to pressure times volume**, so a pressure-fed system pays for chamber pressure in structure, linearly, over the whole propellant volume.
+- **Assumes** — membrane stress; thin wall.
+- **Fails when** — buckling rather than burst sizes the wall (large low-pressure tanks); a common bulkhead changes the geometry.
+- **Tag** [F] [A] · **Code** —
+- **Alias** — 12-3.2 with $k_t j$ in place of $\Phi$.
+
+### 13-3.7 — Expander turbine inlet temperature
+
+$$T_t = T_{in} + \frac{Q}{\dot m_f\,c_{p,f}},\qquad Q = \int_{A_w} q\,dA$$
+
+- **Variables** — $T_t$ turbine inlet temperature [K]; $T_{in}$ pump discharge temperature [K]; $Q$ total heat pickup [W]; $\dot m_f$ fuel flow [kg/s]; $c_{p,f}$ coolant specific heat [J/(kg·K)]; $q$ local gas-side heat flux [W/m²]; $A_w$ wetted regen area [m²].
+- **Meaning** — **the expander's turbine inlet temperature is a heat-transfer result, not a design choice.** Everything about the cycle follows from how much heat the chamber can push into the fuel.
+- **Assumes** — all fuel is the coolant; no bypass; single-phase supercritical hydrogen.
+- **Fails when** — part of the fuel bypasses the jacket (a common trim); $c_p$ varies strongly across the pseudo-critical region — for hydrogen above ~15 bar it is well-behaved, for methane near its critical point it is not, one reason a methane expander is hard.
+- **Tag** [F] · **Code** `coolant_bulk_rise(Q, mdot, cp)`
+
+### 13-3.8 — Expander scaling wall
+
+$$\frac{\text{available}}{\text{required}} \propto p_c^{-1.2}\,D_t^{-0.2}$$
+
+- **Variables** — $p_c$ [Pa]; $D_t$ throat diameter [m].
+- **Meaning** — the expander margin degrades **strongly with chamber pressure** and only weakly with engine diameter: heat pickup scales with wetted area while required power scales with $p_c$ and flow. This is why closed expanders stop around 60–70 bar.
+- **Assumes** — geometric similarity; Bartz scaling; constant efficiencies; constant jacket pressure drop.
+- **Fails when** — the jacket pressure drop is *not* constant — and it is not, which turns a weak scaling into a hard wall.
+- **Tag** [F] [J] · **Code** —
+
+### 13-3.9 — Electric-pump battery mass fraction
+
+$$\frac{m_{batt}}{m_{prop}} = \frac{\overline{\Delta p}}{\bar\rho\;\eta_p\,\eta_{inv}\eta_{mot}\,e_b}$$
+
+- **Variables** — $\overline{\Delta p}$ flow-weighted mean pump pressure rise [Pa]; $\bar\rho$ flow-weighted mean propellant density [kg/m³]; $\eta_p, \eta_{inv}, \eta_{mot}$ pump, inverter and motor efficiencies [—]; $e_b$ **usable** battery specific energy [J/kg].
+- **Meaning** — **an electric-pump stage pays a fixed fraction of its propellant mass in permanent dead battery mass**, proportional to chamber pressure and inversely proportional to propellant density and battery specific energy.
+- **Assumes** — constant thrust and mixture ratio; one battery for the whole burn.
+- **Fails when** — packs are jettisoned mid-burn (which is exactly what Rocket Lab does, changing the stage $\Delta v$ integral rather than this ratio); the battery is sized by *power* (C-rate) rather than energy, the case for very short burns.
+- **Tag** [F] [E] · **Code** —
+
+---
+
+## Module 14 — Valves, Plumbing, and Engine Hardware
+
+### 14-3.1 — Orifice flow, mass and volumetric forms
+
+$$\dot m = C_d A \sqrt{2\rho\,\Delta p}, \qquad Q = \frac{\dot m}{\rho} = C_d A \sqrt{\frac{2\Delta p}{\rho}}$$
+
+- **Variables** — $\dot m$ [kg/s]; $Q$ [m³/s]; $C_d$ [—]; $A$ reference geometric area [m²]; $\rho$ [kg/m³]; $\Delta p$ [Pa].
+- **Meaning** — a restriction converts pressure into kinetic energy, and flow scales as the square root of the drop.
+- **Assumes** — single-phase incompressible liquid; no cavitation; steady flow; $\Delta p$ measured between stations far enough from the restriction that velocity heads are recovered or accounted for.
+- **Fails when** — the fluid cavitates or flashes (flow chokes and becomes independent of downstream pressure); the fluid is a gas beyond the critical pressure ratio; the flow is transient on the acoustic transit timescale of the component.
+- **Tag** [F] · **Code** `orifice_mdot(Cd, A, rho, dp)`
+- **Alias** — 07-3.1.
+
+### 14-3.2 — Series effective areas
+
+$$\frac{1}{(C_dA)_{tot}^2} = \sum_i \frac{1}{(C_dA)_i^2}$$
+
+- **Variables** — $(C_dA)_i$ effective areas of components in series [m²].
+- **Meaning** — series resistances add in *pressure drop* at fixed flow, and since $\Delta p \propto \dot m^2/(C_dA)^2$, the reciprocal squares add.
+- **Assumes** — incompressible flow; no pressure-recovery interaction between adjacent components; each $C_d$ measured in a configuration resembling its installed one.
+- **Fails when** — components are close-coupled so the downstream one sees a distorted profile (a valve immediately after an elbow can lose 20 % of its $C_d$); any component cavitates.
+- **Tag** [F] · **Code** —
+
+### 14-3.3 — Valve flow coefficients $C_v$ and $K_v$
+
+$$C_v = Q_{[\mathrm{US\ gpm}]}\sqrt{\frac{SG}{\Delta p_{[\mathrm{psi}]}}}, \qquad K_v = Q_{[\mathrm{m^3/h}]}\sqrt{\frac{SG}{\Delta p_{[\mathrm{bar}]}}}$$
+
+- **Variables** — $SG$ specific gravity relative to water at 60 °F, $\rho/999$ kg/m³ [—]; $Q$ volumetric flow in the stated unit; $\Delta p$ in the stated unit.
+- **Meaning** — a purely empirical capacity index, defined so the same number sizes any liquid by scaling with $\sqrt{SG}$.
+- **Assumes** — fully turbulent, non-cavitating, incompressible flow, with the component in the standard straight-pipe test fixture.
+- **Fails when** — the flow is laminar (very viscous propellant, small trim); cavitation limits the flow; the installed piping differs from the test fixture — the honest correction is a piping-geometry factor $F_P$, where a lot of quiet error lives.
+- **Tag** [E] · **Code** —
+- **Alias** — ⚠ these are *not* SI; convert with 14-3.4 before using them in any equation on this sheet.
+
+### 14-3.4 — $C_v$ / $K_v$ to effective area
+
+$$C_dA = 1.698\times10^{-5}\,C_v = 1.963\times10^{-5}\,K_v \quad [\mathrm{m^2}]$$
+
+- **Variables** — $C_dA$ effective flow area [m²]; $C_v$, $K_v$ [—, unit-bearing].
+- **Meaning** — a $C_v$ of 1000 is an effective area of 17.0 cm², about a 47 mm hole. **Use this to sanity-check vendor data**: if a quoted $C_v$ implies an effective area larger than the valve's own bore, the number is wrong or was measured with pressure recovery included.
+- **Assumes** — everything 14-3.1 and 14-3.3 assume.
+- **Fails when** — in the same places.
+- **Tag** [F] · **Code** —
+
+### 14-3.5 — Pump discharge budget (full form)
+
+$$p_{pump,disch} = p_c + \Delta p_{inj} + \Delta p_{cool} + \Delta p_{valve} + \Delta p_{line} + \Delta p_{manifold} + \rho g h + \tfrac12\rho v^2$$
+
+- **Variables** — all pressures [Pa]; $\rho g h$ static head (small in flight, not small on a test stand); $\tfrac12\rho v^2$ dynamic head at the pump discharge station.
+- **Meaning** — the pump must produce every one of these terms, and each costs turbine power.
+- **Assumes** — steady state; single phase; one-dimensional.
+- **Fails when** — during transients; in the coolant jacket wherever the fluid is supercritical and its density changes by a factor of three along the passage.
+- **Tag** [F] [E] · **Code** —
+- **Alias** — 06-3.13, 11-3.12, 12-3.1, 13-3.1.
+
+### 14-3.6 — Valve cavitation index
+
+$$\sigma = \frac{p_1 - p_v}{p_1 - p_2}$$
+
+- **Variables** — $\sigma$ cavitation index [—]; $p_1$ upstream static pressure [Pa]; $p_2$ downstream static pressure [Pa]; $p_v$ vapour pressure at the local liquid temperature [Pa].
+- **Meaning** — the numerator is the available margin against boiling, the denominator the pressure the valve is asked to throw away. Large $\sigma$ is safe.
+- **Assumes** — single-phase upstream; quasi-steady flow; $p_v$ at the *actual* bulk temperature, which for a partially chilled line is not the tank temperature.
+- **Fails when** — the liquid is near critical (LOX above ~50 bar, LH2 above ~13 bar) so surface tension collapses; for saturated propellants, where $p_1 - p_v \to 0$ by construction. Several definitions circulate — some use $(p_2-p_v)/(p_1-p_2)$, others the reciprocal. **State which you are using.**
+- **Tag** [E] [J] · **Code** —
+- **Alias** — 07-3.3 writes the same group as $K$. ⚠ $\sigma$ here is a cavitation index, not stress or the Bartz correction.
+
+### 14-3.7 — Joukowsky water-hammer surge
+
+$$\Delta p_J = \rho\, a\, \Delta v$$
+
+- **Variables** — $\Delta p_J$ pressure rise at the valve [Pa]; $\rho$ [kg/m³]; $a$ pressure-wave speed in the fluid–pipe system [m/s]; $\Delta v$ change in mean line velocity [m/s].
+- **Meaning** — stopping a liquid column converts its momentum into pressure through a wave; the conversion factor is the acoustic impedance $\rho a$, about $9.3\times10^5$ Pa per (m/s) for LOX in a thin steel line.
+- **Assumes** — closure faster than the pipe period $2L/a$; rigid supports; no cavitation; no line friction; 1-D; small perturbation.
+- **Fails when** — the reflected rarefaction drives pressure below $p_v$ — the column then separates, a vapour cavity forms, and its collapse produces a *second* surge that can exceed the first; closure is slower than $2L/a$ (use 14-3.9); a large gas pocket cushions the event but makes it nonlinear.
+- **Tag** [F] · **Code** —
+
+### 14-3.8 — Korteweg wave speed
+
+$$a = \frac{\sqrt{K_f/\rho}}{\sqrt{1 + \dfrac{K_f D}{E t}}}$$
+
+- **Variables** — $a$ [m/s]; $K_f$ liquid bulk modulus [Pa]; $\rho$ [kg/m³]; $D$ pipe inside diameter [m]; $E$ wall Young's modulus at operating temperature [Pa]; $t$ wall thickness [m].
+- **Meaning** — the effective compressibility is the liquid's own plus the pipe's radial compliance in series; a thin, large-diameter, soft pipe slows the wave and reduces the surge.
+- **Assumes** — thin wall ($D/t > 20$); linear elastic wall; axially unrestrained line; single-phase liquid.
+- **Fails when** — the pipe is thick-walled or heavily reinforced; the line is a bellows or flexible hose (their radial compliance is enormous and $a$ can drop by half); even 0.1 % free gas is entrained, which can halve $a$ again.
+- **Tag** [F] · **Code** —
+
+### 14-3.9 — Slow-closure surge (Michaud / Allievi)
+
+$$\Delta p \approx \Delta p_J \cdot \frac{2L/a}{t_c} = \frac{2\rho L\,\Delta v}{t_c} \qquad (t_c > 2L/a)$$
+
+- **Variables** — $L$ line length from valve to the nearest large-volume reflecting boundary [m]; $t_c$ effective closure time [s]; other symbols as 14-3.7.
+- **Meaning** — for slow closure the surge is set by decelerating the *whole column* over $t_c$, i.e. $\rho L\,dv/dt$, with a factor 2 from the reflection bookkeeping.
+- **Assumes** — linear valve closure characteristic in *flow* (not in stroke); frictionless line; a single reflecting boundary.
+- **Fails when** — the valve's flow-versus-stroke characteristic is strongly nonlinear, which it always is: a ball valve passes most of its flow in the last 20 % of closure, so the *effective* $t_c$ can be a quarter of the mechanical stroke time. This is the most common error in surge analysis; using the effective time is the conservative direction.
+- **Tag** [F] [J] · **Code** —
+
+### 14-3.10 — Regulator force balance
+
+$$p_{out}A_s = F_0 - kx + p_{in}A_{seat} + F_{flow}(x)$$
+
+- **Variables** — $p_{out}$ regulated outlet pressure [Pa]; $A_s$ sensing area [m²]; $F_0$ spring preload [N]; $k$ spring rate [N/m]; $x$ poppet lift [m]; $p_{in}$ inlet pressure [Pa]; $A_{seat}$ seat area [m²]; $F_{flow}(x)$ Bernoulli/jet reaction force on the poppet [N].
+- **Meaning** — the regulator holds outlet pressure by trading spring force against sensing force; opening the poppet compresses the spring, which *lowers* the equilibrium outlet pressure — the origin of droop.
+- **Assumes** — quasi-steady operation; no friction; incompressible or slowly varying flow.
+- **Fails when** — the flow-force term becomes comparable to the spring term (large lift, high $\Delta p$); friction and stiction dominate at small motions; poppet dynamics couple with the downstream volume to produce oscillation.
+- **Tag** [F] [E] · **Code** —
+
+### 14-3.11 — Burst-disk / relief tolerance stack
+
+$$\mathrm{MDP} \ \ge\ p_{burst,max} = p_{burst,nom}(1+\tau) \ \ge\ \mathrm{MEOP}\,\frac{(1+\tau)}{(1-\tau)}$$
+
+- **Variables** — $\tau$ fractional tolerance on burst or relief set pressure [—]; MEOP maximum expected operating pressure [Pa]; MDP maximum design pressure the structure must be qualified to [Pa].
+- **Meaning** — the disk must never open in nominal service (its *minimum* burst above MEOP) and the structure must survive its *maximum* burst. With $\tau = 5$ % this gives MDP $\ge$ 1.105 MEOP — the origin of the "a burst disk costs you 10 % of your structural margin" rule.
+- **Assumes** — symmetric tolerance band, same hot and cold.
+- **Fails when** — temperature shifts the burst pressure (it does); the disk has been pressure-cycled toward fatigue.
+- **Tag** [E] [J] · **Code** —
+
+### 14-3.12 — Choked gas flow through a relief path
+
+$$\dot m = \Gamma(\gamma)\,\frac{C_dA\, p_0}{\sqrt{R T_0}}, \qquad \Gamma(\gamma) = \sqrt{\gamma}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+- **Variables** — $p_0$, $T_0$ stagnation pressure [Pa] and temperature [K] upstream of the throat; $R$ [J/(kg·K)]; $C_dA$ effective throat area [m²]; $\Gamma$ [—].
+- **Meaning** — a choked orifice passes mass in proportion to upstream pressure and inversely to $\sqrt{T_0}$; nothing downstream matters.
+- **Assumes** — pressure ratio above critical (2.05 for helium, 1.89 for nitrogen); calorically perfect gas; adiabatic flow.
+- **Fails when** — real-gas effects matter (helium at 25 MPa and 300 K has $Z \approx 1.13$, so the ideal-gas mass flow is a few percent optimistic); the flow is not choked.
+- **Tag** [F] · **Code** `choked_mdot(gamma, R, T0, p0, At)`
+- **Alias** — 02-3.10, 03-3.7, with $C_dA$ in place of $A_t$.
+
+### 14-3.13 — Relief-to-regulator area ratio
+
+$$\frac{(C_dA)_{relief}}{(C_dA)_{reg}} = \frac{p_{supply}}{p_{relief}}\sqrt{\frac{T_{relief}}{T_{supply}}}$$
+
+- **Variables** — effective areas [m²]; $p$ [Pa]; $T$ [K].
+- **Meaning** — **the relief valve must be bigger than the failed regulator's seat by roughly the pressure ratio it is protecting against.** A regulator failed open at 300 bar into a 20 bar system needs a relief path ~15× its seat area.
+- **Assumes** — both flows choked; same gas; $C_d$ absorbed into each area.
+- **Fails when** — the relief valve is not choked (low set pressures near ambient); the regulator's failure mode is partial rather than full opening — *not* conservative to assume, so use full open.
+- **Tag** [F] [J] · **Code** —
+
+### 14-3.14 — Manifold maldistribution
+
+$$\frac{\delta \dot m}{\dot m} \approx \frac12\frac{\tfrac12\rho v_m^2}{\Delta p_{inj}} = \frac{C_d^2}{2}\left(\frac{\sum A_{or}}{A_m}\right)^{2} = \frac{C_d^2}{2\,AR^2}$$
+
+- **Variables** — $AR = A_m/\sum A_{or}$ manifold area ratio [—]; $C_d$ orifice discharge coefficient [—]; $\delta\dot m/\dot m$ fractional spread in per-orifice flow between dead end and inlet [—]; $v_m$ manifold velocity [m/s].
+- **Meaning** — the manifold's own dynamic head becomes a static-pressure gradient across the face; flow goes as $\sqrt{\Delta p}$, hence the factor of one half.
+- **Assumes** — full stagnation recovery at the dead end, none at the inlet; a 1-D manifold; uniform orifices.
+- **Fails when** — the manifold is an annulus fed tangentially (a swirl component makes the problem 2-D); the manifold is short compared with its own diameter; the flow separates off the inlet.
+- **Tag** [E] · **Code** —
+- **Alias** — 07-3.5, same result with $V_{man}/V$ instead of $AR$.
+
+### 14-3.15 — Bellows squirm pressure
+
+$$p_{sq} \approx \frac{\pi^2 (EI)_{eq}}{(KL)^2\,A_{eff}}$$
+
+- **Variables** — $p_{sq}$ squirm pressure [Pa]; $(EI)_{eq}$ equivalent bending stiffness of the convoluted shell [N·m²]; $L$ bellows live length [m]; $K$ end-fixity factor (1.0 pinned–pinned, 0.5 fixed–fixed) [—]; $A_{eff}$ pressure-effective area [m²].
+- **Meaning** — squirm is Euler buckling with the pressure thrust as the load. **The practical design rule: keep the live length short.** Get flexibility from more, shallower convolutions or a gimbal ring, not from length.
+- **Assumes** — symmetric convolutions; no lateral offset; no external axial load.
+- **Fails when** — the bellows is already offset or angulated (any initial imperfection lowers $p_{sq}$ sharply); the convolutions are unequal, since one soft convolution localises deformation and produces *in-plane* squirm at much lower pressure.
+- **Tag** [F] [A] · **Code** —
+
+### 14-3.16 — Bellows convolution shedding frequency
+
+$$f_s = St\,\frac{v}{q}$$
+
+- **Variables** — $f_s$ shedding frequency [Hz]; $St$ Strouhal number [—]; $v$ mean flow velocity [m/s]; $q$ convolution pitch [m].
+- **Meaning** — the convolutions are a periodic cavity array and the shear layer over them oscillates at a frequency set by pitch and velocity; if it coincides with a shell mode the bellows fails by high-cycle fatigue.
+- **Assumes** — fully developed turbulent flow; no internal liner.
+- **Fails when** — an internal liner (a smooth sleeve inside the bellows) is fitted — which is precisely the fix, because it removes the flow from the convolutions altogether.
+- **Tag** [E] · **Code** —
+
+### 14-3.17 — Thin-wall hoop stress and minimum wall
+
+$$\sigma_\theta = \frac{p D}{2t} \quad\Rightarrow\quad t \ge \frac{p_{MDP}\,D\,\mathrm{FS}}{2\,\sigma_{allow}}$$
+
+- **Variables** — $\sigma_\theta$ hoop stress [Pa]; $p$ internal pressure [Pa]; $D$ inside diameter [m]; $t$ wall thickness [m]; FS factor of safety [—]; $\sigma_{allow}$ material allowable at temperature [Pa].
+- **Meaning** — for a thin cylinder the hoop stress is twice the axial, so hoop governs.
+- **Assumes** — $D/t > 10$; no bending; no external pressure; no stress concentration.
+- **Fails when** — the tube is bent (the outer wall thins and the inner wall wrinkles — hence minimum bend-radius rules); at fittings and welds (apply a weld efficiency factor); under external pressure or vacuum-jacket collapse, which is a *buckling* problem, not a strength problem. Representative factors: 1.5 on yield and 2.5 on ultimate for lines, 4.0 for hoses.
+- **Tag** [F] [J] · **Code** —
+- **Alias** — 22-3.x uses the same hoop relation for motor cases.
+
+### 14-3.18 — Helmholtz resonance of a pressure tap
+
+$$f_H = \frac{c}{2\pi}\sqrt{\frac{A}{V L_{eff}}}$$
+
+- **Variables** — $f_H$ [Hz]; $c$ speed of sound in the fluid *in the line* [m/s]; $A$ tap/line cross-sectional area [m²]; $V$ cavity volume at the transducer [m³]; $L_{eff}$ effective neck length including end corrections [m].
+- **Meaning** — the tap line and transducer cavity resonate, amplifying pressure fluctuations near $f_H$ and attenuating those well above it. A bad port lies about the amplitude and the frequency at once.
+- **Assumes** — lumped acoustic behaviour, $\lambda \gg L$.
+- **Fails when** — the line is long enough to be an organ pipe instead (use quarter-wave resonances); the fluid in the line is two-phase, in which case $c$ is unknowable and so is everything else.
+- **Tag** [F] · **Code** —
+
+---

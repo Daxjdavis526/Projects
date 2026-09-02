@@ -422,9 +422,11 @@ followed by a 2.0 s tail-off. The record:
 - Tail-off begins at 24.5 s, takes **4.2 s** (predicted 2.0 s), and ends in a
   long low tail below 0.5 MPa.
 - $\int p_c\,dt$ over the record is **1.5 % above** prediction.
-- Delivered vacuum $I_{sp}$ is **3.1 % below** prediction.
-- Post-fire: throat area **4.0 % larger** than the predicted eroded area;
-  a 12 mm-deep asymmetric gouge in the nozzle entry at one azimuth; aft-dome
+- Delivered vacuum $I_{sp}$, computed on **loaded** propellant mass, is
+  **3.1 % below** prediction.
+- Post-fire: throat area at end of burn **4.0 % larger** than the predicted
+  eroded area, and **1.5 % larger** when area-averaged over the burn; a
+  12 mm-deep asymmetric gouge in the nozzle entry at one azimuth; aft-dome
   insulation char depth twice predicted.
 - The propellant lot's strand-burner data were nominal and the four previous
   motors from the same lot were nominal.
@@ -439,14 +441,17 @@ mechanisms that produce a *smooth ramp* rather than a step, and say which one
 the aft-dome char evidence supports.
 
 **(c)** (2 pts) Compute the chamber-pressure effect of a 4.0 % throat-area
-growth at fixed $K_n$, and the $C_F$ and $I_{sp}$ effect of the resulting
-expansion-ratio loss. Show that the $C_F$ term alone cannot explain a 3.1 %
-$I_{sp}$ shortfall, and name the two loss mechanisms that make up the balance.
+growth at fixed burning area, and the $C_F$ and $I_{sp}$ effect of the
+resulting expansion-ratio loss at end of burn. Show that the $C_F$ term alone
+is far too small to explain a 3.1 % $I_{sp}$ shortfall.
 
-**(d)** (2 pts) Reconcile the two integrated numbers: $\int p_c\,dt$ **up**
-1.5 % while $I_{sp}$ is **down** 3.1 %. Write the relation between total
-impulse, $\int p_c\,dt$, $C_F$ and $A_t$, and say what each of the three
-anomalies does to it.
+**(d)** (2 pts) Reconcile the two integrated numbers. Write total impulse as
+$I_t = \overline{C_F}\,\overline{A_t}\int p_c\,dt$, use the burn-averaged
+$A_t$ and $C_F$ figures, and compute the total impulse the **trace** predicts
+relative to the nominal. Compare it with the measured $-3.1$ %, state the size
+of the unaccounted impulse deficit, and explain why $\int p_c\,dt$ and $I_t$
+are **not** proportional in a metallised motor. Name the post-fire measurement
+that would confirm your explanation.
 
 **(e)** (2 pts) Give a one-sentence diagnosis for each of the three anomalies,
 then state which single one you would refuse to certify around and why. Name

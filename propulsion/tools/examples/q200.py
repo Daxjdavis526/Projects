@@ -248,3 +248,50 @@ EXAMPLES += [
      "args": {"c_eff": 1747.2 * 1.85},
      "expect": 329.605, "tol": 0.001},
 ]
+
+# --- Q121-130 -------------------------------------------------------------
+# Q123 Ao = 2.2783e-6 m^2 (do = 1.703 mm), Af = 1.1712e-6 m^2 total
+#   (two holes of 5.856e-7 m^2, d = 0.863 mm each);
+#   momentum ratio (0.12*46.203)/(0.052*54.813) = 1.945.
+# Q126 gain 464.53 - 447.89 = 16.63 s; from eps 40 (437.1 s) to 285 it is
+#   27.4 s, which is the ~30 s usually attributed to the RL10B-2 extension.
+# Q128 (1/2.5)**0.9 = 0.4384; (1/10)**0.9 = 0.12589.
+# Q130 Dh = 4*(1.5e-3*4.5e-3)/(2*(1.5e-3+4.5e-3)) = 2.25e-3 m;
+#   Pr = mu cp / k = 7.5e-4*2100/0.13 = 12.115.
+EXAMPLES += [
+    {"id": "q200.123a", "fn": "orifice_mdot",
+     "args": {"Cd": 0.78, "A": 2.27826e-6, "rho": 1140.0, "dp": 2.0e6},
+     "expect": 0.12, "tol": 0.001},
+    {"id": "q200.123b", "fn": "orifice_mdot",
+     "args": {"Cd": 0.78, "A": 1.17121e-6, "rho": 810.0, "dp": 2.0e6},
+     "expect": 0.052, "tol": 0.001},
+    {"id": "q200.123c", "fn": "orifice_velocity",
+     "args": {"Cd": 0.78, "rho": 1140.0, "dp": 2.0e6},
+     "expect": 46.2032, "tol": 0.001},
+    {"id": "q200.123d", "fn": "orifice_velocity",
+     "args": {"Cd": 0.78, "rho": 810.0, "dp": 2.0e6},
+     "expect": 54.8128, "tol": 0.001},
+    {"id": "q200.123e", "fn": "momentum_ratio",
+     "args": {"mdot_o": 0.12, "v_o": 46.2032, "mdot_f": 0.052,
+              "v_f": 54.8128},
+     "expect": 1.94522, "tol": 0.001},
+    {"id": "q200.126a", "fn": "Cf",
+     "args": {"gamma": 1.22, "eps": 77.0, "p0": 1.0, "pa": 0.0},
+     "expect": 1.90971, "tol": 0.001},
+    {"id": "q200.126b", "fn": "Cf",
+     "args": {"gamma": 1.22, "eps": 285.0, "p0": 1.0, "pa": 0.0},
+     "expect": 1.98063, "tol": 0.001},
+    {"id": "q200.126c", "fn": "isp_from_c",
+     "args": {"c_eff": 2300.0 * 1.90971},
+     "expect": 447.893, "tol": 0.001},
+    {"id": "q200.126d", "fn": "isp_from_c",
+     "args": {"c_eff": 2300.0 * 1.98063},
+     "expect": 464.526, "tol": 0.001},
+    {"id": "q200.130a", "fn": "reynolds",
+     "args": {"rho": 810.0, "v": 6.0, "L": 2.25e-3, "mu": 7.5e-4},
+     "expect": 14580.0, "tol": 0.001},
+    {"id": "q200.130b", "fn": "dittus_boelter",
+     "args": {"k": 0.13, "D": 2.25e-3, "Re": 14580.0, "Pr": 12.1154,
+              "n": 0.4},
+     "expect": 7723.77, "tol": 0.001},
+]

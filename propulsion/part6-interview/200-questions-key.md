@@ -2319,7 +2319,9 @@ it, and elevated temperature. It is established by test, not by reasoning from
 chemistry — mechanical impact testing in liquid oxygen, promoted-combustion and
 autogenous-ignition testing in gaseous oxygen at pressure, and configurational
 testing of the actual part where geometry matters — and by the material and
-configuration acceptance procedures those tests feed. [M][G-095][STD-6001]
+configuration acceptance procedures those tests feed — the ASTM mechanical-impact
+and promoted-combustion methods and NASA's materials flammability standard are
+the usual basis. [M]
 Monel and other high-nickel alloys are the classic "fine": they are used for
 LOX valve internals and high-pressure oxygen service precisely because they are
 very difficult to ignite and do not sustain burning. Titanium is the classic
@@ -2356,3 +2358,248 @@ number inherits it.
 the assumption everything rests on.
 **Follow-up:** "Your first hot-fire gives $\eta_{c^*} = 0.93$. What changes,
 and what does not?"
+
+### 121. [M06, M15]
+Chug is a low-frequency (roughly 20–200 Hz) coupling between the feed system and
+the chamber, and the chamber volume is the gas capacitance in that loop: a
+pressure rise in the chamber reduces the injector $\Delta p$, which reduces the
+flow, which — one combustion time lag later — reduces the chamber pressure, and
+if the phase around that loop comes back in step the oscillation grows. [F] The
+chamber's gas-filling time $t_s = V_c\rho_c/\dot m$ sets how fast chamber
+pressure can respond, so increasing $L^*$ lowers the chug frequency and moves
+it around relative to the feed-line acoustic and the combustion time lag —
+which can either stabilise or destabilise depending on where you started. The
+reason increasing $L^*$ is nonetheless a standard cure for one problem is that
+more residence time means more complete mixing and vaporisation, which raises
+$\eta_{c^*}$ and reduces the combustion-response sensitivity that drives
+high-frequency instability. What it creates is a bigger acoustic cavity: the
+transverse mode frequencies fall as the chamber grows, and a larger volume of
+burning gas is a larger energy reservoir for whatever mode does get excited, so
+the classic outcome is that you cure a rough-combustion problem and inherit a
+chug or a lower-frequency transverse one. [J][M] The lesson is that $L^*$ is
+not a monotone knob and the honest way to set it is against measured
+$\eta_{c^*}$ with a stability check at both ends.
+
+**Probing:** whether you name chamber volume as a capacitance in a loop and can
+say what the time lag is.
+**Follow-up:** "What is the cheapest fix for chug, and why is it not free?"
+
+### 122. [M07, M13]
+A pintle has one element whose geometry moves: the annular slot area is set by
+the axial position of a sleeve, so as flow falls you close the gap and keep the
+injection velocity — and therefore the injector pressure drop and the
+momentum ratio between the radial and axial sheets — roughly where they were at
+full thrust. [F][M] That is the whole trick, and it is why 10:1 is achievable
+for a pintle and not for a fixed-orifice injector, where $\Delta p\propto
+\dot m^2$ means throttling to 30 % flow leaves you with 9 % of the design
+pressure drop, an injector that no longer atomises and no longer isolates the
+chamber from the feed system. What limits it: at the low end the gap becomes
+small enough that manufacturing tolerance and thermal growth are a significant
+fraction of it, so flow calibration and pattern repeatability degrade; the
+actuator and its seals must work in the propellant at full chamber pressure;
+the single central element means mixing quality depends on one interaction, so
+$\eta_{c^*}$ is usually a point or two below a good multi-element face; and the
+chamber wall sees a spray fan whose impingement location moves with throttle
+setting, which is a cooling problem across the range rather than at one point.
+The LMDE demonstrated the architecture at 10:1 in flight, which is why the
+claim is credible rather than aspirational. [H]
+
+**Probing:** whether you state the fixed-orifice $\Delta p\propto\dot m^2$
+problem that the pintle exists to solve.
+**Follow-up:** "What is your $\eta_{c^*}$ penalty at full thrust for choosing a
+pintle, and would you accept it?"
+
+### 123. [M07]
+LOX: $A_o = \dot m/(C_d\sqrt{2\rho\Delta p}) =
+0.12/(0.78\sqrt{2\times1140\times2\times10^{6}}) =
+\mathbf{2.28\times10^{-6}\ m^2}$, $d_o = \mathbf{1.70\ mm}$,
+$v_o = C_d\sqrt{2\Delta p/\rho} = \mathbf{46.2\ m/s}$.
+RP-1: $A_f = 0.052/(0.78\sqrt{2\times810\times2\times10^{6}}) =
+\mathbf{1.17\times10^{-6}\ m^2}$ total, $d_f = \mathbf{1.22\ mm}$ if it were
+one hole — but this is a fuel-oxidiser-fuel triplet, so it is two holes of
+$5.86\times10^{-7}$ m² each, $d = 0.86$ mm; $v_f = \mathbf{54.8\ m/s}$.
+Total momentum ratio $= \dot m_o v_o/(\dot m_f v_f) =
+(0.12\times46.2)/(0.052\times54.8) = \mathbf{1.95}$. [F] Two comments. The
+fuel is the faster stream despite the common pressure drop, purely because it
+is less dense — that is always true and it is why equal-$\Delta p$ designs do
+not give equal velocities. And a momentum ratio near 2 with the oxidiser
+dominating means the resultant spray leans toward the oxidiser jet's direction;
+for an F-O-F triplet you usually want the two fuel streams to balance the
+central oxidiser, so I would check whether 1.95 is the intended design point or
+an artefact of picking a common $\Delta p$.
+
+**Probing:** whether you split the fuel flow between the two holes and whether
+you interpret the momentum ratio rather than just reporting it.
+**Follow-up:** "How would you get the momentum ratio to 1.0 without changing
+the mixture ratio?"
+
+### 124. [M07, M10, M11]
+A circumferential erosion pattern that maps one-to-one onto the outer element
+ring is a spray-impingement problem, not a general heat-transfer problem: the
+outer elements' spray fans are reaching the wall before combustion is complete,
+so you have near-stoichiometric or oxidiser-rich combustion happening *at* the
+wall instead of in the core, and locally the gas-side temperature and the
+oxidising environment are both far worse than the design assumption. [F][M]
+Bartz cannot see this — it is exactly the injector-driven non-uniformity the
+correlation is blind to — which is why the wall failed where the model said it
+was comfortable. Two candidate fixes, in order of preference. First, change the
+outer row: cant or rotate the elements so the fans point inward, recess them,
+reduce their flow, or bias them fuel-rich so that whatever does reach the wall
+is a fuel-rich, reducing mixture rather than an oxidising one. Second, add or
+increase film cooling from a fuel ring just inside the wall, which is the
+reliable fix and the one that costs you $I_{sp}$, so I would try to buy the
+result with pattern changes before spending performance. Thickening the wall or
+adding coolant flow treats the symptom and will fail again at a slightly later
+time.
+
+**Probing:** whether you go to the injector rather than the cooling circuit
+first.
+**Follow-up:** "The programme has no schedule for an injector rebuild. Defend
+the film-cooling fix."
+
+### 125. [M08, M14, M15]
+A hard start is the ignition of an accumulated charge: propellant enters the
+chamber, fails to ignite promptly, collects in the chamber, the dribble volumes
+downstream of the valves and the injector manifolds, and then ignites all at
+once, releasing in a millisecond the energy that the design assumed would be
+released over a residence time. The peak pressure can be several times $p_c$
+and it is a detonation-like transient, so it loads the injector face, the
+chamber, and — through the feed lines — the pumps. [F][H] In a pump-fed engine
+the mechanism has an extra ingredient: the pumps are spinning up, so flow and
+pressure are transient and the mixture ratio during the first tens of
+milliseconds is whatever the two pumps' spin-up characteristics happen to
+produce, which is frequently far from nominal and often oxidiser-rich. Three
+design features that prevent it: an ignition *permissive* — igniter-established
+detection (torch chamber pressure or thermocouple) as a hard interlock before
+either main valve opens, rather than an open-loop timer; a controlled sequence
+with fuel lead and staged valve opening so the chamber never contains an
+unignited stoichiometric charge, with the dribble volumes minimised by putting
+the valves as close to the injector as the design allows; and a start
+sequence that brings the chamber up at a controlled rate — ramped valve
+opening, a start orifice or a low-flow start position — so that even a delayed
+light-off has a small charge to consume. [M] The fourth, which is procedural
+but real, is a purge that guarantees the chamber is inert before the sequence
+begins.
+
+**Probing:** whether you name the dribble volume and the permissive, which are
+the two things that actually change the outcome.
+**Follow-up:** "How would you size the maximum dribble volume you can tolerate?"
+
+### 126. [M09, M03]
+With $\gamma = 1.22$ and $c^* = 2300$ m/s, vacuum:
+$\varepsilon = 77$ gives $C_f = 1.910$ and $I_{sp} = \mathbf{447.9\ s}$;
+$\varepsilon = 285$ gives $C_f = 1.981$ and $I_{sp} = \mathbf{464.5\ s}$;
+the ideal gain is **16.6 s**. [F] The RL10B-2's extendible carbon–carbon
+nozzle is credited with about **30 s**, roughly double, and the difference is
+instructive rather than embarrassing. The 77:1 "retracted" figure is not a
+firing configuration — the engine does not run stowed — so the honest baseline
+for the ~30 s claim is the nozzle the stage could carry *without* extension
+given its interstage length, which is nearer 40:1; redo the sum from 40:1 to
+285:1 and you get 27.4 s, which is the same claim. Carry the caveats: the
+RL10B-2's area ratio is **contested at 280:1 versus 285:1**, its chamber
+pressure is not published by the manufacturer at all, and the 465.5 s flight
+$I_{sp}$ is the highest of any flown chemical engine, so it is a figure people
+quote loosely. (Engine database note A.2.7.)
+
+**Probing:** whether you interrogate the baseline instead of concluding the
+published figure is wrong.
+**Follow-up:** "What does the extension mechanism cost you in mass and
+reliability, and does the 30 s survive that?"
+
+### 127. [M09, M35]
+Dual-bell: the contour has a deliberate inflection so the flow separates at the
+inflection at low altitude (running at the lower area ratio) and attaches to
+the full extension in vacuum. The technical problems are that the transition is
+hysteretic and not perfectly repeatable, that it happens at a particular
+ambient pressure which is a particular altitude and therefore a particular
+trajectory — so a trajectory change moves the transition into a phase where you
+did not want it — and that during transition the flow is unsteady and generates
+significant side loads on a nozzle that is, by construction, long. [R][J]
+Sea-level operation also means the extension is a large piece of hardware doing
+nothing but adding mass and wetted area during the phase when thrust matters
+most. Aerospike: the performance argument is sound but the hardware is not. The
+spike is a large, continuously curved surface exposed to the full combustion
+gas along its entire length, so it must be cooled everywhere — the ratio of
+cooled surface area to thrust is far worse than a bell — and truncating it to
+manage that reintroduces a base region whose base pressure, and hence thrust,
+is a difficult and Reynolds-number-sensitive prediction. Segmented combustion
+around the annulus multiplies the number of injector and ignition interfaces,
+and gimballing a linear or annular aerospike is a structural problem with no
+good answer. [Dressler00] Neither has failed on physics; both have failed on
+mass, cooling and controllability, which is a different and more stubborn kind
+of problem.
+
+**Probing:** whether you say "cooled area per unit thrust" for the aerospike and
+"transition repeatability and side loads" for the dual-bell.
+**Follow-up:** "If you had to fly one of them next year, which, and on what
+stage?"
+
+### 128. [M10, M11]
+Bartz scales $h_g$ with $(A_t/A)^{0.9}$, so relative to the throat:
+at $A/A_t = 2.5$ in the chamber, $h_g/h_{g,t} = (1/2.5)^{0.9} =
+\mathbf{0.438}$; at $A/A_t = 10$ in the nozzle,
+$(1/10)^{0.9} = \mathbf{0.126}$. [E][Bartz57] So the chamber runs at about 44 %
+of throat coefficient and the downstream nozzle at 13 %, and the actual heat
+*flux* ratios are a little different again because $T_{aw}$ falls with Mach
+number downstream while the wall temperature target does not. The cooling
+circuit therefore needs its margin concentrated in a short axial band around
+the throat — that is where the channels get narrow and tall, where the coolant
+is fastest and where the wall is thinnest — and it can afford to be generous
+downstream, which is why nozzle extensions can be film-cooled, dump-cooled,
+ablative or radiatively cooled while the throat cannot. The trap is the chamber
+number: 44 % of a large flux is still a large flux, over a much larger area
+than the throat, so the chamber dominates the *total* heat load and therefore
+the coolant bulk temperature rise even though the throat dominates the *peak*.
+
+**Probing:** whether you distinguish peak flux from total load, which are
+managed by different design decisions.
+**Follow-up:** "So which one sizes your coolant flow rate?"
+
+### 129. [M11, M10, M06]
+Film-cooling propellant is not thrown away — it goes out of the nozzle like
+everything else and produces thrust. What it loses is only the difference
+between the $I_{sp}$ of the core flow and the $I_{sp}$ of a cooler, off-mixture
+peripheral layer, and since that layer still expands through the same nozzle
+and still has substantial enthalpy, the loss is a fraction of its mass flow
+rather than all of it. [F][A] A typical rule is that 3–5 % of the fuel diverted
+to a film costs 0.5–1.5 % of $I_{sp}$ — roughly a third of the naive
+expectation. Two further effects push the same way: the film mixes into the
+core as it travels, so downstream of the first few chamber diameters it is
+mostly part of the main flow anyway, and by protecting the wall it lets you run
+a hotter core or a higher chamber pressure that you could not otherwise afford,
+which can return more than it costs. The argument breaks down when the film is
+so heavy that a genuinely unburnt, cold fuel layer survives all the way to the
+exit — then you really are paying full price for that mass — and it breaks
+down in the other direction for small chambers, where the wall area per unit
+flow is large, the film must be a bigger fraction, and the mixing length is
+short compared with the chamber. That is one of the reasons small thrusters
+deliver a lower fraction of theoretical $I_{sp}$.
+
+**Probing:** whether you can say why the loss is much less than the diverted
+fraction, and then find the case where it is not.
+**Follow-up:** "How would you measure the film-cooling $I_{sp}$ penalty on a
+test stand?"
+
+### 130. [M11, M10]
+Hydraulic diameter $D_h = 4A/P = 4(0.0015\times0.0045)/
+(2(0.0015+0.0045)) = \mathbf{2.25\times10^{-3}\ m}$.
+$Re = \rho v D_h/\mu = 810\times6.0\times0.00225/7.5\times10^{-4} =
+\mathbf{1.46\times10^{4}}$.
+$Pr = \mu c_p/k = 7.5\times10^{-4}\times2100/0.13 = \mathbf{12.1}$.
+Dittus–Boelter: $h = 0.023(k/D_h)Re^{0.8}Pr^{0.4} =
+\mathbf{7.72\times10^{3}\ W/(m^2K)}$. [E] Comment before you hand that over:
+$Re = 1.5\times10^{4}$ is only just turbulent, and Dittus–Boelter is a
+correlation for fully developed turbulent flow in a smooth straight round tube
+with modest property variation — this is a short high-aspect-ratio rectangular
+channel with a strongly heated wall, curvature, and a fluid whose viscosity
+falls by a large factor across the film. Expect the correlation to be optimistic
+on the heated side and to miss the corner effects entirely; a Sieder–Tate
+viscosity correction or a rectangular-duct and entrance-length correction is the
+minimum fix, and the real number comes from a heated-tube test with the actual
+fluid. 6 m/s is also on the low side for a throat channel — most designs run
+10–30 m/s there, which is what buys the $Re^{0.8}$.
+
+**Probing:** whether you challenge the correlation's applicability rather than
+just evaluating it.
+**Follow-up:** "Raise the velocity to 20 m/s. What happens to $h$, and what
+happens to your pump discharge pressure?"

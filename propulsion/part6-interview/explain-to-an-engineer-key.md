@@ -2912,3 +2912,919 @@ business case, and that assumption is outside the engineer's control.
 back?"*
 
 ---
+
+## P. Testing
+
+### 95. What do you measure on a hot fire, and which measurement do you trust least? `[M18]`
+
+**Physics.** Four primary channels carry the performance argument — thrust,
+chamber pressure, propellant mass flows and propellant temperatures — and every
+derived quantity ($c^*$, $C_F$, Isp, mixture ratio) is an algebraic combination of
+them, so the uncertainty propagates by the product rule.
+
+**Mechanism.** Thrust comes from a calibrated load cell in a stand whose stiffness,
+plumbing restraint and thermal growth all appear as tare; chamber pressure from
+transducers at the injector face, which must be flush-mounted and cooled; flows
+from turbine or Coriolis meters, plus a tank-level or weight-loss integral as a
+check; and everything is sampled fast enough to catch the start transient. Then
+there are the diagnostic channels — wall temperatures, coolant $\Delta p$,
+turbopump speeds, accelerometers and high-response pressure for stability.
+
+**Quantitative hook.** The least-trusted measurement is **cryogenic mass flow**.
+No turbine meter is happy in two-phase or near-saturated LOX, calibration is done
+on water and transferred, and the meter sits in the line whose density you are also
+estimating. That is exactly why the choked throat is used as the reference flow
+meter: $\dot m = \Gamma p_0 A_t/\sqrt{RT_0}$ closed to within 1% on the RS-25 in
+three lines `[EX 17.a–c]`.
+
+**Trade-off / exception.** Thrust on an altitude-simulation stand is worse still,
+because the diffuser and ejector impose forces on the article. And every one of
+these instruments has a start-transient response you must know before you believe a
+0.1 s number.
+
+**Follow-up:** *"Give me an uncertainty budget for $c^*$."*
+
+---
+
+### 96. Why is $c^*$ efficiency the first number you look at after a test? `[M18][M03]`
+
+**Physics.** $c^* = p_c A_t/\dot m$ is computed from measured quantities alone and
+contains no nozzle information — so it isolates the chamber's combustion process
+from everything downstream.
+
+**Mechanism.** Divide it by the CEA-predicted $c^*$ for the measured mixture ratio
+and chamber pressure and you have $\eta_{c^*}$, a single number between about 0.92
+and 0.99 that says how completely the propellant burned and mixed before the
+throat. A shortfall points at the injector, the mixture ratio, or $L^*$ — in that
+order of likelihood. It is also the number that best survives measurement problems,
+because the three inputs are the best-instrumented on the stand.
+
+**Quantitative hook.** A 2% $c^*$ shortfall drops Isp about 2%, which is 6 s on a
+311 s engine — and through the rocket equation that costs a few percent of payload
+on an upper stage. Typical values: 0.95 is a working engine with a known mixing
+loss; below 0.92 something is wrong, not merely imperfect.
+
+**Trade-off / exception.** The split only works if your throat area is right.
+Throat erosion moves both $c^*$ and $C_F$ and looks like neither: 2% area growth
+drops a solid's chamber pressure 3.0% `[EX 53.a–b]`, and computing $c^*$ with the
+pre-fire throat will make you blame the propellant. On the first test of a new
+chamber, measure the throat afterwards before you believe the efficiency.
+
+**Follow-up:** *"$\eta_{c^*}$ is 0.94 and $\eta_{C_F}$ is 0.99. What do you do
+next?"*
+
+---
+
+### 97. How would you tell an injector problem from a nozzle problem from the data alone? `[M18][M07][M09]`
+
+**Physics.** The two halves of Isp separate cleanly: $c^*$ is everything upstream
+of the throat, $C_F$ is everything downstream. Compute both and the fault localises
+itself.
+
+**Mechanism.** Low $\eta_{c^*}$ with normal $\eta_{C_F}$ says the propellant is not
+burning out before the throat — poor atomisation or maldistribution (injector),
+wrong mixture ratio (feed system or a flow-meter error), or too short a chamber.
+Normal $\eta_{c^*}$ with low $\eta_{C_F}$ says the nozzle is not doing its job —
+separation, an expansion ratio you do not actually have, throat erosion changing
+$\varepsilon$, or an ambient-pressure correction applied wrongly. Corroborate with
+the diagnostic channels: an injector problem usually shows in chamber-wall
+temperatures and in the $c^*$ trend with mixture ratio; a nozzle problem shows in
+wall-pressure taps down the divergent section and in side-load accelerometers.
+
+**Quantitative hook.** The RS-25 arithmetic makes the sensitivity concrete: at
+$\varepsilon = 69$ vacuum $C_F$ is 1.9393, at 77.5 it is 1.9479 — 0.45%
+`[EX 52.a–b]`. So a 3% $C_F$ shortfall is not an area-ratio bookkeeping error; it
+is separation or erosion. Conversely a 3% $c^*$ shortfall is far outside any
+plausible $p_c$ transducer error.
+
+**Trade-off / exception.** Both terms are wrong together if $A_t$ is wrong, and
+both are wrong together if the flow measurement is wrong. That degeneracy is the
+one case the split cannot resolve — which is why the post-test throat measurement
+and the tank-weight-loss flow check exist.
+
+**Follow-up:** *"Now the same question for a solid motor, where you cannot
+measure flow."*
+
+---
+
+### 98. Why does altitude-simulation testing cost so much, and when can you skip it? `[M18][M09]`
+
+**Physics.** To run a high-$\varepsilon$ nozzle full-flowing you must hold the cell
+below the nozzle's exit pressure — and the engine itself is pumping mass into that
+cell at hundreds of kilograms per second.
+
+**Mechanism.** You cannot simply evacuate a chamber; you need a supersonic diffuser
+that captures the plume and recompresses it, usually with steam ejectors in series
+and a spray cooler to condense the exhaust. The plant is large, consumes enormous
+quantities of steam and water, and takes time to start and stop, which limits test
+cadence. Everything is then harder to measure: thrust has to be corrected for
+diffuser forces, and cell pressure is itself a measurement with a transient.
+
+**Quantitative hook.** The requirement is set by the exit pressure. An RS-25-class
+$\varepsilon = 69$ nozzle at 206.4 bar has an exit static pressure around 22.6 kPa
+`[EX 49.a]` — you must hold the cell below that to avoid separation. A
+$\varepsilon = 285$ RL10B-2 needs far less, which is why upper-stage engines are the
+ones that most need the facility [_verify-liquid, RL10B-2 block].
+
+**Trade-off / exception.** You can skip it when you can get what you need another
+way: test the chamber and injector at sea level with a truncated nozzle, verify the
+nozzle contour separately by analysis and cold flow, and take the full-$\varepsilon$
+demonstration on the first flight — which is a programme risk decision, not a
+technical one [J]. First stages generally do not need it at all, because they start
+at sea level; the RS-25 is fired sea-level on the stand with its flight nozzle,
+separated, every time.
+
+**Follow-up:** *"What would you accept as evidence instead of an altitude test?"*
+
+---
+
+## Q. Solid rocket motors
+
+### 99. Why are solid motors attractive for some missions? `[M19][M32]` — *seed*
+
+**Physics.** The propellant is the pressure vessel's contents *and* its structural
+liner, and there is no feed system at all — so a solid stores enormous impulse per
+unit of hardware and needs nothing to work but an igniter.
+
+**Mechanism.** Everything that makes a liquid engine hard — pumps, valves, plumbing,
+propellant conditioning, ignition timing — is absent. The motor sits sealed for years
+at ambient temperature, then delivers full thrust in tens of milliseconds. Density
+is high, so the volume is small; mass fraction is excellent because there are no
+tanks separate from the case; and the thrust trace is designed in through grain
+geometry rather than controlled in flight.
+
+**Quantitative hook.** The numbers that matter: mass fraction **0.924** for the
+monolithic filament-wound P120C, against 0.85 for the segmented steel Shuttle SRB
+[engine-database B.1.7]. Thrust density is the other half: a Shuttle SRB delivers
+≈14,700 kN per motor at peak with no turbomachinery at all
+[engine-database B.1]. And Isp is the price: 242 s SL / 268 s vac for the SRB
+against 311 s for kerolox.
+
+**Trade-off.** Once lit there is no throttling and no shutdown — thrust termination
+exists but is violent, one-shot and structurally destructive
+[engine-database B.7, Minuteman]. The trace is fixed at casting, temperature
+sensitivity moves it, and the whole article is an explosive requiring hazard
+classification, handling and storage infrastructure.
+
+**Follow-up:** *"So why is every large booster stage not a solid?"*
+
+---
+
+### 100. Why does the burn-rate exponent $n$ have to be less than 1? `[M20][M19]`
+
+**Physics.** Chamber pressure is set by a balance between gas generation ($\propto
+p^n$) and gas discharge through the throat ($\propto p$). If generation grows faster
+with pressure than discharge does, the balance is unstable and the motor runs away.
+
+**Mechanism.** Equate them: $a\rho_p A_b p^n = p A_t/c^*$, so
+$p = (a\rho_p c^* K_n)^{1/(1-n)}$ with $K_n = A_b/A_t$. The exponent $1/(1-n)$ is
+positive and finite only for $n<1$. Physically, at $n<1$ a small pressure rise
+increases discharge more than it increases burning, so the perturbation decays; at
+$n>1$ it increases burning more, so it grows — pressure rises until the case
+bursts, in milliseconds.
+
+**Quantitative hook.** Practical AP composites sit at $n = 0.3$–$0.5$; the worked
+value here is 0.35 [E]. Even well below 1, the amplification is real: a 10% rise in
+$K_n$ raises chamber pressure **15.8%** — 62.2 bar to 72.0 bar `[EX 103.a–b]`. At
+$n = 0.8$ the same 10% would give 64%, which is why high-$n$ propellants are
+avoided regardless of their other virtues.
+
+**Trade-off / exception.** $n$ is not constant. Some formulations show a plateau
+or even a *mesa* — a region of low or negative slope, deliberately engineered, which
+is very desirable — and some show a pressure-dependent break where $n$ jumps.
+Erosive burning near a high-Mach port raises the local rate independently of the
+Vieille law, and that is not captured by $n$ at all.
+
+**Follow-up:** *"What would you do if your propellant's $n$ came back at 0.7?"*
+
+---
+
+### 101. What happens if the grain is 10 K colder than its qualification temperature? `[M20][M19]`
+
+**Physics.** Burn rate rises with initial grain temperature — the condensed-phase
+reaction zone needs less heat to reach ignition when it starts warmer — and that
+sensitivity is amplified into chamber pressure by the same $1/(1-n)$ factor.
+
+**Mechanism.** The temperature sensitivity at constant pressure, $\sigma_p$, is
+typically 0.001–0.003 per K for AP composites [E]. A colder grain burns slower, so
+at fixed $K_n$ the equilibrium pressure falls; the motor then produces lower thrust
+for longer, with the *same* total impulse to first order but a different trace. A
+lower trace changes the vehicle's staging times, its max-Q, and its guidance
+solution; a higher one (a hot grain) risks the case's proof pressure.
+
+**Quantitative hook.** At $\sigma_p = 0.002$/K, a 10 K cold soak cuts burn rate by
+**2.0%** `[EX 101.a]`, and the pressure sensitivity $\pi_K = \sigma_p/(1-n) =
+0.00308$ per K `[EX 101.b]` turns that into about a **3.1% chamber-pressure drop**
+over 10 K. That is why motors are qualified over a stated temperature band and why
+launchers have propellant-temperature launch commit criteria.
+
+**Trade-off / exception.** The consequences are not symmetric, and cold is not
+always the benign direction: the Shuttle SRB's field-joint O-rings were
+*rate*-dependent seals whose extrusion rate is strongly temperature-dependent, and
+cold-stiffened rings failed to seat on STS-51-L [engine-database B.1.6]. Grain
+temperature also drives grain structural integrity — thermal shrinkage against a
+bonded case can crack the grain and expose extra burning surface.
+
+**Follow-up:** *"What is your launch commit criterion, and where did the number
+come from?"*
+
+---
+
+### 102. Why does grain geometry determine the thrust trace, and how do you get neutral burning? `[M21]`
+
+**Physics.** Thrust follows chamber pressure, chamber pressure follows $K_n =
+A_b/A_t$, and $A_b$ is a pure geometry problem: it is the area of the burning
+surface at each instant as the surface regresses normal to itself.
+
+**Mechanism.** A plain cylindrical bore has a burning area that *grows* as the port
+opens up — progressive. An end-burner has constant area — neutral, but with tiny
+$A_b$, so low thrust for a long time. Real grains combine features so that growing
+and shrinking contributions cancel: a star point's surface shrinks as the points
+burn away while the cylindrical bore behind it grows, so the sum can be held flat.
+Fins, slots, cones and wagon-wheel shapes are all doing that same arithmetic.
+
+**Quantitative hook.** The Shuttle SRB is the canonical case: an **11-point star**
+in the forward segment and **double-truncated-cone** perforations aft, shaped
+deliberately to give a head-end regressive-then-neutral trace that limits the
+vehicle's max-Q loads [engine-database B.1]. The opposite extreme is the LVM3
+S200, with **max/avg = 1.44** — a strongly shaped trace that is meaningless to
+quote without saying which figure you mean [engine-database B.5].
+
+**Trade-off.** Neutral is not always what you want, and complex grains cost you.
+More surface area shaping means more sliver at burnout, harder casting and mandrel
+extraction, and more demanding grain structural analysis — a star point is a stress
+concentration in a viscoelastic material bonded to a case that flexes.
+
+**Follow-up:** *"Draw me the $K_n$ curve for that star and tell me where the
+sliver is."*
+
+---
+
+### 103. Why is $K_n$ the variable a solid designer actually works in? `[M20][M21]`
+
+**Physics.** $K_n = A_b/A_t$ is the one parameter that sets equilibrium chamber
+pressure, and it is the only one the designer controls continuously through the
+burn — the propellant's $a$ and $n$ are fixed by chemistry.
+
+**Mechanism.** From the pressure balance, $p_c = (a\rho_p c^* K_n)^{1/(1-n)}$.
+Design proceeds by plotting $K_n$ against web burned: pick a target pressure, invert
+for the required $K_n$, then shape the grain so the $A_b(x)$ curve tracks it. The
+throat is the other lever, but it is fixed at manufacture and then *erodes*, so all
+the design freedom is in $A_b$. Working in $K_n$ also makes scaling immediate — two
+motors with the same propellant and the same $K_n$ history have the same pressure
+history regardless of size.
+
+**Quantitative hook.** The amplification is what makes it powerful and dangerous:
+at $n = 0.35$, $K_n$ 250 → 275 (+10%) takes chamber pressure 62.2 → 72.0 bar,
+**+15.8%** `[EX 103.a–b]`. Run it the other way and it explains throat erosion:
+a 2% throat-area growth is a 2% $K_n$ drop and a **3.0%** pressure drop
+`[EX 53.a–b]`.
+
+**Trade-off / exception.** $K_n$ analysis is a lumped, equilibrium model. It says
+nothing about ignition transients, erosive burning in a high-Mach port, or the
+pressure gradient along a long grain — all of which matter in exactly the motors
+that are large enough to be interesting. It also assumes $A_t$ constant, which the
+previous paragraph just contradicted.
+
+**Follow-up:** *"How would you build erosive burning into that curve?"*
+
+---
+
+### 104. Why do filament-wound composite cases beat segmented steel, and by how much? `[M22][M32]`
+
+**Physics.** A pressure vessel's mass for a given burst pressure scales with
+$pV/\sigma_{allow}$ per unit density — so the figure of merit is specific strength,
+and wound carbon fibre beats steel by a large factor along the fibre direction.
+
+**Mechanism.** Filament winding lays continuous fibre along the exact load paths —
+hoop and helical — so the material is strong where the stress is, instead of being
+isotropic and therefore over-built in one direction. Winding also produces a
+**monolithic** case: no field joints. The joints are what actually cost you, both in
+mass (tangs, clevises, pins, seals) and in risk.
+
+**Quantitative hook.** Mass fraction **0.924** for the monolithic filament-wound
+P120C against **0.85** for the segmented steel Shuttle SRB
+[engine-database B.1.7]. The defense progression says the same thing in steps:
+steel → glass filament wound → Kevlar/epoxy → graphite/epoxy, each step roughly a
+**20–30% case-mass reduction at equal burst pressure** [engine-database B.7]. Titan
+IV's UA1205 (steel, 5–7 segments, LITVC) to SRMU (graphite/epoxy, 3 segments,
+gimballed nozzle) is the same generational change in one vehicle
+[engine-database Part D §31].
+
+**Trade-off.** Segments exist for a reason: to be shipped by rail from Utah to
+Florida. If you can cast in one piece near the launch site — as Europropulsion does
+for P120C, winding ≈3,500 km of carbon fibre over ≈33 days — you should
+[engine-database B.1]. Composite cases are also harder to inspect, cannot be
+refurbished the way steel can (the SLS boosters reuse Shuttle-era D6AC segments),
+and carry a different, less-understood damage-tolerance story.
+
+**Follow-up:** *"Why is SLS still flying steel, then?"*
+
+---
+
+### 105. Why did the Shuttle field joint fail, and what was actually redesigned? `[M22][M34]`
+
+**Physics.** The joint **rotated** under ignition pressure — tang and clevis legs
+deflected apart — so the gap the O-rings had to seal opened *while* they were being
+asked to seal it. The seal was therefore rate-dependent, and elastomer extrusion
+rate is strongly temperature-dependent.
+
+**Mechanism.** The original tang-and-clevis joint carried a primary and a secondary
+fluorocarbon O-ring in the clevis. On ignition the case pressurises in
+milliseconds; the joint hinges open; the rings must extrude into the opening gap
+faster than it grows. Cold rings are stiffer and extrude more slowly. On
+**STS-51-L, 1986-01-28**, cold-stiffened rings failed to seat in the aft field joint
+of the right-hand SRB, hot gas blew by, burned through, and the plume impinged on
+the External Tank [engine-database B.1.6][Rogers86].
+
+**Quantitative hook.** The RSRM redesign did not simply fit a better O-ring. It
+added a **capture feature** on the tang — an inner lip engaging the inside clevis
+leg to mechanically limit the rotation — plus a **third O-ring** on that capture
+feature, redesigned joint insulation, and **joint heaters**
+[engine-database B.1.6].
+
+**Trade-off / exception.** State the lesson precisely: *the seal was not the
+problem; the rotation was the problem.* This belongs in a joint failure-modes
+discussion, not a materials one. And note the provenance caveat: the claim that the
+capture-feature concept derives from the abandoned filament-wound case booster's
+"double tang" joint is confidence C.
+
+**Follow-up:** *"What would have shown this on the ground before it flew?"*
+
+---
+
+### 106. What does the liner do that the insulation does not? `[M23]`
+
+**Physics.** They solve two different problems: the insulation protects the case
+from a 3,000 K gas for the burn duration; the liner is an adhesive that bonds the
+propellant to the insulation and keeps that bond intact for the motor's whole
+storage life.
+
+**Mechanism.** Insulation is a thick, filled elastomer (EPDM, NBR) sized by
+ablation: enough char-forming material to survive the local exposure time and gas
+velocity, thickest where the grain burns out earliest and exposes the wall longest.
+The liner is a thin compatible layer, chemically similar to the propellant binder,
+that migrates plasticiser correctly and provides a strong, void-free bond. If that
+bond fails you get an unbonded region where hot gas can penetrate between grain and
+case — burning surface that was never in your $K_n$ calculation, on top of an
+unprotected wall.
+
+**Quantitative hook.** Materials, not thicknesses, are what is publishable: the
+Shuttle SRB used asbestos-filled NBR insulation, and the SLS RSRMV changed to
+**asbestos-free insulation with a new liner configuration** while keeping the same
+1981 PBAN propellant [engine-database B.1.8]. The Zefiro family uses
+**low-density EPDM** [engine-database B.3.4].
+
+**Trade-off / exception.** Insulation is inert mass that directly reduces mass
+fraction, so every millimetre is argued over — and it is placed by ablation
+analysis, which is empirical. The liner is nearly massless but is the single most
+common cause of grain defects: debonds, voids and migration are the failure modes
+that show up in ageing surveillance rather than at manufacture.
+
+**Follow-up:** *"How do you find a debond in a motor you cannot open?"*
+
+---
+
+### 107. Why does a solid nozzle throat erode, and what does it do to the trace? `[M24][M20]`
+
+**Physics.** The throat sees the highest heat flux and a chemically aggressive,
+particle-laden flow, and unlike a liquid engine there is no coolant — so the
+material's only defence is to ablate slowly.
+
+**Mechanism.** Three mechanisms combine: thermochemical attack, as the char reacts
+with H₂O, CO₂ and HCl in the exhaust; mechanical erosion by condensed alumina
+droplets in an aluminised propellant, which arrive at high velocity and at an angle
+set by the contraction; and thermal-stress spallation of the insert. The result is
+a throat area that grows monotonically through the burn, so $K_n$ falls, so
+chamber pressure falls, so the burn rate falls and the trace droops and lengthens.
+
+**Quantitative hook.** At $n = 0.35$, a **2% throat-area growth costs 3.0%** of
+chamber pressure, 62.2 → 60.3 bar `[EX 53.a–b]`. Carbon–carbon inserts exist
+precisely to hold that number down. When they do not, it is fatal: Vega-C VV22
+lost the vehicle to unexpected erosion of a carbon–carbon throat insert, traced to a
+supplier change — a materials qualification decision in a subcomponent
+[engine-database B.3.3, confidence C on the attribution detail].
+
+**Trade-off / exception.** Some erosion is designed in and compensated for in the
+predicted trace, so a motor with zero erosion would also be off-nominal — high, in
+that case. The design lever is the insert material and its qualification, and the
+lesson from Vega-C is that a qualification is about a specific supply chain, not
+about a generic material.
+
+**Follow-up:** *"How would you catch an insert supplier change before flight?"*
+
+---
+
+### 108. Why is thrust vector control harder on a solid than on a liquid? `[M24][M27]`
+
+**Physics.** A liquid engine's thrust chamber is a small, cool-jacketed component
+you can hang on a gimbal bearing; a solid's "engine" is the entire pressurised case,
+so only the nozzle can move — and that nozzle is a hot, ablating structure carrying
+full chamber pressure across whatever joint you use to steer it.
+
+**Mechanism.** Three architectures, in historical order. **Jetavators / jet vanes**
+put a surface in the exhaust: simple, but lossy and consumed. **Liquid injection
+(LITVC)** injects a fluid through ports in the exit cone to make an asymmetric shock
+— no moving nozzle at all, but you carry injectant mass and a distribution system.
+**Flexible-joint (flexseal) gimballing** uses an elastomer-and-shim bearing that
+carries pressure while allowing a few degrees of deflection; efficient, and now
+standard, but the joint must survive storage, temperature and the burn.
+
+**Quantitative hook.** Shuttle SRB: submerged flexseal, **±8° pitch and yaw**, two
+hydraulic actuators fed by hydrazine APUs per booster. Ariane 5 EAP: flexseal to
+**7.3°** (6° is quoted in places; use 7.3° per B.1.5). Titan's UA120 family used
+**LITVC with N₂O₄** and no moving nozzle; the SRMU that replaced it went to a
+gimballed nozzle. PSLV's S139 uses **SITVC with aqueous strontium perchlorate** —
+LITVC with a dense, cheap, non-toxic injectant, letting a very large motor keep a
+fixed nozzle [engine-database B.1, B.2, B.5.3].
+
+**Trade-off.** Flexseal wins on efficiency and mass but needs an elastomeric joint
+qualified for years of storage; LITVC wins on simplicity and storage but carries
+dead injectant; spin stabilisation deletes TVC entirely and pays in injection
+accuracy, which is what Scout's upper stages did [engine-database B.5.2].
+
+**Follow-up:** *"Which would you choose for a stage that sits in a silo for
+twenty years?"*
+
+---
+
+### 109. Why can a solid motor only be shut down violently? `[M21][M27]`
+
+**Physics.** There is no valve between the propellant and the chamber — the
+propellant *is* in the chamber, burning. The only way to stop it is to drop the
+pressure below the deflagration limit, and the only fast way to drop pressure is to
+open a large area.
+
+**Mechanism.** Thrust termination works by firing shaped charges that blow ports in
+the forward dome. The vented area suddenly exceeds the nozzle throat by a large
+factor, chamber pressure collapses, the propellant's burn rate falls with it and
+combustion extinguishes. Because the ports face forward, the vented gas also
+produces a forward thrust component that cancels much of the residual aft thrust —
+which is the point, on a missile that needs a precise burnout velocity. The event
+is structurally destructive by design, single-use, and irreversible.
+
+**Quantitative hook.** The Minuteman third stage does exactly this — shaped charges
+opening ports in the forward dome to set final velocity — and the Titan UA1205
+retained pyrotechnic thrust-termination ports for the crewed MOL/Titan IIIM
+configurations [engine-database B.7, B.2]. Note what is *not* available: no
+throttling, no restart, no graceful abort.
+
+**Trade-off / exception.** This is the fundamental argument in the liquid-versus-
+solid trade for anything crewed or anything requiring precise cutoff: a liquid
+engine shuts down by closing a valve, repeatably, in milliseconds, with the hardware
+intact. It is also why the Shuttle's SRBs made an abort impossible until they
+burned out — once lit there is no throttling and no shutdown
+[engine-database B.1.7].
+
+**Follow-up:** *"How do you get precise burnout velocity out of a motor you cannot
+throttle?"*
+
+---
+
+### 110. Why does a 0.2 percentage-point change in iron oxide loading matter? `[M20][M25]`
+
+**Physics.** Iron oxide is a **burn-rate catalyst**, not an ingredient whose mass
+matters — so a fraction of a percent by mass changes $a$ in $r = ap^n$ by several
+percent, and the $1/(1-n)$ amplification carries it into chamber pressure and the
+whole thrust trace.
+
+**Mechanism.** Fe₂O₃ catalyses AP decomposition in the condensed phase and the
+near-surface gas phase, raising the regression rate at a given pressure. Because the
+motor then finds a new equilibrium at higher $K_n$-equivalent burning, the effect is
+not a small perturbation on thrust — it is a shift of the whole operating point.
+This is why catalyst loading is a controlled, lot-tested parameter and why every
+propellant batch is strand-burned before it is cast.
+
+**Quantitative hook.** The Shuttle SRB's published composition appears two ways:
+**AP 69.6 / Al 16.0 / Fe₂O₃ 0.4 / PBAN 12.04 / epoxy 1.96** (NASA fact sheet) and a
+competing AP 69.8 / Fe₂O₃ 0.2 [engine-database B.1.1]. Both sum to 100%; the
+difference is the catalyst, halved. That is not a rounding question — it is a
+several-percent change in burn rate and therefore in chamber pressure and thrust.
+For scale: 3% on burn rate propagates like a 3% $K_n$ change, i.e. about **4.6%**
+in $p_c$ at $n = 0.35$ `[EX 103.a–b]`.
+
+**Trade-off / exception.** The same sensitivity is a design tool: catalyst loading
+is exactly how a formulator tunes burn rate to hit a required trace without
+redesigning the grain. It is also why "the same propellant" across two production
+lots is a claim requiring evidence, and why a solid's quality assurance is a
+chemistry problem more than a mechanical one.
+
+**Follow-up:** *"How would you detect a bad lot before you cast a segment?"*
+
+---
+
+## R. Cold gas
+
+### 111. Why does a cold-gas thruster get 70 s when a bipropellant gets 300? `[M28][M01]`
+
+**Physics.** Exhaust velocity goes as $\sqrt{T_0/M}$, and a cold-gas thruster gives
+up the temperature term entirely — it expands stored gas at 300 K where a
+bipropellant expands combustion products at 3,600 K.
+
+**Mechanism.** There is no combustion, so the only energy available is the enthalpy
+the gas already has: $c_p T_0$. A factor of twelve in $T_0$ is a factor of 3.5 in
+velocity before any molecular-weight effect. Nitrogen at $M = 28$ then loses again
+against LOX/RP-1 products at $M = 23$ and LOX/LH2 at 13.5. What you gain is that
+nothing has to burn, so there is no igniter, no mixture ratio, no combustion
+stability and no thermal problem at all.
+
+**Quantitative hook.** Ideal, $T_0 = 300$ K, $\varepsilon = 50$: nitrogen gives
+**76.8 s** and helium **178.1 s** `[EX 111.a–b]` [engine-database C.1]. Realized
+values are about 90% of ideal — ~65–73 s for N₂ [engine-database C.1.3]. Against
+Merlin 1D's 311 s vacuum, that is a factor of four
+[_verify-liquid, Merlin block].
+
+**Trade-off / exception.** Any published cold-gas Isp is meaningless without $T_0$
+and $\varepsilon$: the spread between $\varepsilon = 20$ and 100 is 3–10% depending
+on $\gamma$ [engine-database C.1]. And the comparison is not the one that decides
+designs — for a small spacecraft the tank, not the Isp, dominates the mass, which
+is why a 40 s refrigerant beats 178 s helium in practice.
+
+**Follow-up:** *"Then why does anyone fly helium?"*
+
+---
+
+### 112. Why did MarCO fly a 40-second-Isp propellant to Mars? `[M28][M31][M33]`
+
+**Physics.** For a volume- and safety-constrained spacecraft the right figure of
+merit is impulse per unit stored *volume*, $\rho I_{sp} g_0$ — not Isp — and a dense
+liquefiable propellant wins that comparison by a wide margin.
+
+**Mechanism.** R-236fa is stored as a self-pressurising saturated liquid at about
+2.7 bar. That means no regulator, no high-pressure COPV, and a thin-walled welded
+aluminium module that can hold propellant, valves and electronics in one part. A
+gaseous system of the same total impulse needs a ~200-bar vessel, which does not fit
+a 6U bus and would not pass launch-safety review as a secondary payload.
+
+**Quantitative hook.** Impulse density: R-236fa at 1.36 g/cm³ and ~42 s gives
+**57,120 kg·s/m³** `[EX 112.b]`, against 241-bar helium at ~0.04 g/cm³ and ~160 s
+giving **6,400** `[EX 112.c]` — a factor of about **8.9** in the refrigerant's
+favour, and the engine database records this explicitly as a correction to the
+verification worksheet's own figures [engine-database C.1.1]. MarCO-A and MarCO-B
+flew the VACCO MiPS: 8 thrusters, **755 N·s** total impulse, 3,490 g wet, >40 m/s
+of TCM capability, and they were the first interplanetary CubeSats
+[engine-database C.2].
+
+**Trade-off.** You give up more than half the Δv per kilogram, and the propellant's
+vapour pressure — and hence thrust — is temperature-dependent, so performance drifts
+with the thermal environment. Accept both, because the constraint was never Δv
+efficiency.
+
+**Follow-up:** *"What would you have flown if the mass budget, not the volume, were
+binding?"*
+
+---
+
+### 113. Why does a real cold-gas thruster deliver only about 90% of ideal Isp? `[M29][M28]`
+
+**Physics.** The ideal calculation assumes isentropic, one-dimensional, adiabatic
+expansion of a perfect gas from a fully developed plenum — and a millimetre-scale
+nozzle firing millisecond pulses violates every one of those assumptions at once.
+
+**Mechanism.** Four losses stack. Boundary layers are relatively enormous at small
+throat Reynolds numbers, so the effective area is smaller and the exit profile is
+not uniform. Heat transfer runs the wrong way: the gas cools as it expands and takes
+heat *from* the wall, then the wall cools and the next pulse starts colder.
+Divergence and non-equilibrium effects appear in polyatomic refrigerants, whose
+internal modes do not relax fast enough. And valve/plenum dead volume means part of
+each pulse leaves without ever reaching design pressure — which dominates in
+pulse mode.
+
+**Quantitative hook.** Across the whole cold-gas table the measured/theoretical
+ratio is about **0.91**: H₂ 296/272, He 179/165, N₂ 80/73, Ar 57/52, Xe 31/28
+[engine-database C.1.3]. SAFER is the honest worked example: 3.05 m/s × ~180 kg ÷
+(1.4 kg × 9.80665) implies about **40 s** against a ~77 s ideal — because it fires
+millisecond bursts at low $\varepsilon$ [engine-database C.2.2].
+
+**Trade-off / exception.** Do not use MMU as the example: its published Δv cannot
+be reconciled with its published propellant load without knowing the reference mass,
+and working it backwards implies ~100 s from GN₂, which is not credible
+[engine-database C.2.1]. Quote the system whose numbers close.
+
+**Follow-up:** *"Which of those four losses would you attack first?"*
+
+---
+
+### 114. How does blowdown regulation change your mission design? `[M29][M30]`
+
+**Physics.** In a blowdown system there is no regulator, so tank pressure falls
+monotonically as gas leaves — which means thrust, mass flow and minimum impulse bit
+all change over the mission, and none of them is a constant you can design against.
+
+**Mechanism.** For a fixed-volume gas tank, $p$ falls with the remaining mass;
+thrust falls roughly proportionally, while Isp falls only slightly (the pressure
+ratio across a vacuum nozzle stays large). So late-mission burns take longer for the
+same Δv, minimum impulse bits shrink, and control authority degrades — which the
+attitude control system must be designed to tolerate at *end* of life, not
+beginning. A regulator fixes all of this and adds a component that can fail open or
+closed, plus mass and a pressure drop.
+
+**Quantitative hook.** Usable fraction from a 241 bar COPV down to a 20 bar useful
+floor is **91.7% isothermal** but only **83.1% adiabatic** `[EX 114.a–b]` — the
+difference is real gas cooling during a fast draw, and it is propellant you paid to
+launch and cannot use. A liquefiable propellant sidesteps the whole problem: R-236fa
+self-pressurises at its ~2.7 bar vapour pressure and holds it nearly constant until
+the liquid is gone [engine-database C.2].
+
+**Trade-off / exception.** The MMU flew *regulated*, with two independent systems
+either of which was flyable alone; MarCO flew unregulated self-pressurising blowdown
+with no regulator and no high-pressure COPV
+[engine-database C.2]. Both are right, for different missions.
+
+**Follow-up:** *"Where in the mission would you rather have the extra thrust?"*
+
+---
+
+### 115. Why does a cold-gas system's leak rate matter more than its Isp? `[M30][M31]`
+
+**Physics.** A cold-gas system's propellant is a gas at high pressure held by
+mechanical seals for years — so the integral of leak rate over the mission can
+exceed the propellant the mission actually plans to use.
+
+**Mechanism.** Total impulse is proportional to propellant delivered *through the
+thrusters*. Anything lost through valve seats, fittings and joints is impulse you
+never get, and unlike a liquid system there is no surface tension or vapour pressure
+to help retain it — a gas finds every path. Worse, a leaking thruster valve produces
+a small continuous thrust, which is a disturbance torque the attitude control system
+must counter, spending more propellant. A 10% Isp improvement is worth nothing
+against a system that loses 30% of its propellant in three years on orbit.
+
+**Quantitative hook.** This is why the architecture converged on **printing the
+plenum, feed passages and nozzles as one part** — it removes the joints that dominate
+leak-rate budgets in a system that must hold propellant for years
+[engine-database C.2.7, confidence C]. MarCO's MiPS is a **single-tank all-welded
+aluminium module** with chemically-etched frictionless micro-valves; the modular
+VACCO units are rated for up to **1,860,000 firings** [engine-database C.2].
+
+**Trade-off / exception.** Low-pressure liquefiable propellants help twice: less
+driving pressure across every seal, and a liquid store rather than a gas one. The
+price is temperature-dependent performance and a propellant that must not condense
+in the wrong place. Note also that leak rate is a *qualification* property of a
+build, not of a design — which makes it a process and inspection problem.
+
+**Follow-up:** *"How would you budget leak rate for a five-year mission?"*
+
+---
+
+### 116. What happens if you heat the gas, and why isn't that always done? `[M29][M28]`
+
+**Physics.** Isp goes as $\sqrt{T_0}$, so heating the gas is the only lever on
+cold-gas performance that does not require changing propellant — and it is a
+square-root lever, so it takes a lot of heat to buy a little Isp.
+
+**Mechanism.** A resistojet puts an electrical heater in the plenum or the throat
+region, raising stagnation temperature before expansion. Nothing else in the system
+changes: same propellant, same tank, same valves. Doubling $T_0$ buys 41%. But the
+power comes from the spacecraft bus, it must be supplied *while* thrusting, and the
+heater's thermal time constant means short pulses do not reach the design
+temperature at all — so the gain is real for long burns and largely illusory for
+attitude-control pulses.
+
+**Quantitative hook.** Nitrogen at $\varepsilon = 50$: **76.8 s at 300 K** and
+**108.7 s at 600 K** `[EX 111.a][EX 116.a]`, exactly $\sqrt{2}$. The flown example
+is CHIPS: the same refrigerant class taken from a ~43 s cold ideal to **82 s** —
+which *is* the entire argument for a resistojet, and also the boundary of what
+"cold gas" means [engine-database C.2]. NASA's small-spacecraft envelope quotes the
+class as 40–110 s and says explicitly that the top of that band is reachable only
+with warm gas [engine-database C.2, NASA-SOA].
+
+**Trade-off.** Power, mass and thermal management. A CubeSat with 5 W of margin
+cannot run a 30 W heater, and adding solar array to do so costs more mass than the
+propellant saved. You have also reintroduced a failure mode — a heater that does not
+come on — into a system whose whole appeal was that nothing has to work but a valve.
+
+**Follow-up:** *"At what mission Δv does the resistojet start paying for its
+power system?"*
+
+---
+
+## S. Systems, history and judgment
+
+### 117. Why is the propulsion choice a vehicle decision rather than an engine decision? `[M32][M33]`
+
+**Physics.** The rocket equation acts on the *stage*, not the engine: payload
+depends on Isp, on structural mass fraction and on propellant bulk density, and the
+propellant that maximises the first often degrades the other two.
+
+**Mechanism.** Pick hydrogen and you gain 100+ s of Isp but your tanks are three
+times the volume, insulated, and heavier per kilogram of propellant carried; the
+stage grows, drag and structure grow, and the exponential gain is partly eaten. Pick
+a solid and you lose 60 s of Isp but delete the entire feed system and get 0.92 mass
+fraction. Pick a low-Isp refrigerant on a CubeSat and you fit in the volume you have.
+The engine's figure of merit is Isp; the vehicle's is payload per unit cost, and
+those two optimisations do not have the same answer.
+
+**Quantitative hook.** Density impulse makes it concrete: LOX/LH2 at 362 kg/m³ and
+452.3 s gives 163,800 kg·s/m³, LOX/RP-1 at 1,017 kg/m³ and 311 s gives 316,200 — a
+factor of **1.93** in kerosene's favour `[EX 16.a–c]`. Vulcain 1 → 2 is the same
+lesson inside one engine family: mixture ratio 5.3 → 6.1 *lowered* vacuum Isp from
+431 to 429 s and was adopted anyway, because it raised density and thrust
+[_verify-liquid, Vulcain blocks; engine-database A.4.2].
+
+**Trade-off / exception.** Where the stage is small and acts late — an upper stage,
+an apogee kick — the exponential dominates and Isp really is the answer, which is
+why hydrogen and high-$\varepsilon$ nozzles live upstairs. The rule is that the
+optimum for a vehicle is not the optimum for an engine, in both directions.
+
+**Follow-up:** *"Where does that argument reverse?"*
+
+---
+
+### 118. Why did the RS-68 deliberately give up performance? `[M13][M33][M35]`
+
+**Physics.** Nothing physical forced it. The programme optimised recurring cost and
+development risk instead of Isp and T/W, and every design choice follows from that
+objective function.
+
+**Mechanism.** A gas generator instead of staged combustion, so no preburner, no
+high-pressure hot-gas path, and a much simpler start. An **ablative** nozzle instead
+of a regen one, so no tube forming, no brazing, no coolant circuit — at the price of
+a nozzle that chars and erodes through the burn. A low expansion ratio because the
+ablative nozzle is mass-limited. The result is roughly **80% fewer parts than the
+RS-25** [_verify-liquid, RS-68A block].
+
+**Quantitative hook.** The bill, stated plainly: $p_c$ **102.6 bar** against the
+RS-25's 206.4; $\varepsilon$ **21.5** against 69; vacuum Isp **411.9 s** against
+452.3 s; and T/W **47.4:1** — the **lowest of any modern large booster engine**, on
+an engine of 3,560 kN vacuum thrust [_verify-liquid, RS-68A and RS-25 blocks]. Forty
+seconds of Isp, given away on purpose.
+
+**Trade-off / exception.** It worked for its vehicle: Delta IV flew 2002–2024 and
+Delta IV Heavy carried national-security payloads to their orbits. But the same
+choice is why Delta IV was never competitive on cost per kilogram against vehicles
+that recovered their hardware — the low-cost-expendable premise was overtaken. A
+design-to-cost decision is a bet on the market as it will be, not as it is.
+
+**Follow-up:** *"Would you make the same choice today?"*
+
+---
+
+### 119. Why is engine reliability more about part count than about margin? `[M33][M34]`
+
+**Physics.** Independent failure modes multiply: a system of $N$ series parts each
+with reliability $R$ has $R^N$. Margin raises $R$ on the components you thought
+about; deleting parts removes failure modes you did not.
+
+**Mechanism.** Margin protects against the loads you predicted. Most propulsion
+failures are not overload failures — they are interfaces, contamination,
+misassembly, a valve that stuck, a seal that leaked, a joint that rotated. Those
+scale with the number of parts, joints and operations, and no amount of stress
+margin removes them. Deleting a component deletes its entire failure tree, including
+the branches nobody enumerated.
+
+**Quantitative hook.** At $R = 0.9999$ per part, 100 parts give 0.990 and 500 parts
+give 0.951 — a fivefold increase in loss rate from part count alone. The historical
+evidence points the same way: the **Redstone A-7 was man-rated by subtraction**, its
+pneumatic system cut from 31 components to 10 by deleting check valves and
+consolidating regulators [engine-database Part D §3]. The **Apollo SPS** removed
+mechanisms rather than adding redundancy — pressure-fed, hypergolic, no igniter, no
+turbopump, no valve that must move more than once — and flew every lunar orbit
+insertion and trans-Earth injection without a failure. **Viking**: 2 failures in 958
+engines across 144 launches [engine-database A.4.5]. **Gamma**: 128 engines, 26
+launches, zero failures [engine-database A.9.2].
+
+**Trade-off / exception.** Redundancy genuinely helps where failures are
+independent and detectable — dual spark plugs, dual O-rings, parallel valve trains.
+It hurts where the redundant elements share a cause, or where adding them adds more
+leak paths than they protect: SuperDraco's 2019 loss came through a check valve
+[engine-database A.3.9].
+
+**Follow-up:** *"So when *would* you add redundancy?"*
+
+---
+
+### 120. What does a propulsion failure investigation actually look for? `[M34][M18]`
+
+**Physics.** A failure investigation is a search for the *initiating* event in a
+causal chain, distinguished from the much longer list of consequential damage that
+the initiating event produced.
+
+**Mechanism.** The method is the fault tree: enumerate every mechanism that could
+produce the observed signature, then eliminate each with evidence — telemetry,
+hardware, and analysis in that order of reliability. Time-align everything: the
+first anomalous channel, to millisecond resolution, is usually near the initiator.
+Then look for the *root* rather than the proximate cause: the O-ring did not seat,
+but the joint rotated; the throat eroded, but a supplier changed; the inducer
+failed, but the operating point had no margin.
+
+**Quantitative hook.** Three examples, each with a distinct root layer.
+**STS-51-L**: the proximate cause was a cold-stiffened O-ring, the design cause was
+joint rotation, and the fix was a capture feature — not a better seal
+[engine-database B.1.6][Rogers86]. **H-II Flight 8, 1999**: LH2 turbopump inducer
+failure; the fix was a de-rated LE-7A at 120 bar rather than 127
+[_verify-liquid, LE-7/LE-7A blocks]. **Vega-C VV22, 2022**: Zefiro 40
+under-pressure, attributed to unexpected carbon–carbon throat-insert erosion traced
+to a supplier change [engine-database B.3.3, confidence C on the attribution].
+
+**Trade-off / exception.** The investigation's hardest job is resisting the
+plausible story that fits the first evidence, and its second-hardest is stating
+honestly what could not be determined. Note that one of the three examples above is
+still recorded at confidence C — the course does not upgrade an attribution because
+it is convenient.
+
+**Follow-up:** *"What would you have to see to close it out as 'cause not
+determined'?"*
+
+---
+
+### 121. Why did the same lesson get learned three times — V-2, Atlas, Vega-C? `[M34][M35]`
+
+**Physics.** The recurring lesson is that a propulsion system's reliability is set
+by the weakest *qualification* argument, not by the weakest physical margin — and
+qualification arguments decay silently as processes, suppliers and personnel change.
+
+**Mechanism.** Each generation rediscovers that a component qualified in one context
+is not qualified in another. The V-2 era learned it about mass production: an engine
+designed at Peenemünde and built at Mittelwerk was not the same engine, and its
+failures were manufacturing and quality failures rather than design ones. The
+Atlas/early-US era learned it about propellant and structure interactions and about
+the cost of stage-and-a-half compromises — the sustainer's 220 s sea-level Isp is a
+badly overexpanded nozzle accepted for a system-level reason
+[engine-database Part D §4]. Vega-C learned it about supply chain: a **carbon–carbon
+throat-insert material supplier change** eroded unexpectedly and destroyed a vehicle
+[engine-database B.3.3].
+
+**Quantitative hook.** The counter-examples show it is learnable and holdable:
+Viking, 2 failures in 958 engines over 144 launches, 1979–2003; Gamma, 128 engines
+across 26 launches with zero failures; Orion motors, ~500 delivered with zero flight
+failures across 100+ launches [engine-database A.4.5, A.9.2, B.3.5]. All three are
+architecturally conservative programmes with stable production.
+
+**Trade-off / exception.** Architectural conservatism buys reliability and costs
+performance and progress — Black Arrow orbited Prospero and the programme was
+cancelled anyway. The lesson is not "never change anything"; it is that every change
+to a qualified article, including one a supplier makes for you, restarts a
+qualification argument that someone has to own.
+
+**Follow-up:** *"How would you catch a supplier change in your own programme?"*
+
+---
+
+### 122. What does it cost to develop an engine decoupled from a vehicle commitment? `[M33][M35]`
+
+**Physics.** An engine has no requirements of its own — thrust, Isp, throttle range,
+restart count and life all come from a mission. Without a committed vehicle those
+requirements drift, and a design optimised for a moving target is optimised for
+none.
+
+**Mechanism.** Decoupled programmes accumulate three costs. Requirements churn, as
+each candidate application adds a capability the last one did not need. Schedule
+cost, because there is no launch date forcing decisions to close. And obsolescence,
+because by the time the engine is qualified the vehicle it was designed for has
+changed or been cancelled — and a qualified engine is a snapshot of a supply chain
+and a workforce, both of which decay.
+
+**Quantitative hook.** The file is full of them. **J-2X**: announced 2007, hot-fired
+2011–13, idle after 2014, **never flown**, with its intended applications (Ares I,
+Ares V EDS, early SLS upper stages) all cancelled or changed
+[_verify-liquid, J-2X block]. **RD-0146**: concept 1988, project start 1999, first
+firing 2001, still in development as of 2022, never flown — and holding the highest
+Isp figure ever claimed, 470 s [_verify-liquid, RD-0146 block, low confidence].
+**Aestus II / RS-72**: built, tested, never flew [engine-database A.4.6]. **J-2S**:
+tested 1965–72 at 436 s, never flown. Against that: **Vinci** took 26 years from
+1998 to first flight in 2024 — and flew, because Ariane 6 eventually committed
+[_verify-liquid, Vinci block].
+
+**Trade-off / exception.** The counter-argument is real: technology programmes with
+no vehicle produced ORSC, expander bleed and full-flow staged combustion. The
+distinction is between funding a *cycle demonstration* and funding a *flight engine*
+without a customer.
+
+**Follow-up:** *"Which of those would you have cancelled earlier, and when?"*
+
+---
+
+### 123. Why should you be suspicious of a published Raptor number, and how do you say so without sounding like a crank? `[M36][M33]`
+
+**Physics.** Suspicion here is not about physics — the numbers are physically
+plausible — it is about evidence: there is no independent measurement, and an
+unaudited figure is a claim regardless of who makes it.
+
+**Mechanism.** SpaceX publishes almost nothing in the peer-reviewed or
+government-report literature. Raptor's thrust, chamber pressure, Isp, dry mass and
+T/W all originate from company statements, several of them **Musk posts on
+Twitter/X** — the Raptor 2 thrust figures trace to an August 2020 post — and several
+have changed silently over time. Independent corroboration exists **only for
+thrust**, and only indirectly, through FAA licensing and environmental documents and
+third-party analysis of flight telemetry and acoustics. There is **no independent
+verification of Raptor chamber pressure, Isp, dry mass or T/W at all**
+[engine-database A.3.5]. The same treatment applies to BE-3U, BE-4, Archimedes,
+Prometheus and BOLE.
+
+**Quantitative hook.** State the claim and its status together: "Raptor 2 is claimed
+at 2,256 kN sea level and 300 bar, Raptor 3 at 2,452 kN and 330 bar — company
+figures, unaudited. If they hold, that exceeds the RS-25's 206 bar and the RD-180's
+267 bar" [_verify-liquid, Raptor block].
+
+**Trade-off / exception.** The way not to sound like a crank is to lead with what is
+*certain and impressive*: Raptor is the **first full-flow staged combustion engine
+ever flown**, ahead of the RD-270 (never flown) and the IPD (test only), and that
+fact depends on no contested number at all [engine-database A.3.6]. Then attach the
+evidentiary status to the figures, once, without editorialising. Doing this is not a
+slight against the company; it is an accurate statement of the evidentiary
+situation — and the same discipline applies to a NASA number whose measurement
+station is unstated.
+
+**Follow-up:** *"What would count as independent verification?"*
+
+---

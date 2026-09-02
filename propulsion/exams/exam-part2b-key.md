@@ -96,7 +96,7 @@ $$H_f = \frac{\Delta p_f}{\rho_f g_0} = \frac{1.335\times10^7\ \mathrm{Pa}}{423\
 
 $$H_o = \frac{\Delta p_o}{\rho_o g_0} = \frac{1.080\times10^7}{1141\times9.80665} = \mathbf{965.2\ m}$$
 
-**The fuel pump makes 3.33 times the head while moving 29 % of the mass**, for
+**The fuel pump makes 3.33 times the head while moving 22.5 % of the total flow**, for
 two independent reasons: methane is **2.70 times less dense** than LOX, so the
 same $\Delta p$ costs 2.70 times the head; **and** the fuel side carries the
 25 bar regenerative jacket that the oxidiser side does not. Either alone would
@@ -145,7 +145,7 @@ $\omega = 2\pi\times 25\,000/60 = 2618.0$ rad/s.
 
 $$N_{s,f} = \frac{\omega\sqrt{Q_f}}{(g_0H_f)^{3/4}}
 = \frac{2618.0\times\sqrt{6.2648\times10^{-2}}}{(9.80665\times3218)^{3/4}}
-= \frac{655.2}{2367.6} = \mathbf{0.2767}$$
+= \frac{655.3}{2367.9} = \mathbf{0.2767}$$
 
 $$N_{s,o} = \frac{2618.0\times\sqrt{8.0193\times10^{-2}}}{(9.80665\times965.2)^{3/4}}
 = \frac{741.4}{959.6} = \mathbf{0.7726}$$
@@ -362,10 +362,10 @@ $$R_t = \frac{R_u}{\mathcal{M}_t} = \frac{8314.46}{17.5} = \mathbf{475.1\ J/(kg\
 
 $$c_{p,t} = \frac{\gamma_t R_t}{\gamma_t - 1} = \frac{1.24\times475.11}{0.24} = \mathbf{2455\ J/(kg\,K)}$$
 
-$$\pi_t^{-(\gamma_t-1)/\gamma_t} = 22.0^{-0.193548} = 0.5104$$
+$$\pi_t^{-(\gamma_t-1)/\gamma_t} = 22.0^{-0.193548} = 0.5498$$
 
 $$\Delta h_{is} = c_{p,t}T_t\left[1 - \pi_t^{-(\gamma_t-1)/\gamma_t}\right]
-= 2454.7\times1000\times0.48959 = \mathbf{1.1052\ MJ/kg}$$
+= 2454.7\times1000\times0.45024 = \mathbf{1.1052\ MJ/kg}$$
 
 $$w_t = \eta_t\,\Delta h_{is} = 0.62\times1.1052\times10^6 = \mathbf{6.852\times10^5\ J/kg}$$
 
@@ -409,7 +409,7 @@ staged-combustion cycle spends its complexity to recover.
 
 ### (d) Raising turbine inlet temperature to 1200 K (3)
 
-$$w_t = 0.62\times2454.7\times1200\times0.48959 = \mathbf{8.223\times10^5\ J/kg}$$
+$$w_t = 0.62\times2454.7\times1200\times0.45024 = \mathbf{8.223\times10^5\ J/kg}$$
 
 $$\dot m_t = \frac{2.4493\times10^6}{8.2228\times10^5} = \mathbf{2.979\ kg/s},\qquad
 \dot m_{\text{total}} = 120.98\ \mathrm{kg/s},\qquad f_{gg} = \mathbf{2.462\ \%}$$
@@ -723,8 +723,8 @@ and $\tau_c = 1.4891\times10^{-3}$ s. Iterating:
 
 | $\omega$ (rad/s) | $\omega\tau$ | $\arctan(\omega\tau_c)$ | sum |
 |---|---|---|---|
-| 2000 | 1.8000 | 1.2470 | 3.0470 |
-| 2100 | 1.8900 | 1.2610 | 3.1510 |
+| 2000 | 1.8000 | 1.2469 | 3.0469 |
+| 2100 | 1.8900 | 1.2613 | 3.1513 |
 | **2090.7** | **1.8816** | **1.2600** | **3.1416** = $\pi$ ✓ |
 
 $$f_{\text{neutral}} = \frac{2090.7}{2\pi} = \mathbf{332.7\ Hz}$$
@@ -912,9 +912,9 @@ Bisecting on $\log(2N_f)$:
 
 | $2N_f$ | elastic term | plastic term | sum |
 |---|---|---|---|
-| 300 | 2.010×10⁻³ | 1.226×10⁻² | 1.427×10⁻² |
-| 600 | 1.862×10⁻³ | 8.087×10⁻³ | 9.95×10⁻³ |
-| 400 | 1.955×10⁻³ | 1.023×10⁻² | 1.219×10⁻² |
+| 300 | 1.989×10⁻³ | 1.240×10⁻² | 1.439×10⁻² |
+| 600 | 1.843×10⁻³ | 8.183×10⁻³ | 1.003×10⁻² |
+| 400 | 1.927×10⁻³ | 1.044×10⁻² | 1.236×10⁻² |
 | **423.5** | **1.915×10⁻³** | **1.008×10⁻²** | **1.200×10⁻²** ✓ |
 
 $$2N_f = 423.5 \quad\Rightarrow\quad \boxed{N_f = 211.8\ \text{cycles}}$$
