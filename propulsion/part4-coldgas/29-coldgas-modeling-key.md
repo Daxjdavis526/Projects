@@ -143,7 +143,7 @@ before rising, which is why its correction at 250 bar is smaller than
 nitrogen's — worth noting, and a common source of confusion.)
 
 (c) Ideal vacuum $I_{sp}$ at $\varepsilon=40$, $T_0=288$ K, $\gamma=1.667$:
-$c^*=\sqrt{208.132\times288}/\Gamma$ with $\Gamma(1.667)=0.72649$, giving
+$c^*=\sqrt{208.132\times288}/\Gamma$ with $\Gamma(1.667)=0.72623$, giving
 $c^*=337.12$ m/s; $C_F(\varepsilon{=}40)=1.6037$;
 $$I_{sp}=\frac{337.12\times1.6037}{9.80665}=\mathbf{55.13\ s}$$
 
@@ -479,10 +479,10 @@ with $n\approx1.2$ and at worst adiabatic.
 
 **Size of the error, 6:1 nitrogen blowdown** ($p_f/p_i=0.1667$):
 - isothermal: $\phi=0.833$
-- polytropic $n=1.2$: $\phi=1-0.1667^{1/1.2}=0.783$
-- adiabatic: $\phi=1-0.1667^{1/1.4}=0.716$
+- polytropic $n=1.2$: $\phi=1-0.1667^{1/1.2}=0.775$
+- adiabatic: $\phi=1-0.1667^{1/1.4}=0.722$
 
-So the propellant shortfall is **6 % to 14 %**, and on top of that the
+So the propellant shortfall is **7 % to 13 %**, and on top of that the
 delivered $I_{sp}$ falls with $\sqrt{T_t}$ — a further 8 % on the mean for
 the adiabatic case (Eq. 3.18 gives a $2/(\gamma+1)=0.833$ prefactor). **The
 combined total-impulse error is 10–22 %.**
@@ -582,9 +582,10 @@ change the impulse; and the question gives enough to answer.*
 
 **Q7 (10).** Expect a **loss**, not a recovery. At 55 μm and CubeSat
 plenum pressures $Re_t$ is of order $10^3$; going from $\varepsilon=30$ to
-80 adds about 2 s of ideal $I_{sp}$ (74.8 → 76.5 s) while $b$ rises from
-7.75 to 12.6, costing roughly 15 % of $\eta_{visc}$ at $Re_t=1500$ — a net
-loss of about 8 s. The added divergent length is a friction surface, not an
+80 adds 1.5 s of ideal $I_{sp}$ (75.08 → 76.60 s) while $b(\varepsilon)$
+rises from 7.75 to 12.65, dropping $\eta_{visc}$ at $Re_t=1500$ from 0.800
+to 0.673 — delivered $I_{sp}$ falls from 59.0 s to 50.7 s, **a net loss of
+8.3 s**. The added divergent length is a friction surface, not an
 expansion surface, at this Reynolds number `[Grisnik87]`.
 
 **Instead:** leave the nozzle alone and raise the plenum pressure (which

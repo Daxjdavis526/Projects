@@ -112,8 +112,8 @@ $$
 \sum F_x \;=\; \oint_{CS} \rho\, u_x \,(\mathbf{u}\cdot \mathbf{\hat n})\, dA
 $$
 
-> **Eq. 3.1** — variables: $\rho$ gas density [kg/m³], $u_x$ axial velocity
-> [m/s], $\mathbf{\hat n}$ outward unit normal, $dA$ area element [m²].
+> **Eq. 3.1** — variables: $\rho$ gas density (kg/m³), $u_x$ axial velocity
+> (m/s), $\mathbf{\hat n}$ outward unit normal, $dA$ area element (m²).
 > Meaning: the net axial force on the control volume equals the net rate at
 > which axial momentum leaves it. Assumes: steady state, a fixed
 > (non-accelerating) control volume, negligible axial body force. Fails when
@@ -143,9 +143,9 @@ $$
 F \;=\; \dot m\, u_e \;+\; (p_e - p_a)\,A_e
 $$
 
-> **Eq. 3.2 — the thrust equation** — variables: $F$ thrust [N], $\dot m$ mass
-> flow [kg/s], $u_e$ mass-averaged axial exit velocity [m/s], $p_e$ exit static
-> pressure [Pa], $p_a$ ambient static pressure [Pa], $A_e$ exit area [m²].
+> **Eq. 3.2 — the thrust equation** — variables: $F$ thrust (N), $\dot m$ mass
+> flow (kg/s), $u_e$ mass-averaged axial exit velocity (m/s), $p_e$ exit static
+> pressure (Pa), $p_a$ ambient static pressure (Pa), $A_e$ exit area (m²).
 > Meaning: thrust is momentum flux out of the nozzle plus the pressure
 > imbalance on the exit plane. Assumes: steady flow; one-dimensional, uniform
 > exit conditions; propellant enters with negligible axial momentum; the entire
@@ -235,7 +235,7 @@ $$
 c \;\equiv\; \frac{F}{\dot m} \;=\; u_e + \frac{(p_e - p_a)A_e}{\dot m}
 $$
 
-> **Eq. 3.4 — effective exhaust velocity** — variables: $c$ [m/s]. Meaning: the
+> **Eq. 3.4 — effective exhaust velocity** — variables: $c$ (m/s). Meaning: the
 > velocity at which the propellant would have to leave, with no pressure
 > thrust, to produce the observed thrust. Assumes: nothing beyond Eq. 3.2.
 > Fails: $c$ is *not* a physical velocity of any gas parcel; it is an
@@ -288,8 +288,8 @@ $$
 u_e \;=\; \sqrt{\frac{2\gamma}{\gamma-1}\,R\,T_0\left[1-\left(\frac{p_e}{p_0}\right)^{\frac{\gamma-1}{\gamma}}\right]}
 $$
 
-> **Eq. 3.6** — variables: $R = R_u/\mathcal{M}$ [J/(kg·K)], $T_0$ chamber
-> stagnation temperature [K], $p_0 = p_c$ [Pa], $p_e$ [Pa]. Meaning: all of the
+> **Eq. 3.6** — variables: $R = R_u/\mathcal{M}$ (J/(kg·K)), $T_0$ chamber
+> stagnation temperature (K), $p_0 = p_c$ (Pa), $p_e$ (Pa). Meaning: all of the
 > thermal energy released between chamber and exit that is not still stored as
 > enthalpy at the exit appears as directed kinetic energy. Assumes: adiabatic,
 > reversible, one-dimensional, calorically perfect gas with constant $\gamma$,
@@ -333,8 +333,8 @@ $$
 $$
 
 > **Eq. 3.7 — choked mass flow and the Vandenkerckhove function** — variables:
-> $\Gamma$ dimensionless, $p_0$ [Pa], $A_t$ [m²], $R$ [J/(kg·K)], $T_0$ [K],
-> $\dot m$ [kg/s]. Meaning: once the throat is choked, mass flow is set by
+> $\Gamma$ dimensionless, $p_0$ (Pa), $A_t$ (m²), $R$ (J/(kg·K)), $T_0$ (K),
+> $\dot m$ (kg/s). Meaning: once the throat is choked, mass flow is set by
 > chamber conditions and throat area alone, and is completely independent of
 > what happens downstream. Assumes: steady, isentropic, one-dimensional,
 > calorically perfect gas, sonic throat, uniform throat profile. Fails if the
@@ -354,8 +354,8 @@ $$
 c^* \;\equiv\; \frac{p_c\, A_t}{\dot m} \;=\; \frac{\sqrt{R\,T_0}}{\Gamma(\gamma)}
 $$
 
-> **Eq. 3.8 — characteristic velocity** — variables: $c^*$ [m/s], $p_c$ chamber
-> stagnation pressure [Pa], $A_t$ [m²], $\dot m$ [kg/s]. Meaning: a figure of
+> **Eq. 3.8 — characteristic velocity** — variables: $c^*$ (m/s), $p_c$ chamber
+> stagnation pressure (Pa), $A_t$ (m²), $\dot m$ (kg/s). Meaning: a figure of
 > merit for the chamber and the propellant combination — how much stagnation
 > pressure a given mass flow can hold up behind a given throat. Assumes: the
 > defining form (left) assumes only a choked throat and a measurable stagnation
@@ -411,7 +411,7 @@ $$
 
 > **Eq. 3.9 — thrust coefficient** — variables: $C_f$ dimensionless,
 > $\varepsilon = A_e/A_t$, $p_e$ from $\varepsilon$ and $\gamma$ by the
-> isentropic area relation, $p_a$ ambient [Pa]. Meaning: the factor by which
+> isentropic area relation, $p_a$ ambient (Pa). Meaning: the factor by which
 > the nozzle amplifies the force that chamber pressure exerts on the throat
 > area — a pure figure of merit for the nozzle. Assumes: isentropic, attached,
 > one-dimensional, calorically perfect, chemically frozen flow; uniform axial
@@ -545,7 +545,7 @@ $$
 $$
 
 > **Eq. 3.12 — Summerfield separation criterion** — variables: $p_e$ ideal exit
-> static pressure [Pa], $p_a$ ambient [Pa]. Meaning: a nozzle flowing with
+> static pressure (Pa), $p_a$ ambient (Pa). Meaning: a nozzle flowing with
 > $p_e$ below about 40 % of ambient will separate. Assumes: conical or
 > conventional bell, cold-wall, steady. Fails as a sharp rule — it is a fit,
 > not a physical threshold; observed separation ratios range from 0.25 to 0.5
@@ -560,7 +560,7 @@ $$
 $$
 
 > **Eq. 3.13** — variables: $M_e$ ideal exit Mach number, $p_{sep}$ the wall
-> pressure at which separation occurs [Pa]. Meaning: separation is delayed to
+> pressure at which separation occurs (Pa). Meaning: separation is delayed to
 > lower pressure ratios at higher exit Mach number, because the boundary layer
 > is thinner and more energetic. Assumes: over-expanded conventional nozzles,
 > free-shock separation (not restricted-shock). Fails for the
@@ -629,8 +629,8 @@ L^* \;\equiv\; \frac{V_c}{A_t}
 $$
 
 > **Eq. 3.14 — characteristic length** — variables: $V_c$ chamber volume from
-> injector face to throat plane *including* the convergent section [m³], $A_t$
-> [m²], $L^*$ [m]. Meaning: a proxy for gas residence time, since
+> injector face to throat plane *including* the convergent section (m³), $A_t$
+> (m²), $L^*$ (m). Meaning: a proxy for gas residence time, since
 > $t_s = V_c\rho_c/\dot m = L^* \rho_c c^*/p_c$ and $\rho_c c^*/p_c$ varies
 > little across propellant combinations. Assumes: the chamber is the dominant
 > combustion volume; geometry effects beyond volume are second order. Fails as
@@ -732,7 +732,7 @@ Typical values [E]:
   over the exit sphere gives
   $$\lambda = \frac{1 + \cos\alpha}{2}$$
   > **Eq. 3.16 — conical divergence correction** — variables: $\alpha$ the
-  > divergent half-angle [rad]. Meaning: the fraction of exit momentum that is
+  > divergent half-angle (rad). Meaning: the fraction of exit momentum that is
   > axial. Assumes: conical nozzle, source flow from the throat, uniform Mach
   > number on the exit spherical cap. Fails for bell nozzles, where the wall
   > turns the flow back toward axial and $\lambda$ is much closer to 1 — a bell
@@ -1701,12 +1701,12 @@ expansion ratio. State what happens to: nozzle length, nozzle mass,
 divergence loss, and boundary-layer loss. Which of the four is most uncertain
 and why?
 
-**Q9 (10).** [Judgment] A programme reports that $\eta_{c^*}$ improved from
+**Q9 (10).** [J] A programme reports that $\eta_{c^*}$ improved from
 0.951 to 0.958 after an injector change, and declares the change a success.
 Give two reasons to withhold that judgment, and say what you would require
 before accepting it.
 
-**Q10 (10).** [Judgment] You must choose the chamber pressure for a new
+**Q10 (10).** [J] You must choose the chamber pressure for a new
 methalox booster engine: 80 bar with a gas-generator cycle, or 250 bar with
 oxidiser-rich staged combustion. Argue the case for each in terms of the
 quantities in this module — $c^*$, $C_f$, $\varepsilon^{opt}$, $A_t$, heat flux

@@ -239,13 +239,13 @@ diverging (fan) rather than a converging (shock) boundary at the lip.
 2. $M_2 = $ Eq. 3.12 $= \mathbf{0.4027}$.
 3. $p_2/p_1 = 1 + (2.4/2.2)(10.75-1) = 11.64$.
    $p_{0,2}/p_{0,1} = (p_2/p_1)\cdot\dfrac{(p_0/p)(M_2)}{(p_0/p)(M_1)}
-   = 11.64\times\dfrac{1.1104}{80.44} = \mathbf{0.1606}$
+   = 11.64\times\dfrac{1.1013}{79.76} = \mathbf{0.1606}$
    (an 84% stagnation-pressure loss).
 4. $A^*$ jumps: $A_e/A_2^* = \varepsilon\,(p_{0,2}/p_{0,1}) = 25\times0.1606
    = 4.016$.
 5. $M_{exit} = $ Eq. 3.11 at 4.016, **subsonic** root $= \mathbf{0.1492}$.
-6. $p_{exit} = p_{0,2}/(p_0/p)(M_{exit}) = (5\times10^6\times0.1606)/1.01568
-   = \mathbf{792.5\ \text{kPa}}$.
+6. $p_{exit} = p_{0,2}/(p_0/p)(M_{exit}) = (5\times10^6\times0.1606)/1.01343
+   = \mathbf{792.4\ \text{kPa}}$.
 
 So the required back pressure is **$p_b = 792$ kPa**, and the exit Mach number
 is 0.149. Marks are lost mainly at step 4: candidates who keep using the
@@ -450,9 +450,9 @@ overexpanded** at 10 km. (It reaches ideal expansion at about 12.2 km.)
 **Q5 (12).** $M_1 = 3.5$, $\gamma = 1.2$:
 $p_2/p_1 = 1+(2.4/2.2)(12.25-1) = \mathbf{13.27}$;
 $M_2 = \sqrt{(1+0.1\times12.25)/(1.2\times12.25-0.1)} = \mathbf{0.390}$.
-$\rho_2/\rho_1 = 2.2\times12.25/(0.2\times12.25+2) = 5.86$;
-$T_2/T_1 = 13.27/5.86 = 2.265$; $c_p = 1.2\times500/0.2 = 3000$;
-$\Delta s = 3000\ln2.265 - 500\ln13.27 = 2452 - 1291 = 1061$ J/(kg·K);
+$\rho_2/\rho_1 = 2.2\times12.25/(0.2\times12.25+2) = 6.056$;
+$T_2/T_1 = 13.27/6.056 = 2.192$; $c_p = 1.2\times500/0.2 = 3000$;
+$\Delta s = 3000\ln2.192 - 500\ln13.27 = 2354 - 1293 = 1061$ J/(kg·K);
 $p_{0,2}/p_{0,1} = e^{-1061/500} = 0.120$, i.e. **88% of the stagnation pressure
 is lost.**
 *Marking:* 4 + 4 + 4. A candidate who quotes the loss without computing

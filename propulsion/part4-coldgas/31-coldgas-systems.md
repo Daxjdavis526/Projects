@@ -1232,8 +1232,9 @@ on a secondary payload).
 1. **Volume, not mass, was binding.** A 6U bus carrying an X-band radio, a
    deployable reflectarray, solar arrays and a full avionics stack has almost
    no volume left. R-236fa's impulse density (0.576 N·s/cm³) is 2.7× GN₂'s at
-   241 bar. At MarCO's 755 N·s, the same impulse in nitrogen needs roughly
-   3,600 cm³ of tank volume against ~1,400 cm³ — and the nitrogen figure is
+   241 bar. At MarCO's 755 N·s, the same impulse in nitrogen needs
+   $m_p = 755/(70 g_0) = 1.10$ kg, i.e. **~3,900 cm³** at 241 bar (~4,700 cm³
+   at 200 bar) against R-236fa's **~1,400 cm³** — and the nitrogen figure is
    *propellant* volume, before the COPV wall.
 2. **The tank pressure sets the qualification path.** A 2.7-bar can is, for
    range-safety purposes, barely a pressure vessel. A 200-bar COPV on a

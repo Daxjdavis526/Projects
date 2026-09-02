@@ -980,9 +980,12 @@ $I_{sp}=75.96$ s:
 $$I_{tot}=\phi m_i I_{sp}g_0 = 0.800\times9.195\times10^{-3}\times75.96\times9.80665=\mathbf{5.479\ N\!\cdot\!s}$$
 Check against $F_i\tau(1-p_f/p_i)=0.0611\times112.1\times0.8=5.479$ N·s ✓
 
-At the realized level — $Re_t$ starts at $1.5\times10^4$ and ends at
-$3.1\times10^3$, so $\eta_I$ runs 0.90 down to 0.80 — the delivered impulse
-is about **4.7 N·s**, some 14 % below ideal.
+At the realized level, $Re_t$ starts at $4.50\times10^4$ (at 20 bar) and
+ends at $8.99\times10^3$ (at 4 bar), so $\eta_I$ runs from 0.937 down to
+0.879. Integrating $\eta_I(p)\,I_{sp,ideal}\,g_0\,dm$ over the discharge
+gives a delivered impulse of **5.03 N·s**, **8.1 % below ideal**. Note that
+the viscous loss *grows* as the tank empties — the last gas out is the
+worst gas out, and that is a general feature of blowdown systems.
 
 **Sanity check.** VACCO's Standard MiPS (0.3U) delivers **44 N·s**. This
 0.4 L module at 20 bar delivers about a tenth of that from a tenth of the
@@ -1051,8 +1054,9 @@ $A_t=F/(C_Fp_{reg})=0.025/(1.7292\times5\times10^5)=2.892\times10^{-8}$ m²,
 $D_t=\mathbf{0.192\ mm}$;
 $\dot m=\Gamma p_{reg}A_t/\sqrt{RT_0}=\mathbf{33.56\ mg/s}$;
 $I_{sp}=F/(\dot m g_0)=75.96$ s ideal, and with
-$Re_t = 4\dot m/(\pi D_t\mu^*)=1.44\times10^4$,
-$\eta_I=0.983(1-10/120)=0.901$, giving $I_{sp}=\mathbf{68.5\ s}$ realized.
+$Re_t = 4\dot m/(\pi D_t\mu^*)=1.438\times10^4$,
+$\eta_I=0.983(1-10/119.9)=0.901$, giving $I_{sp}=\mathbf{68.4\ s}$
+realized.
 
 **Tank decay.** From Eq. 3.16,
 $$\frac{dp_t}{dt}=-\frac{\dot m RT_i}{V}
@@ -1071,7 +1075,7 @@ overpressurises everything downstream, which is why flight systems carry a
 relief valve and a burst disc) and a Joule–Thomson temperature drop.
 
 **Total impulse and duration.**
-$$I_{tot}=80.8\times10^{-3}\times68.5\times9.80665=\mathbf{54.3\ N\!\cdot\!s}$$
+$$I_{tot}=80.8\times10^{-3}\times68.44\times9.80665=\mathbf{54.2\ N\!\cdot\!s}$$
 Accumulated on-time $=80.8\times10^{-3}/3.356\times10^{-5}=2408$ s = 40 min.
 
 **Sanity check.** VACCO's Standard MiPS 0.3U is 44 N·s and the modular
