@@ -1701,9 +1701,9 @@ $$\frac{\sigma_{A_f}}{A_f} = 2\times\frac{0.025}{1.60} = 3.125\ \%,\qquad
 \frac{\sigma_{A_o}}{A_o} = 2\times\frac{0.025}{2.23} = 2.242\ \%$$
 $$\frac{\sigma_{\dot m_f}}{\dot m_f} = \sqrt{3.125^2+3^2} = 4.33\ \%,\qquad
 \frac{\sigma_{\dot m_o}}{\dot m_o} = \sqrt{2.242^2+3^2} = 3.75\ \%$$
-$$\frac{\sigma_{MR}}{MR} = \sqrt{4.33^2+3.83^2} = 5.78\ \%
+$$\frac{\sigma_{MR}}{MR} = \sqrt{4.33^2+3.75^2} = 5.73\ \%
 \;\Rightarrow\; \sigma_{MR} = 0.133,\quad MR \in [1.91,\ 2.70]\ \text{at } \pm3\sigma$$
-**2.33 times worse than drilled.** This is the quantitative reason that printed
+**2.31 times worse than drilled.** This is the quantitative reason that printed
 injectors are printed as *bodies* — manifolds, posts, face cooling, element
 geometry — and then have their **metering orifices finish-machined, EDM'd or
 reamed** to tolerance. Printing the orifice itself is the one thing you should

@@ -760,3 +760,78 @@ no formulations, processing procedures or weapon-specific dimensions.*
 - [ ] (L3, M35) I can explain why additive manufacturing has raised no engine's chamber pressure or $I_{sp}$, and why what it changed — part count, internal geometry freedom, development calendar time — is a bigger deal and a different one.
 - [ ] (L3, M35) I can explain why Rutherford's electric pump cycle wins below a thrust threshold and loses above it, and why its 72.8:1 engine T/W excludes the batteries.
 - [ ] (L3, M35) I can explain why newer is not automatically better: Merlin 1D's sea-level $I_{sp}$ is below the F-1's and its chamber pressure well below the RD-253's, because the objective function changed from payload mass to unit cost to cost per flight.
+
+---
+
+## Self-audit protocol
+
+A checklist you tick once is a reading list. A checklist you *sample* is an
+instrument. Run this every three to six months.
+
+**1. Sample.** Draw **40 items at random** across the whole file — not by
+section, not by the parts you enjoy. Number the items and use a random number
+generator, or shuffle a deck of section names and pick items blind. Sampling by
+section defeats the purpose: the point is to find the gaps you would not have
+gone looking for.
+
+**2. Attempt cold.** No notes, no engine database, no course text, no search.
+Give yourself a sheet of paper and a fixed budget: **5 minutes for an L1 item,
+15 for an L2, 20 for an L3**. Write the answer out. An answer you cannot write
+is an answer you cannot give in a review.
+
+**3. Score honestly, by level.** Score each attempt 1 or 0, with no partial
+credit and one rule for what counts:
+
+| level | passes when |
+|---|---|
+| **L1** | you produced the explanation, the names and the trend, in plain language, and got the direction of every trend right |
+| **L2** | you set up the calculation correctly, carried units, produced a number, and quoted the range or assumption the item asked for. A right setup with an arithmetic slip **passes**; a wrong setup with a lucky number **fails** — the same rule as the course exams |
+| **L3** | you produced a defensible position, named what you would measure or compute to test it, argued the other side, and named the programme or engine that faced it. Missing the counter-argument fails the item |
+
+Number items pass inside the stated band and fail outside it. Real-engine items
+require the number **and** its caveat: a Raptor figure quoted without the word
+"claim", or a Star 48B $I_{sp}$ quoted without the nozzle, is a failed item even
+if the digits are right. Diagnosis items require the discriminating measurement,
+not just the most likely cause.
+
+**4. Compute three percentages** — one per level — from your sample. A 40-item
+sample gives roughly ±8 percentage points of sampling error per level, so treat
+a 5-point move between audits as noise and a 20-point move as real.
+
+**5. Map every failure to its module and re-study *that module only*.** The
+module tag exists for this. Three or more failures carrying the same module tag
+is a re-read; a single failure is a worked example. Failures clustered by
+*level* rather than by module mean something different: many L2 failures across
+unrelated modules is a calculation-fluency problem, and many L3 failures with
+solid L2s means you know the physics and have not practised defending a
+position — go to [Part VI](../part6-interview/) rather than back to the modules.
+
+**6. Log the date, the sample, and the three percentages.** The trend matters
+more than any single audit, exactly as it does with $\eta_{c^*}$ across a test
+series and with bond strength across a surveillance programme. A score that is
+flat across two years means the sampling has stopped finding your gaps — widen
+the budget, tighten the pass rule, or move to the oral-exam bank.
+
+### Scoring
+
+Map each level's percentage onto the course's [grading scale](../README.md#grading-scale):
+
+| % of sampled items ticked | band | reading |
+|---|---|---|
+| **90–100** | interview mastery | you could defend this material to a senior propulsion engineer |
+| **75–89** | working engineering knowledge | correct analysis; the gaps are in judgment, not method |
+| **60–74** | familiarity | concepts right, calculations or reasoning incomplete |
+| **< 60** | re-study | go back to the modules the failures point at before proceeding |
+
+Read the three percentages as a profile, not as one number:
+
+| profile | what it means | what to do |
+|---|---|---|
+| L1 ≥ 90, L2 < 75 | you can talk about propulsion and cannot yet do it | work the module problems and the [whiteboard problems](../part6-interview/whiteboard-problems.md); do not read more |
+| L1 and L2 ≥ 90, L3 < 60 | textbook-solid, argument-thin | [trade-study projects](../part6-interview/trade-study-projects.md), the [oral-exam bank](../part6-interview/oral-exam.md), and the capstone |
+| L2 ≥ L1 | you have been calculating without consolidating | you will fail the "explain it in plain language" questions; practise the [explain-to-an-engineer](../part6-interview/explain-to-an-engineer.md) prompts |
+| all three ≥ 90 | the checklist has stopped measuring you | sit the [final exam](../exams/exam-final.md) cold, then re-audit on the items you have never sampled |
+
+If you want a single number for the whole audit, weight it the way the course
+weights judgment over recall: **L1 × 0.2 + L2 × 0.4 + L3 × 0.4**, and read it
+against the same four bands.
