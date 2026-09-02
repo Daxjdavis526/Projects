@@ -171,3 +171,23 @@ EXAMPLES += [
               "At": 0.62, "c_star_val": 1550.0},
      "expect": 6.2e6, "tol": 0.005},
 ]
+
+# --- Q101-110 -------------------------------------------------------------
+# Q102 ratio He/N2 = 178.06/76.84 = 2.317; at 90 % realisation, 69.2 s and
+#   160.3 s.
+# Q103 mp = 755/(40*9.80665) = 1.9247 kg; V = 1.9247/1360 = 1.415 L.
+# Q105 one year = 3.156e7 s; 1e-4 scc/s -> 3156 scc -> 0.56 g of helium.
+# Q106 1e-4 * 14 * 9.467e7 s = 1.3254e5 scc = 23.7 g He at 0.1786 mg/scc.
+EXAMPLES += [
+    {"id": "q200.102a", "fn": "ideal_isp_vac",
+     "args": {"gamma": 1.40, "R": 296.797, "T0": 300.0, "eps": 50.0},
+     "expect": 76.839, "tol": 0.001},
+    {"id": "q200.102b", "fn": "ideal_isp_vac",
+     "args": {"gamma": 1.667, "R": 2077.06, "T0": 300.0, "eps": 50.0},
+     "expect": 178.059, "tol": 0.001},
+    {"id": "q200.103", "fn": "propellant_for_dv",
+     # cross-check of mp = Itot/(Isp g0): a 1.9247 kg load on a 100 kg final
+     # mass is worth dv = 7.478 m/s at Isp = 40 s.
+     "args": {"isp": 40.0, "m_final": 100.0, "dv": 7.47826},
+     "expect": 1.9247, "tol": 0.005},
+]

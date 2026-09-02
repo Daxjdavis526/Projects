@@ -1397,3 +1397,493 @@ $$A_{t,ig} = \frac{\dot m_{ig}\,c^*_{ig}}{p_{ig}},\qquad p_{ig}\gtrsim 1.2\,p_c$
 - **Tag** [F] [J] on the 1.2 factor · **Code** `throat_area_from_thrust`-style rearrangement of `choked_mdot`
 
 ---
+
+## Module 09 — Nozzles
+
+### 09-3.1 — Throat area from mass flow
+
+$$A_t = \frac{\dot m\,c^*}{p_c}$$
+
+- **Variables** — $A_t$ throat area [m²]; $\dot m$ total propellant mass flow [kg/s]; $c^*$ delivered characteristic velocity [m/s]; $p_c$ chamber stagnation pressure [Pa].
+- **Meaning** — the throat is the area that will pass the required flow at the required chamber pressure.
+- **Assumes** — choked flow; $c^*$ referenced to the same pressure station as $p_c$; the *same* $A_t$ definition (geometric, not effective).
+- **Fails when** — the nozzle is unchoked (start-up, deep throttle at low $p_c$ against significant back pressure); $c^*$ was measured against a different pressure tap; the throat has eroded (a solid-motor problem — in a liquid engine a throat changing size is a failure).
+- **Tag** [F] · **Code** rearrangement of `choked_mdot(...)`
+- **Alias** — 06-3.3 inverted.
+
+### 09-3.2 — Throat area from thrust
+
+$$A_t = \frac{F}{p_c\,C_F}$$
+
+- **Variables** — $F$ thrust at the stated ambient pressure [N]; $C_F$ thrust coefficient at that ambient pressure [—]; $p_c$ [Pa].
+- **Meaning** — the throat is the area that turns available chamber pressure into required thrust, given how good the nozzle is.
+- **Assumes** — $C_F$ and $F$ refer to the same $p_a$; $C_F$ includes the nozzle efficiency you actually expect.
+- **Fails when** — the flow is separated (the attached-flow $C_F$ is then wrong); and silently, when a vacuum $C_F$ is used with a sea-level thrust requirement.
+- **Tag** [F] [J] · **Code** `throat_area_from_thrust(F, p0, Cf_val)`
+- **Alias** — 03-3.11.
+
+### 09-3.3 — Throat arc geometry
+
+$$x_N = R_d\sin\theta_n,\qquad r_N = r_t + R_d\left(1-\cos\theta_n\right)$$
+
+- **Variables** — $(x_N, r_N)$ coordinates of the downstream arc's end, the contour's inflection point [m], measured from the throat plane on the axis; $R_d$ downstream throat radius of curvature [m]; $r_t$ throat radius [m]; $\theta_n$ initial wall angle at the inflection [rad].
+- **Meaning** — where the bell contour proper begins.
+- **Assumes** — a circular arc tangent to the throat plane.
+- **Fails when** — the contour is defined by a full method-of-characteristics solution that does not use a circular arc, as some modern designs do not.
+- **Tag** [F] [J] · **Code** —
+
+### 09-3.4 — Chamber Mach number from contraction ratio
+
+$$\varepsilon_c = \frac{1}{M_c}\left[\frac{2}{\gamma+1}\left(1+\frac{\gamma-1}{2}M_c^2\right)\right]^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+- **Variables** — $\varepsilon_c$ contraction ratio [—]; $M_c$ chamber Mach number [—]; $\gamma$ [—].
+- **Meaning** — how fast the gas is already moving when it reaches the injector-face end of the convergent section.
+- **Assumes** — isentropic, uniform, no heat addition *in the convergent* (heat addition happens upstream).
+- **Fails when** — combustion is still occurring in the convergent, which it is in a short chamber, and which is why the real chamber pressure profile is not isentropic.
+- **Tag** [F] [A] · **Code** `mach_from_area_ratio(gamma, eps, supersonic=False)`
+- **Alias** — 02-3.11, 06-3.6.
+
+### 09-3.5 — Exit pressure ratio and expansion ratio
+
+$$\frac{p_e}{p_c} = \left(1+\frac{\gamma-1}{2}M_e^2\right)^{-\frac{\gamma}{\gamma-1}},
+\qquad
+\varepsilon = \frac{1}{M_e}\left[\frac{2}{\gamma+1}\left(1+\frac{\gamma-1}{2}M_e^2\right)\right]^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+- **Variables** — $M_e$ exit Mach number [—]; $\varepsilon = A_e/A_t$ [—]; $p_e$, $p_c$ [Pa].
+- **Meaning** — fix the area ratio and you have fixed the exit pressure ratio; there is no other knob.
+- **Assumes** — isentropic, calorically perfect, attached, 1-D flow.
+- **Fails when** — the flow separates (then $p_e$ is *not* the wall pressure at the exit); real-gas or finite-rate effects shift $\gamma$ along the nozzle (they do, by 0.02–0.05 in a hydrogen engine); in the transonic region near the throat where the 1-D assumption is worst.
+- **Tag** [F] [A] · **Code** `area_ratio`, `p0_over_p`, `mach_from_area_ratio`
+
+### 09-3.6 — Conical divergence efficiency
+
+$$\lambda = \frac{1+\cos\alpha}{2}$$
+
+- **Variables** — $\lambda$ divergence efficiency [—]; $\alpha$ cone half-angle [rad].
+- **Meaning** — the fraction of exit momentum flux that points along the axis; multiply the *momentum* term of $C_F$ by it. For the reference 15° cone, $\lambda = 0.983$.
+- **Assumes** — conical nozzle; uniform speed on a spherical exit cap; source flow from a virtual apex; no boundary layer.
+- **Fails when** — the contour is not conical (a bell's exit flow is not uniform source flow, and this is not a valid estimate for it); it also says nothing about friction or chemistry. Applies to the momentum term only — the pressure term $(p_e - p_a)A_e$ is already axial.
+- **Tag** [F] [A] · **Code** —
+
+### 09-3.7 — Conical nozzle length
+
+$$L_n = \frac{r_t\left(\sqrt{\varepsilon}-1\right) + R_d\left(\sec\alpha - 1\right)}{\tan\alpha}$$
+
+- **Variables** — $L_n$ axial length from throat plane to exit plane [m]; $r_t$ throat radius [m]; $\varepsilon$ [—]; $R_d$ downstream throat radius of curvature [m] (take $1.5\,r_t$ for the reference 15° cone); $\alpha$ [rad].
+- **Meaning** — the length a conical nozzle needs; the baseline against which "80 % bell" is defined.
+- **Assumes** — circular throat arc tangent to a straight cone.
+- **Fails when** — the contour is not conical. The first term dominates; the arc term is a few per cent.
+- **Tag** [F] · **Code** —
+
+### 09-3.8 — Rao parabolic (quadratic Bézier) contour
+
+$$\begin{pmatrix}x(t)\\ r(t)\end{pmatrix} = (1-t)^2\begin{pmatrix}x_N\\ r_N\end{pmatrix} + 2(1-t)t\begin{pmatrix}x_Q\\ r_Q\end{pmatrix} + t^2\begin{pmatrix}L_n\\ r_e\end{pmatrix},\qquad t\in[0,1]$$
+
+- **Variables** — $t$ curve parameter [—]; $(x_N, r_N)$ inflection point [m]; $(x_Q, r_Q)$ tangent-intersection control point [m]; $(L_n, r_e)$ exit point [m].
+- **Meaning** — a two-parameter ($\theta_n$, $\theta_e$) family that reproduces the method-of-characteristics optimum contour closely enough for hardware.
+- **Assumes** — the $\theta_n, \theta_e$ pair is taken from the Rao charts for the intended $\varepsilon$ and percentage length; throat arc $R_d = 0.382\,r_t$.
+- **Fails when** — the nozzle is very short (below ~60 % bell, where the parabola departs noticeably from the optimum); at very high $\varepsilon$ where the exit-lip characteristic assumptions weaken; and always in the sense that the true optimum is a viscous, reacting, 3-D problem this does not touch.
+- **Tag** [E] · **Code** —
+
+### 09-3.9 — Friction (boundary-layer) efficiency, order of magnitude
+
+$$\eta_f \approx 1 - \frac{\bar\tau_w S_w}{F}$$
+
+- **Variables** — $\eta_f$ [—]; $\bar\tau_w$ mean wall shear stress [Pa]; $S_w$ wetted area of the divergent [m²]; $F$ thrust [N].
+- **Meaning** — the friction loss is a drag force over a thrust; typically 0.5–1.5 % of $C_F$.
+- **Assumes** — shear can be represented by a mean value; ignores the displacement effect, so it *over*states the loss.
+- **Fails when** — the flow is separated; there is significant film or transpiration cooling (which thickens the layer and changes $\bar\tau_w$ substantially); very small nozzles where the boundary layer is a large fraction of the radius and may be laminar. Use for scaling, not prediction; the real calculation is a boundary-layer code on the actual contour, as JANNAF requires.
+- **Tag** [A] [E] · **Code** —
+
+### 09-3.10 — Nozzle efficiency budget
+
+$$\eta_n = \lambda\;\eta_f\;\eta_{kin}\;\eta_{2\phi},
+\qquad C_{F,\,delivered} = \eta_n\,C_{F,\,ideal}$$
+
+- **Variables** — $\lambda$ divergence [—]; $\eta_f$ friction/boundary layer [—]; $\eta_{kin}$ kinetic (finite-rate chemistry) [—]; $\eta_{2\phi}$ two-phase (condensed-phase lag; unity for a liquid engine with no condensed products) [—].
+- **Meaning** — the multiplicative loss chain from the ideal 1-D equilibrium nozzle to the real one.
+- **Assumes** — the losses are independent enough to multiply, which is an approximation: film cooling couples $\eta_f$ and $\eta_{kin}$, and separation couples everything.
+- **Fails when** — the flow separates; the budget is then meaningless and the separated $C_F$ must be obtained directly. The rigorous version is the JANNAF simplified/standard methodology, which contracts are written against.
+- **Tag** [E] · **Code** —
+- **Alias** — the $\eta_{C_f}$ of 03-3.15 is $\eta_n$ here, decomposed.
+
+### 09-3.11 — Thrust versus altitude at fixed geometry
+
+$$F(h) = C_{F,vac}\,p_c A_t - p_a(h)\,A_e = p_c A_t\left[C_{F,vac} - \frac{p_a(h)}{p_c}\varepsilon\right]$$
+
+- **Variables** — $F(h)$ thrust at altitude $h$ [N]; $p_a(h)$ ambient pressure [Pa]; $C_{F,vac}$ [—]; $\varepsilon$ [—].
+- **Meaning** — a nozzle's thrust rises with altitude by exactly the ambient force on its exit area, and the vacuum term is a pure geometry constant.
+- **Assumes** — attached flow at all altitudes of interest; fixed $p_c$ (the engine is not throttled).
+- **Fails when** — the flow separates at low altitude; the effective $A_e$ is then the separated area, not the geometric one.
+- **Tag** [F] · **Code** `Cf(gamma, eps, p0, pa)`
+
+### 09-3.12 — Break-even ambient pressure between two expansion ratios
+
+$$p_{a,\,BE} = p_c\,\frac{C_{F,vac}(\varepsilon_2)-C_{F,vac}(\varepsilon_1)}{\varepsilon_2-\varepsilon_1}$$
+
+- **Variables** — $p_{a,BE}$ break-even ambient pressure [Pa]; $C_{F,vac}$ vacuum thrust coefficient, a function of $\gamma$ and $\varepsilon$ only [—].
+- **Meaning** — below this ambient pressure (above this altitude) the larger nozzle wins; above it the smaller one does. This is the whole altitude-optimisation trade in one line.
+- **Assumes** — same throat, same $p_c$, attached flow in both — check the larger nozzle against a separation criterion at sea level before believing the low-altitude end.
+- **Fails when** — the comparison is at constant *thrust* rather than constant throat (the throats then differ and so does the whole engine); the larger nozzle separates. Convert $p_{a,BE}$ to altitude with a standard atmosphere.
+- **Tag** [F] · **Code** `Cf(gamma, eps, p0, 0.0)` for each $\varepsilon$
+
+### 09-3.13 — The two separation criteria side by side
+
+$$\text{Summerfield: } p_{sep} \approx 0.4\,p_a
+\qquad
+\text{Schmucker: } \frac{p_{sep}}{p_a} = \left(1.88\,M_{sep}-1\right)^{-0.64}$$
+
+- **Variables** — $p_{sep}$ wall static pressure at separation [Pa]; $p_a$ [Pa]; $M_{sep}$ local Mach number just upstream of separation [—].
+- **Meaning** — the wall pressure a turbulent boundary layer can survive before the adverse gradient from ambient recompression pushes it off the wall.
+- **Assumes** — conical or near-conical wall; turbulent attached layer; steady operation.
+- **Fails when** — the contour is thrust-optimised and the separation is restricted (RSS); during start and shutdown transients; outside the $M \approx 2$–5 fit range for Schmucker. The two criteria routinely disagree by 20–40 % in separation *area*, and in marginal cases about whether the nozzle separates at all.
+- **Tag** [E] · **Code** `summerfield_separation_pressure(p0, frac)`, `schmucker_separation(pa, Me)`
+- **Alias** — 02-3.21/3.22, 03-3.12/3.13.
+
+### 09-3.14 — Half-and-half side-load model
+
+$$F_{side} = 2\,\Delta p\int_{x_1}^{x_2} r(x)\,dx \approx 2\,\Delta p\,\bar r\,\Delta x$$
+
+- **Variables** — $F_{side}$ lateral force [N]; $\Delta p = |p_A - p_B|$ circumferential pressure difference [Pa]; $\bar r$ mean wall radius over the band [m]; $\Delta x$ axial extent of the asymmetry [m].
+- **Meaning** — an asymmetric wall pressure over an area produces a lateral force equal to twice the pressure difference times the *projected* side area of the band. This is what breaks gimbal actuators during start transients.
+- **Assumes** — a clean half-and-half circumferential split (the worst realistic case for a given $\Delta p$ and $\Delta x$); nearly cylindrical wall over the band; quasi-steady.
+- **Fails when** — the asymmetry is a smoothly varying tilt rather than a step (the answer is then smaller by a factor of order 2); it also says nothing about the *frequency content*, which is what determines whether the nozzle's bending modes are excited.
+- **Tag** [F] [A] · **Code** —
+
+---
+
+## Module 10 — Heat Transfer
+
+### 10-3.1 — Recovery factor
+
+$$r \equiv \frac{T_{aw}-T_\infty}{T_0-T_\infty}$$
+
+- **Variables** — $r$ recovery factor [—]; $T_{aw}$ adiabatic wall temperature [K]; $T_\infty$ local free-stream static temperature [K]; $T_0$ local stagnation temperature [K].
+- **Meaning** — the fraction of free-stream kinetic energy actually recovered as temperature rise at an insulated wall. $r \approx \mathrm{Pr}^{1/3} \approx 0.9$ turbulent, $\mathrm{Pr}^{1/2} \approx 0.85$ laminar.
+- **Assumes** — a boundary layer in local equilibrium; constant Pr.
+- **Fails when** — the gas is chemically reacting inside the boundary layer with a different effective Pr (it is, mildly, in a rocket); the boundary layer is separated.
+- **Tag** [F] [E] · **Code** —
+
+### 10-3.2 — Adiabatic wall temperature
+
+$$T_{aw} = T_\infty\left[1 + r\frac{\gamma-1}{2}M^2\right]
+= T_0\,\frac{1+r\frac{\gamma-1}{2}M^2}{1+\frac{\gamma-1}{2}M^2}$$
+
+- **Variables** — $T_{aw}$ [K]; $T_0$ chamber stagnation temperature [K]; $\gamma$ [—]; $M$ local Mach number [—]; $r$ [—].
+- **Meaning** — the temperature the gas "presents" to the wall as a driving potential. It is *not* $T_0$ and it is *not* $T_\infty$; using either is a common and large error.
+- **Assumes** — calorically perfect gas; adiabatic stagnation upstream; constant $r$.
+- **Fails when** — recombination in the boundary layer releases chemical energy at the wall (a real effect in H₂/O₂, worth up to a few percent); the free stream is not isentropic (after a shock in an over-expanded nozzle).
+- **Tag** [F] · **Code** `adiabatic_wall_T(T0, gamma, Mach, r=0.9)`
+
+### 10-3.3 — Gas-side film coefficient definition
+
+$$q'' = h_g\,(T_{aw}-T_{wg})$$
+
+- **Variables** — $q''$ heat flux [W/m²]; $h_g$ gas-side film coefficient [W/(m²·K)]; $T_{aw}$ [K]; $T_{wg}$ gas-side wall temperature [K].
+- **Meaning** — Newton's law of cooling on the gas side; the definition of $h_g$.
+- **Assumes** — $h_g$ independent of $T_{wg}$ — which is *false* in a rocket, because the Bartz $\sigma$ depends on $T_{wg}$; the equation must therefore be solved iteratively with the wall model.
+- **Fails when** — film cooling, a soot layer, or ablation puts something between gas and wall, in which case $h_g$ is no longer the resistance that matters.
+- **Tag** [F] · **Code** `heat_flux(hg, Taw, Twg)`
+- **Alias** — 11-3.1 is the same equation with worked numbers.
+
+### 10-3.4 — Bartz correlation
+
+$$h_g = \frac{0.026}{D_t^{0.2}}\left(\frac{\mu^{0.2}c_p}{\mathrm{Pr}^{0.6}}\right)_0
+\left(\frac{p_0}{c^*}\right)^{0.8}\left(\frac{D_t}{R_u}\right)^{0.1}
+\left(\frac{A_t}{A}\right)^{0.9}\sigma$$
+
+- **Variables** — $h_g$ [W/(m²·K)]; $D_t$ throat diameter [m]; $\mu_0$ stagnation viscosity [Pa·s]; $c_{p0}$ stagnation specific heat [J/(kg·K)]; $\mathrm{Pr}_0$ stagnation Prandtl number [—]; $p_0$ chamber stagnation pressure [Pa]; $c^*$ [m/s] — use the **delivered** value, because $p_0/c^*$ *is* the throat mass flux $\dot m/A_t$; $R_u$ throat upstream wall radius of curvature [m]; $A/A_t$ local area ratio [—]; $\sigma$ property correction [—].
+- **Meaning** — a fully developed turbulent pipe-flow heat-transfer coefficient re-expressed in rocket variables and corrected for property variation and throat curvature. The workhorse of chamber thermal design.
+- **Assumes** — attached turbulent boundary layer; smooth wall; quasi-1-D area distribution; no film cooling; no deposits; properties frozen at the stagnation composition.
+- **Fails when** — any of those is broken. Accuracy ±20–30 % at the throat, worse in the chamber and far downstream.
+- **Tag** [E] · **Code** `bartz_hg(Dt, mu0, cp0, Pr0, p0, c_star_val, rc, A_ratio, sigma)`
+- **Alias** — ⚠ $R_u$ here is the throat wall **radius of curvature** [m], not the universal gas constant. `rocket.py` names it `rc`.
+
+### 10-3.5 — Bartz property correction $\sigma$
+
+$$\sigma = \left[\frac{1}{2}\frac{T_{wg}}{T_0}\left(1+\frac{\gamma-1}{2}M^2\right)
++\frac{1}{2}\right]^{-0.68}\left(1+\frac{\gamma-1}{2}M^2\right)^{-0.12}$$
+
+- **Variables** — $\sigma$ [—]; $T_{wg}$ gas-side wall temperature [K]; $T_0$ [K]; $\gamma$ [—]; $M$ [—].
+- **Meaning** — corrects a stagnation-property coefficient for the real density and viscosity inside the boundary layer.
+- **Assumes** — $\rho \propto T^{-1}$ at constant pressure; $\mu \propto T^{0.6}$; arithmetic-mean reference temperature.
+- **Fails when** — the wall is hot enough that $T_{wg}/T_0 \to 1$ (then $\sigma \to 1$ and the correction is pointless); the gas composition changes across the layer (recombination); the wall is transpiration-cooled.
+- **Tag** [E] [A] · **Code** `bartz_sigma(gamma, Mach, Tw_over_T0)`
+
+### 10-3.6 — Series thermal resistance chain
+
+$$q'' = \frac{T_{aw}-T_{co}}{\dfrac{1}{h_g}+\dfrac{t_w}{k}+\dfrac{1}{h_c}}
+= \frac{T_{aw}-T_{co}}{R''_{tot}}$$
+
+- **Variables** — $q''$ [W/m²]; $T_{aw}$ [K]; $T_{co}$ coolant bulk temperature [K]; $h_g, h_c$ [W/(m²·K)]; $t_w$ wall thickness [m]; $k$ wall conductivity [W/(m·K)]; $R''_{tot}$ [m²·K/W].
+- **Meaning** — series thermal resistances add; the biggest one governs the design.
+- **Assumes** — steady state; 1-D conduction; no internal heat generation; constant $k$; perfect contact between layers; $h_c$ referenced to the *plain* wall area (a ribbed or finned channel needs a fin-efficiency multiplier, Module 11).
+- **Fails when** — transient (start-up, throttle step); there is contact resistance at a braze or bond line; circumferential conduction into channel lands matters (it does — the 1-D answer is conservative).
+- **Tag** [F] · **Code** `heat_flux`, `wall_dT(q, t, k)`
+- **Alias** — 11-3.4 with $h_{c,\mathrm{eff}}$ in place of $h_c$.
+
+### 10-3.7 — Recovering the wall temperatures
+
+$$T_{wg}=T_{aw}-\frac{q''}{h_g},\qquad
+\Delta T_{wall}=\frac{q''t_w}{k},\qquad
+T_{wc}=T_{wg}-\Delta T_{wall}$$
+
+- **Variables** — $T_{wg}$ gas-side wall temperature [K]; $T_{wc}$ coolant-side wall temperature [K]; $\Delta T_{wall}$ through-wall drop [K]; others as 10-3.6.
+- **Meaning** — the order of operations matters: you do **not** get to pick $T_{wg}$; it is an *output* of the resistance chain.
+- **Assumes** — as 10-3.6.
+- **Fails when** — as 10-3.6.
+- **Tag** [F] · **Code** `wall_dT(q, t, k)`
+
+### 10-3.8 — Elastic thermal stress in a constrained wall
+
+$$\sigma_{th}=\frac{E\,\alpha\,\Delta T_{wall}}{2(1-\nu)}
+=\frac{E\,\alpha\,q''\,t_w}{2\,k\,(1-\nu)}$$
+
+- **Variables** — $\sigma_{th}$ [Pa]; $E$ Young's modulus at temperature [Pa]; $\alpha$ linear thermal expansion coefficient [1/K]; $\Delta T_{wall} = q'' t_w/k$ [K]; $\nu$ Poisson's ratio [—].
+- **Meaning** — the in-plane stress generated by a linear gradient in a fully constrained plate: compressive on the hot face, tensile on the cold face. The driver of low-cycle fatigue in every regen liner.
+- **Assumes** — linear elasticity; linear temperature profile; full in-plane constraint; temperature-independent properties; no superposed pressure or mechanical load.
+- **Fails when** — $\sigma_{th} > \sigma_y$, which it always is for a rocket liner. After that the elastic answer is an *index*, not a stress, and an elastic-plastic cyclic analysis is required.
+- **Tag** [F] [A] · **Code** `thermal_stress_hoop(E, alpha, dT, nu)`
+- **Alias** — 11-3.14, identical.
+
+### 10-3.9 — Semi-infinite solid under constant flux
+
+$$T_s(t)-T_i = \frac{2q''}{k}\sqrt{\frac{\alpha_d t}{\pi}},
+\qquad \alpha_d=\frac{k}{\rho_s c_s}$$
+
+- **Variables** — $T_s$ surface temperature [K]; $T_i$ initial uniform temperature [K]; $q''$ constant applied flux [W/m²]; $k$ [W/(m·K)]; $\alpha_d$ thermal diffusivity [m²/s]; $\rho_s$ [kg/m³]; $c_s$ [J/(kg·K)]; $t$ time [s].
+- **Meaning** — how fast an uncooled wall heats up under a fixed flux.
+- **Assumes** — constant properties; constant flux; a body thick enough that the back face has not felt the pulse.
+- **Fails when** — the thermal wave reaches the back face, i.e. $2\sqrt{\alpha_d t} \gtrsim L$; the wall then heats bodily and the temperature rise accelerates.
+- **Tag** [F] · **Code** —
+
+### 10-3.10 — Heat-sink survival time
+
+$$t_{surv} = \frac{\pi}{\alpha_d}\left(\frac{k\,\Delta T_{allow}}{2q''}\right)^2
+= \frac{\pi\,\rho_s c_s k \,\Delta T_{allow}^2}{4\,q''^2}$$
+
+- **Variables** — $t_{surv}$ [s]; $\Delta T_{allow}$ allowable surface temperature rise [K]; $\rho_s c_s k$ [W²·s/(m⁴·K²)]; $q''$ [W/m²].
+- **Meaning** — two scalings matter: $t_{surv}\propto q''^{-2}$ (halving the flux quadruples run time) and $t_{surv}\propto \rho_s c_s k$, the **thermal effusivity squared**. The group $\sqrt{\rho_s c_s k}$, not $k$ alone, makes a good heat sink — which is why copper and, surprisingly, graphite both work.
+- **Assumes** — as 10-3.9.
+- **Fails when** — as 10-3.9; also for a wall thin enough to saturate before $t_{surv}$.
+- **Tag** [F] [A] · **Code** —
+
+### 10-3.11 — Radiation from combustion gases to the wall
+
+$$q''_{rad}=\varepsilon_w'\,\varepsilon_g\,\sigma_{SB}\left(T_g^4 - T_{wg}^4\right)$$
+
+- **Variables** — $q''_{rad}$ [W/m²]; $\varepsilon_g$ gas emissivity [—]; $\varepsilon_w' \approx (\varepsilon_w+1)/2$ effective wall emissivity factor for a grey wall in a gas-filled enclosure [—]; $\sigma_{SB} = 5.670\times10^{-8}$ W/(m²·K⁴); $T_g$ gas temperature [K]; $T_{wg}$ [K].
+- **Meaning** — net radiant exchange between an isothermal grey gas and its bounding wall; typically 5–20 % of chamber flux for sooty hydrocarbons, much less for H₂/O₂.
+- **Assumes** — isothermal gas volume; grey gas; grey diffuse wall; no scattering.
+- **Fails when** — the gas has a strong temperature gradient (it does in the nozzle — the chamber assumption is much better); soot loading is high enough to make the medium optically thick and the mean-beam-length idea meaningless.
+- **Tag** [E] [A] · **Code** —
+
+---
+
+## Module 11 — Cooling Systems
+
+### 11-3.1 — The flux the wall must reject
+
+$$q'' = h_g\,(T_{aw} - T_{wg})$$
+
+- **Variables** — $q''$ wall heat flux [W/m²]; $h_g$ [W/(m²·K)]; $T_{aw}$ [K]; $T_{wg}$ [K]. For a typical high-$p_c$ chamber: $1.8\times10^4 \times (3567-800) \approx 5\times10^7$ W/m².
+- **Meaning** — the wall temperature you *choose* fixes the flux you must *remove*. Rocket throats run at $10^7$–$10^8$ W/m², two orders above a gas-turbine blade.
+- **Assumes** — $h_g$ independent of $T_{wg}$ (it is not — see the Bartz $\sigma$); steady state; no radiation term.
+- **Fails when** — the wall is soot-coated or carbon-deposited (both reduce effective $h_g$); radiation from soot particles is significant (hydrocarbon engines at low $p_c$); near an injection film where $T_{aw}$ is not the free-stream recovery temperature.
+- **Tag** [F] · **Code** `heat_flux(hg, Taw, Twg)`
+- **Alias** — 10-3.3.
+
+### 11-3.2 — Lumped heat-sink wall
+
+$$\rho_w c_{p,w} t_w \frac{dT_w}{dt} = q''$$
+
+- **Variables** — $\rho_w$ wall density [kg/m³]; $c_{p,w}$ wall specific heat [J/(kg·K)]; $t_w$ wall thickness [m]; $q''$ [W/m²]; $t$ time [s]; $T_w$ [K].
+- **Meaning** — lumped capacitance: the whole wall thickness heats uniformly, and burn duration is set by how much heat the wall can swallow.
+- **Assumes** — Biot number $h_g t_w/k_w \ll 1$. For copper at $t_w \sim 20$ mm and $h_g \sim 10^4$ this is marginal ($Bi \approx 0.5$) — the real wall has a significant internal gradient and the front face runs hotter.
+- **Fails when** — thin walls; poor conductors; any burn long enough for the back face to reach the front-face temperature.
+- **Tag** [F] [A] · **Code** —
+
+### 11-3.3 — Radiative cooling
+
+$$q''_{rad} = \varepsilon_{em}\,\sigma_{SB}\,(T_w^4 - T_\infty^4)$$
+
+- **Variables** — $\varepsilon_{em}$ surface emissivity [—]; $\sigma_{SB} = 5.670\times10^{-8}$ W/(m²·K⁴); $T_w$ outer wall temperature [K]; $T_\infty$ sink temperature [K] — effectively 0 for deep space, but **not** for a nozzle extension seeing the vehicle base or another engine's plume.
+- **Meaning** — the only heat rejection available when there is no coolant; $T^4$ means radiative cooling is only viable above ~1300 K.
+- **Assumes** — grey diffuse surface; unobstructed view to the sink.
+- **Fails when** — view factors are blocked (nozzle extensions radiate to each other in a clustered stage); the coating providing $\varepsilon_{em}$ has spalled; above the coating's service temperature.
+- **Tag** [F] · **Code** —
+
+### 11-3.4 — Regenerative wall as a series resistance
+
+$$q'' = \frac{T_{aw} - T_b}{\dfrac{1}{h_g} + \dfrac{t_w}{k_w} + \dfrac{1}{h_{c,\mathrm{eff}}}}$$
+
+- **Variables** — $T_{aw}$ [K]; $T_b$ coolant bulk temperature at this station [K]; $h_g$ [W/(m²·K)]; $t_w$ hot-wall thickness [m]; $k_w$ liner conductivity [W/(m·K)]; $h_{c,\mathrm{eff}}$ coolant-side coefficient referred to gas-side area [W/(m²·K)].
+- **Meaning** — the whole regenerative cooling problem in one line: three resistances, and the biggest one governs.
+- **Assumes** — 1-D radial conduction; steady state; no contact resistance at a braze or closeout joint; constant properties across the wall; no circumferential variation.
+- **Fails when** — the wall is thick relative to the channel pitch (land conduction is then 2-D and this underestimates $T_{wg}$ over the land); at a braze joint with real contact resistance; transiently during start and shutdown, where the liner's thermal time constant (milliseconds for 1 mm of copper) matters for low-cycle fatigue.
+- **Tag** [F] · **Code** `heat_flux`, `wall_dT`
+- **Alias** — 10-3.6.
+
+### 11-3.5 — The three temperatures that matter
+
+$$T_{wg} = T_{aw} - \frac{q''}{h_g}, \qquad
+\Delta T_w = \frac{q'' t_w}{k_w}, \qquad
+T_{wc} = T_b + \frac{q''}{h_{c,\mathrm{eff}}}$$
+
+- **Variables** — as 11-3.4; all temperatures [K].
+- **Meaning** — $T_{wg}$ is limited by the liner alloy's strength and creep; $\Delta T_w$ drives the thermal strain that causes low-cycle fatigue and the "dog-house" bulge failure; $T_{wc}$ is limited by coolant decomposition — coking for hydrocarbons, nothing much for hydrogen.
+- **Assumes** — as 11-3.4.
+- **Fails when** — as 11-3.4.
+- **Tag** [F] · **Code** `wall_dT(q, t, k)`
+- **Alias** — 10-3.7, 05-3.6 (the $T_{wc}$ form).
+
+### 11-3.6 — Land-as-fin effectiveness
+
+$$m = \sqrt{\frac{2 h_c}{k_w t_L}}, \qquad
+\eta_f = \frac{\tanh(m\,h_{ch})}{m\,h_{ch}}, \qquad
+\Phi = \frac{w + 2\eta_f h_{ch}}{p_{ch}}, \qquad
+h_{c,\mathrm{eff}} = \Phi\, h_c$$
+
+- **Variables** — $m$ fin parameter [1/m]; $h_c$ coolant-side coefficient on the wetted channel surface [W/(m²·K)]; $k_w$ [W/(m·K)]; $t_L$ land width [m]; $h_{ch}$ channel height [m]; $w$ channel width [m]; $p_{ch}$ pitch [m]; $\eta_f$ fin efficiency [—]; $\Phi$ area enhancement referred to gas-side area [—].
+- **Meaning** — the lands are the reason a milled channel beats a plain annulus by a factor of two.
+- **Assumes** — 1-D conduction along the land; uniform $h_c$ over the land; adiabatic tip; constant $k_w$.
+- **Fails when** — the land is short and thick (not a fin at all; 2-D conduction needed); the aspect ratio is very high (the tip is not adiabatic and $h_c$ is not uniform down a tall narrow slot); $k_w$ falls sharply with temperature, as it does for copper alloys above ~700 K.
+- **Tag** [F] [A] · **Code** —
+
+### 11-3.7 — Dittus–Boelter coolant-side coefficient
+
+$$h_c = 0.023\,\frac{k_c}{D_h}\,Re_c^{0.8}\,Pr_c^{n}, \qquad n = 0.4\ \text{(heating)}$$
+
+- **Variables** — $h_c$ [W/(m²·K)]; $k_c$ coolant thermal conductivity [W/(m·K)]; $D_h$ hydraulic diameter [m]; $Re_c = \rho_c V_c D_h/\mu_c$ [—]; $Pr_c = c_{p,c}\mu_c/k_c$ [—]; $n = 0.4$ heating, 0.3 cooling.
+- **Meaning** — turbulent forced convection in a smooth round tube; the default coolant-side model.
+- **Assumes** — $Re > 10^4$; $0.6 < Pr < 160$; $L/D > 10$; fully developed; **small property variation across the boundary layer**; smooth wall; no curvature.
+- **Fails when** — the wall-to-bulk temperature ratio is large (always, in a rocket jacket — hence the corrections); near the critical point; in boiling; in a strongly curved passage; in a rectangular duct at high aspect ratio (use $D_h$ and accept ±15 %). Accuracy in a rocket channel **±25 % at best**, systematically optimistic for supercritical fluids near $T_{pc}$.
+- **Tag** [E] · **Code** `dittus_boelter(k, D, Re, Pr, n=0.4)`
+- **Alias** — 05-3.6, 10 companion to Bartz.
+
+### 11-3.8 — Sieder–Tate wall-viscosity correction
+
+$$h_c = 0.027\,\frac{k_c}{D_h}\,Re_c^{0.8}\,Pr_c^{1/3}\left(\frac{\mu_b}{\mu_w}\right)^{0.14}$$
+
+- **Variables** — as 11-3.7, plus $\mu_b$ viscosity at bulk temperature and $\mu_w$ at wall temperature [Pa·s].
+- **Meaning** — corrects for property distortion across a thermal boundary layer with a large $\Delta T$.
+- **Assumes** — as 11-3.7, but tolerates larger property variation.
+- **Fails when** — near critical; in boiling; for gases, where the correction should be a temperature ratio rather than a viscosity ratio.
+- **Tag** [E] · **Code** —
+
+### 11-3.9 — Curvature (Dean) enhancement
+
+$$\frac{h_{c,\mathrm{curved}}}{h_{c,\mathrm{straight}}} = \left[Re_c\left(\frac{D_h}{2R_c}\right)^{2}\right]^{0.05}$$
+
+- **Variables** — $R_c$ radius of curvature of the channel centreline in the meridional plane [m]; $D_h$ [m]; $Re_c$ [—].
+- **Meaning** — an empirical Dean-number correction; the concave side of a curved channel transfers more heat.
+- **Assumes** — turbulent, mild curvature, single phase.
+- **Fails when** — curvature is sharp enough to separate the flow; on the convex side, where curvature *suppresses* turbulence and heat transfer falls. Use as a design allowance, not a prediction; measured values scatter by a factor of two.
+- **Tag** [E] · **Code** —
+
+### 11-3.10 — Darcy–Weisbach channel pressure drop
+
+$$\Delta p_f = f\,\frac{L}{D_h}\,\frac{\rho_c V_c^2}{2}$$
+
+- **Variables** — $\Delta p_f$ [Pa]; $f$ Darcy friction factor [—]; $L$ channel length along the path [m]; $D_h$ [m]; $\rho_c$ [kg/m³]; $V_c$ [m/s].
+- **Meaning** — frictional loss in the cooling channel; typically 10–30 % of $p_c$ and a major term in the pump budget.
+- **Assumes** — fully developed; incompressible; constant properties; constant area.
+- **Fails when** — coolant density changes along the channel (always, in a heated channel — integrate in segments); the channel area is tapered (integrate); at very high heat flux, where the near-wall viscosity change alters $f$.
+- **Tag** [F] [E] · **Code** —
+
+### 11-3.11 — Haaland friction factor
+
+$$\frac{1}{\sqrt f} = -1.8\log_{10}\left[\left(\frac{\epsilon/D_h}{3.7}\right)^{1.11} + \frac{6.9}{Re}\right]$$
+
+- **Variables** — $f$ [—]; $\epsilon$ absolute roughness [m]; $D_h$ [m]; $Re$ [—].
+- **Meaning** — an explicit approximation to Colebrook for a rough turbulent duct; within 2 % of the implicit solution.
+- **Assumes** — fully rough or transitional turbulent flow; circular-duct equivalence via $D_h$.
+- **Fails when** — laminar; roughness elements comparable to $D_h$ (as in some additively manufactured channels, where $\epsilon/D_h$ can exceed the correlation's range).
+- **Tag** [E] · **Code** —
+
+### 11-3.12 — Fuel-pump discharge pressure budget
+
+$$p_{\mathrm{pump,disch}} = p_{c,\mathrm{inj}} + \Delta p_{\mathrm{inj}} + \Delta p_j + \Delta p_{\mathrm{lines,valves}}$$
+
+- **Variables** — all pressures [Pa]; $\Delta p_j$ jacket drop.
+- **Meaning** — the fuel pump discharge pressure budget; every pascal of jacket drop is pump work.
+- **Assumes** — fuel is the coolant and the circuit is jacket-then-injector, the usual arrangement.
+- **Fails when** — the coolant is a separate fluid (Viking's water); a dump-cooled or bleed circuit discharges to a turbine or overboard rather than to the injector.
+- **Tag** [F] · **Code** —
+- **Alias** — 06-3.13 with the Rayleigh term shown separately.
+
+### 11-3.13 — The $h_c$–$\Delta p$ trade
+
+$$h_c \propto V^{0.8} D_h^{-0.2} \propto A_{ch}^{-0.9}, \qquad
+\Delta p \propto \frac{V^{1.8}}{D_h^{1.2}} \propto A_{ch}^{-2.4}$$
+
+- **Variables** — $A_{ch}$ channel flow area [m²]; $V$ coolant velocity [m/s]; $D_h$ [m].
+- **Meaning** — **halving the channel area buys 87 % more $h_c$ and costs 5.3× the pressure drop.** The central design tension of a regenerative jacket.
+- **Assumes** — Dittus–Boelter; $f = 0.184 Re^{-0.2}$; fixed aspect ratio; fixed mass flow; constant properties.
+- **Fails when** — very low $Re$; the supercritical deterioration regime; where fin efficiency changes materially (a taller channel at fixed width has worse $\eta_f$, which this ignores).
+- **Tag** [F] [A] · **Code** —
+
+### 11-3.14 — Elastic thermal stress in a restrained liner
+
+$$\sigma_{th} \approx \frac{E\,\alpha\,\Delta T_w}{2(1-\nu)}$$
+
+- **Variables** — $E$ Young's modulus [Pa]; $\alpha$ coefficient of thermal expansion [1/K]; $\Delta T_w$ through-wall temperature difference [K]; $\nu$ [—].
+- **Meaning** — the elastic thermal stress in a fully restrained wall with a linear through-thickness gradient.
+- **Assumes** — elastic; fully restrained; linear gradient; temperature-independent properties.
+- **Fails when** — immediately, because a real copper liner **yields** on the first cycle. This tells you the elastic stress you would need; when it exceeds yield (it always does, by 2–5×) you are in the low-cycle-fatigue regime and must design to strain, not stress.
+- **Tag** [F] [A] · **Code** `thermal_stress_hoop(E, alpha, dT, nu)`
+- **Alias** — 10-3.8, identical.
+
+### 11-3.15 — Film-cooling enthalpy capacity
+
+$$\Delta h_{film} = c_{p,\ell}\,(T_{sat} - T_{inj}) + h_{fg}$$
+
+- **Variables** — $\Delta h_{film}$ enthalpy the film absorbs per kg [J/kg]; $c_{p,\ell}$ liquid specific heat [J/(kg·K)]; $T_{sat}$ effective vaporisation temperature at chamber pressure [K]; $T_{inj}$ injection temperature [K]; $h_{fg}$ latent heat [J/kg]; with $\dot m_{film}$ [kg/s], $\bar q''$ mean wall flux over the filmed length [W/m²], $D_c$ chamber diameter [m], $L_{film}$ length over which the film survives [m].
+- **Meaning** — sizes the film flow for a required covered length.
+- **Assumes** — all wall heat over $L_{film}$ goes into the film; the film stays attached and uniform; no entrainment loss into the core; no combustion of the film.
+- **Fails when** — on every one of those to some degree. **Entrainment by the high-velocity core is the dominant loss mechanism** and can carry away 30–60 % of the film before it has done its job. Use as a lower bound and apply a 1.5–2× factor.
+- **Tag** [E] [J] · **Code** `coolant_bulk_rise(Q, mdot, cp)` for the sensible part
+
+### 11-3.16 — Film-cooling effectiveness
+
+$$\eta_{fc} = \frac{T_{aw} - T_{aw,\mathrm{film}}}{T_{aw} - T_{c,\mathrm{inj}}}$$
+
+- **Variables** — $\eta_{fc}$ [—]; $T_{aw,\mathrm{film}}$ effective adiabatic wall temperature with film present [K]; $T_{c,\mathrm{inj}}$ film injection temperature [K].
+- **Meaning** — the fraction of available temperature depression the film actually delivers.
+- **Assumes** — the film mixes only with the boundary layer.
+- **Fails when** — $\eta_{fc}$ decays along the chamber roughly as $x^{-0.5}$ to $x^{-0.8}$ and is essentially spent within 10–20 slot heights on a high-shear rocket wall — which is why film is injected from the **injector face** for the barrel and needs a **separate slot** to protect the throat.
+- **Tag** [E] · **Code** —
+
+### 11-3.17 — Performance penalty of film cooling
+
+$$\frac{I_{sp}}{I_{sp,core}} = (1 - x_{fc}) + x_{fc}\,\frac{I_{sp,film}}{I_{sp,core}}
+\quad\Rightarrow\quad
+\frac{\Delta I_{sp}}{I_{sp}} = x_{fc}\left(1 - \frac{I_{sp,film}}{I_{sp,core}}\right)$$
+
+- **Variables** — $x_{fc}$ film flow as a fraction of *total* engine flow [—]; $I_{sp,film}/I_{sp,core}$ effective performance ratio of the film stream, typically **0.6–0.8** for a fuel film in a hydrocarbon engine.
+- **Meaning** — a stream-thrust weighted average: 5 % film at a 0.7 ratio costs 1.5 % $I_{sp}$.
+- **Assumes** — the two streams do not interact — wrong, but conservative in the right direction; ignores the small *benefit* that a cooler wall boundary layer slightly reduces the boundary-layer $I_{sp}$ loss.
+- **Fails when** — gas-generator exhaust is used as film (the F-1's nozzle curtain): that flow was already committed as a cycle loss and the marginal penalty is **zero**. Do not double-count it.
+- **Tag** [E] · **Code** —
+
+### 11-3.18 — Ablative liner thickness
+
+$$t_{abl} = FS \cdot \dot s \cdot t_{burn} + t_{residual}$$
+
+- **Variables** — $t_{abl}$ liner thickness [m]; $FS$ factor of safety, typically 1.3–1.5 [—]; $\dot s$ recession rate [m/s]; $t_{burn}$ total accumulated burn time [s]; $t_{residual}$ virgin material that must remain at end of life [m].
+- **Meaning** — linear-recession sizing for an ablative chamber or throat.
+- **Assumes** — steady char-front recession, reached after a transient of a few seconds.
+- **Fails when** — pulsed duty (the char cools and cracks between pulses, and recession per second is higher than in a continuous burn); at the throat, where mechanical erosion adds to chemical ablation; restart-heavy profiles.
+- **Tag** [E] [J] · **Code** —
+
+### 11-3.19 — Radiation-cooled equilibrium wall temperature
+
+$$\varepsilon_{em}\sigma_{SB}T_w^4 = h_g(T_{aw} - T_w)$$
+
+- **Variables** — $\varepsilon_{em}$ [—]; $\sigma_{SB}$ [W/(m²·K⁴)]; $T_w$ [K]; $h_g$ [W/(m²·K)]; $T_{aw}$ [K].
+- **Meaning** — the wall floats at whatever temperature balances convective input against radiative output. Solve iteratively; this sets the material choice for a radiation-cooled skirt.
+- **Assumes** — no conduction along the wall (good for a thin niobium skirt, bad near a cooled joint); full view to a cold sink.
+- **Fails when** — at the attachment joint to the cooled chamber, where axial conduction sets up a severe gradient — and where radiative nozzle extensions actually crack.
+- **Tag** [F] · **Code** —
+
+---

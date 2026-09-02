@@ -1894,3 +1894,225 @@ hardware complexity for the elimination of a continuous performance penalty.
 harder joint, rather than reciting three names.
 **Follow-up:** "For a small tactical motor with a 4 s burn, which would you
 pick today?"
+
+### 101. [M28, M29]
+Ideal gas fails when the stored state is dense or near saturation — which for a
+cold-gas system is most of the interesting cases. Nitrogen at 300 K and 300 bar
+has a compressibility factor around 1.12, so $m = pV/RT$ overpredicts the
+stored mass by about 12 %: you think you have loaded more propellant than you
+have, and your $\Delta v$ budget is wrong in the dangerous direction. [F][A]
+For a liquefiable propellant — butane, R-236fa — ideal gas is not merely
+inaccurate, it is the wrong model: the tank contains two phases at the vapour
+pressure, so the pressure does not fall as gas is withdrawn until the liquid is
+exhausted, and every blowdown formula you would apply is meaningless. The
+second failure is thermal: real gases cool on expansion by more than the ideal
+prediction (Joule–Thomson), which drops the feed temperature, drops the thrust,
+and can drive a liquefiable propellant to condense in the line or the valve. If
+you ignore all this, the symptoms are a system that under-delivers total
+impulse, a thruster whose $I_{sp}$ droops more than modelled, and a tank you
+cannot empty as far as you planned.
+
+**Probing:** whether you name both the density error and the two-phase case,
+and whether you know which way the error goes.
+**Follow-up:** "What would you use instead of the ideal gas law, and where does
+the data come from?"
+
+### 102. [M28, M29]
+$R_{N_2} = 8314.46/28.014 = 296.8$ J/(kg·K);
+$R_{He} = 8314.46/4.003 = 2077.1$ J/(kg·K). At $\varepsilon = 50$,
+$T_0 = 300$ K:
+nitrogen $I_{sp,vac} = \mathbf{76.8\ s}$, helium $\mathbf{178.1\ s}$, a ratio
+of **2.32** — which is $\sqrt{\gamma\text{-corrected }\mathcal{M}}$ doing
+exactly what the $1/\sqrt{\mathcal{M}}$ scaling says it should. [F] A real
+thruster delivers roughly **85–92 %** of these ideal values: the losses are
+boundary layer in a small, cold, low-Reynolds-number nozzle, divergence,
+non-isentropic expansion through the valve and plenum, and heat leak. So expect
+about 65–70 s of realised $I_{sp}$ for nitrogen and 150–165 s for helium, and
+note that published MarCO-class refrigerant systems land near 40 s against a
+40–43 s cold ideal — that is a ~90 % efficiency and it is the honest number to
+carry. [E][MarCO][VACCO]
+
+**Probing:** whether you attach a realisation factor rather than quoting the
+ideal as if it flew.
+**Follow-up:** "Why is the efficiency lower for a small thruster than a large
+one, at the same area ratio?"
+
+### 103. [M29, M31]
+$m_p = \dfrac{I_{tot}}{I_{sp}g_0} = \dfrac{755}{40\times9.80665} =
+\mathbf{1.92\ kg}$. Tank volume
+$V = m_p/\rho = 1.92/1360 = \mathbf{1.42\times10^{-3}\ m^3} = 1.42$ litres.
+[F] Those are the MarCO numbers — 755 N·s of total impulse at about 40 s from
+R-236fa stored as a saturated liquid at roughly 1.36 g/cm³ — and the point of
+doing the arithmetic is that 1.4 litres fits inside a 6U CubeSat with room to
+spare, at a tank design pressure of about 2.7 bar rather than 240. [MarCO] The
+same impulse from cold nitrogen at 70 s would need 1.10 kg of propellant but
+about 5.5 litres of 300 bar COPV, and the COPV, not the gas, is what does not
+fit. That comparison is the whole reason CubeSats use refrigerants.
+
+**Probing:** whether you finish the calculation with the volume, which is the
+answer that decides the architecture.
+**Follow-up:** "1.92 kg of propellant on a 3.5 kg module. Where did the rest of
+the mass go?"
+
+### 104. [M29, M30]
+The gas expanding out of the tank does work and cools — approaching the
+adiabatic limit for a fast firing — and $I_{sp}\propto\sqrt{T_0}$, so a falling
+plenum and tank temperature directly lowers thrust and specific impulse through
+the burn. In a blowdown system the pressure is falling at the same time, which
+lowers thrust further and, in a small nozzle, lowers the throat Reynolds number
+and hence the discharge and nozzle efficiency as well. [F][A] A 30 % drop in
+absolute temperature is a 16 % drop in $I_{sp}$, and it does not recover until
+heat leaks back in from the structure, which takes minutes to hours. What that
+does to the advertised duty cycle is the real answer: you cannot quote a single
+$I_{sp}$ for the system, only an $I_{sp}$ at a stated duty cycle, and the
+specification has to say "these many pulses of this width with this
+inter-pulse spacing", because a long continuous firing and a train of short
+pulses with recovery time between them are different machines. Systems that
+need a firm number either heat the gas, oversize the plenum, or use a
+liquefiable propellant whose latent heat holds the tank near constant pressure.
+
+**Probing:** whether you finish with the specification consequence, not just
+the physics.
+**Follow-up:** "How would you test that, on the ground, honestly?"
+
+### 105. [M30]
+A latching solenoid uses power only during the transition and holds its state
+magnetically, so a system that must stay open or closed for long periods pays
+no continuous power and generates no continuous coil heat — which on a CubeSat,
+where the whole bus may run on a few watts, is often the deciding factor. It
+also fails in its last commanded state rather than springing to a default,
+which is either a safety feature or a hazard depending on the design; that is
+why latching valves are usually used as isolation valves in series with a
+non-latching thruster valve, so a stuck-open thruster can still be isolated.
+[M][J] For leakage, the number that matters is not a rate but a mission total:
+a one-year mission is $3.15\times10^{7}$ s, so a system-level allowance of
+$1\times10^{-4}$ scc/s of helium would lose about 3,150 scc — half a gram of
+helium, but a substantial fraction of a small propellant load if the same path
+leaks propellant. A defensible spec for a one-year mission is $10^{-5}$ to
+$10^{-4}$ scc/s helium at the *system* level, and $10^{-6}$ scc/s per joint,
+with the requirement stated after vibration and thermal cycling, not on a
+pristine unit. [J]
+
+**Probing:** whether you turn a leak rate into a mission-total mass before
+calling it acceptable.
+**Follow-up:** "Your latching valve fails open in flight. What in your design
+saves the mission?"
+
+### 106. [M30, M31, M33]
+Total allowed leakage $= 1\times10^{-4}\times14\times(3\times3.156\times10^{7})
+= \mathbf{1.33\times10^{5}\ scc}$ = 133 standard litres of helium, which at
+0.1786 mg/scc is **23.7 g of helium**. [F][A] Whether that is acceptable is a
+budget question, not a number question, and it needs three things. First: is
+the leaking fluid the propellant? For a self-pressurising refrigerant system
+the propellant is not helium and the conversion between a helium leak rate and
+a propellant leak rate depends on the leak's flow regime — molecular flow scales
+as $1/\sqrt{\mathcal{M}}$, viscous flow with viscosity — so a 23.7 g helium
+figure might be several times more or less propellant mass. Second: what is the
+propellant load? 24 g against MarCO's 1.9 kg is 1.3 % and probably acceptable;
+against a 200 g module it is not. Third: leakage is not the only loss — permeation
+through elastomer seals is often larger than joint leakage over three years and
+is not covered by this spec at all. What I would measure: a system-level
+accumulation or pressure-decay test at flight pressure, held long enough to
+resolve the rate, run *after* vibration and thermal cycling, plus a
+helium-mass-spectrometer sniff of each joint to find which one is the outlier,
+and a separate permeation test on the seal materials at the flight temperature.
+
+**Probing:** whether you notice the spec is written in helium and the mission
+flies something else.
+**Follow-up:** "The measured system rate is twice the spec. What do you do?"
+
+### 107. [M31, M30]
+MarCO's constraint was volume and safety on a rideshare, not performance. A
+self-pressurising R-236fa system stores propellant as a saturated liquid at
+about 2.7 bar, which means no COPV, no high-pressure regulator, no pyro valve
+and no high-pressure joint anywhere in the module — so the whole thing is an
+all-welded aluminium block that a launch provider's safety panel will accept as
+a secondary payload next to a flagship spacecraft, and it fits in a fraction of
+a 6U bus. [MarCO][VACCO] The propellant's own vapour pressure does the
+pressurisation, so the feed pressure is nearly constant while liquid remains
+rather than blowing down, which also removes the regulator's failure modes. What
+it gave up: specific impulse, about 40 s against 60–70 s for nitrogen and far
+less than any chemical option, so total impulse per kilogram is poor; thrust,
+tens of millinewtons, so every manoeuvre is long; and temperature sensitivity,
+because the feed pressure *is* the vapour pressure and therefore tracks the
+module's thermal state directly — a cold module is a low-thrust module. For a
+mission needing 40 m/s of trajectory correction on a 14 kg spacecraft with
+months of cruise to do it in, all three concessions were free. [J]
+
+**Probing:** whether you identify "no COPV" as the actual architectural win.
+**Follow-up:** "What would you have had to change to get the same impulse with
+nitrogen?"
+
+### 108. [M22, M26, M32, M33]
+On mass fraction alone the monolithic filament-wound case wins and it is not
+close: **0.924 for the P120C against about 0.85 for the Shuttle SRB**, which on
+a 150 t-class booster is tens of tonnes of inert mass, and inert booster mass is
+carried to a significant fraction of the mission velocity. [P120C] I would pick
+the monolithic composite. But the mass-fraction argument is overturnable by
+things that are not physics. Segmentation exists because of transport: the
+Shuttle SRBs were cast in Utah and shipped by rail, and the segment length is a
+rail-clearance number, so if your casting facility is not adjacent to your
+launch site, monolithic may be impossible at any price. It is also overturned by
+casting capacity — a monolithic 140 t grain needs a pit, a mixer train and a
+cure oven that exist in very few places — by the carbon-fibre supply chain and
+its cost and qualification lead time, by recoverability if you intend to reuse
+the case (steel tolerates salt-water recovery in a way a wound composite does
+not), and by heritage: a qualified segmented design with fifty flights behind it
+is a schedule and risk asset that a paper composite is not. [J][M] The honest
+answer names the mass fraction, commits, and then says which of those five
+would make me reverse.
+
+**Probing:** whether you can say why segments exist at all — shipping, not
+engineering preference.
+**Follow-up:** "SLS still flies segmented steel. Give me the strongest defence
+of that choice."
+
+### 109. [M33, M15]
+You cannot put a margin on a number you cannot measure, so early in a programme
+you convert the unmeasurable requirement into measurable proxies plus a
+demonstration plan, and you hold margin in all three. For combustion stability
+the requirement is written as a *demonstrated* damping requirement — an induced
+disturbance of stated amplitude must decay to a stated fraction within a stated
+time, at every operating point in the box — because that is testable, and the
+industry convention is the bomb test with a specified recovery time. [M][CPIA-246]
+The proxies you hold margin on before hardware exists are design-rule based:
+injector pressure drop as a fraction of $p_c$ above a threshold, acoustic
+cavity or baffle provisions carried in the design even if you hope not to need
+them, and a chamber geometry whose predicted mode frequencies you have
+deliberately separated from the injector's characteristic response times. [J]
+Then you hold *schedule and configuration* margin: you keep the injector face
+modifiable — a bolt-on face plate, a cavity ring you can re-tune — because the
+real historical answer to instability has always been iteration on hardware,
+and a programme that has designed out the ability to iterate has no margin at
+all, whatever its documents say.
+
+**Probing:** whether you propose demonstrable criteria and preserved design
+freedom, rather than a number with a percentage on it.
+**Follow-up:** "How many bomb tests, at which operating points, before you
+would sign?"
+
+### 110. [M34, M24, M25]
+It tells you that a qualification argument attaches to a *process and a supply
+chain*, not to a drawing: the insert met its specification on paper, and the
+material change was invisible at the level the specification controlled, so the
+qualification evidence — which was generated on the old material — no longer
+applied to the flight article. [M34][J] What I would have required of the
+supplier: a change-notification obligation covering raw material source, fibre
+and matrix precursor, densification cycle and any process parameter, with the
+right to reject or requalify; first-article and periodic lot testing on the
+properties that actually govern erosion, not just the ones easy to measure
+(density, porosity distribution, ply architecture, thermal conductivity, and an
+erosion or oxidation coupon test in a representative environment); retained
+samples from every lot; and traceability to the specific billet in the specific
+motor. Programme-side, I would require at least one hot-fire on the new
+material before flight — the general lesson is that a material substitution in
+an ablative or erosive application is a qualification event, because the
+governing behaviour is a rate that no room-temperature acceptance test measures.
+The systemic version of the lesson: write qualification plans so that "same
+part number" is never sufficient evidence, and identify in advance which
+suppliers are single-source for a property you cannot inspect.
+
+**Probing:** whether you go after the change-control clause, which is the
+actual mechanism, rather than "test more".
+**Follow-up:** "Your supplier says the change is proprietary and they will not
+disclose it. Now what?"

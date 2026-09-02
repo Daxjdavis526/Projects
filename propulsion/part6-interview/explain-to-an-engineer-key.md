@@ -2630,3 +2630,285 @@ specific to an injector, not to a propellant combination.
 **Follow-up:** *"What would you need to see to believe the RD-0120 claim?"*
 
 ---
+
+## N. Materials
+
+### 86. Why does hydrogen embrittle the metals that contain it? `[M16][M05]`
+
+**Physics.** Atomic hydrogen is small enough to dissolve into and diffuse through
+a metal lattice, and where it collects — at dislocations, grain boundaries and
+crack tips — it lowers the energy needed to separate the material.
+
+**Mechanism.** Molecular H₂ adsorbs on a clean metal surface, dissociates, and the
+atoms enter the lattice. Two mechanisms then compete in the literature: hydrogen
+raises local dislocation mobility so deformation localises, and it reduces
+cohesive strength across grain boundaries. Either way the result is the same:
+ductility falls, fracture toughness falls, and a crack that would have arrested
+propagates. High-strength steels and nickel alloys are the most susceptible, and
+susceptibility rises with strength — which is exactly backwards from what a
+designer wants. High pressure and elevated temperature accelerate the uptake.
+
+**Quantitative hook.** The engineering response is material selection, not
+coatings alone: hydrogen-compatible alloys (Inconel 718 in specific heat-treat
+conditions, A-286, austenitic stainless), copper alloys for liners, and gold or
+copper plating on susceptible parts. Every hydrogen engine in the file — RS-25,
+RL10, Vulcain, LE-7A, LE-9, RS-68A, J-2 — lives with this, and the standards
+literature exists specifically for it [G-095].
+
+**Trade-off / exception.** The compatible alloys are generally lower-strength or
+harder to fabricate, so the structure gets heavier. And embrittlement is not the
+only hydrogen problem: leak rate through joints, the invisible flame, and the wide
+flammability range are separate hazards that drive the whole ground-support design.
+
+**Follow-up:** *"Which part of a hydrogen engine worries you most, and why?"*
+
+---
+
+### 87. Why does low-cycle thermal fatigue kill a regen chamber before creep does? `[M16][M11]`
+
+**Physics.** The liner is a thin, constrained membrane with hundreds of kelvin
+across it — so each firing imposes a large *strain* cycle, and strain-controlled
+fatigue at high strain fails in tens to hundreds of cycles, long before
+time-dependent creep accumulates.
+
+**Mechanism.** On start, the hot face expands but the cold structure behind it
+does not, so the hot face goes into compression and yields plastically. On
+shutdown the sign reverses and it yields in tension. Each cycle ratchets the
+channel wall thinner and bulges it into the gas — the classic "doghouse" failure —
+until it cracks and coolant leaks into the chamber. Creep needs sustained load at
+temperature; a rocket firing is minutes, not thousands of hours, so creep is a
+secondary contributor except in a long-burn or a hot-restart case.
+
+**Quantitative hook.** The design consequence is that thermal-cycle life, not burn
+time, is the reusability number. The RS-25 was designed for 55 reuses and the
+between-flight inspection cost is what actually ended the Shuttle's reusability
+premise [engine-database Part D §11]. AJ10-190 OMS: 100 missions, 1,000 starts,
+15 hours cumulative burn — long life, but at 8.6 bar and modest heat flux
+[_verify-liquid, AJ10-190 block]. Push $p_c$ up and cycle life falls.
+
+**Trade-off / exception.** The fixes trade against cooling: a thicker liner
+survives more cycles but runs hotter; a lower-conductivity alloy is stronger but
+raises $\Delta T$ across the wall and therefore the strain `[EX 59.a–b]`. Copper
+alloying (NARloy-Z, GRCop-84) is the compromise — enough strength and creep
+resistance to buy cycles without losing the conductivity that keeps $\Delta T$
+small [GRCop].
+
+**Follow-up:** *"How would you inspect for it between flights?"*
+
+---
+
+### 88. Why is a copper liner closed out with electroformed nickel rather than made thicker? `[M16][M17]`
+
+**Physics.** The liner and the closeout have two different jobs: the liner must
+conduct heat, which wants copper and thinness; the jacket must carry the hoop
+load from the coolant pressure, which wants strength.
+
+**Mechanism.** Milling channels into a copper liner leaves open slots; something
+must close them and take the pressure. Making the copper itself thick enough to
+carry that load would put a large temperature drop across the hot wall — copper's
+conductivity does not help if you use a lot of it — so instead the channels are
+filled with a sacrificial wax or alloy, the outer surface is made conductive, and
+nickel is **electroformed** onto it, growing a dense, metallurgically bonded jacket
+that follows the exact channel geometry with no braze joint to fail. Then the
+filler is melted out.
+
+**Quantitative hook.** The RS-25's main combustion chamber is exactly this: a
+NARloy-Z (Cu–Ag–Zr) liner with **390 milled channels** and an electroformed-nickel
+closeout, with a 1,080-tube brazed nozzle downstream
+[_verify-liquid, RS-25 block]. The thermal argument in one line: 26 MW/m² through
+0.7 mm of NARloy-Z is a 52 K drop; through the same thickness of a nickel alloy it
+is 904 K `[EX 59.a–b]`.
+
+**Trade-off.** Electroforming is slow — deposition rates are measured in
+millimetres per week — expensive, and hard to inspect for bond quality. It is one
+of the main reasons an RS-25 chamber costs what it does, and it is precisely the
+process additive manufacturing is trying to displace [GradlAM][RAMPT].
+
+**Follow-up:** *"How would you inspect an electroformed bond line?"*
+
+---
+
+### 89. What does an enamel coating actually do in an oxidizer-rich turbine? `[M16][M13]`
+
+**Physics.** Hot oxygen-rich gas attacks metal directly; an inert, adherent,
+non-metallic layer removes the fuel from that reaction by putting a ceramic
+between the oxygen and the alloy.
+
+**Mechanism.** In ORSC the preburner exhaust is dense oxygen-rich gas at high
+temperature and pressure. Bare nickel or steel surfaces oxidise, and if a local
+hot spot or a particle impact exposes fresh metal, the oxidation can become
+self-sustaining — a metal fire propagating downstream through the manifold and
+turbine. The Russian answer was to coat **every metal surface in contact with the
+hot oxygen-rich gas** with an inert enamel, so there is no exposed metal to ignite
+and no fresh-surface initiation site. It is a process technology as much as a
+material: adhesion, coverage and repair are the hard parts.
+
+**Quantitative hook.** This single technology is what makes ORSC survivable, and
+it is why the West could not simply copy the cycle
+[_verify-liquid, RD-180 block]. The performance it enabled: RD-253 at 147 bar in
+1965 with a T/W of 156:1; RD-170 at 245 bar; RD-180 at 267 bar, the highest
+chamber pressure of any engine in regular service before Raptor
+[_verify-liquid, respective blocks].
+
+**Trade-off / exception.** A coating is a single-layer defence with no margin: a
+chip, a scratch during assembly, or a repair that does not take is a potential
+ignition site, so inspection and handling discipline become flight-critical. And
+it constrains what you can weld, machine or rework after coating.
+
+**Follow-up:** *"How would you inspect that coating on an assembled engine?"*
+
+---
+
+### 90. Why is niobium the default radiatively cooled nozzle material, and what displaced it? `[M16][M11]`
+
+**Physics.** A radiation-cooled nozzle rejects heat as $\sigma T^4$, so the whole
+design hinges on how hot the wall may run — the useful figure of merit is
+allowable temperature, not strength.
+
+**Mechanism.** Niobium (columbium) alloys are formable, weldable, low-density and
+retain strength to ~1,600 K, which puts them well above superalloys. Bare niobium
+oxidises catastrophically in air, so flight hardware is **silicide-coated** —
+a coating that is protective on ascent and adequate for a vacuum-firing thruster.
+It is the workhorse: cheap enough, hot enough, and manufacturable.
+
+**Quantitative hook.** The R-4D tells the whole story in one component:
+**molybdenum alloy → silicide-coated niobium → iridium-lined rhenium**. Each step
+raised allowable wall temperature, which cut the film-cooling fraction, which
+bought roughly **10 s of Isp** — 312 s classic against ~322 s for the
+rhenium-chamber variants [_verify-liquid, R-4D block]. Radiatively cooled niobium
+extensions also appear on the Shuttle RCS R-40 and OMS AJ10-190, and on the
+Merlin Vacuum, whose niobium extension glows cherry-red in flight as designed
+[_verify-liquid, R-40, AJ10-190 and MVac blocks].
+
+**Trade-off.** Ir/Re runs to about 2,200 K but is far more expensive, hard to
+fabricate — the iridium liner is deposited by CVD onto a mandrel and the rhenium
+grown around it — and heavier per unit volume. So niobium has not gone away; it has
+been displaced only where the Isp is worth the money, which is high-value
+spacecraft apogee engines rather than every RCS thruster.
+
+**Follow-up:** *"Where would carbon–carbon beat both?"*
+
+---
+
+## O. Manufacturing
+
+### 91. Why did tube-wall chambers give way to milled channels, and then to printed ones? `[M17][M11]`
+
+**Physics.** Every generation moved the coolant passage closer to being *exactly*
+the shape the heat flux distribution wants, with fewer joints in the load path.
+
+**Mechanism.** A tube-wall chamber is built by forming hundreds of tapered tubes
+to the contour, stacking them, and brazing the whole assembly into a jacket — the
+tube wall is thin where you need conduction, and the braze carries the structure.
+It scales but every tube is a hand operation and every braze is a potential leak.
+Milled channels replaced that with a machined liner and an electroformed or brazed
+closeout: fewer joints, and a channel cross-section that can be varied
+continuously along the contour. Additive manufacturing goes further and grows the
+liner, channels and manifolds as a single part, so channel shape is limited by
+print resolution rather than by cutter access.
+
+**Quantitative hook.** The generational line is visible in the file: F-1, **178
+brazed tubes**; RS-25, a 1,080-tube brazed nozzle but a **390-milled-channel**
+liner; Vinci, a smooth-wall chamber with high-speed milled channels; Merlin, regen
+milled-channel; Rutherford, with chamber, injectors, pumps and main valves all
+printed [_verify-liquid, respective blocks].
+
+**Trade-off.** Printed parts bring their own problems: surface roughness inside
+the channels changes both the pressure drop and the heat transfer, residual stress
+and anisotropy have to be qualified, and powder removal from internal passages is
+a real inspection problem. The process is new enough that the qualification
+argument, not the hardware, is the long pole [GradlAM][Gradl18].
+
+**Follow-up:** *"How would you qualify a printed channel you cannot see inside?"*
+
+---
+
+### 92. What does additive manufacturing actually change about an engine's cost? `[M17][M33]`
+
+**Physics.** Cost in a low-rate engine programme is dominated by touch labour,
+tooling and schedule, not by material — so the win is part-count consolidation and
+iteration speed, not cheaper metal.
+
+**Mechanism.** Printing lets one part replace an assembly of dozens, which removes
+joints, fasteners, welds, inspections, and the drawings and tooling that go with
+each. It also collapses the development loop: a redesigned injector can be printed
+and tested in weeks rather than being re-tooled over months, which matters more
+than unit cost during development. What it does *not* do is make the powder, the
+machine time, or the post-processing (HIP, machining, inspection) cheap.
+
+**Quantitative hook.** The best-documented industrial claim in the file is European
+and is about a conventional process pushed by manufacturing thinking: the
+**Vulcain 2.1 nozzle — 90% fewer parts, 40% lower cost, 30% faster to produce**,
+by laser-welded sandwich construction [_verify-liquid, Vulcain 2.1 block]. On the
+additive side: Prometheus targets ~€1 M per engine, one tenth of Vulcain 2, with
+**up to 50% of the engine by metal 3D printing** — a target for an unflown engine,
+not a result [_verify-liquid, Prometheus block]. Rutherford is the demonstrated
+case at scale: 369 engines flown across 47 flights by April 2024
+[_verify-liquid, Rutherford block].
+
+**Trade-off.** You are trading a mature, statistically characterised process for a
+new one whose defect population you do not yet know, on a part whose failure is not
+survivable. That is why printed parts entered on igniters, injectors and small
+thrust chambers before large structures [RAMPT].
+
+**Follow-up:** *"Where would you refuse to print a part today?"*
+
+---
+
+### 93. Why does one brazed joint set the schedule for a whole chamber build? `[M17][M16]`
+
+**Physics.** A braze is a single irreversible thermal operation on a nearly
+finished assembly — so its yield multiplies against everything already invested,
+and its rework path is usually another braze cycle that degrades the first.
+
+**Mechanism.** The furnace cycle has to bring a large assembly to temperature
+uniformly, with the filler flowing into every joint by capillary action, under
+tight control of atmosphere, fixturing and gap. Gaps out of tolerance give voids;
+voids give leaks or hot spots; and you find them by proof and leak test *after*
+the cycle, i.e. after months of tube forming or liner machining. Each rework cycle
+re-heats the base metal, coarsening grain structure and consuming the parent
+material's remaining braze capability, so there is a hard limit on attempts.
+
+**Quantitative hook.** The scale of exposure: the F-1's 178 brazed tubes, and the
+RS-25's **1,080-tube brazed nozzle** [_verify-liquid, F-1 and RS-25 blocks]. One
+bad joint in a thousand is a whole nozzle. The counter-move is exactly the
+Vulcain 2.1 result — laser-welded sandwich construction, 90% fewer parts, 40%
+lower cost, 30% faster [_verify-liquid, Vulcain 2.1 block].
+
+**Trade-off / exception.** Brazing is not obsolete: it gives a thin, conductive,
+low-mass joint that welding cannot match, and for tube-wall geometry there is no
+practical alternative. The engineering answer is to design the joint out where you
+can and to build schedule margin around the furnace where you cannot.
+
+**Follow-up:** *"How many chambers would you build before you trust the yield?"*
+
+---
+
+### 94. Why is the Vulcain 2.1 nozzle the most-quoted manufacturing result in European propulsion? `[M17][M09]`
+
+**Physics.** It is a rare case where the *outcome* of a design-for-manufacture
+decision is published as three specific numbers, on flight hardware, with no
+performance claim attached.
+
+**Mechanism.** The Vulcain 2.1 is not a performance uprate — its vacuum thrust
+(1,324 kN) is slightly *lower* than Vulcain 2's 1,359 kN. The whole point of the
+programme was Ariane 6's cost. The nozzle was redesigned as a **laser-welded
+sandwich structure** rather than the tube-wall construction of Vulcain 1 and 2,
+which removed the tube-forming and brazing operations that dominated its cost and
+schedule.
+
+**Quantitative hook.** **90% fewer parts, 40% lower cost, 30% faster to produce**
+[_verify-liquid, Vulcain 2.1 block] — the best-documented manufacturing-driven
+redesign in European propulsion, on an engine that first flew 2024-07-09. Compare
+with the honest counterpoint: the engine's own performance numbers went slightly
+backwards, and Vulcain 2.1's sea-level thrust and Isp are not separately published.
+
+**Trade-off.** Cost-driven redesigns of a qualified engine are expensive up front:
+you re-qualify a flight-critical component to save recurring cost, which only pays
+across enough units. Ariane 6's flight rate is the assumption underneath the
+business case, and that assumption is outside the engineer's control.
+
+**Follow-up:** *"What would you have to believe about flight rate for that to pay
+back?"*
+
+---
