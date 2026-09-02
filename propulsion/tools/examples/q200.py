@@ -438,3 +438,27 @@ EXAMPLES += [
      "args": {"isp": 70.0, "m0": 148.0, "mf": 136.2},
      "expect": 57.0370, "tol": 0.001},
 ]
+
+# --- Q186-200 -------------------------------------------------------------
+# Q186 rho*Isp*g0: helium 0.04e-3*160*9.80665 = 0.06276 N*s/cm^3;
+#   R-236fa 1.36e-3*40*9.80665 = 0.53348 N*s/cm^3; ratio 8.50.
+# Q187 allocation 2.0 + 1.5 + 2.0 + 2.5 + 2.0 (all e-5) = 1.0e-4, product
+#   0.99990; N for 0.9999 at 90 % confidence = ln(0.1)/ln(0.9999) = 23025;
+#   30 zero-failure trials support only R_LB = 0.1**(1/30) = 0.926.
+# Q193 rss(0.015, 0.020, 0.003) = 0.025179 (positional args, see Q85 note);
+#   the propellant-mass term is 0.020^2/0.025179^2 = 63 % of the variance;
+#   7 independent flights bring the mean to 0.0095 if the errors are random.
+# Q195 RS-25: mdot = 2279e3/(452.3*9.80665) = 513.8 kg/s, fuel 73.09 kg/s ->
+#   1.029 m^3/s at 71 kg/m^3, ox 440.7 kg/s -> 0.387 m^3/s (total 1.416).
+#   RD-170: mdot = 7900e3/(337*9.80665) = 2390.4 kg/s, fuel 658.5 kg/s ->
+#   0.813 m^3/s at 810 kg/m^3, ox 1731.9 kg/s -> 1.519 m^3/s (total 2.332).
+#   Volumetric ratio 1.647, pressure ratio 245.2/206.4 = 1.188 -> ~2x.
+EXAMPLES += [
+    {"id": "q200.186a", "fn": "density_isp",
+     # kg/m^3 form: 40 kg/m^3 of helium at 160 s
+     "args": {"rho": 40.0, "isp": 160.0},
+     "expect": 6400.0, "tol": 0.001},
+    {"id": "q200.186b", "fn": "density_isp",
+     "args": {"rho": 1360.0, "isp": 40.0},
+     "expect": 54400.0, "tol": 0.001},
+]

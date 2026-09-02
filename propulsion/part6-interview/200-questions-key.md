@@ -4028,3 +4028,455 @@ entry, note C.2.1; SAFER95]
 different reference mass, rather than declaring the numbers wrong.
 **Follow-up:** "Where else does a published $\Delta v$ hide its reference
 mass?"
+
+### 186. [M28, M30, M32]
+Impulse per unit propellant volume is $\rho I_{sp} g_0$:
+helium $= 0.04\times10^{-3}\ \mathrm{kg/cm^3}\times160\times9.80665 =
+\mathbf{0.063\ N\cdot s/cm^3}$;
+R-236fa $= 1.36\times10^{-3}\times40\times9.80665 =
+\mathbf{0.533\ N\cdot s/cm^3}$.
+The refrigerant wins by a factor of **8.5** despite giving up a factor of four
+in $I_{sp}$, because it wins a factor of 34 in stored density. [F] Then the
+tank makes it worse for helium, not better. The helium is at 241 bar, so it
+needs a composite-overwrapped pressure vessel whose mass is comparable to or
+greater than the gas it holds and whose external volume exceeds the internal
+volume by the wall thickness — while the R-236fa sits at its 2.7 bar vapour
+pressure in a thin welded aluminium can that adds a few percent. Include the
+vessel and the gap widens to something like an order of magnitude on both mass
+and envelope. [MarCO][VACCO] Two caveats worth carrying: the stored-density
+figures in the literature for compressed gases are frequently ideal-gas
+computed and internally inconsistent, so treat 0.04 g/cm³ as approximate; and
+the comparison reverses completely if the mission is mass-limited rather than
+volume-limited and the tank can be made large — which is why helium is a
+pressurant and a leak-test gas, and almost never a propellant.
+
+**Probing:** whether you finish the argument at the system level, where the
+tank is the answer.
+**Follow-up:** "Name a mission where you would still pick the helium."
+
+### 187. [M33, M27, M34]
+A series chain, so unreliabilities add to first order and the budget is
+$1\times10^{-4}$ total. A defensible split, weighted by complexity and by how
+much evidence exists for each: **igniter $2\times10^{-5}$** (a small, well
+characterised pyrotechnic device with an enormous lot-test history, but it is
+a one-shot with no ability to retry); **case $1.5\times10^{-5}$** (a passive
+structure with a proof test on every article and a mature analysis basis — the
+lowest risk in the chain if the process is controlled); **grain
+$2\times10^{-5}$** (passive, but its failure modes — cracks, debonds — are
+manufacturing-driven and inspection-limited); **nozzle $2.5\times10^{-5}$**
+(the largest, because it is an eroding ablative structure operating in a
+particle-laden flow with a moving flexseal joint, and because Vega-C VV22 is a
+recent demonstration that the failure mode is live); **TVC $2\times10^{-5}$**
+(actuators, power, control electronics — the only active system, but also the
+only one that can be tested end-to-end before flight and monitored). Product:
+0.99990. [J] Which number do I believe: **none of them individually**. To
+demonstrate 0.9999 at 90 % confidence with zero failures requires
+$\ln(0.1)/\ln(0.9999) \approx \mathbf{23{,}000}$ trials; a large motor
+programme fires perhaps 30, which supports a demonstrated lower bound of
+$(1-C)^{1/N} = 0.926$ at 90 % confidence. So the 0.9999 is not a demonstrated
+number and cannot be — it is an allocation, and what it actually buys is a
+disciplined argument: it forces each subsystem to name its failure modes, show
+that each is either eliminated by design or controlled by process, and justify
+its share. What I *do* believe is the **ranking**, and the statement that the
+nozzle and the grain carry the most risk. Anyone who presents 0.9999 as a
+measured reliability should be asked how many motors they fired.
+
+**Probing:** whether you compute how many tests 1e-4 would require and say the
+number is an allocation, not a measurement.
+**Follow-up:** "So how does anyone certify a launch abort motor at all?"
+
+### 188. [M34, M33, M14]
+Common-cause failure is a single condition that defeats multiple supposedly
+independent elements at once: shared environment (a fire, a fragment, a
+vibration mode), shared resource (one power bus, one helium supply, one
+software load), shared process (the same technician, the same batch of
+material, the same calibration error), or shared design flaw. Reliability
+mathematics assumes independence, so a system that computes to $10^{-6}$ with
+independent redundant legs can be dominated by a common-cause term of
+$10^{-3}$, and in real systems it usually is. [F][M33] The propulsion example I
+would give is the N-1: its thirty first-stage engines were arranged with the
+KORD control system to shut down engines symmetrically on a fault, which was
+explicitly a redundancy and engine-out scheme — and it made things worse. The
+engines were not individually acceptance-fired (they were built in batches with
+a sample fired), the shared plumbing and structure propagated the effects of a
+single engine failure, and the automatic shutdown logic itself commanded
+shutdowns that destroyed vehicles. The redundancy added components, shared
+failure paths and a new active failure mode, and the arithmetic that justified
+it assumed an independence the hardware did not have. [H] The Shuttle
+field-joint secondary O-ring is the same lesson in miniature: a redundant seal
+that shared the joint's rotation and the same cold temperature was not
+redundancy at all, and its presence supported a false confidence argument.
+The rule that comes out of it: before adding a redundant leg, ask what the two
+legs share — and count the failure modes you are adding, not just the ones you
+are covering.
+
+**Probing:** whether your example shows redundancy *creating* failure modes, not
+merely failing to help.
+**Follow-up:** "How would you find the common-cause terms in a design review?"
+
+### 189. [M35, M17, M25]
+The knowledge that does not live in drawings is process knowledge and judgment:
+the sequence and fixturing of a weld and how much a joint distorts, the exact
+brazing schedule and how the alloy actually flows in that geometry, the hand
+skills of tube forming, the acceptance criteria a shop applied by eye, the
+reason a dimension has an unusual tolerance, the workarounds that were never
+drawn, and the tacit understanding of what a bad part looks like. Also lost:
+the *rationale* — which requirement drove which feature, what alternatives were
+tried and failed, and what the test failures were. A drawing tells you the
+geometry; it does not tell you how to make that geometry repeatably, or why it
+is that geometry. [H][M] Add the supply chain: the specific alloy, the specific
+mill process, the specific vendor's powder or forging practice, and the
+inspection equipment — all of which have moved on. What it implies for
+documenting a production engine: capture the *process* as a controlled artefact
+alongside the drawing — parameters, sequences, fixtures, acceptance criteria
+and their basis; record the design rationale and the trade history, including
+the failures, because the failures are what constrain the design space; keep
+the test data and the anomaly record, not just the summary; qualify and document
+the manufacturing process such that a change to it is a controlled change
+(question 110); and — the honest practical answer — keep a production line
+warm, or at least keep people who have made the part, because some knowledge
+transfers only by apprenticeship. The F-1 lesson is that a programme can hold
+every drawing and still be unable to build the engine.
+
+**Probing:** whether "design rationale" and "the failures" appear alongside
+process parameters.
+**Follow-up:** "You have a budget for exactly one of those. Which?"
+
+### 190. [M36, M07, M15]
+CFD predicts well: the *cold-flow* hydrodynamics — orifice discharge
+coefficients, manifold flow distribution and pressure drops across a face,
+element-to-element flow balance, and the gross structure of jets, sheets and
+their impingement; the mean flow field and recirculation pattern in a chamber;
+wall heat flux distributions well enough to find where the hot streaks will be
+(directionally, not quantitatively); and the ranking of design variants against
+each other, which is often all you need. [M][M36] It predicts badly: primary
+atomisation and droplet size distributions, which are sub-grid and largely
+modelled rather than computed; turbulent mixing at the small scales that
+control the actual local mixture ratio; combustion efficiency in absolute terms
+— you should not believe a computed $\eta_{c^*}$ to better than a few percent;
+transcritical and supercritical mixing thermodynamics, which are still an active
+research area; and anything involving the transient — ignition, start, throttle
+— where the physics and the numerics are both hardest. What I would never
+accept without a hot-fire: a **combustion stability** claim, in any form. A
+computed stability margin, a computed damping time, a claim that a new element
+pattern is stable, a claim that acoustic cavities are correctly tuned — none of
+those is qualification evidence, because the governing physics is a nonlinear
+flame response at amplitudes the simulation does not resolve and cannot
+validate. I would also not accept a computed wall heat flux as the basis for
+liner life without a hot-fire, for the same reason Bartz needs test data:
+injector-driven non-uniformity is the thing that kills walls and it is exactly
+what the model is least able to get right.
+
+**Probing:** whether the never-accept item is stability, and whether you can say
+*why* rather than "because it is hard".
+**Follow-up:** "CFD says design A is 2 % better than design B. Do you believe
+the sign?"
+
+### 191. [M36, M15, M33]
+Under narrow conditions, and never as the evidence itself. What a surrogate can
+legitimately do in a qualification argument is *screen* and *interpolate*: rank
+candidate geometries so that the hot-fire campaign tests the right ones, fill in
+between tested points inside a domain where you have test data bracketing the
+prediction, and flag designs that fall outside the training distribution so a
+human looks at them. That is genuine value and it shortens programmes. [R][J]
+The conditions I would impose before it enters a qualification package at all:
+the training data must be *hot-fire* data of the same class of hardware, not
+simulation output, or if simulation-trained, the simulation itself must be
+validated against hot-fire; the model must report a calibrated uncertainty and
+an explicit in-distribution/out-of-distribution determination, and a prediction
+flagged out-of-distribution is not a prediction; the model, its training set and
+its version must be configuration-controlled artefacts, because a retrained
+model is a different model and every conclusion drawn from the old one is
+suspect; there must be held-out test articles whose results were never in
+training, and the qualification argument must be sound *without* the surrogate's
+interpolations for the flight configuration; and someone must own the failure
+mode where the surrogate is confidently wrong. What I would refuse: using it to
+reduce the number of bomb tests at the flight operating points, or to justify a
+configuration no one has fired. The asymmetry is that a surrogate's error mode
+is silent — it does not know what it does not know — while a bomb test's error
+mode is a loud engine.
+
+**Probing:** whether you allow it for screening and forbid it as evidence, and
+whether configuration control of the model appears.
+**Follow-up:** "The vendor's model was trained on their own proprietary data
+they will not show you. Does that change anything?"
+
+### 192. [M17, M18, M33]
+First, stop and characterise before deciding anything: how much porosity, of
+what type (spherical gas versus crack-like lack-of-fusion), at what locations
+relative to the stress and thermal fields, in how many units, and — critically —
+is the distribution stable or drifting with build date, machine or powder lot?
+A drifting distribution is a process going out of control and is a far more
+serious finding than a stable one. [M][J] Then run the actual engineering
+question: is the observed defect population bounded by what the qualification
+articles contained? If the qualified hardware had the same porosity and passed,
+then the acceptance tests were never the thing protecting you and the
+qualification remains valid — the CT has simply told you what was always there.
+If the fleet population exceeds the qualification articles, you have flying
+hardware outside its basis. Then a fracture-mechanics and fatigue assessment
+with the defects treated as initial flaws, and, if it is affordable, test to
+failure a unit with representative porosity.
+**The argument for acting:** nothing has failed *yet* is not evidence of
+adequacy at the sample size you have; the acceptance tests demonstrably do not
+screen this defect, so you have no continuing control; and the porosity is a
+fatigue-life issue, so the failures would appear late, in the units with the
+most cycles — exactly the flight units. Normalisation of deviance is the named
+failure mode here and it has killed people.
+**The argument against:** every intervention has its own risk — recalling and
+rebuilding injectors introduces handling damage, new welds and new process
+variability, and grounding a fleet has real consequences; and a defect
+population that is bounded and shown analytically to be non-limiting is a
+legitimate engineering conclusion, not a dodge.
+My decision: do not ground on the finding alone, but immediately (a) add CT to
+acceptance so the population is controlled going forward, (b) bound the fleet
+analytically and set a conservative interim life limit, and (c) commit to a
+test-to-failure article. If the population is drifting or exceeds the
+qualification basis, ground it.
+
+**Probing:** whether you ask "was the qualification hardware the same?" — that
+question decides the case.
+**Follow-up:** "The programme manager says CT on every unit is unaffordable.
+What do you offer instead?"
+
+### 193. [M18, M03, M36]
+$I_{sp} = F t/(m_p g_0)$ is a product and quotient of independent measurements,
+so
+$\sqrt{0.015^2+0.020^2+0.003^2} = \mathbf{0.0252}$, i.e. **±2.5 %**. [F] A 1 %
+shortfall is well inside that, so **no — a single flight reconstruction cannot
+resolve it.** Two useful follow-through statements. The propellant mass term
+dominates (0.020² is 63 % of the variance) and tank-level gauging is the usual
+weak point, so that is where the improvement would come from — flowmeters, a
+better gauging model, or a mass-balance reconstruction using measured tank
+pressures and temperatures. And you can beat the single-flight limit
+statistically: the uncertainty on the *mean* of $N$ independent flights falls as
+$1/\sqrt{N}$ for the random part, so about seven flights would bring the mean
+to 1 %, provided the errors really are random. That proviso is the trap — a
+calibration bias in the accelerometry or a systematic error in the tank-level
+model does not average down at all, so before promising the $\sqrt{N}$ argument
+you must separate the random and systematic parts of each term. In practice
+that is why performance shortfalls are diagnosed on the ground, where you can
+instrument properly, and flight data are used to confirm rather than to
+discover.
+
+**Probing:** whether you distinguish random from systematic before invoking
+$1/\sqrt{N}$.
+**Follow-up:** "How would you find out whether your 2.0 % is random or a
+bias?"
+
+### 194. [M05, M12, M33]
+The four places the cost shows up. **Ground infrastructure:** subcooling
+requires a refrigeration or liquid-nitrogen-bath plant at the pad sized for the
+full load, plus the storage, transfer and recirculation to keep it cold — real
+capital and real operating cost, and a new single-point failure in the launch
+chain. **Launch operations:** densified propellant warms continuously once
+loaded, so the load must be late, fast and continuously topped, which compresses
+the count, tightens the launch window, complicates holds and recycles, and
+couples the propellant state to every delay — and for crewed flight it forces
+the argument about loading with crew aboard. **Vehicle thermal and structural
+design:** colder propellant means more thermal contraction, larger thermal
+gradients in structure and lines, insulation designed for a colder boundary,
+more heat leak into a colder fluid, and ullage/pressurisation behaviour that
+changes because the vapour pressure is lower — which helps NPSH but changes
+tank pressurisation and collapse-factor design. **Engine and feed system:** the
+engine sees a colder, denser fluid at its inlet, so the pump operating point,
+the NPSH margin, the seal and bearing thermal environment, valve clearances and
+the start transient all shift — and every one of those must be requalified over
+the new temperature range, which is a full engine qualification, not a
+paperwork change. [M][J] Would I adopt them on a new vehicle? Only if the
+vehicle is genuinely performance-limited, the programme owns and operates its
+own pad, and the flight rate is high enough to amortise the ground plant — the
+conditions SpaceX had. For a vehicle flying from a shared range at a low rate,
+the operational fragility outweighs a few percent of density, and I would spend
+the same engineering on structure and $I_{sp}$ instead.
+
+**Probing:** whether "requalify the engine over a new inlet temperature range"
+appears — it is the cost people forget.
+**Follow-up:** "Which of those four would you attack to make densification
+cheaper?"
+
+### 195. [M12, M13, M26]
+Pump shaft power is $P = \dot m\Delta p/(\rho\eta) = \dot V\Delta p/\eta$ —
+volumetric flow times pressure rise. Now substitute:
+$\dot m = F/(I_{sp}g_0)$ and $\Delta p \propto p_c$, so
+$P \propto \dfrac{F\,p_c}{\rho\,I_{sp}}$. Power scales linearly with thrust,
+linearly with chamber pressure, and *inversely with propellant density* — which
+is the term that explains the RS-25. [F] Numbers: the RS-25 at 2,279 kN vacuum
+and 452.3 s flows 514 kg/s, of which at O/F 6.03 about 73 kg/s is liquid
+hydrogen at 71 kg/m³ — **1.03 m³/s of fuel**, more volumetric flow than its
+441 kg/s of oxygen (0.39 m³/s). Raising that 1.03 m³/s by roughly 48 MPa at
+realistic efficiency is tens of megawatts, and the published HPFTP figure is
+**53.05 MW (71,140 hp) at ~35,360 rpm**; adding the HPOTP's 17.34 MW gives about
+70 MW of high-pressure pump power for the engine. The RD-170 at 7,900 kN vacuum
+and 337 s flows 2,390 kg/s of dense propellants — 0.81 m³/s of kerosene plus
+1.52 m³/s of LOX, **2.33 m³/s total against the RS-25's 1.42** — at 245 bar
+against 206 bar. So the volumetric-flow ratio is 1.64 and the pressure ratio
+about 1.19, predicting roughly **2×** the RS-25's total pump power, or about
+140 MW; the published figures are **contested at 170 versus 192 MW**, which is
+the right order and larger than the simple scaling, as you would expect once
+the preburner discharge pressure and the four-chamber manifold losses are
+included. [A.6.1] The lesson: the RD-170 needs three and a half times the thrust
+of the RS-25 but only about 2.5–2.7 times the pump power, because dense
+propellants are cheap to pump.
+
+**Probing:** whether you get to $\dot V\Delta p$ and then notice hydrogen's
+density is the whole story.
+**Follow-up:** "So why is the RS-25 turbopump the hard one to build?"
+
+### 196. [M15, M07, M33]
+The case for shipping with an exclusion zone: it is a demonstrated, bounded
+behaviour at a known operating point, and if the mission profile does not
+require sustained operation at 70 % — many do not, since throttle buckets are
+transited rather than dwelt in — then a control-law constraint that steps
+through the band is a legitimate engineering solution with immediate schedule
+value. Aircraft engines and turbomachinery ship with prohibited speed ranges
+routinely, and nobody considers it a scandal. [J]
+The case against, which I find stronger: an instability at 70 % is evidence that
+the *margin* is small there, not that the problem lives only there. Margin
+varies with propellant temperature, mixture ratio, engine-to-engine build
+variation and wear, so the band will move, and it may move into a region you do
+depend on — and it may broaden as hardware ages. An exclusion zone is only as
+good as your ability to guarantee you never enter it, and off-nominal
+trajectories, engine-out cases and abort scenarios are exactly the situations
+where the control system may have to go where it was told not to. You are also
+shipping a known instability, which means every future anomaly investigation
+starts by asking whether it was this.
+**Decision: fix it.** Specifically, characterise the band across temperature and
+mixture ratio to find out how wide it really is; attack the driving side first
+(injector $\Delta p$ at low flow, element pattern or recess on the responsible
+rows) and the damping side second (cavity retune for the mode observed); and
+re-bomb across the whole throttle range at multiple amplitudes to confirm the
+margin, not just the absence of the tone. I would ship with the exclusion zone
+only as an interim measure, with a closure plan and a date. [M]
+
+**Probing:** whether you argue both sides seriously and then commit with a
+reason that is about margin, not about tidiness.
+**Follow-up:** "Your fix costs a year. The customer will accept the exclusion
+zone. Do you hold the line?"
+
+### 197. [M09, M02, M18]
+Static-fire plume data at sea level cannot reproduce the flight base
+environment, for three reasons that all push the same way. First, plume
+expansion: at altitude the ambient pressure falls to a small fraction of the
+exit pressure, so the plume expands enormously, and the plume boundary moves
+outward and forward toward the base — the recirculation region that returns hot
+gas to the base is far larger and far hotter in flight than at sea level, where
+the atmosphere confines the plume. Second, multi-engine interaction: adjacent
+plumes expand into each other, and the impingement between them drives a strong
+central recirculation and an upward flow along the vehicle axis that a
+single-engine static fire simply does not contain. Third, afterburning: a
+fuel-rich exhaust that is only partly burnt (which every engine's is, and a
+gas-generator exhaust dramatically so) mixes with entrained air in the base
+region and burns there, releasing heat exactly where you did not want it — and
+radiation from soot and from hot CO₂ and H₂O adds a component that scales
+differently from convection. [F][M] There is a fourth for a vehicle with
+solids: alumina particles radiate strongly and deposit. What I would instrument
+on the next flight: distributed thermocouples and heat-flux gauges
+(Gardon/Schmidt–Boelter) across the base heat shield, separated so convective
+and radiative components can be split — a radiometer with a window alongside a
+total-heat-flux gauge is the standard way to do that; static pressure taps in
+the base region to characterise the recirculation; gas-sampling or species-
+specific optical measurement if afterburning is the hypothesis; and cameras
+looking at the base and the plume boundary, with a known reference for scale.
+I would also fly them on the *first* flight of any new configuration, since
+this is a class of error that only flight resolves.
+
+**Probing:** whether all three of plume expansion, multi-engine interaction and
+afterburning appear, and whether you split radiation from convection in the
+instrumentation.
+**Follow-up:** "Can you get any of that from a wind tunnel or a subscale hot
+fire?"
+
+### 198. [M32, M19, M35]
+Three technical reasons, all rooted in the same fact: in a hybrid the fuel
+regression rate is governed by heat transfer from the flame in the boundary
+layer to the fuel surface, and $\dot r = aG_{ox}^n$ with $n$ around 0.5–0.8
+gives a *low* regression rate that scales with mass flux rather than with
+pressure. First, **low regression rate forces complex grain geometry**: to get
+useful thrust you need enormous burning surface, so a single-port grain gives
+too little, and multi-port grains give poor volumetric loading, large slivers,
+structural problems in the fuel webs, and residual unburnt fuel — so the
+density impulse advantage the propellants promise is thrown away at the system
+level. Second, **the O/F ratio shifts through the burn**, because the port area
+grows while the oxidiser flow is roughly constant, so the mixture ratio drifts
+and the delivered $I_{sp}$ and thrust drift with it; you can partially design
+around it (with $n = 0.5$ the fuel flow is nearly constant, as the arithmetic
+shows) but not eliminate it. Third, **combustion efficiency is poor** — the
+diffusion flame sits in the boundary layer and there is no mechanism forcing
+the core oxidiser to mix with the fuel-rich wall layer, so $\eta_{c^*}$ needs
+a mixing chamber and still lands below a liquid's, and hybrids have a long
+record of low-frequency instability driven by the coupling between the boundary
+layer, the vaporisation lag and the feed system. [E][M][R] Add the
+non-technical-but-decisive fact that solids have a 70-year qualification base
+and hybrids do not. The one development that would change it: a fuel with a
+regression rate several times higher than HTPB's at the same mass flux —
+liquefying paraffin-based fuels that entrain droplets from a melt layer are the
+credible candidate, and they have demonstrated 3–4× regression in test. If that
+can be made structurally and thermally sound at scale, single-port grains
+become viable, the geometry problem collapses, and the argument changes.
+
+**Probing:** whether you identify low regression rate as the *root* cause of the
+geometry, loading and efficiency problems rather than listing them separately.
+**Follow-up:** "Hybrids are advertised as safe and throttleable. Is that worth
+nothing?"
+
+### 199. [M34, M18, M33]
+The engineering content is small and the process content is everything. The
+reading is in specification, so there is no automatic action; it is outside the
+fleet's historical scatter, so it is a *signal*, and the entire lesson of
+Challenger and Columbia is that a signal outside experience is not made safe by
+being inside a limit. [M34] What I do, in order. Determine whether the
+transducer or the engine has changed: pull the calibration record and the
+installation history for that transducer, compare it against the other
+transducers on the same engine and the same manifold, and check whether the
+1.2 % appears in other parameters that should correlate (flow, temperature,
+valve positions) — a single instrument reading low with everything else nominal
+is an instrument story; a coherent shift across parameters is an engine story.
+Re-run the check if the procedure allows it, and look at the same engine's
+history across previous checks to see whether this is a step or a drift.
+Consult the transducer's own failure modes, because a shifting reference is a
+known and characterised behaviour. Then — and this is the part that matters —
+**raise it, in writing, through the flight-readiness process, with my
+assessment and my uncertainty, and say plainly what I do not know.** I do not
+resolve it privately by concluding it is probably fine, and I do not let the
+absence of a violated limit substitute for an explanation. If I cannot explain
+the reading before the commit point, my recommendation is to replace the
+transducer or to not fly; the cost of a scrub is a day, and the standard for a
+crewed vehicle is that unexplained deviations are resolved, not tolerated. [J]
+I would also expect, and ask for, an independent technical opinion rather than
+being the sole judge.
+
+**Probing:** whether you say the words "I raise it and I do not resolve it
+myself", and whether the burden of proof lands on flying rather than on
+scrubbing.
+**Follow-up:** "The programme manager says the data are within spec and asks
+you to sign. What do you say?"
+
+### 200. [M01–M36]
+**Know where every number came from, and say so.** Not "be careful with
+numbers" — the specific discipline of being able to state, for any figure in
+your analysis, whether it is a measurement, a derivation, a correlation inside
+or outside its validity range, a heritage value, a supplier claim, or a guess,
+and what its uncertainty is. Everything else in this course is downstream of
+it: a Bartz flux is ±20–30 %; an $L^*$ from a 1960s engine is a residence-time
+proxy at a different chamber pressure; an expansion ratio quoted for the RS-25
+might be 69 or 77.5; a company's thrust-to-weight is a ratio with no agreed
+definition; a 0.9999 reliability is an allocation and not a measurement.
+[J] The programme failure I would cite is **Challenger** — not for the
+O-ring, but for the reasoning. Field-joint erosion had been observed on
+previous flights and was treated as evidence that the joint was acceptable,
+when it was in fact evidence that the joint was operating outside its design
+intent and that nobody had a model that explained it. The number "we have seen
+erosion before and flown safely" was a heritage value being used as a
+measurement, and the uncertainty on it was never stated because stating it
+would have made the argument fall over. [Rogers86][M34] **Vega-C VV22** makes
+the same point in the manufacturing domain and is more recent: a qualification
+figure was carried across a supplier change as if it were a property of the
+part rather than of a process. If you carry one habit into a design review,
+make it the habit of asking, out loud, "where did that number come from?" — and
+of answering it about your own numbers before anyone else has to ask.
+
+**Probing:** whether you can commit to one principle, defend it with a specific
+programme, and — the real test — apply it to your own work rather than to
+other people's.
+**Follow-up:** "Give me a number from your own last project and tell me where
+it came from."

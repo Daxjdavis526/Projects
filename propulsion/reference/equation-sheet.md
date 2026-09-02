@@ -55,38 +55,38 @@ systematic ones.
 | 02 | [Compressible flow and nozzles](#module-02--compressible-flow-and-nozzles) | 3.1–3.24 |
 | 03 | [Rocket performance](#module-03--rocket-performance-thrust-c-c_f-i_sp) | 3.1–3.15 |
 | 04 | [Thermochemistry and CEA](#module-04--thermochemistry-and-cea) | 3.1–3.9 |
-| 05 | [Propellants](#module-05--propellants) | — |
-| 06 | [Combustion chambers](#module-06--combustion-chambers) | — |
-| 07 | [Injectors](#module-07--injectors) | — |
-| 08 | [Ignition systems](#module-08--ignition-systems) | — |
-| 09 | [Nozzles](#module-09--nozzles) | — |
-| 10 | [Heat transfer](#module-10--heat-transfer) | — |
-| 11 | [Cooling systems](#module-11--cooling-systems) | — |
-| 12 | [Feed systems and turbopumps](#module-12--feed-systems-and-turbopumps) | — |
-| 13 | [Engine cycles](#module-13--engine-cycles) | — |
-| 14 | [Valves and plumbing](#module-14--valves-plumbing-and-engine-hardware) | — |
-| 15 | [Combustion instability](#module-15--combustion-instability) | — |
-| 16 | [Structures and materials](#module-16--structures-and-materials) | — |
-| 17 | [Manufacturing](#module-17--manufacturing) | — |
-| 18 | [Testing and instrumentation](#module-18--engine-testing-and-instrumentation) | — |
-| 19 | [Solid propellant fundamentals](#module-19--solid-propellant-fundamentals) | — |
-| 20 | [Combustion and burn rate](#module-20--combustion-and-burn-rate) | — |
-| 21 | [Grain geometry](#module-21--grain-geometry) | — |
-| 22 | [Motor cases](#module-22--motor-cases) | — |
-| 23 | [Insulation and liners](#module-23--insulation-and-liners) | — |
-| 24 | [Solid rocket nozzles](#module-24--solid-rocket-nozzles) | — |
-| 25 | [Solid rocket manufacturing](#module-25--solid-rocket-manufacturing) | — |
-| 26 | [Historical large solid motors](#module-26--historical-large-solid-motors) | — |
-| 27 | [Modern defense propulsion](#module-27--modern-defense-propulsion-engineering) | — |
-| 28 | [Cold-gas principles](#module-28--cold-gas-principles) | — |
-| 29 | [Cold-gas performance modeling](#module-29--cold-gas-performance-modeling) | — |
-| 30 | [Cold-gas hardware](#module-30--cold-gas-hardware) | — |
-| 31 | [Real cold-gas systems](#module-31--real-cold-gas-systems) | — |
-| 32 | [Liquid vs solid vs cold gas](#module-32--liquid-vs-solid-vs-cold-gas) | — |
-| 33 | [Systems engineering](#module-33--systems-engineering-for-propulsion) | — |
-| 34 | [Failure case studies](#module-34--failure-case-studies) | — |
-| 35 | [Historical evolution](#module-35--historical-evolution) | — |
-| 36 | [Modern engineering methods](#module-36--modern-engineering-methods) | — |
+| 05 | [Propellants](#module-05--propellants) | 3.1–3.10 |
+| 06 | [Combustion chambers](#module-06--combustion-chambers) | 3.1–3.15 |
+| 07 | [Injectors](#module-07--injectors) | 3.1–3.23 |
+| 08 | [Ignition systems](#module-08--ignition-systems) | 3.1–3.7 |
+| 09 | [Nozzles](#module-09--nozzles) | 3.1–3.14 |
+| 10 | [Heat transfer](#module-10--heat-transfer) | 3.1–3.11 |
+| 11 | [Cooling systems](#module-11--cooling-systems) | 3.1–3.19 |
+| 12 | [Feed systems and turbopumps](#module-12--feed-systems-and-turbopumps) | 3.1–3.20 |
+| 13 | [Engine cycles](#module-13--engine-cycles) | 3.1–3.9 |
+| 14 | [Valves and plumbing](#module-14--valves-plumbing-and-engine-hardware) | 3.1–3.18 |
+| 15 | [Combustion instability](#module-15--combustion-instability) | 3.1–3.15 |
+| 16 | [Structures and materials](#module-16--structures-and-materials) | 3.1–3.10 |
+| 17 | [Manufacturing](#module-17--manufacturing) | 3.1–3.8 |
+| 18 | [Testing and instrumentation](#module-18--engine-testing-and-instrumentation) | 3.1–3.23 |
+| 19 | [Solid propellant fundamentals](#module-19--solid-propellant-fundamentals) | 3.1–3.5 |
+| 20 | [Solid combustion and burn rate](#module-20--solid-combustion-and-burn-rate) | 3.1–3.14 |
+| 21 | [Grain geometry](#module-21--grain-geometry) | 3.1–3.11 |
+| 22 | [Solid motor cases](#module-22--solid-motor-cases) | 3.1–3.12 |
+| 23 | [Insulation and liners](#module-23--insulation-and-liners) | 3.1–3.6 |
+| 24 | [Solid rocket nozzles](#module-24--solid-rocket-nozzles) | 3.1–3.18 |
+| 25 | [Solid rocket manufacturing](#module-25--solid-rocket-manufacturing) | 3.1–3.9 |
+| 26 | [Historical large solid motors](#module-26--historical-large-solid-motors) | 3.1–3.2, 5.1 |
+| 27 | [Modern defense propulsion](#module-27--modern-defense-propulsion-engineering) | 3.1–3.11 |
+| 28 | [Cold-gas principles](#module-28--cold-gas-principles) | 3.1–3.18 |
+| 29 | [Cold-gas performance modeling](#module-29--cold-gas-performance-modeling) | 3.1–3.22 (+3.12a) |
+| 30 | [Cold-gas hardware](#module-30--cold-gas-hardware) | 3.1–3.10 |
+| 31 | [Real cold-gas systems](#module-31--real-cold-gas-systems) | 3.1–3.6, 5.1 |
+| 32 | [Liquid vs solid vs cold gas](#module-32--liquid-vs-solid-vs-cold-gas) | 3.1–3.10 |
+| 33 | [Systems engineering](#module-33--systems-engineering-for-propulsion) | 3.1–3.11 |
+| 34 | [Failure case studies](#module-34--failure-case-studies) | 3.1, 5.1–5.3 |
+| 35 | [Historical evolution](#module-35--historical-evolution) | 5.1–5.3 |
+| 36 | [Modern engineering methods](#module-36--modern-engineering-methods) | 3.1–3.21 |
 
 ---
 
@@ -5178,3 +5178,310 @@ $$S_i=\frac{\mathrm{Var}_{x_i}\!\left(\mathbb{E}[f\mid x_i]\right)}{\mathrm{Var}
 - **Tag** [F] · **Code** —
 
 ---
+
+# VI — Dimensionless groups
+
+Every group below appears somewhere in the course. Each entry gives the
+definition, the physical ratio it expresses, the value or range that matters in
+propulsion, and where in the course it decides something.
+
+## Fluid dynamics and flow regime
+
+### Mach number
+
+$$M = \frac{V}{a}, \qquad a = \sqrt{\gamma R T}$$
+
+- **Variables** — $V$ local flow speed [m/s]; $a$ local speed of sound [m/s]; $\gamma$ [—]; $R$ [J/(kg·K)]; $T$ *static* temperature [K].
+- **Ratio** — inertial to elastic (compressibility) forces; equivalently, kinetic to thermal energy.
+- **Where it decides something** — $M = 1$ at the throat is the whole basis of choked flow (02-3.10). Chamber $M \approx 0.1$–0.35 sets the Rayleigh loss (06-3.9). Exit $M$ of 3–5 sets $\varepsilon$ and separation behaviour (02-3.22).
+- **Code** `a_sound(gamma, R, T)`, `mach_from_area_ratio(...)`, `mach_from_pressure_ratio(...)`
+- ⚠ Uses **static** temperature. Using $T_0$ is a common and large error at high $M$.
+
+### Reynolds number
+
+$$\mathrm{Re} = \frac{\rho V L}{\mu} = \frac{V L}{\nu}$$
+
+- **Variables** — $\rho$ [kg/m³]; $V$ [m/s]; $L$ characteristic length [m]; $\mu$ dynamic viscosity [Pa·s]; $\nu = \mu/\rho$ kinematic viscosity [m²/s].
+- **Ratio** — inertial to viscous forces.
+- **Where it decides something** — coolant-channel $\mathrm{Re} > 10^4$ validates Dittus–Boelter (11-3.7). Throat $Re_t$ of $10^3$–$10^4$ sets the discharge coefficient and viscous loss of a cold-gas micronozzle (29-3.11, 29-3.12, 30-3.9b). Droplet $\mathrm{Re}_d$ sets the convection correction to evaporation (07-3.15). DNS cost scales as $\mathrm{Re}^{9/4}$ (36-3.7).
+- **Code** `reynolds(rho, v, L, mu)`
+- **Alias** — $L$ is $D_h$ in channels, $D_t$ at a throat, $d$ for a droplet or jet. Always state it.
+
+### Weber number
+
+$$\mathrm{We} = \frac{\rho V^2 L}{\sigma}$$
+
+- **Variables** — $\rho$ [kg/m³] (gas density for $\mathrm{We}_g$, liquid for $\mathrm{We}_l$); $V$ [m/s] (relative velocity for $\mathrm{We}_g$); $L$ [m]; $\sigma$ surface tension [N/m].
+- **Ratio** — aerodynamic disruptive force to surface-tension restoring force.
+- **Where it decides something** — primary atomization regime (07-3.10). Droplet $\mathrm{We}_g \gtrsim 12$ means secondary breakup rather than evaporation (07-3.15). Cold-flow simulant similarity is normally matched on We, not Re (18-3.5).
+- **Code** `weber(rho, v, L, sigma)`
+- ⚠ Collapses entirely above the propellant's critical pressure, where $\sigma \to 0$ — the regime of a LOX post in a 200+ bar staged-combustion chamber.
+
+### Ohnesorge number
+
+$$\mathrm{Oh} = \frac{\mu_l}{\sqrt{\rho_l \sigma L}} = \frac{\sqrt{\mathrm{We}_l}}{\mathrm{Re}}$$
+
+- **Variables** — $\mu_l$ liquid dynamic viscosity [Pa·s]; $\rho_l$ [kg/m³]; $\sigma$ [N/m]; $L$ [m].
+- **Ratio** — viscous damping of surface waves to surface-tension restoring force. Note it contains no velocity: it is a property of the *liquid and the length scale*, not of the flow.
+- **Where it decides something** — large Oh means the liquid resists breakup and produces ligaments rather than drops (07-3.11); it separates the breakup regimes on the classical Ohnesorge–Reynolds map.
+- **Code** `ohnesorge(mu, rho, sigma, L)`
+
+### Knudsen number
+
+$$\mathrm{Kn} = \frac{\lambda_{mfp}}{L}$$
+
+- **Variables** — $\lambda_{mfp}$ molecular mean free path [m]; $L$ characteristic length [m].
+- **Ratio** — molecular mean free path to flow scale; the validity test for the continuum assumption.
+- **Where it decides something** — $\mathrm{Kn} \lesssim 0.01$ is required for continuum CFD (36-3.6). It is violated in micronozzles below ~20 µm throat, at plenum pressures below ~0.1 bar (29-3.11), and always in the far plume of a cold-gas thruster. Above $\mathrm{Kn} \approx 0.1$ the correct tool is DSMC, not Navier–Stokes.
+- **Code** —
+
+### Strouhal number
+
+$$\mathrm{St} = \frac{f L}{V} \qquad\Longleftrightarrow\qquad f_s = \mathrm{St}\,\frac{v}{q}$$
+
+- **Variables** — $f$ shedding or oscillation frequency [Hz]; $L$ characteristic length [m]; $V$ velocity [m/s]. In the bellows form, $q$ is the convolution pitch [m].
+- **Ratio** — a dimensionless frequency: how many oscillation cycles occur in one flow-transit time.
+- **Where it decides something** — vortex shedding over bellows convolutions and the high-cycle fatigue that follows (14-3.16). The fix — an internal liner — removes the flow from the convolutions entirely.
+- **Code** —
+
+## Heat and mass transfer
+
+### Prandtl number
+
+$$\mathrm{Pr} = \frac{c_p \mu}{k} = \frac{\nu}{\alpha_d}$$
+
+- **Variables** — $c_p$ [J/(kg·K)]; $\mu$ [Pa·s]; $k$ thermal conductivity [W/(m·K)]; $\nu$ [m²/s]; $\alpha_d$ thermal diffusivity [m²/s].
+- **Ratio** — momentum diffusivity to thermal diffusivity; the relative thickness of the velocity and thermal boundary layers. A fluid property, not a flow property.
+- **Values** — ~0.7 for combustion gases; 0.6–160 is the Dittus–Boelter validity band; near-critical hydrogen and methane leave it violently.
+- **Where it decides something** — the $\mathrm{Pr}^{-0.6}$ in Bartz (10-3.4); the $\mathrm{Pr}^{0.4}$ in Dittus–Boelter (11-3.7); the recovery factor $r \approx \mathrm{Pr}^{1/3} \approx 0.9$ turbulent, $\mathrm{Pr}^{1/2}$ laminar (10-3.1).
+- **Code** —
+
+### Nusselt number
+
+$$\mathrm{Nu} = \frac{h L}{k} \qquad\text{e.g.}\qquad \mathrm{Nu} = 0.023\,\mathrm{Re}^{0.8}\mathrm{Pr}^{n}$$
+
+- **Variables** — $h$ convective heat-transfer coefficient [W/(m²·K)]; $L$ characteristic length [m], usually $D_h$; $k$ *fluid* thermal conductivity [W/(m·K)].
+- **Ratio** — convective to conductive heat transfer at the wall; equivalently, the dimensionless temperature gradient at the surface.
+- **Where it decides something** — every convective correlation in the course is a Nu correlation in disguise: Dittus–Boelter (11-3.7), Sieder–Tate (11-3.8), Bartz (10-3.4), the Lenoir–Robillard erosive-burning term (20-3.11), and the roughness enhancement of 17-3.8.
+- **Code** `dittus_boelter(k, D, Re, Pr, n)`
+- ⚠ $k$ is the *fluid* conductivity. Using the wall's is a classic error.
+
+### Biot number
+
+$$\mathrm{Bi} = \frac{h L_c}{k_s}$$
+
+- **Variables** — $h$ external film coefficient [W/(m²·K)]; $L_c$ characteristic solid dimension [m], typically thickness or volume/area; $k_s$ *solid* thermal conductivity [W/(m·K)].
+- **Ratio** — external convective resistance to internal conductive resistance in the *solid*. The mirror image of Nu, which uses the fluid conductivity.
+- **Where it decides something** — $\mathrm{Bi} \ll 0.1$ validates the lumped-capacitance heat-sink wall (11-3.2). For copper at $t_w \sim 20$ mm and $h_g \sim 10^4$ W/(m²·K), $\mathrm{Bi} \approx 0.5$ — marginal, and the front face runs hotter than lumped analysis says. $\mathrm{Bi} \ll 0.1$ also validates the slug calorimeter (18-3.6) and the lumped thermocouple bead (18-3.15).
+- **Code** —
+
+### Fourier number
+
+$$\mathrm{Fo} = \frac{\alpha_d t}{L^2}, \qquad \alpha_d = \frac{k}{\rho c}$$
+
+- **Variables** — $\alpha_d$ thermal diffusivity [m²/s]; $t$ time [s]; $L$ characteristic length [m].
+- **Ratio** — dimensionless time for transient conduction: how far the thermal wave has penetrated relative to the body size.
+- **Where it decides something** — the semi-infinite solutions of 10-3.9, 23-3.3 and 24-3.6 are valid only while $\mathrm{Fo} \lesssim 0.05$–0.1, i.e. while the back face has not felt the pulse. Beyond that the wall heats bodily and the heat-sink survival time of 10-3.10 no longer applies. It is also the parameter that separates the $\sqrt{t}$ char-growth regime from the linear-recession regime in insulation sizing.
+- **Code** —
+
+### Spalding transfer number
+
+$$B = \frac{c_{p,g}(T_\infty - T_s)}{h_{fg}} \quad(\text{thermal}), \qquad B_M = \frac{Y_{F,s}-Y_{F,\infty}}{1-Y_{F,s}} \quad(\text{mass})$$
+
+- **Variables** — $c_{p,g}$ film specific heat [J/(kg·K)]; $T_\infty$, $T_s$ far-field and surface temperature [K]; $h_{fg}$ latent heat [J/kg]; $Y_F$ fuel mass fraction [—].
+- **Ratio** — driving potential for evaporation to the energy (or mass) needed to evaporate.
+- **Where it decides something** — the $\ln(1+B)$ in the $d^2$ evaporation law (07-3.14) and in the Lagrangian droplet mass equation (36-3.10).
+- **Code** —
+
+## Turbomachinery
+
+### Specific speed
+
+$$N_s = \frac{\omega\sqrt{Q}}{(g_0 H)^{3/4}}$$
+
+- **Variables** — $\omega$ [rad/s]; $Q$ volumetric flow per stage per flow path [m³/s]; $H$ head rise per stage [m]; $g_0$ [m/s²].
+- **Ratio** — a dimensionless shape parameter: it selects the machine type. Low $N_s$ → radial centrifugal, high $N_s$ → axial.
+- **Where it decides something** — the first choice in any turbopump layout (12-3.14).
+- **Code** `specific_speed_SI(omega, Q, H)`
+- ⚠ **US practice uses $N_s = N\sqrt{Q}/H^{3/4}$ with rpm, US gpm and feet — larger than the SI dimensionless value by a factor of 2733.** A number near 1 is dimensionless; a number near 2000 is US. Never mix them.
+
+### Suction specific speed
+
+$$N_{ss} = \frac{\omega\sqrt{Q}}{(g_0\,\mathrm{NPSH})^{3/4}}$$
+
+- **Variables** — as above with NPSH [m] in place of $H$.
+- **Ratio** — how hard the inlet can suck before cavitating; the figure of merit for an inducer.
+- **Values (SI dimensionless)** — 2–3 plain impeller, no inducer; 4–6 with a modest inducer; 7–10 a well-designed rocket inducer; >10 claimed on some hydrogen inducers exploiting thermodynamic suppression.
+- **Where it decides something** — sets $\mathrm{NPSH}_r$ and therefore tank ullage pressure and tank mass (12-3.16, 33-3.5).
+- **Code** `suction_specific_speed_SI(omega, Q, NPSH)`
+- ⚠ Same 2733 factor to the US form. Also: NPSH at 3 % head loss is *not* NPSH at incipient cavitation (2–3× higher) and *not* NPSH free of rotating cavitation (higher still).
+
+## Propulsion-specific groups
+
+### Vandenkerckhove function $\Gamma$
+
+$$\Gamma(\gamma) = \sqrt{\gamma}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+- **Values** — 0.6247 at $\gamma = 1.08$; 0.6485 at 1.20; 0.6584 at 1.25; 0.6847 at 1.40; 0.7268 at $\gamma = 5/3$. **It spans only 0.62–0.73 across every gas in this course**, which is why $c^*$ is dominated by $\sqrt{T_0/\mathcal{M}}$ and only weakly by $\gamma$.
+- **Where it decides something** — choked mass flow (02-3.10), $c^*$ (03-3.8), residence time (06-3.5), chamber fill time (20-3.8).
+- **Code** `gamma_function(gamma)`
+
+### Thrust coefficient $C_F$ and expansion ratio $\varepsilon$
+
+$$C_F = \frac{F}{p_c A_t}, \qquad \varepsilon = \frac{A_e}{A_t}, \qquad \varepsilon_c = \frac{A_c}{A_t}$$
+
+- **Values** — $C_F$ 1.3–1.6 sea level, 1.7–2.0 vacuum at moderate $\varepsilon$; theoretical vacuum maximum $\sqrt{2\gamma^2/(\gamma-1)\cdot(2/(\gamma+1))^{(\gamma+1)/(\gamma-1)}} \approx 2.25$ at $\gamma = 1.2$. $\varepsilon$ 5–40 for first stages, 40–300 for upper stages. $\varepsilon_c$ 2–6.
+- **Code** `Cf(gamma, eps, p0, pa, pe)`, `area_ratio(gamma, Mach)`
+
+### Mixture ratio, equivalence ratio, $K_n$
+
+$$r = O\!/\!F = \frac{\dot m_{ox}}{\dot m_f}, \qquad \phi = \frac{r_{st}}{r}, \qquad K_n = \frac{A_b}{A_t}$$
+
+- **Where it decides something** — $r$ sets $T_c$ and $\mathcal{M}$ and hence $c^*$ (04-3.3). $K_n$ is the entire geometric input to solid-motor equilibrium pressure (19-3.3); it typically runs 150–400 for APCP.
+- ⚠ $\phi > 1$ is fuel-rich; $r > r_{st}$ is oxidiser-rich. Rocket practice runs fuel-rich of the $T_c$ peak because $\mathcal{M}$ falls faster than $T_c$.
+
+### Cavitation number
+
+$$K = \frac{p_1 - p_v}{p_1 - p_2} \qquad\text{(injector, 07-3.3)}, \qquad \sigma = \frac{p_1 - p_v}{p_1 - p_2} \qquad\text{(valve, 14-3.6)}$$
+
+- ⚠ Several definitions circulate — some use $(p_2-p_v)/(p_1-p_2)$, others the reciprocal. **State which you are using.** Note $\sigma$ here is a cavitation index, not stress and not the Bartz property correction.
+
+### Stokes number
+
+$$\mathrm{Stk} = \frac{\tau_v u}{L_c}, \qquad \tau_v = \frac{\rho_p d_p^2}{18\mu}$$
+
+- **Ratio** — particle response time to flow time. $\mathrm{Stk} \ll 1$: particles follow the gas. $\mathrm{Stk} \gtrsim 1$: they fly straight and impinge.
+- **Where it decides something** — alumina impingement on submerged solid-nozzle noses and the two-phase $I_{sp}$ lag (24-3.5).
+
+### Larson–Miller and WLF shift
+
+$$P_{LM} = T(C + \log_{10}t_r) \qquad\text{(16-3.4)}, \qquad \log_{10}a_T = \frac{-C_1(T-T_g)}{C_2 + (T-T_g)} \qquad\text{(34-3.1)}$$
+
+- Both are time–temperature equivalence parameters: the first for metal creep rupture, the second for polymer viscoelastic response. Both fail the same way — by extrapolation past a change of mechanism.
+
+---
+
+# VII — Constants and conversions
+
+## Defined constants used throughout
+
+| symbol | value | unit | note |
+|---|---|---|---|
+| $g_0$ | 9.80665 | m/s² | **exactly**; a defined unit conversion in $I_{sp}$, *not* local gravity |
+| $R_u$ | 8314.46 | J/(kmol·K) | course default; `rocket.RU` |
+| $R_u$ | 8.31446 | J/(mol·K) | same constant, per-mole basis — used in 25-3.5 and 30-3.10 |
+| $\sigma_{SB}$ | $5.670\times10^{-8}$ | W/(m²·K⁴) | Stefan–Boltzmann |
+| $F$ (Faraday) | 96 485 | C/mol | electroforming, 17-3.4 |
+| $\mu_0$ | $4\pi\times10^{-7}$ | H/m | solenoid force, 30-3.7 |
+| $p^\circ$ | 1 | bar = $10^5$ Pa | thermochemical standard state |
+| $T^\circ$ | 298.15 | K | thermochemical reference |
+| $J_1'$ first zero | 1.8412 | — | first tangential acoustic mode; also written 1.841 in slosh (33-3.6) |
+
+⚠ **Molar basis.** $R_u = 8314.46$ J/(kmol·K) pairs with $\mathcal{M}$ in kg/kmol and $E_a$ in J/kmol; $R_u = 8.31446$ J/(mol·K) pairs with molar quantities in J/mol. Mixing them is a factor-of-1000 error and it looks plausible. Check the exponent on any quoted activation energy.
+
+## Pressure
+
+| from | to | multiply by |
+|---|---|---|
+| psi | Pa | 6894.757 |
+| psi | bar | 0.0689476 |
+| bar | Pa | $10^{5}$ (exact) |
+| bar | MPa | 0.1 |
+| MPa | Pa | $10^{6}$ (exact) |
+| MPa | psi | 145.038 |
+| atm | Pa | 101 325 (exact) |
+| torr | Pa | 133.322 |
+
+Useful anchors: 1 bar ≈ 14.5 psi; 100 bar = 10 MPa ≈ 1450 psi; a 3000 psi bottle is 207 bar; a 10 000 psi COPV is 690 bar.
+
+⚠ **psia versus psig.** US propulsion data is normally psia (absolute). A psig figure is 14.7 psi lower. Chamber pressures are always absolute; some hydraulic and pneumatic schematics are gauge. If a source does not say, and the number is below ~30 psi, suspect gauge.
+
+## Force, mass, length
+
+| from | to | multiply by |
+|---|---|---|
+| lbf | N | 4.448222 |
+| N | lbf | 0.2248089 |
+| kgf | N | 9.80665 (exact) |
+| lbm | kg | 0.45359237 (exact) |
+| kg | lbm | 2.204623 |
+| slug | kg | 14.5939 |
+| in | mm | 25.4 (exact) |
+| in | m | 0.0254 (exact) |
+| ft | m | 0.3048 (exact) |
+| in² | m² | $6.4516\times10^{-4}$ (exact) |
+| in³ | m³ | $1.638706\times10^{-5}$ |
+| US gal | m³ | $3.785412\times10^{-3}$ |
+| L | m³ | $10^{-3}$ (exact) |
+
+Useful anchors: 1 lbf ≈ 4.45 N, so 1 000 000 lbf ≈ 4.45 MN (F-1 sea-level thrust is 6.77 MN ≈ 1.52 Mlbf); 1 kN ≈ 225 lbf.
+
+## Flow, density, and derived
+
+| from | to | multiply by |
+|---|---|---|
+| lbm/s | kg/s | 0.45359237 |
+| US gpm | m³/s | $6.30902\times10^{-5}$ |
+| m³/h | m³/s | $2.7\overline{7}\times10^{-4}$ |
+| lbm/in³ | kg/m³ | 27 679.9 |
+| lbm/ft³ | kg/m³ | 16.0185 |
+| Btu/(lbm·°F) | J/(kg·K) | 4186.8 |
+| Btu/(ft²·s) | W/m² | 11 356.5 |
+| ksi·√in | Pa·√m | $1.0988\times10^{6}$ |
+| ksi | MPa | 6.894757 |
+| cP (centipoise) | Pa·s | $10^{-3}$ |
+| cSt (centistokes) | m²/s | $10^{-6}$ |
+
+⚠ **Valve coefficients.** $C_v$ and $K_v$ (14-3.3) are unit-bearing empirical indices, not dimensionless. Convert to an effective area before using them anywhere on this sheet: $C_dA\ [\mathrm{m^2}] = 1.698\times10^{-5}\,C_v = 1.963\times10^{-5}\,K_v$ (14-3.4).
+
+⚠ **Burn-rate coefficient.** $a$ in $r = ap^n$ carries the units of the whole law. From the usual mm/s–MPa tabulation to SI: $a_{\mathrm{SI}} = a_{[\mathrm{mm/s,MPa}]}\times10^{-3}\times(10^{-6})^{n}$ (20-3.5). Check whether the source instead writes $r = a(p/p_{ref})^n$, which is a different and safer convention.
+
+⚠ **Pump specific speed.** $N_{s,\mathrm{US}} = 2733\,N_{s,\mathrm{SI}}$, same for $N_{ss}$ (12-3.14, 12-3.16).
+
+## Temperature
+
+$$T[\mathrm{K}] = T[\mathrm{^\circ C}] + 273.15, \qquad
+T[\mathrm{^\circ R}] = 1.8\,T[\mathrm{K}], \qquad
+T[\mathrm{^\circ F}] = 1.8\,T[\mathrm{^\circ C}] + 32$$
+
+- Rankine is the absolute scale that pairs with Fahrenheit: $T[\mathrm{^\circ R}] = T[\mathrm{^\circ F}] + 459.67$.
+- **Temperature *differences*** convert without the offset: $\Delta T[\mathrm{K}] = \Delta T[\mathrm{^\circ C}]$, and $\Delta T[\mathrm{K}] = \Delta T[\mathrm{^\circ R}]/1.8$. This matters for CTE, $\sigma_p$, and every $\Delta T$ on this sheet.
+- Anchors: LH2 NBP 20.3 K; LOX NBP 90.2 K; LCH4 NBP 111.7 K; 0 °C = 273.15 K = 491.67 °R; the military storage envelope −54 °C to +71 °C is 219.15 K to 344.15 K.
+
+## $I_{sp}$ unit conventions
+
+| convention | symbol | unit | relation |
+|---|---|---|---|
+| specific impulse (seconds) | $I_{sp}$ | s | $I_{sp} = F/(\dot m g_0) = c/g_0$ |
+| mass-specific impulse | $I_{sp,m}$, $c$ | N·s/kg = m/s | $c = I_{sp}\,g_0$ |
+| effective exhaust velocity | $c$ | m/s | identical to $I_{sp,m}$ |
+| density impulse (no $g_0$) | $I_d$ | kg·s/m³ | $I_d = \rho I_{sp}$ — 05-3.3, 19-3.5 |
+| density impulse (with $g_0$) | $I_v$, $\Lambda$ | N·s/m³ | $I_v = \rho I_{sp} g_0$ — 28-3.18, 29-3.4, 31-3.4, 32-3.3 |
+| total impulse | $I_t$ | N·s | $I_t = m_p I_{sp} g_0$ — 26-3.3 |
+
+Rules the course holds to:
+
+- "$I_{sp}$" always means **seconds** unless stated. 1 s of $I_{sp}$ = 9.80665 m/s of $c$.
+- Always state the ambient condition: **vacuum** or **sea level**. An unqualified $I_{sp}$ for a real engine is not a number.
+- Always state the expansion ratio alongside a vacuum $I_{sp}$; it is meaningless without one.
+- Always state the reference method for an *efficiency*: ODE (one-dimensional equilibrium) is the JANNAF convention, and a number quoted against a frozen or kinetic reference is a different number (18-3.9).
+- $g_0$ is exact and carries no uncertainty; it therefore contributes nothing to the $I_{sp}$ uncertainty budget (18-3.21).
+- ⚠ Two "density impulse" conventions are in use, differing by a factor of $g_0$. Both appear in this course, in the modules noted above. Check units before comparing published figures.
+
+## Chamber-pressure station conventions
+
+Three different stations are all called "$p_c$" in the literature, and they differ
+by 2–8 %:
+
+| station | symbol used here | what it is |
+|---|---|---|
+| injector face | $p_{c,\mathrm{inj}}$, $p_{inj}$ | static pressure at the face, where $u \approx 0$ so it is also the stagnation pressure there |
+| nozzle stagnation | $p_{c,\mathrm{ns}}$, $p_{0,t}$, $p_0$ | stagnation pressure at the nozzle entrance, *after* the Rayleigh loss — this is the station $c^*$ is defined against |
+| throat static | — | rarely quoted; lower again by the isentropic factor at $M=1$ |
+
+Convert between the first two with 01-3.8 / 06-3.9 / 18-3.10. The correction is
+1–2 % for $\varepsilon_c \ge 3$ and grows sharply below $\varepsilon_c = 2$. The
+course default is that $p_c$ means the **injector-face** value unless stated,
+following `README.md`; but $c^*$ is always referenced to **nozzle stagnation**.
+Getting these two crossed inflates $\eta_{c^*}$ by several percent and is the
+single most common silent error in reduced test data.

@@ -381,3 +381,582 @@ database's caveats.
    architecture is unavailable `[engine-database A.9.5]`.
 
 ---
+
+# Project 2 — A small launch vehicle second stage
+
+## §1. Reference sizing (D1)
+
+### The Δv closure, all six combinations
+
+R2.6 caps stage gross at 2,600 kg *including* payload; R2.2 requires ≥ 300 kg to
+500 km SSO; R2.1 requires ≥ 3,600 m/s. The burnout mass allowed is
+$m_f = 2600\,e^{-3600/(I_{sp}g_0)}$, and the dry-mass allowance is that minus the
+300 kg payload:
+
+| axis 1 × axis 2 | $I_{sp}$ (s) | $m_f$ allowed (kg) | dry allowed (kg) | propellant (kg) | verified |
+|---|---|---|---|---|---|
+| GG × kerolox | 348 | 905.4 | **605.4** | 1,694.6 | `[TS P2.1]` |
+| electric pump × kerolox | 343 | 891.6 | **591.6** | 1,708.4 | `[TS P2.2]` |
+| pressure-fed × kerolox | 305 | 780.3 | **480.3** | 1,819.7 | `[TS P2.3]` |
+| GG × methalox | 362 | 943.1 | **643.1** | 1,656.9 | `[TS P2.4]` |
+| electric pump × methalox | 358 | 932.5 | **632.5** | 1,667.5 | `[TS P2.5]` |
+| pressure-fed × methalox | 318 | 819.6 | **519.6** | 1,780.4 | `[TS P2.6]` |
+
+Each row is verified by feeding $m_0 = 2{,}600$ kg and the resulting $m_f$ back
+through the rocket equation, which returns 3,600 m/s.
+
+**The first finding is that Δv is not the binding constraint.** Every
+combination allows a dry mass far above R2.7's 380 kg ceiling. **R2.7 is
+binding, and it binds through tank mass and pressurisation hardware, which is why
+the two axes are not independent.**
+
+### The closed design loop (project-specific deliverable)
+
+The loop is $p_c \to$ pump power $\to$ battery or turbine flow $\to$ dry mass
+$\to$ propellant $\to$ tank volume $\to$ tank mass $\to$ dry mass. Two iterations
+for the electric-pump kerolox candidate, starting from a 300 kg dry guess:
+
+| iteration | dry (kg) | propellant (kg) | volume (m³) | tank (kg) | battery (kg) | new dry (kg) |
+|---|---|---|---|---|---|---|
+| 1 | 300 (guess) | 1,700 | 1.756 | 21.3 | 40.5 | 279 |
+| 2 | 279 | 1,708 | 1.765 | 21.4 | 40.5 | 280 |
+
+Converged to **280 kg basic** in two iterations, because the tank is only 8 % of
+dry mass at 6 bar — the loop is weakly coupled for a pump-fed stage. **For the
+pressure-fed candidate it is strongly coupled**, because the tank is 27 % of dry
+mass and grows with the propellant it holds.
+
+### Tank and pressurisation masses
+
+Propellant volumes at 5 % ullage, from the bulk densities above:
+
+| candidate | MEOP | volume (m³) | membrane tank (kg) | pressurisation |
+|---|---|---|---|---|
+| GG kerolox | 4 bar | 1.750 | **14.2** | autogenous / small He, ~15 kg |
+| EP kerolox | 6 bar | 1.765 | **21.4** | small He, ~12 kg |
+| **PF kerolox** | **26 bar** | 1.879 | **98.9** | **He system 52.5 kg** |
+| GG methalox | 4 bar | 2.114 | 17.1 | ~15 kg |
+| EP methalox | 6 bar | 2.127 | 25.8 | ~12 kg |
+| **PF methalox** | **26 bar** | 2.271 | **119.6** | ~58 kg |
+
+The pressure-fed helium system, worked out: **9.41 kg** of helium in the ullage
+at 26 bar and 250 K `[TS P2.9]`; a usable fraction of **0.749** blowing down from
+300 to 30 bar adiabatically `[TS P2.10]`; therefore **12.6 kg stored** in a
+**0.261 m³** COPV massing **39.9 kg** at a 20,000 m performance factor — **52.5 kg
+of helium system to deliver 9.4 kg of gas.**
+
+> **This is the answer to "a 1,500-litre propellant volume at 26 bar MEOP is a
+> very different tank from the same volume at 4 bar."** It is 98.9 kg against
+> 14.2 kg, plus a 52.5 kg pressurant system that the 4 bar stage does not need.
+> **151 kg of the 380 kg dry budget, spent before the engine exists.**
+
+### The electric-pump question: energy-limited or power-limited?
+
+Both must be computed and the larger taken. At $F$ = 30 kN, $p_c$ = 60 bar,
+$\Delta p = 1.35p_c - 6$ bar = 75 bar, $\eta_{pump}$ = 0.65:
+
+| | kerolox | methalox |
+|---|---|---|
+| $\dot m = F/(I_{sp}g_0)$ | 8.92 kg/s | 8.55 kg/s |
+| $\rho_{bulk}$ | 1,016.6 kg/m³ | 833.1 kg/m³ |
+| **shaft power** | **101.2 kW** `[TS P2.7]` | **118.3 kW** `[TS P2.8]` |
+| energy at 120 s burn | 3.37 kWh → **18.7 kg** | 3.99 kWh → **22.2 kg** |
+| energy at 200 s burn | 5.62 kWh → **31.2 kg** | 6.66 kWh → **37.0 kg** |
+| power-limited pack | **40.5 kg** | **47.9 kg** |
+| **pack mass (the larger)** | **40.5 kg** | **47.9 kg** |
+
+**The pack is power-limited across the entire burn-time window R2.4 allows
+(120–200 s), and it is not close: 40.5 kg against 31.2 kg at the longest
+permitted burn.** That is the answer the project asks for, and it has a design
+consequence: the cell chemistry must be chosen for **specific power**, not
+specific energy — high-rate Li-polymer at ~2.5 kW/kg and ~180 Wh/kg, not the
+250+ Wh/kg cells that would minimise an energy-limited pack. A student who
+assumes energy-limiting (the intuitive case, because it is the case for an
+aircraft) undersizes the pack by 30 % and gets a dry mass that is wrong in the
+favourable direction.
+
+Motors and controllers add ~18 kg, so the **electric drive is ~58 kg** against a
+turbopump-plus-gas-generator package of ~35 kg for the same duty. **The electric
+option is not the light option.** It is chosen for other reasons, and the memo
+must say so.
+
+### NPSH check
+
+At the electric-pump inlet: 6 bar tank, LOX vapour pressure 1.0 bar at the tank
+condition, 0.4 bar of line loss, 2 m of head at 3 g of stage acceleration →
+**NPSHa = 47.1 m** `[TS P2.14]`. Ample for a low-suction-specific-speed
+centrifugal pump without an inducer, which is itself a reason the electric-pump
+architecture is buildable by a team that has never built a turbopump: **at 6 bar
+tank pressure you can delete the inducer.**
+
+### Nozzle and $C_F$
+
+| candidate | ε | vacuum $C_F$ | note |
+|---|---|---|---|
+| pressure-fed ($p_c$ ≈ 19 bar) | 40 | **1.884** `[TS P2.11]` | throat is 104 mm at 30 kN, so the nozzle is stage-diameter-limited well before performance limits it |
+| pump-fed ($p_c$ = 60 bar) | 120 | **1.964** `[TS P2.12]` | throat 33 mm; ε is limited by base heating and the interstage, not by aerodynamics |
+
+With $c^*_{ideal}$ = 1,758.9 m/s `[TS P2.13]` and $\eta_{c^*}$ = 0.96, ε = 120
+gives $0.96\times1758.9\times1.964/9.80665 = 338$ s — slightly below the project's
+343 s for the electric-pump kerolox case, which is the honest direction for the
+discrepancy to run and should be stated rather than smoothed.
+
+### Mass budgets (D2), basic → predicted
+
+| subsystem | GG kero | EP kero | PF kero | MGA |
+|---|---|---|---|---|
+| tanks | 14.2 | 21.4 | **98.9** | 15 % new design |
+| pressurisation (He, COPV, regulator) | 15 | 12 | **52.5** | 5 % qualified |
+| engine (chamber, injector, valves) | 45 | 40 | 45 | 15 % |
+| turbomachinery / electric drive | 35 | **58** | 0 | 25 % / 15 % |
+| structure, interstage, TVC, avionics | 140 | 140 | 150 | 10 % |
+| lines, valves, fittings | 25 | 20 | 25 | 5 % |
+| **basic total** | **274.2** | **291.4** | **371.4** | |
+| **predicted (MGA applied per line)** | **~305** | **~322** | **~412** | |
+| **+15 % system margin** | **~351** | **~370** | **~474** | |
+| **against R2.7's 380 kg** | **passes** | **passes, 10 kg to spare** | **fails by 94 kg** | |
+
+**The pressure-fed candidates are eliminated on mass, and the elimination is not
+marginal.** The methalox pressure-fed case is worse still (119.6 kg of tank).
+This is Project 2's arithmetic elimination, and it takes the form the project
+warned about: *the two axes are not independent*, because the cycle choice sets
+the tank pressure and the tank pressure sets a dry mass that the propellant
+choice then multiplies through the bulk density.
+
+### Rate and cost (D4)
+
+| candidate | UCI per stage (relative) | skilled labour h/stage | rate at 24/yr |
+|---|---|---|---|
+| GG kerolox | **1.00** (datum) | ~1,400 | needs a turbopump line: 2 precision rotating parts × 25 × 1.6 (special process) each |
+| EP kerolox | **0.82** | ~900 | printed chamber and pumps; motors and cells are catalogue parts at $k$ = 0.6; **no precision rotating part above an impeller** |
+| PF kerolox | **1.35** | ~1,100 | the 26 bar tanks are large welded assemblies at $k$ = 1.6 |
+| GG methalox | 1.06 | ~1,500 | as GG kerolox plus cryogenic fuel GSE |
+
+The battery pack is a genuine recurring cost the electric option carries and the
+turbine options do not — roughly 40 kg of high-rate cells expended per flight.
+It is scored, and it is why the electric option does **not** get a positive cost
+score in the matrix below.
+
+### "What your company can actually build" (project-specific deliverable)
+
+Ninety engineers, no turbopump experience, 36 months to first flight (R2.9), and
+a sustained rate of 24 stages a year from month 30 (R2.8). A turbopump is not one
+component; it is a discipline — rotordynamics, cavitation and suction specific
+speed, bearing and seal design, turbine blade life, and a balance-piston or
+thrust-bearing arrangement that must be got right the first time
+`[SP-8107][SP-8109][Brennen-Pumps]`. Hiring and qualifying that capability inside
+36 months while also qualifying a stage is the programme's largest single risk,
+and it is a **requirement**, not an aside: the mission statement puts it in
+writing. A study that scores the gas generator highest without addressing it has
+ignored a stated constraint and loses marks under D6 and D7.
+
+## §2. Recommended architecture, with the argument both ways
+
+**Recommendation: electric pump-fed, LOX/RP-1, at $p_c$ ≈ 60 bar, ε = 120,
+30 kN vacuum, with a printed regeneratively cooled chamber, two brushless DC
+motors on a power-optimised Li-polymer pack, and helium spin-free restart.**
+
+### The argument for
+
+1. **It is the only architecture this company can build to schedule.** No
+   turbine, no gas generator, no hot-gas joint, no turbopump discipline to hire.
+   Rutherford is the existence proof: 369 engines across 47 flights by April 2024
+   `[engine-database A.3]`.
+2. **It closes the dry-mass requirement with margin.** ~370 kg predicted against
+   R2.7's 380 kg, against ~474 kg for the pressure-fed alternative.
+3. **The pack is power-limited, and power-limited packs do not grow with burn
+   time.** Stretching the burn from 120 s to 200 s costs zero pack mass
+   `[TS P2.7]`. That is a schedule and growth-margin property, not just a mass
+   property.
+4. **Rate.** 24 stages a year with no precision rotating part harder than a
+   centrifugal impeller, and a chamber, injector and pumps produced by laser
+   powder bed fusion. The UCI is the lowest of the six and the labour hours are
+   the lowest by ~35 %.
+5. **Restart is nearly free.** R2.5 wants two restarts including one after a
+   45-minute coast. An electric pump spins up from a battery on command; there is
+   no start cartridge, no spin-start gas, and no turbine to chill.
+
+### The argument against — what the recommendation costs
+
+1. **Isp.** 343 s against the gas generator's 348 s and methalox's 358–362 s.
+   Choosing kerolox over methalox costs 15 s and about 40 kg of propellant.
+2. **The batteries are parasitic mass and recurring cost.** 40.5 kg of cells and
+   ~18 kg of motors and controllers, expended every flight, against ~35 kg of
+   turbomachinery. **The electric-pump cycle is heavier at the engine level and
+   the company's own database entry says so** `[engine-database A.3.7]`.
+3. **It does not scale.** Pack mass is linear in thrust; turbopump mass grows as
+   roughly $F^{0.7}$. At this stage's 30 kN the penalty is tolerable; by 100 kN
+   it is not, and Rocket Lab itself moved to oxidiser-rich staged combustion for
+   its next, larger vehicle `[engine-database A.3.7]`. **If the company's second
+   product is bigger, this architecture is a dead end, and the memo must say so.**
+4. **The manufacturer's efficiency claim must not be repeated.** ~95 % for the
+   electric drive against ~50 % for a gas-generator turbine compares
+   electrical-to-hydraulic efficiency against thermodynamic cycle efficiency and
+   is not a like-for-like comparison `[engine-database A.3.7]`. Using it in a
+   trade study is an automatic −5 for quoting a flagged figure without its
+   caveat.
+
+**Two criteria the recommendation loses on: performance and mass.** Both by
+measurable amounts, both named above.
+
+### The second defensible answer
+
+**Gas generator, kerolox** is defensible if you believe the company can hire
+turbopump capability inside 36 months, and it wins on performance, on engine
+mass and on scalability. The study that recommends it and *says* it is betting
+the schedule on a hiring plan is a good study. The study that recommends it
+without mentioning the hiring plan has ignored a requirement.
+
+## §3. Pugh matrix and sensitivity (D6)
+
+**Datum: gas generator, kerolox** — the conventional answer and what the
+programme would default to. **Both pressure-fed candidates are retained in the
+matrix rather than gated out**, because they fail R2.7 only after margins are
+applied and a reader may reasonably dispute the margin policy; their scores
+record why they lose.
+
+| criterion | w | justification tied to the mission statement | GG kero (datum) | EP kero | PF kero | GG meth | EP meth | PF meth |
+|---|---|---|---|---|---|---|---|---|
+| performance | 12 | Isp buys stage dry-mass headroom, but the headroom is 200+ kg wide, so Isp is not decisive | 0 | −1 | −2 | +1 | 0 | −2 |
+| mass | 15 | R2.7's 380 kg is the binding requirement | 0 | −1 | −2 | −1 | −1 | −2 |
+| complexity | 10 | 90 engineers and 36 months; every hot-gas joint is a discipline | 0 | +2 | +2 | −1 | +1 | +2 |
+| reliability | 12 | 24 flights a year: an 0.98 stage loses one vehicle every two years | 0 | +2 | +2 | 0 | +1 | +2 |
+| manufacturability | 13 | R2.8: 24 stages/year sustained from month 30 | 0 | +2 | +1 | −1 | +1 | +1 |
+| cost | 22 | R2.10 says recurring cost is *the* binding constraint | 0 | −1 (packs expended) | 0 | −1 | 0 | −1 |
+| mission fit | 16 | "90 engineers, never built a turbopump, 36 months" is a written requirement | 0 | **+2** | −1 | −1 | 0 | −2 |
+| **weighted total** | **100** | | **0** | **+53** | **−13** | **−64** | **+20** | **−51** |
+
+### Sensitivity
+
+Varying each weight ±50 %, one at a time: **nothing flips.** The runner-up is
+electric-pump methalox at +20, and the gap of 33 closes only if the
+**performance** weight rises to 45 (+275 %) or the **cost** weight rises to 55
+(+150 %). Two-criterion perturbations within ±50 % (mass +50 % with mission fit
+−50 %, the most adverse pair) leave the electric-pump kerolox option ahead by 12.
+
+**Report honestly: this decision is robust on weights, and it is not robust on
+scale.** The thing that changes the answer is not a preference, it is a number in
+the mission statement: **if the stage thrust rises above roughly 60 kN, the
+power-limited pack passes 80 kg and the electric option's mission-fit advantage
+no longer covers its mass penalty.** The measurement that would settle it is the
+battery pack's demonstrated specific power at the flight discharge rate and
+temperature — assume 2.5 kW/kg and you get 40.5 kg; assume 1.5 kW/kg and you get
+67.5 kg, and the recommendation moves to the gas generator.
+
+## §4. Rubric — Project 2, out of 100
+
+| deliverable | marks | what earns them |
+|---|---|---|
+| **D1 sizing** | **25** | 4: Δv budget with losses. **6: at least four of the six combinations sized** (R2's explicit instruction) with the eliminations of the other two justified. 5: the **closed design loop**, at least two iterations, with the convergence stated. 5: pump power computed both ways for the electric option and **the larger taken** `[TS P2.7]`. 3: tank volumes, MEOP and pressurant mass and pressurant *tank* mass `[TS P2.9, P2.10]`. 2: nozzle ε argued from stage diameter and base heating, not assumed |
+| **D2 mass budget** | **15** | 6: per-subsystem basic → MGA → predicted. 4: system margin, and the pressure-fed exceedance reported. 3: 2 % launch-stage performance reserve and residuals. 2: propellant sized on predicted dry mass |
+| **D3 reliability** | **12** | 4: part count in the five categories — this is where the electric option's case is actually made. 3: single-point failures. 3: FMEA with specific modes. 2: **binomial honesty** — 24 flights a year means the demonstrated-reliability statement has to survive a fleet, not a first flight |
+| **D4 manufacturability and cost** | **12** | 5: UCI per stage with the complexity classes and multipliers. 3: **rate-and-cost table with skilled labour hours** and the assumption stated. 4: **the "what your company can actually build" paragraph** — this is a requirement and its absence is a −4 here regardless of the rest |
+| **D5 risk** | **8** | 5: eight risks, if–then, 5×5, retirement points. 2: two non-technical (the hiring plan and the cell supply chain are the obvious ones). 1: one created by the recommendation |
+| **D6 Pugh + sensitivity** | **18** | 4: weights before scores, justified against *this* mission. 4: real datum. 4: evidence line per score. **6: the sensitivity — full marks require reporting that no weight flips it and naming the assumption (specific power, or stage thrust) that does** |
+| **D7 memo** | **10** | 3: recommendation first. 2: three numbers. 3: what it costs. 1: measurable trigger ("if pack specific power qualifies below 1.8 kW/kg, revert to the gas generator"). 1: one page |
+
+## §5. Common weak answers
+
+1. **"Methalox because Isp."** 362 s against 348 s, and a bulkier fuel that needs
+   conditioning, a second cryogenic pad system, and a 4-hour hold at T−10 min
+   (R2.11) with liquid methane in the tank. The Isp advantage is real and it is
+   not what the mission is short of.
+2. **Assuming the battery is energy-limited.** It is power-limited by a factor of
+   1.3 at the longest permitted burn `[TS P2.7]`. *What it reveals:* the pack was
+   sized by analogy with a drone.
+3. **Repeating the 95 %-versus-50 % efficiency claim.** Automatic −5
+   `[engine-database A.3.7]`.
+4. **Treating the two axes as independent.** The project says outright that the
+   study is "largely about noticing that the axes are not independent." Cycle
+   sets MEOP; MEOP sets tank mass; tank mass sets dry mass; propellant density
+   multiplies the volume through. A study with a 2×3 grid of Isp values and no
+   tank masses has done a table, not a trade.
+5. **A design loop with one iteration.** One iteration is an estimate. The
+   deliverable asks for two and a convergence statement.
+6. **Ignoring the 90-engineer constraint** because it is not in the requirements
+   table. It is in the mission statement, which is part of the requirement set.
+7. **Sizing the pressurant gas but not the pressurant tank.** 9.4 kg of helium in
+   a 39.9 kg COPV `[TS P2.9, P2.10]`. The tank is four times the gas and it is
+   the line students omit.
+8. **Quoting Rutherford's 72.8:1 thrust-to-weight as if it included the
+   batteries.** It does not, and the database says so `[engine-database A.3]`.
+
+---
+
+# Project 3 — A GEO communications satellite propulsion suite
+
+## §1. Reference sizing (D1)
+
+### Comparing at constant delivered mass
+
+R3.1 states a *beginning-of-life mass in GEO* of ≥ 3,000 kg. Sizing to that
+number directly makes candidates A and C identical at separation, which is an
+artefact of the requirement's wording, not a physical result. **The honest
+comparison holds the delivered dry spacecraft constant** — bus, payload and
+propulsion hardware — and reports the wet mass at separation, because that is
+what the launcher charges for. Take $D = 2{,}318.5$ kg, the dry mass that
+falls out of the all-chemical case at exactly 3,000 kg BOL. State the choice in
+the assumption register; a student who sizes to constant BOL and *says so* is
+not wrong, but must then compare on propellant mass rather than wet mass.
+
+Δv terms: apogee 1,500 m/s (R3.2), station-keeping 800 m/s (R3.3), disposal
+11 m/s (R3.4) — station-keeping and disposal combined as 811 m/s.
+
+| | A all-chemical (321 s) | B all-electric (1,800 s) | C hybrid |
+|---|---|---|---|
+| SK + disposal propellant | **681.3 kg** `[TS P3.1]` | **109.0 kg** xenon `[TS P3.3]` | **109.0 kg** xenon |
+| mass before SK | 2,999.8 kg | 2,427.5 kg | 2,427.5 kg |
+| orbit-raising propellant | **1,831.2 kg** `[TS P3.2]` | **449.7 kg** xenon `[TS P3.4]` | **1,481.8 kg** `[TS P3.5]` |
+| **wet mass at separation** | **4,831.0 kg** | **2,877.2 kg** | **3,909.3 kg** |
+| saving against A | — | **1,953.8 kg** | **921.7 kg** |
+| transfer duration | days | **367 days** | days |
+
+Closure check: 4,831.0 → 2,318.5 kg at 321 s returns 2,311 m/s `[TS P3.6]`, the
+full budget.
+
+### Candidate B is eliminated on arithmetic
+
+R3.8 caps propulsion power during transfer at **6 kW**, and the EP black box
+draws **5 kW per thruster** for **0.25 N**. Six kilowatts runs **one** thruster;
+two would need ten. The orbit-raising xenon of 449.7 kg at 1,800 s is a total
+impulse of **7.94 × 10⁶ N·s**, and at 0.25 N that is **3.18 × 10⁷ s = 367 days**.
+
+R3.7 allows **45 days**. In 45 days one thruster delivers 9.72 × 10⁵ N·s — **12 %
+of what the transfer needs.** Candidate B misses the requirement by a factor of
+8.2, and no reasonable EP assumption closes it: you would need eight thrusters and
+40 kW.
+
+Costed against R3.7's stated penalty of 0.35 % of programme value per week:
+(367 − 45)/7 = 46 weeks × 0.35 % = **16.1 % of programme value**, against a
+launch-mass saving of 1,954 kg. At any plausible $/kg the revenue penalty
+dominates, and it does so before the requirement violation is even considered.
+
+**The mandatory chart** — wet mass at separation against time-to-station for all
+three, with the revenue penalty converted onto the mass axis at the launcher's
+$/kg — is the deliverable that makes this visible in one figure, and it is where
+the marks are.
+
+### The ACS sub-trade, sized four ways
+
+R3.5 requires **8,000 N·s** of attitude-control impulse over life, excluding
+station-keeping; R3.6 requires a minimum impulse bit **≤ 0.05 N·s repeatable to
+±10 %**.
+
+| option | realised $I_{sp}$ | propellant | tank | other hardware | **system wet** |
+|---|---|---|---|---|---|
+| **GN₂ cold gas**, 300 bar COPV | 69 s (ideal 76.8 s at ε = 50 `[TS P3.7]`, ×0.90) | **11.8 kg** `[TS P3.12]` | 35.1 L COPV, **5.4 kg** | regulator, latch valves, lines 6.0 kg | **23.2 kg** |
+| **butane**, self-pressurising | 62 s (ideal 69.2 s `[TS P3.10]`) | 13.2 kg | 23.1 L at 2.6 bar, 3.0 kg | valves, heaters 4.0 kg | **20.2 kg** |
+| **R-236fa**, self-pressurising | 40 s (ideal 43.2 s `[TS P3.11]`) | 20.4 kg | 15.0 L at 2.7 bar, 2.5 kg | valves 4.0 kg | **26.9 kg** |
+| **monopropellant hydrazine** | 225 s | **3.6 kg** | 3.6 L, 3.5 kg | cat-bed heaters, valves, thrusters 7.0 kg | **14.1 kg** |
+| **shared bipropellant** | 290 s | 2.8 kg | shared, 0 kg | small thrusters, valves 6.0 kg | **8.8 kg** |
+| **shared electric** | 1,800 s | 0.45 kg | shared, 0 kg | 0 kg | **0.5 kg** — but non-compliant on R3.6 |
+
+### What the sub-trade actually turns on
+
+**Not specific impulse.** Look at the spread:
+
+- GN₂ has **1.11×** butane's specific impulse and is **15 % heavier** as a system.
+- GN₂ has **1.73×** R-236fa's specific impulse and is **14 % lighter** — a much
+  smaller difference than the Isp ratio implies.
+- Hydrazine has **3.26×** GN₂'s specific impulse and is only **39 % lighter**,
+  because 10.5 kg of its 14.1 kg is hardware that does not scale with Isp at all.
+
+**It turns on stored density and dry hardware.** Density impulse makes the point
+in one column: GN₂ at 280 kg/m³ stored gives **19,320 kg·s/m³** `[TS P3.13]`;
+R-236fa at 1,360 kg/m³ gives **54,400** `[TS P3.14]`, nearly three times more,
+*at 58 % of the specific impulse*; butane gives **35,340** `[TS P3.15]`. **The
+tank, not the propellant, decides the trade** — which is exactly the MarCO
+lesson: a 40-second propellant is the *right* answer when the constraint is
+volume, integration and safety rather than Δv `[MarCO]` `[engine-database C.2.5]`.
+
+The second thing it turns on is **fifteen years**. A 300 bar COPV holding
+nitrogen for fifteen years is a leak-rate budget across every joint in the
+system, and cold gas has more joints per newton-second than anything else here.
+That, not Isp, is why GEO spacecraft do not use cold-gas ACS.
+
+### Gauging (R3.10)
+
+±3 % of load, on 681 kg for the all-chemical case, is ±20 kg. The methods:
+
+| method | realistic accuracy | note |
+|---|---|---|
+| book-keeping (integrated flow) | ±2–4 % early, **±5–8 % after 15 years** | error accumulates monotonically; it is the *drift* that kills it |
+| PVT (pressure–volume–temperature) | **±3–5 %** near end of life, worse when the ullage is small | needs accurate tank temperature mapping |
+| thermal gauging (heat pulse) | **±1–2 % at low fill fractions** | best exactly where the others are worst |
+| **combination** | **±2–3 %** | book-keeping through life, PVT as a check, thermal gauging in the last 10 % |
+
+**It is not 1 %.** A study that claims 1 % has not read a gauging paper. The
+combination is the answer, and the reason is that the methods have *opposite*
+error behaviour with fill fraction.
+
+## §2. Recommended architecture, with the argument both ways
+
+**Recommendation: candidate C — a 450 N-class NTO/MMH bipropellant apogee engine
+for orbit raising, electric propulsion for the 15-year station-keeping and
+disposal budget, and an independent monopropellant hydrazine ACS.**
+
+### The argument for
+
+1. **921.7 kg off the wet mass at separation** for the same delivered
+   spacecraft, at a transfer duration measured in days rather than a year.
+2. **It puts the high-Isp system exactly where the Δv is slow-and-patient.**
+   Station-keeping is 800 m/s spread over fifteen years at ~50 m/s per year;
+   there is no schedule pressure and the on-station power cap of 1.5 kW (R3.9) is
+   enough for one thruster running a duty cycle.
+3. **It puts the high-thrust system exactly where the Δv is time-critical.**
+   The apogee burn is the revenue clock, and R3.7's penalty is 0.35 % of
+   programme value per week.
+4. **This is what Western GEO operators converged on**, and the reason is the one
+   above, not fashion.
+
+### The argument against — what the recommendation costs
+
+1. **Two propulsion systems on one spacecraft.** Two propellants, two feed
+   architectures, two sets of qualification, two failure trees, a PPU and its
+   thermal load, and six satellites of it (R3.11).
+2. **Reliability.** Fifteen years of Hall-thruster operation at 450 kg of
+   demonstrated xenon throughput per thruster against a 109 kg requirement is
+   comfortable — but the PPU, the xenon feed regulation and the cathode are new
+   single-string items that the all-chemical spacecraft does not have.
+3. **Schedule.** 42 months to first launch (R3.12) with an EP string to qualify
+   is tighter than 42 months with a heritage bipropellant system.
+4. **All-chemical is simpler and is not disqualified.** It is 922 kg heavier and
+   it works, and for an operator who values schedule certainty over launch mass
+   that is a defensible choice.
+
+**Two criteria the recommendation loses on: complexity and reliability**, both
+by −2 in the matrix, both traceable to "two propulsion systems instead of one".
+
+### The shared-versus-separate fault tree (project-specific deliverable)
+
+Three levels, for the recommended architecture:
+
+```
+Loss of station-keeping capability
+├─ Loss of EP string
+│  ├─ PPU failure ................ mitigated: 2 strings, cross-strapped
+│  ├─ cathode failure ............ mitigated: 2 thrusters per string
+│  └─ xenon feed regulator fails closed ... NOT mitigated by redundancy:
+│        single high-pressure regulator → add a parallel latch-valve bypass
+├─ Loss of xenon
+│  ├─ tank leak .................. detectable by PVT; not recoverable
+│  └─ isolation valve fails closed ... mitigated: series-parallel valve train
+└─ Loss of pointing during SK burn
+   ├─ ACS propellant exhausted ... mitigated: independent N2H4 tank, gauged
+   └─ ACS thruster fails on ...... mitigated: series latch valve per thruster
+```
+
+**The line that earns the marks is the third one.** A shared propellant supply
+between the apogee engine and the station-keeping thrusters turns *one blocked
+filter* into the loss of both orbit raising and fifteen years of station-keeping.
+The independent hydrazine ACS costs ~5 kg over sharing the bipropellant supply
+and removes an entire branch of this tree — which is the Apollo SPS argument
+applied to a comsat: **remove the mechanism rather than add the redundancy**
+`[SLPRE]` `[engine-database A.8.3]`.
+
+## §3. Pugh matrices and sensitivity (D6)
+
+### Architecture matrix
+
+**Datum: candidate A, all-chemical** — the incumbent. **Candidate B is gated out
+at R3.7** and is not scored.
+
+| criterion | w | justification tied to the mission statement | A (datum) | C hybrid |
+|---|---|---|---|---|
+| performance | 10 | Δv is fixed; Isp only buys launch mass | 0 | +2 |
+| mass | 22 | "every kilogram you remove from the wet mass is worth real money"; both launchers charge by kilogram | 0 | **+2** (921.7 kg) |
+| complexity | 12 | six satellites, one bus design, 42 months | 0 | **−2** (two propulsion systems) |
+| reliability | 15 | 15-year design life with no servicing | 0 | **−2** (PPU, cathode, xenon feed) |
+| manufacturability | 6 | six units; producibility is not the constraint | 0 | −1 |
+| cost | 20 | launch cost is charged by kilogram and dominates the propulsion budget | 0 | **+2** |
+| mission fit | 15 | R3.7's 45 days is a customer requirement with a stated revenue value | 0 | 0 (both meet it) |
+| **weighted total** | **100** | | **0** | **+44** |
+
+**Sensitivity.** Nothing flips within ±50 %. The gap closes only if the
+**complexity** weight rises to 34 (+183 %) or the **reliability** weight rises to
+37 (+147 %). Report it as robust — and note *why* it is robust: candidate C wins
+on the two heaviest criteria (mass 22 and cost 20) and loses on two lighter ones,
+so the answer is stable unless you believe reliability alone is worth more than
+a third of the decision. For a spacecraft with a 15-year life and no servicing,
+that belief is arguable, and a study that argues it and recommends all-chemical
+is a good study.
+
+### ACS sub-trade matrix
+
+**Datum: independent monopropellant hydrazine.** Shared electric is gated out on
+R3.6 — a Hall thruster cannot produce a 0.05 N·s impulse bit repeatable to ±10 %,
+and it cannot point while it is station-keeping.
+
+| criterion | w | justification | N₂H₄ (datum) | GN₂ | butane | shared bipropellant |
+|---|---|---|---|---|---|---|
+| system mass | 20 | launcher charges by kilogram; the spread is 8.8–26.9 kg | 0 | **−2** (23.2 kg) | −1 (20.2 kg) | **+2** (8.8 kg) |
+| fault-tree independence | 20 | a shared supply couples ACS loss to main-propulsion loss | 0 | +1 | +1 | **−2** |
+| minimum impulse bit | 15 | R3.6: ≤ 0.05 N·s repeatable to ±10 % | 0 | **+2** (gas, fast valve) | 0 | **−2** (a 10 N thruster cannot; dedicated small thrusters needed) |
+| 15-year ageing / leak | 20 | R3.10 and the design life; every joint is a 15-year leak path | 0 | **−2** (300 bar for 15 years) | −2 (two-phase, needs thermal control) | +1 (shared, already qualified) |
+| complexity | 10 | one bus design across six satellites | 0 | +1 | +1 | 0 |
+| cost | 15 | six units; hardware count drives it | 0 | +1 | +1 | +1 |
+| **weighted total** | **100** | | **0** | **−5** | **−15** | **+5** |
+
+**Sensitivity — and this is the interesting one.** The gap between the winner
+(shared bipropellant, +5) and the datum (independent hydrazine, 0) is **five
+points**, and it is flipped by:
+
+| weight | flips at | change needed |
+|---|---|---|
+| system mass | 17.5 | **−12 %** |
+| fault-tree independence | 22.5 | **+12 %** |
+| minimum impulse bit | 17.5 | +17 % |
+| 15-year ageing | 15.0 | −25 % |
+| cost | 10.0 | −33 % |
+
+**A 12 % change in either of two weights flips the answer.** By the project
+file's own standard, that is "a coin toss dressed as engineering", and the memo
+must say so. The honest conclusion is:
+
+> The ACS sub-trade is not decided by the current data. The measurement that
+> would settle it is the demonstrated minimum-impulse-bit repeatability of the
+> small bipropellant thruster over a 15-year duty-cycle profile. If it meets
+> 0.05 N·s ±10 %, share the supply and accept the fault-tree coupling with a
+> series-parallel isolation architecture; if it does not, fly the independent
+> hydrazine system and pay 5.3 kg.
+
+That paragraph is worth more marks than the matrix that produced it.
+
+## §4. Rubric — Project 3, out of 100
+
+| deliverable | marks | what earns them |
+|---|---|---|
+| **D1 sizing** | **25** | 4: Δv budget with every term named. **6: all three architectures sized at a stated constant** (delivered dry mass or BOL — either, if declared). **5: candidate B's transfer duration computed and the requirement violation quantified** `[TS P3.4]` — this is the project's arithmetic elimination and missing it costs all five. **6: the ACS sized four ways** with tank mass, not just propellant mass. 4: the EP assumption table, so a reader can substitute their own |
+| **D2 mass budget** | **15** | 6: basic → MGA → predicted per subsystem, both propulsion systems. 4: system margin. **3: the 10 % performance reserve on a 15-year station-keeping budget** — the project file names this rate explicitly. 2: gauging uncertainty carried into the reserve |
+| **D3 reliability** | **12** | 4: part count. **4: the shared-versus-separate fault tree to three levels**. 2: FMEA. 2: what a 15-year life does to the demonstrated-reliability argument |
+| **D4 manufacturability and cost** | **12** | 4: UCI. 4: NRI over six units. **4: the revenue penalty from R3.7 costed in the same units as the mass saving** — the project asks for this explicitly and it is where all-electric dies |
+| **D5 risk** | **8** | 5: eight risks with retirement points. 2: two non-technical (xenon supply and export control are the obvious pair). 1: one created by the recommendation |
+| **D6 Pugh + sensitivity** | **18** | 3: weights before scores. 3: real datum, B gated not scored. 3: evidence per score. **4: the ACS sub-trade run as its own matrix.** **5: the sensitivity, and full marks require identifying the ACS trade as a coin toss and naming the measurement that settles it** |
+| **D7 memo** | **10** | 3: recommendation first. 2: three numbers. 3: what it costs. **1: the mass-versus-time chart referenced as the single figure.** 1: one page |
+
+## §5. Common weak answers
+
+1. **"All-electric, because 1,954 kg."** It takes 367 days against a 45-day
+   requirement `[TS P3.4]`, and the revenue penalty is 16 % of programme value.
+   *What it reveals:* Δv was budgeted and time was not.
+2. **Sizing electric propulsion without checking the power cap.** R3.8's 6 kW
+   runs one 5 kW thruster. Students routinely assume four.
+3. **"The ACS sub-trade turns on specific impulse."** The project file says in
+   advance: *"If your answer is 'specific impulse', re-read your own numbers."*
+   GN₂ has 1.7× R-236fa's Isp and is within 14 % on system mass; hydrazine has
+   3.3× GN₂'s and saves 39 %.
+4. **Sizing the ACS propellant and not the ACS tank.** 11.8 kg of nitrogen needs
+   a 35 L COPV `[TS P3.12]`; the tank and regulation are half the system.
+5. **Claiming ±1 % gauging.** It is ±2–3 % with a *combination* of methods and
+   the project says so in the requirement (R3.10 is ±3 %, which is the number the
+   gauging must achieve, not the number it achieves easily).
+6. **Comparing A and C at constant BOL and reporting "no saving".** An artefact
+   of the requirement's wording. State the comparison basis.
+7. **Sharing the propellant supply without drawing the fault tree.** Sharing is
+   the lightest answer by 5.3 kg and it couples two loss-of-mission branches.
+   Either is defensible; not noticing is not.
+8. **Treating the EP black box as free of failure modes.** It has a PPU, a
+   cathode and a high-pressure xenon regulator, and they are single-string until
+   you pay for a second string at 15 kg.
+
+---
