@@ -474,17 +474,17 @@ values and their provenance**, not silently reduced to one. Here:
 "~170 MW in the article body, 192 MW in the specification table; the most
 powerful rocket turbopump ever built either way, by roughly a factor of three
 over the RS-25 HPFTP" [_verify-liquid §5].
-(b) $170\times10^6/7.9\times10^6 = \mathbf{21.5\ W/N}$ (with 192 MW,
-24.3 W/N). RE-500 from WE2: **6.34 W/N**.
-(c) The ratio is about 3.4. Two causes, both large: **chamber pressure** —
+(b) $170\times10^6/7.25\times10^6 = \mathbf{23.4\ W/N}$ (with 192 MW,
+26.5 W/N). RE-500 from WE2: **6.34 W/N**.
+(c) The ratio is about 3.7. Two causes, both large: **chamber pressure** —
 the RD-170 runs 245 bar against RE-500's 100 bar, and pump power per unit
 thrust rises roughly linearly with $p_c$ — and **cycle**: the RD-170 is
 oxidiser-rich *staged combustion*, so the pumps must raise the propellant
 above the preburner pressure *plus* the turbine pressure drop *plus* the main
 injector drop, not merely above the chamber. A gas-generator engine's pumps
 only have to beat the chamber; a staged-combustion engine's pumps have to beat
-the whole hot-gas circuit. 100/245 accounts for a factor of 2.45; the
-remaining 1.4 is the cycle.
+the whole hot-gas circuit. 245/100 accounts for a factor of 2.45; the
+remaining 1.5 is the cycle.
 
 ---
 

@@ -1743,3 +1743,908 @@ anchored to test data.** That combination is what a certification argument is
 made of. [J]
 
 ---
+
+## 4. Typical engineering ranges
+
+**Method cost and fidelity.** [E]/[J] — indicative, and the absolute numbers
+will age faster than the ratios.
+
+| quantity | typical range | low end | high end |
+|---|---|---|---|
+| Cells, 2-D axisymmetric nozzle RANS | 5×10⁴ – 5×10⁵ | coarse contour check | resolved BL, $y^+<1$, real gas |
+| Cells, 3-D single-element reacting RANS | 2×10⁶ – 3×10⁷ | wall-function mesh | resolved wall + refined shear layer |
+| Cells, 3-D multi-element chamber LES | 10⁸ – 10⁹ | wall-modelled, few elements | wall-resolved research case |
+| Time steps, chamber LES for statistics | 10⁵ – 10⁶ | short sample | instability limit-cycle study |
+| Core-hours, one chamber LES | 10⁵ – 10⁷ | small sector | full annulus, finite-rate |
+| Species in a CFD mechanism | 5 – 60 | global 1–2 step | skeletal methane (GRI-derived) |
+| Bartz accuracy at throat | ±20 – 30 % | well-behaved gas, no film | film-cooled, streaked, sooting |
+| Peak/mean circumferential wall flux | 1.3 – 2.0 | many small elements, good film | few large elements, near face |
+| CFD $y^+$ for resolved wall heat transfer | < 1 | required | > 30 needs a wall function |
+| Grid convergence index on a good case | 1 – 5 % | 2-D non-reacting | reacting 3-D rarely reported |
+| Engine cycle balance runtime | 1 ms – 10 s | algebraic GG cycle | staged combustion with maps |
+| Start-transient simulation runtime | s – minutes | warm start | cryogenic chill-down with 2-phase |
+| Monte Carlo samples for a mean | 10³ – 10⁴ | 0.1 % SE on the mean | tails need 10⁶ or importance sampling |
+| $I_{sp}$ 1σ from propagated inputs | 0.8 – 2 % | mature engine, measured maps | new propellant/cycle, assumed maps |
+| Topology-optimisation mass saving, bracket | 25 – 60 % | strength-driven | stiffness-driven, generous envelope |
+| AM as-built $R_a$, L-PBF | 10 – 25 µm | downskin-free, fine parameters | downskin surfaces, coarse layers |
+| AM anisotropy, strength | 5 – 15 % | HIP'd, optimised | as-built, unfavourable orientation |
+| Structural FoS, deterministic (NASA) | 1.25 – 2.0 | ultimate on tested structure | pressure vessels, [STD-5001] |
+| Reliability target, probabilistic | 10⁻³ – 10⁻⁶ | expendable secondary structure | human-rated pressure boundary |
+
+**Real-engine anchors for the methods.** Numbers below are from
+`reference/_verify-liquid.md`; see §6 for the argument.
+
+| engine | era | representative method fact |
+|---|---|---|
+| F-1 | 1959–67 | injector stability solved by ~2,000 tests / 210 injector designs, not analysis |
+| RS-25 | 1971–81 | 390 milled channels + electroformed closeout; 206 bar; extensive but pre-modern analysis |
+| RL10 | 1958–63 | expander cycle designed on hand and early-computer cycle balances |
+| Merlin 1D | 2011–13 | pintle injector (TRW lineage), high test cadence, T/W 184:1 |
+| Rutherford | 2013–17 | chamber, injector, pumps and valves all printed; AM as the design method |
+| Raptor 3 | 2016–26 | claimed 330 bar; secondary plumbing integrated into prints |
+| BE-4 | 2011–24 | 140 bar chosen *below* capability for life; hydrostatic bearings |
+
+---
+
+## 5. Worked examples
+
+### 5.1 Worked Example 1 — Monte Carlo of $I_{sp}$ through the $c^*$/$C_F$ chain
+
+**Problem.** A LOX/methane upper-stage engine is being sized. The performance
+chain is the one from Module 03:
+
+$$I_{sp,\text{vac}}=\frac{\eta_{c^*}\,c^*_{\text{ideal}}(\gamma,R,T_0)\ \cdot\ C_F(\gamma,\varepsilon,p_c,p_a=0)}{g_0},\qquad R=\frac{R_u}{\mathcal{M}}$$
+
+Nominal inputs, from a CEA run at $r=3.6$, $p_c=10.0$ MPa (100 bar):
+
+| input | nominal | 1σ (relative) | why it is uncertain |
+|---|---|---|---|
+| $T_0$ | 3500 K | 1.5 % | CEA equilibrium vs real (finite mixing, heat loss, non-uniform $r$) |
+| $\gamma$ | 1.16 | 0.5 % | which $\gamma$ — chamber, throat, or an exit-averaged value |
+| $\mathcal{M}$ | 21.5 kg/kmol | 0.7 % | shifts with local mixture ratio and with freeze point |
+| $\eta_{c^*}$ | 0.980 | 1.0 % | injector mixing; the dominant *engineering* unknown |
+| $\varepsilon$ | 40.0 | 0.5 % | as-built throat and exit area tolerance |
+| $p_c$ | 10.0 MPa | 1.0 % | measurement station and engine-to-engine variation |
+
+Inputs are taken independent and normal. Find the distribution of
+$I_{sp,\text{vac}}$, and decompose its variance.
+
+**Procedure.**
+
+1. Compute the nominal answer with `rocket.py`.
+2. Draw $N=2\times10^5$ samples of the six inputs from their distributions.
+3. For each sample: $R=R_u/\mathcal{M}$; `c_star(gamma, R, T0)`;
+   `Cf(gamma, eps, pc, pa=0)`; `isp_from_c(c_eff(eta*c_star, Cf))`.
+4. Report mean, standard deviation and percentiles of the sample.
+5. Separately, perturb each input by $+1\sigma$ alone to get its logarithmic
+   sensitivity, and combine by Eq. 3.20 (`rocket.rss`).
+
+**Nominal.**
+
+$$R=\frac{8314.46}{21.5}=386.72\ \mathrm{J/(kg\,K)}$$
+$$c^*_{\text{ideal}}=\frac{\sqrt{RT_0}}{\Gamma(\gamma)}=\frac{\sqrt{386.72\times3500}}{\Gamma(1.16)}=1815.99\ \mathrm{m/s}$$
+$$C_{F,\text{vac}}(\gamma=1.16,\ \varepsilon=40)=1.9294$$
+$$I_{sp,\text{vac}}=\frac{0.980\times1815.99\times1.9294}{9.80665}=350.14\ \mathrm{s}$$
+
+**Monte Carlo result** (seed fixed; $N=2\times10^5$):
+
+| statistic | value |
+|---|---|
+| mean | 350.16 s |
+| standard deviation | 4.92 s |
+| coefficient of variation | **1.406 %** |
+| 2.28th percentile (−2σ) | 340.4 s |
+| 50th percentile | 350.1 s |
+| 97.7th percentile (+2σ) | 360.1 s |
+| 0.13th percentile (−3σ) | 335.6 s |
+
+**One-at-a-time sensitivities and the analytic check.** Perturbing each
+input by $+1\sigma$ alone:
+
+| input | $+1\sigma$ gives | $\Delta I_{sp}$ | relative | first-order Sobol $S_i$ |
+|---|---|---|---|---|
+| $\eta_{c^*}$ | 353.64 s | +3.501 s | +1.000 % | **0.508** |
+| $T_0$ | 352.76 s | +2.616 s | +0.747 % | 0.284 |
+| $\gamma$ | 348.27 s | −1.877 s | −0.536 % | 0.146 |
+| $\mathcal{M}$ | 348.92 s | −1.219 s | −0.348 % | 0.062 |
+| $\varepsilon$ | 350.23 s | +0.088 s | +0.025 % | 0.0003 |
+| $p_c$ | 350.14 s | 0.000 s | 0.000 % | 0.000 |
+
+Root-sum-square (Eq. 3.20, `rocket.rss`):
+
+$$\frac{\sigma_{I_{sp}}}{I_{sp}}=\sqrt{1.000^2+0.747^2+0.536^2+0.348^2+0.025^2}\ \%=1.4025\ \%$$
+
+against the Monte Carlo's **1.406 %**. Agreement to 0.004 percentage points
+confirms the response is effectively linear over these ranges — so for *this*
+problem the cheap first-order formula is sufficient and the Monte Carlo was a
+verification of it, not a necessity. That will stop being true the moment a
+constraint activates (e.g. if the cycle cannot deliver $p_c$ at the low
+end of the $\eta$ distribution).
+
+**Three things to take from the numbers.**
+
+1. **$\eta_{c^*}$ owns half the variance** ($S=0.51$). Everything else
+   together is the other half. The programme decision that follows is
+   concrete: spend money on injector characterisation — cold-flow
+   patternation, subscale calorimetric hot fire — because a 1 % → 0.5 %
+   reduction in $\eta_{c^*}$ uncertainty cuts the total $I_{sp}$ 1σ from
+   1.40 % to 1.06 %, which is worth more than any other available action.
+2. **$p_c$ contributes nothing, and this is not a bug.** In vacuum with
+   isentropic attached flow, $C_F$ depends only on $\gamma$ and $\varepsilon$
+   (the exit pressure scales with $p_c$, so $p_e/p_c$ is fixed), and $c^*$
+   does not contain $p_c$ at all in the ideal formulation. Chamber pressure
+   buys *thrust density and expansion ratio at fixed length*, not vacuum
+   $I_{sp}$ directly. Repeat this at sea level and $p_c$ immediately becomes
+   a significant contributor through the $\varepsilon(p_e-p_a)/p_c$ term.
+   [F] — and it is a good check that your propagation is wired correctly.
+3. **$\varepsilon$ contributes almost nothing at $\varepsilon=40$**, because
+   $dC_F/d\varepsilon$ has nearly flattened. At $\varepsilon=8$ it would
+   matter substantially. Sensitivities are local; never carry them across a
+   design change.
+
+**Sanity check.** 350 s vacuum for a 100 bar methalox engine at
+$\varepsilon=40$ is right in the expected band: the Raptor family is claimed
+at ~350 s vacuum (a company claim, at higher $p_c$ and $\varepsilon\approx34$
+for the sea-level variant), and Archimedes is stated at 365 s vacuum for the
+vacuum-optimised version. A ±5 s 1σ band on a paper engine is also realistic:
+it is exactly why programmes carry 1–2 % $I_{sp}$ margin at PDR.
+
+### 5.2 Worked Example 2 — Bartz versus a described CFD result
+
+**Problem.** The same engine: $F=100$ kN vacuum, $p_c=10.0$ MPa,
+$T_0=3500$ K, $\gamma=1.16$, $\mathcal{M}=21.5$ kg/kmol, $\varepsilon=40$,
+$\eta_{c^*}=0.98$. Chamber gas properties at stagnation:
+$\mu_0=9.5\times10^{-5}$ Pa·s, $c_{p,0}=2.90$ kJ/(kg·K), $Pr_0=0.55$. Throat
+radius of curvature $r_c=1.5D_t$. The liner is GRCop-42, hot-wall target
+$T_{wg}=1225$ K ($=0.35\,T_0$), wall thickness 0.9 mm, $k_w=290$ W/(m·K).
+
+A vendor delivers a conjugate RANS analysis reporting a **circumferentially
+averaged throat heat flux of 61.7 MW/m²** and a **local peak of 95.6 MW/m²**
+on a band aligned with the injector element pattern. Do you believe it?
+
+**Step 1 — size the throat.**
+
+$$C_{F,\text{vac}}=1.9294\ \Rightarrow\ A_t=\frac{F}{p_c C_F}=\frac{100{,}000}{10.0\times10^6\times1.9294}=5.183\times10^{-3}\ \mathrm{m^2}$$
+$$D_t=2\sqrt{A_t/\pi}=0.08123\ \mathrm{m}\ (81.2\ \mathrm{mm}),\qquad r_c=1.5D_t=0.1219\ \mathrm{m}$$
+
+**Step 2 — Bartz property correction at the throat** ($M=1$,
+$T_{wg}/T_0=0.35$):
+
+$$\sigma=\frac{1}{\left[\tfrac12\tfrac{T_{wg}}{T_0}\left(1+\tfrac{\gamma-1}{2}\right)+\tfrac12\right]^{0.68}\left[1+\tfrac{\gamma-1}{2}\right]^{0.12}}=1.2764$$
+
+**Step 3 — Bartz $h_g$** with $c^*_{\text{eff}}=0.98\times1815.99=1779.67$ m/s:
+
+$$h_g=\frac{0.026}{0.08123^{0.2}}\left(\frac{(9.5\!\times\!10^{-5})^{0.2}\times2900}{0.55^{0.6}}\right)\left(\frac{10^{7}}{1779.67}\right)^{0.8}\left(\frac{0.08123}{0.1219}\right)^{0.1}(1)^{0.9}(1.2764)$$
+$$h_g=3.427\times10^{4}\ \mathrm{W/(m^2\,K)}$$
+
+**Step 4 — driving temperature and flux.** With recovery factor $r=0.9$ at
+$M=1$:
+
+$$T_{aw}=T_0\frac{1+r\frac{\gamma-1}{2}}{1+\frac{\gamma-1}{2}}=3500\times\frac{1.072}{1.080}=3474\ \mathrm{K}$$
+$$q_{\text{Bartz}}=h_g(T_{aw}-T_{wg})=3.427\times10^4\times(3474-1225)=\boxed{77.1\ \mathrm{MW/m^2}}$$
+
+Wall $\Delta T$ across 0.9 mm of GRCop-42: $q t/k = 77.1\times10^6\times
+9\times10^{-4}/290=239$ K.
+
+**Step 5 — the comparison.**
+
+| quantity | value | ratio to Bartz |
+|---|---|---|
+| Bartz estimate | 77.1 MW/m² | 1.00 |
+| CFD circumferential mean | 61.7 MW/m² | 0.80 |
+| CFD local peak | 95.6 MW/m² | 1.24 |
+| Bartz band (±25 %) | 57.8 – 96.4 MW/m² | — |
+
+**Interpretation — which do you trust, where?**
+
+- **The CFD mean sits at 0.80× Bartz, inside the ±25 % band.** That is not
+  agreement, it is *consistency*. It is also the direction you should expect
+  if the design has fuel-film cooling or a fuel-rich boundary layer, because
+  Bartz knows nothing about either. So: plausible, and the deviation has a
+  nameable physical cause. **Believe the CFD mean, provisionally**, and demand
+  the two pieces of evidence that would make it more than provisional: the
+  near-wall resolution ($y^+$ at the throat — if it is not below about 1, or
+  a properly validated wall treatment is not in use, the wall flux is a
+  wall-function artefact and the number is worthless), and the grid study on
+  *heat flux specifically*, not on residuals.
+- **The local peak is the number that matters, and only the CFD has it.**
+  Bartz cannot produce a circumferential distribution — it is a
+  one-dimensional correlation and there is no term in it that knows how many
+  injector elements you have. A peak/mean ratio of 1.55 is within the
+  1.3–2.0 band reported for near-face streaking. **Believe the CFD's
+  *existence* of a peak; be sceptical of its magnitude**, because peak flux
+  is precisely the quantity most sensitive to the turbulence model, the
+  chemistry closure and the element-resolution of the mesh.
+- **Design to the peak, not the mean.** The wall $\Delta T$ is 191 K at the
+  CFD mean and 297 K at the peak, and the thermal strain range — hence the
+  LCF life through Eq. 3.15 — scales with $\Delta T$. Using the mean would
+  under-predict the strain range by ~35 % and over-predict life by far more
+  than that, since $N_f\propto(\Delta\varepsilon_p)^{1/c}$ with $c\approx-0.6$
+  gives roughly $N_f\propto\Delta\varepsilon_p^{-1.7}$: a 35 % strain
+  under-estimate is a factor of ~1.8 over-estimate in life. That is the
+  arithmetic behind the story in this module's opening paragraph.
+- **What would make you trust Bartz over the CFD?** If the CFD's near-wall
+  mesh is a wall-function mesh; if the CFD used a $k$–$\epsilon$ model
+  through a strongly accelerated throat (it will under-predict flux); if the
+  reported flux is *above* the Bartz band with no film cooling and no
+  identified impingement (something is unphysical); or if the CFD was run
+  without the real chamber gas properties. In any of those cases, size the
+  cooling with Bartz plus a peaking factor and treat the CFD as unusable
+  until fixed.
+
+**Sanity check.** 77 MW/m² at the throat of a 100 bar chamber is in the right
+place. The RS-25 at 206 bar is generally quoted in the 100–160 MW/m² range at
+the throat; scaling by $p_c^{0.8}$ from 100 to 206 bar multiplies by
+$(2.06)^{0.8}=1.78$, giving 137 MW/m² — consistent. The Bartz correlation is
+doing its job as a *scale check*, which is exactly the job it should be given.
+
+### 5.3 Worked Example 3 — Topology-optimisation mass bound for a bracket
+
+**Problem.** A gimbal-actuator support bracket is to be printed in Ti-6Al-4V
+($E=113.8$ GPa, $\rho=4430$ kg/m³, yield ≈ 880 MPa). It is a cantilever of
+length $L=250$ mm carrying a tip load $F=5.0$ kN, and the requirement is
+**stiffness**: tip deflection $\delta \le 0.25$ mm, i.e. $k \ge 20$ MN/m.
+The available envelope allows a structural depth up to $h_{\max}=100$ mm and
+a width of 60 mm. Minimum printable wall is 0.5 mm; use 0.7 mm for a shear
+web. What mass can topology optimisation reach, and what should you expect
+in practice?
+
+**Step 1 — required second moment of area.** For a tip-loaded cantilever,
+$\delta=FL^3/(3EI)$, so
+
+$$I_{\text{req}}=\frac{FL^3}{3E\delta}=\frac{kL^3}{3E}=\frac{2.0\times10^{7}\times0.25^{3}}{3\times113.8\times10^{9}}=9.153\times10^{-7}\ \mathrm{m^4}$$
+
+**Step 2 — the naive baseline: a solid rectangular section.** With $b=60$ mm,
+$I=bh^3/12$ gives
+
+$$h=\left(\frac{12I}{b}\right)^{1/3}=\left(\frac{12\times9.153\times10^{-7}}{0.060}\right)^{1/3}=0.0568\ \mathrm{m}$$
+$$m_{\text{solid}}=\rho\,b\,h\,L=4430\times0.060\times0.0568\times0.25=\boxed{3.77\ \mathrm{kg}}$$
+
+**Step 3 — the ideal material distribution (the bound).** In pure bending,
+material is only useful at the extreme fibres. Put the depth at the envelope
+limit $h_{\max}=100$ mm and place two flanges of area $A_f$ each at
+$\pm h/2$:
+
+$$I\approx 2A_f\left(\frac{h}{2}\right)^2=\frac{A_f h^2}{2}\ \Rightarrow\ A_f=\frac{2I}{h^2}=\frac{2\times9.153\times10^{-7}}{0.01}=1.831\times10^{-4}\ \mathrm{m^2}\ (183\ \mathrm{mm^2})$$
+$$m_{\text{flanges}}=\rho\,(2A_f)\,L=4430\times3.661\times10^{-4}\times0.25=0.406\ \mathrm{kg}$$
+
+The web carries shear only: $\tau=F/(h t_w)=5000/(0.100\times0.0007)=71.4$ MPa,
+comfortably below any Ti allowable, so the web is set by printability, not
+strength:
+
+$$m_{\text{web}}=\rho\,h\,t_w\,L=4430\times0.100\times0.0007\times0.25=0.0775\ \mathrm{kg}$$
+$$m_{\text{const-section}}= 0.406+0.078=\boxed{0.48\ \mathrm{kg}}$$
+
+**Step 4 — allow the section to taper (the true optimum).** With variable
+$I(x)$, minimise $\int A\,dx$ subject to
+$\delta=(F/E)\int_0^L (L-x)^2/I(x)\,dx$. The Lagrange condition gives
+$I(x)\propto(L-x)$ — the optimal cantilever's second moment is *linear* in
+distance from the tip. Substituting back:
+
+$$\frac{V_{\text{taper}}}{V_{\text{const}}}=\frac{3}{4}\ \Rightarrow\ m_{\text{flanges}}=0.75\times0.406=0.304\ \mathrm{kg}$$
+$$m_{\text{ideal}}=0.304+0.078=\boxed{0.38\ \mathrm{kg}}$$
+
+**Step 5 — the reality factor.** The 0.38 kg figure is a *lower bound* for a
+single load case in pure bending. Real topology optimisation on this part
+will land somewhere around **0.6–0.8 kg**, i.e. 1.5–2× the bound, because:
+
+- there are multiple load cases (actuator push, actuator pull, lateral,
+  and a launch random-vibration case) and the optimum for several load cases
+  is heavier than the optimum for any one;
+- load introduction needs real pads and bolt bosses at both ends, which the
+  beam idealisation ignores and which are pure added mass;
+- thin flanges in compression buckle, so the flange must be thickened or
+  stabilised — compliance minimisation does not know this;
+- a frequency requirement (keep the first mode above the engine's excitation)
+  usually binds before the deflection requirement does;
+- AM constraints — 45° overhang, powder escape, minimum wall — force material
+  into places the mathematics did not want it;
+- surface roughness knocks down fatigue allowables, so fatigue-critical
+  junctions get radii and thickness back.
+
+**Step 6 — the honest comparison.** The relevant baseline is not the 3.77 kg
+solid block; it is what a competent designer would machine, which for this
+part would be a lightened I-section or a webbed casting at perhaps
+**1.3–1.6 kg**. Against *that*, a topology-optimised printed bracket at
+0.7 kg is a **~50 % saving**, which is exactly the range reported in
+practice, and it also removes an assembly of several machined pieces and
+fasteners. The stress result confirms why the saving is available at all:
+flange stress at the root is $M/(2A_f\,h/2)=(5000\times0.25)/(2\times
+1.831\times10^{-4}\times0.05)=68$ MPa, less than 8 % of yield. **The part is
+stiffness-driven by a factor of twelve**, and stiffness-driven parts are
+where topology optimisation and AM pay. A strength-driven part in the same
+envelope would show a far smaller saving.
+
+**Sanity check.** Structural efficiency: 0.38 kg supporting a 5 kN load over
+250 mm at 0.25 mm deflection corresponds to a specific stiffness of
+$20\ \mathrm{MN/m}/0.38\ \mathrm{kg}=53$ MN/(m·kg). For comparison, a solid
+Ti block in the same envelope gives 5.3 MN/(m·kg) — a factor of ten worse,
+which is the whole argument for putting the material at the extreme fibres,
+and it is the same argument that made the I-beam the default section in 1850.
+Topology optimisation is not magic; on a simple load path it rediscovers
+beam theory, and its value appears when the load path is *not* simple.
+
+---
+
+## 6. Real engines: why did they use those methods?
+
+The question in this module is not "why that hardware" but "why *that
+method*", and the honest answer for every engine is: because of what
+computing and what test capacity cost at the time.
+
+### 6.1 F-1 (Rocketdyne, 1959–67) — the empirical extreme
+
+The F-1's stability problem was solved by roughly **2,000 tests across 210
+injector designs, 15 baffle designs and 14 injector configurations** under
+"Project Go" in 1962–64, and the certification method was to **detonate a
+bomb near the injector centre at full thrust and require damping within
+45 ms**. There was no alternative: no computer of the era could resolve a
+reacting flow, and the theory available — Crocco's $n$–$\tau$ [CC56] — could
+tell you whether a mode was driven but not what to do about it.
+
+*Alternatives available at the time:* more theory (insufficient), scale-model
+testing (used, and misleading — subscale stability did not predict full-scale
+stability), or a fundamentally more stable injector concept (the pintle
+existed at TRW but was not a Rocketdyne technology and not obviously scalable
+to 6.7 MN at the time).
+
+*Would a modern engineer do the same?* **Yes, and they do.** Modern
+programmes have LES, and they still bomb-test. What has changed is the *cost
+of each iteration*: an AM injector can be redesigned and printed in weeks
+rather than machined and brazed in months, so a modern programme reaches a
+stable design in tens of iterations rather than hundreds. The method is
+unchanged; the loop got faster. That is the single most accurate one-line
+summary of what modern methods have actually bought propulsion.
+
+### 6.2 RS-25 (1971–81) — analysis at the edge of the possible
+
+206 bar, fuel-rich staged combustion, 390 milled channels in a NARloy-Z
+liner with an electroformed nickel closeout, 600 coaxial shear elements, an
+HPFTP delivering 53 MW at 35,360 rpm. Almost everything in that list was
+beyond the analysis of its day: the turbopump rotordynamics were not
+predicted and the subsynchronous whirl was found on the test stand
+[Biggs89]; the liner life was found by cutting up fired chambers; the
+throat heat flux was sized with Bartz plus test calibration.
+
+*Would a modern engineer do it the same way?* The hardware, arguably yes; the
+process, no. A modern equivalent would run CHT on the liner, rotordynamics
+with measured seal coefficients, and a full ROM of the start transient before
+the first test — and would still find several things on the stand. The RS-25's
+real methodological legacy is negative and valuable: it is the standing
+example of what it costs to develop a machine whose behaviour you cannot
+predict, and the reason the BE-4 was deliberately built at **140 bar rather
+than at its structural capability**, trading performance for life and for
+predictability. That is a *methods* decision expressed as a hardware
+parameter.
+
+### 6.3 RL10 (1958–63) — the ROM as the whole design
+
+The expander cycle is a closed loop in which the chamber's heat flux drives
+the turbine that drives the pumps that set the chamber pressure that sets
+the heat flux. It has no free energy source; it either closes or it does
+not. That is a fixed-point problem in a handful of variables, and it was
+solved with hand calculations and early machine computation — a reduced-order
+model in the purest sense. The RL10's remarkable longevity (in service since
+1963) partly reflects that a cycle whose design basis is a small,
+well-understood balance is a cycle whose derivatives are predictable.
+
+*Modern practice:* identical in structure, executed in EcosimPro or NPSS,
+with the difference that the regen model inside the loop is now a discretised
+1-D channel model (Eq. 3.5) rather than a lumped heat-load assumption, and
+that the whole balance is now wrapped in an optimiser and a Monte Carlo.
+
+### 6.4 Merlin 1D (2011–13) — test cadence as a method
+
+Merlin's design choices are conservative — gas generator, 97 bar, pintle
+injector from the TRW/LMDE lineage, $\varepsilon=16$ — and its performance
+follows: 311 s vacuum for the sea-level engine, which no one would call
+efficient. What is remarkable is the T/W of 184:1 and a production rate no
+other liquid engine programme has matched. The method behind that is not
+simulation; it is **iteration count**. A pintle is inherently stable and
+throttleable, which removes the highest-risk development item (stability)
+from the critical path, and a company that can build and fire engines
+frequently can converge by measurement rather than by prediction.
+
+*The methodological point:* choosing an architecture with fewer
+hard-to-predict failure modes is itself a methods decision, and it is often
+worth more than better analysis. [J]
+
+### 6.5 Rutherford (2013–17) — AM as the design method
+
+Chamber, injectors, pumps and main propellant valves all printed; an
+electric-pump cycle with no turbine, no gas generator and no power-cycle
+propellant loss; 35 kg dry; 369 engines flown across 47 Electron flights by
+April 2024. The electric cycle exists *because* the pump could be small, and
+the small engine exists because printing made it cheap to iterate.
+
+*Alternatives at the time:* a conventional gas-generator engine of the same
+thrust (heavier, more parts, slower to iterate) or a pressure-fed stage
+(much heavier tanks). The battery mass is carried as parasitic weight, which
+caps the approach at small vehicles — and Rocket Lab itself moved to ORSC
+(Archimedes) for the larger Neutron, which is the honest verdict on the
+scaling limit.
+
+*Would a modern engineer choose it again?* At Electron's scale, yes. It is
+the clearest example in the database of a manufacturing method changing what
+architectures are viable.
+
+### 6.6 Raptor 3 and BE-4 — the two modern method philosophies
+
+**Raptor** (all figures company claims): full-flow staged combustion at a
+claimed 250→300→330 bar across three versions, with T/W claimed to rise from
+88.9 to 163.9 and dry mass to fall from 2,080 to 1,525 kg, much of the later
+reduction from integrating secondary plumbing into the printed castings. The
+method is **rapid iteration at high tempo with heavy manufacturing
+integration**, and the version history is not documented in any stable public
+record — which is itself the point: an internal, fast, test-driven method
+does not produce citable engineering literature.
+
+**BE-4**: oxidiser-rich staged combustion on methane at **140 bar, chosen
+deliberately below capability for life**, with hydrostatic bearings instead
+of rolling-element bearings, and a head-pressure start that removes the
+start cartridge. The method is **design for predictability and life**, at a
+cost of T/W ≈ 46:1, which is modest.
+
+Both are defensible; they optimise different objectives, and an MDO study
+with the right objective function would produce each from the other's
+requirements. This is the cleanest available illustration of §3.9's warning
+that **getting the objective right matters more than the optimiser**.
+
+---
+
+## 7. Design trade-offs, failure modes, materials, manufacturing, testing
+
+### 7.1 The trade-offs specific to methods
+
+| trade | one way | the other way | who usually wins |
+|---|---|---|---|
+| fidelity vs iteration count | one LES | a thousand ROM runs | ROM, until the ROM's assumption is the question |
+| model accuracy vs traceability | tuned high-fidelity model | conservative correlation with a known bias | correlation, for certification; model, for design |
+| deterministic margin vs UQ | stacked factors of safety | reliability target | both — factors certify, UQ allocates |
+| optimise for performance vs for predictability | Raptor at 330 bar | BE-4 at 140 bar | mission-dependent; reuse pushes to predictability |
+| AM freedom vs inspectability | lattice-cored organic part | printed part with conventional geometry | inspectability, on anything human-rated |
+| surrogate speed vs extrapolation risk | neural surrogate in the loop | high-fidelity in the loop | surrogate for search, high-fidelity for the answer |
+| MBSE rigour vs early-programme velocity | full SysML model at ATP | spreadsheets until PDR | scale-dependent; MBSE wins above ~10² requirements |
+
+### 7.2 Failure modes of the methods themselves
+
+Mechanism → symptom → evidence → fix.
+
+- **Wall-function abuse in CHT.** Mechanism: first cell at $y^+\gg1$ with a
+  wall function derived for near-isothermal, incompressible flow, applied
+  across a 2,200 K near-wall gradient. Symptom: heat flux that is smooth,
+  plausible and 30–50 % low, and that barely changes with grid refinement in
+  the *core*. Evidence: plot $y^+$ over the wall; refine only the wall-normal
+  spacing and watch the flux move. Fix: resolve to $y^+<1$, or use a
+  validated compressible thermal wall model, and always Bartz-check.
+- **Grid-converged-looking non-convergence in reacting LES.** Mechanism:
+  refining an LES changes the filter width, hence the model, so results move
+  without approaching an asymptote. Symptom: three grids, three answers, no
+  monotone trend, and a reported "GCI" computed anyway. Evidence: the
+  observed order $p$ comes out nonsensical. Fix: report resolved-TKE
+  fraction and a model-sensitivity study instead of a GCI; do not claim a
+  discretisation error bar you cannot compute.
+- **Flamelet applied to ignition.** Mechanism: the flamelet library contains
+  only burning and extinguished steady solutions; ignition is a transient
+  through the unstable branch. Symptom: the simulation either lights
+  instantly everywhere or never lights, with almost no sensitivity to igniter
+  energy. Evidence: the predicted ignition delay is independent of the
+  igniter model. Fix: finite-rate chemistry, or do not use CFD for this.
+- **Spray model above the critical pressure.** Mechanism: a Lagrangian
+  droplet model with latent heat and surface tension applied where neither
+  exists. Symptom: unphysically long or short mixing lengths; strong
+  sensitivity to an assumed initial drop size that has no physical meaning.
+  Evidence: check $p_c$ against the propellant's critical pressure (LOX:
+  5.04 MPa). Fix: real-fluid single-phase treatment [OY93].
+- **Surrogate extrapolation.** Mechanism: optimiser drives outside the
+  training hull. Symptom: an optimum that the high-fidelity model does not
+  reproduce, always in the optimistic direction. Evidence: check the query
+  point against the training convex hull, or the GP variance. Fix: trust
+  region, hull check, refuse-don't-extrapolate, and validate every optimum.
+- **Calibration mistaken for validation.** Mechanism: model parameters tuned
+  to a test, then the model is quoted as validated by that test. Symptom:
+  excellent agreement with the calibration set, poor with anything else.
+  Evidence: ask whether the prediction was recorded before the data was
+  opened. Fix: hold out data; make blind predictions a programme
+  requirement.
+- **Digital twin configuration drift.** Mechanism: hardware changed, model
+  did not. Symptom: residuals step at a maintenance action. Fix:
+  configuration management as a first-class part of the twin.
+
+### 7.3 Materials
+
+Methods interact with materials in one place above all others: **allowables**.
+Classical design uses A- and B-basis allowables from [MMPDS], which are
+statistically derived from large, standardised datasets. AM alloys mostly do
+not have them, in most orientations, for most parameter sets. GRCop-84 is the
+well-documented copper-alloy baseline and GRCop-42 the more printable variant
+now common in AM chambers, with property data still consolidating [GRCop,
+GradlAM]. Until a printed alloy has a real allowables database, the honest
+method is programme-specific coupon testing with the process frozen — which
+is a *method* constraint expressed as a material fact, and it is why AM
+qualification schedules are dominated by coupon and witness-specimen testing
+rather than by part testing.
+
+### 7.4 Manufacturing
+
+Two effects run in both directions.
+
+**Manufacturing constrains the method.** Build orientation, minimum wall,
+overhang angle and powder removal are hard constraints that must enter the
+optimiser, not be applied afterwards. An unconstrained topology result that
+is then "made printable" by hand is neither optimal nor validated.
+
+**The method constrains manufacturing.** Once a geometry is generated by
+script (§3.13) and optimised, the resulting part is often un-drawable in the
+classical sense: there is no dimensioned drawing that fully defines an
+organic surface. The definition becomes the model file plus the process
+definition, which is a genuine change in how hardware is specified,
+inspected and accepted, and it is one of the real motivations behind the
+digital-engineering push.
+
+### 7.5 Testing
+
+Testing does not go away; its *role* changes. In a well-run modern
+programme, tests are designed to be **model-discriminating**: instrumented
+and conditioned so that the result distinguishes between competing model
+hypotheses, rather than merely confirming that the hardware works.
+Concretely, that means:
+
+- **Calorimetric chamber sections**, where heat flux is measured directly
+  from coolant $\dot m c_p \Delta T$ over a known area, are worth more to a
+  thermal model than any number of wall thermocouples.
+- **Multiple circumferentially distributed high-bandwidth pressure
+  transducers**, because a single one cannot distinguish a first tangential
+  mode from a first longitudinal mode.
+- **Cold-flow patternation** before hot fire, because it separates mixing
+  errors from combustion errors.
+- **Recorded blind predictions** before every test, with the prediction
+  uncertainty stated. A programme that does this accumulates a validation
+  record; one that does not accumulates anecdotes.
+- **Uncertainty-quantified data reduction** per [CPIA-245], so that a measured
+  $\eta_{c^*}$ arrives with an error bar that can be compared to the model's.
+
+---
+
+## 8. Misconceptions and what engineers actually care about
+
+**"CFD has replaced the correlations."** No. Correlations size the hardware
+and bound the CFD; CFD answers the specific multi-dimensional questions the
+correlations cannot pose. Every regeneratively cooled chamber flying today
+was sized with a Bartz-based 1-D model, including the ones whose CFD is
+excellent.
+
+**"A finer mesh gives a more accurate answer."** Only for the discretisation
+error, and only in the asymptotic range. It does nothing about model-form
+error, which usually dominates in reacting flow. A perfectly grid-converged
+answer from a $k$–$\epsilon$ model in a separated flow is a precise wrong
+number. In LES, refinement changes the model itself.
+
+**"LES can predict combustion instability."** It can reproduce it in
+specific, heavily studied configurations at very large cost, with residual
+sensitivity to modelling choices comparable to the effect. It cannot yet
+serve as a design tool that tells you whether *your* new chamber will be
+stable. Bomb testing remains the certification basis.
+
+**"Machine learning learns the physics."** A surrogate learns the mapping
+present in its training data, including that data's errors, and has no
+mechanism for behaving sensibly outside it. A network trained on RANS is a
+fast RANS.
+
+**"A digital twin predicts failures."** It detects departures from its own
+calibrated behaviour in instrumented quantities. It has no term for a
+mechanism it does not model, and the quantities that determine engine life
+are mostly not instrumented on flight hardware.
+
+**"Topology optimisation finds the lightest part."** It finds the lightest
+distribution of material for the objective and constraints you gave it,
+usually compliance under one load case. That is rarely the requirement, and
+the result is a starting shape.
+
+**"MBSE / digital engineering reduces technical risk."** It reduces
+*coordination* risk — interfaces, traceability, change impact. Technical
+risk is reduced by analysis and test, which MBSE organises but does not
+perform. A fully green verification matrix has never made a chamber stable.
+
+**"More margin is safer."** Unquantified stacked margin produces designs
+whose actual risk is unknown and whose mass is certainly higher. Sometimes
+extra mass moves risk elsewhere — a heavier bracket changes a modal
+frequency into an excitation. Margin should be allocated where the
+uncertainty is, which requires knowing where the uncertainty is.
+
+### What engineers actually care about
+
+1. **What is the error bar, and where did it come from?** Not the number —
+   the band, and its basis. This is the question that separates an engineer
+   from an operator of software.
+2. **What is the validation domain of this model, and am I inside it?**
+   Almost every serious analysis failure is an extrapolation.
+3. **Which input dominates the answer?** Because that is where the next
+   dollar of test or characterisation money goes. Sobol indices, or even
+   one-at-a-time sensitivities, answer a budget question.
+4. **What is the cheapest calculation that would catch this being wrong?**
+   Bartz against CHT, a hand momentum balance against a CFD thrust, a
+   $\Gamma p_c A_t/\sqrt{RT_0}$ check against a simulated mass flow. Keep a
+   short list and run it every time.
+5. **Which test would retire the most risk per dollar?** The V&V ladder is a
+   sequencing problem, and sequencing it well is worth more than any single
+   tool in this module.
+
+---
+
+## 9. Mastery levels
+
+**Level 1 — Familiarity.** You can name the main method families (equilibrium
+codes, ROM/cycle codes, RANS/LES/DNS, CHT, FEA, MDO, topology optimisation,
+surrogates, UQ, MBSE, digital twins), say in one sentence what each computes,
+and place them in cost order. You know that verification and validation are
+different questions, and that the engine is designed in a ROM before any CFD.
+You can name one real engine associated with each of: empirical stability
+development, AM as a design method, and design-for-predictability.
+
+**Level 2 — Working engineering knowledge.** You can set up and run a Bartz
+cross-check on a CHT result and state what would make you believe each; write
+down the equations a cycle balance solves and the closures it needs; compute
+a first-order uncertainty propagation through a $c^*$/$C_F$ chain and
+interpret the variance decomposition; estimate the cell count and cost class
+of a proposed CFD study from $Re$ and the resolution requirement; state the
+assumptions of a flamelet model and name three rocket situations that violate
+them; and compute a stiffness-driven beam-theory mass bound for a bracket.
+You can read a CFD or FEA report and list the three questions whose absence
+makes it uninterpretable.
+
+**Level 3 — Interview mastery.** Given an unfamiliar engine development
+problem, you can lay out the V&V ladder for it — what is retired at each
+rung, what each rung costs, and where the ladder should stop — and defend the
+sequencing against an alternative. You can argue both sides of "should this
+be qualified by analysis?" using NASA-STD-7009 language and a specific
+credibility argument. Given a simulation result that disagrees with a
+correlation, you can enumerate the physical and numerical explanations for
+the disagreement, say which is testable and how, and state what you would do
+if the test were unavailable. You can explain, with cases, why combustion
+instability, ignition, cavitation and AM allowables remain empirical, and
+what would have to change for that to stop being true.
+
+---
+
+## 10. Problems
+
+### Conceptual
+
+**C1.** Distinguish verification, validation and qualification. For each,
+name one artefact that constitutes evidence, and one thing that is commonly
+mistaken for that evidence.
+
+**C2.** A colleague refines a reacting LES from 40 million to 320 million
+cells and the predicted mean wall heat flux changes by 18 %. They compute a
+GCI from the two grids and report ±9 %. State two reasons this number is not
+a discretisation error bar, and say what should be reported instead.
+
+**C3.** Explain why chamber pressure has essentially no effect on ideal
+vacuum $I_{sp}$ in the $c^*\!\cdot\!C_F$ formulation, but a substantial
+effect on sea-level $I_{sp}$. What does chamber pressure actually buy?
+
+**C4.** A flamelet-based chamber CFD reproduces the measured mean wall heat
+flux to 6 % but predicts a stable chamber that is in fact unstable. Is the
+model validated? Answer in terms of validation domain and quantity of
+interest.
+
+**C5.** Give three reasons a liner low-cycle-fatigue prediction is
+systematically optimistic, and rank them by expected magnitude for an
+additively manufactured GRCop-42 chamber.
+
+**C6.** Why is a Lagrangian droplet spray model inapplicable to LOX injection
+at 100 bar? What replaces it, and what changes about the answer?
+
+**C7.** State what a digital twin of a reusable engine contains that a model
+of the engine *design* does not, and name two quantities that determine
+engine life which the twin must infer rather than measure.
+
+**C8.** Your MDO study returns an optimum sitting exactly on the upper bound
+of the "injector element count" design variable. What are the two possible
+interpretations, and how do you tell them apart?
+
+### Calculation
+
+**N1.** For the engine of §5.1 ($\gamma=1.16$, $\mathcal{M}=21.5$,
+$T_0=3500$ K, $\varepsilon=40$, $\eta_{c^*}=0.98$), recompute the $I_{sp}$
+1σ if a subscale hot-fire campaign reduces the $\eta_{c^*}$ uncertainty from
+1.0 % to 0.4 % and improves the $T_0$ uncertainty from 1.5 % to 1.0 %,
+leaving the others unchanged. By how many seconds does the 3σ low bound move?
+
+**N2.** Using Eq. 3.7, estimate the DNS cell count for a chamber with
+integral scale $L=0.10$ m at $Re_L=8\times10^5$. If a machine sustains
+10⁵ cell-updates per core-second and you have 10⁵ cores, how long is one
+time step? Comment.
+
+**N3.** Repeat the Bartz calculation of §5.2 for the same engine at
+$p_c=20.0$ MPa with all other inputs unchanged (recompute $A_t$, $D_t$,
+$r_c$, $h_g$, $q$). By what factor does throat heat flux rise, and how does
+that compare with the naive $p_c^{0.8}$ scaling? Explain the difference.
+
+**N4.** A CFD study reports throat flux on three grids: 58.2, 61.7 and
+62.9 MW/m² for cell sizes in ratio 4:2:1. Compute the observed order of
+convergence and the GCI on the finest grid ($F_s=1.25$). Is this in the
+asymptotic range?
+
+**N5.** For the bracket of §5.3, the requirement changes from a deflection
+limit to a first-mode frequency limit of 400 Hz with a 2.0 kg tip mass
+(treat as $f_1=\frac{1}{2\pi}\sqrt{k/m}$). Compute the required stiffness and
+the new ideal (tapered, $h=100$ mm) mass bound. Which requirement drives?
+
+**N6.** A Coffin–Manson fit gives $\varepsilon_f'=0.30$, $c=-0.60$. A liner
+analysis predicts $\Delta\varepsilon_p=0.014$ using the circumferentially
+averaged heat flux. A CHT analysis shows a local peak/mean flux ratio of
+1.55; assume the plastic strain range scales linearly with $\Delta T$ and
+therefore with flux. Compute $N_f$ for both, and the ratio.
+
+**N7.** An engine balance has six uncertain inputs with logarithmic
+sensitivities on chamber pressure of $+0.9, -0.5, +0.3, +0.25, -0.2, +0.1$
+and relative 1σ of $1.0\,\%, 1.5\,\%, 2.0\,\%, 0.8\,\%, 3.0\,\%, 1.2\,\%$
+respectively. Compute the 1σ on $p_c$ and the first-order Sobol index of each
+input. Which two inputs would you characterise better, and what does that buy?
+
+**N8.** A Monte Carlo of 5,000 samples gives a mean $I_{sp}$ of 350.1 s with
+$\sigma=4.9$ s. Compute the standard error on the mean, and the number of
+samples needed to estimate the 0.13th percentile ($-3\sigma$) with a
+comparable relative precision. Comment on why tail estimation is expensive.
+
+### Engineering reasoning
+
+**R1.** A vendor delivers a CHT analysis of your chamber reporting a
+circumferentially averaged throat flux 45 % *above* your Bartz estimate, with
+no film cooling in the design. List, in the order you would check them, the
+physical and numerical explanations. What single plot would you ask for
+first?
+
+**R2.** You have budget for exactly one of: (a) a reacting LES of the full
+injector face; (b) a subscale calorimetric hot-fire campaign at three
+mixture ratios; (c) a coupon programme characterising your printed GRCop-42
+in three build orientations. The programme risk register lists, as its top
+three items, liner life, $\eta_{c^*}$ shortfall, and AM material scatter.
+Choose, and justify in terms of what each option retires and what the
+alternatives to each are.
+
+**R3.** A described plot: measured chamber pressure from twelve acceptance
+tests of the same engine design sits within a ±1.5 % band, but the digital
+twin's residual for one engine drifts monotonically by −0.9 % across its five
+tests while remaining inside the band. Interpret. What would you do, and what
+would you *not* conclude?
+
+**R4.** Argue the case *against* your own position in §3.18 for one of the
+four areas (instability, ignition, cavitation, AM allowables): state the
+strongest argument that simulation is now, or will shortly be, the design
+basis, and then say why you do or do not accept it.
+
+**R5.** An optimiser working against a Gaussian-process surrogate of a
+CFD-predicted $\eta_{c^*}$ returns a design 1.8 % better than anything in the
+training set. The GP variance at that point is three times the mean training
+variance. What do you do next, in order, and what are you looking for?
+
+### Mini trade study
+
+**T1.** You are the chief engineer for a new 250 kN methalox upper-stage
+engine, first hot fire in 30 months. You must choose the **analysis and test
+strategy** for the injector and thrust chamber. Four options, and you have
+funding for approximately one and a half of them:
+
+- **Option A — heavy CFD.** Build a validated reacting-CFD capability:
+  real-fluid single-element RANS plus one multi-element LES, with a reduced
+  methane mechanism developed and validated in-house.
+- **Option B — heavy subscale test.** Build a subscale calorimetric hot-fire
+  rig with optical access and a translating oxidiser post (CVRC-style) and
+  run a broad matrix of element geometries and operating points.
+- **Option C — heritage-scaled ROM plus fast AM iteration.** Buy or build a
+  strong ROM, scale the element from a known-good heritage design, and rely
+  on printing three full-scale injector variants and hot-firing them.
+- **Option D — surrogate-driven MDO.** Build a parametric geometry generator
+  and a GP surrogate over a moderate CFD database, and optimise the element
+  and chamber together against performance, wall flux and a stability proxy.
+
+Constraints: the stability requirement is a bomb test with 40 ms damping;
+the liner life requirement is 25 full-duration cycles; the $I_{sp}$
+requirement carries 1.5 % margin at PDR; there is no in-house CFD team and no
+existing methalox element database.
+
+Recommend a strategy, state what each rung of your V&V ladder retires, name
+the risk you are accepting, and say what would make you change your mind.
+
+---
+
+## 11. Quiz (100 points)
+
+**Q1 (8).** In one sentence each, define verification and validation, and
+state which one requires an experiment.
+
+**Q2 (10).** A 3-D reacting RANS uses a first cell at $y^+=60$ with a
+standard wall function and reports a throat heat flux. Give two reasons the
+reported flux is unreliable and one cheap check that would expose it.
+
+**Q3 (12).** *Calculation.* An $I_{sp}$ chain has relative 1σ contributions of
+1.0 % ($\eta_{c^*}$), 0.75 % ($T_0$), 0.54 % ($\gamma$) and 0.35 %
+($\mathcal{M}$). Compute the total 1σ and the first-order Sobol index of
+$\eta_{c^*}$. If $\eta_{c^*}$ uncertainty is halved, what is the new total?
+
+**Q4 (10).** Which of the following can a steady RANS calculation predict, in
+principle? (i) mean wall heat flux; (ii) limit-cycle amplitude of a 1T
+instability; (iii) mean separation location in an overexpanded nozzle;
+(iv) side-load amplitude during start-up; (v) mixture-ratio maldistribution
+across an injector face. Justify each answer in a phrase.
+
+**Q5 (12).** *Calculation.* A cantilever bracket must have $k\ge30$ MN/m over
+$L=0.20$ m in Ti-6Al-4V ($E=113.8$ GPa, $\rho=4430$ kg/m³) with structural
+depth limited to $h=80$ mm. Compute $I_{\text{req}}$, the ideal two-flange
+constant-section flange area, and the flange mass. Ignore the web.
+
+**Q6 (8).** Multiple choice. The single largest reason a flamelet model is
+inappropriate for simulating ignition in a rocket chamber is:
+(a) it is too expensive; (b) the flamelet library contains only steady
+burning and extinguished states; (c) it cannot handle three inlet streams;
+(d) it neglects radiation. Justify.
+
+**Q7 (10).** *Judgment.* Your programme must decide whether to take
+qualification credit by analysis for a component's thermal margin. Using
+NASA-STD-7009 concepts, list the four things you would require before saying
+yes, and the one that most often is missing.
+
+**Q8 (10).** *Calculation.* Estimate the ratio of DNS to wall-modelled-LES
+cost for a flow at $Re=10^6$, taking DNS work $\propto Re^3$ and WMLES work
+$\propto Re$. Express as a power of ten and comment on what it implies about
+DNS in engine design.
+
+**Q9 (10).** Name three quantities a digital twin of a reusable engine must
+*infer* rather than measure, and for each say what the inference depends on.
+
+**Q10 (10).** *Judgment.* You are shown a topology-optimised, printed
+injector manifold that is 42 % lighter than the machined baseline, with a
+lattice-cored web and internal passages 0.8 mm across. It is for a
+human-rated vehicle. Give the three questions you ask before approving it,
+and state which single answer would most likely stop the design.
+
+---
+
+## 12. Further reading
+
+- **[STD-7009]** — NASA-STD-7009, *Standard for Models and Simulations*. Read
+  the Credibility Assessment Scale and its eight factors; then score a model
+  you have actually used. It is uncomfortable and instructive.
+- **[ASME-V&V-20]** and **[Roache98]** — the mechanics of solution
+  verification and the validation-uncertainty framework. Read for the GCI and
+  for the definition of $u_{\text{val}}$.
+- **[Slotnick14]** — NASA's *CFD Vision 2030* study. Read for a sober,
+  agency-level assessment of what CFD can and cannot do, and how slowly the
+  hard parts are moving.
+- **[Poinsot]** and **[Peters00]** — the standard texts on turbulent
+  combustion. Read Peters for the flamelet concept and its regime diagram;
+  Poinsot for the numerics and boundary conditions that decide whether a
+  reacting CFD is even well-posed.
+- **[Pitsch06]** — LES of turbulent combustion, review. Read for what LES
+  closures actually assume and where they break.
+- **[OY93]** — supercritical droplet and injection behaviour. Read before you
+  ever apply a spray model to a high-pressure LOX injector.
+- **[Yu12]** — the CVRC model-combustor instability work. Read as the template
+  for how a validation experiment is designed to be informative.
+- **[Casiano10]** — throttling review. Read as an example of how a
+  comprehensive survey of real hardware substitutes for a predictive theory
+  that does not exist.
+- **[CPIA-246]** and **[CPIA-245]** — the JANNAF performance prediction and
+  test-data-interpretation manuals. Read to learn what a quoted efficiency
+  legally means and how a measured $I_{sp}$ acquires an uncertainty.
+- **[GradlAM]** and **[Gradl18]**, with **[RAMPT]** — AM for combustion
+  devices: process, alloys, hot-fire results, and the large-scale
+  channel-wall direction. Read [Gradl18] first for "what has actually been
+  fired".
+- **[Martins]** and **[Martins13]** — engineering design optimisation and the
+  MDO architecture survey. Read Martins & Ning's book for the mechanics,
+  the survey for why the architectures differ.
+- **[Bendsoe]** — topology optimisation, the reference. Read chapter 1 for
+  SIMP and then look at the compliance objective critically.
+- **[Rasmussen06]** and **[Forrester08]** — Gaussian processes, and surrogate
+  modelling for engineering design. Read Forrester for the design-of-
+  experiments and infill criteria that make a small CFD budget go further.
+- **[Sobol01]** and **[Saltelli08]** — variance-based sensitivity analysis.
+  Read Saltelli's primer; it is short and it will change how you report
+  results.
+- **[Glaessgen12]** — the paper that put "digital twin" into aerospace
+  vocabulary. Read for the original, disciplined definition, then compare it
+  with what vendors now sell.

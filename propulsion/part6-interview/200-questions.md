@@ -254,8 +254,8 @@ pressure, compute the ideal thrust coefficient and, taking $c^* = 2330$ m/s,
 the ideal vacuum $I_{sp}$. Compare with the RS-25's published 452.3 s. [M03,
 M09]
 
-**56.** A test article at $p_c = 5.5$ MPa with $A_t = 0.0080$ m² flows 24.0 kg/s
-and produces 62.0 kN at sea level. Compute the measured $c^*$ and $C_f$, and
+**56.** A test article at $p_c = 5.5$ MPa with $A_t = 0.0080$ m² flows 26.0 kg/s
+and produces 65.0 kN at sea level. Compute the measured $c^*$ and $C_f$, and
 the corresponding efficiencies given ideal values of 1755 m/s and 1.52. [M03,
 M18]
 
@@ -491,10 +491,11 @@ say what a designer loses and gains from the low value. [M01, M04]
 method-of-characteristics ideal contour, and what is actually being traded?
 [M02, M09]
 
-**113.** A nozzle with $\gamma = 1.20$ and $\varepsilon = 40$ is fired at sea
-level. Compute the ideal exit pressure, then the Mach number and pressure just
-downstream of a normal shock at the exit plane, and use the result to argue
-whether the flow can plausibly stay attached. [M02, M09]
+**113.** A nozzle with $\gamma = 1.20$, $p_c = 100$ bar and $\varepsilon = 40$
+is fired at sea level. Compute the ideal exit pressure, then the Mach number
+and static pressure just downstream of a normal shock at the exit plane, and
+use the result to argue whether the flow can plausibly stay attached. [M02,
+M09]
 
 **114.** Your engine's measured vacuum $I_{sp}$ is 4 s below the CEA
 shifting-equilibrium prediction times your assumed efficiencies, and the
@@ -725,3 +726,172 @@ bearing failure from a contaminated LOX line, and a hard start from a slow
 oxidiser valve. [M34, M18, M25]
 
 ---
+
+## Very advanced (166–200)
+
+**166.** Small thrusters consistently deliver a lower fraction of theoretical
+$I_{sp}$ than large engines at the same chamber conditions. Give the three
+mechanisms, and say which one dominates below 100 N. [M03, M04, M10]
+
+**167.** Build the standard $I_{sp}$ loss budget for a large nozzle: name every
+term, say what physics each represents, and give a realistic magnitude for
+each. [M09, M02, M03]
+
+**168.** An engine has a theoretical shifting-equilibrium vacuum $I_{sp}$ of
+366 s. Apply divergence loss 0.6 %, boundary-layer loss 0.9 %, kinetic loss
+0.7 %, mixing/combustion loss 1.4 % and film-cooling loss 1.1 %. Compute the
+delivered $I_{sp}$ two ways — multiplicatively and additively — and say which
+is right and why the difference matters. [M03, M09, M11]
+
+**169.** Beryllium, fluorine and OF₂ all offer higher theoretical performance
+than anything flown. Explain, propellant by propellant, why none of them is
+used, and identify the one argument that is *not* toxicity. [M04, M05, M35]
+
+**170.** A company claims a 330 bar full-flow staged-combustion engine with a
+thrust-to-weight of 164. You are the customer's chief engineer. List, in
+priority order, the evidence you would demand before you put that number in a
+vehicle performance model. [M13, M18, M33]
+
+**171.** A staged-combustion engine flows 300 kg/s total at $p_c = 25$ MPa. The
+fuel pump must raise 45 kg/s of LH2 ($\rho = 71$ kg/m³) by 45 MPa at 75 %
+efficiency, and the preburner turbine runs 45 kg/s at 850 K,
+$c_p = 6000$ J/(kg·K), $\gamma = 1.36$, 78 % efficiency. Compute the pump power
+and the turbine pressure ratio needed to close the power balance. [M12, M13]
+
+**172.** Why is linear stability analysis insufficient for combustion
+instability, and what does "triggered" or nonlinear instability mean for how
+you must test an engine? [M15, M18]
+
+**173.** Where does the state of the art actually stand on predicting
+combustion instability before hardware exists? Be specific about what
+high-fidelity simulation can and cannot currently deliver. [M36, M15]
+
+**174.** A reusable engine's throat diameter grows 0.15 % per flight from
+thermal and chemical wear, and the acceptance limit is 1.5 % on thrust at fixed
+$p_c$. Set an inspection and retirement interval, and say what measurement you
+would use in the field. [M10, M18, M33]
+
+**175.** Oxidiser-rich staged combustion depends on protective coatings on every
+surface wetted by hot oxygen-rich gas. Why does that requirement interact badly
+with additively manufactured internal passages, and what would you do about it?
+[M16, M17, M13]
+
+**176.** Hydrogen in a regenerative circuit at 8 MPa and 60 K is supercritical.
+Explain why Dittus–Boelter is the wrong correlation there, estimate the sign
+and rough magnitude of the error, and name what you would use instead. [M11,
+M10, M16]
+
+**177.** A sea-level nozzle has $\gamma = 1.20$, $p_c = 100$ bar and
+$\varepsilon = 16$, a conical-equivalent exit half-angle of 15°, and a
+boundary-layer displacement loss of 0.8 %. Compute the divergence efficiency,
+the ideal sea-level $C_f$, the delivered $C_f$ after both losses, and compare
+with the $C_f$ available at the sea-level-optimum expansion ratio. [M09, M02,
+M03]
+
+**178.** Solid motors have their own instability physics. Explain vortex
+shedding in a segmented motor, why it produces discrete tones, and how it is
+distinguished from a propellant-response instability. [M20, M21, M15]
+
+**179.** A motor's ignition transient must bring 6.0 m³ of free volume from
+0.1 MPa to 6.0 MPa. With $c^* = 1550$ m/s, $A_t = 0.62$ m², $T_0 = 3300$ K and
+$R = 320$ J/(kg·K), compute the mass of gas that must accumulate in the free
+volume and the chamber filling time constant $V/(c^{*}A_t)$. What sets the
+actual rise time? [M21, M20, M25]
+
+**180.** Distinguish MEOP, proof pressure and burst pressure for a composite
+motor case, and explain why the failure mode of a filament-wound case is
+different in kind from that of a steel one. [M22, M16]
+
+**181.** Write the outline of a qualification campaign for a motor that must fire
+reliably after 30 years of storage in an uncontrolled thermal environment,
+architecture level only. What do you age, and how do you prove the acceleration
+factor? [M27, M25, M33]
+
+**182.** Segmented steel cases were obsolete on mass-fraction grounds decades
+before the Shuttle SRB stopped flying, and the SLS boosters are still
+segmented. Give the real reasons, and say under what conditions monolithic
+composite loses. [M26, M22, M25]
+
+**183.** A micro-nozzle has a 0.15 mm throat, nitrogen at 300 K and 2.0 bar
+chamber pressure, mean free path at throat conditions of about 0.04 μm.
+Compute the Knudsen number and the throat Reynolds number, and say what regime
+you are in. [M28, M29, M30]
+
+**184.** For that same micro-nozzle, estimate the discharge coefficient
+degradation from the viscous boundary layer using the throat Reynolds number,
+and state how the resulting $I_{sp}$ penalty scales as you shrink the thruster
+further. [M30, M29]
+
+**185.** The Manned Maneuvering Unit's published figures — 11.8 kg of GN₂,
+110–130 ft/s of $\Delta v$ — imply a specific impulse near 100 s, which is
+impossible for cold nitrogen. Reconcile the numbers, and say which published
+figure you would trust. [M31, M29, M28]
+
+**186.** Helium at 241 bar stores about 0.04 g/cm³; R-236fa stores 1.36 g/cm³ as
+a saturated liquid at 2.7 bar. Using realised $I_{sp}$ of 160 s and 40 s
+respectively, compute impulse per cubic centimetre of propellant for each, then
+argue what happens to the comparison once the tank is included. [M28, M30,
+M32]
+
+**187.** Allocate a 0.9999 reliability requirement across a crewed launch abort
+solid motor: igniter, case, grain, nozzle, TVC. Justify the split and say which
+number you actually believe. [M33, M27, M34]
+
+**188.** Explain common-cause failure in a propulsion system and give an example
+where adding redundancy made reliability worse, not better. [M34, M33, M14]
+
+**189.** Rebuilding the F-1 required reverse-engineering hardware because the
+process knowledge had gone even though the drawings survived. What kinds of
+engineering knowledge do not live in drawings, and what does that imply for how
+a programme should document a production engine? [M35, M17, M25]
+
+**190.** For injector design specifically, what does CFD currently predict well,
+what does it predict badly, and what would you never accept a CFD result for
+without a hot-fire? [M36, M07, M15]
+
+**191.** A vendor offers a machine-learned surrogate that predicts combustion
+stability margin from geometry in seconds instead of weeks. Under what
+conditions, if any, would you allow it into a qualification argument? [M36,
+M15, M33]
+
+**192.** Post-qualification, a fleet-wide CT sweep finds sub-critical porosity in
+an additively manufactured injector body that passed every acceptance test.
+Nothing has failed. What do you do, and what is the argument on each side?
+[M17, M18, M33]
+
+**193.** A flight $I_{sp}$ reconstruction uses thrust from accelerometry
+(±1.5 %), propellant mass from tank levels (±2.0 %) and burn time (±0.3 %).
+Compute the combined uncertainty and say whether it can resolve a 1 %
+performance shortfall. [M18, M03, M36]
+
+**194.** Subcooled (densified) propellants raise stage performance for free, on
+paper. Name the four places the cost actually shows up, and say whether you
+would adopt them on a new vehicle. [M05, M12, M33]
+
+**195.** Turbopump shaft power scales roughly with $\dot m \Delta p / \rho$.
+Show how that makes pump power scale with thrust and chamber pressure, and use
+it to explain why the RS-25's HPFTP needs 53 MW while the RD-170's turbopump
+needs of order 170–190 MW. [M12, M13, M26]
+
+**196.** You inherit an engine that is stable everywhere except a narrow band
+near 70 % throttle, where it shows a first tangential mode. Ship it with a
+throttle exclusion zone, or fix it? Argue both sides and decide. [M15, M07,
+M33]
+
+**197.** A new vehicle's base region runs 200 K hotter in flight than the
+predictions from static-fire plume data. What plume physics did the prediction
+miss, and what would you instrument on the next flight? [M09, M02, M18]
+
+**198.** Hybrid rockets have been "five years away" for fifty years. Give the
+technical reasons they have not displaced solids for any operational
+application, and name the one development that would change that. [M32, M19,
+M35]
+
+**199.** Twenty-four hours before a crewed launch, a single chamber-pressure
+transducer on one engine reads 1.2 % low in the pre-flight check, within
+specification but outside the fleet's historical scatter. You are the
+responsible propulsion engineer. What do you do? [M34, M18, M33]
+
+**200.** If you could carry only one principle from all of this into a design
+review, what would it be, and what real programme failure would you cite to
+defend it? [M01–M36]

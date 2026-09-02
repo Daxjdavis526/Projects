@@ -1214,11 +1214,11 @@ its pressure distribution has a net resultant.
   does not) and on axial accelerometers.
 
 > **Sanity check.** $f_{1T}/f_{1L} = 1407/1200 = 1.17$ for a chamber whose length
-> equals its diameter, and 1T sits above 1L only because $\alpha_{11}/\pi =
-> 0.586$ against $0.5$ for the longitudinal mode. In any chamber longer than
-> $0.586\,D_c$ — i.e. essentially all of them — the **1L mode is the lowest
-> acoustic mode**, and yet 1T is the one that destroys engines. That is the
-> Rayleigh criterion talking: the nozzle damps 1L heavily and 1T hardly at all.
+> equals its diameter. Setting $f_{1T} = f_{1L}$ gives $\alpha_{11}c/\pi D_c =
+> c/2L_{cyl}$, i.e. $L_{cyl} = \pi D_c/(2\times1.8412) = 0.853\,D_c$: **any
+> chamber longer than $0.853\,D_c$ has 1L as its lowest acoustic mode**, which is
+> most of them — and yet 1T is the one that destroys engines. That is the Rayleigh
+> criterion talking: the nozzle damps 1L heavily and 1T hardly at all.
 
 ### WE2 — Chug stability for two injector pressure drops
 

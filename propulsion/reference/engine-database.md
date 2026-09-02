@@ -577,3 +577,415 @@ module.
 margin; it is a capable second-generation ORSC engine, not a frontier one. It
 underpins China's entire current launch fleet and the crewed lunar programme
 (Long March 10).
+
+---
+
+## A.8 In-space and spacecraft engines
+
+Draco and SuperDraco are spacecraft engines but are tabulated in §A.3 with the
+rest of SpaceX; cross-reference them from here.
+
+| engine | maker / country | years | vehicle | propellants | O/F | cycle | F_SL kN | F_vac kN | Pc bar | Isp_SL s | Isp_vac s | ε | dry kg | T/W | cooling | injector | ignition | feed system | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Aerojet AJ10-137 — Apollo SPS** | Aerojet-General / USA; contract 1962-04 | 1962–66; **first flight 1966** (AS-201/AS-202); crewed from Apollo 7 (1968); retired 1975 (ASTP) | Apollo Service Module | **N₂O₄ / Aerozine 50** | **1.6** *(Apollo documentation; not stated in the sources fetched — med conf.)* | **Pressure-fed** — **39.2 ft³ (1.11 m³) of gaseous helium at 3,600 psi (25 MPa)** in two tanks, regulated down | — | **91.19** (20,500 lbf) | **~6.9** `inj` (~100 psia) *(Apollo-era documentation; **not stated in the sources fetched — low conf., verify before printing**)* | — | **314.5** | **62.5:1** *(Apollo documentation; **not confirmed — verify**)*. The **sourced** dimensions are more useful: nozzle **152.82 in (3.882 m) long, exit 98.48 in (2.501 m)** | **~294** (650 lb) *(unverified — flag)* | n.p. | **ablative chamber with a radiatively cooled niobium/titanium extension** *(standard Apollo description; not confirmed in the sources fetched)* | **unlike-impinging doublet**, deliberately conservative and **unbaffled** — designed for absolute reliability, not performance | hypergolic. **No igniter, no turbopump, no valve that must move more than once.** Redundant series-parallel valve trains throughout | pressure-fed helium; burn **750 s max**, multiple restarts; two-axis gimbal | **med [C]** on F/Isp/propellants/burn time/pressurisation/nozzle dimensions; **LOW [D]** on Pc, ε, dry mass and cooling — see A.8.1 |
+| **TRW LMDE (Descent Propulsion System)** | TRW Systems, Redondo Beach CA / USA | 1964–72; Apollo 5 (1968) unmanned, Apollo 9 (1969) crewed | Apollo Lunar Module descent stage | **N₂O₄ / Aerozine 50** | **1.6** | **Pressure-fed** using **supercritical (cryogenic) liquid helium** — stored cold and dense to save tank mass, then warmed to pressurise | — | **46.7 max** (10,500 lbf); **throttleable 4.67–30.36** (1,050–6,825 lbf), i.e. **10–60%**. **The 60–100% band was prohibited in operation** because of nozzle erosion — the engine ran at full thrust or in the throttle band, never between. This detail is frequently omitted and should not be | **7.6** `inj` (110 psia) at 100%; **0.76** (11 psia) at 10% — a **10:1 chamber-pressure turndown**, the best illustration in the file of what deep throttling demands of an injector | — | **311** at full thrust; **285** at 10% | **47.5:1** (Apollo 14 and earlier); **53.6:1** (Apollo 15 and later) — the extended nozzle for the J-mission landers, long enough that it crushed on landing | **179** (394 lb) | ≈27:1 `CALC` | **ablative chamber** with a radiatively cooled skirt | **Variable-area pintle injector**, invented by **Gerard W. Elverum Jr.** at TRW. A movable pintle sleeve varies injection area with flow, holding injection velocity and mixing quality roughly constant across a 10:1 throttle range. **This is why deep throttling was possible**, and the direct ancestor of the Merlin and (by reputation) SuperDraco injectors | hypergolic | pressure-fed; **restarts demonstrated up to four** | **high [A]** — one of the best-documented blocks in the file |
+| **Bell / Rocketdyne LM Ascent Engine (APS)** | **Bell Aerosystems** (engine) with the **injector supplied by Rocketdyne** after Bell could not solve combustion instability / USA | 1964–72; Apollo 5 through Apollo 17 | Apollo Lunar Module ascent stage | **N₂O₄ / Aerozine 50** | **1.6** | **Pressure-fed** (helium). **Fixed thrust, non-gimballed, single chamber** | — | **15.6** (3,500 lbf) | **8.3** `inj` (120 psia) | — | **311** | **45.6:1** (the source gives 46:1) | **94.8** (209.1 lb) | ≈16.7:1 `CALC` | ablative | Rocketdyne **baffled impinging** design | hypergolic — **no igniter, no pumps, no gimbal, and no backup** | pressure-fed; burn **200 s max**, designed for **one restart** | **high [A]** |
+| **Aerojet AJ10-190 — Shuttle OMS** | Aerojet / USA; directly derived from the Apollo SPS | 1970s; **STS-1 1981-04-12**; retired 2011; **refurbished units repurposed for the Orion European Service Module** | Shuttle orbiter — **2 engines, one per OMS pod** | **N₂O₄ / MMH** (note: MMH, not the SPS's Aerozine 50) | **1.65** | **Pressure-fed** (helium) | — | **26.7** (6,000 lbf) | **8.6** `inj` (125 psia) | — | **316** | **55:1** | **118** (260 lb) | ≈23:1 `CALC` | regeneratively (fuel) cooled chamber with a radiatively cooled niobium extension *(standard description; **not confirmed in the sources fetched**)* | impinging doublet | hypergolic | pressure-fed. **Life: reusable for 100 missions; 1,000 starts and 15 hours cumulative burn time** — the only reusable member of the AJ10 family and one of very few reusable rocket engines of any kind | med-high [B] on F/Pc/Isp/ε/mass/O/F/life; **low** on cooling |
+| **Marquardt R-40 / R-40A** | The Marquardt Company, Van Nuys CA (→ Kaiser Marquardt → Aerojet) / USA | 1970s; **STS-1 1981-04-12**; retired 2011 | Shuttle orbiter RCS — **38 primary R-40** (14 fwd, 12 per aft pod) **plus 6 vernier R-1E** (24 lbf class) | **N₂O₄ / MMH** | ~1.6 *(not published in the sources fetched)* | Pressure-fed | — | **3.87** (870 lbf) nominal | **10.5** `inj` (152 psia) | — | **280 at ε = 22:1** per NASA N91-28200; **289 s is also widely quoted** — see A.8.2 | **22:1** | **not published** in the sources fetched | n.p. | **fuel-film cooled** with a **radiatively cooled niobium (columbium) nozzle**, silicide-coated | unlike-impinging doublet with a film-cooling ring | hypergolic; **pulse-mode capable down to very short minimum impulse bits** | pressure-fed | med [C] |
+| **Marquardt R-4D** | Marquardt → Kaiser Marquardt → **Aerojet Rocketdyne** / USA | early 1960s for Apollo; **still in production in derivative form after sixty years** | Apollo SM RCS (16, four quads), Apollo LM RCS (16), and since then a very wide range of satellites. Variants **R-4D-11, R-4D-15**, and **HiPAT** (~445 N at ~322 s) | **NTO / MMH** (Apollo-era units used NTO / Aerozine 50 or MMH depending on application) | **not published** | Pressure-fed | — | **0.490** (110 lbf) | **6.93** `inj` (100.5 psia) | — | **312** classic; **~322** for rhenium-chamber variants | **Not published** in the source. Commonly cited near 40:1–60:1 depending on variant — **do not print a number** | **3.6** (8 lb); length 300 mm, diameter 150 mm | n.p. | **fuel-film cooling** (fuel injected longitudinally down the wall) plus radiative cooling of chamber and nozzle. **Liner history in one line: molybdenum alloy → niobium (columbium) with silicide coating → iridium-lined rhenium.** The Ir/Re change raised allowable wall temperature enough to cut the film-cooling fraction and buy ~10 s of Isp | unlike-impinging doublet with film-cooling orifices | hypergolic, no igniter | pressure-fed. **Life: up to one hour continuous, 40,000 s total accumulated, 20,000 individual firings** | med-high [B]; **n.p.** on ε and O/F |
+
+### Notes and contested figures — A.8
+
+**A.8.1 Apollo SPS — four figures are unsourced.** Chamber pressure (~100 psia),
+expansion ratio (62.5:1), dry mass (~294 kg) and the cooling description are from
+memory of Apollo documentation and were **not** confirmed by any fetched source.
+**Verify against the Apollo CSM News Reference or NASA SP-4009 before
+publication.** Until then, prefer the *sourced* nozzle dimensions (3.882 m long,
+2.501 m exit) to the unsourced area ratio — they are more useful anyway.
+
+**A.8.2 Shuttle RCS R-40 Isp: 280 s vs 289 s.** NASA N91-28200 gives **280 s at a
+22:1 area ratio**; 289 s is widely quoted elsewhere, almost certainly a different
+nozzle configuration or a theoretical-versus-delivered distinction. **Use 280 s
+and cite the NASA document.** **Open action: re-read N91-28200 directly to confirm
+the figure** — it currently comes from a search summary.
+
+**A.8.3 The SPS was over-powered for the job it did.** It was originally sized to
+lift the whole spacecraft off the Moon under the **direct-ascent** mission mode;
+lunar-orbit rendezvous made it an orbital manoeuvring engine instead. It performed
+**every** lunar orbit insertion and trans-Earth injection without a failure. It is
+the canonical example of designing for single-string criticality by *removing
+mechanisms* rather than adding redundancy.
+
+**A.8.4 The LM ascent engine had no redundancy and no abort mode.** The only
+engine in history on which human survival depended with neither. It worked every
+time. Bell's combustion instability problem was severe enough to require a
+competitor's injector — a good illustration that hypergolic propellants do not
+make an engine automatically stable. Redesignated **RS-18** when reconfigured for
+LOX/methane testing in 2008 under Constellation: the same hardware, sixty years on.
+
+**A.8.5 LMDE on Apollo 13.** It performed the mid-course corrections and the
+free-return burn that brought the crew home — an application it was never designed
+for.
+
+---
+
+## A.9 Historical oddities
+
+| engine | maker / country | years | vehicle | propellants | O/F | cycle | F_SL kN | F_vac kN | Pc bar | Isp_SL s | Isp_vac s | ε | dry kg | T/W | cooling | injector | ignition | turbopump | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Reaction Motors XLR99** | Reaction Motors Inc. (later Thiokol Reaction Motors) / USA | from 1956; first X-15 flight **1960-11-15**; programme to 1968 | **North American X-15** (and X-15A-2) — an aircraft, not a launch vehicle | **anhydrous liquid ammonia (LNH₃) / LOX** — chosen for a clean, non-sooting, restartable engine in a piloted aircraft | ~1.25 *(not published; low conf.)* | GG — but the turbopump is driven by **HTP decomposed over a catalyst**, i.e. a monopropellant steam drive, like the V-2 and Redstone | **250** (57,000 lbf) max | — | **41.4** `n.s.` (600 psia) | **239** | **279** | **not published**; nozzle exit 39.3 in (998 mm) | **413** (910 lb); length 82 in (2,083 mm) | **62:1** | regenerative (ammonia) | impinging | spark/igniter with a controlled start sequence | HTP catalytic steam drive. **Throttle 50–100%, continuously variable by the pilot with a throttle lever. In-flight shutdown and restart** — required, since the X-15 was air-launched and the pilot managed the energy profile manually. Chamber temp 4,982 °F (3,023 K); flow >10,000 lb/min (4,500 kg/min); burn ~83 s (basic X-15), >150 s (X-15A-2 with external tanks) | med-high [B]; **n.p.** on ε and O/F |
+| **Bristol Siddeley Gamma 201** | Armstrong Siddeley → Bristol Siddeley → Rolls-Royce / UK | 1955–57 | **Black Knight** | **85% HTP / kerosene (RP-1)** | **8:1** — the very high O/F is characteristic of HTP, which is mostly oxygen and water by mass | GG; **HTP decomposed over a silver-plated nickel-gauze catalyst pack** to 600 °C steam and oxygen, then kerosene injected into that stream ignites spontaneously. **There is no igniter and no hypergolic slug — the catalyst pack *is* the ignition system** | **73** (16,400 lbf); **4 chambers, gimballed in opposed pairs** | — | **n.p.** | n.p. | **n.p.** | **not published** | **not published** | n.p. | regenerative (kerosene) | kerosene injected downstream of the catalyst pack into decomposed HTP — an architecture with no direct parallel in any other flown engine family | catalytic; none required | — | med-high [B] on architecture |
+| **Bristol Siddeley Gamma 301** | as above / UK | later Black Knight and Black Arrow development | Black Knight | 85% HTP / kerosene | 8:1 | as above; **4 chambers** | **76–96** (17,000–21,600 lbf) | — | **n.p.** | n.p. | **250** | n.p. | n.p. | n.p. | regenerative | as above | catalytic | burn 120 s | med-high [B] |
+| **Bristol Siddeley Gamma 8** | as above / UK | Black Arrow first flight 1969; **Prospero orbited 1971-10-28** — after the programme had been cancelled | **Black Arrow first stage** | 85% HTP / kerosene | 8:1 | as above; **8 chambers, in pairs on tangential gimbals** | **234.8** (52,785 lbf) — **CONTESTED, see A.9.1** | — | **47.4** `n.s.` (687 psia) | **251** | **265** | **not published** | **not published** | n.p. | regenerative | as above | catalytic | burn 125 s | med-high [B] on architecture; **med** on thrust |
+| **Bristol Siddeley Gamma 2** | as above / UK | Black Arrow | **Black Arrow second stage** | 85% HTP / kerosene | 8:1 | as above; **2 chambers with extended nozzles** | **64.6** (14,520 lbf) | **68.2** (15,300 lbf) | **n.p.** | n.p. | **n.p.** | **not published** | **not published** | n.p. | regenerative | as above | catalytic | burn 113 s | med-high [B] |
+| **Rocketdyne AR2-3** | Rocketdyne / USA | designed and first run in the late 1950s; **refurbished and re-tested in 1999** for the Future-X Demonstrator Engine project (Boeing X-37 Reusable Upper Stage) | **Aircraft, not launch vehicles** — North American **F-86F(R)** (M1.22 at 60,000 ft), **FJ-4**, and the **Lockheed NF-104A** aerospace trainer | **90% HTP / JP-4 or JP-5 jet fuel** — using the aircraft's own fuel as the rocket fuel is the entire point | ~7.5 *(not published; inferred from HTP practice — low conf.)* | GG, pump-fed; HTP decomposed over a catalyst drives the turbopump | **29.34** (6,600 lbf) mainstage, **variable down to 14.7** (3,300 lbf) = **50–100% throttle** on a single lever. Some sources give the family range as 13.3–26.7 kN (3,000–6,000 lbf); 6,600 lbf is the AR2-3 as tested in 1999 | — | **38.6** `n.s.` (560 psia) | **245** (condition not distinguished in the source) | — | **not published** | **not published** | n.p. | regenerative *(not directly confirmed)* | — | **catalytic** — HTP over the pack, then JP-4 injected. No igniter | **Throttle mechanism: a single lever regulating oxidiser flow to the turbopump gas generator**, changing turbopump speed and hence propellant flow — throttling by turbopump speed rather than by injector area, the opposite approach to the LMDE's variable-area pintle. Chamber temp 4,600 °F (2,538 °C) | med [C]; **n.p.** on ε, mass and O/F |
+
+### Notes and contested figures — A.9
+
+**A.9.1 Gamma 8 thrust: 234.8 kN vs 222.4 kN.** Wikipedia gives **52,785 lbf
+(234.8 kN)**; Encyclopedia Astronautica gives **222.4 kN (49,998 lbf)** — a 5%
+spread. The Astronautix figure looks like a rounded 50,000 lbf design value.
+**Use 234.8 kN and note the alternative.**
+
+**A.9.2 The Gamma reliability record.** **128 Gamma engines flew across 26 launches
+with zero failures.** Black Arrow made the UK the sixth nation to orbit a satellite
+on its own launcher, and the only nation ever to develop that capability and then
+abandon it.
+
+**A.9.3 Why HTP deserves its own section.** HTP/kerosene is storable, its exhaust
+is steam and CO₂, and the engine self-ignites — properties nothing else in this
+file combines. The price is poor Isp (245–265 s), decomposition in storage, and a
+demand for scrupulous cleanliness, since any contaminant is a catalyst.
+
+**A.9.4 XLR99's operational philosophy.** The first man-rated, throttleable,
+restartable large liquid rocket engine. Pilot-commanded throttle, in-flight
+restart, ground-checkout turnaround — the direct ancestor of every reusable-engine
+programme since, and it predates them by fifty years.
+
+**A.9.5 Two opposite throttling architectures, side by side.** LMDE throttles by
+**varying injector area** (variable-area pintle); AR2-3 throttles by **varying
+turbopump speed** (a single lever on the GG oxidiser flow). Draw the contrast
+explicitly in module 07 and module 12.
+
+---
+
+# Part B — Solid rocket motors
+
+**Every thrust figure carries an explicit `/motor` or `/vehicle` suffix and a
+`max` or `avg` tag. No exceptions, including for single-motor vehicles where it
+looks redundant.** More than half the disagreements found in the verification pass
+were not real disagreements — they were per-motor versus per-vehicle confusions,
+or maximum versus average thrust quoted without the qualifier. Titan IV and
+Ariane 5 are the worst offenders. If a number in a module is not tagged this way,
+it is not finished.
+
+**Defense motors (§B.7) are recorded strictly at architecture level**, per the
+course scope boundary: stage count, propellant *family* name, case material
+*family*, nozzle *concept*, and only those thrust/Isp/mass figures that appear in
+open, citable, unclassified sources. No formulations beyond NASA fact-sheet level,
+no processing, no weapon-component dimensions. Those entries are deliberately
+shorter than the civil-launcher entries; that is the intended outcome, not a gap
+to be filled later.
+
+**Do-not-print flags** are carried in the notes under each table and collected in
+§B.9. Where the worksheet says `NEEDS PRIMARY`, it means the entry is not yet fit
+to quote in a module.
+
+## B.1 Large segmented boosters
+
+| motor | maker / country | years | vehicle | propellant family | grain | case (material, segments) | nozzle (material, ε, TVC) | F_max kN | F_avg kN | Pc max/avg bar | Isp SL / vac s | burn s | propellant kg | total kg | mass fraction | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Space Shuttle SRB / RSRM** | Morton Thiokol → Thiokol → ATK → Northrop Grumman, Brigham City / Promontory UT / USA | SRM **STS-1 1981-04-12**; RSRM (post-Challenger) **STS-26 1988-09-29**; last **STS-135 2011-07-08** | Space Shuttle, **2 per stack** | **PBAN-bound AP/Al composite (APCP)**. Published composition **AP 69.6%, Al 16%, Fe₂O₃ 0.4%, PBAN 12.04%, epoxy curing agent 1.96%** by mass (**A**); competing figure AP 69.8 / Fe₂O₃ 0.2 (**C**) — see B.1.1 | **Forward segment: 11-point star** perforation. **Aft segments: double-truncated-cone** perforation. The star tailors the head-end regressive-then-neutral trace that limits max-Q loads (**A**) | **D6AC high-strength low-alloy steel**, ~**12.7 mm (0.5 in)** nominal membrane wall (one source says ~2 cm — see B.1.2). **Segmented: 11 casting segments assembled into 4 flight segments joined by 3 field joints**; factory joints inside each flight segment (**B**) | carbon-phenolic and silica-phenolic ablative liners on a steel/composite shell; **submerged, flexible-bearing (flexseal) gimbal**. **ε 7.72 initial, 7.16 on later motors** (**C**) — both are real, the nozzle changed. **TVC ±8° pitch and yaw**, two hydraulic actuators fed by two hydrazine APU/HPUs per booster (**B**) | **≈ 14,700** (3,300,000 lbf) `/motor` `max` SL, at about t+20 s (**B**); **≈ 12,500** (2,800,000 lbf) `/motor` at liftoff | not separately published | **≈ 62.5 avg** (906.8 psi) nominal; **peak ~64** (**B**) | **242 SL / 268 vac** (**B**) | **≈ 123–124** (action time to 50 psi) (**A**) | **≈ 500,000** (1,100,000 lb) (**B**) | **≈ 590,000** gross (1,300,000 lb); **≈ 91,000** inert (200,000 lb) (**B**) | **≈ 0.85** `CALC` | **B** overall |
+| **SLS five-segment booster (RSRMV)** | Northrop Grumman, Promontory UT / USA | DM-1 static test 2009; **first flight Artemis I 2022-11-16** | SLS Block 1 / 1B, **2 per vehicle** | **PBAN-bound AP/Al — unchanged from Shuttle** (**A**) | not published separately; the fifth segment is added propellant, not new chemistry | **Steel — refurbished Shuttle-era D6AC case segments**, planned for the first eight SLS flights. **5 segments** (**A**). Length 177 ft (53.9 m), diameter 12 ft (3.71 m) (**A**) | **new nozzle design** vs RSRM; **gimballed nozzle, hydraulic** (Shuttle-heritage TVC) (**B**). ε not published | **≈ 16,000** (3,600,000 lbf) `/motor` — **NASA's page does not say max or avg; treat as `max`** (**A**) | not published | not published | **not published on the NASA reference page**; ~269 s vac commonly quoted (**C**) | **126** (**A**) — see B.1.3 | **not published on the NASA reference page**; ≈ 635,000 kg (1.4 million lb) is the widely repeated figure (**C**) | **≈ 726,000** (1.6 million lb) gross (**A**) | not computable from published figures | **A** on the NASA-page figures; **C** on Isp and propellant mass |
+| **SLS BOLE booster** — **IN DEVELOPMENT; ALL FIGURES ARE CONTRACTOR CLAIMS** | Northrop Grumman / USA | **DM-1 full-scale static test 2025-06-26. Not flown** (**A**) | intended: SLS Block 2, from the ninth SLS flight, when Shuttle-heritage steel cases run out (**B**) | **HTPB**-bound AP/Al, replacing PBAN (**B**) | not published | **Carbon-fibre composite**, replacing refurbished steel. DM-1 cases used **IM7/T300** fibre; DM-2 onward planned in **T1100**. **5 segments** (**B**) | **Electric** thrust vector control, replacing hydraulic (**B**) | DM-1 test: **"more than 4 million pounds of thrust"** (≈17,800 kN) `/motor` `max` — **claim**; **an anomaly was observed near the end of the burn (nozzle)** (**B**) | — | — | — | DM-1 burn "just over two minutes"; 156 ft motor (**B**) | — | — | — | **B (claim)** |
+| **Ariane 5 EAP — P230 / P238 / P241** | Europropulsion (SNPE/Regulus casting; Aérospatiale/EADS cases) / France–Italy (ESA) | 1996–2023 | Ariane 5, **2 per vehicle** (**A**) | **HTPB-bound AP/Al**; ESA-published composition **AP 68%, Al 18%, HTPB 14%** (**B**) | cast in three segments; **forward segment star-shaped, aft segments cylindrical bore** (**C**) | **Steel**, segmented, **3 segments bolted together** (**A**). Length/diameter **31.6 m × 3.06 m** (**B**) | carbon-phenolic ablative, **flexible-joint (flexseal)**; **ε 9.7 originally, raised to 11.0 after 1997**; **TVC gimballed nozzle up to 7.3°**, hydraulic — see B.1.5 (**B**) | **P238 ≈ 6,650; P241 ≈ 7,080** `/motor` `max` SL (**C**) | not published | not published — **NEEDS PRIMARY** | **≈ 275 vac** (**B**) | **≈ 130 (P238), ≈ 140 (P241)** (**C**) | **P230 237,800; P238 238,000; P241 241,000** — **the number in the name *is* the propellant mass in tonnes** (**B**). See B.1.4 | empty mass ≈ **33,000** (P241) (**C**) | not computed | **B** on architecture; **C** on thrust/burn/empty mass |
+| **P120C** | Europropulsion (Avio + ArianeGroup JV); casting at Regulus, Kourou and Avio, Colleferro / Italy–France (ESA) | **first flight Vega-C 2022-07-13** | Vega-C first stage (**1**); Ariane 6 boosters (**2 or 4**) | **HTPB 1912** — AP/Al/HTPB. Composition **Al 19%, AP 69%, HTPB 12%** — "1912" encodes 19% Al, 12% binder (**B**) | **monolithic, single cast** (**B**) | **Carbon-fibre filament-wound, monolithic — one piece, no segments, no field joints** (**B**). Manufacture: ≈3,500 km of carbon fibre wound over ≈33 days in a climate-controlled hall (**C**). 13.5 m × 3.4 m (**B**) | carbon-phenolic, flexseal joint (**C**); **electromechanical actuators on a flexible-joint nozzle** (**B**). ε not published | **≈ 4,780** `/motor` `max` **vacuum** (**B**) | not published | **not published — NEEDS PRIMARY** (Avio data sheet) | **≈ 280** (**B**) | **≈ 130–140** (**C**) | **141,400** (**B**) | **153,000** gross; **11,200** inert (**B**) | **0.924** `CALC` | **B** |
+| **P160C** | Europropulsion / Italy–France | in development / early flight | later Ariane 6, Vega-E | HTPB 1912 | monolithic | carbon-fibre filament-wound monolithic | as P120C | not published | — | — | — | — | **≈ 160,000** | — | — | **C — label as in development** |
+
+### Notes and contested figures — B.1
+
+**B.1.1 Shuttle SRB propellant composition: 69.6/0.4 vs 69.8/0.2.** Both sum to
+100%; the difference is iron-oxide **burn-rate catalyst** loading, 0.2 percentage
+points. Print the NASA fact-sheet figure (**AP 69.6, Al 16.0, Fe₂O₃ 0.4, PBAN
+12.04, epoxy 1.96**) and footnote the variant. Then make the real teaching point:
+iron oxide is a burn-rate catalyst, so a 0.2% difference in its loading is not a
+rounding question — it is a several-percent change in burn rate and therefore in
+chamber pressure and thrust trace. That is the number worth checking.
+
+**B.1.2 Shuttle SRB case wall: 12.7 mm vs "2 cm".** The 0.5 in membrane thickness
+is the figure consistent with the published burst-pressure and case-mass numbers;
+2 cm (Wikipedia) is plausibly a local thickness at a joint. **Present 12.7 mm
+nominal membrane and note that joint regions are thicker.**
+
+**B.1.3 SLS booster burn time: 126 s vs ~123 s.** NASA's reference page gives
+**126 s**; several secondaries give ~123 s, apparently carrying over the Shuttle
+figure. **Use 126 s.**
+
+**B.1.4 Ariane 5 EAP propellant mass: 237.8 / 238 / 241 t, NOT 270 t.** Wikipedia's
+Ariane 5 article reports "propellant mass 270,000 kg" for P238 and "273,000 kg"
+for P241. **These are gross masses, mislabelled.** The designation P*nnn* means
+*nnn* tonnes of propellant, by construction. Present the designation-consistent
+value (**237.8 / 238 / 241 t**) and add a footnote naming the error, because
+students will find the wrong number in thirty seconds and need to know why it is
+wrong. **Do not propagate 270/273 t as propellant mass.**
+
+**B.1.5 Ariane 5 EAP nozzle deflection: 6° vs 7.3°.** Quoted as 6° in some places,
+7.3° in the ESA-derived text. **Use 7.3° and footnote the alternative.**
+
+**B.1.6 The Shuttle SRB field joint — the architectural story.** The original
+tang-and-clevis joint carried two fluorocarbon O-rings, primary and secondary, in
+the clevis. Under ignition pressure the joint **rotated**: tang and clevis legs
+deflected apart, momentarily opening the gap the O-rings had to seal. The rings
+had to extrude into the gap faster than it opened — a rate-dependent seal, and the
+extrusion rate of a fluorocarbon elastomer is strongly temperature-dependent
+(**B**). On **STS-51-L, 1986-01-28**, cold-stiffened O-rings failed to seat in the
+aft field joint of the right-hand SRB; hot gas blew by, burned through the joint,
+and the plume impinged on the External Tank aft attachment and the ET itself
+(**B**). The **RSRM redesign** added a **capture feature** on the tang — an inner
+lip engaging the inside clevis leg to mechanically limit rotation — plus a **third
+O-ring** on that capture feature, redesigned joint insulation, and **joint
+heaters** (**B**). The capture-feature concept is said to derive from the "double
+tang" joint of the abandoned filament-wound case booster (**C** for that
+provenance specifically). This is the canonical worked example of *"the seal was
+not the problem; the rotation was the problem"* and belongs in the joint
+failure-modes section (module 22 / module 34), not the materials section.
+
+**B.1.7 What the segmented steel case costs.** Mass fraction **0.85** for the
+Shuttle SRB against **0.924** for the monolithic filament-wound P120C. That
+number-pair is the single most useful argument in Part III for why composite
+monolithic construction won for everything that does not have to be shipped by
+rail. Once lit there is no throttling and no shutdown.
+
+**B.1.8 SLS RSRMV — what changed and what did not.** Fifth propellant segment
+(25% more propellant), new nozzle, **asbestos-free insulation** (the Shuttle
+motor's insulation used asbestos-filled NBR), new liner configuration, new
+avionics, and no parachutes or recovery. The pedagogically interesting point is
+that a 25% propellant increase in the same case diameter is bought almost entirely
+with length and a redesigned nozzle, **not with propellant chemistry** — it is the
+same PBAN formulation as 1981.
+
+**B.1.9 BOLE: the anomaly must travel with the claim.** +11% total impulse, "more
+than 4 million pounds of thrust", composite case and electric TVC are all
+contractor figures for a motor that has static-fired **once, with an anomaly near
+the end of the burn**. The anomaly must appear in the same paragraph as the
+performance claim, never in a footnote.
+
+**B.1.10 Open verification actions.** Shuttle SRB: re-quote the composition from
+the NASA STS news reference (503 during the pass; web.archive.org unreachable from
+this environment). SLS RSRMV: the NASA fact-sheet PDFs would not text-extract
+cleanly and the automated extraction was visibly corrupted (e.g. "length 177
+inches" for a 177-foot booster) — **do not quote the PDF-derived numbers; re-open
+the PDF by hand**. Ariane 5 EAP: fetch the ESA EAP page (403 from this
+environment) and ESA Bulletin 104, *First Test Firing of an Ariane-5 Production
+Booster*, which should settle thrust trace, chamber pressure and burn time.
+P120C: Avio's own data sheet for the thrust trace and chamber pressure.
+
+---
+
+## B.2 Titan solid boosters — UA120 family and SRMU
+
+**Every number in this section is confidence C and NEEDS PRIMARY.** This is the
+weakest entry in Part B. The architecture is confidence B; the numbers are not
+fit to tabulate in a module until the CSD/Hercules AIAA papers or the Titan IV
+User's Guide have been read.
+
+| motor | maker / country | years | vehicle | propellant family | grain | case (material, segments) | nozzle (material, ε, TVC) | F_max kN | F_avg kN | Pc | Isp SL / vac s | burn s | propellant kg | total kg | mass fraction | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **UA1205** | United Technologies Chemical Systems Division (CSD) / USA | 1965–1982 | Titan IIIC / IIID / IIIE | **PBAN-bound AP/Al** | not published | **Steel, segmented, 5 segments** — the last digit of the designation is the segment count. Diameter **120 in (3.05 m)**, the "120" in the name | **LITVC — liquid injection thrust vector control**, N₂O₄ injected through ports in the nozzle exit cone from external nacelles. **No moving nozzle.** Also **pyrotechnic thrust-termination ports in the forward dome** (retained for the crewed MOL / Titan IIIM configurations) | **≈ 5,300** (1,200,000 lbf) `/motor` `avg` SL | as left | not published | not published | **≈ 115** | not published | not published | — | **C** on numbers, **B** on architecture |
+| **UA1206** | CSD / USA | 1982–1992 | Titan 34D, Commercial Titan III | PBAN AP/Al | not published | steel, segmented, **6 segments** | LITVC | not published | not published | not published | not published | not published | not published | not published | — | **B** on architecture only |
+| **UA1207** | CSD / USA | first flight 1989 | Titan IV-A | PBAN AP/Al | not published | steel, segmented, **7 segments** | LITVC | Wikipedia infobox **14,234** (3,200,000 lbf) is **`/vehicle` (two boosters), not `/motor`**; **per motor ≈ 7,100** `max` — see B.2.1 | not published | not published | **272 vac** (**C**) | **120** (**C**) | not published | not published | — | **C** on numbers, **B** on architecture |
+| **SRMU** | Hercules Aerospace → Alliant Techsystems / USA | **first flight 1997** (Titan IV-B) | Titan IV-B | **HTPB**-bound AP/Al — a generation change from the UA120's PBAN | not published | **Graphite/epoxy filament-wound composite, 3 segments** | **Gimballed (movable) nozzle** — abandoning LITVC | Wikipedia infobox **15,120** (3,400,000 lbf) is again **`/vehicle`**; **≈ 7,600 `/motor`** `max` | not published | not published | **286** (**C**) | **≈ 140** (**C**) | not published | not published | — | **C** on numbers, **B** on architecture |
+
+### Notes — B.2
+
+**B.2.1 Titan thrust figures are per-vehicle presented as per-motor.** Wikipedia's
+Titan IV infobox gives "14.234 MN" for the UA1207 and "15.12 MN" for the SRMU;
+**both are two-booster totals presented as if they described one motor.** This is
+the single most common error in the secondary literature on solids and it is a
+factor of two. Halve them for a per-motor figure and say you have done so.
+
+**B.2.2 UA1205 → SRMU is the cleanest side-by-side in the whole solid-motor
+field.** Same vehicle, same job, same diameter class, but **PBAN → HTPB**, **steel
+→ graphite/epoxy**, **LITVC → gimballed nozzle**, **5–7 segments → 3 segments**.
+Roughly **+14 s of Isp** and a large inert-mass saving. Use it as the Part III
+worked comparison (module 26).
+
+**B.2.3 SRMU development was famously troubled.** A case failed during a **1991
+structural test, killing one worker**, and the program slipped years — which is
+why early Titan IV-B flights used leftover UA1207s. **Confidence C; needs a
+primary (GAO report or AIAA paper) before it is stated in a module.**
+
+---
+
+## B.3 Vega, GEM, Castor and Pegasus/Orion motor families
+
+| motor | maker / country | years | vehicle / stage | propellant family | case (material, segments) | nozzle / TVC | F_max kN | Isp s | burn s | propellant kg | gross kg | mass fraction | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **P80FW** | Avio / Italy (ESA) | Vega from 2012 | Vega stage 1 | HTPB 1912 AP/Al | **graphite-epoxy filament wound**, monolithic | carbon-phenolic with **carbon–carbon throat insert**; flexible joint, **electromechanical TVC** | **2,261** `/motor` `max` | **280** | **107** | **88,365** | **~95,800** | 0.922 `CALC` | **B** |
+| **Zefiro 23** | Avio / Italy | Vega from 2012 | Vega stage 2 | HTPB 1912 | carbon-epoxy filament wound, 1.9 m | as above | **1,120** `/motor` `max` | **287.5** | **77.1** | **23,814** | **26,300** | 0.905 `CALC` | **B** |
+| **Zefiro 9A** | Avio / Italy | Vega and Vega-C | Vega / Vega-C stage 3 | HTPB 1912 | carbon-epoxy filament wound, 1.9 m | as above | **317** `/motor` `max` | **295.9** | **119.6** | **10,567** | **12,000** | 0.881 `CALC` | **B** |
+| **Zefiro 40** | Avio / Italy | Vega-C from 2022 | Vega-C stage 2 | HTPB 1912 | carbon-epoxy filament wound, 2.4 m | as above | **1,304** `/motor` `max` | **293.5** | **92.9** | **36,239** | **40,477** | 0.895 `CALC` | **B** |
+| **GEM-40** | Hercules → ATK → Northrop Grumman / USA | 1990-11-26 → 2018-09-15 | Delta II strap-on | HTPB-bound AP/Al | **CFRP filament-wound monolithic** | **fixed** | **643.8** `/motor` `max` | **274** | **63.3** | **11,770** | **12,962** | **0.908** `CALC` | **B** |
+| **GEM-46** | NG / USA | 1998-08-26 → 2011-09-10 | Delta III, Delta II Heavy | HTPB AP/Al | CFRP filament-wound monolithic | **fixed + vectorable variant** | **611** `/motor` `max` — *lower* than GEM-40 despite 43% more propellant; see B.3.1 | **277.8** | **75.9** | **16,860** | **18,860** | **0.894** `CALC` | **B** |
+| **GEM-60** | NG / USA | 2002-11-20 → 2019-08-22 | Delta IV M+ | HTPB AP/Al | CFRP filament-wound monolithic | fixed or vectorable | **1,248.9** `/motor` `max` | **275** | **90.8** | **29,698** | **33,183** | **0.895** `CALC` | **B** |
+| **GEM-63** | NG / USA | 2020-11-13 → 2026-07-02 | Atlas V | HTPB AP/Al | CFRP filament-wound monolithic | fixed | **1,649.6** `/motor` `max` | **279.1** | **97.6** | **44,087** | **49,342** | **0.894** `CALC` | **B** |
+| **GEM-63XL** | NG / USA | 2024-01-08 → active | Vulcan Centaur | HTPB AP/Al | CFRP filament-wound monolithic; **"the longest monolithic rocket motor produced to date"** (NG) | fixed (63XLT vectorable, **cancelled**); nozzle exit dia. 60 in | **2,061** `/motor` `max` — NG states 15–20% more thrust than GEM-63 | **280.3** | **87.3** | **47,853** (NG: 105,497 lb — both agree) | **53,030** | **0.902** `CALC` | **B→A** for the propellant mass |
+| **Castor 120** | Thiokol → ATK → NG / USA | Athena/Taurus era | Athena I/II stage 1; Taurus stage 0 | **Class 1.3 HTPB/AP** | filament-wound composite | movable nozzle | **1,900** `/motor` `max` | **280** | **83.4** | not published | not published | — | **B** |
+| Castor 1 (TX-33) | Thiokol / USA | Sergeant heritage | Scout S2, Delta strap-on | PBAA/AP | — | — | not published | not published | 27 | — | — | — | **C — do not tabulate** |
+| Castor 2 (TX-354) | Thiokol / USA | — | Delta, Scout | PBAN/AP | — | — | not published | not published | ~37 | — | — | — | **C — do not tabulate** |
+| Castor 4 / 4A / 4B | Thiokol / USA | — | Delta 3914/3920 strap-ons, Atlas IIAS (4A/4B), Shavit-class | HTPB/AP (4A/4B) | — | — | ~430–478 `/motor` | ~266–280 | ~56 (4A) | — | — | — | **C — do not tabulate** |
+| Castor 30 | ATK → NG / USA | — | Antares stage 2 | HTPB/AP | — | — | not published | not published | not published | — | ≈14,000 | — | **C — do not tabulate** |
+| Castor 30XL | ATK → NG / USA | — | Antares stage 2 | HTPB/AP | — | — | not published | ~300 | not published | — | ≈25,000 | — | **C — do not tabulate** |
+| **Orion 50S** | Orbital Sciences → NG / USA | Pegasus from 1990 | Pegasus stage 1 | HTPB/Al composite | **graphite-epoxy filament wound** | delta wing + **gimballed nozzle** | **500** `/motor` `max` | not published | **75.3** | not published | — | — | **C** |
+| **Orion 50SXL** | OSC → NG / USA | Pegasus XL | Pegasus XL stage 1 | HTPB/Al | graphite-epoxy filament wound | wing + gimballed nozzle | **726** `/motor` `max` | **284.6** | **68.6** | **15,014** | — | — | **B** |
+| **Orion 50XL** | OSC → NG / USA | Pegasus XL | Pegasus XL stage 2 | HTPB/Al | graphite-epoxy filament wound | **electromechanically gimballed** | **196** `/motor` `max` | **283.8** | **69.4** | **3,925** | — | — | **B** |
+| **Orion 38** | OSC → NG / USA | Pegasus | Pegasus stage 3 | HTPB/Al | graphite-epoxy filament wound | electromechanically gimballed | **36** `/motor` `max` | **281.7** | **68.5** | **770** | — | — | **B** |
+
+### Notes — B.3
+
+**B.3.1 GEM-46 has lower max thrust than GEM-40 despite 43% more propellant**,
+because the burn time is longer. This is a genuine design choice — lower thrust,
+longer burn, better for the Delta III trajectory — **not a transcription error**.
+Flag it in the module as an example that "bigger motor" does not mean "more
+thrust."
+
+**B.3.2 Castor: only Castor 120 is quotable.** Every other Castor row above is
+confidence **C** and **must not be tabulated in a module yet**; the Wikipedia
+article is unusually thin and gives no thrust, Isp or propellant mass for most
+variants. **Castor 120 is the clearest public case of an ICBM first-stage motor
+being commercialised essentially unchanged** — it is a direct derivative of the
+**Peacekeeper stage-1 motor**, with the architecture (HTPB, filament-wound
+composite case, movable nozzle) carried straight over. Use it to make the point
+that *the architecture is what transfers, not a formulation*.
+
+**B.3.3 Vega flight anomalies — record these, they are the teaching value.**
+- **Vega VV15, 2019-07-11 (FalconEye 1):** Zefiro 23 second-stage motor failure
+  shortly after ignition; vehicle lost. (**B**)
+- **Vega-C VV22, 2022-12-20:** Zefiro 40 under-pressure at second-stage burn;
+  vehicle lost. The independent inquiry attributed it to unexpected erosion of the
+  **carbon–carbon nozzle throat insert**, traced to an insert-material supplier
+  change. (**C** on the attribution detail — **NEEDS PRIMARY**: the
+  ESA/Arianespace independent enquiry commission press release.) This is the best
+  modern example available of *"a materials qualification decision in a
+  subcomponent destroyed a launch vehicle"* and belongs in both the
+  nozzle-materials (module 24) and quality-assurance (module 25) sections.
+
+**B.3.4 Zefiro family common architecture.** 1.9 m (Z23, Z9A) or 2.4 m (Z40)
+carbon-epoxy filament-wound case, **low-density EPDM insulation**, carbon-phenolic
+nozzle with a **carbon–carbon throat insert**, flexible nozzle joint with
+**electromechanical TVC**, HTPB 1912 propellant throughout. (**B**)
+
+**B.3.5 Pegasus/Orion record.** Northrop Grumman states 14 Orion variants, ~500
+delivered, first flight 1990, **zero flight failures across 100+ launches**
+(**B**). The case-material and nozzle details are **C** — **NEEDS PRIMARY**
+(Pegasus User's Guide).
+
+**B.3.6 Open verification action — GEM chamber pressures and expansion ratios are
+missing** from every GEM row. The Northrop Grumman *Propulsion Products Catalog*
+PDF would supply them; it would not text-extract in this environment.
+
+---
+
+## B.4 Upper-stage and apogee-kick motors
+
+| motor | maker / country | years | vehicle / use | propellant family | case | nozzle (ε, TVC) | F kN | Isp vac s | burn s | propellant kg | gross kg | inert kg | mass fraction | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Star 48B (TE-M-711-9)** | Thiokol Elkton → Northrop Grumman / USA | Star 48 (TE-M-711) 1980–85; **Star 48B 1985–** | PAM-D upper stage on Delta II and Shuttle-deployed satellites; **New Horizons third stage** | **TP-H-3340 (HTPB/AP/Al)** — **C, NEEDS PRIMARY** | **Titanium (6Al-4V)** — **C, NEEDS PRIMARY** | carbon-phenolic, **fixed** (Star 48BV adds TVC). **ε ≈ 47.7 short nozzle / 54.8–70.4 long nozzle** | **≈ 66.0–66.4** `/motor` vac (within quoting noise) | **286.2 (short nozzle) / 292.2 (long nozzle)** — **both correct; never quote "Star 48B Isp" without the nozzle.** See B.4.1 | **≈ 87** | **2,009–2,011** | **≈ 2,137** | **≈ 128 — NOT 28.** See B.4.1 | **≈ 0.94** | **B** on masses/thrust; **C** on Isp/ε |
+| **Star 48BV** | Thiokol → NG / USA | — | Minotaur IV+ and Minotaur V | as Star 48B | titanium | **thrust-vectoring, non-spinning variant** | as Star 48B | as Star 48B | — | — | — | — | — | **B** |
+| **Star 37 family** (37E, 37F, 37FM, 37XFP) | Thiokol → NG / USA | — | apogee-kick, 37 in (0.94 m) class; **Star 37FM flew as the Lunar Prospector injection motor** | TP-H-3340-class HTPB | titanium or steel | fixed carbon-phenolic | not published | roughly **286–290** | not published | not published | not published | not published | — | **C — NEEDS PRIMARY. Do not put Star 37 numbers in a module from this file** |
+| **Orbus 21D** | United Technologies / CSD → Pratt & Whitney / USA | — | Athena II second stage | Class 1.3 HTPB/AP | not published | not published | **194** `/motor` vac | **293** | **150** | not published | not published | — | — | **C — do not tabulate** |
+| **Orbus 6 / Orbus 21** | UTC/CSD → P&W / USA | IUS era | Inertial Upper Stage stages 2 and 1 respectively | HTPB/AP | **Kevlar-epoxy** | **extendable exit cone (EEC)**, gimballed nozzle | not published | not published | not published | not published | not published | — | — | **C — NEEDS PRIMARY** (Boeing IUS documentation or the NASA IUS user's guide) |
+
+### Notes and contested figures — B.4
+
+**B.4.1 Star 48B — a genuinely contested motor.**
+
+| quantity | value A | value B | note |
+|---|---|---|---|
+| Isp vac | **286.2 s** | **292.2 s** | **Both correct** — short-nozzle and long-nozzle variants. Never quote "Star 48B Isp" without the nozzle |
+| ε | 47.7 | 54.8 / 70.4 | Same cause |
+| Thrust | 66.0 kN | 66.4 kN | Within quoting noise |
+| **Inert mass** | **28 kg** `[JM-LV]` | **126 kg** `[EA]` | **Cannot both be right.** 2,137 − 2,009 = **128 kg**, which supports the ~126 kg figure; **the 28 kg figure is almost certainly a dropped digit.** Use **≈128 kg**, mass fraction ≈ 0.94 |
+
+The short-nozzle variant (ε ≈ 47.7) was built to fit inside the Shuttle PAM-D
+cradle; the long-nozzle variant is the higher-performing motor. Present both,
+always with the ε, and use the pair as the worked example for **"Isp is a property
+of the motor *and* its nozzle, not of the propellant"** (module 24).
+
+**B.4.2 The IUS extendable exit cone** is the flight-proven reference for the EEC
+concept in a solid motor and is the example to use in the nozzle module — but the
+numbers are **C** and need a primary source.
+
+---
+
+## B.5 Scout, Indian, Japanese and Israeli motors
+
+| motor | maker / country | vehicle / stage | propellant family | case | nozzle / TVC | F kN | Isp s | burn s | propellant kg | gross kg | mass fraction | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Algol** | Aerojet General / USA | Scout A stage 1 (**Polaris heritage**) | AP composite | not published | not published | **564.25** `/motor` vac | not published | **47** | not published | **11,600** | — | **C — NEEDS PRIMARY** |
+| **Castor** | Thiokol / USA | Scout A stage 2 (**Sergeant heritage**) | PBAN/AP | not published | not published | **258.92** `/motor` vac | not published | **37** | not published | **4,424** | — | **C** |
+| **Antares** | Allegany Ballistics Lab / Hercules / USA | Scout A stage 3 | AP composite | not published | **spin-stabilised, no TVC** | **93.09** `/motor` vac | not published | **36** | not published | **1,400** | — | **C** |
+| **Altair** | Allegany Ballistics Lab / USA | Scout A stage 4 | AP composite | not published | **spin-stabilised, no TVC** | **22.24** `/motor` vac | not published | **28** | not published | **275** | — | **C** |
+| **PSLV PS1 (S139)** | ISRO / VSSC / India | PSLV core (also GSLV) | **HTPB/AP/Al** | **M250 maraging steel, segmented** | **SITVC — secondary injection TVC using aqueous strontium perchlorate**, injected into the exit cone for pitch and yaw; roll handled by a separate liquid RCS module. Fixed nozzle. Diameter 2.8 m | **4,846.9** `/motor` `max` | **237 SL / 269 vac** (**C**) | **≈ 110** (PSLV) / **100** (GSLV) | **138,200** | inert **30,200** | **0.821** `CALC` | **B** on architecture and propellant mass; **C** on thrust/Isp/burn |
+| **PSOM (S9)** | ISRO / India | PSLV strap-on | HTPB/AP/Al | not published | some carry SITVC, others fixed | **510** `/motor` | not published | **44** | **9,000** | not published | — | **C** |
+| **PSOM-XL (S12)** | ISRO / India | PSLV-XL strap-on; 12 m × 1 m | HTPB/AP/Al | not published | some SITVC | **703.5** `/motor` | not published | **70** | **12,200** | not published | — | **C** |
+| **LVM3 S200** | ISRO / India | LVM3 boosters, **2 per vehicle** — **the best-documented non-US large segmented solid** | **HTPB/AP** | **M250 maraging steel, 3 segments**. 25 m × 3.2 m | **flex nozzle, ±8°, electro-hydraulic actuators** | **5,150** `/motor` `max`; **3,578.2** `/motor` `avg` — **max/avg = 1.44**, a strongly progressive-then-regressive trace quite unlike the Shuttle SRB | **274.5 vac** | **128** | **205,000** each. **Published grain split: head-end segment 27,100; middle 97,380; nozzle-end 82,210** | not published | — | **B** |
+| **M-14** | ISAS / IHI Aerospace / Japan | M-V stage 1 (1997–2006) | HTPB-bound composite (BP-207 family) | **HT-230M high-strength steel** | **movable nozzle TVC** | **3,780** `/motor` vac | **246** | **46** | not published | not published | — | **C — NEEDS PRIMARY** |
+| **M-24** | ISAS / IHI / Japan | M-V stage 2 | HTPB composite | **CFRP filament-wound** | not published | **1,245** `/motor` vac | **203 — IMPLAUSIBLE, DO NOT PRINT.** See B.5.1 | **71** | not published | not published | — | **D** |
+| **M-34 / M-34b** | ISAS / IHI / Japan | M-V stage 3 | HTPB composite | CFRP filament-wound | **carbon–carbon extendable exit cone (EEC)** — one of very few flight-proven solid-motor EECs outside the US | **294** `/motor` vac | **301** (M-34b ≈ 301 vac) | **102** | not published | not published | — | **C** |
+| **KM-V1** | ISAS / IHI / Japan | M-V stage 4 | HTPB composite | CFRP | not published | **51.9** `/motor` vac | **298** | **73** | not published | not published | — | **C** |
+| **SRB-A3** | IHI Aerospace / Japan | Epsilon stage 1 — the **H-IIA/H-IIB strap-on booster reused as an orbital first stage**, which is the whole cost argument for Epsilon | HTPB composite | **CFRP filament-wound monolithic** | **movable nozzle** | **2,271** `/motor` `max` | **284** | **116** | **65,900** | not published | — | **B** |
+| **M-35** | IHI Aerospace / Japan | Epsilon stage 2 (descends from the M-V upper stages) | HTPB composite | CFRP | not published | **445** `/motor` `max` | **295** | **129** | not published | not published | — | **C** |
+| **KM-V2c** | IHI Aerospace / Japan | Epsilon stage 3 | HTPB composite | CFRP | not published | **99.6** `/motor` `max` | **299** | **91** | **2,500** | not published | — | **C** |
+| **LK-1 (stage 1)** | Israel Military Industries / Israel | Shavit stage 1 | HTPB | not published | not published | **553.8** `/motor` | **268** | **55** | not published | not published | — | **C — NEEDS PRIMARY** |
+| **LK-1 (stage 2)** | IMI / Israel | Shavit stage 2 | HTPB | not published | not published | **515.8** `/motor` | **268** | **55** | not published | not published | — | **C** |
+| **RSA-3-3** | Rafael / Israel | Shavit stage 3 | solid (family not published) | not published | not published | **58.6** `/motor` | **298** | **94** | not published | not published | — | **C** |
+| **LK-4** (optional 4th stage) | — / Israel | Shavit stage 4, **liquid** | hydrazine | — | — | **0.402** `/motor` | **200** | **800** | — | — | — | **C** |
+| **FG-112** | CASC / China | Long March 6A strap-on, 4 per vehicle; 15.1 m × 2.0 m | not published | not published | not published | **1,214** `/motor` `max`; **4,828** `/vehicle` | not published | not published | not published | not published | — | **C** |
+
+### Notes and contested figures — B.5
+
+**B.5.1 M-V second stage Isp of 203 s — DO NOT PRINT.** Wikipedia's M-V infobox
+gives the M-24 an Isp of 203 s. That is not physically credible for an HTPB/AP/Al
+upper-stage motor with a high-expansion nozzle sitting between a 246 s stage and a
+301 s stage. It is almost certainly a transcription error (possibly a sea-level or
+a mis-unit figure). Expected value is ~282–292 s. **Either state "≈285 s
+(uncorroborated)" with a visible caveat, or omit the M-24 Isp entirely and say the
+source data is inconsistent. Printing a wrong number with a caveat is worse than
+printing no number.** Flagged unresolved until a JAXA source is read.
+
+**B.5.2 Scout is the reference case for spin stabilisation in place of TVC.**
+Stages 3 and 4 were spun up and flown unguided, which removes the actuator, the
+hydraulics and the mass, at the cost of injection accuracy. It is also the heritage
+line: **Algol from Polaris, Castor from Sergeant.** Architecture confidence **B**;
+the numbers are **C** — **NEEDS PRIMARY** (the NASA Scout User's Manual, on NTRS).
+
+**B.5.3 The S139's SITVC is a genuinely distinctive choice.** It is LITVC with a
+dense, non-toxic, cheap injectant (aqueous strontium perchlorate), and it lets a
+very large motor keep a fixed nozzle. Worth a subsection in module 24.
+
+**B.5.4 S200's published per-segment grain split** (27,100 / 97,380 / 82,210 kg)
+is unusually generous documentation and makes it a good worked example for
+grain-design and thrust-trace problems (module 21).
+
+**B.5.5 GSLV.** Same S139 core as PSLV (138,200 kg HTPB, 4,846.9 kN, Isp 237 s),
+burn 100 s, but with four **liquid** L40H strap-ons (N₂O₄/UDMH, 42,700 kg each,
+760 kN, 154 s, Isp 262 s) rather than solid strap-ons. (**C**)
+
+**B.5.6 Chinese solids — keep to a paragraph, do not tabulate.** Long March 6A's
+FG-112 is the only entry with even confidence C. **Long March 11 (CZ-11)** is an
+all-solid four-stage launcher derived from road-mobile missile technology; open
+specifications are inconsistent and no set could be verified — **omit it from the
+textbook table rather than publish confidence-D numbers.** The CZ-3/4 families use
+**no** solid strap-ons (they are hypergolic).
+
+**B.5.7 M-V context.** At retirement M-V was the largest all-solid orbital
+launcher ever flown and had the highest-performing solid upper-stage set (M-34b
+Isp ≈ 301 s vac). Architecture confidence **C** — **NEEDS PRIMARY** (the ISAS/JAXA
+M-V papers).
+
+**B.5.8 Shavit's interesting engineering point is not the motors.** Shavit
+launches **retrograde, westward over the Mediterranean**, paying roughly 2×460 m/s
+of Earth-rotation penalty for range-safety reasons. Open sources state the first
+two stages are common with Jericho II. Everything else is **C** and needs a
+primary.

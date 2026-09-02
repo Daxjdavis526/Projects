@@ -1333,20 +1333,30 @@ $T_2 = 50\ ^\circ\mathrm F = 10.00\ ^\circ\mathrm C = 283.15$ K;
 $T_3 = 28\ ^\circ\mathrm F = -2.22\ ^\circ\mathrm C = 270.93$ K.
 $\Delta T = T_1 - T_2 = 13.89$ K.
 
-**Step 2 — try Arrhenius first, and watch it fail.** If $\tau \propto \exp(E_a/RT)$,
+**Step 2 — Arrhenius first, and read the number sceptically.** If
+$\tau \propto \exp(E_a/RT)$,
 
 $$ \ln\frac{\tau_2}{\tau_1} = \frac{E_a}{R}\left(\frac{1}{T_2}-\frac{1}{T_1}\right) $$
 
 $\ln(600/2.4) = \ln 250 = 5.521$; $1/T_2 - 1/T_1 = 3.5317\times10^{-3} -
-3.3666\times10^{-3} = 1.6513\times10^{-5}\ \mathrm{K^{-1}}$. Hence
+3.3666\times10^{-3} = 1.6513\times10^{-4}\ \mathrm{K^{-1}}$. Hence
 
-$$ E_a = \frac{(8.3145)(5.521)}{1.6513\times10^{-5}} = 2.78\times10^{6}\ \mathrm{J/mol} = 2{,}780\ \mathrm{kJ/mol} $$
+$$ E_a = \frac{(8.3145)(5.521)}{1.6513\times10^{-4}} = 2.78\times10^{5}\ \mathrm{J/mol} = 278\ \mathrm{kJ/mol} $$
 
-That is roughly five times the strongest covalent bond energy in the molecule. [A]
-**An Arrhenius activation energy of 2,780 kJ/mol is not a physical activation
-energy** — it is the signature of a process governed by segmental mobility near a
-glass transition, where the temperature dependence is far steeper than Arrhenius.
-Rejecting this model is the first real result.
+Extrapolating to $T_3 = 270.93$ K: $1/T_3 - 1/T_1 = 3.2446\times10^{-4}$ K⁻¹,
+so $\ln a_T = (2.78\times10^{5}/8.3145)(3.2446\times10^{-4}) = 10.85$,
+$a_T = 5.15\times10^{4}$, and
+
+$$ \tau(28\ ^\circ\mathrm F) \approx 2.4 \times 5.15\times10^{4} = 1.24\times10^{5}\ \mathrm{s} \approx 1.4\ \text{days} $$
+
+[A][J] **278 kJ/mol looks entirely respectable** — it is the same order as a C–C
+bond dissociation energy — and that is exactly the trap. A *physical* relaxation
+process has no bond to break; apparent activation energies of 200–400 kJ/mol are
+the classic signature of a polymer near its glass transition, where the
+temperature dependence is *not* Arrhenius at all and the apparent $E_a$ is itself
+a function of temperature. So the Arrhenius fit is a valid interpolation between
+the two measured points and an unreliable extrapolation beyond them. Do it
+anyway, keep the answer, and cross-check with a model that has the right physics.
 
 **Step 3 — fit WLF (Eq. 3.1) instead.** Take the universal constants
 $C_1 = 17.44$, $C_2 = 51.6$ K referenced to $T_g$, and let $x \equiv T_1 - T_g$.
@@ -1368,10 +1378,19 @@ $$ \tau(28\ ^\circ\mathrm F) = 2.4\ \mathrm{s} \times 3.47\times10^{5} = 8.3\tim
 At the 36 °F ambient the same model gives $a_T = 1.75\times10^4$ and
 $\tau \approx 4.2\times10^{4}$ s ≈ 12 hours.
 
-**Step 5 — compare with the duty cycle.** The seal must follow a gap that opens
-over roughly $0.6$ s. The ratio is
+**Step 5 — compare with the duty cycle, and compare the two models.** The seal
+must follow a gap that opens over roughly $0.6$ s. The two independent models
+give, at 28 °F:
 
-$$ \frac{\tau(28\ ^\circ\mathrm F)}{t_{\text{duty}}} \approx \frac{8.3\times10^{5}}{0.6} \approx 1.4\times10^{6} $$
+| model | $a_T$ at 28 °F | $\tau$ (s) | $\tau/t_{\text{duty}}$ |
+|---|---|---|---|
+| Arrhenius (Step 2) | $5.15\times10^{4}$ | $1.24\times10^{5}$ | $2\times10^{5}$ |
+| WLF (Step 4) | $3.47\times10^{5}$ | $8.3\times10^{5}$ | $1.4\times10^{6}$ |
+
+They disagree by a factor of 7 — and **they agree on the only thing that
+matters**: the seal's response time exceeds its duty by five to six orders of
+magnitude. A conclusion that survives a factor-of-7 model disagreement is a
+robust conclusion.
 
 **Step 6 — state what is wrong with the model.** [A][J] Three things, and a
 competent investigator states all of them.
@@ -1384,13 +1403,13 @@ convolves relaxation with geometry, squeeze and friction.
 where WLF diverges and is least trustworthy.
 (iii) The absolute number is therefore meaningless; **the order of magnitude is
 not.** Any model that reproduces the 2.4 s → 600 s shift over 13.9 K predicts a
-further catastrophic shift over the next 12 K, because that is what the data
-already showed.
+further catastrophic shift over the next 12.2 K, because that is what the data
+already showed — which is why the two models in Step 5 agree despite disagreeing.
 
 **Sanity check.** The defensible conclusion is not "the recovery time was
 8.3×10⁵ s." It is: *the measured data alone establish a 250× degradation for a
 13.9 K drop; a further 12.2 K drop lies in the same steepening regime; therefore
-the seal's response time at 28 °F exceeds the 0.6 s duty by at least four orders
+the seal's response time at 28 °F exceeds the 0.6 s duty by at least five orders
 of magnitude, on any model that fits the data.* That is a conclusion robust to the
 model, and it is the conclusion the Commission reached without the algebra
 `[Rogers86 ch. IV]`.
@@ -1954,8 +1973,11 @@ $\sigma_f' = 1{,}400$ MPa and $b = -0.085$, find the alternating stress
 corresponding to that life.
 
 **P6.** Using the Rogers Commission resiliency data (2.4 s at 75 °F, 600 s at
-50 °F), fit an Arrhenius model and report the apparent activation energy. Then
-state, in one sentence, what the magnitude of that number tells you about the
+50 °F), fit an Arrhenius model and report the apparent activation energy. Use it
+to predict the recovery time at **40 °F**, then repeat the prediction with the
+WLF fit of WE1 ($T_g = 269.17$ K, $C_1 = 17.44$, $C_2 = 51.6$ K). Report both,
+state which you would quote to a launch-readiness review and why, and say in one
+sentence what the magnitude of the apparent $E_a$ tells you about the Arrhenius
 model.
 
 **P7.** A solid motor's throat erodes 8 % more than predicted over its burn.

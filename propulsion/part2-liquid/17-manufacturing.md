@@ -1,0 +1,1388 @@
+# Module 17 — Manufacturing
+Part II · Prerequisites: modules 11, 12, 16 · Estimated time: 8 h
+
+There is a moment in every engine programme when the analysis is finished, the
+drawings are released, and the shop tells you the part cannot be made. Not "will
+be expensive" — cannot be made, because the 1.2 mm cutter needed to reach the
+throat channels breaks before it finishes one pass, or because the braze alloy
+will not wet a joint with 0.15 mm of clearance, or because the 0.89 m tall
+printed liner does not fit in the machine you have a contract for. Everything
+you decided in modules 06 through 16 — the channel aspect ratio, the liner
+alloy, the number of injector elements, the wall thickness at the throat — was
+a manufacturing decision that you made while pretending it was a thermal or a
+structural one. This module is the correction. It is the chapter where the
+geometry you drew meets the physics of removing, melting, joining and
+depositing metal, and where you learn which of your design freedoms were real.
+Engineers who skip it design engines that exist only in CAD; the F-1's
+combustion instability programme cost 2,000 tests, but the F-1's *tube* problem
+cost Rocketdyne just as much schedule and almost nobody writes about it.
+
+---
+
+## 1. Learning objectives
+
+By the end of this module you should be able to:
+
+1. For a stated cooling-channel or tube-wall requirement, work out how many
+   tubes or channels the throat circumference will accept, what section each
+   must have to pass the coolant, and identify the station at which the geometry
+   forces a bifurcation or a change of cooling method.
+2. Explain the physical mechanism of furnace brazing — capillary rise, wetting,
+   isothermal solidification — and state why joint clearance, not filler
+   strength, governs braze quality.
+3. Describe the electrodeposition mechanism behind an electroformed nickel
+   closeout, and name the three ways it fails (adhesion, nodules, residual
+   stress).
+4. Predict the effect of as-built additive surface roughness on cooling-channel
+   friction factor, pressure drop and heat-transfer coefficient, using a
+   roughness-corrected friction correlation and a Nusselt–friction analogy, and
+   state the uncertainty in that prediction.
+5. Estimate the build time, part mass and powder inventory for a laser
+   powder-bed-fusion combustion chamber from layer thickness, hatch spacing,
+   scan speed, laser count and part volume, and identify whether the build is
+   recoat-limited or exposure-limited.
+6. Propagate an orifice diameter and discharge-coefficient tolerance stack into
+   an element-level mixture-ratio spread and an engine-level mixture-ratio
+   error, and explain why the two answers differ by $\sqrt{N}$ and which one
+   burns a wall.
+7. Name the defect each process introduces (recast layer, forging lap, casting
+   porosity, braze void, solidification crack, lack-of-fusion, keyhole porosity)
+   and the inspection method that finds it.
+8. Argue where additive manufacturing genuinely changed rocket-engine design,
+   and where it did not and will not.
+9. Read a production-rate requirement (one engine a year versus one a day) and
+   say what it does to process selection, tolerance policy and inspection plan.
+10. Given an unfamiliar engine component, propose a manufacturing route, state
+    its dominant defect, and specify the acceptance inspection.
+
+---
+
+## 2. Terminology
+
+| term | symbol | SI unit | definition |
+|---|---|---|---|
+| Arithmetic mean roughness | $R_a$ | m | mean absolute deviation of a surface profile from its mean line |
+| Equivalent sand-grain roughness | $k_s$ | m | roughness height that reproduces the measured friction factor in the Nikuradse/Colebrook framework |
+| Relative roughness | $k_s/D_h$ | — | roughness height normalised by hydraulic diameter |
+| Hydraulic diameter | $D_h$ | m | $4A/P$ for a duct of area $A$ and wetted perimeter $P$ |
+| Darcy friction factor | $f$ | — | $\Delta p = f (L/D_h)\rho V^2/2$; four times the Fanning factor |
+| Nusselt number | $\mathrm{Nu}$ | — | $hD_h/k$; dimensionless convective coefficient |
+| Prandtl number | $\mathrm{Pr}$ | — | $\mu c_p/k$; momentum-to-thermal diffusivity ratio |
+| Layer thickness | $t_\ell$ | m | powder-bed increment deposited per recoat in a PBF build |
+| Hatch spacing | $h_s$ | m | lateral offset between adjacent laser scan vectors |
+| Scan speed | $v_s$ | m/s | laser spot traverse speed |
+| Volumetric energy density | $E_v$ | J/m³ | $P_\ell/(v_s h_s t_\ell)$; the first-order PBF process parameter |
+| Laser power | $P_\ell$ | W | beam power delivered to the powder bed |
+| Deposition rate | $\dot V$ | m³/s | $t_\ell h_s v_s$ per laser; theoretical laser-on build rate |
+| Recoat time | $t_r$ | s | time to spread one powder layer and reposition |
+| Overhang angle | $\theta_o$ | ° | angle of a downward-facing surface from the build plate |
+| Braze joint clearance | $\delta$ | m | gap between the two faying surfaces at brazing temperature |
+| Filler liquidus | $T_L$ | K | temperature at which the braze filler is fully molten |
+| Current density | $j$ | A/m² | electroforming deposition current per unit cathode area |
+| Faraday constant | $F$ | C/mol | 96 485 C/mol |
+| Throwing power | — | — | ability of a plating bath to deposit uniformly into recesses |
+| Heat-affected zone | HAZ | — | weld-adjacent region altered by thermal cycle without melting |
+| Laves phase | — | — | Nb-rich brittle intermetallic that segregates in solidifying alloy 718 |
+| Hot isostatic pressing | HIP | — | simultaneous high temperature and isostatic gas pressure to close internal porosity |
+| Directed energy deposition | DED | — | AM class in which feedstock is melted as it is delivered to the melt pool |
+| Laser powder bed fusion | L-PBF | — | AM class in which a laser fuses a pre-spread powder layer |
+| Electrical discharge machining | EDM | — | material removal by controlled spark erosion in a dielectric |
+| Recast layer | — | m | resolidified melt film left on an EDM'd or laser-drilled surface |
+| Discharge coefficient | $C_d$ | — | actual over ideal orifice mass flow (module 07) |
+| Mixture ratio | $MR$ | — | oxidizer-to-fuel mass flow ratio |
+| Relative standard uncertainty | $\sigma_x/x$ | — | standard deviation normalised by the nominal value |
+| Number of injection elements | $N$ | — | count of injector elements on the face |
+| Coolant mass flow | $\dot m_f$ | kg/s | mass flow through the regenerative circuit |
+
+---
+
+## 3. Theory
+
+### 3.1 Manufacturing is a design variable, not a downstream activity
+
+Every propulsion component is the intersection of three constraint sets: the
+thermodynamic one (what the cycle needs), the structural one (what the material
+will carry), and the *process* one (what can actually be produced at the
+required rate, cost and confidence). Textbooks treat the third as a footnote.
+Programmes do not: the RS-68 was explicitly a "design for minimum cost"
+exercise that accepted a gas-generator cycle and about **80 % fewer parts than
+the RS-25** in exchange for lower performance, and it was the manufacturing
+argument that won [_verify-liquid, RS-68A block] [H]. The Vulcain 2.1 nozzle
+achieved **90 % fewer parts, 40 % lower cost and 30 % faster production** than
+the Vulcain 2 nozzle through a laser-welded sandwich redesign with no
+thermodynamic change at all [_verify-liquid, Vulcain block] [M].
+
+The useful mental model is that each process defines a *feasible set* in the
+space of geometries, and the designer's job is to place the design inside the
+intersection of the feasible set and the performance requirement. Three
+recurring patterns [J]:
+
+- **A process sets a minimum feature size.** You cannot mill a 0.6 mm wide,
+  6 mm deep channel with a conventional end mill: the cutter has a length-to-
+  diameter ratio of 10 and will chatter, deflect or snap. That single fact
+  caps the achievable channel aspect ratio, which caps the coolant-side area
+  per unit wall area, which caps chamber pressure for a given liner alloy.
+- **A process sets a joint count.** Every joint is a leak path and an
+  inspection item. Tube-wall construction converts a cooling requirement into
+  hundreds of metres of braze land (§3.5, WE1). Additive construction converts
+  the same requirement into zero joints and a new set of internal defects.
+- **A process sets a rate ceiling.** A furnace-brazed tube bundle is a
+  multi-week operation dominated by hand fit-up. That is acceptable at five
+  engines a year and impossible at five hundred.
+
+Throughout this module, tag the claim you are making: whether a limit is
+physical (melt-pool stability, capillarity), technological (today's machines),
+or economic (rate and cost). The first never moves, the second moves every few
+years, and the third is a management decision wearing engineering clothes.
+
+### 3.2 Machining
+
+#### 3.2.1 The physics of chip formation, and why it limits you
+
+Metal cutting is localised shear. The tool edge drives a plastic shear zone
+ahead of itself; the workpiece material fails in shear along a plane inclined
+at the shear angle $\phi$, and the chip flows up the rake face. Nearly all of
+the work goes to heat, concentrated in the primary shear zone and the tool–chip
+interface. Cutting force scales with the uncut chip area and the material's
+specific cutting energy; for nickel superalloys that energy is roughly three
+times that of aluminium and the thermal conductivity is roughly a tenth, so
+the heat stays in the tool [F].
+
+Two consequences dominate rocket-engine machining:
+
+**Tool deflection sets tolerance.** A slender end mill is a cantilever. Its tip
+deflection under a lateral cutting force $F_c$ is
+
+$$\delta_{tip} = \frac{F_c L^3}{3EI},\qquad I = \frac{\pi d^4}{64}$$
+
+> **Eq. 3.1** — variables: $\delta_{tip}$ tool tip deflection (m), $F_c$ lateral
+> cutting force (N), $L$ unsupported tool length (m), $E$ tool Young's modulus
+> (Pa, ≈ 600 GPa for tungsten carbide), $I$ second moment of area (m⁴), $d$ tool
+> diameter (m). Meaning: the cutter bends away from the cut, so the machined
+> wall is thicker than programmed and tapers with depth. Assumes: a solid
+> cylindrical cantilever with a point load, elastic response, rigid holder.
+> Fails when: the tool is fluted (real $I$ is 60–80 % of the solid value),
+> when the holder or spindle compliance dominates, or when chatter makes the
+> problem dynamic rather than static.
+
+The $d^4$ in the denominator and $L^3$ in the numerator are the whole story: a
+cutter twice as long deflects eight times as much, and a cutter half as wide
+deflects sixteen times as much. This is why deep, narrow cooling channels are
+*hard* rather than merely tedious, and why real milled-channel liners have
+channels with depth-to-width ratios of about 2:1 to 4:1 rather than the 8:1
+that the thermal analysis would like [E][J].
+
+**Heat sets tool life and surface integrity.** In Inconel 718 or Monel, the
+tool–chip interface runs hot enough that diffusion wear and notch wear at the
+depth-of-cut line dominate. The practical countermeasure is a low surface speed
+with high feed and through-tool high-pressure coolant. The surface left behind
+carries residual stress: an abusive cut leaves *tensile* residual stress at the
+surface, which reduces fatigue life exactly where a cooling channel needs it
+most. A gently finished or shot-peened surface leaves compressive stress. This
+is a real and frequently missed coupling between §3.2 and the low-cycle fatigue
+life you computed in module 16 [E].
+
+#### 3.2.2 Five-axis machining
+
+Five-axis machining adds two rotary degrees of freedom to the three linear
+ones, which buys three things: the tool can be kept normal (or at a controlled
+lead/lag angle) to a curved surface, so the effective cutting geometry is
+constant along a contour; shorter tools can reach into cavities, which by
+Eq. 3.1 is worth more than any other single improvement; and a part can be
+machined in one setup rather than four, eliminating the setup-to-setup datum
+error that otherwise stacks.
+
+For propulsion this is what makes **integrally bladed rotors** (blisks),
+contoured chamber liners with milled channels, and complex manifold bodies
+practical. A turbopump impeller with 3D-curved backswept blades and a shroud
+is a five-axis part; the alternative is casting (§3.4) or a bladed disc with
+individually inserted blades and a mechanical or brazed attachment.
+
+The cost of a five-axis part is dominated by *cycle time*, and cycle time by
+the finishing passes, which use a small stepover to hold surface finish. A
+liner with 250 channels is 250 slot operations plus 250 finish passes; at even
+90 s each that is over 12 hours of spindle time before any of the contour work.
+This is why milled-channel chambers are typically the highest-touch-time
+component of an engine after the injector [J].
+
+#### 3.2.3 Injector orifice production: drilling and EDM
+
+The injector is a plate with several hundred to several thousand holes in it,
+each of which must have the right diameter, the right axis, the right inlet
+edge condition and the right $L/D$ (module 07). Four routes:
+
+**Twist drilling.** Cheapest, fastest, and adequate down to about 0.5 mm in
+steels and nickel alloys with peck cycles and through-coolant. Diameter is held
+by the drill, which wears; a production shop resharpens or replaces on a hole
+count. Typical achievable diameter tolerance on a small hole in a superalloy is
+of order **±0.013 to ±0.025 mm (±0.0005 to ±0.001 in)** including drill wear
+across a lot [E][J]. The exit burr must be removed, and the inlet edge — which
+controls $C_d$ and the onset of hydraulic flip (module 07) — is whatever the
+drill left unless it is separately controlled by a chamfer, a radius or an
+abrasive-flow pass.
+
+**Gun drilling.** For deep holes ($L/D > 10$), a single-flute drill with
+internal coolant and an external V-pad supports itself against the hole wall.
+This is how long LOX post bores and manifold cross-drillings are made. It holds
+straightness far better than a twist drill but is slow.
+
+**EDM (electrical discharge machining).** A shaped electrode and the workpiece
+are separated by a dielectric; a pulsed voltage breaks down the gap and each
+discharge melts and vaporises a crater of material, which the dielectric flushes
+away. Material removal is thermal, not mechanical, so **there is no cutting
+force at all**: hole straightness and position do not depend on tool stiffness,
+and hardness of the workpiece is irrelevant. This is the enabling process for
+thousands of small, deep, angled orifices in hard alloys.
+
+The physics that matters: each spark leaves a **recast layer**, a thin film of
+melted and resolidified base metal, typically 5–25 µm thick depending on pulse
+energy, often micro-cracked and always different in composition and hardness
+from the parent [E]. Under it is a heat-affected zone. Recast is a fatigue
+initiation site and, in an orifice, it changes both the effective diameter and
+the edge condition. Every serious injector specification therefore either
+requires the recast to be removed (abrasive flow machining, electropolish,
+chemical etch) or requires a low-energy "trim" finishing setting that reduces
+the recast to a few micrometres. There is no third option; leaving a
+25 µm cracked recast layer in a hydrogen-wetted orifice is how you generate a
+crack in a component you never expected to crack [J].
+
+Fast-hole EDM (a rotating tubular electrode with pressurised dielectric through
+its centre) is the production route for the very large hole counts. For
+non-conductive or very fine work, laser drilling is used, with the same recast
+issue and worse taper.
+
+#### 3.2.4 What the tolerance does to the engine
+
+An injector orifice's mass flow goes as $C_d d^2$. Differentiating,
+
+$$\frac{\delta \dot m}{\dot m} = \frac{\delta C_d}{C_d} + 2\frac{\delta d}{d}$$
+
+> **Eq. 3.2** — variables: $\dot m$ orifice mass flow (kg/s), $C_d$ discharge
+> coefficient (—), $d$ orifice diameter (m). Meaning: a diameter error is
+> doubled in the flow error, and the edge-condition error enters directly.
+> Assumes: incompressible single-phase flow at fixed $\Delta p$ and $\rho$,
+> $C_d$ independent of $d$ over the tolerance band. Fails when: the orifice
+> cavitates or hydraulically flips (then $C_d$ jumps discontinuously), or when
+> the flow is two-phase.
+
+Two distinct consequences, and confusing them is a classic error:
+
+- **Engine-level.** The total effective area of each circuit sets the engine
+  mixture ratio. Random per-hole errors average: with $N$ nominally identical
+  elements, the circuit's total-area error is smaller than the single-hole
+  error by $\sqrt{N}$. WE4 works this out: a per-element $MR$ spread of 2.5 %
+  becomes an engine $MR$ error of about 0.1 % across 562 elements.
+- **Local.** Nothing averages the wall out. One outer-row oxidizer orifice
+  4 % large, or one fuel orifice partially blocked by a burr, produces a
+  local oxidizer-rich streak that will erode a copper liner in a handful of
+  tests. This is why injector acceptance is a **flow bench** exercise on every
+  circuit and often every element, not a statistical sample, and why the outer
+  row usually carries tighter tolerance than the core [M][J].
+
+Machining tolerance also drives throat area. $A_t$ sets $\dot m$ at fixed $p_c$
+and $c^*$; a throat diameter 0.1 % large is 0.2 % more flow and, at fixed
+propellant load, 0.2 % less burn time. Throats are therefore machined and
+inspected to a much tighter band than the rest of the contour and are
+re-measured after every hot fire, because erosion moves them (module 06 §7.5).
+
+### 3.3 Forging
+
+#### 3.3.1 Why forge at all
+
+A cast structure is a network of dendrites with segregated interdendritic
+regions, residual porosity and no preferred grain orientation. Forging is hot
+working: the material is deformed above its recrystallisation temperature, so
+that the cast dendritic structure is broken up, porosity is welded closed, and
+the grains recrystallise fine and equiaxed. The result is a wrought structure
+with roughly **20–50 % higher tensile ductility and dramatically better fatigue
+and fracture toughness** than the same alloy as-cast, and — critically —
+properties that are reproducible enough to have statistically derived design
+allowables in [MMPDS] [F][E].
+
+The second forging benefit is **grain flow**. Hot deformation elongates the
+grains and the inclusion stringers along the material flow direction. A part
+whose grain flow follows its principal stress path is markedly stronger in
+fatigue than the same geometry machined from plate, where the flow lines are
+cut through. This is why a turbopump impeller hub, a pump housing boss, or a
+gimbal bearing block is forged to a near-net shape and then machined, rather
+than hogged from a billet: you are buying the flow lines, not just the density.
+
+#### 3.3.2 Propulsion applications
+
+- **Pump housings and volutes.** Forged or cast-plus-HIP, then five-axis
+  machined. A LOX pump housing carries full discharge pressure (7,000 psi class
+  on the RS-25's HPFTP [_verify-liquid, RS-25 block]) and must not shed a
+  particle into a LOX stream. Forged Inconel 718 or a stainless is the
+  conservative answer; cast is the cheap one.
+- **Impellers and inducers.** For high-tip-speed impellers, forged 718 machined
+  from a forged puck is standard (never titanium in LOX — see module 16 on
+  titanium's LOX incompatibility). The blade root fillet is the fatigue-critical
+  feature and it wants grain flow turning the corner with it.
+- **Turbine discs.** Powder-metallurgy or cast-and-wrought superalloy discs,
+  forged to shape with tightly controlled strain and cooling to produce the
+  desired grain size distribution — coarse in the rim for creep, fine in the
+  bore for burst strength.
+
+#### 3.3.3 Defects and inspection
+
+The forging defects worth naming:
+
+| defect | mechanism | detection |
+|---|---|---|
+| **Lap** | metal folded over on itself and not welded, because the die filled in the wrong order | macroetch of a sectioned first article; ultrasonic; magnetic particle or fluorescent penetrant after machining |
+| **Burst** | internal tearing from tensile secondary stress in the centre of an under-heated or over-fast upset | ultrasonic C-scan |
+| **Flow-through** | grain flow running out of the part surface instead of following the contour | macroetch on a sectioned sample; controlled by die design |
+| **Abnormal grain growth** | critical strain (a few percent) plus high temperature produces a few enormous grains | metallographic sample; sonic attenuation ("noisy" UT) |
+| **Segregation carried from the ingot** | freckles, white spots in vacuum-arc-remelted superalloy ingot | ultrasonic; billet macroetch; controlled by melt practice |
+
+The standard flow is: forge, solution and age heat treat, ultrasonically inspect
+the *forging* before machining (when the geometry is still simple enough to
+scan), machine, then fluorescent penetrant inspect the machined surfaces. A
+forging house delivers a macroetch and a certified grain-flow photograph on the
+first article.
+
+### 3.4 Casting
+
+#### 3.4.1 Investment casting
+
+Investment (lost-wax) casting produces near-net-shape parts with internal
+passages, thin sections and surfaces that need little machining. A wax pattern
+(itself injection-moulded in a metal die) is assembled onto a wax runner tree,
+repeatedly dipped in ceramic slurry and stucco to build a shell, the wax is
+steam-autoclaved out, the shell is fired, and metal is poured — under vacuum,
+for superalloys, because the reactive elements (Al, Ti, Hf) will otherwise
+oxidise.
+
+For propulsion, investment casting produces:
+
+- **Turbine blades and vanes.** Rocket turbines are partial-admission,
+  high-pressure-ratio machines running on hot, often chemically aggressive gas
+  (fuel-rich soot-laden gas, or oxygen-rich gas in an ORSC engine). The blades
+  are cast because the airfoil geometry with internal cooling passages cannot be
+  machined.
+- **Housings, manifolds and volutes** where the geometry is complex and the
+  loads are moderate.
+- **Injector bodies** in some low-cost designs.
+
+#### 3.4.2 Solidification structure: equiaxed, directional, single crystal
+
+The grain structure follows the heat flow. Three regimes [F]:
+
+- **Equiaxed:** ordinary casting; randomly oriented grains, transverse grain
+  boundaries everywhere. Grain boundaries are the weak link in creep — they
+  slide, and they are where cavities nucleate.
+- **Directionally solidified (DS):** a chilled plate withdraws the shell slowly
+  from the furnace so the solidification front moves axially. Columnar grains
+  grow along the withdrawal direction; there are *no transverse grain
+  boundaries* in the airfoil, which raises creep and thermal-fatigue life
+  substantially.
+- **Single crystal (SX):** a helical "pigtail" grain selector at the base of the
+  mould allows only one grain to propagate. No grain boundaries at all,
+  therefore no grain-boundary strengtheners needed (carbon, boron, zirconium are
+  removed), which raises the incipient melting point and lets the alloy be
+  solution-treated closer to it, which in turn allows a higher $\gamma'$ volume
+  fraction. SX blades are the reason modern turbines run where they do.
+
+This matters to Module 17's AM discussion: **you cannot print a single crystal**
+at any useful rate. The melt-pool solidification in L-PBF produces fine
+columnar-to-equiaxed grains with a strong texture but many boundaries. For any
+component whose life is creep-governed at high homologous temperature, casting
+still wins and will keep winning (§3.10.9) [M][J].
+
+#### 3.4.3 Porosity and HIP
+
+Two porosity mechanisms, with different signatures [F]:
+
+- **Shrinkage porosity:** metal contracts on solidification (typically 3–6 % by
+  volume for superalloys) and if the last liquid to freeze cannot be fed from a
+  riser, it leaves interdendritic voids — irregular, dendritic-walled, usually
+  clustered at thermal centres.
+- **Gas porosity:** dissolved gas (hydrogen in aluminium, nitrogen or oxygen in
+  steels) exceeds solubility on freezing and comes out as bubbles — round,
+  smooth-walled, often distributed.
+
+**Hot isostatic pressing** closes internal porosity by applying an isostatic
+gas pressure (typically 100–200 MPa of argon) at a temperature high enough for
+creep and diffusion bonding (typically 0.7–0.9 $T_m$; for nickel superalloys,
+1,150–1,200 °C). The void collapses by creep of the surrounding metal and the
+two closed surfaces then diffusion-bond. HIP raises fatigue life by a large
+factor and reduces scatter, which is the more valuable effect [E].
+
+Two limits you must remember. **HIP cannot close a pore connected to the
+surface**, because the gas simply pressurises the pore from inside; surface-
+connected porosity must be found and rejected. And HIP is a full thermal cycle:
+it will coarsen precipitates and must be integrated into the heat-treat
+sequence, not bolted on afterwards.
+
+Inspection: real-time or film radiography for volumetric porosity; fluorescent
+penetrant for surface-connected defects; computed tomography for anything
+geometrically complex enough that a single radiographic view will not resolve
+it (§3.12).
+
+### 3.5 Brazing, and the tube-wall chamber
+
+#### 3.5.1 The physics
+
+Brazing joins two parts with a filler metal that melts below the solidus of the
+base metals and is drawn into the joint by **capillary action**. The pressure
+that drives the filler into a parallel-sided gap of clearance $\delta$ is
+
+$$\Delta p_{cap} = \frac{2\sigma\cos\theta}{\delta}$$
+
+> **Eq. 3.3** — variables: $\Delta p_{cap}$ capillary driving pressure (Pa),
+> $\sigma$ liquid filler surface tension (N/m, ~1–1.9 N/m for molten braze
+> alloys), $\theta$ contact angle of the filler on the base metal (rad; good
+> wetting means $\theta \to 0$), $\delta$ joint clearance (m). Meaning: the
+> narrower the gap, the harder the filler is pulled in. Assumes: parallel
+> surfaces, clean and wettable, filler fully molten and free of oxide skin.
+> Fails when: $\theta > 90°$ (no wetting: the filler balls up and does not enter
+> at all), when the gap is so small that viscous resistance stalls the flow, or
+> when the joint is not vented and trapped gas blocks the fill.
+
+Two competing effects therefore set an **optimum joint clearance**, and it is
+narrow. Too wide and the capillary pressure is insufficient, the filler runs out
+under gravity, and the joint is filler-dominated — meaning it has the (low)
+strength of the filler alloy rather than the (high) strength of a thin,
+constrained, diffusion-modified layer. Too tight and viscous drag and oxide
+films stop the flow, leaving voids. For most nickel and silver fillers on
+superalloys the practical window is roughly **0.025–0.125 mm (0.001–0.005 in)
+at brazing temperature** — which is a statement about differential thermal
+expansion between two dissimilar parts, not about the room-temperature fit-up
+[E]. Getting a tube bundle to hold that clearance at 1,200 K is the whole
+engineering problem.
+
+A joint is stronger than the bulk filler because it is thin: the constrained
+layer cannot deform plastically in the transverse direction, so it is under
+triaxial constraint and its effective yield strength is raised. Some fillers
+(nickel-based, boron- or silicon-depressed) also **isothermally solidify**: the
+melting point depressant (B, Si) diffuses into the base metal during a hold at
+temperature, raising the filler's remaining liquidus until it freezes *at
+temperature*. The joint's remelt temperature then ends up far above the brazing
+temperature, which is the only way to braze a joint that will later see
+1,000 K service.
+
+#### 3.5.2 Filler families used in engines
+
+| family | typical service | notes |
+|---|---|---|
+| **Silver-based (Ag–Cu–Zn, Ag–Cu–Pd)** | moderate temperature, copper and stainless | low braze temperature, easy, but limited high-temperature strength; zinc is volatile in vacuum furnaces |
+| **Gold-based (Au–Ni, Au–Cu, Au–Pd–Ni)** | high-reliability joints on superalloys, including hydrogen service | excellent wetting and ductility, very low erosion of the base metal, no melting-point depressant to embrittle — and eye-watering cost. Used where a joint absolutely must not leak |
+| **Nickel-based (Ni–Cr–B–Si, AMS 4777 class)** | hot-section structural joints, tube-to-tube and tube-to-jacket | high strength and temperature capability via isothermal solidification; the B and Si can erode thin base metal and form brittle borides if the hold is wrong |
+| **Copper** | steel assemblies | cheap, high flow, common in general engineering; less used in engines |
+
+The choice is a three-way trade among service temperature, base-metal erosion
+(a 0.3 mm tube wall does not tolerate much dissolution), and cost. Gold-nickel
+on a thin-wall hydrogen-wetted tube joint is not extravagance; it is the
+recognition that the joint has to survive a hydrogen environment, thin sections,
+and thousands of thermal cycles [J].
+
+#### 3.5.3 Tube-wall chambers
+
+The tube-wall thrust chamber (E. A. Neu's patent, filed 5 April 1950, out of the
+Navaho programme [_verify-liquid, XLR43 block]) is the dominant American
+architecture from the Atlas era through the Shuttle. The chamber and nozzle
+contour are formed from a bundle of individually shaped, tapered, thin-wall
+tubes laid side by side; the coolant flows inside them; adjacent tubes are
+brazed to each other along their contact line and to an outer structural
+jacket, which carries the hoop load. Real examples from the course database:
+
+| engine | construction | count |
+|---|---|---|
+| Atlas LR-89/LR-105 | brazed thin-wall tube bundle | not published |
+| **F-1** | brazed tubes, fuel-cooled, down-and-back routing, Inconel X-750/Hastelloy tubes in an Inconel jacket with steel bands | **178 tubes** |
+| **J-2** | brazed tube wall, fuel-cooled | not published |
+| **RL10A-3-3A** | brazed stainless-steel tube wall — *and the cooling circuit is the power cycle* | not published |
+| **RS-25 nozzle** | brazed tube wall, hydrogen-cooled | **1,080 tubes** |
+
+(All from `reference/_verify-liquid.md`.)
+
+Why tubes at all? Because in 1955 there was no way to mill 250 channels into a
+contoured liner and close them out, and because a tube is a naturally efficient
+pressure vessel: the coolant pressure is carried as hoop stress in a small-radius
+thin wall, so the wall can be very thin, and thin wall means low $\Delta T$
+through it (module 10: $\Delta T = q t/k$) and therefore low thermal stress. The
+tube-wall chamber is a genuinely elegant answer to the 1950s problem.
+
+Its costs are joint count and geometry. WE1 works both through. The geometric
+one is fundamental: the tube must follow a contour whose circumference varies by
+a factor of $\sqrt{\varepsilon}$ from throat to exit — a factor of **4 at
+$\varepsilon = 16$**. Either the tube gets four times wider (and, at constant
+flow area, four times shallower, until it is an unbuildable ribbon), or it
+**bifurcates** — splits into two tubes at a station where the circumference has
+doubled — or the regenerative circuit simply stops and the rest of the nozzle is
+film-cooled or radiation-cooled. The F-1 does the last of these: it dumps
+turbine exhaust as a film-cooling curtain over the nozzle extension, which is
+why it needs no regen circuit down there and why the plume has that dark outer
+sheath [_verify-liquid, F-1 block].
+
+#### 3.5.4 The braze-joint leak problem
+
+This is the defining failure mode of the architecture, and it deserves to be
+stated mechanically rather than as folklore.
+
+**Mechanism.** A braze joint fails to fill over some length — because the local
+clearance opened outside the capillary window, because an oxide film was not
+reduced by the furnace atmosphere, because the flux or the vacuum was
+inadequate, because the assembly moved during the thermal ramp, or because a
+gas pocket was not vented. The result is a **void**: an unbrazed length of the
+tube-to-tube land.
+
+**Symptom.** In service, coolant at full pump discharge pressure (which can be
+several hundred bar) is separated from the combustion gas by whatever remains
+of a 0.3 mm tube wall at the void. Either the wall bulges and fails, venting
+coolant into the chamber — a fuel leak into the combustion zone, which if it is
+hydrogen you will see as a rising mixture-ratio anomaly and if it is kerosene
+you will see as a fire — or, on the outboard side, coolant leaks out through the
+jacket. On a hydrogen engine, the leak is invisible.
+
+**Evidence.** Pre-test: X-ray of the brazed assembly (the filler is denser than
+the base metal, so a filled joint is radiographically distinguishable from an
+unfilled one), followed by a hydrostatic **proof pressure test** at typically
+1.2–1.5× the maximum expected operating pressure, then a **helium mass
+spectrometer leak test** to a specified leak rate. In test: coolant circuit
+$\Delta p$ falling below prediction (flow bypassing through a breach), coolant
+outlet temperature or flow anomalies, or a mixture-ratio shift.
+
+**Fix.** Repair brazing of localised voids is standard practice and is itself a
+qualified process. The systemic fixes are fixturing that holds clearance through
+the ramp, controlled-atmosphere or vacuum furnaces, cleanliness protocol,
+and — ultimately — going to milled channels or additive manufacture, which is
+what everybody did.
+
+The honest summary: tube-wall chambers work extremely well and have flown more
+successful missions than any other architecture, but they are the highest-skill,
+longest-lead, most inspection-intensive way to build a chamber, and every
+programme that could leave them behind, did [H][J].
+
+### 3.6 Electroforming
+
+#### 3.6.1 The mechanism
+
+Electroforming is electrodeposition used as a fabrication process rather than a
+coating process: a metal is deposited from solution onto a conductive mandrel or
+substrate until it is thick enough to be a structural member. Mass deposited
+follows Faraday's law:
+
+$$m = \frac{M\, I\, t\, \eta_c}{n F},\qquad
+\text{thickness } \;s = \frac{M\, j\, t\, \eta_c}{n F \rho}$$
+
+> **Eq. 3.4** — variables: $m$ deposited mass (kg), $M$ molar mass of the
+> deposited metal (kg/mol; 0.05869 for Ni), $I$ current (A), $j$ current density
+> (A/m²), $t$ time (s), $\eta_c$ cathode current efficiency (—; ~0.95–1.0 for
+> nickel sulphamate), $n$ electrons per ion (2 for Ni²⁺), $F$ Faraday constant
+> (96,485 C/mol), $\rho$ deposit density (kg/m³, 8,900 for Ni), $s$ thickness
+> (m). Meaning: deposition rate is set by current density alone. Assumes:
+> uniform current distribution, no side reactions, steady bath chemistry. Fails
+> when: the current distribution is non-uniform (which it always is — see
+> throwing power), when hydrogen evolution takes part of the current, or when
+> mass transport of Ni²⁺ to the surface limits the rate.
+
+For nickel sulphamate at a typical $j = 200$ A/m² (20 mA/cm²) the deposition
+rate is about **0.25 mm per day**. A 2 mm structural closeout is therefore an
+**eight-day tank residence**, unattended but not interruptible. That number is
+the whole scheduling story of electroformed chambers.
+
+The bath matters as much as the current. **Nickel sulphamate** is the standard
+because it deposits with low internal stress — a sulphate (Watts) bath produces
+a deposit with tensile residual stress high enough to curl or crack a thick
+electroform. Stress is tuned with additives and monitored continuously with a
+stress-measuring strip; a bath that drifts produces a deposit that will
+delaminate months later.
+
+**Throwing power** — the bath's ability to deposit uniformly into a recess — is
+poor for nickel. Current concentrates at edges and protrusions (the field is
+strongest there), so a nickel electroform grows preferentially at corners and
+can bridge over a groove, trapping electrolyte. Thieves (auxiliary cathodes),
+shields, and conforming anodes are used to flatten the current distribution.
+
+#### 3.6.2 The RS-25 main combustion chamber
+
+The RS-25 MCC is the canonical example and the one to know. From the course
+database: the liner is **NARloy-Z** (Cu–Ag–Zr), with **390 coolant channels
+machined into it**, hydrogen-cooled, and an **electroformed-nickel closeout**
+[_verify-liquid, RS-25 block]. The sequence [H]:
+
+1. Form the liner (a forged or spun copper-alloy shell), machine the contour
+   inside and out.
+2. **Mill the 390 channels** into the outside of the liner, following the
+   contour, with a depth and width profile that varies axially to match the heat
+   flux distribution — deep and narrow at the throat where the flux peaks.
+3. **Fill the channels with a sacrificial filler** — conductive wax, or a
+   low-melting alloy — machined or scraped flush with the lands, so that the
+   outside of the liner is a continuous surface.
+4. **Activate and strike** the copper surface: an acid activation and a thin
+   Wood's-nickel strike to defeat the copper oxide and give the deposit
+   something to key into. **This is the step that determines whether the part
+   is any good.** Adhesion of nickel to copper is entirely a surface-preparation
+   question.
+5. **Electroform nickel** over the whole assembly to structural thickness. The
+   nickel bridges the filled channels, so the deposit becomes a continuous
+   jacket integral with the lands.
+6. **Melt or dissolve out the filler**, flush the channels, and inspect.
+
+The result is a chamber with no braze joints and no bolted jacket: a copper hot
+wall with the highest available conductivity and a nickel structural jacket
+metallurgically bonded to the lands. That is the highest-heat-flux chamber
+architecture that has flown, and it is why the RS-25 could run at 206 bar.
+
+#### 3.6.3 How it fails
+
+**Adhesion loss.** If the copper was not properly activated, or if the strike was
+contaminated, the nickel is mechanically interlocked but not bonded. Under
+thermal cycling the differential expansion between copper ($\alpha \approx
+17\times10^{-6}$/K) and nickel ($\approx 13\times10^{-6}$/K) shears the
+interface, and the jacket separates from the lands. A separated land carries no
+hoop load, so the channel opposite it bulges. Detection: ultrasonic C-scan of
+the bond line, and destructive peel tests on process-control coupons run with
+every part.
+
+**Nodules and inclusions.** A particle in the bath becomes a growth centre; the
+deposit grows a nodule around it, which shadows the surrounding area and
+propagates upward as a defect column. Continuous filtration and periodic
+"scrubbing" of the growing surface are the controls.
+
+**Residual stress and cracking.** A high-stress deposit will crack through
+thickness — sometimes not until the part is heat treated.
+
+**Filler residue.** Wax left in a channel is a flow blockage that will not be
+found on a flow bench unless the flow bench is per-channel. This is a genuine
+and recurring problem in electroformed and, later, additive channels.
+
+#### 3.6.4 The RS-25 liner cracks
+
+The RS-25's copper liner is also the standard case study in coolant-channel
+life. The hot wall between two channels is a thin ligament that, on every start,
+goes from cryogenic to roughly 800 K on the gas side in under a second while its
+back face is held near the hydrogen temperature. The through-thickness $\Delta T$
+generates a compressive thermal stress that exceeds the copper's yield
+(module 16), so the wall yields in compression when hot; on shutdown
+it goes into tension. Each cycle ratchets the ligament: it thins, bulges into
+the channel — the classic **"dog-house" deformation** — and eventually cracks
+through, opening a coolant path into the chamber.
+
+Overlaid on this is **blanching**: local loss of the silver and zirconium
+strengtheners and a change of surface appearance in the hot-gas wall of copper
+alloys exposed to the oxidising/reducing cycling of a hydrogen engine, which
+reduces conductivity and strength [GRCop]. The combination is the
+life-limiting mechanism of the whole architecture, and it is the reason
+NASA developed the **GRCop** dispersion-strengthened Cu–Cr–Nb family: the
+Cr₂Nb dispersoids resist the coarsening and blanching that degrade NARloy-Z
+[GRCop]. GRCop-42 — the more printable of the family — is now the default
+liner alloy for additively manufactured chambers.
+
+Note the manufacturing point: none of this is a braze or electroform defect.
+The electroformed closeout did its job. The liner cracked because of a thermal
+cycle, and the fix was a *materials* change, not a *process* change. Do not
+attribute every chamber failure to the joining process; ask which part actually
+failed and why [J].
+
+### 3.7 Welding
+
+#### 3.7.1 Processes
+
+**GTAW / TIG.** A non-consumable tungsten electrode strikes an arc under argon
+or helium; filler is added separately or the joint is autogenous. Slow,
+controllable, excellent for thin sections and repairs, and still the workhorse
+for engine plumbing, small pressure vessels and repair welds. Heat input is
+high relative to the deposited metal, so the HAZ is wide.
+
+**Electron beam welding (EBW).** A focused electron beam in vacuum delivers
+power densities of order $10^{10}$–$10^{11}$ W/m², enough to vaporise metal and
+open a **keyhole** — a vapour cavity through the joint that the beam maintains
+and the surrounding liquid closes behind. This gives a very deep, very narrow
+weld: depth-to-width ratios of 20:1 and above, with a HAZ a fraction of a
+millimetre wide. The consequences are the ones you want: minimal distortion,
+minimal residual stress, minimal metallurgical damage, and single-pass welding
+of thick sections. The consequences you do not want: it must be done in vacuum
+(chamber size limits part size), fit-up must be near-perfect because there is
+little filler to bridge a gap, and the keyhole can collapse and leave a root
+void. EBW is the standard process for structural joints in nickel-alloy engine
+hardware, turbine wheels and thick-section pressure boundaries.
+
+**Laser beam welding.** Similar keyhole physics at somewhat lower power density,
+no vacuum required, fibre-delivered and robot-friendly. Increasingly displaces
+EBW where the section is thinner and the volume higher. It is the process behind
+the Vulcain 2.1 laser-welded sandwich nozzle [_verify-liquid, Vulcain block].
+
+**Friction stir welding (FSW).** A rotating, profiled, non-consumable tool is
+plunged into the joint line and traversed. Frictional heat softens the material
+to a plastic (not molten) state and the tool's shoulder and pin extrude and
+forge the material from ahead of the tool to behind it. **There is no melting**,
+which eliminates every solidification defect: no porosity, no hot cracking, no
+solidification segregation. The nugget is a fine, dynamically recrystallised
+grain structure with joint efficiencies of 70–95 % of parent in aluminium alloys
+that are effectively unweldable by fusion (2xxx and 7xxx series). This is the
+process that made modern launch-vehicle tankage practical: large-diameter
+Al–Li barrel and dome longitudinal and circumferential welds, with distortion
+and residual stress far below fusion welding and no filler wire to control.
+Its limits: it needs heavy backing and rigid fixturing (the forge force is
+large), it leaves an exit hole at the end of the run unless a retractable pin
+tool is used, and it is essentially restricted to aluminium and other low-flow-
+stress alloys in production practice.
+
+#### 3.7.2 Weld metallurgy and why alloy 718 cracks
+
+A fusion weld has three zones: the **fusion zone** (melted and resolidified,
+with a cast structure), the **HAZ** (not melted but thermally cycled), and the
+unaffected parent. Both of the first two crack, by different mechanisms [F][E]:
+
+**Solidification (hot) cracking** happens in the fusion zone at the end of
+solidification. As the weld pool freezes from the edges inward, the last liquid
+is a thin, low-melting film between dendrites. Solidification shrinkage plus
+thermal contraction pulls the solidifying weld apart; if the remaining liquid
+cannot flow in to feed the gap, the film tears. Alloys with a wide freezing
+range and strong segregation are the worst. **Alloy 718 is a textbook case**:
+niobium segregates strongly to the interdendritic liquid and forms a
+low-melting $\gamma$/Laves eutectic at about 1,150 °C. The Laves phase is
+brittle, it is a niobium sink (which starves the matrix of the Nb it needs for
+$\gamma''$ strengthening), and the eutectic film is exactly the low-melting
+liquid that tears. Controls: minimise heat input and dilution (favouring EBW and
+LBW over TIG), control the ingot/product-form segregation before you ever weld,
+and homogenise after welding.
+
+**Strain-age cracking** (post-weld heat-treatment cracking) is the second and
+more insidious mechanism, and again 718 is the reference alloy — favourably.
+On heating a welded precipitation-hardened superalloy to its ageing
+temperature, two things race: the relaxation of weld residual stress by creep,
+and the precipitation of the strengthening phase, which stops creep. If
+precipitation wins, the residual stress cannot relax and instead cracks the
+embrittled HAZ grain boundaries. Alloy 718's whole reason for existing is that
+its $\gamma''$ (Ni₃Nb) precipitation is **sluggish** compared with the $\gamma'$
+of Waspaloy or René 41, so stress relaxes before the alloy hardens, and 718 can
+be welded and then aged without cracking. This — not its room-temperature
+strength — is why 718 is the most-used structural superalloy in rocket engines
+[E][M]. The corollary: if you weld 718 and then choose the wrong post-weld
+thermal path, you lose the property you selected it for.
+
+**Hydrogen effects.** In a hydrogen engine, welds and their HAZs are where
+hydrogen environment embrittlement (module 16) shows up first, because they are
+where residual stress and hardness are highest. Nickel-plating a hydrogen-wetted
+surface, or copper-plating it, is the classical barrier (§3.11).
+
+#### 3.7.3 Weld inspection
+
+| method | finds | misses |
+|---|---|---|
+| Visual + weld profile | undercut, underfill, mismatch, obvious cracks | everything subsurface |
+| Fluorescent penetrant (FPI/PT) | surface-connected cracks and porosity | subsurface defects; smeared surfaces hide indications |
+| Radiography (RT) | volumetric defects: porosity, inclusions, lack of penetration | tight planar cracks normal to the beam — the most dangerous defect type |
+| Ultrasonic (UT), incl. phased array | planar defects, lack of fusion, with depth information | requires access, couplant, and a technique developed on representative flaws; coarse-grained welds scatter |
+| Eddy current | surface and near-surface cracks in conductive material | depth |
+| **Proof pressure test** | gross structural inadequacy, in the actual load path | nothing about margin beyond the proof level |
+| **Helium leak test** | leak paths down to $10^{-9}$ std cm³/s | structural adequacy |
+
+A serious weld specification does not pick one; it specifies a sequence, with
+the acceptance flaw size derived from a fracture-mechanics analysis of the part
+(module 16). "Inspect to the smallest flaw the method can find" is not an
+engineering requirement; "inspect to a flaw size below the critical flaw size
+with a stated probability of detection" is.
+
+### 3.8 Diffusion bonding and platelet devices
+
+**Diffusion bonding** joins two clean, flat surfaces held in intimate contact at
+high temperature and moderate pressure, for hours. Asperities creep flat, the
+interface voids shrink by surface and volume diffusion, and grain boundaries
+migrate across the original interface until it disappears. Done properly the
+joint is *indistinguishable from parent metal* — no filler, no cast structure,
+no melting-point depressant, no HAZ. Done improperly it is a plane of
+unbonded voids and it will delaminate. The controls are surface cleanliness
+(oxide films are the enemy; this is done in vacuum or dry hydrogen), flatness,
+and the pressure–temperature–time schedule.
+
+**Platelet construction** is what diffusion bonding enables, and it is the most
+interesting manufacturing idea in classical injector design. Take a stack of
+thin metal sheets (typically 0.25–0.75 mm). Photochemically etch each one with a
+two-dimensional pattern of holes and slots — a process that is essentially free
+per feature, since the whole sheet is etched at once from a photographic mask.
+Stack the sheets in a defined order and diffusion-bond the stack into a
+monolith. The two-dimensional patterns in successive layers combine into a
+fully three-dimensional internal flow network: manifolds, distribution passages,
+metering orifices, impingement geometry, and face-cooling passages, all
+integral, with feature sizes and positional accuracy set by photolithography
+rather than by drilling.
+
+Aerojet developed and flew this extensively — Aerojet platelet injectors and
+platelet-faced thrust chambers are the reference examples [H]. What it buys:
+
+- Extremely fine, precisely located metering features that would be impossible
+  to drill, including non-circular orifices and integral filtration screens.
+- Transpiration-cooled or convectively-cooled injector faces with the coolant
+  passages built in.
+- Very high element densities, and elements whose internal geometry can vary
+  smoothly across the face.
+
+What it costs: a design that cannot be changed without re-etching the whole
+sheet set; a bond area of tens of thousands of square millimetres that must be
+inspected, essentially, by proof and leak test plus destructive coupons; and a
+part with no repair path. It also has an important conceptual relationship to
+additive manufacturing — **platelet construction is layer-wise manufacturing
+implemented with photochemistry and diffusion bonding instead of a laser**, and
+almost every geometric trick the AM injector community rediscovered in the 2010s
+was known to the platelet community in the 1970s [J].
+
+### 3.9 Spinning and flow forming
+
+Large, thin, axisymmetric shells — nozzle extensions, jackets, tank domes,
+liners before channel milling — are not machined from billet, because the chip-
+to-part ratio would be absurd and the resulting part would have no useful grain
+structure. They are formed.
+
+**Spinning** presses a rotating blank against a mandrel with a roller, moving
+the metal over the mandrel in successive passes. Wall thickness is roughly
+preserved (conventional spinning) and the operation is incremental, so forming
+loads are low and tooling is cheap.
+
+**Shear forming / flow forming** deliberately thins the wall. In shear forming
+the blank thickness follows the sine law:
+
+$$t_f = t_0 \sin\alpha$$
+
+> **Eq. 3.5** — variables: $t_f$ formed wall thickness (m), $t_0$ blank
+> thickness (m), $\alpha$ the angle between the mandrel wall and the plane of
+> the original blank. Meaning: in single-pass shear forming, the wall thins
+> exactly as the sine of that angle, so a mandrel wall at 30° halves the wall
+> thickness. Assumes: single-pass shear spinning of a flat blank over a conical
+> mandrel, no circumferential strain, no thinning from the roller path itself.
+> Fails when: multiple passes redistribute material, when the part is not
+> conical, or when the material's formability is exceeded and it tears or
+> wrinkles.
+
+Flow forming over a cylindrical mandrel achieves the same thinning with axial
+material flow and is the standard route for high-precision thin-wall cylinders
+(also, notably, for solid-motor cases — see module 22). The advantages for a
+nozzle shell are substantial: excellent thickness control (a few percent), a
+work-hardened and axially aligned grain structure, and a surface finish good
+enough to use as-formed. Intermediate stress-relief anneals are needed because
+the process cold-works heavily.
+
+The propulsion consequence: **a large thin nozzle shell is a formed part, not a
+printed one**, and this is one of the clearest places where additive
+manufacturing is the wrong answer (§3.10.9).
+
+### 3.10 Additive manufacturing
+
+This is the section that has changed most since the last generation of textbooks
+and will change most again. Treat the *physics* as durable and the
+*capability numbers* as perishable [GradlAM].
+
+#### 3.10.1 Laser powder bed fusion: the physics
+
+L-PBF (also DMLS, SLM) builds a part by repeating: spread a layer of powder of
+thickness $t_\ell$ across a build plate with a recoater; scan a laser over the
+cross-section of the part in that layer, melting the powder and re-melting some
+of the layer below; lower the plate by $t_\ell$; repeat.
+
+The controlling variable at first order is **volumetric energy density**:
+
+$$E_v = \frac{P_\ell}{v_s\, h_s\, t_\ell}$$
+
+> **Eq. 3.6** — variables: $E_v$ volumetric energy density (J/m³), $P_\ell$
+> laser power (W), $v_s$ scan speed (m/s), $h_s$ hatch spacing (m), $t_\ell$
+> layer thickness (m). Meaning: the energy deposited per unit volume of powder
+> processed; the single most useful lumped process parameter. Assumes: constant
+> absorptivity and a stable melt pool; ignores beam diameter, spot shape, scan
+> strategy, preheat and gas flow, all of which matter. Fails when: comparing
+> different machines or alloys — $E_v$ is not transferable, and two parameter
+> sets with the same $E_v$ can give completely different microstructures.
+
+Three defect regimes bracket the usable process window [F][E]:
+
+- **Too little energy → lack of fusion.** The melt pool does not penetrate into
+  the previous layer or does not overlap the adjacent track. The result is
+  irregular, flat, often large voids with unmelted powder inside, aligned with
+  the layer or hatch geometry. These are the worst defects: they are planar,
+  they are crack-like, they can be large, and they are aligned with the build
+  direction so they act as delamination planes.
+- **Too much energy → keyholing.** The melt pool becomes a deep vapour
+  depression (the same keyhole as in EBW). The keyhole is unstable; its tip
+  collapses periodically and traps a spherical gas pore at the bottom of the
+  melt pool. Keyhole porosity is round, small, deep, and reasonably tractable —
+  HIP closes it, provided it is not surface-connected.
+- **Marginal wetting → balling.** If the melt track does not wet the substrate,
+  Rayleigh–Plateau instability breaks the liquid cylinder into a row of
+  spheres. The next recoater pass then drags across the balls, damaging the
+  layer or jamming.
+
+Beyond these, **residual stress** is intrinsic. Each track heats and cools at
+$10^5$–$10^7$ K/s. The material contracts on cooling but is constrained by the
+solid beneath, so every layer ends in tension and imposes compression below.
+The accumulated stress warps parts off the plate, cracks brittle alloys, and
+must be relieved thermally *while the part is still bolted to the build plate*
+(§3.10.8). It also means the residual-stress state of an as-built part is not a
+small correction.
+
+**Alloys.** Weldable alloys print; unweldable ones do not, and for the same
+reason (solidification cracking, §3.7.2). Inconel 718 prints extremely well and
+is the workhorse. Copper alloys were historically difficult — copper reflects
+1,064 nm laser light and conducts heat away from the melt pool — which is why
+green (515 nm) and blue lasers, and higher powers, were developed. **GRCop-42
+and GRCop-84** are the propulsion-specific dispersion-strengthened Cu–Cr–Nb
+liner alloys [GRCop]; GRCop-42 is the more printable and is now the default for
+AM chambers [GradlAM][Gradl18]. Refractories and single-crystal superalloys do
+not print usefully today.
+
+**Powder.** Gas-atomised spherical powder, typically 15–45 µm for L-PBF, is
+specified on particle size distribution, sphericity, satellite content,
+flowability, apparent and tap density, and interstitial chemistry (O, N, H).
+Powder is reused, sieved between builds, and its oxygen content climbs with
+reuse. Powder lot control is a flight-hardware traceability item, not a shop
+convenience: the qualification argument for an AM part is built on the powder
+lot, the machine, the parameter set and the witness coupons together
+[GradlAM].
+
+#### 3.10.2 Overhangs, supports, and why they are the real design constraint
+
+A layer melted over loose powder has nothing to conduct heat into and nothing to
+hold it flat. Below a critical overhang angle from the horizontal — commonly
+**about 45°**, alloy- and machine-dependent — a downward-facing surface must be
+supported by a sacrificial lattice that anchors it and conducts heat away
+[E][M]. Supports cost material, cost build time, and must be removed
+mechanically afterwards, leaving witness marks.
+
+For a rocket engine this is decisive, because **supports inside a closed
+internal channel cannot be removed**. The entire art of designing a printable
+regeneratively cooled chamber is arranging every internal passage so that it is
+self-supporting: teardrop or diamond channel cross-sections instead of
+rectangular ones (the "roof" of a rectangular channel is a 0° overhang and will
+droop or collapse), channel routing that keeps the local overhang above the
+critical angle, and part orientation chosen so the channels run steeply rather
+than horizontally. A designer who draws rectangular channels and hands them to
+a printer has not designed a printable part [J].
+
+#### 3.10.3 Surface roughness, and why it is not a cosmetic issue
+
+An as-built L-PBF surface is rough because it is made of partly melted powder
+particles stuck to a solidified melt track. Typical as-built $R_a$ values,
+which vary strongly with orientation [E][M][GradlAM]:
+
+| surface | typical as-built $R_a$ |
+|---|---|
+| Upskin (upward-facing) | 5–12 µm |
+| Vertical wall | 8–15 µm |
+| **Downskin (downward-facing, unsupported)** | **15–40 µm** |
+| Machined reference | 0.4–1.6 µm |
+
+An internal cooling channel has all three orientations around its perimeter, and
+its downskin roof is the worst of them. Since the roof is also the hot side in
+many orientations, this is not a happy coincidence.
+
+Roughness matters through the friction factor. In fully rough turbulent flow the
+friction factor becomes independent of Reynolds number and depends only on
+relative roughness; in the transitional regime the Colebrook equation applies:
+
+$$\frac{1}{\sqrt{f}} = -2\log_{10}\!\left(\frac{k_s/D_h}{3.7} + \frac{2.51}{\mathrm{Re}\sqrt{f}}\right)$$
+
+> **Eq. 3.7** — variables: $f$ Darcy friction factor (—), $k_s$ equivalent
+> sand-grain roughness (m), $D_h$ hydraulic diameter (m), $\mathrm{Re}$
+> Reynolds number based on $D_h$ (—). Meaning: implicit relation for turbulent
+> friction in a rough pipe, spanning smooth to fully rough. Assumes: fully
+> developed turbulent flow in a circular duct with uniform sand-grain
+> roughness. Fails when: the flow is developing (the entrance region of a short
+> channel is much of a rocket channel), when the duct is a high-aspect-ratio
+> rectangle (use $D_h$ and accept a few percent error), when curvature induces
+> secondary flow, or when the coolant is supercritical with strong property
+> variation across the boundary layer — all of which are true in a real
+> regenerative channel.
+
+The bridge from the measured $R_a$ to the $k_s$ that Eq. 3.7 needs is the weak
+link. There is no universal conversion. Published AM channel work fits ratios
+in the range $k_s/R_a \approx 2$ to $10$; a working value of **$k_s \approx
+5R_a$** is defensible for as-built L-PBF channels but must be tagged [E][A] and
+carried with its uncertainty, because a factor of 2 in $k_s$ is roughly ±15 %
+in $f$ in this regime.
+
+Heat transfer follows friction, but not one-for-one. Roughness elements trip the
+viscous sublayer and increase turbulent transport, but they also add form drag
+which contributes to $f$ and *not* to heat transfer. The standard closure is a
+friction analogy, e.g. Norris:
+
+$$\frac{\mathrm{Nu}}{\mathrm{Nu}_{smooth}} = \left(\frac{f}{f_{smooth}}\right)^{n},
+\qquad n = 0.68\,\mathrm{Pr}^{0.215}$$
+
+> **Eq. 3.8** — variables: $\mathrm{Nu}$ rough-wall Nusselt number (—),
+> $\mathrm{Nu}_{smooth}$ smooth-wall value from Dittus–Boelter or Gnielinski,
+> $f$ friction factors as above, $\mathrm{Pr}$ Prandtl number (—). Meaning:
+> heat transfer rises with roughness, but sublinearly in $f$ once form drag
+> dominates. Assumes: $f/f_{smooth} \le 3$; beyond that the enhancement
+> saturates. Fails when: the roughness is not sand-grain-like (AM roughness is
+> irregular and partly re-entrant), and for high-aspect-ratio channels where
+> only part of the perimeter is rough.
+
+WE2 runs this for a real channel. The headline result — a factor of ~2.3 on
+$f$ and hence on $\Delta p$, and a factor of ~2.4 on $h$ — is a **mixed
+blessing that programmes routinely misread**: the pressure drop is a straight
+cost, paid in pump power and therefore in turbine flow and cycle margin, while
+the heat-transfer increase is a genuine benefit that lets the wall run cooler.
+Measured AM channel data generally shows less heat-transfer enhancement than
+Eq. 3.8 predicts (ratios of 1.3–1.8 are commonly reported) while showing the
+full friction penalty, so the honest design position is: **take the whole
+pressure-drop penalty in your budget, and take at most half the heat-transfer
+credit** [J][GradlAM].
+
+#### 3.10.4 Internal channel limits
+
+The geometric envelope of L-PBF internal features, as of the mid-2020s
+production state of the art [M] — expect these to improve:
+
+| feature | practical limit |
+|---|---|
+| Minimum self-supporting internal channel | ~0.5–1.0 mm hydraulic diameter, teardrop or diamond section |
+| Minimum wall between channels | ~0.4–0.6 mm, and thinner walls print but leak |
+| Maximum unsupported horizontal span | a few millimetres before droop |
+| Overhang angle without support | ≳ 40–45° from horizontal |
+| Positional accuracy | ±0.1–0.2 mm typical, worse on long unsupported features |
+| Achievable channel length | limited by powder removal, not by printing |
+
+The last entry is the one that catches people. A 2 mm channel that snakes 900 mm
+through a chamber, with bends, is easy to print and *hard to clean*. Unfused but
+partly sintered powder cakes on the channel walls under the heat of adjacent
+melting and does not simply pour out. Every AM chamber programme has a powder
+removal procedure — vibration, tumbling, rotation on multiple axes, pressurised
+gas, ultrasonic cleaning in solvent, and, as verification, a **per-channel flow
+test compared against a CFD or empirical prediction** plus CT (§3.12). Residual
+powder in a coolant channel is a blockage, and a blockage is a burn-through.
+
+#### 3.10.5 Build volume
+
+Machine build envelopes set a hard part-size limit. Production L-PBF machines in
+current service span roughly 250 mm cubes at the small end to **600 mm-class**
+platforms (600 × 600 × 600 mm; and cylindrical formats around 600 mm diameter by
+up to ~1,000 mm tall). Multi-laser machines (4, 8, 12 lasers) exist mainly to
+make these large volumes buildable in a tolerable time. A one-metre-class
+envelope is the current frontier for L-PBF [M].
+
+For a booster-class engine, that is small. WE3's chamber is 0.89 m tall and
+0.42 m in diameter *to an area ratio of only 4* — the full $\varepsilon = 16$
+nozzle is 0.79 m in exit diameter and would not fit at all. So a printed booster
+chamber is either segmented and joined (which reintroduces joints), or split
+at the process boundary: L-PBF for the high-detail chamber and throat, DED
+(§3.10.6) or forming for the large nozzle. That is exactly what the industry
+does.
+
+#### 3.10.6 Directed energy deposition
+
+In DED the feedstock is delivered to the melt pool rather than pre-spread.
+Two families:
+
+**Blown-powder laser DED.** Powder is carried in an inert gas stream through
+nozzles coaxial with a laser, converging at the focal point, where the laser
+maintains a melt pool on the existing surface. The head is on a robot or a
+multi-axis gantry, so there is no build-envelope box: the part can be as large
+as the machine's reach. Deposition rates are **one to two orders of magnitude
+above L-PBF** (kilograms per hour rather than tens of grams), resolution is much
+coarser (bead widths of millimetres), surfaces need machining, and internal
+closed channels cannot be made directly — but *open* channels can be
+closed out by depositing over a filler, which is the key trick.
+
+**Wire-arc additive manufacturing (WAAM).** An arc process (GMAW/GTAW/plasma)
+on a robot deposits weld beads. Very high deposition rate, very low feedstock
+cost, very coarse resolution, and large heat input with correspondingly large
+residual stress and distortion. It is the process for very large, structurally
+simple parts.
+
+**NASA's RAMPT project** is the propulsion exemplar and the one to know
+[RAMPT]. Its purpose is large-scale AM of regeneratively cooled channel-wall
+nozzles and chambers by blown-powder DED with composite overwrap. The pieces
+that matter conceptually:
+
+- **Scale.** DED removes the build-envelope limit, so metre-class channel-wall
+  nozzles become a single part rather than a brazed tube bundle or a welded
+  assembly.
+- **Bimetallic deposition.** Because the powder feed is a stream, it can be
+  changed *during the build*. RAMPT demonstrated depositing a **GRCop copper-
+  alloy liner and then a nickel-superalloy (718-class) structural jacket in one
+  continuous build**, with a graded or abrupt transition between them. This is
+  the single most significant capability in the section: it replaces the
+  entire electroform-or-braze closeout problem — the one that killed schedules
+  from the F-1 to the RS-25 — with a change of powder hopper. There is no
+  interface to inspect for adhesion because there is no bonded interface; there
+  is a fusion transition.
+- **Channel closeout.** Open channels machined or deposited into the liner are
+  filled with a sacrificial material and deposited over, exactly as in the
+  electroform sequence, but in hours instead of days.
+
+Report the RAMPT results as what they are: **project progress snapshots from an
+active technology programme, hot-fire tested at component scale, not a
+qualified production process for a flight engine** [R]. The numbers in RAMPT
+publications are explicitly expected to be superseded [RAMPT].
+
+#### 3.10.7 Other AM processes worth knowing
+
+**Electron-beam PBF (EB-PBF).** A powder bed fused by an electron beam in
+vacuum, with the powder bed held at high temperature (700–1,000 °C). The high
+bed temperature is the point: it nearly eliminates residual stress, so
+crack-prone alloys (titanium aluminides, some superalloys) can be built without
+cracking, and supports are needed mainly for heat conduction rather than
+anchoring. Costs: vacuum, a lightly sintered powder cake that must be blasted
+off, coarser resolution and worse surface finish than L-PBF, and charging
+effects that restrict the process to conductive powders. Used for turbine
+hardware, rarely for combustion devices.
+
+**Binder jetting.** An inkjet head deposits binder onto a powder bed; the green
+part is depowdered, debound and sintered, usually with 15–25 % linear shrinkage,
+and often infiltrated. No melting means no residual stress and no
+support structures at all, and the process is fast and cheap per part at
+volume. The costs are severe for propulsion: sintering shrinkage must be
+predicted and compensated to hold tolerance, sintered density and therefore
+properties lag wrought material, and the resulting microstructure is a sintered
+one. Binder jet has a real place in tooling, cores and non-structural hardware,
+and essentially no place today in a hot, pressurised, fatigue-critical engine
+component [J].
+
+#### 3.10.8 Post-processing: the half of AM nobody photographs
+
+An as-built AM part is not a part. The sequence for a flight chamber, in order,
+with the reason for each step [M][GradlAM]:
+
+1. **Stress relief on the build plate.** Thermal cycle to relax residual stress
+   *before* cutting the part free, or it will distort as it is released. This is
+   non-negotiable.
+2. **Removal from the plate** — wire EDM or bandsaw.
+3. **Powder removal.** Before any thermal cycle that would sinter trapped powder
+   into a solid mass. Order matters: powder removal after HIP is powder removal
+   from a part that now has an integral ceramic-hard plug in it.
+4. **HIP.** Closes internal keyhole and lack-of-fusion porosity that is not
+   surface-connected, dramatically reducing fatigue scatter. Not a cure for
+   surface-connected defects, and not a cure for a lack-of-fusion plane that
+   reaches the surface.
+5. **Solution and age heat treatment** to develop the required microstructure —
+   frequently combined with the HIP cycle to save a thermal excursion.
+6. **Machining** of every sealing face, flange, interface diameter and the throat
+   contour. AM does not hold interface tolerance; nobody expects it to.
+7. **Internal surface finishing where reachable:** abrasive flow machining
+   (a viscoelastic abrasive-laden putty extruded back and forth through the
+   passage, which preferentially cuts the high spots and the restrictions),
+   chemical or electrochemical polishing, or tumbling. AFM can take an
+   internal channel from $R_a \approx 15$ µm to $R_a \approx 3$–6 µm, which by
+   Eq. 3.7 recovers a large part of the pressure-drop penalty — at the cost of
+   removing material non-uniformly (it cuts most where the velocity is highest,
+   which is the *restriction* you may have wanted).
+8. **NDE** (§3.12) and proof/leak test.
+
+Steps 1–8 typically take longer in calendar time than the build itself, and the
+programme that budgets only for machine hours will be late [J].
+
+#### 3.10.9 Where AM is not the answer
+
+State this plainly, because the enthusiasm in the field obscures it [J][M]:
+
+- **Large thin nozzle shells.** A 3 m diameter, 1 mm wall bell is a spun or
+  formed part in hours, for very little money, with better grain structure and
+  better surface than any printed equivalent. Printing it would take weeks and
+  cost more. DED can print a large *channel-wall* nozzle where the channels are
+  the point (RAMPT), but a plain shell is a forming job.
+- **Turbine blades requiring single-crystal or DS structure.** §3.4.2: the
+  solidification physics of PBF cannot produce the structure. Investment casting
+  wins on the merits.
+- **Any part where the driver is cost at rate.** A machined-from-bar fitting
+  produced 10,000 times a year on a Swiss lathe costs a few dollars. The same
+  part printed costs orders of magnitude more and always will, because the
+  process is inherently serial in a way that machining is not.
+- **Very large primary structure.** Thrust structures, tank barrels: FSW'd
+  aluminium plate remains far cheaper and lighter.
+- **Anything where the qualification burden exceeds the design benefit.** If AM
+  saves you two brazed joints on a part that already has a qualified braze
+  process, and buys you a two-year AM qualification campaign, you have made a
+  bad trade.
+
+The correct framing is not "AM versus conventional" but "which process for which
+feature". Modern engines are process-mixed by design: printed injector, printed
+or milled chamber liner, DED or formed nozzle, forged pump housings, cast
+turbine wheel, FSW'd tanks.
+
+### 3.11 Coatings
+
+Coatings solve problems that the base material cannot, at the cost of an
+interface that can spall.
+
+**Thermal barrier coatings (TBC).** A low-conductivity ceramic — typically
+yttria-stabilised zirconia, 7–8 wt% Y₂O₃ — applied over a metallic bond coat,
+either by air plasma spray (a lamellar, porous, more compliant structure) or by
+electron-beam physical vapour deposition (a columnar structure that is far more
+strain-tolerant). The physics is a thermal resistance in series:
+$\Delta T = q\,t/k$ with $k \approx 1$ W/(m·K) versus ~20 for a superalloy, so
+a 0.25 mm TBC over a wall carrying 5 MW/m² drops about 1,250 K across the
+coating. Failure is by spallation, driven by growth of the thermally-grown oxide
+at the bond coat and by the thermal expansion mismatch; the spalled area then
+runs at full gas temperature. In liquid engines TBCs are used more on turbine
+hardware and gas-generator/preburner components than on regeneratively cooled
+chamber walls, where they interfere with the intended heat flux into the
+coolant — a TBC on a regen chamber reduces the heat *into the coolant*, which
+for an expander cycle is a direct loss of turbine power.
+
+**Silicide coatings on niobium.** Refractory-metal radiation-cooled nozzle
+extensions — C-103 niobium alloy, used on the Merlin Vacuum extension
+[_verify-liquid, Merlin block] and on essentially every storable-propellant
+apogee engine — oxidise catastrophically in air above ~700 K and would be
+consumed by any oxygen-bearing exhaust. The protection is a **disilicide
+diffusion coating** (the R512E fused-slurry silicide is the classic), applied as
+a slurry and diffused at high temperature, forming an adherent
+(Nb,Ti,Cr)Si₂ layer. It works by forming a thin, self-healing, glassy silica
+scale in service. Its limits are the ones you would expect from a brittle
+diffusion coating: it is damaged by handling and by impact, it has a finite life
+governed by silicon depletion into the substrate, and its most dangerous failure
+is **pesting** — accelerated intergranular oxidation at intermediate
+temperatures (roughly 800–1,000 K) that can destroy an unprotected or
+locally-damaged part quickly. Coated niobium extensions therefore have handling
+and inspection requirements out of all proportion to their apparent robustness.
+
+**Plating for hydrogen service.** Hydrogen environment embrittlement (module 16)
+attacks susceptible alloys — high-strength steels, many nickel alloys — by
+hydrogen ingress at the surface. A barrier layer of a low-permeability, low-
+susceptibility metal blocks the ingress. **Copper and gold plating** are used on
+threads, seal surfaces and hydrogen-wetted components; **nickel plating** is
+used both as a barrier and as a build-up layer, and electroless nickel gives
+uniform coverage in bores where a plating bath's throwing power would fail.
+The coating must be pore-free — a pinhole is a local hydrogen entry point and
+concentrates the problem instead of solving it — so plating for hydrogen
+service is specified with thickness, porosity and adhesion acceptance, not just
+thickness.
+
+### 3.12 Non-destructive evaluation and acceptance
+
+An inspection plan is a set of answers to one question: *for each credible
+defect this process produces, what method finds it at a size below the critical
+flaw size, with what probability of detection?* The methods:
+
+| method | physics | best at | blind to |
+|---|---|---|---|
+| **Visual / borescope** | optics | surface condition, blockages, gross damage | anything subsurface |
+| **Fluorescent penetrant (PT)** | capillary action draws dyed liquid into surface-connected defects | tight surface cracks in non-porous material | subsurface defects; useless on as-built AM surfaces, whose roughness holds penetrant everywhere and creates a solid false indication |
+| **Radiography (RT)** | differential X-ray attenuation | volumetric defects: porosity, inclusions, **braze voids** (filler and base metal differ in density) | planar cracks aligned with the beam; thick or complex sections |
+| **Computed tomography (CT)** | reconstructed 3D attenuation map | internal geometry of complex parts: **channel dimensions, residual powder, internal porosity, wall thickness** — the method that made AM qualifiable | resolution scales with part size; a 0.3 m diameter part gives voxel sizes of hundreds of micrometres, so small defects in large parts are still invisible |
+| **Ultrasonic (UT)** | elastic wave reflection at an interface | planar defects with depth, bond-line disbonds (electroform adhesion, diffusion bonds) | requires access and couplant; scattering in coarse or textured grain structures — which includes many AM microstructures |
+| **Eddy current** | induced-current perturbation | surface/near-surface cracks in conductors | depth, non-conductors |
+| **Proof pressure test** | applied load | gross structural inadequacy in the real load path | margin beyond the proof level; it can also *damage* a marginal part |
+| **Leak test (He mass spec)** | tracer gas transport | leak paths to $10^{-9}$ std cm³/s | structural adequacy |
+| **Flow test** | measured $\dot m$ vs $\Delta p$ per circuit or per channel | blockages, wrong effective area, residual powder, wrong $C_d$ | the reason for the deviation |
+
+Three propulsion-specific points:
+
+**Brazes are X-rayed, then proofed, then leak-tested, in that order.** Each
+finds something the others cannot, and the order matters because proof testing a
+part with a known large void is how you turn an inspection finding into a
+destroyed part.
+
+**AM parts are CT-scanned, and CT is the reason AM parts can be flown.** No
+other method sees inside a monolithic part with internal channels. The practical
+constraint is that CT resolution degrades with part size and density: small
+printed injectors can be scanned to tens of micrometres; a metre-class chamber
+cannot. So the qualification argument for large AM parts is necessarily a
+*process* argument — locked parameter sets, machine qualification, powder lot
+control, witness coupons built alongside every part and destructively tested —
+supported by CT where CT reaches, rather than a purely part-based argument
+[GradlAM][Gradl18]. This is a genuine and unresolved difficulty in the field, and
+you should say so rather than pretending the inspection problem is solved.
+
+**Witness coupons are the load-bearing element of an AM acceptance argument.**
+Tensile bars and fatigue specimens built on the same plate, from the same powder
+lot, in the same parameter set, in representative orientations, and put through
+the same post-processing. They are what connects the part in your hand to the
+allowables in your analysis. They are also imperfect: a coupon does not
+reproduce the thermal history of a thin curved wall in the middle of a large
+build, and part-to-part and location-within-build variability is the known open
+issue [GradlAM].
+
+### 3.13 Production rate and cost as engineering variables
+
+Rate is a design input, not a manufacturing consequence. Three regimes [J]:
+
+**One to ten engines per year (RS-25, RL10, F-1 era, Vulcain).** Touch labour is
+affordable. Processes that require skill — hand fit-up of tube bundles, hand
+welding, per-unit tuning — are acceptable. Inspection can be exhaustive because
+there are few units. Non-recurring cost dominates: the tooling for a
+higher-rate process cannot be amortised. The optimisation is *performance per
+unit mass*, because unit cost is a small fraction of mission cost.
+
+**Tens to low hundreds per year (Merlin, Rutherford, RL10 in its best years).**
+Now the calculus inverts. The **Merlin's stated design intent is exactly this**:
+the engine is "optimised for cost, restart and reuse, not Isp", it accepts a
+gas-generator cycle and $p_c = 97$ bar, and its distinguishing achievement is
+"manufacturing cadence — hundreds of engines a year, an output no other liquid
+engine programme has matched" [_verify-liquid, Merlin 1D block]. Every
+manufacturing choice follows: milled channels rather than brazed tubes; a
+**pintle** injector, which is one large machined element instead of hundreds of
+drilled ones; a niobium radiative extension rather than a regeneratively cooled
+one. Rocket Lab's Rutherford makes the same argument by a different route:
+**chamber, injectors, pumps and main propellant valves all printed by L-PBF**,
+which converts a labour-intensive assembly into machine time
+[_verify-liquid, Rutherford block]. By April 2024, **369 Rutherford engines had
+flown across 47 Electron flights** — a production statistic, and the real
+justification for the architecture.
+
+**Very high rate.** Not yet demonstrated for orbital-class liquid engines in the
+open record; SpaceX's Raptor claims belong here but every Raptor figure in this
+course is explicitly a company claim [_verify-liquid, Raptor block] and rate
+claims should be treated the same way.
+
+The historical cost data worth carrying:
+
+- **RS-25.** "Cost and complexity" is listed as its major limitation; between-
+  flight inspection was enormous, and the engine is now flown expendably on SLS
+  [_verify-liquid, RS-25 block]. The **RS-25E ("Expendable") restart** is the
+  interesting engineering event: the objective was to re-establish production of
+  a 1970s design at substantially lower unit cost, and the levers were
+  manufacturing ones — parts consolidation, replacing multi-piece welded and
+  brazed assemblies with printed monolithic parts (the pogo accumulator assembly
+  is the widely cited example, reported by the manufacturer as a large reduction
+  in part count and weld count), modern machining, and deleting the reusability-
+  driven inspection burden. Treat the specific cost-reduction percentages as
+  **manufacturer claims not carried in this course's engine file** [M].
+- **RS-68.** Designed under an explicit "design for minimum cost" brief,
+  achieving roughly **80 % fewer parts than the RS-25**, at the price of
+  performance — its Isp and $p_c$ are well below what a staged-combustion
+  hydrogen engine of the era could reach, and the course file records that this
+  is "the direct price of the cost-driven design" [_verify-liquid, RS-68A block].
+- **Prometheus.** Europe's explicit statement of the same idea: a **€1 million
+  per engine target, one tenth the cost of Vulcain 2**, with **up to 50 % of the
+  engine by metal 3D printing**, and a gas-generator cycle chosen deliberately.
+  "The cost target, not the performance, is the programme's stated purpose."
+  Every figure is a target for an unflown engine [_verify-liquid, Prometheus
+  block] [R].
+
+A number of small and mid-size Western engine companies — Relativity (Aeon),
+Launcher (E-2), Ursa Major, and others — have built their entire engineering
+identity on printing most or all of an engine. Their published performance
+numbers are company claims for engines that are not in this course's verified
+engine file, so this module does not quote them; what is worth taking from them
+is the *pattern*, which is uniform: small teams, high AM content, few joints,
+and cost and iteration speed as the stated design drivers rather than $I_{sp}$
+[M][R].
+
+The general lesson, and it is the most transferable thing in this module: **when
+unit cost or rate becomes the binding constraint, the engine architecture
+changes, not just its manufacturing plan.** Cycle selection, injector type,
+cooling method and nozzle construction all move. An engineer who treats "make it
+cheaper" as a purchasing activity rather than a design activity will produce an
+expensive engine with a cost-reduction programme attached.
+
+---
+
+## 4. Typical engineering ranges
+
+| quantity | typical range | extremes / who sits there |
+|---|---|---|
+| Tube count, tube-wall chamber | 100–1,100 | F-1: 178 tubes; RS-25 nozzle: 1,080 tubes [_verify-liquid] |
+| Milled channel count, chamber liner | 100–450 | RS-25 MCC: 390 channels [_verify-liquid] |
+| Coolant channel width | 0.8–2.5 mm | narrower at the throat, wider in the barrel |
+| Channel depth : width ratio | 2:1 to 4:1 (milled); up to ~6:1 (AM/EDM) | limited by cutter stiffness, Eq. 3.1 |
+| Tube/liner hot wall thickness | 0.25–1.0 mm | 0.3 mm class for thin tubes; 0.8–1.0 mm for a milled copper liner |
+| Braze joint clearance at temperature | 0.025–0.125 mm | the capillary window, Eq. 3.3 |
+| Electroform nickel deposition rate | 0.15–0.4 mm/day | at 100–300 A/m² in sulphamate |
+| Electroformed closeout thickness | 1.5–5 mm | structural jacket on a milled-channel liner |
+| EDM recast layer thickness | 2–25 µm | low with trim settings, high with roughing |
+| Injector orifice diameter | 0.4–3 mm | drilled or EDM'd |
+| Orifice diameter tolerance (drilled) | ±0.013 to ±0.025 mm | tighter on the outer/wall-protection row |
+| Orifice diameter tolerance (as-printed) | ±0.05 to ±0.10 mm | why printed orifices are usually finish-machined or EDM'd |
+| Injector element count | 1 (pintle) to ~2,000 | Merlin: 1 pintle element; J-2: 614 posts; RS-25: 600 elements [_verify-liquid] |
+| L-PBF layer thickness | 20–60 µm | 30 µm typical; 60 µm for rate at the cost of resolution |
+| L-PBF hatch spacing | 80–150 µm | |
+| L-PBF scan speed | 0.5–2 m/s | |
+| L-PBF deposition rate | 5–20 cm³/h per laser | multiply by laser count; 4–12 lasers on production machines |
+| L-PBF build envelope | 250 mm cube to ~600 mm × 1,000 mm | 1 m class is the current frontier |
+| L-PBF as-built $R_a$ | 5–40 µm | downskin worst; machined reference 0.4–1.6 µm |
+| DED deposition rate | 0.5–10 kg/h | 1–2 orders above L-PBF, at much coarser resolution |
+| Minimum self-supporting overhang | 40–45° from horizontal | alloy and machine dependent |
+| HIP conditions (Ni superalloys) | 1,150–1,200 °C, 100–200 MPa Ar | |
+| Proof pressure factor | 1.2–1.5 × MEOP | per the applicable standard, e.g. [AIAA-S-080] |
+| He leak-test sensitivity | $10^{-6}$ to $10^{-9}$ std cm³/s | |

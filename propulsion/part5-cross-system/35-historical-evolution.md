@@ -1899,11 +1899,13 @@ State what the residual tells you about the model.
 on year *after removing the two segmented-steel motors*. Report the new slope
 and $R^2$, and state what the change means.
 
-**N8.** The RD-180 delivers 3,830 kN at sea level with a dry mass of 5,480 kg;
-the F-1 delivers 6,770 kN at 8,400 kg. Compute both thrust-to-weight ratios,
-then compute what dry mass the F-1 would have needed to match the RD-180's
-$T/W$. Express the difference as a fraction of the F-1's actual mass and
-comment on whether cycle or era is the better explanation.
+**N8.** The RD-180 delivers 3,830 kN at sea level and 4,150 kN in vacuum with a
+dry mass of 5,480 kg; the F-1 delivers 6,770 kN at sea level and 7,770 kN in
+vacuum at 8,400 kg. Compute the sea-level thrust-to-weight ratio of each from
+those figures, compare with the published values of 78.44 and 94.1, and explain
+the discrepancy. Then compute what dry mass the F-1 would have needed to match
+the RD-180 on a consistent basis, and comment on whether cycle or era is the
+better explanation for the gap.
 
 ### Engineering reasoning
 

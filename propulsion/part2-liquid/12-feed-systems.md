@@ -1560,6 +1560,9 @@ suction-critical circuit.
 | impeller + good rocket inducer | 8.0 | **37.9 m** |
 | aggressive LH₂-class inducer | 10.0 | 28.2 m |
 
+Equivalently, inverting Eq. 3.16 at the available 18.17 m, the pump would
+need $N_{ss} = \mathbf{13.9}$ — well above anything demonstrated on oxygen.
+
 **Every option fails against 18.17 m available.** Even the best inducer needs
 twice the NPSH the vehicle can supply. The pump cannot run at 20 000 rpm off
 a 2.5 bar tank. This is not a marginal call.
@@ -2341,7 +2344,7 @@ strongest argument against it, and say which you would act on.
 **Q10 (10 pts).** From the data table in §3.20, the RD-170's turbopump power
 is given as either ~170 MW or 192 MW. (a) State how the course requires you
 to present a contested figure like this. (b) Using the lower figure and the
-RD-170's 7 900 kN sea-level thrust, compute the shaft power per newton and
+RD-170's 7 250 kN sea-level thrust, compute the shaft power per newton and
 compare it to the RE-500 value from WE2. (c) Explain the difference in terms
 of chamber pressure and cycle.
 
