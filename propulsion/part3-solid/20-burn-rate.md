@@ -1570,7 +1570,7 @@ the propellant supplier before committing.
 **Q1 (8 pts).** In $p_c = (a\rho_pc^*K_n)^{1/(1-n)}$, a 4 % underestimate of
 the burning surface area produces what percentage error in predicted chamber
 pressure at $n = 0.45$?
-(a) 4.0 % (b) 5.8 % (c) 7.3 % (d) 8.9 %
+(a) 4.0 % (b) 5.8 % (c) 7.4 % (d) 9.1 %
 
 **Q2 (8 pts).** A propellant has $\sigma_p = 0.0025$ K⁻¹ and $n = 0.40$.
 Compute $\pi_K$ and the chamber-pressure ratio between motors conditioned at

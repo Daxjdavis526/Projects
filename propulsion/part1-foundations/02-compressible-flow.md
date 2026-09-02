@@ -656,8 +656,8 @@ $$\tan\theta = 2\cot\beta\,\frac{M_1^2\sin^2\beta-1}{M_1^2(\gamma+\cos 2\beta)+2
 > $\beta=\mu$ (a Mach wave) and $\beta=90°$ (a normal shock). [F]
 
 For an overexpanded plume, the required pressure jump sets $M_{n1}$, hence
-$\beta$, hence $\theta$. RS-25 at sea level (§5.2): $M_e=4.71$, $p_e = 18.6$
-kPa, needs $p_a/p_e = 5.43$, giving $M_{n1} = 2.25$, $\beta = 28.6°$ and a
+$\beta$, hence $\theta$. RS-25 at sea level (§5.2): $M_e=4.71$, $p_e = 18.7$
+kPa, needs $p_a/p_e = 5.42$, giving $M_{n1} = 2.25$, $\beta = 28.5°$ and a
 deflection of $\theta = 20.2°$. The plume physically necks inward by twenty
 degrees at the lip — which is precisely what a Shuttle launch photograph shows.
 
@@ -681,7 +681,7 @@ $$\nu(M) = \sqrt{\frac{\gamma+1}{\gamma-1}}\arctan\sqrt{\frac{\gamma-1}{\gamma+1
 > beyond that a vacuum forms. [F]
 
 For $\gamma=1.2$: $\nu(4.71) = 102.0°$. Expanding an RS-25 exhaust at 20 km,
-where $p_a = 5.47$ kPa and $p_e = 18.6$ kPa, requires reaching $M=5.43$ with
+where $p_a = 5.47$ kPa and $p_e = 18.7$ kPa, requires reaching $M=5.43$ with
 $\nu = 113.4°$, so the plume boundary turns outward by $11.4°$ at the lip. Note
 the asymmetry with §3.11: at sea level the flow is turned inward 20° through a
 shock and loses stagnation pressure; at altitude it is turned outward 11°
@@ -936,7 +936,7 @@ State the failures explicitly, because everything above is a first-order model:
 | $\varepsilon$, upper stage / vacuum | 40–300 | 45 (Vulcain 1) | 285 (RL10B-2, deployed) |
 | $M_e$ | 2.5–6 | 2.5 ($\varepsilon\approx 4$) | 5.7 ($\varepsilon=285$) |
 | $p_e/p_0$ | $10^{-4}$–$10^{-1}$ | $8\times10^{-5}$ (RL10B-2) | $10^{-1}$ (short conical) |
-| $p_e$, sea-level engine | 40–80 kPa | 19 kPa (RS-25, extreme) | 80 kPa |
+| $p_e$, sea-level engine | 40–80 kPa | 18.7 kPa (RS-25, extreme) | 80 kPa |
 | $p_e/p_a$ at liftoff | 0.15–0.8 | 0.18 (RS-25) | 0.65 (Merlin 1D SL) |
 | $I_{sp,SL}/I_{sp,vac}$ | 0.80–0.93 | 0.80 (RS-25) | 0.93 (low-$\varepsilon$ booster) |
 | throat mass flux $\rho^*V^*$ | 2000–5000 kg/(m²·s) | — | scales with $p_0/\sqrt{T_0}$ |
@@ -970,7 +970,7 @@ $a_0 = \sqrt{\gamma R T_0} = \sqrt{1.2\times377.9\times3600} = 1278$ m/s.
 
 **Step 2 — mass flow (Eq. 3.10).**
 $\Gamma(1.2) = \sqrt{1.2}\,(2/2.2)^{2.2/0.4} = 0.6485$.
-$$\dot m = \frac{7.0\times10^6 \times 0.618}{\sqrt{377.9\times3600}}\times0.6485 = 2404\ \text{kg/s}$$
+$$\dot m = \frac{7.0\times10^6 \times 0.618}{\sqrt{377.9\times3600}}\times0.6485 = 2405\ \text{kg/s}$$
 
 **Step 3 — station table.** For each station, get $M$ from Eq. 3.11 (subsonic
 root upstream of the throat, supersonic root downstream), then Eqs. 3.5–3.7,
@@ -1003,7 +1003,7 @@ full at sea level, comfortably. That is exactly why $\varepsilon = 16$ was
 chosen (§6.2).
 
 **Sanity check.** Published F-1 total flow is 2577 kg/s [_verify-liquid, F-1].
-We computed 2404 kg/s, 6.7% low. The gap is not an error in Eq. 3.10; it is the
+We computed 2405 kg/s, 6.7% low. The gap is not an error in Eq. 3.10; it is the
 chamber pressure. The F-1's $p_c$ is quoted at 965, 982, 1015 and 1125 psia in
 different sources, and $\dot m \propto p_0$: at 1125 psia (77.6 bar) the same
 throat passes 2665 kg/s. This is a good early lesson in reading engine data —
@@ -1024,15 +1024,15 @@ $\mathcal{M} = 13.5$ kg/kmol, $T_0 = 3600$ K [A].
 $M_e = 4.707$.
 
 **Step 2 — exit pressure.** Eq. 3.6:
-$$\frac{p_0}{p_e} = \left(1+0.1\times4.707^2\right)^{6} = 1.106\times10^{3}
+$$\frac{p_0}{p_e} = \left(1+0.1\times4.707^2\right)^{6} = 1.1048\times10^{3}
 \;\Rightarrow\;
-p_e = \frac{20.64\times10^6}{1106} = 18.65\ \text{kPa}$$
+p_e = \frac{20.64\times10^6}{1104.8} = 18.68\ \text{kPa}$$
 
 **Step 3 — find the altitude where $p_a = p_e$.** Using the 1976 US Standard
-Atmosphere: $p_a = 18.65$ kPa lies in the isothermal stratosphere
+Atmosphere: $p_a = 18.68$ kPa lies in the isothermal stratosphere
 ($T = 216.65$ K above 11 km, where $p_{11} = 22.632$ kPa):
 $$h = 11000 + \frac{R_{air}T}{g_0}\ln\frac{p_{11}}{p_e}
-= 11000 + \frac{287.05\times216.65}{9.80665}\ln\frac{22632}{18646} = 11000 + 1229$$
+= 11000 + \frac{287.05\times216.65}{9.80665}\ln\frac{22632}{18682} = 11000 + 1216$$
 $$\boxed{h \approx 12.2\ \text{km}}$$
 
 **Step 4 — the trajectory in context.**
@@ -1040,9 +1040,9 @@ $$\boxed{h \approx 12.2\ \text{km}}$$
 | $h$ (km) | $p_a$ (kPa) | $p_e/p_a$ | regime |
 |---|---|---|---|
 | 0 | 101.3 | 0.184 | deeply overexpanded |
-| 5 | 54.0 | 0.345 | overexpanded |
-| 10 | 26.4 | 0.705 | overexpanded |
-| 12.2 | 18.6 | 1.00 | **ideally expanded** |
+| 5 | 54.0 | 0.346 | overexpanded |
+| 10 | 26.4 | 0.707 | overexpanded |
+| 12.2 | 18.7 | 1.00 | **ideally expanded** |
 | 15 | 12.0 | 1.55 | underexpanded |
 | 20 | 5.47 | 3.41 | underexpanded |
 
@@ -1064,21 +1064,21 @@ One equation, one unknown $M$. Left side falls steeply with $M$; right side
 falls slowly; there is a single root between $M=1$ and $M_e$.
 
 **Step 2 — solve.** Bisection between $M = 1.5$ and $M_e = 4.707$ gives
-$$M_{sep} = 4.475,\qquad p_{wall} = 28.1\ \text{kPa},\qquad p_{sep}/p_a = 0.277$$
+$$M_{sep} = 4.476,\qquad p_{wall} = 28.11\ \text{kPa},\qquad p_{sep}/p_a = 0.277$$
 
-**Step 3 — convert to a location.** Eq. 3.11 at $M = 4.475$:
-$A_{sep}/A_t = 55.9$. The nozzle is $\varepsilon = 77.5$, so separation is
+**Step 3 — convert to a location.** Eq. 3.11 at $M = 4.476$:
+$A_{sep}/A_t = 56.0$. The nozzle is $\varepsilon = 77.5$, so separation is
 predicted at 72% of the exit area — in radius terms $r_{sep}/r_e =
-\sqrt{55.9/77.5} = 0.85$, i.e. about 85% of the way out in radius and, for a
+\sqrt{56.0/77.5} = 0.85$, i.e. about 85% of the way out in radius and, for a
 bell contour, roughly 90% of the way along the axis.
 
 **Step 4 — the same calculation with Summerfield.** $p_{sep} = 0.4\times101325
 = 40.5$ kPa; solving Eq. 3.6 for the station with that wall pressure gives
-$M_{sep} = 4.272$ and $A_{sep}/A_t = 41.9$ — separation at 54% of exit area, far
+$M_{sep} = 4.273$ and $A_{sep}/A_t = 42.0$ — separation at 54% of exit area, far
 deeper into the nozzle.
 
 **Step 5 — read the disagreement honestly.** Two respectable criteria put the
-separation point at $\varepsilon = 42$ and $\varepsilon = 56$ on the same
+separation point at $\varepsilon = 42.0$ and $\varepsilon = 56.0$ on the same
 hardware at the same operating point. That is a 33% disagreement in area, which
 is exactly the scatter [Schmucker73] documents and [OMK05] explains. If you are
 sizing a nozzle you use the conservative one; if you are predicting side loads
@@ -1101,7 +1101,7 @@ precisely the observed history (§6.1). [J]
 4.707$. Eq. 3.13:
 $$\frac{p_2}{p_1} = 1 + \frac{2\times1.2}{2.2}\left(4.707^2-1\right)
 = 1 + 1.0909\times21.16 = 24.08$$
-With $p_1 = p_e = 18.65$ kPa, $p_2 = 449$ kPa. Eq. 3.12 gives $M_2 = 0.348$.
+With $p_1 = p_e = 18.68$ kPa, $p_2 = 450$ kPa. Eq. 3.12 gives $M_2 = 0.348$.
 Entropy rise (with $R = 615.9$ J/(kg·K)): $\Delta s = 2312$ J/(kg·K), so
 $p_{0,2}/p_{0,1} = e^{-2312/615.9} = 0.023$. **A normal shock at the RS-25 exit
 Mach number would destroy 97.7% of the stagnation pressure.**
@@ -1109,8 +1109,8 @@ Mach number would destroy 97.7% of the stagnation pressure.**
 Why this matters even though it never happens at the exit plane: it bounds the
 worst case. Any shock system inside the nozzle costs somewhere between nothing
 (a Mach wave) and this. It also explains why the *oblique* shocks of §3.11 are
-the benign outcome: at sea level the plume needs only $p_2/p_1 = 5.43$, which is
-a $M_{n1} = 2.25$ normal component — $p_{0}$ loss of about 45% in the shocked
+the benign outcome: at sea level the plume needs only $p_2/p_1 = 5.42$, which is
+a $M_{n1} = 2.25$ normal component — $p_{0}$ loss of about 46% in the shocked
 streamtube, not 97.7%, and only in the outer part of the jet.
 
 **Part B — shock inside the $\varepsilon=16$ nozzle of §5.1.** Take the same
@@ -1135,7 +1135,7 @@ p_{0,2}/(p_0/p)(M_{exit})$. Iterate on $A_s/A_t$ until $p_{exit} = p_b$.
 
 So at $p_b = 2.0$ MPa the shock stands at $A/A_t = 5.21$. Note the exit Mach
 number: 0.129. The engine at that instant is producing a momentum flux
-corresponding to about 400 m/s of exit velocity, against 3037 m/s when flowing
+corresponding to an exit velocity of only 165 m/s, against 3037 m/s when flowing
 full. **Thrust during a shock-in-nozzle transient is a small fraction of
 mainstage thrust**, which is why start transients look the way they do on a
 thrust trace and why nobody designs an engine to operate here.
@@ -1160,7 +1160,7 @@ of them. Integrated over the trajectory, the vacuum $I_{sp}$ dominates the
 mission; the sea-level penalty is paid for one minute while the SRBs are
 providing 71% of the stack's thrust anyway. With $p_0 = 20.6$ MPa the engine can
 afford a huge area ratio without an absurd exit diameter, because
-$p_e = p_0/1106$ regardless of $p_0$'s value — high chamber pressure is what
+$p_e = p_0/1104.8$ regardless of $p_0$'s value — high chamber pressure is what
 *buys* a high area ratio at sea level. That is the fundamental reason staged
 combustion and large $\varepsilon$ go together.
 
@@ -1558,11 +1558,13 @@ and the fraction of the nozzle (by area ratio) that is running separated.
 
 ### Engineering reasoning
 
-**R1.** You are handed a wall-static-pressure plot from a hot fire: pressure
-falls smoothly along the contour to $A/A_t = 30$, then rises abruptly to about
-80 kPa and stays flat to the exit at $A/A_t = 60$. Ambient was 101 kPa. Say what
-happened, estimate $p_{sep}/p_a$, and say which criterion in §3.14 your hardware
-agrees with.
+**R1.** You are handed a wall-static-pressure plot from a hot fire of a
+$\gamma = 1.2$, $\varepsilon = 60$ nozzle at $p_0 = 10$ MPa, ambient 101 kPa.
+Pressure falls smoothly along the contour to $A/A_t = 30$, then rises abruptly
+to about 80 kPa and stays roughly flat to the exit. Say what happened, compute
+$p_{sep}/p_a$ from the data, say which criterion in §3.14 your hardware agrees
+with, and state whether the topology is FSS or RSS and how you can tell from
+this plot alone.
 
 **R2.** Two sources quote an engine's expansion ratio as 69 and 77.5. You need
 $p_e$ for a plume-impingement analysis. Describe how you would decide which to

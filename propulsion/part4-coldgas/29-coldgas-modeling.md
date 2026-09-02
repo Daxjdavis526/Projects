@@ -460,6 +460,20 @@ $$C_d \approx 1 - \frac{a}{\sqrt{Re_t}},\qquad
 > `[Grisnik87]`, not to a single data set. **Re-read the source figures
 > before you use this for a flight prediction.**
 
+The coefficient $b$ carries the area-ratio dependence, because a longer
+divergent section has more wetted wall. A crude but serviceable heuristic
+that reproduces the observed collapse of the optimum area ratio is
+
+$$b(\varepsilon) \approx 10\sqrt{\varepsilon/50}$$
+
+> **Eq. 3.12a** — [A], a heuristic, not a fit. It is calibrated so that the
+> $\varepsilon$-dependence of $\eta_{visc}$ crosses the
+> $\varepsilon$-dependence of ideal $C_F$ at around $Re_t\sim10^4$, which
+> is where `[Grisnik87]` puts the crossover. Do not use it outside
+> $20\le\varepsilon\le100$, and do not present it to a customer as a
+> correlation. It exists so that you can make the $\varepsilon$ trade
+> quantitatively on the back of an envelope instead of hand-waving.
+
 | $Re_t$ | $\eta_{visc}$ (Eq. 3.12, $b=10$) | comment |
 |---|---|---|
 | 300 | 0.42 | model invalid; expect worse |
@@ -919,14 +933,14 @@ ratio, and a 22 % $I_{sp}$ difference — entirely because one throat is
 propellant" without a throat diameter is quoting a number they cannot
 defend.
 
-**Sanity check.** Redo (b) at $\varepsilon=20$: $C_F=1.7100$, $D_t=61.0$ μm,
-$Re_t$ essentially unchanged, ideal $I_{sp}=75.1$ s. But the wetted area of
-the divergent section falls by a factor of $\sqrt{50/20}\approx1.6$, so
-$b$ in Eq. 3.12 falls with it, roughly to $b\approx6.3$: $\eta_{visc}=0.852$,
-$\eta_I=0.838$, $I_{sp}=\mathbf{62.9\ s}$. **The shorter nozzle wins by
-5.7 s.** That is Grisnik's result reproduced with a back-of-envelope
-model `[Grisnik87]`, and it is the reason CubeSat cold-gas nozzles are
-stubby.
+**Sanity check.** Redo (b) at $\varepsilon=20$: $C_F=1.6899$,
+$D_t=61.4$ μm, $\dot m=1.374\times10^{-6}$ kg/s, $Re_t=1.84\times10^3$
+(essentially unchanged), ideal $I_{sp}=74.23$ s at 293.15 K. By Eq. 3.12a,
+$b(20)=6.32$, so $\eta_{visc}=0.853$, $\eta_I=0.838$ and
+$I_{sp}=\mathbf{62.2\ s}$. **The shorter nozzle wins by 5.1 s** — it gives
+up 1.7 s of ideal $I_{sp}$ and recovers 6.8 s of viscous loss. That is
+Grisnik's result reproduced on the back of an envelope `[Grisnik87]`, and
+it is the reason CubeSat cold-gas nozzles are stubby.
 
 ### WE4 — Unregulated blowdown: $p(t)$, $F(t)$, and total impulse
 

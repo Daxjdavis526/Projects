@@ -777,9 +777,9 @@ $$R = \frac{R_u}{\bar M} = \frac{8314.46}{27.5} = 302.34\ \mathrm{J/(kg\,K)}$$
 
 **Step 2 — characteristic velocity.** With
 $\Gamma = \sqrt{\gamma}\,(2/(\gamma+1))^{(\gamma+1)/(2(\gamma-1))}$ at
-$\gamma = 1.18$, $\Gamma = 0.6541$:
+$\gamma = 1.18$, $\Gamma = 0.6446$:
 
-$$c^* = \frac{\sqrt{R T_c}}{\Gamma} = \frac{\sqrt{302.34 \times 3400}}{0.6541} = \frac{1{,}028.7}{0.6541} = 1{,}572.9\ \mathrm{m/s}$$
+$$c^* = \frac{\sqrt{R T_c}}{\Gamma} = \frac{\sqrt{302.34 \times 3400}}{0.6446} = \frac{1{,}013.9}{0.6446} = 1{,}572.9\ \mathrm{m/s}$$
 
 **Step 3 — exit conditions.** Inverting the isentropic area relation at
 $\varepsilon = 7.72$, $\gamma = 1.18$ gives $M_e = 3.048$, and
@@ -876,14 +876,20 @@ $$\gamma' = \frac{c_{p,mix}}{c_{p,mix}-R_{eff}} = \frac{1818.6}{1818.6-241.7} = 
 inverting the area relation gives $p_e/p_c = 0.0199$. The momentum-only
 exhaust velocity is
 
-$$c_{eq} = \sqrt{2\,c_{p,mix}\,T_c\left[1-\left(\tfrac{p_e}{p_c}\right)^{(\gamma'-1)/\gamma'}\right]} = \sqrt{2(1818.6)(3400)(0.1085)} = 2{,}240\ \mathrm{m/s}$$
+with $(\gamma'-1)/\gamma' = 0.1329$, so $(p_e/p_c)^{0.1329} = 0.5942$ and the
+bracket is $0.4058$:
+
+$$c_{eq} = \sqrt{2\,c_{p,mix}\,T_c\left[1-\left(\tfrac{p_e}{p_c}\right)^{(\gamma'-1)/\gamma'}\right]} = \sqrt{2(1818.6)(3400)(0.4058)} = 2{,}240\ \mathrm{m/s}$$
 
 **Step 4 — fully-lagging limit.** The particles receive no acceleration and no
 heat exchange: they contribute their mass to $\dot m$ but nothing to thrust,
 and the gas expands with its own $\gamma_g$ and $c_{p,g}$ over the same
 pressure ratio:
 
-$$c_{lag} = (1-\xi)\sqrt{2\,c_{p,g}\,T_c\left[1-\left(\tfrac{p_e}{p_c}\right)^{(\gamma_g-1)/\gamma_g}\right]} = 0.698 \times 2{,}587 = 1{,}806\ \mathrm{m/s}$$
+Here $(\gamma_g-1)/\gamma_g = 0.1732$, so $(p_e/p_c)^{0.1732} = 0.5074$ and the
+bracket is $0.4926$:
+
+$$c_{lag} = (1-\xi)\sqrt{2\,c_{p,g}\,T_c\left[1-\left(\tfrac{p_e}{p_c}\right)^{(\gamma_g-1)/\gamma_g}\right]} = 0.698 \times 2{,}588 = 1{,}806\ \mathrm{m/s}$$
 
 **Step 5 — the bracket.**
 

@@ -1092,7 +1092,7 @@ law is not in `tools/rocket.py`.)*
 
 ---
 
-## 6. Real motors: why did they design it that way?
+## 6. Real engines and motors: why did they design it that way?
 
 ### 6.1 Space Shuttle RSRM and the five-segment SLS booster — the conditioned-environment case
 
@@ -1125,7 +1125,9 @@ materials-driven one: no field joint, no field-joint failure mode.
 
 ### 6.2 Star 48B — the mass-fraction extreme
 
-**Choice.** A titanium case, HTPB-class composite propellant, a fixed
+**Choice.** A titanium case (reported in the secondary sources but not
+confirmed against a manufacturer data sheet in this course's verification
+pass), HTPB-class composite propellant, a fixed
 carbon-phenolic nozzle, and a mass fraction around 0.94 with two published
 nozzle variants at $I_{sp} \approx 286$ s and $292$ s vacuum.
 

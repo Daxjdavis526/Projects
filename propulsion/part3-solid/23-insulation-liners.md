@@ -190,11 +190,11 @@ The energy bookkeeping at the surface, per unit area:
 $$ q_{\text{conv}}\,\phi_b + q_{\text{rad}} = \rho_i\,\dot{s}_c\,H_{\text{eff}} + q_{\text{cond,in}} $$
 
 > **Eq. 3.1** — variables: $q_{\text{conv}}$ convective flux with no blowing
-> [W/m²]; $\phi_b$ blowing-reduction factor, dimensionless, 0.4–0.7 typical;
-> $q_{\text{rad}}$ radiative flux from the particle-laden gas [W/m²];
-> $\rho_i$ insulation density [kg/m³]; $\dot{s}_c$ char rate [m/s];
-> $H_{\text{eff}}$ effective heat of ablation [J/kg]; $q_{\text{cond,in}}$ flux
-> conducted into the virgin substrate [W/m²]. **Meaning:** the incident heat is
+> (W/m²); $\phi_b$ blowing-reduction factor, dimensionless, 0.4–0.7 typical;
+> $q_{\text{rad}}$ radiative flux from the particle-laden gas (W/m²);
+> $\rho_i$ insulation density (kg/m³); $\dot{s}_c$ char rate (m/s);
+> $H_{\text{eff}}$ effective heat of ablation (J/kg); $q_{\text{cond,in}}$ flux
+> conducted into the virgin substrate (W/m²). **Meaning:** the incident heat is
 > split between consuming material and heating what remains. **Assumes:**
 > quasi-steady ablation, one-dimensional through-thickness conduction, no
 > in-depth radiation absorption. **Fails when:** the char is being stripped
@@ -226,9 +226,9 @@ uses a correlated recession rate of the form
 
 $$ \dot{s} = \dot{s}_0 + C_G\,G^{m}\,p^{k} $$
 
-> **Eq. 3.2 [E]** — variables: $\dot{s}$ total surface recession rate [m/s];
+> **Eq. 3.2 [E]** — variables: $\dot{s}$ total surface recession rate (m/s);
 > $\dot{s}_0$ the zero-crossflow (radiation- and conduction-limited) rate
-> [m/s]; $G$ local mass flux [kg/(m²·s)]; $p$ local static pressure [Pa];
+> (m/s); $G$ local mass flux (kg/(m²·s)); $p$ local static pressure (Pa);
 > $C_G, m, k$ fitted constants for one material at one propellant flame
 > condition. Typically $m \approx 0.6$–1.0 and $k \approx 0.1$–0.3.
 > **Meaning:** a floor set by radiation plus a crossflow-driven term.
@@ -246,8 +246,8 @@ as a conduction front:
 
 $$ \delta_c(t) \approx C\sqrt{\kappa\, t}, \qquad \kappa = \frac{k_i}{\rho_i c_{p,i}} $$
 
-> **Eq. 3.3 [A]** — variables: $\delta_c$ char depth [m]; $\kappa$ thermal
-> diffusivity of the virgin insulator [m²/s]; $t$ time [s]; $C$ an $O(1)$
+> **Eq. 3.3 [A]** — variables: $\delta_c$ char depth (m); $\kappa$ thermal
+> diffusivity of the virgin insulator (m²/s); $t$ time (s); $C$ an $O(1)$
 > constant set by the ratio of pyrolysis temperature to surface temperature.
 > **Meaning:** for short exposures the char depth grows as $\sqrt{t}$, not
 > linearly. **Assumes:** semi-infinite solid, constant properties, surface
@@ -324,13 +324,13 @@ The sizing logic is a chain, and each link is a separate analysis:
 
 $$ t_{\text{ins}}(x) = \mathrm{FS}\cdot\delta_c(x) + \delta_{\text{res}} + \delta_{\text{mfg}} $$
 
-> **Eq. 3.4 [J]** — variables: $t_{\text{ins}}$ design thickness [m];
+> **Eq. 3.4 [J]** — variables: $t_{\text{ins}}$ design thickness (m);
 > FS the safety factor on predicted char depth, typically 1.5–2.0 for a new
 > design, 1.25–1.5 where flight or full-scale static data exist;
 > $\delta_{\text{res}}$ the required residual *virgin* layer that keeps the
-> bondline below its temperature limit [m], typically 1–3 mm and properly set
+> bondline below its temperature limit (m), typically 1–3 mm and properly set
 > by the thermal model of step 4, not by a rule; $\delta_{\text{mfg}}$ the
-> manufacturing tolerance allowance [m]. **Meaning:** never let the char front
+> manufacturing tolerance allowance (m). **Meaning:** never let the char front
 > reach the case, and never let it reach the case *plus a thermal buffer*.
 > **Assumes:** the recession prediction is unbiased, so the FS covers scatter,
 > not error. **Fails when:** the model is extrapolated — the FS then covers
@@ -440,9 +440,9 @@ propellant, a volume balance (derived in worked example 3) gives
 $$ \varepsilon_\theta(a) \;=\; \frac{\Delta T\big[\,2\alpha_c b^2 - (3\alpha_p - \alpha_c)(b^2-a^2)\,\big]}{2a^2} $$
 
 > **Eq. 3.5 [A]** — variables: $\varepsilon_\theta(a)$ hoop strain at the bore
-> [–]; $\Delta T = T - T_{sf}$ [K], negative on cooldown; $\alpha_p,\alpha_c$
-> linear CTE of propellant and case [1/K]; $a,b$ bore and outer grain radii
-> [m]. **Meaning:** the linear CTE mismatch, which is of order 10⁻³ over a
+> (–); $\Delta T = T - T_{sf}$ (K), negative on cooldown; $\alpha_p,\alpha_c$
+> linear CTE of propellant and case (1/K); $a,b$ bore and outer grain radii
+> (m). **Meaning:** the linear CTE mismatch, which is of order 10⁻³ over a
 > 100 K cooldown, is amplified at the bore by roughly $3(b^2-a^2)/(2a^2)$ —
 > a factor of 10–25 for a thick-web grain. **Assumes:** perfectly rigid case,
 > perfectly incompressible propellant ($\nu = 0.5$), plane strain with the
@@ -515,8 +515,8 @@ hence chamber pressure. From the equilibrium-pressure relation (module 20),
 
 $$ \frac{p_2}{p_1} = \left(\frac{A_{b,2}}{A_{b,1}}\right)^{\!1/(1-n)} $$
 
-> **Eq. 3.6 [F]** — variables: $p$ equilibrium chamber pressure [Pa]; $A_b$
-> burning area [m²]; $n$ Vieille exponent [–]. **Meaning:** the pressure
+> **Eq. 3.6 [F]** — variables: $p$ equilibrium chamber pressure (Pa); $A_b$
+> burning area (m²); $n$ Vieille exponent (–). **Meaning:** the pressure
 > amplifies the area error by $1/(1-n)$, typically 1.4–1.8, and up to 3+ for a
 > high-exponent double-base propellant. **Assumes:** quasi-steady operation
 > ($A_b$ changes slowly compared with the chamber filling time $\approx
