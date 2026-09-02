@@ -399,7 +399,9 @@ percentage of total fuel flow.
 **(c) (3 points)** Compute the jacket heat load from the coolant flow and the
 measured temperature rise, and its ratio to the predicted 25.0 MW. Then
 compute, from your Problem 1(d) results, the ratio by which the *throat-local*
-flux would rise if both the film and the soot layer were removed. Explain in
+flux would rise if both the film and the soot layer were removed; if you did
+not reach that part, write the ratio symbolically and argue the comparison
+qualitatively for partial credit. Explain in
 two sentences why the measured integrated jacket ratio is much smaller than
 the throat-local ratio, and say whether the two are consistent.
 
@@ -493,8 +495,9 @@ extended essays; the marks are for precision.
 
 **6.1 (2 points) — Nozzle separation on the Problem 2 motor.**
 The solid booster of Problem 2 is static fired at sea level rather than in
-vacuum, at its initial chamber pressure of 6.31 MPa with $\gamma = 1.15$ and
-$\varepsilon = 11.0$. Compute the exit Mach number and exit static pressure,
+vacuum, at its initial chamber pressure with $\gamma = 1.15$ and
+$\varepsilon = 11.0$. Use your answer to Problem 2(a) for $p_c$; if you did
+not reach it, use 6.31 MPa and say so. Compute the exit Mach number and exit static pressure,
 then apply **both** the Summerfield criterion and the Schmucker criterion
 $p_{sep}/p_a = (1.88M_e - 1)^{-0.64}$. Does the nozzle flow full? Say which
 criterion is the conservative one here and by how much they disagree.
@@ -531,7 +534,7 @@ you would not in an ambient hydraulic line.
 
 **6.6 (2 points) — Chamber acoustics.**
 For the RE-1000 chamber of Problem 1(b) with a chamber sound speed of
-1150 m/s, compute the first tangential (1T) mode frequency using the Bessel
+1150 m/s (take $D_c = 0.400$ m if you did not reach Problem 1(b)), compute the first tangential (1T) mode frequency using the Bessel
 root 1.8412. State which transducer or sensor would see it and which would
 not, and give the sample rate and anti-alias corner you would specify to
 capture it honestly.
@@ -541,7 +544,7 @@ A hot fire measures thrust to ±0.30 % and total mass flow to ±0.25 %, both
 1σ and independent. Derive $\partial I_{sp}/\partial F$ and
 $\partial I_{sp}/\partial \dot m$, combine in root-sum-square, and report the
 1σ uncertainty on the RE-1000's delivered sea-level $I_{sp}$ in per cent and
-in seconds. Then state why averaging 500 samples of the steady segment
+in seconds (take $I_{sp,SL} = 272$ s if you did not reach Problem 1(a)). Then state why averaging 500 samples of the steady segment
 reduces some of that uncertainty and not the rest.
 
 **6.8 (2 points) — Insulation.**
