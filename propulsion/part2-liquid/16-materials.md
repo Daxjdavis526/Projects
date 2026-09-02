@@ -1013,3 +1013,343 @@ deposited on a mandrel because it cannot be conventionally worked at all — and
 process, not the material's temperature capability, sets the maximum chamber size.
 
 ---
+
+## 4. Typical engineering ranges
+
+> **Read this first.** Every number below is a **nominal or typical** value at room
+> temperature unless stated, collected for orientation and trade studies. They are **not
+> design allowables.** A- and B-basis allowables for flight hardware come from
+> [MMPDS]; GRCop data from [GRCop]; cryogenic and hydrogen-environment data from
+> [G-095] and the NASA hydrogen-compatibility literature. Values in the open literature
+> for the same alloy commonly spread 10–20 % with heat treatment, product form,
+> thickness and direction, and NARloy-Z and GRCop-42 in particular have a wider spread
+> than that.
+
+**Copper alloys**
+
+| alloy | $k$ (W/m·K) | $F_{ty}$ (MPa) | $F_{tu}$ (MPa) | $e$ (%) | $E$ (GPa) | $\alpha$ (10⁻⁶/K) | $\rho$ (kg/m³) | service limit (K) |
+|---|---|---|---|---|---|---|---|---|
+| OFHC Cu (C10200) | 391 | ~70 | ~220 | 45 | 115 | 17.0 | 8,940 | ~600 |
+| NARloy-Z (Cu–3Ag–0.5Zr) | ~316 | 120–190 | 280–330 | 20–30 | 110 | 18.1 | 8,900 | ~800 |
+| GRCop-84 (Cu–8Cr–4Nb) | ~310 | 190–210 | ~350 | 15–25 | 125 | 17.5 | 8,756 | ~1,000 |
+| GRCop-42 (Cu–4Cr–2Nb) | ~340 | 160–190 | ~320 | 20–30 | 120 | 17.5 | 8,800 | ~1,000 |
+| CuCrZr (C18150) | ~320 | 280–350 | 400–470 | 15 | 128 | 17.0 | 8,900 | ~700 |
+
+**Nickel and iron–nickel alloys**
+
+| alloy | strengthening | $k$ (W/m·K) | $F_{ty}$ (MPa) | $F_{tu}$ (MPa) | $E$ (GPa) | $\alpha$ (10⁻⁶/K) | $\rho$ (kg/m³) | service limit (K) | weldable? |
+|---|---|---|---|---|---|---|---|---|---|
+| Inconel 718 | γ″ (Ni₃Nb) | 11.4 | 1,030–1,100 | 1,240–1,375 | 200 | 13.0 | 8,190 | ~925 | yes (its main virtue) |
+| Inconel 625 | solid solution | 9.8 | 415–520 | 830–930 | 208 | 12.8 | 8,440 | ~1,250 | yes, freely |
+| Waspaloy | γ′ | 10.7 | ~795 | ~1,275 | 211 | 12.2 | 8,190 | ~1,000 | with care |
+| René 41 | γ′ | 9.0 | 895–1,000 | 1,240–1,400 | 218 | 12.6 | 8,250 | ~1,150 | strain-age cracks |
+| Haynes 230 | solid soln + carbide | 8.9 | ~390 | ~860 | 211 | 13.5 | 8,970 | ~1,400 | yes, freely |
+| Haynes 282 | γ′ (low fraction) | 9.5 | ~700 | ~1,100 | 210 | 13.0 | 8,270 | ~1,200 | yes, by design |
+| MAR-M-246 (cast DS/SX) | γ′ | ~11 | ~900 (cast) | ~1,000 | 200 | 12.5 | 8,440 | ~1,300 | not weldable |
+| A-286 | γ′, Fe-base | 12.6 | 655–725 | 965–1,000 | 201 | 16.4 | 7,940 | ~975 | yes |
+| JBK-75 | γ′, Fe-base | ~12.5 | ~700 | ~1,000 | 200 | 16.5 | 7,940 | ~975 | yes, by design |
+
+**Stainless steels, aluminium, titanium, refractory, composite**
+
+| material | $k$ (W/m·K) | $F_{ty}$ (MPa) | $F_{tu}$ (MPa) | $E$ (GPa) | $\alpha$ (10⁻⁶/K) | $\rho$ (kg/m³) | notes |
+|---|---|---|---|---|---|---|---|
+| 304L | 16.2 | ~170 | ~485 | 193 | 17.3 | 8,000 | cryo OK; marginal austenite stability |
+| 316L | 16.3 | ~170 | ~485 | 193 | 16.0 | 8,000 | preferred cryo austenitic |
+| 347 | 16.1 | ~205 | ~515 | 193 | 16.6 | 8,000 | Nb-stabilised, hot-service weldable |
+| 21-6-9 (Nitronic 40) | 14.5 | 380–415 | 690–760 | 193 | 15.8 | 7,830 | hydrogen lines; very stable austenite |
+| 2219-T87 Al | 120 | ~393 | ~476 | 73 | 22.3 | 2,840 | tank alloy; strengthens at cryo |
+| 2195-T8 Al–Li | ~90 | ~560 | ~600 | 76 | 22.0 | 2,710 | SLWT; anisotropic, fussy welds |
+| 6061-T6 Al | 167 | ~276 | ~310 | 69 | 23.6 | 2,700 | pressure-fed, non-hot hardware |
+| Ti-6Al-4V | 6.7 | 830–880 | 900–950 | 114 | 8.6 | 4,430 | **never with LOX or ox-rich gas** |
+| C-103 (Nb–10Hf–1Ti) | ~45 | ~240 | ~330 | 105 | 7.5 | 8,850 | silicide-coated; to ~1,650 K |
+| Rhenium (Ir-lined) | 48 | ~290 | ~1,100 | 460 | 6.6 | 21,020 | to ~2,470 K; CVD-formed |
+| 3D carbon–carbon | 30–100 (‖) | — | 100–350 | 40–100 | ~1 | 1,700–2,000 | stronger hot; needs SiC coating |
+| YSZ TBC (plasma-sprayed) | 1.0–1.5 | — | — | ~50 | 10.5 | ~5,600 | 0.2–0.4 mm typical |
+
+**Operating environment ranges**
+
+| quantity | range | who sits at the extreme |
+|---|---|---|
+| Chamber pressure | 6.9 bar → 330 bar (claimed) | Apollo SPS ~6.9 bar; Raptor 3 330 bar (SpaceX claim) |
+| Gas-side wall heat flux | 1 → ~160 MW/m² | ablative small thruster; RS-25 throat |
+| Liner gas-side wall temperature | 700 → 900 K | copper-alloy liners, essentially all of them |
+| Liner wall thickness | 0.7 → 1.3 mm | milled-channel and printed chambers |
+| Liner through-wall $\Delta T$ | 100 → 450 K | WE1 and the RS-25 throat |
+| Liner total strain range per cycle | 0.6 → 2.5 % | high-$p_c$ reusable engines at the top |
+| Liner LCF life (analysis, before factor) | 10² → 10⁴ cycles | expendable vs reusable |
+| Turbine inlet temperature, fuel-rich | 900 → 1,150 K | GG cycles and fuel-rich staged combustion |
+| Turbine inlet temperature, ox-rich | 500 → 800 K | RD-170/180 family, BE-4, Raptor ox side |
+| Radiation-cooled wall temperature | 1,300 → 2,500 K | C-103 at the bottom; Ir/Re at the top |
+| Cryogenic service temperature | 20 → 111 K | LH₂ / LOX / LCH₄ |
+| Random vibration at engine hardware | 10 → 30 g rms | booster-mounted components |
+| Acoustic OASPL near a large booster | 160 → 165 dB | [SMC-S-016], [STD-7001] |
+
+---
+
+## 5. Worked examples
+
+Constants: $g_0 = 9.80665$ m/s². Library functions used are from
+`propulsion/tools/rocket.py`; the registered cases are in `tools/examples/16.py`.
+
+### WE1 — LCF life of a copper liner
+
+**Given.** A regeneratively cooled milled-channel chamber, NARloy-Z liner.
+Gas-side heat flux in the barrel $q'' = 80$ MW/m². Land thickness between the gas and
+the coolant channel $t = 0.89$ mm (0.035 in). NARloy-Z at the operating temperature:
+$k = 316$ W/(m·K), $E = 100$ GPa, $\alpha = 18.0\times10^{-6}$/K, $\nu = 0.34$.
+A nonlinear thermal-structural analysis of the same liner reports a **total mechanical
+strain range of $\Delta\varepsilon_t = 1.2\,\%$ per start–shutdown cycle**. LCF constants
+for the alloy at 811 K: $\sigma'_f = 340$ MPa, $E = 96$ GPa, $b = -0.10$,
+$\varepsilon'_f = 0.35$, $c = -0.60$.
+
+**Step 1 — through-wall temperature drop** (Eq. 3.1, `wall_dT`):
+
+$$\Delta T_w = \frac{q'' t}{k} = \frac{80\times10^{6}\times 0.89\times10^{-3}}{316}
+= 225.3\ \mathrm{K}$$
+
+**Step 2 — the elastic thermal stress, to show why this is an LCF problem** (Eq. 3.2,
+`thermal_stress_hoop`):
+
+$$\sigma_{th} = \frac{E\alpha\Delta T_w}{2(1-\nu)}
+= \frac{100\times10^{9}\times18.0\times10^{-6}\times225.3}{2(1-0.34)} = 307\ \mathrm{MPa}$$
+
+NARloy-Z's yield at 800 K is of the order of 70 MPa. The computed elastic stress is
+**more than four times the hot yield strength**, so the wall cannot be elastic: it yields
+in compression on the hot face during the burn and yields back in tension on shutdown.
+That is the whole justification for using a strain-based life method. The kinematic
+strain excursion from the gradient alone is $\alpha\Delta T_w/[2(1-\nu)] = 0.31\,\%$, which
+is about a quarter of the reported total — the rest comes from the mean-temperature rise
+against the cold jacket, the pressure load, and the stress concentration at the channel
+corners. This is exactly the factor Eq. 3.10 warns about.
+
+**Step 3 — Manson–Coffin–Basquin** (Eq. 3.7) with $\Delta\varepsilon_t/2 = 0.006$:
+
+$$0.006 = \frac{340\times10^{6}}{96\times10^{9}}(2N_f)^{-0.10} + 0.35\,(2N_f)^{-0.60}
+= 3.542\times10^{-3}(2N_f)^{-0.10} + 0.35\,(2N_f)^{-0.60}$$
+
+Iterating (bisection on $\log 2N_f$):
+
+| $2N_f$ | elastic term | plastic term | sum |
+|---|---|---|---|
+| 1,000 | 1.775×10⁻³ | 5.547×10⁻³ | 7.32×10⁻³ |
+| 2,000 | 1.656×10⁻³ | 3.660×10⁻³ | 5.32×10⁻³ |
+| 1,529 | 1.701×10⁻³ | 4.299×10⁻³ | **6.00×10⁻³** ✓ |
+
+$$2N_f = 1{,}529 \quad\Rightarrow\quad N_f = 765\ \text{cycles}$$
+
+The plastic term is 72 % of the total, confirming we are well inside the LCF regime.
+
+**Step 4 — apply the design factor.** [SP-8087] practice is a factor of 4 on cycles or 2
+on strain range, whichever is more conservative. Factor of 4 on cycles gives
+**191 allowable cycles**. Factor of 2 on strain ($\Delta\varepsilon_t = 2.4\,\%$,
+$\Delta\varepsilon_t/2 = 0.012$) gives $2N_f = 379$, $N_f = 190$ — the two criteria happen
+to land in the same place here, which is a coincidence of the exponents and not general.
+**Design life ≈ 190 cycles.**
+
+**Sensitivity, which is the real lesson.** Rerunning Step 3 at other strain ranges:
+
+| $\Delta\varepsilon_t$ | $N_f$ | design life (÷4) |
+|---|---|---|
+| 0.8 % | 1,951 | 488 |
+| 1.2 % | 765 | 191 |
+| 1.6 % | 416 | 104 |
+| 2.0 % | 266 | 66 |
+
+A 67 % increase in strain range costs 65 % of the life. Since strain range scales with
+$q''t/k$ (Eq. 3.10), a 0.1 mm thicker liner or a 20 % higher flux is a first-order life
+change. This is why liner walls are made as thin as manufacturing and erosion margin
+permit, and why the industry moved from NARloy-Z to GRCop.
+
+**Sanity check.** A few hundred allowable cycles is the right order for a reusable
+hydrogen engine liner: the Shuttle's engine life requirement was measured in tens of
+missions and thousands of seconds, and the RS-25 main combustion chamber was a limited-life
+component that was inspected and replaced. Two hundred cycles would be absurd for a
+turbine disc (which needs 10⁴) and enormous overkill for an expendable engine (which needs
+about 20, counting acceptance tests). Note also that the *analysis* does not include
+blanching, creep–fatigue interaction or ratcheting, each of which reduces the answer; the
+factor of 4 is partly there to cover exactly that.
+
+### WE2 — creep-limited wall temperature: Inconel 718 versus Haynes 230
+
+**Given.** A hot-gas manifold wall carries a sustained membrane stress of
+$\sigma = 100$ MPa. Larson–Miller master curves at 100 MPa give
+$P_{LM}/1000 = 22.5$ for Inconel 718 and $P_{LM}/1000 = 26.0$ for Haynes 230,
+with $C = 20$, $T$ in K and $t_r$ in hours. Required rupture life: (a) 10 h, (b) 1,000 h.
+
+**Step 1 — invert Eq. 3.4.**
+
+$$T = \frac{1000\,(P_{LM}/1000)}{C + \log_{10} t_r}$$
+
+**Step 2 — evaluate.**
+
+| alloy | $P_{LM}/1000$ | $t_r = 10$ h → $T$ | $t_r = 1{,}000$ h → $T$ |
+|---|---|---|---|
+| Inconel 718 | 22.5 | $22{,}500/21 = 1{,}071$ K (798 °C) | $22{,}500/23 = 978$ K (705 °C) |
+| Haynes 230 | 26.0 | $26{,}000/21 = 1{,}238$ K (965 °C) | $26{,}000/23 = 1{,}130$ K (857 °C) |
+
+**Step 3 — the engineering answer, which is not the arithmetic answer.** [J] The 718
+result at 10 h, 1,071 K, is **wrong as a design allowable** even though the arithmetic is
+right. Inconel 718's strength comes from metastable γ″ (Ni₃Nb), which transforms to the
+stable, coarse, non-strengthening δ phase above roughly 925 K. Above that temperature the
+alloy is not the alloy the master curve was fitted for: hold a 718 part at 1,050 K and it
+overages, loses strength irreversibly, and then fails at a stress the curve said it could
+carry. **Larson–Miller extrapolation cannot see a phase change.** The practical 718 limit
+is 925 K, and at 925 K with $C = 20$ the parameter available is
+$925 \times 23 / 1000 = 21.3$, below the 22.5 the 100 MPa/1,000 h requirement demands —
+i.e. **718 cannot do this job for 1,000 h at 100 MPa at all**, and can do it for 10 h only
+by living 150 K above its microstructural limit.
+
+Haynes 230 at 1,130 K for 1,000 h is credible: it is a solid-solution and carbide
+strengthened alloy with no metastable precipitate to lose, and its documented service
+limit is around 1,400 K. Its penalty is strength — 390 MPa yield against 718's 1,030 —
+so the *same* wall carrying 100 MPa membrane needs no more thickness, but any part that
+also carries a mechanical load will be much heavier in 230.
+
+**Step 4 — the second check nobody remembers.** At 1,130 K in an oxygen-bearing gas,
+oxidation may set the life before creep does. Haynes 230 is chosen for hot service
+precisely because its oxidation resistance matches its creep resistance; 718's does not.
+Always run creep and oxidation limits together.
+
+**Sanity check.** 718 at 100 MPa/1,000 h at ~705 °C is the standard published figure for
+the alloy, and 230 at ~857 °C for the same condition is consistent with its reputation as
+a 100–170 K improvement over 718. The ranking, not the third significant figure, is what
+you should carry.
+
+### WE3 — hoop stress in a pump housing and the material choice
+
+**Given.** A LOX turbopump volute with discharge pressure $p = 300$ bar = 30 MPa
+(RS-25-class: the HPFTP discharges near 480 bar, the HPOTP main stage rather less
+[_verify-liquid, RS-25 block]). Bore radius $a = 100$ mm, outer radius $b = 112$ mm, so
+wall $t = 12$ mm. Closed ends. Design factors: 1.25 on yield, 1.5 on ultimate
+(a representative set — check the current revision of [STD-5001] and [AIAA-S-080] before
+using them on hardware).
+
+**Step 1 — thin-wall estimate.**
+
+$$\sigma_\theta \approx \frac{p a}{t} = \frac{30\times10^{6}\times0.100}{0.012} = 250\ \mathrm{MPa}$$
+
+$t/a = 0.12$, so "thin wall" is marginal. Do it properly.
+
+**Step 2 — Lamé thick-wall solution at the bore.**
+
+$$\sigma_\theta = p\,\frac{b^2+a^2}{b^2-a^2}
+= 30\times10^{6}\,\frac{0.112^2+0.100^2}{0.112^2-0.100^2}
+= 30\times10^{6}\times 8.861 = 265.8\ \mathrm{MPa}$$
+
+$$\sigma_r = -p = -30\ \mathrm{MPa}, \qquad
+\sigma_z = p\,\frac{a^2}{b^2-a^2} = 117.9\ \mathrm{MPa}$$
+
+The thin-wall estimate is 6 % low, which is the usual size of that error at $t/a = 0.12$.
+
+**Step 3 — von Mises equivalent stress at the bore.**
+
+$$\sigma_{vm} = \sqrt{\tfrac12\left[(\sigma_\theta-\sigma_r)^2+(\sigma_r-\sigma_z)^2+(\sigma_z-\sigma_\theta)^2\right]} = 256\ \mathrm{MPa}$$
+
+**Step 4 — required allowables.** Using the bore hoop stress as the governing value
+(conservative relative to von Mises here):
+
+$$F_{ty} \ge 1.25\times265.8 = 332\ \mathrm{MPa}, \qquad F_{tu} \ge 1.5\times265.8 = 399\ \mathrm{MPa}$$
+
+**Step 5 — screen the candidates.**
+
+| candidate | RT $F_{ty}$ | passes strength? | verdict |
+|---|---|---|---|
+| 316L stainless | ~170 MPa | **no** | fails by 2× |
+| 2219-T87 aluminium | ~393 MPa | marginal (1.18 margin) | and it is a casting-unfriendly, low-stiffness choice for a volute |
+| Ti-6Al-4V | ~830 MPa | yes, easily | **disqualified: titanium in LOX** (§3.3.5, §3.4.8) |
+| A-286 | ~690 MPa | yes | good oxygen behaviour, weldable; heavier and lower stiffness margin |
+| **Inconel 718** | ~1,030 MPa | yes, 3.9× margin | **selected** |
+
+**Step 6 — why the huge margin is the right answer anyway.** [J] The static hoop stress is
+not what sizes a pump housing. Once a candidate clears strength, the drivers become:
+
+- **Stiffness**, because rotordynamics and seal clearances depend on casing deflection;
+- **Fracture control**, because this is a pressure vessel under [AIAA-S-080] and the
+  critical flaw size at 266 MPa in 718 ($K_{Ic}\approx 100$ MPa·√m) is
+  $a_{cr}=(1/\pi)(100/(1.12\times266))^2 \approx 36$ mm — comfortably larger than anything
+  NDE could miss, so the part is flaw-tolerant, which is exactly what you want in a
+  rotating-machinery casing;
+- **Cryogenic behaviour**, and 718's yield *rises* toward 1,200 MPa at 90 K while its
+  toughness stays adequate;
+- **Weldability and castability**, since the volute has bosses, flanges and inlet
+  transitions;
+- **Oxygen compatibility**, since this is a LOX pump: nickel alloys are acceptable in
+  oxygen; titanium is not, at any margin.
+
+Note that on the *fuel* side of a hydrogen engine the same analysis reaches a different
+answer, because 718's hydrogen susceptibility (§3.4.1) turns a comfortable margin into a
+qualification problem, and the design must add a barrier plating, a strength derate, or a
+change to A-286/JBK-75.
+
+**Sanity check.** 266 MPa in an alloy with 1,030 MPa yield is a stress ratio of about 0.26,
+which is typical of real turbopump housings; they are stiffness-, life- and
+manufacturing-driven, not strength-driven. If your housing analysis comes out at a
+stress ratio of 0.8, you have either mis-modelled it or designed something that will not
+survive its fatigue spectrum.
+
+### WE4 — CTE mismatch between a copper liner and a nickel closeout on cooldown
+
+**Given.** A NARloy-Z liner, $t_{Cu} = 0.89$ mm, closed out with electroformed nickel,
+$t_{Ni} = 3.0$ mm, bonded at 300 K and then chilled to 90 K on LOX-side chilldown, so
+$\Delta T = -210$ K. Mean CTEs over 300→90 K: $\alpha_{Cu} = 15.5\times10^{-6}$/K,
+$\alpha_{Ni} = 12.0\times10^{-6}$/K. Moduli: $E_{Cu} = 110$ GPa, $\nu_{Cu} = 0.34$;
+$E_{Ni} = 207$ GPa, $\nu_{Ni} = 0.31$.
+
+**Step 1 — free mismatch strain.** Copper wants to shrink more than nickel:
+
+$$\varepsilon_{mis} = (\alpha_{Cu}-\alpha_{Ni})\,|\Delta T| = 3.5\times10^{-6}\times210 = 7.35\times10^{-4}$$
+
+**Step 2 — biaxial moduli.** For an in-plane biaxially constrained layer,
+$E^{*} = E/(1-\nu)$:
+
+$$E^{*}_{Cu} = \frac{110}{0.66} = 166.7\ \mathrm{GPa},\qquad
+E^{*}_{Ni} = \frac{207}{0.69} = 300.0\ \mathrm{GPa}$$
+
+**Step 3 — bounding case: rigid closeout.** If the nickel were infinitely stiff the copper
+would be fully constrained and would carry
+
+$$\sigma_{Cu} = E^{*}_{Cu}\,\varepsilon_{mis} = 166.7\times10^{9}\times7.35\times10^{-4} = 122.5\ \mathrm{MPa}\ \text{(tension)}$$
+
+**Step 4 — real case: finite closeout stiffness.** Force balance across the two bonded
+layers ($\sigma_{Cu} t_{Cu} = \sigma_{Ni} t_{Ni}$, strain compatibility) gives
+
+$$\sigma_{Cu} = \frac{E^{*}_{Cu}\,\varepsilon_{mis}}{1 + \dfrac{E^{*}_{Cu} t_{Cu}}{E^{*}_{Ni} t_{Ni}}}$$
+
+$$\frac{E^{*}_{Cu}t_{Cu}}{E^{*}_{Ni}t_{Ni}} = \frac{166.7\times0.89}{300.0\times3.0} = 0.165$$
+
+$$\sigma_{Cu} = \frac{122.5}{1.165} = 105.2\ \mathrm{MPa}\ \text{(tension in the copper)}$$
+
+and the balancing compression in the nickel is
+$\sigma_{Ni} = \sigma_{Cu}t_{Cu}/t_{Ni} = 31.2$ MPa.
+
+**Step 5 — interpretation.** Three things follow.
+
+1. **Sign.** On cooldown the copper goes into *tension* and the nickel into compression.
+   On heat-up during the burn the signs reverse and add to the thermal-gradient stress of
+   WE1 — the CTE mismatch is not an independent load case, it is a mean-stress shift on
+   the fatigue cycle.
+2. **Magnitude.** 105 MPa in NARloy-Z at 90 K is elastic (cold yield is well above
+   200 MPa), so nothing yields on chilldown. But it consumes roughly a third of the room-
+   temperature yield before the engine has even started, and it is present on *every*
+   chilldown, including the ones that do not end in a hot fire.
+3. **Where it actually bites** is the bond, not the layers: the mismatch produces an
+   interfacial shear that peaks at free edges — channel ends, manifold transitions, the
+   liner-to-jacket termination. Debonds start at edges, which is why liner-to-closeout
+   terminations are always given a compliant transition or a graded joint.
+
+**Cross-check with the library.** `rocket.thermal_stress_hoop(E=110e9, alpha=3.5e-6,
+dT=210, nu=0.34)` returns **61.3 MPa**. That is *not* the answer to this problem, and
+knowing why is the point: Eq. 3.2 carries a factor of 2 in the denominator because it
+describes a *linear through-thickness gradient* whose mid-plane is unstrained. A CTE
+mismatch between two bonded layers is a uniform membrane mismatch with no such
+mid-plane, so the factor of 2 does not apply. Using the library function here would
+under-predict the stress by exactly 2×. **Read the callout under the equation before you
+use the function.**
+
+**Sanity check.** A CTE-mismatch stress of order 100 MPa for a 3.5×10⁻⁶/K mismatch over
+210 K is what you should expect from the rule of thumb $\sigma \sim E\Delta\alpha\Delta T$;
+if you get 10 MPa or 1 GPa, you have a unit error. For comparison, a zirconia TBC on a
+superalloy has $\Delta\alpha \approx 3.5\times10^{-6}$/K over a 900 K excursion — five
+times this strain — which is why TBCs spall and metallic closeouts do not.
+
+---

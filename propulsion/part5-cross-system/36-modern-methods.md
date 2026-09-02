@@ -447,3 +447,406 @@ until they test one. This is why the first thing any engine programme does
 with early test data is not "did we hit the performance target" but
 "**recalibrate the model**" — every hot fire is, among other things, a
 validation point for the ROM that will design the next iteration.
+
+### 3.5 CFD for injectors and chambers
+
+#### 3.5.1 The three levels, and what separates them
+
+All three solve the same conservation laws — mass, momentum, energy, species:
+
+$$\frac{\partial \rho}{\partial t}+\nabla\!\cdot(\rho\mathbf{u})=0,\qquad
+\frac{\partial(\rho\mathbf{u})}{\partial t}+\nabla\!\cdot(\rho\mathbf{u}\mathbf{u})=-\nabla p+\nabla\!\cdot\boldsymbol{\tau}$$
+$$\frac{\partial(\rho Y_k)}{\partial t}+\nabla\!\cdot(\rho\mathbf{u}Y_k)=\nabla\!\cdot(\rho D_k\nabla Y_k)+\dot\omega_k$$
+
+> **Eq. 3.6a–c** — variables: $\rho$ [kg/m³], $\mathbf{u}$ [m/s], $p$ [Pa],
+> $\boldsymbol{\tau}$ viscous stress [Pa], $Y_k$ mass fraction of species $k$
+> [—], $D_k$ diffusivity [m²/s], $\dot\omega_k$ net chemical production rate
+> [kg/(m³·s)]. Meaning: the Navier–Stokes equations with reacting species.
+> Assumes: continuum ($Kn\ll1$ — true everywhere in a chamber, not true in
+> the far plume of a cold-gas thruster, see Module 30), Newtonian fluid,
+> Fickian diffusion. Fails when: the equation of state is wrong (dense
+> supercritical injection), when radiation is a significant energy path
+> (soot-forming propellants), or when the species set is inadequate. [F].
+
+The difference between DNS, LES and RANS is **what fraction of the turbulent
+spectrum you resolve, and therefore what you must model**.
+
+**DNS** resolves everything down to $\eta_K$. The required cell count scales
+as $Re_L^{9/4}$ in three dimensions and the time-step count as $Re_L^{3/4}$,
+so total work scales roughly as $Re_L^{3}$.
+
+$$N_{\text{cells}}\sim\left(\frac{L}{\eta_K}\right)^{3}\sim Re_L^{9/4}$$
+
+> **Eq. 3.7** — variables: $L$ integral length scale [m], $\eta_K$ Kolmogorov
+> length [m], $Re_L=uL/\nu$ [—]. Meaning: resolving every eddy costs the cube
+> of the scale separation. Assumes: homogeneous isotropic turbulence scaling;
+> a wall-bounded flow is worse. Fails to be even a bound when combustion adds
+> a flame thickness smaller than $\eta_K$, which it often does. [F].
+
+Put a number on it. A 100 mm chamber at $Re\sim10^6$: $Re^{9/4}\approx
+10^{13.5}$ cells. There is no computer. **DNS is not an engineering tool for
+rocket chambers and will not become one in your career.** It is a tool for
+*model development* on canonical problems — a temporally evolving jet, a
+counterflow flame, a single droplet — from which the closures used by LES
+and RANS are derived and tested [Poinsot].
+
+**RANS** resolves nothing of the turbulence: it solves for the time-averaged
+(or, for URANS, slowly-varying-in-time) field, and models the entire
+turbulent spectrum with an eddy viscosity. The workhorse in propulsion is
+Menter's **SST $k$–$\omega$** [Menter94], which uses $k$–$\omega$ near walls
+(good for adverse pressure gradients and separation) and blends to
+$k$–$\epsilon$ in the free stream (no free-stream sensitivity):
+
+$$-\overline{\rho u_i'u_j'} = \mu_t\left(\frac{\partial \bar u_i}{\partial x_j}+\frac{\partial \bar u_j}{\partial x_i}-\frac{2}{3}\frac{\partial \bar u_k}{\partial x_k}\delta_{ij}\right)-\frac{2}{3}\rho k\,\delta_{ij},\qquad \mu_t=\frac{\rho a_1 k}{\max(a_1\omega,\;S F_2)}$$
+
+> **Eq. 3.8** — variables: $\mu_t$ turbulent viscosity [Pa·s], $k$ turbulent
+> kinetic energy [m²/s²], $\omega$ specific dissipation rate [1/s], $S$
+> strain-rate magnitude [1/s], $a_1=0.31$, $F_2$ a blending function [—].
+> Meaning: the Boussinesq hypothesis — turbulent momentum transport is
+> represented as a large extra viscosity aligned with the mean strain.
+> Assumes: local equilibrium of turbulence production and dissipation, and
+> alignment of the Reynolds stress tensor with the mean strain tensor.
+> Fails when: the flow has strong streamline curvature, strong swirl,
+> significant rotation, large separated regions, or strong density gradients
+> — i.e. in every one of the flows a rocket injector produces. [E], and this
+> is a *calibrated* model, not a derived one.
+
+**LES** resolves the energy-containing eddies and models only the subgrid
+scales, whose behaviour is closer to universal. The filtered equations look
+like Eq. 3.6 with a subgrid stress $\tau^{sgs}_{ij}$ requiring closure
+(Smagorinsky with dynamic coefficient, WALE, sigma). The cost scaling is
+$Re^{1.8}$–$Re^{2}$ for wall-resolved LES and roughly $Re^{0.4}$–$Re^{1}$ for
+wall-modelled LES — the difference between "impossible" and "expensive"
+[Slotnick14, Pitsch06]. Hybrids (DES, DDES, IDDES) run RANS in the boundary
+layer and LES in the separated core, which is the practical compromise for
+chamber and nozzle work.
+
+**The judgment, plainly stated.** [J]
+
+- If you want a **mean** field — mean wall heat flux, mean mixture-ratio
+  distribution, pressure drop, mean thrust — use RANS, and cross-check it
+  against a correlation.
+- If you want an **unsteady** field — flame response to an acoustic
+  perturbation, mixing intermittency, ignition kernel transport, side loads
+  during nozzle start — RANS cannot give it to you at any grid resolution,
+  because the closure has already averaged out what you are asking for. You
+  need LES, and you must budget accordingly.
+- If someone shows you a RANS combustion-instability prediction, the model
+  either has a separately supplied flame-response function (i.e. the answer
+  was an input) or it is not predicting instability.
+
+#### 3.5.2 Chemistry closure: the real cost driver
+
+Rocket combustion is fast, hot, and (in a real chamber) not close to any
+canonical regime. The choices:
+
+**Finite-rate chemistry with a mechanism.** Integrate $\dot\omega_k$ directly
+from an Arrhenius mechanism. The source term is stiff — chemical timescales
+span 10⁻⁹ to 10⁻² s — so it is usually operator-split and integrated with an
+implicit ODE solver per cell. Cost scales roughly with the *square* of the
+species count (the chemical Jacobian) and this dominates everything else:
+a detailed methane mechanism (GRI-Mech 3.0: 53 species, 325 reactions) is
+already painful in 3-D; a detailed kerosene mechanism has hundreds of
+species and is out of the question. Hence **reduced mechanisms**: 15–25
+species skeletal sets derived by sensitivity analysis and validated against
+the detailed mechanism for ignition delay, laminar flame speed and
+extinction strain over the pressure and equivalence-ratio range of interest.
+[M] Building and validating that reduced mechanism is a real piece of work
+and is often the difference between a defensible chamber CFD and a
+decorative one.
+
+**Flamelet models (SLFM, FPV, FGM).** Assume the flame is thin relative to
+the turbulence and that its local structure is that of a laminar
+counterflow diffusion flame parameterised by mixture fraction $Z$ and scalar
+dissipation $\chi$ (or a progress variable $C$). Precompute a library of
+flamelets offline with detailed chemistry; in the CFD, transport only $Z$,
+its variance, and $C$, then look up temperature and composition:
+
+$$\tilde\phi = \int\!\!\int \phi(Z,C)\,\tilde P(Z)\,\tilde P(C)\,dZ\,dC$$
+
+> **Eq. 3.9** — variables: $\phi$ any thermochemical quantity, $\tilde P$
+> presumed sub-filter PDFs (usually a beta function for $Z$, a delta or beta
+> for $C$). Meaning: replace an expensive chemistry integration with a table
+> lookup and a presumed-PDF convolution. Assumes: thin flame ($Ka<1$),
+> unity-ish Lewis numbers, statistical independence of $Z$ and $C$,
+> equilibrium of the flame structure with the local strain. Fails when: the
+> flame is thickened by turbulence ($Ka>1$), during ignition and extinction
+> (transient flamelets), for partially premixed and multi-stream problems
+> (a staged-combustion chamber has *three* streams — main oxidiser, main
+> fuel, and preburner gas — and a single $Z$ cannot describe three streams),
+> and near walls. [E]/[A]; see [Peters00], [Pitsch06].
+
+The cost difference is roughly two orders of magnitude, which is why
+flamelet-type closures dominate industrial chamber CFD. The failure modes
+above are also why flamelet chamber CFD is not trusted for ignition,
+blow-off, or instability — all three violate the core assumption.
+
+**Well-stirred-reactor / EDC-type models.** Cheap, robust, and physically
+crude: assume mixing controls and burn whatever mixes at a rate set by
+turbulence. Reasonable for a global heat release field, useless for
+temperature-sensitive outputs like NOx or wall flux in a hydrocarbon flame.
+[A]
+
+#### 3.5.3 Spray and dense-phase injection: Euler–Lagrange
+
+For a subcritical liquid injection — LOX/RP-1 at moderate pressure, storables,
+anything at start-up — the liquid arrives as a sheet or jet that breaks into
+ligaments and then drops. The standard industrial treatment is
+**Euler–Lagrange**: solve the gas phase on the Eulerian grid, and track
+statistical **parcels** of droplets as Lagrangian points with their own
+equations of motion, heating and vaporisation:
+
+$$m_d\frac{d\mathbf{u}_d}{dt}=\frac{1}{2}C_D\rho_g A_d\lvert\mathbf{u}_g-\mathbf{u}_d\rvert(\mathbf{u}_g-\mathbf{u}_d)+m_d\mathbf{g},\qquad \frac{dm_d}{dt}=-\pi d\,\rho_g D\,\mathrm{Sh}\,\ln(1+B_M)$$
+
+> **Eq. 3.10a–b** — variables: $m_d$ droplet mass [kg], $d$ diameter [m],
+> $C_D$ drag coefficient [—], $A_d$ frontal area [m²], $\mathrm{Sh}$ Sherwood
+> number [—], $B_M$ Spalding mass-transfer number [—]. Meaning: a droplet is
+> a point that feels drag and evaporates, exchanging mass, momentum and
+> energy with the gas cell it occupies. Assumes: dilute spray (droplets do
+> not see each other), spherical drops much smaller than the cell, a
+> subcritical droplet with a distinct surface, and a known initial droplet
+> size distribution. Fails when: the spray is dense near the injector (it
+> always is — the region where breakup actually happens is precisely where
+> the dilute assumption is invalid), when the drop is supercritical (no
+> surface, no latent heat — the whole formulation collapses), and when
+> the cell size is comparable to the drop. [E]/[A]; [LM] is the reference for
+> the atomisation correlations underneath.
+
+**The honest statement about spray CFD:** the answer is dominated by the
+**injected droplet size distribution**, which the CFD does not compute — it is
+an *input*, taken from a correlation ([LM]) or, at best, from a cold-flow
+patternation and Phase-Doppler measurement of that specific element. Primary
+atomisation — the physics of how the sheet becomes ligaments — is not
+resolved in any production rocket CFD. So the standing joke is fair: spray
+CFD tells you what happens downstream of the assumption you made. [J]
+
+For **supercritical** injection (LOX in any modern high-pressure chamber),
+Euler–Lagrange is not merely inaccurate, it is inapplicable: above the
+critical pressure there is no surface tension, no latent heat and no
+droplet. The correct treatment is a single-phase real-fluid (Eulerian)
+calculation with a cubic or higher equation of state and correct
+high-pressure transport properties, in which the "spray" appears as
+turbulent mixing of a dense fluid — the "finger" structures observed in
+optically accessible experiments. [OY93] is the review that established this
+framing; getting it wrong (using a droplet model above $p_c$) produces
+plausible-looking, systematically wrong mixing lengths.
+
+#### 3.5.4 The Purdue/AFRL model-combustor validation history
+
+Because chamber CFD cannot be validated against a full engine — you cannot
+put optical access and a hundred thermocouples into a flight chamber — the
+community built **model combustors** whose whole purpose is to be measurable.
+The most important open example in American work is the Purdue/AFRL family
+of single- and multi-element combustors, of which the best documented is the
+**Continuously Variable Resonance Combustor (CVRC)** [Yu12].
+
+Its design logic is worth understanding because it is the template for how
+this kind of validation is done:
+
+- **One element**, so the geometry is unambiguous and the boundary conditions
+  are knowable.
+- **A translating oxidiser-post length**, which continuously varies the
+  coupling between the injector's acoustic response and the chamber's
+  longitudinal mode. The combustor can therefore be driven *deliberately*
+  from stable to unstable and back within a single test, producing a
+  continuous stability map rather than a binary result.
+- **Measurable, publishable, unclassified**: gaseous or simple propellants at
+  pressures high enough to be relevant, with high-bandwidth pressure
+  instrumentation and, in related rigs, optical access for chemiluminescence
+  and PIV.
+
+What the campaign delivered, and what it did not: it produced a public data
+set against which unsteady CFD could be tested on the *right question* —
+does the simulation predict the onset of instability, the limit-cycle
+amplitude, and the frequency, without being told the answer? Results across
+the community established the pattern that: (i) URANS with a flamelet
+closure could reproduce the *frequency* (that is mostly acoustics and
+geometry) but not reliably the *amplitude* or the stability boundary;
+(ii) LES with finite-rate chemistry could reproduce onset and limit-cycle
+amplitude in specific cases, at a cost of large parallel machine time per
+configuration; (iii) the answers remained sensitive to the chemical
+mechanism, the subgrid model and the inflow boundary treatment at a level
+comparable to the effect being predicted. [R]/[M]
+
+The engineering lesson is the one that matters: **after decades of effort,
+predicting combustion instability from first principles for a new chamber is
+still a research capability, not a design tool.** That is why Module 15's
+classical methods — the $n$–$\tau$ sensitive time-lag framework [CC56],
+Culick's modal analysis [Culick68], and the empirical stability-rating bomb
+test — remain the operational basis for stability, and why every new engine
+is still bomb-tested. See §3.18.
+
+#### 3.5.5 What a converged answer actually costs
+
+A "converged answer" in reacting chamber CFD means four separate things,
+and programmes routinely deliver one and claim all four:
+
+1. **Iterative convergence** — residuals dropped several orders and, more
+   importantly, the *quantity of interest* has stopped moving. Residuals
+   alone are not evidence; monitor integrated wall heat flux or mean
+   chamber pressure and show it flat.
+2. **Statistical convergence** (LES/URANS) — enough flow-through times, after
+   the initial transient is discarded, that the time-averaged statistics
+   have settled. For a chamber with a 3 ms residence time, meaningful
+   statistics need tens of milliseconds of simulated time, at time steps of
+   10⁻⁸–10⁻⁷ s. That is 10⁵–10⁶ time steps.
+3. **Grid convergence** — Eq. 3.1, on the quantity of interest, with at least
+   three grids. In reacting LES this is almost never done, because
+   refining the grid in LES changes the *model* (the filter width), not just
+   the discretisation. The honest substitute is a sensitivity study plus a
+   resolution metric (e.g. fraction of turbulent kinetic energy resolved
+   $>80\,\%$).
+4. **Model convergence** — the answer no longer changes when you change the
+   subgrid model, the mechanism, or the inflow turbulence specification. This
+   is the one that is almost always skipped and almost always the largest
+   term.
+
+The practical budget, [E]/[J], for a reacting multi-element chamber LES that
+would survive a technical review: 10⁷–10⁹ cells, 10⁵–10⁶ time steps,
+10³–10⁵ cores, weeks to months, and a team that has done it before. For a
+single-element RANS case with a flamelet table: hours on a few hundred cores.
+The factor between them is why the multi-element case gets run once, at the
+end, to confirm a decision that was already made on other grounds.
+
+### 3.6 Nozzle CFD: method of characteristics versus RANS
+
+The nozzle is the one place in the engine where a classical analytic method
+is *not* merely a sanity check — it is still the design method.
+
+**Method of characteristics (MOC).** For steady, supersonic, irrotational,
+isentropic flow, the governing PDE is hyperbolic and its characteristics are
+the left- and right-running Mach lines, along which the compatibility
+relations reduce to ordinary differential equations. The two-dimensional
+irrotational relations are
+
+$$\theta \pm \nu(M) = \text{const along } C_\mp,\qquad \nu(M)=\sqrt{\frac{\gamma+1}{\gamma-1}}\arctan\!\sqrt{\frac{\gamma-1}{\gamma+1}(M^2-1)}-\arctan\!\sqrt{M^2-1}$$
+
+> **Eq. 3.11** — variables: $\theta$ flow angle [rad], $\nu$ Prandtl–Meyer
+> function [rad], $M$ Mach [—]. Meaning: in supersonic irrotational flow,
+> $\theta\pm\nu$ is constant along characteristic lines, which turns contour
+> design into a marching algebra problem. Assumes: steady, supersonic
+> throughout, irrotational, isentropic, calorically perfect (or a corrected
+> $\gamma$), no viscosity. Fails when: shocks appear inside the nozzle, in
+> the transonic throat region (handled by a separate transonic start line),
+> when the flow separates, or where the boundary layer is thick. [F]; see
+> [ZH Vol. 2] and Module 09.
+
+MOC gives you an *exact* inviscid contour: the shortest nozzle producing
+uniform parallel exit flow, or — the practically important case — Rao's
+thrust-optimised parabolic contour, obtained by a variational condition on
+the characteristic net [Rao58, Rao60]. Nobody has improved on this. Every
+production bell nozzle contour in the engine database began life as an
+MOC/Rao contour, then received a **boundary-layer displacement correction**
+(add $\delta^*$ to the wall) and a manufacturing smoothing.
+
+**So what is RANS for?** Four things MOC cannot do:
+
+1. **Boundary layer and its performance debit.** A 2-D axisymmetric RANS gives
+   the momentum-thickness drag and wall heat flux directly rather than by a
+   correlation. Typical boundary-layer loss in $I_{sp}$: 0.3–1.5 %, larger for
+   small throats.
+2. **Real-gas and finite-rate effects.** Recombination along the nozzle,
+   varying $\gamma$, condensation of alumina in solid motors.
+3. **Off-design and separated operation.** The one that matters most.
+4. **Film-cooling and turbine-exhaust dump interactions.** The F-1's
+   gas-generator exhaust curtain, the RS-68's ablative-skirt film, the
+   nozzle-extension mixing layer — none of it is MOC-able.
+
+**Separation prediction.** An overexpanded nozzle at sea level separates, and
+predicting *where* determines the side load, which determines the gimbal
+bearing and the nozzle structure. The classical criteria (Module 09) —
+Summerfield's $p_{\text{sep}}\approx0.4\,p_a$ [SFS54], Schmucker's
+$p_{\text{sep}}/p_a=(1.88M_e-1)^{-0.64}$ [Schmucker73] — are correlations
+fitted to particular families of nozzles.
+
+RANS does better in a specific and limited sense: with a well-behaved
+turbulence model (SST is standard here, because $k$–$\epsilon$ notoriously
+delays separation) and an adequately resolved boundary layer
+($y^+\lesssim1$), 2-D axisymmetric RANS predicts the *mean* separation
+location in cold-flow subscale nozzles to within a few percent of the exit
+radius. What it does **not** reliably predict is:
+
+- the transition between **free shock separation (FSS)** and **restricted
+  shock separation (RSS)**, which is the physical origin of the large
+  transient side loads in thrust-optimised contours, and which involves a
+  bistable, hysteretic reattachment [OMK05, Ostlund02];
+- the *unsteady* side load amplitude, which is a fluctuating asymmetric
+  pressure integral and therefore needs at minimum a DDES/LES treatment with
+  a long sample;
+- separation with significant film cooling or a dumped turbine exhaust
+  altering the near-wall gas.
+
+[J] The working practice is: MOC/Rao for the contour, 2-D RANS for
+performance and mean separation, an empirical criterion as the design bound
+because it is conservative and traceable, and a **hot-fire side-load
+measurement** as the actual qualification. This is a good example of a field
+where forty years of CFD has moved the classical method from "the answer" to
+"the bound", and no further.
+
+### 3.7 Conjugate heat transfer, and the Bartz check
+
+**What it computes.** A CHT analysis solves the gas-side flow, conduction in
+the wall, and the coolant-side flow *simultaneously*, with the interfaces
+enforcing continuity of temperature and heat flux rather than a prescribed
+boundary condition:
+
+$$T_{g,\text{wall}}=T_{s,\text{wall}},\qquad -k_g\left.\frac{\partial T}{\partial n}\right|_g=-k_s\left.\frac{\partial T}{\partial n}\right|_s$$
+
+> **Eq. 3.12** — variables: $k_g,k_s$ gas and solid conductivity [W/(m·K)],
+> $n$ wall-normal coordinate [m]. Meaning: the wall temperature is an
+> *output* of the coupled problem, not an input to a decoupled one.
+> Assumes: no contact resistance (a real issue at braze joints and in
+> AM part-to-part interfaces), and that all three domains are resolved
+> adequately. Fails when: the thermal time constants of the three domains
+> differ by orders of magnitude and the coupling scheme is not designed for
+> it (gas-side response is microseconds, wall conduction is milliseconds,
+> the coolant bulk is tens of milliseconds), and whenever the coupling is
+> under-relaxed to the point of a converged-looking but unconverged answer.
+> [F].
+
+**Why it matters and what it adds.** The decoupled 1-D model (Eq. 3.5)
+assumes a circumferentially uniform gas-side flux and 1-D conduction. Both
+are wrong in specific, quantifiable ways that CHT exposes:
+
+- **Circumferential streaks.** A finite number of injector elements produces a
+  finite number of hot stripes. The peak-to-mean flux ratio at the wall is
+  the single most consequential number in liner life, and 1-D models do not
+  contain it. Values of 1.3–2.0 are commonly reported for the peak/mean
+  ratio in the near-injector region [J]; the number depends on element type,
+  spacing, and the film-cooling scheme.
+- **Rib conduction.** Heat entering the land between channels is conducted
+  circumferentially into the channel side walls; the 1-D fin-efficiency
+  correction is a decent approximation but degrades at high channel aspect
+  ratio, which is exactly the direction modern (especially AM) channels have
+  gone.
+- **Curvature enhancement at the throat.** Concave streamline curvature on
+  the converging side destabilises the boundary layer and raises flux;
+  convex curvature downstream suppresses it. Bartz's $(D_t/r_c)^{0.1}$ term
+  is a crude nod to this.
+- **Coolant-side non-uniformity.** Channel-to-channel flow maldistribution
+  from the manifold — a real and frequently underestimated failure path.
+
+**The Bartz check — do this every time.** Before you believe a CHT result,
+recompute the throat flux with Bartz [Bartz57]:
+
+$$h_g=\frac{0.026}{D_t^{0.2}}\left(\frac{\mu^{0.2}c_p}{Pr^{0.6}}\right)_0\left(\frac{p_c}{c^*}\right)^{0.8}\left(\frac{D_t}{r_c}\right)^{0.1}\left(\frac{A_t}{A}\right)^{0.9}\sigma$$
+
+> **Eq. 3.13** — as in Module 10; $\sigma$ is the property-variation
+> correction. Meaning: a Dittus–Boelter-type turbulent pipe correlation
+> reshaped for a nozzle. Assumes: attached turbulent boundary layer,
+> chamber-stagnation properties, no film cooling, no injector-driven
+> maldistribution. Fails: everywhere those hold poorly; the paper itself
+> calls it a *rapid estimate*, and the honest band is $\pm20$–$30\,\%$ at the
+> throat and worse elsewhere. [E].
+
+The check is not "does the CFD match Bartz". It is: **is the CFD inside the
+Bartz band, and if not, is there a physical reason I can name?** Legitimate
+reasons for the CFD to sit below Bartz: film cooling, a fuel-rich boundary
+layer, a low-conductivity soot layer (kerolox), a low wall temperature ratio
+handled properly. Legitimate reasons to sit above: a hot streak, a
+recirculation zone impinging on the wall, curvature. Illegitimate reasons —
+and these are the ones you find — a first cell at $y^+=80$ with a wall
+function that was never intended for a 3000 K gradient; radiation switched
+off in a soot-forming flame; a mesh that is fine in the chamber and coarse
+through the throat because that is where the geometry generator put the
+cells. Worked Example 2 (§5.2) runs the check numerically.

@@ -739,9 +739,10 @@ $$A_{port}(u) \;=\; A_0 + P_0\,u + \tfrac{1}{2}\,P'\,u^2,
 > loading and port-to-throat ratio at any web position. Assumes Phase I.
 > Fails outside it. [F]
 
-*(Both Eq. 3.7 and Eq. 3.8 were checked against a direct numerical Minkowski
-sum of the polygon on a fine grid for three different $(N,\theta,R_p)$ sets;
-agreement was better than 0.005 % in area. The check script is in
+*(Eq. 3.8 was checked against a direct numerical Minkowski sum of the polygon
+on a $1400\times1400$ grid at four offsets spanning the whole burn, plus a
+spot check at a second $(N,\theta,R_p)$; worst area disagreement 0.005 %. The
+parameters, results and the geometry functions are in
 `tools/examples/21.py`.)*
 
 **The neutrality condition.** Setting $P' = 0$ in Eq. 3.7:

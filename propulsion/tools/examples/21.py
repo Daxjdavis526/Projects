@@ -110,7 +110,7 @@ EXAMPLES = [
      "expect": 3.3846153846153846e-3, "tol": 1e-9},
     {"id": "21.C4.hot30K", "fn": "temperature_sensitivity_pressure",
      "args": {"sigma_p": PI_K, "dT": 30.0},
-     "expect": 1.1069294, "tol": 1e-5},
+     "expect": 1.1068725, "tol": 1e-5},
 
     # --- Quiz Q4: CP tube, Ri0 = 0.10, Ro = 0.25, L = 2.5, At = 0.0090 ----
     {"id": "21.Q4.pc0", "fn": "solid_equilibrium_pressure",
@@ -125,7 +125,7 @@ EXAMPLES = [
     # --- Trade study T1: hot-day correction on MEOP ------------------------
     {"id": "21.T1.hot", "fn": "temperature_sensitivity_pressure",
      "args": {"sigma_p": PI_K, "dT": 30.0},
-     "expect": 1.1069294, "tol": 1e-5},
+     "expect": 1.1068725, "tol": 1e-5},
 ]
 
 
@@ -227,12 +227,16 @@ def phase1_sizing_Rp(N, theta, Ro):
 #   P0 = 1.080491, dP/du = 4.477929, u1 = 0.088008, V_L = 0.8272,
 #   m_prop = 1242.0 kg, Ab 3.3758 -> 5.6382 m^2 (+67 %).
 #
-#   VALIDATION.  Eq. 3.7 and Eq. 3.8 were checked against a direct grid
-#   Minkowski sum of the sharp polygon (dilate by u, count cells) for
-#   (N, theta, Rp) = (8, 15 deg, 0.2024), (8, 30 deg, 0.140) and
-#   (11, 25 deg, 0.218122) at four offsets each, on a 1400 x 1400 grid.
-#   Worst area disagreement 0.005 %.  Eq. 3.7 and Eq. 3.10 were checked to
-#   agree to machine precision at u = u1 (both reduce to N u1 (pi - 2 theta)).
+#   VALIDATION.  Eq. 3.8 was checked against a direct grid Minkowski sum of
+#   the sharp polygon (dilate by u, count cells) on a 1400 x 1400 grid, for
+#   (N, theta, Rp) = (8, 15 deg, 0.2024) at u = 0.008, 0.030, 0.0879 and
+#   0.09763 m, and for (8, 30 deg, 0.140) at u = 0.008 m.  Worst area
+#   disagreement 0.005 %.  Eq. 3.7 and Eq. 3.10 agree to machine precision at
+#   u = u1: substituting u1 = Rp sin(beta)/cos(beta+theta) into Eq. 3.10 gives
+#   arccos(cos(beta+theta)) = beta+theta, and both reduce to
+#   N u1 (pi - 2 theta).  Re-run the grid check with a Minkowski-sum routine
+#   if the relations are ever edited; it shares no algebra with them, which
+#   is what makes it a check.
 #
 # 21.WE4 — pure inversion of Eq. 3.2: Ab2/Ab1 = (p2/p1)^(1-n) =
 #   (6.9/5.2)^0.70 = 1.219; the same ratio applied to At gives -18.0 %.
