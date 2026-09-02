@@ -93,3 +93,76 @@ have materially different thrust ceilings and Isp penalties. Every engine in thi
 file is labelled with the specific variant.
 
 ---
+
+# Part A — Liquid engines
+
+All Part A thrust figures are `/engine` unless the row says otherwise. Where an
+"engine" is really several combustion chambers on one turbopump (LR87, RD-107,
+RD-170, RD-180, MA-5) the row says so and the notes give the stage total
+separately.
+
+## A.1 German and early American heritage
+
+| engine | maker / country | years | vehicle | propellants | O/F | cycle | F_SL kN | F_vac kN | Pc bar | Isp_SL s | Isp_vac s | ε | dry kg | T/W | cooling | injector | ignition | turbopump | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **V-2 / A-4 (Model 39)** | Peenemünde ARC; production Mittelwerk / Germany | dev ~1938–42; flew 1942-10-03 → 1945-03 | A-4/V-2 missile; Hermes, Bumper, R-1 derivatives | LOX / 75% ethanol–25% water | ~1.18 (some sources 1.2–1.25; low conf. on 2nd decimal) | GG, **monopropellant steam** — 80% H₂O₂ over Na/K permanganate | ~245 (55,000 lbf) | ~285 (64,000 lbf) | 15.2 `inj`† (220 psia) | ~203 | ~239 | ~3.5:1 (15° conical) | ~1,126 | ≈22:1 `CALC` | regen double-wall steel + **heavy film cooling** (4 rings, ~10% of fuel) | **18 pot-type pre-mixing burner cups**, two concentric circles on a flat dome | pyrotechnic ("Zündkerze"), gravity-fed preliminary stage then mainstage | single shaft, centrifugal LOX + alcohol, **steam turbine 4,000 rpm, ~430 kW (580 hp)**; 68 kg/s LOX, 55 kg/s alcohol | med-high [B] |
+| **Rocketdyne XLR43-NA-1 ("75K")** | North American Aviation / Rocketdyne / USA | 1946–51; first successful test 1950-11-15 | XSSM-A-2 Navaho test vehicle (never operational) | LOX / 75%–25% ethanol–water | ~1.32 (from the Redstone derivative; n.p. for the XLR43) | GG, V-2-type H₂O₂ steam generator | **334** (75,000 lbf) | n.p. | 21.9 `inj`† (318 psia) | n.p. (Redstone A-7 derivative: 235) | n.p. (derivative: ~265) | **3.61** (throat 15.3 in) | **668** (1,473 lb) | ≈51:1 `CALC` | double-wall regen + film | **flat-face, concentric rings of drilled holes, F-O-F impinging triplet** — the break from Germany | pyrotechnic | single shaft, H₂O₂/permanganate steam turbine, V-2 layout | med-high [B]; **low** on Isp and O/F |
+| **Rocketdyne A-7 (NAA 75-110-A-7)** | North American Aviation / Rocketdyne / USA | 1953–58; MR-3 (Shepard) 1961-05-05 | PGM-11 Redstone, Jupiter-C, Juno I, Mercury-Redstone | LOX / 75% ethyl alcohol (Jupiter-C/Juno I used **Hydyne**; Mercury-Redstone reverted to ethanol for crew safety) | **1.324** | GG, 75% H₂O₂ over K permanganate steam generator | **369** (82,977 lbf) — see note A.1.1 | **416** (93,565 lbf) | 21.9 `inj`† (318 psia) | **235** | **~265** | **3.61** | **671** (1,479 lb) | **56:1** (published) | regen double-wall + film | flat-face impinging, XLR43 heritage | pyrotechnic igniter | single shaft, steam turbine **4,718 rpm, 758 hp (565 kW)**; burn time 155 s | high [A] on the enginehistory.org set |
+| **Rocketdyne MA-5 (LR-89 booster pair)** | Rocketdyne / USA | lineage from 1954; Atlas SLV-3 / E-F / G / Atlas I | Atlas stage-and-a-half — 2 booster chambers in a jettisoned skirt | LOX / RP-1 | ~2.25 (med conf.) | GG — **both booster chambers share one gas generator and one centrally mounted turbopump** | **1,681** (378,000 lbf) `/booster pair` | **1,882** (423,000 lbf) `/pair` | ~40 `inj`† (580 psia) — contested, see A.1.2 | 259 | 292 | ~8:1 (med conf.) | **n.p. per chamber**; MA-5A system ~1,700 kg class | n.p. | regen **tube-wall** (Neu patent, production form) | flat-face impinging, like-on-like doublet | pyrotechnic / hypergolic slug by block | geared, single turbine driving both pumps through a reduction gearbox (XLR71 architecture) | med [C] |
+| **Rocketdyne MA-5 (LR-105 sustainer)** | Rocketdyne / USA | as above | Atlas sustainer, burns to orbit insertion | LOX / RP-1 | ~2.27 (med conf.) | GG, own turbopump and gas generator | **269** (60,473 lbf) | **374** (86,866 lbf) | ~40 `inj`† (580 psia) | **220** — genuinely low; a large-ε nozzle badly overexpanded at liftoff | 309 | ~25:1 (med conf.) | n.p. | n.p. | regen tube-wall | flat-face impinging | pyrotechnic / hypergolic slug | geared single-turbine, two-pump | med [C] |
+| **Rocketdyne MA-5A (RS-56-OSA / -OBA)** | Rocketdyne / USA | Atlas II 1991-12-07 → 2004-08-31 | Atlas II / IIA / IIAS | LOX / RP-1 | ~2.25 / ~2.27 | GG | **1,890** `/system`; booster pair alone 1,896 (426,240 lbf) | **2,100** `/system` | 48 bar/atm **at the injector end** for the sustainer per Astronautix — a *different block*, not a contradiction | 263 `/system` | 295 `/system`; booster Isp quoted 294 | n.p. | ~1,700 kg class `/system` | n.p. | regen tube-wall | flat-face impinging | pyrotechnic / hypergolic | geared | med [C] |
+| **Rocketdyne LR-101 (verniers)** | Rocketdyne / USA | with MA-5 | Atlas — 2 vernier chambers, roll control | LOX / RP-1 | n.p. | GG (fed from the sustainer circuit) | n.p. | n.p. | n.p. | n.p. | n.p. | n.p. | n.p. | n.p. | n.p. | n.p. | n.p. | n.p. | low [D] |
+
+### Notes and contested figures — A.1
+
+**A.1.1 Redstone A-7 thrust: 75,000 vs 78,000 vs 82,977 lbf.** Three numbers, all
+correct, all meaning different things.
+
+| value | what it is |
+|---|---|
+| 75,000 lbf (334 kN) | the **NAA 75-110 nameplate rating** — 75,000 lbf for 110 seconds |
+| 78,000 lbf (347 kN) | the nameplate **plus ~3,000 lbf of steam-generator exhaust thrust**; the turbine exhaust is a real, measurable thrust contribution |
+| **82,977 lbf (369 kN) SL / 93,565 lbf (416 kN) vac** | the **uprated A-7 as flown** on Mercury-Redstone `[enginehistory.org RPE §4.2]` |
+
+Print 82,977 lbf SL for the flown A-7 and explain the other two. This is the
+cleanest example in the file of "which thrust?" being a real question, and it
+generalises directly to modern engines with turbine-exhaust or film-cooling
+thrust terms.
+
+**A.1.2 Atlas MA-5 chamber pressure: 580 psia vs 48 bar/atm.** heroicrelics.org
+gives **580 psia (40 bar)** for both the LR-89 and the LR-105; Encyclopedia
+Astronautica gives **48 bar / 48 atm at the injector end** for the MA-5A
+sustainer. These are **different engine blocks** (MA-5 vs MA-5A / RS-56), so it
+is probably not a contradiction — but neither source is primary. Quote them
+separately by block, label both medium confidence, and seek a Rocketdyne or
+General Dynamics document before printing either as fact. **No primary source was
+obtained for MA-5 / MA-5A at all**; Braeunig and Astronautix both returned errors
+during the verification pass.
+
+**A.1.3 MA-5 dry mass is not published per chamber.** The MA-5A *system* mass is
+~1,700 kg class. Treat per-chamber dry mass as not published rather than quoting
+a figure. Expansion ratios (booster ~8:1, sustainer ~25:1) are medium confidence
+and need a primary document.
+
+**A.1.4 V-2 Isp is a reconstruction.** The Wikipedia article gives exhaust
+velocity (~2,000 m/s), not Isp; secondary tables vary **199–210 s SL**. Present
+203 s SL / 239 s vac with a tolerance, not as a measured value. Mixture ratio and
+expansion ratio are likewise reconstructions from secondary data.
+
+**A.1.5 V-2 thrust rises with altitude by design accounting.** ~245 kN (55,000
+lbf) SL at the 25-tonne rating, rising to ~285 kN (64,000 lbf, "29 tons") as
+ambient pressure falls. The gravity-fed preliminary stage is ~78 kN (8 t).
+
+**A.1.6 The XLR43's successors** carried the lineage to Atlas: XLR71-NA-1 at
+120,000 lbf, 438 psia, ε 4.16, on 92.5% ethanol with a **true fuel-rich
+bipropellant gas generator**; XLR83-NA-1 at 135,000 lbf per chamber on JP-4.
+Between them they produced the tube-wall chamber (E. A. Neu Jr.'s patent, filed
+1950-04-05) and the geared turbopump used on Atlas, Jupiter, Thor, Delta and
+Saturn I.
+
+**A.1.7 The MA-5 is a propulsion system, not an engine.** Two LR-89 booster
+chambers jettisoned in a dropped skirt, one LR-105 sustainer that burns to orbit
+insertion, plus two LR-101 verniers. Stage-and-a-half exists to solve air-start
+reliability by never air-starting: all three engines light on the pad and are
+verified before release. The price is carrying the sustainer's oversized nozzle
+and full plumbing off the pad, which is why its SL Isp is 220 s.
