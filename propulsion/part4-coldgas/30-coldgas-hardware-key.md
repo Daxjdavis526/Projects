@@ -137,6 +137,46 @@ Comment expected: the *modelled* droop is negligible (hundredths of a bar) while
 
 ---
 
+## K2. Quiz answers with explanations
+
+**Q1 (8) — (b) 8,000 m.** From C1's derivation, $PV/W = \sigma_\mathrm{tu}/(2FS_u\rho g_0)$ for a membrane sphere: radius and pressure cancel exactly. Doubling the volume doubles both the stored $pV$ and the shell mass.
+*(a) 4,000 m* assumes mass scales faster than volume — it does not; both scale as $r^3$.
+*(c) 11,300 m* is $8000\sqrt{2}$, the answer if mass scaled as area at constant thickness.
+*(d) 16,000 m* assumes mass does not change at all.
+Credit a note that in reality the larger tank does slightly better, because bosses and non-membrane regions are a smaller fraction of it — the idealisation errs in the conservative direction.
+
+**Q2 (8) — (d).** Polymer liners in Type IV vessels are specifically designed to accommodate the strain of the overwrap at burst; strain capability is not the objection. (a), (b) and (c) are all genuine reasons spaceflight uses metal-lined Type III: helium permeation over multi-year missions (Eq. 3.4), liner buckling on depressurisation, and the difficulty of making a leak-tight, load-carrying boss interface to a polymer.
+
+**Q3 (12).** Loss $= 0.04\times2.4 = 96.0$ g over $4\times365.25\times24 = 35{,}064$ h $= 2.738\times10^{-3}$ g/h. With $\rho_\mathrm{std}(N_2) = 1.2498\times10^{-3}$ g/cm³:
+$$\dot V_\mathrm{total} = 2.19\ \mathrm{scc/h} = 6.08\times10^{-4}\ \mathrm{scc/s}$$
+40 % over eight seats: $0.876/8 = 0.1095$ scc/h $= 3.04\times10^{-5}$ scc/s GN₂ each.
+GHe equivalent (molecular, ×2.645): $8.05\times10^{-5}$ scc/s GHe.
+*Marking:* 4 for the total, 4 for the per-seat allocation, 4 for the correct helium conversion with the regime named. Using 2 instead of 2.645, or converting the wrong way (dividing), loses the last 4.
+
+**Q4 (10).** $SPE = A_\mathrm{seat}/A_s = (1.2/30)^2 = 1.60\times10^{-3}$. Inlet decay $280-40 = 240$ bar, so setpoint shift $= 1.60\times10^{-3}\times240 = 0.384$ bar $= 2.56$ % of a 15 bar setpoint. Full marks require recognising that the areas enter as the *square* of the diameter ratio; using $1.2/30 = 0.04$ directly gives 9.6 bar and is the standard error here.
+
+**Q5 (10).** (i) A valve that **fails to open** is defeated by **parallel** valves. (ii) A **leaking seat** is defeated by **series** valves. (iii) **Both** require **series-parallel (quad)**, four valves. For a two-valve CubeSat: choose **series**. Grounds: inadvertent thrust can tumble or de-orbit the spacecraft and is a range-safety concern before launch, so it must be prevented; loss of thrust usually costs only the propulsive portion of the mission and can often be tolerated. In addition, the two-independent-inhibits requirement typically mandates series regardless. Full marks require both the correct pairing and a stated reason for the asymmetry, not just a preference.
+
+**Q6 (12).** Throat: $\delta A_t/A_t = 2(6/200) = 0.060 = \pm6.0$ %.
+Combined: $\sqrt{0.060^2 + 0.015^2 + 0.025^2} = \sqrt{0.0036+0.000225+0.000625} = 0.0667 = \pm6.67$ %.
+Variance fraction from the throat: $0.0036/0.004450 = 0.809$, i.e. **81 %**.
+*Marking:* 4 for remembering the factor of 2 on the diameter, 4 for the RSS, 4 for the variance fraction (a common error is to quote the ratio of the *uncertainties*, $0.060/0.0667 = 90$ %, rather than of the variances).
+
+**Q7 (10).** $t_\mathrm{eff} = 6.0 - 2.5 + 3.5 = 7.0$ ms; equal rise and fall cancel, so $I_\mathrm{bit} = (0.040)(7.0\times10^{-3}) = 2.8\times10^{-4}$ N·s $= 0.28$ mN·s. Note that $t_\mathrm{eff}$ exceeds $t_\mathrm{cmd}$, because the closing delay is longer than the opening delay — the valve stays open past the end of the command.
+As $t_\mathrm{cmd}\to2.5$ ms (the opening delay), the valve is commanded off at almost the same moment it begins to move: it never reaches full lift, the flow area peaks below its open value, and the delivered profile is a truncated triangle rather than a trapezoid. The trapezoidal model assumes the thruster reaches its steady-state thrust $F$; in partial lift it does not, so both $F$ and the profile shape are wrong, and the pulse-to-pulse scatter is governed by armature dynamics rather than by command timing.
+
+**Q8 (10).** $\Delta H_\mathrm{vap}/(RT) = 21000/(8.314\times295) = 8.56$. Linearised: $\Delta p_v/p_v \approx 8.56\times(8/295) = 0.232$, i.e. **+23 %** (the exact exponential form gives +25 %). A stored gas at constant volume: $\Delta p/p = \Delta T/T = 8/295 = 0.027$, i.e. **+2.7 %**. The self-pressurising propellant is **~8.6× more temperature-sensitive**.
+Design consequence (one sentence): a self-pressurising system requires active tank thermal control and a temperature-corrected thrust model, because its feed pressure — and therefore its thrust — is an exponential function of tank temperature.
+
+**Q9 (10).** **Total impulse and firing count are not independent**: $220\ \mathrm{N\,s} / 2{,}200{,}000 = 1.0\times10^{-4}$ N·s $= 0.1$ mN·s, exactly the quoted minimum impulse bit. So the "firing count" is total impulse divided by minimum impulse bit — an arithmetic statement of how many minimum-size bits fit in the tank, not a demonstrated cycle-life result. (Strictly, all three of total impulse, firing count and minimum impulse bit are linked; identifying firing count as the derived quantity is what earns the marks.) *What to ask for instead:* the **qualification cycle count** — how many actuations a valve was demonstrated to survive on a life test, with the test pressure, temperature, pulse width and post-test leak rate. Also worth asking: the impulse bit at the pulse widths the mission will actually use, since a duty cycle built on 5 ms pulses will exhaust the propellant in a fifth of the quoted firings.
+
+**Q10 (10).** Torque $= 1.5\times10^{-3}\ \mathrm{N\,m\,s}/10\ \mathrm{s} = 1.5\times10^{-4}$ N·m.
+$$\sin\theta_m = \frac{T}{FL} = \frac{1.5\times10^{-4}}{(0.060)(0.20)} = 1.25\times10^{-2} \quad\Rightarrow\quad \theta_m = 0.72^\circ$$
+*Two hardware causes:* (i) **thrust magnitude mismatch** between the paired thrusters, from throat-area tolerance ($A_t\propto D_t^2$); (ii) **thrust-vector misalignment**, from throat-to-exit non-concentricity, a throat burr, or the nozzle axis not being normal to its mounting face.
+*Which is correctable after the fact:* **(i)**. Measure each flight nozzle's throat, record it, and use the measured $A_t$ in the flight software's thrust model and control allocation; the residual then reduces to the metrology uncertainty. (ii) can be partially compensated only if the misalignment has been measured to better accuracy than the effect you are correcting, and any residual continues to accumulate momentum on every burn. Full marks require the correct arithmetic *and* the distinction between a magnitude error (calibratable) and a direction error (largely not).
+
+---
+
 ## K3. Trade-study reference solution
 
 ### T1 — 12U smallsat propulsion module
@@ -188,46 +228,6 @@ The argument, in the order the constraints bind:
 - Ignoring the power budget for D, or assuming proportional valves seal like on/off valves.
 - Using ideal-gas density for 300 bar nitrogen.
 - Any answer that recommends an option without naming the strongest counter-argument to it.
-
----
-
-## K2. Quiz answers with explanations
-
-**Q1 (8) — (b) 8,000 m.** From C1's derivation, $PV/W = \sigma_\mathrm{tu}/(2FS_u\rho g_0)$ for a membrane sphere: radius and pressure cancel exactly. Doubling the volume doubles both the stored $pV$ and the shell mass.
-*(a) 4,000 m* assumes mass scales faster than volume — it does not; both scale as $r^3$.
-*(c) 11,300 m* is $8000\sqrt{2}$, the answer if mass scaled as area at constant thickness.
-*(d) 16,000 m* assumes mass does not change at all.
-Credit a note that in reality the larger tank does slightly better, because bosses and non-membrane regions are a smaller fraction of it — the idealisation errs in the conservative direction.
-
-**Q2 (8) — (d).** Polymer liners in Type IV vessels are specifically designed to accommodate the strain of the overwrap at burst; strain capability is not the objection. (a), (b) and (c) are all genuine reasons spaceflight uses metal-lined Type III: helium permeation over multi-year missions (Eq. 3.4), liner buckling on depressurisation, and the difficulty of making a leak-tight, load-carrying boss interface to a polymer.
-
-**Q3 (12).** Loss $= 0.04\times2.4 = 96.0$ g over $4\times365.25\times24 = 35{,}064$ h $= 2.738\times10^{-3}$ g/h. With $\rho_\mathrm{std}(N_2) = 1.2498\times10^{-3}$ g/cm³:
-$$\dot V_\mathrm{total} = 2.19\ \mathrm{scc/h} = 6.08\times10^{-4}\ \mathrm{scc/s}$$
-40 % over eight seats: $0.876/8 = 0.1095$ scc/h $= 3.04\times10^{-5}$ scc/s GN₂ each.
-GHe equivalent (molecular, ×2.645): $8.05\times10^{-5}$ scc/s GHe.
-*Marking:* 4 for the total, 4 for the per-seat allocation, 4 for the correct helium conversion with the regime named. Using 2 instead of 2.645, or converting the wrong way (dividing), loses the last 4.
-
-**Q4 (10).** $SPE = A_\mathrm{seat}/A_s = (1.2/30)^2 = 1.60\times10^{-3}$. Inlet decay $280-40 = 240$ bar, so setpoint shift $= 1.60\times10^{-3}\times240 = 0.384$ bar $= 2.56$ % of a 15 bar setpoint. Full marks require recognising that the areas enter as the *square* of the diameter ratio; using $1.2/30 = 0.04$ directly gives 9.6 bar and is the standard error here.
-
-**Q5 (10).** (i) A valve that **fails to open** is defeated by **parallel** valves. (ii) A **leaking seat** is defeated by **series** valves. (iii) **Both** require **series-parallel (quad)**, four valves. For a two-valve CubeSat: choose **series**. Grounds: inadvertent thrust can tumble or de-orbit the spacecraft and is a range-safety concern before launch, so it must be prevented; loss of thrust usually costs only the propulsive portion of the mission and can often be tolerated. In addition, the two-independent-inhibits requirement typically mandates series regardless. Full marks require both the correct pairing and a stated reason for the asymmetry, not just a preference.
-
-**Q6 (12).** Throat: $\delta A_t/A_t = 2(6/200) = 0.060 = \pm6.0$ %.
-Combined: $\sqrt{0.060^2 + 0.015^2 + 0.025^2} = \sqrt{0.0036+0.000225+0.000625} = 0.0667 = \pm6.67$ %.
-Variance fraction from the throat: $0.0036/0.004450 = 0.809$, i.e. **81 %**.
-*Marking:* 4 for remembering the factor of 2 on the diameter, 4 for the RSS, 4 for the variance fraction (a common error is to quote the ratio of the *uncertainties*, $0.060/0.0667 = 90$ %, rather than of the variances).
-
-**Q7 (10).** $t_\mathrm{eff} = 6.0 - 2.5 + 3.5 = 7.0$ ms; equal rise and fall cancel, so $I_\mathrm{bit} = (0.040)(7.0\times10^{-3}) = 2.8\times10^{-4}$ N·s $= 0.28$ mN·s. Note that $t_\mathrm{eff}$ exceeds $t_\mathrm{cmd}$, because the closing delay is longer than the opening delay — the valve stays open past the end of the command.
-As $t_\mathrm{cmd}\to2.5$ ms (the opening delay), the valve is commanded off at almost the same moment it begins to move: it never reaches full lift, the flow area peaks below its open value, and the delivered profile is a truncated triangle rather than a trapezoid. The trapezoidal model assumes the thruster reaches its steady-state thrust $F$; in partial lift it does not, so both $F$ and the profile shape are wrong, and the pulse-to-pulse scatter is governed by armature dynamics rather than by command timing.
-
-**Q8 (10).** $\Delta H_\mathrm{vap}/(RT) = 21000/(8.314\times295) = 8.56$. Linearised: $\Delta p_v/p_v \approx 8.56\times(8/295) = 0.232$, i.e. **+23 %** (the exact exponential form gives +25 %). A stored gas at constant volume: $\Delta p/p = \Delta T/T = 8/295 = 0.027$, i.e. **+2.7 %**. The self-pressurising propellant is **~8.6× more temperature-sensitive**.
-Design consequence (one sentence): a self-pressurising system requires active tank thermal control and a temperature-corrected thrust model, because its feed pressure — and therefore its thrust — is an exponential function of tank temperature.
-
-**Q9 (10).** **Total impulse and firing count are not independent**: $220\ \mathrm{N\,s} / 2{,}200{,}000 = 1.0\times10^{-4}$ N·s $= 0.1$ mN·s, exactly the quoted minimum impulse bit. So the "firing count" is total impulse divided by minimum impulse bit — an arithmetic statement of how many minimum-size bits fit in the tank, not a demonstrated cycle-life result. (Strictly, all three of total impulse, firing count and minimum impulse bit are linked; identifying firing count as the derived quantity is what earns the marks.) *What to ask for instead:* the **qualification cycle count** — how many actuations a valve was demonstrated to survive on a life test, with the test pressure, temperature, pulse width and post-test leak rate. Also worth asking: the impulse bit at the pulse widths the mission will actually use, since a duty cycle built on 5 ms pulses will exhaust the propellant in a fifth of the quoted firings.
-
-**Q10 (10).** Torque $= 1.5\times10^{-3}\ \mathrm{N\,m\,s}/10\ \mathrm{s} = 1.5\times10^{-4}$ N·m.
-$$\sin\theta_m = \frac{T}{FL} = \frac{1.5\times10^{-4}}{(0.060)(0.20)} = 1.25\times10^{-2} \quad\Rightarrow\quad \theta_m = 0.72^\circ$$
-*Two hardware causes:* (i) **thrust magnitude mismatch** between the paired thrusters, from throat-area tolerance ($A_t\propto D_t^2$); (ii) **thrust-vector misalignment**, from throat-to-exit non-concentricity, a throat burr, or the nozzle axis not being normal to its mounting face.
-*Which is correctable after the fact:* **(i)**. Measure each flight nozzle's throat, record it, and use the measured $A_t$ in the flight software's thrust model and control allocation; the residual then reduces to the metrology uncertainty. (ii) can be partially compensated only if the misalignment has been measured to better accuracy than the effect you are correcting, and any residual continues to accumulate momentum on every burn. Full marks require the correct arithmetic *and* the distinction between a magnitude error (calibratable) and a direction error (largely not).
 
 ---
 

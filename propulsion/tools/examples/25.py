@@ -67,16 +67,17 @@ EXAMPLES = [
      "expect": 4.3103e-3, "tol": 1e-3},
 
     # --- Quiz Q3: n = 0.30, lot 2.5 % high in a -> p_c +3.59 %.
-    # Expressed with a unit-consistent (a, K_n) pair chosen so the nominal is
-    # 5.00 MPa: a = 0.008 / (5e6)^0.30, K_n = (5e6)^0.70 / (a rho c*).
+    # Same nominal operating point as WE2 (5.00 MPa, 8.00 mm/s, rho 1770,
+    # c* 1520), so K_n = p / (r rho c*) = 232.31 regardless of n; only the
+    # Vieille coefficient changes: a = 0.008 / (5e6)^0.30 = 7.8235e-5.
     {"id": "25.Q3a", "fn": "solid_equilibrium_pressure",
-     "args": {"a": 7.15185e-5, "n": 0.30, "rho_p": 1770.0,
-              "Ab": 461.65, "At": 1.0, "c_star_val": 1520.0},
+     "args": {"a": 7.8235e-5, "n": 0.30, "rho_p": 1770.0,
+              "Ab": 232.31, "At": 1.0, "c_star_val": 1520.0},
      "expect": 5.0e6, "tol": 0.005},
 
     {"id": "25.Q3b", "fn": "solid_equilibrium_pressure",
-     "args": {"a": 7.33065e-5, "n": 0.30, "rho_p": 1770.0,
-              "Ab": 461.65, "At": 1.0, "c_star_val": 1520.0},
+     "args": {"a": 8.01909e-5, "n": 0.30, "rho_p": 1770.0,
+              "Ab": 232.31, "At": 1.0, "c_star_val": 1520.0},
      "expect": 5.1795e6, "tol": 0.005},
 ]
 

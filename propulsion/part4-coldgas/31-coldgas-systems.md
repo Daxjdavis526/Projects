@@ -1136,7 +1136,7 @@ pressure, which is precisely why MarCO used it.
 
 ---
 
-## 6. Real systems: why did they design it that way?
+## 6. Real engines and systems: why did they design it that way?
 
 ### 6.1 MMU — why gaseous nitrogen, at 24 nozzles, next to the Orbiter?
 
