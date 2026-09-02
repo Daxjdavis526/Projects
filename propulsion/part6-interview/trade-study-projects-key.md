@@ -960,3 +960,290 @@ That paragraph is worth more marks than the matrix that produced it.
    you pay for a second string at 15 kg.
 
 ---
+
+# Project 4 — A reusable medium-lift booster engine
+
+## §1. Reference sizing (D1)
+
+### The chamber-pressure trade curve — the project's technical core
+
+Methalox at O/F 3.6, $c^*_{ideal}$ = 1,873.0 m/s `[TS P4.1]`, $\eta_{c^*}$ = 0.97,
+so delivered $c^*$ = 1,816.8 m/s. At each chamber pressure the area ratio is the
+one that gives $p_e$ = 0.55 bar — slightly overexpanded at sea level, and
+comfortably above the separation limit (checked below). Thrust is held at R4.1's
+2,400 kN sea level throughout.
+
+| $p_c$ (bar) | ε | $C_F$ (SL) | $A_t$ (m²) | $D_t$ (mm) | $I_{sp,SL}$ (s) | $\dot m$ (kg/s) | pump power (MW) | $h_g$ (W/m²K) | **$q_{throat}$ (MW/m²)** | $\Delta T$ through an 0.8 mm liner (K) | $N_f$ scaling |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **100** | 20.93 `[P4.2]` | 1.6491 `[P4.6]` | 0.1455 `[P4.10]` | 430.5 | **305.5** | 801.2 | **19.37** `[P4.14]` | 21,850 `[P4.20]` | **59.5** `[P4.24]` | 159 | ~181 |
+| **150** | 28.80 `[P4.3]` | 1.7013 `[P4.7]` | 0.0940 `[P4.11]` | 346.0 | **315.2** | 776.4 | **28.43** `[P4.15]` | 31,572 `[P4.21]` | **86.0** `[P4.25]` | **229** `[P4.28]` | ~87 |
+| **200** | 36.42 `[P4.4]` | 1.7358 `[P4.8]` | 0.0691 `[P4.12]` | 296.7 | **321.6** | 761.1 | **37.32** `[P4.16]` | 40,983 `[P4.22]` | **111.6** `[P4.26]` | 298 | ~51 |
+| **300** | 50.51 `[P4.5]` | 1.7810 `[P4.9]` | 0.0449 `[P4.13]` | 239.1 | **330.0** | 741.7 | **54.82** `[P4.17]` | 59,185 `[P4.23]` | **161.2** `[P4.27]` | **430** `[P4.29]` | ~25 |
+
+Bartz inputs, from Module 10's fixed recipe: $c_{p0}$ = 2,940.5 J/(kg·K),
+$Pr_0$ = 0.8529, $\mu_0$ = 10⁻⁴ Pa·s, $\sigma$ = 1.3689 `[TS P4.18]`,
+$T_{aw}$ = 3,523.7 K `[TS P4.19]`, $T_{wg}$ = 800 K, $r_c$ = 1.5 × throat radius.
+**Bartz is ±20–30 % at the throat at best**, so the heat fluxes are an ordering
+tool, not a design load; the $N_f$ column is a Coffin–Manson scaling
+$N_f \propto q^{-2}$ anchored at 100 cycles at 80 MW/m² **[J]**, and it is a
+ranking, not a life prediction. Saying that out loud is part of the deliverable.
+
+Separation check at the 150 bar point: $M_e$ = 3.819 at ε = 28.80
+`[TS P4.31]`, and Schmucker's correlation gives $p_{sep}$ = **31.6 kPa**
+`[TS P4.32]` against a wall pressure of 55 kPa at the exit — **attached at sea
+level with ~1.7× margin.** At 300 bar and ε = 50.5 the margin is thinner and the
+start transient becomes the design case `[Ostlund02][OMK05][Schmucker73]`.
+
+Coolant closure at 150 bar: taking 15 % of the methane flow (25.3 kg/s) through
+the chamber jacket against a ~48 MW chamber heat load gives a bulk temperature
+rise of **542 K** `[TS P4.30]` — supercritical methane, no boiling crisis, but
+a large enough rise that the last channels run hot and the Dittus–Boelter
+correlation is being used outside its comfort zone. That is the number that sets
+channel count and aspect ratio.
+
+### Reading the curve
+
+Four things move together, and they move in opposite directions:
+
+1. **Isp rises and saturates.** 100 → 300 bar buys **24.5 s** (305.5 → 330.0),
+   but the first half of the range buys 16.1 s of it and the second half 14.4 s
+   — and most of the gain is the *area ratio* the higher pressure permits, not
+   the pressure itself.
+2. **Throat diameter falls almost as $p_c^{-1/2}$**: 430.5 → 239.1 mm. That is
+   the entire mass argument for high chamber pressure. Engine mass scales roughly
+   with the chamber and nozzle *surface*, so halving the throat diameter is worth
+   far more than 24.5 s of Isp on a T/W-limited engine.
+3. **Pump power rises almost linearly**: 19.4 → 54.8 MW. At 300 bar the turbine
+   is delivering RS-25-class power to a booster engine, and the preburner and
+   turbine become the mass and life drivers rather than the chamber.
+4. **Throat heat flux rises faster than linearly with $p_c$** (Bartz gives
+   $q \propto p_c^{0.8}$ at fixed geometry, but the throat is also shrinking, so
+   the observed scaling here is close to $p_c^{0.9}$): 59.5 → 161.2 MW/m². The
+   through-thickness ΔT rises with it, 159 → 430 K, and **low-cycle fatigue life
+   falls with the square of the strain range.**
+
+### The requirement conflict, stated plainly
+
+- **R4.5** (dry mass ≤ 2,200 kg, T/W ≥ 111) pushes *up* the pressure axis.
+- **R4.6 and R4.7** (10 flights between overhauls, 25 flights, ≥ 100 starts)
+  push *down* it.
+
+They do not both close at the same point, and the study's job is to find where
+they cross.
+
+**At 100 bar:** throat 430 mm, exit 1,966 mm, and the chamber and nozzle
+structure of a 2,400 kN engine at that size. The only measured data point in the
+reference file for a large methalox ORSC engine is the **BE-4 at 5,400 kg dry
+for 2,460 kN at 140 bar** `[engine-database A.3]` — a T/W of ~46:1. Nothing in
+the public record supports 2,200 kg at 100 bar. **Candidate "ORSC at 100 bar" is
+eliminated at the compliance gate on R4.5**, and the elimination must be stated
+with its evidence rather than asserted.
+
+**At 300 bar:** the fatigue scaling gives ~25 cycles against R4.7's requirement
+of 25 flights *and ≥ 100 starts including acceptance*. Even allowing Bartz's
+±30 %, the margin is not there without a different wall — a thinner liner, a
+lower gas-side temperature through more film cooling (which costs Isp), or a
+material change. The only 300 bar-class figures in the file are **SpaceX claims
+with no independent verification of chamber pressure, Isp, dry mass or T/W at
+all** `[engine-database A.3.5]`, and a trade study cannot rest a life argument on
+them.
+
+**At 150–200 bar** both requirements are within reach: Isp 315–322 s against
+R4.8's 300 s floor, throat 297–346 mm, pump power 28–37 MW, and a fatigue
+scaling of 50–90 cycles that a real wall design can be argued up to 100 starts.
+
+### Life analysis (project-specific deliverable)
+
+| | |
+|---|---|
+| **life-limiting component** | the main combustion chamber liner at the throat |
+| **damage mechanism** | thermal low-cycle fatigue — "doghouse" ratcheting of the coolant-channel land: each start/stop cycles the hot-gas-side surface through a large compressive-then-tensile plastic strain excursion, the land thins, bulges into the channel and eventually splits |
+| **secondary mechanisms** | blanching of the copper liner (oxidation–reduction cycling), turbine blade thermal fatigue on the ox-rich side, bearing wear, and coking — **which is why methane rather than RP-1**: methane does not coke, and a booster that must fly 25 times with borescope-only inspection cannot carry a coking mechanism |
+| **the parameter to instrument** | coolant outlet temperature per circuit, trended flight-to-flight. A rising outlet temperature at constant flow and power level is channel blockage or land distortion, and it is the earliest available signature. Second: chamber-pressure-to-pump-discharge ratio, which drifts as the injector fouls |
+| **the inspection that matters** | borescope of the throat land tips at every flight, and the ten-flight overhaul exists because that is the point at which the trend, not the image, becomes the decision |
+
+### Reuse economics (project-specific deliverable)
+
+Let $C_{unit}$ be the recurring cost of one engine, $C_{NRI}$ the non-recurring,
+$N_{fleet}$ the number of engines built and $c_{ref}$ the refurbishment cost per
+engine-flight. Cost per engine-flight over $n$ flights:
+
+$$C(n) = \frac{C_{unit}}{n} + c_{ref} + \frac{C_{NRI}}{N_{fleet}\,n}$$
+
+With the UCI/NRI indices of D4 rather than currency, and normalising the
+gas-generator option to $C_{unit}$ = 1.00:
+
+| architecture | $C_{unit}$ | $C_{NRI}$ | $c_{ref}$/flight | crossover against expendable GG |
+|---|---|---|---|---|
+| GG methalox, 150 bar | 1.00 | 1.0 | 0.06 | **n ≈ 2.3** |
+| ORSC methalox, 150 bar | 1.45 | 2.2 | 0.05 | **n ≈ 3.6** |
+| ORSC methalox, 300 bar | 1.80 | 3.4 | 0.14 (overhaul at 10 → refurbish more) | **n ≈ 7.1**, and life caps it near 25 |
+| FFSC methalox, 300 bar | 2.10 | 4.6 | 0.14 | **n ≈ 9.8** |
+
+At 180 engines a year (R4.10) and 25 flights per booster, **every option crosses
+well inside 25 flights, so the reusability requirement does pay for itself** —
+which is the answer the project asks for, and it is not the interesting part. The
+interesting part is that **the crossover moves the wrong way with chamber
+pressure**: the architecture with the best Isp has the worst refurbishment cost
+and the highest NRI, so raising $p_c$ buys performance and *sells* the economic
+case. Say that.
+
+### Company-claimed numbers used, and what happens if they are 15 % optimistic
+
+| claim | used for | if 15 % optimistic |
+|---|---|---|
+| Raptor 2/3 at 300–330 bar, T/W 141–164 `[claim]` `[A.3.5]` | the upper end of the $p_c$ trade, and the existence proof that 2,200 kg at 2,400 kN is achievable at all | 300 bar → 255 bar and T/W 164 → 139. **R4.5 becomes unachievable at any pressure in the trade**, and the requirement itself must be renegotiated. This is the single largest exposure in the study |
+| Merlin 1D T/W 184:1 `[claim]` `[A.3]` | the argument that a gas generator can be light | 184 → 156, still the lightest architecture. The GG case survives |
+| BE-4 2,460 kN at 140 bar, 5,400 kg (specification + a Nov-2025 uprate claim) `[A.3.4]` | the only *measured-ish* large methalox ORSC data point | mass is not a claim in the optimistic direction; the thrust uprate to 2,847 kN is, and it is unclear which vehicles fly which rating |
+| Archimedes 730 kN, deliberately de-rated for life `[claim, unflown]` `[A.3]` | the qualitative argument that de-rating buys reflight life | unaffected — it is an architectural statement, not a number |
+
+**The honest summary line for the memo:** *the recommendation's T/W requirement
+rests on unverified manufacturer claims; if they are 15 % optimistic, R4.5 does
+not close at any chamber pressure and the vehicle needs ten engines rather than
+nine.*
+
+## §2. Recommended architecture, with the argument both ways
+
+**Recommendation: oxidiser-rich staged combustion, LOX/LCH₄, $p_c$ = 150 bar
+(design headroom to 165), ε = 28.8, regeneratively cooled milled-channel
+copper-alloy chamber with a GRCop-class liner, hydrostatic bearings, coaxial
+swirl gas–liquid injector, and a head-pressure start for the three in-flight
+relights.**
+
+### The argument for
+
+1. **It is the point where R4.5 and R4.7 both close.** 315.2 s SL (15 s above the
+   R4.8 floor), 346 mm throat, 28.4 MW of pump power, 86 MW/m² of throat heat
+   flux and a fatigue scaling of ~87 cycles that a real wall can be argued to
+   100 starts.
+2. **Methane, not kerosene, because of R4.6.** RP-1 cokes the cooling channels
+   and the injector face; methane does not. A booster inspected only by borescope
+   for ten flights cannot carry a deposition mechanism it cannot see.
+3. **Oxidiser-rich rather than fuel-rich because of the throttle requirement.**
+   R4.3 demands 20 % thrust with restart. An ORSC powerhead delivers hot
+   oxidiser *gas* to the injector, and a gas–liquid coaxial swirl element holds
+   its Δp/$p_c$ far better across a 5:1 turndown than a liquid–liquid element,
+   because the gas-side pressure drop is dominated by the post geometry rather
+   than by $\dot m^2$.
+4. **Deliberately low chamber pressure is a stated, defended industrial choice.**
+   Blue Origin runs the BE-4 at 140 bar against the RD-180's 267 bar and says
+   plainly that this is a life-and-reusability decision, not a limitation
+   `[engine-database A.3]`. This recommendation is the same argument with the
+   arithmetic shown.
+5. **Hydrostatic bearings.** Also a stated life-driven choice on the BE-4, and
+   at 28 MW and 100+ starts the rolling-element alternative is a scheduled
+   replacement item, which R4.6's inspection-only turnaround forbids.
+
+### The argument against — what the recommendation costs
+
+1. **It loses 14.8 s of Isp to the 300 bar option** and 6.4 s to 200 bar. On a
+   first stage that is roughly 1.5 % of payload — real money over 25 flights.
+2. **T/W.** At 150 bar the engine is bigger than at 300 bar and R4.5's 2,200 kg
+   is harder. The recommendation is betting that additive manufacturing and
+   integrated plumbing close a gap that the only measured comparable (BE-4 at
+   5,400 kg) does not close.
+3. **ORSC is the hardest cycle to develop.** The enabling technology is an inert
+   enamel coating on every metal surface in contact with hot oxygen-rich gas, and
+   that single item is why the West could not copy the cycle for thirty years
+   `[SLPRE][Clark]` `[engine-database A.6]`. Against R4.11's 48 months, a gas
+   generator is a far safer schedule.
+4. **The gas generator is only 7 points behind in the matrix and is the only
+   architecture with a demonstrated 20-flight reuse record.** That record belongs
+   to Merlin, a gas generator `[engine-database A.3]`.
+
+**Two criteria the recommendation loses on: cost and manufacturability**, both to
+the gas generator, both by −2, and the matrix says so.
+
+## §3. Pugh matrix and sensitivity (D6)
+
+**Datum: ORSC methalox at 150 bar.** **ORSC at 100 bar is gated out on R4.5** and
+is not scored. Fuel-rich staged combustion is not carried as a candidate: at
+O/F 3.6 a fuel-rich methane preburner runs cool and soot-free but the turbine
+flow is a large fraction of the fuel, which caps chamber pressure exactly where
+this engine wants headroom — say so in one line rather than omitting it silently.
+
+| criterion | w | justification tied to the mission statement | ORSC 150 (datum) | ORSC 200 | ORSC 300 | GG 150 | FFSC 300 |
+|---|---|---|---|---|---|---|---|
+| performance | 12 | R4.8 sets a 300 s floor and every candidate clears it; Isp buys payload, not compliance | 0 | +1 | +2 | **−2** (302.6 s, 2.6 s of margin) | +2 |
+| mass / T/W | 15 | R4.5 is a hard 2,200 kg and no measured engine achieves it | 0 | +1 | +2 | −1 (turbine exhaust duct; more propellant for the same Δv) | +2 |
+| complexity | 10 | 48 months to first flight with a new cycle | 0 | −1 | −2 | **+2** | −2 |
+| **life / reuse** | **22** | **"the company's entire economic case rests on flying each booster 25 times"** — R4.6 and R4.7 are the business case | 0 | −1 (51 cycles) | **−2** (25 cycles) | 0 (no ox-rich hot gas, but an open turbine and a duct) | **−2** |
+| manufacturability | 10 | R4.10: 180 engines/year at steady state | 0 | −1 | −2 | +1 | −2 |
+| cost | 16 | 180 engines/year and a 25-flight amortisation | 0 | −1 | −2 | **+2** | −2 |
+| mission fit | 15 | R4.2/R4.3/R4.4: 40–100 % throttle, 20 % landing throttle, three relights on the vehicle's own resources | 0 | 0 | −2 (throttle and relight both harder at 300 bar) | −2 (GG relight needs a start cartridge or spin gas; R4.12 forbids ground support) | −1 |
+| **weighted total** | **100** | | **0** | **−31** | **−92** | **−7** | **−77** |
+
+### Sensitivity
+
+The gap to the gas generator is **7 points**, and it is inside ±50 % on **five of
+the seven weights**:
+
+| weight | flips to GG at | change |
+|---|---|---|
+| performance | 8.5 | **−29 %** |
+| mass / T/W | 8.0 | **−47 %** |
+| complexity | 13.5 | **+35 %** |
+| cost | 19.5 | **+22 %** |
+| mission fit | 11.5 | **−23 %** |
+| manufacturability | 17.0 | +70 % |
+| life / reuse | — | never flips (GG scores 0 here) |
+
+**Report:** *this decision is close to a coin toss and the memo must say so.* A
+22 % increase in the cost weight — entirely plausible for a company whose case
+rests on price per flight — puts the gas generator ahead. The two-criterion
+perturbation makes it worse: raising cost 22 → 26 and lowering mission fit
+15 → 12 puts the GG ahead by 8.
+
+**The measurement that settles it** is not a weight. It is the demonstrated
+low-cycle fatigue life of the chosen liner at 86 MW/m², measured on a subscale
+chamber to 150 thermal cycles. If the wall makes 150 cycles, ORSC at 150 bar is
+right and the Isp is worth having. If it makes 60, the engine must run cooler,
+which means lower $p_c$, which means the gas generator was the better answer all
+along because it gets there with a third of the part count.
+
+## §4. Rubric — Project 4, out of 100
+
+| deliverable | marks | what earns them |
+|---|---|---|
+| **D1 sizing** | **25** | **10: the chamber-pressure trade curve, four points minimum, with $I_{sp}$, throat diameter, pump power, peak throat heat flux and a cycles-to-crack estimate** `[TS P4.2–P4.29]`. 5: every candidate cycle sized, not just the winner. 4: $C_F$ computed at the actual ε and back pressure, with a separation check `[TS P4.31, P4.32]`. 3: coolant bulk rise and channel implication `[TS P4.30]`. 3: Bartz's accuracy stated and the fatigue scaling labelled as a scaling |
+| **D2 mass budget** | **15** | 6: engine mass budget by assembly with maturity-based MGA. 4: system margin, and **the R4.5 exceedance reported against the only measured comparable (BE-4, 5,400 kg)**. 3: the propellant reserve for boostback, re-entry and landing. 2: gimbal, harness and controller not forgotten |
+| **D3 reliability** | **12** | 4: part count in the five categories — this is where the GG case is made. 3: single-point failures. **3: the life analysis (component, mechanism, instrumented parameter)** — this is a project-specific deliverable and it lives here. 2: what 25 flights does to the demonstrated-reliability argument |
+| **D4 manufacturability and cost** | **12** | 4: UCI. 3: NRI over the fleet. **5: the reuse-economics crossover, computed, with the finding that raising $p_c$ moves the crossover the wrong way** |
+| **D5 risk** | **8** | 5: eight risks with retirement points. 2: two non-technical. **1: at least one risk created by the recommendation** — the ox-rich enamel process qualification is the obvious one |
+| **D6 Pugh + sensitivity** | **18** | 3: weights before scores. 3: real datum, with ORSC-100 gated not scored. 3: evidence per score. **5: the sensitivity, including the finding that five of seven weights flip it inside ±50 %.** **4: the explicit list of company-claimed numbers used and what the recommendation becomes if they are 15 % optimistic** |
+| **D7 memo** | **10** | 3: recommendation first. 2: three numbers. **3: what it costs — Isp and T/W, named with magnitudes.** 1: measurable trigger ("if the subscale liner fails before 100 thermal cycles at 86 MW/m², drop to 120 bar or change the wall"). 1: one page |
+
+## §5. Common weak answers
+
+1. **"Copy Raptor."** Every Raptor number is a SpaceX claim with no independent
+   verification of chamber pressure, Isp, dry mass or T/W `[engine-database
+   A.3.5]`, and the 300 bar point fails the life requirement on the study's own
+   fatigue scaling. Copying an engine whose numbers you cannot check, for a
+   mission whose requirements differ, is the failure the project warns about in
+   its mission statement.
+2. **A trade curve with two points.** Four minimum, and the interesting behaviour
+   (Isp saturating while heat flux keeps climbing) is invisible with two.
+3. **Quoting Bartz heat fluxes to three significant figures.** ±20–30 % at the
+   throat, and the key says so every time it uses one.
+4. **Presenting the Coffin–Manson number as a life prediction.** It is a ranking
+   with an assumed exponent and an assumed anchor. Label it **[J]**.
+5. **Choosing 300 bar for the Isp.** 24.5 s over 100 bar sounds large; it is
+   1.5 % of payload, against a fatigue life that falls by a factor of seven and a
+   pump power that triples.
+6. **Choosing RP-1 for the density and not mentioning coking.** R4.6's
+   inspection-only turnaround for ten flights is a coking requirement in
+   disguise.
+7. **Ignoring R4.12.** No ground support connection after lift-off means the
+   three relights must come from the vehicle's own resources. A gas generator
+   needs a start cartridge (four per mission, consumable, countable) or a
+   spin-start system; a head-pressure start needs neither. Students size the
+   engine and forget the start system entirely.
+8. **Not sizing the deep throttle.** R4.3's 20 % is a stability problem before it
+   is a performance problem, and the injector element type is the answer.
+9. **A mass budget that omits the gimbal actuators, the controller and the
+   harness.** They are inside the R4.5 dry-mass definition on every real
+   programme, and the RS-25's contested dry mass is the file's standing warning
+   about exactly this: 3,177 kg bare against 3,526 kg installed, and a T/W of
+   73:1 or 66:1 depending which you used `[engine-database A.2.5]`.
+
+---
