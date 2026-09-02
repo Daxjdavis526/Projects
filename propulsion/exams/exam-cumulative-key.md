@@ -339,3 +339,300 @@ Mandatory on every development firing:
 > **Rubric (2).** 1 pt for four components with four *indices* — naming the
 > alloy alone earns nothing. 1 pt for the cycle-count argument plus one
 > measurement and one inspection that actually detect the (d) mechanism.
+
+---
+
+# Problem 2 — Composite-cased solid booster (17 points)
+
+## Derived once
+
+$$a = \frac{r_{ref}}{p_{ref}^{\,n}} = \frac{7.20\times10^{-3}}{(6.00\times10^{6})^{0.350}}
+= \mathbf{3.0548\times10^{-5}}\ \mathrm{m\,s^{-1}Pa^{-0.35}}$$
+
+$$\frac{1}{1-n} = 1.53846,\qquad a\rho_pc^* = 3.0548\times10^{-5}\times1770\times1560 = 84.349,
+\qquad \pi_K = \frac{\sigma_p}{1-n} = \mathbf{3.0769\times10^{-3}\ K^{-1}}$$
+
+**The unit rule.** $a$ carries the units of $r$ divided by the units of $p$
+**raised to $n$**. A conversion of the pressure unit must itself be raised to
+$n$; applying the full decade is the single most common error in solid
+internal ballistics and it is out by $10^{6(1-n)}$.
+
+## (a) (3 points) — Internal ballistics
+
+$$A_t = \frac{\pi}{4}(0.340)^2 = \mathbf{9.0792\times10^{-2}\ m^2},\qquad
+K_n = \frac{A_b}{A_t} = \frac{28.30}{9.0792\times10^{-2}} = \mathbf{311.70}$$
+
+$$p_c = (a\rho_pc^*K_n)^{\frac{1}{1-n}} = (84.349\times311.70)^{1.53846}
+= (2.6291\times10^{4})^{1.53846} = \mathbf{6.3055\ MPa}$$
+
+$$r = ap_c^{\,n} = 3.0548\times10^{-5}(6.3055\times10^{6})^{0.350}
+= \mathbf{7.3262\ mm/s}$$
+
+$$t_b = \frac{w_b}{r} = \frac{0.500}{7.3262\times10^{-3}} = \mathbf{68.25\ s}$$
+
+$$V_p = A_bw_b = 28.30\times0.500 = 14.150\ \mathrm{m^3},\qquad
+V_{case} = \pi R_c^2L_c = \pi(0.800)^2(8.00) = 16.085\ \mathrm{m^3}$$
+
+$$\eta_V = \frac{14.150}{16.085} = \mathbf{0.8797},\qquad
+m_p = \rho_pV_p = \mathbf{25\,046\ kg}$$
+
+$$\dot m = \frac{p_cA_t}{c^*} = \frac{6.3055\times10^{6}\times9.0792\times10^{-2}}{1560}
+= \mathbf{366.98\ kg/s}$$
+
+**Closure:** $m_p/t_b = 25\,046/68.25 = 366.98$ kg/s ✓ — identical, because a
+neutral grain burns at constant $\dot m$ by construction.
+
+*Sanity:* 88 % volumetric loading and 6.3 MPa are exactly where flown
+strap-ons sit; the P120C-class monolithic booster is the public architecture
+this resembles.
+
+> **Rubric (3).** 1 pt $a$ with the correct unit rule. 1 pt $K_n$, $p_c$, $r$,
+> $t_b$. 1 pt $m_p$, $\eta_V$, $\dot m$ *and* the closure check (stating
+> "they agree" without both numbers earns 0).
+
+## (b) (3 points) — Delivered performance
+
+At $\varepsilon = 11.0$, $\gamma = 1.15$, vacuum:
+
+$$C_{F,vac} = \mathbf{1.7875},\qquad
+F_{vac} = C_Fp_cA_t = \mathbf{1023.3\ kN}$$
+
+$$I_{sp,vac} = \frac{c^*C_F}{g_0} = \frac{1560\times1.7875}{9.80665} = \mathbf{284.4\ s}$$
+
+$$I_{tot} = Ft_b = 1023.3\times10^{3}\times68.25 = \mathbf{6.984\times10^{7}\ N\cdot s}$$
+
+$$\rho_pI_{sp}g_0 = 1770\times284.4\times9.80665 = 4.936\times10^{6}\ \mathrm{N\,s/m^3}
+= \mathbf{4936\ N\cdot s/L}$$
+
+**Comparison.** Module 32's master table gives solids **4.8–5.0 k N·s/L**;
+4936 sits inside it. LOX/RP-1 at a bulk density near 1030 kg/m³ and 300 s
+vacuum gives ≈ 3.0 k N·s/L, and LOX/LH₂ ≈ 1.6 k. **A strap-on is a
+volume-limited, not a mass-limited, problem** — it hangs off the side of a
+core whose diameter is fixed — so buying 60 % more impulse per litre than
+kerolox is worth giving up 50–150 s of $I_{sp}$ for.
+
+> **Rubric (3).** 1 pt $C_F$ and $F$ (accept $C_F$ within 0.01 of 1.788).
+> 1 pt $I_{sp}$ and $I_{tot}$. 1 pt impulse density *with* the comparison and
+> the volume-limited argument. A comparison that ranks on $I_{sp}$ alone and
+> concludes solids lose earns 0 for the third mark.
+
+## (c) (4 points) — Case, mass fraction, material argument
+
+**1. Pressure stack.**
+
+$$k_T = e^{\pi_K\Delta T} = e^{3.0769\times10^{-3}\times30} = \mathbf{1.0967}$$
+
+$$\mathrm{MEOP} = 6.3055\times1.0967\times1.06\times1.05\times1.03 = \mathbf{7.9275\ MPa}$$
+
+$$p_b = j_b\,\mathrm{MEOP} = 1.50\times7.9275 = \mathbf{11.891\ MPa}$$
+
+**2. Carbon/epoxy by netting theory.**
+
+$$t_L = \frac{1.5p_bR}{\sigma_fV_f}
+= \frac{1.5\times11.891\times10^{6}\times0.800}{2550\times10^{6}\times0.600}
+= \mathbf{9.327\ mm}$$
+
+$t/R = 0.01166 \ll 0.1$, so the thin-wall membrane assumption holds
+comfortably.
+
+$$m_{case} = 1.25\,(2\pi R_ct_LL_c\rho_{lam})
+= 1.25\times2\pi(0.800)(9.327\times10^{-3})(8.00)(1580) = \mathbf{740.7\ kg}$$
+
+**3. D6AC-class steel.**
+
+$$t = \frac{p_bR}{F_{tu}} = \frac{11.891\times10^{6}\times0.800}{1500\times10^{6}}
+= \mathbf{6.342\ mm},\qquad m_{case} = 1.25\times2\pi(0.800)(6.342\times10^{-3})(8.00)(7830)
+= \mathbf{2496\ kg}$$
+
+**4. Mass fraction, $\Delta v$ and $PV/W$.** Other hardware
+$= 0.060\times25\,046 = 1503$ kg.
+
+| | composite | steel |
+|---|---|---|
+| case mass | 740.7 kg | 2496 kg |
+| total inert | 2243 kg | 3999 kg |
+| $\zeta = m_p/(m_p+m_{inert})$ | **0.9178** | **0.8623** |
+| motor-alone $\Delta v = I_{sp}g_0\ln(1/(1-\zeta))$ | **6967 m/s** | **5529 m/s** |
+| $PV/W = p_bV_{case}/(m_{case}g_0)$ | **26.3 km** | **7.81 km** |
+
+**Which number to show a programme manager.** Not $PV/W$ — it is a materials
+index that flatters composites by ignoring domes, joints, bosses, skirts,
+insulation and the fact that a composite case is not a membrane at the
+polar openings. Show **$\Delta v$**, or the payload it buys: 5.5 points of
+propellant mass fraction is **1438 m/s** on this motor, and that is a number
+a manager can trade against schedule and against the cost of qualifying a new
+case. $PV/W$ is how you *choose*; $\Delta v$ is how you *justify*.
+
+> **Rubric (4).** 1 pt $k_T$, MEOP, $p_b$. 1 pt netting thickness, thin-wall
+> check, composite mass. 1 pt steel case and both $\zeta$. 1 pt both $\Delta v$
+> and the argument about which number to present. Using MEOP rather than $p_b$
+> in the netting formula loses the second mark.
+
+## (d) (3 points) — Throat erosion
+
+**1.**
+
+$$\dot s = 0.100\left(\frac{6.3055}{6.00}\right)^{0.8} = \mathbf{0.10405\ mm/s}$$
+
+**2.** With $r_{t0} = 0.170$ m and $t = t_b = 68.25$ s:
+
+$$X \equiv 1+\frac{\dot st}{r_{t0}} = 1+\frac{0.10405\times10^{-3}\times68.25}{0.170}
+= \mathbf{1.04177}$$
+
+$$\frac{A_t(t_b)}{A_t(0)} = X^2 = \mathbf{1.0853}\quad(+8.53\ \%)$$
+
+$$\frac{p_c(t_b)}{p_c(0)} = X^{-2/(1-n)} = 1.04177^{-3.0769} = \mathbf{0.88169}
+\;\Rightarrow\;p_c(t_b) = \mathbf{5.559\ MPa}$$
+
+$$\frac{F(t_b)}{F(0)} = X^{-2n/(1-n)} = 1.04177^{-1.07692} = \mathbf{0.95689}
+\;\Rightarrow\;F(t_b) = \mathbf{979.2\ kN}$$
+
+**3.** The exit area is fixed, so
+
+$$\varepsilon(t_b) = \frac{\varepsilon_0}{X^2} = \frac{11.0}{1.0853} = \mathbf{10.14}$$
+
+$$C_{F,vac}(t_b) = \mathbf{1.7759}\;\Rightarrow\;
+I_{sp,vac}(t_b) = \frac{1560\times1.7759}{9.80665} = \mathbf{282.5\ s},\qquad
+\Delta I_{sp} = \mathbf{-1.85\ s}$$
+
+**Which way the constant-$\dot s$ assumption errs.** $\dot s \propto p_c^{0.8}$
+and $p_c$ *falls* as the throat opens, so the true erosion rate declines
+through the burn. Holding $\dot s$ at its initial value therefore
+**over-estimates** the throat growth, over-estimates the pressure decay and
+over-estimates the thrust loss — it is conservative for performance and
+non-conservative for nothing, which is why it is the standard first cut.
+
+**Why thrust falls so much less than pressure, and impulse is conserved.**
+$F = C_Fp_cA_t$, and $A_t$ grows by exactly the factor that $p_c$ falls to
+the power $(1-n)/2$ — algebraically $F \propto p_c^{\,n/(1-n)\cdot(-1)}$
+rather than $p_c^{-2/(1-n)}$, so the exponent is smaller by $1/n$. Physically:
+the mass flow $\dot m = p_cA_t/c^*$ barely changes, because the propellant is
+still burning at nearly the same rate over nearly the same area. The
+**burn takes longer** ($r = ap_c^n$ falls with $p_c$), and total impulse
+$I_{tot} = m_pI_{sp}g_0$ is nearly conserved because $m_p$ and $c^*$ are
+fixed and only the small $C_F$ term moves. What is **not** conserved is the
+thrust–time *shape*, and a launch trajectory is flown against a thrust
+history, not against a total impulse — the vehicle arrives late, low and off
+the nominal loft.
+
+> **Rubric (3).** 1 pt $\dot s$ and $X$. 1 pt the three ratios and both
+> absolute values. 1 pt the eroded $\varepsilon$/$C_F$/$I_{sp}$ **and** both
+> arguments. Using $r_{t0} = D_{t0}$ instead of the radius is the classic
+> error and costs the whole second mark.
+
+## (e) (4 points) — The cold-conditioned firing
+
+**1. Prediction for a $-30\ ^\circ$C soak** ($\Delta T = -51$ K from the
+$+21\ ^\circ$C qualification datum):
+
+$$k_T = e^{\pi_K\Delta T} = e^{-0.15692} = 0.85477
+\;\Rightarrow\;p_{c,cold} = 6.3055\times0.85477 = \mathbf{5.3897\ MPa}$$
+
+$$a_{cold} = a\,e^{\sigma_p\Delta T} = a\times0.90303
+\;\Rightarrow\;r_{cold} = a_{cold}p_{c,cold}^{\,n} = \mathbf{6.2622\ mm/s}$$
+
+$$t_{b,cold} = \frac{0.500}{6.2622\times10^{-3}} = \mathbf{79.84\ s}$$
+
+**2. Against the record.**
+
+$$\frac{p_{meas}}{p_{pred}} = \frac{5.95}{5.3897} = 1.1040\quad(+10.40\ \%),\qquad
+\frac{t_{meas}}{t_{pred}} = \frac{72.3}{79.84} = 0.9056\quad(-9.44\ \%)$$
+
+At fixed $a$, $A_t$ and $c^*$, $p_c \propto A_b^{1/(1-n)}$, so
+
+$$\frac{A_b'}{A_b} = \left(\frac{p_{meas}}{p_{pred}}\right)^{1-n} = 1.1040^{0.65}
+= \mathbf{1.0664}\quad(\mathbf{+6.64\ \%}),\qquad A_b' = 30.18\ \mathrm{m^2}$$
+
+Consistency with the burn time: with the propellant *mass* fixed, adding
+burning area shortens the effective web in the same proportion, so
+$t_b \propto A_b^{-1/(1-n)}$ and
+
+$$\frac{t_b'}{t_b} = 1.0664^{-1.53846} = 0.9058\quad\text{against the measured }0.9056\ \checkmark$$
+
+Equivalently, reading the area back out of the burn time,
+$(79.84/72.3)^{0.65} = 1.0666$ — the two independent channels agree to
+0.02 %. **That agreement is the finding**: one physical change explains both
+numbers.
+
+**3. The invariant.** For any motor that burns all of its propellant through a
+fixed throat,
+
+$$\int p_c\,\mathrm{d}t = \int \frac{\dot mc^*}{A_t}\,\mathrm{d}t
+= \frac{c^*}{A_t}\int\dot m\,\mathrm{d}t = \boxed{\frac{m_pc^*}{A_t}}$$
+
+$$= \frac{25\,046\times1560}{9.0792\times10^{-2}} = \mathbf{4.303\times10^{8}\ Pa\cdot s}$$
+
+It contains **no** $a$, no $n$, no $A_b$, no soak temperature and no burn
+time. Measured: $5.95\times10^{6}\times72.3 = 4.302\times10^{8}$ Pa·s, within
+0.03 %. So the propellant mass is right, the delivered $c^*$ is right and the
+throat area is right — the anomaly is **entirely in the burning-area/burn-rate
+product**, and the pressure and time excursions must cancel in the integral.
+Any diagnosis that changes $m_p$, $c^*$ or $A_t$ is refuted by this line
+alone.
+
+**4. Diagnosis — and the trap.** Before naming a cause, notice that
+**two of the four candidates are algebraically degenerate in this data set.**
+Write the equilibrium relation as $p_c = (a_T\rho_pc^*K_n)^{1/(1-n)}$: a
+temperature shift enters only through $a_T = a\,e^{\sigma_p\Delta T}$, and an
+area change enters only through $K_n$. They multiply. Both then give
+
+$$p_c \propto \lambda^{\frac{1}{1-n}},\qquad t_b \propto \lambda^{-\frac{1}{1-n}}$$
+
+— for a temperature shift because the web is fixed and $r$ scales, and for an
+area change because the propellant *mass* is fixed so the effective web
+shortens as $1/\lambda$ while $r$ rises as $\lambda^{n/(1-n)}$. **The pressure
+and the burn time cannot separate them, and neither can $\int p_c\,dt$, which
+is invariant under both.**
+
+Quantitatively, against the $+21\ ^\circ$C nominal,
+$p_{meas}/p_{nom} = 5.95/6.3055 = 0.94360$, so
+$\lambda = 0.94360^{\,0.65} = 0.96297$. Read as pure temperature,
+$\Delta T = \ln(0.96297)/\sigma_p = -18.9$ K — **a grain actually at about
+$+2\ ^\circ$C, not $-30\ ^\circ$C**. Read as a genuine $-30\ ^\circ$C soak,
+the same $\lambda$ requires $A_b$ up by 6.64 % as computed in step 2. Both
+reproduce 5.95 MPa and 72.3 s exactly.
+
+**Diagnosis (one sentence).** *Either the grain was not at the recorded soak
+temperature, or it cracked under cold-soak bore strain and gained about 6.6 %
+of burning surface; the ballistic record alone cannot separate the two, and
+the conditioning-chamber and grain-core temperature records must be pulled
+before the anomaly is written up.*
+
+If the conditioning record is confirmed good, the answer is the cracked
+grain, and the module 34 failure class is **operations / environment** — the
+hardware met its specification and the environment took the case-bonded grain
+outside the bore-strain envelope it could accept. (A script that argues
+**design margin** instead, on the grounds that a motor qualified to
+$-30\ ^\circ$C should have carried margin on cold bore strain, is accepted
+with the argument made.) If the conditioning record is bad, the class is
+**instrumentation / operations**, and the corrective action is a
+configuration-controlled soak verification, not anything to do with the
+grain.
+
+The **40 Hz feature** is what tips the balance toward cracking, and it is
+corroborating rather than decisive: a fresh crack presents a compliant,
+growing surface whose area is not steady while the crack tip runs and the
+flanks open, and it disappears once the flanks burn back into a smooth
+contour. A mis-recorded soak temperature produces no such transient. It is
+**not** a chamber acoustic mode — the 1L mode of an 8 m grain at a
+~1000 m/s sound speed sits near 60 Hz and would persist for the whole burn,
+not for 8 s.
+
+**Candidate elimination.**
+
+| candidate | verdict | evidence |
+|---|---|---|
+| (i) out-of-family burn-rate lot | **out** | three earlier motors from the same lot fired nominal at $+21\ ^\circ$C and the strand data were nominal. Note that a high-$a$ lot is the *third* member of the degenerate family — it enters through $a_T$ exactly as temperature does — so it is killed by lot history, not by ballistics. That is precisely why lot traceability exists. |
+| (ii) insulation-to-propellant debond | **out** | a debond exposes the grain's *outer* cylindrical surface along the case wall, which shows as a **step** in the trace at the moment the flame reaches it, not as a flat offset from ignition, and it drives case-wall and insulation temperatures up. The record is steady from 0.5 s and char depths are nominal. |
+| (iii) erosive burning | **out** | erosive burning is a port-mass-flux effect concentrated at the aft end early in the burn: it produces a decaying **hump** in the first seconds and a head-to-aft pressure difference. Neither is present, and a flat +10 % for the whole burn is the wrong shape. |
+| (iv) mis-recorded soak temperature | **cannot be ruled out from this record** | it reproduces both numbers exactly, as shown above. Only the conditioning-chamber thermocouple record, the grain-core thermocouple if fitted, and post-fire CT or dissection of the residual grain can separate it from cracking. |
+
+> **Rubric (4).** 1 pt the cold prediction — both $p_c$ and $t_b$; using
+> $\sigma_p$ where $\pi_K$ belongs, or vice versa, loses it. 1 pt the area
+> ratio from the pressure **and** the independent check from the burn time.
+> 1 pt the invariant $\int p_c\,dt = m_pc^*/A_t$, derived and evaluated.
+> 1 pt the diagnosis, the failure class and the candidate table. **Full marks
+> require recognising that (i), (iv) and the cracked grain are degenerate in
+> the ballistics** and that the tie is broken by lot history, the conditioning
+> record and the 40 Hz transient — a script that declares "cracked grain,
+> certain" caps at 3 of 4 however good the arithmetic.

@@ -440,3 +440,633 @@ solution), or accept a lower shaft speed and a larger, heavier impeller.
 > *Rubric (2):* 1 for $\mathrm{NPSH}_a$ with the acceleration head correctly
 > included (omitting the $6.0\times1.35$ term is the common error and costs
 > the mark); 1 for $S_{ss}$ and the inducer/boost-pump conclusion.
+
+---
+
+## B3 — Internal ballistics with erosive burning and $\sigma_p$ (10 points)
+
+### (a) Coefficient, geometry, non-erosive equilibrium (2 pts)
+
+$$a = \frac{r_{ref}}{p_{ref}^{\,n}} = \frac{7.20\times10^{-3}}{(6.00\times10^{6})^{0.35}}
+= \frac{7.20\times10^{-3}}{235.69} = \mathbf{3.0548\times10^{-5}}\ \mathrm{m\,s^{-1}Pa^{-0.35}}$$
+
+$$A_t = \frac{\pi}{4}(0.0740)^2 = \mathbf{4.30084\times10^{-3}\ m^2},\qquad
+K_n = \frac{A_b}{A_t} = \frac{1.4451}{4.30084\times10^{-3}} = \mathbf{336.0}$$
+
+$$p_c = \left(a\rho_pc^*K_n\right)^{\frac{1}{1-n}}
+= \left(3.0548\times10^{-5}\times1770\times1545\times336.0\right)^{1/0.65}$$
+$$= (28{,}071)^{1.53846} = \mathbf{6.973\ MPa}$$
+
+$$r = ap_c^{\,n} = 3.0548\times10^{-5}\times(6.973\times10^{6})^{0.35}
+= \mathbf{7.589\ mm/s}$$
+
+$$\dot m = \frac{p_cA_t}{c^*} = \frac{6.973\times10^{6}\times4.30084\times10^{-3}}{1545}
+= \mathbf{19.412\ kg/s}$$
+
+*Check:* $\rho_pA_br = 1770\times1.4451\times7.589\times10^{-3} = 19.41$ kg/s. ✓
+
+> *Rubric (2):* 1 for $a$ in correct SI units (a student who leaves $a$ in
+> mm/s·MPa$^{-n}$ and then feeds pascals into it will be out by a factor of
+> $10^{-3}\times(10^{6})^{0.35} = 0.236$ and loses this mark); 1 for $K_n$,
+> $p_c$, $r$, $\dot m$ with the mass-balance check.
+
+### (b) Port geometry and the erosive-burning screen (1 pt)
+
+$$A_p = \frac{\pi}{4}(0.100)^2 = 7.854\times10^{-3}\ \mathrm{m^2},\qquad
+J = \frac{A_p}{A_t} = \frac{7.854\times10^{-3}}{4.30084\times10^{-3}} = \mathbf{1.826}$$
+
+$$G = \frac{\dot m}{A_p} = \frac{19.412}{7.854\times10^{-3}}
+= \mathbf{2472\ kg\,m^{-2}s^{-1}}$$
+
+$J = 1.83$ is below the comfortable $J>2$ line and $G$ is **2.15×** the
+threshold flux. **Expect an erosive hump.** (Equivalently: treating the port
+as a subsonic duct feeding a choked throat, $A/A^* = 1.83$ at $\gamma=1.18$
+gives $M_{port}\approx0.34$, above the 0.2–0.3 onset band.)
+
+> *Rubric (1):* all of $A_p$, $J$, $G$ and the conclusion. Half for the
+> numbers with no conclusion.
+
+### (c) The coupled erosive equilibrium (3 pts)
+
+Solve simultaneously, with the aft 30 % of the surface augmented:
+
+$$\bar r = ap_c^{\,n} + 0.30\,k\left\langle \frac{p_cA_t/c^*}{A_p}-G_{th}\right\rangle,
+\qquad p_c = \frac{\rho_pA_b\bar r\,c^*}{A_t}$$
+
+Successive substitution from the non-erosive pressure:
+
+| it. | $p_c$ [MPa] | $G$ [kg m⁻²s⁻¹] | $r_0$ [mm/s] | $\Delta r$ [mm/s] | $\bar r$ [mm/s] | $p_c'$ [MPa] |
+|---|---|---|---|---|---|---|
+| 1 | 6.9733 | 2471.6 | 7.5890 | 2.1145 | 8.2233 | 7.5562 |
+| 2 | 7.5562 | 2678.2 | 7.8052 | 2.4451 | 8.5388 | 7.8460 |
+| 3 | 7.8460 | 2780.9 | 7.9087 | 2.6094 | 8.6916 | 7.9865 |
+| 4 | 7.9865 | 2830.7 | 7.9580 | 2.6891 | 8.7647 | 8.0537 |
+| 5 | 8.0537 | 2854.5 | 7.9814 | 2.7272 | 8.7995 | 8.0857 |
+| … | | | | | | |
+| conv. | **8.1145** | 2876.1 | 8.0024 | 2.7617 | 8.8309 | 8.1145 |
+
+$$\boxed{p_{c,erosive} = 8.115\ \mathrm{MPa}},\qquad
+\bar r = 8.831\ \mathrm{mm/s}$$
+
+Aft-end local rate $= r_0+\Delta r = 8.0024+2.7617 = \mathbf{10.764\ mm/s}$;
+**local augmentation ratio $= 1.345$**.
+
+$$\frac{p_{c,erosive}}{p_{c,non-erosive}} - 1 = \frac{8.1145}{6.9733}-1
+= \mathbf{+16.4\ \%}$$
+
+**Why one pass is wrong.** The erosive term raises $\bar r$, which raises
+$\dot m$, which (at a fixed throat) raises $p_c$, which raises $G$, which
+raises the erosive term again. Evaluating $k\langle G-G_{th}\rangle$ once at
+6.973 MPa gives $\Delta r = 2.11$ mm/s and a pressure of 7.56 MPa — it
+under-predicts the converged answer by 7 %, and it under-predicts the local
+augmentation by 24 %. The loop still converges because $n<1$ keeps the
+discharge term winning, but it converges *above* the first pass, always.
+
+> *Rubric (3):* 1 for writing the coupled pair correctly (including the 0.30
+> weighting); 1 for at least three visible iterations converging to
+> 8.11 ± 0.05 MPa; 1 for the local rate, augmentation ratio, percentage rise
+> and the "why one pass is wrong" sentence. A single-pass answer of 7.56 MPa
+> presented as the result: maximum 1 of 3.
+
+### (d) Hot conditioning and the MEOP stack (2 pts)
+
+$$\pi_K = \frac{\sigma_p}{1-n} = \frac{0.0021}{0.65}
+= \mathbf{3.231\times10^{-3}\ K^{-1}} = 0.323\ \%/\mathrm{K}$$
+
+$$a_{hot} = a\,e^{\sigma_p\Delta T} = 3.0548\times10^{-5}\times e^{0.0021\times30}
+= 3.0548\times10^{-5}\times1.06503 = 3.2534\times10^{-5}$$
+
+Hot **non-erosive**: $p_c = (a_{hot}\rho_pc^*K_n)^{1/0.65} = \mathbf{7.683\ MPa}$
+(+10.2 % on nominal — and note $10.2\% \approx \pi_K\times30 = 9.7\%$, the
+small difference being the exactness of the exponential versus the linearised
+$\pi_K$).
+
+Hot **erosive**, re-running the same loop with $a_{hot}$:
+
+| it. | $p_c$ [MPa] | $G$ | $r_0$ [mm/s] | $\Delta r$ | $\bar r$ | $p_c'$ |
+|---|---|---|---|---|---|---|
+| 1 | 7.6830 | 2723.1 | 8.3614 | 2.5170 | 9.1165 | 8.3769 |
+| 2 | 8.3769 | 2969.0 | 8.6182 | 2.9105 | 9.4914 | 8.7214 |
+| 3 | 8.7214 | 3091.2 | 8.7407 | 3.1058 | 9.6724 | 8.8878 |
+| conv. | **9.0382** | 3203.4 | 8.8505 | 3.2855 | 9.8362 | 9.0382 |
+
+$$\boxed{p_{c,\ hot+erosive} = 9.038\ \mathrm{MPa}} = 1.296\times \text{nominal}$$
+
+Against MEOP: $9.038/9.50 = 0.951$ — **4.9 % below MEOP**. Against burst
+($1.40\times9.50 = 13.30$ MPa): $9.038/13.30 = 0.680$, a burst margin of 1.47.
+
+**It passes, but only just, and the stack is not finished.** Three further
+contributors that belong in it before the case is signed off:
+
+1. **Ignition overshoot** — the igniter's own mass addition plus the
+   filling transient, typically several percent above the equilibrium
+   pressure and superimposed on exactly the same early-time window as the
+   erosive hump.
+2. **Lot-to-lot dispersion on $a$** (and on $\rho_p$ and $c^*$) — a
+   statistical allowance, normally a 3σ upper bound on the burn-rate
+   coefficient, is a separate multiplier from the temperature term.
+3. **Throat-area tolerance and slag** — a throat 1 % small raises $K_n$ by
+   1 % and $p_c$ by 1.54 %; partial slag blockage does the same thing
+   transiently and is not a manufacturing tolerance you can inspect out.
+
+(Also acceptable: grain-crack or debond exposure of extra surface, and
+uncertainty in the erosive constants themselves, which are the least
+trustworthy numbers in the whole calculation.)
+
+> *Rubric (2):* 1 for $\pi_K$, $a_{hot}$, hot non-erosive; 1 for the hot
+> erosive value, the MEOP/burst comparison **and** three named contributors.
+> Two contributors: half. Applying $\pi_K$ to the *erosive* pressure directly
+> (i.e. $8.115\times1.097$) is a defensible approximation that lands at
+> 8.90 MPa — award the mark but note the 1.5 % error and its cause: $\pi_K$ is
+> derived at constant $K_n$ with no erosive term.
+
+### (e) When the hump dies (2 pts)
+
+Once the erosive term shuts off the plateau returns to the non-erosive
+$\dot m = 19.412$ kg/s. The term extinguishes when $G$ falls to $G_{th}$:
+
+$$A_{p,ext} = \frac{\dot m}{G_{th}} = \frac{19.412}{1150}
+= 1.6880\times10^{-2}\ \mathrm{m^2}
+\ \Rightarrow\ D_{p,ext} = \mathbf{146.6\ mm}$$
+
+$$w = \frac{146.6-100.0}{2} = \mathbf{23.3\ mm\ of\ web\ burned}$$
+
+At the augmented mean rate of 8.83 mm/s this takes $23.3/8.83 = 2.64$ s; at
+the plateau rate of 7.59 mm/s it would be 3.07 s. So the hump occupies
+**roughly 2.6–3.1 s, i.e. 12–14 % of the 22 s web time** — and, since it
+decays smoothly, the *visible* part of it is shorter still. (The estimate is a
+lower bound on the duration in one sense and an upper bound in another: the
+elevated pressure during the hump raises $\dot m$, which keeps $G$ above
+threshold slightly longer, but it also burns the web faster.)
+
+**Geometric fix and its cost.** Open the initial port — raise $J$ above 2 by
+increasing the bore diameter (or, better for a finocyl, by deepening the
+fins so the *flow area* grows without the burning area growing). Going from
+$J=1.83$ to $J=2.2$ needs $A_p$ up 20 %, i.e. $D_p$ from 100 to 110 mm. **The
+cost is volumetric loading**: the same case now holds less propellant, so
+either the motor grows or the total impulse falls. That is the standard trade
+and it is why tactical motors, which are volume-starved by the airframe,
+live with erosive humps and size the case for them instead.
+
+> *Rubric (2):* 1 for $D_{p,ext}$ and the web burned; 1 for the time fraction
+> and a fix with its stated cost. "Use a slower propellant" is also
+> acceptable for the fix (it lowers $\dot m$ and hence $G$) provided the cost —
+> lower thrust for the same geometry — is stated.
+
+---
+
+## B4 — Cold-gas blowdown module (10 points)
+
+Gas constants: $R_{N_2} = 8314.46/28.014 = 296.797$ J/(kg·K);
+$R_{Ar} = 8314.46/39.948 = 208.132$ J/(kg·K).
+
+### (a) Propellant, tank volume, tank size (3 pts)
+
+$$I_{sp,ideal}(\gamma{=}1.400,\ R_{N_2},\ T_0{=}293.15,\ \varepsilon{=}60)
+= \mathbf{76.223\ s}$$
+$$I_{sp,del} = 0.90\times76.223 = \mathbf{68.601\ s}$$
+
+$$m_{usable} = \frac{I_t}{g_0I_{sp}} = \frac{1150}{9.80665\times68.601}
+= \mathbf{1.7094\ kg}$$
+
+$$\phi_{iso} = 1-\frac{p_f}{p_i} = 1-\frac{20}{200} = \mathbf{0.900}$$
+
+$$m_i = \frac{m_{usable}}{\phi} = \frac{1.7094}{0.900} = \mathbf{1.8994\ kg}$$
+
+$$V = \frac{m_iZ_iRT}{p_i}
+= \frac{1.8994\times1.05\times296.797\times293.15}{2.00\times10^{7}}
+= 8.676\times10^{-3}\ \mathrm{m^3} = \mathbf{8.676\ L}$$
+
+Tank internal volume at 95 % fill: $8.676/0.95 = 9.133$ L, so
+
+$$r = \left(\frac{3V_{tank}}{4\pi}\right)^{1/3} = 0.12967\ \mathrm{m}
+\ \Rightarrow\ D_{tank} = \mathbf{259.3\ mm}$$
+
+*Sanity check:* $1.899$ kg of gas in a 9.1 L sphere at 200 bar on a 145 kg
+spacecraft — 1.3 % of the vehicle mass as propellant for 7.9 m/s of $\Delta v$
+(Tsiolkovsky at 68.6 s gives 7.98 m/s). That is the cold-gas bargain and its
+limit in one line.
+
+> *Rubric (3):* 1 for both $I_{sp}$ figures; 1 for $m_{usable}$, $\phi$, $m_i$;
+> 1 for $V$ (with $Z$ applied) and $D_{tank}$. Omitting $Z$ gives
+> $V = 8.26$ L — a 4.8 % error, and it is always in the unsafe direction. Lose
+> half the third mark.
+
+### (b) Thruster sizing (2 pts)
+
+$$C_{F,vac}(1.400,\ \varepsilon{=}60) = \mathbf{1.73521}$$
+
+$$A_t = \frac{F_{EOL}}{C_Fp_f} = \frac{0.350}{1.73521\times2.00\times10^{6}}
+= \mathbf{1.00852\times10^{-7}\ m^2}
+\ \Rightarrow\ D_t = \mathbf{358.3\ \mu m}$$
+
+$$F_{BOL} = C_Fp_iA_t = 1.73521\times2.00\times10^{7}\times1.00852\times10^{-7}
+= \mathbf{3.500\ N}$$
+
+$$\dot m = \frac{\Gamma p_0A_t}{\sqrt{RT_0}}:\qquad
+\dot m_{BOL} = \mathbf{4.682\times10^{-3}\ kg/s},\quad
+\dot m_{EOL} = \mathbf{4.682\times10^{-4}\ kg/s}$$
+
+**The control problem.** Thrust varies **10:1** over the mission, and so does
+the impulse bit at a fixed valve on-time. A closed-loop attitude controller
+tuned at 3.5 N is badly over-damped at 0.35 N and a duty cycle sized at
+0.35 N saturates at 3.5 N; worse, the minimum impulse bit — set by valve
+opening and closing time, not by the commanded pulse — also varies 10:1, so
+the pointing dead-band is not constant over the mission.
+
+**The two standard fixes:** (i) put a **pressure regulator** downstream of the
+tank and run the thruster at a fixed plenum pressure, accepting the regulator's
+mass, its droop, and its failure modes (this is what almost every flight system
+does); or (ii) keep the blowdown and **close the loop on measured thrust or on
+tank pressure**, scaling commanded on-time as $1/p_{tank}$ in the flight
+software, which costs nothing in mass but leaves the minimum impulse bit
+uncontrolled at the low-pressure end.
+
+> *Rubric (2):* 1 for $C_F$, $A_t$, $D_t$, $F_{BOL}$ and both flows; 1 for the
+> control problem *and* two fixes. Naming only the regulator: half.
+
+### (c) The adiabatic bound (3 pts)
+
+$$\phi_{adiab} = 1-\left(\frac{p_f}{p_i}\right)^{1/\gamma}
+= 1-(0.100)^{1/1.400} = 1-0.19307 = \mathbf{0.80693}$$
+
+$$T_f = T_i\left(\frac{p_f}{p_i}\right)^{\frac{\gamma-1}{\gamma}}
+= 293.15\times(0.100)^{0.285714} = \mathbf{151.84\ K}$$
+
+$$m_{usable,adiab} = m_i\phi_{adiab} = 1.8994\times0.80693 = \mathbf{1.5326\ kg}$$
+
+$$\text{shortfall} = 1-\frac{0.80693}{0.900} = \mathbf{10.34\ \%}$$
+
+$$I_{sp}(\text{cut-off}) = I_{sp,del}\sqrt{\frac{T_f}{T_i}}
+= 68.601\times\sqrt{\frac{151.84}{293.15}} = \mathbf{49.37\ s}$$
+
+**Which bound the real tank sits nearer, and what decides it.** Nearer the
+**isothermal** bound, and the deciding parameter is the ratio of the blowdown
+time to the tank's thermal time constant $\tau_{th} \sim m_wc_w/(hA)$ — the
+time for the tank wall (and, through it, the spacecraft structure) to
+re-warm the gas. A cold-gas system that fires in short pulses separated by
+minutes or hours is *quasi-isothermal*, because the wall re-heats the gas
+between pulses; one that dumps its tank in a single continuous burn of
+seconds is *adiabatic*. This module's duty cycle — 400+ discrete pulses over
+years — is emphatically the first case, so size on isothermal and quote the
+adiabatic number as the worst case for a single long burn.
+
+> *Rubric (3):* 1 for $\phi_{adiab}$ and $T_f$; 1 for the usable mass,
+> shortfall and cut-off $I_{sp}$; 1 for naming the thermal time constant (or
+> equivalently the pulse spacing versus wall re-warm time) as the deciding
+> parameter. "Real systems are in between" with no parameter named: zero on
+> the third mark — that sentence is true of everything and predicts nothing.
+
+### (d) Argon in the same tank (2 pts)
+
+$$I_{sp,ideal}(\gamma{=}1.667,\ R_{Ar},\ 293.15,\ \varepsilon{=}60) = \mathbf{55.787\ s}
+\ \Rightarrow\ I_{sp,del} = \mathbf{50.208\ s}$$
+
+$$m_{i,Ar} = \frac{p_iV}{Z_iR_{Ar}T}
+= \frac{2.00\times10^{7}\times8.676\times10^{-3}}{1.02\times208.132\times293.15}
+= \mathbf{2.7881\ kg}$$
+
+$$I_{t,Ar} = m_{i,Ar}\phi_{iso}\,g_0I_{sp,del}
+= 2.7881\times0.900\times9.80665\times50.208 = \mathbf{1236\ N\,s}$$
+
+against nitrogen's 1,150 N·s in the identical tank — **argon delivers 7.4 %
+more impulse from the same volume at the same pressure**, despite an $I_{sp}$
+27 % lower, because impulse density $\rho I_{sp}$ favours the heavier gas.
+
+**Which would I fly, and on what criterion.** **Nitrogen**, on *system mass*.
+Argon buys 86 N·s at the cost of 0.89 kg of extra loaded gas on a 145 kg
+spacecraft — that is 0.6 % of vehicle mass spent to buy 7 % of a 1,150 N·s
+requirement that is not mass-critical. Nitrogen also has the deeper flight
+heritage in cold-gas systems and its material compatibility and cleanliness
+practice is universal.
+
+**What reverses it:** a **volume**-limited rather than mass-limited design. If
+the tank cannot grow — a fixed CubeSat or ESPA envelope, a tank that must fit
+between existing structure — then the criterion changes from N·s per kilogram
+to N·s per litre, and argon (or a self-pressurising liquid such as R-236fa,
+better still) wins outright. The same reversal happens if the requirement
+grows: at some total impulse the nitrogen tank no longer fits.
+
+> *Rubric (2):* 1 for both argon numbers and the total impulse; 1 for a
+> *criterion-based* recommendation plus the condition that reverses it. An
+> answer that recommends argon on impulse density and says a mass-limited bus
+> reverses it earns full marks — the recommendation is not the graded object,
+> the named criterion is.
+
+---
+
+# Section C — Diagnosis (20 points)
+
+## C1 — TR-90 acceptance series (10 points)
+
+### (a) Reduce both runs (3 pts)
+
+$$p_{c,ns} = \frac{p_{c,inj}}{1.030}:\qquad
+\text{run 1: }\mathbf{60.194\ bar},\qquad \text{run 5: }\mathbf{58.641\ bar}$$
+
+$$c^*_{del} = \frac{p_{c,ns}A_t}{\dot m}:\qquad
+\text{run 1: }\frac{6.0194\times10^{6}\times9.600\times10^{-3}}{33.50}
+= \mathbf{1725.0\ m/s}$$
+$$\text{run 5: }\mathbf{1680.5\ m/s}$$
+
+$$\eta_{c^*} = \frac{c^*_{del}}{1798.6}:\qquad
+\text{run 1: }\mathbf{0.9591},\qquad\text{run 5: }\mathbf{0.9343}
+\qquad(\Delta = -2.58\ \%)$$
+
+$$C_{F,meas} = \frac{F}{p_{c,ns}A_t}:\qquad
+\text{run 1: }\frac{8.94\times10^{4}}{5.7786\times10^{4}} = \mathbf{1.5471},
+\qquad\text{run 5: }\mathbf{1.5401}$$
+
+Ideal $C_F$ at sea level ($\gamma=1.20$, $\varepsilon=14$, $p_a=101{,}325$ Pa)
+is 1.54666 for run 1 and 1.54041 for run 5, so
+
+$$\eta_{C_F} = \mathbf{1.0003}\ \text{(run 1)},\qquad \mathbf{0.9998}\ \text{(run 5)}$$
+
+$$I_{sp} = \frac{F}{\dot mg_0}:\qquad \mathbf{272.1\ s}\ \text{(run 1)},
+\qquad\mathbf{263.9\ s}\ \text{(run 5)}$$
+
+**Decomposition of the 3.02 % thrust loss.** $F \propto c^*C_F$:
+$c^*$ contributes $-2.58$ %, $C_F$ contributes $-0.40$ %, and
+$(1-0.0258)(1-0.0040)-1 = -2.97$ %, which closes on the measured $-3.02$ %
+to within reading error. **The nozzle is innocent**: $\eta_{C_F}$ is unity to
+0.03 % in both runs, and the $-0.40$ % in $C_F$ is *itself* a consequence of
+the $c^*$ loss — a lower $p_c$ makes the fixed-$\varepsilon$ nozzle more
+over-expanded at sea level, worsening the pressure-thrust term. **Essentially
+100 % of the loss is combustion, none of it is expansion.**
+
+> *Rubric (3):* 1 for both $p_{c,ns}$ (a reduction with $p_{c,inj}$ used raw
+> loses this mark — the 3 % correction is 3 % straight onto $c^*$ and it is
+> Module 18's whole point); 1 for $c^*$, $\eta_{c^*}$ and $C_F$; 1 for the
+> decomposition **with** the statement that the $C_F$ change is a consequence,
+> not a cause.
+
+### (b) Injector effective area (2 pts)
+
+At constant $\dot m_f$ and $\rho$, $\dot m_f = C_dA\sqrt{2\rho\Delta p}$, so
+$C_dA \propto \Delta p^{-1/2}$:
+
+$$\frac{(C_dA)_5}{(C_dA)_1} = \sqrt{\frac{11.20}{9.10}} = \mathbf{1.1094}
+\qquad (+10.94\ \%)$$
+
+Run 1's absolute value, with $\dot m_f = 33.50/(1+2.35) = 10.00$ kg/s:
+
+$$C_dA = \frac{10.00}{\sqrt{2\times810\times1.120\times10^{6}}}
+= \frac{10.00}{42{,}596} = 2.3477\times10^{-4}\ \mathrm{m^2}$$
+$$A = \frac{C_dA}{0.80} = 2.9346\times10^{-4}\ \mathrm{m^2}
+\ \Rightarrow\ N = \frac{2.9346\times10^{-4}}{\frac{\pi}{4}(1.60\times10^{-3})^2}
+= \mathbf{146\ orifices}$$
+
+**Can six elements account for it?** No. A 10.94 % area increase on 146
+orifices is **16.0 orifice-equivalents**. Spread over six orifices, each would
+have to grow to 3.66 times its original area — a diameter of
+$1.60\times1.91 = 3.06$ mm. Erosion that severe would be unmistakable, and it
+would not produce six *streaks* on the face; it would produce six craters. The
+honest conclusion is that the borescope is seeing the **downstream symptom**
+on the face of a change distributed over many more orifices than six — a
+general enlargement, a lost or eroded orifice insert, or an eroded
+manifold-side entry radius that has raised $C_d$ rather than $A$. (Note the
+measurement cannot separate $C_d$ from $A$: a rounded, cavitation-free entry
+can raise $C_d$ from 0.65–0.70 toward 0.85 with no area change at all, and
+that alone is a 20–30 % $C_dA$ shift.)
+
+> *Rubric (2):* 1 for the 1.1094 ratio and $N = 146$; 1 for the "no" with a
+> quantitative reason. A student who says "yes, six elements could do it"
+> without computing the required per-orifice growth scores zero on the second
+> mark. Full marks for spotting that $C_d$ and $A$ are not separable here.
+
+### (c) Stability margin and the 220 Hz (2 pts)
+
+$$\frac{\Delta p_{inj,f}}{p_{c,inj}}:\qquad
+\text{run 1: }\frac{11.20}{62.00} = \mathbf{18.1\ \%},\qquad
+\text{run 5: }\frac{9.10}{60.40} = \mathbf{15.1\ \%}$$
+
+Run 1 sits comfortably inside the 15–25 % band; run 5 sits **on its lower
+edge**. But the oscillation appears at **60 % throttle**, and that is where
+the margin actually goes: injector $\Delta p$ falls roughly as $\dot m^2$
+while $p_c$ falls roughly as $\dot m$, so
+
+$$\left.\frac{\Delta p}{p_c}\right|_{60\%} \approx
+\frac{\Delta p_{100\%}\times0.36}{p_{c,100\%}\times0.60}
+= 0.60\left.\frac{\Delta p}{p_c}\right|_{100\%}$$
+
+giving **10.8 %** for run 1 and **9.0 %** for run 5. Run 5 has crossed below
+the ~10 % line at which chug is expected; run 1 was marginal and did not.
+
+**Band and mechanism.** 220 Hz is in the **low-frequency (chug) band**
+(10–500 Hz): chamber gas volume acting as a capacitance against the feed-line
+fluid column, driven by the injector $\Delta p$ being modulated by $p_c$ with
+a combustion time lag. It also overlaps the bottom of the buzz band
+(200–1,000 Hz), so the discriminator matters: **chug** appears simultaneously
+and in phase on the propellant-line pressure transducers and on $p_c$, and it
+scales with feed-line length; **buzz** is a manifold/dome acoustic resonance
+seen strongly on the dome transducer and hardly at all up the line. Check the
+line transducers before naming it.
+
+> *Rubric (2):* 1 for both ratios and the throttled values; 1 for naming chug,
+> the coupling mechanism, and the discriminator against buzz. Naming chug with
+> no mechanism: half. Naming screech: zero — 220 Hz is two orders below the
+> acoustic band and this is a Level-1 error.
+
+### (d) Diagnosis (3 pts)
+
+**Diagnosis, one sentence.** The fuel injector's effective flow area has grown
+by about 11 % over five runs, lowering the injector pressure drop from 18 % to
+15 % of $p_c$; the coarser, less well mixed spray costs 2.6 % of $c^*$ (hence
+3 % of thrust and 8 s of $I_{sp}$), streaks the face, drives a local hot spot,
+and has eaten the chug margin, which is why 220 Hz appears at 60 % throttle.
+
+**The four candidates:**
+
+| candidate | verdict | the evidence that decides it |
+|---|---|---|
+| **(i) Throat erosion** | **ruled out** | $A_t$ measured within 0.3 % post-test. And the signature is wrong: an eroded throat lowers $p_c$ **at constant $\dot m$ while $c^*$ stays put**, because $c^* = p_cA_t/\dot m$ is area-corrected. Here $c^*$ itself fell. |
+| **(ii) Drifting fuel flowmeter** | **ruled out, with a caveat** | If $\dot m$ were really higher than indicated, $c^*$ would be over-stated in *both* runs equally, not drifting. More decisively, a flow error cannot produce a $\Delta p$ change: at constant true flow through a constant orifice, $\Delta p$ is constant. The measured $\Delta p$ moved 19 %. Caveat: this argument assumes the $\Delta p$ transducers are good, so cross-check them. |
+| **(iii) Injector face erosion / orifice enlargement** | **ruled in** | It is the only candidate that explains all four independent observations at once: $\Delta p$ down at constant flow, $c^*$ down, streaking on the fuel side, and one wall thermocouple 90 K hot while the others are unchanged (a maldistributed element throwing a fuel-lean streak at one azimuth). |
+| **(iv) Mixture-ratio shift** | **ruled out** | $MR$ is reported as 2.35 in both runs and the oxidiser-side $\Delta p$ is unchanged (12.40 → 12.30 bar, within noise). A real $MR$ shift would move the ox $\Delta p$ or the flows, and would move $c^*$ *and* the wall temperatures globally, not at one azimuth. |
+
+**The one measurement to add, and the instrument.** A **cold-flow calibration
+of the fuel circuit between runs**: flow water (or the actual fuel) through the
+assembled injector on a flow bench at several flow rates and measure
+$\dot m$ against $\Delta p$ directly, giving $C_dA$ as a curve rather than a
+single hot-fire point. That separates area growth from a $C_d$ change (the
+curve's *shape* moves if the entry geometry changed; only its level moves if
+area changed) and it is non-destructive. Second choice, if the engine cannot
+come off the stand: add **high-response Kulite transducers in the fuel dome
+and in the fuel line** so that the 220 Hz can be phase-correlated with $p_c$
+and the chug/buzz question settled in the next run.
+
+> *Rubric (3):* 1 for the one-sentence diagnosis naming injector area growth
+> as the cause and the $c^*$ loss as the mechanism; 1 for four verdicts with
+> evidence (¼ each; a verdict with no evidence scores nothing); 1 for a
+> measurement **with** an instrument and a statement of what it discriminates.
+> "Inspect the injector" is not a measurement.
+
+---
+
+## C2 — Solid motor qualification firing (10 points)
+
+Throughout, the working relation is $p_c \propto K_n^{1/(1-n)}$ with
+$1/(1-n) = 1/0.65 = 1.53846$, so a pressure ratio implies an area (or
+burn-rate) ratio through the **inverse** exponent $1-n = 0.65$.
+
+### (a) The early hump (2 pts)
+
+$$\frac{p_{peak}}{p_{plateau}} = \frac{8.15}{6.98} = 1.16762$$
+
+$$m_{mean} = \left(\frac{p_{peak}}{p_{plateau}}\right)^{1-n} = 1.16762^{0.65}
+= \mathbf{1.1060}$$
+
+so the *surface-averaged* burn rate at $t=0.25$ s is **10.6 % above** nominal.
+If only the aft 30 % of the surface is augmented,
+
+$$m_{local} = 1 + \frac{0.1060}{0.30} = \mathbf{1.353}$$
+
+a **35 % local augmentation** — which is exactly the size B3's coupled
+solution produced for a $J=1.83$ port.
+
+**Phenomenon: erosive burning.** It decays because the erosive term is driven
+by the port mass flux $G = \dot m/A_p$, and $A_p$ grows as the web burns back.
+Once $G$ falls below $G_{th}$ the augmentation switches off entirely. The
+3.4 s decay time is consistent with a port that opens ~20–25 mm of web in
+that interval.
+
+> *Rubric (2):* 1 for the mean multiplier with the correct $1-n$ exponent
+> (using $1/(1-n)$ instead gives 1.271 and loses the mark — this inversion is
+> the single most common error on solid-motor traces); 1 for the local value,
+> the name, and the decay mechanism.
+
+### (b) The late ramp (2 pts)
+
+$$\frac{A_{b,24}}{A_{b,18}} = \left(\frac{7.60}{6.98}\right)^{0.65}
+= 1.08883^{0.65} = \mathbf{1.0569}\qquad(+5.7\ \%)$$
+
+**Two mechanisms that give a smooth ramp rather than a step:**
+
+1. **Progressive burnback geometry** — a fin tip, a slot end or a star point
+   burning out, so that the burning perimeter grows continuously as the web
+   passes a geometric feature. This is *designed* behaviour if it is in the
+   burnback prediction, and an *error in the burnback model* if it is not.
+2. **Progressive exposure of new surface through a failing thermal barrier** —
+   insulation or liner receding faster than predicted at the aft dome,
+   uncovering propellant (or, in the limit, a propagating debond) at a rate
+   set by the char rate rather than by a geometric feature.
+
+**The aft-dome evidence supports the second.** Char depth twice predicted at
+the aft dome is a direct statement that the insulator there ran far hotter or
+far longer than the design case; a geometric burnback feature would leave the
+insulation untouched. A step would indicate a debond opening at once (the
+Part III exam's case); a *ramp* is consistent with progressive recession.
+
+> *Rubric (2):* 1 for the +5.7 % area; 1 for two mechanisms and the correct
+> attribution to the char evidence. One mechanism: half.
+
+### (c) Throat growth and the $I_{sp}$ arithmetic (2 pts)
+
+At fixed burning area, a 4.0 % larger throat is a 4.0 % smaller $K_n$:
+
+$$\frac{p_c}{p_{c,0}} = \left(\frac{1}{1.040}\right)^{1.53846} = \mathbf{0.9414}
+\qquad(-5.86\ \%)$$
+
+Expansion ratio falls from 9.00 to $9.00/1.040 = 8.654$:
+
+$$C_{F,vac}(1.18,\ 9.00) = 1.74035 \;\rightarrow\;
+C_{F,vac}(1.18,\ 8.654) = 1.73495 \qquad(\mathbf{-0.310\ \%})$$
+
+$$I_{sp} = \frac{c^*C_F}{g_0}:\quad 274.19\ \mathrm{s} \rightarrow 273.33\ \mathrm{s}
+\qquad(\mathbf{-0.310\ \%})$$
+
+**The $C_F$ term is 0.31 %, one tenth of the observed 3.1 % shortfall.** It
+cannot be the explanation, and this is the physically important asymmetry: an
+eroding throat costs chamber pressure heavily (−5.9 %) and specific impulse
+barely (−0.3 %), because $C_F$ is a weak logarithmic-ish function of
+$\varepsilon$ while $p_c$ goes as $K_n^{1.54}$. That is why an eroding throat
+looks alarming on a pressure trace and benign on a thrust trace.
+
+> *Rubric (2):* 1 for the $-5.86$ % pressure effect with the exponent right;
+> 1 for the $C_F$/$I_{sp}$ effect and the explicit statement that it is an
+> order of magnitude too small.
+
+### (d) Reconciling $\int p_c\,dt$ with $I_t$ (2 pts)
+
+$$I_t = \overline{C_F}\,\overline{A_t}\int p_c\,dt$$
+
+Using the burn-averaged figures — $\int p_c\,dt$ up 1.5 %, $\overline{A_t}$
+up 1.5 %, $\overline{C_F}$ down ~0.19 % (half the end-of-burn 0.31 %, since
+the throat grows through the burn):
+
+$$\frac{I_{t,pred\ from\ trace}}{I_{t,nominal}} = 1.015\times1.015\times0.9981
+= \mathbf{1.0283}\qquad(+2.8\ \%)$$
+
+The measured delivered $I_{sp}$ — and therefore, on the loaded propellant
+mass, the measured $I_t$ — is **−3.1 %**. The unaccounted deficit is
+
+$$1-\frac{0.969}{1.0283} = \mathbf{5.8\ \%\ of\ the\ expected\ total\ impulse}$$
+
+**Why the two are not proportional.** $\int p_c\,dt$ measures **gas
+generation** — how much propellant surface burned, at what pressure. $I_t$
+measures **momentum actually leaving the nozzle**. In a metallised motor the
+two decouple, because a fraction of the condensed-phase products
+(molten Al₂O₃) is **retained as slag**, chiefly in the aft dome behind the
+nozzle entry, and in the boundary layer. That mass was loaded, burned, and
+raised the chamber pressure — but it never left, so it contributed to
+$\int p_c\,dt$ and nothing to $I_t$. Two-phase lag adds to the same account:
+particles that do leave do so below the gas velocity. The unburned sliver
+(the long low tail) is the third contributor: propellant that is loaded, hence
+in the denominator of $I_{sp}$, but that burns at a pressure too low to expand
+usefully.
+
+**The confirming measurement: post-fire weigh-back.** Weigh the motor before
+and after, and weigh the slag recovered from the aft dome and the nozzle
+separately. A 5–6 % impulse deficit should show up as a few percent of loaded
+mass recovered as slag plus sliver residue. If the weigh-back closes, the
+motor is behaving as a metallised motor with an aft-dome slag trap problem; if
+it does not, the thrust-stand calibration is the next suspect.
+
+> *Rubric (2):* 1 for the relation and the +2.8 % trace-predicted impulse;
+> 1 for the deficit and the slag/two-phase/sliver explanation with a named
+> post-fire measurement. A student who simply asserts "two-phase losses"
+> without noting that $\int p_c\,dt$ and $I_t$ measure different things gets
+> half.
+
+### (e) Three diagnoses, one refusal (2 pts)
+
+| anomaly | one-sentence diagnosis |
+|---|---|
+| **Early hump, 0.25–3.4 s** | Erosive burning at a low-$J$ aft port, decaying as the bore opens; benign, predictable, and it belongs in the MEOP stack, not in a failure report. |
+| **Ramp, 18–24 s** | Aft-dome insulation receding faster than predicted and progressively exposing propellant (or an opening bond line), corroborated by doubled char depth. |
+| **Long tail-off and the $I_{sp}$ shortfall** | Heavy slag retention plus an unburned sliver, with an asymmetric nozzle-entry gouge indicating slag or a liner fragment passing through — the gouge also implies a **side force** during the event. |
+
+**The one I would refuse to certify around: the aft-dome insulation.** The
+hump is understood and boundable; the slag and sliver cost impulse but are a
+performance problem, and performance problems are traded, not feared. The
+insulation is different: char depth twice predicted means the **margin to
+burn-through of the case at the aft dome is unknown**, and the failure mode if
+it is exceeded is not a performance shortfall but a case rupture. A motor
+whose thermal-protection margin cannot be stated is not qualifiable at any
+performance level. (The gouge is a close second and for the same reason: an
+asymmetric nozzle entry is a side-force and a structural-margin question, not
+a performance one.)
+
+**Instrumentation for the next motor:**
+
+- *Hump:* an **aft-end chamber-pressure transducer in addition to the head-end
+  one**. The head-to-aft $\Delta p$ is the direct measurement of port flow and
+  is the only way to see erosive burning as such rather than infer it.
+- *Ramp:* **insulation thermocouples or breakwires embedded at known depths**
+  in the aft dome, plus a bond-line strain or breakwire array, to timestamp
+  recession and separate "insulation receded" from "bond opened".
+- *Tail-off and slag:* **thrust-stand load cells with lateral axes** (to catch
+  the side force from the gouge event), high-speed **plume video** for slag
+  ejection, and post-fire weigh-back with slag recovery.
+
+**Which anomaly is invisible on a head-end transducer:** the **asymmetric
+nozzle gouge and its side force**. A uniform throat change moves $p_c$ and is
+visible; an asymmetric gouge introduces a lateral force and a thrust
+misalignment that the head-end pressure trace cannot see at all — which is
+precisely why lateral load cells and post-fire nozzle metrology exist.
+
+> *Rubric (2):* 1 for three diagnoses (⅓ each); 1 for the refusal with a
+> safety-versus-performance argument, the instrumentation, and the invisible
+> anomaly. Naming the insulation *or* the gouge as the refusal both earn full
+> marks if argued on margin-unknown grounds; refusing on the erosive hump does
+> not — it is the one anomaly that is fully explained.

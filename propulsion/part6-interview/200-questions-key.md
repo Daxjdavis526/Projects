@@ -2859,3 +2859,491 @@ condition, not as "heat and pressure in phase" alone, and then connect it to
 injector $\Delta p$.
 **Follow-up:** "Injector $\Delta p$ of 20 % of $p_c$ is expensive in pump work.
 What would let you go lower safely?"
+
+### 141. [M15, M06]
+Transverse mode frequencies in a cylinder are $f = \alpha_{mn}a/(\pi D)$ with
+$\alpha$ the Bessel root: 1.8412 for 1T, 3.0542 for 2T, 3.8317 for 1R.
+With $a = 1150$ m/s and $D = 0.28$ m:
+$f_{1T} = \mathbf{2407\ Hz}$, $f_{2T} = \mathbf{3993\ Hz}$,
+$f_{1R} = \mathbf{5009\ Hz}$. [F] Three things to say with them. The sound
+speed is the one soft input — it is $\sqrt{\gamma RT}$ in the burnt gas and it
+varies axially and with mixture ratio, so treat these as ±5–10 % and never
+claim a mode identification on frequency alone. The spacing matters: 1T and 2T
+are close enough that a suppression device tuned narrowly for 1T can leave 2T
+untouched, which is the classic way a fix moves the problem rather than
+removing it. And these are the frequencies your acoustic cavities must be sized
+for — a quarter-wave cavity for 2407 Hz is about 12 cm of effective length at
+this sound speed, which is a real packaging constraint on an injector face.
+
+**Probing:** whether you know the Bessel roots and immediately attach an
+uncertainty to $a$.
+**Follow-up:** "The measured tone is 2650 Hz. Is that 1T with a wrong sound
+speed, or a different mode?"
+
+### 142. [M15, M18, M33]
+No, I do not accept unit B on that evidence, but I also do not condemn it. The
+industry convention is that an induced disturbance must decay to a small
+fraction of its initial amplitude within a stated time — commonly of order
+40–50 ms — at every operating point, and unit A at 38 ms passes comfortably
+while unit B at 95 ms does not. [M][CPIA-246] The more important fact is that
+two nominally identical units differ by a factor of 2.5 in damping, which means
+the design's stability margin is not controlled by the drawing: something that
+varies build to build — injector element flow calibration, face flatness,
+cavity depth or its as-built tolerance, element recess, or a propellant
+temperature difference — is worth more damping than the design intends. What I
+do next: measure the difference. Dimensional and flow inspection of both
+injectors side by side, cavity depth verification, and a review of both tests'
+operating conditions to confirm they really are the same point. Then re-bomb
+unit B at several amplitudes and several operating points, because a nonlinear
+(triggered) instability shows up as a decay time that depends on bomb size, and
+if unit B's decay degrades with amplitude you have a triggering problem rather
+than a marginal linear one. If the population scatter is real, the fix is a
+design change that raises the margin for everybody, not a screening test that
+selects the good ones. [J]
+
+**Probing:** whether the build-to-build scatter alarms you more than the 95 ms.
+**Follow-up:** "You cannot find any hardware difference. What is your next
+hypothesis?"
+
+### 143. [M16, M11, M17]
+The loading is a thermal strain cycle, once per start–shutdown: at steady state
+the gas-side face of the channel land is at 700–900 K while the coolant-side is
+several hundred kelvin cooler and the surrounding structure is cooler still, so
+the hot face is in compression because the cold material around it will not let
+it expand. That compressive stress exceeds the hot yield strength of the copper
+alloy, so it yields in compression; on shutdown it contracts from a
+plastically-shortened state and goes into tension, yielding again. [F][M16]
+Each cycle leaves a small permanent deformation in the same direction —
+ratcheting — and the hot wall progressively thins and bulges *toward the gas*,
+into the chamber, while the channel behind it deforms. After enough cycles the
+thinned wall either opens as a longitudinal crack along the channel or tears,
+and coolant vents into the chamber. The failed hardware is unmistakable: the
+land between two channels is bowed outward into the chamber and thinned at its
+centre, with a longitudinal split — the shape the literature calls a doghouse.
+It is a low-cycle-fatigue-plus-ratcheting failure, not a creep failure and not a
+thermal-shock failure, which matters because the life prediction is a strain-range
+calculation with a Coffin–Manson-type law, and because the mitigations are
+lower wall $\Delta T$, a higher-conductivity liner alloy, and reduced restraint
+— not simply a thicker wall, which makes $\Delta T$ worse.
+
+**Probing:** whether you say "ratcheting" and "bulges toward the gas", and
+whether you notice that thickening the wall is counterproductive.
+**Follow-up:** "How many cycles is that worth on a modern liner, and how would
+you demonstrate it?"
+
+### 144. [M16, M11]
+$\sigma = \dfrac{E\alpha\Delta T}{2(1-\nu)} =
+\dfrac{110\times10^{9}\times1.8\times10^{-5}\times150}{2(1-0.34)} =
+\dfrac{2.97\times10^{7}\times10}{1.32} = \mathbf{225\ MPa}$. [F][A] Against a
+hot yield strength of about 200 MPa, the wall yields — on every single cycle,
+by construction. That is not a design error, it is the design: high-conductivity
+copper liners are deliberately operated in the plastic regime, and their life is
+governed by low-cycle fatigue and ratcheting rather than by staying elastic,
+which is exactly the mechanism of question 143. The elastic formula is
+therefore a screening calculation only: once you exceed yield it overestimates
+the stress and tells you nothing about life, and the real analysis is an
+elastic–plastic cyclic one with a strain-range life law. What the number *is*
+good for is comparison — halve the $\Delta T$ and you halve this stress, which
+is why coolant-side heat transfer and liner conductivity buy engine life
+directly.
+
+**Probing:** whether you recognise that exceeding yield is intentional and say
+what the correct analysis would be.
+**Follow-up:** "So what wall $\Delta T$ would keep it elastic, and why do we
+not design to that?"
+
+### 145. [M17, M16]
+Lack-of-fusion porosity: insufficient energy density or poor overlap leaves
+irregular, often flat voids between melt tracks, usually with unmelted powder
+inside; they are the worst kind because their shape makes them crack-like.
+Keyhole and gas porosity: too much energy density collapses the vapour cavity
+and traps spherical pores, and dissolved or entrapped gas from the powder does
+the same; these are rounder and less damaging but they degrade fatigue and can
+be numerous. Cracking and residual stress: the steep thermal gradients leave
+large residual stresses that cause distortion, delamination from the plate, and
+— in crack-susceptible alloys — solidification or liquation cracking at grain
+boundaries. [M][GradlAM] Post-processing maps onto them unevenly, which is the
+point of the question. Hot isostatic pressing closes internal porosity of both
+kinds, and it is genuinely effective — but only for pores with no path to the
+surface, so a surface-connected lack-of-fusion void is untouched, and HIP does
+not heal a crack that has an oxide on its faces. Stress-relief heat treatment
+before removal from the build plate addresses residual stress and distortion,
+and a full solution-and-age sets the microstructure. Neither addresses the
+fourth problem that is specific to rocket parts: as-built internal surface
+roughness in cooling channels and injector passages, which changes both flow
+and heat transfer and is reachable only by abrasive flow machining, chemical
+polishing, or designing the passage so a tool can reach it. Detection for all of
+these is computed tomography, with an explicit statement of the smallest defect
+detectable at the relevant wall thickness.
+
+**Probing:** whether you say which defects HIP cannot fix — that is the real
+discriminator.
+**Follow-up:** "Your CT can resolve 200 μm at that wall. Is that good enough?"
+
+### 146. [M17, M11, M36]
+Forty units a year of a 200 kN channel-wall nozzle is a production rate, not a
+development rate, so the criterion is unit cost and cycle time at acceptable and
+*repeatable* quality. Brazed tube-wall is the heritage answer — the RS-25's
+1,080-tube nozzle — and it works, but it is enormously labour-intensive: each
+tube is formed and trimmed, the stack is fixtured, and a single braze escape
+means rework on a large expensive assembly. At 40 a year the labour and the
+inspection burden dominate, and the skill base for it barely exists any more.
+Milled channels with an electroformed nickel closeout gives excellent, proven
+quality — it is what the RS-25 main combustion chamber liner uses — but
+electroforming is slow, measured in weeks of plating per part, and it is a
+capacity problem at 40 a year, not a capability problem. [H][M] I commit to
+**additively manufactured channel walls**, specifically a large-format
+directed-energy or blown-powder process for the nozzle structure with laser
+powder-bed fusion reserved for the smaller high-detail parts — that is the
+route NASA's RAMPT work and multiple commercial programmes have taken, and it
+collapses the part count and the schedule per unit. [RAMPT][GradlAM] The
+condition on that commitment is the one from question 84: I am buying a
+production process, so the qualification is of the process, and I need witness
+coupons, frozen parameters, CT with a stated detection limit, and a
+demonstrated build-to-build property distribution before the first flight unit —
+which is a real up-front cost that only pays back at this rate.
+
+**Probing:** whether the rate, not the technology, drives your answer.
+**Follow-up:** "Two years in, your machine vendor discontinues the model. What
+is your exposure?"
+
+### 147. [M18]
+A thrust stand measures the force between the engine and ground, and everything
+else that connects the engine to ground is a tare: the propellant and purge
+lines crossing the measurement plane, the instrumentation harness, the gimbal
+restraints, the thermal growth of the whole assembly, and any pressure force on
+the flexible elements. In-situ calibration means applying a known force —
+usually a calibrated load cell in series with a hydraulic or motor-driven
+actuator — to the thrust frame *in the test configuration*, with the lines
+installed and pressurised, before and ideally after each test, so the
+calibration includes the tare stiffnesses rather than pretending they are
+absent. [M18][M] The propellant lines are the hardest part because they are the
+only tare that changes during the test: they are pressurised from ambient to
+several hundred bar, they contain flowing fluid with its own momentum, they are
+chilled from ambient to 90 K or 20 K, and a bellows or flex joint under
+internal pressure develops an axial force proportional to pressure times
+effective area — hundreds of newtons or more — that is present during the test
+and absent during the calibration unless you take care. The standard mitigations
+are to route lines perpendicular to the thrust axis so their force has no axial
+component, to use pressure-balanced flex joints, to calibrate at flight
+pressure and temperature, and to record line pressures so a residual correction
+can be applied. Then you state the uncertainty honestly, because a 1 % thrust
+error is a 1 % $I_{sp}$ error and that is the whole argument of a test
+programme.
+
+**Probing:** whether the pressurised-bellows force appears — it is the tare
+people forget and the one that biases every test the same way.
+**Follow-up:** "You calibrate before the test and after, and they differ by
+0.4 %. Which do you use?"
+
+### 148. [M18, M02, M09]
+$\varepsilon = 100$, $\gamma = 1.20$: $M_e = 4.89$ and $p_0/p_e = 1521$, so
+$p_e = 4.0\times10^{6}/1521 = \mathbf{2.63\ kPa}$. Normal shock at the exit:
+$p_2/p_1 = 1+\frac{2\gamma}{\gamma+1}(M_e^2-1) = \mathbf{26.0}$, giving
+$p_2 = \mathbf{68.4\ kPa}$. [F] Read those together. The cell must be held at
+5 kPa, which is above $p_e$, so the nozzle is mildly overexpanded even in the
+cell — check separation: Schmucker gives $p_{sep} = 1.30$ kPa at this exit
+Mach number, below $p_e$, so the flow stays attached and the test is valid.
+The diffuser's job is to take exit flow at 2.63 kPa and return it to
+atmosphere at 101.3 kPa, an overall recovery of **38.5:1**. A single normal
+shock delivers only 26:1, so a straight-through diffuser cannot do it alone:
+the standard architecture is a supersonic (second-throat) diffuser to capture
+the plume and take most of the compression through a shock train, followed by a
+subsonic diffuser, with a steam ejector or vacuum pumping to establish and hold
+the cell pressure at start-up and to make up the shortfall. That start-up
+condition, not the steady state, usually sizes the ejector.
+
+**Probing:** whether you compute the required recovery and notice a single
+normal shock cannot supply it.
+**Follow-up:** "What happens in the cell at engine shutdown?"
+
+### 149. [M19, M20, M27]
+A plateau propellant has a pressure range over which the burn-rate exponent $n$
+falls to near zero — the burn rate is essentially independent of chamber
+pressure — and a mesa propellant goes further, with $n$ actually negative over a
+band, so the rate *falls* as pressure rises. [E][Kubota] In double-base and
+composite-modified double-base propellants the classic modifiers are lead
+compounds — lead salts of aromatic acids, lead stearate, lead β-resorcylate,
+often with carbon black — which catalyse the surface reactions in a way that
+saturates with pressure; in composite propellants, oxamide and similar
+coolants, and particle-size tailoring of the ammonium perchlorate, are the
+usual levers. Why pay for it: everything that makes a solid motor unpredictable
+runs through $n$. Equilibrium pressure goes as $(A_b/A_t)^{1/(1-n)}$, so with
+$n\to 0$ a burning-area error, a throat-erosion change or a temperature-driven
+burn-rate shift no longer amplifies into a pressure excursion; the motor becomes
+insensitive to grain-geometry tolerance and to throat erosion, and the
+temperature sensitivity $\pi_K = \sigma_p/(1-n)$ collapses toward $\sigma_p$.
+For a tactical or strategic motor that must fly over a 100 K conditioning
+range, that is worth real performance — and it usually costs some, because the
+modifiers are inert mass and the plateau formulations tend to have lower
+$I_{sp}$ than the best conventional ones. A mesa's extra trick is genuine
+self-regulation: a pressure excursion is self-correcting rather than amplified.
+
+**Probing:** whether you connect $n$ to the $1/(1-n)$ amplification and to
+$\pi_K$ — that is what makes the plateau worth money.
+**Follow-up:** "If negative $n$ is so good, why is not everything a mesa
+propellant?"
+
+### 150. [M20, M19]
+$n = \dfrac{\ln(r_2/r_1)}{\ln(p_2/p_1)} = \dfrac{\ln(11.3/8.4)}{\ln(7.0/4.0)} =
+\dfrac{0.2963}{0.5596} = \mathbf{0.530}$.
+Then $a = r/p^n = 8.4\times10^{-3}/(4.0\times10^{6})^{0.530} =
+\mathbf{2.66\times10^{-6}}$ in SI (m/s per Pa$^n$); check at 7.0 MPa it returns
+11.3 mm/s. [F][E] Stability: the equilibrium condition requires $n < 1$, and
+0.530 satisfies it, so the motor has a stable equilibrium pressure — a
+perturbation does not run away. But 0.53 is high for comfort: the amplification
+factor $1/(1-n) = 2.13$ means every error in burning area or throat area is
+more than doubled in pressure, and the temperature sensitivity is amplified by
+the same factor. I would call it stable but pressure-sensitive, and I would want
+either a lower-$n$ formulation or a generous MEOP margin, especially if the
+motor must be qualified over a wide temperature range. Two caveats on the data
+itself: strand-burner rates are systematically lower than motor rates (there is
+no cross-flow, no erosive augmentation, and a different thermal environment),
+and two points define a line with no evidence that the log–log relation is
+straight over the operating range — I would want at least four pressures before
+believing $n$ to two decimal places.
+
+**Probing:** whether you distrust a two-point fit and know strand data are not
+motor data.
+**Follow-up:** "What is the motor-to-strand burn-rate ratio typically, and
+which way does it go?"
+
+### 151. [M21, M20]
+Burn time is web over rate: $t_b = 0.42/0.0095 = \mathbf{44.2\ s}$, and the peak
+occurs at 30 % of web, i.e. at $t = \mathbf{13.3\ s}$. Since thrust is
+proportional to burning area at fixed pressure — and to first order chamber
+pressure follows $A_b^{1/(1-n)}$, so the excursions are *larger* than the area
+excursions — the trace rises 28 % from 9.0 to 11.5 m² over the first 13 s, then
+falls 46 % from 11.5 to 6.2 m² over the remaining 31 s: progressive, then a long
+regressive tail with a max/avg of roughly 1.24 on area alone. [F] A mean area of
+about 9.3 m² (area-weighted trapezoids) times the web times the density gives
+roughly $1800\times9.27\times0.42 = \mathbf{7.0\ tonnes}$ of propellant, which
+is a useful cross-check that the geometry closes. The number to interrogate is
+the tail: the last 20 % of the burn is at 6.2 m², so the motor spends a
+significant fraction of its life at a substantially lower thrust and pressure —
+lower pressure means a lower burn rate than the 9.5 mm/s assumed, so the real
+burn time is longer than 44.2 s and the real tail is longer and softer than
+this sketch.
+
+**Probing:** whether you notice that a constant burn rate is inconsistent with a
+varying area, and say which way the error goes.
+**Follow-up:** "How much longer? Estimate it."
+
+### 152. [M21, M26, M33]
+A max/avg of **1.44** — against about **1.18** for the Shuttle SRB — means a
+strongly shaped grain: a large initial burning area that falls sharply, which
+is what a heavily perforated head-end geometry (a deep star or a large finocyl)
+gives you, followed by a long low-thrust tail. Both figures are B-confidence in
+the engine database, which also notes the S200 is the best-documented non-US
+large segmented motor, so the comparison is a fair one. The vehicle requirement that drives it is a thrust profile
+matched to a specific trajectory shape: very high thrust off the pad, where
+thrust-to-weight and gravity losses dominate, followed by a rapid fall to stay
+under the vehicle's structural and aerodynamic limits through max-q. On LVM3
+the boosters are the sole first-stage thrust at liftoff and the core lights
+later, which makes the early thrust demand extreme. [J] What it costs: the case
+and nozzle are sized by the *peak*, so all the structure is heavier than the
+average performance would justify; the peak pressure sets MEOP and therefore
+case thickness for the whole motor; the tail delivers impulse at low $C_f$
+efficiency and low acceleration, which is impulse spent inefficiently in the
+gravity-loss sense; and the strongly shaped grain has a bigger sliver and a
+harder structural analysis than a neutral one. The Shuttle's 1.18 is what you
+choose when you can shift some of the demand onto core engines that are already
+running.
+
+**Probing:** whether you can name the structural cost of a peaky trace — the
+case is sized by max, not average.
+**Follow-up:** "You want to keep the liftoff thrust and drop the ratio to 1.2.
+What changes on the vehicle?"
+
+### 153. [M22, M26]
+Cylindrical case mass $= \pi D L t \rho = \pi\times3.4\times13.5\times0.012
+\times1580 = \mathbf{2734\ kg}$. Inert mass $= 2734 + 2400 =
+\mathbf{5134\ kg}$. Propellant mass fraction
+$= 141{,}400/(141{,}400+5134) = \mathbf{0.965}$ — against the P120C's published
+**0.924**. [P120C] The answer is not that the P120C is badly designed; it is
+that my model is missing mass. To hit 0.924 at 141,400 kg of propellant the
+inert mass must be **11,630 kg**, so about **6,500 kg** is unaccounted for.
+Where it lives: the two domes, which are not in $\pi DLt$ at all and which
+carry a thickness build-up around the polar openings; the local reinforcement
+at the skirt attachments and the aft boss; the wall thickness above the
+membrane minimum needed for handling, buckling and transport loads; and the
+fact that a filament-wound wall contains both hoop and helical ply families, so
+12 mm of "required wall" from a hoop calculation is not 12 mm of total
+laminate. [J] Quoting 0.965 as a design number would be a serious error, and the
+gap between a membrane estimate and a real mass fraction — about 30 % of inert
+mass — is a good number to carry.
+
+**Probing:** whether you compare against the real figure and then go looking for
+the missing mass, instead of trusting your own arithmetic.
+**Follow-up:** "Which of those four would you attack first to actually reach
+0.93?"
+
+### 154. [M23, M21]
+You size insulation station by station against the local exposure time, not
+against the burn time: a station covered by propellant until late in the burn
+is exposed for only the remainder, while the aft dome and the region near the
+nozzle are exposed from ignition and see the highest gas velocity and the most
+particle impingement. So the first input is the grain burn-back analysis, which
+gives you an exposure-time map along the case; the second is a local heat-flux
+and particle-loading estimate, which is worst where the flow turns and where
+alumina impinges. [E][M] The char complication is handled by using a
+char-and-erosion model rather than a conductivity calculation: the material
+recedes at a rate that is a function of local flux and shear, and the remaining
+virgin thickness plus the insulating char must keep the case bondline below its
+limit — typically a few hundred kelvin for a composite case, higher for steel.
+The convention is a safety factor on *thickness* — commonly 1.5–2 on the
+predicted char-plus-erosion depth, sometimes expressed as requiring a stated
+minimum virgin-material margin at the end of the burn. What it is protecting
+against is not the mean prediction but the tail: burn-rate and burn-time
+dispersion, off-nominal grain geometry, local flow anomalies from a slag pool
+or a fin root, and the material property scatter of a hand-laid or
+tape-wrapped ablator. [J] It is also protecting the *bondline*, not the case
+wall — a debond is a worse outcome than a slightly hot case.
+
+**Probing:** whether you frame the sizing around exposure time and the bondline
+temperature, not the case temperature.
+**Follow-up:** "How would you validate that map short of a full-scale static
+fire?"
+
+### 155. [M24, M20, M03]
+Radius grows by $0.12\times10^{-3}\times120 = 14.4$ mm, so
+$r_t: 0.200 \to \mathbf{0.2144\ m}$ and
+$A_t: 0.1257 \to \mathbf{0.1444\ m^2}$, an area increase of **14.9 %**. [F]
+At *fixed* $p_c$, thrust is $C_f p_c A_t$, and $C_f$ moves too because the exit
+area is fixed so the expansion ratio falls by the same 14.9 % — for a
+sea-level booster nozzle starting near $\varepsilon = 16$ with $\gamma = 1.18$
+at 6 MPa, $C_f$ actually *rises* slightly (1.542 to 1.561) because the nozzle
+was overexpanded, so thrust at fixed $p_c$ would rise about **16 %**. In vacuum
+$C_f$ falls 0.9 % and thrust rises about 14 %. But chamber pressure is not
+fixed: with $n = 0.35$ the equilibrium pressure moves as $A_t^{-1/(1-n)}$, so
+$p_c$ falls by a factor $1.149^{-1.538} = 0.807$ — a **19 % drop** — and the
+net sea-level thrust change is $0.807\times1.149\times(1.561/1.542) =
+\mathbf{0.94}$, i.e. thrust *falls* about 6 %. That is the whole lesson: the
+$C_f$-only answer has the sign wrong, because internal ballistics dominate.
+
+**Probing:** whether you refuse to answer at fixed $p_c$ and go get the real
+pressure response.
+**Follow-up:** "So what happens to total impulse over the burn?"
+
+### 156. [M25, M19, M27]
+Cast composite propellant is a highly filled elastomer — 85–90 % solids in a
+rubber binder — so it is weak (tensile strengths of order 0.5–1.5 MPa),
+strain-limited, and viscoelastic, meaning its stiffness and failure strain both
+depend on temperature and loading rate. Cracks come from stresses it cannot
+carry: cure shrinkage as the binder polymerises against a rigid case and
+tooling; thermal cycling, because the propellant's coefficient of expansion is
+several times the case's, so cooling from cure to a cold-day condition puts the
+bore surface in tension (which is why cold conditioning is the critical
+structural case); the pressurisation and axial acceleration transient at
+ignition; gravity slump in a large horizontally-stored grain; and handling and
+transport shock. [F][E] Stress concentrates at the bore surface, at star or fin
+roots, and at the grain-to-liner bondline, which is why those are the
+inspection targets. A 40-year surveillance programme measures the properties
+that govern all of that as functions of age: uniaxial tensile strength, modulus
+and strain capacity on samples cut from aged motors and from stored carton
+samples; bond strength at the liner interface; propellant hardness and chemical
+markers of binder degradation and plasticiser migration; burn rate on strands
+from aged grains; and full-motor non-destructive inspection (X-ray and
+ultrasonic) for crack and debond initiation — plus periodic static fires of
+motors drawn from the fleet, which is the only measurement that tests all of it
+at once. [M][M27]
+
+**Probing:** whether "cold day is the structural case" is in your answer.
+**Follow-up:** "Your aged samples show strain capacity down 30 %. Is the motor
+still safe?"
+
+### 157. [M26, M22, M24]
+RSRM: PBAN/Al composite, D6AC steel case in four flight segments with three
+field joints, submerged flexseal gimballed nozzle with hydraulic actuators,
+mass fraction about **0.85**, ~500 t of propellant per motor. P120C: HTPB/Al,
+**monolithic filament-wound carbon-fibre case with no joints at all**,
+carbon-phenolic flexseal nozzle with **electromechanical** actuators, mass
+fraction **0.924**, 141.4 t. LVM3 S200: HTPB/AP, **M250 maraging steel in three
+segments**, flexseal nozzle with electro-hydraulic actuators, 205 t per motor,
+and the strongly shaped 1.44 max/avg trace. (Engine database B.1 and B.5;
+all three mass fractions are `CALC` or B-confidence, not manufacturer
+statements.) Which choices are
+physics: the flexseal nozzle on all three — it is simply better than the
+alternatives and everyone converged on it; the composite case being lighter
+than steel; and the aluminised composite propellant family, which is what the
+performance requirement dictates. Which are logistics: **segmentation**, above
+all — the Shuttle segments exist because the motors were cast in Utah and
+shipped by rail, and the S200's segments exist for the same class of reason,
+while the P120C is monolithic because it is cast at Kourou and Colleferro
+within reach of the pad. Steel versus composite is partly physics and heavily
+industrial: steel is cheap, repairable, recoverable from salt water, and
+supported by an existing supply base, and the Shuttle intended to reuse its
+cases. Electromechanical versus hydraulic actuation is a modern-practice choice
+driven by eliminating hydrazine APUs and ground servicing, not by control
+performance. [J]
+
+**Probing:** whether you identify segmentation as a shipping decision and say so
+plainly.
+**Follow-up:** "If Thiokol had been on the coast in Florida, would Challenger
+have happened?"
+
+### 158. [M27, M22, M23]
+Architecture level, the submarine imposes four things a silo does not. Volume,
+brutally: the launch tube's diameter and length are fixed by the hull, so
+length-to-diameter and total volume are hard constraints, which pushes you to
+maximise volumetric loading and density impulse rather than $I_{sp}$, and it is
+why submarine-launched motors historically accepted lower-performance,
+higher-density propellant and geometries that pack well. Ejection and water
+transit: the motor and vehicle must survive being expelled by gas or steam and
+travelling through water before ignition, which is a structural and sealing
+case with no silo analogue, and it imposes a first-stage ignition transient
+that starts in a very different ambient. Environment: a shipboard magazine is
+warm, humid, salt-laden, and *moving* — vibration, shock and hull flexure for
+years — so the grain structural analysis includes a fatigue-like duty cycle and
+the case and insulation face a corrosion and moisture-ingress problem that a
+climate-controlled silo does not. And safety: the motor lives inside a crewed
+pressure hull, so insensitive-munitions behaviour — response to fire, impact
+and adjacent-round detonation — is a first-order architectural requirement
+rather than a compliance item, and it drives case, propellant family and
+venting design. [J][M] The fifth, if you want it, is maintenance access:
+nothing on the motor can require servicing while embarked.
+
+**Probing:** whether the crewed-hull safety argument appears, not just the
+dimensional one.
+**Follow-up:** "Which of those five would you expect to drive the propellant
+choice hardest?"
+
+### 159. [M28, M29]
+$R_{N_2} = 8314.46/28.014 = 296.8$ J/(kg·K).
+Ideal: $m = pV/RT = 300\times10^{5}\times4.0\times10^{-3}/(296.8\times300) =
+\mathbf{1.348\ kg}$.
+Real: divide by $Z = 1.12$ → $\mathbf{1.203\ kg}$. [F][A] Ignoring the
+compressibility factor **overpredicts the stored mass by 12 %**, which is the
+dangerous direction: you believe you have loaded 1.35 kg of propellant and you
+have 1.20 kg, so your total impulse and your $\Delta v$ budget are both 12 %
+optimistic and you find out at the end of the mission. The physical reason $Z >
+1$ here is that at 300 bar and 300 K nitrogen is above its Boyle temperature
+regime — repulsive intermolecular forces dominate, so the gas is *less*
+compressible than ideal and occupies more volume per unit mass. Note this also
+means every blowdown formula built on $m\propto p$ is wrong by a
+pressure-dependent factor, so the usable-fraction estimate needs the real-gas
+treatment too, not just the initial load.
+
+**Probing:** whether you state which way the error goes and why it matters
+operationally.
+**Follow-up:** "Where would you get $Z$ for helium at 400 bar and 200 K?"
+
+### 160. [M29, M31]
+Isothermal blowdown usable fraction $= 1 - p_f/p_i = 1 - 20/200 = 0.90$, so
+usable propellant $= 0.90\times0.35 = \mathbf{0.315\ kg}$.
+Total impulse $= m I_{sp} g_0 = 0.315\times68\times9.80665 =
+\mathbf{210\ N\cdot s}$.
+$\Delta v = I_{sp}g_0\ln\!\left(\dfrac{12}{12-0.315}\right) =
+666.9\times\ln(1.0270) = \mathbf{17.7\ m/s}$. [F] Three caveats belong with it.
+The isothermal assumption is optimistic — an adiabatic blowdown gives
+$1-(0.1)^{1/1.4} = 0.80$, so 0.28 kg and about 15.7 m/s, and reality lies
+between and depends on the duty cycle. The 68 s is a *realised* $I_{sp}$ at
+some nominal condition, and it droops as the tank cools and the pressure falls,
+so the delivered figure is lower again. And the 12 kg is the initial mass, so a
+mission that spends its propellant in several separated manoeuvres gets
+slightly more $\Delta v$ than this single-burn number. Call it 15–18 m/s and
+say why the range exists.
+
+**Probing:** whether you bracket the answer rather than reporting 17.7 m/s as
+if it were measured.
+**Follow-up:** "The requirement is 20 m/s. What is the cheapest change?"

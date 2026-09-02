@@ -40,8 +40,9 @@ is *not* marginal is the coolant chemistry: RP-1 must hold its coolant-side wall
 below roughly **560–590 K** for long life (up to ~700 K for short-duration
 expendable hardware), while methane cracks only above roughly **900–950 K**.
 That ~350 K is what decides whether a 200–300 bar chamber can be regeneratively
-cooled and reflown at all (Module 11 §3.10, §3.11), and it is the reason every
-clean-sheet reusable hydrocarbon engine designed since 2010 chose methane.
+cooled and reflown at all (Module 11 §3.10, §3.11; `[SP-8087]`, `[NIST-WB]` for
+the property basis), and it is the reason every clean-sheet reusable hydrocarbon
+engine designed since 2010 chose methane.
 
 **Second strongest reason: cryogenic commonality with LOX.** Methane's normal
 boiling point (111.67 K) is within 21 K of LOX's (90.19 K), which gives one
@@ -129,7 +130,8 @@ subcooling, so **all** of the density-impulse benefit is tank volume.
 
 ### Sanity check and the honest caveat
 
-Module 05 §4.3 lists LOX/CH₄ at $I_d \approx 297{,}000$ kg·s/m³ and
+Module 05 §4.3 (built on `[CEA]`-class chamber states and `[NIST-WB]`
+densities) lists LOX/CH₄ at $I_d \approx 297{,}000$ kg·s/m³ and
 $I_{sp} \approx 360$ s at $\varepsilon = 40$; 298,800 kg·s/m³ and 358.9 s at
 $\varepsilon = 35$ is the same answer, which is the check.
 
@@ -176,14 +178,15 @@ $$T_{wc} = T_b + \frac{q''}{h_c}$$
 
 and in a high-flux throat the film drop $q''/h_c$ is the **larger** of the two
 terms: in this exam's own D1, $T_b = 250$ K and $q''/h_{c,\mathrm{eff}} = 542$ K,
-so $T_{wc} = 792$ K — the wall runs **more than twice** the bulk temperature.
-A design checked against the bulk temperature alone would pass by a wide margin
-and coke anyway. [F]
+so $T_{wc} = 792$ K — the wall runs at **more than three times** the bulk
+temperature, and 68 % of that number is the film drop. A design checked against
+the bulk temperature alone would pass by a wide margin and coke anyway. [F]
 
 ### (b) Instrumentation (2)
 
-**Cheapest detector: the pressure transducers across the cooling jacket.** A
-coke layer is a growing surface roughness *and* a flow-area restriction, so
+**Cheapest detector: the pressure transducers across the cooling jacket**
+`[SP-8087]`. A coke layer is a growing surface roughness *and* a flow-area
+restriction, so
 **jacket $\Delta p$ rises run over run at constant coolant mass flow and
 constant chamber pressure**. It is monotone, it appears before any thermal
 symptom, and the instrument is already installed for other reasons. A 5–10 %
@@ -347,9 +350,11 @@ $$V_f = C_d\sqrt{\frac{2\Delta p}{\rho}} = 0.78\sqrt{\frac{5.20\times10^{6}}{423
 $$L = 4d = \mathbf{6.86\ mm}\ \text{minimum faceplate thickness in the fuel circuit}$$
 
 **Comment.** 1.72 mm sits mid-band in the 0.5–2.5 mm range that rocket injector
-orifices cluster in, and 86 m/s is at the high end of the 20–60 m/s liquid band
-— which is what a 130 bar chamber with a 20 % stiffness requirement forces, and
-is a first hint that this face will be shear-dominated and erosion-sensitive.
+orifices cluster in, but 86 m/s is **above** the usual 20–60 m/s liquid band and
+into the 80 m/s-plus territory Module 07 §4 reserves for high-$p_c$ oxidiser
+circuits — which is what a 130 bar chamber with a 20 % stiffness requirement
+forces, and is a first hint that this face will be shear-dominated and
+erosion-sensitive.
 
 ### (c) Barrel Mach number and the injector-end pressure (2)
 
@@ -384,7 +389,8 @@ $$k_{crit} = \sqrt{1+(\omega t_s)^2} = \sqrt{1+10.215} = \mathbf{3.349}$$
 $$\left.\frac{\Delta p}{p_c}\right|_{min} = \frac{1}{2k_{crit}} = \mathbf{14.93\ \%}$$
 
 372.8 Hz sits squarely in the observed 50–500 Hz chug band, and a 15 % floor is
-the bottom of the classical 15–25 % rule — both of which is the sanity check.
+the bottom of the classical 15–25 % rule quoted by `[SB]`, `[HH]` and
+`[SP-8089]` — both of which is the sanity check.
 
 ### (e) Which chamber pressure goes in the loop gain (2)
 
@@ -423,7 +429,7 @@ $\tau = 1.10$ ms gives $f = 283.7$ Hz, $k_{crit} = 2.630$, and a required
 $\Delta p/p_c$ of **19.0 %** — the requirement has risen while the delivered
 stiffness has fallen by nearly half. This is the quantitative statement of why
 deep throttling needs a variable-area injector, a dual manifold, or cavitating
-venturis.
+venturis `[Casiano10]`.
 
 ### Rubric (13)
 
@@ -536,8 +542,8 @@ cancel by symmetry, so the resultant is axial regardless of residual imbalance,
 which makes it far less sensitive to throttling and to flow scatter than a
 doublet.
 
-**Recommendation: (ii).** The constraint that decides it is the chug floor of
-B2(d): fix (i) buys mixing by spending exactly the stiffness the engine cannot
+**Recommendation: (ii).** The criterion itself is Rupe's `[Rupe65]`; the
+constraint that decides between the two fixes is the chug floor of B2(d): fix (i) buys mixing by spending exactly the stiffness the engine cannot
 spare.
 
 ### Rubric (6)
@@ -579,7 +585,7 @@ at *constant* $\Delta p$, so a Bernoulli orifice would deliver constant flow;
 the fact that flow falls as the back pressure is lowered proves the discharge is
 no longer set by $\Delta p$ at all. In the cavitating regime the flow is set by
 the *upstream-to-vapour* margin, $\dot m = C_c A\sqrt{2\rho(p_1-p_v)}$,
-equivalently $C_d = C_c\sqrt K$ with $C_c \approx 0.61$ (Nurick).
+equivalently $C_d = C_c\sqrt K$ with $C_c \approx 0.61$ `[Nurick76]`.
 
 **Critical cavitation number.** $C_d$ is flat at 0.780 down to $p_2 = 15$ bar
 ($K = 1.749$) and has departed by $p_2 = 12$ bar ($K = 1.599$), so the
@@ -730,7 +736,8 @@ accumulation transitions from deflagration to detonation the lumped model
 collapses and the local pressure exceeds $p_{CV}$ through shock reflection, so
 the credit is not merely optimistic, it can be qualitatively wrong. Write the
 requirement at the unvented bound and treat the venting factor as margin, not as
-budget. [J]
+budget. [J] `[SP-8051]`'s ignition-transient overpressure taxonomy is written the
+same way and for the same reason.
 
 **Weakest assumption in the chain:** $t_b$, for the reason just given. Runners-up
 worth full credit if argued: that all of $m_{acc}$ is at a burnable mixture
@@ -798,7 +805,9 @@ $\varepsilon = 24$ on either criterion alone**: you would cold-flow the actual
 contour at subscale, or treat 24 as an upper bound and design to 20–22 with
 margin. This is why booster expansion ratios cluster where they do — not because
 larger ones are impossible, but because the criteria stop being trustworthy
-right there. [E][J]
+right there. [E][J] `[Schmucker73]` shows the scatter behind both fits honestly;
+`[SFS54]` is two pages and claims very little; `[OMK05]` is the review to read
+before choosing a criterion for real hardware.
 
 ### (c) Thrust coefficients and sea-level thrust (2)
 
@@ -919,7 +928,8 @@ gap) paired with main-chamber pressure; or igniter chamber pressure as the
 **dissimilar** and must sense **different stations**, because two identical
 sensors on the same station fail identically. The fast sensor gates "may I open
 the main valves"; a second, independent main-chamber confirmation gates
-"proceed to mainstage."
+"proceed to mainstage." The RS-25's start sequence is the canonical worked
+example of that philosophy `[Biggs89]`, `[SSME-Orient]`.
 
 ### Rubric (4)
 
@@ -1039,7 +1049,8 @@ Start from $T_{wg} = 900$ K. With $\sigma = \left[\frac12\frac{T_{wg}}{T_0}
 $$q'' = \frac{T_{aw}-T_b}{\dfrac{1}{h_g}+\dfrac{t_w}{k_w}+\dfrac{1}{h_{c,\mathrm{eff}}}},
 \qquad T_{wg} = T_{aw}-\frac{q''}{h_g}$$
 
-three sweeps converge to
+three sweeps converge to (the correlation and its $\sigma$ are `[Bartz57]`;
+the design procedure around them is `[SP-8087]`)
 
 $$\sigma = \mathbf{1.327}, \qquad h_g = K_0\sigma = \mathbf{2.888\times10^{4}\ W/(m^2 K)}$$
 
@@ -1089,7 +1100,7 @@ fatigue** problem governed by plastic *strain range* (Coffin–Manson), not a
 stress problem governed by an endurance limit. What it does **not** tell you is
 the life: once the elastic stress exceeds yield the number is an index, not a
 stress, and predicting cycles requires an elastic–plastic cyclic analysis and
-alloy-specific LCF data. It also omits the superposed hoop load from the
+alloy-specific LCF data `[GRCop]`, `[MMPDS]`. It also omits the superposed hoop load from the
 coolant-to-chamber pressure difference and the restraint from the closeout,
 which together carry the remaining 15–30 % of the equivalent strain range.
 
@@ -1208,7 +1219,9 @@ the build volume the part sat. If the design closes only because $\epsilon =
 specifies, nobody measures on the flight article, and nobody can hold constant
 between builds. That is not a design margin; it is an undeclared dependency of
 exactly the same kind as a kerolox engine relying on its own soot layer — and
-soot at least re-forms. Take the polished channel, take the lower and more
+soot at least re-forms. The AM literature is explicit that as-built
+roughness and its scatter are design parameters to be controlled and flow-tested,
+not finish notes `[Gradl18]`, `[GradlAM]`. Take the polished channel, take the lower and more
 repeatable pressure drop, and fix the hot wall where D1 said it must be fixed:
 on the channel schedule at the throat, or with film cooling. [J]
 
@@ -1321,8 +1334,9 @@ rather than budget. Do **not** put a coated-niobium skirt on this engine at any
 station reachable on a 120:1 nozzle: the 1,600 K coating limit is a hard,
 coating-integrity limit whose failure mode is catastrophic oxidation of the
 substrate, and the whole prediction rests on a correlation that is admitted to
-be 30–50 % wrong at these stations. And in either case the design number is not
-the Bartz number: it is the **measured skirt temperature** from a hot fire with
+be 30–50 % wrong at these stations. The radiation-cooled and self-cooled architecture is `[SP-8124]`'s subject and
+the contour and loss conventions are `[SP-8120]`'s. And in either case the design
+number is not the Bartz number: it is the **measured skirt temperature** from a hot fire with
 thermocouples or a calibrated pyrometer on the outer wall, which is the only
 station in the engine where the wall temperature is directly observable.
 

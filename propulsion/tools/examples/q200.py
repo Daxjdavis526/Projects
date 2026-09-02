@@ -308,3 +308,34 @@ EXAMPLES += [
      "args": {"omega": 3769.911, "Q": 0.070, "NPSH": 300.0},
      "expect": 2.49689, "tol": 0.001},
 ]
+
+# --- Q141-150 -------------------------------------------------------------
+# Q141 f = alpha a/(pi D) with a = 1150 m/s, D = 0.28 m:
+#   1T (alpha 1.8412) 2407.1 Hz, 2T (3.0542) 3992.9 Hz, 1R (3.8317) 5009.4 Hz.
+# Q148 required diffuser recovery 101325/2629.7 = 38.53:1 against 26.0:1 from
+#   a single normal shock.
+# Q150 n = ln(11.3/8.4)/ln(7/4) = 0.52995; a = 8.4e-3/(4.0e6**n) = 2.6637e-6
+#   SI; 1/(1-n) = 2.127.
+EXAMPLES += [
+    {"id": "q200.144", "fn": "thermal_stress_hoop",
+     "args": {"E": 110e9, "alpha": 1.8e-5, "dT": 150.0, "nu": 0.34},
+     "expect": 2.25e8, "tol": 0.001},
+    {"id": "q200.148a", "fn": "mach_from_area_ratio",
+     "args": {"gamma": 1.20, "eps": 100.0},
+     "expect": 4.89003, "tol": 0.001},
+    {"id": "q200.148b", "fn": "p0_over_p",
+     "args": {"gamma": 1.20, "Mach": 4.89003},
+     "expect": 1521.07, "tol": 0.001},
+    {"id": "q200.148c", "fn": "normal_shock_p2_p1",
+     "args": {"gamma": 1.20, "M1": 4.89003},
+     "expect": 25.9953, "tol": 0.001},
+    {"id": "q200.148d", "fn": "schmucker_separation",
+     "args": {"pa": 5000.0, "Me": 4.89003},
+     "expect": 1301.24, "tol": 0.001},
+    {"id": "q200.150a", "fn": "vieille_burn_rate",
+     "args": {"a": 2.66371e-6, "p": 4.0e6, "n": 0.529955},
+     "expect": 8.4e-3, "tol": 0.002},
+    {"id": "q200.150b", "fn": "vieille_burn_rate",
+     "args": {"a": 2.66371e-6, "p": 7.0e6, "n": 0.529955},
+     "expect": 11.3e-3, "tol": 0.002},
+]

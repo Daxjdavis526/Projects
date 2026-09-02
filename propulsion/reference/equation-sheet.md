@@ -2999,3 +2999,533 @@ $$t_{lat} = \tau_{sensor} + t_{filter} + t_{sample} + t_{logic} + t_{valve}$$
 - **Tag** [J] · **Code** —
 
 ---
+
+# Part III — Solid rocket motors (modules 19–27)
+
+## Module 19 — Solid Propellant Fundamentals
+
+### 19-3.1 — Gas generation rate
+
+$$\dot m_{gen} = \rho_p A_b r$$
+
+- **Variables** — $\dot m_{gen}$ gas generation rate [kg/s]; $\rho_p$ propellant density [kg/m³]; $A_b$ instantaneous burning surface area [m²]; $r$ burning rate [m/s].
+- **Meaning** — the propellant is consumed by sweeping a surface through a solid of known density. The supply side of every solid-motor ballistic calculation.
+- **Assumes** — the surface burns uniformly and normal to itself; no unburned propellant is ejected; the grain is homogeneous at the scale of the regression.
+- **Fails when** — the grain is cracked (so $A_b$ is not the design surface); slivers or unbonded chunks are expelled; erosive burning makes $r$ a function of position; near ignition and tail-off when the surface is not yet or no longer fully lit.
+- **Tag** [F] · **Code** —
+- **Alias** — 20-3.1, 21-3.1 (left-hand side).
+
+### 19-3.2 — Choked nozzle discharge
+
+$$\dot m_{out} = \frac{\Gamma\, p_c A_t}{\sqrt{R T_c}} = \frac{p_c A_t}{c^*}, \qquad \Gamma = \sqrt{\gamma}\left(\frac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+- **Variables** — $p_c$ chamber stagnation pressure [Pa]; $A_t$ throat area [m²]; $R = R_u/\bar M$ [J/(kg·K)]; $T_c$ [K]; $c^*$ [m/s]; $\Gamma$ [—].
+- **Meaning** — a choked throat is a fixed-conductance valve whose conductance depends only on the gas and the area. The demand side of the balance.
+- **Assumes** — choked, quasi-steady, calorically perfect single-phase gas; no throat erosion.
+- **Fails when** — the throat erodes (it always does, a few percent over a long burn); a large condensed fraction makes "the gas" a poor description; during the chamber-filling transient.
+- **Tag** [F] · **Code** `choked_mdot(gamma, R, T0, p0, At)`
+- **Alias** — 02-3.10, 03-3.7.
+
+### 19-3.3 — Equilibrium chamber pressure
+
+$$p_c = \left(a\,\rho_p\,c^*\,K_n\right)^{\frac{1}{1-n}}, \qquad K_n = \frac{A_b}{A_t}$$
+
+- **Variables** — $a$ burn-rate coefficient [m·s⁻¹·Pa⁻ⁿ]; $n$ pressure exponent [—]; $\rho_p$ [kg/m³]; $c^*$ [m/s]; $K_n$ burning-area-to-throat-area ratio [—]; $p_c$ [Pa].
+- **Meaning** — chamber pressure is set by the propellant ($a$, $n$, $\rho_p$, $c^*$) and by one geometric number ($K_n$). This is the design equation of solid internal ballistics.
+- **Assumes** — steady state; Vieille's law valid over the pressure range; $n < 1$.
+- **Fails when** — $n \ge 1$, in which case the equilibrium is unstable and the motor either extinguishes or runs away. This is the single hardest constraint on propellant formulation and why no flown propellant has $n$ near unity.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(a, n, rho_p, Ab, At, c_star_val)`
+- **Alias** — 20-3.7, 21-3.2, identical.
+
+### 19-3.4 — Solid-motor specific impulse
+
+$$I_{sp} = \frac{c^* C_F}{g_0}, \qquad c^* = \frac{\sqrt{R T_c}}{\Gamma} = \frac{1}{\Gamma}\sqrt{\frac{R_u T_c}{\bar M}}$$
+
+- **Variables** — $c^*$ [m/s]; $C_F$ [—]; $g_0 = 9.80665$ m/s²; $R_u = 8314.46$ J/(kmol·K); $T_c$ [K]; $\bar M$ mean molar mass [kg/kmol]; $\Gamma$ [—].
+- **Meaning** — performance splits cleanly into a chemistry term ($c^*$) and a nozzle-and-altitude term ($C_F$), just as for liquids. Aluminised AP composites land at 240–270 s vacuum because $\bar M$ is high (HCl, Al₂O₃) even though $T_c$ is high.
+- **Assumes** — ideal, 1-D, equilibrium or frozen single-phase expansion of a calorically perfect gas.
+- **Fails when** — a condensed phase is present, which is exactly the solid-motor case; the flow is not fully expanded or separates; $\gamma$ varies strongly through the nozzle.
+- **Tag** [F] [A] · **Code** `c_star(...)`, `c_eff(...)`, `isp_from_c(...)`
+- **Alias** — 03-3.10.
+
+### 19-3.5 — Density impulse
+
+$$I_d = \rho_p I_{sp}$$
+
+- **Variables** — $I_d$ [kg·s/m³]; $\rho_p$ propellant bulk density [kg/m³]; $I_{sp}$ [s].
+- **Meaning** — total impulse deliverable per unit *volume* of propellant; the metric on which solids beat liquids decisively (1750 kg/m³ × 265 s versus 1030 × 340 for kerolox).
+- **Assumes** — nothing beyond definitions, but the comparison is only fair between systems at the same expansion ratio and against the same back pressure.
+- **Fails when** — the mission is $\Delta v$-limited with a generous volume budget (then $I_{sp}$ alone wins); tankage/case mass rather than propellant volume dominates.
+- **Tag** [F] · **Code** `density_isp(rho, isp)`
+- **Alias** — 05-3.3, 32.
+
+---
+
+## Module 20 — Solid Combustion and Burn Rate
+
+### 20-3.1 — Gas generation rate (with the gas-displacement correction)
+
+$$\dot m_{gen} = \rho_p A_b r$$
+
+- **Variables** — as 19-3.1.
+- **Meaning** — mass of solid converted to gas per second. Strictly the gas *added to the port* is $(\rho_p - \rho_g)A_b r$, because the vacated volume already held gas; at $p_c = 7.5$ MPa with $\rho_g \approx 8$ kg/m³ against $\rho_p = 1750$ kg/m³ that correction is 0.46 % and is conventionally absorbed into the $c^*$ efficiency.
+- **Assumes** — the whole surface burns at the same rate; the propellant is homogeneous at the scale of the surface.
+- **Fails when** — an unbonded region or crack suddenly exposes new $A_b$; part of the surface is inhibited or debonded; erosive burning makes $r$ position-dependent.
+- **Tag** [F], [A] for the neglected $\rho_g$ term · **Code** —
+
+### 20-3.2 — Subsurface thermal profile
+
+$$T(x) = T_i + (T_s - T_i)\exp\!\left(\frac{r x}{\alpha}\right), \qquad x \le 0$$
+
+- **Variables** — $x$ measured into the solid, negative into cold propellant [m]; $T_i$ bulk soak temperature [K]; $T_s$ surface temperature [K]; $r$ [m/s]; $\alpha$ thermal diffusivity [m²/s].
+- **Meaning** — the preheated layer is an exponential of e-folding depth $\delta_{th} = \alpha/r$, typically tens of microns. Its thermal relaxation time $\tau_{th} = \alpha/r^2$ sets the frequency above which the burn rate cannot follow pressure.
+- **Assumes** — steady 1-D regression; constant properties; no subsurface reaction; no radiation absorption below the surface.
+- **Fails when** — an energetic plasticiser reacts below the surface (nitrate-ester systems do); $r$ changes on a timescale comparable to $\tau_{th}$; near an embedded oxidiser particle, where the field is not 1-D.
+- **Tag** [F] · **Code** —
+
+### 20-3.3 — Summerfield granular-diffusion-flame linearisation
+
+$$\frac{p}{r} = a' + b'p^{1/3}$$
+
+- **Variables** — $p$ [Pa]; $r$ [m/s]; $a'$, $b'$ empirical constants [SI-consistent].
+- **Meaning** — plotting $p/r$ against $p^{1/3}$ linearises composite burn-rate data over a useful range; the intercept is the kinetics-controlled term and the slope the diffusion-controlled term.
+- **Assumes** — AP-composite propellant; monomodal oxidiser; no metal; no erosive flow.
+- **Fails when** — the propellant is aluminised (metal changes the near-surface energy balance); at very high pressure where the flame collapses to the surface; for nitramine or double-base propellants, which have no granular diffusion structure.
+- **Tag** [E] · **Code** —
+
+### 20-3.4 — Saint-Robert / Vieille law
+
+$$r = a\,p^{\,n}$$
+
+- **Variables** — $r$ [m/s]; $p$ [Pa]; $a$ [m·s⁻¹·Pa⁻ⁿ]; $n$ [—].
+- **Meaning** — the propellant's constitutive law, measured not derived; $n$ is typically 0.2–0.5 for AP composites.
+- **Assumes** — fixed initial temperature $T_i$; no cross-flow over the surface; quasi-steady combustion (pressure changing slowly compared with $\tau_{th}$); pressure inside the fitted range.
+- **Fails when** — extrapolated outside the fitted range (extrapolating across a plateau is a common and expensive error); during the ignition transient and tail-off where $dp/dt$ is large; in the aft end of a high-$G$ port; at very low pressure, below the *deflagration limit* (typically 0.5–1.5 MPa for AP composites) where combustion is not sustained at all.
+- **Tag** [E] · **Code** `vieille_burn_rate(a, p, n)`
+
+### 20-3.5 — Burn-rate coefficient unit conversion
+
+$$a_{\mathrm{SI}} = a_{[\mathrm{mm/s,MPa}]}\times 10^{-3}\times\left(10^{-6}\right)^{n}$$
+
+- **Variables** — $a_{\mathrm{SI}}$ [m·s⁻¹·Pa⁻ⁿ]; $a_{[\mathrm{mm/s,MPa}]}$ the coefficient as usually tabulated; $n$ [—], dimensionless and unchanged between systems.
+- **Meaning** — the conversion that must be done before any SI calculation. $a$ carries the units of the whole law, so it changes by $10^{-3}\cdot(10^{-6})^n$, not by a simple factor.
+- **Assumes** — the same $n$ in both systems, which is true.
+- **Fails when** — someone has quoted "$a$" for a law written as $r = a(p/p_{ref})^n$, a different and much safer convention. **Always check whether a reference pressure is present.**
+- **Tag** [F] · **Code** —
+
+### 20-3.6 — Lumped chamber mass balance
+
+$$\frac{d}{dt}\left(\rho_g V_c\right) = \rho_p A_b r - \frac{p_c A_t}{c^*}$$
+
+- **Variables** — $\rho_g$ port gas density [kg/m³]; $V_c$ free port volume [m³]; other symbols as above.
+- **Meaning** — gas accumulates in the port at the difference between what the surface makes and what the throat passes. Setting the derivative to zero gives 20-3.7.
+- **Assumes** — choked nozzle; uniform port properties (a lumped chamber); $c^*$ constant; no gas storage in cracks or the igniter cavity.
+- **Fails when** — the nozzle is not yet choked (early ignition transient); the port is long and slender enough that head-to-aft pressure drop is not negligible; significant mass is stored in an unvented crack.
+- **Tag** [F] · **Code** —
+
+### 20-3.7 — Equilibrium pressure (design equation)
+
+$$p_c = \left(a\,\rho_p\,c^*\,K_n\right)^{\frac{1}{1-n}},\qquad K_n \equiv \frac{A_b}{A_t}$$
+
+- **Variables** — as 19-3.3.
+- **Meaning** — everything the designer controls appears once: chemistry in $a$, $n$, $\rho_p$, $c^*$; geometry in $K_n$.
+- **Assumes** — everything in 20-3.6, plus $n < 1$ (else no stable root), plus quasi-steady operation.
+- **Fails when** — erosive burning makes $r$ position-dependent; during transients; when $A_t$ changes fast enough that equilibrium is not reached — which, given a relaxation time of a few milliseconds, essentially never happens in a large motor.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(a, n, rho_p, Ab, At, c_star_val)`
+
+### 20-3.8 — Pressure-perturbation decay and the $n<1$ condition
+
+$$\frac{d\varepsilon}{dt} = -\frac{(1-n)}{\tau_{fill}}\,\varepsilon,
+\qquad \tau_{fill} \equiv \frac{V_c}{A_t c^*\Gamma^2} = \frac{L^*}{c^*\Gamma^2}$$
+
+- **Variables** — $\varepsilon$ fractional pressure perturbation [—]; $\tau_{fill}$ chamber filling time [s]; $L^* = V_c/A_t$ [m]; $\Gamma$ [—].
+- **Meaning** — perturbations decay exponentially with time constant $\tau_{fill}/(1-n)$. The closer $n$ is to 1 the slower the motor recovers from an upset; at $n > 1$ the exponent changes sign and perturbations grow. This is the dynamic proof of the $n < 1$ requirement.
+- **Assumes** — lumped chamber; quasi-steady burn rate (the surface responds instantly); constant $T_0$; choked throat; small perturbation.
+- **Fails when** — the perturbation period approaches the solid-phase relaxation time $\tau_{th} = \alpha/r^2$; the burn rate then lags pressure and this analysis is invalid.
+- **Tag** [F] · **Code** —
+- **Alias** — $\tau_{fill}$ is identical to the $t_s$ of 06-3.5 and $\tau_c$ of 15-3.4.
+
+### 20-3.9 — Temperature sensitivity of burn rate
+
+$$\sigma_p \equiv \left(\frac{\partial \ln r}{\partial T_i}\right)_p
+\;\Longrightarrow\;
+\frac{r_2}{r_1} = \exp\!\left[\sigma_p (T_{i,2}-T_{i,1})\right]$$
+
+- **Variables** — $\sigma_p$ [1/K], typically 0.001–0.004 K⁻¹; $T_i$ initial (soak) temperature [K].
+- **Meaning** — fractional change in burn rate per kelvin of soak temperature, measured **at constant pressure** — in a strand burner or closed bomb, not in a motor.
+- **Assumes** — $\sigma_p$ constant over the range; the grain uniformly soaked.
+- **Fails when** — the range spans a binder glass transition or an ingredient phase change (plasticised binders can transition inside the military −54 °C to +71 °C range); the grain is *not* uniformly soaked — a thick grain takes days to equilibrate, and a rapid transfer from a cold magazine to a warm launcher leaves a gradient.
+- **Tag** [E] · **Code** `temperature_sensitivity_pressure(sigma_p, dT)`
+
+### 20-3.10 — Temperature sensitivity of chamber pressure
+
+$$\pi_K \equiv \left(\frac{\partial \ln p_c}{\partial T_i}\right)_{K_n} = \frac{\sigma_p}{1-n}$$
+
+- **Variables** — $\pi_K$ [1/K]; $\sigma_p$ [1/K]; $n$ [—].
+- **Meaning** — the temperature sensitivity of *chamber pressure* is that of *burn rate* amplified by the same $1/(1-n)$ that amplifies everything else. This drives the hot-day MEOP factor.
+- **Assumes** — $n$ independent of $T_i$ (good to first order); fixed geometry; equilibrium operation; $c^*$ and $\rho_p$ temperature-independent (grain thermal expansion is a $10^{-4}$/K effect on $\rho_p$ and is neglected).
+- **Fails when** — $n$ itself varies with temperature; outside the qualified temperature range.
+- **Tag** [F] · **Code** `pressure_sensitivity_pi_K(sigma_p, n)`
+
+### 20-3.11 — Lenoir–Robillard erosive burning
+
+$$r = \underbrace{a p^{n}}_{r_0} + \underbrace{\frac{\alpha_{LR}\,G^{0.8}}{D_h^{0.2}}\exp\!\left(-\frac{\beta_{LR}\,\rho_p r}{G}\right)}_{r_e}$$
+
+- **Variables** — $G$ local port mass flux [kg/(m²·s)]; $D_h$ port hydraulic diameter [m]; $\alpha_{LR}$, $\beta_{LR}$ empirical constants fitted per propellant.
+- **Meaning** — the erosive term is a turbulent-convection heat-transfer law — the $G^{0.8}D_h^{-0.2}$ group is exactly the Dittus–Boelter/Colburn scaling of Module 10 — multiplied by a blowing correction: gas leaving the surface at $\rho_p r$ thickens the boundary layer and *shields* the surface.
+- **Assumes** — turbulent, fully developed, subsonic port flow; constants fitted to this propellant at this pressure.
+- **Fails when** — extrapolated to another propellant (the constants are not transferable); in the port entrance region; near a slot or fin where the flow is 3-D; at transonic port Mach numbers. Note $r$ appears on both sides — the equation is implicit and must be solved iteratively.
+- **Tag** [E] · **Code** —
+
+### 20-3.12 — Threshold-flux erosive model
+
+$$r = a p^n + k\,\langle G - G_{th}\rangle, \qquad \langle x\rangle = \max(x,0)$$
+
+- **Variables** — $k$ erosive slope [m³/kg]; $G_{th}$ threshold flux [kg/(m²·s)]; $G$ [kg/(m²·s)].
+- **Meaning** — below a threshold flux the boundary layer's blowing shield wins and there is no augmentation; above it, augmentation is roughly linear in the excess.
+- **Assumes** — constants fitted to data; single propellant; subsonic port.
+- **Fails when** — used outside the fit; it will always understate the sharp onset seen in some data. A teaching and preliminary-design model, not a qualification model.
+- **Tag** [E] [A] · **Code** —
+
+### 20-3.13 — Solid-motor acoustic modes
+
+$$f_{1L} = \frac{a_g}{2L_c}, \qquad
+f_{1T} = \frac{1.8412\,a_g}{\pi D}, \qquad
+a_g = \sqrt{\gamma R_g T_0}$$
+
+- **Variables** — $f_{1L}$, $f_{1T}$ first longitudinal and first tangential frequencies [Hz]; $a_g$ speed of sound in the combustion gas [m/s]; $L_c$ chamber length [m]; $D$ port diameter [m]; 1.8412 the first zero of $J_1'$ [—].
+- **Meaning** — the discrete frequencies the chamber will ring at. In a large solid, 1L is the dangerous one (tens of Hz) and it couples to vehicle structure — the "thrust oscillation" problem of the Shuttle SRB and Ares I.
+- **Assumes** — uniform gas properties; simple cylindrical geometry; rigid walls; no mean-flow correction.
+- **Fails when** — the port is star-shaped or slotted (transverse mode shapes are then not Bessel functions); the gas is heavily particle-laden (effective sound speed drops); and as the grain burns back and $L_c$, $D$ change — **the mode frequencies sweep during the burn, which is why instability often appears only in a window of the trace**.
+- **Tag** [F] · **Code** `a_sound(gamma, R, T)`
+- **Alias** — 06-3.15, 15-3.9, 18-3.14 give the same $f_{1T}$.
+
+### 20-3.14 — Ballistic influence coefficients
+
+$$\frac{\delta p_c}{p_c} = \frac{1}{1-n}\left[\frac{\delta A_b}{A_b} - \frac{\delta A_t}{A_t} + \frac{\delta a}{a} + \frac{\delta c^*}{c^*} + \frac{\delta \rho_p}{\rho_p}\right]$$
+
+- **Variables** — fractional perturbations of each input [—].
+- **Meaning** — the influence-coefficient form of 20-3.7; the equation used to build a ballistic error budget. Every input error is amplified by $1/(1-n)$.
+- **Assumes** — small perturbations; $n$ constant.
+- **Fails when** — perturbations are large (use 20-3.7 directly); the perturbation itself changes $n$ — a grain crack does not just raise $A_b$, it exposes surface at a location with different flow conditions.
+- **Tag** [F] · **Code** —
+- **Alias** — 21-3.4 and 23-3.6 are special cases with only the $A_b$ term.
+
+---
+
+## Module 21 — Grain Geometry
+
+### 21-3.1 — Quasi-steady mass balance
+
+$$\rho_p A_b r = \frac{p_c A_t}{c^*}$$
+
+- **Variables** — $\rho_p$ [kg/m³]; $A_b$ [m²]; $r$ [m/s]; $p_c$ [Pa]; $A_t$ [m²]; $c^*$ [m/s].
+- **Meaning** — gas generated by surface regression equals gas leaving a choked throat.
+- **Assumes** — quasi-steady (chamber gas mass is small compared with what flows through it in one filling time); uniform $p_c$ over the burning surface; no erosive burning; no throat erosion; complete and prompt combustion.
+- **Fails when** — during ignition transient and tail-off; at high port mass flux (erosive burning); when the throat erodes appreciably.
+- **Tag** [F] · **Code** —
+
+### 21-3.2 — Equilibrium pressure from $K_n$
+
+$$p_c = \left( a\,\rho_p\, c^*\, K_n \right)^{\frac{1}{1-n}}, \qquad K_n \equiv \frac{A_b}{A_t}$$
+
+- **Variables** — as 19-3.3.
+- **Meaning** — chamber pressure is set entirely by the *area ratio* $K_n$ and the propellant's ballistic constants. Grain design is therefore the design of the $K_n(u)$ curve.
+- **Assumes** — everything in 21-3.1, plus $n < 1$.
+- **Fails when** — $n \to 1$; $a$ shifts with initial grain temperature; erosive burning makes $r$ position-dependent.
+- **Tag** [F], with [E] inherited from the rate law · **Code** `solid_equilibrium_pressure(...)`
+
+### 21-3.3 — Thrust from burning area
+
+$$F = C_F\, p_c\, A_t = C_F\, c^*\, \rho_p\, A_b\, r$$
+
+- **Variables** — $F$ [N]; $C_F$ [—]; $p_c$ [Pa]; $A_t$ [m²]; $c^*$ [m/s]; $\rho_p$ [kg/m³]; $A_b$ [m²]; $r$ [m/s].
+- **Meaning** — with $A_t$, $C_F$ and the propellant fixed, thrust is proportional to $A_b r$; since $r$ itself rises with $p_c$ which rises with $A_b$, thrust is a *superlinear* function of burning area.
+- **Assumes** — fixed, attached nozzle flow.
+- **Fails when** — the nozzle separates; throat erosion changes $A_t$ during the burn.
+- **Tag** [F] · **Code** —
+
+### 21-3.4 — Burning-area amplification law
+
+$$\frac{\delta p_c}{p_c} = \frac{1}{1-n}\,\frac{\delta A_b}{A_b}
+\qquad\text{and}\qquad
+\frac{\delta F}{F} \approx \frac{1}{1-n}\,\frac{\delta A_b}{A_b}$$
+
+- **Variables** — fractional perturbations [—]; $n$ [—].
+- **Meaning** — a fractional error or variation in burning area shows up in chamber pressure amplified by $1/(1-n)$. A 10 % area error at $n = 0.35$ is a 15 % pressure error.
+- **Assumes** — small perturbations; fixed $A_t$; $C_F$ weakly dependent on $p_c$.
+- **Fails when** — excursions are large (use 21-3.2 directly); $n$ near 1.
+- **Tag** [F] · **Code** —
+
+### 21-3.5 — Level-set (eikonal) surface regression
+
+$$\frac{\partial \phi}{\partial t} + r\,\lvert \nabla \phi \rvert = 0$$
+
+- **Variables** — $\phi$ signed distance function [m]; $r$ local burn rate [m/s]; $t$ [s].
+- **Meaning** — the zero level set of $\phi$ is the burning surface, and it propagates normal to itself. This is the general burn-back statement that every modern grain-design code solves numerically.
+- **Assumes** — $r$ may depend on position and time but not on surface curvature.
+- **Fails when** — the surface meets an inert boundary (liner, inhibitor, case) — those are boundary conditions, not part of the PDE; the propellant is inhomogeneous at the scale of interest.
+- **Tag** [F] · **Code** —
+
+### 21-3.6 — Star-grain reference geometry
+
+$$s_0 = \lvert AV\rvert = R_p\,\frac{\sin\beta}{\sin(\beta+\theta)},
+\qquad
+R_i = \lvert OV\rvert = R_p\,\frac{\sin\theta}{\sin(\beta+\theta)}$$
+
+- **Variables** — $s_0$ flank length [m]; $R_i$ valley radius [m]; $R_p$ apex radius [m]; $\beta = \pi/N$ [rad]; $\theta$ flank half-angle [rad]; $N$ point count [—].
+- **Meaning** — the sharp star is fully determined by $(N, R_p, \theta)$.
+- **Assumes** — $\beta + \theta < \pi/2$, i.e. the propellant spokes actually point inward.
+- **Fails when** — that inequality is violated; the outline then self-intersects.
+- **Tag** [F] · **Code** —
+
+### 21-3.7 — Star burning perimeter, Phase I
+
+$$P(u) = 2N\,s_0 + 2N\left[\left(\frac{\pi}{2}-\theta\right) - \cot(\beta+\theta)\right] u$$
+
+- **Variables** — $P$ burning perimeter [m]; $u = f + y$ total offset (fillet plus web burned) [m]; $N$, $\theta$, $\beta$, $s_0$ as 21-3.6.
+- **Meaning** — **the burning perimeter of a star grain is exactly linear in burned distance**, with a slope that depends only on $N$ and $\theta$ — not on $R_p$, not on $f$, not on the case radius. This is why stars are the classical neutral-burn geometry.
+- **Assumes** — prismatic grain (constant section, inhibited ends); uniform burn rate; Phase I (the flanks have not yet vanished and the tips have not reached the liner).
+- **Fails when** — outside Phase I; use 21-3.10.
+- **Tag** [F] · **Code** —
+
+### 21-3.8 — Star port area, Phase I
+
+$$A_{port}(u) = A_0 + P_0\,u + \tfrac{1}{2}\,P'\,u^2,
+\qquad A_0 = N R_p R_i \sin\beta, \quad P_0 = 2Ns_0, \quad P' = dP/du$$
+
+- **Variables** — $A_{port}$ port cross-sectional area [m²]; $A_0$ area of the sharp reference polygon [m²]; $P_0$ initial perimeter [m]; $P'$ perimeter slope [—].
+- **Meaning** — exact quadratic; gives volumetric loading and port-to-throat ratio at any web position, which is what sets erosive-burning risk.
+- **Assumes** — Phase I.
+- **Fails when** — outside Phase I.
+- **Tag** [F] · **Code** —
+
+### 21-3.9 — Neutrality condition for a star
+
+$$\frac{\pi}{2} - \theta = \cot\!\left(\frac{\pi}{N} + \theta\right)$$
+
+- **Variables** — $N$ point count [—]; $\theta$ flank half-angle [rad].
+- **Meaning** — a single transcendental relation for an exactly neutral star. **Neutrality is a property of the angles alone**; the radii set the web, burn time and loading, but not the shape of the trace.
+- **Assumes** — Phase I throughout the burn.
+- **Fails when** — the burn leaves Phase I before web-out.
+- **Tag** [F] · **Code** —
+
+### 21-3.10 — Star burning perimeter, Phase II
+
+$$P(u) = N u \left[\pi + 2\beta - 2\arccos\!\left(\frac{R_p\sin\beta}{u}\right)\right], \qquad u \ge u_1$$
+
+- **Variables** — $u_1$ offset at which the flat flanks vanish [m]; other symbols as above.
+- **Meaning** — once the flat flanks are gone the star has forgotten it was a star; as $u \to \infty$ the bracket tends to $2\beta = 2\pi/N$ and $P \to 2\pi u$, a plain circular bore. It joins 21-3.7 continuously at $u_1$.
+- **Assumes** — the arcs have not reached the liner.
+- **Fails when** — the tips touch the liner; the burn then becomes a sliver problem.
+- **Tag** [F] · **Code** —
+
+### 21-3.11 — Star sizing for whole-web neutrality
+
+$$R_o - R_p \lesssim u_1 = R_p\,\frac{\sin\beta}{\cos(\beta+\theta)}
+\quad\Longrightarrow\quad
+R_p \ge \frac{R_o}{1 + \sin\beta/\cos(\beta+\theta)}$$
+
+- **Variables** — $R_o$ case (outer grain) radius [m]; $R_p$ apex radius [m]; $u_1$ [m]; $\beta$, $\theta$ [rad].
+- **Meaning** — the sizing rule that keeps the star in Phase I for its whole web. It forces the star points out toward the case, which thins the web and enlarges the port — the mechanism by which neutrality costs volumetric loading and burn time.
+- **Assumes** — the geometry of 21-3.6.
+- **Fails when** — treated as an equality rather than an inequality; the "$\lesssim$" is a judgment call about how much Phase-II regressivity is acceptable.
+- **Tag** [J] on the inequality; the equality is geometry · **Code** —
+
+---
+
+## Module 22 — Solid Motor Cases
+
+### 22-3.1 — Hoop (circumferential) membrane stress
+
+$$\sigma_\theta = \frac{pR}{t}$$
+
+- **Variables** — $\sigma_\theta$ [Pa]; $p$ internal gauge pressure [Pa]; $R$ internal radius [m]; $t$ wall thickness [m].
+- **Meaning** — the circumferential tension that keeps the cylinder from unzipping along a generator; it is the sizing stress for every motor case.
+- **Assumes** — thin wall ($t/R \lesssim 0.1$); membrane behaviour (no through-thickness bending); uniform pressure; far from discontinuities.
+- **Fails when** — within about $\sqrt{Rt}$ of any dome junction, joint, boss or thickness step, where bending boundary layers add local stress; for thick walls, where the Lamé solution must be used and the inner-surface stress exceeds this.
+- **Tag** [F] · **Code** —
+- **Alias** — 14-3.17 uses $\sigma_\theta = pD/2t$, the same relation with diameter.
+
+### 22-3.2 — Axial membrane stress
+
+$$\sigma_z = \frac{pR}{2t} = \frac{\sigma_\theta}{2}$$
+
+- **Variables** — as 22-3.1; $\sigma_z$ meridional membrane stress [Pa].
+- **Meaning** — the axial tension that carries the pressure load on the domes back through the cylinder; exactly half the hoop stress, which is why the critical flaw orientation is axial.
+- **Assumes** — closed vessel; pressure-only loading; thin wall.
+- **Fails when** — external axial load is present. A gimballed nozzle, stack compression, or a bending moment adds to or subtracts from this; in a booster at max-Q the compressive side of the bending distribution can drive $\sigma_z$ negative and turn the case into a buckling problem.
+- **Tag** [F] · **Code** —
+
+### 22-3.3 — Laplace–Young membrane shell equation
+
+$$\frac{\sigma_1}{r_1} + \frac{\sigma_2}{r_2} = \frac{p}{t}$$
+
+- **Variables** — $\sigma_1$ meridional and $\sigma_2$ circumferential membrane stress [Pa]; $r_1$, $r_2$ principal radii of curvature [m]; $p$ [Pa]; $t$ [m].
+- **Meaning** — pressure is carried by the *curvature* of the shell, not by bending. It is the design equation for domes.
+- **Assumes** — membrane state (no moments); smooth continuous shape; thickness small compared with both radii.
+- **Fails when** — at the dome–cylinder junction of any dome that is not tangent-continuous *and* curvature-compatible; near the polar opening. Both need a bending analysis or local thickening.
+- **Tag** [F] · **Code** —
+
+### 22-3.4 — MEOP build-up
+
+$$\mathrm{MEOP} = p_{c,\mathrm{nom}} \times k_{T} \times k_{\mathrm{ign}} \times k_{\mathrm{mfg}} \times k_{\mathrm{stat}}$$
+
+- **Variables** — $p_{c,\mathrm{nom}}$ nominal equilibrium chamber pressure [Pa]; $k_T$ hot-day temperature-sensitivity factor from $\pi_K = \sigma_p/(1-n)$ ($\sigma_p = 0.002$ K⁻¹ with $n = 0.35$ gives $\pi_K \approx 0.0031$ K⁻¹, so +30 K of conditioning is about +9.7 % pressure); $k_{\mathrm{ign}}$ ignition-transient overshoot; $k_{\mathrm{mfg}}$ burn-rate and throat-area manufacturing tolerance; $k_{\mathrm{stat}}$ statistical allowance (typically a 3σ / 99.865 % upper bound). All [—].
+- **Meaning** — the design pressure is a *worst credible stack*, not a mean.
+- **Assumes** — the factors are independent and multiplicative.
+- **Fails when** — a factor is not independent (throat erosion and burn rate are correlated through the same propellant batch); a genuinely off-nominal event — a grain crack raising burning area — is outside the stack entirely.
+- **Tag** [E] [J] · **Code** `pressure_sensitivity_pi_K(sigma_p, n)` for $k_T$
+
+### 22-3.5 — Burst and proof pressures
+
+$$p_b = j_b\,\mathrm{MEOP}, \qquad p_{pr} = j_{pr}\,\mathrm{MEOP}$$
+
+- **Variables** — $j_b$ burst (ultimate) factor [—]; $j_{pr}$ proof factor [—]; pressures [Pa].
+- **Meaning** — the case must not rupture below $p_b$, and every flight article is taken to $p_{pr}$ as an acceptance screen.
+- **Assumes** — ambient-temperature material allowables unless the case runs hot.
+- **Fails when** — the case is hot at the moment of peak pressure. A thin steel case under a failed insulation panel loses strength fast and the burst factor evaporates.
+- **Tag** [J] · **Code** —
+- **Alias** — 18-3.2 gives the same relation in liquid-engine test language ($k_p$, $k_b$).
+
+### 22-3.6 — Critical surface-flaw depth
+
+$$a_c = \frac{1}{\pi}\left(\frac{K_{Ic}}{1.12\,\sigma}\right)^{2}$$
+
+- **Variables** — $a_c$ flaw depth at instability [m]; $K_{Ic}$ plane-strain fracture toughness [Pa·m$^{1/2}$]; $\sigma$ membrane stress normal to the flaw [Pa] (use the hoop stress; the critical flaw is axial); 1.12 the free-surface correction [—]; $Q$ flaw-shape parameter [—], 1.0 for a long shallow flaw to ~2.4 for a semicircular one.
+- **Meaning** — the flaw size NDE must be able to find with confidence. This is why high-strength steel cases are sized by *toughness*, not strength: raising $\sigma$ shrinks $a_c$ quadratically until it falls below inspection capability.
+- **Assumes** — linear-elastic fracture mechanics; plane strain (thickness large compared with the plastic zone); a flaw normal to the maximum principal stress.
+- **Fails when** — thin sections, where plane stress raises apparent toughness; residual stress from welds or forming, which must be added to $\sigma$; environmentally assisted cracking, where the governing threshold is $K_{ISCC} \ll K_{Ic}$.
+- **Tag** [F] · **Code** —
+- **Alias** — 16-3.8 rearranged for $a$ at $K = K_{Ic}$.
+
+### 22-3.7 — Joint-rotation seal rate condition
+
+$$\dot{\delta}_{\mathrm{seal}} \ge \dot{\delta}_{\mathrm{gap}}$$
+
+- **Variables** — $\dot\delta$ rates of seal recovery and gap opening [m/s]; the gap opens on the ignition-rise timescale, order 0.3–0.6 s.
+- **Meaning** — the seal is maintained only if the O-ring's own elastic recovery plus the pressure pushing it into the gap can close the gap as fast as the gap opens. **This is a rate-matched seal, not a static one** — the physics behind the Challenger clevis-joint failure.
+- **Assumes** — the ring is seated with design squeeze at the moment of ignition.
+- **Fails when** — elastomer stiffness rises: an O-ring's response time is strongly temperature-dependent, and a fluorocarbon elastomer below its glass-transition-influenced range responds far more slowly than the same ring at 25 °C.
+- **Tag** [F] · **Code** —
+
+### 22-3.8 — Netting analysis of a filament-wound cylinder
+
+$$t_\alpha = \frac{pR}{2\sigma_f\cos^2\alpha},\qquad
+t_{90} = \frac{pR}{\sigma_f}\left(1-\frac{\tan^{2}\alpha}{2}\right),\qquad
+t_L = \frac{t_\alpha + t_{90}}{V_f}$$
+
+- **Variables** — $t_\alpha$, $t_{90}$ fibre-only layer thicknesses for helical and hoop plies [m]; $\alpha$ helical winding angle from the motor axis [rad]; $\sigma_f$ delivered fibre allowable [Pa]; $V_f$ fibre volume fraction [—]; $t_L$ physical laminate thickness [m].
+- **Meaning** — a direct force balance telling you how much fibre to put in each direction.
+- **Assumes** — the resin carries nothing; fibres straight and equally stressed; membrane state; no interlaminar or bending stress; perfect fibre translation.
+- **Fails when** — near bosses, skirts and any discontinuity; in compression or shear (netting says a composite has zero compressive strength — wrong but usefully conservative); whenever fibre waviness, tow-drop or cure residual stress reduces translation. Real burst pressures run below netting prediction unless $\sigma_f$ is calibrated on burst tests of the same construction.
+- **Tag** [E] · **Code** —
+
+### 22-3.9 — Geodesic winding angle from the polar opening
+
+$$\sin\alpha = \frac{r_0}{R}$$
+
+- **Variables** — $r_0$ polar opening (boss) radius [m]; $R$ cylinder radius [m]; $\alpha$ helical angle at the cylinder [rad].
+- **Meaning** — the boss size dictates the winding angle; you do not get to choose them independently.
+- **Assumes** — geodesic (frictionless) winding on a surface of revolution; constant $r_0$ at both ends.
+- **Fails when** — non-geodesic winding exploits fibre friction to hold off-geodesic paths (used deliberately to open the design space); the case has different fore and aft boss diameters.
+- **Tag** [F] · **Code** —
+
+### 22-3.10 — Vessel performance index
+
+$$\frac{pV}{W} = \frac{2}{3}\frac{\sigma}{\rho g_0}\quad\text{(sphere)}$$
+
+- **Variables** — $\sigma$ material allowable at burst [Pa]; $\rho$ density [kg/m³]; $g_0$ [m/s²]; $pV/W$ [m].
+- **Meaning** — the material-only merit of a pressure vessel; higher is a lighter case for the same pressure and volume. The units are metres — an energy per unit weight, i.e. the height the vessel could lift itself to on its own stored gas energy.
+- **Assumes** — membrane cylinder or sphere; no domes, bosses, joints, skirts, insulation or minimum-gauge constraint; isotropic material at a single allowable.
+- **Fails when** — real hardware carries 25–50 % parasitic mass on top; anisotropic composites require the netting-derived effective value; minimum gauge, handling or non-pressure loads set the thickness instead of $\sigma$.
+- **Tag** [F] · **Code** —
+- **Alias** — 12-3.6 uses the same index for pressurant bottles.
+
+### 22-3.11 — Netting-based vessel index
+
+$$\frac{pV}{W}\bigg|_{\mathrm{netting}} = \frac{\sigma_f V_f}{3\rho\, g_0}$$
+
+- **Variables** — $\sigma_f$ delivered fibre allowable [Pa]; $V_f$ fibre volume fraction [—]; $\rho$ *laminate* density [kg/m³]; $g_0$ [m/s²].
+- **Meaning** — the composite equivalent of 22-3.10, with the factor 3 rather than 2 paying for the 1.5× fibre penalty of a cylinder that is not a pure isotensoid sphere.
+- **Assumes** — netting theory; fibre translation captured in $\sigma_f$.
+- **Fails when** — everywhere netting fails (see 22-3.8).
+- **Tag** [E] · **Code** —
+
+### 22-3.12 — Motor mass fraction from the vessel index
+
+$$\zeta = \frac{m_p}{m_p + m_{\mathrm{case}} + m_{\mathrm{other}}}
+= \left[1 + \frac{p_b}{\eta_V \rho_p g_0 (PV/W)} + \frac{m_{\mathrm{other}}}{\eta_V V\rho_p}\right]^{-1}$$
+
+- **Variables** — $\zeta$ propellant mass fraction [—]; $\eta_V$ volumetric loading fraction [—]; $\rho_p$ propellant density [kg/m³]; $m_{\mathrm{other}}$ nozzle + insulation + igniter + skirts + TVC [kg]; $V$ case internal volume [m³]; $p_b$ burst pressure [Pa].
+- **Meaning** — the whole case-design argument in one line: mass fraction improves with a better vessel index, a higher propellant density, a fuller case, and a *lower* design pressure.
+- **Assumes** — the case is membrane-sized.
+- **Fails when** — small motors, where $m_{\mathrm{other}}$ dominates and the case material barely matters.
+- **Tag** [F] · **Code** —
+
+---
+
+## Module 23 — Insulation and Liners
+
+### 23-3.1 — Ablation surface energy balance
+
+$$q_{\text{conv}}\,\phi_b + q_{\text{rad}} = \rho_i\,\dot{s}_c\,H_{\text{eff}} + q_{\text{cond,in}}$$
+
+- **Variables** — $q_{\text{conv}}$ convective flux with no blowing [W/m²]; $\phi_b$ blowing-reduction factor [—], 0.4–0.7 typical; $q_{\text{rad}}$ radiative flux from the particle-laden gas [W/m²]; $\rho_i$ insulation density [kg/m³]; $\dot s_c$ char rate [m/s]; $H_{\text{eff}}$ effective heat of ablation [J/kg]; $q_{\text{cond,in}}$ flux conducted into the virgin substrate [W/m²].
+- **Meaning** — incident heat is split between consuming material and heating what remains. Ablation works because pyrolysis gas blows into the boundary layer and cuts the convective flux.
+- **Assumes** — quasi-steady ablation; 1-D through-thickness conduction; no in-depth radiation absorption.
+- **Fails when** — the char is stripped mechanically rather than thermally (particle impingement, high shear), in which case recession is set by momentum, not energy, and this underpredicts badly; during the first few seconds, when the transient conduction term dominates.
+- **Tag** [F] [A] · **Code** —
+
+### 23-3.2 — Recession-rate correlation
+
+$$\dot{s} = \dot{s}_0 + C_G\,G^{m}\,p^{k}$$
+
+- **Variables** — $\dot s$ total surface recession rate [m/s]; $\dot s_0$ zero-crossflow (radiation- and conduction-limited) rate [m/s]; $G$ local mass flux [kg/(m²·s)]; $p$ local static pressure [Pa]; $C_G$, $m$, $k$ fitted constants for one material at one propellant flame condition, typically $m \approx 0.6$–1.0 and $k \approx 0.1$–0.3.
+- **Meaning** — a floor set by radiation plus a crossflow-driven term; the practical sizing tool for insulation thickness distribution.
+- **Assumes** — the fit was made on the *same* propellant, the same material lot, and a comparable geometry.
+- **Fails when** — extrapolated to another propellant (particle size distribution changes impingement); to a stagnation or impingement geometry (this is a boundary-layer correlation and impingement is not); below the exposure time at which the char layer reaches quasi-steady thickness. **There is no universal correlation**; published constants are order-of-magnitude only.
+- **Tag** [E] [J] · **Code** —
+
+### 23-3.3 — Short-exposure char depth
+
+$$\delta_c(t) \approx C\sqrt{\kappa\, t}, \qquad \kappa = \frac{k_i}{\rho_i c_{p,i}}$$
+
+- **Variables** — $\delta_c$ char depth [m]; $\kappa$ thermal diffusivity of the virgin insulator [m²/s]; $t$ time [s]; $C$ an $O(1)$ constant set by the ratio of pyrolysis temperature to surface temperature [—].
+- **Meaning** — for short exposures char depth grows as $\sqrt{t}$, not linearly. Short-exposure stations (a submerged nozzle's forward face, an aft dome exposed only late) must be sized with this, not a linear rate.
+- **Assumes** — semi-infinite solid; constant properties; surface temperature stepped at $t = 0$.
+- **Fails when** — the char thickness becomes large enough for blowing and char conduction to control, i.e. after roughly $\delta_c^2/\kappa$ seconds. For a filled EPDM with $\kappa \approx 1.6\times10^{-7}$ m²/s and $\delta_c = 3$ mm that is about 60 s — most of a booster burn.
+- **Tag** [A] [J] · **Code** —
+
+### 23-3.4 — Insulation thickness sizing
+
+$$t_{\text{ins}}(x) = \mathrm{FS}\cdot\delta_c(x) + \delta_{\text{res}} + \delta_{\text{mfg}}$$
+
+- **Variables** — $t_{\text{ins}}$ design thickness [m]; FS safety factor on predicted char depth [—], typically 1.5–2.0 for a new design, 1.25–1.5 where flight or full-scale static data exist; $\delta_{\text{res}}$ required residual *virgin* layer keeping the bondline below its temperature limit [m], typically 1–3 mm; $\delta_{\text{mfg}}$ manufacturing tolerance allowance [m].
+- **Meaning** — never let the char front reach the case, and never let it reach the case *plus a thermal buffer*.
+- **Assumes** — the recession prediction is unbiased, so FS covers scatter, not error.
+- **Fails when** — the model is extrapolated: the FS then covers nothing, because the mean is wrong. **A factor of 1.5 on a prediction that is 2× low is not conservative.** This is the single most common way insulation sizing goes wrong.
+- **Tag** [J] · **Code** —
+
+### 23-3.5 — Bore hoop strain from case–grain CTE mismatch
+
+$$\varepsilon_\theta(a) = \frac{\Delta T\big[\,2\alpha_c b^2 - (3\alpha_p - \alpha_c)(b^2-a^2)\,\big]}{2a^2}$$
+
+- **Variables** — $\varepsilon_\theta(a)$ hoop strain at the bore [—]; $\Delta T = T - T_{sf}$ [K], negative on cooldown from the stress-free (cure) temperature; $\alpha_p$, $\alpha_c$ linear CTE of propellant and case [1/K]; $a$, $b$ bore and outer grain radii [m].
+- **Meaning** — a CTE mismatch of order $10^{-3}$ over a 100 K cooldown is amplified at the bore by roughly $3(b^2-a^2)/(2a^2)$ — a factor of 10–25 for a thick-web grain. This is why case-bonded grains crack in cold storage.
+- **Assumes** — perfectly rigid case; perfectly incompressible propellant ($\nu = 0.5$); plane strain with axial strain following the case; uniform temperature; linear elastic behaviour; no liner or insulation compliance.
+- **Fails when** — any of those is relaxed: a composite case is not rigid (which helps); $\nu = 0.4995$ not 0.5 (relieving a few percent); the temperature is not uniform during a transient; propellant is viscoelastic, so a slow cooldown relaxes stress a fast one does not. **A screening number that tells you whether you have a problem, never a qualification analysis** — real work is nonlinear viscoelastic FE with a time–temperature-shifted relaxation modulus.
+- **Tag** [A] · **Code** —
+
+### 23-3.6 — Pressure amplification of a burning-area defect
+
+$$\frac{p_2}{p_1} = \left(\frac{A_{b,2}}{A_{b,1}}\right)^{\!1/(1-n)}$$
+
+- **Variables** — $p$ equilibrium chamber pressure [Pa]; $A_b$ burning area [m²]; $n$ Vieille exponent [—].
+- **Meaning** — the pressure amplifies the area error by $1/(1-n)$, typically 1.4–1.8 and up to 3+ for a high-exponent double-base propellant. This is why an unbond or crack that exposes extra surface is a burst risk, not a performance nuisance.
+- **Assumes** — quasi-steady operation ($A_b$ changing slowly compared with the filling time $\approx V_c/(c^*A_t)$); the nozzle stays choked; same $c^*$.
+- **Fails when** — the area change is sudden — a crack opening at ignition is *not* quasi-steady and the transient overshoot exceeds the equilibrium value; $n \ge 1$, where no equilibrium exists at all.
+- **Tag** [F] · **Code** `solid_equilibrium_pressure(...)` evaluated at both areas
+- **Alias** — 20-3.14, 21-3.4 in ratio form.
+
+---
