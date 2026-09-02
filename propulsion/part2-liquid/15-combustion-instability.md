@@ -837,3 +837,549 @@ which is exactly the regime where $\Delta p/p_c$ collapses (Module 07 §3.4).
 Second, "inherently stable" is a statement about *high-frequency transverse*
 modes, which is where the historical evidence is.
 
+### 3.12 Damping: the other side of the ledger
+
+Eq. 3.3 has two sides, and the right-hand side is where the engineering leverage
+is. The damping mechanisms available in a rocket chamber, in rough order of
+magnitude [SP-194 §8][SP-8113 §2.3]:
+
+- **Nozzle damping.** The converging nozzle is not a rigid wall; acoustic energy
+  convects and radiates out through it. This is usually the *largest* natural
+  damping term, and it is strongly mode-dependent: longitudinal modes lose a lot
+  through the nozzle, purely transverse modes lose relatively little (their
+  velocity is perpendicular to the flow direction). Quantified by the **nozzle
+  admittance**, computed from a linearised solution of the flow in the
+  convergent section [Culick68][SP-194 §3.6]. This asymmetry is the fundamental
+  reason transverse modes are the ones that survive.
+- **Acoustic absorbers** — quarter-wave cavities, Helmholtz resonators, slotted
+  liners. Deliberate, tunable, and the main tool for high-frequency modes (§3.13).
+- **Baffles.** Not primarily absorbers: they restructure the mode so the
+  vulnerable one no longer exists at a vulnerable frequency, and they add viscous
+  and vortex-shedding losses at the blade edges (§3.13).
+- **Droplet and particle drag.** Relative motion between the oscillating gas and
+  the (much heavier) droplets dissipates energy. This is significant, and it has a
+  perverse consequence: **finer sprays damp less**, because small drops follow the
+  gas. Improving atomization therefore raises both the driving and reduces the
+  damping. It is the clearest example in propulsion of a performance improvement
+  that is a stability regression.
+- **Viscous and thermal boundary-layer losses** at the wall. Small in a big
+  chamber (they scale with surface-to-volume ratio) but not negligible in a small
+  one — one of the reasons small thrusters are quieter than scaling suggests.
+- **Mean-flow convection.** Any energy in the acoustic field is convected toward
+  the nozzle at $\bar u$; at $\mathrm{Ma}\approx0.3$ this is a real term.
+
+### 3.13 Stabilisation hardware
+
+#### Baffles
+
+A baffle is an array of blades projecting from the injector face into the
+chamber. It works in three ways, and only the first is dominant [SP-8113 §3]:
+
+1. **It changes the eigenvalue problem.** With $N$ radial blades running from the
+   centre to the wall, the chamber near the face is divided into $N$ sectors of
+   angle $2\pi/N$ with rigid radial walls. In a sector, the azimuthal solution
+   must satisfy $\partial p'/\partial\theta = 0$ on both radial walls, so the
+   admissible azimuthal orders are $m = jN/2$ for $j = 1, 2, \dots$ — the lowest
+   is $m = N/2$, not $m = 1$. The 1T mode *cannot exist* inside a compartment.
+   The lowest transverse frequency the baffled region supports is
+
+   $$f_{1T}^{baffled} = \frac{\alpha_{N/2,1}\;c}{\pi D_c}$$
+
+   > **Eq. 3.12** — variables: $N$ number of compartments [—]; $\alpha_{\nu,1}$
+   > first non-trivial root of $J_\nu'(x)=0$ for (possibly non-integer) order
+   > $\nu = N/2$ [—]. A good approximation for the root is
+   > $\alpha_{\nu,1} \approx \nu + 0.8086\,\nu^{1/3} + 0.0725\,\nu^{-1/3} -
+   > 0.0510\,\nu^{-1}$, accurate to 0.1 % for $\nu \ge 1$. Meaning: the baffle
+   > raises the lowest transverse mode by the factor
+   > $\alpha_{N/2,1}/1.8412$. Assumes: blades that run the full radius, are
+   > acoustically rigid, and extend far enough axially to cover the region where
+   > the mode is driven. Fails when: the blades are too short — beyond the blade
+   > tips the full unbaffled mode reappears, so a baffle that is too short simply
+   > moves the problem downstream.
+
+   Sample values for the reference chamber ($D_c = 0.5$ m, $c = 1200$ m/s,
+   unbaffled $f_{1T} = 1407$ Hz):
+
+   | $N$ | $\nu = N/2$ | $\alpha_{\nu,1}$ | lowest transverse $f$ (Hz) | ratio to 1T |
+   |---|---|---|---|---|
+   | 3 | 1.5 | 2.460 | 1879 | 1.34 |
+   | 4 | 2.0 | 3.054 | 2333 | 1.66 |
+   | 5 | 2.5 | 3.632 | 2775 | 1.97 |
+   | 6 | 3.0 | 4.201 | 3209 | 2.28 |
+   | 8 | 4.0 | 5.318 | 4062 | 2.89 |
+   | 13 | 6.5 | 8.041 | 6143 | 4.37 |
+
+2. **It shields the spray from transverse velocity.** Inside a compartment the
+   transverse gas velocity at the acoustic frequency is greatly reduced, which
+   cuts the velocity-coupling term of §3.10 directly.
+3. **It dissipates.** Vortex shedding from the blade tips converts acoustic
+   energy to turbulence. A real but second-order effect.
+
+**Blade length is the design parameter that gets underestimated.** The baffle
+must extend axially past the region where the coupling occurs — i.e. past most of
+the heat-release zone, not merely past the sprays. Design practice puts $L_b$ at
+roughly 0.1–0.3 $D_c$ [E][SP-8113], and the honest statement is that it was set
+by test on every programme that ever needed it.
+
+**What baffles cost.** (i) They are in the hottest, highest-heat-flux region of
+the engine and must be cooled — the F-1's are copper, fed from the fuel circuit
+and consuming fuel that is then injected off-pattern. (ii) They occupy chamber
+volume in which combustion is being *organised* rather than completed, so the
+effective $L^*$ is lower than the geometric one (Module 06 §6.3). (iii) They
+disturb the injection pattern near the blades, costing $\eta_{c^*}$ — typically
+0.5–2 %. (iv) They are a structural and thermal-fatigue liability: a burned-off
+baffle blade is a piece of copper travelling down a nozzle.
+
+#### Acoustic cavities and quarter-wave tubes
+
+An absorber is a small volume of gas coupled to the chamber through an aperture,
+tuned so that near its resonance the gas in the aperture moves with large
+amplitude and out of phase with the chamber pressure, doing negative work on the
+mode and dissipating the energy viscously in the aperture. Two geometries:
+
+**Quarter-wave tube.** A tube of depth $L_{cav}$, closed at the far end, resonates
+when the depth is a quarter wavelength:
+
+$$f_{cav} = \frac{c_{cav}}{4\,L_{eff}}, \qquad L_{eff} = L_{cav} + \Delta L$$
+
+> **Eq. 3.13** — variables: $c_{cav}$ speed of sound in the *cavity* gas [m/s];
+> $L_{cav}$ geometric depth [m]; $\Delta L$ end correction, ≈ 0.4–0.8 times the
+> aperture's characteristic dimension [m]. Meaning: at this frequency the aperture
+> sees a velocity antinode and the absorber is maximally effective. Assumes:
+> plane waves in the tube, uniform cavity gas, aperture small compared with the
+> wavelength. Fails when: the cavity gas temperature is not what you assumed —
+> and it never is.
+
+**Helmholtz resonator.** A volume $V$ connected through necks of total area
+$A_n$ and effective length $L_{eff}$:
+
+$$f_{H} = \frac{c_{cav}}{2\pi}\sqrt{\frac{A_n}{V\,L_{eff}}}$$
+
+> **Eq. 3.14** — variables: $V$ cavity volume [m³]; $A_n$ total neck area [m²];
+> $L_{eff}$ neck length plus end corrections [m]. Meaning: the gas plug in the
+> neck is the mass, the gas in the cavity is the spring. Assumes: $V$ small
+> compared with $(\lambda/2\pi)^3$ so the cavity pressure is uniform; linear
+> amplitudes. Fails when: the acoustic particle velocity in the neck becomes
+> large enough for jetting and separation (which is normal at instability
+> amplitudes, and *increases* the damping while lowering the effective tuning —
+> nonlinear absorbers are more forgiving than the linear theory suggests).
+
+**The cavity gas temperature is the whole problem.** The absorber is tuned by
+$c_{cav} = \sqrt{\gamma R T_{cav}}$, and $T_{cav}$ depends on how the cavity is
+purged. With a fuel or inert purge the cavity may run at 700–1500 K; unpurged it
+fills with combustion gas near $T_c$. Between 800 K and 3300 K the sound speed
+varies by a factor of two, so the *same hardware* is tuned to two frequencies an
+octave apart (WE3 works this through). Consequences in practice:
+
+- Cavities are made **several different depths** on one injector, so the assembly
+  covers a band rather than a line — deliberately detuning some of them.
+- The purge flow rate is a *stability* parameter, not just a cooling parameter.
+- The resonator's bandwidth is set by its damping; a well-designed rocket
+  absorber is deliberately lossy ($Q$ of order 5–20), trading peak absorption for
+  a usable band **[J]**.
+
+The RS-25 uses acoustic-resonator cavities in the injector face and no baffles
+[_verify-liquid, RS-25 block] — the choice is coupled to the fact that its 1T mode
+is near 2 kHz, where a cavity of a few centimetres' depth is practical. A cavity
+tuned to the F-1's several-hundred-hertz 1T would need to be tens of centimetres
+deep, which is why the F-1 got baffles instead. **Frequency, not fashion, decides
+between a baffle and a cavity [J].** Acoustic cavities and quarter-wave slots are
+widely reported on the J-2, on Titan-family injectors and on Vulcain; the
+verification file confirms baffles on the Titan LR87/LR91 injectors and cavities
+on the RS-25, and does not confirm the others — treat those attributions as
+unverified here.
+
+#### Injector redesign
+
+The cheapest fixes if you can afford them early enough, all acting on $\tau$, $n$
+or the axial distribution of heat release:
+
+- **Smaller elements, more of them.** Raises the hydrodynamic frequency of the
+  spray out of the acoustic band and shortens the vaporization lag. Costs
+  manufacturing complexity and face cooling.
+- **Higher $\Delta p_{inj}$.** Buys chug margin directly (Eq. 3.6), and raises
+  injection velocity, which shortens $\tau$. Costs pump power (Module 07 §3.4).
+- **Impingement distance.** Moving the impingement point away from the face moves
+  the heat release to a lower-$|p'|$ region for a longitudinal mode and delays
+  the response.
+- **LOX post recess** on coaxial elements. Recessing the post so the shear layer
+  develops inside a cup changes the lag substantially and — in most reported
+  work — improves stability, at some cost in post thermal environment.
+- **Deliberate pattern non-uniformity.** A pattern with a distribution of element
+  sizes or a de-tuned outer row spreads $\tau$ across the face, and a *spread* of
+  lags is stabilising because the $\sin(\omega\tau/2)$ responses no longer add in
+  phase. This is the least intuitive and most useful trick in the box **[J]**.
+
+#### Chamber geometry
+
+Changing $D_c$ moves every transverse mode; changing $L_{cyl}$ moves the
+longitudinal ones. Since $f_{1T}\propto 1/D_c$ and contraction ratio sets $D_c$
+for a given throat, **the contraction ratio is a stability parameter** (Module 06
+§3.12). This is genuinely used: if the 1T sits on the combustion response peak,
+a few percent of $D_c$ moves it off. It is also the reason the Soviet
+multi-chamber architecture works so well as a stability strategy — see §6.
+
+### 3.14 Stability rating: how you prove it
+
+Since a chamber can be linearly stable and nonlinearly unstable, "it ran for 100
+seconds without going unstable" is not evidence. The accepted practice, codified
+in [SP-8113] and unchanged in principle since, is to **disturb the running engine
+deliberately and measure how fast the disturbance decays** [F]/[M].
+
+**The three disturbance sources.**
+
+| method | what it is | disturbance character | comments |
+|---|---|---|---|
+| **Bomb** | a small explosive charge in a case, mounted through the chamber wall or on the injector face, initiated at steady state | Sharp, broadband, large amplitude (tens of percent of $p_c$ locally); excites everything at once | The most severe and the most standard. Position matters: near the injector face and off-axis to excite tangential modes. The case fragments must be benign. |
+| **Pulse gun** | a small gun that fires a slug of gas (or a projectile) through a burst diaphragm into the chamber | Directional, repeatable, tunable amplitude, less broadband | Better for parametric work — you can sweep amplitude to find the *threshold* for nonlinear instability, which a bomb cannot do |
+| **Directed gas flow** | a jet of inert or fuel gas injected tangentially at the chamber wall | Continuous, non-explosive, moderate amplitude | Used where explosives are impractical, and to excite a specific mode continuously |
+
+**The criterion.** The engine must return to its pre-disturbance noise level
+within a specified time, and both the time and the reference amplitude are
+programme-specific. [SP-8113]'s **dynamic stability** definition is the standard
+one: the engine is dynamically stable if, following a disturbance of specified
+magnitude, the resulting oscillation **damps to within the pre-pulse noise band
+within a specified interval**, for a specified number of pulses at specified
+operating conditions. Common practice expresses the requirement as **decay to
+10 % of the peak disturbance amplitude within a stated time**, typically 10–50
+ms. The F-1's requirement was recovery within **45 ms** after a bomb detonated
+near the injector centre at full thrust [_verify-liquid, F-1 block][OY93].
+
+Converting a criterion to a damping rate is one line. For an exponentially
+decaying mode $\hat p(t) = \hat p_0 e^{-\alpha_d t}$:
+
+$$\alpha_d = \frac{\ln(\hat p_0/\hat p)}{t}, \qquad \text{"10 \% in } t_{10}\text{"} \Rightarrow \alpha_d = \frac{\ln 10}{t_{10}} = \frac{2.303}{t_{10}}$$
+
+> **Eq. 3.15** — variables: $\alpha_d$ damping rate [s⁻¹]; $t_{10}$ time to decay
+> to 10 % of peak [s]. Meaning: converts a test acceptance criterion into the
+> quantity an analysis produces. Assumes: a single mode decaying exponentially —
+> read off the envelope of the band-pass-filtered dynamic pressure, not the raw
+> trace. Fails when: two modes with different decay rates are present (the
+> envelope has a knee), or when the response is a decaying *limit cycle*, which
+> decays much more slowly than exponentially near the end.
+
+So a 45 ms requirement is $\alpha_d \ge 51$ s⁻¹ and a 20 ms requirement is
+$\alpha_d \ge 115$ s⁻¹. It is worth relating that to a damping ratio: at 500 Hz,
+$\alpha_d = 51$ s⁻¹ is $\zeta = \alpha_d/\omega = 0.016$, i.e. $Q \approx 30$.
+**A "dynamically stable" rocket chamber is a very lightly damped resonator that
+happens to be net-stable** — which is exactly why the margin is fragile and why
+small design changes flip it.
+
+**How many pulses, and where.** A rating programme pulses at several operating
+points (mixture ratio and thrust extremes, not just nominal), at more than one
+bomb location, and repeats — a single successful recovery is not statistical
+evidence. Programmes that shortcut this have been embarrassed later.
+
+### 3.15 Modern analysis methods
+
+The state of practice, honestly stated: **no method predicts limit-cycle
+amplitude reliably enough to replace the bomb test** [M]. What has changed since
+[SP-194] is the ability to compute the pieces.
+
+- **Linear acoustic solvers.** Finite-element Helmholtz solvers give the mode
+  shapes and frequencies of the real (non-cylindrical, non-uniform-temperature)
+  chamber including nozzle admittance, in minutes. This has essentially retired
+  hand calculation of mode frequencies except as a sanity check — but Eq. 3.9 is
+  still how you check the solver.
+- **Flame transfer / describing functions.** Measure or compute the heat-release
+  response to an imposed pressure or velocity oscillation as a function of
+  frequency *and amplitude* (a flame describing function), then feed it into the
+  acoustic solver. This is the modern replacement for $n$ and $\tau$, and it is
+  amplitude-dependent, so it can predict limit cycles in principle.
+- **Large-eddy simulation with real-fluid thermodynamics.** LOX/LH₂ and LOX/CH₄
+  chambers run above the critical pressure of both propellants, so the classic
+  droplet picture is wrong and the physics is a variable-density turbulent mixing
+  layer with strongly non-ideal thermodynamics. LES with a real-fluid equation of
+  state, sometimes Euler–Lagrange for the sub-critical spray region, is the
+  research standard [R][LRTC][OY93]. Cost is the limitation: a full engine at
+  flight scale for enough cycles to establish a limit cycle is still a heroic
+  computation.
+- **Model rocket combustors.** The most useful experimental development of the
+  last twenty years: small, optically accessible, deliberately *unstable*
+  combustors with a variable acoustic length, run at realistic pressures, that
+  produce repeatable self-excited instability for model validation. The Purdue
+  continuously-variable-resonance combustor and the AFRL/industry rigs of that
+  family are the reference examples [R]. They exist because full-scale data is
+  expensive, sparse, and rarely instrumented well enough to validate anything.
+- **Company claims.** SpaceX has stated that Raptor is stable across its
+  operating range and has attributed this partly to the coaxial swirl element.
+  There is no public data — no PSD, no bomb-test result, no damping rate. Treat
+  it as a claim, consistent with what is known about swirl elements, and
+  unverified [_verify-liquid, Raptor block].
+
+### 3.16 Cross-reference: solid motors
+
+Solid motors have the same Rayleigh criterion and much of the same acoustic
+machinery, with three differences (Module 20):
+
+- The response function is the **pressure-coupled response function** of the
+  burning surface, $R_p = (\dot r'/\bar{\dot r})/(p'/\bar p)$, derived from the
+  unsteady solid-phase heat conduction and gas-phase flame [Culick68]. It peaks
+  at a frequency set by the solid thermal wave, typically 500–3000 Hz.
+- The dominant mode is usually **longitudinal**, because the grain port is a long
+  duct rather than a squat cylinder.
+- The dominant damping is **particle damping** from aluminium-oxide droplets, and
+  it is tuned by the particle size distribution — a design parameter with no
+  liquid-engine analogue.
+
+The measurement analogue of the bomb test is the **T-burner**, which measures the
+response function directly. Velocity coupling and vortex shedding from segment
+joints (a documented Space Shuttle SRB phenomenon) are the solid-motor versions
+of the coupling mechanisms in §3.10.
+
+---
+
+## 4. Typical engineering ranges
+
+| quantity | typical | range | who sits at the extremes |
+|---|---|---|---|
+| Chug frequency | 100–400 Hz | 10–500 Hz | small thrusters high; large chambers low |
+| Buzz / intermediate | 300–700 Hz | 200–1000 Hz | manifold-dominated cases |
+| 1T frequency, kerosene booster | 500–900 Hz | 400–1500 Hz | F-1 lowest (largest $D_c$) |
+| 1T frequency, LOX/LH₂ | 1500–3000 Hz | 1000–4000 Hz | RS-25 ≈ 2 kHz [A] |
+| 1T frequency, small storable thruster | 5–15 kHz | 3–20 kHz | R-4D-class highest |
+| POGO / structural mode | 5–25 Hz | 3–60 Hz | drops through a burn as tanks empty |
+| "Rough combustion" threshold | 5 % of $p_c$ pk-pk | 2–10 % | programme-specific |
+| Developed instability amplitude | 20–50 % of $p_c$ pk-pk | 10–100 %+ | limit cycles above 100 % are recorded |
+| Heat-flux multiplication when unstable | ×3–5 | ×2–10 | near-face wall worst |
+| Injector $\Delta p/p_c$ | 0.15–0.25 | 0.10–0.35 | hydrogen circuits at 0.10–0.15 |
+| Combustion time lag $\tau$ | 0.8–1.5 ms (RP-1, storable) | 0.2–3 ms | LH₂ 0.2–0.4 ms; large-element RP-1 up to 3 ms |
+| Interaction index $n$ | 0.3–1.0 | 0.1–1.5 | fitted, never predicted |
+| Chamber fill time $\tau_c$ | 1.0–1.5 ms | 0.7–2.5 ms | tracks $L^*$ exactly (Eq. 3.4) |
+| Damping rate required (dynamic stability) | 50–150 s⁻¹ | 30–250 s⁻¹ | F-1: 45 ms ⇒ ≈51 s⁻¹ |
+| Damping ratio $\zeta$ of a chamber mode | 0.01–0.05 | 0.005–0.1 | $Q$ of 10–100 |
+| Baffle compartments | 3–13 | 3–20 | F-1 at 13 |
+| Baffle blade length $L_b$ | 0.1–0.3 $D_c$ | 0.05–0.4 $D_c$ | set by test |
+| Baffle $\eta_{c^*}$ penalty | 0.5–2 % | 0–3 % | [E] |
+| Acoustic cavity depth | 20–80 mm | 10–200 mm | scales as $c_{cav}/4f$ |
+| Cavity open-area fraction of face | 2–8 % | 1–15 % | [E], [SP-8113] |
+| POGO accumulator gas volume | 1–20 L | 0.5–50 L | scales with line inertance |
+
+---
+
+## 5. Worked examples
+
+Throughout, the **reference chamber** is: LOX/RP-1, $\gamma = 1.20$,
+$M = 22.86$ kg/kmol ($R = 363.7$ J/(kg·K)), $T_c = 3300$ K, so
+$c = \sqrt{\gamma R T_c} = 1200$ m/s and $c^* = \sqrt{RT_c}/\Gamma = 1689$ m/s
+with $\Gamma(1.20) = 0.6485$. Geometry: $D_c = 0.500$ m, $L_{cyl} = 0.500$ m,
+$\varepsilon_c = 1.9$ so $A_c = 0.1963$ m², $A_t = 0.10334$ m²,
+$D_t = 0.3627$ m. Operating: $p_c = 100$ bar, $L^* = 1.05$ m,
+$\dot m = p_cA_t/c^* = 612$ kg/s. These are registered in
+`tools/examples/15.py`.
+
+### WE1 — Acoustic mode frequencies, and which instrument sees which mode
+
+**Given.** The reference chamber. **Find** the 1L, 1T, 2T, 1R and 1T1L mode
+frequencies, and say what a chamber-mounted lateral accelerometer would show.
+
+**Step 1 — sound speed.** $R = R_u/M = 8314.46/22.86 = 363.7$ J/(kg·K);
+$c = \sqrt{1.20 \times 363.7 \times 3300} = \sqrt{1.4400\times10^6} =
+\mathbf{1200\ m/s}$.
+
+**Step 2 — longitudinal.** $f_{1L} = c/(2L_{cyl}) = 1200/(2\times0.500) =
+\mathbf{1200\ Hz}$. ($f_{2L} = 2400$ Hz.)
+
+**Step 3 — transverse.** $\pi D_c = \pi\times0.500 = 1.5708$ m, so
+$f_{mn0} = \alpha_{mn}\times 1200/1.5708 = 763.9\,\alpha_{mn}$:
+
+| mode | $\alpha_{mn}$ | $f$ (Hz) |
+|---|---|---|
+| 1T | 1.8412 | **1407** |
+| 2T | 3.0542 | **2333** |
+| 3T | 4.2012 | 3209 |
+| 1R | 3.8317 | **2927** |
+| 1T1R | 5.3314 | 4073 |
+
+**Step 4 — combined 1T1L.** $f = \sqrt{1407^2 + 1200^2} = \sqrt{1.980\times10^6
++ 1.440\times10^6} = \mathbf{1849\ Hz}$.
+
+**Step 5 — what sees what.** A mode exerts a net force on the chamber only if
+its pressure distribution has a net resultant.
+
+- **1T ($m=1$):** pressure is high on one side and low on the other, so the
+  integrated wall pressure has a **net lateral force** at 1407 Hz. A lateral
+  accelerometer on the chamber sees it clearly, and two diametrically opposite
+  dynamic-pressure transducers read **180° out of phase**. This is the mode you
+  detect from outside the engine.
+- **2T ($m=2$):** four alternating lobes; the net lateral force cancels. A
+  lateral accelerometer sees little, but the *shell* is being ovalised at 2333
+  Hz, so a strain gauge or an accelerometer sensitive to the shell's ovalising
+  mode may pick it up. Transducers 90° apart read 180° out of phase.
+- **1R ($m=0$):** axisymmetric. No lateral force at all; it appears as a
+  **hoop-strain and axial** signal, and all circumferential transducers read
+  **in phase**.
+- **1L:** axisymmetric, produces an axial thrust oscillation — visible on the
+  thrust-mount load cell if the mount's own response reaches 1200 Hz (it usually
+  does not) and on axial accelerometers.
+
+> **Sanity check.** $f_{1T}/f_{1L} = 1407/1200 = 1.17$ for a chamber whose length
+> equals its diameter, and 1T sits above 1L only because $\alpha_{11}/\pi =
+> 0.586$ against $0.5$ for the longitudinal mode. In any chamber longer than
+> $0.586\,D_c$ — i.e. essentially all of them — the **1L mode is the lowest
+> acoustic mode**, and yet 1T is the one that destroys engines. That is the
+> Rayleigh criterion talking: the nozzle damps 1L heavily and 1T hardly at all.
+
+### WE2 — Chug stability for two injector pressure drops
+
+**Given.** The reference chamber; combustion time lag $\tau = 1.2$ ms (LOX/RP-1
+with moderately coarse elements). Two candidate designs: $\Delta p_{inj}/p_c =
+0.15$ (15 bar) and $0.25$ (25 bar). **Find** whether each chugs, at what
+frequency, and how fast the mode grows or decays.
+
+**Step 1 — chamber fill time.** Eq. 3.4:
+
+$$\tau_c = \frac{L^*}{\Gamma^2 c^*} = \frac{1.05}{(0.6485)^2 \times 1689.3} = \frac{1.05}{710.5} = \mathbf{1.478\ ms}$$
+
+Cross-check the long way: $\rho_c = p_c/(RT_c) = 10^7/(363.7\times3300) =
+8.332$ kg/m³; $V_c = L^*A_t = 1.05\times0.10334 = 0.10851$ m³;
+$\tau_c = V_c\rho_c/\dot m = 0.10851\times8.332/611.7 = 1.478$ ms. ✓
+
+**Step 2 — neutral-stability point.** Solve $\omega\tau + \arctan(\omega\tau_c) =
+\pi$ with $\tau = 1.2$ ms, $\tau_c = 1.478$ ms. Iterating: $\omega = 1636$ rad/s.
+Check: $\omega\tau = 1.963$; $\arctan(1636\times1.478\times10^{-3}) =
+\arctan(2.418) = 1.179$; sum $= 3.142 = \pi$ ✓. So $f_{neutral} =
+1636/2\pi = 260$ Hz, and
+
+$$k_{crit} = \sqrt{1+(\omega\tau_c)^2} = \sqrt{1+2.418^2} = \sqrt{6.847} = 2.616$$
+
+$$\left(\frac{\Delta p_{inj}}{p_c}\right)_{min} = \frac{1}{2k_{crit}} = \frac{1}{5.232} = \mathbf{19.1\ \%}$$
+
+**Step 3 — evaluate the two designs.**
+
+| design | $k = p_c/(2\Delta p)$ | vs $k_{crit} = 2.616$ | verdict |
+|---|---|---|---|
+| $\Delta p/p_c = 0.15$ | 3.333 | **exceeds** | unstable |
+| $\Delta p/p_c = 0.25$ | 2.000 | below by 24 % | stable |
+
+**Step 4 — growth and decay rates.** Solve $\tau_c s + 1 + k e^{-s\tau} = 0$ for
+the complex root (Newton iteration from $s = i\,2\pi\times260$):
+
+| design | $s$ (s⁻¹) | $f = \Im(s)/2\pi$ | interpretation |
+|---|---|---|---|
+| 0.15 | $+151.4 + 1688.9i$ | **269 Hz** | grows; amplitude doubles in $\ln2/151.4 = \mathbf{4.6\ ms}$ |
+| 0.20 | $-28.2 + 1625.3i$ | 259 Hz | marginal; decays to 10 % in 82 ms — fails a 45 ms criterion |
+| 0.25 | $-166.1 + 1570.9i$ | **250 Hz** | decays to 10 % in $\ln10/166.1 = \mathbf{13.9\ ms}$ |
+
+**Step 5 — read the result as a designer.** The 15 % design does not merely fail;
+it doubles in 4.6 ms, so a startup transient reaches limit-cycle amplitude within
+about 30 ms of ignition — before the engine reaches mainstage. The 20 % design
+is *linearly* stable but takes 82 ms to damp, which would fail an F-1-class 45 ms
+dynamic-stability requirement. **Only the 25 % design meets both.** This is the
+quantitative content of "20 % is a floor, not a target".
+
+> **Sanity check.** 250–270 Hz is squarely in the observed chug band. And the
+> criterion reproduces the textbook 15–25 % rule from two parameters: sweeping
+> $\tau$ from 0.8 to 1.5 ms gives thresholds of 14.0 %, 16.7 %, 19.1 % and
+> 22.3 % — the whole published range of the rule of thumb generated by the whole
+> plausible range of $\tau$.
+
+### WE3 — Quarter-wave cavity for the 1T mode, with hot cavity gas
+
+**Given.** Suppress the reference chamber's 1T mode at $f_{1T} = 1407$ Hz with
+quarter-wave cavities around the injector periphery. Cavity gas is a fuel-purged
+mixture; take $\gamma_{cav} = 1.25$, $R = 363.7$ J/(kg·K), and consider
+$T_{cav} = 1200$ K as the design assumption. Aperture slots 8 mm wide.
+
+**Step 1 — cavity sound speed.**
+$c_{cav} = \sqrt{1.25 \times 363.7 \times 1200} = \sqrt{5.456\times10^5} =
+\mathbf{738.6\ m/s}$ — 38 % below the chamber's 1200 m/s, purely because of
+temperature.
+
+**Step 2 — depth.**
+
+$$L_{eff} = \frac{c_{cav}}{4f_{1T}} = \frac{738.6}{4\times1406.6} = 0.1313\ \mathrm{m} = \mathbf{131\ mm}$$
+
+Subtract the end correction, $\Delta L \approx 0.4 \times 8\ \mathrm{mm} = 3.2$
+mm: **geometric depth ≈ 128 mm.**
+
+**Step 3 — the temperature sensitivity, which is the point of the example.**
+
+| assumed $T_{cav}$ | $c_{cav}$ (m/s) | required depth (mm) |
+|---|---|---|
+| 800 K (heavy purge) | 615 | 109 |
+| 1200 K (design) | 739 | 131 |
+| 1800 K (light purge) | 894 | 159 |
+| 3300 K (no purge, chamber gas) | 1200 | 213 |
+
+If you build the 131 mm cavity and it actually runs at 1800 K, its resonance
+moves to $c/(4L) = 894/(4\times0.1313) = \mathbf{1702\ Hz}$ — **21 % high**, and
+it is no longer absorbing at 1407 Hz to any useful degree unless its $Q$ is below
+about 5. Conversely a design that assumed chamber-temperature gas would be 62 %
+too deep.
+
+**Step 4 — the Helmholtz alternative.** For a compact resonator, Eq. 3.14 with
+six 8 mm-diameter necks ($A_n = 3.016\times10^{-4}$ m²), neck length 20 mm plus
+end corrections ($L_{eff} = 23.2$ mm) and the same 739 m/s:
+
+$$V = \frac{A_n c_{cav}^2}{(2\pi f)^2 L_{eff}} = \frac{3.016\times10^{-4}\times 5.456\times10^5}{(8838)^2 \times 0.0232} = 9.1\times10^{-5}\ \mathrm{m^3} = \mathbf{91\ cm^3}$$
+
+A 91 cm³ cavity is far more compact than a 131 mm-deep tube, which is why
+injector-face resonators are usually Helmholtz-type. It is also *more* sensitive
+to neck geometry and to erosion of the necks.
+
+**Step 5 — the design response.** Because $T_{cav}$ is uncertain by ±40 % and
+$f \propto \sqrt{T_{cav}}$, tuning uncertainty is ±18 %. Practice: make three or
+four cavity depths spanning ±20 % around the target, accept lower peak
+absorption, and get a usable band. Verify by cold-flow acoustic testing of the
+injector with a driver, then confirm on the hot-fire bomb test.
+
+> **Sanity check.** 100–150 mm of cavity depth for a 1.4 kHz mode is exactly the
+> scale of real hardware, and it explains the design split of §3.13: the RS-25's
+> ≈2 kHz 1T needs ~90 mm at 1200 K, which fits in an injector; the F-1's ≈500 Hz
+> 1T would need **370 mm**, which does not. F-1 got baffles.
+
+### WE4 — Choosing a baffle compartment count
+
+**Given.** The reference chamber has an unbaffled $f_{1T} = 1407$ Hz. The
+combustion response (from $|R| = 2n|\sin(\omega\tau/2)|$ with $\tau = 1.2$ ms)
+peaks at $f = 1/(2\tau) = 417$ Hz and stays strong up to about 2 kHz, falling off
+above. **Requirement:** move the lowest transverse mode above **3000 Hz**, where
+the measured response is small and the nozzle and viscous damping are larger.
+
+**Step 1 — what eigenvalue is needed.** From Eq. 3.12,
+
+$$\alpha_{\nu,1} \ge \frac{\pi D_c f_{target}}{c} = \frac{1.5708 \times 3000}{1200} = 3.927$$
+
+**Step 2 — read off the compartment count.** Using $\nu = N/2$ and the root
+approximation:
+
+| $N$ | $\nu$ | $\alpha_{\nu,1}$ | $f$ (Hz) | meets 3000 Hz? |
+|---|---|---|---|---|
+| 4 | 2.0 | 3.054 | 2333 | no |
+| 5 | 2.5 | 3.632 | 2775 | no |
+| **6** | **3.0** | **4.201** | **3209** | **yes** |
+| 8 | 4.0 | 5.318 | 4062 | yes, with margin |
+
+**Choose $N = 6$**: six radial blades, lowest transverse mode 3209 Hz, a factor
+2.28 above the unbaffled 1T.
+
+**Step 3 — blade length.** The blades must cover the region where the mode is
+driven. Take the heat-release zone to extend roughly one vaporization length from
+the face; with injection velocity ~30 m/s and $\tau = 1.2$ ms that is ~36 mm for
+the *first* heat release, and the bulk of it is complete by 2–3 times that. Design
+guidance of $L_b = 0.1$–$0.3\,D_c$ gives **50–150 mm**; take $L_b = 100$ mm
+(0.2 $D_c$) and expect it to be adjusted by test **[J]**.
+
+**Step 4 — count the cost.** Six blades 100 mm long across a 500 mm face is
+roughly $6 \times 0.100 \times 0.250 \times 2$ faces $= 0.30$ m² of additional
+hot surface to cool, in the highest-flux region of the engine. The blades occupy
+about 1.5 % of the barrel volume, disturb the pattern in perhaps 10 % of the face
+area, and should be budgeted at **1–2 % of $\eta_{c^*}$** [E].
+
+**Step 5 — sanity-check against the F-1.** Thirteen compartments corresponds to
+$\nu = 6.5$, $\alpha \approx 8.04$, a factor **4.37** above 1T. Applied to the
+F-1's own geometry ($D_c \approx 1.13$ m, near-face $c \approx 900$ m/s giving an
+unbaffled 1T near 467 Hz), the baffled compartment's lowest transverse mode is
+$8.04\times900/(\pi\times1.13) = \mathbf{2040\ Hz}$ — an octave and a half above
+the mode that was destroying engines, and above the band where the F-1's coarse
+sprays responded strongly. Thirteen compartments looks like overkill until you
+notice that the F-1 team had already been beaten by 3-, 5- and 7-compartment
+designs.
+
+> **Sanity check.** The scaling $\alpha_{N/2,1}\approx N/2$ for large $N$ means
+> **frequency ratio ≈ $N/(2\times1.8412) = N/3.68$** — a quick mental rule: a
+> 4-compartment baffle buys you a factor of about 1.1 per compartment above
+> three. Doubling compartments does not double the frequency, which is why
+> baffle counts saturate around 10–15 and other measures take over.
+
