@@ -134,6 +134,158 @@ EXAMPLES = [
     {"id": "13.WE4b", "fn": "pump_power",   # module 03 fuel pump, as WE1a
      "args": {"mdot": 55.2, "dp": 136.0e5, "rho": 810.0, "eta": 0.70},
      "expect": 1.32402e6, "tol": 0.001},
+
+    # ---- C5: why a kerolox closed expander does not close ------------------
+    # 100 kN, pc = 40 bar, MR 2.6, c* 1800, Isp 300 -> mdot 33.991,
+    # mf 9.442, mo 24.549, At 0.015296 m2, Dt 0.1396 m, q_t 48.91 MW/m2,
+    # Q 11.52 MW. Unconstrained bulk rise at cp 2200 is 555 K (-> 855 K),
+    # far past the ~550-600 K coking limit, so Tt is CAPPED at 550 K below.
+    {"id": "13.C5a", "fn": "pump_power",    # RP-1 pump, dp = 48+25+20-3 bar
+     "args": {"mdot": 9.442, "dp": 90.0e5, "rho": 810.0, "eta": 0.70},
+     "expect": 1.49873e5, "tol": 0.002},
+    {"id": "13.C5b", "fn": "pump_power",    # LOX pump, dp = 48-3 bar
+     "args": {"mdot": 24.549, "dp": 45.0e5, "rho": 1141.0, "eta": 0.70},
+     "expect": 1.38313e5, "tol": 0.002},
+    {"id": "13.C5c", "fn": "turbine_power",  # coking-capped Tt, pr = 68/48
+     "args": {"mdot": 9.442, "cp": 2200.0, "T_in": 550.0, "pr": 1.416667,
+              "gamma": 1.10, "eta": 0.70},
+     "expect": 2.49264e5, "tol": 0.005},
+    # -> turbine 249.3 kW vs pump shaft (0.288186/0.98) = 294.1 kW:
+    #    ratio 0.85. The cycle does not close.
+
+    # ---- N1: methalox gas generator, 900 kN at pc = 110 bar ---------------
+    {"id": "13.N1a", "fn": "pump_power",    # CH4, dp = 110+22+20+5-4 bar
+     "args": {"mdot": 68.1818, "dp": 153.0e5, "rho": 423.0, "eta": 0.72},
+     "expect": 3.42521e6, "tol": 0.001},
+    {"id": "13.N1b", "fn": "pump_power",    # LOX, dp = 110+22+5-4 bar
+     "args": {"mdot": 231.8182, "dp": 133.0e5, "rho": 1141.0, "eta": 0.72},
+     "expect": 3.75302e6, "tol": 0.001},
+    {"id": "13.N1c", "fn": "turbine_power",  # at the solved GG flow
+     "args": {"mdot": 9.8036, "cp": 2400.0, "T_in": 1050.0, "pr": 18.0,
+              "gamma": 1.26, "eta": 0.66},
+     "expect": 7.32474e6, "tol": 0.002},
+
+    # ---- N2: the same engine uprated to pc = 180 bar ----------------------
+    {"id": "13.N2a", "fn": "pump_power",    # dp = 180+36+32.727+5-4 bar
+     "args": {"mdot": 68.1818, "dp": 249.727e5, "rho": 423.0, "eta": 0.72},
+     "expect": 5.59063e6, "tol": 0.001},
+    {"id": "13.N2b", "fn": "pump_power",    # dp = 180+36+5-4 bar
+     "args": {"mdot": 231.8182, "dp": 217.0e5, "rho": 1141.0, "eta": 0.72},
+     "expect": 6.12335e6, "tol": 0.001},
+    {"id": "13.N2c", "fn": "turbine_power",
+     "args": {"mdot": 15.9982, "cp": 2400.0, "T_in": 1050.0, "pr": 18.0,
+              "gamma": 1.26, "eta": 0.66},
+     "expect": 1.19530e7, "tol": 0.002},
+
+    # ---- N3: 150 kN closed expander, pc = 55 bar --------------------------
+    {"id": "13.N3a", "fn": "pump_power",    # LH2, dp = 66+35+55-3 bar
+     "args": {"mdot": 4.9437, "dp": 153.0e5, "rho": 71.0, "eta": 0.70},
+     "expect": 1.52190e6, "tol": 0.002},
+    {"id": "13.N3b", "fn": "pump_power",    # LOX, dp = 66-3 bar
+     "args": {"mdot": 28.6733, "dp": 63.0e5, "rho": 1141.0, "eta": 0.70},
+     "expect": 2.26170e5, "tol": 0.002},
+    {"id": "13.N3c", "fn": "turbine_power",  # pr = 121/66, Tt = 223.7 K
+     "args": {"mdot": 4.9437, "cp": 14500.0, "T_in": 223.69, "pr": 1.833333,
+              "gamma": 1.40, "eta": 0.70},
+     "expect": 1.78485e6, "tol": 0.005},
+
+    # ---- N4: RD-180-class ORSC at pc = 267 bar ----------------------------
+    {"id": "13.N4a", "fn": "pump_power",    # RP-1, dp = 1.45*267 - 4 bar
+     "args": {"mdot": 336.0215, "dp": 383.15e5, "rho": 810.0, "eta": 0.75},
+     "expect": 2.11929e7, "tol": 0.001},
+    {"id": "13.N4b", "fn": "pump_power",
+     "args": {"mdot": 913.9785, "dp": 383.15e5, "rho": 1141.0, "eta": 0.75},
+     "expect": 4.09221e7, "tol": 0.001},
+    {"id": "13.N4c", "fn": "turbine_power",  # all the LOX, at the solved pr
+     "args": {"mdot": 913.9785, "cp": 1100.0, "T_in": 720.0, "pr": 1.6493,
+              "gamma": 1.33, "eta": 0.75},
+     "expect": 6.33841e7, "tol": 0.005},
+
+    # ---- N6: LE-9 expander bleed ------------------------------------------
+    {"id": "13.N6a", "fn": "pump_power",    # LH2, dp = 1.5*100 - 3 bar
+     "args": {"mdot": 51.0309, "dp": 147.0e5, "rho": 71.0, "eta": 0.72},
+     "expect": 1.46744e7, "tol": 0.001},
+    {"id": "13.N6b", "fn": "pump_power",
+     "args": {"mdot": 301.0824, "dp": 147.0e5, "rho": 1141.0, "eta": 0.72},
+     "expect": 5.38747e6, "tol": 0.001},
+    {"id": "13.N6c", "fn": "turbine_power",  # at the solved bleed flow
+     "args": {"mdot": 11.2008, "cp": 15000.0, "T_in": 400.0, "pr": 8.0,
+              "gamma": 1.40, "eta": 0.68},
+     "expect": 2.04712e7, "tol": 0.002},
+
+    # ---- N7: F-1 implied pump efficiency ----------------------------------
+    # eta = 1.0 so these return the IDEAL hydraulic power; the implied mean
+    # pump efficiency is (N7a+N7b)/(41 MW * 0.98) = 0.62.
+    {"id": "13.N7a", "fn": "pump_power",
+     "args": {"mdot": 788.073, "dp": 97.5e5, "rho": 810.0, "eta": 1.0},
+     "expect": 9.48606e6, "tol": 0.001},
+    {"id": "13.N7b", "fn": "pump_power",
+     "args": {"mdot": 1788.927, "dp": 97.5e5, "rho": 1141.0, "eta": 1.0},
+     "expect": 1.52866e7, "tol": 0.001},
+
+    # ---- Q3/Q4 and Q8 ------------------------------------------------------
+    {"id": "13.Q3", "fn": "turbine_power",   # at the solved GG flow
+     "args": {"mdot": 9.0975, "cp": 2050.0, "T_in": 1020.0, "pr": 16.0,
+              "gamma": 1.24, "eta": 0.62},
+     "expect": 4.89794e6, "tol": 0.002},
+    # Q8: mass (kg) substituted for mass flow (kg/s), so pump_power returns
+    # the total HYDRAULIC ENERGY in J for the whole burn, not a power.
+    # 3.7543e7 J / (0.95*0.96) = 4.1166e7 J; / 4.14e5 J/kg = 99.4 kg battery.
+    {"id": "13.Q8", "fn": "pump_power",
+     "args": {"mdot": 4200.0, "dp": 62.0e5, "rho": 1020.0, "eta": 0.68},
+     "expect": 3.75433e7, "tol": 0.001},
+
+    # ---- R3: 200 kN closed expander at pc = 45 bar (key K1-R3) ------------
+    # mdot 44.144, mf 6.4917, mo 37.652, At 0.022758 m2, Dt 0.17023 m,
+    # q_t 51.65 MW/m2, Q 18.10 MW, dT 192.3 K -> Tt 222.3 K,
+    # jacket drop scaled from WE2 case A (30 bar at Dt 0.1288) = 39.65 bar.
+    {"id": "13.R3a", "fn": "pump_power",    # LH2, dp = 54+39.65+34-3 bar
+     "args": {"mdot": 6.4917, "dp": 124.65e5, "rho": 71.0, "eta": 0.70},
+     "expect": 1.62815e6, "tol": 0.002},
+    {"id": "13.R3b", "fn": "pump_power",    # LOX, dp = 54-3 bar
+     "args": {"mdot": 37.652, "dp": 51.0e5, "rho": 1141.0, "eta": 0.70},
+     "expect": 2.40422e5, "tol": 0.002},
+    {"id": "13.R3c", "fn": "turbine_power",  # pr = 88/54
+     "args": {"mdot": 6.4917, "cp": 14500.0, "T_in": 222.3, "pr": 1.629630,
+              "gamma": 1.40, "eta": 0.70},
+     "expect": 1.90758e6, "tol": 0.005},
+    # -> turbine 1.9076 MW vs pump shaft 1.9067 MW: closes with 0.05 % margin
+    #    at a pump discharge of 127.7 bar for a 45 bar chamber (2.8 x pc).
+
+    # ---- T1: trade-study candidates at 1 MN methalox (key K3) -------------
+    # (a) gas generator at pc = 120 bar: mdot 333.33, mf 75.757, mo 257.573,
+    #     dp_j scaled to 32.727 bar -> dp_f 166.818, dp_o 145.0 bar.
+    {"id": "13.T1a", "fn": "pump_power",
+     "args": {"mdot": 75.757, "dp": 166.8182e5, "rho": 423.0, "eta": 0.72},
+     "expect": 4.14948e6, "tol": 0.001},
+    {"id": "13.T1b", "fn": "pump_power",
+     "args": {"mdot": 257.573, "dp": 145.0e5, "rho": 1141.0, "eta": 0.72},
+     "expect": 4.54622e6, "tol": 0.001},
+    {"id": "13.T1c", "fn": "turbine_power",  # at the solved GG flow
+     "args": {"mdot": 11.876, "cp": 2400.0, "T_in": 1050.0, "pr": 18.0,
+              "gamma": 1.26, "eta": 0.66},
+     "expect": 8.87313e6, "tol": 0.002},
+    # -> shaft 8.873 MW, f_gg = 11.876/345.21 = 3.44 %,
+    #    Isp penalty 7.4 s with a 130 s dump credit.
+    # (b) ORSC at pc = 150 bar, MR 3.6: mf 72.463, mo 260.867,
+    #     dp = 1.45*150 - 4 = 213.5 bar.
+    {"id": "13.T1d", "fn": "pump_power",
+     "args": {"mdot": 72.463, "dp": 213.5e5, "rho": 423.0, "eta": 0.75},
+     "expect": 4.87655e6, "tol": 0.001},
+    {"id": "13.T1e", "fn": "pump_power",
+     "args": {"mdot": 260.867, "dp": 213.5e5, "rho": 1141.0, "eta": 0.75},
+     "expect": 6.50834e6, "tol": 0.001},
+    {"id": "13.T1f", "fn": "turbine_power",  # all the LOX at the solved pr
+     "args": {"mdot": 260.867, "cp": 1100.0, "T_in": 750.0, "pr": 1.3513,
+              "gamma": 1.33, "eta": 0.75},
+     "expect": 1.16182e7, "tol": 0.005},
+    # -> shaft 11.62 MW, required pr = 1.351. Comfortable margin, which is
+    #    the entire argument for de-rating a reusable ORSC booster engine.
+    # (d) methane expander bleed at 1 MN, pc = 60 bar: mdot 309.0,
+    #     mf 67.17, At 0.094246 m2, Dt 0.3464 m, q_t 56.4 MW/m2, Q 81.9 MW,
+    #     bulk rise ~348 K at cp 3500. The heat is THERE; the cycle is
+    #     rejected on the jacket drop (~80 bar at that Dt), on methane's
+    #     pseudo-critical cp, and on 60 bar being the wrong pc for a booster.
 ]
 
 # --------------------------------------------------------------------------

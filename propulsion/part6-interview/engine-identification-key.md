@@ -1653,3 +1653,727 @@ dimensions instead."*
 - O/F 1.6 is Apollo documentation, medium confidence.
 
 ---
+
+# Tier 3 — Hard (23–30)
+
+## Exercise 23 — KBKhA **RD-0120** (11D122)
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **LOX / LH2**, O/F **6.0** |
+| 2. Cycle | **Fuel-rich staged combustion with a single-shaft turbopump driving both pumps** — structurally simpler than the RS-25's dual-shaft, dual-preburner arrangement |
+| 3. Cooling | **Regenerative, hydrogen-cooled** |
+| 4. Injector | **Coaxial**; torch ignition; **no acoustic resonance cavities** |
+| 5. Mission class | **Expendable core-stage engine** for a super-heavy vehicle, four per core, sea-level start |
+| 6. The engine | **RD-0120** (Energia core stage) |
+
+### Chain
+
+1. **455 s vacuum at 219 bar, ε 85.7:1, 1,961.3 kN at 106 %.** Hydrolox staged
+   combustion at the very top of the flown field. *Eliminates:* every gas
+   generator.
+2. **Single-shaft turbopump driving both the fuel and the oxidiser pumps.**
+   *This is the discriminator.* The RS-25 is dual-shaft with one preburner per
+   turbopump. *Eliminates:* the RS-25.
+3. **Nominal burn 480–500 s but certified to 1,670 s.** A long-duration
+   certification of an expendable engine — a Soviet practice and a specific fact.
+4. **Two flights, 15 May 1987 and 15 November 1988, four engines per vehicle,
+   then the programme died with its country.** Energia.
+5. **Reached combustion stability without acoustic resonance cavities.** A
+   specific, checkable design difference, not a marketing claim — though the
+   database flags it as coming from a single source `[engine-database A.6.2]`.
+
+### The decisive clue
+
+**"A single-shaft turbopump driving both the fuel and the oxidiser pumps."**
+That one architectural line separates this engine from the only other engine that
+looks like it.
+
+### The real question — the second engine, and the three clues
+
+The second engine is the **RS-25 (SSME)**. It shares LOX/LH2, the fuel-rich
+staged-combustion cycle family, regenerative hydrogen cooling, a coaxial
+injector, torch ignition, booster/sustainer mission class, and Isp within 3 s
+(452.3 versus 455).
+
+The **three clues** that separate them, one of each kind:
+
+| kind | clue | RD-0120 | RS-25 |
+|---|---|---|---|
+| **architectural** | turbopump layout | **single shaft**, both pumps, one preburner | **dual shaft**, one preburner per turbopump, both exhausting to the main injector |
+| **performance** | chamber pressure | **219 bar** `noz`† | 206.4 bar `inj` |
+| **stability design** | high-frequency suppression | **no acoustic resonance cavities** | **resonator cavities machined into the injector face** |
+
+A fourth, not asked for but worth having: the RD-0120 was **expendable**; the
+RS-25 was designed for 55 reuses, and that single requirement explains most of
+the cost and complexity gap.
+
+### If you said …
+
+- **"RS-25."** Reasonable, and this is the intended near-miss. **What should
+  have stopped you:** the single shaft, 219 versus 206 bar, ε 85.7 versus the
+  contested 69/77.5, and "two flights, then the programme died with its country."
+- **"LE-7A."** Reasonable: fuel-rich staged combustion hydrolox with separate
+  turbopumps on one preburner. **What should have stopped you:** 120 bar,
+  1,098 kN vacuum, 440 s, and Japan.
+- **"J-2X."** Reasonable if you keyed on the high ε and hydrolox. **What should
+  have stopped you:** gas generator, 92 bar, and never flew.
+
+### Numbers to carry
+
+- **219 bar is `noz`†** — Russian convention, inferred rather than stated.
+  Comparing it directly to the RS-25's 206 bar `inj` overstates the gap slightly.
+- **The comparative claims are single-sourced.** "Slightly higher Isp and higher
+  chamber pressure at lower complexity and cost" and "stability without resonance
+  cavities" come from the same one source and **should be corroborated before
+  being printed as fact** `[engine-database A.6.2]`. Carrying that caveat is part
+  of the right answer.
+- 1,961.3 kN is quoted **at 106 % power**; state the power level.
+
+---
+
+## Exercise 24 — MHI/JAXA **LE-9**
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **LOX / LH2**, O/F **5.9** |
+| 2. Cycle | **Expander bleed** — *not* closed expander, *not* tap-off. The cooling jacket drives the turbines and the turbine flow is then **dumped overboard** rather than injected |
+| 3. Cooling | **Regenerative**, hydrogen-cooled — and the jacket is the power source |
+| 4. Injector | **Coaxial**; turbopump detail not published |
+| 5. Mission class | **Core-stage engine**, two or three per stage, sea-level start |
+| 6. The engine | **LE-9** (H3 core stage) |
+
+### Chain
+
+1. **1,471 kN vacuum at 426 s with O/F 5.9 and ε 37:1.** Hydrolox core engine.
+2. **426 s vacuum at 100 bar in a booster-class engine — 30 s below what staged
+   combustion delivers at the same size** (RS-25 452.3 s, RD-0120 455 s). So the
+   cycle is **not** staged combustion. *Eliminates:* FRSC and ORSC.
+3. **"No preburner and no gas generator anywhere."** *Eliminates:* the gas
+   generator, which was the obvious remaining open cycle (RS-68A, Vulcain 2).
+4. **"The cooling jacket drives the turbines and the turbine flow is then dumped
+   overboard rather than injected into the chamber."** That sentence is the
+   definition of **expander bleed**, and it is what distinguishes it from the
+   **closed expander** (all flow burned; hard thrust ceiling) and from **tap-off**
+   (hot gas bled from the main chamber, not from the cooling jacket).
+   *Eliminates:* RL10, Vinci, RD-0146 (closed); BE-3PM, J-2S (tap-off).
+5. **"At 1,471 kN this is by a wide margin the largest engine of its cycle
+   *family* ever flown — against 110 kN and 180 kN for the two best-known
+   members."** RL10 and Vinci. Bleed escapes the closed expander's ceiling
+   because the turbine no longer has to be fed by the whole fuel flow
+   `[engine-database A.5.1]`.
+6. **Chamber-wall cracks and turbine-blade fatigue cracks found in 2020, ~2-year
+   delay; first flight 7 March 2023 with the engines performing correctly and the
+   failure in the stage above; fully successful 17 February 2024.**
+
+### The decisive clue
+
+**"The turbine flow is dumped overboard."** Everything else in the exercise is
+consistent with three cycles; that clause is consistent with one.
+
+### If you said …
+
+- **"Closed expander."** Reasonable: no preburner, no gas generator, jacket-driven
+  turbines. **What should have stopped you:** the dumping. A closed expander burns
+  all its turbine flow, which is precisely why it cannot reach 1,471 kN — the
+  closed-expander record is Vinci's 180 kN.
+- **"Tap-off."** Reasonable: also preburner-free and gas-generator-free. **What
+  should have stopped you:** tap-off bleeds **hot gas from the main chamber**;
+  this engine's turbine gas comes from the **cooling jacket**. Different source,
+  different temperature, different failure modes.
+- **"RS-68A."** Reasonable: large hydrolox, low-ish Isp, low part count, cost
+  driven, dumps flow overboard. **What should have stopped you:** RS-68A dumps
+  **gas-generator** products through a side duct, runs 102.6 bar with an
+  **ablative** nozzle and ε 21.5, and gives 411.9 s.
+- **"LE-5B."** Reasonable: Japanese expander bleed, chamber-only heat exchange.
+  **What should have stopped you:** 137.2 kN and 446.8 s — an upper-stage engine.
+
+### Numbers to carry
+
+- **Sea-level thrust is not published**; nor are injector element type or
+  turbopump detail `[engine-database A.5.4]`.
+- 100 bar is flagged `n.s.` — station not stated by any source consulted.
+- T/W 62.5:1 is quoted **in vacuum, as published**.
+- The turbine cracks are the point, not trivia: they show the thermal margins on
+  a bleed cycle at this scale are tight, which is the engineering caveat that must
+  travel with "the variant has no practical thrust ceiling."
+
+---
+
+## Exercise 25 — KBKhA **RD-0146**
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **LOX / LH2** (mixture ratio not published) |
+| 2. Cycle | **Closed expander** — no preburner, no gas generator; the turbopumps are driven by heat absorbed in the nozzle and combustion chamber. **The first Russian expander engine** |
+| 3. Cooling | **Regenerative chamber — the jacket is the power cycle — with an *uncooled* nozzle extension** |
+| 4. Injector | **Not published** |
+| 5. Mission class | **Restartable cryogenic upper stage** (five firings, thrust control in two planes) — proposed, never flown |
+| 6. The engine | **RD-0146** (RD-0146D derivative still in development) |
+
+### Chain
+
+1. **68.6 kN vacuum at 59 bar with a claimed 470 s.** Upper stage, hydrolox,
+   small. *Eliminates:* everything sea-level.
+2. **"No preburner, no gas generator — the turbopumps are driven by heat absorbed
+   in the nozzle and combustion chamber."** Expander family. And because nothing
+   is said to be dumped, and because 59 bar sits **exactly where the closed
+   expander's heat-balance ceiling falls at this thrust**, it is the **closed**
+   variant. *Eliminates:* expander bleed (which would not be pressure-capped this
+   way) and tap-off.
+3. **Separate fuel and oxidiser turbopumps, with the fuel turbopump above
+   120,000 rpm — the highest published turbopump speed of any rocket engine
+   anywhere** `[SP-8107][SP-8101]`. *Eliminates:* the RL10 (geared, ~31,000 rpm)
+   and Vinci (ungeared but not at that speed).
+4. **"It is the first engine of its cycle from its country."** Combined with
+   "developed with foreign industrial collaboration in the early 2000s" (Pratt &
+   Whitney) and a first test firing on 9 October 2001, that is Russia.
+5. **Concept 1988, project start 1999, twenty-five years without a flight.**
+
+### The decisive clue
+
+**120,000 rpm.** One published number, one engine.
+
+### If you said …
+
+- **"RL10B-2."** Reasonable: closed expander, hydrolox, upper stage, the Isp
+  record-holder. **What should have stopped you:** 110.1 kN, 465.5 s, geared
+  single shaft, ε 285:1 deployed, and — decisively — the RL10B-2 has *flown*.
+- **"Vinci."** Reasonable: closed expander, ungeared separate turbopumps,
+  restartable, ~60 bar. **What should have stopped you:** 180 kN, 457.2 s,
+  ε 240:1, first flight 9 July 2024, and a *cooled* deployable extension rather
+  than an uncooled one.
+- **"YF-75D."** Reasonable: a closed expander "like the RL10" on a Chinese upper
+  stage. **What should have stopped you:** the nationality clues, and the fact
+  that every YF-75D performance figure is unconfirmed and confidence D — the
+  database says find a primary source before tabulating them `[engine-database
+  A.7.2]`.
+
+### Numbers to carry
+
+- **The 470 s must never be quoted flat.** It is a **test-stand figure from a
+  design bureau for an engine that has never flown**, confidence **low [D]**,
+  and the course's rule is that flown and unflown engines never share a column.
+  The highest Isp ever *flown* is the RL10B-2's 465.5 s `[engine-database A.6.3]`
+  `[_verify-liquid §17 of contested figures]`.
+- **Expansion ratio, dry mass and mixture ratio are all not published.**
+- 59 bar is `noz`† — Russian convention, inferred.
+
+---
+
+## Exercise 26 — AALPT **YF-100**
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **LOX / RP-1**, O/F **2.6, adjustable ±10 %** |
+| 2. Cycle | **Oxidiser-rich staged combustion (ORSC)** |
+| 3. Cooling | **Regenerative, kerosene (fuel) as coolant** |
+| 4. Injector | **Coaxial**; chemical ignition |
+| 5. Mission class | **First-stage booster and strap-on**, throttleable 65–105 %, ~155 s burn |
+| 6. The engine | **YF-100**, with the **YF-100K** uprate, the **YF-100M** vacuum-optimised variant and the **YF-100GBI** dual-roll-nozzle variant |
+
+### Chain
+
+1. **1,200 kN SL at 180 bar with Isp 300 s SL / 335 s vacuum.** Kerolox at a
+   staged-combustion chamber pressure. *Eliminates:* every GG kerolox engine.
+2. **Oxidiser-rich preburner, single-shaft turbopump with a single-stage oxidiser
+   pump and a two-stage fuel pump.** ORSC, and the specific pump arrangement is
+   published. *Eliminates:* full-flow, fuel-rich staged combustion.
+3. **"Development began in the early 2000s, drawing on technology transferred
+   from another country's engine programme in the 1990s."** RD-120 technology
+   from NPO Energomash. *Eliminates:* an indigenous-from-scratch programme.
+4. **"The fourth entity to fly this cycle, nine years before the third did."**
+   The USSR/Russia flew ORSC from 1963; China flew the YF-100 on 20 September
+   2015; the United States flew ORSC only with the BE-4 in January 2024. That
+   ordering is a clean national fingerprint.
+5. **"In service across an entire national launch fleet, with an uprated variant,
+   a vacuum-optimised variant and a variant carrying dual roll-control nozzles";
+   first 300-second test November 2007; diameter 1.338 m.**
+6. **"Its chamber pressure and Isp trail the leading engine of the same cycle and
+   propellants by a clear margin; this is a capable second-generation machine,
+   not a frontier one."** 180 bar and 335 s against the RD-180's 267 bar and
+   338 s.
+
+### The decisive clue
+
+**Mixture ratio adjustable ±10 %, on a single-shaft ORSC kerolox engine, in
+service across a whole national fleet from 2015.** The adjustability is unusual
+and published; the date and the fleet role close it.
+
+### If you said …
+
+- **"RD-120."** Reasonable — it is the technology ancestor, ORSC kerolox, and the
+  transfer is stated. **What should have stopped you:** the RD-120 is a
+  *vacuum* upper-stage engine (Zenit stage 2) with no sea-level rating, and the
+  described engine gives 1,200 kN at sea level with a 65–105 % throttle range.
+- **"RD-191."** Reasonable: single-chamber kerolox ORSC, ~2,000 kN class, wide
+  throttle. **What should have stopped you:** 258 bar versus 180, 1,920 kN SL
+  versus 1,200, published dry mass (2,290 kg) versus none, and a Russian
+  programme.
+- **"BE-4."** Reasonable: single ox-rich preburner driving both pumps, modern,
+  low-ish pressure by ORSC standards. **What should have stopped you:**
+  **methane**, 140 bar, 2,460 kN, and 2024.
+
+### Numbers to carry
+
+- **Dry mass is not published, and the widely circulated T/W of ~78–80 is not
+  sourced — do not quote a figure** `[engine-database A.7]`. This is the single
+  most important caveat in the exercise: a student who supplies a T/W here has
+  invented one.
+- 180 bar is `noz`† — Chinese practice follows the Russian convention here by
+  inheritance of the technology, and the flag records that the station is
+  inferred.
+- Burn time ~155 s is **estimated**.
+
+---
+
+## Exercise 27 — Reaction Motors **XLR99**
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **LOX / anhydrous liquid ammonia (LNH₃)**, O/F ~1.25 (not published; low confidence) — ammonia chosen for a clean, non-sooting, restartable engine in a piloted vehicle |
+| 2. Cycle | **Gas generator — but of the monopropellant-steam type**: high-test hydrogen peroxide decomposed over a catalyst drives the turbopump. The same idea as the V-2 and the Redstone A-7, in an engine otherwise thoroughly modern for 1960 |
+| 3. Cooling | **Regenerative, ammonia (fuel) as coolant** |
+| 4. Injector | **Impinging**; spark-ignited with a closely sequenced start |
+| 5. Mission / vehicle class | **Rocket-powered research *aircraft*, air-launched, pilot-throttled** — not a launch vehicle at all |
+| 6. The engine | **Reaction Motors XLR99** (North American X-15) |
+
+### Chain
+
+1. **"The vehicle was not a launch vehicle."** Stated outright, and it reframes
+   every other number. *Eliminates:* the entire launch-vehicle field.
+2. **Anhydrous liquid ammonia as fuel.** Nothing else in the file uses it. The
+   reason — clean, non-sooting, restartable, in a **piloted** vehicle — is the
+   whole design rationale. *Eliminates:* kerosene, alcohol, hydrogen, hypergolics.
+3. **HTP decomposed over a catalyst driving the turbopump.** Monopropellant steam
+   drive. *Eliminates:* bipropellant gas generators.
+4. **Throttle 50–100 %, continuously variable, commanded by the pilot with a
+   throttle lever, plus in-flight shutdown and restart** — required, because the
+   vehicle was air-launched and the pilot managed the energy profile by hand.
+5. **250 kN (57,000 lbf) max, 600 psia, Isp 279 s vac / 239 s SL, 413 kg dry,
+   T/W 62:1, chamber temp 3,023 K, ~83 s burn (over 150 s with external tanks),
+   development from 1956, first flight 15 November 1960, programme to 1968, past
+   Mach 6.7 and above 100 km.**
+
+### The decisive clue
+
+**Anhydrous liquid ammonia.** One engine in this course burns it.
+
+### If you said …
+
+- **"Rocketdyne AR2-3."** Reasonable, and it is the closest relative: HTP
+  catalytic turbine drive, aircraft application, throttle 50–100 % on a single
+  lever, US, late 1950s. **What should have stopped you:** the propellants and
+  the thrust. The AR2-3 burns **90 % HTP with the aircraft's own JP-4/JP-5** at
+  29.34 kN — a factor of eight smaller — and its **catalyst pack is also the
+  ignition system**, whereas the XLR99 needs a spark and a sequenced start.
+  Also, the two throttle *by opposite means*: the AR2-3 varies turbopump speed
+  through the gas-generator oxidiser flow; that is a different architecture from
+  a throttled main chamber `[engine-database A.9.5]`.
+- **"V-2 / A-4."** Reasonable: peroxide-permanganate steam turbine, regenerative,
+  impinging-ish. **What should have stopped you:** 1938–42, alcohol–water,
+  15.2 bar, 18 burner cups, and no throttle or restart of any kind.
+- **"LMDE."** Reasonable if you keyed on throttling and crewed vehicles. **What
+  should have stopped you:** pressure-fed hypergolics at 7.6 bar and 46.7 kN,
+  and a 10:1 turndown rather than 2:1.
+
+### Numbers to carry
+
+- **Expansion ratio is not published**; the nozzle exit diameter is 998 mm, which
+  is what you should quote instead.
+- **Mixture ratio ~1.25 is not published and is low confidence.**
+- 41.4 bar is `n.s.` — station not stated.
+- The claim worth making is the operational one: **the first man-rated,
+  throttleable, restartable large liquid rocket engine**, and the direct ancestor
+  of every reusable-engine programme since, by fifty years `[engine-database
+  A.9.4]`.
+
+---
+
+## Exercise 28 — Bristol Siddeley **Gamma 8** (Black Arrow first stage)
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **85 % high-test hydrogen peroxide (HTP) / kerosene (RP-1)**, O/F **8:1** — the very high ratio is characteristic of HTP, which is mostly oxygen *and water* by mass, so most of that 8 is not doing oxidising work |
+| 2. Cycle | **Gas generator**, HTP-driven |
+| 3. Cooling | **Regenerative, kerosene-cooled** |
+| 4. Injector and ignition | **Kerosene injected downstream of a silver-plated nickel-gauze catalyst pack into 600 °C decomposed HTP (steam + oxygen), where it ignites spontaneously. There is no igniter and no hypergolic slug — the catalyst pack *is* the ignition system** |
+| 5. Mission class | **Small orbital launcher first stage**, eight chambers in pairs on tangential gimbals |
+| 6. The engine | **Gamma 8** (Black Arrow first stage); the second-stage engine of the same family is the **Gamma 2** |
+
+### Chain
+
+1. **Mixture ratio 8:1.** Stop and ask what oxidiser has a stoichiometric-ish O/F
+   that high. Only a peroxide that is mostly water by mass. *Eliminates:* LOX
+   (2.3–2.7 with hydrocarbons), N₂O₄ (1.6–1.9).
+2. **The catalyst pack as the ignition system.** Nothing else in the reference
+   file has this architecture. *Eliminates:* every spark, torch, pyrotechnic and
+   hypergolic-slug engine.
+3. **Eight combustion chambers, mounted in pairs on tangential gimbals.** The
+   Gamma 8 layout specifically — Gamma 201/301 have four chambers, Gamma 2 has
+   two with extended nozzles.
+4. **"A suborbital test vehicle from 1955–57; the variant here flew on a small
+   orbital launcher from 1969; that launcher put a satellite in orbit on
+   28 October 1971 — after the programme had already been cancelled."**
+   Black Knight → Black Arrow → Prospero.
+5. **"Its country remains the only one ever to develop an independent orbital
+   launch capability and then abandon it."** The UK.
+6. **128 engines of this family flew across 26 launches with zero failures.**
+
+### The decisive clue
+
+**O/F 8:1 with a catalyst pack for ignition.** Those two together are one engine
+family, and the eight tangentially gimballed chambers pick the variant.
+
+### If you said …
+
+- **"Gamma 301."** Reasonable: same family, same architecture, same catalyst
+  ignition, same 8:1. **What should have stopped you:** four chambers and
+  76–96 kN, on Black Knight rather than Black Arrow.
+- **"Gamma 2."** Reasonable: same family and it is described in the last
+  performance sentence. **What should have stopped you:** two chambers with
+  extended nozzles at 64.6 kN SL / 68.2 kN vac — the *second* stage.
+- **"AR2-3."** Reasonable: HTP over a catalyst, kerosene-family fuel, no igniter.
+  **What should have stopped you:** the AR2-3 is a 29 kN **aircraft** engine
+  burning the aircraft's own JP-4, with a single-lever turbopump-speed throttle;
+  the Gamma 8 is a 235 kN eight-chamber launch-vehicle first stage.
+- **"RD-107A."** Reasonable if "peroxide" made you think Soviet: the RD-107A does
+  use catalytically decomposed H₂O₂ — but only to drive its *turbine*. **What
+  should have stopped you:** the RD-107A's main propellants are LOX/RG-1 at
+  ~2.4, not HTP/kerosene at 8:1.
+
+### Numbers to carry
+
+- **Thrust is contested:** **52,785 lbf (234.8 kN)** in the most-cited source
+  versus **222.4 kN (49,998 lbf)** in a second — a 5 % spread, and the lower
+  figure looks like a rounded 50,000 lbf design value. **Use 234.8 kN and note
+  the alternative** `[engine-database A.9.1]`.
+- **Dry mass and expansion ratio are not published.**
+- The propellant-combination trade is worth stating: storable, non-cryogenic,
+  non-hypergolic, exhaust of steam and CO₂ — properties nothing else in this
+  course combines — at a cost of 250–265 s Isp, an oxidiser that decomposes in
+  storage, and a cleanliness requirement so strict that any contaminant is a
+  catalyst `[Clark]` `[engine-database A.9.3]`.
+
+---
+
+## Exercise 29 — Aerojet Rocketdyne **RL10B-2**, with **RL10C-1** as the discrimination
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **LOX / LH2**, O/F **5.88** |
+| 2. Cycle | **Closed expander** |
+| 3. Cooling | **Chamber: regenerative brazed tube wall, hydrogen-cooled. Nozzle extension: none — radiatively cooled 3D-woven carbon–carbon, entirely uncooled by propellant** |
+| 4. Injector | **Coaxial shear**; spark torch igniter; geared single-shaft turbopump |
+| 5. Mission class | **High-energy cryogenic upper stage**, vacuum-only |
+| 6. The engine | **RL10B-2** |
+
+### Chain
+
+1. **110.1 kN vacuum at 465.5 s — the highest specific impulse of any flown
+   chemical rocket engine.** That figure alone is nearly an identification.
+2. **Closed expander, regenerative tube-wall chamber, coaxial shear, spark torch,
+   geared single-shaft turbopump — "all standard for its family."** RL10.
+3. **A 3D-woven carbon–carbon extension, ~2.5 m long, exit just over 2.1 m, the
+   largest carbon–carbon extendible nozzle ever flown, translating into place
+   after stage separation, worth ~30 s of Isp** — and **a single-point failure
+   with no meaningful abort mode**. That picks the **B-2** out of the family.
+4. **First flight 1998; still flying today on a government heavy-lift upper
+   stage** (SLS ICPS).
+
+### The decisive clue
+
+**465.5 s.** No other flown engine reaches it. (The 470 s of Exercise 25 is a
+test-stand figure for an engine that never flew — keep the columns separate.)
+
+### The discrimination question
+
+Given only **Isp, mass and expansion ratio**, the two sentences are:
+
+> **Sentence 1.** At a fixed chamber pressure and mixture ratio, upper-stage Isp
+> is dominated by expansion ratio, so 449.7 s against 465.5 s is essentially the
+> difference between ε = 130 and ε = 285 — the engine with the smaller nozzle is
+> the lower-Isp one, and 15.8 s is about the right size for that ratio step.
+>
+> **Sentence 2.** A 285:1 carbon–carbon extendible nozzle is a large, heavy
+> structure with a deployment mechanism, so it is the *nozzle* that makes the
+> heavier engine heavier — 301 kg against 190 kg is 111 kg of nozzle and
+> mechanism, not 111 kg of powerhead.
+
+**Why the lighter engine has the lower specific impulse:** because on a
+vacuum upper stage, Isp is bought almost entirely with nozzle area, and nozzle
+area is bought with mass. The 190 kg engine has a **fixed 130:1** nozzle; the
+301 kg engine carries a 2.5 m carbon–carbon extension that translates into place
+after separation. **You are not looking at a better engine and a worse one; you
+are looking at the same powerhead with two different answers to "how much mass
+will you spend on expansion ratio, and will you accept a deployment mechanism as
+a single-point failure?"** The RL10C-1 exists because two production lines were
+consolidated into one, and a fixed nozzle is cheaper, simpler and abort-tolerant.
+
+### If you said …
+
+- **"RL10C-1 for the first engine."** Reasonable — same family, same cycle, same
+  everything except the nozzle. **What should have stopped you:** 465.5 s and a
+  translating carbon–carbon extension. The C-1 is 449.7 s at a fixed 130:1.
+- **"RL10A-4-2."** Reasonable: 22,300 lbf, 451.0 s, 370 lb, O/F 5.5. **What
+  should have stopped you:** the mass and Isp both, and the absence of an
+  extendible nozzle.
+- **"Vinci."** Reasonable: closed expander with a deployable extension at high ε.
+  **What should have stopped you:** 180 kN, 457.2 s, ε 240, ungeared twin
+  turbopumps, and ~550 kg.
+- **"RD-0146."** Reasonable: the 470 s figure is tempting. **What should have
+  stopped you:** it has never flown, and the exercise says "the highest Isp of
+  any **flown** chemical rocket engine."
+
+### Numbers to carry
+
+- **Expansion ratio is contested:** **280:1** in the most-copied table versus
+  **285:1** in the technical literature on the nozzle itself, which states the
+  extension raises the ratio **from 77:1 to 285:1**. **Use 285:1 deployed and
+  77:1 retracted; 280:1 is a rounding** `[RL10B2-CC]` `[engine-database A.2.7]`.
+  The retracted figure is the more interesting one — it is what makes the
+  mechanism worth its mass and its single-point-failure risk.
+- **Chamber pressure is not published** by the manufacturer or in any fetched
+  secondary; a ~44 bar figure circulates from one aggregator and **should not be
+  printed** `[engine-database A.2]`.
+- **RL10C-1 thrust:** 22,890 lbf (101.8 kN, L3Harris) versus 22,820 lbf
+  (101.5 kN, widely copied). A 70 lbf difference — immaterial in magnitude, but
+  **the manufacturer's figure should win on principle** `[engine-database A.2.8]`.
+
+---
+
+## Exercise 30 — Snecma **HM7B**
+
+### Answers
+
+| # | answer |
+|---|---|
+| 1. Propellants | **LOX / LH2**, O/F **5.0** |
+| 2. Cycle | **Gas generator**, open, turbine exhaust dumped overboard |
+| 3. Cooling | **Regenerative** (detail not published) |
+| 4. Injector | **Not published in detail**; ignition detail and turbopump speeds also not published |
+| 5. Mission class | **Cryogenic upper stage**, vacuum-only, **single burn, no restart** |
+| 6. The engine | **HM7B** (Ariane 1–4 third stages; Ariane 5 ECA upper stage) |
+
+### Chain
+
+1. **62.2 kN vacuum, 444.6 s, ε 83.1:1, O/F 5:1, dry mass 165 kg, burn times of
+   735 / 780 / 950 s.** Hydrolox upper stage, small, light, long-burning.
+2. **"An open cycle that dumps turbine exhaust overboard" at 37 bar.** Gas
+   generator. *Eliminates:* expander (which would be the obvious guess at 37 bar)
+   and staged combustion.
+3. **The question the numbers pose — 444.6 s at 37 bar from an open cycle.**
+   The answer is in **ε 83.1:1 and the fact that it never sees atmosphere**.
+   Upper-stage Isp is dominated by expansion ratio, not chamber pressure: chamber
+   pressure buys you $C_F$ only through the pressure-ratio term, which saturates,
+   whereas area ratio keeps buying exit velocity. A closed-expander at 60 bar and
+   ε 240 gets 457 s; a staged-combustion booster at 219 bar and ε 85.7 gets 455 s;
+   this engine at 37 bar and ε 83.1 gets 444.6 s. **The gas-generator penalty —
+   2–3 % of flow thrown overboard — is worth roughly 10 s, and everything else in
+   the 13 s gap is expansion ratio** `[SB][SP-8120]`. That is the cleanest
+   demonstration in the course of where upper-stage Isp comes from.
+4. **Single-shaft *fuel* turbopump; no restart, single burn only** — the
+   limitation that forced its final vehicle into direct high-energy-orbit
+   insertion and motivated the closed-expander replacement (Vinci).
+5. **Family from 1973; first flight 24 December 1979 on the maiden flight of its
+   country's first orbital launcher; retired 2023 after 44 years across four
+   launcher generations; nearly 300 units produced.** Ariane 1 L01.
+
+### The decisive clue
+
+**444.6 s at 37 bar from an open cycle, with no restart.** The combination of a
+very high expansion ratio, a very low chamber pressure and a single-burn
+limitation is one engine.
+
+### If you said …
+
+- **"YF-75."** Reasonable, and it is the closest thing in the file: LOX/LH2 gas
+  generator upper-stage engine, 37.6 bar, 438 s vacuum, ε 80:1, single-shaft
+  hydrogen turbopump, ~470 s burn. **What should have stopped you:** three
+  things — the dates (first flight 8 February 1994, not 1979), the dry mass
+  (**550 kg**, which the database itself flags as suspiciously high for the
+  thrust and possibly a two-engine assembly, against 165 kg here), and the
+  cooling, which on the YF-75 is **split: regenerative chamber, dump-cooled
+  nozzle** — one of the few good flown examples of dump cooling. Two engines per
+  stage, not one, as well.
+- **"LE-5."** Reasonable: LOX/LH2 gas generator upper stage, 36.5 bar, 450 s,
+  ε 140:1, 255 kg. **What should have stopped you:** ε 140 versus 83.1, and the
+  LE-5 is **qualified for up to 16 starts** — the described engine does not
+  restart at all.
+- **"RL10A-3-3A."** Reasonable: hydrolox upper stage at low chamber pressure with
+  Isp in the 440s. **What should have stopped you:** the RL10 is a **closed
+  expander** that dumps nothing, at 32.8 bar and ε 61 with restart capability.
+
+### Numbers to carry
+
+- **Chamber pressure is internally inconsistent inside a single article:**
+  **3.7 MPa (37 bar, 537 psia)** in the specification table and **3.5 MPa** in
+  the body text of the *same* document. **Use 37 bar and footnote the other**,
+  and take the general lesson: tertiary sources are not self-consistent
+  `[engine-database A.4.3]`.
+- **Injector element type, ignition detail and turbopump speeds are all not
+  published.**
+- 165 kg dry is the number worth memorising — it is remarkably light and is what
+  makes the 38:1 T/W possible on a 62 kN engine.
+
+---
+
+# The three checks from "After you have finished"
+
+## 1. Did you name the specific cycle variant every time?
+
+Family names are not answers. Here is the whole file sorted by cycle, which is
+the table to memorise:
+
+| cycle variant | engines in this file | thrust ceiling / signature |
+|---|---|---|
+| **Gas generator** (bipropellant) | F-1 (1), J-2 (11), RS-68A (12), Vulcain 2 (13), HM7B (30) | none in practice; 2–5 % of flow dumped; the default |
+| **Gas generator, monopropellant steam** | V-2 (10), XLR99 (27), Gamma 8 (28), and RD-107A | turbine runs on decomposed peroxide, not combustion gas |
+| **Closed expander** | RL10A-3-3A (3), Vinci (14), RD-0146 (25), RL10B-2 (29) | hard Pc ceiling: heat input ∝ wall area (D²), thrust ∝ throat area. Flown record 180 kN (Vinci) |
+| **Expander bleed** | LE-9 (24) | escapes the ceiling by dumping turbine flow. 1,471 kN, and no practical ceiling shown |
+| **Tap-off** | (none identified here; BE-3PM and J-2S are the file's examples) | hot gas bled from the main chamber |
+| **Fuel-rich staged combustion** | RS-25 (2), LE-7A (15), RD-0120 (23) | hydrolox only; kerosene cokes a fuel-rich preburner |
+| **Oxidiser-rich staged combustion** | RD-180 (6), NK-33 (16), RD-253 family (17), BE-4 (18), YF-100 (26) | enamel-coated hot-oxygen surfaces; small turbomachinery, high T/W |
+| **Full-flow staged combustion** | Raptor (5) | two preburners of opposite mixture ratio; first flown example |
+| **Electric pump-fed** | Rutherford (19) | no turbine at all; battery mass is parasitic |
+| **Pressure-fed** | LMDE (9), Apollo SPS (22) | Pc limited by tank MEOP; no rotating machinery |
+| **Solid** | Shuttle SRB (7), P120C (20), Star 48B (21) | no throttle, no shutdown, once lit |
+| **Stored cold gas** | SAFER / MMU (8) | the stored pressure *is* the cycle |
+
+Three pairs in this file exist specifically to punish "expander cycle" as an
+answer: **RL10A-3-3A (closed) versus LE-9 (bleed)**, **Vinci (closed, ungeared)
+versus RL10B-2 (closed, geared)**, and **RD-0146 (closed, never flown) versus
+everything flown**. Two more punish "staged combustion": **RS-25 (fuel-rich,
+dual-shaft) versus RD-0120 (fuel-rich, single-shaft)** and **BE-4 (ox-rich, one
+preburner) versus Raptor (full-flow, two preburners)**.
+
+## 2. Did you attach a caveat to every contested number?
+
+The file's own list, with the caveat you should have written:
+
+| exercise | figure | caveat |
+|---|---|---|
+| 1 — F-1 | chamber pressure | four values circulate: 965 / 982 / **1,015** / 1,125 psia. Quote ≈70 bar `inj` and footnote the range; the spread is a measurement-station and programme-phase artefact `[engine-database A.2.2]` |
+| 2 — RS-25 | expansion ratio | **69:1** (manufacturer, "area ratio") / 77.5:1 (agency training material) / 78:1. Quote 69:1 as geometric and footnote 77.5:1 `[A.2.3]` |
+| 2 — RS-25 | dry mass | 3,177 kg (bare) vs **3,526 kg** (manufacturer, installed). T/W 73.1:1 uses the *smaller* mass; ~66:1 on the larger. Never quote T/W without saying which mass `[A.2.5]` |
+| 5 — Raptor | everything | company claims; thrust corroborated only indirectly via FAA documents and third-party telemetry/acoustics. **No independent verification of Pc, Isp, dry mass or T/W** `[A.3.5]` |
+| 21 — Star 48B | vacuum Isp | **286.2 s and 292.2 s are both correct** — short and long nozzle. Never quote it without the nozzle. Inert mass 28 kg is almost certainly a dropped digit for 128 kg `[B.4.1]` |
+| 29 — RL10B-2 | expansion ratio | **285:1 deployed / 77:1 retracted**; 280:1 is a rounding `[A.2.7]` |
+
+And the ones the file's own list does not mention but that a strong answer
+carries anyway: the Gamma 8's 234.8 vs 222.4 kN thrust (Ex 28), the HM7B's
+37 vs 35 bar *inside one document* (Ex 30), the RD-170's 170 vs 192 MW turbopump
+power quoted for the RD-180's parent (Ex 6), the Shuttle SRB's 69.6/0.4 vs
+69.8/0.2 composition (Ex 7), the MMU's Δv that does not close (Ex 8), and the
+four unsourced Apollo SPS figures (Ex 22).
+
+**Quoting a contested number flat is a wrong answer even when the number is the
+one the interviewer had in mind.** They will ask "where's that from?" and the
+answer "an infobox" ends the conversation.
+
+## 3. The two decoys
+
+The exercise file never says which two, so this is an inference from its own
+definition — *"a second real engine shares almost every clue in the description,
+and exactly one detail separates them"* — applied to the exercises that give **no
+hint that a twin exists**. On that test [J]:
+
+### Decoy 1 — Exercise 2 (RS-25), whose twin is the RD-0120
+
+Shared: LOX/LH2; fuel-rich staged combustion; regenerative hydrogen cooling;
+coaxial injector; torch ignition; booster/sustainer class; chamber pressure
+within 6 % (206 vs 219 bar); vacuum Isp within 3 s (452.3 vs 455).
+
+**The single detail that separates them: the powerhead.** The RS-25 has **two
+preburners on two independent turbopump shafts**; the RD-0120 has **one
+preburner and a single shaft driving both pumps**. Everything else — the
+resonator cavities, the reusability requirement, the 55-flight design life — is
+downstream of that.
+
+Exercise 23 works the same pair from the other side, which is why the file's
+closing note can send you back to find it: the drill is symmetric, and only one
+of the two exercises declares the twin.
+
+### Decoy 2 — Exercise 30 (HM7B), whose twin is the YF-75
+
+Shared: LOX/LH2; **gas generator**; regenerative cooling; cryogenic upper stage;
+chamber pressure within 2 % (37 vs 37.6 bar); vacuum Isp within 7 s (444.6 vs
+438); expansion ratio within 4 % (83.1 vs 80); **single-shaft hydrogen
+turbopump**; long burn (735–950 s vs 470 s); no published injector detail.
+
+**The single detail that separates them: the cooling.** The HM7B is
+**regenerative throughout**; the YF-75 is **split — regenerative chamber, dump-
+cooled nozzle**, and is one of the very few flown examples of dump cooling
+anywhere. If you want a second discriminator, the dry masses are 165 kg and
+550 kg, and the database itself flags the 550 kg as possibly covering a
+two-engine assembly.
+
+### Runners-up, and why they do not qualify
+
+- **Exercise 3 (RL10A-3-3A) vs RL10A-4-2 / RL10C-1.** A real near-twin set, but
+  the discriminating clue is a *rating table*, not a single architectural detail
+  — and Exercise 29 declares the family's twin problem explicitly.
+- **Exercise 10 (V-2) vs the Redstone A-7.** Shares propellants, cooling
+  philosophy and the whole power cycle; separated by the injector (18 burner cups
+  vs flat-face impinging) — a clean single discriminator. It loses only because
+  the era clue (1938–42) closes it before the injector has to.
+- **Exercise 27 (XLR99) vs the AR2-3.** Shares the HTP catalytic turbine drive,
+  the aircraft application and the 50–100 % single-lever throttle; separated by
+  the propellants and by *how* they throttle. Again, the era and the thrust close
+  it early.
+
+**If your answer named any of these five pairs with its discriminator, mark it
+correct.** The skill being tested is "which single clue settles it", and all five
+exercise that skill honestly.
+
+---
+
+# What the drill was actually testing
+
+Six habits, in the order they matter:
+
+1. **Read the mixture ratio first.** O/F alone partitions the entire file:
+   ~1.2 (alcohol–water), 1.6–1.9 (storables), 2.2–2.7 (kerolox), 3.6 (methalox),
+   5–6 (hydrolox), 8 (HTP). Exercises 5, 11, 17 and 28 are decided on it.
+2. **Read chamber pressure as a cycle statement, not a performance statement.**
+   33 bar on hydrolox is a closed expander's heat-balance ceiling. 100–120 bar is
+   a gas generator. 200+ bar is staged combustion. 267–330 bar is oxidiser-rich
+   or full-flow. Exercises 3, 12, 16, 18 and 24 turn on it.
+3. **Read expansion ratio as a mission statement.** ε 8–21 is sea level;
+   ε 27–60 is a compromise or an interstage constraint; ε 80–285 is a vacuum
+   upper stage. Exercises 11, 29 and 30 turn on it.
+4. **Treat "not published" as data.** Exercises 18, 19, 22, 24, 26 and 30 each
+   omit a parameter because no credible source publishes it, and in every case
+   the omission narrows the field — an engine whose dry mass is unpublished is
+   not an American engine of the Apollo era.
+5. **Name the ruled-out alternative.** Every entry above is written so that the
+   answer *is* the elimination. An identification with no eliminated twin is a
+   recognition, and recognition is Level 1.
+6. **Carry the caveat.** The engine database exists because rocket performance
+   figures are not exact, and an engineer who quotes them as though they were has
+   told you something about their sourcing habits that no amount of correct
+   recall repairs.
+
+---
+
+*Numbers throughout are from [`reference/engine-database.md`](../reference/engine-database.md),
+which consolidates [`reference/_verify-liquid.md`](../reference/_verify-liquid.md)
+and [`reference/_verify-solid-coldgas.md`](../reference/_verify-solid-coldgas.md)
+with their caveats intact. Citation tags resolve in
+[`reference/sources.md`](../reference/sources.md) and in the database's Part E
+tag list. Where this key says a figure is not published, that is a finding of the
+verification pass, not a gap in this key.*
