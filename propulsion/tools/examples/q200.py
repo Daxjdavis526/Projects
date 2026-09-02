@@ -191,3 +191,60 @@ EXAMPLES += [
      "args": {"isp": 40.0, "m_final": 100.0, "dv": 7.47826},
      "expect": 1.9247, "tol": 0.005},
 ]
+
+# --- Q111-120 -------------------------------------------------------------
+# Q111 at T0 = 3400 K, M = 22, pc = 100 bar, eps = 40, vacuum:
+#   gamma 1.15 -> c* 1775.0, Cf 1.9415, Isp 351.4 s, SL-optimum eps 13.17
+#   gamma 1.25 -> c* 1722.6, Cf 1.8346, Isp 322.3 s, SL-optimum eps 10.58
+# Q115 table: eps 16 -> 1.635 SL / 1.797 vac; eps 40 -> 1.479 SL / 1.884 vac.
+#   SL-optimum eps = 11.75 gives Cf = 1.643.
+# Q120 At = 800e3/(12e6*1.85) = 0.036036 m^2, Dt = 0.21420 m;
+#   c*_del = 0.96*1820 = 1747.2 m/s; mdot = 12e6*At/c* = 247.50 kg/s;
+#   Vc = 1.05*At = 0.037838 m^3; Ac = 2.5*At = 0.090090 m^2, Dc = 0.33868 m.
+EXAMPLES += [
+    {"id": "q200.113a", "fn": "mach_from_area_ratio",
+     "args": {"gamma": 1.20, "eps": 40.0},
+     "expect": 4.2394, "tol": 0.001},
+    {"id": "q200.113b", "fn": "p0_over_p",
+     "args": {"gamma": 1.20, "Mach": 4.2394},
+     "expect": 479.05, "tol": 0.001},
+    {"id": "q200.113c", "fn": "normal_shock_p2_p1",
+     "args": {"gamma": 1.20, "M1": 4.2394},
+     "expect": 19.5155, "tol": 0.001},
+    {"id": "q200.113d", "fn": "normal_shock_M2",
+     "args": {"gamma": 1.20, "M1": 4.2394},
+     "expect": 0.36098, "tol": 0.001},
+    {"id": "q200.113e", "fn": "schmucker_separation",
+     "args": {"pa": 101325.0, "Me": 4.2394},
+     "expect": 29244.5, "tol": 0.001},
+    {"id": "q200.115a", "fn": "Cf",
+     "args": {"gamma": 1.20, "eps": 16.0, "p0": 100e5, "pa": 101325.0},
+     "expect": 1.63496, "tol": 0.001},
+    {"id": "q200.115b", "fn": "Cf",
+     "args": {"gamma": 1.20, "eps": 16.0, "p0": 100e5, "pa": 0.0},
+     "expect": 1.79708, "tol": 0.001},
+    {"id": "q200.115c", "fn": "Cf",
+     "args": {"gamma": 1.20, "eps": 40.0, "p0": 100e5, "pa": 101325.0},
+     "expect": 1.47897, "tol": 0.001},
+    {"id": "q200.115d", "fn": "Cf",
+     "args": {"gamma": 1.20, "eps": 40.0, "p0": 100e5, "pa": 0.0},
+     "expect": 1.88427, "tol": 0.001},
+    {"id": "q200.115e", "fn": "optimum_eps_for_pa",
+     "args": {"gamma": 1.20, "p0": 100e5, "pa": 101325.0},
+     "expect": 11.7527, "tol": 0.001},
+    {"id": "q200.117a", "fn": "c_star",
+     "args": {"gamma": 1.20, "R": 386.719, "T0": 3550.0},
+     "expect": 1806.68, "tol": 0.001},
+    {"id": "q200.117b", "fn": "c_star",
+     "args": {"gamma": 1.20, "R": 409.579, "T0": 3390.0},
+     "expect": 1816.93, "tol": 0.001},
+    {"id": "q200.120a", "fn": "throat_area_from_thrust",
+     "args": {"F": 800e3, "p0": 12e6, "Cf_val": 1.85},
+     "expect": 0.036036, "tol": 0.001},
+    {"id": "q200.120b", "fn": "chamber_volume_from_Lstar",
+     "args": {"Lstar": 1.05, "At": 0.036036},
+     "expect": 0.037838, "tol": 0.001},
+    {"id": "q200.120c", "fn": "isp_from_c",
+     "args": {"c_eff": 1747.2 * 1.85},
+     "expect": 329.605, "tol": 0.001},
+]
