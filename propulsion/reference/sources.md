@@ -10,6 +10,16 @@ being listed here. Items that could not be confirmed are quarantined in
 [Unverified](#unverified) at the bottom with whatever is actually known about
 them. Nothing in the verified sections carries an invented report number or DOI.
 
+Sections 1–7 hold that standard. **Sections 8 and 9 do not, deliberately.**
+Section 8 collects the failure-investigation record, where the only public
+account of a finding is often a press statement or a trade-news article, and it
+labels which is which. Section 9 collects the short tags the two verification
+worksheets used for manufacturer pages, agency fact sheets and tertiary
+compilations — several of which could not be fetched at all — and states the
+reliability caveat that applies to all of them. Both sections exist so that every
+tag used anywhere in the course resolves to something honest about its own
+provenance.
+
 ## How to read the report numbers
 
 American propulsion literature is a stack of overlapping numbering schemes, and
@@ -75,6 +85,17 @@ the method of characteristics that a propulsion student needs. The historical
 asides are not padding — they explain why the conventions are what they are.
 Earlier editions (2nd 1990, 3rd 2003) are fine for everything this course uses.
 
+**[Bendsoe]** — Bendsøe, M. P., and Sigmund, O., *Topology Optimization: Theory,
+Methods, and Applications*, 2nd ed., Springer, Berlin, 2003. DOI:
+[10.1007/978-3-662-05086-6](https://doi.org/10.1007/978-3-662-05086-6)
+The reference for SIMP: element pseudo-densities, the penalisation exponent, and
+the filtering that stops checkerboarding and mesh dependence. **Caveat that
+matters in propulsion:** the book's worked objective is compliance minimisation,
+and almost nothing in an engine is sized by compliance. A manifold, a gimbal
+bracket or an injector body is sized by pressure, thermal gradient, fatigue life
+and manufacturability. Read chapter 1 for the mechanics, then treat a
+compliance-optimal shape as a starting geometry, not an answer.
+
 **[Bergman]** — Bergman, T. L., Lavine, A. S., Incropera, F. P., and DeWitt,
 D. P., *Fundamentals of Heat and Mass Transfer*, 8th ed., Wiley, 2017.
 ISBN 978-1-118-98917-3.
@@ -122,6 +143,17 @@ The most complete open treatment of solid propellant chemistry, processing,
 ballistics and case/nozzle design in one volume, with a European (SEP/SNPE)
 perspective that usefully complements the American literature. Out of print and
 expensive; a library copy is the realistic route.
+
+**[Forrester08]** — Forrester, A. I. J., Sóbester, A., and Keane, A. J.,
+*Engineering Design via Surrogate Modelling: A Practical Guide*, Wiley,
+Chichester, 2008. DOI:
+[10.1002/9780470770801](https://doi.org/10.1002/9780470770801)
+The practical companion to [Rasmussen06]: sampling plans, kriging construction,
+infill criteria (expected improvement and its relatives), and how to spend a
+small CFD budget so the surrogate is informative where the optimiser will go.
+Read it before wrapping any optimiser around an expensive simulation. Its
+worked examples are low-dimensional; a 30-parameter engine balance behaves
+worse than anything in the book.
 
 **[GradlAM]** — Gradl, P. R., Protz, C. S., Mireles, O. R., and Garcia, C. P.
 (eds.), *Metal Additive Manufacturing for Propulsion Applications*, Progress in
@@ -205,6 +237,15 @@ chamber modelling — the most current comprehensive treatment of combustion
 devices. This is where to look for swirl-injector design theory; see the
 Unverified section regarding the specific Bazarov attribution.
 
+**[Martins]** — Martins, J. R. R. A., and Ning, A., *Engineering Design
+Optimization*, Cambridge University Press, 2021. Author-hosted free PDF:
+<https://mdobook.github.io/>
+The current textbook for gradient-based and gradient-free design optimisation,
+including adjoints, constraint handling and the practicalities of coupling
+disciplinary solvers. The free PDF is the authors' own. Aerospace examples are
+mostly aerodynamic rather than propulsive, but the machinery transfers directly
+to a cycle-balance or nozzle-contour problem.
+
 **[MIT16512]** — Martinez-Sanchez, M., *16.512 Rocket Propulsion*, MIT
 OpenCourseWare, Fall 2005.
 <https://ocw.mit.edu/courses/16-512-rocket-propulsion-fall-2005/>
@@ -212,6 +253,44 @@ Free graduate lecture notes covering thermochemistry, nozzle flow with real-gas
 and kinetic effects, cooling and wall stresses, turbomachinery, pressurization,
 and solid/hybrid ballistics. Terse and mathematical — best used alongside a
 textbook rather than instead of one. Lecture PDFs download individually.
+
+**[Peters00]** — Peters, N., *Turbulent Combustion*, Cambridge University Press,
+Cambridge, 2000. DOI:
+[10.1017/CBO9780511612701](https://doi.org/10.1017/CBO9780511612701)
+The flamelet concept and its regime diagram, which is where the assumption
+"chemistry is fast compared with the resolved flow" gets made explicit. Read it
+to know what a flamelet closure is claiming. **Caveat:** the classical
+formulation assumes a single conserved scalar, and a staged-combustion chamber
+with three feed streams (oxidiser, fuel, preburner gas) violates that
+assumption before the first cell is meshed.
+
+**[Poinsot]** — Poinsot, T., and Veynante, D., *Theoretical and Numerical
+Combustion*, 3rd ed., 2011.
+The other standard text, and the one to read for the numerics rather than the
+theory: boundary conditions for compressible reacting flow (the NSCBC
+treatment), acoustic reflection at inlets and outlets, and the discretisation
+choices that decide whether a reacting simulation is even well-posed. If a
+combustion CFD result looks like an instability, this is where you check
+whether the boundary condition invented it.
+
+**[Rasmussen06]** — Rasmussen, C. E., and Williams, C. K. I., *Gaussian Processes
+for Machine Learning*, MIT Press, Cambridge, MA, 2006. Author-hosted free PDF:
+<http://gaussianprocess.org/gpml/>
+The reference for Gaussian-process regression, which is the surrogate most used
+for expensive propulsion simulations because it returns a variance as well as a
+mean. **The caveat is the whole point:** that variance is conditional on the
+kernel, so a confidently wrong kernel produces confidently wrong error bars, and
+fitting cost is O(n³) in the number of training points.
+
+**[Saltelli08]** — Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni,
+J., Gatelli, D., Saisana, M., and Tarantola, S., *Global Sensitivity Analysis:
+The Primer*, Wiley, Chichester, 2008. DOI:
+[10.1002/9780470725184](https://doi.org/10.1002/9780470725184)
+Short, readable, and the book that makes one-factor-at-a-time sensitivity
+studies indefensible. Read it for the practical estimators of the [Sobol01]
+indices and for the sample sizes they actually need. **Caveat:** variance-based
+indices lose their clean interpretation when inputs are strongly correlated,
+which in an engine model they usually are.
 
 **[SB]** — Sutton, G. P., and Biblarz, O., *Rocket Propulsion Elements*, Wiley.
 7th ed. 2001 (ISBN 978-0-471-32642-7); 8th ed. 2010 (ISBN 978-0-470-08024-5);
@@ -571,6 +650,17 @@ stable and deeply throttleable, and the TRW/LMDE lineage that leads to the Apoll
 descent engine and, later, Merlin. It is a heritage-and-performance survey by the
 vendor, not a design method — take the design guidance as directional.
 
+**[Grisnik87]** — Grisnik, S. P., Smith, T. A., and Saltz, L. E., "Experimental
+Study of Low Reynolds Number Nozzles," NASA TM-89858 / AIAA-87-0992, 1987.
+NTRS: <https://ntrs.nasa.gov/citations/19870010950>. DOI:
+[10.2514/6.1987-992](https://doi.org/10.2514/6.1987-992)
+Conical, bell, trumpet and modified-trumpet nozzles plus a sharp-edged orifice,
+tested with unheated nitrogen and hydrogen over throat Reynolds numbers of
+roughly 500–9,000. Together with [Spisz65] it is the experimental basis for the
+viscous-efficiency correlation used in Module 29, and it is the source for the
+result that contour refinement stops paying at low Re because the boundary layer
+has already eaten the divergent section.
+
 **[LR57]** — Lenoir, J. M., and Robillard, G., "A Mathematical Method to Predict
 the Effects of Erosive Burning in Solid-Propellant Rockets," *Sixth Symposium
 (International) on Combustion*, 1957, pp. 667–683. DOI:
@@ -580,6 +670,17 @@ The heat-transfer-based erosive burning model (r = r₀ + αG^0.8 e^(−βr₀ρ
 its usual form) that is still the most widely used engineering correlation for
 erosive burning. Its constants are propellant- and geometry-specific and must be
 fitted; treat published values as starting guesses only.
+
+**[Menter94]** — Menter, F. R., "Two-Equation Eddy-Viscosity Turbulence Models
+for Engineering Applications," *AIAA Journal*, Vol. 32, No. 8, 1994,
+pp. 1598–1605. DOI:
+[10.2514/3.12149](https://arc.aiaa.org/doi/10.2514/3.12149)
+The SST k–ω model: k–ω near the wall, k–ε in the free stream, blended, with the
+shear-stress-transport limiter on eddy viscosity. It is the RANS workhorse for
+nozzle and cooling-channel work because it handles adverse pressure gradients
+and separation onset better than standard k–ε. It remains a two-equation
+eddy-viscosity model: it will not tell you about combustion-driven unsteadiness,
+and its separation prediction is a calibrated behaviour, not a derived one.
 
 **[Nurick76]** — Nurick, W. H., "Orifice Cavitation and Its Effect on Spray
 Mixing," *Journal of Fluids Engineering*, Vol. 98, No. 4, Dec. 1976,
@@ -601,6 +702,31 @@ and injector-pattern evolution, and what "dynamic stability" was actually
 demonstrated to mean. The best available case study of an instability fix
 achieved by systematic testing rather than by theory, and honest about that.
 
+**[Priem60]** — Priem, R. J., and Heidmann, M. F., *Propellant Vaporization as a
+Design Criterion for Rocket-Engine Combustion Chambers*, NASA TR R-67, NASA
+Lewis Research Center, 1960. Catalogue record:
+<https://catalog.hathitrust.org/Record/011432577>
+The vaporisation-limited chamber-length analysis: compute the fraction of the
+spray vaporised along the chamber and correlate performance against an effective
+length. This is where the modern habit of sizing L* against a vaporisation
+criterion rather than a residence-time rule of thumb comes from, and the paper is
+explicit that a small number of large drops, not the mean drop size, is what
+costs performance. **Caveat:** it is a subcritical, discrete-droplet picture. It
+does not describe what a supercritical LOX jet does above the critical pressure,
+which is the regime almost every engine above ~60 bar operates in. No NTRS
+document ID was confirmed for this report in this session; cite the report
+number.
+
+**[Quentmeyer77]** — Quentmeyer, R. J., "Experimental Fatigue Life Investigation of
+Cylindrical Thrust Chambers," NASA TM X-73665 / AIAA 77-893, 1977.
+NTRS: <https://ntrs.nasa.gov/citations/19770024295>
+Twenty-one cylindrical liners (OFHC copper, Amzirc, NARloy-Z) cycled to failure
+with hydrogen–oxygen at ~54 MW/m² average throat flux. The source of the
+"doghouse" failure mode: progressive thinning and bulging of the cooling-channel
+land at the centreline, ending in tensile rupture. Cite it for what low-cycle
+thermal fatigue does to a regeneratively cooled wall, and for the observation
+that isothermal coupon tests rank alloys differently from cycled chambers.
+
 **[Rao58]** — Rao, G. V. R., "Exhaust Nozzle Contour for Optimum Thrust,"
 *Journal of Jet Propulsion*, Vol. 28, No. 6, June 1958, pp. 377–382. DOI:
 [10.2514/8.7324](https://arc.aiaa.org/doi/10.2514/8.7324)
@@ -619,6 +745,24 @@ length. This — not the full characteristics solution — is what "80% bell" me
 and what almost every textbook nozzle contour actually is. A research note, not a
 full paper; check the length ratio conventions of whatever chart you are reading
 before trusting it.
+
+**[Ricciardi92]** — Ricciardi, A., "Generalized Geometric Analysis of Right
+Circular Cylindrical Star Perforated and Tapered Grains," *Journal of Propulsion
+and Power*, Vol. 8, No. 1, 1992, pp. 51–58. DOI:
+[10.2514/3.23441](https://arc.aiaa.org/doi/10.2514/3.23441)
+Closed-form burn-back for star and tapered grains, taken far enough to cover the
+sliver phase and the transitions between burning-surface regimes. The reference
+for why a star grain's burn-area history has corners in it, and the analytical
+check to run before trusting a numerical burn-back code.
+
+**[Rothe71]** — Rothe, D. E., "Electron-Beam Studies of Viscous Flow in Supersonic
+Nozzles," *AIAA Journal*, Vol. 9, No. 5, 1971, pp. 804–811. DOI:
+[10.2514/3.6279](https://arc.aiaa.org/doi/10.2514/3.6279)
+Non-intrusive electron-beam density measurements inside small supersonic nozzles,
+showing boundary layers from opposite walls merging so that the "nozzle" is
+better described as a viscous duct. The experimental evidence behind the
+statement in Module 29 that below a throat Reynolds number of order 10³ there is
+no isentropic core left to expand.
 
 **[Rupe65]** — Rupe, J. H., *An Experimental Correlation of the Nonreactive
 Properties of Injection Schemes and Combustion Effects in a Liquid-Propellant
@@ -658,6 +802,14 @@ cut on a conical nozzle. Modern practice uses pressure-ratio correlations from
 [Schmucker73] or [OMK05] instead; keep Summerfield as the sanity check. The
 original 1954 article is not on NTRS and has no DOI; it is verified here through
 its citation in the peer-reviewed review literature.
+**[Spisz65]** — Spisz, E. W., Brinich, P. F., and Jack, J. R., *Thrust
+Coefficients of Low-Thrust Nozzles*, NASA TN D-3056, NASA Lewis Research Center,
+1965. NTRS: <https://ntrs.nasa.gov/citations/19650027295>
+Seven nozzles, area ratios 25–150, resistance-heated hydrogen, propellant
+temperatures 530–4000 °R, with losses correlated against throat Reynolds number
+and area ratio. The original demonstration that C_F falls steeply below
+Re_t ≈ 10³ and that the optimum area ratio collapses with it. Paired with
+[Grisnik87] throughout Module 29.
 
 ---
 
@@ -734,6 +886,16 @@ module. Useful as a real, cited data point for Part IV cold-gas sizing. It is
 vendor literature — the performance figures are nominal, not measured flight
 data. For broader context see NASA's *State of the Art of Small Spacecraft
 Technology*, propulsion chapter: <https://sst-soa.arc.nasa.gov/04-propulsion>
+
+**[NTRS-20140011656]** — NASA, *Waking a Giant: Bringing the Saturn F-1 Engine
+Back to Life*, NTRS document ID 20140011656.
+<https://ntrs.nasa.gov/citations/20140011656>
+The F-1 gas-generator-cycle teardown and hot-fire revival work, cited in this
+course for F-1 chamber pressure and for the measurement-station question behind
+the 965 vs 1,125 psia spread. **Tagged by its NTRS document ID rather than an
+author-year key** because that is how `reference/engine-database.md` §E.2 records
+it; the report number and full author list were not established here, and the PDF
+returned binary rather than extractable text during the verification pass.
 
 **[RAMPT]** — Fikes, J. C., *Rapid Analysis and Manufacturing Propulsion
 Technology (RAMPT)*, NASA Space Technology Mission Directorate / Game Changing
@@ -833,6 +995,16 @@ guidance: <https://www.nasa.gov/centers-and-facilities/white-sands/copv-standard
 Implementation guidance for the earlier revision is public via DTIC:
 <https://apps.dtic.mil/sti/tr/pdf/ADA413531.pdf>
 
+**[ASME-V&V-20]** — ASME V&V 20-2009 (reaffirmed 2021), *Standard for Verification
+and Validation in Computational Fluid Dynamics and Heat Transfer*, American
+Society of Mechanical Engineers, New York, 2009.
+The standard that defines validation uncertainty u_val — the combination of
+numerical, input and experimental uncertainties against which a
+simulation-to-test comparison error E must be judged. Its single most useful
+consequence: the accuracy you are entitled to claim is |E| + u_val, never zero,
+and a 4 % agreement with a test point measured to ±3 % is not a 4 % model. Paid
+standard; check institutional access before designing a V&V plan around it.
+
 **[CPIA-245]** — Evans, S. A., Gross, K. W., Combs, L. P., and Geniec, W.,
 *JANNAF Rocket Engine Performance Test Data Acquisition and Interpretation
 Manual*, CPIA Publication 245, JHU/APL, Apr. 1975.
@@ -853,6 +1025,16 @@ number legally means, it is defined here. Distribution is public but DTIC does
 not serve a PDF; the NTRS record is the reliable route. Most other JANNAF
 publications are *not* public — do not assume a CPIA number implies availability.
 
+**[DoD-DES]** — U.S. Department of Defense, Office of the Deputy Assistant
+Secretary of Defense for Systems Engineering, *Digital Engineering Strategy*,
+June 2018.
+The policy document that turned model-based systems engineering from an option
+into a contractual expectation on many US programmes, and the reason propulsion
+suppliers are now asked for authoritative digital models rather than documents.
+It is a strategy, not a specification: it states five goals and no method, so
+treat it as the reason a programme demands MBSE, not as guidance on how to do
+it.
+
 **[G-095]** — ANSI/AIAA G-095A-2017, *Guide to Safety of Hydrogen and Hydrogen
 Systems* (revision of AIAA G-095-2004), 236 pp. DOI:
 [10.2514/4.105197](https://arc.aiaa.org/doi/book/10.2514/4.105197)
@@ -871,6 +1053,15 @@ MIL-HDBK-5** — MMPDS-12 (2017) formally superseded all editions of MIL-HDBK-5,
 citing MIL-HDBK-5 for current design is an error, though it remains valid for
 reading legacy analyses. Volume II of the 2024 edition adds process-intensive
 materials and joining, which is where additively manufactured alloys are heading.
+
+**[Roache98]** — Roache, P. J., *Verification and Validation in Computational
+Science and Engineering*, Hermosa Publishers, Albuquerque, NM, 1998.
+The book behind the Grid Convergence Index. Read it for the distinction that
+gets blurred in practice — verification asks whether you solved the equations
+right, validation asks whether they were the right equations — and for the
+procedure that turns three systematically refined meshes into a numerical
+uncertainty band. Companion to [ASME-V&V-20], which formalises the validation
+half.
 
 **[SMC-S-016]** — SMC-S-016 (2014), *Test Requirements for Launch, Upper-Stage
 and Space Vehicles*, US Air Force Space and Missile Systems Center, 5 Sept. 2014.
@@ -900,6 +1091,18 @@ Standardises the acoustic and random-vibration verification of payload hardware,
 including the maximum expected flight level (MEFL) enveloping requirement.
 Relevant to propulsion mainly for feedline, valve and tank qualification. As with
 [STD-5001], get the current revision from standards.nasa.gov.
+**[STD-7009]** — NASA-STD-7009 (revision A with Change 1, 2016; original 2008),
+*Standard for Models and Simulations*, NASA.
+<https://standards.nasa.gov>
+Written because models were entering flight-decision processes with no traceable
+statement of how far they should be trusted. Its central artefact is the
+Credibility Assessment Scale: eight factors (verification, validation, input
+pedigree, results uncertainty, results robustness, use history, M&S management,
+people qualification) each scored on a defined ladder, reported alongside the
+answer. Scoring a model you have actually used is uncomfortable and is the
+fastest way to learn what the standard is for. Always check
+<https://standards.nasa.gov> for the current revision before quoting a level
+definition.
 
 ---
 
@@ -925,6 +1128,17 @@ same reasons: privately compiled, unreferenced in places, occasionally
 contradicts primary sources. Excellent for orientation and diagrams, not for
 citation.
 
+**[Cantera]** — Goodwin, D. G., Moffat, H. K., Schoegl, I., Speth, R. L., and
+Weber, B. W., *Cantera: An Object-Oriented Software Toolkit for Chemical
+Kinetics, Thermodynamics, and Transport Processes*. <https://cantera.org/>
+Open-source, scriptable, and the right tool when [CEA] cannot answer the
+question: finite-rate kinetics with a real mechanism, one-dimensional flames,
+reactor networks, and equilibrium as a special case. In this course it is the
+way to march composition down a nozzle streamline and find where the chemistry
+actually freezes, instead of choosing "equilibrium" or "frozen" by assertion.
+**Caveat:** the answer is only as good as the mechanism and the thermodynamic
+data you load, and neither ships validated for rocket conditions.
+
 **[CEA]** — Gordon, S., and McBride, B. J., *Chemical Equilibrium with
 Applications (CEA)*, NASA Glenn Research Center. Current documentation:
 <https://nasa.github.io/cea/>; source: <https://github.com/nasa/cea>; NASA
@@ -945,6 +1159,15 @@ Isp number, and the right tool for coursework. Input options are a subset of the
 full code — for parametric sweeps, custom species or scripted runs, use the
 standalone CEA or [RPA].
 
+**[ESPSS]** — *European Space Propulsion System Simulation (ESPSS)*, EcosimPro
+component library, developed for ESA by Empresarios Agrupados.
+An equation-based differential-algebraic modelling environment with a validated
+propulsion component library — tanks, lines, valves, turbomachinery, combustion
+chambers — used across ESA programmes for transient system analysis: start-up,
+shutdown, water-hammer, priming and cycle balance. The European counterpart to
+[NPSS]. Commercial licence; the component library, not the solver, is what makes
+it worth the money.
+
 **[JANAF]** — Chase, M. W., Jr., *NIST-JANAF Thermochemical Tables*, 4th ed.,
 *Journal of Physical and Chemical Reference Data* Monograph No. 9, Parts I and
 II, ACS/AIP for NIST, 1998. ISBN 1-56396-831-2. Online:
@@ -962,6 +1185,16 @@ Free thermophysical property data for pure fluids, including saturation and
 supercritical properties for oxygen, hydrogen, methane, nitrogen and helium —
 enough for most feed-system and cooling-jacket calculations. Free but limited to
 pure fluids and a fixed set of state-point queries.
+
+**[NPSS]** — *Numerical Propulsion System Simulation (NPSS)*, originated at NASA
+Glenn Research Center, now maintained through an industry consortium managed by
+Southwest Research Institute.
+An object-oriented engine-cycle framework, originally for airbreathing engines
+and extended to rockets. Assemble components, impose conservation at the
+interfaces, and solve the balance; the value is in the standardised component
+interfaces and the solver, not in any physics you could not write yourself.
+Licensed, US-export-controlled in practice. See [ESPSS] for the European
+equivalent.
 
 **[P120C]** — Avio, *P120C solid rocket motor*.
 <https://www.avio.com/p120c>
@@ -1005,6 +1238,17 @@ its outputs need the same scepticism as any other one-dimensional estimate.
 
 ## 7. Theses and modern review papers
 
+**[Bayt99]** — Bayt, R. L., *Analysis, Fabrication and Testing of a MEMS-Based
+Micropropulsion System*, Ph.D. thesis, Dept. of Aeronautics and Astronautics,
+Massachusetts Institute of Technology, 1999 (also issued as FDRL TR 99-1).
+<https://dspace.mit.edu/handle/1721.1/8970>
+DRIE-etched silicon micronozzles with throat widths of order 20–35 µm, analysed
+and hot-fired. The document that confirms both the Re^(-1/2) scaling of the
+viscous loss and the collapse of the optimum area ratio at low Reynolds number,
+and the reference for why a micronozzle contour is an etching problem rather
+than a machining one. Read it with [Rothe71], [Spisz65] and [Grisnik87] before
+quoting any low-Re nozzle efficiency.
+
 **[Casiano10]** — Casiano, M. J., Hulka, J. R., and Yang, V.,
 "Liquid-Propellant Rocket Engine Throttling: A Comprehensive Review," *Journal of
 Propulsion and Power*, Vol. 26, No. 5, 2010, pp. 897–923. DOI:
@@ -1015,6 +1259,52 @@ faster than thrust, and the full catalogue of mitigations (pintles, dual
 manifolds, gas injection, variable-area elements) with the historical engines
 that used each. Directly relevant to lander and reusable-booster design, and the
 best single entry point to the throttling literature.
+
+**[Culick06]** — Culick, F. E. C., *Unsteady Motions in Combustion Chambers for
+Propulsion Systems*, RTO AGARDograph AG-AVT-039, NATO Research and Technology
+Organisation, Neuilly-sur-Seine, 2006. DOI:
+[10.14339/RTO-AG-AVT-039](https://doi.org/10.14339/RTO-AG-AVT-039);
+open-access PDF:
+<https://publications.sto.nato.int/publications/STO%20Technical%20Reports/RTO-AG-AVT-039/$$AG-AVT-039-ALL.pdf>
+Culick's book-length synthesis of combustion instability: spatial averaging, the
+modal expansion, the response function, and nonlinear limit-cycle behaviour, for
+both liquid and solid chambers. The successor in coverage to [Culick68] and the
+place to go for what the response function measured in a T-burner is and is not
+telling you. Free.
+
+**[Glaessgen12]** — Glaessgen, E. H., and Stargel, D. S., "The Digital Twin
+Paradigm for Future NASA and U.S. Air Force Vehicles," AIAA 2012-1818, 53rd
+AIAA/ASME/ASCE/AHS/ASC Structures, Structural Dynamics and Materials Conference,
+Honolulu, HI, 2012. DOI:
+[10.2514/6.2012-1818](https://doi.org/10.2514/6.2012-1818)
+The paper that put "digital twin" into aerospace vocabulary, with a far more
+disciplined definition than the term now carries: an ultra-high-fidelity model of
+a *specific* vehicle, updated by that vehicle's own sensor and maintenance
+history. Read it, then compare it with what vendors sell. If the model does not
+change when a particular engine serial number runs a hot fire, it is a model, not
+that engine's twin.
+
+**[Hulka08]** — Hulka, J. R., "Scaling of Performance in Liquid Propellant Rocket
+Engine Combustion Devices," AIAA 2008-5113, 44th AIAA/ASME/SAE/ASEE Joint
+Propulsion Conference, Hartford, CT, 2008. DOI:
+[10.2514/6.2008-5113](https://doi.org/10.2514/6.2008-5113). NTRS:
+<https://ntrs.nasa.gov/citations/20090001888>
+The review of what actually scales between a subscale combustor and a flight
+chamber: the 1950s–60s scaling research, the individual performance losses and
+how each depends on size, and the development programmes where the scaling
+assumption failed. The key result for this course is that c* efficiency and
+stability scale differently, so a stable single-element test is weak evidence
+about a full injector.
+
+**[Martins13]** — Martins, J. R. R. A., and Lambe, A. B., "Multidisciplinary Design
+Optimization: A Survey of Architectures," *AIAA Journal*, Vol. 51, No. 9, 2013,
+pp. 2049–2075. DOI:
+[10.2514/1.J051895](https://doi.org/10.2514/1.J051895)
+The taxonomy of MDO architectures — monolithic (MDF, IDF, SAND) versus
+distributed — with a consistent notation and a clear statement of what each
+assumes about solver coupling and gradient availability. Read it for why the
+architecture choice is driven by organisational and solver constraints at least
+as much as by mathematics.
 
 **[OMK05]** — Östlund, J., and Muhammad-Klingmann, B., "Supersonic Flow
 Separation with Application to Rocket Engine Nozzles," *Applied Mechanics
@@ -1035,6 +1325,355 @@ experimental and analytical detail the review compresses. The best single
 document on why overexpanded nozzles generate side loads during start-up and how
 those loads are estimated. Note that the DiVA record and the review use slightly
 different titles for related documents in the same series.
+**[Pitsch06]** — Pitsch, H., "Large-Eddy Simulation of Turbulent Combustion,"
+*Annual Review of Fluid Mechanics*, Vol. 38, 2006, pp. 453–482. DOI:
+[10.1146/annurev.fluid.38.050304.092133](https://doi.org/10.1146/annurev.fluid.38.050304.092133)
+The review of what LES combustion closures assume and where they fail. Read it
+for the honest statement of the subgrid problem: the flame is always smaller than
+the filter, so every LES of a reacting flow is reporting a model of the flame,
+not the flame. Read with [Peters00] for the flamelet basis and [Slotnick14] for
+the cost trend.
+**[RL10B2-CC]** — *Testing of the RL10B-2 carbon–carbon nozzle extension*, Acta
+Astronautica, 2001.
+<https://www.sciencedirect.com/science/article/abs/pii/S0094576501001783>
+The source for the RL10B-2 extendible nozzle figures used in this course: 77:1
+retracted, 285:1 with the carbon–carbon extension deployed, with 280:1 a rounding
+that circulates widely. **Locator taken from `reference/engine-database.md` §E.2**;
+the full author list and volume/page range were not confirmed in this session, and
+the article is paywalled.
+**[Slotnick14]** — Slotnick, J., Khodadoust, A., Alonso, J., Darmofal, D., Gropp,
+W., Lurie, E., and Mavriplis, D., *CFD Vision 2030 Study: A Path to Revolutionary
+Computational Aerosciences*, NASA/CR-2014-218178, NASA Langley Research Center,
+March 2014. <https://ntrs.nasa.gov/citations/20140003093>
+The sober agency assessment of what CFD can and cannot do, the cost scaling of
+DNS, wall-resolved LES and wall-modelled LES, and how slowly the hard parts
+(turbulence, combustion, multiphase, mesh generation, uncertainty) are actually
+moving. Cite it for the *ordering* of the cost estimates; the absolute numbers
+are indicative and were already a decade old when this course was written.
+**[Sobol01]** — Sobol', I. M., "Global sensitivity indices for nonlinear
+mathematical models and their Monte Carlo estimates," *Mathematics and Computers
+in Simulation*, Vol. 55, Nos. 1–3, 2001, pp. 271–280. DOI:
+[10.1016/S0378-4754(00)00270-6](https://doi.org/10.1016/S0378-4754(00)00270-6)
+The variance decomposition behind first-order and total-effect sensitivity
+indices — the output that tells a programme which input to spend money measuring.
+The estimators and their sample-size requirements are in [Saltelli08]; the
+interpretation degrades when inputs are correlated, and a generalised
+decomposition is then required.
+**[Yu12]** — Yu, Y. C., Sisco, J. C., Rosen, S., Madhav, A., and Anderson, W. E.,
+"Spontaneous Longitudinal Combustion Instability in a Continuously Variable
+Resonance Combustor," *Journal of Propulsion and Power*, Vol. 28, No. 5, 2012,
+pp. 876–887. DOI:
+[10.2514/1.B34308](https://doi.org/10.2514/1.B34308)
+The CVRC: a single-element combustor whose oxidiser-post length can be varied
+continuously, so the same hardware crosses from stable to unstable during a run.
+The best-documented model instability experiment in the open literature, and the
+template for how a validation experiment is designed to be informative rather
+than merely realistic. Read it before believing any LES that claims to have
+predicted an instability.
+
+---
+
+## 8. Failure investigations and contemporaneous reporting
+
+Sources for Module 34. Two different kinds of document sit here and they are not
+interchangeable. **Investigation reports and official statements** — an accident
+board report, an agency or manufacturer press statement closing an inquiry — are
+primary within their scope, and where a manufacturer and an independent board
+disagreed (Antares Orb-3, Vega-C VV22) this course reports the disagreement
+rather than picking a winner. **Contemporaneous trade reporting** — *SpaceNews*,
+*Spaceflight Now*, *Spaceflight Insider*, *SpacePolicyOnline*, *Payload*,
+NASASpaceflight.com, UPI — is secondary: it is often the only public record of a
+finding, it is written to a deadline, and its technical detail should be treated
+as a lead. Wikipedia-derived tags are marked as such and are third-hand. Where a
+figure from any of these enters a module, the module says so.
+
+**[Avio-VV15]** — Avio S.p.A., statement on VV15 root cause (thermal protection of
+the Z23 forward dome), 6 Dec. 2019.
+The manufacturer's attribution, which is narrower than the Commission's
+"thermo-structural failure in the forward dome area" ([ESA-VV15]). Company
+statement; no independent verification.
+
+**[CORDIS-V157]** — European Commission CORDIS, "Ariane 5 explosion caused by
+fault in main engine cooling system," 9 Jan. 2003.
+Contemporaneous summary of the Flight 157 inquiry finding. Secondary; use
+[ESA-V157] for the finding itself.
+
+**[Cortright70]** — Cortright, E. M., et al., *Report of the Apollo 13 Review
+Board*, NASA, June 1970. <https://ntrs.nasa.gov/citations/19700076776>
+The full accident board report: the oxygen tank No. 2 heater-thermostat damage
+during detanking, the resulting insulation failure, and the pressure history.
+Primary, free, and the model for what a failure report should contain — the
+"what evidence" sections are worth reading purely as a template.
+
+**[ESA-V157]** — ESA/Arianespace, "Arianespace Flight 157 — Inquiry Board submits
+findings," press release, 7 Jan. 2003.
+The Vulcain 2 nozzle thermo-structural failure finding. Agency statement
+summarising an inquiry board; the board's own report is not public.
+
+**[ESA-VV15]** — ESA/Arianespace, "Vega flight VV15: findings of the Independent
+Inquiry Commission's investigations," 5 Sept. 2019.
+The Z23 forward-dome finding. Compare [Avio-VV15].
+
+**[ESA-VV22]** — ESA/Arianespace, "Loss of flight VV22: Independent Enquiry
+Commission announces conclusions," 3 Mar. 2023.
+The Zefiro-40 carbon–carbon throat insert finding, and a *qualification-method*
+conclusion rather than a materials conclusion. The supplier publicly contested
+the attribution; see [PL-VV22].
+
+**[FAA-Starship]** — Federal Aviation Administration, "FAA Closes SpaceX Starship
+Mishap Investigation," 8 Sept. 2023.
+Regulatory closure listing corrective actions, including changes to the
+autonomous flight safety system and to change-control practice. A regulatory
+finding is a statement about the licensee's process, not a root-cause analysis of
+the hardware; read it for what it actually claims.
+
+**[GS-Titan]** — GlobalSecurity.org, Titan IV programme summaries (citing
+USAF/DOT&E material).
+Secondary compilation. Useful for programme-level context on the Titan solid
+motors; verify any number against the underlying USAF or DOT&E document before
+quoting it.
+
+**[NSF-CRS7]** — NASASpaceflight.com, "SpaceX Falcon 9 failure investigation
+focuses on COPV struts," July 2015; and "NASA's IRT publishes report on SpaceX's
+CRS-7 failure," Mar. 2018.
+Trade reporting, including coverage of the NASA Independent Review Team report
+that differed in emphasis from SpaceX's own conclusion. Secondary.
+
+**[Orb3-IRT]** — NASA Independent Review Team, *Orb–3 Accident Investigation
+Report*, Executive Summary, 9 Oct. 2015.
+<https://sma.nasa.gov/SignificantIncidents/assets/orb3_accident_investigation_report.pdf>
+The IRT executive summary on the Antares AJ-26 turbopump failure. Primary within
+its scope, and notable because three parties (the IRT, Orbital's own board, and
+Aerojet Rocketdyne) reached three different proximate causes; see [SFN-Orb3] and
+[SN-Orb3].
+
+**[PL-VV22]** — *Payload*, "Ukraine contests findings of Vega-C independent
+inquiry," Mar. 2023.
+Records the supplier's dissent from the [ESA-VV22] conclusion. Secondary, and
+cited here specifically so the disagreement is visible rather than smoothed over.
+
+**[SFI-Proton15]** — *Spaceflight Insider*, "Third stage engine blamed for Russian
+Proton-M rocket crash," 2015. Secondary trade reporting.
+
+**[SFN-Orb3]** — *Spaceflight Now*, "Two Antares failure probes produce different
+results," 1 Nov. 2015.
+The clearest public account of the disagreement between the investigation teams.
+Secondary.
+
+**[SFN-Proton15]** — *Spaceflight Now*, "Roscosmos: Design flaw brought down
+Proton rocket," 1 June 2015.
+The RD-0214 turbopump shaft/rotordynamic finding as reported at the time. No
+public primary report exists in English; this and [SFI-Proton15],
+[SPO-Proton15] are the record.
+
+**[SN-Orb3]** — *SpaceNews*, "Turbopump in AJ-26 engine implicated in Antares
+failure," 2014. Secondary.
+
+**[SN-Solder]** — *SpaceNews*, "ILS still planning three commercial launches this
+year despite Proton engine recall," 2016.
+The engine-recall episode in which a workmanship substitution was invisible to
+the inspection in use. Secondary; cited for the class of failure, not for
+figures.
+
+**[SN-Titan93]** — *SpaceNews*, "Aug. 2, 1993: Death of a Titan." Secondary
+retrospective on the Titan IV/UA1207 failure.
+
+**[SN-V157]** — *SpaceNews*, "Arianespace Flight 157: The Inquiry Board Submits
+its Findings," Jan. 2003. Secondary.
+
+**[SN-VV22]** — *SpaceNews*, "Independent Enquiry Commission conclusions on loss
+of Vega-C flight VV22," Mar. 2023. Secondary.
+
+**[SPO-Proton15]** — *SpacePolicyOnline*, "Proton-M Failure Due to Same Design
+Flaw that Doomed 1988 Mission," 2015.
+The repeat-mechanism-across-decades observation. Secondary, and the claim that
+the 1988 and 2015 failures share a mechanism is the reporting's, not a published
+board's.
+
+**[SpaceX-AMOS6]** — SpaceX, "Anomaly Updates" (AMOS-6), 2 Jan. 2017.
+The COPV liner buckle / solid-oxygen mechanism. Company statement, and the most
+instructive materials-compatibility account in the modern public record — but it
+is the operator investigating itself, with no independent board report.
+
+**[SpaceX-CRS7]** — SpaceX / NASA, "SpaceX Details Preliminary Investigation
+Findings" (CRS-7), NASA blog, 21 July 2015, together with SpaceX's final CRS-7
+statement.
+The strut-failure attribution and the ~0.893 s anomaly development. Company
+statement; NASA's IRT emphasised different contributing factors ([NSF-CRS7]).
+
+**[SpaceX-F1]** — SpaceX Falcon 1 flight update statements, 2006–2008.
+Company statements covering the Flight 1 corroded nut, Flight 2 slosh and
+Flight 3 residual-thrust recontact. Cited for the failure classes; the technical
+detail is thin and unverified.
+
+**[UPI-Titan34D]** — UPI Archives, reporting on the Titan 34D-9 accident
+investigation findings, 2 July 1986.
+The SRM case-bond debonding finding. Contemporaneous news reporting of a
+military investigation whose report is not public. Secondary.
+
+**[VO-2023]** — Virgin Orbit, "Virgin Orbit update on UK mission anomaly,"
+14 Feb. 2023.
+The dislodged fuel-filter finding, with the company noting that ground testing
+reproduced the downstream behaviour. Company statement.
+
+**[WP-GPSIIR1]** — Wikipedia, *GPS IIR-1* and *List of Delta II launches* (citing
+Boeing/USAF material).
+Third-hand. Used only for the outline of the Delta II GEM case-rupture event, and
+flagged in the module text as such. Verify anything load-bearing against the USAF
+accident record.
+
+**[WP-LE7]** — Wikipedia, *LE-7* (citing JAXA/MHI material).
+Third-hand. Used for the H-II Flight 8 LE-7 turbopump inducer cavitation /
+high-cycle fatigue sequence and the engine's recovery from ~3,000 m of water. The
+primary JAXA/MHI material is recorded as NEEDS PRIMARY in
+`reference/_verify-liquid.md`.
+
+**[YA95-class]** — Yang, V., and Anderson, W. E. (eds.), *Liquid Rocket Engine
+Combustion Instability*, Progress in Astronautics and Aeronautics Vol. 169, AIAA,
+1995 — cited in Module 34 for the Rayleigh-criterion treatment. Same book as
+[LRECI]; the suffixed tag marks the citation as being to the general class of
+instability treatment rather than to a specific chapter.
+
+---
+
+## 9. Worksheet and secondary-source tags
+
+These tags come from the two verification worksheets
+(`reference/_verify-liquid.md`, `reference/_verify-solid-coldgas.md`) and are
+reproduced with their expansions from `reference/engine-database.md` §E. They are
+kept separate from sections 1–8 because **none of them meets the standard applied
+above**: several are manufacturer marketing pages, several are tertiary
+compilations known to propagate errors, one is a computation rather than a
+source, and several could not be fetched at all during the verification passes
+(recorded there as 403, 503 or "would not text-extract"). They are listed so that
+every tag used in the course resolves to something, not because they are good
+citations.
+
+**Reliability caveat — applies to every tag in this section.** Treat a figure
+carrying only one of these tags as **confidence B at best**, and never as the
+sole basis for a calculation that leaves this repository. Where a module quotes
+one, it is because no primary source was found, and the module says so. If you
+need the number for real work, chase the primary document first.
+
+**[CALC]** — Computed in the worksheet from stated inputs, not a source at all.
+The cold-gas script is archived under `propulsion/tools/`. **Reproduce the
+calculation before quoting the result**; a [CALC] figure inherits every
+assumption of its inputs and none of the authority of a measurement.
+
+**[EA]** — *Encyclopedia Astronautica* (astronautix.com). Secondary,
+single-maintainer, **known to propagate errors**, and returned 503 on all direct
+fetches during the verification pass, so the values that reached the worksheet
+came from search summaries rather than the pages themselves. See [Astronautix]
+in section 6 for the fuller assessment. Leads only.
+
+**[ESA-EAP]** — ESA, *Ariane 5 boosters (EAP)* page, plus ESA Bulletin 104,
+"First Test Firing of an Ariane-5 Production Booster"
+(esa.int/esapub/bulletin/bullet104/gonzalez104.pdf). The EAP page returned
+**403 from the verification environment**; figures used came from search-result
+extracts, which is why nothing sourced to it exceeds confidence B.
+
+**[FAA-SS]** — FAA Starship licensing and environmental documents. The only
+independent corroboration of Raptor thrust available in the open literature, and
+it corroborates thrust *only*, and indirectly. Not a propulsion datasheet: it is
+a regulatory record that quotes vehicle-level numbers supplied by the operator.
+
+**[FAS]** — Federation of American Scientists and GlobalSecurity.org
+nuclear-forces pages (fas.org, globalsecurity.org). Secondary compilations of
+US defence-motor programme material. Used in this course for **architecture and
+family-level statements only** — stage counts, propellant class, rough eras —
+never for motor performance figures.
+
+**[JAXA]** — JAXA / ISAS / MHI published programme material (LE-7A, LE-9, H3,
+M-V, Epsilon). **A pointer, not a citation:** neither worksheet records a URL for
+it, and the ISAS/JAXA M-V papers are marked NEEDS PRIMARY. Anything tagged
+[JAXA] alone is awaiting a primary source.
+
+**[JM-LV]** — McDowell, J., *General Catalogue of Artificial Space Objects* and
+the associated launch-vehicle motor lists (planet4589.org). A carefully
+maintained secondary catalogue and much better than most, but still a
+compilation: it is authoritative about *what flew and when*, and derivative about
+motor performance.
+
+**[L3H]** — L3Harris Aerojet Rocketdyne product pages for the RL10 and RS-25
+(l3harris.com). Manufacturer datasheets — the source of the RS-25 thrust, Pc,
+Isp, ε = 69:1 and 7,775 lb dry-mass figures, and of the RL10 family table.
+Manufacturer marketing material: headline figures are nominal, the conditions
+behind them are usually unstated, and where the same quantity has more than one
+defensible definition (RS-25 expansion ratio) the page picks one silently.
+
+**[NASA-SLS-SRB]** — NASA SLS Solid Rocket Booster reference page
+(nasa.gov/reference/space-launch-system-solid-rocket-booster/) plus the 2015 and
+2024 SLS SRB fact sheets. Agency public-affairs material rather than engineering
+documentation; the fact-sheet PDFs would not text-extract during the pass and one
+extraction was visibly corrupted, so figures were read from the web page.
+
+**[NASA-SRB]** — NASA Space Shuttle SRB news reference / fact-sheet material
+(propellant composition, grain geometry, burn time). The
+`science.ksc.nasa.gov` STS news reference returned **503 during the pass** and
+web.archive.org was unreachable from that environment, so this tag rests on
+widely reproduced extracts of a document that could not be re-read. The PBAN
+composition figures it carries are consistent across every secondary source, which
+is reassuring but is not verification.
+
+**[NASA-SOA]** — NASA, *State of the Art of Small Spacecraft Technology*,
+propulsion chapter (ch. 4, In-Space Propulsion). An agency survey of flown and
+offered small-spacecraft propulsion, revised roughly annually. Better than the
+rest of this section — it is edited and referenced — but it is a survey of
+*manufacturer-supplied* envelopes, so its performance ranges are what suppliers
+claim, not what an independent test measured. Quote it for class envelopes
+(e.g. the 10 µN – 3.6 N cold-gas band), not for a specific unit.
+
+**[NG-BOLE]** — Northrop Grumman BOLE DM-1 press material
+(news.northropgrumman.com). Manufacturer press release on a motor still in
+development; every figure from it is a claim, and the modules label it so.
+
+**[NG-COMM]** — Northrop Grumman commercial rocket motor product pages (GEM and
+Star families). Manufacturer datasheets. The *Propulsion Products Catalog* PDF
+would not text-extract during the pass, so the product pages are what was
+actually read.
+
+**[Rogers Commission]** — *Report of the Presidential Commission on the Space
+Shuttle Challenger Accident*, Vol. I, ch. IV (field joint, O-ring seal dynamics,
+STS-51-L failure). **The exception in this section:** this is a primary
+government investigation report and is entirely citable. It is listed here only
+because the tag entered the course through the solid-motor worksheet. See
+[Rogers86] in section 4 for the entry with a link.
+
+**[VACCO]** — VACCO Industries CubeSat propulsion data sheets
+(cubesat-propulsion.com system pages), plus the JPL MarCO data sheet. Supplier
+datasheets: thrust, total impulse and wet mass as offered, with test conditions
+usually unstated. See [MarCO] in section 4 for the one unit in this family with
+flight data behind it.
+
+**[WP]** — Wikipedia. Used **only** where the article itself cites a source, and
+flagged as [WP] wherever it appears so the reader knows the chain is third-hand.
+Where a [WP] figure mattered, the module pairs it with a second tag (e.g. the
+GEM-40 propellant mass and burn time carry `[WP]`/`[NG-COMM]` at confidence B).
+Never cite it onward without following its reference.
+
+### 9.1 Alternative tag forms used in module text
+
+Several modules were drafted with a different short form for a source that is
+already in this bibliography. The tags below are aliases, kept so that the text
+resolves without rewriting citations; **cite the canonical tag in new material.**
+
+- **[Gradl22]** — alias for [GradlAM]: Gradl, P. R., Protz, C. S., Mireles,
+  O. R., and Garcia, C. P. (eds.), *Metal Additive Manufacturing for Propulsion
+  Applications*, AIAA, 2022.
+- **[HHL]** — alias for [Humble]: Humble, R. W., Henry, G. N., and Larson, W. J.
+  (eds.), *Space Propulsion Analysis and Design*, McGraw-Hill, 1995. (The tag is
+  the three authors' initials.)
+- **[Lenoir57]** — alias for [LR57]: Lenoir, J. M., and Robillard, G., "A
+  Mathematical Method to Predict the Effects of Erosive Burning in
+  Solid-Propellant Rockets," *Sixth Symposium (International) on Combustion*,
+  1957.
+- **[NIST]** — alias for [NIST-WB] (the free *NIST Chemistry WebBook*, SRD 69)
+  and, where a real equation of state is required, [REFPROP] (SRD 23). Which one
+  is meant depends on the calculation: WebBook for a property lookup, REFPROP for
+  a supercritical cooling-jacket or feed-system model.
+- **[YA95]** — alias for [LRECI]: Yang, V., and Anderson, W. E. (eds.), *Liquid
+  Rocket Engine Combustion Instability*, Progress in Astronautics and
+  Aeronautics Vol. 169, AIAA, 1995. See also [YA95-class] in section 8.
 
 ---
 
@@ -1099,6 +1738,13 @@ was seen. Treat these as leads to chase in a library, not as citations.
 - **Stepanoff, A. J.**, *Centrifugal and Axial Flow Pumps*, Wiley, 1957 (2nd ed.).
   A genuine classic, but no catalogue record was confirmed in this session.
   [Japikse] and [Brennen-Pumps] cover the same ground and are verified.
+- **[Summerfield60]** — Summerfield, M., et al., granular diffusion flame (GDF)
+  model of composite propellant burning, c. 1960, in the ARS *Progress in
+  Astronautics and Rocketry* series. The model is standard and is the origin of
+  the p^(1/3)-plus-linear burning-rate form used in Module 20; the original
+  publication could not be located from this session, so no volume, page range or
+  link is offered. [BDP70] is the verified modern successor, and [SB] §12.2
+  reproduces the GDF derivation. Cite the tag only alongside one of those.
 - **Summerfield granular diffusion flame (GDF) model** (Summerfield et al.,
   c. 1960, in the ARS *Progress in Astronautics and Rocketry* series). The model
   — which yields the p^(1/3)-plus-linear burning-rate form — is standard, but the

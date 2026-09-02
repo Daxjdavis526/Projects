@@ -35,6 +35,28 @@ REQUIRED_MODULE_HEADINGS = [
 ]
 REQUIRED_KEY_HEADINGS = ["K1", "K2", "K3", "K4"]
 
+# --- things that look like a citation tag but are not -------------------------
+# Epistemic/confidence labels ([F] fact, [E] estimate, [A]-[D] confidence, ...),
+# and the handful of bare words the course uses as bracketed markers rather than
+# as sources.
+SKIP_TAGS = {
+    "A", "B", "C", "D", "E", "F", "H", "J", "M", "R", "SI",
+    "K1", "K2", "K3", "K4",
+    "EX",         # registered worked-example results, e.g. [EX 01.a-d]
+    "TS",         # trade-study problem references, e.g. [TS P1.9.A]
+    "Judgment",   # question-type marker in problem sets
+    "Module",     # prose cross-reference, e.g. [Module 01, WE1]
+}
+# Module cross-references: [M07], [M15, M36], [M01-M36].
+MODULE_REF = r"M\d{2}(?:[\u2013\u2014-]M\d{2})?"
+# reference/engine-database.md section references: [A.2.3], [B.4.1], [C.2.2].
+DB_SECTION_REF = r"[A-E](?:\.\d+)+"
+NON_CITATION = re.compile(rf"^(?:{MODULE_REF}|{DB_SECTION_REF})$")
+UNITLIKE = re.compile(
+    r"^(Pa|K|N|W|J|m|s|kg|MPa|kPa|bar|psi|Hz|mm|cm|V|A|C|kN|MN|GPa|MW|kW"
+    r"|dB|ppm|rad|deg|K\u207b\u00b9|N\u00b7s|N\u00b7m|N\u00b7m\u00b7s|mN|\u00b5m|\u03bcm)$"
+)
+
 MODULE_RE = re.compile(r"^(\d{2})-[a-z0-9-]+\.md$")
 KEY_RE = re.compile(r"^(\d{2})-[a-z0-9-]+-key\.md$")
 LINK_RE = re.compile(r"\]\(([^)#\s]+)(?:#[^)]*)?\)")
@@ -109,11 +131,10 @@ def main() -> int:
                     for t in TAG_RE.findall(text):
                         base = re.split(r"[\s,;§]", t)[0]
                         used.add(base)
-                    # ignore epistemic tags and obvious non-citations
-                    skip = {"F", "E", "H", "M", "R", "A", "J", "SI", "K1", "K2", "K3", "K4"}
-                    unitlike = re.compile(r"^(Pa|K|N|W|J|m|s|kg|MPa|kPa|bar|psi|Hz|mm|cm|V|A|C|kN|MN|GPa|MW|kW|dB|ppm|rad|deg|K⁻¹|N·s|N·m|N·m·s|mN|µm|μm)$")
-                    for u in sorted(used - skip):
-                        if unitlike.match(u) or "/" in u or "·" in u or "^" in u:
+                    for u in sorted(used - SKIP_TAGS):
+                        if UNITLIKE.match(u) or "/" in u or "·" in u or "^" in u:
+                            continue
+                        if NON_CITATION.match(u):
                             continue
                         if u not in defined and not any(u == dd.split()[0] for dd in defined):
                             failures.append(f"{d}/{fn}: citation tag [{u}] not in sources.md")
