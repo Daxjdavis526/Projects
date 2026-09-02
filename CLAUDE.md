@@ -34,6 +34,7 @@ touching the others.
 | `universe/` | observable universe explorer (HORIZON) |
 | `raptor/` | F-22A flight simulator |
 | `supernova/` | core-collapse supernova simulator |
+| `propulsion/` | rocket propulsion engineering course (Markdown, no code to run beyond the example checker) |
 
 ## Conventions
 

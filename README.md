@@ -79,3 +79,15 @@ Live: https://daxjdavis526.github.io/Projects/raptor/
 
 See [raptor/README.md](raptor/README.md) for controls and what is actually
 simulated versus approximated.
+
+## propulsion/
+
+**PROPULSION** — a two-semester-equivalent rocket propulsion engineering
+course in plain Markdown: 36 modules across liquid bipropellant engines,
+solid rocket motors, and cold-gas thrusters, plus exams, an interview
+question bank, a capstone trade study, a verified engine database, and an
+annotated bibliography. Problems and answer keys live in separate files.
+Every worked example is recomputed by `python3 propulsion/tools/check_examples.py`.
+
+Not a browser toy: read it on GitHub or in any Markdown viewer that renders
+LaTeX. Start at [propulsion/README.md](propulsion/README.md).
