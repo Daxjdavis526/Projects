@@ -39,6 +39,10 @@ therefore done longhand in the key rather than registered here:
   Q179  m = pV/(RT) = 6.0e6*6.0/(320*3300) = 34.1 kg; tau = V/(c* At) = 6.24 ms.
   Q184  Cd degradation scaling 1 - k/sqrt(Re) at Re = 3,868.
   Q186  Impulse density rho * Isp * g0 per cm^3.
+  Q85   rocket.rss() takes positional arguments, which the EXAMPLES harness
+        cannot express, so the two uncertainty answers are checked by hand:
+            rss(0.005, 0.008, 0.012) = 0.015264  (Q85)
+            rss(0.015, 0.020, 0.003) = 0.025179  (Q193)
 
 SI units throughout. gamma dimensionless, R in J/(kg K), T0 in K, pressures in
 Pa, areas in m^2, thrust in N, mass flow in kg/s.
@@ -156,8 +160,6 @@ EXAMPLES = [
     {"id": "Q79", "fn": "turbine_power",
      "args": {"mdot": 18.0, "cp": 2800.0, "T_in": 900.0, "pr": 16.0, "gamma": 1.30, "eta": 0.65},
      "expect": 1.393464e7, "tol": 1e-4},
-    # Q85 - c* uncertainty
-    {"id": "Q85", "fn": "rss", "args": {}, "expect": 0.0152643, "tol": 1e-4},
     # Q89 - temperature sensitivity
     {"id": "Q89.a", "fn": "temperature_sensitivity_pressure", "args": {"sigma_p": 0.0025, "dT": 78.0},
      "expect": 1.21531, "tol": 1e-4},
@@ -177,9 +179,9 @@ EXAMPLES = [
     {"id": "Q113.a", "fn": "mach_from_area_ratio", "args": {"gamma": 1.20, "eps": 40.0},
      "expect": 4.23940, "tol": 1e-4},
     {"id": "Q113.b", "fn": "normal_shock_p2_p1", "args": {"gamma": 1.20, "M1": 4.23940},
-     "expect": 19.4106, "tol": 1e-3},
+     "expect": 19.5155, "tol": 1e-3},
     {"id": "Q113.c", "fn": "normal_shock_M2", "args": {"gamma": 1.20, "M1": 4.23940},
-     "expect": 0.407659, "tol": 1e-3},
+     "expect": 0.360977, "tol": 1e-3},
     # Q115 - altitude compensation map
     {"id": "Q115.a", "fn": "Cf", "args": {"gamma": 1.20, "eps": 16.0, "p0": 100e5, "pa": 101325.0},
      "expect": 1.63496, "tol": 1e-4},
@@ -274,15 +276,7 @@ EXAMPLES = [
     {"id": "Q183", "fn": "choked_mdot",
      "args": {"gamma": 1.400, "R": 296.7955, "T0": 300.0, "p0": 2.0e5, "At": 1.7671459e-8},
      "expect": 8.11022e-6, "tol": 1e-4},
-    # Q193 - flight Isp reconstruction uncertainty
-    {"id": "Q193", "fn": "rss", "args": {}, "expect": 0.0251794, "tol": 1e-4},
     # Q195 - LH2 pump power scaling illustration
     {"id": "Q195", "fn": "pump_power",
      "args": {"mdot": 70.0, "dp": 48e6, "rho": 71.0, "eta": 0.75}, "expect": 6.30986e7, "tol": 1e-4},
 ]
-
-# rss() takes *args, not keywords; patch the two entries that use it.
-for _e in EXAMPLES:
-    if _e["fn"] == "rss":
-        _e["args"] = {}
-EXAMPLES = [e for e in EXAMPLES if e["fn"] != "rss"]

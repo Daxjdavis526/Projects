@@ -843,8 +843,8 @@ $\sqrt{RT_0}$: from module 28, at $T_0 = 300$ K and $\varepsilon = 50$ the
 ideal frozen values are H₂ 285.6 s, He 178.1 s, N₂ 76.8 s, Ar 56.4 s,
 n-butane 69.2 s, R-236fa 43.2 s, Xe 31.1 s. Real thrusters deliver about
 **90 %** of frozen-ideal. That factor is where boundary layers, wall heat
-transfer into a cold gas, and non-equilibrium expansion go. [CALC from
-`_verify-solid-coldgas.md` B.1]
+transfer into a cold gas, and non-equilibrium expansion go. [E] (ideal values
+computed from stated inputs in `reference/_verify-solid-coldgas.md` §B.1)
 
 So cold gas is never chosen for performance. It is chosen when the *system*
 cost of any alternative — a catalyst bed that must be preheated, a hypergolic

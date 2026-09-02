@@ -1386,3 +1386,525 @@ expensive engine with a cost-reduction programme attached.
 | HIP conditions (Ni superalloys) | 1,150–1,200 °C, 100–200 MPa Ar | |
 | Proof pressure factor | 1.2–1.5 × MEOP | per the applicable standard, e.g. [AIAA-S-080] |
 | He leak-test sensitivity | $10^{-6}$ to $10^{-9}$ std cm³/s | |
+
+---
+
+## 5. Worked examples
+
+The reference engine is **RE-500**, carried from modules 03 and 06:
+LOX/RP-1, $F_{SL} = 500$ kN, $p_{c,ns} = 100$ bar, $\varepsilon = 16$,
+$\dot m = 170.03$ kg/s, $A_t = 0.030582$ m², $D_t = 197.3$ mm,
+$D_c = 279.1$ mm (contraction ratio 2.0), barrel length 0.5229 m, convergent
+height 0.0708 m. Assume $MR = 2.30$, so $\dot m_f = 170.03/3.30 = 51.52$ kg/s
+of RP-1 at $\rho_f = 810$ kg/m³.
+
+Every number below is reproduced in `tools/examples/17.py`.
+
+### WE1 — Tube-wall chamber: how many tubes, and what section?
+
+**Given.** Build the RE-500 chamber as a brazed tube wall, single down-pass,
+tube wall thickness $t_w = 0.30$ mm, coolant velocity at the throat
+$V = 40$ m/s. Find the tube count, the tube section at the throat, at the
+barrel and at the exit, the total braze land length, and the station at which
+the geometry breaks.
+
+**Step 1 — the binding station is the throat.** Circumference there:
+$$C_t = \pi D_t = \pi \times 0.1973 = 0.61984\ \mathrm{m} = 619.8\ \mathrm{mm}$$
+For comparison, the barrel and the exit:
+$$C_c = \pi \times 0.2791 = 876.8\ \mathrm{mm};\qquad
+D_e = D_t\sqrt{\varepsilon} = 0.1973\times 4 = 0.7892\ \mathrm{m},\quad
+C_e = 2479.3\ \mathrm{mm}$$
+The circumference varies by a factor of **4.00** from throat to exit and by
+1.41 from throat to barrel. Hold that thought.
+
+**Step 2 — choose the tube count from the throat pitch.** Take $N = 180$ tubes.
+$$p_t = C_t/N = 619.8/180 = 3.444\ \mathrm{mm}$$
+Subtracting two tube walls, the internal flow width at the throat is
+$$w_t = p_t - 2t_w = 3.444 - 0.600 = 2.844\ \mathrm{mm}$$
+
+**Step 3 — required flow area.** All the fuel passes down through all 180 tubes:
+$$A_{tot} = \frac{\dot m_f}{\rho_f V} = \frac{51.52}{810 \times 40}
+= 1.5903\times10^{-3}\ \mathrm{m^2} = 15.90\ \mathrm{cm^2}$$
+$$A_{tube} = A_{tot}/N = 1.5903\times10^{-3}/180 = 8.835\ \mathrm{mm^2}$$
+
+**Step 4 — tube depth at the throat.** Treating the flattened tube as
+rectangular:
+$$h_t = A_{tube}/w_t = 8.835/2.844 = \mathbf{3.11\ mm}$$
+So a **2.84 mm wide by 3.11 mm deep** tube at the throat: aspect ratio 1.09,
+entirely reasonable, and the 0.3 mm wall carries the coolant pressure as hoop
+stress at a ~1.4 mm radius, which is why it can be that thin.
+
+**Step 5 — the barrel.** Pitch $876.8/180 = 4.871$ mm, flow width
+$4.871-0.600 = 4.271$ mm. Holding the same flow area (constant velocity, which
+is what you want since the heat flux is lower here anyway):
+$$h_c = 8.835/4.271 = 2.07\ \mathrm{mm}$$
+The tube is **wider and shallower in the barrel and narrower and deeper at the
+throat** — which is precisely why tube-wall tubes are individually *tapered*
+and drawn to a varying section rather than cut from stock tubing. That is the
+manufacturing burden of the architecture in one sentence.
+
+**Step 6 — the exit, and where it breaks.** Pitch $2479.3/180 = 13.77$ mm,
+flow width 13.17 mm, so at constant area:
+$$h_e = 8.835/13.17 = \mathbf{0.67\ mm}$$
+A 13 mm wide, 0.67 mm deep ribbon with a 0.3 mm wall. It will not hold coolant
+pressure, it will not stay flat between the lands, and it cannot be formed
+reliably. **The geometry has broken.** Three fixes, all used in practice:
+
+- **Bifurcate.** Split each tube into two where the circumference has doubled,
+  i.e. where $C = 2C_t \Rightarrow D = 2D_t = 394.6$ mm $\Rightarrow
+  \varepsilon = 4$. Downstream, 360 tubes carry half the flow each; at the exit
+  the pitch is 6.89 mm and the depth 0.70 mm — still marginal, so a second
+  bifurcation or a different fix is needed.
+- **Let the velocity fall.** Heat flux at $\varepsilon = 16$ is roughly two
+  orders of magnitude below the throat value, so a slow, wide, shallow tube is
+  thermally adequate; the problem is structural, not thermal.
+- **Stop cooling regeneratively.** Terminate the regen circuit around
+  $\varepsilon \approx 4$–10 and film-cool or radiation-cool the extension.
+  **This is what the F-1 does** — it dumps fuel-rich turbine exhaust as a film
+  over the nozzle extension, which is why the extension needs no regen circuit
+  [_verify-liquid, F-1 block] — and what the Merlin 1D Vacuum does with a
+  radiatively cooled niobium extension [_verify-liquid, Merlin block].
+
+**Step 7 — braze land length.** Take the tube run as barrel + convergent +
+divergent to $\varepsilon = 4$. The divergent length for an 80 % bell at a 15°
+equivalent cone half-angle, from $R_t = 98.66$ mm to $R_4 = 197.3$ mm:
+$$L_{div} = 0.8\,\frac{R_4-R_t}{\tan 15°} = 0.8\times\frac{0.09864}{0.26795}
+= 0.2945\ \mathrm{m}$$
+Axial length $= 0.5229 + 0.0708 + 0.2945 = 0.8882$ m; allowing 5 % for contour
+path length, the tube is $L_{tube} = 0.933$ m. There are $N$ tube-to-tube lands
+around a closed ring, so
+$$L_{braze} = N\,L_{tube} = 180 \times 0.933 = \mathbf{168\ m}$$
+of braze land per chamber, plus the tube-to-jacket braze area.
+
+**Step 8 — what that means.** Suppose the furnace-braze process produces, on
+average, one leak-path void per 50 m of land on the first pass — a plausible
+mature-process number, and one you should demand real data for [J]. Then
+$$\text{expected voids per chamber} = 168/50 = 3.4$$
+Every one must be found by X-ray, located, and repair-brazed, and the assembly
+re-proofed and re-leak-tested. That is the actual reason tube-wall chambers have
+long lead times. It is not the forming of the tubes; it is the joint count.
+
+> **Sanity check.** 180 tubes on a 197 mm throat is the right order: the F-1
+> has 178 tubes on a throat roughly 4.5 times larger in area, and the RS-25
+> nozzle has 1,080 tubes on a much larger, much higher-area-ratio contour
+> [_verify-liquid]. A tube pitch of 3.4 mm at the throat and 13.8 mm at
+> $\varepsilon = 16$ reproduces exactly the visual proportions of a real
+> tube-wall nozzle, where the tubes are visibly narrow at the throat and broad
+> at the exit — and reproduces the bifurcations you can see in photographs of
+> F-1 and RS-25 nozzles.
+
+### WE2 — What as-built AM roughness does to a cooling channel
+
+**Given.** The same RE-500 chamber, built instead with rectangular-ish coolant
+channels 1.5 mm wide × 3.0 mm deep, coolant velocity 25 m/s, channel run
+$L = 0.9$ m. Hot RP-1 properties at bulk temperature: $\rho = 810$ kg/m³,
+$\mu = 3.0\times10^{-4}$ Pa·s, $k = 0.11$ W/(m·K), $c_p = 2400$ J/(kg·K).
+Compare a machined channel ($R_a = 0.8$ µm) with an as-built L-PBF channel
+($R_a = 12$ µm).
+
+**Step 1 — geometry and flow state.**
+$$D_h = \frac{2ab}{a+b} = \frac{2(1.5)(3.0)}{4.5} = 2.00\ \mathrm{mm}$$
+$$\mathrm{Re} = \frac{\rho V D_h}{\mu} = \frac{810 \times 25 \times 0.002}{3.0\times10^{-4}} = 1.35\times10^{5}$$
+$$\mathrm{Pr} = \frac{\mu c_p}{k} = \frac{3.0\times10^{-4}\times 2400}{0.11} = 6.545$$
+Turbulent, comfortably.
+
+**Step 2 — channel count check.** With 1.5 mm channels on 1.0 mm lands the pitch
+is 2.5 mm, so at the throat $N_{ch} = C_t/2.5 = 619.8/2.5 = 248$ channels —
+the same order as the RS-25's 390, on a smaller throat. Consistent.
+
+**Step 3 — equivalent sand-grain roughness.** Using $k_s \approx 5R_a$ [E][A]:
+$$\text{machined: } k_s = 4\ \mu\mathrm{m},\quad k_s/D_h = 0.0020$$
+$$\text{as-built L-PBF: } k_s = 60\ \mu\mathrm{m},\quad k_s/D_h = 0.0300$$
+
+**Step 4 — friction factors** from Colebrook (Eq. 3.7), solved iteratively at
+$\mathrm{Re} = 1.35\times10^5$:
+$$f_{machined} = 0.02470,\qquad f_{AM} = 0.05740,\qquad
+\frac{f_{AM}}{f_{machined}} = \mathbf{2.32}$$
+
+**Step 5 — pressure drop.**
+$$\Delta p = f\frac{L}{D_h}\frac{\rho V^2}{2}
+= f \times \frac{0.9}{0.002}\times \frac{810\times 25^2}{2}
+= f \times 450 \times 253{,}125\ \mathrm{Pa}$$
+$$\Delta p_{machined} = 0.02470 \times 1.1391\times10^{8} = 28.1\ \mathrm{bar}$$
+$$\Delta p_{AM} = 0.05740 \times 1.1391\times10^{8} = \mathbf{65.4\ bar}$$
+
+A penalty of **37.3 bar**, on an engine whose chamber pressure is 100 bar. In
+pump work, at 70 % pump efficiency:
+$$\Delta P_{pump} = \frac{\dot m_f\,\Delta(\Delta p)}{\rho_f\,\eta_p}
+= \frac{51.52 \times 37.3\times10^{5}}{810 \times 0.70} = 3.4\times10^{5}\ \mathrm{W}
+= \mathbf{338\ kW}$$
+For scale, the whole fuel pump on this engine at a 150 bar rise absorbs about
+1.4 MW, so the roughness penalty is roughly **a quarter of the fuel pump
+power**, which on a gas-generator cycle is a quarter more turbine flow dumped
+overboard.
+
+**Step 6 — heat transfer.** Smooth-wall Dittus–Boelter (heating, $n = 0.4$):
+$$h_{smooth} = 0.023\frac{k}{D_h}\mathrm{Re}^{0.8}\mathrm{Pr}^{0.4}
+= 0.023\times\frac{0.11}{0.002}\times(1.35\times10^5)^{0.8}\times 6.545^{0.4}$$
+$$= 3.41\times10^{4}\ \mathrm{W/(m^2 K)}$$
+Norris (Eq. 3.8) with $n = 0.68\,\mathrm{Pr}^{0.215} = 0.68\times 6.545^{0.215}
+= 1.018$:
+$$\frac{\mathrm{Nu}_{AM}}{\mathrm{Nu}_{smooth}} = 2.32^{1.018} = 2.36
+\;\Rightarrow\; h_{AM} = 8.05\times10^{4}\ \mathrm{W/(m^2 K)}$$
+
+**Step 7 — the engineering reading.** Rough channels transfer heat much better
+and cost a great deal of pressure. But Eq. 3.8's $f/f_{smooth} = 2.32$ is close
+to its stated validity limit of 3, AM roughness is not sand-grain-like, and the
+measured enhancement in real AM channels is usually **less** than the analogy
+predicts while the friction penalty is fully realised. Design position [J]:
+budget the full 37 bar, credit no more than half the $h$ increase (i.e. use
+$h_{AM} \approx 1.5$–1.7 $h_{smooth}$), and if the pressure budget will not
+close, abrasive-flow-machine the channels to $R_a \approx 5$ µm, which brings
+$k_s/D_h$ to 0.0125 and recovers most of the penalty.
+
+> **Sanity check.** A 28 bar coolant $\Delta p$ on a 100 bar chamber is about
+> right for a kerosene regen circuit — regenerative cooling typically costs
+> 20–40 % of $p_c$ in pump rise. The 65 bar as-built figure is not
+> right; it would drive the pump discharge to nearly 200 bar on a 100 bar
+> engine, which is exactly the kind of result that sends an AM chamber to
+> abrasive flow machining.
+
+### WE3 — Build time, mass and powder inventory for an L-PBF chamber
+
+**Given.** Print the RE-500 chamber liner-plus-jacket as one L-PBF part from
+GRCop-42 ($\rho = 8756$ kg/m³), from the injector face to $\varepsilon = 4$
+(the largest piece that fits a 600 mm-diameter, 1,000 mm-tall machine). Process:
+$t_\ell = 30$ µm, $h_s = 110$ µm, $v_s = 0.9$ m/s, **4 lasers**, recoat time
+$t_r = 9$ s per layer. Effective solid wall stack: 1.0 mm hot wall + 40 % land
+fraction of the 3.0 mm channel depth + 2.0 mm jacket.
+
+**Step 1 — wetted area of the contour.**
+Barrel: $A_1 = 2\pi R_c L_{cyl} = 2\pi(0.13953)(0.5229) = 0.4584$ m².
+Convergent frustum, slant $s_2 = \sqrt{(0.13953-0.098663)^2 + 0.07079^2} = 0.08174$ m:
+$A_2 = \pi(R_c+R_t)s_2 = \pi(0.23819)(0.08174) = 0.0612$ m².
+Divergent to $\varepsilon=4$, slant $s_3 = \sqrt{(0.1973-0.098663)^2+0.29449^2} = 0.31057$ m:
+$A_3 = \pi(R_4+R_t)s_3 = \pi(0.29596)(0.31057) = 0.2888$ m².
+$$A = 0.4584+0.0612+0.2888 = 0.8084\ \mathrm{m^2}$$
+
+**Step 2 — solid volume.**
+$$t_{eff} = 1.0 + 0.4\times 3.0 + 2.0 = 4.2\ \mathrm{mm}$$
+$$V = A\,t_{eff} = 0.8084 \times 0.0042 = 3.395\times10^{-3}\ \mathrm{m^3} = 3395\ \mathrm{cm^3}$$
+Add 800 cm³ for inlet/outlet manifolds, flanges and the injector interface ring:
+$$V_{total} = 4195\ \mathrm{cm^3}$$
+
+**Step 3 — theoretical deposition rate per laser.**
+$$\dot V_1 = t_\ell h_s v_s = (30\times10^{-6})(110\times10^{-6})(0.9)
+= 2.97\times10^{-9}\ \mathrm{m^3/s} = 2.97\ \mathrm{mm^3/s}$$
+$$= 10.69\ \mathrm{cm^3/h\ per\ laser};\qquad 4\ \text{lasers} \to 42.8\ \mathrm{cm^3/h}$$
+
+**Step 4 — exposure time.**
+$$t_{laser} = \frac{4195}{42.8} = 98.1\ \mathrm{h}$$
+
+**Step 5 — recoat time.** Build height is the axial length,
+$H = 0.5229+0.0708+0.2945 = 0.8882$ m:
+$$N_{layers} = H/t_\ell = 0.8882/(30\times10^{-6}) = 29{,}606\ \text{layers}$$
+$$t_{recoat} = 29{,}606 \times 9\ \mathrm{s} = 2.664\times10^{5}\ \mathrm{s} = 74.0\ \mathrm{h}$$
+
+**Step 6 — total build time.**
+$$T_{build} = t_{recoat} + t_{laser} = 74.0 + 98.1 = \mathbf{172\ h} = 7.2\ \text{days}$$
+The build is **exposure-limited but only just** — 57 % laser, 43 % recoat. This
+ratio is the number to compute first on any AM part, because it tells you which
+lever works. Adding lasers 5 through 8 would cut only the 98 h; it cannot touch
+the 74 h, which depends solely on height and recoater speed. Doubling the layer
+thickness to 60 µm halves the recoat time *and* halves the exposure time (since
+$\dot V \propto t_\ell$) — but coarsens the surface, deepens the melt pool and
+degrades the downskin, which by WE2 you will pay for in $\Delta p$.
+
+**Step 7 — mass and powder inventory.**
+$$m_{part} = 4195\times10^{-6}\times 8756 = \mathbf{36.7\ kg}$$
+The build cylinder, at 450 mm diameter over the 0.888 m height, holds
+$$V_{cyl} = \tfrac{\pi}{4}(0.45)^2(0.888) = 0.1413\ \mathrm{m^3}$$
+of powder at roughly 55 % apparent density:
+$$m_{powder,\,in\ machine} = 0.1413 \times 8756 \times 0.55 = \mathbf{680\ kg}$$
+Only 36.7 kg of that is consumed; the rest is sieved and reused, but it is
+working capital sitting in a machine, and its oxygen content rises with every
+reuse cycle. **Powder inventory, not powder consumption, is the cost driver**,
+and it is the reason AM shops standardise on very few alloys per machine.
+
+**Step 8 — the honest schedule.** After the 7.2-day build: stress relief on the
+plate, wire-EDM removal, powder removal and verification, HIP, solution/age,
+machining of every interface and the throat, internal finishing, CT, proof and
+leak. In calendar terms that is typically longer than the build. A programme
+that quotes "seven days to print a chamber" is quoting the easy 40 %.
+
+> **Sanity check.** ~170 h and ~37 kg for a 500 kN-class chamber section is
+> consistent with the publicly discussed timescales for printed chambers of this
+> size, and with the fact that Rocket Lab prints an entire 25 kN Rutherford
+> primary structure — an engine of **35 kg total dry mass**
+> [_verify-liquid, Rutherford block] — in a far smaller build. Scaling by
+> thrust, RE-500 is 20 times the Rutherford, and a 37 kg chamber section on a
+> ~250 kg engine is the right proportion.
+
+### WE4 — Orifice tolerance stack to mixture-ratio spread
+
+**Given.** RE-500's injector uses unlike-doublet elements, one fuel and one
+oxidizer orifice each, $d_f = 1.60$ mm and $d_o = 2.23$ mm, $C_d = 0.80$ on
+both, $\Delta p = 20$ bar on both circuits, $\rho_f = 810$, $\rho_o = 1140$
+kg/m³ (LOX). Drilling tolerance $\pm 0.025$ mm on diameter, interpreted as a
+$3\sigma$ band. Element-to-element $C_d$ scatter $\sigma_{C_d}/C_d = 1.5$ %.
+Find the element mixture-ratio spread and the engine-level mixture-ratio error,
+and repeat for as-printed orifices.
+
+**Step 1 — nominal element flows.**
+$$A_f = \tfrac{\pi}{4}(1.60\times10^{-3})^2 = 2.0106\times10^{-6}\ \mathrm{m^2},
+\quad A_o = \tfrac{\pi}{4}(2.23\times10^{-3})^2 = 3.9057\times10^{-6}\ \mathrm{m^2}$$
+$$\dot m = C_d A \sqrt{2\rho\,\Delta p}$$
+$$\dot m_f = 0.80 \times 2.0106\times10^{-6}\sqrt{2 \times 810 \times 2.0\times10^{6}}
+= 0.09156\ \mathrm{kg/s}$$
+$$\dot m_o = 0.80 \times 3.9057\times10^{-6}\sqrt{2 \times 1140 \times 2.0\times10^{6}}
+= 0.21099\ \mathrm{kg/s}$$
+$$MR_{element} = 0.21099/0.09156 = 2.3045\quad\checkmark$$
+
+**Step 2 — element count.** $\dot m_f^{total} = 170.03/(1+2.3045) = 51.45$ kg/s,
+so
+$$N = 51.45/0.09156 = 562\ \text{elements}$$
+(Comparable to the RS-25's 600 main elements [_verify-liquid, RS-25 block].)
+
+**Step 3 — per-orifice uncertainties.** With $\sigma_d = 0.025/3 = 0.00833$ mm:
+$$\frac{\sigma_{d_f}}{d_f} = \frac{0.00833}{1.60} = 0.521\ \%,\qquad
+\frac{\sigma_{d_o}}{d_o} = \frac{0.00833}{2.23} = 0.374\ \%$$
+Area goes as $d^2$, so (Eq. 3.2) the relative area uncertainties double:
+$$\frac{\sigma_{A_f}}{A_f} = 1.042\ \%,\qquad \frac{\sigma_{A_o}}{A_o} = 0.747\ \%$$
+Combining with the $C_d$ scatter in quadrature (independent):
+$$\frac{\sigma_{\dot m_f}}{\dot m_f} = \sqrt{1.042^2+1.5^2} = 1.826\ \%,\qquad
+\frac{\sigma_{\dot m_o}}{\dot m_o} = \sqrt{0.747^2+1.5^2} = 1.676\ \%$$
+
+**Step 4 — element mixture-ratio spread.**
+$$\frac{\sigma_{MR}}{MR} = \sqrt{1.826^2 + 1.676^2} = 2.479\ \%
+\;\Rightarrow\; \sigma_{MR} = 2.3045 \times 0.02479 = 0.0571$$
+Across 562 elements you will see essentially the full $\pm 3\sigma$ population:
+$$MR \in [2.13,\ 2.48]$$
+That is a **±7.4 % local mixture-ratio band** on an engine whose nominal is
+2.30, produced entirely by a $\pm 0.025$ mm hole tolerance and 1.5 % $C_d$
+scatter. It is not a small effect and it is not removable by better analysis.
+
+**Step 5 — engine-level error.** The circuit total areas are sums of $N$
+independent draws, so the relative error of each *total* falls as $\sqrt{N}$:
+$$\frac{\sigma_{MR,engine}}{MR} = \frac{2.479\ \%}{\sqrt{562}} = 0.105\ \%
+\;\Rightarrow\; \sigma_{MR,engine} = 0.0024$$
+The engine's mixture ratio is repeatable to about a tenth of a percent from
+this source. **The same tolerance produces a 2.5 % element spread and a 0.1 %
+engine spread**, and the two numbers answer different questions: the engine one
+governs $I_{sp}$ and propellant residuals, the element one governs wall streaks
+and local $\eta_{c^*}$ loss. An engineer who quotes the $\sqrt{N}$-reduced
+number when asked about wall compatibility has made a serious error.
+
+**Step 6 — as-printed orifices.** With an as-printed diameter tolerance of
+$\pm 0.075$ mm ($3\sigma$, so $\sigma_d = 0.025$ mm) and a $C_d$ scatter of
+3 % (as-built roughness and edge condition vary far more):
+$$\frac{\sigma_{A_f}}{A_f} = 2\times\frac{0.025}{1.60} = 3.125\ \%,\qquad
+\frac{\sigma_{A_o}}{A_o} = 2\times\frac{0.025}{2.23} = 2.242\ \%$$
+$$\frac{\sigma_{\dot m_f}}{\dot m_f} = \sqrt{3.125^2+3^2} = 4.33\ \%,\qquad
+\frac{\sigma_{\dot m_o}}{\dot m_o} = \sqrt{2.242^2+3^2} = 3.83\ \%$$
+$$\frac{\sigma_{MR}}{MR} = \sqrt{4.33^2+3.83^2} = 5.78\ \%
+\;\Rightarrow\; \sigma_{MR} = 0.133,\quad MR \in [1.91,\ 2.70]\ \text{at } \pm3\sigma$$
+**2.33 times worse than drilled.** This is the quantitative reason that printed
+injectors are printed as *bodies* — manifolds, posts, face cooling, element
+geometry — and then have their **metering orifices finish-machined, EDM'd or
+reamed** to tolerance. Printing the orifice itself is the one thing you should
+not do [M][J].
+
+> **Sanity check.** A 1.5–2 % element flow uncertainty and a ~0.1 % engine
+> mixture-ratio uncertainty are consistent with real practice, where engine
+> mixture ratio is trimmed by orifice plates in the feed lines to a few tenths
+> of a percent and element-to-element scatter is controlled by 100 % flow-bench
+> acceptance rather than by tolerance alone.
+
+---
+
+## 6. Real engines — why did they design it that way?
+
+### 6.1 F-1 (1967) — 178 brazed tubes
+
+**The choice.** A regenerative **tube-wall** chamber of 178 individually formed,
+tapered tubes, brazed to each other and into an Inconel jacket with steel bands,
+fuel-cooled with a down-and-back routing, with gas-generator exhaust film-
+cooling the nozzle extension [_verify-liquid, F-1 block].
+
+**The alternatives in 1962.** Milled channels with a brazed or bolted jacket —
+but nobody could mill a contoured channel set on that scale, and there was no
+five-axis machining. Electroforming — the technology existed but not at that
+scale of contour. Ablative — impossible at 155 s of burn at 6.7 MN. Double-wall
+"spaghetti" construction — the tube wall *is* the mature form of that idea, out
+of the Navaho programme.
+
+**Why it made sense.** The thin tube wall gives the smallest possible
+through-wall $\Delta T$ at a given heat flux, and the tube's own small radius
+carries coolant pressure efficiently. The architecture scales to any size by
+adding tubes rather than by inventing a new process. Critically, it was
+*already qualified*: the Neu patent and the Atlas and Thor engines had made
+tube-wall chambers a known quantity, and the F-1 programme had enough novel
+risk in the injector (about 2,000 tests across 210 injector designs
+[_verify-liquid, F-1 block]) without adding a new chamber architecture.
+
+**What it cost.** Hundreds of metres of braze land per chamber (WE1), an
+enormous inspection burden, and a build that is fundamentally hand work.
+
+**Would a modern engineer choose it?** No. A modern F-1-class chamber would be
+a DED-deposited channel-wall structure or a segmented L-PBF assembly with a
+formed nozzle. The tube wall is not wrong; it is simply dominated now.
+
+### 6.2 RS-25 (1981) — milled channels and an electroformed nickel closeout
+
+**The choice.** A NARloy-Z (Cu–Ag–Zr) liner with **390 machined coolant
+channels** and an **electroformed-nickel closeout**, hydrogen-cooled, at
+206 bar — plus, separately, a **1,080-tube brazed tube-wall nozzle**
+[_verify-liquid, RS-25 block].
+
+**Why not tubes in the chamber?** Because the RS-25 runs at 206 bar and the
+heat flux at the throat is the highest of any flown engine. A tube wall cannot
+give you the *local* channel geometry the heat-flux distribution demands: milled
+channels can be deep and narrow exactly at the throat and shallow and wide in the
+barrel, varying continuously. And a copper alloy liner is essential at that flux
+(module 16), while a copper *tube* is far harder to form and braze than a
+nickel-alloy one.
+
+**Why electroforming rather than brazing the jacket on?** Because a brazed
+jacket over 390 lands is 390 braze joints with the same clearance problem as
+WE1, on a copper part where the braze would need to be low-temperature enough
+not to anneal the liner. Electroforming deposits the jacket *onto* the lands,
+producing a metallurgical bond with no filler, no clearance and no capillary
+requirement. The price is eight days in a tank per part (§3.6.1) and total
+dependence on surface preparation.
+
+**And why tubes on the nozzle?** Because the nozzle's heat flux is orders of
+magnitude lower, it is enormous, and 1,080 tubes is a cheaper way to make a big
+low-flux cooled surface than milling and electroforming metres of contour. The
+RS-25 is a **process-mixed engine by design**, and that is the lesson to take
+from it.
+
+**Would a modern engineer choose it?** For the chamber: no — a printed GRCop-42
+liner with a DED 718 jacket does the same job with no closeout process at all
+(§6.5). For the nozzle: also no — a channel-wall DED nozzle. But the design
+*logic* — put the highest-precision process where the flux is highest, and the
+cheapest process where it is lowest — is exactly right and should be copied.
+
+### 6.3 RD-170 family (1985) — the Soviet answer
+
+**The choice.** Four combustion chambers on a single turbopump, oxidizer-rich
+staged combustion at **245.2 bar**, regeneratively kerosene-cooled, 7,250 kN
+sea-level thrust; the highest-thrust liquid engine ever flown
+[_verify-liquid, RD-170 block].
+
+Soviet chamber construction differs from American practice in a way that is
+worth knowing, with a caveat: the course's engine file records only
+"regenerative, kerosene-cooled" for the RD-170 [_verify-liquid], so the
+construction description below is from the general open literature on Soviet
+engine practice, not from the course database, and is tagged accordingly [H].
+The Energomash tradition uses a **milled or corrugated inner liner brazed to an
+outer structural shell** — an inner shell of high-conductivity bronze or copper
+alloy with channels formed in it, joined to a steel outer shell by furnace
+brazing over the whole surface rather than by electroforming. It is
+architecturally the same idea as the RS-25's milled-channel liner, closed out by
+brazing rather than by plating, and executed at very large scale with a
+correspondingly large national investment in brazing technology.
+
+**Why it made sense.** The Soviet programme had deep, industrialised brazing
+capability; it also had a firm institutional preference (Glushko's) for multiple
+small chambers over one large one, which *reduces* the per-chamber manufacturing
+difficulty enormously — an 1,800 kN chamber is far easier to cool, braze and
+inspect than a 7,250 kN one. The four-chamber layout is, among other things, a
+manufacturing decision.
+
+**What it cost.** The course file names it: "four chambers where one would be
+preferable; the single-turbopump-four-chamber layout means one turbopump failure
+loses all thrust" [_verify-liquid]. Four chambers is four times the joint count,
+four sets of inspections, and a complex hot-gas manifold.
+
+**Would a modern engineer choose it?** The multi-chamber layout, no — Western
+practice went the other way and the RD-191 shows Energomash did too, deriving a
+single-chamber engine from the same design. The brazed channel-wall liner,
+though, remains a perfectly sound architecture and is closely related to the
+laser-welded and additively closed-out liners of today.
+
+### 6.4 Rutherford (2017) — print the whole thing
+
+**The choice.** **Chamber, injectors, pumps and main propellant valves all
+additively manufactured** by L-PBF/DMLS; the first engine to fly with
+essentially the entire primary structure printed. Electric-pump cycle, 25 kN,
+35 kg dry [_verify-liquid, Rutherford block].
+
+**Why it made sense.** At 25 kN, everything is small enough to fit a build
+envelope comfortably — the build-volume constraint that dominates booster-engine
+AM (§3.10.5) simply does not bite. The engine is produced in *quantity*: 369
+engines across 47 flights by April 2024. And nine engines per first stage means
+part-count reduction and process repeatability matter more than peak
+performance. AM converts a many-part, many-joint, high-touch-labour assembly
+into machine hours that scale by buying machines. That is precisely the right
+trade at this size and rate.
+
+**What it cost.** Surface roughness in the coolant channels (WE2), the powder
+removal and CT burden, and the qualification effort of proving that a printed
+pump impeller spinning at 40,000 rpm has adequate fatigue properties.
+
+**Would a modern engineer choose it?** For a small engine at rate, yes,
+unreservedly — this is now the default. SuperDraco makes the same point from a
+different direction: a **3D-printed Inconel** regeneratively cooled hypergolic
+chamber, "the first 3D-printed combustion chamber to fly on a crewed
+spacecraft" [_verify-liquid, SuperDraco block]. The architecture does not scale
+unchanged to booster class, for the reasons in §3.10.5.
+
+### 6.5 RAMPT (2018–) — the bimetallic build
+
+**The choice.** Large-scale blown-powder DED of regeneratively cooled
+channel-wall nozzles and chambers, including **a GRCop copper-alloy liner and a
+nickel-superalloy structural jacket deposited in one continuous build**, with
+composite overwrap [RAMPT][GradlAM].
+
+**Why it matters.** Every architecture in §§6.1–6.3 spends its difficulty on the
+same problem: *how do you attach a structural jacket to a high-conductivity
+liner without ruining either?* Brazing (F-1, RD-170) buys it with joint count
+and inspection. Electroforming (RS-25) buys it with schedule and surface-prep
+sensitivity. Bimetallic DED makes the question disappear: there is no joint,
+there is a fusion transition, and the transition is made by changing the powder
+feed mid-build. It also removes the build-envelope limit, so a metre-class
+nozzle is a single part.
+
+**What it costs, and the caveat.** Coarse resolution requiring extensive
+machining; a graded interface whose properties are neither copper's nor
+nickel's and must be separately characterised; a large deposited part with
+substantial residual stress; and a qualification argument that is still being
+built. RAMPT results are **project progress snapshots from an active technology
+programme**, hot-fire tested at component scale, and the published numbers are
+expected to be superseded [RAMPT][R].
+
+**Would a modern engineer choose it?** For a new large regeneratively cooled
+nozzle today: it is the most promising route in the open literature, and the one
+to watch. It is not yet a flight-qualified production process, and saying
+otherwise would be dishonest.
+
+### 6.6 Merlin 1D (2013) — cost-first, and what that does to the hardware
+
+**The choice.** Gas-generator cycle at 97 bar, **milled-channel** RP-1-cooled
+chamber, a **single pintle** injector element, a radiatively cooled niobium
+nozzle extension on the vacuum variant, and the highest thrust-to-weight of any
+flown orbital engine at 184:1. Explicitly "optimised for cost, restart and
+reuse, not Isp", with the standout achievement being manufacturing cadence —
+"hundreds of engines a year, an output no other liquid engine programme has
+matched" [_verify-liquid, Merlin 1D block].
+
+**Read every one of those choices as a manufacturing decision:**
+
+- **Gas generator over staged combustion.** No preburner, no hot oxygen-rich
+  turbine gas, no oxygen-compatible superalloy hot-gas manifold. Fewer parts and
+  vastly less process qualification, at a permanent Isp cost.
+- **Pintle over a multi-element face.** WE4 shows what 562 drilled elements cost
+  in tolerance control and flow-bench time. A pintle is *one* machined
+  element — an annular sleeve and a central post — with metering that is
+  turned and ground rather than drilled, and it throttles (40–100 %) and is
+  inherently stable. SpaceX traces the lineage directly to the Apollo LM descent
+  engine [_verify-liquid]. This is the single biggest manufacturing simplification
+  in the engine.
+- **Milled channels over brazed tubes.** WE1's 168 m of braze land, gone.
+- **Niobium radiative extension over a regen extension.** WE1 Step 6's
+  geometric breakdown, sidestepped entirely: a spun or formed C-103 shell with
+  a silicide coating (§3.11), no channels, no joints.
+- **$p_c = 97$ bar.** Chamber pressure is the master variable for
+  manufacturing difficulty, because it sets the heat flux, which sets the wall
+  and channel requirement. Stopping at 97 bar keeps a kerosene-cooled milled
+  copper-alloy chamber comfortable.
+
+**Would a modern engineer choose it?** For a high-rate reusable booster engine,
+the logic is unimpeachable and has been widely copied. The specific choices are
+already moving: printed chamber liners and printed pintle bodies do the same
+job with fewer operations.

@@ -1145,3 +1145,231 @@ The following are **not yet fit to quote in a module**. Where the worksheet says
   NEEDS PRIMARY.
 - **Minuteman case-material progression** and **Peacekeeper HMX/NEPE association**
    — **C**; the NEPE association specifically is *not* recorded as fact.
+
+---
+
+# Part C — Cold-gas thrusters
+
+## C.1 Gas properties and ideal performance
+
+**Method** (worksheet §B.1, confidence **A** for the ideal-Isp column — it is
+`[CALC]` from stated inputs and reproducible). Ideal-gas, frozen-flow, isentropic
+nozzle. For each gas the area-ratio relation is solved for exit Mach number at the
+stated ε, then
+
+$$C_F^{vac} = \Gamma\sqrt{\frac{2\gamma}{\gamma-1}\left[1-\left(\tfrac{p_e}{p_c}\right)^{\frac{\gamma-1}{\gamma}}\right]} + \frac{p_e}{p_c}\varepsilon,
+\qquad c^{*}=\frac{\sqrt{R T_0}}{\Gamma},
+\qquad \Gamma=\sqrt{\gamma}\left(\tfrac{2}{\gamma+1}\right)^{\frac{\gamma+1}{2(\gamma-1)}}$$
+
+with **T₀ = 300 K**, $R = R_u/M$, $R_u = 8314.46$ J/(kmol·K), $g_0 = 9.80665$ m/s².
+**Any published cold-gas Isp is meaningless without T₀ and ε**; the spread between
+ε = 20 and ε = 100 is 3–10% depending on γ.
+
+| gas | M (kg/kmol) | γ @300 K | c* (m/s) | C_F,vac (ε=50) | **Isp ideal, ε=50 (s)** | ε=20 | ε=100 | typical **realized** Isp (s) | liquefiable @300 K? | stored density (see C.1.2) | **ρ·Isp·g₀ (N·s/cm³)** (see C.1.1) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| H₂ | 2.016 | 1.405 | 1622.5 | 1.726 | **285.6** | 279.2 | 288.9 | ~250–272 | no (Tc 33 K) | ~0.02 g/cm³ @241 bar | ≈ 0.049–0.053 |
+| **He** | 4.003 | 1.667 | 1087.0 | 1.606 | **178.1** | 176.4 | 178.8 | ~150–165 | no (Tc 5.2 K) | ~0.04 g/cm³ @241 bar | **≈ 0.059–0.065** |
+| NH₃ | 17.031 | 1.31 | 572.0 | 1.795 | **104.7** | 101.5 | 106.5 | ~90–100 (warm gas) | **yes**, vp ≈ 10.6 bar | ~0.60 g/cm³ liquid | ≈ 0.53–0.59 |
+| N₂ | 28.014 | 1.400 | 435.8 | 1.729 | **76.8** | 75.1 | 77.8 | **~65–73** | no (Tc 126 K) | ~0.28 g/cm³ @241 bar; ~0.25 @300 bar (**inconsistent — C.1.2**) | ≈ 0.18–0.20 |
+| Air | 28.965 | 1.400 | 428.6 | 1.729 | **75.6** | 73.9 | 76.5 | ~63–71 | no | ~0.29 g/cm³ @241 bar | ≈ 0.18–0.20 |
+| Ar | 39.948 | 1.667 | 344.1 | 1.606 | **56.4** | 55.8 | 56.6 | ~48–52 | no (Tc 151 K) | ~0.44 g/cm³ @241 bar | ≈ 0.21–0.22 |
+| CO₂ | 44.010 | 1.289 | 357.9 | 1.813 | **66.2** | 64.0 | 67.4 | ~50–60 | **yes, marginally** — Tc = 304.1 K, vp ≈ 67 bar @300 K | ~0.6–0.7 g/cm³ liquid | ≈ 0.32–0.38 |
+| n-butane | 58.122 | 1.09 | 330.8 | 2.050 | **69.2** | 65.0 | 71.9 | **~60–70** cold, ~75–80 warm | **yes**, vp ≈ 2.6 bar | ~0.57 g/cm³ liquid | ≈ 0.34–0.39 |
+| Kr | 83.798 | 1.667 | 237.6 | 1.606 | **38.9** | 38.6 | 39.1 | ~33–36 | no (Tc 209 K) | ~1.0 g/cm³ @241 bar | ≈ 0.32–0.35 |
+| R-134a | 102.03 | ~1.12 | 247.2 | 2.005 | **50.5** | 47.8 | 52.3 | **~40–50** cold; ~70–82 warm-gas | **yes**, vp ≈ 7.0 bar | ~1.19 g/cm³ liquid | ≈ 0.47–0.58 |
+| Xe | 131.29 | 1.667 | 189.8 | 1.606 | **31.1** | 30.8 | 31.2 | ~26–28 | no — Tc = 289.7 K, so **supercritical** at 300 K | ~2.74 g/cm³ @241 bar (**suspect — C.1.2**) | ≈ 0.70–0.75 |
+| SF₆ | 146.06 | ~1.09 | 208.7 | 2.050 | **43.6** | 41.0 | 45.4 | ~35–42 | **yes**, vp ≈ 21 bar | ~1.4 g/cm³ liquid | ≈ 0.48–0.58 |
+| **R-236fa** | 152.04 | ~1.08 | 205.2 | 2.067 | **43.2** | 40.6 | 45.0 | **~40** cold; ~82 warm-gas (CHIPS) | **yes**, vp ≈ 2.7 bar | ~1.36 g/cm³ liquid | **≈ 0.53–0.57** |
+
+Confidence: **A** for the ideal-Isp column. **C** for the γ values of the
+refrigerants and butane (these are real gases well away from ideal near
+saturation; γ is temperature- and pressure-dependent and a single value is an
+approximation). **C** for the stored-density column, which is literature-recalled
+rather than NIST-verified — **NEEDS PRIMARY**: NIST REFPROP/WebBook densities and
+real-gas γ before the table ships.
+
+### C.1.1 Correction to the worksheet's impulse-density claim
+
+**The worksheet's §B.1 design rule 2 is arithmetically wrong and must not be
+carried forward.** It states that helium gives "~7.1 N·s per cm³ of propellant"
+and R-236fa "~5.8 N·s/cm³ — nearly the same", and concludes that the *tank*, not
+the propellant, is what decides the trade. The conclusion is right; **the numbers
+are wrong by roughly two orders of magnitude and in the wrong direction.**
+
+Impulse per unit stored propellant volume is
+
+$$\frac{I_{tot}}{V} = \rho\, I_{sp}\, g_0$$
+
+With ρ in g/cm³ and Isp in seconds, the product is in units of 10⁻³ N·s/cm³.
+Evaluated at the worksheet's own stated conditions and realized Isp values:
+
+| propellant | ρ (g/cm³) | realized Isp (s) | **ρ·Isp·g₀ (N·s/cm³)** |
+|---|---|---|---|
+| **He @ 241 bar, 300 K** | 0.04 | 150–165 | **≈ 0.059–0.065**, i.e. **≈ 0.06–0.07** |
+| **R-236fa, saturated liquid @ 2.7 bar** | 1.36 | 40–43 | **≈ 0.533–0.573**, i.e. **≈ 0.53–0.58** |
+
+**R-236fa beats helium by a factor of about 8 on impulse density** — the 34×
+density advantage overwhelms the ~4× Isp disadvantage. **Both module 28
+(cold-gas principles) and module 31 (real cold-gas systems) independently derived
+this and found the worksheet figure in error; this file records the corrected
+values as authoritative.**
+
+The corrected numbers make the design rule *stronger*, not weaker:
+
+1. **Isp scales as $1/\sqrt{M}$.** Helium is 2.3× nitrogen's Isp; xenon is 0.4×.
+   If the requirement is Δv per kilogram of propellant, pick light.
+2. **Impulse density scales the other way, and by more than the Isp gain.**
+   R-236fa stores ~8× the impulse per cubic centimetre that 241-bar helium does,
+   *and* it needs only a thin-walled ~2.7-bar can instead of a 241-bar COPV. **For
+   a CubeSat, the tank is the system.** That is why every flown CubeSat cold-gas
+   module uses a liquefiable propellant and no launcher uses one.
+
+### C.1.2 The stored-density column is ideal-gas and internally inconsistent
+
+Treat the whole column as confidence **C** and do not quote a value from it
+without checking NIST.
+
+- The compressed-gas entries are **ideal-gas values**: at 241 bar and 300 K,
+  $\rho = pM/(R_uT)$ gives 0.039 g/cm³ for He and 0.270 g/cm³ for N₂, which are
+  the tabulated 0.04 and 0.28. Real gases at 241 bar depart from ideal by several
+  percent to tens of percent — real N₂ is nearer 0.25 g/cm³ and real He is *less*
+  dense than ideal because of repulsive non-ideality, not more.
+- **The nitrogen row is internally impossible as written:** it gives ~0.28 g/cm³
+  at 241 bar and ~0.25 g/cm³ at 300 bar. Density cannot fall as pressure rises at
+  fixed temperature. One of the two is wrong (the 300-bar figure is the more
+  plausible real-gas value).
+- **The heavy-noble-gas entries are not ideal-gas values and are not consistent
+  with the light ones.** Ideal gas at 241 bar, 300 K gives 0.81 g/cm³ for Kr and
+  1.27 g/cm³ for Xe, against the tabulated 1.0 and 2.74. Xenon at 300 K is
+  supercritical (Tc = 289.7 K) and genuinely far denser than ideal, so the
+  tabulated figure may be closer to reality — but it is then a *different kind of
+  number* from the He and N₂ entries in the same column, which is exactly the
+  inconsistency to fix.
+
+The derived ρ·Isp·g₀ column above inherits this uncertainty. The **He vs R-236fa
+ratio of ~8× survives it comfortably**: even a 30% error in either density leaves
+the conclusion unchanged.
+
+### C.1.3 The 0.90 efficiency factor is the physically interesting number
+
+Cross-checked against Wikipedia's cold-gas table (stated at 0 °C, 241 bar):
+H₂ 296/272, He 179/165, N₂ 80/73, Ar 57/52, Xe 31/28 theoretical/measured. The
+worksheet's He (178.1), Ar (56.4) and Xe (31.1) agree to within 1%. Its N₂ (76.8)
+is 4% below their 80 and its H₂ (285.6) is 3.5% below their 296 — consistent with
+them using a larger effective expansion (or expansion to zero back pressure) than
+ε = 50.
+
+**The measured/theoretical ratio of ~0.91 across that whole table is the useful
+number: a real cold-gas thruster delivers about 90% of frozen-ideal Isp.** Give
+ideal values and realized values separately, name the ~0.90 factor, and state T₀
+and ε in the caption. The discount is where boundary layers, wall-to-gas heat
+transfer and non-equilibrium expansion of a polyatomic refrigerant all show up at
+once.
+
+---
+
+## C.2 Cold-gas systems
+
+| system | supplier / country | years | host | propellant | thrusters | tank / regulation | thrust | Isp s | total impulse | propellant mass | system mass | Δv | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **MMU (Manned Maneuvering Unit)** | Martin Marietta / NASA / USA | **STS-41-B 1984-02-07** (McCandless & Stewart — first untethered EVA), STS-41-C (Solar Max), STS-51-A (Westar VI / Palapa B2 retrieval) | Shuttle EVA | **GN₂** | **24** nozzles in 4 clusters of 6, giving **6-DOF** (**A**) | 2 × aluminium tanks with Kevlar overwrap (**A**); ≈**3,000 psi (207 bar)** ground charge (**C — NEEDS PRIMARY**); **regulated**, two independent regulated systems, either alone flyable (**C**); solenoid-actuated poppet valves (**C**) | **≈ 7.6 N (1.7 lbf)** per thruster — ***derived, not sourced***: 0.091 m/s² × ~340 kg ÷ ~4 thrusters firing (**C — NEEDS PRIMARY**) | **implied ≈ 100 s — too high for GN₂; see C.2.1** | not published | **5.9 kg per tank, 11.8 kg total** (**A**) | **148 kg loaded** (**A**) | **110–130 ft/s (33.5–39.6 m/s)** on a ground charge; ≥72 ft/s (22 m/s) on an on-orbit recharge (**A**). Translational accel **0.091 m/s² (0.3 ± 0.05 ft/s²)**; rotational **10.0 ± 3.0 °/s²** (**A**) | **A** on the published figures, **C** on the derived ones — **but the set does not close, see C.2.1** |
+| **SAFER (Simplified Aid For EVA Rescue)** | NASA / USA | ISS/Shuttle EVA era, in service | EVA self-rescue | **GN₂** | **24** (**A**) | **224 bar (3,250 psi)** (**A**) | **≈ 3.6 N (0.8 lbf)** per thruster (**C — NEEDS PRIMARY**) | **implied ≈ 40 s** `CALC` — **credible; see C.2.2** | not published | **1.4 kg (3 lb)** (**A**) | **37.7 kg (83–85 lb)** (**A**) | **3.05 m/s (10 ft/s)** (**A**) | **A** on the published set |
+| **Gemini HHMU ("zip gun")** | NASA / USA | carried on Gemini 4, 8, 10, 11; **used on Gemini 4 (White, 1965-06-03) and Gemini 10** | Gemini EVA — **the first one** | **Oxygen** on the Gemini 4 unit (two bottles at 3,400 psi); later units used **nitrogen**, and **Freon** was used in the family (**B**) | **3 nozzles** — one pusher (aft), two tractor (on extenders) (**B**) | aluminium and stainless steel construction (**B**) | commonly quoted ~2 lbf (8.9 N) — **not confirmed in any source read** (**D**) | not published | not published | not published | **3.1 kg (6.8 lb)** (**B**) | not published | **B** on architecture; **D** on thrust |
+| **Falcon 9 first-stage GN₂ ACS** | SpaceX / USA | Falcon 9 booster recovery era | Falcon 9 stage 1 | **GN₂** (**B**) | **2 clusters of 4** in the interstage region near the top of the first stage (**C**) | high-pressure **COPVs** (**C**) | **Not published by SpaceX** (**D**) | **not published** (**D**) | **not published** (**D**) | not published | not published | not published | **D — see C.2.3** |
+| **MarCO MiPS (Micro CubeSat Propulsion System)** | VACCO Industries / USA (JPL mission) | MarCO-A / MarCO-B, **first interplanetary CubeSats**; launched with InSight **2018-05-05**, Mars flyby **2018-11-26** | 6U CubeSat bus | **R-236fa**, stored as a **self-pressurising saturated liquid** (**A**) | **8** — 4 canted for attitude control, 4 axial for TCMs (**A**) | **single-tank all-welded aluminium module** housing propellant, valves and electronics; **self-pressurising blowdown** at the ~2.7 bar vapour pressure — **no regulator, no high-pressure COPV** (**B**). **VACCO ChEMS** chemically-etched micro-valves, frictionless, latching/solenoid (**B**) | VACCO states **>50 mN per thruster** for its cold-gas line generally; **~25 mN** is quoted for MarCO specifically in some accounts (**C**) | **≈ 40** (consistent with the ε = 20–50 ideal of 40.6–43.2 s at ~90% efficiency) (**B/CALC**) | **755 N·s** (**A**) | not published separately | **3,490 g wet** (**A**) | **> 40 m/s** for TCMs (**A**) | **A** |
+| **Standard MiPS (0.3U)** | VACCO / USA | catalogue | CubeSat | R-236fa | modular | self-pressurising | **>50 mN**/thruster | ~40 | **44 N·s**, up to **880,000 firings**; **82–515 N·s** across the modular range | not published | not published | — | **B** |
+| **Micro MiPS (0.25U)** | VACCO / USA | catalogue | CubeSat | R-236fa | — | self-pressurising | **>50 mN** | ~40 | **93 N·s**, up to **1,860,000 firings** | not published | not published | — | **B** |
+| **CHIPS** | CU Aerospace + VACCO (AFRL) / USA | — | CubeSat | R-134a / R-236fa / SO₂ | — | — | **30 mN** | **82** — **warm gas / resistojet, electrothermal, not pure cold gas.** The 82 s against a 43 s cold ideal *is* the entire argument for heating the gas | not published | **0.7 kg propellant** | **1.2 kg wet** | — | **B** |
+| **NanoProp CGP3 / CubeProp (3U)** | GomSpace / Denmark | flown on **TW-1 (2015)** | 3U CubeSat | **n-butane** | **4**, **1 mN each, 5 μN resolution** | **self-pressurising, 1–4 bar** from butane vapour pressure | 1 mN/thruster | ~60–70 | not published | **60 g** | not published | up to **15 m/s** for a 2.66 kg satellite | **B** |
+| **NanoProp 6U** | GomSpace / Denmark | flown on **GOMX-4B (2018)** — ESA's butane-propelled CubeSat, which demonstrated formation flying with GOMX-4A over ~4,500 km separation | 6U CubeSat | n-butane | not published | self-pressurising | not published | not published | not published | not published | not published | — | **B** |
+| **CGMT-000-9** | Marotta Controls / USA | flew on NASA **ST-5 (2006)** | ST-5 microsatellite | **GN₂** | not published | not published | not published | not published | not published | not published | not published | — | **B** |
+| **BioSentinel ACS** | Lightsey Space Research (Georgia Tech / UT Austin lineage) / USA | 6U CubeSat flown on **Artemis I (2022)** | BioSentinel | **R-236fa** | not published | not published | not published | not published | not published | not published | not published | — | **B** |
+| **I2T5** | ThrustMe / France | flown 2019+ | CubeSat | **iodine, subliming** — **not strictly cold gas**; solid→vapour sublimation feed | not published | not published | not published | not published | not published | not published | not published | — | **B** |
+
+**General envelope (NASA *State of the Art of Small Spacecraft Technology*,
+confidence A `[NASA-SOA]`).** The cold-gas class is **10 μN – 3.6 N thrust** and
+**40 – 110 s Isp**, with two governing trades stated explicitly: *"Lower molecular
+weight gases offer higher specific impulse but require more voluminous storage"*
+and *"Saturated liquids are stored at low pressure and vaporized when introduced
+into a low-pressure chamber."* **The top of that Isp band (110 s) is only reachable
+with warm gas (resistojet-heated), not true cold gas** — see CHIPS.
+
+### Notes and contested figures — C.2
+
+**C.2.1 The MMU Δv does not close.** With 11.8 kg of GN₂ at a realistic 70 s Isp,
+total impulse is ~8,100 N·s; against a 340 kg combined mass (MMU + suited
+astronaut) that is **~24 m/s, not the published 33.5–39.6 m/s**. Working the
+published Δv backwards implies **Isp ≈ 100 s, which is too high for GN₂**. Either
+the quoted Δv assumes a lighter reference mass (the MMU alone, 148 kg, gives
+~55 m/s), or the tank load is larger than 11.8 kg. **The inconsistency is real and
+must be resolved before any module uses MMU as a worked example.** **NEEDS
+PRIMARY** — the Martin Marietta MMU description or NASA MSFC documentation.
+Mention MMU for its history and its 24-thruster 6-DOF architecture, and state
+plainly that the published Δv cannot be reconciled with the published propellant
+load without knowing the reference mass.
+
+**C.2.2 SAFER closes, and is the honest worked example.** 3.05 m/s × ~180 kg
+(SAFER + suited crew) ÷ (1.4 kg × 9.80665) ≈ **40 s implied Isp** — *credible*: a
+small, short-pulse, low-ε thruster firing in millisecond bursts loses most of the
+ideal 77 s to heat transfer, non-equilibrium expansion and valve/plenum dead
+volume. **Use SAFER, not MMU, as the cold-gas worked example.** The pair also makes
+the design point: SAFER is a self-rescue device with a single-use budget, not a
+manoeuvring unit, and its entire specification follows from "get back to the
+handrail once."
+
+**C.2.3 Falcon 9 — say only what is honest.** Falcon 9 uses GN₂ cold gas for
+first-stage attitude control during the unpowered phases of the return, and the
+choice is driven by three things: the thrusters must work in vacuum *and* in dense
+atmosphere, must not require ignition or ullage, and must be restartable an
+arbitrary number of times over a ten-minute coast. **No performance numbers should
+be quoted.** SpaceX does not publish them and the figures circulating on
+enthusiast sites have no traceable origin. Cold gas is rare on launch vehicles
+because the impulse-to-mass penalty is severe at that scale; Falcon 9's use is the
+notable exception.
+
+**C.2.4 The Hubble / Centaur / Sputnik misattribution note — three exclusions.**
+
+- **Sputnik 1 and the Vanguard satellites did not carry cold-gas thrusters.** No
+  citable evidence was found; Sputnik 1 was uncontrolled and Vanguard 1 was
+  passively stabilised. The Wikipedia cold-gas article does not mention either.
+  **Remove this from the textbook outline** unless someone produces a source. The
+  genuine early cold-gas milestones are the **Gemini HHMU (1965)** and the
+  reaction-control systems of early attitude-controlled scientific satellites.
+  Confidence **B** on the exclusion.
+- **Hubble uses reaction wheels and magnetic torquers, not thrusters**, and should
+  not appear in a cold-gas chapter at all. Confidence **B** on the exclusion.
+- **Centaur's settling/attitude system is not cold gas in the classic sense** — it
+  uses **hydrogen peroxide monopropellant** thrusters on the early vehicles and
+  **hydrazine** on later ones, with gaseous hydrogen and helium for tank
+  pressurisation and, on some variants, settling thrust via vented GH₂ thrusters.
+  Cataloguing it properly requires the ULA Centaur documentation. Confidence **D**
+  as written — **do not put Centaur in the cold-gas chapter without a primary
+  source; it risks teaching a category error.** Ariane 5 EPS and the Ariane 6
+  upper stages likewise use hydrazine or (Ariane 6 APU) a gas-generator system,
+  not cold gas.
+
+**C.2.5 Why MarCO matters pedagogically.** It is the proof that a 40-second-Isp
+propellant is the *right* engineering answer when the constraint is volume, safety
+and integration — not Δv efficiency. A GN₂ system of the same total impulse would
+have needed a ~200-bar COPV and would not have fit, or passed launch-safety
+review, as a secondary payload. **Propellant choice is a systems decision, not a
+performance decision.** This is the single best example in the whole cold-gas part.
+
+**C.2.6 The HHMU lesson is control authority, not performance.** A hand-held
+thruster whose line of action does not pass through the combined centre of mass
+produces a torque, and White reported exactly that on Gemini 4. It is the argument
+for why the MMU had 24 fixed thrusters around a rigid backpack.
+
+**C.2.7 The university/JPL lineage.** The R-236fa self-pressurising architecture
+traces through JPL (MarCO, CPOD, NEA Scout) and the Lightsey group's academic work
+(BioSentinel, and earlier Georgia Tech / UT Austin 3D-printed integrated
+tank-and-nozzle designs). The distinguishing academic contribution is **printing
+the plenum, feed passages and nozzles as one part**, which removes the joints that
+dominate leak-rate budgets in a system that must hold propellant for years.
+Confidence **C** — **NEEDS PRIMARY** (the SmallSat conference papers).
+
+**C.2.8 Do-not-print list — cold gas.** MMU and SAFER thrust-per-thruster;
+anything numeric about Falcon 9's GN₂ system; Centaur in a cold-gas context;
+HHMU thrust; the stored-density and refrigerant-γ columns of §C.1 without a NIST
+check; and the worksheet's original 7.1 / 5.8 N·s/cm³ impulse-density figures,
+which are superseded by §C.1.1.

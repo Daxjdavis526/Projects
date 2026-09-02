@@ -29,7 +29,7 @@ Examples whose arithmetic is not a single library call
           eta_overall = 0.9506 * 0.9696                    = 0.9218
         The "wrong station" counter-example: p_inj * At / mdot = 1802.1 m/s,
         giving eta_c* = 1.015 (impossible), and Cf = 1.5090 -> eta_Cf = 0.9573.
-        Exit-plane check [18.WE1.d]: Me = 3.405, pe = 63.7 kPa, pe/pa = 0.63.
+        Exit-plane check [18.WE1.d]: Me = 3.4052, pe = 63.7 kPa, pe/pa = 0.63.
 
 18.WE2  The uncertainty budget. rocket.rss() and rocket.rel_unc_product() take
         *args and so cannot be registered through the keyword-only harness;
