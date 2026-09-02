@@ -1097,7 +1097,7 @@ registered in `tools/examples/09.py`.
 
 ### 5.1 Full nozzle geometry for the Module 03 500 kN engine
 
-**Given** [Module 03 §5 WE1]: $F_{SL} = 500$ kN, $p_c = 10.0$ MPa (100 bar),
+**Given** (Module 03 §5, WE1): $F_{SL} = 500$ kN, $p_c = 10.0$ MPa (100 bar),
 LOX/RP-1 at $MR = 2.35$, $\gamma = 1.20$, $c^* = 1\,689$ m/s delivered,
 $\dot m = 184.8$ kg/s, $\varepsilon = 16$, contraction ratio
 $\varepsilon_c = 2.5$.
@@ -1646,15 +1646,24 @@ through FAA licensing documents and third-party telemetry analysis; there is no
 independent verification of chamber pressure, $I_{sp}$, dry mass or T/W at all,
 and several figures trace to social-media posts rather than any document.
 
-**What the nozzle numbers imply, if true.** $\varepsilon = 34.3$ at
-$p_c = 300$ bar gives $p_e \approx 300\times10^5/\,$(the isentropic ratio at
-$M_e$ for methalox $\gamma\approx1.16$) — a sea-level exit pressure well above
-the separation threshold, so a 34:1 sea-level nozzle at 300 bar is
-aerodynamically unremarkable. **The high chamber pressure is what buys the high
-area ratio**, which is the general rule: $p_e/p_a = (p_e/p_c)(p_c/p_a)$, so
-tripling $p_c$ lets you roughly triple $\varepsilon$ at the same separation
-margin. That is the single most useful thing to take from the Raptor
-architecture and it does not depend on believing any specific number.
+**What the nozzle numbers imply, if true.** At $\gamma \approx 1.16$ (methalox)
+and $\varepsilon = 34.3$, the exit Mach number is 3.926 and $p_e/p_c =
+2.956\times10^{-3}$. At the claimed $p_c = 300$ bar that gives
+$$p_e = 88.7\ \mathrm{kPa},\qquad \frac{p_e}{p_a} = 0.875$$
+against a Schmucker separation pressure of 30.9 kPa — **a separation margin of
+nearly a factor of three**, more comfortable than the F-1's at
+$\varepsilon = 16$. A 34:1 sea-level nozzle is aerodynamically unremarkable
+*provided* the chamber pressure is what is claimed.
+
+**The high chamber pressure is what buys the high area ratio**, and that is the
+general rule worth carrying away:
+$$\frac{p_e}{p_a} = \frac{p_e}{p_c}\cdot\frac{p_c}{p_a}$$
+The first factor is fixed by $\varepsilon$ and $\gamma$; the second is the
+engine's chamber pressure over ambient. Tripling $p_c$ therefore triples the
+separation margin at fixed $\varepsilon$, which is what lets a 300 bar engine
+carry roughly twice the area ratio of a 100 bar engine at the same margin. That
+conclusion does not depend on believing any specific Raptor number — it depends
+only on the claim being *self-consistent*, which it is.
 
 **What to say in an interview.** [J] "Raptor's sea-level area ratio of about 34
 is unusually high for a booster engine, and the reason is the claimed 300 bar

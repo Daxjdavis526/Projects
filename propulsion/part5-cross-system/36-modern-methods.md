@@ -1543,3 +1543,203 @@ practice [M]:
    red-lines set from a propagated model plus measurement uncertainty, rather
    than from a fleet-percentile rule of thumb, catch more real anomalies and
    scrap fewer good engines.
+
+### 3.17 The V&V ladder: a new methalox injector, rung by rung
+
+The abstractions above only mean something in sequence. Here is the sequence
+for a concrete, generic case: a new LOX/methane injector for a 100 kN-class,
+100 bar, regeneratively cooled thrust chamber. At each rung, the question is
+**what does this stage retire, and what does it not?**
+
+**Rung 0 — Requirements and architecture.** Thrust, mixture ratio, throttle
+range, restart requirement, life, envelope, and the stability requirement
+(usually stated as: recovers from a defined bomb pulse within a defined time
+to a defined amplitude). Nothing is computed. Everything downstream is
+traced to this. Retires: nothing. Establishes: what "done" means.
+
+**Rung 1 — Chemical equilibrium (CEA / Cantera).** Sweep mixture ratio;
+obtain $T_0$, $\gamma$, $\mathcal{M}$, $c^*_{\text{ideal}}$ and the
+equilibrium-versus-frozen $I_{sp}$ spread. Pick the operating $r$ from the
+$I_{sp}$–$\rho I_{sp}$–cooling trade, not from the $I_{sp}$ peak.
+*Retires:* the propellant thermochemistry, the theoretical performance
+baseline, and the thermal boundary condition for everything else.
+*Does not retire:* anything about the injector. CEA cannot tell you whether
+the element will mix.
+*Cost:* minutes.
+
+**Rung 2 — Reduced-order model.** Build the engine balance (Eq. 3.3): pump
+discharge pressures, injector $\Delta p$ (start at 15–20 % of $p_c$ — the
+classical stability rule of thumb from Module 15), chamber $L^*$, throat
+area, channel geometry and the 1-D regen model (Eq. 3.5) with Bartz for
+$h_g$. Iterate the whole engine until it closes. Add the transient model and
+design the start sequence.
+*Retires:* the engine architecture, the sizing of every component, whether
+the cycle closes at all, the coolant $\Delta p$ and bulk temperature rise,
+the first-cut wall temperature, and the start sequence. This is where the
+engine is actually designed.
+*Does not retire:* mixture-ratio uniformity, local wall flux, atomisation,
+stability, and anything three-dimensional.
+*Cost:* days to weeks of engineering; seconds per run.
+
+**Rung 3 — Element-level cold flow and single-element CFD.** Now the injector
+element. Cold-flow the candidate element with water or gaseous simulants:
+measure $C_d$ versus $\Delta p$, spray angle, and — the important one —
+**patternation**, the spatial distribution of each propellant downstream of
+the face. In parallel, run a single-element 3-D reacting RANS (real-fluid
+equation of state for the LOX side; a reduced methane mechanism or a
+flamelet table) to get the flame anchoring location, the near-face
+recirculation, and the wall flux distribution the 1-D model cannot produce.
+*Retires:* element discharge coefficients (these are then *measured* numbers
+in the ROM, not assumptions), gross geometric errors, obvious flame-anchoring
+problems, and the near-face mixture-ratio field to within the CFD's stated
+band.
+*Does not retire:* element-to-element interaction, manifold flow
+distribution, chamber-scale acoustics, or the real wall flux at the throat.
+*Cost:* weeks; a cold-flow rig plus 10²–10³ core-hours per CFD case.
+
+**Rung 4 — Subscale hot fire.** A small-scale, often 1–7-element or
+single-element chamber at as near the real chamber pressure and mixture
+ratio as the facility allows, heavily instrumented: high-bandwidth pressure
+transducers (multiple, circumferentially spaced, for mode identification),
+wall thermocouples, calorimetric chamber sections that measure heat flux
+directly by coolant $\Delta T$, and, where possible, optical access.
+*Retires:* the element's $\eta_{c^*}$ at the real thermodynamic state; the
+gas-side heat flux at subscale (compare to Bartz — this is the calibration
+that makes the 1-D model trustworthy); ignition behaviour of *this* element;
+and the CFD's validation, if a blind prediction was recorded first.
+*Does not retire:* **scaling**. The classical warning holds: performance and
+stability do not scale by geometric similarity, because $\eta_{c^*}$ depends
+on residence time and mixing length while stability depends on the ratio of
+chamber acoustic frequencies to the injector's characteristic times, and
+those scale differently [Hulka08, SP-194]. Subscale stability is *weak*
+evidence about full-scale stability, and the literature is full of subscale
+articles that were stable and full-scale articles that were not.
+*Cost:* months; a test cell.
+
+**Rung 5 — Full-scale hot fire.** The real injector, the real chamber, the
+real manifolds. Instrumented for performance ($c^*$, $C_F$, $I_{sp}$ by the
+[CPIA-245]/[CPIA-246] reduction methods, with a stated uncertainty),
+thermal (wall and coolant temperatures), structural (jacket strain), and
+dynamic (multiple high-bandwidth chamber pressure transducers).
+Stability-rated by **bomb test**: detonate a defined charge and require the
+induced oscillation to damp to below a defined amplitude within a defined
+time. The F-1 standard — damp within 45 ms — is the historical benchmark
+and its origin is worth remembering: it came out of roughly 2,000 tests
+across 210 injector designs, not out of an analysis.
+*Retires:* performance at the operating point, the wall thermal environment
+at full scale, the manifold distribution, dynamic stability at the tested
+conditions, and — through the model recalibration that follows — the
+credibility of the ROM for the next engine.
+*Does not retire:* life (that needs the full cycle count), off-nominal
+conditions not tested, or long-duration effects. And it does not retire
+stability at *untested* operating points; stability boundaries are notoriously
+local in $(p_c, r, \Delta p/p_c)$ space.
+*Cost:* the programme.
+
+**What the ladder is really for.** Each rung's job is to make the next rung's
+test *informative*. If you arrive at a full-scale hot fire without having
+retired the element $C_d$, the patternation and the subscale flux, then a
+bad test result has a dozen possible causes and you learn nothing except
+that it failed. The ladder is not bureaucracy; it is the discipline that
+makes each expensive test answer exactly one question. [J]
+
+```mermaid
+flowchart TD
+    R0["Rung 0 — requirements, stability spec"] --> R1
+    R1["Rung 1 — CEA / Cantera<br/>T0, gamma, M, c*, freeze point"] --> R2
+    R2["Rung 2 — ROM engine balance + 1-D regen + start transient<br/>ENGINE IS DESIGNED HERE"] --> R3
+    R3["Rung 3 — element cold flow + single-element reacting CFD<br/>Cd, patternation, flame anchoring, near-face field"] --> R4
+    R4["Rung 4 — subscale hot fire<br/>eta_c*, calorimetric heat flux, ignition"] --> R5
+    R5["Rung 5 — full-scale hot fire + bomb test<br/>performance, thermal, dynamic stability"] --> R6
+    R6["Recalibrate ROM and CFD; write the validation domain down"]
+    R4 -. "flux data calibrates Bartz coefficient" .-> R2
+    R5 -. "maps, efficiencies, eta_c* update component maps" .-> R2
+    R3 -. "measured Cd replaces assumed Cd" .-> R2
+```
+
+### 3.18 Where traditional analysis remains necessary
+
+The argument of this section is not nostalgia. It is that four classes of
+propulsion problem have a structure that defeats simulation on grounds that
+more computing power does not remove, and in each of them a classical
+analytic or empirical method is still the operational basis of design.
+
+**1. Combustion instability.** The physics is a coupling between unsteady
+heat release and chamber acoustics, and the quantity that decides
+stability — the *phase* between pressure and heat release perturbations —
+is a small difference between large, poorly known quantities. LES of a
+multi-element chamber, at the cost described in §3.5.5, produces an answer
+whose sensitivity to the subgrid model and mechanism is comparable to the
+effect being predicted [Yu12 and the surrounding literature]. Meanwhile
+Crocco's $n$–$\tau$ framework [CC56] with $n$ and $\tau$ obtained from
+subscale testing, plus Culick's modal analysis of the driving and damping
+terms [Culick68], plus the empirical design rules (injector $\Delta p/p_c
+\ge 0.15$–0.20, baffle compartments sized against the tangential mode,
+acoustic cavities tuned to the mode of concern [SP-8113, SP-194]) is what
+actually gets engines certified — and the certification itself is empirical:
+**bomb the engine and watch it recover**. Every flying engine in the database
+was stability-rated this way. [M] A field where the empirical method is the
+certification basis after seventy years of theory is telling you something
+about the theory's predictive standing.
+
+**2. Ignition transients.** Ignition is a stiff, multi-physics,
+strongly-3-D, strongly-transient problem in which the ignition kernel is
+millimetres across, the relevant chemistry is at its most temperature
+sensitive, the propellants may be two-phase, and the geometry contains
+accumulated propellant in corners the mesh does not resolve. Every
+assumption a flamelet model makes is violated during ignition, and a
+finite-rate LES of an ignition transient in a full chamber is a research
+exercise. So ignition is designed with: energy-balance sizing of the igniter
+(is the deposited energy several times the minimum ignition energy of the
+worst-case local mixture?), the classical hard-start rule (limit the mass of
+unburnt propellant accumulated before ignition — the "$\Delta p$ spike
+versus accumulated mass" curve is empirical), an oxidiser-lead or fuel-lead
+sequencing choice made in a 1-D transient model, and then **test, at every
+condition in the box, dozens of times**, because ignition is statistical.
+Hypergolic ignition sidesteps the problem by construction, which is why
+TEA-TEB slugs and hypergolic cartridges survive on modern engines.
+
+**3. Cavitation and inducer performance.** Cavitation inception is set by
+nucleation on microscopic sites, by dissolved-gas content, by the thermal
+depression effect in cryogens, and by surface finish — none of which a CFD
+model contains without empirical input. What CFD gives you is the pressure
+field; whether that pressure field cavitates, and what the resulting
+two-phase structure does to head, depends on parameters you must supply.
+Worse, the failure modes of interest — **rotating cavitation** and
+**cavitation surge** — are unsteady, whole-machine phenomena requiring
+transient two-phase simulation of a full inducer at a cost nobody pays in
+design. So the design basis remains: **suction specific speed** correlations
+and NPSH-required curves from [Brennen-Pumps] and [SP-8109], a required
+NPSH margin (typically 2× NPSH-required as a design rule [J]), inducer
+design from established families, and **water-rig testing** to measure the
+head-drop curve directly. The 2 % head-drop point is a measured quantity, not
+a computed one.
+
+**4. Additively manufactured material properties.** This one is different in
+kind: it is not that simulation is too expensive, it is that **the input
+does not exist**. A thermostructural model needs $E(T)$, $\alpha(T)$, the
+cyclic stress-strain curve, the Coffin–Manson coefficients, the creep
+behaviour and the fracture-mechanics properties of the material *as built,
+in this orientation, on this machine, with this powder lot, with this
+post-processing*. AM material is anisotropic, has an as-built defect
+population that depends on the parameter set, and has properties sensitive to
+HIP and heat-treat schedules. There is no MMPDS-style A-basis allowable for
+most printed alloys in most orientations [MMPDS, GradlAM]. So the method is
+the oldest one in engineering: **build coupons in the same build, in the same
+orientation, from the same powder lot, and test them.** Witness coupons,
+process-control specimens, statistical allowables developed programme by
+programme, and generous knockdowns until the database exists. No amount of
+computational sophistication substitutes for a tensile bar.
+
+**The common structure.** In all four cases the obstacle is the same: the
+governing behaviour depends on a quantity that is either (a) a small
+difference between large terms, (b) set by physics below the resolution of
+any affordable model, or (c) an empirical material or process property that
+has to be measured. Simulation is superb at interpolating within a validated
+regime and useless at supplying a missing input. **The classical methods
+survive not because they are more accurate — they usually are not — but
+because they are traceable, cheap, conservative in a known direction, and
+anchored to test data.** That combination is what a certification argument is
+made of. [J]
+
+---

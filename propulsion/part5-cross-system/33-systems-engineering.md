@@ -854,3 +854,788 @@ trap is that the first article is usually built by the most experienced people
 in the shop, which is exactly the condition that will not obtain for unit 40.
 [J]
 
+### 3.12 Method: trade studies
+
+A trade study is a decision made in public. Its output is not a number but an
+argument that a reviewer can attack, and its value lies almost entirely in the
+attacking.
+
+**The procedure.**
+
+1. **State the decision and the constraints.** What is being chosen, from what
+   set, subject to what non-negotiables. Constraints are not criteria: an
+   option that violates a constraint is eliminated, not penalised. Confusing
+   the two is the most common structural error in a trade study, and it always
+   works in favour of the option somebody already liked.
+2. **Choose criteria that are independent and complete.** Independent, because
+   scoring "mass" and "propellant density" separately double-counts;
+   complete, because a criterion you omit is a criterion you have weighted
+   zero.
+3. **Choose a datum.** The Pugh method scores every option *relative to a
+   reference option* on each criterion — better (+), same (0), worse (−), or
+   on a −2…+2 scale — rather than in absolute units. This is deliberate: human
+   judgment is far more reliable at comparison than at absolute rating, and
+   the datum keeps everyone honest about what "good" means.
+4. **Weight the criteria** and compute a weighted score.
+5. **Sweep the weights and report the range over which the answer holds.**
+   This step is the study. The rest is bookkeeping.
+6. **Recommend, and state what would change the recommendation.**
+
+$$S_j = \sum_{i=1}^{n} w_i\,s_{ij}, \qquad \sum_i w_i = 100$$
+
+> **Eq. 3.7** — variables: $S_j$ total score of option $j$ [—]; $w_i$ weight of
+> criterion $i$ [—]; $s_{ij}$ score of option $j$ on criterion $i$, relative to
+> the datum [—]. Meaning: a linear scalarisation of a multi-objective problem.
+> Assumes: criteria are independent, preferences are linear in each score, and
+> trade-offs between criteria are constant (one point of mass is always worth
+> the same amount of schedule). Fails when: any of those assumptions is
+> false — which is usually — and especially when one criterion has a hard
+> threshold, in which case it is a constraint and does not belong in the sum.
+
+**The trap of false precision.** A weighted matrix produces numbers like 62.4
+and 58.7, and everyone in the room starts treating a 6 % difference as a
+result. It is not. The scores are ordinal judgments dressed as cardinal
+numbers, the weights were chosen in a meeting, and neither carries three
+significant figures. There are exactly two honest ways to report a trade
+matrix: (i) as a ranking with an explicit statement of how far the weights
+must move to change it, or (ii) as a decision that the matrix *did not*
+resolve, in which case say so and go find the discriminating analysis or test.
+Worked Example 4 shows a matrix in which the winner changes three times as one
+weight moves across its plausible range — which is the normal case, not a
+pathological one. [J]
+
+The productive use of a trade matrix is diagnostic rather than decisional:
+it tells you *which criterion the decision is really about*. If the ranking
+flips when the schedule weight moves from 30 to 35, then the decision is a
+schedule decision, and you should stop scoring and go get a better schedule
+estimate.
+
+### 3.13 Method: margins
+
+**Design margin versus demonstrated margin.** These are different quantities
+and programmes have been lost by confusing them.
+
+- **Design margin** is the ratio between a design allowable and a predicted
+  load, computed by analysis. It exists in a spreadsheet.
+- **Demonstrated margin** is the ratio between a condition at which hardware
+  has actually been shown to survive or perform and the condition it must meet
+  in flight. It exists in a test report.
+
+Design margin is worth what your analysis is worth. Demonstrated margin is
+worth what your test was representative of. A programme that has 40 % design
+margin on turbine blade life and has never run a blade past nominal duration
+has *no* demonstrated margin, and a review board is entitled to say so.
+
+**Structural factors of safety.** The convention is to define a **limit load**
+(the maximum expected in service), then require:
+
+| quantity | typical factor on limit | note |
+|---|---|---|
+| yield | 1.1–1.25 | no detrimental permanent deformation |
+| ultimate | 1.4 | for structures verified by analysis plus test |
+| pressure vessel proof | 1.1–1.5 × MDP | applied to every flight article |
+| pressure vessel burst | 1.5 × MDP (metallic) | demonstrated on qualification articles |
+| lines and fittings, small diameter | 4.0 × MDP burst | historically 4.0 for lines under about 38 mm |
+| service life (cycles or time) | 4× expected | fatigue and fracture life demonstration |
+
+> These are the *shape* of the standard factors, not a substitute for the
+> governing document. Actual numbers depend on the programme, on whether the
+> article is crewed, on whether verification is by analysis alone or by test,
+> and on the revision of the standard invoked. Read the contract's tailoring
+> of [STD-5001], [AIAA-S-080] and [AIAA-S-081] before using any number in this
+> table. [M]
+
+The 4× life factor is the one propulsion engineers meet most often: to certify
+an engine for a 500 s mission duty cycle you demonstrate 2,000 s on
+qualification engines, and to certify $n$ starts you demonstrate $4n$. It is
+not arbitrary — it is a crude but effective allowance for the scatter in
+fatigue life, which for a well-controlled metallic component is comfortably a
+factor of 4 between the mean and the lower tail, and for a weld or an
+additively manufactured part can be more. [E]
+
+**Thermal margins.** Component qualification temperatures are set beyond the
+predicted extremes by a margin, and acceptance temperatures beyond the
+predicted extremes by a smaller one; margins in the range 10–15 K for
+qualification and 5–10 K for acceptance are common practice, with a separate
+*uncertainty* margin added to the analytical prediction itself while the model
+is unvalidated (often ±20 K until a thermal balance test is run, reduced to
+±5–10 K afterwards). Inside the engine, the equivalent statement is a hot-gas
+wall temperature limit set 50–150 K below the material's capability, because
+the Bartz-class heat-transfer correlations behind the prediction are
+themselves only good to ±20–30 % (Module 10). [E] [J]
+
+**Specific impulse margin.** Programme practice is to size the vehicle on a
+specific impulse **below** the current best prediction, holding 1–2 % in
+reserve. The reason is asymmetry: Isp shortfalls are common and expensive,
+Isp surpluses are free. The reserve is retired in stages as evidence arrives —
+full margin at concept, reduced after component and injector testing, reduced
+again after the first full engine hot fire, and set to the demonstrated value
+minus test uncertainty once a qualification population exists. Note the
+interaction with test uncertainty: a hot-fire measurement of vacuum Isp on a
+sea-level stand, corrected to vacuum, carries perhaps ±0.5–1 % of its own, so
+"demonstrated Isp" is never a single number [CPIA-246]. [M]
+
+**Mass growth allowance.** Hardware gets heavier between concept and flight,
+always, and by amounts that are statistically predictable from design
+maturity. Programmes therefore apply an allowance to each current best
+estimate and hold an additional system-level margin on top. A representative
+maturity table, in the style of the AIAA mass-properties guidance (S-120 for
+mass properties control and G-020 for the estimating practice):
+
+| maturity of the estimate | MGA on CBE |
+|---|---|
+| conceptual / scaled from analogy, no drawings | 25–30 % |
+| preliminary layout, sized by analysis | 15–20 % |
+| detailed design, drawings released | 5–10 % |
+| existing qualified hardware, new application | 3–5 % |
+| existing hardware, identical application | 1–2 % |
+| measured on the actual article | 0 (measurement uncertainty only) |
+
+> Nomenclature varies between organisations (basic mass, predicted mass,
+> allocated mass, "not-to-exceed"), and the specific percentages are
+> organisational practice rather than physics. What does not vary is the
+> discipline: MGA is applied *per item by that item's own maturity*, never as
+> a single flat percentage on the total, because a stage that is 70 % heritage
+> hardware and 30 % new does not have the same growth risk as one that is the
+> reverse. [M]
+
+On top of item-level MGA sits **system margin**, held by the programme and not
+by the subsystems, typically 10–15 % at the preliminary design review, 5–8 %
+at the critical design review, and approaching zero at flight. The single most
+useful thing a propulsion engineer can do at a mass review is to state, on one
+line: *this is the CBE, this is the MGA and its basis, this is the allocation,
+and this is how much of the allocation I have left.* Anyone who reports a
+single number is reporting one they have not thought about. [J]
+
+### 3.14 Method: uncertainty analysis
+
+Take the rocket equation as the performance model and propagate. [F]
+
+$$\Delta v = I_{sp}\,g_0 \ln\!\frac{m_0}{m_f}$$
+
+Differentiate with respect to specific impulse, holding masses fixed:
+
+$$\frac{\partial \Delta v}{\partial I_{sp}} = g_0\ln\frac{m_0}{m_f} = \frac{\Delta v}{I_{sp}}
+\quad\Longrightarrow\quad \frac{\delta(\Delta v)}{\Delta v} = \frac{\delta I_{sp}}{I_{sp}}$$
+
+> **Eq. 3.8** — variables as above. Meaning: **Δv is exactly as sensitive to
+> specific impulse in relative terms as it is possible to be** — a 1 % Isp
+> shortfall is a 1 % Δv shortfall, always, at any mass ratio. Assumes: the
+> propellant load is fixed (a real vehicle whose tanks are already full).
+> Fails when: the comparison is made at fixed Δv instead — then a lower Isp
+> demands exponentially more propellant, and the sensitivity is much worse
+> than 1:1.
+
+Now differentiate with respect to a dry-mass increment $\delta m_d$ that
+appears in **both** $m_0$ and $m_f$ (the propellant load is unchanged; the
+stage simply got heavier):
+
+$$\frac{\partial \Delta v}{\partial m_d} = c\left(\frac{1}{m_0}-\frac{1}{m_f}\right)
+= -\,c\,\frac{m_p}{m_0\,m_f}$$
+
+> **Eq. 3.9** — variables: $c = I_{sp}g_0$ [m/s]; $m_p = m_0-m_f$ usable
+> propellant [kg]. Meaning: added inert mass costs Δv in proportion to the
+> propellant mass fraction; on a stage with a large mass ratio it is brutal,
+> on a stage with a small one it is mild. Assumes: propellant load fixed.
+> Fails when: the added mass forces a propellant offload (volume-limited
+> stage), which makes it worse, or when the stage is resized around it, which
+> is a different calculation entirely.
+
+And with respect to residual propellant $\delta m_{res}$, which raises $m_f$
+alone because the propellant was loaded and then not burned:
+
+$$\frac{\partial \Delta v}{\partial m_{res}} = -\frac{c}{m_f}$$
+
+> **Eq. 3.10** — Meaning: a kilogram left in the tank costs strictly more than
+> a kilogram of dry mass, because it was carried but delivered no impulse.
+> Assumes: $m_0$ fixed (the propellant was loaded). Fails when: the residual
+> is known in advance and simply not loaded, in which case it behaves like
+> Eq. 3.9.
+
+For independent contributors, combine by root-sum-square:
+
+$$\sigma_{\Delta v} = \sqrt{\sum_k \left(\frac{\partial \Delta v}{\partial x_k}\right)^2 \sigma_{x_k}^2}$$
+
+> **Eq. 3.11** — variables: $\sigma_{x_k}$ standard deviation of input $k$;
+> $\sigma_{\Delta v}$ resulting standard deviation of Δv [m/s]. Meaning: the
+> first-order propagation of independent uncertainties. Assumes:
+> independence, small perturbations so the model is locally linear, and
+> inputs that are meaningfully described by a standard deviation. Fails when:
+> inputs are correlated (Isp and mixture ratio are; dry mass and residuals
+> often are, because a heavier stage usually has more line volume), when the
+> distribution is skewed or bounded (mass growth is one-sided — hardware
+> rarely comes in light), or when a term is large enough that curvature
+> matters.
+
+**When to Monte Carlo instead.** Run a Monte Carlo when any of the RSS
+assumptions fails: correlated inputs, one-sided or bounded distributions,
+discrete outcomes (an engine either restarts or does not), or a model with
+thresholds. Do *not* run one to add rigour to a linear model — for the
+rocket equation over a few per cent, the Monte Carlo standard deviation and
+the RSS estimate agree to better than 1 %, as Worked Example 2 demonstrates,
+and the Monte Carlo's only real contribution is the shape of the tails. The
+common failure mode of Monte Carlo analysis in propulsion is not the method;
+it is feeding it input distributions that were invented in a meeting and then
+reporting the 99.87th percentile of them to three significant figures. [J]
+
+### 3.15 Method: sensitivity analysis and influence coefficients
+
+An influence coefficient is a partial derivative expressed in units an
+engineer can argue about. They are the currency of design meetings, and every
+propulsion engineer should carry a handful for their own system:
+
+| coefficient | typical magnitude | what it is for |
+|---|---|---|
+| $\partial I_{sp}/\partial \mathrm{MR}$ | 5–30 s per unit MR near the optimum, and zero *at* it | sizing PU authority and mixture-ratio tolerance |
+| $\partial I_{sp}/\partial p_c$ | ~0.5–2 s per bar at low $p_c$, falling towards zero above ~100 bar | deciding whether more chamber pressure is worth the pump |
+| $\partial I_{sp}/\partial \varepsilon$ | large at low $\varepsilon$, ~0.05–0.2 s per unit area ratio near $\varepsilon=100$ | nozzle length and mass trade |
+| $\partial F/\partial p_c$ | $F/p_c$ (linear at fixed geometry) | throttling authority, and the throttle-to-Δp relationship |
+| $\partial \Delta v/\partial I_{sp}$ | $\Delta v/I_{sp}$ | Eq. 3.8 |
+| $\partial \Delta v/\partial m_d$ | Eq. 3.9 | mass reserve negotiations |
+| $\partial(\text{payload})/\partial m_d$ | typically −1 kg per kg on an upper stage | the number the customer understands |
+
+Two rules of use. First, **a derivative at the optimum is zero, and that is
+information**: $\partial I_{sp}/\partial \mathrm{MR} = 0$ at the optimum
+mixture ratio is precisely why running off-optimum for propellant utilisation
+is cheap, and why a mixture-ratio tolerance of ±2 % costs almost no
+performance while a 2 % thrust tolerance costs real residuals. Second,
+**quote the range over which the linearisation holds**. An influence
+coefficient with no stated validity range will eventually be extrapolated by
+someone in a hurry.
+
+### 3.16 Verification and validation
+
+The definitions are not interchangeable and the distinction is the single
+most frequently botched item in a design review. [M]
+
+- **Verification** answers *did we build the thing right?* — does the article
+  meet its specified requirements. Its reference is the specification.
+- **Validation** answers *did we build the right thing?* — does the article,
+  meeting its specification, actually satisfy the need. Its reference is the
+  mission.
+
+An engine that meets every line of its specification and cannot start after a
+five-hour coast because nobody wrote a coast requirement is verified and not
+validated. That is not a hypothetical; it is the standard way in-space stages
+fail.
+
+**Verification methods.** Every requirement is assigned exactly one primary
+method, and the four are not interchangeable:
+
+| method | what it is | when it is appropriate | propulsion example |
+|---|---|---|---|
+| **Inspection** | examination against a drawing or document, without operating the article | physical characteristics: dimensions, mass, markings, material certifications | "engine dry mass shall not exceed 120 kg" — weigh it |
+| **Analysis** | mathematical modelling, similarity to qualified hardware, or extrapolation from test | conditions that cannot be created on the ground, or that would destroy the article | vacuum Isp of a high-area-ratio nozzle, from sea-level test plus nozzle analysis |
+| **Test** | operating the article under controlled conditions with instrumentation and pass/fail criteria | anything you can afford to do and that carries risk | hot-fire duration, start transient, redline function |
+| **Demonstration** | operating the article to show a functional capability, usually without detailed instrumentation | operability, procedures, human interfaces | "the engine shall be removable and replaceable in 8 hours" |
+
+The verification matrix is a table with one row per requirement and columns
+for method, level (component / engine / stage / vehicle), the procedure that
+implements it, and the report that closes it. It is the programme's actual
+plan for proving it is done, and it is the artefact the review board spends
+its time in. Two rules that survive contact with reality: **analysis that
+verifies a requirement must itself be validated against test data**, and
+**a requirement verified at a level above the one where the risk lives is
+usually not verified at all** — proving on a stage hot fire that the engine
+delivers thrust does not verify that the engine delivers thrust *after four
+restarts at the cold end of the inlet temperature range*.
+
+### 3.17 Qualification
+
+**Qualification versus protoflight.** Two philosophies.
+
+- **Qualification (dedicated).** Build a dedicated qualification article,
+  identical to flight, and test it at qualification levels for qualification
+  durations — levels above the maximum predicted environment and durations
+  several times the mission. The article accumulates damage and is not flown.
+  Flight articles then receive only acceptance testing at the MPE. This is
+  the conservative route: full margin demonstrated, on hardware you were
+  prepared to break.
+- **Protoflight.** Test a *flight* article at qualification amplitude but
+  acceptance duration, and then fly it. This saves the cost of a dedicated
+  article and the schedule of building it, at the price of flying hardware
+  that has seen levels above flight. It suits small programmes, single-unit
+  missions and mature designs; it is a poor fit for anything with a fatigue-
+  or wear-driven failure mode, which describes most rotating propulsion
+  machinery. [M] [SMC-S-016]
+
+**Test levels.** The structure is always the same even though the numbers are
+revision-dependent: acceptance testing is performed at the maximum predicted
+environment; qualification adds an amplitude margin (commonly 3 dB on random
+vibration and acoustics, 6 dB on shock) and a duration or cycle margin
+(commonly 2–3× the acceptance duration); protoflight uses qualification
+amplitude with acceptance duration. Thermal qualification adds 10–15 K beyond
+the predicted extremes and requires a number of thermal cycles well above the
+mission's. **Read the invoked revision of [SMC-S-016] and [STD-7001] rather
+than these numbers**, and read the programme's tailoring of them, which is
+where the arguments actually are.
+
+**The environmental sequence.** Order matters, because the purpose of the
+sequence is to find defects, and a defect found after the wrong test tells you
+nothing about which test caused it. The conventional order for a propulsion
+component:
+
+```
+inspection / mass properties / proof pressure
+        |
+functional and performance baseline
+        |
+vibration  (random, then sine if required)   <- workmanship defects surface here
+        |
+shock
+        |
+thermal cycling / thermal vacuum
+        |
+functional and performance repeat  <- compare against baseline
+        |
+life / duration (hot fire, cycles)
+        |
+burst or destructive examination (qualification article only)
+```
+
+Two principles govern it. First, **functional tests bracket every
+environment**, so that a change in performance can be attributed to the
+environment that preceded it. Second, **the destructive tests come last**, and
+the article that goes to burst has already accumulated the full environmental
+history, so the demonstrated burst margin is a margin on used hardware rather
+than on new. [M]
+
+**What is being protected against.** Vibration and acoustics find workmanship:
+cold solder joints, unlocked fasteners, chafed harnesses, cracked braze.
+Thermal vacuum finds design and materials problems: seals that leak cold,
+lubricants that migrate, mechanisms that bind on differential contraction,
+and — for propulsion specifically — valves whose actuation force rises past
+the actuator's capability at the cold extreme. Life testing finds wear-out:
+bearings, seals, catalyst beds, and thermal fatigue of cooled walls. Each is
+looking for a different failure population and none substitutes for another.
+
+### 3.18 Reviews: what a propulsion engineer brings
+
+A review is a gate at which the programme decides whether it has earned the
+right to spend the next tranche of money. The propulsion engineer's material
+at each is different in kind, not just in maturity.
+
+**System requirements review (SRR).** *Question: do we understand what is
+being asked?* Bring: the propulsion requirements set traced to mission
+requirements, with rationale; the mission Δv budget and its assumptions; the
+propellant and cycle trade study with its sensitivity sweep; the environments
+you will impose on everyone else (a first cut at thrust, vibration, base
+heating) and the ones you need from them (inlet conditions, thermal
+environment, power); a list of every TBD and TBR with an owner. What closes
+it: agreement that the requirements are complete, consistent, verifiable, and
+achievable.
+
+**Preliminary design review (PDR).** *Question: is the design approach sound
+and does it close?* Bring: the engine or system concept with a power balance
+that closes; a mass statement with CBE, MGA and allocation; performance
+predictions with margin policy stated; the failure modes and effects analysis
+at functional level; the interface control document at draft; the preliminary
+verification matrix; long-lead procurement identified; the risk register with
+mitigations. What closes it: a design that can be shown to meet requirements
+with margin, and a credible plan to verify it. The most common propulsion
+failure at PDR is a power balance or a thermal balance that closes only at
+nominal, with no statement of what happens at the corners of the tolerance
+box.
+
+**Critical design review (CDR).** *Question: is it ready to build?* Bring:
+released drawings and specifications; the completed structural, thermal and
+dynamic analyses with margins of safety; qualification test plans with levels
+and pass/fail criteria; the completed verification matrix with every
+requirement assigned; component qualification status; the interface control
+document signed by both sides; closed TBRs; and — the item most often
+missing — the analysis showing behaviour at the *worst-case combination* of
+tolerances, not the worst case of each in isolation. What closes it:
+authorisation to manufacture.
+
+**Test readiness review (TRR).** *Question: are we ready to run this specific
+test safely and get usable data?* Bring: the test objectives mapped to the
+requirements they verify; the procedure with the sequence and abort criteria;
+the instrumentation list with ranges, accuracies and sample rates, and the
+demonstration that they are adequate for the measurement uncertainty you
+promised; redline settings for the test article and the facility; the hazard
+analysis; the data reduction plan *written before the test*; and the
+disposition of every open discrepancy on the article. What closes it: nothing
+outstanding that could cost you the article or the data.
+
+**Flight readiness review (FRR).** *Question: is this specific article ready
+to fly this specific mission?* Bring: as-built configuration against
+as-designed, with every deviation and waiver listed and dispositioned;
+acceptance test results with trends against the population; the closure of
+every verification item; open anomalies from previous flights or from this
+article's own history with rationale for flying; the flight-specific
+predictions (duty cycle, propellant load, expected performance with
+dispersions); and the constraints and commit criteria you are imposing on the
+count. What closes it: a signature, and the willingness to give it.
+
+The pattern is worth stating plainly, because it is the whole of systems
+engineering compressed: **SRR is about requirements, PDR about feasibility,
+CDR about completeness, TRR about safety and data, FRR about this particular
+article.** An engineer who brings CDR material to SRR wastes everyone's time;
+an engineer who brings SRR material to CDR has a programme in trouble. [J]
+
+---
+
+## 4. Typical engineering ranges
+
+| quantity | typical range | extremes and who sits there |
+|---|---|---|
+| gimbal angle, launch vehicle main engine | ±5° to ±10.5° | RS-25 gimbals ±10.5° in pitch and yaw; upper-stage engines often ±3–4° |
+| gimbal rate | 5–30 °/s | rate limits are set by the first bending mode and actuator power |
+| thrust tolerance, engine specification | ±2 % to ±3 % of nominal | tight tolerances cost acceptance-test rejections and buy residual margin |
+| Isp margin held at concept | 1–2 % | retired progressively as test evidence arrives |
+| MGA, preliminary design | 15–20 % of CBE | conceptual estimates carry 25–30 % |
+| system-level mass margin at PDR | 10–15 % | approaching 0 % at flight |
+| propellant residuals | 0.5–2 % of load | pressure-fed storable systems at the low end; long, complex cryogenic feed systems at the high end |
+| flight performance reserve | ~3σ of Δv dispersion | typically 0.5–2 % of stage Δv |
+| loading accuracy, cryogenic stage | 0.2–0.5 % of load | drives outage and PU system need |
+| $\mathrm{NPSH}_r$, main pump (as head) | 5–30 m of propellant | hydrogen at the high end in metres, low end in pascals |
+| NPSH margin factor $k_{NPSH}$ | 1.3–2.0 on $\mathrm{NPSH}_r$ | or an absolute margin where $\mathrm{NPSH}_r$ is small |
+| upper-stage tank ullage pressure | 1.5–4 bar | LH₂ tanks at the low end; dense-propellant tanks higher for the same head |
+| structural ultimate factor of safety | 1.4 on limit | crewed and pressurised systems can carry more |
+| pressure-vessel burst factor | 1.5 × MDP metallic | small lines and fittings historically 4.0 |
+| service life demonstration factor | 4× mission duration and cycles | the near-universal engine qualification rule |
+| qualification vibration margin | +3 dB over MPE, 2–3× duration | shock commonly +6 dB |
+| qualification thermal margin | 10–15 K beyond predicted extremes | acceptance 5–10 K |
+| slosh damping, unbaffled | 0.5–1 % of critical | baffles raise this several-fold |
+| pogo-relevant structural frequency | 5–25 Hz, rising through the burn | large launch vehicles; the S-II and Titan II are the classic cases |
+| RCS minimum repeatable impulse bit | 10⁻³ to 10⁻¹ N·s | cold gas at the low end; 400–500 N bipropellant thrusters at the high end |
+| thrust misalignment, effective | 0.5–3 mm equivalent offset | drives RCS sizing on fixed-thruster spacecraft |
+
+---
+
+## 5. Worked examples
+
+### WE1 — Full flow-down: 1,500 kg to geostationary transfer orbit
+
+**The mission requirement.** *"The system shall deliver a 1,500 kg spacecraft
+to a geostationary transfer orbit of 185 km × 35,786 km at 28.5° inclination."*
+The launch vehicle delivers the stage and payload to a 185 km circular
+parking orbit at 28.5°; the upper stage performs the transfer injection.
+
+**Level 0 → Level 1: the Δv requirement.**
+Circular velocity at $r_p = 6{,}563$ km (185 km altitude, $\mu = 398{,}600.4$
+km³/s²):
+
+$$v_c = \sqrt{\mu/r_p} = \sqrt{398{,}600.4/6{,}563} = 7.7932\ \mathrm{km/s}$$
+
+Perigee velocity of the transfer ellipse with $r_a = 42{,}164$ km, so
+$a = (6{,}563+42{,}164)/2 = 24{,}363.5$ km:
+
+$$v_p = \sqrt{\mu\left(\frac{2}{r_p}-\frac{1}{a}\right)}
+= \sqrt{398{,}600.4\,(3.04739\times10^{-4}-4.10450\times10^{-5})} = 10.2522\ \mathrm{km/s}$$
+
+$$\Delta v_{ideal} = 10.2522 - 7.7932 = 2.459\ \mathrm{km/s} = 2{,}459\ \mathrm{m/s}$$
+
+Now add the two allowances that convert an impulsive orbital-mechanics number
+into a stage requirement: **2 % for finite-burn and steering losses** (the burn
+is several minutes long, so the thrust is not applied impulsively at perigee)
+and **2 % for trajectory dispersions and unmodelled effects**. Both are [J]
+allocations, and both are recorded with that rationale.
+
+$$\Delta v_{req} = 2{,}459 \times 1.04 = 2{,}557\ \mathrm{m/s}$$
+
+> **L1-01.** *The upper stage shall provide a velocity increment of not less
+> than 2,557 m/s to a 1,500 kg payload.* Parent: mission. Rationale: 2,459
+> m/s impulsive GTO injection from a 185 km parking orbit, plus 2 % finite
+> burn and 2 % dispersion allowance. Verification: analysis, closed by stage
+> performance model validated against engine acceptance data.
+
+**Level 1: stage sizing.** Inputs and their status:
+
+| item | value | basis |
+|---|---|---|
+| payload | 1,500 kg | requirement |
+| stage dry mass, CBE | 600 kg | preliminary layout |
+| mass growth allowance | 15 % | preliminary-design maturity |
+| stage dry mass, allocated | 690 kg | CBE × 1.15 |
+| residuals + reserves | 1.2 % of loaded propellant | design estimate |
+| engine $I_{sp}$, predicted (CBE) | 365 s vacuum | cycle analysis, LOX/CH₄ gas generator |
+| engine $I_{sp}$, design value | 360 s vacuum | 1.4 % Isp margin held |
+
+Sizing is implicit because residuals scale with the propellant load. Iterate
+$m_f = m_{pl} + m_d + 0.012\,m_p$ with
+$m_p = m_f\left(e^{\Delta v/(I_{sp}g_0)}-1\right)$ until it converges:
+
+$$m_p = 2{,}358.6\ \mathrm{kg}, \quad m_{res} = 28.3\ \mathrm{kg},
+\quad m_{load} = 2{,}386.9\ \mathrm{kg}$$
+$$m_f = 1{,}500 + 690 + 28.3 = 2{,}218.3\ \mathrm{kg}, \qquad
+m_0 = 4{,}576.9\ \mathrm{kg}$$
+
+Check: $\Delta v = 360 \times 9.80665 \times \ln(4{,}576.9/2{,}218.3) = 2{,}557$
+m/s. Stage inert fraction $690/(690+2{,}386.9) = 0.224$ — high, and honestly
+so: a 2.4 t cryogenic stage is small, and tank and insulation mass does not
+scale down with propellant.
+
+**Level 1 → Level 2: thrust.** Two constraints. Initial acceleration should be
+around 0.5 $g_0$ for an upper stage (much lower and gravity/finite-burn losses
+exceed the 2 % allowance; much higher and the engine and thrust structure grow
+for no benefit). Take $F = 22.5$ kN:
+
+$$a_0 = \frac{22{,}500}{4{,}576.9\times 9.80665} = 0.501\,g_0, \qquad
+a_f = \frac{22{,}500}{2{,}218.3\times 9.80665} = 1.034\,g_0$$
+
+$$\dot m = \frac{F}{I_{sp,CBE}\,g_0} = \frac{22{,}500}{365\times9.80665}
+= 6.286\ \mathrm{kg/s}, \qquad t_b = \frac{2{,}358.6}{6.286} = 375\ \mathrm{s}$$
+
+At MR = 3.4: $\dot m_{ox} = 4.857$ kg/s, $\dot m_f = 1.429$ kg/s. Propellant
+volumes at load: LOX $1{,}845/1{,}141 = 1.617$ m³, LCH₄ $542/423 = 1.282$ m³.
+
+**Level 2: the engine specification.**
+
+| ID | requirement | parent | rationale | verification |
+|---|---|---|---|---|
+| E-01 | Vacuum thrust shall be 22.5 kN ± 3 % at nominal inlet conditions | L1-02 | 0.50 $g_0$ initial acceleration; ±3 % is the tightest band achievable at acceptance without excessive rejection | test (acceptance hot fire), analysis to vacuum |
+| E-02 | Vacuum specific impulse shall be not less than 360 s | L1-01 | 365 s predicted, 1.4 % margin held per programme Isp policy | test + analysis |
+| E-03 | Mixture ratio shall be 3.40 ± 2 % | L1-03 | tank volume split and outage control; Isp is second-order in MR at the optimum | test |
+| E-04 | Engine dry mass, as installed, shall not exceed 120 kg | L1-04 | stage dry-mass allocation; "as installed" defined by ICD drawing 4-1 | inspection (weigh) |
+| E-05 | Engine shall fit a 1.30 m diameter × 1.85 m envelope including ±4° gimbal sweep | L1-05 | interstage inner diameter, minus clearance | inspection |
+| E-06 | Engine shall support 4 starts and 900 s cumulative firing | L1-06 | mission needs 2 starts and 375 s; margin for a contingency second burn | test, 4× life factor → 16 starts, 3,600 s on qualification engines |
+| E-07 | Engine shall gimbal ±4° at not less than 10 °/s | L1-07 | control authority and rate analysis | test |
+| E-08 | Engine shall operate with $\mathrm{NPSH}_a \ge 15$ m LOX, 12 m LCH₄ at the inlet flanges | L1-08 | pump suction performance; this is the tank interface requirement | test (pump inducer suction test) |
+
+Note E-06: the 4× service life factor turns a 2-start, 375 s mission into a
+16-start, 3,600 s qualification campaign. That is not padding; it is most of
+the engine test programme's cost, and it is decided by one line in a standard.
+
+**Level 2 → Level 3: component requirements.** With $p_c = 60$ bar and
+$\varepsilon = 100$, from Module 03:
+
+$$C_F = 2.010\ (\gamma = 1.16,\ \varepsilon = 100,\ \text{vacuum})$$
+$$A_t = \frac{F}{p_c C_F} = \frac{22{,}500}{60\times10^5 \times 2.010}
+= 1.866\times10^{-3}\ \mathrm{m^2} \Rightarrow D_t = 48.7\ \mathrm{mm},\ D_e = 487\ \mathrm{mm}$$
+$$c^*_{req} = \frac{I_{sp}g_0}{C_F} = \frac{365\times9.80665}{2.010} = 1{,}781\ \mathrm{m/s}$$
+
+Pump discharge pressures follow from a pressure budget along each feed path:
+
+| station | fuel path (bar) | oxidiser path (bar) |
+|---|---|---|
+| chamber (injector face) | 60.0 | 60.0 |
+| injector pressure drop | +12.0 (0.20 $p_c$) | +15.0 (0.25 $p_c$) |
+| regenerative jacket | +20.0 | — |
+| valves, lines, orifices | +5.0 | +4.0 |
+| **required pump discharge** | **97.0** | **79.0** |
+
+> **L3 requirements.** *The fuel pump shall deliver not less than 97 bar at
+> 1.43 kg/s at the design point.* *The oxidiser pump shall deliver not less
+> than 79 bar at 4.86 kg/s.* *The main injector fuel-side pressure drop shall
+> be 12.0 ± 1.0 bar at the design flow.* *The hot-gas wall temperature shall
+> not exceed 800 K at any point at 105 % of rated power* (the material limit
+> is 900 K; 100 K of thermal margin is held against the ±20–30 % accuracy of
+> the heat-transfer prediction).
+
+**Sanity check.** The result is a 22.5 kN, 365 s, 120 kg vacuum engine at
+$p_c = 60$ bar and $\varepsilon = 100$. For comparison, the storable Aestus
+delivers 29.6 kN at 324 s and about 111 kg, and the RL10A-3-3A delivers 73.4
+kN at 444 s and roughly 136 kg [SB]. Our fictional engine sits sensibly
+between them in thrust-to-weight (19:1) and in specific impulse for its
+propellant combination. Nothing in the flow-down is physically surprising,
+which is the point of doing it in this order.
+
+### WE2 — Δv uncertainty from Isp, dry mass and residuals
+
+Take the stage of WE1 at its design point: $I_{sp} = 360$ s, $m_0 = 4{,}576.9$
+kg, $m_f = 2{,}218.3$ kg, $\Delta v = 2{,}557.0$ m/s, $c = I_{sp}g_0 = 3{,}530.4$
+m/s, loaded propellant 2,386.9 kg, allocated dry mass 690 kg. Three
+independent uncertainties, each stated as a 1σ:
+
+- specific impulse: ±1 % → $\sigma_{I} = 3.60$ s
+- dry mass: ±3 % → $\sigma_{m_d} = 20.7$ kg
+- residuals: ±0.5 % of loaded propellant → $\sigma_{res} = 11.93$ kg
+
+**Sensitivities** (Eqs. 3.8–3.10):
+
+$$\frac{\partial \Delta v}{\partial I_{sp}} = \frac{\Delta v}{I_{sp}}
+= \frac{2557.0}{360} = 7.103\ \mathrm{m/s\ per\ s}$$
+
+$$\frac{\partial \Delta v}{\partial m_d} = c\left(\frac{1}{m_0}-\frac{1}{m_f}\right)
+= 3530.4\,(2.18488\times10^{-4} - 4.50795\times10^{-4}) = -0.8201\ \mathrm{m/s\ per\ kg}$$
+
+$$\frac{\partial \Delta v}{\partial m_{res}} = -\frac{c}{m_f}
+= -\frac{3530.4}{2218.3} = -1.5915\ \mathrm{m/s\ per\ kg}$$
+
+**Contributions:**
+
+| source | 1σ input | sensitivity | 1σ Δv contribution | share of variance |
+|---|---|---|---|---|
+| specific impulse | 3.60 s | 7.103 m/s per s | 25.57 m/s | 50.2 % |
+| dry mass | 20.7 kg | −0.8201 m/s per kg | 16.98 m/s | 22.1 % |
+| residuals | 11.93 kg | −1.5915 m/s per kg | 18.99 m/s | 27.7 % |
+
+$$\sigma_{\Delta v} = \sqrt{25.57^2 + 16.98^2 + 18.99^2} = \sqrt{1{,}302.7}
+= 36.09\ \mathrm{m/s} = 1.41\,\%\ \mathrm{of}\ \Delta v$$
+
+**Monte Carlo cross-check.** Drawing 10⁵ samples with Gaussian inputs (Isp
+1 % relative, dry mass increment applied to both $m_0$ and $m_f$, residual
+increment applied to $m_f$ only) gives a mean of 2,557.2 m/s and a standard
+deviation of **36.08 m/s** — agreement with the RSS estimate to 0.03 %. The
+model is linear over this range; the Monte Carlo adds nothing but confidence
+that the derivatives were taken correctly. That is a legitimate use of it.
+
+**Interpretation, which is the actual deliverable.** The 3σ Δv shortfall is
+108.3 m/s. The margin held in WE1 was 4 % of 2,459 m/s, i.e. **98 m/s** — so
+the flight performance reserve covers only **2.7σ**, not the 3σ the programme
+requires. Three options, in increasing order of cost:
+
+1. Reduce the residual uncertainty. Residuals contribute 27.7 % of the
+   variance from a quantity that is *knowable*: drain-and-weigh tests on the
+   stage, a better sump design, and a measured shutdown propellant inventory
+   could plausibly halve $\sigma_{res}$ to 0.25 %, which drops
+   $\sigma_{\Delta v}$ to 31.7 m/s and 3σ to 95.1 m/s — inside the margin, for
+   the cost of one test series.
+2. Tighten the Isp uncertainty by testing more engines, which shrinks the
+   dominant term but slowly, as $1/\sqrt{n}$ on the mean while doing nothing
+   for the unit-to-unit spread.
+3. Load 30 kg more propellant, which costs 30 kg of payload at the ~1:1
+   exchange rate of an upper stage.
+
+Option 1 is right, and it is the answer only because the variance was
+decomposed. A single number "σ = 36 m/s" would not have told anyone what to
+do. **Sanity check:** 1.4 % Δv dispersion at 1σ is typical for a well-
+characterised upper stage; flight performance reserves in the 0.5–2 % range
+are standard practice [Humble].
+
+### WE3 — The NPSH interface: required tank pressure at end of burn
+
+The oxidiser pump of the WE1 engine has $\mathrm{NPSH}_r = 10$ m of liquid
+oxygen at the design flow, and the programme requires a margin factor
+$k_{NPSH} = 1.5$, so $\mathrm{NPSH}_a \ge 15$ m must hold **at the worst
+point of the burn**. Conditions at that point:
+
+| quantity | value | note |
+|---|---|---|
+| propellant | LOX at 92 K bulk | slightly warm from tank soak |
+| density $\rho$ | 1,141 kg/m³ | at 92 K |
+| vapour pressure $p_v$ | 120 kPa | saturation at 92 K [NIST-WB] |
+| liquid column $z$ | 0.25 m | end of burn, near-empty tank |
+| acceleration $a$ | 10.14 m/s² (1.034 $g_0$) | from WE1, burnout |
+| feed line loss $\Delta p_{line}$ | 18 kPa | at 4.86 kg/s |
+
+Invert Eq. 3.5 for the required ullage pressure:
+
+$$p_t = p_v + \Delta p_{line} + \rho g_0\left(\mathrm{NPSH}_{req} - \frac{z\,a}{g_0}\right)$$
+
+$$\frac{z\,a}{g_0} = \frac{0.25\times 10.14}{9.80665} = 0.2585\ \mathrm{m}
+\qquad \rho g_0 = 1{,}141\times 9.80665 = 11{,}189\ \mathrm{Pa/m}$$
+
+$$p_t = 120{,}000 + 18{,}000 + 11{,}189\,(15 - 0.2585)
+= 120{,}000 + 18{,}000 + 164{,}946 = 302{,}946\ \mathrm{Pa}$$
+
+$$\boxed{p_t \ge 3.03\ \mathrm{bar}\ (43.9\ \mathrm{psia})}$$
+
+Check by forward substitution: $\mathrm{NPSH}_a = (302{,}946-120{,}000-18{,}000)/11{,}189
++ 0.2585 = 14.75 + 0.26 = 15.00$ m. ✓
+
+**The same calculation on the fuel side.** Liquid methane at 115 K:
+$\rho = 423$ kg/m³, $p_v = 145$ kPa, $\mathrm{NPSH}_r = 12$ m so
+$\mathrm{NPSH}_{req} = 18$ m, $\Delta p_{line} = 8$ kPa. Now
+$\rho g_0 = 4{,}148$ Pa/m:
+
+$$p_t = 145{,}000 + 8{,}000 + 4{,}148\,(18-0.2585) = 226{,}600\ \mathrm{Pa} = 2.27\ \mathrm{bar}$$
+
+**Read the two results together — this is the lesson.** The methane pump
+demands *more* head (18 m against 15 m) yet needs *less* tank pressure (2.27
+bar against 3.03 bar), because head converts to pressure through $\rho g_0$,
+and methane is 2.7 times less dense. Repeat the exercise with hydrogen
+($\rho = 70.8$ kg/m³, $\rho g_0 = 694$ Pa/m) and 30 m of required head costs
+only 0.21 bar of tank pressure above vapour pressure. **The lower the
+propellant density, the cheaper NPSH is in tank pressure, and the more
+expensive everything else about the tank is.**
+
+**Consequences that fall out of this one number.** Ideal-gas helium pressurant
+to displace the propellant volumes at 250 K:
+
+$$m_{He} = \frac{p_t V}{R T} : \quad \text{LOX tank } \frac{3.03\times10^5 \times 1.617}{2077.06\times 250} = 0.944\ \mathrm{kg},
+\quad \text{CH}_4 \text{ tank } \frac{2.27\times10^5\times1.282}{2077.06\times250} = 0.560\ \mathrm{kg}$$
+
+Total 1.50 kg ideal. **Multiply by 2 to 3** for the real system: incoming gas
+cools against cold liquid and cold walls, so the mass required to hold
+pressure is far above the isothermal ideal [SP-8112]. Call it 3.5–4.5 kg of
+helium, plus a bottle to hold it. That bottle mass lands in the stage dry mass
+of WE1 — and if it grows, Eq. 3.9 says it costs 0.82 m/s per kg of Δv. The
+chain from *pump inducer suction performance* to *stage Δv* is four steps
+long and every step is a different engineering group.
+
+**Sanity check.** Upper-stage tank pressures of 2–4 bar for dense propellants
+and 1.5–2.5 bar for hydrogen are the normal published range, and the RS-25's
+low-pressure boost pumps exist precisely so the Shuttle External Tank could
+run at the low end of it [SP-8107].
+
+### WE4 — Pugh matrix for three engine options, and a sensitivity flip
+
+The upper stage of WE1 needs an engine. Three candidates, with the LOX/CH₄
+gas-generator engine (option B, the WE1 baseline) as the **datum**:
+
+- **A — LOX/LH₂ closed expander**, $I_{sp} \approx 450$ s. New development at
+  this thrust class.
+- **B — LOX/CH₄ gas generator**, $I_{sp} \approx 365$ s. Datum.
+- **C — N₂O₄/MMH pressure-fed**, $I_{sp} \approx 320$ s. Derived from
+  qualified hardware.
+
+Scores relative to the datum on a −2…+2 scale, and initial weights:
+
+| criterion | $w_i$ | A | B | C |
+|---|---|---|---|---|
+| delivered performance (payload to GTO) | 30 | +2 | 0 | −2 |
+| stage dry mass and tank volume | 20 | −2 | 0 | 0 |
+| development schedule risk | 20 | −1 | 0 | +2 |
+| recurring cost | 15 | −2 | 0 | +1 |
+| restart and long-coast capability | 10 | 0 | 0 | +2 |
+| ground operations complexity | 5 | −2 | 0 | −1 |
+| **weighted total** | **100** | **−40** | **0** | **+10** |
+
+Arithmetic for A: $30(2)+20(-2)+20(-1)+15(-2)+10(0)+5(-2) = 60-40-20-30-10 = -40$.
+For C: $30(-2)+20(0)+20(2)+15(1)+10(2)+5(-1) = -60+40+15+20-5 = +10$.
+
+**Ranking: C > B > A.** The storable pressure-fed stage wins. If you stop
+here, you write that in the report and somebody builds it.
+
+**Now sweep.** The two criteria that carry the argument are performance and
+schedule. Trade weight between them, holding the other four fixed, with
+$w_{perf} = x$ and $w_{sched} = 50 - x$:
+
+$$S_A(x) = 2x - (50-x) - 80 = 3x - 130, \qquad S_C(x) = -2x + 2(50-x) + 30 = 130 - 4x,
+\qquad S_B = 0$$
+
+(The constant −80 in $S_A$ is A's fixed contributions: $20(-2)+15(-2)+10(0)+5(-2)$.
+The +30 in $S_C$ is $20(0)+15(1)+10(2)+5(-1)$.)
+
+| $w_{perf}$ | $S_A$ | $S_B$ | $S_C$ | winner |
+|---|---|---|---|---|
+| 20 | −70 | 0 | +50 | C |
+| 30 | −40 | 0 | +10 | C |
+| **32.5** | −32.5 | 0 | **0** | B/C tie |
+| 35 | −25 | 0 | −10 | **B** |
+| 40 | −10 | 0 | −30 | B |
+| **43.3** | **0** | 0 | −43 | A/B tie |
+| 45 | +5 | 0 | −50 | **A** |
+| 50 | +20 | 0 | −70 | A |
+
+**The winner changes twice inside a range of weights that no one could defend
+choosing between.** Move the performance weight from 30 to 45 — a change any
+programme manager could make with a straight face after one customer meeting —
+and the recommendation goes from the storable pressure-fed stage to the
+hydrogen expander, passing through the methane baseline on the way.
+
+**What to report.** Not "C wins, score +10". Report this:
+
+> The trade does not resolve on the criteria as weighted. The recommendation
+> is controlled entirely by the relative weight of delivered performance and
+> schedule risk: option C is preferred if performance is weighted below ~32,
+> option B between ~32 and ~43, option A above ~43. The programme should
+> decide the performance-versus-schedule priority explicitly, and should fund
+> a firmer schedule estimate for option A, whose −1 schedule score is the
+> least well supported number in the matrix. On present information, option B
+> is recommended as the choice that is never worse than second and is first
+> across the widest weight band.
+
+That last sentence is a real and defensible criterion — minimax regret — and
+it is a better answer than the raw score, because it acknowledges that the
+weights are uncertain instead of pretending they are data.
+
+**Sanity check.** The result matches history: methane and kerosene
+gas-generator engines dominate new mid-size upper stages, hydrogen expanders
+persist where performance dominates and schedule does not (the RL10 lineage),
+and storable pressure-fed stages persist where restart, storability and
+heritage dominate (Aestus, and the whole class of spacecraft apogee engines)
+[SB, SLPRE].
+

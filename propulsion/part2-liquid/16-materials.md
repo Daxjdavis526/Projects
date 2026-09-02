@@ -1353,3 +1353,631 @@ superalloy has $\Delta\alpha \approx 3.5\times10^{-6}$/K over a 900 K excursion 
 times this strain — which is why TBCs spall and metallic closeouts do not.
 
 ---
+
+## 6. Real engines — why did they design it that way?
+
+### 6.1 RS-25 (1981) — why NARloy-Z, and why an electroformed nickel closeout?
+
+**The choice.** A NARloy-Z (Cu–3Ag–0.5Zr) liner with 390 milled coolant channels, closed
+out by electroformed nickel, running at 206.4 bar with hydrogen coolant
+[_verify-liquid, RS-25 block].
+
+**The constraint.** 206 bar fuel-rich staged combustion puts a throat heat flux of the
+order of 160 MW/m² into a wall that must survive tens of flights. Run Eq. 3.1 for that
+flux and a 0.89 mm wall: NARloy-Z carries it on a 451 K gradient; Inconel 718 at its hot
+conductivity would need a 6,700 K gradient, i.e. the wall would melt long before the
+gradient established. **There was no non-copper option.** The remaining question was which
+copper.
+
+**The alternatives available in 1972.** OFHC copper (no strength, recrystallises), a
+dispersion-strengthened copper (Al₂O₃-dispersion coppers existed but were not qualified at
+this scale and are hard to join), and NARloy-Z, which Rocketdyne had developed
+specifically for this class of service. NARloy-Z gave roughly twice OFHC's yield at
+80 % of its conductivity and could be forged, machined and joined. It won.
+
+**Why electroformed nickel for the closeout?** Because the liner cannot carry the pressure
+load: copper alloys at 800 K have yields of tens of MPa. The closeout is a separate
+structural jacket, and electroforming was chosen because it deposits nickel conformally
+onto a filled channel pattern without a braze joint and without a heat-treatment cycle
+that would overage the copper. It is slow and it is a plating-shop process at engine
+scale — a real manufacturing burden — but it produces a metallurgically bonded,
+leak-tight, void-free closeout in a geometry that could not be brazed.
+
+**What it cost.** Blanching (§3.3.1): the liner surface roughened and degraded in the
+alternating oxidising/reducing environment, raising heat flux and initiating cracks.
+Combined with LCF and creep–fatigue at 800 K, the main combustion chamber became a
+limited-life, inspected, replaceable component. The engine's between-flight inspection
+burden — the honest verdict on its reusability premise, per its own verification block —
+was substantially a materials bill.
+
+**Would a modern engineer choose the same?** No. **GRCop-84 or GRCop-42.** [M] The Cr₂Nb
+dispersoid does not overage, so the alloy keeps roughly 130 MPa yield at 800 K where
+NARloy-Z is near 70; its blanching resistance is markedly better; its LCF life at equal
+strain range is longer; and GRCop-42 can be printed, which removes the milling and
+electroforming operations entirely [GRCop], [Gradl18], [RAMPT]. The conductivity penalty
+is a few per cent. This is one of the cleanest "the material got better and the design
+followed" stories in the field.
+
+### 6.2 RS-25 HPFTP (1977–2001) — turbine blade cracking, and the single-crystal answer
+
+**The problem.** The high-pressure fuel turbopump is a three-stage centrifugal pump turning
+at ~35,360 rpm and absorbing 53 MW from a car-engine-sized package
+[_verify-liquid, RS-25 block]. Its two-stage turbine blades sit in fuel-rich hot gas —
+hydrogen at high pressure and high temperature — carrying centrifugal load, gas bending
+load, and unsteady excitation at blade-passing frequency. Turbine blade cracking was among
+the recurring development failures of the programme [Biggs89].
+
+**The mechanism, and why it was three problems at once.** The blades were cast nickel
+superalloy with conventional grain boundaries. In that configuration:
+
+1. **HCF.** At 589 Hz shaft order and tens of kHz blade passing, a 500 s burn accumulates
+   10⁷–10⁹ cycles. Any resonance with a blade mode is fatal in seconds.
+2. **Hydrogen-assisted fatigue** (§3.4.7). The environment is high-pressure hydrogen at a
+   temperature near the susceptibility peak. Crack-growth rates in that environment can be
+   one to two orders of magnitude above air data, and the threshold $\Delta K$ falls.
+3. **Grain boundaries.** Hydrogen segregates to them, creep cavitation nucleates on them,
+   and the thermal-fatigue crack runs along them. Every one of the three mechanisms above
+   is worse at a grain boundary.
+
+**The fixes, in the order they were applied.** [H] Blade dampers and platform damping to
+detune and dissipate the resonant response; shot peening to put the surface in residual
+compression; changes to the blade root and shank geometry to remove stress concentrations;
+tighter control of the operating map. These are HCF fixes — they attack the load, not the
+material.
+
+**The structural answer.** The Block II HPFTP, developed by Pratt & Whitney and first
+flown on STS-104 in 2001 [_verify-liquid, RS-25 block], replaced the turbine rotor with a
+**cast, integrally bladed single-crystal turbine wheel** — no blade attachments and, more
+importantly, **no grain boundaries**. Remove the grain boundaries and you remove the
+preferred path for all three mechanisms simultaneously, and the integral blisk removes the
+fretting and load-transfer problems of the blade root as well. [M] (The single-crystal
+detail is widely reported in the programme literature; it is not in this course's
+verification file, so treat the alloy designation as reported rather than verified.)
+
+**Would a modern engineer choose the same?** Yes, and does — single-crystal rotors are now
+standard for high-duty rocket turbines. The transferable lesson is not "use single
+crystal": it is that when three independent failure mechanisms all localise at the same
+microstructural feature, the productive move is to delete the feature rather than to fight
+each mechanism separately. [J]
+
+### 6.3 RD-180 (2000) — the enamel that made oxidizer-rich staged combustion possible
+
+**The choice.** Oxidizer-rich staged combustion, single oxygen-rich preburner, two chambers
+on one turbopump, 267 bar chamber pressure, and **an inert enamel coating on every metal
+surface in contact with the hot oxygen-rich gas** [_verify-liquid, RD-180 block].
+
+**The constraint.** ORSC gives the highest performance of any kerosene cycle, because no
+propellant is dumped and the fuel-rich soot problem of a kerosene preburner is avoided
+entirely (an oxygen-rich preburner cannot coke). The price is that the entire turbine
+drive path — preburner liner, turbine manifold, nozzles, blades, ducting and injector — is
+in oxygen at 500–800 K and hundreds of bar. By §3.4.2 that is a metal-fire environment,
+and a single particle impact or rub is an ignition source.
+
+**Why a coating rather than a better alloy.** Because there is no alloy that is genuinely
+inert in high-pressure hot oxygen at engine temperatures *and* has the strength and
+formability to be a turbine. The coating decouples the two requirements: the substrate
+provides mechanical properties, the enamel provides chemical inertness. It also means the
+solution is a **process** — surface preparation, application, firing, adhesion
+qualification, inspection, and a repair procedure — rather than a purchased material.
+That is the crucial point for anyone asking why the cycle did not transfer to the West
+with the drawings. You can read a cycle diagram. You cannot read a process qualification
+built from thirty years of test failures. [J]
+
+**The rest of the recipe** matters too and is often forgotten: run the preburner far enough
+oxidizer-rich to keep the gas at 500–800 K rather than 1,200 K; weld rather than bolt;
+control particulate to a level that Western oxygen practice would recognise from
+ASTM G88; and accept a physically large turbopump because the turbine works on a large
+mass flow at low temperature.
+
+**Would a modern engineer choose the same?** The West took twenty-five years to answer
+that. The BE-4 is the first US-designed ORSC engine to fly, in January 2024, after
+development from 2011 and a roughly five-year schedule overrun, and it runs at **140 bar,
+deliberately low against the RD-180's 267 bar, explicitly for life and reusability**
+[_verify-liquid, BE-4 block]. Halving the pressure roughly halves the oxygen partial
+pressure in the preburner and turbine, which moves you a long way down the promoted-
+ignition threshold curve. That is a materials decision wearing a cycle-analysis costume,
+and it is a defensible one: the RD-180 bought its 267 bar with a coating technology Blue
+Origin did not have and chose not to try to reinvent. [J]
+
+### 6.4 RL10 (1962) — why stainless steel is the right answer at 33 bar
+
+**The choice.** A brazed **stainless-steel** tube-wall chamber, hydrogen-cooled, at
+$p_c = 32.8$ bar, on a closed expander cycle [_verify-liquid, RL10A-3-3A block].
+
+**The constraint.** With $p_c$ at 33 bar the heat flux is roughly $(33/206)^{0.8} = 0.23$
+of the RS-25's — a quarter, in round terms. Eq. 3.1 with a stainless wall at that flux
+gives a manageable gradient. **The conductivity argument that forces copper at 206 bar
+simply does not apply at 33 bar.** Once conductivity stops being the driver, the ranking
+changes completely, and stainless wins on everything else:
+
+- **Hydrogen compatibility.** Austenitic stainless is in the "slightly affected" class of
+  §3.4.1; a high-strength nickel alloy would not be.
+- **Cryogenic toughness.** No DBTT, ductile at 20 K, in an engine whose coolant is liquid
+  hydrogen.
+- **Brazeability and formability.** Hundreds of tapered tubes, formed and furnace-brazed
+  in one operation. Stainless does this well and cheaply.
+- **Cost and availability.** The RL10 has been in production for over six decades — the
+  longest of any rocket engine [_verify-liquid] — and a common-alloy design is part of why.
+
+**And the cycle inverts the usual objective.** [F] In a closed expander the hydrogen picks
+up heat in the chamber wall and that heat *is* the turbine power. The engine does not want
+to minimise heat into the wall; it wants to maximise enthalpy into the coolant. A wall that
+runs hotter is not a penalty, it is the product. This is also why the expander cycle has a
+thrust ceiling: heat pickup scales with wall area ($\propto D^2$) while thrust scales with
+throat area, so $p_c$ has a hard limit [_verify-liquid, RL10 block].
+
+**Would a modern engineer choose the same?** For a 33 bar expander, largely yes — though a
+new-build engine would very likely print the chamber rather than braze 100-odd tubes, and
+would then choose the alloy for printability. The RL10's own successors have gone that way
+in components. The transferable lesson: **do not import the material choice from a
+higher-pressure engine.** Copper at 33 bar is unnecessary mass, cost and joining
+difficulty, purchased to solve a problem you do not have. [J]
+
+### 6.5 Merlin Vacuum (2013) — a niobium skirt because mass is the only thing that matters
+
+**The choice.** A radiatively cooled **niobium alloy** nozzle extension taking the vacuum
+engine to $\varepsilon = 165$, glowing cherry-red in flight [_verify-liquid, Merlin block].
+
+**The constraint.** An upper-stage nozzle extension at $\varepsilon = 165$ is a large area
+of thin shell that sees a modest heat flux (the gas is expanded and cool by then) and
+essentially no pressure load. What it must be is *light*, *cheap*, and *not require
+coolant*. Regeneratively cooling that area would add manifolds, pressure drop and mass to
+buy nothing, because there is no wall-temperature crisis out there.
+
+**The alternatives.** (a) Regenerative extension — heavier, and the coolant pressure drop
+comes straight off the pump. (b) Carbon–carbon, as on the RL10B-2 — lighter still per unit
+area and higher temperature capability, but far more expensive, requires an oxidation
+coating, and is a specialist supply chain. (c) Ablative — mass and a burn-time limit,
+which is unacceptable for a restartable stage. (d) **Silicide-coated C-103 niobium** —
+formable, weldable, ductile at room temperature, good to ~1,650 K, and producible in
+quantity at a price consistent with building a hundred engines a year.
+
+For a company whose defining constraint is production rate and unit cost, (d) is the
+obvious answer, and SpaceX's own material traces the vacuum-nozzle and pintle heritage
+directly to Apollo-era practice [_verify-liquid, Merlin block]. The R-4D, the Shuttle RCS
+R-40 and the Apollo SPS extension all used the same solution.
+
+**What it costs.** The silicide coating, not the niobium, is the life-limiting item: bare
+niobium above ~800 K in an oxidising plume is consumed rather than passivated, so a coating
+chip is a hole. Handling, transport and installation damage are real programme risks, and
+the extension cannot tolerate sea-level operation at all (flow separation would put a
+pressure load and a side load on a shell designed for neither).
+
+**Would a modern engineer choose the same?** For a high-rate, cost-driven upper stage, yes.
+For a maximum-$I_{sp}$, low-rate stage where 30 s of $I_{sp}$ is worth almost any money —
+the RL10B-2 case — carbon–carbon still wins.
+
+### 6.6 Rutherford (2017) and Raptor (2016– ) — the modern claims, read carefully
+
+**Rutherford.** [M] The first engine to fly with essentially its entire primary
+structure additively manufactured: **chamber, injectors, pumps and main propellant valves
+all printed** by laser powder-bed fusion, with RP-1 regenerative cooling through channels
+embedded in the printed chamber, and an electric pump cycle [_verify-liquid, Rutherford
+block]. Rocket Lab has publicly described the printed hot structure as an Inconel-type
+nickel superalloy and has more recently discussed copper-alloy (GRCop-class) chamber work.
+**Neither the specific alloy nor any property data appear in this course's verification
+file**, so treat the alloy identification as reported, not verified. What is solidly
+established is the *architecture* argument: at 25 kN thrust the chamber is small, the flux
+is modest, and printing a nickel alloy in one piece removes an enormous amount of joining
+— which is the point, since Rocket Lab's constraint is engines per year (369 flown by
+April 2024), not $I_{sp}$.
+
+**Raptor.** [M], and **every figure is a company claim** [_verify-liquid, Raptor block].
+Two materials statements can be made about it without repeating unverified numbers:
+
+1. **Its cycle guarantees an oxygen-rich metallurgy problem.** Full-flow staged combustion
+   has an oxidizer-rich preburner driving the LOX turbopump. Everything in §3.4.2 applies,
+   at chamber pressures claimed at 300–330 bar — well above the RD-180's 267 bar and thus
+   at a *higher* oxygen partial pressure than the hardest previously flown case. SpaceX has
+   publicly referred to in-house alloys developed for hot oxygen-rich service; **no
+   composition, property or test data are published**, so per this course's convention that
+   is a claim, not data. It is, however, a claim of exactly the right kind: it says the
+   company understood that FFSC is a materials programme first.
+2. **Methane helps.** A methane-cooled copper-alloy liner does not coke the way kerosene
+   does and does not embrittle the way hydrogen does, which removes two of the three
+   classic coolant-side materials problems and leaves only the copper LCF problem of WE1.
+
+**The honest position on Raptor in a materials module** [J]: the cycle is verified (it flew),
+the chamber pressure is not independently verified, and the alloys are not published at
+all. Present it as the frontier *and* as the object lesson in the difference between
+published data and verified data.
+
+---
+
+## 7. Design trade-offs, failure modes, materials, manufacturing, testing
+
+### 7.1 The trade in one table
+
+| component | dominant load | dominant property | the alloy | what you give up |
+|---|---|---|---|---|
+| Chamber liner | thermal gradient, LCF | $k$, then $\varepsilon'_f$ | GRCop-42/84, NARloy-Z, CuCrZr | strength — the jacket carries pressure |
+| Chamber closeout / jacket | pressure | $F_{ty}$, weldability | Inconel 718, electroformed Ni | conductivity (irrelevant here) |
+| Injector body / faceplate | pressure, thermal, LCF | strength + printability | 718; copper faceplates | hydrogen susceptibility (barrier plate it) |
+| Pump housing | pressure, stiffness, cryo | $F_{ty}$, $K_{Ic}$, LOX compatibility | 718, A-286, 316L | mass |
+| Pump impeller/inducer (LH₂) | centrifugal, HCF, cavitation | specific strength | Ti-6Al-4V, 718 | **Ti forbidden on the LOX side** |
+| Turbine blade | creep, HCF, environment | creep + no grain boundaries | DS/SX cast superalloy, TBC | cost, non-weldable, non-printable |
+| Preburner / GG liner | oxidation, creep, thermal | oxidation resistance | Haynes 230, 625, + TBC or enamel | strength |
+| Hot-gas manifold | creep, pressure, thermal cycling | creep + weldability | 625, 718 (cool), Haynes 282 | |
+| Tube-wall nozzle | thermal, pressure, braze integrity | brazeability, cryo toughness, H₂ | austenitic stainless, Inconel X-750 | flux capability above ~100 bar |
+| Radiation-cooled extension | radiation equilibrium, creep sag | temperature capability / density | C-103 + silicide; C–C; Ir/Re | coating integrity is the life |
+| Ablative chamber | recession, char depth | char yield, erosion rate | silica/carbon phenolic | single use; $A_t$ drifts |
+| Cryogenic lines, bellows | pressure, cyclic, cryo | cryo toughness, formability | 316L, 321, 21-6-9 | strength |
+| Tanks | pressure, cryo, SCC | specific strength, weldability | 2219, 2195, 316L, Ti-6Al-4V (storables) | Ti + N₂O₄ needs MON |
+
+### 7.2 Failure modes: mechanism → symptom → evidence → fix
+
+| mechanism | symptom | evidence you would look for | fix |
+|---|---|---|---|
+| Liner LCF / ratcheting | coolant leak into the chamber; falling $\eta_{c^*}$; rising coolant $\Delta T$ | borescope: channel wall thinned and bulged into the gas path ("doghouse"); striations on the fracture face | thinner/higher-$k$ liner, lower flux, GRCop, reduce cycle count |
+| Blanching | rising heat flux and wall temperature over the service life at fixed operating point | roughened, discoloured, porous liner surface; metallography showing a subsurface porous layer | GRCop; reduce near-wall O/F excursions |
+| Hydrogen environment embrittlement | brittle failure at a stress the analysis passed; low notched strength | intergranular or quasi-cleavage fracture surface; $NSR$ in H₂ vs He below ~0.8 | resistant alloy (21-6-9, A-286, JBK-75); Au/Cu barrier plating; strength derate |
+| Hydrogen-assisted fatigue | crack growth 10–100× faster than the air-data life prediction | striation spacing far larger than $\Delta K$ predicts; frequency dependence | H₂-environment crack-growth data; reduce $\Delta K$; barrier |
+| Metal fire (ox-rich) | catastrophic, seconds; molten and re-solidified metal, burn-through | burn pattern originating at an impingement site or a particle strike; oxide-rich melt | coating; lower $p_{O_2}$; cleanliness; velocity limits; ASTM G88 design rules |
+| Oxidation / scale spallation | wall thinning; TBC loss; rising metal temperature | spalled scale, alumina/chromia depletion zone in metallography | alumina-forming alloy or coating; lower temperature |
+| Creep | dimensional growth (turbine tip clearance), nozzle sag, channel closure | creep cavities on grain boundaries; measured permanent set | DS/SX blades; lower stress or temperature; Haynes-class alloy |
+| Cryogenic brittle fracture | fast fracture at low load during chilldown or proof | cleavage facets; BCC alloy in the assembly where it should not be | austenitic or FCC alloy; verify the whole bill of materials, including fasteners |
+| SCC (Ti in N₂O₄, 7xxx Al) | cracking in storage with no cyclic load | branched, intergranular cracking; corrosion product in the crack | change the environment (MON-3), the temper (T73), or the alloy |
+| Braze void | leak at a tube joint after tens of cycles | dye penetrant / X-ray at the joint; leak path following the braze fillet | milled channels instead; better braze process control; proof + leak test each cycle |
+| Coating chip (silicide, TBC) | local burn-through or hot spot | missing coating with a locally oxidised substrate underneath | handling controls; repair procedure; design out the edges |
+
+### 7.3 Testing
+
+| what you measure | with what | healthy | unhealthy |
+|---|---|---|---|
+| Tensile allowables at temperature | servo-hydraulic frame with furnace or cryostat | matches [MMPDS] for the product form | 10 %+ below → wrong heat treatment or wrong direction |
+| Hydrogen compatibility | slow-strain-rate notched tensile in high-pressure H₂, ratioed against He | $NSR > 0.8$ | $NSR < 0.6$ → do not use unprotected |
+| LOX impact sensitivity | ASTM G86 / NASA-STD-6001 Test 13 drop tower on the sample in LOX | 0 reactions in 20 drops at 98 J | any reaction → reject for oxygen service |
+| Promoted ignition threshold | ASTM G124 rod burn in pressurised O₂ | no self-sustained burn below the service pressure | burns → coating or a different alloy |
+| LCF life | strain-controlled isothermal fatigue at operating temperature | matches Eq. 3.7 constants within scatter band | short life → check for creep–fatigue or environment |
+| Creep rupture | constant-load rupture at temperature | falls on the Larson–Miller master curve | early rupture → microstructure has changed |
+| Fracture toughness | ASTM E399 / E1820 compact tension | matches handbook $K_{Ic}$ | low → hydrogen charging or embrittling phase |
+| Braze / weld integrity | X-ray, dye penetrant, proof + helium leak | no indications; leak below spec | voids at fillets; leak growth cycle to cycle |
+| AM part internal quality | X-ray CT, witness coupons, powder chemistry | density > 99.5 %, coupons meet allowables | lack-of-fusion porosity; trapped powder in channels |
+| Coating integrity | visual, eddy current, thermal cycling coupons | continuous, adherent after cycling | edge spallation; substrate oxidation under the coating |
+| Liner condition, in service | borescope, dimensional check of channel lands, throat CMM | lands unchanged | thinning, bulging, discoloration → doghouse forming |
+
+---
+
+## 8. Misconceptions and what engineers actually care about
+
+**"Copper is used for the liner because it is soft and forgiving."**
+No. Copper is used because $k \approx 316$–390 W/(m·K) and nothing else structural is
+within a factor of ten. Softness is a *cost* — the liner cannot carry the pressure load and
+needs a separate structural closeout. What copper does contribute besides conductivity is
+ductility, which buys LCF life (Eq. 3.6), but that is a secondary benefit of the same
+choice.
+
+**"Liquid hydrogen embrittles metal, so cryogenic hydrogen hardware is the problem."**
+Backwards. Hydrogen environment embrittlement peaks near **200–300 K** and is negligible
+below ~120 K, because the mechanism is diffusion-controlled and hydrogen cannot reach the
+crack tip fast enough when it is cold. The dangerous parts are warm gaseous-hydrogen
+components — turbine hardware, manifolds, seal cavities, hot ducts — not the LH₂ tank.
+
+**"Inconel 718 is the best superalloy, so use it wherever it is hot."**
+718 is the *most useful* superalloy because it is strong, cryogenically capable, weldable
+and printable. It is not the best at anything hot: it overages above ~925 K and it is one
+of the worst alloys in the table for hydrogen. It won on manufacturability, and knowing
+that is the difference between a specification and a reason.
+
+**"Titanium is fine with LOX as long as it is clean and below its ignition temperature."**
+There is no such condition. Titanium ignites in LOX under mechanical impact at low
+energies, and it fails the standard screening test (ASTM G86). It is categorically excluded
+from oxygen service, not managed within a margin.
+
+**"Thermal stress is what breaks a liner, so use a stronger alloy."**
+The load on a liner is a *strain*, imposed kinematically by the temperature field
+(Eq. 3.10). A stronger alloy delivers the same strain at a higher stress, which buys
+nothing and can be actively worse if the strength comes at the price of ductility. Liner
+life is bought with conductivity (which lowers the strain) and ductility (which raises the
+allowable strain).
+
+**"An A-basis allowable is the minimum measured value."**
+No. It is the value exceeded by 99 % of the population with 95 % confidence — a statistical
+lower tolerance bound derived from many heats and lots [MMPDS]. Individual test coupons
+routinely fall below it and above it; a single low coupon is not a material rejection, and
+a single high coupon is not a licence.
+
+**"Additive manufacturing means we can use any alloy we want."**
+The printable alloy list is *shorter* than the wrought list, not longer. Crack-prone γ′
+superalloys, high-reflectivity coppers and some aluminium alloys are hard or impossible to
+print reliably — GRCop-42 exists partly because GRCop-84 was hard to print. What AM changes
+is *geometry*, not chemistry.
+
+**"Larson–Miller gives the maximum use temperature."**
+It gives the temperature at which a stated stress causes rupture in a stated time,
+extrapolated along a fitted curve. It knows nothing about phase stability, oxidation, or
+coating limits, all three of which usually bind first (WE2).
+
+### What engineers actually care about
+
+1. **What is the strain range, and how many cycles do I have?** For any cooled wall this is
+   the life question, and it is answered by a nonlinear thermal-structural analysis, not by
+   a stress margin. Everything about liner design — thickness, conductivity, channel
+   geometry, flux — is downstream of it.
+2. **Is this part wetted by hydrogen or by oxygen, and does the alloy survive that
+   environment?** This question is asked component by component and it removes candidates
+   absolutely, not by margin. A margin cannot save a titanium part in LOX.
+3. **Can it be made, joined and inspected?** Weldability, printability, brazeability,
+   heat-treat compatibility across a joint, and whether NDE can find the flaw size the
+   fracture analysis assumed. This decides more selections than any property.
+4. **Where does the allowable come from, and at what temperature?** [MMPDS] and its basis,
+   the product form, the direction, the thickness debit — and the temperature the part
+   actually runs at, not room temperature.
+5. **What is the critical flaw size, and can I prove it is not there?** Proof pressure,
+   NDE sensitivity, and crack growth over the required life — in the service environment,
+   which for hydrogen means hydrogen crack-growth data or no claim at all.
+
+---
+
+## 9. Mastery levels
+
+**Level 1 — Familiarity.**
+Name the load set acting on a chamber liner, a turbine blade and a nozzle extension. State
+which alloy family goes with each of: chamber liner, chamber jacket, pump housing, turbine
+blade, radiation-cooled extension, cryogenic line, propellant tank. Explain in plain
+language why copper is used for liners and why titanium is banned from oxygen service.
+Name two engines that used a copper-alloy liner and two that used a radiation-cooled
+niobium extension.
+
+**Level 2 — Working engineering knowledge.**
+Compute $\Delta T_w$ and the constrained thermal stress for a stated flux, thickness and
+alloy, and say whether the wall is elastic. Estimate LCF life from a stated strain range
+with Eq. 3.7 and apply the design factor. Invert a Larson–Miller parameter for an
+allowable temperature and state why the answer may be inadmissible. Compute Lamé stresses
+in a thick-walled housing and screen candidate alloys against factored allowables.
+Compute a CTE-mismatch stress in a bonded bimetallic wall and get the factor of 2 right.
+Quote from memory: copper conductivity ~300–390 W/(m·K), 718 yield ~1,030 MPa and its
+925 K limit, austenitic stainless conductivity ~16 W/(m·K), C-103 to ~1,650 K coated,
+Ir/Re to ~2,470 K, and the hydrogen susceptibility ranking JBK-75 ≈ A-286 ≫ 718.
+
+**Level 3 — Interview mastery.**
+Given an unfamiliar engine's cycle, chamber pressure, propellants and duty cycle, propose
+a material for every major component and defend each on the correct index; identify which
+two components are life-limiting and say what test you would run first. Given a described
+failure — a leak at flight 12, a turbine blade liberation, a burn-through in a preburner —
+produce a ranked differential diagnosis with the fractographic or metallographic evidence
+that would separate the candidates. Argue both sides of the ORSC materials question: why
+the RD-180's enamel approach and the BE-4's low-pressure approach are each defensible, and
+what you would do with a clean sheet and no coating heritage. State honestly where the
+public record ends — for Raptor's alloys, for Rutherford's chamber material, for the RS-25
+nozzle tube alloy — rather than filling the gap.
+
+---
+
+## 10. Problems
+
+*(Answers in `16-materials-key.md`. Use $g_0 = 9.80665$ m/s². Property values from §4
+unless stated. Where an engine number is needed, take it from §6 or
+`reference/engine-database.md`.)*
+
+### Conceptual
+
+**C1.** Explain, without algebra, why the liner of a 200 bar engine must be copper while
+the liner of a 33 bar engine need not be. Then state the *one* number you would compute to
+settle the question for a 90 bar engine, and what you would compare it against.
+
+**C2.** A colleague proposes replacing a NARloy-Z liner with Inconel 718 "because 718 is
+ten times stronger and the liner keeps cracking". Give the two-sentence rebuttal, then the
+paragraph-length version that names the governing equation and the property that actually
+sets liner life.
+
+**C3.** Why is hydrogen environment embrittlement worst near room temperature rather than
+at 20 K? Give the mechanism, and then name a component in a hydrogen engine that sits in
+the worst part of the temperature range.
+
+**C4.** State the four elements of the Russian solution to oxidizer-rich staged combustion.
+For each, say whether it is a material, a process, an operating-point choice, or a
+system-design rule — and explain why that classification is the reason the technology did
+not transfer to the West with the drawings.
+
+**C5.** Explain why a single-crystal turbine blade helps against creep, against thermal
+fatigue *and* against hydrogen embrittlement. What is the common feature being removed?
+
+**C6.** A designer wants to use 4340 steel for a cryogenic valve body because it is strong,
+cheap and available. Give two independent reasons to refuse, and name the crystal-structure
+argument that underlies one of them.
+
+**C7.** Why does the thermal-shock figure of merit $M_{ts}$ rank 2219 aluminium above
+NARloy-Z, and why is that ranking useless? State the general rule about selection indices
+that this illustrates.
+
+**C8.** The RL10 is an expander-cycle engine whose chamber wall is deliberately a poor
+conductor by liner standards. Explain why that is not a defect, and what it implies about
+the objective function of the wall design in an expander cycle versus a staged-combustion
+cycle.
+
+### Calculation
+
+**N1.** A methalox chamber runs at $q'' = 45$ MW/m² in the barrel with a GRCop-42 liner,
+$t = 1.0$ mm, $k = 340$ W/(m·K). (a) Compute $\Delta T_w$. (b) With $E = 105$ GPa,
+$\alpha = 18.5\times10^{-6}$/K and $\nu = 0.33$ at temperature, compute the elastic
+constrained thermal stress. (c) GRCop-42's yield at 800 K is roughly 110 MPa. Is the wall
+elastic? (d) Compute the gradient-only strain range from Eq. 3.10 and, assuming the total
+strain range is 2.2× that value, estimate $N_f$ using
+$\sigma'_f = 400$ MPa, $E = 100$ GPa, $b=-0.10$, $\varepsilon'_f = 0.40$, $c=-0.62$.
+Apply the factor of 4.
+
+**N2.** Repeat N1(a) for the same flux and thickness with (i) Inconel 718 at
+$k = 21$ W/(m·K), (ii) 316L at $k = 21.5$ W/(m·K), (iii) Ti-6Al-4V at $k = 10$ W/(m·K).
+For each, compute the wall thickness that would hold $\Delta T_w$ to 200 K, and comment on
+manufacturability.
+
+**N3.** A Haynes 230 gas-generator liner must survive 300 s per firing and 150 firings at a
+membrane stress of 40 MPa. (a) Convert the life requirement to hours. (b) Using
+$P_{LM}/1000 = 27.6$ for Haynes 230 at 40 MPa and $C = 20$, find the allowable temperature.
+(c) The gas generator runs at 1,050 K. What is the margin, and what failure mode would you
+check next?
+
+**N4.** A helium pressurant bottle is a 316L sphere, internal radius 150 mm, MEOP 350 bar,
+proof factor 1.5, and it operates at 90 K where 316L's yield is 390 MPa. (a) Size the wall
+thickness for a factor of 1.25 on yield at MEOP. (b) Compute the membrane stress at proof.
+(c) With $K_{Ic} = 150$ MPa·√m and $Y = 1.12$, compute the critical surface flaw depth at
+proof stress. (d) If NDE can reliably find a 0.8 mm flaw, is the design damage-tolerant?
+
+**N5.** A GRCop-84 liner ($\alpha = 17.5\times10^{-6}$/K, $E = 125$ GPa, $\nu = 0.33$,
+$t = 1.0$ mm) is closed out with Inconel 718 ($\alpha = 13.0\times10^{-6}$/K,
+$E = 200$ GPa, $\nu = 0.29$, $t = 4.0$ mm) at 300 K, then chilled to 110 K. Compute the
+mismatch strain, the biaxial moduli, the stress in the copper and the stress in the
+nickel. State the sign of each and whether either yields.
+
+**N6.** For the pump housing of WE3, recompute the bore hoop stress if the wall is
+increased to 20 mm. By what percentage does the stress fall, and by what percentage does
+the housing mass (per unit length) rise? Comment on the exchange rate.
+
+**N7.** An Inconel 718 part in a 350 bar hydrogen environment has an air-data crack-growth
+life of 4,000 cycles from the NDE-detectable flaw size to critical. Hydrogen raises
+$da/dN$ by a factor of 40 at the relevant $\Delta K$ and Paris' law is being integrated
+with $m = 3$. Estimate the life in hydrogen, state the assumption you had to make, and say
+what you would do about the result.
+
+### Engineering reasoning
+
+**R1.** An engine has completed 40 hot fires. Over the last 8, the measured coolant outlet
+temperature at fixed operating point has risen by 6 %, the coolant $\Delta p$ has fallen by
+3 %, and $\eta_{c^*}$ is unchanged. Borescope shows a dull, roughened liner surface. Give a
+ranked differential diagnosis, the physical link between each candidate and each symptom,
+and the next measurement you would take.
+
+**R2.** A preburner in an ORSC development engine burned through 4.2 s into its third test.
+The burn pattern originates at a weld land downstream of an injector element. Give four
+candidate initiating events, the evidence that would distinguish them, and the design
+change you would make for each.
+
+**R3.** Two teams propose upper-stage nozzle extensions for the same engine: 3D
+carbon–carbon and silicide-coated C-103. Production rate is 8 engines per year for team A's
+customer and 200 per year for team B's. Argue which material each should choose and state
+the single number that would flip your recommendation in each case.
+
+**R4.** A hydrogen turbopump housing in Inconel 718 passes its structural analysis with a
+margin of 2.1 on yield, and then fails in proof test at 1.15× MEOP with a brittle,
+intergranular fracture originating at a machined fillet. Explain what most likely happened,
+name the two tests you would demand on the failed part, and give the three candidate fixes
+in the order you would try them.
+
+**R5.** You are handed a data plot: LCF life (log $N_f$) versus total strain range (log
+$\Delta\varepsilon_t$) for a copper alloy, tested at 300 K and at 800 K. The two lines are
+nearly parallel at high strain range but diverge strongly at low strain range, with the
+800 K line falling below. Explain, in terms of Eq. 3.7, which of the four constants has
+changed and why the divergence is at the low-strain end.
+
+### Mini trade study
+
+**T1.** You are selecting the liner material and closeout for a new **reusable, 120 bar,
+LOX/methane** booster engine. Required life: 50 flights plus 20 acceptance firings, with a
+factor of 4, so 280 analysed cycles. Predicted barrel heat flux 55 MW/m², throat 95 MW/m².
+The company has an in-house laser powder-bed fusion capability with qualified parameter
+sets for Inconel 718 and GRCop-42, and buys forgings and does milling and brazing in
+house. It has **no** electroforming capability and no directed-energy-deposition machine.
+
+Options:
+- **(a)** Printed GRCop-42 liner, printed Inconel 718 jacket (two prints, joined).
+- **(b)** Forged and milled NARloy-Z liner with a brazed Inconel 625 jacket.
+- **(c)** Forged and milled CuCrZr liner with a brazed Inconel 718 jacket.
+- **(d)** Printed Inconel 718 monolithic chamber with film cooling to reduce the flux.
+
+Recommend one. Justify with numbers from this module (compute at least $\Delta T_w$ and an
+LCF life estimate for your recommendation and for your runner-up), state the two largest
+risks in your choice and the test that retires each, and say explicitly what would change
+your answer.
+
+---
+
+## 11. Quiz (100 points)
+
+**Q1 (8).** The primary reason copper alloys are used for high-flux chamber liners is:
+(a) their high ductility gives long LCF life;
+(b) their thermal conductivity keeps the through-wall $\Delta T$ and hence the thermal
+strain small;
+(c) their low modulus reduces thermal stress;
+(d) they resist blanching.
+
+**Q2 (10).** A liner has $q'' = 100$ MW/m², $t = 0.80$ mm, $k = 310$ W/(m·K),
+$E = 100$ GPa, $\alpha = 18\times10^{-6}$/K, $\nu = 0.33$. Compute $\Delta T_w$ and the
+elastic constrained thermal stress. State in one sentence what the second number means
+given that the alloy's hot yield is about 130 MPa.
+
+**Q3 (8).** Hydrogen environment embrittlement of Inconel 718 is most severe:
+(a) at 20 K, at high strain rate;
+(b) at 20 K, at low strain rate;
+(c) near 250 K, at low strain rate;
+(d) near 800 K, at any strain rate.
+
+**Q4 (12).** An alloy has a Larson–Miller parameter of 24.0 (in units of K×10⁻³, $C=20$) at
+the design stress. (a) What temperature can it hold that stress for 100 h? (b) For
+10,000 h? (c) Give one reason the answer to (a) might be inadmissible even if the
+arithmetic is right.
+
+**Q5 (10).** Rank these for use as a *radiation-cooled* nozzle extension at 1,500 K and say
+why the loser loses: 316L stainless; C-103 with silicide coating; Ti-6Al-4V; GRCop-84.
+
+**Q6 (10).** A titanium alloy would be ideal for a particular pump impeller on specific
+strength. Give the one-word reason it is used on the fuel-side impeller of a hydrogen
+engine and forbidden on the oxidizer side, and name the standardised test that establishes
+the prohibition.
+
+**Q7 (12).** A copper liner has $\Delta\varepsilon_t = 1.0\,\%$. Using
+$\sigma'_f/E = 3.5\times10^{-3}$, $b = -0.10$, $\varepsilon'_f = 0.35$, $c = -0.60$,
+estimate $2N_f$ to within 20 %, state $N_f$, and apply the factor of 4 on cycles. Show
+that the plastic term dominates.
+
+**Q8 (10).** Which pairing is wrong, and why?
+(a) Inconel 625 — manifolds and bellows, chosen for weldability;
+(b) Haynes 230 — gas-generator liner, chosen for oxidation resistance;
+(c) Inconel 718 — hydrogen turbine blades, chosen for hydrogen resistance;
+(d) 21-6-9 — hydrogen lines, chosen for hydrogen resistance and cryogenic toughness.
+
+**Q9 (10).** You must choose between GRCop-84 and GRCop-42 for a printed liner. State one
+reason to choose each, and say which you would pick for a first-of-kind printed chamber and
+why.
+
+**Q10 (10).** An ORSC engine developer proposes raising chamber pressure from 140 bar to
+250 bar to improve performance. Give the materials-based argument against, name the
+specific mechanism, and state the one thing the RD-180 has that would have to be developed
+or acquired to make the change safe.
+
+---
+
+## 12. Further reading
+
+- **[MMPDS]** *Metallic Materials Properties Development and Standardization Handbook* —
+  the source of record for A- and B-basis allowables. Read the front matter on how basis
+  values are derived before you use a single table; it is what separates a design allowable
+  from a typical value. Note it superseded MIL-HDBK-5 at MMPDS-12 (2017).
+- **[G-095]** ANSI/AIAA G-095A, *Guide to Safety of Hydrogen and Hydrogen Systems* — the
+  most complete open treatment of hydrogen embrittlement, hydrogen compatibility rankings,
+  and the design rules that follow. Read it before designing anything wetted by hydrogen.
+- **[GRCop]** Ellis and Nathal, *Development of GRCop-84 for Rocket Engine Applications*
+  and the *Aerospace Structural Materials Handbook Supplement: GRCop-84* — conductivity,
+  creep, LCF and blanching resistance of the Cu–Cr–Nb family versus NARloy-Z, with the data
+  behind the claims in §3.3.1. Free on NTRS.
+- **[SP-8087]** *Liquid Rocket Engine Fluid-Cooled Combustion Chambers* — the design
+  criteria for cooled chambers, including the wall-temperature, thermal-stress and
+  low-cycle-fatigue life methodology and the factors of safety on cycles used in WE1. Its
+  materials coverage predates GRCop and AM entirely; read the method, not the allowables.
+- **[SP-8124]** *Liquid Rocket Engine Self-Cooled Combustion Chambers* — ablative and
+  radiation-cooled walls: char behaviour, recession, refractory-metal walls and their
+  coatings. The counterpart to [SP-8087] for everything without a cooling circuit.
+- **[SP-8110]** *Liquid Rocket Engine Turbines* — blade stress and thermal issues in the
+  partial-admission, high-pressure-ratio turbines rocket engines actually use, which the
+  gas-turbine literature does not cover. Background for §6.2.
+- **[AIAA-S-080]** ANSI/AIAA S-080A, *Metallic Pressure Vessels, Pressurized Structures,
+  and Pressure Components* — the requirements a modern programme is held to: design
+  factors, damage tolerance, fracture control, proof and burst testing. This, not
+  [SP-8088], governs current work.
+- **[STD-5001]** NASA-STD-5001, *Structural Design and Test Factors of Safety for
+  Spaceflight Hardware* — for the factors used in WE3. Always check the current revision;
+  the numbers have changed between revisions.
+- **[Biggs89]** Biggs, "Space Shuttle Main Engine: The First Ten Years" — the insider
+  narrative of the SSME development failures, including the turbopump problems behind
+  §6.2. The best account in the literature of what a staged-combustion development
+  actually costs.
+- **[Gradl18]**, **[GradlAM]**, **[RAMPT]** — additive manufacturing of combustion devices:
+  which alloys print, what defect population comes with them, and what hot-fire experience
+  exists. [GradlAM] is the book-length treatment; [RAMPT] is the large-scale channel-wall
+  nozzle work.
+- **[SLPRE]** Sutton, *History of Liquid Propellant Rocket Engines* — for the materials
+  history: how tube-wall construction, copper liners, refractory nozzles and Soviet
+  oxidizer-rich metallurgy actually developed, programme by programme.
+- **ASTM G86, G88, G94, G124**, and **NASA-STD-6001** — the oxygen-compatibility test
+  methods and design guides referenced in §3.4.8. G88 is the one a systems engineer should
+  read end to end; the others define the tests it relies on.

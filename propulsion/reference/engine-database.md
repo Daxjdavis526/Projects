@@ -393,3 +393,187 @@ NTO leaking past a check valve into a helium line.
 **A.3.10 Draco vs R-4D — the comparison to make.** **400 N at 300 s (Draco, 2010)
 versus 490 N at 312 s (R-4D, 1965).** Fifty years, and the small-hypergolic state
 of the art barely moved. That is itself the lesson.
+
+---
+
+## A.4 European engines
+
+| engine | maker / country | years | vehicle | propellants | O/F | cycle | F_SL kN | F_vac kN | Pc bar | Isp_SL s | Isp_vac s | ε | dry kg | T/W | cooling | injector | ignition | turbopump | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Vulcain 1** | Snecma → ArianeGroup / France (Avio IT: LOX pump; GKN/Volvo SE: turbines, nozzle) | dev from 1988; **1996-06-04** → 2009-12-18 | Ariane 5 G / G+ / GS core | LOX / LH2 | **5.3** | **Gas generator** — Europe deliberately did not attempt staged combustion for Ariane 5 | **n.p.** | **1,140** (256,000 lbf) | **100** `n.s.` (1,450 psia) | n.p. | **431** | **45.1:1** | **1,300** | n.p. | regen **tube-wall** | coaxial shear (LOX post / H₂ annulus) | pyrotechnic / spark torch, **ground start only — Vulcain does not restart** | **two separate turbopumps** on a common GG: **LOX 13,600 rpm / 3 MW; LH2 34,000 rpm / 12 MW**. Flow ~235 kg/s total, 41.2 kg/s H₂ | high [A] |
+| **Vulcain 2** | ArianeGroup / France | **2005-02-12** → 2023-07-05 | Ariane 5 ECA / ECA+ / ES core | LOX / LH2 | **6.1** — the increase is the single biggest source of the thrust uprate | GG | **n.p.** (~960 kN commonly cited — **treat as unverified**) | **1,359** (306,000 lbf) | **117.3** `n.s.` (1,701 psia); "115 bar" in secondary summaries is a rounding, see A.4.1 | n.p. | **429** — *lower* than Vulcain 1 despite higher Pc, because the richer 6.1:1 ratio trades Isp for density and thrust; see A.4.2 | **58.2:1** | **1,800** | ≈77:1 vac `CALC` | regen tube-wall; **film cooling added to the lower nozzle**, injecting turbine exhaust — needed because higher Pc and a richer mixture raised wall heat flux | coaxial shear | pyrotechnic / spark torch, no restart | two separate turbopumps: **LOX ~12,300 rpm; LH2 ~36,500 rpm** *(med conf. — from a secondary summary of the AIAA development paper)* | high [A]; **med** on turbopump speeds; **low** on SL thrust |
+| **Vulcain 2.1** | ArianeGroup / France | dev from 2014; first nozzle 2017-06; **first flight 2024-07-09** | Ariane 6 core | LOX / LH2 | 6.1 | GG | n.p. | **1,324** (298,000 lbf) — slightly **lower** than Vulcain 2; the 2.1 is a manufacturing simplification, not a performance uprate | **120.8** `n.s.` (1,752 psia) | n.p. | **not separately published** | n.p. | **2,000** | n.p. | as Vulcain 2; **nozzle: 90% fewer parts, 40% lower cost, 30% faster to produce**, by laser-welded sandwich construction — the best-documented manufacturing-driven redesign in European propulsion | coaxial shear | spark torch, no restart | two turbopumps | high [A] |
+| **ArianeGroup Vinci** | ArianeGroup (Snecma heritage) / France + European workshare | dev began **1998** — a 26-year development; **first flight 2024-07-09** | Ariane 6 upper stage (ULPM) | LOX / LH2 | **6.1** (some sources round to 6); flows **34.1 kg/s LOX, 5.59 kg/s LH2** back-compute to 6.10, confirming it internally | **Closed expander** — the first European expander engine and the highest-thrust closed expander ever flown (180 kN vs RL10's 110 kN) | — | **180** (40,000 lbf) | **60** `n.s.` (870 psia) — typical of the expander heat-balance limit | — | **457.2** | **240:1**, deployable extension | **~550 total; 160 excluding the nozzle** — the nozzle is ~70% of engine mass | ≈33:1 `CALC` | regen, **smooth-wall chamber with high-speed milled cooling channels**; powder-metallurgy turbopump impellers | coaxial | spark torch. Restart enabled by an **auxiliary propulsion unit (APU)** heating propellant in a **3D-printed gas generator** to re-pressurise tanks, also giving settling and orbital-adjust thrust — arguably more novel than the engine | separate high-speed H₂ and O₂ turbopumps, **not geared** (unlike RL10); speeds **n.p.** Burn up to **900 s**, up to **3 restarts** (some sources say 4+; 3 is the fetched figure) | high [A] |
+| **Snecma HM7B** | Snecma → ArianeGroup / France | HM7 from 1973; **1979-12-24** (Ariane 1 L01) → 2023; ~300 engines produced | Ariane 1 / 2 / 3 / 4 third stages (H10); Ariane 5 ECA upper stage (ESC-A) | LOX / LH2 | **5.0** | Gas generator | — | **62.2** (13,980 lbf) | **37** `n.s.` (3.7 MPa, 537 psia) — the article body says 3.5 MPa, see A.4.3 | — | **444.6** | **83.1:1** | **165** (364 lb) — remarkably light | ≈**38:1** `CALC` | regenerative | **n.p. in detail** | **n.p.**; **no restart — single burn only**, the limitation that forced Ariane 5 ECA into direct GTO insertion and motivated Vinci | single-shaft hydrogen turbopump; speeds **n.p.** Burn 735 s (A2/3), 780 s (A4), 950 s (A5 ECA) | med-high [B] |
+| **Astrium / ArianeGroup Aestus** | DASA → Astrium → ArianeGroup, Ottobrunn / Germany | 1988–95; **1997-10-30** → **2018-07-25** | Ariane 5 G and ES storable upper stage (EPS) | **N₂O₄ / MMH** | **1.9** | **Pressure-fed** (helium). No turbopump at all | — | **29.6** (6,654 lbf) | **11** `n.s.` (160 psia) — very low, the unavoidable consequence of pressure feeding: tanks must survive Pc plus feed losses | — | **324** | **84:1** | **111** | ≈27:1 `CALC` | regenerative chamber with a **cooled nozzle extension** | **132 coaxial swirl elements** — unusual for a hypergolic engine, where impinging doublets are the norm | hypergolic, none required | none. Burn **1,100 s**, **multiple re-ignitions** | med-high [B] |
+| **SEP Viking 2** | SEP / France | from 1971; **1979-12-24** → 2003 | Ariane 1 stage 1 (4×) | N₂O₄ / **UDMH** | **1.86** | Gas generator | **611** | **690** | **55** `n.s.` (5.5 MPa) | n.p. | **281** | **10:1** | **776** | n.p. | **water cooling** — see A.4.4 | impinging | hypergolic | **three coaxial pumps (ox, fuel, water) on one shaft, 2,500 kW at 10,000 rpm** | med-high [B] |
+| **SEP Viking 4B** | SEP / France | Ariane 2/3, Ariane 4 stage 2 | Ariane 2/3/4 second stage | N₂O₄ / **UH 25** (25% hydrazine hydrate in UDMH) | **1.70** | GG | **n.p.** | **805** | **55** (5.5 MPa) | n.p. | **301** | **30.8:1** | **826** | n.p. | water-augmented | impinging | hypergolic | three coaxial pumps on one shaft | med-high [B] |
+| **SEP Viking 5C** | SEP / France | Ariane 4 stage 1 (4×) | Ariane 4 first stage | N₂O₄ / UH 25 | **1.70** | GG | **678** | **758** | **~58** (~5.8 MPa) | n.p. | **301** | **10:1** | **826** | ≈**84:1** SL `CALC` | water-augmented | impinging | hypergolic | as above | med-high [B] |
+| **SEP Viking 6** | SEP / France | Ariane 4 liquid strap-ons | Ariane 4 strap-on boosters | N₂O₄ / UH 25 | **1.71** | GG | **n.p.** | **750** | **n.p.** | n.p. | **n.p.** | **n.p.** | **n.p.** | n.p. | water-augmented | impinging | hypergolic | as above | **incomplete — full parameter set not published** |
+| **ArianeGroup / ESA Prometheus** | ArianeGroup for ESA / France–Germany–Europe | ESA funding 2017-06 (€85 M) and 2021 (€135 M); **12-second test firing 2023-06** at Vernon; four consecutive ignitions demonstrated by mid-2025. **Not yet flown** | intended: **Themis** demonstrator, **Ariane Next**, **Maia** | LOX / LCH₄ | **n.p.** | **Gas generator** — notably *not* staged combustion; Europe chose the cheap cycle deliberately for a reusability demonstrator | **~980** (220,000 lbf) — **claim** | n.p. | **100** (1,450 psia) — **claim** | n.p. | **360** — variant/condition not specified in the source; presumably vacuum, **flag as ambiguous** — **claim** | **n.p.** | **n.p.** | n.p. | **n.p.** | **n.p.** | **n.p.** | **n.p.**; throttle **30–110%** claimed; reusability **5 flights** claimed; **up to 50% of the engine by metal 3D printing**; target cost ~**€1 M/engine, one tenth of Vulcain 2** — the cost target, not the performance, is the programme's stated purpose | **low [D] — every figure is a target or a claim for an unflown engine** |
+
+### Notes and contested figures — A.4
+
+**A.4.1 Vulcain 2 chamber pressure: 117.3 bar vs "115 bar".** Not a real
+disagreement; 115 bar is a rounding that appears in secondary summaries. **Use
+117.3 bar.**
+
+**A.4.2 Vulcain 1 → 2 is the mixture-ratio worked example.** Vulcain 2's vacuum
+Isp (429 s) is *lower* than Vulcain 1's (431 s) despite substantially higher
+chamber pressure, because the richer 6.1:1 mixture ratio trades Isp for propellant
+density and thrust. The optimum for a *vehicle* is not the optimum for an
+*engine*. Use this in module 05 (propellants) and module 04 (thermochemistry).
+
+**A.4.3 HM7B chamber pressure: 3.7 MPa vs 3.5 MPa.** The specification table and
+the body text of the same Wikipedia article disagree. **Use 37 bar and footnote
+the 35 bar figure.** A 5% internal inconsistency inside a single article is a
+useful reminder that tertiary sources are not self-consistent.
+
+**A.4.4 Viking's water cooling — THE distinguishing feature.** The Viking carries
+a **dedicated water tank and water pump** and injects water into the
+exhaust/nozzle to cool it. No other production launch-vehicle engine has done
+this. It is a strange, effective and entirely rational answer to cooling a
+hypergolic engine whose fuel is a poor coolant, and it is the canonical "there are
+more than four cooling methods" example for module 11. The water system is dead
+mass, which is the price.
+
+**A.4.5 Viking's reliability record.** **Only 2 failures in 958 engines across 144
+launches (1979–2003)** — one of the best records ever compiled by a booster
+engine, and a strong argument that architectural conservatism buys reliability.
+
+**A.4.6 Aestus II / RS-72.** A pump-fed ~55 kN development with Rocketdyne was
+built and tested but **never flew**. Its numbers are **low confidence** and are
+not verified in the worksheet; do not tabulate them.
+
+**A.4.7 Open verification action.** Vulcain 2 turbopump speeds currently come from
+a secondary summary of the AIAA development-status paper — read the paper.
+
+---
+
+## A.5 Japanese engines
+
+| engine | maker / country | years | vehicle | propellants | O/F | cycle | F_SL kN | F_vac kN | Pc bar | Isp_SL s | Isp_vac s | ε | dry kg | T/W | cooling | injector | ignition | turbopump | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **MHI/JAXA LE-7** | Mitsubishi Heavy Industries with NASDA/JAXA / Japan | from 1984; **first flight 1994-02-04**; **H-II Flight 8 failure 1999-11-15** (LH2 turbopump inducer) | H-II stage 1 | LOX / LH2 | 5.9 | **Fuel-rich staged combustion** | **843.5** | **1,078** | **127** `n.s.` (12.7 MPa, 1,842 psia) | **349** | **446** | **52:1** | **1,714** | **64.1:1** | regen, hydrogen-cooled | coaxial | spark torch | separate LH2 and LOX turbopumps on a fuel-rich preburner; speeds **n.p.** | med-high [B] |
+| **MHI/JAXA LE-7A** (long nozzle, operational) | MHI with JAXA / Japan | redesign after the 1999 failure; **first flight 2001-08-29** | H-IIA and H-IIB stage 1 | LOX / LH2 | **5.9** | Fuel-rich staged combustion | **870** (196,000 lbf) | **1,098** (247,000 lbf) | **120** `n.s.` (12.0 MPa, 1,740 psia) — **lower** than the LE-7's; the redesign traded performance for turbopump margin after the failure | **not given in the source** (the LE-7's 349 s is what is published) | **440** | **51.9:1** | **1,800** | **65.9:1** (vac, as published) | regen, hydrogen-cooled | coaxial | spark torch | separate LH2 and LOX turbopumps; speeds **n.p.**; throttle **72–100%** | med-high [B] |
+| *LE-7A short-nozzle variant* | — | — | — | LOX / LH2 | 5.9 | FRSC | **843** | **1,074** | 120 | n.p. | **429** | n.p. | n.p. | n.p. | — | — | — | — | med-high [B] |
+| **MHI/JAXA LE-5** | MHI with NASDA / Japan | flew on H-I from 1986 | H-I second stage | LOX / LH2 | **5.5** | **Gas generator** | — | **102.9** (23,100 lbf) | **36.5** (3.65 MPa, 529 psia) | — | **450** | **140:1** | **255** | n.p. | regenerative | coaxial | spark | qualified for up to **16 starts** | med-high [B] |
+| **MHI/JAXA LE-5A** | MHI with NASDA / Japan | H-II, 1994 | H-II second stage | LOX / LH2 | **5.0** | **Expander bleed** (nozzle + chamber) — **the world's first operational expander bleed engine** | — | **121.5** (27,300 lbf) | **39.8** (3.98 MPa, 577 psia) | — | **452** | **130:1** | **248** | n.p. | regenerative; the cooling circuit is the power source | coaxial | spark | — | med-high [B] |
+| **MHI/JAXA LE-5B** | MHI with JAXA / Japan | from 2001 | H-IIA / H-IIB second stage | LOX / LH2 | **not published** in the source | **Expander bleed** (chamber only) — a deliberate simplification, dropping the nozzle from the heat-exchange circuit to cut cost and improve reliability at a small Isp penalty | — | **137.2** (30,800 lbf) | **35.8** (3.58 MPa, 519 psia) | — | **446.8** | **not published** in the source | **285** | ≈49:1 `CALC` | regenerative | coaxial | spark | throttle **100 / 60 / 30% and a 3% idle mode** used for settling and low-thrust manoeuvres | med-high [B] |
+| **MHI/JAXA LE-9** | JAXA (design) + MHI (manufacture) / Japan | firing tests from 2017-04; **chamber-wall cracks and turbine-blade fatigue cracks found in 2020**, ~2-year delay; **first flight 2023-03-07** (H3 TF1 — the LE-9s performed correctly, the failure was in stage 2); fully successful 2024-02-17 | H3 core stage — 2 or 3 engines | LOX / LH2 | **5.9** | **Expander bleed** — by a wide margin the **largest expander-cycle-family engine ever flown** (1,471 kN vs RL10's 110 and Vinci's 180). It demonstrates the bleed variant has no practical thrust ceiling | **not published** in the source consulted | **1,471** (331,000 lbf) | **100** `n.s.` (10.0 MPa, 1,450 psia) | n.p. | **426** — well below what staged combustion would give at the same size | **37:1** | **2,400** (5,300 lb) | **62.5:1** (vac, as published) | regen; the jacket drives the turbines and the flow is then dumped | coaxial | **n.p. in detail** | **n.p. in detail** | med-high [B] |
+
+### Notes — A.5
+
+**A.5.1 The cycle distinction that matters.** An **expander bleed** cycle heats a
+*portion* of the fuel in the cooling jacket, runs it through the turbine, and then
+**dumps it overboard** rather than injecting it into the chamber. It sacrifices a
+little Isp (LE-5B's 446.8 s against LE-5A's 452 s) but **escapes the closed
+expander's thrust ceiling entirely**, because the turbine no longer has to be fed
+by the whole fuel flow. LE-5A/5B and LE-9 are the clearest flown demonstrations;
+BE-3U is the American adoption of the same idea. Japan invented and proved this
+cycle.
+
+**A.5.2 LE-7 → LE-7A: reliability-driven de-rating.** The LE-7A runs at *lower*
+chamber pressure (120 vs 127 bar) than the engine it replaced. The redesign traded
+performance for turbopump margin after the Flight 8 inducer failure. It is a clean
+case study for module 33 (systems engineering) and module 34 (failure cases).
+
+**A.5.3 LE-7A nozzle side loads.** The nozzle-extension **side-load problem at
+start-up** damaged gimbal actuators; the LE-7A's redesigned nozzle was
+specifically to fix it. Start-transient side loads deserve their own section in
+module 09, and the LE-7A is the best-documented case.
+
+**A.5.4 What is not published.** LE-7A sea-level Isp; LE-5B expansion ratio and
+mixture ratio; LE-9 sea-level thrust, injector and turbopump detail. Do not fill
+these in.
+
+---
+
+## A.6 Soviet and Russian engines
+
+**Note on Russian chamber-pressure conventions.** Soviet and Russian sources
+conventionally quote chamber pressure at the **nozzle stagnation** condition,
+whereas US sources of the Apollo era quote **injector-end** pressure, which is
+typically a few percent higher. Every Pc in this table is therefore flagged
+`noz`†. When comparing an RD-180 to an RS-25 the text must say which convention
+each number follows, or the comparison is not quite honest.
+
+| engine | maker / country | years | vehicle | propellants | O/F | cycle | F_SL kN | F_vac kN | Pc bar | Isp_SL s | Isp_vac s | ε | dry kg | T/W | cooling | injector | ignition | turbopump | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **RD-107A** | OKB-456 / NPO Energomash (Glushko) / USSR–Russia | 1954–57; **first flight 1957-05-15**; RD-107A/108A modernisation 1993–2001, crewed service 2002-10. **Still in production** | R-7; Sputnik, Vostok, Voskhod, Molniya, Soyuz, **Soyuz-2** — four strap-on boosters | LOX / **RG-1** (Russian refined kerosene) | ~2.4 — *not published in the source; low conf.* | **GG of the monopropellant steam type** — H₂O₂ catalytically decomposed drives a steam turbine, exactly as on the V-2 and Redstone. The R-7 still flies a 1940s power cycle in 2026. LN₂ for tank pressurisation | **839** (189,000 lbf) | **1,020** (230,000 lbf) | **60** `noz`† (6 MPa, 870 psia) | **263.3** | **320.2** | **not published** | **1,190** (2,620 lb) for the whole **four-chamber assembly** | ≈**72:1** SL `CALC` | regen, kerosene-cooled brazed chamber | impinging/swirl coaxial, Glushko practice | **pyrotechnic** originally; **chemical (hypergolic) ignition** on the RD-107A/108A | **single shaft**, one steam turbine driving both pumps. **Architecture: four main chambers per turbopump + 2 vernier chambers** (RD-107). Diameter 1,850 mm | med-high [B]; **n.p.** on ε and O/F |
+| **RD-108A** | NPO Energomash / USSR–Russia | as above | R-7 family **central core** | LOX / RG-1 | ~2.4 | as RD-107A | **792.4** (178,140 lbf) | **921.9** (207,240 lbf) | 60 `noz`† | **257.7** | **320.6** | n.p. | n.p. | n.p. | regen | impinging/swirl coaxial | pyrotechnic → chemical | single shaft; **four main chambers + 4 verniers** (the core needs full three-axis control, the strap-ons do not). Diameter 1,950 mm. Lower thrust than the RD-107 because it is optimised to keep burning after booster separation | med-high [B] |
+| **RD-253** | OKB-456 / NPO Energomash (Glushko) / USSR | 1961–63; **first flight 1965-07** | Proton stage 1 — **6 engines** | **N₂O₄ / UDMH** | **2.67** | **Oxidizer-rich staged combustion — the first ORSC engine ever flown**, and the origin point of the tradition leading to RD-170, RD-180, YF-100 and BE-4 | **1,470** (330,000 lbf) | **1,630** | **147** `noz`† (14.7 MPa, 2,130 psia) — in **1963**; American engines did not reach that Pc until the SSME fifteen years later | **285** | **316** | **26.2:1** | ~**1,070–1,080** | **156.2:1** — the direct payoff of ORSC: the ox-rich preburner lets the turbine run on dense cool gas at high mass flow, so the turbomachinery is small for the power | regen, fuel-cooled | coaxial | hypergolic, no igniter | single shaft, ox-rich preburner-driven. Gimbal 7.5° in a single plane; on Proton the six engines gimbal tangentially, giving three-axis control from single-plane actuators | high [A] on the variant table; **med** on cooling/injector (standard-practice inference) |
+| **RD-275** | NPO Energomash / Russia | 1987–93; maiden flight **1995** | Proton stage 1 | N₂O₄ / UDMH | 2.67 | ORSC | **1,590** | **1,750** | **157** `noz`† (2,280 psia) | **287** | **316** | 26.2:1 | ~1,070–1,080 | — | regen | coaxial | hypergolic | single shaft | high [A] |
+| **RD-275M** | NPO Energomash / Russia | 2001–05; first launch **2007-07-07**; retired with Proton (final flights 2025) | Proton stage 1 | N₂O₄ / UDMH | 2.67 | ORSC | **1,671** (376,000 lbf) | **1,832** | **165** `noz`† (2,390 psia) | **288** | **315.8** | 26.2:1 | ~1,070–1,080 | — | regen | coaxial | hypergolic | single shaft | high [A] |
+| **RD-170 / RD-171 / RD-171M** | NPO Energomash (Glushko) / USSR–Russia | from 1976; **RD-170 first flight 1985-04-13** (Energia), last 1988-11-15; RD-171 for Zenit; RD-171M finalised 2006; **RD-171MV** test article 2019, tested successfully 2021-09 for Soyuz-5/Irtysh | Energia strap-ons (RD-170); Zenit stage 1 (RD-171); Soyuz-5/Irtysh (RD-171MV) | LOX / RG-1 | **2.63** | **ORSC with four combustion chambers fed by a single turbopump** — the Glushko architecture at its limit | **7,250** (1,630,000 lbf) — **the highest-thrust liquid rocket engine ever flown**, but across four chambers; see the records note | **7,900** (1,777,000 lbf) | **245.2** `noz`† (24.52 MPa, 3,556 psia) | **309** | **337** | **36.87:1** | **9,750** | **82:1** SL (as published) | regen, kerosene-cooled | coaxial swirl | chemical (hypergolic starter fluid) | single turbopump for four chambers; **power contested 170 vs 192 MW**, see A.6.1. **RD-170's nozzles gimbal on two axes; the RD-171's on one** — that is the whole difference | high [A]; **contested** on turbopump power; RD-171/171M/171MV performance **not separately published** |
+| **RD-180** | NPO Energomash, Khimki / Russia (marketed in the US by RD AMROSS) | early–mid 1990s, derived by **halving the RD-170**; **first flight 2000-05-24** (Atlas III); deliveries ended 2021 | Atlas III and Atlas V stage 1 — 1 engine | LOX / RP-1 | **2.72** (73% O₂ / 27% RP-1) | **ORSC**, single ox-rich preburner, **two chambers on one turbopump** | **3,830** (860,000 lbf) | **4,150** (930,000 lbf) | **267** `noz`† (26.7 MPa, 3,870 psia) — the highest Pc of any engine in regular service before Raptor | **311** | **338** | **36.87:1** — identical to the RD-170; the chambers are the same part | **5,480** (12,080 lb) | **78.44:1** | regen, kerosene-cooled. **The key materials point: an inert enamel coating on every metal surface in contact with the hot oxygen-rich gas.** This single technology is what makes ORSC survivable and why the West could not simply copy the cycle | coaxial swirl | chemical / hypergolic starter | single shaft, single ox-rich preburner. Power and rpm **n.p.** (the RD-170's ~170–190 MW scales to roughly half). Mass flow **1,250 kg/s**, burn 270 s, throttle **47–100%** | high [A]; **n.p.** on turbopump power |
+| **RD-191** | NPO Energomash / Russia | design completed 2001; **first flight 2014-07** (Angara 1.2PP). In production | **Angara** family; **RD-151** (de-rated, KSLV-1); **RD-181** (Antares 230/230+); RD-193 proposed | LOX / RP-1 | **2.6** | ORSC, **single chamber** | **1,920** (430,000 lbf) at 100% | **2,090** (470,000 lbf) | **258** `noz`† (25.8 MPa, 3,740 psia) | **310.7** | **337** | **37:1** | **2,290** (5,050 lb) | **89:1** | regenerative | coaxial swirl | chemical | single shaft, ox-rich preburner; speeds **n.p.** Throttle **27–105%** — exceptionally wide for staged combustion. Gimbal to **8°**. The engine also **heats tank pressurisation gas and generates hydraulic power for vehicle control**, so it cannot be traded independently of the stage | high [A]; **n.p.** on turbopump detail |
+| **Kuznetsov NK-33** (AJ26-58/-62; NK-33A) | **Kuznetsov Design Bureau (OKB-276)**, Samara / USSR–Russia — *not* Glushko/Energomash; an **aircraft-engine bureau**, brought in after Korolev and Glushko fell out over propellant choice | NK-15 for N1 (all four launches failed 1969–72); NK-33 late 1960s–early 70s; ~150 engines hidden after the 1974 cancellation; **first successful flight 2013-04-21** on Antares — **forty years after manufacture**; supply exhausted early 2025 | N1 (NK-15); **Antares 110/120/130** (as AJ26-62); Soyuz-2.1v (NK-33A) | LOX / RP-1 | ~2.6 — *not published; low conf.* | **Oxidizer-rich closed staged combustion** | **1,510** (340,000 lbf) | **1,680** (380,000 lbf) | **148.3** `noz`† (14.83 MPa, 2,151 psia) | **297** | **331** | **not published** | **1,240** (2,730 lb) | **137:1** — for decades the highest of any booster engine; the number that made Western engineers disbelieve the engine was real in 1993 | regen, kerosene-cooled | coaxial | chemical | requires **subcooled LOX for bearing cooling** — the bearings run in the LOX flow, which constrains ground operations. Throttle **50–105%** | med-high [B]; **n.p.** on ε and O/F |
+| **KBKhA RD-0120 (11D122)** | KB Khimavtomatiki, Voronezh / USSR | from 1976; **first flight 1987-05-15** (Energia/Polyus); **last flight 1988-11-15** (Energia/Buran). **Only two flights** | Energia core stage — 4 engines | LOX / LH2 | **6.0** | **Fuel-rich staged combustion with a single-shaft turbopump driving both pumps** — structurally simpler than the RS-25's dual-shaft, dual-preburner arrangement | **1,526** (343,000 lbf) | **1,961.3** (440,900 lbf) at 106% | **219** `noz`† (21.9 MPa, 3,180 psia) | **354** | **455** | **85.7:1** | **3,450** (7,610 lb) | **57.93:1** (vac at 106%) | regen, hydrogen-cooled | coaxial | torch | single shaft. Burn nominal 480–500 s; **certified for 1,670 s** | med-high [B] — see A.6.2 |
+| **KBKhA RD-0146 / RD-0146D** | KB Khimavtomatiki, Voronezh, with P&W collaboration in the early 2000s / Russia | concept 1988 (RO-95); project start 1999; **first test firing 2001-10-09**; RD-0146D still in development as of 2022 for KVTK. **Never flown** | proposed: Proton, Angara (KVTK), Onega, Rus-M | LOX / LH2 | **n.p.** | **Closed expander** — turbopumps driven by waste heat absorbed in the nozzle and chamber. **The first Russian expander engine**, with **no preburner and no gas generator at all** | — | **68.6** (15,400 lbf) | **59** `noz`† (5.9 MPa, 860 psia) | — | **470** — **if correct, the highest Isp ever demonstrated by a chemical rocket engine**, above the RL10B-2's flown 465.5 s. **Test-stand figure for an engine that has never flown; see A.6.3** | **not published**; the nozzle extension is **uncooled** | **n.p.** | n.p. | regen; the jacket is the power cycle | **n.p.** | **n.p.** | **separate fuel and oxidiser turbopumps**, with the **fuel turbopump running at over 120,000 rpm** — the highest published turbopump speed of any rocket engine. Capable of **five firings**, thrust control in two planes | med [C] on F/Pc/rpm; **low [D]** on the 470 s Isp |
+
+### Notes and contested figures — A.6
+
+**A.6.1 RD-170 turbopump power: 170 MW vs 192 MW.** Wikipedia's article body says
+~170 MW; its specification table says 192 MW — a 13% disagreement inside a single
+article. Print "**approximately 170–190 MW**" and note that it is the most
+powerful rocket turbopump ever built either way, by a factor of about three over
+the RS-25's HPFTP. Do not pick one to two significant figures.
+
+**A.6.2 RD-0120 vs RS-25 — the comparison to make, with its caveat.** The RD-0120
+achieved **slightly higher Isp (455 vs 452.3 s) and higher chamber pressure (219
+vs 206 bar) with lower complexity and cost — but it was expendable**, whereas the
+RS-25 was designed for 55 reuses. It also **achieved combustion stability without
+the acoustic resonance cavities the RS-25 requires**, which is a real and specific
+design difference, not just a claim. **Caveat:** the comparative claims about
+resonance cavities and cost come from the same single source and should be
+corroborated before being printed as fact.
+
+**A.6.3 The RD-0146's 470 s — the highest Isp ever, but never flown.** It exceeds
+the RL10B-2's flown 465.5 s. Keep flown and unflown engines in separate tables, or
+mark unflown engines unmistakably; otherwise the book appears to claim a record
+that has not been demonstrated in flight. The same applies to the F-1A's 1,800,000
+lbf and the J-2S's 436 s.
+
+**A.6.4 "Highest thrust engine" — RD-170 vs F-1.** The RD-170 produces more total
+thrust (7,900 kN vac) than the F-1 (7,770 kN vac), but across **four combustion
+chambers**. The F-1 remains the highest-thrust **single-chamber** engine ever
+flown. Both records are real and the text must state which one it means every
+single time, or it will be wrong in one direction or the other.
+
+**A.6.5 The Glushko multi-chamber architecture.** Four (or two) chambers per
+turbopump was adopted because Glushko could not solve combustion instability in a
+single large chamber. It became the defining Soviet layout, running from RD-107
+through RD-253 to RD-170, and the RD-170 family is uniquely *modular* — four
+chambers (RD-170) → two (RD-180) → one (RD-191) from a single chamber design.
+The cost is that one turbopump failure loses all thrust.
+
+**A.6.6 Counting chambers, not engines.** The R-7 is often described as having
+"32 nozzles" at liftoff. That is chambers: four RD-107s (4 main + 2 vernier each)
+plus one RD-108 (4 main + 4 vernier). Always say whether a count is engines,
+chambers, or nozzles.
+
+---
+
+## A.7 Chinese engines
+
+| engine | maker / country | years | vehicle | propellants | O/F | cycle | F_SL kN | F_vac kN | Pc bar | Isp_SL s | Isp_vac s | ε | dry kg | T/W | cooling | injector | ignition | turbopump | conf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **AALPT YF-100** | Academy of Aerospace Liquid Propulsion Technology (AALPT / Xi'an), CASC / China | began early 2000s, drawing on RD-120 technology transferred in the 1990s; first 300-second test 2007-11; **first flight 2015-09-20** (Long March 6). In service | LM-5 boosters, LM-6, LM-7, LM-8; **YF-100K** uprated (LM-12, LM-10); **YF-100M** vacuum-optimised (LM-10 stage 2); **YF-100GBI** with dual roll-control nozzles (LM-6) | LOX / RP-1 | **2.6, adjustable ±10%** | **Oxidizer-rich staged combustion.** China is the fourth entity to fly ORSC — after the USSR/Russia, and **ahead of the US** (BE-4, 2024) | **1,200** (270,000 lbf) | **1,340** (300,000 lbf) | **180** `noz`† (18 MPa, 2,600 psia) | **300** | **335** | **35:1** | **Not published.** T/W is widely rumoured at ~78–80 but is not sourced — **do not print a figure** | **n.p.** | regen, kerosene-cooled | coaxial | chemical | **single shaft**: a **single-stage oxygen pump** and a **two-stage kerosene pump** on one shaft, ox-rich preburner-driven. Throttle **65–105%**; burn ~155 s (estimated); diameter 1.338 m | med-high [B]; **n.p.** on dry mass and T/W |
+| **BAPI YF-75** | Beijing Aerospace Propulsion Institute (BAPI / AALPT Beijing), CASC / China | development began 1986; **first flight 1994-02-08** (Long March 3A) | LM-3A/3B/3C third stage — 2 engines | LOX / LH2 | **5.1, adjustable** | **Gas generator** | — | **78.45** (17,640 lbf) | **37.6** `noz`† (3.76 MPa, 545 psia) | — | **438** | **80:1** | **550** — *high for the thrust (≈14.5:1 T/W), which suggests the figure may cover the two-engine assembly. Med conf.* | ≈14.5:1 as published — see left | **split — regen in the chamber, dump cooling in the nozzle.** Dump cooling (routing coolant through the nozzle and expelling it) is rare enough that the YF-75 is one of the few good flown examples | coaxial | spark/torch | **single-shaft hydrogen turbopump at 42,000 rpm**; burn 470 s | med [C] |
+| **BAPI YF-75D** | BAPI, CASC / China | development from ~2006 for Long March 5 | Long March 5 second stage — 2 engines | LOX / LH2 | **n.p.** | **Closed expander cycle, "like the RL10"** — a change of cycle from the YF-75 despite the shared designation; they share a name and not a design | — | commonly quoted **88.36 kN** — **not confirmed in the source fetched; treat as unverified** | **not published** | — | commonly quoted **~442 s** — **unverified** | **n.p.** | **n.p.** | n.p. | n.p. | **n.p.** | **n.p.** | **n.p.** | **low [D]** — performance figures not confirmed |
+
+### Notes — A.7
+
+**A.7.1 YF-75 → YF-75D is a cycle change, not an uprate.** GG upper stage first,
+closed expander second — the same trajectory Japan (LE-5 → LE-5A) and Europe
+(HM7B → Vinci) followed. Flag the shared designation as a trap.
+
+**A.7.2 Open verification action.** YF-75D thrust and Isp are unconfirmed; find a
+Chinese primary source or a credible translation before tabulating them in a
+module.
+
+**A.7.3 YF-100 in context.** Chamber pressure and Isp trail the RD-180 by a clear
+margin; it is a capable second-generation ORSC engine, not a frontier one. It
+underpins China's entire current launch fleet and the crewed lunar programme
+(Long March 10).
