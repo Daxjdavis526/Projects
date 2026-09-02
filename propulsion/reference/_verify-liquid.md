@@ -1229,3 +1229,382 @@ is labelled as one. The textbook should say so on the page, not bury it in a foo
 - **CONFIDENCE: medium** on thrust and Isp; **low/not published** on everything else.
 
 ---
+
+## Part 4 — European engines
+
+### Snecma / ArianeGroup Vulcain 2 and Vulcain 2.1
+
+- **Manufacturer / country:** Snecma Moteurs → **ArianeGroup**, France (prime).
+  International workshare: **Avio (Italy)** LOX turbopump; **GKN Aerospace / Volvo Aero
+  (Sweden)** turbines and nozzle.
+- **Development:** Vulcain 1 from **1988**, first flight **4 June 1996** (Ariane 5 G,
+  the maiden flight that failed for guidance-software reasons unrelated to the engine);
+  last Vulcain 1 flight 18 December 2009. **Vulcain 2** first flight **12 February 2005**
+  (Ariane 5 ECA), last flight **5 July 2023**. **Vulcain 2.1** development from **2014**,
+  first nozzle delivered June 2017, **first flight 9 July 2024** (Ariane 6).
+- **Vehicles:** Ariane 5 (Vulcain 1: G/G+/GS; Vulcain 2: ECA/ECA+/ES), Ariane 6 (Vulcain 2.1).
+- **Propellants:** LOX / LH2.
+- **Mixture ratio:** Vulcain 1 **5.3:1**; **Vulcain 2 6.1:1** — the increase is the
+  single biggest source of the thrust uprate.
+- **Cycle:** **Gas generator.** Europe deliberately did not attempt staged combustion for
+  Ariane 5, and Vulcain is the reference example of a large, well-executed GG hydrogen engine.
+- **Thrust (vacuum):** Vulcain 1 **1,140 kN (256,000 lbf)**;
+  **Vulcain 2: 1,359 kN (306,000 lbf)**; **Vulcain 2.1: 1,324 kN (298,000 lbf)**.
+  Note Vulcain 2.1 is slightly *lower* than Vulcain 2 — the 2.1 is a manufacturing
+  simplification, not a performance uprate.
+  Sea-level thrust is not separately quoted in the sources fetched (~960 kN for Vulcain 2
+  is commonly cited but **treat as unverified**).
+- **Chamber pressure:** Vulcain 1 **100 bar (1,450 psia)**;
+  **Vulcain 2 117.3 bar (1,701 psia)**; **Vulcain 2.1 120.8 bar (1,752 psia)**.
+  Some secondary sources round Vulcain 2 to "115 bar" — a rounding, not a real disagreement.
+- **Isp (vacuum):** Vulcain 1 **431 s**; **Vulcain 2 429 s**; Vulcain 2.1 not separately
+  published. Vulcain 2's Isp is *lower* than Vulcain 1's despite higher pc, because the
+  richer 6.1:1 mixture ratio trades Isp for density and thrust. **This is an excellent
+  worked example for the mixture-ratio optimisation chapter** — the optimum for a
+  *vehicle* is not the optimum for an *engine*.
+- **Expansion ratio:** Vulcain 1 **45.1:1**; **Vulcain 2 58.2:1.**
+- **Dry mass:** Vulcain 1 **1,300 kg**; **Vulcain 2 1,800 kg**; **Vulcain 2.1 2,000 kg.**
+- **Thrust-to-weight:** Vulcain 2 ≈ **77:1** vacuum (computed).
+- **Mass flow:** Vulcain 1 ~235 kg/s total, of which 41.2 kg/s hydrogen.
+- **Cooling:** Regenerative **tube-wall** chamber. **Vulcain 2 added film cooling to the
+  lower nozzle**, injecting turbine exhaust — needed because the higher pc and richer
+  mixture raised the wall heat flux.
+- **Injector:** Coaxial shear (LOX post / H2 annulus).
+- **Ignition:** Pyrotechnic/spark torch, ground-started only — Vulcain does not restart.
+- **Turbopump:** **Two separate turbopumps** on a common gas generator.
+  Vulcain 1: **LOX pump 13,600 rpm / 3 MW; LH2 pump 34,000 rpm / 12 MW.**
+  Vulcain 2: **LOX pump ~12,300 rpm; LH2 pump ~36,500 rpm** *(medium confidence — from a
+  secondary summary of the Vulcain 2 development paper)*.
+- **Major innovation:** Vulcain 2.1's nozzle — **90% fewer parts, 40% lower cost, 30%
+  faster to produce** than the Vulcain 2 nozzle, achieved by laser-welded sandwich
+  construction. It is the best-documented example of manufacturing-driven redesign in
+  European propulsion.
+- **Major limitation:** GG cycle and no restart; Ariane 5 needed a separate storable
+  upper stage for anything beyond a direct injection.
+- **Historical significance:** Gave Europe independent heavy-lift access for three decades.
+- **SOURCES:** Wikipedia, *Vulcain (rocket engine)* —
+  https://en.wikipedia.org/wiki/Vulcain_(rocket_engine) (fetched);
+  ESA, *Ariane 5 Vulcain engine* — https://www.esa.int/Enabling_Support/Space_Transportation/Ariane/Ariane_5_Vulcain_engine;
+  *Development Status of the Vulcain 2 Engine* (AIAA, via search summary);
+  Encyclopedia Astronautica *Vulcain 2* (pointer).
+- **CONFIDENCE: high** on thrust, pc, Isp, ε, mass, mixture ratio and Vulcain 1 turbopump;
+  **medium** on Vulcain 2 turbopump speeds; **low** on sea-level thrust (not sourced).
+
+---
+
+### ArianeGroup Vinci
+
+- **Manufacturer / country:** ArianeGroup (Snecma heritage), France, with European workshare.
+- **Development:** Began **1998** — a 26-year development. **First flight 9 July 2024**
+  (Ariane 6 maiden flight).
+- **Vehicle:** Ariane 6 upper stage (ULPM).
+- **Propellants:** LOX / LH2. **Mixture ratio: 6.1:1** (some sources round to 6:1).
+  Flow rates **34.1 kg/s LOX, 5.59 kg/s LH2** — which back-computes to 6.10, confirming
+  the ratio internally.
+- **Cycle:** **Closed expander.** The first European expander-cycle engine, and by some
+  margin the highest-thrust closed expander ever flown (180 kN versus the RL10's 110 kN).
+- **Thrust:** **180 kN (40,000 lbf) vacuum.**
+- **Chamber pressure:** **60 bar (870 psia).** Typical of the expander cycle's heat-balance limit.
+- **Isp:** **457.2 s vacuum.**
+- **Expansion ratio:** **240:1**, with a deployable nozzle extension.
+- **Dry mass:** **~550 kg total; 160 kg excluding the nozzle.** The nozzle is ~70% of the
+  engine mass — a striking figure worth using.
+- **Thrust-to-weight:** ≈ 33:1 (computed).
+- **Burn time / restarts:** up to **900 s**, up to **3 restarts** (some sources say 4+;
+  3 is the figure in the fetched source).
+- **Cooling:** Regenerative, **smooth-wall** chamber technology with **high-speed milled
+  cooling channels**; **powder-metallurgy turbopump impellers**.
+- **Injector / ignition:** Coaxial; spark torch. Restart is enabled by an **auxiliary
+  propulsion unit (APU)** that heats propellant in a **3D-printed gas generator** to
+  re-pressurise the tanks and provides low-thrust settling and orbital adjustment.
+  The APU is arguably more novel than the engine.
+- **Turbopump:** Separate high-speed hydrogen and oxygen turbopumps (not geared, unlike
+  the RL10). Speeds **not published** in the sources fetched.
+- **Major innovation:** Scaling the closed expander cycle to 180 kN, and the APU-based
+  multi-restart architecture.
+- **Major limitation:** A 26-year development for an engine whose vehicle flies a few
+  times a year; the expander cycle still caps chamber pressure at 60 bar.
+- **Historical significance:** Gives Europe multi-burn, high-Isp upper-stage capability
+  for the first time, closing a gap that had existed since Ariane 1.
+- **SOURCES:** Wikipedia, *Vinci (rocket engine)* —
+  https://en.wikipedia.org/wiki/Vinci_(rocket_engine) (fetched);
+  *VINCI®, the European reference for Ariane 6 upper stage* (EUCASS 2019) —
+  https://www.eucass-proceedings.eu/articles/eucass/pdf/2019/01/eucass2019_481.pdf;
+  eoPortal, *Ariane 6* — https://www.eoportal.org/other-space-activities/ariane6.
+- **CONFIDENCE: high** on thrust, pc, Isp, ε, mass, mixture ratio, flows and cycle.
+
+---
+
+### Snecma HM7B
+
+- **Manufacturer / country:** Snecma (now ArianeGroup), France.
+- **Development:** HM7 from **1973**; HM7B **first flight 24 December 1979** (Ariane 1
+  maiden flight, L01). Retired with Ariane 5 ECA in 2023. **Nearly 300 engines produced.**
+- **Vehicles:** Ariane 1 third stage; Ariane 2/3 third stage; Ariane 4 third stage (H10);
+  Ariane 5 ECA upper stage (ESC-A).
+- **Propellants:** LOX / LH2. **Mixture ratio: 5:1.**
+- **Cycle:** Gas generator.
+- **Thrust:** **62.2 kN (13,980 lbf) vacuum.**
+- **Chamber pressure:** **3.7 MPa = 37 bar (537 psia)** per the specification table;
+  the article body says 3.5 MPa. **Minor internal disagreement — use 37 bar and note it.**
+- **Isp:** **444.6 s vacuum.**
+- **Expansion ratio:** **83.1:1.**
+- **Dry mass:** **165 kg (364 lb)** — remarkably light.
+- **Thrust-to-weight:** ≈ **38:1** (computed).
+- **Burn time:** 735 s (Ariane 2/3), 780 s (Ariane 4), 950 s (Ariane 5 ECA).
+- **Restart:** **None.** Single-burn only. This is the limitation that forced Ariane 5 ECA
+  into direct GTO insertion and eventually motivated Vinci.
+- **Cooling:** Regenerative.
+- **Injector / ignition / turbopump:** **Not published in detail.** Single-shaft hydrogen
+  turbopump. Speeds not published.
+- **Major innovation:** 444.6 s from a gas-generator cycle at only 37 bar — achieved
+  almost entirely through the 83:1 nozzle and low mass. It is the demonstration that
+  upper-stage Isp is dominated by expansion ratio, not chamber pressure.
+- **Major limitation:** No restart, and low thrust.
+- **Historical significance:** The engine of Europe's first orbital launch, in service for
+  44 years across four launcher generations.
+- **SOURCES:** Wikipedia, *HM7B* — https://en.wikipedia.org/wiki/HM7B (fetched).
+- **CONFIDENCE: medium-high** on the performance set (single source, but internally
+  consistent and widely corroborated); **not published** on injector and turbopump detail.
+
+---
+
+### Astrium / ArianeGroup Aestus
+
+- **Manufacturer / country:** DASA / Astrium / ArianeGroup, **Ottobrunn Space Propulsion
+  Centre**, Germany.
+- **Development:** **1988–1995.** **First flight 30 October 1997** (Ariane 5 G, flight 502).
+  **Last flight 25 July 2018.** Retired.
+- **Vehicles:** Ariane 5 G and ES storable upper stage (EPS).
+- **Propellants:** **N2O4 / MMH**, storable hypergolic. **Mixture ratio: 1.9.**
+- **Cycle:** **Pressure-fed** (helium). No turbopump at all.
+- **Thrust:** **29.6 kN (6,654 lbf) vacuum.**
+- **Chamber pressure:** **11 bar (160 psia)** — very low, which is the direct and
+  unavoidable consequence of pressure feeding: the tanks must survive the chamber pressure
+  plus the feed losses.
+- **Isp:** **324 s vacuum.**
+- **Expansion ratio:** **84:1.**
+- **Dry mass:** **111 kg.**
+- **Thrust-to-weight:** ≈ 27:1 (computed).
+- **Burn time:** **1,100 s.** **Multiple re-ignitions.**
+- **Cooling:** Regenerative chamber with a **cooled nozzle extension**.
+- **Injector:** **132 coaxial swirl elements** producing swirl mixing — an unusual choice
+  for a hypergolic engine, where impinging doublets are the norm, and worth noting.
+- **Ignition:** Hypergolic; none required.
+- **Major innovation:** Achieving 324 s at only 11 bar through a large 84:1 nozzle and a
+  well-mixed swirl injector — a good illustration that low chamber pressure need not mean
+  poor Isp in vacuum.
+- **Major limitation:** Low thrust and low chamber pressure make it useless for anything
+  but upper-stage/orbital work; ATV missions needed very long burns.
+- **Historical significance:** The workhorse of Ariane 5's ATV and dual-launch GTO
+  missions. Aestus II / **RS-72** (a pump-fed, ~55 kN development with Rocketdyne) was
+  developed and tested but **never flew**.
+- **SOURCES:** Wikipedia, *Aestus* — https://en.wikipedia.org/wiki/Aestus (fetched).
+- **CONFIDENCE: medium-high** on the performance set; **low** on the RS-72/Aestus II
+  numbers, which are not verified here.
+
+---
+
+### SEP Viking (Ariane 1–4)
+
+- **Manufacturer / country:** Société Européenne de Propulsion (SEP), France.
+- **Development:** From 1971. **First flight 24 December 1979** (Ariane 1). Last flight
+  **2003** (final Ariane 4). Retired.
+- **Vehicles:** Ariane 1 first stage (4× Viking 2) and second stage (1× Viking 4);
+  Ariane 2/3 (Viking 5/4B); Ariane 4 first stage (4× Viking 5C), second stage (Viking 4B),
+  liquid strap-on boosters (Viking 6).
+- **Propellants:** N2O4 / **UDMH** (Viking 2) and N2O4 / **UH 25** (25% hydrazine hydrate
+  in UDMH) for the later variants.
+- **Mixture ratio:** Viking 2 **1.86**; Viking 4B/5C **1.70**; Viking 6 **1.71**.
+- **Cycle:** Gas generator.
+- **Performance by variant:**
+
+  | | Viking 2 | Viking 4B | Viking 5C | Viking 6 |
+  |---|---|---|---|---|
+  | Thrust SL | 611 kN | — | 678 kN | — |
+  | Thrust vac | 690 kN | 805 kN | 758 kN | 750 kN |
+  | pc | 5.5 MPa (55 bar) | 5.5 MPa | ~5.8 MPa | — |
+  | Isp vac | 281 s | 301 s | 301 s | — |
+  | ε | 10:1 | 30.8:1 | 10:1 | — |
+  | Dry mass | 776 kg | 826 kg | 826 kg | — |
+
+- **Thrust-to-weight:** Viking 5C ≈ **84:1** sea level (computed).
+- **Cooling:** **THE distinguishing feature — water cooling.** The Viking carries a
+  **dedicated water tank and water pump**, and injects water into the exhaust/nozzle to
+  cool it. No other production launch-vehicle engine has done this. It is a strange,
+  effective, and entirely rational answer to cooling a hypergolic engine whose fuel is a
+  poor coolant, and the textbook should use it as the canonical "there are more than four
+  cooling methods" example.
+- **Injector / ignition:** Impinging; hypergolic, no igniter.
+- **Turbopump:** **Three coaxial pumps** (oxidizer, fuel, water) on one shaft,
+  **2,500 kW at 10,000 rpm**.
+- **Major innovation:** Water-augmented cooling, and the coaxial three-fluid turbopump.
+- **Major limitation:** Toxic propellants, modest Isp, and the water system is dead mass.
+- **Historical significance:** **Only 2 failures in 958 engines across 144 launches
+  (1979–2003)** — one of the best reliability records ever compiled by a booster engine,
+  and a strong argument that architectural conservatism buys reliability.
+- **SOURCES:** Wikipedia, *Viking (rocket engine)* —
+  https://en.wikipedia.org/wiki/Viking_(rocket_engine) (fetched).
+- **CONFIDENCE: medium-high** on the variant table and the water-cooling description;
+  **incomplete** for Viking 6, whose full parameter set is not published.
+
+---
+
+### ArianeGroup / ESA Prometheus — **ESA AND ARIANEGROUP CLAIMS, UNFLOWN**
+
+- **Manufacturer / country:** ArianeGroup for ESA. France/Germany/Europe.
+- **Development:** ESA funding from **June 2017 (€85 M)**, further **€135 M in 2021**.
+  **12-second test firing June 2023** at Vernon, France. By mid-2025 the second engine
+  model demonstrated **four consecutive ignitions** — "a first in Europe for this type of
+  engine". **Not yet flown.**
+- **Vehicles (intended):** **Themis** reusable demonstrator, **Ariane Next**, **Maia**.
+- **Propellants:** LOX / liquid methane. **Mixture ratio: not published.**
+- **Cycle:** **Gas generator.** Notably *not* staged combustion — Europe chose the cheap
+  cycle deliberately for a reusability demonstrator.
+- **Thrust:** **~980 kN (220,000 lbf) sea level.**
+- **Chamber pressure:** **100 bar (1,450 psia).**
+- **Isp:** **360 s** (variant/condition not specified in the source; presumably vacuum —
+  **flag as ambiguous**).
+- **Expansion ratio, dry mass:** **Not published.**
+- **Throttle:** **30–110%** — an unusually wide claimed range.
+- **Reusability:** **5 flights** claimed.
+- **Manufacturing:** **Up to 50% of the engine by metal 3D printing.**
+- **Target cost:** ~**€1 million per engine** — explicitly **one tenth the cost of
+  Vulcain 2**. The cost target, not the performance, is the programme's stated purpose.
+- **Cooling / injector / ignition / turbopump:** **Not published.**
+- **Major innovation:** Cost as the primary design variable in a European engine, for the
+  first time.
+- **Major limitation:** Unflown; all figures are programme targets, not measured results.
+- **Historical significance:** Pending. Its importance is as Europe's answer to Merlin,
+  and the textbook should treat it as a statement of intent.
+- **SOURCES:** Wikipedia, *Prometheus (rocket engine)* —
+  https://en.wikipedia.org/wiki/Prometheus_(rocket_engine) (fetched); ESA press material (pointer).
+- **CONFIDENCE: low.** Every figure is a target or a claim for an unflown engine.
+
+---
+
+## Part 5 — Japanese engines
+
+### MHI / JAXA LE-7A
+
+- **Manufacturer / country:** Mitsubishi Heavy Industries with JAXA/NASDA. Japan.
+- **Development:** LE-7 from 1984 (first flight H-II, **4 February 1994**); the LE-7A
+  redesign followed the **H-II Flight 8 failure (15 November 1999)**, in which an LE-7
+  LH2 turbopump inducer failed. LE-7A first flight **29 August 2001** (H-IIA).
+- **Vehicles:** H-II (LE-7), H-IIA and H-IIB first stages (LE-7A).
+- **Propellants:** LOX / LH2. **Mixture ratio: 5.9:1.**
+- **Cycle:** **Fuel-rich staged combustion.** Japan is one of only three countries
+  (with the US and USSR/Russia) to fly staged combustion on hydrogen.
+- **Thrust (LE-7A):**
+  - Short-nozzle: **843 kN SL / 1,074 kN vac**, Isp **429 s** vac.
+  - **Long-nozzle (operational): 870 kN (196,000 lbf) SL / 1,098 kN (247,000 lbf) vac**,
+    Isp **440 s** vac, **ε 51.9:1**.
+  (LE-7 original: 843.5 kN SL / 1,078 kN vac, Isp 349 s SL / 446 s vac, ε 52:1.)
+- **Chamber pressure:** LE-7 **12.7 MPa (127 bar, 1,842 psia)**;
+  **LE-7A 12.0 MPa (120 bar, 1,740 psia)** — the LE-7A runs at *lower* chamber pressure
+  than the LE-7. The redesign traded performance for turbopump margin after the failure,
+  which is a good case study in reliability-driven de-rating.
+- **Dry mass:** LE-7 **1,714 kg**; **LE-7A 1,800 kg**.
+- **Thrust-to-weight:** LE-7 **64.1:1**; **LE-7A 65.9:1** (vacuum, as published).
+- **Throttle:** **72–100%** (LE-7A).
+- **Cooling:** Regenerative, hydrogen-cooled.
+- **Injector / ignition:** Coaxial; spark torch. **Turbopump:** separate LH2 and LOX
+  turbopumps on a fuel-rich preburner; speeds **not published** here.
+- **Major innovation:** Japan's independent mastery of fuel-rich staged combustion.
+- **Major limitation:** The nozzle-extension **side-load problem at start-up** damaged
+  gimbal actuators; the LE-7A's redesigned nozzle was specifically to fix it. Side loads
+  during nozzle start transients are worth a section of their own in the textbook and the
+  LE-7A is the best-documented case.
+- **Historical significance:** The third national staged-combustion hydrogen engine,
+  achieved on a fraction of the American or Soviet budget.
+- **SOURCES:** Wikipedia, *LE-7* — https://en.wikipedia.org/wiki/LE-7 (fetched);
+  JAXA/MHI published material (pointer).
+- **CONFIDENCE: medium-high.** Note that the LE-7A's SL Isp is not given in the source;
+  only the vacuum figures and the LE-7's 349 s SL are published there.
+
+---
+
+### MHI / JAXA LE-5B
+
+- **Manufacturer / country:** Mitsubishi Heavy Industries with JAXA/NASDA. Japan.
+- **Development:** LE-5 (gas generator) flew on H-I from 1986; **LE-5A** introduced the
+  **expander bleed cycle** (H-II, 1994) — the **world's first operational expander bleed
+  engine**; **LE-5B** simplified it further for H-IIA from 2001.
+- **Vehicles:** LE-5: H-I second stage. LE-5A: H-II second stage. **LE-5B: H-IIA / H-IIB
+  second stage.**
+- **Propellants:** LOX / LH2.
+- **Cycle and performance across the family:**
+
+  | | LE-5 | LE-5A | LE-5B |
+  |---|---|---|---|
+  | Cycle | Gas generator | Expander **bleed** (nozzle + chamber) | Expander **bleed** (chamber only) |
+  | Thrust vac | 102.9 kN (23,100 lbf) | 121.5 kN (27,300 lbf) | **137.2 kN (30,800 lbf)** |
+  | pc | 3.65 MPa (36.5 bar / 529 psia) | 3.98 MPa (39.8 bar / 577 psia) | **3.58 MPa (35.8 bar / 519 psia)** |
+  | Isp vac | 450 s | 452 s | **446.8 s** |
+  | ε | 140:1 | 130:1 | not published |
+  | Dry mass | 255 kg | 248 kg | **285 kg** |
+  | O/F | 5.5 | 5.0 | not published |
+
+- **Thrust-to-weight (LE-5B):** ≈ 49:1 (computed).
+- **The cycle distinction that matters:** an **expander bleed** cycle heats a *portion* of
+  the fuel in the cooling jacket, runs it through the turbine, and then **dumps it
+  overboard** rather than injecting it into the chamber. It sacrifices a little Isp
+  (hence LE-5B's 446.8 s against LE-5A's 452 s) but **escapes the closed expander's thrust
+  ceiling entirely**, because the turbine no longer has to be fed by the whole fuel flow.
+  The LE-5A/5B and the LE-9 are the clearest flown demonstrations of this, and the
+  BE-3U is the American adoption of the same idea.
+- **Throttle:** LE-5B operates at **100%, 60%, 30% and a 3% idle mode** — the idle mode is
+  used for settling and low-thrust manoeuvres.
+- **Restart:** LE-5 was qualified for up to **16 starts**.
+- **Cooling:** Regenerative; the cooling circuit is the power source.
+- **Injector / ignition:** Coaxial; **spark ignition**.
+- **Major innovation:** The world's first operational expander bleed engine (LE-5A), and
+  the LE-5B's deliberate simplification — dropping the nozzle from the heat-exchange
+  circuit — to cut cost and improve reliability at a small Isp penalty.
+- **Major limitation:** The bleed flow is a real Isp loss; and the LE-5B's chamber pressure
+  is very low.
+- **Historical significance:** Japan invented and proved the expander bleed cycle, which
+  is now the basis of the LE-9 and (in a different form) the BE-3U.
+- **SOURCES:** Wikipedia, *LE-5* — https://en.wikipedia.org/wiki/LE-5 (fetched).
+- **CONFIDENCE: medium-high** on the table; **not published** for LE-5B expansion ratio
+  and mixture ratio in this source.
+
+---
+
+### MHI / JAXA LE-9
+
+- **Manufacturer / country:** JAXA (design) and Mitsubishi Heavy Industries (manufacture). Japan.
+- **Development:** Firing tests from **April 2017**; the programme suffered **combustion
+  chamber wall cracks and turbine blade fatigue cracks** discovered in 2020, delaying H3
+  by roughly two years. **First flight 7 March 2023** (H3 TF1 — the LE-9s performed
+  correctly; the failure was in the second stage). **Second flight 17 February 2024**,
+  fully successful. In production.
+- **Vehicle:** **H3** core stage — two or three engines.
+- **Propellants:** LOX / LH2. **Mixture ratio: 5.9.**
+- **Cycle:** **Expander bleed** — and this is the headline. The LE-9 is by a wide margin
+  the **largest expander-cycle-family engine ever flown**, at 1,471 kN against the
+  RL10's 110 kN and Vinci's 180 kN. It demonstrates that the bleed variant has no
+  practical thrust ceiling.
+- **Thrust:** **1,471 kN (331,000 lbf) vacuum.** Sea-level thrust **not published** in the
+  source consulted.
+- **Chamber pressure:** **10.0 MPa = 100 bar (1,450 psia).**
+- **Isp:** **426 s vacuum.**
+- **Expansion ratio:** **37:1.**
+- **Dry mass:** **2,400 kg (5,300 lb).**
+- **Thrust-to-weight:** **62.5:1** (vacuum, as published).
+- **Cooling:** Regenerative; the jacket drives the turbines and the flow is then dumped.
+- **Injector / ignition / turbopump:** Coaxial; **not published** in detail here.
+- **Major innovation:** Booster-class thrust from a cycle with no preburner and no gas
+  generator — the simplest large hydrogen engine ever built, with correspondingly low
+  part count and (intended) low cost.
+- **Major limitation:** Isp of 426 s is well below what staged combustion would give at
+  the same size; and the development's turbine-crack problems showed the thermal margins
+  are tight.
+- **Historical significance:** The clearest demonstration that the expander bleed cycle
+  scales, which reopens a design space the industry had written off.
+- **SOURCES:** Wikipedia, *LE-9* — https://en.wikipedia.org/wiki/LE-9 (fetched);
+  JAXA H3 programme material (pointer).
+- **CONFIDENCE: medium-high** on the published performance set; **not published** on
+  sea-level thrust, injector and turbopump detail.
+
+---
