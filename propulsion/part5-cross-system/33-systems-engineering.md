@@ -2079,8 +2079,9 @@ programme where each engine must independently demonstrate the full life?
 depth of 2.0 m under an acceleration of 0.6 $g_0$. Compute the first slosh
 mode frequency. Recompute at the end of the burn when the depth is 0.3 m and
 the acceleration is 1.4 $g_0$. The vehicle's rigid-body control frequency is
-0.35 Hz; comment on whether an interaction is plausible and what you would do
-about it.
+0.5 Hz; comment on whether an interaction is plausible, on what the two
+results together tell you about how the slosh frequency behaves over a burn,
+and on what you would do about it.
 
 **P7.** A 445 N apogee engine has a thrust vector offset from the spacecraft
 centre of mass by an effective 2.0 mm and an angular misalignment of 0.15° on
@@ -2132,8 +2133,8 @@ parking orbit to a 1,750 m/s escape-assist manoeuvre, with **first flight in
 - **Option P — pressure-fed, storable (N₂O₄/MMH).** $I_{sp} = 322$ s,
   $p_c = 11$ bar. Tanks must hold roughly 18 bar; estimate tank plus
   pressurisation mass at 22 % of the propellant load. Thruster and feed
-  hardware derived from qualified components; development estimate 22 months
-  with a 4-month uncertainty.
+  hardware derived from qualified components; engine dry mass 40 kg;
+  development estimate 22 months with a 4-month uncertainty.
 - **Option U — pump-fed, storable (N₂O₄/MMH).** $I_{sp} = 338$ s,
   $p_c = 60$ bar. Tanks at 4 bar; estimate tank plus pressurisation mass at
   9 % of the propellant load. New turbopump; development estimate 30 months
