@@ -1147,7 +1147,9 @@ flowchart TD
   L3 -- yes --> LIQ2["LIQUID hydrolox<br/>RL10 / Vinci class"]
   L3 -- no --> SOL1
 
-  Q1 -- no --> Q2{"I_t > 10^5 N·s?"}
+  Q1 -- no --> QEP{"Δv may be spread over<br/>weeks–months, and<br/>power > 100 W spare?"}
+  QEP -- yes --> EP["ELECTRIC<br/>Hall / gridded ion<br/>1,300–3,500 s"]
+  QEP -- no --> Q2{"I_t > 10^5 N·s?"}
   Q2 -- yes --> Q2a{"Restart / precise<br/>cut-off required?"}
   Q2a -- yes --> BIP["STORABLE BIPROPELLANT<br/>N2O4/MMH, pressure-fed<br/>SPS / Aestus / R-4D class"]
   Q2a -- no --> KICK["SOLID KICK MOTOR<br/>Star-48 class<br/>(check Δv vs 610 m/s crossover)"]
@@ -1159,9 +1161,6 @@ flowchart TD
   Q3 -- no --> Q4{"Response < 10 ms<br/>or µN impulse bits?"}
   Q4 -- yes --> CG["COLD GAS<br/>liquefiable propellant<br/>if volume-limited"]
   Q4 -- no --> CG
-
-  Q2 -- "and duration<br/>months available" --> Q5{"Power > 100 W<br/>and Δv > 300 m/s?"}
-  Q5 -- yes --> EP["ELECTRIC<br/>Hall / gridded ion<br/>1,300–3,500 s"]
 
   LIQ --> CHK["Closure test Eq. 3.8:<br/>k(e^(Δv/c) − 1) < 1?"]
   SOL1 --> CHK

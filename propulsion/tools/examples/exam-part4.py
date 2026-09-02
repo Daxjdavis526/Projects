@@ -38,7 +38,7 @@ Arithmetic in the exam that does NOT map to a rocket.py function
         SF6,     1400, 38 s: Lambda = 5.2171e5 (0.52171)                 -> 469.5 N s
     A1.2 impulse densities at the table's ideal Isp (eps = 50, 300 K):
         Xe      : 2740 * 31.091 * g0 = 8.3554e5 N s/m^3 = 0.8355 N s/cm^3
-        R-236fa : 1360 * 43.251 * g0 = 5.7690e5          = 0.5769
+        R-236fa : 1360 * 43.245 * g0 = 5.7682e5          = 0.5769
         ratio 1.448 in xenon's favour.
 
   * B1 is a derivation. The only registered piece is the identity
@@ -155,7 +155,7 @@ EXAMPLES = [
      "expect": 31.091, "tol": 1e-4},
     {"id": "P4.A1.2b", "fn": "ideal_isp_vac",
      "args": {"gamma": 1.08, "R": R_236FA, "T0": 300.0, "eps": 50.0},
-     "expect": 43.251, "tol": 1e-4},
+     "expect": 43.2452, "tol": 1e-5},
 
     # ---------------------------------------------------------------
     # B2 (i)-(iii) — GN2 blowdown, V = 0.600 L, p_i = 30 bar, T_i = 290 K,
