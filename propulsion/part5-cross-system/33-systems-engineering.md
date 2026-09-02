@@ -1641,3 +1641,613 @@ and storable pressure-fed stages persist where restart, storability and
 heritage dominate (Aestus, and the whole class of spacecraft apogee engines)
 [SB, SLPRE].
 
+---
+
+## 6. Real engines: why did they design it that way?
+
+### 6.1 The RS-25 controller and its redlines
+
+**The choice.** Rocketdyne put a dual-redundant digital computer on the
+engine, gave it authority to sequence the start, to close the loop on chamber
+pressure and mixture ratio, and to shut the engine down on its own judgment
+against a set of redline limits [SSME-Orient, Biggs89]. In 1972 this was an
+aggressive choice. The alternatives available were a hydromechanical
+sequencer with fixed timing (the F-1 and J-2 approach), or a vehicle-resident
+computer commanding valves directly.
+
+**Why it made sense.** The RS-25 is a fuel-rich staged-combustion engine at
+206 bar with a 67–109 % throttle range and two independently spooled
+turbopumps [SB]. Nothing about that is open-loop-schedulable. Preburner
+temperatures depend on chamber pressure, pump speeds depend on preburner
+temperature, and the whole powerhead is one coupled system whose start
+transient passes through conditions no fixed valve schedule can hold across
+engine-to-engine variation and inlet-condition variation. The alternative to a
+closed-loop controller is a much wider tolerance band on everything, which
+costs performance and life. Putting the computer on the engine, rather than
+in the orbiter, meant the control laws and the redlines were qualified *with*
+the engine and travelled with it.
+
+**The lesson that had to be learned in flight.** On STS-51F in July 1985, a
+centre-engine shutdown driven by temperature sensor indications produced an
+abort-to-orbit; a second engine came close to being shut down for the same
+reason and the crew inhibited it [Biggs89]. The redline logic had done exactly
+what it was told: it saw an out-of-limit temperature and shut the engine down.
+The problem was that the temperature was not real. **A redline built on a
+single sensor is a requirement to shut down whenever that sensor fails.** The
+response was the architecture described in §3.7 — multiple channels,
+qualification logic that disqualifies a channel behaving unphysically, and
+agreement of two qualified channels before a shutdown is issued — plus,
+later, a much more capable health-management approach that watches turbopump
+vibration signatures rather than only thresholds.
+
+**Would a modern engineer do the same?** Yes to the controller, without
+hesitation: every new engine of any complexity carries one, and the trend is
+toward more authority, not less. On redlines, modern practice keeps the
+philosophy but moves further in two directions: sensor fault accommodation is
+designed in from the start rather than added after an incident, and the
+redline *set* is phase-dependent by design, tight on the pad and progressively
+inhibited in flight. The genuinely open question is how much authority to
+give a model-based health algorithm in flight, and here the field disagrees:
+one camp argues that a trend detector catches failures a threshold cannot, the
+other that any algorithm with more states than you can exhaustively test is a
+new failure mode with an engine attached. [J]
+
+### 6.2 Saturn V: designing for engine-out, and paying for pogo
+
+**The choice.** The S-IC (five F-1) and S-II (five J-2) stages were designed
+so that the mission could continue after the loss of one engine, with the
+guidance system absorbing the shortfall by burning the remaining engines
+longer [SP-4206, SaturnV-Man].
+
+**Why it made sense.** With five engines per stage and two stages that matter,
+a vehicle with no engine-out capability multiplies ten engine reliabilities
+together. Engine-out changes the arithmetic from "all ten must work" to
+something far more forgiving, and the marginal cost was low because a
+hydrogen upper stage with a long burn already has the propellant and the burn
+time to trade. What it costs is control authority for the asymmetry (the
+outboard F-1 engines gimbal; the centre one is fixed), thrust structure
+capability for the asymmetric load, and the detection and shutdown logic.
+
+**It was used.** On Apollo 6 (April 1968) two J-2 engines on the S-II shut
+down, and the stage completed its burn on the remaining three with the S-IVB
+compensating [SP-4206]. The mission reached orbit. Without engine-out design
+that flight is a total loss, and the Apollo schedule looks very different.
+
+**And the interface it did not anticipate.** Pogo. The S-IC exhibited
+longitudinal oscillation on early flights, and on Apollo 13 the S-II centre
+engine shut down 132 s early because of a pogo oscillation in its LOX feed
+system [SP-4206]. The vehicle recovered — engine-out capability again — and an
+accumulator was subsequently fitted to the centre-engine LOX line. The two
+stories belong together: **the same programme that got a system-level
+interface decision right (engine-out) got a different one wrong (feed-system
+dynamics), and the first one paid for the second.** That is the honest
+argument for redundancy at system level: not that it prevents mistakes, but
+that it buys you the flight on which you discover them.
+
+**Would a modern engineer do the same?** Engine-out on a multi-engine stage,
+yes — it is now near-universal on vehicles with more than about five engines.
+Pogo, no: nobody now designs a large liquid vehicle without a pogo stability
+analysis and, on the oxidiser side, either an accumulator or a documented
+argument for why one is not needed.
+
+### 6.3 Falcon 9: engine-out as an architecture, and its limit
+
+**The choice.** Nine engines on the first stage, with the vehicle able to
+continue after losing one during much of the ascent.
+
+**Why it made sense.** Nine small engines instead of one large one is a
+manufacturing and reuse decision first — the Merlin is produced at a rate no
+other liquid engine programme has matched, and rate buys reliability through
+learning — and the engine-out capability comes almost free with the
+architecture [SB]. It also buys landing capability, since a stage that lands
+on one of nine engines can throttle to a thrust-to-weight the vehicle could
+never reach with a single large engine.
+
+**It was used, and the limit showed.** On the CRS-1 flight in October 2012,
+about 79 s into ascent, one first-stage engine shut down; the vehicle
+recomputed its ascent and delivered its primary payload to the intended
+orbit. The secondary payload was not delivered to its intended orbit, because
+the longer first-stage burn left the second stage without the propellant
+margin required by the rules governing a restart in the vicinity of the
+primary payload's destination. *(This account rests on public reporting and
+company statements rather than on a primary report available in this course's
+bibliography; treat the details as [H] with medium confidence.)*
+
+**The systems-engineering lesson** is precise and it is not about engines.
+Engine-out capability is defined against a *mission*, and the mission here had
+two payloads with different requirements. The primary mission was robust to an
+engine-out; the secondary was not, because the propellant margin that
+engine-out consumed was the same margin the secondary payload's restart
+needed. **Two requirements competed for one resource and the flow-down never
+said which one won.** Writing "the vehicle shall tolerate the loss of one
+first-stage engine" without stating *with respect to which mission objectives,
+and at what point in flight*, is a requirement with a hole in it.
+
+**Would a modern engineer do the same?** The architecture, yes; it has been
+copied. The requirement, no — a modern flow-down states engine-out capability
+as a function of flight time and of which mission objectives survive, and the
+resource that engine-out consumes (propellant reserve) is budgeted explicitly
+against the other claims on it.
+
+### 6.4 Centaur, the RL10, and where you put the NPSH problem
+
+**The choice.** Centaur's designers met the pump inlet requirement with tank
+pressure, propellant conditioning and inducer design, and did not add boost
+pumps [SP-4230].
+
+**Why it made sense.** Three reasons compound. First, Centaur's tanks are
+pressure-stabilised stainless steel — the structure requires internal pressure
+to carry load at all, so a substantial ullage pressure is present whether NPSH
+needs it or not, and using it costs nothing. Second, hydrogen's density makes
+head cheap: at 70.8 kg/m³, a metre of NPSH costs 0.69 kPa of tank pressure
+against 11.2 kPa for LOX (§3.8 and WE3), so the hydrogen side of a hydrogen
+stage is the *easy* side of the NPSH problem, exactly opposite to the
+intuition that hydrogen is always the hard one. Third, the RL10's gear-driven
+architecture puts a high-speed multi-stage hydrogen pump and a slower LOX pump
+on one shaft [SB], and adding boost stages to a small, restartable,
+minimum-parts engine would have fought its entire design philosophy.
+
+**What it cost instead.** Everything moved into the *operational* domain:
+chill-down of the pumps and lines before every start, thermal conditioning
+during coast, propellant settling before every restart, and management of
+tank pressure and boil-off across long coasts. The Centaur programme's
+difficulties were overwhelmingly of this kind, and they are documented at
+length in the hydrogen history [SP-4230]. The engine was not the problem; the
+interface was.
+
+**The contrasting choice, on the same propellants.** The RS-25 put low-pressure
+fuel and oxidiser turbopumps ahead of its high-pressure units [SB]. That is a
+deliberate decision to move the NPSH problem *out of the tank and into the
+engine*: the boost pumps tolerate a low inlet head, which lets the External
+Tank fly at low ullage pressure and therefore with a thinner wall. On a
+vehicle whose tank held over 700 tonnes of propellant, wall thickness beats
+engine mass by a wide margin. Two hydrogen–oxygen systems, two opposite
+architectures, and both are right for their vehicle. **The lesson is that
+NPSH is not an engine requirement or a tank requirement; it is a
+system-allocation decision about which subsystem carries the mass.** [J]
+
+**Would a modern engineer do the same?** For a small restartable upper stage,
+yes — tank pressure plus a good inducer remains the minimum-parts answer, and
+subcooled loading has since been added to the toolkit as a way of buying NPSH
+on the ground rather than mass in flight. For a large booster feeding
+high-pressure staged-combustion pumps, boost pumps remain the standard
+answer, and every large staged-combustion engine has them.
+
+---
+
+## 7. Design trade-offs, failure modes, materials, manufacturing, testing
+
+### 7.1 The recurring trade-offs
+
+- **Margin versus mass.** Every margin is mass somewhere. The systems
+  engineer's job is not to maximise margin but to place it where the
+  uncertainty is, which requires the variance decomposition of §3.14 rather
+  than a flat percentage.
+- **Interface tightness versus programme risk.** A tight interface tolerance
+  (±1 % thrust) transfers risk from the vehicle to the engine supplier; a
+  loose one transfers it back. Neither is free and both are negotiable, so
+  negotiate with the arithmetic: state what the tolerance costs in residuals
+  or control authority.
+- **Verification level versus cost.** Verifying at component level is cheap
+  and unrepresentative; verifying at stage level is expensive and definitive.
+  The right answer is almost always "component for the physics, stage for the
+  interfaces", and the failure mode is verifying interfaces at component
+  level because the stage test was late.
+- **Redundancy versus complexity.** Every redundant path is a new failure
+  mode (the switchover), a new interface, and mass. Redundancy pays where the
+  failure is random and detectable; it pays nothing against a common-cause
+  failure, and a surprising fraction of propulsion failures are common-cause
+  (a contaminated propellant lot, a design error, a shared purge).
+
+### 7.2 Failure modes at the interface
+
+| failure | mechanism | symptom | evidence | fix |
+|---|---|---|---|---|
+| pogo | structural mode couples to feed system through pump gain | growing longitudinal oscillation at 5–25 Hz; possible engine cut-off on a redline | accelerometer and $p_c$ data showing a common growing frequency; correlation with propellant depletion | accumulator at the pump inlet to lower feed-line frequency; verify with a measured pump transfer function |
+| pump cavitation at end of burn | $\mathrm{NPSH}_a$ falls below $\mathrm{NPSH}_r$ as $z$ and $p_t$ fall | head fall-off, flow and $p_c$ oscillation, sudden thrust loss | inlet pressure trace crossing the computed NPSH boundary; inducer damage on teardown | raise ullage pressure, subcool the load, add a boost pump, or reduce end-of-burn flow |
+| redline shutdown on a failed sensor | single-channel limit logic | healthy engine shuts down; other parameters normal | the shutdown parameter moves discontinuously or beyond physical rate | multi-channel qualification logic; phase-dependent redline set |
+| propellant outage | loading error plus MR error, no PU | one tank empties early; thrust and MR excursion at the end of burn | tank level traces diverging; MR drift in the last seconds | bias the load, or close the loop with a propellant utilisation system |
+| geysering | boiling in a tall vertical downcomer during hold | pressure surge and line hammer before launch | line pressure spikes with a period of minutes during hold | helium bubbling or recirculation in the downcomer; insulation |
+| slosh–control interaction | slosh frequency sweeps through the control bandwidth as the tank drains | attitude oscillation that grows and then subsides at a particular fill fraction | body-rate data correlating with computed slosh frequency | baffles; notch filter in the controller; both, because the filter costs phase margin |
+| plume impingement torque | thruster plume strikes a structure | manoeuvre delivers less than commanded Δv; unexplained disturbance torque | delivered impulse consistently below prediction by a fixed fraction | cant the thrusters; accept the cosine loss; relocate |
+| thrust misalignment | manufacturing and assembly tolerance stack | constant disturbance torque; RCS propellant consumed faster than budget | secular growth of momentum in one axis | measure thrust vector at acceptance; align at assembly; budget the residual |
+
+### 7.3 Materials, manufacturing and testing, from the systems view
+
+The materials decisions that cross the interface are the ones about
+*compatibility and environment*, not about strength. Which alloys may contact
+which propellant (nitrogen tetroxide and titanium is the classic prohibition;
+so is anything copper-bearing in hydrazine service), which elastomers survive
+the propellant and the temperature, which metals embrittle in hydrogen at the
+operating stress — these are documented in the materials-compatibility
+literature and in [MMPDS] for allowables, and they are usually settled at
+system level because they constrain every subsystem at once.
+
+Manufacturing crosses the interface through **rate and process control**. An
+engine qualified on units built by the development shop must be produced by
+the factory, and the systems engineer's obligation is to require that
+qualification hardware be built by the production process — not by the best
+machinist available. Where additive manufacturing is used, the process
+parameters, powder lot control and post-processing are part of the
+qualification basis, and a change to any of them is a change to the qualified
+configuration [GradlAM].
+
+Testing crosses the interface through **measurement uncertainty**. Every
+performance requirement is verified against an instrument, and the instrument
+has an uncertainty that must be smaller than the tolerance you promised. If
+the specification says thrust shall be 22.5 kN ± 3 % (±675 N) and the test
+stand measures thrust to ±1 %, then 1/3 of the tolerance band is consumed by
+not knowing the answer, and the acceptance limits must be tightened
+accordingly or the requirement relaxed. Stating the measurement uncertainty
+alongside every verification requirement is the mark of a specification
+written by someone who has run a test stand [CPIA-246, SP-8041].
+
+---
+
+## 8. Misconceptions and what engineers actually care about
+
+### 8.1 Misconceptions
+
+**"Systems engineering is paperwork."** The paperwork is the artefact; the work
+is deciding what the numbers should be and who carries the risk. A programme
+with excellent documents and no allocation discipline fails; one with scruffy
+documents and a rigorously maintained mass, Δv and margin budget usually does
+not. The test of whether a requirements database is real is whether anybody
+has ever been told "no" by it.
+
+**"Margin is conservatism, and more is better."** Margin held in the wrong
+place is mass carried for nothing while the real uncertainty goes uncovered.
+A 40 % structural margin on a component whose loads are known to ±5 %, on a
+vehicle whose Δv margin is 2.7σ, is not conservatism — it is a misallocated
+budget. Margin belongs where the variance is.
+
+**"A trade study picks the winner."** A trade study documents an argument and,
+done properly, identifies which single piece of information the decision
+actually hinges on. If the ranking is robust across the plausible weight
+range, the study confirmed a decision you had already made on physical
+grounds. If it is not robust, the study's real output is "go and reduce the
+uncertainty on this one criterion". Either way the matrix is not the answer.
+
+**"Verification and validation are the same thing."** They are not, and the
+distinction has teeth: verification is against the specification, validation
+against the need. Almost every "the hardware worked but the mission failed"
+outcome is a validation failure, and validation failures are invisible to a
+verification matrix by construction.
+
+**"The engine specification is the interface."** The specification says what
+the engine does. The interface control document says what the engine and the
+vehicle do *to each other*, and it is longer, more contentious and more
+frequently the location of the failure. Ask any propulsion engineer which
+document they have spent more hours in.
+
+**"NPSH is a pump problem."** It is a system allocation. The same requirement
+can be met by tank pressure, by subcooling, or by a boost pump, and the
+choice moves mass between the tank, the pressurisation system, the ground
+system and the engine. §6.4 is the whole argument in two vehicles.
+
+**"Isp is the thing to optimise."** Δv is exactly as sensitive to Isp as to
+nothing else in relative terms (Eq. 3.8), but on a small stage the dry-mass
+and residual terms together carried half the variance in WE2, and the
+propellant that buys high Isp cost dry mass in tank volume and insulation. The
+figure of merit is delivered payload, and it is not monotonic in Isp.
+
+**"A requirement with a TBD is still a requirement."** It is a placeholder
+with a shall statement wrapped around it, and it cannot be verified, costed or
+designed to. Counting open TBDs is one of the few genuinely predictive
+programme metrics.
+
+### 8.2 What engineers actually care about
+
+1. **What is my margin, against what, and demonstrated how?** Not "is there
+   margin" but the three-part answer: against which requirement, computed or
+   measured, and with what remaining uncertainty. This question is asked in
+   every review and answered badly in most.
+2. **What crosses my boundary, in both directions, and is it written down and
+   signed?** The interface control document is the propulsion systems
+   engineer's principal work product, and unsigned interfaces are the leading
+   cause of late, expensive surprises.
+3. **What is the worst case, and is it a real combination?** Worst-case
+   analysis at the corners of every tolerance simultaneously produces a
+   vehicle nobody can build; ignoring combinations produces a vehicle that
+   fails. The useful discipline is to identify which two or three tolerances
+   actually stack in the same direction physically, and analyse those.
+4. **What am I about to be surprised by?** Which of my numbers is an estimate
+   nobody has tested, which analysis has never been validated against data,
+   which supplier's schedule is the one everything else waits on. Keeping a
+   short honest list of these and reporting it at every review is worth more
+   than any amount of process.
+5. **What does it cost in payload?** Every engineering argument on a launch
+   vehicle eventually converts to kilograms of payload, and the engineer who
+   can do that conversion in their head — via Eq. 3.9 and the stage exchange
+   ratio — wins arguments that the engineer who cannot, loses.
+
+---
+
+## 9. Mastery levels
+
+**Level 1 — Familiarity.** You can name the seven interfaces a propulsion
+system has (structures, thermal, GN&C, avionics, tanks, spacecraft or
+payload, launch vehicle) and state for each the one or two quantities that
+dominate it. You can explain in plain language what a requirement flow-down
+is, what a margin is, and the difference between verification and validation.
+You can say what pogo is and why an accumulator helps, and name two vehicles
+that had it.
+
+**Level 2 — Working engineering knowledge.** Given a mission statement, you
+can produce a defensible four-level flow-down with numbers, including the Δv
+budget, stage sizing, engine thrust and Isp, and at least three component
+requirements, each with a rationale and a verification method. You can compute
+$\mathrm{NPSH}_a$ and invert it for tank pressure, propagate Δv uncertainty by
+RSS from stated input uncertainties and decompose the variance, apply MGA by
+maturity, and build a weighted trade matrix and sweep it. You can lay out a
+qualification sequence and say what each test protects against, and you can
+state the standard factors of safety and life factors and where to look up
+the governing ones.
+
+**Level 3 — Interview mastery.** Given an unfamiliar vehicle or an anomaly
+description, you can identify which interface is implicated and what
+requirement was missing, wrong or unverified — and argue the counter-case.
+You can defend a margin philosophy against a reviewer who wants more margin
+and against a programme manager who wants less, using the variance
+decomposition rather than assertion. You can say when a Monte Carlo is worth
+running and when it is theatre. Given a trade study, you can find the
+criterion the answer actually turns on and the assumption that was smuggled
+in as a weight. And for any of the historical cases in §6, you can state what
+the engineers knew at the time, what they decided, what it cost, and whether
+you would decide differently now with reasons that are not hindsight.
+
+---
+
+## 10. Problems
+
+### Conceptual
+
+**C1.** A requirement reads: *"The engine shall have a fast and reliable start
+transient."* Rewrite it as three verifiable requirements, each with a
+tolerance, a rationale and a verification method. Explain what the original
+statement would have cost the programme if it had survived to critical design
+review.
+
+**C2.** Explain why the worst case for net positive suction head is the end of
+the burn even though vehicle acceleration is highest then. Under what
+circumstance would the worst case instead occur at the *start* of a burn?
+
+**C3.** A programme has 30 % design margin on turbopump bearing life,
+calculated from a bearing life model, and has never run a bearing beyond
+nominal duration. A second programme has 5 % design margin and has run three
+bearings to 4× nominal duration without failure. Which programme is in better
+shape, and what exactly would you ask each of them for?
+
+**C4.** Explain, in terms of the closed loop, why filling the prevalve cavities
+of a LOX feed line with helium changes a vehicle's pogo behaviour. Why does
+adding compliance help rather than hurt, given that a more compliant system
+usually oscillates more easily?
+
+**C5.** A spacecraft's attitude control designer asks for a 2 ms minimum
+thruster pulse. Give three distinct reasons why the propulsion engineer might
+refuse, and state what number you would put in the interface document
+instead.
+
+**C6.** Distinguish residuals from reserves. A stage carries 1.5 % residuals
+and a 2 % flight performance reserve. On a nominal flight, how much of each is
+consumed, and what does each cost in delivered payload?
+
+**C7.** Why is a requirement without a verification method not a requirement?
+Give a propulsion example of a statement that sounds like a requirement,
+cannot be verified as written, and can be repaired by rewriting it.
+
+### Calculation
+
+**P1.** A stage has $m_0 = 12{,}000$ kg, $m_f = 3{,}500$ kg and $I_{sp} = 340$
+s. Compute Δv. Then compute $\partial \Delta v/\partial I_{sp}$,
+$\partial \Delta v/\partial m_d$ (dry mass added to both $m_0$ and $m_f$), and
+$\partial \Delta v/\partial m_{res}$ (residual added to $m_f$ only). Which
+kilogram is more expensive, dry mass or residual, and by what factor?
+
+**P2.** For the stage of P1, the uncertainties are $I_{sp}$ ±0.8 % (1σ), dry
+mass ±4 % of a 2,000 kg dry mass (1σ), residuals ±0.4 % of the 8,500 kg
+propellant load (1σ). Compute the 1σ Δv dispersion by RSS, give the
+percentage of the variance contributed by each source, and state which one you
+would spend money to reduce and why.
+
+**P3.** A liquid oxygen pump requires $\mathrm{NPSH}_r = 18$ m with a margin
+factor of 1.4. At the worst point of the burn the liquid column is 0.4 m, the
+acceleration is 2.2 $g_0$, the feed line loss is 25 kPa, the LOX bulk
+temperature is 95 K (take $p_v = 155$ kPa, $\rho = 1{,}125$ kg/m³). Compute
+the required tank ullage pressure. Then recompute for the same requirement
+with the propellant subcooled to 85 K ($p_v = 55$ kPa, $\rho = 1{,}178$
+kg/m³) and state the tank pressure saved.
+
+**P4.** A stage dry mass breakdown at preliminary design: engine 120 kg (CBE,
+existing qualified hardware in a new application), tanks 210 kg (CBE,
+preliminary layout), structure 130 kg (CBE, preliminary layout), avionics
+45 kg (CBE, existing hardware identical application), pressurisation 60 kg
+(CBE, conceptual). Apply mass growth allowance per item using the table in
+§3.13 (take the midpoint of each band), compute the allocated dry mass, and
+compare with the result of applying a flat 15 % to the total. Which is
+larger, and what does the difference tell you about where the programme's
+mass risk is?
+
+**P5.** An engine specification calls for 4 starts and 900 s of cumulative
+firing. Applying the 4× service life factor, state the qualification
+requirement. If a single qualification hot fire costs 380 000 currency units
+and can accumulate at most 500 s and 3 starts, how many firings and what
+budget does the life demonstration need on a two-engine qualification
+programme where each engine must independently demonstrate the full life?
+
+**P6.** A cylindrical propellant tank of radius 1.1 m contains liquid to a
+depth of 2.0 m under an acceleration of 0.6 $g_0$. Compute the first slosh
+mode frequency. Recompute at the end of the burn when the depth is 0.3 m and
+the acceleration is 1.4 $g_0$. The vehicle's rigid-body control frequency is
+0.35 Hz; comment on whether an interaction is plausible and what you would do
+about it.
+
+**P7.** A 445 N apogee engine has a thrust vector offset from the spacecraft
+centre of mass by an effective 2.0 mm and an angular misalignment of 0.15° on
+a 1.8 m moment arm. Compute the disturbance torque. Over a 2,400 s burn, what
+angular impulse must the reaction control system absorb? If the RCS thrusters
+produce 22 N at a 1.2 m arm with an $I_{sp}$ of 220 s, how much propellant
+does this consume?
+
+### Engineering reasoning
+
+**R1.** You are handed a stage design in which the analysis shows
+$\mathrm{NPSH}_a = 1.05\,\mathrm{NPSH}_r$ at the end of the burn, and the
+programme's margin policy requires 1.5. The tank cannot take more pressure
+without a wall thickness increase that costs 40 kg. Lay out at least four
+options with their mass, cost and schedule implications, and recommend one.
+State what test would retire the risk in your recommendation.
+
+**R2.** A stage hot fire produces a chamber pressure trace with a growing
+oscillation at 11 Hz that begins 140 s into the burn and stops when the engine
+throttles down at 190 s. Vehicle accelerometers show the same frequency.
+Propose a diagnosis, state what additional data you would want, and describe
+the two design fixes you would evaluate and how you would choose between them.
+
+**R3.** A supplier proposes to deliver an engine qualified by protoflight
+rather than by a dedicated qualification article, saving nine months and a
+substantial sum. The engine is a pump-fed, restartable upper-stage engine. Set
+out the argument for and against accepting this, and state the conditions
+under which you would accept it.
+
+**R4.** Two propulsion engineers disagree. One says the stage should carry a
+propellant utilisation system; the other says a biased propellant load is
+sufficient. The stage is cryogenic, loads 18 t of propellant, has a loading
+accuracy of 0.4 % and an engine mixture-ratio tolerance of ±1.5 %. Estimate
+the outage each approach leaves, convert it to delivered payload, and rule on
+the disagreement.
+
+**R5.** A review board asks why your engine's redline set is *looser* after
+lift-off than on the pad, and suggests this is a safety compromise. Answer
+them.
+
+### Mini trade study
+
+**T1 — Pressure-fed or pump-fed kick stage, under a schedule constraint.**
+
+A customer needs a kick stage to deliver a 900 kg spacecraft from a 200 km
+parking orbit to a 1,750 m/s escape-assist manoeuvre, with **first flight in
+30 months**. Two architectures:
+
+- **Option P — pressure-fed, storable (N₂O₄/MMH).** $I_{sp} = 322$ s,
+  $p_c = 11$ bar. Tanks must hold roughly 18 bar; estimate tank plus
+  pressurisation mass at 22 % of the propellant load. Thruster and feed
+  hardware derived from qualified components; development estimate 22 months
+  with a 4-month uncertainty.
+- **Option U — pump-fed, storable (N₂O₄/MMH).** $I_{sp} = 338$ s,
+  $p_c = 60$ bar. Tanks at 4 bar; estimate tank plus pressurisation mass at
+  9 % of the propellant load. New turbopump; development estimate 30 months
+  with a 9-month uncertainty. Engine dry mass 45 kg heavier than option P.
+
+Common to both: 240 kg of stage structure, avionics and harness (CBE,
+preliminary layout); residuals 1.2 % of load; a 2 % Δv margin on the
+manoeuvre.
+
+Size both stages. Then build a weighted trade matrix with at least five
+criteria including schedule confidence, sweep the schedule weight across a
+defensible range, and make a recommendation. State explicitly what single
+piece of additional information would most change your answer, and how you
+would go and get it.
+
+---
+
+## 11. Quiz (100 marks)
+
+**Q1 (8).** State the four fields every well-formed requirement carries, and
+explain in one sentence each why the third and fourth are the ones most often
+missing.
+
+**Q2 (10).** A stage has $I_{sp} = 320$ s, $m_0 = 6{,}000$ kg, $m_f = 2{,}400$
+kg. Compute Δv, and compute the Δv penalty of adding 50 kg of dry mass and,
+separately, of leaving 50 kg of extra residual propellant. Which is worse and
+by what factor?
+
+**Q3 (8).** Multiple choice, with a one-line justification for your answer.
+The worst case for net positive suction head available on an upper stage
+occurs:
+(a) at ignition, when acceleration is lowest;
+(b) at end of burn, when the liquid column is shortest;
+(c) at maximum dynamic pressure;
+(d) during the coast before restart, when the tank has warmed.
+More than one may be defensible; argue for the one you pick.
+
+**Q4 (10).** A LOX pump needs $\mathrm{NPSH}_a = 20$ m with $\rho = 1{,}140$
+kg/m³, $p_v = 115$ kPa, feed line loss 20 kPa, liquid column 0.5 m at an
+acceleration of 1.8 $g_0$. Compute the required tank ullage pressure in bar.
+
+**Q5 (10).** Explain the difference between verification and validation, and
+give one propulsion example of hardware that could pass all verification and
+still fail validation. Then state which review is the last realistic
+opportunity to catch a validation failure.
+
+**Q6 (12).** A component's CBE mass is 84 kg at preliminary layout maturity.
+State the MGA you would apply and the allocated mass. The programme also
+holds 12 % system margin. If the component is later measured at 97 kg, is the
+allocation still met? Show the arithmetic and say what you would report at the
+mass review.
+
+**Q7 (10).** Multiple choice with justification. A redline that shuts an
+engine down on a single temperature sensor exceeding a limit is primarily
+a design error because:
+(a) temperature sensors are inaccurate;
+(b) the logic cannot distinguish a failed sensor from a failed engine;
+(c) redlines should never have shutdown authority;
+(d) the limit will drift with engine age.
+
+**Q8 (12).** A trade matrix scores three options at 62, 58 and 41 out of 100.
+The analyst recommends the first. List four questions you would ask before
+accepting the recommendation, and state what result from the weight sweep
+would make you reject it.
+
+**Q9 (10).** Describe the conventional environmental test sequence for a
+propulsion component and justify (i) why functional tests bracket each
+environment and (ii) why the burst test comes last.
+
+**Q10 (10).** You are the propulsion representative at a critical design
+review. Name four items you must bring that you would *not* have brought to
+the preliminary design review, and for each say what question it answers.
+
+---
+
+## 12. Further reading
+
+- **[SB]** — *Rocket Propulsion Elements*. Chapters on engine and vehicle
+  design integration, and the sections on thrust vector control, feed system
+  dynamics and engine selection. The single best starting point for how
+  engine-level and vehicle-level requirements interact.
+- **[Humble]** — *Space Propulsion Analysis and Design*. Written as a design
+  process rather than a physics text; the mass-estimating relationships and
+  the systems-level sizing methodology are directly usable and are the closest
+  thing in the literature to the flow-down of §3.2.
+- **[SMAD]** — *Space Mission Analysis and Design*. The canonical treatment of
+  requirements flow-down, budgets and margins at mission level. Read the
+  chapters on requirements definition and on the propulsion subsystem
+  together.
+- **[SMC-S-016]** — Test requirements for launch, upper-stage and space
+  vehicles. Read it for the structure of a qualification programme: the
+  distinction between qualification, protoflight and acceptance, the test
+  matrices, and the logic behind the level and duration margins.
+- **[STD-7001]** — Payload vibroacoustic test criteria. Read alongside
+  [SMC-S-016] for how the maximum predicted environment is defined and how
+  test levels are derived from it.
+- **[STD-5001]**, **[AIAA-S-080]**, **[AIAA-S-081]** — structural design and
+  test factors, and pressure vessel requirements for metallic and composite
+  overwrapped vessels. Read these for what a factor of safety actually
+  means and how it changes with verification approach.
+- **[SP-8107]**, **[SP-8109]**, **[SP-8112]** — turbopump systems, centrifugal
+  turbopumps, and pressurisation systems. The suction performance and NPSH
+  sections of the first two, and the pressurant-mass methodology of the third,
+  are the technical basis for §3.8 and WE3.
+- **[SP-4206]** — *Stages to Saturn*. The engine-out and pogo material in
+  §6.2, plus a great deal else about how a large propulsion programme
+  actually made decisions.
+- **[SP-4230]** — *Taming Liquid Hydrogen*. The Centaur story of §6.4: chill-
+  down, settling, restart, tank pressure and the operational cost of the
+  architecture chosen.
+- **[Biggs89]**, **[SSME-Orient]** — the Space Shuttle Main Engine's first ten
+  years and the engine orientation manual. Read the first for the controller
+  and redline history and the failures that shaped it, the second for the
+  engine's control architecture.
+- **[CPIA-246]** — rocket engine performance prediction and evaluation. Read
+  it for what "demonstrated specific impulse" means once measurement
+  uncertainty and test-to-flight corrections are accounted for.
