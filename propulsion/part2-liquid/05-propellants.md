@@ -1614,7 +1614,7 @@ on the diminishing return.
 inputs unchanged, and report gross mass and total tank volume for all three
 pairs. Which pair now gives the smallest gross mass, and by how much?
 
-**N4.** A methane cooling channel is 1.2 mm × 3.5 mm, carries 0.20 kg/s of
+**N4.** A methane cooling channel is 1.2 mm × 3.5 mm, carries 0.08 kg/s of
 supercritical methane at a bulk temperature of 250 K, and sees 30 MW/m². Take
 $k = 0.075$ W/(m·K), $c_p = 3.6$ kJ/(kg·K), $\mu = 3.0\times10^{-5}$ Pa·s,
 $\rho = 210$ kg/m³. Compute $Re$, $Pr$, $h$ and $T_{wc}$, and compare with a
