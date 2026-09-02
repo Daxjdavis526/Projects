@@ -98,7 +98,7 @@ volume with no pressure term at all and the same thrust."
 as action–reaction against the air. It reveals that the derivation was
 memorised, and it predicts the wrong sign for the altitude trend.
 
-## Item 2 — Why performance splits into c\* and C_F `[M03]`
+## Item 2 — Why performance is split into c\* and C_F `[M03]`
 
 **What a strong answer contains**
 
@@ -150,7 +150,7 @@ the injector team or the nozzle team."
 is not an impulse, it has no nozzle in it, and treating it that way makes the
 candidate unable to explain why c\* is unchanged when you bolt on an extension.
 
-## Item 3 — Choking and what the throat controls `[M02]`
+## Item 3 — Choking, and what the throat actually controls `[M02]`
 
 **What a strong answer contains**
 
@@ -203,7 +203,7 @@ percent."
 than sound". It can and does, immediately downstream. The constraint is on
 information, not on speed.
 
-## Item 4 — What CEA gives you and what it does not `[M04, M01]`
+## Item 4 — Thermochemistry: what CEA gives you and what it does not `[M04, M01]`
 
 **What a strong answer contains**
 
@@ -306,7 +306,7 @@ mass, not by the optimum."
 stage. It is the textbook optimum for a single instant that the vehicle spends
 almost none of its burn at.
 
-## Item 6 — Molecular weight, gamma, temperature `[M01, M04]`
+## Item 6 — Molecular weight, gamma, and temperature `[M01, M04]`
 
 **What a strong answer contains**
 
@@ -1311,7 +1311,7 @@ spend the gas-generator exhaust first, because that flow is already paid for."
 the Isp bill, then being unable to explain a performance shortfall that the
 candidate created.
 
-## Item 25 — Coolant chemistry and compatibility `[M11, M05, M16]`
+## Item 25 — Coolant chemistry and material compatibility `[M11, M05, M16]`
 
 **What a strong answer contains**
 

@@ -1089,3 +1089,483 @@ without producing the dry-mass table that shows *why*. 72–84.
     exists to do, and it is exactly the number the person reading the memo
     needs. Leaving it in an appendix is the difference between a report and a
     decision.
+
+---
+---
+
+# Mission C — reference solution
+
+## C.1 The sizing chain
+
+### C.1.1 Impulse, propellant mass, thrust
+
+Take the design point at the middle of the C1.2 band, $t_b = 8.0$ s, and at
+$p_c = 7.0$ MPa (a conventional design pressure for a case of this class [J]).
+
+**C1, aluminized AP/HTPB/Al.** $\mathcal{M} = 27.5$, $T_0 = 3300$ K,
+$\gamma = 1.18$, so $R = 302.34$ J/(kg·K) and
+
+$$c^*_{ideal} = \frac{\sqrt{302.34\times3300}}{\Gamma(1.18)} = 1549.5\ \mathrm{m/s} \quad(\text{table: } 1550)$$
+
+which confirms the chamber-gas row and the $c^*$ row of C-G1 are consistent —
+**check this; it is a two-line check and it catches a table you have
+misread.** With $\eta_{c^*} = 0.95$, $c^* = 1472.5$ m/s.
+
+At $\varepsilon = 8$, $\gamma = 1.18$: $C_{F,vac} = 1.7239$, $C_{F,SL} = 1.6081$.
+With $\eta_n = 0.96$:
+
+$$I_{sp,vac} = \frac{1472.5 \times 1.7239 \times 0.96}{9.80665} = 248.5\ \mathrm{s}, \qquad I_{sp,SL} = 231.8\ \mathrm{s}$$
+
+Sanity check against the database: the Orion 38 delivers 281.7 s at
+$\varepsilon = 68.5$ and the GEM-40 274 s at $\varepsilon = 11$ [database,
+confidence B]. At $\varepsilon = 8$ on a much smaller motor with a 4 % nozzle
+loss, 248.5 s vacuum is the right neighbourhood; the gap to the GEM-40 is
+mostly nozzle and partly scale.
+
+$$m_p = \frac{I_{tot}}{I_{sp,vac}\,g_0} = \frac{155{,}000}{248.5 \times 9.80665} = 63.60\ \mathrm{kg}$$
+$$\dot m = \frac{63.60}{8.0} = 7.951\ \mathrm{kg/s}, \qquad F_{vac} = \dot m I_{sp} g_0 = 19.375\ \mathrm{kN}$$
+$$A_t = \frac{F}{p_c C_{F,vac}\eta_n} = 1{,}672\ \mathrm{mm^2} \Rightarrow D_t = 46.15\ \mathrm{mm}, \quad D_e = 130.5\ \mathrm{mm}$$
+
+**C2, reduced-smoke AP/HTPB.** $c^*_{ideal} = 1500$ m/s, $\eta_{c^*} = 0.96$,
+$\gamma = 1.20$: $C_{F,vac} = 1.7133$ and $I_{sp,vac} = 241.5$ s — **7.0 s, or
+2.8 %, below C1.** That is the price of taking the aluminium out, and it is
+smaller than most students expect. It buys back a lower $n$, a lower $\sigma_p$,
+a cooler flame, less throat erosion, no slag, and a plume an optical payload can
+see through. $m_p$ rises to 65.44 kg and $\dot m$ to 8.181 kg/s at the same
+19.375 kN.
+
+### C.1.2 Ballistics: $a$, $K_n$, and the equilibrium check
+
+Convert the tabulated burn rate to SI. For C1, $r = 8.0$ mm/s at 7.0 MPa with
+$n = 0.35$:
+
+$$a = \frac{r}{p^n} = \frac{0.0080}{(7.0\times10^6)^{0.35}} = 3.2159\times10^{-5}\ \mathrm{(m/s)/Pa^{0.35}}$$
+
+Required burn area:
+
+$$A_b = \frac{\dot m}{\rho_p r} = \frac{7.951}{1770 \times 0.0080} = 0.5615\ \mathrm{m^2}, \qquad K_n = \frac{A_b}{A_t} = 335.7$$
+
+Verify by closing the loop — `solid_equilibrium_pressure(a, n, ρ, Ab, At, c*)`
+returns **7.0000 MPa**, which is the check that your $a$, your $K_n$ and your
+$c^*$ are mutually consistent. Do it. A student who computes $K_n$ from $A_b$
+and $A_t$ and never feeds it back through the equilibrium relation has not
+checked anything.
+
+For C2: $a = 6.1883\times10^{-5}$, $A_b = 0.6794$ m², $K_n = 403.7$. The
+**higher $K_n$ is a direct consequence of the lower burn rate**, and it means
+more burning surface in the same envelope — a more aggressive fin geometry, a
+thinner web, and a larger sliver if you are not careful. This is the first place
+the "obvious" propellant swap costs something in the grain.
+
+### C.1.3 The temperature range, which is the hardest requirement
+
+$\pi_K = \sigma_p/(1-n)$ (module 20). Reference temperature +21 °C;
+$\Delta T = +39$ K to the hot limit and $-61$ K to the cold limit.
+
+| | $\sigma_p$ (K⁻¹) | $n$ | $\pi_K$ (K⁻¹) | $p_c$ at −40 °C | $p_c$ at +21 °C | $p_c$ at +60 °C | hot/cold ratio |
+|---|---|---|---|---|---|---|---|
+| C1 | 0.0020 | 0.35 | 0.003077 | **5.802 MPa** | 7.000 | **7.892 MPa** | **1.360** |
+| C2 | 0.0018 | 0.30 | 0.002571 | **5.984 MPa** | 7.000 | **7.738 MPa** | **1.293** |
+
+Burn rate itself moves less than chamber pressure does — that is the whole point
+of $\pi_K$, and the amplification factor is $1/(1-n)$, which is 1.54 for C1 and
+1.43 for C2. Action time follows $r$: C1 runs **7.40 s** hot and **9.04 s**
+cold, C2 **7.46 s** and **8.93 s**. **C1 violates C1.2's 7.0–9.0 s band at the
+cold limit by 0.04 s.** That is inside the accuracy of the model and it is not
+a reason to reject the candidate, but it *is* a reason to state that C1 has no
+margin on action time at −40 °C and that the design point may need to move to
+$t_b = 7.8$ s. Finding that is worth marks; not noticing it is the tell of a
+student who computed the hot case only.
+
+MEOP per C-G3 (hot equilibrium × 1.10 for ignition transient and lot dispersion):
+
+| | MEOP | design burst (1.5×) | $t$ CFRP (1,400 MPa) | $t$ 15-5PH (1,100 MPa) | $t$ 4130 (620 MPa) |
+|---|---|---|---|---|---|
+| C1 | **8.68 MPa** | 13.02 MPa | 1.21 mm | 1.54 mm | 2.73 mm |
+| C2 | **8.51 MPa** | 12.77 MPa | 1.19 mm | 1.51 mm | 2.68 mm |
+
+C2's lower $\pi_K$ buys 2 % of case thickness, which is worth almost nothing on
+its own, and a **5 % narrower thrust dispersion across the temperature range**,
+which is worth a great deal against C1.3.
+
+### C.1.4 C1.3 and C1.4: the requirements the temperature range actually sets
+
+**C1.3, thrust shape.** Max/mean ≤ 1.30 across the conditioned range. Taking the
++21 °C mean as the datum, the hot case raises thrust by the same factor as
+$p_c$: 1.128 for C1 and 1.106 for C2. A finocyl trimmed to ±3 % neutrality then
+gives max/mean of **1.16 (C1)** and **1.14 (C2)**, both compliant, with C1
+holding about half the margin. Any grain that is genuinely progressive — a
+plain internal-burning tube, for instance — adds 20–40 % on its own and blows
+the requirement immediately at the hot limit. **C1.3 is a grain-geometry
+requirement disguised as a thrust requirement, and $\pi_K$ is what makes it
+tight.**
+
+**C1.4, peak acceleration, and the most satisfying result in this mission.**
+On the C-G9 reference vehicle: lift-off mass = 45 (payload) + 40 (airframe) +
+74.2 (C1 motor) = **159.2 kg**; burnout mass = 159.2 − 63.6 = **95.6 kg**. Peak
+acceleration is at burnout, hot-conditioned.
+
+If the throat did not erode, the hot thrust at burnout would still be 21.85 kN
+and
+
+$$a = \frac{21{,}850}{95.6} = 228.6\ \mathrm{m/s^2} = 23.3\,g \quad \textbf{— fails C1.4.}$$
+
+But it does erode. A carbon-phenolic insert at the mid of its class
+(0.10 mm/s over 8 s) grows the throat radius by 0.8 mm, so $A_t$ grows by 7.05 %
+and, since $p_c \propto (1/A_t)^{1/(1-n)}$,
+
+$$\frac{p_{c,\text{end}}}{p_{c,\text{start}}} = \left(\frac{1}{1.0705}\right)^{1/0.65} = 0.900$$
+
+Thrust at burnout is therefore about 19.7 kN and
+
+$$a = \frac{19{,}700}{95.6} = 206\ \mathrm{m/s^2} = 21.0\,g \quad \textbf{— compliant, by 1 g.}$$
+
+**Throat erosion, which is a loss mechanism everywhere else in this course, is
+what makes this requirement achievable.** It flattens the tail of the thrust
+trace exactly where the vehicle is lightest. That also means the erosion rate is
+now a *design parameter with a two-sided tolerance*: too little and C1.4 fails,
+too much and the delivered impulse and C1.3 both suffer (graphite at 0.175 mm/s
+drops $p_c$ by 16.6 % and costs about 2 % of total impulse). Reporting erosion
+as a one-sided "loss to be minimised" is the standard error and it is wrong
+here.
+
+C2 lands at 20.7 g on the same calculation. Both candidates are inside C1.4 by
+about a gravity, which is a statement the memo should make plainly: **this
+motor is acceleration-limited at burnout and the margin is thin.**
+
+### C.1.5 Envelope and mass fraction — where three candidates die
+
+Propellant volume $V_p = m_p/\rho_p$; grain length at 260 mm case ID and 88 %
+volumetric loading (a case-bonded finocyl figure [E]):
+
+| | $m_p$ (kg) | $V_p$ (m³) | grain length (m) | overall length est. (m) |
+|---|---|---|---|---|
+| C1 | 63.60 | 0.03593 | 0.769 | ~1.02 with closures and nozzle |
+| C2 | 65.44 | 0.03805 | 0.814 | ~1.07 |
+| C4 (cartridge, 75 % loading) | 63.60 | 0.03593 | 0.902 | ~1.16 |
+
+All inside C1.6's 1,200 mm; C4 with 40 mm to spare, which is not a margin.
+
+Now the mass fraction, C1.7 ≥ 0.85. Case mass from the wall thickness above,
+with a ×2.5 factor on the wound cylinder for domes, polar bosses and skirts, and
+×1.6 on a metal case for closures:
+
+| candidate | case (kg) | insulation | nozzle | igniter | misc | **inert** | motor (kg) | **$m_p/m_{motor}$** |
+|---|---|---|---|---|---|---|---|---|
+| **C1** aluminized, CFRP, finocyl | 4.7 | 1.9 | 2.8 | 0.7 | 0.5 | 10.6 | 74.20 | **0.857** ✓ |
+| **C2** reduced-smoke, CFRP, finocyl | 4.8 | 1.7 | 2.8 | 0.7 | 0.5 | 10.5 | 75.94 | **0.862** ✓ |
+| **C3** aluminized, **15-5PH steel** case | 12.6 | 1.9 | 2.8 | 0.7 | 0.5 | 18.5 | 82.10 | **0.775** ✗ |
+| **C3b** aluminized, **4130 steel** case | 22.4 | 1.9 | 2.8 | 0.7 | 0.5 | 28.3 | 91.90 | **0.692** ✗ |
+| **C4** cartridge-loaded, CFRP | 5.5 | 2.2 | 2.8 | 0.7 | 1.7 | 12.9 | 76.50 | **0.831** ✗ |
+
+**C3 and C4 fail C1.7 on arithmetic.** The steel case fails it decisively — even
+in a 1,100 MPa precipitation-hardening alloy the case is 12.6 kg against the
+composite's 4.7, and at this size that is 8 percentage points of mass fraction.
+The cartridge-loaded candidate fails it marginally, and for a specific reason
+worth naming: cartridge loading costs volumetric loading (88 % → 75 %), which
+costs length, which costs case mass, *and* it adds an inhibitor, a support
+structure and a thermal standoff. It buys the elimination of the case-bond
+failure mode, and on this mission that is not enough.
+
+C2 having a **higher** mass fraction than C1 despite a lower $I_{sp}$ is not a
+paradox: the inert mass is nearly fixed by the envelope and the pressure, so
+carrying 1.8 kg more propellant raises the ratio. **Mass fraction and delivered
+impulse are different questions and C1.7 is not a performance requirement.**
+Students who conflate them get this backwards.
+
+### C.1.6 C5, the hybrid, and why the arithmetic ends the argument
+
+Take a delivered $I_{sp}$ of 245 s ($\eta_{c^*} = 0.92$, which is generous for a
+multi-port hybrid) at $O/F = 7$:
+
+$$m_{total} = \frac{155{,}000}{245 \times 9.80665} = 64.5\ \mathrm{kg} \Rightarrow m_{fuel} = 8.06\ \mathrm{kg},\quad m_{ox} = 56.45\ \mathrm{kg}$$
+
+$$V_{ox} = \frac{56.45}{745} = 0.0758\ \mathrm{m^3} \Rightarrow L_{ox\ tank} = \frac{0.0758}{\pi (0.13)^2} = \mathbf{1.427\ m}$$
+
+**The oxidizer tank alone is 227 mm longer than the entire motor is allowed to
+be (C1.6, 1,200 mm), before the fuel grain, the injector, the combustion chamber
+or the nozzle.** With a multi-port HTPB grain at perhaps 60 % volumetric
+efficiency the fuel section adds another 0.27 m; the vehicle is ≥ 1.70 m of
+propulsion. C5 fails C1.6 by 42 %.
+
+That alone ends it, but the temperature requirement ends it twice. **N₂O's
+critical temperature is 36.4 °C.** Above that, self-pressurising N₂O is
+supercritical, there is no vapour pressure to regulate the tank to, and pressure
+becomes a steep function of fill density and temperature. C1.8 requires firing
+at **+60 °C** and C1.9 requires *storage* at **+71 °C**, both far above the
+critical point. A sealed, pre-loaded N₂O tank at +71 °C is a pressure vessel
+whose pressure depends on how full it was when it left the factory, and N₂O has
+a documented exothermic decomposition hazard. C1.16 then finishes the job: the
+alternative — loading at the site — is exactly what C1.16 forbids.
+
+**Evaluate the hybrid, do not dismiss it.** The report must contain this
+paragraph and these three numbers. It must not contain a sentence that says
+hybrids are unsuitable for sounding rockets, which is false in general and true
+only against *these* requirements.
+
+### C.1.7 Grain concept and the burn-area history
+
+C1's finocyl must deliver $A_b = 0.5615$ m² held within about ±3 % over a web of
+$w \approx (0.13 - r_{port,0})$. In a 260 mm ID, 769 mm long case the bore alone
+at mid-web (say 180 mm mean diameter) gives $\pi \times 0.18 \times 0.769 =
+0.435$ m². The fins supply the remaining 0.13 m² and, more importantly, supply
+it **early**, when the cylindrical bore area is smallest — which is exactly how
+a finocyl is neutralised: a progressive cylindrical term summed with a
+regressive fin term. Sliver at the end of web, where the fins have burned out
+and the remaining propellant sits in the corners between fin roots, should be
+held below **3 %** of the load; above that the tail-off lengthens, $I_{tot}$
+falls and C1.2's action-time definition becomes ambiguous.
+
+The nozzle: $\varepsilon = 8$ gives $M_e = 3.07$ and, at sea-level ignition,
+$p_e = 1.24$ bar — slightly *under*expanded at lift-off, which is the right
+choice for a motor that spends most of its 8 s above 5 km. The Schmucker
+separation pressure at that $M_e$ is 0.372 bar, so there is no separation risk
+anywhere in the trajectory; the only altitude-related loss is the underexpansion
+at $t = 0$, which is small and which buys a shorter, lighter nozzle. Say that
+explicitly — a report that sizes $\varepsilon$ for vacuum on a motor that fires
+from the ground has optimised the wrong end of the trajectory.
+
+## C.2 Recommended architecture and the strongest alternative
+
+### Recommended: **C2 — reduced-smoke AP/HTPB (no metal), case-bonded finocyl, filament-wound carbon/epoxy case**
+
+1. **It has the widest margin on the requirement that is hardest to hold.**
+   $\pi_K = 0.00257$ K⁻¹ against C1's 0.00308 gives a hot/cold chamber-pressure
+   ratio of 1.293 against 1.360, a max/mean thrust of 1.14 against 1.16, and an
+   action time of 7.46–8.93 s that sits inside C1.2 at both ends — which C1's
+   9.04 s cold case does not.
+2. **It meets C1.7 with the largest margin of any compliant candidate** (0.862),
+   despite the lower $I_{sp}$, because inert mass is set by envelope and pressure
+   rather than by propellant mass.
+3. **Lower flame temperature and no condensed alumina** means less throat
+   erosion, no slag accumulation in the aft dome, a longer-lived insulation
+   design and — for a payload class that includes optical and atmospheric
+   instruments — a plume that does not obscure the vehicle. That is a mission-fit
+   argument, not a propulsion argument, and it belongs in D12.
+4. **Production**: no metal powder in the mix, which simplifies the raw-material
+   supply chain, the mix hazard classification and the cleanup, and helps the
+   Class 1.3 certification argument of C1.11.
+
+**What it costs, and the memo must say it:**
+
+- **7.0 s of $I_{sp}$, 2.8 %.** That is 1.84 kg more propellant, 45 mm more
+  grain, and about 1.7 kg more motor mass for the same 155 kN·s.
+- **$K_n = 404$ against 336** — a more aggressive fin geometry in the same
+  envelope, a thinner web, and a harder sliver problem.
+- **Erosion margin against C1.4.** C2 lands at 20.7 g against C1's 21.0 g, so it
+  is marginally better, but *both* rely on throat erosion to comply and C2's
+  cooler, cleaner flame erodes less. This is the one place where C2's advantage
+  on paper works against it, and the report should notice.
+- **It is the less conventional choice** for a high-impulse sounding motor and
+  will need to be defended to a customer who has bought aluminized motors for
+  thirty years.
+
+### Strongest alternative: **C1 — aluminized AP/HTPB, same case and grain concept**
+
+It is a very strong alternative. Higher $I_{sp}$, shorter motor, higher
+density-impulse, and it is the incumbent technology with the deepest supply
+chain and the least qualification novelty. It complies with C1.7 (0.857) and
+C1.4 (21.0 g) and, on a straight performance-per-envelope basis, it wins.
+
+Its whole weakness is **dispersion**: $\sigma_p$ and $n$ are both higher, so
+every temperature-driven quantity is worse — MEOP by 2 %, thrust ratio by 5 %,
+and the cold action time at 9.04 s falls outside the C1.2 band by 0.04 s on the
+nominal ballistic model, before any lot-to-lot variation is added. A programme
+buying 600 motors over ten years will see lot variation; a candidate that has no
+margin on the nominal will fail acceptance on some lots.
+
+**A report that recommends C1, identifies the cold action-time exceedance, and
+proposes moving the design point to $t_b = 7.8$ s to recover it, scores as
+highly as one that recommends C2.** That is a real and probably better answer,
+and it is precisely the kind of small design move that a trade study should
+surface.
+
+## C.3 Pugh matrix
+
+Datum: **C1**, the aluminized composite in a wound case — the incumbent
+architecture and a real candidate. Scoring −2 to +2.
+
+| criterion | weight | justification (tied to this mission) |
+|---|---|---|
+| Temperature-range robustness | 18 | C1.8's −40/+60 °C drives C1.3, C1.4 and MEOP simultaneously; it is the requirement that eliminates margin everywhere else. |
+| Storage, transport and certification | 14 | C1.9–C1.11: an article that cannot ship as delivered is not a candidate at any performance. |
+| Performance ($I_{sp}$, impulse in envelope) | 13 | C1.1 inside C1.5 and C1.6; the envelope is fixed and small. |
+| Mass fraction | 12 | C1.7 is a hard number and it eliminates two candidates outright. |
+| Manufacturability and rate | 12 | 60 units/yr for ten years on one line; C1.14 is a sustained-rate requirement, not a peak. |
+| Cost (UCI) | 11 | The customer stated cost matters as much as performance; unusual, and the weight should reflect that it was said out loud. |
+| Reliability | 8 | 600 units; reliability is demonstrated by lot acceptance statistics, not by a single qualification. |
+| Complexity | 6 | Few moving parts in any candidate; kept separate because it drives the igniter and inspection story. |
+| Mission fit | 6 | Plume transparency for optical payloads, launch-site handling, interstage interface. |
+| **total** | **100** | |
+
+| criterion | w | **C1 datum** | **C2** | C3 steel | C4 cartridge | C5 hybrid |
+|---|---|---|---|---|---|---|
+| Temperature robustness | 18 | 0 *(π_K 0.00308; 1.360 hot/cold; cold $t_b$ 9.04 s, outside C1.2)* | **+1** *(π_K 0.00257; 1.293; 7.46–8.93 s, inside)* | 0 *(same propellant)* | −1 *(free-standing grain, different thermal soak, ends unbonded)* | **−2** *(N₂O critical at 36.4 °C; C1.8 and C1.9 both above it)* |
+| Storage / certification | 14 | 0 | **0** *(same family; metal-free mix marginally simpler)* | +1 *(metal case is the easiest NDT and damage-tolerance case)* | 0 | **−2** *(pressurised, temperature-dependent, decomposition hazard)* |
+| Performance | 13 | 0 *(248.5 s)* | **−1** *(241.5 s, −2.8 %)* | 0 | 0 | −1 *(245 s but cannot fit)* |
+| Mass fraction | 12 | 0 *(0.857)* | **+1** *(0.862)* | **−2** *(0.775, fails C1.7)* | **−2** *(0.831, fails C1.7)* | −2 |
+| Manufacturability / rate | 12 | 0 *(winding is the takt driver)* | **0** *(same route; no metal powder handling)* | +2 *(no winding line; commodity tube stock)* | +1 *(grain and case are independent lines)* | −2 *(new everything)* |
+| Cost (UCI) | 11 | 0 | **0** *(cheaper mix, same case)* | +2 *(case is the dominant part and it is 4× cheaper)* | +1 | −1 |
+| Reliability | 8 | 0 | **+1** *(narrower dispersion → fewer acceptance failures)* | 0 | +1 *(no case bond to fail)* | −2 *(O/F drift, blowdown, ignition)* |
+| Complexity | 6 | 0 | **0** | +1 | 0 | −2 |
+| Mission fit | 6 | 0 *(smoke and Al₂O₃ obscure optical payloads)* | **+2** *(clean plume)* | 0 | 0 | +1 *(shutdown capability, unused here)* |
+| **weighted total** | | **0** | **+22** | **+9** | **−13** | **−87** |
+
+C3's +9 is worth staring at: **on the weighted criteria the steel case scores
+positively**, because it wins manufacturability and cost — the two things the
+customer said out loud — by two full points each. It is eliminated anyway,
+because C1.7 is a hard requirement and 0.775 is not 0.85. **A Pugh matrix does
+not enforce compliance; the requirements table does, and the matrix is scored
+only over compliant candidates.** Reports that let C3 win because it scored well
+have made the classic error of treating a scoring exercise as a decision
+procedure.
+
+### C.3.1 Sensitivity and the flip
+
+| weight varied ±50 % | flips? | at what value |
+|---|---|---|
+| Temperature robustness | **yes** | below **9** (from 18) the winner becomes C1 |
+| Performance | **yes** | above **22** (from 13) the winner becomes C1 |
+| Mission fit (plume) | no | — |
+| Mass fraction | no | — |
+| all others | no | — |
+
+The decision is a two-body problem between C1 and C2 and it turns on a single
+question: **is 7 s of $I_{sp}$ worth a 5 % narrower thrust dispersion across
+100 K?** At the weights above, no. Move Performance from 13 to 22 — which is
+what happens if the customer's altitude requirement tightens — and it becomes
+yes.
+
+**Two-criterion perturbation.** Temperature robustness 18 → 12 with Performance
+13 → 19 (the trade a scientific customer makes when apogee matters more than
+schedule predictability) brings C2 to +4 and C1 to 0 — still C2, but the
+decision has become a coin toss and the memo must say so.
+
+**Input perturbation, and it is the decisive one.** The tabulated $\sigma_p$
+values are class values labelled [A], and real propellant $\sigma_p$ is measured
+lot by lot with genuine scatter — ±15 % is not unusual [E]. Push C2's
+$\sigma_p$ from 0.0018 to 0.0021 (the top of a plausible band) and its $\pi_K$
+becomes 0.0030 K⁻¹, essentially identical to C1's, and **the entire basis of the
+recommendation evaporates**: C2 is then a lower-$I_{sp}$ propellant with no
+compensating dispersion advantage and C1 wins on every criterion that is left.
+
+That single sentence is the most valuable output of this trade study, and it
+converts directly into a programme action: **the first thing to do after
+architecture selection is to measure $\sigma_p$ and $n$ on the actual candidate
+propellant across the actual temperature range, on at least three mix lots,
+before the grain design is frozen.** If those measurements come back at
+$\sigma_p > 0.0020$, revert to C1. A recommendation with a measurable
+reversal trigger is worth ten with a confident conclusion.
+
+## C.4 Risk register (10)
+
+| # | risk (if–then) | L | C | score | mitigation | retires at |
+|---|---|---|---|---|---|---|
+| C-R1 | **If** measured $\sigma_p$ on production lots exceeds 0.0020 K⁻¹, **then** C2's entire advantage over C1 disappears and the selection reverses. | 3 | 4 | 12 | Strand-burner and small-motor temperature characterisation on three mix lots before grain design freeze; hold C1 as a funded fallback until the data is in. | Three-lot $\sigma_p$/$n$ characterisation — month 5. |
+| C-R2 | **If** the throat erodes less than 0.08 mm/s, **then** burnout thrust stays high, the vehicle exceeds 22 g and C1.4 fails. | 3 | 4 | 12 | Specify the insert material and density with a *two-sided* erosion tolerance; measure throat profile after every development firing; hold a small nozzle-throat oversize as the design recovery. | Throat profile measured on 3 hot firings across temperature — month 14. |
+| C-R3 | **If** case-bond integrity is lost during a −54 °C storage excursion (C1.9), **then** exposed grain surface increases $A_b$, $p_c$ rises above MEOP and the case bursts on ignition. | 2 | 5 | 10 | Liner and bond-system qualification by thermal cycling to both storage limits; X-ray or CT of every unit at acceptance; bond tensile coupons from every mix lot. | Thermal-cycle bond qualification — month 18. |
+| C-R4 | **If** cold ignition at −40 °C is slower than 250 ms (C1.12), **then** the vehicle leaves the rail off-nominally or chuffs. | 3 | 4 | 12 | Pyrogen igniter sized against the cold case, not the nominal; ignition testing at the cold limit *first*, not last; instrument the ignition transient with a high-rate pressure transducer. | 10 cold-conditioned ignitions — month 12. |
+| C-R5 | **If** sliver fraction exceeds 3 %, **then** tail-off lengthens, action time becomes ambiguous against C1.2 and delivered $I_{tot}$ falls. | 3 | 3 | 9 | Burn-area integration of the actual fin geometry, not a 2-D approximation; measure the sliver on a cut inert grain before the first live cast. | Inert-grain cut and measurement — month 8. |
+| C-R6 | **If** filament winding cannot sustain 60 cases/year on the planned mandrel count, **then** C1.14 fails on the case line regardless of the propellant line. | 3 | 4 | 12 | Takt-time analysis from the P120C winding data scaled to this diameter [P120C]; procure a second mandrel set at contract award, not at ramp; qualify a second winding cell. | Rate demonstration: 6 cases in 30 days — month 20. |
+| C-R7 | *(non-technical)* **If** AP or HTPB supply is interrupted, **then** the propellant line stops and there is no substitute qualified. | 3 | 5 | 15 | Dual-source both at qualification, not after; carry 12 months of raw material; write the specification to a property envelope rather than to one supplier's product. | Second source qualified on a full mix lot — month 24. |
+| C-R8 | *(non-technical)* **If** the Class 1.3 certification (C1.11) requires a change to the propellant or the packaging, **then** the qualification restarts. | 2 | 5 | 10 | Engage the certifying authority at architecture selection, not at first article; run the classification test series on the actual formulation family early. | Classification testing complete — month 16. |
+| C-R9 | *(created by the recommendation)* **If** the metal-free propellant's lower flame temperature reduces throat erosion below the range assumed, **then** C1.4 compliance is lost — a risk C1 does not have, because C2 is the cleaner-burning of the two. | 3 | 4 | 12 | Measure erosion on C2 specifically; do not carry across a rate measured on an aluminized motor. Size the nozzle with the C2 erosion data or accept a small throat oversize. | C2-specific erosion data — month 14. |
+| C-R10 | **If** the composite case is damaged in field handling and the damage is not detectable by visual inspection, **then** a motor with a compromised case is fired. | 3 | 5 | 15 | Impact-damage tolerance testing; a field-inspectable protective layer or a damage-indicating coating; handling fixtures specified as part of the delivered article; train the field crews and put the inspection in the launch procedure. | Damage-tolerance test series — month 22. |
+
+## C.5 What distinguishes an A from a C on Mission C
+
+**A C-grade report** computes total impulse, propellant mass, $A_t$ and $K_n$
+for one candidate, states that composite cases are lighter than steel,
+recommends the aluminized composite motor, and treats the temperature range as a
+storage requirement. It usually never converts $\sigma_p$ into $\pi_K$ and
+therefore never discovers that the temperature range is a *thrust* requirement.
+50–64.
+
+**A B-grade report** sizes all the candidates, converts $\sigma_p$ to $\pi_K$,
+produces hot and cold chamber pressures, derives MEOP correctly, computes the
+mass fraction and eliminates the steel case on it, and builds a matrix with
+justified weights. It usually treats throat erosion as a one-sided loss and it
+usually evaluates the hybrid qualitatively. 70–84.
+
+**An A-grade report** does five things:
+
+1. **It converts $\sigma_p$ to $\pi_K$ and then follows the consequence all the
+   way through** — to MEOP, to case thickness, to C1.3's thrust ratio, to C1.2's
+   action-time band, and to the discovery that C1's cold action time falls
+   outside the requirement.
+2. **It finds that C1.4 is met only because the throat erodes**, and therefore
+   treats the erosion rate as a two-sided requirement on the insert rather than
+   as a loss.
+3. **It kills the hybrid with three numbers** — a 1.427 m oxidizer tank in a
+   1.2 m envelope, a 36.4 °C critical temperature against a +71 °C storage
+   requirement, and C1.16 — and does not editorialise beyond them.
+4. **It notices that C3 scores positively in the matrix and is eliminated
+   anyway**, and says explicitly that compliance is checked in the requirements
+   table and not in the Pugh matrix.
+5. **It states the measurement that would reverse its own recommendation**,
+   with the number ($\sigma_p > 0.0020$ K⁻¹) and the schedule point (before
+   grain design freeze). 88–96.
+
+## C.6 The ten most common errors on Mission C
+
+1. **Never computing $\pi_K$.** $\sigma_p$ is a burn-rate sensitivity; the
+   chamber pressure moves by $\sigma_p/(1-n)$, which is 1.4–1.5 times larger.
+   Reports that apply $\sigma_p$ directly to $p_c$ under-predict the hot case by
+   about 4 % and then size the case to it.
+2. **Sizing MEOP from the nominal chamber pressure.** MEOP is a hot-conditioned,
+   transient-and-dispersion-loaded number. Sizing the case at 7.0 MPa instead of
+   8.68 MPa understates the wall by 24 % and the whole mass-fraction table with
+   it.
+3. **Computing peak acceleration at ignition.** It is at burnout, on the hot
+   case, after erosion. Getting it at ignition understates it by about 60 %.
+4. **Treating throat erosion as purely a loss.** On this motor it is the only
+   reason C1.4 closes. A one-sided "minimise erosion" statement is the tell.
+5. **Confusing mass fraction with performance.** C2 has the lower $I_{sp}$ *and*
+   the higher mass fraction, and both statements are correct. C1.7 constrains
+   inert mass in an envelope, not delivered impulse.
+6. **Dismissing the hybrid in a sentence.** C-G7 requires an evaluation. The
+   oxidizer-tank length and the N₂O critical temperature are two lines of
+   arithmetic and they are worth full marks; an assertion is worth none.
+7. **Letting a non-compliant candidate win the matrix.** C3 scores +9 and fails
+   C1.7. Compliance is a gate, the matrix is a comparison among survivors, and
+   confusing the two is the most consequential process error in the mission.
+8. **Never closing the ballistic loop.** Computing $K_n$ from $A_b/A_t$ and not
+   feeding it back through the equilibrium-pressure relation means the $a$,
+   $\rho_p$, $c^*$ and $K_n$ you report may be mutually inconsistent, and
+   nobody — including you — will know.
+9. **Sizing $\varepsilon$ for vacuum on a ground-launched motor.** At
+   $\varepsilon = 8$ this motor is slightly underexpanded at lift-off, which is
+   correct; sizing it for vacuum adds nozzle mass, adds length inside a 1,200 mm
+   envelope, and risks separation at ignition for a gain the 8 s burn never
+   collects.
+10. **Writing a rate argument as an assertion.** C1.14 asks for 60 units a year
+    sustained on one line. "The architecture supports the rate" is worth nothing;
+    a takt-time argument naming the winding cell, the mix batch size and the cure
+    oven cycle, with the step that saturates first, is worth the marks and is the
+    answer to the third memo question.
+
+---
+
+## Closing note for the grader
+
+Across all three missions the same four failures recur, and they are worth more
+than any individual calculation:
+
+1. **Sizing only the preferred candidate.** Every mission here has a candidate
+   that is eliminated by arithmetic — A5's battery, B3's and B5's arrival mass,
+   C3's and C5's mass fraction and envelope — and in every case the elimination
+   is the most valuable page in the report.
+2. **Stopping one step short of the consequence.** Heat flux without wall
+   gradient. $\sigma_p$ without $\pi_K$. Δv without residuals. Exit diameter
+   never checked at all. The step that is skipped is almost always the one that
+   turns a number into a decision.
+3. **A matrix that agrees with the author.** If the recommendation wins
+   everywhere, the analysis stopped before the trade began. All three reference
+   solutions above recommend an architecture that loses on at least three
+   criteria, and two of the three recommend against the raw matrix result and
+   say why.
+4. **No reversal trigger.** A recommendation without a measurable condition that
+   would change it is an opinion. The three triggers in this key —
+   $\eta_{c^*} < 0.9575$ for Mission A, a 55 % reduction in cryogenic thermal
+   mass for Mission B, $\sigma_p > 0.0020$ K⁻¹ for Mission C — are what make the
+   three recommendations engineering rather than preference.
