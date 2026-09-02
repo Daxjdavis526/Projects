@@ -522,8 +522,8 @@ demanded **four years** from architecture selection.
 
 | # | requirement | value |
 |---|---|---|
-| A1.1 | Payload to 200 km circular, 28.5° inclination, with first-stage recovery | **≥ 11,000 kg** |
-| A1.2 | Payload to the same orbit, first stage expended | **≥ 14,000 kg** (goal, not a floor) |
+| A1.1 | Payload to 200 km circular, 28.5° inclination, with first-stage recovery | **≥ 10,000 kg** |
+| A1.2 | Payload to the same orbit, first stage expended | **≥ 13,000 kg** (goal, not a floor) |
 | A1.3 | Gross lift-off mass | **≤ 460,000 kg** |
 | A1.4 | Lift-off thrust-to-weight at GLOW | **≥ 1.25** |
 | A1.5 | Engine-out: loss of one first-stage engine at T+0 | vehicle must sustain **T/W ≥ 1.05** and reach a safe abort or degraded orbit |
@@ -533,7 +533,7 @@ demanded **four years** from architecture selection.
 | A1.9 | Reuse: flights between engine removal for major overhaul | **≥ 10** |
 | A1.10 | Reuse: flights before engine retirement | **≥ 25** |
 | A1.11 | Turnaround: booster wheels-down to next launch | **≤ 21 days**, of which ≤ 5 days of engine work |
-| A1.12 | Engine sea-level thrust-to-weight | **≥ 100:1** |
+| A1.12 | Engine sea-level thrust-to-weight | **≥ 70:1** |
 | A1.13 | Production rate at steady state | **≥ 160 engines/year** equivalent (see ground rule A-G4) |
 | A1.14 | First flight | **≤ 48 months** from architecture selection |
 | A1.15 | Second-stage engine derived from the same architecture | required; state the derivation |
