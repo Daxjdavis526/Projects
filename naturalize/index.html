@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Natural Rewrite — make over-polished writing sound human again</title>
+<meta name="description" content="Paste over-polished or formulaic writing and get back prose that sounds like a person wrote it, with every edit explained. Runs entirely in your browser.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='25' font-size='24'%3E%E2%9C%8E%3C/text%3E%3C/svg%3E">
+<script>
+  // Set the theme before first paint so the page never flashes white.
+  try {
+    var t = localStorage.getItem('nr.theme');
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1 class="wordmark">Natural Rewrite</h1>
+    <p class="tagline">Removes formulaic writing patterns while keeping your meaning, facts and voice.</p>
+    <button class="icon-btn" id="theme" type="button" aria-label="Switch theme">Dark</button>
+  </header>
+
+  <section class="controls" aria-label="Rewriting options">
+    <div class="field">
+      <label for="mode">Mode</label>
+      <select id="mode"></select>
+    </div>
+
+    <div class="field">
+      <span class="lbl" id="strength-lbl">Rewrite strength</span>
+      <div class="slider-row">
+        <input type="range" id="strength" min="1" max="5" step="1" value="2"
+               aria-labelledby="strength-lbl" aria-describedby="strength-text">
+        <span class="strength-label" id="strength-text">2 — Light cleanup</span>
+      </div>
+    </div>
+
+    <div class="checks">
+      <label class="check"><input type="checkbox" id="preserve"> Preserve my writing style</label>
+      <label class="check"><input type="checkbox" id="technical"> Technical / engineering text</label>
+    </div>
+
+    <div class="actions">
+      <button class="ghost" id="example" type="button">Load example</button>
+      <button class="ghost" id="reset" type="button">Reset</button>
+      <button class="primary" id="run" type="button">Naturalize</button>
+    </div>
+
+    <p class="mode-blurb" id="mode-blurb"></p>
+  </section>
+
+  <section class="editors">
+    <div class="pane">
+      <div class="pane-head">
+        <h2 class="pane-title"><label for="input">Paste your text</label></h2>
+        <span class="counts" id="in-counts">0 words · 0 characters</span>
+      </div>
+      <textarea class="surface" id="input" spellcheck="false"
+        placeholder="Paste the text you want to naturalize.
+
+It works best on a few paragraphs at a time — enough for the engine to see which habits the writing actually leans on."></textarea>
+    </div>
+
+    <div class="pane">
+      <div class="pane-head">
+        <h2 class="pane-title">Naturalized</h2>
+        <div class="tabs" role="tablist" aria-label="Output view">
+          <button class="tab" id="tab-out" role="tab" aria-selected="true" aria-controls="output">Rewritten</button>
+          <button class="tab" id="tab-diff" role="tab" aria-selected="false" aria-controls="output">Changes</button>
+        </div>
+        <span class="counts" id="out-counts">0 words · 0 characters</span>
+        <button class="icon-btn" id="copy" type="button">Copy</button>
+      </div>
+      <div class="diff-key" id="diff-key" hidden>
+        <span class="k-del">removed or replaced</span>
+        <span class="k-ins">added</span>
+      </div>
+      <div class="surface" id="output" role="tabpanel" aria-live="polite">
+        <p class="empty">The rewrite will appear here. Highlighted sentences are ones the engine changed — click any of them to accept, revert or adjust that sentence on its own.</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="status" id="status"></p>
+
+  <section class="report" id="report" hidden>
+    <details class="report-box" id="why-box" open>
+      <summary>Why these changes were made <span class="pill" id="why-pill"></span></summary>
+      <div class="report-body" id="why-body"></div>
+    </details>
+
+    <details class="report-box" id="notes-box">
+      <summary>What the engine noticed but did not change <span class="pill" id="notes-pill"></span></summary>
+      <div class="report-body"><ul class="notes" id="notes-list"></ul></div>
+    </details>
+
+    <details class="report-box" id="voice-box">
+      <summary>Your writing, measured <span class="pill">from the original text</span></summary>
+      <div class="report-body"><div class="stats" id="voice-stats"></div></div>
+    </details>
+  </section>
+
+  <footer class="foot">
+    <span>Your text is processed only to generate the rewrite.</span>
+    <span>The rewriting engine runs in this page, so nothing you paste is sent anywhere.</span>
+    <span>Not an AI-detector bypass — see the <a href="README.md">README</a>.</span>
+  </footer>
+
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

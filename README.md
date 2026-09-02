@@ -52,6 +52,23 @@ Desktop recommended (scroll + drag + click); basic touch works. See
 [universe/README.md](universe/README.md) for controls, architecture, and
 exactly what is physically accurate versus artistically approximated.
 
+## naturalize/
+
+**NATURAL REWRITE** — a writing utility that strips formulaic patterns out
+of over-polished prose while keeping the author's meaning, facts and voice.
+Roughly 70 sentence rules plus document-level passes that budget their edits
+against the habits a text actually leans on: overused transitions, restated
+sentences, corporate vocabulary, qualifier padding, em-dash overuse, the
+three-item list rhythm. Every edit is listed with a reason, and patterns it
+cannot fix safely are reported rather than guessed at. Six modes, a 1–5
+strength slider, a technical-text mode that masks equations and units, and
+per-sentence override. Runs entirely in the browser.
+
+Live: https://daxjdavis526.github.io/Projects/naturalize/
+
+Not an AI-detector bypass. See [naturalize/README.md](naturalize/README.md)
+for what the engine does honestly versus what it approximates.
+
 ## supernova/
 
 **SUPERNOVA** — an interactive, scientifically grounded visualisation of the
