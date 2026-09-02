@@ -245,3 +245,987 @@ Atlas is the reason the numbers are always quoted as a package.
   General Dynamics document before the textbook prints them as fact.
 
 ---
+
+## Part 2 — American large boosters and upper stages
+
+### Aerojet LR87-AJ-11 (Titan III/IV stage 1)
+
+- **Manufacturer / country:** Aerojet-General (later Aerojet Rocketdyne). USA.
+- **Development:** LR87 family from 1955 (LOX/RP-1 LR87-AJ-3 for Titan I); converted to
+  storable propellants for Titan II (LR87-AJ-5, 1962). The **AJ-11** block was developed
+  for Titan 34D/Titan IV, first flight **1968** in the -9/-11 lineage per Wikipedia's
+  variant table; Titan IV service ran to **19 October 2005**.
+- **Vehicles:** Titan 24B, 34B, IIIB/IIID/IIIE, 34D, Titan IV A/B. (An LR87-LH2 LOX/LH2
+  variant was built and tested but never flew.)
+- **Propellants:** N2O4 / Aerozine 50 (50/50 UDMH–hydrazine). Storable, hypergolic.
+- **Mixture ratio (O/F):** **1.91**.
+- **Cycle:** Gas generator. Twin combustion chambers mounted as a single unit off one
+  turbopump assembly — the LR87 is a *two-chamber engine*, not two engines.
+- **Thrust:** **968.4 kN (217,800 lbf) sea level; 1,218.8 kN (274,000 lbf) vacuum.**
+  (Wikipedia's LR87 table also quotes "1,900 kN total" for the -11; that is the
+  **two-engine stage** figure for Titan IV, not one engine. *See contested figures.*)
+- **Chamber pressure:** **58.3 atm ≈ 59.1 bar (857 psia)**. Wikipedia's variant table
+  gives "59 bar" for the -11 and "40–59 bar" as the family range.
+- **Isp:** **250 s sea level; 302 s vacuum.**
+- **Expansion ratio:** **15:1**.
+- **Dry mass:** **700 kg (1,540 lb)** for the -11; 758 kg quoted for the -9.
+- **Thrust-to-weight:** ≈ 141:1 sea level (computed from 968.4 kN / 700 kg).
+- **Cooling:** Regenerative (fuel-cooled tubular chamber).
+- **Injector:** Unlike-impinging doublet, hypergolic pairs. Baffled.
+- **Ignition:** Hypergolic — none required. This is the whole point of the propellant choice.
+- **Turbopump:** "A single high-speed turbine drove the lower-speed centrifugal fuel and
+  oxidizer pumps through gearing" — a geared, single-turbine, two-pump arrangement chosen
+  for turbine efficiency. rpm and shaft power **not published** in the sources consulted.
+- **Major innovation:** Making a large storable-propellant booster engine that could sit
+  fuelled in a silo for years and start on command, then be uprated repeatedly across
+  four decades without architectural change.
+- **Major limitation:** Aerozine 50 and N2O4 are carcinogenic, corrosive and lethal;
+  ground handling cost is enormous, and Isp is unremarkable.
+- **Historical significance:** The workhorse of American national-security launch for
+  forty years, and the only ICBM engine that also carried astronauts (Gemini, via the
+  earlier LR87-AJ-7).
+- **SOURCES:**
+  - Wikipedia, *LR87* and *Aerojet LR87* — https://en.wikipedia.org/wiki/LR87,
+    https://en.wikipedia.org/wiki/Aerojet_LR87 (both fetched)
+  - Encyclopedia Astronautica, *LR87-7*, *LR87-5* (via search summary)
+  - Braeunig, *Space Launchers — Titan* — http://www.braeunig.us/space/specs/titan.htm (pointer)
+- **CONFIDENCE: medium-high.** The performance set is internally consistent across two
+  Wikipedia articles and Astronautix. The "1,900 kN" figure must be flagged.
+
+---
+
+### Aerojet LR91-AJ-11 (Titan III/IV stage 2)
+
+- **Manufacturer / country:** Aerojet-General. USA.
+- **Development:** LR91 family from the late 1950s; **first flight 1 September 1964**
+  (LR91 lineage); last flight **19 October 2005**. Retired.
+- **Vehicles:** Titan III and Titan IV second stages.
+- **Propellants:** N2O4 / Aerozine 50.
+- **Mixture ratio:** **1.86**.
+- **Cycle:** Gas generator, single chamber.
+- **Thrust:** **467 kN (105,000 lbf) vacuum.** No meaningful sea-level rating — it is a
+  vacuum-start upper stage.
+- **Chamber pressure:** **5.93 MPa = 59.3 bar (860 psia)**.
+- **Isp:** **316 s vacuum.**
+- **Expansion ratio:** **49.2:1**.
+- **Dry mass:** **589 kg (1,299 lb)**.
+- **Thrust-to-weight:** ≈ 81:1 (computed).
+- **Burn time:** 247 s.
+- **Cooling:** **Hybrid — regeneratively (fuel) cooled chamber with a separate ablative
+  nozzle skirt.** This is worth calling out in the textbook as a clean example of using
+  two cooling technologies where each is cheapest.
+- **Injector:** Unlike-impinging doublet. **Ignition:** hypergolic.
+- **Turbopump:** Not published in the sources consulted.
+- **Major innovation:** The regen-chamber / ablative-skirt split, and a genuinely
+  reliable air-start on hypergols.
+- **Major limitation:** Same toxicity problem as the LR87; performance capped by the
+  propellant combination.
+- **Historical significance:** Second stage for Gemini (in its -AJ-5 form) and for four
+  decades of national-security payloads.
+- **SOURCES:** Wikipedia, *LR91* — https://en.wikipedia.org/wiki/LR91 (fetched);
+  Encyclopedia Astronautica *LR91* (pointer).
+- **CONFIDENCE: medium-high** on performance; **low** on turbopump detail (not published).
+
+---
+
+### Rocketdyne H-1
+
+- **Manufacturer / country:** Rocketdyne. USA.
+- **Development:** Contract **15 August 1958**. Derived from the Thor/Jupiter S-3D
+  (175,000 lbf). **First flight 27 October 1961** (SA-1); last flight **15 July 1975**
+  (Apollo-Soyuz).
+- **Vehicles:** Saturn I and Saturn IB first stages — eight engines per stage.
+- **Propellants:** LOX / RP-1.
+- **Mixture ratio:** **2.23 ± 2%.**
+- **Cycle:** Gas generator. Started by a **solid propellant gas generator (SPGG)** —
+  a solid grain spins the turbopump up to self-sustaining speed.
+- **Thrust:** uprated across the program — **165,000 → 188,000 → 200,000 → 205,000 lbf**
+  sea level (**734 → 836 → 890 → 912 kN**). The Saturn IB flew the 200,000 lbf and
+  205,000 lbf blocks. Vacuum thrust is not separately quoted in the sources consulted;
+  the vacuum Isp is.
+- **Chamber pressure:** **633–700 psia (43.6–48.3 bar)** across blocks.
+- **Isp:** **255 s sea level; 289 s vacuum.**
+- **Expansion ratio:** **8:1.**
+- **Dry mass:** ~1,000 kg class (Wikipedia's "1,000–2,100 kg" range in the infobox is
+  garbled — it conflates inboard/outboard installations and gimbal hardware).
+  **Treat the single-engine dry mass as ~1,000 kg, low confidence.**
+- **Thrust-to-weight:** ≈ 90:1 at 890 kN / 1,000 kg (computed, inherits the mass uncertainty).
+- **Burn time:** 155 s.
+- **Cooling:** Regenerative, **tube-wall** (brazed tube bundle), fuel-cooled.
+- **Injector:** Flat-face impinging with baffles. (Wikipedia's "waterfall-type" phrasing
+  is nonstandard; the H-1 uses a conventional Rocketdyne impinging pattern.)
+- **Ignition:** **Triethylaluminum (TEA) pyrophoric slug** in a burst-diaphragm cartridge —
+  the direct ancestor of the TEA-TEB used on Merlin fifty years later.
+- **Turbopump:** Single geared turbopump, SPGG spin-start.
+- **Major innovation:** Cost-down mass production. The H-1 was deliberately engineered to
+  be *cheap and repeatable* rather than high-performing — Rocketdyne built hundreds.
+- **Major limitation:** ε = 8 and pc under 700 psia leave a lot of Isp on the table; the
+  eight-engine cluster was a reliability worry that never actually bit.
+- **Historical significance:** Proved clustering worked, which made Saturn V credible.
+  Directly evolved into the RS-27.
+- **SOURCES:** Wikipedia, *Rocketdyne H-1* — https://en.wikipedia.org/wiki/Rocketdyne_H-1
+  (fetched); enginehistory.org RPE series (pointer).
+- **CONFIDENCE: medium-high** on thrust/Isp/pc; **low** on dry mass and vacuum thrust.
+
+---
+
+### Rocketdyne F-1
+
+- **Manufacturer / country:** Rocketdyne. USA.
+- **Development:** Air Force study contract 1955–57; component testing 1957; first
+  full-stage firing **March 1959**; first engine delivery October 1963; flight rating
+  December 1964. **First flight 9 November 1967** (Apollo 4); last flight
+  **14 May 1973** (Skylab 1).
+- **Vehicle:** Saturn V S-IC first stage — five engines.
+- **Propellants:** LOX / RP-1.
+- **Mixture ratio:** **2.27** (≈69% LOX / 31% RP-1 by mass).
+  Flow: 1,789 kg/s LOX, 788 kg/s RP-1 — **2,577 kg/s total**, which is the number
+  worth putting in front of students.
+- **Cycle:** Gas generator, fuel-rich. The GG exhaust is dumped into the nozzle extension
+  as a **film-cooling curtain** — this is why the F-1 nozzle extension needs no regen
+  circuit and why the exhaust plume has that dark outer sheath.
+- **Thrust:** **6,770 kN (1,522,000 lbf) sea level; 7,770 kN (1,746,000 lbf) vacuum**
+  for the flight-rated engine. Early flights (Apollo 4, 6, 8) were flown at
+  **6,700 kN (1,500,000 lbf)**. enginehistory.org gives 1,522,000 lbf SL / **1,748,200 lbf**
+  vacuum — a 2,200 lbf difference from Wikipedia's vacuum figure, i.e. noise.
+- **Chamber pressure:** **THIS IS CONTESTED.** Values in circulation:
+  - **1,015 psia (70 bar)** — Wikipedia infobox, consistently.
+  - **982 psia (67.7 bar)** — appears in NASA-derived F-1 documentation.
+  - **1,125 psia (77.6 bar)** — enginehistory.org, and described elsewhere as the
+    "unprecedented chamber pressure" reached in development.
+  - **965 psia (66.5 bar)** — the figure in older Sutton editions and in the textbook's
+    working draft.
+  **Recommendation: quote ~1,015 psia (70 bar) injector-end as the nominal flight value,
+  and state the spread explicitly.** The reason for the spread is almost certainly the
+  measurement station: injector-end static pressure, nozzle stagnation pressure, and
+  the *development* peak are three different numbers, and secondary sources rarely say
+  which they mean. Do not let the textbook print a single unqualified value.
+- **Isp:** **263 s sea level (260 s on the early engines); 304 s vacuum** (Wikipedia).
+  enginehistory.org gives **265.4 s SL / 304.1 s vac**. The ~2 s SL spread is the same
+  early-block vs flight-block distinction.
+- **Expansion ratio:** **16:1** — including the nozzle extension. Undisputed.
+- **Dry mass:** **8,400 kg (18,500 lb)**. Both sources agree.
+- **Thrust-to-weight:** **94.1:1** at sea level.
+- **Cooling:** Regenerative **tube-wall** — **178 brazed tubes**, fuel-cooled, down-and-back
+  ("up-pass/down-pass") routing; plus GG-exhaust film cooling of the nozzle extension.
+- **Chamber liner material:** Nickel-alloy (Inconel X-750 / Hastelloy) tubes brazed into
+  an Inconel jacket, with steel bands.
+- **Injector:** Flat-face **impinging, mixed doublet and triplet**, in the final
+  **"5U(f)" pattern**, with a **copper baffle assembly** dividing the face into 13
+  compartments. Reaching that pattern took **~2,000 tests across 210 injector designs,
+  15 baffle designs and 14 injector configurations** under "Project Go" (1962–64).
+  Stability was demonstrated by detonating a **bomb near the injector centre** at full
+  thrust and requiring the engine to damp the induced oscillation within **45 ms**.
+- **Ignition:** **Hypergolic cartridge** — a TEA/TEB slug in a burst-diaphragm cartridge
+  ignites the chamber; a pyrotechnic igniter lights the gas generator.
+- **Turbopump:** Single shaft, direct-drive (no gearbox), two-stage turbine driving a
+  single-stage centrifugal LOX pump and a single-stage centrifugal RP-1 pump.
+  **5,488 rpm** (enginehistory.org; Wikipedia rounds to 5,500), **55,000 bhp (41 MW)**.
+  The turbopump alone outpowers a nuclear submarine's propulsion plant — a useful
+  classroom line.
+- **Major innovation:** Combustion stability at 1.5 million lbf in a single chamber.
+  The baffled injector plus the deliberate bomb-testing protocol is the F-1's real
+  technical legacy, more than the thrust number.
+- **Major limitation:** ε = 16 and pc ≈ 70 bar are modest; the F-1 is a *big* engine, not
+  an efficient one. It is also entirely expendable and was never restarted.
+- **Historical significance:** Still the highest-thrust single-chamber liquid engine ever
+  flown. The F-1A uprate reached ~1,800,000 lbf (8 MN) in test but never flew.
+- **SOURCES:**
+  - Wikipedia, *Rocketdyne F-1* — https://en.wikipedia.org/wiki/Rocketdyne_F-1 (fetched)
+  - enginehistory.org, *Rocket Propulsion Evolution* §8.11 "F-1 Engine" —
+    https://www.enginehistory.org/Rockets/RPE08.11/RPE08.11.shtml (fetched)
+  - NASA NTRS 20140011656, *Waking a Giant: Bringing the Saturn F-1 Engine Back to Life* —
+    https://ntrs.nasa.gov/api/citations/20140011656/downloads/20140011656.pdf
+    (retrieved as binary; not text-extractable in this pass — **re-verify chamber pressure
+    against this document before publication**)
+  - heroicrelics.org, *F-1 Engine Thrust Chamber* — http://heroicrelics.org/info/f-1/f-1-thrust-chamber.html
+- **CONFIDENCE: high** on thrust, Isp, mass, expansion ratio, turbopump and injector.
+  **Low on chamber pressure** until an NTRS primary source is read as text.
+
+---
+
+### Rocketdyne J-2
+
+- **Manufacturer / country:** Rocketdyne. USA.
+- **Development:** Approval to Rocketdyne **1 June 1960**; production from May 1963.
+  **First flight 26 February 1966** (AS-201). Retired with Apollo/Skylab.
+- **Vehicles:** Saturn IB S-IVB (one engine); Saturn V S-II (five) and S-IVB (one).
+- **Propellants:** LOX / LH2.
+- **Mixture ratio:** **5.5:1 nominal.** The **propellant utilisation (PU) valve** could
+  shift the ratio between **4.5:1 and 5.5:1**, trading thrust
+  (**780–1,000 kN / 175,000–225,000 lbf**) against Isp — used both to burn the tanks dry
+  simultaneously and to manage S-II acceleration.
+- **Cycle:** Gas generator.
+- **Thrust:** **1,033.1 kN (232,250 lbf) vacuum** at the 5.5:1 setting. Vacuum only —
+  it never operates at sea level.
+- **Chamber pressure:** **5,260 kPa = 52.6 bar (763 psia)**.
+- **Isp:** **421 s vacuum.**
+- **Expansion ratio:** **27.5:1.**
+- **Dry mass:** **1,788.1 kg (3,942 lb)**.
+- **Thrust-to-weight:** ≈ 59:1 (computed).
+- **Cooling:** Regenerative, **tube-wall**, fuel-cooled.
+- **Injector:** **Coaxial (concentric-element) shear injector — 614 hollow oxidizer posts
+  with concentric fuel annuli**, through a **porous sintered stainless-steel faceplate**
+  that transpiration-cools the face with hydrogen. This is the archetype for essentially
+  every subsequent LOX/LH2 injector.
+- **Ignition:** **Augmented spark igniter (ASI)** with dual spark plugs — a small
+  LOX/LH2 torch at the injector centre. Also the archetype; the RS-25 uses the same idea.
+- **Turbopump:** **Separate, independently driven pumps in series on the GG exhaust.**
+  Fuel pump: **7-stage axial, 27,000 rpm**. Oxidizer pump: **single-stage centrifugal,
+  8,600 rpm**. The GG gas passes through the fuel turbine first, then the oxidizer
+  turbine — a series arrangement that makes the mixture ratio self-regulating.
+- **Restart:** Yes — the S-IVB restarted the J-2 for translunar injection. This required
+  a separate ambient helium start-tank and settling motors.
+- **Major innovation:** The first flight-proven restartable, high-performance LOX/LH2
+  engine, and the coaxial-post injector with a transpiration-cooled porous face.
+- **Major limitation:** Gas-generator cycle dumps ~2–3% of propellant overboard; ε = 27.5
+  is small for a vacuum engine because the S-IVB interstage constrained the nozzle.
+- **Historical significance:** The engine that actually performed translunar injection.
+- **J-2S (uprated, tested 1965–72, never flown):** **1,138.5 kN (255,945 lbf)**, Isp
+  **436 s**, dry mass **1,400 kg**, and — importantly for the textbook — it replaced the
+  gas generator with a **tap-off cycle**, bleeding hot gas from the main chamber. The
+  J-2S is the best historical example of a tap-off engine after the BE-3.
+- **SOURCES:** Wikipedia, *Rocketdyne J-2* — https://en.wikipedia.org/wiki/Rocketdyne_J-2
+  (fetched); Encyclopedia Astronautica *J-2*, *J-2S* (pointers).
+- **CONFIDENCE: high.**
+
+---
+
+### Rocketdyne / Aerojet Rocketdyne J-2X
+
+- **Manufacturer / country:** Pratt & Whitney Rocketdyne → Aerojet Rocketdyne. USA.
+- **Development:** Formally announced **July 2007** for Ares I upper stage / Ares V EDS.
+  Extensive hot-fire at Stennis A-2 and A-3, 2011–2013. Program moved to **"idle"
+  status after 2014** when SLS Block 1B adopted the RL10 for the EUS. **Never flown.**
+- **Vehicles:** Intended for Ares I upper stage, Ares V Earth Departure Stage, and
+  early SLS upper-stage concepts.
+- **Propellants:** LOX / LH2. **Mixture ratio:** 5.5:1.
+- **Cycle:** Gas generator (deliberately, for schedule and cost — not a performance choice).
+- **Thrust:** **1,307–1,310 kN (294,000 lbf) vacuum.**
+- **Chamber pressure:** **~1,332–1,337 psia (91.9–92.2 bar)** — sources give both;
+  the difference is rounding. Roughly **double** the J-2's.
+- **Isp:** **448 s vacuum.**
+- **Expansion ratio:** **92:1** (with the nozzle extension).
+- **Dry mass:** **2,472 kg (5,450 lb)**.
+- **Thrust-to-weight:** ≈ 54:1 (computed).
+- **Cooling:** Regenerative **milled-channel** chamber (a deliberate change from the J-2's
+  brazed tube wall), with a **film-cooled / radiatively cooled nozzle extension**.
+- **Injector:** Coaxial, J-2/RS-25 heritage. **Ignition:** augmented spark igniter.
+- **Turbopump:** **Centrifugal** fuel pump replacing the J-2's axial pump — one of the
+  four changes the program itself listed. Separate fuel and oxidizer turbopumps.
+- **Design deltas from J-2 (as stated by the program):** removal of beryllium; modern
+  electronics; centrifugal rather than axial fuel turbopump; **channel-walled combustion
+  chamber rather than tube-welded**.
+- **Major innovation:** Demonstrated that a modern GG hydrogen engine could reach 448 s
+  with a 92:1 nozzle and be built with contemporary manufacturing.
+- **Major limitation:** Heavy (2.47 t for 1.31 MN) and it never flew — a complete,
+  well-characterised engine with no vehicle.
+- **Historical significance:** The most thoroughly tested American rocket engine never to
+  fly; a cautionary tale about engine development decoupled from vehicle commitment.
+- **SOURCES:** Wikipedia, *Rocketdyne J-2* and *J-2X* — https://en.wikipedia.org/wiki/J-2X;
+  NASA NTRS 20100034922, *The J-2X Upper Stage Engine: From Design to Hardware* —
+  https://ntrs.nasa.gov/api/citations/20100034922/downloads/20100034922.pdf (pointer,
+  not text-extracted this pass); NASA news release, *J-2X Engine Ready for 'Higher'
+  Level of Tests*.
+- **CONFIDENCE: medium-high.** Chamber pressure should be pinned to the NTRS paper
+  (1,332 vs 1,337 psia) before printing.
+
+---
+
+### Pratt & Whitney RL10A-3-3A
+
+- **Manufacturer / country:** Pratt & Whitney (West Palm Beach) → Aerojet Rocketdyne →
+  **L3Harris Aerojet Rocketdyne**. USA.
+- **Development:** RL10 family from 1958; first flight of the family **1962**. The
+  **-3-3A** block entered service in **1986** and flew through the Atlas IIAS / Titan
+  Centaur era into the early 2000s.
+- **Vehicles:** Centaur upper stage (Atlas I/II/IIA/IIAS, Titan IV Centaur), Delta III.
+- **Propellants:** LOX / LH2. **Mixture ratio: 5.0:1.**
+- **Cycle:** **Closed expander.** No preburner, no gas generator. Hydrogen is heated in the
+  chamber-wall cooling channels, drives the turbine, then is injected and burned. Nothing
+  is dumped — this is the defining feature and the reason the RL10 is the standard
+  classroom example of the expander cycle.
+- **Thrust:** **16,500 lbf (73.4 kN) vacuum.**
+- **Chamber pressure:** **475 psia (32.8 bar).** Low by design — the expander cycle is
+  limited by how much heat the chamber wall can put into the hydrogen, which scales with
+  surface area (≈ D²) while thrust scales with throat area, so pc has a hard ceiling.
+  This "expander cycle thrust limit" is the single most useful pedagogical point in the block.
+- **Isp:** **444–445 s vacuum.**
+- **Expansion ratio:** **61:1.**
+- **Dry mass:** ~**300 lb (136 kg)** class for this block. *Medium confidence* — the
+  L3Harris table gives 370 lb for the later RL10A-4-2 and 420 lb for the RL10C-1.
+- **Thrust-to-weight:** ≈ 55:1 (computed, inherits mass uncertainty).
+- **Cooling:** Regenerative, **brazed stainless-steel tube-wall**, hydrogen-cooled —
+  and the cooling circuit *is* the power cycle.
+- **Injector:** Coaxial shear (concentric LOX post / hydrogen annulus).
+- **Ignition:** Spark torch igniter.
+- **Turbopump:** **Single shaft with a reduction gearbox.** A two-stage centrifugal
+  hydrogen pump on the high-speed shaft drives, through gearing, a single-stage
+  centrifugal LOX pump on a slower shaft. Hydrogen pump speed ~**31,000 rpm**;
+  the gearbox is one of the RL10's most distinctive and most-copied features.
+  *rpm figure is medium confidence.*
+- **Major innovation:** The first flight LOX/LH2 engine of any kind (1962), and the first
+  closed expander cycle. Also the first engine designed from the start for multiple restarts.
+- **Major limitation:** Thrust is capped by the expander heat balance; the engine cannot
+  simply be scaled up without going to expander *bleed* or a preburner.
+- **Historical significance:** Over six decades in continuous production — the longest
+  service life of any rocket engine, ever.
+- **SOURCES:**
+  - NASA CR-190786, *An RL10A-3-3A Rocket Engine Model* —
+    https://ntrs.nasa.gov/api/citations/19950017370/downloads/19950017370.pdf
+  - NASA TM-107318, *RL10A-3-3A Rocket Engine Modeling Project* —
+    https://ntrs.nasa.gov/api/citations/19970010379/downloads/19970010379.pdf
+    (both located; PDF text extraction failed this pass — figures come from the search
+    summary of these two documents and should be re-read directly before printing)
+  - L3Harris, *RL10 Engine* — https://www.l3harris.com/all-capabilities/rl10-engine (fetched)
+  - Encyclopedia Astronautica, *RL-10A-3A* (pointer)
+- **CONFIDENCE: medium-high** on thrust / pc / Isp / ε / MR (four sources agree);
+  **medium** on mass and turbopump speed.
+
+---
+
+### Aerojet Rocketdyne RL10B-2
+
+- **Manufacturer / country:** Pratt & Whitney → Aerojet Rocketdyne → L3Harris. USA.
+- **Development:** Early–mid 1990s for the Delta III second stage. **First flight 1998.**
+- **Vehicles:** Delta III second stage; **Delta IV DCSS**; **SLS ICPS** (still flying).
+- **Propellants:** LOX / LH2. **Mixture ratio: 5.88:1.**
+- **Cycle:** Closed expander.
+- **Thrust:** **110.1 kN (24,750 lbf) vacuum.** Wikipedia and L3Harris agree exactly.
+- **Chamber pressure:** **Not published** in the manufacturer or Wikipedia sources fetched.
+  Encyclopedia Astronautica quotes ~44 bar (~640 psia); **low confidence — do not print
+  without a primary source.**
+- **Isp:** **465.5 s vacuum.** The highest specific impulse of any flown chemical rocket
+  engine. Both Wikipedia and L3Harris give this figure.
+- **Expansion ratio:** **CONTESTED.** Wikipedia's table says **280:1**; the AIAA/SEP
+  carbon-carbon nozzle literature says the extension raises it **from 77:1 to 285:1**.
+  **Recommendation: quote 285:1 deployed / 77:1 retracted**, citing the nozzle paper,
+  and note the 280:1 figure as a rounding that appears in secondary tables.
+- **Dry mass:** **301 kg (664 lb)** — Wikipedia and L3Harris agree.
+- **Thrust-to-weight:** ≈ 37:1 (computed).
+- **Cooling:** Regenerative tube-wall chamber; the **nozzle extension is uncooled
+  radiatively-cooled carbon–carbon**.
+- **Nozzle extension:** **NOVOLTEX® SEPCARB® 3D carbon–carbon**, made by SEP (Snecma),
+  ~100 in (2.5 m) long, exit diameter just over 84 in (2.1 m) — the largest
+  carbon–carbon extendible nozzle ever flown. It **translates into place after stage
+  separation** and is worth ~30 s of Isp.
+- **Injector:** Coaxial shear. **Ignition:** spark torch.
+- **Turbopump:** Geared single-shaft, RL10 heritage.
+- **Major innovation:** The extendible carbon–carbon nozzle — packaging a 285:1 expansion
+  ratio into an interstage sized for 77:1.
+- **Major limitation:** The deployment mechanism is a single-point failure with no
+  meaningful abort mode, and the engine is heavy for its thrust.
+- **Historical significance:** Holds the flown Isp record; still flying on SLS.
+- **SOURCES:** Wikipedia, *RL10* — https://en.wikipedia.org/wiki/RL10 (fetched);
+  L3Harris, *RL10 Engine* (fetched); *Testing of the RL10B-2 carbon-carbon nozzle
+  extension* (AIAA/Acta Astronautica; https://www.sciencedirect.com/science/article/abs/pii/S0094576501001783).
+- **CONFIDENCE: high** on thrust, Isp, mass; **medium** on expansion ratio (two values);
+  **low** on chamber pressure (not published).
+
+---
+
+### Aerojet Rocketdyne RL10C-1
+
+- **Manufacturer / country:** Aerojet Rocketdyne → L3Harris. USA.
+- **Development:** Consolidation of the RL10A-4-2 and RL10B-2 production lines into a
+  single common engine, ~2010–2014. **First flight 2014.**
+- **Vehicles:** Atlas V Centaur (single- and dual-engine), Vulcan Centaur V (as RL10C-1-1).
+- **Propellants:** LOX / LH2. **Mixture ratio: 5.5:1.**
+- **Cycle:** Closed expander.
+- **Thrust:** **CONTESTED, mildly.** Wikipedia: **101.5 kN (22,820 lbf)**.
+  L3Harris (manufacturer): **22,890 lbf (101.8 kN)**.
+  **Recommendation: use the manufacturer's 22,890 lbf**; the 70 lbf difference is
+  immaterial but the textbook should cite the primary.
+- **Chamber pressure:** **Not published** by the manufacturer. *Do not guess.*
+- **Isp:** **449.7 s vacuum** — Wikipedia and L3Harris agree exactly.
+- **Expansion ratio:** **130:1** (fixed nozzle, no extension). Wikipedia only.
+- **Dry mass:** **190 kg (420 lb)** — both sources agree.
+- **Thrust-to-weight:** ≈ 55:1 (computed).
+- **Cooling / injector / ignition / turbopump:** RL10 family standard — regenerative
+  tube-wall, coaxial shear injector, spark torch igniter, geared single-shaft turbopump.
+- **Major innovation:** Not technical — industrial. One engine replaces two production lines.
+- **Major limitation:** Fixed 130:1 nozzle gives up ~16 s to the RL10B-2.
+- **Historical significance:** The current production RL10 and the baseline for the
+  SLS Exploration Upper Stage (four RL10C-3s).
+- **Family context (L3Harris manufacturer table, useful for the textbook):**
+
+  | Variant | Thrust (lbf) | Isp (s) | Weight (lb) | O/F |
+  |---|---|---|---|---|
+  | RL10A-4-2 | 22,300 | 451.0 | 370 | 5.5 |
+  | RL10B-2 | 24,750 | 465.5 | 664 | 5.88 |
+  | RL10C-1 | 22,890 | 449.7 | 420 | 5.5 |
+  | RL10C-3 | 24,340 | 460.1 | 508 | 5.7 |
+  | RL10C-X | 24,120 | 460.9 | 510 | 5.5 |
+
+  (RL10C-X is the additively-manufactured development variant.)
+- **SOURCES:** L3Harris, *RL10 Engine* — https://www.l3harris.com/all-capabilities/rl10-engine
+  (fetched); Wikipedia, *RL10* (fetched).
+- **CONFIDENCE: high** on Isp, mass, and the manufacturer table; **medium** on thrust
+  (two values 70 lbf apart); **low/absent** on chamber pressure.
+
+---
+
+### Aerojet Rocketdyne RS-25 (SSME Block II)
+
+- **Manufacturer / country:** Rocketdyne → Pratt & Whitney Rocketdyne → Aerojet
+  Rocketdyne → **L3Harris**. USA.
+- **Development:** RFP issued 1970; **contract awarded 13 July 1971**; first complete
+  engine test **16 March 1977**; **first flight 12 April 1981 (STS-1)**. Block II
+  (new HPFTP) first flown on **STS-104 (2001)**. Now flying expendably on SLS.
+- **Vehicles:** Space Shuttle orbiter (three engines); SLS core stage (four engines).
+- **Propellants:** LOX / LH2. **Mixture ratio: 6.03:1** (L3Harris rounds to 6.0).
+- **Cycle:** **Fuel-rich staged combustion, dual-shaft** — two independent preburners
+  (one per turbopump), both fuel-rich, both exhausting into the main injector.
+- **Thrust:**
+  | Power level | Sea level | Vacuum |
+  |---|---|---|
+  | 100% RPL | 1,670 kN (380,000 lbf) | 2,090 kN (470,000 lbf) |
+  | 104.5% NPL | 1,750 kN (390,000 lbf) | 2,170 kN (490,000 lbf) |
+  | 109% FPL | 1,860 kN (418,000 lbf) | 2,279 kN (512,300 lbf) |
+
+  The 109% column is confirmed independently by **L3Harris** (418,000 lbf SL /
+  512,300 lbf vac), so it is the best-attested row.
+- **Chamber pressure:** **2,994 psia (206.4 bar) at 109%.** Wikipedia and L3Harris agree
+  exactly — this is one of the most solidly attested numbers in the file.
+  At 104.5% it is ~2,870 psia (198 bar); at 100%, ~2,747 psia (189 bar) *(scaled, medium
+  confidence — the scaling is very nearly linear in thrust but the textbook should say so).*
+- **Isp:** **452.3 s vacuum / 366 s sea level** (L3Harris rounds vacuum to 452).
+- **Expansion ratio:** **CONTESTED — the classic case.**
+  - **69:1** — Wikipedia's infobox *and* L3Harris's own datasheet, labelled "area ratio".
+  - **77.5:1** — appears in NASA/Rocketdyne training material and much of the
+    aerodynamics literature, sometimes as "about 77.5:1".
+  - **78:1** — also appears in the Wikipedia body text.
+  **What is actually going on:** 69:1 is the *nozzle exit area / throat area* of the
+  bell as built. The ~77.5:1 figures come from analyses that use a slightly different
+  reference — most plausibly the exit area against a different throat definition, or an
+  effective/aerodynamic area ratio. **Recommendation: print 69:1 as the geometric
+  expansion ratio, cite L3Harris, and add a footnote that 77.5:1 is widely quoted and
+  explain why.** Do not silently pick one; this specific discrepancy is a well-known
+  trap and a good teaching moment about what "expansion ratio" means.
+- **Dry mass:** **3,177 kg (7,004 lb)** per Wikipedia; **7,775 lb (3,526 kg)** per
+  L3Harris. **These disagree by 771 lb (350 kg).** The likely explanation is that
+  L3Harris quotes the *installed* engine including the heat shield, gimbal bearing and
+  controller, while 7,004 lb is the bare powerhead-plus-nozzle. **Recommendation: quote
+  L3Harris's 7,775 lb as the manufacturer figure and note the 7,004 lb variant.**
+- **Thrust-to-weight:** **73.1:1** (Wikipedia, using the 7,004 lb mass and vacuum thrust).
+  Recomputed on the L3Harris mass it is ~66:1. Another reason to be explicit about which
+  mass is used.
+- **Cooling:** Regenerative, **milled-channel** — **390 channels machined into the
+  main-combustion-chamber liner**, hydrogen-cooled. The nozzle is a **1,080-tube brazed
+  tube-wall**, also hydrogen-cooled.
+- **Chamber liner material:** **NARloy-Z** (copper–silver–zirconium), electroformed-nickel
+  closeout. This is the standard textbook example of a high-conductivity copper-alloy liner.
+- **Injector:** **Coaxial shear**, 600 main elements, with the **augmented spark igniter
+  (ASI)** at the centre of the face. Acoustic-resonator cavities in the injector face
+  suppress high-frequency instability.
+- **Ignition:** Augmented spark igniter — an H2/O2 torch at the injector centre, plus
+  separate ASIs in each preburner.
+- **Turbopump architecture:** **Four pumps, two shafts of interest:**
+  - **LPFTP** — axial, ~**16,185 rpm**, hydrogen-turbine-driven.
+  - **HPFTP** — **three-stage centrifugal, ~35,360 rpm, 71,140 hp (53.05 MW)**.
+    Discharge ~7,000 psi.
+  - **LPOTP** — ~**5,150 rpm**.
+  - **HPOTP** — **two-stage centrifugal (main + preburner boost) on one shaft,
+    ~28,120 rpm, 23,260 hp (17.34 MW)**.
+  The HPFTP's 53 MW from a unit the size of a car engine is the standard
+  power-density demonstration.
+- **Throttle range:** 67%–109% RPL. Ground-tested to 111%.
+- **Major innovation:** Reusable staged combustion at 206 bar with deep throttling —
+  no other engine has combined all three.
+- **Major limitation:** Cost and complexity. Between-flight inspection was enormous, and
+  the engine is now flown expendably on SLS, which is a fair verdict on the reusability premise.
+- **Historical significance:** The highest-chamber-pressure fuel-rich staged-combustion
+  engine ever flown, and the benchmark against which every hydrogen engine is measured.
+- **SOURCES:**
+  - Wikipedia, *RS-25* — https://en.wikipedia.org/wiki/RS-25 (fetched)
+  - L3Harris, *RS-25 Engine* — https://www.l3harris.com/all-capabilities/rs-25-engine (fetched)
+  - NASA/Rocketdyne, *Space Transportation System Training Data: Space Shuttle Main
+    Engine Orientation* — http://large.stanford.edu/courses/2011/ph240/nguyen1/docs/SSME_PRESENTATION.pdf
+    (503 during this pass — **this is the document to read for the expansion-ratio question**)
+- **CONFIDENCE: high** on thrust, chamber pressure, Isp, turbopump, cooling and injector.
+  **Medium** on dry mass (two figures). **Contested** on expansion ratio — see above.
+
+---
+
+### Aerojet Rocketdyne RS-68A
+
+- **Manufacturer / country:** Rocketdyne (Boeing) → Pratt & Whitney Rocketdyne →
+  Aerojet Rocketdyne. USA.
+- **Development:** RS-68 developed from the mid-1990s under a deliberate "design for
+  minimum cost" brief for the EELV competition — roughly 80% fewer parts than the RS-25.
+  **RS-68 first flight 20 November 2002**; **RS-68A** entered service 2012.
+  **Last flight 9 April 2024** (final Delta IV Heavy). Retired.
+- **Vehicles:** Delta IV Medium and Delta IV Heavy common booster cores.
+- **Propellants:** LOX / LH2. **Mixture ratio: ~6.0** *(not stated in the sources fetched;
+  low confidence — treat as not published)*.
+- **Cycle:** **Gas generator** — chosen explicitly over staged combustion for cost. The
+  GG exhaust is dumped through a side duct, which is why the engine's efficiency is low
+  for a hydrogen engine.
+- **Thrust:**
+  - RS-68: **2,950 kN (660,000 lbf) SL / 3,370 kN (758,000 lbf) vac**
+  - **RS-68A: 3,137 kN (705,000 lbf) SL / 3,560 kN (800,000 lbf) vac**
+  (Note: some Rocketdyne material quotes "650,000 lb sea level thrust" for the original
+  RS-68 — an early design figure, superseded.)
+- **Chamber pressure:** **1,488 psia (102.6 bar)** for both. The RS-68A's uprate came
+  from ~5 bar more chamber pressure plus a redesigned injector for better mixing
+  efficiency — a rare case where the published delta is explained.
+- **Isp:** RS-68 **365 s SL / 410 s vac**; **RS-68A 411.9 s vac**.
+- **Expansion ratio:** **21.5:1** — very low for a hydrogen engine, because the nozzle is
+  ablative and mass-limited.
+- **Dry mass:** RS-68 **6,600 kg (14,560 lb)**; **RS-68A 6,740 kg (14,870 lb)**.
+- **Thrust-to-weight:** RS-68 **45.3:1**; **RS-68A 47.4:1**. The lowest of any modern
+  large booster engine — the direct price of the cost-driven design.
+- **Cooling:** **Split.** The **main combustion chamber is regeneratively cooled**
+  (hydrogen through channels in the chamber wall); the **nozzle is ablative** — a
+  silica/carbon-phenolic liner that chars and erodes through the burn. The ablated carbon
+  reacting with atmospheric oxygen is what produces the RS-68's famously bright orange
+  exhaust and the spectacular hydrogen-fireball ignition.
+- **Chamber liner material:** Copper-alloy regen liner; ablative phenolic nozzle.
+- **Injector:** Coaxial; redesigned between RS-68 and RS-68A for mixing/combustion efficiency.
+- **Ignition:** Pyrotechnic/spark, with a large pre-ignition hydrogen bloom (the "hydrogen
+  burnoff" that scorches the booster).
+- **Turbopump:** Separate fuel and oxidizer turbopumps on a gas-generator circuit.
+  rpm and power **not published** in the sources consulted.
+- **Major innovation:** Design-for-cost. It demonstrated that deliberately accepting
+  lower performance (GG cycle, ablative nozzle, ε = 21.5) can be the right systems
+  answer if the part count and touch labour fall far enough.
+- **Major limitation:** Isp and T/W are poor for hydrolox; the ablative nozzle is
+  single-use by definition, which foreclosed any reusability path.
+- **Historical significance:** The largest hydrogen engine ever built by thrust, and the
+  clearest counter-example to the assumption that engine development should maximise performance.
+- **SOURCES:** Wikipedia, *RS-68* — https://en.wikipedia.org/wiki/RS-68 (fetched);
+  *Propulsion for the 21st Century — RS-68* (AIAA/Rocketdyne, via search);
+  Everyday Astronaut, *Engine Cooling* (secondary, for the regen-chamber/ablative-nozzle split);
+  Encyclopedia Astronautica *RS-68* (pointer).
+- **CONFIDENCE: high** on thrust, pc, Isp, ε, mass, T/W. **Low** on mixture ratio and
+  turbopump detail (not published).
+
+---
+
+### Rocketdyne RS-27A
+
+- **Manufacturer / country:** Rocketdyne. USA.
+- **Development:** RS-27 developed **1974** to replace the MB-3 on Delta, built from H-1
+  and MB-3 components. **RS-27A** in the 1980s–early 1990s with an extended nozzle for
+  the Delta II. Last flight **ICESat-2, 15 September 2018** (final Delta II). Retired.
+- **Vehicles:** Delta 2000/3000 (RS-27); **Delta II and Delta III first stages** (RS-27A).
+- **Propellants:** LOX / RP-1. **Mixture ratio: ~2.25** *(not stated in the source; low
+  confidence)*.
+- **Cycle:** Gas generator.
+- **Thrust:** **890.1 kN (200,100 lbf) SL / 1,054.2 kN (237,000 lbf) vacuum.**
+  Note the RS-27A has **lower sea-level thrust than the RS-27** (971 kN) — the bigger
+  nozzle costs SL thrust and buys vacuum performance. This is a clean textbook example
+  of the nozzle trade and worth using as one.
+- **Chamber pressure:** **4.8 MPa = 48 bar (700 psia)** (RS-27: 4.9 MPa / 710 psia).
+- **Isp:** **255 s SL / 302 s vacuum** (RS-27: 264 s SL / 295 s vac — again, the trade).
+- **Expansion ratio:** **12:1**, increased from the RS-27's **8:1**.
+- **Dry mass:** **1,147 kg (2,529 lb)** (RS-27: 1,027 kg).
+- **Thrust-to-weight:** ≈ 79:1 sea level (computed).
+- **Burn time:** 265 s.
+- **Cooling:** Regenerative tube-wall, fuel-cooled — direct H-1 heritage.
+- **Injector:** Flat-face impinging. **Ignition:** pyrotechnic/hypergolic slug.
+- **Turbopump:** Single geared turbopump, H-1/MB-3 heritage.
+- **Major innovation:** None, deliberately — it is a parts-bin engine assembled from two
+  mature designs to a fixed price.
+- **Major limitation:** Ancient architecture; performance was uncompetitive by 2000.
+- **Historical significance:** Powered the Delta II, the most reliable American launch
+  vehicle of its era (100+ consecutive successes), which is an argument for conservative
+  engine design that the textbook should make.
+- **SOURCES:** Wikipedia, *RS-27* — https://en.wikipedia.org/wiki/RS-27 (fetched).
+- **CONFIDENCE: medium.** Single source for the whole block; the numbers are internally
+  consistent and match the RS-27→RS-27A story, but a second source is wanted.
+
+---
+
+## Part 3 — Commercial-era American engines
+
+**A standing caveat for this entire section.** SpaceX, Blue Origin and Rocket Lab publish
+almost nothing in the peer-reviewed or government-report literature. Most figures below
+originate from company websites, press kits, conference talks, or executive social-media
+posts, and several have changed silently over time. Where a number is a company claim, it
+is labelled as one. The textbook should say so on the page, not bury it in a footnote.
+
+### SpaceX Merlin 1D (sea level) and Merlin 1D Vacuum
+
+- **Manufacturer / country:** SpaceX, Hawthorne CA. USA.
+- **Development:** Merlin 1D developed **2011–2012**, qualified March 2013, **first flight
+  29 September 2013** (Falcon 9 v1.1). Uprated repeatedly; the **Block 5** configuration
+  reached its final 845 kN sea-level rating by **May 2018**.
+- **Vehicles:** Falcon 9 (nine SL engines + one MVac), Falcon Heavy (27 + 1).
+- **Propellants:** LOX / RP-1. **Mixture ratio: ~2.34** *(SpaceX does not publish this;
+  low confidence — treat as not published)*.
+- **Cycle:** **Gas generator**, open cycle, fuel-rich. A deliberate simplicity choice.
+- **Thrust:**
+  - **Merlin 1D (SL): 845 kN (190,000 lbf) sea level; 981 kN (221,000 lbf) vacuum.**
+  - **Merlin 1D Vacuum (MVac): 981 kN (220,500 lbf) vacuum.**
+  The coincidence that both quote ~981 kN vacuum is a known source of confusion — the
+  SL engine's *vacuum* rating and the MVac's rating happen to be nearly identical, because
+  the MVac trades chamber-pressure headroom for nozzle area rather than for thrust.
+- **Chamber pressure:** **9.7 MPa = 97 bar (1,410 psi)**. Company figure; not
+  independently verified.
+- **Isp:**
+  - Merlin 1D SL: **282 s SL / 311 s vacuum.**
+  - **MVac: 348 s vacuum** — the highest specific impulse of any American hydrocarbon
+    engine flown. **Note:** Wikipedia's MVac infobox has at times carried the SL engine's
+    311 s in the vacuum field, flagged "needs update". Use 348 s.
+- **Expansion ratio:** **16:1** (SL engine, up from 14.5:1 on Merlin 1C);
+  **165:1** (MVac, with the niobium nozzle extension).
+- **Dry mass:** **470 kg (1,030 lb)** for the SL engine. MVac mass **not published**.
+- **Thrust-to-weight:** **184:1** — the highest of any flown orbital-class engine.
+  This is a SpaceX claim, repeated widely, and it is at least plausible given the
+  mass and thrust figures above (845 kN / 470 kg → 183:1 at sea level, which checks out).
+- **Cooling:** Regenerative, **milled-channel**, RP-1-cooled chamber and nozzle.
+  The MVac nozzle extension is **radiatively cooled niobium alloy** — visibly cherry-red
+  in flight, which is normal, not a fault.
+- **Injector:** **Pintle.** A single central pintle post, throttleable by design, and
+  inherently stable. SpaceX's own material traces this directly to the **Apollo Lunar
+  Module descent engine** — the same TRW lineage, six decades on.
+- **Ignition:** **TEA-TEB** (triethylaluminium–triethylborane) pyrophoric slug, ground-fed
+  on the first stage and carried aboard for MVac restarts.
+- **Turbopump:** **Single-shaft, dual-impeller** — one shaft carries both the LOX and RP-1
+  impellers and the turbine. **~36,000 rpm, ~10,000 hp (7,500 kW)**. Company figures.
+- **Throttle:** originally 70–100%; **40–100%** after 2013 (SL engine). MVac **39–100%**
+  (360–981 kN).
+- **Notable design detail:** The TVC actuators run on **RP-1 tapped from the high-pressure
+  side and returned to the low-pressure inlet** — there is no separate hydraulic fluid to
+  run out, which is exactly the failure that has ended other vehicles.
+- **Major innovation:** The pintle injector at production scale, and manufacturing
+  cadence — hundreds of engines a year, an output no other liquid engine programme has matched.
+- **Major limitation:** Gas-generator cycle and pc = 97 bar mean the Merlin will never be
+  efficient; the design is optimised for cost, restart and reuse, not Isp.
+- **Historical significance:** The first orbital-class engine to be routinely recovered
+  and reflown, and the first to make reuse economically real.
+- **SOURCES:** Wikipedia, *SpaceX Merlin* and *Merlin (rocket engine family)* —
+  https://en.wikipedia.org/wiki/SpaceX_Merlin (both fetched); SpaceX Falcon 9 users'
+  guide (pointer); Space Launch Report Falcon 9 data sheet —
+  https://sma.nasa.gov/LaunchVehicle/assets/space-launch-report-falcon-9-data-sheet.pdf.
+- **CONFIDENCE: medium-high** on thrust, Isp, ε, mass (multiply repeated and mutually
+  consistent); **medium** on chamber pressure and turbopump (single-source company claims);
+  **low/not published** on mixture ratio.
+
+---
+
+### SpaceX Raptor 1 / 2 / 3 — **ALL FIGURES ARE COMPANY CLAIMS**
+
+- **Manufacturer / country:** SpaceX, McGregor TX and Hawthorne CA. USA.
+- **Development:** Methane engine studies from ~2009; **first Raptor test firing
+  25 September 2016** at McGregor. **Raptor 2** production began **18 December 2021**.
+  **Raptor 3** reported first flight **22 May 2026** (Starship Flight Test 12).
+- **Vehicles:** Starship / Super Heavy.
+- **Propellants:** **Subcooled** liquid methane / liquid oxygen. The subcooling (densified
+  propellant) is integral to the design, not an operational nicety.
+- **Mixture ratio: 3.6:1** (≈78% O2 / 22% CH4).
+- **Cycle:** **Full-flow staged combustion (FFSC)** — an **oxidizer-rich preburner**
+  driving the LOX turbopump and a **fuel-rich preburner** driving the CH4 turbopump, with
+  *both* preburner exhausts entering the main chamber. Every gram of propellant passes
+  through a turbine. Only the Soviet **RD-270** (never flown) and the American
+  **Integrated Powerhead Demonstrator** (test only) preceded it; **Raptor is the first
+  FFSC engine ever flown.** That is the single most important fact in this block.
+- **Performance — as claimed, by version:**
+
+  | | Raptor 1 | Raptor 2 | Raptor 3 |
+  |---|---|---|---|
+  | Thrust SL | 185 tf ≈ **1,814 kN (408,000 lbf)** | 230 tf ≈ **2,256 kN (507,000 lbf)** | 250 tf ≈ **2,452 kN (551,000 lbf)** (280 tf max on ground test) |
+  | Thrust vac | 200 tf ≈ 1,962 kN | 258 tf ≈ **2,530 kN** | 275 tf ≈ 2,697 kN |
+  | Chamber pressure | **250 bar (3,626 psia)** | **300 bar (4,351 psia)** | **330 bar (4,786 psia)** operational |
+  | Isp | 327 s SL / 350 s vac | 347 s SL | ~350 s |
+  | Dry mass | **2,080 kg** | **1,630 kg** | **1,525 kg** |
+  | T/W | 88.9 | **141.1** | **163.9** |
+  | Expansion ratio | 34.34 (SL) / 80 (vac variant) | ~34.3 / ~80 | ~34.3 / ~80 |
+
+- **Chamber pressure context:** at 300–330 bar Raptor 2/3 exceed the RS-25's 206 bar and
+  the RD-180's 267 bar, making it (if the claims hold) the highest-chamber-pressure
+  production rocket engine ever built.
+- **Cooling:** Regenerative, methane-cooled milled channels. Raptor 3 additionally
+  integrates much of the secondary plumbing into the castings/prints, which is where a
+  large part of the claimed mass reduction comes from.
+- **Injector:** **Coaxial swirl** (from Raptor 2 onward).
+- **Ignition:** **Torch igniters** in the preburners. Raptor 2 **eliminated the main-chamber
+  igniter** entirely — the preburner torches and the hot preburner gas light the main
+  chamber. Earlier Raptors used spark torch ignition; no TEA-TEB, which matters for
+  on-orbit relight.
+- **Turbopumps:** Two — one oxidizer-rich, one fuel-rich, mechanically independent.
+  Speeds and shaft powers **not published**.
+- **What independent data exists:** FAA licensing and environmental documents for Starship
+  give thrust and propellant-load figures that are broadly consistent with the SL thrust
+  claims, and flight telemetry / acoustic analysis by third parties has been used to
+  cross-check total liftoff thrust. **No independent verification exists for chamber
+  pressure, Isp, dry mass or T/W** — those rest entirely on SpaceX statements, several of
+  which were first made on Twitter/X by Elon Musk rather than in any document.
+  The Raptor 2 thrust figures in particular trace to an **August 2020 Musk tweet**.
+- **Major innovation:** First flown full-flow staged combustion engine; first flown
+  methalox engine at booster scale; deep throttling with rapid reuse.
+- **Major limitation:** The claims are unaudited, the version history is not documented in
+  any stable public record, and early Raptors had a poor reliability record in flight.
+- **Historical significance:** If the numbers are broadly right, Raptor is the highest
+  performance-density rocket engine ever built. The textbook should present it as the
+  frontier *and* as an object lesson in the difference between published data and
+  verified data.
+- **SOURCES:** Wikipedia, *SpaceX Raptor* — https://en.wikipedia.org/wiki/SpaceX_Raptor
+  (fetched; the article itself flags which figures come from Musk tweets and which from
+  FAA documents); FAA Starship licensing/environmental documents (pointer).
+- **CONFIDENCE: LOW-MEDIUM, and this label is the point.** Thrust and cycle: medium-high.
+  Chamber pressure, Isp, mass, T/W: **low — company claims only.** Print them with the
+  attribution attached.
+
+---
+
+### Blue Origin BE-3PM
+
+- **Manufacturer / country:** Blue Origin, Kent WA. USA.
+- **Development:** Announced **January 2013**; **first flight 29 April 2015** on
+  New Shepard. Status: dormant/superseded (New Shepard continues to fly it).
+- **Vehicle:** New Shepard suborbital booster (single engine).
+- **Propellants:** LOX / LH2.
+- **Mixture ratio:** **Not published.**
+- **Cycle:** **Tap-off.** Hot gas is bled directly from the main combustion chamber to
+  drive the turbopump — no preburner and no gas generator. The other flown tap-off
+  examples are the J-2S (never flown operationally) and the Saturn LR87-LH2 studies, so
+  **the BE-3 is effectively the only tap-off engine in regular service** and is the
+  right worked example for that cycle in the textbook.
+- **Thrust:** **490 kN (110,000 lbf) sea level** at full power;
+  **minimum 89 kN (20,000 lbf)** — a **18–100% throttle range**, which is extraordinary
+  and is what makes propulsive vertical landing on a single engine possible.
+- **Chamber pressure:** **Not published.**
+- **Isp:** **Not published** for the PM variant.
+- **Expansion ratio, dry mass, injector, ignition, turbopump detail:** **Not published.**
+- **Cooling:** Regenerative *(stated generally by Blue Origin; not documented in detail)*.
+- **Major innovation:** Deep throttling (18%) on a hydrogen engine, and the tap-off cycle
+  in operational service.
+- **Major limitation:** Almost nothing about it is publicly documented; it is a suborbital
+  engine with no orbital application.
+- **Historical significance:** The engine behind the first vertical landing and reflight
+  of a liquid-fuelled rocket booster (New Shepard, November 2015).
+- **SOURCES:** Wikipedia, *BE-3* — https://en.wikipedia.org/wiki/BE-3 (fetched);
+  Blue Origin product pages (pointer).
+- **CONFIDENCE: medium** on thrust, throttle range, cycle and dates. **Most of the
+  parameter set is genuinely not published** — say so rather than filling it in.
+
+---
+
+### Blue Origin BE-3U
+
+- **Manufacturer / country:** Blue Origin. USA.
+- **Development:** From ~2015, with the extendible nozzle funded separately.
+  **First orbital flight 16 January 2025** on New Glenn. Active.
+- **Vehicle:** New Glenn second stage — two engines.
+- **Propellants:** LOX / LH2. **Mixture ratio: not published.**
+- **Cycle:** **Expander bleed** — *not* the tap-off cycle of the BE-3PM. Blue Origin
+  changed the cycle for the vacuum variant. Getting this distinction right matters:
+  the BE-3PM and BE-3U share a name and very little else in the power cycle.
+- **Thrust:** the published figure has moved:
+  - Original specification: **711.5 kN (160,000 lbf)**
+  - Improved: **889.5 kN (200,000 lbf)**
+  - Demonstrated: **941.5 kN (211,658 lbf)**
+  **Recommendation: quote 710 kN as the design point and note the uprate history**, since
+  it is unclear which figure is flight-nominal.
+- **Chamber pressure:** **Not published.**
+- **Isp:** **445 s vacuum** (company figure).
+- **Expansion ratio:** **Not published** (an extendible nozzle is used).
+- **Dry mass:** **Not published**, but the company quotes a **thrust-to-weight of 90:1**,
+  which back-solves to ~1,000 kg at 889 kN. *Derived, low confidence.*
+- **Throttle:** 75–100%.
+- **Cooling / injector / ignition / turbopump:** **Not published.**
+- **Major innovation:** A high-Isp expander-bleed hydrogen engine at nearly 900 kN — far
+  above the thrust class where expander cycles are usually considered viable, which the
+  bleed architecture is precisely what enables.
+- **Major limitation:** Undocumented; and the shifting thrust figures make independent
+  performance assessment impossible.
+- **Historical significance:** The upper-stage engine of the first new American
+  heavy-lift vehicle since Delta IV Heavy.
+- **SOURCES:** Wikipedia, *BE-3* — https://en.wikipedia.org/wiki/BE-3 (fetched).
+- **CONFIDENCE: low-medium.** Cycle, propellants, Isp and dates are reasonably firm;
+  thrust has three published values; most other parameters are not published.
+
+---
+
+### Blue Origin BE-4
+
+- **Manufacturer / country:** Blue Origin, Huntsville AL (production). USA.
+- **Development:** Work began **2011**; publicly announced **September 2014**; first
+  hotfire **October 2017**; **first flight 8 January 2024** (Vulcan Centaur Cert-1).
+- **Vehicles:** **ULA Vulcan Centaur** (two engines) and **Blue Origin New Glenn**
+  (seven engines, first stage).
+- **Propellants:** LOX / **liquid methane (LNG)**. **Mixture ratio: not published.**
+- **Cycle:** **Oxidizer-rich staged combustion** — a single oxygen-rich preburner whose
+  turbine drives **both** the fuel and oxidizer pumps. This is the American adoption of
+  the Soviet ORSC architecture, and the first US-designed ORSC engine to fly.
+- **Thrust:** **2,460 kN (550,000 lbf) sea level** as originally specified;
+  **2,847 kN (640,000 lbf)** at the improved performance stated in **November 2025**.
+  Vacuum thrust **not published**. **Recommendation: quote 2,450 kN as the baseline and
+  note the 2025 uprate**, because it is not yet clear which vehicles fly which rating.
+- **Chamber pressure:** **140 bar (2,030 psia)** — deliberately *low* for an ORSC engine
+  (compare RD-180 at 267 bar). Blue Origin has been explicit that this is a life-and-
+  reusability choice, not a limitation.
+- **Isp:** **340 s** (sea level, company figure).
+- **Expansion ratio:** **Not published.**
+- **Dry mass:** **5,400 kg (11,900 lb)** for the original configuration.
+- **Thrust-to-weight:** ≈ 46:1 at 2,460 kN / 5,400 kg (computed). Modest.
+- **Throttle:** **40–100%.**
+- **Cooling:** Regeneratively cooled thrust chamber, **methane** as the coolant.
+- **Injector:** Full-scale injector elements were tested during development; the element
+  type is **not published**.
+- **Ignition:** Relightable in flight via a **head-pressure start** — tank pressure spins
+  the turbine up without a separate start cartridge or spin-start system.
+- **Turbopump:** ~**75,000 hp (56 MW)**, and notably uses **hydrostatic bearings rather
+  than rolling-element bearings** — a life-driven choice aimed at reuse.
+- **Major innovation:** ORSC on methane, with hydrostatic bearings and a low chamber
+  pressure chosen for engine life. It is the clearest example in the file of designing an
+  engine around *reuse* rather than around peak performance.
+- **Major limitation:** Poor thrust-to-weight, and a development that ran roughly five
+  years late, which delayed two launch vehicles.
+- **Historical significance:** Ended American dependence on the Russian RD-180 for
+  national-security launch.
+- **SOURCES:** Wikipedia, *BE-4* — https://en.wikipedia.org/wiki/BE-4 (fetched);
+  Blue Origin and ULA statements (pointers).
+- **CONFIDENCE: medium.** Cycle, propellants, pc, throttle, mass, bearings and start
+  method are consistently reported. Thrust has two ratings; Isp, ε and mixture ratio are
+  single-source or unpublished.
+
+---
+
+### Rocket Lab Rutherford (sea level and vacuum)
+
+- **Manufacturer / country:** Rocket Lab, Auckland NZ / Long Beach CA. New Zealand–USA.
+- **Development:** **First test firing 2013**; flight qualification **March 2016**;
+  **first flight 25 May 2017**. In production; by April 2024, 369 engines had flown
+  across 47 Electron flights.
+- **Vehicle:** Electron — **nine sea-level Rutherfords** on stage 1, **one vacuum
+  Rutherford** on stage 2.
+- **Propellants:** LOX / RP-1. **Mixture ratio: not published.**
+- **Cycle:** **Electric pump-fed** — the first such engine ever flown. Two **brushless DC
+  motors** driving the propellant pumps, powered by **lithium-polymer batteries**. There
+  is no turbine, no gas generator, and no power-cycle propellant loss at all.
+- **Thrust:** **SL: 24.9 kN (5,600 lbf). Vacuum: 25.8 kN (5,800 lbf)** (vacuum variant,
+  larger nozzle).
+- **Chamber pressure:** **Not published.**
+- **Isp:** **311 s sea level; 343 s vacuum.**
+- **Expansion ratio:** **Not published** for either variant.
+- **Dry mass:** **35 kg (77 lb)**.
+- **Thrust-to-weight:** **72.8:1**. Note this is *engine* T/W and excludes the batteries,
+  which is the honest criticism of the electric-pump cycle — the stage-level figure is
+  much worse, and the batteries are partly jettisoned in flight to manage it.
+- **Electric system:** **two motors, 37 kW (50 hp) each at 40,000 rpm**. The stage-1
+  battery pack supplies **over 1 MW (1,300 hp)** to run all nine engines.
+- **Claimed efficiency:** ~**95%** for the electric pump drive versus ~50% for a
+  gas-generator turbine. This is a Rocket Lab claim; it is comparing different things
+  (electrical-to-hydraulic efficiency versus thermodynamic cycle efficiency) and the
+  textbook should not repeat it uncritically.
+- **Cooling:** Regenerative — cold RP-1 through channels embedded in the printed chamber.
+- **Manufacturing:** **Chamber, injectors, pumps and main propellant valves are all
+  3D-printed** by laser powder bed fusion / DMLS. Rutherford was the first engine to fly
+  with essentially the entire primary structure additively manufactured.
+- **Injector / ignition:** **Not published** in detail; spark ignition.
+- **Major innovation:** The electric pump cycle, and end-to-end additive manufacturing.
+- **Major limitation:** The battery mass is carried as pure parasitic weight, which caps
+  the approach at small vehicles; Rocket Lab itself moved to ORSC (Archimedes) for Neutron.
+- **Historical significance:** The first fundamentally new propellant-feed architecture to
+  reach orbit since the turbopump.
+- **SOURCES:** Wikipedia, *Rutherford (rocket engine)* —
+  https://en.wikipedia.org/wiki/Rutherford_(rocket_engine) (fetched); Rocket Lab
+  published material (pointer).
+- **CONFIDENCE: medium-high** on thrust, Isp, mass, motor power and manufacturing;
+  **not published** on chamber pressure, expansion ratio, mixture ratio.
+
+---
+
+### Rocket Lab Archimedes
+
+- **Manufacturer / country:** Rocket Lab, Long Beach CA. USA/NZ.
+- **Development:** Announced 2021; cycle changed to ORSC during development; first
+  hotfire 2024; **full-mission-duration hot fire completed August 2025**. **In development,
+  not yet flown.**
+- **Vehicle:** **Neutron** — nine on stage 1, one vacuum-optimised on stage 2.
+- **Propellants:** LOX / liquid methane. **Mixture ratio: not published.**
+- **Cycle:** **Oxidizer-rich staged combustion.** Rocket Lab has stated the change from
+  its original gas-generator design was forced by the requirement to hold performance
+  "through all the throttle points that a reusable rocket needs" — a directly quotable
+  justification for ORSC in a reuse context.
+- **Thrust:** **730 kN (165,000 lbf) sea level; 890 kN (200,000 lbf) vacuum.**
+- **Chamber pressure:** **Not published.**
+- **Isp:** **329 s sea level; 365 s vacuum.**
+- **Expansion ratio:** **Not published.**
+- **Dry mass:** **Not published.**
+- **Throttle:** **50–100%.**
+- **Cooling / injector / ignition / turbopump:** **Not published.** Mostly 3D printed.
+- **Major innovation:** Deliberately de-rated ORSC — Rocket Lab has said Archimedes runs
+  well below its structural capability specifically to extend life between reflights.
+- **Major limitation:** Unflown. Every number is a company projection.
+- **Historical significance:** Pending.
+- **SOURCES:** Wikipedia, *Archimedes (rocket engine)* —
+  https://en.wikipedia.org/wiki/Archimedes_(rocket_engine) (fetched); Rocket Lab
+  investor and press material (pointer).
+- **CONFIDENCE: low.** Company claims for an unflown engine. Thrust and Isp are the only
+  figures with any circulation; treat everything as provisional.
+
+---
+
+### SpaceX SuperDraco
+
+- **Manufacturer / country:** SpaceX. USA.
+- **Development:** Announced **1 February 2012**; qualification complete **May 2014**;
+  **first flight (pad abort test) 6 May 2015**. In service.
+- **Vehicle:** **Crew Dragon** launch escape system — **eight engines in four pods of two**.
+- **Propellants:** **MMH / N2O4**, storable hypergolic. Propellant load **1,388 kg (3,060 lb)**.
+- **Mixture ratio:** **Not published.**
+- **Cycle:** **Pressure-fed** (helium).
+- **Thrust:** **71 kN (16,000 lbf) each at sea level**; a pod pair produces 32,000 lbf;
+  all eight give ~568 kN.
+- **Chamber pressure:** **6.9 MPa = 69 bar (1,000 psi)** — exceptionally high for a
+  pressure-fed engine, and the reason the helium system is so substantial.
+- **Isp:** **235 s sea level.** Low, as expected for a short, low-ε abort engine.
+- **Expansion ratio:** **Not published**; visibly small.
+- **Dry mass:** **Not published.**
+- **Throttle:** **20–100%** — genuinely deep throttling on a hypergolic pressure-fed engine.
+- **Burn time:** ~25 s.
+- **Cooling:** **Regenerative** — unusual for a hypergolic abort engine, most of which are
+  ablative or film-cooled, and necessary here because the engine must be restartable and
+  reusable.
+- **Chamber material:** **3D-printed Inconel** by direct metal laser sintering. This was
+  the first 3D-printed combustion chamber to fly on a crewed spacecraft.
+- **Injector:** **Not published** (pintle is likely given SpaceX practice, but this is
+  inference — do not print it as fact).
+- **Ignition:** Hypergolic; no igniter.
+- **Major innovation:** A printed, regeneratively cooled, deeply throttleable, restartable
+  hypergolic engine — and the integration of abort propulsion into the spacecraft rather
+  than a jettisoned tower.
+- **Major limitation:** The propellants are toxic and the system rides all the way to
+  orbit; the original propulsive-landing application was abandoned after a **April 2019
+  ground-test explosion** traced to NTO leaking past a check valve into a helium line.
+- **Historical significance:** The first integrated (non-tower) launch escape system on an
+  American crewed vehicle, and the reason Crew Dragon has abort coverage through the
+  whole ascent.
+- **SOURCES:** Wikipedia, *SuperDraco* — https://en.wikipedia.org/wiki/SuperDraco (fetched).
+- **CONFIDENCE: medium.** Thrust, pc, Isp, propellants, throttle and manufacturing are
+  well reported; mass, ε, injector and mixture ratio are not published.
+
+---
+
+### SpaceX Draco
+
+- **Manufacturer / country:** SpaceX. USA.
+- **Development:** ~2008–2010; **first flight December 2010** (Dragon C1). In service.
+- **Vehicle:** Dragon 1 (18 thrusters) and Dragon 2 (16 thrusters) — attitude control,
+  orbital manoeuvring, deorbit. Sources differ on 16 vs 18; the count changed between
+  Dragon variants.
+- **Propellants:** **MMH / NTO**, storable hypergolic.
+- **Mixture ratio:** **Not published.**
+- **Cycle:** Pressure-fed.
+- **Thrust:** **400 N (90 lbf) vacuum.**
+- **Chamber pressure:** **Not published.**
+- **Isp:** **300 s vacuum.**
+- **Expansion ratio:** **Not published.**
+- **Dry mass:** **Not published.**
+- **Cooling:** Film/radiative *(not documented; inferred from class — flag as such)*.
+- **Injector / ignition:** Not published; hypergolic, no igniter.
+- **Major innovation:** None claimed — it is a conventional small hypergolic thruster,
+  notable mainly for being built in-house rather than bought from Aerojet or Ariane.
+- **Major limitation:** Undocumented; performance is unremarkable for the class.
+- **Historical significance:** Useful in the textbook as a direct modern comparison to the
+  R-4D: **400 N at 300 s (Draco, 2010) versus 490 N at 312 s (R-4D, 1965)** — fifty years
+  and the small-hypergolic state of the art barely moved, which is itself the lesson.
+- **SOURCES:** Wikipedia, *SpaceX Draco* — https://en.wikipedia.org/wiki/SpaceX_Draco
+  and *Draco (rocket engine family)* (fetched).
+- **CONFIDENCE: medium** on thrust and Isp; **low/not published** on everything else.
+
+---
