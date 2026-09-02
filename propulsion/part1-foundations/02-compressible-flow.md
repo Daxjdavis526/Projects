@@ -1586,12 +1586,10 @@ $\mathcal{M} = 20$ kg/kmol, $T_0 = 3500$ K, sea-level start, booster burns to
 15 km. The base of the vehicle can accommodate an exit diameter up to 1.8 m per
 engine; nine engines. Options:
 
-- **A.** $\varepsilon = 20$ — conservative, no separation at any throttle
-  setting.
-- **B.** $\varepsilon = 34$ — near ideal expansion at ~6 km, the trajectory's
-  mean ambient.
-- **C.** $\varepsilon = 55$ — optimised for the upper half of the burn, requires
-  a thrust-optimised contour and accepts sea-level overexpansion.
+- **A.** $\varepsilon = 20$ — conservative; underexpanded even at sea level.
+- **B.** $\varepsilon = 34$ — ideally expanded at about 3.7 km.
+- **C.** $\varepsilon = 55$ — ideally expanded at about 8.1 km, optimised for
+  the upper half of the burn, and accepting sea-level overexpansion.
 - **D.** $\varepsilon = 34$ with a dual-bell contour.
 
 Recommend one. Your answer must include: $p_e$ and $p_e/p_a$ at sea level for
