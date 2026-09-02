@@ -2268,11 +2268,11 @@ The file's own list, with the caveat you should have written:
 | exercise | figure | caveat |
 |---|---|---|
 | 1 — F-1 | chamber pressure | four values circulate: 965 / 982 / **1,015** / 1,125 psia. Quote ≈70 bar `inj` and footnote the range; the spread is a measurement-station and programme-phase artefact `[engine-database A.2.2]` |
-| 2 — RS-25 | expansion ratio | **69:1** (manufacturer, "area ratio") / 77.5:1 (agency training material) / 78:1. Quote 69:1 as geometric and footnote 77.5:1 `[A.2.3]` |
-| 2 — RS-25 | dry mass | 3,177 kg (bare) vs **3,526 kg** (manufacturer, installed). T/W 73.1:1 uses the *smaller* mass; ~66:1 on the larger. Never quote T/W without saying which mass `[A.2.5]` |
-| 5 — Raptor | everything | company claims; thrust corroborated only indirectly via FAA documents and third-party telemetry/acoustics. **No independent verification of Pc, Isp, dry mass or T/W** `[A.3.5]` |
-| 21 — Star 48B | vacuum Isp | **286.2 s and 292.2 s are both correct** — short and long nozzle. Never quote it without the nozzle. Inert mass 28 kg is almost certainly a dropped digit for 128 kg `[B.4.1]` |
-| 29 — RL10B-2 | expansion ratio | **285:1 deployed / 77:1 retracted**; 280:1 is a rounding `[A.2.7]` |
+| 2 — RS-25 | expansion ratio | **69:1** (manufacturer, "area ratio") / 77.5:1 (agency training material) / 78:1. Quote 69:1 as geometric and footnote 77.5:1 `[engine-database A.2.3]` |
+| 2 — RS-25 | dry mass | 3,177 kg (bare) vs **3,526 kg** (manufacturer, installed). T/W 73.1:1 uses the *smaller* mass; ~66:1 on the larger. Never quote T/W without saying which mass `[engine-database A.2.5]` |
+| 5 — Raptor | everything | company claims; thrust corroborated only indirectly via FAA documents and third-party telemetry/acoustics. **No independent verification of Pc, Isp, dry mass or T/W** `[engine-database A.3.5]` |
+| 21 — Star 48B | vacuum Isp | **286.2 s and 292.2 s are both correct** — short and long nozzle. Never quote it without the nozzle. Inert mass 28 kg is almost certainly a dropped digit for 128 kg `[engine-database B.4.1]` |
+| 29 — RL10B-2 | expansion ratio | **285:1 deployed / 77:1 retracted**; 280:1 is a rounding `[engine-database A.2.7]` |
 
 And the ones the file's own list does not mention but that a strong answer
 carries anyway: the Gamma 8's 234.8 vs 222.4 kN thrust (Ex 28), the HM7B's

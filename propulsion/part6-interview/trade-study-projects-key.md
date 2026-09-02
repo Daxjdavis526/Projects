@@ -975,10 +975,10 @@ comfortably above the separation limit (checked below). Thrust is held at R4.1's
 
 | $p_c$ (bar) | ε | $C_F$ (SL) | $A_t$ (m²) | $D_t$ (mm) | $I_{sp,SL}$ (s) | $\dot m$ (kg/s) | pump power (MW) | $h_g$ (W/m²K) | **$q_{throat}$ (MW/m²)** | $\Delta T$ through an 0.8 mm liner (K) | $N_f$ scaling |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| **100** | 20.93 `[P4.2]` | 1.6491 `[P4.6]` | 0.1455 `[P4.10]` | 430.5 | **305.5** | 801.2 | **19.37** `[P4.14]` | 21,850 `[P4.20]` | **59.5** `[P4.24]` | 159 | ~181 |
-| **150** | 28.80 `[P4.3]` | 1.7013 `[P4.7]` | 0.0940 `[P4.11]` | 346.0 | **315.2** | 776.4 | **28.43** `[P4.15]` | 31,572 `[P4.21]` | **86.0** `[P4.25]` | **229** `[P4.28]` | ~87 |
-| **200** | 36.42 `[P4.4]` | 1.7358 `[P4.8]` | 0.0691 `[P4.12]` | 296.7 | **321.6** | 761.1 | **37.32** `[P4.16]` | 40,983 `[P4.22]` | **111.6** `[P4.26]` | 298 | ~51 |
-| **300** | 50.51 `[P4.5]` | 1.7810 `[P4.9]` | 0.0449 `[P4.13]` | 239.1 | **330.0** | 741.7 | **54.82** `[P4.17]` | 59,185 `[P4.23]` | **161.2** `[P4.27]` | **430** `[P4.29]` | ~25 |
+| **100** | 20.93 `[TS P4.2]` | 1.6491 `[TS P4.6]` | 0.1455 `[TS P4.10]` | 430.5 | **305.5** | 801.2 | **19.37** `[TS P4.14]` | 21,850 `[TS P4.20]` | **59.5** `[TS P4.24]` | 159 | ~181 |
+| **150** | 28.80 `[TS P4.3]` | 1.7013 `[TS P4.7]` | 0.0940 `[TS P4.11]` | 346.0 | **315.2** | 776.4 | **28.43** `[TS P4.15]` | 31,572 `[TS P4.21]` | **86.0** `[TS P4.25]` | **229** `[TS P4.28]` | ~87 |
+| **200** | 36.42 `[TS P4.4]` | 1.7358 `[TS P4.8]` | 0.0691 `[TS P4.12]` | 296.7 | **321.6** | 761.1 | **37.32** `[TS P4.16]` | 40,983 `[TS P4.22]` | **111.6** `[TS P4.26]` | 298 | ~51 |
+| **300** | 50.51 `[TS P4.5]` | 1.7810 `[TS P4.9]` | 0.0449 `[TS P4.13]` | 239.1 | **330.0** | 741.7 | **54.82** `[TS P4.17]` | 59,185 `[TS P4.23]` | **161.2** `[TS P4.27]` | **430** `[TS P4.29]` | ~25 |
 
 Bartz inputs, from Module 10's fixed recipe: $c_{p0}$ = 2,940.5 J/(kg·K),
 $Pr_0$ = 0.8529, $\mu_0$ = 10⁻⁴ Pa·s, $\sigma$ = 1.3689 `[TS P4.18]`,
@@ -1092,10 +1092,10 @@ case. Say that.
 
 | claim | used for | if 15 % optimistic |
 |---|---|---|
-| Raptor 2/3 at 300–330 bar, T/W 141–164 `[claim]` `[A.3.5]` | the upper end of the $p_c$ trade, and the existence proof that 2,200 kg at 2,400 kN is achievable at all | 300 bar → 255 bar and T/W 164 → 139. **R4.5 becomes unachievable at any pressure in the trade**, and the requirement itself must be renegotiated. This is the single largest exposure in the study |
-| Merlin 1D T/W 184:1 `[claim]` `[A.3]` | the argument that a gas generator can be light | 184 → 156, still the lightest architecture. The GG case survives |
-| BE-4 2,460 kN at 140 bar, 5,400 kg (specification + a Nov-2025 uprate claim) `[A.3.4]` | the only *measured-ish* large methalox ORSC data point | mass is not a claim in the optimistic direction; the thrust uprate to 2,847 kN is, and it is unclear which vehicles fly which rating |
-| Archimedes 730 kN, deliberately de-rated for life `[claim, unflown]` `[A.3]` | the qualitative argument that de-rating buys reflight life | unaffected — it is an architectural statement, not a number |
+| Raptor 2/3 at 300–330 bar, T/W 141–164 `[claim]` `[engine-database A.3.5]` | the upper end of the $p_c$ trade, and the existence proof that 2,200 kg at 2,400 kN is achievable at all | 300 bar → 255 bar and T/W 164 → 139. **R4.5 becomes unachievable at any pressure in the trade**, and the requirement itself must be renegotiated. This is the single largest exposure in the study |
+| Merlin 1D T/W 184:1 `[claim]` `[engine-database A.3]` | the argument that a gas generator can be light | 184 → 156, still the lightest architecture. The GG case survives |
+| BE-4 2,460 kN at 140 bar, 5,400 kg (specification + a Nov-2025 uprate claim) `[engine-database A.3.4]` | the only *measured-ish* large methalox ORSC data point | mass is not a claim in the optimistic direction; the thrust uprate to 2,847 kN is, and it is unclear which vehicles fly which rating |
+| Archimedes 730 kN, deliberately de-rated for life `[claim, unflown]` `[engine-database A.3]` | the qualitative argument that de-rating buys reflight life | unaffected — it is an architectural statement, not a number |
 
 **The honest summary line for the memo:** *the recommendation's T/W requirement
 rests on unverified manufacturer claims; if they are 15 % optimistic, R4.5 does
@@ -1247,3 +1247,700 @@ along because it gets there with a third of the part count.
    73:1 or 66:1 depending which you used `[engine-database A.2.5]`.
 
 ---
+
+# Project 5 — A strap-on booster for an existing core
+
+## §1. Reference sizing (D1)
+
+### Total impulse, mass fraction and the gross-mass cap
+
+R5.1 demands ≥ 60 MN·s per booster; R5.4 caps gross mass at 27,000 kg. The
+propellant needed is $m_p = I_{tot}/(I_{sp}g_0)$, and the gross mass follows from
+the architecture's mass fraction:
+
+| candidate | delivered $I_{sp,vac}$ | propellant (kg) | mass fraction | **gross (kg)** | margin on R5.4 |
+|---|---|---|---|---|---|
+| **A** monolithic filament-wound composite | **286.5** | 21,358 | **0.905** (P120C: 0.924; GEM family 0.894–0.908) | **23,600** | 3,400 kg |
+| **B** segmented steel (RSRM architecture) | **268** | 22,829 | **0.85** (Shuttle SRB, `CALC`) | **26,858** | **142 kg** |
+| **C** kerolox liquid strap-on | ~290 trajectory-average | 21,098 | ~0.90 stage | ~23,442 | 3,558 kg |
+| **D** segmented composite (SRMU-like) | 286.5 | 21,358 | 0.89 | 24,552 | 2,448 kg |
+
+**Candidate B closes R5.4 with 142 kg of margin — 0.5 %.** It is not eliminated,
+but it has no growth margin at all, and any study that reports 26,858 kg against
+a 27,000 kg cap without saying that the requirement is effectively already
+breached has misread its own number. The 0.85-versus-0.924 mass-fraction pair is
+**the single most useful argument in Part III** for why monolithic composite
+construction won for everything that does not have to be shipped by rail
+`[engine-database B.1.7]`.
+
+### The performance figures, closed
+
+At ε = 12 with the AP/Al/HTPB gas model (γ = 1.18, delivered $c^*$ = 1,580 m/s):
+
+| | value | source |
+|---|---|---|
+| vacuum $C_F$ | **1.7780** | `[TS P5.1]` |
+| sea-level $C_F$ | **1.5754** | `[TS P5.2]` |
+| $I_{sp,vac}$ = 1,580 × 1.7780 / 9.80665 | **286.5 s** | |
+| $I_{sp,SL}$ = 1,580 × 1.5754 / 9.80665 | **253.8 s** | |
+| burn-averaged vacuum thrust at 115 s | **521.7 kN** | 60 MN·s / 115 s |
+| throat area at $p_c$ = 60 bar | **0.048906 m²** | `[TS P5.3]` |
+| throat diameter | **249.5 mm** | |
+
+**R5.2's 1,650 kN cap is not binding.** The burn-time window R5.3 imposes
+(90–140 s) forces the average thrust into 429–667 kN, and even the peak of the
+shaped trace is ~660 kN. The structural cap is generous by a factor of 2.5. That
+is a finding worth a sentence in the memo, because it means the design is
+**impulse-and-mass limited, not thrust limited**, and it removes the constraint
+students spend the most time on.
+
+### Internal ballistics and the grain (project-specific deliverable)
+
+Propellant: AP/Al/HTPB, $\rho_p$ = 1,800 kg/m³, **$n$ = 0.35**,
+$a$ = 3.394197 × 10⁻⁵ m/s/Paⁿ (i.e. $r$ = 8.0 mm/s at 60 bar `[TS P5.7]`).
+
+| point in the burn | $A_b$ (m²) | $K_n = A_b/A_t$ | equilibrium $p_c$ | source |
+|---|---|---|---|---|
+| **peak, t ≈ 2 s** | 15.238 | 311.6 | **77.6 bar** | `[TS P5.5]` |
+| **nominal / burn-average** | 12.897 | 263.7 | **60.0 bar** | `[TS P5.4]` |
+| **after fin burnout, t ≈ 55 s** | 12.200 | 249.5 | **55.1 bar** | `[TS P5.6]` |
+
+**The thrust trace and R5.5.** Sea-level thrust at the 77.6 bar peak is
+$p_c A_t C_F$ = 7.76 MPa × 0.048906 × 1.628 = **618 kN**; at 55.1 bar it is
+**419 kN**. That is a **32 % roll-off**, comfortably clearing R5.5's ≥ 25 %
+before T+62 s, and it is produced by a **20 % reduction in burning area**,
+because $p \propto K_n^{1/(1-n)}$ and $1/(1-n) = 1.54$ amplifies the area change.
+
+**The grain that does it: a finocyl** — a cylindrical bore through the full
+length with radial fins in the forward third. The fins supply the extra 3.0 m² of
+initial burning area and burn out at roughly 40 % of web, at which point the area
+drops to the cylindrical-bore value and then grows slowly as the bore regresses,
+giving the regressive-then-neutral trace the vehicle needs through max-Q. This is
+the same *function* as the Shuttle SRB's 11-point forward star and
+double-truncated-cone aft segments — a head-end regressive trace that unloads the
+vehicle at maximum dynamic pressure `[engine-database B.1]` — implemented in a
+monolithic grain that has no segment boundaries to place it at.
+
+**What it costs in volumetric loading.** Propellant volume is 11.87 m³. At a
+case inner radius of 0.78 m (1.6 m outer diameter less insulation) and a 6.8 m
+grain, a plain cylindrical bore of radius 0.302 m holds 11.05 m³; the fins
+remove a further ~0.35 m³ of propellant volume at the forward end, so the grain
+must run ~7.3 m to hold the load. **Volumetric loading falls from ~0.87 to ~0.83
+— about 4 points, and roughly 0.5 m of extra length.** A solid-booster study
+without a grain design is a study without a design, and a grain design without
+its volumetric-loading cost is a sketch.
+
+The port-to-throat ratio is $A_p/A_t$ = 0.286/0.0489 = **5.85**, safely above the
+~4 below which erosive burning becomes a design problem.
+
+### Temperature sensitivity (project-specific deliverable)
+
+With $\sigma_p$ = 0.002 K⁻¹ and $n$ = 0.35, $\pi_K = \sigma_p/(1-n)$ =
+**0.003077 K⁻¹** `[TS P5.8]`. Over R5's stated bulk range of −5 °C to +35 °C,
+i.e. ±20 K about 15 °C:
+
+| | cold (−5 °C) | nominal (15 °C) | hot (+35 °C) |
+|---|---|---|---|
+| $p_c$ and thrust | **×0.9403** (−6.0 %) `[TS P5.10]` | 1.000 | **×1.0635** (+6.3 %) `[TS P5.9]` |
+| burn rate | ×0.9403 | 1.000 | ×1.0635 |
+| burn time | ×1.0635 (+6.3 %) | 115 s | ×0.9403 (−6.0 %) |
+| peak $p_c$ | 73.0 bar | 77.6 bar | **82.5 bar** |
+| peak SL thrust ($C_F$ = 1.6315 hot `[TS P5.11]`) | ~580 kN | 618 kN | **657 kN** |
+| total impulse | essentially unchanged (same propellant; $I_{sp}$ rises ~0.5 % with $p_c$) | 60 MN·s | ~60.3 MN·s |
+
+**The vehicle closes at both extremes**: peak thrust of 657 kN hot is 40 % of the
+1,650 kN structural cap, and burn time of 108–122 s stays inside R5.3's 90–140 s
+window.
+
+**But R5.6 does not close by itself.** A 3 % thrust imbalance between paired
+boosters corresponds to a bulk-temperature difference of only
+$0.03/0.003077 =$ **9.8 K**. Two boosters on opposite sides of a vehicle, one in
+morning sun and one in shade, can differ by more than that. **The requirement is
+therefore a thermal-conditioning requirement on the pad**, not a propellant
+requirement: the boosters must be soaked to within ~5 K of each other, verified
+by embedded bulk-temperature instrumentation, before the count can proceed. That
+sentence is the deliverable. *Solids are the only architecture here whose
+performance depends on what the weather was like last week*, and the rubric
+checks that you noticed.
+
+### Transport and handling (project-specific deliverable)
+
+Grain 7.3 m plus forward dome, nozzle and skirt gives an overall length of
+**~9 m** at **1.6 m diameter and 23,600 kg**. That is an over-dimension permit
+load on a public road — a routine one. **The monolithic composite motor is
+road-legal in one piece**, and R5.9 is satisfied without a barge.
+
+**This destroys the entire rationale for candidate B.** Segmentation exists for
+one reason: it lets you cast in one place, ship by rail, and assemble somewhere
+else `[engine-database B.1.7]`. The site has **no rail connection** and the motor
+is road-legal whole. Candidate B therefore pays 0.055 of mass fraction, three
+field joints, a field-assembly building, and the entire O-ring failure mode
+`[Rogers86]` **for a capability the programme does not need.**
+
+Hazard classification: an AP/Al/HTPB composite of this size is normally **Class
+1.3** (mass fire) rather than 1.1 (mass detonation), which is the difference
+between a facility with a 400 m quantity-distance arc and one with 1,200 m,
+between a normal road permit and a specialist explosives convoy, and between an
+insurable and a barely-insurable operation. **Class 1.3 and Class 1.1 are
+different businesses**, and stating which one you are in is part of D4.
+
+### Pad and ground-systems delta
+
+| candidate | pad delta |
+|---|---|
+| A / D (solid) | booster erection and mate hardware, ordnance safing, an FTS linear-shaped-charge run per booster, bulk-temperature instrumentation and a conditioning plan. **No propellant loading at all** |
+| B (segmented solid) | all of the above, plus a field-joint assembly building, joint heaters and their power, and a joint-assembly workforce with a qualification programme |
+| C (liquid) | **a second complete propellant loading system**: LOX storage and transfer, RP-1 storage, chilldown and drainback, purge, and a hold capability — on a pad that is fixed and cannot be modified except for structural hardpoints and *one* additional command line (R5) |
+
+**Candidate C is eliminated on the mission statement, not on physics.** One
+additional command line cannot carry a liquid booster's loading, conditioning,
+health-monitoring and abort interfaces; and the ignition simultaneity of R5.7
+(≤ 30 ms) and the thrust imbalance of R5.6 (≤ 3 % at any instant) are hard for
+two independently starting liquid engines with turbopump spin-up transients,
+where they are natural for two solid motors fired from a common ordnance train.
+The 30-month schedule (R5.12) for a new ~500 kN engine — the RD-107A's 839 kN is
+too large and does not throttle — is not credible.
+
+## §2. Recommended architecture, with the argument both ways
+
+**Recommendation: candidate A — a monolithic carbon-fibre filament-wound
+composite case, a single monolithic HTPB/AP/Al cast, a finocyl grain giving a
+77.6 → 55 bar regressive-then-neutral trace, a fixed submerged carbon-phenolic
+nozzle at ε = 12 with a carbon–carbon throat insert, and no thrust vector
+control.**
+
+### The argument for
+
+1. **Mass fraction.** 0.905 against 0.85 buys 3,258 kg of gross mass, which is
+   the difference between 3,400 kg of margin on R5.4 and 142 kg.
+2. **The reason for segmentation does not apply here.** No rail, road-legal
+   whole, no casting facility on site either way. Segmentation would be paying
+   the cost of a capability the programme cannot use.
+3. **It deletes the field joint, and with it the single most instructive failure
+   mode in the whole course** `[Rogers86]` `[engine-database B.1.6]`.
+4. **Fixed nozzle.** R5.6 says TVC is not required from the boosters; the core
+   gimbals. A vectorable nozzle would add a flexseal, actuators, power and a
+   control interface the one available command line cannot carry.
+5. **Storage.** R5.8 wants five years fully assembled with an annual inspection.
+   A cast solid in a composite case does that; a loaded liquid stage does not,
+   and a segmented steel motor does it only with joint-seal recertification.
+
+### The argument against — what the recommendation costs
+
+1. **Isp and controllability, to candidate C.** The liquid strap-on delivers
+   ~290 s trajectory-average against 286.5 s, can be throttled, can be shut down,
+   and can be tested before flight. **Once lit, a solid has no throttling and no
+   shutdown**, and that is a real loss on a crew-rated or high-value payload.
+2. **Temperature sensitivity.** ±6.3 % of thrust across the bulk range, and a
+   3 % imbalance requirement that translates into a 9.8 K conditioning
+   tolerance. The liquid option has no equivalent problem.
+3. **Facility risk.** A monolithic 21.4 t cast in one pour needs a mixer, a
+   casting pit and a cure oven sized for the whole motor, and the site has none —
+   so the motor is cast elsewhere and shipped whole, which is exactly why the
+   road-legality finding is load-bearing. If the transport analysis is wrong, the
+   architecture is wrong.
+4. **The SRMU precedent.** The segmented-composite route (candidate D) was
+   famously troubled: a case failure during a 1991 structural test killed a
+   worker and slipped the programme by years `[_verify-solid-coldgas A.4]`.
+   Composite cases are not free, and a monolithic one is a larger article than
+   any of the segments that failed.
+
+**Two criteria the recommendation loses on: performance and mass — both to the
+liquid strap-on**, which is 3.5 s better on Isp and ~160 kg lighter at gross. The
+matrix records that.
+
+## §3. Pugh matrix and sensitivity (D6)
+
+**Datum: candidate A**, the modern default and the architecture the programme
+would build without a study.
+
+| criterion | w | justification tied to the mission statement | A (datum) | B segmented steel | C kerolox liquid | D segmented composite |
+|---|---|---|---|---|---|---|
+| performance | 8 | R5.1's total impulse is a floor, not a target; Isp only buys gross-mass margin | 0 | −2 (268 s) | **+1** (~290 s) | 0 |
+| mass | 12 | R5.4's 27,000 kg is the binding cap | 0 | **−2** (26,858 kg — 142 kg of margin) | **+1** (23,442 kg) | −1 (24,552 kg) |
+| complexity | 10 | 30 months to first flight (R5.12) | 0 | −2 (three field joints, field assembly) | −2 (second pad propellant system) | −1 |
+| reliability | 15 | 8 flights a year for 20 years; R5.6 and R5.7 are start-transient requirements | 0 | −1 (RSRM's post-1988 record is excellent; the joint is still 3 more failure paths) | **−2** (30 ms simultaneity, 3 % imbalance, turbopump start transients) | −1 |
+| manufacturability | 15 | 16–32 boosters/year for 20 years | 0 | 0 (mature supply chain, but field assembly labour) | −2 (a new engine line at 16–32/yr in 30 months) | −1 (three winding runs plus joints) |
+| cost | 22 | R5.11: recurring cost is binding | 0 | −1 | −2 (the cost is mostly not in the booster) | −1 |
+| mission fit | 18 | **no rail connection, no casting facility, one additional command line, 5-year assembled storage** | 0 | **−2** (segmentation solves a problem this site does not have) | **−2** (one command line; no 5-year loaded storage) | 0 |
+| **weighted total** | **100** | | **0** | **−133** | **−140** | **−74** |
+
+### Sensitivity
+
+**No weight, singly or in pairs, flips this answer within ±50 %**, and the gap to
+the nearest alternative (candidate D, −74) is large. Report that as the result:
+**this is a robust decision, and the robustness is a property of the mission
+statement, not of the analysis.** Three site facts do the work — no rail, no
+casting facility, one command line — and every one of them is a sentence in the
+mission statement rather than a number in the requirements table.
+
+**The requirement change that would flip it**, and which the memo should name as
+the change-of-mind trigger: if the launch site gained a rail connection *and* the
+gross-mass cap rose above ~28,000 kg, candidate B's mature supply chain and
+existing tooling would become competitive on cost, which is the criterion with
+the largest weight. Absent that, it does not.
+
+**And the one honest caveat:** candidate A wins on five of seven criteria and
+ties on one. That is close to the pattern the project file warns about. It is
+defensible here only because the recommendation **does** lose on two criteria to
+candidate C — performance and mass — and because the losses to C are real rather
+than manufactured. If your matrix has A winning every cell, you have flattened
+the liquid option and should score it again.
+
+## §4. Rubric — Project 5, out of 100
+
+| deliverable | marks | what earns them |
+|---|---|---|
+| **D1 sizing** | **25** | 4: total impulse → propellant → gross for all candidates against R5.4. **8: the internal ballistics — $K_n$, equilibrium $p_c$ at three points, and the thrust trace computed rather than sketched** `[TS P5.3–P5.7]`. **6: the grain design, with the volumetric-loading cost stated**. 4: $C_F$ at the actual ε for both SL and vacuum `[TS P5.1, P5.2]`. 3: port-to-throat ratio and erosive-burning check |
+| **D2 mass budget** | **15** | 6: case, insulation, liner, nozzle, igniter, skirts, ordnance, instrumentation, with maturity MGA. 4: system margin against R5.4, and **candidate B's 142 kg reported as effectively zero**. 3: propellant sliver and unburnt residual (a solid's version of residuals — 0.5–1.5 % and routinely forgotten). 2: mass fraction stated as `CALC` with its inputs |
+| **D3 reliability** | **12** | 4: part count — a monolithic solid's is startlingly small and that is the argument. 3: single-point failures (the case is one, and it is not removable by redundancy). 3: FMEA with specific modes (insulation debond, nozzle throat insert erosion — see Vega-C VV22 `[engine-database B.3.3]`, igniter no-fire). 2: what 8 flights/year × 20 years does to a demonstrated-reliability claim |
+| **D4 manufacturability and cost** | **12** | 4: UCI with the large-cast-grain (60) and filament-wound-case (40) complexity classes used properly. 3: NRI and the facility term — **the casting facility is the architecture** `[P120C]`. **3: the transport and handling analysis with a hazard classification.** 2: rate at 16–32/year against a 33-day winding cycle |
+| **D5 risk** | **8** | 5: eight risks with retirement points. 2: two non-technical (AP supply and the carbon-fibre supply chain are the obvious pair). 1: one created by the recommendation — a monolithic cast has no partial-scrap recovery, so one bad pour loses a whole motor |
+| **D6 Pugh + sensitivity** | **18** | 3: weights before scores. 3: real datum. 3: evidence per score. **4: the temperature-sensitivity analysis and its R5.6 consequence** — this is a project-specific deliverable and the rubric checks that you noticed. **5: the sensitivity, with the correct finding that nothing flips and the requirement change that would** |
+| **D7 memo** | **10** | 3: recommendation first. 2: three numbers (0.905, 23,600 kg, 9.8 K). 3: what it costs. 1: trigger. 1: one page |
+
+## §5. Common weak answers
+
+1. **"Segmented steel, because that is how boosters are built."** It was how they
+   were built when they had to move by rail. This site has no rail, and the motor
+   is road-legal whole at 9 m and 23.6 t. *What it reveals:* the architecture was
+   chosen by precedent rather than by the constraint that produced the precedent.
+2. **No grain design.** The single most common omission. A solid-motor study
+   without $K_n$, an equilibrium pressure and a thrust trace is not a design.
+3. **A sketched thrust trace.** R5.5 asks for ≥ 25 % roll-off before T+62 s; the
+   reference solution computes 32 % from a 20 % area reduction, and the
+   amplification factor $1/(1-n)$ = 1.54 is the physics that makes it work.
+4. **Forgetting temperature sensitivity entirely**, or computing it and not
+   connecting it to R5.6. The 3 % imbalance limit is a 9.8 K conditioning
+   tolerance and that is the only place in the study where the propellant's
+   $\sigma_p$ touches a requirement.
+5. **Assuming R5.2's 1,650 kN cap is binding.** It is not, by a factor of 2.5,
+   and hours are lost designing against it.
+6. **Taking the liquid option seriously on physics and not on the pad.** Its
+   cost is mostly not in the booster, and the mission statement says the pad
+   cannot be modified except for hardpoints and one command line.
+7. **Quoting P120C's ≈4,780 kN and ≈280 s without their tags.** The thrust is
+   `/motor` `max` **vacuum**, and chamber pressure and the thrust trace are
+   flagged as needing a primary source `[P120C]` `[engine-database B.1.10]`.
+   Automatic −5.
+8. **Using the Shuttle SRB's 0.85 without noting it is `CALC`** from published
+   masses rather than a sourced mass fraction.
+9. **Ignoring the SRMU precedent when scoring candidate D.** A fatal 1991 case
+   failure and a multi-year slip is exactly the kind of evidence a risk register
+   exists to carry `[_verify-solid-coldgas A.4]`.
+
+---
+
+# Project 6 — A crew-capsule launch abort system
+
+## §1. Reference sizing (D1)
+
+### First: the motor the project hands you does not meet the requirements
+
+Candidate A is specified as "a solid abort motor of **1,800 kN for 5 s** at
+**270 s** vacuum-equivalent $I_{sp}$". Work it:
+
+- Total impulse = 1,800 kN × 5 s = **9.0 MN·s**
+- Propellant = 9.0 × 10⁶ / (270 × 9.80665) = **3,399 kg** `[TS P6.1]`
+- Tower inert (case, insulation, nozzle at ~0.35 $m_p$, plus jettison motor,
+  attitude-control motor, structure and boost protective cover at ~900 kg)
+  = **3,449 kg**
+- LAS total = **6,848 kg**; stack at abort $M_0$ = **17,348 kg**;
+  burnout $M_f$ = **13,949 kg**
+
+Then:
+
+| check | value | requirement | verdict |
+|---|---|---|---|
+| Δv imparted | **577.4 m/s** `[TS P6.2]` | ≥ 250 m/s (R6.2) | **2.3× over** |
+| axial acceleration at ignition | 1,800 kN / 17,348 kg = 103.8 m/s² = **10.6 g** | ≤ 12 g (R6.4) | passes |
+| axial acceleration at burnout | 1,800 kN / 13,949 kg = 129.0 m/s² = **13.2 g** | ≤ 12 g (R6.4) | **FAILS** |
+
+**The given motor busts the g-ceiling at burnout and over-delivers Δv by a factor
+of 2.3.** The correct engineering response is not to accept the assumption. It is
+either to (i) shape the trace so thrust falls by ≥ 21 % across the burn — which a
+regressive grain does naturally and which the project asks you to design — or
+(ii) size the motor from the requirement. The reference solution does both, and
+notes that a real abort motor does exactly this: the Orion-class abort motor's
+trace is strongly regressive for precisely this reason.
+
+### Candidate A, resized from the requirement
+
+Target: 250 m/s in ≤ 4.0 s with 4 g ≤ a ≤ 12 g. The Δv floor and the g ceiling
+bracket the burn time: at the 12 g ceiling, 250 m/s takes ≥ 2.12 s; at 4 g it
+takes 6.4 s, which violates R6.3. **The corner is a burn of ~3.2 s at an average
+of ~8 g**, and that is the design point R6.2/R6.3/R6.4 leave you.
+
+Converged (iterating tower inert = 0.75 $m_p$ + 900 kg):
+
+| quantity | value |
+|---|---|
+| propellant | **1,219 kg** |
+| tower inert | **1,815 kg** |
+| **LAS total (jettisoned)** | **3,034 kg** |
+| stack at abort $M_0$ | **13,534 kg** |
+| burnout $M_f$ | 12,315 kg |
+| Δv | **250.0 m/s** `[TS P6.3]` |
+| average thrust chosen | **1,000 kN** |
+| burn time | **3.23 s** |
+| acceleration, ignition → burnout | **7.53 g → 8.28 g** |
+| nozzle: ε = 8, $p_c$ = 90 bar, $C_F$(SL) | **1.6339** `[TS P6.8]` |
+| throat area | **0.06800 m²** (298 mm diameter) `[TS P6.9]` |
+
+Both g-limits are met with the trace essentially flat, and shaping is needed only
+to keep the *peak* below 12 g on a hot grain (see below).
+
+### Candidate B, at the SuperDraco baseline — and why it fails
+
+SuperDraco reference: **8 engines in 4 pods of 2, 71 kN each (≈ 568 kN total),
+69 bar chamber pressure, 235 s, 1,388 kg of MMH/NTO, 20–100 % throttle,
+3D-printed Inconel regeneratively cooled chamber** `[engine-database A.3]`.
+Retained inert (engines, tanks, helium, lines, structure) ≈ **1,080 kg**.
+
+| check | value | requirement | verdict |
+|---|---|---|---|
+| Δv | **260.9 m/s** `[TS P6.4]` | ≥ 250 m/s | passes, 11 m/s of margin |
+| acceleration, ignition → burnout | 568 kN / 12,968 kg = **4.47 g** → **5.00 g** | 4–12 g | passes |
+| **time to 250 m/s** | **≈ 5.4 s** | **≤ 4.0 s (R6.3)** | **FAILS** |
+
+**Candidate B as specified meets the Δv and fails the clock.** R6.3 is a thrust
+requirement in disguise: 250 m/s in 4.0 s needs an average of ≥ 62.5 m/s²
+(6.4 g), which on a ~12,900 kg stack is ≥ **806 kN** — not 568 kN.
+
+### Candidate B, resized
+
+Twelve SuperDraco-class engines at 71 kN = **852 kN**:
+
+| quantity | value |
+|---|---|
+| propellant | **1,327 kg** `[TS P6.6]` |
+| retained inert (12 engines ~600 kg, Ti tanks 160 kg, He system 122 kg, lines/valves/structure 200 kg) | **1,080 kg** |
+| stack at abort $M_0$ | **12,907 kg** |
+| Δv | **250.0 m/s** `[TS P6.5]` |
+| acceleration, ignition → burnout | **6.73 g → 7.50 g** |
+| burn time | **3.59 s** |
+| **mass carried to staging on every nominal flight** | **2,407 kg** |
+
+**R6.9's target is ≤ 1,000 kg carried to staging.** Candidate A is *jettisoned*
+before staging, so its penalty after jettison is **zero** and R6.9 is met
+trivially. Candidate B is retained, so its penalty is its full **2,407 kg** —
+**2.4× the target.** That asymmetry is the whole trade, and it is why the project
+words R6.9 as "after jettison if applicable".
+
+### Abort trajectories (project-specific deliverable)
+
+**Pad abort, candidate A resized.** Burnout speed ≈ Δv − $g t_b$ = 250 − 9.81 ×
+3.23 = **218.3 m/s**; altitude at burnout ≈ ½ ā $t_b^2$ ≈ **200 m**; coast
+apogee above burnout = $v^2/2g$ = **2,429 m**. Total apogee ≈ **2,630 m**
+against R6.6's ≥ 1,000 m — met with 2.6× margin, and the surplus is what buys
+the downrange. Pitching the tower ~15° from vertical after 0.5 s converts enough
+of the burnout velocity into horizontal component to clear R6.6's 600 m
+downrange while still exceeding 1,000 m of apogee, with chute deployment above
+1,500 m. **The pad abort sizes the total impulse.**
+
+**Max-Q abort.** At max-Q the capsule separates into ~35 kPa of dynamic pressure
+at Mach ~1.2. The relative Δv requirement is the same 250 m/s, but the *lateral*
+loads dominate: an angle of attack of 10° at that dynamic pressure on a capsule
+of ~5 m² reference area gives a normal force of order 60 kN, i.e. ~0.6 g lateral
+on a 10,500 kg capsule — inside R6.5's 4 g, but the *structure* must carry it and
+the attitude-control motor must null it. **The max-Q abort sizes the structure and
+the lateral loads, not the impulse.** Two trajectories minimum, and they size
+different things: that distinction is worth marks on its own.
+
+### The g-limit compliance plot
+
+Axial acceleration versus time for candidate A, nominal and hot (+30 °C) grain:
+
+| | nominal | hot (+30 °C, $\pi_K$ = 0.003077 K⁻¹ as in Project 5) |
+|---|---|---|
+| chamber pressure | 90 bar peak | ×1.0967 → **98.7 bar** |
+| thrust | 1,000 kN average | **1,097 kN** |
+| ignition acceleration | 7.53 g | **8.26 g** |
+| burnout acceleration | 8.28 g | **9.08 g** |
+| burn time | 3.23 s | 2.95 s |
+| Δv | 250 m/s | 250 m/s (impulse is conserved) |
+
+**Both stay inside 4–12 g, with 2.9 g of margin on the hot day** — which is why
+the reference design chooses an average of 1,000 kN rather than pushing toward
+the ceiling. Jerk at ignition is bounded by the igniter and grain design; a
+50 ms rise to full thrust gives $73.9/0.05$ = **1,478 m/s³**, which **violates
+R6.4's 500 m/s³** and forces a deliberately shaped ignition transient — a
+progressive igniter and a tailored initial burning surface stretching the rise to
+≥ 150 ms. That is a real, easily missed requirement.
+
+### Demonstrated reliability (project-specific deliverable)
+
+R6.11 asks for **≥ 0.995 on demand, demonstrable by analysis plus ≤ 4 flight
+tests.** The statistics, stated honestly:
+
+- To demonstrate **R = 0.995 at 95 % confidence by test alone** requires
+  $\ln(0.05)/\ln(0.995)$ = **598 consecutive successful trials.**
+- **Four successes out of four** gives a 95 % lower confidence bound of
+  $0.05^{1/4}$ = **0.473.** Not 0.995. Not close.
+- Two out of two gives **0.224**.
+
+**Therefore R6.11 cannot be demonstrated by flight test, and the requirement does
+not ask you to.** It says "by analysis plus ≤ 4 flight tests". The four flight
+tests exist to validate the *model*, not to establish the number. The number
+comes from a component-level reliability roll-up: ordnance initiator reliability
+(demonstrated at lot level over thousands of units), igniter no-fire and all-fire
+margins, case burst margin against a demonstrated proof-test distribution,
+separation-system reliability, and — critically — the **jettison event on nominal
+flights**, which for candidate A is an additional single-use ordnance-driven
+event that must succeed on all twelve flights and whose failure is catastrophic.
+
+**This is the criterion that can decide the architecture**, and the argument runs
+both ways. Candidate A adds a jettison event that candidate B does not have.
+Candidate B adds 1,327 kg of hypergolic propellant, a 100 bar helium system and
+twelve engines that live next to the crew for the whole mission, and the
+**April 2019 ground-test explosion traced to NTO leaking past a check valve into
+a helium line** `[engine-database A.3.9]` is exactly the failure mode that
+argument produces.
+
+### Engagement with the 2019 check-valve event (project-specific deliverable)
+
+The event: during a ground test of the propulsive-landing configuration of this
+same engine set, nitrogen tetroxide leaked past a check valve into a helium
+pressurisation line; on subsequent pressurisation the NTO slug was driven into a
+titanium component at high velocity, and NTO/titanium under impact is
+energetic. The vehicle was destroyed and the propulsive-landing application was
+abandoned `[engine-database A.3.9]`.
+
+**Why it is directly relevant to R6.10.** R6.10 requires ≥ 12 months on-vehicle
+without servicing and ≥ 5 years shelf. A check valve is a *single* barrier
+between an oxidiser and a pressurant, and its leak rate is a function of seat
+condition, which is a function of time and of every pressurisation cycle it has
+seen. **A single check valve is not an acceptable barrier for a twelve-month
+dormant hypergolic system.** The fix, if candidate B is chosen, is architectural
+rather than component-level:
+
+1. **Two barriers of different type in series** — a check valve *and* a normally
+   closed pyrotechnic or latching isolation valve — so that a seat leak is not
+   sufficient.
+2. **Burst discs upstream of the helium regulator**, so that a slug cannot reach
+   titanium at pressurisation velocity.
+3. **Materials selection that removes the energetic pair**: no titanium
+   downstream of any path an oxidiser could reach.
+4. **Instrumented leak detection** on the helium line, trended monthly through
+   the twelve-month dormancy — which is a servicing activity, so R6.10's "without
+   servicing" has to be renegotiated or the detection made autonomous.
+
+**If candidate A is chosen, engage anyway**, because the equivalent single-barrier
+question exists there too: the tower's ordnance train has one initiation path per
+function, and the answer is the same — two initiators, different lots, different
+firing circuits.
+
+## §2. Recommended architecture, with the argument both ways
+
+**Recommendation: candidate A — a jettisonable solid tractor tower with a
+regressive-grain abort motor of ~1,000 kN average for 3.2 s, a separate
+attitude-control motor, a separate jettison motor, and a shaped ignition
+transient to hold jerk below 500 m/s³.**
+
+### The argument for
+
+1. **The nominal-flight mass penalty is zero after jettison.** Candidate B
+   carries 2,407 kg to staging on eleven of twelve flights, against R6.9's
+   1,000 kg target. At a typical medium-lift staging sensitivity of roughly
+   0.15 kg of payload per kilogram of stage-1 burnout mass, 2,407 kg is on the
+   order of **360 kg of payload on every flight**, and over twelve flights that is
+   the largest single number in the study.
+2. **The propellant is not next to the crew.** Twelve months of dormant
+   NTO/MMH with a 100 bar helium system inside the pressure vessel's outer mould
+   line is a hazard the tractor architecture simply does not have.
+3. **R6.8's 100 ms from sensed fault to first thrust is easier.** A solid
+   ordnance train fires in single-digit milliseconds. A pressure-fed hypergolic
+   system must open isolation valves, prime lines and reach chamber pressure in
+   twelve chambers simultaneously; it is achievable — SuperDraco does it — but it
+   is a harder 100 ms.
+4. **The heritage is deep and the failure modes are known.** Mercury, Apollo,
+   Soyuz and Orion are one lineage `[Hunley07]`, and Soyuz has used it in anger
+   twice, successfully.
+
+### The argument against — what the recommendation costs
+
+1. **It adds a jettison event to every nominal flight.** A single-use,
+   ordnance-driven, non-testable-in-flight separation of a 3,034 kg structure
+   over the crew, whose failure is catastrophic and which candidate B does not
+   have at all. This is the strongest argument against the recommendation and the
+   memo must state it as such.
+2. **No abort-of-the-abort, no throttle, no shutdown.** Once the tower motor
+   lights it burns to completion. Candidate B can throttle 20–100 % and shut
+   down, which allows a much gentler and more controllable abort and preserves
+   propellant for the reorientation of R6.12.
+3. **Mass at abort.** 3,034 kg of tower is 22 % of the abort stack, and every
+   kilogram of it must be accelerated by the motor that carries it.
+4. **The abort system does nothing on eleven of twelve flights and is thrown
+   away on all twelve.** Candidate B's engines are testable, reusable and
+   available for other functions — which is a real programme benefit that a
+   tower cannot offer.
+
+**Two criteria the recommendation loses on: mission fit and cost** — B scores
++2 and +1 against it — plus the reliability argument above, which the matrix
+scores as a tie rather than a win because the jettison event and the dormant
+hypergolic system roughly cancel.
+
+## §3. Pugh matrix and sensitivity (D6)
+
+**Datum: candidate A, the solid tractor tower** — the incumbent architecture for
+every crewed capsule ever flown except one.
+
+| criterion | w | justification tied to the mission statement | A (datum) | B liquid pusher, retained |
+|---|---|---|---|---|
+| performance | 10 | both meet R6.2–R6.4 once resized; B adds throttle and shutdown authority | 0 | **+1** |
+| mass | 18 | R6.9's ≤ 1,000 kg to staging, on eleven of twelve nominal flights | 0 | **−2** (2,407 kg retained vs 0 after jettison) |
+| complexity | 12 | 12 flights over 8 years; every subsystem must be maintained through 12-month dormancies | 0 | **−2** (12 engines, 100 bar He, hypergolics, isolation architecture) |
+| reliability | 25 | R6.11's 0.995 on demand with ≤ 4 flight tests; "seven people in the loop" | 0 | **0** — B removes the jettison event and adds a dormant hypergolic system; the two cancel, and saying so is the honest score |
+| manufacturability | 8 | 12 units over 8 years; producibility is not the constraint | 0 | −1 |
+| cost | 12 | 12 crewed flights; the tower is thrown away twelve times | 0 | **+1** |
+| mission fit | 15 | R6.7: abort from T−0 through max-Q to staging, in one system | 0 | **+2** (no jettison window, no coverage gap, propellant available for R6.12) |
+| **weighted total** | **100** | | **0** | **−16** |
+
+### Sensitivity
+
+The gap is **16 points**, and **one weight flips it inside ±50 %**:
+
+| weight | flips at | change |
+|---|---|---|
+| **mass** | **10.0** | **−44 %** |
+| mission fit | 23.0 | +53 % |
+| performance | 26.0 | +160 % |
+| cost | 28.0 | +133 % |
+| complexity | 4.0 | −67 % |
+
+**If the mass weight falls below 10 — that is, if 2,407 kg carried to staging on
+eleven of twelve flights is worth less than about a tenth of the decision — the
+liquid pusher wins.** That is not an abstract possibility. It is exactly the
+judgment a programme makes when the launcher has performance to spare and the
+capsule's other requirements (propulsive landing, on-orbit manoeuvring, a
+reusable capsule) let the same propellant do more than one job. **One operator
+made that judgment and flew it**; the rest did not.
+
+Two-criterion check: mass −50 % (18 → 9) together with mission fit +50 %
+(15 → 22.5) puts candidate B at **+13**, a clear win.
+
+**Report:** the recommendation is sensitive to a single weight within ±50 %, and
+the weight in question encodes a programme-level judgment about the value of
+payload mass rather than a propulsion judgment. **That is a coin toss dressed as
+engineering unless the payload sensitivity is nailed down**, and the memo's
+change-of-mind trigger should say so: *if the vehicle's payload sensitivity to
+stage-1 burnout mass is below 0.06 kg/kg, or if the programme adopts a
+requirement that the abort propellant also serve on-orbit manoeuvring, the
+integrated pusher becomes the better architecture.*
+
+## §4. Rubric — Project 6, out of 100
+
+| deliverable | marks | what earns them |
+|---|---|---|
+| **D1 sizing** | **25** | **5: noticing that the given 1,800 kN × 5 s motor over-delivers Δv by 2.3× and busts the 12 g ceiling at burnout** `[TS P6.1, P6.2]` — accepting the assumption uncritically costs all five. 5: candidate A resized from the requirement with the burn-time corner found `[TS P6.3]`. **5: candidate B checked against R6.3 and found to fail at the SuperDraco baseline** `[TS P6.4]`, then resized `[TS P6.5, P6.6]`. **5: two trajectories, pad and max-Q, with numbers, and a statement of which sizes what.** 3: nozzle and throat sized `[TS P6.8, P6.9]`. 2: the R6.12 reorientation subsystem sized, not forgotten |
+| **D2 mass budget** | **15** | 6: basic → MGA → predicted, both architectures. 4: system margin. **4: the nominal-flight mass-penalty accounting, in payload terms and in programme terms** — this is a project-specific deliverable and it is where the trade is decided. 1: propellant reserve |
+| **D3 reliability** | **12** | 3: part count. 3: single-point failures — **the jettison event on candidate A and the check-valve path on candidate B must both appear**. 3: FMEA with specific modes. **3: the demonstrated-reliability argument, arithmetically honest** — 598 trials for 0.995 at 95 %, and 0.473 from 4/4 |
+| **D4 manufacturability and cost** | **12** | 4: UCI, with the pyrotechnic/ordnance class used for the initiators and jettison devices. 4: NRI over 12 units — a 12-unit programme is NRI-dominated and a study that optimises unit cost has misread it. 4: the four-flight-test campaign costed as part of NRI |
+| **D5 risk** | **8** | 5: eight risks with retirement points. 2: two non-technical. **1: at least one created by the recommendation** — "if the jettison motor fails to separate the tower, the mission is lost with no recovery" is the obvious one and it must appear if you recommended A |
+| **D6 Pugh + sensitivity** | **18** | 3: weights before scores. 3: real datum. 3: evidence per score. **4: the g-limit compliance plot, nominal and hot grain, with the jerk check.** **5: the sensitivity, and full marks require finding that the mass weight flips it at −44 % and saying what that weight actually encodes** |
+| **D7 memo** | **10** | 3: recommendation first. 2: three numbers. **3: what it costs — the jettison event, named as the strongest argument against your own recommendation.** 1: measurable trigger. 1: one page. **The one-paragraph engagement with the 2019 check-valve event is required whichever architecture you recommend** and its absence costs 3 of the 10 |
+
+## §5. Common weak answers
+
+1. **Accepting the 1,800 kN × 5 s motor as given.** It delivers 577 m/s and
+   13.2 g at burnout `[TS P6.2]`. The project says "a total tower jettison mass
+   you must compute rather than assume" — the invitation to check the rest of the
+   assumption is right there.
+2. **Sizing candidate B on Δv and not on time.** 568 kN gives 260.9 m/s and takes
+   5.4 s against R6.3's 4.0 s `[TS P6.4]`. R6.3 is a thrust requirement.
+3. **"0.999 reliability from twelve hot fires."** The project file names this
+   specifically. Four out of four gives 0.473 at 95 % confidence; 598 trials are
+   needed for 0.995.
+4. **Forgetting the post-burnout attitude-control subsystem (R6.12).** It is a
+   separate propulsion system with its own propellant, its own impulse budget and
+   its own 12-second deadline, and students routinely size the abort motor and
+   stop.
+5. **Ignoring jerk.** R6.4 caps it at 500 m/s³, and a 50 ms ignition transient
+   gives 1,478 m/s³. It is one line of arithmetic and it changes the igniter
+   design.
+6. **Comparing mass at abort rather than mass at staging.** The tower is
+   jettisoned; the pusher is not. R6.9 is worded "after jettison if applicable"
+   precisely to make you notice.
+7. **No engagement with the 2019 check-valve event.** It is a named,
+   project-specific deliverable, it is required whichever way you recommend, and
+   it costs 3 marks of the memo.
+8. **Quoting SuperDraco's figures without their caveats.** The 235 s, 69 bar,
+   1,388 kg set is confidence **[C]** and the injector element type is **not
+   published** — pintle is *likely* given the manufacturer's practice, but that is
+   inference and the database says do not print it as fact
+   `[engine-database A.3]`. Automatic −5 if quoted flat.
+9. **Scoring reliability as a clear win for the tower.** It removes a dormant
+   hypergolic system and adds a catastrophic single-use separation event. The
+   honest score is a tie, and a matrix that gives the recommendation a win on
+   every criterion is the pattern Appendix A warns about.
+
+---
+
+# Cross-project notes
+
+## The five findings that generalise
+
+1. **Compliance is a gate, not a criterion.** Four of the six projects have a
+   candidate that fails a hard requirement and would score well in a weighted
+   matrix: hydrazine in Project 1, the pressure-fed stage in Project 2,
+   all-electric in Project 3, ORSC-at-100-bar in Project 4. Gate them, record why,
+   and do not score them.
+2. **The tank is usually the answer.** Project 2's pressure-fed candidate dies on
+   98.9 kg of tank plus 52.5 kg of helium system; Project 3's ACS sub-trade turns
+   on stored density rather than specific impulse; Project 1's helium system is
+   4.6 kg of a 35 kg budget. **Specific impulse decides less than students expect
+   and stored density decides more.**
+3. **Requirements that are not numbers are still requirements.** "Ninety
+   engineers and no turbopump experience" (Project 2), "no rail connection"
+   (Project 5), "one additional command line" (Project 5) and "seven people in the
+   loop" (Project 6) each decide their study. They are in the mission statement,
+   not the requirements table, and they are binding.
+4. **The interesting sensitivity is often not a weight.** Project 2's answer
+   turns on battery specific power; Project 4's on a subscale liner's fatigue
+   life; Project 6's on the vehicle's payload sensitivity to burnout mass. When a
+   weight sweep says "robust", ask which *assumption* is not.
+5. **Every architecture that wins, loses somewhere.** Project 1's storable system
+   loses 22 s of Isp and all its NTO freezing margin; Project 2's electric pump is
+   heavier than the turbopump it replaces; Project 4's 150 bar ORSC loses 14.8 s
+   to 300 bar and loses cost and manufacturability to the gas generator; Project
+   6's tower adds a catastrophic jettison event. **If your recommendation lost
+   nothing, you did not run a trade study.**
+
+## The automatic deductions, in practice
+
+| deduction | where it most often lands |
+|---|---|
+| −10, a candidate lacks a sizing | Project 1 candidates B and C; Project 2's unsized combinations; Project 3's ACS options 3 and 4 |
+| −10, the recommendation wins every criterion | Project 5, where candidate A genuinely is strong and students flatten the liquid option rather than scoring its two real wins |
+| −5, a flagged figure quoted without its caveat | Raptor's chamber pressure and T/W (Project 4), SuperDraco's Isp and injector (Project 6), P120C's thrust tags (Project 5), Rutherford's efficiency claim and T/W (Project 2), the LMDE's 311 s (Project 1) |
+| −5, no margin policy or a flat percentage | every project; it is the most common single deduction |
+| −5, weights after scores | detectable when a weight is a suspiciously round number that makes the total work |
+| **−20, a number invented rather than computed or sourced** | engine dry masses, tank masses, battery specific power, refurbishment cost. **The fix is not to avoid assuming — it is to put the assumption in the register with its justification and the deliverable it feeds.** An assumption in the register is sourced; the same number in the body is invented |
+
+## A note on the assumption register
+
+Every project requires one, ten to thirty entries, and the entries taken from
+[`reference/engine-database.md`](../reference/engine-database.md) must carry the
+database's confidence label and its caveats. **A company claim is an assumption
+with a name attached to it**, and naming the claimant is part of the citation:
+"2,460 kN (Blue Origin specification; a 2,847 kN improved figure was stated in
+November 2025 and it is unclear which vehicles fly which rating)
+`[engine-database A.3.4]`" is a register entry. "2,460 kN" is not.
+
+The register is also the only artefact that tells somebody revisiting the study
+in eighteen months whether the conclusion still holds. Project 4's conclusion, for
+instance, rests on the claim that a 2,400 kN engine can be built to 2,200 kg —
+which is supported only by unaudited manufacturer figures for one engine
+`[engine-database A.3.5]`. If that entry is in the register, the study has a
+shelf life. If it is buried in a mass table, it does not.
+
+---
+
+*Every number in this key is computed with [`tools/rocket.py`](../tools/rocket.py)
+and registered in [`tools/examples/tradestudies.py`](../tools/examples/tradestudies.py);
+run `python3 tools/check_examples.py` to reproduce them. Real-engine figures are
+from [`reference/engine-database.md`](../reference/engine-database.md) with that
+file's caveats carried intact, and citation tags resolve in
+[`reference/sources.md`](../reference/sources.md) and the database's Part E tag
+list. Where this key says a figure is a claim, not published, or contested, that
+is a finding of the verification pass and not a hedge.*
