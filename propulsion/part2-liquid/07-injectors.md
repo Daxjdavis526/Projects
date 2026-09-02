@@ -784,3 +784,509 @@ criterion is usually stated as a maximum local deviation from the intended
 profile rather than a global uniformity number. Streaking, the failure mode in
 §7, is a distribution failure, not a mixing failure, and it is found on the
 patternator long before it is found on a chamber wall.
+
+### 3.8 Element types: the impinging family
+
+All sketches below are schematic sections through the injector face; flow is left
+to right (or top to bottom where marked). O denotes an oxidizer orifice, F a fuel
+orifice.
+
+#### Showerhead
+
+```
+   manifold
+   ========================
+     |    |    |    |    |        parallel non-impinging jets
+     v    v    v    v    v
+   ---O----F----O----F----   <- injector face
+      :    :    :    :
+      :    :    :    :        no impingement; mixing by turbulent
+      v    v    v    v        entrainment only, over a long distance
+```
+
+The simplest possible pattern: straight axial holes, no impingement. Mixing
+depends entirely on turbulent entrainment between adjacent streams, which is
+slow. The V-2's American successors abandoned it immediately, and it survives
+only where mixing is not the problem: gas-side injection, some gas generators,
+and igniters. **It is also the most stable pattern there is** [H][SP-8089], for
+the same reason it performs badly — the heat release is spread over a long axial
+distance, so no single region of the chamber can drive an acoustic mode.
+Showerhead is the reference case: everything else trades some of that stability
+for mixing.
+
+#### Like-on-like (self-impinging) doublet
+
+```
+   O     O                    F     F
+    \   /                      \   /
+     \ /                        \ /
+      X   <- fuel-free            X   <- oxidizer-free
+     / \      impingement        / \      impingement
+    /   \                       /   \
+   fan of O drops              fan of F drops
+        \                        /
+         \                      /
+          `--- mix downstream --'
+```
+
+Two orifices of the **same** propellant impinge on each other. The element itself
+does no inter-propellant mixing at all; it atomizes one propellant into a fan, and
+mixing happens between adjacent fans further downstream. This sounds like a
+disadvantage and is in fact the reason the pattern is used: because the two
+propellants never meet at the injector face, there is no reactive stream
+separation, no hypergolic reaction blowing the streams apart, and the heat release
+is pushed downstream where it couples less strongly to the acoustic modes. The
+F-1 used like-doublets in its pattern, and the Atlas LR-89 used a like-on-like
+doublet face [H]. The cost is $\eta_{c^*}$: like-doublets need a longer chamber
+and more careful fan-to-fan spacing to reach the same performance as unlike
+elements.
+
+#### Unlike-impinging doublet
+
+```
+       O         F
+        \       /
+         \     /
+          \   /            impingement angle 2-theta,
+           \ /             typically 2-theta = 60 deg
+            X              free jet length L_j = 5-8 d
+           / \
+        spray fan (perpendicular to the page)
+```
+
+The workhorse. One oxidizer and one fuel jet collide, form a sheet, and atomize
+and mix in a single event. Highest mixing efficiency per element of the impinging
+family, and the pattern used on the Titan LR87 and LR91, the Apollo SPS, the
+Shuttle OMS AJ10-190, and the R-4D and R-40 RCS thrusters — that is, on almost
+every storable-propellant engine ever flown [H][M]. Design variables:
+impingement half-angle $\theta$ (typically 25–35°), free jet length (5–8 orifice
+diameters — shorter and the jets have not settled, longer and manufacturing
+angular tolerance causes misses), and the momentum balance of Eq. 3.18.
+
+The failure mode specific to unlike doublets with hypergolic propellants is
+**reactive stream separation**: the propellants react on contact so vigorously
+that the gas generated at the impingement point blows the two liquid streams
+apart before they can mix. It appears at low chamber pressure and low injection
+velocity — that is, at low thrust and during start — and it produces exactly the
+performance loss you would expect. It is one reason hypergolic thrusters have a
+minimum reliable pulse width.
+
+#### Unlike triplet: F-O-F and O-F-O
+
+```
+      F        O        F
+       \       |       /
+        \      |      /
+         \     |     /       two outer jets impinge on one
+          \    |    /        central jet; the resultant is
+           \   |   /         axial by symmetry
+            \  |  /
+             \ | /
+              \|/
+               X
+               |
+          axial spray fan
+```
+
+Two outer jets of one propellant impinge on a single central jet of the other.
+The symmetry is the point: the transverse momentum of the two outer jets cancels,
+so the resultant is axial regardless of the momentum balance, which makes the
+element far less sensitive to flow variation and to throttling than a doublet.
+The XLR43 that led to the Atlas lineage used **F-O-F** — two fuel streams onto one
+LOX stream — and that pattern is the ancestor of every American impinging injector
+through the F-1 [H]. The Titan family used unlike doublets instead.
+
+Choosing F-O-F versus O-F-O is not arbitrary. Worked example 3 shows that at
+LOX/RP-1 mixture ratios with equal pressure drop on both circuits, it is the
+*oxidizer* stream that carries excess momentum, so **O-F-O** is the arrangement
+that balances naturally. F-O-F was nevertheless chosen historically for two
+reasons that outrank Rupe balance [J]: the locally fuel-rich element is thermally
+forgiving, and the central oxidizer jet is shielded from the wall by fuel on both
+sides. The engineering lesson is that the momentum criterion is one of several
+constraints, and it is routinely the one that loses.
+
+#### Quadlets and pentads
+
+```
+   quadlet (2 O on 2 F)            pentad (4 F around 1 O)
+
+      O   F                          F   F
+       \ /                            \ /
+        X       <- one impingement     O   <- one central jet,
+       / \         point                / \    four impinging on it
+      F   O                          F   F
+```
+
+More orifices per impingement point: quadlets (two of each), pentads (four of one
+around one of the other), and hexads. The gain is finer-scale interleaving of the
+two propellants and therefore better mixing at a given orifice size; the cost is
+hole count, drilling accuracy, and sensitivity to a single blocked orifice. The
+pentad is the classic high-performance LOX/hydrocarbon element where the central
+orifice carries the *oxidizer* and four fuel jets impinge on it, and it is
+favoured where $\eta_{c^*}$ matters more than manufacturing simplicity
+[SP-8089][H].
+
+#### Splash plate
+
+```
+       O       F
+        \     /
+         \   /
+   -------\ /-------
+           V             <- both streams strike a small plate
+      ===========           and are deflected into a sheet
+       |||||||||
+       spray sheet
+```
+
+Both streams are aimed at a small plate rather than at each other. The plate
+turns two jets into a sheet mechanically, so atomization no longer depends on the
+jets meeting precisely — which makes the element remarkably tolerant of
+manufacturing error and of flow variation. It also gives up some mixing
+efficiency and adds a small piece of hardware sitting in the flame that must
+survive. Splash plates appear in [SP-8089] as a recognised element class and are
+used where robustness beats peak performance.
+
+### 3.9 The coaxial family
+
+#### Shear coaxial
+
+```
+   section through one element (flow left to right)
+
+   ============================================
+      fuel (gas) annulus  ->->->->->->->->->
+   ----------------------------\
+      LOX post (liquid)  ->        \____  post tip
+   ----------------------------/    :     recess L_r
+      fuel (gas) annulus  ->->->->->:->->->
+   ============================================
+                                    |<-->|
+                                    recess
+```
+
+A central post carries the liquid oxidizer; an annulus around it carries the fuel,
+which for LOX/LH2 is a low-density gas moving 10–20 times faster. The gas shears
+the liquid column, strips a film off it, and atomizes it — this is a
+prefilming-airblast atomizer in a rocket, and Lefebvre's correlations (Eq. 3.13)
+are the right family for it. The J-2's 614 concentric posts through a porous
+faceplate is the archetype, and essentially every LOX/LH2 injector since is a
+variation on it: the RS-25 (600 elements), the RL10, Vulcain, the RD-0120, LE-7A
+[H][M].
+
+The two design groups are the **velocity ratio** and the **momentum flux ratio**:
+
+$$\mathrm{VR} = \frac{V_g}{V_l}, \qquad J = \frac{\rho_g V_g^2}{\rho_l V_l^2}$$
+
+> **Eq. 3.19** — variables: $V_g$, $V_l$ gas-annulus and liquid-post exit
+> velocities (m/s); $\rho_g$, $\rho_l$ the corresponding densities (kg/m³).
+> Meaning: VR governs the shear that strips the liquid; $J$ governs whether the
+> gas stream can actually penetrate and disrupt the liquid core rather than just
+> flowing past it. Assumes: both streams are at their design flows and the
+> annulus is concentric. Fails when: the propellant is injected supercritically
+> (LOX at 200+ bar), where the density ratio is small, surface tension is
+> negligible, and the element behaves as a variable-density turbulent mixing
+> layer rather than as an atomizer [LRTC].
+
+Typical design values for LOX/LH2: $\mathrm{VR} = 10$–$20$, $J = 1$–$10$.
+Performance rises with both and then saturates; below $J \approx 1$ the gas
+cannot disrupt the core and $\eta_{c^*}$ falls off sharply [E].
+
+**Recess** — setting the LOX post tip back behind the face by 0–2 post diameters
+— starts the shear interaction inside a small confined cup, which improves mixing
+and, more importantly, improves stability by moving heat release off the face and
+by decoupling the element from the transverse acoustic field. It costs face
+heating and post thermal stress, and a recessed post is a post whose tip is
+directly exposed to recirculating hot gas.
+
+Shear coaxial elements are the only common element type that gets atomization
+essentially free from the propellant combination itself. That is why hydrogen
+engines have small $L^*$ and high $\eta_{c^*}$ and comparatively easy injector
+development, and why the same architecture applied to LOX/kerosene — where the
+fuel is a *liquid* and there is no high-velocity gas — performs badly.
+
+#### Swirl coaxial
+
+```
+   section through one swirl element
+
+   ============================================
+     tangential inlets
+        \     |
+         v    v
+      +--------------+
+      |   swirl      |            hollow conical sheet
+      |   chamber     \___         emerging at half-angle alpha
+      |                    \___
+      +---------------+        \___
+                                    \__ 
+   ============================================
+                       gas core on the axis
+```
+
+Liquid enters a small cylindrical chamber through tangential ports, spins up, and
+leaves through a central exit as a **hollow conical sheet** with a gas core on the
+axis. The sheet thins as it expands, becomes unstable, and breaks into a fine
+spray at a wide cone angle. Swirl elements atomize well at low injection velocity
+and low pressure drop, which is exactly what a low-$p_c$ pressure-fed engine
+needs.
+
+The classical ideal-swirl theory (Abramovich's maximum-flow principle, developed
+for rocket use in the Soviet school and presented for a modern audience in
+[LRTC] — note that this course's bibliography flags the specific chapter
+attribution as unverified, so cite the chapter you actually hold) reduces the
+element to one geometric group:
+
+$$A_s = \frac{R_n R_{in}}{n\,r_{in}^2}$$
+
+> **Eq. 3.20** — variables: $R_n$ exit-orifice radius (m); $R_{in}$ radius from the
+> element axis to the centre of the tangential inlet ports (m); $n$ number of
+> tangential ports (—); $r_{in}$ tangential port radius (m). Meaning: the ratio of
+> angular momentum supplied to axial throughflow, and the single parameter that
+> fixes the ideal element's discharge coefficient, filling coefficient and cone
+> angle. Assumes: inviscid liquid, no boundary layer in the swirl chamber, exit
+> flow at maximum discharge for the given angular momentum. Fails when: viscosity
+> matters (small elements, viscous fuels), where the effective $A_s$ must be
+> corrected downward; and at very low $\Delta p$, where the gas core may not form
+> at all.
+
+With filling coefficient $\varphi$ (the liquid-occupied fraction of the exit area,
+the rest being gas core), ideal theory gives the pair
+
+$$A_s = \frac{(1-\varphi)\sqrt{2}}{\varphi\sqrt{\varphi}}, \qquad
+C_d = \sqrt{\frac{\varphi^3}{2-\varphi}}$$
+
+> **Eq. 3.21** — variables as above. Meaning: a strongly swirling element has a
+> large gas core, a small liquid-occupied area, and therefore an intrinsically
+> low $C_d$ — a swirl element with $A_s = 2$ has $\varphi = 0.5$ and $C_d = 0.29$,
+> about a third of a plain orifice's. Assumes: inviscid ideal swirl. Fails when:
+> viscous losses in the swirl chamber are significant, which raises $C_d$ above
+> ideal in small hardware.
+
+That low $C_d$ is the swirl element's price and its virtue at once: for the same
+$\Delta p$ it needs a much larger exit area, so its orifices are big, tolerant of
+contamination, and easy to make — and it atomizes them anyway.
+
+Swirl coaxial elements — a swirled liquid oxidizer sheet inside a swirled or
+axial fuel annulus — are the Soviet and Russian standard: RD-107/108, RD-253,
+RD-170/171, RD-180, RD-191 all use coaxial swirl elements [H][M]. The Aestus
+upper-stage engine uses 132 coaxial swirl elements to reach 324 s at only 11 bar
+chamber pressure, which is a clean demonstration that a swirl injector mixes well
+without the velocity a low-$p_c$ engine cannot afford. SpaceX states that Raptor
+uses coaxial swirl elements from Raptor 2 onward — a company claim, like every
+Raptor figure.
+
+### 3.10 The pintle
+
+```
+   section, flow left to right; the pintle is on the engine axis
+
+              annular AXIAL sheet (propellant 1)
+   =====================>>>>>>>>>>>>>>>>>>>>>>>>
+                                |
+       manifold 2   ------------+---+
+                                |   |  <- pintle post
+                    ~~~~~~~~~~~~+   |
+                     RADIAL jets ->  |======  pintle tip
+                    ~~~~~~~~~~~~+   |
+                                |   |
+   =====================>>>>>>>>>>>>>>>>>>>>>>>>
+              annular AXIAL sheet (propellant 1)
+
+                        |<-- L_sk -->|
+                         skip distance
+```
+
+One propellant leaves an annular gap around a central post as an **axial sheet**;
+the other leaves radial orifices in the post as a ring of **radial jets** that
+punch through the axial sheet. The collision is a single, continuous, annular
+event rather than a hundred discrete ones. This is Gerard Elverum's TRW invention
+of the early 1960s, flown on the Apollo Lunar Module descent engine and, six
+decades later, on the Merlin [Dressler00].
+
+Three properties follow from the geometry [F][E]:
+
+**Throttling.** Make the annular gap variable — a moving sleeve on the pintle —
+and the injection area tracks the flow, so $\Delta p$ and injection velocity stay
+roughly constant as thrust falls. The square-law collapse of §3.4 is defeated by
+construction. The LMDE throttled 10:1, from 46.7 kN down to 4.67 kN, with chamber
+pressure falling from 110 psia to 11 psia, and the variable-area pintle is *the*
+reason that was possible. Merlin throttles 40–100 % on a fixed-area pintle, which
+is the easier problem.
+
+**Stability.** Pintle engines have an exceptional high-frequency stability record.
+The usual explanation is that there is no azimuthal array of identical elements
+for a transverse acoustic mode to couple to, that the heat release is distributed
+over a comparatively long axial distance, and that the single element cannot
+support the element-to-element phase relationships a spinning tangential mode
+needs [Dressler00][J]. Note that this is a strong empirical record with a
+plausible physical story, not a proof — and pintles are not immune to chug, which
+is a feed-system phenomenon and does not care how many elements you have.
+
+**Mixing is set by TMR and blockage.** The controlling parameter is the total
+momentum ratio of the radial to the axial stream,
+
+$$\mathrm{TMR} = \frac{\dot m_{rad} V_{rad}}{\dot m_{ax} V_{ax}}$$
+
+> **Eq. 3.22** — variables: $\dot m$ mass flow (kg/s) and $V$ injection velocity
+> (m/s) of the radial and axial streams. Meaning: TMR sets how deeply the radial
+> jets penetrate the axial sheet and therefore the angle of the resulting
+> combined spray cone; TMR near 1 puts the spray at roughly 45° and is the usual
+> design region. Assumes: both streams' velocities computed consistently (see the
+> $C_c$ warning under Eq. 3.2). Fails when: the blockage factor is so low that the
+> radial jets are discrete and the sheet leaks between them, or so high that the
+> radial flow becomes a sheet itself and the penetration model changes.
+
+together with the **blockage factor** (fraction of the pintle circumference
+occupied by radial orifices, typically 0.3–0.7) and the **skip distance** (axial
+gap between the radial orifice row and the pintle tip, which sets how long the
+combined spray is confined before it expands).
+
+The pintle's costs are real and are usually understated by its advocates [J]:
+$\eta_{c^*}$ is typically a point or two below a well-developed multi-element
+face, because the mixing is coarse — a single element cannot interleave the
+propellants on a millimetre scale. It puts a hot, mechanically loaded, sometimes
+moving part on the engine axis. And the spray cone impinges on the chamber wall
+at a defined station, which must be managed with film cooling or with the
+combustion-zone geometry. Its compensations — one element to develop instead of
+a thousand, deep throttling, stability, and a face that is largely just structure
+— are why it dominates landers and why SpaceX built a launch business on it.
+
+### 3.11 Protecting the face and the wall
+
+The injector face is in the worst thermal position in the engine: a stagnation
+region of recirculating combustion gas, with no coolant on the other side except
+the propellant manifolds, and no velocity to thin its boundary layer. Four
+mechanisms are used, usually in combination [M][SP-8089]:
+
+- **Porous (transpiration-cooled) faceplates.** A sintered wire-mesh or sintered
+  powder plate — Rigimesh is the trade name most often quoted — through which a
+  small fraction of the fuel bleeds uniformly, forming a cool film over the entire
+  face. The J-2 used a porous sintered stainless-steel faceplate cooled by
+  hydrogen, and the architecture carried into its staged-combustion successors.
+  The cost is a fuel flow that does not participate in combustion at the design
+  mixture ratio, plus a plate that will clog if the fuel is not filtered
+  scrupulously.
+- **Face film-cooling orifices.** Discrete small holes drilled through the face,
+  usually fuel, aimed to spread along it. Cruder than a porous plate, far easier
+  to make, and repairable.
+- **Element recess.** Setting the element exit back from the face moves the
+  ignition point downstream and lets the element's own flow cool the recess.
+- **Wall film-cooling ring.** The outermost row, aimed at the chamber wall
+  (module 11 treats this properly). The R-40 and R-4D both carry explicit
+  film-cooling rings, and both pay for them in $I_{sp}$.
+
+**Baffles** are radial and circumferential blades standing 20–75 mm proud of the
+face, dividing it into compartments. They do not improve mixing; they exist to
+break the transverse acoustic modes by interrupting the azimuthal path a spinning
+wave needs and by damping through vortex shedding at their tips
+[SP-8113][SP-194]. The F-1's answer was a copper baffle assembly dividing the
+face into 13 compartments, arrived at after 15 baffle designs, and stability was
+demonstrated by detonating a bomb near the injector centre at full thrust and
+requiring the engine to damp the induced oscillation within 45 ms [OY93]. The
+costs: the baffles are hardware in the flame that must be cooled (hence copper,
+and hence fuel passages inside them), they displace elements and so cost
+performance, and they are a fatigue item.
+
+**Acoustic cavities** — Helmholtz resonators or quarter-wave slots cut into the
+injector face periphery — are the alternative, and increasingly the preference,
+because they add no obstruction to the flow. The RS-25's injector face carries
+acoustic-resonator cavities for exactly this purpose. Sizing and tuning are in
+[SP-8113] and module 15.
+
+### 3.12 Injector–stability coupling (preview)
+
+Module 15 treats instability properly. What matters here is that the injector is
+the actuator in all three of the classical instability bands, and that the three
+are *different problems requiring opposite fixes* [F]:
+
+| band | frequency | mechanism | injector's role | fix |
+|---|---|---|---|---|
+| **Chug** | 50–500 Hz | feed-system/chamber coupling through the injector resistance and the combustion time lag | $\Delta p/p_c$ is the loop gain (§3.4) | raise $\Delta p$; cavitating venturis; stiffen or detune the feed line |
+| **Buzz / intermediate** | 400–1000 Hz | manifold and dome acoustics coupling to combustion | manifold volume and its acoustic modes | change manifold volume; add manifold resistance |
+| **Screech / high-frequency** | 1000–10 000 Hz | chamber acoustic modes coupled to the atomization and vaporization response | element type, spacing, recess, and where the heat release sits | baffles, acoustic cavities, change element pattern, recess posts, move heat release downstream |
+
+The trap is that the fixes conflict. Raising $\Delta p$ helps chug and does very
+little for screech. Making the injector mix faster — moving heat release toward
+the face — raises $\eta_{c^*}$ and makes screech *worse*, because it puts the
+heat release where the transverse acoustic pressure amplitude is largest. This is
+the fundamental performance-versus-stability trade of injector design, and it is
+why the F-1's final pattern was a deliberately compromised performer [OY93].
+
+### 3.13 Element count and scaling
+
+Element size is bounded from below by manufacturing and contamination (orifices
+below about 0.5 mm are difficult to make repeatably and easy to block) and from
+above by atomization (SMD grows with $d$) and by mixing scale. In practice
+orifice diameters cluster between 0.5 and 2.5 mm, and element count follows from
+the flow:
+
+$$N = \frac{\dot m}{\rho\,V\,A_{or}} = \frac{\dot m}{C_d\,A_{or}\sqrt{2\rho\Delta p}}$$
+
+> **Eq. 3.23** — variables as in Eq. 3.1, with $N$ the number of orifices in that
+> circuit. Meaning: once you have fixed $\Delta p$ (from stability) and orifice
+> diameter (from atomization and manufacturing), element count is not a free
+> choice — it is determined. Assumes: identical orifices. Fails when: the pattern
+> deliberately uses several orifice sizes, which most real injectors do.
+
+Element **density** on the face, $n_A$, is bounded by the face area available,
+which is set by the contraction ratio $\varepsilon_c$ from module 06. Typical
+values are 1–10 elements per cm² of face. Too dense and adjacent elements
+interfere, the face cannot be cooled, and there is no room for manifold feed
+passages; too sparse and there are cold unmixed regions between element sprays.
+
+The range is enormous. The F-1's face carries on the order of a thousand orifices
+of each propellant in a mixed doublet-and-triplet pattern; the RS-25 has 600
+coaxial elements and the J-2 had 614; the Aestus has 132 swirl elements; a Merlin
+has **one**. That last comparison is the most useful thing in this section: the
+pintle replaces a thousand small mixing events with one large one, trading mixing
+fineness — and therefore a point or two of $\eta_{c^*}$ — for the elimination of
+element-to-element variation, of azimuthal acoustic coupling, and of most of the
+manufacturing problem. Whether that is a good trade depends entirely on whether
+your engine is throttled and how many of them you intend to build.
+
+### 3.14 Manufacturing
+
+The manufacturing process is not a downstream detail; it bounds what patterns are
+possible [M][GradlAM].
+
+- **Drilled plates.** Conventional gun-drilling or twist-drilling of a forged or
+  machined plate, usually stainless steel, Inconel 718, or a copper alloy for the
+  face. Cheap, well understood, and limited to straight holes at achievable
+  angles with achievable $L/D$. Burrs and drill breakout at the face are the
+  quality problem; the fix is deburring and inlet radiusing, which is the same
+  operation that fixes $C_d$ scatter (§3.2).
+- **EDM.** Electrical discharge machining cuts small, steeply angled, or shaped
+  orifices that a drill cannot reach, and cuts them in hard alloys. It leaves a
+  recast layer that must be characterised or removed, because a recast lip
+  changes $C_d$ and can spall.
+- **Brazed assemblies.** A real injector is several parts — oxidizer dome, fuel
+  manifold, element bodies or posts, faceplate — furnace-brazed into one. Braze
+  quality is the leading cause of injector rejection, and an unbrazed joint
+  between the two propellant manifolds is a catastrophic internal leak. Every
+  injector is proof-pressure and leak tested between manifolds before it ever
+  sees a chamber.
+- **Platelet construction.** A stack of thin photochemically etched sheets,
+  each carrying part of a flow passage, diffusion-bonded into a monolith. This
+  produces flow passages of essentially arbitrary two-dimensional shape at very
+  fine scale — including internal turns, splits and metering sections impossible
+  to drill. Aerojet developed and used it extensively for injectors and for
+  film-cooled walls.
+- **Additive manufacturing.** Laser powder-bed fusion prints injector bodies with
+  internal manifolds, posts, and cooling passages as a single part, collapsing
+  part counts from dozens to one and removing most of the braze joints that used
+  to cause rejection. NASA MSFC's consolidated results include hot-fired AM
+  injectors [Gradl18][GradlAM]. Rocket Lab's Rutherford is the production
+  demonstration: chamber, injectors, pumps and main valves are all printed, and
+  it was the first engine to fly with essentially its entire primary structure
+  additively manufactured. Relativity's Aeon engines are the other frequently
+  cited AM-injector example; their design details are company statements and are
+  not in this course's engine data file, so no numbers are quoted here.
+
+  The limits are real: as-built surface roughness inside small printed orifices
+  changes $C_d$ relative to a drilled hole and must be calibrated by flow test;
+  minimum printable feature size sets a floor on orifice diameter; and powder or
+  partially sintered particles left in an internal manifold are a contamination
+  source that a drilled-and-brazed injector does not have. The standard practice
+  is to print the manifolds and post structure and then finish the metering
+  orifices conventionally.

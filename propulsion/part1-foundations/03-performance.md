@@ -1561,8 +1561,10 @@ expansion-ratio dispute in the literature?
 **P12.** An engine has $p_c = 70$ bar and $\gamma = 1.21$. (a) Compute the
 sea-level optimum expansion ratio. (b) Compute $C_{f,SL}$ at that optimum and
 at $\varepsilon = 16$. (c) Compute $C_{f,vac}$ at both. (d) The engine is a
-first stage that spends 20 % of its burn below 5 km and 80 % above 15 km.
-Argue for one of the two area ratios and quantify the argument.
+first stage that spends 20 % of its burn near 5 km ($p_a = 54.0$ kPa) and 80 %
+near 15 km ($p_a = 12.0$ kPa). Compute $C_f$ at both altitudes for both area
+ratios, form the burn-time-weighted average, and recommend one. Also check
+the separation margin of each at sea level.
 
 **P13.** Continuing P8: with the throat from P8(c) and $L^* = 1.05$ m, compute
 the chamber volume. Then with a contraction ratio of 2.5, compute the chamber
@@ -1570,7 +1572,7 @@ diameter and estimate the cylindrical chamber length, stating the assumption
 your estimate makes and the direction of its error.
 
 **P14.** A hot fire gives $p_c = 5.50$ MPa, $D_t = 75.0$ mm,
-$\dot m = 17.5$ kg/s, $F = 42.0$ kN at sea level, $\varepsilon = 12$. The ideal
+$\dot m = 14.6$ kg/s, $F = 36.5$ kN at sea level, $\varepsilon = 12$. The ideal
 reference is $\gamma = 1.20$, $T_0 = 3\,500$ K, $\mathcal{M} = 22.5$ kg/kmol.
 Compute $c^*_{meas}$, $c^*_{ideal}$, $\eta_{c^*}$, $C_{f,meas}$,
 $C_{f,ideal}$, $\eta_{C_f}$, $\eta_{ov}$ and $I_{sp,meas}$. Then check the
@@ -1617,25 +1619,40 @@ to reconcile them.
 ### Mini trade study
 
 **P21.** You are setting the expansion ratio for the single engine of a small
-launcher's **second stage**. Constraints: $p_c = 55$ bar, LOX/RP-1
-($\gamma = 1.21$), $F_{vac} = 120$ kN required, the stage ignites at 65 km
-(effectively vacuum), the interstage inner diameter is **1.30 m**, and every
-kilogram of engine mass costs 0.9 kg of payload. Nozzle mass may be estimated
-as 18 kg/m² of internal bell surface area, and bell surface may be approximated
-as a 15° cone frustum from throat to exit.
+launcher's **second stage**.
+
+*Engine constraints:* $p_c = 55$ bar, LOX/RP-1 with $\gamma = 1.21$,
+$T_0 = 3\,550$ K, $\mathcal{M} = 23.0$ kg/kmol, $\eta_{c^*} = 0.96$, required
+$F_{vac} = 120$ kN. The stage ignites at 65 km, so treat $p_a = 0$ throughout.
+
+*Packaging constraints:* interstage inner diameter **1.45 m**; the length
+available for the engine from the throat plane aft is **2.00 m** in the stowed
+configuration.
+
+*Mass model:* estimate the bell as a 15° cone frustum from throat to exit and
+charge **18 kg/m²** of internal bell surface area. Ignore the mass of
+everything upstream of the throat (it is identical in all options).
+
+*Mission model:* the stage carries **4 500 kg** of propellant, has a burnout
+mass of **800 kg excluding the nozzle**, and must deliver **$\Delta v = 3\,600$
+m/s**. Payload is whatever mass the stage can carry while still closing that
+$\Delta v$.
 
 Options:
 - **A:** $\varepsilon = 40$, fixed bell.
 - **B:** $\varepsilon = 80$, fixed bell.
 - **C:** $\varepsilon = 130$, fixed bell.
-- **D:** $\varepsilon = 130$ via an extendible carbon–carbon extension
-  (stowed at 55), adding 22 kg of mechanism and a deployment reliability
-  penalty you must state and defend.
+- **D:** $\varepsilon = 130$ deployed, stowed at $\varepsilon = 55$ via an
+  extendible carbon–carbon extension, adding **22 kg** of mechanism. The
+  stowed length is that of the $\varepsilon = 55$ bell; the deployed exit
+  diameter is that of the $\varepsilon = 130$ bell.
 
-For each option compute $C_{f,vac}$, $I_{sp,vac}$, exit diameter, estimated
-nozzle mass, and whether it fits the interstage. Then recommend one, quantify
-the payload difference against the runner-up, and state explicitly what would
-change your recommendation.
+For each option compute $C_{f,vac}$, $I_{sp,vac}$, $A_t$, $D_t$, $D_e$, bell
+length, bell surface area, nozzle mass, whether it fits both packaging
+constraints, and the payload it delivers. Then recommend one, quantify the
+payload difference against the runner-up, state the reliability argument
+explicitly, and say what single change to the constraints would flip your
+recommendation.
 
 ---
 
@@ -1661,8 +1678,8 @@ $\gamma = 1.20$. Compute $C_f$ at sea level and in vacuum, and the percentage
 by which thrust increases from sea level to vacuum.
 
 **Q5 (12).** A test gives $p_c = 9.0$ MPa, $A_t = 0.0125$ m²,
-$\dot m = 62.0$ kg/s, $F = 178$ kN in vacuum. Compute $c^*$, $C_f$ and
-$I_{sp}$. If the ideal $c^*$ is 1 820 m/s and the ideal $C_f$ is 1.86, compute
+$\dot m = 62.0$ kg/s, $F = 208$ kN in vacuum. Compute $c^*$, $C_f$ and
+$I_{sp}$. If the ideal $c^*$ is 1 900 m/s and the ideal $C_f$ is 1.90, compute
 all three efficiencies and say which subsystem you would investigate.
 
 **Q6 (10).** True or false, with one sentence of justification each:
