@@ -1608,3 +1608,798 @@ is labelled as one. The textbook should say so on the page, not bury it in a foo
   sea-level thrust, injector and turbopump detail.
 
 ---
+
+## Part 6 — Soviet and Russian engines
+
+**Note on Russian chamber-pressure conventions.** Soviet and Russian sources conventionally
+quote chamber pressure at the **nozzle stagnation** condition, whereas American sources of
+the Apollo era quote **injector-end** pressure. Injector-end pressure is typically a few
+percent higher. When comparing an RD-180 to an RS-25 the textbook should say which
+convention each number follows, or the comparison is not quite honest.
+
+### NPO Energomash RD-107 and RD-108 (RD-107A / RD-108A)
+
+- **Manufacturer / country:** OKB-456 / **NPO Energomash**, under **Valentin Glushko**.
+  USSR / Russia. Still in production.
+- **Development:** **1954–1957.** First flight **15 May 1957** (R-7). The **RD-107A /
+  RD-108A** modernisation ran **1993–2001**, entering crewed service **October 2002**.
+- **Vehicles:** R-7 ICBM; Sputnik, Vostok, Voskhod, Molniya, Soyuz, and **Soyuz-2 today**.
+  RD-107 on the four strap-on boosters; RD-108 on the central core.
+- **Propellants:** LOX / **RG-1** (a Russian refined kerosene, similar to RP-1).
+- **Mixture ratio:** ~2.4 *(not published in the source; low confidence)*.
+- **Cycle:** **Gas generator — of the monopropellant steam type.** Hydrogen peroxide is
+  catalytically decomposed to drive a steam turbine, exactly as on the V-2 and Redstone.
+  The R-7 therefore still flies a 1940s power-cycle architecture in 2026, which is a
+  remarkable fact in its own right. Liquid nitrogen is used for tank pressurisation.
+- **Architecture:** Each "engine" is **four main combustion chambers fed by one turbopump**,
+  plus vernier chambers: **two verniers on the RD-107**, **four on the RD-108** (the core
+  needs full three-axis control, the strap-ons do not). Counting chambers rather than
+  engines is why the R-7 is often described as having "32 nozzles" at liftoff.
+- **Thrust (RD-107A):** **839 kN (189,000 lbf) SL / 1,020 kN (230,000 lbf) vacuum.**
+- **Thrust (RD-108A):** **792.4 kN (178,140 lbf) SL / 921.9 kN (207,240 lbf) vacuum.**
+  The RD-108 is lower because it is optimised to keep burning after the boosters drop.
+- **Chamber pressure:** **6 MPa = 60 bar (870 psia)** (RD-107A).
+- **Isp:** RD-107A **263.3 s SL / 320.2 s vac**; RD-108A **257.7 s SL / 320.6 s vac.**
+- **Expansion ratio:** **Not published** in the source consulted.
+- **Dry mass:** RD-107A **1,190 kg (2,620 lb)** for the whole four-chamber assembly.
+- **Thrust-to-weight:** ≈ **72:1** sea level (computed).
+- **Diameter:** RD-107 1,850 mm; RD-108 1,950 mm.
+- **Cooling:** Regenerative, kerosene-cooled brazed chamber.
+- **Injector:** Impinging/swirl coaxial elements, Glushko practice.
+- **Ignition:** **Pyrotechnic** on the original; **chemical (hypergolic) ignition** on the
+  RD-107A/108A modernisation.
+- **Turbopump:** **Single shaft**, one turbine driving both pumps, steam-driven.
+- **Major innovation:** The multi-chamber-per-turbopump architecture, adopted because
+  Glushko could not solve combustion instability in a single large chamber. It became the
+  defining Soviet engine layout, running through the RD-253 to the RD-170.
+- **Major limitation:** A 1950s power cycle with H2O2 as a third fluid to manage; and the
+  four-chamber layout is heavy and complex compared to one big chamber.
+- **Historical significance:** The most-flown rocket engine family in history — Sputnik,
+  Gagarin, and every Soyuz crew launch for seven decades.
+- **SOURCES:** Wikipedia, *RD-107* — https://en.wikipedia.org/wiki/RD-107 (fetched);
+  Encyclopedia Astronautica *RD-107* (pointer); heroicrelics.org RD-107 engine photos.
+- **CONFIDENCE: medium-high** on thrust, Isp, pc, mass, architecture and ignition;
+  **not published** on expansion ratio and mixture ratio.
+
+---
+
+### NPO Energomash RD-253 / RD-275 / RD-275M
+
+- **Manufacturer / country:** OKB-456 / **NPO Energomash**, Glushko. USSR / Russia.
+- **Development:** RD-253 **1961–1963**, **first flight July 1965** (Proton).
+  RD-275 **1987–1993**, maiden flight **1995**. RD-275M **2001–2005**, first launch
+  **7 July 2007**. Retired with Proton (final flights 2025).
+- **Vehicle:** **Proton first stage — six engines.**
+- **Propellants:** **N2O4 / UDMH**, storable hypergolic.
+- **Mixture ratio: 2.67.**
+- **Cycle:** **Oxidizer-rich staged combustion.** The RD-253 is the **first
+  oxidizer-rich staged combustion engine ever flown**, and therefore the origin point of
+  the entire ORSC tradition that leads to the RD-170, RD-180, YF-100 and BE-4.
+  That precedence claim is the most important sentence in this block.
+- **Performance:**
+
+  | | RD-253 | RD-275 | RD-275M |
+  |---|---|---|---|
+  | Thrust SL | 1,470 kN (330,000 lbf) | 1,590 kN | **1,671 kN (376,000 lbf)** |
+  | Thrust vac | 1,630 kN | 1,750 kN | **1,832 kN** |
+  | pc | 14.7 MPa (147 bar / 2,130 psia) | 15.7 MPa (157 bar / 2,280 psia) | **16.5 MPa (165 bar / 2,390 psia)** |
+  | Isp SL | 285 s | 287 s | 288 s |
+  | Isp vac | 316 s | 316 s | 315.8 s |
+
+- **Expansion ratio:** **26.2:1** (all variants).
+- **Dry mass:** **~1,070–1,080 kg.**
+- **Thrust-to-weight:** **156.2:1** — extraordinary, and the direct payoff of ORSC:
+  the oxidizer-rich preburner lets the turbine run on dense, cool gas with a high
+  mass flow, so the turbomachinery is small for the power delivered.
+- **Gimbal:** 7.5° in a single plane. (On Proton the six engines gimbal tangentially,
+  giving full three-axis control from single-plane actuators.)
+- **Cooling:** Regenerative, fuel-cooled.
+- **Injector / ignition:** Coaxial; hypergolic, no igniter.
+- **Turbopump:** Single shaft, oxidizer-rich preburner-driven.
+- **Major innovation:** ORSC itself, at 147 bar, in **1963**. American engines did not
+  reach that chamber pressure until the SSME fifteen years later, and no American ORSC
+  engine flew until the BE-4 in 2024.
+- **Major limitation:** The oxidizer-rich hot gas attacks everything it touches. Glushko's
+  solution — passivating enamel and specialised alloys — was closely held and is the main
+  reason the West did not follow for decades. Propellants are also extremely toxic.
+- **Historical significance:** The engine that made Proton, and the proof of concept for
+  every ORSC engine since.
+- **SOURCES:** Wikipedia, *RD-253* — https://en.wikipedia.org/wiki/RD-253 (fetched);
+  Encyclopedia Astronautica (pointer).
+- **CONFIDENCE: high** on the variant table; **medium** on cooling and injector detail
+  (standard-practice inference rather than direct citation).
+
+---
+
+### NPO Energomash RD-170 / RD-171 / RD-171M
+
+- **Manufacturer / country:** NPO Energomash, Glushko. USSR / Russia.
+- **Development:** From 1976. **RD-170 first flight 13 April 1985** (Energia); last flight
+  **15 November 1988**. RD-171 for Zenit; **RD-171M** finalised 2006; **RD-171MV** (fully
+  Russian components, new control system) completed as a test article early 2019 and
+  tested successfully **September 2021**, for Soyuz-5/Irtysh.
+- **Vehicles:** **Energia strap-on boosters (RD-170); Zenit first stage (RD-171);
+  Soyuz-5/Irtysh (RD-171MV).**
+- **Propellants:** LOX / RG-1 kerosene. **Mixture ratio: 2.63.**
+- **Cycle:** **Oxidizer-rich staged combustion**, with **four combustion chambers fed by a
+  single turbopump** — the Glushko architecture taken to its limit.
+- **Thrust:** **7,250 kN (1,630,000 lbf) sea level; 7,900 kN (1,777,000 lbf) vacuum.**
+  **This is the highest-thrust liquid rocket engine ever flown**, roughly 7% above the
+  F-1's vacuum thrust — but across four chambers, not one. The F-1 retains the
+  single-chamber record. The textbook must state both records precisely or it will be
+  wrong one way or the other.
+- **Chamber pressure:** **24.52 MPa = 245.2 bar (3,556 psia).**
+- **Isp:** **309 s sea level; 337 s vacuum.**
+- **Expansion ratio:** **36.87:1.**
+- **Dry mass:** **9,750 kg.**
+- **Thrust-to-weight:** **82:1** (sea level, as published).
+- **Turbopump power:** **~170 MW** in the article body; **192 MW** in the specification
+  table. **Contested — see the contested-figures section.** Either way it is the most
+  powerful rocket turbopump ever built, by a factor of about three over the RS-25's HPFTP.
+- **Cooling:** Regenerative, kerosene-cooled.
+- **Injector:** Coaxial swirl. **Ignition:** chemical (hypergolic starter fluid).
+- **RD-170 vs RD-171:** the **RD-170's nozzles gimbal on two axes; the RD-171's on one**.
+  That is the whole difference — Energia needed full vector authority from each booster,
+  Zenit did not.
+- **Major innovation:** 245 bar oxidizer-rich staged combustion at 7.9 MN, and a reusable
+  design (the RD-170 was qualified for multiple flights on the Energia booster recovery
+  scheme that never materialised).
+- **Major limitation:** Enormous, complex, and four chambers where one would be preferable;
+  the single-turbopump-four-chamber layout means one turbopump failure loses all thrust.
+- **Historical significance:** The high-water mark of Soviet propulsion, and the direct
+  parent of the RD-180 (two chambers) and RD-191 (one chamber) — a *modular* family
+  derived by halving and quartering a single design, which is unique in engine history.
+- **SOURCES:** Wikipedia, *RD-170* and *RD-171* — https://en.wikipedia.org/wiki/RD-170
+  (both fetched).
+- **CONFIDENCE: high** on thrust, pc, Isp, ε, mass; **contested** on turbopump power
+  (170 vs 192 MW); the RD-171/171M/171MV variant performance is **not separately published**.
+
+---
+
+### NPO Energomash RD-180
+
+- **Manufacturer / country:** NPO Energomash, Khimki. Russia. (Marketed in the US by
+  RD AMROSS, a Pratt & Whitney/Energomash joint venture.)
+- **Development:** Early–mid 1990s, derived by **halving the RD-170** to two chambers.
+  **First flight 24 May 2000** (Atlas III). Deliveries ended 2021; last flight expected
+  with the final Atlas V.
+- **Vehicles:** **Atlas III and Atlas V first stages** — one engine.
+- **Propellants:** LOX / RP-1. **Mixture ratio: 2.72** (73% O2 / 27% RP-1).
+- **Cycle:** **Oxidizer-rich staged combustion**, single oxygen-rich preburner,
+  **two combustion chambers on one turbopump**.
+- **Thrust:** **3,830 kN (860,000 lbf) sea level; 4,150 kN (930,000 lbf) vacuum.**
+- **Chamber pressure:** **26.7 MPa = 267 bar (3,870 psia)** — the highest chamber pressure
+  of any engine in regular service before Raptor.
+- **Isp:** **311 s sea level; 338 s vacuum.**
+- **Expansion ratio:** **36.87:1** (identical to the RD-170 — the chambers are the same part).
+- **Dry mass:** **5,480 kg (12,080 lb).**
+- **Thrust-to-weight:** **78.44:1.**
+- **Mass flow:** **1,250 kg/s.** **Burn time:** 270 s. **Throttle: 47–100%.**
+- **Cooling:** Regenerative, kerosene-cooled.
+- **The key materials point:** **an inert enamel coating on every metal surface in contact
+  with the hot oxygen-rich gas.** This is the single technology that makes ORSC survivable
+  and it is why the West could not simply copy the cycle. Put it in the materials chapter.
+- **Injector:** Coaxial swirl. **Ignition:** chemical/hypergolic starter.
+- **Turbopump:** Single shaft, single oxygen-rich preburner. Power and rpm **not published**
+  in the source consulted (the RD-170's ~170–190 MW scales to roughly half).
+- **Major innovation:** Packaging RD-170 performance into a single-engine module that a
+  Western vehicle could integrate — the first Russian engine ever certified for US
+  national-security launch.
+- **Major limitation:** Geopolitical, not technical. Its supply was cut off by sanctions,
+  which is precisely what drove the BE-4 and Vulcan.
+- **Historical significance:** For twenty years the highest-performance booster engine in
+  American service, and not American.
+- **SOURCES:** Wikipedia, *RD-180* — https://en.wikipedia.org/wiki/RD-180 (fetched);
+  NPO Energomash and RD AMROSS material (pointer).
+- **CONFIDENCE: high** on the full performance set; **not published** on turbopump power.
+
+---
+
+### NPO Energomash RD-191
+
+- **Manufacturer / country:** NPO Energomash. Russia.
+- **Development:** Design completed **2001**; the single-chamber member of the RD-170
+  family. **First flight July 2014** (Angara 1.2PP). In production.
+- **Vehicles:** **Angara** family (RD-191); **RD-151** (de-rated, Korean KSLV-1);
+  **RD-181** (Antares 230/230+); RD-193 proposed.
+- **Propellants:** LOX / RP-1. **Mixture ratio: 2.6:1.**
+- **Cycle:** Oxidizer-rich staged combustion, **single chamber**.
+- **Thrust:** **1,920 kN (430,000 lbf) SL / 2,090 kN (470,000 lbf) vacuum** at 100%.
+- **Chamber pressure:** **25.8 MPa = 258 bar (3,740 psia).**
+- **Isp:** **310.7 s sea level; 337 s vacuum.**
+- **Expansion ratio:** **37:1.**
+- **Dry mass:** **2,290 kg (5,050 lb).**
+- **Thrust-to-weight:** **89:1.**
+- **Throttle:** **27–105%** — an exceptionally wide range for a staged-combustion engine,
+  and one of the RD-191's genuine selling points.
+- **Gimbal:** up to **8°**.
+- **Additional functions:** the engine also **heats the tank pressurisation gas and
+  generates hydraulic power for vehicle control** — a level of vehicle-system integration
+  worth pointing out, since it means the engine cannot be traded independently of the stage.
+- **Cooling:** Regenerative. **Injector:** coaxial swirl. **Ignition:** chemical.
+- **Turbopump:** Single shaft, oxidizer-rich preburner. Speeds **not published**.
+- **Major innovation:** The 27% minimum throttle, and the completion of the modular
+  RD-170 family (4 chambers → 2 → 1) from one chamber design.
+- **Major limitation:** Angara's flight rate has been very low, so the engine has little
+  operational history relative to its age.
+- **Historical significance:** The current Russian booster engine, and (as the RD-181)
+  the engine that kept Antares flying after the NK-33 failure.
+- **SOURCES:** Wikipedia, *RD-191* — https://en.wikipedia.org/wiki/RD-191 (fetched).
+- **CONFIDENCE: high** on the published set; **not published** on turbopump detail.
+
+---
+
+### Kuznetsov NK-33 (and NK-15; AJ26-58/-62)
+
+- **Manufacturer / country:** **Kuznetsov Design Bureau (OKB-276)**, Samara. USSR/Russia.
+  Note: **not** Glushko/Energomash — Kuznetsov was an *aircraft engine* bureau, brought in
+  after Korolev and Glushko fell out over propellant choice. That institutional fact
+  explains the NK-33's unusual design sensibilities.
+- **Development:** NK-15 for the **N1** (all four N1 launches failed, 1969–72); **NK-33**
+  developed late 1960s–early 1970s with simplified pneumatics and hydraulics, improved
+  controls and enhanced turbopumps. The N1 was cancelled in 1974 and ~150 engines were
+  ordered destroyed; Kuznetsov hid them. **First successful flight 21 April 2013** on
+  Antares — **forty years after manufacture.** Supply exhausted early 2025.
+- **Vehicles:** N1 (NK-15, never successful); **Antares 110/120/130** (as **AJ26-62**);
+  Soyuz-2.1v (as NK-33A).
+- **Propellants:** LOX / RP-1. **Mixture ratio: ~2.6** *(not published; low confidence)*.
+- **Cycle:** **Oxidizer-rich (oxygen-rich) closed staged combustion.**
+- **Thrust:** **1,510 kN (340,000 lbf) sea level; 1,680 kN (380,000 lbf) vacuum.**
+- **Chamber pressure:** **14.83 MPa = 148.3 bar (2,151 psia).**
+- **Isp:** **297 s sea level; 331 s vacuum.**
+- **Expansion ratio:** **Not published** in the source consulted.
+- **Dry mass:** **1,240 kg (2,730 lb).**
+- **Thrust-to-weight:** **137:1** — for decades the highest of any booster engine, and
+  still remarkable. This is the number that made Western engineers disbelieve the engine
+  was real when they first saw it in 1993.
+- **Throttle:** **50–105%.**
+- **Cooling:** Regenerative, kerosene-cooled.
+- **Turbopump note:** requires **subcooled liquid oxygen for bearing cooling** — the
+  bearings run in the LOX flow, which constrains ground operations.
+- **Injector / ignition:** Coaxial; chemical ignition.
+- **Major innovation:** Extreme thrust-to-weight through aviation-derived design practice
+  applied to a rocket engine, at a time when the West believed oxidizer-rich staged
+  combustion was impossible.
+- **Major limitation:** **The Antares Orb-3 failure (28 October 2014)** was traced to an
+  AJ26 turbopump — a 40-year-old engine with corrosion and manufacturing debris. The
+  engines were superb when new and could not be re-qualified as they aged.
+- **Historical significance:** The engine that, on inspection in 1993, forced a wholesale
+  revision of Western assumptions about Soviet propulsion and led directly to the RD-180
+  procurement.
+- **SOURCES:** Wikipedia, *NK-33* — https://en.wikipedia.org/wiki/NK-33 (fetched).
+- **CONFIDENCE: medium-high** on thrust, pc, Isp, mass, T/W; **not published** on
+  expansion ratio and mixture ratio.
+
+---
+
+### KBKhA RD-0120 (11D122)
+
+- **Manufacturer / country:** **KB Khimavtomatiki (KBKhA)**, Voronezh. USSR.
+- **Development:** From 1976. **First flight 15 May 1987** (Energia/Polyus);
+  **last flight 15 November 1988** (Energia/Buran). Only two flights. Retired.
+- **Vehicle:** **Energia core stage — four engines.**
+- **Propellants:** LOX / LH2. **Mixture ratio: 6:1.**
+- **Cycle:** **Fuel-rich staged combustion**, but with a **single-shaft turbopump driving
+  both the fuel and oxidizer pumps** — structurally simpler than the RS-25's dual-shaft,
+  dual-preburner arrangement.
+- **Thrust:** **1,961.3 kN (440,900 lbf) vacuum at 106%; 1,526 kN (343,000 lbf) sea level.**
+- **Chamber pressure:** **21.9 MPa = 219 bar (3,180 psia).**
+- **Isp:** **455 s vacuum; 354 s sea level.**
+- **Expansion ratio:** **85.7:1.**
+- **Dry mass:** **3,450 kg (7,610 lb).**
+- **Thrust-to-weight:** **57.93:1** (vacuum at 106%).
+- **Burn time:** nominal 480–500 s; **certified for 1,670 s.**
+- **Cooling:** Regenerative, hydrogen-cooled.
+- **Injector / ignition:** Coaxial; torch ignition.
+- **The comparison the textbook needs:** against the RS-25, the RD-0120 achieved
+  **slightly higher Isp (455 vs 452.3 s) and higher chamber pressure (219 vs 206 bar)
+  with lower complexity and cost — but it was expendable**, whereas the RS-25 was designed
+  for 55 reuses. Notably the RD-0120 **achieved combustion stability without the acoustic
+  resonance cavities the RS-25 requires**, which is a real and specific design difference,
+  not just a claim.
+- **Major innovation:** Single-shaft fuel-rich staged combustion at 219 bar — proving the
+  RS-25's dual-shaft complexity was a choice, not a necessity.
+- **Major limitation:** Expendable, and it flew twice. The programme died with the USSR.
+- **Historical significance:** The only Soviet large hydrogen engine to fly, and the best
+  available control experiment against the SSME.
+- **SOURCES:** Wikipedia, *RD-0120* — https://en.wikipedia.org/wiki/RD-0120 (fetched).
+- **CONFIDENCE: medium-high.** The comparative claims about resonance cavities and cost
+  come from the same single source and should be corroborated before being printed as fact.
+
+---
+
+### KBKhA RD-0146
+
+- **Manufacturer / country:** KB Khimavtomatiki, Voronezh, with Pratt & Whitney
+  collaboration in the early 2000s. Russia.
+- **Development:** Concept **1988** (RO-95); project start **1999**; **first test firing
+  9 October 2001.** **RD-0146D** still in development as of 2022 for the KVTK upper stage.
+  **Never flown.**
+- **Vehicles (proposed):** Proton, Angara (KVTK), Onega, Rus-M.
+- **Propellants:** LOX / LH2. **Mixture ratio: not published.**
+- **Cycle:** **Closed expander** — "the turbopumps are driven by waste heat absorbed in the
+  nozzle and combustion chamber." **The first Russian expander-cycle engine**, and notable
+  for having **no preburner and no gas generator at all**.
+- **Thrust:** **68.6 kN (15,400 lbf) vacuum.**
+- **Chamber pressure:** **5.9 MPa = 59 bar (860 psia).**
+- **Isp:** **470 s vacuum** — **if correct, the highest specific impulse ever demonstrated
+  by a chemical rocket engine**, above the RL10B-2's flown 465.5 s. **Flag this clearly:
+  it is a test-stand figure for an engine that has never flown**, and should not be listed
+  in the same column as flight-demonstrated values.
+- **Expansion ratio:** **Not published**; the nozzle extension is **uncooled**.
+- **Dry mass:** **Not published.**
+- **Restart:** capable of **five firings**, with thrust control in two planes.
+- **Turbopump:** **Separate fuel and oxidiser turbopumps**, with the **fuel turbopump
+  running at over 120,000 rpm** — the highest published turbopump speed of any rocket
+  engine. That figure alone justifies the block.
+- **Cooling:** Regenerative; the jacket is the power cycle.
+- **Major innovation:** 470 s and a 120,000 rpm turbopump from a preburner-free engine.
+- **Major limitation:** Twenty-five years of development without a flight.
+- **Historical significance:** Demonstrates that the closed expander cycle's performance
+  ceiling is higher than the RL10's service record suggests.
+- **SOURCES:** Wikipedia, *RD-0146* — https://en.wikipedia.org/wiki/RD-0146 (fetched).
+- **CONFIDENCE: medium** on thrust, pc and turbopump speed; **low** on the 470 s Isp,
+  which is a manufacturer/bureau figure for an unflown engine.
+
+---
+
+## Part 7 — Chinese engines
+
+### AALPT YF-100
+
+- **Manufacturer / country:** **Academy of Aerospace Liquid Propulsion Technology
+  (AALPT / Xi'an)**, CASC. China.
+- **Development:** Began early 2000s, drawing on RD-120 technology transferred in the
+  1990s. **First 300-second test November 2007. First flight 20 September 2015**
+  (Long March 6). In service.
+- **Vehicles:** Long March 5 (boosters), 6, 7, 8; **YF-100K** uprated for Long March 12
+  and Long March 10; **YF-100M** vacuum-optimised for the Long March 10 second stage;
+  **YF-100GBI** with dual roll-control nozzles on Long March 6.
+- **Propellants:** LOX / RP-1 kerosene. **Mixture ratio: 2.6, adjustable ±10%.**
+- **Cycle:** **Oxidizer-rich staged combustion.** China is the fourth entity to fly ORSC,
+  after the USSR/Russia, and ahead of the US (BE-4, 2024).
+- **Thrust:** **1,200 kN (270,000 lbf) sea level; 1,340 kN (300,000 lbf) vacuum.**
+- **Chamber pressure:** **18 MPa = 180 bar (2,600 psia).**
+- **Isp:** **300 s sea level; 335 s vacuum.**
+- **Expansion ratio:** **35:1.**
+- **Dry mass:** **Not published.** (T/W is widely rumoured at ~78–80 but is not sourced
+  here — **do not print a figure.**)
+- **Throttle:** **65–105%.**
+- **Burn time:** ~155 s (estimated).
+- **Diameter:** 1.338 m.
+- **Cooling:** Regenerative, kerosene-cooled.
+- **Turbopump:** **Single shaft**, a **single-stage oxygen pump** and a **two-stage
+  kerosene pump** on one shaft, driven by an oxidizer-rich preburner.
+- **Injector / ignition:** Coaxial; chemical ignition.
+- **Major innovation:** China's transition from hypergolic (YF-20/YF-21 series) to
+  cryogenic kerolox boosters, and independent mastery of ORSC.
+- **Major limitation:** Chamber pressure and Isp trail the RD-180 by a clear margin; the
+  engine is a capable second-generation ORSC, not a frontier one.
+- **Historical significance:** The engine underpinning China's entire current launch fleet
+  and its crewed lunar programme (Long March 10).
+- **SOURCES:** Wikipedia, *YF-100* — https://en.wikipedia.org/wiki/YF-100 (fetched).
+- **CONFIDENCE: medium-high** on the published performance set; **not published** on dry
+  mass and T/W.
+
+---
+
+### BAPI YF-75 and YF-75D
+
+- **Manufacturer / country:** **Beijing Aerospace Propulsion Institute (BAPI / AALPT
+  Beijing)**, CASC. China.
+- **Development:** YF-75 development began **1986**; **first flight 8 February 1994**
+  (Long March 3A). YF-75D development from ~2006 for Long March 5.
+- **Vehicles:** YF-75 — Long March 3A/3B/3C third stage (two engines).
+  YF-75D — Long March 5 second stage (two engines).
+- **Propellants:** LOX / LH2. **Mixture ratio: 5.1, adjustable** (YF-75).
+- **Cycle:** **YF-75: gas generator. YF-75D: closed expander cycle, "like the RL10".**
+  The change of cycle between the two is the interesting part and should be flagged —
+  they share a designation and not a design.
+- **Thrust (YF-75):** **78.45 kN (17,640 lbf) vacuum.** YF-75D thrust: commonly quoted at
+  **88.36 kN**, but **not confirmed in the source fetched — treat as unverified.**
+- **Chamber pressure (YF-75):** **3.76 MPa = 37.6 bar (545 psia).** YF-75D **not published** here.
+- **Isp (YF-75):** **438 s vacuum.** YF-75D commonly quoted at ~442 s — **unverified.**
+- **Expansion ratio (YF-75):** **80:1.**
+- **Dry mass (YF-75):** **550 kg** *(for the engine; note this is high for the thrust —
+  ≈ 14.5:1 T/W — which suggests the figure may cover the two-engine assembly.
+  Medium confidence.)*
+- **Burn time:** 470 s.
+- **Cooling:** **Split — regenerative in the combustion chamber, dump cooling in the
+  nozzle.** Dump cooling (routing coolant through the nozzle and expelling it) is rare
+  enough that the YF-75 is one of the few good flown examples.
+- **Turbopump:** **Single-shaft hydrogen turbopump at 42,000 rpm.**
+- **Injector / ignition:** Coaxial; spark/torch.
+- **Major innovation:** The YF-75D is China's first closed-expander engine and shows the
+  same trajectory Japan and Europe followed — GG upper stage first, expander second.
+- **Major limitation:** Low thrust and low chamber pressure; the YF-75 is a modest engine
+  by international standards.
+- **Historical significance:** Gave China restartable cryogenic upper-stage capability and
+  hence a competitive commercial GTO service in the 1990s.
+- **SOURCES:** Wikipedia, *YF-75* — https://en.wikipedia.org/wiki/YF-75 (fetched).
+- **CONFIDENCE: medium** for YF-75; **low** for YF-75D, whose performance figures are not
+  confirmed in the source consulted.
+
+---
+
+## Part 8 — Spacecraft and in-space propulsion
+
+### Aerojet AJ10-137 — Apollo Service Propulsion System (SPS)
+
+- **Manufacturer / country:** Aerojet-General. USA. Contract signed **April 1962**.
+- **Development:** 1962–1966. **First flight 1966** (AS-201/AS-202 unmanned CSM);
+  crewed from Apollo 7 (1968). Retired 1975 (ASTP).
+- **Vehicle:** Apollo Service Module.
+- **Propellants:** **N2O4 / Aerozine 50**, storable hypergolic.
+- **Mixture ratio:** **1.6** *(Apollo documentation; not stated in the sources fetched —
+  medium confidence)*.
+- **Cycle:** **Pressure-fed** — **39.2 ft³ (1.11 m³) of gaseous helium at 3,600 psi
+  (25 MPa)** in two tanks, regulated down to feed the propellants.
+- **Thrust:** **91.19 kN (20,500 lbf) vacuum.**
+- **Chamber pressure:** **~100 psia (6.9 bar)** *(Apollo-era documentation; **not stated
+  in the sources fetched — low confidence, verify against the Apollo CSM News Reference
+  before printing**)*.
+- **Isp:** **314.5 s vacuum.**
+- **Expansion ratio:** **62.5:1** *(Apollo documentation; **not confirmed in the sources
+  fetched — verify**)*. The nozzle is **152.82 in (3.882 m) long with a 98.48 in (2.501 m)
+  exit diameter** — those two dimensions *are* sourced and are more useful anyway.
+- **Dry mass:** **~294 kg (650 lb)** *(unverified — flag)*.
+- **Burn time:** **750 s maximum.** Multiple restarts.
+- **Cooling:** **Ablative chamber with a radiatively cooled niobium/titanium nozzle
+  extension** *(standard Apollo description; not confirmed in the sources fetched)*.
+- **Injector:** Unlike-impinging doublet, in a deliberately conservative, unbaffled design
+  — the SPS was designed for absolute reliability rather than performance, since it was
+  the only engine that could return the crew from lunar orbit.
+- **Ignition:** Hypergolic. **No igniter, no turbopump, no valve that must move more than
+  once.** Redundant series-parallel valve trains throughout.
+- **Gimbal:** two axes.
+- **Major innovation:** None sought — the SPS is the canonical example of designing for
+  *single-string criticality* by removing mechanisms rather than adding redundancy.
+- **Major limitation:** Low Isp and heavy pressurisation hardware.
+- **Historical significance:** Originally sized to lift the whole spacecraft off the Moon
+  under the **direct-ascent** mission mode; lunar-orbit rendezvous made it an orbital
+  manoeuvring engine instead, which is why it is over-powered for the job it did.
+  It performed **every** lunar orbit insertion and trans-Earth injection without a failure.
+- **SOURCES:** Wikipedia, *Service Propulsion System* —
+  https://en.wikipedia.org/wiki/Service_Propulsion_System and *AJ10* —
+  https://en.wikipedia.org/wiki/AJ10 (both fetched).
+- **CONFIDENCE: medium on thrust, Isp, propellants, burn time, pressurisation and nozzle
+  dimensions; LOW on chamber pressure, expansion ratio, dry mass and cooling** — those
+  four are from memory of Apollo documentation and were **not** confirmed by a fetched
+  source. **Verify against the Apollo CSM News Reference or NASA SP-4009 before publication.**
+
+---
+
+### TRW Lunar Module Descent Engine (LMDE / Descent Propulsion System)
+
+- **Manufacturer / country:** **TRW Systems**, Redondo Beach CA. USA.
+- **Development:** **1964–1972.** First flight **Apollo 5 (1968)** unmanned; crewed
+  **Apollo 9 (1969)**.
+- **Vehicle:** Apollo Lunar Module descent stage.
+- **Propellants:** **N2O4 / Aerozine 50.** **Mixture ratio: 1.6.**
+- **Cycle:** **Pressure-fed**, using **supercritical (cryogenic) liquid helium** — stored
+  cold and dense to save tank mass, then warmed to pressurise. A genuinely unusual choice
+  worth its own paragraph in the pressurisation chapter.
+- **Thrust:** **maximum 10,500 lbf (46.7 kN)**; **throttleable 1,050–6,825 lbf
+  (4.67–30.36 kN), i.e. 10%–60%.**
+  **The band between 60% and 100% was prohibited** in operation because of nozzle
+  erosion — the engine ran either at full thrust or in the throttle band, never between.
+  This detail is frequently omitted and should not be.
+- **Chamber pressure:** **110 psia (7.6 bar) at 100% thrust; 11 psia (0.76 bar) at 10%.**
+  A **10:1 chamber-pressure turndown** — the single best illustration in the whole file of
+  what deep throttling actually demands of an injector.
+- **Isp:** **311 s at full thrust; 285 s at 10%.**
+- **Expansion ratio:** **47.5:1 (Apollo 14 and earlier); 53.6:1 (Apollo 15 and later)** —
+  the extended nozzle for the J-mission heavier landers. Note the Apollo 15 nozzle was
+  long enough that it crushed on landing.
+- **Dry mass:** **394 lb (179 kg).**
+- **Thrust-to-weight:** ≈ 27:1 (computed).
+- **Cooling:** **Ablative chamber** with a radiatively cooled skirt.
+- **Injector:** **Variable-area pintle injector** — invented by **Gerard W. Elverum Jr.**
+  at TRW. A movable pintle sleeve varies the injection area with the propellant flow, so
+  the injection velocity and mixing quality stay roughly constant across a 10:1 throttle
+  range. This is *the* reason deep throttling was possible, and the direct ancestor of
+  the Merlin and (by reputation) SuperDraco injectors.
+- **Ignition:** Hypergolic.
+- **Restarts:** demonstrated up to **four**.
+- **Major innovation:** The variable-area pintle injector. Nothing else in this file has
+  had as long a technological afterlife relative to how simple it is.
+- **Major limitation:** The forbidden 60–100% throttle band; and ablative cooling caps
+  total burn time.
+- **Historical significance:** Landed humans on the Moon six times, and — on **Apollo 13** —
+  performed the mid-course corrections and the free-return burn that brought the crew home,
+  an application it was never designed for.
+- **SOURCES:** Wikipedia, *Descent Propulsion System* —
+  https://en.wikipedia.org/wiki/Descent_Propulsion_System (fetched).
+- **CONFIDENCE: high.** This is one of the best-documented blocks in the file.
+
+---
+
+### Bell / Rocketdyne Lunar Module Ascent Engine (APS)
+
+- **Manufacturer / country:** **Bell Aerosystems** (engine), with the **injector supplied
+  by Rocketdyne** after Bell could not solve combustion instability. USA. The dual-source
+  arrangement is itself historically notable.
+- **Development:** **1964–1972.** Flew Apollo 5 through Apollo 17.
+- **Vehicle:** Apollo Lunar Module ascent stage.
+- **Propellants:** **N2O4 / Aerozine 50.** **Mixture ratio: 1.6.**
+- **Cycle:** **Pressure-fed** (helium). **Fixed thrust, non-gimbaled, single chamber.**
+- **Thrust:** **3,500 lbf (15.6 kN) vacuum.**
+- **Chamber pressure:** **120 psia (8.3 bar).**
+- **Isp:** **311 s vacuum.**
+- **Expansion ratio:** **45.6:1** (the source gives 46:1).
+- **Dry mass:** **209.1 lb (94.8 kg).**
+- **Thrust-to-weight:** ≈ 16.7:1 (computed).
+- **Burn time:** **200 s maximum**; designed for **one restart**.
+- **Cooling:** Ablative.
+- **Injector:** Rocketdyne baffled impinging design.
+- **Ignition:** Hypergolic — **no igniter, no pumps, no gimbal, and no backup.**
+- **Major innovation:** Radical simplification as a reliability strategy. There is
+  essentially nothing in this engine that can fail to start, which was the requirement:
+  it had exactly one job and no alternative.
+- **Major limitation:** Bell's combustion instability problem was severe enough to require
+  a competitor's injector — a good illustration that hypergolic propellants do not make
+  an engine automatically stable.
+- **Historical significance:** The only engine in history on which human survival depended
+  with no redundancy and no abort mode. It worked every time.
+- **Postscript:** redesignated **RS-18** when reconfigured for LOX/methane testing in 2008
+  under the Constellation programme — the same hardware, sixty years on.
+- **SOURCES:** Wikipedia, *Ascent Propulsion System* —
+  https://en.wikipedia.org/wiki/Ascent_Propulsion_System (fetched).
+- **CONFIDENCE: high.**
+
+---
+
+### Aerojet AJ10-190 — Space Shuttle Orbital Maneuvering System (OMS)
+
+- **Manufacturer / country:** Aerojet. USA. Directly derived from the Apollo SPS (AJ10-137).
+- **Development:** 1970s. **First flight 12 April 1981 (STS-1).** Retired 2011;
+  **refurbished units were repurposed for the Orion European Service Module.**
+- **Vehicle:** Space Shuttle orbiter — **two engines, one per OMS pod.**
+- **Propellants:** **N2O4 / MMH** (note: MMH, not the SPS's Aerozine 50).
+- **Mixture ratio: 1.65:1.**
+- **Cycle:** **Pressure-fed** (helium).
+- **Thrust:** **26.7 kN (6,000 lbf) vacuum.**
+- **Chamber pressure:** **8.6 bar (125 psia).**
+- **Isp:** **316 s vacuum.**
+- **Expansion ratio:** **55:1.**
+- **Dry mass:** **118 kg (260 lb).**
+- **Thrust-to-weight:** ≈ 23:1 (computed).
+- **Life:** **reusable for 100 missions; 1,000 starts and 15 hours of cumulative burn time.**
+  It is **the only reusable member of the AJ10 family** and one of very few reusable
+  rocket engines of any kind.
+- **Cooling:** Regeneratively (fuel) cooled chamber with a radiatively cooled niobium
+  nozzle extension *(standard description; not confirmed in the sources fetched)*.
+- **Injector / ignition:** Impinging doublet; hypergolic.
+- **Major innovation:** Certified reusability on a storable bipropellant engine — 1,000
+  starts is a figure no other engine in this file approaches.
+- **Major limitation:** Low performance; the OMS pods were a persistent maintenance and
+  toxic-handling burden between flights.
+- **Historical significance:** Every Shuttle orbit insertion, orbit change and deorbit
+  burn for thirty years; and the engines are still flying, on Orion.
+- **SOURCES:** Wikipedia, *AJ10* — https://en.wikipedia.org/wiki/AJ10 (fetched);
+  Wikipedia, *Orbital Maneuvering System*; Encyclopedia Astronautica *OME* (via search).
+- **CONFIDENCE: medium-high** on thrust, pc, Isp, ε, mass, O/F and life;
+  **low** on the cooling description (not directly sourced).
+
+---
+
+### Marquardt R-40 / R-40A — Space Shuttle primary RCS thruster
+
+- **Manufacturer / country:** **The Marquardt Company**, Van Nuys CA (later Kaiser
+  Marquardt, then Aerojet). USA.
+- **Development:** 1970s. **First flight STS-1, 12 April 1981.** Retired 2011.
+- **Vehicle:** Space Shuttle orbiter RCS — **38 primary R-40 thrusters** (14 forward,
+  12 per aft pod) **plus 6 vernier R-1E thrusters** (24 lbf class).
+- **Propellants:** **N2O4 / MMH**, storable hypergolic.
+- **Mixture ratio:** ~1.6 *(not published in the sources fetched)*.
+- **Cycle:** Pressure-fed.
+- **Thrust:** **870 lbf (3.87 kN) vacuum, nominal.**
+- **Chamber pressure:** **152 psia (10.5 bar).**
+- **Isp:** **280 s vacuum at the 22:1 area ratio** (NASA N91-28200). **Note:** 289 s is
+  also widely quoted; the difference is almost certainly a different nozzle configuration
+  or a delivered-vs-theoretical distinction. **Use 280 s and cite the NASA document.**
+- **Expansion ratio:** **22:1.**
+- **Dry mass:** **Not published** in the sources fetched.
+- **Cooling:** **Fuel-film cooled** with a **radiatively cooled niobium (columbium)
+  nozzle**, silicide-coated.
+- **Injector:** Unlike-impinging doublet with a film-cooling ring.
+- **Ignition:** Hypergolic. Pulse-mode capable down to very short minimum impulse bits.
+- **Major innovation:** Pulse-mode life — these thrusters fire tens of thousands of times
+  per vehicle lifetime, and the film-cooled/radiative design is what makes that survivable.
+- **Major limitation:** Vulnerable to propellant-leak-driven oxidiser/fuel migration and
+  to nozzle-coating loss; leak detection was a persistent Shuttle operational concern.
+- **Historical significance:** The workhorse RCS thruster of the Shuttle era.
+- **SOURCES:** NASA N91-28200, *Space Shuttle Propulsion Systems* —
+  https://ntrs.nasa.gov/api/citations/19910018886/downloads/19910018886.pdf (via search
+  summary — **re-read directly to confirm the 280 s figure**);
+  Encyclopedia Astronautica *R-40 engine series* (503 this pass);
+  AIAA 1980-1131, *Space Shuttle RCS Thruster Propellant Leak Detection*.
+- **CONFIDENCE: medium.** Thrust, pc and area ratio are consistent; Isp has two values;
+  dry mass not published.
+
+---
+
+### Marquardt R-4D
+
+- **Manufacturer / country:** The Marquardt Company → Kaiser Marquardt → **Aerojet
+  Rocketdyne**. USA.
+- **Development:** Early 1960s for Apollo. Still in production in derivative form after
+  **sixty years** — one of the longest continuous production runs of any rocket engine.
+- **Vehicles:** Apollo Service Module RCS (16 thrusters, four quads), Apollo Lunar Module
+  RCS (16), and since then an enormous range of satellites and spacecraft. Variants
+  include **R-4D-11, R-4D-15**, and the **HiPAT** (high-performance apogee thruster,
+  ~445 N at ~322 s).
+- **Propellants:** **NTO / MMH** (Apollo-era units used NTO / Aerozine 50 or MMH depending
+  on application). **Mixture ratio: not published** in the source consulted.
+- **Cycle:** Pressure-fed.
+- **Thrust:** **110 lbf (490 N) vacuum.**
+- **Chamber pressure:** **100.5 psia (6.93 bar).**
+- **Isp:** **312 s vacuum** for the classic R-4D; later variants with the rhenium chamber
+  reach **~322 s**.
+- **Expansion ratio:** **Not published** in the source consulted (classic R-4D is
+  commonly cited near 40:1 to 60:1 depending on variant — **do not print a number**).
+- **Dry mass:** **8 lb (3.6 kg).** Length 12 in (300 mm), diameter 6 in (150 mm).
+- **Life:** **up to one hour continuous, 40,000 s total accumulated, 20,000 individual
+  firings.** These are the numbers that matter for this class of engine and they are
+  well attested.
+- **Cooling:** **Fuel-film cooling** — fuel injected longitudinally down the chamber wall
+  forms a cooling film — plus radiative cooling of the chamber and nozzle.
+- **Chamber liner material — a real technology history in one line:**
+  **molybdenum alloy** (original) → **niobium (columbium) alloy** with silicide coating →
+  **iridium-lined rhenium** in modern variants. The iridium/rhenium change raised the
+  allowable wall temperature enough to cut the film-cooling fraction and buy ~10 s of Isp.
+  This progression is the best short case study of materials-driven performance gain in
+  the whole file.
+- **Injector:** Unlike-impinging doublet with film-cooling orifices.
+- **Ignition:** Hypergolic, no igniter.
+- **Major innovation:** Longevity and pulse life; and the iridium/rhenium chamber.
+- **Major limitation:** Low thrust and, in the original, a large film-cooling penalty.
+- **Historical significance:** Flew on Apollo, and is still flying. Its performance is the
+  benchmark against which every small storable thruster (including SpaceX's Draco) is measured.
+- **SOURCES:** Wikipedia, *R-4D* — https://en.wikipedia.org/wiki/R-4D (fetched);
+  Artemis Project, *Kaiser Marquardt Rocket Engines* (secondary pointer).
+- **CONFIDENCE: medium-high** on thrust, pc, Isp, mass, life and materials;
+  **not published** on expansion ratio and mixture ratio.
+
+---
+
+## Part 9 — Historical oddities worth a chapter each
+
+### Reaction Motors XLR99
+
+- **Manufacturer / country:** **Reaction Motors Inc.** (later Thiokol Reaction Motors). USA.
+- **Development:** From 1956. First flight in the X-15 **15 November 1960**; the X-15
+  programme ran to 1968.
+- **Vehicle:** **North American X-15** hypersonic research aircraft (and X-15A-2).
+- **Propellants:** **Anhydrous liquid ammonia (LNH3) / LOX.** An unusual combination
+  chosen for a clean, non-sooting, restartable engine in a piloted aircraft.
+- **Mixture ratio:** ~1.25 *(not published in the source; low confidence)*.
+- **Cycle:** Gas generator — but the turbopump is driven by **high-test hydrogen peroxide
+  decomposed over a catalyst**, i.e. a monopropellant steam drive, like the V-2 and Redstone.
+- **Thrust:** **57,000 lbf (250 kN) maximum.**
+- **Chamber pressure:** **600 psia (41.4 bar).**
+- **Isp:** **279 s vacuum; 239 s sea level.**
+- **Expansion ratio:** **Not published**; nozzle exit diameter 39.3 in (998 mm).
+- **Dry mass:** **910 lb (413 kg).** Length 82 in (2,083 mm).
+- **Thrust-to-weight:** **62:1.**
+- **Throttle:** **50–100%**, continuously variable **by the pilot, with a throttle lever.**
+- **Restart:** **In-flight shutdown and restart** — required, since the X-15 was air-launched
+  and the pilot managed the energy profile manually.
+- **Chamber temperature:** 4,982 °F (3,023 K).
+- **Mass flow:** over 10,000 lb/min (4,500 kg/min).
+- **Burn time:** ~83 s (basic X-15); over 150 s (X-15A-2 with external tanks).
+- **Cooling:** Regenerative (ammonia).
+- **Injector / ignition:** Impinging; spark/igniter with a controlled start sequence.
+- **Major innovation:** **The first man-rated, throttleable, restartable large liquid
+  rocket engine.** Everything about it — pilot-commanded throttle, in-flight restart,
+  ground-checkout turnaround — was aimed at operating a rocket engine like an aircraft engine.
+- **Major limitation:** Ammonia is toxic and the H2O2 turbine drive adds a third fluid;
+  and the engine required careful pre-start conditioning.
+- **Historical significance:** Flew the X-15 to Mach 6.7 and above 100 km. Its operational
+  philosophy — throttle, restart, reuse, inspect, fly again — is the direct ancestor of
+  every reusable-engine programme since, and it predates them by fifty years.
+- **SOURCES:** Wikipedia, *Reaction Motors XLR99* —
+  https://en.wikipedia.org/wiki/Reaction_Motors_XLR99 (fetched).
+- **CONFIDENCE: medium-high** on thrust, pc, Isp, mass, T/W, throttle;
+  **not published** on expansion ratio and mixture ratio.
+
+---
+
+### Bristol Siddeley Gamma (Black Arrow / Black Knight)
+
+- **Manufacturer / country:** **Armstrong Siddeley → Bristol Siddeley → Rolls-Royce**.
+  United Kingdom.
+- **Development:** Gamma 201 from **1955–1957** for Black Knight; Gamma 301 for later
+  Black Knight and Black Arrow development; **Gamma 8** and **Gamma 2** for Black Arrow.
+  Black Arrow first flight 1969; **Prospero orbited 28 October 1971** — and the programme
+  was cancelled before that launch. Retired.
+- **Vehicles:** **Black Knight** (Gamma 201/301) and **Black Arrow** (Gamma 8 first stage,
+  Gamma 2 second stage).
+- **Propellants:** **85% high-test hydrogen peroxide (HTP) / kerosene (RP-1).**
+  **Mixture ratio: 8:1** — the very high O/F is characteristic of HTP, which is mostly
+  oxygen and water by mass.
+- **Cycle:** Gas generator. **The HTP is decomposed over a silver-plated nickel-gauze
+  catalyst pack**, producing 600 °C steam and oxygen; the kerosene is then injected into
+  that stream and ignites spontaneously. **There is no igniter and no hypergolic slug —
+  the catalyst pack *is* the ignition system.** This is the defining feature of the
+  design and the reason HTP deserves its own section in the textbook.
+- **Performance:**
+
+  | | Gamma 201 | Gamma 301 | Gamma 8 | Gamma 2 |
+  |---|---|---|---|---|
+  | Chambers | 4, gimballed in opposed pairs | 4 | **8, in pairs on tangential gimbals** | 2 (extended nozzles) |
+  | Thrust SL | 16,400 lbf (73 kN) | 17,000–21,600 lbf (76–96 kN) | **52,785 lbf (234.8 kN)** | 14,520 lbf (64.6 kN) |
+  | Thrust vac | — | — | — | 15,300 lbf (68.2 kN) |
+  | Isp | — | 250 s | **265 s vac / 251 s SL** | — |
+  | pc | — | — | **47.4 bar (687 psia)** | — |
+  | Burn time | — | 120 s | 125 s | 113 s |
+
+  **Note a real disagreement:** Wikipedia gives the Gamma 8 as **52,785 lbf (234.8 kN)**;
+  Encyclopedia Astronautica gives **222.4 kN (49,998 lbf)**. That is a 5% spread.
+  **Recommendation: use Wikipedia's 234.8 kN and note the alternative**, since the
+  Astronautix figure looks like a rounded 50,000 lbf design value.
+- **Dry mass:** **Not published.**
+- **Expansion ratio:** **Not published.**
+- **Cooling:** Regenerative (kerosene).
+- **Injector:** The kerosene is injected downstream of the catalyst pack into decomposed
+  HTP — an architecture with no direct parallel in any other flown engine family.
+- **Major innovation:** Catalytic HTP ignition and a completely non-cryogenic,
+  non-hypergolic, non-toxic propellant combination. HTP/kerosene is storable, its exhaust
+  is steam and CO2, and the engine self-ignites — properties nothing else in this file combines.
+- **Major limitation:** HTP's Isp is poor (250–265 s), it decomposes in storage, and it
+  demands scrupulous cleanliness — any contaminant is a catalyst.
+- **Historical significance:** **128 Gamma engines flew across 26 launches with zero
+  failures.** Black Arrow made the UK the sixth nation to orbit a satellite on its own
+  launcher, and **the only nation ever to develop that capability and then abandon it.**
+- **SOURCES:** Wikipedia, *Bristol Siddeley Gamma* —
+  https://en.wikipedia.org/wiki/Bristol_Siddeley_Gamma (fetched);
+  Encyclopedia Astronautica *Gamma 8*, *Gamma 2* (via search summary);
+  NASASpaceFlight, *On the 50th anniversary of Black Arrow* (secondary).
+- **CONFIDENCE: medium-high** on the architecture, propellants, catalyst and reliability
+  record; **medium** on Gamma 8 thrust (two values); **not published** on mass and ε.
+
+---
+
+### Rocketdyne AR2-3
+
+- **Manufacturer / country:** Rocketdyne. USA.
+- **Development:** Designed late 1950s, first run in the 1950s. Refurbished and re-tested
+  in **1999** for the **Future-X Demonstrator Engine** project, with a view to the Boeing
+  X-37 Reusable Upper Stage.
+- **Vehicles:** **Aircraft, not launch vehicles** — North American **F-86F(R)** Sabre
+  (reached M1.22 at 60,000 ft), **FJ-4**, and most famously the **Lockheed NF-104A**
+  astronaut-training aerospace trainer.
+- **Propellants:** **90% high-test hydrogen peroxide (HTP) / JP-4 or JP-5 jet fuel.**
+  Using the aircraft's own jet fuel as the rocket fuel is the entire point of the design.
+- **Mixture ratio:** ~7.5 *(not published; inferred from HTP practice — low confidence)*.
+- **Cycle:** Gas generator, pump-fed. HTP decomposed over a catalyst drives the turbopump.
+- **Thrust:** **6,600 lbf (29.34 kN)** mainstage, **variable down to 3,300 lbf (14.7 kN)**
+  — i.e. **50–100% throttle** on a single lever. Some sources give the family range as
+  3,000–6,000 lbf (13.3–26.7 kN); the 6,600 lbf figure is the AR2-3 as tested in 1999.
+- **Chamber pressure:** **560 psia (38.6 bar).**
+- **Isp:** **245 s.**
+- **Expansion ratio:** **Not published.**
+- **Dry mass:** **Not published.**
+- **Chamber temperature:** 4,600 °F (2,538 °C).
+- **Cooling:** Regenerative *(not directly confirmed)*.
+- **Throttle mechanism:** **a single lever regulating oxidiser flow to the turbopump gas
+  generator**, which changes turbopump speed and hence propellant flow to the chamber.
+  Throttling by turbopump speed rather than by injector area — the opposite approach to
+  the LMDE's variable-area pintle, and a good contrast to draw.
+- **Ignition:** Catalytic — HTP over the catalyst pack, then JP-4 injected. No igniter.
+- **Major innovation:** A rocket engine a pilot operates with a throttle lever, burning
+  the aircraft's own fuel, requiring only one exotic fluid (HTP).
+- **Major limitation:** 245 s Isp, and HTP handling.
+- **Historical significance:** Powered the NF-104A used to train astronaut candidates in
+  zero-g and reaction-control handling — including **Chuck Yeager's 1963 crash**, which
+  is the reason most people have heard of the aircraft. Its 1999 revival for X-37 studies
+  is a nice illustration of how propulsion technology gets re-examined every few decades.
+- **SOURCES:** Wikipedia, *Rocketdyne AR2* — https://en.wikipedia.org/wiki/Rocketdyne_AR2
+  (fetched); Encyclopedia Astronautica *AR2-3* (via search);
+  NASA MSFC, *Peroxide Propulsion at The Turn of the Century* (W. E. Anderson) —
+  https://ntrs.nasa.gov/api/citations/20000033615/downloads/20000033615.pdf;
+  AIAA 99-2738, *AR2-3 engine refurbishment and gas generator testing*.
+- **CONFIDENCE: medium** on thrust, pc, Isp, propellants and throttle mechanism;
+  **not published** on expansion ratio, mass and mixture ratio.
+
+---
