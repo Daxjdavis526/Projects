@@ -1718,7 +1718,7 @@ would care about the direction of the shift.
 
 **N7.** An engine burns LOX/RP-1 at $\dot m = 250$ kg/s of which 12 kg/s is
 injected as film coolant at the wall. Hot-fire data give
-$p_{c,\mathrm{inj}} = 105$ bar, $A_t = 0.0400$ m², $\varepsilon_c = 2.2$,
+$p_{c,\mathrm{inj}} = 105$ bar, $A_t = 0.0432$ m², $\varepsilon_c = 2.2$,
 $\gamma = 1.20$, and CEA gives $c^*_{theo} = 1810$ m/s at the overall mixture
 ratio. Compute (a) $\eta_{c^*}$ as a naive engineer would, using
 $p_{c,\mathrm{inj}}$; (b) $\eta_{c^*}$ done correctly with the station

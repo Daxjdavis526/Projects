@@ -996,7 +996,7 @@ capability, and lower uncured viscosity.
    exactly the class of reasoning that the Challenger accident falsified, not
    for the propellant but for the *elastomeric O-rings* in the field joints:
    the same error (assume the Florida environment is benign) applied to a
-   different component [Rogers Commission].
+   different component [Rogers86].
 4. **Hazard class.** 1.3, with all that implies for a facility in Utah that
    ships loaded segments by rail.
 

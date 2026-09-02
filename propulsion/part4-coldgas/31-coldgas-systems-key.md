@@ -348,7 +348,9 @@ two years, which is a *small* budget. (iv) 6U volume.
 
 *Cold-gas refrigerant (R-236fa).* Impulse required for a 12 kg spacecraft at
 30 m/s is roughly $I_t \approx m_0 \Delta v = 360$ N·s plus an ACS allocation;
-at 0.576 N·s/cm³ that is ~625 cm³ before ACS — comfortable in 6U. Non-toxic,
+at 40 s that is $m_p = 12(1-e^{-30/392.27}) = 0.88$ kg, and at
+1.36 g/cm³ that is **~650 cm³** of propellant before the ACS allocation —
+comfortable in 6U. Non-toxic,
 non-flammable, low tank pressure, no plume chemistry, no condensables of
 concern on a warm surface, microsecond-response impulse bits with no warm-up.
 Only real cost: $I_{sp}$, and the budget is small enough not to care.
@@ -650,14 +652,15 @@ the temperature excursion is smaller — cost is volume.)
 
 **Q9 (12).**
 **Recommend R-236fa.**
-*The calculation (6):* at 0.576 N·s/cm³, 400 N·s needs
-$400/0.576 = 694\ \mathrm{cm^3} = 0.69$ L of propellant — inside the 1.0 L
-allocation with room for the module structure. GN₂ at 200 bar: its impulse
-density scales from the 241-bar figure as
-$0.211 \times (200/241) = 0.175$ N·s/cm³, so 400 N·s needs
-$400/0.175 = 2{,}290\ \mathrm{cm^3} = 2.3$ L of propellant alone — **2.3× the
-entire allocation before the COPV wall.** The nitrogen option does not fit and
-the argument ends there.
+*The calculation (6):* R-236fa at a realized 40 s needs
+$m_p = 400/(40 \times 9.80665) = 1.020$ kg, and at 1.36 g/cm³ that is
+$1.020/0.00136 = \mathbf{750\ cm^3} = 0.75$ L — inside the 1.0 L allocation
+with room for the module structure. GN₂ at 200 bar stores
+$0.28 \times (200/241) = 0.232$ g/cm³, and at a realized 70 s needs
+$m_p = 400/(70 \times 9.80665) = 0.583$ kg, i.e.
+$0.583/0.000232 = \mathbf{2{,}510\ cm^3} = 2.5$ L of propellant alone —
+**2.5× the entire allocation before the COPV wall.** The nitrogen option does
+not fit and the argument ends there.
 *The non-numerical argument (6):* the rideshare provider treats a >100 bar
 vessel as a schedule risk, and a 200-bar COPV commits the programme to a
 pressure-vessel qualification path — burst article, proof history, compliance
@@ -702,39 +705,51 @@ $\Delta v = 35$ m/s. Add an attitude-control allocation; a defensible one for a
 assumption — any figure between 80 and 300 N·s, stated and justified, earns
 full marks).
 
-| option | $I_{sp}$ | $m_p$ for 35 m/s | ACS mass (150 N·s) | total $m_p$ | $\rho I_{sp}g_0$ | propellant volume |
+| option | realized $I_{sp}$ | $m_p$ for 35 m/s | ACS mass (150 N·s) | total $m_p$ | stored $\rho$ | **propellant volume** |
 |---|---|---|---|---|---|---|
-| **A** GN₂ 241 bar regulated | 70 s | 0.907 kg | 0.219 kg | **1.13 kg** | 0.211 N·s/cm³ | **4,020 cm³** |
-| **B** R-236fa | 40 s | 1.581 kg | 0.382 kg | **1.96 kg** | 0.576 | **1,440 cm³** |
-| **C** n-butane | 65 s | 0.975 kg | 0.235 kg | **1.21 kg** | 0.387 | **1,100 cm³** |
-| **D** R-236fa warm (82 s) | 82 s | 0.775 kg | 0.187 kg | **0.96 kg** | 1.181 | **710 cm³** |
+| **A** GN₂ 241 bar regulated | 70 s | 0.895 kg | 0.219 kg | **1.113 kg** | 0.28 g/cm³ | **3,980 cm³** |
+| **B** R-236fa | 40 s | 1.536 kg | 0.382 kg | **1.919 kg** | 1.36 g/cm³ | **1,410 cm³** |
+| **C** n-butane | 65 s | 0.962 kg | 0.235 kg | **1.197 kg** | 0.57 g/cm³ | **2,100 cm³** |
+| **D** R-236fa warm | 82 s | 0.767 kg | 0.187 kg | **0.953 kg** | 1.36 g/cm³ | **701 cm³** |
 
-(Volumes are propellant only. Δv propellant computed sequentially from 18 kg;
-ACS mass $= I_t/(I_{sp}g_0)$. Impulse density for D is R-236fa's density
-1.36 g/cm³ × 82 s × $g_0$.)
+(Volumes are propellant only, $V = m_p/\rho$. Δv propellant from
+$m_p = m_0(1-e^{-\Delta v/I_{sp}g_0})$ at $m_0 = 18$ kg; ACS mass
+$= I_t/(I_{sp}g_0)$. **Note the volumes are computed from realized $I_{sp}$ and
+stored density directly, not from the §3.2 impulse-density column, which uses
+*ideal* $I_{sp}$ — using the table's 0.211 for GN₂ would understate the
+nitrogen volume by 10 %.** Marks are not lost for using the table provided the
+inconsistency is noticed.)
+
+**Only options B and D fit inside 1.5 L on propellant volume alone.**
 
 ### Step 2 — Tank mass where a pressure vessel is involved
 
-Only option A. $V = 4{,}020$ cm³ $= 4.02\times10^{-3}$ m³ at 241 bar:
-$pV = 241\times10^5 \times 4.02\times10^{-3} = 9.69\times10^4$ J. At a
-realistic small-COPV $pV/W = 8{,}000$ m, $m_{tank} = 1.23$ kg — **more than the
-1.13 kg of propellant it holds.** At an optimistic 15,000 m it is 0.66 kg.
+Only option A. $V = 3{,}980$ cm³ $= 3.98\times10^{-3}$ m³ at 241 bar:
+$pV = 241\times10^5 \times 3.98\times10^{-3} = 9.58\times10^4$ J. At a
+realistic small-COPV $pV/W = 8{,}000$ m, $m_{tank} = 1.22$ kg — **more than the
+1.113 kg of propellant it holds.** At an optimistic 15,000 m it is 0.65 kg.
 Options B, C and D need only a low-pressure can, tens of grams.
 
 ### Step 3 — Which requirement each rejected option fails
 
-- **A (GN₂) fails volume, twice over.** 4,020 cm³ of propellant against a
-  1.5 L total allocation — 2.7× over before the COPV wall, the regulator, the
-  manifold or the thrusters. **And** it fails the pressure constraint: 241 bar
-  triggers the rideshare schedule penalty explicitly named in the requirements.
-  Two independent hard failures. Reject.
-- **C (butane) fits (1,100 cm³) and is the mass-efficient cold option**, but it
-  puts a **flammable hydrocarbon** on a rideshare manifest. That is not a
-  physics failure, it is a manifest and review risk, and the requirements
-  single out rideshare schedule sensitivity as a programme concern. It is the
-  legitimate runner-up and a defensible answer if you argue the flammability
-  case explicitly.
-- **D (warm gas) is the volume winner (710 cm³) and the mass winner (0.96 kg)**
+- **A (GN₂) fails twice over.** 3,980 cm³ of propellant against a 1.5 L
+  total allocation — 2.7× over *before* the COPV wall, the regulator, the
+  manifold or the thrusters, and the COPV itself weighs more than the
+  propellant (Step 2). **And** it fails the pressure constraint independently:
+  241 bar triggers the rideshare schedule penalty explicitly named in the
+  requirements. Two independent hard failures. Reject.
+- **C (butane) also fails volume**, which is the answer most students miss.
+  Butane is the *mass*-efficient cold option (1.197 kg against B's 1.919 kg)
+  and this makes it look attractive — but at 0.57 g/cm³ it needs **2,100 cm³**,
+  which is 1.4× the entire allocation. Butane buys its $I_{sp}$ with density,
+  and on a volume-limited bus that is the wrong currency. **Secondary
+  objection:** a flammable hydrocarbon on a rideshare manifest is a review and
+  manifest risk on a programme the requirements tell us is
+  schedule-sensitive. Reject on volume; note the flammability as a second
+  reason. An answer that rejects C *only* on flammability has not done the
+  arithmetic.
+- **D (warm gas) is the volume winner (701 cm³) and the mass winner
+  (0.953 kg)**
   and it fails on **power and on impulse-bit resolution**. A CHIPS-class heater
   draws tens of watts during a burn against a 25 W orbit-average budget on a
   spacecraft whose primary mission is a 12-month optical campaign — the burns
@@ -749,24 +764,24 @@ Options B, C and D need only a low-pressure can, tens of grams.
 
 **Recommend B: R-236fa self-pressurising cold gas.** [J]
 
-It is the only option that satisfies every stated constraint simultaneously:
-1,440 cm³ of propellant inside a 1.5 L allocation is tight but achievable in a
-flight-proven module form factor; the tank is a ~2.7 bar can, far below the
-100 bar threshold; the system draws essentially no power except valve
-actuation, leaving the 25 W for the payload; and an unheated micro-valve
-delivers the fastest, most repeatable, lowest-quantum impulse bit of any option,
-which is what the 20 μN·s requirement is really asking for. It gives up
-specific impulse — 1.96 kg of propellant against option A's 1.13 kg — and that
-is the right thing to give up, because the mass budget is not the binding
-constraint and the volume, pressure and power budgets all are.
+It is the only *unheated* option that fits: 1,410 cm³ of propellant against
+a 1.5 L allocation; the tank is a ~2.7 bar can, far below the 100 bar
+threshold; the system draws essentially no power except valve actuation,
+leaving the 25 W for the payload; and an unheated micro-valve delivers the
+fastest, most repeatable, lowest-quantum impulse bit of any option, which is
+what the 20 μN·s requirement is really asking for. It gives up specific
+impulse — 1.919 kg of propellant against option A's 1.113 kg — and that is the
+right thing to give up, because the mass budget is not the binding constraint
+and the volume, pressure and power budgets all are.
 
-**A strong answer notes the tightness honestly:** 1,440 cm³ inside a 1.5 L
-allocation leaves ~60 cm³ for the tank wall, valves, manifold and electronics,
+**A strong answer notes the tightness honestly.** 1,410 cm³ inside a 1.5 L
+allocation leaves ~90 cm³ for tank wall, valves, manifold and electronics,
 which is not achievable. The real recommendation is therefore **B with a
-descoped ACS allocation or a reduced de-orbit Δv**, or **B plus reaction wheels
-carrying the fine-pointing duty** so the propulsion ACS allocation drops from
-150 N·s to perhaps 40 N·s (1,140 cm³ total, which does close). Saying "B, and
-here is what has to give" is a better answer than "B" alone.
+descoped ACS allocation**, or **B plus reaction wheels carrying the
+fine-pointing duty**, dropping the propulsion ACS allocation from 150 N·s to
+~40 N·s: total propellant 1.638 kg, **1,205 cm³**, leaving ~295 cm³ for
+hardware — which does close on a flight-proven module form factor. Saying
+"B, and here is what has to give" is a better answer than "B" alone.
 
 ### Step 5 — Largest risk and the test that retires it
 

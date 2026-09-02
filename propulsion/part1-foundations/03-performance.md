@@ -1083,11 +1083,14 @@ can perform without knowing anything about SpaceX's combustion.
 **Compute.** $\gamma = 1.20$ (LOX/RP-1), $\varepsilon = 16$:
 $M_e = 3.6044$, $p_e = 65.67$ kPa.
 
-$$C_{f,SL} = 1.7971 + \frac{65\,672 - 101\,325}{9.7\times10^6}\times16 = 1.7971 - 0.0588 = 1.6299$$
-$$C_{f,vac} = 1.7971 + \frac{65\,672}{9.7\times10^6}\times16 = 1.7971$$
+The momentum term (which is the same in both cases, since it depends only on
+$\gamma$ and $p_e/p_c$) is 1.68875. Then:
 
-Note the vacuum $C_f$ here is written as (momentum term) + (pressure term) with
-$p_a=0$; numerically $C_{f,vac} = 1.7383 + 0.0588 = 1.7971$.
+$$C_{f,SL} = 1.68875 + \frac{65\,672 - 101\,325}{9.7\times10^6}\times16 = 1.68875 - 0.05881 = \mathbf{1.6299}$$
+$$C_{f,vac} = 1.68875 + \frac{65\,672 - 0}{9.7\times10^6}\times16 = 1.68875 + 0.10833 = \mathbf{1.7971}$$
+
+The difference between them is exactly $p_a\varepsilon/p_c = 101\,325\times16/9.7\times10^6
+= 0.16714$, which is the check to run before trusting either number.
 
 $$\frac{C_{f,vac}}{C_{f,SL}} = \frac{1.7971}{1.6299} = 1.1025$$
 

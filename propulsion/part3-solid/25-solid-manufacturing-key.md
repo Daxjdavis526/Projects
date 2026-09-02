@@ -629,6 +629,182 @@ specific measurement rather than a flat accept or reject.
 
 ---
 
+## K2. Quiz answers with explanations
+
+**Q1 (8 pts).** *Proves:* the Vieille coefficient $a$ and pressure exponent $n$
+of that specific mix, measured in a quiescent bomb at several pressures — i.e.
+the propellant's intrinsic burn-rate law as produced by that batch. *Does not
+prove:* how that propellant burns in the motor, because the strand sees no
+cross-flow (hence no erosive burning), no transient pressure history, no
+port-to-throat geometry, and is not at the motor's bulk conditioning
+temperature. The gap is bridged by a configuration-specific, empirically
+determined strand-to-motor scale factor of a few per cent, derived from
+static-fired motors of that family. (4 pts each half; deduct 2 for an answer
+that does not mention the scale factor or erosive burning.)
+
+**Q2 (10 pts).** Batches deliverable per mixer inside the working life:
+$\lfloor t_{\rm pot}/t_{\rm mix}\rfloor = \lfloor 7.0/3.0\rfloor = \lfloor 2.33\rfloor = 2$.
+Eq. 3.2: $N_{\rm mixers} \ge \lceil 9/2 \rceil = \mathbf{5}$ mixers.
+
+The reasoning that earns the marks: the floor is not a rounding convenience.
+A mixer that is one-third of the way into a third cycle when the first batch
+passes its working life has contributed two batches, not 2.33. And the ceiling
+on the outer division is equally physical — four mixers deliver eight batches
+and the ninth batch has nowhere to come from, so the motor cannot be cast at
+all, not merely cast slowly. (6 pts for the number, 4 for the floor/ceiling
+reasoning.)
+
+**Q3 (12 pts).** $n = 0.30 \Rightarrow 1/(1-n) = 1.4286$.
+
+(a) $p_c$: $(1.025)^{1.4286} = \exp(1.4286 \times 0.024693) = \exp(0.035275) = 1.0359$
+→ **+3.59 %**.
+(b) Peak thrust $\propto p_c$ at fixed $A_t$, $C_F$ → **+3.59 %**.
+(c) Burn rate tracks pressure at equilibrium, so $t_b \propto 1/r$:
+$1/1.0359 - 1 = $ **−3.47 %**.
+(d) Total impulse: $1.0359 \times 0.9653 = 1.0000$ → **0 % to first order**.
+
+(3 pts each. Full marks on (d) require the explanation, not just "zero": the
+same propellant mass burns at the same $c^*$ and $C_F$, so the area under the
+thrust trace is preserved and only its shape changes.)
+
+**Q4 (10 pts).** **(iii)** — weighing the motor and comparing with the recorded
+inert mass. A 0.4 % bulk porosity distributed as millions of sub-millimetre
+bubbles produces no callable indication in radiography (contrast per bubble is
+far below the noise floor) or CT (each bubble is below the voxel-count
+threshold), is invisible to a bondline ultrasonic scan (it is not at a bond),
+and is far too deep for thermography. It is, however, a 0.4 % mass deficit,
+which a scale resolving ~0.05 % detects with an order of magnitude to spare.
+
+(6 pts for the choice, 4 for a justification that names *why the volumetric
+methods fail* rather than only why the scale works.)
+
+**Q5 (12 pts).** Geometry factor: $(b/a_i)^2 - 1 = 6.25 - 1 = 5.25$; Eq. 3.3
+amplifier $= 1.5 \times 5.25 = 7.875$.
+$\Delta T = 65 - (-40) = 105$ K, so $\alpha\Delta T = 1.05\times10^{-2}$.
+
+$$\varepsilon_\theta = 7.875 \times 1.05\times10^{-2} = \mathbf{0.0827 = 8.3\ \%}$$
+
+Against an 18 % limit: **passes**, with a margin of $0.18/0.0827 = 2.18$.
+
+(8 pts for the number, 4 for the pass/fail with margin. Note for the grader: a
+student who also observes that ignoring chemical shrinkage is non-conservative —
+adding 1 % volumetric shrinkage would push the strain to about 10.9 % and the
+margin to 1.65 — deserves the credit even though it was not asked.)
+
+**Q6 (10 pts).** **(ii)** — casting pit and cure oven occupancy. Cure takes days
+while mixing takes hours, so a pit holds an article roughly an order of
+magnitude longer than any other station holds it; and the obvious remedy —
+raising cure temperature to shorten the cure — is blocked because cure
+temperature sets the grain's stress-free temperature and therefore its cold-end
+structural margin (Eq. 3.3).
+
+A different answer is correct when: **(i)** on a tactical line, where one mix
+fills many motors and the ovens hold batches of them, so mixer and moulding
+tooling throughput binds instead; **(iii)** on a programme that CT-scans 100 %
+of articles, since CT is hours per article; **(iv)** or **(v)** whenever case
+fabrication (winding hall time, forging lead) or a single-source raw material is
+in shortage — which binds the whole industry rather than one line and is the
+answer that most often surprises programmes.
+
+(5 pts for the choice, 3 for the reason, 2 for a valid exception.)
+
+**Q7 (12 pts).** Radiography through 0.9 m at 1–2 % of traversed thickness:
+$0.009$–$0.018$ m = **9–18 mm**. CT at 1.5 mm voxel × 3 voxels =
+**4.5 mm** — a factor of 2–4 better, and orientation-independent, and with a
+location attached.
+
+Why radiography is nonetheless the 100 % inspection: **throughput and capital**.
+A radiograph of a segment is minutes to an hour; a CT scan of the same article
+is hours of acquisition plus reconstruction, and the machine that can rotate and
+scan a large booster segment is a building rather than a cabinet. Eq. 3.6 says a
+station that takes hours per article will bind the line long before a station
+that takes minutes. CT is therefore used for qualification, for first articles,
+and for characterising indications that radiography has flagged but cannot
+resolve.
+
+(4 pts each detection limit, 4 for the throughput argument. Deduct 2 for a
+student who says CT is "more accurate" without saying that its advantage is
+orientation-independence and 3-D location, not just size.)
+
+**Q8 (10 pts).** *The argument for enlarging the throat.* $K_n = A_b/A_t$ is the
+only term in Eq. 3.7 the manufacturer can still change once the propellant
+exists. A lot 3 % high in $a$ would fly $(1.03)^{1/(1-n)}$ high in chamber
+pressure — about +4.6 % at $n = 0.35$ — with correspondingly higher peak thrust
+and a shorter burn. Increasing $A_t$ by 3.0 % (diameter +1.5 %) drops $K_n$ by
+3.0 %, restoring the product $a K_n$ and hence $p_c$, peak thrust and burn time
+to nominal. The lot is perfectly good propellant; rejecting it discards material
+and schedule for a variation the design can absorb.
+
+*What it actually does to the ballistics.* It restores $p_c(t)$, $F(t)$ and
+$t_b$ to the nominal trace. It does **not** change total impulse, which was
+never off. But it does reduce the nozzle expansion ratio
+$\varepsilon = A_e/A_t$ by 3 % at fixed exit area, which costs a small amount of
+$C_F$ and therefore of delivered specific impulse — a few tenths of a per cent.
+That penalty is the real, and usually acceptable, price of the trim, and a
+student who names it has understood the trade rather than memorised the fix.
+
+*The configuration-management cost.* Throat diameter becomes a build-to-lot
+dimension rather than a drawing dimension. That means: the nozzle cannot be
+finish-machined until the lot's strand data exist, so long-lead nozzle
+assemblies must be held in an unfinished state; every motor needs a serialised
+as-built record of its actual throat and its mix-specific ballistic prediction;
+the delivered performance prediction supplied to the vehicle differs motor to
+motor; and any subsequent throat erosion analysis must be run against the
+as-built dimension, not the nominal.
+
+(4 pts argument, 3 pts ballistic effect including the $\varepsilon$ penalty,
+3 pts configuration-management cost.)
+
+**Q9 (8 pts).** At equilibrium the mass generated equals the mass choked:
+$\rho_p A_b r = p_c A_t/c^*$. With $A_b$, $A_t$, $\rho_p$ and $c^*$ fixed by the
+hardware, $r \propto p_c$ exactly, so a lot with a higher $a$ raises both burn
+rate and pressure by the same fraction. Peak thrust follows $p_c$ and rises;
+burn time follows $w/r$ and falls by the same fraction. Total impulse is
+$\int F\,dt$, and to first order the two effects cancel — the same propellant
+mass is expelled at the same $c^*$ and $C_F$, just faster. **Lot variation
+changes the shape of the thrust trace, not the area under it.**
+
+(4 pts for the $r \propto p_c$ argument, 4 for the cancellation. An answer that
+just asserts "impulse depends only on mass" without connecting it to the
+equilibrium relation earns 4.)
+
+**Q10 (8 pts).** *Decision:* **do not extend beyond year 15 on this data**, but
+the case is not hopeless — it is under-evidenced.
+
+The numbers: the requirement with margin is $0.19 \times 1.25 = 23.75$ %.
+Measured capability at year 12 is 21 %, which is **already below** the required
+value. The fleet is therefore not merely un-extendable; its *current*
+certification basis needs re-examination. The trend is roughly
+$(28 - 21)/12 = 0.58$ percentage points per year, so year 15 projects to about
+19.3 % — at the bare requirement with no margin at all.
+
+*Additional data demanded:*
+- More pull points to establish whether the trend is linear or decelerating —
+  binder aging often slows as the accessible reaction sites are consumed, and a
+  decelerating trend changes the projection materially.
+- The **storage temperature distribution** of the fielded population, since the
+  12-year articles pulled may not represent the hottest sites.
+- Bondline peel data alongside the propellant strain data; the propellant may
+  not be the life-limiting element.
+- A re-run of the **grain structural analysis** with the aged property set —
+  including aged modulus, which usually rises and increases the demanded stress
+  even at constant strain — rather than comparison against a requirement derived
+  from delivery-condition properties.
+- At least one **cold-conditioned static firing** of a 12-year article; ambient
+  firings do not interrogate the limiting condition.
+
+*Interim restriction:* raise the fleet's minimum operating and handling
+temperature — restrict cold conditioning to a limit at which the analysis shows
+margin with the measured 21 % capability — and prioritise the hottest-stored
+serial numbers for pull and disposition. That converts a certification problem
+into an operational limitation while the data is gathered.
+
+(3 pts for computing the requirement and comparing it, 3 for the data demands,
+2 for a coherent interim restriction. A student who extends the life because
+"21 % is still above 19 %" has ignored the margin factor and earns at most 2.)
+
+---
+
 ## K3. Trade-study reference solution (T1)
 
 ### The arithmetic first
