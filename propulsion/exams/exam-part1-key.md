@@ -24,17 +24,26 @@ Missing units cost 1 mark per question, once, not per line.
 
 **Answer: (b).**
 
-Two effects stack between the injector face and the nozzle stagnation station,
-and both are consequences of adding heat to a subsonic flow in a duct of finite
-cross-section. First, the combustion gas is not at rest at the chamber exit: at
-$\varepsilon_c = 2.2$ the chamber-exit Mach number is roughly 0.3, so the
-*static* pressure there is already several per cent below the local stagnation
-pressure. Second, and the reason the *stagnation* pressures differ at all,
-heat addition at finite Mach number drives the flow along a Rayleigh line
-toward $M = 1$, and every Rayleigh line loses stagnation pressure as it does so.
-This is Module 01 §3.8. The magnitude scales as roughly $\gamma M_c^2$, which
-is why the loss is a few per cent at $\varepsilon_c \approx 2$ and well under
-1 % at $\varepsilon_c \geq 4$.
+At the injector face the gas is essentially at rest, so a tap flush with the
+face reads the *stagnation* pressure directly. Moving downstream, combustion
+adds heat, the gas accelerates to the Mach number set by the contraction ratio,
+and because that acceleration is driven by heat addition — a Rayleigh-line
+process — the **stagnation** pressure falls with it. That is Module 01 §3.8,
+whose momentum balance on a constant-area chamber gives
+
+$$\frac{p_{0,2}}{p_{inj}} = \frac{\left(1+\frac{\gamma-1}{2}M_2^2\right)^{\frac{\gamma}{\gamma-1}}}{1+\gamma M_2^2}$$
+
+**Check against the stated 4 %.** At $\varepsilon_c = 2.2$ and $\gamma = 1.20$
+the subsonic root of the area relation gives $M_2 = 0.281$, so
+
+$$\frac{p_{0,2}}{p_{inj}} = \frac{(1+0.10\times0.07896)^{6}}{1+1.20\times0.07896}
+= \frac{1.04832}{1.09475} = 0.9576$$
+
+a loss of **4.2 %** — which is the 4 % the question describes, from this
+mechanism alone. The loss scales as roughly $\gamma M_2^2$, which is why it is
+5 % at $\varepsilon_c = 2$, 2.3 % at $\varepsilon_c = 3$, and under 1 % at
+$\varepsilon_c \geq 4$; it is also why contraction ratios below about 2 are a
+design error.
 
 **Which reading belongs in $\eta_{c^*}$:** the **nozzle stagnation pressure**,
 because $c^* \equiv p_0 A_t/\dot m$ is defined on the stagnation state that
@@ -995,12 +1004,14 @@ dry mass.
 
 ### (d) Why nobody flies $r = 3.5$ (1)
 
-**Bulk density.** At $r = 3.5$ the propellant load is nearly a third hydrogen by
-mass, at 71 kg/m³ against LOX's 1141 kg/m³. The hydrogen tank becomes
-enormous; its structure, its insulation and its boil-off cost far more stage
-mass than the 3 s of $I_{sp}$ (466 → 434 s at $r = 3.0$; the $c^*$ optimum is
-worth *less* $I_{sp}$ than $r = 5$, not more) could ever repay. The optimum for
-the **vehicle** is not the optimum for the **engine**.
+**Bulk density.** At $r = 3.5$ the propellant load is more than a fifth hydrogen
+by mass, at 71 kg/m³ against LOX's 1141 kg/m³, so the hydrogen tank becomes
+enormous — and its structure, insulation and boil-off are charged to stage dry
+mass. And the move buys nothing in return: Curve X shows vacuum $I_{sp}$ at
+$r = 3.5$ is roughly 447 s, some **19 s below** the 466.1 s peak at $r = 5.0$.
+The $c^*$ optimum is dominated on both axes at once. The optimum for the
+**vehicle** is not the optimum for the **engine**, and here it is not even the
+optimum for the engine.
 
 *(Also acceptable, for full marks if argued: at $r = 3.5$ the vacuum $I_{sp}$ is
 already below its peak, so the $c^*$ optimum buys nothing in $I_{sp}$ either —

@@ -50,9 +50,8 @@ The **dominant** cause of that 4 % is:
 
 - **(a)** wall friction along the cylindrical section of the chamber;
 - **(b)** heat release into a subsonic flow of finite cross-section, which
-  raises the Mach number along the chamber and drops stagnation pressure
-  (the Rayleigh effect), together with the static-to-stagnation difference
-  associated with the chamber-exit Mach number;
+  accelerates the gas to the Mach number set by the contraction ratio and, being
+  a Rayleigh-line process, drops the stagnation pressure as it does so;
 - **(c)** the injector pressure drop, which is what the transducer is really
   reading;
 - **(d)** dissociation in the chamber absorbing energy and thereby lowering the

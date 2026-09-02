@@ -989,3 +989,159 @@ launches **retrograde, westward over the Mediterranean**, paying roughly 2×460 
 of Earth-rotation penalty for range-safety reasons. Open sources state the first
 two stages are common with Jericho II. Everything else is **C** and needs a
 primary.
+
+---
+
+## B.6 (reserved)
+
+*Numbering kept aligned with the worksheet's sectioning; no entries.*
+
+## B.7 Defense motors — architecture only
+
+Per the course scope boundary, this section records **only architecture**: stage
+count, propellant *family* name, case material *family*, nozzle *concept*, and any
+thrust/Isp/mass figures that appear in open, citable, unclassified sources. No
+formulations beyond what NASA publishes in a fact sheet, no processing, no
+dimensions of weapon components. These entries are deliberately shorter than the
+civil-launcher entries; that is the intended outcome.
+
+### Minuteman
+
+| | Minuteman I (LGM-30A/B) | Minuteman II (LGM-30F) | Minuteman III (LGM-30G) |
+|---|---|---|---|
+| Stage 1 | Thiokol M55 (TU-122) | Thiokol M55A1 | Thiokol **M55A1** |
+| Stage 2 | Aerojet SR19-AJ-1 | Aerojet **SR19-AJ-1** (enlarged) | Aerojet **SR19-AJ-1** |
+| Stage 3 | Aerojet/Thiokol **SR73-AJ/TC-1** | — | Hercules **SR73-AJ-1 / M57** |
+| Dates | 1962–1969 | 1965–1990s | 1970– (in service) |
+
+Architecture-level points, confidence **B** unless noted:
+
+- **All stages: AP/Al composite propellant.** Stage 1 is a PBAN-class
+  polybutadiene composite; later stages moved to higher-energy binders. **No
+  formulation detail beyond family is recorded**, per scope.
+- **Stage 1 case: steel. Stages 2 and 3 progressively moved to filament-wound
+  composite** — stage 2 to titanium and then composite, stage 3 to
+  glass-filament-wound and then composite. Confidence **C** on the specific
+  progression; **NEEDS PRIMARY**.
+- **TVC concepts: stage 1, four gimballed nozzles. Stage 2, liquid injection**
+  (Freon injectant on Minuteman II/III-era hardware). **Stage 3, fixed nozzle with
+  a liquid-injection TVC system** — Wikipedia describes the Minuteman III third
+  stage explicitly in those terms. Confidence **B**.
+- **Thrust-termination ports on the third stage** — shaped charges open ports in
+  the forward dome, dropping chamber pressure and terminating thrust to set final
+  velocity. **This is the architectural feature worth teaching: a solid motor *can*
+  be shut down, at the cost of a violent, one-shot, structurally destructive
+  event.** Confidence **B**.
+- Published thrust figures (Minuteman I): stage 1 ≈ **790 kN** `/motor`, stage 2 ≈
+  **268 kN** `/motor`, stage 3 ≈ **152 kN** `/motor`. Confidence **C**.
+
+### Peacekeeper (LGM-118A, MX)
+
+| stage | motor | manufacturer | conf |
+|---|---|---|---|
+| 1 | SR118 | Thiokol | B |
+| 2 | SR119 | Aerojet General | B |
+| 3 | SR120 | Hercules | B |
+| PBV | restartable storable-hypergolic liquid | Rocketdyne | B |
+
+- **Case material family: Kevlar/epoxy filament-wound on all three solid stages.**
+  Confidence **B** (FAS and GlobalSecurity both say Kevlar-epoxy for the marching
+  stages).
+- **Stages 2 and 3 use extendable exit cones (EEC).** Confidence **B**. This is the
+  single most important architectural fact about Peacekeeper for a propulsion
+  textbook: **EECs let a stage carry a high-ε nozzle inside a length-limited silo,
+  buying ~10–15 s of Isp for a deployment mechanism.**
+- **Propellant family:** open sources state the propellant used **HMX**, a
+  nitramine of higher energy than AP alone — i.e. a **nitramine-loaded composite /
+  CMDB-class** propellant rather than a plain AP/Al/HTPB. Confidence **C**. Some
+  sources associate **NEPE** with Peacekeeper stage 3; this could not be
+  corroborated and **is not recorded here as fact**.
+- Stage 1 thrust ≈ **2.2 MN (500,000 lbf)** `/motor`. Confidence **C**.
+- **Castor 120** is the commercial derivative of the stage-1 motor (§B.3).
+
+### Polaris → Poseidon → Trident
+
+| system | stages | propellant family (open sources) | case family | nozzle concept | decade |
+|---|---|---|---|---|---|
+| **Polaris A-1** | 2 | polyurethane / PBAA-class AP composite | **steel** | **four rotatable nozzles with jetavators** (jet vanes / deflector rings) | late 1950s |
+| **Polaris A-2** | 2 | AP composite; second stage moved toward a higher-energy binder | steel; **glass-filament-wound second stage** | rotatable nozzles / jetavators | early 1960s |
+| **Polaris A-3** | 2 | **CTPB**-class composite (both stages) | **glass filament wound** | **liquid injection TVC (Freon)** replacing jetavators | mid 1960s |
+| **Poseidon C-3** | 2 | high-energy composite (nitramine-loaded) | **glass filament wound** | **LITVC** | late 1960s / 1970s |
+| **Trident I C-4** | 3 | high-energy composite | **Kevlar/epoxy** | **single gimballed nozzle per stage; extendable nozzle; aerospike** | late 1970s |
+| **Trident II D-5** | 3 | **NEPE-75** (nitrate-ester-plasticised polyether) | **graphite/epoxy** on stages 1 and 2; stage 3 changed from Kevlar to graphite/epoxy mid-programme (**1988**) | **one oscillating (gimballed) graphite-composite nozzle per stage; aerospike** | 1980s–90s |
+
+Confidence **B** for Trident — the FAS/GlobalSecurity D-5 features pages are
+explicit about NEPE-75 and about the Kevlar→graphite case change and its two
+stated reasons: **inert-weight reduction *and* elimination of the electrostatic
+potential difference between Kevlar and graphite**. Confidence **C** for the
+Polaris/Poseidon rows; the Wikipedia Polaris article carries no propulsion detail
+and no primary could be reached. **NEEDS PRIMARY**: the Navy Strategic Systems
+Programs historical summaries, and the classic open-literature account of the
+jetavator→LITVC transition.
+
+**The Trident "aerospike" is not an aerospike nozzle.** It is a **telescoping
+drag-reduction spike deployed from the nose**, reportedly cutting frontal drag by
+roughly 50% and buying range. This naming collision confuses students every year
+and the module must state it explicitly. Confidence **B**.
+
+**The two architectural arcs worth teaching, and nothing more:**
+
+1. **Nozzle control:** jetavators (1950s, simple, lossy) → liquid injection
+   (1960s, no moving nozzle, injectant mass penalty) → single gimballed flexseal
+   nozzle (1970s onward, efficient, needs a flexible joint that can survive
+   submarine storage). Trident's *single* gimballed nozzle per stage replacing
+   four nozzles is a large inert-mass and complexity win.
+2. **Case material:** steel → glass filament wound → Kevlar/epoxy →
+   graphite/epoxy. Each step is roughly a **20–30% case-mass reduction at equal
+   burst pressure**. This progression alone accounts for a large part of the range
+   growth from Polaris A-1 to Trident D-5, independent of chemistry.
+
+---
+
+## B.8 Solid-motor contested figures, consolidated
+
+Ranked by how much damage getting them wrong would do. (Details are in the notes
+under each table; this is the checklist.)
+
+1. **Thrust: per-motor versus per-vehicle** (Titan IV, Ariane 5, SLS). The most
+   common error in the secondary literature, and it is a factor of two. Every
+   thrust figure in this file carries `/motor` or `/vehicle`, and every module
+   quoting one repeats the suffix. **No exceptions.** (§B.2.1)
+2. **Ariane 5 EAP propellant mass: 237.8 / 238 / 241 t, not 270 / 273 t.** The
+   Wikipedia figures are gross masses mislabelled as propellant mass. (§B.1.4)
+3. **Star 48B Isp: 286.2 vs 292.2 s** — not an error, two nozzles; and **inert
+   mass 128 kg, not 28 kg**. (§B.4.1)
+4. **Shuttle SRB composition: 69.6/0.4 vs 69.8/0.2** — iron oxide is a burn-rate
+   catalyst, so the 0.2-point difference is a several-percent change in burn rate.
+   (§B.1.1)
+5. **M-V second stage Isp of 203 s — do not print it.** (§B.5.1)
+6. **BOLE and every other in-development motor** — contractor claims; the DM-1
+   nozzle anomaly must appear in the same paragraph as the +11% impulse claim.
+   (§B.1.9)
+7. **Shuttle SRB case wall 12.7 mm nominal membrane**, not 2 cm. (§B.1.2)
+8. **Ariane 5 EAP nozzle deflection 7.3°**, not 6°. (§B.1.5)
+9. **SLS booster burn time 126 s**, not ~123 s. (§B.1.3)
+10. **Titan IV UA1207 and SRMU infobox thrusts are two-booster totals.** (§B.2.1)
+
+## B.9 Do-not-print list — solids
+
+The following are **not yet fit to quote in a module**. Where the worksheet says
+`NEEDS PRIMARY`, it means it.
+
+- All **Titan UA120 / SRMU** numbers (architecture only is quotable).
+- All **Castor** numbers **except Castor 120**.
+- All **Star 37** numbers.
+- All **Orbus** numbers.
+- All **Scout** stage numbers (the spin-stabilisation architecture is quotable).
+- All **Shavit** numbers.
+- **Every Chinese motor** — keep to a one-paragraph architectural note; omit
+  Long March 11 entirely.
+- **M-V M-24 Isp (203 s)** — omit or caveat visibly; never print bare.
+- **Star 48B inert mass of 28 kg** — use ≈128 kg.
+- **Ariane 5 EAP "propellant mass" of 270 / 273 t** — those are gross masses.
+- **SLS RSRMV Isp and propellant mass** from PDF text extraction — the extraction
+  was visibly corrupted; re-open the PDF by hand.
+- **Star 48B propellant designation (TP-H-3340) and titanium case** — both **C**,
+  NEEDS PRIMARY.
+- **Minuteman case-material progression** and **Peacekeeper HMX/NEPE association**
+   — **C**; the NEPE association specifically is *not* recorded as fact.
