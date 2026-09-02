@@ -702,7 +702,7 @@ flowchart LR
   OT[("LOX tank")] --> OP[LOX pump]
   FP --> SPL{Split}
   SPL -->|main fuel| INJ[Main injector]
-  SPL -->|bleed 1-3 pct| JKT[Regen jacket<br/>chamber only on LE-5B]
+  SPL -->|bleed, a few pct of total flow| JKT[Regen jacket<br/>chamber only on LE-5B]
   JKT --> TRB[Turbine]
   TRB --> DUMP[Overboard or small nozzle]
   TRB -.->|shaft| FP
@@ -719,7 +719,10 @@ each kilogram of bleed does five to ten times the work, so you need only a
 small fraction of the fuel instead of all of it.
 
 **Power balance.** Eq. 3.3 with $\pi_t$ free and $\dot m_t = f_b \dot m_f$.
-Solve for $f_b$; realistic values are on the order of 1–3 % of fuel flow. The
+Solve for $f_b$; realistic values are **a few per cent of the engine's total
+flow** — which, because hydrogen is only 12–17 % of the mass on a hydrolox
+engine, can be 10–25 % of the *fuel* flow. Problem N6 works this out for the
+LE-9 and the answer is worth seeing before you assume "a bleed is small". The
 jacket no longer has to pass the entire fuel flow, so $\Delta p_j$ decouples
 from the main circuit and the fixed-point problem of §3.7 disappears.
 
@@ -743,10 +746,10 @@ clean record on H-II/H-IIA/H-IIB; the LE-9 first flew 7 March 2023 and
 performed correctly on H3 TF1 (the failure on that flight was in the second
 stage), with a fully successful second flight on 17 February 2024.
 
-**$I_{sp}$ penalty: small, roughly 1–2 %** (≈5–15 s on a hydrogen engine),
-because the bleed fraction is small and the dumped gas is warm hydrogen, which
-is a surprisingly good propellant in its own right — a dumped-hydrogen nozzle
-can reach 200+ s.
+**$I_{sp}$ penalty: roughly 1–3 %** (≈5–15 s on a hydrogen engine), because
+the bleed fraction of total flow is small and the dumped gas is warm hydrogen,
+which is a surprisingly good propellant in its own right — a dumped-hydrogen
+nozzle can reach 180–220 s, so much of the bleed's momentum is recovered.
 
 **Materials and turbomachinery.** The same cryogenic-hydrogen problem set as the
 closed expander, but with a higher-pressure-ratio, smaller turbine that is
@@ -2244,7 +2247,8 @@ comparable, and write down the quantity that *is* comparable.
 ### Calculation
 
 **N1.** A LOX/methane gas-generator engine delivers 900 kN at sea level with
-$p_c = 110$ bar, $MR = 3.4$, $I_{sp,vac} = 340$ s. Take
+$p_c = 110$ bar, $MR = 3.4$, a main-chamber flow of $\dot m = 300$ kg/s and a
+main-chamber $I_{sp,vac} = 340$ s. Take
 $\rho_{CH_4} = 423$ kg/m³, $\rho_{LOX} = 1141$ kg/m³, $\eta_p = 0.72$,
 $\Delta p_{inj} = 0.2p_c$, $\Delta p_j = 20$ bar on the fuel side, 5 bar of
 lines each side, 4 bar pump inlet. The GG runs at $T_t = 1{,}050$ K,

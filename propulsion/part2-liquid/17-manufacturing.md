@@ -1908,3 +1908,436 @@ matched" [_verify-liquid, Merlin 1D block].
 the logic is unimpeachable and has been widely copied. The specific choices are
 already moving: printed chamber liners and printed pintle bodies do the same
 job with fewer operations.
+
+---
+
+## 7. Design trade-offs, failure modes, materials, manufacturing, testing
+
+### 7.1 The trade
+
+Every chamber-construction decision is the same four-way trade:
+
+| | tube wall | milled + electroform | milled + brazed jacket | monolithic AM |
+|---|---|---|---|---|
+| Joint count | very high | zero (bonded deposit) | high | zero |
+| Local channel tailoring | poor (tube section is continuous) | excellent | excellent | excellent |
+| Max heat flux | moderate | highest flown | high | high |
+| Lead time | longest | long (tank residence) | long | shortest |
+| Scales to very large | yes | poorly | yes | not in L-PBF; yes in DED |
+| Dominant defect | braze void | adhesion loss, filler residue | braze void | lack-of-fusion, residual powder |
+| Rate capability | poor | poor | moderate | good |
+
+### 7.2 Failure modes: mechanism → symptom → evidence → fix
+
+| failure | mechanism | symptom | evidence | fix |
+|---|---|---|---|---|
+| **Braze void** | capillary fill failed (clearance, oxide, venting) | coolant leak into chamber or outboard; coolant $\Delta p$ low | X-ray shows unfilled land; proof or He leak test fails | repair braze; fixturing and atmosphere control; move to milled/AM |
+| **Electroform disbond** | inadequate copper activation; interface shear from CTE mismatch on cycling | channel bulge; jacket separation | UT of the bond line; peel coupons | requalify activation/strike; process-control coupons every build |
+| **Recast-layer crack** | EDM thermal damage, micro-cracked resolidified film | orifice fatigue crack; changed $C_d$ | metallographic section of a sample hole; flow-bench drift | trim-EDM settings; abrasive flow or electropolish removal |
+| **Solidification crack (718 weld)** | Nb segregation → low-melting Laves eutectic film torn by shrinkage | crack at weld centreline or interdendritic | RT/PT; metallography shows Laves | low heat input (EB/laser), low dilution, control base-metal segregation, homogenise |
+| **Lack of fusion (AM)** | insufficient $E_v$; poor track overlap | planar void aligned with layer; unmelted powder inside | CT; witness coupon fatigue debit | parameter requalification; HIP does **not** fix if surface-connected |
+| **Residual powder in channel** | partly sintered cake not removed | local coolant blockage → burn-through | per-channel flow test vs prediction; CT | powder removal procedure before any sintering thermal cycle; verify by flow |
+| **Casting porosity** | shrinkage without feeding; dissolved gas | fatigue debit; leak in a pressure wall | RT; CT | risering and gating redesign; HIP (only for non-surface-connected) |
+| **Forging lap** | die fill order folded metal over | fatigue crack at an unexpected location | macroetch first article; PT after machining | die and preform redesign |
+| **Silicide coating pest** | intergranular oxidation of Nb at 800–1,000 K through a damaged coating | rapid local consumption of the extension | visual; the damage is unmistakable | handling protocol; coating inspection; touch-up procedure |
+| **Copper liner ratchet / dog-house** | cyclic plastic strain from through-wall $\Delta T$; blanching degrades the alloy | channel wall bulges into the channel, then cracks through | borescope; channel dimensional check; hot-fire coolant anomalies | GRCop-class alloy; reduce $\Delta T$; life-limit the part |
+
+### 7.3 Materials, from the process side
+
+The manufacturing-relevant selection logic (module 16 gives the property side):
+
+- **Inconel 718** dominates structural engine hardware because it welds and
+  prints without cracking (§3.7.2, §3.10.1) — a *processing* property, not a
+  mechanical one.
+- **Copper alloys (NARloy-Z, GRCop-42/84)** are used where conductivity is
+  king; GRCop-42 is specified for AM chambers primarily because it is the more
+  printable member of the family [GRCop][GradlAM].
+- **C-103 niobium** is used for radiative nozzle extensions because it is
+  formable and creep-resistant hot — and requires the silicide coating whose
+  handling burden is the real cost (§3.11).
+- **Al–Li alloys** dominate tankage because friction stir welding makes them
+  joinable (§3.7.1); they are essentially unweldable by fusion.
+- **Single-crystal superalloys** stay cast because the process is the property
+  (§3.4.2).
+
+### 7.4 Process selection: a working procedure
+
+Given a component, ask in order [J]:
+
+1. What is the peak heat flux and the local $\Delta T$ through the wall? That
+   sets whether you need a copper alloy and therefore a closeout.
+2. Does it have internal passages? If yes, can supports be removed and can
+   powder be got out? If no, AM's advantage is much smaller.
+3. What is the largest dimension? Above ~600 mm, L-PBF is out; DED, forming or
+   segmentation.
+4. What is the required production rate? Above ~50 per year, delete every
+   hand-fitted joint.
+5. What loads it? Fatigue-critical and creep-critical parts drive to forging or
+   casting respectively.
+6. What is the critical flaw size, and which NDE method finds it at that size
+   in this geometry? If the answer is "none", the design is not producible,
+   whatever the shop says.
+
+### 7.5 Testing and acceptance
+
+Component acceptance, in the usual order:
+
+| test | what it proves | typical criterion |
+|---|---|---|
+| Dimensional (CMM, air gauge, bore gauge) | geometry, especially throat area and orifice diameters | drawing tolerance; $A_t$ to a tight band |
+| **Flow bench**, per circuit and often per element | effective area and $C_d$; blockage; distribution | measured $\dot m$ vs $\Delta p$ within a few percent of nominal, and **circuit-to-circuit balance** |
+| CT / RT / UT / PT as applicable | internal and surface defects | acceptance flaw size from fracture analysis |
+| **Proof pressure** | structural adequacy in the real load path | 1.2–1.5 × MEOP, no yielding, no leak |
+| **Helium leak** | no leak paths | specified std cm³/s |
+| Cold-flow / water flow of the cooling circuit | channel $\Delta p$ vs prediction | within a stated band; a low $\Delta p$ means a breach, a high one means a blockage |
+| Witness coupon tensile/fatigue (AM) | that the build produced the assumed properties | allowables from the qualification database |
+
+The single highest-value diagnostic in this whole module is the **coolant-circuit
+flow test compared against prediction**, because almost every manufacturing
+defect that matters — braze void, disbond, residual powder, blocked channel,
+wrong channel dimensions, roughness far from expectation — moves the
+$\Delta p$–$\dot m$ curve, and it costs almost nothing to run.
+
+---
+
+## 8. Misconceptions and what engineers actually care about
+
+**"Additive manufacturing lets you build any geometry."**
+No. It lets you build geometry that is self-supporting above about 45°, that
+can be reached for powder removal, that fits the build envelope, and whose
+surfaces you can either finish or tolerate as-built. Those four constraints are
+as restrictive in their own way as a milling cutter's reach, just differently
+shaped. A printable part is designed for printing from the first sketch.
+
+**"HIP fixes AM porosity."**
+It closes internal, gas-filled or vacuum porosity that is not connected to a
+surface. It does nothing for a lack-of-fusion plane that reaches the surface,
+nothing for residual powder, and nothing for geometric error. And it is a full
+thermal cycle that must be designed into the heat-treat sequence.
+
+**"The braze holds the tubes together, so braze strength sets the chamber
+strength."**
+The *jacket and bands* carry the hoop load; the braze mostly seals and
+transfers shear over a large area. And a thin brazed joint is stronger than the
+bulk filler because it is triaxially constrained. Braze quality is a *leak*
+requirement far more than a *strength* requirement.
+
+**"Surface roughness is a finish issue, not a performance issue."**
+WE2: as-built roughness in a 2 mm channel multiplied the pressure drop by 2.3
+and cost 338 kW of pump power on a 500 kN engine. That is a cycle-level
+consequence of a surface-finish parameter.
+
+**"A tighter tolerance always gives a better engine."**
+Tolerance costs money superlinearly and buys different things in different
+places. WE4: tightening every orifice improves engine mixture ratio by a
+negligible amount (it is already 0.1 %) while improving local uniformity
+proportionally. Spend the tolerance on the outer row and on the throat; do not
+spend it uniformly.
+
+**"Printed parts are cheaper."**
+Sometimes, at low volume, for complex parts. Never for simple parts at rate. The
+cost model is machine-hours plus powder inventory plus a long post-processing
+tail plus a qualification campaign; the benefit is part-count reduction and
+schedule. Compute both.
+
+**"Electroforming is plating."**
+It is the same electrochemistry used for a completely different purpose. A
+plating is 5–50 µm and cosmetic or protective; an electroform is 1.5–5 mm and
+structural, takes a week, and fails by mechanisms (internal stress, nodules,
+throwing power) that a plating shop never has to think about.
+
+**"The RD-170's four chambers are a Soviet quirk."**
+The four-chamber layout is a manufacturing and cooling decision, not an
+aesthetic one: four 1,800 kN chambers are individually far easier to build and
+cool than one 7,250 kN chamber, which is the same reason F-1 development was so
+hard. Energomash then showed the family logic by deriving two-chamber (RD-180)
+and single-chamber (RD-191) engines from the same chamber design
+[_verify-liquid].
+
+### What engineers actually care about
+
+1. **Does the coolant-circuit flow test match prediction?** It is the cheapest
+   test in the building and it detects most manufacturing defects that will
+   destroy the part.
+2. **What is the critical flaw size, and can I find it?** Every inspection
+   requirement traces to this. If NDE cannot find a flaw smaller than critical,
+   the design must change or the life must be reduced.
+3. **How many joints does this part have, and what is each one's failure
+   mode?** Joint count is the best single predictor of lead time, inspection
+   burden and in-service leaks.
+4. **What is the rate requirement, and does the process meet it?** Rate changes
+   the architecture, not just the plan.
+5. **Which surfaces will actually be machined?** In an AM part, the interfaces,
+   seals and throat will be machined; everything else is as-built, and every
+   as-built surface has a roughness consequence you must have accounted for.
+
+---
+
+## 9. Mastery levels
+
+**Level 1 — Familiarity.** You can name the main manufacturing routes for a
+combustion chamber (tube wall, milled + electroform, milled + brazed jacket,
+L-PBF, DED) and say which real engine used each. You can explain in plain
+language why brazing needs a small clearance, why a printed overhang needs
+support, and why a single-crystal turbine blade cannot be printed. You can
+state that as-built AM roughness increases both pressure drop and heat transfer,
+and name two engines built largely by additive manufacturing.
+
+**Level 2 — Working engineering knowledge.** Given a chamber contour and a
+coolant flow, you can size a tube-wall or channel-wall design, count the tubes
+or channels, compute the tube section at three stations, and identify where the
+geometry forces a bifurcation or a change of cooling method. You can use
+Colebrook plus a friction analogy to quantify the roughness penalty and credit,
+and state their uncertainties. You can estimate an L-PBF build time from process
+parameters and say whether it is recoat- or exposure-limited. You can propagate
+an orifice tolerance stack to both element and engine mixture-ratio spreads and
+explain why they differ. You can name the characteristic defect of each process
+and the NDE method that finds it.
+
+**Level 3 — Interview mastery.** Given an unfamiliar engine component, you can
+propose a manufacturing route, defend it against two alternatives on the
+grounds of heat flux, size, rate, joint count and inspectability, name the
+dominant defect and the acceptance test, and say what you would change if the
+production rate were multiplied by fifty. Given a hot-fire anomaly — a coolant
+$\Delta p$ 12 % below prediction, or a local wall streak, or a mixture-ratio
+shift — you can list the manufacturing defects consistent with it, rank them,
+and specify the inspection that discriminates. You can argue, with numbers, both
+where additive manufacturing changed engine design and where it did not, and
+you can say which of today's AM capability claims are physics and which are
+current machine limits.
+
+---
+
+## 10. Problems
+
+### Conceptual
+
+**P1.** Explain, from capillary physics, why a brazed joint that is *too* wide
+is weaker than one at the optimum clearance, and why one that is *too* narrow
+can also be defective. Which failure is more likely to be caught by X-ray?
+
+**P2.** A colleague proposes eliminating the electroformed nickel closeout on a
+copper chamber by brazing a machined nickel jacket over the lands instead. Give
+three specific technical objections, each tied to a mechanism in §3.5 or §3.6.
+
+**P3.** Why does alloy 718 dominate rocket-engine structural hardware in a way
+that its room-temperature strength alone does not justify? Name the two weld
+cracking mechanisms and explain which one 718 avoids and why.
+
+**P4.** An AM chamber has rectangular cooling channels 2 mm wide and 3 mm deep,
+oriented with the channel axis horizontal in the build. State what will happen
+to the channel roof and why, and give two design changes that fix it without
+changing the flow area.
+
+**P5.** HIP is applied to two parts: an investment casting with interdendritic
+shrinkage porosity 3 mm below the surface, and an L-PBF part with a
+lack-of-fusion void that intersects an internal channel wall. Predict the
+outcome for each and explain the difference in one sentence.
+
+**P6.** Why is a per-channel or per-circuit flow test more informative than a
+CT scan for detecting residual powder in a large printed chamber? Give one
+defect that the flow test would miss and CT would catch.
+
+**P7.** The F-1 dumps gas-generator exhaust as a film over its nozzle
+extension. Explain how this choice is related to WE1's Step 6 result, and what
+the F-1 would have had to do instead.
+
+**P8.** Explain why the same orifice tolerance produces a 2.5 % element mixture-
+ratio spread and a 0.1 % engine mixture-ratio spread, and give one design
+decision that should be based on each number.
+
+### Calculation
+
+**P9.** A chamber throat diameter is 320 mm. Cooling channels are 1.8 mm wide on
+1.2 mm lands. How many channels fit at the throat? If each channel is 3.5 mm
+deep and the coolant is RP-1 at 810 kg/m³ flowing at 28 m/s, what total coolant
+mass flow does the circuit carry?
+
+**P10.** For the same channel as P9 ($D_h$ from a 1.8 × 3.5 mm rectangle),
+coolant $\mu = 2.6\times10^{-4}$ Pa·s, $k = 0.11$ W/(m·K), $c_p = 2400$
+J/(kg·K), compute Re and Pr. Then compute the Darcy friction factor for a
+machined surface ($R_a = 1.0$ µm) and an as-built L-PBF surface
+($R_a = 18$ µm), using $k_s = 5R_a$ and the Colebrook equation. Report the
+ratio.
+
+**P11.** Using the P10 results, compute the pressure drop over a 1.1 m channel
+run for both surfaces, and the additional pump power required for the rough
+case at 68 % pump efficiency for a coolant flow of 60 kg/s.
+
+**P12.** Using the Norris analogy with the P10 friction ratio and the P10
+Prandtl number, compute the Nusselt enhancement factor and the rough-wall $h$,
+given the smooth-wall value from Dittus–Boelter. State one reason your answer
+is probably optimistic.
+
+**P13.** An L-PBF chamber has a solid metal volume of 2,800 cm³ and a build
+height of 540 mm. The machine has 8 lasers, $t_\ell = 40$ µm, $h_s = 120$ µm,
+$v_s = 1.1$ m/s, recoat time 7 s. Compute the exposure time, the recoat time,
+and the total build time, and state which is limiting. Then compute the build
+time if the number of lasers is doubled, and comment.
+
+**P14.** An injector has 400 unlike-doublet elements. $d_f = 1.20$ mm,
+$d_o = 1.70$ mm, both drilled to $\pm 0.020$ mm at $3\sigma$, with a $C_d$
+scatter of 2 % ($1\sigma$). Compute the element-level relative mixture-ratio
+standard deviation, the $\pm 3\sigma$ element $MR$ band about a nominal
+$MR = 2.10$, and the engine-level $MR$ standard deviation.
+
+**P15.** Using the engine database entry for the RS-25, compute the average
+coolant channel pitch at the throat if the throat diameter is 262 mm and there
+are 390 channels. If lands are 40 % of the pitch, what is the channel width?
+Compare with your answer to P9 and comment on which engine has the harder
+machining job.
+
+**P16.** A nickel sulphamate bath runs at 250 A/m² with 96 % cathode efficiency.
+How many days to deposit a 3.2 mm structural closeout? ($M_{Ni} = 0.05869$
+kg/mol, $n = 2$, $F = 96{,}485$ C/mol, $\rho_{Ni} = 8900$ kg/m³.)
+
+### Engineering reasoning
+
+**P17.** A newly built AM chamber is hot-fired. The coolant circuit $\Delta p$
+is 18 % *higher* than predicted and the coolant outlet temperature is 40 K
+*lower* than predicted at the same inlet condition and flow. List the
+manufacturing explanations consistent with both observations, rank them, and
+specify the single inspection that would discriminate.
+
+**P18.** A tube-wall chamber passes X-ray and proof test, then fails helium leak
+test at $4\times10^{-4}$ std cm³/s — three orders of magnitude above
+specification, but with no visible damage. Explain what kind of defect is
+consistent with all three results, and describe how you would locate it.
+
+**P19.** Two suppliers quote a 400 kN chamber. Supplier A proposes a milled
+GRCop-42 liner with an electroformed nickel closeout, 14-month lead. Supplier B
+proposes a monolithic L-PBF GRCop-42 chamber, 5-month lead, but has never built
+a part this large and proposes to qualify by witness coupons plus partial CT.
+You need six chambers for a development programme and, if it succeeds, forty per
+year. Write the recommendation you would give, including what you would require
+of Supplier B before selecting them.
+
+**P20.** A programme reports that its printed injector shows 3 % lower $c^*$
+efficiency than the drilled injector it replaced, with identical element
+geometry on the drawing. Using §3.2.3, §3.10.3 and WE4, propose three distinct
+manufacturing mechanisms that could produce this, and for each give the
+measurement that would confirm it.
+
+### Mini trade study
+
+**P21.** You are choosing the construction of the regeneratively cooled chamber
+and nozzle (to $\varepsilon = 25$) for a **new 1,200 kN LOX/methane booster
+engine at $p_c = 130$ bar**, intended for a reusable first stage flying
+**40 engines per year** with a 25-flight design life per engine. Available
+options:
+
+- **A.** Milled GRCop-42 liner, electroformed nickel closeout, brazed tube-wall
+  nozzle above $\varepsilon = 6$.
+- **B.** Milled GRCop-42 liner, laser-welded superalloy jacket; spun and
+  channel-milled nozzle.
+- **C.** Monolithic L-PBF GRCop-42 chamber to $\varepsilon = 4$ (fits a 600 mm
+  machine), plus a DED bimetallic channel-wall nozzle to $\varepsilon = 25$.
+- **D.** Full blown-powder DED bimetallic chamber and nozzle in one build.
+
+Constraints: the throat diameter is 300 mm, the exit diameter at
+$\varepsilon = 25$ is 1.5 m, the engine must reach a first hot fire in
+30 months, and the programme has no existing electroforming or brazing
+capability in-house. Recommend one option. Justify it on heat flux, size,
+joint count, rate, qualification risk and schedule, state what you would do to
+retire the largest risk in your choice, and name the condition under which you
+would switch to your second choice.
+
+---
+
+## 11. Quiz (100 points)
+
+**Q1 (6 pts).** Which of the following is *not* a reason brazed tube-wall
+chambers were displaced by milled-channel and additive construction?
+(a) joint count and inspection burden; (b) inability to tailor channel section
+locally; (c) inadequate heat-transfer capability of a thin tube wall;
+(d) unsuitability for high production rate.
+
+**Q2 (8 pts).** An EDM'd injector orifice is left with a 20 µm recast layer.
+Give two distinct ways this degrades engine behaviour, and name one process
+used to remove it.
+
+**Q3 (12 pts).** A cooling channel has $D_h = 1.8$ mm and runs at
+$\mathrm{Re} = 1.6\times10^5$. Compute the Colebrook friction factor for
+$k_s = 5$ µm and for $k_s = 70$ µm, and give the ratio. (Iterate; three
+significant figures.)
+
+**Q4 (8 pts).** An L-PBF build has a solid volume of 1,900 cm³ and a height of
+310 mm, with $t_\ell = 30$ µm, $h_s = 100$ µm, $v_s = 1.0$ m/s, 4 lasers,
+recoat 8 s/layer. Is the build recoat-limited or exposure-limited, and by what
+margin? Show the two times.
+
+**Q5 (10 pts).** State the mechanism of strain-age cracking and explain in two
+sentences why alloy 718 resists it.
+
+**Q6 (10 pts).** An injector's 300 elements each have one 1.4 mm fuel orifice
+drilled to $\pm 0.021$ mm at $3\sigma$, with $\sigma_{C_d}/C_d = 1.8$ %.
+Compute the relative standard deviation of a single element's fuel flow, and of
+the total fuel circuit flow.
+
+**Q7 (8 pts).** Which single NDE method is most responsible for making
+additively manufactured combustion devices qualifiable, and what is its
+principal limitation on large parts?
+
+**Q8 (12 pts).** You must produce a nozzle extension: 1.8 m exit diameter,
+1.2 mm wall, radiation-cooled C-103 niobium, 30 units per year. Choose a
+manufacturing route, name the required coating and its dominant failure mode,
+and justify why you did not print it. (Judgment.)
+
+**Q9 (14 pts).** A tube-wall chamber for a 300 kN engine has a throat diameter
+of 160 mm and is built from tubes with 0.28 mm walls at a pitch set by the
+throat. The fuel flow is 30 kg/s of RP-1 ($\rho = 810$ kg/m³) at 35 m/s at the
+throat, single-pass. Choose a tube count such that the throat tube aspect ratio
+(depth/width) is between 1.0 and 1.5, and report the count, the flow width, the
+depth and the aspect ratio.
+
+**Q10 (12 pts).** A programme proposes to print the entire engine — chamber,
+nozzle to $\varepsilon = 40$ (2.2 m exit diameter), turbine blades and thrust
+structure — by L-PBF, arguing part-count reduction. Identify the three specific
+components in that list where this is the wrong choice, and for each give the
+physical or economic reason and the process you would use instead. (Judgment.)
+
+---
+
+## 12. Further reading
+
+- **[GradlAM]** — *Metal Additive Manufacturing for Propulsion Applications*
+  (AIAA, 2022). The book to read for this module. Process selection, GRCop
+  behaviour, post-processing, NDE and — most valuable — honest treatment of
+  part-to-part variability and what qualification actually requires. Expect the
+  process-capability numbers to age; the methodology will not.
+- **[Gradl18]** — NASA MSFC's consolidated summary of AM combustion devices with
+  hot-fire results. Read it for "these have actually been fired, and here is
+  what happened," which is a different and more useful claim than "these can be
+  printed."
+- **[RAMPT]** — Read for large-scale blown-powder DED of channel-wall nozzles
+  and the bimetallic GRCop-plus-superalloy build. Treat as progress snapshots.
+- **[GRCop]** — Ellis and Nathal on GRCop-84 development. Read for why copper
+  alloys blanch and creep in a hydrogen engine's wall, and what the Cr₂Nb
+  dispersoids do about it. The essential background to every modern AM chamber
+  alloy choice.
+- **[HH]** — Huzel & Huang, *Modern Engineering for Design of Liquid-Propellant
+  Rocket Engines*. Read the thrust-chamber and injector fabrication sections for
+  the Rocketdyne 1965–1985 practice this module's classical half describes,
+  including tube forming, brazing and the drilling of injector patterns. US
+  customary units throughout.
+- **[SP-8087]** — *Liquid Rocket Engine Fluid-Cooled Combustion Chambers*. The
+  design-criteria treatment of channel sizing, coolant pressure drop and wall
+  life. Materials and NDE coverage predates GRCop and AM entirely, which makes
+  it a useful measure of how much has moved and how much has not.
+- **[SP-8124]** — *Liquid Rocket Engine Self-Cooled Combustion Chambers*. For
+  ablative, radiation-cooled and refractory-metal chambers, and therefore for
+  the coating and forming practice behind niobium extensions.
+- **[SP-8089]** — Gill and Nurick on injectors. Read alongside §3.2.3 for how
+  element geometry and orifice tolerance connect to mixing and to wall
+  compatibility.
+- **[MMPDS]** — For design allowables and the statistical basis behind them.
+  Volume II of the 2024 edition begins to address process-intensive materials
+  and joining, which is where AM allowables are heading. Note that it supersedes
+  MIL-HDBK-5.
+- **[Biggs89]** — "Space Shuttle Main Engine: The First Ten Years." Read for what
+  a high-heat-flux, high-cycle-life chamber and its turbomachinery actually cost
+  to develop and inspect — the counterweight to any claim that manufacturing
+  difficulty is a solved problem.
+- **[F1-R3896]** — The F-1 technical manual series. The best primary-source view
+  of tube-wall chamber hardware at the level of actual drawings. Scans on
+  archive and enthusiast sites; verify any number against a second source.

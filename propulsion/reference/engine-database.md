@@ -1373,3 +1373,55 @@ anything numeric about Falcon 9's GN₂ system; Centaur in a cold-gas context;
 HHMU thrust; the stored-density and refrigerant-γ columns of §C.1 without a NIST
 check; and the worksheet's original 7.1 / 5.8 N·s/cm³ impulse-density figures,
 which are superseded by §C.1.1.
+
+---
+
+# Part D — "Why did they design it that way" index
+
+One line each: the key design choice, and the module where it is discussed.
+Module numbers follow the README table of contents.
+
+| # | engine / motor | the design choice, and why | module |
+|---|---|---|---|
+| 1 | **V-2 (Model 39)** | Eighteen pre-mixing burner-cup injectors instead of one face, because nobody yet knew how to distribute and mix propellant across a large flat injector — and the choice caps chamber pressure and forces ~10% of the fuel into film cooling | **07** injectors (also **35**) |
+| 2 | **XLR43-NA-1** | The single flat-face impinging triplet (F-O-F) replacing the V-2's 18 pots — the decisive American break, and the ancestor of every US impinging injector through the F-1 | **07** injectors |
+| 3 | **Redstone A-7** | Man-rating by *subtraction*: the pneumatic system cut from 31 components to 10 by deleting check valves and consolidating regulators. Reliability came from fewer parts, not more redundancy | **14** valves and plumbing (also **33**) |
+| 4 | **Atlas MA-5** | Stage-and-a-half: light all three engines on the pad and verify them before release, then drop the boosters. It solves air-start reliability by never air-starting, and pays with a badly overexpanded sustainer nozzle (220 s SL) | **33** systems engineering (also **09**) |
+| 5 | **LR87 / LR91 (Titan)** | Storable hypergols so the vehicle can sit fuelled in a silo for years and start on command; the LR91's **regen chamber + ablative nozzle skirt** puts each cooling technology where it is cheapest | **11** cooling (also **05**, **08**) |
+| 6 | **H-1** | Deliberately *not* high-performing: ε = 8 and pc < 700 psia, engineered for cheap repeatable mass production. Rocketdyne built hundreds, and clustering eight of them made Saturn V credible | **17** manufacturing (also **35**) |
+| 7 | **F-1** | Combustion stability at 1.5 Mlbf in one chamber: 13 copper baffle compartments and the "5U(f)" pattern, reached through ~2,000 tests across 210 injector designs, and proved by detonating a bomb in the chamber and requiring damping within 45 ms | **15** combustion instability |
+| 8 | **J-2** | The coaxial LOX-post injector with a porous sintered transpiration-cooled faceplate, and the series GG gas path (fuel turbine then ox turbine) that makes mixture ratio self-regulating | **07** injectors (also **12**) |
+| 9 | **RL10** | Closed expander: the cooling jacket *is* the power cycle, so chamber pressure is capped by wall area (≈D²) against throat area — the expander thrust limit, and the reason RL10 never grew | **13** engine cycles |
+| 10 | **RL10B-2** | An extendible carbon–carbon nozzle to package ε = 285 into an interstage sized for ε = 77, worth ~30 s of Isp for one deployment mechanism with no abort mode | **09** nozzles (also **16**) |
+| 11 | **RS-25** | Reusable fuel-rich staged combustion at 206 bar with 67–109% throttling — three things no other engine has combined, at a between-flight inspection cost that ended the reusability premise | **13** engine cycles (also **11**, **16**) |
+| 12 | **RS-68A** | Design for minimum cost: GG cycle, ablative nozzle, ε = 21.5, ~80% fewer parts than the RS-25, and the worst T/W of any modern large booster engine — deliberately | **33** systems engineering (also **32**) |
+| 13 | **Merlin 1D** | A pintle injector at production scale: inherently stable, throttleable by design, cheap to build in the hundreds — the TRW LMDE lineage six decades on | **07** injectors (also **17**) |
+| 14 | **Raptor** | Full-flow staged combustion so every gram passes through a turbine and both preburner exhausts enter the chamber — the first FFSC engine ever flown | **13** engine cycles |
+| 15 | **BE-4** | ORSC deliberately run *low* at 140 bar, with hydrostatic bearings and a head-pressure start — an engine designed around reuse life rather than peak performance | **12** feed systems (also **13**, **36**) |
+| 16 | **Rutherford** | Electric pump feed: brushless DC motors and batteries replace the turbine entirely, so there is no power-cycle propellant loss — at the price of parasitic battery mass that caps the approach at small vehicles | **12** feed systems |
+| 17 | **Vulcain 1 → 2** | Richer mixture ratio (5.3 → 6.1) *lowers* Isp (431 → 429 s) but raises density and thrust: the optimum for a vehicle is not the optimum for an engine | **05** propellants (also **04**) |
+| 18 | **Viking (Ariane 1–4)** | Water cooling — a dedicated water tank, water pump and third coaxial pump on the shaft — because the hypergolic fuel is a poor coolant. The canonical "there are more than four cooling methods" case | **11** cooling |
+| 19 | **LE-5A / LE-5B / LE-9** | Expander *bleed*: heat part of the fuel in the jacket, run the turbine, dump it overboard. A small Isp loss buys escape from the closed expander's thrust ceiling — which is how LE-9 reaches 1,471 kN | **13** engine cycles |
+| 20 | **LE-7 → LE-7A** | Chamber pressure *reduced* from 127 to 120 bar after a turbopump inducer failure: performance traded for margin, plus a redesigned nozzle to fix start-transient side loads | **34** failure case studies (also **09**) |
+| 21 | **RD-253 / RD-170 family** | Oxidizer-rich staged combustion at 147–245 bar, made survivable by an inert enamel coating on every surface touching hot ox-rich gas — the technology the West could not copy for decades; and multiple chambers per turbopump because instability in one big chamber was unsolved | **16** materials (also **13**, **15**) |
+| 22 | **RD-0120** | Single-shaft fuel-rich staged combustion, and stability without the RS-25's acoustic resonance cavities — proof that the SSME's dual-shaft complexity was a choice, not a necessity | **13** engine cycles (also **15**) |
+| 23 | **Apollo SPS (AJ10-137)** | Single-string criticality handled by *removing mechanisms*: pressure-fed, hypergolic, no igniter, no turbopump, no valve that must move more than once | **33** systems engineering (also **14**) |
+| 24 | **LMDE (Apollo LM descent)** | The variable-area pintle: a movable sleeve keeps injection velocity and mixing constant across a 10:1 chamber-pressure turndown — and the 60–100% band was still forbidden because of nozzle erosion | **07** injectors (also **03**) |
+| 25 | **R-4D** | A materials history in one thruster: molybdenum → silicide-coated niobium → iridium-lined rhenium, each step raising wall temperature, cutting the film-cooling fraction and buying ~10 s of Isp | **16** materials (also **10**) |
+| 26 | **Bristol Siddeley Gamma** | HTP over a silver-gauze catalyst pack *is* the ignition system — no igniter, no hypergolic slug, non-cryogenic and non-toxic, at 250–265 s | **08** ignition (also **05**) |
+| 27 | **XLR99 vs AR2-3** | Two opposite throttling architectures: XLR99 and AR2-3 throttle by turbopump speed off a single pilot lever; the LMDE throttles by injector area. Same requirement, opposite mechanism | **12** feed systems (also **07**) |
+| 28 | **Shuttle SRB field joint** | The tang-and-clevis joint *rotated* under ignition pressure, so the seal was rate-dependent and therefore temperature-dependent. The RSRM fix was a capture feature to stop the rotation — not a better O-ring | **22** cases (also **34**) |
+| 29 | **Shuttle SRB grain** | An 11-point star in the forward segment and double-truncated-cone perforations aft, shaped to hold the thrust trace inside the max-Q structural box | **21** grain geometry |
+| 30 | **P120C vs Shuttle SRB** | Monolithic filament-wound composite case, mass fraction 0.924 against 0.85 for segmented steel. Segments exist to be shipped by rail; if you can cast in one piece, do | **22** cases (also **25**) |
+| 31 | **UA1205 → SRMU (Titan IV)** | One vehicle, one job, one diameter class, four simultaneous generation changes: PBAN→HTPB, steel→graphite/epoxy, LITVC→gimballed nozzle, 5–7 segments→3. About +14 s Isp and a large inert-mass saving | **26** historical large solid motors |
+| 32 | **PSLV S139** | SITVC with aqueous strontium perchlorate — liquid-injection TVC with a dense, cheap, non-toxic injectant, which lets a very large motor keep a fixed nozzle | **24** solid rocket nozzles |
+| 33 | **Star 48B** | Two nozzles, one motor: ε 47.7 (short, to fit the PAM-D cradle) gives 286.2 s, ε 54.8–70.4 (long) gives 292.2 s. Isp is a property of the motor *and* its nozzle | **24** solid rocket nozzles (also **03**) |
+| 34 | **Peacekeeper / IUS / M-34b** | Extendable exit cones let a stage carry a high-ε nozzle inside a length-limited silo or interstage, buying ~10–15 s of Isp for a deployment mechanism | **27** defense propulsion (also **24**) |
+| 35 | **Minuteman III stage 3** | Thrust-termination ports: shaped charges open the forward dome to drop chamber pressure and stop the motor. A solid *can* be shut down — violently, once, destructively | **27** defense propulsion (also **19**) |
+| 36 | **Trident D-5** | Kevlar→graphite/epoxy cases for two stated reasons: inert-weight reduction *and* eliminating the electrostatic potential difference between Kevlar and graphite. Also: the "aerospike" is a nose drag spike, not a nozzle | **22** cases (also **27**) |
+| 37 | **Scout upper stages** | Spin stabilisation instead of TVC on stages 3 and 4: delete the actuators, hydraulics and mass, and pay in injection accuracy | **24** solid rocket nozzles (also **26**) |
+| 38 | **Vega-C Zefiro 40 (VV22)** | A carbon–carbon throat-insert supplier change eroded unexpectedly and destroyed a launch vehicle — a materials qualification decision in a subcomponent | **34** failure case studies (also **24**, **25**) |
+| 39 | **GEM-46 vs GEM-40** | 43% more propellant and *less* peak thrust, because the burn is longer — a trajectory-driven choice, not a transcription error | **20** burn rate (also **21**) |
+| 40 | **MarCO / VACCO MiPS** | A 40-second-Isp refrigerant beats helium ~8× on impulse density and needs a 2.7-bar can instead of a 241-bar COPV. For a CubeSat the tank is the system | **31** real cold-gas systems (also **28**, **30**) |
+| 41 | **SAFER vs MMU** | SAFER's ~40 s implied Isp is credible for millisecond pulses at low ε; MMU's published Δv implies ~100 s from GN₂ and does not close. Use the one whose numbers close | **29** cold-gas performance modeling (also **31**) |
+| 42 | **CHIPS** | Heating the same refrigerant takes 43 s to 82 s — the entire argument for a resistojet, and the boundary of what "cold gas" means | **28** cold-gas principles (also **30**) |
