@@ -88,6 +88,9 @@ solid rocket motors, and cold-gas thrusters, plus exams, an interview
 question bank, a capstone trade study, a verified engine database, and an
 annotated bibliography. Problems and answer keys live in separate files.
 Every worked example is recomputed by `python3 propulsion/tools/check_examples.py`.
+Read it in the browser with progress tracking at
+https://daxjdavis526.github.io/Projects/propulsion/ or download the single
+offline file in `propulsion/offline/`.
 
 Not a browser toy: read it on GitHub or in any Markdown viewer that renders
 LaTeX. Start at [propulsion/README.md](propulsion/README.md).

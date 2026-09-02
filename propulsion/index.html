@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROPULSION — course reader</title>
+<link rel="stylesheet" href="reader/reader.css">
+<script>
+  window.MathJax = { tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true },
+                     svg: { fontCache: 'global' }, startup: { typeset: false } };
+</script>
+<script src="vendor/marked.min.js"></script>
+<script src="vendor/tex-svg.js"></script>
+<script src="vendor/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: false, theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default' });</script>
+<script src="reader/manifest.js"></script>
+</head>
+<body>
+<aside id="side">
+  <header>
+    <h1>PROPULSION</h1>
+    <div id="progress"></div>
+    <div id="progress-track"><div id="progress-bar"></div></div>
+    <a id="resume" href="#" hidden></a>
+  </header>
+  <nav id="nav"></nav>
+  <footer>
+    <button id="export" title="Save your progress to a file">Export progress</button>
+    <label title="Load a saved progress file">Import<input id="import" type="file" accept="application/json"></label>
+    <button id="reset">Reset</button>
+  </footer>
+</aside>
+<section id="main">
+  <div id="topbar"><button id="menu">☰</button><h2 id="doc-title"></h2></div>
+  <div id="toolbar" hidden></div>
+  <article id="content"></article>
+</section>
+<script src="reader/reader.js"></script>
+</body>
+</html>

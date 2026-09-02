@@ -13,6 +13,22 @@ Markdown viewer that renders `$…$` LaTeX. Problems and answer keys are in
 
 ---
 
+## Two ways to read it
+
+- **In the browser, with progress tracking:**
+  https://daxjdavis526.github.io/Projects/propulsion/ — a reader that renders
+  every chapter with math and diagrams, remembers where you stopped, lets you
+  mark modules done, record quiz scores, tick the checklist, and export or
+  import your progress as a small JSON file. Progress is stored in your
+  browser; nothing is sent anywhere.
+- **Offline, as one file:** download
+  [`offline/PROPULSION-course.html`](offline/PROPULSION-course.html)
+  (about 15 MB), save it anywhere, and double-click it. It is the same reader
+  with the whole course embedded, so it works with no internet. Rebuild it
+  after editing chapters with `python3 tools/build_offline.py`.
+
+The plain Markdown files render on GitHub too, but without progress.
+
 ## How to use this course
 
 1. Read [`reference/sources.md`](reference/sources.md) once. It is the
