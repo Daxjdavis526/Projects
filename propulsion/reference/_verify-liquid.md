@@ -2403,3 +2403,227 @@ convention each number follows, or the comparison is not quite honest.
   **not published** on expansion ratio, mass and mixture ratio.
 
 ---
+
+## Contested figures and how the textbook should present them
+
+Every disagreement found during this verification pass, with a recommendation. The general
+rule proposed for the book: **where two credible sources disagree by more than the
+precision the textbook prints, show both.** A table of engine data that silently picks a
+winner teaches students that rocket performance figures are exact. They are not.
+
+### 1. F-1 chamber pressure — 965 / 982 / 1,015 / 1,125 psia
+
+| Value | bar | Source |
+|---|---|---|
+| 965 psia | 66.5 | Sutton & Biblarz (older editions); the textbook's own working draft |
+| 982 psia | 67.7 | NASA-derived F-1 documentation quoted in search results |
+| **1,015 psia** | **70.0** | Wikipedia infobox, consistently |
+| 1,125 psia | 77.6 | enginehistory.org RPE §8.11; also described elsewhere as a development peak |
+
+**Recommendation: print "≈70 bar (1,015 psia) at the injector end" and footnote the
+range 965–1,125 psia.** The spread is a measurement-station and program-phase artefact:
+injector-end static pressure, nozzle stagnation pressure, and the maximum reached during
+development are three different quantities, and secondary sources almost never say which
+they are quoting. **Action item: read NASA NTRS 20140011656 as text and pin this down.**
+
+### 2. RS-25 expansion ratio — 69:1 vs 77.5:1 vs 78:1
+
+| Value | Source |
+|---|---|
+| **69:1** | **L3Harris (manufacturer) datasheet, labelled "area ratio"**; Wikipedia infobox |
+| 77.5:1 | NASA/Rocketdyne SSME training material; widely repeated in the nozzle-flow literature |
+| 78:1 | Wikipedia body text |
+
+**Recommendation: print 69:1 as the geometric nozzle area ratio, cite L3Harris, and add a
+footnote that ~77.5:1 is widely quoted.** Then use the discrepancy deliberately, in the
+nozzle chapter, to make the point that "expansion ratio" is not a single unambiguous
+quantity — exit area over *geometric* throat area, over *effective/sonic* throat area, and
+the value used in a particular performance analysis can all differ. This is a teaching
+opportunity, not an error to be tidied away.
+
+### 3. RS-25 dry mass — 7,004 lb vs 7,775 lb
+
+| Value | Source |
+|---|---|
+| 7,004 lb / 3,177 kg | Wikipedia |
+| **7,775 lb / 3,526 kg** | **L3Harris (manufacturer)** |
+
+771 lb (350 kg) apart. Almost certainly bare engine versus installed engine (heat shield,
+gimbal bearing, controller). **Recommendation: quote the manufacturer's 7,775 lb, state
+that it is the installed mass, and note the 7,004 lb bare figure.** This matters because
+the published thrust-to-weight of 73.1:1 uses the *lower* mass — on the manufacturer's
+mass it is ~66:1. **Never quote a T/W without saying which mass it used.**
+
+### 4. Raptor — every figure is a SpaceX claim
+
+Thrust, chamber pressure, Isp, dry mass and thrust-to-weight for Raptor 1/2/3 originate
+from SpaceX statements, several of them **Musk posts on Twitter/X** (the Raptor 2 thrust
+figures trace to an August 2020 post). Independent corroboration exists only for thrust,
+and only indirectly, via FAA licensing/environmental documents and third-party analysis of
+flight telemetry and acoustics. **There is no independent verification of Raptor chamber
+pressure, Isp, dry mass or T/W at all.**
+
+**Recommendation: present Raptor in a visually distinct block — a shaded box, or a
+"manufacturer-claimed" column — and say plainly that the figures are unverified.** The
+same treatment should apply to BE-3U, BE-4, Archimedes and Prometheus. It is not a slight
+against those companies; it is an accurate statement of the evidentiary situation, and it
+teaches students to ask where a number came from.
+
+### 5. RD-170 turbopump power — 170 MW vs 192 MW
+
+Wikipedia's article body says ~170 MW; its specification table says 192 MW. A 13%
+disagreement within a single article. **Recommendation: print "approximately 170–190 MW"
+and note that it is the most powerful rocket turbopump ever built either way.** Do not
+pick one to two significant figures.
+
+### 6. RL10B-2 expansion ratio — 280:1 vs 285:1
+
+Wikipedia's table says 280:1; the SEP/AIAA carbon-carbon nozzle literature says the
+extension takes the engine **from 77:1 to 285:1**. **Recommendation: print "285:1
+deployed, 77:1 retracted", cite the nozzle paper**, and note that 280:1 circulates as a
+rounding. The retracted figure is more interesting than the deployed one anyway — it is
+what makes the extendible nozzle worth its mechanism.
+
+### 7. RL10C-1 thrust — 22,820 lbf vs 22,890 lbf
+
+Wikipedia: 101.5 kN (22,820 lbf). L3Harris: 22,890 lbf. A 70 lbf difference — immaterial
+in magnitude, but **the manufacturer's figure should win on principle**. Use 22,890 lbf.
+
+### 8. Redstone A-7 thrust — 75,000 / 78,000 / 82,977 lbf
+
+Three numbers, all correct, all meaning different things:
+- **75,000 lbf** is the **NAA 75-110 nameplate** (75,000 lbf for 110 seconds).
+- **78,000 lbf** is the nameplate **plus ~3,000 lbf of steam-generator exhaust thrust** —
+  the turbine exhaust is a real, measurable thrust contribution.
+- **82,977 lbf** is the **uprated A-7 as flown** on Mercury-Redstone (enginehistory.org),
+  with 93,565 lbf in vacuum.
+
+**Recommendation: print 82,977 lbf SL for the flown A-7 and explain the other two.** This
+is the cleanest example in the file of "which thrust?" being a real question, and it
+generalises directly to modern engines with turbine-exhaust or film-cooling thrust terms.
+
+### 9. LR87-AJ-11 thrust — 968 kN vs 1,900 kN
+
+Wikipedia's LR87 variant table lists "1,900 kN" for the -11. That is the **two-engine
+Titan IV stage** figure, not one engine. The single-engine values are **968.4 kN SL /
+1,218.8 kN vacuum**. **Recommendation: print the single-engine figures and state the stage
+total separately.** The same care is needed for the LR87 generally, since each "engine" is
+itself two combustion chambers on one turbopump — the LR87 is a two-chamber engine and
+Titan's stage 1 has two of them, i.e. four chambers total.
+
+### 10. Atlas MA-5 chamber pressure — 580 psia vs 48 bar/atm
+
+heroicrelics gives **580 psia (40 bar)** for both LR-89 and LR-105; Encyclopedia
+Astronautica gives **48 bar / 48 atm at the injector end** for the MA-5A sustainer.
+These are **different engine blocks** (MA-5 vs MA-5A / RS-56), so it is probably not a
+contradiction — but neither source is primary. **Recommendation: quote them separately by
+block, label both medium confidence, and seek a Rocketdyne or General Dynamics document
+before printing either as fact.**
+
+### 11. Gamma 8 thrust — 234.8 kN vs 222.4 kN
+
+Wikipedia: **52,785 lbf (234.8 kN)**. Encyclopedia Astronautica: **222.4 kN (49,998 lbf)**.
+A 5% spread. The Astronautix figure looks like a rounded 50,000 lbf design value.
+**Recommendation: use 234.8 kN, note the alternative.**
+
+### 12. Shuttle RCS R-40 Isp — 280 s vs 289 s
+
+NASA N91-28200 gives **280 s at a 22:1 area ratio**; 289 s is widely quoted elsewhere.
+Likely a different nozzle configuration or a theoretical-versus-delivered distinction.
+**Recommendation: use 280 s and cite the NASA document.**
+
+### 13. HM7B chamber pressure — 3.7 MPa vs 3.5 MPa
+
+The specification table and the body text of the same Wikipedia article disagree.
+**Recommendation: use 37 bar and footnote the 35 bar figure.** A 5% internal
+inconsistency in a single article is a good reminder to students that tertiary sources
+are not self-consistent.
+
+### 14. BE-3U thrust — 711.5 / 889.5 / 941.5 kN, and BE-4 thrust — 2,460 / 2,847 kN
+
+Both Blue Origin engines have multiple published thrust ratings reflecting uprates
+announced without clear indication of which is flight-nominal. **Recommendation: give the
+original specification as the baseline, list the uprates with their dates, and say that
+the flight-nominal value is not clearly published.**
+
+### 15. Merlin 1D Vacuum Isp — 311 s vs 348 s
+
+Wikipedia's MVac infobox has at times carried **311 s** — which is the *sea-level engine's
+vacuum* Isp — in the MVac's vacuum field, flagged "needs update". The correct figure is
+**348 s**. **Recommendation: use 348 s.** Flagged here because this specific error has
+propagated into a number of derivative tables and is easy to repeat.
+
+### 16. Vulcain 2 chamber pressure — 117.3 bar vs "115 bar"
+
+Not a real disagreement; 115 bar is a rounding that appears in secondary summaries.
+**Use 117.3 bar.**
+
+### 17. RD-0146's 470 s — the highest Isp ever, but never flown
+
+The RD-0146's **470 s** vacuum Isp exceeds the RL10B-2's flown **465.5 s**. It is a
+test-stand figure from a design bureau for an engine that has never flown.
+**Recommendation: keep flown and unflown engines in separate tables, or mark unflown
+engines unmistakably.** Otherwise the book will appear to claim a record that has not
+been demonstrated in flight. The same applies to the F-1A's 1,800,000 lbf and the
+J-2S's 436 s.
+
+### 18. Injector-end versus nozzle-stagnation chamber pressure (systemic)
+
+This underlies items 1 and 10 and quietly affects every US-versus-Russian comparison in
+the file. American Apollo-era practice quotes **injector-end static pressure**; Soviet and
+Russian practice quotes **nozzle stagnation pressure**, which is a few percent lower.
+**Recommendation: add a standing footnote to the master comparison table** stating the
+convention used for each engine, or at minimum stating that the convention varies by
+national origin and era. Comparing the RD-180's 267 bar to the RS-25's 206 bar without
+that caveat overstates the gap slightly.
+
+### 19. "Expander cycle" is three different cycles (systemic, terminology)
+
+The file contains **closed expander** (RL10, Vinci, RD-0146, YF-75D), **expander bleed**
+(LE-5A/5B, LE-9, BE-3U), and **tap-off** (BE-3PM, J-2S) engines, and sources routinely
+call all three "expander cycle". They have materially different thrust ceilings and Isp
+penalties. **Recommendation: the textbook should define all three explicitly and label
+every engine with the specific variant**, since this is the single most common cycle
+misclassification in the secondary literature.
+
+### 20. "Highest thrust engine" — RD-170 vs F-1 (systemic, record claims)
+
+The **RD-170** produces more total thrust (7,900 kN vacuum) than the **F-1**
+(7,770 kN vacuum), but does so across **four combustion chambers**. The F-1 remains the
+highest-thrust **single-chamber** engine ever flown. **Both records are real and the
+textbook must state which one it means every single time**, or it will be wrong in one
+direction or the other.
+
+---
+
+## Verification gaps — work still outstanding
+
+Items that should be closed before this file is treated as final:
+
+1. **F-1 chamber pressure.** Read NASA NTRS 20140011656 (*Waking a Giant*) as text. The
+   PDF was retrieved but not text-extracted in this pass.
+2. **RL10A-3-3A.** Read NASA CR-190786 and TM-107318 directly; current figures come from
+   search summaries of those documents rather than the documents themselves.
+3. **RS-25 expansion ratio.** Read the Rocketdyne *SSME Orientation* training document
+   (returned 503 this pass) to establish what the 77.5:1 figure actually measures.
+4. **Apollo SPS (AJ10-137).** Chamber pressure, expansion ratio, dry mass and cooling are
+   currently **unsourced**. Verify against the Apollo CSM News Reference or NASA SP-4009.
+5. **Atlas MA-5 / MA-5A.** No primary source obtained. Braeunig and Astronautix both
+   returned errors during this pass; retry, or find a Rocketdyne document.
+6. **Shuttle RCS R-40.** Confirm the 280 s figure directly in NASA N91-28200.
+7. **J-2X chamber pressure.** Pin 1,332 vs 1,337 psia against NTRS 20100034922.
+8. **Vulcain 2 turbopump speeds.** Currently from a secondary summary of the AIAA
+   development-status paper; read the paper.
+9. **YF-75D.** Thrust and Isp are unconfirmed; find a Chinese primary or a credible
+   translation.
+10. **Dry masses generally.** Several blocks (H-1, YF-100, BE-3PM/3U, Archimedes,
+    SuperDraco, Draco, Gamma, AR2-3, R-40) have no published dry mass. Resist the
+    temptation to fill these from tertiary aggregators — most such figures are
+    themselves uncited.
+
+### Sources that failed to load during this pass
+`astronautix.com` (503 on all direct fetches; usable via search summaries only),
+`braeunig.us` (503), `heroicrelics.org` (503 on some pages),
+`large.stanford.edu` SSME PDF (503), and NTRS PDFs which returned binary rather than
+extracted text. All are worth retrying — Astronautix in particular is the only
+secondary source with per-variant Soviet engine coverage.
