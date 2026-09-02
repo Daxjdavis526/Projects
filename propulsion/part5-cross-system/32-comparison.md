@@ -1163,6 +1163,7 @@ flowchart TD
   Q4 -- no --> CG
 
   LIQ --> CHK["Closure test Eq. 3.8:<br/>k(e^(Δv/c) − 1) < 1?"]
+  LIQ2 --> CHK
   SOL1 --> CHK
   BIP --> CHK
   KICK --> CHK

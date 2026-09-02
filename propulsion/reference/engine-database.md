@@ -1425,3 +1425,92 @@ Module numbers follow the README table of contents.
 | 40 | **MarCO / VACCO MiPS** | A 40-second-Isp refrigerant beats helium ~8× on impulse density and needs a 2.7-bar can instead of a 241-bar COPV. For a CubeSat the tank is the system | **31** real cold-gas systems (also **28**, **30**) |
 | 41 | **SAFER vs MMU** | SAFER's ~40 s implied Isp is credible for millisecond pulses at low ε; MMU's published Δv implies ~100 s from GN₂ and does not close. Use the one whose numbers close | **29** cold-gas performance modeling (also **31**) |
 | 42 | **CHIPS** | Heating the same refrigerant takes 43 s to 82 s — the entire argument for a resistojet, and the boundary of what "cold gas" means | **28** cold-gas principles (also **30**) |
+
+---
+
+# Part E — Source tags
+
+Every short tag used in the two worksheets, with its expansion and the URL as
+given there, so `reference/sources.md` can absorb them without going back to the
+worksheets. Tags in the first table are the worksheet's own short forms; the
+second table lists the recurring long-form sources of the liquid worksheet, which
+used no short tags, so they can be given tags in `sources.md`.
+
+## E.1 Short tags defined in `_verify-solid-coldgas.md`
+
+| tag | expansion | URL / locator |
+|---|---|---|
+| `[NASA-SRB]` | NASA Space Shuttle SRB news reference / fact sheet material — propellant composition, grain, burn time | science.ksc.nasa.gov STS news reference (**503 during the pass**; web.archive.org unreachable from this environment) |
+| `[NASA-SLS-SRB]` | NASA SLS Solid Rocket Booster reference page | nasa.gov/reference/space-launch-system-solid-rocket-booster/ ; plus the NASA SLS SRB fact sheets (2015 and 2024 revisions) |
+| `[NG-BOLE]` | Northrop Grumman BOLE DM-1 press material | news.northropgrumman.com |
+| `[NG-COMM]` | Northrop Grumman commercial rocket motors product pages (GEM family, Star family) | northropgrumman.com product pages; the *Propulsion Products Catalog* PDF would not text-extract in this environment |
+| `[ESA-EAP]` | ESA Ariane 5 boosters (EAP) page | esa.int Ariane 5 boosters (EAP) — **403 from this environment**; values used came from search-result extracts, hence conf **B** at best. Also ESA Bulletin 104, *First Test Firing of an Ariane-5 Production Booster*, esa.int/esapub/bulletin/bullet104/gonzalez104.pdf |
+| `[JM-LV]` | J. McDowell, *General Catalogue of Artificial Space Objects* / launch-vehicle motor lists | planet4589.org |
+| `[EA]` | Encyclopedia Astronautica (astronautix.com) — **secondary, known to propagate errors**; 503 on all direct fetches during the pass, usable via search summaries only | astronautix.com |
+| `[WP]` | Wikipedia — used only where the article cites a source, and flagged as such | en.wikipedia.org |
+| `[FAS]` | Federation of American Scientists / GlobalSecurity nuclear-forces pages | fas.org, globalsecurity.org |
+| `[NASA-SOA]` | NASA *State of the Art of Small Spacecraft Technology*, propulsion chapter (ch. 4, In-Space Propulsion) | nasa.gov small spacecraft technology state-of-the-art report |
+| `[VACCO]` | VACCO Industries CubeSat propulsion data sheets | cubesat-propulsion.com system pages; plus the JPL MarCO data sheet |
+| `[CALC]` | Computed in the worksheet from stated inputs; the cold-gas script is archived under `propulsion/tools/` — reproduce before quoting | — |
+| `[Rogers Commission]` | *Report of the Presidential Commission on the Space Shuttle Challenger Accident*, Vol. I ch. IV (field joint, O-ring seal dynamics, STS-51-L failure) | — |
+| `[JAXA]` | JAXA / ISAS / MHI published programme material — cited in prose in both worksheets (LE-7A, LE-9, H3, M-V, Epsilon) as a **pointer only**; **no URL is given in either worksheet** and the ISAS/JAXA M-V papers are recorded as **NEEDS PRIMARY** | — (to be supplied when the primary is read) |
+
+Additional short-form sources named in the solid worksheet without a bracket tag,
+worth tagging in `sources.md`: **NASASpaceflight** (nasaspaceflight.com/2025/06/bole-dm1-test/,
+BOLE DM-1 coverage), **Avio** product pages (P120C, Vega, Zefiro), **GomSpace**
+propulsion white paper, **ESA GOMX-4B** mission pages, **CU Aerospace** CHIPS
+product page, and the **ESA/Arianespace independent enquiry commission** press
+release on Vega-C VV22 (**NEEDS PRIMARY**).
+
+## E.2 Recurring sources in `_verify-liquid.md` (untagged in the worksheet)
+
+| proposed tag | source | URL / locator |
+|---|---|---|
+| `[EH]` | enginehistory.org, *Rocket Propulsion Evolution* — §3 Navaho (V-2 Model 39/39a, XLR43), §4.2 Redstone Engine, §8.11 F-1 Engine | enginehistory.org/Rockets/RPE03/RPE03.shtml ; /RPE04/RPE04-2.shtml ; /RPE08.11/RPE08.11.shtml |
+| `[HR]` | heroicrelics.org — LR-105 cut-away, LR-89 injector, F-1 thrust chamber, RD-107 photos, Rocketdyne engine family tree | heroicrelics.org/info/atlas/lr-105-cut-away.html ; /info/f-1/f-1-thrust-chamber.html (**503 on some pages during the pass**) |
+| `[L3H]` | L3Harris Aerojet Rocketdyne product pages — RL10 and RS-25 datasheets (the manufacturer figures for RS-25 thrust, Pc, Isp, ε 69:1, dry mass 7,775 lb, and the RL10 family table) | l3harris.com/all-capabilities/rl10-engine ; l3harris.com/all-capabilities/rs-25-engine |
+| `[NASA-SSME-OR]` | NASA/Rocketdyne, *Space Transportation System Training Data: Space Shuttle Main Engine Orientation* — **the document to read for the expansion-ratio question** | large.stanford.edu/courses/2011/ph240/nguyen1/docs/SSME_PRESENTATION.pdf (**503 during the pass**) |
+| `[NTRS-20140011656]` | NASA, *Waking a Giant: Bringing the Saturn F-1 Engine Back to Life* — **the document to read for F-1 chamber pressure** | ntrs.nasa.gov/api/citations/20140011656/downloads/20140011656.pdf (retrieved as binary; not text-extractable in the pass) |
+| `[NTRS-20100034922]` | NASA, *The J-2X Upper Stage Engine: From Design to Hardware* — for the 1,332 vs 1,337 psia question | ntrs.nasa.gov/api/citations/20100034922/downloads/20100034922.pdf |
+| `[NASA-CR-190786]` | NASA CR-190786, *An RL10A-3-3A Rocket Engine Model* | ntrs.nasa.gov/api/citations/19950017370/downloads/19950017370.pdf |
+| `[NASA-TM-107318]` | NASA TM-107318, *RL10A-3-3A Rocket Engine Modeling Project* | ntrs.nasa.gov/api/citations/19970010379/downloads/19970010379.pdf |
+| `[N91-28200]` | NASA N91-28200, *Space Shuttle Propulsion Systems* — the R-40 280 s at ε = 22 figure | ntrs.nasa.gov/api/citations/19910018886/downloads/19910018886.pdf |
+| `[NTRS-20000033615]` | NASA MSFC, W. E. Anderson, *Peroxide Propulsion at the Turn of the Century* — AR2-3 context | ntrs.nasa.gov/api/citations/20000033615/downloads/20000033615.pdf |
+| `[AIAA-99-2738]` | *AR2-3 engine refurbishment and gas generator testing* | AIAA 99-2738 |
+| `[AIAA-1980-1131]` | *Space Shuttle RCS Thruster Propellant Leak Detection* | AIAA 1980-1131 |
+| `[RL10B2-CC]` | *Testing of the RL10B-2 carbon–carbon nozzle extension* (AIAA / Acta Astronautica) — the 77:1 → 285:1 figures | sciencedirect.com/science/article/abs/pii/S0094576501001783 |
+| `[ESA-VULCAIN]` | ESA, *Ariane 5 Vulcain engine* | esa.int/Enabling_Support/Space_Transportation/Ariane/Ariane_5_Vulcain_engine |
+| `[EUCASS-2019-481]` | *VINCI®, the European reference for Ariane 6 upper stage*, EUCASS 2019 | eucass-proceedings.eu/articles/eucass/pdf/2019/01/eucass2019_481.pdf |
+| `[eoPortal-A6]` | eoPortal, *Ariane 6* | eoportal.org/other-space-activities/ariane6 |
+| `[SLR-F9]` | Space Launch Report, *Falcon 9 data sheet* | sma.nasa.gov/LaunchVehicle/assets/space-launch-report-falcon-9-data-sheet.pdf |
+| `[Braeunig]` | Braeunig, *Space Launchers* — Atlas and Titan specification pages | braeunig.us/space/specs/atlas.htm ; /titan.htm (**503 during the pass**) |
+| `[NASM]` | Smithsonian NASM collection records — e.g. A19700252000, *Rocket Engine, Liquid Fuel, A-7, Redstone Missile*; Gemini 4 HHMU | airandspace.si.edu collection records |
+| `[NASA-MSFC-MR]` | NASA MSFC, *Mercury-Redstone Launch Vehicle* | nasa.gov/centers-and-facilities/marshall/mercury-redstone-launch-vehicle/ |
+| `[FAA-SS]` | FAA Starship licensing and environmental documents — the only independent corroboration of Raptor thrust | FAA licensing / environmental record |
+
+Also cited as pointers in the liquid worksheet, for `sources.md` to reconcile
+against its existing bibliography: SpaceX Falcon 9 users' guide; Blue Origin and
+ULA product statements; Rocket Lab published and investor material;
+NPO Energomash and RD AMROSS material; Artemis Project, *Kaiser Marquardt Rocket
+Engines*; Everyday Astronaut, *Engine Cooling*; *Propulsion for the 21st Century —
+RS-68* (AIAA/Rocketdyne); *Development Status of the Vulcain 2 Engine* (AIAA);
+NASASpaceFlight, *On the 50th anniversary of Black Arrow*.
+
+## E.3 Sources that failed to load during the verification passes
+
+`astronautix.com` (503 on all direct fetches; usable via search summaries only —
+and it is the only secondary source with per-variant Soviet engine coverage),
+`braeunig.us` (503), `heroicrelics.org` (503 on some pages), the
+`large.stanford.edu` SSME PDF (503), the ESA EAP page (403), the NASA STS news
+reference at `science.ksc.nasa.gov` (503, with web.archive.org unreachable), the
+Northrop Grumman *Propulsion Products Catalog* and NASA SLS SRB fact-sheet PDFs
+(would not text-extract; the SLS extraction was visibly corrupted), and NTRS PDFs
+generally, which returned binary rather than extracted text. All are worth
+retrying.
+
+---
+
+*Compiled from `_verify-liquid.md` and `_verify-solid-coldgas.md`, both dated
+2026-09-02. A figure enters a module only after its confidence reaches B or better
+and its per-motor/per-vehicle and max/avg qualifiers are attached. Where this file
+says "not published", the module says "not reliably published" — never a guess.*

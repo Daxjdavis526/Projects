@@ -577,10 +577,15 @@ $$m = \frac{M\, I\, t\, \eta_c}{n F},\qquad
 > throwing power), when hydrogen evolution takes part of the current, or when
 > mass transport of Ni²⁺ to the surface limits the rate.
 
-For nickel sulphamate at a typical $j = 200$ A/m² (20 mA/cm²) the deposition
-rate is about **0.25 mm per day**. A 2 mm structural closeout is therefore an
-**eight-day tank residence**, unattended but not interruptible. That number is
-the whole scheduling story of electroformed chambers.
+For nickel sulphamate at a typical $j = 200$ A/m² (20 mA/cm²) with
+$\eta_c = 0.97$, Eq. 3.4 gives $s/t = M j \eta_c/(nF\rho) = 6.6\times10^{-9}$
+m/s, i.e. about **0.57 mm per day**. A 2 mm structural closeout is therefore a
+**three-and-a-half-day tank residence at best**, and in practice a week or more,
+because the average current density over a contoured part is well below the
+nominal (throwing power, below) and the run cannot simply be turned up: raising
+$j$ raises deposit stress and roughness. That number is the whole scheduling
+story of electroformed chambers, and it is a *process rate*, not a queue time —
+you cannot buy your way out of it with a second shift.
 
 The bath matters as much as the current. **Nickel sulphamate** is the standard
 because it deposits with low internal stress — a sulphate (Watts) bath produces
@@ -1368,7 +1373,7 @@ expensive engine with a cost-reduction programme attached.
 | Channel depth : width ratio | 2:1 to 4:1 (milled); up to ~6:1 (AM/EDM) | limited by cutter stiffness, Eq. 3.1 |
 | Tube/liner hot wall thickness | 0.25–1.0 mm | 0.3 mm class for thin tubes; 0.8–1.0 mm for a milled copper liner |
 | Braze joint clearance at temperature | 0.025–0.125 mm | the capillary window, Eq. 3.3 |
-| Electroform nickel deposition rate | 0.15–0.4 mm/day | at 100–300 A/m² in sulphamate |
+| Electroform nickel deposition rate | 0.29–0.86 mm/day | at 100–300 A/m² in sulphamate, Eq. 3.4 |
 | Electroformed closeout thickness | 1.5–5 mm | structural jacket on a milled-channel liner |
 | EDM recast layer thickness | 2–25 µm | low with trim settings, high with roughing |
 | Injector orifice diameter | 0.4–3 mm | drilled or EDM'd |
@@ -1764,8 +1769,8 @@ jacket over 390 lands is 390 braze joints with the same clearance problem as
 WE1, on a copper part where the braze would need to be low-temperature enough
 not to anneal the liner. Electroforming deposits the jacket *onto* the lands,
 producing a metallurgical bond with no filler, no clearance and no capillary
-requirement. The price is eight days in a tank per part (§3.6.1) and total
-dependence on surface preparation.
+requirement. The price is the better part of a week in a tank per part
+(§3.6.1) and total dependence on surface preparation.
 
 **And why tubes on the nozzle?** Because the nozzle's heat flux is orders of
 magnitude lower, it is enormous, and 1,080 tubes is a cheaper way to make a big

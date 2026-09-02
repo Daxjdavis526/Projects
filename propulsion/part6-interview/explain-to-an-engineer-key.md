@@ -681,3 +681,717 @@ overpredict. Compute the core MR separately.
 **Follow-up:** *"Show me on the data how you would isolate the throat area."*
 
 ---
+
+## D. Propellants
+
+### 24. Why does hydrogen provide excellent Isp but poor density? `[M05][M01]` — *seed*
+
+**Physics.** Both properties come from the same fact: the hydrogen molecule is
+the lightest thing there is. Low molecular weight is exactly what raises
+$\sqrt{T_0/M}$, and low molecular weight at cryogenic temperature is exactly
+what gives you a liquid at 71 kg/m³.
+
+**Mechanism.** In the exhaust, hydrogen-rich combustion leaves H₂O plus unburnt
+H₂, so mean $M$ lands near 13.8 kg/kmol instead of the 23 you get from
+kerosene. In the tank, liquid hydrogen has no polar interactions and boils at
+20 K, so it is fourteen times less dense than LOX and it needs vacuum-jacketed
+or foam-insulated tankage that a kerosene stage does not.
+
+**Quantitative hook.** LOX/LH2 at MR 6.03 gives a bulk density of 362 kg/m³
+and 452.3 s (RS-25); LOX/RP-1 at MR 2.34 gives 1,017 kg/m³ and 311 s (Merlin
+1D). Density impulse: 163,800 versus 316,200 kg·s/m³ — kerosene wins by 1.93×
+`[EX 16.a–c]` [_verify-liquid, RS-25 and Merlin blocks].
+
+**Trade-off.** So hydrogen wins where the exponential in the rocket equation
+dominates — upper stages, long $\Delta v$ — and loses where tank and structure
+mass dominate. It also brings boil-off, embrittlement, a very wide flammability
+range, and the largest turbopump on the vehicle: the RS-25 HPFTP delivers 53 MW
+from a package the size of a car engine [_verify-liquid, RS-25 block]. Almost
+nobody flies a pure-hydrogen first stage without solids beside it.
+
+**Follow-up:** *"So is the RS-68's 21.5:1 nozzle a hydrogen decision or a cost
+decision?"*
+
+---
+
+### 25. Why did methane displace kerosene for reusable engines? `[M05][M13][M16]`
+
+**Physics.** Methane sits between hydrogen and kerosene on almost every axis,
+and the properties it buys — no coking, high cooling capacity, mild
+cryogenics — are exactly the ones reuse cares about.
+
+**Mechanism.** Kerosene cracks and deposits carbon on hot coolant-channel walls
+(coking), which reduces channel area and raises wall temperature run over run.
+Methane does not: it is a single small molecule with no aromatics, so it can be
+run to higher wall temperature as a regenerative coolant. It is also
+non-toxic, leaves no residue in the chamber to inspect between flights,
+and its 111 K boiling point is close enough to LOX's 90 K that both tanks share
+a thermal environment.
+
+**Quantitative hook.** Bulk density at MR 3.6 is about 833 kg/m³ `[EX 16.d]` —
+82% of kerolox, with 10–20 s more Isp. Every new large engine designed for
+reuse since 2010 chose it: Raptor (LOX/subcooled CH₄, MR 3.6), BE-4 (LOX/LNG),
+Archimedes, Prometheus [_verify-liquid, respective blocks]. **All of those
+performance figures are company claims**, and Raptor's especially — the Raptor
+2 thrust numbers trace to an August 2020 Musk post [_verify-liquid, contested
+item 4].
+
+**Trade-off.** Methane's density is worse than kerosene's, its tanks are
+bigger, and it needs cryogenic ground handling that RP-1 does not. And the
+argument is a *reuse* argument: for an expendable booster, kerosene is still
+perfectly reasonable, which is why the RD-180 and Merlin remained competitive.
+
+**Follow-up:** *"How much of the coking argument is real, and how much is
+that everyone copied SpaceX?"*
+
+---
+
+### 26. Why is RP-1 coking a design constraint, and where does it bite? `[M05][M10][M11]`
+
+**Physics.** Above roughly 700 K the heavier hydrocarbons in RP-1 pyrolyse and
+deposit solid carbon on the hot side of the coolant passage — an insulating
+layer that makes the problem worse the longer it runs.
+
+**Mechanism.** The deposit has a thermal conductivity two orders of magnitude
+below the copper it sits on, so it raises the gas-side wall temperature at
+constant heat flux, which raises the fuel-side film temperature, which
+accelerates further deposition. It is a positive feedback with a runaway at the
+end of it. It also physically reduces the channel cross-section, which raises
+pressure drop and reduces coolant flow.
+
+**Quantitative hook.** The practical design limit is a fuel-side wall
+temperature ceiling — commonly stated around 600–700 K for RP-1 — and that
+ceiling, not the copper's strength, sets your allowable heat flux. It bites
+first at the throat, where Bartz flux is highest: 26 MW/m² for a 70 bar kerolox
+engine at an 800 K gas-side wall `[EX 57.b]`.
+
+**Trade-off.** The escape routes all cost something. Film cooling on the
+gas side reduces the flux but costs Isp. Higher coolant velocity raises the
+heat-transfer coefficient but costs pump head. Or you change fuel — which is
+half of why methane engines exist. RP-1's own answer historically was to accept
+lower chamber pressure: the RS-27A ran 48 bar with a tube-wall chamber and
+never had the problem [_verify-liquid, RS-27A block].
+
+**Follow-up:** *"Would you accept RP-1 at 300 bar? What would you have to
+change?"*
+
+---
+
+### 27. Why are toxic hypergolic storables still the default on spacecraft? `[M05][M08][M33]`
+
+**Physics.** Hypergols ignite on contact, so a hypergolic engine has no ignition
+system at all — and an ignition system is the thing most likely to fail after
+five years in orbit.
+
+**Mechanism.** N₂O₄/MMH and N₂O₄/Aerozine 50 are liquid across the whole
+spacecraft thermal range, need no cryogenic insulation, do not boil off, and
+can be pressure-fed with helium through valves that never have to move more
+than once. The failure tree is short: no igniter, no turbopump, no chilldown,
+no start transient to sequence.
+
+**Quantitative hook.** The Apollo SPS did every lunar orbit insertion and
+trans-Earth injection with no failures, at 314.5 s vacuum, using redundant
+series-parallel valve trains and "no igniter, no turbopump, no valve that must
+move more than once" [_verify-liquid, SPS block]. The R-4D has been in
+production for sixty years and is qualified for 20,000 individual firings and
+40,000 s of accumulated burn [_verify-liquid, R-4D block]. Fifty years apart,
+the R-4D at 490 N / 312 s and SpaceX's Draco at 400 N / 300 s are essentially
+the same engine [_verify-liquid, Draco block].
+
+**Trade-off.** The cost is entirely on the ground: NTO and hydrazines are
+carcinogenic, corrosive and lethal, and the handling infrastructure is
+enormous. The Shuttle OMS pods were a persistent toxic-handling burden between
+flights [_verify-liquid, AJ10-190 block]. That is a launch-site cost, and for a
+one-shot spacecraft it is cheaper than an ignition failure.
+
+**Follow-up:** *"What would it take to displace them — green monoprops, or
+storable methane?"*
+
+---
+
+### 28. What actually changes when you subcool propellants? `[M05][M12][M33]`
+
+**Physics.** Cooling a cryogen below its boiling point raises its density and
+lowers its vapour pressure — the first buys you propellant mass in a fixed
+tank, the second buys you pump suction margin.
+
+**Mechanism.** More mass in the same tank is a direct mass-ratio gain with no
+structural change. Lower vapour pressure means higher NPSH available for the
+same tank pressure, so the pump can run faster or the tank can run at lower
+pressure and be lighter. Subcooling also increases the thermal margin before
+two-phase flow appears anywhere in the feed system.
+
+**Quantitative hook.** NPSH available is
+$(p_{tank} - p_{vap})/(\rho g_0)$ plus static head. For LOX at a 3 bar tank
+with 1 bar vapour pressure that is 17.9 m `[EX 65.a]`; drop the vapour pressure
+to 0.3 bar by subcooling and the same tank gives 24.1 m. Raptor's propellants
+are described as subcooled by design, "integral to the design, not an
+operational nicety" [_verify-liquid, Raptor block] — though as with all Raptor
+detail, that is a company statement.
+
+**Trade-off.** You pay for it on the ground with chillers and a much tighter
+load timeline, because the propellant warms from the moment loading stops. It
+also drives the launch scrub logic: a hold long enough to warm the load costs
+you performance. The NK-33 shows the other end of the same physics — it
+*requires* subcooled LOX for bearing cooling, which constrains ground
+operations permanently [_verify-liquid, NK-33 block].
+
+**Follow-up:** *"How much performance does a 30-minute hold cost you?"*
+
+---
+
+### 29. Why is HTP attractive on paper, and why did it lose? `[M05][M08]`
+
+**Physics.** High-test hydrogen peroxide is a storable, non-cryogenic,
+non-toxic oxidiser that decomposes exothermically over a catalyst — so it is
+its own igniter and its own turbine drive fluid.
+
+**Mechanism.** Pass 85–90% HTP over a silver-plated nickel-gauze pack and you
+get 600 °C steam and oxygen with no ignition source. Inject kerosene into that
+stream and it lights spontaneously. That single property removes the igniter,
+the hypergolic slug, and the separate turbine working fluid all at once.
+
+**Quantitative hook.** Black Arrow's Gamma 8 ran 85% HTP/kerosene at MR 8:1,
+47.4 bar, 265 s vacuum, and the family flew **128 engines across 26 launches
+with zero failures** [_verify-solid-coldgas... no — _verify-liquid, Gamma
+block]. The Rocketdyne AR2-3 used 90% HTP and the aircraft's own JP-4, giving a
+pilot a throttle lever on a rocket engine at 245 s [_verify-liquid, AR2-3
+block].
+
+**Trade-off.** 250–265 s is the whole problem: it is 40–50 s below LOX/RP-1 and
+the mission planner notices. HTP also decomposes in storage, and its
+sensitivity to contamination is absolute — any contaminant is a catalyst, so
+cleanliness requirements are punishing. The reliability record says the
+architecture was sound; the Isp says it could not compete once LOX handling
+became routine.
+
+**Follow-up:** *"Would you use it today on a small launcher?"*
+
+---
+
+### 30. Why does the fuel constrain the cooling method more than the reverse? `[M05][M11]`
+
+**Physics.** In a regenerative engine the fuel *is* the coolant, so its
+thermophysical properties — heat capacity, thermal conductivity, decomposition
+temperature — set the maximum heat flux you can remove before you have chosen
+any hardware at all.
+
+**Mechanism.** The wall temperature is fixed by a chain: gas-side flux in,
+conduction across the liner, convection into the coolant out. The coolant end
+of that chain is bounded by the fuel. Hydrogen has an enormous specific heat
+and no decomposition limit worth worrying about, so hydrogen engines can run
+206 bar chambers with milled channels. RP-1 cokes above ~700 K. Hypergolic
+fuels are poor coolants outright.
+
+**Quantitative hook.** The engines line up exactly along this axis. Hydrogen:
+RS-25, 206 bar, 390 milled channels in a NARloy-Z liner. Kerosene: RS-27A,
+48 bar, tube wall. Hypergolic: the LR91 uses a regen chamber with an
+*ablative* nozzle skirt, and the SPS and LM engines are ablative outright
+[_verify-liquid, respective blocks]. The Viking is the exhibit that proves the
+rule: SEP could not cool a hypergolic engine with its own fuel, so it carried a
+dedicated water tank and water pump and injected water — three coaxial pumps on
+one shaft, 2,500 kW at 10,000 rpm [_verify-liquid, Viking block].
+
+**Trade-off.** You can break the constraint by adding film cooling, ablation,
+or a third fluid, but each costs Isp, burn time or mass. The Viking bought
+cooling with dead mass and got 958 engines across 144 launches with two
+failures — a defensible trade, and one nobody has repeated.
+
+**Follow-up:** *"So what limits a methane engine's chamber pressure?"*
+
+---
+
+## E. Combustion chambers
+
+### 31. Why does a chamber need a characteristic length $L^*$? `[M06][M07]`
+
+**Physics.** $L^* = V_c/A_t$ is a residence-time proxy: it says how long the
+propellant has to atomise, vaporise, mix and react before it is accelerated out
+of the throat.
+
+**Mechanism.** The stay time is
+$t_s = V_c \rho_c/\dot m$, and the physical processes it has to accommodate —
+droplet breakup, evaporation, turbulent mixing, chemical reaction — each have
+their own characteristic time. Whichever is slowest sets your minimum $L^*$.
+For a hydrocarbon that is usually droplet evaporation; for hydrogen, which
+arrives as a gas, it is mixing.
+
+**Quantitative hook.** An RS-25-class chamber at $L^* = 0.9$ m has
+$V_c = 0.051$ m³ and a stay time of 0.94 ms `[EX 31.a–b]`. Typical ranges are
+$L^*$ = 0.8–1.0 m for LOX/LH2, 1.0–1.3 m for LOX/RP-1, and up to 2 m for
+hypergolics with poor mixing.
+
+**Trade-off.** Too short and you get incomplete combustion — low $c^*$ — plus
+unburnt propellant reaching the throat, which erodes it. Too long and you pay
+in chamber mass, in wall area to cool (heat load scales with wall area), in
+pressure drop, and in an increased risk of low-frequency instability because
+the longer stay time changes the phase relationship between injection and heat
+release. It is a genuine optimum, not a "bigger is safer" parameter.
+
+**Follow-up:** *"How would you shorten $L^*$ without losing $c^*$?"*
+
+---
+
+### 32. Why does contraction ratio matter if the chamber flow is subsonic? `[M06][M02]`
+
+**Physics.** A finite chamber Mach number means finite stagnation-pressure loss
+across the combustion zone and a real dynamic-pressure difference between the
+injector face and the throat.
+
+**Mechanism.** Contraction ratio $A_c/A_t$ sets chamber Mach number. Too small
+a ratio and the chamber Mach number rises, the Rayleigh loss from heat addition
+grows, and injector-face pressure diverges from throat stagnation pressure —
+which corrupts every performance number you compute from $p_c$. Too large and
+you carry chamber wall and mass you do not need, and the flow near the wall
+becomes slow and recirculating, which is bad for wall heat transfer and for
+mixing uniformity.
+
+**Quantitative hook.** At $A_c/A_t = 3$, chamber Mach is about 0.20 and
+$p_{0,inj}/p_{0,throat}$ is 1.025 — 2.5% [Module 01, WE1]. Typical values run
+2 to 4 for large engines and up to 8–10 for small thrusters, where the throat
+is tiny and the chamber cannot usefully be made smaller.
+
+**Trade-off / exception.** Small thrusters get high contraction ratios almost
+by accident, and that is fine — the losses scale with $M^2$ and are negligible
+there. For a large booster chamber, dropping contraction ratio to save mass is
+a real temptation and it eats directly into your $c^*$ bookkeeping.
+
+**Follow-up:** *"At what contraction ratio does the correction stop being
+negligible?"*
+
+---
+
+### 33. What happens if the chamber is too short for the propellant? `[M06][M07]`
+
+**Physics.** Propellant that has not finished reacting when it reaches the
+throat contributes mass flow but not full enthalpy — so $c^*$ falls, and you
+have raw propellant in the highest-heat-flux region of the engine.
+
+**Mechanism.** The symptom chain is specific enough to diagnose from data.
+$c^*$ efficiency drops. Throat erosion appears where it should not, because
+droplets are burning *at* the wall instead of in the core. Exhaust looks wrong.
+And because the heat-release distribution has moved downstream, the acoustic
+coupling changes — a chamber that was stable can become unstable.
+
+**Quantitative hook.** Droplet lifetime scales as $d_0^2$ under a $D^2$ law, so
+halving mean droplet diameter cuts evaporation time by four. This is why the
+answer to a short chamber is usually a finer injector rather than a longer
+chamber: it is cheaper to make the droplets smaller than to make the chamber
+bigger and then cool it.
+
+**Trade-off / exception.** Not always. The V-2 chose the opposite route — a
+long, almost spherical chamber with pre-mixing pot injectors — and still only
+made about 94% $c^*$ [_verify-liquid, V-2 block]. A short chamber with a good
+injector beats a long chamber with a bad one, every time.
+
+**Follow-up:** *"Show me what that looks like on the $p_c$ and thrust
+traces."*
+
+---
+
+### 34. Why did Glushko put four chambers on one turbopump? `[M06][M15][M26]`
+
+**Physics.** Acoustic instability frequencies scale inversely with chamber
+diameter, and instability amplitude at a given frequency is far easier to
+suppress in a small chamber. Four small chambers dodge a problem one big
+chamber has to solve.
+
+**Mechanism.** The first tangential mode frequency goes roughly as $a/D$. Make
+the chamber smaller and you push the mode up in frequency, where acoustic
+damping is stronger and where the combustion response is weaker. You also get
+shorter injector-to-wall distances and better mixing per unit volume. The cost
+is four sets of everything downstream of the manifold.
+
+**Quantitative hook.** The architecture defines the whole Soviet lineage:
+RD-107/108 (four main chambers plus verniers on one turbopump, still flying on
+Soyuz in 2026), RD-253 (single chamber), RD-170 (four chambers, 7,250 kN SL,
+24.52 MPa), RD-180 (two), RD-191 (one) — a modular family derived by halving
+and quartering one chamber design [_verify-liquid, RD-107 and RD-170 blocks].
+
+**Trade-off.** The RD-170 is "enormous, complex, and four chambers where one
+would be preferable", and one turbopump failure loses all four chambers
+[_verify-liquid, RD-170 block]. The American answer was the opposite bet: the
+F-1 solved single-chamber stability at 1.5 million lbf with a baffled injector,
+after ~2,000 tests across 210 injector designs [_verify-liquid, F-1 block].
+Both worked. One took a decade of testing; the other took a permanent mass
+penalty.
+
+**Follow-up:** *"Which bet would you make today?"*
+
+---
+
+### 35. Why can't you scale a small chamber up by ten? `[M06][M15][M10]`
+
+**Physics.** Nothing in the chamber scales with the same exponent. Mass flow
+goes as $D^2$, wall area as $D^2$ but with a different constant, acoustic
+frequency as $1/D$, heat flux per unit area as $D^{-0.2}$, and injector element
+count as $D^2$ while element *size* stays fixed.
+
+**Mechanism.** Three specific things break. Acoustically, the transverse-mode
+frequencies drop into the band where the combustion process responds, so a
+chamber stable at 100 mm can be violently unstable at 1 m. Thermally, the
+per-area flux falls only as $D_t^{-0.2}$ (Bartz), so total heat load grows
+almost as $D^2$ while coolant flow grows as $D^2$ too — that part scales, but
+the pressure drop through longer channels does not. And in the injector,
+scaling a working element means using thousands of them, and manifold
+distribution error grows with the number of feeds.
+
+**Quantitative hook.** Bartz gives $h_g \propto D_t^{-0.2}$: tripling throat
+diameter from 0.30 to 0.90 m cuts the flux only 20% `[EX 35.a]`. Meanwhile the
+first tangential frequency falls by three. The F-1 needed 13 baffle
+compartments and 45 ms demonstrated damping to a bomb detonation
+[_verify-liquid, F-1 block] — hardware that a 100 mm chamber never needs.
+
+**Trade-off / exception.** Subscale testing is still worth doing; it just
+answers different questions. Use it for injector element performance and
+$c^*$, not for stability.
+
+**Follow-up:** *"What would you test at subscale and what would you refuse
+to?"*
+
+---
+
+## F. Injectors
+
+### 36. Why does an injector need pressure drop? `[M07][M15]` — *seed*
+
+**Physics.** The pressure drop across the injector is what decouples the feed
+system from the chamber. Without it, chamber pressure oscillations feed
+straight back into the propellant flow and the engine oscillates.
+
+**Mechanism.** Flow through an orifice goes as $\dot m \propto \sqrt{\Delta p}$,
+so a chamber pressure perturbation $\delta p_c$ produces a flow perturbation of
+relative size $\frac{1}{2}\frac{\delta p_c}{\Delta p}$. Make $\Delta p$ large
+and that feedback gain is small. Make it small and the gain approaches one:
+the chamber modulates its own propellant supply, and if the delay from
+injection to heat release lines up with the chamber's fill time, you get chug.
+The drop also sets injection velocity, which drives atomisation — Weber number
+goes as $v^2$.
+
+**Quantitative hook.** The classical rule is
+$\Delta p/p_c \geq 15\text{–}20\%$ [E]. At $p_c = 100$ bar and 20% drop, a
+kerosene orifice at $C_d = 0.75$ injects at 52.7 m/s; at 5% drop it is
+26.4 m/s `[EX 36.a–b]` — half the velocity, a quarter of the Weber number, and
+much coarser droplets. You lose stability and $c^*$ together.
+
+**Trade-off.** That 20% is paid for by the feed system: on a pump-fed engine it
+is pump discharge pressure and turbine power; on a pressure-fed engine it is
+tank wall thickness, and it is why the Aestus runs at 11 bar
+[_verify-liquid, Aestus block]. Deep-throttling engines have it worst — flow
+falls, $\Delta p$ falls as flow squared, and the margin evaporates exactly when
+you need it. That is what the variable-area pintle exists to fix.
+
+**Follow-up:** *"So what is the LMDE's $\Delta p/p_c$ at 10% thrust?"*
+
+---
+
+### 37. Why coaxial shear for LOX/LH2 and impinging doublets for kerolox? `[M07][M05]`
+
+**Physics.** The element type is chosen by the *phase* of the propellants at
+the injector face. Hydrogen arrives as a low-density gas; kerosene arrives as a
+liquid of similar density to LOX.
+
+**Mechanism.** In a hydrogen engine the fuel is warm gas from the regen jacket
+at maybe 20–70 kg/m³ against LOX at 1,100. You cannot usefully impinge a gas
+jet on a liquid jet — the momentum ratio is hopeless. But you can run the gas
+as a high-velocity annulus around a slow LOX post and let the velocity
+*difference* shear the liquid core apart. In a kerolox engine both streams are
+liquids of comparable density, so direct impingement converts their momentum
+into a fan-shaped sheet that breaks into fine droplets, and mixes them at the
+same time.
+
+**Quantitative hook.** The J-2 established the archetype: 614 hollow oxidizer
+posts with concentric fuel annuli through a porous sintered stainless faceplate
+transpiration-cooled with hydrogen; the RS-25 uses 600 coaxial elements
+[_verify-liquid, J-2 and RS-25 blocks]. The kerolox lineage runs the other way:
+XLR43's F-O-F triplet, the F-1's mixed doublet/triplet "5U(f)" pattern
+[_verify-liquid, XLR43 and F-1 blocks].
+
+**Trade-off.** Coaxial elements are stable and forgiving but mix relatively
+slowly, so hydrogen chambers are long. Impinging elements mix fast but their
+performance is exquisitely sensitive to orifice geometry, and misimpingement
+puts a hot streak on the wall. And neither is the whole answer: the Aestus uses
+132 coaxial *swirl* elements on a hypergolic engine, which is unusual and worth
+knowing about [_verify-liquid, Aestus block].
+
+**Follow-up:** *"What would you use for LOX/methane?"*
+
+---
+
+### 38. How does a pintle throttle 10:1 when a fixed orifice cannot? `[M07][M13]`
+
+**Physics.** A fixed orifice has $\Delta p \propto \dot m^2$, so a 10:1 flow
+turndown is a 100:1 pressure-drop turndown — the injector stops working long
+before you get there. A variable-area injector moves the *area* instead, and
+keeps $\Delta p$ and injection velocity roughly constant.
+
+**Mechanism.** The pintle is a central post with a movable sleeve. One
+propellant comes radially out of an annular slot in the post; the other flows
+axially down the outside; they meet on a conical impingement surface. Sliding
+the sleeve changes the slot height, so flow area tracks flow rate. Momentum
+ratio and mixing quality stay roughly constant across the range, which is
+exactly what a fixed-orifice injector cannot do.
+
+**Quantitative hook.** The Apollo LM descent engine, TRW, Gerard Elverum's
+design: throttleable 10%–60% of 46.7 kN, with chamber pressure going from
+110 psia at full thrust to 11 psia at 10% — a 10:1 chamber-pressure turndown
+[_verify-liquid, LMDE block]. Isp held 311 s at full thrust and 285 s at 10%.
+
+**Trade-off.** The LMDE also had a **prohibited 60–100% throttle band**, avoided
+in operation because of nozzle erosion — the pintle solved the injector problem
+and exposed a different one [_verify-liquid, LMDE block]. Pintles are also
+single-element, so mixing uniformity depends entirely on one geometry, and
+their inherent stability comes partly from that: there is no element-to-element
+coupling to drive a tangential mode. SpaceX's Merlin traces directly to this
+TRW lineage [_verify-liquid, Merlin block].
+
+**Follow-up:** *"Why is a pintle inherently stable?"*
+
+---
+
+### 39. Why does an injector face have a cooling problem? `[M07][M10]`
+
+**Physics.** The face sits at the upstream end of a 3,600 K chamber, sees
+radiation from the flame and recirculating hot gas, and — unlike the chamber
+wall — has propellant passing *through* it rather than *along* it.
+
+**Mechanism.** The face is riddled with orifices, so you cannot run a
+continuous coolant channel behind it. Between the orifices are lands with no
+active cooling and a direct radiative view of the flame. Recirculation zones
+between elements can bring hot gas right back onto the face. And if any element
+runs oxidizer-rich locally, the face material is attacked chemically as well as
+thermally.
+
+**Quantitative hook.** The classic solutions are transpiration and film. The J-2
+used a **porous sintered stainless-steel faceplate** so hydrogen bleeds
+uniformly through the face itself; the RS-25 inherited the idea
+[_verify-liquid, J-2 and RS-25 blocks]. The F-1 went the other way and used a
+**copper baffle assembly dividing the face into 13 compartments**, which is
+structural, thermal and acoustic hardware in one part [_verify-liquid, F-1
+block].
+
+**Trade-off.** Transpiration flow is fuel that does not participate in core
+combustion, so it costs $c^*$; porous faceplates are also a manufacturing and
+contamination nightmare, since any particulate plugs them permanently.
+Baffles cost Isp too — they are wetted area and they disturb the flow field.
+
+**Follow-up:** *"How would you inspect a sintered faceplate between
+flights?"*
+
+---
+
+### 40. What happens if the manifolds fill at different rates at start? `[M07][M08]`
+
+**Physics.** During the fill transient the local mixture ratio at each element
+is whatever the two manifold pressures make it — not the design value — and it
+can pass through the entire range from pure fuel to pure oxidizer.
+
+**Mechanism.** Manifold fill time scales with volume divided by flow, and the
+two circuits rarely match: the oxidizer side is usually denser and shorter, the
+fuel side often runs through the regen jacket first and is much larger. If
+oxidizer arrives first at full flow with only a trickle of fuel, you get an
+oxidizer-rich transient — hot, oxidising gas on a copper wall and on the face.
+If fuel arrives first you accumulate unburnt propellant in the chamber, and
+when it does light you get a pressure spike.
+
+**Quantitative hook.** This is *the* start-transient problem, and every engine
+solves it with sequencing rather than symmetry: valve open rates, ignition
+timing relative to valve position, and often deliberate lead. The V-2 used a
+gravity-fed preliminary stage before turbopump mainstage precisely to get a
+controlled low-flow light-off before committing full flow [_verify-liquid, V-2
+block].
+
+**Trade-off / exception.** You can shrink manifold volumes to shorten fill
+times, but small manifolds have poor distribution — the design rule is a
+manifold cross-section large compared with the summed orifice area, or
+element-to-element flow varies. So you are trading start transient against
+steady-state distribution uniformity.
+
+**Follow-up:** *"Which lead would you choose, and why?"*
+
+---
+
+### 41. Why does element size trade against efficiency and stability oppositely? `[M07][M15]`
+
+**Physics.** Smaller elements atomise better and mix faster — which raises
+$c^*$ — but they also shorten the characteristic combustion time, which moves
+heat release closer to the injector and increases coupling with high-frequency
+acoustic modes.
+
+**Mechanism.** Finer sprays mean smaller droplets, and droplet lifetime goes as
+$d^2$. So the heat release concentrates in a shorter axial distance near the
+face. That is exactly the region where the pressure antinode of a transverse
+acoustic mode sits, so the Rayleigh criterion — heat added in phase with
+pressure — becomes easier to satisfy. Coarser elements spread the heat release
+out and detune the coupling, at the cost of $c^*$.
+
+**Quantitative hook.** This is why development programmes converge slowly.
+Project Go on the F-1 ran about 2,000 tests across 210 injector designs, 15
+baffle designs and 14 injector configurations between 1962 and 1964
+[_verify-liquid, F-1 block]. That is not incompetence; it is what searching a
+two-objective space with opposing gradients looks like.
+
+**Trade-off / exception.** The escape is to decouple the two: get efficiency
+from element design, and get stability from damping hardware — baffles,
+acoustic cavities — rather than from detuning. That is the RS-25's approach:
+600 fine coaxial elements *plus* acoustic-resonator cavities in the injector
+face [_verify-liquid, RS-25 block].
+
+**Follow-up:** *"Why did the RD-0120 not need the cavities?"*
+
+---
+
+### 42. When is cavitation in an injector orifice useful? `[M07][M14]`
+
+**Physics.** A fully cavitating orifice chokes: once the vena contracta reaches
+vapour pressure, further reduction in downstream pressure does not increase
+flow. The injector becomes flow-insensitive to chamber pressure.
+
+**Mechanism.** In normal operation, $\dot m \propto \sqrt{p_{feed} - p_c}$, so
+chamber oscillations modulate flow. In a cavitating orifice the flow depends
+only on $p_{feed} - p_{vap}$, so the coupling to $p_c$ is broken *completely*.
+That is a much stronger decoupling than any finite $\Delta p$ can give, and it
+is a genuine stability tool for low-frequency (chug) modes.
+
+**Quantitative hook.** The onset is set by cavitation number
+$K = (p_{up} - p_{vap})/(p_{up} - p_{down})$; below about 1.8 for a
+sharp-edged orifice, the flow separates at the inlet and cavitates
+[Nurick76]. Discharge coefficient drops from ~0.8 to ~0.6 and stops changing.
+
+**Trade-off.** You buy stability with a permanent $C_d$ penalty and with
+erosion: collapsing cavities pit the orifice, so geometry drifts over life.
+Cavitation is also *partial* over a range of conditions, and partial cavitation
+is unstable — the orifice flips between attached and separated, which is worse
+than either. So the design has to be firmly on one side or the other, never in
+between.
+
+**Follow-up:** *"How would you tell from the data that an orifice is
+cavitating?"*
+
+---
+
+## G. Ignition
+
+### 43. Why is a hard start a pressure problem, not a temperature problem? `[M08][M15]`
+
+**Physics.** A hard start is a detonation-like pressure spike from igniting an
+accumulated volume of mixed propellant all at once, rather than igniting a
+small flow continuously.
+
+**Mechanism.** If ignition is late, propellant keeps flowing into the chamber
+unburnt. The chamber fills with a premixed, near-stoichiometric charge. When it
+finally lights, the energy release is a constant-volume explosion rather than a
+constant-pressure burn — and constant-volume combustion of a stoichiometric
+charge gives a pressure ratio of order eight to ten over the initial pressure,
+in a chamber designed for steady flow.
+
+**Quantitative hook.** The engineering countermeasures are all about limiting
+accumulated mass: ignition *before* main valves reach full flow, a low-flow
+preliminary stage, a fuel lead so the accumulation is fuel not oxidiser, and a
+hard ignition-detection interlock that shuts the main valves if chamber
+pressure has not risen within a set window. The V-2's pyrotechnic igniter,
+gravity-fed preliminary stage, then turbopump mainstage is the ancestral
+version [_verify-liquid, V-2 block].
+
+**Trade-off / exception.** Hypergols do not remove the problem, they change it —
+ignition delay in a hypergolic pair produces exactly the same accumulation, and
+that is what killed engines in the early storable programmes. Contaminated or
+cold propellant lengthens the delay, which is why hypergolic engines have
+propellant temperature limits.
+
+**Follow-up:** *"What ignition-detection signal would you use, and how fast?"*
+
+---
+
+### 44. Why does an ASI beat a pyrotechnic for a restartable engine? `[M08][M13]`
+
+**Physics.** A pyrotechnic cartridge is consumed by use; a spark torch is not.
+Restart count is the whole argument.
+
+**Mechanism.** An augmented spark igniter is a small chamber at the centre of
+the injector face fed with a trickle of the engine's own propellants and lit by
+redundant spark plugs. It produces a hot torch that lights the main chamber.
+Because it draws on the main propellants, it can be relit as often as the
+spark plugs survive, and it is verifiable before commitment — you can see the
+torch light and only then open the main valves.
+
+**Quantitative hook.** The J-2 established it and the RS-25 uses the same idea,
+with separate ASIs in each preburner [_verify-liquid, J-2 and RS-25 blocks].
+The J-2 restarted in flight for translunar injection, which needed a separate
+ambient helium start tank and settling motors. The LE-5 family was qualified
+for up to **16 starts** [_verify-solid-coldgas... — _verify-liquid, LE-5
+block]. Compare the F-1: a TEA/TEB hypergolic cartridge, one shot, never
+restarted [_verify-liquid, F-1 block].
+
+**Trade-off.** The ASI is a small engine with its own valves, its own igniter
+circuit, its own propellant taps and its own failure modes, and it must work
+in vacuum after hours of cold soak. TEA-TEB is simpler and utterly reliable
+per use — Merlin still uses it, carried aboard for MVac restarts — but the
+number of restarts is the number of slugs you brought [_verify-liquid, Merlin
+block]. Raptor went further and eliminated the main-chamber igniter entirely
+from Raptor 2 onward, lighting the main chamber off the preburner torches
+[_verify-liquid, Raptor block, company claim].
+
+**Follow-up:** *"How many restarts before TEA-TEB stops making sense?"*
+
+---
+
+### 45. What happens when a hypergolic pair has ignition delay? `[M08][M05]`
+
+**Physics.** Hypergolic ignition delay is a chemical induction time, and during
+it propellant accumulates — so delay converts directly into hard-start energy.
+
+**Mechanism.** The delay is the time from first liquid contact to sustained
+flame, typically a few milliseconds for NTO/hydrazines. It lengthens with
+falling propellant temperature, with contamination, and with poor mixing at the
+impingement point. Because injection is continuing throughout, accumulated mass
+grows linearly with the delay while the resulting spike grows with the
+accumulated mass — a mild nonlinearity that turns a 10 ms delay into a
+qualitatively different event from a 3 ms one.
+
+**Quantitative hook.** It is the reason hypergolic spacecraft engines carry
+propellant temperature limits and heaters, and the reason ignition delay is a
+qualification measurement, not an assumed property. Nothing in the verification
+worksheets publishes delay figures for a specific engine, so quote the
+mechanism and the temperature dependence rather than a number you cannot
+source.
+
+**Trade-off / exception.** The most instructive counter-example is that
+hypergolicity does not buy stability. Bell could not solve combustion
+instability on the Apollo LM **ascent** engine and had to fly a Rocketdyne
+injector in a Bell engine — on the one engine in history with no redundancy and
+no abort mode [_verify-liquid, APS block].
+
+**Follow-up:** *"What would you measure in qualification to bound it?"*
+
+---
+
+### 46. Why does oxidizer-lead versus fuel-lead matter so much? `[M08][M07][M16]`
+
+**Physics.** During the lead interval one propellant is present without the
+other, and hot oxidiser in contact with a copper or nickel wall is a chemical
+attack, not just a thermal load.
+
+**Mechanism.** With an oxidizer lead you get oxygen-rich gas across the
+injector face and chamber wall at ignition — which oxidises copper liners,
+attacks nickel closeouts, and can ignite the metal itself if the surface is
+hot and the oxygen is dense. With a fuel lead you get unburnt fuel
+accumulating, a cooler start, and a fuel-rich film on the wall — but a bigger
+pressure spike when it lights, and on a hydrogen engine an external
+hydrogen cloud.
+
+**Quantitative hook.** The choice is visible from outside. The RS-68 has a
+large pre-ignition hydrogen bloom — the "hydrogen burnoff" that scorches the
+booster — because it runs a fuel lead and lights the accumulated hydrogen
+deliberately [_verify-liquid, RS-68 block]. Almost every hydrogen engine leads
+with fuel for exactly this reason.
+
+**Trade-off.** Oxidizer lead is chosen in some hypergolic and oxidizer-rich
+systems where fuel accumulation is the greater hazard, and in engines where
+the oxidiser circuit is the slow one and matching it is easier than fighting
+it. The rule of thumb is: lead with whichever propellant your materials
+tolerate. For copper chambers that is fuel, always.
+
+**Follow-up:** *"What sets the length of the lead?"*
+
+---

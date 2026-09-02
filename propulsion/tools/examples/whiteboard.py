@@ -360,17 +360,17 @@ EXAMPLES = [
      "args": {"a": 3.2e-5, "n": 0.355, "rho_p": 1750.0,
               "Ab": 2.7488935718910694, "At": 7.853981633974483e-3,
               "c_star_val": 1500.0},
-     "expect": 7628925.0, "tol": 0.001},
+     "expect": 8465844.0, "tol": 0.001},
     {"id": "WB.P10b", "fn": "solid_equilibrium_pressure",
      "args": {"a": 3.2e-5, "n": 0.355, "rho_p": 1750.0,
               "Ab": 2.7488935718910694, "At": 1.05 * 7.853981633974483e-3,
               "c_star_val": 1500.0},
-     "expect": 7073922.0, "tol": 0.001},
-    # ratio 0.92725 = (6.49/7.00) to four figures -- the inversion is
+     "expect": 7849078.0, "tol": 0.001},
+    # ratio 0.927147 vs (6.49/7.00) = 0.927143 -- four figures -- the inversion is
     # self-consistent.
     {"id": "WB.P10c", "fn": "vieille_burn_rate",
      "args": {"a": 3.2e-5, "p": 7.0e6, "n": 0.355},
-     "expect": 7.90466e-3, "tol": 0.001},
+     "expect": 8.61311e-3, "tol": 0.001},
 
     # --- P25: 12% pressure step at n = 0.35 ------------------------------
     # A 7.64% burning-area step reproduces the observed 12% pressure step.
@@ -429,7 +429,7 @@ EXAMPLES = [
     {"id": "WB.P14d", "fn": "suction_specific_speed_SI",
      "args": {"omega": 628.3185307179587, "Q": 0.1002046783625731,
               "NPSH": 25.8898},
-     "expect": 3.1113, "tol": 0.002},
+     "expect": 3.12706, "tol": 0.001},
 
     # =====================================================================
     # Block I — vehicle, test, measurement
@@ -445,7 +445,7 @@ EXAMPLES = [
     # single-stage sanity: the same 9.4 km/s on 300 s alone needs e^3.19
     {"id": "WB.P12c", "fn": "propellant_for_dv",
      "args": {"isp": 300.0, "m_final": 1.0, "dv": 9400.0},
-     "expect": 23.2405, "tol": 0.001},
+     "expect": 23.4129, "tol": 0.001},
 
     # --- P30: size the whole engine, 250 kN vac LOX/CH4 at 90 bar --------
     {"id": "WB.P30a", "fn": "R_specific",
@@ -465,5 +465,5 @@ EXAMPLES = [
      "expect": 350.566, "tol": 0.001},
     {"id": "WB.P30f", "fn": "chamber_volume_from_Lstar",
      "args": {"Lstar": 1.0, "At": 0.014604818378826967},
-     "expect": 0.01460482, "tol": 1e-9},
+     "expect": 0.01460482, "tol": 1e-6},
 ]
