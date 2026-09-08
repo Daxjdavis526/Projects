@@ -204,6 +204,22 @@ export class Gear {
       }
     }
 
+    // A fish, close enough to take out of the water by hand.
+    const fish = g.eco?.nearest(p, 2.6, c => c.sp.aquatic && c.alive);
+    if (fish) {
+      return {
+        key: 'E', label: `CATCH ${fish.sp.name}`,
+        act: () => {
+          fish.die();
+          fish.harvested = true;
+          g.inventory.add('fish_raw', 1 + (Math.random() < 0.3 ? 1 : 0));
+          g.hud.log(`Caught a ${fish.sp.name.toLowerCase()}. Cook it aboard the ship.`, 'good');
+          g.fx?.splash(fish.pos.clone(), 0.7);
+          g.emit('caught', fish);
+        },
+      };
+    }
+
     // A corpse you can butcher.
     const corpse = g.eco?.nearest(p, 4.2, c => !c.alive && !c.harvested);
     if (corpse) {

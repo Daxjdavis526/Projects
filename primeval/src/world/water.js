@@ -106,7 +106,8 @@ void main() {
   foam *= 0.35 + 0.65 * smoothstep(0.25, 0.7, churn);
   col = mix(col, vec3(0.92, 0.95, 0.97), foam * 0.85);
 
-  float alpha = clamp(mix(0.62, 0.96, dt) + foam * 0.5, 0.0, 1.0) * vMask;
+  // Shallow water stays see-through, so you can spot fish from the bank.
+  float alpha = clamp(mix(0.44, 0.94, dt) + foam * 0.5, 0.0, 1.0) * vMask;
 
   // Exponential-squared fog, matched to the scene's own.
   float f = 1.0 - exp( -uFogDensity * uFogDensity * dist * dist );
@@ -126,7 +127,7 @@ function makeMaterial() {
       uSunDir: { value: new THREE.Vector3(0, 1, 0) },
       uSunColor: { value: new THREE.Color(1, 0.95, 0.88) },
       uSkyColor: { value: new THREE.Color(0.35, 0.5, 0.68) },
-      uShallow: { value: new THREE.Color(0.16, 0.34, 0.33) },
+      uShallow: { value: new THREE.Color(0.24, 0.46, 0.43) },
       uDeep: { value: new THREE.Color(0.015, 0.055, 0.085) },
       uFogColor: { value: new THREE.Color(0.6, 0.7, 0.76) },
       uFogDensity: { value: 0.0009 },
@@ -203,7 +204,7 @@ export class Water {
     u.uFogColor.value.copy(daylight.fog.color);
     u.uFogDensity.value = daylight.fog.density;
     const night = daylight.nightT;
-    u.uShallow.value.setRGB(lerp(0.16, 0.03, night), lerp(0.34, 0.07, night), lerp(0.33, 0.09, night));
+    u.uShallow.value.setRGB(lerp(0.24, 0.04, night), lerp(0.46, 0.09, night), lerp(0.43, 0.11, night));
     u.uDeep.value.setRGB(lerp(0.015, 0.004, night), lerp(0.055, 0.013, night), lerp(0.085, 0.026, night));
     u.uMurk.value = storm * 0.6;
   }

@@ -10,6 +10,7 @@ import { sharedUniforms } from './shaders.js';
 // ---------------------------------------------------------------------------
 
 const RAIN_VERT = /* glsl */`
+precision highp float;
 uniform float uTime;
 uniform vec3 uOrigin;
 uniform float uSpeed;
@@ -32,7 +33,7 @@ void main() {
 `;
 
 const RAIN_FRAG = /* glsl */`
-precision mediump float;
+precision highp float;
 uniform float uOpacity;
 uniform vec3 uColor;
 varying float vFade;
@@ -77,6 +78,7 @@ function makeRain(count, box) {
 // ---------------------------------------------------------------------------
 
 const PLUME_VERT = /* glsl */`
+precision highp float;
 uniform float uTime;
 varying vec2 vUv;
 varying float vH;
@@ -94,7 +96,7 @@ void main() {
 `;
 
 const PLUME_FRAG = /* glsl */`
-precision mediump float;
+precision highp float;
 varying vec2 vUv;
 varying float vH;
 uniform float uTime;

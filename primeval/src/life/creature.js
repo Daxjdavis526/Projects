@@ -280,6 +280,10 @@ export class Creature {
       case STATE.WANDER: {
         this.desiredSpeed = st.walk;
         this.headAim = -0.2;
+        if (this.beached && this.lastWater) {
+          this.desiredSpeed = st.run;
+          this.wander.set(this.lastWater.x, 0, this.lastWater.z);
+        }
         const d = _v2.subVectors(this.wander, this.pos);
         d.y = 0;
         if (d.length() < 4 || this.stateTime > 22) {
@@ -468,9 +472,19 @@ export class Creature {
     if (water !== null && water > groundY) {
       const depth = water - groundY;
       this.submerged = clamp(depth / Math.max(0.4, this.height), 0, 1);
-      if (this.sp.aquatic) y = water - this.height * 0.55;
+      if (this.sp.aquatic) {
+        // Hold mid-water, and remember where the water was.
+        y = lerp(groundY + 0.25, water - 0.28, 0.55);
+        this.lastWater = { x: this.pos.x, z: this.pos.z };
+        this.beached = false;
+      }
       else if (depth > this.height * 0.9) y = water - this.height * 0.85;   // swimming
       else if (this.sp.stats.amphibious && this.state === STATE.STALK) y = groundY;
+    }
+    if (this.sp.aquatic && (water === null || water <= groundY)) {
+      // A fish that has wandered onto dry land steers straight back.
+      this.beached = true;
+      y = groundY + 0.1;
     }
     if (this.sp.flying) {
       const cruise = groundY + 40 + Math.sin(ctx.time * 0.3 + this.noiseSeed) * 14;

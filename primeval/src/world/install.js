@@ -36,7 +36,8 @@ class Director {
     this.firstLandingT = -1;
     this.greeted = false;
 
-    game.on('start', () => { this.opening = 0.01; });
+    // Only for the real opening; a debug spawn straight onto THERA skips it.
+    game.on('start', () => { if (game.locale.id === 'moon') this.opening = 0.01; });
     game.on('shipLanded', () => {
       if (game.locale.id === 'planet' && !this.greeted) this.firstLandingT = 0;
     });

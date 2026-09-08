@@ -136,6 +136,40 @@ export class Ecology {
     return false;
   }
 
+  /**
+   * Fish are placed by looking for water rather than by biome, because a
+   * river is a thin thing and the biome under it is whatever it cut through.
+   */
+  trySpawnAquatic(px, pz) {
+    const sp = SPECIES.glimmerfin;
+    if (this.countAlive(sp) >= (sp.spawn.maxAlive ?? 12)) return false;
+    if (this.live.length >= this.budget + 12) return false;   // fish are cheap
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = 10 + Math.random() * 55;
+      const x = px + Math.cos(a) * r, z = pz + Math.sin(a) * r;
+      const w = waterAt(x, z);
+      if (w === null) continue;
+      const bed = heightAt(x, z);
+      if (w - bed < 0.8) continue;                            // too shallow
+      const shoal = 3 + Math.floor(Math.random() * 5);
+      let placed = 0;
+      for (let i = 0; i < shoal; i++) {
+        if (this.countAlive(sp) >= (sp.spawn.maxAlive ?? 12)) break;
+        const ox = x + (Math.random() - 0.5) * 6, oz = z + (Math.random() - 0.5) * 6;
+        if (waterAt(ox, oz) === null) continue;
+        const c = this._obtain(sp);
+        if (!c) break;
+        c.spawn(ox, waterAt(ox, oz) - 0.5, oz, { packIndex: i });
+        c.lastWater = { x: ox, z: oz };
+        this.live.push(c);
+        placed++;
+      }
+      return placed > 0;
+    }
+    return false;
+  }
+
   /** Explicitly place a named species near a point — used by set pieces. */
   spawnAt(speciesId, x, z, opts = {}) {
     const sp = SPECIES[speciesId];
@@ -227,6 +261,11 @@ export class Ecology {
     if (this.spawnTimer <= 0) {
       this.spawnTimer = 0.55;
       if (this.live.length < this.budget) this.trySpawn(px, pz, ctx.forward);
+    }
+    this.fishTimer = (this.fishTimer ?? 0) - dt;
+    if (this.fishTimer <= 0) {
+      this.fishTimer = 1.8;
+      this.trySpawnAquatic(px, pz);
     }
 
     for (let i = this.live.length - 1; i >= 0; i--) {
