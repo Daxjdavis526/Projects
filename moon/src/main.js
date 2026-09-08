@@ -19,6 +19,7 @@ import { QUALITY, DEFAULT_QUALITY, R_MOON, TERRAIN, OPTICS, TIME, STREAM } from 
 import { Stage } from './render/stage.js';
 import { TerrainSystem } from './render/terrain.js';
 import { Sky } from './render/sky.js';
+import { DustField } from './render/dust.js';
 import { Exposure } from './render/exposure.js';
 import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime } from './physics/ephemeris.js';
 import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
@@ -36,6 +37,7 @@ import { Base } from './game/base.js';
 import { Vehicle } from './game/vehicle.js';
 import { HistoricSites } from './game/historic.js';
 import { Shelter, hoursUntilSunElevation } from './game/shelter.js';
+import { Moment } from './game/moment.js';
 import { SuitHud } from './ui/suithud.js';
 import { OrbitPicker } from './ui/orbit.js';
 import { Sound } from './audio/audio.js';
@@ -247,8 +249,12 @@ async function start() {
      how the screenshot harness checks the sky without driving the controls. */
   const lookAt = params.get('look');
 
+  /* Regolith goes where it is thrown and then it lands. See render/dust.js. */
+  const dust = new DustField(stage, { max: state.quality.rocks > 0.5 ? 1600 : 700 });
+
   const suitHud = new SuitHud();
   const photo = new Photo();
+  const moment = new Moment();
   /* Eating, sleeping, and waiting for the Sun, which on a body with a
      29 and a half day rotation is a real thing to want to do. */
   const shelter = new Shelter({
@@ -441,6 +447,18 @@ async function start() {
     if (e.code === 'Space' && descent) descent.skip();
     /* R gets on and off the rover. You have to be next to it, and getting off
        puts you on the ground beside it rather than inside the wheel. */
+    /* Recovery. This is a game convention and it says so on the screen: the
+       drone brings you back, the suit is replaced, and nothing about what
+       happened is dramatised. */
+    if (e.code === 'KeyR' && eva && eva.suit.unconscious) {
+      const home = base ? { lat: base.lat, lon: base.lon } : { lat: cam.lat, lon: cam.lon };
+      eva.suit.reset();
+      eva.place(home.lat, home.lon, 0.1);
+      driving = false;
+      el('blackout-why').textContent = 'The suit could no longer hold pressure.';
+      save.write(game, 'recovered');
+      return;
+    }
     if (e.code === 'KeyR' && vehicle && eva) {
       if (driving) {
         driving = false;
@@ -538,6 +556,8 @@ async function start() {
   let last = performance.now(), fpsAcc = 0, fpsN = 0, fps = 0, ready = false;
   const probeCache = { t: 0, value: null };
   let shelterAt = 0;
+  const startedAt = performance.now();
+  let lastSteps = 0;
 
   function frame(now) {
     requestAnimationFrame(frame);
@@ -758,6 +778,53 @@ async function start() {
        would ask for, or a 250 mm shot is a photograph of a smooth wall. */
     terrain.quadtree.lodScale = Math.min(4, 55 / Math.max(8, stage.camera.fov));
     terrain.setPixelAngle(stage.camera.fov, stage.renderer.domElement.height);
+    /* Footfalls throw a little, wheels throw more, and a descent engine throws
+       a thin sheet outwards rather than a cloud upwards. */
+    dust.update(dt, rebased ? stage.origin.lastShift : null);
+    dust.setPixelScale(stage.renderer.domElement.height, stage.camera.fov);
+    if (eva && !driving && eva.player.grounded) {
+      const steps = eva.player.stepsTaken;
+      if (steps !== lastSteps) {
+        lastSteps = steps;
+        const u = eva.player.up();
+        const o = stage.origin.origin;
+        dust.burst({
+          at: { x: eva.player.pos.x - o.x, y: eva.player.pos.y - o.y, z: eva.player.pos.z - o.z },
+          up: u, count: eva.player.speed > 2 ? 14 : 6,
+          speed: 0.7 + eva.player.speed * 0.35, angle: 26, spread: 0.7, size: 13,
+        });
+      }
+    }
+    if (driving && vehicle && Math.abs(vehicle.rover.speed) > 1.2) {
+      const r = vehicle.rover;
+      const o = stage.origin.origin;
+      const b = enuBasis(r.lat, r.lon);
+      const p = { x: 0, y: 0, z: 0 };
+      llhToXyz(r.lat, r.lon, (r.meanGround ?? cam.alt), p);
+      /* A rooster tail comes off the wheels, and it comes off hardest when they
+         are sliding, which is what the Apollo crews found the moment they
+         tried to corner. */
+      const hard = r.sliding || r.slipping || r.boost;
+      dust.burst({
+        at: { x: p.x - o.x, y: p.y - o.y, z: p.z - o.z }, up: b.u,
+        count: hard ? 12 : 5, speed: 1.0 + Math.abs(r.speed) * 0.5,
+        angle: 34, spread: 0.8, size: 15,
+      });
+    }
+    if (descent && descent.dust > 0.02) {
+      const o = stage.origin.origin;
+      const b = enuBasis(descent.lat, descent.lon);
+      const p = { x: 0, y: 0, z: 0 };
+      llhToXyz(descent.lat, descent.lon, heightfield.heightAt(descent.lat, descent.lon), p);
+      /* One to three degrees above horizontal, which is why it reads as a sheet
+         moving outwards rather than as a cloud going up. */
+      dust.burst({
+        at: { x: p.x - o.x, y: p.y - o.y, z: p.z - o.z }, up: b.u,
+        count: Math.round(26 * descent.dust), speed: 9 + 26 * descent.dust,
+        angle: 2.5, spread: 0.9, size: 10,
+      });
+    }
+
     if (eva) {
       eva.updateLights(stage.origin.origin, camFrame);
       eva.updateModel(stage.origin.origin, dt);
@@ -820,6 +887,21 @@ async function start() {
     el('s-time').textContent = new Date(state.simMs).toISOString().replace('T', ' ').slice(0, 19) +
       (state.timeRate === 0 ? '  (held)' : state.timeRate === 1 ? '' : `  ${fmtRate(state.timeRate)}`);
     const evaSnap = eva ? eva.snapshot() : null;
+    /* The caption for arriving. It waits until the ground under you has
+       actually resolved, so the elevation it quotes is the real one. */
+    moment.update(now);
+    if (eva && mode === 'surface' && !photo.active && terrain.stats.tiles > 90 &&
+        now - startedAt > 2500) {
+      const near = historic.nearest();
+      moment.firstStep({
+        lat: cam.lat, lon: cam.lon, elevation: surfaceH,
+        feature: near && near.range < 1200 ? 'Tranquility Base'
+          : orbit.nearestFeature(cam.lat, cam.lon)?.f[0],
+        unit: geology ? geologyName(geology, cam.lat, cam.lon) : null,
+        earthVisible: local.earthEl > 0, earthEl: local.earthEl,
+        earthDist: eph.earthDist / 1000,
+      });
+    }
     suitHud.update(photo.active ? null : evaSnap);
     if (photo.active) {
       photo.update({
@@ -883,6 +965,14 @@ async function start() {
 }
 
 /* --- helpers ---------------------------------------------------------------- */
+
+/** The USGS unit name under a point, for the arrival caption. */
+function geologyName(geology, lat, lon) {
+  const x = Math.min(geology.width - 1, Math.max(0, ((lon + 180) / 360 * geology.width) | 0));
+  const y = Math.min(geology.height - 1, Math.max(0, ((90 - lat) / 180 * geology.height) | 0));
+  const u = geology.legend.units[String(geology.data[y * geology.width + x])];
+  return u ? u.name.toLowerCase() : null;
+}
 
 /** Angle between two directions given as elevation and azimuth, in degrees. */
 function phaseAngle(el1, az1, el2, az2) {

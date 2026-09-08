@@ -243,8 +243,35 @@ canvas{display:block;position:fixed;inset:0}
 #blackout{
   position:fixed;inset:0;z-index:30;background:#000;opacity:0;
   pointer-events:none;transition:opacity 2.5s ease;
+  display:flex;align-items:center;justify-content:center;
 }
-#blackout.on{opacity:1}
+#blackout.on{opacity:1;pointer-events:auto}
+#blackout .msg{
+  text-align:center;font-size:11px;letter-spacing:.14em;color:var(--dim);
+  line-height:2.2;max-width:44ch;
+}
+#blackout .msg b{display:block;font-family:Michroma,sans-serif;font-size:12px;
+  letter-spacing:.26em;color:var(--crit);margin-bottom:14px;font-weight:400}
+#blackout .msg em{display:block;margin-top:18px;color:var(--warm);font-style:normal;
+  letter-spacing:.2em}
+
+/* ---- the first moment ---- */
+#moment{
+  position:fixed;inset:0;z-index:28;display:none;pointer-events:none;
+  align-items:flex-end;justify-content:center;padding-bottom:16vh;
+}
+#moment .lines{
+  text-align:center;opacity:0;transition:opacity 2.5s ease;
+  text-shadow:0 2px 20px #000;
+}
+#moment.show .lines{opacity:1}
+#moment .lines b{
+  display:block;font-family:Michroma,sans-serif;font-size:13px;
+  letter-spacing:.3em;color:var(--hot);margin-bottom:12px;font-weight:400;
+}
+#moment .lines span{
+  display:block;font-size:11px;letter-spacing:.1em;color:#a9a29a;line-height:2.1;
+}
 
 /* ---- loading and title ---- */
 #boot{
@@ -332,9 +359,9 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">V</span><span>data overlay</span></div>
     <div class="row"><span class="k">T</span><span>time rate</span></div>
     <div class="row"><span class="k">M</span><span>site markers</span></div>
-    <div class="row"><span class="k">O</span><span>settings</span></div>
     <div class="row"><span class="k">P</span><span>photography</span></div>
     <div class="row"><span class="k">F2</span><span>save</span></div>
+    <div class="row"><span class="k">O</span><span>settings</span></div>
     <div class="row"><span class="k">H</span><span>this panel</span></div>
   </div>
 
@@ -482,7 +509,17 @@ canvas{display:block;position:fixed;inset:0}
 </div>
 <div id="photo-stamp"></div>
 
-<div id="blackout"></div>
+<div id="moment"><div class="lines">
+  <b id="moment-title">—</b>
+  <span id="moment-1"></span>
+  <span id="moment-2"></span>
+</div></div>
+
+<div id="blackout"><div class="msg">
+  <b>Consciousness lost</b>
+  <span id="blackout-why">The suit could no longer hold pressure.</span>
+  <em>press R to be recovered to the ship</em>
+</div></div>
 <div id="fatal"></div>
 
 <script type="importmap">

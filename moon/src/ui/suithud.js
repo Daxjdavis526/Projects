@@ -89,6 +89,14 @@ export class SuitHud {
     const text = suit.warnings.map(w => `<div class="${w.level}">${w.text}</div>`).join('');
     if (text !== this.lastWarnings) { this.warnings.innerHTML = text; this.lastWarnings = text; }
     this.blackout.classList.toggle('on', !!suit.unconscious);
+    if (suit.unconscious) {
+      const why = document.getElementById('blackout-why');
+      if (why) {
+        why.textContent = suit.co2mmHg > 30
+          ? 'Carbon dioxide passed the point where anyone stays conscious.'
+          : 'The suit could no longer hold pressure.';
+      }
+    }
   }
 }
 

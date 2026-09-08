@@ -208,6 +208,9 @@ export function matMul(a, b) {
 export class FloatingOrigin {
   constructor() {
     this.origin = v3();
+    /* How far the origin moved on the last re-base. Anything holding positions
+       in render space has to be shifted by this, or it teleports. */
+    this.lastShift = v3();
     this.version = 0;
   }
 
@@ -218,9 +221,13 @@ export class FloatingOrigin {
       return false;
     }
     const L = FRAME.originLattice;
+    const px = this.origin.x, py = this.origin.y, pz = this.origin.z;
     this.origin.x = Math.round(x / L) * L;
     this.origin.y = Math.round(y / L) * L;
     this.origin.z = Math.round(z / L) * L;
+    this.lastShift.x = this.origin.x - px;
+    this.lastShift.y = this.origin.y - py;
+    this.lastShift.z = this.origin.z - pz;
     this.version++;
     return true;
   }
