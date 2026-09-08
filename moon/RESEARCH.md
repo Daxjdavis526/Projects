@@ -144,17 +144,43 @@ Carrer et al. (2024, *Nature Astronomy* 8:1119, doi 10.1038/s41550-024-02302-y)
 found that Mini-RF radar images of the Mare Tranquillitatis pit carry an
 anomaly no model of the pit alone reproduces, and that an unlit void below and
 to one side of it does. The abstract calls the conduit "tens of metres long".
-The Extended Data captions carry the rest and are freely readable: the
-best-fitting model B has a roof dipping 55 degrees and a floor 45; the tested
-conduit widths were 15, 30, 55, 100 and 200 m; the pit floor was populated for
-the simulation with rocks 1-4 m across taken off LROC NAC image M155016845R at
-0.41 m/pixel, with two boulders of 8-10 m in the south-western floor excluded
-as outliers. The paper is explicit that the radar cannot separate model B from
-a model A whose roof and floor both dip about 3 degrees — a nearly level
-chamber rather than a ramp. It also names Wagner & Robinson's photogrammetric
-3D model of the pit and overhang as the surface it built on, and deposits its
-data at doi 10.5281/zenodo.11005458 (**not retrieved** — Zenodo timed out from
-here, so nothing in this repository comes from it).
+The paper is paywalled, but its figure and Extended Data captions are open and
+carry most of what a reconstruction needs, quoted here verbatim:
+
+- Fig. 2: "The comparison of experimental and simulated data implies that an
+  accessible conduit-like cave is present below the MTP **west** wall."
+- Fig. 3: "Model A is a conduit with a floor slope of about 3° ± 2.5°. Model B
+  is a conduit with a roof slope of about 55° ± 5° and a floor slope of about
+  45° ± 5°." And: "The solid and dashed lines of the side-view representation
+  depict what is observed and hypothesized of the pit morphology, respectively."
+- Extended Data Fig. 7: conduit widths of 15, 30, 55, 100 and 200 m were
+  simulated, and the radar-measured width saturates against the model width —
+  so a width from this method is a **lower bound**, not a measurement. Press
+  coverage says "at least 45 m"; the Padova release says a minimum of 55-60 m
+  "and possibly several hundred".
+- Extended Data Fig. 6: the pit floor was populated with rocks 1-4 m across
+  sized off LROC NAC image M155016845R at 0.41 m/pixel, with two boulders of
+  8-10 m in the south-western floor excluded as outliers.
+
+**Which wall, because this is the thing most likely to be got wrong.** The
+atlas describes the visible pit floor as "flat and covered in boulders, floor
+under the E wall slopes downward" — so the side that optically looks like a way
+in is the east. The radar found the void under the *west* wall. The two are not
+in conflict: the Mini-RF product they analysed, `lsz_06587_2s1_eku_10n033`, was
+acquired looking LEFT at a look azimuth of about 270°, due west, so the beam
+entered the pit travelling west and could only illuminate the base of the far
+wall. The paper constrains a westward conduit and is silent about an eastward
+one. A reconstruction should build the west one and say the east floor slopes.
+
+Horizontal extent is reported as 30-80 m depending on how steeply the conduit
+dips — model B at the steep end, model A at the shallow — and depth below the
+surface as 130-170 m (INAF) or 135-175 m (Eos). Both of those reach us through
+press coverage rather than the paper, and both are recorded here as such.
+
+The paper names Wagner & Robinson's photogrammetric 3D model of the pit and
+overhang as the surface it built on, and deposits its data at doi
+10.5281/zenodo.11005458 (**not retrieved** — Zenodo timed out from here, so
+nothing in this repository comes from it).
 
 Horvath, Hayne & Paige (2022, *GRL*, doi 10.1029/2022GL099710) is why any of
 this matters for a person. Diviner sees the Tranquillitatis and Ingenii pits
@@ -167,6 +193,17 @@ Seventeen degrees Celsius, every hour of a month-long day, in a place where
 the surface swings three hundred kelvin. The same paper notes that a cave
 below a pit would raise the night-time temperature of the ground above it by
 0.1 K, which is why nobody is going to find a second one from orbit this way.
+
+**There is stereo topography over these pits, and this project does not use
+it.** `NAC_DTM_TRANQPIT1` — LROC RDR, "Mare Tranquillitatis Pit", centre
+8.39/33.19, extent 7.91-8.86 N and 33.11-33.27 E, **2 m per pixel**, relative
+LE 0.72 m, LOLA RMS 0.55 m, built from stereo pairs M152655237, M152662021 and
+M137332905, downloadable as a 32-bit GeoTIFF, with orthophotos at 0.60-0.70
+m/px. `NAC_DTM_MARIUSPIT01` and `NAC_DTM_INGENIIPIT` exist likewise. What is
+true is the narrower statement: **NASA Trek**, which is where this game streams
+elevation from, serves nothing better than 118 m/px at any of these
+coordinates. Vendoring TRANQPIT1 would turn the pit's topography from DERIVED
+into MEASURED, and is the single highest-value thing left on this subject.
 
 Two other lines of evidence for lunar voids were checked and are **not** used,
 because neither constrains a shape and a shape is what it takes to build a

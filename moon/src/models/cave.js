@@ -99,9 +99,9 @@ function materials() {
  */
 function buildPortal(cave, group) {
   const x = -OVERLAP - 1;
-  const lo = cave.floorU - 2, hi = cave.floorU + CONDUIT.mouthHeight + 1;
-  const geo = grid(1, 1, (i, j) => V(
-    cave.mouthR + x, -cave.halfW + CONDUIT.width * i, j === 0 ? lo : hi));
+  const lo = cave.floorU - 2, hi = cave.floorU + cave.mouthHeight + 1;
+  const geo = grid(1, 1, (i, j) => T(
+    cave, x, -cave.halfW + CONDUIT.width * i, j === 0 ? lo : hi));
   const mat = new THREE.MeshBasicMaterial({
     colorWrite: false, depthWrite: false, side: THREE.DoubleSide,
     stencilWrite: true, stencilRef: 1,
@@ -153,6 +153,16 @@ function grid(nu, nv, at, flip = false) {
    +X east, +Y up, +Z south. So a cave-local (e, n, u) lands at (e, u, -n). */
 const V = (e, n, u) => ({ x: e, y: u, z: -n });
 
+/* And a point in the conduit's own frame — x metres out from the mouth, y
+   across it — which is the frame every function below thinks in, so that
+   turning the passage round is one sign in src/game/cave.js and nothing here.
+   The two candidate bearings differ by 180 degrees about the vertical, which
+   is a rotation: triangle winding is unaffected. */
+const T = (cave, x, y, u) => {
+  const l = cave.fromAxis(cave.mouthR + x, y);
+  return V(l.e, l.n, u);
+};
+
 /**
  * The conduit itself: floor, two walls, and an arched roof that comes down to
  * meet the floor and closes the far end without needing a cap.
@@ -162,8 +172,9 @@ function buildConduit(cave, tier, M, group) {
   const nu = tier.along, nv = tier.across;
   const xAt = (i) => x0 + (x1 - x0) * (i / nu);
   const yAt = (j) => -cave.halfW + CONDUIT.width * (j / nv);
-  const f = (x) => cave.floorLocal(cave.mouthR + x, 0);
-  const roofAt = (x, y) => cave.ceilingLocal(cave.mouthR + x, y);
+  const at0 = (x, y) => cave.fromAxis(cave.mouthR + x, y);
+  const f = (x) => { const l = at0(x, 0); return cave.floorLocal(l.e, l.n); };
+  const roofAt = (x, y) => { const l = at0(x, y); return cave.ceilingLocal(l.e, l.n); };
 
   /* Outward-only roughness, keyed on the grid index so neighbouring faces
      agree and the surface is continuous rather than sparkling. */
@@ -171,7 +182,7 @@ function buildConduit(cave, tier, M, group) {
 
   const floor = grid(nu, nv, (i, j) => {
     const x = xAt(i), y = yAt(j);
-    return V(cave.mouthR + x, y, f(x));
+    return T(cave, x, y, f(x));
   });
   if (floor) {
     const m = new THREE.Mesh(floor, M.floor);
@@ -187,7 +198,7 @@ function buildConduit(cave, tier, M, group) {
     /* Push up, never down, and taper the roughness out as the roof closes so
        the far end still meets the floor exactly. */
     const r = Math.max(0, Math.abs(bump(i, j, 7))) * Math.min(1, head / 3);
-    return V(cave.mouthR + x, y, u + r);
+    return T(cave, x, y, u + r);
   }, true);
   if (roof) {
     const m = new THREE.Mesh(roof, M.roof);
@@ -204,7 +215,7 @@ function buildConduit(cave, tier, M, group) {
       const t = k / 6;
       const out = Math.max(0, Math.abs(bump(i, k, side > 0 ? 11 : 13))) *
         Math.sin(Math.PI * t);
-      return V(cave.mouthR + x, y + side * out, lo + (hi - lo) * t);
+      return T(cave, x, y + side * out, lo + (hi - lo) * t);
     }, side > 0);
     if (!wall) continue;
     const m = new THREE.Mesh(wall, M.rock);

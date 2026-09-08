@@ -393,10 +393,21 @@ Four collapse pits in the maria are drawn, and one of them has a cave under it.
 An earlier version of this file said the opposite — that the pits could not be
 drawn because the finest elevation over any of them is 118 m per pixel and
 modelling them would mean inventing the shape of the one thing you came to see.
-The first half of that is true and the conclusion was wrong. The LROC Lunar
-Pits Atlas measured these pits off oblique NAC images and stereo models and
-published the numbers; Wagner & Robinson did photogrammetry on six of them. The
-shape is published. It just arrives as a table rather than as a raster.
+Both halves of that were wrong, and it is worth being specific about how.
+
+The LROC Lunar Pits Atlas measured these pits off oblique NAC images and stereo
+models and published the numbers; Wagner & Robinson did photogrammetry on six
+of them. So the shape is published — it just arrives as a table rather than as
+a raster, which is what this project builds from.
+
+And the resolution claim was too broad. There is a stereo digital terrain model
+of the Mare Tranquillitatis pit at **two metres per pixel**, `NAC_DTM_TRANQPIT1`,
+with a relative vertical accuracy of 0.72 m, and there are equivalents over
+Marius Hills and Mare Ingenii. What is actually true is the narrower thing:
+NASA Trek, which is where this game streams its elevation from, serves nothing
+better than 118 m/px at any of these coordinates. Vendoring that DTM would turn
+the pit from DERIVED into MEASURED, and it is the most valuable thing left
+undone here.
 
 So `src/data/pits.js` fits an elliptical funnel-and-shaft profile to the atlas's
 own dimensions and hands it to the height field as a one-metre patch, installed
@@ -419,19 +430,32 @@ walls that read 89 degrees against a 37 degree friction angle. Falling into
 Mare Tranquillitatis arrives at 20 m/s, which is well past survivable; the
 jetpack climbs back out of it in four seconds and about half its heat budget.
 
-Under the east side of the Tranquillitatis pit floor there is a cave. In 2024
+Under the west side of the Tranquillitatis pit floor there is a cave. In 2024
 Carrer et al. showed that Mini-RF radar images of the pit carry an anomaly no
 model of the pit alone reproduces, and that an unlit conduit below and to one
 side of it does. It is the only cave on the Moon anyone has evidence for. Here
-it is 45 m wide, level for twelve metres under the overhang and then dropping at
-the published 45 degrees to about 169 m below the plain, with a roof at 55
-degrees that comes down to meet the floor and ends the passage. Forty-five
-degrees is too steep to walk back up, so bring the jetpack.
+it is at least 45 m wide and drops at the published 45 degrees for the 30 m of
+horizontal extent their best-fitting model has, reaching about 155 m below the
+plain, with a roof at 55 degrees that comes down to meet the floor and ends the
+passage. Forty-five degrees is too steep to walk back up, so bring the jetpack.
+
+The west side is worth dwelling on, because the obvious answer is the other
+one. The atlas describes the pit's visible floor as sloping down under the
+**east** wall, which is exactly what a way in looks like from orbit. The radar
+found the void under the **west** wall — and the reason is in the observation
+rather than in the geology: the Mini-RF pass was taken looking left at an
+azimuth of 270 degrees, due west, so the beam could only ever illuminate the
+base of the far wall. The paper constrains a westward conduit and says nothing
+at all about an eastward one. This game builds the one that was measured. An
+earlier version of it built the east side, which was a reasonable reading of
+the atlas and not what the paper found.
 
 None of it has been seen. The overlay says DERIVED, names the paper, and says
 the thing the paper says about itself: the radar cannot separate this geometry
 from a second one it fits about as well, which would be a nearly level chamber
-rather than a ramp.
+reaching some eighty metres instead of thirty. The 45 m width is a lower bound
+rather than a measurement, because the width this method recovers saturates
+against the real one.
 
 The temperature readout changes when you go in, and this is the part worth
 going for. Horvath, Hayne & Paige measured these pits with Diviner and modelled
@@ -476,6 +500,13 @@ and an explicit note wherever a position is inferred, and the other five
 deserve the same standard or none at all. Guessing where an ALSEP central
 station sits because it would look right is exactly the thing this project
 refuses to do.
+
+**The NAC stereo DTMs over the pits.** `NAC_DTM_TRANQPIT1` at 2 m/px, plus
+`NAC_DTM_MARIUSPIT01` and `NAC_DTM_INGENIIPIT`, are 32-bit GeoTIFFs on the LROC
+RDR archive. They are not on NASA Trek, which is why nothing streams them here.
+Vendoring them would replace a profile fitted to six catalogue numbers with the
+measured surface, and turn the pit rows in `DATA_SOURCES.md` from DERIVED to
+MEASURED. This is the most valuable single item on this list.
 
 **SLDEM2015 at 59 m globally.** The reader and the registry entry are the work;
 `src/data/surface.js` already handles scheduling, blending and provenance.

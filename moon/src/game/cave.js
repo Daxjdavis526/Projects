@@ -27,34 +27,47 @@
 
      the conduit exists            Carrer et al. 2024, from the Mini-RF anomaly
      "tens of metres long"         Carrer et al. 2024, abstract
-     roof 55 deg, floor 45 deg     Carrer et al. 2024, Extended Data Fig. 4-5,
-                                   the best-fitting model B
-     width about 45 m              Carrer et al. 2024; their simulations bracket
-                                   it, testing 15, 30, 55, 100 and 200 m
+     it is below the WEST wall     Carrer et al. 2024, Fig. 2 caption, verbatim:
+                                   "an accessible conduit-like cave is present
+                                   below the MTP west wall"
+     roof 55 +/- 5 deg,            Carrer et al. 2024, Fig. 3 caption, model B
+     floor 45 +/- 5 deg
+     about 30 m of horizontal      the value reported for model B; the shallow
+     extent for model B            model A reaches about 80 m instead
+     width at least 45 m           and it is a lower bound, not a measurement:
+                                   the radar-derived width saturates against the
+                                   true width, so 45 m is a floor. Simulations
+                                   ran 15, 30, 55, 100 and 200 m
      130-170 m below the surface   Carrer et al. 2024
-     opens off the east side       LROC Lunar Pits Atlas, which reports the pit
-                                   "floor under the E wall slopes downward"
      overhangs of 10-15 m on the   LROC Lunar Pits Atlas
      east, west and north
      floor boulders 1-4 m, plus    Carrer et al. 2024, Extended Data Fig. 6,
      two of 8-10 m in the          measured off LROC NAC image M155016845R at
      south-west of the floor       0.41 m per pixel
 
+   WHICH SIDE, because this file had it wrong and the wrong answer was
+   reasonable. The LROC atlas describes the visible pit floor as "flat and
+   covered in boulders, floor under the E wall slopes downward" — so the side
+   that optically looks like a way in is the EAST. The radar found the void
+   under the WEST wall, and the reason is in the observation itself: the
+   Mini-RF product they used, lsz_06587_2s1_eku_10n033, was taken looking LEFT
+   at a look azimuth of 270.2 degrees. Due west. The beam entered the pit
+   travelling west and could only illuminate the base of the far wall, so the
+   paper constrains a westward conduit and is silent about an eastward one. The
+   two observations are not in conflict; they are of different walls. This
+   builds the one that was measured, and says here that the other side is where
+   the floor visibly slopes.
+
    WHAT IS NOT, and is therefore shape rather than measurement:
 
-     the height of the mouth       Not published. Set to 19 m, which is not a
-                                   free choice: a roof at 55 degrees closes on a
-                                   floor at 45 degrees after mouthHeight/0.428
-                                   metres, and the conduit has to bottom out at
-                                   the published 170 m. Those two facts fix it.
+     the height of the mouth       Not published, and not free either: a roof at
+                                   55 degrees closes on a floor at 45 over the
+                                   published 30 m of extent, which fixes the
+                                   opening at 30 * (tan 55 - tan 45), about
+                                   thirteen metres.
      the arched cross-section      A lava tube is arched. The paper models the
                                    conduit as a simple void because radar at
                                    13 cm does not care.
-     the flat run at the mouth     Not published. Twelve metres of level floor
-                                   before the ramp starts, which is the atlas's
-                                   overhang figure of "at least 10-15 m" used
-                                   as a length rather than invented.
-
    What is deliberately NOT here is a walkable recess running round the pit
    under the overhanging rim. The overhang is real and the atlas measures it,
    but how much of it is open void and how much is talus is not published, and
@@ -75,17 +88,20 @@ const R = 1737400;
  * The conduit, in metres and degrees. Every field is sourced in the header.
  */
 export const CONDUIT = {
-  /* East, because the atlas says the pit floor slopes down under the east
-     wall, and because that is the side the radar anomaly is on. */
-  bearing: 90,
+  /* West. Not east, which is where the floor visibly slopes: see the header. */
+  bearing: 270,
+  /* A lower bound rather than a width. The radar-derived figure saturates
+     against the true one, so the paper's 45 m is a floor and the Padova release
+     puts the minimum at 55-60 m "and possibly several hundred". 45 is the most
+     quoted and the most conservative. */
   width: 45,
   roofSlope: 55,
+  roofSlopeErr: 5,
   floorSlope: 45,
-  mouthHeight: 19,
-  /* Metres of level floor inside the mouth before the roof starts coming down
-     and the floor starts going away: the part that is under the overhanging
-     rim rather than under the plain. */
-  skirt: 12,
+  floorSlopeErr: 5,
+  /* Horizontal extent from the mouth, for model B. Model A, which the radar
+     cannot rule out, would be a nearly level chamber reaching about 80 m. */
+  extent: 30,
   /* The bearings the atlas reports overhangs on, and how wide an arc each one
      covers. The south side is not overhung. Nothing is built from this — the
      overhang is not walkable floor here — but the conduit opens under one of
@@ -94,9 +110,19 @@ export const CONDUIT = {
   overhangArc: 55,
 };
 
-/* Where the roof meets the floor, measured from the mouth. */
-const CLOSE_AT = CONDUIT.mouthHeight /
-  (Math.tan(CONDUIT.roofSlope * DEG) - Math.tan(CONDUIT.floorSlope * DEG));
+/* The mouth height is not published, and it is not a free choice either. A roof
+   dipping 55 degrees closes on a floor dipping 45 over the conduit's 30 m of
+   horizontal extent, and that fixes the opening: 30 * (tan 55 - tan 45). About
+   thirteen metres, which also puts the deepest floor 155 m below the plain,
+   inside the published 130-170 m band. */
+const CONVERGE = Math.tan(CONDUIT.roofSlope * DEG) - Math.tan(CONDUIT.floorSlope * DEG);
+const MOUTH_H = CONDUIT.extent * CONVERGE;
+
+/* Which way along the east-west axis the passage runs. The two candidate
+   bearings are 90 and 270, and 270 is a 180 degree rotation of 90 about the
+   vertical — a rotation, not a reflection, so nothing downstream has to think
+   about triangle winding. */
+const DIR = CONDUIT.bearing === 270 ? -1 : 1;
 
 /* How far inside the shaft wall the cave also owns the floor.
 
@@ -134,8 +160,10 @@ export class Cave {
     /* The shaft radius on the conduit's bearing: where the mouth starts. */
     this.mouthR = shaftRadiusAt(opts.pit, CONDUIT.bearing);
     this.halfW = CONDUIT.width / 2;
-    this.length = CONDUIT.skirt + CLOSE_AT;
-    this.deepestU = this.floorU - CLOSE_AT * Math.tan(CONDUIT.floorSlope * DEG);
+    this.axis = DIR;
+    this.mouthHeight = MOUTH_H;
+    this.length = CONDUIT.extent;
+    this.deepestU = this.floorU - CONDUIT.extent * Math.tan(CONDUIT.floorSlope * DEG);
     this.label = LABEL.DERIVED;
     this.source = 'Carrer et al. 2024, Nature Astronomy 8:1119, model B';
     /* One-entry memo. The player's ground source asks for the height, the
@@ -195,10 +223,11 @@ export class Cave {
     const bearing = r < 1e-6 ? 0 : Math.atan2(e, n) / DEG;
     const rIn = shaftRadiusAt(this.pit, bearing);
 
-    /* The conduit runs east from the shaft wall. Its own frame: x metres out
-       from the wall, y metres either side of the axis. It reaches back inside
-       the wall by OVERLAP so the doorway has no lip. */
-    const x = e - this.mouthR, y = n;
+    /* The conduit runs away from the shaft wall along its bearing. Its own
+       frame: x metres out from the wall, y metres either side of the axis. It
+       reaches back inside the wall by OVERLAP so the doorway has no lip. */
+    const { a, y } = this.toAxis(e, n);
+    const x = a - this.mouthR;
     if (x >= -OVERLAP && x <= this.length && Math.abs(y) <= this.halfW) return 'conduit';
 
     if (r <= rIn) return 'shaft';
@@ -219,9 +248,14 @@ export class Cave {
    * meet the floor, and somewhere before it does you have to stop.
    */
   get walkableTo() {
-    return CONDUIT.skirt + (CONDUIT.mouthHeight - STAND) /
-      (Math.tan(CONDUIT.roofSlope * DEG) - Math.tan(CONDUIT.floorSlope * DEG));
+    return (MOUTH_H - STAND) / CONVERGE;
   }
+
+  /** Along-axis and across-axis metres, from pit-local east and north. */
+  toAxis(e, n) { return { a: DIR * e, y: DIR * n }; }
+
+  /** And back. */
+  fromAxis(a, y) { return { e: DIR * a, n: DIR * y }; }
 
   /** Floor height relative to the plain, or null where there is no cave floor. */
   floorLocal(e, n) {
@@ -233,9 +267,8 @@ export class Cave {
     /* The shaft floor is already in the height field — the pit patch put it
        there — so the cave does not own it and does not fight it for it. */
     if (where === 'shaft') return null;
-    const x = e - this.mouthR;
-    if (x <= CONDUIT.skirt) return this.floorU;
-    return this.floorU - (x - CONDUIT.skirt) * Math.tan(CONDUIT.floorSlope * DEG);
+    const x = Math.max(0, DIR * e - this.mouthR);
+    return this.floorU - x * Math.tan(CONDUIT.floorSlope * DEG);
   }
 
   /**
@@ -251,11 +284,8 @@ export class Cave {
 
   _ceilOf(where, floor, e, n) {
     if (where === null || where === 'shaft') return null;
-    const x = e - this.mouthR;
-    const head = x <= CONDUIT.skirt
-      ? CONDUIT.mouthHeight
-      : CONDUIT.mouthHeight - (x - CONDUIT.skirt) *
-        (Math.tan(CONDUIT.roofSlope * DEG) - Math.tan(CONDUIT.floorSlope * DEG));
+    const x = Math.max(0, DIR * e - this.mouthR);
+    const head = MOUTH_H - x * CONVERGE;
     if (head <= 0) return floor;
     const arch = 1 - 0.4 * Math.pow(Math.min(1, Math.abs(n) / this.halfW), 2);
     return floor + head * arch;
@@ -287,19 +317,19 @@ export class Cave {
     return u >= m.floor - 2 && u <= m.ceil;
   }
 
-  /** Level for the first twelve metres, then the published 45 degree ramp. */
+  /** The published 45 degree ramp, from the mouth inward. */
   slopeAt(lat, lon) {
     const m = this._at(lat, lon);
     if (m.region === null || m.region === 'shaft') return null;
-    return (m.e - this.mouthR) > CONDUIT.skirt ? CONDUIT.floorSlope : 0;
+    return (DIR * m.e - this.mouthR) > 0 ? CONDUIT.floorSlope : 0;
   }
 
-  /** Downhill is east, into the Moon. */
+  /** Downhill is along the conduit's bearing, into the Moon. */
   normalAt(lat, lon) {
     const s = this.slopeAt(lat, lon);
     if (s === null) return null;
     const t = s * DEG;
-    return { e: -Math.sin(t), n: 0, u: Math.cos(t) };
+    return { e: -DIR * Math.sin(t), n: 0, u: Math.cos(t) };
   }
 
   /**
@@ -320,17 +350,20 @@ export class Cave {
     if (u > -this.pit.funnelDepth) return null;
 
     const where = this.region(e, n);
-    const x = e - this.mouthR;
+    const { a, y } = this.toAxis(e, n);
+    const x = a - this.mouthR;
 
     if (where === 'conduit') {
-      let ne = e, nn = n, moved = false;
+      let nx = x, ny = y, moved = false;
       const lim = this.halfW - radius;
-      if (Math.abs(n) > lim) { nn = Math.sign(n) * lim; moved = true; }
+      if (Math.abs(y) > lim) { ny = Math.sign(y) * lim; moved = true; }
       /* The far end. The roof comes down to meet the floor, and a person in a
          suit runs out of headroom before it gets there. */
       const limX = Math.min(this.length - radius, this.walkableTo);
-      if (x > limX) { ne = this.mouthR + limX; moved = true; }
-      return moved ? this.toGeographic(ne, nn) : null;
+      if (x > limX) { nx = limX; moved = true; }
+      if (!moved) return null;
+      const l = this.fromAxis(this.mouthR + nx, ny);
+      return this.toGeographic(l.e, l.n);
     }
 
     /* Outside every void and below the shaft mouth: solid rock, which you can
@@ -338,8 +371,9 @@ export class Cave {
        way — sideways if this is beside the conduit, radially otherwise. */
     const r = Math.hypot(e, n) || 1e-6;
     const bearing = Math.atan2(e, n) / DEG;
-    if (x >= -OVERLAP && x <= this.length && Math.abs(n) > this.halfW) {
-      return this.toGeographic(e, Math.sign(n) * (this.halfW - radius));
+    if (x >= -OVERLAP && x <= this.length && Math.abs(y) > this.halfW) {
+      const l = this.fromAxis(a, Math.sign(y) * (this.halfW - radius));
+      return this.toGeographic(l.e, l.n);
     }
     /* Far enough out and this is not the cave's business: the pit's own walls
        and the plain beyond them are the height field's to defend. */
@@ -430,9 +464,9 @@ export function breakdownBlocks(cave, count = 70) {
   const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
   for (let i = 0; i < count; i++) {
     /* Squared, so the pile is heaviest just inside the mouth. */
-    const x = CONDUIT.skirt * 0.2 + Math.pow(rnd(), 2) * (cave.walkableTo - CONDUIT.skirt * 0.2);
-    const n = (rnd() * 2 - 1) * (cave.halfW - 1.5);
-    const e = cave.mouthR + x;
+    const x = Math.pow(rnd(), 2) * cave.walkableTo;
+    const y = (rnd() * 2 - 1) * (cave.halfW - 1.5);
+    const { e, n } = cave.fromAxis(cave.mouthR + x, y);
     const floor = cave.floorLocal(e, n);
     if (floor === null) continue;
     const head = cave.ceilingLocal(e, n) - floor;
