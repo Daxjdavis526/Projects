@@ -340,7 +340,7 @@ the vessel they protect. Study it before reading on.
   <text x="512" y="820" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CH₄ — in trench</text>
 
   <!-- ============ LEGEND ============ -->
-  <rect x="18" y="862" width="170" height="104" rx="5" fill="var(--side)" stroke="var(--line)" stroke-width="1.5"/>
+  <rect x="18" y="862" width="166" height="104" rx="5" fill="var(--side)" stroke="var(--line)" stroke-width="1.5"/>
   <path d="M28,878 L28,890 L40,878 L40,890 Z" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
   <text x="48" y="889" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">normally closed</text>
   <path d="M28,898 L28,910 L40,898 L40,910 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
@@ -451,35 +451,39 @@ Now close HV-108, close MOV-110, and let CV-303 hold. The segment between them
 contains liquid oxygen, has no path out, and is warming.
 
 <figure>
-<svg viewBox="0 0 660 250" role="img" aria-label="Detail of the trapped volume in the oxidiser feed leg between the isolation valve, the main valve and the purge check valve, showing the thermal relief that protects it.">
-  <line x1="90" y1="70" x2="90" y2="200" stroke="var(--oxy)" stroke-width="3"/>
-  <path d="M81,60 L99,60 L81,80 L99,80 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
-  <text x="110" y="66" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-108 closed</text>
-  <path d="M81,190 L99,190 L81,210 L99,210 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
-  <text x="110" y="216" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">MOV-110 closed</text>
-  <line x1="90" y1="150" x2="180" y2="150" stroke="var(--inert)" stroke-width="1.8"/>
-  <path d="M160,142 L144,150 L160,158 Z" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
-  <line x1="144" y1="141" x2="144" y2="159" stroke="var(--inert)" stroke-width="1.8"/>
-  <text x="186" y="154" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CV-303 holds ← GN₂</text>
-  <rect x="72" y="84" width="36" height="102" fill="var(--warn-bg)" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="5 4"/>
-  <text x="122" y="104" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">Isolated volume: LOX, ~1.5 L,</text>
-  <text x="122" y="121" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">no path out, warming from ambient.</text>
-  <text x="122" y="138" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">Confined cryogen warming to ambient</text>
-  <text x="122" y="176" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">reaches pressures in excess of 10 000 psig.</text>
-  <line x1="400" y1="70" x2="400" y2="200" stroke="var(--oxy)" stroke-width="3"/>
-  <path d="M391,60 L409,60 L391,80 L409,80 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
-  <path d="M391,190 L409,190 L391,210 L409,210 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
-  <rect x="382" y="84" width="36" height="102" fill="var(--ok-bg)" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 4"/>
-  <line x1="400" y1="120" x2="470" y2="120" stroke="var(--oxy)" stroke-width="2.4"/>
-  <path d="M470,111 L488,111 L479,123 Z M488,114 L488,132 L479,123 Z" fill="none" stroke="var(--oxy)" stroke-width="2"/>
-  <polyline points="479,123 484,117 474,113 484,109" fill="none" stroke="var(--oxy)" stroke-width="1.4"/>
-  <line x1="488" y1="123" x2="560" y2="123" stroke="var(--oxy)" stroke-width="2.4"/>
-  <path d="M560,123 l-1,-5 l9,5 l-9,5 z" fill="var(--oxy)"/>
-  <text x="470" y="96" font-family="system-ui, sans-serif" font-size="13" fill="var(--ok)">PSV-109</text>
-  <text x="500" y="150" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">→ oxidiser vent header,</text>
-  <text x="500" y="167" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">then stack A. Not isolatable.</text>
-  <text x="90" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="var(--warn)">the trap</text>
-  <text x="400" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="var(--ok)">the answer</text>
+<svg viewBox="0 0 660 300" role="img" aria-label="Detail of the trapped volume in the oxidiser feed leg between the isolation valve, the main valve and the purge check valve, and the same segment protected by a thermal relief.">
+  <text x="40" y="30" font-family="system-ui, sans-serif" font-size="14" fill="var(--warn)">the trap</text>
+  <rect x="92" y="74" width="36" height="112" fill="var(--warn-bg)" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <line x1="110" y1="60" x2="110" y2="200" stroke="var(--oxy)" stroke-width="3"/>
+  <path d="M101,50 L119,50 L101,70 L119,70 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
+  <text x="130" y="56" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-108 closed</text>
+  <path d="M101,190 L119,190 L101,210 L119,210 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
+  <text x="130" y="214" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">MOV-110 closed</text>
+  <line x1="110" y1="140" x2="196" y2="140" stroke="var(--inert)" stroke-width="1.8"/>
+  <path d="M186,132 L170,140 L186,148 Z" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
+  <line x1="170" y1="131" x2="170" y2="149" stroke="var(--inert)" stroke-width="1.8"/>
+  <text x="204" y="144" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CV-303 holds ← GN₂</text>
+  <text x="40" y="248" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">Isolated volume: LOX, ~1.5 L,</text>
+  <text x="40" y="266" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">no path out, warming from ambient.</text>
+  <text x="40" y="284" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">Confined cryogen: over 10 000 psig.</text>
+
+  <text x="400" y="30" font-family="system-ui, sans-serif" font-size="14" fill="var(--ok)">the answer</text>
+  <rect x="452" y="74" width="36" height="112" fill="var(--ok-bg)" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <line x1="470" y1="60" x2="470" y2="200" stroke="var(--oxy)" stroke-width="3"/>
+  <path d="M461,50 L479,50 L461,70 L479,70 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
+  <path d="M461,190 L479,190 L461,210 L479,210 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
+  <line x1="470" y1="140" x2="400" y2="140" stroke="var(--inert)" stroke-width="1.8"/>
+  <path d="M440,132 L424,140 L440,148 Z" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
+  <line x1="424" y1="131" x2="424" y2="149" stroke="var(--inert)" stroke-width="1.8"/>
+  <line x1="470" y1="100" x2="520" y2="100" stroke="var(--oxy)" stroke-width="2.4"/>
+  <path d="M520,91 L538,91 L529,103 Z M538,94 L538,112 L529,103 Z" fill="none" stroke="var(--oxy)" stroke-width="2"/>
+  <polyline points="529,103 534,97 524,93 534,89" fill="none" stroke="var(--oxy)" stroke-width="1.4"/>
+  <line x1="538" y1="103" x2="600" y2="103" stroke="var(--oxy)" stroke-width="2.4"/>
+  <path d="M600,103 l-1,-5 l10,5 l-10,5 z" fill="var(--oxy)"/>
+  <text x="512" y="76" font-family="system-ui, sans-serif" font-size="13" fill="var(--ok)">PSV-109</text>
+  <text x="400" y="248" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">Relieved to the oxidiser vent</text>
+  <text x="400" y="266" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">header, then stack A, by a path</text>
+  <text x="400" y="284" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">that cannot itself be isolated.</text>
 </svg>
 <figcaption>Figure 8.2 — The canonical cryogenic finding: two closed valves and a check valve define an isolated volume of liquid. PSV-109 exists solely to give it somewhere to go.</figcaption>
 </figure>
@@ -589,18 +593,18 @@ link.* Read every fail position off the drawing and write down the resulting
 whole-system state.
 
 <figure>
-<svg viewBox="0 0 660 220" role="img" aria-label="Comparison of a fail-closed main propellant valve and a fail-open vent valve, showing the state each takes on loss of instrument air and why the two philosophies are opposite.">
-  <line x1="120" y1="60" x2="120" y2="160" stroke="var(--oxy)" stroke-width="3"/>
-  <path d="M111,100 L129,100 L111,120 L129,120 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
-  <path d="M111,89 A9 9 0 0 1 129,89 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="1.5"/>
-  <line x1="120" y1="100" x2="120" y2="89" stroke="var(--oxy)" stroke-width="1.5"/>
+<svg viewBox="0 0 660 250" role="img" aria-label="Comparison of a fail-closed main propellant valve and a fail-open vent valve, showing the state each takes on loss of instrument air and why the two philosophies are opposite.">
+  <line x1="120" y1="60" x2="120" y2="160" stroke="currentColor" stroke-width="3"/>
+  <path d="M111,100 L129,100 L111,120 L129,120 Z" fill="currentColor" stroke="currentColor" stroke-width="2"/>
+  <path d="M111,89 A9 9 0 0 1 129,89 Z" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+  <line x1="120" y1="100" x2="120" y2="89" stroke="currentColor" stroke-width="1.5"/>
   <text x="120" y="46" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="currentColor">MOV-110 / MFV-210</text>
   <text x="120" y="182" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">FAIL CLOSED</text>
   <text x="120" y="200" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">stop adding propellant</text>
-  <line x1="440" y1="60" x2="440" y2="160" stroke="var(--oxy)" stroke-width="3"/>
-  <path d="M431,100 L449,100 L431,120 L449,120 Z" fill="none" stroke="var(--oxy)" stroke-width="2"/>
-  <circle cx="440" cy="89" r="7" fill="var(--bg)" stroke="var(--oxy)" stroke-width="1.5"/>
-  <line x1="440" y1="100" x2="440" y2="96" stroke="var(--oxy)" stroke-width="1.5"/>
+  <line x1="440" y1="60" x2="440" y2="160" stroke="currentColor" stroke-width="3"/>
+  <path d="M431,100 L449,100 L431,120 L449,120 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+  <circle cx="440" cy="89" r="7" fill="var(--bg)" stroke="currentColor" stroke-width="1.5"/>
+  <line x1="440" y1="100" x2="440" y2="96" stroke="currentColor" stroke-width="1.5"/>
   <text x="440" y="46" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="currentColor">PV-103 / FV-203</text>
   <text x="440" y="182" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--ok)">FAIL OPEN</text>
   <text x="440" y="200" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">never bottle up a cryogen</text>
@@ -608,7 +612,7 @@ whole-system state.
   <text x="190" y="112" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">flow stops</text>
   <text x="510" y="95" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">loss of air →</text>
   <text x="510" y="112" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">tank vents</text>
-  <text x="330" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">opposite logic, same objective: the least dangerous state</text>
+  <text x="330" y="232" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">opposite logic, same objective: the least dangerous state</text>
 </svg>
 <figcaption>Figure 8.3 — Fail-safe is per-valve, not per-system: isolation and pressurisation valves fail closed, vent and relief paths fail open. Both answers come from one question — which position is least dangerous when the utility disappears?</figcaption>
 </figure>

@@ -258,7 +258,8 @@ containers and **S-1.2** portable ones; ASME BPVC VIII allows 10 % accumulation 
 below 19.5 % exhausts outside the building `[SLAC-CH36]`, and a relieving stack is a nozzle
 that must be restrained. **Fuel and oxidiser vents are never combined:** a shared header is a
 mixing chamber holding gas from one system until the other vents. **Icing** attacks the one
-component that must never block `[JLAB-OVERPRESSURE]`.
+component that must never block: cold gas freezes atmospheric moisture at the outlet, and
+blocked vent lines are a principal cause of overpressure `[JLAB-OVERPRESSURE]`.
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
 Relief devices are the layer that does not depend on the control system. If a finding can
@@ -329,9 +330,10 @@ infrared cannot detect hydrogen at all.
 The tag scheme is ANSI/ISA-5.1 `[ISA-5.1]`: **letters plus a loop number**. The **first
 letter is the measured variable** — P pressure, T temperature, F flow, L level, A analysis —
 and **succeeding letters say what the device does**: T transmit, I indicate, C control, S
-switch *or* safety, V valve, E element. So `PT` is a pressure
-transmitter, `FE` the flow element, `LSH` a level switch high, `PSV` a pressure safety
-valve, `PSE` conventionally the rupture disc, `AT` an analyser — usually the gas monitor.
+switch *or* safety, V valve, E element. So `PT`, `TT`, `FT` and `LT` are the pressure,
+temperature, flow and level transmitters, `FE` the flow element itself, `LSH` a level switch
+high, `PSV` a pressure safety valve, `PSE` conventionally the rupture disc, and `AT` an
+analyser — usually the gas monitor.
 Note that `S` is ambiguous: *safety* in PSV, *switch* in LSH. The digits identify the
 **loop, not the device**, and loops are numbered by system: 100-series LOX, 200-series fuel.
 
@@ -400,14 +402,17 @@ separately for fuel, oxidiser and inert.
   <text x="120" y="218" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="var(--oxy)">run tank</text>
   <text x="120" y="236" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="var(--oxy)">TK-101</text>
   <circle cx="30" cy="140" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
-  <text x="30" y="145" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">PT</text>
+  <text x="30" y="136" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">PT</text>
+  <text x="30" y="150" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">101</text>
   <line x1="30" y1="157" x2="30" y2="175" stroke="currentColor"/>
   <line x1="30" y1="175" x2="60" y2="175" stroke="currentColor"/>
   <circle cx="30" cy="230" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
-  <text x="30" y="235" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">LT</text>
+  <text x="30" y="226" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">LT</text>
+  <text x="30" y="240" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">110</text>
   <line x1="47" y1="230" x2="60" y2="230" stroke="currentColor"/>
   <circle cx="30" cy="290" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
-  <text x="30" y="295" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">TT</text>
+  <text x="30" y="286" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">TT</text>
+  <text x="30" y="300" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">111</text>
   <line x1="47" y1="285" x2="70" y2="272" stroke="currentColor"/>
   <line x1="100" y1="150" x2="100" y2="90" stroke="var(--oxy)" stroke-width="2"/>
   <line x1="150" y1="150" x2="150" y2="90" stroke="var(--oxy)" stroke-width="2"/>
@@ -435,7 +440,8 @@ separately for fuel, oxidiser and inert.
   <line x1="379" y1="236" x2="379" y2="244" stroke="var(--warn)" stroke-width="2"/>
   <text x="330" y="296" font-size="13" font-family="system-ui, sans-serif" fill="var(--warn)">PSV-105 — trapped volume</text>
   <circle cx="530" cy="196" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
-  <text x="530" y="201" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">FT</text>
+  <text x="530" y="192" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">FT</text>
+  <text x="530" y="206" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor">108</text>
   <line x1="530" y1="213" x2="530" y2="228" stroke="currentColor" stroke-dasharray="4 3"/>
   <text x="606" y="226" font-size="13" font-family="system-ui, sans-serif" fill="var(--oxy)">engine</text>
   <circle cx="600" cy="290" r="17" fill="none" stroke="currentColor" stroke-width="2"/>
