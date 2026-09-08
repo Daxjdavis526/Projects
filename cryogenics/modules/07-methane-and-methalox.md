@@ -6,18 +6,16 @@ A LOX facility has one propellant that makes everything else burn. A methalox
 facility has that, plus a fuel of its own, plus every place the two can meet: a
 shared trench, a shared purge manifold, a low spot where both drain. NASA's
 position in 2023 was that guidance for assessing the explosive hazard of LOX with
-liquefied natural gas was *interim* `[NASA-NESC-LOXLNG]`. Not a comfortable
-sentence, and the honest starting point.
+liquefied natural gas was *interim* `[NASA-NESC-LOXLNG]`.
 
 ## What you'll be able to do
 
-- Say why methane beat hydrogen and kerosene, in numbers, and what each argument
-  costs on the ground.
+- Say why methane beat hydrogen and kerosene, and what it costs on the ground.
 - Explain the 0.507 K margin between LOX's boiling point and methane's freezing
   point, and name the hardware it constrains.
-- Predict where a cold methane cloud goes, and site combustible-gas detectors and
-  oxygen monitors for different physical reasons.
-- Say what triggers hazardous area classification and what it then drives.
+- Site combustible-gas detectors and oxygen monitors for different physical
+  reasons.
+- Say what triggers hazardous area classification and what it drives.
 - Walk the LN₂ → LOX → methalox ladder and name what changes at each rung.
 
 ---
@@ -32,55 +30,48 @@ space-storable," with in-situ production possible on planetary surfaces
 **Density.** Liquid methane is **423 kg/m³**, against **71** for LH₂ and **808**
 for RP-1 `[NASA-CHEN-ISRU]`. For a fixed fuel mass the tank is about one sixth of
 a hydrogen tank and twice an RP-1 tank — which sets the inventory a facility must
-site, relieve and separate. The criterion worth carrying from that trade study is
-that Isp *combined with* bulk density decides, not Isp alone.
+site, relieve and separate. Isp *combined with* bulk density decides the trade.
 
 **Storability.** Hydrogen lost on mass, not Isp: boil-off, tank volume and pump
-complexity "resulted in a high spacecraft dry mass and cost which offset the high
-specific impulse" `[NASA-HURLBERT-2016]`. LOX and methane sit at **90–120 K** in
-equilibrium with deep space — no heaters, no active cooling.
+complexity "offset the high specific impulse" `[NASA-HURLBERT-2016]`, while LOX
+and methane sit at **90–120 K** in equilibrium with deep space — no heaters, no
+active cooling.
 
-**Coking and cleanliness.** A propellant must "avoid thermal decomposition and
-coking in engine coolant channels" `[NASA-CHEN-ISRU]`, and NASA's repeated "clean
-burning, non-sooting" `[NASA-HURLBERT-2016]` is the citable contrast with RP-1 —
-though no NASA source giving a side-by-side coking *rate* was found for this
-course. Operationally, non-toxic propellants "enable rapid loading, testing, and
-turnaround operations" with no hazardous loading offsite. Methalox deletes the
+**Coking, cleanliness, ISRU.** A propellant must "avoid thermal decomposition and
+coking in engine coolant channels" `[NASA-CHEN-ISRU]`, and NASA's "clean burning,
+non-sooting" `[NASA-HURLBERT-2016]` is the citable contrast with RP-1 (no
+side-by-side coking *rate* was found for this course). Non-toxic propellants also
+"enable rapid loading, testing, and turnaround operations" — methalox deletes the
 SCAPE suits and scrubbers of hypergolics and substitutes cryogenic and
-flammable-gas problems: a trade, not a free win.
-
-**Mars ISRU.** Human-Mars architectures point to "an oxygen-methane economy" built
-on ISRU commodities `[NASA-IPP]`; ~95 % CO₂ atmosphere plus regolith water makes
-both propellants producible in place `[NASA-CHEN-ISRU]`.
+flammable-gas problems. And Mars architectures point to "an oxygen-methane
+economy" `[NASA-IPP]`, both propellants being producible in place.
 
 **Thermal proximity.** LOX boils at 90.1875 K, methane at 111.667 K
-`[NIST-FLUIDS]` — close enough that a common bulkhead avoids the brutal gradient
-of a LOX/LH₂ one. Hold that thought: the same proximity puts a fuel and an
-oxidiser one wall apart.
+`[NIST-FLUIDS]` — close enough that a common bulkhead avoids the gradient a
+LOX/LH₂ bulkhead carries. The same proximity puts a fuel and an oxidiser one wall
+apart.
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
 Methane boils nearer to ambient than LOX, so the methane tank has lower heat leak
 and less boil-off than the LOX tank beside it — but its vent gas is flammable,
 which the LOX and LN₂ vent gas is not. Boil-off becomes a smaller thermal problem
-and a larger hazard problem.
+and a bigger hazard problem.
 </div>
 
 ## 2. How cold methane behaves
 
 **Two-phase flow is a normal regime, not a fault.** Every line starts warm and
-runs two-phase until cold: vapour slugs, unstable flow, transient loads,
-unreliable metering. NASA built dedicated conditioning rigs for it `[NASA-PCFS]`.
-Reliefs, restraints and instrument ranges are designed for that regime.
+runs two-phase until cold — vapour slugs, unstable flow, transient loads,
+unreliable metering — so reliefs, restraints and instrument ranges are designed
+for it `[NASA-PCFS]`.
 
 **Weathering and rollover are LNG phenomena.** Weathering is compositional drift
 as lighter components boil off first; rollover is the sudden inversion of a
 stratified tank, releasing vapour at many times the normal rate. Rocket-grade
-methane is high-purity and single-component, so it does not weather and a run
-tank is a poor rollover candidate. They still matter: Morpheus's consumables were
-"liquid oxygen, **liquefied natural gas**, helium, liquid nitrogen, and gaseous
-nitrogen" `[NASA-MORPHEUS-LESSONS]`; purity is a combustion variable too
-`[NASA-IGNITER]`; and the general lesson holds — **relief sizing must consider
-credible upset vapour-generation rates, not just steady heat leak.**
+methane is single-component, so it does not weather and a run tank is a poor
+rollover candidate — but Morpheus ran on **LNG** `[NASA-MORPHEUS-LESSONS]` and the
+general lesson holds: **relief sizing must consider credible upset
+vapour-generation rates, not just steady heat leak.**
 
 **The margin.** Methane's triple point is **90.6941 K**, oxygen's normal boiling
 point **90.1875 K** `[NIST-FLUIDS]`; Chen's trade table independently lists
@@ -94,16 +85,15 @@ widens the gap.
 </div>
 
 Three designs live on that margin. A **LOX/methane heat exchanger** must be
-de-rated — methane cooled against LOX condenses, keeps cooling, and freezes, so
+de-rated: methane cooled against LOX condenses, keeps cooling, and freezes, so
 designers insulate to *retard* heat transfer. **Densification** spends the same
-margin: the window between methane's NBP and freezing is 21 K wide, and Chen's
+margin — the window between methane's NBP and freezing is 21 K wide, and Chen's
 subcooled case sits at 101.7 K. **Common bulkheads and common-walled downcomers**
-put the two fluids in thermal contact across that half kelvin by design.
+put the two fluids in contact across that half kelvin by design.
 
-Say it as the evidence supports: the property collision is certain, the incident
-is not. No primary source reporting an actual methane-freezing event in a
-methalox exchanger or bulkhead was found. It is a design constraint that follows
-from property data, not a case study.
+Say it as the evidence supports: the collision of properties is certain, the
+incident is not. No primary source reporting an actual methane-freezing event was
+found — a design constraint from property data, not a case study.
 
 ## 3. Flammability and ignition
 
@@ -116,23 +106,20 @@ from property data, not a case study.
 | NEC gas group | **D** | B |
 
 The **narrow range in air** is methane's real advantage: a leak is more often
-outside the window than in it, and ventilation can be designed against a
-10-point band. The **rich limit in oxygen** deletes that advantage — the range
-widens roughly fourfold `[USBM-503]` — while the lean limit barely moves. Oxygen
-enrichment does not make a leak ignite *sooner*; it makes almost every mixture
-ignitable.
+outside the window than in it. The **rich limit in oxygen** deletes that
+advantage — the range widens fourfold while the lean limit barely moves
+`[USBM-503]`. Oxygen enrichment does not make a leak ignite *sooner*; it makes
+almost every mixture ignitable.
 
 The **AIT disagreement is a test-method artefact**, so use the value in the code
-you work to: the T-code in §6 depends on it, and picking 630 °C where the AHJ
-uses 537 °C is choosing the less conservative surface-temperature limit.
-
-The **MIE comparison flatters methane and should not** — a human static discharge
-is about 10 mJ, 35× methane's MIE. Neither margin is a margin. Methane's flash
-point is **−188 °C** `[USBM-680]`: there is no temperature at which liquid methane
-is not giving off ignitable vapour. And the limits are method-dependent — 15.0 %
-rich in a flammability tube, 15.8 % in a 120 L closed vessel `[NIOSH-ZLOCHOWER]`.
-A flammability limit is a property of the gas *plus* the vessel *plus* the
-criterion, never a line to operate up to.
+you work to: the T-code in §6 depends on it, and 630 °C where the AHJ uses 537 °C
+is the less conservative limit. The **MIE comparison flatters methane** — a human
+static discharge is about 10 mJ, 35× methane's MIE, so neither margin is a margin.
+The flash point of **−188 °C** `[USBM-680]` says there is no temperature at which
+liquid methane is not giving off ignitable vapour. And the limits are
+method-dependent — 15.0 % rich in a tube, 15.8 % in a closed vessel
+`[NIOSH-ZLOCHOWER]` — so treat them as a property of the gas *plus* the vessel
+*plus* the criterion, never a line to operate up to.
 
 ## 4. Where the cloud goes
 
@@ -190,34 +177,33 @@ that would entrain air.
 </svg>
 <figcaption>Figure 7.1 — The hazard lives in stage 2: cold enough to hug the ground, already diluted into the flammable band. Methane must warm more than 52 K above its boiling point before it will lift.</figcaption>
 </figure>
+
 Recognition criteria, not construction rules. **Low points are collection
 points** — trenches, cable ducts, sumps, stairwells, below-grade rooms. **Grade
-and drainage decide where the cloud runs before wind does.** **Buildings are
+and drainage decide where the cloud runs before wind does**, and **buildings are
 entered at grade**, through doorways, floor penetrations and low HVAC intakes.
-**Trenches are the specific trap**: they channel and concentrate the cloud, they
-are hard to ventilate, and they hold exactly the cabling and junction boxes that
-area classification exists to control.
+**Trenches are the specific trap**: they channel and concentrate the cloud, resist
+ventilation, and hold exactly the cabling and junction boxes that area
+classification exists to control.
 
-Sandia's LNG work is the reference body for large releases, and its own caveat is
-the teachable part: dispersion is dominated by site-specific terrain, weather and
-operations, and published distances serve for "identifying the scale of hazards,
+Sandia's LNG work is the reference body for large releases, and its caveat is the
+teachable part: published distances serve for "identifying the scale of hazards,
 not… defining hazard distances for a specific site" `[SANDIA-LNG-SPILL]`.
-`[NFPA-59A]` (2026 edition) holds the best-developed thinking about cryogenic
-methane — dispersion exclusion zones, impoundment, spill containment, grading —
-but it governs LNG plants, not test stands. Expect an AHJ to reach for it as
-precedent; do not assume it applies.
+`[NFPA-59A]` (2026) holds the best-developed thinking about cryogenic methane —
+exclusion zones, impoundment, containment, grading — but it governs LNG plants,
+not test stands. An AHJ will reach for it as precedent; it does not apply
+automatically.
 
 ## 5. Detection and monitoring
 
-- **Catalytic bead (pellistor):** burns gas on a heated bead. Cheap, rugged, sees
-  hydrogen too — but it **requires oxygen to work**, reading low or zero in an
-  inert or fuel-rich atmosphere; it is poisoned by silicones, sulphur and
-  halogens; a very rich mixture can read *low*.
-- **Point infrared:** absorption over a short fixed path. Immune to poisoning,
-  works with no oxygen, self-checking — but blinded by dirt, ice or condensation.
-- **Open-path infrared:** covers a line, good for perimeters and large equipment.
-  Reports a path-integrated value (LEL·metres), not a point concentration;
-  alignment and obscuration are its failure modes.
+- **Catalytic bead (pellistor):** cheap and rugged, but it **requires oxygen to
+  work** — reading low or zero in an inert or fuel-rich atmosphere — and it is
+  poisoned by silicones, sulphur and halogens.
+- **Point infrared:** immune to poisoning, works with no oxygen, self-checking,
+  but blinded by dirt, ice or condensation on the windows.
+- **Open-path infrared:** covers a line rather than a point, good for perimeters.
+  Reports LEL·metres, not a point concentration; alignment and obscuration are its
+  failure modes.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 A catalytic bead inside a nitrogen-purged enclosure reads zero — not because
@@ -227,13 +213,19 @@ exactly like a clean atmosphere.
 </div>
 
 **Setpoints are a fraction of LEL, and there are always two.** Practice runs to a
-low alarm near 10–20 % LEL and a high alarm near 20–40 %, set by site risk
-assessment. The alarm measures *margin*, not danger: 20 % LEL leaves 80 % to
-absorb sensor error, sampling delay, and the fact that a stratified dense cloud is
-not well mixed — 20 % LEL at a sensor two metres away can coexist with 100 % LEL
-at the leak. Two levels separate warning from action; one forces a choice between
-nuisance shutdowns and a late response. OSHA already catches a flammable gas above
-**10 % of its LFL** — 0.5 vol % for methane `[OSHA-1910.146]`.
+low alarm near 10–20 % LEL and a high alarm near 20–40 %. The alarm measures
+*margin*, not danger: 20 % LEL leaves 80 % to absorb sensor error, sampling delay,
+and the fact that a stratified dense cloud is not well mixed — 20 % LEL at a
+sensor two metres away can coexist with 100 % LEL at the leak. Two levels separate
+warning from action; one forces a choice between nuisance shutdowns and a late
+response. OSHA already treats a flammable gas above **10 % of its LFL** as
+hazardous `[OSHA-1910.146]`.
+
+**Placement is where methane diverges from hydrogen.** Warm methane is buoyant and
+cold methane is dense, so combustible-gas detectors go high *and* low, and into
+the trench — gas detectors go where the gas will be. Oxygen monitors answer a
+different question: they protect people, so they sit at breathing height in
+occupied spaces.
 
 <figure>
 <svg viewBox="0 0 660 330" role="img" aria-label="Cross-section of a test-stand enclosure showing methane detectors at high and low level and in a trench, and an oxygen monitor at breathing height, each labelled with the physical reason for its position.">
@@ -276,16 +268,16 @@ nuisance shutdowns and a late response. OSHA already catches a flammable gas abo
 </svg>
 <figcaption>Figure 7.2 — Combustible-gas detectors go where the gas goes; oxygen-deficiency monitors go where the lungs are. An ODH monitor at head height can read normal while a cold, dense, lethal atmosphere sits at floor level.</figcaption>
 </figure>
-So a methalox facility runs **three detection populations** — combustible gas,
-oxygen deficiency, oxygen enrichment — with different sensors, setpoints,
-placements and responses. Conflating them is a design finding. Deficiency
-threshold **19.5 % O₂**, enrichment **23.5 %** `[OSHA-1910.146]`, `[SLAC-CH36]`.
 
-**Calibration.** Sensors are calibrated against a reference gas and read others
-through a cross-sensitivity factor, so where the two differ, setpoints must be
-conservative. A **bump test** proves the loop is alive; only **calibration**
-proves the number. Smell will not help: rocket-grade methane is not odorised, and
-a sulphur odorant is unwelcome near oxygen-cleaned components.
+So a methalox facility runs **three detection populations** — combustible gas,
+oxygen deficiency (below **19.5 % O₂**), oxygen enrichment (above **23.5 %**) —
+with different sensors, setpoints, placements and responses `[OSHA-1910.146]`,
+`[SLAC-CH36]`. Conflating them is a design finding.
+
+**Calibration.** Sensors read non-calibration gases through a cross-sensitivity
+factor, so where the two differ setpoints must be conservative. A **bump test**
+proves the loop is alive; only **calibration** proves the number. And smell is not
+a layer here — rocket-grade methane is not odorised.
 
 ## 6. Hazardous area classification
 
@@ -295,69 +287,55 @@ character.
 
 `[NFPA-70]` (2026) Art. 500 is the foundation: **Class I**, **Division 1** where
 an ignitable mixture is present in normal operation or frequently, **Division 2**
-where only abnormally. Art. 505 offers the IEC-aligned **Zone 0/1/2**
-alternative, Art. 504 intrinsic safety, Art. 501 wiring methods. `[NFPA-497]`
-(2024) is the recommended practice used to draw the boundary and look up gas
-group and AIT. Enforceable chain: OSHA 29 CFR 1910.307 → NFPA 70 → the area must
-be classified → NFPA 497 is the recognised method.
+where only abnormally; Art. 505 offers the IEC-aligned **Zone 0/1/2** alternative,
+Art. 504 intrinsic safety, Art. 501 wiring methods. `[NFPA-497]` (2024) is the
+recommended practice used to draw the boundary and look up gas group and AIT. The
+enforceable chain: OSHA 29 CFR 1910.307 → NFPA 70 → classify the area → NFPA 497
+is the recognised method.
 
 Three questions classify an area: is there a **source of release** (flanges,
 seals, valve stems, vents, relief discharges, drains)? **How likely, how long?**
-And **where does it go** — for cold methane the classified volume is not the shape
-you would draw around a hydrogen source; it reaches down and sideways.
+And **where does it go** — for cold methane the classified volume reaches down and
+sideways, not up. What follows is equipment certified for **Group D** with a
+suitable **T-code**, wiring to Art. 501 or 505, conduit seals so a classified
+volume cannot communicate with an unclassified one through the wiring, and a
+drawing maintained as the plant changes. Group D hardware is cheap and everywhere;
+hydrogen's Group B is neither.
 
-Classification then drives every electrical choice: equipment certified for
-**Group D** with a suitable **T-code**, wiring to Art. 501 or 505, conduit seals
-so a classified volume cannot communicate with an unclassified one through the
-wiring, and a drawing maintained as the plant changes. Group D hardware is cheap
-and everywhere; hydrogen's Group B is neither.
-
-The findings a review actually turns up: the drawing was not updated after a
-modification; an unrated item sits inside the boundary (laptop, phone, camera,
-portable light, temporary heater); trenches and pits were never treated as
-classified volumes; conduit seals were omitted; and — most often missed on a
-methalox stand — the oxygen system was ignored, even though **equipment certified
-for a Group D methane atmosphere was tested in air and says nothing about an
-oxygen-enriched one**.
+The usual review findings: a drawing not updated after a modification; an unrated
+laptop, phone or temporary heater inside the boundary; trenches and pits never
+treated as classified volumes; conduit seals omitted; and — most often missed —
+the oxygen system ignored, even though **equipment certified for a Group D methane
+atmosphere was tested in air**.
 
 ## 7. Purging and inerting
 
-A GN₂ purge does four separable jobs: displace oxygen before fuel enters;
-displace fuel before the system is opened to air; exclude moisture and CO₂ that
-freeze solid on cold surfaces and block orifices; and hold a continuous inert
-blanket in annular, interstitial and enclosed volumes so a leak into them cannot
-find an oxidiser. **Inert before, inert after** — the transitions are when the
-flammable window opens. If the inner wall of a vacuum-jacketed line leaks, that
-interstitial space receives fuel; if it also communicates with air, it is a
-confined flammable mixture inside a strong container.
+A GN₂ purge does four jobs: displace oxygen before fuel enters; displace fuel
+before the system is opened to air; exclude moisture and CO₂ that freeze solid and
+block orifices; and hold an inert blanket in annular and interstitial volumes so a
+leak into them cannot find an oxidiser. **Inert before, inert after** — the
+transitions are when the flammable window opens. If the inner wall of a
+vacuum-jacketed line leaks, that interstitial space receives fuel, and if it also
+communicates with air it is a confined flammable mixture in a strong container.
 
-**Fuel and oxidiser are never purged from a shared supply.** A purge manifold is
-a flow path; share one and the only thing keeping methane out of the LOX side is
-a check valve. Check valves leak, hang open on debris, cannot be tested in place
-without breaking the joint, and fail in whichever direction the differential
-pressure points. **A check valve is not a barrier between a fuel and an
-oxidiser.** The control is physical separation — separate sources, manifolds and
-connections — with positive isolation where systems must cross-connect.
-Hydrocarbon into an oxygen system is a contamination event; oxygen into a fuel
-system creates an internal flammable mixture in a volume designed on the
-assumption there is no oxidiser.
-
-Purge gas entering an oxygen system *is part of the oxygen system* and must meet
-the same cleanliness standard, because the line injects whatever is in it —
-compressor oil, hydrocarbon residue, particulate. `[CGA-G-4.1]` governs cleaning
-of surfaces contacting fluid above 23.5 % oxygen, and particulate matters on its
-own account: particle impact is a recognised oxygen ignition mechanism
+**Fuel and oxidiser are never purged from a shared supply.** A purge manifold is a
+flow path; share one and the only thing keeping methane out of the LOX side is a
+check valve — and check valves leak, hang open on debris, cannot be tested in
+place, and fail in whichever direction the pressure points. **A check valve is not
+a barrier between a fuel and an oxidiser.** The control is physical separation,
+with positive isolation where systems must cross-connect. And purge gas entering
+an oxygen system *is part of the oxygen system*: the line injects whatever is
+inside it, so `[CGA-G-4.1]` cleaning applies above 23.5 % oxygen, and particulate
+counts too — particle impact is an oxygen ignition mechanism
 `[NASA-TM-2007-213740]`.
 
 **Helium versus nitrogen.** Nitrogen's triple point is 63.15 K, far above liquid
 hydrogen's 20.3 K, so nitrogen in an LH₂ system **freezes solid** — hence helium
-`[NIST-FLUIDS]`, `[LINDE-PURGE]`. For methalox nitrogen does not freeze and GN₂
-is generally fine, but that is a 1 bar statement: nitrogen's saturation
-temperature reaches 90 K at **3.6 bar** and 111.7 K near **15.6 bar**
-`[NIST-FLUIDS]`, and purge supplies run well above those pressures. Nitrogen can
-**liquefy** against a LOX-temperature surface, depositing liquid where gas was
-intended — pressurant collapse, unexpected chilling, slug flow. Helium stays
-gaseous under anything the system will see.
+`[NIST-FLUIDS]`, `[LINDE-PURGE]`. For methalox nitrogen does not freeze, but "GN₂
+is fine" is a 1 bar statement: its saturation temperature reaches 90 K at **3.6
+bar** and 111.7 K near **15.6 bar** `[NIST-FLUIDS]`, and purge supplies run well
+above that, so nitrogen can **liquefy** against a LOX-temperature surface. Helium
+stays gaseous under anything the system will see.
 
 ## 8. Methalox is more than the sum of its parts
 
@@ -369,13 +347,12 @@ the rich side — in whatever volume both releases can reach.
 NASA has published on the combined hazard directly. The NESC investigation of
 LO₂/LNG found that the **miscibility** of the two liquids creates a risk of
 **condensed-phase detonation** with significantly higher overpressures than
-LO₂/LH₂ or LO₂/RP-1, with "unique risks when used in launch vehicles that have
-common bulkhead tank designs, common-walled downcomers, or transfer tubes," and
-that intentionally mixed unconfined mixtures showed "a broad detonable range with
-yields greater than that of TNT" `[NASA-NESC-LOXLNG]`. The same source records
-that little data exist for launch-vehicle accident scenarios and that guidance was
-interim. Caveats travel with it: the text had to be reconstructed during
-verification, and no numeric value from it is reproduced here.
+LO₂/LH₂ or LO₂/RP-1, and "unique risks when used in launch vehicles that have
+common bulkhead tank designs, common-walled downcomers, or transfer tubes";
+deliberately mixed unconfined samples showed "a broad detonable range with yields
+greater than that of TNT" `[NASA-NESC-LOXLNG]`. Caveats travel with it: little
+data exist for accident scenarios, and the source text had to be reconstructed
+during verification, so no numeric value from it is reproduced here.
 
 <figure>
 <svg viewBox="0 0 660 330" role="img" aria-label="Layout diagram: separate fuel and oxidiser vent stacks, separate purge panels and separate trenches, with a shared trench and a combined vent header marked as prohibited.">
@@ -417,162 +394,149 @@ verification, and no numeric value from it is reproduced here.
 </svg>
 <figcaption>Figure 7.3 — Fuel orange, oxidiser green, inert grey. Every dashed warn-coloured path is a route by which one fluid reaches the other: a combined vent header, a shared trench, a shared purge manifold behind a check valve.</figcaption>
 </figure>
+
 The recognition criteria are structural. Is there **any volume** — room, trench,
 duct, pit, cable chase — into which both a fuel and an oxidiser release are
 credible? Is there **shared drainage or grading** bringing a methane pool and a
-LOX pool to the same low point? Are the **relief and vent discharges** routed so
+LOX pool to the same low point? Are the **vent and relief discharges** routed so
 their plumes can meet under any wind?
 
-A shared vent stack is the one flat prohibition here: it makes a flammable
-mixture inside a pipe, undiluted and uninspectable. The same logic covers shared
-relief headers and knockout drums — and the subtler case of separate stacks whose
-plumes co-mingle downstream because discharge points are close, exit velocities
-low, or the building wake brings them together.
+A shared vent stack is the one flat prohibition here: it makes a flammable mixture
+inside a pipe, undiluted and uninspectable. The same logic covers shared relief
+headers — and the subtler case of separate stacks whose plumes co-mingle
+downstream because discharge points are close, exit velocities low, or the
+building wake brings them together.
 
 At the engine, start and shutdown transients pass through mixture ratios nowhere
-near the design point. A fuel-rich pocket at the injector face or an oxygen-rich
-pocket in the chamber is a normal transient feature — and an oxygen-rich
-condition makes chamber and nozzle *materials* flammable in a way they are not at
-the design mixture ratio `[NASA-TM-2007-213740]`. Sequencing and ignition timing
-are operating-procedure content and stop being this course's business here.
+near the design point; a fuel-rich pocket at the injector face or an oxygen-rich
+pocket in the chamber is normal, and an oxygen-rich condition makes chamber and
+nozzle *materials* flammable `[NASA-TM-2007-213740]`. Sequencing and ignition
+timing are operating-procedure content, and stop here.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 NASA flooded 2 m square asphalt slabs with LOX. In rainy weather, plummet impact
-produced no reaction. On a dry slab, a plummet-initiated test gave <em>a violent
-reaction that appeared to propagate over the entire slab surface</em>, destroyed
-the fixture and threw fragments 48 m; laboratory impact tests reacted on old
-asphalt at energies as low as 1 kg·m, while concrete never reacted
-<code>[UVU-LOX-ASPHALT]</code>. Both halves are true — initiation takes real
-energy, and moisture suppressed it — but those energies are within reach of
-ordinary mechanical events. LOX plus <em>any</em> hydrocarbon (asphalt, grease,
-oil, paint, leaves, cardboard) is an impact-sensitive mixture in intimate
-contact. Housekeeping is an engineering control, not tidiness.
+produced no reaction; on a dry slab it gave <em>a violent reaction that appeared
+to propagate over the entire slab surface</em>, destroyed the fixture and threw
+fragments 48 m. Laboratory impact tests reacted on old asphalt at energies as low
+as 1 kg·m; concrete never reacted <code>[UVU-LOX-ASPHALT]</code>. Both halves are
+true — initiation takes real energy, and moisture suppressed it — but those
+energies are within reach of ordinary mechanical events. LOX plus <em>any</em>
+hydrocarbon (asphalt, grease, oil, paint, leaves, cardboard) is an
+impact-sensitive mixture in intimate contact, so housekeeping is an engineering
+control, not tidiness.
 </div>
 
 ## 9. The escalation ladder
 
 | Dimension | LN₂ only | + LOX | + LOX & methane |
 |---|---|---|---|
-| **Dominant hazard** | Asphyxiation, cold burn, trapped liquid | **plus fire**: LOX makes existing materials flammable | **plus a fuel**, and a **miscible pair** capable of condensed-phase detonation `[NASA-NESC-LOXLNG]` |
-| **Materials & cleaning** | Ordinary cryogenic selection; embrittlement | **Step change:** oxygen cleaning above 23.5 % O₂, hydrocarbon and particulate limits `[CGA-G-4.1]` | LOX side still oxygen-clean; methane is undemanding, so **cross-contamination control dominates** |
-| **Ignition sources** | Largely irrelevant | Particle impact, heat of compression, friction, mechanical impact | Those **and** static, electrical and hot-surface sources, at once, on the same hardware |
-| **Area classification** | None | Still none — but O₂ invalidates certifications tested in air | **Required.** Class I, Group D, T-codes, drawings, conduit seals `[NFPA-70]`, `[NFPA-497]` |
-| **Detection** | O₂ deficiency at breathing height | Add **O₂ enrichment** — different sensor, opposite alarm direction | Add **combustible gas, high and low**: three populations, three setpoint philosophies |
-| **Separation & quantity** | Modest; driven by ODH and relief discharge | Bulk oxygen separation from combustibles controls `[NFPA-55]` | **Fuel–oxidiser separation governs**; launch sites add explosive siting and net explosive weight |
-| **Relief & vent design** | Vents are benign | Discharge is an **oxygen-enriching** plume | Discharge is a **flammable** plume; vents **never share a stack**, and plume interaction must be assessed |
-| **Procedures & training** | Cryogen handling, PPE, confined space | Add cleanliness discipline, no hydrocarbons, saturated-clothing hazard | Add flammable-gas and ignition-source control, hot work, cross-contamination rules |
-| **Emergency response** | Evacuate, ventilate, warm up | Fire credible; LOX-soaked material impact-sensitive `[UVU-LOX-ASPHALT]` | Vapour cloud and pool fire; **detonation credible**; a fire fed by an oxidiser you cannot exclude |
-| **Code & institutional triggers** | `[NFPA-55]` Ch. 8; OSHA 1910.101 | `[NFPA-55]` Ch. 9; OSHA 1910.104; oxygen compatibility assessment | Add NEC classification, `[NFPA-59A]` as reference practice, explosive siting, methods NASA called interim |
+| **Dominant hazard** | Asphyxiation, cold burn, trapped liquid | **plus fire**: LOX makes materials flammable | **plus a fuel**, and a **miscible pair** capable of condensed-phase detonation `[NASA-NESC-LOXLNG]` |
+| **Materials & cleaning** | Ordinary cryogenic selection | **Step change:** oxygen cleaning above 23.5 % O₂ `[CGA-G-4.1]` | LOX side still oxygen-clean; **cross-contamination control dominates** |
+| **Ignition sources** | Largely irrelevant | Particle impact, heat of compression, friction, impact | Those **and** static, electrical and hot surfaces, on the same hardware |
+| **Area classification** | None | Still none — but O₂ invalidates certifications tested in air | **Required.** Class I, Group D, T-codes, drawings, seals `[NFPA-70]`, `[NFPA-497]` |
+| **Detection** | O₂ deficiency at breathing height | Add **O₂ enrichment** — opposite alarm direction | Add **combustible gas, high and low**: three populations |
+| **Separation & quantity** | Modest; ODH and relief discharge | Bulk oxygen separation from combustibles `[NFPA-55]` | **Fuel–oxidiser separation governs**; launch sites add explosive siting |
+| **Relief & vent design** | Vents are benign | Discharge is an **oxygen-enriching** plume | Discharge is **flammable**; vents **never share a stack** |
+| **Procedures & training** | Cryogen handling, PPE, confined space | Add cleanliness, no hydrocarbons, saturated clothing | Add ignition-source and hot-work control, cross-contamination |
+| **Emergency response** | Evacuate, ventilate, warm up | Fire credible; LOX-soaked material impact-sensitive `[UVU-LOX-ASPHALT]` | Vapour cloud, pool fire, **credible detonation** |
+| **Code & institutional** | `[NFPA-55]` Ch. 8; OSHA 1910.101 | `[NFPA-55]` Ch. 9; OSHA 1910.104; oxygen compatibility assessment | Add NEC classification, `[NFPA-59A]`, explosive siting, methods NASA called interim |
 
 **LN₂ → LOX is a change of kind, not degree.** Nothing burns; then everything
-does. The facility does not get a bigger version of its old hazard, it gets a new
-one, and the whole materials and cleanliness discipline exists only from this rung
+does. The entire materials and cleanliness discipline exists only from this rung
 upward.
 
 **LOX → methalox is the step people underestimate.** Adding a fuel adds a fuel's
-hazards; that much is expected. What is not expected is that the *co-location*
-creates hazards neither system has — a flammable range four times wider wherever
-the clouds meet, a shared trench that collects both, a purge manifold connecting
-them behind a check valve, vent plumes merging in a crosswind, and a miscible
-liquid pair that can detonate rather than deflagrate. Those hazards live in the
-spaces *between* the systems, exactly where a system-by-system review does not
-look — and a review assuming the LOX/RP-1 or LOX/LH₂ siting precedent transfers
-is assuming something NASA does not `[NASA-NESC-LOXLNG]`.
+hazards; that much is expected. What is not is that the *co-location* creates
+hazards neither system has — a flammable range four times wider wherever the
+clouds meet, a shared trench that collects both, a purge manifold connecting them
+behind a check valve, vent plumes merging in a crosswind, a miscible liquid pair
+that can detonate rather than deflagrate. Those hazards live in the spaces
+*between* the systems, exactly where a system-by-system review does not look — and
+assuming the LOX/RP-1 or LOX/LH₂ precedent transfers is assuming something NASA
+does not `[NASA-NESC-LOXLNG]`.
 
 ## 10. What NASA actually published
 
-Project Morpheus is the deepest public facility-and-operations record:
-`[NASA-MORPHEUS-LESSONS]` (JSC-CN-29387, NTRS 20140001410) carries the propellant
-rationale, pad-crew positions with per-position certification for cryogenic
-handling, hazard tracking with an embedded S&MA engineer, and the August 2012
-vehicle loss, investigated in `[NASA-MORPHEUS-FAILURE]` (NTRS 20140001490). The
-propulsion rationale is best stated in `[NASA-HURLBERT-2016]` (JSC-CN-35060).
-Hardware experience: RS-18 ascent-engine testing at White Sands
-`[NASA-RS18-WSTF]`, vehicle-level hot-fire at thermal vacuum
-`[NASA-TVAC-HOTFIRE]`, igniter testing with methane purity as a variable
-`[NASA-IGNITER]`, the conditioning feed rigs `[NASA-PCFS]`, and the propellant
-trade study `[NASA-CHEN-ISRU]`.
+Project Morpheus is the deepest public facility record: `[NASA-MORPHEUS-LESSONS]`
+(JSC-CN-29387, NTRS 20140001410) carries the propellant rationale, pad-crew
+positions with per-position certification for cryogenic handling, hazard tracking
+with an embedded S&MA engineer, and the August 2012 vehicle loss, investigated in
+`[NASA-MORPHEUS-FAILURE]` (NTRS 20140001490). Hardware experience: RS-18 testing
+at White Sands `[NASA-RS18-WSTF]`, vehicle-level hot-fire at thermal vacuum
+`[NASA-TVAC-HOTFIRE]`, igniter tests with methane purity as a variable
+`[NASA-IGNITER]`, conditioning feed rigs `[NASA-PCFS]`, and the propellant trade
+study `[NASA-CHEN-ISRU]`.
 
 <div class="box"><span class="lbl">Worth knowing</span>
 <strong>Morpheus did not run on rocket-grade methane — it ran on LNG</strong>:
 its consumables were "liquid oxygen, liquefied natural gas, helium, liquid
-nitrogen, and gaseous nitrogen" <code>[NASA-MORPHEUS-LESSONS]</code>, and the
-NESC explosive-hazard work is likewise framed as LO₂/LNG. And <strong>there is no
-public NASA training document called "Cryogenics Safety for Morpheus"</strong> —
-it is widely assumed to exist, but NTRS and nasa.gov return nothing under that
-title. Cite the lessons-learned papers above and the certification requirement in
-<strong>JPR 1700.1 Ch. 6.4</strong> instead.
+nitrogen, and gaseous nitrogen" <code>[NASA-MORPHEUS-LESSONS]</code>, and the NESC
+work is likewise framed as LO₂/LNG. And <strong>there is no public NASA training
+document called "Cryogenics Safety for Morpheus"</strong> — it is widely assumed
+to exist, but NTRS and nasa.gov return nothing under that title. Cite the
+lessons-learned papers and the certification requirement in <strong>JPR 1700.1
+Ch. 6.4</strong> instead.
 </div>
 
 ---
 
 ## Checkpoint quiz
 
-1. A stand routes its fuel-tank relief and its LOX-tank relief into one header
-   discharging from a single tall stack, arguing that height disperses both
-   safely. What is wrong — and what subtler version of the mistake survives if you
-   split the stacks?
+1. A stand routes its fuel-tank relief and its LOX-tank relief into one header on
+   a single tall stack, arguing that height disperses both safely. What is wrong —
+   and what subtler version survives if you split the stacks?
 
 2. A cold methane leak occurs at grade on a still day. When is the cloud *most*
-   dangerous? (a) at release, 112 K · (b) partway through warming, still below
-   164.25 K · (c) once warmed above 164.25 K · (d) risk is constant
+   dangerous? (a) at release, 112 K · (b) warming, still below 164.25 K · (c) once
+   above 164.25 K · (d) risk is constant
 
 3. A design uses catalytic bead detectors throughout, including inside a
-   continuously GN₂-purged enclosure and in the roof space of a methane pump
-   house, with none at low level. Identify two independent problems.
+   GN₂-purged enclosure and in a pump-house roof space, with none at low level.
+   Identify two independent problems.
 
 4. Methane's triple point is 90.6941 K; oxygen's normal boiling point 90.1875 K.
-   State the margin, name two pieces of hardware it constrains, and say whether
-   this is a documented failure mode or an inferred one.
+   State the margin, name two pieces of hardware it constrains, and say whether it
+   is a documented failure mode or an inferred one.
 
 5. A facility handles LN₂ only and proposes adding LOX, then methane. Which rung
-   introduces hazardous area classification — and why does the other rung not,
-   despite still changing the electrical problem?
+   introduces hazardous area classification — and why does the other not, despite
+   still changing the electrical problem?
 
 <details>
 <summary>Show answers</summary>
 
-1. **A shared header makes a flammable mixture inside a pipe** — undiluted,
-   uninspectable, in a strong container — and stack height does nothing, because
-   the mixing happened upstream of the tip. The same ban covers shared relief
-   headers and knockout drums. What survives separate stacks: **the plumes
-   co-mingle downstream in the atmosphere** when discharge points are close, exit
-   velocities low, or terrain and building wake bring them together. Separation is
-   about where the plumes go, not where the pipes end.
+1. **A shared header makes a flammable mixture inside a pipe** — undiluted and
+   uninspectable — and stack height does nothing, because the mixing happened
+   upstream of the tip. What survives separate stacks: **the plumes co-mingle
+   downstream** when discharge points are close, exit velocities low, or building
+   wake brings them together. Separation is about where the plumes go.
 
 2. **(b).** At release the cloud is far too rich to burn and hugs the ground;
    above 164.25 K it is buoyant and lifting away. In between it is still denser
-   than air — running into trenches, pits and doorways — while having entrained
-   enough air to sit inside 5–15 % somewhere. (a) is wrong because a mixture above
-   the upper limit only becomes ignitable as it dilutes; (c) because buoyancy is
-   what removes the cloud; (d) because the hazard is entirely a function of
-   temperature and dilution history.
+   than air — running into trenches, pits and doorways — while diluted into 5–15 %
+   somewhere. (a) is wrong because a mixture above the upper limit only becomes
+   ignitable as it dilutes; (c) because buoyancy removes the cloud; (d) because the
+   hazard is a function of temperature and dilution history.
 
 3. **Catalytic beads need oxygen to work**, so in a nitrogen-purged enclosure the
-   sensor reads near zero however much methane is present — the atmosphere you most
-   need to measure is the one it cannot. Point IR is oxygen-independent and belongs
-   there. **Roof-only placement is imported hydrogen practice**: high detectors
-   catch the small warm leak, but a cryogenic release makes vapour ~1.45× the
-   density of air that must warm more than 52 K before it lifts, so without
-   low-level or trench detection the worst case is invisible. Also acceptable:
-   beads can be poisoned silently and fail *low*, reporting safe.
+   sensor reads near zero however much methane is present; point IR is
+   oxygen-independent and belongs there. **Roof-only placement is imported
+   hydrogen practice**: a cryogenic release makes vapour ~1.45× the density of air
+   that must warm more than 52 K before it lifts, so the worst case is invisible.
+   Also acceptable: beads can be poisoned silently and fail *low*.
 
 4. **0.507 K — methane freezes above the temperature at which LOX boils.** Any two
    of: a LOX/methane heat exchanger (de-rated and insulated to *retard* heat
-   transfer, because methane cooled against LOX condenses, then freezes and plugs
-   it); a common bulkhead or common-walled downcomer, which puts the fluids in
-   thermal contact by design; densified methane storage, which spends freezing
-   margin to buy density. It is **inferred**: the property data are Confidence A
-   and the arithmetic elementary, but no primary source documenting an actual
-   freezing incident was found.
+   transfer, because methane cooled against LOX condenses, freezes and plugs it);
+   a common bulkhead or common-walled downcomer; densified methane storage, which
+   spends freezing margin to buy density. It is **inferred** — the property data
+   are Confidence A, but no source documents an actual freezing incident.
 
-5. **Methane triggers classification; LOX does not.** NEC Art. 500/505 covers
-   locations where a *flammable* gas or vapour may be present, and **oxygen is an
-   oxidiser, not a fuel** — it creates no ignitable atmosphere of its own. The trap
-   in the second half: adding LOX still changes the electrical problem, because
-   equipment certified for a Group D methane atmosphere was tested **in air** and
-   says nothing about an oxygen-enriched one. So the classification exercise on a
-   methalox stand must account for the oxygen system even though the oxygen system
-   did not trigger it.
+5. **Methane triggers classification; LOX does not**, because NEC Art. 500/505
+   covers locations where a *flammable* gas may be present and **oxygen is an
+   oxidiser, not a fuel**. The trap in the second half: adding LOX still changes
+   the electrical problem, because equipment certified for a Group D methane
+   atmosphere was tested **in air**. The classification exercise must therefore
+   account for the oxygen system that did not trigger it.
 
 </details>
