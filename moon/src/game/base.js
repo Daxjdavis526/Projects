@@ -27,9 +27,8 @@ import * as THREE from 'three';
 import { SHIP } from '../config.js';
 import { Pad } from '../terrain/heightfield.js';
 import { enuBasis, llhToXyz, xyzToLlh, offsetLatLon, surfaceDistance } from '../physics/frames.js';
+import { ShipInterior } from './interior.js';
 
-/* Where the decks are in the ship's own frame, from models/ship.js. */
-const DECKS = [2.55, 4.95];
 const DECK_CLEAR = 2.15;
 /* The free floor inside the rack line, with the corners of the twelve-sided
    hull cut off. */
@@ -48,9 +47,6 @@ export class Base {
     this.lon = opts.lon;
     this.heading = opts.heading ?? 0;
     this.model = null;
-    this.airlock = 1;            // 1 = open to the cabin, 0 = open to vacuum
-    this.airlockTarget = 1;
-    this.pressure = 1;
     this.interiorLevel = 0.85;
     this.group = new THREE.Group();
     opts.stage.world.add(this.group);
@@ -62,6 +58,10 @@ export class Base {
       radius: SHIP.padRadius, feather: SHIP.padFeather, height: this.groundHeight,
     });
     this.hf.addPad(this.pad);
+    this.interior = new ShipInterior({
+      lat: this.lat, lon: this.lon, heading: this.heading,
+      groundHeight: this.groundHeight,
+    });
     if (this.terrain) {
       const d = SHIP.padRadius * 2.4 / 30300;    // degrees, generously
       this.terrain.invalidateArea([this.lon - d, this.lat - d, this.lon + d, this.lat + d]);
@@ -104,87 +104,25 @@ export class Base {
    * A point on the surface expressed in the ship's own frame.
    * @returns {{x, y, z, range}} metres; x east of the ship, z south of it
    */
-  toLocal(lat, lon, alt) {
-    const range = surfaceDistance(lat, lon, this.lat, this.lon);
-    if (range > 400) return { x: 1e6, y: 0, z: 1e6, range };
-    /* Close in, the surface is flat enough that a local tangent plane is exact
-       to well under a millimetre, so this is a rotation and not a projection. */
-    const dLat = (lat - this.lat) * Math.PI / 180 * 1737400;
-    const dLon = (lon - this.lon) * Math.PI / 180 * 1737400 * Math.cos(this.lat * Math.PI / 180);
-    const h = -this.heading * Math.PI / 180;
-    const c = Math.cos(h), s = Math.sin(h);
-    return {
-      x: dLon * c - dLat * s,
-      y: alt - this.groundHeight,
-      z: -(dLat * c + dLon * s),
-      range,
-    };
-  }
-
-  /** True where the hull's floor plan is solid ground rather than a doorway. */
-  static onFloor(x, z) {
-    return Math.abs(x) < FLOOR_HALF && Math.abs(z) < FLOOR_HALF &&
-           Math.abs(x) + Math.abs(z) < FLOOR_HALF + FLOOR_DIAG;
-  }
-
-  /**
-   * The floor under a point inside the ship, or null if there is none.
-   * Whichever deck is below you and within a step wins, so walking up the
-   * companionway hands you from one to the next.
-   */
-  floorAt(lat, lon, alt) {
-    const p = this.toLocal(lat, lon, alt);
-    if (p.range > 12 || !Base.onFloor(p.x, p.z)) return null;
-    let best = null;
-    for (const d of DECKS) {
-      if (p.y >= d - 0.6 && p.y < d + DECK_CLEAR) best = d;
-    }
-    return best === null ? null : this.groundHeight + best;
-  }
-
-  /** Are you breathing ship air? */
-  inside(lat, lon, alt) { return this.floorAt(lat, lon, alt) !== null; }
-
-  /**
-   * Push a position out of the hull walls. Returns a corrected lat/lon, or
-   * null if nothing was in the way.
-   */
-  resolve(lat, lon, alt, radius = 0.34) {
-    const p = this.toLocal(lat, lon, alt);
-    if (p.range > 14) return null;
-    const deck = this.floorAt(lat, lon, alt);
-    if (deck === null) return null;
-    const lim = FLOOR_HALF - radius;
-    let x = Math.max(-lim, Math.min(lim, p.x));
-    let z = Math.max(-lim, Math.min(lim, p.z));
-    /* The cut corners, as a single diagonal constraint. */
-    const diag = Math.abs(x) + Math.abs(z);
-    const diagLim = FLOOR_HALF + FLOOR_DIAG - radius;
-    if (diag > diagLim) {
-      const k = diagLim / diag;
-      x *= k; z *= k;
-    }
-    if (Math.abs(x - p.x) < 1e-6 && Math.abs(z - p.z) < 1e-6) return null;
-    /* Back to geographic. */
-    const h = this.heading * Math.PI / 180;
-    const c = Math.cos(h), s = Math.sin(h);
-    const dLon = x * c - (-z) * s;
-    const dLat = (-z) * c + x * s;
-    return {
-      lat: this.lat + dLat / 1737400 * 180 / Math.PI,
-      lon: this.lon + dLon / (1737400 * Math.cos(this.lat * Math.PI / 180)) * 180 / Math.PI,
-    };
-  }
-
-  /** Open the airlock towards vacuum (0) or towards the cabin (1). */
-  cycleAirlock(toward) { this.airlockTarget = toward; }
+  /* The geometry and the airlock live in game/interior.js, which imports no
+     three.js so it can be checked in Node. Everything below is the same call
+     on that object; the split exists because this is the code that had no
+     callers and no test, and both of those were the same problem. */
+  toLocal(lat, lon, alt) { return this.interior.toLocal(lat, lon, alt); }
+  toGeographic(x, z) { return this.interior.toGeographic(x, z); }
+  floorAt(lat, lon, alt) { return this.interior.floorAt(lat, lon, alt); }
+  inside(lat, lon, alt) { return this.interior.inside(lat, lon, alt); }
+  resolve(lat, lon, alt, radius) { return this.interior.resolve(lat, lon, alt, radius); }
+  ladderFoot() { return this.interior.ladderFoot(); }
+  insideStand() { return this.interior.insideStand(); }
+  canEnter(lat, lon, alt) { return this.interior.canEnter(lat, lon, alt); }
+  canExit(lat, lon, alt) { return this.interior.canExit(lat, lon, alt); }
+  cycleAirlock(toward) { this.interior.cycleAirlock(toward); }
+  get airlock() { return this.interior.airlock; }
+  get pressure() { return this.interior.pressure; }
 
   step(dt, playerLlh) {
-    const rate = dt / SHIP.airlockCycle;
-    if (this.airlock < this.airlockTarget) this.airlock = Math.min(this.airlockTarget, this.airlock + rate);
-    else if (this.airlock > this.airlockTarget) this.airlock = Math.max(this.airlockTarget, this.airlock - rate);
-    /* Pressure follows the inner door, which is what the sound listens to. */
-    this.pressure = Math.max(0, Math.min(1, this.airlock));
+    this.interior.step(dt);
     if (this.model) {
       this.model.setAirlock(this.airlock);
       this.model.animate({ airlock: this.airlock, interiorLevel: this.interiorLevel,

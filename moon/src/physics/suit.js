@@ -66,6 +66,20 @@ export class Suit {
     return this;
   }
 
+  /**
+   * What a full recharge would take out of whoever is providing it: the
+   * shortfall against a full suit, not the capacity, so topping up a nearly
+   * full suit is nearly free.
+   */
+  refillCost() {
+    return {
+      o2: Math.max(0, SUIT.o2Capacity - this.o2) +
+          Math.max(0, SUIT.o2Secondary - this.o2Reserve),
+      co2: Math.max(0, this.co2),
+      water: Math.max(0, SUIT.waterCapacity - this.water),
+    };
+  }
+
   /** A full recharge, from the ship or the rover. */
   recharge() {
     this.o2 = SUIT.o2Capacity;

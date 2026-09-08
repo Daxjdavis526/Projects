@@ -4,7 +4,8 @@
    wheels can only push as hard as the ground holds them down, and the ground
    holds them down with a sixth of the weight it would on Earth. */
 import { Rover, MODE } from '../src/physics/rover.js';
-import { ROVER, GM_MOON, R_MOON } from '../src/config.js';
+import { ROVER, SUIT, GM_MOON, R_MOON } from '../src/config.js';
+import { Suit } from '../src/physics/suit.js';
 import { surfaceDistance } from '../src/physics/frames.js';
 
 let failures = 0;
@@ -214,6 +215,50 @@ console.log('snapshot');
                    'mode', 'canopy', 'pressure', 'boostHeat', 'supplies', 'enduranceHours'])
     check(`snapshot carries ${k}`, s[k] !== undefined);
   check('four wheels report suspension travel', s.suspension.length === 4);
+}
+
+console.log('the rover is a range tier, not a readout');
+{
+  const ground = { heightAt: () => 0, slopeAt: () => 0, normalAt: () => ({ e: 0, n: 0, u: 1 }) };
+
+  /* Driving sealed has to cost something. `consume` used to be called only
+     from the sleep handler, so the days-remaining figure in the nav console
+     never moved while you drove and the middle tier constrained nothing. */
+  const r = new Rover({ ground, lat: 0, lon: 0 });
+  r.mode = MODE.CLOSED;
+  r.pressure = 1;
+  const before = r.endurance(1);
+  r.consume(8, 1);
+  check('eight hours sealed in the cabin costs eight hours of endurance',
+    Math.abs((before - r.endurance(1)) - 8) < 0.6,
+    `${before.toFixed(1)} h -> ${r.endurance(1).toFixed(1)} h`);
+
+  /* A recharge comes out of the rover's tanks. Free consumables on every nap
+     made the tier decorative: you could stay out indefinitely by sleeping. */
+  const s = new Suit();
+  for (let t = 0; t < 7 * 3600; t += 60) s.step(60, { exertion: 0.5, sunlit: true });
+  const cost = s.refillCost();
+  check('a suit worked for seven hours needs most of a kilogram of oxygen back',
+    cost.o2 > 0.5 && cost.o2 < 1.3, cost.o2.toFixed(2) + ' kg');
+  const rover = new Rover({ ground, lat: 0, lon: 0 });
+  const o2Before = rover.supplies.o2;
+  check('and the rover can give it', rover.rechargeSuit(s) === true);
+  check('out of its own tanks, not out of nowhere',
+    Math.abs((o2Before - rover.supplies.o2) - cost.o2) < 0.01,
+    `${o2Before.toFixed(2)} -> ${rover.supplies.o2.toFixed(2)} kg`);
+  check('topping up a full suit is free, because there is nothing to top up',
+    rover.rechargeSuit(new Suit()) === true &&
+    Math.abs(rover.supplies.o2 - (o2Before - cost.o2)) < 1e-9);
+
+  /* And it has to be able to run out. */
+  const empty = new Rover({ ground, lat: 0, lon: 0 });
+  empty.supplies.o2 = 0.05;
+  const drained = new Suit();
+  for (let t = 0; t < 7 * 3600; t += 60) drained.step(60, { exertion: 0.5, sunlit: true });
+  check('an empty rover refuses rather than conjuring oxygen',
+    empty.rechargeSuit(drained) === false);
+  check('and the suit it refused is still empty',
+    drained.o2 < 0.5 * SUIT.o2Capacity);
 }
 
 console.log(failures ? `\nrover: ${failures} FAILED` : '\nrover: all checks passed');

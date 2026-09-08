@@ -285,6 +285,22 @@ export class Rover {
     return this;
   }
 
+  /**
+   * Top a suit up from the rover's own stores. Returns false when there is not
+   * enough left, because a recharge that costs nothing is not a range tier —
+   * the point of the middle tier is that it can run out too.
+   */
+  rechargeSuit(suit) {
+    const need = suit.refillCost ? suit.refillCost() : { o2: 1.0, co2: 0.6, water: 4.5 };
+    if (this.supplies.o2 < need.o2 || this.supplies.co2 < need.co2 ||
+        this.supplies.water < need.water) return false;
+    this.supplies.o2 -= need.o2;
+    this.supplies.co2 -= need.co2;
+    this.supplies.water -= need.water;
+    suit.recharge();
+    return true;
+  }
+
   /** How long the rover can keep someone alive, in hours. */
   endurance(crew = 1) {
     return Math.min(

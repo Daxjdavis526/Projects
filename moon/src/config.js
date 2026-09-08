@@ -211,7 +211,11 @@ export const LABEL = {
   MEASURED: 'MEASURED',
   DERIVED: 'DERIVED',
   INTERPOLATED: 'INTERPOLATED',
-  REGIONAL: 'REGIONAL DATA',
+  /* One word each, so they read as a family of tags rather than as prose, and
+     so the constant matches what is actually painted: this one said
+     'REGIONAL DATA' while the screen said 'REGIONAL', which meant adopting the
+     constant would silently have changed the display. */
+  REGIONAL: 'REGIONAL',
   PROCEDURAL: 'PROCEDURAL',
   FICTIONAL: 'FICTIONAL',
 };

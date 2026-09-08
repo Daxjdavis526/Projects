@@ -15,7 +15,8 @@
    ========================================================================== */
 
 import * as THREE from 'three';
-import { QUALITY, DEFAULT_QUALITY, R_MOON, TERRAIN, OPTICS, TIME, STREAM } from './config.js';
+import { QUALITY, DEFAULT_QUALITY, R_MOON, TERRAIN, OPTICS, TIME, STREAM, LABEL,
+         SUIT, ROVER, PLAYER } from './config.js';
 import { Stage } from './render/stage.js';
 import { TerrainSystem } from './render/terrain.js';
 import { Sky } from './render/sky.js';
@@ -37,6 +38,7 @@ import { Base } from './game/base.js';
 import { Vehicle } from './game/vehicle.js';
 import { HistoricSites } from './game/historic.js';
 import { Shelter, hoursUntilSunElevation } from './game/shelter.js';
+import { Visited } from './game/visited.js';
 import { Moment } from './game/moment.js';
 import { clearLanding, standClearOf, explain as explainKeepOut } from './game/keepout.js';
 import { SuitHud } from './ui/suithud.js';
@@ -265,7 +267,16 @@ async function start() {
     onRest: (hours, what) => {
       if (what === 'eat') { shelter.needs.eat(); return; }
       if (what === 'resupply' && vehicle) { vehicle.rover.restock(); vehicle.dust = 0; return; }
-      if (what === 'recharge' && eva) { eva.suit.recharge(); return; }
+      /* A recharge comes out of somewhere. Free suit consumables on every
+         sleep made the middle range tier decorative: you could stay out
+         indefinitely as long as you napped. */
+      if (what === 'recharge' && eva) {
+        const from = shelterKind();
+        if (from === 'rover' && vehicle) {
+          if (!vehicle.rover.rechargeSuit(eva.suit)) return;
+        } else eva.suit.recharge();          // the ship restocks from its own tanks
+        return;
+      }
       let h = hours;
       if (what && what.startsWith('sun:')) {
         h = hoursUntilSunElevation(skyAt, ephemerisAt, jdFromUnixMs,
@@ -275,11 +286,23 @@ async function start() {
       if (!h) return;
       state.simMs += h * 3600 * 1000;
       shelter.needs.sleep(h);
-      if (eva) eva.suit.recharge();
-      if (vehicle && vehicle.rover.pressure > 0.9) vehicle.rover.consume(h, 1);
+      /* Sleeping in the rover draws on the rover; sleeping in the ship draws
+         on the ship, which for now is the one place with more than it needs. */
+      const where = shelterKind();
+      if (vehicle && where === 'rover') vehicle.rover.consume(h, 1);
+      if (eva) {
+        if (where === 'rover' && vehicle) vehicle.rover.rechargeSuit(eva.suit);
+        else eva.suit.recharge();
+      }
       save.write(game, 'slept');
     },
   });
+  /* Where you are sheltering, which decides what a night's sleep costs and
+     whose tanks a recharge comes out of. */
+  const shelterKind = () => (
+    base && eva && base.inside(eva.player.llh.lat, eva.player.llh.lon, eva.player.llh.h) ? 'ship'
+      : driving && vehicle && vehicle.rover.pressure > 0.9 ? 'rover' : null);
+
   const save = new Save();
   /* Audio cannot start without a gesture, so it waits for the first key or
      click and is a safe no-op until then. */
@@ -304,6 +327,20 @@ async function start() {
   /* On foot. Created only when the player steps outside; until then the free
      camera flies and `eva` is null. */
   let eva = null, driving = false, canopyPress = false;
+  /* The places you have actually been inside. Nothing gates on it; it is
+     the record of a run, and the brief is explicit that discovery is the
+     content. It was a hardcoded empty array that nothing appended to and
+     the save never read back. */
+  const visited = new Visited();
+
+  /* The bottom-right line, which is the game's whole notification budget. */
+  let hintBack = 0;
+  const say = (text, ms) => {
+    el('hint').textContent = text;
+    clearTimeout(hintBack);
+    hintBack = setTimeout(() => { el('hint').textContent = 'H for controls'; }, ms);
+  };
+
   const startEva = (lat, lon) => {
     /* Standing on the exact published coordinates of a landing site puts you
        inside the spacecraft. Step out of the hardware and turn to look at it,
@@ -316,6 +353,7 @@ async function start() {
       suitMode: params.get('suit') || undefined,
     });
     if (astronaut) eva.setModel(astronaut);
+    if (base) eva.setBase(base);
     return eva;
   };
 
@@ -393,6 +431,7 @@ async function start() {
     if (clear.site) { keepOut = clear; lat = clear.lat; lon = clear.lon; }
     base = new Base({ stage, heightfield, terrain, quality: state.quality, lat, lon, heading });
     if (shipModel) base.setModel(shipModel);
+    if (eva) eva.setBase(base);
     /* The rover parks off the ship's port side, clear of the engines. */
     const park = offsetLatLon(lat, lon, (heading + 250) % 360, 11);
     vehicle = new Vehicle({
@@ -409,7 +448,7 @@ async function start() {
   /* One object holding the live game, so the save system has something to read
      and write without reaching into closures. */
   const game = {
-    state, settle, visited: [],
+    state, settle, visited, shelter,
     get waypoints() { return nav.waypoints; },
     set waypoints(v) { nav.waypoints.length = 0; nav.waypoints.push(...(v || [])); },
     get base() { return base; },
@@ -482,6 +521,14 @@ async function start() {
       save.write(game, 'recovered');
       return;
     }
+    /* Righting a rolled rover. This is a game convention and it exists so a
+       save cannot be permanently ruined, which is what the brief asked for;
+       until now `recover()` was called from a test and nothing else, so a roll
+       past forty degrees was final. */
+    if (e.code === 'KeyR' && vehicle && eva && vehicle.rover.rolled && !driving) {
+      vehicle.rover.recover();
+      return;
+    }
     if (e.code === 'KeyR' && vehicle && eva) {
       if (driving) {
         driving = false;
@@ -493,6 +540,25 @@ async function start() {
            to be walking, or the first thing you see is its own bodywork. */
         cam.yaw = vehicle.rover.heading * Math.PI / 180;
         cam.pitch = -0.05;
+      }
+    }
+    /* E goes in and out of the ship. There is no ladder-climbing physics and
+       there should not be: what was asked for is a walkable interior and an
+       airlock that means something, not a climbing minigame. The cycle it
+       starts is where the physics actually is — pressure ramps over twenty-two
+       seconds and the sound follows it down, which is the whole demonstration
+       the vacuum audio was built around and which nothing could trigger before
+       this existed. */
+    if (e.code === 'KeyE' && eva && base && !driving) {
+      const p = eva.player.llh;
+      if (base.canExit(p.lat, p.lon, p.h)) {
+        base.cycleAirlock(0);
+        const f = base.ladderFoot();
+        eva.place(f.lat, f.lon, 0.1);
+      } else if (base.canEnter(p.lat, p.lon, p.h)) {
+        base.cycleAirlock(1);
+        const inn = base.insideStand();
+        eva.place(inn.lat, inn.lon, inn.agl);
       }
     }
     if (e.code === 'KeyC' && vehicle) canopyPress = true;
@@ -513,8 +579,7 @@ async function start() {
     /* F5 would reload the page, so saving is on F2, and it autosaves anyway. */
     if (e.code === 'F2') {
       const w = save.write(game, 'manual');
-      el('hint').textContent = w ? 'saved' : 'could not save';
-      setTimeout(() => { el('hint').textContent = 'H for controls'; }, 2500);
+      say(w ? 'saved' : 'could not save', 2500);
       e.preventDefault();
     }
     if (e.code === 'KeyF' && eva) eva.toggleView();
@@ -578,7 +643,7 @@ async function start() {
   /* --- the loop ------------------------------------------------------------ */
   let last = performance.now(), fpsAcc = 0, fpsN = 0, fps = 0, ready = false;
   const probeCache = { t: 0, value: null };
-  let shelterAt = 0;
+  let shelterAt = 0, visitedAt = 0;
   const startedAt = performance.now();
   let lastSteps = 0;
 
@@ -704,6 +769,14 @@ async function start() {
         toggleCanopy: canopyPress,
       }, true);
       canopyPress = false;
+      /* Living out of the rover costs the rover. `consume` used to be called
+         from the sleep handler alone, so the nav console's days-remaining
+         never moved while you drove and the middle range tier was a readout
+         rather than a constraint. Sealed and pressurised, you are breathing
+         its air; with the canopy open you are on the suit and it is not. */
+      if (vehicle.rover.pressure > 0.9) {
+        vehicle.rover.consume(dt * Math.max(1, state.timeRate) / 3600, 1);
+      }
       /* Move the vehicle before reading the seat out of it, or the camera
          trails the vehicle by a frame and the ride looks loose. */
       vehicle.place(stage.origin.origin, dt);
@@ -893,8 +966,7 @@ async function start() {
       if (eva.model) eva.model.group.visible = !driving && eva.view === 'third';
     }
     /* Somewhere pressurised is somewhere you can take the helmet off. */
-    const sheltered = base && base.inside(cam.lat, cam.lon, cam.alt) ? 'ship'
-      : driving && vehicle && vehicle.rover.pressure > 0.9 ? 'rover' : null;
+    const sheltered = shelterKind();
     shelter.needs.step(dt * Math.max(1, state.timeRate));
     if (now - shelterAt > 900) {
       shelterAt = now;
@@ -970,6 +1042,20 @@ async function start() {
         } : null,
       });
     }
+    /* Arriving somewhere. Inside a mapped feature's own radius, on foot or in
+       the rover — the same containment test the orbital picker uses, so the
+       two agree about what being inside Tycho means. */
+    if (mode === 'surface' && now - visitedAt > 1500) {
+      visitedAt = now;
+      const here = orbit.nearestFeature(cam.lat, cam.lon);
+      const got = visited.step(here, { lat: cam.lat, lon: cam.lon, simMs: state.simMs });
+      if (got) {
+        /* Quietly. A named crater on the Moon does not need a banner, and the
+           brief was specific about not turning the place into a theme park. */
+        say(`entering ${got.name}`, 4000);
+        save.write(game, 'arrived');
+      }
+    }
     nav.show(driving && !photo.active);
     if (driving && vehicle) {
       const near = orbit.nearestFeature(cam.lat, cam.lon);
@@ -1021,7 +1107,7 @@ async function start() {
 
     if (state.showScience && now - probeCache.t > 250) {
       probeCache.t = now;
-      updateScience(heightfield, geology, cam, local, eph, surface, streams, temperature);
+      updateScience(heightfield, geology, cam, local, eph, surface, streams, temperature, historic);
     }
   }
 
@@ -1038,6 +1124,7 @@ async function start() {
     land(lat, lon) { land({ lat, lon }); },
     temperature,
     get astronaut() { return astronaut; },
+    game, save, visited,
     walk(lat, lon) { startEva(lat, lon); },
     goto(lat, lon, alt) { cam.lat = lat; cam.lon = lon; cam.alt = alt ?? cam.alt; },
     setTime(iso) { state.simMs = Date.parse(iso); },
@@ -1116,15 +1203,26 @@ const tag = (label) => {
   return `<span class="tag ${cls}">${label}</span>`;
 };
 
+/* What the equipment is, on the screen rather than in a comment. The README
+   claimed these were labelled FICTIONAL wherever they surfaced and the word
+   reached the display exactly once, on the landing pad; `LABEL.FICTIONAL` sat
+   unused. Every number in this line is from `config.js`, so it cannot drift
+   away from what the simulation actually uses. */
+const equipmentLine = () =>
+  `suit ${SUIT.o2Capacity.toFixed(2)} kg O2, ${(SUIT.powerCapacity / 1000).toFixed(1)} kWh · ` +
+  `rover ${ROVER.supplies.o2} kg O2, ${ROVER.supplies.water} kg water · ` +
+  `jetpack ${PLAYER.jetpackAccel.toFixed(1)} m/s² ${tag(LABEL.FICTIONAL)}` +
+  '<span class="est"> a plausible near-future design, not flown hardware</span>';
+
 let sciencePending = false;
 let scienceRemote = null;
 let scienceAt = { lat: 999, lon: 999 };
 
-function updateScience(hf, geology, cam, local, eph, streamer, streams, temperature) {
+function updateScience(hf, geology, cam, local, eph, streamer, streams, temperature, historic) {
   const p = hf.probe(cam.lat, cam.lon);
   el('d-topo').innerHTML = `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
   el('d-detail').innerHTML = Math.abs(p.proceduralHeight) > 0.001
-    ? `${p.proceduralHeight >= 0 ? '+' : ''}${p.proceduralHeight.toFixed(2)} m ${tag('PROCEDURAL')}`
+    ? `${p.proceduralHeight >= 0 ? '+' : ''}${p.proceduralHeight.toFixed(2)} m ${tag(LABEL.PROCEDURAL)}`
     : 'none';
   const desc = streamer ? streamer.describe() : null;
   if (desc && desc.elevation) {
@@ -1132,8 +1230,22 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
       `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
   }
   el('d-img').innerHTML = desc && desc.imagery
-    ? `${desc.imagery.res_m < 10 ? desc.imagery.res_m.toFixed(2) : desc.imagery.res_m.toFixed(0)} m/px ${tag('MEASURED')}`
-    : `LROC WAC 1.3 km/px ${tag('MEASURED')}`;
+    ? `${desc.imagery.res_m < 10 ? desc.imagery.res_m.toFixed(2) : desc.imagery.res_m.toFixed(0)} m/px ${tag(LABEL.MEASURED)}`
+    : `LROC WAC 1.3 km/px ${tag(LABEL.MEASURED)}` +
+      (desc && desc.imageryError ? `<span class="est"> nothing finer: ${desc.imageryError}</span>` : '');
+  /* Why the topography is no finer than it is. A failed request and a request
+     that came back with nothing better are different facts about the Moon and
+     the network, and saying neither — which is what this did — leaves the one
+     line in the game that is supposed to explain its own limits silent about
+     the most common reason it has one. */
+  if (desc && !desc.elevation) {
+    if (desc.elevationError) {
+      el('d-topo').innerHTML += `<span class="est"> nothing finer: ${desc.elevationError}</span>`;
+    } else if (desc.elevationSkipped) {
+      el('d-topo').innerHTML +=
+        `<span class="est"> nothing finer offered: best available ${desc.elevationSkipped.toFixed(0)} m/px</span>`;
+    }
+  }
   let geolText = 'unavailable';
   if (geology) {
     const x = Math.min(geology.width - 1, Math.max(0, ((cam.lon + 180) / 360 * geology.width) | 0));
@@ -1142,16 +1254,21 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
     const u = geology.legend.units[String(dn)];
     geolText = u ? `${u.code} ${u.name}, ${u.age}` : `unit ${dn}`;
   }
-  el('d-geol').innerHTML = `${geolText} ${tag('REGIONAL')}`;
+  el('d-geol').innerHTML = `${geolText} ${tag(LABEL.REGIONAL)}`;
   /* Diviner's own maps, vendored at half a degree, interpolated across the day
      by the model in data/temperature.js. */
   const lt = localSolarTime(eph, cam.lat, cam.lon);
   const temp = temperature ? temperature.at(cam.lat, cam.lon, local.sunEl, lt * 24) : null;
   el('d-temp').innerHTML = temp
     ? `${temp.kelvin.toFixed(0)} K  <span class="est">${temp.celsius.toFixed(0)} C</span> ` +
-      `${tag('REGIONAL')}<span class="est"> Diviner ${temp.diviner.min.toFixed(0)}–${temp.diviner.max.toFixed(0)} K</span>`
+      `${tag(LABEL.REGIONAL)}<span class="est"> Diviner ${temp.diviner.min.toFixed(0)}–${temp.diviner.max.toFixed(0)} K</span>`
     : 'unavailable';
-  el('d-slope').textContent = hf.slopeAt(cam.lat, cam.lon).toFixed(1) + '°';
+  /* Slope is computed from the measured grid rather than measured directly, so
+     it carries the tag that says so — it was the one number on this panel
+     printed with no provenance at all. */
+  el('d-slope').innerHTML = `${hf.slopeAt(cam.lat, cam.lon).toFixed(1)}° ${tag(LABEL.DERIVED)}` +
+    `<span class="est"> from ${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px topography</span>`;
+  el('d-kit').innerHTML = equipmentLine();
 
   /* Ask NASA what is really here, but only when the player has moved: these are
      network round trips, not something to do every frame. */
@@ -1165,39 +1282,65 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
   /* What NASA says is here, when the network can be asked. Each of these is a
      different instrument at a different resolution, so each carries its own
      tag rather than being merged into one confident-looking line. */
-  if (scienceRemote) {
-    if (scienceRemote.geology) {
-      const g = scienceRemote.geology;
-      el('d-geol').innerHTML = `${g.unit} ${g.name}, ${g.period} ${tag('REGIONAL')}`;
+  /* Three states, not two. A service that answered with no measurement here
+     and a service that could not be reached are different things, and telling
+     them apart is the entire reason this overlay exists. Until now they were
+     both a bare null and both rendered as whatever the row happened to say
+     last, which could be a reading from a place you left ten kilometres ago. */
+  if (streams && !streams.enabled) {
+    for (const id of ['d-min', 'd-grav', 'd-count']) el(id).textContent = 'offline';
+  } else if (scienceRemote) {
+    const r = scienceRemote;
+    if (r.geology) {
+      const g = r.geology;
+      el('d-geol').innerHTML = `${g.unit} ${g.name}, ${g.period} ${tag(LABEL.REGIONAL)}`;
+    } else if (r.geologyFailed) {
+      el('d-geol').innerHTML = `${geolText} ${tag(LABEL.REGIONAL)}` +
+        '<span class="est"> USGS unreachable; vendored map shown</span>';
     }
-    if (scienceRemote.minerals && scienceRemote.minerals.FeO !== null) {
-      el('d-min').innerHTML = `FeO ${scienceRemote.minerals.FeO.toFixed(1)} wt % ${tag('REGIONAL')}` +
-        '<span class="est"> Kaguya MI, 7.6 km</span>';
-    }
-    if (scienceRemote.gravity && scienceRemote.gravity.freeAir_mGal !== null) {
+    el('d-min').innerHTML = r.minerals && r.minerals.FeO !== null
+      ? `FeO ${r.minerals.FeO.toFixed(1)} wt % ${tag(LABEL.REGIONAL)}` +
+        '<span class="est"> Kaguya MI, 7.6 km</span>'
+      : r.mineralsFailed ? 'service unreachable'
+      : 'no measurement here';
+    if (r.gravity && r.gravity.freeAir_mGal !== null) {
       /* A hundred milligals is about six thousandths of lunar gravity, which
          is real, is measured, and is far too small for anyone to feel. */
-      const mGal = scienceRemote.gravity.freeAir_mGal;
+      const mGal = r.gravity.freeAir_mGal;
       el('d-grav').innerHTML =
-        `${(1.6246 + mGal * 1e-5).toFixed(4)} m/s² ${tag('MEASURED')}` +
+        `${(1.6246 + mGal * 1e-5).toFixed(4)} m/s² ${tag(LABEL.MEASURED)}` +
         `<span class="est"> free-air ${mGal >= 0 ? '+' : ''}${mGal.toFixed(0)} mGal, GRAIL</span>`;
+    } else {
+      el('d-grav').textContent = r.gravityFailed ? 'service unreachable' : 'no measurement here';
     }
-    if (scienceRemote.lolaCount !== null && scienceRemote.lolaCount !== undefined) {
-      const n = scienceRemote.lolaCount;
+    if (r.lolaCountFailed) {
+      el('d-count').textContent = 'service unreachable';
+    } else if (r.lolaCount !== null && r.lolaCount !== undefined) {
+      const n = r.lolaCount;
       el('d-count').innerHTML = n > 0
-        ? `${n.toFixed(0)} LOLA shots in this pixel ${tag('MEASURED')}`
-        : `no altimeter shot here ${tag('INTERPOLATED')}` +
+        ? `${n.toFixed(0)} LOLA shots in this pixel ${tag(LABEL.MEASURED)}`
+        : `no altimeter shot here ${tag(LABEL.INTERPOLATED)}` +
           '<span class="est"> the elevation is filled in between tracks</span>';
+    } else {
+      el('d-count').textContent = 'no measurement here';
     }
-  } else if (streams && !streams.enabled) {
-    for (const id of ['d-min', 'd-grav', 'd-count']) el(id).textContent = 'offline';
   }
 
   const parts = [p.source];
   if (desc && desc.imagery) parts.push(desc.imagery.source);
   if (temp) parts.push(temp.source);
-  if (p.padded) parts.push('landing pad (FICTIONAL)');
+  if (p.padded) parts.push(`landing pad (${LABEL.FICTIONAL})`);
   if (desc) parts.push('streaming: ' + desc.status);
+  /* Six science services are asked at once; say when some of them did not
+     answer, rather than letting the rows above imply the Moon is featureless. */
+  if (scienceRemote && scienceRemote.reached !== undefined && scienceRemote.reached < 6) {
+    parts.push(`${6 - scienceRemote.reached} of 6 science services unreachable`);
+  }
+  /* A reconstruction that failed to build is the one silence that matters
+     most: standing at Tranquility Base with no hardware in front of you looks
+     from the inside exactly like standing on empty mare. */
+  const broken = historic ? historic.failures() : [];
+  for (const b of broken) parts.push(`${b.name} could not be built: ${b.why}`);
   el('d-src').textContent = parts.join('  ·  ');
 }
 

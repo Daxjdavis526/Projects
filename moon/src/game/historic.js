@@ -66,7 +66,7 @@ export class HistoricSites {
           console.warn(`could not build ${s.id}:`, e.message);
           s.build = () => { throw e; };          // do not try again every frame
           s.kit = null;
-          s.failed = true;
+          s.failed = e.message || String(e);
         }
       } else if (s.range > BUILD_RANGE * 1.4 && s.kit) {
         this.group.remove(s.kit.group);
@@ -103,5 +103,16 @@ export class HistoricSites {
     let best = null;
     for (const s of this.sites) if (!best || s.range < best.range) best = s;
     return best;
+  }
+
+  /**
+   * Any reconstruction that was near enough to build and could not be. It was
+   * recorded on the site and read by nothing, so the one case that matters —
+   * standing at Tranquility Base with the hardware silently missing — looked
+   * from the inside exactly like standing on empty mare.
+   */
+  failures() {
+    return this.sites.filter(s => s.failed)
+      .map(s => ({ id: s.id, name: s.name || s.id, why: s.failed }));
   }
 }

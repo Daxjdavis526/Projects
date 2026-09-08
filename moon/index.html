@@ -63,7 +63,15 @@ canvas{display:block;position:fixed;inset:0}
 .tag.interpolated{color:var(--warn);border-color:#5c4726}
 .tag.procedural{color:#c4a0e0;border-color:#4a3a5c}
 .tag.regional{color:#8fb8e8;border-color:#2f4867}
+.tag.derived{color:#9fd0cc;border-color:#2e5350}
 .tag.fictional{color:#ff9d7a;border-color:#5c3a2a}
+/* The line that says which parts of this are not the Moon. Quiet, always
+   present, never in the way — the project's whole ethic is that the player is
+   told what is measured and what is invented, and that has to reach the
+   screen to count. */
+.fict{margin-top:8px;padding-top:7px;border-top:1px solid var(--faint);
+  color:var(--faint);font-size:9px;line-height:1.5;letter-spacing:.05em;
+  white-space:normal}
 
 #help{top:14px;right:14px;max-width:280px;display:none}
 #help .row{white-space:normal}
@@ -358,6 +366,7 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">composition</span><span class="v" id="d-min">—</span></div>
     <div class="row"><span class="k">gravity</span><span class="v" id="d-grav">—</span></div>
     <div class="row"><span class="k">altimetry</span><span class="v" id="d-count">—</span></div>
+    <div class="row"><span class="k">equipment</span><span class="v" id="d-kit">—</span></div>
     <div class="src" id="d-src"></div>
   </div>
 
@@ -372,6 +381,7 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">F</span><span>first / third person</span></div>
     <div class="row"><span class="k">L</span><span>suit lamps</span></div>
     <div class="row"><span class="k">R</span><span>get on / off the rover</span></div>
+    <div class="row"><span class="k">E</span><span>ship hatch, at the ladder</span></div>
     <div class="row"><span class="k">C</span><span>rover canopy</span></div>
     <div class="row"><span class="k">Q / E</span><span>down / up (free camera)</span></div>
     <div class="row"><span class="k">scroll</span><span>camera speed</span></div>
@@ -382,6 +392,10 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">F2</span><span>save</span></div>
     <div class="row"><span class="k">O</span><span>settings</span></div>
     <div class="row"><span class="k">H</span><span>this panel</span></div>
+    <div class="fict">The ship, the rover, the jetpack and the suit are a
+      near-future design <span class="tag fictional">FICTIONAL</span>. Apollo
+      astronauts carried none of it. Everything they are standing on is
+      measured.</div>
   </div>
 
   <div class="panel" id="suit">
@@ -400,6 +414,11 @@ canvas{display:block;position:fixed;inset:0}
     <div class="state">
       <span id="v-gait">—</span><span id="v-lamps">—</span><span id="v-jet">—</span>
     </div>
+    <!-- Said on the screen rather than only in a comment. Every capacity above
+         is a plausible near-future design, not a flown one: the Moon is
+         measured, the hardware standing on it is not. -->
+    <div class="fict">near-future suit; capacities are a design, not a
+      flown specification <span class="tag fictional">FICTIONAL</span></div>
   </div>
 
   <div class="panel" id="settings">
@@ -456,6 +475,9 @@ canvas{display:block;position:fixed;inset:0}
       </div>
       <div class="row"><span class="k">waypoint</span><span class="v" id="n-wp">none</span></div>
     </div>
+    <div class="fict">rover and its stores are a near-future design
+      <span class="tag fictional">FICTIONAL</span>; the ground, the names and the
+      distances are measured</div>
   </div>
 
   <div class="panel" id="shelter">

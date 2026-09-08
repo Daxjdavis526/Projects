@@ -213,5 +213,44 @@ function makeTiff(w, h, data) {
   return buf;
 }
 
+/* --- the distinction the overlay exists to draw ---------------------------- */
+console.log('a missing service and a missing measurement are different things');
+{
+  /* Every service answers with a value. */
+  const good = new Streams(registry, { enabled: true });
+  good.fetchWithRetry = async () => ({ value: 7.5, results: [{ attributes: { UNIT: 'Im', PERIOD: 'Imbrian', NAME: 'mare' } }] });
+  const r = await good.probe(0.6, 23.4);
+  check('a measurement comes back as a measurement',
+        r.minerals && Math.abs(r.minerals.FeO - 7.5) < 1e-9);
+  check('and nothing is reported as failed', r.errors === null && r.reached === 6);
+
+  /* Every service answers, and says it has nothing here. */
+  const blank = new Streams(registry, { enabled: true });
+  blank.fetchWithRetry = async () => ({ value: 'NoData', results: [] });
+  const b = await blank.probe(0.6, 23.4);
+  check('no measurement here is not a failure',
+        b.minerals === null && b.mineralsFailed === false, JSON.stringify(b.errors));
+  check('and neither is an empty geologic query',
+        b.geology === null && b.geologyFailed === false);
+  check('all six were still reached', b.reached === 6);
+
+  /* Nothing answers at all. */
+  const dead = new Streams(registry, { enabled: true });
+  dead.fetchWithRetry = async () => { throw new Error('offline'); };
+  const d = await dead.probe(0.6, 23.4);
+  check('an unreachable service is reported as unreachable, not as absence',
+        d.mineralsFailed === true && d.gravityFailed === true &&
+        d.lolaCountFailed === true && d.geologyFailed === true);
+  check('and the count of what answered says none of them', d.reached === 0);
+  check('with the reason kept', Array.isArray(d.errors) && d.errors[0] === 'offline');
+
+  /* The one that matters: the same rendered result must not come from both. */
+  check('the two cases are distinguishable',
+        b.mineralsFailed !== d.mineralsFailed && b.reached !== d.reached);
+
+  const off = new Streams(registry, { enabled: false });
+  check('streaming off is its own state again', (await off.probe(0, 0)).off === true);
+}
+
 console.log(failures ? `\n${failures} failed` : '\nall good');
 process.exit(failures);

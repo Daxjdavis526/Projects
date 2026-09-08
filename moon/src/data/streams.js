@@ -264,22 +264,32 @@ export class Streams {
 
   /* --- science ------------------------------------------------------------ */
 
-  /** One pixel value from an image service, e.g. a Diviner temperature. */
+  /**
+   * One pixel value from an image service, e.g. a Diviner temperature.
+   *
+   * The return is deliberately three-valued, because the whole point of the
+   * science overlay is the difference between the two ways of having no
+   * number. `{ value: n }` is a measurement, `{ value: null }` is the service
+   * answering that it has nothing here, and `{ error }` is not having asked
+   * successfully at all. Collapsing the last two into a bare `null` — which is
+   * what this did — makes an unreachable network look exactly like a gap in
+   * the coverage, and that is the one distinction the overlay exists to draw.
+   */
   async identifyImage(server, id, lat, lon) {
-    if (!this.enabled) return null;
+    if (!this.enabled) return { error: 'streaming off' };
     const base = IMAGE_SERVER.replace('{origin}', this.origin)
       .replace('{server}', server).replace('{id}', id);
     const url = `${base}/identify?geometry=${lon},${lat}&geometryType=esriGeometryPoint&sr=104903&f=json`;
     try {
       const j = await this.run(() => this.fetchWithRetry(url, 'json'));
       const v = Number(j.value);
-      return Number.isFinite(v) ? v : null;
-    } catch { return null; }
+      return { value: Number.isFinite(v) ? v : null };
+    } catch (e) { return { error: e.message || String(e) }; }
   }
 
   /** The polygon under a point in a vector service, e.g. a geologic unit. */
   async identifyMap(server, id, lat, lon, layer = 'all') {
-    if (!this.enabled) return null;
+    if (!this.enabled) return { error: 'streaming off' };
     const base = MAP_SERVER.replace('{origin}', this.origin)
       .replace('{server}', server).replace('{id}', id);
     const url = `${base}/identify?geometry=${lon},${lat}&geometryType=esriGeometryPoint&sr=104903` +
@@ -287,8 +297,8 @@ export class Streams {
       `&returnGeometry=false&f=json`;
     try {
       const j = await this.run(() => this.fetchWithRetry(url, 'json'));
-      return (j.results && j.results[0] && j.results[0].attributes) || null;
-    } catch { return null; }
+      return { value: (j.results && j.results[0] && j.results[0].attributes) || null };
+    } catch (e) { return { error: e.message || String(e) }; }
   }
 
   /**
@@ -297,7 +307,7 @@ export class Streams {
    * up the others.
    */
   async probe(lat, lon) {
-    if (!this.enabled) return {};
+    if (!this.enabled) return { off: true };
     const s = this.registry.science;
     const [geology, tMax, tMin, feO, freeAir, count] = await Promise.all([
       this.identifyMap(s.geology.server, s.geology.map, lat, lon),
@@ -309,16 +319,36 @@ export class Streams {
     ]);
     this.stats.science++;
     const f = s.geology.fields;
+    /* Every field carries the reason it is empty, so the overlay can say
+       "unreachable" where it means unreachable and "no measurement here" where
+       it means that instead. */
+    const errors = [];
+    const val = (r) => {
+      if (r && r.error) { errors.push(r.error); return undefined; }
+      return r ? r.value : null;
+    };
+    const g = val(geology), max = val(tMax), min = val(tMin);
+    const fe = val(feO), fa = val(freeAir), n = val(count);
+    const gone = (v) => v === undefined;
     return {
-      geology: geology ? {
-        unit: geology[f.unit], period: geology[f.period], name: geology[f.name],
-        source: s.geology.source,
+      geology: g ? {
+        unit: g[f.unit], period: g[f.period], name: g[f.name], source: s.geology.source,
       } : null,
-      temperature: (tMax !== null || tMin !== null)
-        ? { max: tMax, min: tMin, source: s.diviner.source, res_deg: s.diviner.res_deg } : null,
-      minerals: feO !== null ? { FeO: feO, source: s.minerals.source } : null,
-      gravity: freeAir !== null ? { freeAir_mGal: freeAir, source: s.gravity.source } : null,
-      lolaCount: count,
+      geologyFailed: gone(g),
+      temperature: (max != null || min != null)
+        ? { max: max ?? null, min: min ?? null, source: s.diviner.source, res_deg: s.diviner.res_deg }
+        : null,
+      temperatureFailed: gone(max) && gone(min),
+      minerals: fe != null ? { FeO: fe, source: s.minerals.source } : null,
+      mineralsFailed: gone(fe),
+      gravity: fa != null ? { freeAir_mGal: fa, source: s.gravity.source } : null,
+      gravityFailed: gone(fa),
+      lolaCount: gone(n) ? null : n,
+      lolaCountFailed: gone(n),
+      errors: errors.length ? errors : null,
+      /* Six services asked, and how many answered. One failure is a service
+         being down; six is the network. */
+      reached: 6 - errors.length,
     };
   }
 

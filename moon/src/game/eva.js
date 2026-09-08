@@ -48,9 +48,33 @@ export class EVA {
   constructor(opts) {
     this.stage = opts.stage;
     this.heightfield = opts.heightfield;
+    /* The ship, when there is one. Its decks are ground and its walls are
+       solid, and both have to be consulted here rather than in physics/, which
+       imports no DOM, no three.js and nothing that knows a ship exists — that
+       separation is what lets the whole simulation run headlessly in Node.
+       Before this the decks were geometry you walked through and the interior
+       was unreachable, which took out the airlock, the resupply and the ship's
+       whole range tier with it. */
+    this.base = null;
+    const ground = {
+      heightAt: (lat, lon, minLambda) => {
+        const deck = this.base && this.base.floorAt(lat, lon, this.player.llh.h);
+        return deck === null || deck === undefined || deck === false
+          ? this.heightfield.heightAt(lat, lon, minLambda)
+          : deck;
+      },
+      slopeAt: (lat, lon, step) => (
+        this.base && this.base.floorAt(lat, lon, this.player.llh.h) !== null
+          ? 0                                    // a deck is a deck
+          : this.heightfield.slopeAt(lat, lon, step)),
+      normalAt: (lat, lon, step) => (
+        this.base && this.base.floorAt(lat, lon, this.player.llh.h) !== null
+          ? { e: 0, n: 0, u: 1 }
+          : this.heightfield.normalAt(lat, lon, step)),
+    };
     this.player = new Player({
       lat: opts.lat, lon: opts.lon, yaw: opts.yaw ?? 90,
-      ground: opts.heightfield,
+      ground,
     });
     this.suit = new Suit({ mode: opts.suitMode });
     this.view = VIEW.FIRST;
@@ -94,6 +118,9 @@ export class EVA {
     this._right = new THREE.Vector3();
     this.jumpEdge = false;
   }
+
+  /** The ship, once it has landed. Its decks become ground and its walls solid. */
+  setBase(base) { this.base = base; }
 
   /** Attach the astronaut once it has been built. */
   setModel(model) {
@@ -156,6 +183,14 @@ export class EVA {
     this.accumulator = Math.min(0.25, (this.accumulator || 0) + dt);
     while (this.accumulator >= FIXED_STEP) {
       p.step(FIXED_STEP, command);
+      /* Hull walls, after the step rather than before it: the body moves, then
+         the ship pushes it back out. Doing it inside physics/ would mean
+         teaching the player about ships, which is the coupling this project
+         spends most of its structure avoiding. */
+      if (this.base) {
+        const push = this.base.resolve(p.llh.lat, p.llh.lon, p.llh.h, 0.34);
+        if (push) p.place(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
+      }
       this.accumulator -= FIXED_STEP;
       command.jump = false;             // one jump per press, not one per substep
     }

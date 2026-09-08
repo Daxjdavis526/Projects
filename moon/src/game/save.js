@@ -28,7 +28,7 @@ export class Save {
 
   /** Gather everything worth keeping from the live game. */
   static capture(game) {
-    const { state, base, vehicle, eva, waypoints, visited } = game;
+    const { state, base, vehicle, eva, waypoints, visited, shelter } = game;
     return {
       version: 1,
       savedAt: new Date().toISOString(),
@@ -41,12 +41,13 @@ export class Save {
         mode: vehicle.rover.mode, canopy: vehicle.rover.canopy,
         supplies: { ...vehicle.rover.supplies },
         distance: vehicle.rover.distance, dust: vehicle.dust,
+        rolled: !!vehicle.rover.rolled, boostHeat: vehicle.rover.boostHeat,
       } : null,
       player: eva ? {
         lat: eva.player.llh.lat, lon: eva.player.llh.lon,
         yaw: eva.player.yaw, pitch: eva.player.pitch,
         distance: eva.player.distance, steps: eva.player.stepsTaken,
-        view: eva.view, lamps: eva.lampMode,
+        view: eva.view, lamps: eva.lampMode, jetHeat: eva.player.jetHeat,
       } : null,
       suit: eva ? {
         o2: eva.suit.o2, o2Reserve: eva.suit.o2Reserve, co2: eva.suit.co2,
@@ -54,8 +55,13 @@ export class Save {
         mode: eva.suit.mode,
       } : null,
       driving: !!game.driving,
-      waypoints: waypoints || [],
-      visited: visited || [],
+      needs: shelter ? {
+        sinceMeal: shelter.needs.sinceMeal,
+        sinceSleep: shelter.needs.sinceSleep,
+        sleepDebt: shelter.needs.sleepDebt,
+      } : null,
+      waypoints: (waypoints || []).map((w) => ({ lat: w.lat, lon: w.lon })),
+      visited: visited ? (visited.capture ? visited.capture() : visited) : [],
     };
   }
 
@@ -73,6 +79,8 @@ export class Save {
       r.canopy = data.rover.canopy;
       r.supplies = { ...data.rover.supplies };
       r.distance = data.rover.distance || 0;
+      r.rolled = !!data.rover.rolled;
+      r.boostHeat = data.rover.boostHeat || 0;
       game.vehicle.dust = data.rover.dust || 0;
     }
     if (data.player && game.eva) {
@@ -83,8 +91,20 @@ export class Save {
       game.eva.player.stepsTaken = data.player.steps || 0;
       game.eva.view = data.player.view || 'first';
       game.eva.lampMode = data.player.lamps || 0;
+      game.eva.player.jetHeat = data.player.jetHeat || 0;
     }
     if (data.suit && game.eva) Object.assign(game.eva.suit, data.suit);
+    /* The rest of it. All of this was written by `capture` and read by nobody,
+       which is the quietest kind of bug there is: the save file looked
+       complete, the game came back subtly wrong, and no test that did not
+       compare the two halves could have seen it. */
+    if (data.needs && game.shelter) Object.assign(game.shelter.needs, data.needs);
+    game.waypoints = data.waypoints || [];
+    if (game.visited && game.visited.load) game.visited.load(data.visited);
+    else game.visited = data.visited || [];
+    /* Boarding last: `settle` puts you on the ground beside the ladder, so
+       anything that decides where you are has to happen after it. */
+    game.driving = !!data.driving && !!game.vehicle;
     return { ok: true, at: data.savedAt };
   }
 

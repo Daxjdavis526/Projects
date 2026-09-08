@@ -42,7 +42,7 @@ export class SurfaceStreamer {
       skipped: null, lastError: null,
     }));
     this.imagery = { bounds: null, busy: false, level: -1, source: null,
-                     res_m: null, key: null, atBest: false };
+                     res_m: null, key: null, atBest: false, lastError: null };
     this.enabled = streams.enabled;
     this.lastImageryAt = 0;
   }
@@ -105,7 +105,14 @@ export class SurfaceStreamer {
          leaving NaNs to punch through the terrain. */
       let sum = 0, n = 0;
       for (const v of patch.data) if (Number.isFinite(v)) { sum += v; n++; }
-      const mean = n ? sum / n : current.h;
+      /* A patch with nothing finite in it has nothing to fill the holes from.
+         `streams.elevation` already rejects anything under half valid, so this
+         is unreachable in practice — but it used to reach for an identifier
+         that does not exist in this scope, which would have turned a bad patch
+         into a ReferenceError swallowed by the catch below and retried
+         forever. */
+      if (!n) { ring.layer = null; ring.lastError = 'no valid samples'; return; }
+      const mean = sum / n;
       for (let i = 0; i < patch.data.length; i++) {
         if (!Number.isFinite(patch.data[i])) patch.data[i] = mean;
       }
@@ -147,7 +154,7 @@ export class SurfaceStreamer {
     this.lastImageryAt = now;
     try {
       const tile = await this.streams.imageryTile(lat, lon, wantRes);
-      if (!tile) return;
+      if (!tile) { this.imagery.lastError = 'no tile returned'; return; }
       /* Imagery coarser than the vendored colour map is not an improvement, it
          is a rectangle. The global map resolves about 1.3 km per pixel, so
          anything above that is dropped rather than laid over the Moon. */
@@ -162,22 +169,43 @@ export class SurfaceStreamer {
       this.imagery.key = tile.key;
       this.imagery.atBest = tile.atBest;
       this.terrain.setImagery(tile.bitmap, tile.bounds);
+      this.imagery.lastError = null;
       this.onLayer('imagery', tile);
-    } catch {
-      /* keep the last one */
+    } catch (e) {
+      /* Keep the last picture, and keep the reason the new one did not come:
+         dropping it entirely is what made a dead network indistinguishable
+         from ground that simply has no finer mosaic. */
+      this.imagery.lastError = e.message || String(e);
     } finally {
       this.imagery.busy = false;
     }
   }
 
-  /** What the overlay should say about the surface under the player. */
+  /**
+   * What the overlay should say about the surface under the player — including
+   * what went wrong, which is the part that was recorded and never read. Four
+   * fields here were written on every failure and never surfaced anywhere,
+   * which reads like handled error plumbing and is worse than none: the game's
+   * whole claim is that it tells you what it knows and how it knows it.
+   */
   describe() {
     const finest = this.rings.filter(r => r.layer).sort((a, b) => a.layer.res_m - b.layer.res_m)[0];
+    /* The nearest ring that could not be had, and why. Nearest first, because
+       that is the one whose absence you are actually standing on. */
+    const failed = this.rings.filter(r => r.lastError);
+    const skipped = this.rings.filter(r => r.skipped !== null && !r.layer);
     return {
       elevation: finest ? finest.layer : null,
       imagery: this.imagery.bounds ? {
         res_m: this.imagery.res_m, source: this.imagery.source, level: this.imagery.level,
       } : null,
+      /* Nothing finer was fetched, and here is why: a request that failed, or
+         a request that succeeded and brought back nothing better than the
+         ground already has. Those are different facts. */
+      elevationError: failed.length ? failed[failed.length - 1].lastError : null,
+      elevationSkipped: !finest && skipped.length
+        ? Math.min(...skipped.map(r => r.skipped)) : null,
+      imageryError: this.imagery.lastError,
       status: this.streams.status(),
     };
   }
