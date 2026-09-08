@@ -150,7 +150,10 @@ export function leafCluster(cx, cy, cz, radius, count, r, colLow, colHigh, cell 
 
     const base = pos.length / 3;
     const shade = 0.55 + r() * 0.45;
-    const c = lo.clone().lerp(hi, shade);
+    // Cards deep inside the lobe are shaded by the ones outside them. Without
+    // this a canopy is uniformly bright and reads as a cut-out.
+    const ao = 0.52 + 0.48 * Math.min(1, rr / Math.max(radius, 1e-4));
+    const c = lo.clone().lerp(hi, shade).multiplyScalar(ao);
     for (const [sx, sy, u, vv] of [[-1, -1, 0, 0], [1, -1, 1, 0], [1, 1, 1, 1], [-1, 1, 0, 1]]) {
       v.set(
         px + ex.x * sx * size + ey.x * sy * size,
@@ -175,36 +178,59 @@ export function leafCluster(cx, cy, cz, radius, count, r, colLow, colHigh, cell 
 }
 
 /** A single flat card: fronds, blades, reeds. */
-export function card(width, height, cell, r, colLow, colHigh, bend = 0, cup = 0) {
-  const g = new THREE.PlaneGeometry(width, height, cup > 0 ? 2 : 1, bend > 0 ? 4 : 1);
+export function card(width, height, cell, r, colLow, colHigh, bend = 0, cup = 0, twist = 0) {
+  const curved = bend > 0 || cup > 0 || twist > 0;
+  const g = new THREE.PlaneGeometry(width, height, cup > 0 ? 2 : 1, curved ? 7 : 1);
   g.translate(0, height / 2, 0);
-  if (bend > 0 || cup > 0) {
+  if (curved) {
     const pos = g.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const t = pos.getY(i) / height;
+      let x = pos.getX(i);
+      let y = pos.getY(i);
       let z = pos.getZ(i);
       // A flat card seen edge-on disappears. Curling the cross section into a
       // shallow channel — which is what a real frond does — keeps a sliver of
       // it facing you from every angle, and gives the normals somewhere to go.
       if (cup > 0) {
-        const u = Math.abs(pos.getX(i)) / (width * 0.5);
+        const u = Math.abs(x) / (width * 0.5);
         z += u * u * cup * width * 0.5;
       }
       if (bend > 0) {
-        z += t * t * bend * height;
-        pos.setY(i, pos.getY(i) - t * t * bend * height * 0.35);
+        // An arc, not a parabola. The quadratic curled the tip right over into
+        // a hook, which is most of what made a fern read as a cabbage.
+        const k = height / bend;
+        const a = t * bend;
+        z += (1 - Math.cos(a)) * k;
+        y = Math.sin(a) * k;
       }
-      pos.setZ(i, z);
+      if (twist > 0) {
+        // Roll about the long axis, so a ring of fronds is not a flat rosette.
+        const a = t * twist;
+        const c = Math.cos(a), sn = Math.sin(a);
+        const nx = x * c - z * sn;
+        z = x * sn + z * c;
+        x = nx;
+      }
+      pos.setXYZ(i, x, y, z);
     }
     g.computeVertexNormals();
   }
-  remapUV(g, cell);
-  const lo = new THREE.Color(colLow), hi = new THREE.Color(colHigh);
   const n = g.attributes.position.count;
   const col = new Float32Array(n * 3);
+  const lo = new THREE.Color(colLow), hi = new THREE.Color(colHigh);
   const shade = 0.6 + (r ? r() : 0.5) * 0.4;
   const c = lo.clone().lerp(hi, shade);
-  for (let i = 0; i < n; i++) { col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b; }
+  // Occlusion toward the root: the base of a frond or a grass blade is buried
+  // in its own clump and in the ground, and lighting it as brightly as the tip
+  // is what leaves a plant looking pasted onto the terrain. Taken from the UV
+  // rather than the position, because the arc has already moved the positions.
+  const uvv = g.attributes.uv;
+  for (let i = 0; i < n; i++) {
+    const ao = 0.46 + 0.54 * Math.pow(Math.min(1, Math.max(0, uvv.getY(i))), 0.55);
+    col[i * 3] = c.r * ao; col[i * 3 + 1] = c.g * ao; col[i * 3 + 2] = c.b * ao;
+  }
+  remapUV(g, cell);
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   return g;
 }
@@ -317,7 +343,7 @@ export function treeFern(seed = 1, scale = 1) {
   for (let i = 0; i < fronds; i++) {
     const a = (i / fronds) * Math.PI * 2 + r() * 0.4;
     const len = (2.2 + r() * 1.4) * scale;
-    const g = card(len * 0.34, len, 'frond', r, '#365a24', '#8fc04c', 0.42, 0.62);
+    const g = card(len * 0.30, len, 'frond', r, '#365a24', '#8fc04c', 0.62, 0.40, 0.30);
     xform(g, { rot: [-0.92 - r() * 0.40, a, 0], pos: [0, H, 0] });
     parts.push(swayRamp(g, 1.0, 0.9));
   }
@@ -332,7 +358,7 @@ export function giantFern(seed = 1, scale = 1) {
   for (let i = 0; i < fronds; i++) {
     const a = (i / fronds) * Math.PI * 2 + r() * 0.6;
     const len = (0.82 + r() * 0.62) * scale;
-    const g = card(len * 0.34, len, 'frond', r, '#2b4a1e', '#7cad42', 0.5, 0.66);
+    const g = card(len * 0.30, len, 'frond', r, '#2b4a1e', '#7cad42', 0.78, 0.42, 0.36);
     xform(g, { rot: [-0.68 - r() * 0.55, a, 0], pos: [0, 0.06 * scale, 0] });
     parts.push(swayRamp(g, 1.1, 0.85));
   }
@@ -352,7 +378,7 @@ export function cycad(seed = 1, scale = 1) {
     const len = (1.6 + r() * 1.0) * scale;
     // Wide, cupped and lifted well off the horizontal: at eye level you look
     // up at a cycad crown, so near-flat fronds present nothing at all.
-    const g = card(len * 0.36, len, 'frond', r, '#3f5c24', '#9cc052', 0.30, 0.56);
+    const g = card(len * 0.32, len, 'frond', r, '#3f5c24', '#9cc052', 0.46, 0.38, 0.22);
     xform(g, { rot: [-0.72 - r() * 0.42, a, 0], pos: [0, H * 0.97, 0] });
     parts.push(swayRamp(g, 0.75, 1.0));
   }

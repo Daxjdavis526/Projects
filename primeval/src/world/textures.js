@@ -453,20 +453,39 @@ void main(){
 
   } else if (cell.y > 0.5) {
     // --- pinnate frond ----------------------------------------------------
+    // Discrete lance-shaped leaflets on a rachis, not a striped envelope. A
+    // mask made by stepping a stripe pattern inside a teardrop reads as one
+    // big leaf from a couple of metres away — which is exactly how a fern ends
+    // up looking like a cabbage.
     bleed = vec3(0.105, 0.205, 0.050);
     float t = uv.y;
     float across = abs(uv.x - 0.5);
-    float spine = (1.0 - smoothstep(0.006, 0.014, across)) * step(t, 0.97);
-    // Leaflets: narrow, clearly separated, shortening toward the tip.
-    float span = sin(3.14159 * pow(clamp(t, 0.0, 1.0), 0.62)) * 0.42;
-    // Leaflets rake toward the tip rather than sitting square to the spine, and
-    // they close up enough that the frond reads as a leaf, not a comb.
-    float pin = fract(t * 62.0 - across * 8.0);
-    float leaflet = step(across, span) * step(pin, 0.74) * step(0.03, t) * step(t, 0.97);
+    float side = sign(uv.x - 0.5);
+    float spine = (1.0 - smoothstep(0.005, 0.011, across)) * step(0.01, t) * step(t, 0.985);
+
+    // Leaflets rake toward the tip, so the row a texel belongs to is found by
+    // walking back down the rake to the rachis.
+    const float PINS = 19.0;
+    float rake = 0.60;
+    float tRoot = t - across * rake;
+    float k = floor(tRoot * PINS);
+    float ft = (fract(tRoot * PINS) - 0.5) * 2.0;          // -1..1 across a leaflet
+    // Reach shortens toward the tip and, less, toward the crozier end.
+    float jitter = 0.82 + h21(vec2(k, side * 3.7 + 11.0)) * 0.36;
+    float reach = sin(3.14159 * pow(clamp(tRoot, 0.0, 1.0), 0.55)) * 0.33 * jitter;
+    float u = across / max(reach, 1e-4);                   // 0 at rachis, 1 at tip
+    // Lance profile: broad at the root, pointed at the tip.
+    float halfW = sqrt(max(0.0, 1.0 - u)) * (0.86 - u * 0.22);
+    float leaflet = step(abs(ft), halfW) * step(u, 1.0)
+                  * step(0.015, tRoot) * step(tRoot, 0.985);
     a = max(spine, leaflet);
-    float shade = 0.42 + (1.0 - across / max(span, 0.001)) * 0.5;
-    col = mix(vec3(0.040, 0.105, 0.032), vec3(0.24, 0.42, 0.095), clamp(shade, 0.0, 1.0));
-    col = mix(col, vec3(0.11, 0.19, 0.055), spine * 0.6);
+
+    float mid = 1.0 - smoothstep(0.0, 0.30, abs(ft));      // each leaflet's own rib
+    vec3 deep = vec3(0.040, 0.105, 0.032);
+    vec3 pale = vec3(0.26, 0.44, 0.10);
+    col = mix(deep, pale, clamp(0.30 + (1.0 - u) * 0.45 + h21(vec2(k, 8.1)) * 0.30, 0.0, 1.0));
+    col *= 1.0 - mid * 0.18;
+    col = mix(col, vec3(0.13, 0.20, 0.058), spine * 0.75);
 
   } else if (cell.x < 0.5) {
     // --- grass blades -----------------------------------------------------

@@ -119,6 +119,7 @@ No build step. Static ES modules, an importmap, and a vendored three.js.
 src/
   game.js            scene, clock, locale, mode; the frame
   main.js            boot, quality presets, pause
+  ao.js              screen-space ambient occlusion
   fx.js              pooled beams, flashes, sparks, dust
   missions.js        three jobs and what each unlocks
   math/noise.js      simplex, fbm, ridged, hashes — no DOM, no three
@@ -196,6 +197,24 @@ they still present something when seen edge-on, and grass blades drawn bold
 enough to survive the mip chain. Creature hide is sampled triplanar in bind-pose
 object space, which is the one projection that stays glued to the skin through a
 gait cycle.
+
+Ambient occlusion comes from two places, because one is not enough. The large
+scale is baked into the terrain: every patch vertex measures its own sky
+visibility from the height grid it was built from — eight directions, five
+distances in metres so the answer does not change with the level of detail — so
+gullies, riverbanks, the inside of a caldera and the foot of a cliff are darker
+without a single extra height sample. Plants carry their own: leaf cards deep
+inside a canopy lobe are shaded by the ones outside them, and every frond and
+grass blade darkens toward its root, which is the contact shadow that stops a
+plant looking pasted onto the ground.
+
+The small scale is screen space, and it is hand-rolled because the stock passes
+cannot work here: this renderer needs a logarithmic depth buffer to hold a near
+plane at 9 cm and a far plane 90 km out, and they all assume the ordinary
+perspective encoding. Inverting three's encoding gives back the view-space
+distance directly — `w = exp2(2 * depth / logDepthBufFC) - 1` — with no division
+and no precision cliff at range. The rest is a hemisphere occlusion at half
+resolution behind a depth-aware blur.
 
 Fog is not three's flat exponential fog. Haze pools in low ground, thins with
 altitude, and mixes between a cool colour and a warm one along a forward-scatter
@@ -287,7 +306,7 @@ and render targets are allocated once. `?q=PERFORMANCE` in the URL overrides the
 saved preset without touching it.
 
 The expensive things are, in order: vegetation instance count, multisampling,
-terrain patch count, and shadow map resolution. If it stutters, drop a preset
+ambient occlusion, terrain patch count, and shadow map resolution. If it stutters, drop a preset
 before anything else.
 
 Baking the textures costs about a fifth of a second at boot and nothing after —

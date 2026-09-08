@@ -6,6 +6,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { AOPass } from './ao.js';
 
 /**
  * Final grade: vignette, chromatic fringing at the edges, film grain, a heat
@@ -93,8 +94,10 @@ export class Renderer {
     this.camera.rotation.order = 'YXZ';
 
     this.composer = null;
+    this.composerTarget = null;
     this.grade = null;
     this.bloom = null;
+    this.ao = null;
     this.scene = null;
     this.resize();
     addEventListener('resize', () => this.resize());
@@ -112,8 +115,20 @@ export class Renderer {
       depthBuffer: true,
       stencilBuffer: false,
     });
+    if (this.quality.ao) {
+      // The AO pass reads this back. EffectComposer clones the target for its
+      // second buffer and the clone shares this texture, which is what we want:
+      // the render pass writes depth into it once a frame either way.
+      target.depthTexture = new THREE.DepthTexture(target.width, target.height);
+      target.depthTexture.type = THREE.UnsignedIntType;
+    }
     this.composer = new EffectComposer(this.renderer, target);
+    this.composerTarget = target;
     this.composer.addPass(new RenderPass(scene, this.camera));
+    if (this.quality.ao) {
+      this.ao = new AOPass(this.camera, target.depthTexture, this.quality.aoOpts);
+      this.composer.addPass(this.ao);
+    }
     if (this.quality.bloom) {
       this.bloom = new UnrealBloomPass(
         new THREE.Vector2(this.width, this.height), 0.36, 0.72, 0.94
@@ -137,6 +152,8 @@ export class Renderer {
     if (this.composer) {
       this.composer.setPixelRatio(dpr * this.quality.renderScale);
       this.composer.setSize(w, h);
+      // setSize reallocates the target's depth texture; hand the new one over.
+      if (this.ao && this.composerTarget) this.ao.setDepthTexture(this.composerTarget.depthTexture);
       this.grade.uniforms.uResolution.value.set(w, h);
     }
   }

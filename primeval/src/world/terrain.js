@@ -132,6 +132,14 @@ const _hgrid = new Float32Array((GRID + 1) * (GRID + 1));
 const _col = [0, 0, 0];
 const _splat = [0, 0, 0];
 
+// Eight compass directions and the grid steps sampled along each, for the
+// terrain's own sky-visibility term.
+const AO_DIRS = [1, 0, 1, 1, 0, 1, -1, 1, -1, 0, -1, -1, 0, -1, 1, -1];
+// Metres, not grid cells: a patch three LOD levels out has a step sixteen times
+// wider, and sampling in cells would give the same hillside a different
+// occlusion at every level and pop as you walked toward it.
+const AO_DISTS = [3, 7, 14, 26, 45];
+
 /**
  * Build one terrain patch. `size` is its world extent, `ox/oz` the min corner.
  * Returns a BufferGeometry with positions relative to the patch centre.
@@ -171,6 +179,7 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
   const nrm = new Float32Array(count * 3);
   const col = new Float32Array(count * 3);
   const hot = new Float32Array(count);        // drives the lava cracks
+  const occ = new Float32Array(count);        // sky visibility, 1 = wide open
   const splatA = new Float32Array(count * 3); // turf weight, accent weight, accent id
   const cx = ox + size * 0.5, cz = oz + size * 0.5;
   const skirt = Math.max(2, step * 3.0);
@@ -199,6 +208,27 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
       const il = 1 / (Math.hypot(nx, ny, nz) || 1);
       nrm[k] = nx * il; nrm[k + 1] = ny * il; nrm[k + 2] = nz * il;
 
+      // Sky visibility, from the height grid we already have. Eight directions,
+      // three distances each: the largest elevation angle a ray meets is how
+      // much of the sky that direction takes away. Gullies, riverbanks, the
+      // inside of a caldera and the foot of a cliff all come out darker, and it
+      // costs no extra height samples.
+      let horizon = 0;
+      for (let d = 0; d < 8; d++) {
+        const dx = AO_DIRS[d * 2], dz = AO_DIRS[d * 2 + 1];
+        for (let r = 0; r < AO_DISTS.length; r++) {
+          const m = Math.max(1, Math.round(AO_DISTS[r] / step));
+          const si = clamp(gi + dx * m, 0, GRID), sj = clamp(gj + dz * m, 0, GRID);
+          if (si === gi && sj === gj) continue;
+          const dist = Math.hypot(si - gi, sj - gj) * step;
+          if (dist < 1e-4) continue;
+          const rise = (_hgrid[sj * n1 + si] - h) / dist;
+          if (rise > horizon) horizon = rise;
+        }
+      }
+      // tan -> a rough cosine-weighted openness. Never fully black.
+      occ[j * SIDE + i] = 1 - clamp(horizon, 0, 1.7) / 1.7 * 0.72;
+
       const slope = 1 - nrm[k + 1];
       const u = gi / GRID, v = gj / GRID;
       sampler.color(h, slope, climate(u, v, 0), climate(u, v, 1), climate(u, v, 2),
@@ -218,6 +248,7 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
   g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   g.setAttribute('aHot', new THREE.BufferAttribute(hot, 1));
+  g.setAttribute('aOcc', new THREE.BufferAttribute(occ, 1));
   g.setAttribute('aSplat', new THREE.BufferAttribute(splatA, 3));
   g.setIndex(sharedIndices());
   const r = size * 0.75 + (maxY - minY) * 0.5 + skirt;
@@ -272,8 +303,8 @@ export function makeTerrainMaterial(tex) {
 
     shader.vertexShader = `
       uniform vec3 uCurveOrigin; uniform float uCurveRadius; uniform float uCurveAmount;
-      attribute float aHot; attribute vec3 aSplat;
-      varying float vHot; varying vec3 vSplat; varying vec3 vPvWorld;
+      attribute float aHot; attribute vec3 aSplat; attribute float aOcc;
+      varying float vHot; varying vec3 vSplat; varying vec3 vPvWorld; varying float vOcc;
       vec3 primevalCurve(vec3 wp){
         vec2 d = wp.xz - uCurveOrigin.xz;
         wp.y -= (dot(d, d) / (2.0 * uCurveRadius)) * uCurveAmount;
@@ -283,7 +314,7 @@ export function makeTerrainMaterial(tex) {
     shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', `
       vec4 primevalWorld = modelMatrix * vec4( transformed, 1.0 );
       vPvWorld = primevalWorld.xyz;
-      vHot = aHot; vSplat = aSplat;
+      vHot = aHot; vSplat = aSplat; vOcc = aOcc;
       primevalWorld.xyz = primevalCurve( primevalWorld.xyz );
       vec4 mvPosition = viewMatrix * primevalWorld;
       gl_Position = projectionMatrix * mvPosition;
@@ -295,7 +326,7 @@ export function makeTerrainMaterial(tex) {
       uniform sampler2D tRock; uniform sampler2D nRock;
       uniform sampler2D tAcc;  uniform sampler2D nAcc;
       uniform float uLava; uniform float uTile; uniform float uMacro; uniform float uBumpStrength;
-      varying float vHot; varying vec3 vSplat; varying vec3 vPvWorld;
+      varying float vHot; varying vec3 vSplat; varying vec3 vPvWorld; varying float vOcc;
       ${GLSL_NOISE}
 
       // Two scales, mixed by a slow third — the standard cure for visible tiling.
@@ -403,6 +434,10 @@ export function makeTerrainMaterial(tex) {
         // temperature.
         diffuseColor.rgb *= clamp(mix(1.0, pvLum / 0.27, 0.55), 0.55, 1.25);
       #endif
+      // Sky visibility from the height field. This is the large-scale half of
+      // the ambient occlusion — the half a screen-space pass cannot see,
+      // because the geometry casting it is mostly off screen.
+      diffuseColor.rgb *= mix(1.0, clamp(vOcc, 0.0, 1.0), 0.85);
     `);
 
     shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>',
@@ -440,7 +475,7 @@ export function makeTerrainMaterial(tex) {
 
     attachAerial(shader);
   };
-  mat.customProgramCacheKey = () => 'primeval-terrain-v11';
+  mat.customProgramCacheKey = () => 'primeval-terrain-v12';
   return mat;
 }
 
