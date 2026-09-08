@@ -1,0 +1,1300 @@
+{
+ "note": "Runtime streaming registry. All endpoints send Access-Control-Allow-Origin: *. Elevation via exportImage F32 GeoTIFF; imagery via WMTS; science via identify.",
+ "imageServerUrl": "https://trek.nasa.gov/moon/{server}/rest/services/{id}/ImageServer",
+ "wmtsUrl": "https://trek.nasa.gov/tiles/Moon/EQ/{id}/1.0.0/default/default028mm/{z}/{row}/{col}.{ext}",
+ "elevation": [
+  {
+   "id": "LRO_LOLA_DEM_Global_256ppd_v06",
+   "server": "trekarcgis",
+   "kind": "global",
+   "bbox": [
+    -180,
+    -90,
+    180,
+    90
+   ],
+   "res_m": 118.451,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_Global_256ppd_v06 (LOLA LDEM 256 ppd)"
+  },
+  {
+   "id": "LRO_LOLA_DEM_Global_128ppd_v04",
+   "server": "trekarcgis",
+   "kind": "global",
+   "bbox": [
+    -180.0,
+    -90.0,
+    180.0,
+    90.0
+   ],
+   "res_m": 236.901,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_Global_128ppd_v04"
+  },
+  {
+   "id": "Apollo17_MetricCam_DEM_Global_1024ppd",
+   "server": "trekarcgis",
+   "kind": "global",
+   "bbox": [
+    -179.9995117,
+    -29.9995117,
+    179.9995117,
+    34.0004883
+   ],
+   "res_m": 29.613,
+   "pixelType": "S16",
+   "priority": 3,
+   "source": "NASA Trek / Apollo17_MetricCam_DEM_Global_1024ppd"
+  },
+  {
+   "id": "ApolloZone_MetricCam_DEM_Global_1024ppd",
+   "server": "trekarcgis",
+   "kind": "global",
+   "bbox": [
+    -180.0,
+    -38.0,
+    180.0,
+    34.0
+   ],
+   "res_m": 29.613,
+   "pixelType": "S16",
+   "priority": 3,
+   "source": "NASA Trek / ApolloZone_MetricCam_DEM_Global_1024ppd"
+  },
+  {
+   "id": "LRO_LOLA_DEM_NPole875_5mp_v04_EQ",
+   "server": "trekarcgis",
+   "kind": "polar",
+   "bbox": [
+    -180.0,
+    86.4646611,
+    180.0,
+    90.0
+   ],
+   "res_m": 35.663,
+   "pixelType": "S16",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_NPole875_5mp_v04_EQ"
+  },
+  {
+   "id": "LRO_LOLA_DEM_SPole875_5mp_v04_EQ",
+   "server": "trekarcgis",
+   "kind": "polar",
+   "bbox": [
+    -180.0,
+    -89.9994527,
+    180.0,
+    -86.4641138
+   ],
+   "res_m": 35.663,
+   "pixelType": "S16",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_SPole875_5mp_v04_EQ"
+  },
+  {
+   "id": "LRO_LOLA_DEM_SPole75_30mp_v04_EQ",
+   "server": "trekarcgis",
+   "kind": "polar",
+   "bbox": [
+    -180.0,
+    -90.0,
+    179.9992504,
+    -68.9074986
+   ],
+   "res_m": 86.646,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_SPole75_30mp_v04_EQ"
+  },
+  {
+   "id": "LRO_LOLA_DEM_NPole75_30mp_v04_EQ",
+   "server": "trekarcgis",
+   "kind": "polar",
+   "bbox": [
+    -180.0,
+    68.9060498,
+    179.999375,
+    90.0
+   ],
+   "res_m": 122.536,
+   "pixelType": "S16",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_NPole75_30mp_v04_EQ"
+  },
+  {
+   "id": "LRO_LOLA_DEM_NPole45_100mp_v04_EQ",
+   "server": "trekarcgis",
+   "kind": "polar",
+   "bbox": [
+    -180.0,
+    29.2559613,
+    180.0,
+    90.0
+   ],
+   "res_m": 155.703,
+   "pixelType": "S16",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_NPole45_100mp_v04_EQ"
+  },
+  {
+   "id": "LRO_LOLA_DEM_SPole45_100mp_v04_EQ",
+   "server": "trekarcgis",
+   "kind": "polar",
+   "bbox": [
+    -180.0,
+    -89.9976713,
+    180.0,
+    -29.2536326
+   ],
+   "res_m": 155.703,
+   "pixelType": "S16",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_SPole45_100mp_v04_EQ"
+  },
+  {
+   "id": "LRO_NAC_DEM_2_4mpp_SiteC",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    176.4921344,
+    -61.2925408,
+    176.6294765,
+    -61.2265448
+   ],
+   "res_m": 0.786,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_2_4mpp_SiteC"
+  },
+  {
+   "id": "LRO_NAC_DEM_1mpp_SiteH",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    -159.7230442,
+    -60.183576,
+    -159.4455028,
+    -59.2443379
+   ],
+   "res_m": 1.414,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_1mpp_SiteH"
+  },
+  {
+   "id": "LRO_NAC_DEM_02S317E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -43.3346321,
+    -2.950065,
+    -42.9085417,
+    -1.8250045
+   ],
+   "res_m": 1.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_02S317E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_00N234E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -125.9745278,
+    -0.5607312,
+    -125.1071764,
+    0.7690361
+   ],
+   "res_m": 1.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_00N234E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_02N085E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    84.8636886,
+    1.3778288,
+    85.7542915,
+    2.8147863
+   ],
+   "res_m": 1.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_02N085E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_07N022E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    21.6228271,
+    6.271912,
+    22.2195488,
+    7.2298986
+   ],
+   "res_m": 1.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_07N022E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_02S167E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    166.5794433,
+    -2.9191836,
+    166.9709973,
+    -1.7502106
+   ],
+   "res_m": 1.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_02S167E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_03S286E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -74.5352075,
+    -3.6992955,
+    -73.7101073,
+    -2.5608235
+   ],
+   "res_m": 1.501,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_03S286E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_05N000E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -0.593908,
+    4.1054742,
+    -0.1651101,
+    5.3703911
+   ],
+   "res_m": 1.503,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_05N000E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_09S015E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    15.140349,
+    -9.646928,
+    15.6961668,
+    -8.6195703
+   ],
+   "res_m": 1.509,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_09S015E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_10N058E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    58.639812,
+    10.6602392,
+    58.940383,
+    11.1357376
+   ],
+   "res_m": 1.512,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_10N058E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_13N356E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -3.9301294,
+    12.5162711,
+    -3.6453022,
+    13.4699413
+   ],
+   "res_m": 1.52,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_13N356E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_17S173E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    173.1571205,
+    -17.4359906,
+    173.7186004,
+    -15.9753373
+   ],
+   "res_m": 1.534,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_17S173E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_19S070E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    69.5021195,
+    -19.3338089,
+    70.2347657,
+    -17.6288402
+   ],
+   "res_m": 1.543,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_19S070E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_16S041E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    40.4705789,
+    -16.5957932,
+    41.2194618,
+    -15.2778055
+   ],
+   "res_m": 1.543,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_16S041E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_19S129E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    128.2947893,
+    -20.1830688,
+    128.8312375,
+    -18.723368
+   ],
+   "res_m": 1.543,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_19S129E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_26N004E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    3.0271666,
+    25.4546362,
+    3.8496142,
+    26.7641022
+   ],
+   "res_m": 1.582,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_26N004E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_26N178E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    177.5399094,
+    25.6717469,
+    178.0041043,
+    26.4302622
+   ],
+   "res_m": 1.582,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_26N178E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_27N318E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -42.01247,
+    26.7586524,
+    -41.5622661,
+    27.7137664
+   ],
+   "res_m": 1.589,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_27N318E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_28N307E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -52.743986,
+    27.2168,
+    -52.1655977,
+    28.4802054
+   ],
+   "res_m": 1.596,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_28N307E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_37S206E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -153.9539506,
+    -37.2487834,
+    -153.4460401,
+    -36.8352287
+   ],
+   "res_m": 1.678,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_37S206E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_43S349E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -11.64536,
+    -43.6576932,
+    -10.923577,
+    -42.3481321
+   ],
+   "res_m": 1.754,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_43S349E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_53N354E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -5.483328,
+    53.0779292,
+    -4.8128358,
+    53.5176801
+   ],
+   "res_m": 1.934,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_53N354E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_2mpp_SiteQ",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    139.1957361,
+    -75.0539029,
+    139.4515242,
+    -74.9879098
+   ],
+   "res_m": 2,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_2mpp_SiteQ"
+  },
+  {
+   "id": "LRO_NAC_DEM_06N120E_200cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    119.5578735,
+    5.9841583,
+    120.1012514,
+    7.10901
+   ],
+   "res_m": 2.006,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_06N120E_200cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_07N301E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -58.8657122,
+    6.8588855,
+    -58.4103964,
+    7.823278
+   ],
+   "res_m": 2.007,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_07N301E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_08N332E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -28.0737086,
+    7.0614631,
+    -27.1065834,
+    8.746329
+   ],
+   "res_m": 2.01,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_08N332E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_13S358E_200cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -2.6084195,
+    -13.1203075,
+    -2.0040504,
+    -12.0865602
+   ],
+   "res_m": 2.026,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_13S358E_200cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_14N304E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -56.1363763,
+    13.2130277,
+    -55.6417446,
+    14.1964524
+   ],
+   "res_m": 2.03,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_14N304E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_19N005E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    5.2290773,
+    18.1294632,
+    5.5045732,
+    19.0862814
+   ],
+   "res_m": 2.057,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_19N005E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_20N010E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    10.1997172,
+    19.5486798,
+    10.5707322,
+    20.5179174
+   ],
+   "res_m": 2.063,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_20N010E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_25N311E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -49.0411832,
+    24.0892205,
+    -48.4352399,
+    25.2896856
+   ],
+   "res_m": 2.101,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_25N311E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_26N150E_200cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    150.1461771,
+    25.6232254,
+    150.6846895,
+    26.8169245
+   ],
+   "res_m": 2.11,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_26N150E_200cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_26S265E_200cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -95.7877312,
+    -26.7174791,
+    -95.0620432,
+    -25.4910156
+   ],
+   "res_m": 2.11,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_26S265E_200cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_60S200E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -160.6816672,
+    -60.6430685,
+    -159.4890184,
+    -59.3178763
+   ],
+   "res_m": 2.121,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_60S200E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_61N099E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    98.7325771,
+    60.4580063,
+    100.1980529,
+    61.7296316
+   ],
+   "res_m": 2.154,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_61N099E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_32N292E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -68.2808357,
+    31.0043632,
+    -66.8543272,
+    32.3600785
+   ],
+   "res_m": 2.172,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_32N292E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_36N320E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -40.3343706,
+    35.6676621,
+    -39.6430575,
+    36.7431694
+   ],
+   "res_m": 2.224,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_36N320E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_36S164E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    164.0230593,
+    -36.135881,
+    164.863656,
+    -34.8574938
+   ],
+   "res_m": 2.224,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_36S164E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_2_5mpp_SiteG",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    -162.6475127,
+    -57.2319111,
+    -162.5255731,
+    -57.1658978
+   ],
+   "res_m": 2.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_2_5mpp_SiteG"
+  },
+  {
+   "id": "LRO_NAC_DEM_2_5mpp_SiteB",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    162.4329771,
+    -57.6286788,
+    162.7365495,
+    -56.8544227
+   ],
+   "res_m": 2.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_2_5mpp_SiteB"
+  },
+  {
+   "id": "LRO_NAC_DEM_2_5mpp_SiteA",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    160.9866934,
+    -59.157527,
+    161.1155546,
+    -59.0914267
+   ],
+   "res_m": 2.5,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_2_5mpp_SiteA"
+  },
+  {
+   "id": "LRO_NAC_DEM_51S171E_2mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    170.5025927,
+    -51.6683185,
+    171.4012766,
+    -50.3714127
+   ],
+   "res_m": 2.521,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_51S171E_2mp"
+  },
+  {
+   "id": "LRO_NAC_DEM_2_5mpp_Shioli",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    25.0626334,
+    -14.1732505,
+    25.8441525,
+    -12.5872781
+   ],
+   "res_m": 2.538,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_2_5mpp_Shioli"
+  },
+  {
+   "id": "LRO_NAC_DEM_55N077E_200cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    76.9027489,
+    53.7777266,
+    77.3971211,
+    54.9352554
+   ],
+   "res_m": 2.641,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_55N077E_200cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_73N350E_150cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -9.4368827,
+    73.3188433,
+    -8.291074,
+    73.7131748
+   ],
+   "res_m": 2.774,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_73N350E_150cmp"
+  },
+  {
+   "id": "LRO_NAC_DEM_3_75mpp_SiteH",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    -161.8642201,
+    -57.8951694,
+    -161.7400191,
+    -57.829087
+   ],
+   "res_m": 3.745,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_3_75mpp_SiteH"
+  },
+  {
+   "id": "LRO_NAC_DEM_20S337E_400cmp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -22.7926867,
+    -21.0658297,
+    -22.2073208,
+    -20.484135
+   ],
+   "res_m": 4.126,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_20S337E_400cmp"
+  },
+  {
+   "id": "NAC_DTM_APOLLO17",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    29.9059224,
+    19.3905316,
+    31.65811,
+    21.3035496
+   ],
+   "res_m": 5.0,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / NAC_DTM_APOLLO17"
+  },
+  {
+   "id": "LRO_LOLA_NAC_DEM_3_5mpp_IM_1_LandingSite",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    0.9371452,
+    -80.2173736,
+    1.9423989,
+    -80.0421277
+   ],
+   "res_m": 8.599,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_LOLA_NAC_DEM_3_5mpp_IM_1_LandingSite"
+  },
+  {
+   "id": "LRO_NAC_DEM_89N023E_450cmp_v02",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    -75.1233781,
+    87.6229123,
+    87.2178588,
+    89.947392
+   ],
+   "res_m": 53.765,
+   "pixelType": "F32",
+   "priority": 0,
+   "source": "NASA Trek / LRO_NAC_DEM_89N023E_450cmp_v02"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteG",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    -164.4276922,
+    -58.1945192,
+    -161.1479376,
+    -56.5125513
+   ],
+   "res_m": 234.514,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteG"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_Site007",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    -179.9999833,
+    -89.5286561,
+    180.0,
+    -87.705174
+   ],
+   "res_m": 235.849,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_Site007"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteA",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    159.4004193,
+    -59.9536867,
+    162.7186979,
+    -58.2788951
+   ],
+   "res_m": 235.849,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteA"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteC",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    174.7923356,
+    -62.0888576,
+    178.3453981,
+    -60.414066
+   ],
+   "res_m": 235.849,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteC"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteD",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    -173.4910422,
+    -58.0669721,
+    -170.3527645,
+    -56.3921806
+   ],
+   "res_m": 235.849,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteD"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteO",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    156.012311,
+    -67.4048691,
+    168.8798001,
+    -62.3410921
+   ],
+   "res_m": 236.593,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteO"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteP",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    132.3034144,
+    -74.2321669,
+    138.4327483,
+    -72.5505291
+   ],
+   "res_m": 236.813,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteP"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteB",
+   "server": "trekarcgis3",
+   "kind": "site",
+   "bbox": [
+    162.0102846,
+    -57.5639285,
+    163.2446594,
+    -56.8842411
+   ],
+   "res_m": 236.901,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteB"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteE",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    -172.3197472,
+    -56.2656758,
+    -169.3246906,
+    -54.583413
+   ],
+   "res_m": 236.901,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteE"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteF",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    -168.1927012,
+    -57.4302659,
+    -165.1033121,
+    -55.7558642
+   ],
+   "res_m": 236.901,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteF"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteH",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    -163.3974668,
+    -58.6958399,
+    -160.1980231,
+    -57.0214381
+   ],
+   "res_m": 236.901,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteH"
+  },
+  {
+   "id": "LRO_LOLA_DEM_128ppd_SiteQ",
+   "server": "trekarcgis2",
+   "kind": "site",
+   "bbox": [
+    135.9430759,
+    -75.8549462,
+    142.7192933,
+    -74.1648224
+   ],
+   "res_m": 236.901,
+   "pixelType": "F32",
+   "priority": 1,
+   "source": "NASA Trek / LRO_LOLA_DEM_128ppd_SiteQ"
+  },
+  {
+   "id": "horseshoe_DEM_merged",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    61.0001114,
+    16.6113813,
+    62.9997768,
+    19.0906479
+   ],
+   "res_m": 1.38,
+   "pixelType": "F32",
+   "priority": 2,
+   "source": "NASA Trek / horseshoe_DEM_merged"
+  },
+  {
+   "id": "picard_DEM_merged",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    53.9998751,
+    13.0003167,
+    55.499155,
+    15.6587319
+   ],
+   "res_m": 1.392,
+   "pixelType": "F32",
+   "priority": 2,
+   "source": "NASA Trek / picard_DEM_merged"
+  },
+  {
+   "id": "20191118_demmos_lzw",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    24.5768438,
+    43.4411587,
+    26.0529993,
+    45.9874958
+   ],
+   "res_m": 2.215,
+   "pixelType": "F32",
+   "priority": 2,
+   "source": "NASA Trek / 20191118-demmos-lzw"
+  },
+  {
+   "id": "UCL_Aristarchus_DTM_JPL_AOI_10m",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -48.0349295,
+    23.0593252,
+    -46.5789558,
+    24.4453858
+   ],
+   "res_m": 10,
+   "pixelType": "F32",
+   "priority": 2,
+   "source": "NASA Trek / UCL-Aristarchus-DTM-JPL-AOI-10m"
+  },
+  {
+   "id": "schrodinger_vent_dem_clip_eq",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    134.8048165,
+    -76.6885641,
+    143.4760592,
+    -74.5319804
+   ],
+   "res_m": 10.087,
+   "pixelType": "F32",
+   "priority": 2,
+   "source": "NASA Trek / schrodinger_vent_dem.clip.eq"
+  },
+  {
+   "id": "Apollo15_PanCam_DEM_28N307E_3mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -53.1015073,
+    26.7635801,
+    -51.5924499,
+    29.0334672
+   ],
+   "res_m": 3.193,
+   "pixelType": "F32",
+   "priority": 3,
+   "source": "NASA Trek / Apollo15_PanCam_DEM_28N307E_3mp"
+  },
+  {
+   "id": "Apollo15_PanCam_DEM_19S129E_5mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    127.3918913,
+    -21.0529025,
+    129.7577254,
+    -18.2873921
+   ],
+   "res_m": 5.142,
+   "pixelType": "F32",
+   "priority": 3,
+   "source": "NASA Trek / Apollo15_PanCam_DEM_19S129E_5mp"
+  },
+  {
+   "id": "Apollo15_PanCam_DEM_25N311E_5mp",
+   "server": "trekarcgis",
+   "kind": "site",
+   "bbox": [
+    -49.771146,
+    23.4260907,
+    -48.0356413,
+    26.0942471
+   ],
+   "res_m": 5.252,
+   "pixelType": "F32",
+   "priority": 3,
+   "source": "NASA Trek / Apollo15_PanCam_DEM_25N311E_5mp"
+  }
+ ],
+ "imagery": [
+  {
+   "id": "LRO_WAC_Mosaic_Global_303ppd_v02",
+   "ext": "jpg",
+   "maxLevel": 8,
+   "bbox": [
+    -180,
+    -90,
+    180,
+    90
+   ],
+   "res_m": 83.0,
+   "source": "LROC WAC global mosaic (303 ppd), NASA Trek WMTS"
+  },
+  {
+   "id": "apollo11_26cm_mosaic_byte_geo_1_2_highContrast",
+   "ext": "png",
+   "maxLevel": 15,
+   "bbox": [
+    23.4484963,
+    0.1464532,
+    23.5396925,
+    1.1149077
+   ],
+   "res_m": 0.65,
+   "source": "LROC NAC Apollo 11 site mosaic (26 cm/px source, high-contrast), NASA Trek WMTS"
+  }
+ ],
+ "science": {
+  "geology": {
+   "server": "trekarcgis3",
+   "map": "Unified_Global_Geologic_Map_of_the_Moon_Geologic_Units",
+   "fields": {
+    "unit": "FIRST_Unit",
+    "period": "FIRST_Un_1",
+    "name": "FIRST_Un_2"
+   },
+   "source": "USGS Unified Geologic Map of the Moon 1:5M (Fortezzo et al. 2020)"
+  },
+  "diviner": {
+   "server": "trekarcgis2",
+   "max": "diviner_tbol_max",
+   "min": "diviner_tbol_min",
+   "noon": "diviner_tbol_hour12",
+   "midnight": "diviner_tbol_hour00",
+   "res_deg": 0.5,
+   "source": "LRO Diviner bolometric brightness temperature (Williams et al. 2017), 0.5 deg"
+  },
+  "minerals": {
+   "server": "trekarcgis",
+   "res_deg": 0.25,
+   "FeO": "Lunar_Kaguya_MIMap_MineralDeconv_FeOWeightPercent_50N50S",
+   "olivine": "Lunar_Kaguya_MIMap_MineralDeconv_OlivinePercent_50N50S",
+   "cpx": "Lunar_Kaguya_MIMap_MineralDeconv_ClinopyroxenePercent_50N50S",
+   "opx": "Lunar_Kaguya_MIMap_MineralDeconv_OrthopyroxenePercent_50N50S",
+   "plagioclase": "Lunar_Kaguya_MIMap_MineralDeconv_PlagioclasePercent_50N50S",
+   "omat": "Lunar_Kaguya_MIMap_MineralDeconv_OpticalMaturityIndex_50N50S",
+   "source": "Kaguya Multiband Imager mineral deconvolution maps (Lemelin et al.), 50N-50S"
+  },
+  "gravity": {
+   "server": "trekarcgis2",
+   "freeair": "gggrx_1200a_anom_l180_eq",
+   "bouguer": "gggrx_1200a_boug_l180_eq",
+   "res_deg": 0.0625,
+   "source": "GRAIL GRGM1200A free-air / Bouguer anomaly (mGal), degree 180"
+  },
+  "lolacount": {
+   "server": "trekarcgis",
+   "id": "LRO_LOLA_Count_Global_128ppd_v04",
+   "source": "LOLA observation count per 128 ppd pixel (0 = interpolated)"
+  },
+  "nomenclature": {
+   "server": "trekarcgis",
+   "map": "CombinedNomenclature",
+   "layer": 0,
+   "source": "IAU Gazetteer of Planetary Nomenclature + spacecraft sites (Trek combined layer)"
+  }
+ }
+}

@@ -1,0 +1,2340 @@
+{
+ "generated": "2026-09-08T04:30:21Z",
+ "source": "JPL Horizons API (ssd.jpl.nasa.gov/api/horizons.api), observer on Moon via CENTER=coord@301, APPARENT=AIRLESS",
+ "sites": {
+  "tranquility": {
+   "lat": 0.67415,
+   "lon": 23.47314
+  },
+  "taurus_littrow": {
+   "lat": 20.19108,
+   "lon": 30.7722
+  },
+  "shackleton_rim": {
+   "lat": -89.67,
+   "lon": 129.78
+  },
+  "north_pole": {
+   "lat": 89.9,
+   "lon": 0.0
+  },
+  "change4": {
+   "lat": -45.4446,
+   "lon": 177.5991
+  },
+  "aristarchus": {
+   "lat": 23.73,
+   "lon": -47.49
+  },
+  "tycho": {
+   "lat": -43.3,
+   "lon": -11.22
+  },
+  "copernicus": {
+   "lat": 9.62,
+   "lon": -20.08
+  },
+  "orientale": {
+   "lat": -19.87,
+   "lon": -94.67
+  },
+  "tsiolkovskiy": {
+   "lat": -20.38,
+   "lon": 128.97
+  }
+ },
+ "epochs": {
+  "1969-07-20 20:17": {
+   "subpoints": {
+    "subearth_lon": 352.840524,
+    "subearth_lat": 1.698106,
+    "subsolar_lon": 102.787051,
+    "subsolar_lat": 1.298886,
+    "range_km": 0.00260368911484
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 88.80544,
+      "el": 10.697652,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.744,
+      "range_km": 1.01519665637086,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 272.193967,
+      "el": 59.224478,
+      "illum": 67.23489,
+      "angdiam_arcsec": 6782.698,
+      "range_km": 0.00259322732234,
+      "sto_deg": 69.8384
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 95.124316,
+      "el": 17.309751,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.747,
+      "range_km": 1.01519535656555,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 248.31898,
+      "el": 48.434238,
+      "illum": 67.25145,
+      "angdiam_arcsec": 6779.341,
+      "range_km": 0.00259451154624,
+      "sto_deg": 69.8182
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 333.00988,
+      "el": -1.005487,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.74,
+      "range_km": 1.01519901487607,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 223.065531,
+      "el": -2.194689,
+      "illum": 67.12126,
+      "angdiam_arcsec": 6755.596,
+      "range_km": 0.00260363020718,
+      "sto_deg": 69.977
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 77.21094,
+      "el": 1.276096,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.741,
+      "range_km": 1.01519855246395,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 187.162004,
+      "el": 1.541899,
+      "illum": 67.13508,
+      "angdiam_arcsec": 6757.561,
+      "range_km": 0.00260287296085,
+      "sto_deg": 69.9602
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 281.855492,
+      "el": 9.648084,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.744,
+      "range_km": 1.01519686389394,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 173.134518,
+      "el": -46.230275,
+      "illum": 67.11064,
+      "angdiam_arcsec": 6735.017,
+      "range_km": 0.00261158479259,
+      "sto_deg": 69.99
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 53.250097,
+      "el": -51.784096,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.723,
+      "range_km": 1.01520793643988,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 113.369738,
+      "el": 45.014549,
+      "illum": 67.00614,
+      "angdiam_arcsec": 6778.105,
+      "range_km": 0.00259498464409,
+      "sto_deg": 70.1174
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 106.033625,
+      "el": -18.153983,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.734,
+      "range_km": 1.01520243036993,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 5.727097,
+      "el": 44.672438,
+      "illum": 67.11182,
+      "angdiam_arcsec": 6777.976,
+      "range_km": 0.0025950338674,
+      "sto_deg": 69.9886
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 82.334725,
+      "el": -32.082516,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.729,
+      "range_km": 1.01520498059849,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 120.872263,
+      "el": 74.842152,
+      "illum": 67.08255,
+      "angdiam_arcsec": 6785.908,
+      "range_km": 0.00259200076407,
+      "sto_deg": 70.0243
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 224.72237,
+      "el": -64.773133,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.721,
+      "range_km": 1.01520931698574,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 87.555019,
+      "el": 1.50919,
+      "illum": 66.92843,
+      "angdiam_arcsec": 6757.545,
+      "range_km": 0.0026028792779,
+      "sto_deg": 70.212
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 307.104695,
+      "el": 56.41866,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.758,
+      "range_km": 1.01518913519311,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 252.142267,
+      "el": -43.486291,
+      "illum": 67.26107,
+      "angdiam_arcsec": 6736.036,
+      "range_km": 0.00261118960542,
+      "sto_deg": 69.8065
+     }
+    }
+   }
+  },
+  "1969-07-21 02:56": {
+   "subpoints": {
+    "subearth_lon": 352.719737,
+    "subearth_lat": 2.09328,
+    "subsolar_lon": 99.398574,
+    "subsolar_lat": 1.293714,
+    "range_km": 0.00259464107772
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 88.835287,
+      "el": 14.085149,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.521,
+      "range_km": 1.01531651434399,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 272.959703,
+      "el": 59.090242,
+      "illum": 64.52538,
+      "angdiam_arcsec": 6806.432,
+      "range_km": 0.00258418557381,
+      "sto_deg": 73.1131
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 96.408637,
+      "el": 20.47202,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.524,
+      "range_km": 1.01531527869494,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 248.930479,
+      "el": 48.520346,
+      "illum": 64.54224,
+      "angdiam_arcsec": 6803.118,
+      "range_km": 0.00258544434677,
+      "sto_deg": 73.0929
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 329.621745,
+      "el": -1.009681,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.516,
+      "range_km": 1.0153195442582,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 222.946583,
+      "el": -2.591189,
+      "illum": 64.40892,
+      "angdiam_arcsec": 6778.967,
+      "range_km": 0.00259465482427,
+      "sto_deg": 73.2525
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 80.599395,
+      "el": 1.276727,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.517,
+      "range_km": 1.01531908086897,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 187.282583,
+      "el": 1.936248,
+      "illum": 64.42289,
+      "angdiam_arcsec": 6781.365,
+      "range_km": 0.00259373737744,
+      "sto_deg": 73.2358
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 279.371697,
+      "el": 7.315308,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.519,
+      "range_km": 1.01531786006085,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 172.912302,
+      "el": -46.613156,
+      "illum": 64.39773,
+      "angdiam_arcsec": 6758.315,
+      "range_km": 0.00260258280415,
+      "sto_deg": 73.2659
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 56.779437,
+      "el": -49.245483,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.5,
+      "range_km": 1.01532813784248,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 112.988636,
+      "el": 45.329512,
+      "illum": 64.29132,
+      "angdiam_arcsec": 6801.961,
+      "range_km": 0.00258588417969,
+      "sto_deg": 73.3932
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 103.521358,
+      "el": -15.765979,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.51,
+      "range_km": 1.01532249595988,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 5.518585,
+      "el": 44.284974,
+      "illum": 64.39951,
+      "angdiam_arcsec": 6801.567,
+      "range_km": 0.00258603409557,
+      "sto_deg": 73.2638
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 83.154868,
+      "el": -28.769518,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.506,
+      "range_km": 1.01532493018495,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 119.811895,
+      "el": 75.153119,
+      "illum": 64.36959,
+      "angdiam_arcsec": 6809.744,
+      "range_km": 0.00258292893945,
+      "sto_deg": 73.2996
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 218.240212,
+      "el": -66.882439,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.496,
+      "range_km": 1.01533002064518,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 87.142244,
+      "el": 1.486621,
+      "illum": 64.21166,
+      "angdiam_arcsec": 6781.127,
+      "range_km": 0.00259382821367,
+      "sto_deg": 73.4884
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 303.289943,
+      "el": 53.825459,
+      "illum": 100.0,
+      "angdiam_arcsec": 1889.533,
+      "range_km": 1.01530996421747,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 252.554373,
+      "el": -43.770957,
+      "illum": 64.55157,
+      "angdiam_arcsec": 6759.372,
+      "range_km": 0.0026021757898,
+      "sto_deg": 73.0817
+     }
+    }
+   }
+  },
+  "1972-12-11 19:54": {
+   "subpoints": {
+    "subearth_lon": 352.864976,
+    "subearth_lat": -4.264099,
+    "subsolar_lon": 106.24439,
+    "subsolar_lat": -0.769445,
+    "range_km": 0.00260713640103
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 90.861047,
+      "el": 7.217978,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.715,
+      "range_km": 0.98346658134901,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 260.557512,
+      "el": 58.886197,
+      "illum": 69.95312,
+      "angdiam_arcsec": 6773.61,
+      "range_km": 0.00259670647713,
+      "sto_deg": 66.4826
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 95.850309,
+      "el": 13.342398,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.717,
+      "range_km": 0.98346536034249,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 240.877309,
+      "el": 45.281877,
+      "illum": 69.96374,
+      "angdiam_arcsec": 6769.218,
+      "range_km": 0.00259839104084,
+      "sto_deg": 66.4693
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 336.462089,
+      "el": 1.071313,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.712,
+      "range_km": 0.98346782228953,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 223.066101,
+      "el": 3.768598,
+      "illum": 69.85964,
+      "angdiam_arcsec": 6749.798,
+      "range_km": 0.0026058662335,
+      "sto_deg": 66.5993
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 73.757106,
+      "el": -0.798093,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.711,
+      "range_km": 0.98346820115446,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 187.136655,
+      "el": -4.419628,
+      "illum": 69.83984,
+      "angdiam_arcsec": 6745.505,
+      "range_km": 0.00260752453942,
+      "sto_deg": 66.6241
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 282.97928,
+      "el": 13.523404,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.717,
+      "range_km": 0.9834653228594,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 173.818758,
+      "el": -40.306448,
+      "illum": 69.84485,
+      "angdiam_arcsec": 6728.402,
+      "range_km": 0.00261415219406,
+      "sto_deg": 66.6178
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 51.77276,
+      "el": -55.717076,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.693,
+      "range_km": 0.9834776360077,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 120.073851,
+      "el": 41.551858,
+      "illum": 69.72363,
+      "angdiam_arcsec": 6767.794,
+      "range_km": 0.00259893789545,
+      "sto_deg": 66.769
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 110.177655,
+      "el": -19.051336,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.704,
+      "range_km": 0.98347183110303,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 6.449126,
+      "el": 50.635233,
+      "illum": 69.84484,
+      "angdiam_arcsec": 6771.106,
+      "range_km": 0.0025976667704,
+      "sto_deg": 66.6178
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 83.924856,
+      "el": -35.889439,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.698,
+      "range_km": 0.98347484862753,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 136.544401,
+      "el": 70.967091,
+      "illum": 69.80191,
+      "angdiam_arcsec": 6776.303,
+      "range_km": 0.00259567459795,
+      "sto_deg": 66.6714
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 227.237425,
+      "el": -60.910789,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.692,
+      "range_km": 0.9834781879617,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 93.179153,
+      "el": 3.50952,
+      "illum": 69.66056,
+      "angdiam_arcsec": 6749.664,
+      "range_km": 0.00260591824826,
+      "sto_deg": 66.8477
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 308.620187,
+      "el": 60.368508,
+      "illum": 100.0,
+      "angdiam_arcsec": 1950.732,
+      "range_km": 0.98345794406295,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 245.165631,
+      "el": -40.567433,
+      "illum": 69.98553,
+      "angdiam_arcsec": 6728.297,
+      "range_km": 0.00261419290014,
+      "sto_deg": 66.4421
+     }
+    }
+   }
+  },
+  "1990-05-05 05:05": {
+   "subpoints": {
+    "subearth_lon": 5.401309,
+    "subearth_lat": 4.410532,
+    "subsolar_lon": 56.114131,
+    "subsolar_lat": 1.56778,
+    "range_km": 0.00266344465237
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 88.1459,
+      "el": 57.353361,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.085,
+      "range_km": 1.01020340079525,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 282.003635,
+      "el": 71.490659,
+      "illum": 18.46715,
+      "angdiam_arcsec": 6632.297,
+      "range_km": 0.00265202900302,
+      "sto_deg": 129.0948
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 123.773979,
+      "el": 59.020767,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.085,
+      "range_km": 1.01020322247632,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 240.796024,
+      "el": 60.579005,
+      "illum": 18.48118,
+      "angdiam_arcsec": 6630.064,
+      "range_km": 0.00265292231042,
+      "sto_deg": 129.0741
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 286.342355,
+      "el": -1.475608,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.066,
+      "range_km": 1.01021347816227,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 235.6462,
+      "el": -4.846089,
+      "illum": 18.41998,
+      "angdiam_arcsec": 6602.492,
+      "range_km": 0.00266399998308,
+      "sto_deg": 129.1645
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 123.883744,
+      "el": 1.622875,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.067,
+      "range_km": 1.01021285018674,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 174.594522,
+      "el": 4.261248,
+      "illum": 18.40982,
+      "angdiam_arcsec": 6607.066,
+      "range_km": 0.00266215586495,
+      "sto_deg": 129.1795
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 247.515665,
+      "el": -22.69326,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.058,
+      "range_km": 1.01021765898466,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 191.769197,
+      "el": -48.569092,
+      "illum": 18.43346,
+      "angdiam_arcsec": 6583.363,
+      "range_km": 0.00267173972964,
+      "sto_deg": 129.1446
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 82.978491,
+      "el": -11.785175,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.062,
+      "range_km": 1.01021555217254,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 102.181485,
+      "el": 35.358619,
+      "illum": 18.28905,
+      "angdiam_arcsec": 6621.614,
+      "range_km": 0.00265630739039,
+      "sto_deg": 129.3583
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 72.88154,
+      "el": 15.163522,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.072,
+      "range_km": 1.01021014200836,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 21.855877,
+      "el": 39.789562,
+      "illum": 18.38257,
+      "angdiam_arcsec": 6623.384,
+      "range_km": 0.00265559734351,
+      "sto_deg": 129.2198
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 90.760723,
+      "el": 13.871996,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.072,
+      "range_km": 1.01021039576756,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 99.86211,
+      "el": 64.078066,
+      "illum": 18.34185,
+      "angdiam_arcsec": 6630.882,
+      "range_km": 0.0026525949289,
+      "sto_deg": 129.2801
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 119.031201,
+      "el": -56.080311,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.049,
+      "range_km": 1.01022281704996,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 89.238483,
+      "el": -11.207857,
+      "illum": 18.2597,
+      "angdiam_arcsec": 6599.326,
+      "range_km": 0.0026652775701,
+      "sto_deg": 129.4018
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 277.647708,
+      "el": 15.466781,
+      "illum": 100.0,
+      "angdiam_arcsec": 1899.073,
+      "range_km": 1.01021008089231,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 261.789373,
+      "el": -33.133185,
+      "illum": 18.54753,
+      "angdiam_arcsec": 6589.2,
+      "range_km": 0.00266937314187,
+      "sto_deg": 128.9762
+     }
+    }
+   }
+  },
+  "2000-01-01 12:00": {
+   "subpoints": {
+    "subearth_lon": 5.025824,
+    "subearth_lat": -6.720739,
+    "subsolar_lon": 242.181075,
+    "subsolar_lat": 0.619964,
+    "range_km": 0.00268998925442
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 271.831959,
+      "el": -51.271884,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.863,
+      "range_km": 0.98188204444526,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 247.826563,
+      "el": 70.074466,
+      "illum": 77.02715,
+      "angdiam_arcsec": 6564.242,
+      "range_km": 0.00267952184626,
+      "sto_deg": 57.2765
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 300.316747,
+      "el": -52.867915,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.862,
+      "range_km": 0.98188224347116,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 225.868259,
+      "el": 52.899838,
+      "illum": 77.00691,
+      "angdiam_arcsec": 6560.203,
+      "range_km": 0.0026811713974,
+      "sto_deg": 57.304
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 112.39725,
+      "el": -0.74639,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.88,
+      "range_km": 0.98187313619104,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 235.210963,
+      "el": 6.286243,
+      "illum": 77.0963,
+      "angdiam_arcsec": 6540.743,
+      "range_km": 0.00268914760697,
+      "sto_deg": 57.1822
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 297.820034,
+      "el": 0.572617,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.881,
+      "range_km": 0.98187286888486,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 174.978572,
+      "el": -6.866274,
+      "illum": 77.07462,
+      "angdiam_arcsec": 6534.278,
+      "range_km": 0.00269180783327,
+      "sto_deg": 57.2118
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 70.861312,
+      "el": 17.061806,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.887,
+      "range_km": 0.9818695781161,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 189.296581,
+      "el": -37.608571,
+      "illum": 77.07853,
+      "angdiam_arcsec": 6520.449,
+      "range_km": 0.00269751652609,
+      "sto_deg": 57.2065
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 262.405023,
+      "el": 18.208882,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.888,
+      "range_km": 0.98186935484297,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 113.96987,
+      "el": 30.198118,
+      "illum": 77.21245,
+      "angdiam_arcsec": 6551.866,
+      "range_km": 0.00268458271516,
+      "sto_deg": 57.0237
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 258.898343,
+      "el": -12.434608,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.876,
+      "range_km": 0.98187548484855,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 26.030952,
+      "el": 50.573713,
+      "illum": 77.12983,
+      "angdiam_arcsec": 6559.491,
+      "range_km": 0.00268146212622,
+      "sto_deg": 57.1365
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 271.917401,
+      "el": -7.52534,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.878,
+      "range_km": 0.98187450480166,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 122.233605,
+      "el": 60.002718,
+      "illum": 77.15899,
+      "angdiam_arcsec": 6562.143,
+      "range_km": 0.00268037854436,
+      "sto_deg": 57.0967
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 309.380924,
+      "el": 59.430527,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.901,
+      "range_km": 0.98186298490459,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 99.674444,
+      "el": -6.991851,
+      "illum": 77.25768,
+      "angdiam_arcsec": 6534.218,
+      "range_km": 0.00269183267812,
+      "sto_deg": 56.9619
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 97.874028,
+      "el": -21.913284,
+      "illum": 100.0,
+      "angdiam_arcsec": 1953.872,
+      "range_km": 0.98187732022293,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 249.817425,
+      "el": -28.845157,
+      "illum": 76.95003,
+      "angdiam_arcsec": 6524.047,
+      "range_km": 0.00269602880744,
+      "sto_deg": 57.3815
+     }
+    }
+   }
+  },
+  "2013-12-14 13:11": {
+   "subpoints": {
+    "subearth_lon": 5.13429,
+    "subearth_lat": 1.704546,
+    "subsolar_lon": 36.735955,
+    "subsolar_lat": 1.167268,
+    "range_km": 0.00265430970976
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 87.772871,
+      "el": 76.72981,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.62,
+      "range_km": 0.98654895763863,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 273.382436,
+      "el": 71.561839,
+      "illum": 7.48068,
+      "angdiam_arcsec": 6654.94,
+      "range_km": 0.00264300660347,
+      "sto_deg": 148.2486
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 162.228932,
+      "el": 70.102606,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.619,
+      "range_km": 0.98654934066272,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 236.78528,
+      "el": 58.7481,
+      "illum": 7.49092,
+      "angdiam_arcsec": 6652.21,
+      "range_km": 0.0026440911763,
+      "sto_deg": 148.2264
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 266.962535,
+      "el": -1.185448,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.597,
+      "range_km": 0.98656050128287,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 235.367515,
+      "el": -2.142836,
+      "illum": 7.44639,
+      "angdiam_arcsec": 6626.284,
+      "range_km": 0.0026544353879,
+      "sto_deg": 148.3234
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 143.262969,
+      "el": 1.246733,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.598,
+      "range_km": 0.98656000827754,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 174.860737,
+      "el": 1.553721,
+      "illum": 7.44364,
+      "angdiam_arcsec": 6628.155,
+      "range_km": 0.00265368618026,
+      "sto_deg": 148.3294
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 229.534977,
+      "el": -33.959098,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.585,
+      "range_km": 0.98656674797929,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 190.835841,
+      "el": -45.934289,
+      "illum": 7.45584,
+      "angdiam_arcsec": 6606.562,
+      "range_km": 0.0026623587061,
+      "sto_deg": 148.3028
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 91.257228,
+      "el": 5.754702,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.6,
+      "range_km": 0.98655909756655,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 105.273547,
+      "el": 34.360853,
+      "illum": 7.36043,
+      "angdiam_arcsec": 6643.756,
+      "range_km": 0.00264745539797,
+      "sto_deg": 148.5115
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 57.444178,
+      "el": 28.249444,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.608,
+      "range_km": 0.98655476473397,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 22.507781,
+      "el": 42.471303,
+      "illum": 7.42173,
+      "angdiam_arcsec": 6646.98,
+      "range_km": 0.00264617145057,
+      "sto_deg": 148.3773
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 94.874752,
+      "el": 32.88265,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.61,
+      "range_km": 0.98655395663435,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 105.95835,
+      "el": 63.595517,
+      "illum": 7.39583,
+      "angdiam_arcsec": 6653.395,
+      "range_km": 0.00264362023714,
+      "sto_deg": 148.4339
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 105.33167,
+      "el": -38.962711,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.583,
+      "range_km": 0.98656756480331,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 91.738858,
+      "el": -10.049917,
+      "illum": 7.33874,
+      "angdiam_arcsec": 6622.307,
+      "range_km": 0.00265602940186,
+      "sto_deg": 148.5591
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 270.316728,
+      "el": -2.501344,
+      "illum": 100.0,
+      "angdiam_arcsec": 1944.596,
+      "range_km": 0.98656076673395,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 258.700153,
+      "el": -32.354098,
+      "illum": 7.53423,
+      "angdiam_arcsec": 6611.868,
+      "range_km": 0.00266022237128,
+      "sto_deg": 148.1322
+     }
+    }
+   }
+  },
+  "2024-01-19 15:20": {
+   "subpoints": {
+    "subearth_lon": 5.833518,
+    "subearth_lat": -3.104514,
+    "subsolar_lon": 77.270167,
+    "subsolar_lat": -1.520588,
+    "range_km": 0.00254535935112
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 92.376813,
+      "el": 36.162775,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.259,
+      "range_km": 0.98470616362862,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 257.810914,
+      "el": 71.887526,
+      "illum": 34.21821,
+      "angdiam_arcsec": 6941.702,
+      "range_km": 0.00253383349938,
+      "sto_deg": 108.3972
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 109.895714,
+      "el": 39.545121,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.26,
+      "range_km": 0.98470562222799,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 229.204015,
+      "el": 56.066395,
+      "illum": 34.23766,
+      "angdiam_arcsec": 6937.877,
+      "range_km": 0.00253523016911,
+      "sto_deg": 108.3737
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 307.482579,
+      "el": 1.720742,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.246,
+      "range_km": 0.98471266699322,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 236.04077,
+      "el": 2.659309,
+      "illum": 34.15579,
+      "angdiam_arcsec": 6913.121,
+      "range_km": 0.00254430815142,
+      "sto_deg": 108.4726
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 102.732582,
+      "el": -1.499226,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.245,
+      "range_km": 0.98471331959312,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 174.165367,
+      "el": -3.266329,
+      "illum": 34.15049,
+      "angdiam_arcsec": 6909.86,
+      "range_km": 0.00254550875428,
+      "sto_deg": 108.479
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 261.536405,
+      "el": -6.134139,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.243,
+      "range_km": 0.9847142559325,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 190.908853,
+      "el": -41.09763,
+      "illum": 34.17584,
+      "angdiam_arcsec": 6890.954,
+      "range_km": 0.002552491846,
+      "sto_deg": 108.4483
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 75.98005,
+      "el": -32.170419,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.233,
+      "range_km": 0.98471920028943,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 109.879836,
+      "el": 31.389578,
+      "illum": 33.99241,
+      "angdiam_arcsec": 6928.105,
+      "range_km": 0.00253880594477,
+      "sto_deg": 108.67
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 90.071454,
+      "el": 2.140979,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.246,
+      "range_km": 0.9847125827257,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 25.453673,
+      "el": 46.866442,
+      "illum": 34.10758,
+      "angdiam_arcsec": 6934.714,
+      "range_km": 0.00253638660777,
+      "sto_deg": 108.5308
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 90.276919,
+      "el": -7.500375,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.242,
+      "range_km": 0.98471453287511,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 114.99917,
+      "el": 61.089582,
+      "illum": 34.05844,
+      "angdiam_arcsec": 6939.323,
+      "range_km": 0.00253470196223,
+      "sto_deg": 108.5902
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 158.800602,
+      "el": -67.195192,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.224,
+      "range_km": 0.98472372190911,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 96.555013,
+      "el": -9.047955,
+      "illum": 33.95341,
+      "angdiam_arcsec": 6906.698,
+      "range_km": 0.00254667419181,
+      "sto_deg": 108.7172
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 283.6754,
+      "el": 36.157843,
+      "illum": 100.0,
+      "angdiam_arcsec": 1948.259,
+      "range_km": 0.98470616261134,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 253.931477,
+      "el": -29.750545,
+      "illum": 34.32289,
+      "angdiam_arcsec": 6896.024,
+      "range_km": 0.00255061563145,
+      "sto_deg": 108.2708
+     }
+    }
+   }
+  },
+  "2026-09-08 00:00": {
+   "subpoints": {
+    "subearth_lon": 2.278415,
+    "subearth_lat": -2.894119,
+    "subsolar_lon": 223.404589,
+    "subsolar_lat": -0.452288,
+    "range_km": 0.00246517583476
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 270.532379,
+      "el": -70.068701,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.425,
+      "range_km": 1.00578645690312,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 260.344797,
+      "el": 68.410718,
+      "illum": 87.58568,
+      "angdiam_arcsec": 7165.515,
+      "range_km": 0.00245469752692,
+      "sto_deg": 41.257
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 326.418489,
+      "el": -66.711551,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.426,
+      "range_km": 1.00578620648122,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 233.677336,
+      "el": 53.580257,
+      "illum": 87.56869,
+      "angdiam_arcsec": 7161.291,
+      "range_km": 0.00245614528638,
+      "sto_deg": 41.2865
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 93.626956,
+      "el": 0.430758,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.446,
+      "range_km": 1.00577545173293,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 232.481242,
+      "el": 2.423453,
+      "illum": 87.6522,
+      "angdiam_arcsec": 7135.615,
+      "range_km": 0.00246498227892,
+      "sto_deg": 41.1413
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 316.594998,
+      "el": -0.525601,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.446,
+      "range_km": 1.00577564562574,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 177.726182,
+      "el": -3.063676,
+      "illum": 87.63135,
+      "angdiam_arcsec": 7132.397,
+      "range_km": 0.00246609414301,
+      "sto_deg": 41.1776
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 55.585231,
+      "el": 29.648938,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.457,
+      "range_km": 1.00576979445824,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 186.237695,
+      "el": -41.684372,
+      "illum": 87.64152,
+      "angdiam_arcsec": 7111.875,
+      "range_km": 0.00247320948321,
+      "sto_deg": 41.1598
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 269.225974,
+      "el": 0.636076,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.446,
+      "range_km": 1.00577540912495,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 111.85744,
+      "el": 34.54548,
+      "illum": 87.74594,
+      "angdiam_arcsec": 7153.28,
+      "range_km": 0.00245889539489,
+      "sto_deg": 40.9777
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 243.710997,
+      "el": -24.576946,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.437,
+      "range_km": 1.00578036875113,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 20.321192,
+      "el": 47.669579,
+      "illum": 87.67573,
+      "angdiam_arcsec": 7159.085,
+      "range_km": 0.00245690181024,
+      "sto_deg": 41.1003
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 274.270818,
+      "el": -26.198222,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.436,
+      "range_km": 1.00578066533648,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 118.254684,
+      "el": 64.337947,
+      "illum": 87.69839,
+      "angdiam_arcsec": 7164.555,
+      "range_km": 0.0024550262976,
+      "sto_deg": 41.0607
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 290.171269,
+      "el": 44.617839,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.461,
+      "range_km": 1.00576738114831,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 95.102497,
+      "el": -5.800207,
+      "illum": 87.79015,
+      "angdiam_arcsec": 7130.799,
+      "range_km": 0.00246664662291,
+      "sto_deg": 40.9004
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 91.971833,
+      "el": -3.998958,
+      "illum": 100.0,
+      "angdiam_arcsec": 1907.444,
+      "range_km": 1.00577635002552,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 252.326121,
+      "el": -33.037037,
+      "illum": 87.53035,
+      "angdiam_arcsec": 7115.891,
+      "range_km": 0.00247181411859,
+      "sto_deg": 41.353
+     }
+    }
+   }
+  },
+  "2026-09-22 12:00": {
+   "subpoints": {
+    "subearth_lon": 356.446858,
+    "subearth_lat": 2.320557,
+    "subsolar_lon": 46.264579,
+    "subsolar_lat": -0.779943,
+    "range_km": 0.00265680924774
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 93.612985,
+      "el": 67.162772,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.125,
+      "range_km": 1.00541749242696,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 273.78274,
+      "el": 62.822901,
+      "illum": 17.94518,
+      "angdiam_arcsec": 6647.249,
+      "range_km": 0.00264606438826,
+      "sto_deg": 129.8699
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 142.28333,
+      "el": 64.113693,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.125,
+      "range_km": 1.0054177471857,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 246.341644,
+      "el": 51.888071,
+      "illum": 17.95482,
+      "angdiam_arcsec": 6644.262,
+      "range_km": 0.00264725367514,
+      "sto_deg": 129.8555
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 276.479823,
+      "el": 0.816537,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.105,
+      "range_km": 1.00542802978071,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 226.68044,
+      "el": -2.797208,
+      "illum": 17.87832,
+      "angdiam_arcsec": 6620.031,
+      "range_km": 0.00265694226593,
+      "sto_deg": 129.9698
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 133.736547,
+      "el": -0.711472,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.104,
+      "range_km": 1.00542833956734,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 183.55002,
+      "el": 2.170112,
+      "illum": 17.86025,
+      "angdiam_arcsec": 6622.54,
+      "range_km": 0.00265593577108,
+      "sto_deg": 129.9968
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 237.401265,
+      "el": -26.977594,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.095,
+      "range_km": 1.00543346320542,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 178.32096,
+      "el": -47.034907,
+      "illum": 17.87235,
+      "angdiam_arcsec": 6600.294,
+      "range_km": 0.00266488705516,
+      "sto_deg": 129.9787
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 89.202596,
+      "el": -3.751389,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.103,
+      "range_km": 1.0054289562696,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 110.008273,
+      "el": 42.263978,
+      "illum": 17.75895,
+      "angdiam_arcsec": 6640.941,
+      "range_km": 0.00264857721222,
+      "sto_deg": 130.1485
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 66.953745,
+      "el": 23.608734,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.114,
+      "range_km": 1.00542354483777,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 10.658765,
+      "el": 43.678965,
+      "illum": 17.85872,
+      "angdiam_arcsec": 6641.467,
+      "range_km": 0.00264836759227,
+      "sto_deg": 129.9991
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 95.020904,
+      "el": 23.158414,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.113,
+      "range_km": 1.00542362898591,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 112.911125,
+      "el": 71.9453,
+      "illum": 17.82041,
+      "angdiam_arcsec": 6649.025,
+      "range_km": 0.00264535753553,
+      "sto_deg": 130.0564
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 113.704347,
+      "el": -46.511503,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.089,
+      "range_km": 1.00543662200383,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 88.197337,
+      "el": -2.09177,
+      "illum": 17.71463,
+      "angdiam_arcsec": 6620.386,
+      "range_km": 0.00265680010698,
+      "sto_deg": 130.215
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 271.816307,
+      "el": 7.107871,
+      "illum": 100.0,
+      "angdiam_arcsec": 1908.107,
+      "range_km": 1.00542675715583,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 255.00861,
+      "el": -40.515259,
+      "illum": 17.98683,
+      "angdiam_arcsec": 6602.665,
+      "range_km": 0.00266393000075,
+      "sto_deg": 129.8077
+     }
+    }
+   }
+  },
+  "2027-03-15 06:00": {
+   "subpoints": {
+    "subearth_lon": 356.270337,
+    "subearth_lat": -5.891874,
+    "subsolar_lon": 91.70466,
+    "subsolar_lat": 0.857652,
+    "range_km": 0.00249130673933
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 89.345722,
+      "el": 21.774751,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.896,
+      "range_km": 0.99407576066097,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 256.037614,
+      "el": 61.932093,
+      "illum": 55.01786,
+      "angdiam_arcsec": 7090.801,
+      "range_km": 0.00248055926553,
+      "sto_deg": 84.2405
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 99.969593,
+      "el": 27.457619,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.898,
+      "range_km": 0.99407471373653,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 236.053399,
+      "el": 47.035489,
+      "illum": 55.03551,
+      "angdiam_arcsec": 7085.823,
+      "range_km": 0.00248230175228,
+      "sto_deg": 84.2202
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 321.92707,
+      "el": -0.598541,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.887,
+      "range_km": 0.994080189162,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 226.465458,
+      "el": 5.399143,
+      "illum": 54.91098,
+      "angdiam_arcsec": 7064.787,
+      "range_km": 0.00248969252314,
+      "sto_deg": 84.3636
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 88.294021,
+      "el": 0.854007,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.888,
+      "range_km": 0.99407989469243,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 183.729661,
+      "el": -6.058179,
+      "illum": 54.91243,
+      "angdiam_arcsec": 7058.213,
+      "range_km": 0.00249201101858,
+      "sto_deg": 84.362
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 273.529251,
+      "el": 2.266352,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.888,
+      "range_km": 0.99407960775961,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 178.306651,
+      "el": -38.857296,
+      "illum": 54.90652,
+      "angdiam_arcsec": 7041.06,
+      "range_km": 0.0024980812068,
+      "sto_deg": 84.3687
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 64.029451,
+      "el": -43.380481,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.872,
+      "range_km": 0.99408804535326,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 119.110861,
+      "el": 37.841046,
+      "illum": 54.76447,
+      "angdiam_arcsec": 7081.916,
+      "range_km": 0.00248367119601,
+      "sto_deg": 84.5323
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 98.317936,
+      "el": -9.964451,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.883,
+      "range_km": 0.99408207827752,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 12.161323,
+      "el": 51.848604,
+      "illum": 54.88841,
+      "angdiam_arcsec": 7087.628,
+      "range_km": 0.00248166975646,
+      "sto_deg": 84.3896
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 85.273395,
+      "el": -21.307023,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.879,
+      "range_km": 0.99408428893488,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 132.957156,
+      "el": 67.402488,
+      "illum": 54.8469,
+      "angdiam_arcsec": 7092.152,
+      "range_km": 0.00248008701715,
+      "sto_deg": 84.4374
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 198.931153,
+      "el": -69.990507,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.866,
+      "range_km": 0.99409098051053,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 95.860793,
+      "el": 0.853154,
+      "illum": 54.69262,
+      "angdiam_arcsec": 7062.178,
+      "range_km": 0.002490612061,
+      "sto_deg": 84.615
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 295.682125,
+      "el": 47.792785,
+      "illum": 100.0,
+      "angdiam_arcsec": 1929.904,
+      "range_km": 0.99407146463294,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 245.629667,
+      "el": -36.840835,
+      "illum": 55.07011,
+      "angdiam_arcsec": 7041.973,
+      "range_km": 0.00249775765586,
+      "sto_deg": 84.1804
+     }
+    }
+   }
+  },
+  "2030-06-30 18:00": {
+   "subpoints": {
+    "subearth_lon": 356.962039,
+    "subearth_lat": 2.458221,
+    "subsolar_lon": 178.662887,
+    "subsolar_lat": -0.607984,
+    "range_km": 0.0026878691865
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 89.990592,
+      "el": -65.191323,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.965,
+      "range_km": 1.01400523602699,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 274.150295,
+      "el": 63.323149,
+      "illum": 99.94874,
+      "angdiam_arcsec": 6569.195,
+      "range_km": 0.00267750142705,
+      "sto_deg": 2.5909
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 62.019202,
+      "el": -52.996872,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.967,
+      "range_km": 1.01400396891275,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 246.112577,
+      "el": 52.396442,
+      "illum": 99.95053,
+      "angdiam_arcsec": 6566.32,
+      "range_km": 0.00267867372815,
+      "sto_deg": 2.5451
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 48.885807,
+      "el": 0.82433,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.985,
+      "range_km": 1.01399452639784,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 227.187101,
+      "el": -2.929609,
+      "illum": 99.94447,
+      "angdiam_arcsec": 6542.435,
+      "range_km": 0.00268845209537,
+      "sto_deg": 2.6972
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 1.337329,
+      "el": -0.708613,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.984,
+      "range_km": 1.01399483715807,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 183.043997,
+      "el": 2.31057,
+      "illum": 99.95839,
+      "angdiam_arcsec": 6545.02,
+      "range_km": 0.00268739032036,
+      "sto_deg": 2.3339
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 1.508205,
+      "el": 45.1531,
+      "illum": 100.0,
+      "angdiam_arcsec": 1892.0,
+      "range_km": 1.01398645942096,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 179.058051,
+      "el": -47.178042,
+      "illum": 99.94702,
+      "angdiam_arcsec": 6523.173,
+      "range_km": 0.00269639034254,
+      "sto_deg": 2.6345
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 290.459635,
+      "el": -39.673391,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.971,
+      "range_km": 1.01400210718679,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 109.502157,
+      "el": 41.898731,
+      "illum": 99.95839,
+      "angdiam_arcsec": 6562.793,
+      "range_km": 0.00268011307073,
+      "sto_deg": 2.3341
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 194.098602,
+      "el": -45.207381,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.969,
+      "range_km": 1.01400293524991,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 11.325497,
+      "el": 43.474106,
+      "illum": 99.94734,
+      "angdiam_arcsec": 6563.365,
+      "range_km": 0.00267987959724,
+      "sto_deg": 2.6266
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 294.699778,
+      "el": -69.289087,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.964,
+      "range_km": 1.01400555649594,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 111.846104,
+      "el": 71.539455,
+      "illum": 99.95461,
+      "angdiam_arcsec": 6570.758,
+      "range_km": 0.00267686453224,
+      "sto_deg": 2.4381
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 270.561224,
+      "el": 3.340226,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.986,
+      "range_km": 1.01399401578747,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 88.239352,
+      "el": -2.610997,
+      "illum": 99.95514,
+      "angdiam_arcsec": 6542.595,
+      "range_km": 0.00268838655637,
+      "sto_deg": 2.4242
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 74.232176,
+      "el": 37.592982,
+      "illum": 100.0,
+      "angdiam_arcsec": 1891.998,
+      "range_km": 1.01398760932519,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 255.449846,
+      "el": -40.113346,
+      "illum": 99.94494,
+      "angdiam_arcsec": 6525.685,
+      "range_km": 0.00269535246342,
+      "sto_deg": 2.6855
+     }
+    }
+   }
+  },
+  "2045-01-01 00:00": {
+   "subpoints": {
+    "subearth_lon": 354.58416,
+    "subearth_lat": -6.620244,
+    "subsolar_lon": 28.719244,
+    "subsolar_lat": -1.251952,
+    "range_km": 0.00243504577114
+   },
+   "sites": {
+    "tranquility": {
+     "sun": {
+      "az": 110.160905,
+      "el": 84.411874,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.118,
+      "range_km": 0.98528340615149,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 255.340271,
+      "el": 60.130306,
+      "illum": 8.87611,
+      "angdiam_arcsec": 7254.198,
+      "range_km": 0.00242469151245,
+      "sto_deg": 145.3287
+     }
+    },
+    "taurus_littrow": {
+     "sun": {
+      "az": 185.599108,
+      "el": 68.46251,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.116,
+      "range_km": 0.98528416169602,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 236.719289,
+      "el": 45.26146,
+      "illum": 8.89135,
+      "angdiam_arcsec": 7248.773,
+      "range_km": 0.0024265059445,
+      "sto_deg": 145.298
+     }
+    },
+    "shackleton_rim": {
+     "sun": {
+      "az": 258.932175,
+      "el": 1.187946,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.095,
+      "range_km": 0.9852947238158,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 224.782286,
+      "el": 6.114623,
+      "illum": 8.79248,
+      "angdiam_arcsec": 7227.923,
+      "range_km": 0.00243350487168,
+      "sto_deg": 145.4975
+     }
+    },
+    "north_pole": {
+     "sun": {
+      "az": 151.281939,
+      "el": -1.164928,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.094,
+      "range_km": 0.98529520067736,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 185.410123,
+      "el": -6.792343,
+      "illum": 8.82697,
+      "angdiam_arcsec": 7220.177,
+      "range_km": 0.00243611557208,
+      "sto_deg": 145.4278
+     }
+    },
+    "change4": {
+     "sun": {
+      "az": 219.572338,
+      "el": -35.797679,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.081,
+      "range_km": 0.98530175738136,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 176.211278,
+      "el": -38.080157,
+      "illum": 8.79051,
+      "angdiam_arcsec": 7203.028,
+      "range_km": 0.00244191471344,
+      "sto_deg": 145.5015
+     }
+    },
+    "aristarchus": {
+     "sun": {
+      "az": 96.807657,
+      "el": 12.085386,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.099,
+      "range_km": 0.98529253408004,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 121.142822,
+      "el": 38.729465,
+      "illum": 8.73525,
+      "angdiam_arcsec": 7245.842,
+      "range_km": 0.00242748742185,
+      "sto_deg": 145.6135
+     }
+    },
+    "tycho": {
+     "sun": {
+      "az": 51.539225,
+      "el": 34.948973,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.108,
+      "range_km": 0.98528831225428,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 9.608778,
+      "el": 52.800721,
+      "illum": 8.78868,
+      "angdiam_arcsec": 7251.753,
+      "range_km": 0.00242550893258,
+      "sto_deg": 145.5052
+     }
+    },
+    "copernicus": {
+     "sun": {
+      "az": 99.92282,
+      "el": 40.2126,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.109,
+      "range_km": 0.98528746733559,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 137.473933,
+      "el": 68.049873,
+      "illum": 8.78033,
+      "angdiam_arcsec": 7256.285,
+      "range_km": 0.00242399441732,
+      "sto_deg": 145.5221
+     }
+    },
+    "orientale": {
+     "sun": {
+      "az": 103.96273,
+      "el": -30.665015,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.083,
+      "range_km": 0.98530088880108,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 95.981007,
+      "el": 2.665942,
+      "illum": 8.67746,
+      "angdiam_arcsec": 7225.852,
+      "range_km": 0.00243420245907,
+      "sto_deg": 145.7309
+     }
+    },
+    "tsiolkovskiy": {
+     "sun": {
+      "az": 265.209964,
+      "el": -9.159461,
+      "illum": 100.0,
+      "angdiam_arcsec": 1947.091,
+      "range_km": 0.98529681219144,
+      "sto_deg": 0.0
+     },
+     "earth": {
+      "az": 243.755018,
+      "el": -37.886566,
+      "illum": 8.89142,
+      "angdiam_arcsec": 7203.122,
+      "range_km": 0.00244188300169,
+      "sto_deg": 145.2979
+     }
+    }
+   }
+  }
+ }
+}
