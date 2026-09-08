@@ -23,6 +23,7 @@
 
 import { R_MOON } from '../config.js';
 import { llhToXyz, xyzToLlh, enuBasis } from '../physics/frames.js';
+import { clearLanding, explain as explainKeepOut } from '../game/keepout.js';
 
 const el = (id) => document.getElementById(id);
 
@@ -212,8 +213,13 @@ export class OrbitPicker {
       ? `${p.probe.res_m < 10 ? p.probe.res_m.toFixed(1) : p.probe.res_m.toFixed(0)} m/px ${p.probe.label}`
       : '—';
 
-    /* A warning rather than a prohibition. Steep is a bad idea, not illegal. */
+    /* A warning rather than a prohibition. Steep is a bad idea, not illegal.
+       The keep-out is the exception: that one is not advice, it is what the
+       game is about to do, so it is said before you press the button rather
+       than discovered when the ship comes down two kilometres off. */
     const warn = [];
+    const clear = clearLanding(this.sites.sites, p.lat, p.lon);
+    if (clear.site) warn.push(explainKeepOut(clear));
     if (p.slope > 15) warn.push(`${p.slope.toFixed(0)}° slope: the ship will land, but the rover will struggle`);
     if (sky && sky.sunEl < 3 && sky.sunEl > -3) warn.push('the Sun is on the horizon: shadows will run for kilometres');
     if (sky && sky.sunEl <= -3) warn.push('lunar night: nothing but earthshine and your lamps');

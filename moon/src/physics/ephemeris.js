@@ -363,6 +363,17 @@ export function skyAt(eph, latDeg, lonDeg, height = 0) {
     /* Earth is visible from the near side and never from the far side; near the
        limb libration swings it above and below the horizon over a month. */
     earthVisible: earth.el > -eph.earthAngularRadius,
+    /* Whether it will EVER be, which is a different question. The mean
+       sub-Earth point is 0 N 0 E; optical libration in longitude and latitude
+       together carry the true one about ten degrees away from it at the
+       extreme. So ninety degrees from the mean point is the nominal limb, and
+       only beyond a hundred is a place out of the Earth's reach for good.
+       Between the two the Earth sits on the horizon and rises and sets over a
+       month, which is what it does at the lunar south pole: Shackleton is
+       90.2 degrees from the mean sub-Earth point and is emphatically not the
+       far side. */
+    farSide: Math.acos(Math.max(-1, Math.min(1,
+      Math.cos(latDeg / RAD) * Math.cos(lonDeg / RAD)))) * RAD > 100,
   };
 }
 

@@ -36,6 +36,7 @@ export class Moment {
     el('moment-title').textContent = lines.title || '';
     el('moment-1').textContent = lines.a || '';
     el('moment-2').textContent = lines.b || '';
+    el('moment-3').textContent = lines.c || '';
     this.root.style.display = 'flex';
     /* One frame so the transition has something to animate from. */
     requestAnimationFrame(() => this.root.classList.add('show'));
@@ -60,11 +61,19 @@ export class Moment {
     const where = info.feature ? info.feature : 'unnamed ground';
     const earth = info.earthVisible
       ? `The Earth is ${info.earthEl.toFixed(0)} degrees above the horizon, ${(info.earthDist / 1000).toFixed(0)} thousand kilometres away, and everyone you have ever known is on it.`
-      : 'The Earth is not in the sky here, and will not be. This is the far side.';
+      : info.farSide
+        ? 'The Earth is not in the sky here, and will not be. This is the far side.'
+        : 'The Earth is under the horizon from here. You are close enough to the limb that libration will lift it back into sight before the month is out.';
     return this.show('firstStep', {
       title: where.toUpperCase(),
       a: `${lat}  ${lon} · ${info.elevation.toFixed(0)} m · ${info.unit || 'regolith'}`,
       b: earth,
+      /* Only when the ship was held off a site: it explains a landing that
+         would otherwise look like the picker missed, and it points the way. */
+      c: info.approach
+        ? `${info.approach.name} is ${info.approach.distance} ${info.approach.where} of here. ` +
+          'The ship set down clear of it so the descent engine would not throw regolith over the site.'
+        : '',
       seconds: 14,
     });
   }

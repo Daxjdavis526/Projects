@@ -23,7 +23,7 @@ import { DustField } from './render/dust.js';
 import { Exposure } from './render/exposure.js';
 import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime } from './physics/ephemeris.js';
 import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
-         offsetLatLon, surfaceDistance } from './physics/frames.js';
+         offsetLatLon, surfaceDistance, bearing } from './physics/frames.js';
 import { loadVendoredHeightfield, readJson, readBinary } from './terrain/loader.js';
 import { Detail } from './terrain/detail.js';
 import { decodePng8 } from './terrain/png16.js';
@@ -38,6 +38,7 @@ import { Vehicle } from './game/vehicle.js';
 import { HistoricSites } from './game/historic.js';
 import { Shelter, hoursUntilSunElevation } from './game/shelter.js';
 import { Moment } from './game/moment.js';
+import { clearLanding, standClearOf, explain as explainKeepOut } from './game/keepout.js';
 import { SuitHud } from './ui/suithud.js';
 import { OrbitPicker } from './ui/orbit.js';
 import { Sound } from './audio/audio.js';
@@ -304,9 +305,14 @@ async function start() {
      camera flies and `eva` is null. */
   let eva = null, driving = false, canopyPress = false;
   const startEva = (lat, lon) => {
+    /* Standing on the exact published coordinates of a landing site puts you
+       inside the spacecraft. Step out of the hardware and turn to look at it,
+       which is what you would do anyway. */
+    const clear = standClearOf(sites.sites, lat ?? cam.lat, lon ?? cam.lon);
     eva = new EVA({
       stage, heightfield, quality: state.quality,
-      lat: lat ?? cam.lat, lon: lon ?? cam.lon, yaw: cam.yaw * 180 / Math.PI,
+      lat: clear.lat, lon: clear.lon,
+      yaw: clear.yaw ?? cam.yaw * 180 / Math.PI,
       suitMode: params.get('suit') || undefined,
     });
     if (astronaut) eva.setModel(astronaut);
@@ -354,13 +360,17 @@ async function start() {
      that decides where the rest of the game happens. The last minute of the
      approach is flown rather than animated: see game/descent.js. */
   let descent = null;
+  let keepOut = null;
   function land(pick) {
     mode = 'descent';
     orbit.show(false);
     terrain.setOverlay(0);
+    /* Not on top of somebody else's spacecraft: see game/keepout.js. */
+    keepOut = clearLanding(sites.sites, pick.lat, pick.lon);
+    if (keepOut.site) console.info('keep-out:', explainKeepOut(keepOut));
     el('hint').textContent = 'landing · press space to skip';
     descent = new Descent({
-      heightfield, target: { lat: pick.lat, lon: pick.lon },
+      heightfield, target: { lat: keepOut.lat, lon: keepOut.lon },
       onDone: (at) => {
         descent = null;
         mode = 'surface';
@@ -370,12 +380,17 @@ async function start() {
     });
     /* Ask for the ground under the landing site straight away rather than
        waiting for the camera to arrive. */
-    if (surface) surface.update(pick.lat, pick.lon, 400);
+    if (surface) surface.update(keepOut.lat, keepOut.lon, 400);
   }
 
   /* Arriving: the ship is now here, the rover unloads beside it, and you step
      out onto ground nobody has stood on. */
   function settle(lat, lon, heading = 0) {
+    /* The guarantee, not just the picker's good manners: nothing that calls
+       this can put the ship down on hardware, restores and debug URLs
+       included. Already-cleared points come back unchanged. */
+    const clear = clearLanding(sites.sites, lat, lon);
+    if (clear.site) { keepOut = clear; lat = clear.lat; lon = clear.lon; }
     base = new Base({ stage, heightfield, terrain, quality: state.quality, lat, lon, heading });
     if (shipModel) base.setModel(shipModel);
     /* The rover parks off the ship's port side, clear of the engines. */
@@ -902,8 +917,14 @@ async function start() {
         feature: near && near.range < 1200 ? 'Tranquility Base'
           : orbit.nearestFeature(cam.lat, cam.lon)?.f[0],
         unit: geology ? geologyName(geology, cam.lat, cam.lon) : null,
-        earthVisible: local.earthEl > 0, earthEl: local.earthEl,
+        earthVisible: local.earthEl > 0, earthEl: local.earthEl, farSide: local.farSide,
         earthDist: eph.earthDist / 1000,
+        /* The site the ship was held off, and which way it is from here. */
+        approach: keepOut && keepOut.site ? {
+          name: keepOut.site.name,
+          distance: fmtDist(surfaceDistance(cam.lat, cam.lon, keepOut.site.lat, keepOut.site.lon)),
+          where: compass(bearing(cam.lat, cam.lon, keepOut.site.lat, keepOut.site.lon)),
+        } : null,
       });
     }
     nav.show(driving && !photo.active);
@@ -1015,6 +1036,11 @@ function fmtDist(m) {
   if (Math.abs(m) < 1e6) return (m / 1000).toFixed(2) + ' km';
   return (m / 1000).toFixed(0) + ' km';
 }
+/* Which way to look, in words, because a bearing in degrees is not something
+   you can turn towards without reading it off an instrument first. */
+const POINTS = ['north', 'north-east', 'east', 'south-east',
+                'south', 'south-west', 'west', 'north-west'];
+function compass(az) { return POINTS[Math.round(((az % 360) + 360) % 360 / 45) % 8]; }
 function fmtRate(r) {
   if (r >= 86400) return (r / 86400).toFixed(0) + ' d/s';
   if (r >= 3600) return (r / 3600).toFixed(0) + ' h/s';
