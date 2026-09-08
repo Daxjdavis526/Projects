@@ -28,6 +28,7 @@ import { decodePng8 } from './terrain/png16.js';
 import { Streams } from './data/streams.js';
 import { Cache } from './data/cache.js';
 import { SurfaceStreamer } from './data/surface.js';
+import { EVA } from './game/eva.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -181,6 +182,16 @@ async function start() {
   }
   if (!site) site = sites.sites[0];
 
+  /* The astronaut is only needed in third person, and the page must still run
+     if the module is missing, so it is imported on the side. */
+  let astronaut = null;
+  import('./models/astronaut.js')
+    .then((m) => {
+      astronaut = m.buildAstronaut({ quality: state.qualityName });
+      if (eva) eva.setModel(astronaut);
+    })
+    .catch((e) => console.warn('astronaut model unavailable:', e.message));
+
   const view = params.get('view') || 'ground';
   /* `alt` is height above the local surface, which is what anyone actually
      means by it; the surface at Tranquility Base is 1.9 km below the datum. */
@@ -203,6 +214,32 @@ async function start() {
   const world = { x: 0, y: 0, z: 0 };
   const frustum = new THREE.Frustum();
   const projScreen = new THREE.Matrix4();
+  /* Reused every frame: building a Matrix4 and four Vector3s sixty times a
+     second is free in isolation and expensive next to a streaming terrain. */
+  const tmpM = new THREE.Matrix4();
+  const tmpX = new THREE.Vector3(), tmpY = new THREE.Vector3();
+  const tmpZ = new THREE.Vector3(), tmpUp = new THREE.Vector3();
+  /* Mouse movement accumulates between frames and is consumed by whichever
+     controller is driving, so a fast mouse is not quantised to the frame rate. */
+  const look = { yaw: 0, pitch: 0 };
+  const clampPitch = (p) => Math.max(-1.55, Math.min(1.55, p));
+
+  /* On foot. Created only when the player steps outside; until then the free
+     camera flies and `eva` is null. */
+  let eva = null;
+  const startEva = (lat, lon) => {
+    eva = new EVA({
+      stage, heightfield, quality: state.quality,
+      lat: lat ?? cam.lat, lon: lon ?? cam.lon, yaw: cam.yaw * 180 / Math.PI,
+      suitMode: params.get('suit') || undefined,
+    });
+    if (astronaut) eva.setModel(astronaut);
+    return eva;
+  };
+
+  /* `?mode=eva` starts on foot, which is what the screenshot harness wants when
+     it is checking the suit, the lamps or the third-person camera. */
+  if (params.get('mode') === 'eva') startEva(site.lat, site.lon);
 
   /* --- input --------------------------------------------------------------- */
   const keys = new Set();
@@ -214,6 +251,14 @@ async function start() {
       const rates = [0, 1, 60, 600, 3600, 21600, 86400];
       state.timeRate = rates[(rates.indexOf(state.timeRate) + 1) % rates.length];
     }
+    /* G steps outside and back: on foot you are a person with a suit and a
+       clock, in the free camera you are nobody and nothing runs out. */
+    if (e.code === 'KeyG') {
+      if (eva) { eva.group.removeFromParent(); eva = null; cam.speed = 6; }
+      else startEva();
+    }
+    if (e.code === 'KeyF' && eva) eva.toggleView();
+    if (e.code === 'KeyL' && eva) eva.cycleLamps();
   });
   addEventListener('keyup', (e) => keys.delete(e.code));
   let dragging = false;
@@ -221,8 +266,8 @@ async function start() {
   canvas.addEventListener('pointerup', (e) => { dragging = false; canvas.releasePointerCapture(e.pointerId); });
   canvas.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    cam.yaw -= e.movementX * 0.0022;
-    cam.pitch = Math.max(-1.55, Math.min(1.55, cam.pitch - e.movementY * 0.0022));
+    look.yaw += e.movementX * 0.0022;
+    look.pitch += e.movementY * 0.0022;
   });
   canvas.addEventListener('wheel', (e) => {
     cam.speed = Math.max(0.4, Math.min(400000, cam.speed * Math.exp(-e.deltaY * 0.0015)));
@@ -242,61 +287,6 @@ async function start() {
 
     state.simMs += dt * 1000 * state.timeRate;
     const eph = ephemerisAt(jdFromUnixMs(state.simMs));
-
-    /* --- move the camera ------------------------------------------------- */
-    const b = enuBasis(cam.lat, cam.lon);
-    const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
-    const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
-    /* Forward in the local frame: yaw 0 is north, positive towards east. */
-    const fwd = {
-      x: (b.n.x * cy + b.e.x * sy) * cp + b.u.x * sp,
-      y: (b.n.y * cy + b.e.y * sy) * cp + b.u.y * sp,
-      z: (b.n.z * cy + b.e.z * sy) * cp + b.u.z * sp,
-    };
-    const right = { x: b.e.x * cy - b.n.x * sy, y: b.e.y * cy - b.n.y * sy, z: b.e.z * cy - b.n.z * sy };
-    const boost = keys.has('ShiftLeft') || keys.has('ShiftRight') ? 6 : 1;
-    const v = cam.speed * boost * dt;
-    let dx = 0, dy = 0, dz = 0;
-    if (keys.has('KeyW')) { dx += fwd.x * v; dy += fwd.y * v; dz += fwd.z * v; }
-    if (keys.has('KeyS')) { dx -= fwd.x * v; dy -= fwd.y * v; dz -= fwd.z * v; }
-    if (keys.has('KeyD')) { dx += right.x * v; dy += right.y * v; dz += right.z * v; }
-    if (keys.has('KeyA')) { dx -= right.x * v; dy -= right.y * v; dz -= right.z * v; }
-    if (keys.has('KeyE')) { dx += b.u.x * v; dy += b.u.y * v; dz += b.u.z * v; }
-    if (keys.has('KeyQ')) { dx -= b.u.x * v; dy -= b.u.y * v; dz -= b.u.z * v; }
-
-    llhToXyz(cam.lat, cam.lon, cam.alt, world);
-    world.x += dx; world.y += dy; world.z += dz;
-    const llh = xyzToLlh(world.x, world.y, world.z);
-    cam.lat = llh.lat; cam.lon = llh.lon; cam.alt = llh.h;
-
-    /* Keep the free camera above the ground. The heightfield is the authority
-       here, not the resident tile grid: early in a session the only tile under
-       you may be hundreds of kilometres across, and a one-directional clamp
-       against its interpolated surface would shove the camera a hundred metres
-       into the air and leave it there. */
-    const surfaceH = heightfield.heightAt(cam.lat, cam.lon);
-    if (cam.alt < surfaceH + 1.6) {
-      cam.alt = surfaceH + 1.6;
-      llhToXyz(cam.lat, cam.lon, cam.alt, world);
-    }
-
-    const rebased = stage.setEye(world.x, world.y, world.z);
-
-    /* Orientation: build the camera basis from the local frame. */
-    const b2 = enuBasis(cam.lat, cam.lon);
-    const f2 = {
-      x: (b2.n.x * cy + b2.e.x * sy) * cp + b2.u.x * sp,
-      y: (b2.n.y * cy + b2.e.y * sy) * cp + b2.u.y * sp,
-      z: (b2.n.z * cy + b2.e.z * sy) * cp + b2.u.z * sp,
-    };
-    const m = new THREE.Matrix4();
-    const zAxis = new THREE.Vector3(-f2.x, -f2.y, -f2.z).normalize();
-    const upV = new THREE.Vector3(b2.u.x, b2.u.y, b2.u.z);
-    const xAxis = new THREE.Vector3().crossVectors(upV, zAxis).normalize();
-    const yAxis = new THREE.Vector3().crossVectors(zAxis, xAxis);
-    m.makeBasis(xAxis, yAxis, zAxis);
-    stage.camera.quaternion.setFromRotationMatrix(m);
-    stage.camera.updateMatrixWorld();
 
     /* --- sky and light ---------------------------------------------------- */
     const local = skyAt(eph, cam.lat, cam.lon, cam.alt);
@@ -329,12 +319,99 @@ async function start() {
       /* Looking down at your boots and looking out at the horizon are two very
          different exposures, and the difference is most of a stop. */
       viewMu: Math.max(0.06, Math.sin(Math.max(0.05, -cam.pitch))),
-      groundFraction: cam.alt - surfaceH > 50000 ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
+      groundFraction: cam.alt - heightfield.heightAt(cam.lat, cam.lon) > 50000
+        ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
       earthIllum: eph.earthIllum,
       earthElevation: local.earthEl,
     }, ready ? dt : 1e6);
     stage.setExposure(ev);
     sky.update(eph, ev);
+
+    /* --- move ------------------------------------------------------------- */
+    /* Two ways of being here. On foot, physics/player.js decides where the body
+       goes and the camera follows it; in the free camera, the camera is the only
+       thing there is, and it flies. */
+    let camFrame;
+    if (eva) {
+      eva.step(dt, {
+        forward: (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0),
+        strafe: (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0),
+        run: keys.has('ShiftLeft') || keys.has('ShiftRight'),
+        jump: keys.has('Space'),
+        jet: keys.has('KeyJ'),
+        dYaw: look.yaw, dPitch: look.pitch,
+      }, {
+        sunlit: local.sunEl > 0,
+        timeScale: Math.max(1, state.timeRate),
+      });
+      look.yaw = look.pitch = 0;
+      camFrame = eva.camera();
+      cam.lat = eva.player.llh.lat; cam.lon = eva.player.llh.lon;
+      cam.alt = eva.player.llh.h; cam.yaw = eva.player.yaw; cam.pitch = eva.player.pitch;
+      world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
+    } else {
+      cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
+      look.yaw = look.pitch = 0;
+      const b = enuBasis(cam.lat, cam.lon);
+      const cp0 = Math.cos(cam.pitch), sp0 = Math.sin(cam.pitch);
+      const cy0 = Math.cos(cam.yaw), sy0 = Math.sin(cam.yaw);
+      const fwd = {
+        x: (b.n.x * cy0 + b.e.x * sy0) * cp0 + b.u.x * sp0,
+        y: (b.n.y * cy0 + b.e.y * sy0) * cp0 + b.u.y * sp0,
+        z: (b.n.z * cy0 + b.e.z * sy0) * cp0 + b.u.z * sp0,
+      };
+      const right = { x: b.e.x * cy0 - b.n.x * sy0, y: b.e.y * cy0 - b.n.y * sy0, z: b.e.z * cy0 - b.n.z * sy0 };
+      const boost = keys.has('ShiftLeft') || keys.has('ShiftRight') ? 6 : 1;
+      const v = cam.speed * boost * dt;
+      let dx = 0, dy = 0, dz = 0;
+      if (keys.has('KeyW')) { dx += fwd.x * v; dy += fwd.y * v; dz += fwd.z * v; }
+      if (keys.has('KeyS')) { dx -= fwd.x * v; dy -= fwd.y * v; dz -= fwd.z * v; }
+      if (keys.has('KeyD')) { dx += right.x * v; dy += right.y * v; dz += right.z * v; }
+      if (keys.has('KeyA')) { dx -= right.x * v; dy -= right.y * v; dz -= right.z * v; }
+      if (keys.has('KeyE')) { dx += b.u.x * v; dy += b.u.y * v; dz += b.u.z * v; }
+      if (keys.has('KeyQ')) { dx -= b.u.x * v; dy -= b.u.y * v; dz -= b.u.z * v; }
+
+      llhToXyz(cam.lat, cam.lon, cam.alt, world);
+      world.x += dx; world.y += dy; world.z += dz;
+      const llh = xyzToLlh(world.x, world.y, world.z);
+      cam.lat = llh.lat; cam.lon = llh.lon; cam.alt = llh.h;
+
+      /* Keep the free camera above the ground. The heightfield is the authority
+         here, not the resident tile grid: early in a session the only tile under
+         you may be hundreds of kilometres across, and a one-directional clamp
+         against its interpolated surface would shove the camera a hundred metres
+         into the air and leave it there. */
+      const gh = heightfield.heightAt(cam.lat, cam.lon);
+      if (cam.alt < gh + 1.6) {
+        cam.alt = gh + 1.6;
+        llhToXyz(cam.lat, cam.lon, cam.alt, world);
+      }
+      const b2 = enuBasis(cam.lat, cam.lon);
+      camFrame = {
+        eye: { x: world.x, y: world.y, z: world.z },
+        dir: fwd, up: b2.u, head: { x: world.x, y: world.y, z: world.z }, fov: null,
+      };
+    }
+    const surfaceH = heightfield.heightAt(cam.lat, cam.lon);
+
+    const rebased = stage.setEye(world.x, world.y, world.z);
+
+    /* Orientation: three.js wants a basis, and the camera looks down its own
+       negative z, so the forward direction is negated into the third column. */
+    const zAxis = tmpZ.set(-camFrame.dir.x, -camFrame.dir.y, -camFrame.dir.z).normalize();
+    const upV = tmpUp.set(camFrame.up.x, camFrame.up.y, camFrame.up.z);
+    const xAxis = tmpX.crossVectors(upV, zAxis).normalize();
+    const yAxis = tmpY.crossVectors(zAxis, xAxis);
+    tmpM.makeBasis(xAxis, yAxis, zAxis);
+    stage.camera.quaternion.setFromRotationMatrix(tmpM);
+    stage.camera.updateMatrixWorld();
+    if (camFrame.fov && Math.abs(stage.camera.fov - camFrame.fov) > 0.01 && !params.get('fov')) {
+      stage.setFov(camFrame.fov);
+    }
+    if (eva) {
+      eva.updateLights(stage.origin.origin, camFrame);
+      eva.updateModel(stage.origin.origin, dt);
+    }
 
     /* --- terrain ---------------------------------------------------------- */
     if (surface) surface.update(cam.lat, cam.lon, cam.alt - surfaceH);
@@ -376,6 +453,9 @@ async function start() {
 
   window.SELENE = {
     ready: false, stage, terrain, sky, heightfield, cam, state, streams, surface,
+    get eva() { return eva; },
+    get astronaut() { return astronaut; },
+    walk(lat, lon) { startEva(lat, lon); },
     goto(lat, lon, alt) { cam.lat = lat; cam.lon = lon; cam.alt = alt ?? cam.alt; },
     setTime(iso) { state.simMs = Date.parse(iso); },
     stats: () => ({ ...terrain.stats, fps }),

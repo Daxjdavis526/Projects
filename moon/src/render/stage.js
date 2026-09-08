@@ -129,6 +129,14 @@ export class Stage {
 
   setExposure(e) { this.renderer.toneMappingExposure = e; }
 
+  /* Both tiers share a field of view, or the sky slides against the ground. */
+  setFov(fov) {
+    this.camera.fov = fov;
+    this.skyCamera.fov = fov;
+    this.camera.updateProjectionMatrix();
+    this.skyCamera.updateProjectionMatrix();
+  }
+
   render() {
     this.renderer.clear(true, true, true);
     this.skyCamera.quaternion.copy(this.camera.quaternion);

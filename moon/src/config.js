@@ -131,14 +131,22 @@ export const PLAYER = {
 /* Suit consumables. Apollo's PLSS carried ~0.85 kg of oxygen for an eight-hour
    EVA (~0.09 kg/h at work rates); the xEMU design point is 8 h + 1 h reserve.
    SELENE's suit is a near-future one with the same architecture. */
+/* Sized so that all four consumables run out within about an hour of each
+   other at moderate work, which is how a real suit is designed: there is no
+   point carrying ten hours of oxygen behind an eight hour scrubber. Which one
+   binds first then depends on what you are actually doing, and the lamps and
+   the shade cost you real endurance. Apollo's own numbers are the anchor
+   (0.85 kg of oxygen and 3.9 kg of feedwater for about eight hours); this suit
+   is near-future fiction and carries a little more. See RESEARCH.md section 9. */
 export const SUIT = {
-  o2Capacity: 1.30,        // kg
-  o2RateIdle: 0.055, o2RateWalk: 0.085, o2RateHard: 0.125,   // kg/h
-  co2Capacity: 1.6,        // kg absorbed before the scrubber saturates
-  co2Rate: 0.075,          // kg/h produced
-  powerCapacity: 1400,     // Wh
-  powerBase: 95, powerLights: 40, powerHeater: 140, powerCooling: 120,  // W
-  waterCapacity: 6.0, waterRate: 0.32,   // kg, kg/h (drinking + sublimator)
+  o2Capacity: 1.05,        // kg, primary
+  o2Secondary: 0.068,      // kg, the purge bottle: about thirty minutes
+  o2RateIdle: 0.075, o2RateHard: 0.20,   // kg/h, including suit leakage
+  co2Capacity: 0.60,       // kg absorbed before the scrubber saturates
+  co2Rate: 0.098,          // kg/h produced at hard work
+  powerCapacity: 900,      // Wh
+  powerBase: 75, powerLights: 40, powerHeater: 90, powerCooling: 25,  // W
+  waterCapacity: 4.5, waterRate: 0.75,   // kg, kg/h at hard work (sublimator + drinking)
   pressure: 29.6,          // kPa (4.3 psi)
   reserveWarnFraction: 0.20,
   reserveCriticalFraction: 0.08,
