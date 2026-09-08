@@ -41,6 +41,7 @@ import { OrbitPicker } from './ui/orbit.js';
 import { Sound } from './audio/audio.js';
 import { Save } from './game/save.js';
 import { Photo } from './ui/photo.js';
+import { Settings } from './ui/settings.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -454,7 +455,11 @@ async function start() {
     if (e.code === 'KeyP') photo.toggle();
     /* Markers stay off unless you ask. Walking up to Tranquility Base and
        recognising it should not require a floating label. */
-    if (e.code === 'KeyM') { state.markers = !state.markers; historic.setMarkers(state.markers); }
+    if (e.code === 'KeyM') {
+      state.markers = !state.markers;
+      settings.set('markers', state.markers ? 'on' : 'off');
+    }
+    if (e.code === 'KeyO') settings.toggle();
     if (photo.active) {
       if (e.code === 'BracketLeft') photo.zoom(-1);
       if (e.code === 'BracketRight') photo.zoom(1);
@@ -511,6 +516,20 @@ async function start() {
     }
     e.preventDefault();
   }, { passive: false });
+
+  const settings = new Settings({
+    state,
+    get: {
+      eva: () => eva, streams: () => streams, historic: () => historic,
+      cache: () => window.SELENE_CACHE || null,
+    },
+    onQuality: (q) => {
+      const u = new URL(location.href);
+      u.searchParams.set('quality', q);
+      location.href = u.toString();
+    },
+  });
+  state.markers = settings.values.markers;
 
   /* --- the loop ------------------------------------------------------------ */
   let last = performance.now(), fpsAcc = 0, fpsN = 0, fps = 0, ready = false;

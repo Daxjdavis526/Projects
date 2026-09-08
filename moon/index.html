@@ -174,6 +174,30 @@ canvas{display:block;position:fixed;inset:0}
   letter-spacing:.08em;pointer-events:none;
 }
 
+/* ---- settings ---- */
+#settings{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(420px,90vw);display:none;z-index:26;padding:18px 20px;
+}
+#settings h2{font-size:9px;margin-bottom:12px}
+#settings .set{display:flex;justify-content:space-between;align-items:center;
+  gap:14px;padding:7px 0;border-bottom:1px solid rgba(216,213,207,.06)}
+#settings .set:last-of-type{border-bottom:0}
+#settings .set .k{font-size:11px;color:var(--ink)}
+#settings .set .k small{display:block;color:var(--dim);font-size:9px;
+  letter-spacing:.03em;margin-top:2px;line-height:1.5}
+#settings .opts{display:flex;gap:3px;flex-shrink:0}
+#settings button{
+  background:rgba(216,213,207,.05);border:1px solid var(--edge);border-radius:2px;
+  color:var(--dim);font:inherit;font-size:9.5px;letter-spacing:.05em;
+  padding:4px 8px;cursor:pointer;transition:all .12s;white-space:nowrap;
+}
+#settings button:hover{border-color:rgba(232,201,160,.4);color:var(--ink)}
+#settings button.on{background:rgba(232,201,160,.16);border-color:rgba(232,201,160,.45);
+  color:var(--hot)}
+#settings .foot{margin-top:14px;font-size:9px;color:var(--faint);letter-spacing:.05em;
+  line-height:1.7}
+
 /* ---- shelter ---- */
 #shelter{
   position:fixed;top:50%;right:22px;transform:translateY(-50%);
@@ -297,6 +321,7 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">V</span><span>data overlay</span></div>
     <div class="row"><span class="k">T</span><span>time rate</span></div>
     <div class="row"><span class="k">M</span><span>site markers</span></div>
+    <div class="row"><span class="k">O</span><span>settings</span></div>
     <div class="row"><span class="k">P</span><span>photography</span></div>
     <div class="row"><span class="k">F2</span><span>save</span></div>
     <div class="row"><span class="k">H</span><span>this panel</span></div>
@@ -318,6 +343,31 @@ canvas{display:block;position:fixed;inset:0}
     <div class="state">
       <span id="v-gait">—</span><span id="v-lamps">—</span><span id="v-jet">—</span>
     </div>
+  </div>
+
+  <div class="panel" id="settings">
+    <h2>Settings</h2>
+    <div class="set">
+      <span class="k">Quality<small>reloads the page</small></span>
+      <span class="opts" id="set-quality"></span>
+    </div>
+    <div class="set">
+      <span class="k">EVA endurance<small>how fast the suit runs down</small></span>
+      <span class="opts" id="set-suit"></span>
+    </div>
+    <div class="set">
+      <span class="k">Stream from NASA<small>finer elevation and imagery as you go</small></span>
+      <span class="opts" id="set-stream"></span>
+    </div>
+    <div class="set">
+      <span class="k">Site markers<small>off by default, and meant to be</small></span>
+      <span class="opts" id="set-markers"></span>
+    </div>
+    <div class="set">
+      <span class="k">Cache<small id="set-cache-status">—</small></span>
+      <span class="opts" id="set-cache"></span>
+    </div>
+    <div class="foot" id="set-foot"></div>
   </div>
 
   <div class="panel" id="shelter">
