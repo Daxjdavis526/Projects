@@ -1,0 +1,18 @@
+{
+ "id": "apollo11_nac",
+ "path": "dem/apollo11_nac2m.png",
+ "w": 1600,
+ "h": 1600,
+ "bbox": [
+  23.420337,
+  0.621435,
+  23.525866,
+  0.726965
+ ],
+ "res_m": 2.0,
+ "priority": 0,
+ "kind": "window",
+ "min_m": -1966.4,
+ "max_m": -1876.2,
+ "source": "LROC NAC DTM NAC_DTM_APOLLO11 v1.9, 2 m/px (stereo pair M150361817/M150368601)"
+}
