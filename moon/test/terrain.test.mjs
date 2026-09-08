@@ -246,8 +246,15 @@ console.log('rocks');
   const again = d.rocks(0.6740, 23.4730, 0.6745, 23.4735, 2, 1);
   check('the same patch gives the same rocks',
     again.length === rocks.length && again.every((r, i) => r.lat === rocks[i].lat && r.radius === rocks[i].radius));
-  check('no rocks are scattered where the data is too coarse to be standing on',
-    d.rocks(0, 0, 0.01, 0.01, 1900, 1).length === 0);
+  /* The gate is the tile, not the dataset. Rocks lie on every square metre of
+     the Moon regardless of how coarsely it has been surveyed, so the far side
+     gets them too; what a distant tile is spared is the cost of instancing
+     cobbles nobody can resolve. */
+  check('the far side gets rocks even though its elevation is 1.9 km a pixel',
+    d.rocks(-0.043, 179.617, -0.0385, 179.622, 2, 1).length > 0,
+    d.rocks(-0.043, 179.617, -0.0385, 179.622, 2, 1).length + ' in a 500 m patch');
+  check('but a tile too coarse to stand on carries none',
+    d.rocks(0, 0, 0.01, 0.01, 60, 1).length === 0);
 }
 
 console.log(failures === 0 ? '\nterrain: all checks passed' : `\nterrain: ${failures} FAILED`);

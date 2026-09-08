@@ -111,11 +111,13 @@ function build(m) {
   if (cancelled.has(m.key)) { cancelled.delete(m.key); return; }
 
   const src = {
-    heightAt: (lat, lon) => hf.heightAt(lat, lon),
-    rocksIn: (latMin, lonMin, latMax, lonMax) => {
-      const res = hf.sampleData((latMin + latMax) / 2, (lonMin + lonMax) / 2, {}).res_m;
-      return detail.rocks(latMin, lonMin, latMax, lonMax, res, rockDensity);
-    },
+    /* `minLambda` is the finest wavelength the tile being built can hold. It
+       has to be passed through: without it every tile computes detail down to
+       the configured floor, which is both wasteful on coarse tiles and
+       aliased. */
+    heightAt: (lat, lon, minLambda) => hf.heightAt(lat, lon, minLambda),
+    rocksIn: (latMin, lonMin, latMax, lonMax, minLambda) =>
+      detail.rocks(latMin, lonMin, latMax, lonMax, minLambda, rockDensity),
   };
 
   /* Inherit the parent's far-field horizon, if we still have it. */

@@ -105,6 +105,29 @@ export class EVA {
   toggleView() { this.view = this.view === VIEW.FIRST ? VIEW.THIRD : VIEW.FIRST; }
   cycleLamps() { this.lampMode = (this.lampMode + 1) % 3; }
 
+  /**
+   * Roughly how hard the lamps are lighting the ground you are looking at, in
+   * the same units as sunlight, so the exposure model can meter for them.
+   *
+   * Without this the camera adapts to a moonless night, opens eleven stops,
+   * and then the headlamp arrives and the screen goes white -- which is
+   * exactly what a night walk at Tranquility Base looked like. Six metres is
+   * the distance a walking pace puts the pool of light at, and each lamp is
+   * weighted by how much of the frame its cone actually fills: the long beam
+   * is by far the brightest and by far the narrowest, and metering the whole
+   * frame from it would leave everything around it black.
+   */
+  lampIrradiance(distance = 6) {
+    if (this.lampMode <= 0) return 0;
+    let e = 0;
+    for (const { spec, light } of this.lamps) {
+      if (!light.visible) continue;
+      const coverage = Math.min(1, (spec.angle / 0.6) ** 2);
+      e += spec.intensity / Math.pow(distance, light.decay) * coverage;
+    }
+    return e;
+  }
+
   place(lat, lon, agl = 0) { this.player.place(lat, lon, agl); }
 
   /**

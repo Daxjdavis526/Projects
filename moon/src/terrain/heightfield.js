@@ -237,10 +237,16 @@ export class Heightfield {
    * Because the detail is limited to below the source pixel size, a real crater
    * stays exactly where the measurement puts it; only the pebbles are invented.
    */
-  heightAt(lat, lon) {
+  /**
+   * @param {number} minLambda  the finest wavelength the caller can hold, in
+   *   metres. A tile passes its own vertex spacing so it neither misses the
+   *   detail it could show nor computes detail it would only alias. Physics
+   *   asks with the default and gets everything.
+   */
+  heightAt(lat, lon, minLambda = 0) {
     const s = this.sampleData(lat, lon, this._tmp || (this._tmp = {}));
     let h = s.h;
-    if (this.detail) h += this.detail.heightAt(lat, lon, s.res_m);
+    if (this.detail) h += this.detail.heightAt(lat, lon, s.res_m, minLambda);
     return this.pads.length ? this.applyPads(lat, lon, h) : h;
   }
 

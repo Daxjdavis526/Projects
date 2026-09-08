@@ -47,7 +47,7 @@ export class TerrainSystem {
     this.installBudget = 4;
     this.pendingInstall = [];
     this.onProgress = opts.onProgress || (() => {});
-    this.stats = { tiles: 0, triangles: 0, queued: 0, building: 0 };
+    this.stats = { tiles: 0, triangles: 0, queued: 0, building: 0, finestLevel: 0 };
 
     const count = opts.workers ?? 1;
     this.workers = [];
@@ -236,6 +236,15 @@ export class TerrainSystem {
     this.stats.triangles = triangles;
     this.stats.queued = request.length;
     this.stats.building = this.inFlight.size;
+    /* The finest level actually on screen, which is the only honest answer to
+       "how detailed is the ground you are standing on": the tile count says
+       nothing about whether the refinement got all the way down. */
+    let finest = 0;
+    for (const key of draw) {
+      const e = this.quadtree.get(key);
+      if (e && e.level > finest) finest = e.level;
+    }
+    this.stats.finestLevel = finest;
   }
 
   _sphere(x, y, z, r) {

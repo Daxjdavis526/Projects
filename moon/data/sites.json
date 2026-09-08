@@ -440,12 +440,13 @@
    "name": "Shackleton rim",
    "sub": "south pole, near-permanent sunlight",
    "kind": "landmark",
-   "lat": -89.67,
-   "lon": 129.78,
+   "lat": -89.7793,
+   "lon": -155.2234,
    "status": "",
    "preset": true,
-   "blurb": "Stand on a rim lit about 94% of the lunar year and look down into a floor that has been dark for billions of years. The Sun rolls around the horizon instead of rising.",
-   "source": "IAU Gazetteer; Speyerer & Robinson 2013 (illumination, secondary)"
+   "blurb": "Stand on a rim lit about 94% of the lunar year, 4.4 km above a floor that has been dark for billions of years. The Sun rolls around the horizon instead of rising, and the crater is 10.5 km away downhill to the north-west.",
+   "source": "Highest point on the rim in the vendored LOLA 16 ppd grid, on a ring 10.5 km from the crater centre at 89.67 S 129.78 E (IAU Gazetteer). Derived, not published: the grid is 1.9 km a pixel, so this locates the rim rather than a surveyed high point, and the streamed 5 m polar DEM refines the ground under it at runtime.",
+   "verify": true
   },
   {
    "id": "south_pole",

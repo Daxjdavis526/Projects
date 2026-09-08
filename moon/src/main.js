@@ -600,6 +600,10 @@ async function start() {
       const el2 = lookAt === 'earth' ? local.earthEl : local.sunEl;
       cam.yaw = az * Math.PI / 180;
       cam.pitch = el2 * Math.PI / 180;
+      /* On foot the body owns the view: the camera is read back off the player
+         further down the frame, so aiming the camera alone is silently undone
+         and `?look=earth` came out staring at the ground. */
+      if (eva) { eva.player.yaw = cam.yaw; eva.player.pitch = cam.pitch; }
     }
     stage.setSun(local.sunDir, Math.max(0, local.sunEl > -0.3 ? 1 : 0));
     const earthshineScale = 1.5e-4 * eph.earthIllum * Math.max(0, Math.sin(local.earthEl * Math.PI / 180));
@@ -612,6 +616,11 @@ async function start() {
         z: OPTICS.earthshineTint[2] * earthshineScale,
       },
       sunAngularRadius: eph.sunAngularRadius * Math.PI / 180,
+      /* How much light the ground around you bounces into its own shadows.
+         Highland anorthosite is nearly twice as bright as mare basalt, so the
+         shadows in Taurus-Littrow are genuinely less black than the ones at
+         Tranquility Base. */
+      bounceAlbedo: albedoAt(geology, cam.lat, cam.lon),
     });
 
     const ev = exposure.update({
@@ -621,6 +630,10 @@ async function start() {
          highlands, and standing on one or the other is a two-thirds of a stop
          difference in how dark the shadows look. */
       albedo: albedoAt(geology, cam.lat, cam.lon),
+      /* Measured, not assumed. A hundred metres is the baseline the ten-degree
+         global figure was quoted at, so this is the same quantity read locally
+         rather than off a table. */
+      slopeSpreadDeg: heightfield.slopeAt(cam.lat, cam.lon, 100),
       /* Looking down at your boots and looking out at the horizon are two very
          different exposures, and the difference is most of a stop. */
       viewMu: Math.max(0.06, Math.sin(Math.max(0.05, -cam.pitch))),
@@ -638,6 +651,13 @@ async function start() {
         ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
       earthIllum: eph.earthIllum,
       earthElevation: local.earthEl,
+      /* What you are carrying. A helmet lamp two metres from the ground is
+         brighter than the Sun is at a polar dawn, so leaving it out of the
+         metering is not a rounding error: it opened the camera eleven stops
+         for the dark and then washed the picture out the moment the lamps
+         came on. */
+      lampLuminance: eva && !driving
+        ? albedoAt(geology, cam.lat, cam.lon) * eva.lampIrradiance() / Math.PI : 0,
     }, ready ? dt : 1e6);
     exposure.bias = photo.bias;
     stage.setExposure(ev);

@@ -96,10 +96,13 @@ export class Detail {
     this.craterMinD = opts.craterMinD ?? TERRAIN.craterMinD;
     this.rockCell = opts.rockCell ?? TERRAIN.rockCell;
     this.eqSlope = opts.eqSlope ?? TERRAIN.craterEqSlope;
-    /* Crater size bands below the source resolution. Six octaves reach from the
-       resolution limit down to about a hundredth of it; anything finer is
-       cheaper and more convincing as roughness than as geometry. */
-    this.maxBands = opts.maxBands ?? 5;
+    /* A safety stop, not the working limit. What actually decides how far down
+       the crater bands run is the vertex spacing of the tile being built: see
+       `craters`. Five bands used to be the limit, and with a 1.9 km source
+       pixel that meant the smallest crater anywhere on the far side was sixty
+       metres across, so a hundred metres of ground held two enormous bowls and
+       nothing else. */
+    this.maxBands = opts.maxBands ?? 14;
     this.enabled = opts.enabled !== false;
     /* Terrain roughness varies with geology: highlands are saturated with old
        craters and much rougher than young mare. Supplied by the caller from the
@@ -118,16 +121,18 @@ export class Detail {
    * Fractal roughness: octaves of value noise, each faded in only once the
    * source data is too coarse to contain it.
    */
-  roughness(lat, lon, res, rough) {
+  roughness(lat, lon, res, rough, minLambda = 0.25) {
     const p = this._unit(lat, lon, this._p || (this._p = { x: 0, y: 0, z: 0 }));
     const x = p.x * R, y = p.y * R, z = p.z * R;
     let h = 0;
-    /* Wavelengths from the resolution limit down to 25 cm. */
+    /* Wavelengths from the resolution limit down to the finest the geometry
+       asking the question can actually hold. */
     let lambda = 2048;
     while (lambda > res * 2) lambda *= 0.5;
-    /* Seven octaves below the resolution limit. Anything finer contributes a
-       few centimetres of geometry and is far cheaper as shader normal detail. */
-    for (let n = 0; n < 7 && lambda >= 0.25; lambda *= 0.5, n++) {
+    const floor = Math.max(0.25, minLambda);
+    /* Nine octaves below the resolution limit. Anything finer contributes a few
+       centimetres of geometry and is far cheaper as shader normal detail. */
+    for (let n = 0; n < 9 && lambda >= floor; lambda *= 0.5, n++) {
       const w = bandWeight(lambda, res);
       if (w <= 0) continue;
       const amp = this.amp100 * Math.pow(lambda * 0.01, this.hurst);
@@ -154,19 +159,30 @@ export class Detail {
    *    guarantees that every crater able to influence a point lies in one of the
    *    twenty-seven neighbouring cells, so the surface is continuous.
    */
-  craters(lat, lon, res, rough) {
+  craters(lat, lon, res, rough, minLambda = 0) {
     const p = this._unit(lat, lon, this._c || (this._c = { x: 0, y: 0, z: 0 }));
     const px = p.x * R, py = p.y * R, pz = p.z * R;
     const maxD = Math.min(2 * res, 4000);
+    /* The lower end is set by whoever is asking, not by a fixed band count. A
+       tile whose vertices are half a metre apart can hold a two-metre crater
+       and should have thousands of them; a tile whose vertices are twenty
+       kilometres apart cannot hold any of this and must not pay for it, and
+       would only alias if it tried. Three vertices across is the smallest bowl
+       that reads as a bowl rather than as a spike. */
+    const minD = Math.max(this.craterMinD, minLambda);
     let h = 0, bands = 0;
     const rnd = this._r || (this._r = [0, 0, 0]);
-    for (let D = maxD; D >= this.craterMinD && bands < this.maxBands; D *= 0.5) {
+    for (let D = maxD; D >= minD && bands < this.maxBands; D *= 0.5) {
       const w = bandWeight(D * 2.2, res);
       if (w <= 0) continue;
       bands++;
       const cell = D * 3.2;
       const jitter = 0.8 * cell;          // +/- 0.4 cell, the bound the proof needs
       const reach = D * 1.25;             // 2.5 crater radii
+      /* Half a cell per axis in three dimensions is 0.4*sqrt(3) of a cell in
+         the worst case, and projecting onto the sphere cannot lengthen it. */
+      const maxOffset = 0.4 * Math.sqrt(3) * cell;
+      const farLimit2 = (reach + maxOffset) * (reach + maxOffset);
       const inv = 1 / cell;
       const cx = Math.floor(px * inv), cy = Math.floor(py * inv), cz = Math.floor(pz * inv);
       const band = this.seed ^ ((D * 1000) | 0);
@@ -182,22 +198,30 @@ export class Detail {
             const cl2 = ccx * ccx + ccy * ccy + ccz * ccz;
             if (cl2 < rLo2 || cl2 > rHi2) continue;     // the surface misses this cell
             const cl = Math.sqrt(cl2);
+            /* Reject the cell before hashing it. The crater it may hold sits
+               within `maxOffset` of the cell centre and reaches `reach` beyond
+               itself, so a cell whose centre is further than the sum away
+               cannot touch this point however it hashes. Most of the
+               twenty-seven fail here, and the hash and the projection below
+               are the expensive part. */
+            const k0 = R / cl;
+            const sx = px - ccx * k0, sy = py - ccy * k0, sz = pz - ccz * k0;
+            if (sx * sx + sy * sy + sz * sz > farLimit2) continue;
+
             const hh = hash3(hx, hy, hz, band);
             const occupancy = 0.85 * (0.55 + 0.9 * rough);
             if (rand01(hh) > occupancy) continue;
             cellRandom(hx, hy, hz, this.seed ^ 0x2545f491, rnd);
-            /* Tangent frame at the cell centre. */
-            const ux = ccx / cl, uy = ccy / cl, uz = ccz / cl;
-            let ax, ay, az;
-            if (Math.abs(uz) < 0.9) { ax = -uy; ay = ux; az = 0; }
-            else { ax = 0; ay = -uz; az = uy; }
-            const al = Math.sqrt(ax * ax + ay * ay + az * az) || 1;
-            ax /= al; ay /= al; az /= al;
-            const bx = uy * az - uz * ay, by = uz * ax - ux * az, bz = ux * ay - uy * ax;
-            const j1 = (rnd[0] - 0.5) * jitter, j2 = (rnd[1] - 0.5) * jitter;
-            let qx = ux * R + ax * j1 + bx * j2;
-            let qy = uy * R + ay * j1 + by * j2;
-            let qz = uz * R + az * j1 + bz * j2;
+            /* Jitter the cell centre in space and project the result back down
+               to the surface. Projection can only shorten the tangential part
+               of a displacement and discards the radial part entirely, so a
+               jitter bounded by half a cell per axis moves the crater by at
+               most `maxOffset` along the surface -- which is what makes the
+               twenty-seven neighbours a complete search and stops craters
+               popping in and out as the query crosses a cell boundary. */
+            const qx = ccx + (rnd[0] - 0.5) * jitter;
+            const qy = ccy + (rnd[1] - 0.5) * jitter;
+            const qz = ccz + (rnd[2] - 0.5) * jitter;
             const ql = Math.sqrt(qx * qx + qy * qy + qz * qz) || 1;
             const k = R / ql;
             const ex = px - qx * k, ey = py - qy * k, ez = pz - qz * k;
@@ -205,8 +229,14 @@ export class Detail {
             if (dist2 > reach * reach) continue;
             const dist = Math.sqrt(dist2);
             /* Age: fresh craters are deep bowls with sharp rims, old ones are
-               shallow dishes. Both exist side by side on a real surface. */
-            const age = rnd[2];
+               shallow dishes. Both exist side by side on a real surface. It is
+               drawn from the cell hash rather than from the jitter triple, so
+               that moving a crater does not also change how old it is. */
+            /* Weighted towards old, because most craters are. A surface at
+               equilibrium is mostly degraded bowls a few per cent deep with a
+               minority of sharp fresh ones, not a field of identical dimples;
+               sqrt of a uniform draw puts the mean age at two thirds. */
+            const age = Math.sqrt(rand01(Math.imul(hh ^ 0x6d2b79f5, 0x9e3779b1) >>> 0));
             const depth = D * (0.17 - 0.12 * age);
             const rim = D * (0.038 - 0.026 * age);
             h += w * craterProfile(dist / (D * 0.5), depth, rim);
@@ -218,10 +248,11 @@ export class Detail {
   }
 
   /** Total procedural elevation at a point, in metres. */
-  heightAt(lat, lon, res) {
+  heightAt(lat, lon, res, minLambda = 0) {
     if (!this.enabled || !(res > 0)) return 0;
     const rough = this.roughnessAt(lat, lon);
-    return this.roughness(lat, lon, res, rough) + this.craters(lat, lon, res, rough);
+    return this.roughness(lat, lon, res, rough, minLambda) +
+           this.craters(lat, lon, res, rough, minLambda);
   }
 
   /**
@@ -230,12 +261,21 @@ export class Detail {
    *
    * @returns {Array<{lat,lon,radius,seed,tilt}>}
    */
-  rocks(latMin, lonMin, latMax, lonMax, res, density = 1) {
+  rocks(latMin, lonMin, latMax, lonMax, minLambda, density = 1) {
     const out = [];
     if (!this.enabled || density <= 0) return out;
-    /* Rocks are sub-metre to a few metres; there is no point scattering them
-       until the data is fine enough that they would not be visible anyway. */
-    if (res > 40) return out;
+    /* Rocks are scattered by how close the tile is, not by how good the
+       elevation data is. There are rocks on every square metre of the Moon
+       whether or not anyone has flown a laser altimeter over it at two metres
+       a pixel, and gating on the source resolution -- which is what this used
+       to do -- meant the entire far side had a bare, swept-looking surface
+       because the only elevation there is 1.9 km per pixel.
+
+       What the gate is really for is cost: only tiles small enough to be
+       underfoot should carry instances. Eight metres is a tile about eighty
+       across, so rocks appear within a couple of hundred metres of you and a
+       ten-centimetre cobble beyond that would be under a pixel anyway. */
+    if (!(minLambda <= 8)) return out;
     const midLat = (latMin + latMax) / 2;
     const mPerDegLat = R * DEG;
     const mPerDegLon = R * DEG * Math.max(0.02, Math.cos(midLat * DEG));

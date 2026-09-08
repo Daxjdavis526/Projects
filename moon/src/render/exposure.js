@@ -20,7 +20,8 @@ import { EXPOSURE, OPTICS, EARTHSHINE_FULL, SOLAR_CONSTANT } from '../config.js'
 import { regolithBrdf } from './photometry.js';
 
 /* Degrees. See targetLuminance: this is what stops a polar sunrise from
-   blowing out. */
+   blowing out. It is only a fallback; a caller that knows what the ground
+   around the camera is doing passes `slopeSpreadDeg` measured from it. */
 const SLOPE_SPREAD_DEG = 10;
 
 export class Exposure {
@@ -41,6 +42,9 @@ export class Exposure {
    * @param {object} s {
    *   sunElevation   degrees above the local horizon
    *   sunVisible     0..1, is the Sun actually above the local horizon profile
+ *   slopeSpreadDeg how steeply the ground around here runs, degrees: the
+ *                  brightest thing in frame is lit as though the Sun stood
+ *                  this much higher than it does
    *   albedo         local normal albedo
    *   groundFraction 0..1, how much of the frame is ground rather than sky
  *   viewMu         cosine of the angle the ground is seen at, 0.35 standing
@@ -61,8 +65,17 @@ export class Exposure {
        brightest thing in frame is lit as though the Sun were about ten degrees
        higher than it is. */
     const el = s.sunElevation ?? 0;
+    /* Ten degrees is the Moon's RMS slope at hundred-metre baselines, but the
+       Moon is not uniformly rough: a mare plain runs two or three degrees and a
+       saturated highland or a crater wall runs twenty-five. Metering flat
+       ground with the highland figure makes the mare too dark; metering a
+       cratered highland with the mare figure blows every sunward slope to white
+       paper, which is exactly what the first screenshot pass showed at nine
+       degrees of Sun on the far side. So the caller measures it where the
+       camera actually is rather than reading it off a table. */
+    const spread = Math.max(2, Math.min(28, s.slopeSpreadDeg ?? SLOPE_SPREAD_DEG));
     const sunEl = el <= 0 ? 0
-      : Math.sin(Math.min(90, el + SLOPE_SPREAD_DEG) * Math.PI / 180);
+      : Math.sin(Math.min(90, el + spread) * Math.PI / 180);
     const albedo = s.albedo ?? OPTICS.albedoMare;
     const ground = s.groundFraction ?? 0.55;
     /* The same photometry the shader uses, so the camera cannot over-expose the

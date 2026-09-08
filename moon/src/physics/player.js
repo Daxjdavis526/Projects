@@ -126,7 +126,26 @@ export class Player {
     /* --- where the ground is ------------------------------------------- */
     const llh = xyzToLlh(this.pos.x, this.pos.y, this.pos.z);
     this.llh = llh;
+    const wasSurface = this.surface;
     this.surface = this.ground.heightAt(llh.lat, llh.lon);
+
+    /* The ground moves under you. A tile arriving at a finer level can drop or
+       lift the surface by a metre or two while you stand perfectly still, and
+       reading that as a fall is why the player was permanently getting up on
+       rough terrain: refine, drop, land hard, refine again.
+
+       This is sampled at the position you were already standing at, which is
+       what separates a refinement from a cliff. Walking off an edge changes the
+       ground because you moved; a tile arriving changes the ground under the
+       spot you have not left. The first is a fall and should hurt. The second
+       is bookkeeping, and the body is simply carried with it. */
+    if (this.grounded && wasSurface !== null && wasSurface !== undefined &&
+        Math.abs(this.surface - wasSurface) > CONTACT_SLOP) {
+      llhToXyz(llh.lat, llh.lon, this.surface, this.pos);
+      llh.h = this.surface;
+      const nu = this.vel.x * u.x + this.vel.y * u.y + this.vel.z * u.z;
+      this.vel.x -= nu * u.x; this.vel.y -= nu * u.y; this.vel.z -= nu * u.z;
+    }
     const agl = llh.h - this.surface;
     const b = enuBasis(llh.lat, llh.lon);
 

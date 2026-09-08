@@ -35,8 +35,10 @@ const UV_METRES = R_MOON * Math.PI / 4;
 
 /**
  * @param {object} spec  { face, level, i, j, verts, apron, horizon, rocks }
- * @param {object} src   { heightAt(lat, lon), rocksIn(latMin, lonMin, latMax, lonMax, res)
- *                         , resAt(lat, lon) }
+ * @param {object} src   { heightAt(lat, lon, minLambda),
+ *                         rocksIn(latMin, lonMin, latMax, lonMax, minLambda) }
+ *   `minLambda` is the finest wavelength this tile's vertices can represent;
+ *   the source uses it to band-limit procedural detail to what will not alias.
  * @param {Float32Array|null} parentHorizon  the parent tile's far-field rings
  */
 export function buildTile(spec, src, parentHorizon = null) {
@@ -45,6 +47,11 @@ export function buildTile(spec, src, parentHorizon = null) {
   const { face, level, i, j } = spec;
   const N = verts + 2 * apron;                 // sampled grid including the apron
   const spacing = edgeArc(level) / (verts - 1);
+  /* The finest thing this tile can hold. A bowl needs three vertices across to
+     read as a bowl rather than as a spike, and asking for anything finer only
+     buys aliasing: the same tile rebuilt one level down would put the detail
+     somewhere else, which is what makes a surface shimmer as it refines. */
+  const minLambda = spacing * 3;
 
   /* --- sample the surface, apron included ------------------------------- */
   const H = new Float32Array(N * N);
@@ -57,7 +64,7 @@ export function buildTile(spec, src, parentHorizon = null) {
       tileVertexUv(level, i, j, a - apron, b - apron, verts, uv);
       faceUvToUnit(face, uv.u, uv.v, dir);
       unitToLl(dir.x, dir.y, dir.z, ll);
-      H[b * N + a] = src.heightAt(ll.lat, ll.lon);
+      H[b * N + a] = src.heightAt(ll.lat, ll.lon, minLambda);
       if (a >= apron && a < apron + verts && b >= apron && b < apron + verts) {
         if (ll.lat < latMin) latMin = ll.lat;
         if (ll.lat > latMax) latMax = ll.lat;
@@ -204,14 +211,14 @@ export function buildTile(spec, src, parentHorizon = null) {
   /* --- rocks ------------------------------------------------------------- */
   let rocks = null;
   if (spec.rocks && src.rocksIn) {
-    const list = src.rocksIn(latMin, lonMin, latMax, lonMax);
+    const list = src.rocksIn(latMin, lonMin, latMax, lonMax, minLambda);
     rocks = new Float32Array(list.length * 5);
     for (let r = 0; r < list.length; r++) {
       const rk = list[r];
       faceUvToUnit(face, 0, 0, dir);                    // reuse dir
       const la = rk.lat * DEG, lo = rk.lon * DEG, cl = Math.cos(la);
       const px = cl * Math.cos(lo), py = cl * Math.sin(lo), pz = Math.sin(la);
-      const rr = R_MOON + src.heightAt(rk.lat, rk.lon);
+      const rr = R_MOON + src.heightAt(rk.lat, rk.lon, minLambda);
       rocks[r * 5] = px * rr - centre.x;
       rocks[r * 5 + 1] = py * rr - centre.y;
       rocks[r * 5 + 2] = pz * rr - centre.z;

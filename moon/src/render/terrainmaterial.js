@@ -40,6 +40,7 @@ const PARS = /* glsl */`
 uniform vec3  uSunDir;          // unit, world space
 uniform vec3  uEarthDir;
 uniform vec3  uEarthshine;      // radiance, already tinted
+uniform float uBounceAlbedo;    // how bright the neighbouring ground is, 0 disables
 uniform float uSunAngularRadius;
 uniform vec3  uMoonCentre;      // -origin, so worldPos - uMoonCentre is radial
 uniform float uDetailAmount;    // albedo variation, 0 in scientific mode
@@ -64,6 +65,7 @@ uniform float uImageryBlurLod;  // mip level standing in for the local mean
 uniform sampler2D uImagery;
 varying float vSunVis;
 varying float vEarthVis;
+varying float vSkyVis;          // fraction of the hemisphere that is sky, not terrain
 varying vec2  vDetailXY;
 varying vec3  vWorldPos;
 varying vec3  vNormal2;         // the surface normal in world space, for overlays
@@ -94,6 +96,17 @@ const VERTEX_BODY = /* glsl */`
      black and white: the map is being asked for a precision it does not have.
      Ordinary terrain is unaffected, because there the skyline rises steeply
      enough that a degree of blur is a few centimetres on the ground. */
+  /* How much of the sky this point can actually see. The horizon map already
+     knows the skyline in eight directions; a cosine-weighted mean of
+     sin(horizon angle) is the fraction of the hemisphere the terrain has taken
+     away, and what the terrain has taken away is what can bounce light back.
+     On open ground this is nearly one and nothing happens; on a crater floor
+     it drops and the walls start to fill the shadows in. */
+  vec4 s0 = max(sin(aHorizon0), 0.0);
+  vec4 s1 = max(sin(aHorizon1), 0.0);
+  float blocked = dot(s0, vec4(0.125)) + dot(s1, vec4(0.125));
+  vSkyVis = clamp(1.0 - blocked, 0.0, 1.0);
+
   vSunVis = horizonVisibility(uSunDir, up, east, north, aHorizon0, aHorizon1,
                               max(uSunAngularRadius, 0.020));
   vEarthVis = horizonVisibility(uEarthDir, up, east, north, aHorizon0, aHorizon1,
@@ -204,6 +217,10 @@ export function makeTerrainMaterial(opts = {}) {
     uSunDir: { value: new THREE.Vector3(1, 0, 0) },
     uEarthDir: { value: new THREE.Vector3(0, 1, 0) },
     uEarthshine: { value: new THREE.Vector3(0, 0, 0) },
+    /* The neighbourhood's own albedo, which is what sets how much light the
+       terrain bounces into its own shadows. Mare and highland differ by
+       nearly a stop; this is the local value, updated as you travel. */
+    uBounceAlbedo: { value: opts.plain ? 0 : OPTICS.albedoMare },
     uSunAngularRadius: { value: 0.00465 },
     uMoonCentre: { value: new THREE.Vector3(0, 0, 0) },
     uDetailAmount: { value: opts.plain ? 0 : 0.22 },
@@ -252,6 +269,10 @@ export function makeTerrainMaterial(opts = {}) {
 
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
+    /* Keep the patched source. three.js throws it away once the program is
+       linked, and this material is most of the picture: when the ground comes
+       out wrong the first question is always what the shader actually says. */
+    material.userData.shader = shader;
 
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${PARS}\n${VERTEX_HEAD}\n${HORIZON_FN}`)
@@ -345,27 +366,46 @@ export function makeTerrainMaterial(opts = {}) {
           vec3 N = normalize(normal);
           vec3 V = normalize(vViewPosition);
           vec3 albedo = diffuseColor.rgb;
-          reflectedLight.directDiffuse = vec3(0.0);
-          reflectedLight.indirectDiffuse = vec3(0.0);
+          /* Only the Sun's contribution is replaced, and it is replaced by
+             subtracting exactly what three.js put in rather than by clearing
+             the accumulator. Clearing was wrong: the helmet lamps are spot
+             lights and three.js has already added them by this point, so the
+             lamps lit nothing at all -- which at Shackleton, where they are the
+             only light there is, meant walking into a black screen with three
+             lamps burning.
+
+             Regolith is not a specular surface at any wavelength that matters
+             here, so the specular terms do go. */
           reflectedLight.directSpecular = vec3(0.0);
           reflectedLight.indirectSpecular = vec3(0.0);
+          /* The Sun's irradiance, picked out of the light list so the bounce
+             term below can use it without a second uniform saying the same
+             thing. Directional lights that are not the Sun (there are none
+             outdoors, but the ship carries some) do not bounce off the
+             landscape. */
+          vec3 sunE = vec3(0.0);
           #if ( NUM_DIR_LIGHTS > 0 )
           #pragma unroll_loop_start
           for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
             DirectionalLight dl = directionalLights[ i ];
             vec3 L = dl.direction;
+            if (dot(L, uSunDir) > 0.999) sunE = dl.color;
             float mu0 = dot(N, L);
+            float shadow = 1.0;
+            #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
+            DirectionalLightShadow dls = directionalLightShadows[ i ];
+            shadow = getShadow( directionalShadowMap[ i ], dls.shadowMapSize,
+                                dls.shadowIntensity, dls.shadowBias,
+                                dls.shadowRadius, vDirectionalShadowCoord[ i ] );
+            #endif
+            /* Undo three.js's Lambert term for this light, exactly as it was
+               added: saturate(N.L) * colour * shadow * diffuse / pi. */
+            reflectedLight.directDiffuse -=
+              saturate(mu0) * dl.color * shadow * albedo * RECIPROCAL_PI;
             if (mu0 > 0.0) {
               float mu = max(dot(N, V), 1e-3);
               float phase = acos(clamp(dot(L, V), -1.0, 1.0));
               float isSun = step(0.999, dot(L, uSunDir));
-              float shadow = 1.0;
-              #if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
-              DirectionalLightShadow dls = directionalLightShadows[ i ];
-              shadow = getShadow( directionalShadowMap[ i ], dls.shadowMapSize,
-                                  dls.shadowIntensity, dls.shadowBias,
-                                  dls.shadowRadius, vDirectionalShadowCoord[ i ] );
-              #endif
               float vis = mix(1.0, vSunVis, isSun);
               float brdf = uPlain == 1 ? mu0 : lunarBrdf(mu0, mu, phase);
               reflectedLight.directDiffuse += albedo * dl.color * brdf * shadow * vis;
@@ -373,6 +413,24 @@ export function makeTerrainMaterial(opts = {}) {
           }
           #pragma unroll_loop_end
           #endif
+
+          /* Regolith bounce. The one thing that is genuinely wrong about a
+             shadow rendered as pure black: there is no atmosphere to scatter
+             light into it, but there is a great deal of sunlit ground nearby,
+             and ground with a tenth of the light bounces a tenth of the light.
+             It is why Aldrin coming down the ladder is visible at all in the
+             LM's shadow, and why Apollo photographs show the inside of a
+             crater rather than a hole cut out of the picture.
+
+             The model is one bounce and no more: a surface receives, from the
+             terrain filling the part of its hemisphere the sky does not, light
+             of the neighbourhood's own albedo. It lands around a fortieth of
+             direct sunlight, four or five stops down, which is invisible
+             beside a lit slope and clearly there once the eye has adapted. */
+          vec3 up2 = normalize(vWorldPos - uMoonCentre);
+          float neighboursLit = smoothstep(-0.02, 0.30, dot(up2, uSunDir));
+          float fill = (1.0 - vSkyVis) * neighboursLit * uBounceAlbedo;
+          reflectedLight.indirectDiffuse += albedo * sunE * fill;
 
           /* Earthshine: not a light in the scene, because it must not go through
              the shadow map or be confused with the Sun. */
@@ -422,7 +480,8 @@ export function makeTerrainMaterial(opts = {}) {
 
 /** Push the current sky state into the material's uniforms. */
 export function updateTerrainUniforms(material, { sunDir, earthDir, earthshine,
-                                                  sunAngularRadius, origin }) {
+                                                  sunAngularRadius, origin,
+                                                  bounceAlbedo }) {
   const u = material.userData.uniforms;
   if (!u) return;
   u.uSunDir.value.set(sunDir.x, sunDir.y, sunDir.z);
@@ -430,4 +489,5 @@ export function updateTerrainUniforms(material, { sunDir, earthDir, earthshine,
   u.uEarthshine.value.set(earthshine.x, earthshine.y, earthshine.z);
   u.uSunAngularRadius.value = sunAngularRadius;
   u.uMoonCentre.value.set(-origin.x, -origin.y, -origin.z);
+  if (bounceAlbedo !== undefined) u.uBounceAlbedo.value = bounceAlbedo;
 }

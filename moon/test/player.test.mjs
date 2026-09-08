@@ -192,5 +192,53 @@ console.log('snapshot');
     s.heading.toFixed(0) + ' deg');
 }
 
+console.log('the ground moving under you is not a fall');
+{
+  /* Terrain streams in. A tile arriving at a finer level changes the surface
+     under a player who has not moved, and the first version of this read every
+     refinement as a two-metre drop: the player landed hard, got up, and was
+     knocked down again by the next tile. */
+  let surface = 0;
+  const ground = {
+    heightAt: () => surface,
+    slopeAt: () => 0,
+    normalAt: () => ({ e: 0, n: 0, u: 1 }),
+  };
+  const p = new Player({ ground, lat: 0, lon: 0 });
+  for (let t = 0; t < 1; t += 1 / 120) p.step(1 / 120, {});
+  check('the player is standing on the ground to begin with', p.grounded && !p.snapshot().fallen);
+
+  surface = -2.4;                       // a finer tile says the ground is lower
+  for (let t = 0; t < 0.5; t += 1 / 120) p.step(1 / 120, {});
+  check('a refinement carries the body down with it rather than dropping it',
+    p.grounded && Math.abs(p.llh.h - surface) < 0.05,
+    `h ${p.llh.h.toFixed(2)} vs ground ${surface}`);
+  check('and it is not counted as a fall', !p.snapshot().fallen && p.stumbles === 0,
+    `${p.stumbles} stumbles`);
+
+  surface = 1.7;                        // and back up again
+  for (let t = 0; t < 0.5; t += 1 / 120) p.step(1 / 120, {});
+  check('the same going up', p.grounded && Math.abs(p.llh.h - surface) < 0.05 &&
+    p.stumbles === 0);
+
+  /* A real drop still has to hurt, so the discrimination has to be by cause and
+     not by size: this one happens because the player walked off it. */
+  const cliff = {
+    heightAt: (lat) => (lat > 0.00002 ? -9 : 0),
+    slopeAt: () => 0,
+    normalAt: () => ({ e: 0, n: 0, u: 1 }),
+  };
+  const q = new Player({ ground: cliff, lat: 0, lon: 0 });
+  q.yaw = 0;
+  let worst = 0, airborne = 0;
+  for (let t = 0; t < 6; t += 1 / 120) {
+    q.step(1 / 120, { forward: 1, run: true });
+    worst = Math.max(worst, q.lastImpact);
+    if (!q.grounded) airborne += 1 / 120;
+  }
+  check('walking off a cliff is still a fall', airborne > 2 && worst > 4,
+    `${airborne.toFixed(1)} s in the air, hit at ${worst.toFixed(1)} m/s`);
+}
+
 console.log(failures ? `\nplayer: ${failures} FAILED` : '\nplayer: all checks passed');
 process.exit(failures ? 1 : 0);
