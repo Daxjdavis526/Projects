@@ -272,8 +272,10 @@ field. A tile only computes the bands between the source data's resolution and
 its own vertex spacing, so a distant tile is nearly free and the expensive ones
 are the handful under your boots. The worst case is a tile at the finest level
 over ground whose only elevation is the 1.9 km global grid, where the range
-spans nine octaves: about 58 ms. Where a metre-scale stereo model has streamed
-in there is almost nothing left to invent and the same tile costs 3 ms.
+spans nine octaves and the last of them is faded in rather than cut, so that
+neighbouring levels do not disagree about the ground along the edge they share:
+about 70 ms. Where a metre-scale stereo model has streamed in there is almost
+nothing left to invent and the same tile costs 3 ms.
 
 ## Three ranges
 

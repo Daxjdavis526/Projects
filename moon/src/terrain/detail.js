@@ -77,6 +77,12 @@ function valueNoise3(x, y, z, seed) {
  * source data resolves `res` metres per pixel. Full strength well below the
  * Nyquist limit, zero at and above it.
  */
+/** Hermite ramp, 0 below `a` and 1 above `b`. */
+function smoothstep(a, b, x) {
+  const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+}
+
 export function bandWeight(lambda, res) {
   const cut = 2 * res;
   if (lambda >= cut) return 0;
@@ -172,9 +178,18 @@ export class Detail {
     const minD = Math.max(this.craterMinD, minLambda);
     let h = 0, bands = 0;
     const rnd = this._r || (this._r = [0, 0, 0]);
-    for (let D = maxD; D >= minD && bands < this.maxBands; D *= 0.5) {
-      const w = bandWeight(D * 2.2, res);
-      if (w <= 0) continue;
+    /* Cutting the finest band off sharply puts a step in the ground at every
+       LOD boundary: two tiles at neighbouring levels then disagree about the
+       height along the edge they share, by the whole depth of one octave of
+       craters. Fading the last octave in over a factor of four halves that
+       step and costs nothing, and it is the same reasoning as the upper cut:
+       a band-limited signal wants a ramp, not a wall. */
+    for (let D = maxD * 2; D >= minD * 0.5 && bands < this.maxBands; D *= 0.5) {
+      if (D > maxD) continue;
+      const w = bandWeight(D * 2.2, res) * smoothstep(minD * 0.5, minD * 2, D);
+      /* A band contributing less than a few per cent of its own depth is
+         millimetres of ground for a full pass over twenty-seven cells. */
+      if (w <= 0.04) continue;
       bands++;
       const cell = D * 3.2;
       const jitter = 0.8 * cell;          // +/- 0.4 cell, the bound the proof needs
