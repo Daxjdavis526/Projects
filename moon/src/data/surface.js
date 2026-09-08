@@ -148,6 +148,10 @@ export class SurfaceStreamer {
     try {
       const tile = await this.streams.imageryTile(lat, lon, wantRes);
       if (!tile) return;
+      /* Imagery coarser than the vendored colour map is not an improvement, it
+         is a rectangle. The global map resolves about 1.3 km per pixel, so
+         anything above that is dropped rather than laid over the Moon. */
+      if (tile.res_m > 1300) return;
       if (this.imagery.res_m !== null && tile.res_m > this.imagery.res_m && wellInside) return;
       /* The same tile again is not worth a new texture upload. */
       if (tile.key === this.imagery.key) { this.imagery.atBest = tile.atBest; return; }

@@ -38,7 +38,7 @@ const DEFAULT_SHOTS = [
   ['descent', 'site=apollo11&view=ground&alt=9000&t=2026-09-19T00:00Z&rate=0&quality=balanced'],
   /* Offset from the descent stage rather than on top of it: standing at the
      published coordinates puts the camera inside the spacecraft. */
-  ['tranquility-now', 'site=0.67510,23.47420&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=190&quality=high'],
+  ['tranquility-now', 'site=0.67446,23.47353&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=230&pitch=-2&quality=high'],
   ['tranquility-1969', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&quality=high'],
   ['tranquility-earth', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&look=earth&fov=12&quality=high'],
   ['third-person', 'site=apollo11&mode=eva&t=1969-07-21T02:56:15Z&rate=0&view3=1&quality=high'],

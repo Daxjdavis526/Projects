@@ -285,6 +285,11 @@ export function makeTerrainMaterial(opts = {}) {
         if (uImageryAmount > 0.0) {
           vec2 iuv = (vLatLonUv - uImageryRect.xy) / uImageryRect.zw;
           if (iuv.x > 0.0 && iuv.x < 1.0 && iuv.y > 0.0 && iuv.y < 1.0) {
+            /* Feather the edges. A streamed tile is a rectangle on a sphere and
+               a hard boundary reads as a rectangle, which is the one shape the
+               Moon does not have. */
+            vec2 edge = min(iuv, 1.0 - iuv);
+            float feather = smoothstep(0.0, 0.06, min(edge.x, edge.y));
             /* An orbital mosaic is not an albedo map: it was photographed under
                one particular Sun, and its crater shadows are baked in. Using it
                raw would shade the ground twice, once from the picture and once
@@ -300,8 +305,8 @@ export function makeTerrainMaterial(opts = {}) {
             float hi = dot(texture2D(uImagery, iuv).rgb, W);
             float lo = dot(textureLod(uImagery, iuv, uImageryBlurLod).rgb, W);
             float ratio = clamp(hi / max(lo, 1e-3), 0.35, 2.4);
-            diffuseColor.rgb *= mix(1.0, pow(ratio, uImageryContrast), uImageryAmount);
-            seleneImagery = uImageryAmount;
+            diffuseColor.rgb *= mix(1.0, pow(ratio, uImageryContrast), uImageryAmount * feather);
+            seleneImagery = uImageryAmount * feather;
           }
         }
         /* How much ground one pixel covers, which decides how much of the
