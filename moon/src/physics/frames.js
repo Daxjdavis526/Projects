@@ -35,6 +35,11 @@ export function xyzToLlh(x, y, z, out = { lat: 0, lon: 0, h: 0 }) {
   const r = Math.hypot(x, y, z);
   out.lat = Math.asin(r > 0 ? z / r : 0) * RAD;
   out.lon = Math.atan2(y, x) * RAD;
+  /* Exactly 180 is a discontinuity: the sign of longitude flips across it, and
+     anything that keys a lattice or a texture off longitude flickers between
+     the two sides. A hundred-nanodegree nudge is four millimetres on the
+     ground and puts the value on one side of the seam and keeps it there. */
+  if (out.lon >= 179.9999999) out.lon = 179.9999999;
   out.h = r - R_MOON;
   return out;
 }

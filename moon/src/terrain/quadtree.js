@@ -33,6 +33,7 @@ export class Quadtree {
        normal lens becomes a smooth wall at 250 mm; the renderer raises this in
        proportion to the magnification. */
     this.lodScale = 1;
+    this.verts = opts.verts ?? TERRAIN.verts;
     this.tileBudget = opts.tileBudget ?? 900;
     this.cacheSize = opts.cacheSize ?? 1400;
     this.tiles = new Map();          // key -> { state, tile, lastWanted, level, ... }
@@ -124,12 +125,16 @@ export class Quadtree {
       }
 
       if (this.isResident(key)) {
-        /* Drawing a tile whose triangles are wider than the distance to it puts
-           a plane through the landscape rather than covering it. When that
-           would happen, leave the gap: the chain of tiles under the camera is
-           requested first, so it is a gap for a second, not a wall for a
-           session. */
-        const tooCoarse = wantSplit && near < arc * 0.03 && level < 6;
+        /* Drawing a tile whose triangles are kilometres wide, from inside it,
+           puts a plane through the landscape rather than covering it. The test
+           is how far a triangle's chord departs from the sphere: three metres
+           is a tile edge of about two hundred kilometres, and anything coarser
+           than that visibly cuts through the ground you are standing on. Below
+           it the departure is centimetres and the tile is a fine stand-in
+           while its children load. */
+        const chord = arc / (this.verts - 1);
+        const sagitta = chord * chord / (8 * R_MOON);
+        const tooCoarse = wantSplit && near < arc * 0.1 && sagitta > 3;
         if (!tooCoarse) draw.push(key);
       } else {
         if (!entry || entry.state !== 'pending') {

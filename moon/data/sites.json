@@ -508,12 +508,12 @@
    "name": "Earth antipode",
    "sub": "0 N 180 E, the far side",
    "kind": "landmark",
-   "lat": 0.0,
-   "lon": 180.0,
+   "lat": -0.0421,
+   "lon": 179.6183,
    "status": "",
    "preset": true,
-   "blurb": "The point exactly opposite Earth: highlands 2.7 km above the datum, saturated with craters, where Earth sits precisely at the nadir and can never be seen. The Sun and the stars are the only things in this sky.",
-   "source": "chosen point; elevation from the vendored LOLA 16 ppd layer"
+   "blurb": "The point on the Moon furthest from the Earth, give or take: the antipode of the sub-Earth point, in the far side highlands. The Earth has never risen here and never will. Nudged a fraction off the exact antipode because 0 N 180 E is the seam where longitude changes sign and the point is to stand somewhere, not on a discontinuity.",
+   "source": "antipode of the mean sub-Earth point; the Moon's synchronous rotation keeps it Earthless"
   },
   {
    "id": "spa",

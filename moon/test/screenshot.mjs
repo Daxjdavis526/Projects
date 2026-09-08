@@ -35,8 +35,10 @@ const SETTLE = Number(argOf('settle', 6000));
 
 const DEFAULT_SHOTS = [
   ['orbit', 'site=apollo11&view=orbit&alt=1200000&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
-  ['descent', 'site=apollo11&view=ground&alt=9000&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
-  ['tranquility-now', 'site=apollo11&view=ground&alt=2.2&t=2026-09-22T14:00Z&rate=0&quality=high'],
+  ['descent', 'site=apollo11&view=ground&alt=9000&t=2026-09-19T00:00Z&rate=0&quality=balanced'],
+  /* Offset from the descent stage rather than on top of it: standing at the
+     published coordinates puts the camera inside the spacecraft. */
+  ['tranquility-now', 'site=0.67510,23.47420&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=190&quality=high'],
   ['tranquility-1969', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&quality=high'],
   ['tranquility-earth', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&look=earth&fov=12&quality=high'],
   ['third-person', 'site=apollo11&mode=eva&t=1969-07-21T02:56:15Z&rate=0&view3=1&quality=high'],
@@ -46,7 +48,7 @@ const DEFAULT_SHOTS = [
      slivers on the sunward slopes, and the lamps are not optional. */
   ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&lamps=2&quality=balanced'],
   ['farside', 'site=farside_highlands&mode=eva&t=2026-09-08T09:00Z&rate=0&quality=balanced'],
-  ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-22T14:00Z&rate=0&yaw=270&quality=balanced'],
+  ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&quality=balanced'],
   ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],
 ];
 
