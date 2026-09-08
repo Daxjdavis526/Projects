@@ -133,7 +133,7 @@ You do not hunt for the spark. You walk each mechanism and ask which required el
 the design has removed.
 
 <figure>
-<svg viewBox="0 0 680 330" role="img" aria-label="Map of three ignition mechanisms. Each row shows the mechanism on the left, its required characteristic elements in the centre, and the design control on the right. Removing any one required element removes the mechanism.">
+<svg viewBox="0 0 700 330" role="img" aria-label="Map of three ignition mechanisms. Each row shows the mechanism on the left, its required characteristic elements in the centre, and the design control on the right. Removing any one required element removes the mechanism.">
   <g font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">
     <text x="10" y="20">MECHANISM</text>
     <text x="170" y="20">ALL CHARACTERISTIC ELEMENTS REQUIRED</text>

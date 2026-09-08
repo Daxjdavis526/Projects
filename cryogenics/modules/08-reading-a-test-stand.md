@@ -38,7 +38,7 @@ CGA S-1.3 (10th ed., 2024) and ASME BPVC Section VIII Div. 1 (2025), and belong 
 the vessel they protect. Study it before reading on.
 
 <figure>
-<svg viewBox="0 0 700 1000" role="img" aria-label="Piping and instrumentation schematic of a small liquid-oxygen and liquid-methane rocket engine test stand, showing two run tanks with helium pressurisation, separate oxidiser and fuel vent stacks, relief valves and burst discs, fill and drain lines, filtered feed legs with fail-closed main propellant valves, nitrogen purge panels, an engine, gas detection, and a remote-operation boundary with a control room outside it.">
+<svg viewBox="0 0 740 1000" role="img" aria-label="Piping and instrumentation schematic of a small liquid-oxygen and liquid-methane rocket engine test stand, showing two run tanks with helium pressurisation, separate oxidiser and fuel vent stacks, relief valves and burst discs, fill and drain lines, filtered feed legs with fail-closed main propellant valves, nitrogen purge panels, an engine, gas detection, and a remote-operation boundary with a control room outside it.">
   <text x="14" y="15" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">TEST CELL — remote-operation boundary (dashed). No personnel inside during propellant operations.</text>
   <rect x="14" y="24" width="672" height="814" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="9 6"/>
 

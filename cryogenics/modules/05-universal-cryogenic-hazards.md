@@ -136,7 +136,7 @@ Nine places, and every one appears on real drawings.
   <rect x="24" y="76" width="52" height="88" rx="4" fill="none" stroke="var(--inert)" stroke-width="1.5"/>
   <line x1="50" y1="58" x2="50" y2="74" stroke="var(--muted)" stroke-width="1"/>
   <text x="50" y="52" text-anchor="middle" font-size="13" font-family="system-ui, sans-serif" fill="var(--muted)">annulus</text>
-  <text x="50" y="190" text-anchor="middle" font-size="13" font-family="system-ui, sans-serif" fill="currentColor">V-1 supply dewar</text>
+  <text x="14" y="190" text-anchor="start" font-size="13" font-family="system-ui, sans-serif" fill="currentColor">V-1 supply dewar</text>
 
   <line x1="82" y1="120" x2="575" y2="120" stroke="var(--inert)" stroke-width="3"/>
 

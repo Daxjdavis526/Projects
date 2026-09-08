@@ -84,7 +84,7 @@ pick one and the other is decided for you. The tank state is a point sliding alo
 a curve — here it is for nitrogen, from `reference/properties.md` §7.
 
 <figure>
-<svg viewBox="0 0 640 270" role="img" aria-label="Pressure versus temperature saturation curve for nitrogen, rising from the triple point at 63 kelvin and 0.13 bar through the normal boiling point at 77.4 kelvin and 1.01 bar to the critical point at 126.2 kelvin and 34 bar. The liquid region lies above and left of the curve, the vapour region below and right. Two tank states are marked on the curve itself: a vented tank at 77.4 kelvin and 1.01 bar, and a warmer pressurised tank at 90 kelvin and 3.6 bar.">
+<svg viewBox="-30 0 670 270" role="img" aria-label="Pressure versus temperature saturation curve for nitrogen, rising from the triple point at 63 kelvin and 0.13 bar through the normal boiling point at 77.4 kelvin and 1.01 bar to the critical point at 126.2 kelvin and 34 bar. The liquid region lies above and left of the curve, the vapour region below and right. Two tank states are marked on the curve itself: a vented tank at 77.4 kelvin and 1.01 bar, and a warmer pressurised tank at 90 kelvin and 3.6 bar.">
   <g font-family="system-ui, sans-serif" font-size="13">
     <!-- axes -->
     <line x1="70" y1="200" x2="600" y2="200" stroke="currentColor" stroke-width="1.2"/>
@@ -300,7 +300,7 @@ between two closed valves, a dead leg, an instrument tap — and let it warm.
     <text x="60" y="164" fill="var(--muted)">Volume is fixed by the steel.</text>
     <text x="60" y="182" fill="var(--muted)">The fluid does not know that yet.</text>
     <!-- right panel -->
-    <text x="340" y="26" fill="var(--warn)" font-weight="600">Warming: the expansion has nowhere to go</text>
+    <text x="336" y="26" fill="var(--warn)" font-weight="600">Warming: expansion has nowhere to go</text>
     <line x1="380" y1="70" x2="590" y2="70" stroke="currentColor" stroke-width="1.6"/>
     <line x1="380" y1="110" x2="590" y2="110" stroke="currentColor" stroke-width="1.6"/>
     <rect x="406" y="72" width="158" height="37" fill="var(--warn)" opacity="0.22"/>
@@ -315,10 +315,10 @@ between two closed valves, a dead leg, an instrument tap — and let it warm.
       <path d="M530 109 V129" marker-end="url(#ar-w2)"/>
     </g>
     <text x="485" y="96" text-anchor="middle" fill="var(--warn)" font-weight="600">P ↑↑</text>
-    <text x="380" y="164" fill="currentColor">1 volume of liquid N₂ wants 696 volumes of gas</text>
-    <text x="380" y="182" fill="var(--muted)">(at 70 °F, 1 atm). It cannot have them.</text>
-    <text x="380" y="200" fill="var(--warn)">So it takes pressure instead.</text>
-    <text x="20" y="228" fill="var(--muted)">Every isolatable section that can hold cryogenic liquid needs its own relief path. There are no exceptions worth arguing about.</text>
+    <text x="336" y="164" fill="currentColor">1 volume of liquid N₂ wants 696 of gas</text>
+    <text x="336" y="182" fill="var(--muted)">(at 70 °F, 1 atm). It cannot have them.</text>
+    <text x="336" y="200" fill="var(--warn)">So it takes pressure instead.</text>
+    <text x="20" y="228" fill="var(--muted)">Every isolatable section that can hold cryogenic liquid needs its own relief path.</text>
     <defs>
       <marker id="ar-w2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
         <path d="M0 0 L10 5 L0 10 z" fill="var(--warn)"/></marker>
