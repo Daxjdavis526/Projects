@@ -26,10 +26,10 @@ committed months earlier by someone who never touched a valve.
 Cold reaches skin by three routes `[LBNL-PUB3000-29]`. **Liquid splash** is often
 the mildest: liquid landing on a surface far above its boiling point hovers on a
 self-generated vapour film — the Leidenfrost effect — so a small splash on bare
-skin "tends to skate off on a cushion of expanding gas." **Cold vapour** does
-burn, being barely warmer than the liquid `[UNIV-EHS-OTHER]`. **Cold metal** has
-no Leidenfrost protection at all: fittings that have held cryogen "can and will
-cause severe burns on contact with skin."
+skin "tends to skate off on a cushion of expanding gas." **Cold vapour** burns
+too, being barely warmer than the liquid `[UNIV-EHS-OTHER]`. **Cold metal** has no
+Leidenfrost protection at all: fittings that have held cryogen "can and will cause
+severe burns on contact with skin."
 
 What separates a nuisance from a disfiguring injury is not the cryogen but whether
 the liquid can leave. Anywhere it collects — a cupped hand, a pocket, a rolled
@@ -37,13 +37,13 @@ cuff — destroys that protection, and absorbent cloth destroys it outright.
 
 Hence the conventions. Berkeley Lab recommends oversized cryo gloves with **wide,
 loose wrist openings** and labels elastic-cuff gloves "Not Recommended": a glove
-that has taken liquid must come off with a flick of the arm. Trousers go over
-boots for the same reason — every tucked interface is a cup. PPE is a weak last
-line; a wetted glove gives no protection at all.
+that has taken liquid must come off with a flick of the arm. Trousers go over boots
+for the same reason — every tucked interface is a cup. PPE is a weak last line, and
+a wetted glove gives none at all.
 
 The eye is the highest-consequence target: LBNL treats contact with liquid *or
 cold vapour* as an immediate emergency that can cost vision, which is why a face
-shield beats glasses wherever there is a splash path or a vent path.
+shield beats glasses wherever there is a splash or vent path.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 The injury hides itself. Below about 7 °C tissue goes numb, so there may be no
@@ -90,20 +90,20 @@ Berkeley Lab publishes the endpoint directly `[LBNL-PUB3000-29]`:
 
 Those follow from one line of arithmetic, worth doing because it turns a memorised
 number into an understood one. **State every assumption:** a rigid, perfectly
-strong, perfectly sealed volume *V*; initially **100 % liquid-full** at its normal
-boiling point and 1 atm; all of it ending as gas at room temperature (~294 K, the
-70 °F basis these ratios use); **ideal-gas** behaviour; no leakage, no container
-expansion. The final pressure is then the expansion ratio times one atmosphere:
+strong, sealed volume *V*, initially **100 % liquid-full** at its normal boiling
+point and 1 atm; all of it ending as gas at ~294 K (the 70 °F basis these ratios
+use) in that same *V*; **ideal-gas** behaviour; no leakage, no container expansion.
+The final pressure is then the expansion ratio times one atmosphere:
 
 > LN₂: *P* ≈ 696 × 1 atm ≈ **10,200 psi ≈ 70 MPa**
 
 Now label it an idealisation, the way LBNL does. At that density the fluid is a
-**dense supercritical fluid, not an ideal gas**: its compressibility factor exceeds
-1, so the true pressure is *higher*. **Real hardware never gets there** — tube,
-fittings, hose and valve bodies fail one to two orders of magnitude lower. The
-number's job is not to predict a pressure but to show the demand is unbounded
-relative to any containment you could specify. And it is an **endpoint, not a
-threshold**: a segment that warms partway still reaches destructive pressure.
+**dense supercritical fluid, not an ideal gas**, with a compressibility factor above
+1 — so the true pressure is *higher*. **Real hardware never gets there**: fittings,
+hose and valve bodies fail one to two orders of magnitude lower. The number's job
+is not to predict a pressure but to show the demand is unbounded relative to any
+containment you could specify — and it is an **endpoint, not a threshold**, because
+a segment that warms partway still reaches destructive pressure.
 
 <div class="box remember"><span class="lbl">Remember this</span>
 There is no "strong enough pipe" answer to a trapped cryogen. There is only a
@@ -235,10 +235,10 @@ the existence of the path is not negotiable.
 
 **Vented ball valves** solve the body cavity: a hole through one wall of the ball
 ties the cavity to one side of the line, capping cavity pressure at line pressure.
-The hole faces **upstream** — vent it downstream and cavity pressure lifts the
-ball off the upstream seat, giving a permanent leak path. So a vented ball is
-**unidirectional**: check that each is oriented for the direction in which it must
-*hold* pressure, which during a drain or purge may not be the flow direction.
+The hole faces **upstream** — vent it downstream and cavity pressure lifts the ball
+off the upstream seat, giving a permanent leak path. A vented ball is therefore
+**unidirectional**: check each is oriented for the direction in which it must
+*hold* pressure, which during a drain may not be the flow direction.
 
 **No block valve upstream of a relief unless positively locked open.** JLab permits
 them only under ASME BPVC VIII Div. 1 Appendix M controls — procedures plus locks
@@ -248,7 +248,7 @@ Car-sealed-open is standard practice and still an **administrative** control.
 **Relief hardware suited to the service.** Devices must not fail from ice build-up
 or shift set pressure when thermally shocked, and one fine for LN₂ may be
 unsuitable for LHe or LO₂. Users never replace or repair them, and practice mounts
-the device on a riser so it sees warmed gas rather than cold liquid.
+the device on a riser so it sees warmed gas.
 
 <figure>
 <svg viewBox="0 0 680 240" role="img" aria-label="Three relief arrangements compared: a relief isolated behind a closed block valve, a car-sealed open block valve, and a relief mounted with no isolation.">
@@ -310,7 +310,7 @@ work introduced heat, the confined liquid heated, and the shell ruptured: a BLEV
 and fire, **two workers killed and 167 people reporting injuries**. A 2001
 management-of-change had installed block valves able to isolate each reboiler from
 its relief, after which the organisation relied on administrative control of valve
-positions. The CSB found that a relief valve on the reboiler itself would have been
+positions. The CSB found a relief valve on the reboiler itself would have been
 better than "relying on a locked open block valve... less reliable due to the
 possibility of human implementation errors." Propane is not a cryogen; the
 mechanism is.
@@ -318,10 +318,10 @@ mechanism is.
 **A university LN₂ dewar cylinder, 12 January 2006** `[TX-FIRE-MARSHAL-2006]`. A
 liquid nitrogen cylinder ruptured in a chemistry building at 3 a.m., causing
 substantial structural damage. Its relief valve and rupture disc "had been replaced
-by two brass plugs" — an undocumented modification by unidentified people. The
-cylinder had vented through a leaking gasket for over a year, read as a nuisance
-rather than as evidence that the relief path was gone; twelve hours before the
-explosion someone replaced the gasket and refilled it, removing the last vent.
+by two brass plugs" — an undocumented modification by unidentified people. It had
+vented through a leaking gasket for over a year, read as a nuisance rather than as
+evidence that the relief path was gone; twelve hours before the explosion someone
+replaced the gasket and refilled it, removing the last vent.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 The trapping agent can be the atmosphere. A liquid helium cylinder at Berkeley Lab
@@ -374,39 +374,36 @@ separate cases for a fan blowing in, a fan drawing out, the period after the
 release, and stratification — of which JLab says **"Stratification should not be
 used to reduce the risk."** Second a **fatality factor** *F*ᵢ set by concentration,
 exposure duration and difficulty of escape: zero above 18 % O₂, 10⁻⁷ at 18 %, and
-**1 at 8.8 %**, the concentration at which one minute of consciousness is expected.
-Between those it is logarithmic in oxygen *partial pressure*, so **altitude is a
-real input**.
+**1 at 8.8 %**, where one minute of consciousness is expected. Between those it is
+logarithmic in oxygen *partial pressure*, so **altitude is a real input**.
 
 **Inputs:** room volume, penetrations and passive vent area; ventilation
-capacities, and whether ventilation is credited in each case; the inventory of
-every ODH source and its flow rates; release scenarios up to instantaneous venting
-of the whole inventory; event rates from experience or published failure data; and
-ease of egress. One figure from JLab's tables deserves reading twice: a cryogenic
-line is given a rupture rate near 10⁻⁷ per hour, a human-in-the-loop transfer
-connection 10⁻² to 10⁻³ **per demand**. Connecting and disconnecting is orders of
-magnitude more likely to release cryogen than the pipe is to fail.
+capacities, and whether ventilation is credited in each case; the inventory of every
+ODH source; release scenarios up to instantaneous venting of the whole inventory;
+event rates from experience or published failure data; and ease of egress. One
+figure from JLab's tables deserves reading twice: a cryogenic line is given a
+rupture rate near 10⁻⁷ per hour, a human-in-the-loop transfer connection 10⁻² to
+10⁻³ **per demand**.
 
 **What follows** is an **ODH class**, 0 to 4, of which JLab treats 3 and 4 as
 unacceptable. The class drives engineering controls to obtain *and retain* it
 (ventilation, sealed penetrations, lintels to stop dense gas draining into lower
 spaces), calibrated oxygen monitors, alarms and posting verified *before* the
-source arrives, training, restricted access and periodic re-review. **The class of
-your space is facility-specific** `[CERN-ODH]`, and a student team cannot
-self-certify it.
+source arrives, training and restricted access. **The class of your space is
+facility-specific** `[CERN-ODH]`, and a student team cannot self-certify it.
 
 ---
 
 ## 4. Confined spaces and low points
 
 Cold vapour collects low for two reasons often conflated. Molecular weight matters
-— argon is genuinely denser than air — but near a release **temperature
-dominates**: boil-off leaves at the liquid's boiling point and is enormously denser
-than room air until it warms. UT Austin warns that even well-ventilated labs with
-pits or low-lying areas can have the oxygen displaced by this cold, dense gas
-`[UNIV-EHS-OTHER]`. So a nitrogen release is a low-lying hazard **for as long as it
-stays cold**, even though room-temperature nitrogen is nearly neutrally buoyant.
-The buoyancy reverses as it warms, and the danger zone moves.
+— argon is denser than air — but near a release **temperature dominates**: boil-off
+leaves at the liquid's boiling point and is enormously denser than room air until
+it warms, so even well-ventilated labs with pits or low-lying areas can have the
+oxygen displaced by this cold, dense gas `[UNIV-EHS-OTHER]`. A nitrogen release is
+therefore a low-lying hazard **for as long as it stays cold**, though
+room-temperature nitrogen is nearly neutrally buoyant. The buoyancy reverses as it
+warms, and the danger zone moves.
 
 The locations: pits, trenches, sumps, basements, cold rooms, stairwells (vertical
 drains) and lift cars — elevators get separate treatment because the occupant
@@ -489,11 +486,11 @@ oxygen preferentially out of the air touching it. LBNL quantifies it: condensed
 "liquid air" dripping off uninsulated LN₂ lines is "approximately 50 % oxygen," and
 **open dewars can enrich to as high as 80 % oxygen** `[LBNL-PUB3000-29]`. Cornell
 adds the closed-system version: condensed oxygen on an LN₂-cooled surface will
-over-pressurise the equipment when the nitrogen is removed, or cause a chemical
-explosion if it meets combustibles such as rotary pump oil `[CORNELL-CRYO]`. The
-pale blue liquid in a cold trap is that condensate — a concentrated oxidiser inside
-apparatus never designed for oxygen service (Module 02). The control has the same
-shape as the glove rule: exclude air **without** sealing the vessel.
+over-pressurise the equipment when the nitrogen is removed, or explode if it meets
+combustibles such as rotary pump oil `[CORNELL-CRYO]`. The pale blue liquid in a
+cold trap is that condensate — a concentrated oxidiser inside apparatus never
+designed for oxygen service (Module 02). The control has the same shape as the
+glove rule: exclude air **without** sealing the vessel.
 
 <figure>
 <svg viewBox="0 0 680 235" role="img" aria-label="Left: an uninsulated liquid nitrogen line condensing oxygen-enriched liquid air that drips onto combustible material below. Right: an open-neck dewar with a loose cover, enriching its own bath with condensed oxygen.">
@@ -560,14 +557,14 @@ freezes the moisture in its pores, causing spalling and cracking. No free
 authoritative source quantifies it, so this course gives no number.
 
 **LOX on asphalt** needs care, because the folk version is stronger than the
-evidence, and overstating one hazard discredits the correctly stated ones beside it
+evidence and overstating one hazard discredits the correctly stated ones beside it
 `[UVU-LOX-ASPHALT]`. NASA's 1973 impact tests did detonate — but the stratum was
 crumbled asphalt with a **solid aluminium block** buried in it, immersed in LOX. A
 2021–23 replication reproduced those detonations *only* with that stratum, and got
-no reaction from asphalt and LOX alone: none from driving apparatus through a LOX
-pool, from dropped tools, or from a simulated sledgehammer strike. The same study
-is emphatic in the other direction: with an ignition source present, combustion in
-an oxygen-enriched environment is "violent and instantaneous." So the defensible
+none from asphalt and LOX alone: not from driving apparatus through a LOX pool, not
+from dropped tools, not from a simulated sledgehammer strike. The same study is
+emphatic the other way: with an ignition source present, combustion in an
+oxygen-enriched environment is "violent and instantaneous." So the defensible
 teaching is *LOX plus a hydrocarbon plus any ignition source is immediate and
 violent, and LOX-soaked porous materials stay hazardous long after the frost has
 gone.* Module 06 takes this further.
@@ -589,17 +586,17 @@ cannot itself be isolated, sized for the worst credible heat input into that
 volume** `[SLAC-CH36]`, `[LBNL-PUB3000-29]`.
 
 Sizing comes down to two cases. **Normal heat leak and boil-off** is the steady
-case — ambient heat leaks through the insulation regardless of its quality, and the
+case — ambient heat leaks through the insulation whatever its quality, and the
 relief must pass that vapour without exceeding the accumulation limit — and it
 sizes the *small* reclosing device. **Fire** is the accident case that sizes the
 *large* device, usually a burst disc; the equations live in **CGA S-1.3** for
 stationary storage containers and **CGA S-1.2** for portable ones, both 2024
 editions `[CGA-S-1-SERIES]`. JLab treats **loss of insulating vacuum** as a third
-mandatory case alongside fire `[JLAB-OVERPRESSURE]`. The code basis for the vessel
-is **ASME BPVC Section VIII Division 1** (2025) — UG-125, UG-127 for rupture discs,
-Appendix M for block valves upstream of reliefs — with **ASME B31.3** for the
-piping `[ASME-BPVC-VIII]`. Set pressures and capacities for a specific system are
-design outputs, not course numbers.
+mandatory case alongside fire `[JLAB-OVERPRESSURE]`. The vessel itself is governed
+by **ASME BPVC Section VIII Division 1** (2025) — UG-125, UG-127 for rupture discs,
+Appendix M for block valves upstream of reliefs — and the piping by **ASME B31.3**
+`[ASME-BPVC-VIII]`. Set pressures and capacities are design outputs, not course
+numbers.
 
 ---
 
@@ -654,27 +651,26 @@ rates, relief set pressures, confined-space classification.
    **CV-1 to HV-3**, because CV-1 is a closed valve no operator can open;
    **(iv)** the **P-1 pump casing**; **(v)** the **flex hose** through QD-1, a
    filled capped tube with no rating once the disconnect is parted; **(vi)** the
-   segment under **PSV-1** if **BV-2** closes — a correctly sized relief
-   disconnected from what it protects; **(vii)** each ball-valve **body cavity**,
-   unless the valves are vented-ball types, which the drawing does not say. The
-   volume that exists **with every valve open** is the **annulus** of V-1 and T-2:
-   a crack in an inner vessel admits cryogen to the vacuum space.
+   segment under **PSV-1** if **BV-2** closes; **(vii)** each ball-valve **body
+   cavity**, unless the valves are vented-ball types, which the drawing does not
+   say. The volume that exists **with every valve open** is the **annulus** of V-1
+   and T-2: a crack in an inner vessel admits cryogen to the vacuum space.
 
 2. Frost on the outer casing means **loss of insulating vacuum** — external ice is
    a clear sign the jacket has failed, which is both a step change in heat leak
    (rapid boil-off, an ODH source, a pressure rise the relief must now handle) and
-   a possible route for cryogen into the annulus. The **iced relief valve** is the
-   hazard that fails both ways: frozen shut, the vessel is an unrelieved closed
-   volume; frozen open, it releases continuously into the room.
+   a possible route for cryogen into the annulus. The **iced relief valve** fails
+   both ways: frozen shut, the vessel is an unrelieved closed volume; frozen open,
+   it releases continuously into the room.
 
 3. Assumptions: rigid, perfectly strong, sealed volume; 100 % liquid-full at NBP
    and 1 atm; all of it ending as gas at 294 K in the same volume; ideal-gas
    behaviour; no leakage or container expansion. Then *P* ≈ 696 × 1 atm ≈
    **10,200 psi ≈ 70 MPa**. It is not a design pressure because fittings and valve
-   bodies fail one to two orders of magnitude lower; the answer is a relief path,
-   not a thicker wall. Nor is it conservative — at that density the nitrogen is a
+   bodies fail one to two orders of magnitude lower — the answer is a relief path,
+   not a thicker wall. Nor is it conservative: at that density the nitrogen is a
    dense supercritical fluid with a compressibility factor above 1, so the true
-   pressure is higher than the ideal-gas estimate.
+   pressure is higher still.
 
 4. **(c).** (a) is the classic error: room-temperature nitrogen is nearly neutrally
    buoyant, but vapour leaving a spill is at 77 K and behaves as a heavy gas until
@@ -684,11 +680,11 @@ rates, relief set pressures, confined-space classification.
    published effects already include impaired thinking and attention.
 
 5. The finding is that **the relief is isolatable**, so the tank has no
-   uninterruptible relief path. A car seal is an administrative control that
+   uninterruptible relief path, and a car seal is an administrative control that
    depends on people. Ask for the relief to be mounted with no isolation between it
    and the protected volume, or, if the block valve must exist for maintenance, for
    a second independent relief that stays connected. The supporting incident is
-   **Williams Olefins, 13 June 2013**, where the CSB found that a relief valve on
-   the reboiler would have been more reliable than a locked-open block valve.
+   **Williams Olefins, 13 June 2013**, where the CSB found a relief valve on the
+   reboiler would have been more reliable than a locked-open block valve.
 
 </details>

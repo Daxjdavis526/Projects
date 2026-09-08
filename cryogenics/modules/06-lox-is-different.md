@@ -95,27 +95,26 @@ burning is on average not sustained **[A]**:
 | Inconel 718 | 500 psi |
 | **Monel K-400/K-500, nickel, copper 12200, brass** | **10,000 psi — top of range** |
 
-Davis's caveat travels with the table: data "for comparison purposes only, not to be
-considered standard values." Note also that the same metal scores differently in
-different tests — 304L sustains burning at 250 psi but resists *impact* ignition to
-10,000 psi — so a compatibility pressure quoted without naming the test is meaningless.
-And LOX is not merely cold GOX: aluminium 2219's impact threshold is 1,500 psi in GOX
-and **50 psi in LOX** **[A]**.
+Davis's caveat travels with the table: "for comparison purposes only, not to be
+considered standard values." The same metal also scores differently in different tests —
+304L sustains burning at 250 psi but resists *impact* ignition to 10,000 psi — so a
+compatibility pressure quoted without naming the test is meaningless. And LOX is not
+merely cold GOX: aluminium 2219's impact threshold is 1,500 psi in GOX, **50 psi in
+LOX** **[A]**.
 
 <div class="box remember"><span class="lbl">Remember this</span>
 <b>304L stainless sustains combustion in oxygen at 250 psi</b> — an ordinary pressure in
-a cryogenic propulsion system. Stainless is not an "oxygen-safe" material; it is a
-material with a threshold. Monel, nickel, copper and brass resist to the 10,000 psi top
-of the test range, which is why NASA's own worked example of a hazard control is "change
-the valve body from stainless steel to Monel" <b>[A]</b>.
+a cryogenic propulsion system. Stainless is not "oxygen-safe"; it is a material with a
+threshold. Monel, nickel, copper and brass resist to the 10,000 psi top of the test
+range, which is why NASA's own worked hazard control is "change the valve body from
+stainless steel to Monel" <b>[A]</b>.
 </div>
 
-**Where the evidence stops.** No citable air-versus-oxygen comparison of ignition
-energy, autoignition temperature or flame temperature could be found in the
-oxygen-safety literature; `properties.md` §14.7 marks the circulated MIE figures **[C]**
-and they are not printed here. The direction is authoritative — EIGA has ignition
-temperature and energy "much lower" and flame temperature higher in oxygen `[EIGA-04]`
-**[A]** — the magnitudes are not.
+**Where the evidence stops.** No citable air-versus-oxygen comparison of ignition energy,
+autoignition temperature or flame temperature could be found in the oxygen-safety
+literature, and `properties.md` §14.7 marks the circulated MIE figures **[C]**. The
+direction is authoritative — EIGA has ignition temperature and energy "much lower" and
+flame temperature higher in oxygen `[EIGA-04]` **[A]** — the magnitudes are not.
 
 ---
 
@@ -198,10 +197,10 @@ the design has removed.
 
 **Particle impact** is the most effective igniter of *metals*, and NASA's test footnote
 is the course's best argument for cross-sectional drawings. A fixture simulating the
-Space Shuttle Main Propulsion System oxygen flow control valve, Inconel 718 at 600 K and
-4,600 psig, **ignited on the second test** with a drill point downstream of the flow
-orifice, and **did not ignite in 40 tests** with the drill points removed and the impact
-angle at 45° **[A]**. One geometric feature.
+Shuttle Main Propulsion System oxygen flow control valve, Inconel 718 at 600 K and
+4,600 psig, **ignited on the second test** with a drill point downstream of the orifice
+and **did not ignite in 40 tests** with the drill points removed and the impact angle at
+45° **[A]**. One geometric feature.
 
 **Flow friction**, heat from oxygen flowing across a polymer, is the one NASA admits it
 does not understand — no laboratory method reproduces it, and yet "it has caused a
@@ -218,9 +217,9 @@ hazard, and commissioning proved nothing.
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 A ball valve is chosen for a GOX line because it is quick to actuate and cheap. It opens
 in a quarter turn (rapid pressurization), rotates a seal against a seat every cycle
-(particle generation), can chatter if mis-sized (mechanical impact, friction), and the
-line downstream ends in a capped test port (dead end, plus resonance geometry). One
-procurement decision, four mechanisms.
+(particles), can chatter if mis-sized (mechanical impact, friction), and the line
+downstream ends in a capped test port (dead end, plus resonance). One procurement
+decision, four mechanisms.
 </div>
 
 ---
@@ -234,11 +233,10 @@ difference. NASA's relation, symbols as the TM defines them **[A]**:
 
 $$T_f = T_i \left(\frac{P_f}{P_i}\right)^{(n-1)/n}, \qquad n = 1.4 \text{ for oxygen}$$
 
-**Worked example — the assumptions do the work.** Ideal gas, constant *n* = 1.4,
-isentropic (adiabatic *and* reversible, so no heat into the wall), compression fast
-relative to the volume's thermal time constant, gas phase only, and the dead-ended line
-initially at **20 °C and 14.7 psia**. From a **3,000 psi** supply the pressure ratio is
-204:
+**Worked example — the assumptions do the work.** Ideal gas; constant *n* = 1.4;
+isentropic, so no heat into the wall; compression fast relative to the volume's thermal
+time constant; gas phase only; dead-ended line initially at **20 °C and 14.7 psia**. From
+a **3,000 psi** supply the ratio is 204:
 
 $$T_f = 293.15 \times 204.1^{0.2857} \approx 1{,}340\ \text{K} \approx 1{,}070\ ^\circ\text{C}\ (1{,}950\ ^\circ\text{F})$$
 
@@ -294,8 +292,8 @@ a median failure pressure or an ignition-probability curve — not a formula `[A
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
 The compression equation tells you when you <b>cannot rule the mechanism out</b>. It
 never tells you a design is safe; qualification comes from testing the actual
-configuration. Treat every hand calculation in oxygen work the same way — a screen that
-opens a question, not an answer that closes one.
+configuration. Every hand calculation in oxygen work is like this — a screen that opens a
+question, not an answer that closes one.
 </div>
 
 A fast-opening valve into a dead-ended line supplies all three elements at once:
@@ -312,9 +310,9 @@ limit is printed here: none could be verified from a primary standard, and ASTM 
 
 "Oxygen clean" is not "visually clean". It is a **specified, verified and documented
 level of freedom from contaminants that could act as fuel or as an ignition initiator**,
-appropriate to the pressure, concentration and geometry of the system. NASA makes
-"determine the worst-case cleanliness level of each component" a required step of the
-compatibility assessment **[A]**: a hazard control, not housekeeping.
+appropriate to the system's pressure, concentration and geometry. NASA makes "determine
+the worst-case cleanliness level of each component" a required step of the assessment
+**[A]**: a hazard control, not housekeeping.
 
 Two contaminant families. **Nonvolatile residues** — oils, greases, films, and the
 classics found in investigations: thread lubricants, crayon, paint — are dominated by
@@ -328,9 +326,8 @@ The governing documents are **ASTM G93/G93M-25**, *Standard Guide for Cleanlines
 and Cleaning Methods for Materials and Equipment Used in Oxygen-Enriched Environments*
 `[ASTM-G93]` **[A]**, and **CGA G-4.1, 7th edition (2018)**, *Cleaning of Equipment for
 Oxygen Service* `[CGA-G-4.1]` **[B]**. The 2025 revision made G93 a *Guide* rather than a
-*Practice*: it avoids prescribing single correct levels, expecting users to select one
-from their own documented risk analysis **[B]**, so material treating it as prescriptive
-is out of date.
+*Practice*, avoiding single prescribed levels in favour of selection from a documented
+risk analysis **[B]** — so material treating it as prescriptive is out of date.
 
 Verification is quantitative or it is not verification. **Nonvolatile residue (NVR)** is
 the mass left after a solvent extract from a defined area is evaporated, reported per
@@ -343,9 +340,8 @@ Cleanliness is a supply-chain and lifecycle property. G93's 2025 edition spans
 procurement, process specification, verification, packaging, preservation and assembly —
 every one a place cleanliness is lost — so a purchase order should carry a level
 <i>designation</i>, not the adjective "clean". Cleaning has its own hazards: LANL warns
-that non-volatile cleaning agents can remain in trapped spaces, and that caustic or acid
-solutions can degrade nonmetals and cause crevice corrosion
-<code>[LANL-OXYGEN-GUIDE]</code> <b>[A]</b>.
+that non-volatile cleaning agents can remain in trapped spaces and that caustic or acid
+solutions can degrade nonmetals <code>[LANL-OXYGEN-GUIDE]</code> <b>[A]</b>.
 </div>
 
 Cleaning and its verification are work for trained personnel following an approved
@@ -392,11 +388,10 @@ which safe materials can be chosen" **[A]**.
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
 The promoted-ignition test is so severe that most industry-standard oxygen materials —
-stainless alloys included — fail it at their normal working pressures, and essential
-seal materials fail it outright. <b>The oxygen compatibility assessment exists precisely
-because a materials lookup returns "fail" for almost everything real systems are made
-of.</b> It is the discipline of using flammable materials safely by removing ignition
-mechanisms.
+stainless alloys included — fail it at their working pressures, and seal materials fail
+outright. <b>The oxygen compatibility assessment exists precisely because a materials
+lookup returns "fail" for almost everything real systems are made of.</b> It is the
+discipline of using flammable materials safely by removing ignition mechanisms.
 </div>
 
 ---
@@ -410,14 +405,14 @@ second case involves cryogenic oxygen as such.
 **Apollo 1 / AS-204, 27 January 1967 — oxygen-enriched atmosphere.** *What happened:*
 fire broke out in the Command Module during a plugs-out test and killed the three-man
 crew `[APOLLO-204-BOARD]` **[A]**. *Why:* the test ran at "16.7 pounds per square inch
-absolute, 100-percent oxygen atmosphere", judged by the Board "extremely hazardous".
-Several arcs were evidenced but no single ignition source identified, and the module
-"contained many types and classes of combustible material in areas contiguous to
-possible ignition sources" **[A]**. *Lesson:* enrichment plus pressure plus fuel load is
-the hazard, not any one of them, and the ignition source did not need identifying —
-where arcs are credible and the fuel load is uncontrolled, fire is a matter of time. A
-configuration classified as non-hazardous also receives no hazard controls: the absence
-of fire emergency provisions followed from the paperwork classification **[B]**.
+absolute, 100-percent oxygen atmosphere", judged "extremely hazardous" by the Board;
+several arcs were evidenced but no single ignition source identified, and the module
+"contained many types and classes of combustible material in areas contiguous to possible
+ignition sources" **[A]**. *Lesson:* enrichment, pressure and fuel load together are the
+hazard, and the ignition source did not need identifying — where arcs are credible and
+the fuel load uncontrolled, fire is a matter of time. A configuration classified as
+non-hazardous also receives no hazard controls: the absence of fire emergency provisions
+followed from that classification **[B]**.
 
 **Apollo 13 oxygen tank 2, 13 April 1970 — cryogenic oxygen pressure vessel.** *What
 happened:* seconds after current reached the tank 2 fans, telemetry was lost, main bus B
@@ -432,20 +427,18 @@ tank; that finding never reached the pre-launch discussion. When the fans were p
 textbook electrical-arc ignition — NASA's guide gives almost word for word an insulated
 heater element arcing through its sheath to combustible material. The mechanism was
 catalogued; the tank still carried powered electrics immersed in oxygen. Interface voltage
-is a safety parameter, ground support equipment is part of the system, and untested
-protection is not protection. And PTFE, one of the better oxygen nonmetals, still failed:
+is a safety parameter, and untested protection is not protection. And PTFE, one of the better oxygen nonmetals, still failed:
 material selection does not survive an out-of-envelope thermal excursion.
 
 **Mir SFOG / Vika, 24 February 1997 — chemically generated hot GOX.** *What happened:* a
 lithium perchlorate oxygen generator "failed having burned through the thin stainless
 steel wall. It is assumed that the stainless steel was actually burning in the high
 temperature oxygen stream" `[GRAF-OXYGEN-CANDLES]` **[A]**. *Why:* the unit "was probably
-contaminated during manufacture. The contaminant being either a hydrocarbon material or a
-fragment of the manufacturer's technician's chemical gloves", and the shell fire was "due
-in part to its extreme thinness" **[A]**. *Lesson:* no field discipline could remove a
-contaminant sealed inside the canister — cleanliness is a supply-chain property. Thin
-stainless *burned*, not melted, and the containment was the next link in the kindling
-chain.
+contaminated during manufacture… either a hydrocarbon material or a fragment of the
+manufacturer's technician's chemical gloves", and the shell fire was "due in part to its
+extreme thinness" **[A]**. *Lesson:* no field discipline removes a contaminant sealed
+inside the canister — cleanliness is a supply-chain property. Thin stainless *burned*,
+and the containment was the next link in the kindling chain.
 
 **Aluminium medical oxygen regulators, 1990s — high-pressure GOX.** *What happened:* WHA
 investigated 11 regulator fires, and the FDA logged 17 from 1993 to 1999 on portable
@@ -473,14 +466,13 @@ the ASTM oxygen-enriched-atmospheres STP series `[ASTM-STP-OXYGEN]`.
 ## 7. Why oxygen systems carry special paperwork
 
 An **oxygen compatibility assessment** is a formal review product, not a folder of
-datasheets: NASA/TM-2007-213740 states that an assessment "as required by NASA-STD-6001
-and NASA-STD-6016 shall be performed on each component" **[A]**. Its seven steps are
-worst-case operating conditions; material flammability; ignition mechanisms; the
-**kindling chain**; the **reaction effect**; the **history of use**; the report. The
-kindling chain separates an assessment from a materials checklist: ignition of a
-polysulfone seat can release enough energy to ignite the stem, then the body, "and result
-in a burn-through of the component" — "if a component could be breached, a kindling chain
-is present" **[A]**. Unknown flammability is treated as flammable.
+datasheets: NASA/TM-2007-213740 states that one "as required by NASA-STD-6001 and
+NASA-STD-6016 shall be performed on each component" **[A]**. Its seven steps: worst-case
+conditions; material flammability; ignition mechanisms; the **kindling chain**; the
+**reaction effect**; the **history of use**; the report. The kindling chain separates an
+assessment from a materials checklist — ignition of a polysulfone seat can release enough
+energy to ignite the stem, then the body, and "if a component could be breached, a
+kindling chain is present" **[A]**. Unknown flammability is treated as flammable.
 
 What a reviewer looks for:
 
@@ -496,9 +488,9 @@ What a reviewer looks for:
 - Evidence that the data justifying a material is **applicable to this configuration**.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
-The commonest failure in an oxygen review is not a wrong answer. It is a question never
-asked, because a line was drawn as "inert service, nitrogen only" and later revised to
-GOX without re-running the assessment — Apollo 1's error in miniature: a hazardous
+The commonest failure in an oxygen review is not a wrong answer but a question never
+asked, because a line drawn as "inert service, nitrogen only" was later revised to GOX
+without re-running the assessment — Apollo 1's error in miniature: a hazardous
 configuration classified as not hazardous, and therefore given no controls.
 </div>
 
@@ -539,11 +531,10 @@ configuration classified as not hazardous, and therefore given no controls.
 
 2. **Elements:** pressurisation generally under 1 s; an exposed nonmetal close to the dead
    end; a pressure ratio taking the gas above the nonmetal's situational AIT.
-   **Controls:** slow- or metered-opening valve, or an upstream restricting orifice; move
-   soft goods out of the dead-end zone, or seat metal-to-metal; lowest usable pressure,
-   and avoid pressurising from atmospheric, since it is the *ratio* that matters.
-   **Eliminating the dead-ended leg** also removes the closed-end cavity **resonance**
-   requires.
+   **Controls:** a slow- or metered-opening valve, or an upstream restricting orifice;
+   soft goods moved out of the dead-end zone, or metal-to-metal seating; the lowest usable
+   pressure, since it is the *ratio* that matters. **Eliminating the dead-ended leg** also
+   removes the closed-end cavity **resonance** requires.
 
 3. Ratio = 68.0; *T*_f = 293.15 × 68.0^0.2857 ≈ **979 K, about 706 °C (1,300 °F)**. One
    conclusion follows: the mechanism **cannot be ruled out**, the peak being far above the
@@ -553,16 +544,15 @@ configuration classified as not hazardous, and therefore given no controls.
    equation predicts 404 °C.
 
 4. **(a), (b), (d) and especially (e) do; (c) largely does not.** (a) Stainless sustains
-   combustion from about 250 psi, so at 400 psi the body is flammable, and a ball valve
+   combustion from about 250 psi, so the body is flammable at 400 psi, and a ball valve
    generates particles and opens fast. (b) Monel is the burn-resistant choice, but the
    assessment also covers seat, seals, cleanliness and velocity, and unknown flammability
    defaults to flammable — good material reduces the reaction effect, it does not remove
-   the requirement. (c) Outside the wetted boundary, aluminium as structure is normal
+   the requirement. (c) Outside the wetted boundary aluminium as structure is normal
    practice; the question is whether the drawing defines that boundary correctly. (d) Six
-   years of cycling on a soft seat is the setup for **flow friction**, so assess the worn
+   years of cycling on a soft seat is the setup for **flow friction** — assess the worn
    condition, not the as-new one. (e) The most urgent: a service change from GN₂ to GOX
-   invalidates material selection, cleanliness, velocity limits and dead legs alike — a
-   classification that no longer matches the contents.
+   invalidates material selection, cleanliness, velocity limits and dead legs alike.
 
 5. **It burned.** Graf's account says the unit "failed having burned through the thin
    stainless steel wall… the stainless steel was actually burning in the high temperature

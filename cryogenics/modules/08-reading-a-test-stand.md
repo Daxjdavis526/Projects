@@ -404,11 +404,11 @@ above that liquefies on V-101's cold ullage walls, putting liquid where gas was
 intended and taking tank pressure down with it.
 
 CV-101 stops propellant vapour migrating back into the common helium header, where
-it would meet the other tank's line. Note what it is *not*: not an isolation
+it would meet the other tank's line — but note what it is *not*: not an isolation
 device, not testable in place, and the only thing between the LOX ullage and the
-methane ullage. Section 4 returns to it. PV-104 fails closed — closed mid-run the
-engine goes off-mixture, which is recoverable, whereas failed open the tank rides
-up to the relief setting and sits there venting oxygen.
+methane ullage. PV-104 fails closed: closed mid-run the engine goes off-mixture,
+which is recoverable; failed open the tank rides up to the relief setting and sits
+there venting oxygen.
 
 ### 2.2 The tank tops — where the relief philosophy lives
 
@@ -418,11 +418,10 @@ into the oxidiser vent header and leave via stack A. The disc and the valve are 
 redundancy but two sizing cases. **PSV-101, set lower, recloses** and covers steady
 boiloff from ordinary heat leak. **PSE-102, set higher, does not reclose** and
 covers the accident: fire, or loss of the insulating vacuum, where air entering the
-annulus condenses on the cold inner wall and drives fluxes design guidance puts at
-**1–7 kW/m² insulated and 25–40 kW/m² bare**, against roughly **0.6 W/m²** for
-healthy multilayer insulation. That four-order-of-magnitude step is beyond any
-reclosing valve of sensible size. PV-103, meanwhile, fails *open* — the reversal
-that is the whole fail-safe philosophy in two symbols (Figure 8.3).
+annulus condenses on the cold inner wall and drives fluxes of **1–7 kW/m² insulated
+and 25–40 kW/m² bare** against roughly **0.6 W/m²** for healthy multilayer
+insulation, a step beyond any reclosing valve of sensible size. PV-103 fails *open*
+— the reversal that is the whole fail-safe philosophy in two symbols (Figure 8.3).
 
 <div class="box remember"><span class="lbl">Remember this</span>
 Every isolatable volume that could contain cryogen needs its own relief path, and
@@ -441,10 +440,9 @@ which drips onto whatever is underneath.
 
 Drain HV-105 goes to a disposal pad, and the drawing says what the pad is: concrete,
 graded away, not asphalt. NASA's testing found LOX-soaked asphalt reacting on impact
-in 20 of 20 laboratory drops, and a dry field slab propagating a violent reaction
-that threw fragments 48 m; concrete gave no reaction at all. The fuel drain goes
-elsewhere entirely. And ask where each drain *stops*: close HV-105 with liquid in
-the leg above it and you have made a trap.
+in 20 of 20 laboratory drops, and a dry field slab throwing fragments 48 m; concrete
+gave no reaction at all. And ask where each drain *stops*: close HV-105 with liquid
+in the leg above it and you have made a trap.
 
 ### 2.4 The feed legs — filters, flow meters, and the trap
 
@@ -528,10 +526,10 @@ a cold oxygen-carrying line that has also carried fuel can hold condensed
 hydrocarbon as a detonable deposit.
 </div>
 
-Boiloff we expect continuously, from both tanks, for the whole cold period — that is
-what PSV-101 and PSV-201 are sized for. And the cold gas leaving a stack freezes
-atmospheric moisture at the outlet, so the one component whose whole job is never to
-be blocked is the one that ices up.
+Boiloff we expect continuously, from both tanks, for the whole cold period — that
+is what PSV-101 and PSV-201 are sized for. And the cold gas leaving a stack freezes
+atmospheric moisture at the outlet: the one component whose whole job is never to be
+blocked is the one that ices up.
 
 ### 2.7 Detection, and the line around the stand
 
@@ -545,10 +543,10 @@ it must warm by **52.6 K, from 111.7 K to 164.3 K**, before it is as light as
 ambient air, and until then it runs along the floor and pools.
 
 The dashed boundary is the remote-operation line: everything inside is unoccupied
-during propellant operations and every command originates in the blockhouse. That is
-why MOV-110 and MFV-210 are pneumatic rather than handwheeled. Where the boundary
-actually goes is a facility-specific decision from an explosive-siting analysis, not
-something readable off a generic drawing.
+during propellant operations and every command originates in the blockhouse, which is
+why MOV-110 and MFV-210 are pneumatic rather than handwheeled. Where that boundary
+goes is a facility-specific decision from an explosive-siting analysis, not something
+readable off a generic drawing.
 
 ---
 
@@ -639,10 +637,8 @@ says nothing about a valve that sticks — Artemis I was delayed by a hydrogen v
 valve with a perfectly well-defined fail position. It is a design layer, which is
 exactly why relief devices are independent of the control system.
 
-A last habit rides on top of all seven: *where does a person have to stand, and
-when?* Who touches HV-104, and is the cell safe then? Can a relief discharge reach a
-walkway or an air intake? Can the monitors be read from *outside* the hazardous
-area?
+One habit rides on top of all seven: *where does a person have to stand, and when,
+and can they read the monitors from outside the hazardous area?*
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
 A schematic review is seven cheap passes, not one expensive one. Each asks a single
@@ -673,10 +669,10 @@ this drawing hides. The items on Figure 8.1 that would earn their own line:
 3. **Loss of insulating vacuum on V-101.** The case that sizes PSE-102. Could
    anything in the relief path — a baffle, insulation, ice — pass normal boiloff
    invisibly and choke at full flow?
-4. **Vent-stack icing.** A relief that cannot relieve.
-5. **Plume interaction between stacks A and B.** Separate pipes, yes; separate
-   *plumes* under every wind, exit velocity and building wake? Separation is about
-   where the gas goes, not where the pipe ends.
+4. **Vent-stack icing** — a relief that cannot relieve — and **plume interaction
+   between stacks A and B**: separate pipes, yes, but separate *plumes* under every
+   wind, exit velocity and building wake? Separation is about where the gas goes,
+   not where the pipe ends.
 6. **A methane leak into the trench.** Is it ventilated and graded, is AT-404 sited
    where the layer forms, and what electrical equipment is down there?
 7. **A LOX spill onto the ground.** Which surfaces receive it, and whether any
@@ -687,13 +683,12 @@ this drawing hides. The items on Figure 8.1 that would earn their own line:
    LO₂/LNG notes the two liquids are *miscible*, admitting condensed-phase
    detonation — a hazard unlike LOX/RP-1 or LOX/LH₂, whose assessment guidance NASA
    itself called interim as recently as 2023.
-9. **Oxygen cleanliness downstream of CV-303.** The study wants the documented
-   cleanliness level and how it was verified, not an assurance.
+9. **Oxygen cleanliness downstream of CV-303** — the documented cleanliness level
+   and how it was verified, not an assurance.
 10. **Instrument failure the control system trusts.** A frozen sense line gives a
-    plausible, wrong pressure; an interlock depending on it now depends on a
+    plausible, wrong pressure, and an interlock depending on it now depends on a
     blockage.
-11. **Loss of power, air and comms together** — one case, not three, because a
-    single event often takes all three.
+11. **Loss of power, air and comms together** — one case, not three.
 12. **Ignition of a methane release.** Methane's minimum ignition energy in air is
     about **0.28 mJ**; a static discharge from a person is around **10 mJ**. Neither
     margin is a margin, which is why bonding, grounding and area classification are
@@ -713,15 +708,14 @@ to should be treated with suspicion.
 ## Where this leaves you
 
 You can now look at a cryogenic schematic and see what is not drawn: the volume
-with no way out, the relief that discharges into a plugged pipe, the plume that
+with no way out, the relief discharging into a pipe that will plug, the plume that
 meets another plume, the failure that opens two valves at once.
 
 That does not make you qualified to operate a stand. Operating one requires
-hardware-specific procedures written by the people who built it, independent review
-by someone who did not, documented training, and institutional approval — a chain
-that exists because reading a drawing and running a system safely are different
-competencies. Bring the review skill; let the procedure come from the institution
-that owns the consequences.
+hardware-specific procedures, independent review, documented training and
+institutional approval — a chain that exists because reading a drawing and running a
+system safely are different competencies. Bring the review skill; let the procedure
+come from the institution that owns the consequences.
 
 ---
 
