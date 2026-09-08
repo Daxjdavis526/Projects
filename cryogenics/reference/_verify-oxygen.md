@@ -996,3 +996,523 @@ included."
 Also required and easy to skip: "The analyst shall determine the worst-case
 **cleanliness level** of each component." Cleanliness is an input to the hazard
 analysis, not a housekeeping afterthought. **[A]**
+
+---
+
+## 4. Adiabatic compression in depth
+
+### 4.1 The physics and NASA's equation
+
+NASA/TM-2007-213740 gives the maximum theoretical temperature from compression
+**[A]**. The equation is mangled by PDF text extraction in the source, but it is
+the standard isentropic relation and the TM defines every symbol explicitly:
+
+```
+        ( P_f ) ^ ((n-1)/n)
+T_f = T_i (----)
+        ( P_i )
+```
+
+where, verbatim from the TM **[A]**:
+
+- `T_f` = final temperature (absolute)
+- `T_i` = initial temperature (absolute)
+- `P_f` = final pressure (absolute)
+- `P_i` = initial pressure (absolute)
+- `n` = ratio of specific heats (**1.4 for oxygen**)
+
+And immediately after, the caveat that must always travel with it **[A]**:
+
+> "The actual maximum temperature is inevitably appreciably lower than the
+> maximum theoretical temperature."
+
+**Why it happens.** Gas driven rapidly into a dead-ended volume is compressed
+faster than it can shed heat to the walls. The compression work goes into
+internal energy, so the temperature at the closed end rises — and it rises with
+the *pressure ratio*, not the pressure difference. Because the process is fast
+(NASA's threshold: "generally occurring in less than 1 s"), it is approximately
+adiabatic; because it is approximately adiabatic and approximately reversible,
+it is approximately isentropic, which is what the equation above assumes.
+
+The nonmetal sitting at that dead end — a seat, an O-ring, a seal — sees the
+peak temperature. Bulk metals do not ignite this way; nonmetals do. This is why
+NASA calls it "the most effective igniter of nonmetals."
+
+### 4.2 Worked example
+
+**Assumptions — state these every time, they are doing a lot of work:**
+
+1. Ideal gas.
+2. Constant ratio of specific heats, γ = n = 1.4 for oxygen.
+3. Isentropic: adiabatic *and* reversible. No heat transfer to walls, no
+   viscous dissipation accounted separately.
+4. Compression is effectively instantaneous relative to the thermal time
+   constant of the gas volume.
+5. Initial gas at **20 °C (293.15 K)** and **14.7 psia (1 atm)** — i.e. the
+   dead-ended line is sitting at ambient before the valve opens.
+6. Gas-phase only. No condensed-phase oxygen.
+
+**Result.** Final temperature at the dead end as a function of upstream
+pressure, computed from the TM equation under the assumptions above:
+
+| Upstream P_f (psia) | Pressure ratio | T_f (K) | T_f (°C) | T_f (°F) |
+|---:|---:|---:|---:|---:|
+| 100 | 6.8 | 507 | 234 | 453 |
+| 275 | 18.7 | 677 | 404 | 759 |
+| 500 | 34.0 | 803 | 530 | 986 |
+| 1,000 | 68.0 | 979 | 706 | 1,302 |
+| 2,000 | 136.1 | 1,193 | 920 | 1,688 |
+| 3,000 | 204.1 | 1,340 | 1,067 | 1,952 |
+| 4,500 | 306.1 | 1,504 | 1,231 | 2,248 |
+| 6,000 | 408.2 | 1,633 | 1,360 | 2,480 |
+
+**The headline for the lecture:** opening a valve from a 3,000 psi oxygen supply
+into a dead-ended line that was sitting at atmospheric pressure and room
+temperature can theoretically produce **about 1,070 °C (1,950 °F)** at the
+closed end. No spark, no external heat, no contamination required — just a valve
+opening quickly. Steel glows at that temperature.
+
+Inverting the relation, the pressure ratio needed to reach a given temperature:
+
+| Target T | Pressure ratio | P_f from 1 atm |
+|---|---:|---:|
+| 200 °C | 5.3 | 79 psia (0.54 MPa) |
+| **300 °C** | **10.5** | **154 psia (1.06 MPa)** |
+| 400 °C | 18.3 | 270 psia (1.86 MPa) |
+
+Against EIGA's working convention of a 300 °C minimum AIT for nonmetals in
+oxygen systems **[B]**, the *theoretical* threshold is a pressure ratio of only
+about **10.5** — around 154 psia from atmospheric. That is a low bar, and it is
+why this mechanism dominates nonmetal ignition.
+
+These figures are my own computation from the TM's equation, not quoted from any
+document: **[A]** for the equation and its stated constants, arithmetic
+independently reproducible from the assumptions above.
+
+### 4.3 Ideal versus real — the discrepancy that teaches the lesson
+
+Here is the tension a good student should notice, and it is worth building a
+tutorial around.
+
+NASA/TM-2007-213740 states **[A]**:
+
+> "Extensive testing in a system consistent with ASTM G74 has demonstrated that
+> for **initial upstream pressures less than 275 psia** and an initial
+> downstream pressure of ambient or above, **the actual temperature rise (with
+> real heat loss) is too small for ignition to occur.**"
+
+But the table above says 275 psia gives a *theoretical* 404 °C — comfortably
+above the 300 °C nominal nonmetal AIT. So the ideal calculation predicts
+ignition where forty years of testing says it does not happen.
+
+**Both are correct, and the gap is the lesson:**
+
+- The isentropic result is an **upper bound**, not a prediction. Real
+  compressions are neither perfectly adiabatic nor perfectly reversible: heat
+  flows into the pipe wall and the seat, the compression takes finite time, and
+  the gas at the dead end mixes.
+- Ignition needs not just peak temperature but **enough energy delivered for
+  long enough** to raise a real piece of polymer through its ignition. A brief
+  temperature spike in a small gas mass against a large metal heat sink may not
+  do it.
+- Which is precisely why **ASTM G74-13(2021)** exists as a *test* rather than a
+  calculation. The standard tests components in 5 mm and 14 mm bore
+  configurations at up to 69 MPa, and reports either a median failure pressure
+  or an ignition-probability curve. **[A]**
+
+**The design-review rule to take away:** the isentropic equation is a screening
+tool that tells you when you *cannot* rule the mechanism out. It never tells you
+a design is safe. Qualification comes from G74 testing of the actual
+configuration. NASA says the same thing about the whole method: "The designer of
+an oxygen system or component shall consult the appropriate Materials and
+Processes organization to ensure that the testing data used to make ignitability
+assessments are applicable to the specific design configuration." **[A]**
+
+### 4.4 Why fast-opening valves into dead-ended lines are dangerous
+
+NASA's own example **[A]**: "Fast-opening valve that releases high-pressure
+oxygen into a dead-end tube or pipe compresses the oxygen initially in the tube
+and causes rapid pressurization heating at the dead end."
+
+The hazard needs all three of NASA's characteristic elements at once, and a
+fast-opening valve into a dead-ended line supplies all three:
+
+1. **Rapid pressurization (< 1 s)** — supplied by the valve's opening
+   characteristic.
+2. **An exposed nonmetal close to the dead end** — supplied by the seat, seal or
+   O-ring of whatever terminates the line. A dead end in a real system is almost
+   always a *component*, and components contain polymers.
+3. **A pressure ratio exceeding the situational AIT** — supplied by the supply
+   pressure, and it is the *ratio* that matters, so a line left at atmospheric
+   is the worst case. Leaving a line partially pressurised reduces the ratio.
+
+Compounding factors a reviewer should look for:
+
+- **Quarter-turn valves** (ball, plug) inherently open fast. **[derived]**
+- **Long dead-ended runs** put more gas mass at the closed end. **[derived]**
+- **Contamination at the dead end** lowers the effective ignition temperature —
+  WHA note that for nonvolatile residues such as oils and greases "adiabatic
+  compression is often the dominant ignition threat." **[B]**
+- The kindling chain: ignite the seat and you may burn the stem and then the
+  body (§3.4). Adiabatic compression is a *nonmetal* igniter, but the fire it
+  starts need not stay in the nonmetal. **[A]**
+
+### 4.5 What the standards say about pressurisation rates
+
+**Honest answer: I could not verify a specific numeric pressurisation-rate limit
+from a primary standard, and the course should not print one until someone reads
+ASTM G88-21.** **[C]** for any specific rate figure.
+
+What I *can* cite:
+
+- **The < 1 s characteristic element.** NASA/TM-2007-213740: rapid pressurization
+  "generally occurring in less than 1 s." This is the closest thing to a rate
+  criterion in the primary NASA source, and it is a *screening* criterion for
+  whether the mechanism is present, not a design limit. **[A]**
+- **The 275 psia empirical bound.** Below 275 psia initial upstream pressure with
+  downstream at ambient or above, G74-consistent testing shows the real
+  temperature rise is too small for ignition. **[A]**
+- **ASTM G88-21** is the authoritative design guide and "emphasizes factors that
+  cause ignition and enhance propagation throughout a system's service life so
+  that the occurrence of these conditions may be avoided or minimized."
+  Secondary sources report that G88 establishes design criteria specifically
+  addressing adiabatic compression among other mechanisms. **[B]** — I have the
+  scope statement from ASTM's own product page **[A]** but not the clause text.
+- **ASTM G128/G128M-15(2023)** is described by ASTM as having adiabatic
+  compression as a key focus area. **[A]** (from ASTM's product page)
+- **Slow-opening valves are the recognised control.** The design intent is
+  documented in the patent literature — a portable oxygen system device where
+  "it was required that initially the flow of oxygen be increased slowly in
+  order to prevent local overheating caused by adiabatic [compression] of the
+  oxygen in a high pressure system." **[B]** — this is a patent, i.e. evidence
+  that the control is standard practice, not a standards requirement.
+
+**Controls a design reviewer looks for** (each traceable to removing one of
+NASA's three characteristic elements) **[derived]**:
+
+| Element to remove | Control |
+|---|---|
+| Rapid pressurization | Slow-opening or metered-opening valves; restricting orifice upstream; deliberate staged pressurisation |
+| Exposed nonmetal at the dead end | Move soft goods out of the dead-end impact zone; metal-to-metal seating where feasible; shield the seat |
+| High pressure ratio | Avoid pressurising from atmospheric — keep lines charged; reduce system pressure to the lowest usable (TM §3.1) |
+| Dead end itself | Eliminate dead-ended legs; avoid capped tees and unused ports (this also removes the resonance geometry, §3.3 item 4) |
+
+Note how the last row kills two mechanisms with one design change. That is the
+argument for doing the assessment mechanism-by-mechanism rather than
+hazard-by-hazard: the controls overlap, and you find that out only by tabulating.
+
+---
+
+## 5. Cleanliness
+
+### 5.1 What "oxygen clean" means conceptually
+
+Not "visually clean". Oxygen cleanliness is a **specified, verified and
+documented level of freedom from contaminants that could act as fuel or as an
+ignition initiator**, appropriate to the pressure, oxygen concentration, and
+geometry of the specific system.
+
+The governing framing, from WHA's summary of the 2025 revision **[B]**:
+"Cleaning for oxygen service is fundamentally a fire-prevention measure." It is
+not a quality or product-purity activity that happens to involve oxygen; it is a
+hazard control, and it belongs in the hazard analysis.
+
+NASA makes this structural: "The analyst shall determine the worst-case
+cleanliness level of each component" is a *required step* of the compatibility
+assessment (TM §4.1) **[A]**, and contamination is listed alongside
+concentration, temperature, pressure and flow rate as a condition that
+"can intensify flammability and ignition risks."
+
+### 5.2 The governing standards
+
+- **ASTM G93/G93M-25**, *Standard Guide for Cleanliness Levels and Cleaning
+  Methods for Materials and Equipment Used in Oxygen-Enriched Environments*
+  **[A]**. Covers "selection of methods and apparatus for cleaning materials and
+  equipment intended for service in oxygen-enriched environments... levels of
+  cleanliness used for various applications and the methods used to obtain and
+  verify these levels," across chemical-, solvent- and aqueous-based processes.
+- **CGA G-4.1, 7th edition (2018)**, *Cleaning of Equipment for Oxygen Service*
+  **[B]**. "Describes the cleaning methods and requirements for equipment used in
+  the production, storage, distribution, and use of liquid and gaseous oxygen to
+  reduce the risk of fire, explosion, or promotion of combustion." Internationally
+  harmonised and referenced by NFPA. **[B]**
+- **ASTM G127-15(2023)**, cleaning-agent selection. **[A]**
+- **EIGA/IGC Doc 33**, *Cleaning of Equipment for Oxygen Service* — the European
+  harmonised equivalent, cited by the LANL guide. **[B]**
+
+**Important change to flag in the course [A]:** the 2025 revision moved G93 from
+a *Standard Practice* to a *Standard Guide*. Per WHA's summary **[B]**: "Guides
+are educational. They present options, considerations, and technical context."
+The standard now "deliberately avoids prescribing single correct levels" and
+instead expects users to "select levels based on their specific operating
+conditions and documented risk analysis." Any older course material that treats
+G93 as prescribing a level is now wrong.
+
+### 5.3 Why hydrocarbon and particulate contamination matter — and differently
+
+The 2025 revision treats these as **distinct hazards with different risk
+profiles**, which is the conceptually important point **[B]**:
+
+**Nonvolatile residues (NVR) — oils, greases, films.** The dominant threat is
+**adiabatic compression** (WHA, informed by NASA WSTF data) **[B]**. A film of
+hydrocarbon sitting at a dead end is a low-AIT fuel positioned exactly where the
+compression peak occurs. EIGA is blunt **[A]**:
+
+> "Oil and grease are particularly hazardous in the presence of oxygen as they
+> can ignite extremely easily and burn with explosive violence. In oxygen
+> equipment, oil and grease ignition often causes a chain reaction that finally
+> results in metal burning or melting. In such cases, the molten or burned metal
+> residue is projected away from the equipment and can be followed by an oxygen
+> release."
+> — EIGA Doc 04/26 §5.3.2
+
+That sentence is the whole kindling-chain argument in miniature: a trace of oil
+ignites, and the *metal* ends up burning.
+
+**Particulates.** These involve "more complex ignition mechanisms such as
+particle impact" **[B]**. Recall the characteristic elements from §3.3: entrained
+particles plus >30 m/s velocity plus an unfavourable impact angle. Cleanliness
+removes the first element. It is the only one of the three you can control
+after the geometry is frozen.
+
+The contaminant list a reviewer should expect to see addressed, from the LANL
+guide **[A]**: "solvents, acids, alkalis, thread lubricants, filings, dirt,
+scale, slag, [fi]ling, weld splatter, organic materials such as oil, grease,
+crayon, or paint, and other foreign materials." Note *crayon* and *paint* —
+marking materials are a classic finding in oxygen fire investigations.
+
+### 5.4 How cleanliness is verified — conceptually
+
+Two families of measurement, and the distinction between them matters:
+
+**Nonvolatile residue (NVR).** A measure of the mass of residue remaining after a
+solvent extract from a defined surface area is evaporated. Reported as mass per
+unit area (typically mg/ft² or mg/m²) or mass per unit volume of extractant.
+Supporting ASTM methods **[A]**:
+- **G120-15(2023)**, Determination of Soluble Residual Contamination by Soxhlet
+  Extraction
+- **G136-03(2023)e1**, Determination of Soluble Residual Contaminants in
+  Materials by Ultrasonic Extraction
+- **G144-01(2022)**, Determination of Residual Contamination of Materials and
+  Components by Total Carbon Analysis Using a High Temperature Combustion
+  Analyzer
+
+**Particle count.** Counts of particles by size band per unit area or per unit
+volume of rinse fluid, with a maximum permitted size and permitted counts in
+each band.
+
+**The verification principle that must survive into the course [B]:**
+> "Visual inspection methods alone cannot verify most oxygen service cleanliness
+> levels."
+
+Qualitative methods — visual and UV/black-light inspection — detect only gross
+contamination. Quantitative methods are required to verify compliance with a
+specification. A reviewer confronted with "we looked at it under UV and it was
+clean" has been given a screening result, not a verification.
+
+### 5.5 How a level is specified, and the documentation trail
+
+G93/G93M-25 provides updated **coding conventions** so a cleanliness level can be
+named unambiguously in a procurement document **[B]**. The practical consequence:
+a purchase order should carry a *level designation*, not the adjective "clean".
+
+The 2025 edition covers the **full lifecycle** — "procurement, cleaning process
+specification, verification testing, packaging, preservation, and assembly"
+**[B]**. Each of those is a place cleanliness is lost, and the documentation
+should follow the part through all of them.
+
+What a design reviewer should expect to see in the package **[derived from the
+above, plus LANL]**:
+
+- The **specified cleanliness level** and the standard it is drawn from.
+- **Who cleaned it** — LANL notes components "shall have been cleaned for oxygen
+  service by the manufacturer prior to installation in accordance with the
+  mandatory requirements of CGA G-4.1... or equivalent standard." **[A]**
+- **Verification results** — quantitative NVR and particle data, not a visual
+  sign-off.
+- **Packaging and preservation** evidence, showing cleanliness was maintained
+  from cleaning to installation.
+- **Re-cleaning triggers.** LANL: "Final cleaning after assembly and before
+  introduction of oxygen to the system, by purging the system using clean, dry
+  gaseous nitrogen or dry air." **[A]** And recall the thermal runaway example
+  (§3.3 item 11): a nitrogen proof test *generates* particulate, so the
+  cleanliness state after testing is not the state at cleaning.
+- Awareness of **cleaning's own hazards**, which LANL states plainly **[A]**:
+  "Non-volatile cleaning agents may remain in trapped spaces, which could react
+  with oxygen. Cleaning solutions may degrade non-metals in an assembly. Caustic
+  and acid cleaning solutions may cause crevice corrosion in assemblies." The
+  cleaning process can introduce the contaminant it was meant to remove.
+
+Purity of the oxygen itself is specified separately — **CGA G-4.3**, *Commodity
+Specification for Oxygen*. **[B]**
+
+---
+
+## 6. Materials and lubricants
+
+### 6.1 Why most hydrocarbons are incompatible
+
+EIGA states the rule and the exception together **[A]**:
+
+> "In general, hydrocarbon-based oil and grease shall never be used to lubricate
+> equipment that can be in contact with oxygen or oxygen-enriched air. Special
+> lubricants such as approved perfluorocarbon lubricants are available for use in
+> oxygen-enriched atmospheres. **Oxygen pressure gauges shall not be tested or
+> calibrated in contact with oil.**"
+> — EIGA Doc 04/26 §5.2 area
+
+The mechanism: hydrocarbons have low autoignition temperatures, high heats of
+combustion, and — as contaminants — high surface-area-to-volume ratios and
+positions (films, at dead ends, in crevices) that maximise both ignition
+probability and heat delivery to surrounding metal. They are the ideal first
+link of a kindling chain.
+
+Davis's two rules for lubricants, where one is unavoidable **[A]**: "(1) Use only
+when it is absolutely necessary, and (2) Use only the smallest workable amount."
+Plus: "lubricants become contaminants if they enter into the oxygen stream" —
+i.e. a lubricant is a deliberately introduced contamination source, and should be
+treated as such in the hazard analysis.
+
+Note also the glycol trap, which is not obvious **[A]**: closed-circuit cooling
+systems for oxygen equipment are often filled with water containing up to 50%
+ethylene or propylene glycol. "Both ethylene glycol and propylene glycol are
+flammable and can concentrate if leaked into an oxygen system and the water
+evaporates." The coolant becomes a fuel by evaporative concentration. EIGA notes
+"incidents have occurred when leakage is undetected in the system."
+
+### 6.2 Material classes used in oxygen service
+
+**Metals — the compatible family [A]** (Davis 2012): "The metals that tend to be
+the most compatible include **nickel alloys, copper, brass and bronze**. These
+metals are more difficult to ignite and, once ignited, tend to burn with the
+lowest heats of combustion."
+
+**Metals to avoid [A]:** "magnesium, titanium and many aluminum alloys."
+Cross-reference the threshold table in §2.2 — magnesium and titanium sustain
+combustion *below ambient pressure*.
+
+**Monel** specifically: 10,000 psi threshold in both promoted ignition and
+mechanical impact **[A]**; NASA's own worked hazard control is switching a valve
+body from stainless to Monel **[A]**; LANL: "Monel is approved for tubing,
+fittings, and c[omponents]" **[A]**.
+
+**LANL's pressure-banded guidance [A]:**
+- At or below **200 psig and 200 °F**: carbon steel, 316 SS, or copper (Type K)
+  acceptable for 99.5 mole percent oxygen, at almost any velocity.
+- Above that curve: **copper tubing should be selected** — "This applies also in
+  flow-through valves, where velocity could be an issue, and where oxygen gas
+  impinges directly on ferrous piping."
+- Where velocity through a valve may approach **sonic**: "copper-based materials
+  will be required."
+- Above **4.83 MPa (700 psig)**: "oxygen piping and fittings should be stainless
+  steel, nickel alloys, or copper alloys... because of ignition susceptibility."
+
+**Nonmetals [A]** (Davis 2012): the common classes are elastomers, lubricants,
+ceramics and carbon fibre materials. "The best elastomeric compounds are
+typically the **fluorinated polymers**, which... tend to be the more difficult to
+ignite and burn with a lower heat of combustion."
+
+Specific fluoropolymer/fluorolubricant data from §2.2 **[A]**: fluorinated
+lubricants (PCTFE) resist mechanical-impact ignition to 10,000 psi in GOX and
+8,000 psi in LOX — the best nonmetal numbers in the table.
+
+**The toxicity counterweight, which is easy to omit [A]:** "Special care must be
+taken with nonmetals if they are used within a breathing oxygen system because
+some materials can produce toxic products... Fluorinated elastomers and
+lubricants can produce toxic fluorinated products, especially if any small burn
+within the system allows combustion byproducts to enter the gas stream." The
+same fluorination that gives low heat of combustion gives toxic combustion
+products. For a breathing-gas or crewed application this is a real trade, not a
+footnote.
+
+**Ceramics [A]:** "generally oxidized compounds and tend to be compatible with
+oxygen. However, the use of ceramics is limited because they are typically very
+fragile."
+
+**Carbon fibre / graphite epoxy [A]:** traditionally excluded because the binder
+is incompatible, but "laboratory testing has demonstrated that some of these can
+be used." Davis is candid: "the factors that make graphite epoxy materials
+acceptable for use in oxygen systems are not well understood. Many variables
+inherent with composites have strong influences on their oxygen compatibility,
+namely binder material, layup, cure, shape, etc."
+
+**Secondary (non-wetted) materials [A]:** incompatible materials can be used as
+structural support outside the oxygen-wetted boundary — "A good example of this
+is a composite overwrapped oxygen tank." The wetted/non-wetted distinction is a
+design tool, and it makes the definition of the wetted boundary a safety-critical
+drawing question.
+
+### 6.3 The principle: compatibility is configuration-dependent
+
+This is the single most important idea in §6, and every primary source states it
+independently.
+
+**NASA/TM-2007-213740 [A]:**
+> "Unfortunately, material flammability is affected by many factors and,
+> therefore, **absolute flammability thresholds are difficult to establish
+> without testing the actual use configuration.**"
+
+And the mandatory consultation, stated twice in the document:
+> "The designer of an oxygen system or component **shall** consult the
+> appropriate Materials and Processes organization to ensure that the testing
+> data used to make [flammability / ignitability] assessments are applicable to
+> the specific design configuration."
+
+**Davis 2012 [A]:**
+> "**Caution: The compatibility of untested materials is unknown. They cannot be
+> determined by similarity to other materials whose properties are known**,
+> whether the similarity is in composition, physical properties, etc. Slight
+> differences can drastically change the oxygen compatibility of a material.
+> Testing, and not evaluation, is the only method by which safe materials can be
+> chosen."
+
+And the admission that no single test settles it:
+> "However, there is no decisive test or evaluation method that will clearly
+> indicate the best materials for use in oxygen."
+
+**ASTM's structural admission, in G128's own scope [A]:** the guide "does not
+purport to contain all the information needed to design and operate an
+oxygen-enriched system safely" and "safe system design requires sound technical
+judgment from qualified personnel beyond handbook procedures."
+
+**Four axes on which "the same material" changes verdict**, all evidenced above:
+
+1. **Pressure.** 304L stainless: nonflammable enough below 250 psi, sustains
+   combustion above. **[A]**
+2. **Thickness / geometry.** Thin sections and finely divided forms (mesh,
+   sintered filters) are far more flammable than bulk. The Mir SFOG casing
+   burned partly because it was thin (§7.3). **[A]**
+3. **Velocity and impingement angle.** The Shuttle flow control valve: same
+   alloy, same pressure, same particles — burned with a drill point present,
+   survived 40 tests at 45°. **[A]**
+4. **What it is paired with.** Aluminium is acceptable in many places; aluminium
+   *sheared against PCTFE* is a chemical-reaction ignition mechanism. **[A]**
+
+**The corollary for the promoted ignition test [A]:** Davis notes G124 is so
+harsh that "the majority of the industry standard metals for oxygen systems, such
+as stainless steel alloys, do not meet this criterion at their typical use
+pressures," and essential nonmetal seal materials cannot meet it at all. The
+response was not to abandon those materials but to build a hazards process
+around them: "The harshness of the test has necessitated the development of a
+more realistic hazards evaluation process that will allow the use of materials
+that do not meet the acceptance criteria. This process is called an Oxygen
+Compatibility Assessment."
+
+**This is the pedagogical spine of Module 6.** The oxygen compatibility
+assessment is not a materials lookup that returns pass/fail. It exists precisely
+*because* a materials lookup returns "fail" for almost everything real systems
+are built from. The assessment is the discipline of using flammable materials
+safely by removing ignition mechanisms.
+
+For reference, the G124 acceptance criterion itself **[A]**: 1/8 in (3.2 mm)
+diameter rod, at least 4 in (102 mm) long, ignited at the bottom by an aluminium
+or magnesium promoter; **self-sustained combustion is deemed to occur if the
+sample burns more than 1.2 in (30 mm)**.
+
+And Davis's four design ground rules, from the ASTM Technical and Professional
+Training course *Fire Hazards in Oxygen Systems* **[A]**:
+
+- **Conservation** — conserve both oxygen and materials within the system.
+- **Maximization** — maximise the use of the most burn-resistant materials available.
+- **Minimization** — minimise the potential ignition sources inherent in all systems.
+- **Utilization** — utilise good system design practices.

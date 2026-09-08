@@ -347,13 +347,26 @@ impractical: flight tank exteriors, long ambient-pressure runs, complex shapes,
 and anywhere weight or cost rules out double walls.
 
 NASA's spray-on foam insulation (SOFI) work gives the ground-vs-space contrast
-in one line: SOFI over MLI "prevented purge gas liquefaction within the MLI and
-resulted in the expected ground hold heat leak of **63 W/m²**," while orbit-hold
-tests gave **0.085 and 0.22 W/m²** at warm boundary temperatures of 164 K and
-305 K. **[B]** (reported in the NASA SOFI/composite-insulation literature; see
-Fesmire's KSC Cryogenics Test Laboratory work, e.g.
-https://ntrs.nasa.gov/api/citations/20180006600/downloads/20180006600.pdf for
-the comparative framework and test method)
+in one line: SOFI over MLI prevented purge-gas liquefaction within the MLI and
+gave a ground-hold heat leak of **63 W/m²**, while orbit-hold tests gave
+**0.085 and 0.22 W/m²** at warm boundary temperatures of 164 K and 305 K.
+
+> **[C] — FLAGGED FOR VERIFICATION.** These three figures surfaced in an
+> aggregated index of NASA abstracts, and the specific originating report was
+> not located before the research budget for this file was exhausted. The
+> figures are consistent with the SOFI/MLI literature and with the orders of
+> magnitude elsewhere in this file, but **do not put them in course material
+> until the source report is identified.** The right place to look is Fesmire's
+> KSC Cryogenics Test Laboratory output on composite insulation systems, whose
+> comparative framework and boiloff-calorimetry method are documented at
+> https://ntrs.nasa.gov/api/citations/20180006600/downloads/20180006600.pdf
+> **[A]**.
+
+The *qualitative* point stands on firmer ground and is the one worth teaching:
+a foam layer over MLI exists partly to stop the purge gas in the annulus from
+condensing into the MLI during ground hold, and ground-hold heat leak through an
+ambient-pressure foam system is two to three orders of magnitude worse than the
+same tank's on-orbit performance.
 
 For piping, the vendor-reported contrast is roughly **0.5–2.0 W/m² for
 vacuum-jacketed versus 5–20 W/m² for foam** **[C]**, and Chart states its
@@ -369,3 +382,149 @@ monotonically unless the vapour barrier is genuinely sealed. Foam on LOX service
 additionally raises material-compatibility questions (see CGA G-4.4, *Oxygen
 Pipeline and Piping Systems*, verified at
 https://legacy.cganet.com/Publication/Details.aspx?id=G-4.4 ) **[B]**.
+
+## 1.4 Typical boiloff rates
+
+Boiloff is quoted as **NER — Normal Evaporation Rate** — the percentage of a
+full container's contents lost per day, standing idle at about one atmosphere.
+It is the single number that tells you how good the insulation actually is, and
+it is measured, not calculated: fill, close up, and weigh over 24 hours.
+
+Definition and method, from a cryogenic equipment manufacturer: NER is "the
+amount of cryogenic liquid that boils off to vapor during a given period of
+time," expressed in volume per unit time, "often calculated by weight since that
+is easier to measure," with the weight change over 24 hours divided by the
+latent heat of vaporisation to yield heat leak in watts. **[C]** —
+https://cranecryogenics.com/normal-evaporation-rate-ner-for-dewars/
+
+### Bulk tanks — real catalogue figures
+
+These are the strongest numbers in this file because they come from a
+manufacturer's own published specification table, tank model by tank model.
+Chart bulk storage catalogue, standard MAWP 250 psig **[A]** —
+https://files.chartindustries.com/13608592_BulkCatalog.pdf
+
+| Series | Smallest model | → | Largest model |
+|---|---|---|---|
+| Vertical (VS), NER %/day in **O₂ / Ar** | 0.35 | 0.25 → 0.15 | 0.10 |
+| Vertical (VS), NER %/day in **N₂** | 0.56 | 0.40 → 0.24 | 0.16 |
+| Horizontal (HS), NER %/day in **O₂ / Ar** | 0.56 | 0.32 → 0.22 | 0.15 |
+| Horizontal (HS), NER %/day in **N₂** | 0.90 | 0.52 → 0.35 | 0.24 |
+
+Three lessons a course should draw from this table:
+
+1. **Bigger is better.** NER falls by roughly 3–4× from the ~1,500 gal model to
+   the ~15,000 gal model, and then plateaus. Surface-to-volume ratio, directly
+   visible in a product catalogue.
+2. **Nitrogen is worse than oxygen or argon** in the same tank — roughly 1.6×
+   worse. Same heat leak, but LN₂'s lower latent heat per unit volume means the
+   same watts boil off a larger fraction per day.
+3. **Vertical beats horizontal** for the same capacity, by a substantial margin
+   (0.56 vs 0.90 %/day in N₂ at the small end). Less surface, and fewer/shorter
+   support paths.
+
+Chart also lists **flow capacity 9,000–42,000 SCFH** across the range, rated
+"down to a 20 % contents level" — a reminder that a bulk tank's delivery
+capability is a function of how full it is. **[A]**
+
+### CO₂ / N₂O bulk tanks
+
+Same catalogue: NER 0.15 / 0.08 / 0.05 / 0.04 %/day for vertical 6 / 14 / 30 /
+50 ton units, MAWP 350 psig. **[A]** (much lower — warmer fluid, smaller ΔT)
+
+### Laboratory dewars
+
+Small vessels are dramatically worse, and this is where intuition usually fails.
+A manufacturer's worked example: a **10-litre dewar of LN₂ with an NER of 8.8
+litres/day**, giving a holding time of **1.1 days**. **[C]** —
+https://cranecryogenics.com/normal-evaporation-rate-ner-for-dewars/
+
+Note that this is quoted in litres/day, not %/day; as a percentage it is
+enormous. Small open-neck dewars are, for practical purposes, continuously
+venting gas sources — which is exactly why they drive oxygen-deficiency analysis
+in small rooms (§5.5).
+
+Two caveats worth teaching alongside any NER figure **[C]** (same source, plus
+general vendor guidance):
+- **An unchilled vessel boils far harder.** "If you fill an unchilled vessel the
+  initial evaporation rate will be greater." First-fill losses are not NER.
+- **Static ratings are not working ratings.** Opening a vessel, inserting probes,
+  or drawing from it degrades hold time substantially below the catalogue figure.
+
+### The general industry picture
+
+For orientation only: standard commercial vessels are commonly quoted at 1–3 %
+per day; small-to-mid bulk tanks around 1 %; very large tanks 0.5 % or less;
+and the best modern large systems 0.03–0.05 %. **[C]** — these are aggregated
+vendor/forum figures and should be treated as a sanity range, not as data. The
+Chart catalogue table above is the citable version.
+
+## 1.5 Pressure-build circuits
+
+### What the circuit is
+
+A liquid cylinder or bulk tank does not need an external pressurant to deliver
+liquid. It pressurises itself by boiling a little of its own contents.
+
+The loop: liquid is taken off the **bottom** of the inner vessel, routed through
+a **pressure-building (PB) vaporiser coil** in contact with ambient air (or on
+the warm side of the jacket), where it gasifies, and returned to the **ullage**
+at the top. Adding gas to the ullage raises tank pressure. A **PB regulator**
+senses tank pressure and opens the loop when pressure falls below its set point,
+closing it when the set point is reached. The tank thus holds its own delivery
+pressure with no external supply and no moving pumps.
+
+Chart's description of the mechanism: "As the tank pressure drops below the PB
+set point, the regulator opens and allows liquid to flow off the bottom of the
+tank, through the internal PB vaporization coils, through the R-1 and back into
+the gas phase of the tank." **[B/C]** (Chart/MVE liquid cylinder documentation;
+the mechanism is confirmed in Chart's own manual, which discusses PB regulator
+set points, PB coil frosting, and PB circuit troubleshooting throughout) **[A]** —
+https://files.chartindustries.com/10642912_Liquid_Cylinder_Product_Manual_ws.pdf
+
+### The economiser — the second half nobody explains
+
+Alongside the PB regulator sits an **economiser regulator**, set slightly
+*higher*. Its job is the opposite: when tank pressure rises above its set point
+(from heat leak while idle), it routes the **withdrawal flow from the ullage
+instead of from the liquid leg**, so that the customer's demand consumes the
+excess head gas rather than venting it.
+
+The two regulators are deliberately offset. Chart/MVE documentation describes
+"a fixed pressure difference of about 15 psig ... factory set between the
+pressure building and economizer regulating pressures." **[C]**
+
+Typical published PB set points are MP 125 psig, HP 300 psig, VHP 450 psig
+**[C]**; the corresponding relief-valve settings are visible directly in Chart's
+own filling tables, banded 0–45, up to 170, 171–230, 231–235 and 296–350 psig,
+with a model line explicitly labelled "Dura-Cyl 160 HP (350 psig max. RV)."
+**[A]** (same manual URL)
+
+### Why this matters operationally — the design-review view
+
+- **The tank is a pressure source that never switches off.** Even with the PB
+  valve closed, heat leak alone drives pressure up. A parked cylinder will reach
+  its relief setting and sit there venting. Every stored liquid cylinder is a
+  slow, continuous gas release into whatever room it is in.
+- **Delivery pressure is coupled to withdrawal rate.** Draw faster than the PB
+  coil can vaporise and pressure sags mid-run; this is a feed-system stability
+  problem, not a nuisance. The PB coil is a heat exchanger with finite capacity,
+  and its capacity *falls* as it ices up.
+- **The economiser changes what comes out.** With the economiser open, you are
+  drawing **gas**, not liquid. A system expecting liquid at the outlet gets
+  two-phase or vapour. This is a real and commonly missed failure mode for a run
+  tank fed from a liquid cylinder.
+- **Symptom reading.** Chart's own troubleshooting logic is instructive: if
+  "the pressure builds to the relief valve setting and the PB coil near the
+  bottom of the tank is cold or frosted," the PB regulator has failed to close —
+  the tank is pressurising itself uncontrollably. Conversely a frosted line or
+  head indicates a leak. **[A]** (same manual)
+- **Frost is diagnostic, not decorative.** Chart notes that a ring of ice or an
+  oval ice ball "often remains on the cylinder for days after the last use" and
+  is normal — but *permanent or growing* external ice on a vacuum-jacketed
+  surface means the vacuum is failing. LBNL states it plainly: "if ice does form
+  on the outside of the dewar, it indicates that the dewar may have lost
+  vacuum." **[A]** — https://ehs.lbl.gov/resource/esh-manual-pub-3000/ch29/
+  AIGA 106/19 makes the same call for piping: "If frost, ice, or condensation is
+  permanent and/or grows on vacuum-jacketed components, monitor the components
+  and check the vacuum level of that section." **[A]**
