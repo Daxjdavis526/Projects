@@ -80,6 +80,13 @@ switched off at wavelengths longer than twice the pixel size of whatever data
 is under you. At 1.9 km per pixel the invented part is 14 m RMS; at 2 m per
 pixel it is 7 cm. It shrinks as the data improves, which is the whole design.
 
+It is bounded from below as well, by the vertex spacing of the tile being
+drawn. A crater needs three vertices across to be a bowl rather than a spike,
+so a tile whose vertices are half a metre apart carries craters down to two
+metres and a tile twenty kilometres across carries none of it — which is not a
+compromise but the anti-aliasing condition, since the same ground rebuilt one
+level finer would otherwise put its detail somewhere slightly different.
+
 The overlay labels every value **MEASURED**, **INTERPOLATED**, **REGIONAL**,
 **PROCEDURAL** or **FICTIONAL**, and means it. LOLA's grids have no missing
 data flag because the gaps were filled by interpolation, so the game reads the
@@ -369,6 +376,17 @@ which is why the screenshot harness is a test rather than a convenience.
   boundary between the two. Bounding a tile by what the Moon can actually do
   over its own width, or by its parent's measured range once that is known, put
   the craters back across the whole landscape and cost half the tiles.
+- Anywhere a NAC stereo model streamed in, the landscape came apart into
+  floating slabs with the sky showing between them. Two separate causes. A
+  worker takes a second or two to decode the vendored elevation pyramid, and
+  any streamed raster arriving inside that window was dropped on the floor and
+  never offered again, so the physics knew the ground at Tycho was at -3465 m
+  while the workers went on drawing it at -3375 and the camera stood ninety
+  metres inside the surface, looking up through it. And when a raster did
+  arrive in time, the tiles it covered were deleted outright to force a
+  rebuild — which takes the tile and all its ancestors out of the tree at once,
+  because they cover the same ground. Old tiles now stay on screen until their
+  replacements arrive, which is the rule everywhere else in the renderer.
 
 ## Sources
 

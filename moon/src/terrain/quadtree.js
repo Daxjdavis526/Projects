@@ -38,6 +38,9 @@ export class Quadtree {
     this.cacheSize = opts.cacheSize ?? 1400;
     this.tiles = new Map();          // key -> { state, tile, lastWanted, level, ... }
     this.frame = 0;
+    /* Tiles asked to rebuild this frame, so one frame does not queue the same
+       rebuild twice. */
+    this.rebuildQueued = new Set();
     this.stats = { visible: 0, wanted: 0, pending: 0, resident: 0, triangles: 0 };
   }
 
@@ -52,6 +55,7 @@ export class Quadtree {
     }
     e.tile = payload;
     e.state = 'resident';
+    e.stale = false;
     e.lastWanted = this.frame;
     return e;
   }
@@ -78,9 +82,11 @@ export class Quadtree {
    */
   select(cam, inView) {
     this.frame++;
+    this.rebuildQueued.clear();
     const draw = [];
     const request = [];
     const sphere = { x: 0, y: 0, z: 0, r: 0 };
+    const loose = { x: 0, y: 0, z: 0, r: 0 };
     const camAlt = Math.hypot(cam.x, cam.y, cam.z) - R_MOON;
     /* Near the ground, keep refining tiles just behind the camera as well: the
        shadow cascade needs geometry there even though it is out of frame. */
@@ -113,8 +119,14 @@ export class Quadtree {
       for (let n = 0; n < 20 && e; n++) {
         const b = e.tile && e.tile.bounds;
         /* The tile stores radii; the bounding sphere wants elevations. The
-           margin covers the finer detail a child adds below its parent. */
-        if (b) return { lo: b.rMin - R_MOON - 150, hi: b.rMax - R_MOON + 150 };
+           margin covers what a child can hold that its ancestor never sampled:
+           a coarse grid misses whatever the ground does between two of its
+           vertices, so the allowance grows with that ancestor's own spacing. */
+        if (b) {
+          const m = e.level === level ? 60
+            : Math.max(120, 0.75 * edgeArc(e.level) / (this.verts - 1));
+          return { lo: b.rMin - R_MOON - m, hi: b.rMax - R_MOON + m };
+        }
         const p = parentOf(e.face, e.level, e.i, e.j);
         e = p ? this.tiles.get(tileKey(p[0], p[1], p[2], p[3])) : null;
       }
@@ -127,6 +139,13 @@ export class Quadtree {
 
     const walk = (face, level, i, j) => {
       const key = tileKey(face, level, i, j);
+      /* Two spheres, because culling and level of detail want opposite errors
+         from the same estimate. Throwing a tile away needs an over-estimate:
+         cull something that was actually visible and you punch a hole in the
+         landscape at the horizon. Deciding how finely to draw it needs a
+         realistic one: over-estimate there and every tile within ten kilometres
+         reports zero distance and refines to the finest level there is. */
+      tileBoundingSphere(face, level, i, j, -9500, 11500, loose);
       const span = heightSpread(level, this.tiles.get(key));
       tileBoundingSphere(face, level, i, j, span.lo, span.hi, sphere);
       const dx = sphere.x - cam.x, dy = sphere.y - cam.y, dz = sphere.z - cam.z;
@@ -137,8 +156,8 @@ export class Quadtree {
          but from level one down a tile that is over the horizon or out of
          frame is not worth descending into. */
       if (level > 0) {
-        if (belowHorizon(cam, sphere)) return;
-        if (level > 1 && inView && near > shadowRadius && !inView(sphere)) return;
+        if (belowHorizon(cam, loose)) return;
+        if (level > 1 && inView && near > shadowRadius && !inView(loose)) return;
       }
 
       const arc = edgeArc(level);
@@ -162,6 +181,13 @@ export class Quadtree {
           request.push({ key: kk, face: k[0], level: k[1], i: k[2], j: k[3],
                          priority: near / arc });
         }
+      }
+
+      /* A resident tile whose ground has changed under it asks to be built
+         again while staying on screen: see terrain.invalidateArea. */
+      if (entry && entry.stale && !this.rebuildQueued.has(key)) {
+        this.rebuildQueued.add(key);
+        request.push({ key, face, level, i, j, priority: near / arc - 5000 });
       }
 
       if (this.isResident(key)) {

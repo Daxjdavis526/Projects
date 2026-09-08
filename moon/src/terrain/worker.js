@@ -42,14 +42,33 @@ function post(msg, transfer) {
   self.postMessage(msg, transfer || []);
 }
 
+/* Messages that change the ground and arrived before there was a ground to
+   change. `init` decodes the vendored elevation pyramid, which takes a second
+   or two, and until it finishes `hf` is null; a raster that landed inside that
+   window used to be dropped on the floor and never asked for again. The main
+   thread's own copy took it, so the two disagreed permanently: at Tycho the
+   physics put the player at -3465 m and the workers drew the ground at -3375,
+   which left the camera ninety metres inside the surface looking up through
+   it. A build lost the same way costs nothing, because the quadtree asks
+   again; a raster is never offered twice. */
+const deferred = [];
+
+function applyGroundChange(m) {
+  if (m.type === 'raster') return addRaster(m);
+  if (m.type === 'drop') return hf.removeRaster(m.id);
+  if (m.type === 'pads') return hf.setPads(m.pads.map(p => new Pad(p)));
+}
+
 self.onmessage = async (e) => {
   const m = e.data;
   try {
     switch (m.type) {
       case 'init': return await init(m);
-      case 'raster': return addRaster(m);
-      case 'drop': return hf && hf.removeRaster(m.id);
-      case 'pads': return hf && hf.setPads(m.pads.map(p => new Pad(p)));
+      case 'raster':
+      case 'drop':
+      case 'pads':
+        if (!hf) { deferred.push(m); return; }
+        return applyGroundChange(m);
       case 'build': return build(m);
       case 'cancel': return void cancelled.add(m.key);
       case 'evict': return void m.keys.forEach(k => horizonCache.delete(k));
@@ -75,6 +94,9 @@ async function init(m) {
     roughness: makeRoughness(m.geology),
   });
   hf.attachDetail(detail);
+  /* Anything that arrived while the pyramid was decoding, in the order it
+     arrived, before the first tile is built from it. */
+  while (deferred.length) applyGroundChange(deferred.shift());
   post({ type: 'ready', layers: hf.rasters.map(r => ({ id: r.id, res_m: r.res_m })) });
 }
 

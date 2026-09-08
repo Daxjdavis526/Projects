@@ -142,6 +142,19 @@ export class TerrainSystem {
    * Drop every built tile whose ground overlaps a rectangle, so it gets rebuilt
    * against the new data. Everything else is left alone.
    */
+  /**
+   * The ground under an area has changed: a raster streamed in, or the ship put
+   * a pad down. Every tile overlapping it has to be built again.
+   *
+   * The old tile keeps being drawn until its replacement arrives. Throwing it
+   * away instead, which is what this used to do, takes the tile *and all its
+   * ancestors* out of the tree at once, because they overlap the same ground:
+   * the landscape then comes apart into floating slabs with the sky showing
+   * between them, and a site where elevation streams in continuously never
+   * finishes falling apart. Anywhere with a NAC stereo model over it looked
+   * like that. Same rule as everywhere else in this file -- keep drawing what
+   * you have until you have something better.
+   */
   invalidateArea([w, s, e, n]) {
     const keys = [];
     for (const [key, mesh] of this.meshes) {
@@ -149,12 +162,10 @@ export class TerrainSystem {
       if (!b) continue;
       if (b.lonMax < w || b.lonMin > e || b.latMax < s || b.latMin > n) continue;
       keys.push(key);
+      const entry = this.quadtree.get(key);
+      if (entry) entry.stale = true;
     }
-    for (const key of keys) {
-      this.disposeMesh(key, this.meshes.get(key));
-      this.meshes.delete(key);
-      this.quadtree.tiles.delete(key);
-    }
+    /* The workers' horizon cache is keyed by tile and is now wrong too. */
     for (const w2 of this.workers) w2.postMessage({ type: 'evict', keys });
   }
 
@@ -221,6 +232,22 @@ export class TerrainSystem {
     const perWorker = 4;
     for (const req of request) {
       if (this.inFlight.has(req.key)) continue;
+      /* A rebuild does not go through markPending, or the tile would stop
+         counting as resident and vanish from the picture while it is being
+         replaced. */
+      const stale = this.quadtree.get(req.key);
+      if (stale && stale.stale) {
+        const n2 = this.leastBusy();
+        if (this.busy[n2] >= perWorker) break;
+        this.busy[n2]++;
+        this.inFlight.set(req.key, n2);
+        stale.stale = false;
+        this.workers[n2].postMessage({
+          type: 'build', key: req.key, face: req.face, level: req.level,
+          i: req.i, j: req.j, gen: this.gen,
+        });
+        continue;
+      }
       const n = this.leastBusy();
       if (this.busy[n] >= perWorker) break;
       this.busy[n]++;
