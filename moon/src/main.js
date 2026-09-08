@@ -1103,6 +1103,15 @@ async function start() {
       eva.updateLights(stage.origin.origin, camFrame);
       eva.updateModel(stage.origin.origin, dt);
       if (eva.model) eva.model.group.visible = !driving && eva.view === 'third';
+      /* The bubble, and where the Sun is on it. The helmet is only drawn on
+         foot in the helmet view: the rover's canopy is not a helmet and the
+         free camera has no head to put one on. */
+      const wearing = !driving && eva.view === 'helmet' && !photo.active;
+      const hel = el('helmet');
+      if (hel) {
+        hel.classList.toggle('on', wearing);
+        if (wearing) helmetGlare(hel, local.sunDir, camFrame, stage.camera);
+      }
     }
     /* Somewhere pressurised is somewhere you can take the helmet off. */
     const sheltered = shelterKind();
@@ -1283,6 +1292,40 @@ async function start() {
 }
 
 /* --- helpers ---------------------------------------------------------------- */
+
+/**
+ * Put the Sun on the visor where the Sun actually is.
+ *
+ * A bloom fixed in the middle of the screen would be a lens flare in a game;
+ * this is the reflection off a curved piece of glass a few centimetres from
+ * your eye, so it has to move as you turn your head and go out when the Sun is
+ * behind you. Three CSS variables, no render pass, no post-processing chain.
+ */
+const _hv = new THREE.Vector3();
+function helmetGlare(node, sunDir, frame, camera) {
+  if (!sunDir || !frame) return;
+  /* Whether the Sun is in front at all, from the direction the head is
+     pointing. This has to come first and it has to be the dot product: a point
+     placed out at the Sun's real distance projects to an NDC z past one simply
+     for being beyond the far plane, so the depth test would call every
+     direction "behind" and the glare would never appear at all.  */
+  const behind = sunDir.x * frame.dir.x + sunDir.y * frame.dir.y +
+                 sunDir.z * frame.dir.z <= 0;
+  /* Somewhere comfortably inside the frustum, along the same direction: the
+     Sun is at infinity, so any distance gives the same screen position. */
+  _hv.set(camera.position.x + sunDir.x * 1000,
+          camera.position.y + sunDir.y * 1000,
+          camera.position.z + sunDir.z * 1000);
+  _hv.project(camera);
+  const x = (_hv.x * 0.5 + 0.5) * 100, y = (-_hv.y * 0.5 + 0.5) * 100;
+  /* Fade at the edges of the frame rather than clipping: the glass carries the
+     glare a little way past the field of view. */
+  const off = Math.max(Math.abs(x - 50) / 50, Math.abs(y - 50) / 50);
+  const vis = behind ? 0 : Math.max(0, Math.min(1, 1.6 - off));
+  node.style.setProperty('--sx', x.toFixed(1) + '%');
+  node.style.setProperty('--sy', y.toFixed(1) + '%');
+  node.style.setProperty('--sv', vis.toFixed(3));
+}
 
 /**
  * How much of the frame is ground rather than black sky, which is what an eye

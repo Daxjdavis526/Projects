@@ -78,6 +78,39 @@ canvas{display:block;position:fixed;inset:0}
 #help .k{min-width:74px;color:var(--warm)}
 
 #hint{bottom:14px;right:14px;color:var(--dim);font-size:10px;letter-spacing:.08em}
+
+/* ---- the helmet ---- */
+/* Off unless asked for: the brief wants first person to be the most immersive
+   mode and the helmet to be optional, so F cycles clean, helmet, third. */
+#helmet{position:fixed;inset:0;pointer-events:none;display:none;z-index:5}
+#helmet.on{display:block}
+#helmet>div{position:absolute;inset:0}
+/* The bubble. A helmet's field of view is far wider than the camera's, so
+   there is no hard rim in frame — what there is, is the glass falling away at
+   the edges of what you can see through cleanly. */
+#helmet .hvig{
+  background:radial-gradient(ellipse 78% 88% at 50% 48%,
+    rgba(0,0,0,0) 46%, rgba(0,0,0,.30) 76%, rgba(0,0,0,.72) 100%);
+}
+/* The gold visor's inner surface. A few hundred nanometres of gold reflects
+   most of the infrared, and what it does to the visible is put a warm cast
+   across the top of the field where the coating is in front of you. */
+#helmet .hsheen{
+  background:linear-gradient(to bottom,
+    rgba(255,196,110,.085) 0%, rgba(255,196,110,.035) 22%,
+    rgba(255,196,110,0) 46%),
+  linear-gradient(to top, rgba(180,200,225,.05) 0%, rgba(180,200,225,0) 18%);
+}
+/* And the Sun on the glass, where the Sun actually is. Driven from the
+   simulation: --sx and --sy are the sun's position in the frame, and --sv is
+   zero when it is behind you, so the bloom goes out when you turn away
+   instead of sitting in the middle of the screen forever. */
+#helmet .hglare{
+  opacity:var(--sv,0);
+  background:radial-gradient(circle 34vh at calc(var(--sx,50%)) calc(var(--sy,50%)),
+    rgba(255,236,205,.20) 0%, rgba(255,226,180,.10) 26%, rgba(255,220,170,0) 62%);
+  transition:opacity .25s linear;
+}
 /* The date and time of the landing. A lunar day is 29 and a half Earth days,
    so when you arrive decides what the place looks like more than almost
    anything else does, and it used to be settable only through a URL. */
@@ -399,7 +432,7 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">J</span><span>jetpack (hold)</span></div>
     <div class="row"><span class="k">drag</span><span>look</span></div>
     <div class="row"><span class="k">G</span><span>on foot / free camera</span></div>
-    <div class="row"><span class="k">F</span><span>first / third person</span></div>
+    <div class="row"><span class="k">F</span><span>view: first, helmet, third</span></div>
     <div class="row"><span class="k">L</span><span>suit lamps</span></div>
     <div class="row"><span class="k">R</span><span>get on / off the rover</span></div>
     <div class="row"><span class="k">E</span><span>ship hatch, at the ladder</span></div>
@@ -542,6 +575,19 @@ canvas{display:block;position:fixed;inset:0}
       </div>
       <div class="dust" id="sh-dust">—</div>
     </div>
+  </div>
+
+  <!-- The inside of a bubble helmet. Three layers, all of them things the
+       glass actually does and none of them a HUD: the curvature of the bubble
+       darkening the far edges of the field, the gold sun visor's inner surface
+       throwing a warm sheen across the top, and a soft bloom where the Sun is
+       actually standing, which moves as you turn your head. Nothing is drawn
+       that a helmet does not do — no reticle, no frame, no reflection of a
+       face, because the visor is in front of yours and you cannot see it. -->
+  <div id="helmet" aria-hidden="true">
+    <div class="hglare"></div>
+    <div class="hsheen"></div>
+    <div class="hvig"></div>
   </div>
 
   <div id="warnings"></div>

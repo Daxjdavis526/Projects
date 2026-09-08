@@ -26,7 +26,11 @@ import { Suit } from '../physics/suit.js';
 import { PLAYER } from '../config.js';
 import { enuBasis, xyzToLlh } from '../physics/frames.js';
 
-export const VIEW = { FIRST: 'first', THIRD: 'third' };
+/* Three ways of looking. `helmet` is first person with the bubble drawn — the
+   brief asked for it as an option beside a clean first person, so it is a step
+   in the cycle rather than the default. Third person is unchanged. */
+export const VIEW = { FIRST: 'first', HELMET: 'helmet', THIRD: 'third' };
+const VIEW_CYCLE = [VIEW.FIRST, VIEW.HELMET, VIEW.THIRD];
 
 /* 120 Hz. Fast enough that a push-off and the contact after it are both
    resolved, cheap enough that a slow frame catching up costs nothing. */
@@ -129,7 +133,14 @@ export class EVA {
     if (model) this.group.add(model.group);
   }
 
-  toggleView() { this.view = this.view === VIEW.FIRST ? VIEW.THIRD : VIEW.FIRST; }
+  toggleView() {
+    const i = VIEW_CYCLE.indexOf(this.view);
+    this.view = VIEW_CYCLE[(i + 1) % VIEW_CYCLE.length];
+    return this.view;
+  }
+
+  /** Is the camera behind your own eyes? Both first-person modes are. */
+  get firstPerson() { return this.view !== VIEW.THIRD; }
   cycleLamps() { this.lampMode = (this.lampMode + 1) % 3; }
 
   /**
@@ -227,7 +238,7 @@ export class EVA {
     const eyeH = PLAYER.eye + p.bob;
     const head = { x: p.pos.x + u.x * eyeH, y: p.pos.y + u.y * eyeH, z: p.pos.z + u.z * eyeH };
 
-    if (this.view === VIEW.FIRST) {
+    if (this.firstPerson) {
       this._eye = head;
       return { eye: head, dir, up: u, head, fov: 52 };
     }
