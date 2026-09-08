@@ -44,6 +44,7 @@ import { Sound } from './audio/audio.js';
 import { Save } from './game/save.js';
 import { Photo } from './ui/photo.js';
 import { Settings } from './ui/settings.js';
+import { Nav } from './ui/nav.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -255,6 +256,7 @@ async function start() {
   const suitHud = new SuitHud();
   const photo = new Photo();
   const moment = new Moment();
+  const nav = new Nav({ waypoints: [] });
   /* Eating, sleeping, and waiting for the Sun, which on a body with a
      29 and a half day rotation is a real thing to want to do. */
   const shelter = new Shelter({
@@ -392,7 +394,9 @@ async function start() {
   /* One object holding the live game, so the save system has something to read
      and write without reaching into closures. */
   const game = {
-    state, settle, waypoints: [], visited: [],
+    state, settle, visited: [],
+    get waypoints() { return nav.waypoints; },
+    set waypoints(v) { nav.waypoints.length = 0; nav.waypoints.push(...(v || [])); },
     get base() { return base; },
     get vehicle() { return vehicle; },
     get eva() { return eva; },
@@ -900,6 +904,20 @@ async function start() {
         unit: geology ? geologyName(geology, cam.lat, cam.lon) : null,
         earthVisible: local.earthEl > 0, earthEl: local.earthEl,
         earthDist: eph.earthDist / 1000,
+      });
+    }
+    nav.show(driving && !photo.active);
+    if (driving && vehicle) {
+      const near = orbit.nearestFeature(cam.lat, cam.lon);
+      nav.update({
+        lat: cam.lat, lon: cam.lon, heading: vehicle.rover.heading,
+        elevation: surfaceH, slope: heightfield.slopeAt(cam.lat, cam.lon, 8),
+        speed: vehicle.rover.speed,
+        home: base ? { lat: base.lat, lon: base.lon } : null,
+        driven: vehicle.rover.distance,
+        roverHours: vehicle.rover.endurance(),
+        suitSeconds: eva ? eva.suit.endurance() : Infinity,
+        nearest: near ? { name: near.f[0], km: near.km } : null,
       });
     }
     suitHud.update(photo.active ? null : evaSnap);

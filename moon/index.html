@@ -206,6 +206,25 @@ canvas{display:block;position:fixed;inset:0}
 #settings .foot{margin-top:14px;font-size:9px;color:var(--faint);letter-spacing:.05em;
   line-height:1.7}
 
+/* ---- rover navigation ---- */
+/* Modelled on the console a real expedition vehicle would carry: where you
+   are, where home is, how far you can still go, and what is nearby. */
+#nav{
+  position:fixed;top:14px;right:14px;width:250px;display:none;
+}
+#nav .row{padding:1px 0}
+#nav .grp{margin-top:9px;border-top:1px solid var(--edge);padding-top:8px}
+#nav .lab{font-family:Michroma,sans-serif;font-size:8px;letter-spacing:.2em;
+  color:var(--dim);text-transform:uppercase;margin-bottom:5px}
+#nav .v{color:var(--blue)}
+#nav .warn{color:var(--warn)}
+#nav .crit{color:var(--crit)}
+#nav .wp{display:flex;gap:4px;margin-top:6px}
+#nav button{background:rgba(216,213,207,.05);border:1px solid var(--edge);
+  border-radius:2px;color:var(--dim);font:inherit;font-size:9.5px;
+  letter-spacing:.05em;padding:4px 8px;cursor:pointer}
+#nav button:hover{border-color:rgba(232,201,160,.4);color:var(--ink)}
+
 /* ---- shelter ---- */
 #shelter{
   position:fixed;top:50%;right:22px;transform:translateY(-50%);
@@ -406,6 +425,37 @@ canvas{display:block;position:fixed;inset:0}
       <span class="opts" id="set-cache"></span>
     </div>
     <div class="foot" id="set-foot"></div>
+  </div>
+
+  <div class="panel" id="nav">
+    <h2>Navigation</h2>
+    <div class="row"><span class="k">latitude</span><span class="v" id="n-lat">—</span></div>
+    <div class="row"><span class="k">longitude</span><span class="v" id="n-lon">—</span></div>
+    <div class="row"><span class="k">heading</span><span class="v" id="n-hdg">—</span></div>
+    <div class="row"><span class="k">elevation</span><span class="v" id="n-elev">—</span></div>
+    <div class="row"><span class="k">slope</span><span class="v" id="n-slope">—</span></div>
+    <div class="row"><span class="k">speed</span><span class="v" id="n-speed">—</span></div>
+    <div class="grp">
+      <div class="lab">the ship</div>
+      <div class="row"><span class="k">distance</span><span class="v" id="n-home">—</span></div>
+      <div class="row"><span class="k">bearing</span><span class="v" id="n-bearing">—</span></div>
+      <div class="row"><span class="k">driven</span><span class="v" id="n-driven">—</span></div>
+    </div>
+    <div class="grp">
+      <div class="lab">consumables</div>
+      <div class="row"><span class="k">rover</span><span class="v" id="n-rover">—</span></div>
+      <div class="row"><span class="k">suit</span><span class="v" id="n-suit">—</span></div>
+      <div class="row"><span class="k">safe range</span><span class="v" id="n-reach">—</span></div>
+    </div>
+    <div class="grp">
+      <div class="lab">nearby</div>
+      <div class="row"><span class="k" id="n-near">—</span><span class="v" id="n-neardist"></span></div>
+      <div class="wp">
+        <button id="n-mark">mark here</button>
+        <button id="n-clear">clear</button>
+      </div>
+      <div class="row"><span class="k">waypoint</span><span class="v" id="n-wp">none</span></div>
+    </div>
   </div>
 
   <div class="panel" id="shelter">

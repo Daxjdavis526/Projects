@@ -44,6 +44,7 @@ that spot. Then land.
 | R | get on and off the rover |
 | C | rover canopy: open, or sealed and pressurised |
 | M | site markers |
+| O | settings |
 | V | the data overlay: what you are standing on and where it came from |
 | T | time rate: held, real time, up to a day a second |
 | P | photography |
@@ -215,6 +216,18 @@ possible: flat shading, no invented micro-relief. Streamed data is cached in
 IndexedDB with a size cap, so revisiting somewhere costs nothing and an offline
 session keeps whatever you have already seen. `?offline=1` turns streaming off
 entirely and the game runs on the vendored data, with the overlay saying so.
+
+## Three ranges
+
+The ship carries as much as you like, the rover carries days, and the suit
+carries hours, so an expedition is a planning problem rather than a resource
+grind. Propulsion energy is unlimited by design: nobody is mining anything here
+in order to keep driving. What is limited is what the people inside need.
+
+The rover's navigation console does the arithmetic Apollo did. Every traverse
+they drove was planned under a walkback constraint: never further from the
+lander than you could walk home on the consumables you were carrying. The
+console shows that distance, and turns amber and then red as you approach it.
 
 ## Roadmap
 
