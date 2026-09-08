@@ -528,3 +528,275 @@ with a model line explicitly labelled "Dura-Cyl 160 HP (350 psig max. RV)."
   AIGA 106/19 makes the same call for piping: "If frost, ice, or condensation is
   permanent and/or grows on vacuum-jacketed components, monitor the components
   and check the vacuum level of that section." **[A]**
+
+---
+
+# 2. Piping and joints
+
+## 2.1 VJ piping vs foam-insulated piping vs bare line
+
+**Bare line.** Uninsulated pipe. Legitimate only for short runs where the heat
+leak and the frost/ice accretion are acceptable and nobody can touch it. On LOX
+service a bare line condenses atmospheric moisture and, more dangerously, liquid
+air on the outside — which is oxygen-enriched (~50 % O₂) as it drips. Bare line
+is also the worst case for relief sizing: JLab's design figures put bare metal
+at **25–40 kW/m²** under a cold-surface heat-flux condition, versus 1–7 kW/m²
+insulated. **[A]** —
+https://www.jlab.org/ehs/ehsmanual/Pressure%20and%20Vacuum%20Systems%20Supplement/PSS%20Part%204%20Overpressure%20Protection.htm
+
+**Foam-insulated line.** Cheap, field-repairable, no vacuum to maintain, and
+adequate for short or intermittent runs. Fails by moisture ingress → ice →
+cracking → more ingress (see §1.3). Vendor-reported heat leak in the range
+**5–20 W/m²** **[C]**.
+
+**Vacuum-jacketed (VJ) line.** Pipe-within-a-pipe with an evacuated, MLI-filled
+annulus. Vendor-reported **0.5–2.0 W/m²** **[C]**, i.e. roughly an order of
+magnitude better than foam — Chart claims "greater than 10 times better than
+traditional foam insulated pipe" **[C]**
+(https://www.chartindustries.com/Products/Vacuum-Insulated-Pipe). VJ is the
+default for anything long, anything that must stay single-phase at the far end,
+and anything where chilldown losses matter.
+
+*The decision, in review terms:* VJ buys you low heat leak and a frost-free
+outer surface (touchable, no liquid-air drip) at the cost of a maintained
+vacuum, expansion joints, bayonets, annulus relief devices, and a much harder
+field repair. Foam buys you simplicity at the cost of monotonic degradation.
+
+## 2.2 Why VJ piping needs expansion joints
+
+Because the inner pipe shrinks and the outer pipe does not.
+
+The inner line goes to 77 K (or 90 K, or 20 K); the jacket stays near ambient.
+Austenitic stainless contracts roughly 0.3 % from 293 K to 77 K — on a 30 m run
+that is close to 90 mm of differential movement that has to go *somewhere*.
+Without a take-up element the contraction loads the jacket, the supports, and
+every branch connection.
+
+> **[B] — the ~0.3 % contraction figure.** The standard reference for
+> 304 stainless linear contraction 293 K → 77 K is NIST's cryogenic material
+> property compilation, which draws on Corruccini and Gniewek (1961):
+> https://trc.nist.gov/cryogenics/Papers/Material_Properties/2000-Cryogenic_Material_Properties_Database.pdf
+> Read the exact coefficient off the NIST source before quoting a number in
+> course material; the 0.3 % here is the widely used engineering approximation,
+> not a value transcribed from the table.
+
+AIGA 106/19 makes the requirement explicit: "A flexibility analysis shall be
+performed to consider the thermal compensation of the inner pipe due to thermal
+contraction of the inner pipe (selection of bellows, identification of the
+fixed-point supports, and sliding supports)." It requires that expansion joints
+"be installed according to Standards of the Expansion Joint Manufacturers
+Association, Inc.," that flexible hoses be designed to ASME B31.3 or equivalent,
+and that "the bellows should be dimensioned for a minimum of 1000 cycle loads."
+It also notes the alternative: "Overall system flexibility can be addressed by
+adding expansion loops, specifically when external bellows are used." **[A]** —
+https://asiaiga.org/uploaded_docs/en_AIGA_106_19_Vacuum-Jacketed_Piping_in_Liquid_Oxygen_Service.pdf
+
+The 1000-cycle figure is a good design-review question: *how many cold cycles
+will this line actually see over its life, and does that exceed the bellows
+rating?* A test stand that chills down twice a day eats 1000 cycles in under
+two years.
+
+## 2.3 Why VJ piping needs a vacuum-annulus relief
+
+Because the annulus is a **sealed volume adjacent to a cryogen**, and if the
+inner pipe leaks, the annulus fills with liquid that then boils. Without a
+relief path, the jacket — designed only to hold out one atmosphere — becomes a
+pressure vessel and bursts.
+
+AIGA 106/19: an "Annular space relief device (typically incorporated within the
+vacuum pump out port to minimize penetrations to the vacuum jacket) is required
+on the vacuum jacket to prevent over pressurization of the annular space in case
+of internal leakage." **[A]** (same URL)
+
+Two details from the same document that matter in review:
+- The **pump-out port must not be blocked** by a wall or structure — it is a
+  relief path, not just a service port.
+- **A missing pump-out port plug is a symptom.** "If a vacuum pump out port plug
+  is missing, this could indicate an inner leak that should be investigated
+  immediately." **[A]** The plug blew because the annulus pressurised.
+
+Jefferson Lab's rule is that the insulating vacuum space "must also be relieved,"
+and points at **CGA S-1.3** for the required capacity. **[A]** —
+https://www.jlab.org/ehs/ehsmanual/Pressure%20and%20Vacuum%20Systems%20Supplement/PSS%20Part%204%20Overpressure%20Protection.htm
+JLab also carves out a practical exemption worth knowing: relief devices with set
+pressures below 30 psi protecting vacuum jackets for cryogenic piping ≤ NPS 6
+are not required to meet the full ASME BPVC requirements. **[A]**
+
+Fermilab's PIP-II team frames the large-scale version of the same problem:
+they size "vacuum vessel relief sizing to protect the cryogenic distribution
+system vacuum shells from over pressure during an internal line rupture."
+**[A]** — https://arxiv.org/abs/2307.08608
+
+## 2.4 Bayonet joints
+
+**What it is.** A demountable connection between two VJ lines made of two
+concentric-tube halves that slide into one another, male into female, with the
+seal made at the *warm* end and the cold ends never touching directly. It is
+long and slender on purpose.
+
+**Why not just a flange.** A flange on a cold line is a direct metal conduction
+path from ambient to cryogen, it frosts and drips, its gasket sees the full
+temperature swing, and it must be broken to service the line. A bayonet moves
+the seal away from the cold and uses a **static column of vapour** in the
+annulus between the two halves as the insulator.
+
+Industry description: the bayonet is "relatively long to provide for thermal
+isolation between the room temperature end of the joint and the cold piping.
+When one bayonet is inserted in the other and cryogenic fluid flows inside the
+inner tube, a static column of vapor fills the region between the two bayonets,"
+with sizes chosen for "a close sliding fit to keep the dimensions of this vapor
+column to a minimum and reduce heat loss due to convection." Each side keeps its
+own isolation vacuum. **[C]** — https://www.mtm-inc.com/how-cryogenic-bayonets-work.html
+
+It also solves contraction: the sliding fit lets the inner tube move as it cools
+without loading the joint. **[C]** (same source)
+
+**What engineers worry about:**
+- **Installation.** AIGA 106/19: "If not installed correctly, bayonet connections
+  can lead to leaks," and warns specifically about leakage into the annular
+  space, recommending designs "where axial forces for inner seal and flange
+  gaskets can be adjusted independently." **[A]**
+- **Icing at the joint.** AIGA 106/19 includes a figure captioned "Example of an
+  iced bayonet connection" as something to investigate — an iced bayonet means
+  the vapour column has been defeated or the annulus has failed. **[A]**
+- **LOX-specific ignition risk.** AIGA 106/19 flags that "Liquid oxygen leaking
+  into the annular space or the gap between the male/female parts of the bayonet
+  and being totally evaporated can, in the long term, enrich hydrocarbons on the
+  metal surface until an ignition occurs," alongside an uncontrolled pressure
+  release from the evaporation itself. **[A]** This is the reason LOX systems
+  have cleanliness standards at all — see **CGA G-4.1**, *Cleaning of Equipment
+  for Oxygen Service* (https://legacy.cganet.com/Publication/Details.aspx?id=G-4.1)
+  and **CGA G-4.4**, *Oxygen Pipeline and Piping Systems*
+  (https://legacy.cganet.com/Publication/Details.aspx?id=G-4.4). **[B]**
+- **Adequate support.** AIGA 106/19 devotes a figure to "well supported bayonet
+  connections" — an unsupported bayonet is a cantilever with a seal in it. **[A]**
+
+## 2.5 Flexible hoses, transfer lines and bellows
+
+### Why bellows exist
+
+Two jobs, and they are worth separating in a review:
+1. **Contraction take-up** in VJ line — the inner pipe shrinks relative to the
+   jacket, and a bellows absorbs the difference (§2.2).
+2. **Misalignment and motion** — flexible transfer hoses between a mobile dewar
+   and fixed plumbing, or across a thrust structure that moves under load.
+
+AIGA 106/19 distinguishes **internal and external bellows** (its Figure 3) — a
+bellows on the inner line inside the vacuum, versus one in the jacket itself.
+The choice changes what the vacuum sees and how supports must behave: "For vacuum
+jackets with external bellows, external pipe supports shall allow the piping
+system to move in order to relieve thermal expansion." **[A]**
+
+### How bellows fail
+
+**Squirm (instability)** — the failure mode unique to bellows and the one people
+have not usually heard of. When internal pressure exceeds the bellows' stability
+limit, the convolutions buckle sideways. US Bellows distinguishes two forms:
+*column squirm*, "a gross lateral shift of the centre section of the bellows,"
+associated with a large length-to-diameter ratio and analogous to column
+buckling; and *in-plane squirm*, "a shift or rotation of the plane of one or
+more convolutions such that the plane of these convolutions is no longer
+perpendicular to the axis," driven by high meridional bending stress at the root
+and crest. Critically: **a squirmed bellows cannot be reset — it must be
+scrapped**, and if left in service the deformity "leads to rapid mechanical
+fatigue and thus reduced cycle life." **[B]** —
+https://usbellows.com/resources/squirm-or-instability/
+
+**EJMA requires a safety factor of 3 against squirm**, and the designer must
+"limit movement capacity and flexibility to a level that insures that the
+bellows retains a conservative margin of column stability beyond the required
+design pressure." **[B]** — https://usbellows.com/resources/squirm-or-instability/
+and https://www.ejma.org/bellows/
+
+**Fatigue.** Bellows are displacement-cycled by definition, so cycle life is a
+design quantity, not an afterthought. AIGA 106/19's minimum 1000 cycles **[A]**
+is a floor. Material choice, cleaning, and heat treatment before forming all
+drive fatigue life, and "improper cleaning can result in premature failure."
+**[B]** — https://usbellows.com/resources/installation-maintenance-metallic-ej/typical-causes-of-failure/
+
+**Flow-induced vibration.** Above a critical velocity, flow across the
+convolution cavities sheds vortices at the convolution-pitch frequency; if that
+coincides with the bellows natural frequency (typically tens to a couple of
+hundred Hz depending on size) the convolutions resonate and accumulate fatigue
+cycles extremely fast. This is why high-velocity bellows get internal liners.
+**[C]**
+
+**Other causes.** Improper installation, overpressurisation, unforeseen system
+shifts, improper anchoring/guiding, and corrosion. **[B]** (US Bellows, above)
+
+*Design-review questions for any bellows:* Is it anchored and guided, or is it
+being asked to absorb a load it was not rated for? What is its cycle count over
+life? Is it lined? Has anyone checked the squirm margin at the actual MAWP, not
+the operating pressure?
+
+## 2.6 Fittings: welded vs brazed vs mechanical
+
+The general cold-service ranking is **welded > brazed > mechanical**, and the
+reason is differential thermal contraction at a seal interface.
+
+**Welded.** A full-penetration weld is continuous parent-equivalent metal. There
+is no seal to relax, no gasket to shrink away, no preload to lose. This is why
+cryogenic and high-vacuum systems are welded wherever a joint does not need to
+come apart. The cost is that inspection, repair and modification all require hot
+work, and every weld is a potential defect site — and austenitic stainless is
+sensitive to sensitisation and to weld-metal ferrite content at cryogenic
+temperatures.
+
+**Brazed.** A filler metal wets and flows into a close-fitting joint. Useful for
+dissimilar metals and for joints that are awkward to weld. The concern cold is
+the **mismatch in contraction between filler and parent** and the brittleness of
+some braze alloys at cryogenic temperature; braze joints are generally regarded
+as less predictable than welds below ~100 K and are avoided in primary cryogenic
+pressure boundaries where a weld is possible. **[C]**
+
+**Mechanical.** All mechanical joints share one problem: they rely on a
+maintained contact stress, and cooling changes that stress. Contraction can
+either tighten a joint (if the outer member shrinks onto the inner) or open it
+(if the sealing element shrinks faster than the metal around it). Thermal
+*cycling* is worse than steady cold, because it ratchets.
+
+- **VCR (metal gasket face seal).** The preferred demountable joint for cold and
+  for high vacuum. The seal is a deformable metal gasket crushed between two
+  polished gland faces — metal-to-metal, no elastomer, and the sealing stress is
+  set by plastic deformation rather than by an elastic element that can relax.
+  Swagelok describes the seal as made "when the gasket is compressed by two beads
+  during the engagement of a male nut or body hex and a female nut." **[B]** —
+  https://www.swagelok.com/downloads/webcatalogs/en/ms-13-150.pdf
+
+  NASA has quantified VCR performance specifically for cryogenic fluid
+  management, testing "the leak rate of Vacuum Coupling Radiation (VCR) fittings
+  over the temperature range from ambient to 20 K, both before and after exposure
+  to a launch [environment]," at a fitting test pressure of **31 bar (450 psig)**
+  in 1/4 in, 1/2 in and larger sizes, using a helium mass-spectrometer leak
+  detector in a thermal-vacuum chamber. **[A]** —
+  https://ntrs.nasa.gov/api/citations/20230009407/downloads/C3Or2A-06_Manuscript_CEC%202023_VCR%20Fittings_062223%20(002).pdf
+  Companion formal test reports:
+  https://ntrs.nasa.gov/api/citations/20230004260/downloads/VCR%20Fitting%20Test%20Final%20Report%20-%20Feb%202023.pdf **[A]** and
+  https://ntrs.nasa.gov/api/citations/20205011830/downloads/Fitting%20Leak%20Test%20Report%20Public%20Release%20-%20Dec%202020.pdf **[A]**
+
+  The very existence of this NASA test campaign is the teaching point: the
+  agency did not assume a catalogue fitting would hold at 20 K after vibration —
+  it measured it. That is the correct posture toward every mechanical joint in a
+  cryogenic system.
+
+- **Compression (ferrule / "Swagelok-type").** A swaged mechanical joint between
+  ferrules and the tube OD. Widely used and workable cold, but the seal is a
+  cold-formed interference that can relax under cycling; re-making a joint
+  changes its geometry. Generally accepted for instrument and pneumatic tubing,
+  treated with more caution on primary cryogenic liquid lines.
+
+- **Flare.** A metal-to-metal seal formed by the flared tube end. Sensitive to
+  flare quality and to the exact torque; the flare itself is worked material.
+
+- **CGA connections.** The threaded outlet connections on cylinders and liquid
+  cylinders. These are *not* a design choice — they are a standardised,
+  gas-specific, deliberately non-interchangeable interface whose entire purpose
+  is preventing a fuel container being connected to an oxidiser circuit. In a
+  design review the question about a CGA connection is never "is it good enough"
+  but "is it the right number for this service, and has anyone adapted around
+  it?" An adapter defeating a CGA keying scheme is a serious finding.
+
+- **Elastomer-sealed joints (O-rings) generally.** Most elastomers go through
+  their glass transition well above cryogenic temperature and stop sealing. Where
+  an elastomer must be used near cold, the design has to keep it warm — which is
+  exactly the logic of the extended bonnet (§3.1) and the bayonet (§2.4).
