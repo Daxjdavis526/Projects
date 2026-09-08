@@ -341,14 +341,15 @@ export function berryBush(seed = 1, scale = 1, withBerries = true) {
 export function grassClump(seed = 1, scale = 1, tall = false) {
   const r = rng32(seed);
   const parts = [];
-  const n = tall ? 6 : 4;
-  const lo = new THREE.Color(0.115, 0.155, 0.055);
-  const hi = new THREE.Color(0.32, 0.40, 0.13);
+  const n = tall ? 7 : 5;
+  const lo = new THREE.Color(0.075, 0.115, 0.038);
+  const hi = new THREE.Color(0.185, 0.255, 0.082);
   for (let i = 0; i < n; i++) {
     const a = r() * Math.PI * 2;
-    const len = (tall ? 0.62 + r() * 0.55 : 0.26 + r() * 0.30) * scale;
-    const g = blade(len, (tall ? 0.13 : 0.10) * scale, 0.42 + r() * 0.4, 3, 0.08);
-    xform(g, { rot: [-0.12 - r() * 0.25, a, 0], pos: [(r() - 0.5) * 0.22 * scale, 0, (r() - 0.5) * 0.22 * scale] });
+    const len = (tall ? 0.55 + r() * 0.48 : 0.24 + r() * 0.26) * scale;
+    // Blades stand up. Too much droop and a field reads as scattered litter.
+    const g = blade(len, (tall ? 0.10 : 0.08) * scale, 0.14 + r() * 0.18, 3, 0.05);
+    xform(g, { rot: [-0.06 - r() * 0.14, a, 0], pos: [(r() - 0.5) * 0.19 * scale, 0, (r() - 0.5) * 0.19 * scale] });
     parts.push(swayRamp(paint(g, lo, hi), 1.5, 1.1));
   }
   return mergeGeometries(parts);

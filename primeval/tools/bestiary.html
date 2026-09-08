@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PRIMEVAL · bestiary</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b0d0f;color:#cfcac2;
+    font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace;overflow:hidden}
+  canvas{display:block;position:fixed;inset:0}
+  #ui{position:fixed;left:12px;top:12px;z-index:5}
+  #ui button{font:10px/1 monospace;letter-spacing:.12em;margin:0 4px 4px 0;padding:6px 9px;
+    background:#15181b;color:#9a948b;border:1px solid #2a2e33;cursor:pointer}
+  #ui button.sel{background:#ffb347;color:#111;border-color:#ffb347}
+  #info{position:fixed;right:12px;top:12px;text-align:right;z-index:5;font-size:11px}
+  #info b{color:#ffb347;font-weight:400;letter-spacing:.2em}
+  #hint{position:fixed;left:12px;bottom:10px;color:#5b564e;font-size:10px;letter-spacing:.1em}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui"></div>
+<div id="info"></div>
+<div id="hint">DRAG to orbit · WHEEL to zoom · SPACE cycles gait speed · G toggles ground</div>
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/three.module.min.js", "three/addons/": "../vendor/three/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { buildCreature, makeCreatureMaterial } from '../src/life/anatomy.js';
+import { SPECIES, SPECIES_LIST, creatureHeight } from '../src/life/species.js';
+import { Creature } from '../src/life/creature.js';
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0d0f);
+const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 900);
+
+const key = new THREE.DirectionalLight(0xfff0dd, 3.2);
+key.position.set(6, 9, 5); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = -22; key.shadow.camera.right = 22;
+key.shadow.camera.top = 22; key.shadow.camera.bottom = -22;
+key.shadow.camera.far = 60;
+const rim = new THREE.DirectionalLight(0x8fc8ff, 2.4); rim.position.set(-7, 4, -8);
+const fill = new THREE.DirectionalLight(0xffffff, 1.1); fill.position.set(0, 3, 14);
+scene.add(key, rim, fill, new THREE.HemisphereLight(0x6a8cae, 0x2a2620, 1.5));
+
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(60, 64).rotateX(-Math.PI / 2),
+  new THREE.MeshStandardMaterial({ color: 0x1a1d18, roughness: 1 }));
+ground.receiveShadow = true;
+scene.add(ground);
+const grid = new THREE.GridHelper(60, 60, 0x2a2f28, 0x191d18);
+grid.position.y = 0.005; scene.add(grid);
+
+const material = makeCreatureMaterial();
+material.userData.eye.value = 1.4;
+
+// A metre stick, so the scale claims in species.js can be checked by eye.
+const ruler = new THREE.Group();
+for (let i = 0; i < 20; i++) {
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1, 0.06),
+    new THREE.MeshBasicMaterial({ color: i % 2 ? 0x556 : 0xccbba0 }));
+  bar.position.set(-6, i + 0.5, 0);
+  ruler.add(bar);
+}
+scene.add(ruler);
+
+let current = null;
+const world = { heightAt: () => 0, waterAt: () => null, gravity: 11.4 };
+const ctx = {
+  playerPos: new THREE.Vector3(0, 1.7, 40), playerNoise: 0, dayT: 1, world,
+  cover: 1, time: 0, findPrey: () => null, onAttack: () => {}, onCall: () => {},
+};
+
+let speedMode = 0;
+const SPEEDS = ['idle', 'walk', 'run'];
+
+function show(id) {
+  if (current) { scene.remove(current.mesh); }
+  const sp = SPECIES[id];
+  const built = buildCreature(sp.body, 7 + sp.name.length * 13);
+  const c = new Creature(sp, built.geometry, material);
+  c.spawn(0, 0, 0, { scale: 1 });
+  c.yaw = c.targetYaw = 0.6;
+  scene.add(c.mesh);
+  current = c;
+  const g = built.geometry;
+  g.computeBoundingBox();
+  const bb = g.boundingBox;
+  document.getElementById('info').innerHTML =
+    `<b>${sp.name}</b><br>${sp.binomial}<br>${sp.klass}<br>` +
+    `stated ${sp.lengthM} m · mesh ${(bb.max.z - bb.min.z).toFixed(1)} m long, ${bb.max.y.toFixed(1)} m tall<br>` +
+    `${g.attributes.position.count} verts · ${(g.index.count / 3) | 0} tris · ${built.bones.length} bones<br>` +
+    `gait: ${SPEEDS[speedMode]}`;
+  const span = Math.max(bb.max.z - bb.min.z, bb.max.y - bb.min.y);
+  dist = qp.has('dist') ? parseFloat(qp.get('dist')) : Math.max(4, span * 1.25);
+  target.set(0, bb.max.y * 0.5, (bb.max.z + bb.min.z) * 0.5);
+  document.querySelectorAll('#ui button').forEach(b =>
+    b.classList.toggle('sel', b.dataset.id === id));
+}
+
+const ui = document.getElementById('ui');
+for (const sp of SPECIES_LIST) {
+  const b = document.createElement('button');
+  b.textContent = sp.name;
+  b.dataset.id = sp.id;
+  b.onclick = () => show(sp.id);
+  ui.appendChild(b);
+}
+
+const qp = new URLSearchParams(location.search);
+let yaw = 0.9, pitch = 0.24, dist = 18, dragging = false, px = 0, py = 0;
+let lockView = false;
+if (qp.has('yaw')) { yaw = parseFloat(qp.get('yaw')); lockView = true; }
+if (qp.has('pitch')) pitch = parseFloat(qp.get('pitch'));
+const target = new THREE.Vector3(0, 2, 0);
+canvas.addEventListener('mousedown', e => { dragging = true; px = e.clientX; py = e.clientY; });
+addEventListener('mouseup', () => dragging = false);
+addEventListener('mousemove', e => {
+  if (!dragging) return;
+  yaw -= (e.clientX - px) * 0.006;
+  pitch = Math.max(-0.4, Math.min(1.2, pitch + (e.clientY - py) * 0.005));
+  px = e.clientX; py = e.clientY;
+});
+addEventListener('wheel', e => { dist = Math.max(2, Math.min(160, dist * (1 + Math.sign(e.deltaY) * 0.12))); }, { passive: true });
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { speedMode = (speedMode + 1) % 3; show(current.sp.id); }
+  if (e.code === 'KeyG') { ground.visible = grid.visible = !ground.visible; }
+});
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+let last = performance.now();
+function loop(now) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  ctx.time += dt;
+  if (current) {
+    const st = current.sp.stats;
+    current.desiredSpeed = speedMode === 0 ? 0 : speedMode === 1 ? st.walk : st.run;
+    current.speed = current.desiredSpeed;
+    current.headAim = speedMode === 0 ? -0.3 : 0.1;
+    current.pose(dt, ctx, 1);
+    current.mesh.position.set(0, 0, 0);
+    current.mesh.rotation.set(0, lockView ? 0 : 0.6, 0, 'YXZ');
+  }
+  camera.position.set(
+    target.x + Math.sin(yaw) * Math.cos(pitch) * dist,
+    target.y + Math.sin(pitch) * dist,
+    target.z + Math.cos(yaw) * Math.cos(pitch) * dist);
+  camera.lookAt(target);
+  renderer.render(scene, camera);
+}
+if (qp.has('gait')) speedMode = parseInt(qp.get('gait'));
+show(qp.get('id') || 'ashmaw');
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -28,6 +28,9 @@ let last = performance.now();
 
 async function build() {
   game = new Game(canvas, quality, hud);
+  // Exposed on purpose: this is a toy, and being able to poke at the running
+  // world from the console is most of the fun of having built it.
+  window.PRIMEVAL = game;
   installWorld(game);
   await game.load((p, s) => hud.progress(p, s));
   hud.hideLoading();

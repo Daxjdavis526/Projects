@@ -13,6 +13,8 @@ import {
 } from './world/field.js';
 import { Player } from './player/player.js';
 import { Colliders } from './player/physics.js';
+import { Inventory } from './player/inventory.js';
+import { Gear } from './player/gear.js';
 import { clamp, lerp, smoothstep } from './math/noise.js';
 
 export const MODE = {
@@ -38,6 +40,9 @@ export class Game {
 
     this.colliders = new Colliders();
     this.player = new Player(this.camera, this.colliders);
+    this.inventory = new Inventory();
+    this.gear = null;
+    this.invOpen = false;
 
     this.sky = new Sky(this.scene);
     this.daylight = new Daylight(this.scene, { dayLength: PLANET.dayLength });
@@ -100,7 +105,14 @@ export class Game {
 
     await step(0.06, 'surveying thera');
     this.setLocale(this.planetLocale());
-    this.landingSite = findLandingSite(1180, 240, BIOME.JUNGLE);
+    // ?x=&z= drops you anywhere on THERA, ?t= sets the hour (0..1). Used for
+    // shooting screenshots of places that are a long walk away.
+    const qp = new URLSearchParams(location.search);
+    const qx = parseFloat(qp.get('x')), qz = parseFloat(qp.get('z'));
+    this.landingSite = Number.isFinite(qx) && Number.isFinite(qz)
+      ? { x: qx, z: qz, h: heightAt(qx, qz), biome: -1 }
+      : findLandingSite(1180, 240, BIOME.JUNGLE);
+    this.debugPhase = parseFloat(qp.get('t'));
 
     await step(0.16, 'raising terrain');
     this.renderer.attach(this.scene);
@@ -115,7 +127,7 @@ export class Game {
     this.terrain.flush(s.x, s.z, 220);
 
     await step(0.55, 'lighting the sky');
-    this.daylight.setPhase(0.30);
+    this.daylight.setPhase(Number.isFinite(this.debugPhase) ? this.debugPhase : 0.30);
     this.daylight.update(0, this.camera, this.sky, { atmosphere: 1 });
 
     // Flashlight lives on the camera and is off until you need it.
@@ -125,7 +137,14 @@ export class Game {
     this.camera.add(this.flashlight, this.flashlight.target);
     this.scene.add(this.camera);
 
-    await step(0.75, 'seeding life');
+    await step(0.72, 'checking equipment');
+    this.gear = new Gear(this);
+    this.inventory.add('arrow', 24);
+    this.inventory.add('meat_cooked', 1);
+    this.gear.equip(1);
+    this.bindHud();
+
+    await step(0.80, 'seeding life');
     for (const sys of this.systems) if (sys.load) await sys.load(this);
 
     await step(0.95, 'final checks');
@@ -139,6 +158,34 @@ export class Game {
   }
 
   addSystem(sys) { this.systems.push(sys); return sys; }
+
+  bindHud() {
+    this.hud.objective('OBJECTIVE', 'Survey Site ECHO-7',
+      'Scan three subjects, then return to the HALBERD.');
+    this.refreshInventory();
+  }
+
+  refreshInventory() {
+    this.hud.inventory(this.invOpen, this.inventory.list(), (id) => {
+      const line = this.inventory.consume(id, this.player);
+      if (line) this.hud.log(line, 'good');
+      this.refreshInventory();
+      this.emit('ate', id);
+    });
+  }
+
+  toggleInventory(open) {
+    this.invOpen = open ?? !this.invOpen;
+    this.refreshInventory();
+    if (this.invOpen) this.input.exitLock();
+    else this.input.requestLock();
+  }
+
+  /** Something made a noise at a place. Predators care. */
+  makeNoise(pos, loudness, radius) {
+    this.eco?.alarm(pos, radius, 'noise');
+    this.emit('noise', pos, loudness, radius);
+  }
 
   // --- frame ---------------------------------------------------------------
 
@@ -174,13 +221,34 @@ export class Game {
       aurora: this.auroraStrength ?? 0,
     });
     // Fog thins as the air does, and clears entirely in vacuum.
-    const baseDensity = this.locale.id === 'planet' ? 0.00088 : 0.0;
+    const baseDensity = this.locale.id === 'planet' ? 0.00112 : 0.0;
     this.daylight.fog.density = baseDensity * Math.pow(this.atmosphere, 1.6) * (1 + this.storm * 2.4)
       * (this.fogBoost ?? 1);
+
+    // Under water the whole scene turns into a green-black soup.
+    const wl = this.locale.waterAt ? this.locale.waterAt(cam.x, cam.z) : null;
+    this.underwater = wl !== null && cam.y < wl - 0.05;
+    if (this.underwater) {
+      const deep = clamp((wl - cam.y) / 12, 0, 1);
+      this.daylight.fog.color.setRGB(lerp(0.045, 0.010, deep), lerp(0.115, 0.032, deep), lerp(0.125, 0.055, deep));
+      this.daylight.fog.density = lerp(0.055, 0.14, deep);
+    }
 
     this.sky.update(this.camera, this.clock);
 
     for (const sys of this.systems) if (sys.update) sys.update(dt, this);
+
+    if (this.gear) {
+      if (input.hit('Tab')) this.toggleInventory();
+      this.gear.update(dt, input, {
+        inventory: this.inventory,
+        world: this.locale,
+        eco: this.eco,
+        playerPos: this.camera.position,
+        makeNoise: (p, l, r) => this.makeNoise(p, l, r),
+        onSplash: (p) => this.emit('splash', p),
+      });
+    }
 
     this.terrain.setViewDistance(this.viewDistanceFor(alt));
     this.terrain.update(cam.x, cam.z, dt);
@@ -217,6 +285,19 @@ export class Game {
   updateHud(dt) {
     const hud = this.hud, p = this.player;
     hud.vitals(p);
+
+    if (this.gear) {
+      hud.weapon({ ...this.gear.hudState(), hidden: this.mode !== 'ON_FOOT' });
+      const it = this.gear.interaction;
+      hud.prompt(it?.key ?? 'E', it?.label ?? '');
+      hud.scan(this.gear.scanT > 0.02 ? (this.gear.scanResult ?? {
+        name: 'ANALYSING', klass: `${Math.round(this.gear.scanT * 100)}%`, rows: [], desc: '',
+      }) : null);
+      // Crosshair turns hostile when something dangerous is looking back.
+      const threat = this.eco?.nearest(this.camera.position, 60,
+        (c) => c.isPredator && (c.state === 'CHASE' || c.state === 'ATTACK' || c.state === 'STALK'));
+      hud.crosshair(this.mode === 'ON_FOOT' && !this.invOpen, !!threat);
+    }
     hud.tickSubtitle(dt);
     hud.tickLogs(performance.now());
 

@@ -80,7 +80,7 @@ export class Vegetation {
 
     this.layers = [
       new Layer('canopy', v(canopyTree, 3), {
-        cell: 21, range: R, capacity: N(1100), scaleMin: 0.72, scaleMax: 1.55,
+        cell: 21, range: R, capacity: N(1900), scaleMin: 0.72, scaleMax: 1.55,
         castShadow: true, collide: 0.55, seed: 11, falloff: 0.45,
         density: (s) => s.biome === BIOME.JUNGLE ? 1.35 : s.biome === BIOME.SWAMP ? 0.42
           : s.biome === BIOME.PLAINS ? 0.13 : 0,
@@ -97,7 +97,7 @@ export class Vegetation {
           : s.biome === BIOME.PLAINS ? 0.35 : 0,
       }),
       new Layer('cycad', v(cycad, 2), {
-        cell: 12, range: Math.min(R, 300), capacity: N(700), castShadow: true,
+        cell: 12, range: Math.min(R, 340), capacity: N(1300), castShadow: true,
         collide: 0.2, seed: 43, falloff: 0.4,
         density: (s) => s.biome === BIOME.PLAINS ? 0.8 : s.biome === BIOME.BEACH ? 0.6
           : s.biome === BIOME.JUNGLE ? 0.45 : 0,
@@ -108,7 +108,7 @@ export class Vegetation {
         density: (s) => s.biome === BIOME.SWAMP ? 1.4 : (s.river > 0.25 ? 0.6 : 0),
       }),
       new Layer('spire', v(spireTree, 2), {
-        cell: 15, range: R, capacity: N(800), castShadow: true, collide: 0.35,
+        cell: 15, range: R, capacity: N(1700), castShadow: true, collide: 0.35,
         seed: 61, falloff: 0.45,
         density: (s) => s.biome === BIOME.HIGHLAND ? 1.15 : s.biome === BIOME.ALPINE ? 0.3 : 0,
       }),

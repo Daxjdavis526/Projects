@@ -30,9 +30,9 @@ const C = {
   plainsDry: [0.375, 0.345, 0.168],
   swamp: [0.115, 0.145, 0.086],
   swampMud: [0.135, 0.118, 0.082],
-  rock: [0.255, 0.245, 0.235],
+  rock: [0.225, 0.212, 0.196],
   rockDark: [0.155, 0.148, 0.145],
-  highland: [0.235, 0.245, 0.17],
+  highland: [0.175, 0.205, 0.105],
   basalt: [0.068, 0.062, 0.062],
   ash: [0.20, 0.175, 0.165],
   scoria: [0.28, 0.115, 0.07],
@@ -74,7 +74,7 @@ export function groundColor(h, slope, moist, temp, hot, river, out = [0, 0, 0]) 
       base = mix3(C.swampMud, C.swamp, smoothstep(0.2, 0.8, moist), tmpA);
       break;
     case BIOME.HIGHLAND:
-      base = mix3(C.highland, C.rock, smoothstep(300, 900, h), tmpA);
+      base = mix3(C.highland, C.rock, smoothstep(520, 1250, h), tmpA);
       break;
     case BIOME.VOLCANIC: {
       base = mix3(C.basalt, C.ash, smoothstep(0.7, 0.95, hot), tmpA);
@@ -87,7 +87,7 @@ export function groundColor(h, slope, moist, temp, hot, river, out = [0, 0, 0]) 
     }
   }
   // Exposed rock on anything steep, everywhere.
-  const rockT = smoothstep(0.30, 0.62, slope) * (biome === BIOME.OCEAN ? 0.4 : 1);
+  const rockT = smoothstep(0.36, 0.70, slope) * (biome === BIOME.OCEAN ? 0.4 : 1);
   const rockCol = h > 1500 ? C.alpine : (hot > 0.68 ? C.basalt : C.rock);
   base = mix3(base, rockCol, rockT, tmpA);
   // Snow caps sit on top of everything cold and not-vertical.
