@@ -177,8 +177,11 @@ et al., NTRS 19740019219).
 | Surveyor horizon glow: ~6 µm grains, 3–30 cm above the surface, hops of 6–60 cm | NTRS 19730035060 and related |
 
 SELENE therefore renders dust as strictly ballistic particles with no drag, no
-billowing and no lingering cloud, plus a gradual wear/tint on boots, lower
-suit and rover.
+billowing and no lingering cloud, plus a gradual wear/tint on the rover, which
+accumulates it while driving and is cleaned by restocking at the ship. Boots,
+lower suit and carried equipment do not yet accumulate it: the Apollo record is
+emphatic that they did, and that is a gap in this simulation rather than a
+judgement about the Moon.
 
 ---
 

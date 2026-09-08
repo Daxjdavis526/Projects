@@ -261,9 +261,25 @@ function boundingRadius(positions, n) {
    tree covers hundreds of kilometres, which is as far as the curvature of a
    1737 km sphere lets anything be visible anyway. */
 
-const DIRS = 8;
-const DX = [0, 1, 1, 1, 0, -1, -1, -1];      // east is +a, north is -b
-const DY = [-1, -1, 0, 1, 1, 1, 0, -1];
+/* One source for the azimuth count rather than two. `TERRAIN.horizonDirs` said
+   eight and this said eight independently, so the constant read like a knob and
+   turning it would have changed nothing.
+
+   It is still not a free knob, and the comment has to say why: the vertex
+   attributes are two vec4s, the shader interpolates exactly these eight stored
+   angles, and the march below walks whole grid cells, which only lands on real
+   azimuths for four or eight directions. Sixteen — which would halve the
+   banding at the poles at double the per-vertex cost — needs a float ray march
+   here and a third attribute there. Until that is measured, eight is what
+   everything agrees on, and now it agrees in one place. */
+const DIRS = TERRAIN.horizonDirs;
+/* Azimuth d * 360/DIRS clockwise from north; east is +a and north is -b. */
+const DX = [], DY = [];
+for (let d = 0; d < DIRS; d++) {
+  const az = d * 2 * Math.PI / DIRS;
+  DX.push(Math.round(Math.sin(az)));
+  DY.push(-Math.round(Math.cos(az)));
+}
 
 /* Below this vertex spacing a tile stops measuring its own horizon. */
 export const HORIZON_MIN_SPACING = 4.0;      // metres

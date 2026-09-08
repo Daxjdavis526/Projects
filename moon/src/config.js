@@ -36,7 +36,9 @@ export const SYNODIC_MONTH  = 29.530589 * 86400;   // s  (one lunar day/night cy
 export const FRAME = {
   originLattice: 256,     // m, floating origin snaps to this grid
   originRadius: 2048,     // m, rebase once the camera drifts this far
-  detailLattice: 4096,    // m, lattice the procedural shader detail is keyed to
+  /* No `detailLattice` here: the procedural detail is keyed to real geographic
+     position through the tile builder, not to a lattice in the shader, so a
+     4096 m constant described a design that was replaced and never removed. */
   near: 0.05,             // m
   far: 6.0e6,             // m, comfortably past the far limb from orbit
 };
@@ -62,19 +64,25 @@ export const TERRAIN = {
 };
 
 /* --- quality tiers --------------------------------------------------------- */
+/* `bloom` and `cascades` used to sit in every tier and were read by nothing.
+   There is no post-processing chain in this project — no EffectComposer is
+   imported, and the exposure model is analytic — and there is one directional
+   light with one shadow map rather than a cascade. Both keys described a
+   renderer that was planned and not built, which is the most misleading kind of
+   dead configuration: it reads as a feature that is switched off. */
 export const QUALITY = {
-  performance: { maxLevel: 15, tileBudget: 420,  cache: 700,  shadow: 1024, cascades: 2,
-                 apron: 16, rocks: 0.35, pixelRatio: 1.0, bloom: false, imagery: true },
-  balanced:    { maxLevel: 17, tileBudget: 700,  cache: 1100, shadow: 2048, cascades: 3,
-                 apron: 24, rocks: 0.7,  pixelRatio: 1.25, bloom: true,  imagery: true },
-  high:        { maxLevel: 18, tileBudget: 1000, cache: 1500, shadow: 2048, cascades: 3,
-                 apron: 32, rocks: 1.0,  pixelRatio: 1.5, bloom: true,  imagery: true },
-  ultra:       { maxLevel: 18, tileBudget: 1400, cache: 2000, shadow: 4096, cascades: 4,
-                 apron: 32, rocks: 1.4,  pixelRatio: 2.0, bloom: true,  imagery: true },
+  performance: { maxLevel: 15, tileBudget: 420,  cache: 700,  shadow: 1024,
+                 apron: 16, rocks: 0.35, pixelRatio: 1.0,  imagery: true },
+  balanced:    { maxLevel: 17, tileBudget: 700,  cache: 1100, shadow: 2048,
+                 apron: 24, rocks: 0.7,  pixelRatio: 1.25, imagery: true },
+  high:        { maxLevel: 18, tileBudget: 1000, cache: 1500, shadow: 2048,
+                 apron: 32, rocks: 1.0,  pixelRatio: 1.5,  imagery: true },
+  ultra:       { maxLevel: 18, tileBudget: 1400, cache: 2000, shadow: 4096,
+                 apron: 32, rocks: 1.4,  pixelRatio: 2.0,  imagery: true },
   /* Scientific visualisation: measured data with as little artistic processing
-     as possible. Flat Lambert shading, no procedural micro-relief, no bloom. */
-  science:     { maxLevel: 17, tileBudget: 900,  cache: 1300, shadow: 2048, cascades: 3,
-                 apron: 24, rocks: 0.0,  pixelRatio: 1.25, bloom: false, imagery: true,
+     as possible. Flat Lambert shading and no procedural micro-relief. */
+  science:     { maxLevel: 17, tileBudget: 900,  cache: 1300, shadow: 2048,
+                 apron: 24, rocks: 0.0,  pixelRatio: 1.25, imagery: true,
                  plain: true, noProcedural: true },
 };
 export const DEFAULT_QUALITY = 'high';
@@ -127,16 +135,24 @@ export const EXPOSURE = {
    roughly 60 % of a terrestrial runner's. See RESEARCH.md section 8. */
 export const PLAYER = {
   height: 1.85, radius: 0.34, eye: 1.62, mass: 82, suitMass: 55,
-  walk: 1.1, lope: 2.6, sprint: 3.6,     // m/s
+  lope: 2.6, sprint: 3.6,                 // m/s
   jumpHeight: 0.45,                       // m at 1/6 g
-  slopeLimit: 32 * Math.PI / 180,
-  slideAccel: 0.9,
   airControl: 0.12,
-  stepUp: 0.45,
   fallHurt: 6.0, fallFatal: 11.0,         // m/s impact speed
   jetpackAccel: 18.0,                     // m/s^2 (FICTIONAL)
   jetpackHeatUp: 0.13, jetpackHeatDown: 0.085,  // fraction per second
 };
+/* Four entries used to sit in that table and be read by nothing: `walk`,
+   `slopeLimit`, `slideAccel` and `stepUp`. They are gone rather than wired up,
+   because wiring them up would make the simulation worse. There is no slope
+   limit and no slide acceleration in `physics/player.js` on purpose: gravity
+   pulls you downhill with g·sin θ and a boot resists with at most 0.75·g·cos θ,
+   so the ground stops being standable exactly where tan θ passes the friction
+   angle — about 37° on undisturbed regolith — and nothing special-cases it.
+   A `slopeLimit: 32°` constant sitting next to that read like the physics
+   contract and was not one. The walking speed comes out of the Froude-number
+   gait threshold in the same file, and there is no step-up because there is no
+   step-up. */
 
 /* Suit consumables. Apollo's PLSS carried ~0.85 kg of oxygen for an eight-hour
    EVA (~0.09 kg/h at work rates); the xEMU design point is 8 h + 1 h reserve.
@@ -176,8 +192,13 @@ export const ROVER = {
   motorForce: 3600, brakeForce: 5200, boostFactor: 2.4,  // N total
   speedMax: 5.0, speedBoost: 8.3,                        // m/s (18 / 30 km/h)
   grip: 0.62,                                            // regolith friction
-  slopeMax: 25 * Math.PI / 180,
-  cabinVolume: 9.0,                                      // m^3, like the LER trial
+  /* No `slopeMax` here either, for the reason above: what a wheel can do on a
+     slope falls out of the traction limit, which is the friction coefficient
+     times the normal load, and the normal load is what a sixth of a gravity
+     leaves. A 25 degree constant would have been a second, disagreeing answer.
+     The cabin is nine cubic metres, like the LER pressurised-rover trial, which
+     is a design note and not a simulation input, so it is written here rather
+     than stored as a number nothing reads. */
   pressuriseTime: 45,                                    // s
   supplies: { o2: 34, co2: 40, water: 120, food: 14 },   // kg, kg, kg, days-of-food
   boostHeatUp: 0.09, boostHeatDown: 0.05,
@@ -191,7 +212,9 @@ export const ROVER = {
 export const SHIP = {
   radius: 3.6, height: 9.5, legSpan: 12.4,
   padRadius: 16.0, padFeather: 11.0,   // the one place terrain is edited (FICTIONAL)
-  interiorVolume: 154,                 // m^3 pressurised, two decks plus the airlock
+  /* Two decks plus the airlock come to about 154 m^3 pressurised. Nothing
+     simulates a volume — the airlock is a ramp, not a gas model — so that is a
+     design note in a comment rather than a constant nothing reads. */
   airlockCycle: 22,                    // s
 };
 

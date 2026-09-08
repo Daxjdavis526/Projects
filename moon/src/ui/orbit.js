@@ -203,9 +203,17 @@ export class OrbitPicker {
     el('o-sun').textContent = sky
       ? `${sky.sunEl.toFixed(1)}° elevation, ${sky.sunAz.toFixed(0)}° azimuth`
       : '—';
-    el('o-earth').textContent = sky
-      ? (sky.earthEl > 0 ? `${sky.earthEl.toFixed(0)}° above the horizon` : 'never visible: far side')
-      : '—';
+    /* Three answers, not two. Below the horizon *now* and out of the Earth's
+       reach *for good* are different facts, and `ephemerisAt` has always
+       separated them — this printed "never visible: far side" for any negative
+       elevation, which is the exact bug the README records fixing elsewhere,
+       still live in the picker. Shackleton is 90.2 degrees from the mean
+       sub-Earth point: the Earth sits on its horizon and rises and sets over a
+       month, and calling that the far side is simply wrong. */
+    el('o-earth').textContent = !sky ? '—'
+      : sky.farSide ? 'never visible: far side'
+      : sky.earthEl > 0 ? `${sky.earthEl.toFixed(0)}° above the horizon`
+      : 'below the horizon now; librates into view over a month';
 
     const unit = this.geologyAt(p.lat, p.lon);
     el('o-geol').textContent = unit || '—';

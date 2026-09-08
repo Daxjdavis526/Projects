@@ -32,6 +32,7 @@ import { Streams } from './data/streams.js';
 import { Cache } from './data/cache.js';
 import { SurfaceStreamer } from './data/surface.js';
 import { TemperatureMap } from './data/temperature.js';
+import { GravityMap } from './data/gravity.js';
 import { EVA } from './game/eva.js';
 import { Descent } from './game/descent.js';
 import { Base } from './game/base.js';
@@ -53,6 +54,11 @@ import { Nav } from './ui/nav.js';
 const DATA = new URL('../data/', import.meta.url).href;
 const params = new URLSearchParams(location.search);
 const el = (id) => document.getElementById(id);
+
+/* The rates T cycles through: fixed, then realistic, then every accelerated
+   step the config table names. One list, built from the table the brief's
+   three modes are described in. */
+const TIME_RATES = [...TIME.modes.fixed, ...TIME.modes.realistic, ...TIME.modes.accelerated];
 
 const state = {
   quality: QUALITY[params.get('quality')] || QUALITY[DEFAULT_QUALITY],
@@ -175,6 +181,16 @@ async function start() {
   if (manifest.temperature) {
     try { temperature = await new TemperatureMap(manifest.temperature).load(DATA); }
     catch (e) { console.warn('temperature maps unavailable:', e.message); }
+  }
+  /* GRAIL's free-air anomaly, likewise vendored. This file has been in the
+     repository since the pipeline first ran and had no reader anywhere, while
+     DATA_SOURCES.md described the layer as streamed *and* vendored — so the
+     gravity row was the one line on the science overlay with no offline
+     fallback at all. */
+  let gravity = null;
+  if (manifest.gravity) {
+    try { gravity = await new GravityMap(manifest.gravity).load(DATA); }
+    catch (e) { console.warn('gravity map unavailable:', e.message); }
   }
 
   progress('building terrain', 0.85);
@@ -542,8 +558,15 @@ async function start() {
     if (e.code === 'KeyH') { state.showHelp = !state.showHelp; el('help').style.display = state.showHelp ? 'block' : 'none'; }
     if (e.code === 'KeyV') { state.showScience = !state.showScience; el('science').style.display = state.showScience ? 'block' : 'none'; }
     if (e.code === 'KeyT') {
-      const rates = [0, 1, 60, 600, 3600, 21600, 86400];
-      state.timeRate = rates[(rates.indexOf(state.timeRate) + 1) % rates.length];
+      /* From the config table rather than from a copy of it. The brief asked
+         for REALISTIC, ACCELERATED and FIXED; `TIME.modes` has said what each
+         one means since the first commit and this held its own list, so the
+         table was decorative and the two could drift apart silently. */
+      state.timeRate = TIME_RATES[(TIME_RATES.indexOf(state.timeRate) + 1) % TIME_RATES.length];
+      say(state.timeRate === 0 ? 'time held'
+        : state.timeRate === 1 ? 'time realistic'
+        : `time ${fmtRate(state.timeRate)}`, 2000);
+      sound.beep('select');
     }
     /* G steps outside and back: on foot you are a person with a suit and a
        clock, in the free camera you are nobody and nothing runs out. */
@@ -1040,7 +1063,7 @@ async function start() {
       } : null);
     }
 
-    historic.update(cam.lat, cam.lon, stage.origin.origin, dt, local.sunDir);
+    historic.update(cam.lat, cam.lon, stage.origin.origin, dt, local.sunDir, state.simMs);
     if (base) {
       base.step(dt, eva ? eva.player.llh : null);
       base.place(stage.origin.origin);
@@ -1176,7 +1199,8 @@ async function start() {
 
     if (state.showScience && now - probeCache.t > 250) {
       probeCache.t = now;
-      updateScience(heightfield, geology, cam, local, eph, surface, streams, temperature, historic);
+      updateScience(heightfield, geology, cam, local, eph, surface, streams, temperature, historic,
+                    gravity);
     }
   }
 
@@ -1283,11 +1307,25 @@ const equipmentLine = () =>
   `jetpack ${PLAYER.jetpackAccel.toFixed(1)} m/s² ${tag(LABEL.FICTIONAL)}` +
   '<span class="est"> a plausible near-future design, not flown hardware</span>';
 
+/* The gravity row, from whichever source has an answer. */
+const vendoredGravity = (map, cam) => {
+  const g = map && map.at(cam.lat, cam.lon);
+  return g ? g.freeAir_mGal : null;
+};
+const drawGravity = (mGal, where) => {
+  if (mGal === null || mGal === undefined) return false;
+  el('d-grav').innerHTML =
+    `${(1.6246 + mGal * 1e-5).toFixed(4)} m/s² ${tag(LABEL.MEASURED)}` +
+    `<span class="est"> free-air ${mGal >= 0 ? '+' : ''}${mGal.toFixed(0)} mGal, ${where}</span>`;
+  return true;
+};
+
 let sciencePending = false;
 let scienceRemote = null;
 let scienceAt = { lat: 999, lon: 999 };
 
-function updateScience(hf, geology, cam, local, eph, streamer, streams, temperature, historic) {
+function updateScience(hf, geology, cam, local, eph, streamer, streams, temperature, historic,
+                       gravity) {
   const p = hf.probe(cam.lat, cam.lon);
   el('d-topo').innerHTML = `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
   el('d-detail').innerHTML = Math.abs(p.proceduralHeight) > 0.001
@@ -1356,8 +1394,13 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
      them apart is the entire reason this overlay exists. Until now they were
      both a bare null and both rendered as whatever the row happened to say
      last, which could be a reading from a place you left ten kilometres ago. */
+  /* Gravity first, from the disk, so the row is right before any request has
+     come back and stays right if none ever does. A streamed reading overwrites
+     it below when there is one. */
+  const haveVendoredG = drawGravity(vendoredGravity(gravity, cam), 'GRAIL, vendored 4 ppd');
   if (streams && !streams.enabled) {
-    for (const id of ['d-min', 'd-grav', 'd-count']) el(id).textContent = 'offline';
+    for (const id of ['d-min', 'd-count']) el(id).textContent = 'offline';
+    if (!haveVendoredG) el('d-grav').textContent = 'offline';
   } else if (scienceRemote) {
     const r = scienceRemote;
     if (r.geology) {
@@ -1367,19 +1410,29 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
       el('d-geol').innerHTML = `${geolText} ${tag(LABEL.REGIONAL)}` +
         '<span class="est"> USGS unreachable; vendored map shown</span>';
     }
-    el('d-min').innerHTML = r.minerals && r.minerals.FeO !== null
-      ? `FeO ${r.minerals.FeO.toFixed(1)} wt % ${tag(LABEL.REGIONAL)}` +
-        '<span class="est"> Kaguya MI, 7.6 km</span>'
-      : r.mineralsFailed ? 'service unreachable'
-      : 'no measurement here';
+    if (r.minerals) {
+      /* What the ground is made of, from Kaguya's deconvolution maps. Each
+         figure is a quarter of a degree — 7.6 km — so this is the composition
+         of the region, not of the rock at your feet, and it says so. */
+      const m = r.minerals;
+      const bits = [];
+      if (m.FeO !== null) bits.push(`FeO ${m.FeO.toFixed(1)} wt %`);
+      if (m.plagioclase !== null) bits.push(`plag ${m.plagioclase.toFixed(0)} %`);
+      if (m.clinopyroxene !== null) bits.push(`cpx ${m.clinopyroxene.toFixed(0)} %`);
+      if (m.orthopyroxene !== null) bits.push(`opx ${m.orthopyroxene.toFixed(0)} %`);
+      if (m.olivine !== null) bits.push(`ol ${m.olivine.toFixed(0)} %`);
+      el('d-min').innerHTML = `${bits.join(', ')} ${tag(LABEL.REGIONAL)}` +
+        `<span class="est"> Kaguya MI, 7.6 km` +
+        (m.maturity !== null ? `; optical maturity ${m.maturity.toFixed(2)}` : '') +
+        '</span>';
+    } else {
+      el('d-min').textContent = r.mineralsFailed ? 'service unreachable' : 'no measurement here';
+    }
     if (r.gravity && r.gravity.freeAir_mGal !== null) {
       /* A hundred milligals is about six thousandths of lunar gravity, which
          is real, is measured, and is far too small for anyone to feel. */
-      const mGal = r.gravity.freeAir_mGal;
-      el('d-grav').innerHTML =
-        `${(1.6246 + mGal * 1e-5).toFixed(4)} m/s² ${tag(LABEL.MEASURED)}` +
-        `<span class="est"> free-air ${mGal >= 0 ? '+' : ''}${mGal.toFixed(0)} mGal, GRAIL</span>`;
-    } else {
+      drawGravity(r.gravity.freeAir_mGal, 'GRAIL, 16 ppd');
+    } else if (!haveVendoredG) {
       el('d-grav').textContent = r.gravityFailed ? 'service unreachable' : 'no measurement here';
     }
     if (r.lolaCountFailed) {
@@ -1402,8 +1455,9 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
   if (desc) parts.push('streaming: ' + desc.status);
   /* Six science services are asked at once; say when some of them did not
      answer, rather than letting the rows above imply the Moon is featureless. */
-  if (scienceRemote && scienceRemote.reached !== undefined && scienceRemote.reached < 6) {
-    parts.push(`${6 - scienceRemote.reached} of 6 science services unreachable`);
+  if (scienceRemote && scienceRemote.asked && scienceRemote.reached < scienceRemote.asked) {
+    parts.push(`${scienceRemote.asked - scienceRemote.reached} of ` +
+               `${scienceRemote.asked} science services unreachable`);
   }
   /* A reconstruction that failed to build is the one silence that matters
      most: standing at Tranquility Base with no hardware in front of you looks

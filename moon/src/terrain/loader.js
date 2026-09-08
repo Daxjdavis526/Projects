@@ -39,8 +39,13 @@ export async function readJson(base, rel) {
 
 /**
  * Load one level of the LOLA pyramid as a single global raster.
- * Level 3 (16 ppd) is 128 tiles and about 18 MB of PNG; level 1 (4 ppd) is
- * enough to draw the globe from orbit while the rest arrives.
+ *
+ * Level 3 (16 ppd) is 128 tiles and about 21 MB of PNG and is what everything
+ * asks for. Levels 0 to 2 are built and vendored (7.5 MB between them) against
+ * the progressive load this comment used to describe as though it existed:
+ * level 1 at 4 ppd is 1.5 MB and enough to draw the globe from orbit while the
+ * rest arrives, which would take the first frame from twenty-one megabytes to
+ * one and a half. Nothing does that yet. Every caller passes level 3.
  */
 export async function loadPyramidLevel(base, manifest, z, onTile) {
   const layer = manifest.dem.layers[z];

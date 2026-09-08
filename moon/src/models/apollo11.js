@@ -224,7 +224,7 @@ function makeItems() {
     item('swc', 'Solar Wind Composition experiment',
       eastOf(SWC_BEARING, SWC_RANGE), northOf(SWC_BEARING, SWC_RANGE),
       'position approximate',
-      'Apollo 11 PSR SP-214 pp. 47-48 and the site maps at Fig. 3-15 and 3-16 show it near the LM, but no numeric offset was ever published, so this position is read off the drawing and is an estimate. The foil sheet itself was rolled up and returned to Earth at the end of the EVA; only the staff was left behind. The sheet is drawn as deployed, on a mesh named swcFoil, so a caller wanting the site as it is now can hide it.'),
+      'Apollo 11 PSR SP-214 pp. 47-48 and the site maps at Fig. 3-15 and 3-16 show it near the LM, but no numeric offset was ever published, so this position is read off the drawing and is an estimate. The foil sheet itself was rolled up and returned to Earth at the end of the EVA; only the staff was left behind, and only the staff is drawn unless the simulated clock is inside the EVA of 21 July 1969.'),
     item('jettison', 'Two PLSS backpacks and the jettison bag',
       eastOf(JETT_BEARING, JETT_RANGE), northOf(JETT_BEARING, JETT_RANGE),
       'thrown from the porch before liftoff; the pile position is approximate',
@@ -1107,9 +1107,10 @@ function buildFlag(kit, M, q) {
 
    One further thing the geometry cannot say for itself. The foil was rolled up
    and carried home for analysis in Bern; only the staff was left on the Moon.
-   The sheet is drawn as it was deployed, because the deployed configuration is
-   what the source shows, and it is on a mesh called swcFoil so that a caller
-   who wants the site exactly as it stands today can hide it. */
+   So the sheet is built, on a mesh called swcFoil, and shown only when the
+   simulated clock is inside the EVA of 21 July 1969 — see setEpoch() at the
+   end of this file. The default scene is the site as it stands today, which is
+   a staff and no foil. */
 function buildSWC(kit, M) {
   const g = new THREE.Group();
   g.name = 'swc';
@@ -1437,6 +1438,7 @@ export function buildApollo11(opts = {}) {
      normal, so the sheet is aimed at the sun and not merely stood up. */
   swc.rotation.y = 90 * DEG;
   group.add(swc);
+  const swcFoil = swc.getObjectByName('swcFoil');
 
   const jett = buildJettison(kit, M);
   jett.position.set(px('jettison'), 0, pz('jettison'));
@@ -1567,5 +1569,34 @@ export function buildApollo11(opts = {}) {
      that reads as glass rather than as a lamp. */
   M.silica.emissiveIntensity = 0.015;
 
-  return { group, items, setMarkers, animate, dispose };
+  /**
+   * The one object here that is not there any more.
+   *
+   * The Solar Wind Composition foil was unrolled, exposed for 77 minutes, then
+   * rolled back up and carried home in the ascent stage; it is in a laboratory
+   * on Earth. Only the staff was left standing. The file has said so in a
+   * comment since it was written and drew the sheet deployed anyway, which
+   * makes the default scene — 2026, the site as it is — show a piece of
+   * hardware that is not on the Moon. At a site reconstructed object by object
+   * from cited sources that matters more here than it would anywhere else.
+   *
+   * The window is the EVA itself rather than the 77 minutes, rounded outward,
+   * because the deployment and retrieval minutes are not in this file's
+   * sources and a guessed timestamp would be a worse answer than a stated
+   * approximation. Set the clock to 21 July 1969 and it is there.
+   *
+   * @param {number} simMs simulated time, Unix milliseconds
+   */
+  const EVA_FROM = Date.UTC(1969, 6, 21, 2, 56, 15);
+  const EVA_TO = Date.UTC(1969, 6, 21, 5, 30, 0);
+  function setEpoch(simMs) {
+    if (!swcFoil) return;
+    const during = Number.isFinite(simMs) && simMs >= EVA_FROM && simMs <= EVA_TO;
+    swcFoil.visible = during;
+  }
+  /* Author it absent, so a caller that never sets a clock gets the site as it
+     is rather than as it was for 77 minutes in 1969. */
+  setEpoch(NaN);
+
+  return { group, items, setMarkers, animate, setEpoch, dispose };
 }

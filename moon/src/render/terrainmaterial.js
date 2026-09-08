@@ -6,8 +6,9 @@
    looks flat rather than shaded towards the limb, because every grain throws
    light straight back where it came from.
 
-   This material starts from three.js's standard material, so shadow maps and
-   cascaded shadow maps keep working, and replaces the direct lighting term with:
+   This material starts from three.js's standard material, so the sun's shadow
+   map and the suit lamps keep working, and replaces the direct lighting term
+   with:
 
        Lommel-Seeliger      mu0 / (mu0 + mu)     the porous-surface base
        Henyey-Greenstein    g = -0.25            backscatter

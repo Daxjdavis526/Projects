@@ -222,7 +222,11 @@ console.log('a missing service and a missing measurement are different things');
   const r = await good.probe(0.6, 23.4);
   check('a measurement comes back as a measurement',
         r.minerals && Math.abs(r.minerals.FeO - 7.5) < 1e-9);
-  check('and nothing is reported as failed', r.errors === null && r.reached === 6);
+  check('and all six Kaguya layers are asked for, not one',
+        r.minerals && r.minerals.olivine !== null && r.minerals.plagioclase !== null &&
+        r.minerals.clinopyroxene !== null && r.minerals.orthopyroxene !== null &&
+        r.minerals.maturity !== null, JSON.stringify(r.minerals));
+  check('and nothing is reported as failed', r.errors === null && r.reached === r.asked);
 
   /* Every service answers, and says it has nothing here. */
   const blank = new Streams(registry, { enabled: true });
@@ -232,7 +236,7 @@ console.log('a missing service and a missing measurement are different things');
         b.minerals === null && b.mineralsFailed === false, JSON.stringify(b.errors));
   check('and neither is an empty geologic query',
         b.geology === null && b.geologyFailed === false);
-  check('all six were still reached', b.reached === 6);
+  check('every service was still reached', b.reached === b.asked);
 
   /* Nothing answers at all. */
   const dead = new Streams(registry, { enabled: true });

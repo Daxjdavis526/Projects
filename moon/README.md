@@ -64,7 +64,7 @@ sources and limitations for every layer.
 | | |
 |---|---|
 | **Shape of the Moon** | LOLA LDEM at 16 pixels per degree, 1.9 km per pixel, vendored for the whole globe. Every basin, mare, mountain range and crater larger than a few kilometres is where LOLA measured it. |
-| **Regional topography** | LOLA at 118 m per pixel, streamed from NASA Trek as you go. Polar regions down to 5 m. |
+| **Regional topography** | LOLA at 118 m per pixel, streamed from NASA Trek as you go. Polar regions down to 36 m: the 5 m polar products exist, but Trek serves them reprojected to lat/lon and that reprojection is 35.663 m per pixel, which is what arrives here and what the registry and the overlay both say. |
 | **Metre-scale topography** | About fifty LROC NAC stereo models at 1.5 to 5 m per pixel, streamed where they exist, plus the Apollo 11 model vendored at 2 m. |
 | **Imagery** | The LROC WAC global mosaic at 83 m per pixel, streamed. At Tranquility Base, the NAC mosaic at 65 cm. |
 | **Colour** | The LROC colour map, read as a reflectance rather than as a picture: the mare comes out at 0.07 and the highlands at 0.11, which is what the photometry says, and the display-stretched ray craters are rolled over to a physical maximum. |
@@ -315,7 +315,7 @@ skyline of well under a degree. Each vertex carries eight horizon angles, one
 every 45 degrees, and interpolating eight samples cannot resolve that: the
 polar terminator comes out banded into columns rather than fingered. The
 shadows are in the right places and the geometry underneath them is measured
-5 m LOLA topography; the edges between them are quantised. Sixteen azimuths
+LOLA topography at 36 m; the edges between them are quantised. Sixteen azimuths
 would halve it and double the per-vertex cost, which is a trade worth measuring
 before making.
 
@@ -324,6 +324,14 @@ before making.
 Not in this version: SLDEM2015 region streaming at 59 m globally, persistent
 footprints across sessions, the Apollo 12 to 17 hardware layouts, lava tube
 pits, an achievements list, and a gamepad.
+
+Also not in this version, and worth naming because the data for it is already
+in the repository: the coarse levels of the vendored LOLA pyramid are built and
+shipped but never loaded. Level 1 is 1.5 MB against level 3's 21 MB and would
+be enough to draw the globe while the rest arrives, which is the progressive
+DEM load the loader is shaped for and does not do. Dust accumulates on the
+rover and not yet on boots, suit or carried equipment, which the Apollo record
+is emphatic about. The GRAIL Bouguer anomaly is registered and not queried.
 
 There are no quests and there will not be any. The Moon is the content.
 

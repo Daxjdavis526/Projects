@@ -309,14 +309,26 @@ export class Streams {
   async probe(lat, lon) {
     if (!this.enabled) return { off: true };
     const s = this.registry.science;
-    const [geology, tMax, tMin, feO, freeAir, count] = await Promise.all([
-      this.identifyMap(s.geology.server, s.geology.map, lat, lon),
-      this.identifyImage(s.diviner.server, s.diviner.max, lat, lon),
-      this.identifyImage(s.diviner.server, s.diviner.min, lat, lon),
-      this.identifyImage(s.minerals.server, s.minerals.FeO, lat, lon),
-      this.identifyImage(s.gravity.server, s.gravity.freeair, lat, lon),
-      this.identifyImage(s.lolacount.server, s.lolacount.id, lat, lon),
-    ]);
+    /* The registry has held six Kaguya mineral layers all along and this asked
+       for one of them, while DATA_SOURCES.md listed all six as being "in the
+       scanner". They are now, which is the right way round to resolve that:
+       the deconvolution maps are the most interesting single thing NASA serves
+       about what the ground under you is made of. They only cost anything when
+       the science overlay is open, which is the only time a probe runs. */
+    const [geology, tMax, tMin, feO, olivine, cpx, opx, plag, omat, freeAir, count] =
+      await Promise.all([
+        this.identifyMap(s.geology.server, s.geology.map, lat, lon),
+        this.identifyImage(s.diviner.server, s.diviner.max, lat, lon),
+        this.identifyImage(s.diviner.server, s.diviner.min, lat, lon),
+        this.identifyImage(s.minerals.server, s.minerals.FeO, lat, lon),
+        this.identifyImage(s.minerals.server, s.minerals.olivine, lat, lon),
+        this.identifyImage(s.minerals.server, s.minerals.cpx, lat, lon),
+        this.identifyImage(s.minerals.server, s.minerals.opx, lat, lon),
+        this.identifyImage(s.minerals.server, s.minerals.plagioclase, lat, lon),
+        this.identifyImage(s.minerals.server, s.minerals.omat, lat, lon),
+        this.identifyImage(s.gravity.server, s.gravity.freeair, lat, lon),
+        this.identifyImage(s.lolacount.server, s.lolacount.id, lat, lon),
+      ]);
     this.stats.science++;
     const f = s.geology.fields;
     /* Every field carries the reason it is empty, so the overlay can say
@@ -329,7 +341,10 @@ export class Streams {
     };
     const g = val(geology), max = val(tMax), min = val(tMin);
     const fe = val(feO), fa = val(freeAir), n = val(count);
+    const ol = val(olivine), cp = val(cpx), op = val(opx);
+    const pl = val(plag), om = val(omat);
     const gone = (v) => v === undefined;
+    const pct = (v) => (v === undefined || v === null ? null : v);
     return {
       geology: g ? {
         unit: g[f.unit], period: g[f.period], name: g[f.name], source: s.geology.source,
@@ -339,16 +354,21 @@ export class Streams {
         ? { max: max ?? null, min: min ?? null, source: s.diviner.source, res_deg: s.diviner.res_deg }
         : null,
       temperatureFailed: gone(max) && gone(min),
-      minerals: fe != null ? { FeO: fe, source: s.minerals.source } : null,
-      mineralsFailed: gone(fe),
+      minerals: (fe != null || ol != null || cp != null || op != null || pl != null)
+        ? { FeO: pct(fe), olivine: pct(ol), clinopyroxene: pct(cp),
+            orthopyroxene: pct(op), plagioclase: pct(pl), maturity: pct(om),
+            res_deg: s.minerals.res_deg, source: s.minerals.source }
+        : null,
+      mineralsFailed: gone(fe) && gone(ol) && gone(cp) && gone(op) && gone(pl),
       gravity: fa != null ? { freeAir_mGal: fa, source: s.gravity.source } : null,
       gravityFailed: gone(fa),
       lolaCount: gone(n) ? null : n,
       lolaCountFailed: gone(n),
       errors: errors.length ? errors : null,
-      /* Six services asked, and how many answered. One failure is a service
-         being down; six is the network. */
-      reached: 6 - errors.length,
+      /* Eleven services asked, and how many answered. One failure is a service
+         being down; all of them is the network. */
+      asked: 11,
+      reached: 11 - errors.length,
     };
   }
 

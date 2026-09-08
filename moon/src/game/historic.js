@@ -53,14 +53,19 @@ export class HistoricSites {
     for (const s of this.sites) if (s.kit) s.kit.setMarkers(on);
   }
 
-  /** Build what is near, drop what is not, and place what exists. */
-  update(lat, lon, origin, dt, sunDir) {
+  /**
+   * Build what is near, drop what is not, and place what exists.
+   * `simMs` matters because a reconstruction is of a site at a time: Apollo 11
+   * had one object standing for 77 minutes in 1969 and not since.
+   */
+  update(lat, lon, origin, dt, sunDir, simMs) {
     for (const s of this.sites) {
       s.range = surfaceDistance(lat, lon, s.lat, s.lon);
       if (s.range < BUILD_RANGE && !s.kit) {
         try {
           s.kit = s.build({ quality: this.quality });
           s.kit.setMarkers(this.markers);
+          if (s.kit.setEpoch) s.kit.setEpoch(simMs);
           this.group.add(s.kit.group);
         } catch (e) {
           console.warn(`could not build ${s.id}:`, e.message);
@@ -74,6 +79,7 @@ export class HistoricSites {
         s.kit = null;
       }
       if (!s.kit) continue;
+      if (s.kit.setEpoch) s.kit.setEpoch(simMs);
 
       /* Model +X east, +Y up, +Z south, standing on the real surface. */
       const b = enuBasis(s.lat, s.lon);
