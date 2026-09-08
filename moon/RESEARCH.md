@@ -67,6 +67,22 @@ Coordinates in the ME frame.
 
 ---
 
+## 2b. Defects found in the published services, and what was done
+
+These were measured in this repository against a second source, not assumed.
+Each is corrected in code with the measurement recorded next to the correction,
+so that if the upstream service is ever fixed the correction can be retired
+rather than guessed at.
+
+| what | measured | correction |
+|---|---|---|
+| Five of the six LOLA polar DEM services on NASA Trek (`{N,S}Pole875_5mp`, `NPole75_30mp`, `{N,S}Pole45_100mp`) return the raw stored counts rather than metres: the PDS product's `SCALING_FACTOR` of 0.5 m per count is not applied. | Least-squares ratio against `LRO_LOLA_DEM_Global_256ppd_v06` over 4225 pixels at each of three patches: 2.00022, 1.99679, 1.97469. Shackleton's rim reads −5489 m against −2745 m from two independent products. | `scale: 0.5` in `data/streams.json` with the measurement in `scale_note`; applied in `src/data/streams.js`; asserted in `test/streams.test.mjs`. `LRO_LOLA_DEM_SPole75_30mp_v04_EQ` is the exception and is already in metres. |
+| `Apollo17_MetricCam_DEM_Global_1024ppd` and `ApolloZone_MetricCam_DEM_Global_1024ppd` advertise 29.6 m/px over most of the near-equatorial Moon but hold only the ground actually photographed. | Requests over Mare Tranquillitatis come back more than half no-data. | Ranked last by the registry's `priority`, so a service is chosen by how much of its box it really covers before it is chosen by resolution; a mostly-empty answer falls through to the next service rather than being interpolated into terrain. |
+| Trek's WMTS "DEM" layers are shaded 8-bit renders, not elevation. | Inspected: three-channel byte PNGs with hill shading baked in. | Not used. Elevation comes from the ArcGIS image services as float32 GeoTIFF. |
+| LOLA's gridded DEMs carry no missing-data flag; the gaps were filled by interpolation before publication. | `LRO_LOLA_Count_Global_128ppd_v04` reads 0 at Tranquility Base. | The observation counts are queried separately, and the overlay says "no altimeter shot here" where there is none. |
+
+---
+
 ## 3. Landing sites and landmarks
 
 Full table in `data/sites.json` (with a `verify` flag on rows whose only source
