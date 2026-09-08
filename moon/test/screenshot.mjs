@@ -35,7 +35,10 @@ const SETTLE = Number(argOf('settle', 6000));
 
 const DEFAULT_SHOTS = [
   ['orbit', 'site=apollo11&view=orbit&alt=1200000&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
-  ['descent', 'site=apollo11&view=ground&alt=9000&t=2026-09-19T00:00Z&rate=0&quality=balanced'],
+  /* Nine kilometres over Tycho rather than over mare, because the point of the
+     shot is horizon curvature and relief, and Mare Tranquillitatis is genuinely
+     flat. */
+  ['descent', 'site=tycho&view=ground&alt=9000&t=2026-09-22T14:00Z&rate=0&yaw=20&quality=balanced'],
   /* Offset from the descent stage rather than on top of it: standing at the
      published coordinates puts the camera inside the spacecraft. */
   ['tranquility-now', 'site=0.67446,23.47353&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=230&pitch=-2&quality=high'],
