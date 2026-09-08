@@ -280,13 +280,19 @@ Honesty is the house style, so:
 ## Performance
 
 Three presets on the title screen. `PERFORMANCE` drops render scale to 0.72,
-halves the vegetation and turns off bloom; `ULTRA` roughly triples the plant
-count and pushes terrain detail out much further. Changing preset reloads the
-page, because the shadow map size and render targets are allocated once.
+halves the vegetation, turns off bloom and turns off multisampling; `ULTRA`
+roughly triples the plant count, pushes terrain detail out much further and
+takes MSAA to 8x. Changing preset reloads the page, because the shadow map size
+and render targets are allocated once. `?q=PERFORMANCE` in the URL overrides the
+saved preset without touching it.
 
-The expensive things are, in order: vegetation instance count, terrain patch
-count, and shadow map resolution. If it stutters, drop a preset before
-anything else.
+The expensive things are, in order: vegetation instance count, multisampling,
+terrain patch count, and shadow map resolution. If it stutters, drop a preset
+before anything else.
+
+Baking the textures costs about a fifth of a second at boot and nothing after —
+it happens once, before the world is built, and it is why the loading bar sits
+still for a moment near the start.
 
 ## Tests
 

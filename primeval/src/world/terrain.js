@@ -331,14 +331,24 @@ export function makeTerrainMaterial(tex) {
       float wTurf = clamp(vSplat.x, 0.0, 1.0) * (1.0 - wAcc);
       float wSoil = max(0.0, 1.0 - wTurf - wAcc);
 
-      vec3 soilC = detail2(tSoil, uv, blend).rgb;
-      vec3 turfC = detail2(tTurf, uv * 1.7, blend).rgb;
-      vec3 accC  = accentTex(tAcc, uv * 0.9, floor(vSplat.z + 0.5)).rgb;
-      vec3 ground = soilC * wSoil + turfC * wTurf + accC * wAcc;
-
+      vec3 ground = detail2(tSoil, uv, blend).rgb * wSoil
+                  + detail2(tTurf, uv * 1.7, blend).rgb * wTurf;
       vec3 gN = texture2D(nSoil, uv).xyz * wSoil
-              + texture2D(nTurf, uv * 1.7).xyz * wTurf
-              + accentTex(nAcc, uv * 0.9, floor(vSplat.z + 0.5)).xyz * wAcc;
+              + texture2D(nTurf, uv * 1.7).xyz * wTurf;
+      // The accent gets the same two-scale treatment as everything else. It is
+      // the whole surface of the moon, and one scale of it tiles into corduroy
+      // across a flat mare under a low sun.
+      if (wAcc > 0.004) {
+        float id = floor(vSplat.z + 0.5);
+        vec2 uvA = uv * 0.9;
+        vec2 uvB = PV_TWIST * uvA * 0.183 + 0.61;
+        ground += mix(accentTex(tAcc, uvA, id).rgb,
+                      accentTex(tAcc, uvB, id).rgb, blend) * wAcc;
+        gN += mix(accentTex(nAcc, uvA, id).xyz,
+                  accentTex(nAcc, uvB, id).xyz, blend) * wAcc;
+      } else {
+        gN += vec3(0.5, 0.5, 1.0) * wAcc;
+      }
 
       // Rock takes over on anything steep, projected triplanar so cliffs are
       // not smeared vertical stripes.
@@ -430,7 +440,7 @@ export function makeTerrainMaterial(tex) {
 
     attachAerial(shader);
   };
-  mat.customProgramCacheKey = () => 'primeval-terrain-v10';
+  mat.customProgramCacheKey = () => 'primeval-terrain-v11';
   return mat;
 }
 
