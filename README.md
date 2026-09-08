@@ -94,3 +94,22 @@ offline file in `propulsion/offline/`.
 
 Not a browser toy: read it on GitHub or in any Markdown viewer that renders
 LaTeX. Start at [propulsion/README.md](propulsion/README.md).
+
+## cryogenics/
+
+**CRYOGENIC PROPULSION HARDWARE & SAFETY** — a compact course on the hardware,
+physics and hazards of cryogenic propulsion: LOX, liquid methane, LN2 and the
+gases around them. Eight modules of 15–25 minutes, hand-drawn P&ID and
+cross-section diagrams, checkpoint quizzes, a 30-question final, and a capstone
+in which you review a deliberately flawed methalox test system and find its 32
+defects.
+
+Written for someone who wants to hold an intelligent safety conversation with
+propulsion engineers and a university EHS office *before* ever operating this
+hardware. It teaches hazard recognition and design review, not operating
+procedures, and says so plainly.
+
+Live: https://daxjdavis526.github.io/Projects/cryogenics/
+
+Offline single file in `cryogenics/offline/`. See
+[cryogenics/README.md](cryogenics/README.md).

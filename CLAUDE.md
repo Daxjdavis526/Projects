@@ -35,6 +35,7 @@ touching the others.
 | `raptor/` | F-22A flight simulator |
 | `supernova/` | core-collapse supernova simulator |
 | `propulsion/` | rocket propulsion engineering course (Markdown, no code to run beyond the example checker) |
+| `cryogenics/` | cryogenic propulsion hardware & safety course (Markdown + hand-authored SVG, browser reader) |
 
 ## Conventions
 
