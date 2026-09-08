@@ -220,5 +220,43 @@ console.log('on the real Moon');
     ((big.bounds.rMax - big.bounds.rMin) / 1000).toFixed(2) + ' km');
 }
 
+/* The invariant that matters more than any single number here: the surface the
+   physics walks on and the surface the renderer draws must be the same surface.
+   They are computed by different code on different threads, and when they
+   drifted apart -- a streamed raster reaching one and not the other -- the
+   player stood ninety metres inside a hillside and looked up through it. */
+console.log('the ground you walk on is the ground that is drawn');
+{
+  const { heightfield: hf } = await loadVendoredHeightfield(DATA);
+  hf.attachDetail(new Detail());
+  const src = {
+    heightAt: (lat, lon, minLambda) => hf.heightAt(lat, lon, minLambda),
+    rocksIn: () => [],
+  };
+  let worst = 0, worstAt = null;
+  for (const [lat, lon] of [[0.674, 23.473], [-43.31, -11.36], [-0.042, 179.618],
+                            [26.13, 3.633], [-89.6, 129.8]]) {
+    for (const level of [12, 15, 17]) {
+      const spec = { ...tileForLatLon(level, lat, lon), verts: 33, apron: 8 };
+      const t = buildTile(spec, src);
+      const spacing = edgeArc(level) / 32;
+      /* Compare the tile's own vertices against a fresh query at the same
+         place, asking for the same band limit the tile was built with. */
+      for (const [a, b] of [[0, 0], [16, 16], [32, 32], [8, 24]]) {
+        const uv = tileVertexUv(level, spec.i, spec.j, a, b, 33, { u: 0, v: 0 });
+        const d = faceUvToUnit(spec.face, uv.u, uv.v, { x: 0, y: 0, z: 0 });
+        const ll = unitToLl(d.x, d.y, d.z, { lat: 0, lon: 0 });
+        const drawn = heightInTile(t, a, b);   // grid coordinates, not lat/lon
+        const walked = hf.heightAt(ll.lat, ll.lon, spacing * 3);
+        if (drawn === null || !Number.isFinite(drawn)) continue;
+        const e = Math.abs(drawn - walked);
+        if (e > worst) { worst = e; worstAt = `${lat},${lon} L${level}`; }
+      }
+    }
+  }
+  check('the drawn surface and the queried surface agree to a centimetre',
+    worst < 0.01, `worst ${worst.toFixed(4)} m at ${worstAt}`);
+}
+
 console.log(failures === 0 ? '\ntilebuilder: all checks passed' : `\ntilebuilder: ${failures} FAILED`);
 process.exit(failures ? 1 : 0);
