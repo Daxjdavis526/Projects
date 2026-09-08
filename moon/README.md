@@ -358,6 +358,17 @@ which is why the screenshot harness is a test rather than a convenience.
   as a rectangle of black, which was true and was not a picture.
 - The player was permanently getting up on rough ground, because a tile arriving
   at a finer level drops the surface a metre or two and that was read as a fall.
+- And the one that was hiding all the others. Every tile's bounding sphere was
+  inflated by the Moon's entire height range, 21 kilometres from the floor of
+  the South Pole-Aitken basin to the far-side highlands. A level 17 tile is
+  twenty metres across; a sphere ten kilometres tall around it puts its distance
+  from any camera within ten kilometres at zero, so everything inside that
+  radius refined to the finest level there is. Three hundred tiles of centimetre
+  detail, seen from seven kilometres up, while the middle distance stayed coarse
+  for want of a worker — and a straight bright line ran to the horizon along the
+  boundary between the two. Bounding a tile by what the Moon can actually do
+  over its own width, or by its parent's measured range once that is known, put
+  the craters back across the whole landscape and cost half the tiles.
 
 ## Sources
 

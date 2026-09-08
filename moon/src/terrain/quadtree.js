@@ -86,9 +86,49 @@ export class Quadtree {
        shadow cascade needs geometry there even though it is out of frame. */
     const shadowRadius = camAlt < 4000 ? 220 : 0;
 
+    /* How tall a tile might be, when nothing has measured it yet.
+
+       The global range is 21 km, from the floor of the South Pole-Aitken basin
+       to the top of the far-side highlands, and using it for every tile is what
+       this used to do. The consequence is not subtle: a level 17 tile is twenty
+       metres across, and a bounding sphere inflated to ten kilometres of
+       elevation spread puts its near distance at zero for any camera within ten
+       kilometres. Everything within that radius then refined to the finest
+       level available -- three hundred tiles of centimetre detail seen from
+       seven kilometres up -- while the middle distance stayed coarse, and the
+       boundary between the two was a straight bright line running to the
+       horizon.
+
+       So a tile that has not been built yet is bounded by what the Moon can
+       actually do over its own width. Crater walls reach about 35 degrees, and
+       the steepest sustained slopes anywhere are not far past that, so seven
+       tenths of the tile's arc is a generous bound on its relief; a floor of a
+       few hundred metres keeps small tiles honest about the ground they sit on
+       until their parent's real bounds are known. */
+    const heightSpread = (level, entry) => {
+      /* An ancestor that has been built knows the real answer for this ground,
+         and a child is inside its parent's range up to the detail added below
+         it, which the margin covers. */
+      let e = entry;
+      for (let n = 0; n < 20 && e; n++) {
+        const b = e.tile && e.tile.bounds;
+        /* The tile stores radii; the bounding sphere wants elevations. The
+           margin covers the finer detail a child adds below its parent. */
+        if (b) return { lo: b.rMin - R_MOON - 150, hi: b.rMax - R_MOON + 150 };
+        const p = parentOf(e.face, e.level, e.i, e.j);
+        e = p ? this.tiles.get(tileKey(p[0], p[1], p[2], p[3])) : null;
+      }
+      /* Nothing built anywhere above this tile yet, which happens only in the
+         first frames. The whole range is the only safe answer: a bound that
+         does not contain the ground gets the tile culled below the horizon and
+         the surface never appears at all. */
+      return { lo: -9500, hi: 11500 };
+    };
+
     const walk = (face, level, i, j) => {
       const key = tileKey(face, level, i, j);
-      tileBoundingSphere(face, level, i, j, -9500, 11500, sphere);
+      const span = heightSpread(level, this.tiles.get(key));
+      tileBoundingSphere(face, level, i, j, span.lo, span.hi, sphere);
       const dx = sphere.x - cam.x, dy = sphere.y - cam.y, dz = sphere.z - cam.z;
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
       const near = Math.max(0, dist - sphere.r);

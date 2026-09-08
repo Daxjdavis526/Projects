@@ -343,12 +343,26 @@ export function makeTerrainMaterial(opts = {}) {
         float seleneDist = length(vViewPosition);
         float seleneGraze = max(0.10, abs(dot(normalize(vNormal), normalize(vViewPosition))));
         float seleneWidth = seleneDist * uPixelAngle / seleneGraze;
-        /* A tile the size of a continent cannot carry metre-scale coordinates
-           in a float, and the noise on one degenerates into stripes. Those
-           tiles are always far away, so the texture is simply switched off
-           past the point where the lattice residual says the tile is coarse. */
-        float seleneScale = 1.0 - smoothstep(2500.0, 12000.0,
-          max(abs(vDetailXY.x), abs(vDetailXY.y)));
+        /* Where the regolith texture stops being drawn.
+
+           This used to fade on the tile-local coordinate, and that put a
+           straight bright line across the landscape at nine kilometres up: two
+           neighbouring tiles carry different detail origins, so one side of a
+           shared edge had faded out and the other had not. A criterion that
+           depends on which tile a pixel belongs to cannot be continuous across
+           tiles, and the eye finds a perfectly straight edge instantly.
+
+           View distance is the honest criterion and it is shared by both sides
+           of every edge. Past a few hundred metres a centimetre-scale texture
+           is well under a pixel anyway. The second term is the precision guard
+           the first one was standing in for: a float carries a 24-bit mantissa,
+           so metre-scale detail survives to a couple of hundred kilometres from
+           the tile's detail origin and turns to stripes well beyond that, which
+           only the coarsest tiles ever reach. */
+        float seleneScale =
+          (1.0 - smoothstep(400.0, 1800.0, seleneDist)) *
+          (1.0 - smoothstep(150000.0, 500000.0,
+            max(abs(vDetailXY.x), abs(vDetailXY.y))));
         float seleneMicro = seleneScale * seleneRegolith(vDetailXY, seleneWidth);
         if (uDetailAmount > 0.0) {
           /* Where real imagery is present it already shows this variation, so
