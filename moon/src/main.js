@@ -961,11 +961,35 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
     streams.probe(cam.lat, cam.lon).then((r) => { scienceRemote = r; })
       .finally(() => { sciencePending = false; });
   }
+  /* What NASA says is here, when the network can be asked. Each of these is a
+     different instrument at a different resolution, so each carries its own
+     tag rather than being merged into one confident-looking line. */
   if (scienceRemote) {
     if (scienceRemote.geology) {
       const g = scienceRemote.geology;
       el('d-geol').innerHTML = `${g.unit} ${g.name}, ${g.period} ${tag('REGIONAL')}`;
     }
+    if (scienceRemote.minerals && scienceRemote.minerals.FeO !== null) {
+      el('d-min').innerHTML = `FeO ${scienceRemote.minerals.FeO.toFixed(1)} wt % ${tag('REGIONAL')}` +
+        '<span class="est"> Kaguya MI, 7.6 km</span>';
+    }
+    if (scienceRemote.gravity && scienceRemote.gravity.freeAir_mGal !== null) {
+      /* A hundred milligals is about six thousandths of lunar gravity, which
+         is real, is measured, and is far too small for anyone to feel. */
+      const mGal = scienceRemote.gravity.freeAir_mGal;
+      el('d-grav').innerHTML =
+        `${(1.6246 + mGal * 1e-5).toFixed(4)} m/s² ${tag('MEASURED')}` +
+        `<span class="est"> free-air ${mGal >= 0 ? '+' : ''}${mGal.toFixed(0)} mGal, GRAIL</span>`;
+    }
+    if (scienceRemote.lolaCount !== null && scienceRemote.lolaCount !== undefined) {
+      const n = scienceRemote.lolaCount;
+      el('d-count').innerHTML = n > 0
+        ? `${n.toFixed(0)} LOLA shots in this pixel ${tag('MEASURED')}`
+        : `no altimeter shot here ${tag('INTERPOLATED')}` +
+          '<span class="est"> the elevation is filled in between tracks</span>';
+    }
+  } else if (streams && !streams.enabled) {
+    for (const id of ['d-min', 'd-grav', 'd-count']) el(id).textContent = 'offline';
   }
 
   const parts = [p.source];
