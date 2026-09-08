@@ -306,7 +306,7 @@ export class Weather {
       const u = this.rain.material.uniforms;
       u.uTime.value = t;
       u.uOrigin.value.set(cam.x, cam.y, cam.z);
-      u.uOpacity.value = this.rainAmount * 0.85;
+      u.uOpacity.value = this.rainAmount * 1.0;
       u.uWind.value.set(this.windDir.x * this.wind, 0, this.windDir.y * this.wind);
       u.uSpeed.value = 22 + this.wind * 26;
       u.uColor.value.setRGB(

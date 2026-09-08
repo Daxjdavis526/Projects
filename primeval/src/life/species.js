@@ -26,7 +26,7 @@ export const SPECIES = {
       spineCount: 4, barrel: 1.15, flatBelly: 0.10,
       neck: { count: 6, length: 9.2, rise: 0.62, arch: 0.9, radius0: 1.1, radius1: 0.34, headRise: 0.15 },
       tail: { count: 7, length: 9.0, radius0: 0.95, radius1: 0.05, droop: 0.22 },
-      head: { length: 1.35, width: 0.72, height: 0.70, snout: 0.62, snoutHeight: 0.72, eyeSize: 0.09, eyeAt: 0.30 },
+      head: { length: 1.35, width: 0.72, height: 0.70, snout: 0.62, snoutHeight: 0.72, eyeSize: 0.1305, eyeAt: 0.30 },
       biped: false,
       legs: {
         thigh: 2.1, shin: 1.9, foot: 0.55, spread: 1.05, thickness: 0.40, bend: 0.16,
@@ -64,7 +64,7 @@ export const SPECIES = {
       tail: { count: 6, length: 3.3, radius0: 0.55, radius1: 0.04, droop: 0.14, flat: true },
       head: {
         length: 0.92, width: 0.38, height: 0.42, snout: 0.75, snoutHeight: 0.8,
-        crest: 0.72, crestBack: 0.9, eyeSize: 0.055, eyeAt: 0.3,
+        crest: 0.72, crestBack: 0.9, eyeSize: 0.0798, eyeAt: 0.3,
       },
       biped: false,
       legs: {
@@ -101,7 +101,7 @@ export const SPECIES = {
       spineCount: 3, barrel: 1.2, flatBelly: 0.35,
       neck: { count: 2, length: 0.62, rise: 0.1, radius0: 0.44, radius1: 0.34 },
       tail: { count: 5, length: 2.5, radius0: 0.42, radius1: 0.14, droop: 0.02 },
-      head: { length: 0.66, width: 0.52, height: 0.36, snout: 0.78, snoutHeight: 0.9, horns: 0.16, eyeSize: 0.04, eyeAt: 0.36 },
+      head: { length: 0.66, width: 0.52, height: 0.36, snout: 0.78, snoutHeight: 0.9, horns: 0.16, eyeSize: 0.058, eyeAt: 0.36 },
       biped: false,
       legs: {
         thigh: 0.52, shin: 0.44, foot: 0.24, spread: 0.62, thickness: 0.20, bend: 0.42,
@@ -140,7 +140,7 @@ export const SPECIES = {
       tail: { count: 4, length: 1.7, radius0: 0.48, radius1: 0.08, droop: 0.12 },
       head: {
         length: 1.35, width: 0.72, height: 0.62, snout: 0.42, snoutHeight: 0.62,
-        horns: 0.92, frill: 1.15, brow: 0.06, eyeSize: 0.055, eyeAt: 0.30,
+        horns: 0.92, frill: 1.15, brow: 0.06, eyeSize: 0.0798, eyeAt: 0.30,
       },
       biped: false,
       legs: {
@@ -177,7 +177,7 @@ export const SPECIES = {
       spineCount: 2,
       neck: { count: 2, length: 0.22, rise: 0.7, radius0: 0.07, radius1: 0.05 },
       tail: { count: 4, length: 0.52, radius0: 0.08, radius1: 0.012, droop: 0.02 },
-      head: { length: 0.17, width: 0.09, height: 0.10, snout: 0.5, eyeSize: 0.022, eyeAt: 0.32 },
+      head: { length: 0.17, width: 0.09, height: 0.10, snout: 0.5, eyeSize: 0.0319, eyeAt: 0.32 },
       biped: true,
       arms: { at: 0.9, upper: 0.11, fore: 0.10, thickness: 0.014, claw: 0.05 },
       legs: { thigh: 0.24, shin: 0.24, foot: 0.11, spread: 0.07, thickness: 0.034, bend: 0.85 },
@@ -212,7 +212,7 @@ export const SPECIES = {
       spineCount: 3,
       neck: { count: 3, length: 0.48, rise: 0.55, arch: 0.1, radius0: 0.13, radius1: 0.085 },
       tail: { count: 6, length: 1.35, radius0: 0.115, radius1: 0.016, droop: -0.02 },
-      head: { length: 0.36, width: 0.15, height: 0.17, snout: 0.42, snoutHeight: 0.62, teeth: 6, toothScale: 0.8, eyeSize: 0.028, eyeAt: 0.30, brow: 0.02 },
+      head: { length: 0.36, width: 0.15, height: 0.17, snout: 0.42, snoutHeight: 0.62, teeth: 6, toothScale: 0.8, eyeSize: 0.0406, eyeAt: 0.30, brow: 0.02 },
       biped: true,
       arms: { at: 0.9, upper: 0.30, fore: 0.28, thickness: 0.030, claw: 0.14 },
       legs: { thigh: 0.44, shin: 0.42, foot: 0.20, spread: 0.13, thickness: 0.060, bend: 0.88 },
@@ -249,7 +249,7 @@ export const SPECIES = {
       spineCount: 4, barrel: 1.1, flatBelly: 0.45,
       neck: { count: 2, length: 0.8, rise: 0.05, radius0: 0.52, radius1: 0.42 },
       tail: { count: 7, length: 4.2, radius0: 0.62, radius1: 0.05, droop: 0.0, flat: true },
-      head: { length: 1.85, width: 0.62, height: 0.44, snout: 0.42, snoutHeight: 0.7, teeth: 11, eyeSize: 0.05, eyeAt: 0.18, brow: 0.07 },
+      head: { length: 1.85, width: 0.62, height: 0.44, snout: 0.42, snoutHeight: 0.7, teeth: 11, eyeSize: 0.0725, eyeAt: 0.18, brow: 0.07 },
       biped: false,
       legs: {
         thigh: 0.42, shin: 0.36, foot: 0.26, spread: 0.72, thickness: 0.16, bend: 0.72,
@@ -288,7 +288,7 @@ export const SPECIES = {
       tail: { count: 7, length: 5.6, radius0: 0.60, radius1: 0.05, droop: 0.08 },
       head: {
         length: 1.72, width: 0.86, height: 0.98, snout: 0.55, snoutHeight: 0.66,
-        teeth: 9, toothScale: 1.35, brow: 0.12, eyeSize: 0.075, eyeAt: 0.26,
+        teeth: 9, toothScale: 1.35, brow: 0.12, eyeSize: 0.1087, eyeAt: 0.26,
       },
       biped: true,
       arms: { at: 0.88, upper: 0.62, fore: 0.5, thickness: 0.09, claw: 0.22 },
@@ -327,7 +327,7 @@ export const SPECIES = {
       tail: { count: 8, length: 7.8, radius0: 0.82, radius1: 0.06, droop: 0.08 },
       head: {
         length: 2.35, width: 1.16, height: 1.32, snout: 0.55, snoutHeight: 0.66,
-        teeth: 11, toothScale: 1.6, brow: 0.22, horns: 0.34, eyeSize: 0.10, eyeAt: 0.25,
+        teeth: 11, toothScale: 1.6, brow: 0.22, horns: 0.34, eyeSize: 0.145, eyeAt: 0.25,
       },
       biped: true,
       arms: { at: 0.88, upper: 0.85, fore: 0.68, thickness: 0.12, claw: 0.32 },
@@ -365,7 +365,7 @@ export const SPECIES = {
       spineCount: 2,
       neck: { count: 1, length: 0.05, rise: 0, radius0: 0.04, radius1: 0.03 },
       tail: { count: 4, length: 0.2, radius0: 0.05, radius1: 0.012, droop: 0, flat: true },
-      head: { length: 0.08, width: 0.05, height: 0.055, snout: 0.4, eyeSize: 0.014, eyeAt: 0.3 },
+      head: { length: 0.08, width: 0.05, height: 0.055, snout: 0.4, eyeSize: 0.0203, eyeAt: 0.3 },
       biped: true,
       legs: { thigh: 0.01, shin: 0.01, foot: 0.01, spread: 0.02, thickness: 0.006, bend: 0 },
       armor: { sail: 0.06 },
@@ -392,18 +392,22 @@ export const SPECIES = {
     diet: DIET.PISCIVORE,
     danger: 1,
     massT: 0.03,
-    lengthM: 3.4,
+    lengthM: 2.0,
+    wingspanM: 6.2,
     flying: true,
     body: {
       hipHeight: 0.22, shoulderHeight: 0.24, bodyLength: 0.42, bodyRadius: 0.11, bodyDepth: 0.13,
       spineCount: 2,
       neck: { count: 3, length: 0.62, rise: 0.35, radius0: 0.075, radius1: 0.05 },
       tail: { count: 3, length: 0.3, radius0: 0.06, radius1: 0.01, droop: 0 },
-      head: { length: 0.62, width: 0.10, height: 0.13, snout: 0.22, snoutHeight: 0.45, crest: 0.26, crestBack: 0.2, eyeSize: 0.022, eyeAt: 0.16 },
+      head: { length: 0.62, width: 0.10, height: 0.13, snout: 0.22, snoutHeight: 0.45, crest: 0.26, crestBack: 0.2, eyeSize: 0.0319, eyeAt: 0.16 },
       biped: false,
       legs: {
         thigh: 0.18, shin: 0.16, foot: 0.08, spread: 0.09, thickness: 0.022, bend: 0.7,
-        frontThigh: 1.15, frontShin: 1.05, frontFoot: 0.3, frontSpread: 0.11, frontThickness: 0.035, frontBend: 0.1,
+        // The wings are front limbs, held out sideways and not scaled to reach
+        // the ground — hence frontFit: false.
+        frontThigh: 1.5, frontShin: 1.35, frontFoot: 0.35, frontSpread: 0.11,
+        frontThickness: 0.032, frontBend: 0.06, frontFit: false, frontOut: 1.46,
       },
       colors: { back: '#4a4038', side: '#7a6d5c', belly: '#cfc7b4', accent: '#c1462f' },
       pattern: 'plain',

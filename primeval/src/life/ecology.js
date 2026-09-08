@@ -248,7 +248,9 @@ export class Ecology {
       }
     }
 
-    this.material.userData.eye.value = smoothstep(0.45, 0.0, this.dayT) * 2.6;
+    // Eyeshine: bright enough to catch the bloom, so a predator in the dark
+    // reads as two points of light before it reads as an animal.
+    this.material.userData.eye.value = smoothstep(0.5, 0.0, this.dayT) * 6.5;
   }
 
   handleAttack(c, target, dmg, ctx) {

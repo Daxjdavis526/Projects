@@ -528,6 +528,14 @@ export class Creature {
 
     for (let i = 0; i < rig.legs.length; i++) {
       const leg = rig.legs[i];
+      // Wings flap about the roll axis; legs swing about the pitch axis.
+      if (sp.flying && leg.front) {
+        const flap = Math.sin(ctx.time * 2.4 + this.noiseSeed) * (0.32 + fast * 0.5);
+        leg.upper.rotation.z = leg.side * flap;
+        leg.lower.rotation.z = leg.side * flap * 0.55;
+        leg.ankle.rotation.z = leg.side * flap * 0.3;
+        continue;
+      }
       const ph = this.gait + this.legPhase[i % this.legPhase.length];
       const s = Math.sin(ph), c = Math.cos(ph);
       const lift = Math.max(0, s);

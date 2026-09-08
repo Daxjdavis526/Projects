@@ -162,9 +162,11 @@ export class Game {
     this.fx = new Effects(this.scene, this.camera);
 
     // Flashlight rides the camera and is off until you need it.
-    this.flashlight = new THREE.SpotLight(0xffeecc, 0, 62, 0.42, 0.45, 1.1);
-    this.flashlight.position.set(0, 0, 0);
-    this.flashlight.target.position.set(0, 0, -1);
+    this.flashlight = new THREE.SpotLight(0xffeecc, 0, 85, 0.46, 0.42, 1.35);
+    // Mounted ahead of the viewmodel: at the camera origin it lights the bow
+    // in your hands to a white blob and nothing else.
+    this.flashlight.position.set(0.10, -0.10, -1.05);
+    this.flashlight.target.position.set(0.10, -0.35, -14);
     this.camera.add(this.flashlight, this.flashlight.target);
     this.scene.add(this.camera);
 
@@ -269,7 +271,7 @@ export class Game {
       });
       if (input.hit('KeyF')) {
         this.flashOn = !this.flashOn;
-        this.flashlight.intensity = this.flashOn ? 140 : 0;
+        this.flashlight.intensity = this.flashOn ? 900 : 0;
       }
     }
 

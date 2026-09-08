@@ -250,24 +250,33 @@ export function buildCreature(spec, seed = 1, bonesOnly = false) {
     // forward again — the zigzag that makes a dinosaur leg read as one.
     const bend = (front ? (L.frontBend ?? L.bend ?? 0.5) : (L.bend ?? 0.5));
     const fa = bend * 0.44, ta = -bend * 0.54, ma = bend * 0.62;
+    // outAngle swings the whole limb away from vertical, toward horizontal.
+    // Legs use 0; a pterosaur's wings use most of a right angle.
+    const oa = front ? (L.frontOut ?? 0) : (L.out ?? 0);
+    const co = Math.cos(oa), so = Math.sin(oa) * side;
     let thighL = (front ? (L.frontThigh ?? L.thigh) : L.thigh) * S;
     let shinL = (front ? (L.frontShin ?? L.shin) : L.shin) * S;
     let footL = (front ? (L.frontFoot ?? L.foot) : L.foot) * S;
     // Rescale the segments so the toe lands exactly on the ground, whatever
     // the bend. Stated hip height wins over stated bone lengths.
-    const drop = thighL * Math.cos(fa) + shinL * Math.cos(ta) + footL * Math.cos(ma);
-    const k = (attachY - (front ? 0.04 * S : 0)) / Math.max(0.001, drop);
-    thighL *= k; shinL *= k; footL *= k;
+    // `fit: false` opts a limb pair out — a pterosaur's wings are front limbs
+    // that are emphatically not trying to reach the floor.
+    const fit = front ? (L.frontFit ?? true) : (L.fit ?? true);
+    if (fit) {
+      const drop = (thighL * Math.cos(fa) + shinL * Math.cos(ta) + footL * Math.cos(ma)) * co;
+      const k = (attachY - (front ? 0.04 * S : 0)) / Math.max(0.001, drop);
+      thighL *= k; shinL *= k; footL *= k;
+    }
 
     const tag = `${front ? 'f' : 'r'}${side > 0 ? 'R' : 'L'}`;
     // upper sits at the hip and swings the femur; lower is the knee;
     // ankle is the ankle; toe is the ball of the foot.
     const upper = bone(`${tag}upper`, side * spread, front ? -0.04 * S : 0,
       front ? 0.04 * S : -0.03 * S, attach);
-    const lower = bone(`${tag}lower`, 0, -thighL * Math.cos(fa), thighL * Math.sin(fa), upper);
-    const ankle = bone(`${tag}ankle`, 0, -shinL * Math.cos(ta), shinL * Math.sin(ta), lower);
-    const toe = bone(`${tag}toe`, 0, -footL * Math.cos(ma), footL * Math.sin(ma), ankle);
-    const leg = { upper, lower, ankle, toe, side, front, thighL, shinL, footL, spread, bend };
+    const lower = bone(`${tag}lower`, thighL * so, -thighL * Math.cos(fa) * co, thighL * Math.sin(fa), upper);
+    const ankle = bone(`${tag}ankle`, shinL * so, -shinL * Math.cos(ta) * co, shinL * Math.sin(ta), lower);
+    const toe = bone(`${tag}toe`, footL * so, -footL * Math.cos(ma) * co, footL * Math.sin(ma), ankle);
+    const leg = { upper, lower, ankle, toe, side, front, thighL, shinL, footL, spread, bend, out: oa };
     legs.push(leg);
     return leg;
   };

@@ -80,6 +80,23 @@ Live: https://daxjdavis526.github.io/Projects/raptor/
 See [raptor/README.md](raptor/README.md) for controls and what is actually
 simulated versus approximated.
 
+## primeval/
+
+**PRIMEVAL** — a survival and exploration game on an alien Mesozoic world.
+You start in the observation lounge of a lunar base with the planet filling
+the window, fly a single-stage lifter down through the atmosphere, and try to
+be useful before something enormous decides otherwise. A procedural planet
+with no stored terrain, eleven original species that hunt by sight and hearing
+rather than by knowing where you are, bow hunting, storms, volcanoes, a
+ground-to-space-to-moon transition, an energy rifle you have to earn, and a
+four-metre exosuit you have to earn twice. Every sound in it is synthesised at
+runtime. Desktop only (keyboard + mouse).
+
+Live: https://daxjdavis526.github.io/Projects/primeval/
+
+See [primeval/README.md](primeval/README.md) for controls, architecture, and a
+blunt account of what is simulated versus faked.
+
 ## propulsion/
 
 **PROPULSION** — a two-semester-equivalent rocket propulsion engineering
