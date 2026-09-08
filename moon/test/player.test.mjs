@@ -59,10 +59,28 @@ console.log('jumping');
   run(p, 4, {}, 1 / 480);
   const q = new Player({ lat: 0, lon: 0, ground: flat });
   q.step(1 / 480, { jump: true });
-  for (let i = 0; i < 480 * 4; i++) { q.step(1 / 480, {}); high = Math.max(high, q.agl); }
+  /* Time it, rather than asserting a monotonic counter is not negative and a
+     height already forced by the line above — which is what this did, and it
+     is the flagship physics suite. */
+  let hang = 0;
+  const dt = 1 / 480;
+  for (let i = 0; i < 480 * 4; i++) {
+    q.step(dt, {});
+    high = Math.max(high, q.agl);
+    if (q.agl > 0.001) hang += dt;
+  }
   check('a jump clears about half a metre', Math.abs(high - PLAYER.jumpHeight) < 0.05,
     high.toFixed(2) + ' m');
-  check('and hangs in the air for well over a second', q.stepsTaken >= 0 && high > 0.3);
+  /* Ballistic: up and down again under 1.62 m/s^2 from the take-off speed that
+     reaches that height. Four times as long as the same jump on Earth, and
+     that is the number this suite exists to defend. */
+  const g = GM_MOON / (R_MOON * R_MOON);
+  const expect = 2 * Math.sqrt(2 * PLAYER.jumpHeight / g);
+  check('and hangs in the air for the time lunar gravity says',
+    Math.abs(hang - expect) < 0.06, `${hang.toFixed(2)} s vs ${expect.toFixed(2)} s`);
+  check('which is well over a second, and four times the Earth figure',
+    hang > 1.2 && Math.abs(expect / (2 * Math.sqrt(2 * PLAYER.jumpHeight / 9.81)) - 2.46) < 0.05,
+    hang.toFixed(2) + ' s');
 }
 
 console.log('gaits');

@@ -74,11 +74,34 @@ check('the far side averages 1-3 km above the near side',
   `near ${nearMean.toFixed(0)} m, far ${farMean.toFixed(0)} m`);
 
 /* South Pole-Aitken is the deepest place on the Moon; the limb highlands the
-   highest. The published LOLA extremes are about -9.1 and +10.8 km. */
-check('global minimum is near -9 km', checks.global_min_m < -8500 && checks.global_min_m > -9500,
-  (checks.global_min_m / 1000).toFixed(2) + ' km');
-check('global maximum is near +10.8 km', checks.global_max_m > 10000 && checks.global_max_m < 11500,
-  (checks.global_max_m / 1000).toFixed(2) + ' km');
+   highest. The published LOLA extremes are about -9.1 and +10.8 km.
+
+   Read out of the decoded pyramid rather than out of checks.json. Comparing
+   checks.json against a hardcoded range — which is what this did — never
+   touches the decoder at all: the entire elevation pyramid could be zeroed and
+   both lines would still pass, ten lines below a check that does it correctly.
+   Now the decoder is asked, and checks.json is then confirmed against it, so
+   the file is a record of what was built rather than the thing under test. */
+let decMin = Infinity, decMax = -Infinity;
+{
+  const d = lola.data;
+  for (let i = 0; i < d.length; i++) {
+    const v = d[i];
+    if (v < decMin) decMin = v;
+    if (v > decMax) decMax = v;
+  }
+  decMin = decMin * lola.scale + lola.offset;
+  decMax = decMax * lola.scale + lola.offset;
+}
+check('the decoded pyramid bottoms out near -9 km (South Pole-Aitken)',
+  decMin < -8500 && decMin > -9500, (decMin / 1000).toFixed(2) + ' km');
+check('and peaks near +10.8 km on the far-side limb highlands',
+  decMax > 10000 && decMax < 11500, (decMax / 1000).toFixed(2) + ' km');
+/* Whole-metre storage plus bilinear sampling means checks.json, which was
+   written by interpolation, sits within a metre of the stored extremes. */
+check('and checks.json records what was actually built',
+  Math.abs(checks.global_min_m - decMin) < 2 && Math.abs(checks.global_max_m - decMax) < 2,
+  `json ${checks.global_min_m}/${checks.global_max_m}, decoded ${decMin.toFixed(1)}/${decMax.toFixed(1)}`);
 
 /* Tycho's floor is far below its rim: a crater that survived downsampling. */
 const tychoFloor = at(-43.31, -11.36);

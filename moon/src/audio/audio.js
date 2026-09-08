@@ -155,6 +155,19 @@ function num(v, d = 0) {
   return d;
 }
 
+/**
+ * The same coercion for the one field where a permissive one is unsafe.
+ *
+ * `num` maps any string it does not recognise to 1, which is right for
+ * `airlock: 'open'` and catastrophic for `pressure`: it turns a caller's
+ * mistake into a full cabin, and a full cabin outdoors is airborne sound on
+ * the surface of the Moon. A pressure is a number or it is not a pressure, and
+ * anything else falls back to what the environment implies.
+ */
+function frac(v, d) {
+  return typeof v === 'number' && Number.isFinite(v) ? (v < 0 ? 0 : v > 1 ? 1 : v) : d;
+}
+
 /** A half sine window of `width` starting at phase `at`, wrapping at 1. */
 function pulse(phase, at, width) {
   let x = phase - at;
@@ -221,6 +234,13 @@ export class Sound {
     this.lastStepAt = -1;
     this.lastWheelAt = -1;
     this.lastAlarmAt = Object.create(null);
+    /* Which cautions were standing last frame, so a warning appearing can fire
+       its own tone once. Ten alarm patterns were written and `alarm()` had no
+       call site at all, which left the standing caution pip — one sound for
+       every condition — to say what was wrong. It cannot: an oxygen warning and
+       a thermal one are different amounts of trouble and the whole reason the
+       patterns differ is so you know which without looking. */
+    this.standing = new Set();
   }
 
   /* --- lifecycle ------------------------------------------------------------ */
@@ -653,22 +673,33 @@ export class Sound {
     const closedRover = env === 'rover_closed';
     const openRover = env === 'rover_open';
     const onRover = closedRover || openRover;
+    /* A camera with nobody behind it. There is no helmet around it, no earpiece
+       in it and no cabin holding air near it, so there is nothing for it to
+       hear with and it hears nothing. This is the honest answer and it used to
+       be the opposite one: the free camera flies at ground level and fell
+       through to `environment: 'ship'` at full pressure, so the complete cabin
+       bed — a drone with no physical source — played outdoors on the surface of
+       the Moon, which is the one thing this file exists to forbid. */
+    const disembodied = env === 'vacuum';
 
     /* An absent pressure is inferred from where you are rather than assumed to
        be one, because the wrong default here is the one that would put airborne
        sound on the surface of the Moon. */
-    const pressure = clamp01(num(s.pressure, (inShip || closedRover) ? 1 : 0));
+    const pressure = disembodied ? 0
+      : frac(s.pressure, (inShip || closedRover) ? 1 : 0);
 
     /* A suit is only sealed and running hard when there is a reason for it, so
        the helmet bed rises exactly as the ambient pressure falls. This one line
        is what makes an airlock cycle a crossfade between two worlds instead of a
        fade out followed by a fade in. */
     const helmetEnv = inShip ? 0.10 : closedRover ? 0.45 : 1;
-    const helmet = Math.max(helmetEnv, 1 - pressure);
+    const helmet = disembodied ? 0 : Math.max(helmetEnv, 1 - pressure);
     /* Whereas an earpiece is against your ear wherever you go, so the radio,
-       the caution tones and your own breathing never leave entirely. */
-    const headset = 0.55 + 0.45 * helmet;
-    const cabin = inShip ? clamp01(num(ship && ship.interiorLevel, 1)) : closedRover ? 1 : 0;
+       the caution tones and your own breathing never leave entirely — unless
+       there is no ear. */
+    const headset = disembodied ? 0 : 0.55 + 0.45 * helmet;
+    const cabin = disembodied ? 0
+      : inShip ? clamp01(num(ship && ship.interiorLevel, 1)) : closedRover ? 1 : 0;
 
     setT(n.helmet.gain, helmet, now, 0.25);
     setT(n.head.gain, headset, now, 0.25);
@@ -685,7 +716,21 @@ export class Sound {
     const co2 = clamp01(num(suit && suit.co2Fraction, 0));
     const cooling = clamp01(num(suit && suit.cooling, 0));
     const heating = clamp01(num(suit && suit.heating, 0));
-    const warnings = (suit && suit.warnings && suit.warnings.length) || 0;
+    const list = (suit && suit.warnings) || [];
+    const warnings = list.length;
+
+    /* A caution appearing is an event; a caution standing is a state. The
+       event gets its own pattern, once, and the state gets the slow pip
+       underneath. A condition that clears and returns sounds again, because it
+       has happened again. */
+    const now2 = new Set();
+    for (const w of list) {
+      const id = w && w.id;
+      if (!id) continue;
+      now2.add(id);
+      if (!this.standing.has(id) && this.primed) this.alarm(id);
+    }
+    this.standing = now2;
 
     /* A battery that is nearly flat cannot spin the fan at rate. The bed sags in
        pitch and in level together, which is the first sign that anything is

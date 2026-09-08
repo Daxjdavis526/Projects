@@ -265,23 +265,44 @@ async function start() {
   const shelter = new Shelter({
     el: el('shelter'),
     onRest: (hours, what) => {
-      if (what === 'eat') { shelter.needs.eat(); return; }
-      if (what === 'resupply' && vehicle) { vehicle.rover.restock(); vehicle.dust = 0; return; }
+      if (what === 'eat') { shelter.needs.eat(); sound.beep('confirm'); return; }
+      if (what === 'resupply' && vehicle) {
+        vehicle.rover.restock(); vehicle.dust = 0;
+        sound.beep('confirm');
+        say('rover restocked from the ship', 3000);
+        return;
+      }
       /* A recharge comes out of somewhere. Free suit consumables on every
          sleep made the middle range tier decorative: you could stay out
          indefinitely as long as you napped. */
       if (what === 'recharge' && eva) {
         const from = shelterKind();
         if (from === 'rover' && vehicle) {
-          if (!vehicle.rover.rechargeSuit(eva.suit)) return;
-        } else eva.suit.recharge();          // the ship restocks from its own tanks
+          if (!vehicle.rover.rechargeSuit(eva.suit)) {
+            /* The point of the middle tier is that it can run out too, so
+               being refused has to be legible rather than a button that does
+               nothing. */
+            sound.beep('deny');
+            say('the rover has not enough left to fill the suit', 4000);
+            return;
+          }
+          say('suit recharged from the rover', 3000);
+        } else {
+          eva.suit.recharge();               // the ship restocks from its own tanks
+          say('suit recharged from the ship', 3000);
+        }
+        sound.beep('confirm');
         return;
       }
       let h = hours;
       if (what && what.startsWith('sun:')) {
         h = hoursUntilSunElevation(skyAt, ephemerisAt, jdFromUnixMs,
           state.simMs, cam.lat, cam.lon, Number(what.slice(4)), true);
-        if (h === null) return;
+        if (h === null) {
+          sound.beep('deny');
+          say('the Sun does not reach that elevation here', 4000);
+          return;
+        }
       }
       if (!h) return;
       state.simMs += h * 3600 * 1000;
@@ -295,6 +316,7 @@ async function start() {
         else eva.suit.recharge();
       }
       save.write(game, 'slept');
+      sound.beep('confirm');
     },
   });
   /* Where you are sheltering, which decides what a night's sleep costs and
@@ -332,6 +354,29 @@ async function start() {
      content. It was a hardcoded empty array that nothing appended to and
      the save never read back. */
   const visited = new Visited();
+
+  /* How hard a wheel just hit something.
+     An impact is a rate, not a speed: what puts a knock into a chassis is a
+     suspension leg being compressed fast, which is what happens when a wheel
+     drops off a crater rim or lands after a jump. Feeding it the speed
+     instead — which is what this did — meant driving flat out across a smooth
+     mare knocked continuously and dropping a metre onto a boulder at walking
+     pace was silent, exactly backwards.
+     The reference rate is most of the 42 cm of travel used up in about a tenth
+     of a second, which is a hard hit. */
+  const prevSusp = [0, 0, 0, 0];
+  const wheelImpact = (snap, dt) => {
+    if (!snap || !snap.suspension || dt <= 0) return 0;
+    let worst = 0;
+    for (let i = 0; i < snap.suspension.length; i++) {
+      const rate = (snap.suspension[i] - prevSusp[i]) / dt;
+      prevSusp[i] = snap.suspension[i];
+      /* Only a wheel that is on the ground can be hit by it. */
+      if (snap.contact && !snap.contact[i]) continue;
+      if (rate > worst) worst = rate;
+    }
+    return Math.min(1, worst / 3.5);
+  };
 
   /* The bottom-right line, which is the game's whole notification budget. */
   let hintBack = 0;
@@ -527,6 +572,8 @@ async function start() {
        past forty degrees was final. */
     if (e.code === 'KeyR' && vehicle && eva && vehicle.rover.rolled && !driving) {
       vehicle.rover.recover();
+      sound.beep('confirm');
+      say('rover righted', 2500);
       return;
     }
     if (e.code === 'KeyR' && vehicle && eva) {
@@ -534,12 +581,19 @@ async function start() {
         driving = false;
         const out = vehicle.dismountPoint();
         eva.place(out.lat, out.lon, 0.1);
+        sound.beep('select');
       } else if (vehicle.canBoard(eva.player.llh.lat, eva.player.llh.lon)) {
         driving = true;
         /* Face the way the vehicle is pointing rather than the way you happened
            to be walking, or the first thing you see is its own bodywork. */
         cam.yaw = vehicle.rover.heading * Math.PI / 180;
         cam.pitch = -0.05;
+        sound.beep('select');
+      } else {
+        /* A key that does nothing and says nothing is indistinguishable from a
+           key that is broken. */
+        sound.beep('deny');
+        say('too far from the rover', 2000);
       }
     }
     /* E goes in and out of the ship. There is no ladder-climbing physics and
@@ -555,21 +609,29 @@ async function start() {
         base.cycleAirlock(0);
         const f = base.ladderFoot();
         eva.place(f.lat, f.lon, 0.1);
+        sound.beep('confirm');
+        say('airlock cycling to vacuum', 4000);
       } else if (base.canEnter(p.lat, p.lon, p.h)) {
         base.cycleAirlock(1);
         const inn = base.insideStand();
         eva.place(inn.lat, inn.lon, inn.agl);
+        sound.beep('confirm');
+        say('airlock repressurising', 4000);
+      } else {
+        sound.beep('deny');
+        say('no hatch within reach', 2000);
       }
     }
     if (e.code === 'KeyC' && vehicle) canopyPress = true;
-    if (e.code === 'KeyP') photo.toggle();
+    if (e.code === 'KeyP') { photo.toggle(); sound.beep('select'); }
     /* Markers stay off unless you ask. Walking up to Tranquility Base and
        recognising it should not require a floating label. */
     if (e.code === 'KeyM') {
       state.markers = !state.markers;
       settings.set('markers', state.markers ? 'on' : 'off');
+      sound.beep('select');
     }
-    if (e.code === 'KeyO') settings.toggle();
+    if (e.code === 'KeyO') { settings.toggle(); sound.beep('select'); }
     if (photo.active) {
       if (e.code === 'BracketLeft') photo.zoom(-1);
       if (e.code === 'BracketRight') photo.zoom(1);
@@ -580,6 +642,7 @@ async function start() {
     if (e.code === 'F2') {
       const w = save.write(game, 'manual');
       say(w ? 'saved' : 'could not save', 2500);
+      sound.beep(w ? 'confirm' : 'deny');
       e.preventDefault();
     }
     if (e.code === 'KeyF' && eva) eva.toggleView();
@@ -1053,6 +1116,7 @@ async function start() {
         /* Quietly. A named crater on the Moon does not need a banner, and the
            brief was specific about not turning the place into a theme park. */
         say(`entering ${got.name}`, 4000);
+        sound.beep('comms');
         save.write(game, 'arrived');
       }
     }
@@ -1085,18 +1149,23 @@ async function start() {
        touching; inside the rover or the ship there is a cabin around you. */
     const roverSnap = vehicle ? vehicle.snapshot(eva ? eva.player.llh : null) : null;
     const baseSnap = base ? base.snapshot(eva ? eva.player.llh : null) : null;
+    /* Where the sound is coming from. The last case is the free camera, which
+       has no helmet around it and no cabin near it: it used to fall through to
+       the ship at full pressure and play the whole cabin bed outdoors, which is
+       an ambient drone with no physical source on the surface of the Moon — the
+       one thing the audio design forbids by name. */
     const environment = baseSnap && baseSnap.inside ? 'ship'
       : driving ? (roverSnap.pressure > 0.5 ? 'rover_closed' : 'rover_open')
-      : evaSnap ? 'suit' : 'ship';
+      : evaSnap ? 'suit' : 'vacuum';
     sound.update({
       dt, environment,
       pressure: baseSnap && baseSnap.inside ? baseSnap.pressure
-        : driving ? roverSnap.pressure : evaSnap ? 0 : 1,
+        : driving ? roverSnap.pressure : 0,
       player: evaSnap ? evaSnap.player : undefined,
       suit: evaSnap ? evaSnap.suit : undefined,
       rover: roverSnap ? {
         throttle: driving ? 1 : 0, speed: roverSnap.speed,
-        wheelImpact: roverSnap.airborne ? 0 : Math.min(1, Math.abs(roverSnap.speed) / 8),
+        wheelImpact: wheelImpact(roverSnap, dt),
         boost: roverSnap.boost, canopy: roverSnap.canopy,
       } : undefined,
       ship: baseSnap ? { interiorLevel: baseSnap.interiorLevel, airlock: baseSnap.airlock } : undefined,
