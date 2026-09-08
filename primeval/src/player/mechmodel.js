@@ -58,7 +58,9 @@ function mat(name, detail = null) {
   }), detail, { scale: 1.15, bump: 0.6 });
   const emisU = { value: 1 };
   m.userData.emis = emisU;
-  m.onBeforeCompile = (sh) => {
+  const prevCompile = m.onBeforeCompile;
+  m.onBeforeCompile = (sh, rend) => {
+    if (prevCompile) prevCompile(sh, rend);
     sh.uniforms.uEmis = emisU;
     sh.vertexShader = 'attribute float aEmis;\nvarying float vEmis;\n' + sh.vertexShader;
     sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vEmis = aEmis;');
@@ -66,7 +68,7 @@ function mat(name, detail = null) {
     sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>',
       '#include <emissivemap_fragment>\n totalEmissiveRadiance += diffuseColor.rgb * vEmis * uEmis * 4.0;');
   };
-  m.customProgramCacheKey = () => 'primeval-mech-' + name;
+  m.customProgramCacheKey = () => 'primeval-mech-' + name + (detail ? '-plate' : '');
   return m;
 }
 

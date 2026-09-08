@@ -297,7 +297,9 @@ export function buildShip(detail = null) {
   const heatU = { value: 0 };
   mat.userData.emis = emisU;
   mat.userData.heat = heatU;
-  mat.onBeforeCompile = (sh) => {
+  const prevCompile = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, rend) => {
+    if (prevCompile) prevCompile(sh, rend);
     sh.uniforms.uEmis = emisU;
     sh.uniforms.uHeat = heatU;
     sh.vertexShader = 'attribute float aEmis;\nvarying float vEmis;\nvarying vec3 vLocal;\n' + sh.vertexShader;
@@ -316,7 +318,7 @@ export function buildShip(detail = null) {
       }
     `);
   };
-  mat.customProgramCacheKey = () => 'primeval-ship';
+  mat.customProgramCacheKey = () => 'primeval-ship' + (detail ? '-plate' : '');
 
   const h = new Hull();
   buildFuselage(h);
@@ -458,7 +460,7 @@ export function buildShip(detail = null) {
 }
 
 /** The cockpit you sit in: seat, coamings, side consoles, live displays. */
-export function buildCockpit() {
+export function buildCockpit(detail = null) {
   const group = new THREE.Group();
   const h = new Hull();
   // Very dark: this is an unlit interior seen against a bright sky, and any
@@ -502,12 +504,14 @@ export function buildCockpit() {
     h.slab([[s * 0.10, 0.06, -7.55], [s * 0.30, 0.06, -7.55],
       [s * 0.30, 0.24, -7.35], [s * 0.10, 0.24, -7.35]], 0.06, [0.045, 0.048, 0.055]);
   }
-  const mat = new THREE.MeshStandardMaterial({
+  const mat = injectPanels(new THREE.MeshStandardMaterial({
     vertexColors: true, roughness: 0.85, metalness: 0.15, side: THREE.DoubleSide,
-  });
+  }), detail, { scale: 2.2, bump: 0.45 });
   const emisU = { value: 1 };
   mat.userData.emis = emisU;
-  mat.onBeforeCompile = (sh) => {
+  const prevCockpit = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, rend) => {
+    if (prevCockpit) prevCockpit(sh, rend);
     sh.uniforms.uEmis = emisU;
     sh.vertexShader = 'attribute float aEmis;\nvarying float vEmis;\n' + sh.vertexShader;
     sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vEmis = aEmis;');
@@ -515,7 +519,7 @@ export function buildCockpit() {
     sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>',
       '#include <emissivemap_fragment>\n totalEmissiveRadiance += vec3(0.35,0.85,1.0) * vEmis * uEmis * 1.8;');
   };
-  mat.customProgramCacheKey = () => 'primeval-cockpit';
+  mat.customProgramCacheKey = () => 'primeval-cockpit' + (detail ? '-plate' : '');
   const mesh = new THREE.Mesh(h.build(), mat);
   group.add(mesh);
 

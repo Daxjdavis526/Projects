@@ -27,7 +27,7 @@ export class Ship {
     const built = buildShip(detail);
     this.art = built;
     this.group = built.group;
-    this.cockpit = buildCockpit();
+    this.cockpit = buildCockpit(detail);
     // Raised with the seat so the coaming sits below the sight line.
     this.cockpit.group.position.y = 0.46;
     this.group.add(this.cockpit.group);

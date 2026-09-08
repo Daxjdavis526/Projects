@@ -48,7 +48,7 @@ scene.add(grid);
 const detail = bakeTextures(renderer).panel;
 const ship = buildShip(detail);
 scene.add(ship.group);
-const cockpit = buildCockpit();
+const cockpit = buildCockpit(detail);
 ship.group.add(cockpit.group);
 
 // The exosuit shares this viewer once it exists.
