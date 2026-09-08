@@ -195,10 +195,10 @@ export function buildStation(colliders, opts = {}) {
   const lounge = ROOMS.find(r => r.name === 'lounge');
   const winY0 = 0.85, winY1 = lounge.h - 0.45;
   const winX = 8.4;
-  // Mullions.
-  for (let i = -2; i <= 2; i++) {
-    const x = i * (winX / 2.5);
-    b.box(x - 0.11, winY0 - 0.1, lounge.z1 - 0.05, x + 0.11, winY1 + 0.1, lounge.z1 + WALL + 0.05, C.rib);
+  // Mullions — deliberately no centre post, because THERA sits dead centre in
+  // this window and a mullion through the middle of it would be a shame.
+  for (const x of [-winX * 0.68, -winX * 0.26, winX * 0.26, winX * 0.68]) {
+    b.box(x - 0.10, winY0 - 0.1, lounge.z1 - 0.05, x + 0.10, winY1 + 0.1, lounge.z1 + WALL + 0.05, C.rib);
   }
   b.box(-winX - 0.4, winY1, lounge.z1 - 0.05, winX + 0.4, winY1 + 0.35, lounge.z1 + WALL + 0.05, C.rib);
   b.box(-winX - 0.4, winY0 - 0.35, lounge.z1 - 0.05, winX + 0.4, winY0, lounge.z1 + WALL + 0.05, C.rib);

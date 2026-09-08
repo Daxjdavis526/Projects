@@ -49,11 +49,20 @@ export class Gear {
     this.rifle.onFire = (kind, power) => game.emit('rifleFire', kind, power);
   }
 
+  /** Stow the viewmodels entirely — in a cockpit your hands are elsewhere. */
+  setHidden(hidden) {
+    if (this._hidden === hidden) return;
+    this._hidden = hidden;
+    this.bow.group.visible = !hidden && this.slot === SLOT.BOW;
+    this.rifle.group.visible = !hidden && this.slot === SLOT.RIFLE;
+    if (hidden) { this.interaction = null; this.scanT = 0; this.scanResult = null; }
+  }
+
   equip(slot) {
     if (slot === SLOT.RIFLE && !this.unlocked.rifle) return;
     this.slot = slot;
-    this.bow.equip(slot === SLOT.BOW);
-    this.rifle.equip(slot === SLOT.RIFLE);
+    this.bow.equip(slot === SLOT.BOW && !this._hidden);
+    this.rifle.equip(slot === SLOT.RIFLE && !this._hidden);
   }
 
   cycle(dir) {
@@ -183,7 +192,7 @@ export class Gear {
     // Vehicles first — they are the biggest things nearby and the most wanted.
     if (g.ship && g.mode === 'ON_FOOT') {
       const d = g.ship.entryDistance(eye);
-      if (d < 4.6) return { key: 'E', label: `BOARD ${g.ship.name}`, act: () => g.emit('enterShip') };
+      if (d < 7.0) return { key: 'E', label: `BOARD ${g.ship.name}`, act: () => g.emit('enterShip') };
     }
     if (g.mechBay && g.mode === 'ON_FOOT' && this.unlocked.mech) {
       const d = eye.distanceTo(g.mechBay.position);

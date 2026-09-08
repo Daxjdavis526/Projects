@@ -109,7 +109,9 @@ export class Game {
     // The sun's position is per-world; keep a separate clock for each.
     if (id === 'moon') {
       this._theraTime = this.daylight.time;
-      this.daylight.time = this._anvilTime ?? (0.325 * MOON_LOCALE.dayLength);
+      // Chosen so ANVIL's sun sits about 13 degrees up and behind you: long
+      // shadows across the craters, and a nearly full THERA in the window.
+      this.daylight.time = this._anvilTime ?? (0.72 * MOON_LOCALE.dayLength);
     } else {
       this._anvilTime = this.daylight.time;
       this.daylight.time = this._theraTime ?? (0.30 * PLANET.dayLength);
@@ -246,6 +248,33 @@ export class Game {
     else this.input.requestLock();
   }
 
+  /** Wake up at ANVIL Station, intact, with whatever you were carrying. */
+  respawn() {
+    const p = this.player;
+    p.alive = true;
+    p.health = 100; p.stamina = 100;
+    p.hunger = Math.max(45, p.hunger);
+    p.breath = 100;
+    p.vel.set(0, 0, 0);
+    p.frozen = false;
+    this.dead = false;
+    this.mode = MODE.ON_FOOT;
+    if (this.ship) this.ship.piloted = false;
+    if (this.mech) this.mech.piloted = false;
+    this.hud.vehicle(null);
+    this.camera.up.set(0, 1, 0);
+    this.switchLocale('moon');
+    const site = this.moonSite, sp = this.station.spawn;
+    p.setPosition(site.x + sp.x, site.h + 0.05, site.z + sp.z);
+    p.yaw = Math.PI; p.pitch = 0;
+    // The ship comes home with you; it is the only one there is.
+    const pad = this.station.padCentres[0];
+    this.ship?.placeOn(site.x + pad.x, site.z + pad.z, this.locale, 0.35);
+    this.terrain.flush(p.pos.x, p.pos.z, 200);
+    this.hud.log('Recovered to ANVIL Station. The HALBERD came home on autopilot.', 'warn');
+    this.emit('respawned');
+  }
+
   /** Something made a noise at a place. Predators care. */
   makeNoise(pos, loudness, radius) {
     this.eco?.alarm(pos, radius, 'noise');
@@ -316,6 +345,20 @@ export class Game {
     this.fx?.update(dt);
     this.missions?.update(dt);
 
+    // Death and recovery.
+    if (!p.alive && !this.dead) {
+      this.dead = true;
+      this.gear?.setHidden(true);
+      this.input.exitLock();
+      const cause = p.lastSource || 'THERA';
+      this.hud.death(true, cause === 'fall' ? 'Impact trauma. THERA is not forgiving of altitude.'
+        : cause === 'starvation' ? 'Starvation. There was food everywhere.'
+          : cause === 'drowning' ? 'Drowned. The water was deeper than it looked.'
+            : `Killed by ${cause}. Biometrics flatlined on THERA.`);
+      this.emit('death', cause);
+    }
+
+    this.gear?.setHidden(!onFoot);
     if (this.gear && onFoot) {
       if (input.hit('Tab')) this.toggleInventory();
       this.gear.update(dt, input, {
@@ -360,7 +403,7 @@ export class Game {
         this.moonBody.visible = false;
         this.planetBody.visible = true;
         // THERA hangs off ANVIL's northern horizon, framed by the window.
-        this.planetBody.setDirection(new THREE.Vector3(0.05, 0.225, 0.973));
+        this.planetBody.setDirection(new THREE.Vector3(-0.06, 0.225, 0.972));
         this.planetBody.setAngularRadius(0.168);
       }
     }
@@ -372,9 +415,14 @@ export class Game {
     const hud = this.hud, p = this.player;
     hud.vitals(p);
 
-    if (this.gear) {
-      hud.weapon({ ...this.gear.hudState(), hidden: this.mode !== 'ON_FOOT' });
-      if (this.mode === 'MECH' && this.mech) hud.mech(this.mech.hudState());
+    if (this.gear && this.mode !== MODE.ON_FOOT) {
+      hud.weapon({ name: '', sub: '', big: '', hidden: true });
+      hud.prompt('E', '');
+      hud.scan(null);
+      hud.crosshair(false);
+      if (this.mode === MODE.MECH && this.mech) hud.mech(this.mech.hudState());
+    } else if (this.gear) {
+      hud.weapon({ ...this.gear.hudState(), hidden: false });
       const it = this.gear.interaction;
       hud.prompt(it?.key ?? 'E', it?.label ?? '');
       hud.scan(this.gear.scanT > 0.02 ? (this.gear.scanResult ?? {

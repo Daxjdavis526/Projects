@@ -21,7 +21,79 @@ export function installWorld(game) {
   game.addSystem(new VegetationSystem());
   game.addSystem(new LifeSystem());
   game.addSystem(new SoundSystem());
+  game.addSystem(new Director());
   return game;
+}
+
+/**
+ * Set pieces. Small, rare, and hand-placed: the opening titles, and the beat
+ * where THERA introduces itself about six seconds after you first stand on it.
+ */
+class Director {
+  async load(game) {
+    this.t = 0;
+    this.opening = 0;
+    this.firstLandingT = -1;
+    this.greeted = false;
+
+    game.on('start', () => { this.opening = 0.01; });
+    game.on('shipLanded', () => {
+      if (game.locale.id === 'planet' && !this.greeted) this.firstLandingT = 0;
+    });
+    game.on('disembarked', () => {
+      if (game.locale.id === 'planet' && !this.greeted && this.firstLandingT < 0) this.firstLandingT = 0;
+    });
+    game.on('unlock', (what) => {
+      game.hud.cinematic(true, what === 'rifle'
+        ? 'ARMOURY UNSEALED · SUNDER PULSE LANCE'
+        : 'FABRICATION COMPLETE · BASTION EXOSUIT');
+      this.clearIn = 4.5;
+    });
+  }
+
+  update(dt, game) {
+    this.t += dt;
+
+    // --- opening titles ---------------------------------------------------
+    if (this.opening > 0) {
+      const before = this.opening;
+      this.opening += dt;
+      const lines = [
+        [0.0, 'ANVIL STATION · SURVEY ROTATION 4'],
+        [3.6, 'THERA is 402,000 kilometres below you.'],
+        [7.4, 'Survey Site ECHO-7 is waiting. So is everything else.'],
+        [11.2, null],
+      ];
+      for (const [at, text] of lines) {
+        if (before < at && this.opening >= at) {
+          if (text) game.hud.cinematic(true, text);
+          else { game.hud.cinematic(false); this.opening = -1; }
+        }
+      }
+      if (before < 0.02) game.hud.cinematic(true, lines[0][1]);
+    }
+
+    if (this.clearIn > 0) {
+      this.clearIn -= dt;
+      if (this.clearIn <= 0) game.hud.cinematic(false);
+    }
+
+    // --- first contact ----------------------------------------------------
+    if (this.firstLandingT >= 0) {
+      this.firstLandingT += dt;
+      if (this.firstLandingT > 6.5) {
+        this.greeted = true;
+        this.firstLandingT = -1;
+        // Something enormous, a long way off, in a direction you cannot see.
+        const p = game.camera.position;
+        const a = Math.random() * Math.PI * 2;
+        const at = new THREE.Vector3(p.x + Math.cos(a) * 520, p.y + 30, p.z + Math.sin(a) * 520);
+        game.audio?.voice(at, { pitch: 0.22, power: 1.0, length: 2.6, rasp: 0.8, kind: 'roar' });
+        game.hud.subtitle('Something enormous, a long way off', 4.5);
+        game.player.addShake(0.08);
+      }
+    }
+  }
 }
 
 class LifeSystem {

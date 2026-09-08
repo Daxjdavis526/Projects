@@ -63,7 +63,7 @@ function loop(now) {
 }
 
 document.getElementById('respawn').onclick = () => {
-  game.emit('respawn');
+  game.respawn();
   hud.death(false);
   game.input.requestLock();
 };

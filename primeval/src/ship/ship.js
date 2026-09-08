@@ -94,9 +94,13 @@ export class Ship {
     return this.locale ? this.pos.y - this.locale.heightAt(this.pos.x, this.pos.z) : this.pos.y;
   }
 
-  /** How close is the player to the boarding point? */
+  /**
+   * How close is the player to the boarding point? Measured to the foot of the
+   * ramp, and generous enough that the spot you step off onto is inside it —
+   * disembarking somewhere you cannot immediately re-board is a bad afternoon.
+   */
   entryDistance(p) {
-    const ramp = _v.set(0, -2.0, 4.4).applyQuaternion(this.quat).add(this.pos);
+    const ramp = _v.set(0.6, -2.0, 6.4).applyQuaternion(this.quat).add(this.pos);
     return p.distanceTo(ramp);
   }
 
