@@ -76,7 +76,9 @@
    "res_m": 35.663,
    "pixelType": "S16",
    "priority": 1,
-   "source": "NASA Trek / LRO_LOLA_DEM_NPole875_5mp_v04_EQ"
+   "source": "NASA Trek / LRO_LOLA_DEM_NPole875_5mp_v04_EQ",
+   "scale": 0.5,
+   "scale_note": "served as raw DN; the PDS product's SCALING_FACTOR of 0.5 m per count is not applied by the service. Measured against LOLA 256 ppd over thousands of pixels at both poles: 2.000."
   },
   {
    "id": "LRO_LOLA_DEM_SPole875_5mp_v04_EQ",
@@ -91,7 +93,9 @@
    "res_m": 35.663,
    "pixelType": "S16",
    "priority": 1,
-   "source": "NASA Trek / LRO_LOLA_DEM_SPole875_5mp_v04_EQ"
+   "source": "NASA Trek / LRO_LOLA_DEM_SPole875_5mp_v04_EQ",
+   "scale": 0.5,
+   "scale_note": "served as raw DN; the PDS product's SCALING_FACTOR of 0.5 m per count is not applied by the service. Measured against LOLA 256 ppd over thousands of pixels at both poles: 2.000."
   },
   {
    "id": "LRO_LOLA_DEM_SPole75_30mp_v04_EQ",
@@ -121,7 +125,9 @@
    "res_m": 122.536,
    "pixelType": "S16",
    "priority": 1,
-   "source": "NASA Trek / LRO_LOLA_DEM_NPole75_30mp_v04_EQ"
+   "source": "NASA Trek / LRO_LOLA_DEM_NPole75_30mp_v04_EQ",
+   "scale": 0.5,
+   "scale_note": "served as raw DN; the PDS product's SCALING_FACTOR of 0.5 m per count is not applied by the service. Measured against LOLA 256 ppd over thousands of pixels at both poles: 2.000."
   },
   {
    "id": "LRO_LOLA_DEM_NPole45_100mp_v04_EQ",
@@ -136,7 +142,9 @@
    "res_m": 155.703,
    "pixelType": "S16",
    "priority": 1,
-   "source": "NASA Trek / LRO_LOLA_DEM_NPole45_100mp_v04_EQ"
+   "source": "NASA Trek / LRO_LOLA_DEM_NPole45_100mp_v04_EQ",
+   "scale": 0.5,
+   "scale_note": "served as raw DN; the PDS product's SCALING_FACTOR of 0.5 m per count is not applied by the service. Measured against LOLA 256 ppd over thousands of pixels at both poles: 2.000."
   },
   {
    "id": "LRO_LOLA_DEM_SPole45_100mp_v04_EQ",
@@ -151,7 +159,9 @@
    "res_m": 155.703,
    "pixelType": "S16",
    "priority": 1,
-   "source": "NASA Trek / LRO_LOLA_DEM_SPole45_100mp_v04_EQ"
+   "source": "NASA Trek / LRO_LOLA_DEM_SPole45_100mp_v04_EQ",
+   "scale": 0.5,
+   "scale_note": "served as raw DN; the PDS product's SCALING_FACTOR of 0.5 m per count is not applied by the service. Measured against LOLA 256 ppd over thousands of pixels at both poles: 2.000."
   },
   {
    "id": "LRO_NAC_DEM_2_4mpp_SiteC",

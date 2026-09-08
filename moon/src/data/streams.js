@@ -163,6 +163,16 @@ export class Streams {
         if (this.cache) this.cache.put(key, buf);
       }
       const img = readGeoTiff(buf);
+      /* Five of the six LOLA polar services hand back the raw stored counts
+         rather than metres: the PDS product's scaling factor of half a metre
+         per count is never applied. Measured against the global grid over
+         thousands of pixels at both poles it is exactly two, so Shackleton
+         comes out two and a half kilometres too deep without this. The
+         registry carries the factor and the measurement that established it. */
+      const dnScale = svc.scale ?? 1;
+      if (dnScale !== 1) {
+        for (let i = 0; i < img.data.length; i++) img.data[i] *= dnScale;
+      }
       /* The services return large negative values where they have no data. */
       let valid = 0;
       for (let i = 0; i < img.data.length; i++) {

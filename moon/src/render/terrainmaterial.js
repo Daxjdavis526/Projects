@@ -79,8 +79,15 @@ const VERTEX_BODY = /* glsl */`
   vec3 east = normalize(cross(vec3(0.0, 0.0, 1.0), up));
   vec3 north = cross(up, east);
 
+  /* The softness is the larger of the Sun's own angular radius and the angular
+     resolution of the horizon map itself. Eight azimuths interpolated linearly
+     know the skyline to a degree or so, and using only the quarter-degree Sun
+     as the softness turns a grazing polar dawn into hard polygonal patches of
+     black and white: the map is being asked for a precision it does not have.
+     Ordinary terrain is unaffected, because there the skyline rises steeply
+     enough that a degree of blur is a few centimetres on the ground. */
   vSunVis = horizonVisibility(uSunDir, up, east, north, aHorizon0, aHorizon1,
-                              uSunAngularRadius);
+                              max(uSunAngularRadius, 0.020));
   vEarthVis = horizonVisibility(uEarthDir, up, east, north, aHorizon0, aHorizon1,
                                 0.017);
 `;

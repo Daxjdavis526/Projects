@@ -92,9 +92,12 @@ export class Quadtree {
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
       const near = Math.max(0, dist - sphere.r);
 
-      if (level > 1) {
+      /* The roots are always walked, because everything else hangs off them,
+         but from level one down a tile that is over the horizon or out of
+         frame is not worth descending into. */
+      if (level > 0) {
         if (belowHorizon(cam, sphere)) return;
-        if (inView && near > shadowRadius && !inView(sphere)) return;
+        if (level > 1 && inView && near > shadowRadius && !inView(sphere)) return;
       }
 
       const arc = edgeArc(level);
@@ -121,7 +124,13 @@ export class Quadtree {
       }
 
       if (this.isResident(key)) {
-        draw.push(key);
+        /* Drawing a tile whose triangles are wider than the distance to it puts
+           a plane through the landscape rather than covering it. When that
+           would happen, leave the gap: the chain of tiles under the camera is
+           requested first, so it is a gap for a second, not a wall for a
+           session. */
+        const tooCoarse = wantSplit && near < arc * 0.03 && level < 6;
+        if (!tooCoarse) draw.push(key);
       } else {
         if (!entry || entry.state !== 'pending') {
           request.push({ key, face, level, i, j, priority: near / arc });

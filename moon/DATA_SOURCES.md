@@ -44,6 +44,18 @@ LOLA-tied positions by a kilometre or more.
 | **LOLA LDEC 16 ppd counts** | same directory, `ldec_16.img` | 16 px/deg | global | **vendored** as a 1-bit mask, `data/dem/ldec16.png` | drives the MEASURED vs INTERPOLATED label in the overlay | count is per 1.9 km pixel; a "measured" pixel still contains unmeasured ground |
 | **LOLA LDEM 256 ppd** | NASA Trek ImageServer `LRO_LOLA_DEM_Global_256ppd_v06` | 256 px/deg ≈ **118 m/px** | global | **streamed** (`exportImage`, float32 GeoTIFF, CORS `*`) | regional relief: crater walls, ridges, rilles, the terrain you actually drive over | same interpolation caveat as above; needs network |
 | **LOLA polar DEMs** | Trek `LRO_LOLA_DEM_{S,N}Pole875_5mp_v04_EQ` (5 m), `…Pole75_30mp_v04_EQ` (30 m), `…Pole45_100mp_v04_EQ` (100 m) | 5 / 30 / 100 m/px | \|lat\| > 87.5° / 75° / 45° | **streamed** | polar terrain: Shackleton, the ridge, permanently shadowed floors | polar stereographic products resampled to lat/lon by the service; sparse coverage inside PSRs |
+
+> **A defect worth knowing about.** Five of the six LOLA polar services hand
+> back the raw stored counts rather than metres: the PDS product's
+> `SCALING_FACTOR` of 0.5 m per count is never applied by the service. Measured
+> against `LRO_LOLA_DEM_Global_256ppd_v06` over thousands of pixels at both
+> poles, the ratio is 2.000. Without correcting it Shackleton's rim reads
+> −5489 m instead of −2745 m, which is two and a half kilometres of error in
+> exactly the region the product exists to improve. `data/streams.json` carries
+> the factor and the measurement that established it, and
+> `test/streams.test.mjs` checks that it is still there. The one exception is
+> `LRO_LOLA_DEM_SPole75_30mp_v04_EQ`, which is already in metres.
+
 | **LROC NAC DTM, Apollo 11** | PDS `NAC_DTM_APOLLO11.TIF` (v1.9, 2 m/px, LOLA RMS 1.81 m) | **2 m/px** | 0.3146–1.2365°N, 23.3723–23.5115°E | **vendored** window ±~2.5 km around the LM (`data/dem/apollo11_nac2m.png`) | the actual ground Armstrong and Aldrin walked on | stereo DTM; smooth below ~6 m; shadowed areas interpolated |
 | **SLDEM2015** | PDS `sldem2015_512_00n_30n_000_045_float.img` (LOLA + Kaguya TC) | 512 ppd ≈ **59 m/px**, ~3–4 m vertical | ±60° lat (window vendored around Apollo 11) | **vendored** window; global version is 22.6 GB (streamable by range, v2) | mid-scale relief at Tranquility | ~1 % of source tiles are LOLA-only interpolation; seams remain, worst in South Pole–Aitken and western Orientale |
 | **LROC NAC DTM sites** | Trek `NAC_DTM_APOLLO17`, ~50 `LRO_NAC_DEM_*` services | 1.5–5 m/px | ~50 patches (Apollo 17, Artemis candidate sites, SLIM, IM-1, …) | **streamed** where you happen to be | metre-scale real terrain at the places that have it | patchy; a missing tile means no coverage, not zero elevation |

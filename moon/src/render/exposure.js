@@ -19,6 +19,10 @@
 import { EXPOSURE, OPTICS, EARTHSHINE_FULL, SOLAR_CONSTANT } from '../config.js';
 import { regolithBrdf } from './photometry.js';
 
+/* Degrees. See targetLuminance: this is what stops a polar sunrise from
+   blowing out. */
+const SLOPE_SPREAD_DEG = 10;
+
 export class Exposure {
   constructor(opts = {}) {
     this.ev = -3;
@@ -48,7 +52,17 @@ export class Exposure {
    * }
    */
   static targetLuminance(s) {
-    const sunEl = Math.max(0, Math.sin((s.sunElevation ?? 0) * Math.PI / 180));
+    /* Not the level-ground incidence. Real terrain has slopes, and near the
+       poles that is the whole story: with the Sun half a degree up, level
+       ground reflects almost nothing while every slope tilted towards the Sun
+       is brightly lit, and an exposure set from the level-ground value opens
+       eight stops and turns those slopes into white paper. The Moon's RMS
+       slope at hundred-metre baselines is around seven degrees, so the
+       brightest thing in frame is lit as though the Sun were about ten degrees
+       higher than it is. */
+    const el = s.sunElevation ?? 0;
+    const sunEl = el <= 0 ? 0
+      : Math.sin(Math.min(90, el + SLOPE_SPREAD_DEG) * Math.PI / 180);
     const albedo = s.albedo ?? OPTICS.albedoMare;
     const ground = s.groundFraction ?? 0.55;
     /* The same photometry the shader uses, so the camera cannot over-expose the

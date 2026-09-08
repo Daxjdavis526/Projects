@@ -106,6 +106,37 @@ console.log('request sizing');
   check('a wide patch keeps its full grid', Number(/size=(\d+),/.exec(asked[0])[1]) === 513);
 }
 
+console.log('the polar scaling defect');
+{
+  /* Five of the six LOLA polar services hand back raw counts rather than
+     metres. It is measured, it is documented in the registry, and if the
+     correction is ever dropped the poles silently sink two and a half
+     kilometres, so it is checked here. */
+  const polar = registry.elevation.filter(s => /Pole/.test(s.id));
+  check('the registry knows about all six polar services', polar.length === 6,
+        String(polar.length));
+  const scaled = polar.filter(s => s.scale === 0.5);
+  check('five of them carry the half-metre-per-count correction', scaled.length === 5,
+        scaled.map(s => s.id.replace('LRO_LOLA_DEM_', '')).join(', '));
+  check('and the one that does not is the south 30 m product',
+        polar.find(s => s.scale === undefined).id === 'LRO_LOLA_DEM_SPole75_30mp_v04_EQ');
+  check('each correction says how it was established',
+        scaled.every(s => s.scale_note && /2\.000/.test(s.scale_note)));
+
+  const s = new Streams(registry, { enabled: true });
+  const flat = new Float32Array(33 * 33).fill(-2000);
+  s.fetchWithRetry = async () => makeTiff(33, 33, flat);
+  const svc = polar.find(p2 => p2.id === 'LRO_LOLA_DEM_SPole875_5mp_v04_EQ');
+  const patch = await s.elevationFrom(svc, { latMin: -89.7, latMax: -89.6, lonMin: 129.6, lonMax: 129.9 }, 33);
+  check('a patch from a scaled service comes back in metres',
+        patch && Math.abs(patch.data[0] + 1000) < 0.01, patch && patch.data[0].toFixed(1) + ' m');
+
+  const plain = registry.elevation.find(p2 => p2.id === 'LRO_LOLA_DEM_Global_256ppd_v06');
+  const p2 = await s.elevationFrom(plain, { latMin: 0, latMax: 0.1, lonMin: 0, lonMax: 0.1 }, 33);
+  check('and one from an unscaled service is left alone',
+        p2 && Math.abs(p2.data[0] + 2000) < 0.01, p2 && p2.data[0].toFixed(1) + ' m');
+}
+
 console.log('failure and coverage handling');
 {
   const s = new Streams(registry, { enabled: true });

@@ -32,6 +32,24 @@ EXTRA = [("trekarcgis", "LRO_LOLA_DEM_Global_256ppd_v06", "global", [-180, -90, 
 
 # Quality ranking used by the heightfield when several layers cover a point.
 # Lower is better; LOLA and LROC NAC stereo beat Apollo-era metric camera DEMs.
+# Five of the six LOLA polar services hand back the raw stored counts rather
+# than metres: the PDS product's SCALING_FACTOR of 0.5 m per count is never
+# applied by the service. Measured against LRO_LOLA_DEM_Global_256ppd_v06 over
+# thousands of pixels at both poles, the ratio is 2.000, so Shackleton comes out
+# two and a half kilometres too deep without this. The south 30 m product is the
+# one exception and is already in metres.
+POLAR_DN_SCALE = {
+    "LRO_LOLA_DEM_NPole875_5mp_v04_EQ": 0.5,
+    "LRO_LOLA_DEM_SPole875_5mp_v04_EQ": 0.5,
+    "LRO_LOLA_DEM_NPole75_30mp_v04_EQ": 0.5,
+    "LRO_LOLA_DEM_NPole45_100mp_v04_EQ": 0.5,
+    "LRO_LOLA_DEM_SPole45_100mp_v04_EQ": 0.5,
+}
+POLAR_DN_NOTE = ("served as raw DN; the PDS product's SCALING_FACTOR of 0.5 m per count "
+                 "is not applied by the service. Measured against LOLA 256 ppd over "
+                 "thousands of pixels at both poles: 2.000.")
+
+
 def priority_of(name):
     n = name.lower()
     if "nac" in n or "sldem" in n or "kaguya" in n:
@@ -77,11 +95,15 @@ def main():
         geographic = sr.get("wkid") == 104903 or wkt.startswith("GEOGCS")
         res_m = px * (R_MOON * 3.141592653589793 / 180.0) if geographic else px
         kind = ("polar" if "Pole" in name else "global" if "Global" in name else "site")
-        elevation.append({
+        entry = {
             "id": name, "server": srv, "kind": kind, "bbox": [w, s, e, n],
             "res_m": round(res_m, 3), "pixelType": meta.get("pixelType"),
             "priority": priority_of(name), "source": "NASA Trek / " + label,
-        })
+        }
+        if name in POLAR_DN_SCALE:
+            entry["scale"] = POLAR_DN_SCALE[name]
+            entry["scale_note"] = POLAR_DN_NOTE
+        elevation.append(entry)
         print(f"{name:50s} {srv:12s} {kind:6s} res {res_m:8.2f} m  bbox {w:.3f},{s:.3f},{e:.3f},{n:.3f}")
     for srv, name, kind, bbox, source in EXTRA:
         if any(x["id"] == name for x in elevation):
@@ -92,9 +114,13 @@ def main():
             print(f"EXTRA {name}: unavailable, skipped")
             continue
         res_m = px * (R_MOON * 3.141592653589793 / 180.0)
-        elevation.append({"id": name, "server": srv, "kind": kind, "bbox": bbox,
-                          "res_m": round(res_m, 3), "pixelType": meta.get("pixelType"),
-                          "priority": priority_of(name), "source": source})
+        extra = {"id": name, "server": srv, "kind": kind, "bbox": bbox,
+                 "res_m": round(res_m, 3), "pixelType": meta.get("pixelType"),
+                 "priority": priority_of(name), "source": source}
+        if name in POLAR_DN_SCALE:
+            extra["scale"] = POLAR_DN_SCALE[name]
+            extra["scale_note"] = POLAR_DN_NOTE
+        elevation.append(extra)
         print(f"{name:50s} {srv:12s} {kind:6s} res {res_m:8.2f} m  (extra)")
     # prefer known-good global/polar ids first, then finest site DEMs
     order = {"global": 0, "polar": 1, "site": 2}

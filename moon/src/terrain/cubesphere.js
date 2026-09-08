@@ -130,14 +130,24 @@ export function tileBoundingSphere(face, level, i, j, rMin = -9500, rMax = 11500
  * @param {number} rMin   radius of the guaranteed-interior sphere
  */
 export function belowHorizon(cam, sphere, rMin = R_MOON - 9500) {
-  const cd2 = cam.x * cam.x + cam.y * cam.y + cam.z * cam.z;
-  if (cd2 <= rMin * rMin) return false;               // inside the terrain shell
-  const vx = sphere.x - cam.x, vy = sphere.y - cam.y, vz = sphere.z - cam.z;
-  const dotCV = cam.x * vx + cam.y * vy + cam.z * vz;
-  const t = -dotCV / (cd2 || 1);
-  if (t < 0) return false;                            // the tile is in front
-  const distToHorizonPlane = dotCV + (cd2 - rMin * rMin);
-  return distToHorizonPlane < -sphere.r * Math.sqrt(cd2);
+  const cd = Math.sqrt(cam.x * cam.x + cam.y * cam.y + cam.z * cam.z);
+  if (cd <= rMin) return false;                       // inside the terrain shell
+  const sd = Math.sqrt(sphere.x * sphere.x + sphere.y * sphere.y + sphere.z * sphere.z);
+  if (sd < 1) return false;
+  /* An angular test rather than a plane one, because a plane test has to widen
+     itself by the bounding sphere's radius and that expansion swamps it for a
+     tile a thousand kilometres across: those tiles then never cull, get drawn
+     as coarse meshes with forty kilometre triangles, and slice straight through
+     the landscape you are standing in.
+
+     Angles do not have that problem. The tile is hidden when the angle from
+     your own direction to its nearest edge is greater than the angle to the
+     horizon, and all three of those are exact on a sphere at any size. */
+  const cos = (cam.x * sphere.x + cam.y * sphere.y + cam.z * sphere.z) / (cd * sd);
+  const separation = Math.acos(Math.max(-1, Math.min(1, cos)));
+  const tileAngle = Math.asin(Math.min(1, sphere.r / sd));
+  const horizon = Math.acos(Math.min(1, rMin / cd));
+  return separation - tileAngle > horizon;
 }
 
 /** The four children of a tile. */

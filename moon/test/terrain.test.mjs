@@ -112,6 +112,29 @@ console.log('cube sphere');
   check('the far side is culled below the horizon', belowHorizon(eye, farSphere));
   const hereSphere = tileBoundingSphere(0, 4, 8, 8);
   check('the ground you stand on is not culled', !belowHorizon(eye, hereSphere));
+
+  /* The case that matters and that a plane-based test gets wrong: a tile a
+     thousand kilometres across on the far side has a bounding sphere so large
+     that widening the test by its radius stops it culling anything. It then
+     gets drawn as a mesh with forty kilometre triangles and cuts through the
+     ground under your boots. */
+  for (const level of [0, 1, 2, 3]) {
+    const sphere = tileBoundingSphere(farFace.face, level,
+      (2 ** level) >> 1, (2 ** level) >> 1);
+    if (level === 0) continue;                 // a root is always walked into
+    check(`a level ${level} tile on the far side is culled`, belowHorizon(eye, sphere),
+      `radius ${(sphere.r / 1000).toFixed(0)} km`);
+  }
+
+  /* And from a site below the datum, which is where a test that assumes you
+     are outside the reference sphere quietly stops working. Shackleton's rim
+     sits 2.8 km down. */
+  const deep = { x: 0, y: 0, z: -(R_MOON - 2769) };
+  const overhead = tileBoundingSphere(4, 2, 2, 2);      // the far, northern face
+  check('the far side is culled from a site below the datum too',
+    belowHorizon(deep, overhead));
+  check('and the ground under that site is not',
+    !belowHorizon(deep, tileBoundingSphere(5, 4, 8, 8)));
 }
 
 console.log('procedural detail: the band limit');
