@@ -19,9 +19,9 @@ where people get hurt.
 
 ## 1. Where the line is drawn, and who drew it
 
-The working definition used across the field is that a **cryogen is a fluid whose
-normal boiling point is below about 120 K (−153 °C)**. Everything this course
-handles passes that test:
+The working definition used across the field: a **cryogen is a fluid whose normal
+boiling point is below about 120 K (−153 °C)**. Everything this course handles
+passes that test:
 
 | Fluid | Normal boiling point |
 |---|---|
@@ -67,13 +67,14 @@ second is **thermal energy**: temperature is the kinetic energy of molecular
 motion, and molecules moving fast enough are never caught by that weak attraction.
 They fly past each other, and the substance is a gas.
 
-Liquefaction is taking the thermal energy away until the attraction wins. There is
-nothing else to it, and it explains the whole column above. Helium is a spherical
-atom with two electrons and essentially no attraction to offer, so it condenses
-only below 4.2238 K; hydrogen, tiny and light, manages 20.3689 K; nitrogen, larger
-and more polarisable, 77.3549 K; methane, larger still, 111.667 K. Water has real
-hydrogen bonds and holds together to 373 K — which is why nobody calls a water
-tank cryogenic.
+Liquefaction is taking the thermal energy away until the attraction wins — there
+is nothing else to it, and it explains the whole column above. Helium is a
+spherical atom with essentially no attraction to offer, so it condenses only below
+4.2238 K; hydrogen, tiny and light, manages 20.3689 K; nitrogen, larger and more
+polarisable, 77.3549 K; methane, larger still, 111.667 K. Water has real hydrogen
+bonds and holds together to 373 K — which is why nobody calls a water tank
+cryogenic. Cold is not a substance you add; it is energy you remove, and it always
+leaks back in from a room at roughly 293 K.
 
 ## 3. The mental model shift: a cryogen sits *on* its vapour-pressure curve
 
@@ -145,7 +146,7 @@ is a point sliding along a curve — here it is for nitrogen, from
     <text x="336" y="150" fill="var(--muted)">90 K, 3.605 bar</text>
   </g>
 </svg>
-<figcaption>Figure 1.1 — Nitrogen's vapour-pressure curve, from <code>reference/properties.md</code> §7. A tank holding saturated liquid and vapour is a point <em>on this line</em>, never off it — note that a <em>P</em>–<em>T</em> plot turns the two-phase region into the line itself. At saturation there is one variable, not two.</figcaption>
+<figcaption>Figure 1.1 — Nitrogen's vapour-pressure curve, from <code>reference/properties.md</code> §7. A tank of saturated liquid and vapour is a point <em>on this line</em>, never off it: a <em>P</em>–<em>T</em> plot collapses the two-phase region into the line itself.</figcaption>
 </figure>
 
 Read three things off it. **The curve is steep**: warm saturated nitrogen from
@@ -194,11 +195,11 @@ not disagreement about physics. Ask "at what temperature?" every time — includ
 when the number is your own.
 </div>
 
-There is a sharper version of the trap. The 696 : 1 figure assumes the gas reaches
-room temperature; in the first seconds of a spill it does not, and the immediate
-ratio for nitrogen is only **174.8 : 1**. The big number says how much gas will
-*eventually* exist — the right basis for asphyxiation inventory and relief sizing.
-The small number is closer to how fast the cloud is growing now.
+A sharper version of the same trap: 696 : 1 assumes the gas reaches room
+temperature, and in the first seconds of a spill it does not — the immediate ratio
+for nitrogen is only **174.8 : 1**. The big number says how much gas will
+*eventually* exist, which is the right basis for asphyxiation inventory and relief
+sizing; the small one is closer to how fast the cloud is growing now.
 
 ## 5. Latent heat versus sensible heat
 
@@ -279,12 +280,11 @@ blocked.
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 A dewar is moved indoors and its vent path is obstructed — a valve left shut, a
 frozen relief, a bag over the neck to "keep dirt out". The heat leak does not
-stop, and the vapour has nowhere to go, so pressure climbs the saturation curve of
-Figure 1.1, dragging the liquid temperature with it. The outcome is a relief
-device doing its job loudly, or a rupture. Verifying that a vent path is truly
-open is trained work under a written procedure; what this module gives you is the
-recognition that a sealed cryogenic vessel is an energy store being charged from
-the room.
+stop, so pressure climbs the saturation curve of Figure 1.1, dragging the liquid
+temperature with it, until a relief device does its job loudly or the vessel
+fails. Verifying a vent path is trained work under a written procedure; what this
+module gives you is the recognition that a sealed cryogenic vessel is an energy
+store being charged from the room.
 </div>
 
 ## 7. The sealed volume
@@ -357,10 +357,10 @@ vacuum space `[JLAB-OVERPRESSURE]`.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 Two valves are closed to isolate a section "for a minute" while a transfer is
-paused. The section holds a few litres of LOX, and ambient does the rest. The
-failure — a fitting letting go at pressure, in a LOX-soaked environment, with
-people nearby — is mechanical and combustive at once. On a schematic, train
-yourself to trace every closed-valve pair and ask what is between them.
+paused. It holds a few litres of LOX, and ambient does the rest. The failure — a
+fitting letting go at pressure in a LOX-soaked environment, with people nearby —
+is mechanical and combustive at once. On a schematic, trace every closed-valve
+pair and ask what is between them.
 </div>
 
 ## 8. Two-phase flow, and why the pump is the fussiest thing on the pad
@@ -368,16 +368,16 @@ yourself to trace every closed-valve pair and ask what is between them.
 A saturated cryogen needs little provocation to become a liquid–vapour mixture,
 and that mixture behaves like neither. At 1 atm, liquid nitrogen is 806.085 kg/m³
 and its saturated vapour 4.6121 kg/m³ — a factor of 174.8 — so fluid that flashes
-needs 175 times the passage area to carry the same mass. A line sized for liquid
-then gets violent acceleration, chugging flow and swinging pressure.
+needs 175 times the passage area to carry the same mass, and a line sized for
+liquid gets violent acceleration, chugging flow and swinging pressure.
 
 Three things break at once. **Flow meters lie**: turbine, differential-pressure
 and Coriolis measurements all infer mass flow from an assumed density, so a slug
 mixture makes the reading wrong in an unpredictable direction, not merely noisy.
 **Flow control loses authority**: a valve sized for liquid passes far less mass
-when passing vapour, shifting the loop gain under the controller. **Pumps stop
-pumping**: vapour is compressible, so an impeller ingesting it does no useful
-work, head collapses, and bearings and seals lose the liquid that cooled them.
+when passing vapour. **Pumps stop pumping**: vapour is compressible, so an
+impeller ingesting it does no useful work, head collapses, and bearings and seals
+lose the liquid that cooled them.
 
 The last one deserves the concept behind the acronym. **NPSH** is the margin by
 which inlet pressure exceeds the fluid's vapour pressure at the inlet temperature,
@@ -402,23 +402,24 @@ margin it bought — and at what condition — has not reviewed the feed system.
 
 ## 9. A cryogenic tank is not a water tank
 
-A water tank stores an inert, stable liquid at whatever pressure you apply. Left
-alone, nothing happens. A cryogenic tank is doing all of this continuously, from
-the moment it is filled:
+A water tank stores an inert, stable liquid at whatever pressure you apply, and
+left alone nothing happens. A cryogenic tank is doing all of this continuously
+from the moment it is filled:
 
 - **Boiling**, because heat leaks in through insulation, supports, piping and
   instrument leads, and that energy goes almost entirely into latent heat.
 - **Self-pressurising**, because the vapour raises the pressure, which raises the
   saturation temperature, which warms the liquid — a ratchet, not a steady state.
-- **Venting**, or the ratchet ends at a relief device or a rupture.
+- **Venting**, or that ratchet ends at a relief device or a rupture.
 - **Losing inventory**, whether or not anyone is using the fluid.
 - **Stratifying**, so one temperature reading rarely represents the bulk.
 - **Condensing the atmosphere** on cold external surfaces — and below 90.1875 K
   that means liquefying oxygen out of the air, which is why an innocuous-looking
   LN₂ line is not necessarily innocuous.
 
-None of that is a malfunction; it is what the fluid does. Design, procedure and
-review exist to keep the consequences bounded.
+None of that is a malfunction; it is what the fluid does. Pressure and temperature
+are locked together, latent heat is where the energy goes, and any trapped volume
+of cryogenic liquid is a pressure vessel being charged by the room.
 
 ---
 
@@ -433,35 +434,34 @@ statement is best supported?
   d) The tank must hold a non-condensable gas, because saturated nitrogen cannot exceed 1 atm.
 
 **2.** *Short answer.* A colleague writes: "LN₂ expands 696 : 1, so a 50-litre
-spill fills the room with 34.8 m³ of gas." What is missing from the statement, and
-how is it misleading about the first thirty seconds of the spill?
+spill fills the room with 34.8 m³ of gas." What is missing, and how is it
+misleading about the first thirty seconds?
 
-**3.** *Identify the hazard.* During a hold, a two-metre vacuum-jacketed LOX line
-is isolated by closing the valves at each end while full of liquid. The hold lasts
-an hour. What is the hazard, what drives it, and what feature on the drawing would
-tell you whether it is controlled?
+**3.** *Identify the hazard.* During a one-hour hold, a two-metre vacuum-jacketed
+LOX line is isolated full of liquid by closing the valves at each end. What is the
+hazard, what drives it, and what feature on the drawing would tell you whether it
+is controlled?
 
 **4.** *Conceptual calculation.* A nitrogen dewar has a steady 100 W heat leak.
-Roughly how many kilograms of liquid boil in an hour, and roughly what volume of
-gas does that make at 70 °F and 1 atm? Show the two divisions.
+Roughly how many kilograms boil in an hour, and what gas volume does that make at
+70 °F and 1 atm? Show the two divisions.
 
 **5.** *What would concern you here?* A pump takes suction from a vented LN₂ tank
-through six metres of uninsulated stainless line. The downstream flow meter reads
-erratically and the discharge pressure oscillates. Name the most likely mechanism
-and two independent changes that would address it.
+through six metres of uninsulated line. The downstream flow meter reads
+erratically and the discharge pressure oscillates. Name the likely mechanism and
+two independent changes that would address it.
 
 <details>
 <summary>Show answers</summary>
 
-**1 — (b).** With liquid and vapour in equilibrium the state must lie on the
+**1 — (b).** With liquid and vapour in equilibrium the state lies on the
 saturation curve of Figure 1.1, and nitrogen's 3.6046 bar corresponds to 90 K.
 (a) is wrong because 77.355 K is the boiling point *at 1 atm only* — a boiling
-point is a property of the fluid at a stated pressure, not of the fluid alone.
-(c) is the misconception this module exists to remove: at saturation there is one
-independent variable, not two. (d) is wrong both ways — saturated nitrogen reaches
-33.958 bar at its critical point, and although a non-condensable in the ullage
-*would* raise total pressure above the vapour pressure, nothing here requires that
-explanation.
+point is a property of the fluid at a stated pressure. (c) is the misconception
+this module exists to remove: at saturation there is one independent variable, not
+two. (d) is wrong both ways: saturated nitrogen reaches 33.958 bar at its critical
+point, and while a non-condensable in the ullage *would* raise total pressure
+above the vapour pressure, nothing here requires that explanation.
 
 **2 —** Missing: the reference condition. 696 : 1 means liquid at its normal
 boiling point expanding to gas **at 70 °F and 1 atm**; Safetygram-7 quotes 694 at
@@ -487,10 +487,9 @@ isolated from the tank `[SLAC-CH36]`, `[JLAB-OVERPRESSURE]`.
 360 ÷ 199.18 kJ/kg ≈ **1.8 kg/h** — latent heat alone is the right first cut,
 since sensible heating is a small correction and a vented tank stays near its
 boiling point. Divide by the warm gas density, 1.8 ÷ 1.16042 kg/m³ ≈ **1.6 m³/h at
-70 °F and 1 atm**. As liquid that is barely 2.2 litres; as gas it is a cubic metre
-and a half every hour, which is why the vent matters and why an unventilated room
-with a leaking dewar becomes an oxygen-deficiency problem before it becomes
-anything else.
+70 °F and 1 atm**. Barely 2.2 litres as liquid; a cubic metre and a half as gas,
+every hour — which is why an unventilated room with a leaking dewar becomes an
+oxygen-deficiency problem before it becomes anything else.
 
 **5 —** **Two-phase flow reaching the pump, and cavitation at the impeller
 inlet.** The tank is vented, so liquid leaves it saturated — on the curve, with
