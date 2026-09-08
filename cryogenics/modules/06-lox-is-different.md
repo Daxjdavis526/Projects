@@ -2,11 +2,10 @@
 
 *Roughly 30 minutes. Prerequisite: Module 05.*
 
-Everything else in this course is about cold. This module is about the one fluid where
-cold is the *second* problem. Liquid oxygen does not burn and has no flammable range of
-its own, and it has still killed more people in propulsion than any fuel on the pad. A
-stainless valve body is inert plumbing in a nitrogen system and a fuel in an oxygen
-system.
+Everything else in this course is about cold. This module is about the one fluid where cold
+is the *second* problem. Liquid oxygen does not burn and has no flammable range of its own,
+and it has still killed more people in propulsion than any fuel on the pad. A stainless
+valve body is inert plumbing in a nitrogen system and a fuel in an oxygen system.
 
 ## What you'll be able to do
 
@@ -23,14 +22,13 @@ system.
 ## 1. Oxygen is not a fuel. It is a change of rules.
 
 Oxygen does not burn: no flammability limits, no autoignition temperature, no heat of
-combustion. Every hazard here belongs to some *other* material — a seal, a lubricant, a
-wire insulator, a valve body — that becomes capable of things it was not capable of in
-air.
+combustion. Every hazard here belongs to some *other* material — a seal, a lubricant, a wire
+insulator, a valve body — that becomes capable of things it could not do in air.
 
 Correct the intuition most engineers arrive with. Enrichment does not lower the
-concentration at which a leak becomes flammable: the lower limits in oxygen "are
-essentially the same as those in air at the same temperature and pressure" `[USBM-627]`
-**[A]**. What moves — enormously — is the rich limit.
+concentration at which a leak becomes flammable: the lower limits in oxygen "are essentially
+the same as those in air" `[USBM-627]` **[A]**. What moves — enormously — is the rich
+limit.
 
 <figure>
 <svg viewBox="0 0 660 250" role="img" aria-label="Bar chart comparing flammable ranges in air and in pure oxygen. Methane spans 5 to 15 percent in air and 5.15 to 60.5 percent in oxygen. Hydrogen spans 4 to 75 percent in air and 4.65 to 93.9 percent in oxygen. The lean limits barely move; the rich limits open far to the right.">
@@ -57,9 +55,9 @@ essentially the same as those in air at the same temperature and pressure" `[USB
   <rect x="133" y="159" width="446" height="22" fill="var(--fuel)" opacity="0.75" stroke="var(--fuel)"/>
   <g font-family="system-ui, sans-serif" font-size="13" fill="currentColor">
     <text x="193" y="60">5 – 15 %</text>
-    <text x="421" y="95">5.15 – 60.5 %</text>
+    <text x="406" y="95" text-anchor="end">5.15 – 60.5 %</text>
     <text x="493" y="140">4 – 75 %</text>
-    <text x="587" y="175">4.65 – 93.9 %</text>
+    <text x="572" y="175" text-anchor="end">4.65 – 93.9 %</text>
   </g>
   <path d="M185 34 L185 24 L413 24 L413 34" fill="none" stroke="var(--warn)" stroke-width="1.5"/>
   <text x="299" y="18" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)" text-anchor="middle">the rich limit is what opens — ×4 for methane</text>
@@ -70,14 +68,13 @@ essentially the same as those in air at the same temperature and pressure" `[USB
 A flame must release heat faster than it loses it. In air, four molecules in five are inert
 nitrogen soaking up that heat, so above about 15 % methane the mixture is too fuel-heavy to
 carry flame. Remove the ballast and a 60 % mixture still burns: an oxygen-enriched space is
-flammable across most of the composition range, with no "too rich to worry about" region.
-That is the gas-phase half; the bigger half is that non-fuels become fuels.
+flammable across most of the composition range. That is the gas-phase half; the bigger half
+is that non-fuels become fuels.
 
 **Burn rate.** NASA MSFC data per ISO 14624-1, in `[NASA-DAVIS-2012]` **[A]**: a
-polyester-based foam at **23 % oxygen** burns 1.3 in and self-extinguishes, at
-0.07 in/s; at **25 % oxygen** the same foam is consumed over the whole 12 in specimen at
-0.67 in/s. Two percentage points take a material from self-extinguishing to fully consumed
-and multiply its burn rate tenfold.
+polyester-based foam at **23 % oxygen** burns 1.3 in and self-extinguishes, at 0.07 in/s; at
+**25 % oxygen** the same foam is consumed over the whole 12 in specimen at 0.67 in/s. Two
+percentage points take a material from self-extinguishing to fully consumed, tenfold faster.
 
 **Metals.** From the same source's promoted-ignition (ASTM G124 `[ASTM-G124]`) and
 impact (ASTM G86 `[ASTM-G86]`) data, pressures below which self-sustained burning is on
@@ -90,7 +87,6 @@ average not sustained **[A]**:
 | **Aluminium 4043** | **burns at 25 psi** |
 | **Stainless 304L** | **250 psi** |
 | Stainless 316, 17-4 | 400 psi |
-| Inconel 718 | 500 psi |
 | **Monel, nickel, copper, brass** | **10,000 psi — top of range** |
 
 Davis's caveat travels with the table: "for comparison purposes only, not to be considered
@@ -193,27 +189,27 @@ the design has removed.
 </figure>
 
 **Particle impact** is the most effective igniter of *metals*, and NASA's test footnote is
-the course's best argument for cross-sectional drawings. A fixture simulating the Shuttle
-oxygen flow control valve, Inconel 718 at 600 K and 4,600 psig, **ignited on the second
-test** with a drill point downstream of the orifice and **did not ignite in 40 tests** with
-the drill points removed and the impact angle at 45° **[A]**. One geometric feature.
+the best argument for cross-sectional drawings. A fixture simulating the Shuttle oxygen flow
+control valve, Inconel 718 at 600 K and 4,600 psig, **ignited on the second test** with a
+drill point downstream of the orifice and **did not ignite in 40 tests** with the drill
+points removed and the impact angle at 45° **[A]**. One geometric feature.
 
 **Flow friction**, heat from oxygen flowing across a polymer, is the one NASA admits it
 does not understand — no laboratory method reproduces it, yet "it has caused a significant
 number of real-life fires" **[A]**. Being a *degraded-condition* mechanism, throttling
 across a seat damaged by cycling, an as-new review misses it.
 
-**Resonance** is a sonic jet into a closed-end cavity heating the gas there — the same
-geometry used deliberately as a **rocket igniter** **[A]**; its accidental form is a capped
-tee downstream of a valve. **Thermal runaway** is slower — fines or char self-heating
-over "hours, days, or months" **[A]**, NASA's example being particulate from a *nitrogen
-proof test* igniting when the system later sees oxygen. The test created the hazard.
+**Resonance** is a sonic jet into a closed-end cavity heating the gas there — the geometry
+used deliberately as a **rocket igniter** **[A]**, appearing accidentally as a capped tee
+downstream of a valve. **Thermal runaway** is slower still, fines or char self-heating over
+"hours, days, or months" **[A]** — a system can pass every commissioning test and ignite
+weeks later.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 A ball valve is chosen for a GOX line because it is quick and cheap. It opens in a quarter
 turn (rapid pressurization), rotates a seal against a seat every cycle (particles), can
-chatter if mis-sized (mechanical impact, friction), and the line downstream ends in a capped
-test port (dead end, plus resonance). One decision, four mechanisms.
+chatter if mis-sized (mechanical impact, friction), and the line ends in a capped test port
+(dead end, plus resonance). One decision, four mechanisms.
 </div>
 
 ---
@@ -234,8 +230,8 @@ supply the ratio is 204:
 
 $$T_f = 293.15 \times 204.1^{0.2857} \approx 1{,}340\ \text{K} \approx 1{,}070\ ^\circ\text{C}\ (1{,}950\ ^\circ\text{F})$$
 
-No spark, no external heat, no contamination — just a valve opening quickly, and a
-temperature at which steel glows.
+No spark, no external heat, no contamination — a valve opening quickly, and a temperature
+at which steel glows.
 
 <figure>
 <svg viewBox="0 0 660 260" role="img" aria-label="Schematic of a fast-opening valve admitting high-pressure oxygen into a dead-ended line. A pressure wave travels right and a hot spot forms at the capped end where a polymer seat sits.">
@@ -263,8 +259,8 @@ temperature at which steel glows.
   <text x="512" y="70" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)" text-anchor="middle">hot spot</text>
   <text x="512" y="86" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)" text-anchor="middle">theoretical ~1,070 °C</text>
   <rect x="20" y="185" width="620" height="56" rx="6" fill="none" stroke="var(--ok)" stroke-width="1.5"/>
-  <text x="34" y="207" font-family="system-ui, sans-serif" font-size="13" fill="var(--ok)">Empirical bound: in testing consistent with ASTM G74, for initial upstream pressures below</text>
-  <text x="34" y="227" font-family="system-ui, sans-serif" font-size="13" fill="var(--ok)">275 psia with downstream at ambient or above, the real temperature rise is too small to ignite.</text>
+  <text x="34" y="207" font-family="system-ui, sans-serif" font-size="13" fill="var(--ok)">Empirical bound (ASTM G74 testing): below 275 psia upstream, with downstream at</text>
+  <text x="34" y="227" font-family="system-ui, sans-serif" font-size="13" fill="var(--ok)">ambient or above, the real temperature rise is too small for ignition to occur.</text>
 </svg>
 <figcaption>Figure 6.3 — The classic hazard, and the number that bounds it. Equation and the 275 psia finding from <code>[NASA-TM-2007-213740]</code> (Confidence A); the 1,070 °C figure is computed here from that equation under the stated assumptions.</figcaption>
 </figure>
@@ -282,36 +278,34 @@ Which is why **ASTM G74-13(2021)** is a *test*, reporting a median failure press
 ignition-probability curve, not a formula `[ASTM-G74]` **[A]**.
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
-The compression equation tells you when you <b>cannot rule the mechanism out</b>. It
-never tells you a design is safe; qualification comes from testing the actual
-configuration. Every hand calculation in oxygen work is like this — a screen that opens a
-question, not an answer that closes one.
+The compression equation tells you when you <b>cannot rule the mechanism out</b>. It never
+tells you a design is safe; qualification comes from testing the actual configuration — a
+screen that opens a question, not an answer that closes one.
 </div>
 
 A fast-opening valve into a dead-ended line supplies all three elements at once: sub-second
-pressurisation; an exposed nonmetal at the temperature peak, because a dead end is almost
-always a component and components contain polymers; and the worst possible ratio, because
-the line sat at atmospheric. Eliminating the dead leg removes this mechanism *and* the
+pressurisation; an exposed nonmetal at the temperature peak, since a dead end is almost
+always a component and components contain polymers; and the worst possible ratio, the line
+having sat at atmospheric. Eliminating the dead leg removes this mechanism *and* the
 resonance geometry together. No pressurisation-rate limit is printed here — none could be
-verified from a primary standard **[C]**.
+verified from a primary standard **[C]**. Slow-opening valves are the recognised control.
 
 ---
 
 ## 4. Cleanliness is a fire-prevention measure
 
 "Oxygen clean" is not "visually clean". It is a **specified, verified and documented level
-of freedom from contaminants that could act as fuel or as an ignition initiator**,
-appropriate to the system's pressure, concentration and geometry — and NASA makes
-"determine the worst-case cleanliness level of each component" a required step of the
-assessment **[A]**. A hazard control, not housekeeping.
+of freedom from contaminants that could act as fuel or as an ignition initiator**, matched
+to the system's pressure, concentration and geometry — and NASA makes "determine the
+worst-case cleanliness level of each component" a required step of the assessment **[A]**.
 
-Two contaminant families. **Nonvolatile residues** — oils, greases, films, and the classics
-found in investigations, thread lubricants and crayon and paint — are dominated by
-adiabatic compression: a low-AIT fuel film sitting where the compression peak occurs. EIGA:
-oil and grease ignition "often causes a chain reaction that finally results in metal burning
-or melting" `[EIGA-04]` **[A]**. **Particulates** feed particle impact, and cleanliness
-removes the entrained particles — the only element of that mechanism still controllable
-once the geometry is frozen.
+Two contaminant families. **Nonvolatile residues** — oils, greases, and the classics found
+in investigations: thread lubricants, crayon, paint — are dominated by adiabatic
+compression, a low-AIT fuel film sitting where the compression peak occurs. EIGA: oil and
+grease ignition "often causes a chain reaction that finally results in metal burning or
+melting" `[EIGA-04]` **[A]**. **Particulates** feed particle impact, and cleanliness removes
+the entrained particles — the only element of that mechanism still controllable once the
+geometry is frozen.
 
 The governing documents are **ASTM G93/G93M-25**, *Standard Guide for Cleanliness Levels
 and Cleaning Methods for Materials and Equipment Used in Oxygen-Enriched Environments*
@@ -343,37 +337,36 @@ what it accomplishes, not how to do it.
 
 Hydrocarbon oils and greases are the archetypal wrong answer: low autoignition
 temperatures, high heats of combustion, and — as films in crevices and at dead ends — the
-position that maximises both ignition probability and heat delivery into surrounding
-metal. EIGA's rule is categorical, with a specific that catches people out: oxygen
-pressure gauges "shall not be tested or calibrated in contact with oil" `[EIGA-04]`
-**[A]**. A lubricant, where unavoidable, is used in the smallest workable amount, because
-"lubricants become contaminants if they enter into the oxygen stream" **[A]**.
+position that maximises both ignition probability and heat delivery into surrounding metal.
+EIGA's rule is categorical, down to the specific that oxygen pressure gauges "shall not be
+tested or calibrated in contact with oil" `[EIGA-04]` **[A]**; a lubricant, where
+unavoidable, is used in the smallest workable amount, since "lubricants become contaminants
+if they enter into the oxygen stream" **[A]**.
 
-The classes actually used are **nickel alloys, copper, brass and bronze** among metals —
-harder to ignite, burning with the lowest heats of combustion **[A]** — and
-**fluoropolymers and fluorinated (PCTFE-type) lubricants** among nonmetals, the best
-impact thresholds in the data **[A]**. Avoid magnesium, titanium and many aluminium
-alloys, and carry the counterweight: fluorinated materials can produce toxic combustion
-products **[A]**. Composites are permitted outside the wetted boundary — a
-composite-overwrapped tank is the example — which makes "where exactly is the wetted
-boundary?" a safety-critical drawing question.
+The classes used are **nickel alloys, copper, brass and bronze** among metals — harder to
+ignite, burning with the lowest heats of combustion **[A]** — and **fluoropolymers and
+fluorinated (PCTFE-type) lubricants** among nonmetals, the best impact thresholds in the
+data **[A]**. Avoid magnesium, titanium and many aluminium alloys, and carry the
+counterweight: fluorinated materials can produce toxic combustion products **[A]**.
+Composites are permitted outside the wetted boundary — a composite-overwrapped tank is the
+example — which makes "where is the wetted boundary?" a safety-critical drawing question.
 
-**Compatibility is configuration-dependent.** The same material changes verdict along at
-least four axes, each evidenced above:
+**Compatibility is configuration-dependent.** The same material changes verdict along four
+axes, each evidenced above:
 
 1. **Pressure** — 304L is acceptable below 250 psi and sustains combustion above.
 2. **Thickness and geometry** — thin sections and finely divided forms (mesh, sintered
    filters) are far more flammable than bulk metal **[A]**.
-3. **Velocity and impingement angle** — the Shuttle valve, burning on test two, surviving
-   40 tests at 45°.
-4. **What it is paired with** — aluminium *sheared against PCTFE* is a chemical-reaction
-   ignition mechanism **[A]**.
+3. **Velocity and impingement angle** — the Shuttle valve burned on test two with a drill
+   point and survived 40 tests at 45°.
+4. **What it is paired with** — aluminium is routine, but aluminium *sheared against PCTFE*
+   is a chemical-reaction ignition mechanism **[A]**.
 
 Which is why "is this part oxygen compatible?" has no answer: without the pressure,
 concentration, temperature, velocity, geometry and neighbouring materials there is nothing
 to assess. Davis: compatibility "cannot be determined by similarity to other materials whose
 properties are known… Testing, and not evaluation, is the only method by which safe
-materials can be chosen. **[A]**.
+materials can be chosen" **[A]**.
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
 The promoted-ignition test is so severe that most industry-standard oxygen materials —
@@ -402,41 +395,38 @@ uncontrolled, fire was a matter of time. A configuration classified as non-hazar
 receives no hazard controls **[B]**.
 
 **Apollo 13 oxygen tank 2, 13 April 1970 — cryogenic oxygen pressure vessel.** *What
-happened:* seconds after current reached the tank 2 fans, telemetry was lost, main bus B
+happened:* seconds after current reached the tank 2 fans, telemetry was lost, the main bus
 undervolted, and the tank burst `[ANDERSON-APOLLO13]` **[A]**. *Why — the chain:* the
-tank's protective thermostatic switches were rated **28 V dc**, but during tanking tests at
-KSC the heaters ran on **65 V dc ground support equipment** and the switches failed to open
-— qualification "did not test the ability at any point for the switches to operate at
+tank's thermostatic switches were rated **28 V dc**, but during tanking tests at KSC the
+heaters ran on **65 V dc ground support equipment** and the switches failed to open —
+qualification "did not test the ability at any point for the switches to operate at
 65 V dc." Uncut-off, the heaters may have reached **1,000 °F** during detanking, destroying
 the **Teflon insulation** on wiring inside the tank. When the fans were powered, "the
 current flow generated a spark which ignited oxygen in the tank" **[A]**. *Lesson:*
 textbook electrical-arc ignition — NASA's guide gives almost word for word an insulated
 heater element arcing through its sheath to combustible material. The mechanism was
 catalogued; the tank still carried powered electrics immersed in oxygen. Interface voltage
-is a safety parameter, untested protection is not protection, and the damage was latent —
-inflicted weeks earlier, waiting for a current.
+is a safety parameter, untested protection is not protection, and the damage was latent.
 
 **Mir SFOG / Vika, 24 February 1997 — chemically generated hot GOX.** *What happened:* a
 lithium perchlorate oxygen generator "failed having burned through the thin stainless steel
-wall. It is assumed that the stainless steel was actually burning in the high temperature
-oxygen stream" `[GRAF-OXYGEN-CANDLES]` **[A]**. *Why:* the unit "was probably contaminated
+wall… the stainless steel was actually burning in the high temperature oxygen stream"
+`[GRAF-OXYGEN-CANDLES]` **[A]**. *Why:* the unit "was probably contaminated
 during manufacture… either a hydrocarbon material or a fragment of the manufacturer's
 technician's chemical gloves", and the shell fire was "due in part to its extreme thinness"
-**[A]**. *Lesson:* no field discipline removes a contaminant sealed inside the canister —
-cleanliness is a supply-chain property — and thin stainless *burned*, the containment
+**[A]**. *Lesson:* no field discipline removes a contaminant sealed inside the canister, so
+cleanliness is a supply-chain property; and thin stainless *burned*, the containment
 becoming the next link in the kindling chain.
 
 **Aluminium medical oxygen regulators, 1990s — high-pressure GOX.** *What happened:* WHA
 investigated 11 regulator fires, and the FDA logged 17 from 1993 to 1999 on portable
 cylinders; at Boone, North Carolina in 1995 "flames and molten slag from the regulator
-erupted from the carrying case and engulfed the upper torso of the EMT who was carrying it"
-`[WHA-REGULATORS]` **[B]**. *Why:* four mechanisms across the set, all on the canonical
-list — heat of compression as the valve is opened, contaminant ignition, particle impact
-(identified at Boone) and promoted ignition downstream — in units built of aluminium, which
-ignites as low as 25 psi where brass resists to 10,000 psi **[B]**.
-*Lesson:* the loop closed here, in **ASTM G175** `[ASTM-G175]` **[A]**, which tests **fault
-tolerance**: whether a regulator survives an ignition event, not merely whether it avoids
-one.
+erupted from the carrying case and engulfed the upper torso of the EMT" `[WHA-REGULATORS]`
+**[B]**. *Why:* four mechanisms across the set, all on the canonical list — heat of
+compression as the valve is opened, contaminant ignition, particle impact (identified at
+Boone) and promoted ignition downstream — in units built of aluminium, which ignites as low
+as 25 psi where brass resists to 10,000 psi **[B]**. *Lesson:* the loop closed here, in **ASTM G175** `[ASTM-G175]` **[A]**, which tests **fault
+tolerance** — whether a regulator survives an ignition event, not merely avoids one.
 
 **Industrial valve fires — high-pressure, high-velocity GOX.** A 300 mm butterfly valve is
 reported to have ignited during pipeline start-up, killing three people, after operators
@@ -456,18 +446,18 @@ NASA-STD-6016 shall be performed on each component" **[A]**. Its seven steps: wo
 conditions; material flammability; ignition mechanisms; the **kindling chain**; the
 **reaction effect**; the **history of use**; the report. The kindling chain separates an
 assessment from a materials checklist — ignition of a seat can release enough energy to
-ignite the stem, then the body, and "if a component could be breached, a kindling chain is
-present" **[A]**. Unknown flammability is treated as flammable.
+ignite the stem, then the body, so "if a component could be breached, a kindling chain is
+present" **[A]**.
 
 What a reviewer looks for:
 
 - A **system flow schematic** and a **cross-sectional drawing of each component** —
   mandatory deliverables, and the reason the Shuttle drill point was findable.
-- **Worst-case** conditions, cleanliness level included, not nominal ones.
-- A **mechanism-by-mechanism walk**, so "not possible" rests on a missing element rather
-  than on optimism.
-- A **hazard control table**: component, hazard, probability, reaction effect,
-  recommendation, mitigated effect, status.
+- **Worst-case** conditions, cleanliness level included, not nominal ones, and a
+  **mechanism-by-mechanism walk**, so "not possible" rests on a missing element rather than
+  on optimism.
+- A **hazard control table**: component, hazard, probability, reaction effect, mitigation,
+  status.
 - **Cleanliness documentation** travelling with the part — level and standard, who cleaned
   it, quantitative NVR and particle results, re-cleaning triggers — plus evidence that the
   data justifying each material is **applicable to this configuration**.
@@ -483,12 +473,11 @@ configuration classified as not hazardous, and therefore given no controls.
 
 ## Checkpoint quiz
 
-1. A colleague says: "We're purging with GOX instead of GN₂, so the methane detector's 5 %
-   alarm gives us less warning." Is the reasoning right? What *does* change?
+1. "We're purging with GOX instead of GN₂, so the methane detector's 5 % alarm gives us
+   less warning." Is that right? What *does* change?
 
 2. Name the three characteristic elements of **rapid pressurization** and a control that
-   removes each. Which single design change removes this mechanism *and* one other from
-   the canonical list?
+   removes each. Which single design change removes this mechanism *and* one other?
 
 3. A dead-ended GOX line sits at 14.7 psia and 20 °C; a valve from a 1,000 psia supply
    opens in about 0.2 s. Compute the theoretical maximum gas temperature at the dead end
@@ -497,8 +486,8 @@ configuration classified as not hazardous, and therefore given no controls.
 4. Which of these deserve a formal oxygen compatibility assessment, and why?
    (a) A stainless ball valve in a 400 psi GOX line. (b) A Monel needle valve in the same
    line. (c) An aluminium bracket clamping a LOX line, outside the wetted boundary. (d) A
-   PTFE-seated check valve in a 300 psi GOX line, six years in service. (e) A GN₂ purge
-   line that the latest P&ID revision re-tagged as GOX.
+   PTFE-seated check valve in a 300 psi GOX line, six years in service. (e) A GN₂ purge line
+   that the latest P&ID revision re-tagged as GOX.
 
 5. Two students summarise the Mir SFOG fire. One says "the casing melted through", the
    other "the casing burned". Which is right, on what evidence, and which of Davis's
@@ -508,39 +497,38 @@ configuration classified as not hazardous, and therefore given no controls.
 <summary>Show answers</summary>
 
 1. **Wrong at the lean end.** The lower limit barely moves — methane goes from 5.0 % to
-   5.15 % `[USBM-503]` **[A]** — so the 5 % alarm warns as it always did. The **upper**
-   limit goes from 15 % to **60.5 %**, a fourfold widening, because without nitrogen as
-   ballast a rich mixture still holds flame temperature. The larger change is not
-   gas-phase: the seals, insulation and, above threshold, the metal are now fuels.
+   5.15 % `[USBM-503]` **[A]** — so the alarm warns as it always did. The **upper** limit
+   goes from 15 % to **60.5 %**, because without nitrogen as ballast a rich mixture still
+   holds flame temperature. The larger change is not gas-phase: the seals, insulation and,
+   above threshold, the metal are now fuels.
 
-2. **Elements:** pressurisation generally under 1 s; an exposed nonmetal close to the dead
-   end; a pressure ratio taking the gas above that nonmetal's situational AIT.
-   **Controls:** a slow-opening valve or upstream restricting orifice; soft goods moved out
-   of the dead-end zone; the lowest usable pressure, since it is the *ratio* that matters.
-   **Eliminating the dead-ended leg** also removes the cavity **resonance** requires.
+2. **Elements:** pressurisation under 1 s; an exposed nonmetal close to the dead end; a
+   pressure ratio taking the gas above that nonmetal's situational AIT. **Controls:** a
+   slow-opening valve or upstream orifice; soft goods moved out of the dead-end zone; the
+   lowest usable pressure, since it is the *ratio* that matters. **Eliminating the
+   dead-ended leg** also removes the cavity **resonance** requires.
 
 3. Ratio = 68.0; *T*_f = 293.15 × 68.0^0.2857 ≈ **979 K, about 706 °C**. One conclusion
    follows — the mechanism **cannot be ruled out**, the peak being far above the ~300 °C
    working AIT convention. It does not license claiming ignition will occur: the isentropic
-   result assumes no heat loss and infinite speed, and G74-consistent testing found no
-   ignition below 275 psia upstream even where the equation predicts 404 °C.
+   result assumes no heat loss, and G74-consistent testing found no ignition below 275 psia
+   upstream even where the equation predicts 404 °C.
 
 4. **(a), (b), (d) and especially (e) do; (c) largely does not.** (a) Stainless sustains
    combustion from about 250 psi, so the body is flammable at 400 psi, and a ball valve
    generates particles and opens fast. (b) Monel is the burn-resistant choice, but the
    assessment also covers seat, seals, cleanliness and velocity, and unknown flammability
-   defaults to flammable — good material reduces the reaction effect, it does not remove the
+   defaults to flammable — good material lowers the reaction effect, it does not remove the
    requirement. (c) Outside the wetted boundary aluminium as structure is normal practice;
-   the question is whether the drawing defines that boundary correctly. (d) Six years of
-   cycling on a soft seat is the setup for **flow friction** — assess the worn condition.
-   (e) The most urgent: a service change to GOX invalidates material selection, cleanliness,
-   velocity limits and dead legs alike.
+   the only question is whether the drawing defines that boundary correctly. (d) Six years
+   of cycling on a soft seat is the setup for **flow friction** — assess the worn condition. (e) The most urgent: a
+   service change to GOX invalidates material selection, cleanliness and velocity limits
+   alike.
 
-5. **It burned.** Graf's account has the unit "burned through the thin stainless steel
-   wall… the stainless steel was actually burning in the high temperature oxygen stream",
-   "due in part to its extreme thinness" `[GRAF-OXYGEN-CANDLES]` **[A]**. "Melted" casts
-   the casing as a passive victim of heat; it was a participant, a fuel in the kindling
-   chain. The rule is Davis's fourth: **thinner means easier ignition and faster burning;
-   thicker is safer**.
+5. **It burned.** Graf has the unit "burned through the thin stainless steel wall… the
+   stainless steel was actually burning in the high temperature oxygen stream", "due in part
+   to its extreme thinness" `[GRAF-OXYGEN-CANDLES]` **[A]**. "Melted" casts the casing as a
+   passive victim of heat; it was a participant, a fuel in the kindling chain. The rule is
+   Davis's fourth: **thinner is easier to ignite; thicker is safer**.
 
 </details>

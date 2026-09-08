@@ -46,14 +46,14 @@ the vessel they protect. Study it before reading on.
   <line x1="48" y1="76" x2="48" y2="585" stroke="var(--oxy)" stroke-width="2.4" fill="none"/>
   <path d="M48,76 L48,58 L60,50" stroke="var(--oxy)" stroke-width="2.4" fill="none"/>
   <path d="M60,50 l-8,-1 l4,7 z" fill="var(--oxy)"/>
-  <text x="66" y="48" font-family="system-ui, sans-serif" font-size="13" fill="var(--oxy)">OXIDISER VENT STACK — discharge A</text>
+  <text x="66" y="48" font-family="system-ui, sans-serif" font-size="13" fill="var(--oxy)">OX VENT STACK (A)</text>
   <text x="66" y="64" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">(GOX-enriched plume)</text>
 
   <line x1="652" y1="76" x2="652" y2="585" stroke="var(--fuel)" stroke-width="2.4" fill="none"/>
   <path d="M652,76 L652,58 L640,50" stroke="var(--fuel)" stroke-width="2.4" fill="none"/>
   <path d="M640,50 l8,-1 l-4,7 z" fill="var(--fuel)"/>
-  <text x="634" y="48" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--fuel)">FUEL VENT STACK — discharge B</text>
-  <text x="634" y="64" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">(flammable plume) — never tied to A</text>
+  <text x="634" y="48" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--fuel)">FUEL VENT STACK (B)</text>
+  <text x="634" y="64" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">(flammable) — never tied to A</text>
 
   <!-- ============ HELIUM PRESSURANT ============ -->
   <rect x="280" y="42" width="140" height="46" rx="5" fill="var(--side)" stroke="var(--inert)" stroke-width="2"/>
@@ -73,35 +73,35 @@ the vessel they protect. Study it before reading on.
   <line x1="254" y1="83" x2="230" y2="83" stroke="var(--inert)" stroke-width="1.8"/>
   <path d="M230,83 l8,-4 l0,8 z" fill="var(--inert)"/>
   <text x="226" y="80" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--inert)">PSV-303  350 psig</text>
-  <text x="226" y="95" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">to inert vent, high point</text>
+  <text x="226" y="95" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">→ inert vent</text>
 
   <!-- ============ OXIDISER PRESSURISATION LEG ============ -->
   <polyline points="240,112 240,290 225,290 225,300" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
   <path d="M231,141 L231,159 L249,141 L249,159 Z" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
   <path d="M231,133 A9 9 0 0 1 249,133 Z" fill="var(--inert)" stroke="var(--inert)" stroke-width="1.5"/>
   <line x1="240" y1="141" x2="240" y2="133" stroke="var(--inert)" stroke-width="1.5"/>
-  <text x="256" y="146" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PCV-101 regulator</text>
+  <text x="256" y="146" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PCV-101</text>
   <path d="M232,196 L248,204 L232,212 Z" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
   <line x1="248" y1="195" x2="248" y2="213" stroke="var(--inert)" stroke-width="1.8"/>
-  <text x="256" y="209" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CV-101 check</text>
+  <text x="256" y="209" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CV-101</text>
   <path d="M231,243 L231,261 L249,243 L249,261 Z" fill="var(--inert)" stroke="var(--inert)" stroke-width="1.8"/>
   <circle cx="240" cy="232" r="7" fill="var(--bg)" stroke="var(--inert)" stroke-width="1.5"/>
   <line x1="240" y1="243" x2="240" y2="239" stroke="var(--inert)" stroke-width="1.5"/>
-  <text x="256" y="256" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PV-104  press.  FC</text>
+  <text x="256" y="256" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PV-104  FC</text>
 
   <!-- ============ FUEL PRESSURISATION LEG ============ -->
   <polyline points="460,112 460,290 475,290 475,300" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
   <path d="M451,141 L451,159 L469,141 L469,159 Z" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
   <path d="M451,133 A9 9 0 0 1 469,133 Z" fill="var(--inert)" stroke="var(--inert)" stroke-width="1.5"/>
   <line x1="460" y1="141" x2="460" y2="133" stroke="var(--inert)" stroke-width="1.5"/>
-  <text x="444" y="146" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">regulator PCV-201</text>
+  <text x="444" y="146" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PCV-201</text>
   <path d="M452,196 L468,204 L452,212 Z" fill="none" stroke="var(--inert)" stroke-width="1.8"/>
   <line x1="468" y1="195" x2="468" y2="213" stroke="var(--inert)" stroke-width="1.8"/>
-  <text x="444" y="209" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">check CV-201</text>
+  <text x="444" y="209" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CV-201</text>
   <path d="M451,243 L451,261 L469,243 L469,261 Z" fill="var(--inert)" stroke="var(--inert)" stroke-width="1.8"/>
   <circle cx="460" cy="232" r="7" fill="var(--bg)" stroke="var(--inert)" stroke-width="1.5"/>
   <line x1="460" y1="243" x2="460" y2="239" stroke="var(--inert)" stroke-width="1.5"/>
-  <text x="444" y="256" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PV-204  press.  FC</text>
+  <text x="444" y="256" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PV-204  FC</text>
 
   <!-- ============ OXIDISER TANK TOP ============ -->
   <line x1="48" y1="170" x2="200" y2="170" stroke="var(--oxy)" stroke-width="2.4"/>
@@ -144,7 +144,8 @@ the vessel they protect. Study it before reading on.
   <path d="M481,268 L499,268 L490,256 Z M500,247 L500,265 L490,256 Z" fill="none" stroke="var(--fuel)" stroke-width="2"/>
   <polyline points="490,256 494,250 486,246 494,242" fill="none" stroke="var(--fuel)" stroke-width="1.4"/>
   <polyline points="500,256 510,256 510,170" fill="none" stroke="var(--fuel)" stroke-width="2.4"/>
-  <text x="466" y="276" font-family="system-ui, sans-serif" font-size="13" fill="currentColor" transform="rotate(-90 466 276)">PSV-201  130 psig</text>
+  <text x="452" y="297" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PSV-201  130 psig</text>
+  <line x1="456" y1="292" x2="481" y2="270" stroke="var(--muted)" stroke-width="1"/>
 
   <!-- ============ RUN TANKS ============ -->
   <rect x="115" y="300" width="130" height="152" rx="26" fill="var(--side)" stroke="var(--oxy)" stroke-width="2.6"/>
@@ -186,8 +187,8 @@ the vessel they protect. Study it before reading on.
   <path d="M79,386 L79,404 L97,386 L97,404 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="1.8"/>
   <line x1="88" y1="386" x2="88" y2="372" stroke="var(--oxy)" stroke-width="1.5"/>
   <line x1="81" y1="372" x2="95" y2="372" stroke="var(--oxy)" stroke-width="1.5"/>
-  <text x="16" y="382" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">LOX FILL ← bulk / trailer</text>
-  <text x="16" y="418" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-104  VJ</text>
+  <text x="22" y="368" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">LOX FILL →</text>
+  <text x="22" y="418" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-104  VJ</text>
 
   <line x1="684" y1="395" x2="658" y2="395" stroke="var(--fuel)" stroke-width="2.8"/>
   <path d="M658,395 A6 6 0 0 0 646,395" fill="none" stroke="var(--fuel)" stroke-width="2.8"/>
@@ -197,28 +198,29 @@ the vessel they protect. Study it before reading on.
   <path d="M603,386 L603,404 L621,386 L621,404 Z" fill="var(--fuel)" stroke="var(--fuel)" stroke-width="1.8"/>
   <line x1="612" y1="386" x2="612" y2="372" stroke="var(--fuel)" stroke-width="1.5"/>
   <line x1="605" y1="372" x2="619" y2="372" stroke="var(--fuel)" stroke-width="1.5"/>
-  <text x="684" y="382" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">LCH₄ FILL ← trailer</text>
+  <text x="678" y="368" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">← LCH₄ FILL</text>
   <text x="684" y="418" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-204  VJ</text>
 
   <!-- ============ DRAINS ============ -->
-  <polyline points="140,452 140,478 62,478" fill="none" stroke="var(--oxy)" stroke-width="2.6"/>
-  <path d="M62,478 A6 6 0 0 1 62,466 " fill="none" stroke="var(--oxy)" stroke-width="2.6" transform="rotate(90 56 472)"/>
-  <line x1="50" y1="478" x2="16" y2="478" stroke="var(--oxy)" stroke-width="2.6"/>
+  <polyline points="140,452 140,478 54,478" fill="none" stroke="var(--oxy)" stroke-width="2.6"/>
+  <path d="M54,478 A6 6 0 0 0 42,478" fill="none" stroke="var(--oxy)" stroke-width="2.6"/>
+  <line x1="42" y1="478" x2="16" y2="478" stroke="var(--oxy)" stroke-width="2.6"/>
   <path d="M16,478 l9,-4 l0,8 z" fill="var(--oxy)"/>
   <path d="M105,469 L105,487 L123,469 L123,487 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="1.8"/>
   <line x1="114" y1="469" x2="114" y2="457" stroke="var(--oxy)" stroke-width="1.5"/>
   <line x1="107" y1="457" x2="121" y2="457" stroke="var(--oxy)" stroke-width="1.5"/>
-  <text x="16" y="504" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-105 drain → LOX disposal pad</text>
-  <text x="16" y="520" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">(concrete, graded away, no asphalt)</text>
+  <text x="22" y="504" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-105 → LOX disposal</text>
+  <text x="22" y="520" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">concrete, not asphalt</text>
 
-  <polyline points="560,452 560,478 638,478" fill="none" stroke="var(--fuel)" stroke-width="2.6"/>
-  <line x1="650" y1="478" x2="684" y2="478" stroke="var(--fuel)" stroke-width="2.6"/>
+  <polyline points="560,452 560,478 646,478" fill="none" stroke="var(--fuel)" stroke-width="2.6"/>
+  <path d="M646,478 A6 6 0 0 1 658,478" fill="none" stroke="var(--fuel)" stroke-width="2.6"/>
+  <line x1="658" y1="478" x2="684" y2="478" stroke="var(--fuel)" stroke-width="2.6"/>
   <path d="M684,478 l-9,-4 l0,8 z" fill="var(--fuel)"/>
   <path d="M577,469 L577,487 L595,469 L595,487 Z" fill="var(--fuel)" stroke="var(--fuel)" stroke-width="1.8"/>
   <line x1="586" y1="469" x2="586" y2="457" stroke="var(--fuel)" stroke-width="1.5"/>
   <line x1="579" y1="457" x2="593" y2="457" stroke="var(--fuel)" stroke-width="1.5"/>
-  <text x="684" y="504" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-205 drain → methane disposal</text>
-  <text x="684" y="520" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">(separate area from LOX pad)</text>
+  <text x="678" y="504" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-205 → CH₄ disposal</text>
+  <text x="678" y="520" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">separate from LOX pad</text>
 
   <!-- ============ OXIDISER FEED LEG ============ -->
   <line x1="215" y1="452" x2="215" y2="700" stroke="var(--oxy)" stroke-width="2.8"/>
@@ -236,7 +238,7 @@ the vessel they protect. Study it before reading on.
   <path d="M206,551 L224,551 L206,571 L224,571 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
   <line x1="215" y1="551" x2="215" y2="539" stroke="var(--oxy)" stroke-width="1.5"/>
   <line x1="208" y1="539" x2="222" y2="539" stroke="var(--oxy)" stroke-width="1.5"/>
-  <text x="234" y="562" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-108 vented ball</text>
+  <text x="234" y="562" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-108 vented</text>
   <!-- trapped volume relief -->
   <line x1="215" y1="585" x2="48" y2="585" stroke="var(--oxy)" stroke-width="2.4"/>
   <path d="M164,576 L182,576 L173,588 Z M154,579 L154,597 L164,588 Z" fill="none" stroke="var(--oxy)" stroke-width="2"/>
@@ -244,7 +246,7 @@ the vessel they protect. Study it before reading on.
   <path d="M206,631 L224,631 L206,651 L224,651 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="2"/>
   <path d="M206,620 A9 9 0 0 1 224,620 Z" fill="var(--oxy)" stroke="var(--oxy)" stroke-width="1.5"/>
   <line x1="215" y1="631" x2="215" y2="620" stroke="var(--oxy)" stroke-width="1.5"/>
-  <text x="234" y="638" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">MOV-110 main ox</text>
+  <text x="234" y="638" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">MOV-110 main</text>
   <text x="234" y="654" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">FAIL CLOSED</text>
 
   <!-- ============ FUEL FEED LEG ============ -->
@@ -263,14 +265,14 @@ the vessel they protect. Study it before reading on.
   <path d="M476,551 L494,551 L476,571 L494,571 Z" fill="var(--fuel)" stroke="var(--fuel)" stroke-width="2"/>
   <line x1="485" y1="551" x2="485" y2="539" stroke="var(--fuel)" stroke-width="1.5"/>
   <line x1="478" y1="539" x2="492" y2="539" stroke="var(--fuel)" stroke-width="1.5"/>
-  <text x="466" y="562" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-208 vented ball</text>
+  <text x="466" y="562" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">HV-208 vented</text>
   <line x1="485" y1="585" x2="652" y2="585" stroke="var(--fuel)" stroke-width="2.4"/>
   <path d="M518,576 L536,576 L527,588 Z M536,579 L536,597 L527,588 Z" fill="none" stroke="var(--fuel)" stroke-width="2"/>
   <text x="580" y="608" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PSV-209  200 psig</text>
   <path d="M476,631 L494,631 L476,651 L494,651 Z" fill="var(--fuel)" stroke="var(--fuel)" stroke-width="2"/>
   <path d="M476,620 A9 9 0 0 1 494,620 Z" fill="var(--fuel)" stroke="var(--fuel)" stroke-width="1.5"/>
   <line x1="485" y1="631" x2="485" y2="620" stroke="var(--fuel)" stroke-width="1.5"/>
-  <text x="466" y="638" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">MFV-210 main fuel</text>
+  <text x="466" y="638" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">MFV-210 main</text>
   <text x="466" y="654" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">FAIL CLOSED</text>
 
   <!-- ============ PURGE PANELS ============ -->
@@ -298,10 +300,10 @@ the vessel they protect. Study it before reading on.
   <text x="350" y="714" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">E-1 ENGINE</text>
   <text x="350" y="731" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">LOX / LCH₄</text>
   <text x="350" y="775" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">IG-1 igniter</text>
-  <circle cx="350" cy="655" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
-  <text x="350" y="652" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PT</text>
-  <text x="350" y="666" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">111</text>
-  <line x1="350" y1="672" x2="350" y2="690" stroke="currentColor" stroke-width="1"/>
+  <circle cx="350" cy="600" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+  <text x="350" y="597" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PT</text>
+  <text x="350" y="611" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">111</text>
+  <line x1="350" y1="617" x2="350" y2="690" stroke="currentColor" stroke-width="1"/>
 
   <!-- ============ TRENCH ============ -->
   <rect x="250" y="806" width="200" height="26" fill="none" stroke="var(--warn)" stroke-width="2"/>
@@ -310,49 +312,48 @@ the vessel they protect. Study it before reading on.
   <line x1="330" y1="832" x2="356" y2="806" stroke="var(--warn)" stroke-width="1"/>
   <line x1="370" y1="832" x2="396" y2="806" stroke="var(--warn)" stroke-width="1"/>
   <line x1="410" y1="832" x2="436" y2="806" stroke="var(--warn)" stroke-width="1"/>
-  <text x="350" y="800" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">FLAME / CABLE TRENCH — low point</text>
+  <text x="458" y="794" font-family="system-ui, sans-serif" font-size="13" fill="var(--warn)">FLAME TRENCH — low point</text>
 
   <!-- ============ GAS DETECTION ============ -->
   <circle cx="95" cy="545" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
   <text x="95" y="542" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">AT</text>
   <text x="95" y="556" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">402</text>
   <text x="116" y="543" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">O₂ enrichment</text>
-  <text x="116" y="559" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">at LOX skid, &gt;23.5 %</text>
+  <text x="116" y="559" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">at LOX skid</text>
 
-  <circle cx="272" cy="772" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
-  <text x="272" y="769" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">AT</text>
-  <text x="272" y="783" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">401</text>
-  <text x="236" y="745" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">O₂ deficiency</text>
-  <text x="236" y="761" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">breathing zone</text>
+  <circle cx="200" cy="782" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+  <text x="200" y="779" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">AT</text>
+  <text x="200" y="793" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">401</text>
+  <text x="200" y="740" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">O₂ deficiency</text>
+  <text x="200" y="756" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">breathing zone</text>
 
   <circle cx="600" cy="122" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
   <text x="600" y="119" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">AT</text>
   <text x="600" y="133" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">403</text>
   <text x="578" y="112" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CH₄ — high level</text>
-  <text x="578" y="128" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">under cell roof, % LEL</text>
+  <text x="578" y="128" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">under cell roof</text>
 
   <circle cx="490" cy="819" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
   <text x="490" y="816" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">AT</text>
   <text x="490" y="830" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">404</text>
   <line x1="473" y1="819" x2="450" y2="819" stroke="currentColor" stroke-width="1"/>
-  <text x="512" y="816" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CH₄ — in trench</text>
-  <text x="512" y="832" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">cold vapour sinks</text>
+  <text x="512" y="820" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">CH₄ — in trench</text>
 
   <!-- ============ LEGEND ============ -->
-  <rect x="18" y="726" width="192" height="104" rx="5" fill="var(--side)" stroke="var(--line)" stroke-width="1.5"/>
-  <path d="M28,742 L28,754 L40,742 L40,754 Z" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
-  <text x="48" y="753" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">normally closed</text>
-  <path d="M28,762 L28,774 L40,762 L40,774 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <text x="48" y="773" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">normally open</text>
-  <path d="M28,788 A6 6 0 0 1 40,788 Z" fill="currentColor"/>
-  <circle cx="34" cy="800" r="5" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="48" y="794" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">pneumatic / solenoid</text>
-  <line x1="26" y1="812" x2="42" y2="812" stroke="currentColor" stroke-width="2.4"/>
-  <line x1="26" y1="807" x2="42" y2="807" stroke="var(--muted)" stroke-width="1"/>
-  <line x1="26" y1="817" x2="42" y2="817" stroke="var(--muted)" stroke-width="1"/>
-  <text x="48" y="812" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">vacuum-jacketed</text>
-  <line x1="26" y1="824" x2="42" y2="824" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4"/>
-  <text x="48" y="828" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">signal / command</text>
+  <rect x="18" y="862" width="170" height="104" rx="5" fill="var(--side)" stroke="var(--line)" stroke-width="1.5"/>
+  <path d="M28,878 L28,890 L40,878 L40,890 Z" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+  <text x="48" y="889" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">normally closed</text>
+  <path d="M28,898 L28,910 L40,898 L40,910 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <text x="48" y="909" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">normally open</text>
+  <path d="M28,924 A6 6 0 0 1 40,924 Z" fill="currentColor"/>
+  <circle cx="34" cy="936" r="5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="48" y="930" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">pneumatic/solenoid</text>
+  <line x1="26" y1="948" x2="42" y2="948" stroke="currentColor" stroke-width="2.4"/>
+  <line x1="26" y1="943" x2="42" y2="943" stroke="var(--muted)" stroke-width="1"/>
+  <line x1="26" y1="953" x2="42" y2="953" stroke="var(--muted)" stroke-width="1"/>
+  <text x="48" y="948" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">vacuum-jacketed</text>
+  <line x1="26" y1="960" x2="42" y2="960" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="48" y="964" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">signal / command</text>
 
   <!-- ============ SIGNALS AND CONTROL ROOM ============ -->
   <polyline points="228,641 240,641 240,862 350,862 350,876" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4"/>
