@@ -126,9 +126,11 @@ async function start() {
   const stage = new Stage(canvas, {
     pixelRatio: state.quality.pixelRatio,
     shadowMap: state.quality.shadow,
+    /* A narrower field of view is a longer lens: the photography mode uses it,
+       and so does anyone who wants a proper look at the Earth. */
+    fov: Number(params.get('fov') ?? 55),
   });
   if (params.get('shadows') === '0') stage.renderer.shadowMap.enabled = false;
-  window.__dbg = { params };
   const sky = new Sky(stage);
   try {
     sky.setStars(await readBinary(DATA, 'stars.bin'));
@@ -187,9 +189,15 @@ async function start() {
 
   const cam = {
     lat: site.lat, lon: site.lon, alt: siteGround + startAgl,
-    yaw: 90 * Math.PI / 180, pitch: view === 'orbit' ? -0.9 : -0.06,
+    yaw: Number(params.get('yaw') ?? 90) * Math.PI / 180,
+    pitch: params.get('pitch') !== null
+      ? Number(params.get('pitch')) * Math.PI / 180
+      : (view === 'orbit' ? -0.9 : -0.06),
     speed: view === 'orbit' ? 40000 : 6,
   };
+  /* `look=earth` or `look=sun` aims the camera at something specific, which is
+     how the screenshot harness checks the sky without driving the controls. */
+  const lookAt = params.get('look');
 
   const exposure = new Exposure();
   const world = { x: 0, y: 0, z: 0 };
@@ -292,6 +300,12 @@ async function start() {
 
     /* --- sky and light ---------------------------------------------------- */
     const local = skyAt(eph, cam.lat, cam.lon, cam.alt);
+    if (lookAt === 'earth' || lookAt === 'sun') {
+      const az = lookAt === 'earth' ? local.earthAz : local.sunAz;
+      const el2 = lookAt === 'earth' ? local.earthEl : local.sunEl;
+      cam.yaw = az * Math.PI / 180;
+      cam.pitch = el2 * Math.PI / 180;
+    }
     stage.setSun(local.sunDir, Math.max(0, local.sunEl > -0.3 ? 1 : 0));
     const earthshineScale = 1.5e-4 * eph.earthIllum * Math.max(0, Math.sin(local.earthEl * Math.PI / 180));
     terrain.updateSky({
@@ -308,7 +322,13 @@ async function start() {
     const ev = exposure.update({
       sunElevation: local.sunEl,
       sunVisible: local.sunEl > 0 ? 1 : 0,
-      albedo: OPTICS.albedoMare,
+      /* What the eye is actually adapting to: mare is half as bright as
+         highlands, and standing on one or the other is a two-thirds of a stop
+         difference in how dark the shadows look. */
+      albedo: albedoAt(geology, cam.lat, cam.lon),
+      /* Looking down at your boots and looking out at the horizon are two very
+         different exposures, and the difference is most of a stop. */
+      viewMu: Math.max(0.06, Math.sin(Math.max(0.05, -cam.pitch))),
       groundFraction: cam.alt - surfaceH > 50000 ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
       earthIllum: eph.earthIllum,
       earthElevation: local.earthEl,
@@ -364,6 +384,14 @@ async function start() {
 }
 
 /* --- helpers ---------------------------------------------------------------- */
+
+/** Normal albedo under a point, from the USGS geologic unit. REGIONAL. */
+function albedoAt(geology, lat, lon) {
+  if (!geology) return OPTICS.albedoMare;
+  const x = Math.min(geology.width - 1, Math.max(0, ((lon + 180) / 360 * geology.width) | 0));
+  const y = Math.min(geology.height - 1, Math.max(0, ((90 - lat) / 180 * geology.height) | 0));
+  return geology.albedo[geology.data[y * geology.width + x]];
+}
 
 function fmtLat(v) { return `${Math.abs(v).toFixed(5)}° ${v >= 0 ? 'N' : 'S'}`; }
 function fmtLon(v) { return `${Math.abs(v).toFixed(5)}° ${v >= 0 ? 'E' : 'W'}`; }

@@ -33,7 +33,8 @@
    ========================================================================== */
 
 import * as THREE from 'three';
-import { OPTICS } from '../config.js';
+import { OPTICS, TERRAIN } from '../config.js';
+import { ALBEDO_GLSL } from './albedo.js';
 
 const PARS = /* glsl */`
 uniform vec3  uSunDir;          // unit, world space
@@ -41,8 +42,9 @@ uniform vec3  uEarthDir;
 uniform vec3  uEarthshine;      // radiance, already tinted
 uniform float uSunAngularRadius;
 uniform vec3  uMoonCentre;      // -origin, so worldPos - uMoonCentre is radial
-uniform float uDetailScale;
-uniform float uDetailAmount;
+uniform float uDetailAmount;    // albedo variation, 0 in scientific mode
+uniform float uMicroRelief;     // metres of bump on the finest grains
+uniform float uDetailPeriod;    // metres; the noise repeats on this lattice
 uniform float uOppositionB0;
 uniform float uOppositionH;
 uniform float uHG;
@@ -50,6 +52,8 @@ uniform float uBrdfNorm;
 uniform int   uPlain;           // scientific visualisation: plain Lambert
 uniform vec4  uImageryRect;     // x, y, width, height in equirectangular uv
 uniform float uImageryAmount;
+uniform float uImageryContrast; // how much of the picture's contrast to keep
+uniform float uImageryBlurLod;  // mip level standing in for the local mean
 uniform sampler2D uImagery;
 varying float vSunVis;
 varying float vEarthVis;
@@ -101,6 +105,53 @@ float horizonVisibility(vec3 dir, vec3 up, vec3 east, vec3 north,
 }
 `;
 
+const NOISE = /* glsl */`
+/* Regolith micro-texture. Value noise on a surface-aligned lattice in metres,
+   octaves from eight metres down to twelve centimetres, each fading out as the
+   pixel it covers grows wider than its own cell — so the surface gains detail
+   as you approach and never shimmers in the distance. The lattice wraps on
+   uDetailPeriod so the coordinate can be kept small enough for a float without
+   a seam appearing where it wraps.
+
+   None of this is measured. It stands in for what no orbital dataset resolves:
+   grains, clods, pits and the dusting of small fragments that make regolith
+   look like regolith rather than a smooth grey shell. */
+const vec3 SELENE_HASH = vec3(0.1031, 0.1030, 0.0973);
+
+float seleneHash(vec2 cell, float period) {
+  vec2 c = mod(cell, period);
+  vec3 q = fract(c.xyx * SELENE_HASH);
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.x + q.y) * q.z);
+}
+
+float seleneNoise(vec2 x, float period) {
+  vec2 i = floor(x), f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = seleneHash(i, period);
+  float b = seleneHash(i + vec2(1.0, 0.0), period);
+  float c = seleneHash(i + vec2(0.0, 1.0), period);
+  float d = seleneHash(i + vec2(1.0, 1.0), period);
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+/* Sum the octaves, dropping each one as it approaches the size of a pixel. */
+float seleneRegolith(vec2 metres, float widthM) {
+  float sum = 0.0, weight = 0.0;
+  float cell = 8.0, amp = 1.0;
+  for (int o = 0; o < 5; o++) {
+    float fade = 1.0 - smoothstep(0.30, 1.0, widthM / cell);
+    if (fade > 0.001) {
+      sum += amp * fade * (seleneNoise(metres / cell, uDetailPeriod / cell) - 0.5);
+      weight += amp * fade;
+    }
+    cell *= 0.25;
+    amp *= 0.62;
+  }
+  return weight > 0.0 ? sum / weight : 0.0;
+}
+`;
+
 /* The regolith BRDF, replacing three.js's direct diffuse term. */
 const BRDF = /* glsl */`
 float lunarBrdf(float mu0, float mu, float phase) {
@@ -119,8 +170,11 @@ export function makeTerrainMaterial(opts = {}) {
     uEarthshine: { value: new THREE.Vector3(0, 0, 0) },
     uSunAngularRadius: { value: 0.00465 },
     uMoonCentre: { value: new THREE.Vector3(0, 0, 0) },
-    uDetailScale: { value: 0.35 },
     uDetailAmount: { value: opts.plain ? 0 : 0.16 },
+    uMicroRelief: { value: opts.plain ? 0 : 0.055 },
+    uDetailPeriod: { value: TERRAIN.detailPeriod },
+    uAlbedoMax: { value: OPTICS.albedoMax },
+    uAlbedoKnee: { value: OPTICS.albedoKnee },
     uOppositionB0: { value: OPTICS.oppositionB0 },
     uOppositionH: { value: OPTICS.oppositionH },
     uHG: { value: OPTICS.hgG },
@@ -129,6 +183,8 @@ export function makeTerrainMaterial(opts = {}) {
     uImagery: { value: opts.imagery || null },
     uImageryRect: { value: new THREE.Vector4(0, 0, 1, 1) },
     uImageryAmount: { value: 0 },
+    uImageryContrast: { value: 0.55 },
+    uImageryBlurLod: { value: 4 },
   };
 
   /* Normalise so the BRDF equals Lambert at 30 degrees phase, viewed head on. */
@@ -159,25 +215,59 @@ export function makeTerrainMaterial(opts = {}) {
       .replace('#include <fog_vertex>', `#include <fog_vertex>\n${VERTEX_BODY}`);
 
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\n${PARS}\n${BRDF}`)
+      .replace('#include <common>', `#include <common>\n${PARS}\n${ALBEDO_GLSL}\n${NOISE}\n${BRDF}`)
+      /* Bump the shading normal with the same noise. Screen-space derivatives
+         are taken in view space, where the numbers are small: a world position
+         near 1.7e6 m has no precision left in a float to differentiate. */
+      .replace('#include <normal_fragment_begin>', /* glsl */`
+        #include <normal_fragment_begin>
+        if (uMicroRelief > 0.0 && seleneWidth < 4.0) {
+          vec3 pos = -vViewPosition;
+          vec3 sigmaX = dFdx(pos), sigmaY = dFdy(pos);
+          vec3 R1 = cross(sigmaY, normal), R2 = cross(normal, sigmaX);
+          float det = dot(sigmaX, R1);
+          float h = seleneMicro * uMicroRelief;
+          vec3 grad = sign(det) * (dFdx(h) * R1 + dFdy(h) * R2);
+          normal = normalize(abs(det) * normal - grad);
+        }
+      `)
       /* Albedo: the global colour map, optionally overlaid with streamed
          high-resolution imagery, times a fine procedural variation that gives
          the surface texture at arm's length. */
       .replace('#include <map_fragment>', /* glsl */`
         #include <map_fragment>
+        /* The map is a picture, not a reflectance; read it as one. */
+        diffuseColor.rgb = albedoFromMap(diffuseColor.rgb);
+        float seleneImagery = 0.0;
         if (uImageryAmount > 0.0) {
           vec2 iuv = (vLatLonUv - uImageryRect.xy) / uImageryRect.zw;
           if (iuv.x > 0.0 && iuv.x < 1.0 && iuv.y > 0.0 && iuv.y < 1.0) {
-            vec3 hi = texture2D(uImagery, iuv).rgb;
-            float lum = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-            float hiLum = max(dot(hi, vec3(0.2126, 0.7152, 0.0722)), 1e-3);
-            diffuseColor.rgb = mix(diffuseColor.rgb, hi * (lum / hiLum), uImageryAmount);
+            /* An orbital mosaic is not an albedo map: it was photographed under
+               one particular Sun, and its crater shadows are baked in. Using it
+               raw would shade the ground twice, once from the picture and once
+               from our own Sun, which is why a NAC mosaic dropped straight onto
+               terrain looks like soot.
+
+               So it is divided by a blurred copy of itself. What survives is the
+               local ratio — genuinely brighter and darker material, fresh ejecta
+               against mature regolith — while the broad illumination gradient
+               that produced it cancels out. That ratio then modulates the albedo
+               the colour map already established, rather than replacing it. */
+            const vec3 W = vec3(0.2126, 0.7152, 0.0722);
+            float hi = dot(texture2D(uImagery, iuv).rgb, W);
+            float lo = dot(textureLod(uImagery, iuv, uImageryBlurLod).rgb, W);
+            float ratio = clamp(hi / max(lo, 1e-3), 0.35, 2.4);
+            diffuseColor.rgb *= mix(1.0, pow(ratio, uImageryContrast), uImageryAmount);
+            seleneImagery = uImageryAmount;
           }
         }
+        /* One noise field, used for both the mottling and the relief below. */
+        float seleneWidth = max(fwidth(vDetailXY.x), fwidth(vDetailXY.y));
+        float seleneMicro = seleneRegolith(vDetailXY, seleneWidth);
         if (uDetailAmount > 0.0) {
-          vec2 d = vDetailXY * uDetailScale;
-          float n = sin(d.x * 1.7) * sin(d.y * 2.3) + 0.6 * sin(d.x * 5.1 + 1.3) * sin(d.y * 4.7);
-          diffuseColor.rgb *= 1.0 + uDetailAmount * n * 0.5;
+          /* Where real imagery is present it already shows this variation, so
+             the invented part steps back rather than doubling it. */
+          diffuseColor.rgb *= 1.0 + uDetailAmount * (1.0 - 0.6 * seleneImagery) * seleneMicro * 2.0;
         }
       `)
       /* Direct lighting: the regolith BRDF, plus the horizon test for the Sun.

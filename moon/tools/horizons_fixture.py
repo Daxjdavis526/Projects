@@ -89,7 +89,7 @@ def observer_table(command, lat, lon, epoch):
         "EPHEM_TYPE": "'OBSERVER'", "CENTER": "'coord@301'", "COORD_TYPE": "'GEODETIC'",
         "SITE_COORD": f"'{lon},{lat},0'", "START_TIME": f"'{epoch}'",
         "STOP_TIME": f"'{plus_one_minute(epoch)}'", "STEP_SIZE": "'1 m'",
-        "QUANTITIES": "'4,10,13,20,24'", "APPARENT": "'AIRLESS'", "ANG_FORMAT": "'DEG'",
+        "QUANTITIES": "'4,10,13,14,20,24'", "APPARENT": "'AIRLESS'", "ANG_FORMAT": "'DEG'",
         "CSV_FORMAT": "'YES'", "TIME_DIGITS": "'MINUTES'",
     })
     h = header(text)
@@ -100,10 +100,19 @@ def observer_table(command, lat, lon, epoch):
             if key_part in k:
                 return float(v)
         raise KeyError(key_part + " in " + str(h))
-    return {
+    out = {
         "az": f("Azi"), "el": f("Elev"), "illum": f("Illu"), "angdiam_arcsec": f("Ang-diam"),
         "range_km": f("delta"), "sto_deg": f("S-T-O"),
     }
+    # Quantity 14 is the point on the target directly beneath the observer:
+    # for the Earth that is the sub-lunar point, which is what decides which
+    # continents a person standing on the Moon can see.
+    try:
+        out["sub_lon"] = f("ObsSub-LON")
+        out["sub_lat"] = f("ObsSub-LAT")
+    except KeyError:
+        pass
+    return out
 
 
 def subpoints(epoch):

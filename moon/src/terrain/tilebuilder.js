@@ -29,6 +29,9 @@ import { faceUvToUnit, tileVertexUv, tileCentre, edgeArc } from './cubesphere.js
 import { unitToLl } from '../physics/frames.js';
 
 const DEG = Math.PI / 180;
+/* Face coordinates run -1..1 over 90 degrees of arc, so this is how many metres
+   of surface one unit of u or v covers. */
+const UV_METRES = R_MOON * Math.PI / 4;
 
 /**
  * @param {object} spec  { face, level, i, j, verts, apron, horizon, rocks }
@@ -67,6 +70,11 @@ export function buildTile(spec, src, parentHorizon = null) {
   /* --- centre, in doubles ----------------------------------------------- */
   const c = tileCentre(face, level, i, j);
   const centre = { x: c.x * R_MOON, y: c.y * R_MOON, z: c.z * R_MOON };
+
+  const centreUv = tileVertexUv(level, i, j, (verts - 1) / 2, (verts - 1) / 2, verts, { u: 0, v: 0 });
+  const P = TERRAIN.detailPeriod;
+  const detailOriginU = Math.round(centreUv.u * UV_METRES / P) * P;
+  const detailOriginV = Math.round(centreUv.v * UV_METRES / P) * P;
 
   /* --- positions, normals, uv ------------------------------------------- */
   const n = verts * verts;
@@ -111,10 +119,14 @@ export function buildTile(spec, src, parentHorizon = null) {
     uvs[idx * 2] = (ll.lon + 180) / 360;
     uvs[idx * 2 + 1] = (90 - ll.lat) / 180;
 
-    /* Coordinates for the shader's procedural detail, keyed to a coarse world
-       lattice so re-basing the floating origin never shifts the pattern. */
-    detailXY[idx * 2] = ((dir.x * R_MOON) % 4096 + 4096) % 4096;
-    detailXY[idx * 2 + 1] = ((dir.y * R_MOON + dir.z * R_MOON) % 4096 + 4096) % 4096;
+    /* Coordinates for the shader's regolith texture: metres along the cube
+       face, which is a surface-aligned frame, minus a whole number of noise
+       periods taken off at the tile centre. Subtracting per tile rather than
+       wrapping per vertex keeps the numbers small enough for a float without
+       putting a discontinuity through whichever triangle straddles the wrap,
+       and the noise itself is periodic, so the tiles still agree. */
+    detailXY[idx * 2] = uv.u * UV_METRES - detailOriginU;
+    detailXY[idx * 2 + 1] = uv.v * UV_METRES - detailOriginV;
 
     if (drop === 0) {
       if (r < rMin) rMin = r;

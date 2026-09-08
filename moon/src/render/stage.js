@@ -52,7 +52,11 @@ export class Stage {
        near the render origin. */
     this.eye = { x: 0, y: 0, z: 0 };
 
-    this.sun = new THREE.DirectionalLight(0xfff6ec, 1);
+    /* Sunlight is the white point here, as it is for an eye or a camera with
+       nothing between it and the Sun. The Moon's warm cast then comes from the
+       regolith, which really is faintly brown, rather than from a tinted light
+       that would double it. */
+    this.sun = new THREE.DirectionalLight(0xffffff, 1);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(opts.shadowMap ?? 2048, opts.shadowMap ?? 2048);
     this.sun.shadow.camera.near = 1;

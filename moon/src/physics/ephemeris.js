@@ -283,11 +283,28 @@ export function ephemerisAt(jdUtc) {
   const phase = Math.acos(Math.max(-1, Math.min(1, dot(eToS, eToM))));
   const earthIllum = (1 + Math.cos(phase)) / 2;
 
-  // Earth's spin axis and prime meridian, so the right continents face us.
-  const eps0 = eps * DEG;
-  const earthAxisJ2000 = { x: 0, y: -Math.sin(eps0), z: Math.cos(eps0) };
-  const earthAxis = norm(matMulVec(M, earthAxisJ2000));
+  /* Earth's body-fixed frame, so the right continents face the Moon.
+
+     Everything above is in the equatorial frame of date, precessed back to
+     J2000, so in that frame Earth's rotation axis is simply the z axis, and the
+     Greenwich meridian crosses the equator at a right ascension equal to
+     Greenwich sidereal time. Rotating those two directions into the Moon's body
+     frame gives a complete Earth-fixed basis, which is what the renderer needs
+     to point the globe and what the sub-lunar point falls out of. */
   const gmst = greenwichMeanSiderealTime(jdUtc);
+  const th = gmst * DEG;
+  const toBody = (v) => norm(matMulVec(M, matMulVec(P, v)));
+  const earthNorth = toBody({ x: 0, y: 0, z: 1 });
+  const earthPrime = toBody({ x: Math.cos(th), y: Math.sin(th), z: 0 });
+  const earthEast = norm(cross(earthNorth, earthPrime));     // longitude 90 E
+  const earthAxis = earthNorth;
+
+  /* The point on Earth directly beneath the Moon: geographic, positive east. */
+  const toMoon = { x: -earthFromMoon.x / earthDist, y: -earthFromMoon.y / earthDist,
+                   z: -earthFromMoon.z / earthDist };
+  const earthSubLat = Math.asin(Math.max(-1, Math.min(1, dot(toMoon, earthNorth)))) * RAD;
+  let earthSubLon = Math.atan2(dot(toMoon, earthEast), dot(toMoon, earthPrime)) * RAD;
+  if (earthSubLon < 0) earthSubLon += 360;
 
   const subEarth = unitToLl(earthFromMoon.x / earthDist, earthFromMoon.y / earthDist, earthFromMoon.z / earthDist);
   const subSolar = unitToLl(sunFromMoon.x / sunDist, sunFromMoon.y / sunDist, sunFromMoon.z / sunDist);
@@ -301,7 +318,8 @@ export function ephemerisAt(jdUtc) {
     earthAngularRadius: Math.asin(R_EARTH / earthDist) * RAD,
     earthPhaseAngle: phase * RAD,
     earthIllum,
-    earthAxis, gmst,
+    earthAxis, earthNorth, earthPrime, earthEast, gmst,
+    earthSubLat, earthSubLon,
     subEarth, subSolar,
     bodyFromJ2000: M,
     orientation: orient,

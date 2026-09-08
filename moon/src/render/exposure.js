@@ -38,6 +38,7 @@ export class Exposure {
    *   sunVisible     0..1, is the Sun actually above the local horizon profile
    *   albedo         local normal albedo
    *   groundFraction 0..1, how much of the frame is ground rather than sky
+ *   viewMu         cosine of the angle the ground is seen at, 0.35 standing
    *   earthIllum     0..1 illuminated fraction of the Earth
    *   earthElevation degrees; below zero contributes nothing
    *   lampLuminance  extra light the player is carrying
@@ -47,13 +48,32 @@ export class Exposure {
     const sunEl = Math.max(0, Math.sin((s.sunElevation ?? 0) * Math.PI / 180));
     const albedo = s.albedo ?? OPTICS.albedoMare;
     const ground = s.groundFraction ?? 0.55;
-    const sunlit = albedo * sunEl * (s.sunVisible ?? 1);
+    /* Regolith seen edge-on is brighter than regolith seen from above — the
+       Lommel-Seeliger term again — which is why the far distance is the
+       brightest part of a lunar photograph and why an exposure set by albedo
+       and sun angle alone blows the horizon out. */
+    const sunlit = albedo * sunEl * Exposure.grazingGain(sunEl, s.viewMu) *
+      (s.sunVisible ?? 1);
     const earthEl = Math.max(0, Math.sin((s.earthElevation ?? -90) * Math.PI / 180));
     const earthshine = albedo * earthEl * (s.earthIllum ?? 0) *
       (EARTHSHINE_FULL / SOLAR_CONSTANT);
     const lamp = s.lampLuminance ?? 0;
     /* The sky itself contributes essentially nothing: no atmosphere. */
     return ground * (sunlit + earthshine + lamp) + 1e-6;
+  }
+
+  /**
+   * How much brighter the surface is than a head-on view of it, for a cosine
+   * `mu` between the view direction and the surface normal. Normalised the same
+   * way the renderer's BRDF is: unity at 30 degrees of phase, seen head on.
+   *
+   * @param {number} mu0 sine of the Sun's elevation
+   * @param {number} mu  cosine of the view angle; 1 looking straight down,
+   *                     about 0.1 looking at the horizon, 0.35 standing up
+   */
+  static grazingGain(mu0, mu = 0.35) {
+    const norm = Math.cos(OPTICS.normalisePhase) / (Math.cos(OPTICS.normalisePhase) + 1);
+    return (mu0 / Math.max(mu0 + Math.max(0.05, mu), 1e-4)) / norm;
   }
 
   /** Advance the adaptation by dt seconds and return the exposure multiplier. */

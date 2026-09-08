@@ -43,6 +43,9 @@ export const FRAME = {
 
 /* --- terrain --------------------------------------------------------------- */
 export const TERRAIN = {
+  /* The regolith noise repeats on this many metres, which lets a tile carry its
+     texture coordinates in a float without a seam where they wrap. */
+  detailPeriod: 2048,
   verts: 33,              // vertices per tile edge (32 quads)
   apron: 32,              // extra cells sampled around a tile for normals/horizon
   splitK: 3.0,            // split when distance < splitK * tile arc length
@@ -83,6 +86,11 @@ export const DEFAULT_QUALITY = 'high';
 export const OPTICS = {
   albedoMare: 0.085,       // approximate normal albedo, 643 nm
   albedoHighland: 0.145,
+  /* The brightest fresh crater material measured on the Moon is around a
+     quarter; the colour map's ray craters are stretched well past that for
+     display. See render/albedo.js for what is done about it. */
+  albedoMax: 0.24,
+  albedoKnee: 3,           // how sharply the map's bright end rolls over
   hgG: -0.25,              // Henyey-Greenstein asymmetry (backscattering)
   oppositionB0: 0.9,       // surge amplitude
   oppositionH: 0.06,       // surge angular width (rad)
@@ -97,7 +105,10 @@ export const EXPOSURE = {
   evMin: -14, evMax: 1,
   tauBrighten: 1.5,        // s, adapting to more light is fast
   tauDarken: 12.0,         // s, adapting to darkness is slow
-  evReference: -3.2,
+  /* Where sunlit regolith sits on the tone curve. Set so a level mare surface
+     under a middling sun renders like a well-exposed Hasselblad frame — bright
+     grey, not white — with the shadows left properly black. */
+  evReference: -2.4,
 };
 
 /* --- player, suit, vehicles (FICTIONAL hardware, plausible numbers) --------- */

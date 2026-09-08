@@ -69,7 +69,8 @@ const angDiff = (a, b) => { let d = Math.abs(a - b) % 360; return d > 180 ? 360 
 console.log('vs JPL Horizons (' + Object.keys(fixture.epochs).length + ' epochs x ' +
             Object.keys(fixture.sites).length + ' sites)');
 const worst = { sunAz: 0, sunEl: 0, earthAz: 0, earthEl: 0, illum: 0, angdiam: 0,
-                subELon: 0, subELat: 0, subSLon: 0, subSLat: 0 };
+                subELon: 0, subELat: 0, subSLon: 0, subSLat: 0,
+                earthSubLon: 0, earthSubLat: 0 };
 let n = 0, sunElBias = 0;
 for (const [epoch, data] of Object.entries(fixture.epochs)) {
   const jd = jdFromUnixMs(Date.parse(epoch.replace(' ', 'T') + ':00Z'));
@@ -79,6 +80,21 @@ for (const [epoch, data] of Object.entries(fixture.epochs)) {
   worst.subELat = Math.max(worst.subELat, Math.abs(eph.subEarth.lat - data.subpoints.subearth_lat));
   worst.subSLon = Math.max(worst.subSLon, angDiff(eph.subSolar.lon, data.subpoints.subsolar_lon));
   worst.subSLat = Math.max(worst.subSLat, Math.abs(eph.subSolar.lat - data.subpoints.subsolar_lat));
+
+  /* The other sub-point: which spot on Earth is under the Moon, and therefore
+     which continents are facing anyone standing on the near side. Horizons
+     reports it per observing site, but it barely moves across the Moon, so one
+     site is enough to pin it down. Cosine-weighted because longitude means
+     little near a pole. */
+  {
+    const t = data.sites.tranquility.earth;
+    if (t.sub_lon !== undefined) {
+      const w = Math.cos(t.sub_lat * Math.PI / 180);
+      worst.earthSubLon = Math.max(worst.earthSubLon,
+        angDiff(eph.earthSubLon, t.sub_lon) * w);
+      worst.earthSubLat = Math.max(worst.earthSubLat, Math.abs(eph.earthSubLat - t.sub_lat));
+    }
+  }
 
   for (const [name, site] of Object.entries(fixture.sites)) {
     const sky = skyAt(eph, site.lat, site.lon, 0);
@@ -104,6 +120,9 @@ check('Earth elevation within 0.05 deg', worst.earthEl < 0.05, worst.earthEl.toF
 check('Earth azimuth within 0.05 deg', worst.earthAz < 0.05, worst.earthAz.toFixed(4) + ' deg worst');
 check('Earth illuminated fraction within 1 %', worst.illum < 1.0, worst.illum.toFixed(3) + ' % worst');
 check('Earth angular diameter within 5 arcsec', worst.angdiam < 5, worst.angdiam.toFixed(1) + '" worst');
+check('the right face of the Earth is turned towards the Moon, within 0.5 deg',
+  worst.earthSubLon < 0.5 && worst.earthSubLat < 0.5,
+  `lon ${worst.earthSubLon.toFixed(3)} lat ${worst.earthSubLat.toFixed(3)}`);
 check('sub-Earth point within 0.05 deg',
   worst.subELon < 0.05 && worst.subELat < 0.05,
   `lon ${worst.subELon.toFixed(3)} lat ${worst.subELat.toFixed(3)}`);

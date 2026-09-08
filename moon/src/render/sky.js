@@ -151,10 +151,16 @@ export function makeSun() {
 
 const EARTH_VERT = /* glsl */`
 varying vec3 vNormalW;
+varying vec3 vViewDirW;
 varying vec2 vUv;
 void main() {
   vUv = uv;
   vNormalW = normalize(mat3(modelMatrix) * normal);
+  /* The sky camera sits at the origin, so the direction to the eye has to come
+     from the vertex: normalising the camera's own position would be
+     normalising a zero vector, which is a quiet NaN and a black planet. */
+  vec3 wp = (modelMatrix * vec4(position, 1.0)).xyz;
+  vViewDirW = normalize(cameraPosition - wp);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
@@ -167,6 +173,7 @@ uniform vec3 uSunDir;
 uniform float uIntensity;
 uniform float uCloudAmount;
 varying vec3 vNormalW;
+varying vec3 vViewDirW;
 varying vec2 vUv;
 void main() {
   vec3 N = normalize(vNormalW);
@@ -184,7 +191,7 @@ void main() {
   c += night * (1.0 - smoothstep(-0.12, 0.02, mu)) * 0.22 * uIntensity;
   /* A hint of limb brightening from the atmosphere, strongest near the
      terminator, which is what makes the blue edge in Apollo photographs. */
-  float rim = pow(1.0 - abs(dot(N, normalize(cameraPosition - vec3(0.0)))), 3.0);
+  float rim = pow(1.0 - abs(dot(N, vViewDirW)), 3.0);
   c += vec3(0.20, 0.36, 0.62) * rim * lit * 0.5 * uIntensity;
   gl_FragColor = vec4(c, 1.0);
   #include <tonemapping_fragment>
@@ -271,13 +278,25 @@ export class Sky {
       const radius = dist * Math.tan(eph.earthAngularRadius * Math.PI / 180);
       this.earth.mesh.position.set(ed.x * dist, ed.y * dist, ed.z * dist);
       this.earth.mesh.scale.setScalar(radius);
-      /* Spin the globe so the correct meridian faces the Moon: the sub-lunar
-         longitude on Earth is its right ascension minus Greenwich sidereal
-         time. The axis is Earth's, expressed in the Moon's frame. */
-      const axis = new THREE.Vector3(eph.earthAxis.x, eph.earthAxis.y, eph.earthAxis.z).normalize();
-      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), axis);
-      const spin = new THREE.Quaternion().setFromAxisAngle(axis, -eph.gmst * Math.PI / 180);
-      this.earth.mesh.quaternion.copy(spin.multiply(q));
+
+      /* Turn the globe so the right continents face the Moon.
+
+         The ephemeris hands over Earth's body-fixed frame already expressed in
+         the Moon's frame: the north pole, the direction of the Greenwich
+         meridian on the equator, and the direction of 90 east. A sphere in
+         three.js carries its equirectangular map with longitude zero on +X,
+         north on +Y and 90 east on -Z, so those three directions are exactly
+         the columns of the rotation, and nothing has to be guessed about
+         sidereal time twice. */
+      const prime = this._v1 || (this._v1 = new THREE.Vector3());
+      const north = this._v2 || (this._v2 = new THREE.Vector3());
+      const east = this._v3 || (this._v3 = new THREE.Vector3());
+      const basis = this._m3 || (this._m3 = new THREE.Matrix4());
+      prime.set(eph.earthPrime.x, eph.earthPrime.y, eph.earthPrime.z);
+      north.set(eph.earthNorth.x, eph.earthNorth.y, eph.earthNorth.z);
+      east.set(-eph.earthEast.x, -eph.earthEast.y, -eph.earthEast.z);
+      basis.makeBasis(prime, north, east);
+      this.earth.mesh.quaternion.setFromRotationMatrix(basis);
       this.earth.material.uniforms.uSunDir.value.set(sd.x, sd.y, sd.z);
       /* Earth's albedo is about three times the Moon's, so from here it is a
          genuinely bright object: roughly forty times the light of a full Moon
