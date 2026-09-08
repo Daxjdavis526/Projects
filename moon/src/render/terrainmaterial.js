@@ -45,6 +45,7 @@ uniform vec3  uMoonCentre;      // -origin, so worldPos - uMoonCentre is radial
 uniform float uDetailAmount;    // albedo variation, 0 in scientific mode
 uniform float uMicroRelief;     // metres of bump on the finest grains
 uniform float uDetailPeriod;    // metres; the noise repeats on this lattice
+uniform float uPixelAngle;      // radians subtended by one pixel
 uniform float uOppositionB0;
 uniform float uOppositionH;
 uniform float uHG;
@@ -170,9 +171,10 @@ export function makeTerrainMaterial(opts = {}) {
     uEarthshine: { value: new THREE.Vector3(0, 0, 0) },
     uSunAngularRadius: { value: 0.00465 },
     uMoonCentre: { value: new THREE.Vector3(0, 0, 0) },
-    uDetailAmount: { value: opts.plain ? 0 : 0.16 },
+    uDetailAmount: { value: opts.plain ? 0 : 0.22 },
     uMicroRelief: { value: opts.plain ? 0 : 0.055 },
     uDetailPeriod: { value: TERRAIN.detailPeriod },
+    uPixelAngle: { value: 0.0012 },
     uAlbedoMax: { value: OPTICS.albedoMax },
     uAlbedoKnee: { value: OPTICS.albedoKnee },
     uOppositionB0: { value: OPTICS.oppositionB0 },
@@ -261,9 +263,25 @@ export function makeTerrainMaterial(opts = {}) {
             seleneImagery = uImageryAmount;
           }
         }
-        /* One noise field, used for both the mottling and the relief below. */
-        float seleneWidth = max(fwidth(vDetailXY.x), fwidth(vDetailXY.y));
-        float seleneMicro = seleneRegolith(vDetailXY, seleneWidth);
+        /* How much ground one pixel covers, which decides how much of the
+           regolith texture can be drawn without it turning into noise.
+
+           This is computed from the view distance and the pixel's angular size
+           rather than from the screen derivative of the texture coordinate,
+           because that coordinate runs to hundreds of metres and a float has
+           about six centimetres of precision there: the derivative of it comes
+           out as numerical noise at exactly the range where the detail matters,
+           and the texture fades out instead of appearing. */
+        float seleneDist = length(vViewPosition);
+        float seleneGraze = max(0.10, abs(dot(normalize(vNormal), normalize(vViewPosition))));
+        float seleneWidth = seleneDist * uPixelAngle / seleneGraze;
+        /* A tile the size of a continent cannot carry metre-scale coordinates
+           in a float, and the noise on one degenerates into stripes. Those
+           tiles are always far away, so the texture is simply switched off
+           past the point where the lattice residual says the tile is coarse. */
+        float seleneScale = 1.0 - smoothstep(2500.0, 12000.0,
+          max(abs(vDetailXY.x), abs(vDetailXY.y)));
+        float seleneMicro = seleneScale * seleneRegolith(vDetailXY, seleneWidth);
         if (uDetailAmount > 0.0) {
           /* Where real imagery is present it already shows this variation, so
              the invented part steps back rather than doubling it. */

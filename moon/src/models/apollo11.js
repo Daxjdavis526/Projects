@@ -115,13 +115,13 @@ const PAD_SKID = 0.05;
    for one two hundredth of the geometry. */
 const TIER = {
   performance: { seg: 6,  pad: 8,  bell: 10, battens: false, cubes: false,
-                 prints: 44,  trailStep: 3.2, flagGrid: 3, probes: true },
+                 prints: 44,  trailStep: 3.2, flagGrid: 3 },
   balanced:    { seg: 6,  pad: 10, bell: 14, battens: false, cubes: true,
-                 prints: 90,  trailStep: 2.4, flagGrid: 4, probes: true },
+                 prints: 90,  trailStep: 2.4, flagGrid: 4 },
   high:        { seg: 8,  pad: 12, bell: 18, battens: true,  cubes: true,
-                 prints: 165, trailStep: 1.7, flagGrid: 6, probes: true },
+                 prints: 165, trailStep: 1.7, flagGrid: 6 },
   ultra:       { seg: 10, pad: 16, bell: 24, battens: true,  cubes: true,
-                 prints: 250, trailStep: 1.2, flagGrid: 8, probes: true },
+                 prints: 250, trailStep: 1.2, flagGrid: 8 },
 };
 
 /* --- scratch ---------------------------------------------------------------
@@ -185,8 +185,8 @@ const PSEP_LL = { lat: 0.673220, lon: 23.473150 };
    distances are documented; where the bearing is not, the row says so. */
 const TV_BEARING = 315, TV_RANGE = 20.0;
 const FLAG_BEARING = 300, FLAG_RANGE = 8.0;
-const SWC_BEARING = 285, SWC_RANGE = 5.0;
-const JETT_BEARING = 284, JETT_RANGE = 5.8;
+const SWC_BEARING = 265, SWC_RANGE = 5.5;
+const JETT_BEARING = 289, JETT_RANGE = 6.4;
 
 function makeItems() {
   const item = (id, name, e, n, note, source) => {
@@ -228,7 +228,7 @@ function makeItems() {
     item('jettison', 'Two PLSS backpacks and the jettison bag',
       eastOf(JETT_BEARING, JETT_RANGE), northOf(JETT_BEARING, JETT_RANGE),
       'thrown from the porch before liftoff; the pile position is approximate',
-      'ALSJ a11.posteva.html and PSR SP-214 Fig. 3-16 place them near the +Z (west) footpad. The footpad itself is fixed by the 9.4 m gear span and the landing yaw; the metre or so beyond it is not.'),
+      'ALSJ a11.posteva.html and PSR SP-214 Fig. 3-16 place them near the +Z (west) footpad. The footpad itself is fixed by the 9.4 m gear span and the landing yaw; the metre or so past it that puts the pile clear of the pad is not.'),
     item('disturbance', 'Disturbed ground', 0, 0,
       'extent approximate: LROC resolves the trails but not their edges',
       'LROC NAC imaging of the site (NASA/LROC 2012) shows darkened compacted trails radiating from the ladder, the longest running about 60 m east to Little West crater, and a brighter plume-swept halo around the descent stage. PSR SP-214 pp. 35, 45-46, 77 records that the swept ground "does not appear to extend much past the footpads" and that the predicted erosion crater did not form. Armstrong reached Little West crater 60 m east, PSR SP-214 p. 40.'),
@@ -290,16 +290,6 @@ class Kit {
     return mesh;
   }
 
-  /** A flat panel lying in the ground plane, face up, turned about vertical.
-      The plane is authored facing +Z, so it is yawed first and then tipped
-      back, which is the order that leaves sx running along the yawed X. */
-  slabFlat(parent, m, cx, cy, cz, sx, sz, rotY = 0) {
-    const mesh = this.mesh(parent, new THREE.PlaneGeometry(sx, sz), m);
-    mesh.rotation.set(0, rotY, 0);
-    mesh.rotateX(-Math.PI / 2);
-    mesh.position.set(cx, cy, cz);
-    return mesh;
-  }
 }
 
 /* --- procedural textures ---------------------------------------------------
@@ -335,10 +325,10 @@ function texMLI(base, seam) {
      grain, so neither does this. */
   let s = 0x2f6d3b;
   const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
-  for (let i = 0; i < 220; i++) {
-    const x = rnd() * 128, y = rnd() * 128, a = rnd() * Math.PI, l = 4 + rnd() * 16;
-    g.strokeStyle = rnd() < 0.5 ? 'rgba(255,242,205,0.16)' : 'rgba(24,16,4,0.20)';
-    g.lineWidth = 1 + rnd() * 1.6;
+  for (let i = 0; i < 340; i++) {
+    const x = rnd() * 128, y = rnd() * 128, a = rnd() * Math.PI, l = 3 + rnd() * 11;
+    g.strokeStyle = rnd() < 0.5 ? 'rgba(255,242,205,0.10)' : 'rgba(24,16,4,0.13)';
+    g.lineWidth = 1 + rnd() * 1.2;
     g.beginPath();
     g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
     g.stroke();
@@ -352,7 +342,7 @@ function texMLI(base, seam) {
   }
   const t = makeTexture(c, true);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(6, 1);
+  t.repeat.set(3, 2.2);
   return t;
 }
 
@@ -504,16 +494,16 @@ function makeMaterials(kit, q) {
   const std = (o) => kit.mat(new THREE.MeshStandardMaterial(o));
   const M = {};
 
-  /* Multi layer insulation. Two shades, because the descent stage carries both
-     the amber Kapton over the tank bays and the darker gold over the structure
-     between them. */
-  /* The map is a detail map and carries no hue of its own: crinkle and seams
-     on a near neutral ground, multiplied by the material colour. Painting the
-     hue into both doubles it, and the descent stage ends up the colour of a
+  /* Multi layer insulation, in two shades: the amber Kapton over the quadrant
+     bays and a darker gold on the structure between them.
+
+     The map carries no hue of its own. It is crinkle and seams on a near
+     neutral ground, and the colour comes from the material. Painting the hue
+     into both multiplies it, and the descent stage comes out the colour of a
      traffic cone rather than of aged Kapton. */
-  M.foilAmber = std({ color: 0xcf9a41, roughness: 0.40, metalness: 0.50,
+  M.foilAmber = std({ color: 0xb9862f, roughness: 0.40, metalness: 0.50,
                       map: kit.tex(texMLI('#c6c0b4', 'rgba(52,42,26,0.40)')) });
-  M.foilGold  = std({ color: 0xb98a2d, roughness: 0.33, metalness: 0.58,
+  M.foilGold  = std({ color: 0xa5761f, roughness: 0.33, metalness: 0.58,
                       map: kit.tex(texMLI('#bcb6aa', 'rgba(44,34,18,0.45)')) });
   /* Black blanketing. Held at about 0.05 rather than at zero: a genuinely black
      surface next to a black sky in a scene with no ambient is not a shape, it
@@ -530,7 +520,7 @@ function makeMaterials(kit, q) {
   /* Regolith on hardware. Two strengths: a light coating for things that stood
      in the plume, and the full colour of the ground for things lying on it. */
   M.dusted    = std({ color: 0x6f6759, roughness: 0.95, metalness: 0.04 });
-  M.dustedDk  = std({ color: 0x5e564b, roughness: 0.97, metalness: 0.02 });
+  M.dustedDark  = std({ color: 0x5e564b, roughness: 0.97, metalness: 0.02 });
 
   /* Fused silica corner cubes. Very smooth, nearly black in diffuse, and with
      an emissive term that animate() drives. The real array has lost roughly a
@@ -538,8 +528,10 @@ function makeMaterials(kit, q) {
      the leading explanations, so this is not a mirror. */
   M.silica    = std({ color: 0x14171c, roughness: 0.05, metalness: 0.1,
                       emissive: 0xfff0d2, emissiveIntensity: 0.0 });
-  M.cubePanel = std({ color: 0xa8aeb4, roughness: 0.4, metalness: 0.5,
-                      map: kit.tex(texCubeArray()) });
+  /* Only the tier that draws the array as one quad needs a drawn array. */
+  M.cubePanel = q.cubes ? null
+    : std({ color: 0xa8aeb4, roughness: 0.4, metalness: 0.5,
+            map: kit.tex(texCubeArray()) });
   /* Solar cells on the seismometer wings. */
   M.solar     = std({ color: 0x2a3450, roughness: 0.25, metalness: 0.35 });
   /* Bare aluminium foil, for the Solar Wind Composition sheet. This is the one
@@ -551,12 +543,12 @@ function makeMaterials(kit, q) {
   M.beta      = std({ color: 0xb9b3a5, roughness: 0.92, metalness: 0.0 });
 
   /* --- ground decals -------------------------------------------------------
-     Two of them, going in opposite directions, for the reason set out in the
-     file header. Both are plain Lambert diffuse where the terrain underneath
-     runs a Hapke style regolith BRDF with an opposition surge, so a decal
-     automatically loses the surge the terrain has: which is, conveniently, the
-     right physical behaviour for soil whose fairy castle structure a boot has
-     just crushed. None of them writes depth.
+     Trails and boot prints darken, the plume swept halo brightens, for the
+     reason set out in the file header. All three are plain Lambert diffuse
+     where the terrain underneath runs a Hapke style regolith BRDF with an
+     opposition surge, so a decal automatically loses the surge the terrain has,
+     which is conveniently the right behaviour for soil whose fairy castle
+     structure a boot has just crushed. None of them writes depth.
 
      A decal is held off the terrain by a couple of centimetres of lift and by
      nothing else. Polygon offset was the obvious alternative and is the wrong
@@ -590,7 +582,7 @@ function makeMaterials(kit, q) {
      moves does not have to remember. */
   M.dustMap = new Map([
     [M.foilAmber, M.dusted], [M.foilGold, M.dusted], [M.alum, M.dusted],
-    [M.white, M.dusted], [M.blanket, M.dustedDk], [M.steel, M.dusted],
+    [M.white, M.dusted], [M.blanket, M.dustedDark], [M.steel, M.dusted],
     [M.beta, M.dusted],
   ]);
   return M;
@@ -679,9 +671,9 @@ function buildDescentStage(kit, M, q) {
   kit.cyl(g, M.dark, 0.0, DECK_Y + 0.13, 0.62, 0.11, 0.11, 0.26, 8);
   kit.box(g, M.blanket, -0.55, DECK_Y + 0.04, -0.30, 0.62, 0.08, 0.44);
 
-  /* Vertical battens over the blanket seams, on each flat. Straps rather than
-     structure: the blankets are held down against nothing at all, because
-     there is no air to lift them, but they still have to survive a launch. */
+  /* Vertical battens over the blanket seams, on every face. Straps rather than
+     structure: the blankets are held down against nothing at all, because there
+     is no air to lift them, but they still have to survive a launch. */
   if (q.battens) {
     for (let k = 0; k < 8; k++) {
       const a = k * 45 * DEG;
@@ -718,7 +710,7 @@ function buildDescentStage(kit, M, q) {
   const legs = [
     { dx: -1, dz: 0, ladder: true,  probe: false },   // west, the ladder strut
     { dx: 1,  dz: 0, ladder: false, probe: true },    // east
-    { dx: 0,  dz: -1, ladder: false, probe: true },   // north, the SEQ bay side
+    { dx: 0,  dz: -1, ladder: false, probe: true },   // north
     { dx: 0,  dz: 1, ladder: false, probe: true },    // south
   ];
   for (const leg of legs) buildLeg(kit, M, q, g, leg);
@@ -771,7 +763,7 @@ function buildLeg(kit, M, q, g, leg) {
   const ay = 2.86;
   const [fx, fz] = out(PAD_R);
   const px = fx + skidX, pz = fz + skidZ;
-  const padY = PAD_DIA * 0 + 0.10 - PAD_SINK;         // pad centre height
+  const padY = 0.10 - PAD_SINK;                        // pad centre height
   kit.tube(g, M.dark, ax, ay, az, px, padY + 0.14, pz, 0.115, q.seg);
 
   /* Secondary struts, two per leg, from the lower corners of the box out to the
@@ -801,7 +793,7 @@ function buildLeg(kit, M, q, g, leg) {
      order they had rehearsed, shut the engine down. The probes bent on landing
      and photographs show them lying along the surface, so that is how they are
      drawn: a short drop from the pad and then a run out along the ground. */
-  if (leg.probe && q.probes) {
+  if (leg.probe) {
     const [ex, ez] = out(PAD_R + 0.34);
     const [gx, gz] = out(PAD_R + 1.62);
     kit.tube(g, M.dark, px + dx * 0.42, padY - 0.02, pz + dz * 0.42,
@@ -820,10 +812,17 @@ function buildLeg(kit, M, q, g, leg) {
 function buildLadderAndPorch(kit, M, q, g, leg, px, pz, padY) {
   const { dx, dz } = leg;
   const sx = dz, sz = -dx;
-  const RAD = 3.02;                 // the ladder plane, outboard of the box
+  /* The ladder hangs vertically off the porch, just inboard of the primary
+     strut, and the strut leans out past it on the way down. The lowest rung
+     ends up about 0.7 m above the footpad, which is the gap Armstrong had to
+     jump back up for and reported on. */
+  const RAD = 2.76;
   const HALF = 0.29;                // rungs 0.58 m across
-  const Y0 = 0.62, Y1 = 2.82;
+  const Y0 = 0.66, Y1 = 2.84;
   const at = (u, y) => [dx * RAD + sx * u, y, dz * RAD + sz * u];
+  /* Where the primary strut is at a given height, so the stand-offs reach the
+     thing they are actually bolted to. */
+  const strutR = (y) => 1.94 + (2.86 - y) / 2.62 * 2.76;
 
   for (const side of [-1, 1]) {
     const a = at(side * HALF, Y0), b = at(side * HALF, Y1);
@@ -835,38 +834,42 @@ function buildLadderAndPorch(kit, M, q, g, leg, px, pz, padY) {
     const r = kit.box(g, M.alum, c[0], c[1], c[2], 0.60, 0.022, 0.05);
     r.rotation.y = Math.atan2(dx, dz);
   }
-  /* Two stand-off brackets tying the ladder back to the primary strut. */
-  for (const y of [1.10, 2.30]) {
+  /* Two stand-off brackets out to the primary strut. */
+  for (const y of [1.06, 1.78]) {
     const c = at(0, y);
-    kit.tube(g, M.alum, c[0], c[1], c[2],
-             dx * 2.52, y + 0.06, dz * 2.52, 0.018, 5);
+    const r = strutR(y);
+    kit.tube(g, M.alum, c[0], c[1], c[2], dx * r, y, dz * r, 0.018, 5);
   }
 
   /* The porch. A grating platform outside the forward hatch, at the top of the
      ladder, with a handrail on the far side. About 0.86 by 0.90 m. */
-  const porchY = 2.94;
-  const pcx = dx * 2.62, pcz = dz * 2.62;
-  const porch = kit.box(g, M.alum, pcx, porchY, pcz, 0.90, 0.05, 0.86);
+  const porchY = 2.92;
+  const pcx = dx * 2.50, pcz = dz * 2.50;
+  const porch = kit.box(g, M.alum, pcx, porchY, pcz, 0.92, 0.05, 0.82);
   porch.rotation.y = Math.atan2(dx, dz);
+  /* A low rail across the outboard edge, hip high to somebody kneeling to get
+     through a hatch that is not quite a metre square. */
+  const railY = porchY + 0.38;
   for (const side of [-1, 1]) {
-    const a = at(side * 0.42, porchY + 0.02), b = at(side * 0.42, porchY + 0.72);
-    kit.tube(g, M.alum, a[0], a[1], a[2], b[0], b[1], b[2], 0.020, 5);
+    const a = at(side * 0.44, porchY + 0.02), b = at(side * 0.44, railY);
+    kit.tube(g, M.alum, a[0], a[1], a[2], b[0], b[1], b[2], 0.018, 5);
   }
-  const h0 = at(-0.42, porchY + 0.72), h1 = at(0.42, porchY + 0.72);
-  kit.tube(g, M.alum, h0[0], h0[1], h0[2], h1[0], h1[1], h1[2], 0.020, 5);
+  const h0 = at(-0.44, railY), h1 = at(0.44, railY);
+  kit.tube(g, M.alum, h0[0], h0[1], h0[2], h1[0], h1[1], h1[2], 0.018, 5);
 
   /* The plaque. 23 by 19 cm of stainless steel bolted to the ladder strut,
      unveiled by Armstrong during the EVA and read aloud on the air. It is on
      the strut and not on the ladder, facing outward, so it is the first thing
      anybody walking up to the vehicle sees. */
-  const plaqueY = 1.66;
-  const back = kit.box(g, M.steel, dx * 2.42, plaqueY, dz * 2.42, 0.25, 0.21, 0.02);
+  const plaqueY = 1.62;
+  const pr = strutR(plaqueY) + 0.12;
+  const back = kit.box(g, M.steel, dx * pr, plaqueY, dz * pr, 0.25, 0.21, 0.02);
   back.rotation.y = Math.atan2(dx, dz);
   const face = kit.mesh(g, new THREE.PlaneGeometry(0.23, 0.19),
     kit.mat(new THREE.MeshStandardMaterial({
       color: 0xc9ccd0, roughness: 0.3, metalness: 0.6, map: kit.tex(texPlaque()),
     })));
-  face.position.set(dx * 2.432, plaqueY, dz * 2.432);
+  face.position.set(dx * (pr + 0.012), plaqueY, dz * (pr + 0.012));
   face.rotation.y = Math.atan2(dx, dz);
 }
 
@@ -942,14 +945,18 @@ function buildLRRR(kit, M, q) {
     glint = sheen;
   }
 
-  /* The folding sun shade: two flaps along the sides of the array, which stop
-     the low sun from getting into the cubes sideways and heating them into a
-     thermal gradient the optics would notice. */
+  /* The array sits in a shallow recessed frame, and one folding plate stands up
+     along the sunward edge. Both exist for the same reason: a low sun getting
+     in sideways would put a thermal gradient across the silica, and a corner
+     cube with a gradient across it does not send the beam back where it came
+     from. */
   for (const side of [-1, 1]) {
-    const flap = kit.mesh(tilt, new THREE.PlaneGeometry(0.50, 0.14), M.alum);
-    flap.position.set(side * 0.27, 0.10, 0);
-    flap.rotation.set(0, Math.PI / 2, side * 0.6);
+    kit.box(tilt, M.alum, side * 0.235, 0.075, 0, 0.03, 0.05, 0.50);
+    kit.box(tilt, M.alum, 0, 0.075, side * 0.235, 0.50, 0.05, 0.03);
   }
+  const shade = kit.mesh(tilt, new THREE.PlaneGeometry(0.48, 0.20), M.alum);
+  shade.position.set(0.245, 0.155, 0);
+  shade.rotation.set(0, -Math.PI / 2, -1.15);
 
   return { group: g, panel, glint };
 }
@@ -960,7 +967,7 @@ function buildLRRR(kit, M, q) {
    behind a large rock so that the ascent stage liftoff would not knock it over.
    It returned data for three weeks and then failed in the first lunar night,
    which is what a package with no radioisotope heater does at 90 K. */
-function buildPSEP(kit, M, q) {
+function buildPSEP(kit, M) {
   const g = new THREE.Group();
   g.name = 'psep';
 
@@ -999,7 +1006,7 @@ function buildPSEP(kit, M, q) {
    the vehicle. Six hundred million people watched the EVA through it. The
    distance is the length of the cable and is documented; the exact bearing is
    not, so this is a quadrant and a range. */
-function buildTVCamera(kit, M, q, toLMBearing) {
+function buildTVCamera(kit, M, toLMBearing) {
   const g = new THREE.Group();
   g.name = 'tvCamera';
 
@@ -1103,7 +1110,7 @@ function buildFlag(kit, M, q) {
    The sheet is drawn as it was deployed, because the deployed configuration is
    what the source shows, and it is on a mesh called swcFoil so that a caller
    who wants the site exactly as it stands today can hide it. */
-function buildSWC(kit, M, q) {
+function buildSWC(kit, M) {
   const g = new THREE.Group();
   g.name = 'swc';
   /* The staff, driven in and leaning slightly, because everything driven into
@@ -1128,7 +1135,7 @@ function buildSWC(kit, M, q) {
    jettison bag, boots, urine bags and armrests. The two backpacks and the bag
    are the pieces the site maps mark, near the west footpad and roughly under
    the porch, which is where somebody standing in a hatch would put them. */
-function buildJettison(kit, M, q) {
+function buildJettison(kit, M) {
   const g = new THREE.Group();
   g.name = 'jettison';
 
@@ -1405,13 +1412,13 @@ export function buildApollo11(opts = {}) {
   /* The seismometer's wings had to be pointed at the sun by hand, and the sun
      tracks along the east to west line at this latitude, so the wings face that
      way and the package is not turned at all. */
-  const psep = buildPSEP(kit, M, q);
+  const psep = buildPSEP(kit, M);
   psep.position.set(px('psep'), 0, pz('psep'));
   group.add(psep);
 
   /* The camera looks back at the lunar module from wherever the cable ran out,
      which is the bearing from it to the origin. */
-  const tv = buildTVCamera(kit, M, q, (TV_BEARING + 180) % 360);
+  const tv = buildTVCamera(kit, M, (TV_BEARING + 180) % 360);
   tv.position.set(px('tv'), 0, pz('tv'));
   group.add(tv);
   buildCable(kit, M, group, px('tv'), pz('tv'),
@@ -1423,12 +1430,15 @@ export function buildApollo11(opts = {}) {
   flag.rotation.y = rotForBearing(FLAG_BEARING);
   group.add(flag);
 
-  const swc = buildSWC(kit, M, q);
+  const swc = buildSWC(kit, M);
   swc.position.set(px('swc'), 0, pz('swc'));
-  swc.rotation.y = rotForBearing(90);        // foil face square to the sun's track
+  /* The foil faces east, which is where the sun was during the 77 minutes it
+     was exposed: the point of the experiment is the ions arriving down the
+     normal, so the sheet is aimed at the sun and not merely stood up. */
+  swc.rotation.y = 90 * DEG;
   group.add(swc);
 
-  const jett = buildJettison(kit, M, q);
+  const jett = buildJettison(kit, M);
   jett.position.set(px('jettison'), 0, pz('jettison'));
   jett.rotation.y = rotForBearing(JETT_BEARING);
   group.add(jett);

@@ -28,6 +28,11 @@ export class Quadtree {
   constructor(opts = {}) {
     this.maxLevel = opts.maxLevel ?? 18;
     this.splitK = opts.splitK ?? TERRAIN.splitK;
+    /* Multiplies the split distance. A long lens magnifies the ground without
+       moving the camera any closer to it, so a tile that was small enough on a
+       normal lens becomes a smooth wall at 250 mm; the renderer raises this in
+       proportion to the magnification. */
+    this.lodScale = 1;
     this.tileBudget = opts.tileBudget ?? 900;
     this.cacheSize = opts.cacheSize ?? 1400;
     this.tiles = new Map();          // key -> { state, tile, lastWanted, level, ... }
@@ -93,7 +98,7 @@ export class Quadtree {
       }
 
       const arc = edgeArc(level);
-      const wantSplit = level < this.maxLevel && near < this.splitK * arc;
+      const wantSplit = level < this.maxLevel && near < this.splitK * this.lodScale * arc;
       const entry = this.tiles.get(key);
       if (entry) entry.lastWanted = this.frame;
 

@@ -344,6 +344,16 @@ export class TerrainSystem {
     updateTerrainUniforms(this.material, { ...sky, origin: this.stage.origin.origin });
   }
 
+  /**
+   * Tell the material how much sky one pixel covers, which is what decides how
+   * fine the regolith texture can usefully be drawn. Changes with the field of
+   * view and with the window, so it is set from the camera every frame.
+   */
+  setPixelAngle(fovDeg, heightPx) {
+    this.material.userData.uniforms.uPixelAngle.value =
+      2 * Math.tan(fovDeg * Math.PI / 360) / Math.max(1, heightPx);
+  }
+
   dispose() {
     for (const w of this.workers) w.terminate();
     this.invalidate();

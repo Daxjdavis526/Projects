@@ -34,9 +34,12 @@ import { EVA } from './game/eva.js';
 import { Descent } from './game/descent.js';
 import { Base } from './game/base.js';
 import { Vehicle } from './game/vehicle.js';
+import { HistoricSites } from './game/historic.js';
 import { SuitHud } from './ui/suithud.js';
 import { OrbitPicker } from './ui/orbit.js';
 import { Sound } from './audio/audio.js';
+import { Save } from './game/save.js';
+import { Photo } from './ui/photo.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -243,6 +246,8 @@ async function start() {
   const lookAt = params.get('look');
 
   const suitHud = new SuitHud();
+  const photo = new Photo();
+  const save = new Save();
   /* Audio cannot start without a gesture, so it waits for the first key or
      click and is a safe no-op until then. */
   const sound = new Sound();
@@ -283,6 +288,17 @@ async function start() {
   let names = { features: [] };
   try { names = await readJson(DATA, 'names.json'); }
   catch (e) { console.warn('nomenclature unavailable', e.message); }
+
+  /* Reconstructions of the places people have already been. They are built
+     only when you are close enough to see them and they carry no markers
+     unless you ask for them. */
+  const historic = new HistoricSites({ stage, heightfield, quality: modelQuality });
+  import('./models/apollo11.js')
+    .then((m) => historic.register({
+      id: 'apollo11', lat: m.APOLLO11_SITE.lat, lon: m.APOLLO11_SITE.lon,
+      heading: 0, build: (o) => m.buildApollo11(o),
+    }))
+    .catch((e) => console.warn('Apollo 11 site unavailable:', e.message));
 
   const orbit = new OrbitPicker({
     heightfield, names, sites, geology, cam,
@@ -337,6 +353,37 @@ async function start() {
     const out = offsetLatLon(lat, lon, (heading + 180) % 360, 7.5);
     startEva(out.lat, out.lon);
     eva.player.yaw = heading * Math.PI / 180;
+    save.write(game, 'landed');
+  }
+
+  /* One object holding the live game, so the save system has something to read
+     and write without reaching into closures. */
+  const game = {
+    state, settle, waypoints: [], visited: [],
+    get base() { return base; },
+    get vehicle() { return vehicle; },
+    get eva() { return eva; },
+    historic,
+    get driving() { return driving; },
+    set driving(v) { driving = v; },
+  };
+
+  /* Continuing: a lunar day is twenty nine and a half Earth days long, so a
+     session ending is normal and coming back to the same place matters. */
+  const saved = save.read();
+  if (saved && saved.base) {
+    const b = el('orbit-continue');
+    if (b) {
+      b.style.display = 'flex';
+      b.querySelector('span').textContent =
+        `${new Date(saved.savedAt).toLocaleString()} · ${saved.base.lat.toFixed(3)}, ${saved.base.lon.toFixed(3)}`;
+      b.addEventListener('click', () => {
+        mode = 'surface';
+        orbit.show(false);
+        el('hint').textContent = 'H for controls';
+        Save.restore(game, saved);
+      });
+    }
   }
 
   /* `?mode=eva` starts on foot, which is what the screenshot harness wants when
@@ -381,6 +428,23 @@ async function start() {
       }
     }
     if (e.code === 'KeyC' && vehicle) canopyPress = true;
+    if (e.code === 'KeyP') photo.toggle();
+    /* Markers stay off unless you ask. Walking up to Tranquility Base and
+       recognising it should not require a floating label. */
+    if (e.code === 'KeyM') { state.markers = !state.markers; historic.setMarkers(state.markers); }
+    if (photo.active) {
+      if (e.code === 'BracketLeft') photo.zoom(-1);
+      if (e.code === 'BracketRight') photo.zoom(1);
+      if (e.code === 'Minus' || e.code === 'NumpadSubtract') photo.expose(-0.5);
+      if (e.code === 'Equal' || e.code === 'NumpadAdd') photo.expose(0.5);
+    }
+    /* F5 would reload the page, so saving is on F2, and it autosaves anyway. */
+    if (e.code === 'F2') {
+      const w = save.write(game, 'manual');
+      el('hint').textContent = w ? 'saved' : 'could not save';
+      setTimeout(() => { el('hint').textContent = 'H for controls'; }, 2500);
+      e.preventDefault();
+    }
     if (e.code === 'KeyF' && eva) eva.toggleView();
     if (e.code === 'KeyL' && eva) eva.cycleLamps();
   });
@@ -490,6 +554,7 @@ async function start() {
       earthIllum: eph.earthIllum,
       earthElevation: local.earthEl,
     }, ready ? dt : 1e6);
+    exposure.bias = photo.bias;
     stage.setExposure(ev);
     sky.update(eph, ev);
 
@@ -638,14 +703,21 @@ async function start() {
     tmpM.makeBasis(xAxis, yAxis, zAxis);
     stage.camera.quaternion.setFromRotationMatrix(tmpM);
     stage.camera.updateMatrixWorld();
-    if (camFrame.fov && Math.abs(stage.camera.fov - camFrame.fov) > 0.01 && !params.get('fov')) {
-      stage.setFov(camFrame.fov);
+    const wantFov = photo.active ? photo.fov : camFrame.fov;
+    if (wantFov && Math.abs(stage.camera.fov - wantFov) > 0.01 && !params.get('fov')) {
+      stage.setFov(wantFov);
     }
+    /* A long lens magnifies the ground without moving the camera closer to it,
+       so the terrain has to be told to refine further than distance alone
+       would ask for, or a 250 mm shot is a photograph of a smooth wall. */
+    terrain.quadtree.lodScale = Math.min(4, 55 / Math.max(8, stage.camera.fov));
+    terrain.setPixelAngle(stage.camera.fov, stage.renderer.domElement.height);
     if (eva) {
       eva.updateLights(stage.origin.origin, camFrame);
       eva.updateModel(stage.origin.origin, dt);
       if (eva.model) eva.model.group.visible = !driving && eva.view === 'third';
     }
+    historic.update(cam.lat, cam.lon, stage.origin.origin, dt, local.sunDir);
     if (base) {
       base.step(dt, eva ? eva.player.llh : null);
       base.place(stage.origin.origin);
@@ -667,6 +739,10 @@ async function start() {
 
     stage.render();
 
+    /* Autosave: often enough that nothing is lost, rarely enough that it is
+       never noticed. The ship arriving somewhere new is worth one immediately. */
+    if (base) save.tick(now, game);
+
     if (!ready && terrain.stats.tiles > 40) {
       ready = true;
       el('boot').classList.add('gone');
@@ -685,7 +761,13 @@ async function start() {
     el('s-time').textContent = new Date(state.simMs).toISOString().replace('T', ' ').slice(0, 19) +
       (state.timeRate === 0 ? '  (held)' : state.timeRate === 1 ? '' : `  ${fmtRate(state.timeRate)}`);
     const evaSnap = eva ? eva.snapshot() : null;
-    suitHud.update(evaSnap);
+    suitHud.update(photo.active ? null : evaSnap);
+    if (photo.active) {
+      photo.update({
+        lat: cam.lat, lon: cam.lon, simMs: state.simMs, sunEl: local.sunEl,
+        bias: photo.bias, source: heightfield.probe(cam.lat, cam.lon).source,
+      });
+    }
     /* Vacuum outside, air inside. Until there is a ship or a rover to be in,
        the only two states are wearing a suit and flying a camera that is not
        there at all. */
@@ -723,6 +805,7 @@ async function start() {
   window.SELENE = {
     ready: false, stage, terrain, sky, heightfield, cam, state, streams, surface,
     get eva() { return eva; },
+    historic,
     get base() { return base; },
     get vehicle() { return vehicle; },
     get driving() { return driving; },
