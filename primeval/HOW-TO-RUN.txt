@@ -1,0 +1,31 @@
+PRIMEVAL
+========
+
+The game is plain static files, but browsers refuse to load ES modules straight
+off the disk (file:// URLs), so it needs to be served over http. There are two
+one-click launchers in this folder that do that for you:
+
+  Windows    double-click  "Start PRIMEVAL.bat"
+  macOS      double-click  "Start PRIMEVAL.command"
+             (first time: right-click -> Open, to get past Gatekeeper)
+  Linux      ./Start\ PRIMEVAL.command    from a terminal
+
+Either one starts a small local web server and opens your browser at
+http://localhost:8124. Keep the black terminal window open while you play;
+closing it stops the server.
+
+If you would rather do it by hand, from this folder:
+
+  python3 -m http.server 8124
+
+then open http://localhost:8124 in Chrome, Edge or Firefox.
+
+Desktop only. Keyboard and mouse. Click ENTER THE STATION, then click the
+canvas whenever you need to recapture the mouse pointer. Escape pauses.
+
+Everything else — controls, the bestiary, how it works, and an honest list of
+what is simulated versus faked — is in README.md.
+
+Nothing here phones home and nothing is downloaded at runtime. The only
+external request is a Google Fonts stylesheet for the HUD typeface; without a
+network connection the game still runs, it just falls back to a monospace font.
