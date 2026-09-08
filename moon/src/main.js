@@ -1366,6 +1366,7 @@ async function start() {
         driven: vehicle ? vehicle.rover.distance : 0,
         homeRange: base ? surfaceDistance(cam.lat, cam.lon, base.lat, base.lon) : 0,
         nearestFeature: here,
+        inCave: !!(pitField.cave && pitField.cave.inside(cam.lat, cam.lon, cam.alt)),
       });
       if (won.length) {
         say(won[won.length - 1].title, 5000);
@@ -1594,10 +1595,24 @@ let scienceAt = { lat: 999, lon: 999 };
 function updateScience(hf, geology, cam, local, eph, streamer, streams, temperature, historic,
                        gravity, pitField) {
   const p = hf.probe(cam.lat, cam.lon);
-  el('d-topo').innerHTML = `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
-  el('d-detail').innerHTML = Math.abs(p.proceduralHeight) > 0.001
-    ? `${p.proceduralHeight >= 0 ? '+' : ''}${p.proceduralHeight.toFixed(2)} m ${tag(LABEL.PROCEDURAL)}`
-    : 'none';
+  /* Inside the cave the height field is describing the plain a hundred and
+     thirty metres over your head, not the floor you are standing on, and
+     printing its provenance here would be a lie of the exact kind this panel
+     exists to prevent. The floor down here came out of a radar inversion. */
+  const inCaveNow = !!(pitField && pitField.cave &&
+                       pitField.cave.inside(cam.lat, cam.lon, cam.alt));
+  const caveInfo = inCaveNow ? pitField.cave.describe() : null;
+  el('d-topo').innerHTML = caveInfo
+    ? `${caveInfo.what} ${tag(caveInfo.label)}` +
+      `<span class="est"> ${caveInfo.widthM} m wide, ${caveInfo.lengthM} m long, ` +
+      `${caveInfo.deepestM} m down at its deepest. ${caveInfo.source}. ${caveInfo.note}</span>`
+    : `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
+  el('d-detail').innerHTML = caveInfo
+    ? `roughness only ${tag(LABEL.PROCEDURAL)}<span class="est"> and outward, so the ` +
+      `room you can see is never smaller than the one you are walking in</span>`
+    : Math.abs(p.proceduralHeight) > 0.001
+      ? `${p.proceduralHeight >= 0 ? '+' : ''}${p.proceduralHeight.toFixed(2)} m ${tag(LABEL.PROCEDURAL)}`
+      : 'none';
   const desc = streamer ? streamer.describe() : null;
   if (desc && desc.elevation) {
     el('d-topo').innerHTML =
@@ -1638,8 +1653,7 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
      reason anybody wants to go into one: a shaded cavity holds about 290 K
      while the surface it is cut into swings across three hundred. */
   const inPit = pitField && pitField.at(cam.lat, cam.lon);
-  const cave = pitField && pitField.cave;
-  const inCave = !!(cave && cave.inside(cam.lat, cam.lon, cam.alt));
+  const inCave = inCaveNow;
   const pitT = temp && (inPit || inCave)
     ? pitTemperature(temp.kelvin, {
         inCave, sunElDeg: local.sunEl,

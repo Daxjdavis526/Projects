@@ -148,6 +148,24 @@ console.log('and none of it blocks anything');
     a.step(at(0, 0, { nearestFeature: null, walked: NaN }));
     return true;
   })());
+  /* The one place with rock overhead. */
+  {
+    const a = new Achievements({ sites });
+    const pit = sites.sites.find(s => s.id === 'tranquillitatis_pit');
+    const above = a.step(at(pit.lat, pit.lon));
+    check('reaching the pit is one thing',
+      above.some(e => e.id === 'site:tranquillitatis_pit') &&
+      !above.some(e => e.id.startsWith('cave:')));
+    const below = a.step(at(pit.lat, pit.lon, { inCave: true }));
+    check('and being inside the cave under it is another',
+      below.some(e => e.id === 'cave:tranquillitatis'),
+      below.map(e => e.title).join(', '));
+    check('awarded once, not once a frame',
+      a.step(at(pit.lat, pit.lon, { inCave: true })).length === 0);
+    check('and never from standing on top of it',
+      new Achievements({ sites }).step(at(pit.lat, pit.lon))
+        .every(e => !e.id.startsWith('cave:')));
+  }
   check('a corrupt save loads as empty',
         new Achievements({ sites }).load({ earned: [null, 5, {}] }).size === 0);
 }

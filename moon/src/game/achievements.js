@@ -105,6 +105,18 @@ export class Achievements {
                       site.sub || 'a real landing site', s.simMs));
     }
 
+    /* Under the Moon. There is exactly one place anybody has evidence you
+       could stand with rock over your head, and getting into it is the single
+       most specific thing this game contains. It is worth its own line rather
+       than being folded into the pit above it: reaching the Mare
+       Tranquillitatis pit is standing on the roof of the thing, and going down
+       the ramp under the east wall is being inside it. */
+    if (s.inCave) {
+      push(this.award('cave:tranquillitatis', 'inside the cave',
+                      'under the Mare Tranquillitatis pit, where the radar said '
+                      + 'a conduit was', s.simMs));
+    }
+
     /* Named ground. `visited` already records what you have been inside, so
        this only adds the ones worth saying out loud: a feature big enough to
        be a place rather than a satellite crater. */
