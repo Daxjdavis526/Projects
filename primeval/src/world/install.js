@@ -8,14 +8,19 @@ import { Water } from './water.js';
 import { Ecology } from '../life/ecology.js';
 import { PointsOfInterest } from './poi.js';
 import { VehicleSystem } from './vehicles.js';
+import { Weather } from './weather.js';
+import { Audio } from '../audio/audio.js';
+import { lavaUniform } from './terrain.js';
 import { SPECIES } from '../life/species.js';
 
 export function installWorld(game) {
+  game.addSystem(new WeatherSystem());
   game.addSystem(new VehicleSystem());
   game.addSystem(new PoiSystem());
   game.addSystem(new WaterSystem());
   game.addSystem(new VegetationSystem());
   game.addSystem(new LifeSystem());
+  game.addSystem(new SoundSystem());
   return game;
 }
 
@@ -89,6 +94,27 @@ class LifeSystem {
   }
 }
 
+class WeatherSystem {
+  async load(game) {
+    this.weather = new Weather(game.scene, game.quality);
+    game.weather = this.weather;
+    this.weather.onEvent = (kind, text) => {
+      game.hud.subtitle(text, 5);
+      game.emit('worldEvent', kind, text);
+    };
+    this.weather.onThunder = (dist) => game.emit('thunder', dist);
+  }
+  update(dt, game) {
+    this.weather.update(dt, game);
+    lavaUniform.value = 0.35 + game.daylight.nightT * 1.5;
+    // Lightning washes the screen for a frame or two.
+    const grade = game.renderer.grade.uniforms;
+    if (this.weather.lightning > 0.01) {
+      grade.uVignette.value *= 1 - this.weather.lightning * 0.4;
+    }
+  }
+}
+
 class PoiSystem {
   async load(game) {
     this.poi = new PointsOfInterest(game.scene, game.quality);
@@ -134,6 +160,117 @@ class VegetationSystem {
 }
 
 const _d = new THREE.Vector2();
+
+class SoundSystem {
+  async load(game) {
+    this.audio = new Audio();
+    game.audio = this.audio;
+    this.fwd = new THREE.Vector3();
+    this.up = new THREE.Vector3();
+    this.chargeVoice = null;
+
+    game.on('start', () => { this.audio.start(); this.audio.resume(); });
+
+    // --- the player -------------------------------------------------------
+    game.player.onStep = (kind, power) => {
+      const p = game.camera.position;
+      if (kind === 'water') this.audio.burst(p, { freq: 900, q: 0.8, length: 0.22, peak: 0.22 * power });
+      else if (kind === 'land') this.audio.burst(p, { freq: 220, q: 0.7, length: 0.26, peak: 0.4 * power });
+      else this.audio.burst(p, { freq: 430, q: 1.4, length: 0.10, peak: 0.13 * power });
+    };
+
+    // --- creatures ---------------------------------------------------------
+    game.on('creatureCall', (c, kind) => {
+      const v = c.sp.voice;
+      this.audio.voice(c.pos, {
+        pitch: v.pitch, power: kind === 'roar' ? 1.0 : 0.62,
+        length: kind === 'roar' ? 1.6 / Math.max(0.3, v.pitch) * 0.5 + 0.9 : 0.7,
+        rasp: 0.5 + c.sp.danger * 0.05, kind,
+      });
+      // A roar close enough to matter also shakes you.
+      const d = c.pos.distanceTo(game.camera.position);
+      if (kind === 'roar' && d < 70 && c.sp.stats.roarShake) {
+        game.player.addShake(c.sp.stats.roarShake * (1 - d / 70));
+        game.hud.subtitle(`${c.sp.name} — CLOSE`, 2.2);
+      } else if (kind === 'roar' && d < 900 && c.sp.danger >= 8) {
+        game.hud.subtitle(`Distant roar · ${Math.round(d)} m`, 2.6);
+      }
+    });
+    game.on('creatureAttack', (c) => {
+      this.audio.voice(c.pos, { pitch: c.sp.voice.pitch * 1.2, power: 1, length: 0.55, kind: 'roar' });
+      this.audio.burst(c.pos, { freq: 260, q: 0.9, length: 0.18, peak: 0.4 });
+    });
+    game.on('creatureDeath', (c) => {
+      this.audio.voice(c.pos, { pitch: c.sp.voice.pitch * 0.85, power: 0.8, length: 1.5, rasp: 1.0 });
+      this.audio.burst(c.pos, { freq: 150, q: 0.6, length: 0.7, peak: 0.3 });
+    });
+    game.on('playerHit', () => {
+      this.audio.burst(game.camera.position, { freq: 180, q: 0.5, length: 0.3, peak: 0.5, refDistance: 1 });
+    });
+
+    // --- weapons -----------------------------------------------------------
+    game.on('bowShot', (power) => {
+      const p = game.camera.position;
+      this.audio.burst(p, { freq: 1400, q: 3.0, length: 0.09, peak: 0.16 + power * 0.14, refDistance: 2 });
+      this.audio.zap(p, { f0: 320, f1: 90, length: 0.16, peak: 0.10, noise: 0.9, type: 'triangle' });
+    });
+    game.on('rifleFire', (kind, power) => {
+      const p = game.camera.position;
+      if (kind === 'shot') this.audio.zap(p, { f0: 2600, f1: 160, length: 0.22, peak: 0.42, noise: 0.5 });
+      else if (kind === 'charged') {
+        this.audio.zap(p, { f0: 900, f1: 44, length: 1.5, peak: 0.75, noise: 0.7, type: 'square' });
+        this.audio.thunder(60);
+      } else if (kind === 'vent') this.audio.burst(p, { freq: 3200, q: 0.6, length: 0.65, peak: 0.22, refDistance: 2 });
+      else if (kind === 'overheat') this.audio.zap(p, { f0: 700, f1: 120, length: 0.5, peak: 0.3, noise: 0.9, type: 'square' });
+    });
+
+    // --- machines ----------------------------------------------------------
+    game.on('mechStep', (kind, power) => {
+      this.audio.burst(game.mech.pos, { freq: 90, q: 0.8, length: 0.35, peak: 0.55 * power, refDistance: 9 });
+      this.audio.burst(game.mech.pos, { freq: 1800, q: 2.0, length: 0.10, peak: 0.10 * power, refDistance: 9 });
+    });
+    game.on('mechLand', (impact) => {
+      this.audio.burst(game.mech.pos, { freq: 62, q: 0.7, length: 0.9, peak: Math.min(0.9, 0.4 + impact * 0.5), refDistance: 14 });
+      this.audio.thunder(30);
+    });
+    game.on('mechFire', () => this.audio.zap(game.mech.muzzleWorld, { f0: 1400, f1: 90, length: 0.3, peak: 0.5, noise: 0.6 }));
+    game.on('mechPunch', (hit) => {
+      this.audio.burst(game.mech.pos, { freq: hit ? 150 : 900, q: 0.8, length: hit ? 0.4 : 0.14, peak: hit ? 0.6 : 0.2, refDistance: 8 });
+    });
+    game.on('thunder', (dist) => this.audio.thunder(dist));
+    game.on('splash', (p) => this.audio.burst(p, { freq: 1200, q: 0.7, length: 0.3, peak: 0.3 }));
+    game.on('shipLaunch', () => this.audio.thunder(40));
+    game.on('transitStart', () => this.audio.zap(game.camera.position, { f0: 60, f1: 1400, length: 2.4, peak: 0.5, noise: 0.5, type: 'sawtooth' }));
+  }
+
+  update(dt, game) {
+    const a = this.audio;
+    if (!a.ready) return;
+    const cam = game.camera;
+    this.fwd.set(0, 0, -1).applyQuaternion(cam.quaternion);
+    this.up.set(0, 1, 0).applyQuaternion(cam.quaternion);
+    const w = game.weather ? game.weather.audioState(game) : {
+      wind: 0.2, rain: 0, river: 0, volcano: 0, quake: 0, insects: 0, nightChorus: 0,
+    };
+    const ship = game.ship;
+    const inShip = game.mode === 'SHIP';
+    const inMech = game.mode === 'MECH';
+    a.update(dt, {
+      position: cam.position, forward: this.fwd, up: this.up,
+      atmosphere: game.atmosphere,
+      altitudeT: clamp((cam.position.y - 200) / 8000, 0, 1),
+      interior: game.locale.id === 'moon' && game.mode === 'ON_FOOT'
+        && game.station && Math.hypot(cam.position.x - game.moonSite.x, cam.position.z - game.moonSite.z) < 34,
+      ...w,
+      engine: {
+        level: ship ? (inShip ? ship.burn * 1.0 : ship.burn * 0.35) : 0,
+        speed: ship ? ship.speed : 0,
+        heat: ship ? ship.entryHeat : 0,
+      },
+      servo: inMech ? clamp(Math.hypot(game.mech.vel.x, game.mech.vel.z) / 14, 0, 1) : 0,
+    });
+  }
+}
 
 /** Shove a point out of a list of vertical cylinders. */
 export function pushOut(pos, radius, cylinders) {

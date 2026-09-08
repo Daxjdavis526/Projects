@@ -97,8 +97,26 @@ function loop(){
   ship.emisU.value = 0.5 + burn * 1.6;
   ship.heatU.value = THREE.MathUtils.lerp(ship.heatU.value, heat, 0.05);
   ship.engineLight.intensity = burn * 24;
-  camera.position.set(Math.sin(yaw)*Math.cos(pitch)*dist, Math.sin(pitch)*dist, Math.cos(yaw)*Math.cos(pitch)*dist);
-  camera.lookAt(0, 0, 0);
+  const focus = (mech && mech.group.visible)
+    ? new THREE.Vector3(0, -1.4, 18) : new THREE.Vector3(0, 0, 0);
+  camera.position.set(
+    focus.x + Math.sin(yaw)*Math.cos(pitch)*dist,
+    focus.y + Math.sin(pitch)*dist,
+    focus.z + Math.cos(yaw)*Math.cos(pitch)*dist);
+  camera.lookAt(focus);
+  if (mech && mech.group.visible) {
+    ship.group.visible = false;
+    // Idle animation so the joints can be checked.
+    const t2 = t * 1.6;
+    mech.legs.forEach((l, i) => {
+      const ph = t2 + i * Math.PI;
+      l.hip.rotation.x = -Math.sin(ph) * 0.34;
+      l.knee.rotation.x = Math.max(0, Math.sin(ph)) * 0.7 + 0.18;
+      l.ankle.rotation.x = -Math.max(0, Math.sin(ph)) * 0.5 - 0.1;
+    });
+    mech.arms.forEach((a, i) => { a.shoulder.rotation.x = Math.sin(t2 + i * Math.PI) * 0.24; });
+    mech.hips.position.y = 2.28 + Math.sin(t2 * 2) * 0.05;
+  } else if (mech) { ship.group.visible = true; }
   renderer.render(scene, camera);
 }
 loop();

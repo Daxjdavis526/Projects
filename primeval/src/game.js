@@ -16,6 +16,8 @@ import { Player } from './player/player.js';
 import { Colliders } from './player/physics.js';
 import { Inventory } from './player/inventory.js';
 import { Gear } from './player/gear.js';
+import { Effects } from './fx.js';
+import { Missions } from './missions.js';
 import { clamp, lerp, smoothstep } from './math/noise.js';
 
 export const MODE = {
@@ -157,6 +159,7 @@ export class Game {
 
     await step(0.14, 'starting renderer');
     this.renderer.attach(this.scene);
+    this.fx = new Effects(this.scene, this.camera);
 
     // Flashlight rides the camera and is off until you need it.
     this.flashlight = new THREE.SpotLight(0xffeecc, 0, 62, 0.42, 0.45, 1.1);
@@ -173,6 +176,7 @@ export class Game {
     this.inventory.add('arrow', 24);
     this.inventory.add('meat_cooked', 2);
     this.gear.equip(1);
+    this.missions = new Missions(this);
     this.bindHud();
 
     await step(0.60, 'boarding');
@@ -220,8 +224,7 @@ export class Game {
   addSystem(sys) { this.systems.push(sys); return sys; }
 
   bindHud() {
-    this.hud.objective('OBJECTIVE', 'Survey Site ECHO-7',
-      'Scan three subjects, then return to the HALBERD.');
+    this.missions?.refresh();
     this.refreshInventory();
   }
 
@@ -292,8 +295,9 @@ export class Game {
     });
     // Fog thins as the air does, and clears entirely in vacuum.
     const baseDensity = this.locale.id === 'planet' ? 0.00112 : 0.0;
-    this.daylight.fog.density = baseDensity * Math.pow(this.atmosphere, 1.6) * (1 + this.storm * 2.4)
-      * (this.fogBoost ?? 1);
+    this.daylight.fog.density = clamp(
+      baseDensity * Math.pow(this.atmosphere, 1.6) * (1 + this.storm * 2.4) * (this.fogBoost ?? 1),
+      0, 0.014);
 
     // Under water the whole scene turns into a green-black soup.
     const wl = this.locale.waterAt ? this.locale.waterAt(cam.x, cam.z) : null;
@@ -307,6 +311,8 @@ export class Game {
     this.sky.update(this.camera, this.clock);
 
     for (const sys of this.systems) if (sys.update) sys.update(dt, this);
+    this.fx?.update(dt);
+    this.missions?.update(dt);
 
     if (this.gear && onFoot) {
       if (input.hit('Tab')) this.toggleInventory();
@@ -316,7 +322,8 @@ export class Game {
         eco: this.eco,
         playerPos: this.camera.position,
         makeNoise: (p, l, r) => this.makeNoise(p, l, r),
-        onSplash: (p) => this.emit('splash', p),
+        onSplash: (p) => { this.fx?.splash(p, 0.8); this.emit('splash', p); },
+        onKill: (c) => this.emit('creatureDeath', c, 'player'),
       });
     }
 
@@ -365,6 +372,7 @@ export class Game {
 
     if (this.gear) {
       hud.weapon({ ...this.gear.hudState(), hidden: this.mode !== 'ON_FOOT' });
+      if (this.mode === 'MECH' && this.mech) hud.mech(this.mech.hudState());
       const it = this.gear.interaction;
       hud.prompt(it?.key ?? 'E', it?.label ?? '');
       hud.scan(this.gear.scanT > 0.02 ? (this.gear.scanResult ?? {
@@ -403,6 +411,31 @@ export class Game {
         grid: `${Math.round(cam.x / 100)}, ${Math.round(cam.z / 100)}`,
         where: 'THERA · LOCAL',
       });
+    }
+
+    // Compass marks: the ship, and whatever you are supposed to be doing.
+    this.marks.length = 0;
+    const bearing = (tx, tz) => {
+      let b = Math.atan2(tx - cam.x, -(tz - cam.z)) * 180 / Math.PI;
+      return b < 0 ? b + 360 : b;
+    };
+    if (this.ship && this.mode === 'ON_FOOT') {
+      const d = Math.hypot(this.ship.pos.x - cam.x, this.ship.pos.z - cam.z);
+      if (d > 12) {
+        this.marks.push({
+          bearing: bearing(this.ship.pos.x, this.ship.pos.z),
+          label: d > 1000 ? `SHIP ${(d / 1000).toFixed(1)}km` : `SHIP ${d.toFixed(0)}m`,
+        });
+      }
+    }
+    if (this.locale.id === 'moon' && this.station && this.mode === 'ON_FOOT') {
+      const d = Math.hypot(this.moonSite.x - cam.x, this.moonSite.z - cam.z);
+      if (d > 40) {
+        this.marks.push({
+          bearing: bearing(this.moonSite.x, this.moonSite.z),
+          label: `ANVIL ${d.toFixed(0)}m`, color: 'var(--cyan)',
+        });
+      }
     }
 
     let yawDeg = (-this.player.yaw * 180 / Math.PI) % 360;

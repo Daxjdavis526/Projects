@@ -100,8 +100,9 @@ export class Ship {
     return p.distanceTo(ramp);
   }
 
+  /** Where the player stands after stepping off — clear of hull and wing. */
   boardingPoint() {
-    return new THREE.Vector3(0, -2.2, 5.2).applyQuaternion(this.quat).add(this.pos);
+    return new THREE.Vector3(1.9, -2.2, 9.2).applyQuaternion(this.quat).add(this.pos);
   }
 
   say(msg, seconds = 3) { this.message = msg; this.messageT = seconds; }

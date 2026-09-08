@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import { Bow } from './bow.js';
+import { Rifle } from './rifle.js';
 import { ITEMS } from './inventory.js';
 import { SPECIES, dangerWord } from '../life/species.js';
 import { POI_TYPES } from '../world/poi.js';
@@ -20,7 +21,9 @@ export class Gear {
   constructor(game) {
     this.game = game;
     this.bow = new Bow(game.scene, game.camera);
-    this.rifle = null;                // installed once the locker is opened
+    // Built up front so the shaders compile with everything else; it simply
+    // is not selectable until the armoury opens.
+    this.rifle = new Rifle(game.scene, game.camera, game.fx);
     this.slot = SLOT.BOW;
     this.unlocked = { bow: true, rifle: false, mech: false };
     this.scanT = 0;
@@ -30,13 +33,27 @@ export class Gear {
     this.lastScanned = null;
     this.interaction = null;
     this.harvestT = 0;
+
+    // Effects and scoring hang off the weapons rather than living inside them.
+    this.bow.onHit = (hit, dmg, killed, groundPoint) => {
+      if (hit) {
+        game.fx?.hitFlesh(hit.point, new THREE.Vector3(0, 0.3, 0), 0.9);
+        game.hud.log(`${hit.part.toUpperCase()} hit — ${Math.round(dmg)}`, hit.part === 'head' ? 'good' : '');
+        if (killed) game.emit('creatureDeath', hit.creature, 'player');
+      } else if (groundPoint) {
+        game.fx?.impact(groundPoint, new THREE.Vector3(0, 1, 0),
+          { color: 0x8a7a63, sparks: 2, dust: 3, scale: 0.5 });
+      }
+    };
+    this.bow.onShoot = (power) => game.emit('bowShot', power);
+    this.rifle.onFire = (kind, power) => game.emit('rifleFire', kind, power);
   }
 
   equip(slot) {
     if (slot === SLOT.RIFLE && !this.unlocked.rifle) return;
     this.slot = slot;
     this.bow.equip(slot === SLOT.BOW);
-    this.rifle?.equip(slot === SLOT.RIFLE);
+    this.rifle.equip(slot === SLOT.RIFLE);
   }
 
   cycle(dir) {
@@ -269,7 +286,7 @@ export class Gear {
     this.updateScan(dt, input);
 
     const bowState = this.bow.update(dt, input, g.player, ctx);
-    this.rifle?.update(dt, input, g.player, ctx);
+    this.rifle.update(dt, input, g.player, ctx);
 
     this.interaction = g.mode === 'ON_FOOT' ? this.probeInteract() : null;
     if (this.interaction && input.hit('KeyE')) this.interaction.act();

@@ -108,7 +108,7 @@ export class SpaceStage {
 
   begin(game) {
     if (!this.canTransit(game)) return false;
-    this.transit = { remaining: TRANSIT_DISTANCE, t: 0, duration: 17, peak: 0 };
+    this.transit = { remaining: TRANSIT_DISTANCE, t: 0, duration: 13, peak: 0 };
     this.destination = this.destinationName();
     game.ship.state = 'TRANSIT';
     game.ship.say(`TRANSIT BURN — ${this.destination}`, 4);

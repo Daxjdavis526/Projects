@@ -168,6 +168,7 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
   const pos = new Float32Array(count * 3);
   const nrm = new Float32Array(count * 3);
   const col = new Float32Array(count * 3);
+  const hot = new Float32Array(count);        // drives the lava cracks
   const cx = ox + size * 0.5, cz = oz + size * 0.5;
   const skirt = Math.max(2, step * 3.0);
   let minY = Infinity, maxY = -Infinity;
@@ -200,6 +201,7 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
       sampler.color(h, slope, climate(u, v, 0), climate(u, v, 1), climate(u, v, 2),
         detail > 0.5 ? sampler.river(wx, wz) : 0, _col);
       col[k] = _col[0]; col[k + 1] = _col[1]; col[k + 2] = _col[2];
+      hot[j * SIDE + i] = climate(u, v, 2);
     }
   }
 
@@ -207,6 +209,7 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  g.setAttribute('aHot', new THREE.BufferAttribute(hot, 1));
   g.setIndex(sharedIndices());
   const r = size * 0.75 + (maxY - minY) * 0.5 + skirt;
   g.boundingSphere = new THREE.Sphere(
@@ -217,6 +220,9 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
 }
 
 // --- material --------------------------------------------------------------
+
+/** Lava emission is dialled down in daylight and up at night. */
+export const lavaUniform = { value: 1 };
 
 export function makeTerrainMaterial() {
   const mat = new THREE.MeshStandardMaterial({
@@ -229,19 +235,24 @@ export function makeTerrainMaterial() {
     shader.uniforms.uCurveOrigin = sharedUniforms.uCurveOrigin;
     shader.uniforms.uCurveRadius = sharedUniforms.uCurveRadius;
     shader.uniforms.uCurveAmount = sharedUniforms.uCurveAmount;
+    shader.uniforms.uLava = lavaUniform;
     shader.vertexShader = `
       uniform vec3 uCurveOrigin; uniform float uCurveRadius; uniform float uCurveAmount;
+      attribute float aHot; varying float vHot;
       varying vec3 vPvWorld;
       vec3 primevalCurve(vec3 wp){ vec2 d = wp.xz - uCurveOrigin.xz; wp.y -= (dot(d,d)/(2.0*uCurveRadius))*uCurveAmount; return wp; }
     ` + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', `
       vec4 primevalWorld = modelMatrix * vec4( transformed, 1.0 );
       vPvWorld = primevalWorld.xyz;
+      vHot = aHot;
       primevalWorld.xyz = primevalCurve( primevalWorld.xyz );
       vec4 mvPosition = viewMatrix * primevalWorld;
       gl_Position = projectionMatrix * mvPosition;
     `);
-    shader.fragmentShader = GLSL_NOISE + 'varying vec3 vPvWorld;\n' + shader.fragmentShader;
+    shader.fragmentShader = GLSL_NOISE
+      + 'varying vec3 vPvWorld;\nvarying float vHot;\nuniform float uLava;\n'
+      + shader.fragmentShader;
     // Break up the flat vertex colours with a little procedural grain and a
     // slope-driven darkening, so 2 m terrain resolution does not read as 2 m.
     shader.fragmentShader = shader.fragmentShader.replace(
@@ -255,6 +266,20 @@ export function makeTerrainMaterial() {
         diffuseColor.rgb *= 0.88 + macro * 0.30;
         float cav = smoothstep(0.0, 1.0, 1.0 - vNormal.y);
         diffuseColor.rgb *= 1.0 - cav * 0.18;
+      }
+      `);
+    // Molten cracks in the volcanic country. The pattern is the same fbm the
+    // ground colour uses, thresholded hard so it reads as fissures.
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <emissivemap_fragment>',
+      `
+      #include <emissivemap_fragment>
+      if (vHot > 0.62) {
+        float veins = pvFbm(vPvWorld.xz * 0.055) * 0.7 + pvFbm(vPvWorld.xz * 0.31) * 0.3;
+        float crack = smoothstep(0.50, 0.42, abs(veins - 0.5) * 4.0);
+        float amt = crack * smoothstep(0.62, 0.86, vHot) * uLava;
+        totalEmissiveRadiance += vec3(1.6, 0.34, 0.05) * amt * 2.2;
+        totalEmissiveRadiance += vec3(1.0, 0.72, 0.30) * amt * amt * 1.4;
       }
       `);
   };

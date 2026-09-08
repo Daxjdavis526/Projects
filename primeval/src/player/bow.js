@@ -282,7 +282,7 @@ export class Bow {
           hit.creature.attachArrow(a.mesh, point, hit.part);
           a.live = false;
           this.flying.splice(i, 1);
-          this.onHit?.(hit, dmg, killed);
+          this.onHit?.({ ...hit, point }, dmg, killed);
           ctx.eco.alarm(point, 90, 'attack');
           continue;
         }
@@ -303,7 +303,7 @@ export class Bow {
         a.live = false; a.stuck = true;
         this.flying.splice(i, 1);
         this.worldArrows.push(a);
-        this.onHit?.(null, 0, false);
+        this.onHit?.(null, 0, false, a.mesh.position.clone());
         continue;
       }
       if (a.age > 12) {

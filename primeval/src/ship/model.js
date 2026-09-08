@@ -8,7 +8,7 @@ import { lerp, clamp } from '../math/noise.js';
 
 // --- a tiny mesh toolkit ---------------------------------------------------
 
-class Hull {
+export class Hull {
   constructor() { this.p = []; this.c = []; this.e = []; this.i = []; }
   get n() { return this.p.length / 3; }
   vert(x, y, z, col, emis = 0) {
@@ -458,8 +458,10 @@ export function buildShip() {
 export function buildCockpit() {
   const group = new THREE.Group();
   const h = new Hull();
-  const DARK = [0.045, 0.048, 0.055];
-  const PAD = [0.085, 0.088, 0.095];
+  // Very dark: this is an unlit interior seen against a bright sky, and any
+  // lightness here reads as a white slab across the middle of the view.
+  const DARK = [0.016, 0.018, 0.022];
+  const PAD = [0.030, 0.032, 0.037];
 
   // Coaming / dash, wrapping the forward view.
   for (let i = 0; i < 9; i++) {
@@ -467,14 +469,27 @@ export function buildCockpit() {
     const a = lerp(-1.15, 1.15, t);
     const x0 = Math.sin(a) * 0.95, z0 = -8.05 - Math.cos(a) * 0.30;
     const x1 = Math.sin(a) * 1.10, z1 = -7.85 - Math.cos(a) * 0.34;
-    h.slab([[x0, 0.30, z0], [x1, 0.30, z1], [x1, 0.30, z1 + 0.42], [x0, 0.30, z0 + 0.42]], 0.30, DARK);
+    h.slab([[x0, 0.22, z0], [x1, 0.22, z1], [x1, 0.22, z1 + 0.42], [x0, 0.22, z0 + 0.42]], 0.26, DARK);
   }
-  // Side consoles.
+  // Side consoles, kept low and out of the sight line.
   for (const s of [-1, 1]) {
-    h.slab([[s * 0.52, 0.16, -7.60], [s * 0.94, 0.16, -7.60],
-      [s * 0.94, 0.16, -6.30], [s * 0.52, 0.16, -6.30]], 0.24, PAD);
-    h.slab([[s * 0.56, 0.30, -7.50], [s * 0.90, 0.30, -7.50],
-      [s * 0.90, 0.30, -6.60], [s * 0.56, 0.30, -6.60]], 0.03, [0.02, 0.05, 0.07], 1);
+    h.slab([[s * 0.56, 0.10, -7.60], [s * 0.98, 0.10, -7.60],
+      [s * 0.98, 0.10, -6.20], [s * 0.56, 0.10, -6.20]], 0.20, PAD);
+    h.slab([[s * 0.60, 0.21, -7.50], [s * 0.94, 0.21, -7.50],
+      [s * 0.94, 0.21, -6.50], [s * 0.60, 0.21, -6.50]], 0.02, [0.03, 0.10, 0.14], 1);
+  }
+  // Canopy frame arcs, so the view is framed rather than open.
+  for (const zz of [-7.9, -6.6, -5.2]) {
+    for (let i = 0; i < 7; i++) {
+      const a0 = (i / 7) * Math.PI, a1 = ((i + 1) / 7) * Math.PI;
+      const r = 0.95;
+      h.slab([
+        [Math.cos(a0) * r, 0.28 + Math.sin(a0) * r * 0.62, zz],
+        [Math.cos(a1) * r, 0.28 + Math.sin(a1) * r * 0.62, zz],
+        [Math.cos(a1) * r * 0.94, 0.28 + Math.sin(a1) * r * 0.58, zz + 0.06],
+        [Math.cos(a0) * r * 0.94, 0.28 + Math.sin(a0) * r * 0.58, zz + 0.06],
+      ], 0.05, DARK);
+    }
   }
   // Seat.
   h.slab([[-0.34, 0.08, -6.55], [0.34, 0.08, -6.55], [0.34, 0.08, -5.85], [-0.34, 0.08, -5.85]], 0.14, PAD);
@@ -504,9 +519,9 @@ export function buildCockpit() {
   // Three live displays. Their textures are redrawn by the flight code.
   const screens = [];
   const layout = [
-    { pos: [0, 0.46, -7.68], rot: [-0.62, 0, 0], size: [0.62, 0.30] },
-    { pos: [-0.60, 0.42, -7.05], rot: [-0.5, 0.42, 0], size: [0.34, 0.24] },
-    { pos: [0.60, 0.42, -7.05], rot: [-0.5, -0.42, 0], size: [0.34, 0.24] },
+    { pos: [0, 0.34, -7.72], rot: [-0.55, 0, 0], size: [0.56, 0.27] },
+    { pos: [-0.70, 0.26, -7.00], rot: [-0.45, 0.5, 0], size: [0.30, 0.21] },
+    { pos: [0.70, 0.26, -7.00], rot: [-0.45, -0.5, 0], size: [0.30, 0.21] },
   ];
   for (const l of layout) {
     const canvas = document.createElement('canvas');
