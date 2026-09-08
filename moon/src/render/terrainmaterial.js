@@ -46,6 +46,12 @@ uniform float uDetailAmount;    // albedo variation, 0 in scientific mode
 uniform float uMicroRelief;     // metres of bump on the finest grains
 uniform float uDetailPeriod;    // metres; the noise repeats on this lattice
 uniform float uPixelAngle;      // radians subtended by one pixel
+uniform int   uOverlay;         // 0 none, 1 elevation, 2 slope, 3 geology,
+                                // 4 sunlight, 5 temperature
+uniform sampler2D uGeologyMap;
+uniform sampler2D uTemperatureMap;
+uniform vec2  uElevationRange;  // metres, for the elevation ramp
+uniform float uOverlayMix;
 uniform float uOppositionB0;
 uniform float uOppositionH;
 uniform float uHG;
@@ -60,6 +66,7 @@ varying float vSunVis;
 varying float vEarthVis;
 varying vec2  vDetailXY;
 varying vec3  vWorldPos;
+varying vec3  vNormal2;         // the surface normal in world space, for overlays
 varying vec2  vLatLonUv;
 `;
 
@@ -72,6 +79,7 @@ attribute vec2 aDetail;
 const VERTEX_BODY = /* glsl */`
   vec3 wp = (modelMatrix * vec4(transformed, 1.0)).xyz;
   vWorldPos = wp;
+  vNormal2 = normalize(mat3(modelMatrix) * objectNormal);
   vDetailXY = aDetail;
   vLatLonUv = uv;
 
@@ -160,6 +168,26 @@ float seleneRegolith(vec2 metres, float widthM) {
 }
 `;
 
+const OVERLAY = /* glsl */`
+/* Map overlays for the site picker. These are not how the Moon looks; they are
+   how a dataset looks, which is why they replace the surface rather than tint
+   it, and why the legend is always on screen next to them. */
+vec3 seleneRamp(float t) {
+  /* A perceptually ordered ramp that survives being printed in grey: deep blue
+     through green and yellow to white. */
+  t = clamp(t, 0.0, 1.0);
+  vec3 c0 = vec3(0.05, 0.08, 0.30);
+  vec3 c1 = vec3(0.10, 0.42, 0.55);
+  vec3 c2 = vec3(0.35, 0.68, 0.38);
+  vec3 c3 = vec3(0.92, 0.78, 0.30);
+  vec3 c4 = vec3(1.00, 0.97, 0.92);
+  return t < 0.25 ? mix(c0, c1, t * 4.0)
+       : t < 0.5  ? mix(c1, c2, (t - 0.25) * 4.0)
+       : t < 0.75 ? mix(c2, c3, (t - 0.5) * 4.0)
+                  : mix(c3, c4, (t - 0.75) * 4.0);
+}
+`;
+
 /* The regolith BRDF, replacing three.js's direct diffuse term. */
 const BRDF = /* glsl */`
 float lunarBrdf(float mu0, float mu, float phase) {
@@ -182,6 +210,11 @@ export function makeTerrainMaterial(opts = {}) {
     uMicroRelief: { value: opts.plain ? 0 : 0.055 },
     uDetailPeriod: { value: TERRAIN.detailPeriod },
     uPixelAngle: { value: 0.0012 },
+    uOverlay: { value: 0 },
+    uGeologyMap: { value: null },
+    uTemperatureMap: { value: null },
+    uElevationRange: { value: new THREE.Vector2(-9000, 10700) },
+    uOverlayMix: { value: 0.88 },
     uAlbedoMax: { value: OPTICS.albedoMax },
     uAlbedoKnee: { value: OPTICS.albedoKnee },
     uOppositionB0: { value: OPTICS.oppositionB0 },
@@ -224,7 +257,8 @@ export function makeTerrainMaterial(opts = {}) {
       .replace('#include <fog_vertex>', `#include <fog_vertex>\n${VERTEX_BODY}`);
 
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\n${PARS}\n${ALBEDO_GLSL}\n${NOISE}\n${BRDF}`)
+      .replace('#include <common>',
+        `#include <common>\n${PARS}\n${ALBEDO_GLSL}\n${NOISE}\n${OVERLAY}\n${BRDF}`)
       /* Bump the shading normal with the same noise. Screen-space derivatives
          are taken in view space, where the numbers are small: a world position
          near 1.7e6 m has no precision left in a float to differentiate. */
@@ -345,7 +379,33 @@ export function makeTerrainMaterial(opts = {}) {
       `)
       /* Spot and point lights (helmet lamps) still need their contribution, and
          three.js adds it after the block above, so nothing else to do here. */
-      .replace('#include <lights_fragment_end>', '#include <lights_fragment_end>');
+      .replace('#include <lights_fragment_end>', '#include <lights_fragment_end>')
+      /* Overlays go in at the very end, over the finished shading, because the
+         point of them is to show a dataset rather than a landscape. A little
+         of the real shading is left underneath so the relief still reads. */
+      .replace('#include <dithering_fragment>', /* glsl */`
+        #include <dithering_fragment>
+        if (uOverlay > 0) {
+          vec3 up = normalize(vWorldPos - uMoonCentre);
+          vec3 over = vec3(0.0);
+          if (uOverlay == 1) {
+            float h = length(vWorldPos - uMoonCentre) - 1737400.0;
+            over = seleneRamp((h - uElevationRange.x) /
+                              max(1.0, uElevationRange.y - uElevationRange.x));
+          } else if (uOverlay == 2) {
+            float slope = acos(clamp(dot(normalize(vNormal2), up), 0.0, 1.0));
+            over = seleneRamp(slope / 0.61);            // 0 to 35 degrees
+          } else if (uOverlay == 3) {
+            over = texture2D(uGeologyMap, vLatLonUv).rgb;
+          } else if (uOverlay == 4) {
+            over = mix(vec3(0.03, 0.03, 0.06), vec3(1.0, 0.95, 0.85), vSunVis);
+          } else if (uOverlay == 5) {
+            over = texture2D(uTemperatureMap, vLatLonUv).rgb;
+          }
+          float shade = 0.45 + 0.55 * clamp(dot(normalize(vNormal2), uSunDir), 0.0, 1.0);
+          gl_FragColor.rgb = mix(gl_FragColor.rgb, over * shade, uOverlayMix);
+        }
+      `);
 
     material.userData.shader = shader;
   };

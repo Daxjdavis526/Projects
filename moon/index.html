@@ -122,7 +122,8 @@ canvas{display:block;position:fixed;inset:0}
 #orbit{position:fixed;inset:0;z-index:20;display:none;pointer-events:none}
 #orbit .side{
   position:absolute;top:0;right:0;bottom:0;width:min(370px,34vw);
-  background:linear-gradient(90deg,rgba(4,4,6,0) 0%,rgba(4,4,6,.86) 22%,rgba(4,4,6,.94) 100%);
+  background:linear-gradient(90deg,rgba(4,4,6,0) 0%,rgba(4,4,6,.93) 18%,rgba(4,4,6,.985) 40%,rgba(4,4,6,.99) 100%);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   padding:26px 26px 26px 34px;overflow-y:auto;pointer-events:auto;
   display:flex;flex-direction:column;gap:16px;
 }
@@ -147,6 +148,13 @@ canvas{display:block;position:fixed;inset:0}
 }
 #orbit input:focus{border-color:rgba(232,201,160,.45)}
 #orbit-presets,#orbit-results{display:flex;flex-direction:column;gap:1px;margin-top:6px}
+#orbit .btns{display:flex;flex-wrap:wrap;gap:4px}
+#orbit .btns button{border:1px solid var(--edge);border-radius:2px;padding:5px 9px;
+  font-size:9.5px;letter-spacing:.06em;color:var(--dim)}
+#orbit .btns button:hover{border-color:rgba(232,201,160,.4);color:var(--ink);background:none}
+#orbit .btns button.on{background:rgba(232,201,160,.16);
+  border-color:rgba(232,201,160,.45);color:var(--hot)}
+#orbit-legend{line-height:1.7;margin-top:7px}
 #orbit button{
   display:flex;justify-content:space-between;align-items:baseline;gap:10px;
   background:transparent;border:0;border-left:1px solid transparent;
@@ -442,6 +450,12 @@ canvas{display:block;position:fixed;inset:0}
       <div class="row"><span class="k">sun</span><span class="v" id="o-sun">—</span></div>
       <div class="row"><span class="k">earth</span><span class="v" id="o-earth">—</span></div>
       <div class="warn" id="o-warn"></div>
+    </div>
+
+    <div class="grp">
+      <h2>show me</h2>
+      <div class="btns" id="orbit-overlays"></div>
+      <div class="none" id="orbit-legend"></div>
     </div>
 
     <div class="grp">

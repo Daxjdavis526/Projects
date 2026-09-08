@@ -29,7 +29,7 @@ const el = (id) => document.getElementById(id);
 export class OrbitPicker {
   /**
    * @param {object} opts {
-   *   heightfield, names, sites, geology, cam, skyAt, ephemeris, onLand
+   *   heightfield, names, sites, geology, cam, getSky, onLand, onOverlay
    * }
    */
   constructor(opts) {
@@ -39,6 +39,7 @@ export class OrbitPicker {
     this.geology = opts.geology;
     this.cam = opts.cam;
     this.onLand = opts.onLand;
+    this.onOverlay = opts.onOverlay || (() => {});
     this.getSky = opts.getSky;
     this.root = el('orbit');
     this.pick = null;
@@ -70,6 +71,31 @@ export class OrbitPicker {
       search.value = '';
       el('orbit-results').innerHTML = '';
     });
+
+    /* The overlays. Each one is a dataset rather than a view of the Moon, so
+       each carries a line saying what it is and where it came from. */
+    const overlays = [
+      ['imagery', 0, 'LROC imagery and the LOLA colour map, lit by the real Sun'],
+      ['elevation', 1, 'LOLA elevation, -9.0 to +10.7 km about the 1737.4 km datum'],
+      ['slope', 2, 'surface slope over one pixel, 0 to 35 degrees'],
+      ['geology', 3, 'USGS Unified Geologic Map of the Moon, 1:5 M, unit colours'],
+      ['sunlight', 4, 'lit or shadowed right now, from the real Sun and the terrain skyline'],
+      ['temperature', 5, 'Diviner daytime maximum; purple is ground that never passes 60 K'],
+    ];
+    el('orbit-overlays').innerHTML = overlays
+      .map(([name, v]) => `<button data-o="${v}">${name}</button>`).join('');
+    el('orbit-overlays').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const v = Number(b.dataset.o);
+      this.onOverlay(v);
+      for (const x of el('orbit-overlays').querySelectorAll('button')) {
+        x.classList.toggle('on', Number(x.dataset.o) === v);
+      }
+      el('orbit-legend').textContent = (overlays.find(o => o[1] === v) || [])[2] || '';
+    });
+    el('orbit-overlays').querySelector('button').classList.add('on');
+    el('orbit-legend').textContent = overlays[0][2];
 
     el('orbit-land').addEventListener('click', () => {
       if (this.pick) this.onLand(this.pick);

@@ -328,7 +328,9 @@ async function start() {
     heightfield, names, sites, geology, cam,
     getSky: (lat, lon) => skyAt(ephemerisAt(jdFromUnixMs(state.simMs)), lat, lon, 0),
     onLand: (pick) => land(pick),
+    onOverlay: (v) => terrain.setOverlay(v),
   });
+  terrain.setOverlayMaps(geology, temperature);
 
   let mode = params.get('view') === 'orbit' || (!params.get('view') && !params.get('mode'))
     ? 'orbit' : 'surface';
@@ -347,6 +349,7 @@ async function start() {
   function land(pick) {
     mode = 'descent';
     orbit.show(false);
+    terrain.setOverlay(0);
     el('hint').textContent = 'landing · press space to skip';
     descent = new Descent({
       heightfield, target: { lat: pick.lat, lon: pick.lon },

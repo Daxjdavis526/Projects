@@ -349,6 +349,70 @@ export class TerrainSystem {
    * fine the regolith texture can usefully be drawn. Changes with the field of
    * view and with the window, so it is set from the camera every frame.
    */
+  /**
+   * Build the map overlays. Both are equirectangular textures sampled by the
+   * same latitude and longitude the colour map uses, so nothing has to be
+   * projected twice.
+   *
+   * @param {object} geology { width, height, data, legend } the USGS unit map
+   * @param {object} temperature a TemperatureMap, or null
+   */
+  setOverlayMaps(geology, temperature) {
+    const u = this.material.userData.uniforms;
+    if (geology && geology.legend) {
+      const n = geology.width * geology.height;
+      const rgb = new Uint8Array(n * 4);
+      const lut = new Uint8Array(256 * 3);
+      for (const [dn, unit] of Object.entries(geology.legend.units || {})) {
+        const c = unit.rgb || [128, 128, 128];
+        const i = Number(dn) * 3;
+        lut[i] = c[0]; lut[i + 1] = c[1]; lut[i + 2] = c[2];
+      }
+      for (let i = 0; i < n; i++) {
+        const d = geology.data[i] * 3;
+        rgb[i * 4] = lut[d]; rgb[i * 4 + 1] = lut[d + 1];
+        rgb[i * 4 + 2] = lut[d + 2]; rgb[i * 4 + 3] = 255;
+      }
+      const tex = new THREE.DataTexture(rgb, geology.width, geology.height,
+        THREE.RGBAFormat, THREE.UnsignedByteType);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.NearestFilter;   // units are categories, not a scale
+      tex.needsUpdate = true;
+      u.uGeologyMap.value = tex;
+    }
+    if (temperature && temperature.layers) {
+      const w = temperature.width, h = temperature.height;
+      const rgb = new Uint8Array(w * h * 4);
+      const max = temperature.layers.max, min = temperature.layers.min;
+      const s = temperature.scale;
+      for (let i = 0; i < w * h; i++) {
+        /* The daytime maximum, which is the number that decides whether a
+           place is survivable to stand on and whether ice can persist. */
+        const k = max[i] / s;
+        const t = Math.max(0, Math.min(1, (k - 30) / 370));
+        /* Cold is blue, hot is white through red, which is the convention every
+           Diviner figure uses. */
+        const c = t < 0.5
+          ? [40 + 40 * t * 2, 60 + 120 * t * 2, 160 + 80 * t * 2]
+          : [200 + 55 * (t - 0.5) * 2, 200 - 130 * (t - 0.5) * 2, 190 - 170 * (t - 0.5) * 2];
+        rgb[i * 4] = c[0]; rgb[i * 4 + 1] = c[1]; rgb[i * 4 + 2] = c[2]; rgb[i * 4 + 3] = 255;
+        if (min[i] / s < 60) { rgb[i * 4] = 90; rgb[i * 4 + 1] = 40; rgb[i * 4 + 2] = 160; }
+      }
+      const tex = new THREE.DataTexture(rgb, w, h, THREE.RGBAFormat, THREE.UnsignedByteType);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.needsUpdate = true;
+      u.uTemperatureMap.value = tex;
+    }
+  }
+
+  /** 0 none, 1 elevation, 2 slope, 3 geology, 4 sunlight, 5 temperature. */
+  setOverlay(mode) {
+    this.material.userData.uniforms.uOverlay.value = mode | 0;
+  }
+
   setPixelAngle(fovDeg, heightPx) {
     this.material.userData.uniforms.uPixelAngle.value =
       2 * Math.tan(fovDeg * Math.PI / 360) / Math.max(1, heightPx);
