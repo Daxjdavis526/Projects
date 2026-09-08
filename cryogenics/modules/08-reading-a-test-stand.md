@@ -1,6 +1,6 @@
 # Module 08 — Understanding a Cryogenic Rocket Test Stand
 
-*Roughly 35 minutes. Prerequisite: Modules 01–07.*
+*Roughly 30 minutes. Prerequisite: Modules 01–07.*
 
 Everything so far has been a part: a tank, a valve, a relief, a detector, a
 property of a fluid. A test stand is what happens when those parts are bolted
@@ -360,7 +360,7 @@ the vessel they protect. Study it before reading on.
   <polyline points="472,641 460,641 460,862 350,862" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4"/>
   <rect x="190" y="876" width="320" height="92" rx="6" fill="var(--side)" stroke="currentColor" stroke-width="2"/>
   <text x="350" y="898" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="currentColor">CONTROL ROOM / BLOCKHOUSE</text>
-  <text x="350" y="915" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">outside the barricade — all commands originate here</text>
+  <text x="350" y="915" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">outside the barricade — commands originate here</text>
   <circle cx="250" cy="944" r="17" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
   <line x1="233" y1="944" x2="267" y2="944" stroke="currentColor" stroke-width="1.4"/>
   <text x="250" y="940" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">PIC</text>
@@ -546,7 +546,6 @@ This is the transferable part. An experienced reviewer does not read a schematic
 once; they read it seven times, hunting one class of problem per pass. The
 questions are the same whatever the fluid or the facility.
 
-
 **1. The trapped-volume pass.** *Mentally close every valve. What is now isolated?*
 Two block valves with nothing between them is the canonical finding; the rest of the
 family is valve body cavities, dead legs and sense lines, the volume downstream of a
@@ -688,7 +687,9 @@ facility-specific answers, but it cannot supply the answers.
 
 You can now look at a cryogenic schematic and see what is not drawn: the volume with
 no way out, the relief discharging into a pipe that will plug, the failure that
-opens two valves at once. That does not make you qualified to operate a stand. Operating one requires
+opens two valves at once.
+
+That does not make you qualified to operate a stand. Operating one requires
 hardware-specific procedures, independent review, documented training and
 institutional approval — because reading a drawing and running a system safely are
 different competencies. Bring the review skill; let the procedure come from the
