@@ -1436,3 +1436,681 @@ and is it the same place for fuel and oxidiser? What is the built-up
 back-pressure at full flow? Is anything in the flow path that was not sized for
 the accident case? Is the outlet protected from rain and ice? Is the stack
 restrained against reaction force? And can the discharge reach an air intake?
+
+---
+
+# 5. Instrumentation
+
+## 5.1 Temperature
+
+The general problem: at 77 K, and much worse at 20 K, most room-temperature
+sensing physics either loses sensitivity or stops working. Sensor choice is a
+function of *how cold*, *how accurate*, and *is there a magnetic field*.
+
+The figures below are read directly from Lake Shore Cryotronics' sensor
+selection catalogue, which is the de facto reference in the field. **[A]** —
+https://www.lakeshore.com/docs/default-source/product-downloads/literature/lstc_sensorselection_l.pdf?sfvrsn=60938ed5_15
+
+| Sensor | Range of use (catalogue limits) | Notes |
+|---|---|---|
+| **Silicon diode** (DT-670) | **1.4 K – 500 K** (SD package); 1.4 K – 420 K in other packages | Follows a standard curve, so units are interchangeable without individual calibration |
+| **Platinum RTD** (PT-103) | **14 K – 873 K**; PT-111 14 K – 673 K | Catalogue guidance: "suggested use only T ≥ 30 K" |
+| **Thermocouple Type E** (chromel–constantan) | **3.15 K – 953 K** | Catalogue note: "Useful when T > 10 K" |
+| **Thermocouple Type K** | **3.15 K – 1543 K** | Wider high-temperature range, less low-temperature sensitivity |
+| **Cernox RTD** | sub-1 K upward (model dependent) | The choice when both very low temperature *and* magnetic field are present |
+| **Capacitance** (CS-501) | 1.4 K – 290 K | See the warning below |
+
+### How they actually behave
+
+**Silicon diodes.** A forward-biased diode's voltage drop rises steeply as
+temperature falls. That makes the diode *most* sensitive exactly where most
+other sensors give up. The catalogue's dimensionless-sensitivity table shows
+this directly for the DT-670: −0.01 at 475 K but −1.19 at 4.2 K and −7.5 at
+1.4 K — sensitivity climbs by nearly three orders of magnitude as it gets cold.
+**[A]**
+
+Typical accuracy for a Band-A DT-670: **±0.25 K from 1.4 K through 100 K**,
+loosening to **±0.5 K** at 305–500 K. **[A]**
+
+The catch is magnetic fields and radiation. The catalogue is explicit: the
+DT-670-SD is "Not recommended for T < 60 K, or for B > 5 tesla above 60 K," and
+notes the SD package "has magnetic leads." **[A]**
+
+*Verdict:* the default general-purpose cryogenic thermometer, from 1.4 K up
+through room temperature, absent magnetic fields.
+
+**Platinum RTDs.** Platinum resistance falls with temperature and is beautifully
+linear over a wide warm range — which is why it is the industrial standard. But
+below about 30 K the resistance flattens out and sensitivity collapses; there
+simply isn't enough dR/dT left to resolve temperature. Hence the catalogue's
+"suggested use only T ≥ 30 K." **[A]**
+
+Where platinum shines is **stability**: the catalogue quotes long-term stability
+of **±10 mK/yr over 77 K to 273 K**, and calibrated accuracy down to ±5 mK.
+**[A]** In magnetic fields platinum is "moderately orientation dependent." **[A]**
+
+*Verdict:* excellent from ~30 K up, especially where you need a stable,
+repeatable, interchangeable reading — LN₂ and LOX temperatures are comfortably
+in its band. Useless for liquid hydrogen or helium.
+
+**Thermocouples.** A thermocouple measures the *difference* between the
+measurement junction and a reference junction, which brings two cryogenic
+problems:
+
+1. **Sensitivity collapses as it gets cold.** The Seebeck coefficient of every
+   standard pair falls toward zero at low temperature. Type E (chromel–
+   constantan) has the highest sensitivity of the standard types at low
+   temperature and is the usual choice, but even it carries the catalogue
+   caveat "Useful when T > 10 K." **[A]** Type T is roughly half of Type E's
+   sensitivity in this region.
+
+   > **[C] — FLAGGED.** A figure of "4.1 µV/K at 20 K" for Type T circulated in
+   > the sources consulted, but it appeared once with a unit that was clearly a
+   > transcription error (mV/K), and Lake Shore's cryogenic catalogue lists only
+   > Types E and K. Teach the *ratio* (Type T ≈ half of Type E at low
+   > temperature) and read the absolute coefficient off an ASTM/NIST
+   > thermocouple table before quoting a number.
+
+2. **The reference junction is now a major error source.** At room temperature,
+   a 1 K error in cold-junction compensation is a 1 K error. At 20 K, where the
+   output is a few µV/K, the same compensation error is enormous *in
+   proportion* to the signal.
+
+Add lead-wire heat conduction into the measurement point (a real self-heating /
+thermal-anchoring error at cryogenic temperature), inhomogeneity errors where
+the wire passes through the steep temperature gradient at the cryostat wall, and
+microvolt-level signals in an electrically noisy test-stand environment.
+
+*Verdict:* thermocouples are the cheap, rugged, easy-to-install choice and they
+dominate industrial cryogenic plant — but for accuracy below ~30 K they are the
+weakest of the three. Fesmire's KSC test cryostats use Type K and Type E
+thermocouples for boundary temperatures **[A]**
+(https://ntrs.nasa.gov/api/citations/20180006600/downloads/20180006600.pdf ),
+which is a fair signal of where they are and aren't trusted.
+
+**Capacitance sensors.** Worth a specific warning because they look attractive:
+they are nearly magnetic-field-immune, but the catalogue rates them at ±0.01 K
+"after cooling and stabilizing" while quoting long-term stability of only
+**±1.0 K/yr**, and recommends them "for control purposes." **[A]** In other
+words: excellent as the feedback element in a temperature controller, not
+trustworthy as an absolute thermometer.
+
+### The design-review point about temperature in a propellant system
+
+Cryogenic temperature measurements are almost always used to answer one of three
+questions: *is this line chilled down?*, *is this liquid or gas?*, and *what is
+the density for a flow or mass calculation?* The first tolerates a coarse
+sensor. The third does not — and near saturation, temperature alone doesn't
+answer it, because a saturated fluid's temperature tells you the pressure and
+nothing about quality.
+
+## 5.2 Pressure
+
+Pressure is usually the *easiest* cryogenic measurement to get roughly right and
+one of the easiest to get subtly wrong, because the sensing element is normally
+not rated for the process temperature.
+
+**The two architectures:**
+
+1. **Cold-rated transducer immersed directly.** One part, no plumbing, no
+   thermal lag. Specialist devices are rated to roughly −260 °C for liquid
+   hydrogen and helium service. Simple, expensive, and the calibration must be
+   valid at temperature. **[C]**
+2. **Standard transmitter behind a thermal standoff / sense line.** A length of
+   small-bore tube between the process tap and the transducer. The tube warms up
+   along its length, so the diaphragm sits at a temperature the sensor is
+   actually calibrated for. Cheap, uses ordinary instruments, and is by far the
+   most common arrangement on a test stand. **[C]**
+
+**Why sense lines are kept warm or filled — the actual failure mechanism.**
+
+A standoff line connected to a cryogenic tank fills with cryogen. Heat leaking
+in through the tube wall boils that cryogen, and a **column of cold vapour**
+establishes itself between the liquid surface and the transducer. This column
+is the measurement path, and it has three problems:
+
+- **It is not a static head you can correct for.** The gas density varies along
+  the tube, and it varies with how much heat is leaking in — which changes with
+  ambient conditions and with whether the line is frosted.
+- **It can oscillate.** Liquid periodically ingresses into the warm section and
+  flashes, producing pressure pulsations that look like real process dynamics
+  and can be violent enough to damage the transducer. This is the cryogenic
+  analogue of a steam-trace/impulse-line problem, and it is why the line is kept
+  *deliberately* warm (heat traced) or *deliberately* gas-purged rather than
+  left to find its own equilibrium.
+- **It can freeze solid.** Any moisture or CO₂ in the line becomes a plug, and
+  a plugged sense line reads the *last* pressure it saw. This is the dangerous
+  one, because the instrument does not fail obviously — it fails *steady*.
+
+NASA's Propulsion Test Handbook covers the general family of protective
+accessories and states the underlying reason: "it is desirable to prevent the
+process fluid from coming in contact with the sensing element. The process may
+be noxious, poisonous, corrosive, abrasive, have the tendency to gel, freeze or
+decompose at ambient temperatures, or be hotter or colder than the sensor can
+tolerate." It adds, for cold environments: "When freezing temperatures are
+expected, resistance heating or steam tracing should be used in combination with
+thermal insulation." **[A]** —
+https://ntrs.nasa.gov/api/citations/20100002189/downloads/20100002189.pdf
+
+The Handbook also notes that snubbers "filter out spikes, but cause the
+measurement to be less responsive," and warns that protecting a transducer with
+a relief valve "will result in a loss of measurement when the relief valve is
+open" — a good illustration that every instrument protection measure costs you
+something in the measurement. **[A]**
+
+**Design-review questions:** Is every pressure tap at the *top* of the line
+(so it does not fill with liquid) or deliberately at the bottom (for a DP level
+measurement)? Is the sense line traced, purged, or sloped? Is there a
+frozen-plug failure mode, and would anyone notice? Does a control interlock
+depend on a transducer behind an unmonitored sense line?
+
+## 5.3 Flow
+
+### The technologies
+
+**Turbine meters.** A rotor spins in proportion to volumetric flow; a magnetic or
+RF pick-off counts blade passes. The workhorse of cryogenic and LNG flow
+measurement. NASA's Propulsion Test Handbook gives representative specifications
+**[A]** (NTRS 20100002189):
+
+- Calibration accuracy **±0.05 % of reading**, NIST traceable
+- Repeatability **±0.05 % of reading**
+- Linearity **±0.5 % of reading** over the normal 10:1 turndown; **±0.10 %**
+  over full range with linearising electronics
+- Response time **3–4 ms** typical
+- Temperature range **−450 °F to 750 °F**, dependent on bearing and pick-off
+- Straight run required: **10D upstream and 5D downstream minimum**
+- Recommended filtration: ball bearings 10–100 µm; journal bearings 75–100 µm
+
+Note that −450 °F is about 5.8 K — turbine meters genuinely work at cryogenic
+temperature. Note equally that the accuracy claim is contingent on the straight
+run and the filtration, and that the bearing is a wear item spinning in a fluid
+with essentially no lubricity.
+
+**Coriolis meters.** Measure **mass** flow directly by the Coriolis deflection
+of a vibrating tube, and give density as a bonus — which is enormously valuable
+for a cryogen whose density is temperature-dependent. The cryogenic penalties
+are the thermal stress on the vibrating tubes, the need for the tube to be at
+process temperature (a large chilldown mass), and a severe sensitivity to gas
+entrainment (below).
+
+**Venturi and orifice (differential-pressure) meters.** Infer flow from a
+pressure drop across a restriction. NASA's Handbook: "Differential pressure
+transducers often are used in flow measurement where they can measure the
+pressure differential across a venturi, orifice, or other type of primary
+element. The detected pressure differential is related to flowing velocity and
+therefore to volumetric flow." **[A]** Robust, no moving parts, but the DP
+measurement inherits every sense-line problem in §5.2 — doubled, because there
+are two taps — and the ΔP itself can drop the fluid below saturation and flash
+it.
+
+**The cavitating venturi** deserves separate mention because it is a *control*
+device as much as a measurement one: run choked, it fixes mass flow independent
+of downstream pressure. It is described in the literature as "a form of
+obstruction flow meter that takes advantage of the Bernoulli principle to limit
+fluid flow to a desired rate." **[B]** — *An investigation of a cavitating
+venturi flow control feature in a cryogenic propellant delivery system*,
+Cryogenics, https://www.sciencedirect.com/science/article/abs/pii/S0955598614001216
+This is why cavitating venturis are common in liquid rocket feed systems: they
+decouple the engine from upstream pressure transients.
+
+### Why two-phase flow breaks flow meters
+
+This is the central cryogenic flow-measurement problem, and it has one root
+cause: **a cryogen in a pipe is sitting close to its boiling point, so any local
+pressure drop flashes it.** Every flow meter works by creating a pressure drop.
+The measurement therefore tends to create the condition that invalidates it.
+
+What breaks, mechanism by mechanism:
+
+- **Volumetric meters lose their meaning.** A turbine or venturi measures
+  *volume*. With vapour present, the same volumetric rate carries wildly less
+  mass, and there is no way to recover mass from volume without knowing quality
+  — which the meter does not measure. The error is not noise; it is a systematic
+  and potentially large over-read.
+- **Turbine rotors over-speed and are damaged.** Vapour has far lower density,
+  so the rotor spins faster for the same mass flow. Worse, bubbles collapsing
+  (cavitation) cause "mechanical erosion and noise/vibration that interferes
+  with measurement accuracy." **[C]** The rotor and bearings are attacked at the
+  same time the reading goes wrong.
+- **Coriolis meters lose their signal.** Gas entrainment raises mechanical
+  damping on the flow tube, so oscillation amplitude falls and signal-to-noise
+  collapses; at higher void fractions the drive system cannot maintain
+  oscillation at all. And crucially, "even at low levels of gas entrainment,
+  mass flow errors can be severe." **[B]** — see
+  https://arxiv.org/pdf/1805.01379 for the signal-processing treatment.
+- **DP meters read the wrong physics.** The Bernoulli relation assumes a known,
+  constant density. Two-phase flow breaks that assumption, and flashing across
+  the restriction means the density at the throat differs from the density at
+  the tap.
+
+**The engineering response** is to *prevent* two-phase flow rather than to
+measure through it: subcool the liquid (raise pressure above saturation, or cool
+below it), keep the meter's pressure drop small, chill the line down completely
+before measuring, place the meter where static head is highest (low in the
+system), and use a phase separator upstream (§3.3) where practical.
+
+**The design-review point:** a cryogenic flow measurement is only valid if the
+fluid is single-phase *at the meter*. That is a claim which requires evidence —
+a pressure and a temperature at the meter, compared against the saturation
+curve. A flow reading presented without that evidence should not be trusted, and
+this is a good habit to teach early.
+
+## 5.4 Level
+
+### Why level in a cryogen is harder than in water
+
+Six reasons, and they compound:
+
+1. **The liquid is boiling.** There is no flat, quiet surface. There is a
+   churning two-phase region whose "level" is a statistical statement.
+2. **The density is low and it varies.** LN₂ is about 0.8 g/cm³ and its density
+   changes with temperature and pressure along the saturation line. A DP level
+   measurement divides by density, so a density error becomes a level error
+   directly.
+3. **The head is tiny.** Low density means very small hydrostatic pressure per
+   metre — so a DP transmitter must resolve a very small differential, often on
+   top of a large static pressure.
+4. **The vapour above is dense and variable.** Unlike air over water, cold
+   vapour has significant density that subtracts from the measured head, and it
+   varies with tank pressure and temperature.
+5. **The measurement path itself boils.** Any tube dipping into the liquid boils
+   its contents (§5.2), so the reference leg is not a clean gas column.
+6. **You often cannot see in.** No sight glass on a vacuum-jacketed vessel.
+
+### The techniques
+
+**Differential pressure (DP).** The industry standard for bulk tanks. Measure
+between a bottom tap in the liquid and a top tap in the ullage; the difference
+is the hydrostatic head, and level follows from ρ. The literature states it as
+measuring "the pressure difference between the gas phase in the vessel and the
+gas phase in a tube immersed in the liquid," with level from head and density.
+**[B]** — https://www.sciencedirect.com/science/article/abs/pii/S0011227517300681
+
+Strengths: no moving parts, works on a sealed vessel, the same instrument family
+as everything else on the stand. Weaknesses: needs density (hence needs
+temperature/pressure); both sense lines are subject to §5.2's problems; and near
+atmospheric pressure "many tanks operate near atmospheric pressure, limiting
+differential pressure signal." **[B]**
+
+**Capacitance probe.** A coaxial capacitor down the tank; the dielectric
+constant changes as liquid replaces vapour between the electrodes (LN₂ ε ≈ 1.45,
+GN₂ ε ≈ 1.0), so capacitance is proportional to submerged length. Continuous,
+no moving parts, fast.
+
+The catch is that ε is itself a function of density, hence of temperature and
+pressure. The NASA-era work on this is explicit: "the inaccuracy of liquid
+nitrogen and liquid hydrogen level measurements by use of a coaxial capacitance
+probe varies as a function of fluid temperature and pressure," and the fix is
+"fluid dielectric correction factors based on the actual measured fluid
+temperature and pressure." **[B]** —
+https://ui.adsabs.harvard.edu/abs/1993inin.symp..701E/abstract
+
+So a capacitance level gauge is not a standalone instrument; it needs a
+temperature and a pressure to be honest. It is also degraded by the two-phase
+froth region, where the dielectric is neither liquid nor vapour.
+
+**Point sensors (discrete level).** A sensor that changes state when wetted,
+placed at a specific height. Two common physics:
+- **Self-heated resistor / hot wire.** A small element is driven with enough
+  current to self-heat in gas; when liquid covers it, the vastly better heat
+  transfer cools it and its resistance drops sharply. Very sharp, very
+  unambiguous transition.
+- **Superconducting wire** (for helium), which goes normal/superconducting at
+  the liquid interface.
+
+Strengths: unambiguous, cheap, ideal for interlocks — "full," "low," "trip."
+Weaknesses: discrete, not continuous; the self-heating type is a heat source
+inside the cryogen; and they can be fooled by splashing or by a froth layer.
+
+*Practical architecture:* most real systems combine them — a continuous DP or
+capacitance measurement for operations, plus discrete point sensors for the
+safety-critical decisions (fill termination, low-level pump trip). The interlock
+should be on the point sensor, because it fails in a more obvious way.
+
+## 5.5 Oxygen deficiency and combustible gas monitoring
+
+### Oxygen deficiency monitors (ODMs)
+
+**The hazard.** Cryogens expand enormously on boiling (LN₂ ~696:1, LAr ~847:1,
+LHe ~757:1, LO₂ 860:1, LH₂ 851:1) **[A]** (LBNL), so a modest liquid spill in a
+closed room displaces a great deal of air. Nitrogen and argon are odourless,
+colourless, non-irritating, and give no warning at all.
+
+**The threshold.** Both LBNL and SLAC define it identically: "An oxygen
+deficiency hazard (ODH) exists when the concentration of oxygen is 19.5 percent
+or less by volume" **[A]** —
+https://www-group.slac.stanford.edu/esh/eshmanual/references/cryogenicsReqODH.pdf ;
+"Any local oxygen concentration below 19.5% by volume constitutes an oxygen
+deficiency" **[A]** —
+https://ehs.lbl.gov/resource/esh-manual-pub-3000/ch29/
+Jefferson Lab uses the same 19.5 % figure. **[B]** —
+https://www.jlab.org/ehs/ehsmanual/6540.htm
+
+**Alarm setpoints.** SLAC requires that monitors "provide an oxygen readout and a
+local audible and visible alarm when the oxygen level falls below 19.5 percent."
+**[A]** Commercial units commonly ship with two setpoints, typically **19.5 %
+(warning)** and **18.0 % (evacuate)**. **[C]**
+
+**ODH classification.** LBNL uses a risk-rate classification that is a good
+teaching device because it makes the point that ODH is assessed as a
+*probability × consequence*, not just a concentration **[A]**:
+
+| Class | Fatality risk rate |
+|---|---|
+| 0 | < 10⁻⁷ per hour |
+| 1 | > 10⁻⁷ but < 10⁻⁵ per hour |
+| 2 | > 10⁻⁵ but < 10⁻³ per hour |
+| 3 | > 10⁻³ per hour |
+
+SLAC's controls table shows how classification drives hardware: warning signs,
+installed oxygen monitors and ventilation are required at ODH 1 and above, with
+"Relief valves and piping arrangements as required by [the pressure systems
+chapter] or the cryogenic and ODH safety program manager." **[A]**
+
+**Placement logic — the single most important concept.** *Put the sensor where
+the gas goes.* And where the gas goes depends on its density **at the temperature
+it arrives at**, which is not always its density at room temperature.
+
+- **Helium and hydrogen** are lighter than air and rise. SLAC: "if helium [is]
+  used as a cryogen in an accelerator tunnel then oxygen sensors need to be
+  located where the gas would tend to accumulate during a release. Fixed oxygen
+  monitors sensors should be located at **ceiling height** because helium is
+  lighter than air." **[A]**
+- **Nitrogen and argon.** Argon is denser than air and pools low. Nitrogen is
+  almost exactly air's density warm — but **cold nitrogen vapour is much denser
+  than air** and will initially sink and flow along the floor like a liquid,
+  then rise as it warms. This is why a single mounting height is not a general
+  answer for LN₂: a release behaves like a heavy gas at first and a neutral one
+  later. Breathing-zone height is the usual compromise, with low-level sensing
+  where argon is present or where there is a pit, trench or sump.
+- **Read-out location.** SLAC: "Monitors and alarm readouts should be placed so
+  that they can be read and operated from **outside** of the potential ODH area."
+  **[A]** You must be able to know the room is unsafe without entering it.
+- **Architectural traps.** SLAC discusses **lintels** as an engineering control
+  to hold a buoyant gas layer at the ceiling and buy evacuation time, and warns
+  that "Service buildings located above such a tunnel that have ceiling to floor
+  penetrations ... require special attention to prevent an ODH situation in the
+  above-ground buildings. Such penetrations must be identified and plugged to
+  keep helium out." **[A]**
+
+**A calibration warning that deserves to be taught.** SLAC found that some
+oxygen monitors do not behave correctly in a helium atmosphere:
+
+> "Monitors intended for such spaces must be tested in a helium-enriched
+> reduced-oxygen environment to establish their performance (once per model) as
+> **some models fail to alarm properly in the presence of helium**. Do not depend
+> on vendor literature because experience has shown that it is often unclear on
+> this topic." **[A]**
+
+This is the general lesson in miniature: a gas detector is calibrated against a
+specific mixture, and its behaviour in a *different* diluent is an empirical
+question, not a datasheet question.
+
+**Interlocking.** SLAC describes both a differential-pressure switch tripping a
+solenoid in the supply line, and "a fixed oxygen deficiency monitor alarm
+interlocked in a feedback loop to the supply valve [that] shuts off the flow of
+gas in the system if the oxygen level in the room is below a set point," adding
+that "the use of interlocks should be considered whenever feasible." **[A]**
+
+### Combustible gas detectors
+
+**Sensing principles:**
+
+- **Catalytic bead (pellistor).** A catalysed bead oxidises the combustible gas
+  on its surface; the heat of reaction raises its resistance, measured against a
+  matched inert reference bead. Responds to *anything* combustible, including
+  hydrogen. Requires oxygen to work (it is a combustion device — so it under-
+  reads or fails in an oxygen-depleted atmosphere, which is precisely the
+  condition a cryogenic leak creates). Susceptible to poisoning by silicones,
+  sulphur and halogens. **[C]**
+- **Infrared (NDIR).** Measures absorption at a hydrocarbon C–H band. Immune to
+  poisoning, needs no oxygen, and fails safe on beam loss. **But infrared
+  sensors cannot detect hydrogen** — H₂ is diatomic and homonuclear, with no IR
+  absorption band. **[C]** This is a decisive constraint: an IR detector array is
+  useless for a hydrogen system.
+- Others in use: electrochemical (for H₂ specifically), thermal conductivity,
+  and metal-oxide semiconductor.
+
+**Alarm setpoints.** Combustible gas is measured as a percentage of the **Lower
+Explosive Limit (LEL)**, not as an absolute concentration. Conventional practice
+is a first alarm at **20 % LEL** and a second at **40 % LEL** (or higher), the
+gap giving time to ventilate or evacuate before a flammable atmosphere exists.
+**[C]** — https://www.crowcon.com/us-en/article/what-is-lel/
+
+The design logic behind 20 % is worth stating: it is a **safety margin on a
+mixture that is not yet flammable**. At 20 % LEL there is no fire risk; the
+alarm exists to act before there is.
+
+**Placement — methane detector vs O₂ monitor.** This contrast is a clean teaching
+example because the two answers are different for the same room:
+
+| | Combustible (CH₄, H₂) detector | Oxygen deficiency monitor |
+|---|---|---|
+| **What it is looking for** | A buoyant fuel gas rising and accumulating at the highest point | Displacement of air in the volume people occupy |
+| **Where it goes** | **High** — at or near the ceiling, above the leak source. Guidance for lighter-than-air gases is to mount near the ceiling/roof beams, commonly ~30–60 cm below the ceiling, and above the potential leak point **[C]** | **Breathing zone** for N₂/Ar (commonly ~3–5 ft off the ground), and **ceiling height** for helium **[A]** (SLAC) |
+| **Why** | Fuel accumulates where it collects, and you want to detect it *before* the layer reaches an ignition source | You want to know the oxygen concentration where a person's lungs actually are |
+
+Note the asymmetry: for **helium** the two happen to agree (both go high), but
+helium is not flammable so only the O₂ monitor applies. For **methane or
+hydrogen** the fuel detector goes high while the O₂ monitor stays in the
+breathing zone. For **argon** the O₂ monitor goes low. There is no single
+"gas detector height."
+
+Additional siting rules from vendor practice: mount within roughly 3–5 ft of
+the potential leak source for spot coverage, keep monitors out of dead air
+pockets and away from doors, vents and fans that would sweep the gas past the
+sensor, and site them where they can actually be serviced and bump-tested.
+**[C]** — https://www.rcsystemsco.com/gas-detector-placement
+
+**Calibration concepts.** Three distinct activities that get conflated:
+- **Zero/span calibration** against a certified gas of known concentration
+  (commonly 2.5 % methane in air for combustible sensors, i.e. ~50 % LEL).
+  **[C]**
+- **Bump test** — a brief exposure to confirm the sensor responds and the alarm
+  actuates. Not a calibration; it only proves the device is alive.
+- **Cross-sensitivity / correction factors.** A catalytic sensor calibrated on
+  methane responds differently to propane, hydrogen or a solvent vapour;
+  manufacturers publish correction factors. A detector reading "% LEL" is really
+  reading "% LEL *of the calibration gas*" unless corrected. **[C]**
+
+Calibration gas has an expiry date, and an expired cylinder is a silent way to
+mis-calibrate a whole facility. **[C]**
+
+**The general design-review question for all gas detection:** what does this
+detector *not* see? (IR cannot see hydrogen; catalytic bead needs oxygen; an O₂
+monitor at breathing height will not see a helium layer at the ceiling; a
+detector downstream of a fan may never see the plume at all.) Detection coverage
+should be argued from a release scenario, not from a coverage-radius rule of
+thumb.
+
+---
+
+# 6. How to read a cryogenic P&ID
+
+## 6.1 The governing standard
+
+**ANSI/ISA-5.1**, *Instrumentation Symbols and Identification*, is the
+authoritative reference for instrument tagging and symbology on a P&ID. It was
+"originally published in 1984" and its purpose is to "consistently identify
+instrumentation in project documents used for specifying, purchasing, tracking,
+installing, and eventually maintaining them." ISA notes that in practice the
+standard "is often not followed completely — particularly regarding device
+identification tagging." **[A]** —
+https://www.isa.org/intech/2020/september-october/isa-5-1-instrumentation-symbols-and-identification
+
+The standard itself is maintained by ISA's ISA5 committee: **[A]** —
+https://www.isa.org/standards-and-publications/isa-standards/isa-standards-committees/isa5
+
+> **Note on sourcing.** ISA's own materials state that ISA intellectual property
+> may not be entered into AI tools, and the public ISA pages therefore do not
+> reproduce the letter tables. The tables below are compiled from a public
+> engineering reference **[B]** and are consistent across every secondary source
+> consulted, but **the controlling document is ANSI/ISA-5.1 itself** and a course
+> that teaches this should obtain a copy.
+
+## 6.2 The tag scheme
+
+An ISA tag is **letters + a loop number**, e.g. `PT-101`.
+
+**First letter = the measured or initiating variable.**
+**Succeeding letters = what the device does with it** (readout/passive function,
+then output/active function), plus modifiers.
+
+### First letters (measured variable) **[B]**
+
+| | | | |
+|---|---|---|---|
+| **A** Analysis (composition) | **B** Burner, combustion | **D** User's choice (often density) | **E** Voltage |
+| **F** Flow rate | **G** User's choice (gauging) | **H** Hand (manual) | **I** Current (electrical) |
+| **J** Power | **K** Time, schedule | **L** Level | **P** Pressure, vacuum |
+| **Q** Quantity | **R** Radiation | **S** Speed, frequency | **T** Temperature |
+| **U** Multivariable | **V** Vibration, mechanical analysis | **W** Weight, force | **X** Unclassified |
+| **Y** Event, state, presence | **Z** Position, dimension | | |
+
+### Succeeding letters (function and modifier) **[B]**
+
+| | | | |
+|---|---|---|---|
+| **A** Alarm | **B** User's choice | **D** Differential *(modifier)* | **E** Sensor, primary element |
+| **F** Ratio *(modifier)* | **G** Glass, gauge, viewing device | **H** High *(modifier)* | **I** Indicate |
+| **J** Scan *(modifier)* | **K** Time rate of change; control station | **L** Light; Low *(modifier)* | **P** Point (test connection) |
+| **Q** Integrate, totalise *(modifier)* | **R** Record | **S** Switch; Safety *(modifier)* | **T** Transmit |
+| **U** Multifunction | **V** Valve, damper, louver | **W** Well | **X** Unclassified |
+| **Y** Relay, compute, convert | **Z** Driver, actuator, final control element | | |
+
+Source for both tables: https://mechcodex.com/reference/isa-instrumentation-tag-letters **[B]**
+
+### Worked examples **[B]**
+
+| Tag | Reads as |
+|---|---|
+| **PT** | Pressure Transmitter |
+| **TT** | Temperature Transmitter |
+| **FT** | Flow Transmitter |
+| **LT** | Level Transmitter |
+| **PI** | Pressure Indicator (a local gauge) |
+| **TE** | Temperature Element — the sensor itself |
+| **TW** | Thermowell |
+| **FE** | Flow Element — the orifice, venturi or turbine body |
+| **PIC / FIC / TIC / LIC** | …Indicating Controller |
+| **PSV** | Pressure Safety Valve — P (pressure) + S (safety, modifier) + V (valve) |
+| **PSE** | Pressure Safety Element — conventionally the rupture disc |
+| **LSH / LSL** | Level Switch High / Low |
+| **PDT** | Pressure **D**ifferential Transmitter |
+| **FCV / PCV / TCV** | Flow / Pressure / Temperature Control Valve |
+| **HV** | Hand Valve (manually actuated, shown as an instrument) |
+| **ZS** | Position Switch — e.g. a valve limit switch |
+
+Two decoding habits worth teaching:
+
+1. **Read the first letter as a noun and the rest as a verb phrase.** `PDIT` =
+   *pressure, differential, indicate, transmit*.
+2. **`S` is ambiguous and context decides.** In `PSV` it is the *safety*
+   modifier; in `LSH` it is *switch*. This trips people up constantly.
+
+### Loop numbers
+
+The digits identify the control loop, not the device — `PT-101`, `PIC-101` and
+`PCV-101` are the transmitter, controller and valve of the *same* loop. A
+cryogenic P&ID often numbers loops by system (100-series = LOX, 200-series =
+fuel, 300-series = pneumatics), which is why the number is worth reading as
+carefully as the letters.
+
+## 6.3 Bubbles, symbols and line types
+
+**Instrument bubbles.** A circle is an instrument. What is drawn *through* it
+tells you where it lives:
+
+| Symbol | Meaning |
+|---|---|
+| Plain circle | Discrete instrument, **field mounted** |
+| Circle with a **single horizontal line** | Discrete instrument, mounted on a **main panel**, accessible to the operator |
+| Circle with a **double horizontal line** | Main panel, **rear of panel** / not operator accessible |
+| Circle inside a **square** | **Shared display / shared control** — i.e. it lives in the DCS or PLC |
+| **Hexagon** | Computer function |
+| **Diamond inside a square** | Programmable logic controller |
+| **Dashed** enclosure | Software / non-accessible function |
+
+> **[C] — FLAGGED.** Unlike the letter tables above, this bubble/line-type
+> summary was **not** confirmed against a specific fetched source; it is the
+> widely taught ISA convention as understood across the engineering literature.
+> The letter tables came from
+> https://mechcodex.com/reference/isa-instrumentation-tag-letters **[B]**, which
+> covers tags but was not verified to cover symbology. **Check these against
+> ANSI/ISA-5.1 directly before teaching them** — the horizontal-line convention
+> in particular has changed in wording across editions.
+
+**Line types.** The P&ID distinguishes the process from the signals carrying
+information about it:
+
+| Line | Meaning |
+|---|---|
+| Heavy solid | **Process line** (the actual pipe) |
+| Thin solid | Instrument-to-process connection |
+| Dashed | Electrical signal |
+| Line with double cross-hatches | Pneumatic signal |
+| Line with small circles | Data link / software link |
+| Line with `//` marks | Hydraulic |
+| Line with `-x-x-` | Capillary (filled system) |
+
+**[C]** — same caveat as the bubble table above: standard ISA convention,
+not verified against a fetched primary source. Confirm against ANSI/ISA-5.1.
+
+**Valve symbols.** The body type is drawn (bowtie for a generic valve, with
+gate/globe/ball/check variants distinguished by the internal marking), and the
+**actuator is drawn on top**: a diaphragm dome for pneumatic, a rectangle with
+`S` for solenoid, a handwheel or `M` for manual/motor. **A cryogenic P&ID should
+also carry the fail position** — commonly annotated `FC` (fail closed), `FO`
+(fail open) or `FL` (fail last) beside the valve, or shown with an arrow on the
+actuator. Reading fail positions off the drawing is one of the core skills of a
+cryogenic design review (§3.5).
+
+## 6.4 How a cryogenic schematic is typically laid out
+
+Conventions that make cryogenic P&IDs readable:
+
+- **Left to right in the direction of flow**, source to use point: storage →
+  transfer → run tank → feed → engine/test article, with the vent and relief
+  paths taken off upward.
+- **One fluid, one horizontal band.** LOX on one level, fuel on another,
+  pneumatics/inert on a third. Crossings are minimised and clearly broken.
+  This layout is itself a safety measure: it makes an accidental fuel/oxidiser
+  interconnection visually obvious.
+- **Vacuum-jacketed line is drawn as a double line** or annotated `VJ`, with the
+  jacket's pump-out/relief port shown as its own connection. Insulation type is
+  usually a line-class annotation rather than a symbol.
+- **Every relief device is drawn**, including the small ones. A cryogenic P&ID
+  has far more `PSV`/`PSE` bubbles than a comparable ambient-temperature drawing,
+  because of the isolatable-volume rule (§3.4, §4.1). Trapped-volume reliefs
+  between valve pairs are a distinguishing visual feature of a cryogenic
+  schematic.
+- **Vent and relief headers are shown terminating**, with their discharge point
+  identified — and fuel, oxidiser and inert vents shown terminating *separately*
+  (§4.4).
+- **Bayonet joints and flex hoses are called out**, because they are maintenance
+  break points and flexibility elements, not just pipe.
+- **Line classes carry the design temperature**, which is how material
+  requirements (austenitic stainless, no carbon steel) get enforced from the
+  drawing.
+
+### A reading checklist for a cryogenic P&ID
+
+A useful exercise for a design-review class, built from the rules above:
+
+1. **Close every valve mentally.** List every volume that is now isolated. Does
+   each have a relief? (§3.4)
+2. **Find every relief and trace its discharge.** Where does it end up? Do fuel
+   and oxidiser reliefs share anything? (§4.4)
+3. **Check every vented ball valve's orientation** against the direction it must
+   hold pressure. (§3.4)
+4. **Read every fail position.** On loss of air and loss of power, what state
+   does the whole system go to — and is that state safe? (§3.5)
+5. **Find the vacuum-jacketed sections** and confirm each has an annulus relief
+   and a pump-out port that is accessible. (§2.3)
+6. **Check every instrument's sense line** for freeze/plug and for whether an
+   interlock depends on it. (§5.2)
+7. **Check that every flow measurement can be shown to be single-phase at the
+   meter.** (§5.3)
+8. **Locate the gas detection** and ask what release scenario each detector
+   covers. (§5.5)
