@@ -501,12 +501,21 @@ deserve the same standard or none at all. Guessing where an ALSEP central
 station sits because it would look right is exactly the thing this project
 refuses to do.
 
-**The NAC stereo DTMs over the pits.** `NAC_DTM_TRANQPIT1` at 2 m/px, plus
-`NAC_DTM_MARIUSPIT01` and `NAC_DTM_INGENIIPIT`, are 32-bit GeoTIFFs on the LROC
-RDR archive. They are not on NASA Trek, which is why nothing streams them here.
-Vendoring them would replace a profile fitted to six catalogue numbers with the
-measured surface, and turn the pit rows in `DATA_SOURCES.md` from DERIVED to
+**The NAC stereo DTMs over the pits, and the point clouds under them.**
+`NAC_DTM_TRANQPIT1` at 2 m/px, plus `NAC_DTM_MARIUSPIT01` and
+`NAC_DTM_INGENIIPIT`, are 32-bit GeoTIFFs on the LROC RDR archive; Wagner &
+Robinson's pit-wall point clouds are CC BY 4.0 at doi 10.5281/zenodo.6622042.
+None of them are on NASA Trek, which is why nothing streams them here.
+Vendoring the DTMs would replace a profile fitted to six catalogue numbers with
+the measured surface and turn the pit rows in `DATA_SOURCES.md` from DERIVED to
 MEASURED. This is the most valuable single item on this list.
+
+It would not fix everything, and the part it cannot fix is worth naming.
+Wagner, Rowland & Robinson report the Mare Tranquillitatis shaft as about forty
+metres of near-vertical wall above sixty metres of wall that flares outward at
+twenty to forty degrees. That is an overhang a hundred metres tall, and a
+height field cannot describe any of it. The shaft here is vertical for its
+whole depth because that is the only thing the representation can say.
 
 **SLDEM2015 at 59 m globally.** The reader and the registry entry are the work;
 `src/data/surface.js` already handles scheduling, blending and provenance.

@@ -194,6 +194,20 @@ the surface swings three hundred kelvin. The same paper notes that a cave
 below a pit would raise the night-time temperature of the ground above it by
 0.1 K, which is why nobody is going to find a second one from orbit this way.
 
+Two further things the atlas's numbers are corroborated by, both of which
+predate this reconstruction and neither of which it uses. Wagner, Rowland &
+Robinson (LPSC 2018, #1538) give the Mare Tranquillitatis shaft as "100 x 88",
+matching the catalogue exactly, and describe its wall as "~40 m of roughly
+vertical (1±3° overhang) wall above a ~60 m overhang (~20-40°, based on
+illumination)" — so below about forty metres the wall does not stay vertical,
+it flares outward. A height field cannot express that at all, and this project
+does not try: the shaft here is vertical for its whole depth and the docs say
+so rather than the geometry pretending. And Wagner & Robinson (3rd Int.
+Planetary Caves Conf. 2020, #1045) describe the funnel as "a funnel that
+smoothly increases in slope from flat surrounding terrain to approximately the
+angle of repose near the pit rim", which is the shape `pitDepthAt` builds and
+the reason its exponent is greater than one.
+
 **There is stereo topography over these pits, and this project does not use
 it.** `NAC_DTM_TRANQPIT1` — LROC RDR, "Mare Tranquillitatis Pit", centre
 8.39/33.19, extent 7.91-8.86 N and 33.11-33.27 E, **2 m per pixel**, relative
@@ -204,6 +218,13 @@ true is the narrower statement: **NASA Trek**, which is where this game streams
 elevation from, serves nothing better than 118 m/px at any of these
 coordinates. Vendoring TRANQPIT1 would turn the pit's topography from DERIVED
 into MEASURED, and is the single highest-value thing left on this subject.
+
+Wagner & Robinson's internal-morphology point clouds — the stereo points off
+the pit walls that the published dimensions were derived from in the first
+place — are openly licensed under CC BY 4.0 at doi 10.5281/zenodo.6622042
+(`PitMorphologyDataArchive.zip`, ~132 MB). Those are the other half of the same
+job: the DTM gives the surface around and into the pit, the point cloud gives
+the walls below where a height field stops being able to describe anything.
 
 Two other lines of evidence for lunar voids were checked and are **not** used,
 because neither constrains a shape and a shape is what it takes to build a
