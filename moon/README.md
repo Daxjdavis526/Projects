@@ -233,7 +233,9 @@ console shows that distance, and turns amber and then red as you approach it.
 
 Not in this version: SLDEM2015 region streaming at 59 m globally, persistent
 footprints across sessions, the Apollo 12 to 17 hardware layouts, lava tube
-pits, and a gamepad.
+pits, an achievements list, and a gamepad.
+
+There are no quests and there will not be any. The Moon is the content.
 
 ## What a screenshot found
 
