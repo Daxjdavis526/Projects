@@ -92,8 +92,15 @@ function ease(x) { return 1 - Math.pow(1 - x, 2.4); }
 export const PIT_THERMAL = {
   /** Permanent shadow beyond the opening: a blackbody cavity, near-constant. */
   caveK: 290,
-  /** ">420 K" on a regolith-covered pit floor near the equator at noon. */
+  /** The 2-D model's ">420 K" on a regolith-covered equatorial pit floor at
+      noon, about 20 K over the warmest surface Diviner has measured. Their 3-D
+      model, run for two lunar days rather than to equilibrium, peaks nearer
+      415 K with the same floor. */
   peakFloorK: 422,
+  /** How much hotter than the open surface, at the Sun's highest. The paper's
+      own comparison is "about 20 K higher than the warmest equatorial
+      surfaces", so this is that, not a fitted number. */
+  sunExcessK: 22,
   /** What Diviner actually measured at night, over the surrounding surface. */
   nightExcessK: 100,
   source: 'Horvath, Hayne & Paige 2022, GRL, doi 10.1029/2022GL099710',
@@ -123,7 +130,7 @@ export function pitTemperature(surfaceK, where) {
        open surface and the published peak, which is what makes this DERIVED. */
     const mu = Math.sin(where.sunElDeg * Math.PI / 180);
     return {
-      kelvin: Math.min(PIT_THERMAL.peakFloorK, surfaceK + 32 * mu),
+      kelvin: Math.min(PIT_THERMAL.peakFloorK, surfaceK + PIT_THERMAL.sunExcessK * mu),
       why: 'sunlit pit floor, warmed by the wall opposite',
     };
   }

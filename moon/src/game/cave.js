@@ -32,13 +32,23 @@
                                    below the MTP west wall"
      roof 55 +/- 5 deg,            Carrer et al. 2024, Fig. 3 caption, model B
      floor 45 +/- 5 deg
-     about 30 m of horizontal      the value reported for model B; the shallow
-     extent for model B            model A reaches about 80 m instead
+     30 to 80 m of horizontal      press coverage of the paper, "depending on
+     extent                        how steeply the conduit dips". 30 m is the
+                                   steep end and model B is the steep model, so
+                                   that is the end used here — but note that no
+                                   source actually pairs 30 m with model B. The
+                                   pairing is inference, and it is the one thing
+                                   on this list that is
      width at least 45 m           and it is a lower bound, not a measurement:
                                    the radar-derived width saturates against the
                                    true width, so 45 m is a floor. Simulations
                                    ran 15, 30, 55, 100 and 200 m
-     130-170 m below the surface   Carrer et al. 2024
+     130-170 m below the surface   press coverage, and it does not agree with
+                                   itself: INAF says 130-170 m, Eos says
+                                   135-175 m, and one outlet attributes that
+                                   range to the pit walls rather than to the
+                                   conduit. Used only as a sanity check on the
+                                   geometry, never as an input to it
      overhangs of 10-15 m on the   LROC Lunar Pits Atlas
      east, west and north
      floor boulders 1-4 m, plus    Carrer et al. 2024, Extended Data Fig. 6,

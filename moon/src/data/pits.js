@@ -1,8 +1,8 @@
 /* =============================================================================
    PITS — the holes in the Moon, from the catalogue that measured them
    -----------------------------------------------------------------------------
-   A lunar pit is a collapse in the roof of a void, and there are a few hundred
-   of them. A handful sit in mare basalt with vertical walls and overhanging
+   A lunar pit is a collapse in the roof of a void, and 278 of them have been
+   catalogued. A handful sit in mare basalt with vertical walls and overhanging
    rims, which is what you would expect of a lava tube whose ceiling has given
    way, and one of those has now been shown by radar to open into a conduit that
    is still there.
@@ -24,6 +24,14 @@
    overlay says DERIVED when you stand in one, and the source line names the
    catalogue entry. Everything below the resolution of those numbers is
    procedural and says so, exactly as it does everywhere else.
+
+   And the honest next step, written here because it is the thing that would
+   make this file unnecessary: a height field sampled off the Moon does exist.
+   NAC_DTM_TRANQPIT1 is a two-metre stereo model of the Mare Tranquillitatis pit
+   with a relative vertical accuracy of 0.72 m, and there are equivalents over
+   Marius Hills and Mare Ingenii. They are on the LROC RDR archive as 32-bit
+   GeoTIFFs and not on NASA Trek, which is the only reason this game does not
+   stream them. Vendor those and every one of these pits becomes MEASURED.
 
    Fields, and where each one comes from:
 
@@ -60,9 +68,11 @@ import { LABEL } from '../config.js';
  * The mare pits, which are the ones that look like collapsed lava tubes.
  *
  * Only pits whose atlas entry carries a full set of dimensions are here. The
- * atlas holds a few hundred entries and most are impact-melt pits in crater
- * floors, which are a different thing: melt ponds crack as they cool and the
- * holes are not tube skylights.
+ * released catalogue holds 278: 257 impact-melt pits, 16 mare, 5 highland. The
+ * impact-melt ones are the overwhelming majority and are a different thing —
+ * melt ponds crack as they cool and the holes are not tube skylights — and
+ * they are much smaller, with a median diameter of 15 m against 100 m for the
+ * mare pits.
  */
 export const PITS = [
   {
