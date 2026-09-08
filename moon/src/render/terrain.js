@@ -15,6 +15,36 @@ import { makeTerrainMaterial, updateTerrainUniforms } from './terrainmaterial.js
 import { Raster } from '../terrain/heightfield.js';
 import { R_MOON, TERRAIN } from '../config.js';
 
+/* =============================================================================
+   ROCKS
+   -----------------------------------------------------------------------------
+   One angular fragment, instanced. Every tile fine enough to stand on already
+   generates a scatter of them and ships it to the main thread; until now
+   nothing drew it, so the surface was bare and the work was wasted.
+
+   The shape is an icosahedron with its vertices pushed around by a fixed hash.
+   That is the right primitive for lunar rock: with no water and no wind there
+   is nothing to round a fragment off, so what lies on the surface is angular,
+   and the only erosion is a micrometeorite flux that abrades over aeons rather
+   than smoothing over seasons. Variety comes from per-instance rotation and
+   non-uniform scale rather than from many meshes, which is what keeps twenty
+   thousand of them affordable.
+   ========================================================================== */
+function boulderGeometry() {
+  const g = new THREE.IcosahedronGeometry(1, 0);
+  const p = g.getAttribute('position');
+  /* Deterministic jitter: the same fragment every session, on every machine. */
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+    let h = Math.imul((i + 1) * 0x9e3779b1, 0x85ebca6b) >>> 0;
+    const r = () => ((h = Math.imul(h ^ (h >>> 15), 0xc2b2ae35) >>> 0) / 4294967296);
+    const k = 0.72 + 0.5 * r();
+    p.setXYZ(i, x * k, y * (0.78 + 0.34 * r()), z * k);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
 export class TerrainSystem {
   /**
    * @param {Stage} stage
@@ -40,6 +70,16 @@ export class TerrainSystem {
       cacheSize: opts.quality.cache,
     });
 
+    /* Shared by every tile: never disposed with one. */
+    this.rockGeometry = opts.quality.rocks > 0 ? boulderGeometry() : null;
+    this.rockMaterial = opts.quality.rocks > 0 ? new THREE.MeshStandardMaterial({
+      /* Fresh rock is brighter than the mature regolith around it, which is
+         why boulders read as light specks in orbital imagery rather than dark
+         ones: the surface darkens with exposure and a fragment turned over by
+         an impact has not had time to. */
+      color: 0xb0a99f, roughness: 1, metalness: 0, flatShading: true,
+    }) : null;
+
     this.meshes = new Map();          // key -> THREE.Mesh
     this.inFlight = new Map();        // key -> worker index
     this.gen = 0;
@@ -47,7 +87,7 @@ export class TerrainSystem {
     this.installBudget = 4;
     this.pendingInstall = [];
     this.onProgress = opts.onProgress || (() => {});
-    this.stats = { tiles: 0, triangles: 0, queued: 0, building: 0, finestLevel: 0 };
+    this.stats = { tiles: 0, triangles: 0, queued: 0, building: 0, finestLevel: 0, rocks: 0 };
 
     const count = opts.workers ?? 1;
     this.workers = [];
@@ -179,8 +219,53 @@ export class TerrainSystem {
     this.pendingInstall.length = 0;
   }
 
+  /**
+   * The tile's rock scatter as one instanced draw, in the tile's own frame.
+   *
+   * Positions arrive relative to the tile centre, which sits on the datum
+   * sphere, so the local vertical at a rock is the direction from the Moon's
+   * centre to it — that is what stands each fragment up on the slope it is
+   * lying on instead of all of them pointing the same way.
+   */
+  buildRocks(m) {
+    if (!this.rockGeometry || !m.rocks || m.rocks.length < 5) return null;
+    const n = m.rocks.length / 5;
+    const inst = new THREE.InstancedMesh(this.rockGeometry, this.rockMaterial, n);
+    const q = new THREE.Quaternion();
+    const up = new THREE.Vector3();
+    const pos = new THREE.Vector3();
+    const scale = new THREE.Vector3();
+    const mat = new THREE.Matrix4();
+    const Y = new THREE.Vector3(0, 1, 0);
+    for (let i = 0; i < n; i++) {
+      const x = m.rocks[i * 5], y = m.rocks[i * 5 + 1], z = m.rocks[i * 5 + 2];
+      const radius = m.rocks[i * 5 + 3], tilt = m.rocks[i * 5 + 4];
+      pos.set(x, y, z);
+      up.set(m.centre[0] + x, m.centre[1] + y, m.centre[2] + z).normalize();
+      q.setFromUnitVectors(Y, up);
+      /* Turn it about its own vertical, and squash it a little differently
+         each time, so a field of one mesh does not read as a field of one
+         mesh. Most of these are pebbles; a boulder is rare by construction. */
+      q.multiply(new THREE.Quaternion().setFromAxisAngle(Y, tilt));
+      const wobble = 0.75 + 0.5 * ((Math.sin(tilt * 12.9898) * 43758.5453) % 1 + 1) % 1;
+      /* Kept blockier than a coin: a fragment spalled off bedrock is chunky,
+         and thin plates read as litter rather than as rock. */
+      scale.set(radius, radius * (0.72 + 0.3 * wobble), radius * (0.8 + 0.3 * wobble));
+      inst.setMatrixAt(i, mat.compose(pos, q, scale));
+    }
+    inst.instanceMatrix.needsUpdate = true;
+    inst.castShadow = m.level >= 15;
+    inst.receiveShadow = true;
+    inst.frustumCulled = false;        // the tile it hangs from was already culled
+    inst.userData.rockCount = n;
+    return inst;
+  }
+
   disposeMesh(key, mesh) {
     this.group.remove(mesh);
+    /* The boulder geometry and material are shared by every tile, so only the
+       per-tile instance buffer goes. */
+    for (const child of mesh.children) if (child.isInstancedMesh) child.dispose();
     mesh.geometry.dispose();
   }
 
@@ -266,12 +351,17 @@ export class TerrainSystem {
     /* The finest level actually on screen, which is the only honest answer to
        "how detailed is the ground you are standing on": the tile count says
        nothing about whether the refinement got all the way down. */
-    let finest = 0;
+    let finest = 0, rocks = 0;
     for (const key of draw) {
       const e = this.quadtree.get(key);
       if (e && e.level > finest) finest = e.level;
+      const mesh = this.meshes.get(key);
+      if (mesh) for (const c of mesh.children) rocks += c.userData.rockCount || 0;
     }
     this.stats.finestLevel = finest;
+    /* Instances actually drawn, not instances generated: the difference is the
+       whole of the bug this counter exists to make visible. */
+    this.stats.rocks = rocks;
   }
 
   _sphere(x, y, z, r) {
@@ -333,6 +423,8 @@ export class TerrainSystem {
     mesh.frustumCulled = false;          // the quadtree already culled it
     mesh.userData.centre = m.centre;
     mesh.userData.payload = m;
+    const rocks = this.buildRocks(m);
+    if (rocks) mesh.add(rocks);        // rides the tile's transform and visibility
     this.place(mesh);
 
     const old = this.meshes.get(m.key);

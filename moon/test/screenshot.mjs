@@ -13,6 +13,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import zlib from 'node:zlib';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.NODE_PATH
@@ -28,6 +29,107 @@ const argOf = (name, dflt) => {
   return i >= 0 ? args[i + 1] : dflt;
 };
 const OUT = argOf('out', path.join(ROOT, '..', 'shots'));
+
+/* --- reading the picture back ---------------------------------------------
+   Playwright writes an 8-bit PNG; nothing in this repo decodes one, so here is
+   the twenty lines that do. Only what is needed: no interlacing, no palettes,
+   no 16-bit — if a future Playwright writes something else this throws rather
+   than guessing, which is the right failure. */
+function decodePng(buf) {
+  if (buf.readUInt32BE(0) !== 0x89504e47) throw new Error('not a PNG');
+  let p = 8, w = 0, h = 0, depth = 0, colour = 0;
+  const idat = [];
+  while (p < buf.length) {
+    const len = buf.readUInt32BE(p), type = buf.toString('latin1', p + 4, p + 8);
+    const body = buf.subarray(p + 8, p + 8 + len);
+    if (type === 'IHDR') {
+      w = body.readUInt32BE(0); h = body.readUInt32BE(4);
+      depth = body[8]; colour = body[9];
+      if (body[12] !== 0) throw new Error('interlaced PNG');
+    } else if (type === 'IDAT') idat.push(body);
+    else if (type === 'IEND') break;
+    p += 12 + len;
+  }
+  if (depth !== 8 || (colour !== 6 && colour !== 2)) {
+    throw new Error(`unsupported PNG: depth ${depth} colour ${colour}`);
+  }
+  const bpp = colour === 6 ? 4 : 3;
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const out = Buffer.alloc(w * h * bpp);
+  const stride = w * bpp;
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (stride + 1)];
+    const line = raw.subarray(y * (stride + 1) + 1, y * (stride + 1) + 1 + stride);
+    const o = y * stride, prev = o - stride;
+    for (let x = 0; x < stride; x++) {
+      const a = x >= bpp ? out[o + x - bpp] : 0;
+      const b = y > 0 ? out[prev + x] : 0;
+      const c = x >= bpp && y > 0 ? out[prev + x - bpp] : 0;
+      let v = line[x];
+      if (f === 1) v += a;
+      else if (f === 2) v += b;
+      else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4) {
+        const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
+        v += (pa <= pb && pa <= pc) ? a : (pb <= pc ? b : c);
+      }
+      out[o + x] = v & 255;
+    }
+  }
+  return { width: w, height: h, bpp, data: out };
+}
+
+/**
+ * Is there a picture here at all?
+ *
+ * Not a perceptual comparison — this is the floor below which the frame is
+ * certainly wrong, and it is the floor several bugs in this project's history
+ * fell through while the harness reported success. A frame of one colour means
+ * nothing rendered; a probe region of one colour, chosen to miss both HUD
+ * panels, means no terrain rendered even though the interface did.
+ *
+ * The test is "perfectly uniform", not "dark", because a lunar night is
+ * legitimately almost black and must still pass.
+ */
+async function inspect(file, want) {
+  let img;
+  try { img = decodePng(await readFile(file)); }
+  catch (e) { return `could not read the screenshot back: ${e.message}`; }
+  const { width: w, height: h, bpp, data } = img;
+  const uniform = (x0, y0, x1, y1) => {
+    const at = (x, y) => (y * w + x) * bpp;
+    const r0 = data[at(x0, y0)], g0 = data[at(x0, y0) + 1], b0 = data[at(x0, y0) + 2];
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        const i = at(x, y);
+        if (data[i] !== r0 || data[i + 1] !== g0 || data[i + 2] !== b0) return false;
+      }
+    }
+    return true;
+  };
+  if (uniform(0, 0, w, h)) return 'the frame is a single flat colour';
+  if (want.ground) {
+    /* Clear of the position panel (top left) and the suit HUD (bottom centre). */
+    const x0 = Math.round(w * 0.02), x1 = Math.round(w * 0.22);
+    const y0 = Math.round(h * 0.55), y1 = Math.round(h * 0.80);
+    if (uniform(x0, y0, x1, y1)) return 'no ground drawn: the probe region is one flat colour';
+  }
+  return '';
+}
+
+/** What each shot has to clear to count as rendered. */
+function expect(name, query) {
+  const ground = !query.includes('view=orbit');
+  const eva = query.includes('mode=eva');
+  return {
+    ground,
+    triangles: ground ? 120000 : 80000,
+    finestLevel: eva ? 14 : 0,
+    /* Rocks are only scattered on tiles fine enough to stand on, and only when
+       the quality tier asks for them. */
+    rocks: eva && !query.includes('quality=science') ? 150 : 0,
+  };
+}
 const WIDTH = Number(argOf('width', 1600));
 const HEIGHT = Number(argOf('height', 900));
 const TIMEOUT = Number(argOf('timeout', 180000));
@@ -128,7 +230,17 @@ async function main() {
   for (const [name, query] of SHOTS) {
     const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } });
     const errors = [];
-    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    /* Warnings count as failures, and that is the whole point of this harness.
+       Every way this game degrades gracefully goes through console.warn: the
+       astronaut, ship and rover model imports, the geology raster, the star
+       catalogue, the stream registry, the temperature maps, the nomenclature,
+       and the Apollo 11 site. Catching only `error` meant all three models
+       could fail to load and this would print "12/12 clean" and exit 0 —
+       no astronaut in the third-person shot, no ship in the base shot, no
+       descent stage at Tranquility, and a green run. */
+    page.on('console', (m) => {
+      if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ${m.text()}`);
+    });
     page.on('pageerror', (e) => errors.push(String(e)));
     const relayBase = `http://127.0.0.1:${port}/nasa`;
     const url = `http://127.0.0.1:${port}/index.html?${query}` +
@@ -149,7 +261,30 @@ async function main() {
       if (fatal && fatal.trim()) note += ' | ' + fatal.trim().slice(0, 400);
     }
     const stats = await page.evaluate(() => (window.SELENE ? window.SELENE.stats() : null)).catch(() => null);
-    await page.screenshot({ path: path.join(OUT, name + '.png') });
+    const shot = path.join(OUT, name + '.png');
+    await page.screenshot({ path: shot });
+
+    /* Look at the picture. Writing a PNG and never reading it back is not a
+       test: a frame that is entirely black, or entirely one colour, is exactly
+       what several of the bugs in this project's history produced, and every
+       one of them needed a human to open the file. This is not a perceptual
+       comparison — it is the floor below which the frame is certainly wrong. */
+    const want = expect(name, query);
+    const shotNote = await inspect(shot, want);
+    if (shotNote) { ok = false; note = note ? `${note} | ${shotNote}` : shotNote; }
+
+    /* And the numbers behind it. Recording stats without asserting them let a
+       run with zero triangles at two frames a second pass. */
+    if (ok && stats) {
+      if (stats.triangles < want.triangles) {
+        ok = false; note = `only ${stats.triangles} triangles, wanted ${want.triangles}`;
+      } else if (want.rocks && (stats.rocks || 0) < want.rocks) {
+        ok = false; note = `only ${stats.rocks || 0} rocks drawn, wanted ${want.rocks}`;
+      } else if (want.finestLevel && stats.finestLevel < want.finestLevel) {
+        ok = false;
+        note = `terrain only refined to level ${stats.finestLevel}, wanted ${want.finestLevel}`;
+      }
+    }
     report.push({ name, ok, note, errors: errors.slice(0, 6), stats, seconds: (Date.now() - t0) / 1000 });
     console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${((Date.now() - t0) / 1000).toFixed(1)} s` +
       (stats ? `  tiles ${stats.tiles} triangles ${(stats.triangles / 1000).toFixed(0)}k fps ${stats.fps.toFixed(1)}` : '') +

@@ -306,7 +306,15 @@ export class Detail {
         /* Rock abundance on the Moon is a percent or two of the surface; the
            size distribution is another D^-2-ish power law, so metre boulders
            are rare and pebbles are everywhere. */
-        const count = Math.round((0.4 + 2.6 * rough) * density);
+        /* Rocks per eight-metre cell. The old figures put one cobble every
+           thirty square metres, which is a swept floor: standing on it, the
+           nearest rock was usually out of sight. Apollo surface photography
+           shows scattered cobbles every few metres on ordinary mare, denser on
+           highland and denser again on fresh ejecta, and Diviner's rock
+           abundance product puts typical areal coverage near a per cent. At
+           these sizes that works out around a tenth of a rock per square metre
+           on mare and a quarter on highland, which is what this gives. */
+        const count = Math.round((2.2 + 14 * rough) * density);
         for (let k = 0; k < count; k++) {
           const h = hash3(gx, gy, k + 1, this.seed ^ 0x68e31da4);
           const r0 = rand01(h);

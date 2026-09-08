@@ -8,6 +8,7 @@ import { faceUvToUnit, unitToFaceUv, edgeArc, vertexSpacing, tileVertexUv,
          tileCentre, tileBoundingSphere, children, parent, tileKey, parseKey,
          levelForSpacing, belowHorizon } from '../src/terrain/cubesphere.js';
 import { Detail, bandWeight, craterProfile } from '../src/terrain/detail.js';
+import { Heightfield, Raster } from '../src/terrain/heightfield.js';
 import { R_MOON, TERRAIN } from '../src/config.js';
 import { unitToLl, llToUnit } from '../src/physics/frames.js';
 
@@ -173,6 +174,57 @@ console.log('procedural detail: the band limit');
   const mean = sum / n;
   check('the detail does not shift the measured elevation',
     Math.abs(mean) < 0.35 * mid, `mean ${mean.toFixed(2)} m vs ${mid.toFixed(1)} m RMS`);
+}
+
+console.log('the band limit holds across a raster boundary');
+{
+  /* The hole the single-resolution checks above could never find. Layers are
+     cross-faded at their edges so a 2 m patch does not end in a wall, and the
+     blend used to average the *resolutions* too. Inside the vendored SLDEM
+     window's margin that read as about 977 m against ground measured at 59,
+     and licensed invented craters five hundred metres across on terrain that
+     has none. Cross-fading the elevation is right; cross-fading the provenance
+     is not. */
+  const hf = new Heightfield();
+  const fine = 128, coarse = 32;
+  hf.addRaster(new Raster({
+    id: 'coarse', bbox: [-180, -90, 180, 90], width: coarse, height: coarse / 2,
+    res_m: 1895, wrapX: true, source: 'coarse', label: 'MEASURED',
+  }, new Float32Array((coarse * coarse) / 2)));
+  hf.addRaster(new Raster({
+    id: 'window', bbox: [20, -2, 26, 4], width: fine, height: fine,
+    res_m: 59, source: 'window', label: 'MEASURED',
+  }, new Float32Array(fine * fine)));
+
+  /* Walk from the middle of the window out past its edge. */
+  let worst = 0, worstAt = null, sawBlend = false;
+  for (let lon = 23; lon <= 27; lon += 0.02) {
+    const p = hf.sampleData(1, lon, {});
+    if (p.blended) sawBlend = true;
+    if (p.id === 'window' && p.res_m > 59) { worst = p.res_m; worstAt = lon; }
+  }
+  check('the fade is real, so the seam is a slope and not a step', sawBlend);
+  check('but a point inside the fine window never reports a coarser resolution',
+    worst === 0, worstAt === null ? 'never' : `${worst.toFixed(0)} m at lon ${worstAt}`);
+
+  /* The consequence, measured rather than asserted: what the reported
+     resolution licenses at a point in the margin. */
+  const d = new Detail({ roughness: () => 0.5 });
+  const relief = (res) => {
+    let mn = Infinity, mx = -Infinity;
+    for (let i = 0; i < 400; i++) {
+      const v = d.heightAt(1 + (i * 8) / 30300, 25.9, res, 2);
+      if (v < mn) mn = v;
+      if (v > mx) mx = v;
+    }
+    return mx - mn;
+  };
+  const inMargin = hf.sampleData(1, 25.9, {});
+  check('and the detail it licenses there is bounded by the measured layer',
+    relief(inMargin.res_m) < 0.35 * relief(977),
+    `${relief(inMargin.res_m).toFixed(1)} m invented at the reported ` +
+    `${inMargin.res_m.toFixed(0)} m, against ${relief(977).toFixed(1)} m if the ` +
+    'resolutions were averaged');
 }
 
 console.log('procedural detail: determinism and continuity');

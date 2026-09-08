@@ -168,30 +168,45 @@ export class Heightfield {
    * high-resolution patch fades into its surroundings instead of ending in a
    * wall.
    *
-   * @returns {{h:number, res_m:number, source:string, label:string, id:string}}
+   * `res_m` is the finest layer covering the point, NOT the blend of the layers
+   * that contribute to the height. This matters more than it looks. It is the
+   * number that decides how much detail may be invented here, and averaging it
+   * across a fade breaks the one rule the whole project is built on: inside the
+   * vendored SLDEM window's margin, blending 59 m against 1895 m reads as about
+   * 977 m and licenses invented craters five hundred metres across and eighty
+   * deep, laid over ground that is measured at 59 m a pixel and has no such
+   * crater in it. Cross-fading the elevation is right; cross-fading the
+   * provenance is not. The finest covering layer is the conservative answer and
+   * the only safe one.
+   *
+   * `blended` says whether more than one layer contributed, so the overlay can
+   * be honest that the surface here is a fade rather than one measurement.
+   *
+   * @returns {{h:number, res_m:number, blended:boolean, source:string, label:string, id:string}}
    */
   sampleData(lat, lon, out = {}) {
-    let remaining = 1, h = 0, res = 0, best = null;
+    let remaining = 1, h = 0, layers = 0, best = null;
     for (const r of this.rasters) {
       const w = r.weight(lat, lon);
       if (w <= 0) continue;
       const use = w * remaining;
       h += r.sample(lat, lon) * use;
-      res += r.res_m * use;
-      if (!best) best = r;
+      layers++;
+      if (!best) best = r;                 // rasters are sorted finest first
       remaining -= use;
       if (remaining <= 1e-6) break;
     }
     if (remaining > 1e-6) {
       /* Nothing covers this point: only possible before the vendored global
          layer has loaded. Report the datum and say so. */
-      res += 1e6 * remaining;
-      out.h = h; out.res_m = res; out.source = 'no data loaded';
+      out.h = h; out.res_m = 1e6; out.blended = layers > 1;
+      out.source = 'no data loaded';
       out.label = LABEL.INTERPOLATED; out.id = null;
       return out;
     }
     out.h = h;
-    out.res_m = res;
+    out.res_m = best.res_m;
+    out.blended = layers > 1;
     out.source = best ? best.source : 'no data loaded';
     out.label = best ? best.label : LABEL.INTERPOLATED;
     out.id = best ? best.id : null;
