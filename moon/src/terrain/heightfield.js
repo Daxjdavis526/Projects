@@ -32,7 +32,9 @@ export class Raster {
   /**
    * @param {object} spec  { id, bbox:[w,s,e,n], width, height, res_m, priority,
    *                         source, label, wrapX }
-   * @param {Float32Array} data  row 0 at the north edge, column 0 at the west edge
+   * @param {Float32Array|Int16Array} data  row 0 at the north edge, column 0 at
+   *        the west edge. Int16 is used for the global pyramid, where elevation
+   *        is stored as whole metres and the array would otherwise be 66 MB.
    */
   constructor(spec, data) {
     this.id = spec.id;
@@ -45,6 +47,7 @@ export class Raster {
     this.label = spec.label || LABEL.MEASURED;
     this.wrapX = !!spec.wrapX;
     this.data = data;
+    this.scale = spec.scale ?? 1;
     const [w, s, e, n] = spec.bbox;
     this.lonSpan = e - w;
     this.latSpan = n - s;
@@ -103,8 +106,8 @@ export class Raster {
     const d = this.data;
     const j0 = cy(y0) * W, j1 = cy(y0 + 1) * W;
     const i0 = cx(x0), i1 = cx(x0 + 1);
-    return (d[j0 + i0] * (1 - fx) + d[j0 + i1] * fx) * (1 - fy) +
-           (d[j1 + i0] * (1 - fx) + d[j1 + i1] * fx) * fy;
+    return ((d[j0 + i0] * (1 - fx) + d[j0 + i1] * fx) * (1 - fy) +
+            (d[j1 + i0] * (1 - fx) + d[j1 + i1] * fx) * fy) * this.scale;
   }
 }
 
@@ -291,7 +294,9 @@ export function smoothstep(a, b, x) {
  */
 export function rasterFromPyramid(layer, tiles) {
   const { w, h, tile } = layer;
-  const data = new Float32Array(w * h);
+  /* Int16 metres: the global 16 ppd layer is 16.6 million samples, which is
+     33 MB here and would be 66 MB as float32, copied into every worker. */
+  const data = new Int16Array(w * h);
   for (const t of tiles) {
     const ox = t.x * tile, oy = t.y * tile;
     for (let j = 0; j < tile; j++) {

@@ -8,7 +8,11 @@
 
    Face coordinates u, v run -1..1. The tangent warp spreads the samples evenly
    over the sphere instead of bunching them at the face centres, which keeps the
-   worst-case triangle size within about 15 % of the best case rather than 70 %.
+   worst-case triangle size within a factor of 1.4 rather than 1.73.
+
+   All six faces are laid out so that the cross product of the u and v tangents
+   points outwards. Without that the two polar faces come out mirrored, their
+   triangles face inwards, and half the Moon is quietly back-face culled.
 
    A tile is (face, level, i, j): at level L a face is 2^L tiles across, so a
    level-L tile spans (pi/2) * R / 2^L of arc. At level 18 that is 33 vertices
@@ -29,8 +33,8 @@ export function faceUvToUnit(face, u, v, out = { x: 0, y: 0, z: 0 }) {
     case 1: x = -1; y = -a; z = b; break;    // -X, through 0 N 180 E
     case 2: x = -a; y = 1; z = b; break;     // +Y, through 0 N 90 E
     case 3: x = a; y = -1; z = b; break;     // -Y, through 0 N 90 W
-    case 4: x = b; y = a; z = 1; break;      // +Z, north pole
-    default: x = -b; y = a; z = -1; break;   // -Z, south pole
+    case 4: x = a; y = b; z = 1; break;      // +Z, north pole
+    default: x = a; y = -b; z = -1; break;   // -Z, south pole
   }
   const inv = 1 / Math.sqrt(x * x + y * y + z * z);
   out.x = x * inv; out.y = y * inv; out.z = z * inv;
@@ -48,8 +52,8 @@ export function unitToFaceUv(x, y, z, out = { face: 0, u: 0, v: 0 }) {
     if (y > 0) { face = 2; a = -x / y; b = z / y; }
     else { face = 3; a = -x / y; b = -z / y; }
   } else {
-    if (z > 0) { face = 4; a = y / z; b = x / z; }
-    else { face = 5; a = -y / z; b = x / z; }
+    if (z > 0) { face = 4; a = x / z; b = y / z; }
+    else { face = 5; a = -x / z; b = y / z; }
   }
   out.face = face;
   out.u = Math.atan(a) / K;
@@ -148,6 +152,29 @@ export function children(face, level, i, j) {
 
 export function parent(face, level, i, j) {
   return level > 0 ? [face, level - 1, i >> 1, j >> 1] : null;
+}
+
+/**
+ * Which tile contains a direction, at a given level, and where inside it.
+ * `a` and `b` are fractional vertex coordinates, so the caller can interpolate
+ * the tile's height grid directly.
+ */
+export function tileForUnit(level, x, y, z, verts = 33, out = {}) {
+  const f = unitToFaceUv(x, y, z);
+  const n = 1 << level;
+  const fu = (f.u + 1) * 0.5 * n, fv = (f.v + 1) * 0.5 * n;
+  const i = Math.min(n - 1, Math.max(0, Math.floor(fu)));
+  const j = Math.min(n - 1, Math.max(0, Math.floor(fv)));
+  out.face = f.face; out.level = level; out.i = i; out.j = j;
+  out.a = (fu - i) * (verts - 1);
+  out.b = (fv - j) * (verts - 1);
+  return out;
+}
+
+/** Same, from latitude and longitude in degrees. */
+export function tileForLatLon(level, latDeg, lonDeg, verts = 33, out = {}) {
+  const la = latDeg * Math.PI / 180, lo = lonDeg * Math.PI / 180, c = Math.cos(la);
+  return tileForUnit(level, c * Math.cos(lo), c * Math.sin(lo), Math.sin(la), verts, out);
 }
 
 /**

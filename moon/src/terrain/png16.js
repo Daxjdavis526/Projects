@@ -147,6 +147,18 @@ export async function decodeElevationPng(buffer, bias = 32768) {
   return { width, height, data: m };
 }
 
+/**
+ * Decode an elevation tile into whole metres as Int16. The pipeline writes
+ * integer metres, so nothing is lost, and the global pyramid takes half the
+ * memory it would as float32.
+ */
+export async function decodeElevationPngInt16(buffer, bias = 32768) {
+  const { width, height, data } = await decodePng16(buffer);
+  const m = new Int16Array(width * height);
+  for (let i = 0; i < m.length; i++) m[i] = data[i] - bias;
+  return { width, height, data: m };
+}
+
 /** Decode an 8-bit grayscale PNG (the measured mask, the geology unit raster). */
 export async function decodePng8(buffer) {
   const d = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);

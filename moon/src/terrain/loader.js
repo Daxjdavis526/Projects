@@ -5,7 +5,7 @@
    tests exercise the same decode path the game uses.
    ========================================================================== */
 
-import { decodeElevationPng, decodePng8 } from './png16.js';
+import { decodeElevationPng, decodeElevationPngInt16, decodePng8 } from './png16.js';
 import { Heightfield, Raster, rasterFromPyramid } from './heightfield.js';
 
 /* In Node the tests point `base` at the data directory on disk; in the browser
@@ -49,7 +49,7 @@ export async function loadPyramidLevel(base, manifest, z, onTile) {
     for (let x = 0; x < layer.nx; x++) {
       const rel = layer.path.replace('{x}', x).replace('{y}', y);
       const buf = await readBinary(base, rel);
-      const { data } = await decodeElevationPng(buf, manifest.convention.png16_bias_m);
+      const { data } = await decodeElevationPngInt16(buf, manifest.convention.png16_bias_m);
       tiles.push({ x, y, data });
       if (onTile) onTile(tiles.length, layer.nx * layer.ny);
     }
