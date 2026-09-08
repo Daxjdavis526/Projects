@@ -184,9 +184,12 @@ const DEFAULT_SHOTS = [
      off NAC image M155016845R, with the two 8-10 m outliers they named. */
   ['pit-floor', 'site=8.3358,33.2216&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=110&pitch=10&quality=balanced'],
   /* And the reason for all of it: the cave mouth in the east wall, 45 m across
-     and 19 m tall, with the suit lamps on. A height field cannot draw a ceiling
-     over a void, so what makes this visible is a stencil portal. */
-  ['cave-mouth', 'site=8.3355,33.221333&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=90&pitch=0&lamps=2&quality=balanced'],
+     and 19 m tall, from nineteen metres away with the lamps on. A height field
+     is one height per point and cannot draw a ceiling over a void, so what
+     makes this visible at all is a stencil portal — and this shot is the test
+     of it, because if the portal ever stops writing its mark the hole fills in
+     with wall and the frame still renders happily. */
+  ['cave-mouth', 'site=8.3355,33.222833&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=90&pitch=6&lamps=2&quality=balanced'],
 ];
 
 const shots = args.filter((a, i) => args[i - 1] === '--shot')

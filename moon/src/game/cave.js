@@ -138,6 +138,11 @@ export class Cave {
     this.deepestU = this.floorU - CLOSE_AT * Math.tan(CONDUIT.floorSlope * DEG);
     this.label = LABEL.DERIVED;
     this.source = 'Carrer et al. 2024, Nature Astronomy 8:1119, model B';
+    /* One-entry memo. The player's ground source asks for the height, the
+       slope and the normal at the same point in the same substep, and each of
+       those resolves a region, a floor and a ceiling, so the same dozen
+       trigonometric calls were being made three times over at 120 Hz. */
+    this._memo = { lat: NaN, lon: NaN, e: NaN, n: NaN, region: null, floor: null, ceil: null };
   }
 
   /** Metres east and north of the pit centre. */
@@ -156,6 +161,27 @@ export class Cave {
       lat: p.lat + n / (DEG * R),
       lon: p.lon + e / (DEG * R * Math.cos(p.lat * DEG)),
     };
+  }
+
+  /** Region, floor and ceiling for a point, computed once per point. */
+  _atLocal(e, n) {
+    const m = this._memo;
+    if (m.e === e && m.n === n) return m;
+    m.e = e; m.n = n; m.lat = NaN;
+    m.region = this.region(e, n);
+    m.floor = this._floorOf(m.region, e);
+    m.ceil = this._ceilOf(m.region, m.floor, e, n);
+    return m;
+  }
+
+  /** The same, from geographic coordinates. */
+  _at(lat, lon) {
+    const m = this._memo;
+    if (m.lat === lat && m.lon === lon) return m;
+    const { e, n } = this.toLocal(lat, lon);
+    const r = this._atLocal(e, n);
+    r.lat = lat; r.lon = lon;
+    return r;
   }
 
   /**
@@ -199,7 +225,10 @@ export class Cave {
 
   /** Floor height relative to the plain, or null where there is no cave floor. */
   floorLocal(e, n) {
-    const where = this.region(e, n);
+    return this._atLocal(e, n).floor;
+  }
+
+  _floorOf(where, e) {
     if (where === null) return null;
     /* The shaft floor is already in the height field — the pit patch put it
        there — so the cave does not own it and does not fight it for it. */
@@ -217,9 +246,11 @@ export class Cave {
    * no opinion about arches, so the arch is shape.
    */
   ceilingLocal(e, n) {
-    const where = this.region(e, n);
+    return this._atLocal(e, n).ceil;
+  }
+
+  _ceilOf(where, floor, e, n) {
     if (where === null || where === 'shaft') return null;
-    const floor = this.floorLocal(e, n);
     const x = e - this.mouthR;
     const head = x <= CONDUIT.skirt
       ? CONDUIT.mouthHeight
@@ -241,31 +272,26 @@ export class Cave {
    * in the room.
    */
   floorAt(lat, lon, alt) {
-    const { e, n } = this.toLocal(lat, lon);
-    const f = this.floorLocal(e, n);
-    if (f === null) return null;
-    if (typeof alt !== 'number') return this.base + f;
+    const m = this._at(lat, lon);
+    if (m.floor === null) return null;
+    if (typeof alt !== 'number') return this.base + m.floor;
     const u = alt - this.base;
-    const roof = this.ceilingLocal(e, n);
-    return (u > f - 2 && u < roof + 2) ? this.base + f : null;
+    return (u > m.floor - 2 && u < m.ceil + 2) ? this.base + m.floor : null;
   }
 
   /** True when there is rock overhead. */
   inside(lat, lon, alt) {
-    const { e, n } = this.toLocal(lat, lon);
-    const roof = this.ceilingLocal(e, n);
-    if (roof === null) return false;
+    const m = this._at(lat, lon);
+    if (m.ceil === null) return false;
     const u = alt - this.base;
-    return u >= this.floorLocal(e, n) - 2 && u <= roof;
+    return u >= m.floor - 2 && u <= m.ceil;
   }
 
   /** Level for the first twelve metres, then the published 45 degree ramp. */
   slopeAt(lat, lon) {
-    const { e, n } = this.toLocal(lat, lon);
-    const where = this.region(e, n);
-    if (where === null || where === 'shaft') return null;
-    const x = e - this.mouthR;
-    return x > CONDUIT.skirt ? CONDUIT.floorSlope : 0;
+    const m = this._at(lat, lon);
+    if (m.region === null || m.region === 'shaft') return null;
+    return (m.e - this.mouthR) > CONDUIT.skirt ? CONDUIT.floorSlope : 0;
   }
 
   /** Downhill is east, into the Moon. */

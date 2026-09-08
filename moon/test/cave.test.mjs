@@ -183,6 +183,29 @@ console.log('the boulders are the measured ones');
     JSON.stringify(floorBoulders(pit)) === JSON.stringify(rocks));
 }
 
+console.log('the same answer whichever way you ask, and however often');
+{
+  /* The geometry is memoised one point deep, because the player's ground
+     source asks for height, slope and normal at the same point in the same
+     substep. Interleaving two points is the thing that would break it. */
+  const A = [cave.mouthR + 20, 4], B = [cave.mouthR + 45, -18], C = [10, 10];
+  const snap = (p) => {
+    const g = at(p[0], p[1]);
+    const alt = PLAIN + (cave.floorLocal(p[0], p[1]) ?? -pit.depth) + 1;
+    return JSON.stringify([cave.region(p[0], p[1]), cave.floorLocal(p[0], p[1]),
+                           cave.ceilingLocal(p[0], p[1]), cave.floorAt(g.lat, g.lon, alt),
+                           cave.slopeAt(g.lat, g.lon), cave.inside(g.lat, g.lon, alt)]);
+  };
+  const a0 = snap(A), b0 = snap(B), c0 = snap(C);
+  let stable = true;
+  for (let i = 0; i < 30; i++) {
+    if (snap(A) !== a0 || snap(C) !== c0 || snap(B) !== b0) { stable = false; break; }
+  }
+  check('interleaving three points thirty times changes none of them', stable);
+  check('and the three are genuinely different points',
+    a0 !== b0 && b0 !== c0 && a0 !== c0);
+}
+
 console.log('and it says what it is');
 {
   const d = cave.describe();
