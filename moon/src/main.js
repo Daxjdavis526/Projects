@@ -40,6 +40,7 @@ import { Vehicle } from './game/vehicle.js';
 import { HistoricSites } from './game/historic.js';
 import { Shelter, hoursUntilSunElevation } from './game/shelter.js';
 import { Visited } from './game/visited.js';
+import { Track } from './game/track.js';
 import { Moment } from './game/moment.js';
 import { clearLanding, standClearOf, explain as explainKeepOut } from './game/keepout.js';
 import { SuitHud } from './ui/suithud.js';
@@ -275,7 +276,9 @@ async function start() {
   const suitHud = new SuitHud();
   const photo = new Photo();
   const moment = new Moment();
-  const nav = new Nav({ waypoints: [] });
+  /* Where the rover has been, which the console draws and the save keeps. */
+  const track = new Track();
+  const nav = new Nav({ waypoints: [], track, heightfield });
   /* Eating, sleeping, and waiting for the Sun, which on a body with a
      29 and a half day rotation is a real thing to want to do. */
   const shelter = new Shelter({
@@ -453,6 +456,8 @@ async function start() {
     getSky: (lat, lon) => skyAt(ephemerisAt(jdFromUnixMs(state.simMs)), lat, lon, 0),
     onLand: (pick) => land(pick),
     onOverlay: (v) => terrain.setOverlay(v),
+    getTime: () => state.simMs,
+    onTime: (ms) => { state.simMs = ms; },
   });
   terrain.setOverlayMaps(geology, temperature);
 
@@ -520,7 +525,7 @@ async function start() {
   /* One object holding the live game, so the save system has something to read
      and write without reaching into closures. */
   const game = {
-    state, settle, visited, shelter,
+    state, settle, visited, shelter, track,
     get waypoints() { return nav.waypoints; },
     set waypoints(v) { nav.waypoints.length = 0; nav.waypoints.push(...(v || [])); },
     get base() { return base; },
@@ -1195,6 +1200,7 @@ async function start() {
     }
     nav.show(driving && !photo.active);
     if (driving && vehicle) {
+      track.add(vehicle.rover.lat, vehicle.rover.lon);
       const near = orbit.nearestFeature(cam.lat, cam.lon);
       nav.update({
         lat: cam.lat, lon: cam.lon, heading: vehicle.rover.heading,

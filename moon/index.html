@@ -78,6 +78,20 @@ canvas{display:block;position:fixed;inset:0}
 #help .k{min-width:74px;color:var(--warm)}
 
 #hint{bottom:14px;right:14px;color:var(--dim);font-size:10px;letter-spacing:.08em}
+/* The date and time of the landing. A lunar day is 29 and a half Earth days,
+   so when you arrive decides what the place looks like more than almost
+   anything else does, and it used to be settable only through a URL. */
+#orbit .when{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+#orbit .when input{flex:1 1 auto;min-width:0;background:#0d0f12;color:var(--fg);
+  border:1px solid var(--faint);border-radius:3px;padding:5px 6px;
+  font-family:inherit;font-size:10px;letter-spacing:.04em;color-scheme:dark}
+#orbit .when button{flex:0 0 auto;width:auto;padding:5px 10px;margin:0}
+#orbit-sites{max-height:210px;overflow-y:auto}
+/* The rover's topographic map. Real elevation under the vehicle, shaded by
+   slope, with where you have been drawn on it. */
+#n-map{display:block;width:100%;height:auto;image-rendering:auto;
+  border:1px solid var(--faint);border-radius:2px;background:#0a0b0d;margin:4px 0 6px}
+#orbit .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 #shelter .dust{margin-top:7px;color:var(--faint);font-size:9.5px;
   letter-spacing:.05em;white-space:normal;line-height:1.5}
 
@@ -222,7 +236,12 @@ canvas{display:block;position:fixed;inset:0}
 #nav{
   position:fixed;top:14px;right:14px;width:250px;display:none;
 }
-#nav .row{padding:1px 0}
+/* Values wrap rather than run off the edge of the panel. The safe-range line
+   is the longest thing here and it was being clipped by the window. */
+#nav .row{padding:1px 0;white-space:normal}
+#nav .row .v{text-align:right}
+#nav .cap{margin-top:4px;color:var(--dim);font-size:9px;letter-spacing:.05em;
+  white-space:normal;line-height:1.5}
 #nav .grp{margin-top:9px;border-top:1px solid var(--edge);padding-top:8px}
 #nav .lab{font-family:Michroma,sans-serif;font-size:8px;letter-spacing:.2em;
   color:var(--dim);text-transform:uppercase;margin-bottom:5px}
@@ -482,6 +501,11 @@ canvas{display:block;position:fixed;inset:0}
       </div>
       <div class="row"><span class="k">waypoint</span><span class="v" id="n-wp">none</span></div>
     </div>
+    <div class="grp">
+      <div class="lab">the ground around you</div>
+      <canvas id="n-map" width="240" height="240"></canvas>
+      <div class="cap"><span id="n-map-scale">—</span> · <span id="n-map-relief">—</span></div>
+    </div>
     <div class="fict">rover and its stores are a near-future design
       <span class="tag fictional">FICTIONAL</span>; the ground, the names and the
       distances are measured</div>
@@ -569,6 +593,22 @@ canvas{display:block;position:fixed;inset:0}
     <div class="grp">
       <h2>known places</h2>
       <div id="orbit-presets"></div>
+    </div>
+
+    <div class="grp">
+      <h2>where people and machines have landed</h2>
+      <div class="btns" id="orbit-kinds"></div>
+      <div id="orbit-sites"></div>
+    </div>
+
+    <div class="grp">
+      <h2>when</h2>
+      <div class="when">
+        <input id="orbit-date" type="date">
+        <input id="orbit-time" type="time">
+        <button id="orbit-now">now</button>
+      </div>
+      <div class="none" id="orbit-when">—</div>
     </div>
 
     <div class="grp">

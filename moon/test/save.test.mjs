@@ -14,6 +14,7 @@ import { Visited } from '../src/game/visited.js';
 import { Needs } from '../src/game/shelter.js';
 import { Rover, MODE } from '../src/physics/rover.js';
 import { ShipInterior } from '../src/game/interior.js';
+import { Track } from '../src/game/track.js';
 import { Suit } from '../src/physics/suit.js';
 
 let failures = 0;
@@ -44,6 +45,7 @@ function makeGame() {
     eva,
     shelter: { needs: new Needs() },
     visited: new Visited(),
+    track: new Track(),
     driving: false,
     get waypoints() { return wps; },
     set waypoints(v) { wps.length = 0; wps.push(...(v || [])); },
@@ -93,6 +95,7 @@ function dirty(g) {
   g.waypoints = [{ lat: 0.7, lon: 23.6 }, { lat: 0.9, lon: 23.9 }];
   g.visited.record('Sabine', { lat: 1.38, lon: 20.07, simMs: 1749000000000 });
   g.visited.record('Moltke', { lat: -0.56, lon: 24.22, simMs: 1749500000000 });
+  for (let m = 0; m <= 4000; m += 25) g.track.add(0.6 + m / 30300, 23.4);
   return g;
 }
 
@@ -154,6 +157,8 @@ console.log('the fields that were written and never read');
   check('the jetpack is still hot', Math.abs(fresh.eva.player.jetHeat - 0.66) < 1e-9);
   check('the suit is still dirty', Math.abs(fresh.eva.suit.dust - 0.44) < 1e-9);
   check('and so is the cabin', Math.abs(fresh.base.cabinDust - 0.31) < 1e-9);
+  check('the traverse comes back as a line', fresh.track.size > 100,
+        `${fresh.track.size} points, ${(fresh.track.length / 1000).toFixed(2)} km`);
 }
 
 console.log('and it refuses what it does not recognise');

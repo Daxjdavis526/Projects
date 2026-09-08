@@ -62,6 +62,7 @@ export class Save {
         sleepDebt: shelter.needs.sleepDebt,
       } : null,
       waypoints: (waypoints || []).map((w) => ({ lat: w.lat, lon: w.lon })),
+      track: game.track && game.track.capture ? game.track.capture() : null,
       visited: visited ? (visited.capture ? visited.capture() : visited) : [],
     };
   }
@@ -107,6 +108,7 @@ export class Save {
        compare the two halves could have seen it. */
     if (data.needs && game.shelter) Object.assign(game.shelter.needs, data.needs);
     game.waypoints = data.waypoints || [];
+    if (game.track && game.track.load) game.track.load(data.track);
     if (game.visited && game.visited.load) game.visited.load(data.visited);
     else game.visited = data.visited || [];
     /* Boarding last: `settle` puts you on the ground beside the ladder, so

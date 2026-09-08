@@ -42,6 +42,10 @@ export class OrbitPicker {
     this.onLand = opts.onLand;
     this.onOverlay = opts.onOverlay || (() => {});
     this.getSky = opts.getSky;
+    /* The clock, so the picker can set the epoch it will land at. */
+    this.getTime = opts.getTime || (() => Date.now());
+    this.onTime = opts.onTime || (() => {});
+    this.kind = 'crewed';
     this.root = el('orbit');
     this.pick = null;
     this.visible = false;
@@ -61,6 +65,9 @@ export class OrbitPicker {
       const s = presets.find(p => p.id === b.dataset.id);
       if (s) this.select(s.lat, s.lon, s);
     });
+
+    this.buildSites();
+    this.buildWhen();
 
     const search = el('orbit-search');
     search.addEventListener('input', () => this.search(search.value));
@@ -109,10 +116,155 @@ export class OrbitPicker {
   }
 
   /** Find named features by prefix, nearest first among equal matches. */
+  /* --- where people and machines have landed ---------------------------------
+     Every site in data/sites.json, grouped by what put it there. The file has
+     carried all forty-five since the first commit — six crewed landings, two
+     rovers, twenty robotic craft and seventeen landmarks, each with published
+     coordinates, a citation and a sentence about why it matters — and the
+     picker offered eight of them as presets and no way to reach the rest. The
+     brief asked for historic sites as a first-class thing to go and find, and
+     a list of real places is the whole content of this game. */
+  buildSites() {
+    const host = el('orbit-sites'), kinds = el('orbit-kinds');
+    if (!host || !kinds) return;
+    const KINDS = [
+      ['crewed', 'crewed'], ['rover', 'rovers'],
+      ['robotic', 'robotic'], ['landmark', 'landmarks'],
+    ];
+    const have = KINDS.filter(([k]) => this.sites.sites.some(s => s.kind === k));
+    kinds.innerHTML = have.map(([k, label]) =>
+      `<button data-kind="${k}">${label}</button>`).join('');
+    kinds.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      this.kind = b.dataset.kind;
+      this.renderSites();
+    });
+    host.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const site = this.sites.sites.find(x => x.id === b.dataset.id);
+      if (site) this.select(site.lat, site.lon, site);
+    });
+    this.renderSites();
+  }
+
+  renderSites() {
+    const host = el('orbit-sites'), kinds = el('orbit-kinds');
+    if (!host) return;
+    for (const b of kinds.querySelectorAll('button')) {
+      b.classList.toggle('on', b.dataset.kind === this.kind);
+    }
+    const list = this.sites.sites.filter(s => s.kind === this.kind);
+    host.innerHTML = list.map(s =>
+      `<button data-id="${s.id}"><b>${s.name}</b>` +
+      `<span>${s.sub || fmtLatLon(s.lat, s.lon)}</span></button>`).join('') ||
+      '<div class="none">none of those</div>';
+  }
+
+  /* --- when ------------------------------------------------------------------
+     A lunar day is twenty-nine and a half Earth days, so when you arrive
+     decides what a place looks like more than almost anything else: the same
+     coordinates are a flat grey plain at noon and a landscape of kilometre
+     shadows two Earth-days either side of sunrise. That was settable only by
+     editing the URL. */
+  buildWhen() {
+    const date = el('orbit-date'), time = el('orbit-time'), now = el('orbit-now');
+    if (!date || !time) return;
+    const push = () => {
+      if (!date.value) return;
+      const ms = Date.parse(`${date.value}T${time.value || '00:00'}:00Z`);
+      if (Number.isFinite(ms)) { this.onTime(ms); this.renderWhen(); }
+    };
+    date.addEventListener('change', push);
+    time.addEventListener('change', push);
+    if (now) now.addEventListener('click', () => { this.onTime(Date.now()); this.syncWhen(); });
+    this.syncWhen();
+  }
+
+  /** Put the current simulated time into the two fields. */
+  syncWhen() {
+    const date = el('orbit-date'), time = el('orbit-time');
+    if (!date || !time) return;
+    const iso = new Date(this.getTime()).toISOString();
+    date.value = iso.slice(0, 10);
+    time.value = iso.slice(11, 16);
+    this.renderWhen();
+  }
+
+  renderWhen() {
+    const node = el('orbit-when');
+    if (!node) return;
+    const p = this.pick;
+    const sky = p && this.getSky ? this.getSky(p.lat, p.lon) : null;
+    node.textContent = sky
+      ? `${new Date(this.getTime()).toISOString().replace('T', ' ').slice(0, 16)} UTC · ` +
+        `sun ${sky.sunEl.toFixed(1)}° at the chosen site`
+      : `${new Date(this.getTime()).toISOString().replace('T', ' ').slice(0, 16)} UTC`;
+  }
+
+  /**
+   * Coordinates, if that is what was typed.
+   *
+   * The Moon has nine thousand named features and rather more than nine
+   * thousand places, and every published landing site, every candidate, every
+   * Artemis region and every set of coordinates in a paper is a pair of
+   * numbers rather than a name. Typing one used to return "nothing by that
+   * name", which is a search that refuses the most precise thing you can ask
+   * it. Accepts `0.674, 23.473`, `0.674N 23.473E`, `23.473E 0.674N`, degrees
+   * with or without a sign, and a decimal point or a comma between the two.
+   */
+  static parseCoordinates(text) {
+    const t = text.trim().replace(/[°\u00ba]/g, ' ');
+    /* Two signed decimals with a separator, each optionally carrying a
+       hemisphere letter. */
+    const NUM = '([+-]?\\d+(?:\\.\\d+)?)\\s*([NSEWnsew])?';
+    const m = t.match(new RegExp(`^\\s*${NUM}\\s*[,;\\s]\\s*${NUM}\\s*$`));
+    if (!m) return null;
+    const a = Number(m[1]), b = Number(m[3]);
+    const aTag = (m[2] || '').toUpperCase(), bTag = (m[4] || '').toUpperCase();
+    const signed = (v, tag, neg) => (tag === neg ? -Math.abs(v) : tag ? Math.abs(v) : v);
+    let lat, lon;
+    /* Either order, when the letters say which is which; latitude first when
+       they do not, which is how every source in this project quotes it. */
+    const aIsLon = aTag === 'E' || aTag === 'W';
+    const bIsLat = bTag === 'N' || bTag === 'S';
+    if (aIsLon || bIsLat) {
+      lon = signed(a, aTag, 'W');
+      lat = signed(b, bTag, 'S');
+    } else {
+      lat = signed(a, aTag, 'S');
+      lon = signed(b, bTag, 'W');
+    }
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    if (Math.abs(lat) > 90) return null;
+    /* Positive east: a paper quoting 337 E means the same place as one quoting
+       -23. Only rewritten when it needs to be, so a typed 23.473 comes back as
+       23.473 and not as 23.472999999999956. */
+    if (lon > 180 || lon < -180) lon = ((lon + 180) % 360 + 360) % 360 - 180;
+    return { lat, lon };
+  }
+
   search(query) {
     const q = query.trim().toLowerCase();
     const out = el('orbit-results');
     if (q.length < 2) { out.innerHTML = ''; return; }
+
+    const coord = OrbitPicker.parseCoordinates(query);
+    if (coord) {
+      const near = this.nearestFeature(coord.lat, coord.lon);
+      const where = near
+        ? (near.inside ? `inside ${near.f[0]}` : `${near.km.toFixed(0)} km from ${near.f[0]}`)
+        : 'open ground';
+      const name = `${Math.abs(coord.lat).toFixed(4)}° ${coord.lat >= 0 ? 'N' : 'S'}, ` +
+                   `${Math.abs(coord.lon).toFixed(4)}° ${coord.lon >= 0 ? 'E' : 'W'}`;
+      out.innerHTML =
+        `<button data-lat="${coord.lat}" data-lon="${coord.lon}" ` +
+        `data-name="${name}" data-sub="${where}">` +
+        `<b>${name}</b><span>${where}</span></button>`;
+      return;
+    }
+
     const hits = [];
     for (const f of this.names.features) {
       const name = f[0];
@@ -127,7 +279,9 @@ export class OrbitPicker {
       const sub = diam ? `${type} · ${diam.toFixed(0)} km` : type;
       return `<button data-lat="${lat}" data-lon="${lon}" data-name="${name}" data-sub="${sub}">` +
              `<b>${name}</b><span>${sub}</span></button>`;
-    }).join('') || '<div class="none">nothing by that name</div>';
+    }).join('') ||
+      '<div class="none">nothing by that name — coordinates work too, ' +
+      'as <span class="mono">0.674, 23.473</span></div>';
   }
 
   /** Turn the globe to a place and mark it as the candidate landing site. */
@@ -143,6 +297,7 @@ export class OrbitPicker {
     const probe = this.hf.probe ? this.hf.probe(lat, lon) : null;
     this.pick = { lat, lon, elevation: h, slope, meta, probe };
     this.render();
+    this.renderWhen();
   }
 
   /**
