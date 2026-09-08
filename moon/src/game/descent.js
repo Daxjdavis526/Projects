@@ -2,9 +2,16 @@
    DESCENT — going down
    -----------------------------------------------------------------------------
    The one piece of theatre in the game, and it is kept honest by being flown
-   rather than animated: the profile below is a real descent trajectory, thrust
-   against gravity, and where it ends is where the ship is for the rest of the
-   game. Nothing is teleported.
+   rather than animated: the guidance below commands a height and a speed from
+   the range still to run, the engine supplies what acceleration it can against
+   gravity, and where that ends is where the ship is for the rest of the game.
+   Nothing is teleported and nothing is interpolated.
+
+   What it is not is a propulsion model. There is no propellant, no mass flow
+   and no engine: the thrust available is stated as a thrust-to-weight ratio and
+   a horizontal braking limit, both from what a lander of this class can do, and
+   the guidance law is a pair of proportional terms rather than anything Apollo
+   would recognise. The trajectory is physical; the vehicle is not simulated.
 
    The shape comes from how the Apollo landings actually went, which is the only
    crewed lunar approach anyone has flown. High gate at a couple of kilometres,
@@ -33,6 +40,29 @@ import { offsetLatLon, bearing, surfaceDistance } from '../physics/frames.js';
 const START_ALT = 1150;          // m above the ground
 const START_RANGE = 3100;        // m short of the site
 const APPROACH_BEARING = 250;    // degrees; the Sun is usually behind you at dawn
+/* Where the glide path ends: fifty metres up at a hundred and forty out, from
+   which the last stretch is flown nearly vertically. The slope between there
+   and the start follows from those, so the ship begins the approach exactly on
+   its own profile rather than above it. That matters now that the descent is
+   flown against gravity: a ship above its commanded height can only get back
+   down to it at free fall and no faster, so a profile it starts off is a
+   profile it never catches. */
+const LOW_GATE_ALT = 48, LOW_GATE_RANGE = 140;
+const GLIDE = (START_ALT - LOW_GATE_ALT) / (START_RANGE - LOW_GATE_RANGE);
+const FINAL_SLOPE = LOW_GATE_ALT / LOW_GATE_RANGE;
+const START_SPEED = 175;         // m/s of horizontal closure at high gate
+
+/* What the ship can actually pull.
+   A lander's descent engine is sized for a thrust-to-weight of two to three at
+   lunar gravity — Apollo's LM descent stage could hold about 2.9 g_moon at low
+   mass — so the vertical acceleration available above gravity is a couple of
+   lunar gravities, and the horizontal braking authority is set by how far the
+   thrust vector can be tilted from vertical. Both are limits here rather than
+   an engine model: the file's claim is that the descent is flown against
+   gravity, not that it burns propellant. */
+const THRUST_TO_WEIGHT = 2.9;
+const BRAKE_ACCEL = 34;          // m/s^2 of horizontal deceleration available
+const PUSH_ACCEL = 20;           // m/s^2 of horizontal acceleration available
 
 export class Descent {
   /**
@@ -52,9 +82,10 @@ export class Descent {
     this.alt = this.hf.heightAt(from.lat, from.lon) + START_ALT;
     this.heading = APPROACH_BEARING;
     this.pitch = -34 * Math.PI / 180;
-    this.vDown = 26;
-    this.speed = 175;             // m/s of horizontal closure at high gate
+    this.speed = START_SPEED;
+    this.vDown = GLIDE * START_SPEED;     // on the slope from the first frame
     this.dust = 0;                // 0..1, how much the plume is lifting
+    this.thrust = 1;              // multiples of hover thrust, 0 = engine off
     this.touchdown = false;
   }
 
@@ -83,21 +114,55 @@ export class Descent {
 
     /* Fly the profile rather than interpolate it. Height is commanded from
        range, which is what makes it a glide path rather than a lift descending
-       a shaft: the ship arrives at the site and at the ground together. The
-       vertical rate then chases that commanded height, and both rates are
-       limited so nothing snaps. */
-    const wantAgl = range > 2200 ? START_ALT
-      : range > 140 ? 48 + (range - 140) * 0.46
-      : range * 0.42;
-    const wantDown = clamp((agl - wantAgl) * 0.55, -9, 44);
-    const wantSpeed = range > 2000 ? 175
+       a shaft: the ship arrives at the site and at the ground together.
+
+       The commanded rate has two terms: the rate that holds the glide path at
+       the current ground speed, plus whatever closes the height error that is
+       left. Commanding the error alone — which is what this did — asks for
+       zero descent exactly when the ship is on profile, so it slides off the
+       path and chases it the whole way down. */
+    const wantAgl = range > START_RANGE ? START_ALT
+      : range > LOW_GATE_RANGE ? LOW_GATE_ALT + (range - LOW_GATE_RANGE) * GLIDE
+      : range * FINAL_SLOPE;
+    const onPath = (range > LOW_GATE_RANGE ? GLIDE : FINAL_SLOPE) * this.speed;
+    /* Never negative. A lander has the thrust to climb and this one is not
+       going to: finding itself low on the path, it descends more slowly rather
+       than going back up, which is what the crews flew and what keeps the one
+       piece of theatre in the game from looking like a yo-yo. */
+    const wantDown = clamp(onPath + (agl - wantAgl) * 0.55, 0, 44);
+    const wantSpeed = range > 2000 ? START_SPEED
       : range > 700 ? 95
       : range > 180 ? 34
       : range > 35 ? 11
       : 2.4;
 
-    this.vDown += clamp(wantDown - this.vDown, -14 * dt, 26 * dt);
-    this.speed += clamp(wantSpeed - this.speed, -34 * dt, 20 * dt);
+    /* Against gravity, which is what the header claims and what this used to
+       only look like: the vertical rate was rate-limited straight to its
+       commanded value and gravity appeared nowhere, so the ship descended the
+       way a lift does. Now the guidance asks for an acceleration, the engine
+       supplies what it can, and gravity has the rest.
+
+       g is taken at the current radius rather than at the surface. Over a
+       kilometre of descent it changes by a tenth of a percent, which is far
+       too small to see and is free to be right about. */
+    const g = GM_MOON / Math.pow(R_MOON + this.alt, 2);
+    /* The commanded vertical acceleration: close the error on the commanded
+       rate in about a second. Positive is downward, as vDown is. */
+    const wantAccel = (wantDown - this.vDown) / 1.0;
+    /* Thrust can push up by (T/W - 1) gravities and can never pull down: an
+       engine that is off leaves you falling at exactly g, which is the floor
+       on how fast the rate can be reduced and the reason a landing has to be
+       started early. */
+    const upMax = (THRUST_TO_WEIGHT - 1) * g;
+    const accelDown = clamp(wantAccel, -upMax, g);
+    this.thrust = clamp((g - accelDown) / g, 0, THRUST_TO_WEIGHT);
+    this.vDown += accelDown * dt;
+
+    /* Horizontal, the same way: a commanded speed, an acceleration limited by
+       what the tilted thrust vector can do. */
+    const wantHoriz = (wantSpeed - this.speed) / 1.0;
+    this.speed += clamp(wantHoriz, -BRAKE_ACCEL, PUSH_ACCEL) * dt;
+    this.speed = Math.max(0, this.speed);
     /* The last few metres are flown slowly, by eye, exactly as they were on
        every Apollo landing. */
     if (agl < 14) this.vDown = Math.min(this.vDown, 1.2);
@@ -144,6 +209,7 @@ export class Descent {
       agl: this.alt - ground,
       range: surfaceDistance(this.lat, this.lon, this.target.lat, this.target.lon),
       vDown: this.vDown, speed: this.speed, dust: this.dust,
+      thrust: this.thrust,
       gravity: GM_MOON / Math.pow(R_MOON + this.alt, 2),
     };
   }

@@ -35,13 +35,25 @@ export class Quadtree {
     this.lodScale = 1;
     this.verts = opts.verts ?? TERRAIN.verts;
     this.tileBudget = opts.tileBudget ?? 900;
+    /* How much the split distance is being pulled in to stay inside that
+       budget. The budget was stored by the constructor and read by nothing,
+       so the quality tiers named a number of tiles that had no effect on
+       anything: what actually held the draw list down was the streaming rate,
+       which means the limit was "however fast tiles happen to arrive" and the
+       count would keep climbing the longer you stood still. One over this
+       multiplies the split distance, so a frame that overshoots refines a
+       little less on the next one and a frame well inside it relaxes back.
+       Bounded, and slow enough in both directions that it cannot oscillate
+       visibly. */
+    this.budgetScale = 1;
     this.cacheSize = opts.cacheSize ?? 1400;
     this.tiles = new Map();          // key -> { state, tile, lastWanted, level, ... }
     this.frame = 0;
     /* Tiles asked to rebuild this frame, so one frame does not queue the same
        rebuild twice. */
     this.rebuildQueued = new Set();
-    this.stats = { visible: 0, wanted: 0, pending: 0, resident: 0, triangles: 0 };
+    this.stats = { visible: 0, wanted: 0, pending: 0, resident: 0, triangles: 0,
+                   budgetScale: 1 };
   }
 
   get(key) { return this.tiles.get(key); }
@@ -161,7 +173,8 @@ export class Quadtree {
       }
 
       const arc = edgeArc(level);
-      const wantSplit = level < this.maxLevel && near < this.splitK * this.lodScale * arc;
+      const wantSplit = level < this.maxLevel &&
+        near < this.splitK * this.lodScale * this.budgetScale * arc;
       const entry = this.tiles.get(key);
       if (entry) entry.lastWanted = this.frame;
 
@@ -251,7 +264,16 @@ export class Quadtree {
     request.sort((a, b) => a.priority - b.priority);
     const evict = this.collect();
 
+    /* Close the loop on the budget. A tenth of the error per frame settles in
+       well under a second at any frame rate a person would play at, and the
+       floor stops a pathological frame from collapsing the terrain to blocks.
+       Only ever tightened while over budget: coming back is the same rate. */
+    const over = draw.length / this.tileBudget;
+    const want = over > 1 ? this.budgetScale / Math.pow(over, 0.5) : 1;
+    this.budgetScale += (Math.max(0.25, Math.min(1, want)) - this.budgetScale) * 0.1;
+
     this.stats.visible = draw.length;
+    this.stats.budgetScale = this.budgetScale;
     this.stats.wanted = request.length;
     this.stats.resident = this.tiles.size;
     return { draw, request, evict };

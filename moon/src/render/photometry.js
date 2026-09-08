@@ -56,3 +56,25 @@ const NORM = (() => {
 })();
 
 export { NORM as BRDF_NORM };
+
+/**
+ * The same three terms, for the shader, from the same constants.
+ *
+ * It lives here rather than in the material for the reason the header gives:
+ * two very different pieces of code need the same answer, and until now the
+ * GLSL and the JS were separate transcriptions of it in separate files, with
+ * the normalisation computed twice as well. Nothing checked that they agreed —
+ * in the subsystem making the loudest accuracy claims in the project — and a
+ * disagreement would have shown up as the camera mis-exposing the very thing
+ * it is pointed at, which looks like an art problem and is an arithmetic one.
+ * `test/photometry.test.mjs` evaluates this string against `regolithBrdf`.
+ */
+export const BRDF_GLSL = /* glsl */`
+float lunarBrdf(float mu0, float mu, float phase) {
+  float ls = mu0 / max(mu0 + mu, 1e-4);
+  float g2 = uHG * uHG;
+  float hg = (1.0 - g2) / pow(1.0 + g2 - 2.0 * uHG * cos(3.141592653589793 - phase), 1.5);
+  float surge = 1.0 + uOppositionB0 / (1.0 + tan(min(phase, 3.0) * 0.5) / uOppositionH);
+  return ls * hg * surge * uBrdfNorm;
+}
+`;

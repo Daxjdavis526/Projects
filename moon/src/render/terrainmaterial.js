@@ -36,6 +36,7 @@
 import * as THREE from 'three';
 import { OPTICS, TERRAIN } from '../config.js';
 import { ALBEDO_GLSL } from './albedo.js';
+import { BRDF_GLSL, BRDF_NORM } from './photometry.js';
 
 const PARS = /* glsl */`
 uniform vec3  uSunDir;          // unit, world space
@@ -202,16 +203,9 @@ vec3 seleneRamp(float t) {
 }
 `;
 
-/* The regolith BRDF, replacing three.js's direct diffuse term. */
-const BRDF = /* glsl */`
-float lunarBrdf(float mu0, float mu, float phase) {
-  float ls = mu0 / max(mu0 + mu, 1e-4);
-  float g2 = uHG * uHG;
-  float hg = (1.0 - g2) / pow(1.0 + g2 - 2.0 * uHG * cos(3.14159265 - phase), 1.5);
-  float surge = 1.0 + uOppositionB0 / (1.0 + tan(min(phase, 3.0) * 0.5) / uOppositionH);
-  return ls * hg * surge * uBrdfNorm;
-}
-`;
+/* The regolith BRDF, replacing three.js's direct diffuse term. One source,
+   in photometry.js, shared with the exposure model that has to agree with it. */
+const BRDF = BRDF_GLSL;
 
 export function makeTerrainMaterial(opts = {}) {
   const uniforms = {
@@ -248,15 +242,10 @@ export function makeTerrainMaterial(opts = {}) {
     uImageryBlurLod: { value: 4 },
   };
 
-  /* Normalise so the BRDF equals Lambert at 30 degrees phase, viewed head on. */
-  {
-    const g = OPTICS.hgG, p = OPTICS.normalisePhase;
-    const mu0 = Math.cos(p), mu = 1;
-    const ls = mu0 / (mu0 + mu);
-    const hg = (1 - g * g) / Math.pow(1 + g * g - 2 * g * Math.cos(Math.PI - p), 1.5);
-    const surge = 1 + OPTICS.oppositionB0 / (1 + Math.tan(p / 2) / OPTICS.oppositionH);
-    uniforms.uBrdfNorm.value = mu0 / (ls * hg * surge);
-  }
+  /* Normalise so the BRDF equals Lambert at 30 degrees phase, viewed head on.
+     From photometry.js, which computes it once for both users rather than each
+     of them deriving it again from the same five constants. */
+  uniforms.uBrdfNorm.value = BRDF_NORM;
 
   const material = new THREE.MeshStandardMaterial({
     map: opts.map || null,
