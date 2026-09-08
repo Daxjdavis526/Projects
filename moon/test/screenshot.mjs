@@ -48,14 +48,18 @@ const DEFAULT_SHOTS = [
      that caught the exposure model not knowing they existed. */
   ['night-lamps', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&lamps=2&pitch=-20&quality=high'],
   ['third-person', 'site=apollo11&mode=eva&t=1969-07-21T02:56:15Z&rate=0&view3=1&quality=high'],
-  ['tycho', 'site=tycho&mode=eva&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
+  /* On the floor six kilometres north of the centre, looking back at the
+     central peak. Standing on the published centre coordinates puts you on the
+     peak's own flank, where a 30-degree slope fills the frame and you slide
+     down it: true, dramatic, and not a photograph of Tycho. */
+  ['tycho', 'site=-43.1120,-11.36192&mode=eva&t=2026-09-22T14:00Z&rate=0&yaw=180&quality=balanced'],
   /* The rim of Shackleton never sees the Sun more than about two degrees up,
      so this is what the place actually looks like: a black world with bright
      slivers on the sunward slopes, and the lamps are not optional. */
   /* Looking along the rim rather than into the crater: the floor of Shackleton
      has not seen the Sun in a billion years and photographs as a rectangle of
      black, which is true and is not a picture. */
-  ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&yaw=60&lamps=2&quality=balanced'],
+  ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&yaw=300&lamps=2&quality=balanced'],
   ['farside', 'site=farside_highlands&mode=eva&t=2026-09-08T09:00Z&rate=0&quality=balanced'],
   ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&quality=balanced'],
   ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],

@@ -427,6 +427,11 @@ export function makeTerrainMaterial(opts = {}) {
              of the neighbourhood's own albedo. It lands around a fortieth of
              direct sunlight, four or five stops down, which is invisible
              beside a lit slope and clearly there once the eye has adapted. */
+          /* The scene carries a hemisphere light for the same bounce, because
+             nothing but the terrain has a horizon map to compute it from. The
+             ground does, so it takes its own occlusion-aware version below and
+             drops the scene-wide one rather than counting the light twice. */
+          irradiance = vec3(0.0);
           vec3 up2 = normalize(vWorldPos - uMoonCentre);
           float neighboursLit = smoothstep(-0.02, 0.30, dot(up2, uSunDir));
           float fill = (1.0 - vSkyVis) * neighboursLit * uBounceAlbedo;

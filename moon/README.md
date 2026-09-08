@@ -172,6 +172,13 @@ five stops under direct sun. It is invisible beside a lit slope and it is the
 difference between a shadow you can see into and a hole cut out of the picture.
 Apollo photographs show the inside of a crater for exactly this reason.
 
+The astronaut, the ship and the rover have no horizon map, so they get the same
+bounce as a hemisphere light aimed along the local vertical, and the terrain
+drops the scene-wide version rather than counting it twice. Without it a figure
+standing with the Sun behind them was a black silhouette, which is the one
+thing Apollo photography conclusively refutes: Aldrin is in the lander's shadow
+on the ladder and perfectly legible.
+
 The camera meters the scene analytically rather than reading back the
 framebuffer, so it is deterministic in a screenshot. It knows the local albedo,
 how steeply the ground around you runs, the phase angle, how much of the frame
@@ -337,7 +344,12 @@ which is why the screenshot harness is a test rather than a convenience.
   know they existed: it adapted to a moonless night and opened eleven stops.
 - Every shadow was pure black. There is no air to scatter light into them, but
   the sunlit ground next door bounces about a fortieth of what falls on it, which
-  is why Aldrin is visible coming down the ladder.
+  is why Aldrin is visible coming down the ladder. The astronaut himself stayed
+  a silhouette for a round longer, because the first version of the bounce only
+  lit the ground.
+- The page pulled its two typefaces off Google's CDN, which is the one thing
+  this repository's notes say not to do, and it was the console error every
+  screenshot in the gallery was reporting.
 - The caption told a player standing at Shackleton they were on the far side.
   The Earth is under the horizon there because the site is 90.2 degrees from the
   mean sub-Earth point; libration lifts it into view over the month.

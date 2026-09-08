@@ -610,6 +610,26 @@ async function start() {
       if (eva) { eva.player.yaw = cam.yaw; eva.player.pitch = cam.pitch; }
     }
     stage.setSun(local.sunDir, Math.max(0, local.sunEl > -0.3 ? 1 : 0));
+    /* What the landscape is throwing back at everything standing on it. The
+       terrain works its own out per vertex from the horizon map; this is the
+       version for the astronaut, the ship and the rover, which have no horizon
+       map and were coming out as black silhouettes with the Sun behind them. */
+    {
+      const u = llToUnit(cam.lat, cam.lon);
+      const litGround = Math.max(0, Math.sin(local.sunEl * Math.PI / 180)) *
+        (local.sunEl > 0 ? 1 : 0);
+      /* A flat Lambertian plane filling half an object's hemisphere would put
+         the shadowed side at the ground's albedo times the sine of the Sun's
+         elevation, which is two per cent of the lit side over mare. Apollo
+         photographs of a figure in shadow are plainly brighter than that, for
+         two reasons the flat estimate leaves out: a body standing on rough
+         ground sees ground over well more than half its hemisphere, and
+         regolith is a backscatterer rather than a diffuser. The factor here is
+         calibrated against those photographs and is an approximation, not a
+         derivation; it lands the shadowed side of a white suit around a tenth
+         of its sunlit side over mare and a sixth over highland. */
+      stage.setBounce(u, albedoAt(geology, cam.lat, cam.lon) * litGround * 2.5);
+    }
     const earthshineScale = 1.5e-4 * eph.earthIllum * Math.max(0, Math.sin(local.earthEl * Math.PI / 180));
     terrain.updateSky({
       sunDir: local.sunDir,

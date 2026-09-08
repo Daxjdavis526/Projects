@@ -70,6 +70,21 @@ export class Stage {
     this.world.add(this.sun);
     this.world.add(this.sun.target);
 
+    /* Regolith bounce, for everything that is not the ground.
+
+       The terrain computes its own, because it knows how much of the sky each
+       point can see and can therefore make a crater floor darker than an open
+       plain. Nothing else in the scene has a horizon map, and without this an
+       astronaut standing with the Sun behind them was a black silhouette --
+       which is the one thing Apollo photography conclusively shows is wrong.
+       Aldrin on the ladder is in the LM's shadow and perfectly legible, lit by
+       a landscape that throws back a tenth of what falls on it.
+
+       The Moon is round, so the "up" this light hemispheres about is set every
+       frame from where the camera is rather than being the world Y axis. */
+    this.bounce = new THREE.HemisphereLight(0x000000, 0x000000, 1);
+    this.world.add(this.bounce);
+
     this._onResize = () => this.resize();
     window.addEventListener('resize', this._onResize);
   }
@@ -125,6 +140,17 @@ export class Stage {
     this.sun.position.set(px + d.x / len * back, py + d.y / len * back, pz + d.z / len * back);
     this.sun.target.position.set(px, py, pz);
     this.sun.target.updateMatrixWorld();
+  }
+
+  /**
+   * How much light the ground around you is throwing back up.
+   *
+   * @param {object} up  local vertical, a unit vector in world coordinates
+   * @param {number} r   radiance of the lit ground, in the Sun's own units
+   */
+  setBounce(up, r) {
+    this.bounce.position.set(up.x * 100, up.y * 100, up.z * 100);
+    this.bounce.groundColor.setRGB(r, r * 0.97, r * 0.93);
   }
 
   setExposure(e) { this.renderer.toneMappingExposure = e; }
