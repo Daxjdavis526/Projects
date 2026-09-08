@@ -28,6 +28,8 @@ export class Ship {
     this.art = built;
     this.group = built.group;
     this.cockpit = buildCockpit();
+    // Raised with the seat so the coaming sits below the sight line.
+    this.cockpit.group.position.y = 0.46;
     this.group.add(this.cockpit.group);
     scene.add(this.group);
     this.camera = camera;
@@ -324,6 +326,15 @@ export class Ship {
     a.cockpit ??= null;
     this.cockpit.emisU.value = this.piloted || this.state === SHIP_STATE.LANDED ? 1 : 0.35;
 
+    // From the seat, the hull is around you and there is no aperture cut in
+    // it — so hide the exterior shell and let the cockpit interior do the
+    // framing. Standard practice, and far more reliable than trying to make a
+    // closed lofted tube transparent from one side.
+    const inside = this.piloted && !this.thirdPerson;
+    a.body.visible = !inside;
+    a.canopy.visible = !inside;
+    this.cockpit.group.visible = this.piloted || this.state === SHIP_STATE.LANDED;
+
     // Strobes.
     const t = performance.now() * 0.001;
     const on = (t % 1.6) < 0.09 || ((t + 0.18) % 1.6) < 0.06;
@@ -343,7 +354,9 @@ export class Ship {
       cam.up.copy(this.up);
       cam.lookAt(this.pos.clone().addScaledVector(this.forward, 14));
     } else {
-      const seat = new THREE.Vector3(0, 0.62, -6.15).applyQuaternion(this.quat).add(this.pos);
+      // Inside the canopy bubble, above the fuselage top line. Sit any lower and
+      // you are looking at the inside of a closed tube.
+      const seat = new THREE.Vector3(0, 1.06, -6.35).applyQuaternion(this.quat).add(this.pos);
       cam.position.copy(seat);
       cam.quaternion.copy(this.quat);
       cam.up.set(0, 1, 0).applyQuaternion(this.quat);

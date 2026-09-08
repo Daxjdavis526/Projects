@@ -341,10 +341,12 @@ export function buildShip() {
     if (prev) gh.bridge(ring, prev, false);
     prev = ring;
   }
+  // Barely there. A smooth, shiny canopy mirrors the whole sky and, seen from
+  // the seat, paints the entire view whatever colour the sun happens to be.
   const glassMat = new THREE.MeshPhysicalMaterial({
-    color: 0x0a1218, roughness: 0.08, metalness: 0.1,
-    transmission: 0.0, transparent: true, opacity: 0.62,
-    side: THREE.DoubleSide, envMapIntensity: 1.4,
+    color: 0x121a20, roughness: 0.42, metalness: 0.0,
+    transparent: true, opacity: 0.42, depthWrite: false,
+    side: THREE.DoubleSide, envMapIntensity: 0.5,
   });
   const canopy = new THREE.Mesh(gh.build(), glassMat);
   canopy.name = 'canopy';
@@ -479,7 +481,7 @@ export function buildCockpit() {
       [s * 0.94, 0.21, -6.50], [s * 0.60, 0.21, -6.50]], 0.02, [0.03, 0.10, 0.14], 1);
   }
   // Canopy frame arcs, so the view is framed rather than open.
-  for (const zz of [-7.9, -6.6, -5.2]) {
+  for (const zz of [-8.0, -7.1]) {
     for (let i = 0; i < 7; i++) {
       const a0 = (i / 7) * Math.PI, a1 = ((i + 1) / 7) * Math.PI;
       const r = 0.95;
@@ -497,7 +499,7 @@ export function buildCockpit() {
   // Rudder pedals.
   for (const s of [-1, 1]) {
     h.slab([[s * 0.10, 0.06, -7.55], [s * 0.30, 0.06, -7.55],
-      [s * 0.30, 0.24, -7.35], [s * 0.10, 0.24, -7.35]], 0.06, [0.13, 0.14, 0.15]);
+      [s * 0.30, 0.24, -7.35], [s * 0.10, 0.24, -7.35]], 0.06, [0.045, 0.048, 0.055]);
   }
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true, roughness: 0.85, metalness: 0.15, side: THREE.DoubleSide,

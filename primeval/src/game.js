@@ -162,6 +162,13 @@ export class Game {
     await step(0.14, 'starting renderer');
     this.renderer.attach(this.scene);
     this.fx = new Effects(this.scene, this.camera);
+    // The sky is the only light source with any colour in it, so it is also
+    // the environment map. Without one, every metal in the game — hull, mech,
+    // rifle — renders as flat grey.
+    this.pmrem = new THREE.PMREMGenerator(this.renderer.renderer);
+    this.pmrem.compileEquirectangularShader();
+    this.envScene = new THREE.Scene();
+    this.envAge = 99;
 
     // Flashlight rides the camera and is off until you need it.
     this.flashlight = new THREE.SpotLight(0xffeecc, 0, 85, 0.46, 0.42, 1.35);
@@ -216,8 +223,37 @@ export class Game {
     this.player.applyCamera(0);
 
     await step(0.95, 'final checks');
+    this.refreshEnvironment();
     this.warmup();
     await step(1.0, 'ready');
+  }
+
+  /**
+   * Re-bake the environment from the current sky. Cheap enough to do every
+   * few seconds, which is all the day/night cycle needs.
+   */
+  refreshEnvironment() {
+    if (!this.pmrem) return;
+    const sky = this.sky.mesh;
+    const parent = sky.parent;
+    const scale = sky.scale.x;
+    try {
+      sky.scale.setScalar(1);
+      sky.position.set(0, 0, 0);
+      this.envScene.add(sky);
+      const rt = this.pmrem.fromScene(this.envScene, 0, 0.4, 60);
+      if (this.envTarget) this.envTarget.dispose();
+      this.envTarget = rt;
+      this.scene.environment = rt.texture;
+      this.scene.environmentIntensity = this.locale.hasAtmosphere ? 0.8 : 0.35;
+    } catch (e) {
+      // A driver that will not do this is not worth crashing the game over.
+      this.pmrem = null;
+    } finally {
+      sky.scale.setScalar(scale);
+      if (parent) parent.add(sky);
+    }
+    this.envAge = 0;
   }
 
   /** Compile shaders before the first visible frame so it does not hitch. */
@@ -340,6 +376,8 @@ export class Game {
     }
 
     this.sky.update(this.camera, this.clock);
+    this.envAge += dt;
+    if (this.envAge > 7 && !this.paused) this.refreshEnvironment();
 
     for (const sys of this.systems) if (sys.update) sys.update(dt, this);
     this.fx?.update(dt);

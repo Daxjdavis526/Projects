@@ -9,6 +9,7 @@ import { Ecology } from '../life/ecology.js';
 import { PointsOfInterest } from './poi.js';
 import { VehicleSystem } from './vehicles.js';
 import { Weather } from './weather.js';
+import { Clouds } from './clouds.js';
 import { Audio } from '../audio/audio.js';
 import { lavaUniform } from './terrain.js';
 import { SPECIES } from '../life/species.js';
@@ -171,6 +172,8 @@ class WeatherSystem {
   async load(game) {
     this.weather = new Weather(game.scene, game.quality);
     game.weather = this.weather;
+    this.clouds = new Clouds(game.scene, game.quality);
+    game.clouds = this.clouds;
     this.weather.onEvent = (kind, text) => {
       game.hud.subtitle(text, 5);
       game.emit('worldEvent', kind, text);
@@ -179,6 +182,8 @@ class WeatherSystem {
   }
   update(dt, game) {
     this.weather.update(dt, game);
+    if (game.locale.id === 'planet') this.clouds.update(dt, game);
+    else this.clouds.setVisible(false);
     lavaUniform.value = 0.35 + game.daylight.nightT * 1.5;
     // Lightning washes the screen for a frame or two.
     const grade = game.renderer.grade.uniforms;
