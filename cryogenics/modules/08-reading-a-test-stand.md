@@ -4,24 +4,23 @@
 
 Everything so far has been a part: a tank, a valve, a relief, a detector, a
 property of a fluid. A test stand is what happens when those parts are bolted
-together and the interactions start to matter more than the parts. This module
-teaches you to **review** such a system — to see, in a schematic, the trapped
-volume, the missing relief path, the vent that plugs, the single failure that opens
-two things at once.
+together and the interactions matter more than the parts. This module teaches you
+to **review** such a system — to see, in a schematic, the trapped volume, the
+missing relief path, the vent that plugs, the single failure that opens two things
+at once.
 
 **There is no firing procedure here, and there will not be one.** A real procedure
 is specific to real hardware: actual valves, actual set pressures verified against
-actual relief calculations, actual trained people. It is written by the engineers
-who built the stand, checked by someone who did not, and approved by an institution
-that accepts the consequences. A generic sequence that *looks* like a procedure is
-worse than none, because it invites someone to follow it. What transfers is not the
-sequence — it is the way of looking.
+actual relief calculations, actual trained people. It is written by the engineers who
+built the stand, checked by someone who did not, and approved by an institution that
+accepts the consequences. A generic sequence that merely *looks* like one is worse
+than none, because it invites someone to follow it.
 
 ## What you'll be able to do
 
 - Read a cryogenic P&ID and say what every valve, relief and instrument is for.
-- Find the isolatable volumes in a schematic and check each has a relief path that
-  cannot itself be isolated.
+- Find the isolatable volumes and check each has a relief path that cannot itself
+  be isolated.
 - Trace every relief and vent to its discharge and judge whether it is acceptable.
 - Apply seven standing review passes — trapped volume, relief path, oxygen
   compatibility, accumulation and ventilation, single failure, instrumentation
@@ -32,12 +31,11 @@ sequence — it is the way of looking.
 
 ## 1. The conceptual stand
 
-Figure 8.1 is a small LOX/liquid-methane engine test stand, tagged per
-ANSI/ISA-5.1 (2022). It is deliberately generic, and the set pressures are
-**illustrative placeholders chosen to make the drawing readable**, not design
-values — real ones come from a relief calculation against CGA S-1.3 (10th ed., 2024)
-and ASME BPVC Section VIII Div. 1 (2025), and belong to the vessel they protect.
-Study it before reading on; the walkthrough refers to its tags throughout.
+Figure 8.1 is a small LOX/liquid-methane engine test stand, tagged per ANSI/ISA-5.1
+(2022). It is deliberately generic, and the set pressures are **illustrative
+placeholders**, not design values — real ones come from a relief calculation against
+CGA S-1.3 (10th ed., 2024) and ASME BPVC Section VIII Div. 1 (2025), and belong to
+the vessel they protect. Study it before reading on.
 
 <figure>
 <svg viewBox="0 0 700 1000" role="img" aria-label="Piping and instrumentation schematic of a small liquid-oxygen and liquid-methane rocket engine test stand, showing two run tanks with helium pressurisation, separate oxidiser and fuel vent stacks, relief valves and burst discs, fill and drain lines, filtered feed legs with fail-closed main propellant valves, nitrogen purge panels, an engine, gas detection, and a remote-operation boundary with a control room outside it.">
@@ -375,15 +373,8 @@ Study it before reading on; the walkthrough refers to its tags throughout.
   <text x="450" y="940" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">AI</text>
   <text x="450" y="957" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">401</text>
 </svg>
-<figcaption>Figure 8.1 — A conceptual LOX/LCH₄ test stand. Oxidiser green, fuel orange, inert grey. Set pressures are illustrative placeholders, not design values. Note that the two vent stacks terminate separately (A and B) and share no pipework anywhere on the drawing.</figcaption>
+<figcaption>Figure 8.1 — A conceptual LOX/LCH₄ test stand. Oxidiser green, fuel orange, inert grey; set pressures are illustrative placeholders. The two vent stacks terminate separately and share no pipework anywhere on the drawing.</figcaption>
 </figure>
-
-Conventions: a bubble on a line is field-mounted; a bubble with a horizontal bar
-lives in the control room, which is why PIC-101, HS-110 and AI-401 sit inside the
-blockhouse and PT-102 does not. Filled bow-ties are normally closed, open ones
-normally open. `FC`/`FO` is the **fail** position, a different question from the
-normal position. Dashed lines are signal. The thin grey outriggers on the feed
-legs are the vacuum jacket.
 
 ---
 
@@ -391,24 +382,23 @@ legs are the vacuum jacket.
 
 A bubble on a line is field-mounted; one with a horizontal bar lives in the control
 room, which is why PIC-101, HS-110 and AI-401 sit inside the blockhouse and PT-102
-does not. Filled bow-ties are normally closed. `FC`/`FO` is the **fail** position —
-a different question from the normal position.
+does not. `FC`/`FO` is the **fail** position — a different question from the normal
+position.
 
 ### 2.1 The pressurant leg — GHe, PCV-101, CV-101, PV-104
 
 PCV-101 knocks helium down from pack P-301 to the ullage pressure the feed system
 needs. Why helium, not the nitrogen already on site for purging? Nitrogen's
 saturation temperature climbs steeply with pressure: at 90 K, liquid oxygen's
-boiling point, nitrogen condenses at only **3.6 bar (~52 psia)**. GN₂ pressurant
+boiling point, nitrogen condenses at only **3.6 bar (~52 psia)**, so GN₂ pressurant
 above that liquefies on V-101's cold ullage walls, putting liquid where gas was
 intended and taking tank pressure down with it.
 
 CV-101 stops propellant vapour migrating back into the common helium header, where
 it would meet the other tank's line — but note what it is *not*: not an isolation
 device, not testable in place, and the only thing between the LOX ullage and the
-methane ullage. PV-104 fails closed: closed mid-run the engine goes off-mixture,
-which is recoverable; failed open the tank rides up to the relief setting and sits
-there venting oxygen.
+methane ullage. PV-104 fails closed; failed *open* instead, the tank would ride up
+to the relief setting and sit there venting oxygen.
 
 ### 2.2 The tank tops — where the relief philosophy lives
 
@@ -417,11 +407,10 @@ PV-103, the commanded vent valve; PSV-101, the relief valve. All three discharge
 into the oxidiser vent header and leave via stack A. The disc and the valve are not
 redundancy but two sizing cases. **PSV-101, set lower, recloses** and covers steady
 boiloff from ordinary heat leak. **PSE-102, set higher, does not reclose** and
-covers the accident: fire, or loss of the insulating vacuum, where air entering the
+covers the accident — fire, or loss of the insulating vacuum, where air entering the
 annulus condenses on the cold inner wall and drives fluxes of **1–7 kW/m² insulated
-and 25–40 kW/m² bare** against roughly **0.6 W/m²** for healthy multilayer
-insulation, a step beyond any reclosing valve of sensible size. PV-103 fails *open*
-— the reversal that is the whole fail-safe philosophy in two symbols (Figure 8.3).
+and 25–40 kW/m² bare** against roughly **0.6 W/m²** for healthy MLI, a step beyond
+any reclosing valve of sensible size. PV-103 fails *open* (Figure 8.3).
 
 <div class="box remember"><span class="lbl">Remember this</span>
 Every isolatable volume that could contain cryogen needs its own relief path, and
@@ -434,15 +423,15 @@ combination.
 ### 2.3 Fill and drain — HV-104, HV-105
 
 The fill line enters low through HV-104 and is vacuum-jacketed, because a bare cold
-line is both a boiloff source and a condensation surface: a surface at LN₂ or LOX
-temperature condenses **liquid air of roughly 50 % oxygen** out of the atmosphere,
-which drips onto whatever is underneath.
+line is both a boiloff source and a condensation surface: at LN₂ or LOX temperature
+it condenses **liquid air of roughly 50 % oxygen** out of the atmosphere, which
+drips onto whatever is underneath.
 
 Drain HV-105 goes to a disposal pad, and the drawing says what the pad is: concrete,
 graded away, not asphalt. NASA's testing found LOX-soaked asphalt reacting on impact
-in 20 of 20 laboratory drops, and a dry field slab throwing fragments 48 m; concrete
+in 20 of 20 laboratory drops and a dry field slab throwing fragments 48 m; concrete
 gave no reaction at all. And ask where each drain *stops*: close HV-105 with liquid
-in the leg above it and you have made a trap.
+in the leg above and you have made a trap.
 
 ### 2.4 The feed legs — filters, flow meters, and the trap
 
@@ -451,11 +440,11 @@ isolation ball valve HV-108, main oxidiser valve MOV-110, engine.
 
 **F-106 is also a trap for solids** — water, CO₂ and hydrocarbons that are harmless
 gases at ambient are particles at 90 K — so it catches them, then plugs, showing as
-nothing at all on PT-102. **FT-107 means nothing unless the flow is single-phase**;
-any vapour and the reading is fiction. **HV-108 is a vented ball**, its cavity
-drilled to one side so trapped liquid can never exceed line pressure, which makes it
-**directional**: installed backwards it leaks by design, so check the arrow against
-the direction the valve must *hold* pressure rather than the normal flow direction.
+nothing at all on PT-102. **FT-107 means nothing unless the flow is single-phase.**
+**HV-108 is a vented ball**, its cavity drilled to one side so trapped liquid can
+never exceed line pressure, which makes it **directional**: installed backwards it
+leaks by design, so check the arrow against the direction the valve must *hold*
+pressure.
 
 Now close HV-108, close MOV-110, and let CV-303 hold. The segment between them
 contains liquid oxygen, has no path out, and is warming.
@@ -491,29 +480,25 @@ contains liquid oxygen, has no path out, and is warming.
   <text x="90" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="var(--warn)">the trap</text>
   <text x="400" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="var(--ok)">the answer</text>
 </svg>
-<figcaption>Figure 8.2 — The canonical cryogenic finding: two closed valves and a check valve define an isolated volume of liquid. PSV-109 exists solely to give it somewhere to go, and its discharge must reach a place the drawing shows.</figcaption>
+<figcaption>Figure 8.2 — The canonical cryogenic finding: two closed valves and a check valve define an isolated volume of liquid. PSV-109 exists solely to give it somewhere to go.</figcaption>
 </figure>
-
-That is why PSV-109 and PSV-209 are on the drawing, and why their discharges run to
-the vent headers rather than into the cell.
 
 ### 2.5 The purge circuits — and the rule that has no exceptions
 
 Two purge panels, fed from **separate sources**, one per propellant. A shared purge
 manifold would be a flow path between a fuel system and an oxygen system with only a
-check valve in the way — a device that leaks, hangs open on debris, cannot be tested
-in place, and fails in whichever direction the differential pressure happens to lie.
-Treating a check valve as a fuel/oxidiser barrier is the commonest finding here.
+check valve in the way — a device that leaks, hangs open on debris and cannot be
+tested in place. Treating a check valve as a fuel/oxidiser barrier is the commonest
+finding here.
 
-The oxidiser purge is annotated *O₂-clean*, because purge gas entering an oxygen
-system **is part of the oxygen system**, and a purge line is a direct injection path
-for compressor oil, hydrocarbon residue and particulate. CGA G-4.1 (7th ed., August
-2018) governs every surface contacting fluid above 23.5 % oxygen.
+The oxidiser purge is annotated *O₂-clean*, because a purge line is a direct
+injection path for compressor oil, hydrocarbon residue and particulate — and CGA
+G-4.1 (7th ed., 2018) governs every surface contacting fluid above 23.5 % oxygen.
 
 ### 2.6 The vents — two stacks, and why they never meet
 
-Everything oxidiser-side — PSV-101, PSE-102, PV-103, PSV-109 — reaches stack A;
-everything fuel-side reaches stack B. They share no pipe.
+Everything oxidiser-side — PSV-101, PSE-102, PV-103, PSV-109 — reaches stack A,
+everything fuel-side stack B. They share no pipe.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 Combine those two headers "to save a stack" and you have built a mixing chamber with
@@ -528,25 +513,25 @@ hydrocarbon as a detonable deposit.
 
 Boiloff we expect continuously, from both tanks, for the whole cold period — that
 is what PSV-101 and PSV-201 are sized for. And the cold gas leaving a stack freezes
-atmospheric moisture at the outlet: the one component whose whole job is never to be
+atmospheric moisture at the outlet: the component whose whole job is never to be
 blocked is the one that ices up.
 
 ### 2.7 Detection, and the line around the stand
 
 Four analysers, three siting logics, because there is no general "gas detector
 height". **AT-401** watches for oxygen deficiency in the breathing zone, threshold
-19.5 % by volume. **AT-402** watches the opposite direction at the LOX skid: above
-23.5 %, ordinary materials become ignitable and clothing becomes a fuel. **AT-403**
-sits under the cell roof, where warm methane at 0.55 times the density of air
-collects. **AT-404** sits in the trench, because cold methane vapour does not rise:
-it must warm by **52.6 K, from 111.7 K to 164.3 K**, before it is as light as
-ambient air, and until then it runs along the floor and pools.
+19.5 % by volume; **AT-402** watches the opposite direction at the LOX skid, since
+above 23.5 % ordinary materials become ignitable and clothing becomes a fuel;
+**AT-403** sits under the cell roof, where warm methane at 0.55 times the density of
+air collects; and **AT-404** sits in the trench, because cold methane vapour does
+not rise — it must warm by **52.6 K, from 111.7 K to 164.3 K**, before it is as
+light as ambient air, and until then it runs along the floor and pools.
 
 The dashed boundary is the remote-operation line: everything inside is unoccupied
 during propellant operations and every command originates in the blockhouse, which is
 why MOV-110 and MFV-210 are pneumatic rather than handwheeled. Where that boundary
-goes is a facility-specific decision from an explosive-siting analysis, not something
-readable off a generic drawing.
+goes is a facility-specific decision from an explosive-siting analysis, not
+something readable off a generic drawing.
 
 ---
 
@@ -557,54 +542,49 @@ once; they read it seven times, hunting one class of problem per pass. The
 questions are the same whatever the fluid or the facility.
 
 
-**1. The trapped-volume pass.** *Mentally close every valve. What is now
-isolated?* Two block valves with nothing between them is the canonical finding;
-the rest of the family is valve body cavities, dead legs and instrument sense
-lines, the volume downstream of a check valve, a filled hose disconnected at one
-end, a pump casing, a vacuum annulus that could take an inner-wall leak, and
-anything under a relief someone has isolated with a block valve. A line sealed by
-a plug of ice or solid air counts too: the blockage *is* the closed valve, and it
-forms without anyone touching anything.
+**1. The trapped-volume pass.** *Mentally close every valve. What is now isolated?*
+Two block valves with nothing between them is the canonical finding; the rest of the
+family is valve body cavities, dead legs and sense lines, the volume downstream of a
+check valve, a pump casing, a vacuum annulus that could take an inner-wall leak, and
+anything under an isolated relief. A plug of ice or solid air counts too: the
+blockage *is* the closed valve, and it forms without anyone touching anything.
 
 **2. The relief-path pass.** *Trace every relief to where it comes out.* Each must
-terminate somewhere the drawing shows. Then: is anything in that path unsized for
-the accident case? Can the outlet ice over or take rain? Is the stack restrained —
-a relieving vent is a rocket nozzle and produces a reaction force. And do any two
-reliefs from different fluids share anything at all?
+terminate somewhere the drawing shows. Is anything in that path unsized for the
+accident case? Can the outlet ice over? Is the stack restrained — a relieving vent
+is a rocket nozzle and produces a reaction force. And do any two reliefs from
+different fluids share anything at all?
 
 **3. The oxygen-compatibility pass.** *Highlight everything that sees more than
 23.5 % oxygen and ask whether it is qualified for it.* Tank, fill and drain lines,
 the feed leg, the vent header and stack A, the pressurisation line back to CV-101,
-the purge line downstream of CV-303, and every seal, seat and lubricant inside
-those. Then walk the ignition mechanisms — particle impact, rapid pressurisation,
+the purge line downstream of CV-303, and every seal and seat inside those. Then walk
+the ignition mechanisms — particle impact, rapid pressurisation,
 mechanical impact, galling and friction — asking whether the design has removed at
 least one characteristic element of each. If a material's flammability is unknown,
 it is flammable.
 
 **4. The accumulation-and-ventilation pass.** *Where does a release go, and where
 does it stop?* Follow gravity for cold vapour, buoyancy for warm; mark every trench,
-pit, sump, cable chase, duct and dead corner. The methalox question is whether any
-single volume can receive both a fuel and an oxidiser release, because that volume
-carries a hazard neither system creates alone. Then check the detectors against
-those paths — one in a dead corner, or downstream of a fan, may never see the
-plume.
+pit, sump, cable chase and dead corner. The methalox question is whether any single
+volume can receive both a fuel and an oxidiser release, because that volume carries
+a hazard neither system creates alone. Then check the detectors against those paths
+— one downstream of a fan may never see the plume.
 
 **5. The single-failure pass.** *Fail one component at a time, in the worst
 plausible way* — not "does it break" but "what does its failure enable". The
-governing rule for a bipropellant stand: no single failure may open a fuel path
-and an oxidiser path into a common volume.
+governing rule: no single failure may open a fuel path and an oxidiser path into a
+common volume.
 
 **6. The instrumentation-coverage pass.** *For each failure I just imagined — what
 would tell me it is happening, and how fast?* A leak into the cell shows on AT-403
 or AT-404 in seconds; a degrading vacuum jacket shows only as a rising boiloff rate
-over hours, and only if someone trends it. Ask each instrument the reverse question
-too: what does it *not* see? Infrared detectors cannot see hydrogen at all;
-catalytic beads need oxygen and so under-read in exactly the depleted atmosphere a
-cryogenic leak creates; an oxygen monitor at breathing height will never find a
-helium layer on the ceiling.
+over hours, and only if someone trends it. Ask each instrument what it does *not*
+see: catalytic beads need oxygen, so they under-read in exactly the depleted
+atmosphere a cryogenic leak creates.
 
-**7. The loss-of-utilities pass.** *Cut the power. Cut the instrument air. Cut the
-comms link.* Read every fail position off the drawing and write down the resulting
+**7. The loss-of-utilities pass.** *Cut the power, the instrument air, the comms
+link.* Read every fail position off the drawing and write down the resulting
 whole-system state.
 
 <figure>
@@ -629,7 +609,7 @@ whole-system state.
   <text x="510" y="112" font-family="system-ui, sans-serif" font-size="13" fill="currentColor">tank vents</text>
   <text x="330" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--muted)">opposite logic, same objective: the least dangerous state</text>
 </svg>
-<figcaption>Figure 8.3 — Fail-safe is per-valve, not per-system. Isolation and pressurisation valves fail closed; vent and relief paths fail open. Both answers come from the same question: which position is least dangerous when the utility disappears?</figcaption>
+<figcaption>Figure 8.3 — Fail-safe is per-valve, not per-system: isolation and pressurisation valves fail closed, vent and relief paths fail open. Both answers come from one question — which position is least dangerous when the utility disappears?</figcaption>
 </figure>
 
 *Fail-safe* describes what an actuator does when it loses its motive utility, and
@@ -637,14 +617,13 @@ says nothing about a valve that sticks — Artemis I was delayed by a hydrogen v
 valve with a perfectly well-defined fail position. It is a design layer, which is
 exactly why relief devices are independent of the control system.
 
-One habit rides on top of all seven: *where does a person have to stand, and when,
-and can they read the monitors from outside the hazardous area?*
+And one habit rides on top of all seven: *where does a person have to stand, and
+when?*
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
-A schematic review is seven cheap passes, not one expensive one. Each asks a single
-question of every node, and the cheapness is the point: you find the
-two-block-valves-with-liquid-between-them on pass one, in a conference room, for
-the cost of an afternoon.
+A schematic review is seven cheap passes, not one expensive one. The cheapness is
+the point: you find the two-block-valves-with-liquid-between-them on pass one, in a
+conference room, for the cost of an afternoon.
 </div>
 
 ---
@@ -653,69 +632,62 @@ the cost of an afternoon.
 
 A formal review works through a structured method — a HAZOP walking guide words
 across each node, an FMEA from the component up, a fault tree down from a defined
-top event. OSHA's process-safety rule names What-If, Checklist, HAZOP, FMEA and
-fault tree analysis as acceptable methodologies. HAZOP fits here, because "no flow",
-"reverse flow" and "more pressure" on an isolated node are exactly the deviations
-this drawing hides. The items on Figure 8.1 that would earn their own line:
+top event; OSHA's process-safety rule names all three. HAZOP fits here, because "no
+flow", "reverse flow" and "more pressure" on an isolated node are exactly the
+deviations this drawing hides. The items that would earn their own line:
 
 1. **The shared helium header (CV-101 / CV-201).** One header serving both
    propellant ullages, separated only by check valves; reverse flow past one puts
-   methane vapour into a line that later feeds the LOX tank. Ask whether positive
-   isolation is warranted, and refuse a non-return device as a fuel/oxidiser
-   barrier.
+   methane vapour into a line that later feeds the LOX tank. Refuse a non-return
+   device as a fuel/oxidiser barrier.
 2. **The feed-leg trapped volume (HV-108 / MOV-110 / CV-303).** Confirm the relief
-   exists, is sized for the credible heat input, cannot be isolated, and discharges
-   to stack A.
+   exists, is sized for the credible heat input and cannot be isolated.
 3. **Loss of insulating vacuum on V-101.** The case that sizes PSE-102. Could
    anything in the relief path — a baffle, insulation, ice — pass normal boiloff
    invisibly and choke at full flow?
 4. **Vent-stack icing** — a relief that cannot relieve — and **plume interaction
    between stacks A and B**: separate pipes, yes, but separate *plumes* under every
-   wind, exit velocity and building wake? Separation is about where the gas goes,
-   not where the pipe ends.
-6. **A methane leak into the trench.** Is it ventilated and graded, is AT-404 sited
+   wind and building wake? Separation is about where the gas goes, not where the
+   pipe ends.
+5. **A methane leak into the trench.** Is it ventilated and graded, is AT-404 sited
    where the layer forms, and what electrical equipment is down there?
-7. **A LOX spill onto the ground.** Which surfaces receive it, and whether any
+6. **A LOX spill onto the ground.** Which surfaces receive it, and whether any
    hydrocarbon — grease, drips, debris, asphalt — is present. Housekeeping is an
    engineering control here, not tidiness.
-8. **Coincident fuel and oxidiser release into one volume.** Methane's flammable
-   range widens from 5–15 % to 5.15–60.5 % in oxygen, and NASA's NESC work on
+7. **Coincident fuel and oxidiser release into one volume.** NASA's NESC work on
    LO₂/LNG notes the two liquids are *miscible*, admitting condensed-phase
    detonation — a hazard unlike LOX/RP-1 or LOX/LH₂, whose assessment guidance NASA
    itself called interim as recently as 2023.
-9. **Oxygen cleanliness downstream of CV-303** — the documented cleanliness level
+8. **Oxygen cleanliness downstream of CV-303** — the documented cleanliness level
    and how it was verified, not an assurance.
-10. **Instrument failure the control system trusts.** A frozen sense line gives a
-    plausible, wrong pressure, and an interlock depending on it now depends on a
-    blockage.
-11. **Loss of power, air and comms together** — one case, not three.
-12. **Ignition of a methane release.** Methane's minimum ignition energy in air is
+9. **Instrument failure the control system trusts.** A frozen sense line gives a
+   plausible, wrong pressure, and an interlock depending on it now depends on a
+   blockage.
+10. **Loss of power, air and comms together** — one case, not three.
+11. **Ignition of a methane release.** Methane's minimum ignition energy in air is
     about **0.28 mJ**; a static discharge from a person is around **10 mJ**. Neither
-    margin is a margin, which is why bonding, grounding and area classification are
-    structural requirements, not precautions.
+    margin is a margin — hence bonding, grounding and area classification as
+    structural requirements.
 
 <div class="box"><span class="lbl">Worth knowing</span>
 Notice how often the answer was <em>it depends on the facility</em>. Set pressures
 depend on the vessel's MAWP and its relief calculation; stack heights and
 separations on the site, the terrain and the AHJ; the barricade on an
 explosive-siting analysis. A course can teach which questions have
-facility-specific answers. It cannot supply the answers, and a document that claims
-to should be treated with suspicion.
+facility-specific answers, but it cannot supply the answers.
 </div>
 
 ---
 
 ## Where this leaves you
 
-You can now look at a cryogenic schematic and see what is not drawn: the volume
-with no way out, the relief discharging into a pipe that will plug, the plume that
-meets another plume, the failure that opens two valves at once.
-
-That does not make you qualified to operate a stand. Operating one requires
+You can now look at a cryogenic schematic and see what is not drawn: the volume with
+no way out, the relief discharging into a pipe that will plug, the failure that
+opens two valves at once. That does not make you qualified to operate a stand. Operating one requires
 hardware-specific procedures, independent review, documented training and
-institutional approval — a chain that exists because reading a drawing and running a
-system safely are different competencies. Bring the review skill; let the procedure
-come from the institution that owns the consequences.
+institutional approval — because reading a drawing and running a system safely are
+different competencies. Bring the review skill; let the procedure come from the
+institution that owns the consequences.
 
 ---
 
@@ -726,17 +698,17 @@ come from the institution that owns the consequences.
    requirement its discharge must satisfy.
 
 2. **Short answer.** V-101 carries PSV-101 (145 psig, reclosing) *and* PSE-102
-   (210 psig, non-reclosing). Why two devices rather than one larger one, and which
-   is sized by the loss-of-vacuum case?
+   (210 psig, non-reclosing). Why two rather than one larger one, and which is sized
+   by the loss-of-vacuum case?
 
-3. **Identify the failure state.** Instrument air is lost. From the fail positions
-   on Figure 8.1, what state do MOV-110, MFV-210, PV-103, FV-203, PV-104 and PV-204
-   go to, why is the vent logic the reverse of the main-valve logic, and what
-   failure does fail-safe design not protect against?
+3. **Identify the failure state.** Instrument air is lost. From Figure 8.1, what
+   state do MOV-110, MFV-210, PV-103, FV-203, PV-104 and PV-204 go to, why is the
+   vent logic the reverse of the main-valve logic, and what failure does fail-safe
+   design not protect against?
 
-4. **What would concern you here?** A reviewer proposes deleting AT-404 in the
-   trench, because methane is lighter than air and AT-403 under the roof covers it.
-   Reject this, with the temperature involved.
+4. **What would concern you here?** A reviewer proposes deleting AT-404, because
+   methane is lighter than air and AT-403 under the roof covers it. Reject this,
+   with the temperature involved.
 
 5. **Conceptual calculation.** The isolated segment in Figure 8.2 holds roughly
    1.5 L of liquid oxygen. Estimate the gas volume at 70 °F and 1 atm, and say what
@@ -746,20 +718,16 @@ come from the institution that owns the consequences.
 <summary>Show answers</summary>
 
 1. **Trapped cryogenic liquid** — an isolatable volume of LOX with no path out,
-   warming from ambient. LBNL gives pressures "in excess of 10 000 psig" for
-   confined cryogen warming to ambient; no feed-line component is rated for that,
-   and the failure is a fragmentation event. The device is **PSV-109**, and its
-   discharge must reach somewhere the drawing shows — the oxidiser vent header, then
-   stack A — by a path that **cannot itself be isolated**. "CV-303 will relieve it"
-   is wrong twice: a check valve is not a relief device, and here it holds in the
-   wrong direction.
+   warming from ambient. LBNL gives pressures "in excess of 10 000 psig" for confined
+   cryogen warming to ambient; no feed-line component is rated for that, and the
+   failure is a fragmentation event. The device is **PSV-109**, and its discharge
+   must reach somewhere the drawing shows — the oxidiser vent header, then stack A —
+   by a path that **cannot itself be isolated**.
 
 2. They answer **two different sizing cases**. PSV-101 covers steady boiloff and
    *recloses*, so the test continues. The **burst disc is sized by loss of vacuum**
    (and by fire): air into the annulus condenses on the cold inner wall, driving
    1–7 kW/m² insulated or 25–40 kW/m² bare against about 0.6 W/m² for healthy MLI.
-   A reclosing valve big enough for that would be enormous and would chatter on the
-   ordinary case. Remove either and one case is uncovered — that is not redundancy.
 
 3. **MOV-110, MFV-210, PV-104 and PV-204 go closed; PV-103 and FV-203 go open.**
    Isolation logic is "stop adding propellant, stop adding pressure"; vent logic is
@@ -773,15 +741,13 @@ come from the institution that owns the consequences.
    111.7 K to about **164.3 K — a rise of 52.6 K** — before its density matches
    ambient air, and until then it flows along the floor and pools in low points,
    which is what a trench is. AT-403 covers the warm buoyant regime, AT-404 the cold
-   dense one. The reviewer is importing hydrogen practice: hydrogen crosses over
-   within about 1.7 K of its boiling point.
+   dense one. The reviewer is importing hydrogen practice, where the crossover comes
+   within about 1.7 K of the boiling point.
 
 5. Oxygen's ratio is **860 : 1** (liquid at NBP to gas at 70 °F, 1 atm), so 1.5 L
    becomes roughly **1 290 L, about 1.3 m³**. The segment is fixed at 1.5 L, so the
    gas cannot expand and the pressure goes wherever it must. The hazard is not
-   proportional to how much you trapped — a very small volume is entirely sufficient
-   to burst the pipe. Caveats: 860 : 1 assumes the gas reaches room temperature, and
-   the real limit is the segment's burst strength; the ratio only says the demand is
-   hopelessly beyond it.
+   proportional to how much you trapped: a very small volume is entirely sufficient
+   to burst the pipe.
 
 </details>

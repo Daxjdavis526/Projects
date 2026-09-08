@@ -11,9 +11,9 @@ miss what is holding the hazard down.
 
 - Tell the four kinds of "tank" apart, and say which is not a pressure vessel.
 - Explain what the vacuum annulus does, and what losing it does to heat leak.
-- Say why a cryogenic valve has an extended bonnet and why some balls are drilled.
+- Say why a cryogenic valve has an extended bonnet, and why some balls are drilled.
 - Find every isolatable volume on a schematic and ask whether it is relieved.
-- Read ISA tags, valve and relief symbols and line types off a cryogenic P&ID.
+- Read ISA tags, valve and relief symbols and line types off a P&ID.
 
 ---
 
@@ -22,25 +22,24 @@ miss what is holding the hazard down.
 Four different vessels get called "a tank", and each has a different relief basis.
 
 - **Open-neck dewar.** Closed by a *loose plug* that lets boiloff out while keeping back
-  air, whose water and CO₂ freeze in the neck. It is **not a pressure vessel** — vented
-  by construction, good for "at maximum several days" `[LBNL-PUB3000-29]`. Sealing it,
-  or icing the neck shut, leaves a sealed vessel with no relief.
-- **Pressurised liquid cylinder.** A vacuum-jacketed ASME vessel with a
-  pressure-building circuit, economiser, liquid leg and relief stack — about 22 psig for
-  liquid use, 230–350 psig for gas `[LBNL-PUB3000-29]`. Not a static store but an
-  **active, self-pressurising machine**, closer to a small boiler than to a K-bottle.
-- **Bulk tank.** Foundation-mounted, external vaporiser, full relief system; typical
-  MAWP 250 psig, with "dual relief valves and rupture disks ... as standard"
-  `[CHART-BULK]`.
+  air, whose water and CO₂ freeze in the neck. It is **not a pressure vessel** — vented by
+  construction, good for "at maximum several days" `[LBNL-PUB3000-29]`. Sealing it, or
+  icing the neck shut, leaves a sealed vessel with no relief.
+- **Pressurised liquid cylinder.** A vacuum-jacketed ASME vessel with a pressure-building
+  circuit, economiser, liquid leg and relief stack — about 22 psig for liquid use,
+  230–350 psig for gas `[LBNL-PUB3000-29]`. Not a static store but an **active,
+  self-pressurising machine**, closer to a small boiler than to a K-bottle.
+- **Bulk tank.** Foundation-mounted, external vaporiser, and "dual relief valves and
+  rupture disks ... as standard" at a typical MAWP of 250 psig `[CHART-BULK]`.
 - **Run tank.** What the engine draws from — optimised for *discharge* rather than hold
-  time, and often barely insulated because it is cold for hours. Its design case is a
+  time, often barely insulated because it is cold for hours. Its design case is a
   transient, and so are its failure modes: ullage collapse, stratification, geysering.
 
-**The annulus.** The inner vessel holds the cryogen, the jacket holds one atmosphere
-out, and the evacuated gap kills gas conduction. What remains is radiation across the gap
-and conduction through the supports — so you add shields, and make the supports long,
-thin and low-conductivity, which fights the structure. The vacuum is a consumable, so the
-annulus carries sieve, getter and a pump-out port `[AIGA-106]`.
+**The annulus.** The inner vessel holds the cryogen, the jacket holds one atmosphere out,
+and the evacuated gap kills gas conduction. What remains is radiation across the gap and
+conduction through the supports — so you add shields, and make the supports long, thin and
+low-conductivity, which fights the structure. The vacuum is a consumable, so the annulus
+carries sieve, getter and a pump-out port `[AIGA-106]`.
 
 <figure>
 <svg viewBox="0 0 660 330" role="img" aria-label="Cross-section of a vacuum-jacketed tank showing outer jacket, evacuated annulus filled with multilayer insulation, inner vessel with liquid and ullage, support struts, neck penetration and a combined pump-out port and annulus relief device">
@@ -98,17 +97,16 @@ the day the annulus goes to atmosphere.
 </div>
 
 **Boiloff** is quoted as NER, percent of contents lost per day standing idle. Vertical
-bulk tanks run **0.35 to 0.10 %/day in oxygen**, **0.56 to 0.16 % in nitrogen** — worse,
+bulk tanks run **0.35 to 0.10 %/day in oxygen** and **0.56 to 0.16 % in nitrogen**, worse
 because nitrogen's latent heat per unit volume is lower `[CHART-BULK]`. A 10-litre LN₂
-dewar losing 8.8 litres/day holds **1.1 days** `[TRADE-EXPLANATORY]`: small dewars are
-continuous gas sources.
+dewar losing 8.8 litres/day holds **1.1 days** `[TRADE-EXPLANATORY]`.
 
 **Pressure build.** A liquid cylinder makes its own pressure: liquid off the bottom,
-gasified in a **pressure-building coil** warmed by ambient air, returned to the ullage,
-a **PB regulator** opening that loop below its set point and an **economiser** set higher
-taking withdrawal from the *ullage* instead `[TRADE-EXPLANATORY]`. So the tank never
-stops making pressure; delivery sags if you outrun the coil, whose capacity falls as it
-ices; and with the economiser open you draw **gas, not liquid**.
+gasified in a **pressure-building coil** warmed by ambient air, returned to the ullage, a
+**PB regulator** opening that loop below its set point and an **economiser** set higher
+taking withdrawal from the *ullage* instead `[TRADE-EXPLANATORY]`. So the tank never stops
+making pressure; delivery sags if you outrun the coil, whose capacity falls as it ices;
+and with the economiser open you are drawing **gas, not liquid**.
 
 <div class="box"><span class="lbl">Worth knowing</span>
 Frost is diagnostic. Permanent or growing ice on a vacuum-jacketed surface means the
@@ -122,15 +120,15 @@ dewar may have lost vacuum" `[LBNL-PUB3000-29]`.
 
 **Bare line** suits only short runs nobody can touch; on LOX service it condenses liquid
 air, which is oxygen-enriched as it drips. **Foam** is cheap and field-repairable at
-5–20 W/m², and degrades by the moisture ratchet above. **Vacuum-jacketed (VJ) line** is
-pipe within pipe at 0.5–2.0 W/m² `[CHART-VIP]`, the default for anything long or
-anything that must arrive single-phase. VJ brings two obligations:
+5–20 W/m², and degrades by moisture ingress. **Vacuum-jacketed (VJ) line** is pipe within
+pipe at 0.5–2.0 W/m² `[CHART-VIP]`, the default for anything long. VJ brings two
+obligations:
 
 - **Expansion provisions.** The inner pipe goes to 77 K while the jacket stays near
   ambient, and austenitic stainless contracts roughly 0.3 % over that range (exact
-  coefficient in `[NIST-CRYO-MATERIALS]`), so a 30 m run moves about 90 mm relative to
-  its jacket. AIGA requires a flexibility analysis and bellows rated for at least
-  **1000 cycles** `[AIGA-106]` — a stand chilling down twice a day eats that in two years.
+  coefficient in `[NIST-CRYO-MATERIALS]`), so a 30 m run moves about 90 mm relative to its
+  jacket. AIGA requires a flexibility analysis and bellows rated for at least **1000
+  cycles** `[AIGA-106]` — which a stand chilling down twice a day eats in two years.
 - **An annulus relief.** The annulus is a sealed volume beside a cryogen: an inner leak
   fills it with boiling liquid and bursts a jacket built to hold out one atmosphere. It
   usually sits in the pump-out port — so a **missing pump-out plug** may mean a leak blew
@@ -145,27 +143,26 @@ metal until ignition `[AIGA-106]`.
 **Bellows** take up contraction and misalignment, and fail characteristically by
 **squirm** — above a stability limit the convolutions buckle sideways. A squirmed bellows
 cannot be reset; it is scrapped, and left in service it fatigues fast. EJMA requires a
-**safety factor of 3 against squirm** `[EJMA]`. They also fail by fatigue, by
-flow-induced vibration, and by being anchored wrongly.
+**safety factor of 3 against squirm** `[EJMA]`.
 
 Cold, the joint ranking is **welded > brazed > mechanical**, because every mechanical
-joint depends on a contact stress that cooling changes — and cycling is worse than steady
-cold, because it ratchets. Where a joint must come apart, the metal gasket face seal is
-preferred, sealing by plastic deformation rather than by an elastomer `[SWAGELOK-VCR]`:
+joint depends on a contact stress that cooling changes, and cycling is worse than steady
+cold because it ratchets. Where a joint must come apart, the metal gasket face seal is
+preferred, sealing by plastic deformation rather than by an elastomer `[SWAGELOK-VCR]` —
 most elastomers pass their glass transition well above cryogenic temperature and stop
-sealing `[PARKER-ORD-5712]`. Hence the trick of keeping the elastomer warm — the logic of
-the bayonet and of the extended bonnet.
+sealing `[PARKER-ORD-5712]`. Hence the trick of keeping the elastomer warm, which is the
+logic of the bayonet and of the extended bonnet.
 
 ---
 
 ## 3. Valves
 
-**Ball** valves are the quarter-turn isolation default — full bore, fast, cursed with a
-body cavity. **Globe** valves throttle well at the price of pressure drop. **Gate** valves
-are rarer cold, because clearances and large seat areas sit badly with contraction.
-**Needle** valves meter instrument flows. All four differ from warm valves in the same
-ways: austenitic stainless rather than carbon steel, clearances opened so contraction
-cannot seize them, cold-ductile seats, and an extended bonnet.
+**Ball** valves are the quarter-turn isolation default, cursed with a body cavity.
+**Globe** valves throttle well at the price of pressure drop. **Gate** valves are rarer
+cold, because clearances and large seat areas sit badly with contraction. **Needle** valves
+meter instrument flows. All four differ from warm valves in the same ways: austenitic
+stainless rather than carbon steel, clearances opened so contraction cannot seize them,
+cold-ductile seats, and an extended bonnet.
 
 **Why the stem is that long.** The stem passes through polymeric packing, and at 77 K
 polymers are not seals but brittle rings that shrink away from the stem, while the gland
@@ -177,7 +174,7 @@ area and operating mechanism from freezing" `[MSS-SP-134]`.
 Inside it two pressures compete: clearance is kept small to **minimise convection**, wall
 thickness small to cut conduction. Hence **orientation matters** — the column insulates
 only while it can stratify, so the valve goes stem-vertical, and one mounted far off
-vertical lets liquid in and freezes the packing.
+vertical lets liquid in and freezes the packing it was bought to protect.
 
 <figure>
 <svg viewBox="0 0 660 340" role="img" aria-label="Cross-section of an extended-bonnet cryogenic ball valve showing the cold body with ball and trapped body cavity, a relief hole through the ball facing upstream, the long bonnet extension containing a static vapour column, the frost line, and the warm packing gland and actuator at the top">
@@ -219,17 +216,16 @@ contamination causes sticking, and check-valve leakage is a named cause of overp
 
 **Actuation** is manual, solenoid, or — for anything large — pneumatic piloted by a small
 solenoid `[NASA-PROP-TEST-HANDBOOK]`. **Fail-safe position** asks which state is least
-dangerous when air, power or signal disappears, and is decided per valve: propellant
-isolation and pressurisation valves fail **closed**, while vent and relief paths fail
-**open**, because loss of control must not leave a cryogenic volume bottled up. Fuel and
-oxidiser logic is identical, but the consequences are not — a failed-open oxidiser path
-creates an ignition environment, a fuel path a flammable cloud — and no single failure may
-open both into a common volume.
+dangerous when a utility disappears: propellant isolation and pressurisation valves fail
+**closed**, vent and relief paths fail **open**, because loss of control must not leave a
+cryogenic volume bottled up. Fuel and oxidiser logic is identical, but the consequences are
+not — a failed-open oxidiser path creates an ignition environment, a fuel path a flammable
+cloud — and no single failure may open both into a common volume.
 
 **Trapped volume.** When a ball valve closes, fluid is sealed in the **body cavity**,
 connected to neither line, and it warms. Confined cryogen warming to ambient generates
-pressure "in excess of 10,000 psig" `[LBNL-PUB3000-29]`, driven by an expansion ratio
-near **696:1 for nitrogen** `[AP-SG-27]`; the body fails as a fragmentation event.
+pressure "in excess of 10,000 psig" `[LBNL-PUB3000-29]`, on an expansion ratio near
+**696:1 for nitrogen** `[AP-SG-27]`; the body fails as a fragmentation event.
 
 The fix is a **relief hole** through one wall of the ball, capping cavity pressure at line
 pressure. It faces **upstream**, because venting downstream would push the ball off its
@@ -238,26 +234,26 @@ seat and open a permanent leak path `[TRADE-EXPLANATORY]`. So a vented ball valv
 which during a drain may not be the flow direction.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
-Two block valves in a line with nothing between them. Close both and the pipe between is
-a sealed volume of liquid with no relief on it. The first indication is the pipe or a
-valve body letting go. Module 05 is largely about this finding.
+Two block valves in a line with nothing between them. Close both and the pipe between is a
+sealed volume of liquid with no relief on it. The first indication is the pipe or a valve
+body letting go.
 </div>
 
 ---
 
 ## 4. Relief and venting
 
-**The philosophy in one sentence:** every volume that can hold cryogen and can be
-isolated needs its own relief path that cannot itself be isolated, sized for the worst
-credible heat input. SLAC: "Each and every portion of the cryogenic system must have
-uninterruptible pressure relief" `[SLAC-CH36]`, extended by LBNL to any vacuum space in
-contact with a cryogen `[LBNL-PUB3000-29]`.
+**The philosophy in one sentence:** every volume that can hold cryogen and can be isolated
+needs its own relief path that cannot itself be isolated, sized for the worst credible heat
+input. SLAC: "Each and every portion of the cryogenic system must have uninterruptible
+pressure relief" `[SLAC-CH36]` — extended by LBNL to any vacuum space in contact with a
+cryogen `[LBNL-PUB3000-29]`.
 
 - **Reclosing relief valves** open and reseat, which the boiloff case wants because the
-  system keeps running — typically 2 psi tolerance through 70 psi and 3 % above,
-  reseating before 90 % of set `[NASA-PROP-TEST-HANDBOOK]`.
-- **Burst discs** are non-reclosing: more capacity per size, no seat to leak, no
-  set-point drift, but once open the system stays open.
+  system keeps running — typically 2 psi tolerance through 70 psi, reseating before 90 % of
+  set `[NASA-PROP-TEST-HANDBOOK]`.
+- **Burst discs** are non-reclosing: more capacity per size, no seat to leak, no set-point
+  drift, but once open the system stays open.
 - **In parallel** is the usual tank arrangement — valve for boiloff, disc set higher for
   the catastrophic case `[CHART-BULK]`. **In series**, a disc upstream protects the valve
   seat from freezing or fouling, at the cost of de-rating capacity by **0.90**
@@ -268,17 +264,16 @@ contact with a cryogen `[LBNL-PUB3000-29]`.
 *Fire* is the accident case and sizes the large one: CGA gives Q = G·A^0.82, whose exponent
 encodes that a fire does not engulf the whole surface, and whose smaller *insulated* factor
 may be used only if the insulation stays in place at 1200 °F `[CGA-S-1-SERIES]`. Cryogenics
-adds a third case — failure of the vacuum space `[JLAB-OVERPRESSURE]`. Get the part number
-right: **CGA S-1.3** is stationary containers, **S-1.2** portable ones; ASME BPVC VIII
-allows accumulation of 10 % or 3 psi above MAWP, 21 % for fire `[ASME-BPVC-VIII]`.
+adds a third, loss of the vacuum space `[JLAB-OVERPRESSURE]`. **CGA S-1.3** covers
+stationary containers and **S-1.2** portable ones; ASME BPVC VIII allows accumulation of
+10 % above MAWP, 21 % for fire `[ASME-BPVC-VIII]`.
 
 **Venting.** Discharge must not go where people are: anything that could pull room oxygen
-below 19.5 % exhausts outside the building `[SLAC-CH36]`, while a valve-cavity relief needs
-no stack. A relieving stack is a nozzle and must be restrained `[JLAB-OVERPRESSURE]`.
-**Fuel and oxidiser vents are never combined:** a shared header is a mixing chamber that
-holds gas from one system until the other vents. **Icing** attacks the one component that
-must never block — blocked vent lines are a principal cause of overpressure, and a flame
-arrestor added to a hydrogen vent for safety can itself ice up.
+below 19.5 % exhausts outside the building `[SLAC-CH36]`, and a relieving stack is a nozzle
+that must be restrained `[JLAB-OVERPRESSURE]`. **Fuel and oxidiser vents are never
+combined:** a shared header is a mixing chamber holding gas from one system until the other
+vents. **Icing** attacks the one component that must never block — blocked vent lines are a
+principal cause of overpressure.
 
 <div class="box takeaway"><span class="lbl">Rocket engineer takeaway</span>
 Relief devices are the layer that does not depend on the control system. If a finding can
@@ -293,30 +288,29 @@ be closed only by "the interlock will catch it", it is not closed.
   hydrocarbons that are harmless gases at ambient are solid particles at 77 K. A cryogenic
   filter is a trap, and traps plug, isolating liquid downstream.
 - **Phase separators** let two-phase flow disengage, venting gas and passing liquid on,
-  because heat leak makes vapour and downstream equipment needs liquid. A separator is a
-  vent source by design, and counts toward the room's ODH inventory.
-- **Vaporisers** — finned bundles gasifying liquid with ambient air — turn bulk liquid
-  into gas and drive pressure-building circuits. Their issue is **icing**: frost insulates
-  the fin from the air it must draw heat from, so capacity falls through a run. Hence
-  duty-cycling in pairs, and a real structural load from the ice.
+  because downstream equipment needs single-phase liquid. A separator is a vent source by
+  design, and counts toward the room's ODH inventory.
+- **Vaporisers** — finned bundles gasifying liquid with ambient air — drive
+  pressure-building circuits. Their issue is **icing**: frost insulates the fin from the air
+  it must draw heat from, so capacity falls through a run, and the ice is a structural load.
 
 ---
 
 ## 6. Instrumentation
 
 **Temperature.** How cold you need to go picks the sensor `[LAKESHORE-SENSORS]`. **Silicon
-diodes** cover 1.4–500 K and grow *more* sensitive as they get colder. **Platinum RTDs**
-are stable to ±10 mK/year over 77–273 K, but below about 30 K the resistance flattens and
-sensitivity collapses — fine for LOX and LN₂, useless for liquid hydrogen.
-**Thermocouples** are cheap and rugged, but their sensitivity falls toward zero as they
-cool (Type E is "useful when T > 10 K") and the reference junction then dominates.
+diodes** cover 1.4–500 K and grow *more* sensitive as they get colder. **Platinum RTDs** are
+stable and repeatable, but below about 30 K the resistance flattens and sensitivity
+collapses — fine for LOX and LN₂, useless for liquid hydrogen. **Thermocouples** are cheap
+and rugged, but their sensitivity falls toward zero as they cool (Type E is "useful when
+T > 10 K") and the reference junction then dominates.
 
 **Pressure.** The sensing element is rarely rated for process temperature, so the usual
-arrangement is a transmitter behind a standoff line. That line fills with cryogen, heat
-leak boils it, and a column of cold vapour becomes the measurement path: not a static head
-you can correct for, since its density varies with the heat leaking in; liable to
-oscillate as liquid enters the warm section and flashes; and able to freeze solid. Hence
-traced or purged sense lines `[NASA-PROP-TEST-HANDBOOK]`.
+arrangement is a transmitter behind a standoff line. That line fills with cryogen, heat leak
+boils it, and a column of cold vapour becomes the measurement path: not a static head you
+can correct for, since its density varies with the heat leaking in; liable to oscillate as
+liquid enters the warm section and flashes; and able to freeze solid. Hence traced or purged
+sense lines `[NASA-PROP-TEST-HANDBOOK]`.
 
 <div class="box wcgw"><span class="lbl">What could go wrong?</span>
 A moisture plug freezes in a sense line. The transducer does not read zero and does not
@@ -325,27 +319,27 @@ pressure walks away from it. This one fails quietly.
 </div>
 
 **Flow.** Turbine meters work cold, to about −450 °F `[NASA-PROP-TEST-HANDBOOK]`; Coriolis
-meters give mass and density directly; DP meters inherit every sense-line problem twice.
-But **a cryogen sits close to its boiling point and every meter works by creating a
-pressure drop**, so the measurement creates the condition that invalidates it. With vapour
-present, volumetric meters lose their meaning, turbine rotors over-speed while cavitation
-erodes them, Coriolis tubes lose signal to damping, and DP meters lose the constant density
-they assume. A flow reading is valid only if the fluid is single-phase *at the meter*.
+meters give mass and density directly; DP meters inherit every sense-line problem twice. But
+**a cryogen sits close to its boiling point and every meter works by creating a pressure
+drop**, so the measurement creates the condition that invalidates it. With vapour present,
+volumetric meters lose their meaning, turbine rotors over-speed while cavitation erodes
+them, and Coriolis tubes lose signal to damping. A flow reading is valid only if the fluid
+is single-phase *at the meter*.
 
-**Level** is harder than in water: the liquid is boiling, so there is no quiet surface;
-density is low and varies along the saturation line; head per metre is tiny; and there is
-no sight glass on a jacketed vessel. DP is the bulk-tank standard but needs density;
-capacitance probes need dielectric corrections; point sensors are discrete but
-unambiguous, which is why interlocks sit on them.
+**Level** is harder than in water: the liquid is boiling, density is low and varies along
+the saturation line, head per metre is tiny, and there is no sight glass on a jacketed
+vessel. DP is the bulk-tank standard but needs density; capacitance probes need dielectric
+corrections; point sensors are discrete but unambiguous, which is why interlocks sit on
+them.
 
 **Gas detection.** Placement is the whole lesson: *put the sensor where the gas goes*, at
 the temperature it arrives at. An oxygen-deficiency hazard exists below **19.5 % O₂**
 `[SLAC-CH36]`. Helium and hydrogen rise, so helium monitors go at ceiling height; argon
-sinks; and **cold nitrogen vapour is far denser than air** — as every cryogenic vapour is
-at its boiling point — so a release acts heavy first and neutral later. Breathing-zone
-height is the compromise, with low-level sensing over pits and readouts *outside* the
-space. Combustible detectors go **high**, above the leak source, alarming at 20 % and 40 %
-LEL. Always ask what a detector cannot see: infrared cannot detect hydrogen at all.
+sinks; and **cold nitrogen vapour is far denser than air**, so a release acts heavy first
+and neutral later — breathing-zone height is the compromise, with low-level sensing over
+pits and readouts *outside* the space. Combustible detectors go **high**, above the leak
+source, alarming at 20 % and 40 % LEL. Always ask what a detector cannot see: infrared
+cannot detect hydrogen at all.
 
 ---
 
@@ -358,8 +352,7 @@ S switch *or* safety, V valve, E element, with H/L/D modifiers. So `PT` is a pre
 transmitter, `FE` the flow element, `LSH` a level switch high, `PSV` a pressure safety
 valve, `PSE` conventionally the rupture disc, `AT` an analyser — usually the gas monitor.
 Note that `S` is ambiguous: *safety* in PSV, *switch* in LSH. The digits identify the
-**loop, not the device**, and loops are numbered by system: 100-series LOX, 200-series
-fuel, 300-series pneumatics.
+**loop, not the device**, and loops are numbered by system: 100-series LOX, 200-series fuel.
 
 <figure>
 <svg viewBox="0 0 660 290" role="img" aria-label="Legend of P&amp;ID symbols: normally open and normally closed valves, check valve, manual, solenoid and pneumatic actuators, relief valve and burst disc, field and control-room instrument bubbles, and line types for liquid, gas, vacuum-jacketed pipe and electrical signal">
@@ -415,10 +408,9 @@ fuel, 300-series pneumatics.
 Flow runs **left to right**, source to use point, and **one fluid gets one horizontal
 band** — itself a safety measure, because it makes an accidental interconnection visually
 obvious. VJ line is drawn as a double line, with its pump-out and annulus relief shown.
-**Every relief is drawn**, including the small ones, so a cryogenic P&ID carries far more
-PSV and PSE bubbles than an ambient drawing, and trapped-volume reliefs between valve pairs
-are the visual signature of the genre. Vent headers are shown *terminating*, fuel, oxidiser
-and inert separately, and line classes carry design temperature.
+**Every relief is drawn**, including the small ones, so trapped-volume reliefs between valve
+pairs are the visual signature of the genre. Vent headers are shown *terminating*, fuel,
+oxidiser and inert separately.
 
 <figure>
 <svg viewBox="0 0 660 320" role="img" aria-label="Annotated cryogenic schematic fragment: a vacuum-jacketed LOX run tank with pressure, temperature and level transmitters, a relief valve and burst disc venting to a dedicated LOX vent stack, a vacuum-jacketed outlet line through two block valves with a trapped-volume relief between them, a flow transmitter, and an oxygen-deficiency analyser">
@@ -481,14 +473,13 @@ and inert separately, and line classes carry design temperature.
    anything?
 3. **Check every vented ball valve's orientation** against the direction it must hold
    pressure.
-4. **Read every fail position.** On loss of air and of power, what state does the system
-   go to, and is it safe?
+4. **Read every fail position.** On loss of air and of power, what state does the system go
+   to, and is it safe?
 5. **Find the vacuum-jacketed sections** and confirm each has an annulus relief and an
    accessible pump-out port.
-6. **Check every instrument's sense line** for freeze or plug, and for interlocks
-   depending on it.
-7. **Check that every flow measurement can be shown to be single-phase at the meter.**
-8. **Locate the gas detection** and ask what release scenario each detector covers.
+6. **Check every sense line** for freeze or plug, and for interlocks depending on it.
+7. **Check that every flow measurement is single-phase at the meter.**
+8. **Locate the gas detection** and ask what release each detector covers.
 
 ---
 
@@ -497,19 +488,19 @@ and inert separately, and line classes carry design temperature.
 1. A colleague calls an open-neck dewar and a portable liquid cylinder "both just dewars".
    Give the most important difference, and one failure mode that follows.
 
-2. A vacuum-jacketed LN₂ line has healthy MLI in its annulus, and its pump-out plug is
-   found on the floor beneath it. What does that mean, and by roughly what factor could
-   the heat input have changed?
+2. A vacuum-jacketed LN₂ line has healthy MLI in its annulus, and its pump-out plug is found
+   on the floor beneath it. What does that mean, and by roughly what factor could the heat
+   input have changed?
 
-3. Why is a cryogenic valve's bonnet extension so long, and what does that impose on how
-   the valve may be *installed*?
+3. Why is a cryogenic valve's bonnet extension so long, and what does that impose on how the
+   valve may be *installed*?
 
 4. A relief valve is protected by a rupture disc at its inlet. Name one advantage, one code
    penalty, and one failure mode specific to the arrangement.
 
 5. **Schematic reading.** In Figure 3.4, PSV-105 sits between HV-104 and FCV-106. (a) What
-   is it for? (b) FCV-106 is annotated FC — is that right for this valve, and why?
-   (c) Name two things the drawing does *not* let you verify.
+   is it for? (b) FCV-106 is annotated FC — is that right, and why? (c) Name two things the
+   drawing does *not* let you verify.
 
 <details>
 <summary>Show answers</summary>
@@ -517,8 +508,8 @@ and inert separately, and line classes carry design temperature.
 1. **The cylinder is a pressure vessel; the dewar is not.** The dewar is vented by
    construction, closed by a loose plug; the cylinder is an ASME vessel with a
    pressure-building circuit, economiser and reliefs `[LBNL-PUB3000-29]`. So anything that
-   seals the dewar — a tight cap, an ice plug — leaves a sealed volume of warming cryogen,
-   at pressures "in excess of 10,000 psig".
+   seals the dewar — a tight cap, an ice plug — leaves warming cryogen sealed in, at
+   pressures "in excess of 10,000 psig".
 
 2. **The annulus has pressurised — most likely an inner-line leak** `[AIGA-106]`: the plug
    sits in the combined pump-out and relief port and blows out when the annulus is no
@@ -527,10 +518,10 @@ and inert separately, and line classes carry design temperature.
    defence; it performs only below ~10⁻³ torr `[NASA-MLI-JOHNSON]`.
 
 3. **To keep the stem packing warm**, since cold polymers are brittle rings that shrink
-   away from the stem instead of sealing; the extension holds a static vapour column
-   between cold body and packing `[MSS-SP-134]`. Hence **orientation**: the column
-   insulates only while it can stratify, so the valve is installed stem-vertical. On its
-   side, liquid enters the extension and freezes the packing.
+   away from the stem instead of sealing; the extension holds a static vapour column between
+   cold body and packing `[MSS-SP-134]`. Hence **orientation**: the column insulates only
+   while it can stratify, so the valve is installed stem-vertical — on its side, liquid
+   enters the extension and freezes the packing.
 
 4. **Advantage:** the disc isolates the valve seat, so it cannot be fouled, frozen or
    corroded shut. **Code penalty:** capacity is de-rated by a combination factor of 0.90
@@ -540,13 +531,12 @@ and inert separately, and line classes carry design temperature.
 
 5. (a) **A trapped-volume relief:** with both valves closed the pipe between holds isolated
    liquid oxygen, which heat leak boils until something fails — every isolatable portion
-   needs its own uninterruptible relief `[SLAC-CH36]`. (b) **Yes.** FCV-106 feeds the
+   needs its own uninterruptible relief `[SLAC-CH36]`. (b) **Yes:** FCV-106 feeds the
    engine, so on loss of air or signal you want the oxidiser cut off, not fed to a system
    nobody is commanding; fail-*open* belongs to vent and relief paths instead. (c) Any two
-   of: whether PSV-102 and PSE-103 are sized for fire and loss of vacuum rather than
-   boiloff alone; where the vent stack discharges relative to people and the fuel stack;
-   whether the VJ run has an annulus relief and an accessible pump-out port; whether the
-   fluid is single-phase at the flow element; and whether PT-101's sense line can freeze.
-   The drawing shows topology, not sizing or elevation.
+   of: whether PSV-102 and PSE-103 are sized for fire and loss of vacuum rather than boiloff
+   alone; where the vent stack discharges relative to people and the fuel stack; whether the
+   VJ run has an annulus relief and an accessible pump-out port; whether the fluid is
+   single-phase at the flow element; and whether PT-101's sense line can freeze.
 
 </details>
