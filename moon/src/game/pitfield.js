@@ -16,6 +16,7 @@
    ========================================================================== */
 
 import { PITS, buildPitRaster, distanceToPit } from '../data/pits.js';
+import { caveFor } from './cave.js';
 import { Raster } from '../terrain/heightfield.js';
 
 const INSTALL_RANGE = 30000;
@@ -29,6 +30,11 @@ export class PitField {
     this.hf = opts.heightfield;
     this.terrain = opts.terrain;
     this.installed = new Map();       // id -> { pit, base }
+    /* The one pit with a published cave under it gets one, built at the same
+       moment the hole is cut and from the same surface elevation, so the
+       conduit mouth and the shaft wall cannot drift apart. Null the rest of the
+       time, which is nearly always. */
+    this.cave = null;
     this.stats = { installed: 0, bytes: 0 };
   }
 
@@ -88,6 +94,8 @@ export class PitField {
       this.hf.addRaster(new Raster(spec, data));
     }
     this.installed.set(pit.id, { pit, base, bytes: data.byteLength });
+    const cave = caveFor(pit, base);
+    if (cave) this.cave = cave;
     this.recount();
     return { pit, base };
   }
@@ -96,6 +104,7 @@ export class PitField {
     const e = this.installed.get(pit.id);
     if (!e) return;
     this.installed.delete(pit.id);
+    if (this.cave && this.cave.pit.id === pit.id) this.cave = null;
     this.hf.removeRaster(`pit:${pit.id}`);
     if (this.terrain) this.terrain.dropRaster(`pit:${pit.id}`, this.boundsOf(pit));
     this.recount();

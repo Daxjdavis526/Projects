@@ -25,7 +25,13 @@ export class Stage {
       antialias: opts.antialias !== false,
       logarithmicDepthBuffer: true,
       powerPreference: 'high-performance',
-      stencil: false,
+      /* On, for exactly one thing: the cave under the Mare Tranquillitatis
+         pit. A height field is a single surface per point, so it can describe
+         a hole but never a ceiling over one, and the pit's shaft wall is
+         therefore drawn straight across the cave mouth. The way through is a
+         stencil portal — mark the mouth, then draw the void behind it — and
+         that needs a stencil buffer. Nothing else in the renderer uses it. */
+      stencil: true,
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, opts.pixelRatio ?? 1.5));
     this.renderer.setSize(window.innerWidth, window.innerHeight);

@@ -190,6 +190,22 @@ function ellipseRadius(minD, maxD, azimuthDeg, bearingDeg) {
 }
 
 /**
+ * The radius of a pit's vertical shaft at a bearing, in metres.
+ *
+ * Exported because the cave under the Mare Tranquillitatis pit has to open off
+ * the shaft wall at exactly the radius the terrain puts it, or there is a step
+ * where the mesh meets the ground.
+ */
+export function shaftRadiusAt(pit, bearingDeg) {
+  return ellipseRadius(pit.innerMin, pit.innerMax, pit.azimuth, bearingDeg);
+}
+
+/** The same, for the outer margin of the collapse funnel. */
+export function funnelRadiusAt(pit, bearingDeg) {
+  return ellipseRadius(pit.funnelMin, pit.funnelMax, pit.azimuth, bearingDeg);
+}
+
+/**
  * Depth below the surrounding surface at a point, in metres, for one pit.
  *
  * Three regions, which is what the atlas describes rather than what looks good:

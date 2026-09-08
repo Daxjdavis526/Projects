@@ -63,6 +63,78 @@ const DUSK_EXCESS = 30;
    pretending to be a thermal model of the top centimetre of regolith. */
 function ease(x) { return 1 - Math.pow(1 - x, 2.4); }
 
+/* --- pits and caves ----------------------------------------------------------
+   Diviner sees the pits, and what it sees is the best argument anyone has for
+   going into one.
+
+   Horvath, Hayne and Paige measured the Mare Tranquillitatis and Mare Ingenii
+   pits glowing about a hundred kelvin warmer than the ground around them at
+   night, modelled what that implies about the inside, and found three numbers
+   worth putting in a game. Near the equator a regolith floor in the open part
+   of a pit can pass 420 K at noon — hotter than the plain outside, because it
+   is being cooked by the sunlit wall opposite as well as by the Sun. Beyond the
+   opening, in permanent shadow, the temperature is nearly constant at about
+   290 K: seventeen degrees Celsius, room temperature, the whole lunar day and
+   the whole lunar night, because a shaded cavity comes into radiative
+   equilibrium with itself. And a cave under a pit would raise the night-time
+   temperature of the ground above it by 0.1 K, which is why nobody can find
+   one from orbit this way.
+
+   Two of those are used directly. The third — the day-time temperature of a
+   patch of pit floor that is shaded but still open to the sky — is not
+   published, so it is bounded rather than invented: never colder than the
+   cavity value, because the walls it can see are hotter than that.
+
+   Horvath, T. et al. (2022), Thermal and Illumination Environments of Lunar
+   Pits and Caves, Geophysical Research Letters, doi 10.1029/2022GL099710.
+   ------------------------------------------------------------------------- */
+
+export const PIT_THERMAL = {
+  /** Permanent shadow beyond the opening: a blackbody cavity, near-constant. */
+  caveK: 290,
+  /** ">420 K" on a regolith-covered pit floor near the equator at noon. */
+  peakFloorK: 422,
+  /** What Diviner actually measured at night, over the surrounding surface. */
+  nightExcessK: 100,
+  source: 'Horvath, Hayne & Paige 2022, GRL, doi 10.1029/2022GL099710',
+};
+
+/**
+ * The temperature inside a pit, given what it would be out on the plain.
+ *
+ * @param {number} surfaceK what the open surface at this place and hour reads
+ * @param {object} where { inCave, sunlit, sunElDeg }
+ * @returns {{kelvin:number, why:string}}
+ */
+export function pitTemperature(surfaceK, where) {
+  if (where.inCave) {
+    return { kelvin: PIT_THERMAL.caveK, why: 'permanent shadow, radiative equilibrium' };
+  }
+  if (where.sunElDeg <= 0) {
+    /* Night: the measurement, not a model. The floor holds the day's heat and
+       re-radiates against walls that do the same, and Diviner watches it glow. */
+    return {
+      kelvin: Math.min(PIT_THERMAL.caveK, surfaceK + PIT_THERMAL.nightExcessK),
+      why: 'pit floor at night, ~100 K over the surrounding surface',
+    };
+  }
+  if (where.sunlit) {
+    /* Day, in the Sun: the Sun plus the wall opposite. Interpolated between the
+       open surface and the published peak, which is what makes this DERIVED. */
+    const mu = Math.sin(where.sunElDeg * Math.PI / 180);
+    return {
+      kelvin: Math.min(PIT_THERMAL.peakFloorK, surfaceK + 32 * mu),
+      why: 'sunlit pit floor, warmed by the wall opposite',
+    };
+  }
+  /* Day, in the wall's shadow: no published figure. It cannot be colder than
+     the cavity value, because everything it can see is hotter than that. */
+  return {
+    kelvin: Math.max(PIT_THERMAL.caveK, Math.min(surfaceK, PIT_THERMAL.peakFloorK)),
+    why: 'shaded pit floor, bounded below by the cavity value',
+  };
+}
+
 export class TemperatureMap {
   constructor(manifest) {
     this.spec = manifest;

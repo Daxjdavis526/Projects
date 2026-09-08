@@ -2,7 +2,7 @@
 
    The vendored maps are measurements; what happens between noon and midnight is
    derived, and this is where that derivation is held to the published curves. */
-import { temperatureFrom } from '../src/data/temperature.js';
+import { temperatureFrom, pitTemperature, PIT_THERMAL } from '../src/data/temperature.js';
 
 let failures = 0;
 const check = (label, cond, detail = '') => {
@@ -81,6 +81,45 @@ console.log('range');
     `${lo.toFixed(0)} .. ${hi.toFixed(0)} K`);
   check('and that range is about three hundred kelvin wide', hi - lo > 250,
     (hi - lo).toFixed(0) + ' K');
+}
+
+/* --- pits ---------------------------------------------------------------- */
+console.log('inside a pit, from Horvath et al. 2022');
+{
+  /* The published figures, checked as figures, because the whole argument for
+     a lunar base in a pit rests on the middle one. */
+  check('a shaded cavity holds about 290 K',
+    PIT_THERMAL.caveK === 290, '17 C, the whole lunar day and night');
+  check('an equatorial pit floor can pass 420 K in the Sun',
+    PIT_THERMAL.peakFloorK > 420, PIT_THERMAL.peakFloorK + ' K');
+  check('and glows about 100 K over its surroundings at night',
+    PIT_THERMAL.nightExcessK === 100, 'what Diviner measured');
+  check('and the model says where all of that came from',
+    /Horvath/.test(PIT_THERMAL.source) && /2022GL099710/.test(PIT_THERMAL.source));
+
+  const cave = pitTemperature(95, { inCave: true, sunElDeg: -20, sunlit: false });
+  const caveDay = pitTemperature(390, { inCave: true, sunElDeg: 70, sunlit: false });
+  check('the cave is the same temperature at noon as at midnight',
+    cave.kelvin === caveDay.kelvin && cave.kelvin === 290,
+    `${cave.kelvin} K against a surface running 95 to 390 K`);
+  check('which is 295 K of swing the surface has and the cave does not',
+    Math.abs((390 - 95) - 295) < 1);
+
+  const night = pitTemperature(95, { inCave: false, sunElDeg: -20, sunlit: false });
+  check('the open pit floor at night is warmer than the plain',
+    night.kelvin > 95 && night.kelvin <= PIT_THERMAL.caveK, night.kelvin.toFixed(0) + ' K');
+
+  const noon = pitTemperature(390, { inCave: false, sunElDeg: 88, sunlit: true });
+  check('and in the Sun it is hotter than the plain, not cooler',
+    noon.kelvin > 390 && noon.kelvin <= PIT_THERMAL.peakFloorK, noon.kelvin.toFixed(0) + ' K');
+
+  const shade = pitTemperature(390, { inCave: false, sunElDeg: 40, sunlit: false });
+  check('a shaded patch of floor never reads below the cavity value',
+    shade.kelvin >= PIT_THERMAL.caveK, shade.kelvin.toFixed(0) + ' K');
+  check('nothing anywhere in the pit exceeds the published peak',
+    [cave, caveDay, night, noon, shade].every(r => r.kelvin <= PIT_THERMAL.peakFloorK));
+  check('and every answer says which case it is',
+    [cave, night, noon, shade].every(r => typeof r.why === 'string' && r.why.length > 10));
 }
 
 console.log(failures ? `\ntemperature: ${failures} FAILED` : '\ntemperature: all checks passed');

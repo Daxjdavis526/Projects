@@ -31,7 +31,7 @@ import { decodePng8 } from './terrain/png16.js';
 import { Streams } from './data/streams.js';
 import { Cache } from './data/cache.js';
 import { SurfaceStreamer } from './data/surface.js';
-import { TemperatureMap } from './data/temperature.js';
+import { TemperatureMap, pitTemperature, PIT_THERMAL } from './data/temperature.js';
 import { GravityMap } from './data/gravity.js';
 import { EVA, VIEW } from './game/eva.js';
 import { Descent } from './game/descent.js';
@@ -42,6 +42,8 @@ import { Shelter, hoursUntilSunElevation } from './game/shelter.js';
 import { Visited } from './game/visited.js';
 import { Track } from './game/track.js';
 import { Achievements } from './game/achievements.js';
+import { PitField } from './game/pitfield.js';
+import { floorBoulders } from './game/cave.js';
 import { Gamepads } from './game/gamepad.js';
 import { Tracks } from './render/tracks.js';
 import { Moment } from './game/moment.js';
@@ -221,6 +223,16 @@ async function start() {
     window.SELENE_CACHE = cache;
   }
 
+  /* The catalogued lava-tube pits. Not streamed, because nothing streams them:
+     these are built from the LROC atlas's published dimensions and installed
+     when you come within thirty kilometres of one. Independent of `registry`,
+     since the numbers are in the source rather than on a server. */
+  const pitField = new PitField({ heightfield, terrain });
+  /* The conduit under the Mare Tranquillitatis pit is a mesh rather than
+     terrain, because a height field cannot describe a ceiling over a void. It
+     is built the first time the pit is installed and thrown away with it. */
+  let caveModel = null, caveOwner = null;
+
   /* --- where are we? ------------------------------------------------------ */
   let site = sites.sites.find(s => s.id === (params.get('site') || 'apollo11'));
   if (!site && params.get('site') && params.get('site').includes(',')) {
@@ -228,6 +240,10 @@ async function start() {
     site = { id: 'custom', name: 'custom', lat, lon };
   }
   if (!site) site = sites.sites[0];
+  /* Cut the pit before anyone stands anywhere near it. The frame loop would get
+     to this a moment later, which is a moment too late: it would put the ground
+     a hundred metres below someone who had already been placed on it. */
+  pitField.update(site.lat, site.lon);
 
   /* The astronaut is only needed in third person, and the page must still run
      if the module is missing, so it is imported on the side. */
@@ -520,6 +536,11 @@ async function start() {
     });
     if (astronaut) eva.setModel(astronaut);
     if (base) eva.setBase(base);
+    /* Before the first step rather than after it: a walker created inside the
+       cave would otherwise take one step with no cave to stand on, find itself
+       a hundred metres under the ground the height field describes, and be
+       pushed up through the roof. */
+    eva.cave = pitField.cave;
     return eva;
   };
 
@@ -595,6 +616,7 @@ async function start() {
     /* Ask for the ground under the landing site straight away rather than
        waiting for the camera to arrive. */
     if (surface) surface.update(keepOut.lat, keepOut.lon, 400);
+    pitField.update(keepOut.lat, keepOut.lon);
   }
 
   /* Arriving: the ship is now here, the rover unloads beside it, and you step
@@ -988,6 +1010,7 @@ async function start() {
       cam.alt = camFrame.eye ? heightfield.heightAt(cam.lat, cam.lon) + 1.5 : cam.alt;
       world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
     } else if (eva) {
+      eva.cave = pitField.cave;
       eva.step(dt, {
         forward: clamp1((keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0) + pad.forward),
         strafe: clamp1((keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0) + pad.strafe),
@@ -1245,6 +1268,30 @@ async function start() {
 
     /* --- terrain ---------------------------------------------------------- */
     if (surface) surface.update(cam.lat, cam.lon, cam.alt - surfaceH);
+    pitField.update(cam.lat, cam.lon);
+    if (pitField.cave !== caveOwner) {
+      caveOwner = pitField.cave;
+      if (caveModel) { stage.world.remove(caveModel.group); caveModel.dispose(); caveModel = null; }
+      if (caveOwner) {
+        const forCave = caveOwner;
+        import('./models/cave.js')
+          .then((m) => {
+            /* By the time the module arrives you may have walked away again. */
+            if (pitField.cave !== forCave) return;
+            caveModel = m.buildCave({
+              cave: forCave,
+              boulders: floorBoulders(forCave.pit),
+              quality: modelQuality,
+            });
+            stage.world.add(caveModel.group);
+          })
+          .catch((e) => console.warn('cave model unavailable:', e.message));
+      }
+    }
+    if (caveModel) {
+      caveModel.place(stage.origin.origin);
+      caveModel.update(cam.lat, cam.lon, cam.alt);
+    }
 
     projScreen.multiplyMatrices(stage.camera.projectionMatrix, stage.camera.matrixWorldInverse);
     frustum.setFromProjectionMatrix(projScreen);
@@ -1385,12 +1432,13 @@ async function start() {
     if (state.showScience && now - probeCache.t > 250) {
       probeCache.t = now;
       updateScience(heightfield, geology, cam, local, eph, surface, streams, temperature, historic,
-                    gravity);
+                    gravity, pitField);
     }
   }
 
   window.SELENE = {
     ready: false, stage, terrain, sky, heightfield, cam, state, streams, surface,
+    pitField,
     get eva() { return eva; },
     historic,
     get base() { return base; },
@@ -1544,7 +1592,7 @@ let scienceRemote = null;
 let scienceAt = { lat: 999, lon: 999 };
 
 function updateScience(hf, geology, cam, local, eph, streamer, streams, temperature, historic,
-                       gravity) {
+                       gravity, pitField) {
   const p = hf.probe(cam.lat, cam.lon);
   el('d-topo').innerHTML = `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
   el('d-detail').innerHTML = Math.abs(p.proceduralHeight) > 0.001
@@ -1585,10 +1633,31 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams, temperat
      by the model in data/temperature.js. */
   const lt = localSolarTime(eph, cam.lat, cam.lon);
   const temp = temperature ? temperature.at(cam.lat, cam.lon, local.sunEl, lt * 24) : null;
-  el('d-temp').innerHTML = temp
-    ? `${temp.kelvin.toFixed(0)} K  <span class="est">${temp.celsius.toFixed(0)} C</span> ` +
-      `${tag(LABEL.REGIONAL)}<span class="est"> Diviner ${temp.diviner.min.toFixed(0)}–${temp.diviner.max.toFixed(0)} K</span>`
-    : 'unavailable';
+  /* Inside a pit the half-degree Diviner map is describing the plain overhead
+     rather than the hole you are standing in, and the difference is the whole
+     reason anybody wants to go into one: a shaded cavity holds about 290 K
+     while the surface it is cut into swings across three hundred. */
+  const inPit = pitField && pitField.at(cam.lat, cam.lon);
+  const cave = pitField && pitField.cave;
+  const inCave = !!(cave && cave.inside(cam.lat, cam.lon, cam.alt));
+  const pitT = temp && (inPit || inCave)
+    ? pitTemperature(temp.kelvin, {
+        inCave, sunElDeg: local.sunEl,
+        /* A pit floor is only lit when the Sun can actually get down it: a
+           hundred and twenty five metres of vertical wall is a lot of sky to
+           lose. This is the geometric test, not a shadow map lookup. */
+        sunlit: !inCave && local.sunEl > 0 &&
+          Math.tan(local.sunEl * Math.PI / 180) * (inPit ? inPit.innerMin : 0) >
+            (inPit ? inPit.depth : 0),
+      })
+    : null;
+  el('d-temp').innerHTML = !temp ? 'unavailable'
+    : pitT
+      ? `${pitT.kelvin.toFixed(0)} K  <span class="est">${(pitT.kelvin - 273.15).toFixed(0)} C</span> ` +
+        `${tag(LABEL.DERIVED)}<span class="est"> ${pitT.why}; ` +
+        `${PIT_THERMAL.source}. Outside: ${temp.kelvin.toFixed(0)} K</span>`
+      : `${temp.kelvin.toFixed(0)} K  <span class="est">${temp.celsius.toFixed(0)} C</span> ` +
+        `${tag(LABEL.REGIONAL)}<span class="est"> Diviner ${temp.diviner.min.toFixed(0)}–${temp.diviner.max.toFixed(0)} K</span>`;
   /* Slope is computed from the measured grid rather than measured directly, so
      it carries the tag that says so — it was the one number on this panel
      printed with no provenance at all. */

@@ -60,21 +60,54 @@ export class EVA {
        was unreachable, which took out the airlock, the resupply and the ship's
        whole range tier with it. */
     this.base = null;
+    /* And the cave, when you are standing in the one there is. Same idea and
+       the same reason it lives here: the conduit under the Mare Tranquillitatis
+       pit is a ceiling over a void, which a height field cannot say, so the
+       ground under your boots down there comes from a mesh instead. Unlike a
+       deck it is not level — the published floor dips forty-five degrees — so
+       it has to answer for its slope as well as its height. */
+    this.cave = null;
+    const deckAt = (lat, lon) => {
+      const d = this.base && this.base.floorAt(lat, lon, this.player.llh.h);
+      return (d === null || d === undefined || d === false) ? null : d;
+    };
+    const caveAt = (lat, lon) => {
+      if (!this.cave) return null;
+      const h = this.player.llh.h;
+      let c = this.cave.floorAt(lat, lon, h);
+      /* `floorAt` asks whether you are at the height of the room, which is the
+         right question while you are walking: it stops the cave claiming the
+         ground under someone standing on the plain a hundred metres above its
+         roof. It is the wrong question for someone who arrived rather than
+         walked — a loaded save, a jump to a coordinate — because they are in
+         the room without ever having been at its door. So: below the surface
+         the height field describes, and inside the cave's footprint, is in the
+         cave, however you got there. */
+      if (c === null && h < this.heightfield.heightAt(lat, lon) - 1) {
+        c = this.cave.floorAt(lat, lon);
+      }
+      return (c === null || c === undefined) ? null : c;
+    };
     const ground = {
       heightAt: (lat, lon, minLambda) => {
-        const deck = this.base && this.base.floorAt(lat, lon, this.player.llh.h);
-        return deck === null || deck === undefined || deck === false
-          ? this.heightfield.heightAt(lat, lon, minLambda)
-          : deck;
+        const deck = deckAt(lat, lon);
+        if (deck !== null) return deck;
+        const floor = caveAt(lat, lon);
+        if (floor !== null) return floor;
+        return this.heightfield.heightAt(lat, lon, minLambda);
       },
-      slopeAt: (lat, lon, step) => (
-        this.base && this.base.floorAt(lat, lon, this.player.llh.h) !== null
-          ? 0                                    // a deck is a deck
-          : this.heightfield.slopeAt(lat, lon, step)),
-      normalAt: (lat, lon, step) => (
-        this.base && this.base.floorAt(lat, lon, this.player.llh.h) !== null
-          ? { e: 0, n: 0, u: 1 }
-          : this.heightfield.normalAt(lat, lon, step)),
+      slopeAt: (lat, lon, step) => {
+        if (deckAt(lat, lon) !== null) return 0;   // a deck is a deck
+        if (caveAt(lat, lon) !== null) return this.cave.slopeAt(lat, lon) ?? 0;
+        return this.heightfield.slopeAt(lat, lon, step);
+      },
+      normalAt: (lat, lon, step) => {
+        if (deckAt(lat, lon) !== null) return { e: 0, n: 0, u: 1 };
+        if (caveAt(lat, lon) !== null) {
+          return this.cave.normalAt(lat, lon) || { e: 0, n: 0, u: 1 };
+        }
+        return this.heightfield.normalAt(lat, lon, step);
+      },
     };
     this.player = new Player({
       lat: opts.lat, lon: opts.lon, yaw: opts.yaw ?? 90,
@@ -200,6 +233,11 @@ export class EVA {
          spends most of its structure avoiding. */
       if (this.base) {
         const push = this.base.resolve(p.llh.lat, p.llh.lon, p.llh.h, 0.34);
+        if (push) p.place(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
+      }
+      /* And the cave's walls, for the same reason and by the same route. */
+      if (this.cave) {
+        const push = this.cave.resolve(p.llh.lat, p.llh.lon, p.llh.h, 0.34);
         if (push) p.place(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
       }
       this.accumulator -= FIXED_STEP;

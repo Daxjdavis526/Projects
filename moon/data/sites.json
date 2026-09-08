@@ -490,18 +490,40 @@
    "lat": 14.0917,
    "lon": -56.7701,
    "status": "",
-   "blurb": "A collapse hole about 55 m across opening into what is probably an intact lava tube.",
+   "blurb": "An elliptical collapse in the floor of a sinuous rille, 55 by 49 m at the shaft, with a flat boulder-strewn floor and slight overhangs near floor level on both sides.",
    "source": "LROC Lunar Pits Atlas"
   },
   {
    "id": "tranquillitatis_pit",
    "name": "Mare Tranquillitatis pit",
-   "sub": "skylight, 105 m deep",
+   "sub": "skylight, 125 m to the floor",
    "kind": "landmark",
    "lat": 8.3355,
    "lon": 33.222,
    "status": "",
-   "blurb": "The deepest known lunar pit: a 100 m hole with an overhanging rim and a boulder-strewn floor.",
+   "blurb": "The deepest known lunar pit. A 146 by 140 m funnel drops into a 100 by 88 m shaft with vertical walls and overhangs of at least 10-15 m on three sides, and in 2024 Mini-RF radar showed it opens into a conduit that is still there.",
+   "source": "LROC Lunar Pits Atlas"
+  },
+  {
+   "id": "west_marius_pit",
+   "name": "West Marius Hills pit",
+   "sub": "skylight, 16 m deep, walk-in",
+   "kind": "landmark",
+   "lat": 13.5507,
+   "lon": -58.1733,
+   "status": "",
+   "blurb": "The one catalogued pit you can walk into: collapse debris has built a ramp from the rim to the floor on the south-west side. A linear collapse 2 km north-west lines up with its long axis.",
+   "source": "LROC Lunar Pits Atlas"
+  },
+  {
+   "id": "sw_tranquillitatis_pit",
+   "name": "Southwest Mare Tranquillitatis pit",
+   "sub": "skylight, 25 m deep",
+   "kind": "landmark",
+   "lat": 4.1438,
+   "lon": 24.6871,
+   "status": "",
+   "blurb": "A round pit whose funnel walls expose a stairstep of individual lava flows, with several floor levels and a second, deeper pit in the west side of the floor.",
    "source": "LROC Lunar Pits Atlas"
   },
   {
