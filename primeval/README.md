@@ -127,7 +127,8 @@ src/
                      volcanoes, climate, biomes
     moon.js          ANVIL as pure maths: mare, rilles, craters
     terrain.js       quadtree LOD over a 1048 km root, pluggable sampler
-    shaders.js       shared curvature and wind injections
+    textures.js      every surface, baked on the GPU at boot
+    shaders.js       shared curvature, wind and aerial-perspective injections
     sky.js           analytic sky, stars, celestial bodies, day/night
     water.js         ocean plane plus a streamed river mesh
     props.js         parametric plants and rocks
@@ -173,6 +174,34 @@ row in a table.
 Rendering is a quadtree over a root 1048 km across, subdivided toward the
 camera down to 64 m leaves. Collision does not use the mesh at all — it calls
 the same height function the mesh was built from.
+
+### How the surfaces are made
+
+Nothing is downloaded. At boot a fullscreen shader renders soil, turf, rock,
+sand, snow, ash, regolith, bark, reptile hide, a four-cell ground-accent sheet
+and an RGBA foliage atlas into render targets, and derives a normal map for each
+from central differences of the same height function that produced the albedo.
+The noise wraps on a lattice period, so every tile is seamless.
+
+The ground is splatted per vertex — turf, soil, one of four accents, and rock
+projected triplanar on anything steep — sampled at two scales with the second
+octave rotated, because two axis-aligned octaves share a grain direction and an
+open field then reads as corduroy. Biome colour is applied as a hue tint over
+the texture rather than as the albedo itself, and a half-kilometre noise drifts
+patches toward dry straw and damp olive.
+
+Plants are alpha-cut cards from the foliage atlas: leaf clusters with outward
+normals so a canopy lights as a soft mass, fronds cupped across their section so
+they still present something when seen edge-on, and grass blades drawn bold
+enough to survive the mip chain. Creature hide is sampled triplanar in bind-pose
+object space, which is the one projection that stays glued to the skin through a
+gait cycle.
+
+Fog is not three's flat exponential fog. Haze pools in low ground, thins with
+altitude, and mixes between a cool colour and a warm one along a forward-scatter
+lobe around the sun, so looking into the light and looking away from it are
+different pictures. The post chain runs on a multisampled half-float target;
+without MSAA a jungle of alpha-tested leaf edges crawls.
 
 ### How you get to the moon
 

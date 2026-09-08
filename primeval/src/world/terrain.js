@@ -357,11 +357,11 @@ export function makeTerrainMaterial(tex) {
       float pvBigA = pvFbm(vPvWorld.xz * 0.0023);
       float pvBigB = pvFbm(vPvWorld.xz * 0.00072 + 31.0);
       float pvSoft = 1.0 - rockW;
-      albedo *= 0.82 + pvBigB * 0.42;
-      albedo = mix(albedo, albedo * vec3(1.26, 1.10, 0.62),
-                   smoothstep(0.54, 0.88, pvBigA) * pvSoft * 0.60);
-      albedo = mix(albedo, albedo * vec3(0.70, 0.92, 0.80),
-                   smoothstep(0.46, 0.14, pvBigA) * pvSoft * 0.45);
+      albedo *= 0.89 + pvBigB * 0.24;
+      albedo = mix(albedo, albedo * vec3(1.20, 1.06, 0.66),
+                   smoothstep(0.56, 0.90, pvBigA) * pvSoft * 0.42);
+      albedo = mix(albedo, albedo * vec3(0.76, 0.94, 0.82),
+                   smoothstep(0.44, 0.14, pvBigA) * pvSoft * 0.34);
 
       vec3 packedN = mix(gN, rN, rockW);
       diffuseColor.rgb *= albedo * 1.16;
@@ -408,7 +408,7 @@ export function makeTerrainMaterial(tex) {
 
     attachAerial(shader);
   };
-  mat.customProgramCacheKey = () => 'primeval-terrain-v4';
+  mat.customProgramCacheKey = () => 'primeval-terrain-v5';
   return mat;
 }
 

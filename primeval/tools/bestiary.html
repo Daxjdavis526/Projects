@@ -27,6 +27,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { buildCreature, makeCreatureMaterial } from '../src/life/anatomy.js';
+import { bakeTextures } from '../src/world/textures.js';
 import { SPECIES, SPECIES_LIST, creatureHeight } from '../src/life/species.js';
 import { Creature } from '../src/life/creature.js';
 
@@ -60,7 +61,7 @@ scene.add(ground);
 const grid = new THREE.GridHelper(60, 60, 0x2a2f28, 0x191d18);
 grid.position.y = 0.005; scene.add(grid);
 
-const material = makeCreatureMaterial();
+const material = makeCreatureMaterial(bakeTextures(renderer));
 material.userData.eye.value = 1.4;
 
 // A metre stick, so the scale claims in species.js can be checked by eye.

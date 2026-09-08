@@ -20,14 +20,14 @@ const COVER = {
 };
 
 export class Ecology {
-  constructor(scene, quality) {
+  constructor(scene, quality, textures = null) {
     this.scene = scene;
     this.quality = quality;
     this.group = new THREE.Group();
     this.group.name = 'life';
     scene.add(this.group);
 
-    this.material = injectCurve(makeCreatureMaterial());
+    this.material = injectCurve(makeCreatureMaterial(textures));
     this.geometries = new Map();
     this.pools = new Map();
     this.live = [];

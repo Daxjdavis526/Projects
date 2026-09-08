@@ -5,6 +5,7 @@ export const WORLD_SEED = 20260908;
 export const QUALITY = {
   PERFORMANCE: {
     name: 'PERFORMANCE',
+    msaa: 0,                 // multisample count on the post-chain target
     renderScale: 0.72,
     shadows: true,
     shadowSize: 1024,
@@ -23,6 +24,7 @@ export const QUALITY = {
   },
   BALANCED: {
     name: 'BALANCED',
+    msaa: 4,                 // multisample count on the post-chain target
     renderScale: 1.0,
     shadows: true,
     shadowSize: 2048,
@@ -41,6 +43,7 @@ export const QUALITY = {
   },
   ULTRA: {
     name: 'ULTRA',
+    msaa: 8,                 // multisample count on the post-chain target
     renderScale: 1.0,
     shadows: true,
     shadowSize: 4096,

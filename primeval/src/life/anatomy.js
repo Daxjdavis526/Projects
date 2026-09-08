@@ -579,25 +579,72 @@ export function buildCreature(spec, seed = 1, bonesOnly = false) {
   return { geometry, bones, rig: { root, hips, spine, neck, head: headBone, jaw: jawBone, tail, legs, chest } };
 }
 
-/** Material shared by every creature; eyes glow via the aGlow attribute. */
-export function makeCreatureMaterial() {
+/**
+ * Material shared by every creature; eyes glow via the aGlow attribute.
+ *
+ * The hide is sampled triplanar in bind-pose object space. That is the one
+ * projection that stays glued to the skin through the whole gait cycle — a
+ * world-space projection would have the scales sliding over a running animal,
+ * and these meshes carry no UVs worth speaking of.
+ */
+export function makeCreatureMaterial(textures = null) {
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true, roughness: 0.85, metalness: 0.0,
     side: THREE.DoubleSide, dithering: true,
   });
   mat.userData.eye = { value: 0.0 };
   mat.userData.eyeColor = { value: new THREE.Color(1.0, 0.72, 0.22) };
+  const hide = textures ? textures.hide : null;
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uEye = mat.userData.eye;
     shader.uniforms.uEyeColor = mat.userData.eyeColor;
-    shader.vertexShader = 'attribute float aGlow;\nvarying float vGlow;\n' + shader.vertexShader;
+    shader.vertexShader = 'attribute float aGlow;\nvarying float vGlow;\nvarying vec3 vPvBind;\n' + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace(
-      '#include <begin_vertex>', '#include <begin_vertex>\n vGlow = aGlow;');
-    shader.fragmentShader = 'uniform float uEye;\nuniform vec3 uEyeColor;\nvarying float vGlow;\n' + shader.fragmentShader;
+      '#include <begin_vertex>', '#include <begin_vertex>\n vGlow = aGlow;\n vPvBind = position;');
+    shader.fragmentShader = 'uniform float uEye;\nuniform vec3 uEyeColor;\nvarying float vGlow;\nvarying vec3 vPvBind;\n'
+      + shader.fragmentShader;
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <emissivemap_fragment>',
       '#include <emissivemap_fragment>\n totalEmissiveRadiance += vGlow * uEyeColor * uEye;');
+
+    if (!hide) return;
+    shader.uniforms.tHide = { value: textures.hide.map };
+    shader.uniforms.nHide = { value: textures.hide.normalMap };
+    shader.fragmentShader = 'uniform sampler2D tHide;\nuniform sampler2D nHide;\n'
+      + 'vec3 pvHideN;\nfloat pvHideGloss = 1.0;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `
+      {
+        vec3 an = abs(normalize(vNormal));
+        an = an / (an.x + an.y + an.z);
+        // Bind-pose metres, so the scales come out at a fixed absolute size —
+        // about two centimetres — whatever the animal. A titanosaur ends up
+        // finely pebbled and a dartleg coarsely so, which is how it works.
+        float k = 3.5;
+        vec2 uX = vPvBind.zy * k, uY = vPvBind.xz * k, uZ = vPvBind.xy * k;
+        vec3 h = texture2D(tHide, uX).rgb * an.x
+               + texture2D(tHide, uY).rgb * an.y
+               + texture2D(tHide, uZ).rgb * an.z;
+        pvHideN = texture2D(nHide, uX).xyz * an.x
+                + texture2D(nHide, uY).xyz * an.y
+                + texture2D(nHide, uZ).xyz * an.z;
+        pvHideN = pvHideN * 2.0 - 1.0;
+        diffuseColor.rgb *= h;
+        // Scale plates catch the light; the seams between them do not.
+        pvHideGloss = 1.06 - clamp(h.g, 0.0, 1.4) * 0.20;
+      }
+    `);
+    shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>',
+      '#include <roughnessmap_fragment>\n roughnessFactor *= pvHideGloss;');
+    shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `
+      {
+        vec3 N = normalize(normal);
+        vec3 T = normalize(vec3(0.0, 1.0, 0.0) - N * N.y);
+        if (abs(N.y) > 0.96) T = normalize(vec3(1.0, 0.0, 0.0) - N * N.x);
+        vec3 B = cross(N, T);
+        normal = normalize(N + (T * pvHideN.x + B * pvHideN.y) * 0.85);
+      }
+    `);
   };
-  mat.customProgramCacheKey = () => 'primeval-creature';
+  mat.customProgramCacheKey = () => (hide ? 'primeval-creature-hide' : 'primeval-creature');
   return mat;
 }

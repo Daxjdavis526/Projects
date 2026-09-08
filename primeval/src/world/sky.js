@@ -391,12 +391,15 @@ export class Daylight {
     this.sun.intensity = lerp(0.02, 3.4, dayT) * (1 - storm * 0.72) * lerp(1, 1.35, 1 - atmos);
     this.sun.visible = this.sun.intensity > 0.02;
 
-    // Ambient: blue sky bounce by day, near-black at night, ash-grey in storms.
-    const skyAmb = new THREE.Color().setRGB(0.30, 0.44, 0.66).lerp(new THREE.Color(0.02, 0.028, 0.05), 1 - dayT);
-    const groundAmb = new THREE.Color().setRGB(0.14, 0.13, 0.075).lerp(new THREE.Color(0.012, 0.014, 0.018), 1 - dayT);
+    // Ambient: blue sky bounce by day, moonlit blue at night, ash-grey in
+    // storms. Night used to bottom out at effectively zero, which is not scary,
+    // it is just a black screen — you need enough to read a silhouette against
+    // the sky and no more.
+    const skyAmb = new THREE.Color().setRGB(0.30, 0.44, 0.66).lerp(new THREE.Color(0.075, 0.105, 0.185), 1 - dayT);
+    const groundAmb = new THREE.Color().setRGB(0.14, 0.13, 0.075).lerp(new THREE.Color(0.030, 0.034, 0.048), 1 - dayT);
     this.hemi.color.copy(skyAmb);
     this.hemi.groundColor.copy(groundAmb);
-    this.hemi.intensity = (lerp(0.10, 1.05, dayT) * (1 - storm * 0.45)) * lerp(1, 0.25, 1 - atmos);
+    this.hemi.intensity = (lerp(0.34, 1.05, dayT) * (1 - storm * 0.45)) * lerp(1, 0.25, 1 - atmos);
 
     if (sky) {
       sky.uniforms.uSun.value.copy(this.sunDir);
@@ -409,7 +412,7 @@ export class Daylight {
     // Fog tracks the horizon so distance melts into sky instead of a grey wall.
     const dayFog = new THREE.Color(0.60, 0.70, 0.76);
     const duskFog = new THREE.Color(0.52, 0.33, 0.30);
-    const nightFog = new THREE.Color(0.020, 0.028, 0.048);
+    const nightFog = new THREE.Color(0.038, 0.052, 0.090);
     const c = new THREE.Color().copy(nightFog).lerp(dayFog, dayT).lerp(duskFog, duskT * 0.65);
     if (storm > 0) c.lerp(new THREE.Color(0.13, 0.145, 0.16), storm * 0.8);
     c.multiplyScalar(lerp(1, 0.06, 1 - atmos));

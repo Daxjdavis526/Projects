@@ -65,14 +65,16 @@ export class Vegetation {
     // One atlas, one material, one draw call per species variant — which is
     // the only reason a jungle of alpha-cut leaves is affordable at all.
     const map = textures ? textures.foliage : null;
+    const a2c = (quality.msaa ?? 0) > 0;
     this.material = injectWind(new THREE.MeshStandardMaterial({
       map, vertexColors: true, roughness: 0.86, metalness: 0.0,
       side: THREE.DoubleSide, alphaTest: map ? 0.32 : 0, dithering: true,
+      alphaToCoverage: a2c,
     }));
     this.glowMaterial = injectWind(new THREE.MeshStandardMaterial({
       map, vertexColors: true, roughness: 0.5, metalness: 0.0,
       emissive: new THREE.Color(0.10, 0.85, 0.72), emissiveIntensity: 1.6,
-      side: THREE.DoubleSide, alphaTest: map ? 0.32 : 0,
+      side: THREE.DoubleSide, alphaTest: map ? 0.32 : 0, alphaToCoverage: a2c,
     }));
 
     const D = quality.vegDensity;

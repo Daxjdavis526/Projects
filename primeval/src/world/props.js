@@ -317,7 +317,7 @@ export function treeFern(seed = 1, scale = 1) {
   for (let i = 0; i < fronds; i++) {
     const a = (i / fronds) * Math.PI * 2 + r() * 0.4;
     const len = (2.2 + r() * 1.4) * scale;
-    const g = card(len * 0.50, len, 'frond', r, '#365a24', '#8fc04c', 0.42, 0.55);
+    const g = card(len * 0.34, len, 'frond', r, '#365a24', '#8fc04c', 0.42, 0.62);
     xform(g, { rot: [-0.92 - r() * 0.40, a, 0], pos: [0, H, 0] });
     parts.push(swayRamp(g, 1.0, 0.9));
   }
@@ -332,7 +332,7 @@ export function giantFern(seed = 1, scale = 1) {
   for (let i = 0; i < fronds; i++) {
     const a = (i / fronds) * Math.PI * 2 + r() * 0.6;
     const len = (1.1 + r() * 0.95) * scale;
-    const g = card(len * 0.46, len, 'frond', r, '#2b4a1e', '#7cad42', 0.5, 0.6);
+    const g = card(len * 0.32, len, 'frond', r, '#2b4a1e', '#7cad42', 0.5, 0.66);
     xform(g, { rot: [-0.68 - r() * 0.55, a, 0], pos: [0, 0.06 * scale, 0] });
     parts.push(swayRamp(g, 1.1, 0.85));
   }
@@ -352,7 +352,7 @@ export function cycad(seed = 1, scale = 1) {
     const len = (1.6 + r() * 1.0) * scale;
     // Wide, cupped and lifted well off the horizontal: at eye level you look
     // up at a cycad crown, so near-flat fronds present nothing at all.
-    const g = card(len * 0.48, len, 'frond', r, '#3f5c24', '#9cc052', 0.30, 0.5);
+    const g = card(len * 0.36, len, 'frond', r, '#3f5c24', '#9cc052', 0.30, 0.56);
     xform(g, { rot: [-0.72 - r() * 0.42, a, 0], pos: [0, H * 0.97, 0] });
     parts.push(swayRamp(g, 0.75, 1.0));
   }

@@ -100,7 +100,7 @@ class Director {
 
 class LifeSystem {
   async load(game) {
-    this.eco = new Ecology(game.scene, game.quality);
+    this.eco = new Ecology(game.scene, game.quality, game.textures);
     this.eco.prepare();
     game.eco = this.eco;
     this.forward = new THREE.Vector3(0, 0, 1);

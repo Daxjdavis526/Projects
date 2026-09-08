@@ -294,6 +294,38 @@ vec3 colourAt(vec2 uv, float h){
 }
 `;
 
+/**
+ * Reptile hide: pebbled scales over a wrinkle field. Sampled triplanar in each
+ * creature's bind pose, so the pattern is locked to the skin and does not swim
+ * when a leg swings. The albedo is near-neutral on purpose — the species colour
+ * comes from vertex colours, and this only has to give it grain and relief.
+ */
+const HIDE = /* glsl */`
+float heightAt(vec2 uv){
+  // Wrinkles first, then scales sized by how stretched the skin is there.
+  float wrinkle = fbm(uv * 7.0, 7.0, 4);
+  vec2 warp = vec2(fbm(uv * 5.0 + 3.0, 5.0, 3), fbm(uv * 5.0 + 19.0, 5.0, 3)) - 0.5;
+  vec2 w1 = worley(uv * 30.0 + warp * 4.0, 30.0);
+  vec2 w2 = worley(uv * 13.0 + warp * 2.0, 13.0);
+  // Rounded plates: distance to the cell edge, not to the centre.
+  float plate = smoothstep(0.0, 0.30, w1.y - w1.x);
+  float big = smoothstep(0.0, 0.22, w2.y - w2.x);
+  float scale = mix(plate, big, 0.34);
+  return scale * 0.62 + wrinkle * 0.28 + fbm(uv * 64.0, 64.0, 3) * 0.10;
+}
+vec3 colourAt(vec2 uv, float h){
+  vec2 warp = vec2(fbm(uv * 5.0 + 3.0, 5.0, 3), fbm(uv * 5.0 + 19.0, 5.0, 3)) - 0.5;
+  vec2 w2 = worley(uv * 13.0 + warp * 2.0, 13.0);
+  float seam = smoothstep(0.16, 0.0, w2.y - w2.x);
+  float mottle = fbm(uv * 3.0 + 7.0, 3.0, 4);
+  // Near-white so it multiplies cleanly into the species colour.
+  vec3 c = mix(vec3(0.62), vec3(1.06), smoothstep(0.2, 0.85, h));
+  c *= 1.0 - seam * 0.42;
+  c *= 0.88 + mottle * 0.30;
+  return c;
+}
+`;
+
 /** Fibrous bark with deep vertical fissures. */
 const BARK = /* glsl */`
 float heightAt(vec2 uv){
@@ -383,8 +415,10 @@ void main(){
     float spine = (1.0 - smoothstep(0.006, 0.014, across)) * step(t, 0.97);
     // Leaflets: narrow, clearly separated, shortening toward the tip.
     float span = sin(3.14159 * pow(clamp(t, 0.0, 1.0), 0.62)) * 0.42;
-    float pin = fract(t * 40.0);
-    float leaflet = step(across, span) * step(pin, 0.60) * step(0.03, t) * step(t, 0.97);
+    // Leaflets rake toward the tip rather than sitting square to the spine, and
+    // they close up enough that the frond reads as a leaf, not a comb.
+    float pin = fract(t * 40.0 - across * 5.5);
+    float leaflet = step(across, span) * step(pin, 0.74) * step(0.03, t) * step(t, 0.97);
     a = max(spine, leaflet);
     float shade = 0.42 + (1.0 - across / max(span, 0.001)) * 0.5;
     col = mix(vec3(0.040, 0.105, 0.032), vec3(0.24, 0.42, 0.095), clamp(shade, 0.0, 1.0));
@@ -517,6 +551,7 @@ export function bakeTextures(renderer) {
     ash: baker.bake(ASH, { size: S, bump: 34 }),
     regolith: baker.bake(REGOLITH, { size: S, bump: 30 }),
     bark: baker.bake(BARK, { size: S, bump: 40 }),
+    hide: baker.bake(HIDE, { size: S, bump: 30 }),
     accent: baker.bake(ACCENT, { size: 1024, bump: 26 }),
   };
   // The accent sheet must not wrap between cells.

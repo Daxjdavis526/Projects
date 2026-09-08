@@ -547,7 +547,7 @@ export class Game {
     g.uDamage.value = lerp(g.uDamage.value, p.damageFlash, 0.4);
     g.uHeat.value = lerp(g.uHeat.value, this.heatShimmer ?? 0, 0.12);
     g.uDesat.value = lerp(g.uDesat.value, p.alive ? (p.health < 30 ? 0.35 : 0) : 0.85, 0.06);
-    g.uVignette.value = lerp(g.uVignette.value, 0.86 + (1 - clamp(p.health / 100, 0, 1)) * 0.5, 0.1);
+    g.uVignette.value = lerp(g.uVignette.value, 0.70 + (1 - clamp(p.health / 100, 0, 1)) * 0.5, 0.1);
   }
 
   render() {

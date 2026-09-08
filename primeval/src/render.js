@@ -15,8 +15,9 @@ const GradeShader = {
   uniforms: {
     tDiffuse: { value: null },
     uTime: { value: 0 },
-    uVignette: { value: 0.9 },
-    uGrain: { value: 0.045 },
+    uVignette: { value: 0.72 },
+    uGrain: { value: 0.022 },
+    uSaturation: { value: 1.12 },
     uHeat: { value: 0 },
     uDamage: { value: 0 },
     uDesat: { value: 0 },
@@ -28,7 +29,7 @@ const GradeShader = {
   fragmentShader: /* glsl */`
     varying vec2 vUv;
     uniform sampler2D tDiffuse;
-    uniform float uTime, uVignette, uGrain, uHeat, uDamage, uDesat, uFade, uAberration;
+    uniform float uTime, uVignette, uGrain, uHeat, uDamage, uDesat, uFade, uAberration, uSaturation;
     uniform vec2 uResolution;
     float h12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
     void main(){
@@ -47,7 +48,11 @@ const GradeShader = {
       col.g = texture2D(tDiffuse, uv).g;
       col.b = texture2D(tDiffuse, uv - d * ab).b;
 
-      col = mix(col, vec3(dot(col, vec3(0.299, 0.587, 0.114))), uDesat);
+      // This pass runs before the output pass, so the values here are still
+      // linear HDR: lift saturation multiplicatively rather than around 0.5.
+      float lum = dot(max(col, 0.0), vec3(0.2126, 0.7152, 0.0722));
+      col = mix(vec3(lum), col, uSaturation);
+      col = mix(col, vec3(lum), uDesat);
 
       float vig = 1.0 - uVignette * pow(r2 * 1.72, 1.45);
       col *= clamp(vig, 0.0, 1.0);
@@ -78,7 +83,7 @@ export class Renderer {
     this.renderer.setClearColor(0x000000, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.02;
+    this.renderer.toneMappingExposure = 1.08;
     this.renderer.shadowMap.enabled = quality.shadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.autoClear = true;
@@ -97,11 +102,21 @@ export class Renderer {
 
   attach(scene) {
     this.scene = scene;
-    this.composer = new EffectComposer(this.renderer);
+    // A multisampled half-float target. MSAA matters more here than anywhere
+    // else in the renderer: a jungle is hundreds of thousands of alpha-tested
+    // leaf edges, and without it every one of them crawls.
+    const size = this.renderer.getDrawingBufferSize(new THREE.Vector2());
+    const target = new THREE.WebGLRenderTarget(Math.max(2, size.x), Math.max(2, size.y), {
+      type: THREE.HalfFloatType,
+      samples: this.quality.msaa ?? 0,
+      depthBuffer: true,
+      stencilBuffer: false,
+    });
+    this.composer = new EffectComposer(this.renderer, target);
     this.composer.addPass(new RenderPass(scene, this.camera));
     if (this.quality.bloom) {
       this.bloom = new UnrealBloomPass(
-        new THREE.Vector2(this.width, this.height), 0.42, 0.62, 0.86
+        new THREE.Vector2(this.width, this.height), 0.36, 0.72, 0.94
       );
       this.composer.addPass(this.bloom);
     }
