@@ -1,4 +1,9 @@
-# Further reading — becoming competent in cryogenic propulsion systems
+# Where to go next — becoming competent in cryogenic propulsion systems
+
+*This is the reader-facing reading list. It is a route through the literature, in
+the order to work through it — not a citation record. For citations use
+`sources.md`; for standards editions use `standards.md`; for numbers use
+`properties.md`.*
 
 Twelve references, in the order I would work through them, plus a short note on
 the professional communities. Every item below was checked to exist, with a link
@@ -6,6 +11,11 @@ that resolved on 2026-09-08. Free items are marked **[free]**; paid items are
 marked **[paywalled]** with a note on what the cheapest honest route is, since
 most of the canonical cryogenics literature sits behind publisher paywalls and a
 student should know that before ordering anything.
+
+> **Three corrections applied since this list was first drafted**, from the
+> verification pass recorded in `standards.md`. They are marked inline below:
+> CGA P-12's current edition and title; ASTM MNL36's current edition; and the
+> fact that NASA NSS 1740.15 has been cancelled.
 
 The short version, if you only ever get three: **Barron** for the engineering,
 **Edeskuty & Stewart** for the safety, and the **NASA oxygen guide** for the
@@ -111,6 +121,9 @@ NASA White Sands Test Facility, March 2007.
 *Safety Standard for Oxygen and Oxygen Systems: Guidelines for Oxygen System
 Design, Materials Selection, Operations, Storage, and Transportation*,
 NSS 1740.15, NASA, 1996. <https://ntrs.nasa.gov/citations/19960021046>
+**— CANCELLED. Read it for background only.** Its content was carried into
+ASTM MNL36, 2nd edition (2007), which NASA WSTF staff edited. See `standards.md`
+§4c and corrections §8.
 
 **[free]** — full PDFs on NTRS, no registration.
 
@@ -128,10 +141,12 @@ while you design.
 ### 6. ASTM MNL36 — *Safe Use of Oxygen and Oxygen Systems*
 ASTM International, Manual 36. Full title: *Safe Use of Oxygen and Oxygen
 Systems: Guidelines for Oxygen System Design, Materials Selection, Operations,
-Storage, and Transportation*. Editors H. D. Beeson, W. F. Stewart and S. S. Woods
-for the first edition (1999/2000); later editions have been issued — ASTM's
-current catalogue entry is MNL36-3RD-EB.
-<https://www.astm.org/mnl36-3rd-eb.html>
+Storage, and Transportation* (1st edition, 1999/2000). **Correction: the current
+edition is the 2nd (2007)**, subtitled *Handbook for Design, Operation, and
+Maintenance*, edited by H. D. Beeson, S. R. Smith and W. F. Stewart. **No 3rd
+edition was found during verification** — a "MNL36-3RD" reference circulates but
+could not be confirmed. Cite MNL36-2ND (ISBN 978-0-8031-4470-5).
+<https://store.astm.org/mnl36-2nd-eb.html>
 
 **[paywalled]** — ASTM sells it as a book and as an ASTM Compass e-book; no free
 route. Check whether your institution has ASTM Compass before buying.
@@ -145,8 +160,11 @@ ignition) that sit underneath it. Buy or borrow this once you are designing real
 oxygen hardware rather than studying it.
 
 ### 7. The codes: CGA P-12 and NFPA 55
-Compressed Gas Association, **CGA P-12**, *Safe Handling of Cryogenic Liquids*.
-<https://www.cganet.com/standards>
+Compressed Gas Association, **CGA P-12**, **7th edition, January 2023**,
+*Guideline for Safe Handling of Cryogenic and Refrigerated Liquids*.
+<https://legacy.cganet.com/Publication/Details.aspx?id=P-12>
+**Correction: the widely used title *"Safe Handling of Cryogenic Liquids"* is the
+obsolete 6th edition (2017) title.** Use the 2023 title and edition.
 National Fire Protection Association, **NFPA 55**, *Compressed Gases and Cryogenic
 Fluids Code*. <https://www.nfpa.org/product/nfpa-55-code/p0055code>
 
@@ -162,11 +180,11 @@ adopted into building and fire codes. CGA P-12 is the industry practice document
 for handling cryogenic liquids — containers, transfer, PPE, spill response.
 Read them when you move from analysis to installing something on a real site.
 
-**Verification note:** I could not load CGA's own catalogue page for P-12 from
-this environment (cganet.com blocked automated requests), so the **edition and
-year of CGA P-12 are unverified here** — confirm the current edition directly
-with CGA before citing it. NFPA 55's title and publisher were confirmed from
-NFPA's own product page.
+**Verification note:** CGA P-12's edition and title were subsequently confirmed on
+CGA's own catalogue at `legacy.cganet.com` (7th edition, January 2023) and are
+recorded in `standards.md`. NFPA 55's title and publisher were confirmed from
+NFPA's own product page; its **2026 edition** is confirmed only on secondary
+listings, because NFPA's product pages render client-side.
 
 ## Rocket propulsion, where the cryogens are used
 
@@ -292,7 +310,7 @@ Not references, but the places the field actually talks to itself.
 | Free, read today | Paid |
 |---|---|
 | NASA/TM-2007-213740 oxygen compatibility guide | Barron, *Cryogenic Systems* (out of print) |
-| NASA NSS 1740.15 oxygen safety standard | Barron & Nellis, *Cryogenic Heat Transfer* |
+| NASA NSS 1740.15 oxygen safety standard *(cancelled — background only)* | Barron & Nellis, *Cryogenic Heat Transfer* |
 | NASA SP-125 liquid rocket engine design | Flynn, *Cryogenic Engineering* |
 | NIST cryogenic material properties | Weisend, *Handbook* and *Cryostat Design* |
 | JLab ES&H 6540 ODH control programme | Timmerhaus & Reed, *Fifty Years of Progress* |
