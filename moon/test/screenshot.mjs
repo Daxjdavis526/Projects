@@ -53,8 +53,30 @@ const MIME = {
   '.bin': 'application/octet-stream', '.css': 'text/css',
 };
 
+/* Relay for NASA Trek. The browser in this sandbox cannot reach the internet
+   directly, but Node can (through the agent proxy), so the harness forwards
+   /nasa/* and hands the bytes back with permissive CORS. In the real game the
+   page talks to trek.nasa.gov itself. */
+async function relay(req, res) {
+  const target = 'https://trek.nasa.gov' + req.url.slice('/nasa'.length);
+  try {
+    const upstream = await fetch(target);
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.writeHead(upstream.status, {
+      'Content-Type': upstream.headers.get('content-type') || 'application/octet-stream',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-store',
+    });
+    res.end(buf);
+  } catch (e) {
+    res.writeHead(502, { 'Access-Control-Allow-Origin': '*' });
+    res.end(String(e));
+  }
+}
+
 async function serve() {
   const server = createServer(async (req, res) => {
+    if (req.url.startsWith('/nasa/')) return relay(req, res);
     try {
       const url = decodeURIComponent(req.url.split('?')[0]);
       const file = path.join(ROOT, url === '/' ? 'index.html' : url);
@@ -86,7 +108,9 @@ async function main() {
     const errors = [];
     page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
     page.on('pageerror', (e) => errors.push(String(e)));
-    const url = `http://127.0.0.1:${port}/index.html?${query}`;
+    const relayBase = `http://127.0.0.1:${port}/nasa`;
+    const url = `http://127.0.0.1:${port}/index.html?${query}` +
+      (query.includes('offline=1') ? '' : `&trek=${encodeURIComponent(relayBase)}`);
     process.stdout.write(`${name.padEnd(20)} ${query}\n`);
     const t0 = Date.now();
     let ok = true, note = '';

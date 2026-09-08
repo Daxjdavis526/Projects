@@ -15,7 +15,7 @@
    ========================================================================== */
 
 import * as THREE from 'three';
-import { QUALITY, DEFAULT_QUALITY, R_MOON, TERRAIN, OPTICS, TIME } from './config.js';
+import { QUALITY, DEFAULT_QUALITY, R_MOON, TERRAIN, OPTICS, TIME, STREAM } from './config.js';
 import { Stage } from './render/stage.js';
 import { TerrainSystem } from './render/terrain.js';
 import { Sky } from './render/sky.js';
@@ -25,6 +25,9 @@ import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance } from './physi
 import { loadVendoredHeightfield, readJson, readBinary } from './terrain/loader.js';
 import { Detail } from './terrain/detail.js';
 import { decodePng8 } from './terrain/png16.js';
+import { Streams } from './data/streams.js';
+import { Cache } from './data/cache.js';
+import { SurfaceStreamer } from './data/surface.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -137,6 +140,13 @@ async function start() {
   ]);
   if (day) sky.setEarth({ day, night, clouds });
 
+  /* NASA Trek: finer measured elevation and imagery, fetched as you go. The
+     page works without it; the overlay says which you are looking at. */
+  let streams = null, surface = null, registry = null;
+  try {
+    registry = await readJson(DATA, 'streams.json');
+  } catch (e) { console.warn('stream registry unavailable', e.message); }
+
   progress('building terrain', 0.85);
   const terrain = new TerrainSystem(stage, {
     base: DATA,
@@ -148,6 +158,18 @@ async function start() {
     workers: 2,
     onProgress: (s, f) => progress(s === 'topography' ? 'building terrain' : s, 0.85 + f * 0.14),
   });
+
+  if (registry) {
+    const cache = new Cache(Number(params.get('cache') ?? STREAM.cacheBytesDefault));
+    streams = new Streams(registry, {
+      enabled: !state.offline, cache,
+      /* The screenshot harness passes a local relay here, because the sandbox
+         it runs in reaches the internet only through a proxy. */
+      origin: params.get('trek') || undefined,
+    });
+    surface = new SurfaceStreamer(streams, { heightfield, terrain });
+    window.SELENE_CACHE = cache;
+  }
 
   /* --- where are we? ------------------------------------------------------ */
   let site = sites.sites.find(s => s.id === (params.get('site') || 'apollo11'));
@@ -244,9 +266,9 @@ async function start() {
        you may be hundreds of kilometres across, and a one-directional clamp
        against its interpolated surface would shove the camera a hundred metres
        into the air and leave it there. */
-    const surface = heightfield.heightAt(cam.lat, cam.lon);
-    if (cam.alt < surface + 1.6) {
-      cam.alt = surface + 1.6;
+    const surfaceH = heightfield.heightAt(cam.lat, cam.lon);
+    if (cam.alt < surfaceH + 1.6) {
+      cam.alt = surfaceH + 1.6;
       llhToXyz(cam.lat, cam.lon, cam.alt, world);
     }
 
@@ -287,7 +309,7 @@ async function start() {
       sunElevation: local.sunEl,
       sunVisible: local.sunEl > 0 ? 1 : 0,
       albedo: OPTICS.albedoMare,
-      groundFraction: cam.alt > 50000 ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
+      groundFraction: cam.alt - surfaceH > 50000 ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
       earthIllum: eph.earthIllum,
       earthElevation: local.earthEl,
     }, ready ? dt : 1e6);
@@ -295,6 +317,8 @@ async function start() {
     sky.update(eph, ev);
 
     /* --- terrain ---------------------------------------------------------- */
+    if (surface) surface.update(cam.lat, cam.lon, cam.alt - surfaceH);
+
     projScreen.multiplyMatrices(stage.camera.projectionMatrix, stage.camera.matrixWorldInverse);
     frustum.setFromProjectionMatrix(projScreen);
     terrain.update(world, params.get('cull') === '0' ? null : frustum, rebased);
@@ -312,8 +336,8 @@ async function start() {
     /* --- HUD -------------------------------------------------------------- */
     el('s-lat').textContent = fmtLat(cam.lat);
     el('s-lon').textContent = fmtLon(cam.lon);
-    el('s-elev').textContent = surface.toFixed(0) + ' m';
-    el('s-alt').textContent = fmtDist(cam.alt - surface);
+    el('s-elev').textContent = surfaceH.toFixed(0) + ' m';
+    el('s-alt').textContent = fmtDist(cam.alt - surfaceH);
     el('s-sun').textContent = `${local.sunEl.toFixed(1)}° el  ${local.sunAz.toFixed(0)}° az`;
     el('s-earth').textContent = local.earthVisible
       ? `${local.earthEl.toFixed(1)}° el  ${(eph.earthIllum * 100).toFixed(0)}% lit`
@@ -326,12 +350,12 @@ async function start() {
 
     if (state.showScience && now - probeCache.t > 250) {
       probeCache.t = now;
-      updateScience(heightfield, geology, cam, local, eph);
+      updateScience(heightfield, geology, cam, local, eph, surface, streams);
     }
   }
 
   window.SELENE = {
-    ready: false, stage, terrain, sky, heightfield, cam, state,
+    ready: false, stage, terrain, sky, heightfield, cam, state, streams, surface,
     goto(lat, lon, alt) { cam.lat = lat; cam.lon = lon; cam.alt = alt ?? cam.alt; },
     setTime(iso) { state.simMs = Date.parse(iso); },
     stats: () => ({ ...terrain.stats, fps }),
@@ -359,13 +383,24 @@ const tag = (label) => {
   return `<span class="tag ${cls}">${label}</span>`;
 };
 
-function updateScience(hf, geology, cam, local, eph) {
+let sciencePending = false;
+let scienceRemote = null;
+let scienceAt = { lat: 999, lon: 999 };
+
+function updateScience(hf, geology, cam, local, eph, streamer, streams) {
   const p = hf.probe(cam.lat, cam.lon);
   el('d-topo').innerHTML = `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
   el('d-detail').innerHTML = Math.abs(p.proceduralHeight) > 0.001
     ? `${p.proceduralHeight >= 0 ? '+' : ''}${p.proceduralHeight.toFixed(2)} m ${tag('PROCEDURAL')}`
     : 'none';
-  el('d-img').innerHTML = `LROC WAC 1.3 km/px ${tag('MEASURED')}`;
+  const desc = streamer ? streamer.describe() : null;
+  if (desc && desc.elevation) {
+    el('d-topo').innerHTML =
+      `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
+  }
+  el('d-img').innerHTML = desc && desc.imagery
+    ? `${desc.imagery.res_m < 10 ? desc.imagery.res_m.toFixed(2) : desc.imagery.res_m.toFixed(0)} m/px ${tag('MEASURED')}`
+    : `LROC WAC 1.3 km/px ${tag('MEASURED')}`;
   let geolText = 'unavailable';
   if (geology) {
     const x = Math.min(geology.width - 1, Math.max(0, ((cam.lon + 180) / 360 * geology.width) | 0));
@@ -381,7 +416,37 @@ function updateScience(hf, geology, cam, local, eph) {
   const t = 95 + 300 * Math.pow(noon * Math.max(0.02, Math.cos(cam.lat * Math.PI / 180)), 0.25);
   el('d-temp').innerHTML = `${t.toFixed(0)} K ${tag('DERIVED')}`;
   el('d-slope').textContent = hf.slopeAt(cam.lat, cam.lon).toFixed(1) + '°';
-  el('d-src').textContent = p.source + (p.padded ? '  ·  landing pad (FICTIONAL)' : '');
+
+  /* Ask NASA what is really here, but only when the player has moved: these are
+     network round trips, not something to do every frame. */
+  if (streams && streams.enabled && !sciencePending &&
+      (Math.abs(cam.lat - scienceAt.lat) > 0.002 || Math.abs(cam.lon - scienceAt.lon) > 0.002)) {
+    sciencePending = true;
+    scienceAt = { lat: cam.lat, lon: cam.lon };
+    streams.probe(cam.lat, cam.lon).then((r) => { scienceRemote = r; })
+      .finally(() => { sciencePending = false; });
+  }
+  if (scienceRemote) {
+    if (scienceRemote.geology) {
+      const g = scienceRemote.geology;
+      el('d-geol').innerHTML = `${g.unit} ${g.name}, ${g.period} ${tag('REGIONAL')}`;
+    }
+    if (scienceRemote.temperature && scienceRemote.temperature.max !== null) {
+      const t2 = scienceRemote.temperature;
+      const lt2 = localSolarTime(eph, cam.lat, cam.lon);
+      const day = Math.max(0, Math.cos((lt2 - 0.5) * 2 * Math.PI));
+      const est = t2.min + (t2.max - t2.min) * Math.pow(day, 0.28);
+      el('d-temp').innerHTML = `${est.toFixed(0)} K ${tag('REGIONAL')}` +
+        `<span class="est"> ${t2.min.toFixed(0)}–${t2.max.toFixed(0)} K</span>`;
+    }
+  }
+
+  const parts = [p.source];
+  if (desc && desc.imagery) parts.push(desc.imagery.source);
+  if (scienceRemote && scienceRemote.temperature) parts.push(scienceRemote.temperature.source);
+  if (p.padded) parts.push('landing pad (FICTIONAL)');
+  if (desc) parts.push('streaming: ' + desc.status);
+  el('d-src').textContent = parts.join('  ·  ');
 }
 
 start().catch(e => {

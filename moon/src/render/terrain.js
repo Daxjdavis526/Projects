@@ -12,6 +12,7 @@ import { Quadtree } from '../terrain/quadtree.js';
 import { tileForUnit, tileKey, parent as parentOf } from '../terrain/cubesphere.js';
 import { heightInTile } from '../terrain/tilebuilder.js';
 import { makeTerrainMaterial, updateTerrainUniforms } from './terrainmaterial.js';
+import { Raster } from '../terrain/heightfield.js';
 import { R_MOON, TERRAIN } from '../config.js';
 
 export class TerrainSystem {
@@ -93,23 +94,68 @@ export class TerrainSystem {
     }
   }
 
-  /** Hand a streamed elevation layer to every worker and to the local copy. */
-  addStreamedRaster(spec, data, localHeightfield) {
+  /**
+   * Hand a streamed elevation layer to every worker and to the local copy, then
+   * rebuild only the tiles it actually covers. Throwing away the whole surface
+   * for a patch a few kilometres across would make the Moon flicker every time
+   * a new measurement arrived.
+   */
+  addStreamedRaster(spec, data, localHeightfield, bbox) {
     for (const w of this.workers) {
-      /* Each worker needs its own copy; the array is small (a tile of floats). */
+      /* Each worker needs its own copy; a patch is a few hundred kilobytes. */
       w.postMessage({ type: 'raster', spec, data: data.slice() });
     }
-    if (localHeightfield) {
-      import('../terrain/heightfield.js').then(({ Raster }) => {
-        localHeightfield.addRaster(new Raster(spec, data));
-      });
-    }
-    this.invalidate();
+    if (localHeightfield) localHeightfield.addRaster(new Raster(spec, data));
+    if (bbox) this.invalidateArea(bbox);
+    else this.invalidate();
   }
 
-  setPads(pads) {
+  setPads(pads, bbox) {
     for (const w of this.workers) w.postMessage({ type: 'pads', pads });
-    this.invalidate();
+    if (bbox) this.invalidateArea(bbox);
+    else this.invalidate();
+  }
+
+  /** Streamed imagery for the ground the player is standing on. */
+  setImagery(bitmap, bounds) {
+    const tex = new THREE.Texture(bitmap);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.needsUpdate = true;
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = 8;
+    const u = this.material.userData.uniforms;
+    if (u.uImagery.value && u.uImagery.value.dispose) u.uImagery.value.dispose();
+    u.uImagery.value = tex;
+    /* Equirectangular uv of the tile's rectangle, matching the terrain's uv. */
+    const x = (bounds.lonMin + 180) / 360;
+    const y = (90 - bounds.latMax) / 180;
+    const w = (bounds.lonMax - bounds.lonMin) / 360;
+    const h = (bounds.latMax - bounds.latMin) / 180;
+    u.uImageryRect.value.set(x, y, w, h);
+    u.uImageryAmount.value = 0.85;
+    this.material.needsUpdate = true;
+  }
+
+  /**
+   * Drop every built tile whose ground overlaps a rectangle, so it gets rebuilt
+   * against the new data. Everything else is left alone.
+   */
+  invalidateArea([w, s, e, n]) {
+    const keys = [];
+    for (const [key, mesh] of this.meshes) {
+      const b = mesh.userData.payload && mesh.userData.payload.bounds;
+      if (!b) continue;
+      if (b.lonMax < w || b.lonMin > e || b.latMax < s || b.latMin > n) continue;
+      keys.push(key);
+    }
+    for (const key of keys) {
+      this.disposeMesh(key, this.meshes.get(key));
+      this.meshes.delete(key);
+      this.quadtree.tiles.delete(key);
+    }
+    for (const w2 of this.workers) w2.postMessage({ type: 'evict', keys });
   }
 
   /** Throw away every built tile: used when the terrain definition changes. */

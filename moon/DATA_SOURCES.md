@@ -102,6 +102,14 @@ to accommodate them.
   on the roadmap, not in v1.
 - **LROC WAC Hapke parameter maps** (Sato et al. 2014) — the renderer uses
   fixed Hapke-like parameters labelled ESTIMATED rather than per-pixel maps.
+- **Apollo metric-camera DEM mosaics** (`Apollo17_MetricCam_DEM_Global_1024ppd`,
+  `ApolloZone_MetricCam_DEM_Global_1024ppd`) — these advertise 29.6 m/px over
+  most of the near-equatorial Moon, but only hold the ground actually
+  photographed from orbit, so the box is far larger than the measurements. The
+  streamer ranks services by how much of their box they really cover before it
+  ranks them by resolution, which puts these last; they are still requested
+  where nothing better exists, and an answer that is mostly empty is discarded
+  rather than interpolated into terrain.
 
 ## Accuracy honesty
 
