@@ -245,7 +245,7 @@ export const lavaUniform = { value: 1 };
 export function makeTerrainMaterial(tex) {
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true,
-    roughness: 0.94,
+    roughness: 0.88,
     metalness: 0.0,
     dithering: true,
   });
@@ -309,9 +309,15 @@ export function makeTerrainMaterial(tex) {
       // fract() inside a texture lookup makes the hardware see a derivative
       // spike at every wrap and drop to the coarsest mip, which draws a grid of
       // seam lines across the ground. Supplying the real gradients fixes it.
+      const float ACC_GUT = 8.0 / 512.0;
       vec4 accentTex(sampler2D t, vec2 uv, float id){
         vec2 cell = vec2(mod(id, 2.0) * 0.5, id < 1.5 ? 0.5 : 0.0);
-        return textureGrad(t, cell + fract(uv) * 0.5, dFdx(uv) * 0.5, dFdy(uv) * 0.5);
+        // Land inside the baked gutter, and hand the hardware the real
+        // gradients so it does not see the fract() wrap as a derivative spike
+        // and drop to the coarsest mip.
+        float k = (1.0 - 2.0 * ACC_GUT) * 0.5;
+        vec2 q = cell + ACC_GUT * 0.5 + fract(uv) * k;
+        return textureGrad(t, q, dFdx(uv) * k, dFdy(uv) * k);
       }
     ` + shader.fragmentShader;
 
@@ -361,12 +367,15 @@ export function makeTerrainMaterial(tex) {
       float pvBigB = pvFbm(vPvWorld.xz * 0.00072 + 31.0);
       float pvSoft = 1.0 - rockW;
       albedo *= 0.89 + pvBigB * 0.24;
-      albedo = mix(albedo, albedo * vec3(1.20, 1.06, 0.66),
-                   smoothstep(0.56, 0.90, pvBigA) * pvSoft * 0.42);
+      albedo = mix(albedo, albedo * vec3(1.14, 1.03, 0.70),
+                   smoothstep(0.58, 0.92, pvBigA) * pvSoft * 0.30);
       albedo = mix(albedo, albedo * vec3(0.76, 0.94, 0.82),
                    smoothstep(0.44, 0.14, pvBigA) * pvSoft * 0.34);
 
       vec3 packedN = mix(gN, rN, rockW);
+      // Rock and bare soil take a sheen; turf does not. One roughness across the
+      // whole surface is a big part of why untextured terrain looks like card.
+      pvRough = mix(mix(1.06, 0.90, wSoil + wAcc * 0.6), 0.80, rockW);
       diffuseColor.rgb *= albedo * 1.16;
       vPvNormalMap = packedN * 2.0 - 1.0;
       vPvRock = rockW;
@@ -379,6 +388,9 @@ export function makeTerrainMaterial(tex) {
         diffuseColor.rgb *= mix(vec3(1.0), tint, mix(0.72, 0.22, vPvRock));
       #endif
     `);
+
+    shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>',
+      '#include <roughnessmap_fragment>\n roughnessFactor = clamp(roughnessFactor * pvRough, 0.05, 1.0);');
 
     // Perturb the shading normal by the splatted normal map.
     shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `
@@ -394,6 +406,7 @@ export function makeTerrainMaterial(tex) {
       #include <common>
       vec3 vPvNormalMap = vec3(0.0);
       float vPvRock = 0.0;
+      float pvRough = 1.0;
     `);
 
     // Molten fissures in the volcanic country.
@@ -411,7 +424,7 @@ export function makeTerrainMaterial(tex) {
 
     attachAerial(shader);
   };
-  mat.customProgramCacheKey = () => 'primeval-terrain-v6';
+  mat.customProgramCacheKey = () => 'primeval-terrain-v9';
   return mat;
 }
 

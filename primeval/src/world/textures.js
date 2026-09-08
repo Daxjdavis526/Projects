@@ -461,7 +461,7 @@ void main(){
     float span = sin(3.14159 * pow(clamp(t, 0.0, 1.0), 0.62)) * 0.42;
     // Leaflets rake toward the tip rather than sitting square to the spine, and
     // they close up enough that the frond reads as a leaf, not a comb.
-    float pin = fract(t * 40.0 - across * 5.5);
+    float pin = fract(t * 62.0 - across * 8.0);
     float leaflet = step(across, span) * step(pin, 0.74) * step(0.03, t) * step(t, 0.97);
     a = max(spine, leaflet);
     float shade = 0.42 + (1.0 - across / max(span, 0.001)) * 0.5;
@@ -558,13 +558,21 @@ float accReg(vec2 uv){
   return fbm(uv * 16.0, 16.0, 5) * 0.6 - smoothstep(0.30, 0.0, w.x) * 0.5
        + smoothstep(0.22, 0.0, worley(uv * 26.0 + 3.0, 26.0).x) * 0.25;
 }
+// Each cell is baked with an eight-texel gutter of wrapped content around it,
+// so a bilinear tap at the cell border reads this pattern's own far edge rather
+// than bleeding in the neighbouring accent. Without it every tile boundary drew
+// a pale hairline across the ground, four metres apart, all the way to the
+// horizon. The patterns are all periodic with period one, so evaluating them
+// slightly outside [0,1] is exactly the wrap we want.
+const float ACC_GUT = 8.0 / 512.0;
+vec2 accCellUV(vec2 uv){ return (fract(uv * 2.0) - ACC_GUT) / (1.0 - 2.0 * ACC_GUT); }
 float heightAt(vec2 uv){
-  vec2 c = floor(uv * 2.0); vec2 p = fract(uv * 2.0);
+  vec2 c = floor(uv * 2.0); vec2 p = accCellUV(uv);
   if (c.y > 0.5) return c.x < 0.5 ? accSand(p) : accAsh(p);
   return c.x < 0.5 ? accSnow(p) : accReg(p);
 }
 vec3 colourAt(vec2 uv, float h){
-  vec2 c = floor(uv * 2.0); vec2 p = fract(uv * 2.0);
+  vec2 c = floor(uv * 2.0); vec2 p = accCellUV(uv);
   float grain = fbm(p * 80.0, 80.0, 3);
   if (c.y > 0.5) {
     if (c.x < 0.5) {

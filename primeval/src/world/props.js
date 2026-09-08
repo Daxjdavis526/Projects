@@ -331,8 +331,8 @@ export function giantFern(seed = 1, scale = 1) {
   const fronds = 8 + Math.floor(r() * 5);
   for (let i = 0; i < fronds; i++) {
     const a = (i / fronds) * Math.PI * 2 + r() * 0.6;
-    const len = (1.1 + r() * 0.95) * scale;
-    const g = card(len * 0.32, len, 'frond', r, '#2b4a1e', '#7cad42', 0.5, 0.66);
+    const len = (0.82 + r() * 0.62) * scale;
+    const g = card(len * 0.34, len, 'frond', r, '#2b4a1e', '#7cad42', 0.5, 0.66);
     xform(g, { rot: [-0.68 - r() * 0.55, a, 0], pos: [0, 0.06 * scale, 0] });
     parts.push(swayRamp(g, 1.1, 0.85));
   }
