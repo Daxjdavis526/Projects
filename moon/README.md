@@ -306,6 +306,19 @@ they drove was planned under a walkback constraint: never further from the
 lander than you could walk home on the consumables you were carrying. The
 console shows that distance, and turns amber and then red as you approach it.
 
+## What is still wrong
+
+One known artefact, at the hardest place on the Moon to draw. With the Sun a
+fraction of a degree above the horizon, as it is for most of the year at the
+lunar south pole, what is lit and what is not is decided by differences in the
+skyline of well under a degree. Each vertex carries eight horizon angles, one
+every 45 degrees, and interpolating eight samples cannot resolve that: the
+polar terminator comes out banded into columns rather than fingered. The
+shadows are in the right places and the geometry underneath them is measured
+5 m LOLA topography; the edges between them are quantised. Sixteen azimuths
+would halve it and double the per-vertex cost, which is a trade worth measuring
+before making.
+
 ## Roadmap
 
 Not in this version: SLDEM2015 region streaming at 59 m globally, persistent

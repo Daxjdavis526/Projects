@@ -115,13 +115,19 @@ export class Stage {
   }
 
   /** Aim the Sun. `dir` points from the surface towards the Sun. */
-  setSun(dir, irradiance) {
+  setSun(dir, irradiance, elevationDeg = 90) {
     /* three.js takes the light's position and target; only the direction
        matters, so keep it close to the origin to avoid precision loss. */
     this.sun.position.set(dir.x * 800, dir.y * 800, dir.z * 800);
     this.sun.target.position.set(0, 0, 0);
     this.sun.intensity = irradiance;
     this.sun.visible = irradiance > 0;
+    /* The shadow map covers six hundred metres around the player. At a
+       grazing Sun its camera looks along the surface rather than at it and
+       the depth comparison has almost nothing to work with, so it is left to
+       the per-vertex horizon map, which reaches to the real horizon and is
+       what shapes a polar shadow anyway. */
+    this.sun.castShadow = irradiance > 0 && elevationDeg > 1;
   }
 
   /**

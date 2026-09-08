@@ -609,7 +609,7 @@ async function start() {
          and `?look=earth` came out staring at the ground. */
       if (eva) { eva.player.yaw = cam.yaw; eva.player.pitch = cam.pitch; }
     }
-    stage.setSun(local.sunDir, Math.max(0, local.sunEl > -0.3 ? 1 : 0));
+    stage.setSun(local.sunDir, Math.max(0, local.sunEl > -0.3 ? 1 : 0), local.sunEl);
     /* What the landscape is throwing back at everything standing on it. The
        terrain works its own out per vertex from the horizon map; this is the
        version for the astronaut, the ship and the rover, which have no horizon
