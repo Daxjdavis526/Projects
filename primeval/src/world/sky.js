@@ -204,17 +204,19 @@ void main(){
     float c = fbm3(n * 2.3 + 11.0, 6);
     float land = smoothstep(0.47, 0.56, c);
     float shelf = smoothstep(0.40, 0.50, c);
-    vec3 sea = mix(uSea * 0.55, uSea, shelf);
-    vec3 ground = mix(uLand * 0.72, uLand * 1.25, fbm3(n * 7.0, 4));
+    vec3 sea = mix(uSea * 0.42, uSea * 1.35, shelf);
+    vec3 ground = mix(uLand * 0.62, uLand * 1.75, fbm3(n * 7.0, 4));
     // Arid belts and a volcanic scar or two.
     ground = mix(ground, vec3(0.42, 0.33, 0.17), smoothstep(0.55, 0.75, fbm3(n * 3.1 + 40.0, 4)) * 0.55);
     col = mix(sea, ground, land);
     float ice = smoothstep(0.80, 0.95, abs(n.y));
     col = mix(col, vec3(0.92, 0.95, 0.99), ice);
     float cloud = fbm3(n * 3.4 + vec3(uTime * 0.004, 0.0, uTime * 0.002), 6);
-    float ct = smoothstep(0.50, 0.72, cloud);
-    col = mix(col, vec3(0.96, 0.97, 1.0), ct * 0.86);
-    col *= 0.06 + lambert * 1.05;
+    float ct = smoothstep(0.56, 0.80, cloud);
+    // Banded weather: storms gather along latitudes rather than everywhere.
+    ct *= 0.55 + 0.45 * smoothstep(0.2, 0.8, fbm3(vec3(n.y * 6.0, 3.0, 1.0), 3));
+    col = mix(col, vec3(0.94, 0.95, 0.99), ct * 0.82);
+    col *= 0.05 + pow(lambert, 0.85) * 1.35;
     // Night side keeps a faint reflected glow rather than going pure black.
     col += (1.0 - lambert) * vec3(0.012, 0.016, 0.03);
   } else {
@@ -265,7 +267,7 @@ export class CelestialBody {
       uniforms: this.uniforms,
       vertexShader: BODY_VERT,
       fragmentShader: BODY_FRAG,
-      depthWrite: false, depthTest: false, fog: false,
+      depthWrite: false, depthTest: true, fog: false,
     });
     this.mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 40), mat);
     this.mesh.frustumCulled = false;
@@ -276,13 +278,21 @@ export class CelestialBody {
     if (kind !== 'moon') {
       const haloMat = new THREE.ShaderMaterial({
         uniforms: { uCol: { value: new THREE.Color(0.35, 0.62, 1.0) }, uSunLocal: this.uniforms.uSunLocal },
-        vertexShader: `varying vec3 vN; varying vec3 vV;
-          void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix*vec4(position,1.0); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
-        fragmentShader: `varying vec3 vN; varying vec3 vV; uniform vec3 uCol; uniform vec3 uSunLocal;
-          void main(){ float rim = pow(1.0 - max(dot(vN, vV), 0.0), 2.6);
-            gl_FragColor = vec4(uCol * rim * 1.5, rim); }`,
-        transparent: true, depthWrite: false, depthTest: false,
-        blending: THREE.AdditiveBlending, side: THREE.BackSide, fog: false,
+        vertexShader: `varying vec3 vN; varying vec3 vV; varying vec3 vObj;
+          void main(){ vN = normalize(normalMatrix * normal); vObj = normalize(normal);
+            vec4 mv = modelViewMatrix*vec4(position,1.0); vV = normalize(-mv.xyz);
+            gl_Position = projectionMatrix*mv; }`,
+        // Front-facing shell: the glow has to be zero over the disc and strong
+        // only at the limb, or it paints the whole planet white.
+        fragmentShader: `varying vec3 vN; varying vec3 vV; varying vec3 vObj;
+          uniform vec3 uCol; uniform vec3 uSunLocal;
+          void main(){
+            float rim = pow(1.0 - clamp(dot(vN, vV), 0.0, 1.0), 3.4);
+            float lit = clamp(dot(vObj, uSunLocal) * 1.6 + 0.35, 0.0, 1.0);
+            gl_FragColor = vec4(uCol * rim * 1.7 * lit, rim * lit);
+          }`,
+        transparent: true, depthWrite: false, depthTest: true,
+        blending: THREE.AdditiveBlending, side: THREE.FrontSide, fog: false,
       });
       this.halo = new THREE.Mesh(new THREE.SphereGeometry(1.055, 48, 32), haloMat);
       this.halo.frustumCulled = false;

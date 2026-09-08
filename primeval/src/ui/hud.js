@@ -83,7 +83,11 @@ export class Hud {
     this.el.objHint.textContent = hint;
   }
 
-  status({ time, biome, alt, temp, grid }) {
+  status({ time, biome, alt, temp, grid, where }) {
+    if (where && this._where !== where) {
+      this._where = where;
+      this.el.status.querySelector('h2').textContent = where;
+    }
     this.el.stTime.textContent = time;
     this.el.stBiome.textContent = biome;
     this.el.stAlt.textContent = alt;

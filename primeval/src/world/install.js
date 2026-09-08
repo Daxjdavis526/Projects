@@ -7,9 +7,11 @@ import { Vegetation } from './vegetation.js';
 import { Water } from './water.js';
 import { Ecology } from '../life/ecology.js';
 import { PointsOfInterest } from './poi.js';
+import { VehicleSystem } from './vehicles.js';
 import { SPECIES } from '../life/species.js';
 
 export function installWorld(game) {
+  game.addSystem(new VehicleSystem());
   game.addSystem(new PoiSystem());
   game.addSystem(new WaterSystem());
   game.addSystem(new VegetationSystem());
@@ -91,8 +93,6 @@ class PoiSystem {
   async load(game) {
     this.poi = new PointsOfInterest(game.scene, game.quality);
     game.poi = this.poi;
-    const p = game.player.pos;
-    this.poi.update(0, p.x, p.z);
   }
   update(dt, game) {
     if (game.locale.id !== 'planet') { this.poi.group.visible = false; return; }
@@ -106,10 +106,6 @@ class WaterSystem {
   async load(game) {
     this.water = new Water(game.scene, game.quality);
     game.water = this.water;
-    const p = game.player.pos;
-    this.water.update(0, p.x, p.z);
-    let guard = 0;
-    while (this.water.job && guard++ < 200) this.water._stepJob();
   }
 
   update(dt, game) {
@@ -125,11 +121,6 @@ class VegetationSystem {
   async load(game) {
     this.veg = new Vegetation(game.scene, game.quality);
     game.veg = this.veg;
-    const p = game.player.pos;
-    // Grow the whole first field before the player ever sees the ground.
-    this.veg.update(0, p.x, p.z, p.y);
-    let guard = 0;
-    while (this.veg.job && guard++ < 400) this.veg._stepJob();
   }
 
   update(dt, game) {

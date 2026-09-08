@@ -134,14 +134,14 @@ const _col = [0, 0, 0];
  * Build one terrain patch. `size` is its world extent, `ox/oz` the min corner.
  * Returns a BufferGeometry with positions relative to the patch centre.
  */
-export function buildChunkGeometry(ox, oz, size, detail) {
+export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER) {
   const step = size / GRID;
   const n1 = GRID + 1;
   // Heights on the inner grid.
   for (let j = 0; j < n1; j++) {
     const z = oz + j * step;
     for (let i = 0; i < n1; i++) {
-      _hgrid[j * n1 + i] = heightAt(ox + i * step, z, detail);
+      _hgrid[j * n1 + i] = sampler.height(ox + i * step, z, detail);
     }
   }
   // Climate on a coarse sub-grid; these fields vary over kilometres.
@@ -152,9 +152,8 @@ export function buildChunkGeometry(ox, oz, size, detail) {
       const x = ox + (i / CS) * size, z = oz + (j / CS) * size;
       const h = _hgrid[Math.min(GRID, Math.round(j / CS * GRID)) * n1 + Math.min(GRID, Math.round(i / CS * GRID))];
       const k = (j * cs1 + i) * 3;
-      cm[k] = moistureAt(x, z, h);
-      cm[k + 1] = temperatureAt(x, z, h);
-      cm[k + 2] = hotspotField(x, z);
+      const c = sampler.climate(x, z, h);
+      cm[k] = c[0]; cm[k + 1] = c[1]; cm[k + 2] = c[2];
     }
   }
   const climate = (u, v, c) => {
@@ -198,8 +197,8 @@ export function buildChunkGeometry(ox, oz, size, detail) {
 
       const slope = 1 - nrm[k + 1];
       const u = gi / GRID, v = gj / GRID;
-      groundColor(h, slope, climate(u, v, 0), climate(u, v, 1), climate(u, v, 2),
-        detail > 0.5 ? riverField(wx, wz) : 0, _col);
+      sampler.color(h, slope, climate(u, v, 0), climate(u, v, 1), climate(u, v, 2),
+        detail > 0.5 ? sampler.river(wx, wz) : 0, _col);
       col[k] = _col[0]; col[k + 1] = _col[1]; col[k + 2] = _col[2];
     }
   }
@@ -282,9 +281,21 @@ class Node {
   }
 }
 
+/**
+ * The default sampler describes THERA. ANVIL supplies its own — same quadtree,
+ * different planet.
+ */
+export const THERA_SAMPLER = {
+  height: (x, z, detail) => heightAt(x, z, detail),
+  climate: (x, z, h) => [moistureAt(x, z, h), temperatureAt(x, z, h), hotspotField(x, z)],
+  color: (h, slope, moist, temp, hot, river, out) => groundColor(h, slope, moist, temp, hot, river, out),
+  river: (x, z) => riverField(x, z),
+};
+
 export class Terrain {
-  constructor(scene, quality) {
+  constructor(scene, quality, sampler = THERA_SAMPLER) {
     this.quality = quality;
+    this.sampler = sampler;
     this.group = new THREE.Group();
     this.group.name = 'terrain';
     this.group.matrixAutoUpdate = false;
@@ -369,7 +380,7 @@ export class Terrain {
 
   _build(node) {
     const detail = node.size <= 128 ? 1 : node.size <= 512 ? 0.6 : 0.2;
-    const geo = buildChunkGeometry(node.x, node.z, node.size, detail);
+    const geo = buildChunkGeometry(node.x, node.z, node.size, detail, this.sampler);
     const mesh = new THREE.Mesh(geo, this.material);
     mesh.position.set(node.cx, 0, node.cz);
     mesh.receiveShadow = node.size <= 256;
@@ -381,9 +392,21 @@ export class Terrain {
     this.live.set(this.key(node), mesh);
   }
 
-  dispose() {
+  /** Throw away every built patch — used when swapping worlds. */
+  reset() {
     for (const [, m] of this.live) { this.group.remove(m); m.geometry.dispose(); }
     this.live.clear();
+    this.root = new Node(-ROOT_SIZE / 2, -ROOT_SIZE / 2, ROOT_SIZE, MAX_LEVEL);
+  }
+
+  setSampler(sampler) {
+    if (this.sampler === sampler) return;
+    this.sampler = sampler;
+    this.reset();
+  }
+
+  dispose() {
+    this.reset();
     this.material.dispose();
   }
 }

@@ -67,14 +67,20 @@ export class Colliders {
   /**
    * Push a vertical cylinder out of every box it overlaps.
    * Mutates `pos` (which is the cylinder's base) and returns true if it moved.
+   *
+   * `stepUp` matters more than it looks: a floor slab is a box whose top is at
+   * your feet, and gravity dips you a few millimetres into it every frame. Any
+   * box you could step onto is therefore not an obstruction, or you get shoved
+   * clean across the room by the floor you are standing on.
    */
-  resolve(pos, radius, height) {
+  resolve(pos, radius, height, stepUp = 0.62) {
     let moved = false;
     const feet = pos.y, head = pos.y + height;
     for (let iter = 0; iter < 3; iter++) {
       let any = false;
       for (const b of this.boxes) {
         if (!b.enabled) continue;
+        if (b.climbable && b.top <= feet + stepUp) continue;
         if (b.top <= feet + 0.02 || b.bottom >= head - 0.02) continue;
         b.toLocal(pos.x, 0, pos.z, _v);
         const ox = b.h.x + radius - Math.abs(_v.x);

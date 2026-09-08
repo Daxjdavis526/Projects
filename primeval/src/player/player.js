@@ -155,7 +155,7 @@ export class Player {
     this.pos.addScaledVector(this.vel, dt);
 
     // --- ground / collision resolve ---
-    if (this.colliders) this.colliders.resolve(this.pos, PLAYER.radius, Math.max(0.9, this.eye));
+    if (this.colliders) this.colliders.resolve(this.pos, PLAYER.radius, Math.max(0.9, this.eye), PLAYER.stepUp);
 
     const groundY2 = world.heightAt(this.pos.x, this.pos.z);
     const colY2 = this.colliders
