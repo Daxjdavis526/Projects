@@ -34,14 +34,24 @@ export function albedoFromMap(L) {
   return L / Math.pow(1 + Math.pow(Math.max(0, L) / OPTICS.albedoMax, p), 1 / p);
 }
 
-/** The same curve, for the shader. Uses the same two constants. */
+/** The same curve, for the shader. Uses the same constants. */
 export const ALBEDO_GLSL = /* glsl */`
 uniform float uAlbedoMax;
 uniform float uAlbedoKnee;
+uniform float uChroma;
 
 vec3 albedoFromMap(vec3 c) {
   float L = max(dot(c, vec3(0.2126, 0.7152, 0.0722)), 1e-5);
   float a = L / pow(1.0 + pow(L / uAlbedoMax, uAlbedoKnee), 1.0 / uAlbedoKnee);
+  /* The colour map is a band composite, not a colorimetric one: LROC's wide
+     angle camera puts 689, 643 and 604 nanometres into red, green and blue, and
+     689 is redder than the eye's red. Measured over the whole map its linear
+     red to blue ratio is 1.117, against the roughly 1.05 to 1.10 the published
+     visual spectra give for mature regolith. So the chroma is pulled back
+     towards the luminance by a fixed factor, which lands it in the middle of
+     that range and stops bright highlands reading as sand. Nothing else about
+     the map is touched. */
+  c = mix(vec3(L), c, uChroma);
   return c * (a / L);
 }
 `;

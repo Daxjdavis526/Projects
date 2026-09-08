@@ -134,7 +134,12 @@ export class Quadtree {
            while its children load. */
         const chord = arc / (this.verts - 1);
         const sagitta = chord * chord / (8 * R_MOON);
-        const tooCoarse = wantSplit && near < arc * 0.1 && sagitta > 3;
+        /* How much departure matters depends on how close you are to it. Three
+           metres is intolerable with your boots on the ground and invisible
+           from ten kilometres up, where refusing to draw coarse tiles would
+           punch holes in the landscape while their children build. */
+        const tooCoarse = wantSplit && near < arc * 0.1 &&
+          sagitta > Math.max(3, camAlt * 0.02);
         if (!tooCoarse) draw.push(key);
       } else {
         if (!entry || entry.state !== 'pending') {

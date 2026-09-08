@@ -217,6 +217,7 @@ export function makeTerrainMaterial(opts = {}) {
     uOverlayMix: { value: 0.88 },
     uAlbedoMax: { value: OPTICS.albedoMax },
     uAlbedoKnee: { value: OPTICS.albedoKnee },
+    uChroma: { value: OPTICS.chroma },
     uOppositionB0: { value: OPTICS.oppositionB0 },
     uOppositionH: { value: OPTICS.oppositionH },
     uHG: { value: OPTICS.hgG },

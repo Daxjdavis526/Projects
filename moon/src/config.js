@@ -91,6 +91,10 @@ export const OPTICS = {
      display. See render/albedo.js for what is done about it. */
   albedoMax: 0.24,
   albedoKnee: 3,           // how sharply the map's bright end rolls over
+  /* How much of the colour map's chroma to keep. Its linear red to blue ratio
+     is 1.117 because it is a 689/643/604 nm composite; the published visual
+     ratio for mature regolith is 1.05 to 1.10. See render/albedo.js. */
+  chroma: 0.55,
   hgG: -0.25,              // Henyey-Greenstein asymmetry (backscattering)
   oppositionB0: 0.9,       // surge amplitude
   oppositionH: 0.06,       // surge angular width (rad)
