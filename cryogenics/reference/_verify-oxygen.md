@@ -1516,3 +1516,488 @@ Training course *Fire Hazards in Oxygen Systems* **[A]**:
 - **Maximization** — maximise the use of the most burn-resistant materials available.
 - **Minimization** — minimise the potential ignition sources inherent in all systems.
 - **Utilization** — utilise good system design practices.
+
+---
+
+## 7. Historical incidents
+
+**Read this classification first.** The mechanisms differ by phase and
+environment, and conflating them produces bad engineering intuition:
+
+| Incident | Environment | Why the distinction matters |
+|---|---|---|
+| Apollo 1 (1967) | **Oxygen-enriched atmosphere** — 100% O₂ at 16.7 psia, crewed cabin | Bulk-material flammability in a habitable volume. Not a plumbing failure |
+| Apollo 13 (1970) | **Cryogenic supercritical oxygen** in a pressure vessel | Electrical arc ignition inside an oxygen-wetted vessel |
+| Mir SFOG (1997) | **Chemically generated hot GOX** in a crewed volume | Contamination + thin-metal flammability; casing burn-through |
+| Medical regulator fires | **High-pressure GOX** | Adiabatic compression, particle impact, aluminium |
+| Industrial valve/pipeline fires | **High-pressure/high-velocity GOX** | Friction and particle impact in large piping |
+
+Only Apollo 13 involves cryogenic oxygen as such. A cryogenic propulsion course
+should be explicit that most of the well-documented oxygen fire literature is
+GOX and enriched-atmosphere work, and that LOX adds its own effects — porous
+materials become "dramatically more sensitive to mechanical impact" in LOX (TM
+§4.3.1) **[A]**, and Al 2219's impact threshold drops from 1,500 psi in GOX to
+50 psi in LOX **[A]**.
+
+---
+
+### 7.1 Apollo 1 / AS-204 (27 January 1967) — oxygen-enriched atmosphere
+
+**Primary source [A]:** *Report of Apollo 204 Review Board to the Administrator,
+National Aeronautics and Space Administration*, 5 April 1967.
+- NTRS 19820066930, report number **NASA-TM-84105**, dated 1967-04-05 —
+  https://ntrs.nasa.gov/api/citations/19820066930/downloads/19820066930.pdf
+- Also catalogued as NTRS 19930078717, **NASA-TM-108667**.
+- NASA-hosted Findings, Determinations and Recommendations:
+  https://www.nasa.gov/wp-content/uploads/static/history/Apollo204/find.html
+- Numerous appendices exist as separate NTRS records (19820066927 Appendix B,
+  19820066925 Appendix C §1, 19820066923 Appendix D, 19820066935 Appendix E,
+  19820067189 Appendix G Pt 1).
+
+**What happened.** During a plugs-out test, fire broke out in the Command Module
+and killed the three-man crew. The Board could not identify a single ignition
+source but found physical evidence of arcing.
+
+**Why — verbatim from the NASA-hosted Findings page [A]:**
+
+- Test conditions: *"The test was conducted with a 16.7 pounds per square inch
+  absolute, 100-percent oxygen atmosphere."*
+- Determination: *"The test conditions were extremely hazardous."*
+- Ignition: *"Evidence of several arcs was found in the post-fire
+  investigation,"* with probable location *"an electrical arc in the sector
+  between -Y and +Z spacecraft axes."*
+- Fuel load: *"The Command Module contained many types and classes of
+  combustible material in areas contiguous to possible ignition sources."*
+- Wiring: *"Deficiencies in design, manufacture, installation, rework and quality
+  control existed in the electrical wiring."*
+
+**Recommendations [A]:**
+- *"The amount and location of combustible materials in the Command Module must
+  be severely restricted and controlled."*
+- Three-dimensional jigs for wire bundle manufacture, with rigid inspection at
+  all stages of wiring design, manufacture and installation.
+- Continue studies of a diluent gas, "with particular reference to assessing the
+  problems of gas detection and control and the risk of additional operations
+  that would be required in the use of a two-gas atmosphere."
+
+**The finding that should be quoted in every safety course [B]:** the Board
+found that NASA's long record of success with pure oxygen atmospheres at
+16.7 psia and below had led to *overconfidence and complacency*, and that test
+documents and crew procedures contained no fire emergency provisions because
+*"the test configuration was not classified as potentially hazardous."*
+Marked B because I have it from a search summary of the NASA pages rather than
+having read that clause in the report text; the underlying document is public
+and should be quoted directly for the course.
+
+**Engineering lesson.** Three lessons, and the third is the one people miss:
+
+1. **Enrichment plus pressure plus fuel load is the hazard, not any one of them.**
+   At 16.7 psia of pure oxygen, the cabin's materials — nylon netting, Velcro,
+   foam padding, paper checklists — were a fuel bed. Compare §2.2: two
+   percentage points of enrichment changes polyester foam from
+   self-extinguishing to fully consumed. This cabin was at 100%.
+2. **The ignition source was never definitively identified, and it did not need
+   to be.** Where arcs are credible and the fuel load is uncontrolled, the fire
+   is a matter of time. This is exactly the logic of NASA's ignition mechanism
+   method (§3): remove characteristic elements, do not hunt for the one spark.
+3. **A hazardous configuration classified as non-hazardous receives no hazard
+   controls.** The absence of emergency planning followed directly from the
+   paperwork classification. In review terms: the classification step is itself
+   safety-critical.
+
+Direct lineage to this course: the compatibility-assessment discipline in
+NASA/TM-2007-213740 and the material requirements in NASA-STD-6001 are
+institutional descendants of this report.
+
+---
+
+### 7.2 Apollo 13 oxygen tank 2 (13 April 1970) — cryogenic oxygen pressure vessel
+
+**Primary source [A]:** *Report of Apollo 13 Review Board* (the Cortright
+Report), **NASA-TM-X-65270**, 15 June 1970.
+- NTRS 19700076776 — https://ntrs.nasa.gov/api/citations/19700076776/downloads/19700076776.pdf
+- Appendices: NTRS 19700078804 (Baseline Data), 19700078726 (Appendices B, C),
+  19700078913 (Appendix F Special Tests and Analyses, Appendix G).
+
+**Secondary source used here [A]:** Brenda Lindley Anderson, *A Case Study of the
+Failure on Apollo 13: Based on TMX-65270, Report of Apollo 13 Review Board*,
+NASA Marshall Space Flight Center, report **M11-0349**, 8 August 2011, NTRS
+20110015690 — https://ntrs.nasa.gov/api/citations/20110015690/downloads/20110015690.pdf
+This is a NASA document that explicitly summarises the Board report, and I read
+it directly; the detail below is quoted from it.
+
+**The failure chain, in order [A, from Anderson]:**
+
+1. **Design mismatch.** Each heater in the tank had a thermostatic switch as
+   protection against extreme heat; it "should open if the temperature rises
+   above 80 °F." The switches "were rated at 28 V dc, which is the standard
+   operating power for the Apollo craft."
+2. **Ground support equipment at 65 V.** During the Countdown Demonstration Test
+   and tanking tests at KSC, the heaters were powered from **65 V dc GSE**.
+   Post-flight testing showed the switches "failed to open when the heaters used
+   power from the 65 V dc GSE."
+3. **The gap in qualification.** "Qualification and testing procedures for the
+   heater did not test the ability at any point for the switches to operate at
+   65 V dc." The mismatch existed for years and was never exercised by a test.
+4. **Overheating during detanking.** Flight data reviewed post-flight "showed
+   that the switches did not open at any time when the recorded temperature was
+   above 80 °F." Post-flight testing showed the heaters, "since they were not cut
+   off by the thermostatic switch, may have reached temperatures as high as
+   **1000 °F** during the detanking procedures."
+5. **Insulation destroyed.** "This greatly elevated temperature was shown to
+   cause severe damage to Teflon insulation on wiring. Severe damage almost
+   certainly occurred to the wiring inside oxygen tank 2 during the extended
+   heater use."
+6. **The information never reached the decision.** "This information was not
+   available to decision makers at the time of the pre-launch discussions,
+   instead virtually all attention focused on the potential of damage due [to] a
+   loose fill tube."
+7. **First warning in flight, misread.** At **46:40:02 MET** the crew turned on
+   the tank 2 fans; in three seconds the oxygen quantity reading rose from an
+   expected 82% to off-scale above 100%. The fans ran twice more without adverse
+   effect, "however, the quantity gauge continued to read off scale."
+8. **The failure.** At **55:53:20 GET**, current was applied to the oxygen tank 2
+   fan motors at the EECOM's request to stir the tanks. At **55:54:53.555 GET**
+   telemetry was lost for 1.8 seconds; dc main bus B registered a serious
+   undervolt and the crew heard a loud bang.
+9. **Mechanism.** "It is evident that wiring inside the oxygen tank had lost its
+   Teflon insulation due to the overheating during the de-tanking procedures at
+   KSC. When the fan-on request was performed, **the current flow generated a
+   spark which ignited oxygen in the tank**. The tank was over-pressured by the
+   explosion and burst, causing damage to adjacent systems, including oxygen
+   tank 1, and blowing off the side panel covering SM bay 4."
+
+**Cortright's summary of cause [B]:** the accident "was not the result of a
+chance malfunction in a statistical sense but, rather, it was the result of an
+unusual combination of mistakes coupled with a somewhat deficient and unforgiving
+design." Marked B — widely reported from the Board report; verify the exact
+wording against TM-X-65270 before quoting in courseware.
+
+**Board recommendation [B]:** redesign the service module oxygen tank, including
+**removal of all electrical equipment from inside the pressure vessel**. Same
+caveat — verify against the report text.
+
+**Engineering lessons.**
+
+1. **This is textbook electrical arc ignition (§3.3 item 9), and NASA's own
+   guide names the scenario.** TM-2007-213740's example for electrical arc is
+   "an insulated electrical heater element undergoing a short circuit could
+   produce ignition by arcing through its sheath to a combustible material." The
+   mechanism was catalogued. The tank still had powered electrical equipment
+   immersed in oxygen.
+2. **Interface voltage is a safety parameter.** A 28 V component met by 65 V
+   ground equipment defeated the only protective device in the assembly. Ground
+   support equipment is part of the system.
+3. **Untested protection is not protection.** The switches' behaviour at the
+   voltage they would actually see was never in any qualification procedure. A
+   reviewer's question: *has this protective device been tested at every
+   condition it will encounter, including ground operations?*
+4. **The damage was latent.** The tank flew 46 hours without anomaly. Damage
+   inflicted on the ground, weeks earlier, waited for a current to be applied.
+   Compare thermal runaway (§3.3 item 11): "it worked when we tested it" is not
+   evidence.
+5. **The 82%-to-off-scale spike at 46:40:02 was the system reporting its own
+   damage** and was not recognised as such. Anomalous instrumentation in an
+   oxygen system deserves a fire hypothesis, not just a sensor hypothesis.
+6. **Teflon (PTFE) is a *good* oxygen material and it still failed.** Per §2.2
+   PTFE has among the best impact thresholds of the nonmetals. It was destroyed
+   thermally at 1000 °F. Material selection does not survive an out-of-envelope
+   thermal excursion — which is the configuration-dependence principle (§6.3)
+   stated in the time domain.
+
+---
+
+### 7.3 Mir SFOG / Vika fire (24 February 1997) — chemically generated hot GOX
+
+**Primary source [A]:** John Graf, *Oxygen Candle Background for Subs and Space*,
+NASA Johnson Space Center, report **JSC-CN-38913**, February 2017, NTRS
+20170002051 —
+https://ntrs.nasa.gov/api/citations/20170002051/downloads/20170002051.pdf
+Presented at "Subs in Space", Houston TX, February 2017; the document notes it
+was for eventual publication in an NESC report then in preparation. The internal
+title on the paper is *Chlorate Oxygen Generator (Oxygen Candle) Review of the
+History of Candle Development*.
+
+**Context.** Mir used solid fuel oxygen generators (SFOG), designated **TGK** by
+the Russians and commonly called Vika, burning **lithium perchlorate** canisters
+to generate oxygen chemically, supplementing the Elektron units when the crew
+was large. **[A]** (Graf; system naming also **[B]** from NASA history pages.)
+
+**What happened, verbatim from Graf [A]:**
+
+> "The Russian MIR space station carried a lithium perchlorate oxygen generator
+> designated TGK. In 1997 one TGK unit failed having burned through the thin
+> stainless steel wall. It is assumed that the stainless steel was actually
+> burning in the high temperature oxygen stream. The fire continued for some
+> 10-20 minutes until the generator was exhausted. NASA assisted the Russian
+> Space Agency with the failure investigation."
+
+**Why [A]:**
+
+> "The investigation concluded that the oxygen generator was probably
+> contaminated during manufacture. The contaminant being either a hydrocarbon
+> material or a fragment of the manufacturer's technician's chemical gloves...
+> The fire of the stainless steel shell was due in part to its extreme thinness
+> since **thinner metals have been shown to be more flammable in elevated oxygen
+> compatibility tests**."
+
+**[B]** from NASA history sources: the flames spanned the breadth of the Kvant-1
+module and cut off access to one of the two Soyuz escape craft; the crew
+extinguished the fire without damage to the station structure.
+
+**Engineering lessons.** This incident is worth more class time than it usually
+gets, because it demonstrates three separate course principles converging:
+
+1. **Manufacturing contamination is an ignition source.** A glove fragment or a
+   trace hydrocarbon, introduced at manufacture, was sufficient. This is exactly
+   the cleanliness argument of §5 — and note that no amount of careful field
+   operation could have removed a contaminant sealed inside the canister.
+   Cleanliness is a *supply chain* property.
+2. **Thin stainless steel burned.** Not melted — burned, in the oxygen stream it
+   was generating. This is the thickness rule (§2.3, Davis rule 4) killing
+   someone's intuition that stainless is inert. Cross-reference §2.2: 304L
+   sustains combustion at 250 psi in *bulk rod* form; thin sheet is worse.
+3. **The containment was the fuel.** The design assumed the casing would contain
+   the reaction. In an oxygen-rich, high-temperature environment the casing was
+   simply another flammable material in the kindling chain (§3.4).
+
+**Related incidents in the same source [A]**, useful for showing this is a class
+of failure and not a one-off: candles burning at uneven rates, "occasionally
+tripling their generation rate," attributed to incomplete mixing of iron powder
+into the bulk chlorate; SCOG units found "contaminated on the outside by various
+oils" with reports of "holes burning through the stainless steel SCOG wall";
+and a Dutch submarine (HrMs Bruinvis) candle furnace over-pressure event in May
+2007.
+
+Graf also documents **ValuJet Flight 592** (Everglades, 11 May 1996), where
+expired-but-not-expended chemical oxygen generators carried as cargo without
+safety caps activated in the cargo hold **[A]**. Graf cites NTSB report
+**PB97-910406**, dated 19 August 1997. Different mechanism (uncontrolled
+activation rather than material ignition) but the same family, and a good
+illustration that oxygen sources are hazardous cargo.
+
+---
+
+### 7.4 Aluminium medical oxygen regulator fires (1990s) — high-pressure GOX
+
+**Source [B]:** WHA International case study —
+https://wha-international.com/case-study-medical-oxygen-regulators/
+Marked B: WHA are the recognised specialists and performed the investigations,
+but this is their own summary page, not the underlying reports. The resulting
+**ASTM G175** is verifiable **[A]**.
+
+**What happened [B].** WHA investigated **11** medical oxygen regulator fires;
+the FDA received reports of **17 fires between 1993 and 1999** involving aluminium
+regulators on portable oxygen cylinders. Many involved fire or emergency
+services. In the documented **6 October 1995 Boone, North Carolina** incident,
+responders ventilating a patient from a high-pressure medical oxygen cylinder
+experienced a catastrophic burnout within the aluminium regulator; "flames and
+molten slag from the regulator erupted from the carrying case and engulfed the
+upper torso of the EMT who was carrying it." The ignition mechanism identified
+for that incident was **particle impact**.
+
+**Why [B].** Four ignition mechanisms across the incident set — all four already
+in the canonical list of §3:
+1. **Heat of compression** — "When a cylinder valve is first opened, high
+   pressure gas flows into the mechanism and rapidly recompresses."
+2. **Contaminant ignition** — heat of compression igniting foreign contaminants.
+3. **Particle impact** — "Gas flows extremely fast when a valve is opened (close
+   to the speed of sound!)" propelling metallic particles.
+4. **Promoted ignition** — fire propagating downstream through the gas flow, i.e.
+   the kindling chain.
+
+**The material [B].** All 11 involved regulators "primarily constructed out of
+aluminum." WHA's stated thresholds — aluminium igniting at pressures as low as
+**170 kPa (25 psi)** while brass resists to **70 MPa (10,000 psi)** — agree
+closely with the independently sourced NASA MSFC data in §2.2 (Al 4043 burning
+at 25 psi; brass at 10,000 psi). Two independent sources converging is worth
+noting in the course.
+
+**Engineering lesson.** The most encouraging incident in this file, because the
+loop closed. The investigations produced **ASTM G175**, *Standard Test Method for
+Evaluating the Ignition Sensitivity and Fault Tolerance of Oxygen Pressure
+Regulators Used for Medical and Emergency Applications*, approved 2003, current
+edition **G175-24** **[A]**. WHA report that since approval "there have been no
+new incidents recorded involving medical oxygen regulators that met the
+requirements of ASTM G175" **[B]**.
+
+Note also the standards archaeology **[A]**: **PS127-00**, a provisional standard
+covering the same subject, was withdrawn in 2003 — the year G175 was approved.
+The provisional became the full standard.
+
+The design principle: **fault tolerance**, not just material selection. G175
+tests whether a regulator survives an ignition event, not merely whether it
+avoids one.
+
+---
+
+### 7.5 Industrial oxygen valve and pipeline fires
+
+Two citable works. **Bibliographic data is [A]** (CrossRef); **content detail is
+weaker and marked accordingly**, because both are paywalled and I could not read
+them.
+
+**(a) Lautkaski, R. (2008), "Investigation of a large industrial oxygen valve
+fire", *Journal of Loss Prevention in the Process Industries*, **21**(4),
+466–471. DOI **10.1016/j.jlp.2008.03.002**. [A — bibliographic, verified via
+CrossRef and Semantic Scholar]**
+
+Reported content **[C]**: a 300 mm butterfly valve in an industrial oxygen
+pipeline ignited during system start-up, killing three people; the valve was
+apparently stuck and operators used pipe tongs to open it. **This description
+comes from a search summary, not from the paper.** The publisher elides the
+abstract. If the course uses this incident, obtain the paper.
+
+If it holds up, the lesson is a good one: forcing a stuck valve supplies exactly
+the characteristic elements of galling/friction ignition (§3.3 item 6) — rubbing
+surfaces, relative motion, and high loads — and start-up supplies the rapid
+pressurisation and particle-laden first flow.
+
+**(b) Newton, B. and Forsyth, E.T., "Cause And Origin Analyses Of Two Large
+Industrial Oxygen Valve Fires", in *Flammability and Sensitivity of Materials in
+Oxygen-Enriched Atmospheres: 10th Volume*, ASTM, 2003, pp. 268–289. DOI
+**10.1520/STP11594S**. [A — bibliographic, verified via CrossRef]** Content not
+read; no claims made here.
+
+Also identified but not read: **ASTM STP11595S**, "Oxygen Fire Cause and Origin
+Analysis of the CUMA V2 Underwater Breathing Apparatus" —
+https://store.astm.org/stp11595s.html **[B]** (listing exists).
+
+**The ASTM *Flammability and Sensitivity of Materials in Oxygen-Enriched
+Atmospheres* STP series is the main body of published oxygen fire case
+literature.** For a course building an incident library, that series plus
+**ASTM G145-08(2023)**, *Standard Guide for Studying Fire Incidents in Oxygen
+Systems*, is the right place to start. G145's stated purpose is to help
+investigators "select a direct cause hypothesis and to avoid conclusions based
+on hypotheses... that have proven faulty in the past," and it recommends
+multidisciplinary teams. **[A]**
+
+---
+
+### 7.6 Incidents I deliberately did not include
+
+Several oxygen incidents are widely retold online without documentation I could
+verify. They are omitted rather than included with a hedge. If the course wants
+more incidents, the route is the ASTM STP series above and NASA WSTF's published
+work — not general web sources.
+
+---
+
+## 8. Open items — what still needs verifying
+
+Ordered by how much they matter to Module 6.
+
+1. **Buy and read ASTM G88-21.** It is the design guide, it is the source for
+   design controls per mechanism, and everything in §3's Controls rows and §4.5
+   is currently derived or secondary. This is the biggest single gap. **[C]**
+2. **Read ASTM MNL36 2nd ed.** It is the source NASA points to for material
+   flammability and ignition data, and it is where an air-versus-oxygen MIE
+   comparison would live if one exists in the oxygen-safety literature. **[C]**
+3. **Pressurisation rate limits.** No verified numeric limit found (§4.5). Check
+   G88-21 and CGA G-4.4 6th ed.
+4. **MIE, AIT and flame temperature in oxygen vs air.** No citable quantitative
+   comparison found (§2.2). Direction of effect is solid; magnitudes are not.
+5. **NFPA 55 2026 edition** — confirm against NFPA directly, and discard the
+   unverified issue/effective dates noted in §1.6. **[C]**
+6. **CGA editions** — G-4 (11th, 2015 r2020), G-4.1 (7th, 2018), G-4.4 (6th,
+   2020) came from CGA's *legacy* catalogue. Confirm on the live site. **[B]**
+7. **Lautkaski (2008)** — obtain the paper before using the valve fire incident
+   (§7.5a). **[C]**
+8. **Apollo 13 direct quotes** — the Cortright "unusual combination of mistakes"
+   quote and the "remove all electrical equipment from inside the pressure
+   vessel" recommendation should be pulled from TM-X-65270 itself (NTRS
+   19700076776) rather than from secondary reporting. **[B]**
+9. **Apollo 1 "overconfidence and complacency" finding** — same: quote from the
+   report, not from a summary. **[B]**
+10. **EIGA Doc 04/26 Figure 2** — reproduce the figure under EIGA's reproduction
+    permission rather than transcribing values (§2.2). **[C]** for any
+    transcribed number.
+11. **NASA-STD-6016** — cited by TM-2007-213740 as co-requiring oxygen
+    compatibility assessments, but not verified in this pass. Worth adding to
+    the inventory.
+12. **NASA-STD-6001B Change 3 date** — 9 June vs 25 June 2025 discrepancy
+    (§1.4). Minor.
+
+---
+
+## 9. Source list
+
+Every URL below was fetched successfully during compilation on 2026-09-08 unless
+noted. ASTM standard pages under `www.astm.org/Standards/` return HTTP 403 to
+automated fetches; the `store.astm.org` product pages work and were used instead.
+
+**NASA primary**
+- NASA/TM-2007-213740, Rosales, Shoffstall & Stoltzfus, *Guide for Oxygen
+  Compatibility Assessments on Oxygen Components and Systems*, March 2007 —
+  https://ntrs.nasa.gov/api/citations/20070016582/downloads/20070016582.pdf
+- NASA-STD-6001B w/Change 3, *Flammability, Offgassing, and Compatibility
+  Requirements and Test Procedures*, June 2025 —
+  https://standards.nasa.gov/standard/NASA/NASA-STD-6001
+- Davis, S.E., *An Elementary Overview of the Selection of Materials for Service
+  in Oxygen-Enriched Environments*, NASA MSFC M12-1549, ASTM G04 Symposium,
+  19 September 2012 —
+  https://ntrs.nasa.gov/api/citations/20120015993/downloads/20120015993.pdf
+- Graf, J., *Oxygen Candle Background for Subs and Space*, NASA JSC-CN-38913,
+  February 2017 —
+  https://ntrs.nasa.gov/api/citations/20170002051/downloads/20170002051.pdf
+- Anderson, B.L., *A Case Study of the Failure on Apollo 13*, NASA MSFC
+  M11-0349, 8 August 2011 —
+  https://ntrs.nasa.gov/api/citations/20110015690/downloads/20110015690.pdf
+- *Report of Apollo 204 Review Board*, NASA-TM-84105, 5 April 1967 —
+  https://ntrs.nasa.gov/api/citations/19820066930/downloads/19820066930.pdf
+- Apollo 204 Findings, Determinations and Recommendations (NASA-hosted) —
+  https://www.nasa.gov/wp-content/uploads/static/history/Apollo204/find.html
+- *Report of Apollo 13 Review Board*, NASA-TM-X-65270, 15 June 1970 —
+  https://ntrs.nasa.gov/api/citations/19700076776/downloads/19700076776.pdf
+- NASA WSTF, Oxygen Compatibility Assessment and Hazards Evaluation —
+  https://www.nasa.gov/centers-and-facilities/white-sands/oxygen-compatibility-assessment-and-hazards-evaluation/
+- NASA WSTF, Ignition Susceptibility and Flammability —
+  https://www.nasa.gov/centers-and-facilities/white-sands/ignition-susceptibility-and-flammability/
+
+*NTRS metadata for all of the above was independently verified through the NTRS
+citation API, e.g. `https://ntrs.nasa.gov/api/citations/20070016582`.*
+
+**ASTM**
+- Oxygen Enriched Atmospheres standards listing (edition source of record) —
+  https://store.astm.org/products-services/standards-and-publications/standards/oxygen-enriched-atmospheres-standards.html
+- MNL36 2nd ed. — https://store.astm.org/mnl36-2nd-eb.html
+- G88-21 — https://store.astm.org/g0088-21.html
+- G93/G93M (showing -19 superseded by -25) — https://store.astm.org/g0093_g0093m-19.html
+- G63-15(2023) — https://store.astm.org/g0063-15r23.html
+- G94-22 — https://store.astm.org/g0094-22.html
+- G72/G72M-24 — https://store.astm.org/g0072_g0072m-24.html
+- G74-13(2021) — https://store.astm.org/g0074-13r21.html
+- G86-17(2025) — https://store.astm.org/g0086-17r25.html
+- G128/G128M-15(2023) — https://store.astm.org/g0128_g0128m-15r23.html
+- G145-08(2023) — https://store.astm.org/g0145-08r23.html
+
+**Other standards bodies**
+- EIGA Doc 04/26, *Fire Hazards of Oxygen and Oxygen-Enriched Atmospheres*,
+  June 2026 — https://www.eiga.eu/uploads/documents/DOC004.pdf
+  *(EIGA permits reproduction with acknowledgement.)*
+- EIGA Doc 13/20, *Oxygen Pipeline and Piping Systems* —
+  https://www.eiga.eu/uploads/documents/DOC013.pdf
+- CGA G-4 — https://legacy.cganet.com/Publication/Details.aspx?id=G-4
+- CGA G-4.1 — https://legacy.cganet.com/Publication/Details.aspx?id=G-4.1
+- CGA G-4.4 — https://legacy.cganet.com/Publication/Details.aspx?id=G-4.4
+- NFPA 55 product page — https://www.nfpa.org/product/nfpa-55-code/p0055code
+
+**Engineering guidance and case material**
+- LANL Engineering Standards Manual STD-342-100, Chapter 17 Pressure Safety,
+  Section PS-GUIDE, Attachment GUIDE-2, *Oxygen System Design Guide*, Rev. 0,
+  22 September 2023 —
+  https://engstandards.lanl.gov/esm/pressure_safety/Att-GUIDE-2-R0.pdf
+- WHA International, medical oxygen regulator case study —
+  https://wha-international.com/case-study-medical-oxygen-regulators/
+- WHA International, guide to the ASTM G93-2025 update —
+  https://wha-international.com/guide-to-astm-g93-2025/
+- Lautkaski, R. (2008), *J. Loss Prev. Process Ind.* **21**(4) 466–471 —
+  doi:10.1016/j.jlp.2008.03.002
+- Newton, B. & Forsyth, E.T. (2003), ASTM STP, pp. 268–289 —
+  doi:10.1520/STP11594S
+
+**Note on method.** Several NASA and EIGA PDFs do not survive automated
+HTML-conversion and required direct decompression of their content streams to
+read. Where a source is quoted above, the text was read from the document
+itself, not from a search-engine summary; where only a summary was available,
+the claim is labelled **B** or **C** and says so.
