@@ -226,6 +226,33 @@ console.log('installing and dropping by range');
   check('and is dropped once you are well clear', field.stats.installed === 0);
   check('with the ground restored', Math.abs(hf.heightAt(pit.lat, pit.lon) + 1500) < 0.01);
 
+  /* The hole is cut relative to whatever ground was there at the time, and at
+     thirty kilometres that can still be the vendored global at two kilometres
+     a pixel. When something finer arrives the plain moves; the pit has to
+     move with it or there is a step at the rim. */
+  {
+    const hf2 = flatGround(-1500);
+    const field2 = new PitField({ heightfield: hf2, terrain: null });
+    field2.update(pit.lat, pit.lon);
+    const before = hf2.heightAt(pit.lat, pit.lon);
+    check('the hole sits in the ground that was there when it was cut',
+      Math.abs(before + 1500 + pit.depth) < 0.5, `${(before + 1500).toFixed(1)} m`);
+
+    /* Now the real ground arrives, forty metres lower. */
+    hf2.addRaster(new Raster({
+      id: 'better', bbox: [pit.lon - 0.3, pit.lat - 0.3, pit.lon + 0.3, pit.lat + 0.3],
+      width: 8, height: 8, res_m: 59, priority: 0.5, source: 'finer', label: LABEL.MEASURED,
+    }, new Float32Array(64).fill(-1540)));
+    for (let i = 0; i < 100; i++) field2.update(pit.lat, pit.lon);
+    const after = hf2.heightAt(pit.lat, pit.lon);
+    check('and moves with it when better data lands under it',
+      Math.abs(after + 1540 + pit.depth) < 0.5,
+      `floor ${(after + 1540).toFixed(1)} m below the new plain`);
+    check('rather than leaving a step at the rim',
+      Math.abs(after - before + 40) < 0.5,
+      `the whole pit dropped ${(before - after).toFixed(1)} m`);
+  }
+
   check('the field knows which pit you are inside',
     field.at(pit.lat, pit.lon).id === pit.id);
   check('and that standing on the rim is not inside it',

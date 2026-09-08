@@ -21,6 +21,8 @@ import { Raster } from '../terrain/heightfield.js';
 
 const INSTALL_RANGE = 30000;
 const DROP_RANGE = 50000;
+/* How far the surrounding ground has to move before the hole is recut. */
+const RELEVEL = 2;
 
 export class PitField {
   /**
@@ -67,15 +69,28 @@ export class PitField {
       if (!have && range < INSTALL_RANGE) this.install(pit);
       else if (have && range > DROP_RANGE) this.drop(pit);
     }
+    /* The hole is cut relative to the ground that was there when it went in,
+       and at thirty kilometres that ground may still be the vendored global at
+       nearly two kilometres a pixel. When the finer data arrives the plain
+       moves and the pit does not, which is a step at the rim rather than a
+       pit in a slope. So re-level: cheap enough to do every couple of seconds,
+       and it only ever fires when the surroundings have actually changed. */
+    if (this.installed.size && (this._tick = (this._tick || 0) + 1) % 90 === 0) {
+      for (const e of [...this.installed.values()]) {
+        if (Math.abs(this.baseFor(e.pit) - e.base) > RELEVEL) {
+          this.drop(e.pit);
+          this.install(e.pit);
+        }
+      }
+    }
     return this;
   }
 
-  install(pit) {
-    if (this.installed.has(pit.id)) return null;
-    /* The surrounding surface, sampled before the pit exists, so the hole is
-       cut into the real ground rather than into a flat assumption. Read at four
-       points around the rim and averaged: a pit on a slope should sit in that
-       slope. */
+  /**
+   * The surrounding surface, read at four points around the rim and averaged,
+   * so a pit on a slope sits in that slope.
+   */
+  baseFor(pit) {
     const mPerDeg = 1737400 * Math.PI / 180;
     const d = (pit.funnelMax * 1.4) / mPerDeg;
     const dl = d / Math.max(0.05, Math.cos(pit.lat * Math.PI / 180));
@@ -83,7 +98,14 @@ export class PitField {
     for (const [a, b] of [[d, 0], [-d, 0], [0, dl], [0, -dl]]) {
       sum += this.hf.heightAt(pit.lat + a, pit.lon + b);
     }
-    const base = sum / 4;
+    return sum / 4;
+  }
+
+  install(pit) {
+    if (this.installed.has(pit.id)) return null;
+    /* Sampled before the pit exists, so the hole is cut into the real ground
+       rather than into a flat assumption. */
+    const base = this.baseFor(pit);
 
     const { spec, data } = buildPitRaster(pit, base);
     if (this.terrain) {
