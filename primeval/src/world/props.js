@@ -146,7 +146,7 @@ export function leafCluster(cx, cy, cz, radius, count, r, colLow, colHigh, cell 
     const cs = Math.cos(spin), sn = Math.sin(spin);
     const ex = side.clone().multiplyScalar(cs).addScaledVector(up, sn);
     const ey = side.clone().multiplyScalar(-sn).addScaledVector(up, cs);
-    const size = radius * (0.46 + r() * 0.34);
+    const size = radius * (0.39 + r() * 0.28);
 
     const base = pos.length / 3;
     const shade = 0.55 + r() * 0.45;
@@ -379,7 +379,7 @@ export function stiltTree(seed = 1, scale = 1) {
     const a = (i / 4) * Math.PI * 2 + r();
     parts.push(swayRamp(leafCluster(
       Math.cos(a) * 1.3 * scale, H * (0.86 + r() * 0.16), Math.sin(a) * 1.3 * scale,
-      (1.5 + r() * 1.0) * scale, 14 + Math.floor(r() * 6), r, '#1c3315', '#5c8830'), 0.7, 0.7));
+      (1.5 + r() * 1.0) * scale, 22 + Math.floor(r() * 9), r, '#1c3315', '#5c8830'), 0.7, 0.7));
   }
   return mergeGeometries(parts);
 }

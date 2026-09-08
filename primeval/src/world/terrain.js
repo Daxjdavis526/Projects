@@ -384,8 +384,14 @@ export function makeTerrainMaterial(tex) {
     // The biome colour becomes a hue tint, not the albedo.
     shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `
       #ifdef USE_COLOR
-        vec3 tint = vColor / max(dot(vColor, vec3(0.299, 0.587, 0.114)), 0.004);
+        float pvLum = max(dot(vColor, vec3(0.2126, 0.7152, 0.0722)), 0.004);
+        vec3 tint = vColor / pvLum;
         diffuseColor.rgb *= mix(vec3(1.0), tint, mix(0.72, 0.22, vPvRock));
+        // Keep some of the biome's value, not only its hue. A rainforest floor
+        // really is darker than a savanna, and normalising that away is most of
+        // why every biome reads as the same green blanket at a different
+        // temperature.
+        diffuseColor.rgb *= clamp(mix(1.0, pvLum / 0.27, 0.55), 0.55, 1.25);
       #endif
     `);
 
@@ -424,7 +430,7 @@ export function makeTerrainMaterial(tex) {
 
     attachAerial(shader);
   };
-  mat.customProgramCacheKey = () => 'primeval-terrain-v9';
+  mat.customProgramCacheKey = () => 'primeval-terrain-v10';
   return mat;
 }
 
