@@ -386,6 +386,85 @@ LOLA topography at 36 m; the edges between them are quantised. Sixteen azimuths
 would halve it and double the per-vertex cost, which is a trade worth measuring
 before making.
 
+## The pits, and the cave
+
+Four collapse pits in the maria are drawn, and one of them has a cave under it.
+
+An earlier version of this file said the opposite — that the pits could not be
+drawn because the finest elevation over any of them is 118 m per pixel and
+modelling them would mean inventing the shape of the one thing you came to see.
+The first half of that is true and the conclusion was wrong. The LROC Lunar
+Pits Atlas measured these pits off oblique NAC images and stereo models and
+published the numbers; Wagner & Robinson did photogrammetry on six of them. The
+shape is published. It just arrives as a table rather than as a raster.
+
+So `src/data/pits.js` fits an elliptical funnel-and-shaft profile to the atlas's
+own dimensions and hands it to the height field as a one-metre patch, installed
+when you come within thirty kilometres and dropped past fifty. It is labelled
+DERIVED and never MEASURED, because a profile fitted to six numbers is not a
+height field sampled off the Moon, and every value that is not straight off the
+atlas page is named in that pit's `inferred` list.
+
+| | across | to the floor | how you get in |
+|---|---|---|---|
+| Mare Tranquillitatis | 146 x 140 m | 125 m | fall, or fly |
+| Marius Hills | 92 x 79 m | 40 m | fly |
+| Southwest Mare Tranquillitatis | 100 x 80 m | 25 m | fly |
+| West Marius Hills | 95 x 70 m | 16 m | **walk** |
+
+West Marius is the one you can walk into: the atlas records a ramp of collapse
+debris running from the rim to the floor on its south-west side, and at 23
+degrees it is comfortably inside what a boot will hold. The other three have
+walls that read 89 degrees against a 37 degree friction angle. Falling into
+Mare Tranquillitatis arrives at 20 m/s, which is well past survivable; the
+jetpack climbs back out of it in four seconds and about half its heat budget.
+
+Under the east side of the Tranquillitatis pit floor there is a cave. In 2024
+Carrer et al. showed that Mini-RF radar images of the pit carry an anomaly no
+model of the pit alone reproduces, and that an unlit conduit below and to one
+side of it does. It is the only cave on the Moon anyone has evidence for. Here
+it is 45 m wide, level for twelve metres under the overhang and then dropping at
+the published 45 degrees to about 169 m below the plain, with a roof at 55
+degrees that comes down to meet the floor and ends the passage. Forty-five
+degrees is too steep to walk back up, so bring the jetpack.
+
+None of it has been seen. The overlay says DERIVED, names the paper, and says
+the thing the paper says about itself: the radar cannot separate this geometry
+from a second one it fits about as well, which would be a nearly level chamber
+rather than a ramp.
+
+The temperature readout changes when you go in, and this is the part worth
+going for. Horvath, Hayne & Paige measured these pits with Diviner and modelled
+the inside: a regolith pit floor near the equator can pass 420 K at noon, and
+beyond the opening, in permanent shadow, the temperature holds at about 290 K —
+seventeen degrees Celsius — through the entire lunar day and the entire lunar
+night, while the surface a hundred metres above swings across three hundred
+kelvin. Stand in the cave with the science overlay open and watch it read room
+temperature.
+
+Drawing the cave at all needed one piece of renderer surgery worth naming,
+because it is the only thing in the project that works this way. A height field
+is a single height per point, so it can describe a hole in the ground but never
+a ceiling over one, and the pit's shaft wall is therefore drawn straight across
+the cave mouth. Carving the wall away would stop the pit being the shape the
+atlas measured. So the mouth is a stencil portal — a band of nothing standing
+inside the wall that marks where the void is, after which the cave draws
+ignoring the depth the wall wrote — and the renderer asks for a stencil buffer
+for this and for nothing else.
+
+What is deliberately not there: a walkable recess running round the pit under
+the overhanging rim. The atlas measures overhangs of at least 10 to 15 m on
+three sides of Tranquillitatis, but how much of that space is open void and how
+much is talus is not published, and a ring of floor under the rim is a big,
+prominent, invented room. The pit wall is a wall.
+
+One thing about the pits is visibly wrong and is named here rather than fixed:
+the imagery is mapped by latitude and longitude, so on a wall that is
+eighty-nine degrees from horizontal a single column of texels is stretched over
+a hundred and twenty-five metres. The shaft walls are therefore streaked
+vertically. Fixing it means triplanar projection in the terrain shader, which
+is a change to every surface in the game to improve four of them.
+
 ## Roadmap
 
 Not in this version, and each one named rather than glossed:
@@ -397,15 +476,6 @@ and an explicit note wherever a position is inferred, and the other five
 deserve the same standard or none at all. Guessing where an ALSEP central
 station sits because it would look right is exactly the thing this project
 refuses to do.
-
-**The lava tube skylights.** Marius Hills (14.0917 N, 56.7701 W, 40 m deep) and
-Mare Tranquillitatis (8.3355 N, 33.222 E, 105 m deep) are in the picker and you
-can go and stand on them, and when you do the ground is flat: the pits are a
-hundred metres across and the finest elevation over either of them is 118 m per
-pixel, so nothing that has flown has resolved them in topography. Drawing the
-holes would mean inventing the shape of the one thing you came to see. The
-honest answer today is that the coordinates are right and the hole is not
-there.
 
 **SLDEM2015 at 59 m globally.** The reader and the registry entry are the work;
 `src/data/surface.js` already handles scheduling, blending and provenance.

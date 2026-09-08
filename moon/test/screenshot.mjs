@@ -171,13 +171,22 @@ const DEFAULT_SHOTS = [
   /* Rocks at walking scale, which were generated and thrown away until this
      branch drew them. Low sun, so they cast. */
   ['rocks', 'site=apollo11&mode=eva&t=2026-09-17T12:00Z&rate=0&yaw=200&pitch=-14&quality=high'],
-  /* One of the two lava-tube skylights: a real place, and below the resolution
-     of anything that has been flown over it, so what you see is the ground the
-     hole is in and not the hole. The epoch is chosen for a 21-degree sun,
-     because the first attempt at this shot was at 14:00 on 22 September and
-     the harness correctly refused it — Marius Hills is in lunar night then,
-     and a black frame is not a photograph of anywhere. */
+  /* A lava-tube skylight, standing on its floor. The elevation products this
+     game streams still top out at 118 m/px here — nothing has flown that
+     resolves a hole this size in topography — but the LROC Lunar Pits Atlas
+     published the dimensions, so the hole is cut to them. The epoch is chosen
+     for a 21-degree sun, because the first attempt at this shot was at 14:00
+     on 22 September and the harness correctly refused it: Marius Hills is in
+     lunar night then, and a black frame is not a photograph of anywhere. */
   ['marius', 'site=marius_pit&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=140&pitch=-8&quality=balanced'],
+  /* The deepest pit on the Moon, from its floor, 125 m down. The wall behind is
+     vertical and the boulders are the 1-4 m population Carrer et al. measured
+     off NAC image M155016845R, with the two 8-10 m outliers they named. */
+  ['pit-floor', 'site=8.3358,33.2216&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=110&pitch=10&quality=balanced'],
+  /* And the reason for all of it: the cave mouth in the east wall, 45 m across
+     and 19 m tall, with the suit lamps on. A height field cannot draw a ceiling
+     over a void, so what makes this visible is a stencil portal. */
+  ['cave-mouth', 'site=8.3355,33.221333&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=90&pitch=0&lamps=2&quality=balanced'],
 ];
 
 const shots = args.filter((a, i) => args[i - 1] === '--shot')

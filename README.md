@@ -94,7 +94,15 @@ at kilometres per second and there is a retroreflector there still being ranged
 from Earth. Every value on screen says whether it was measured, interpolated,
 or invented below the resolution of the data.
 
-Choose where and when from orbit — all forty-five sites in the gazetteer,
+Climb down into a lava tube skylight. The four mare pits in the LROC Lunar Pits
+Atlas are cut into the ground at the dimensions it published, and the shallowest
+of them has a ramp of collapse debris you can walk down. Under the deepest one
+there is a cave — the only cave on the Moon anybody has evidence for, found in
+Mini-RF radar in 2024 — and it is dark, walkable, and holds a steady seventeen
+degrees Celsius while the surface a hundred metres overhead swings three hundred
+kelvin between noon and midnight.
+
+Choose where and when from orbit — all forty-seven sites in the gazetteer,
 coordinates typed straight into the search box, and a date, because a lunar day
 is twenty-nine and a half Earth days and the same ground is a flat grey plain at
 noon and a landscape of kilometre shadows near sunrise. The suit gets dirty and

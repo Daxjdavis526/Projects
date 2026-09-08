@@ -113,9 +113,67 @@ Mission 2, Astrobotic Griffin, IM-3 and Chang'e 7 had all slipped to late
 Natural landmarks come from the IAU Gazetteer via `data/names.json` (8985
 features), e.g. Tycho 86.2 km at −43.310/−11.362, Copernicus 96.1 km at
 9.621/−20.079, Shackleton 21.0 km at −89.626/132.322, Mare Tranquillitatis
-875.7 km at 8.349/30.835. Lava-tube skylights: Marius Hills pit
-14.0917/−56.7701, 40 m deep; Mare Tranquillitatis pit 8.3355/33.222, 105 m
-deep (LROC Lunar Pits Atlas).
+875.7 km at 8.349/30.835.
+
+## Pits and the one cave
+
+The LROC Lunar Pits Atlas (https://lroc.im-ldi.com/atlases/pits) catalogues a
+few hundred collapse pits, most of them impact-melt pits in crater floors,
+which are a different thing: melt ponds crack as they cool and the holes are
+not tube skylights. Four mare pits carry a full set of dimensions and are the
+ones in the game. Read entry by entry rather than from notes, in metres and
+degrees from north:
+
+| pit | lat/lon | funnel | shaft | depth | funnel depth | azimuth | overhang | ramp |
+|---|---|---|---|---|---|---|---|---|
+| Mare Tranquillitatis | 8.3355/33.222 | 140-146 | 88-100 | **125** | ~20 | 170 | Y, "at least 10-15 m" E, W, N | N |
+| Marius Hills | 14.0917/−56.7701 | 79-92 | 49-55 | 40 | ~10 | 65 | Y, "slight ... near floor-level" | N |
+| West Marius Hills | 13.5507/−58.1733 | 70-95 | 47 (max N/A) | 16 | not published | 55 | Y? | **Y**, "SW side is a ramp from rim to floor" |
+| Southwest Mare Tranquillitatis | 4.1438/24.6871 | 80-100 | 26-32 | 25 | ~20-25 | 165 | ? | N |
+
+Three things in that table are easy to get wrong and were got wrong here
+first. **Entrance Ramp and Overhang are Y/N flags, not azimuths** — only West
+Marius has a ramp, and the bearing comes from the description text rather than
+from the field. **The Mare Tranquillitatis depth of 105 m is measured from the
+bottom of its funnel**, which the atlas says outright; adding the ~20 m funnel
+puts that floor 125 m below the plain, and that is also what makes the radar
+conduit below sit just under the floor rather than well below it. And **West
+Marius publishes no inner maximum diameter and no funnel depth at all**.
+
+Carrer et al. (2024, *Nature Astronomy* 8:1119, doi 10.1038/s41550-024-02302-y)
+found that Mini-RF radar images of the Mare Tranquillitatis pit carry an
+anomaly no model of the pit alone reproduces, and that an unlit void below and
+to one side of it does. The abstract calls the conduit "tens of metres long".
+The Extended Data captions carry the rest and are freely readable: the
+best-fitting model B has a roof dipping 55 degrees and a floor 45; the tested
+conduit widths were 15, 30, 55, 100 and 200 m; the pit floor was populated for
+the simulation with rocks 1-4 m across taken off LROC NAC image M155016845R at
+0.41 m/pixel, with two boulders of 8-10 m in the south-western floor excluded
+as outliers. The paper is explicit that the radar cannot separate model B from
+a model A whose roof and floor both dip about 3 degrees — a nearly level
+chamber rather than a ramp. It also names Wagner & Robinson's photogrammetric
+3D model of the pit and overhang as the surface it built on, and deposits its
+data at doi 10.5281/zenodo.11005458 (**not retrieved** — Zenodo timed out from
+here, so nothing in this repository comes from it).
+
+Horvath, Hayne & Paige (2022, *GRL*, doi 10.1029/2022GL099710) is why any of
+this matters for a person. Diviner sees the Tranquillitatis and Ingenii pits
+glowing about 100 K warmer than the surrounding surface at night. Modelling
+from that: an equatorial regolith pit floor can exceed 420 K at noon — hotter
+than the plain outside, because the sunlit wall opposite is cooking it too —
+while **beyond the opening, in permanent shadow, the temperature is nearly
+constant at about 290 K**, a blackbody cavity in radiative equilibrium.
+Seventeen degrees Celsius, every hour of a month-long day, in a place where
+the surface swings three hundred kelvin. The same paper notes that a cave
+below a pit would raise the night-time temperature of the ground above it by
+0.1 K, which is why nobody is going to find a second one from orbit this way.
+
+Two other lines of evidence for lunar voids were checked and are **not** used,
+because neither constrains a shape and a shape is what it takes to build a
+room: Kaku et al. (2017) report a Kaguya Lunar Radar Sounder echo pattern
+under the Marius Hills pit consistent with an intact tube, and Chappaz et al.
+(2017) find GRAIL gravity gradients over the Marius Hills consistent with
+buried voids (both **via secondary sources here**).
 
 South-pole illumination: Shackleton rim sites are lit ~94 % of a lunar year;
 de Gerlache ridge ~85 %; Malapert ~74 % (Speyerer & Robinson 2013; Bussey et
