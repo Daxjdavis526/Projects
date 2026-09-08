@@ -55,11 +55,29 @@ console.log('real hardware, at its published coordinates');
   for (const s of sites.sites) {
     if (d.step(at(s.lat, s.lon)).some(e => e.id === 'site:' + s.id)) reached++;
   }
-  const landings = sites.sites.filter(s => s.kind !== 'landmark').length;
-  check('every landing site in the file can be reached',
+  /* Every landing, plus the two skylights, which are landmarks and are
+     reachable on purpose. */
+  const landings = sites.sites.filter(
+    s => s.kind !== 'landmark' || /_pit$/.test(s.id)).length;
+  check('every landing site and skylight in the file can be reached',
         reached === landings, `${reached} of ${landings}`);
   check('and landmarks are not landings',
         !d.has('site:tycho') && !d.has('site:south_pole'));
+
+  /* Except the two skylights, which are the only known way into the lunar
+     subsurface and are reached at their own radius. */
+  const e = new Achievements({ sites });
+  const pit = sites.sites.find(x => x.id === 'tranquillitatis_pit');
+  check('standing on a lava-tube skylight counts',
+        e.step(at(pit.lat, pit.lon)).some(x => x.id === 'site:tranquillitatis_pit'));
+  const nearPit = offsetLatLon(pit.lat, pit.lon, 0, 120);
+  const f = new Achievements({ sites });
+  check('at its rim, not only at its published centre',
+        f.step(at(nearPit.lat, nearPit.lon)).some(x => x.id === 'site:tranquillitatis_pit'));
+  const farPit = offsetLatLon(pit.lat, pit.lon, 0, 400);
+  const g2 = new Achievements({ sites });
+  check('and four hundred metres away is not the pit',
+        !g2.step(at(farPit.lat, farPit.lon)).some(x => x.id === 'site:tranquillitatis_pit'));
 }
 
 console.log('named ground, from the gazetteer');

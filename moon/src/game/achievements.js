@@ -30,6 +30,9 @@ import { surfaceDistance } from '../physics/frames.js';
    the published precision — a few metres at best, worse for the Luna craft —
    does not decide it. */
 const AT_SITE = 50;
+/* The skylights are 55 and 100 metres across, so the rim is the thing to be
+   near rather than the published centre. */
+const AT_PIT = 150;
 
 /* Milestones in metres. Apollo 17 drove 35.7 km, which is the most anyone has
    travelled on another world, so that is the one worth naming. */
@@ -85,11 +88,19 @@ export class Achievements {
 
     /* Real hardware. Being at a landing site is the single most specific thing
        you can do on this Moon, and it is checked against the published
-       coordinates rather than against a trigger volume someone placed. */
+       coordinates rather than against a trigger volume someone placed.
+
+       The two lava-tube skylights come with them, at a radius that matches
+       their published diameters rather than a lander's: standing on the roof
+       of an intact lava tube is the only known way anyone would get into the
+       lunar subsurface, which makes them worth reaching for what they are.
+       Every other landmark is a place you pass through, and `visited` records
+       those. */
     for (const site of this.sites) {
-      if (site.kind === 'landmark') continue;
+      const pit = site.kind === 'landmark' && /_pit$/.test(site.id);
+      if (site.kind === 'landmark' && !pit) continue;
       if (this.has('site:' + site.id)) continue;
-      if (surfaceDistance(s.lat, s.lon, site.lat, site.lon) > AT_SITE) continue;
+      if (surfaceDistance(s.lat, s.lon, site.lat, site.lon) > (pit ? AT_PIT : AT_SITE)) continue;
       push(this.award('site:' + site.id, site.name,
                       site.sub || 'a real landing site', s.simMs));
     }

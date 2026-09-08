@@ -165,6 +165,15 @@ const DEFAULT_SHOTS = [
   ['farside', 'site=farside_highlands&mode=eva&t=2026-09-08T09:00Z&rate=0&quality=balanced'],
   ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&quality=balanced'],
   ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],
+  /* Through the visor. The bubble, the gold coating's warm cast, and the Sun
+     on the glass where the Sun is standing. */
+  ['helmet', 'site=apollo11&mode=eva&helmet=1&t=2026-09-19T00:00Z&rate=0&yaw=94&pitch=-7&quality=high'],
+  /* Rocks at walking scale, which were generated and thrown away until this
+     branch drew them. Low sun, so they cast. */
+  ['rocks', 'site=apollo11&mode=eva&t=2026-09-17T12:00Z&rate=0&yaw=200&pitch=-14&quality=high'],
+  /* One of the two lava-tube skylights, which is a real place and is below the
+     resolution of anything that has been flown over it. */
+  ['marius', 'site=marius_pit&mode=eva&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
 ];
 
 const shots = args.filter((a, i) => args[i - 1] === '--shot')

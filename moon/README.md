@@ -39,11 +39,13 @@ that spot. Then land.
 | space | jump, brake, or skip the landing |
 | J | jetpack (hold) |
 | G | on foot, or the free camera |
-| F | first or third person |
+| F | view: first person, first person with the helmet, third |
 | L | suit lamps: off, flood and head, all three |
 | R | get on and off the rover |
+| E | the ship's hatch, at the ladder |
 | C | rover canopy: open, or sealed and pressurised |
 | M | site markers |
+| K | where you have been |
 | O | settings |
 | V | the data overlay: what you are standing on and where it came from |
 | T | time rate: held, real time, up to a day a second |
@@ -51,9 +53,20 @@ that spot. Then land.
 | F2 | save |
 | H | controls |
 
+A gamepad works if one is plugged in, and produces exactly the same inputs the
+keyboard and mouse do rather than a second control scheme: left stick to move,
+right stick to look, A to jump or brake, B for the lamps, X for the jetpack, Y
+for the view, the bumpers for the rover and the hatch, the triggers to lope or
+boost. Sticks are analogue where the physics takes an analogue value, so easing
+along a crater rim at walking pace is something a pad can ask for and a key
+cannot.
+
 URL parameters are useful for going straight somewhere:
 `?site=apollo11`, `?site=-43.31,-11.36`, `?t=1969-07-20T20:17Z`, `?view=ground`,
-`?mode=eva`, `?quality=ultra`, `?rate=600`, `?offline=1`, `?fov=12`.
+`?mode=eva`, `?quality=ultra`, `?rate=600`, `?offline=1`, `?fov=12`,
+`?helmet=1`. The orbital picker also takes a date and a time, and its search box
+takes coordinates as well as names: `0.674, 23.473` and `0.674N 23.473E` both
+work, in either order.
 
 ## What is real, and how real
 
@@ -249,13 +262,30 @@ rule:
 
     node test/ephemeris.test.mjs      # against JPL Horizons fixtures
     node test/dem.test.mjs            # the vendored elevation data
+    node test/gravity.test.mjs        # GRAIL's anomaly, against the mascons
     node test/terrain.test.mjs        # cube sphere and band-limited detail
     node test/tilebuilder.test.mjs    # tile geometry and horizon maps
+    node test/quadtree.test.mjs       # which tiles get drawn, and the budget
+    node test/photometry.test.mjs     # the BRDF, against its own shader
     node test/streams.test.mjs        # NASA Trek service selection
+    node test/surface.test.mjs        # the streaming state machine
     node test/player.test.mjs         # locomotion in a sixth of a gravity
-    node test/suit.test.mjs           # life support
+    node test/suit.test.mjs           # life support, and dust
     node test/rover.test.mjs          # driving
+    node test/descent.test.mjs        # the landing, flown against gravity
+    node test/ship.test.mjs           # the walkable interior and the airlock
+    node test/audio.test.mjs          # the vacuum, on a stub Web Audio
+    node test/save.test.mjs           # a round trip through the save file
+    node test/track.test.mjs          # the recorder behind tracks and the map
+    node test/achievements.test.mjs   # the log, against the real site data
+    node test/gamepad.test.mjs        # sticks, deadzones and button edges
     node test/temperature.test.mjs    # the Diviner interpolation
+    node test/exposure.test.mjs       # the analytic eye adaptation
+    node test/keepout.test.mjs        # not landing on the historic hardware
+
+Or all of them:
+
+    for t in test/*.test.mjs; do node "$t" || break; done
 
     python3 tools/build_data.py --check     # the vendored data still checks out
 
@@ -305,6 +335,43 @@ The rover's navigation console does the arithmetic Apollo did. Every traverse
 they drove was planned under a walkback constraint: never further from the
 lander than you could walk home on the consumables you were carrying. The
 console shows that distance, and turns amber and then red as you approach it.
+Beside it is a topographic map sampled live out of the heightfield the wheels
+are on — shaded relief, warmed to amber past twenty-five degrees where the
+traction limit on regolith at a sixth of a gravity actually bites, with the
+ship, the waypoints and where you have been drawn on it.
+
+## Dust
+
+Three hours of walking coats the lower suit, and the cost is thermal before it
+is anything else: Gaier 2005 records eleven per cent areal coverage doubling a
+radiator's solar absorptance, so a coated suit in sunlight boils about forty
+per cent more feedwater — nine hours of EVA becoming six and a half — and costs
+nothing at all in shadow, because there is no sunlight to absorb. It comes off
+at the vacuum point in the ship's vestibule and nowhere else; a recharge does
+not clean anything, because a tank of oxygen would not. What does not come off
+goes through the hatch with you, and the cabin says so in words on the shelter
+panel. Nothing about it harms anyone. The honest version of dust mitigation is
+a chore, not a penalty.
+
+Boot prints and wheel ruts stay where you put them. There is no wind here and
+no rain, so the only things that erase a mark are micrometeorite gardening and
+the solar wind, both working on a scale of ten million years: what you leave,
+you leave for longer than the species has existed. They are drawn darker than
+the ground because compaction reduces the shadow-hiding in the porous top
+layer, which is why Apollo boot prints photograph dark on grey and why the LRV
+tracks are visible from orbit.
+
+## Where you have been
+
+`K` opens a log, and it is a list of real places rather than a list of tasks.
+Nothing is scored and nothing in the game is gated on any of it. Landing sites
+are earned against their published coordinates — all twenty-eight in
+`data/sites.json`, from Luna 9 to Chang'e 6 — and named ground against the IAU
+gazetteer. The terrain keeps its own records: the deepest and the highest
+ground you have stood on, the steepest, the furthest you have been from the
+ship. Distances are measured against what people have actually done, so 7.6 km
+on foot is further than an Apollo crew walked in a day and 35.7 km driven is
+further than Apollo 17 went, which is still the record on another world.
 
 ## What is still wrong
 
@@ -321,17 +388,41 @@ before making.
 
 ## Roadmap
 
-Not in this version: SLDEM2015 region streaming at 59 m globally, persistent
-footprints across sessions, the Apollo 12 to 17 hardware layouts, lava tube
-pits, an achievements list, and a gamepad.
+Not in this version, and each one named rather than glossed:
 
-Also not in this version, and worth naming because the data for it is already
-in the repository: the coarse levels of the vendored LOLA pyramid are built and
-shipped but never loaded. Level 1 is 1.5 MB against level 3's 21 MB and would
-be enough to draw the globe while the rest arrives, which is the progressive
-DEM load the loader is shaped for and does not do. The GRAIL Bouguer anomaly is
-registered and not queried. Carried equipment does not accumulate dust, though
-the suit and the rover do.
+**The Apollo 12 to 17 hardware.** You can fly to all six sites, stand on their
+published coordinates and look at the real ground; what is not there is the
+hardware. Apollo 11 was built object by object with a citation for every one
+and an explicit note wherever a position is inferred, and the other five
+deserve the same standard or none at all. Guessing where an ALSEP central
+station sits because it would look right is exactly the thing this project
+refuses to do.
+
+**The lava tube skylights.** Marius Hills (14.0917 N, 56.7701 W, 40 m deep) and
+Mare Tranquillitatis (8.3355 N, 33.222 E, 105 m deep) are in the picker and you
+can go and stand on them, and when you do the ground is flat: the pits are a
+hundred metres across and the finest elevation over either of them is 118 m per
+pixel, so nothing that has flown has resolved them in topography. Drawing the
+holes would mean inventing the shape of the one thing you came to see. The
+honest answer today is that the coordinates are right and the hole is not
+there.
+
+**SLDEM2015 at 59 m globally.** The reader and the registry entry are the work;
+`src/data/surface.js` already handles scheduling, blending and provenance.
+
+**Sato et al. 2014 per-pixel photometry.** The Hapke-like parameters here are
+fixed and labelled ESTIMATED. Sato published resolved parameter maps, which
+would turn an UNVERIFIED entry into a measured one.
+
+**Sixteen horizon azimuths**, which would halve the polar banding above at
+double the per-vertex cost — a trade worth measuring before making.
+
+Also worth naming because the data is already in the repository: the coarse
+levels of the vendored LOLA pyramid are built and shipped but never loaded.
+Level 1 is 1.5 MB against level 3's 21 MB and would be enough to draw the globe
+while the rest arrives, which is the progressive DEM load the loader is shaped
+for and does not do. The GRAIL Bouguer anomaly is registered and not queried.
+Carried equipment does not accumulate dust, though the suit and the rover do.
 
 There are no quests and there will not be any. The Moon is the content.
 

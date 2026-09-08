@@ -92,7 +92,15 @@ flag lies on the ground the ascent engine knocked it onto. Walk in, because the
 ship will not land inside two kilometres of it: a descent engine throws regolith
 at kilometres per second and there is a retroreflector there still being ranged
 from Earth. Every value on screen says whether it was measured, interpolated,
-or invented below the resolution of the data. Desktop only.
+or invented below the resolution of the data.
+
+Choose where and when from orbit — all forty-five sites in the gazetteer,
+coordinates typed straight into the search box, and a date, because a lunar day
+is twenty-nine and a half Earth days and the same ground is a flat grey plain at
+noon and a landscape of kilometre shadows near sunrise. The suit gets dirty and
+the dust costs you feedwater in sunlight; the boot prints and wheel ruts stay
+where you leave them, because nothing here erases them. `K` keeps a list of the
+real places you have reached. Keyboard, mouse or a gamepad. Desktop only.
 
 Live: https://daxjdavis526.github.io/Projects/moon/
 
