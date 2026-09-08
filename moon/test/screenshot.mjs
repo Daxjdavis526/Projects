@@ -68,7 +68,7 @@ const SHOTS = shots.length ? shots : DEFAULT_SHOTS;
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
   '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
-  '.bin': 'application/octet-stream', '.css': 'text/css',
+  '.bin': 'application/octet-stream', '.css': 'text/css', '.woff2': 'font/woff2',
 };
 
 /* Relay for NASA Trek. The browser in this sandbox cannot reach the internet

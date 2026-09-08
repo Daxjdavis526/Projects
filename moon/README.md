@@ -266,6 +266,9 @@ possible: flat shading, no invented micro-relief. Streamed data is cached in
 IndexedDB with a size cap, so revisiting somewhere costs nothing and an offline
 session keeps whatever you have already seen. `?offline=1` turns streaming off
 entirely and the game runs on the vendored data, with the overlay saying so.
+Nothing else on the page reaches outward: the two typefaces are vendored under
+`vendor/fonts/` rather than pulled from a CDN, so an offline session has type
+and a loaded page has told nobody about it.
 
 Tiles are built in Web Workers, and the cost of one is dominated by the crater
 field. A tile only computes the bands between the source data's resolution and
