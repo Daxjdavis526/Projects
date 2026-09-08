@@ -5,6 +5,7 @@
 // up and you are in space, with no scene swap.
 
 import * as THREE from 'three';
+import { sharedUniforms } from './shaders.js';
 import { PLANET } from '../config.js';
 import { clamp, smoothstep, lerp } from '../math/noise.js';
 
@@ -414,6 +415,17 @@ export class Daylight {
     c.multiplyScalar(lerp(1, 0.06, 1 - atmos));
     this.horizonColor.copy(c);
     this.fog.color.copy(c);
+
+    // Aerial perspective. The haze away from the sun is the horizon colour
+    // pushed a little blue; toward the sun it is the horizon lifted toward the
+    // sun's own colour, which is what gives a hazy morning its glow.
+    const hazeCool = sharedUniforms.uAerialCool.value;
+    const hazeWarm = sharedUniforms.uAerialWarm.value;
+    hazeCool.copy(c).lerp(new THREE.Color(0.34, 0.47, 0.68), 0.30 * dayT);
+    hazeWarm.copy(c).lerp(this.sun.color, 0.55 * dayT + duskT * 0.30)
+      .multiplyScalar(lerp(1.0, 1.55, dayT));
+    sharedUniforms.uSunDir.value.copy(this.sunDir);
+    sharedUniforms.uAerialMix.value = atmos * (1 - storm * 0.45);
 
     if (sky) {
       sky.uniforms.uTintHorizon.value.copy(c).multiplyScalar(1.15).lerp(new THREE.Color(0.85, 0.88, 0.92), dayT * 0.25);

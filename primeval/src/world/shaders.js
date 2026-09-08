@@ -7,6 +7,11 @@
 //               float off the ground at range.
 //   wind      — one coherent gust field so ferns, canopies and grass all lean
 //               the same way at the same moment.
+//   aerial    — replaces three's flat exponential fog with something closer to
+//               real atmospheric scattering: haze that pools in low ground,
+//               thins with altitude, and glows warm when you look toward the
+//               sun. This is what stops a landscape reading as a flat green
+//               poster, and it costs a dot product.
 
 import * as THREE from 'three';
 
@@ -17,6 +22,12 @@ export const sharedUniforms = {
   uTime: { value: 0 },
   uWind: { value: new THREE.Vector3(1, 0, 0.3) },  // xz direction, y = strength
   uWindGust: { value: 0.35 },
+  // Aerial perspective. Driven by Daylight.update.
+  uSunDir: { value: new THREE.Vector3(0, 1, 0) },
+  uAerialCool: { value: new THREE.Color(0.55, 0.66, 0.78) },   // looking away
+  uAerialWarm: { value: new THREE.Color(1.00, 0.86, 0.66) },   // into the sun
+  uAerialHeight: { value: new THREE.Vector2(0, 900) },         // floor, falloff
+  uAerialMix: { value: 1 },                                    // 0 = vacuum
 };
 
 const CURVE_FN = /* glsl */`
@@ -38,9 +49,63 @@ vec4 primevalWorld = vec4( transformed, 1.0 );
 #endif
 primevalWorld = modelMatrix * primevalWorld;
 primevalWorld.xyz = primevalCurve( primevalWorld.xyz );
+vPvWorld = primevalWorld.xyz;
 vec4 mvPosition = viewMatrix * primevalWorld;
 gl_Position = projectionMatrix * mvPosition;
 `;
+
+// Fragment-side scattering. Replaces <fog_fragment>; needs vPvWorld from the
+// vertex stage, which PROJECT_CURVED supplies.
+const AERIAL_DECL = /* glsl */`
+uniform vec3 uSunDir;
+uniform vec3 uAerialCool;
+uniform vec3 uAerialWarm;
+uniform vec2 uAerialHeight;
+uniform float uAerialMix;
+`;
+
+const AERIAL_FRAG = /* glsl */`
+#ifdef USE_FOG
+  vec3 pvV = normalize(vPvWorld - cameraPosition);
+  float pvMu = clamp(dot(pvV, uSunDir), 0.0, 1.0);
+  // A forward-scatter lobe on top of a broad one: the haze lights up around
+  // the sun and stays cool blue behind you.
+  float pvMie = pow(pvMu, 7.0) * 0.66 + pvMu * pvMu * 0.34;
+  vec3 pvHaze = mix(uAerialCool, uAerialWarm, clamp(pvMie, 0.0, 1.0));
+  // Density falls off with altitude, so ridges stand clear of the valley murk.
+  float pvAlt = exp(-max(vPvWorld.y - uAerialHeight.x, 0.0) / uAerialHeight.y);
+  float pvD = fogDensity * mix(1.0, 0.42 + pvAlt * 1.10, uAerialMix);
+  float fogFactor = 1.0 - exp(-pvD * pvD * vFogDepth * vFogDepth);
+  gl_FragColor.rgb = mix(gl_FragColor.rgb, mix(fogColor, pvHaze, uAerialMix), fogFactor);
+#endif
+`;
+
+const PV_WORLD_VARYING = 'varying vec3 vPvWorld;';
+
+/**
+ * Wire the aerial-perspective uniforms and fragment into a compiling shader.
+ * Exported because materials that hand-roll their own curved projection (the
+ * terrain) still need the same sky.
+ */
+export function attachAerial(shader) {
+  // Only safe on a shader that actually took the curved projection: that is
+  // where vPvWorld gets written, and an unwritten varying is garbage.
+  if (!shader.vertexShader.includes('vPvWorld =')) return;
+  shader.uniforms.uSunDir = sharedUniforms.uSunDir;
+  shader.uniforms.uAerialCool = sharedUniforms.uAerialCool;
+  shader.uniforms.uAerialWarm = sharedUniforms.uAerialWarm;
+  shader.uniforms.uAerialHeight = sharedUniforms.uAerialHeight;
+  shader.uniforms.uAerialMix = sharedUniforms.uAerialMix;
+  if (!shader.vertexShader.includes(PV_WORLD_VARYING)) {
+    shader.vertexShader = PV_WORLD_VARYING + '\n' + shader.vertexShader;
+  }
+  shader.fragmentShader = AERIAL_DECL
+    + (shader.fragmentShader.includes(PV_WORLD_VARYING) ? '' : PV_WORLD_VARYING + '\n')
+    + shader.fragmentShader;
+  shader.fragmentShader = shader.fragmentShader.replace(
+    '#include <fog_fragment>', AERIAL_FRAG
+  );
+}
 
 const WIND_FN = /* glsl */`
 uniform float uTime;
@@ -76,6 +141,7 @@ export function injectCurve(material) {
     shader.vertexShader = shader.vertexShader.replace(
       '#include <project_vertex>', PROJECT_CURVED
     );
+    attachAerial(shader);
   };
   return material;
 }
@@ -113,6 +179,7 @@ export function injectWind(material, { anchorFromInstance = true } = {}) {
     shader.vertexShader = shader.vertexShader.replace(
       '#include <project_vertex>', PROJECT_CURVED
     );
+    attachAerial(shader);
   };
   return material;
 }

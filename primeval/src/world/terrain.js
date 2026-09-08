@@ -8,8 +8,9 @@ import * as THREE from 'three';
 import {
   heightAt, riverField, hotspotField, moistureAt, temperatureAt, BIOME, classify,
 } from './field.js';
+import { ACCENT_ID, ACCENT_CELL } from './textures.js';
 import { clamp, lerp, smoothstep } from '../math/noise.js';
-import { injectCurve, sharedUniforms, GLSL_NOISE } from './shaders.js';
+import { injectCurve, attachAerial, sharedUniforms, GLSL_NOISE } from './shaders.js';
 
 const ROOT_SIZE = 1048576;      // 1048 km across — you will not find the edge
 const LEAF_SIZE = 64;
@@ -129,6 +130,7 @@ function sharedIndices() {
 
 const _hgrid = new Float32Array((GRID + 1) * (GRID + 1));
 const _col = [0, 0, 0];
+const _splat = [0, 0, 0];
 
 /**
  * Build one terrain patch. `size` is its world extent, `ox/oz` the min corner.
@@ -169,6 +171,7 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
   const nrm = new Float32Array(count * 3);
   const col = new Float32Array(count * 3);
   const hot = new Float32Array(count);        // drives the lava cracks
+  const splatA = new Float32Array(count * 3); // turf weight, accent weight, accent id
   const cx = ox + size * 0.5, cz = oz + size * 0.5;
   const skirt = Math.max(2, step * 3.0);
   let minY = Infinity, maxY = -Infinity;
@@ -202,6 +205,11 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
         detail > 0.5 ? sampler.river(wx, wz) : 0, _col);
       col[k] = _col[0]; col[k + 1] = _col[1]; col[k + 2] = _col[2];
       hot[j * SIDE + i] = climate(u, v, 2);
+      if (sampler.splat) {
+        sampler.splat(h, slope, climate(u, v, 0), climate(u, v, 1), climate(u, v, 2),
+          detail > 0.5 ? sampler.river(wx, wz) : 0, _splat);
+        splatA[k] = _splat[0]; splatA[k + 1] = _splat[1]; splatA[k + 2] = _splat[2];
+      }
     }
   }
 
@@ -210,6 +218,7 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
   g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   g.setAttribute('aHot', new THREE.BufferAttribute(hot, 1));
+  g.setAttribute('aSplat', new THREE.BufferAttribute(splatA, 3));
   g.setIndex(sharedIndices());
   const r = size * 0.75 + (maxY - minY) * 0.5 + skirt;
   g.boundingSphere = new THREE.Sphere(
@@ -224,66 +233,182 @@ export function buildChunkGeometry(ox, oz, size, detail, sampler = THERA_SAMPLER
 /** Lava emission is dialled down in daylight and up at night. */
 export const lavaUniform = { value: 1 };
 
-export function makeTerrainMaterial() {
+/**
+ * The ground material. Four splat layers — soil, turf, one accent from a 2x2
+ * sheet, and triplanar rock on anything steep — each with its own normal map,
+ * sampled at two scales so a 4 m tile does not read as a 4 m tile.
+ *
+ * The per-vertex biome colour survives as a hue tint rather than as the
+ * albedo itself: the texture supplies the value and the detail, the vertex
+ * colour supplies the "this is jungle, not savanna".
+ */
+export function makeTerrainMaterial(tex) {
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true,
-    roughness: 0.96,
+    roughness: 0.94,
     metalness: 0.0,
     dithering: true,
   });
+  if (!tex) return mat;
+
+  const U = {
+    tSoil: { value: tex.soil.map }, nSoil: { value: tex.soil.normalMap },
+    tTurf: { value: tex.turf.map }, nTurf: { value: tex.turf.normalMap },
+    tRock: { value: tex.rock.map }, nRock: { value: tex.rock.normalMap },
+    tAcc: { value: tex.accent.map }, nAcc: { value: tex.accent.normalMap },
+    uLava: lavaUniform,
+    uTile: { value: 0.24 },        // 1 / metres per tile
+    uMacro: { value: 0.031 },
+    uBumpStrength: { value: 1.0 },
+  };
+  mat.userData.uniforms = U;
+
   mat.onBeforeCompile = (shader) => {
-    shader.uniforms.uCurveOrigin = sharedUniforms.uCurveOrigin;
-    shader.uniforms.uCurveRadius = sharedUniforms.uCurveRadius;
-    shader.uniforms.uCurveAmount = sharedUniforms.uCurveAmount;
-    shader.uniforms.uLava = lavaUniform;
+    Object.assign(shader.uniforms, U, {
+      uCurveOrigin: sharedUniforms.uCurveOrigin,
+      uCurveRadius: sharedUniforms.uCurveRadius,
+      uCurveAmount: sharedUniforms.uCurveAmount,
+    });
+
     shader.vertexShader = `
       uniform vec3 uCurveOrigin; uniform float uCurveRadius; uniform float uCurveAmount;
-      attribute float aHot; varying float vHot;
-      varying vec3 vPvWorld;
-      vec3 primevalCurve(vec3 wp){ vec2 d = wp.xz - uCurveOrigin.xz; wp.y -= (dot(d,d)/(2.0*uCurveRadius))*uCurveAmount; return wp; }
+      attribute float aHot; attribute vec3 aSplat;
+      varying float vHot; varying vec3 vSplat; varying vec3 vPvWorld;
+      vec3 primevalCurve(vec3 wp){
+        vec2 d = wp.xz - uCurveOrigin.xz;
+        wp.y -= (dot(d, d) / (2.0 * uCurveRadius)) * uCurveAmount;
+        return wp;
+      }
     ` + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', `
       vec4 primevalWorld = modelMatrix * vec4( transformed, 1.0 );
       vPvWorld = primevalWorld.xyz;
-      vHot = aHot;
+      vHot = aHot; vSplat = aSplat;
       primevalWorld.xyz = primevalCurve( primevalWorld.xyz );
       vec4 mvPosition = viewMatrix * primevalWorld;
       gl_Position = projectionMatrix * mvPosition;
     `);
-    shader.fragmentShader = GLSL_NOISE
-      + 'varying vec3 vPvWorld;\nvarying float vHot;\nuniform float uLava;\n'
-      + shader.fragmentShader;
-    // Break up the flat vertex colours with a little procedural grain and a
-    // slope-driven darkening, so 2 m terrain resolution does not read as 2 m.
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <color_fragment>',
-      `
-      #include <color_fragment>
-      {
-        float grain = pvFbm(vPvWorld.xz * 0.21) * 0.5 + pvFbm(vPvWorld.xz * 1.7) * 0.28;
-        float macro = pvFbm(vPvWorld.xz * 0.014);
-        diffuseColor.rgb *= 0.80 + grain * 0.42;
-        diffuseColor.rgb *= 0.88 + macro * 0.30;
-        float cav = smoothstep(0.0, 1.0, 1.0 - vNormal.y);
-        diffuseColor.rgb *= 1.0 - cav * 0.18;
+
+    shader.fragmentShader = `
+      uniform sampler2D tSoil; uniform sampler2D nSoil;
+      uniform sampler2D tTurf; uniform sampler2D nTurf;
+      uniform sampler2D tRock; uniform sampler2D nRock;
+      uniform sampler2D tAcc;  uniform sampler2D nAcc;
+      uniform float uLava; uniform float uTile; uniform float uMacro; uniform float uBumpStrength;
+      varying float vHot; varying vec3 vSplat; varying vec3 vPvWorld;
+      ${GLSL_NOISE}
+
+      // Two scales, mixed by a slow third — the standard cure for visible tiling.
+      // The second octave is rotated as well as rescaled: leave both axis
+      // aligned and the shared grain direction reads as stripes on open ground.
+      const mat2 PV_TWIST = mat2(0.6820, -0.7314, 0.7314, 0.6820);
+      vec4 detail2(sampler2D t, vec2 uv, float blend){
+        return mix(texture2D(t, uv), texture2D(t, PV_TWIST * uv * 0.171 + 0.37), blend);
       }
-      `);
-    // Molten cracks in the volcanic country. The pattern is the same fbm the
-    // ground colour uses, thresholded hard so it reads as fissures.
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <emissivemap_fragment>',
-      `
+      vec2 accentUV(vec2 uv, float id){
+        vec2 cell = vec2(mod(id, 2.0) * 0.5, id < 1.5 ? 0.5 : 0.0);
+        // Wrap inside the cell by hand, since the sheet cannot repeat.
+        return cell + fract(uv) * 0.5;
+      }
+    ` + shader.fragmentShader;
+
+    // Albedo: splat, before <color_fragment> multiplies in the biome tint.
+    shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `
+      vec2 uv = vPvWorld.xz * uTile;
+      float macro = fract(sin(dot(floor(vPvWorld.xz * uMacro), vec2(12.9898, 78.233))) * 43758.5);
+      float blend = 0.30 + macro * 0.30;
+
+      float wAcc = clamp(vSplat.y, 0.0, 1.0);
+      float wTurf = clamp(vSplat.x, 0.0, 1.0) * (1.0 - wAcc);
+      float wSoil = max(0.0, 1.0 - wTurf - wAcc);
+
+      vec3 soilC = detail2(tSoil, uv, blend).rgb;
+      vec3 turfC = detail2(tTurf, uv * 1.7, blend).rgb;
+      vec3 accC  = texture2D(tAcc, accentUV(uv * 0.9, floor(vSplat.z + 0.5))).rgb;
+      vec3 ground = soilC * wSoil + turfC * wTurf + accC * wAcc;
+
+      vec3 gN = texture2D(nSoil, uv).xyz * wSoil
+              + texture2D(nTurf, uv * 1.7).xyz * wTurf
+              + texture2D(nAcc, accentUV(uv * 0.9, floor(vSplat.z + 0.5))).xyz * wAcc;
+
+      // Rock takes over on anything steep, projected triplanar so cliffs are
+      // not smeared vertical stripes.
+      float slope = 1.0 - clamp(vNormal.y, 0.0, 1.0);
+      float rockW = smoothstep(0.24, 0.62, slope);
+      vec3 rockC = vec3(0.0), rN = vec3(0.5, 0.5, 1.0);
+      if (rockW > 0.004) {
+        vec3 an = abs(normalize(vNormal));
+        an = an / (an.x + an.y + an.z);
+        vec2 uvX = vPvWorld.zy * uTile * 0.7;
+        vec2 uvY = vPvWorld.xz * uTile * 0.7;
+        vec2 uvZ = vPvWorld.xy * uTile * 0.7;
+        rockC = detail2(tRock, uvX, blend).rgb * an.x
+              + detail2(tRock, uvY, blend).rgb * an.y
+              + detail2(tRock, uvZ, blend).rgb * an.z;
+        rN = texture2D(nRock, uvX).xyz * an.x
+           + texture2D(nRock, uvY).xyz * an.y
+           + texture2D(nRock, uvZ).xyz * an.z;
+      }
+
+      vec3 albedo = mix(ground, rockC, rockW);
+
+      // Large-scale drift, so a plain is not one flat green. Half-kilometre
+      // patches go dry and straw-coloured, hollows stay damp and olive.
+      float pvBigA = pvFbm(vPvWorld.xz * 0.0023);
+      float pvBigB = pvFbm(vPvWorld.xz * 0.00072 + 31.0);
+      float pvSoft = 1.0 - rockW;
+      albedo *= 0.82 + pvBigB * 0.42;
+      albedo = mix(albedo, albedo * vec3(1.26, 1.10, 0.62),
+                   smoothstep(0.54, 0.88, pvBigA) * pvSoft * 0.60);
+      albedo = mix(albedo, albedo * vec3(0.70, 0.92, 0.80),
+                   smoothstep(0.46, 0.14, pvBigA) * pvSoft * 0.45);
+
+      vec3 packedN = mix(gN, rN, rockW);
+      diffuseColor.rgb *= albedo * 1.16;
+      vPvNormalMap = packedN * 2.0 - 1.0;
+      vPvRock = rockW;
+    `);
+
+    // The biome colour becomes a hue tint, not the albedo.
+    shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `
+      #ifdef USE_COLOR
+        vec3 tint = vColor / max(dot(vColor, vec3(0.299, 0.587, 0.114)), 0.004);
+        diffuseColor.rgb *= mix(vec3(1.0), tint, mix(0.72, 0.22, vPvRock));
+      #endif
+    `);
+
+    // Perturb the shading normal by the splatted normal map.
+    shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `
+      {
+        vec3 N = normalize(normal);
+        vec3 T = normalize(vec3(1.0, 0.0, 0.0) - N * N.x);
+        vec3 B = cross(N, T);
+        normal = normalize(N + (T * vPvNormalMap.x + B * vPvNormalMap.y) * uBumpStrength);
+      }
+    `);
+
+    shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `
+      #include <common>
+      vec3 vPvNormalMap = vec3(0.0);
+      float vPvRock = 0.0;
+    `);
+
+    // Molten fissures in the volcanic country.
+    shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', `
       #include <emissivemap_fragment>
       if (vHot > 0.62) {
-        float veins = pvFbm(vPvWorld.xz * 0.055) * 0.7 + pvFbm(vPvWorld.xz * 0.31) * 0.3;
-        float crack = smoothstep(0.50, 0.42, abs(veins - 0.5) * 4.0);
+        vec2 cuv = vPvWorld.xz * 0.055;
+        float veins = texture2D(tSoil, cuv).r * 0.6 + texture2D(tRock, cuv * 0.31).r * 0.4;
+        float crack = smoothstep(0.46, 0.36, abs(veins - 0.46) * 4.0);
         float amt = crack * smoothstep(0.62, 0.86, vHot) * uLava;
-        totalEmissiveRadiance += vec3(1.6, 0.34, 0.05) * amt * 2.2;
-        totalEmissiveRadiance += vec3(1.0, 0.72, 0.30) * amt * amt * 1.4;
+        totalEmissiveRadiance += vec3(1.8, 0.36, 0.05) * amt * 2.4;
+        totalEmissiveRadiance += vec3(1.0, 0.74, 0.32) * amt * amt * 1.6;
       }
-      `);
+    `);
+
+    attachAerial(shader);
   };
-  mat.customProgramCacheKey = () => 'primeval-terrain';
+  mat.customProgramCacheKey = () => 'primeval-terrain-v4';
   return mat;
 }
 
@@ -315,17 +440,41 @@ export const THERA_SAMPLER = {
   climate: (x, z, h) => [moistureAt(x, z, h), temperatureAt(x, z, h), hotspotField(x, z)],
   color: (h, slope, moist, temp, hot, river, out) => groundColor(h, slope, moist, temp, hot, river, out),
   river: (x, z) => riverField(x, z),
+  splat: (h, slope, moist, temp, hot, river, out) => {
+    const biome = classify(h, slope, moist, temp, hot, river);
+    // out = [turf weight, accent weight, accent id]
+    let turf = 0, acc = 0, id = ACCENT_ID.sand;
+    switch (biome) {
+      case BIOME.PLAINS: turf = 0.92; break;
+      case BIOME.JUNGLE: turf = 0.42; break;
+      case BIOME.HIGHLAND: turf = 0.55; break;
+      case BIOME.SWAMP: turf = 0.22; break;
+      case BIOME.BEACH: acc = 0.95; id = ACCENT_ID.sand; break;
+      case BIOME.OCEAN: acc = 0.75; id = ACCENT_ID.sand; break;
+      case BIOME.VOLCANIC: acc = 0.90; id = ACCENT_ID.ash; break;
+      case BIOME.ALPINE: acc = 0.5; id = ACCENT_ID.snow; break;
+    }
+    // Snow overrides everything cold and high.
+    const snow = clamp(smoothstep(1200, 1900, h) * (1 - temp * 1.6) * (1 - smoothstep(0.45, 0.72, slope)), 0, 1);
+    if (snow > acc) { acc = snow; id = ACCENT_ID.snow; }
+    // River margins are bare mud, not turf.
+    if (river > 0.05) turf *= 1 - smoothstep(0.05, 0.5, river);
+    out[0] = turf * (1 - acc);
+    out[1] = acc;
+    out[2] = id;
+    return out;
+  },
 };
 
 export class Terrain {
-  constructor(scene, quality, sampler = THERA_SAMPLER) {
+  constructor(scene, quality, sampler = THERA_SAMPLER, textures = null) {
     this.quality = quality;
     this.sampler = sampler;
     this.group = new THREE.Group();
     this.group.name = 'terrain';
     this.group.matrixAutoUpdate = false;
     scene.add(this.group);
-    this.material = makeTerrainMaterial();
+    this.material = makeTerrainMaterial(textures);
     this.root = new Node(-ROOT_SIZE / 2, -ROOT_SIZE / 2, ROOT_SIZE, MAX_LEVEL);
     this.pending = [];
     this.live = new Map();          // key -> mesh

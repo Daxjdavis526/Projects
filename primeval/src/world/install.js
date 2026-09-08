@@ -223,7 +223,7 @@ class WaterSystem {
 
 class VegetationSystem {
   async load(game) {
-    this.veg = new Vegetation(game.scene, game.quality);
+    this.veg = new Vegetation(game.scene, game.quality, game.textures);
     game.veg = this.veg;
   }
 

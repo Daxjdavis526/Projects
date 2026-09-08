@@ -55,20 +55,24 @@ class Layer {
 }
 
 export class Vegetation {
-  constructor(scene, quality) {
+  constructor(scene, quality, textures = null) {
     this.quality = quality;
+    this.textures = textures;
     this.group = new THREE.Group();
     this.group.name = 'vegetation';
     scene.add(this.group);
 
+    // One atlas, one material, one draw call per species variant — which is
+    // the only reason a jungle of alpha-cut leaves is affordable at all.
+    const map = textures ? textures.foliage : null;
     this.material = injectWind(new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.88, metalness: 0.0,
-      side: THREE.DoubleSide, alphaTest: 0, dithering: true,
+      map, vertexColors: true, roughness: 0.86, metalness: 0.0,
+      side: THREE.DoubleSide, alphaTest: map ? 0.32 : 0, dithering: true,
     }));
     this.glowMaterial = injectWind(new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.5, metalness: 0.0,
+      map, vertexColors: true, roughness: 0.5, metalness: 0.0,
       emissive: new THREE.Color(0.10, 0.85, 0.72), emissiveIntensity: 1.6,
-      side: THREE.DoubleSide,
+      side: THREE.DoubleSide, alphaTest: map ? 0.32 : 0,
     }));
 
     const D = quality.vegDensity;
@@ -83,7 +87,7 @@ export class Vegetation {
         cell: 21, range: R, capacity: N(1900), scaleMin: 0.72, scaleMax: 1.55,
         castShadow: true, collide: 0.55, seed: 11, falloff: 0.45,
         density: (s) => s.biome === BIOME.JUNGLE ? 1.35 : s.biome === BIOME.SWAMP ? 0.42
-          : s.biome === BIOME.PLAINS ? 0.13 : 0,
+          : s.biome === BIOME.PLAINS ? 0.19 : 0,
       }),
       new Layer('treefern', v(treeFern, 3), {
         cell: 9.5, range: Math.min(R, 210), capacity: N(1300), castShadow: true,
@@ -99,8 +103,8 @@ export class Vegetation {
       new Layer('cycad', v(cycad, 2), {
         cell: 12, range: Math.min(R, 340), capacity: N(1300), castShadow: true,
         collide: 0.2, seed: 43, falloff: 0.4,
-        density: (s) => s.biome === BIOME.PLAINS ? 0.8 : s.biome === BIOME.BEACH ? 0.6
-          : s.biome === BIOME.JUNGLE ? 0.45 : 0,
+        density: (s) => s.biome === BIOME.PLAINS ? 0.42 : s.biome === BIOME.BEACH ? 0.45
+          : s.biome === BIOME.JUNGLE ? 0.4 : 0,
       }),
       new Layer('stilt', v(stiltTree, 2), {
         cell: 13, range: Math.min(R, 320), capacity: N(600), castShadow: true,
@@ -125,8 +129,11 @@ export class Vegetation {
           : s.biome === BIOME.SWAMP ? 0.2 : 0,
       }),
       new Layer('grass', [grassClump(1, 1, false), grassClump(2, 1, true), grassClump(3, 1, false)], {
-        cell: 2.35, range: G, capacity: N(7000), alignSlope: 0.7, tint: 0.22,
-        seed: 97, falloff: 0.3, scaleMin: 0.7, scaleMax: 1.5,
+        // Spread over the full grass range the clumps are one per eight square
+        // metres, which reads as bare ground. Pull them in close and let the
+        // terrain's own turf texture carry the distance.
+        cell: 2.35, range: Math.min(G, 54), capacity: N(7000), alignSlope: 0.7, tint: 0.22,
+        seed: 97, falloff: 0.62, scaleMin: 0.9, scaleMax: 1.9,
         density: (s) => s.biome === BIOME.PLAINS ? 3.1 : s.biome === BIOME.JUNGLE ? 2.4
           : s.biome === BIOME.HIGHLAND ? 1.2 : s.biome === BIOME.BEACH ? 0.35
             : s.biome === BIOME.SWAMP ? 1.3 : 0,

@@ -6,6 +6,7 @@ import { PLANET, MOON, PLAYER, KEYS, SHIP } from './config.js';
 import { Renderer } from './render.js';
 import { Input } from './input.js';
 import { Terrain, THERA_SAMPLER } from './world/terrain.js';
+import { bakeTextures } from './world/textures.js';
 import { MOON_LOCALE, ANVIL_SAMPLER } from './world/moon.js';
 import { Sky, CelestialBody, Daylight } from './world/sky.js';
 import { sharedUniforms } from './world/shaders.js';
@@ -49,7 +50,9 @@ export class Game {
 
     this.sky = new Sky(this.scene);
     this.daylight = new Daylight(this.scene, { dayLength: PLANET.dayLength });
-    this.terrain = new Terrain(this.scene, quality);
+    // Textures are baked on the GPU before anything that uses them is built.
+    this.textures = bakeTextures(this.renderer.renderer);
+    this.terrain = new Terrain(this.scene, quality, THERA_SAMPLER, this.textures);
 
     // The two worlds that hang in each other's sky.
     this.planetBody = new CelestialBody(this.scene, { kind: 'planet', angularRadius: 0.012, distance: 30000 });

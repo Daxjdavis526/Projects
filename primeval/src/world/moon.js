@@ -111,6 +111,13 @@ export const ANVIL_SAMPLER = {
   climate: () => [0, 0, 0],
   color: moonColor,
   river: () => 0,
+  // All regolith, all the time — the accent sheet's fourth cell.
+  splat: (h, slope, a, b, c, r, out) => {
+    out[0] = 0;
+    out[1] = 1 - smoothstep(0.30, 0.66, slope);   // rock takes over on scarps
+    out[2] = 3;
+    return out;
+  },
 };
 
 /** Flat enough for a landing pad, with a view. */
