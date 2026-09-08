@@ -800,3 +800,639 @@ either tighten a joint (if the outer member shrinks onto the inner) or open it
   their glass transition well above cryogenic temperature and stop sealing. Where
   an elastomer must be used near cold, the design has to keep it warm — which is
   exactly the logic of the extended bonnet (§3.1) and the bayonet (§2.4).
+
+---
+
+# 3. Valves and flow control
+
+## 3.1 Valve types and the extended bonnet
+
+### The valve types, briefly
+
+- **Ball.** Quarter-turn, low pressure drop, full bore, fast. The default
+  isolation valve in cryogenic service. Its distinguishing cryogenic problem is
+  the **body cavity** (§3.4).
+- **Globe.** Rising stem onto a seat, good throttling authority, higher pressure
+  drop. Used where flow modulation matters. No trapped body cavity in the ball
+  sense, but a large wetted body and more mass to chill.
+- **Gate.** Full bore, low drop, poor throttling (gate chatter). Less common
+  cold, partly because the guide clearances and the large wetted seat area are
+  awkward with differential contraction.
+- **Needle.** Fine metering, small Cv, high resolution. Used on instrument and
+  purge lines rather than main flow. Sensitive to galling and to contraction
+  changing the effective orifice at temperature.
+
+The cryogenic versions of all of these differ from their room-temperature
+counterparts in four systematic ways: **materials** selected to stay ductile
+cold (austenitic stainless, not carbon steel — carbon steel is brittle at these
+temperatures); **clearances** opened up to allow for differential contraction so
+things do not seize; **seat materials** chosen for cryogenic ductility; and an
+**extended bonnet**.
+
+Seat/seal polymers, ranked for cold: **PCTFE (Kel-F)** is generally regarded as
+the best cryogenic valve-seat material, quoted down to roughly −450 °F / −200 °C
+depending on the source, at the cost of substantially higher operating torque;
+**filled PTFE** is the common general-purpose choice; **PEEK** is strong and
+durable but becomes very hard cold and is considered inferior to PCTFE for
+cryogenic sealing. Polyimide (Vespel) also retains ductility cold. **[C]** —
+https://www.curbellplastics.com/materials/plastics/pctfe/
+
+### Extended bonnets — why they exist
+
+**The problem.** A valve stem passes through a packing set. Packing is polymeric.
+Polymers at 77 K are not seals — they are brittle rings that shrink away from the
+stem. On top of that, a cold packing gland ices up externally and the stem
+freezes in place.
+
+**The solution.** Lengthen the bonnet so the packing sits far enough from the
+cold body that it stays warm. The space in between fills with a **static column
+of cryogen vapour**, which is an excellent insulator precisely because it is
+stagnant. The body runs at cryogenic temperature; the packing and the operator
+run near ambient.
+
+MSS SP-134 states the requirement functionally: the body/bonnet extension must
+"sufficiently isolate the stem packing and valve operating mechanism from the
+temperature effects of the cryogenic fluid," and must be "long enough to provide
+an insulating gas column that prevents the packing area and operating mechanism
+from freezing." The length "shall be sufficient to maintain the stem packing at
+a temperature high enough to permit operation within the normal temperature
+range of the packing material." **[B]** —
+https://webstore.ansi.org/preview-pages/MSS/preview_MSS+SP-134-2006a.pdf
+(the ANSI preview page for MSS SP-134, *Valves for Cryogenic Service Including
+Requirements for Body/Bonnet Extensions*; the preview blocks automated retrieval
+but the standard's number and title are confirmed)
+
+Two competing design pressures inside the extension, per the same standard
+**[B]**:
+- **Clearance between stem and extension bore** shall be designed to *minimise
+  convection* — too much gap and the vapour column circulates, carrying heat.
+- **Wall thickness shall be minimised**, consistent with pressure rating and the
+  bending stress from operating the valve, to *reduce conduction* down the
+  extension wall.
+
+So the extension is a deliberate compromise between a thermal element and a
+structural one. That tension is a good review topic.
+
+**Consequences that follow from the extended bonnet:**
+- **Orientation matters.** The vapour column only works if it can stratify. A
+  valve installed upside down, or far from vertical, lets liquid into the
+  extension and the packing freezes. Cryogenic valves are conventionally
+  installed with the stem vertical or within a limited angle of vertical.
+- **Stem wind-up.** The long, slender extension is compliant, and that compliance
+  compounds with thermal contraction — the operator can turn while the closure
+  member has not yet moved. **[C]**
+- **It is a heat leak.** Every extended-bonnet valve is a conduction path from
+  ambient into the cold fluid.
+
+The industry design overview presented to the Valve Manufacturers Association
+covers the same ground and is a useful teaching reference (the document is a
+scanned/graphical PDF that resisted automated text extraction, so treat specific
+figures from it as unverified until read manually): **[B]** —
+https://cdn.ymaws.com/www.vma.org/resource/resmgr/2017_tech_seminar_presentations/Bounds_and_Tesch_-_Design_Sp.pdf
+
+**The two controlling standards** for cryogenic valve design and testing are
+**BS 6364** (*Specification for valves for cryogenic service*) and **MSS SP-134**
+(above), with pressure/temperature ratings from **ASME B16.34**. **[B]**
+
+## 3.2 Check valves, relief valves, burst discs
+
+**Check valves.** Prevent reverse flow. Cold, the concerns are that the poppet or
+disc and its spring change dimension and rate; that close tolerances mean
+"contamination or dirt can cause sticking and leakage" **[A]** (NASA Propulsion
+Test Handbook —
+https://ntrs.nasa.gov/api/citations/20100002189/downloads/20100002189.pdf );
+and that a check valve is *not* an isolation valve — check-valve leakage is
+listed by Jefferson Lab among the principal causes of system overpressure.
+**[A]** —
+https://www.jlab.org/ehs/ehsmanual/Pressure%20and%20Vacuum%20Systems%20Supplement/PSS%20Part%204%20Overpressure%20Protection.htm
+SLAC notes an interesting cryogenic-specific *use* of a check valve: routine
+boiloff relief "is best provided by rated spring-loaded relief devices **or an
+open passage to the atmosphere with a check valve**" — the check valve keeping
+air (and its water and CO₂) out of a continuously venting line. **[A]** —
+https://www-group.slac.stanford.edu/esh/eshmanual/pdfs/ESHch36.pdf
+
+**Relief valves (reclosing).** A spring-loaded device that opens at set pressure
+and **recloses**. This is what you want for the normal boiloff case, because the
+system keeps running afterwards. NASA's Propulsion Test Handbook gives typical
+tolerances: direct-acting relief valves have "a set pressure tolerance of 2 psi
+for set pressures through 70 [psi], and 3 percent for set pressures over 70 psi.
+They must reseat before the pressure falls below 90 percent" of set. **[A]**
+(NTRS 20100002189, above). It also distinguishes **direct-acting** from
+**pilot-operated** relief valves, the latter using "a separate direct operating
+relief valve (pilot) for control of pressure forces acting on the main valve
+piston" — pilot-operated devices give higher capacity and tighter seating near
+set pressure. **[A]**
+
+**Burst discs / rupture discs (non-reclosing).** A deliberately weak membrane
+that ruptures and stays open. Higher flow capacity for a given size, no seat to
+leak, no set-point drift — but once it goes, the system is open to atmosphere
+until someone replaces it. Jefferson Lab classifies devices exactly this way:
+"reclosing (such as a spring loaded safety relief valve) and non-reclosing
+(e.g. rupture disk)." **[A]**
+
+### Series and parallel arrangements
+
+**In parallel** (the usual cryogenic-tank arrangement). A relief valve set at
+the lower pressure handles normal boiloff and recloses; a burst disc set higher
+handles the catastrophic case (loss of vacuum, fire) with capacity the valve
+cannot provide. Chart ships its vertical bulk tanks with exactly this: "dual
+relief valves and rupture disks supplied as standard." **[A]** —
+https://files.chartindustries.com/13608592_BulkCatalog.pdf
+
+**In series** (disc upstream of valve). The disc isolates the relief valve from
+the process — used where the fluid would corrode, foul or freeze the valve seat,
+or where zero fugitive leakage is required. The cost is a code penalty: under
+ASME BPVC VIII, a rupture disc installed at the inlet of a pressure relief valve
+requires the valve capacity to be **de-rated by a combination capacity factor of
+0.90**, unless a higher certified factor has been established by test for that
+specific disc/valve pairing and registered with the National Board. **[B]** —
+see ASME BPVC VIII Div 1 UG-127; a public excerpt is at
+https://inglenookeng.com/wp-content/uploads/2019/09/ASMEVIIIUG-127.a.3.c.4.pdf
+and a manufacturer's technical bulletin explaining the rule is at
+https://my.fike.com/_fike_docs/Pressure_Protection/_GLOBAL_Pressure_Protection/Technical_Bulletins/TB8100_ASME_Code_and_Rupture_Discs.pdf
+
+A series arrangement also introduces a failure mode people forget: **the space
+between disc and valve must be monitored**. If the disc develops a pinhole, that
+space pressurises, the disc no longer sees full differential, and it will not
+burst at its rated pressure.
+
+### Block valves upstream of reliefs
+
+Jefferson Lab permits them only under controls: "Block or stop valves may be
+installed upstream of a relief device provided the requirements of ASME BPVC
+VIII D1 Appendix M (or equivalent) are met. Such requirements include operating
+procedures and the installation [of] locks or anti-tampering devices." **[A]**
+In a design review, an unlocked block valve upstream of a relief is a finding.
+
+## 3.3 Regulators, filters, phase separators, vaporisers
+
+**Regulators.** Reduce and hold a downstream pressure. In cryogenic service the
+key distinction is whether the regulator sees cold gas (its elastomers and its
+spring rate both change) or warm gas downstream of a vaporiser — the latter is
+strongly preferred. NASA's Propulsion Test Handbook documents dome-loaded
+regulation as the standard high-flow architecture: "The small volume pressure
+reducing and relief regulator regulates the static pressure to the dome of the
+large volume regulator. The pressure in the dome actuates the large volume
+regulator valve, which maintains a constant pressure downstream." **[A]**
+(NTRS 20100002189). It also carries a safety note directly relevant to fuel
+systems: **"HANDLOADERS SHOULD NOT BE USED IN GASEOUS HYDROGEN SERVICE. THE
+HYDROGEN BLEED PRESENTS A FIRE HAZARD."** **[A]**
+
+**Filters and strainers.** Protect seats and orifices from debris — and in
+cryogenic service, from **frozen contaminant**. Water, CO₂ and hydrocarbons that
+are harmless gases at ambient become solid particles at 77 K. A filter cold is
+therefore also a *trap*, and traps plug. The design tension is that a plugged
+filter is a flow blockage that can trap liquid on the downstream side. Flow-meter
+protection gives a sense of the scale involved: turbine meters call for
+"Ball bearings: 10 to 100 microns ... Journal bearings: 75 to 100 microns"
+filtration. **[A]** (NTRS 20100002189)
+
+**Phase separators.** A small vessel that lets two-phase flow disengage, venting
+the gas and delivering liquid onward. It exists because heat leak in a transfer
+line inevitably generates vapour, and downstream equipment (a flow meter, a
+pump, an engine) usually needs single-phase liquid. Described in the literature
+as removing "any nitrogen gas that forms in the liquid nitrogen supply circuit
+due to heat leakage or changes in pipeline pressures," typically built as "a
+double-walled, vertically mounted, cylindrical tank" with the inner vessel rated
+around 250 psig MAWP and the outer providing vacuum insulation. **[C]**
+
+*Review point:* a phase separator is a vent source by design. Its vent has to go
+somewhere safe, and it counts toward the ODH inventory of the room.
+
+**Vaporisers / ambient air vaporisers (AAV).** Finned aluminium tube bundles that
+gasify cryogenic liquid using ambient air by natural convection. They are how
+bulk liquid becomes usable gas, and how a pressure-building circuit works.
+
+The dominant engineering issue is **icing**. As the fins go below the frost
+point, atmospheric moisture deposits on them; the frost layer insulates the fin
+from the air it is supposed to be drawing heat from, and vaporiser capacity
+falls progressively through a run. Consequences: reduced capacity (so the
+vaporiser must be **derated** for continuous duty, or duty-cycled in pairs so one
+defrosts while the other runs), and a real **structural load** from ice mass.
+The technical literature treats frost growth, wind and seismic loading as
+co-equal AAV design cases. **[B]** — *Cryogenic ambient air vaporizers: frost
+growth, wind and seismic design for safety*, Cryogenics 33 (1993) 789,
+https://ui.adsabs.harvard.edu/abs/1993Cryo...33..789B/abstract
+
+*Review points:* Is the vaporiser sized for continuous duty or for a duty cycle?
+What happens to delivery pressure at the end of a long run when it is fully
+iced? Is anything (or anyone) underneath it when the ice sheds? And is the
+vaporiser's own cold outlet piping treated as cryogenic line?
+
+## 3.4 Trapped volume, vented balls, and relief holes
+
+**What "trapped volume" means.** In a ball valve, when the ball is closed, a
+volume of fluid is sealed inside the **body cavity** — between the ball, the two
+seats, and the body. It is connected to neither the upstream nor the downstream
+line. The same idea applies more generally to any pocket of a system that can be
+isolated on both sides.
+
+**Why it is lethal cold.** That trapped liquid warms up. LBNL's number for
+confined cryogen warming to ambient is pressure "in excess of 10,000 psig."
+**[A]** — https://ehs.lbl.gov/resource/esh-manual-pub-3000/ch29/
+The volumetric driver is the expansion ratio: liquid nitrogen expands roughly
+**696:1** going to ambient gas **[A]** (LBNL). A valve body was never designed
+for that; it fails, and it fails as a fragmentation event. The trade description
+is blunt and correct: "trapped liquid nitrogen in a closed ball cavity could
+expand 600 times in volume as it warms up, potentially exploding the valve."
+**[C]** — https://blog.habonim.com/cryogenic-bi-directional
+
+**The vented ball / relief hole.** The fix is to drill a hole through one wall of
+the ball into the cavity, so the cavity is permanently connected to *one* side of
+the line. Cavity pressure can then never exceed that side's pressure.
+
+**Which side — and why it is always upstream.** The hole faces **upstream**, the
+high-pressure side. Two reasons:
+
+1. Venting to upstream caps cavity pressure at line pressure, which the body is
+   rated for.
+2. If it vented downstream, cavity pressure would push the ball *off* the
+   upstream seat, "and then there would be a continuous leak path by the seat,
+   into the ball and thru the relief hole" — i.e. the valve would no longer shut
+   off. **[C]** — https://www.eng-tips.com/threads/cryogenic-ball-valve-cavity-vent.231275/
+
+**The consequence for design review, and it is a big one: a vented ball valve is
+unidirectional.** It has a flow direction arrow, and it only seals in that
+direction. Install it backwards and you have a valve that leaks by design. Any
+review of a cryogenic P&ID should check that every vented ball valve's
+orientation matches the intended flow and, critically, matches the direction in
+which it is expected to *hold pressure* — which during a drain or a purge may
+not be the normal flow direction at all.
+
+**The alternative: self-relieving seats.** Rather than drilling the ball,
+spring-loaded seats are designed so that above a threshold differential the seat
+deflects against its spring and momentarily relieves cavity pressure into the
+line, then reseats. This preserves bidirectional sealing. **[C]** —
+https://blog.habonim.com/cryogenic-bi-directional
+
+**The generalisation.** The valve-body cavity is only the most compact example
+of a universal cryogenic rule. SLAC states the general form: "Each and every
+portion of the cryogenic system must have uninterruptible pressure relief. Any
+part of the system that can be valved-off from the remainder must have [its own
+relief]." **[A]** —
+https://www-group.slac.stanford.edu/esh/eshmanual/pdfs/ESHch36.pdf
+LBNL states the same: "Every isolatable part of the system which could
+conceivably have cryogenic liquid or gas introduced must have its own pressure
+relief, in the form of a valve or burst disk with adequate gas flow capacity."
+**[A]** — https://ehs.lbl.gov/resource/esh-manual-pub-3000/ch29/
+
+LANL's pressure-safety guidance gives this hazard its own name — **"cryogenic
+liquid lock"** — and a dedicated analysis section, sizing it with CGA S-1.3
+equations. **[A]** —
+https://engstandards.lanl.gov/esm/pressure_safety/Att-GUIDE-1-R1.pdf
+
+*The classic review exercise:* take the P&ID, mentally close every valve, and
+find every volume that is now isolated. Each one needs a relief or a documented
+reason why it cannot contain liquid. Two block valves in a line with nothing
+between them is the canonical finding.
+
+## 3.5 Actuation and fail-safe philosophy
+
+### Pneumatic vs solenoid vs manual
+
+- **Manual.** Simplest, most reliable, no utilities. But it puts a human at the
+  valve — unacceptable for anything that must be operated during a hazardous
+  operation, and slow.
+- **Solenoid.** Direct electrical actuation. Fast, easy to interlock, but limited
+  in size/force, and the coil is a heat source and an ignition source in a
+  flammable atmosphere (hence area-classification requirements). De-energising
+  returns it to its normal position.
+- **Pneumatic.** A gas-pressure actuator, usually piloted by a small solenoid.
+  This is the standard architecture for large valves on a test stand: the
+  solenoid is a low-power signal device, and the pneumatic cylinder provides the
+  force. NASA's Propulsion Test Handbook documents this directly, including the
+  two cylinder types — "normally closed (N.C.) and normally open (N.O.)" — and
+  gives real limits: "The Annin pneumatic cylinders are limited to 150 psi
+  maximum pressure (normal operation is in the 120 to 135 psi range to allow
+  relief valves to be set at 150 psi)." **[A]** —
+  https://ntrs.nasa.gov/api/citations/20100002189/downloads/20100002189.pdf
+
+  Note the design detail embedded in that sentence: the operating band is chosen
+  *below* the relief setting on the actuator supply, so a regulator failure
+  relieves rather than over-strokes the actuator. That is a small, elegant piece
+  of fail-safe design worth putting in front of students.
+
+### Fail-safe position philosophy
+
+The governing question is: **when the utility disappears — electrical power,
+instrument air, control signal — which position leaves the system in its least
+dangerous state?** There is no universal answer; it is per-valve, and it depends
+on what the valve is for.
+
+NASA's Propulsion Test Handbook documents both configurations existing side by
+side, giving "fail-safe closed and fail-safe open solenoid control valve
+relationships." **[A]** (NTRS 20100002189). The general pattern in propellant
+systems:
+
+| Valve function | Usual fail-safe position | Reasoning |
+|---|---|---|
+| **Propellant isolation / main valves (fuel and oxidiser)** | **Fail closed** | Stop adding propellant. On loss of control you want the source cut off, not continuing to feed a system nobody is commanding. |
+| **Vent valves** | **Fail open** | Loss of control must not leave a cryogenic volume bottled up. An open vent is a safe state: it relieves boiloff and prevents pressure rise. This is the reverse of the isolation-valve logic and the reversal is the whole point. |
+| **Relief and pressure-control paths** | **Fail open / fail to relieving** | Same reasoning. |
+| **Pressurisation (pressurant supply)** | **Fail closed** | Stop adding pressure. |
+| **Purge / inert gas** | Often **fail open** | An inert purge is usually the safe state — it keeps air out and dilutes flammables. But it is also an asphyxiant, so this is genuinely case-dependent. |
+
+**Where fuel and oxidiser philosophies diverge.** The isolation logic is the same
+for both (fail closed), but the *consequences of getting it wrong* are not
+symmetric, and the surrounding design differs:
+
+- **Oxidiser (LOX).** A leaking or failed-open LOX valve creates an
+  oxygen-enriched atmosphere in which ordinary materials — clothing, grease,
+  asphalt, aluminium — become ignitable or even detonable. So oxidiser-side
+  failures are about *creating an ignition environment*, and the mitigations are
+  materials and cleanliness (CGA G-4, G-4.1, G-4.4) as much as valve position.
+- **Fuel (LH₂, LCH₄, RP-1).** A leaking or failed-open fuel valve creates a
+  flammable cloud looking for an ignition source. Hydrogen's very wide
+  flammability range and very low ignition energy make this unforgiving, and
+  hydrogen flames are nearly invisible.
+- **The asymmetry that matters:** you must never allow a single failure to open
+  fuel and oxidiser paths into a common volume. Fail-safe positions are chosen so
+  that loss of utilities cannot bring the two together — and vent paths for the
+  two are kept physically separate (§4.4).
+
+**A caution to teach explicitly.** "Fail-safe" describes the *actuator's*
+behaviour on loss of its motive utility. It does not mean the valve cannot stick.
+NASA's Artemis I campaign was delayed by a stuck hydrogen vent valve during
+tanking — a valve that had a defined fail position and nonetheless did not do
+what was wanted. **[C]** —
+https://www.space.com/nasa-artemis-1-moon-rocket-test-stuck-valve
+Fail-safe position is a design layer, not a guarantee, which is exactly why
+relief devices (§4) are independent of the control system and why Jefferson Lab
+lists "operator error" as "the most common cause of system overpressure."
+**[A]** —
+https://www.jlab.org/ehs/ehsmanual/Pressure%20and%20Vacuum%20Systems%20Supplement/PSS%20Part%204%20Overpressure%20Protection.htm
+
+---
+
+# 4. Relief and venting
+
+## 4.1 The philosophy in one sentence
+
+Every volume that can contain cryogen and can be isolated must have its own
+relief path that cannot itself be isolated, sized for the worst credible heat
+input into that volume.
+
+Both SLAC and LBNL state it in almost the same words **[A]**:
+
+> "Each and every portion of the cryogenic system must have uninterruptible
+> pressure relief. Any part of the system that can be valved-off from the
+> remainder must have [its own]." — SLAC ESH Chapter 36,
+> https://www-group.slac.stanford.edu/esh/eshmanual/pdfs/ESHch36.pdf
+
+> "Every isolatable part of the system which could conceivably have cryogenic
+> liquid or gas introduced must have its own pressure relief, in the form of a
+> valve or burst disk with adequate gas flow capacity." — LBNL PUB-3000 Ch. 29,
+> https://ehs.lbl.gov/resource/esh-manual-pub-3000/ch29/
+
+SLAC extends the requirement past the fluid space into the insulation space:
+"any volume cooled externally by a cryogen or any vacuum space in contact with a
+cryogen must have the ability to relieve pressure," because "material cracks can
+more easily develop at cryogenic temperatures" and "the cryogen or air may leak
+into a sealed space through such cracks." **[A]**
+
+## 4.2 The two classic sizing cases
+
+### Case 1 — normal heat leak / boiloff
+
+The steady-state case. Ambient heat leaks through the insulation, boils liquid,
+and the relief must pass that vapour without letting pressure exceed the
+accumulation limit. This is what the reclosing relief valve is for, and it sizes
+the *small* device.
+
+SLAC: heat input "is unavoidable regardless of the quality of the insulation
+installed. Pressure relief must be provided to permit routine release of gas
+vapors generated by this heat input. Typically such relief is best provided by
+rated spring-loaded relief devices or an open passage to the atmosphere with a
+check valve." **[A]** It then names the escalation explicitly: "Additional relief
+devices should be provided as backup to the operational relief when the capacity
+of the operational relief device is not adequate to take care of unusual or
+accidental [conditions]." **[A]**
+
+### Case 2 — the fire case (and, for cryogenics, loss of vacuum)
+
+The transient/accident case, which sizes the *large* device (usually the burst
+disc).
+
+**The fire case.** External fire heats the vessel wall; the wetted area boils
+violently. This is the classic sizing case for any pressure vessel holding a
+liquefied gas.
+
+CGA S-1.2 (the portable-container companion to S-1.3, and publicly available)
+gives the actual form of the calculation, and it is worth showing students the
+real equation rather than describing it:
+
+> "These formulas are based on the principle of relieving the vapor in the
+> container generated at **120 % of the DOT design pressure** of the container."
+>
+> Uninsulated (and insulated containers not meeting the insulation criterion):
+> **Qa = Gu · A^0.82**
+>
+> Insulated containers whose insulation stays in place at 1200 °F:
+> **Qa = Gi · A^0.82**
+>
+> where Qa = flow capacity in cubic feet per minute of free air, Gu and Gi are
+> gas factors from the standard's Table 1, and A = total outside surface area of
+> the container in square feet.
+>
+> — CGA S-1.2-1980, §5.3.2–5.3.5. **[A]** —
+> https://law.resource.org/pub/us/cfr/ibr/003/cga.s-1.2.1980.pdf
+
+Three design insights fall straight out of that:
+
+- **The A^0.82 exponent** encodes the fact that a fire does not engulf 100 % of
+  the surface — relief demand grows more slowly than area.
+- **The insulation criterion is about fire survival, not thermal performance.**
+  CGA S-1.2 only lets you use the (much smaller) insulated gas factor if "all
+  materials comprising a representative sample of the insulation system remain
+  completely in place when subjected to 1200 °F." If the insulation burns,
+  melts, or falls off in a fire, you must size as if bare. This is why an
+  insulation jacket that survives fire is worth so much. **[A]**
+- **The standard explicitly flags the cryogenic complication:** "Depending on
+  specific insulation system used, it may be desirable to consider the effect of
+  air condensation in sizing relief devices." **[A]** That is the loss-of-vacuum
+  mechanism appearing inside the fire-case standard.
+
+The same fire-load concept in the process-industry form is API 520/521's
+Q = 21,000·F·A^0.82 (adequate drainage and firefighting) or Q = 34,500·F·A^0.82
+(without), in BTU/hr, with F an environmental factor and F = 1 for a bare
+vessel. **[B]** Jefferson Lab points designers at API 521 for fire exposure and
+notes it "represents the highest credible heat flux for fires of any type (with
+the exception of metallic combustion)" — that parenthesis being a pointed
+reminder about burning metal in oxygen. **[A]**
+
+**Loss of insulating vacuum — the cryogenic third case.** Jefferson Lab treats
+this as a named, mandatory case alongside fire:
+
+> "Loss of vacuum in the insulation space, due to a failure of a component,
+> operator error, etc., will subject the inner pressure boundary to a high
+> temperature gradient ... This high temperature gradient can cause rapid
+> boil-off of the cryogenic fluid resulting in a rapid pressure rise in the
+> inner fluid space. **Failure of the vacuum space shall be considered for piping
+> and vessels containing cryogenic fluids insulated in this manner.**"
+> **[A]** —
+> https://www.jlab.org/ehs/ehsmanual/Pressure%20and%20Vacuum%20Systems%20Supplement/PSS%20Part%204%20Overpressure%20Protection.htm
+
+with the design heat fluxes given in §1.2 (25–40 kW/m² bare, 1–7 kW/m²
+insulated) and a reference list any course could use directly: Barron,
+*Cryogenic Heat Transfer* (1999); Collier, *Convective Boiling and Condensation*
+(1972); Johnson, *Thermal performance of cryogenic insulation* (2007); Lehman,
+*Safety Aspects for the LHE Cryostats and LHE Transport Containers* (1978);
+Weisend, *Cryogenic Engineering* (1998); Wiseman, *Loss of cavity vacuum
+experiment at CEBAF* (1991). **[A]** (JLab's own citation list, reproduced as
+given)
+
+LANL confirms which CGA sections carry the equations, citing **CGA S-1.3 (2020
+edition)** for "loss of vacuum insulation in a double-walled pipe or vessel with
+fire" and **CGA S-1.3 §6.3.2** for "liquefied compressed gases, refrigerated
+fluids, and refrigerated (cryogenic) fluids in uninsulated or insulated
+containers that lose insulation." **[A]** —
+https://engstandards.lanl.gov/esm/pressure_safety/Att-GUIDE-1-R1.pdf
+
+## 4.3 What code governs
+
+| Standard | Scope | Verified at |
+|---|---|---|
+| **CGA S-1.3**, *Pressure Relief Device Standards — Part 3 — Stationary Storage Containers for Compressed Gases* | The controlling sizing standard for stationary cryogenic storage, including loss-of-vacuum-with-fire. 9th ed. 2020; revised again 2024. | https://legacy.cganet.com/Publication/Details.aspx?id=S-1.3 **[A]** |
+| **CGA S-1.2**, *…Part 2 — Portable Containers for Compressed Gases* | Liquid cylinders, transport containers. Public 1980 copy carries the equations. | https://legacy.cganet.com/Publication/Details.aspx?id=S-1.2 **[A]** |
+| **CGA S-1.1**, *…Part 1 — Cylinders for Compressed Gases* | Gas cylinders. | https://legacy.cganet.com/Publication/Details.aspx?id=S-1.1 **[A]** |
+| **ASME BPVC Section VIII Div. 1** | Vessel construction and overpressure protection. Key paragraphs: **UG-125** (relief required), **UG-127** (rupture discs, incl. the 0.90 combination factor), **UG-131** (capacity certification), **UG-140** (overpressure protection by system design), **Appendix M** (block valves upstream of reliefs). | Paragraph numbers as cited by JLab **[A]** (link above) |
+| **ASME B31.3** | Process piping, including cryogenic piping and flexible hoses. | Cited by AIGA 106/19 **[A]** and JLab **[A]** |
+| **API 520 / API 521** | Relief device sizing and fire-case heat input. JLab: "Excellent guidance for this is given in API 520 and API 521." | **[A]** (JLab, link above) |
+| **CGA P-12**, *Guideline for Safe Handling of Cryogenic and Refrigerated Liquids* | The general cryogenic handling guideline. 7th ed. 2023. | https://legacy.cganet.com/Publication/Details.aspx?id=P-12 **[A]** |
+| **CGA G-5.5**, *Standard for Hydrogen Vent Systems* | Vent system design for hydrogen. | https://legacy.cganet.com/Publication/Details.aspx?id=G-5.5 **[A]** |
+| **CGA P-18**, *Standard for Bulk Inert Gas Systems* | Bulk LN₂/LAr installations. | https://legacy.cganet.com/Publication/Details.aspx?id=P-18 **[A]** |
+| **CGA H-5**, *Standard for Bulk Hydrogen Supply Systems* | Bulk LH₂/GH₂ installations. | https://legacy.cganet.com/Publication/Details.aspx?id=H-5 **[A]** |
+| **AIGA 106/19**, *Vacuum-Jacketed Piping in Liquid Oxygen Service* | VJ piping design, bayonets, bellows, annulus relief, vacuum acceptance. | https://asiaiga.org/uploaded_docs/en_AIGA_106_19_Vacuum-Jacketed_Piping_in_Liquid_Oxygen_Service.pdf **[A]** |
+| **MSS SP-134** / **BS 6364** / **ASME B16.34** | Cryogenic valve design, extension bonnets, testing, ratings. | **[B]** — see §3.1 |
+| **EJMA** standards | Expansion joint / bellows design, incl. safety factor of 3 against squirm. | https://www.ejma.org/bellows/ **[B]** |
+| **ASTM C740** | MLI thermal performance test method. | Cited by Fesmire **[A]** |
+| **CGA G-4 / G-4.1 / G-4.4** | Oxygen; cleaning of equipment for oxygen service; oxygen pipeline and piping. | https://legacy.cganet.com/Publication/Details.aspx?id=G-4.1 **[A]** |
+
+**The key ASME numbers.** For vessels other than unfired steam boilers, relief
+must prevent pressure rising more than **10 % or 3 psi (whichever is greater)
+above MAWP**; for fire or other unexpected external heat, the device shall
+prevent pressure rising more than **21 % above MAWP**, and supplemental
+fire-exposure valves may be set up to **110 % of MAWP**. **[B]** — ASME BPVC VIII
+Div. 1, UG-125; see also
+https://www.tataconsultingengineers.com/blogs/pressure-relief-valve-asme-section-viii-unfired-pressure-vessel-code-requirements/
+
+**Capacity of a home-made relief.** If a lab fabricates its own relief device —
+common for vacuum-annulus protection — capacity must be established by
+calculation or test per ASME BPVC VIII D1 UG-131, Appendix 11, ASME PTC 25, API
+520/521 "or other applicable method." Jefferson Lab additionally caps the
+assumed discharge coefficient: "Unless measured by suitable technique, the
+maximum coefficient of discharge ... shall be no greater than **Kd = 0.62** for
+parallel plate relief valves." **[A]** — a nicely specific, teachable number.
+
+## 4.4 Vent stack design — conceptual considerations
+
+### Where vents discharge
+
+The controlling principle is that relief discharge must not create a hazard where
+people are. SLAC states it as a rule: a relief device "that may vent a quantity
+of gas large enough to reduce the oxygen concentration to < 19.5 percent inside
+of the space due to normal operation, quench, operator error, freezing, or
+control system failure should be exhausted to a safe location **outside of the
+building**." **[A]** —
+https://www-group.slac.stanford.edu/esh/eshmanual/references/cryogenicsReqODH.pdf
+
+Note the neat corollary in the same document: "**Trapped volume reliefs** that
+cannot vent a quantity of gas large enough to reduce the oxygen concentration to
+< 19.5 percent" are treated differently — a valve-cavity relief releasing a few
+cubic centimetres of liquid does not need a stack to the roof. Relief routing is
+proportionate to inventory.
+
+Fermilab's PIP-II team applies the same logic to a tunnel: relief "flow must
+vent to outside to avoid an oxygen deficiency hazard." **[A]** —
+https://arxiv.org/abs/2307.08608
+
+Jefferson Lab's overpressure chapter adds the discharge-side considerations a
+designer must analyse: "**Reaction forces from relief loads**," "**Venting to
+safe locations**," and "Environmental factors and fluid properties (e.g. relief
+of toxic fluids at ground level)." **[A]** The reaction force point is
+underappreciated — a relieving vent stack is a rocket nozzle, and it must be
+restrained.
+
+For hydrogen specifically, the design reference is **CGA G-5.5**, *Standard for
+Hydrogen Vent Systems* **[A]**
+(https://legacy.cganet.com/Publication/Details.aspx?id=G-5.5). Commonly cited
+discharge-geometry guidance is on the order of 3 m (~10 ft) above grade, 0.6 m
+(~2 ft) above adjacent equipment, and 1.5 m (~5 ft) above rooftops **[C]** —
+verify against G-5.5 and NFPA 2 before using these numbers in course material.
+
+### Why oxygen and fuel vents must never be combined
+
+Because a shared vent header is a **mixing chamber with an ignition source at the
+end of it**. Combining an oxidiser vent and a fuel vent creates, inside piping
+that is neither instrumented nor rated for it, exactly the stoichiometry the
+engine was designed to burn — with no control over when it lights.
+
+Even without simultaneous flow, a shared header is unacceptable:
+- **Back-flow and hold-up.** Gas from one system sits in the common header and is
+  still there when the other system vents.
+- **LOX plus hydrocarbon residue.** AIGA 106/19's warning about oxygen
+  evaporating and enriching hydrocarbons on metal surfaces until ignition occurs
+  **[A]** applies with far greater force to a header that has also carried fuel.
+- **Condensation.** A cold vent header condenses; in an oxygen-containing line,
+  condensed or solid fuel is a detonable deposit.
+
+The practical rule taught in industry — separate, dedicated, physically
+separated vent stacks for fuel, for oxidiser, and for inert — follows directly.
+Separation distance between stack outlets matters too, so that two plumes cannot
+meet at the discharge.
+
+### Ice formation on vents
+
+A vent line carrying cold gas to atmosphere condenses and freezes atmospheric
+moisture at its outlet. The failure is that **the relief path plugs** — the one
+component whose whole job is never to be blocked.
+
+- SLAC requires the design to ensure "that any air that enters the cryostat and
+  freezes cannot prevent proper functioning of pressure relief devices." **[A]**
+- SLAC lists "freezing" among the conditions under which a relief may vent.
+  **[A]**
+- Jefferson Lab requires for outdoor reliefs that "the exhaust of relief devices
+  shall be protected from rain, snow, and ice," recommends bug screens on all
+  outdoor relief devices, and requires materials compatible with water exposure.
+  **[A]**
+- Jefferson Lab lists "**Blocked or partially obstructed vent lines**" as a
+  principal cause of overpressure. **[A]**
+- AIGA 106/19's inspection logic includes checking for "Plug, dirt, or debris in
+  the exit of the relief valve." **[A]**
+
+Mitigations discussed in the literature include loops and drip legs so that melt
+cannot run back and refreeze in the throat, outlets angled downward, and heating
+or purge on critical stacks. Note the counter-argument on flame arrestors for
+liquid hydrogen vents: an arrestor "might get cold and build up ice, thereby
+restricting flow" **[C]** — a device added for safety becoming the blockage.
+
+### Back-pressure
+
+A relief valve does not see atmosphere; it sees whatever pressure the discharge
+piping develops at full relieving flow. Two consequences:
+
+1. **Set-point shift and instability.** A conventional spring-loaded relief valve
+   is affected by superimposed and built-up back-pressure. The commonly cited
+   ASME limit is that built-up back-pressure should stay below **10 % of the
+   device set pressure** for proper operation of a reclosing device. **[C]** —
+   verify against ASME BPVC VIII and API 520 before quoting.
+2. **The relief path itself must be sized.** Jefferson Lab: "The relief path
+   shall also be analyzed for adequate capacity and pressure drop." **[A]**
+
+The dewar-industry note on this is unusually clear and worth quoting to students:
+total vessel pressure at relief equals the relief valve set point *plus* the
+accumulated pressure drops across fittings, piping and corrugated hose, and
+designers must account for sonic choking and avoid "unintended flow impedances
+from thermal radiation baffles or multilayer insulation that could compromise
+relief adequacy." **[B]** —
+http://www.mtm-inc.com/ac-20130930-sudden-loss-of-isolation-vacuum-in-cryogenic-liquid-dewars.html
+
+That last clause is a genuine cryogenic trap: **MLI or a radiation baffle sitting
+in the relief path** can pass normal boiloff invisibly and then choke the flow
+in a loss-of-vacuum event, exactly when full capacity is needed.
+
+*Design-review questions for a vent system:* Where does each relief discharge,
+and is it the same place for fuel and oxidiser? What is the built-up
+back-pressure at full flow? Is anything in the flow path that was not sized for
+the accident case? Is the outlet protected from rain and ice? Is the stack
+restrained against reaction force? And can the discharge reach an air intake?

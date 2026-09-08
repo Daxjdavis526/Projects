@@ -422,3 +422,395 @@ A near-miss, and the best illustration of taxonomy item 9:
 
 — LBNL PUB-3000 Ch.29, Appendix C. The trapping agent here was **the atmosphere
 itself**, admitted by an open valve.
+
+---
+
+# 3. Oxygen deficiency hazard (ODH)
+
+## 3.1 Physiology by concentration band
+
+The most widely reproduced table in US practice, published by the CSB and
+attributed by them to the Compressed Gas Association (2001):
+
+| Atmospheric O₂ (%) | Possible results |
+|---|---|
+| 20.9 | Normal |
+| 19.0 | Some unnoticeable adverse physiological effects |
+| 16.0 | Increased pulse and breathing rate, impaired thinking and attention, reduced coordination |
+| 14.0 | Abnormal fatigue upon exertion, emotional upset, faulty coordination, poor judgment |
+| 12.5 | Very poor judgment and coordination, impaired respiration that may cause permanent heart damage, nausea, and vomiting |
+| <10 | Inability to move, loss of consciousness, convulsions, death |
+
+**[A]** — CSB Safety Bulletin, *Hazards of Nitrogen Asphyxiation*, No. 2003-10-B,
+11 June 2003, p.4 (table sourced there to "Compressed Gas Association, 2001") —
+<https://www.csb.gov/assets/1/6/nitrogen_asphyxiation_safety_bulletin_(6-11-03).pdf>
+
+Below the table's range, the same bulletin: "An atmosphere of only 4 to 6 percent
+oxygen causes the victim to fall into a coma in less than 40 seconds." **[A]**
+
+**Regulatory definitions [A]** — OSHA 29 CFR 1910.146:
+- *Oxygen deficient atmosphere* = "an atmosphere containing less than **19.5
+  percent** oxygen by volume."
+- *Oxygen enriched atmosphere* = "an atmosphere containing more than **23.5
+  percent** oxygen by volume."
+- Both appear in the definition of a *hazardous atmosphere*: "Atmospheric oxygen
+  concentration below 19.5 percent or above 23.5 percent."
+
+<https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.146>
+
+## 3.2 Why an inert release is lethal without warning
+
+The human body has **no oxygen sensor**. The urge to breathe is driven by CO₂,
+which an inert diluent does not raise. The CSB states the consequence plainly:
+
+> "Breathing an oxygen deficient atmosphere can have serious and immediate
+> effects, including unconsciousness after only one or two breaths. **The exposed
+> person has no warning and cannot sense that the oxygen level is too low.**"
+
+**[A]** — CSB bulletin (URL above).
+
+Supporting statistics from the same bulletin, all **[A]**:
+- **85 nitrogen asphyxiation incidents** identified in the US, **1992–2002**,
+  causing **80 deaths and 50 injuries**.
+- **~10 % of the fatalities were would-be rescuers** — people who went in after a
+  collapsed colleague. This is the single most important operational fact in the
+  section: the hazard is invisible, so the second casualty is caused by the
+  first.
+- **42 of the 85 incidents involved contractors**, accounting for **over 60 % of
+  the fatalities** — i.e. the people least embedded in the local safety culture.
+- Recurring causal pattern: "workers inadvertently using nitrogen instead of air
+  because of **interchangeable couplings** on lines and **poor or nonexistent
+  labeling**." In one case "workers inadvertently connected the hose for their
+  breathing-air respirator to a pure nitrogen line."
+- "When fatalities and injuries occurred in **open areas**… the hazard of
+  asphyxiation was not expected and personnel were typically caught off guard."
+
+> **Course framing.** Nitrogen killed ~8 people a year in US workplaces over that
+> decade while being, by volume, the most ordinary substance in the room. It is
+> not exotic. The lethality comes from the absence of a warning channel, not from
+> toxicity.
+
+## 3.3 The quantitative ODH analysis method (national-lab practice)
+
+**Explain this conceptually. It is not a procedure the reader should execute** —
+it is performed by a designated, qualified ODH analysis authority, and the course
+should say so.
+
+### What it computes
+
+A **fatality-rate figure of merit** with units of *fatalities per hour of
+occupancy*, combining, for every credible release scenario, **how often the
+release happens** with **how likely it is to kill someone if it does**.
+
+Jefferson Lab states the formula and every symbol **[A]**:
+
+> *f* = Σ *P*ᵢ *F*ᵢ
+>
+> where *f* = the ODH fatality rate (per hour); *P*ᵢ = the expected rate of the
+> *i*-th type of event (per hour); *F*ᵢ = the fatality factor for the *i*-th type
+> event.
+
+— JLab ES&H Manual 6540 Appendix T4, §4.2,
+<https://www.jlab.org/ehs/ehsmanual/6540T4.htm>
+
+Berkeley Lab writes the same quantity as **φ = Σ Fᵢ Pᵢ** and notes it "is always
+≤ 1." **[A]** — <https://ehs.lbl.gov/service/cryogenic-liquid-safety/oxygen-deficiency-hazard-analysis/>
+
+Fermilab's own formulation includes a component-count term, **φ = Σ Nᵢ Pᵢ Fᵢ**,
+where *N*ᵢ is the number of components of that type. **[B]** — Fermilab FESHM
+4240 (not fetchable from this environment; see the "could not reach" note above).
+
+LBNL is explicit about the provenance: "Fermilab essentially wrote the book (or
+at least the chapter) on oxygen deficiency hazard (ODH) risk assessment… Here at
+LBNL, we base all of our own oxygen deficiency hazard assessments on Fermilab's
+model and methods." **[A]**
+
+### The two halves of the model
+
+LBNL describes the structure cleanly **[A]**:
+
+> "There are two main pieces to determining the oxygen deficiency hazard (ODH)
+> class of a given room: a model for determining the **oxygen concentration** in
+> a given room based on the volume of inert gas released and the ventilation
+> provided to the room; and a **risk analysis** to estimate the fatality rate for
+> the given release scenario based on the risk of death from oxygen deficiency
+> and the probability of the event occurring."
+
+**Half 1 — concentration model.** An oxygen mass balance on the room. JLab's
+appendix (excerpting FESHM 4240TA) enumerates five cases **[A]**:
+
+- **A** — during release, perfect mixing, fan **blowing into** the volume
+- **B** — during release, perfect mixing, fan **drawing from** the volume, ventilation rate **>** spill rate
+- **C** — during release, perfect mixing, fan drawing from the volume, ventilation rate **≤** spill rate
+- **D** — **after** release, perfect mixing
+- **E** — **stratification** of inerting gases
+
+with terms *C* (oxygen concentration), *Q* (ventilation rate), *R* (spill rate
+into the confined volume), *V* (confined volume), *t*, *tₑ*.
+
+Stated assumptions for cases A–D **[A]**: "complete and instantaneous mixing
+takes place in the confined volume. This is only a good assumption where gases
+have similar densities and/or mixing is 'vigorous'"; *Q*, *R*, *V* constant;
+pressure stays near atmospheric via louvers or natural leakage; incoming air is
+21 % O₂.
+
+On stratification, JLab gives a rule that is worth quoting to students verbatim:
+**"Stratification should not be used to reduce the risk."** **[A]** In other
+words, you may be *penalised* for stratification but never *credited* for it.
+
+**Half 2 — fatality factor.** *F*ᵢ is "the probability that a person will die if
+the *i*-th event occurs. This value depends on the oxygen concentration, the
+duration of exposure, and the difficulty of escape." **[A]** — JLab §4.5.
+
+Anchor points, both labs agreeing **[A]**:
+- **Above 18 % O₂ → *F*ᵢ = 0.** "All exposures above 18% are defined to not
+  contribute to fatality."
+- **At 18 % O₂ → *F*ᵢ = 10⁻⁷.**
+- **At 8.8 % O₂ → *F*ᵢ = 1** (certain death). JLab: "That point was selected to
+  be 8.8% oxygen, **the concentration at which one minute of consciousness is
+  expected**."
+- The relationship between them is logarithmic. LBNL gives the closed form:
+  **f = 10^((65 − P_O₂)/10)**, with P_O₂ the oxygen **partial pressure in mmHg**,
+  bounded by *p*=0 at ≥135 mmHg (18 % at 760 mmHg) and *p*=1 at ≤65 mmHg (8.8 %).
+  Sanity check: 135 mmHg → 10⁻⁷ ✓, 65 mmHg → 1 ✓.
+- JLab uses the **lowest attainable** concentration, not an average, "since the
+  minimum value is conservative and not enough is understood to allow the
+  definition of an averaging period." **[A]**
+
+Note that LBNL, at ~1,000 ft elevation, uses **730 mmHg** rather than 760 mmHg
+for atmospheric pressure — a reminder that the model runs on *partial pressure*,
+so **altitude is a real input**. **[A]** Directly relevant to any propulsion test
+site on high ground.
+
+### Inputs the analysis needs
+
+Compiled from JLab §1.0 and §4.1 and LBNL **[A]**:
+
+- **Room/enclosure volume**, doorways, penetrations, passive vent areas,
+  elevation views
+- **Ventilation systems and capacities** (and whether ventilation is credited in
+  each case — JLab requires this to be stated explicitly per case)
+- **Inventory** of every ODH source: total quantity and continuous flow rates
+- **Release scenarios**: "all possible cases… (instantaneous venting of entire
+  ODH source, continuous flow into work space, etc.)", with gas mixing and
+  stratification considered
+- **Event rates *P*ᵢ** from operating experience, or published failure-rate data
+- **Ease of egress**, and the work actually performed in the space
+- **Existing ODH sources or installations** nearby
+- Atmospheric pressure / altitude
+
+LBNL adds site-specific scenarios — notably a **seismic scenario** in which all
+cryogenic storage fails completely, with the rate derived from the USGS UCERF3
+forecast (0.72 probability of M6.7+ in 30 years for the SF Bay Area →
+4.84 × 10⁻⁶ per hour). **[A]** This is a good illustration for the course that
+the scenario set is *site*-dependent, not generic.
+
+**Example failure rates** (JLab Tables 2–3, "median estimates excerpted from
+FESHM-4240 Technical Appendix, Rev 11/2016") **[A]**:
+
+| Item | Failure mode | Rate |
+|---|---|---|
+| Dewar | Loss of vacuum | 1 × 10⁻⁶ /hr |
+| Cryogenic fluid line | Leak / rupture | 5 × 10⁻⁷ /hr, 2 × 10⁻⁸ /hr |
+| Header piping assembly | Rupture | 1 × 10⁻⁸ /hr |
+| U-tube change | Small / large cryogen release | 3 × 10⁻² per demand, 1 × 10⁻³ per demand |
+| Electrical power failure (unplanned) | Time / demand rate | 1 × 10⁻⁴ /hr, 3 × 10⁻⁴ /D (1 hr off) |
+
+Note the U-tube figure: a **human-in-the-loop connection operation is four to
+five orders of magnitude more likely to release cryogen than a pipe is to
+rupture**. That is the single most instructive number in the table.
+
+### ODH class ratings and what follows
+
+**[A]** — JLab Table 1 (LBNL's cutoffs agree for classes 0–2):
+
+| ODH Class | Worker-hours per expected fatality* | Φ (ODH fatality rate, per hour) |
+|---|---|---|
+| 0 | > 10 million | < 10⁻⁷ |
+| 1 | 100,000 to 10 million | ≥ 10⁻⁷ and < 10⁻⁵ |
+| 2 | 1,000 to 100,000 | ≥ 10⁻⁵ and < 10⁻³ |
+| 3 | 10 to 1,000 | ≥ 10⁻³ and < 10⁻¹ |
+| 4 | < 10 | ≥ 10⁻¹ |
+
+\*JLab footnote: "2000 worker-hours equals one year."
+
+JLab: **Classes 3 and 4 "are considered unacceptable as an ODH Risk Assessment
+result. Further mitigations to lower the classification would be necessary before
+the risks are considered acceptable."** **[A]**
+
+The 10⁻⁷/hr line at the bottom of Class 0 is the definition of "not an ODH
+operation" — Fermilab defines ODH operations as those exposing personnel to
+fatality risk **in excess of 10⁻⁷/hr** from oxygen deficiency. **[B]** (FESHM
+4240, unreachable; consistent with both JLab and LBNL tables which I did read).
+
+**Mitigations that follow from the class**, per JLab §4.1.8 and §3.4 **[A]**:
+- **Engineering controls** to obtain and *retain* the classification: ventilation,
+  lintels (to stop dense gas pooling), penetration sealing, passive vent area
+- **Area oxygen monitoring systems**, installed, maintained and **calibrated** by
+  a named organisation
+- **Alarms and signage / posting and labelling**, verified in place **before the
+  ODH source is introduced**
+- **Training** — JLab names a specific ODH training course as a qualification
+  requirement for its analysis authority
+- **Restricted access** and administrative controls appropriate to the class
+- **Re-review every 3 years** while the ODH is present, or whenever conditions
+  change
+
+**Approval chain [A]:** JLab requires every ODH risk assessment be approved by
+the primary ODH Analysis Authority, **a second independent ODH Analysis
+Authority**, and the Engineering Division Manager or Cryogenic Department Head,
+then submitted to the ODH Safety Reviewer for verification and approval. The
+qualification bar for an ODH Analysis Authority is specified: an engineering or
+physics degree plus five years' relevant experience, or professional engineering
+registration plus experience, together with named technical proficiencies.
+
+> **Course framing.** The ODH number is not the point. The point is that a room
+> plus an inventory plus a ventilation rate produces a *defensible, reviewable
+> number* which then drives monitoring, access and PPE — and that the number is
+> computed by a qualified person and independently checked. A student group
+> cannot self-certify this. The class of a given space is a **facility-specific**
+> answer the course cannot supply.
+
+**Other labs' framing.** SLAC covers the same ground in ES&H Manual Chapter 36,
+*Cryogenic and Oxygen Deficiency Hazard Safety*, whose stated purpose is to
+ensure work with cryogens and other oxygen-displacing gases "is performed safely,
+avoiding such hazards as asphyxiation, pressure explosions, and cold burns,"
+covering "the approval, use, and handling of such substances, including the
+setting up of new operations and modification of existing operations." **[A]** —
+<https://www-group.slac.stanford.edu/esh/eshmanual/pdfs/ESHch36.pdf>
+CERN's HSE unit "provides assistance and support in the evaluation of oxygen
+deficiency hazards and applicable mitigation measures, in facilities where inert
+gases and cryogens are intended to be used," across "experimental areas,
+accelerator facilities, laboratories, and workshops." **[A]** for that statement;
+the page is a service directory and carries **no** thresholds or classification
+scheme — <https://hse.cern/services-support/OHS/ODH-risk-management>
+
+---
+
+# 4. Confined spaces and low points
+
+## 4.1 Why cold vapour collects low
+
+Two separate effects, often conflated:
+
+1. **Molecular weight.** Argon (M≈40) is denser than air at equal temperature.
+   Nitrogen (M≈28) is very slightly lighter. Helium and hydrogen are far lighter.
+2. **Temperature.** This usually dominates near a release. Boil-off leaves the
+   liquid at its boiling point and is *enormously* denser than room air until it
+   warms. UT Austin states it directly: "In the case of liquid argon and liquid
+   nitrogen, the gas generated from malfunctioning equipment or spills will be
+   **cold and denser than ambient air. Even well-ventilated lab spaces that have
+   pits or other low-lying areas could have the oxygen displaced by this cold,
+   dense gas.**" **[A]** — <https://ehs.utexas.edu/working-safely/equipment-safety/cryogens>
+
+The consequence: **a nitrogen release is a low-lying hazard for as long as it
+stays cold**, even though nitrogen gas at room temperature is neutrally buoyant.
+The buoyancy reverses as it warms, which is why the danger zone moves.
+
+## 4.2 The locations that matter
+
+Pits, trenches, sumps, basements, crawl spaces, cold rooms, environmental
+chambers, stairwells (which act as vertical drains), lift/elevator cars, and any
+enclosure below grade or below the release point.
+
+- **Small rooms and cold rooms**: Cornell — "Small spaces, environmental
+  chambers, and cold rooms often do not have sufficient exhaust ventilation to
+  support storage and use of cryogenic materials." **[A]** —
+  <https://ehs.cornell.edu/book/export/html/1459>
+- **Elevators** get specific treatment because the occupant cannot leave.
+  Berkeley Lab: "The transportation of cryogenic liquids in elevators poses a
+  potential asphyxiation and fire/explosion risk if workers become trapped in an
+  elevator with a container of cryogen," and requires a risk assessment for the
+  case where "a passenger is trapped in the elevator with the evaporating cryogen
+  for a prolonged period." **[A]** UT Austin prohibits pressurised cryogen
+  cylinders in passenger elevators outright and requires freight elevators, with
+  the container sent unaccompanied. **[A]** Utah State: "Do not ride in the
+  elevator with the liquid nitrogen. Make arrangements for someone to send the
+  elevator to a receiving person waiting on the desired floor." **[A]** —
+  <https://research.usu.edu/ehs/training-and-resources/liquid-nitrogen>
+- **Lintels** appear in JLab's list of engineering controls precisely because a
+  raised threshold stops dense gas draining into a lower space. **[A]**
+
+## 4.3 OSHA confined-space framing
+
+**[A]** — 29 CFR 1910.146,
+<https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.146>
+
+A **permit-required confined space** is a confined space with one or more of:
+
+1. contains, or has the potential to contain, a **hazardous atmosphere**;
+2. contains a material with the potential for **engulfing** an entrant;
+3. has an internal configuration such that an entrant could be **trapped or
+   asphyxiated** by inwardly converging walls or a downward-sloping, tapering
+   floor;
+4. contains **any other recognized serious safety or health hazard**.
+
+A **hazardous atmosphere** includes "atmospheric oxygen concentration below 19.5
+percent or above 23.5 percent."
+
+Two points the course should draw out:
+
+- Criterion (1) says **"has the potential to contain."** A pit that is fine today
+  is a permit space if a credible cryogen release could make it hazardous. The
+  classification follows the *potential*, not the *current* reading.
+- The standard notes spaces may be entered without a written permit or attendant
+  **only** where the space "can be maintained in a safe condition for entry by
+  mechanical ventilation alone" — which is exactly the judgement the ODH analysis
+  in §3 exists to support.
+
+Whether a *given* pit, trench or test cell at a *given* facility is a permit
+space is determined by that facility's confined-space programme. **The course
+cannot answer it.**
+
+---
+
+# 5. Vapour clouds and visibility
+
+## 5.1 The visible cloud is not the cryogen
+
+The white cloud over a cryogenic release is **condensed atmospheric water
+vapour** — fog formed in the ambient air chilled by the release. The cryogens in
+question (N₂, O₂, Ar, He, H₂) are colourless gases. The cloud is therefore a
+*tracer of chilled air*, not a map of the hazardous substance.
+
+Even in dry conditions a liquid hydrogen spill "will create a white cloud of
+condensed water vapor," and "the scope of visible cloud indicated by the condensed
+water vapor **expands with the increasing air humidity**." **[C]** — synthesised
+from the LH₂ dispersion literature summarised in search results; I could not
+fetch the h2tools primary documents (403) and have not verified a direct quote.
+Treat the humidity-dependence claim as needing a citation before print.
+
+## 5.2 Why the hazardous envelope can be *larger* than the visible cloud
+
+At the edges of the cloud the chilled air has mixed with enough warm ambient air
+to rise back above its dew point — the fog evaporates while the displacing or
+flammable gas is still present. "The warmer air on the outer edge of the vapor
+cloud causes the gas to become invisible, making it possible to be in an
+oxygen-enriched atmosphere, flammable atmosphere or in a gas that can cause
+asphyxiation **without the gases being visible**." **[C]** — Firehouse Magazine,
+<https://www.firehouse.com/rescue/article/10545542/cryogenic-liquids> (trade
+press; the physics is sound and uncontroversial, the source is not authoritative
+— find a better citation before printing).
+
+Consequence: **the edge of the fog is not the edge of the hazard.** Standing just
+outside the visible cloud is not a control.
+
+## 5.3 Why the visible cloud can also be *smaller* — helium and hydrogen
+
+For the light cryogens the failure mode inverts. Helium and hydrogen warm and
+become buoyant very quickly, so the cold zone that sustains a fog is small and
+short-lived while the gas itself continues to travel. Measurements on helium
+releases show "the visible range of the helium vapor cloud is **much smaller**
+than the measured combustible concentration range" at 50–70 % humidity. For
+hydrogen, "rapid wind dissipates the water vapor cloud and also more rapidly
+warms the cold hydrogen which now **rises invisibly without its water vapor
+cloak**." **[C]** — same sourcing caveat as §5.1; the underlying studies are in
+*Int. J. Hydrogen Energy* / *Cryogenics* but are paywalled and I did not read
+them.
+
+> **Course framing (safe to state at A-confidence as a principle):** for every
+> cryogen, the visible cloud and the hazardous envelope are two different shapes,
+> and neither reliably contains the other. For dense cold vapour the hazard
+> extends beyond the fog and downward; for helium and hydrogen the hazard extends
+> beyond the fog and upward, and may be effectively invisible throughout. Vision
+> is not an instrument. Oxygen and flammable-gas monitoring is.

@@ -57,7 +57,7 @@ Components and Systems*** **[A]**
 | Report numbers | NASA/TM-2007-213740; also **S-998** |
 | NTRS ID | 20070016582 |
 | Working PDF | https://ntrs.nasa.gov/api/citations/20070016582/downloads/20070016582.pdf |
-| Landing page | https://ntrs.nasa.gov/citations/20070016582 |
+| Landing page | https://ntrs.nasa.gov/citations/20070016582 (browser-only; the NTRS landing pages are JavaScript-driven and time out for automated fetches — use the PDF or API URL above) |
 
 Verified two independent ways: the PDF title page, and the NTRS citation API
 record at `https://ntrs.nasa.gov/api/citations/20070016582`. Both agree on all
