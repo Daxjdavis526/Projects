@@ -184,6 +184,63 @@ export function injectWind(material, { anchorFromInstance = true } = {}) {
   return material;
 }
 
+/**
+ * Object-space triplanar surface detail for hard surfaces: hull plate on the
+ * station, the HALBERD and the BASTION. Object space rather than world space
+ * because the ship moves and the panel lines have to move with it, and because
+ * a lofted hull carries no UVs worth the name.
+ *
+ * `scale` is tiles per metre. Call after injectCurve.
+ */
+export function injectPanels(material, detail, { scale = 0.42, bump = 0.8 } = {}) {
+  if (!detail) return material;
+  const prev = material.onBeforeCompile;
+  material.onBeforeCompile = (shader, renderer) => {
+    if (prev) prev(shader, renderer);
+    shader.uniforms.tPanel = { value: detail.map };
+    shader.uniforms.nPanel = { value: detail.normalMap };
+    shader.uniforms.uPanelScale = { value: scale };
+    shader.uniforms.uPanelBump = { value: bump };
+    shader.vertexShader = 'varying vec3 vPvLocal;\n' + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <begin_vertex>', '#include <begin_vertex>\n vPvLocal = position;');
+    shader.fragmentShader =
+      'uniform sampler2D tPanel;\nuniform sampler2D nPanel;\n'
+      + 'uniform float uPanelScale;\nuniform float uPanelBump;\n'
+      + 'varying vec3 vPvLocal;\nvec3 pvPanelN;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `
+      {
+        vec3 an = abs(normalize(vNormal));
+        an = pow(an, vec3(4.0));
+        an /= (an.x + an.y + an.z);
+        vec2 uX = vPvLocal.zy * uPanelScale;
+        vec2 uY = vPvLocal.xz * uPanelScale;
+        vec2 uZ = vPvLocal.xy * uPanelScale;
+        vec3 pc = texture2D(tPanel, uX).rgb * an.x
+                + texture2D(tPanel, uY).rgb * an.y
+                + texture2D(tPanel, uZ).rgb * an.z;
+        pvPanelN = texture2D(nPanel, uX).xyz * an.x
+                 + texture2D(nPanel, uY).xyz * an.y
+                 + texture2D(nPanel, uZ).xyz * an.z;
+        pvPanelN = pvPanelN * 2.0 - 1.0;
+        diffuseColor.rgb *= pc;
+      }
+    `);
+    shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', `
+      {
+        vec3 N = normalize(normal);
+        vec3 T = normalize(vec3(0.0, 1.0, 0.0) - N * N.y);
+        if (abs(N.y) > 0.96) T = normalize(vec3(1.0, 0.0, 0.0) - N * N.x);
+        vec3 B = cross(N, T);
+        normal = normalize(N + (T * pvPanelN.x + B * pvPanelN.y) * uPanelBump);
+      }
+    `);
+  };
+  const key = material.customProgramCacheKey;
+  material.customProgramCacheKey = () => (key ? key() : '') + '|panels';
+  return material;
+}
+
 /** Cheap hash noise usable inside any fragment shader we author. */
 export const GLSL_NOISE = /* glsl */`
 float pvHash(vec2 p){ p = fract(p * vec2(233.34, 851.73)); p += dot(p, p + 23.45); return fract(p.x * p.y); }

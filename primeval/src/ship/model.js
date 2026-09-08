@@ -4,6 +4,7 @@
 // Ship-local axes: -Z is forward, +Y is up, +X is starboard.
 
 import * as THREE from 'three';
+import { injectPanels } from '../world/shaders.js';
 import { lerp, clamp } from '../math/noise.js';
 
 // --- a tiny mesh toolkit ---------------------------------------------------
@@ -284,14 +285,14 @@ function buildDetails(h) {
 
 // --- assembled ship --------------------------------------------------------
 
-export function buildShip() {
+export function buildShip(detail = null) {
   const group = new THREE.Group();
   group.name = 'HALBERD';
 
-  const mat = new THREE.MeshStandardMaterial({
+  const mat = injectPanels(new THREE.MeshStandardMaterial({
     vertexColors: true, roughness: 0.52, metalness: 0.44,
     side: THREE.DoubleSide, dithering: true,
-  });
+  }), detail, { scale: 0.55, bump: 0.65 });
   const emisU = { value: 1 };
   const heatU = { value: 0 };
   mat.userData.emis = emisU;

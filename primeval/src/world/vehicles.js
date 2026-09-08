@@ -16,7 +16,7 @@ export class VehicleSystem {
     setBaseSite(site.x, site.z, site.h, 150);
     game.moonSite = { x: site.x, z: site.z, h: site.h };
 
-    this.station = buildStation();
+    this.station = buildStation(undefined, { detail: game.textures && game.textures.panel });
     this.station.group.position.set(site.x, site.h, site.z);
     game.scene.add(this.station.group);
     game.station = this.station;
@@ -41,7 +41,7 @@ export class VehicleSystem {
     }));
 
     // --- the ship ----------------------------------------------------------
-    this.ship = new Ship(game.scene, game.camera);
+    this.ship = new Ship(game.scene, game.camera, game.textures && game.textures.panel);
     game.ship = this.ship;
     this.space = new SpaceStage(game);
     game.space = this.space;
@@ -50,7 +50,7 @@ export class VehicleSystem {
     game.moonPad = { x: site.x + pad.x, z: site.z + pad.z };
 
     // --- the exosuit -------------------------------------------------------
-    this.mech = new Mech(game.scene, game.camera);
+    this.mech = new Mech(game.scene, game.camera, game.textures && game.textures.panel);
     game.mech = this.mech;
     this.mech.place(site.x + 11, site.h, site.z - 8.5, Math.PI);
     this.mech.group.visible = false;

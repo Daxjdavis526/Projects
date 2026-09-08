@@ -56,6 +56,9 @@ uniform vec3 uDeep;
 uniform vec3 uFogColor;
 uniform float uFogDensity;
 uniform float uMurk;
+uniform vec3 uAerialCool;
+uniform vec3 uAerialWarm;
+uniform float uAerialMix;
 
 float h12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 float n2(vec2 p){
@@ -109,9 +112,13 @@ void main() {
   // Shallow water stays see-through, so you can spot fish from the bank.
   float alpha = clamp(mix(0.44, 0.94, dt) + foam * 0.5, 0.0, 1.0) * vMask;
 
-  // Exponential-squared fog, matched to the scene's own.
+  // The same aerial perspective the rest of the world uses, or a river reads
+  // as a differently-lit cut-out laid over the valley.
+  float mu = clamp(dot(-V, uSunDir), 0.0, 1.0);
+  float mie = pow(mu, 7.0) * 0.66 + mu * mu * 0.34;
+  vec3 haze = mix(uAerialCool, uAerialWarm, clamp(mie, 0.0, 1.0));
   float f = 1.0 - exp( -uFogDensity * uFogDensity * dist * dist );
-  col = mix(col, uFogColor, clamp(f, 0.0, 1.0));
+  col = mix(col, mix(uFogColor, haze, uAerialMix), clamp(f, 0.0, 1.0));
 
   gl_FragColor = vec4(col, alpha);
 }
@@ -132,6 +139,9 @@ function makeMaterial() {
       uFogColor: { value: new THREE.Color(0.6, 0.7, 0.76) },
       uFogDensity: { value: 0.0009 },
       uMurk: { value: 0 },
+      uAerialCool: sharedUniforms.uAerialCool,
+      uAerialWarm: sharedUniforms.uAerialWarm,
+      uAerialMix: sharedUniforms.uAerialMix,
     },
     vertexShader: WATER_VERT,
     fragmentShader: WATER_FRAG,

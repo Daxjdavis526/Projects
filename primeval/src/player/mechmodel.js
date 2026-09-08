@@ -4,6 +4,7 @@
 // every joint is a Group the controller can rotate directly.
 
 import * as THREE from 'three';
+import { injectPanels } from '../world/shaders.js';
 import { Hull } from '../ship/model.js';
 
 const ARM = [0.115, 0.120, 0.128];
@@ -50,11 +51,11 @@ function plate(h, x0, y0, z0, x1, y1, z1, col, chamfer = 0.09, emis = 0) {
   }
 }
 
-function mat(name) {
-  const m = new THREE.MeshStandardMaterial({
+function mat(name, detail = null) {
+  const m = injectPanels(new THREE.MeshStandardMaterial({
     vertexColors: true, roughness: 0.48, metalness: 0.62,
     side: THREE.DoubleSide, dithering: true,
-  });
+  }), detail, { scale: 1.15, bump: 0.6 });
   const emisU = { value: 1 };
   m.userData.emis = emisU;
   m.onBeforeCompile = (sh) => {
@@ -73,8 +74,8 @@ function mat(name) {
  * @returns {{group, rig, material, emisU, thrusters, cannonMuzzle}}
  * Local space: -Z forward, origin at the feet, ~4.1 m tall.
  */
-export function buildMech() {
-  const material = mat('body');
+export function buildMech(detail = null) {
+  const material = mat('body', detail);
   const emisU = material.userData.emis;
   const group = new THREE.Group();
   group.name = 'BASTION';

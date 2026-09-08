@@ -22,9 +22,9 @@ const _q = new THREE.Quaternion();
 const _e = new THREE.Euler();
 
 export class Ship {
-  constructor(scene, camera) {
+  constructor(scene, camera, detail = null) {
     this.name = SHIP.name;
-    const built = buildShip();
+    const built = buildShip(detail);
     this.art = built;
     this.group = built.group;
     this.cockpit = buildCockpit();

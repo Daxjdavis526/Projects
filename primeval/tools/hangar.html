@@ -20,6 +20,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { buildShip, buildCockpit } from '../src/ship/model.js';
+import { bakeTextures } from '../src/world/textures.js';
 
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -44,7 +45,8 @@ const grid = new THREE.GridHelper(90, 45, 0x243038, 0x141a1e);
 grid.position.y = -3.39;
 scene.add(grid);
 
-const ship = buildShip();
+const detail = bakeTextures(renderer).panel;
+const ship = buildShip(detail);
 scene.add(ship.group);
 const cockpit = buildCockpit();
 ship.group.add(cockpit.group);
@@ -52,7 +54,7 @@ ship.group.add(cockpit.group);
 // The exosuit shares this viewer once it exists.
 let mech = null;
 import('../src/player/mechmodel.js').then(m => {
-  mech = m.buildMech();
+  mech = m.buildMech(detail);
   mech.group.position.set(0, -3.4, 18);
   mech.group.visible = new URLSearchParams(location.search).get('mech') === '1';
   scene.add(mech.group);

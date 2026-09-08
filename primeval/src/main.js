@@ -8,7 +8,10 @@ import { installWorld } from './world/install.js';
 const canvas = document.getElementById('gl');
 const hud = new Hud();
 
-let quality = loadQuality();
+// ?q=PERFORMANCE overrides the saved preset, which is handy for a machine you
+// are only borrowing and for driving the game from a headless browser.
+const qParam = new URLSearchParams(location.search).get('q');
+let quality = (qParam && QUALITY[qParam.toUpperCase()]) || loadQuality();
 const setQualityButtons = () => {
   document.querySelectorAll('.qbtn').forEach(b => {
     b.classList.toggle('sel', b.dataset.q === quality.name);

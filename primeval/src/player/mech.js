@@ -13,8 +13,8 @@ const _v = new THREE.Vector3();
 const _d = new THREE.Vector3();
 
 export class Mech {
-  constructor(scene, camera) {
-    const art = buildMech();
+  constructor(scene, camera, detail = null) {
+    const art = buildMech(detail);
     this.art = art;
     this.group = art.group;
     scene.add(this.group);

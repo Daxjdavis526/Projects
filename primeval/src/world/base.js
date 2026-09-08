@@ -6,7 +6,7 @@
 // and the physics can never disagree.
 
 import * as THREE from 'three';
-import { injectCurve } from './shaders.js';
+import { injectCurve, injectPanels } from './shaders.js';
 import { clamp, lerp } from '../math/noise.js';
 
 const WALL = 0.34;
@@ -346,10 +346,10 @@ export function buildStation(colliders, opts = {}) {
   }
 
   // --- materials ------------------------------------------------------------
-  const mat = injectCurve(new THREE.MeshStandardMaterial({
+  const mat = injectPanels(injectCurve(new THREE.MeshStandardMaterial({
     vertexColors: true, roughness: 0.62, metalness: 0.34,
     side: THREE.DoubleSide, dithering: true,
-  }));
+  })), opts.detail, { scale: 0.30, bump: 0.7 });
   const emisU = { value: 1 };
   mat.userData.emis = emisU;
   const prev = mat.onBeforeCompile;

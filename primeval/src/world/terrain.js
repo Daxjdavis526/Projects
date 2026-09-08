@@ -305,10 +305,13 @@ export function makeTerrainMaterial(tex) {
       vec4 detail2(sampler2D t, vec2 uv, float blend){
         return mix(texture2D(t, uv), texture2D(t, PV_TWIST * uv * 0.171 + 0.37), blend);
       }
-      vec2 accentUV(vec2 uv, float id){
+      // The accent sheet cannot repeat, so the wrap is done by hand — and a
+      // fract() inside a texture lookup makes the hardware see a derivative
+      // spike at every wrap and drop to the coarsest mip, which draws a grid of
+      // seam lines across the ground. Supplying the real gradients fixes it.
+      vec4 accentTex(sampler2D t, vec2 uv, float id){
         vec2 cell = vec2(mod(id, 2.0) * 0.5, id < 1.5 ? 0.5 : 0.0);
-        // Wrap inside the cell by hand, since the sheet cannot repeat.
-        return cell + fract(uv) * 0.5;
+        return textureGrad(t, cell + fract(uv) * 0.5, dFdx(uv) * 0.5, dFdy(uv) * 0.5);
       }
     ` + shader.fragmentShader;
 
@@ -324,12 +327,12 @@ export function makeTerrainMaterial(tex) {
 
       vec3 soilC = detail2(tSoil, uv, blend).rgb;
       vec3 turfC = detail2(tTurf, uv * 1.7, blend).rgb;
-      vec3 accC  = texture2D(tAcc, accentUV(uv * 0.9, floor(vSplat.z + 0.5))).rgb;
+      vec3 accC  = accentTex(tAcc, uv * 0.9, floor(vSplat.z + 0.5)).rgb;
       vec3 ground = soilC * wSoil + turfC * wTurf + accC * wAcc;
 
       vec3 gN = texture2D(nSoil, uv).xyz * wSoil
               + texture2D(nTurf, uv * 1.7).xyz * wTurf
-              + texture2D(nAcc, accentUV(uv * 0.9, floor(vSplat.z + 0.5))).xyz * wAcc;
+              + accentTex(nAcc, uv * 0.9, floor(vSplat.z + 0.5)).xyz * wAcc;
 
       // Rock takes over on anything steep, projected triplanar so cliffs are
       // not smeared vertical stripes.
@@ -408,7 +411,7 @@ export function makeTerrainMaterial(tex) {
 
     attachAerial(shader);
   };
-  mat.customProgramCacheKey = () => 'primeval-terrain-v5';
+  mat.customProgramCacheKey = () => 'primeval-terrain-v6';
   return mat;
 }
 

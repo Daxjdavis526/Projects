@@ -326,6 +326,50 @@ vec3 colourAt(vec2 uv, float h){
 }
 `;
 
+/**
+ * Brushed hull plate: panel seams, rivets, weld beads and grime. Sampled
+ * triplanar in object space, so the seams run along the hull's own axes on a
+ * ship that is banking and on a station that never moves alike.
+ */
+const PANEL = /* glsl */`
+// Distance to the nearest seam of a 4x4 panel grid, with the grid jittered so
+// it does not read as graph paper.
+float seamField(vec2 uv, out vec2 cell){
+  vec2 g = uv * 4.0;
+  cell = floor(g);
+  vec2 f = fract(g);
+  vec2 d = min(f, 1.0 - f);
+  return min(d.x, d.y) / 4.0;
+}
+float heightAt(vec2 uv){
+  vec2 cell;
+  float seam = seamField(uv, cell);
+  float groove = smoothstep(0.010, 0.0, seam);
+  // Each plate sits a hair proud of its neighbours.
+  float plate = 0.5 + (h21(cell) - 0.5) * 0.16;
+  // Rivets down two sides of every plate.
+  vec2 rp = fract(uv * 4.0) - 0.5;
+  float rivetRow = min(abs(abs(rp.x) - 0.44), abs(abs(rp.y) - 0.44));
+  float along = fract(uv * 48.0).x;
+  float rivet = smoothstep(0.03, 0.0, rivetRow) * smoothstep(0.30, 0.06, abs(along - 0.5)) * 0.5;
+  float brush = fbm(vec2(uv.x * 128.0, uv.y * 16.0), 16.0, 3);
+  return plate + groove * -0.55 + rivet + brush * 0.10;
+}
+vec3 colourAt(vec2 uv, float h){
+  vec2 cell;
+  float seam = seamField(uv, cell);
+  float groove = smoothstep(0.012, 0.0, seam);
+  float plate = 0.90 + (h21(cell) - 0.5) * 0.13;
+  float grime = fbm(uv * 6.0 + 3.0, 6.0, 4);
+  float streak = fbm(vec2(uv.x * 40.0, uv.y * 3.0), 3.0, 3);
+  vec3 c = vec3(plate);
+  c *= 1.0 - groove * 0.45;
+  c *= 0.90 + grime * 0.24;
+  c = mix(c, c * vec3(0.86, 0.82, 0.78), smoothstep(0.55, 0.95, streak) * 0.5);
+  return c;
+}
+`;
+
 /** Fibrous bark with deep vertical fissures. */
 const BARK = /* glsl */`
 float heightAt(vec2 uv){
@@ -498,8 +542,15 @@ float accSand(vec2 uv){
   return ripple * 0.42 + fbm(uv * 34.0, 34.0, 4) * 0.58;
 }
 float accAsh(vec2 uv){
-  vec2 w = worley(uv * 11.0, 11.0);
-  return fbm(uv * 9.0, 9.0, 5) * 0.6 + (1.0 - smoothstep(0.0, 0.36, w.x)) * 0.4;
+  // Loose grit over drifted ash. The old version was one big worley lobe and
+  // tiled as a field of identical pale eggs.
+  vec2 grit = worley(uv * 26.0, 26.0);
+  vec2 lump = worley(uv * 9.0, 9.0);
+  float drift = fbm(uv * 7.0, 7.0, 5);
+  return drift * 0.52
+       + smoothstep(0.34, 0.02, grit.x) * 0.30
+       + smoothstep(0.30, 0.06, lump.x) * 0.18
+       + fbm(uv * 40.0, 40.0, 3) * 0.12;
 }
 float accSnow(vec2 uv){ return fbm(uv * 6.0, 6.0, 5) * 0.7 + fbm(uv * 30.0, 30.0, 3) * 0.3; }
 float accReg(vec2 uv){
@@ -521,10 +572,13 @@ vec3 colourAt(vec2 uv, float h){
       vec3 col = mix(vec3(0.42, 0.375, 0.295), vec3(0.74, 0.685, 0.545), smoothstep(0.3, 0.8, h));
       return mix(col, vec3(0.86, 0.84, 0.80), shell * 0.8) * (0.86 + grain * 0.28);
     }
-    vec2 w = worley(p * 11.0, 11.0);
-    float clinker = 1.0 - smoothstep(0.0, 0.36, w.x);
-    vec3 col = mix(vec3(0.035, 0.032, 0.034), vec3(0.155, 0.145, 0.140), smoothstep(0.25, 0.8, h));
-    return mix(col, vec3(0.24, 0.115, 0.065), clinker * 0.42) * (0.8 + grain * 0.42);
+    // Ash: sooty grey with rust where the clinker is oxidised. Small and
+    // scattered, not one lobe per cell.
+    float clinker = smoothstep(0.30, 0.04, worley(p * 26.0, 26.0).x);
+    float rust = smoothstep(0.55, 0.92, fbm(p * 6.0 + 13.0, 6.0, 4));
+    vec3 col = mix(vec3(0.048, 0.044, 0.045), vec3(0.175, 0.166, 0.160), smoothstep(0.25, 0.8, h));
+    col = mix(col, vec3(0.20, 0.098, 0.058), clinker * 0.34 + rust * 0.16);
+    return col * (0.82 + grain * 0.36);
   }
   if (c.x < 0.5) {
     float sparkle = step(0.988, h21(floor(p * 512.0)));
@@ -552,6 +606,7 @@ export function bakeTextures(renderer) {
     regolith: baker.bake(REGOLITH, { size: S, bump: 30 }),
     bark: baker.bake(BARK, { size: S, bump: 40 }),
     hide: baker.bake(HIDE, { size: S, bump: 30 }),
+    panel: baker.bake(PANEL, { size: S, bump: 26 }),
     accent: baker.bake(ACCENT, { size: 1024, bump: 26 }),
   };
   // The accent sheet must not wrap between cells.
