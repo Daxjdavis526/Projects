@@ -30,11 +30,15 @@
    began. It must never sound like a boot recorded on gravel, because that
    recording is of a path which does not exist here.
 
-   Three buses carry those ideas and nothing else does.
+   Four buses carry those ideas and nothing else does.
 
-     helmet   your own bubble and the headset inside it. Present whenever the
-              suit is sealed, which the mix infers from the ambient pressure
-              rather than trusting a flag.
+     helmet   the machinery of your own bubble. Present in proportion to how
+              sealed the suit is, which the mix infers from the ambient pressure
+              rather than by trusting a flag.
+     head     the things that happen at your head whatever is around it: the
+              radio, the caution tones and your own breathing. A speaker in your
+              ear does not care whether the helmet outside it is closed, so an
+              alarm is as loud in a shirtsleeve cabin as it is on the surface.
      air      whatever room you are standing in, scaled by that room's pressure
               and by nothing else.
      body     structure borne. Never gated, because a vacuum outside a hull does
@@ -390,6 +394,9 @@ export class Sound {
     n.helmet = gain(1);
     n.helmet.connect(n.master);
 
+    n.head = gain(1);
+    n.head.connect(n.master);
+
     /* Two sources at unrelated rates, so the beds that share the buffer are not
        correlated enough to phase against one another. */
     n.hissA = hiss(1.0);
@@ -411,7 +418,7 @@ export class Sound {
     /* --- breathing ----------------------------------------------------------- */
     n.breathBand = filt('bandpass', 480, 1.1);
     n.breathGain = gain(0);
-    n.hissA.connect(n.breathBand).connect(n.breathGain).connect(n.helmet);
+    n.hissA.connect(n.breathBand).connect(n.breathGain).connect(n.head);
 
     /* --- your own heart ------------------------------------------------------ */
     /* Onto the body bus, because that is honestly how it reaches you. */
@@ -424,12 +431,12 @@ export class Sound {
        it is in your ear whether or not there is air anywhere near you. */
     n.commsBand = filt('bandpass', 1400, 0.85);
     n.commsGain = gain(0);
-    n.hissB.connect(n.commsBand).connect(n.commsGain).connect(n.helmet);
+    n.hissB.connect(n.commsBand).connect(n.commsGain).connect(n.head);
 
     /* --- master caution ------------------------------------------------------ */
     n.cautionOsc = osc('triangle', 560);
     n.cautionGain = gain(0);
-    n.cautionOsc.connect(n.cautionGain).connect(n.helmet);
+    n.cautionOsc.connect(n.cautionGain).connect(n.head);
 
     /* --- suit fabric and joint bearings -------------------------------------- */
     n.fabricBand = filt('bandpass', 1800, 0.8);
@@ -534,13 +541,12 @@ export class Sound {
   }
 
   /** Play one of the pip patterns above into the headset. */
-  _pattern(table, kind, gainScale) {
+  _pattern(table, kind) {
     const spec = table[kind] || table.default;
     const at = this.ctx.currentTime + 0.01;
     for (let i = 0; i < spec.pips.length; i++) {
       const p = spec.pips[i];
-      this._tone(this.n.helmet, spec.type, p[2], p[3], at + p[0], p[1],
-                 spec.peak * gainScale, 0.006);
+      this._tone(this.n.head, spec.type, p[2], p[3], at + p[0], p[1], spec.peak, 0.006);
     }
     return spec;
   }
@@ -560,7 +566,7 @@ export class Sound {
       const last = this.lastAlarmAt[kind];
       if (last !== undefined && now - last < 0.7) return;
       this.lastAlarmAt[kind] = now;
-      const spec = this._pattern(ALARMS, kind, 1);
+      const spec = this._pattern(ALARMS, kind);
       if (spec.thump > 0) this._thump(spec.thump);
     } catch (err) { /* an alarm that fails to sound must not stop the game */ }
   }
@@ -572,7 +578,7 @@ export class Sound {
   beep(kind) {
     if (!this.ok) return;
     try {
-      this._pattern(BEEPS, kind, 1);
+      this._pattern(BEEPS, kind);
       /* A squelch is the carrier opening, so the hiss bed jumps with the click
          rather than the click arriving on its own. update() decays the flash. */
       if (kind === 'comms') this.commsFlash = 1;
@@ -659,11 +665,13 @@ export class Sound {
        fade out followed by a fade in. */
     const helmetEnv = inShip ? 0.10 : closedRover ? 0.45 : 1;
     const helmet = Math.max(helmetEnv, 1 - pressure);
-    /* The headset is strapped to your head in every one of these places. */
+    /* Whereas an earpiece is against your ear wherever you go, so the radio,
+       the caution tones and your own breathing never leave entirely. */
     const headset = 0.55 + 0.45 * helmet;
     const cabin = inShip ? clamp01(num(ship && ship.interiorLevel, 1)) : closedRover ? 1 : 0;
 
     setT(n.helmet.gain, helmet, now, 0.25);
+    setT(n.head.gain, headset, now, 0.25);
     setT(n.air.gain, Math.pow(pressure, AIR_EXPONENT), now, 0.08);
     setT(n.airLP.frequency,
          AIR_CUTOFF_MIN + (AIR_CUTOFF_MAX - AIR_CUTOFF_MIN) * pressure * pressure, now, 0.10);
@@ -717,8 +725,7 @@ export class Sound {
     const inhale = ph < 0.38 ? Math.sin(ph / 0.38 * Math.PI) : 0;
     const exhale = (ph > 0.45 && ph < 0.95) ? Math.sin((ph - 0.45) / 0.5 * Math.PI) : 0;
     const depth = 0.35 + 0.5 * exertion + 0.45 * co2;
-    setT(n.breathGain.gain,
-         (0.30 + 0.70 * helmet) * 0.115 * depth * (inhale * 0.85 + exhale), now, 0.03);
+    setT(n.breathGain.gain, 0.13 * depth * (inhale * 0.85 + exhale), now, 0.03);
     /* An inhale is drawn through the regulator and is brighter than an exhale,
        which is mostly your own chest heard from inside a closed helmet. */
     setT(n.breathBand.frequency, inhale > exhale ? 780 : 330, now, 0.05);
@@ -738,14 +745,13 @@ export class Sound {
 
     /* --- radio and caution ---------------------------------------------------- */
     this.commsFlash *= Math.exp(-dt / 0.22);
-    setT(n.commsGain.gain,
-         headset * (0.010 * (0.4 + 0.6 * power) + 0.055 * this.commsFlash), now, 0.05);
+    setT(n.commsGain.gain, 0.010 * (0.4 + 0.6 * power) + 0.055 * this.commsFlash, now, 0.05);
 
     /* The one shot alarms are the events; this is the state. It repeats slowly
        under everything else for as long as a warning is standing. */
     if (this.autoCaution && warnings > 0) {
       this.cautionPhase = (this.cautionPhase + dt / (warnings > 1 ? 1.6 : 2.8)) % 1;
-      setT(n.cautionGain.gain, (this.cautionPhase < 0.13 ? 0.045 : 0) * headset, now, 0.008);
+      setT(n.cautionGain.gain, this.cautionPhase < 0.13 ? 0.045 : 0, now, 0.008);
       setT(n.cautionOsc.frequency, warnings > 1 ? 740 : 560, now, 0.02);
     } else {
       this.cautionPhase = 0;
@@ -855,9 +861,13 @@ export class Sound {
         const lope = gait === 'lope';
         this._footfall(Math.min(1, 0.35 + 0.45 * Math.min(1, speed / PLAYER.lope)), lope);
       }
-      if (grounded && !this.prevGrounded) {
-        this._footfall(Math.min(1.4, 0.5 + impact / PLAYER.fallHurt), true);
-      }
+      /* Landing on the rising edge of contact, weighted by how hard. A snapshot
+         that omits `grounded` still lands, because `lastImpact` only changes
+         when a landing happened. */
+      const landed = (p && typeof p.grounded === 'boolean')
+        ? (grounded && !this.prevGrounded)
+        : (impact > 0.1 && impact !== this.prevImpact);
+      if (landed) this._footfall(Math.min(1.4, 0.5 + impact / PLAYER.fallHurt), true);
       /* A wheel dropping into a crater rim. Rearmed by falling back below the
          threshold, so a per frame impulse and a running level both work. */
       if (onRover) {

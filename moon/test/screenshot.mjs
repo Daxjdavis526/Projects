@@ -34,13 +34,16 @@ const TIMEOUT = Number(argOf('timeout', 180000));
 const SETTLE = Number(argOf('settle', 6000));
 
 const DEFAULT_SHOTS = [
-  ['orbit', 'site=apollo11&view=orbit&alt=1400000&quality=balanced'],
+  ['orbit', 'site=apollo11&view=orbit&alt=1200000&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
   ['descent', 'site=apollo11&view=ground&alt=9000&quality=balanced'],
   ['tranquility-now', 'site=apollo11&view=ground&alt=2.2&quality=high'],
-  ['tranquility-1969', 'site=apollo11&view=ground&alt=2.2&t=1969-07-20T20:17:40Z&quality=high'],
-  ['tycho', 'site=tycho&view=ground&alt=60&quality=balanced'],
-  ['shackleton', 'site=shackleton_rim&view=ground&alt=6&quality=balanced'],
-  ['farside', 'site=farside_highlands&view=ground&alt=3&quality=balanced'],
+  ['tranquility-1969', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&quality=high'],
+  ['tranquility-earth', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&look=earth&fov=12&quality=high'],
+  ['third-person', 'site=apollo11&mode=eva&t=1969-07-21T02:56:15Z&rate=0&view3=1&quality=high'],
+  ['tycho', 'site=tycho&mode=eva&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
+  ['shackleton', 'site=shackleton_rim&mode=eva&quality=balanced'],
+  ['farside', 'site=farside_highlands&mode=eva&quality=balanced'],
+  ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],
 ];
 
 const shots = args.filter((a, i) => args[i - 1] === '--shot')

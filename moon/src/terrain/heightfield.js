@@ -47,7 +47,12 @@ export class Raster {
     this.label = spec.label || LABEL.MEASURED;
     this.wrapX = !!spec.wrapX;
     this.data = data;
+    /* Stored counts become metres as value * scale + offset. The global
+       pyramid is whole metres and needs neither, but a two metre window over
+       ninety metres of relief would be terraced into steps you can see and
+       walk up, so those are stored in millimetres about a local datum. */
     this.scale = spec.scale ?? 1;
+    this.offset = spec.offset ?? 0;
     const [w, s, e, n] = spec.bbox;
     this.lonSpan = e - w;
     this.latSpan = n - s;
@@ -107,7 +112,7 @@ export class Raster {
     const j0 = cy(y0) * W, j1 = cy(y0 + 1) * W;
     const i0 = cx(x0), i1 = cx(x0 + 1);
     return ((d[j0 + i0] * (1 - fx) + d[j0 + i1] * fx) * (1 - fy) +
-            (d[j1 + i0] * (1 - fx) + d[j1 + i1] * fx) * fy) * this.scale;
+            (d[j1 + i0] * (1 - fx) + d[j1 + i1] * fx) * fy) * this.scale + this.offset;
   }
 }
 

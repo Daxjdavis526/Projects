@@ -82,6 +82,13 @@ def write_png16(path, arr_metres):
     Image.fromarray(v.astype(np.uint16), mode="I;16").save(path, optimize=True)
 
 
+def write_png16_scaled(path, arr, scale, bias=0):
+    """16-bit grayscale PNG holding a physical quantity: value = arr*scale + bias."""
+    v = np.clip(np.round(np.asarray(arr, dtype=np.float64) * scale) + bias, 0, 65535)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    Image.fromarray(v.astype(np.uint16), mode="I;16").save(path, optimize=True)
+
+
 def write_png8(path, arr, mode="L"):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     Image.fromarray(arr.astype(np.uint8), mode=mode).save(path, optimize=True)
@@ -195,6 +202,19 @@ def read_geotiff_float(path):
     return out, tie, scale
 
 
+
+def window_quantisation(win):
+    """A window covers tens or hundreds of metres of relief, not twenty
+    kilometres, so storing whole metres in it throws away most of what the
+    stereo model measured and leaves terraces you can see and walk up. Store
+    counts above a local datum instead, at whatever resolution fills the
+    sixteen bits."""
+    lo = math.floor(float(np.nanmin(win)))
+    span = float(np.nanmax(win)) - lo
+    cpm = max(1, min(1000, int(64000 / max(span, 1e-6))))
+    return lo, cpm
+
+
 def build_apollo11_nac(force):
     """Crop the 2 m/px NAC DTM to a window around the LM."""
     p = os.path.join(DATA, "dem", "apollo11_nac2m.png")
@@ -227,10 +247,12 @@ def build_apollo11_nac(force):
     west, east = x2lon(x0 + i0 * mx), x2lon(x0 + i1 * mx)
     north = math.degrees((y0 - j0 * my) / R_MOON)
     south = math.degrees((y0 - j1 * my) / R_MOON)
-    write_png16(p, win)
+    off, cpm = window_quantisation(win)
+    write_png16_scaled(p, win - off, cpm)
     meta = {"id": "apollo11_nac", "path": "dem/apollo11_nac2m.png", "w": win.shape[1], "h": win.shape[0],
             "bbox": [round(west, 6), round(south, 6), round(east, 6), round(north, 6)],
             "res_m": round(mx, 3), "priority": 0, "kind": "window",
+            "offset_m": off, "counts_per_m": cpm,
             "min_m": round(float(win.min()), 1), "max_m": round(float(win.max()), 1),
             "source": "LROC NAC DTM NAC_DTM_APOLLO11 v1.9, 2 m/px (stereo pair M150361817/M150368601)"}
     json.dump(meta, open(meta_path, "w"), indent=1)
@@ -251,10 +273,12 @@ def build_apollo11_sldem(force):
     # tile covers 0..45 E, rows here are 2 N .. 0 N; crop 22.5..24.5 E
     c0 = int(22.5 * SLDEM_PPD); c1 = int(24.5 * SLDEM_PPD)
     win = a[:, c0:c1]
-    write_png16(p, win)
+    off, cpm = window_quantisation(win)
+    write_png16_scaled(p, win - off, cpm)
     meta = {"id": "apollo11_sldem", "path": "dem/apollo11_sldem.png", "w": win.shape[1], "h": win.shape[0],
             "bbox": [22.5, 0.0, 24.5, 2.0], "res_m": round(math.pi * R_MOON / (180 * SLDEM_PPD), 3),
             "priority": 0, "kind": "window",
+            "offset_m": off, "counts_per_m": cpm,
             "min_m": round(float(win.min()), 1), "max_m": round(float(win.max()), 1),
             "source": "SLDEM2015 (LOLA + Kaguya TC) 512 ppd, PDS tile 00N-30N/000-045"}
     json.dump(meta, open(meta_path, "w"), indent=1)
@@ -395,6 +419,46 @@ def build_gravity(force):
             "source": "GRAIL GRGM1200A free-air anomaly to degree 180 (PDS gggrx_1200a_anom_l180)"}
 
 
+# ---------------------------------------------------------------- temperature
+DIVINER = {
+    "max": "diviner_tbol_max",
+    "min": "diviner_tbol_min",
+    "noon": "diviner_tbol_hour12",
+    "predawn": "diviner_tbol_hour00",
+}
+DIVINER_URL = ("https://trek.nasa.gov/moon/trekarcgis2/rest/services/{id}/ImageServer/exportImage"
+               "?bbox=-180,-90,180,90&bboxSR=104903&imageSR=104903&size=720,360"
+               "&format=tiff&pixelType=F32&interpolation=RSP_BilinearInterpolation&f=image")
+
+
+def build_diviner(force):
+    """Vendor the Diviner bolometric temperature maps at their native half a
+    degree, so the game can say how hot the ground is with no network at all.
+
+    Half a degree is fifteen kilometres, which is far coarser than anything else
+    the player stands on, so every value taken from these is labelled REGIONAL.
+    They are also brightness temperatures of the whole footprint, not of the
+    rock under your boots: a shadowed metre inside a sunlit pixel is far colder
+    than this says, and the game notes that where it matters."""
+    out = {"res_deg": 0.5, "w": 720, "h": 360, "scale": 10, "unit": "K",
+           "layers": {}, "label": "REGIONAL",
+           "source": "LRO Diviner bolometric brightness temperature, Williams et al. 2017 "
+                     "(JGR Planets 122:1029), served by NASA Trek at 0.5 deg"}
+    for key, service in DIVINER.items():
+        rel = f"temp/diviner_{key}.png"
+        path = os.path.join(DATA, rel)
+        if force or not os.path.exists(path):
+            tif = fetch(f"diviner_{key}.tif", DIVINER_URL.format(id=service))
+            a = np.array(Image.open(tif)).astype(np.float64)
+            a = np.where(np.isfinite(a) & (a > 1) & (a < 1000), a, np.nan)
+            if np.isnan(a).any():
+                a = np.where(np.isnan(a), np.nanmedian(a), a)
+            write_png16_scaled(path, a, 10)
+            log(f"  diviner {key}: {a.min():.0f} .. {a.max():.0f} K")
+        out["layers"][key] = rel
+    return out
+
+
 # ---------------------------------------------------------------- checks
 def sample_dem(dem, lat, lon):
     """Bilinear sample of the 16 ppd array in our convention."""
@@ -482,6 +546,8 @@ def main():
     geology = build_geology(args.force)
     log("gravity ...")
     gravity = build_gravity(args.force)
+    log("temperature ...")
+    temperature = build_diviner(args.force)
     log("checks ...")
     checks = build_checks(dem, args.force)
 
@@ -493,7 +559,7 @@ def main():
                        "note": "16-bit PNG value = round(metres) + bias; column 0 is -180 E, row 0 is +90 N"},
         "dem": {"layers": layers, "windows": windows},
         "measured": measured, "colour": colour, "earth": earth, "stars": stars,
-        "geology": geology, "gravity": gravity,
+        "geology": geology, "gravity": gravity, "temperature": temperature,
         "checks": {"global_min_m": checks["global_min_m"], "global_max_m": checks["global_max_m"]},
     }
     json.dump(manifest, open(os.path.join(DATA, "manifest.json"), "w"), indent=1)

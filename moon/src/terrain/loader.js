@@ -60,9 +60,16 @@ export async function loadPyramidLevel(base, manifest, z, onTile) {
 /** Load a vendored window (the Apollo 11 NAC and SLDEM crops). */
 export async function loadWindow(base, manifest, spec) {
   const buf = await readBinary(base, spec.path);
-  const { width, height, data } = await decodeElevationPng(buf, manifest.convention.png16_bias_m);
+  /* Windows are stored as counts above a local datum rather than as metres
+     plus a global bias, because a metre of quantisation is invisible on the
+     1.9 km global grid and a visible terrace on a 2 m one. */
+  const scaled = spec.counts_per_m !== undefined;
+  const { width, height, data } = await decodeElevationPng(
+    buf, scaled ? 0 : manifest.convention.png16_bias_m);
   return new Raster({
     id: spec.id, bbox: spec.bbox, width, height, res_m: spec.res_m,
+    scale: scaled ? 1 / spec.counts_per_m : 1,
+    offset: scaled ? spec.offset_m : 0,
     priority: spec.priority ?? 0, source: spec.source, label: 'MEASURED',
   }, data);
 }

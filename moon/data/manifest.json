@@ -113,6 +113,8 @@
     "res_m": 2.0,
     "priority": 0,
     "kind": "window",
+    "offset_m": -1967,
+    "counts_per_m": 705,
     "min_m": -1966.4,
     "max_m": -1876.2,
     "source": "LROC NAC DTM NAC_DTM_APOLLO11 v1.9, 2 m/px (stereo pair M150361817/M150368601)"
@@ -131,6 +133,8 @@
     "res_m": 59.225,
     "priority": 0,
     "kind": "window",
+    "offset_m": -2488,
+    "counts_per_m": 58,
     "min_m": -2487.4,
     "max_m": -1389.6,
     "source": "SLDEM2015 (LOLA + Kaguya TC) 512 ppd, PDS tile 00N-30N/000-045"
@@ -210,6 +214,21 @@
   "min": -632.1,
   "max": 806.5,
   "source": "GRAIL GRGM1200A free-air anomaly to degree 180 (PDS gggrx_1200a_anom_l180)"
+ },
+ "temperature": {
+  "res_deg": 0.5,
+  "w": 720,
+  "h": 360,
+  "scale": 10,
+  "unit": "K",
+  "layers": {
+   "max": "temp/diviner_max.png",
+   "min": "temp/diviner_min.png",
+   "noon": "temp/diviner_noon.png",
+   "predawn": "temp/diviner_predawn.png"
+  },
+  "label": "REGIONAL",
+  "source": "LRO Diviner bolometric brightness temperature, Williams et al. 2017 (JGR Planets 122:1029), served by NASA Trek at 0.5 deg"
  },
  "checks": {
   "global_min_m": -8981.5,

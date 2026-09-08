@@ -28,7 +28,12 @@ import { decodePng8 } from './terrain/png16.js';
 import { Streams } from './data/streams.js';
 import { Cache } from './data/cache.js';
 import { SurfaceStreamer } from './data/surface.js';
+import { TemperatureMap } from './data/temperature.js';
 import { EVA } from './game/eva.js';
+import { Descent } from './game/descent.js';
+import { SuitHud } from './ui/suithud.js';
+import { OrbitPicker } from './ui/orbit.js';
+import { Sound } from './audio/audio.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -150,6 +155,14 @@ async function start() {
     registry = await readJson(DATA, 'streams.json');
   } catch (e) { console.warn('stream registry unavailable', e.message); }
 
+  /* Diviner's temperature maps, vendored, so the ground has a real temperature
+     with no network at all. */
+  let temperature = null;
+  if (manifest.temperature) {
+    try { temperature = await new TemperatureMap(manifest.temperature).load(DATA); }
+    catch (e) { console.warn('temperature maps unavailable:', e.message); }
+  }
+
   progress('building terrain', 0.85);
   const terrain = new TerrainSystem(stage, {
     base: DATA,
@@ -210,6 +223,13 @@ async function start() {
      how the screenshot harness checks the sky without driving the controls. */
   const lookAt = params.get('look');
 
+  const suitHud = new SuitHud();
+  /* Audio cannot start without a gesture, so it waits for the first key or
+     click and is a safe no-op until then. */
+  const sound = new Sound();
+  const wake = () => { sound.start(); removeEventListener('keydown', wake); removeEventListener('pointerdown', wake); };
+  addEventListener('keydown', wake);
+  addEventListener('pointerdown', wake);
   const exposure = new Exposure();
   const world = { x: 0, y: 0, z: 0 };
   const frustum = new THREE.Frustum();
@@ -237,9 +257,60 @@ async function start() {
     return eva;
   };
 
+  /* --- the opening: orbit ---------------------------------------------------
+     The game starts by looking at the real Moon from a few hundred kilometres
+     up and choosing somewhere to go. `?view=ground` and `?mode=eva` skip
+     straight past it, which is what the screenshot harness wants. */
+  let names = { features: [] };
+  try { names = await readJson(DATA, 'names.json'); }
+  catch (e) { console.warn('nomenclature unavailable', e.message); }
+
+  const orbit = new OrbitPicker({
+    heightfield, names, sites, geology, cam,
+    getSky: (lat, lon) => skyAt(ephemerisAt(jdFromUnixMs(state.simMs)), lat, lon, 0),
+    onLand: (pick) => land(pick),
+  });
+
+  let mode = params.get('view') === 'orbit' || (!params.get('view') && !params.get('mode'))
+    ? 'orbit' : 'surface';
+  orbit.show(mode === 'orbit');
+  if (mode === 'orbit') {
+    cam.alt = Number(params.get('alt') ?? 1200000);
+    cam.pitch = -89 * Math.PI / 180;
+    cam.yaw = 0;
+    orbit.setPick(site.lat, site.lon, site);
+  }
+
+  /* Going down. The ship stays wherever it is put, so this is the one moment
+     that decides where the rest of the game happens. The last minute of the
+     approach is flown rather than animated: see game/descent.js. */
+  let descent = null;
+  function land(pick) {
+    mode = 'descent';
+    orbit.show(false);
+    el('hint').textContent = 'landing · press space to skip';
+    descent = new Descent({
+      heightfield, target: { lat: pick.lat, lon: pick.lon },
+      onDone: (at) => {
+        descent = null;
+        mode = 'surface';
+        el('hint').textContent = 'H for controls';
+        startEva(at.lat, at.lon);
+        eva.player.yaw = at.heading * Math.PI / 180;
+      },
+    });
+    /* Ask for the ground under the landing site straight away rather than
+       waiting for the camera to arrive. */
+    if (surface) surface.update(pick.lat, pick.lon, 400);
+  }
+
   /* `?mode=eva` starts on foot, which is what the screenshot harness wants when
      it is checking the suit, the lamps or the third-person camera. */
-  if (params.get('mode') === 'eva') startEva(site.lat, site.lon);
+  if (params.get('mode') === 'eva') {
+    startEva(site.lat, site.lon);
+    if (params.get('view3') === '1') eva.toggleView();
+    if (params.get('lamps')) eva.lampMode = Number(params.get('lamps'));
+  }
 
   /* --- input --------------------------------------------------------------- */
   const keys = new Set();
@@ -257,20 +328,48 @@ async function start() {
       if (eva) { eva.group.removeFromParent(); eva = null; cam.speed = 6; }
       else startEva();
     }
+    if (e.code === 'Space' && descent) descent.skip();
     if (e.code === 'KeyF' && eva) eva.toggleView();
     if (e.code === 'KeyL' && eva) eva.cycleLamps();
   });
   addEventListener('keyup', (e) => keys.delete(e.code));
   let dragging = false;
-  canvas.addEventListener('pointerdown', (e) => { dragging = true; canvas.setPointerCapture(e.pointerId); });
-  canvas.addEventListener('pointerup', (e) => { dragging = false; canvas.releasePointerCapture(e.pointerId); });
+  let dragged = 0;
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true; dragged = 0; canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    dragging = false;
+    canvas.releasePointerCapture(e.pointerId);
+    if (mode !== 'orbit' || dragged > 6) return;
+    /* A click, not a drag: shoot a ray through the pointer and see where it
+       lands on the real surface. */
+    const r = canvas.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((e.clientX - r.left) / r.width) * 2 - 1,
+      -((e.clientY - r.top) / r.height) * 2 + 1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(ndc, stage.camera);
+    const o = stage.origin.origin;
+    const hit = orbit.rayToGround(
+      { x: ray.ray.origin.x + o.x, y: ray.ray.origin.y + o.y, z: ray.ray.origin.z + o.z },
+      ray.ray.direction);
+    if (hit) orbit.setPick(hit.lat, hit.lon);
+  });
   canvas.addEventListener('pointermove', (e) => {
     if (!dragging) return;
+    dragged += Math.abs(e.movementX) + Math.abs(e.movementY);
     look.yaw += e.movementX * 0.0022;
     look.pitch += e.movementY * 0.0022;
   });
   canvas.addEventListener('wheel', (e) => {
-    cam.speed = Math.max(0.4, Math.min(400000, cam.speed * Math.exp(-e.deltaY * 0.0015)));
+    if (mode === 'orbit') {
+      const ground = heightfield.heightAt(cam.lat, cam.lon);
+      const agl = Math.max(2000, cam.alt - ground);
+      cam.alt = ground + Math.max(2000, Math.min(6e6, agl * Math.exp(e.deltaY * 0.0012)));
+    } else {
+      cam.speed = Math.max(0.4, Math.min(400000, cam.speed * Math.exp(-e.deltaY * 0.0015)));
+    }
     e.preventDefault();
   }, { passive: false });
 
@@ -280,7 +379,12 @@ async function start() {
 
   function frame(now) {
     requestAnimationFrame(frame);
-    const dt = Math.min(0.1, (now - last) / 1000);
+    const dtWall = Math.min(0.5, (now - last) / 1000);
+    /* Physics is clamped so a long stall cannot tunnel anybody through the
+       ground. The landing is not: it is a fixed length of theatre, and letting
+       a slow machine stretch it to five minutes would be worse than letting it
+       take bigger steps. */
+    const dt = Math.min(0.1, dtWall);
     last = now;
     fpsAcc += dt; fpsN++;
     if (fpsAcc > 0.5) { fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; }
@@ -319,6 +423,16 @@ async function start() {
       /* Looking down at your boots and looking out at the horizon are two very
          different exposures, and the difference is most of a stop. */
       viewMu: Math.max(0.06, Math.sin(Math.max(0.05, -cam.pitch))),
+      /* Phase angle: how far the Sun is from behind your head. Zero is the
+         full-Moon direction, where the surface is at its brightest.
+
+         Both directions are measured from the ground looking outwards, so the
+         viewer's is the camera's reversed: a camera pitched ninety degrees down
+         is a viewer ninety degrees up. Getting that backwards puts the phase
+         near a hundred and eighty, makes the model think the ground is almost
+         unlit, and opens the exposure by four stops. */
+      phaseDeg: phaseAngle(-cam.pitch * 180 / Math.PI,
+                           cam.yaw * 180 / Math.PI + 180, local.sunEl, local.sunAz),
       groundFraction: cam.alt - heightfield.heightAt(cam.lat, cam.lon) > 50000
         ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
       earthIllum: eph.earthIllum,
@@ -349,6 +463,46 @@ async function start() {
       cam.lat = eva.player.llh.lat; cam.lon = eva.player.llh.lon;
       cam.alt = eva.player.llh.h; cam.yaw = eva.player.yaw; cam.pitch = eva.player.pitch;
       world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
+    } else if (mode === 'descent') {
+      descent.step(dtWall);
+      const c = descent.camera();
+      cam.lat = c.lat; cam.lon = c.lon; cam.alt = c.alt;
+      cam.yaw = c.yaw; cam.pitch = c.pitch;
+      llhToXyz(cam.lat, cam.lon, cam.alt, world);
+      const bd = enuBasis(cam.lat, cam.lon);
+      const cyd = Math.cos(cam.yaw), syd = Math.sin(cam.yaw);
+      const cpd = Math.cos(cam.pitch), spd = Math.sin(cam.pitch);
+      camFrame = {
+        eye: { x: world.x, y: world.y, z: world.z },
+        dir: {
+          x: (bd.n.x * cyd + bd.e.x * syd) * cpd + bd.u.x * spd,
+          y: (bd.n.y * cyd + bd.e.y * syd) * cpd + bd.u.y * spd,
+          z: (bd.n.z * cyd + bd.e.z * syd) * cpd + bd.u.z * spd,
+        },
+        up: bd.u, head: { x: world.x, y: world.y, z: world.z }, fov: null,
+      };
+    } else if (mode === 'orbit') {
+      /* Turning the Moon rather than turning the camera: the view stays nadir
+         and north up, and dragging slides the sub-point across the surface.
+         How far a drag moves you depends on how high you are, so the same
+         gesture works from a thousand kilometres and from thirty. */
+      const scale = (cam.alt / R_MOON) * 34;
+      cam.lon -= look.yaw * scale * 57.2958 * 0.6;
+      cam.lat = Math.max(-89.9, Math.min(89.9, cam.lat + look.pitch * scale * 57.2958 * 0.6));
+      if (cam.lon > 180) cam.lon -= 360;
+      if (cam.lon < -180) cam.lon += 360;
+      look.yaw = look.pitch = 0;
+      cam.pitch = -89 * Math.PI / 180;
+      cam.yaw = 0;
+      llhToXyz(cam.lat, cam.lon, cam.alt, world);
+      const bo = enuBasis(cam.lat, cam.lon);
+      camFrame = {
+        eye: { x: world.x, y: world.y, z: world.z },
+        dir: { x: -bo.u.x, y: -bo.u.y, z: -bo.u.z },
+        /* North is the top of the picture; straight down has no other sensible
+           roll, and using the local vertical here would be degenerate. */
+        up: bo.n, head: { x: world.x, y: world.y, z: world.z }, fov: null,
+      };
     } else {
       cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
@@ -441,19 +595,35 @@ async function start() {
       : 'below horizon';
     el('s-time').textContent = new Date(state.simMs).toISOString().replace('T', ' ').slice(0, 19) +
       (state.timeRate === 0 ? '  (held)' : state.timeRate === 1 ? '' : `  ${fmtRate(state.timeRate)}`);
+    const evaSnap = eva ? eva.snapshot() : null;
+    suitHud.update(evaSnap);
+    /* Vacuum outside, air inside. Until there is a ship or a rover to be in,
+       the only two states are wearing a suit and flying a camera that is not
+       there at all. */
+    sound.update({
+      dt,
+      environment: evaSnap ? 'suit' : 'ship',
+      pressure: evaSnap ? 0 : 1,
+      player: evaSnap ? evaSnap.player : undefined,
+      suit: evaSnap ? evaSnap.suit : undefined,
+    });
     el('s-tiles').textContent = `${terrain.stats.tiles}  (${terrain.stats.building} building)`;
     el('s-tris').textContent = (terrain.stats.triangles / 1000).toFixed(0) + 'k';
     el('s-fps').textContent = fps.toFixed(0);
 
     if (state.showScience && now - probeCache.t > 250) {
       probeCache.t = now;
-      updateScience(heightfield, geology, cam, local, eph, surface, streams);
+      updateScience(heightfield, geology, cam, local, eph, surface, streams, temperature);
     }
   }
 
   window.SELENE = {
     ready: false, stage, terrain, sky, heightfield, cam, state, streams, surface,
     get eva() { return eva; },
+    get descent() { return descent; },
+    get mode() { return mode; },
+    land(lat, lon) { land({ lat, lon }); },
+    temperature,
     get astronaut() { return astronaut; },
     walk(lat, lon) { startEva(lat, lon); },
     goto(lat, lon, alt) { cam.lat = lat; cam.lon = lon; cam.alt = alt ?? cam.alt; },
@@ -464,6 +634,14 @@ async function start() {
 }
 
 /* --- helpers ---------------------------------------------------------------- */
+
+/** Angle between two directions given as elevation and azimuth, in degrees. */
+function phaseAngle(el1, az1, el2, az2) {
+  const D = Math.PI / 180;
+  const c = Math.sin(el1 * D) * Math.sin(el2 * D) +
+            Math.cos(el1 * D) * Math.cos(el2 * D) * Math.cos((az1 - az2) * D);
+  return Math.acos(Math.max(-1, Math.min(1, c))) / D;
+}
 
 /** Normal albedo under a point, from the USGS geologic unit. REGIONAL. */
 function albedoAt(geology, lat, lon) {
@@ -495,7 +673,7 @@ let sciencePending = false;
 let scienceRemote = null;
 let scienceAt = { lat: 999, lon: 999 };
 
-function updateScience(hf, geology, cam, local, eph, streamer, streams) {
+function updateScience(hf, geology, cam, local, eph, streamer, streams, temperature) {
   const p = hf.probe(cam.lat, cam.lon);
   el('d-topo').innerHTML = `${p.res_m < 10 ? p.res_m.toFixed(1) : p.res_m.toFixed(0)} m/px ${tag(p.label)}`;
   el('d-detail').innerHTML = Math.abs(p.proceduralHeight) > 0.001
@@ -518,11 +696,14 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams) {
     geolText = u ? `${u.code} ${u.name}, ${u.age}` : `unit ${dn}`;
   }
   el('d-geol').innerHTML = `${geolText} ${tag('REGIONAL')}`;
-  /* Diviner-style estimate until the streamed layer is wired in. */
+  /* Diviner's own maps, vendored at half a degree, interpolated across the day
+     by the model in data/temperature.js. */
   const lt = localSolarTime(eph, cam.lat, cam.lon);
-  const noon = Math.max(0, Math.cos((lt - 0.5) * 2 * Math.PI));
-  const t = 95 + 300 * Math.pow(noon * Math.max(0.02, Math.cos(cam.lat * Math.PI / 180)), 0.25);
-  el('d-temp').innerHTML = `${t.toFixed(0)} K ${tag('DERIVED')}`;
+  const temp = temperature ? temperature.at(cam.lat, cam.lon, local.sunEl, lt * 24) : null;
+  el('d-temp').innerHTML = temp
+    ? `${temp.kelvin.toFixed(0)} K  <span class="est">${temp.celsius.toFixed(0)} C</span> ` +
+      `${tag('REGIONAL')}<span class="est"> Diviner ${temp.diviner.min.toFixed(0)}–${temp.diviner.max.toFixed(0)} K</span>`
+    : 'unavailable';
   el('d-slope').textContent = hf.slopeAt(cam.lat, cam.lon).toFixed(1) + '°';
 
   /* Ask NASA what is really here, but only when the player has moved: these are
@@ -539,19 +720,11 @@ function updateScience(hf, geology, cam, local, eph, streamer, streams) {
       const g = scienceRemote.geology;
       el('d-geol').innerHTML = `${g.unit} ${g.name}, ${g.period} ${tag('REGIONAL')}`;
     }
-    if (scienceRemote.temperature && scienceRemote.temperature.max !== null) {
-      const t2 = scienceRemote.temperature;
-      const lt2 = localSolarTime(eph, cam.lat, cam.lon);
-      const day = Math.max(0, Math.cos((lt2 - 0.5) * 2 * Math.PI));
-      const est = t2.min + (t2.max - t2.min) * Math.pow(day, 0.28);
-      el('d-temp').innerHTML = `${est.toFixed(0)} K ${tag('REGIONAL')}` +
-        `<span class="est"> ${t2.min.toFixed(0)}–${t2.max.toFixed(0)} K</span>`;
-    }
   }
 
   const parts = [p.source];
   if (desc && desc.imagery) parts.push(desc.imagery.source);
-  if (scienceRemote && scienceRemote.temperature) parts.push(scienceRemote.temperature.source);
+  if (temp) parts.push(temp.source);
   if (p.padded) parts.push('landing pad (FICTIONAL)');
   if (desc) parts.push('streaming: ' + desc.status);
   el('d-src').textContent = parts.join('  ·  ');

@@ -167,10 +167,15 @@ export const ROVER = {
   boostHeatUp: 0.09, boostHeatDown: 0.05,
 };
 
+/* The ship as models/ship.js actually builds it. NASA's habitable volume
+   guidance is about 25 cubic metres per person and crew quarters want about
+   five, so a hundred and fifty over two decks is a genuine three-person
+   habitat rather than a capsule. The Apollo lunar module cabin, for scale,
+   was 6.7. All of these numbers are FICTIONAL: no such vehicle exists. */
 export const SHIP = {
-  radius: 9.0, height: 13.5, legSpan: 17.0,
-  padRadius: 22.0, padFeather: 14.0,   // the one place terrain is edited (FICTIONAL)
-  interiorVolume: 152,                 // m^3 pressurised
+  radius: 3.6, height: 9.5, legSpan: 12.4,
+  padRadius: 16.0, padFeather: 11.0,   // the one place terrain is edited (FICTIONAL)
+  interiorVolume: 154,                 // m^3 pressurised, two decks plus the airlock
   airlockCycle: 22,                    // s
 };
 
