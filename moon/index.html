@@ -174,6 +174,25 @@ canvas{display:block;position:fixed;inset:0}
   letter-spacing:.08em;pointer-events:none;
 }
 
+/* ---- shelter ---- */
+#shelter{
+  position:fixed;top:50%;right:22px;transform:translateY(-50%);
+  width:266px;display:none;
+}
+#shelter h2{margin-bottom:9px}
+#shelter .where{font-size:11px;color:var(--warm);letter-spacing:.06em;margin-bottom:3px}
+#shelter .needs,#shelter .sun{font-size:9.5px;color:var(--dim);letter-spacing:.05em;line-height:1.7}
+#shelter .grp{margin-top:11px;border-top:1px solid var(--edge);padding-top:9px}
+#shelter .grp .lab{font-size:8px;letter-spacing:.2em;color:var(--dim);
+  text-transform:uppercase;margin-bottom:6px;font-family:Michroma,sans-serif}
+#shelter .btns{display:flex;flex-wrap:wrap;gap:4px}
+#shelter button{
+  background:rgba(216,213,207,.05);border:1px solid var(--edge);border-radius:2px;
+  color:var(--ink);font:inherit;font-size:10px;letter-spacing:.05em;
+  padding:5px 9px;cursor:pointer;transition:background .12s,border-color .12s;
+}
+#shelter button:hover{background:rgba(232,201,160,.14);border-color:rgba(232,201,160,.4)}
+
 /* ---- photography ---- */
 #photo-bar{
   position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:25;
@@ -298,6 +317,37 @@ canvas{display:block;position:fixed;inset:0}
     </div>
     <div class="state">
       <span id="v-gait">—</span><span id="v-lamps">—</span><span id="v-jet">—</span>
+    </div>
+  </div>
+
+  <div class="panel" id="shelter">
+    <h2>Shelter</h2>
+    <div class="where" id="sh-where">—</div>
+    <div class="needs" id="sh-needs">—</div>
+    <div class="sun" id="sh-sun">—</div>
+    <div class="grp">
+      <div class="lab">rest</div>
+      <div class="btns">
+        <button data-do="eat">eat and drink</button>
+        <button data-hours="1">sleep 1 h</button>
+        <button data-hours="4">4 h</button>
+        <button data-hours="8">8 h</button>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="lab">wait for the sun</div>
+      <div class="btns">
+        <button data-sun="0">sunrise</button>
+        <button data-sun="15">15° up</button>
+        <button data-sun="45">45° up</button>
+      </div>
+    </div>
+    <div class="grp" id="sh-resupply">
+      <div class="lab">the ship</div>
+      <div class="btns">
+        <button data-do="resupply">restock the rover</button>
+        <button data-do="recharge">recharge the suit</button>
+      </div>
     </div>
   </div>
 

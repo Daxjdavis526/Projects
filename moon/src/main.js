@@ -35,6 +35,7 @@ import { Descent } from './game/descent.js';
 import { Base } from './game/base.js';
 import { Vehicle } from './game/vehicle.js';
 import { HistoricSites } from './game/historic.js';
+import { Shelter, hoursUntilSunElevation } from './game/shelter.js';
 import { SuitHud } from './ui/suithud.js';
 import { OrbitPicker } from './ui/orbit.js';
 import { Sound } from './audio/audio.js';
@@ -247,6 +248,28 @@ async function start() {
 
   const suitHud = new SuitHud();
   const photo = new Photo();
+  /* Eating, sleeping, and waiting for the Sun, which on a body with a
+     29 and a half day rotation is a real thing to want to do. */
+  const shelter = new Shelter({
+    el: el('shelter'),
+    onRest: (hours, what) => {
+      if (what === 'eat') { shelter.needs.eat(); return; }
+      if (what === 'resupply' && vehicle) { vehicle.rover.restock(); vehicle.dust = 0; return; }
+      if (what === 'recharge' && eva) { eva.suit.recharge(); return; }
+      let h = hours;
+      if (what && what.startsWith('sun:')) {
+        h = hoursUntilSunElevation(skyAt, ephemerisAt, jdFromUnixMs,
+          state.simMs, cam.lat, cam.lon, Number(what.slice(4)), true);
+        if (h === null) return;
+      }
+      if (!h) return;
+      state.simMs += h * 3600 * 1000;
+      shelter.needs.sleep(h);
+      if (eva) eva.suit.recharge();
+      if (vehicle && vehicle.rover.pressure > 0.9) vehicle.rover.consume(h, 1);
+      save.write(game, 'slept');
+    },
+  });
   const save = new Save();
   /* Audio cannot start without a gesture, so it waits for the first key or
      click and is a safe no-op until then. */
@@ -492,6 +515,7 @@ async function start() {
   /* --- the loop ------------------------------------------------------------ */
   let last = performance.now(), fpsAcc = 0, fpsN = 0, fps = 0, ready = false;
   const probeCache = { t: 0, value: null };
+  let shelterAt = 0;
 
   function frame(now) {
     requestAnimationFrame(frame);
@@ -717,6 +741,19 @@ async function start() {
       eva.updateModel(stage.origin.origin, dt);
       if (eva.model) eva.model.group.visible = !driving && eva.view === 'third';
     }
+    /* Somewhere pressurised is somewhere you can take the helmet off. */
+    const sheltered = base && base.inside(cam.lat, cam.lon, cam.alt) ? 'ship'
+      : driving && vehicle && vehicle.rover.pressure > 0.9 ? 'rover' : null;
+    shelter.needs.step(dt * Math.max(1, state.timeRate));
+    if (now - shelterAt > 900) {
+      shelterAt = now;
+      shelter.update(sheltered, sheltered ? {
+        sunEl: local.sunEl,
+        nextSunrise: local.sunEl > 0 ? null : hoursUntilSunElevation(
+          skyAt, ephemerisAt, jdFromUnixMs, state.simMs, cam.lat, cam.lon, 0, true),
+      } : null);
+    }
+
     historic.update(cam.lat, cam.lon, stage.origin.origin, dt, local.sunDir);
     if (base) {
       base.step(dt, eva ? eva.player.llh : null);

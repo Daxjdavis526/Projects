@@ -80,6 +80,25 @@ Live: https://daxjdavis526.github.io/Projects/raptor/
 See [raptor/README.md](raptor/README.md) for controls and what is actually
 simulated versus approximated.
 
+## moon/
+
+**SELENE** — an open-world exploration game on the real Moon, at its real size.
+The whole body is here: LOLA topography for the entire globe, LROC imagery and
+metre-scale stereo models streamed from NASA as you approach, the Sun and the
+Earth where celestial mechanics puts them, Diviner temperatures, and a black
+sky. Land anywhere, get out and walk in a sixth of a gravity, drive a rover to
+the horizon, and visit Tranquility Base at its real coordinates with the flag
+lying on the ground where the ascent engine left it. Every value on screen says
+whether it was measured, interpolated, or invented below the resolution of the
+data. Desktop only.
+
+Live: https://daxjdavis526.github.io/Projects/moon/
+
+See [moon/README.md](moon/README.md) for the controls and the accuracy table,
+[moon/DATA_SOURCES.md](moon/DATA_SOURCES.md) for every dataset with its
+limitations, and [moon/RESEARCH.md](moon/RESEARCH.md) for the constants with
+their citations.
+
 ## propulsion/
 
 **PROPULSION** — a two-semester-equivalent rocket propulsion engineering
