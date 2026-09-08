@@ -32,6 +32,12 @@ export class Moment {
    */
   show(id, lines) {
     if (this.shown.has(id) || !this.root) return false;
+    /* One caption at a time, and a caption that has to wait is not spent. The
+       cave one and the stepping-off-the-ladder one can both come due in the
+       same second — walk in the moment you land — and without this the second
+       replaces the first mid-sentence and is then marked as having been shown,
+       so neither is ever read. */
+    if (this.hideAt && performance.now() < this.hideAt) return false;
     this.shown.add(id);
     el('moment-title').textContent = lines.title || '';
     el('moment-1').textContent = lines.a || '';

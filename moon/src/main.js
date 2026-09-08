@@ -1326,6 +1326,30 @@ async function start() {
     /* The caption for arriving. It waits until the ground under you has
        actually resolved, so the elevation it quotes is the real one. */
     moment.update(now);
+    /* And one for the other place worth a second of room. Every number in it
+       is read off where you actually are, like the first one — off the walker
+       rather than off the camera, because the camera exists before the walker
+       does and during those first seconds it is nowhere in particular. */
+    if (eva && pitField.cave && !photo.active && mode === 'surface' &&
+        terrain.stats.tiles > 90 && now - startedAt > 2500 &&
+        pitField.cave.inside(eva.player.llh.lat, eva.player.llh.lon, eva.player.llh.h)) {
+      const c = pitField.cave;
+      const l = c.toLocal(eva.player.llh.lat, eva.player.llh.lon);
+      /* The roof is what is overhead, not your boots: the rock between the
+         ceiling here and the plain up there. */
+      const overhead = -(c.ceilingLocal(l.e, l.n) ?? c.floorU);
+      moment.show('cave', {
+        title: 'under the Moon',
+        a: `${overhead.toFixed(0)} m of basalt overhead, and about 290 K in here `
+         + 'whatever hour it is outside.',
+        b: 'Nobody has seen this. In 2024 a radar instrument in orbit found a '
+         + 'reflection off the pit that only made sense if something was down '
+         + 'here, and this is the shape that fit it best.',
+        c: 'Carrer et al. 2024 · DERIVED, not measured · the same data admits a '
+         + 'level chamber instead of this ramp',
+        seconds: 13,
+      });
+    }
     if (eva && mode === 'surface' && !photo.active && terrain.stats.tiles > 90 &&
         now - startedAt > 2500) {
       const near = historic.nearest();
@@ -1451,7 +1475,7 @@ async function start() {
     land(lat, lon) { land({ lat, lon }); },
     temperature,
     get astronaut() { return astronaut; },
-    game, save, visited, tracks,
+    game, save, visited, tracks, moment,
     walk(lat, lon) { startEva(lat, lon); },
     goto(lat, lon, alt) { cam.lat = lat; cam.lon = lon; cam.alt = alt ?? cam.alt; },
     setTime(iso) { state.simMs = Date.parse(iso); },
