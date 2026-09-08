@@ -25,6 +25,17 @@
 
 import { OPTICS } from '../config.js';
 
+/* Why the geologic map does not feed this.
+   `src/main.js` carries a per-unit albedo from the USGS map — mare basalt at
+   0.07, highland anorthosite at 0.11 — and it reaches the light meter and the
+   bounce term and never the rendered ground. That looks like a gap and is a
+   decision: the colour map is a per-pixel measurement at 1.3 km and the
+   geologic map is a category at 1:5 million, so tinting the first with the
+   second would be laying a coarse guess over a fine measurement and calling
+   the result more accurate. The unit albedo is used where a single number for
+   the neighbourhood is what is wanted — what the eye is adapting to, and how
+   much light the surroundings bounce into a shadow — and nowhere else. */
+
 /**
  * @param {number} L linear luminance of the colour map, 0..1
  * @returns {number} normal albedo, asymptotically bounded by OPTICS.albedoMax

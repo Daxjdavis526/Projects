@@ -63,6 +63,21 @@ export class Suit {
     this.recovered = 0;
     this.warnings = [];
     this.worstCo2 = 0;
+    /* Areal dust coverage on the lower suit and boots, 0 to 1 over what a
+       working day put on an Apollo crewman. A recharge does not touch it: a
+       tank of oxygen does not clean anything, and the whole point of the
+       vestibule is that the cleaning is a separate chore. */
+    this.dust = 0;
+    return this;
+  }
+
+  /**
+   * The vacuum point in the ship's vestibule: hose, brush, and a tray under
+   * the grating that somebody empties every few days. It does not get all of
+   * it, because on Apollo nothing did.
+   */
+  clean() {
+    this.dust = Math.max(0, this.dust - 0.85);
     return this;
   }
 
@@ -104,9 +119,9 @@ export class Suit {
    * How much longer you can stay out, in seconds, on the consumable that will
    * run out first. This is the number a person actually watches.
    */
-  endurance(exertion = 0.35) {
+  endurance(exertion = 0.35, sunlit = true) {
     if (this.rate === 0) return Infinity;
-    const h = this.rates(exertion);
+    const h = this.rates(exertion, sunlit);
     const times = [
       (this.o2 + this.o2Reserve) / h.o2, (SUIT.co2Capacity - this.co2) / h.co2,
       this.power / h.power, this.water / h.water,
@@ -118,8 +133,8 @@ export class Suit {
   /** Which consumable is the binding one right now. */
   /* Which consumable will run out first. The difficulty scale is the same for
      all four, so it cannot change the answer and is left out here. */
-  limiting(exertion = 0.35) {
-    const h = this.rates(exertion);
+  limiting(exertion = 0.35, sunlit = true) {
+    const h = this.rates(exertion, sunlit);
     const t = {
       oxygen: (this.o2 + this.o2Reserve) / h.o2,
       scrubber: (SUIT.co2Capacity - this.co2) / h.co2,
@@ -130,7 +145,7 @@ export class Suit {
   }
 
   /** Consumption per hour at a given exertion, before the difficulty scale. */
-  rates(exertion) {
+  rates(exertion, sunlit = true) {
     const e = Math.max(0, Math.min(1, exertion));
     /* Metabolic rate roughly doubles between standing and working hard, and
        oxygen use, carbon dioxide production and cooling all follow it. */
@@ -138,7 +153,17 @@ export class Suit {
     return {
       o2: (SUIT.o2RateIdle + (SUIT.o2RateHard - SUIT.o2RateIdle) * e),
       co2: SUIT.co2Rate * work,
-      water: SUIT.waterRate * work,
+      /* Dust is a thermal problem before it is anything else. Gaier 2005
+         (NASA/TM-2005-213610) records eleven per cent areal coverage doubling
+         a radiator's solar absorptance, which is the single most quantified
+         thing anyone measured about lunar dust on hardware. A dirty suit in
+         sunlight therefore has more heat to dump and the sublimator boils more
+         water to dump it. `dust` here runs 0 to 1 over what a working day put
+         on an Apollo lower suit, and the effect is deliberately modest: about
+         forty per cent more feedwater at full coverage in full sun, which is a
+         real cost on a long traverse and is never what kills you. In shadow it
+         does nothing at all, because there is no sunlight to absorb. */
+      water: SUIT.waterRate * work * (sunlit ? 1 + 0.4 * this.dust : 1),
       /* Watts, which is watt-hours per hour, so it divides straight into the
          battery's capacity like the other three. */
       power: SUIT.powerBase + (this.lights ? SUIT.powerLights : 0) +
@@ -164,8 +189,22 @@ export class Suit {
     this.elapsed += dt;
     if (scale === 0) return this;                    // UNLIMITED
 
-    const h = this.rates(s.exertion ?? 0.35);
+    const h = this.rates(s.exertion ?? 0.35, this.cooling);
     const hours = dt / 3600 * scale;
+
+    /* Getting dirty. Apollo crews were visibly coated within one EVA and the
+       dust does not brush off: it is sharp, it is electrostatically charged and
+       it works into the weave. So this only goes up out here, and the only way
+       down is the vacuum point in the ship's vestibule — which the ship has had
+       modelled since it was built, grating, hose, brush and all, with nothing
+       simulated behind it. Roughly three hours of walking to fully coat the
+       lower suit, faster the harder you are working, because the harder you
+       work the more you kick up. */
+    if (s.onFoot) {
+      const kick = 0.35 + 0.65 * Math.max(0, Math.min(1, s.exertion ?? 0.35));
+      this.dust = Math.min(1, this.dust + dt * kick / (3 * 3600));
+    }
+    if (s.fell) this.dust = Math.min(1, this.dust + 0.12);
     const wanted = h.o2 * hours;
     const fromPrimary = Math.min(this.o2, wanted);
     this.o2 -= fromPrimary;
@@ -235,7 +274,7 @@ export class Suit {
       enduranceSeconds: this.endurance(), limiting: this.limiting(),
       elapsed: this.elapsed, warnings: this.warnings,
       unconscious: this.unconscious, lights: this.lights,
-      heating: this.heating, cooling: this.cooling,
+      heating: this.heating, cooling: this.cooling, dust: this.dust,
     };
   }
 }

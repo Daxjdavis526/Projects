@@ -36,6 +36,11 @@ export class Settings {
       suit: 'realistic',
       stream: true,
       markers: false,
+      /* Physical by default: the stars carry their real radiance and the tone
+         curve decides what survives, which is why the Apollo crews saw none
+         from sunlit ground and plenty from inside a shadow. Boosted is a
+         deliberate departure and the panel says so. */
+      stars: 'physical',
       cacheMb: 512,
     }, Save.readSettings());
     this.build();
@@ -57,6 +62,7 @@ export class Settings {
     row('set-suit', SUIT_MODES, ['realistic', 'relaxed', 'unlimited'], 'suit');
     row('set-stream', ['on', 'off'], null, 'stream');
     row('set-markers', ['on', 'off'], null, 'markers');
+    row('set-stars', ['physical', 'boosted'], null, 'stars');
     row('set-cache', CACHE_SIZES.map(String).concat('clear'),
         CACHE_SIZES.map(m => m >= 1024 ? (m / 1024) + ' GB' : m + ' MB').concat('clear'), 'cache');
     this.apply();
@@ -92,6 +98,7 @@ export class Settings {
     mark('set-suit', v.suit);
     mark('set-stream', v.stream ? 'on' : 'off');
     mark('set-markers', v.markers ? 'on' : 'off');
+    mark('set-stars', v.stars);
     mark('set-cache', v.cacheMb);
 
     const eva = this.get.eva();
@@ -100,6 +107,12 @@ export class Settings {
     if (streams) streams.enabled = v.stream;
     const historic = this.get.historic();
     if (historic) historic.setMarkers(v.markers);
+    const sky = this.get.sky && this.get.sky();
+    /* Twelve times, which is between three and four stops: enough that the
+       brighter constellations read against sunlit ground, and not so much that
+       the sky stops being black. `starBrightness` existed and nothing wrote
+       it, so the mode the brief asked for had no way in. */
+    if (sky) sky.starBrightness = v.stars === 'boosted' ? 12 : 1;
     const cache = this.get.cache();
     if (cache) cache.setLimit(v.cacheMb * 1e6);
     if (el('set-cache-status')) {

@@ -92,5 +92,32 @@ console.log('the airlock actually cycles');
     SHIP.airlockCycle > 8, SHIP.airlockCycle + ' s');
 }
 
+console.log('what comes in through the hatch');
+{
+  const b = new ShipInterior({ lat: 0, lon: 0, heading: 0, groundHeight: -1900 });
+  check('a new ship is clean', b.cabinDust === 0);
+  check('and says so in words', /clean/.test(b.describeDust()));
+
+  b.admit({ dust: 1 });
+  check('a fully coated suit brings a fifth of it in',
+        b.cabinDust > 0.15 && b.cabinDust < 0.3, b.cabinDust.toFixed(3));
+  const said = b.describeDust();
+  check('and the panel notices', said !== 'the cabin is clean', said);
+
+  for (let i = 0; i < 6; i++) b.admit({ dust: 1 });
+  check('repeated trips never take it past coated', b.cabinDust <= 1);
+
+  b.admit(null);
+  b.admit({});
+  check('a suit with no dust field is not a crash', Number.isFinite(b.cabinDust));
+
+  /* It wears away rather than going away: a lunar day from coated to clean. */
+  const c = new ShipInterior({ lat: 0, lon: 0, heading: 0, groundHeight: 0 });
+  c.cabinDust = 1;
+  for (let i = 0; i < 29.5 * 24; i++) c.step(3600);
+  check('a lunar day of filters brings a coated cabin back',
+        c.cabinDust < 0.02, c.cabinDust.toFixed(4));
+}
+
 console.log(failures ? `\n${failures} FAILED` : '\nship: all checks passed');
 process.exit(failures);

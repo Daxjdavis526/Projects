@@ -245,10 +245,19 @@ export class Sky {
 
   /**
    * @param {object} eph  from ephemerisAt(): directions in the body frame
-   * @param {number} exposure  the renderer's current exposure, so stars can be
-   *        hidden when the eye is adapted to sunlit ground
+   * @param {object} local from skyAt(): what is above the horizon from here,
+   *        and whether the Earth is ever above it at all
+   *
+   * There is no exposure argument. This used to take one, described as letting
+   * stars be hidden when the eye is adapted to sunlit ground, and ignore it —
+   * and ignoring it was right: the stars carry their real radiance and the tone
+   * curve does the rest, which is the whole reason the Apollo crews saw none of
+   * them from sunlit ground and plenty from inside a shadow. Making that
+   * automatic and then also passing the exposure in would have been two
+   * mechanisms for one effect. `starBrightness` remains, for the deliberately
+   * unphysical boost the settings offer.
    */
-  update(eph, exposure) {
+  update(eph, local) {
     /* The star field is fixed in J2000; rotate it into the body frame. */
     if (this.stars) {
       const M = eph.bodyFromJ2000;
@@ -273,6 +282,14 @@ export class Sky {
     this.sun.material.uniforms.uIntensity.value = 1;
 
     if (this.earth) {
+      /* The far side never sees the Earth. The sky is drawn in its own pass
+         with no terrain to occlude it, so this has to be said rather than left
+         to depth: from beyond a hundred degrees of the mean sub-Earth point,
+         libration never brings it up, and standing there and seeing it hanging
+         in the sky would be the single most obviously wrong thing the game
+         could show. Below the horizon but not on the far side is a different
+         case and is left to the terrain, which is genuinely in the way. */
+      this.earth.mesh.visible = !(local && local.farSide);
       const ed = eph.earthDir;
       const dist = SKY_RADIUS * 0.4;
       const radius = dist * Math.tan(eph.earthAngularRadius * Math.PI / 180);

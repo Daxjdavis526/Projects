@@ -35,7 +35,8 @@ export class Save {
       simMs: state.simMs,
       timeRate: state.timeRate,
       quality: state.qualityName,
-      base: base ? { lat: base.lat, lon: base.lon, heading: base.heading } : null,
+      base: base ? { lat: base.lat, lon: base.lon, heading: base.heading,
+                     cabinDust: base.cabinDust ?? 0 } : null,
       rover: vehicle ? {
         lat: vehicle.rover.lat, lon: vehicle.rover.lon, heading: vehicle.rover.heading,
         mode: vehicle.rover.mode, canopy: vehicle.rover.canopy,
@@ -52,7 +53,7 @@ export class Save {
       suit: eva ? {
         o2: eva.suit.o2, o2Reserve: eva.suit.o2Reserve, co2: eva.suit.co2,
         power: eva.suit.power, water: eva.suit.water, elapsed: eva.suit.elapsed,
-        mode: eva.suit.mode,
+        mode: eva.suit.mode, dust: eva.suit.dust,
       } : null,
       driving: !!game.driving,
       needs: shelter ? {
@@ -71,7 +72,13 @@ export class Save {
     const { state } = game;
     state.simMs = data.simMs;
     state.timeRate = data.timeRate ?? 1;
-    if (data.base) game.settle(data.base.lat, data.base.lon, data.base.heading);
+    if (data.base) {
+      game.settle(data.base.lat, data.base.lon, data.base.heading);
+      /* After `settle`, which is what builds the ship. */
+      if (game.base && game.base.interior) {
+        game.base.interior.cabinDust = data.base.cabinDust || 0;
+      }
+    }
     if (data.rover && game.vehicle) {
       const r = game.vehicle.rover;
       r.place(data.rover.lat, data.rover.lon, data.rover.heading);

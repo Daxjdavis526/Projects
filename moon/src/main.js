@@ -282,6 +282,17 @@ async function start() {
     el: el('shelter'),
     onRest: (hours, what) => {
       if (what === 'eat') { shelter.needs.eat(); sound.beep('confirm'); return; }
+      /* The vacuum point in the vestibule. The ship has had the hose, the brush
+         and the tray under the grating modelled since it was built, and nothing
+         behind them; this is the chore they were built for. */
+      if (what === 'clean' && eva) {
+        const was = eva.suit.dust;
+        eva.suit.clean();
+        sound.beep(was > 0.02 ? 'confirm' : 'deny');
+        say(was > 0.02 ? 'suit vacuumed; the tray goes out with the rubbish'
+                       : 'nothing much to clean off', 3500);
+        return;
+      }
       if (what === 'resupply' && vehicle) {
         vehicle.rover.restock(); vehicle.dust = 0;
         sound.beep('confirm');
@@ -636,10 +647,14 @@ async function start() {
         say('airlock cycling to vacuum', 4000);
       } else if (base.canEnter(p.lat, p.lon, p.h)) {
         base.cycleAirlock(1);
+        /* Whatever is on the suit comes through the hatch with you. */
+        base.admit(eva.suit);
         const inn = base.insideStand();
         eva.place(inn.lat, inn.lon, inn.agl);
         sound.beep('confirm');
-        say('airlock repressurising', 4000);
+        say(eva.suit.dust > 0.3
+          ? 'airlock repressurising · you are bringing the Moon in with you'
+          : 'airlock repressurising', 4500);
       } else {
         sound.beep('deny');
         say('no hatch within reach', 2000);
@@ -716,6 +731,7 @@ async function start() {
     state,
     get: {
       eva: () => eva, streams: () => streams, historic: () => historic,
+      sky: () => sky,
       cache: () => window.SELENE_CACHE || null,
     },
     onQuality: (q) => {
@@ -835,7 +851,7 @@ async function start() {
     }, ready ? dt : 1e6);
     exposure.bias = photo.bias;
     stage.setExposure(ev);
-    sky.update(eph, ev);
+    sky.update(eph, local);
 
     /* --- move ------------------------------------------------------------- */
     /* Two ways of being here. On foot, physics/player.js decides where the body
@@ -1024,13 +1040,45 @@ async function start() {
       llhToXyz(r.lat, r.lon, (r.meanGround ?? cam.alt), p);
       /* A rooster tail comes off the wheels, and it comes off hardest when they
          are sliding, which is what the Apollo crews found the moment they
-         tried to corner. */
+         tried to corner.
+
+         It has to be thrown, not sprayed. This used to be an isotropic cone
+         from the vehicle's centre — the burst API has taken a `forward` and a
+         `bias` since it was written and nothing ever passed them — so the
+         rover drove inside a symmetrical puff rather than trailing anything.
+         What the LRV film actually shows is regolith leaving the tread near
+         the top of the contact patch and arcing up and back, in two fans
+         behind the rear wheels, which is what this is now. */
       const hard = r.sliding || r.slipping || r.boost;
-      dust.burst({
-        at: { x: p.x - o.x, y: p.y - o.y, z: p.z - o.z }, up: b.u,
-        count: hard ? 12 : 5, speed: 1.0 + Math.abs(r.speed) * 0.5,
-        angle: 34, spread: 0.8, size: 15,
-      });
+      const hd = r.heading * Math.PI / 180;
+      const sh = Math.sin(hd), ch = Math.cos(hd);
+      /* Forward in world coordinates: north at heading zero, east at ninety. */
+      const fx = b.e.x * sh + b.n.x * ch;
+      const fy = b.e.y * sh + b.n.y * ch;
+      const fz = b.e.z * sh + b.n.z * ch;
+      /* Backwards for a forward run, forwards in reverse: the throw always
+         opposes the direction of travel because that is where the tread is
+         flinging it. */
+      const sign = r.speed >= 0 ? -1 : 1;
+      const back = { x: fx * sign, y: fy * sign, z: fz * sign };
+      /* From the rear axle rather than the middle of the vehicle, and from
+         both sides of it. */
+      const axle = ROVER.wheelBase * 0.5 * sign;
+      const halfTrack = ROVER.track * 0.5;
+      const ex = b.e.x * ch - b.n.x * sh;
+      const ey = b.e.y * ch - b.n.y * sh;
+      const ez = b.e.z * ch - b.n.z * sh;
+      for (const side of [-1, 1]) {
+        dust.burst({
+          at: { x: p.x - o.x + fx * axle + ex * halfTrack * side,
+                y: p.y - o.y + fy * axle + ey * halfTrack * side,
+                z: p.z - o.z + fz * axle + ez * halfTrack * side },
+          up: b.u,
+          count: hard ? 7 : 3, speed: 1.0 + Math.abs(r.speed) * 0.5,
+          angle: 34, spread: 0.8, size: 15,
+          forward: back, bias: hard ? 0.8 : 0.55,
+        });
+      }
     }
     if (descent && descent.dust > 0.02) {
       const o = stage.origin.origin;
@@ -1060,6 +1108,8 @@ async function start() {
         sunEl: local.sunEl,
         nextSunrise: local.sunEl > 0 ? null : hoursUntilSunElevation(
           skyAt, ephemerisAt, jdFromUnixMs, state.simMs, cam.lat, cam.lon, 0, true),
+        suitDust: eva ? eva.suit.dust : undefined,
+        cabinDust: sheltered === 'ship' && base ? base.describeDust() : null,
       } : null);
     }
 

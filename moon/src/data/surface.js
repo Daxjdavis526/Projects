@@ -43,7 +43,6 @@ export class SurfaceStreamer {
     }));
     this.imagery = { bounds: null, busy: false, level: -1, source: null,
                      res_m: null, key: null, atBest: false, lastError: null };
-    this.enabled = streams.enabled;
     this.lastImageryAt = 0;
   }
 
@@ -60,7 +59,11 @@ export class SurfaceStreamer {
    * @param {number} lat @param {number} lon @param {number} alt metres above ground
    */
   update(lat, lon, alt) {
-    if (!this.enabled || !this.streams.enabled) return;
+    /* Read live rather than captured. This used to hold its own copy taken at
+       construction, so the settings toggle was one-way: a session started with
+       ?offline=1 could be switched to "on" and nothing would ever be fetched,
+       because the copy said no and the copy was never written again. */
+    if (!this.streams.enabled) return;
 
     for (const ring of this.rings) {
       if (alt > ring.maxAlt || ring.busy) continue;

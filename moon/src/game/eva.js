@@ -196,11 +196,20 @@ export class EVA {
     }
 
     /* Life support runs on simulated time, which may be running fast. */
+    /* Whether you are actually on the regolith, which is what dirties a suit:
+       standing on a ship's deck or riding in the rover does not. */
+    const onFoot = p.grounded && !env.inShelter &&
+      !(this.base && this.base.floorAt(p.llh.lat, p.llh.lon, p.llh.h) !== null);
+    const fell = p.lastImpact > 0 && p.lastImpact !== this._lastImpactSeen;
+    this._lastImpactSeen = p.lastImpact;
     this.suit.step(dt * (env.timeScale ?? 1), {
       exertion: p.exertion,
       sunlit: env.sunlit !== false,
       lights: this.lampMode > 0,
       inShelter: env.inShelter,
+      onFoot,
+      /* A hard arrival puts your knees and gloves in it. */
+      fell: fell && p.lastImpact > 4,
     });
     return this;
   }
@@ -290,6 +299,13 @@ export class EVA {
       gait: p.gait, speed: p.speed, stepPhase: p.stepPhase, grounded: p.grounded,
       jetOn: p.jetOn, exertion: p.exertion, dt,
     });
+    /* What the Moon has done to the suit, on the suit. Only when it has moved
+       enough to see: this touches material colours, and doing that every frame
+       for a hundredth of a shade is work for nothing. */
+    if (this.model.setDust && Math.abs(this.suit.dust - (this._shownDust ?? -1)) > 0.01) {
+      this._shownDust = this.suit.dust;
+      this.model.setDust(this.suit.dust);
+    }
   }
 
   snapshot() {

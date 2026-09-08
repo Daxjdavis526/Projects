@@ -118,8 +118,11 @@ export class Base {
   canEnter(lat, lon, alt) { return this.interior.canEnter(lat, lon, alt); }
   canExit(lat, lon, alt) { return this.interior.canExit(lat, lon, alt); }
   cycleAirlock(toward) { this.interior.cycleAirlock(toward); }
+  admit(suit) { this.interior.admit(suit); }
+  describeDust() { return this.interior.describeDust(); }
   get airlock() { return this.interior.airlock; }
   get pressure() { return this.interior.pressure; }
+  get cabinDust() { return this.interior.cabinDust; }
 
   step(dt, playerLlh) {
     this.interior.step(dt);
@@ -137,6 +140,7 @@ export class Base {
       lat: this.lat, lon: this.lon, heading: this.heading,
       airlock: this.airlock, pressure: inside ? this.pressure : 0,
       inside, interiorLevel: this.interiorLevel,
+      cabinDust: this.cabinDust, dustNote: this.describeDust(),
       range: playerLlh ? surfaceDistance(playerLlh.lat, playerLlh.lon, this.lat, this.lon) : Infinity,
     };
   }

@@ -78,6 +78,8 @@ canvas{display:block;position:fixed;inset:0}
 #help .k{min-width:74px;color:var(--warm)}
 
 #hint{bottom:14px;right:14px;color:var(--dim);font-size:10px;letter-spacing:.08em}
+#shelter .dust{margin-top:7px;color:var(--faint);font-size:9.5px;
+  letter-spacing:.05em;white-space:normal;line-height:1.5}
 
 /* ---- the suit ---- */
 /* Bottom centre, because it is the thing you glance at, and because the corners
@@ -412,7 +414,7 @@ canvas{display:block;position:fixed;inset:0}
       <div class="g" id="g-prs"><div class="lab"><span>press</span><b>—</b></div><div class="bar"><i></i></div></div>
     </div>
     <div class="state">
-      <span id="v-gait">—</span><span id="v-lamps">—</span><span id="v-jet">—</span>
+      <span id="v-gait">—</span><span id="v-lamps">—</span><span id="v-jet">—</span><span id="v-dust"></span>
     </div>
     <!-- Said on the screen rather than only in a comment. Every capacity above
          is a plausible near-future design, not a flown one: the Moon is
@@ -438,6 +440,11 @@ canvas{display:block;position:fixed;inset:0}
     <div class="set">
       <span class="k">Site markers<small>off by default, and meant to be</small></span>
       <span class="opts" id="set-markers"></span>
+    </div>
+    <div class="set">
+      <span class="k">Star exposure<small>physical is what a camera metered
+        for the ground would record; boosted is not</small></span>
+      <span class="opts" id="set-stars"></span>
     </div>
     <div class="set">
       <span class="k">Cache<small id="set-cache-status">—</small></span>
@@ -507,7 +514,9 @@ canvas{display:block;position:fixed;inset:0}
       <div class="btns">
         <button data-do="resupply">restock the rover</button>
         <button data-do="recharge">recharge the suit</button>
+        <button data-do="clean">vacuum the suit</button>
       </div>
+      <div class="dust" id="sh-dust">—</div>
     </div>
   </div>
 

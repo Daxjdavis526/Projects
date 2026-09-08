@@ -329,9 +329,9 @@ Also not in this version, and worth naming because the data for it is already
 in the repository: the coarse levels of the vendored LOLA pyramid are built and
 shipped but never loaded. Level 1 is 1.5 MB against level 3's 21 MB and would
 be enough to draw the globe while the rest arrives, which is the progressive
-DEM load the loader is shaped for and does not do. Dust accumulates on the
-rover and not yet on boots, suit or carried equipment, which the Apollo record
-is emphatic about. The GRAIL Bouguer anomaly is registered and not queried.
+DEM load the loader is shaped for and does not do. The GRAIL Bouguer anomaly is
+registered and not queried. Carried equipment does not accumulate dust, though
+the suit and the rover do.
 
 There are no quests and there will not be any. The Moon is the content.
 

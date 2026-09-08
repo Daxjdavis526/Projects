@@ -139,5 +139,16 @@ export class Shelter {
       : '';
     const resupply = el('sh-resupply');
     if (resupply) resupply.style.display = where === 'ship' ? '' : 'none';
+    /* What the Moon has done to the inside of the ship, and to your suit. In
+       words: a dust bar would be a game mechanic, and this is a chore. */
+    if (el('sh-dust') && info) {
+      const suit = info.suitDust !== undefined
+        ? (info.suitDust < 0.05 ? 'the suit is clean'
+          : info.suitDust < 0.3 ? 'grey to the knees'
+          : info.suitDust < 0.6 ? 'grey to the waist, and in the gloves'
+          : 'coated; the seals are grinding')
+        : null;
+      el('sh-dust').textContent = [suit, info.cabinDust].filter(Boolean).join(' · ');
+    }
   }
 }

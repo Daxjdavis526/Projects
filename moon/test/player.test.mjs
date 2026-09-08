@@ -83,6 +83,60 @@ console.log('jumping');
     hang.toFixed(2) + ' s');
 }
 
+console.log('there is nothing to push against');
+{
+  /* A bound with the keys released. In a vacuum the only thing that may touch
+     the horizontal velocity is gravity, which is vertical, so it must come out
+     the far end exactly as fast as it went up. This used to lose about eight
+     per cent of it: the "ask to stop" branch applied the air-control
+     deceleration in flight as well as on the ground, which is a retarding force
+     with no source. */
+  const p = new Player({ lat: 0, lon: 0, ground: flat });
+  run(p, 3, { forward: 1 });                       // up to speed
+  const launch = p.speed;
+  p.step(1 / 480, { forward: 1, jump: true });
+  let flightMin = Infinity, flightMax = 0, airborneSteps = 0, started = false;
+  for (let i = 0; i < 480 * 3; i++) {
+    p.step(1 / 480, {});                            // keys released
+    /* The first continuous stretch in the air only: landing scrubs speed, and
+       a lope bounces, so a later hop would be measured against a slower body. */
+    if (!p.grounded) {
+      started = true;
+      airborneSteps++;
+      flightMin = Math.min(flightMin, p.speed);
+      flightMax = Math.max(flightMax, p.speed);
+    } else if (started) break;
+  }
+  check('the bound actually leaves the ground', airborneSteps > 200,
+        airborneSteps + ' substeps in the air');
+  check('and horizontal speed is conserved through it',
+        flightMax - flightMin < 1e-6,
+        `${flightMin.toFixed(6)} to ${flightMax.toFixed(6)} m/s, from ${launch.toFixed(3)}`);
+}
+
+console.log('the jetpack can stop you, because thrust can');
+{
+  const p = new Player({ lat: 0, lon: 0, ground: flat });
+  run(p, 3, { forward: 1 });
+  p.step(1 / 480, { forward: 1, jump: true });
+  for (let i = 0; i < 240; i++) p.step(1 / 480, {});    // clear of the ground
+  const before = p.speed;
+  check('it is moving to start with', before > 1.5, before.toFixed(2) + ' m/s');
+  /* Jet with no directional input: the pack thrusts against the motion. */
+  for (let i = 0; i < 480; i++) p.step(1 / 480, { jet: true });
+  check('holding the pack with no input arrests the drift',
+        p.speed < before * 0.5, `${before.toFixed(2)} -> ${p.speed.toFixed(2)} m/s`);
+  check('and never reverses it', p.speed >= -1e-9);
+
+  /* On the ground it is still a jump assist and not a brake, because on the
+     ground your boots are the brake. */
+  const q = new Player({ lat: 0, lon: 0, ground: flat });
+  run(q, 3, { forward: 1 });
+  const walking = q.speed;
+  q.step(1 / 480, { forward: 1, jet: true });
+  check('a standing start with the pack still goes up', q.agl >= 0 && walking > 0.5);
+}
+
 console.log('gaits');
 {
   check('walking gives way to loping below a metre per second',

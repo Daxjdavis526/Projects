@@ -191,7 +191,16 @@ export class Player {
 
     const speed = Math.hypot(hx, hy, hz);
     let ax = wish.x / wl * target - hx, ay = wish.y / wl * target - hy, az = wish.z / wl * target - hz;
-    if (want < 0.01) { ax = -hx; ay = -hy; az = -hz; }        // ask to stop
+    /* Asking to stop is a thing a boot does. Letting go of the keys in flight
+       used to apply the same deceleration through `airControl`, which took
+       about eight per cent off the horizontal speed of a two-second bound: a
+       retarding force in a vacuum, with nothing to push against and no source.
+       In the air with no input, the only thing that changes your velocity is
+       gravity — and the jetpack, below, which is thrust and is allowed to. */
+    if (want < 0.01) {
+      if (!this.grounded) { ax = 0; ay = 0; az = 0; }
+      else { ax = -hx; ay = -hy; az = -hz; }
+    }
     const need = Math.hypot(ax, ay, az);
     if (need > 1e-6) {
       const k = Math.min(1, maxAccel * dt / need);
@@ -269,6 +278,19 @@ export class Player {
       vUp += a * 0.82;
       if (want > 0.01) {
         hx += wish.x / wl * a * 0.4; hy += wish.y / wl * a * 0.4; hz += wish.z / wl * a * 0.4;
+      } else if (!wasGrounded) {
+        /* Attitude control, which the brief asked for and which was the one
+           thing the pack could not do: thrust against the way you are already
+           going. This is the only honest way to stop in a vacuum, and it is
+           what makes the pack a manoeuvring unit rather than a jump button —
+           a bad bound is recoverable in the air rather than only survivable on
+           landing. Never more than the speed itself, so it arrests and does
+           not reverse. */
+        const hs = Math.hypot(hx, hy, hz);
+        if (hs > 1e-4) {
+          const k = Math.min(1, a * 0.4 / hs);
+          hx -= hx * k; hy -= hy * k; hz -= hz * k;
+        }
       }
       this.grounded = false;
     } else {

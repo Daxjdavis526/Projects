@@ -524,6 +524,22 @@ export function buildAstronaut(opts = {}) {
   const D = Q.detail;
   const shadows = opts.shadows !== false;
   const mats = makeMaterials(opts.accent ?? 0xb1462c);
+  /* --- dust ----------------------------------------------------------------
+     Apollo crews came back dirty from the knees down and grey to the waist by
+     the third EVA, and it did not brush off: the grains are sharp, angular and
+     electrostatically charged, so they work into the weave rather than sitting
+     on it. So the shin and the boot get their own copy of the materials array
+     and `setDust` tints that one; everything above the knee keeps the clean
+     originals. Tinting rather than texturing, because at any distance the whole
+     visible effect is that the white stops being white. */
+  const dustMats = mats.slice();
+  const DUSTED = [M_FABRIC, M_JOINT, M_ACCENT];
+  const dusted = [];
+  for (const i of DUSTED) {
+    dustMats[i] = mats[i].clone();
+    dusted.push({ mat: dustMats[i], from: mats[i].color.getHex(),
+                  rough: mats[i].roughness });
+  }
 
   /* --- skeleton -----------------------------------------------------------
      Three joints down each arm and each leg, and four nodes up the middle.
@@ -554,14 +570,14 @@ export function buildAstronaut(opts = {}) {
     const fore = pivot(arm, s * SHLD_X, ELBOW_Y, -0.010);
     const hand = pivot(fore, s * SHLD_X, WRIST_Y, -0.010);
     hand.rotation.x = 0.14;      // the glove rests slightly flexed, always
-    const build = (n, ox, oy, oz, fn) => {
+    const build = (n, ox, oy, oz, fn, m) => {
       const g = part(ox, oy, oz);
       fn(g, Q, D, s);
-      attach(n, g, mats, shadows);
+      attach(n, g, m || mats, shadows);
     };
     build(leg,  s * HIP_X,  HIP_Y,   0,      buildThigh);
-    build(shin, s * HIP_X,  KNEE_Y,  0,      buildShin);
-    build(foot, s * HIP_X,  ANKLE_Y, 0,      buildBoot);
+    build(shin, s * HIP_X,  KNEE_Y,  0,      buildShin, dustMats);
+    build(foot, s * HIP_X,  ANKLE_Y, 0,      buildBoot, dustMats);
     build(arm,  s * SHLD_X, SHLD_Y,  -0.010, buildUpperArm);
     build(fore, s * SHLD_X, ELBOW_Y, -0.010, buildForearm);
     build(hand, s * SHLD_X, WRIST_Y, -0.010, buildGlove);
@@ -936,6 +952,7 @@ export function buildAstronaut(opts = {}) {
   function dispose() {
     group.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
     for (let i = 0; i < mats.length; i++) if (mats[i]) mats[i].dispose();
+    for (const d of dusted) d.mat.dispose();
     if (group.parent) group.parent.remove(group);
   }
 
@@ -948,6 +965,25 @@ export function buildAstronaut(opts = {}) {
   for (let i = 0; i < 5; i++) animate(settle);
   time = 0;
 
-  return { group, animate, setHelmetLights, setVisor, dispose, head, lampAnchor,
+  /* The colour of it. Apollo photographs put lunar dust on a white suit
+     somewhere between charcoal and khaki depending on the sun angle; this is
+     the middle of that. */
+  const DUST_COLOUR = 0x6b6055;
+  const _c = new THREE.Color();
+  /**
+   * @param {number} x areal dust coverage, 0 to 1, from Suit.dust
+   */
+  function setDust(x) {
+    const t = Math.max(0, Math.min(1, x)) * 0.8;       // never quite opaque
+    for (const d of dusted) {
+      d.mat.color.setHex(d.from).lerp(_c.setHex(DUST_COLOUR), t);
+      /* Dust also kills the sheen: a coated surface is rougher than the cloth
+         under it, which is why a dirty suit photographs flat. */
+      d.mat.roughness = Math.min(1, d.rough + 0.12 * t);
+    }
+  }
+  setDust(0);
+
+  return { group, animate, setHelmetLights, setVisor, setDust, dispose, head, lampAnchor,
            materials: mats, triangles };
 }

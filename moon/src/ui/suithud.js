@@ -85,6 +85,16 @@ export class SuitHud {
       : s.lamps === 1 ? 'lamps: flood + head' : 'lamps: all three';
     el('v-jet').textContent = p.jetHeat > 0.02
       ? `pack ${(p.jetHeat * 100).toFixed(0)} % hot` : `${(p.distance / 1000).toFixed(2)} km walked`;
+    /* Dust, once there is enough of it to matter. It appears rather than
+       occupying a slot permanently, because a clean suit has nothing to say
+       and this display is meant to be glanced at. What it costs is real —
+       a coated suit boils feedwater faster in sunlight — so it belongs next
+       to the things that decide how long you can stay out. */
+    if (el('v-dust')) {
+      const d = suit.dust ?? 0;
+      el('v-dust').textContent = d < 0.12 ? ''
+        : d < 0.4 ? 'dusty' : d < 0.7 ? 'dust: heavy' : 'dust: coated';
+    }
 
     const text = suit.warnings.map(w => `<div class="${w.level}">${w.text}</div>`).join('');
     if (text !== this.lastWarnings) { this.warnings.innerHTML = text; this.lastWarnings = text; }

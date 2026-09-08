@@ -46,6 +46,39 @@ export class ShipInterior {
     this.airlock = 1;            // 1 = open to the cabin, 0 = open to vacuum
     this.airlockTarget = 1;
     this.pressure = 1;
+    /* How much of the Moon is inside the ship. Gaier 2005 lists coating and
+       contamination among nine categories of Apollo dust problem, and the crews
+       who came back through a hatch with dusty suits found it on everything for
+       the rest of the mission — the vestibule, the grating and the vacuum point
+       in models/ship.js were all built for this and nothing simulated it.
+
+       It is a number on a panel and a chore, not a penalty: nothing here harms
+       anyone, because being nagged is not what the brief asked for. What it
+       does is make coming inside filthy a thing you can see the consequence
+       of, which is the honest version. */
+    this.cabinDust = 0;
+  }
+
+  /**
+   * Coming in through the hatch. Whatever is on the suit comes with it — most
+   * of it stays in the vestibule, which is what the vestibule is for, and the
+   * rest goes into the ship.
+   * @param {object} suit the Suit being brought aboard
+   */
+  admit(suit) {
+    const brought = suit && Number.isFinite(suit.dust) ? suit.dust : 0;
+    this.cabinDust = Math.min(1, this.cabinDust + brought * 0.22);
+    return this;
+  }
+
+  /** In words, because a dust bar would be worse than useless. */
+  describeDust() {
+    const c = this.cabinDust;
+    return c < 0.08 ? 'the cabin is clean'
+      : c < 0.25 ? 'a little grit underfoot'
+      : c < 0.5 ? 'dust on every surface'
+      : c < 0.75 ? 'grey film on the walls and the screens'
+      : 'everything in here is the colour of the Moon';
   }
 
   /** Geographic position to hull coordinates. */
@@ -170,6 +203,12 @@ export class ShipInterior {
       this.airlock = Math.max(this.airlockTarget, this.airlock - rate);
     }
     this.pressure = Math.max(0, Math.min(1, this.airlock));
+    /* Filters and the tray under the grating, slowly. A full cabin takes about
+       a lunar day to come back to clean on its own, which is roughly what the
+       crews reported: it does not go away, it wears away. */
+    if (this.cabinDust > 0) {
+      this.cabinDust = Math.max(0, this.cabinDust - dt / (29.5 * 86400));
+    }
     return this;
   }
 }

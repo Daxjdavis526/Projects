@@ -13,6 +13,7 @@ import { Save } from '../src/game/save.js';
 import { Visited } from '../src/game/visited.js';
 import { Needs } from '../src/game/shelter.js';
 import { Rover, MODE } from '../src/physics/rover.js';
+import { ShipInterior } from '../src/game/interior.js';
 import { Suit } from '../src/physics/suit.js';
 
 let failures = 0;
@@ -46,7 +47,11 @@ function makeGame() {
     driving: false,
     get waypoints() { return wps; },
     set waypoints(v) { wps.length = 0; wps.push(...(v || [])); },
-    settle(lat, lon, heading) { this.base = { lat, lon, heading }; },
+    settle(lat, lon, heading) {
+      const interior = new ShipInterior({ lat, lon, heading, groundHeight: -1900 });
+      this.base = { lat, lon, heading, interior,
+                    get cabinDust() { return interior.cabinDust; } };
+    },
   };
   return game;
 }
@@ -79,6 +84,8 @@ function dirty(g) {
   g.eva.suit.co2 = 0.18;
   g.eva.suit.power = 0.55;
   g.eva.suit.elapsed = 7200;
+  g.eva.suit.dust = 0.44;
+  g.base.interior.cabinDust = 0.31;
   g.shelter.needs.sinceMeal = 5 * 3600;
   g.shelter.needs.sinceSleep = 19 * 3600;
   g.shelter.needs.sleepDebt = 1800;
@@ -145,6 +152,8 @@ console.log('the fields that were written and never read');
   check('a rolled rover is still rolled', fresh.vehicle.rover.rolled === true);
   check('the boost is still hot', Math.abs(fresh.vehicle.rover.boostHeat - 0.42) < 1e-9);
   check('the jetpack is still hot', Math.abs(fresh.eva.player.jetHeat - 0.66) < 1e-9);
+  check('the suit is still dirty', Math.abs(fresh.eva.suit.dust - 0.44) < 1e-9);
+  check('and so is the cabin', Math.abs(fresh.base.cabinDust - 0.31) < 1e-9);
 }
 
 console.log('and it refuses what it does not recognise');

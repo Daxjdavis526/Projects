@@ -136,5 +136,53 @@ console.log('snapshot');
     check(`snapshot carries ${k}`, snap[k] !== undefined);
 }
 
+console.log('dust, which is a thermal problem before it is anything else');
+{
+  /* Gaier 2005: eleven per cent areal coverage doubles a radiator's solar
+     absorptance. A dirty suit in sunlight has more heat to dump and the
+     sublimator boils more water to dump it — and in shadow it costs nothing,
+     because there is no sunlight to absorb. */
+  const s = new Suit();
+  check('a suit starts clean', s.dust === 0);
+
+  for (let i = 0; i < 3 * 3600; i++) s.step(1, { onFoot: true, exertion: 0.5, sunlit: true });
+  check('three hours on the regolith coats the lower suit',
+        s.dust > 0.6 && s.dust <= 1, s.dust.toFixed(2));
+
+  const dirty = new Suit(); dirty.dust = 1;
+  const clean = new Suit();
+  const wetDirty = dirty.rates(0.35, true).water, wetClean = clean.rates(0.35, true).water;
+  check('a coated suit boils more feedwater in the sun',
+        wetDirty > wetClean * 1.3 && wetDirty < wetClean * 1.5,
+        `${wetClean.toFixed(3)} -> ${wetDirty.toFixed(3)} kg/h`);
+  check('and exactly as much as a clean one in shadow',
+        Math.abs(dirty.rates(0.35, false).water - clean.rates(0.35, false).water) < 1e-12);
+  check('so a coated suit has a shorter day in the sun',
+        dirty.endurance(0.35, true) < clean.endurance(0.35, true) * 0.995,
+        `${(dirty.endurance(0.35, true) / 3600).toFixed(2)} h vs ` +
+        `${(clean.endurance(0.35, true) / 3600).toFixed(2)} h`);
+  check('but never a dangerously shorter one',
+        dirty.endurance(0.35, true) > clean.endurance(0.35, true) * 0.7);
+
+  const inside = new Suit();
+  for (let i = 0; i < 3600; i++) inside.step(1, { onFoot: false, exertion: 0.5 });
+  check('riding in the rover does not dirty anything', inside.dust === 0);
+
+  const fell = new Suit();
+  fell.step(1, { onFoot: true, fell: true });
+  check('going over puts your knees in it', fell.dust > 0.1, fell.dust.toFixed(3));
+
+  const washed = new Suit(); washed.dust = 0.9;
+  washed.clean();
+  check('the vestibule vacuum gets most of it off', washed.dust < 0.1,
+        washed.dust.toFixed(3));
+  check('and never below nothing', washed.dust >= 0);
+  const spotless = new Suit(); spotless.dust = 0.5;
+  spotless.recharge();
+  check('a recharge does not clean anything, because a tank of oxygen would not',
+        spotless.dust === 0.5);
+  check('and it is carried in the snapshot', new Suit().snapshot().dust === 0);
+}
+
 console.log(failures ? `\nsuit: ${failures} FAILED` : '\nsuit: all checks passed');
 process.exit(failures ? 1 : 0);
