@@ -33,7 +33,7 @@ import { Cache } from './data/cache.js';
 import { SurfaceStreamer } from './data/surface.js';
 import { TemperatureMap } from './data/temperature.js';
 import { GravityMap } from './data/gravity.js';
-import { EVA } from './game/eva.js';
+import { EVA, VIEW } from './game/eva.js';
 import { Descent } from './game/descent.js';
 import { Base } from './game/base.js';
 import { Vehicle } from './game/vehicle.js';
@@ -41,6 +41,9 @@ import { HistoricSites } from './game/historic.js';
 import { Shelter, hoursUntilSunElevation } from './game/shelter.js';
 import { Visited } from './game/visited.js';
 import { Track } from './game/track.js';
+import { Achievements } from './game/achievements.js';
+import { Gamepads } from './game/gamepad.js';
+import { Tracks } from './render/tracks.js';
 import { Moment } from './game/moment.js';
 import { clearLanding, standClearOf, explain as explainKeepOut } from './game/keepout.js';
 import { SuitHud } from './ui/suithud.js';
@@ -229,8 +232,19 @@ async function start() {
   /* The astronaut is only needed in third person, and the page must still run
      if the module is missing, so it is imported on the side. */
   /* Declared before the dynamic imports below, because those resolve on their
-     own schedule and one of them will land before this line otherwise. */
+     own schedule and one of them will land before this line otherwise.
+
+     `eva` belongs here for exactly the same reason and was three hundred lines
+     further down, which was a latent crash rather than a safe ordering: there
+     are awaits between this line and its old declaration, and an import that
+     resolves during one of them reaches `if (eva)` while `eva` is still in the
+     temporal dead zone. It threw "Cannot access 'eva' before initialization",
+     the catch turned that into "astronaut model unavailable", and the game
+     then ran with no astronaut in third person — a real failure reported as a
+     graceful degradation, which is the shape of bug this project has been
+     digging out all week. */
   let base = null, vehicle = null;
+  let eva = null;
   let astronaut = null, shipModel = null, roverModel = null;
   const modelQuality = state.qualityName === 'science' ? 'balanced' : state.qualityName;
   import('./models/astronaut.js')
@@ -277,7 +291,10 @@ async function start() {
   const photo = new Photo();
   const moment = new Moment();
   /* Where the rover has been, which the console draws and the save keeps. */
+  /* Two lines: what the wheels left and what the boots left. There is no wind
+     here to take them away, so they do not go away. */
   const track = new Track();
+  const bootTrack = new Track();
   const nav = new Nav({ waypoints: [], track, heightfield });
   /* Eating, sleeping, and waiting for the Sun, which on a body with a
      29 and a half day rotation is a real thing to want to do. */
@@ -378,7 +395,7 @@ async function start() {
 
   /* On foot. Created only when the player steps outside; until then the free
      camera flies and `eva` is null. */
-  let eva = null, driving = false, canopyPress = false;
+  let driving = false, canopyPress = false;
   /* The places you have actually been inside. Nothing gates on it; it is
      the record of a run, and the brief is explicit that discovery is the
      content. It was a hardcoded empty array that nothing appended to and
@@ -406,6 +423,80 @@ async function start() {
       if (rate > worst) worst = rate;
     }
     return Math.min(1, worst / 3.5);
+  };
+
+  /* One implementation each for getting in and out of things, because the
+     keyboard and the pad both do them and two copies is how they diverge. */
+  const clamp1 = (v) => (v < -1 ? -1 : v > 1 ? 1 : v);
+
+  const boardToggle = () => {
+    if (!vehicle || !eva) return;
+    if (driving) {
+      driving = false;
+      const out = vehicle.dismountPoint();
+      eva.place(out.lat, out.lon, 0.1);
+      sound.beep('select');
+    } else if (vehicle.canBoard(eva.player.llh.lat, eva.player.llh.lon)) {
+      driving = true;
+      /* Face the way the vehicle is pointing rather than the way you happened
+         to be walking, or the first thing you see is its own bodywork. */
+      cam.yaw = vehicle.rover.heading * Math.PI / 180;
+      cam.pitch = -0.05;
+      sound.beep('select');
+    } else {
+      /* A control that does nothing and says nothing is indistinguishable
+         from one that is broken. */
+      sound.beep('deny');
+      say('too far from the rover', 2000);
+    }
+  };
+
+  const hatchToggle = () => {
+    if (!eva || !base || driving) return;
+    const p = eva.player.llh;
+    if (base.canExit(p.lat, p.lon, p.h)) {
+      base.cycleAirlock(0);
+      const f = base.ladderFoot();
+      eva.place(f.lat, f.lon, 0.1);
+      sound.beep('confirm');
+      say('airlock cycling to vacuum', 4000);
+    } else if (base.canEnter(p.lat, p.lon, p.h)) {
+      base.cycleAirlock(1);
+      /* Whatever is on the suit comes through the hatch with you. */
+      base.admit(eva.suit);
+      const inn = base.insideStand();
+      eva.place(inn.lat, inn.lon, inn.agl);
+      sound.beep('confirm');
+      say(eva.suit.dust > 0.3
+        ? 'airlock repressurising · you are bringing the Moon in with you'
+        : 'airlock repressurising', 4500);
+    } else {
+      sound.beep('deny');
+      say('no hatch within reach', 2000);
+    }
+  };
+
+  /* The log panel. Rebuilt only when it changes or when it is opened, because
+     nothing about it needs to be live. */
+  const renderLog = () => {
+    if (!el('log')) return;
+    const km = (m) => (m >= 1000 ? `${(m / 1000).toFixed(2)} km` : `${m.toFixed(0)} m`);
+    el('lg-walk').textContent = eva ? km(eva.player.distance) : '—';
+    el('lg-drive').textContent = vehicle ? km(vehicle.rover.distance) : '—';
+    const ex = achievements.extremes;
+    const line = (e, unit, dp) => (e
+      ? `<div class="e"><b>${e.value.toFixed(dp)}${unit}</b>` +
+        `<span>${e.note} · ${fmtLat(e.lat)} ${fmtLon(e.lon)}</span></div>`
+      : '');
+    el('lg-extremes').innerHTML =
+      line(ex.deepest, ' m', 0) + line(ex.highest, ' m', 0) +
+      line(ex.steepest, '°', 1) +
+      (ex.furthest ? `<div class="e"><b>${km(ex.furthest.value)}</b>` +
+        `<span>${ex.furthest.note}</span></div>` : '') ||
+      '<div class="none">nothing measured yet</div>';
+    el('lg-list').innerHTML = achievements.list().map(e =>
+      `<div class="e"><b>${e.title}</b>${e.note ? `<span>${e.note}</span>` : ''}</div>`
+    ).join('') || '<div class="none">nowhere yet</div>';
   };
 
   /* The bottom-right line, which is the game's whole notification budget. */
@@ -440,6 +531,12 @@ async function start() {
   try { names = await readJson(DATA, 'names.json'); }
   catch (e) { console.warn('nomenclature unavailable', e.message); }
 
+  /* The log: real places reached, not tasks completed. Nothing is gated on it
+     and nothing about it interrupts anything. Built here rather than with the
+     other game objects because it reads the gazetteer, which is loaded above
+     this line and not below it. */
+  const achievements = new Achievements({ sites, names });
+
   /* Reconstructions of the places people have already been. They are built
      only when you are close enough to see them and they carry no markers
      unless you ask for them. */
@@ -460,6 +557,8 @@ async function start() {
     onTime: (ms) => { state.simMs = ms; },
   });
   terrain.setOverlayMaps(geology, temperature);
+  /* The marks, drawn on the surface from the same recorders the nav map uses. */
+  const tracks = new Tracks(stage, heightfield);
 
   let mode = params.get('view') === 'orbit' || (!params.get('view') && !params.get('mode'))
     ? 'orbit' : 'surface';
@@ -525,7 +624,7 @@ async function start() {
   /* One object holding the live game, so the save system has something to read
      and write without reaching into closures. */
   const game = {
-    state, settle, visited, shelter, track,
+    state, settle, visited, shelter, track, bootTrack, achievements,
     get waypoints() { return nav.waypoints; },
     set waypoints(v) { nav.waypoints.length = 0; nav.waypoints.push(...(v || [])); },
     get base() { return base; },
@@ -563,12 +662,18 @@ async function start() {
        the player rather than on the camera or they are read back over. */
     if (params.get('yaw') !== null) eva.player.yaw = Number(params.get('yaw')) * Math.PI / 180;
     if (params.get('pitch') !== null) eva.player.pitch = Number(params.get('pitch')) * Math.PI / 180;
-    if (params.get('view3') === '1') eva.toggleView();
+    if (params.get('view3') === '1') eva.view = VIEW.THIRD;
+    if (params.get('helmet') === '1') eva.view = VIEW.HELMET;
     if (params.get('lamps')) eva.lampMode = Number(params.get('lamps'));
   }
 
   /* --- input --------------------------------------------------------------- */
   const keys = new Set();
+  /* A pad, if there is one. It produces the same two things the keyboard and
+     the mouse do — held directions and a look delta — and everything
+     downstream is unchanged, so the physics cannot tell which hand is on it. */
+  const pads = new Gamepads();
+  let pad = pads.read(0);
   addEventListener('keydown', (e) => {
     keys.add(e.code);
     if (e.code === 'KeyH') { state.showHelp = !state.showHelp; el('help').style.display = state.showHelp ? 'block' : 'none'; }
@@ -615,26 +720,7 @@ async function start() {
       say('rover righted', 2500);
       return;
     }
-    if (e.code === 'KeyR' && vehicle && eva) {
-      if (driving) {
-        driving = false;
-        const out = vehicle.dismountPoint();
-        eva.place(out.lat, out.lon, 0.1);
-        sound.beep('select');
-      } else if (vehicle.canBoard(eva.player.llh.lat, eva.player.llh.lon)) {
-        driving = true;
-        /* Face the way the vehicle is pointing rather than the way you happened
-           to be walking, or the first thing you see is its own bodywork. */
-        cam.yaw = vehicle.rover.heading * Math.PI / 180;
-        cam.pitch = -0.05;
-        sound.beep('select');
-      } else {
-        /* A key that does nothing and says nothing is indistinguishable from a
-           key that is broken. */
-        sound.beep('deny');
-        say('too far from the rover', 2000);
-      }
-    }
+    if (e.code === 'KeyR' && vehicle && eva) boardToggle();
     /* E goes in and out of the ship. There is no ladder-climbing physics and
        there should not be: what was asked for is a walkable interior and an
        airlock that means something, not a climbing minigame. The cycle it
@@ -642,29 +728,7 @@ async function start() {
        seconds and the sound follows it down, which is the whole demonstration
        the vacuum audio was built around and which nothing could trigger before
        this existed. */
-    if (e.code === 'KeyE' && eva && base && !driving) {
-      const p = eva.player.llh;
-      if (base.canExit(p.lat, p.lon, p.h)) {
-        base.cycleAirlock(0);
-        const f = base.ladderFoot();
-        eva.place(f.lat, f.lon, 0.1);
-        sound.beep('confirm');
-        say('airlock cycling to vacuum', 4000);
-      } else if (base.canEnter(p.lat, p.lon, p.h)) {
-        base.cycleAirlock(1);
-        /* Whatever is on the suit comes through the hatch with you. */
-        base.admit(eva.suit);
-        const inn = base.insideStand();
-        eva.place(inn.lat, inn.lon, inn.agl);
-        sound.beep('confirm');
-        say(eva.suit.dust > 0.3
-          ? 'airlock repressurising · you are bringing the Moon in with you'
-          : 'airlock repressurising', 4500);
-      } else {
-        sound.beep('deny');
-        say('no hatch within reach', 2000);
-      }
-    }
+    if (e.code === 'KeyE' && eva && base && !driving) hatchToggle();
     if (e.code === 'KeyC' && vehicle) canopyPress = true;
     if (e.code === 'KeyP') { photo.toggle(); sound.beep('select'); }
     /* Markers stay off unless you ask. Walking up to Tranquility Base and
@@ -675,6 +739,12 @@ async function start() {
       sound.beep('select');
     }
     if (e.code === 'KeyO') { settings.toggle(); sound.beep('select'); }
+    if (e.code === 'KeyK') {
+      state.showLog = !state.showLog;
+      el('log').classList.toggle('on', state.showLog);
+      if (state.showLog) renderLog();
+      sound.beep('select');
+    }
     if (photo.active) {
       if (e.code === 'BracketLeft') photo.zoom(-1);
       if (e.code === 'BracketRight') photo.zoom(1);
@@ -765,6 +835,22 @@ async function start() {
     last = now;
     fpsAcc += dt; fpsN++;
     if (fpsAcc > 0.5) { fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; }
+
+    /* Read the pad once a frame and fold its look into the same delta the
+       mouse writes, so everything after this is the same code either way. */
+    pad = pads.read(dt);
+    if (pad.connected) {
+      look.yaw += pad.lookYaw * Math.PI / 180;
+      look.pitch += pad.lookPitch * Math.PI / 180;
+      if (pad.pressed.has('view') && eva) eva.toggleView();
+      if (pad.pressed.has('lamps') && eva) eva.cycleLamps();
+      if (pad.pressed.has('board')) boardToggle();
+      if (pad.pressed.has('hatch')) hatchToggle();
+      if (pad.pressed.has('help')) {
+        state.showHelp = !state.showHelp;
+        el('help').style.display = state.showHelp ? 'block' : 'none';
+      }
+    }
 
     state.simMs += dt * 1000 * state.timeRate;
     const eph = ephemerisAt(jdFromUnixMs(state.simMs));
@@ -869,10 +955,13 @@ async function start() {
       cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
       vehicle.step(dt, {
-        throttle: (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0),
-        steer: (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0),
-        brake: keys.has('Space'),
-        boost: keys.has('ShiftLeft') || keys.has('ShiftRight'),
+        /* The stick is analogue where the physics takes an analogue value, so
+           easing along a rim at walking pace is something a pad can ask for
+           and a key cannot. */
+        throttle: clamp1((keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0) + pad.forward),
+        steer: clamp1((keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0) + pad.strafe),
+        brake: keys.has('Space') || pad.held.has('jump'),
+        boost: keys.has('ShiftLeft') || keys.has('ShiftRight') || pad.run,
         toggleCanopy: canopyPress,
       }, true);
       canopyPress = false;
@@ -900,11 +989,11 @@ async function start() {
       world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
     } else if (eva) {
       eva.step(dt, {
-        forward: (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0),
-        strafe: (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0),
-        run: keys.has('ShiftLeft') || keys.has('ShiftRight'),
-        jump: keys.has('Space'),
-        jet: keys.has('KeyJ'),
+        forward: clamp1((keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0) + pad.forward),
+        strafe: clamp1((keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0) + pad.strafe),
+        run: keys.has('ShiftLeft') || keys.has('ShiftRight') || pad.run,
+        jump: keys.has('Space') || pad.pressed.has('jump'),
+        jet: keys.has('KeyJ') || pad.held.has('jet'),
         dYaw: look.yaw, dPitch: look.pitch,
       }, {
         sunlit: local.sunEl > 0,
@@ -1024,6 +1113,22 @@ async function start() {
        a thin sheet outwards rather than a cloud upwards. */
     dust.update(dt, rebased ? stage.origin.lastShift : null);
     dust.setPixelScale(stage.renderer.domElement.height, stage.camera.fov);
+    /* Boot prints, recorded wherever you actually walk rather than only in the
+       rover. Both lines are drawn by the same ribbon. */
+    if (eva && !driving && eva.player.grounded) {
+      bootTrack.add(eva.player.llh.lat, eva.player.llh.lon);
+    }
+    if (mode === 'surface') {
+      /* The same geometry the terrain shader is handed, so the marks stay the
+         right amount darker than the ground as the Sun moves. */
+      const upDotSun = Math.sin(local.sunEl * Math.PI / 180);
+      tracks.setLight({
+        mu0: upDotSun, mu: Math.max(0.06, Math.sin(Math.max(0.05, -cam.pitch))),
+        phase: Math.acos(Math.max(-1, Math.min(1, upDotSun))),
+        albedo: albedoAt(geology, cam.lat, cam.lon),
+      });
+      tracks.update({ boots: bootTrack, wheels: track }, stage.origin.origin, cam);
+    }
     if (eva && !driving && eva.player.grounded) {
       const steps = eva.player.stepsTaken;
       if (steps !== lastSteps) {
@@ -1206,6 +1311,21 @@ async function start() {
         sound.beep('comms');
         save.write(game, 'arrived');
       }
+      /* And the log, which is the same question asked of the whole run. */
+      const won = achievements.step({
+        lat: cam.lat, lon: cam.lon, simMs: state.simMs,
+        elevation: surfaceH, slope: heightfield.slopeAt(cam.lat, cam.lon, 8),
+        walked: eva ? eva.player.distance : 0,
+        driven: vehicle ? vehicle.rover.distance : 0,
+        homeRange: base ? surfaceDistance(cam.lat, cam.lon, base.lat, base.lon) : 0,
+        nearestFeature: here,
+      });
+      if (won.length) {
+        say(won[won.length - 1].title, 5000);
+        sound.beep('comms');
+        renderLog();
+        save.write(game, 'reached');
+      }
     }
     nav.show(driving && !photo.active);
     if (driving && vehicle) {
@@ -1282,7 +1402,7 @@ async function start() {
     land(lat, lon) { land({ lat, lon }); },
     temperature,
     get astronaut() { return astronaut; },
-    game, save, visited,
+    game, save, visited, tracks,
     walk(lat, lon) { startEva(lat, lon); },
     goto(lat, lon, alt) { cam.lat = lat; cam.lon = lon; cam.alt = alt ?? cam.alt; },
     setTime(iso) { state.simMs = Date.parse(iso); },

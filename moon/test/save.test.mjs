@@ -15,6 +15,7 @@ import { Needs } from '../src/game/shelter.js';
 import { Rover, MODE } from '../src/physics/rover.js';
 import { ShipInterior } from '../src/game/interior.js';
 import { Track } from '../src/game/track.js';
+import { Achievements } from '../src/game/achievements.js';
 import { Suit } from '../src/physics/suit.js';
 
 let failures = 0;
@@ -46,6 +47,8 @@ function makeGame() {
     shelter: { needs: new Needs() },
     visited: new Visited(),
     track: new Track(),
+    bootTrack: new Track(),
+    achievements: new Achievements(),
     driving: false,
     get waypoints() { return wps; },
     set waypoints(v) { wps.length = 0; wps.push(...(v || [])); },
@@ -96,6 +99,10 @@ function dirty(g) {
   g.visited.record('Sabine', { lat: 1.38, lon: 20.07, simMs: 1749000000000 });
   g.visited.record('Moltke', { lat: -0.56, lon: 24.22, simMs: 1749500000000 });
   for (let m = 0; m <= 4000; m += 25) g.track.add(0.6 + m / 30300, 23.4);
+  for (let m = 0; m <= 600; m += 5) g.bootTrack.add(0.6, 23.4 + m / 30300);
+  g.achievements.award('pole', 'a lunar pole', 'the Sun never gets far up', 1750000000000);
+  g.achievements.record('deepest', { lat: -43.3, lon: -11.4, simMs: 1 },
+                        (v, b) => v < b, -3465, 'the lowest ground you have stood on');
   return g;
 }
 
@@ -157,6 +164,11 @@ console.log('the fields that were written and never read');
   check('the jetpack is still hot', Math.abs(fresh.eva.player.jetHeat - 0.66) < 1e-9);
   check('the suit is still dirty', Math.abs(fresh.eva.suit.dust - 0.44) < 1e-9);
   check('and so is the cabin', Math.abs(fresh.base.cabinDust - 0.31) < 1e-9);
+  check('the log of places comes back', fresh.achievements.has('pole') &&
+        fresh.achievements.extremes.deepest.value === -3465,
+        JSON.stringify(fresh.achievements.extremes.deepest));
+  check('the boot prints come back too', fresh.bootTrack.size > 15,
+        `${fresh.bootTrack.size} points`);
   check('the traverse comes back as a line', fresh.track.size > 100,
         `${fresh.track.size} points, ${(fresh.track.length / 1000).toFixed(2)} km`);
 }

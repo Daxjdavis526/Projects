@@ -82,6 +82,19 @@ canvas{display:block;position:fixed;inset:0}
 /* ---- the helmet ---- */
 /* Off unless asked for: the brief wants first person to be the most immersive
    mode and the helmet to be optional, so F cycles clean, helmet, third. */
+/* ---- the log ---- */
+#log{top:14px;left:14px;width:300px;display:none;max-height:calc(100vh - 28px);
+  overflow-y:auto}
+#log.on{display:block}
+#log .grp{margin-top:9px;border-top:1px solid var(--edge);padding-top:8px}
+#log .lab{font-family:Michroma,sans-serif;font-size:8px;letter-spacing:.2em;
+  color:var(--dim);text-transform:uppercase;margin-bottom:5px}
+#log .e{padding:3px 0;white-space:normal;line-height:1.45}
+#log .e b{color:var(--ink);font-weight:400}
+#log .e span{color:var(--faint);font-size:9px;display:block}
+#log .none{color:var(--faint);font-size:9.5px}
+#log .row{white-space:normal}
+
 #helmet{position:fixed;inset:0;pointer-events:none;display:none;z-index:5}
 #helmet.on{display:block}
 #helmet>div{position:absolute;inset:0}
@@ -445,6 +458,7 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">P</span><span>photography</span></div>
     <div class="row"><span class="k">F2</span><span>save</span></div>
     <div class="row"><span class="k">O</span><span>settings</span></div>
+    <div class="row"><span class="k">K</span><span>where you have been</span></div>
     <div class="row"><span class="k">H</span><span>this panel</span></div>
     <div class="fict">The ship, the rover, the jetpack and the suit are a
       near-future design <span class="tag fictional">FICTIONAL</span>. Apollo
@@ -473,6 +487,23 @@ canvas{display:block;position:fixed;inset:0}
          measured, the hardware standing on it is not. -->
     <div class="fict">near-future suit; capacities are a design, not a
       flown specification <span class="tag fictional">FICTIONAL</span></div>
+  </div>
+
+  <!-- The log. Not a task list: every line in it is a real place on the Moon
+       or a real fact about where you have been, and nothing in the game is
+       gated on any of it. -->
+  <div class="panel" id="log">
+    <h2>Where you have been</h2>
+    <div class="row"><span class="k">on foot</span><span class="v" id="lg-walk">—</span></div>
+    <div class="row"><span class="k">driven</span><span class="v" id="lg-drive">—</span></div>
+    <div class="grp">
+      <div class="lab">the ground</div>
+      <div id="lg-extremes"></div>
+    </div>
+    <div class="grp">
+      <div class="lab">places</div>
+      <div id="lg-list"><div class="none">nowhere yet</div></div>
+    </div>
   </div>
 
   <div class="panel" id="settings">
