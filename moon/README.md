@@ -99,6 +99,30 @@ Apollo Lunar Roving Vehicle record and from regolith soil mechanics, the suit's
 consumables from the Apollo portable life support system and the published xEMU
 requirements, and the locomotion from the Apollo film analyses.
 
+## Not landing on the hardware
+
+Ask to land at Tranquility Base and the ship sets down two kilometres short of
+it, on the bearing you picked from, and you walk or drive the rest. That is
+about twenty minutes on foot and eight in the rover.
+
+This is not squeamishness. A descent engine firing at the surface throws
+regolith outward at kilometres per second in a sheet a couple of degrees above
+the horizontal, and doing that beside Eagle would sandblast the descent stage,
+bury a retroreflector that is still ranged from Earth every week, and erase the
+bootprints. The keep-out is two kilometres at Apollo 11 and Apollo 17, five
+hundred metres at the other crewed sites, two hundred at robotic landers, and
+nothing at all at landmarks, which are scenery rather than hardware.
+
+Nothing stops you walking right up to the descent stage once you are down. The
+rule is about where a rocket lands, not about where you may stand, and arriving
+on foot is a better arrival anyway.
+
+**These radii are this game's own.** NASA published recommendations in 2011 for
+approaching the US government's lunar artifacts and they set limits of roughly
+this shape; this build could not retrieve that document to quote its figures, so
+nothing here is presented as anyone's published number. `RESEARCH.md` says the
+same in its unverified list.
+
 ## Moving in a sixth of a gravity
 
 Walking on the Moon is not walking on Earth slowed down, and the controller is
@@ -141,7 +165,33 @@ so the camera cannot over-expose the thing it is pointed at.
 
 Every vertex carries eight horizon angles, one every 45 degrees, so a crater
 rim shadows its own floor at any distance without a shadow map reaching to the
-horizon.
+horizon. The same eight angles say what fraction of the sky a point can see,
+and what it cannot see is terrain: that terrain bounces one pass of sunlight
+back into the shadow at the neighbourhood's own albedo, which lands four or
+five stops under direct sun. It is invisible beside a lit slope and it is the
+difference between a shadow you can see into and a hole cut out of the picture.
+Apollo photographs show the inside of a crater for exactly this reason.
+
+The camera meters the scene analytically rather than reading back the
+framebuffer, so it is deterministic in a screenshot. It knows the local albedo,
+how steeply the ground around you runs, the phase angle, how much of the frame
+is ground rather than black sky, the Earth's phase and elevation, and what your
+lamps are putting on the ground. Leaving any of those out has a visible cost:
+metering a cratered highland as though it were a plain blows every sunward
+slope to white paper, and forgetting the lamps opens the camera eleven stops
+for a lunar night and then washes the picture out the moment you switch them on.
+
+Where sunlit regolith sits on the tone curve is one number, and it was set by
+measuring frames rather than by taste: too high and a genuinely cratered
+surface photographs as a smooth dune, because the top of a filmic curve has no
+slope left to spend on relief. The opening view of the whole Moon is the test
+case, since everyone has seen the real thing.
+
+A high Sun really does flatten the Moon. Regolith's backscatter means the light
+comes back the way it went out, so a slope tipped towards the Sun is barely
+brighter than level ground and the craters read as tone rather than as shadow.
+The place to look at a landscape here is the same place it is on Earth: near
+sunrise or sunset, which on the Moon lasts days.
 
 ## Sound in a vacuum
 
@@ -217,6 +267,14 @@ IndexedDB with a size cap, so revisiting somewhere costs nothing and an offline
 session keeps whatever you have already seen. `?offline=1` turns streaming off
 entirely and the game runs on the vendored data, with the overlay saying so.
 
+Tiles are built in Web Workers, and the cost of one is dominated by the crater
+field. A tile only computes the bands between the source data's resolution and
+its own vertex spacing, so a distant tile is nearly free and the expensive ones
+are the handful under your boots. The worst case is a tile at the finest level
+over ground whose only elevation is the 1.9 km global grid, where the range
+spans nine octaves: about 58 ms. Where a metre-scale stereo model has streamed
+in there is almost nothing left to invent and the same tile costs 3 ms.
+
 ## Three ranges
 
 The ship carries as much as you like, the rover carries days, and the suit
@@ -259,6 +317,30 @@ which is why the screenshot harness is a test rather than a convenience.
 - A tile a thousand kilometres across was being drawn through the ground under
   your boots, because the horizon cull had to widen itself by the tile's
   bounding radius and that swamps it at that size.
+- The ship was standing on top of Tranquility Base, with the descent stage, the
+  seismometer and the retroreflector scattered under its legs.
+- The far side was made of sand dunes. The crater field stopped five bands below
+  the source resolution, and where the only elevation is 1.9 km a pixel that put
+  the smallest procedural crater at sixty metres across, so a hundred metres of
+  ground held two enormous smooth bowls and nothing else. Rocks were missing for
+  a related reason: they were gated on how good the elevation data was rather
+  than on how close the tile was.
+- The helmet lamps lit nothing. The terrain shader cleared every light's
+  contribution and not just the Sun's, and three.js has already added the spot
+  lights by that point.
+- Turning them on then washed the frame white, because the exposure model did not
+  know they existed: it adapted to a moonless night and opened eleven stops.
+- Every shadow was pure black. There is no air to scatter light into them, but
+  the sunlit ground next door bounces about a fortieth of what falls on it, which
+  is why Aldrin is visible coming down the ladder.
+- The caption told a player standing at Shackleton they were on the far side.
+  The Earth is under the horizon there because the site is 90.2 degrees from the
+  mean sub-Earth point; libration lifts it into view over the month.
+- Shackleton's own preset was at the crater's centre, which is a floor four
+  kilometres down that has not seen the Sun in a billion years. It photographed
+  as a rectangle of black, which was true and was not a picture.
+- The player was permanently getting up on rough ground, because a tile arriving
+  at a finer level drops the surface a metre or two and that was read as a fall.
 
 ## Sources
 

@@ -87,10 +87,12 @@ The whole body is here: LOLA topography for the entire globe, LROC imagery and
 metre-scale stereo models streamed from NASA as you approach, the Sun and the
 Earth where celestial mechanics puts them, Diviner temperatures, and a black
 sky. Land anywhere, get out and walk in a sixth of a gravity, drive a rover to
-the horizon, and visit Tranquility Base at its real coordinates with the flag
-lying on the ground where the ascent engine left it. Every value on screen says
-whether it was measured, interpolated, or invented below the resolution of the
-data. Desktop only.
+the horizon, and walk in to Tranquility Base at its real coordinates, where the
+flag lies on the ground the ascent engine knocked it onto. Walk in, because the
+ship will not land inside two kilometres of it: a descent engine throws regolith
+at kilometres per second and there is a retroreflector there still being ranged
+from Earth. Every value on screen says whether it was measured, interpolated,
+or invented below the resolution of the data. Desktop only.
 
 Live: https://daxjdavis526.github.io/Projects/moon/
 

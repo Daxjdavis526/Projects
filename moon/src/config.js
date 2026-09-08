@@ -111,8 +111,14 @@ export const EXPOSURE = {
   tauDarken: 12.0,         // s, adapting to darkness is slow
   /* Where sunlit regolith sits on the tone curve. Set so a level mare surface
      under a middling sun renders like a well-exposed Hasselblad frame — bright
-     grey, not white — with the shadows left properly black. */
-  evReference: -2.4,
+     grey, not white — with the shadows left properly black.
+
+     Measured off the frame rather than chosen: at -2.4 the sunlit far-side
+     highlands came out at 0.72 in sRGB, which is the top of the curve where it
+     flattens, and the effect was that a genuinely cratered surface photographed
+     as a smooth dune. Two thirds of a stop down puts it near 0.55, where the
+     curve still has slope to spend on the relief. */
+  evReference: -3.05,
 };
 
 /* --- player, suit, vehicles (FICTIONAL hardware, plausible numbers) --------- */

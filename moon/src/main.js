@@ -443,6 +443,10 @@ async function start() {
   if (params.get('mode') === 'eva') {
     if (params.get('ship') === '1') settle(site.lat, site.lon, 0);
     else startEva(site.lat, site.lon);
+    /* On foot the body owns the view, so `?yaw` and `?pitch` have to be set on
+       the player rather than on the camera or they are read back over. */
+    if (params.get('yaw') !== null) eva.player.yaw = Number(params.get('yaw')) * Math.PI / 180;
+    if (params.get('pitch') !== null) eva.player.pitch = Number(params.get('pitch')) * Math.PI / 180;
     if (params.get('view3') === '1') eva.toggleView();
     if (params.get('lamps')) eva.lampMode = Number(params.get('lamps'));
   }
@@ -647,8 +651,7 @@ async function start() {
          unlit, and opens the exposure by four stops. */
       phaseDeg: phaseAngle(-cam.pitch * 180 / Math.PI,
                            cam.yaw * 180 / Math.PI + 180, local.sunEl, local.sunAz),
-      groundFraction: cam.alt - heightfield.heightAt(cam.lat, cam.lon) > 50000
-        ? 0.35 : 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch)),
+      groundFraction: groundFraction(cam, heightfield, stage.camera.fov),
       earthIllum: eph.earthIllum,
       earthElevation: local.earthEl,
       /* What you are carrying. A helmet lamp two metres from the ground is
@@ -1024,6 +1027,27 @@ async function start() {
 }
 
 /* --- helpers ---------------------------------------------------------------- */
+
+/**
+ * How much of the frame is ground rather than black sky, which is what an eye
+ * or a camera actually meters.
+ *
+ * Near the surface it depends on where you are looking. From orbit it is
+ * geometry: the Moon's angular radius from a given height against the lens's
+ * own half-angle. Treating the globe from a thousand kilometres up as a small
+ * bright object in a mostly black frame was worth nearly a stop, and it is the
+ * reason the opening view came out as a sheet of white paper rather than as
+ * the grey, mare-mottled disc every photograph of it shows.
+ */
+function groundFraction(cam, heightfield, fovDeg) {
+  const alt = cam.alt - heightfield.heightAt(cam.lat, cam.lon);
+  if (alt < 50000) return 0.55 + 0.35 * Math.max(0, -Math.sin(cam.pitch));
+  const angle = Math.asin(Math.min(1, R_MOON / (R_MOON + Math.max(1, alt))));
+  const half = (fovDeg || 55) * 0.5 * Math.PI / 180;
+  /* Squared because it is an area, floored because there is always something
+     under a camera pointed at a planet from orbit. */
+  return Math.max(0.25, Math.min(0.95, (angle / half) ** 2));
+}
 
 /** The USGS unit name under a point, for the arrival caption. */
 function geologyName(geology, lat, lon) {

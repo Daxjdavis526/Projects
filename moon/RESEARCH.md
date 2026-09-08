@@ -265,6 +265,27 @@ silence, which matches the Apollo testimony above.
 
 ---
 
+## 11b. Approaching hardware that is already there
+
+NASA published *Recommendations to Space-Faring Entities: How to Protect and
+Preserve the Historic and Scientific Value of U.S. Government Lunar Artifacts*
+in July 2011, and it does set descent, landing and surface-mobility limits
+around the Apollo and robotic sites. **UNVERIFIED here**: this build could not
+retrieve the document to quote its figures, and the web-search budget for the
+session was spent, so nothing in the game is presented as its numbers.
+
+What the game uses instead are its own radii, sized from what is on the ground
+rather than from a citation: 2 km at Apollo 11 and Apollo 17, whose surface
+equipment is both extensive and still in scientific use (both retroreflectors
+are ranged from Earth to this day); 500 m at the other crewed sites; 200 m at
+robotic landers, which are small and mostly a single object; and nothing at
+landmarks. See `src/game/keepout.js`, which carries the same caveat.
+
+The physical reason is not in doubt and is cited in §6: a descent engine firing
+at the surface throws regolith outward at over 2 km/s in a sheet 1–3° above the
+horizontal (Metzger; NTRS 20205003590), and plume erosion at Apollo 11 was
+measurable barely beyond the footpads only because the LM was already there.
+
 ## 12. Unverified list (summary)
 
 Sato 2014 numerical Hapke parameters · mare/highland normal albedo · Kaguya MI
@@ -276,4 +297,7 @@ free-air and Bouguer ranges in mGal · suited jump heights · EMU primary O₂
 mass, total mass and sublimator rating · O₂ reserve caution timing ·
 NASA-STD-3001 thermal and acoustic limits · ISS Quest depressurisation time ·
 dB inside an EMU · structure-borne sound testimony · Artemis LTV requirements ·
-Lunar Cruiser 30-day figure · post-mid-2025 lander outcomes.
+Lunar Cruiser 30-day figure · post-mid-2025 lander outcomes · the radii in
+NASA's 2011 artifact-preservation recommendations (§11b) · the highest point on
+Shackleton's rim, which `data/sites.json` derives from the vendored 1.9 km LOLA
+grid rather than from a survey.

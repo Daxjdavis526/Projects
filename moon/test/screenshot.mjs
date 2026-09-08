@@ -43,13 +43,19 @@ const DEFAULT_SHOTS = [
      published coordinates puts the camera inside the spacecraft. */
   ['tranquility-now', 'site=0.67446,23.47353&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=230&pitch=-2&quality=high'],
   ['tranquility-1969', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&quality=high'],
-  ['tranquility-earth', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&look=earth&fov=12&quality=high'],
+  ['tranquility-earth', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&look=earth&fov=14&quality=high'],
+  /* Night, lamps on. The one shot that shows what a lamp is for, and the one
+     that caught the exposure model not knowing they existed. */
+  ['night-lamps', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&lamps=2&pitch=-20&quality=high'],
   ['third-person', 'site=apollo11&mode=eva&t=1969-07-21T02:56:15Z&rate=0&view3=1&quality=high'],
   ['tycho', 'site=tycho&mode=eva&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
   /* The rim of Shackleton never sees the Sun more than about two degrees up,
      so this is what the place actually looks like: a black world with bright
      slivers on the sunward slopes, and the lamps are not optional. */
-  ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&lamps=2&quality=balanced'],
+  /* Looking along the rim rather than into the crater: the floor of Shackleton
+     has not seen the Sun in a billion years and photographs as a rectangle of
+     black, which is true and is not a picture. */
+  ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&yaw=60&lamps=2&quality=balanced'],
   ['farside', 'site=farside_highlands&mode=eva&t=2026-09-08T09:00Z&rate=0&quality=balanced'],
   ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&quality=balanced'],
   ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],
