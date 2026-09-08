@@ -68,7 +68,7 @@ sources and limitations for every layer.
 | **Metre-scale topography** | About fifty LROC NAC stereo models at 1.5 to 5 m per pixel, streamed where they exist, plus the Apollo 11 model vendored at 2 m. |
 | **Imagery** | The LROC WAC global mosaic at 83 m per pixel, streamed. At Tranquility Base, the NAC mosaic at 65 cm. |
 | **Colour** | The LROC colour map, read as a reflectance rather than as a picture: the mare comes out at 0.07 and the highlands at 0.11, which is what the photometry says, and the display-stretched ray craters are rolled over to a physical maximum. |
-| **Sun and Earth** | Computed from the date and your position, checked against JPL Horizons at 240 site-epochs. Sun and Earth azimuth and elevation are right to 0.05 degrees, the illuminated fraction to 1 percent, and the face of the Earth turned towards you to 0.2 degrees. |
+| **Sun and Earth** | Computed from the date and your position, checked against JPL Horizons at ten sites across twelve epochs from 1969 to 2045. Sun and Earth azimuth and elevation are right to 0.05 degrees, the illuminated fraction to 1 percent, the angular diameter to 5 arcseconds, and the face of the Earth turned towards you to 0.2 degrees. |
 | **Stars** | The Yale Bright Star Catalogue, 9096 stars, rotated into the Moon's frame. |
 | **Geology** | The USGS Unified Geologic Map of the Moon, 1:5 million. Tranquility Base reads `Im2`, Upper Mare Unit, Imbrian, which is correct. |
 | **Temperature** | Diviner's bolometric temperature maps at half a degree, interpolated across the day by a model that is documented as being a model. |
@@ -234,6 +234,29 @@ console shows that distance, and turns amber and then red as you approach it.
 Not in this version: SLDEM2015 region streaming at 59 m globally, persistent
 footprints across sessions, the Apollo 12 to 17 hardware layouts, lava tube
 pits, and a gamepad.
+
+## What a screenshot found
+
+Every one of these was invisible in a stack trace and obvious in a picture,
+which is why the screenshot harness is a test rather than a convenience.
+
+- The colour map was being read as an albedo. Tycho came out at 0.76
+  reflectance, which pushed whole frames into the top of the tone curve, and
+  filmic response turns bright neutral grey into warm sand. The Moon looked
+  like a beach.
+- The Earth was black. Its limb term normalised the vector from the camera to
+  itself, and the sky camera sits at the origin, so every pixel of the planet
+  was a quiet NaN.
+- Tranquility Base was a staircase. The two metre stereo model was stored as
+  whole metres, which is invisible on a 1.9 km global grid and a visible
+  terrace on a 2 m one.
+- Shackleton was two and a half kilometres too deep, because five of the six
+  LOLA polar services return raw counts rather than metres.
+- The far side came apart down the middle, because the preset sat exactly on
+  the longitude seam.
+- A tile a thousand kilometres across was being drawn through the ground under
+  your boots, because the horizon cull had to widen itself by the tile's
+  bounding radius and that swamps it at that size.
 
 ## Sources
 
