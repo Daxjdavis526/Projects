@@ -53,9 +53,9 @@
    What is grounded in real hardware and what is not:
 
    Grounded. The wheels are woven wire mesh with chevron treads over part of the
-   circumference, which is what Apollo used and for the reason Apollo used it: a
-   pneumatic tyre cannot hold pressure at 100 K and a solid one has no
-   compliance. The wheel is 1.04 m across against the LRV's 0.82 m, carrying
+   circumference, which is what Apollo used and for the reason Apollo used it:
+   an elastomer goes glassy somewhere around 200 K and the ground here reaches
+   100 K at night, while a solid wheel has no compliance at all. The wheel is 1.04 m across against the LRV's 0.82 m, carrying
    about twice the LRV's per wheel load. Motors sit in the hubs behind harmonic
    drives, again as on the LRV. All four wheels steer, counter phase at low
    speed for a tight turn and slightly in phase at speed so the vehicle can crab
@@ -292,7 +292,20 @@ function makeMaterials(q) {
     }),
     tread: new THREE.MeshStandardMaterial({ color: 0x7b7f84, roughness: 0.62, metalness: 0.85 }),
     seat: new THREE.MeshStandardMaterial({ color: 0x2b3138, roughness: 0.92, metalness: 0.0 }),
-    grip: new THREE.MeshStandardMaterial({ color: 0xffffff, map: grip, roughness: 0.80, metalness: 0.35 }),
+    /* Zero thickness sheets: the arch web, its tracks, the console face and the
+       dish. They need two sides, and they are separate instances so that asking
+       for that does not turn the whole vehicle inside out. */
+    sheet: new THREE.MeshStandardMaterial({ color: 0x3c4045, roughness: 0.74,
+      metalness: 0.20, side: THREE.DoubleSide }),
+    sheetMetal: new THREE.MeshStandardMaterial({ color: 0x9aa1a8, roughness: 0.34,
+      metalness: 0.95, side: THREE.DoubleSide }),
+    sheetWhite: new THREE.MeshStandardMaterial({ color: 0xe9e7e1, roughness: 0.52,
+      metalness: 0.04, side: THREE.DoubleSide }),
+    /* The grip plate is white so the drawn pattern comes through unchanged;
+       without a canvas to draw on there is no pattern, so it falls back to the
+       colour the pattern averages to. */
+    grip: new THREE.MeshStandardMaterial({ color: grip ? 0xffffff : 0x6f7378,
+      map: grip, roughness: 0.80, metalness: 0.35 }),
     /* Lamps. Black when off, blinding when on; setLights drives the intensity. */
     lampWhite: new THREE.MeshStandardMaterial({ color: 0x0a0a0a, emissive: 0xfff2dc,
       roughness: 0.25, metalness: 0.1, emissiveIntensity: 0 }),
@@ -313,7 +326,6 @@ function makeMaterials(q) {
     if (!tex) M.screen[i].emissive.setHex(0x16303f);
   }
   M._textures = [wire, grip];
-  M._q = q;
   return M;
 }
 
@@ -431,7 +443,9 @@ function buildWheel(ctx, index) {
     const a = (i / q.chev) * Math.PI * 2;
     for (let s = 0; s < 2; s++) {
       const sx = s ? 1 : -1;
-      eu.set(a + sx * 0.10, 0, 0);
+      /* The placement puts z at -sin(a), so the tilt has to be -a as well or
+         the tread ends up pointing off the rim instead of along it. */
+      eu.set(-(a + sx * 0.10), 0, 0);
       qt.setFromEuler(eu);
       pos.set(sx * WHEEL_W * 0.24,
               Math.cos(a) * (WHEEL_R + 0.012),
@@ -452,7 +466,7 @@ function buildWheel(ctx, index) {
     const a = (i / q.spokes) * Math.PI * 2;
     for (let s = 0; s < 2; s++) {
       const sx = s ? 1 : -1;
-      eu.set(a, 0, sx * 0.16);
+      eu.set(-a, 0, sx * 0.16);
       qt.setFromEuler(eu);
       pos.set(sx * WHEEL_W * 0.20,
               Math.cos(a) * (WHEEL_R * 0.5 + 0.06),
@@ -471,7 +485,6 @@ function buildWheel(ctx, index) {
   const disc = xTube(ctx, hub, M.dark, 0.175, 0.016, -WHEEL_W * 0.42, 0, 0, q.wheel);
   disc.name = 'brake.' + index;
 
-  ctx.dusty.push(M.tyre, M.tread);
   return { hub, tyre };
 }
 
@@ -490,8 +503,15 @@ function buildCorner(ctx, index, side, zAxle, front) {
   const root = new THREE.Object3D();     // fixed to the chassis
   root.name = 'corner.' + index;
 
-  const LOW_L = 0.780, LOW_PX = 0.4265, LOW_PY = 0.620, LOW_A0 = -7.4 * DEG;
-  const UPP_L = 0.620, UPP_PX = 0.4700, UPP_PY = 0.980, UPP_A0 = -6.0 * DEG;
+  /* Arm lengths and rest angles are chosen; the inboard pivots then follow from
+     the track, so moving the track in config.js moves the whole corner with it
+     instead of leaving the wheel hanging off the end of an arm. The upper ball
+     joint is set 113 mm inboard of the lower one, which is where the kingpin
+     inclination comes from. */
+  const LOW_L = 0.780, LOW_PY = 0.620, LOW_A0 = -7.4 * DEG;
+  const UPP_L = 0.620, UPP_PY = 0.980, UPP_A0 = -6.0 * DEG;
+  const LOW_PX = TRACK / 2 - LOW_L * Math.cos(LOW_A0);
+  const UPP_PX = TRACK / 2 - 0.113 - UPP_L * Math.cos(UPP_A0);
 
   /* The arms. Each is a wishbone: two legs meeting at the upright, so it is
      drawn as two slim boxes splayed fore and aft of the axle line. */
@@ -532,14 +552,14 @@ function buildCorner(ctx, index, side, zAxle, front) {
     ctx.u.fender = fg;
   }
   const fender = new THREE.Mesh(ctx.u.fender, M.struct);
-  fender.position.x = -side * 0.005;
+  fender.position.x = side * ((X_FENDER0 + X_FENDER1) / 2 - TRACK / 2);
   susp.add(fender);
   ctx.dustyMesh.push(fender);
   /* The mud flap. Regolith thrown by a wheel follows a clean ballistic arc and
      lands a very long way away, so what the flap is really protecting is the
      radiator and the seals, not the paint. */
   const flap = box(ctx, susp, M.struct, X_FENDER1 - X_FENDER0, 0.26, 0.025,
-                   -side * 0.005, 0.30, front ? -0.44 : 0.44);
+                   fender.position.x, 0.30, front ? -0.44 : 0.44);
   ctx.dustyMesh.push(flap);
 
   /* Upright, then the steering knuckle above it. All four wheels steer, so
@@ -699,15 +719,22 @@ function buildArch(ctx, root, side) {
 
   /* The web plate and the three tracks. */
   const web = new THREE.Mesh(arcPlate(R_WEB_IN, R_WEB_OUT, PHI_WEB_0, PHI_WEB_1, q.ring * 2),
-                             M.struct);
+                             M.sheet);
   web.position.x = side * X_WEB;
-  web.material.side = THREE.DoubleSide;
   arch.add(web);
+  /* The lip the rising panels seal against. It is on fixed structure, which is
+     the whole reason the panels close upward onto the web instead of against
+     the shells: a seal wants one moving face, not two. */
+  const lip = new THREE.Mesh(
+    arcPlate(R_WEB_IN - 0.012, R_WEB_IN + 0.012, PHI_WEB_0, PHI_WEB_1, q.ring * 2), M.sheetMetal);
+  lip.position.x = side * (X_WEB - 0.022);
+  arch.add(lip);
+  ctx.geo.push(lip.geometry);
   ctx.geo.push(web.geometry);
   for (let k = 0; k < 3; k++) {
     const groove = new THREE.Mesh(
       arcPlate(R_SHELL[k] - 0.022, R_SHELL[k] + 0.022, PHI_WEB_0, PHI_WEB_1, q.ring * 2),
-      M.metal);
+      M.sheetMetal);
     groove.position.x = side * (X_WEB - 0.012);
     arch.add(groove);
     ctx.geo.push(groove.geometry);
@@ -860,7 +887,20 @@ function buildSidePanel(ctx, root, side, z0, z1, index) {
   }
   const seal = box(ctx, hinge, M.dark, 0.030, 0.030, z1 - z0 - 0.02, 0, 0.02, (z0 + z1) / 2);
   seal.name = 'seal.panel.' + index;
-  const step = box(ctx, hinge, M.grip, 0.020, 0.16, 0.44, side * 0.034, 0.30, (z0 + z1) / 2);
+  /* The bead along the top edge, in three short lengths because the edge is an
+     arc and one straight extrusion would stand off it at the ends. */
+  for (let i = 0; i < 3; i++) {
+    const za = z0 + (z1 - z0) * ((i + 0.5) / 3);
+    const dz = C_Z - za, ins = R_WEB_IN * R_WEB_IN - dz * dz;
+    const top = (ins > 0 ? C_Y + Math.sqrt(ins) : Y_HINGE) - Y_HINGE - 0.012;
+    const bead = box(ctx, hinge, M.dark, 0.038, 0.030, (z1 - z0) / 3 - 0.02,
+                     0, Math.max(0.05, top), za);
+    bead.name = 'seal.panel.' + index;
+  }
+  /* The tread. It faces outboard when the panel is down and is therefore the
+     boarding step; folded up it becomes a grab rail at shoulder height inside
+     the cabin, which is where a suited crew member wants one anyway. */
+  const step = box(ctx, hinge, M.grip, 0.020, 0.16, 0.44, -side * 0.034, 0.30, (z0 + z1) / 2);
   ctx.dustyMesh.push(step);
 
   /* The ball screw drives a crank on the hinge shaft rather than reaching up
@@ -872,7 +912,7 @@ function buildSidePanel(ctx, root, side, z0, z1, index) {
      Both anchors lie in one cross section, so the animation aims the screw with
      a single arc tangent and never needs a vector. */
   const jz = (z0 + z1) / 2;
-  const crank = box(ctx, hinge, M.metal, 0.030, 0.075, 0.030, 0, -0.0375, jz);
+  box(ctx, hinge, M.metal, 0.030, 0.075, 0.030, 0, -0.0375, jz);
   zTube(ctx, hinge, M.metal, 0.018, 0.05, 0, -0.075, jz, 6);
   const jack = new THREE.Object3D();
   jack.position.set(side * X_JACK, Y_HINGE - 0.30, jz);
@@ -897,7 +937,7 @@ function buildSidePanel(ctx, root, side, z0, z1, index) {
     dogs.push(d);
   }
 
-  return { hinge, jack, rod, dogs, crank, side };
+  return { hinge, jack, rod, dogs, side };
 }
 
 /* --- the dogs on the cowl --------------------------------------------------
@@ -965,18 +1005,32 @@ function buildRearDeck(ctx, root) {
      panel that looks down radiates into an oven. It is undersized for a real
      crewed thermal load and no amount of area on a vehicle this size would fix
      that; a real one would carry a water sublimator as well. */
-  const rad = box(ctx, root, M.white, 1.70, 0.95, 0.035, 0, 1.22, 2.235);
+  const rad = box(ctx, root, M.white, 1.66, 0.90, 0.030, 0, 1.20, 2.230);
   rad.name = 'radiator';
   for (let i = 0; i < 7; i++) {
-    box(ctx, root, M.metal, 0.02, 0.93, 0.05, -0.72 + i * 0.24, 1.22, 2.20);
+    box(ctx, root, M.metal, 0.02, 0.88, 0.045, -0.72 + i * 0.24, 1.20, 2.200);
+  }
+  /* Frame and the two struts that carry it off the rear sub frame. */
+  for (const dy of [-0.465, 0.465]) box(ctx, root, M.struct, 1.74, 0.05, 0.07, 0, 1.20 + dy, 2.215);
+  for (const dx of [-0.845, 0.845]) box(ctx, root, M.struct, 0.05, 0.98, 0.07, dx, 1.20, 2.215);
+  for (const dx of [-0.60, 0.60]) {
+    const st = box(ctx, root, M.metal, 0.04, 0.60, 0.04, dx, 0.94, 2.115);
+    st.rotation.x = -0.32;
   }
 
   /* High gain dish on a two axis gimbal, aimed at Earth by hand. A 0.55 m dish
      at S band closes a useful link from anywhere on the near side, which is the
      whole reason the vehicle can go over a horizon at all. */
+  /* Both antennas stand on a pedestal off the rear cross member, because the
+     tank deck below them is a service area and nothing structural can sit on a
+     pressure vessel. */
+  for (const px of [0.62, -0.68]) {
+    box(ctx, root, M.struct, 0.16, 0.52, 0.16, px, 1.36, 1.89);
+    box(ctx, root, M.struct, 0.30, 0.05, 0.30, px, 1.62, 1.89);
+  }
   const mast = new THREE.Object3D();
   mast.name = 'hga';
-  mast.position.set(0.62, 1.72, 1.88);
+  mast.position.set(0.62, 1.72, 1.89);
   root.add(mast);
   cyl(ctx, mast, M.struct, 0.038, 0.36, 0, -0.18, 0, q.tube);
   box(ctx, mast, M.struct, 0.10, 0.11, 0.10, 0, 0.02, 0);
@@ -987,8 +1041,7 @@ function buildRearDeck(ctx, root) {
   }
   const dishGeo = new THREE.LatheGeometry(dishPts, q.dish);
   ctx.geo.push(dishGeo);
-  const dish = new THREE.Mesh(dishGeo, M.white);
-  dish.material.side = THREE.DoubleSide;
+  const dish = new THREE.Mesh(dishGeo, M.sheetWhite);
   dish.position.y = 0.10;
   dish.rotation.set(-0.55, 0, 0.30);
   mast.add(dish);
@@ -999,7 +1052,7 @@ function buildRearDeck(ctx, root) {
      the ground because the vehicle is on its side. */
   const whip = new THREE.Object3D();
   whip.name = 'whip';
-  whip.position.set(-0.68, 1.60, 1.90);
+  whip.position.set(-0.68, 1.66, 1.89);
   root.add(whip);
   cyl(ctx, whip, M.metal, 0.010, 1.30, 0, 0.65, 0, 5);
   const ball = new THREE.Mesh(unitSphere(ctx, 6), M.metal);
@@ -1127,8 +1180,7 @@ function buildInterior(ctx, root, cowlY, cowlZ) {
   const faceGeo = new THREE.CylinderGeometry(1.50, 1.50, 0.34, q.ring, 1, true,
                                              Math.PI - 34.5 * DEG, 69 * DEG);
   ctx.geo.push(faceGeo);
-  const face = new THREE.Mesh(faceGeo, M.struct);
-  face.material.side = THREE.DoubleSide;
+  const face = new THREE.Mesh(faceGeo, M.sheet);
   face.position.z = 1.50 - 0.30;
   console3.add(face);
   box(ctx, console3, M.struct, 1.66, 0.06, 0.42, 0, -0.18, -0.14);
@@ -1265,7 +1317,7 @@ function buildInterior(ctx, root, cowlY, cowlZ) {
      something to brace against under braking. */
   box(ctx, cab, M.struct, 1.60, 0.05, 0.10, 0, Y_DECK + 0.10, -0.86);
 
-  return { seats, boost, over, console3 };
+  return { seats };
 }
 
 /* --- assembly --------------------------------------------------------------- */
@@ -1291,8 +1343,51 @@ function countTriangles(root) {
 /**
  * Build the rover.
  *
- * @param {object} opts { quality: 'performance'|'balanced'|'high'|'ultra' }
- * @returns see the module header
+ * @param {object} opts
+ *   quality  'performance' | 'balanced' | 'high' | 'ultra'. Anything else gets
+ *            the 'high' table. Only segment counts and optional detail change;
+ *            every dimension and every pivot is the same at all four.
+ *
+ * @returns {object}
+ *   group           THREE.Group. Author frame, unscaled, origin on the ground.
+ *   animate(state)  once a frame. See below. Allocates nothing.
+ *   wheels          four { hub, tyre, steerPivot, suspension }, ordered front
+ *                   left, front right, rear left, rear right, where left is -X.
+ *                   suspension carries the whole corner and moves up as the
+ *                   spring compresses; steerPivot is inside it; hub is inside
+ *                   that and spins about X; tyre is the mesh, for dust or for
+ *                   a raycast.
+ *   seats           two THREE.Object3D at the crew eye positions, unrotated.
+ *   interiorAnchor  THREE.Object3D between the crew at eye height, unrotated,
+ *                   so a camera parented to it looks forward with no offset.
+ *   colliders       ten { type:'box', centre, half } in model space, describing
+ *                   the pressure hull. Turn them on when the cabin is sealed;
+ *                   while it is open there is nothing above the waist to hit.
+ *   setCanopy(t)    0 open, 1 closed and dogged. Allocates nothing.
+ *   setLights(on)   drives the emissive lenses. The housings are named
+ *                   headlamp.0..3, taillamp.0..1 and worklamp.0..1, so real
+ *                   spot lights can be parented to them if the budget allows.
+ *   setDust(a)      0..1. It only ever goes up in play; regolith does not brush
+ *                   off, and there is no rain.
+ *   dispose()       geometries, materials and canvas textures.
+ *   lamps           the eight lamp housings, in the order named above.
+ *   materials       the material table, for anyone who wants to retune it.
+ *   triangles       the count for this build, for the render statistics panel.
+ *
+ * The state object passed to animate():
+ *   wheelAngle   radians of roll, shared by all four. Positive is forwards.
+ *   steer        -1..1. Positive turns right. The front wheels take the full
+ *                32 degrees; the rear pair counter steer at low speed and come
+ *                slightly into phase above about 3 m/s so the vehicle crabs.
+ *   suspension   four travel values in metres, positive compressed, measured
+ *                from the authored pose and clamped to ROVER.suspTravel. Zero
+ *                is where the model is drawn, and at one sixth g that is also
+ *                where it sits.
+ *   speed        m/s, for the steering phase and the antenna.
+ *   canopy       0..1, forwarded to setCanopy.
+ *   boost        high power drive mode.
+ *   dt           seconds. Only the antenna integrates it; everything else is
+ *                a direct pose, so a dropped frame cannot desynchronise it.
  */
 export function buildRover(opts = {}) {
   const q = TIER[opts.quality] || TIER.high;
@@ -1307,7 +1402,7 @@ export function buildRover(opts = {}) {
   M.lampDrive = M.lampRed.clone();
   M.lampDrive.emissive.setHex(0xffa63c);
 
-  const ctx = { q, M, u: {}, geo: [], dusty: [], dustyMesh: [] };
+  const ctx = { q, M, u: {}, geo: [], dustyMesh: [] };
 
   const group = new THREE.Group();
   group.name = 'rover';
@@ -1574,6 +1669,13 @@ export function buildRover(opts = {}) {
       if (o.geometry) geos.add(o.geometry);
       if (o.material) mats.add(o.material);
     });
+    /* Anything in the material table that never reached a mesh would otherwise
+       hold its GPU resources for the life of the page. */
+    for (const k in M) {
+      const v = M[k];
+      if (v && v.isMaterial) mats.add(v);
+      else if (Array.isArray(v)) for (const m of v) if (m && m.isMaterial) mats.add(m);
+    }
     for (const g of ctx.geo) geos.add(g);
     for (const m of mats) {
       for (const k of ['map', 'alphaMap', 'emissiveMap', 'roughnessMap', 'normalMap']) {
@@ -1589,7 +1691,11 @@ export function buildRover(opts = {}) {
     group.removeFromParent();
   }
 
-  /* Author the vehicle open, then let the caller drive it. */
+  /* Author the vehicle open, then let the caller drive it. The suspension pose
+     comes out of animate() rather than out of the builders, so it has to be run
+     once here; without it the dampers and springs sit at their unit length,
+     standing a metre out of the bodywork until the first frame. */
+  animate(IDLE);
   setCanopy(0);
   setLights(false);
   setDust(0);

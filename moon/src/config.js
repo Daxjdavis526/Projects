@@ -156,7 +156,13 @@ export const SUIT = {
 
 export const ROVER = {
   mass: 1450, wheelBase: 3.1, track: 2.4, wheelRadius: 0.52, clearance: 0.55,
-  suspTravel: 0.42, suspK: 46000, suspC: 5200,           // N/m, N.s/m per wheel
+  /* Spring rates are set for lunar weight, not Earth weight. The vehicle
+     presses down with 1450 kg times 1.62, which is 2.3 kN in total, so a rate
+     that would give a sensible 11 cm of static sag on Earth would hold this
+     one rigid and every pebble would launch it. Damping is a little past
+     critical, because a bouncing rover in low gravity takes a very long time
+     to settle. */
+  suspTravel: 0.42, suspK: 5200, suspC: 2600,            // N/m, N.s/m per wheel
   motorForce: 3600, brakeForce: 5200, boostFactor: 2.4,  // N total
   speedMax: 5.0, speedBoost: 8.3,                        // m/s (18 / 30 km/h)
   grip: 0.62,                                            // regolith friction

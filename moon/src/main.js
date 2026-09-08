@@ -21,7 +21,8 @@ import { TerrainSystem } from './render/terrain.js';
 import { Sky } from './render/sky.js';
 import { Exposure } from './render/exposure.js';
 import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime } from './physics/ephemeris.js';
-import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance } from './physics/frames.js';
+import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
+         offsetLatLon, surfaceDistance } from './physics/frames.js';
 import { loadVendoredHeightfield, readJson, readBinary } from './terrain/loader.js';
 import { Detail } from './terrain/detail.js';
 import { decodePng8 } from './terrain/png16.js';
@@ -31,6 +32,8 @@ import { SurfaceStreamer } from './data/surface.js';
 import { TemperatureMap } from './data/temperature.js';
 import { EVA } from './game/eva.js';
 import { Descent } from './game/descent.js';
+import { Base } from './game/base.js';
+import { Vehicle } from './game/vehicle.js';
 import { SuitHud } from './ui/suithud.js';
 import { OrbitPicker } from './ui/orbit.js';
 import { Sound } from './audio/audio.js';
@@ -197,13 +200,29 @@ async function start() {
 
   /* The astronaut is only needed in third person, and the page must still run
      if the module is missing, so it is imported on the side. */
-  let astronaut = null;
+  /* Declared before the dynamic imports below, because those resolve on their
+     own schedule and one of them will land before this line otherwise. */
+  let base = null, vehicle = null;
+  let astronaut = null, shipModel = null, roverModel = null;
+  const modelQuality = state.qualityName === 'science' ? 'balanced' : state.qualityName;
   import('./models/astronaut.js')
     .then((m) => {
-      astronaut = m.buildAstronaut({ quality: state.qualityName });
+      astronaut = m.buildAstronaut({ quality: modelQuality });
       if (eva) eva.setModel(astronaut);
     })
     .catch((e) => console.warn('astronaut model unavailable:', e.message));
+  import('./models/ship.js')
+    .then((m) => {
+      shipModel = m.buildShip({ quality: modelQuality });
+      if (base) base.setModel(shipModel);
+    })
+    .catch((e) => console.warn('ship model unavailable:', e.message));
+  import('./models/rover.js')
+    .then((m) => {
+      roverModel = m.buildRover({ quality: modelQuality });
+      if (vehicle) vehicle.setModel(roverModel);
+    })
+    .catch((e) => console.warn('rover model unavailable:', e.message));
 
   const view = params.get('view') || 'ground';
   /* `alt` is height above the local surface, which is what anyone actually
@@ -246,7 +265,7 @@ async function start() {
 
   /* On foot. Created only when the player steps outside; until then the free
      camera flies and `eva` is null. */
-  let eva = null;
+  let eva = null, driving = false, canopyPress = false;
   const startEva = (lat, lon) => {
     eva = new EVA({
       stage, heightfield, quality: state.quality,
@@ -295,8 +314,7 @@ async function start() {
         descent = null;
         mode = 'surface';
         el('hint').textContent = 'H for controls';
-        startEva(at.lat, at.lon);
-        eva.player.yaw = at.heading * Math.PI / 180;
+        settle(at.lat, at.lon, at.heading);
       },
     });
     /* Ask for the ground under the landing site straight away rather than
@@ -304,10 +322,28 @@ async function start() {
     if (surface) surface.update(pick.lat, pick.lon, 400);
   }
 
+  /* Arriving: the ship is now here, the rover unloads beside it, and you step
+     out onto ground nobody has stood on. */
+  function settle(lat, lon, heading = 0) {
+    base = new Base({ stage, heightfield, terrain, quality: state.quality, lat, lon, heading });
+    if (shipModel) base.setModel(shipModel);
+    /* The rover parks off the ship's port side, clear of the engines. */
+    const park = offsetLatLon(lat, lon, (heading + 250) % 360, 11);
+    vehicle = new Vehicle({
+      stage, heightfield, lat: park.lat, lon: park.lon, heading: (heading + 90) % 360,
+    });
+    if (roverModel) vehicle.setModel(roverModel);
+    /* Step out onto the surface beside the ladder rather than inside the hull. */
+    const out = offsetLatLon(lat, lon, (heading + 180) % 360, 7.5);
+    startEva(out.lat, out.lon);
+    eva.player.yaw = heading * Math.PI / 180;
+  }
+
   /* `?mode=eva` starts on foot, which is what the screenshot harness wants when
      it is checking the suit, the lamps or the third-person camera. */
   if (params.get('mode') === 'eva') {
-    startEva(site.lat, site.lon);
+    if (params.get('ship') === '1') settle(site.lat, site.lon, 0);
+    else startEva(site.lat, site.lon);
     if (params.get('view3') === '1') eva.toggleView();
     if (params.get('lamps')) eva.lampMode = Number(params.get('lamps'));
   }
@@ -329,6 +365,22 @@ async function start() {
       else startEva();
     }
     if (e.code === 'Space' && descent) descent.skip();
+    /* R gets on and off the rover. You have to be next to it, and getting off
+       puts you on the ground beside it rather than inside the wheel. */
+    if (e.code === 'KeyR' && vehicle && eva) {
+      if (driving) {
+        driving = false;
+        const out = vehicle.dismountPoint();
+        eva.place(out.lat, out.lon, 0.1);
+      } else if (vehicle.canBoard(eva.player.llh.lat, eva.player.llh.lon)) {
+        driving = true;
+        /* Face the way the vehicle is pointing rather than the way you happened
+           to be walking, or the first thing you see is its own bodywork. */
+        cam.yaw = vehicle.rover.heading * Math.PI / 180;
+        cam.pitch = -0.05;
+      }
+    }
+    if (e.code === 'KeyC' && vehicle) canopyPress = true;
     if (e.code === 'KeyF' && eva) eva.toggleView();
     if (e.code === 'KeyL' && eva) eva.cycleLamps();
   });
@@ -446,7 +498,34 @@ async function start() {
        goes and the camera follows it; in the free camera, the camera is the only
        thing there is, and it flies. */
     let camFrame;
-    if (eva) {
+    if (driving && vehicle) {
+      /* Driving. The player rides along, so the suit keeps running unless the
+         canopy is shut and the cabin has come up to pressure. */
+      cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
+      look.yaw = look.pitch = 0;
+      vehicle.step(dt, {
+        throttle: (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0),
+        steer: (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0),
+        brake: keys.has('Space'),
+        boost: keys.has('ShiftLeft') || keys.has('ShiftRight'),
+        toggleCanopy: canopyPress,
+      }, true);
+      canopyPress = false;
+      /* Move the vehicle before reading the seat out of it, or the camera
+         trails the vehicle by a frame and the ride looks loose. */
+      vehicle.place(stage.origin.origin, dt);
+      /* The player goes where the rover goes. */
+      eva.player.place(vehicle.rover.lat, vehicle.rover.lon, 0.9);
+      eva.player.yaw = cam.yaw;
+      eva.suit.step(dt * Math.max(1, state.timeRate), {
+        exertion: 0.12, sunlit: local.sunEl > 0, lights: eva.lampMode > 0,
+        inShelter: vehicle.rover.pressure > 0.9,
+      });
+      camFrame = vehicle.camera(cam.yaw, cam.pitch);
+      cam.lat = vehicle.rover.lat; cam.lon = vehicle.rover.lon;
+      cam.alt = camFrame.eye ? heightfield.heightAt(cam.lat, cam.lon) + 1.5 : cam.alt;
+      world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
+    } else if (eva) {
       eva.step(dt, {
         forward: (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0),
         strafe: (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0),
@@ -565,6 +644,16 @@ async function start() {
     if (eva) {
       eva.updateLights(stage.origin.origin, camFrame);
       eva.updateModel(stage.origin.origin, dt);
+      if (eva.model) eva.model.group.visible = !driving && eva.view === 'third';
+    }
+    if (base) {
+      base.step(dt, eva ? eva.player.llh : null);
+      base.place(stage.origin.origin);
+    }
+    if (vehicle && !driving) {
+      vehicle.step(dt, { toggleCanopy: canopyPress }, false);
+      canopyPress = false;
+      vehicle.place(stage.origin.origin, dt);
     }
 
     /* --- terrain ---------------------------------------------------------- */
@@ -600,12 +689,26 @@ async function start() {
     /* Vacuum outside, air inside. Until there is a ship or a rover to be in,
        the only two states are wearing a suit and flying a camera that is not
        there at all. */
+    /* Where you are decides what you can hear. Outside there is no air at all,
+       so everything arrives through the suit or through whatever you are
+       touching; inside the rover or the ship there is a cabin around you. */
+    const roverSnap = vehicle ? vehicle.snapshot(eva ? eva.player.llh : null) : null;
+    const baseSnap = base ? base.snapshot(eva ? eva.player.llh : null) : null;
+    const environment = baseSnap && baseSnap.inside ? 'ship'
+      : driving ? (roverSnap.pressure > 0.5 ? 'rover_closed' : 'rover_open')
+      : evaSnap ? 'suit' : 'ship';
     sound.update({
-      dt,
-      environment: evaSnap ? 'suit' : 'ship',
-      pressure: evaSnap ? 0 : 1,
+      dt, environment,
+      pressure: baseSnap && baseSnap.inside ? baseSnap.pressure
+        : driving ? roverSnap.pressure : evaSnap ? 0 : 1,
       player: evaSnap ? evaSnap.player : undefined,
       suit: evaSnap ? evaSnap.suit : undefined,
+      rover: roverSnap ? {
+        throttle: driving ? 1 : 0, speed: roverSnap.speed,
+        wheelImpact: roverSnap.airborne ? 0 : Math.min(1, Math.abs(roverSnap.speed) / 8),
+        boost: roverSnap.boost, canopy: roverSnap.canopy,
+      } : undefined,
+      ship: baseSnap ? { interiorLevel: baseSnap.interiorLevel, airlock: baseSnap.airlock } : undefined,
     });
     el('s-tiles').textContent = `${terrain.stats.tiles}  (${terrain.stats.building} building)`;
     el('s-tris').textContent = (terrain.stats.triangles / 1000).toFixed(0) + 'k';
@@ -620,6 +723,10 @@ async function start() {
   window.SELENE = {
     ready: false, stage, terrain, sky, heightfield, cam, state, streams, surface,
     get eva() { return eva; },
+    get base() { return base; },
+    get vehicle() { return vehicle; },
+    get driving() { return driving; },
+    board() { driving = true; },
     get descent() { return descent; },
     get mode() { return mode; },
     land(lat, lon) { land({ lat, lon }); },
