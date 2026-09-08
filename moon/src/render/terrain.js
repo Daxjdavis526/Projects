@@ -150,6 +150,19 @@ export class TerrainSystem {
     else this.invalidate();
   }
 
+  /**
+   * Take a raster back out again, from the workers and from the local
+   * heightfield both. The worker protocol has always had a 'drop' message and
+   * nothing on this side sent one: streamed patches are replaced rather than
+   * removed, so it was never needed until the pits, which are big enough to be
+   * worth dropping when you leave.
+   */
+  dropRaster(id, bbox) {
+    for (const w of this.workers) w.postMessage({ type: 'drop', id });
+    if (bbox) this.invalidateArea(bbox);
+    else this.invalidate();
+  }
+
   setPads(pads, bbox) {
     for (const w of this.workers) w.postMessage({ type: 'pads', pads });
     if (bbox) this.invalidateArea(bbox);
