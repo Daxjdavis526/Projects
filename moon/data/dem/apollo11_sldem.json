@@ -1,0 +1,20 @@
+{
+ "id": "apollo11_sldem",
+ "path": "dem/apollo11_sldem.png",
+ "w": 1024,
+ "h": 1024,
+ "bbox": [
+  22.5,
+  0.0,
+  24.5,
+  2.0
+ ],
+ "res_m": 59.225,
+ "priority": 0,
+ "kind": "window",
+ "offset_m": -2488,
+ "counts_per_m": 58,
+ "min_m": -2487.4,
+ "max_m": -1389.6,
+ "source": "SLDEM2015 (LOLA + Kaguya TC) 512 ppd, PDS tile 00N-30N/000-045"
+}

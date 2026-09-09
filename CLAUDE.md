@@ -15,6 +15,9 @@ context for zero insight.
 helios/three.min.js      same, older layout
 ```
 
+`moon/data/` is 47 MB of vendored NASA rasters. They are data, not code: read
+them with `moon/tools/build_data.py --check` or numpy, never by opening them.
+
 If you need to know a library's API, consult its documentation or the small
 readable addon files under `vendor/three/jsm/` — never the bundle itself.
 When searching the repo, expect vendor paths in the results and skip them;
@@ -34,6 +37,7 @@ touching the others.
 | `universe/` | observable universe explorer (HORIZON) |
 | `raptor/` | F-22A flight simulator |
 | `supernova/` | core-collapse supernova simulator |
+| `moon/` | SELENE — open-world exploration of the real Moon at full scale |
 | `propulsion/` | rocket propulsion engineering course (Markdown, no code to run beyond the example checker) |
 | `cryogenics/` | cryogenic propulsion hardware & safety course (Markdown + hand-authored SVG, browser reader) |
 

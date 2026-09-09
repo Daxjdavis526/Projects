@@ -1,0 +1,194 @@
+<!doctype html>
+<!-- =============================================================================
+     The index. Eight self-contained pages, one per directory, and a list of them.
+
+     No build step and no font from a CDN, for the same reason none of the
+     projects below use one: these pages are meant to keep working when a
+     network does not. The type is whatever monospace the machine already has.
+     ========================================================================== -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Projects</title>
+<meta name="description" content="Different ideas on the daily — eight browser toys, one per directory.">
+<style>
+:root{
+  --ink:#d8d5cf;
+  --dim:#8a857d;
+  --faint:#454039;
+  --warm:#e8c9a0;
+  --edge:rgba(216,213,207,.11);
+}
+*{box-sizing:border-box}
+html{background:#000}
+body{
+  margin:0;
+  min-height:100%;
+  background:#000;
+  color:var(--ink);
+  font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+  font-weight:300;
+  font-size:14px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  padding:0 6vw 14vh;
+}
+main{max-width:760px;margin:0 auto}
+
+header{padding:16vh 0 9vh}
+h1{
+  margin:0;
+  font-size:13px;
+  font-weight:400;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+header p{
+  margin:1.1em 0 0;
+  color:var(--dim);
+  max-width:58ch;
+}
+
+ul{list-style:none;margin:0;padding:0}
+li{border-top:1px solid var(--edge)}
+li:last-child{border-bottom:1px solid var(--edge)}
+
+a.item{
+  display:grid;
+  grid-template-columns:12ch 1fr;
+  gap:0 2.5ch;
+  align-items:baseline;
+  padding:1.9em 0;
+  text-decoration:none;
+  color:inherit;
+  transition:background .18s ease,padding .18s ease;
+}
+a.item:hover,a.item:focus-visible{
+  background:rgba(232,201,160,.045);
+  padding-left:1.6ch;
+  outline:none;
+}
+a.item:focus-visible{box-shadow:inset 2px 0 0 var(--warm)}
+
+.dir{
+  color:var(--faint);
+  font-size:12px;
+  letter-spacing:.05em;
+  transition:color .18s ease;
+}
+a.item:hover .dir,a.item:focus-visible .dir{color:var(--warm)}
+
+.name{
+  font-size:13px;
+  letter-spacing:.19em;
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.what{
+  grid-column:2;
+  margin:.5em 0 0;
+  color:var(--dim);
+  max-width:58ch;
+}
+
+footer{
+  margin-top:9vh;
+  color:var(--faint);
+  font-size:12px;
+}
+footer a{color:var(--dim);text-decoration:none;border-bottom:1px solid var(--edge)}
+footer a:hover{color:var(--warm)}
+
+/* One column once twelve characters of directory name and a sentence stop
+   fitting side by side. */
+@media (max-width:620px){
+  header{padding:11vh 0 7vh}
+  a.item{grid-template-columns:1fr;gap:0}
+  .what{grid-column:1}
+  .dir{display:block;margin-bottom:.45em}
+}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Projects</h1>
+  <p>Different ideas on the daily. Eight browser toys, one per directory,
+     sharing no code and no build step — each one runs as static files.</p>
+</header>
+
+<ul>
+  <li><a class="item" href="moon/">
+    <span class="dir">moon/</span>
+    <span class="name">Selene</span>
+    <p class="what">An open-world exploration game on the real Moon, at its real
+      size. Land anywhere, walk in a sixth of a gravity, and climb down into a
+      lava-tube skylight. Every value on screen says whether it was measured,
+      interpolated, derived or invented.</p>
+  </a></li>
+
+  <li><a class="item" href="raptor/">
+    <span class="dir">raptor/</span>
+    <span class="name">Raptor</span>
+    <p class="what">An F-22A flight simulator with a six-degree-of-freedom
+      flight model, fly-by-wire control laws, thrust vectoring, and a streamed
+      world at true Earth scale.</p>
+  </a></li>
+
+  <li><a class="item" href="universe/">
+    <span class="dir">universe/</span>
+    <span class="name">Horizon</span>
+    <p class="what">An observable universe explorer. One continuous zoom from
+      Earth to the edge of what can be seen.</p>
+  </a></li>
+
+  <li><a class="item" href="supernova/">
+    <span class="dir">supernova/</span>
+    <span class="name">Supernova</span>
+    <p class="what">The death of a massive star: a red supergiant's final
+      minutes, iron-core collapse, the neutrino burst, a lopsided shock
+      revival, and three thousand years of remnant evolution.</p>
+  </a></li>
+
+  <li><a class="item" href="blackhole/">
+    <span class="dir">blackhole/</span>
+    <span class="name">Black Hole Explorer</span>
+    <p class="what">A real-time Kerr black hole, rendered by tracing null
+      geodesics through curved spacetime on the GPU.</p>
+  </a></li>
+
+  <li><a class="item" href="helios/">
+    <span class="dir">helios/</span>
+    <span class="name">Helios</span>
+    <p class="what">A first-person spaceship flight sandbox through the real
+      solar system.</p>
+  </a></li>
+
+  <li><a class="item" href="branch/">
+    <span class="dir">branch/</span>
+    <span class="name">Branch</span>
+    <p class="what">A music-driven generative lightning and vascular growth
+      system.</p>
+  </a></li>
+
+  <li><a class="item" href="propulsion/">
+    <span class="dir">propulsion/</span>
+    <span class="name">Propulsion</span>
+    <p class="what">A two-semester-equivalent rocket propulsion engineering
+      course: 36 modules across liquid bipropellant engines, solid motors and
+      cold-gas thrusters, with exams, a capstone trade study and a verified
+      engine database.</p>
+  </a></li>
+</ul>
+
+<footer>
+  <p>Source: <a href="https://github.com/Daxjdavis526/Projects">github.com/Daxjdavis526/Projects</a>.
+     Desktop browsers, WebGL2.</p>
+</footer>
+
+</main>
+</body>
+</html>

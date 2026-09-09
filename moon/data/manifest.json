@@ -1,0 +1,237 @@
+{
+ "generated_by": "moon/tools/build_data.py",
+ "frame": "Mean Earth/Polar Axis (ME) of DE421, planetocentric latitude, longitude positive east",
+ "datum": {
+  "reference_radius_m": 1737400.0,
+  "note": "elevation = radius - reference_radius_m"
+ },
+ "convention": {
+  "lon0_deg": -180,
+  "lat0_deg": 90,
+  "png16_bias_m": 32768,
+  "note": "16-bit PNG value = round(metres) + bias; column 0 is -180 E, row 0 is +90 N"
+ },
+ "dem": {
+  "layers": [
+   {
+    "id": "lola2",
+    "z": 0,
+    "ppd": 2,
+    "w": 720,
+    "h": 360,
+    "tile": 360,
+    "nx": 2,
+    "ny": 1,
+    "path": "dem/lola16/0/{x}_{y}.png",
+    "bbox": [
+     -180,
+     -90,
+     180,
+     90
+    ],
+    "res_m": 15161.68,
+    "priority": 1,
+    "kind": "pyramid",
+    "source": "LRO LOLA LDEM 16 ppd (PDS lrolol_1xxx, V3.1) downsampled"
+   },
+   {
+    "id": "lola4",
+    "z": 1,
+    "ppd": 4,
+    "w": 1440,
+    "h": 720,
+    "tile": 360,
+    "nx": 4,
+    "ny": 2,
+    "path": "dem/lola16/1/{x}_{y}.png",
+    "bbox": [
+     -180,
+     -90,
+     180,
+     90
+    ],
+    "res_m": 7580.84,
+    "priority": 1,
+    "kind": "pyramid",
+    "source": "LRO LOLA LDEM 16 ppd (PDS lrolol_1xxx, V3.1) downsampled"
+   },
+   {
+    "id": "lola8",
+    "z": 2,
+    "ppd": 8,
+    "w": 2880,
+    "h": 1440,
+    "tile": 360,
+    "nx": 8,
+    "ny": 4,
+    "path": "dem/lola16/2/{x}_{y}.png",
+    "bbox": [
+     -180,
+     -90,
+     180,
+     90
+    ],
+    "res_m": 3790.42,
+    "priority": 1,
+    "kind": "pyramid",
+    "source": "LRO LOLA LDEM 16 ppd (PDS lrolol_1xxx, V3.1) downsampled"
+   },
+   {
+    "id": "lola16",
+    "z": 3,
+    "ppd": 16,
+    "w": 5760,
+    "h": 2880,
+    "tile": 360,
+    "nx": 16,
+    "ny": 8,
+    "path": "dem/lola16/3/{x}_{y}.png",
+    "bbox": [
+     -180,
+     -90,
+     180,
+     90
+    ],
+    "res_m": 1895.21,
+    "priority": 1,
+    "kind": "pyramid",
+    "source": "LRO LOLA LDEM 16 ppd (PDS lrolol_1xxx, V3.1)"
+   }
+  ],
+  "windows": [
+   {
+    "id": "apollo11_nac",
+    "path": "dem/apollo11_nac2m.png",
+    "w": 1600,
+    "h": 1600,
+    "bbox": [
+     23.420337,
+     0.621435,
+     23.525866,
+     0.726965
+    ],
+    "res_m": 2.0,
+    "priority": 0,
+    "kind": "window",
+    "offset_m": -1967,
+    "counts_per_m": 705,
+    "min_m": -1966.4,
+    "max_m": -1876.2,
+    "source": "LROC NAC DTM NAC_DTM_APOLLO11 v1.9, 2 m/px (stereo pair M150361817/M150368601)"
+   },
+   {
+    "id": "apollo11_sldem",
+    "path": "dem/apollo11_sldem.png",
+    "w": 1024,
+    "h": 1024,
+    "bbox": [
+     22.5,
+     0.0,
+     24.5,
+     2.0
+    ],
+    "res_m": 59.225,
+    "priority": 0,
+    "kind": "window",
+    "offset_m": -2488,
+    "counts_per_m": 58,
+    "min_m": -2487.4,
+    "max_m": -1389.6,
+    "source": "SLDEM2015 (LOLA + Kaguya TC) 512 ppd, PDS tile 00N-30N/000-045"
+   }
+  ]
+ },
+ "measured": {
+  "id": "ldec16",
+  "path": "dem/ldec16.png",
+  "ppd": 16,
+  "w": 5760,
+  "h": 2880,
+  "measured_fraction": 0.9889,
+  "source": "LRO LOLA LDEC 16 ppd observation counts (0 = interpolated)"
+ },
+ "colour": {
+  "tiers": [
+   {
+    "w": 8192,
+    "path": "color/moon_8192.jpg"
+   },
+   {
+    "w": 4096,
+    "path": "color/moon_4096.jpg"
+   },
+   {
+    "w": 1024,
+    "path": "color/moon_1024.jpg"
+   }
+  ],
+  "bbox": [
+   -180,
+   -90,
+   180,
+   90
+  ],
+  "source": "NASA SVS CGI Moon Kit, LROC WAC colour (lroc_color_poles_8k.tif)"
+ },
+ "earth": {
+  "day": "earth/day_4k.jpg",
+  "night": "earth/night_2k.jpg",
+  "clouds": "earth/clouds_2k.jpg",
+  "source": "NASA Earth Observatory Blue Marble (Dec 2004), Earth at Night, cloud composite"
+ },
+ "stars": {
+  "path": "stars.bin",
+  "count": 9096,
+  "fields": [
+   "ra_rad",
+   "dec_rad",
+   "vmag",
+   "b_v"
+  ],
+  "source": "Yale Bright Star Catalogue, 5th revised ed. (Hoffleit & Warren)"
+ },
+ "geology": {
+  "path": "geology8.png",
+  "legend": "geology.json",
+  "ppd": 8,
+  "w": 2880,
+  "h": 1440,
+  "bbox": [
+   -180,
+   -90,
+   180,
+   90
+  ],
+  "source": "USGS Unified Geologic Map of the Moon 1:5M (Fortezzo, Spudis & Harrel 2020), numerical raster"
+ },
+ "gravity": {
+  "path": "grail4.png",
+  "ppd": 4,
+  "w": 1440,
+  "h": 720,
+  "unit": "mGal",
+  "bias": 32768,
+  "min": -632.1,
+  "max": 806.5,
+  "source": "GRAIL GRGM1200A free-air anomaly to degree 180 (PDS gggrx_1200a_anom_l180)"
+ },
+ "temperature": {
+  "res_deg": 0.5,
+  "w": 720,
+  "h": 360,
+  "scale": 10,
+  "unit": "K",
+  "layers": {
+   "max": "temp/diviner_max.png",
+   "min": "temp/diviner_min.png",
+   "noon": "temp/diviner_noon.png",
+   "predawn": "temp/diviner_predawn.png"
+  },
+  "label": "REGIONAL",
+  "source": "LRO Diviner bolometric brightness temperature, Williams et al. 2017 (JGR Planets 122:1029), served by NASA Trek at 0.5 deg"
+ },
+ "checks": {
+  "global_min_m": -8981.5,
+  "global_max_m": 10685.5
+ }
+}
