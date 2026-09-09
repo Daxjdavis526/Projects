@@ -26,7 +26,8 @@ if (!existsSync(join(shim, 'index.js'))) {
 
 import { results } from './harness.mjs';
 
-const suites = ['./field.test.mjs', './anatomy.test.mjs', './physics.test.mjs'];
+const suites = ['./field.test.mjs', './anatomy.test.mjs', './physics.test.mjs',
+  './movement.test.mjs', './transit.test.mjs'];
 for (const s of suites) {
   const mod = await import(s);
   process.stdout.write(`\n${mod.NAME.padEnd(22)} `);

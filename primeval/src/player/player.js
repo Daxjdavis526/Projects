@@ -18,6 +18,9 @@ export class Player {
     this.yaw = 0;
     this.pitch = 0;
     this.grounded = false;
+    this.coyote = 0;            // grace period after walking off an edge
+    this.jumpBuffer = 0;        // grace period before touching down
+    this.jumpLock = 0;          // stops the ground snap eating a fresh jump
     this.crouching = false;
     this.sprinting = false;
     this.swimming = false;
@@ -145,10 +148,21 @@ export class Player {
       this.grounded = false;
     } else {
       this.vel.y -= g * dt;
-      if (canMove && input.anyHit(KEYS.jump) && this.grounded && this.stamina > 8) {
+      // A jump needs the press and the ground to line up in the same frame only
+      // if you are unforgiving about it. The buffer remembers a press made just
+      // before landing; coyote time remembers ground left a moment ago. Between
+      // them, a jump that looks like it should have worked does.
+      this.jumpLock = Math.max(0, this.jumpLock - dt);
+      this.coyote = this.grounded ? PLAYER.coyoteTime : Math.max(0, this.coyote - dt);
+      this.jumpBuffer = Math.max(0, this.jumpBuffer - dt);
+      if (canMove && input.anyHit(KEYS.jump)) this.jumpBuffer = PLAYER.jumpBuffer;
+      if (this.jumpBuffer > 0 && this.coyote > 0 && this.stamina > 1) {
         this.vel.y = PLAYER.jumpSpeed * (opts.jumpMul ?? 1);
-        this.stamina -= 7;
+        this.stamina = Math.max(0, this.stamina - PLAYER.jumpCost);
         this.grounded = false;
+        this.coyote = 0;
+        this.jumpBuffer = 0;
+        this.jumpLock = 0.2;
       }
     }
 
@@ -164,7 +178,14 @@ export class Player {
     const floor = Math.max(groundY2, colY2);
 
     const wasGrounded = this.grounded;
-    if (this.pos.y <= floor + 0.001) {
+    // Snap down onto ground we are barely off, rather than treating every
+    // downhill step as a fall. Only while descending, and never in the moment
+    // after a jump.
+    // Note this must not require having been grounded last frame: gate it on
+    // that and a single hair's-breadth gap locks you out of the ground for
+    // good, skiing a few centimetres above the slope for the rest of the run.
+    const snap = (this.jumpLock <= 0 && this.vel.y <= 0.01) ? PLAYER.groundSnap : 0;
+    if (this.pos.y <= floor + 0.001 || this.pos.y <= floor + snap) {
       if (!wasGrounded && this.vel.y < -7) {
         // Landing: dip the camera and take fall damage past a threshold.
         const impact = -this.vel.y;

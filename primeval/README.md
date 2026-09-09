@@ -53,12 +53,21 @@ Then fly it down.
 | `Shift` | afterburner |
 | `R` | toggle vectored (VTOL) and aerodynamic modes |
 | `G` | landing gear · `F` landing lights · `V` cockpit / chase |
-| `Tab` | transit burn to the other world — needs vacuum, alignment and throttle |
+| `Tab` | transit burn to the other world — press it whenever, even on the pad |
 | `B` | deploy the exosuit onto the surface (once you have one) |
 | `E` | disembark (landed only) |
 
 Gear down is drag. Gear up is a belly landing. The ship will tell you which
 one you just did.
+
+The crossing is 402,000 km, so `Tab` does it in a thirteen-second burn and
+drops you nine kilometres over the far side, nose down and doing 200 m/s —
+close enough to pick a landing site and start slowing down. There is no fuel to
+manage: the gauge is scenery. If you would rather it were a discipline, the
+switches are `infiniteFuel`, `transitNeedsSpace`, `transitNeedsAlignment` and
+`transitArrivalAltitude` in `src/config.js`, and turning them back on restores
+the original version — clear the atmosphere, line the nose up, throttle past
+55%, and come in from 220 km.
 
 ### BASTION exosuit
 

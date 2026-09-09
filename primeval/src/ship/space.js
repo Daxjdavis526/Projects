@@ -22,7 +22,7 @@ export class SpaceStage {
     this.game = game;
     this.orbitT = 0;
     this.transit = null;
-    this.arrivalAltitude = 220000;
+    this.arrivalAltitude = SHIP.transitArrivalAltitude;
     this.starStreak = 0;
     this.destination = null;
   }
@@ -92,23 +92,39 @@ export class SpaceStage {
     const s = game.ship;
     if (!s || game.mode !== 'SHIP') return false;
     if (this.transit) return false;
-    if (s.state !== 'SPACE') return false;
-    if (s.fuel < 12) return false;
-    return this.alignment(game) > 0.90 && s.throttle > 0.55;
+    if (!SHIP.transitFromGround && (s.state === 'LANDED' || s.state === 'BOARDING')) return false;
+    if (s.state === 'BOARDING') return false;
+    if (SHIP.transitNeedsSpace && s.state !== 'SPACE') return false;
+    if (!SHIP.infiniteFuel && s.fuel < 12) return false;
+    if (SHIP.transitNeedsAlignment && this.alignment(game) <= 0.90) return false;
+    if (SHIP.transitNeedsAlignment && s.throttle <= 0.55) return false;
+    return true;
   }
 
   transitBlocker(game) {
     const s = game.ship;
-    if (!s || s.state !== 'SPACE') return 'CLEAR ATMOSPHERE FIRST';
-    if (s.fuel < 12) return 'FUEL TOO LOW FOR TRANSIT';
-    if (this.alignment(game) <= 0.90) return `ALIGN NOSE TO ${this.destinationName()}`;
-    if (s.throttle <= 0.55) return 'THROTTLE UP FOR TRANSIT BURN';
+    if (!s) return 'NO SHIP';
+    if (s.state === 'BOARDING') return 'CLOSING UP';
+    if (!SHIP.transitFromGround && s.state === 'LANDED') return 'LIFT OFF FIRST';
+    if (SHIP.transitNeedsSpace && s.state !== 'SPACE') return 'CLEAR ATMOSPHERE FIRST';
+    if (!SHIP.infiniteFuel && s.fuel < 12) return 'FUEL TOO LOW FOR TRANSIT';
+    if (SHIP.transitNeedsAlignment && this.alignment(game) <= 0.90) {
+      return `ALIGN NOSE TO ${this.destinationName()}`;
+    }
+    if (SHIP.transitNeedsAlignment && s.throttle <= 0.55) return 'THROTTLE UP FOR TRANSIT BURN';
     return null;
   }
 
   begin(game) {
     if (!this.canTransit(game)) return false;
     this.transit = { remaining: TRANSIT_DISTANCE, t: 0, duration: 13, peak: 0 };
+    // Leaving from the pad: unstick and climb away, so the burn does not start
+    // with the ship sitting in the dirt.
+    if (game.ship.state === 'LANDED') {
+      game.ship.pos.y += 3;
+      game.ship.vel.y = Math.max(game.ship.vel.y, 40);
+      game.ship.gearDown = false;
+    }
     this.destination = this.destinationName();
     game.ship.state = 'TRANSIT';
     game.ship.say(`TRANSIT BURN — ${this.destination}`, 4);
@@ -136,7 +152,7 @@ export class SpaceStage {
     tr.peak = Math.sin(p * Math.PI);
     this.starStreak = tr.peak;
     ship.burn = 1;
-    ship.fuel = clamp(ship.fuel - dt * 1.35, 0, SHIP.maxFuel);
+    if (!SHIP.infiniteFuel) ship.fuel = clamp(ship.fuel - dt * 1.35, 0, SHIP.maxFuel);
     ship.shake = Math.max(ship.shake, 0.14 + tr.peak * 0.18);
 
     if (game.input.down('KeyS') && tr.t > 1.5) { this.abort(game); return; }
@@ -155,8 +171,11 @@ export class SpaceStage {
     game.emit('transitArrive', dest);
     game.switchLocale(dest === 'ANVIL' ? 'moon' : 'planet', { fromSpace: true });
     const site = dest === 'ANVIL' ? game.moonSite : game.landingSite;
-    ship.pos.set(site.x + 2600, this.arrivalAltitude, site.z + 4200);
-    ship.vel.set(-140, -820, -220);
+    // Close in and slow enough to fly, rather than 220 km up doing 820 m/s —
+    // that descent was most of the journey and none of the fun.
+    const v = SHIP.transitArrivalSpeed;
+    ship.pos.set(site.x + 900, this.arrivalAltitude, site.z + 1500);
+    ship.vel.set(-v * 0.18, -v, -v * 0.28);
     // Point the nose down the velocity vector so the first thing you see is
     // the surface coming up at you.
     const look = ship.vel.clone().normalize();

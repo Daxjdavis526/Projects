@@ -103,6 +103,13 @@ export const PLAYER = {
   staminaDrain: 17,           // per second sprinting
   staminaRegen: 12,
   stepUp: 0.62,
+  // Walking down a slope leaves you a few centimetres airborne every frame.
+  // Without a snap the ground flag flickers, which stutters the footsteps and
+  // the head bob and silently eats jumps.
+  groundSnap: 0.45,
+  coyoteTime: 0.14,           // still jumpable just after leaving the ground
+  jumpBuffer: 0.16,           // jump pressed just before landing still fires
+  jumpCost: 7,
 };
 
 export const MECH = {
@@ -122,11 +129,23 @@ export const MECH = {
 export const SHIP = {
   name: 'HALBERD',
   maxThrust: 34,              // m/s^2 at full throttle
-  hoverPower: 1.9,            // multiple of local gravity available in VTOL
+  // Multiple of local gravity available in VTOL. This being a multiple of the
+  // LOCAL value meant the moon, at a fifth of a g, got thrusters that barely
+  // beat the ship's own weight: six seconds of full lift bought four metres.
+  hoverPower: 3.4,
   maxFuel: 100,
   cruiseCeiling: 20000,
   spaceAltitude: 62000,
   orbitAltitude: 140000,
+  // The trip between the two worlds is meant to be a journey, not a chore.
+  // Fuel management and a two-minute climb to the transit altitude were the
+  // chore; both are off.
+  infiniteFuel: true,
+  transitNeedsSpace: false,   // airborne is enough
+  transitFromGround: true,    // and so is sitting on the pad
+  transitNeedsAlignment: false,
+  transitArrivalAltitude: 9000,
+  transitArrivalSpeed: 200,
 };
 
 export const KEYS = {

@@ -230,10 +230,12 @@ export class Ship {
     this.pos.addScaledVector(this.vel, dt);
 
     // --- fuel ---
-    const burnRate = (this.throttle * 0.55 + this.after * 1.4 + Math.abs(this.lift ?? 0) * 0.5
-      + (this.vtol ? 0.35 : 0)) * (game.locale.hasAtmosphere ? 1 : 0.7);
-    this.fuel = clamp(this.fuel - burnRate * dt * 0.55, 0, SHIP.maxFuel);
-    if (this.fuel <= 0) { this.throttle = Math.min(this.throttle, 0.12); this.after = 0; }
+    if (!SHIP.infiniteFuel) {
+      const burnRate = (this.throttle * 0.55 + this.after * 1.4 + Math.abs(this.lift ?? 0) * 0.5
+        + (this.vtol ? 0.35 : 0)) * (game.locale.hasAtmosphere ? 1 : 0.7);
+      this.fuel = clamp(this.fuel - burnRate * dt * 0.55, 0, SHIP.maxFuel);
+      if (this.fuel <= 0) { this.throttle = Math.min(this.throttle, 0.12); this.after = 0; }
+    }
 
     // --- reentry heating ---
     const heatLoad = atmos * Math.pow(s / 260, 3);
