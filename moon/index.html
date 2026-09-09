@@ -400,6 +400,16 @@ canvas{display:block;position:fixed;inset:0}
   background:#000;color:var(--crit);font-size:12px;white-space:pre-wrap;
   line-height:1.7;overflow:auto;
 }
+/* Its opposite number: an error the game carried on through. It has to be
+   readable and it must not take the screen, because there is still a Moon
+   behind it. Click to dismiss. */
+#notice{
+  position:fixed;left:7vw;bottom:26vh;z-index:89;display:none;max-width:min(64ch,42vw);
+  max-height:30vh;overflow:auto;padding:11px 13px;
+  background:var(--panel);border:1px solid var(--edge);border-left:2px solid var(--crit);
+  border-radius:2px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  color:var(--crit);font-size:11px;line-height:1.6;white-space:pre-wrap;cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -720,6 +730,7 @@ canvas{display:block;position:fixed;inset:0}
   <em>press R to be recovered to the ship</em>
 </div></div>
 <div id="fatal"></div>
+<div id="notice" title="click to dismiss"></div>
 
 <script type="importmap">
 {
@@ -729,15 +740,47 @@ canvas{display:block;position:fixed;inset:0}
 }
 </script>
 <script>
-  window.addEventListener('error', e => {
-    const el = document.getElementById('fatal');
-    el.style.display = 'flex';
-    el.textContent = 'SELENE failed to start\n\n' + (e.error && e.error.stack || e.message);
-  });
-  window.addEventListener('unhandledrejection', e => {
-    const el = document.getElementById('fatal');
-    el.style.display = 'flex';
-    el.textContent = 'SELENE failed to start\n\n' + (e.reason && e.reason.stack || e.reason);
+  /* Two different failures used to wear the same coat. A module that throws on
+     the way up means there is no game, and taking the whole screen to say so is
+     right. An error thrown by one frame does not mean that: `frame()` re-queues
+     itself before it does anything else, so the next frame runs and the Moon is
+     still there — and a full-screen black panel on top of it, reading "failed
+     to start", was worse than the error it was reporting. That is exactly what
+     a landing did on the day this shipped.
+
+     So: before the first frame, the takeover. After it, a notice you can read
+     and dismiss, with the game still running behind it. Nothing is swallowed —
+     every error still reaches the console, and the harness still fails on it. */
+  let seen = 0;
+  function report(detail) {
+    const running = window.SELENE && window.SELENE.ready;
+    if (!running) {
+      const el = document.getElementById('fatal');
+      el.style.display = 'flex';
+      el.textContent = 'SELENE failed to start\n\n' + detail;
+      return;
+    }
+    /* One bad frame is worth reading. The same one sixty times a second is not,
+       so the count is shown instead of the text being rewritten forever. */
+    seen++;
+    const el = document.getElementById('notice');
+    el.style.display = 'block';
+    if (seen === 1) {
+      el.textContent = 'SELENE hit an error and kept going. The Moon is still '
+        + 'behind this — click to dismiss.\n\n' + detail;
+    } else {
+      el.textContent = `SELENE hit ${seen} errors and kept going. Click to `
+        + 'dismiss; reload if it stops behaving.\n\n' + detail;
+    }
+  }
+  window.addEventListener('error', e =>
+    report((e.error && e.error.stack) || e.message));
+  window.addEventListener('unhandledrejection', e =>
+    report((e.reason && e.reason.stack) || e.reason));
+  addEventListener('DOMContentLoaded', () => {
+    document.getElementById('notice').addEventListener('click', function () {
+      this.style.display = 'none';
+    });
   });
 </script>
 <script type="module" src="./src/main.js"></script>

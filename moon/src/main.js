@@ -8,7 +8,7 @@
      ?site=apollo11        a site id from data/sites.json, or lat,lon
      ?t=1969-07-20T20:17Z  simulation start time
      ?alt=800              starting altitude in metres
-     ?view=orbit|ground    camera framing
+     ?view=orbit|ground|descent   camera framing, or fly the landing in
      ?quality=high         performance | balanced | high | ultra | science
      ?rate=600             time acceleration
      ?offline=1            do not stream anything from NASA
@@ -675,6 +675,14 @@ async function start() {
     }
   }
 
+  /* `?view=descent` flies the approach into `?site=` rather than starting on
+     the ground there. It is the only way to reach the landing from a URL, which
+     is why nothing tested it until a landing crashed on the live site: the
+     harness's `descent` shot uses `view=ground`, and everything that is not
+     `view=orbit` starts already parked. The keep-out still applies, so asking
+     to land at Tranquility Base puts you two kilometres short of it. */
+  if (params.get('view') === 'descent') land({ lat: site.lat, lon: site.lon });
+
   /* `?mode=eva` starts on foot, which is what the screenshot harness wants when
      it is checking the suit, the lamps or the third-person camera. */
   if (params.get('mode') === 'eva') {
@@ -1028,8 +1036,21 @@ async function start() {
       cam.alt = eva.player.llh.h; cam.yaw = eva.player.yaw; cam.pitch = eva.player.pitch;
       world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
     } else if (mode === 'descent') {
-      descent.step(dtWall);
-      const c = descent.camera();
+      /* Held for the length of the branch rather than read twice, because the
+         second read used to come back null and take the whole game with it.
+         Touchdown happens inside `step`: it calls `finish`, which calls the
+         `onDone` this file passed in, which sets `descent = null` and flips
+         `mode` to 'surface' — all before `step` has returned. The next line
+         then asked the cleared variable for a camera and threw, on exactly one
+         frame, the frame you land on. Nothing caught it because nothing had
+         ever flown a landing: `?view=descent` exists now partly so the
+         screenshot harness can.
+
+         The frame still finishes on the pose it landed in, which is the right
+         one to draw; the next frame is a surface frame. */
+      const d = descent;
+      d.step(dtWall);
+      const c = d.camera();
       cam.lat = c.lat; cam.lon = c.lon; cam.alt = c.alt;
       cam.yaw = c.yaw; cam.pitch = c.pitch;
       llhToXyz(cam.lat, cam.lon, cam.alt, world);
