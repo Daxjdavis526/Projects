@@ -394,7 +394,39 @@ canvas#gl{display:block;position:fixed;inset:0;width:100%;height:100%}
   };
   window.addEventListener('error', e => fatal(e.error?.stack || e.message));
   window.addEventListener('unhandledrejection', e => fatal(e.reason?.stack || String(e.reason)));
-  import('./src/main.js').catch(e => fatal(e?.stack || String(e)));
+
+  // Opened by double-clicking index.html. Browsers refuse to load ES modules
+  // over file://, so nothing below would work and the error it throws explains
+  // none of that. Say the useful thing instead.
+  if (location.protocol === 'file:') {
+    const el = document.getElementById('fatal');
+    el.style.display = 'flex';
+    el.style.color = '#e8e4dc';
+    el.innerHTML =
+      '<div style="max-width:56em">'
+      + '<div style="color:#ff9a3c;font-size:15px;letter-spacing:.14em;margin-bottom:1.4em">'
+      + 'PRIMEVAL NEEDS A LOCAL SERVER</div>'
+      + '<div style="font-size:13px;line-height:1.9">'
+      + 'The game is fine — it just cannot start this way. You opened it straight off the '
+      + 'disk, and browsers refuse to load a page&rsquo;s modules over <b>file://</b>. '
+      + 'That is a browser security rule, not a fault in the game.'
+      + '<div style="margin:1.8em 0 0.8em;color:#ff9a3c;letter-spacing:.1em">DO THIS INSTEAD</div>'
+      + 'Go back to the folder this file is in and double-click:'
+      + '<div style="margin:1em 0 1em 1.5em;color:#9fe8b0">'
+      + '<b>Start PRIMEVAL.bat</b> &nbsp;on Windows<br>'
+      + '<b>Start PRIMEVAL.command</b> &nbsp;on macOS'
+      + '</div>'
+      + 'A small black window opens and your browser goes to '
+      + '<b>http://localhost:8124</b>. Leave that window open while you play.'
+      + '<div style="margin:1.8em 0 0.8em;color:#ff9a3c;letter-spacing:.1em">OR BY HAND</div>'
+      + 'Open a terminal in this folder and run <b>python3 -m http.server 8124</b> '
+      + '(<b>py -m http.server 8124</b> on Windows), then go to '
+      + '<b>http://localhost:8124</b>.'
+      + '</div></div>';
+    document.getElementById('loading')?.classList.add('gone');
+  } else {
+    import('./src/main.js').catch(e => fatal(e?.stack || String(e)));
+  }
 </script>
 </body>
 </html>
