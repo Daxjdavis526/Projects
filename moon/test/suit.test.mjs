@@ -5,7 +5,8 @@
    what you are doing, and that the warnings fire at the levels real flight
    rules use rather than wherever looks dramatic. */
 import { Suit, MODE, co2PartialPressure } from '../src/physics/suit.js';
-import { SUIT } from '../src/config.js';
+import { SUIT, TIME } from '../src/config.js';
+import { readFileSync } from 'node:fs';
 
 let failures = 0;
 const check = (label, cond, detail = '') => {
@@ -182,6 +183,53 @@ console.log('dust, which is a thermal problem before it is anything else');
   check('a recharge does not clean anything, because a tank of oxygen would not',
         spotless.dust === 0.5);
   check('and it is carried in the snapshot', new Suit().snapshot().dust === 0);
+}
+
+/* ---------------------------------------------------------------------------
+   The clock the suit runs on, which is the one that shipped wrong.
+
+   For a while the game stepped life support by the time acceleration, so
+   fast-forwarding the sky drained the tanks with it. At the 600x default that
+   turned a nine-hour EVA into fifty-four seconds of play, and it reached real
+   players before anyone noticed, because every test here feeds `step` its own
+   dt and the model is blameless: the fault was entirely in the callers.
+
+   So this checks two things the model alone cannot. That elapsed time is the
+   only thing that empties a tank -- the same hour in one step or sixty must
+   cost the same -- and that no caller has quietly started multiplying that
+   hour by the time rate again. The second is a source check rather than a
+   behavioural one, because the callers own three.js and will not import into
+   node; a grep that fails the build is worth more here than elegance. */
+console.log('the clock the suit runs on');
+{
+  const once = new Suit(); once.step(3600, { exertion: 0.35, sunlit: true });
+  const often = new Suit(); eva(often, 1, { exertion: 0.35, sunlit: true });
+  check('an hour is an hour however finely it is sliced',
+    Math.abs(once.o2 - often.o2) < 1e-9 && Math.abs(once.power - often.power) < 1e-9,
+    `${once.o2.toFixed(6)} vs ${often.o2.toFixed(6)} kg`);
+
+  /* Comments talk about the bug on purpose, so they have to go before the
+     code is searched or this would fail on its own explanation. */
+  const code = (f) => readFileSync(new URL(f, import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const callers = ['../src/main.js', '../src/game/eva.js'];
+  const scaled = [];
+  for (const f of callers) {
+    for (const line of code(f).split('\n')) {
+      if (!/\b(suit\.step|needs\.step|rover\.consume)\s*\(/.test(line)) continue;
+      if (/timeRate|timeScale/.test(line)) scaled.push(f + ': ' + line.trim());
+    }
+  }
+  check('nothing scales life support by the time rate',
+    scaled.length === 0, scaled.join(' | ') || 'all callers pass the frame dt');
+
+  /* The default matters as well as the coupling: the two together are what
+     decided how long the suit actually lasted. */
+  check('the sky runs fast enough to watch and no faster',
+    TIME.defaultRate >= 1 && TIME.defaultRate <= 600, TIME.defaultRate + 'x');
+  const budget = new Suit().endurance(0.35);
+  check('and a full EVA is hours of real time, not a minute of it',
+    budget / 3600 > 1, (budget / 3600).toFixed(1) + ' h of wall clock');
 }
 
 console.log(failures ? `\nsuit: ${failures} FAILED` : '\nsuit: all checks passed');

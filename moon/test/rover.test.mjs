@@ -56,18 +56,24 @@ console.log('speed and boost');
 {
   const r = new Rover({ lat: 0, lon: 0, ground: flat });
   drive(r, 60, { throttle: 1 });
-  check('flat out is about 18 km/h, like the Apollo record',
+  check('flat out is 60 km/h, which the Apollo rover would not recognise',
     Math.abs(r.speed - ROVER.speedMax) < 0.1, (r.speed * 3.6).toFixed(1) + ' km/h');
 
   const b = new Rover({ lat: 0, lon: 0, ground: flat });
   drive(b, 60, { throttle: 1 });
   let top = 0;
   for (let i = 0; i < 120 * 11; i++) { b.step(1 / 120, { throttle: 1, boost: true }); top = Math.max(top, b.speed); }
-  check('boost gets it to about 30 km/h', top > ROVER.speedMax * 1.4,
+  check('boost gets it past 100 km/h', top > ROVER.speedMax * 1.4,
     (top * 3.6).toFixed(1) + ' km/h');
   check('but the drive heats up', b.boostHeat > 0.9, b.boostHeat.toFixed(2));
   drive(b, 6, { throttle: 1, boost: true });
-  check('and once it is hot the boost stops working', b.speed <= ROVER.speedMax + 0.01,
+  /* Not `<= speedMax` to the centimetre: once the drive is too hot it refuses,
+     cools a little below the threshold, grants one more moment of boost and
+     refuses again, so the speed hovers a hair over the cruise ceiling rather
+     than sitting exactly on it. What matters is that it is nowhere near the
+     boost ceiling any more. */
+  check('and once it is hot the boost stops working',
+    b.speed < (ROVER.speedMax + ROVER.speedBoost) / 2,
     'back to ' + (b.speed * 3.6).toFixed(1) + ' km/h');
   drive(b, 30, { throttle: 0 });
   check('and cools down again when you stop asking', b.boostHeat < 0.3, b.boostHeat.toFixed(2));
@@ -88,8 +94,11 @@ console.log('stopping');
   while (Math.abs(r.speed) > 0.05 && t < 60) {
     d += Math.abs(r.speed) / 120; r.step(1 / 120, { brake: true }); t += 1 / 120;
   }
-  check('stopping from full speed takes tens of metres',
-    d > 8 && d < 60, `${d.toFixed(0)} m from ${(v0 * 3.6).toFixed(0)} km/h`);
+  /* Braking is the same traction budget as driving, so at 60 km/h in a sixth
+     of a gravity it takes more than a hundred metres to stop. This is the
+     number that should make anyone think twice before boosting downhill. */
+  check('stopping from full speed takes over a hundred metres',
+    d > 60 && d < 200, `${d.toFixed(0)} m from ${(v0 * 3.6).toFixed(0)} km/h`);
   check('which is six times an Earth car doing the same speed',
     d > (v0 * v0 / (2 * ROVER.grip * 9.81)) * 4,
     `${d.toFixed(0)} m against ${(v0 * v0 / (2 * ROVER.grip * 9.81)).toFixed(0)} m on Earth`);
@@ -138,6 +147,34 @@ console.log('slopes');
   drive(tooSteep, 20, { throttle: 1 });
   check('and it cannot climb forty five: gravity beats the traction budget',
     tooSteep.speed < 0, (tooSteep.speed * 3.6).toFixed(1) + ' km/h, sliding backwards');
+}
+
+/* Getting air, which is the whole point of a fast vehicle in a sixth of a
+   gravity. A rise that ends is a ramp: drive up it at the boost ceiling and the
+   wheels should leave the ground for long enough to notice, and the vehicle
+   should come down on them rather than staying in the air for ever. */
+console.log('leaving the ground');
+{
+  const mPerDeg = R_MOON * Math.PI / 180;
+  /* Rising at ten degrees until the lip, flat after it. */
+  const lipLat = 200 / mPerDeg;
+  const k = Math.tan(10 * Math.PI / 180);
+  const jump = {
+    heightAt: (lat) => Math.min(lat, lipLat) * mPerDeg * k,
+    slopeAt: (lat) => (lat < lipLat ? 10 : 0),
+    normalAt: (lat) => (lat < lipLat
+      ? { e: 0, n: -Math.sin(0.1745), u: Math.cos(0.1745) } : { e: 0, n: 0, u: 1 }),
+  };
+  const r = new Rover({ lat: 0, lon: 0, heading: 0, ground: jump });
+  r.speed = ROVER.speedBoost;
+  let air = 0;
+  for (let i = 0; i < 120 * 40; i++) {
+    r.step(1 / 120, { throttle: 1, boost: true });
+    air = Math.max(air, r.airborneFor);
+  }
+  check('the lip throws it into the air', air > 0.5, air.toFixed(1) + ' s of air');
+  check('and it lands again rather than flying away',
+    r.airborneFor < 1 && r.contact.some(Boolean), r.airborneFor.toFixed(2) + ' s airborne now');
 }
 
 console.log('rolling over');
@@ -197,8 +234,8 @@ console.log('driving somewhere');
   const from = { lat: r.lat, lon: r.lon };
   drive(r, 600, { throttle: 1 });
   const km = surfaceDistance(from.lat, from.lon, r.lat, r.lon) / 1000;
-  check('ten minutes of driving covers a couple of kilometres',
-    km > 1.5 && km < 4, km.toFixed(2) + ' km');
+  check('ten minutes of driving covers ten kilometres',
+    km > 8 && km < 11, km.toFixed(2) + ' km');
   check('the odometer agrees with the map',
     Math.abs(r.distance / 1000 - km) < 0.05, (r.distance / 1000).toFixed(2) + ' km driven');
   check('heading north-east raised the latitude and the longitude',

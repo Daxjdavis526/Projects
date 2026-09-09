@@ -22,7 +22,7 @@ import { TerrainSystem } from './render/terrain.js';
 import { Sky } from './render/sky.js';
 import { DustField } from './render/dust.js';
 import { Exposure } from './render/exposure.js';
-import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime } from './physics/ephemeris.js';
+import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime, nextDaylight } from './physics/ephemeris.js';
 import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
          offsetLatLon, surfaceDistance, bearing } from './physics/frames.js';
 import { loadVendoredHeightfield, readJson, readBinary } from './terrain/loader.js';
@@ -240,6 +240,26 @@ async function start() {
     site = { id: 'custom', name: 'custom', lat, lon };
   }
   if (!site) site = sites.sites[0];
+
+  /* --- and is anyone home when we get there? ------------------------------
+     The Moon turns once a month, so "now" is a coin toss between a lit
+     landscape and fourteen days of dark. On the day this was written forty of
+     the forty-seven sites in the catalogue were below the horizon or within
+     three degrees of the terminator, Tranquility Base among them at eighty-two
+     degrees below -- local midnight. Arriving there without being told is
+     indistinguishable from a black screen and a broken game, which is exactly
+     how it was reported.
+     So unless a time was asked for, the clock moves to the next time the sun
+     is over the place we are going. Nothing about the lighting is faked: the
+     date on the HUD is the date being simulated, and the shift is said out
+     loud when it happens. `?t=` still wins, and touching the picker's clock
+     hands control back for good. */
+  let autoClock = !params.get('t');
+  let clockMoved = 0;
+  if (autoClock) {
+    const lit = nextDaylight(state.simMs, site.lat, site.lon);
+    if (lit && lit.waitedMs > 0) { state.simMs = lit.ms; clockMoved = lit.waitedMs; }
+  }
   /* Cut the pit before anyone stands anywhere near it. The frame loop would get
      to this a moment later, which is a moment too late: it would put the ground
      a hundred metres below someone who had already been placed on it. */
@@ -444,6 +464,15 @@ async function start() {
   /* One implementation each for getting in and out of things, because the
      keyboard and the pad both do them and two copies is how they diverge. */
   const clamp1 = (v) => (v < -1 ? -1 : v > 1 ? 1 : v);
+  /* The two movement axes, in one place so the arrows cannot be bound for
+     walking and forgotten for driving. `KeyW` and friends are physical key
+     positions rather than letters, so this is still the top-left cluster on a
+     keyboard that calls it Z. */
+  const held = (...codes) => codes.some(c => keys.has(c));
+  const moveAhead = () =>
+    (held('KeyW', 'ArrowUp') ? 1 : 0) - (held('KeyS', 'ArrowDown') ? 1 : 0);
+  const moveSide = () =>
+    (held('KeyD', 'ArrowRight') ? 1 : 0) - (held('KeyA', 'ArrowLeft') ? 1 : 0);
 
   const boardToggle = () => {
     if (!vehicle || !eva) return;
@@ -515,13 +544,22 @@ async function start() {
     ).join('') || '<div class="none">nowhere yet</div>';
   };
 
-  /* The bottom-right line, which is the game's whole notification budget. */
+  /* The bottom-right line, which is the game's whole notification budget.
+     What it falls back to depends on whether the pointer is yours or the
+     game's: on the surface with the pointer loose, the single most useful
+     thing it can say is how to start looking around. */
   let hintBack = 0;
+  const idleHint = () =>
+    (mode !== 'orbit' && !looking() && !lockDenied)
+      ? 'click to look  ·  H for controls'
+      : 'H for controls';
+  const restHint = () => { el('hint').textContent = idleHint(); };
   const say = (text, ms) => {
     el('hint').textContent = text;
     clearTimeout(hintBack);
-    hintBack = setTimeout(() => { el('hint').textContent = 'H for controls'; }, ms);
+    hintBack = setTimeout(restHint, ms);
   };
+  addEventListener('pointerlockchange', restHint, false);
 
   const startEva = (lat, lon) => {
     /* Standing on the exact published coordinates of a landing site puts you
@@ -532,7 +570,12 @@ async function start() {
       stage, heightfield, quality: state.quality,
       lat: clear.lat, lon: clear.lon,
       yaw: clear.yaw ?? cam.yaw * 180 / Math.PI,
-      suitMode: params.get('suit') || undefined,
+      /* The URL wins, then whatever the settings panel was last left on. This
+         read the URL alone, so a saved `relaxed` was honoured until you
+         reloaded and then silently was not: `Settings.apply` pushes the mode
+         into a live suit, and on a fresh load there is no live suit yet --
+         the game opens in orbit and this builds the first one. */
+      suitMode: params.get('suit') || (Save.readSettings() || {}).suit || undefined,
     });
     if (astronaut) eva.setModel(astronaut);
     if (base) eva.setBase(base);
@@ -575,7 +618,9 @@ async function start() {
     onLand: (pick) => land(pick),
     onOverlay: (v) => terrain.setOverlay(v),
     getTime: () => state.simMs,
-    onTime: (ms) => { state.simMs = ms; },
+    /* Setting the clock by hand is a decision, and it stands: from here on
+       nothing moves it to find you better light. */
+    onTime: (ms) => { state.simMs = ms; autoClock = false; },
   });
   terrain.setOverlayMaps(geology, temperature);
   /* The marks, drawn on the surface from the same recorders the nav map uses. */
@@ -600,6 +645,13 @@ async function start() {
     mode = 'descent';
     orbit.show(false);
     terrain.setOverlay(0);
+    /* You may well have picked somewhere other than where the URL pointed, and
+       the boot-time daylight search only knew about that first place. Look
+       again for wherever you actually chose. */
+    if (autoClock) {
+      const lit = nextDaylight(state.simMs, pick.lat, pick.lon);
+      if (lit && lit.waitedMs > 0) { state.simMs = lit.ms; clockMoved = lit.waitedMs; }
+    }
     /* Not on top of somebody else's spacecraft: see game/keepout.js. */
     keepOut = clearLanding(sites.sites, pick.lat, pick.lon);
     if (keepOut.site) console.info('keep-out:', explainKeepOut(keepOut));
@@ -640,7 +692,91 @@ async function start() {
     const out = offsetLatLon(lat, lon, (heading + 180) % 360, 7.5);
     startEva(out.lat, out.lon);
     eva.player.yaw = heading * Math.PI / 180;
+    arriveInto(lat, lon);
     save.write(game, 'landed');
+  }
+
+  /* What the ground looks like at the moment you reach it, said out loud.
+     -----------------------------------------------------------------------
+     Two cases worth a sentence. Either the clock was moved to find the sun,
+     which the player is entitled to know about because the date on the HUD is
+     no longer today; or it is genuinely night, in which case the screen is
+     black for a real reason and saying nothing makes a correct simulation
+     look like a failed one. Lamps come on by themselves in the dark: a person
+     who had walked down that ladder would not be feeling for the switch. */
+  const days = (ms) => {
+    const d = ms / 86400e3;
+    return d < 1.5 ? `${Math.round(d * 24)} hours` : `${d.toFixed(1).replace(/\.0$/, '')} days`;
+  };
+
+  /* The controls panel, and the one time it opens on its own.
+     -----------------------------------------------------------------------
+     Everything a player needs was already in here on H, and the only thing
+     pointing at it was five words of grey text in a corner. That is not a
+     control scheme, it is a rumour. So the first time anyone stands on the
+     Moon the panel is simply open, and after that it stays out of the way
+     for good. Remembered next to the settings, because a player who has read
+     it once does not want it again tomorrow. */
+  const setHelp = (v) => {
+    state.showHelp = v;
+    el('help').style.display = v ? 'block' : 'none';
+    restHint();
+  };
+  function openHelpOnce() {
+    /* `?help=0` for anyone who already knows, and for the screenshot harness,
+       whose pictures are documentation and should not have a panel across
+       them. `?help=1` forces it back for testing the thing itself. */
+    if (params.get('help') === '0') return;
+    let seen = false;
+    try { seen = !!Save.readSettings().helpSeen; } catch { /* private mode: show it */ }
+    if (seen && params.get('help') !== '1') return;
+    Save.writeSettings({ ...Save.readSettings(), helpSeen: true });
+    setHelp(true);
+  }
+
+  /* Three things the game owned and never mentioned.
+     -----------------------------------------------------------------------
+     The rover parks eleven metres off the ship's port side and boards from
+     within four, and `boardable` has been computed every frame since it was
+     written without anything ever reading it -- so the vehicle was, in
+     practice, invisible. The jetpack is held on J and was findable only by
+     reading the panel. Each of these gets one line, the first time it can
+     possibly be useful, and then never again. */
+  const told = { rover: false, jet: false, rolled: false };
+  let fallingFor = 0;
+  function prompts() {
+    if (photo.active || mode !== 'surface' || !eva) return;
+    if (vehicle && !driving) {
+      const s = vehicle.snapshot(eva.player.llh);
+      if (s.rolled && !told.rolled) {
+        told.rolled = true;
+        say('The rover is on its roof. R rights it.', 6000);
+      } else if (s.boardable && !told.rover) {
+        told.rover = true;
+        say('R gets you into the rover. Shift is the boost.', 6000);
+      }
+    }
+    /* Long enough in the air to be worried rather than mid-stride. */
+    fallingFor = (!driving && eva.player && !eva.player.grounded) ? fallingFor + 1 : 0;
+    if (fallingFor > 90 && !told.jet) {
+      told.jet = true;
+      say('Hold J for the jetpack.', 6000);
+    }
+  }
+
+  function arriveInto(lat, lon) {
+    openHelpOnce();
+    const sunEl = skyAt(ephemerisAt(jdFromUnixMs(state.simMs)), lat, lon, 0).sunEl;
+    if (sunEl <= 0) {
+      if (eva && eva.lampMode === 0) eva.cycleLamps();
+      const dawn = nextDaylight(state.simMs, lat, lon, 0.5);
+      say(dawn && dawn.waitedMs > 0
+        ? `Lunar night, sun ${Math.abs(sunEl).toFixed(0)}° below the horizon. Lamps on. Sunrise in ${days(dawn.waitedMs)} — T runs the clock forward.`
+        : 'Lunar night. Lamps on.', 12000);
+    } else if (clockMoved > 0) {
+      say(`Waited ${days(clockMoved)} for the sun to come up here. The clock is running from ${new Date(state.simMs).toISOString().slice(0, 10)}.`, 10000);
+      clockMoved = 0;
+    }
   }
 
   /* One object holding the live game, so the save system has something to read
@@ -706,14 +842,20 @@ async function start() {
   let pad = pads.read(0);
   addEventListener('keydown', (e) => {
     keys.add(e.code);
-    if (e.code === 'KeyH') { state.showHelp = !state.showHelp; el('help').style.display = state.showHelp ? 'block' : 'none'; }
+    if (e.code === 'KeyH') setHelp(!state.showHelp);
+    if (e.code === 'Escape' && state.showHelp) setHelp(false);
     if (e.code === 'KeyV') { state.showScience = !state.showScience; el('science').style.display = state.showScience ? 'block' : 'none'; }
     if (e.code === 'KeyT') {
       /* From the config table rather than from a copy of it. The brief asked
          for REALISTIC, ACCELERATED and FIXED; `TIME.modes` has said what each
          one means since the first commit and this held its own list, so the
          table was decorative and the two could drift apart silently. */
-      state.timeRate = TIME_RATES[(TIME_RATES.indexOf(state.timeRate) + 1) % TIME_RATES.length];
+      /* Shift steps back down it. The list is ascending and should stay that
+         way -- it reads as one -- but without a way down, getting from the
+         default to held or to real time is five presses of the same key. */
+      const step = e.shiftKey ? -1 : 1;
+      const n = TIME_RATES.length;
+      state.timeRate = TIME_RATES[(TIME_RATES.indexOf(state.timeRate) + step + n) % n];
       say(state.timeRate === 0 ? 'time held'
         : state.timeRate === 1 ? 'time realistic'
         : `time ${fmtRate(state.timeRate)}`, 2000);
@@ -768,7 +910,9 @@ async function start() {
       settings.set('markers', state.markers ? 'on' : 'off');
       sound.beep('select');
     }
-    if (e.code === 'KeyO') { settings.toggle(); sound.beep('select'); }
+    /* The settings panel is buttons, and buttons need a pointer, so opening it
+       hands the pointer back. Clicking the canvas afterwards takes it again. */
+    if (e.code === 'KeyO') { releaseLook(); settings.toggle(); sound.beep('select'); }
     if (e.code === 'KeyK') {
       state.showLog = !state.showLog;
       el('log').classList.toggle('on', state.showLog);
@@ -794,10 +938,43 @@ async function start() {
   addEventListener('keyup', (e) => keys.delete(e.code));
   let dragging = false;
   let dragged = 0;
+  /* Looking around, in the two ways the two views want.
+     -----------------------------------------------------------------------
+     In orbit you are handling an object: you grab the Moon and turn it, so
+     the pointer stays where it is and a press-drag is exactly right. Standing
+     on the surface you are a head, and a head does not work that way. This
+     used to be press-drag everywhere, which meant turning to look at
+     something was grab, drag, release, re-grab, over and over, and it felt
+     broken because for a first-person view it is.
+     So: on the surface, in the rover and in the free camera, a click takes
+     the pointer and the mouse simply turns you until Escape gives it back.
+     The move handler already reads `movementX/Y`, which is what a locked
+     pointer reports, so both paths feed the same two numbers. Drag survives
+     as the fallback for when the lock is refused -- some browsers and most
+     embedded frames will refuse it -- and as the only mode in orbit. */
+  const looking = () => document.pointerLockElement === canvas;
+  const releaseLook = () => { if (looking()) document.exitPointerLock(); };
+  /* Set once the browser has told us no. Without it a refusal is a soft lock:
+     every click would ask again, always fail, and never reach the drag path,
+     which is the one case where looking around has to keep working. */
+  let lockDenied = false;
+  addEventListener('pointerlockerror', () => { lockDenied = true; }, false);
   canvas.addEventListener('pointerdown', (e) => {
+    /* The first click after the panel opens itself is almost always "yes, I
+       have read it" -- and it is the same click that takes the pointer, so
+       reading and playing are not two separate gestures. */
+    if (state.showHelp) setHelp(false);
+    if (mode !== 'orbit' && !looking() && !lockDenied) {
+      /* Only ever from a real gesture. Older browsers return undefined here
+         rather than a promise, hence the shape check. */
+      const r = canvas.requestPointerLock();
+      if (r && typeof r.catch === 'function') r.catch(() => { lockDenied = true; });
+      return;
+    }
     dragging = true; dragged = 0; canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener('pointerup', (e) => {
+    if (!dragging) return;
     dragging = false;
     canvas.releasePointerCapture(e.pointerId);
     if (mode !== 'orbit' || dragged > 6) return;
@@ -816,7 +993,7 @@ async function start() {
     if (hit) orbit.setPick(hit.lat, hit.lon);
   });
   canvas.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
+    if (!dragging && !looking()) return;
     dragged += Math.abs(e.movementX) + Math.abs(e.movementY);
     look.yaw += e.movementX * 0.0022;
     look.pitch += e.movementY * 0.0022;
@@ -877,8 +1054,7 @@ async function start() {
       if (pad.pressed.has('board')) boardToggle();
       if (pad.pressed.has('hatch')) hatchToggle();
       if (pad.pressed.has('help')) {
-        state.showHelp = !state.showHelp;
-        el('help').style.display = state.showHelp ? 'block' : 'none';
+        setHelp(!state.showHelp);
       }
     }
 
@@ -988,8 +1164,8 @@ async function start() {
         /* The stick is analogue where the physics takes an analogue value, so
            easing along a rim at walking pace is something a pad can ask for
            and a key cannot. */
-        throttle: clamp1((keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0) + pad.forward),
-        steer: clamp1((keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0) + pad.strafe),
+        throttle: clamp1(moveAhead() + pad.forward),
+        steer: clamp1(moveSide() + pad.strafe),
         brake: keys.has('Space') || pad.held.has('jump'),
         boost: keys.has('ShiftLeft') || keys.has('ShiftRight') || pad.run,
         toggleCanopy: canopyPress,
@@ -1001,7 +1177,7 @@ async function start() {
          rather than a constraint. Sealed and pressurised, you are breathing
          its air; with the canopy open you are on the suit and it is not. */
       if (vehicle.rover.pressure > 0.9) {
-        vehicle.rover.consume(dt * Math.max(1, state.timeRate) / 3600, 1);
+        vehicle.rover.consume(dt / 3600, 1);
       }
       /* Move the vehicle before reading the seat out of it, or the camera
          trails the vehicle by a frame and the ride looks loose. */
@@ -1009,7 +1185,7 @@ async function start() {
       /* The player goes where the rover goes. */
       eva.player.place(vehicle.rover.lat, vehicle.rover.lon, 0.9);
       eva.player.yaw = cam.yaw;
-      eva.suit.step(dt * Math.max(1, state.timeRate), {
+      eva.suit.step(dt, {
         exertion: 0.12, sunlit: local.sunEl > 0, lights: eva.lampMode > 0,
         inShelter: vehicle.rover.pressure > 0.9,
       });
@@ -1020,15 +1196,14 @@ async function start() {
     } else if (eva) {
       eva.cave = pitField.cave;
       eva.step(dt, {
-        forward: clamp1((keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0) + pad.forward),
-        strafe: clamp1((keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0) + pad.strafe),
+        forward: clamp1(moveAhead() + pad.forward),
+        strafe: clamp1(moveSide() + pad.strafe),
         run: keys.has('ShiftLeft') || keys.has('ShiftRight') || pad.run,
         jump: keys.has('Space') || pad.pressed.has('jump'),
         jet: keys.has('KeyJ') || pad.held.has('jet'),
         dYaw: look.yaw, dPitch: look.pitch,
       }, {
         sunlit: local.sunEl > 0,
-        timeScale: Math.max(1, state.timeRate),
       });
       look.yaw = look.pitch = 0;
       camFrame = eva.camera();
@@ -1103,10 +1278,10 @@ async function start() {
       const boost = keys.has('ShiftLeft') || keys.has('ShiftRight') ? 6 : 1;
       const v = cam.speed * boost * dt;
       let dx = 0, dy = 0, dz = 0;
-      if (keys.has('KeyW')) { dx += fwd.x * v; dy += fwd.y * v; dz += fwd.z * v; }
-      if (keys.has('KeyS')) { dx -= fwd.x * v; dy -= fwd.y * v; dz -= fwd.z * v; }
-      if (keys.has('KeyD')) { dx += right.x * v; dy += right.y * v; dz += right.z * v; }
-      if (keys.has('KeyA')) { dx -= right.x * v; dy -= right.y * v; dz -= right.z * v; }
+      const ahead = moveAhead() * v, side = moveSide() * v;
+      dx += fwd.x * ahead + right.x * side;
+      dy += fwd.y * ahead + right.y * side;
+      dz += fwd.z * ahead + right.z * side;
       if (keys.has('KeyE')) { dx += b.u.x * v; dy += b.u.y * v; dz += b.u.z * v; }
       if (keys.has('KeyQ')) { dx -= b.u.x * v; dy -= b.u.y * v; dz -= b.u.z * v; }
 
@@ -1264,7 +1439,7 @@ async function start() {
     }
     /* Somewhere pressurised is somewhere you can take the helmet off. */
     const sheltered = shelterKind();
-    shelter.needs.step(dt * Math.max(1, state.timeRate));
+    shelter.needs.step(dt);
     if (now - shelterAt > 900) {
       shelterAt = now;
       shelter.update(sheltered, sheltered ? {
@@ -1288,7 +1463,15 @@ async function start() {
     }
 
     /* --- terrain ---------------------------------------------------------- */
-    if (surface) surface.update(cam.lat, cam.lon, cam.alt - surfaceH);
+    /* Driving, the streamer is told where the rover is going rather than only
+       where it is: at the boost ceiling it covers nearly two kilometres a
+       minute, which is faster than a patch arrives. */
+    if (surface) {
+      surface.update(cam.lat, cam.lon, cam.alt - surfaceH,
+        driving && vehicle
+          ? { heading: vehicle.rover.heading, speed: Math.abs(vehicle.rover.speed) }
+          : null);
+    }
     pitField.update(cam.lat, cam.lon);
     if (pitField.cave !== caveOwner) {
       caveOwner = pitField.cave;
@@ -1436,6 +1619,7 @@ async function start() {
       });
     }
     suitHud.update(photo.active ? null : evaSnap);
+    prompts();
     if (photo.active) {
       photo.update({
         lat: cam.lat, lon: cam.lon, simMs: state.simMs, sunEl: local.sunEl,
@@ -1494,6 +1678,10 @@ async function start() {
     get descent() { return descent; },
     get mode() { return mode; },
     land(lat, lon) { land({ lat, lon }); },
+    /* Where the sun is from where you are standing, for tests that care
+       whether it is daylight rather than what the screen looks like. Not
+       `sky`, which is already the renderer's sky above. */
+    skyHere: () => skyAt(ephemerisAt(jdFromUnixMs(state.simMs)), cam.lat, cam.lon, cam.alt),
     temperature,
     get astronaut() { return astronaut; },
     game, save, visited, tracks, moment,

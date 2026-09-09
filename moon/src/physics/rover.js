@@ -85,11 +85,25 @@ export class Rover {
      the plane the vehicle actually rides on. */
   get altitude() { return (this.meanGround ?? this.groundHeight) + this.height; }
 
-  /** Maximum tractive force the ground can accept, in newtons. */
-  tractionLimit() {
+  /**
+   * Maximum tractive force the ground can accept, in newtons.
+   *
+   * This, not the motor, is what decides how hard the rover accelerates. In a
+   * sixth of a gravity the vehicle weighs 2.3 kN, so even good regolith grip
+   * gives under two kilonewtons to push against, well below what the motors
+   * can ask for. Which is why the boost has to work here rather than on the
+   * torque: multiplying a force that is already being clamped away changes
+   * nothing at all, and for a long time that is exactly what it did.
+   *
+   * Boosting therefore raises the effective grip, not the torque -- the drive
+   * shifting torque between wheels to use what the surface will actually
+   * take. That is the fiction, and it is a small one.
+   */
+  tractionLimit(boosting = this.boost) {
     const g = GM_MOON / Math.pow(R_MOON + this.altitude, 2);
     const onGround = this.contact.reduce((n, c) => n + (c ? 1 : 0), 0) / 4;
-    return ROVER.grip * ROVER.mass * g * onGround;
+    const grip = ROVER.grip * (boosting ? ROVER.boostGrip : 1);
+    return grip * ROVER.mass * g * onGround;
   }
 
   /**
@@ -151,6 +165,26 @@ export class Rover {
       load += compression * ROVER.suspK - this.vertical * ROVER.suspC * (this.contact[i] ? 1 : 0);
     }
 
+    /* --- getting air -------------------------------------------------------
+       `height` is measured from the mean of the contact patches, so the body
+       has no memory of how fast that mean was itself rising. Drive off a
+       cliff and this model already works -- the ground falls away, the springs
+       run out of travel and the wheels lose contact. But drive *up* a ramp and
+       over its lip and nothing happened at all: the vehicle had been climbing
+       at thirty metres a second times the sine of the slope, and every bit of
+       that vertical speed was thrown away the instant the ground levelled,
+       because it only ever existed in the ground's frame.
+       So when the ground stops rising, the body keeps the speed it had. The
+       reverse case -- ground suddenly rising -- is left to the springs, which
+       is what they are for. The threshold ignores pebble-scale noise in a
+       real height field, and the cap means a bad sample cannot launch a
+       fifteen-hundred-kilogram vehicle into orbit. */
+    const rate = dt > 0 ? (mean - (this.lastMean ?? mean)) / dt : 0;
+    const shed = (this.groundRate ?? rate) - rate;
+    if (shed > 0.5) this.vertical += Math.min(shed, 8);
+    this.lastMean = mean;
+    this.groundRate = rate;
+
     const weight = ROVER.mass * g;
     this.vertical += (load - weight) / ROVER.mass * dt;
     this.height += this.vertical * dt;
@@ -173,10 +207,15 @@ export class Rover {
        Nothing here is limited by the motors. It is limited by the ground,
        which can only accept about a tenth of a gravity's worth of push. */
     this.boost = !!input.boost && this.boostHeat < 1;
-    const limit = this.tractionLimit();
+    /* The slope is wanted twice -- once for what the wheels can push against
+       and once for what gravity is doing to you -- so it is measured here,
+       above both, rather than only in front of the second. */
+    const slopeDeg = this.ground.slopeAt ? this.ground.slopeAt(this.lat, this.lon, 4) : 0;
+    const slope = slopeDeg * Math.PI / 180;
+    const limit = this.tractionLimit() * Math.cos(slope);
     const maxSpeed = this.boost ? ROVER.speedBoost : ROVER.speedMax;
     const throttle = Math.max(-1, Math.min(1, input.throttle || 0));
-    let force = throttle * (this.boost ? ROVER.motorForce * ROVER.boostFactor : ROVER.motorForce);
+    let force = throttle * ROVER.motorForce;
     if (input.brake) force = -Math.sign(this.speed) * ROVER.brakeForce;
     else if (Math.abs(throttle) < 0.02) force = -Math.sign(this.speed) * ROVER.brakeForce * 0.12;
     /* Grip saturation: ask for more than the surface can give and the wheels
@@ -190,9 +229,10 @@ export class Rover {
     if (before !== 0 && Math.sign(this.speed) !== Math.sign(before) && !input.throttle) this.speed = 0;
 
     /* Slope. On anything past the friction angle the rover slides whatever the
-       driver does, which is what makes a crater wall a decision. */
-    const slopeDeg = this.ground.slopeAt ? this.ground.slopeAt(this.lat, this.lon, 4) : 0;
-    const slope = slopeDeg * Math.PI / 180;
+       driver does, which is what makes a crater wall a decision. That angle is
+       atan(grip) and it falls out of the two terms rather than being declared:
+       traction is scaled by the cosine above, the pull below by the sine, and
+       where the sine wins the wheels cannot hold. */
     if (slope > 0.02 && anyContact) {
       const n = this.ground.normalAt ? this.ground.normalAt(this.lat, this.lon, 4) : null;
       /* The horizontal part of the surface normal points downhill and already
@@ -289,6 +329,14 @@ export class Rover {
    * Top a suit up from the rover's own stores. Returns false when there is not
    * enough left, because a recharge that costs nothing is not a range tier —
    * the point of the middle tier is that it can run out too.
+   *
+   * What it charges for is mass: oxygen, scrubber and feedwater. It does not
+   * charge for the suit's battery, and that is deliberate rather than an
+   * oversight. The rover's own drive energy is unlimited by design, so the
+   * vehicle carries a power source this game never meters; billing for a
+   * kilowatt-hour into a backpack while the traction motors draw on the same
+   * supply for free would be an inconsistency, not a constraint. Electricity
+   * is the one thing out here that is genuinely cheap.
    */
   rechargeSuit(suit) {
     const need = suit.refillCost ? suit.refillCost() : { o2: 1.0, co2: 0.6, water: 4.5 };
