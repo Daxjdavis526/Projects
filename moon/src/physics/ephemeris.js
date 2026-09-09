@@ -391,3 +391,56 @@ export function localSolarTime(eph, latDeg, lonDeg) {
 export function solarDeclination(eph) {
   return eph.subSolar.lat;
 }
+
+/**
+ * When the sun next stands over a given place, searching forward from `fromMs`.
+ *
+ * The Moon turns once a month, so "wait for morning" is a fortnight, and a
+ * player who arrives at local midnight is looking at nothing at all for longer
+ * than any session. This finds the next moment worth landing in.
+ *
+ * Returns `{ ms, sunEl, waitedMs }`, or null if the place sees no sun at all
+ * inside the window. `waitedMs` is zero when the time asked for was already
+ * good, which is the caller's cue to say nothing.
+ *
+ * Poles are the interesting case and the reason this does not simply return
+ * the first crossing of `wantDeg`: at Shackleton the sun never climbs past
+ * about 1.6 degrees, so a fixed threshold would search a month and find
+ * nothing. When the target is never met, the best elevation in the window is
+ * the honest answer — and at a pole that grazing light is the whole point.
+ *
+ * @param {number} fromMs   Unix ms to search forward from.
+ * @param {number} latDeg   Site latitude.
+ * @param {number} lonDeg   Site longitude, east-positive.
+ * @param {number} wantDeg  Sun elevation that counts as a good arrival.
+ * @param {number} windowDays  How far ahead to look. A synodic month is 29.53.
+ */
+export function nextDaylight(fromMs, latDeg, lonDeg, wantDeg = 12, windowDays = 31) {
+  const elAt = (ms) => skyAt(ephemerisAt(jdFromUnixMs(ms)), latDeg, lonDeg, 0).sunEl;
+  const here = elAt(fromMs);
+  if (here >= wantDeg) return { ms: fromMs, sunEl: here, waitedMs: 0 };
+
+  /* Three hours moves the sun about 1.7 degrees, which is fine enough to land
+     within a couple of degrees of the target and cheap enough to scan a month
+     of it. */
+  const STEP = 3 * 3600e3;
+  const steps = Math.ceil(windowDays * 24 * 3600e3 / STEP);
+  const els = [here];
+  let bestEl = here;
+  for (let i = 1; i <= steps; i++) {
+    const ms = fromMs + i * STEP;
+    const el = elAt(ms);
+    if (el >= wantDeg) return { ms, sunEl: el, waitedMs: ms - fromMs };
+    els.push(el);
+    if (el > bestEl) bestEl = el;
+  }
+  if (bestEl <= 0) return null;
+
+  /* Nothing in the window met the target, so this is a place the sun never
+     really rises over -- a pole, or close to one. Take the first moment it is
+     above the horizon at all rather than hunting the best: the difference
+     between half a degree and one and a half is a month of waiting and almost
+     nothing to look at, and grazing light is what these places are for. */
+  const i = els.findIndex(el => el > 0);
+  return { ms: fromMs + i * STEP, sunEl: els[i], waitedMs: i * STEP };
+}

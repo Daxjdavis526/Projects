@@ -189,9 +189,26 @@ export const ROVER = {
      critical, because a bouncing rover in low gravity takes a very long time
      to settle. */
   suspTravel: 0.42, suspK: 5200, suspC: 2600,            // N/m, N.s/m per wheel
-  motorForce: 3600, brakeForce: 5200, boostFactor: 2.4,  // N total
-  speedMax: 5.0, speedBoost: 8.3,                        // m/s (18 / 30 km/h)
-  grip: 0.62,                                            // regolith friction
+  motorForce: 3600, brakeForce: 5200,                    // N total
+  speedMax: 16.7, speedBoost: 30.6,                      // m/s (60 / 110 km/h)
+  /* Traction, and the reason the numbers above are reachable at all.
+     -----------------------------------------------------------------------
+     Drive force is clamped to grip x mass x g (physics/rover.js), and in a
+     sixth of a gravity that is a very small number: at the 0.62 measured for
+     Apollo wheels on regolith it comes to 1.46 kN against a 3.6 kN motor, so
+     the vehicle is traction-limited at about 1 m/s^2 and always was. The old
+     `boostFactor` multiplied the motor, which the clamp then threw away
+     before it reached the ground -- so the boost raised the top speed and
+     changed the acceleration by exactly nothing.
+     0.78 is a deliberate fiction and the one place this vehicle's numbers
+     leave the literature: an engineered tyre with a compliant mesh and a
+     contact patch designed for this, rather than the wire mesh of 1971.
+     `boostGrip` is the drive using more of what is there, and it is applied
+     to the traction limit because that is the only term that can matter.
+     Everything the rover drives over is still measured; only the rubber is
+     invented. LABEL.FICTIONAL, and README.md says so. */
+  grip: 0.78,                                            // FICTIONAL: 0.62 measured
+  boostGrip: 1.25,                                       // FICTIONAL: torque vectoring
   /* No `slopeMax` here either, for the reason above: what a wheel can do on a
      slope falls out of the traction limit, which is the friction coefficient
      times the normal load, and the normal load is what a sixth of a gravity
@@ -226,7 +243,12 @@ export const TIME = {
     fixed: [0],
   },
   defaultMode: 'accelerated',
-  defaultRate: 600,
+  /* 60x moves the sun about sixteen degrees over half an hour of play, which
+     reads as shadows lengthening while you walk. The old default was 600x,
+     where the sun crosses fifty-five degrees in ten minutes and visibly
+     crawls while you stand still -- and, back when life support was scaled by
+     this number too, emptied the suit in under a minute. */
+  defaultRate: 60,
 };
 
 /* --- data provenance labels ------------------------------------------------ */

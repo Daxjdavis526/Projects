@@ -47,6 +47,21 @@ export class SurfaceStreamer {
   }
 
   /** Distance in metres from a ring's centre, or Infinity if it has none. */
+  /**
+   * Where to centre a patch: a few seconds along the current heading, never
+   * further than `maxM`. Standing still, or with no motion given, this is
+   * simply where you are.
+   */
+  static lead(lat, lon, motion, maxM) {
+    const LEAD_S = 8;
+    if (!motion || !(motion.speed > 2)) return { lat, lon };
+    const d = Math.min(motion.speed * LEAD_S, maxM);
+    const b = (motion.heading || 0) * Math.PI / 180;
+    const dN = d * Math.cos(b) / R_MOON * 180 / Math.PI;
+    const dE = d * Math.sin(b) / (R_MOON * Math.cos(lat * Math.PI / 180)) * 180 / Math.PI;
+    return { lat: lat + dN, lon: lon + dE };
+  }
+
   static distance(centre, lat, lon) {
     if (!centre) return Infinity;
     const dLat = (lat - centre.lat) * Math.PI / 180;
@@ -56,9 +71,21 @@ export class SurfaceStreamer {
 
   /**
    * Called every frame or so with where the camera is.
+   *
+   * `motion`, when given, is where you are going rather than where you are:
+   * `{ heading, speed }` in degrees and metres per second. Patches are then
+   * centred a few seconds ahead, which matters once the rover is doing thirty
+   * metres a second and would otherwise arrive somewhere before its ground
+   * did. The lead is capped at a fraction of the patch so the camera always
+   * stays well inside what was fetched -- aim too far ahead and the test
+   * below, which asks whether the camera has left the middle of the patch,
+   * would be true the moment each patch landed and the streamer would spend
+   * its life re-fetching.
+   *
    * @param {number} lat @param {number} lon @param {number} alt metres above ground
+   * @param {{heading:number, speed:number}} [motion]
    */
-  update(lat, lon, alt) {
+  update(lat, lon, alt, motion) {
     /* Read live rather than captured. This used to hold its own copy taken at
        construction, so the settings toggle was one-way: a session started with
        ?offline=1 could be switched to "on" and nothing would ever be fetched,
@@ -70,7 +97,8 @@ export class SurfaceStreamer {
       const halfSpanM = ring.span * 0.5 * Math.PI / 180 * R_MOON;
       /* Re-fetch once the camera has left the middle half of the patch. */
       if (SurfaceStreamer.distance(ring.centre, lat, lon) < halfSpanM * 0.5) continue;
-      this.fetchRing(ring, lat, lon);
+      const at = SurfaceStreamer.lead(lat, lon, motion, halfSpanM * 0.4);
+      this.fetchRing(ring, at.lat, at.lon);
       break;              // one new patch at a time; the nearest ring first
     }
 

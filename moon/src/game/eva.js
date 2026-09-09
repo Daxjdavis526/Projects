@@ -244,14 +244,20 @@ export class EVA {
       command.jump = false;             // one jump per press, not one per substep
     }
 
-    /* Life support runs on simulated time, which may be running fast. */
+    /* Life support runs on the clock on your wall, never on simulated time.
+       It used to take the time acceleration as a multiplier, which read as
+       consistent -- fast-forward the world and the suit ages with it -- and
+       was unplayable: at the old 600x default the nine-hour budget emptied in
+       fifty-four seconds, while your legs went on walking at 1x. A tank holds
+       what it holds for as long as you are actually out there. The sun runs
+       fast; you do not. */
     /* Whether you are actually on the regolith, which is what dirties a suit:
        standing on a ship's deck or riding in the rover does not. */
     const onFoot = p.grounded && !env.inShelter &&
       !(this.base && this.base.floorAt(p.llh.lat, p.llh.lon, p.llh.h) !== null);
     const fell = p.lastImpact > 0 && p.lastImpact !== this._lastImpactSeen;
     this._lastImpactSeen = p.lastImpact;
-    this.suit.step(dt * (env.timeScale ?? 1), {
+    this.suit.step(dt, {
       exertion: p.exertion,
       sunlit: env.sunlit !== false,
       lights: this.lampMode > 0,

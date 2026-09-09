@@ -33,8 +33,8 @@ that spot. Then land.
 
 | Input | Action |
 |---|---|
-| drag | look, or turn the Moon in orbit |
-| W A S D | walk, or drive |
+| click | look. Escape gives the pointer back. In orbit, drag to turn the Moon |
+| W A S D | walk, or drive. The arrow keys do the same |
 | shift | lope, or the rover's boost mode |
 | space | jump, brake, or skip the landing |
 | J | jetpack (hold) |
@@ -48,7 +48,7 @@ that spot. Then land.
 | K | where you have been |
 | O | settings |
 | V | the data overlay: what you are standing on and where it came from |
-| T | time rate: held, real time, up to a day a second |
+| T | time rate: held, real time, up to a day a second. Shift+T steps back down |
 | P | photography |
 | F2 | save |
 | H | controls |
@@ -63,10 +63,19 @@ cannot.
 
 URL parameters are useful for going straight somewhere:
 `?site=apollo11`, `?site=-43.31,-11.36`, `?t=1969-07-20T20:17Z`, `?view=ground`,
-`?mode=eva`, `?quality=ultra`, `?rate=600`, `?offline=1`, `?fov=12`,
-`?helmet=1`. The orbital picker also takes a date and a time, and its search box
-takes coordinates as well as names: `0.674, 23.473` and `0.674N 23.473E` both
-work, in either order.
+`?mode=eva`, `?quality=ultra`, `?rate=600`, `?suit=relaxed`, `?offline=1`,
+`?fov=12`, `?helmet=1`, `?help=0`. The orbital picker also takes a date and a time, and its
+search box takes coordinates as well as names: `0.674, 23.473` and
+`0.674N 23.473E` both work, in either order.
+
+Leave `?t=` off and the clock starts at the next time the sun is actually up
+over wherever you are going. That is not cosmetic: the Moon turns once a month,
+so at any given moment about half the catalogue is in the dark, and on the day
+this was written it was forty sites out of forty-seven — Tranquility Base among
+them, at eighty-two degrees below the horizon. Nothing about the lighting is
+faked; the date on the HUD is the date being simulated, and the game says so
+when it moves the clock. Give it a `?t=` and it does exactly as it is told,
+including landing you at local midnight.
 
 `?view=descent` is the one worth knowing: it flies the approach into wherever
 `?site=` points rather than starting you on the ground there — a minute of
@@ -122,10 +131,32 @@ they surface, and the Moon is never altered to accommodate them, with one
 exception: the ship flattens a circle of ground sixteen metres across so it can
 stand on its legs, and that pad is labelled too.
 
-The physics they run on is not fiction. The rover's handling comes from the
-Apollo Lunar Roving Vehicle record and from regolith soil mechanics, the suit's
-consumables from the Apollo portable life support system and the published xEMU
-requirements, and the locomotion from the Apollo film analyses.
+The physics they run on is very nearly not fiction. The rover's handling comes
+from the Apollo Lunar Roving Vehicle record and from regolith soil mechanics,
+the suit's consumables from the Apollo portable life support system and the
+published xEMU requirements, and the locomotion from the Apollo film analyses.
+
+Three departures, which are deliberate and worth naming.
+
+**Life support runs on the clock on your wall.** Fast-forward the sky and your
+oxygen does not go with it. This is a departure from consistency and it is the
+right one: the alternative shipped, and at the old 600× default it emptied a
+nine-hour suit in fifty-four seconds while your legs went on walking at normal
+speed. A tank holds what it holds for as long as you are actually out there,
+which also means the endurance on the HUD is a number you can trust — nine
+hours is nine hours.
+
+**The rover's tyres grip better than Apollo's did**, 0.78 against the 0.62
+measured for wire mesh on regolith. In a sixth of a gravity traction, not
+torque, is what decides everything: the vehicle weighs 2.3 kN, so grip alone
+sets how hard it can accelerate, how steep a slope it holds — the friction
+angle falls out as atan(0.78), about 38° — and how far it takes to stop, which
+at 60 km/h is over a hundred metres. Boosting raises the grip again rather than
+the torque, because multiplying a force that is already being clamped away
+changes nothing at all.
+
+**And it is fast**: 60 km/h, 110 boosted, against the real rover's 13. Nothing
+it drives over is invented; only the vehicle is.
 
 ## Not landing on the hardware
 
@@ -169,11 +200,18 @@ from a lope takes four metres.
 Your mass is not a sixth. The suit and backpack together mass more than you do,
 and inertia does not care which planet it is on.
 
-The rover has the same problem an order of magnitude larger: it can accelerate
-and brake at about a tenth of a gravity, takes twelve metres to stop from 18
-km/h, slides rather than turns if you ask too much of a corner, climbs twenty
-degrees three times slower than it crosses flat ground, and slides back down
-forty five.
+The rover has the same problem an order of magnitude larger. It accelerates and
+brakes at about a tenth of a gravity whatever the motors are asked for, so it
+takes 13 seconds to reach 60 km/h and over a hundred metres to stop again,
+slides rather than turns if you ask too much of a corner, climbs twenty degrees
+at half the rate it crosses flat ground, and slides back down forty five.
+
+It also gets air, and that is not decoration either. Hit a ten degree rise at
+the boost ceiling and the vehicle keeps the vertical speed it had while it was
+climbing — five seconds of it, and a couple of hundred metres of ground — then
+lands on its suspension. Past about forty degrees of roll the centre of mass is
+outside the wheels and it goes over; **R** rights it, because a rollover should
+cost you a moment rather than a save.
 
 ## Light
 

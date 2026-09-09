@@ -152,8 +152,50 @@ const DEFAULT_SHOTS = [
      loop had never once been executed by a test. What it is watching for is
      not the picture but the error list: `onDone` sets `mode` before the throw,
      so waiting on 'surface' alone would have gone green through the bug. */
+  /* Also the one shot that reaches the surface the way a player does, so it is
+     where the controls panel opening itself on first arrival gets checked:
+     assert it is up, then put it away so the photograph is of the Moon rather
+     than of a list of keys. */
   ['landing', 'site=apollo11&view=descent&t=2026-09-28T00:00Z&rate=0&quality=balanced',
-   'window.SELENE.mode === "surface"'],
+   `window.SELENE.mode === "surface" && (() => {
+      const h = document.getElementById('help');
+      if (h.style.display !== 'block') return false;
+      h.style.display = 'none';
+      window.SELENE.state.showHelp = false;
+      return true;
+    })()`],
+  /* No `?t=` at all, which is how anyone clicking a bare link arrives. The
+     Moon turns once a month, so "now" is a coin toss, and on the day this was
+     written forty of the forty-seven sites were dark -- Tranquility Base at
+     eighty-two degrees below the horizon. The clock should therefore have
+     moved itself to daylight before the first frame, and the wait expression
+     is the whole assertion: if it does not, this hangs and fails rather than
+     quietly taking a photograph of nothing. */
+  ['daylight', 'site=apollo11&mode=eva&rate=0&quality=balanced',
+   'window.SELENE.skyHere().sunEl > 5'],
+  /* The suit against the clock on the wall. Life support used to be scaled by
+     the time acceleration, so at the old default a nine-hour EVA emptied in
+     fifty-four seconds; here the sky is winding forward at a day a second and
+     the suit must not care. Ten seconds of that is nearly three months of
+     simulated time, and the endurance may not fall by more than a couple of
+     minutes. Held to the end of the run rather than sampled once, because the
+     bug was a rate and not a value.
+     Put the coupling back and this fails, though not always with the message
+     below: the suit empties inside a second, the player passes out, and the
+     blackout overlay trips the "no ground drawn" check first. Either way it
+     is red. The precise guard is in test/suit.test.mjs, which reads the
+     callers and names the offending line. */
+  ['suit-clock', 'site=apollo11&mode=eva&rate=86400&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.eva) return false;
+      window.__t0 = window.__t0 ?? { at: Date.now(), left: s.eva.suit.endurance() };
+      const dt = (Date.now() - window.__t0.at) / 1000;
+      if (dt < 10) return false;
+      const lost = window.__t0.left - s.eva.suit.endurance();
+      if (lost > 240) throw new Error('suit drained ' + lost.toFixed(0) + ' s in ' + dt.toFixed(0) + ' s of wall clock');
+      return true;
+    })()`],
   /* Offset from the descent stage rather than on top of it: standing at the
      published coordinates puts the camera inside the spacecraft. */
   ['tranquility-now', 'site=0.67446,23.47353&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=230&pitch=-2&quality=high'],
@@ -176,7 +218,7 @@ const DEFAULT_SHOTS = [
      black, which is true and is not a picture. */
   ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&yaw=300&lamps=2&quality=balanced'],
   ['farside', 'site=farside_highlands&mode=eva&t=2026-09-08T09:00Z&rate=0&quality=balanced'],
-  ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&quality=balanced'],
+  ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&help=0&quality=balanced'],
   ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],
   /* Through the visor. The bubble, the gold coating's warm cast, and the Sun
      on the glass where the Sun is standing. */
@@ -321,7 +363,23 @@ async function main() {
     }
     const stats = await page.evaluate(() => (window.SELENE ? window.SELENE.stats() : null)).catch(() => null);
     const shot = path.join(OUT, name + '.png');
-    await page.screenshot({ path: shot });
+    /* Inside a try, and with a budget of its own. This used to be a bare await:
+       one slow page threw an unhandled rejection that took the whole process
+       down, so a run of twenty shots reported two and then died -- the failure
+       of one shot destroying the evidence from all the others. A shot that
+       cannot be photographed is a failed shot, not a failed run.
+       The generous timeout is because the heavy shots earn it: a landing at
+       ten frames a second with the quadtree still building under it can leave
+       the compositor unable to produce a frame inside Playwright's default
+       thirty seconds, which says nothing about whether the game is correct. */
+    let photographed = true;
+    try {
+      await page.screenshot({ path: shot, timeout: 120000 });
+    } catch (e) {
+      photographed = false;
+      ok = false;
+      note = (note ? note + ' | ' : '') + 'screenshot: ' + String(e).split('\n')[0];
+    }
 
     /* Look at the picture. Writing a PNG and never reading it back is not a
        test: a frame that is entirely black, or entirely one colour, is exactly
@@ -329,8 +387,10 @@ async function main() {
        one of them needed a human to open the file. This is not a perceptual
        comparison — it is the floor below which the frame is certainly wrong. */
     const want = expect(name, query);
-    const shotNote = await inspect(shot, want);
-    if (shotNote) { ok = false; note = note ? `${note} | ${shotNote}` : shotNote; }
+    if (photographed) {
+      const shotNote = await inspect(shot, want).catch(e => 'inspect: ' + e.message);
+      if (shotNote) { ok = false; note = note ? `${note} | ${shotNote}` : shotNote; }
+    }
 
     /* And the numbers behind it. Recording stats without asserting them let a
        run with zero triangles at two frames a second pass. */
