@@ -68,6 +68,14 @@ URL parameters are useful for going straight somewhere:
 takes coordinates as well as names: `0.674, 23.473` and `0.674N 23.473E` both
 work, in either order.
 
+`?view=descent` is the one worth knowing: it flies the approach into wherever
+`?site=` points rather than starting you on the ground there — a minute of
+guided descent from 1150 m and three kilometres out, space to skip it. So
+`?site=apollo11&view=descent&t=2026-09-28T00:00Z` lands you at Tranquility
+Base, which is to say two kilometres short of it, on the bearing you came in
+on, because that is what the keep-out below insists on. You walk or drive the
+rest: twenty minutes on foot, eight in the rover.
+
 ## What is real, and how real
 
 This is the part that matters. The overlay (`V`) will tell you the same thing

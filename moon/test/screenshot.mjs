@@ -139,8 +139,21 @@ const DEFAULT_SHOTS = [
   ['orbit', 'site=apollo11&view=orbit&alt=1200000&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
   /* Nine kilometres over Tycho rather than over mare, because the point of the
      shot is horizon curvature and relief, and Mare Tranquillitatis is genuinely
-     flat. */
+     flat. Note this one does NOT fly a landing — `view=ground` starts already
+     parked. See `landing` below, which does. */
   ['descent', 'site=tycho&view=ground&alt=9000&t=2026-09-22T14:00Z&rate=0&yaw=20&quality=balanced'],
+  /* An actual landing, flown all the way in and held until the ship is on the
+     ground: a minute of approach rather than six seconds of settling, which is
+     why this one names a third field to wait for.
+
+     It exists because the touchdown frame threw for everyone who flew a
+     landing on the day this shipped, and no check here could have caught it —
+     every other shot starts on the surface, so the descent branch of the frame
+     loop had never once been executed by a test. What it is watching for is
+     not the picture but the error list: `onDone` sets `mode` before the throw,
+     so waiting on 'surface' alone would have gone green through the bug. */
+  ['landing', 'site=apollo11&view=descent&t=2026-09-28T00:00Z&rate=0&quality=balanced',
+   'window.SELENE.mode === "surface"'],
   /* Offset from the descent stage rather than on top of it: standing at the
      published coordinates puts the camera inside the spacecraft. */
   ['tranquility-now', 'site=0.67446,23.47353&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=230&pitch=-2&quality=high'],
@@ -195,8 +208,15 @@ const DEFAULT_SHOTS = [
   ['cave-mouth', 'site=8.3355,33.222833&mode=eva&t=2026-09-22T00:00Z&rate=0&yaw=270&pitch=4&lamps=2&quality=balanced'],
 ];
 
+/* `--shot name:query`, or `--shot name:query::waitExpression` to hold the
+   capture until something is true on the page. */
 const shots = args.filter((a, i) => args[i - 1] === '--shot')
-  .map(s => [s.split(':')[0], s.slice(s.indexOf(':') + 1)]);
+  .map(s => {
+    const name = s.split(':')[0];
+    const rest = s.slice(s.indexOf(':') + 1);
+    const cut = rest.indexOf('::');
+    return cut < 0 ? [name, rest] : [name, rest.slice(0, cut), rest.slice(cut + 2)];
+  });
 const SHOTS = shots.length ? shots : DEFAULT_SHOTS;
 
 const MIME = {
@@ -255,7 +275,7 @@ async function main() {
            '--disable-lcd-text', '--no-sandbox', '--enable-features=SharedArrayBuffer'],
   });
   const report = [];
-  for (const [name, query] of SHOTS) {
+  for (const [name, query, until] of SHOTS) {
     const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } });
     const errors = [];
     /* Warnings count as failures, and that is the whole point of this harness.
@@ -280,6 +300,17 @@ async function main() {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
       await page.waitForFunction('window.SELENE && window.SELENE.ready === true', null,
         { timeout: TIMEOUT, polling: 500 });
+      /* A shot may name a third thing to wait for, which is what lets one of
+         them fly a whole landing: `ready` goes true as soon as the ground is
+         drawn, long before the ship is on it. */
+      if (until) {
+        /* Its own budget, and a generous one. A landing is a minute of flying
+           at full speed and rather more than that while the quadtree is still
+           building four hundred tiles under it: the frame clamp at 0.5 s means
+           a page running at two frames a second flies the approach at a third
+           of real time, which is the right behaviour and a slow test. */
+        await page.waitForFunction(until, null, { timeout: TIMEOUT * 2, polling: 500 });
+      }
       /* Let the quadtree finish refining and the exposure settle. */
       await page.waitForTimeout(SETTLE);
     } catch (e) {
