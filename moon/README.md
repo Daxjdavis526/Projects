@@ -78,8 +78,8 @@ when it moves the clock. Give it a `?t=` and it does exactly as it is told,
 including landing you at local midnight.
 
 `?view=descent` is the one worth knowing: it flies the approach into wherever
-`?site=` points rather than starting you on the ground there — a minute of
-guided descent from 1150 m and three kilometres out, space to skip it. So
+`?site=` points rather than starting you on the ground there — about forty seconds
+of guided descent from 1150 m and three kilometres out, space to skip it. So
 `?site=apollo11&view=descent&t=2026-09-28T00:00Z` lands you at Tranquility
 Base, which is to say two kilometres short of it, on the bearing you came in
 on, because that is what the keep-out below insists on. You walk or drive the

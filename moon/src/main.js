@@ -478,7 +478,23 @@ async function start() {
   const boardToggle = () => {
     if (!vehicle || !eva) return;
     if (driving) {
+      /* Getting out of a moving vehicle.
+         This used to just do it, and leave the rover with every bit of its
+         speed — so stepping out at the cruise ceiling abandoned a driverless
+         vehicle that coasted 324 metres before the residual drag caught it,
+         and over a kilometre from a boost. That is the whole of "when I got
+         out it disappeared": it had driven off without you.
+         So: below a walking pace you may step down, and the vehicle is
+         stopped as you do. Above it, you are told to stop first. */
+      if (Math.abs(vehicle.rover.speed) > 1.5) {
+        sound.beep('deny');
+        say(`${(vehicle.rover.speed * 3.6).toFixed(0)} km/h is too fast to step down — space is the brake`, 3000);
+        return;
+      }
       driving = false;
+      vehicle.rover.speed = 0;
+      vehicle.rover.vertical = 0;
+      vehicle.rover.yawRate = 0;
       const out = vehicle.dismountPoint();
       eva.place(out.lat, out.lon, 0.1);
       sound.beep('select');
@@ -933,7 +949,14 @@ async function start() {
       sound.beep(w ? 'confirm' : 'deny');
       e.preventDefault();
     }
-    if (e.code === 'KeyF' && eva) eva.toggleView();
+    /* One view key, whichever thing you are in. It used to always toggle the
+       astronaut's view, so pressing F while driving silently cycled a state
+       with nothing to show for it and then dropped you into a different view
+       when you got out. */
+    if (e.code === 'KeyF') {
+      if (driving && vehicle) say(vehicle.toggleView() === 'chase' ? 'chase view' : 'from the seat', 1600);
+      else if (eva) eva.toggleView();
+    }
     if (e.code === 'KeyL' && eva) eva.cycleLamps();
   });
   addEventListener('keyup', (e) => keys.delete(e.code));
@@ -1067,7 +1090,10 @@ async function start() {
     if (pad.connected) {
       look.yaw += pad.lookYaw * Math.PI / 180;
       look.pitch += pad.lookPitch * Math.PI / 180;
-      if (pad.pressed.has('view') && eva) eva.toggleView();
+      if (pad.pressed.has('view')) {
+        if (driving && vehicle) vehicle.toggleView();
+        else if (eva) eva.toggleView();
+      }
       if (pad.pressed.has('lamps') && eva) eva.cycleLamps();
       if (pad.pressed.has('board')) boardToggle();
       if (pad.pressed.has('hatch')) hatchToggle();
@@ -1198,9 +1224,13 @@ async function start() {
       if (vehicle.rover.pressure > 0.9) {
         vehicle.rover.consume(dt / 3600, 1);
       }
-      /* Move the vehicle before reading the seat out of it, or the camera
-         trails the vehicle by a frame and the ride looks loose. */
-      vehicle.place(stage.origin.origin, dt);
+      /* The model is placed below, with everything else, once `setEye` has
+         settled the floating origin. It used to be placed here instead — the
+         only object in the scene put down against the PREVIOUS origin — so on
+         every rebase, which is roughly every two kilometres, the rover was
+         drawn a couple of hundred metres from where it was and vanished for a
+         frame. The camera does not need it: `camera()` works from the rover's
+         coordinates, not from its mesh. */
       /* The player goes where the rover goes. */
       eva.player.place(vehicle.rover.lat, vehicle.rover.lon, 0.9);
       eva.player.yaw = cam.yaw;
@@ -1214,6 +1244,7 @@ async function start() {
       world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
     } else if (eva) {
       eva.cave = pitField.cave;
+      eva.vehicle = vehicle;
       eva.step(dt, {
         forward: clamp1(moveAhead() + pad.forward),
         strafe: clamp1(moveSide() + pad.strafe),
@@ -1446,7 +1477,16 @@ async function start() {
     if (eva) {
       eva.updateLights(stage.origin.origin, camFrame);
       eva.updateModel(stage.origin.origin, dt);
-      if (eva.model) eva.model.group.visible = !driving && eva.view === 'third';
+      /* Third person on foot, and also whenever the chase camera is looking at
+         the rover — a driverless vehicle bounding across a mare is the wrong
+         picture. The pose is the walker's rather than a seated one, which is a
+         known cheat: at chase distance the figure is a metre tall on screen
+         and the alternative is a rig this model does not have. */
+      if (eva.model) {
+        eva.model.group.visible = driving
+          ? !!(vehicle && vehicle.view === 'chase')
+          : eva.view === 'third';
+      }
       /* The bubble, and where the Sun is on it. The helmet is only drawn on
          foot in the helmet view: the rover's canopy is not a helmet and the
          free camera has no head to put one on. */
@@ -1476,9 +1516,15 @@ async function start() {
       base.step(dt, eva ? eva.player.llh : null);
       base.place(stage.origin.origin);
     }
-    if (vehicle && !driving) {
-      vehicle.step(dt, { toggleCanopy: canopyPress }, false);
-      canopyPress = false;
+    /* The rover's mesh, whether or not anyone is in it, and always after
+       `setEye` above so it is placed against the origin everything else is
+       placed against. Its physics only runs here when nobody is driving —
+       otherwise the driving branch has already stepped it. */
+    if (vehicle) {
+      if (!driving) {
+        vehicle.step(dt, { toggleCanopy: canopyPress }, false);
+        canopyPress = false;
+      }
       vehicle.place(stage.origin.origin, dt);
     }
 

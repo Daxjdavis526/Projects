@@ -67,6 +67,9 @@ export class EVA {
        deck it is not level — the published floor dips forty-five degrees — so
        it has to answer for its slope as well as its height. */
     this.cave = null;
+    /* And the rover, for its bodywork alone — the ground under it is ordinary
+       ground. Assigned by the game each frame, like `base` and `cave`. */
+    this.vehicle = null;
     const deckAt = (lat, lon) => {
       const d = this.base && this.base.floorAt(lat, lon, this.player.llh.h);
       return (d === null || d === undefined || d === false) ? null : d;
@@ -250,6 +253,12 @@ export class EVA {
       /* And the cave's walls, for the same reason and by the same route. */
       if (this.cave) {
         const push = this.cave.resolve(p.llh.lat, p.llh.lon, p.llh.h, 0.34);
+        if (push) p.slideTo(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
+      }
+      /* And the rover, which is a solid object parked in the middle of
+         everything and which you could previously walk straight through. */
+      if (this.vehicle) {
+        const push = this.vehicle.resolve(p.llh.lat, p.llh.lon, p.llh.h, 0.34);
         if (push) p.slideTo(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
       }
       this.accumulator -= FIXED_STEP;
