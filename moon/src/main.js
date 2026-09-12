@@ -26,6 +26,7 @@ import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime, nextDaylight } from '
 import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
          offsetLatLon, surfaceDistance, bearing } from './physics/frames.js';
 import { loadVendoredHeightfield, readJson, readBinary } from './terrain/loader.js';
+import { tileLambda } from './terrain/cubesphere.js';
 import { Detail } from './terrain/detail.js';
 import { decodePng8 } from './terrain/png16.js';
 import { Streams } from './data/streams.js';
@@ -1043,6 +1044,23 @@ async function start() {
     fpsAcc += dt; fpsN++;
     if (fpsAcc > 0.5) { fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; }
 
+    /* Stand on the ground that is actually drawn.
+       -----------------------------------------------------------------------
+       Everything physical samples the height field without asking for a band
+       limit, and it used to get all of it: octaves down to twenty-five
+       centimetres that the mesh, built at three times its own vertex spacing,
+       never carried. At a coarse tile level that is metres of relief you can
+       stand on and cannot see -- which is how a walker ends up inside a hill,
+       and how a rover doing thirty metres a second samples sub-Nyquist noise
+       and levitates on it.
+       So physics is told what the renderer managed. `finestLevel` is from the
+       frame just drawn (terrain.update runs at the bottom of this function),
+       and one frame of lag against a quadtree that refines towards the eye is
+       not worth the reorder. Level 0 gives a lambda wider than the Moon, which
+       correctly means "nothing is refined here, simulate the measurements and
+       nothing else". */
+    heightfield.walkLambda = tileLambda(terrain.stats.finestLevel, TERRAIN.verts);
+
     /* Read the pad once a frame and fold its look into the same delta the
        mouse writes, so everything after this is the same code either way. */
     pad = pads.read(dt);
@@ -1158,7 +1176,8 @@ async function start() {
     if (driving && vehicle) {
       /* Driving. The player rides along, so the suit keeps running unless the
          canopy is shut and the cabin has come up to pressure. */
-      cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
+      /* `+=` on the yaw: see game/eva.js, which had the same sign backwards. */
+      cam.yaw += look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
       vehicle.step(dt, {
         /* The stick is analogue where the physics takes an analogue value, so
@@ -1264,7 +1283,8 @@ async function start() {
         up: bo.n, head: { x: world.x, y: world.y, z: world.z }, fov: null,
       };
     } else {
-      cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
+      /* The free camera, and the third place the same sign was wrong. */
+      cam.yaw += look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
       const b = enuBasis(cam.lat, cam.lon);
       const cp0 = Math.cos(cam.pitch), sp0 = Math.sin(cam.pitch);

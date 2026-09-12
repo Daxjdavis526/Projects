@@ -25,7 +25,7 @@
    ========================================================================== */
 
 import { R_MOON, TERRAIN } from '../config.js';
-import { faceUvToUnit, tileVertexUv, tileCentre, edgeArc } from './cubesphere.js';
+import { faceUvToUnit, tileVertexUv, tileCentre, edgeArc, tileLambda } from './cubesphere.js';
 import { unitToLl } from '../physics/frames.js';
 
 const DEG = Math.PI / 180;
@@ -50,8 +50,10 @@ export function buildTile(spec, src, parentHorizon = null) {
   /* The finest thing this tile can hold. A bowl needs three vertices across to
      read as a bowl rather than as a spike, and asking for anything finer only
      buys aliasing: the same tile rebuilt one level down would put the detail
-     somewhere else, which is what makes a surface shimmer as it refines. */
-  const minLambda = spacing * 3;
+     somewhere else, which is what makes a surface shimmer as it refines.
+     Shared with physics via `tileLambda`, so the ground you stand on and the
+     ground you see cannot drift apart again. */
+  const minLambda = tileLambda(level, verts);
 
   /* --- sample the surface, apron included ------------------------------- */
   const H = new Float32Array(N * N);

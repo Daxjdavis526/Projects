@@ -92,8 +92,13 @@ export class Gamepads {
       out.forward += -move.y;
       out.strafe += move.x;
       const look = dead(ax[2] || 0, ax[3] || 0);
+      /* Both of these feed the same accumulator the mouse does, so they inherit
+         its conventions: yaw positive turns right, pitch positive looks down.
+         Up on a stick is negative, so the pitch axis passes straight through --
+         it used to be negated here, which made the stick disagree with the
+         mouse about which way was up. */
       out.lookYaw += look.x * LOOK_RATE * dt;
-      out.lookPitch += -look.y * LOOK_RATE_PITCH * dt;
+      out.lookPitch += look.y * LOOK_RATE_PITCH * dt;
 
       const prev = this.was.get(p.index) || new Set();
       const now = new Set();

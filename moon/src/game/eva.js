@@ -80,11 +80,17 @@ export class EVA {
          ground under someone standing on the plain a hundred metres above its
          roof. It is the wrong question for someone who arrived rather than
          walked — a loaded save, a jump to a coordinate — because they are in
-         the room without ever having been at its door. So: below the surface
-         the height field describes, and inside the cave's footprint, is in the
-         cave, however you got there. */
-      if (c === null && h < this.heightfield.heightAt(lat, lon) - 1) {
-        c = this.cave.floorAt(lat, lon);
+         the room without ever having been at its door.
+         The catch is what counts as having arrived. This used to be "a metre
+         below the height field", answered by calling `floorAt` with no
+         altitude at all — which skips its gate entirely and hands back a floor
+         a hundred and twenty-five metres down. One metre of sink anywhere in
+         the conduit's footprint was therefore a trapdoor, and sinking a metre
+         was easy. `inside` is the question actually being asked, it takes the
+         altitude, and it cannot answer for somebody who is merely standing on
+         the roof. */
+      if (c === null && this.cave.inside(lat, lon, h)) {
+        c = this.cave.floorAt(lat, lon, h) ?? this.cave.floorAt(lat, lon);
       }
       return (c === null || c === undefined) ? null : c;
     };
@@ -208,7 +214,13 @@ export class EVA {
    */
   step(dt, input, env = {}) {
     const p = this.player;
-    if (input.dYaw) p.yaw -= input.dYaw;
+    /* Mouse right turns you right, which took embarrassingly long to be true.
+       Yaw is a compass bearing -- zero north, ninety east -- so turning right
+       means yaw going UP, and this subtracted. Under the old press-drag look it
+       passed for grabbing the world and pulling it; the moment a click took the
+       pointer it was simply backwards. Pitch was always the right way round,
+       which is why only the left and right of it got reported. */
+    if (input.dYaw) p.yaw += input.dYaw;
     if (input.dPitch) p.pitch = Math.max(-1.5, Math.min(1.5, p.pitch - input.dPitch));
 
     /* A jump is an edge, not a state: holding the key must not pogo. */
@@ -233,12 +245,12 @@ export class EVA {
          spends most of its structure avoiding. */
       if (this.base) {
         const push = this.base.resolve(p.llh.lat, p.llh.lon, p.llh.h, 0.34);
-        if (push) p.place(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
+        if (push) p.slideTo(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
       }
       /* And the cave's walls, for the same reason and by the same route. */
       if (this.cave) {
         const push = this.cave.resolve(p.llh.lat, p.llh.lon, p.llh.h, 0.34);
-        if (push) p.place(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
+        if (push) p.slideTo(push.lat, push.lon, Math.max(0, p.llh.h - p.surface));
       }
       this.accumulator -= FIXED_STEP;
       command.jump = false;             // one jump per press, not one per substep

@@ -87,8 +87,19 @@ console.log('looking is a rate, because a stick is not a mouse');
         `${a.toFixed(2)}° then ${b.toFixed(2)}°`);
   check('a full second at full deflection is a half turn or so',
         Math.abs(g.read(1).lookYaw - 180) < 1e-9);
+  /* Both look axes feed the same accumulator the mouse writes, so they carry
+     the mouse's conventions, and those are worth spelling out because each of
+     them was wrong at some point. Yaw positive turns RIGHT. Pitch positive
+     looks DOWN — every consumer subtracts it, exactly as it subtracts a mouse
+     that has been pushed down the desk. So "up on the stick looks up" is a
+     negative number, and asserting the opposite is what kept the pad
+     disagreeing with the mouse about which way was up. */
+  plug(pad([0, 0, 1, 0]));
+  check('right on the right stick turns right', g.read(1).lookYaw > 0,
+        g.read(1).lookYaw.toFixed(0) + '°');
   plug(pad([0, 0, 0, -1]));
-  check('up on the right stick looks up', g.read(1).lookPitch > 0);
+  check('up on the right stick looks up, which is a negative pitch delta',
+        g.read(1).lookPitch < 0, g.read(1).lookPitch.toFixed(0) + '°');
 }
 
 console.log('buttons have an edge, which is what a toggle needs');
