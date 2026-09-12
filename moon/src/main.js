@@ -634,6 +634,10 @@ async function start() {
     getSky: (lat, lon) => skyAt(ephemerisAt(jdFromUnixMs(state.simMs)), lat, lon, 0),
     onLand: (pick) => land(pick),
     onOverlay: (v) => terrain.setOverlay(v),
+    /* The photograph behind the featured-site previews. A THREE.Texture's
+       `.image` is the HTMLImageElement it was decoded from, which is all a
+       2D canvas needs to crop it. */
+    colour: colourMap && colourMap.image,
     getTime: () => state.simMs,
     /* Setting the clock by hand is a decision, and it stands: from here on
        nothing moves it to find you better light. */

@@ -218,6 +218,34 @@ canvas{display:block;position:fixed;inset:0}
 }
 #orbit input:focus{border-color:rgba(232,201,160,.45)}
 #orbit-presets,#orbit-results{display:flex;flex-direction:column;gap:1px;margin-top:6px}
+/* The featured sites, with a picture of each. The list used to be one-line
+   buttons and half of what it offered was deliberately flat ground, so there
+   was no way to tell a two kilometre central peak from a mare until you had
+   landed on it. The thumbnails are drawn in the browser from the vendored LOLA
+   elevation and the vendored LROC colour — see src/ui/preview.js — so they
+   cost no files and work offline like everything else here. */
+#orbit-presets{gap:5px;max-height:none}
+#orbit-presets button.card{
+  display:block;padding:0 0 7px;border-left-width:2px;
+  border-bottom:1px solid var(--edge);
+}
+#orbit-presets button.card:hover{background:rgba(232,201,160,.07)}
+/* `position:static` is not decoration. The global rule at the top of this
+   file is `canvas{display:block;position:fixed;inset:0}`, written when the
+   only canvas in the document was the WebGL view — so every thumbnail was
+   pinned to the top of the rail, thirteen of them stacked on the same spot,
+   and twelve of the drawings were invisible underneath the last one. */
+#orbit-presets .thumb{
+  display:block;position:static;inset:auto;
+  width:100%;height:auto;margin-bottom:5px;
+  border-radius:2px;background:#0a0b0d;
+}
+#orbit-presets button.card b{display:block;padding:0 8px;font-size:11px;
+  letter-spacing:.04em}
+#orbit-presets button.card span{display:block;padding:2px 8px 0;color:var(--dim);
+  font-size:9.5px;line-height:1.5;letter-spacing:.02em;white-space:normal}
+#orbit-presets button.card i{display:block;padding:3px 8px 0;color:var(--faint);
+  font-size:8.5px;letter-spacing:.07em;font-style:normal;white-space:nowrap}
 #orbit .btns{display:flex;flex-wrap:wrap;gap:4px}
 #orbit .btns button{border:1px solid var(--edge);border-radius:2px;padding:5px 9px;
   font-size:9.5px;letter-spacing:.06em;color:var(--dim)}
@@ -678,7 +706,7 @@ canvas{display:block;position:fixed;inset:0}
     </div>
 
     <div class="grp">
-      <h2>known places</h2>
+      <h2>somewhere worth landing</h2>
       <div id="orbit-presets"></div>
     </div>
 
