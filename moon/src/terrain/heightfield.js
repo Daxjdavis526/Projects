@@ -134,6 +134,12 @@ export class Heightfield {
     this.pads = [];
     this.measuredMask = null;      // { width, height, data: Uint8Array }
     this.detail = null;            // set by attachDetail(); optional
+    /* The band limit a caller gets when it does not ask for one: see
+       `heightAt`. Zero means everything, which is right for a headless test
+       and wrong for anything standing on the surface while a renderer draws
+       it. The game writes this every frame from the tile level actually on
+       screen. */
+    this.walkLambda = 0;
     this._byId = new Map();
   }
 
@@ -255,10 +261,17 @@ export class Heightfield {
   /**
    * @param {number} minLambda  the finest wavelength the caller can hold, in
    *   metres. A tile passes its own vertex spacing so it neither misses the
-   *   detail it could show nor computes detail it would only alias. Physics
-   *   asks with the default and gets everything.
+   *   detail it could show nor computes detail it would only alias.
+   *
+   *   Callers that do not ask — physics, the pickers, the keep-out — get
+   *   `walkLambda`, which the game keeps pointed at the tile level actually
+   *   being drawn. It used to default to zero, meaning physics simulated every
+   *   octave down to 25 cm while the mesh carried none of it: at a coarse
+   *   level that is metres of relief you could stand on and not see, which is
+   *   how you ended up inside a hill, and it also gave the rover and the
+   *   walker phantom twenty-degree slopes to be shoved around by.
    */
-  heightAt(lat, lon, minLambda = 0) {
+  heightAt(lat, lon, minLambda = this.walkLambda) {
     const s = this.sampleData(lat, lon, this._tmp || (this._tmp = {}));
     let h = s.h;
     if (this.detail) h += this.detail.heightAt(lat, lon, s.res_m, minLambda);

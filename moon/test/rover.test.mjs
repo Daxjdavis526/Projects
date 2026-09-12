@@ -177,6 +177,78 @@ console.log('leaving the ground');
     r.airborneFor < 1 && r.contact.some(Boolean), r.airborneFor.toFixed(2) + ' s airborne now');
 }
 
+/* Noise, and data that jumps.
+   -----------------------------------------------------------------------------
+   The reason the previous version of the "getting air" term shipped broken is
+   that its only test was an analytic ramp: perfectly smooth, no noise, no level
+   of detail, nothing streaming. On the real thing it levitated continuously and
+   flew off with the camera in it.
+   Three surfaces it now has to survive. Regolith-scale noise at the speeds this
+   vehicle can reach; a tile refining or a raster landing, which moves the whole
+   surface by metres between one frame and the next; and a pit being cut, which
+   is a 125 m hole appearing underneath. None of them is terrain the wheels are
+   riding over, and none of them may throw the vehicle. */
+console.log('not being launched by the data');
+{
+  const mPerDeg = R_MOON * Math.PI / 180;
+  /* Band-limited bumps, as the drawn mesh carries them: a metre of wavelength
+     and a few centimetres of amplitude. */
+  const bumpy = {
+    heightAt: (lat, lon) => {
+      const x = lat * mPerDeg, y = lon * mPerDeg;
+      return 0.06 * Math.sin(x / 1.0) + 0.04 * Math.sin(y / 1.3 + 1.7)
+           + 0.03 * Math.sin(x / 2.7 + 0.4);
+    },
+    slopeAt: () => 3,
+    normalAt: () => ({ e: 0, n: 0, u: 1 }),
+  };
+  const r = new Rover({ lat: 0, lon: 0, heading: 0, ground: bumpy });
+  let air = 0, worstUp = 0;
+  for (let i = 0; i < 120 * 60; i++) {
+    r.step(1 / 120, { throttle: 1, boost: true });
+    if (r.airborneFor > air) air = r.airborneFor;
+    worstUp = Math.max(worstUp, r.height);
+  }
+  check('a minute at the boost ceiling over real bumps does not levitate it',
+    worstUp < ROVER.clearance + 1.0 && air < 1.0,
+    `${(r.speed * 3.6).toFixed(0)} km/h, hull peaked at ${worstUp.toFixed(2)} m, longest hop ${air.toFixed(2)} s`);
+
+  /* Now the same drive, with the whole surface stepping by metres the way a
+     streamed raster does. */
+  let offset = 0;
+  const stepping = {
+    heightAt: (lat, lon) => bumpy.heightAt(lat, lon) + offset,
+    slopeAt: () => 3,
+    normalAt: () => ({ e: 0, n: 0, u: 1 }),
+  };
+  const q = new Rover({ lat: 0, lon: 0, heading: 0, ground: stepping });
+  let qAir = 0, qUp = 0;
+  for (let i = 0; i < 120 * 40; i++) {
+    if (i % 240 === 0) offset += (i % 480 === 0) ? 3 : -3;
+    q.step(1 / 120, { throttle: 1, boost: true });
+    if (q.airborneFor > qAir) qAir = q.airborneFor;
+    qUp = Math.max(qUp, q.height);
+  }
+  check('and a raster arriving every two seconds does not either',
+    qUp < ROVER.clearance + 1.0 && qAir < 1.0,
+    `hull peaked at ${qUp.toFixed(2)} m, longest hop ${qAir.toFixed(2)} s`);
+
+  /* A pit being cut: 125 m, in one frame. */
+  let hole = 0;
+  const cut = {
+    heightAt: () => hole,
+    slopeAt: () => 0,
+    normalAt: () => ({ e: 0, n: 0, u: 1 }),
+  };
+  const c2 = new Rover({ lat: 0, lon: 0, heading: 0, ground: cut });
+  for (let i = 0; i < 240; i++) c2.step(1 / 120, {});
+  hole = -125;
+  let flung = 0;
+  for (let i = 0; i < 120 * 3; i++) { c2.step(1 / 120, {}); flung = Math.max(flung, c2.vertical); }
+  check('and a 125 m pit appearing underneath does not fling it upward',
+    flung < 0.5, 'peak climb ' + flung.toFixed(2) + ' m/s');
+}
+
 console.log('rolling over');
 {
   const r = new Rover({ lat: 0, lon: 0, ground: flat });
@@ -190,6 +262,55 @@ console.log('rolling over');
   check('recovery puts it back on its wheels', !r.rolled && r.roll === 0);
   drive(r, 5, { throttle: 1 });
   check('and it drives again', r.speed > 0.2, r.speed.toFixed(2) + ' m/s');
+}
+
+/* Left alone.
+   -----------------------------------------------------------------------------
+   Three ways the vehicle used to get away from you. Parked, only the residual
+   drag held it -- 0.12 of the brake force over 1450 kg, which is 0.43 m/s^2,
+   and gravity down a slope beats that from fifteen degrees, so a rover left on
+   anything but the flat drove itself off. Dismounting never touched its speed,
+   so stepping out at the cruise ceiling abandoned a driverless vehicle that
+   coasted 324 m. And `place` did not clear what the suspension remembers, so
+   restoring a save computed a climb rate between two different sites and
+   launched it on arrival. */
+console.log('left alone, it stays where it is');
+{
+  const slope = new Rover({ lat: 0, lon: 0, ground: ramp(20), heading: 0 });
+  const from = { lat: slope.lat, lon: slope.lon };
+  /* `parked` is what the Vehicle layer passes when nobody is aboard. */
+  drive(slope, 60, { throttle: 0, parked: true });
+  const drift = surfaceDistance(from.lat, from.lon, slope.lat, slope.lon);
+  check('a minute parked on a twenty degree slope does not move it',
+    drift < 1.0 && Math.abs(slope.speed) < 0.1,
+    `${drift.toFixed(2)} m, ${slope.speed.toFixed(3)} m/s`);
+
+  /* But the parking brake is still only a brake: past the friction angle the
+     ground cannot hold the wheels however hard they are held. */
+  /* 44 rather than 48: past about 46 the nose-up pitch alone trips the
+     rollover threshold, and a rolled rover has its speed damped on purpose,
+     which would be measuring the wrong thing. */
+  const tooSteep = new Rover({ lat: 0, lon: 0, ground: ramp(44), heading: 0 });
+  drive(tooSteep, 30, { throttle: 0, parked: true });
+  check('and past the friction angle it slides anyway, brake or no brake',
+    Math.abs(tooSteep.speed) > 0.5, tooSteep.speed.toFixed(2) + ' m/s');
+
+  /* Coasting is not parking: a driver off the throttle still rolls. */
+  const coast = new Rover({ lat: 0, lon: 0, ground: flat });
+  drive(coast, 30, { throttle: 1 });
+  const rolling = coast.speed;
+  drive(coast, 1, { throttle: 0 });
+  check('a driver off the throttle still coasts, which is not the same thing',
+    coast.speed > rolling * 0.9, `${rolling.toFixed(1)} -> ${coast.speed.toFixed(1)} m/s`);
+
+  /* A teleport must not be read as terrain. */
+  const moved = new Rover({ lat: 0, lon: 0, ground: ramp(20), heading: 0 });
+  drive(moved, 10, { throttle: 1 });
+  moved.place(40, 120, 90);
+  let flung = 0;
+  for (let i = 0; i < 120 * 3; i++) { moved.step(1 / 120, {}); flung = Math.max(flung, moved.vertical); }
+  check('and being put somewhere else does not launch it on arrival',
+    flung < 0.5 && moved.airborneFor < 0.2, 'peak climb ' + flung.toFixed(2) + ' m/s');
 }
 
 console.log('open and closed');

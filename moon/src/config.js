@@ -135,9 +135,27 @@ export const EXPOSURE = {
    roughly 60 % of a terrestrial runner's. See RESEARCH.md section 8. */
 export const PLAYER = {
   height: 1.85, radius: 0.34, eye: 1.62, mass: 82, suitMass: 55,
-  lope: 2.6, sprint: 3.6,                 // m/s
+  /* Three speeds, and the first of them is new.
+     -----------------------------------------------------------------------
+     There used to be no walk: the slowest thing on offer was 2.6 m/s, which is
+     three and a half times the Froude threshold, so the gait latched to a bound
+     the instant you touched a key and never came back. A bound is airborne half
+     the time by construction, and airborne a boot has nothing to push against,
+     which halved every deceleration and made the ground feel like ice. Walking
+     keeps a foot down. It is what you get by default; the lope is the shift
+     key, which is the right way round for a place where loping is the
+     committed, fast, hard-to-stop option. */
+  walk: 1.4, lope: 2.6, sprint: 3.6,      // m/s
   jumpHeight: 0.45,                       // m at 1/6 g
   airControl: 0.12,
+  /* What the suit's maneuvering unit can do about your velocity while your
+     boots are off the ground, as a fraction of what a boot could. The jetpack
+     is the same hardware and the same fiction; this is it running at a trickle
+     to keep you pointed, rather than in a burn. Without it a lope is fully
+     ballistic and a bound you regret lasts nearly a second. LABEL.FICTIONAL:
+     Apollo crews had no such thing and simply planned the landing of every
+     stride. See README.md. */
+  airBrake: 0.34,                         // FICTIONAL
   fallHurt: 6.0, fallFatal: 11.0,         // m/s impact speed
   jetpackAccel: 18.0,                     // m/s^2 (FICTIONAL)
   jetpackHeatUp: 0.13, jetpackHeatDown: 0.085,  // fraction per second

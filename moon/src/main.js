@@ -26,6 +26,7 @@ import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime, nextDaylight } from '
 import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
          offsetLatLon, surfaceDistance, bearing } from './physics/frames.js';
 import { loadVendoredHeightfield, readJson, readBinary } from './terrain/loader.js';
+import { tileLambda } from './terrain/cubesphere.js';
 import { Detail } from './terrain/detail.js';
 import { decodePng8 } from './terrain/png16.js';
 import { Streams } from './data/streams.js';
@@ -477,7 +478,23 @@ async function start() {
   const boardToggle = () => {
     if (!vehicle || !eva) return;
     if (driving) {
+      /* Getting out of a moving vehicle.
+         This used to just do it, and leave the rover with every bit of its
+         speed — so stepping out at the cruise ceiling abandoned a driverless
+         vehicle that coasted 324 metres before the residual drag caught it,
+         and over a kilometre from a boost. That is the whole of "when I got
+         out it disappeared": it had driven off without you.
+         So: below a walking pace you may step down, and the vehicle is
+         stopped as you do. Above it, you are told to stop first. */
+      if (Math.abs(vehicle.rover.speed) > 1.5) {
+        sound.beep('deny');
+        say(`${(vehicle.rover.speed * 3.6).toFixed(0)} km/h is too fast to step down — space is the brake`, 3000);
+        return;
+      }
       driving = false;
+      vehicle.rover.speed = 0;
+      vehicle.rover.vertical = 0;
+      vehicle.rover.yawRate = 0;
       const out = vehicle.dismountPoint();
       eva.place(out.lat, out.lon, 0.1);
       sound.beep('select');
@@ -617,6 +634,10 @@ async function start() {
     getSky: (lat, lon) => skyAt(ephemerisAt(jdFromUnixMs(state.simMs)), lat, lon, 0),
     onLand: (pick) => land(pick),
     onOverlay: (v) => terrain.setOverlay(v),
+    /* The photograph behind the featured-site previews. A THREE.Texture's
+       `.image` is the HTMLImageElement it was decoded from, which is all a
+       2D canvas needs to crop it. */
+    colour: colourMap && colourMap.image,
     getTime: () => state.simMs,
     /* Setting the clock by hand is a decision, and it stands: from here on
        nothing moves it to find you better light. */
@@ -932,7 +953,14 @@ async function start() {
       sound.beep(w ? 'confirm' : 'deny');
       e.preventDefault();
     }
-    if (e.code === 'KeyF' && eva) eva.toggleView();
+    /* One view key, whichever thing you are in. It used to always toggle the
+       astronaut's view, so pressing F while driving silently cycled a state
+       with nothing to show for it and then dropped you into a different view
+       when you got out. */
+    if (e.code === 'KeyF') {
+      if (driving && vehicle) say(vehicle.toggleView() === 'chase' ? 'chase view' : 'from the seat', 1600);
+      else if (eva) eva.toggleView();
+    }
     if (e.code === 'KeyL' && eva) eva.cycleLamps();
   });
   addEventListener('keyup', (e) => keys.delete(e.code));
@@ -1043,13 +1071,33 @@ async function start() {
     fpsAcc += dt; fpsN++;
     if (fpsAcc > 0.5) { fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; }
 
+    /* Stand on the ground that is actually drawn.
+       -----------------------------------------------------------------------
+       Everything physical samples the height field without asking for a band
+       limit, and it used to get all of it: octaves down to twenty-five
+       centimetres that the mesh, built at three times its own vertex spacing,
+       never carried. At a coarse tile level that is metres of relief you can
+       stand on and cannot see -- which is how a walker ends up inside a hill,
+       and how a rover doing thirty metres a second samples sub-Nyquist noise
+       and levitates on it.
+       So physics is told what the renderer managed. `finestLevel` is from the
+       frame just drawn (terrain.update runs at the bottom of this function),
+       and one frame of lag against a quadtree that refines towards the eye is
+       not worth the reorder. Level 0 gives a lambda wider than the Moon, which
+       correctly means "nothing is refined here, simulate the measurements and
+       nothing else". */
+    heightfield.walkLambda = tileLambda(terrain.stats.finestLevel, TERRAIN.verts);
+
     /* Read the pad once a frame and fold its look into the same delta the
        mouse writes, so everything after this is the same code either way. */
     pad = pads.read(dt);
     if (pad.connected) {
       look.yaw += pad.lookYaw * Math.PI / 180;
       look.pitch += pad.lookPitch * Math.PI / 180;
-      if (pad.pressed.has('view') && eva) eva.toggleView();
+      if (pad.pressed.has('view')) {
+        if (driving && vehicle) vehicle.toggleView();
+        else if (eva) eva.toggleView();
+      }
       if (pad.pressed.has('lamps') && eva) eva.cycleLamps();
       if (pad.pressed.has('board')) boardToggle();
       if (pad.pressed.has('hatch')) hatchToggle();
@@ -1158,7 +1206,8 @@ async function start() {
     if (driving && vehicle) {
       /* Driving. The player rides along, so the suit keeps running unless the
          canopy is shut and the cabin has come up to pressure. */
-      cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
+      /* `+=` on the yaw: see game/eva.js, which had the same sign backwards. */
+      cam.yaw += look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
       vehicle.step(dt, {
         /* The stick is analogue where the physics takes an analogue value, so
@@ -1179,9 +1228,13 @@ async function start() {
       if (vehicle.rover.pressure > 0.9) {
         vehicle.rover.consume(dt / 3600, 1);
       }
-      /* Move the vehicle before reading the seat out of it, or the camera
-         trails the vehicle by a frame and the ride looks loose. */
-      vehicle.place(stage.origin.origin, dt);
+      /* The model is placed below, with everything else, once `setEye` has
+         settled the floating origin. It used to be placed here instead — the
+         only object in the scene put down against the PREVIOUS origin — so on
+         every rebase, which is roughly every two kilometres, the rover was
+         drawn a couple of hundred metres from where it was and vanished for a
+         frame. The camera does not need it: `camera()` works from the rover's
+         coordinates, not from its mesh. */
       /* The player goes where the rover goes. */
       eva.player.place(vehicle.rover.lat, vehicle.rover.lon, 0.9);
       eva.player.yaw = cam.yaw;
@@ -1195,6 +1248,7 @@ async function start() {
       world.x = camFrame.eye.x; world.y = camFrame.eye.y; world.z = camFrame.eye.z;
     } else if (eva) {
       eva.cave = pitField.cave;
+      eva.vehicle = vehicle;
       eva.step(dt, {
         forward: clamp1(moveAhead() + pad.forward),
         strafe: clamp1(moveSide() + pad.strafe),
@@ -1264,7 +1318,8 @@ async function start() {
         up: bo.n, head: { x: world.x, y: world.y, z: world.z }, fov: null,
       };
     } else {
-      cam.yaw -= look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
+      /* The free camera, and the third place the same sign was wrong. */
+      cam.yaw += look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
       const b = enuBasis(cam.lat, cam.lon);
       const cp0 = Math.cos(cam.pitch), sp0 = Math.sin(cam.pitch);
@@ -1426,7 +1481,16 @@ async function start() {
     if (eva) {
       eva.updateLights(stage.origin.origin, camFrame);
       eva.updateModel(stage.origin.origin, dt);
-      if (eva.model) eva.model.group.visible = !driving && eva.view === 'third';
+      /* Third person on foot, and also whenever the chase camera is looking at
+         the rover — a driverless vehicle bounding across a mare is the wrong
+         picture. The pose is the walker's rather than a seated one, which is a
+         known cheat: at chase distance the figure is a metre tall on screen
+         and the alternative is a rig this model does not have. */
+      if (eva.model) {
+        eva.model.group.visible = driving
+          ? !!(vehicle && vehicle.view === 'chase')
+          : eva.view === 'third';
+      }
       /* The bubble, and where the Sun is on it. The helmet is only drawn on
          foot in the helmet view: the rover's canopy is not a helmet and the
          free camera has no head to put one on. */
@@ -1456,9 +1520,15 @@ async function start() {
       base.step(dt, eva ? eva.player.llh : null);
       base.place(stage.origin.origin);
     }
-    if (vehicle && !driving) {
-      vehicle.step(dt, { toggleCanopy: canopyPress }, false);
-      canopyPress = false;
+    /* The rover's mesh, whether or not anyone is in it, and always after
+       `setEye` above so it is placed against the origin everything else is
+       placed against. Its physics only runs here when nobody is driving —
+       otherwise the driving branch has already stepped it. */
+    if (vehicle) {
+      if (!driving) {
+        vehicle.step(dt, { toggleCanopy: canopyPress }, false);
+        canopyPress = false;
+      }
       vehicle.place(stage.origin.origin, dt);
     }
 

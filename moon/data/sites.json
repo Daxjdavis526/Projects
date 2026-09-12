@@ -2,19 +2,24 @@
  "note": "Landing sites, landmarks and scenic destinations. Coordinates are Mean Earth/Polar Axis (ME) frame, planetocentric latitude, longitude positive east in -180..180. 'verify' marks rows whose best available source was secondary; see RESEARCH.md.",
  "presets": [
   "apollo11",
-  "apollo17",
   "tycho",
   "copernicus",
-  "imbrium",
-  "south_pole",
+  "aristarchus",
+  "schroteri",
+  "hadley",
+  "mons_huygens",
+  "apollo17",
+  "orientale",
+  "tsiolkovskiy",
+  "spa",
   "shackleton_rim",
-  "farside_highlands"
+  "tranquillitatis_pit"
  ],
  "sites": [
   {
    "id": "apollo11",
    "name": "Tranquility Base",
-   "sub": "Apollo 11 \u00b7 20 July 1969",
+   "sub": "Apollo 11 · 20 July 1969",
    "kind": "crewed",
    "lat": 0.67415,
    "lon": 23.47314,
@@ -26,7 +31,7 @@
   {
    "id": "apollo12",
    "name": "Apollo 12",
-   "sub": "Ocean of Storms \u00b7 19 November 1969",
+   "sub": "Ocean of Storms · 19 November 1969",
    "kind": "crewed",
    "lat": -3.01271,
    "lon": -23.42193,
@@ -37,7 +42,7 @@
   {
    "id": "apollo14",
    "name": "Apollo 14",
-   "sub": "Fra Mauro \u00b7 5 February 1971",
+   "sub": "Fra Mauro · 5 February 1971",
    "kind": "crewed",
    "lat": -3.6459,
    "lon": -17.47195,
@@ -48,7 +53,7 @@
   {
    "id": "apollo15",
    "name": "Apollo 15",
-   "sub": "Hadley-Apennine \u00b7 30 July 1971",
+   "sub": "Hadley-Apennine · 30 July 1971",
    "kind": "crewed",
    "lat": 26.13237,
    "lon": 3.6333,
@@ -59,7 +64,7 @@
   {
    "id": "apollo16",
    "name": "Apollo 16",
-   "sub": "Descartes \u00b7 21 April 1972",
+   "sub": "Descartes · 21 April 1972",
    "kind": "crewed",
    "lat": -8.97344,
    "lon": 15.50105,
@@ -70,7 +75,7 @@
   {
    "id": "apollo17",
    "name": "Taurus-Littrow",
-   "sub": "Apollo 17 \u00b7 11 December 1972",
+   "sub": "Apollo 17 · 11 December 1972",
    "kind": "crewed",
    "lat": 20.19108,
    "lon": 30.7722,
@@ -117,7 +122,7 @@
   {
    "id": "lunokhod1",
    "name": "Lunokhod 1",
-   "sub": "Luna 17 \u00b7 17 November 1970",
+   "sub": "Luna 17 · 17 November 1970",
    "kind": "rover",
    "lat": 38.315158,
    "lon": -35.007964,
@@ -139,7 +144,7 @@
   {
    "id": "lunokhod2",
    "name": "Lunokhod 2",
-   "sub": "Luna 21 \u00b7 15 January 1973",
+   "sub": "Luna 21 · 15 January 1973",
    "kind": "rover",
    "lat": 25.832307,
    "lon": 30.922149,
@@ -366,7 +371,8 @@
    "lon": -47.49726,
    "status": "",
    "blurb": "The brightest large feature on the Moon, on a plateau of volcanic deposits beside Vallis Schroteri.",
-   "source": "IAU Gazetteer"
+   "source": "IAU Gazetteer",
+   "preset": true
   },
   {
    "id": "schroteri",
@@ -377,7 +383,8 @@
    "lon": -51.58,
    "status": "",
    "blurb": "The Moon's largest sinuous rille: a collapsed lava channel up to 10 km wide with a smaller channel meandering inside it.",
-   "source": "IAU Gazetteer"
+   "source": "IAU Gazetteer",
+   "preset": true
   },
   {
    "id": "hadley",
@@ -388,7 +395,8 @@
    "lon": 3.15,
    "status": "",
    "blurb": "Apollo 15 parked at its edge and photographed layered bedrock in the far wall.",
-   "source": "IAU Gazetteer"
+   "source": "IAU Gazetteer",
+   "preset": true
   },
   {
    "id": "imbrium",
@@ -398,7 +406,6 @@
    "lat": 34.72,
    "lon": -14.91,
    "status": "",
-   "preset": true,
    "blurb": "The great flooded basin of the near side. Flat, dark and vast: the best driving on the Moon.",
    "source": "IAU Gazetteer"
   },
@@ -411,7 +418,8 @@
    "lon": -94.67,
    "status": "",
    "blurb": "The youngest and best preserved multi-ring impact basin, three concentric mountain rings around a small dark sea, mostly hidden around the western limb.",
-   "source": "IAU Gazetteer"
+   "source": "IAU Gazetteer",
+   "preset": true
   },
   {
    "id": "tsiolkovskiy",
@@ -422,7 +430,8 @@
    "lon": 128.97,
    "status": "",
    "blurb": "A dark lava-flooded floor and a bright central peak, unmistakable on the far side. No Earth in this sky.",
-   "source": "IAU Gazetteer"
+   "source": "IAU Gazetteer",
+   "preset": true
   },
   {
    "id": "reinergamma",
@@ -456,7 +465,6 @@
    "lat": -89.99,
    "lon": 0.0,
    "status": "",
-   "preset": true,
    "blurb": "Grazing light, kilometre-long shadows, and permanently shadowed floors near 25 K.",
    "source": "definition"
   },
@@ -480,7 +488,8 @@
    "lon": -2.86,
    "status": "",
    "blurb": "The highest peak on the Moon, in the Apennines on the rim of Imbrium.",
-   "source": "IAU Gazetteer"
+   "source": "IAU Gazetteer",
+   "preset": true
   },
   {
    "id": "marius_pit",
@@ -502,7 +511,8 @@
    "lon": 33.222,
    "status": "",
    "blurb": "The deepest known lunar pit. A 146 by 140 m funnel drops into a 100 by 88 m shaft with vertical walls and overhangs of at least 10-15 m on three sides, and in 2024 Mini-RF radar showed it opens into a conduit that is still there.",
-   "source": "LROC Lunar Pits Atlas"
+   "source": "LROC Lunar Pits Atlas",
+   "preset": true
   },
   {
    "id": "west_marius_pit",
@@ -534,7 +544,6 @@
    "lat": -0.0421,
    "lon": 179.6183,
    "status": "",
-   "preset": true,
    "blurb": "The point on the Moon furthest from the Earth, give or take: the antipode of the sub-Earth point, in the far side highlands. The Earth has never risen here and never will. Nudged a fraction off the exact antipode because 0 N 180 E is the seam where longitude changes sign and the point is to stand somewhere, not on a discontinuity.",
    "source": "antipode of the mean sub-Earth point; the Moon's synchronous rotation keeps it Earthless"
   },
@@ -548,7 +557,8 @@
    "status": "",
    "verify": true,
    "blurb": "Eight kilometres deep and older than almost everything else on the Moon; the floor exposes material from the lower crust or mantle.",
-   "source": "secondary; basin has no IAU centre point"
+   "source": "secondary; basin has no IAU centre point",
+   "preset": true
   }
  ]
 }

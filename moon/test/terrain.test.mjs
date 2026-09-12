@@ -6,7 +6,7 @@
    thread and in this test. */
 import { faceUvToUnit, unitToFaceUv, edgeArc, vertexSpacing, tileVertexUv,
          tileCentre, tileBoundingSphere, children, parent, tileKey, parseKey,
-         levelForSpacing, belowHorizon } from '../src/terrain/cubesphere.js';
+         levelForSpacing, belowHorizon, tileLambda } from '../src/terrain/cubesphere.js';
 import { Detail, bandWeight, craterProfile } from '../src/terrain/detail.js';
 import { Heightfield, Raster } from '../src/terrain/heightfield.js';
 import { R_MOON, TERRAIN } from '../src/config.js';
@@ -307,6 +307,65 @@ console.log('rocks');
     d.rocks(-0.043, 179.617, -0.0385, 179.622, 2, 1).length + ' in a 500 m patch');
   check('but a tile too coarse to stand on carries none',
     d.rocks(0, 0, 0.01, 0.01, 60, 1).length === 0);
+}
+
+/* ---------------------------------------------------------------------------
+   The ground you stand on is the ground you can see.
+
+   The tile builder band-limits its vertices to `tileLambda(level, verts)` — the
+   finest wavelength three of its vertices can carry. Physics, asking without a
+   band limit, used to get everything down to the 25 cm detail floor: relief
+   that is really there in the model and is nowhere in the mesh. At level 13
+   that is over two metres, comfortably more than eye height, which is how a
+   walker ends up looking at the inside of a hill, and how a rover doing thirty
+   metres a second samples noise below its own step size and takes off on it.
+
+   `walkLambda` is the fix and this is the invariant: with it set from the level
+   being drawn, the default answer must be the mesh's answer. */
+console.log('standing on what is drawn');
+{
+  const hf = new Heightfield();
+  hf.addRaster(new Raster({
+    id: 'global', bbox: [-180, -90, 180, 90], width: 64, height: 32,
+    res_m: 1895, wrapX: true, source: 'test', label: 'MEASURED',
+  }, new Float32Array(64 * 32)));
+  hf.attachDetail(new Detail({ seed: 7 }));
+
+  check('by default it hands back everything, which is what a test wants',
+    hf.walkLambda === 0);
+
+  /* Somewhere with detail to lose, sampled across a few tile levels. */
+  const spots = [[12.5, 41.25], [-3.75, -18.5], [48.0, 121.0]];
+  let worstGap = 0, worstLevel = null, agreed = 0;
+  for (const level of [13, 15, 17, 18]) {
+    const lam = tileLambda(level, TERRAIN.verts);
+    hf.walkLambda = lam;
+    for (const [lat, lon] of spots) {
+      /* What physics gets, against what the builder bakes for that tile. */
+      const walked = hf.heightAt(lat, lon);
+      const drawn = hf.heightAt(lat, lon, lam);
+      const gap = Math.abs(walked - drawn);
+      if (gap > worstGap) { worstGap = gap; worstLevel = level; }
+      agreed++;
+    }
+  }
+  check(`physics agrees with the mesh at every level (${agreed} samples)`,
+    worstGap < 1e-9,
+    worstGap === 0 ? 'exactly' : `${worstGap.toExponential(1)} m off at level ${worstLevel}`);
+
+  /* And the gap it closes is not academic. With no band limit, the same point
+     carries relief the mesh never had — on this synthetic raster about a
+     metre at a coarse level, and more on rougher highland units, where the
+     amplitude carries a 1.45x factor. A metre is already twice the depth the
+     contact clamp will tolerate and most of the way to the eyes. */
+  hf.walkLambda = 0;
+  let biggest = 0;
+  for (const [lat, lon] of spots) {
+    const lam = tileLambda(13, TERRAIN.verts);
+    biggest = Math.max(biggest, Math.abs(hf.heightAt(lat, lon) - hf.heightAt(lat, lon, lam)));
+  }
+  check('and unlimited physics really did differ by the better part of a metre',
+    biggest > 0.5, biggest.toFixed(2) + ' m of invisible relief at level 13');
 }
 
 console.log(failures === 0 ? '\nterrain: all checks passed' : `\nterrain: ${failures} FAILED`);

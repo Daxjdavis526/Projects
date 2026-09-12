@@ -71,6 +71,21 @@ export function vertexSpacing(level, verts) {
   return edgeArc(level) / (verts - 1);
 }
 
+/**
+ * The finest wavelength a level-L tile's vertices can carry: three vertices
+ * across, because a bowl needs three to read as a bowl rather than as a spike.
+ *
+ * This lives here rather than in the tile builder because two very different
+ * callers have to agree on it exactly. The builder uses it to band-limit the
+ * procedural detail it bakes into a mesh; physics uses it to decide how much of
+ * that detail to simulate. When they disagreed, the ground you stood on was not
+ * the ground you could see -- at a coarse level the gap beat eye height, and you
+ * walked around inside the hill.
+ */
+export function tileLambda(level, verts) {
+  return vertexSpacing(level, verts) * 3;
+}
+
 /** u,v range covered by tile (level, i, j). */
 export function tileBounds(level, i, j, out = { u0: 0, v0: 0, u1: 0, v1: 0 }) {
   const n = 1 << level, s = 2 / n;

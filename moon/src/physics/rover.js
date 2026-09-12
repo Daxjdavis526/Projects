@@ -76,7 +76,18 @@ export class Rover {
     this.speed = 0; this.yawRate = 0; this.vertical = 0;
     this.height = ROVER.clearance;
     this.rolled = false;
-    this.vertical = 0;
+    /* Everything the suspension remembers about the ground it was on, because
+       it is not on that ground any more. `lastMean` and `groundRate` used to
+       survive a teleport, so restoring a save computed a climb rate from the
+       old site to the new one -- thousands of metres across one frame -- and
+       launched the vehicle on arrival. */
+    this.lastMean = undefined;
+    this.groundRate = 0;
+    this.meanGround = undefined;
+    this.wasDown = undefined;
+    this.airborneFor = 0;
+    this.suspension = [0, 0, 0, 0];
+    this.contact = [true, true, true, true];
     return this;
   }
 
@@ -167,26 +178,75 @@ export class Rover {
 
     /* --- getting air -------------------------------------------------------
        `height` is measured from the mean of the contact patches, so the body
-       has no memory of how fast that mean was itself rising. Drive off a
-       cliff and this model already works -- the ground falls away, the springs
-       run out of travel and the wheels lose contact. But drive *up* a ramp and
-       over its lip and nothing happened at all: the vehicle had been climbing
-       at thirty metres a second times the sine of the slope, and every bit of
-       that vertical speed was thrown away the instant the ground levelled,
-       because it only ever existed in the ground's frame.
-       So when the ground stops rising, the body keeps the speed it had. The
-       reverse case -- ground suddenly rising -- is left to the springs, which
-       is what they are for. The threshold ignores pebble-scale noise in a
-       real height field, and the cap means a bad sample cannot launch a
-       fifteen-hundred-kilogram vehicle into orbit. */
-    const rate = dt > 0 ? (mean - (this.lastMean ?? mean)) / dt : 0;
-    const shed = (this.groundRate ?? rate) - rate;
-    if (shed > 0.5) this.vertical += Math.min(shed, 8);
+       has no memory of how fast that mean was itself rising. Drive off a cliff
+       and the existing model works -- the ground falls away, the springs run
+       out of travel, the wheels lose contact. But drive *up* a ramp and over
+       its lip and nothing happened: the vehicle had been climbing at its speed
+       times the sine of the slope, and all of that was thrown away the instant
+       the ground levelled, because it only ever existed in the ground's frame.
+       So when the ground stops rising, the body keeps the speed it had.
+
+       The previous attempt at this was wrong in four ways at once, and between
+       them they are why the rover levitated and flew off with the camera. It
+       took `groundRate - rate`, which is POSITIVE when the ground drops -- so
+       a downward step threw the vehicle upward. It compared single frames, so
+       it was really measuring d2h/dt2 across one 60th of a second and was
+       frame-rate dependent: at 144 fps a three-centimetre step saturated it.
+       It had no way to tell terrain from a data artefact, and the terrain
+       system serves plenty -- a tile refining, a raster landing, a 125 m pit
+       being cut -- each of which is a step of metres in one frame. And its
+       0.5 m/s threshold only filtered pebbles at walking pace: at the boost
+       ceiling the vehicle covers half a metre per frame against a 25 cm
+       procedural noise floor, which is below Nyquist, so the "rate" was
+       aliased noise of several m/s and it fired on most frames.
+
+       This version measures the thing it actually wants -- how fast the ground
+       under the wheels is climbing -- and:
+         - takes the climb rate only while the wheels are down, since a body in
+           the air has no ground rate to inherit;
+         - low-passes it over about a fifth of a second, so one bad sample
+           cannot launch anything and the number stops being frame-rate
+           dependent;
+         - throws away any single step bigger than the suspension can absorb,
+           because real terrain at a plausible speed cannot do that and a
+           refining tile can;
+         - and launches on the climb rate being LOST, which is the sign the
+           old code had backwards.
+       The band limit added in the same pass as this comment is what makes the
+       low-pass meaningful: physics now samples the same surface the mesh
+       carries, so there is real signal in there rather than noise. */
+    const climb = dt > 0 ? (mean - (this.lastMean ?? mean)) / dt : 0;
     this.lastMean = mean;
-    this.groundRate = rate;
+    const anyDown = this.contact.some(Boolean);
+    /* A step no plausible speed could produce is the data moving, not the
+       ground. `suspTravel` is the natural scale: anything the springs could
+       have swallowed is terrain, anything larger is a discontinuity. */
+    const plausible = Math.abs(climb * dt) <= ROVER.suspTravel;
+    const climbNow = (anyDown && plausible) ? climb : 0;
+    const tau = 0.2;
+    const wasRate = this.groundRate ?? 0;
+    this.groundRate = wasRate + (climbNow - wasRate) * Math.min(1, dt / tau);
+
+    /* And this is what the launch actually is.
+       `height` and `vertical` are measured against the mean of the contact
+       patches, which makes that mean a moving reference frame. A frame that
+       accelerates shows up inside itself as a pseudo-force -- a_rel = a_body -
+       a_frame -- and that single term is the whole of getting air. On a
+       constant ramp the ground's climb rate is constant, the term is zero, and
+       nothing happens, correctly. At the lip the climb rate collapses to nil,
+       the term goes sharply positive, and the body is thrown exactly as hard
+       as the ground stopped coming up. Drive off a drop and it works the other
+       way round, which is the case that worked all along.
+       It is bounded by construction: the filter above limits how fast the rate
+       can change, the clamp below limits the worst case anyway, and because
+       terrain noise is symmetric the term averages to nothing over bumps
+       instead of accumulating. The previous attempt only ever ADDED, which is
+       why it levitated. */
+    const framePush = dt > 0 ? (this.groundRate - wasRate) / dt : 0;
+    const pseudo = Math.max(-4 * g, Math.min(4 * g, framePush));
 
     const weight = ROVER.mass * g;
-    this.vertical += (load - weight) / ROVER.mass * dt;
+    this.vertical += ((load - weight) / ROVER.mass - pseudo) * dt;
     this.height += this.vertical * dt;
     if (this.height < 0.05) { this.height = 0.05; this.vertical = Math.max(0, this.vertical); }
     const anyContact = this.contact.some(Boolean);
@@ -216,8 +276,34 @@ export class Rover {
     const maxSpeed = this.boost ? ROVER.speedBoost : ROVER.speedMax;
     const throttle = Math.max(-1, Math.min(1, input.throttle || 0));
     let force = throttle * ROVER.motorForce;
+    /* Whether the parking brake is actually winning. It matters twice: once
+       for pinning the vehicle at a standstill, and once below, where the
+       anti-jitter guard must not become a second, unconditional parking brake
+       that holds it on ground no wheel could hold it on. */
+    let holding = false;
     if (input.brake) force = -Math.sign(this.speed) * ROVER.brakeForce;
-    else if (Math.abs(throttle) < 0.02) force = -Math.sign(this.speed) * ROVER.brakeForce * 0.12;
+    else if (Math.abs(throttle) < 0.02) {
+      /* Coasting, or parked. With nobody aboard this is the parking brake, and
+         it needs to be a real one: the residual drag is 0.12 of the brake
+         force, which over 1450 kg is 0.43 m/s^2, and gravity down a slope beats
+         that from fifteen degrees. So a rover left on anything but the flat
+         drove itself away, and because the ship flattens sixteen metres of pad
+         around itself you only ever saw it after parking somewhere real.
+         Parked it gets the whole brake, and is held at a standstill only where
+         the ground can actually hold it: the wheels can resist `limit` and
+         gravity is pulling with mg·sin(slope), so past the friction angle the
+         pin is released and it slides, brake or no brake. Pinning
+         unconditionally would have made a 48 degree slope as good as a
+         car park. */
+      const parked = input.parked === true;
+      force = -Math.sign(this.speed) * ROVER.brakeForce * (parked ? 1 : 0.12);
+      const downhill = ROVER.mass * g * Math.sin(slope);
+      holding = parked && downhill <= limit;
+      if (holding && Math.abs(this.speed) < 0.05) {
+        this.speed = 0;
+        force = 0;
+      }
+    }
     /* Grip saturation: ask for more than the surface can give and the wheels
        spin, which on the Moon throws a rooster tail and gets you nowhere. */
     this.slipping = Math.abs(force) > limit;
@@ -226,7 +312,12 @@ export class Rover {
     const before = this.speed;
     this.speed += force / ROVER.mass * dt;
     if (Math.abs(this.speed) > maxSpeed) this.speed = Math.sign(this.speed) * maxSpeed;
-    if (before !== 0 && Math.sign(this.speed) !== Math.sign(before) && !input.throttle) this.speed = 0;
+    /* A brake that overshoots through zero should stop, not reverse. But only
+       where something is holding it: on ground past the friction angle this
+       guard was quietly pinning a sliding vehicle at a standstill every frame,
+       and the slope never got a chance. */
+    if (before !== 0 && Math.sign(this.speed) !== Math.sign(before) && !input.throttle
+        && (holding || !input.parked)) this.speed = 0;
 
     /* Slope. On anything past the friction angle the rover slides whatever the
        driver does, which is what makes a crater wall a decision. That angle is

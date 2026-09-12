@@ -24,6 +24,8 @@
 import { R_MOON } from '../config.js';
 import { llhToXyz, xyzToLlh, enuBasis } from '../physics/frames.js';
 import { clearLanding, explain as explainKeepOut } from '../game/keepout.js';
+import { FEATURED } from '../data/featured.js';
+import { drawPreview, spanLabel } from './preview.js';
 
 const el = (id) => document.getElementById(id);
 
@@ -44,6 +46,9 @@ export class OrbitPicker {
     this.getSky = opts.getSky;
     /* The clock, so the picker can set the epoch it will land at. */
     this.getTime = opts.getTime || (() => Date.now());
+    /* The LROC colour mosaic as a plain image, for the previews. Optional:
+       without it they come out as greyscale relief, which still reads. */
+    this.colour = opts.colour || null;
     this.onTime = opts.onTime || (() => {});
     this.kind = 'crewed';
     this.root = el('orbit');
@@ -53,18 +58,28 @@ export class OrbitPicker {
   }
 
   build() {
-    const presets = this.sites.presets
-      .map(id => this.sites.sites.find(s => s.id === id))
-      .filter(Boolean);
-    el('orbit-presets').innerHTML = presets.map(s =>
-      `<button data-id="${s.id}"><b>${s.name}</b><span>${s.sub || fmtLatLon(s.lat, s.lon)}</span></button>`
-    ).join('');
+    /* The shortlist, with a picture each. `data/featured.js` says which places
+       and how wide to draw them; the catalogue still says where they are and
+       what they are. The cards carry `data-id` and the delegate below resolves
+       it exactly as the old plain buttons did, so nothing about picking has
+       changed — only that you can now see what you are picking. */
+    const presets = FEATURED
+      .map(f => ({ f, s: this.sites.sites.find(s => s.id === f.id) }))
+      .filter(x => x.s);
+    el('orbit-presets').innerHTML = presets.map(({ f, s }) => `
+      <button class="card" data-id="${s.id}">
+        <canvas class="thumb" width="240" height="104" data-for="${s.id}"></canvas>
+        <b>${s.name}</b>
+        <span>${f.why}</span>
+        <i>${spanLabel(f.span)} &middot; ${fmtLatLon(s.lat, s.lon)}</i>
+      </button>`).join('');
     el('orbit-presets').addEventListener('click', (e) => {
       const b = e.target.closest('button');
       if (!b) return;
-      const s = presets.find(p => p.id === b.dataset.id);
-      if (s) this.select(s.lat, s.lon, s);
+      const s = presets.find(p => p.s.id === b.dataset.id);
+      if (s) this.select(s.s.lat, s.s.lon, s.s);
     });
+    this._featured = presets;
 
     this.buildSites();
     this.buildWhen();
@@ -113,6 +128,42 @@ export class OrbitPicker {
   show(on) {
     this.visible = on;
     this.root.style.display = on ? 'block' : 'none';
+    if (on) this.drawPreviews();
+  }
+
+  /**
+   * Fill in the featured cards' thumbnails.
+   *
+   * Deferred rather than done in `build()`, which runs before the global
+   * elevation has finished loading and before the colour mosaic exists as an
+   * image — a card drawn then would be a flat grey rectangle, permanently.
+   * Called on every `show`, and cheap enough to be: thirteen cards at a 96
+   * sample grid is about a hundred and twenty thousand `heightAt` calls
+   * against a resident raster, which is a few tens of milliseconds once.
+   * `done` stops it repeating for cards that already came out right.
+   */
+  drawPreviews() {
+    if (!this._featured) return;
+    this._drawn = this._drawn || new Set();
+    for (const { f, s } of this._featured) {
+      if (this._drawn.has(s.id)) continue;
+      const canvas = this.root.querySelector(`canvas[data-for="${s.id}"]`);
+      if (!canvas) continue;
+      const ok = drawPreview(canvas, {
+        heightfield: this.hf, colour: this.colour,
+        lat: s.lat, lon: s.lon, spanKm: f.span,
+      });
+      /* Only remember it as done once the photograph is in it as well as the
+         relief, or a card drawn during the first second keeps its grey. */
+      if (ok && this.colour && this.colour.complete) this._drawn.add(s.id);
+    }
+  }
+
+  /** The colour mosaic, once the game has it. Redraws whatever was grey. */
+  setColour(image) {
+    this.colour = image;
+    this._drawn = new Set();
+    if (this.visible) this.drawPreviews();
   }
 
   /** Find named features by prefix, nearest first among equal matches. */

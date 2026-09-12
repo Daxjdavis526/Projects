@@ -41,6 +41,12 @@ const FRICTION = Math.tan(37 * Math.PI / 180);
 const CONTACT_SLOP = 0.02;
 const CONTACT_STICK = 0.22;
 
+/* How far under the surface the body is allowed to be before it is pushed back
+   out regardless of what it is doing. Deep enough not to fight the stick
+   distance or a jump's first frame, shallow enough that it never reaches the
+   eyes: they sit 1.62 m up. */
+const MAX_SINK = 0.5;
+
 /* Slope is sampled over a stride rather than a boot print. A person walks over
    the centimetre-scale roughness; what tips them over is the metre-scale shape
    of the ground. */
@@ -92,6 +98,34 @@ export class Player {
     this.surface = h;
   }
 
+  /**
+   * Pushed out of something solid, keeping whatever motion was along the wall.
+   *
+   * This is what touching a hull or a conduit wall should do, and for a while
+   * it went through `place` instead — which zeroes all three velocity
+   * components. Since a resolve fires on every substep you are in contact,
+   * brushing a wall did not slow you down, it deleted your momentum outright:
+   * the exact opposite of the open ground, where nothing slowed you at all.
+   * The push direction is the only normal available here, so the component
+   * heading into the surface is removed and the rest is left alone.
+   */
+  slideTo(lat, lon, agl = 0) {
+    const h = this.ground.heightAt(lat, lon);
+    const before = { x: this.pos.x, y: this.pos.y, z: this.pos.z };
+    llhToXyz(lat, lon, h + agl, this.pos);
+    const nx = this.pos.x - before.x, ny = this.pos.y - before.y, nz = this.pos.z - before.z;
+    const nl = Math.hypot(nx, ny, nz);
+    if (nl > 1e-9) {
+      const ux = nx / nl, uy = ny / nl, uz = nz / nl;
+      const into = this.vel.x * ux + this.vel.y * uy + this.vel.z * uz;
+      if (into < 0) {
+        this.vel.x -= into * ux; this.vel.y -= into * uy; this.vel.z -= into * uz;
+      }
+    }
+    this.llh = { lat, lon, h: h + agl };
+    this.surface = h;
+  }
+
   get speed() {
     const u = this.up();
     const vr = this.vel.x * u.x + this.vel.y * u.y + this.vel.z * u.z;
@@ -124,27 +158,44 @@ export class Player {
     const g = GM_MOON / (r * r);
 
     /* --- where the ground is ------------------------------------------- */
+    const was = this.llh;
     const llh = xyzToLlh(this.pos.x, this.pos.y, this.pos.z);
     this.llh = llh;
     const wasSurface = this.surface;
     this.surface = this.ground.heightAt(llh.lat, llh.lon);
+
+    /* How much of the change in the ground is the ground's own fault.
+       Re-sampling where we stood LAST substep, with the data we have NOW,
+       isolates the data's movement from ours: the difference against
+       `wasSurface` is what a refining tile or an arriving raster did, with our
+       own travel divided out. Without this the two are indistinguishable, and
+       the old code could only tell them apart by refusing to look while
+       airborne -- which is half the time at a lope, so half of every tile
+       refinement landed as a fall instead of as bookkeeping. */
+    const dataShift = (was && wasSurface !== null && wasSurface !== undefined)
+      ? this.ground.heightAt(was.lat, was.lon) - wasSurface : 0;
 
     /* The ground moves under you. A tile arriving at a finer level can drop or
        lift the surface by a metre or two while you stand perfectly still, and
        reading that as a fall is why the player was permanently getting up on
        rough terrain: refine, drop, land hard, refine again.
 
-       This is sampled at the position you were already standing at, which is
-       what separates a refinement from a cliff. Walking off an edge changes the
-       ground because you moved; a tile arriving changes the ground under the
-       spot you have not left. The first is a fall and should hurt. The second
-       is bookkeeping, and the body is simply carried with it. */
-    if (this.grounded && wasSurface !== null && wasSurface !== undefined &&
-        Math.abs(this.surface - wasSurface) > CONTACT_SLOP) {
-      llhToXyz(llh.lat, llh.lon, this.surface, this.pos);
-      llh.h = this.surface;
-      const nu = this.vel.x * u.x + this.vel.y * u.y + this.vel.z * u.z;
-      this.vel.x -= nu * u.x; this.vel.y -= nu * u.y; this.vel.z -= nu * u.z;
+       Walking off an edge changes the ground because you moved; a tile
+       arriving changes the ground under the spot you have not left. The first
+       is a fall and should hurt. The second is bookkeeping, and the body is
+       carried with it -- in the air as well as on foot, because a bound is not
+       a good reason to be left standing inside a hill. What is carried is your
+       height ABOVE the ground, so a refinement never turns into a drop and
+       never turns into a hard landing either. */
+    if (Math.abs(dataShift) > CONTACT_SLOP) {
+      llh.h += dataShift;
+      llhToXyz(llh.lat, llh.lon, llh.h, this.pos);
+      /* Only a body in contact has its vertical motion killed by the ground
+         moving. In the air the shift is a coordinate change, not an impact. */
+      if (this.grounded) {
+        const nu = this.vel.x * u.x + this.vel.y * u.y + this.vel.z * u.z;
+        this.vel.x -= nu * u.x; this.vel.y -= nu * u.y; this.vel.z -= nu * u.z;
+      }
     }
     const agl = llh.h - this.surface;
     const b = enuBasis(llh.lat, llh.lon);
@@ -167,7 +218,11 @@ export class Player {
        camera and the heading readout use. */
     const fwd = { x: b.n.x * cy + b.e.x * sy, y: b.n.y * cy + b.e.y * sy, z: b.n.z * cy + b.e.z * sy };
     const rgt = { x: b.e.x * cy - b.n.x * sy, y: b.e.y * cy - b.n.y * sy, z: b.e.z * cy - b.n.z * sy };
-    const top = input.run ? PLAYER.sprint : PLAYER.lope;
+    /* Shift asks for the bound, and gets the same speed it always got — the
+       point of this change was to add a gait below it, not to take the fast one
+       away. Without shift you walk, which is both the controllable gait and
+       the one a person actually uses to look at something. */
+    const top = input.run ? PLAYER.sprint : PLAYER.walk;
     const wish = {
       x: (fwd.x * (input.forward || 0) + rgt.x * (input.strafe || 0)),
       y: (fwd.y * (input.forward || 0) + rgt.y * (input.strafe || 0)),
@@ -185,21 +240,25 @@ export class Player {
        east/north/up frame, which is the contract the whole project uses. */
     const slope = (this.ground.slopeAt ? this.ground.slopeAt(llh.lat, llh.lon, SLOPE_STEP) : 0) * DEG;
     const traction = FRICTION * g;
+    /* On the ground, what a boot can push with. In the air, what the suit's
+       maneuvering unit can do — which is a fiction, and a deliberate one.
+       Steering used to run at `airControl` and braking at nothing at all, on
+       the correct grounds that a vacuum gives you nothing to push against; but
+       a lope is airborne half the time, so that made half of all travel purely
+       ballistic and stopping took five metres. `airBrake` is the same hardware
+       as the jetpack, idling. */
     const maxAccel = this.grounded
       ? traction * (fallen ? 0 : 1) * Math.max(0.25, Math.cos(slope))
-      : traction * PLAYER.airControl;
+      : traction * (fallen ? 0 : Math.max(PLAYER.airControl, PLAYER.airBrake));
 
     const speed = Math.hypot(hx, hy, hz);
     let ax = wish.x / wl * target - hx, ay = wish.y / wl * target - hy, az = wish.z / wl * target - hz;
-    /* Asking to stop is a thing a boot does. Letting go of the keys in flight
-       used to apply the same deceleration through `airControl`, which took
-       about eight per cent off the horizontal speed of a two-second bound: a
-       retarding force in a vacuum, with nothing to push against and no source.
-       In the air with no input, the only thing that changes your velocity is
-       gravity — and the jetpack, below, which is thrust and is allowed to. */
+    /* Asking to stop. On the ground a boot does it; in the air the pack does,
+       at the same authority it steers with. What is NOT allowed is a retarding
+       force with no source, which is what this used to be before the pack was
+       named as the thing providing it. */
     if (want < 0.01) {
-      if (!this.grounded) { ax = 0; ay = 0; az = 0; }
-      else { ax = -hx; ay = -hy; az = -hz; }
+      ax = -hx; ay = -hy; az = -hz;
     }
     const need = Math.hypot(ax, ay, az);
     if (need > 1e-6) {
@@ -241,7 +300,15 @@ export class Player {
     /* A lope is a bound: each stride leaves the ground. The stride lengthens
        with speed, and the push-off is whatever vertical speed keeps you in the
        air for exactly that long — which is what makes the motion read as low
-       gravity rather than as a slow-motion walk. */
+       gravity rather than as a slow-motion walk.
+       How committed the bound is now depends on whether you asked for it.
+       Hold shift and it is the full Apollo article: airborne exactly as long as
+       it is grounded, 50% duty cycle by construction, and you plan your stop
+       several paces ahead. Walking, the same stride runs at about a third of
+       the push-off, so a boot is down roughly three quarters of the time and
+       the gait can be steered. The Froude number says a true walk is unstable
+       above 0.74 m/s, and it is right — this is a brisk, deliberately
+       half-committed shuffle, and the honest name for it is a compromise. */
     if (this.grounded && !fallen) {
       const stride = moving > 0.05 ? 1.15 + 0.42 * moving : 1;
       this.stepPhase += moving * dt / stride;
@@ -250,7 +317,8 @@ export class Player {
         this.stepsTaken++;
         if (this.gait === GAIT.LOPE) {
           const flight = Math.min(1.1, stride / Math.max(moving, 0.1));
-          vUp = Math.max(vUp, Math.min(1.1, g * flight * 0.5));
+          const commit = input.run ? 1 : 0.35;
+          vUp = Math.max(vUp, Math.min(1.1, g * flight * 0.5 * commit));
         }
       }
       this.bob = this.gait === GAIT.WALK
@@ -335,6 +403,22 @@ export class Player {
       if (!wasGrounded) this.land(impact);
       this.grounded = true;
       after.h = gh;
+    } else if (after.h < gh - MAX_SINK) {
+      /* The floor under the floor. `rising` deliberately skips the contact test
+         so that a jump is not cancelled on its own first frame -- but it used
+         to skip it with no depth limit whatever, so any upward velocity at all
+         (a jump, a lope's push-off, one substep of jetpack) meant there was
+         nothing between the body and the centre of the Moon. A jetpack burn
+         inside a hill, or a raster arriving while mid-bound, went straight
+         through. Rising or not, half a metre under is not a place to be. */
+      llhToXyz(after.lat, after.lon, gh, this.pos);
+      after.h = gh;
+      const u2 = this.up();
+      const nu = this.vel.x * u2.x + this.vel.y * u2.y + this.vel.z * u2.z;
+      if (nu < 0) {
+        this.vel.x -= nu * u2.x; this.vel.y -= nu * u2.y; this.vel.z -= nu * u2.z;
+      }
+      this.grounded = true;
     } else {
       this.grounded = false;
     }

@@ -105,8 +105,13 @@ console.log('the profile has the shape Apollo flew');
         `${high.speed.toFixed(0)} m/s at ${high.agl.toFixed(0)} m`);
   check('low gate has washed most of it off', low.speed < 60 && low.agl < 400,
         `${low.speed.toFixed(0)} m/s at ${low.agl.toFixed(0)} m`);
-  check('and the last metres are flown at walking pace',
-        final.vDown <= 1.3 && final.speed < 5,
+  /* Firmer than it was. The terminal rate cap went from 1.2 to 2.2 m/s because
+     it alone imposed nearly twelve seconds on the final fourteen metres, and
+     the whole descent was fifty-three. 2.2 m/s is four times what Armstrong
+     touched down at and still inside the LM's design limit of about three on a
+     single leg, so it is a firm arrival rather than a crash. */
+  check('and the last metres are still flown slowly, by eye',
+        final.vDown <= 2.3 && final.speed < 6,
         `${final.vDown.toFixed(2)} m/s down, ${final.speed.toFixed(1)} m/s across`);
   /* Height above the datum, not above the ground: over real relief the ground
      rises and falls underneath and the height above it does too. */

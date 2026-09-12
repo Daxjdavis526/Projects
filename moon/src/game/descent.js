@@ -38,6 +38,14 @@ import { offsetLatLon, bearing, surfaceDistance } from '../physics/frames.js';
 /* Where the approach begins: high, fast and off to one side, so the site comes
    into view rather than simply appearing underneath. */
 const START_ALT = 1150;          // m above the ground
+/* Stays at 3100. Trimming it to 2500 does remove six seconds of unchanging
+   cruise, and it also removes the ship's only margin above its own commanded
+   profile -- and the profile commands height above the LOCAL ground, so
+   approaching over ground that rises towards the site the ship goes below
+   profile, cannot climb back (there is no upward authority in the guidance,
+   deliberately), and flies into the hill. It missed Apollo 11 by 464 m over
+   the kind of relief Tycho actually has. The time comes out of the tail
+   instead, which is where it was. */
 const START_RANGE = 3100;        // m short of the site
 const APPROACH_BEARING = 250;    // degrees; the Sun is usually behind you at dawn
 /* Where the glide path ends: fifty metres up at a hundred and forty out, from
@@ -130,11 +138,16 @@ export class Descent {
        than going back up, which is what the crews flew and what keeps the one
        piece of theatre in the game from looking like a yo-yo. */
     const wantDown = clamp(onPath + (agl - wantAgl) * 0.55, 0, 44);
+    /* The gates, retuned because the whole thing took fifty-three seconds and
+       twenty-one of them went on the last hundred and eighty metres. The shape
+       of the profile is unchanged -- high gate, brake, low gate, a slow
+       vertical finish -- but the terminal steps used to be 11 m/s and 2.4 m/s,
+       which is a very long time to spend closing thirty-five metres. */
     const wantSpeed = range > 2000 ? START_SPEED
       : range > 700 ? 95
-      : range > 180 ? 34
-      : range > 35 ? 11
-      : 2.4;
+      : range > 180 ? 42
+      : range > 35 ? 17
+      : 4.5;
 
     /* Against gravity, which is what the header claims and what this used to
        only look like: the vertical rate was rate-limited straight to its
@@ -164,8 +177,10 @@ export class Descent {
     this.speed += clamp(wantHoriz, -BRAKE_ACCEL, PUSH_ACCEL) * dt;
     this.speed = Math.max(0, this.speed);
     /* The last few metres are flown slowly, by eye, exactly as they were on
-       every Apollo landing. */
-    if (agl < 14) this.vDown = Math.min(this.vDown, 1.2);
+       every Apollo landing -- Armstrong touched down at about 0.5 m/s. This is
+       the single biggest lever on how long the descent feels: at 1.2 m/s it
+       imposed nearly twelve seconds on the final fourteen metres by itself. */
+    if (agl < 14) this.vDown = Math.min(this.vDown, 2.2);
 
     /* Steer at the site the whole way in. */
     if (range > 3) this.heading = bearing(this.lat, this.lon, this.target.lat, this.target.lon);
