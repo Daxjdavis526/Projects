@@ -1400,6 +1400,13 @@ async function start() {
        a thin sheet outwards rather than a cloud upwards. */
     dust.update(dt, rebased ? stage.origin.lastShift : null);
     dust.setPixelScale(stage.renderer.domElement.height, stage.camera.fov);
+    /* Grains as bright as the ground they came off, rather than a constant six
+       stops over it. Outside `mode === 'surface'` too, because the descent
+       plume is dust as well. */
+    dust.setLight({
+      mu0: Math.sin(local.sunEl * Math.PI / 180),
+      albedo: albedoAt(geology, cam.lat, cam.lon),
+    });
     /* Boot prints, recorded wherever you actually walk rather than only in the
        rover. Both lines are drawn by the same ribbon. */
     if (eva && !driving && eva.player.grounded) {
@@ -1425,7 +1432,7 @@ async function start() {
         dust.burst({
           at: { x: eva.player.pos.x - o.x, y: eva.player.pos.y - o.y, z: eva.player.pos.z - o.z },
           up: u, count: eva.player.speed > 2 ? 14 : 6,
-          speed: 0.7 + eva.player.speed * 0.35, angle: 26, spread: 0.7, size: 13,
+          speed: 0.7 + eva.player.speed * 0.35, angle: 26, spread: 0.7, size: 0.018,
         });
       }
     }
@@ -1472,7 +1479,7 @@ async function start() {
                 z: p.z - o.z + fz * axle + ez * halfTrack * side },
           up: b.u,
           count: hard ? 7 : 3, speed: 1.0 + Math.abs(r.speed) * 0.5,
-          angle: 34, spread: 0.8, size: 15,
+          angle: 34, spread: 0.8, size: 0.030,
           forward: back, bias: hard ? 0.8 : 0.55,
         });
       }
@@ -1487,7 +1494,7 @@ async function start() {
       dust.burst({
         at: { x: p.x - o.x, y: p.y - o.y, z: p.z - o.z }, up: b.u,
         count: Math.round(26 * descent.dust), speed: 9 + 26 * descent.dust,
-        angle: 2.5, spread: 0.9, size: 10,
+        angle: 2.5, spread: 0.9, size: 0.045,
       });
     }
 
@@ -1772,6 +1779,11 @@ async function start() {
     get driving() { return driving; },
     board() { driving = true; },
     get descent() { return descent; },
+    /* For the harness. Dust is emitted from footfalls and wheels deep inside
+       the frame loop, and there is no way to make a screenshot walk, so the
+       only way to test the thing is to throw some directly. */
+    get dust() { return dust; },
+    get stage() { return stage; },
     get mode() { return mode; },
     land(lat, lon) { land({ lat, lon }); },
     /* Where the sun is from where you are standing, for tests that care
