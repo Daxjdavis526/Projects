@@ -302,16 +302,34 @@ const DEFAULT_SHOTS = [
    `(() => {
       const s = window.SELENE;
       if (!s.vehicle || !s.eva) return false;
-      if (!s.driving) {
-        s.eva.player.place(s.vehicle.rover.lat, s.vehicle.rover.lon, 0.1);
+      if (!window.__rs) {
+        window.__rs = 1;
+        /* PUT it on the flank rather than drive it there. Driving off the pad
+           was the first attempt and it does not work: the ship flattens
+           sixteen metres around itself and immediately outside that Tycho's
+           central peak is steeper than the friction angle, so the vehicle
+           slid back and the chase camera spent the whole shot looking at the
+           ship's landing gear. rover.place also clears everything the
+           suspension remembers, which is exactly what a teleport wants. */
+        const R = 1737400, D = 180 / Math.PI;
+        const r = s.vehicle.rover;
+        /* Bearing 70, not 205: the Sun is at azimuth 66 here, so the outward
+           slope on that side is the LIT one. The first attempt put it on the
+           south-west flank, which at a 24 degree Sun is in full shadow, and
+           the harness correctly refused the frame for having no ground in it. */
+        const m = 260, brg = 70 / D;
+        const lat = r.lat + Math.cos(brg) * m / R * D;
+        const lon = r.lon + Math.sin(brg) * m / R * D / Math.cos(r.lat / D);
+        r.place(lat, lon, 160);
+        s.eva.player.place(lat, lon, 0.1);
         s.board();
         s.vehicle.view = 'chase';
         window.__t = Date.now();
         return false;
       }
-      /* Drive off the pad and onto real ground, where there is a gradient. */
-      s.vehicle.rover.speed = 9;
-      return Date.now() - window.__t > 6000;
+      /* Long enough for the suspension and the pitch/roll filters to settle,
+         and for the terrain under it to have refined. */
+      return Date.now() - window.__t > 5000;
     })()`],
 
   /* The map, at a scale where the Moon is doing something. Tycho is 85 km
@@ -344,6 +362,13 @@ const DEFAULT_SHOTS = [
       if (!window.__wp) {
         window.__wp = 1;
         const R = 1737400, D = 180 / Math.PI;
+        /* Step clear of the ship first. Standing at the ladder the landing
+           gear fills the frame and the nearer of the two columns is behind a
+           leg, which was the first version of this shot. */
+        {
+          const me = s.eva.player.llh;
+          s.eva.place(me.lat, me.lon - 100 / R * D / Math.cos(me.lat / D), 0.1);
+        }
         /* Offsets in degrees, small-angle, which is plenty at these ranges. */
         const at = (brg, m) => {
           const b = brg / D;
@@ -370,7 +395,20 @@ const shots = args.filter((a, i) => args[i - 1] === '--shot')
     const cut = rest.indexOf('::');
     return cut < 0 ? [name, rest] : [name, rest.slice(0, cut), rest.slice(cut + 2)];
   });
-const SHOTS = shots.length ? shots : DEFAULT_SHOTS;
+/* `--only tycho` runs just the default shots whose name contains that, which
+   is what you want when one of twenty-eight needs iterating on: the whole run
+   is a quarter of an hour and `--shot` defines a NEW shot rather than picking
+   an existing one, so re-running one of these used to mean copying its whole
+   wait expression onto a command line. Comma-separated for a few at once. */
+const only = argOf('only', '');
+const picked = only
+  ? DEFAULT_SHOTS.filter(s => only.split(',').some(k => s[0].includes(k.trim())))
+  : DEFAULT_SHOTS;
+if (only && !picked.length) {
+  console.error(`--only ${only} matched none of: ${DEFAULT_SHOTS.map(s => s[0]).join(' ')}`);
+  process.exit(2);
+}
+const SHOTS = shots.length ? shots : picked;
 
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
