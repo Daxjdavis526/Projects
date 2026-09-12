@@ -110,12 +110,22 @@ function soleBelowHip(hip, knee, ankle, lean) {
    stripes, tread and radiator fins, then the things nobody can make out from
    more than about two metres away.                                          */
 
+/* The counts went up because they were nearly free and they were the other
+   half of "boxy". At `high` a limb was a twelve-sided prism, which is visibly
+   faceted at the distance the third-person camera sits at; the whole figure is
+   a few thousand triangles against a terrain budget of a million, so twenty
+   sides costs nothing anyone can measure. `ribs` drives the convolute rows,
+   which at two read as two steps rather than as bellows. */
 const TIERS = {
-  performance: { rad: 6,  sphW: 10, sphH: 6,  ribs: 2, detail: 0 },
-  balanced:    { rad: 8,  sphW: 14, sphH: 8,  ribs: 2, detail: 1 },
-  high:        { rad: 12, sphW: 18, sphH: 11, ribs: 3, detail: 2 },
-  ultra:       { rad: 16, sphW: 24, sphH: 15, ribs: 3, detail: 3 },
+  performance: { rad: 8,  sphW: 12, sphH: 7,  ribs: 3, detail: 0 },
+  balanced:    { rad: 14, sphW: 16, sphH: 10, ribs: 4, detail: 1 },
+  high:        { rad: 20, sphW: 22, sphH: 14, ribs: 5, detail: 2 },
+  ultra:       { rad: 28, sphW: 30, sphH: 19, ribs: 6, detail: 3 },
 };
+
+/* How much slack cloth to put on a limb, by tier. Off at the lowest, where
+   the radial count is too coarse to carry it anyway. */
+const FOLD = (detail) => (detail >= 2 ? 0.020 : detail >= 1 ? 0.013 : 0);
 
 /* --- materials -------------------------------------------------------------
    One directional sun, no ambient, and shadows that go properly black. That
@@ -174,13 +184,92 @@ const cyl = (rt, rb, h, seg) => new THREE.CylinderGeometry(rt, rb, h, seg, 1, fa
 const tube = (r, h, seg) => new THREE.CylinderGeometry(r, r, h, seg, 1, true);
 
 /**
+ * A limb, as a profile revolved rather than as a cone.
+ *
+ * This is what stops the figure reading as plumbing. A thigh is not a
+ * truncated cone: it is widest a third of the way down, the calf carries most
+ * of a shin's volume behind the knee, and a shoulder swells before it tapers.
+ * Cones cannot say any of that, and nine of them stacked in a row is most of
+ * why the whole model looked boxy.
+ *
+ * `pts` is a list of `[t, r]` — t from 0 at the top to 1 at the bottom, r the
+ * radius there, in metres. The revolve is closed with flat caps, because these
+ * sections are joined by overlapping and an open end shows the inside of the
+ * next one. `LatheGeometry` is already how this project builds the ship's
+ * tanks and the rover's wheel hubs, so nothing new is being introduced.
+ *
+ * @param {Array<[number, number]>} pts
+ * @param {number} len   the section's length in metres
+ * @param {number} seg   radial segments
+ */
+function limb(pts, len, seg, fold = 0) {
+  const prof = [];
+  /* A flat cap at the top, the profile, then a flat cap at the bottom. Lathe
+     wants its points in increasing y, and the authoring frame here is +Y up
+     with the section centred on the origin, matching what `cyl` produces. */
+  prof.push(new THREE.Vector2(0.0001, len / 2));
+  for (const [t, r] of pts) prof.push(new THREE.Vector2(r, len / 2 - t * len));
+  prof.push(new THREE.Vector2(0.0001, -len / 2));
+  const g = new THREE.LatheGeometry(prof, seg);
+  /* Cloth, at a couple of millimetres. A pressurised garment is never smooth:
+     the restraint layer gathers into slack folds that run along the limb, and
+     without them a lathe is a suspiciously perfect extrusion. The amplitude is
+     deliberately tiny — this is for the way the light breaks across it, not
+     for a silhouette — and it is the same per-vertex displacement trick as
+     `convolute` below and for the same reason: no new machinery. */
+  if (fold > 0) {
+    const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      const rad = Math.hypot(x, z);
+      if (rad < 1e-5) continue;                  // a cap vertex, on the axis
+      const a = Math.atan2(z, x);
+      const k = 1 + fold * (Math.sin(a * 7) * 0.6 + Math.sin(a * 4 + y * 26) * 0.4);
+      p.setXYZ(i, x * k, y, z * k);
+    }
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+/**
+ * A box with its corners taken off: a superellipsoid, built by pushing a
+ * sphere's vertices out towards the faces of a cube.
+ *
+ * The life support pack was four stacked `BoxGeometry` slabs, 42 cm wide
+ * across the shoulders, and it was the largest hard edge on the figure — the
+ * one thing you cannot help seeing in the third-person view. Real flight
+ * hardware has a radius on every corner because a sharp edge in a
+ * pressurised garment's way is a puncture waiting to happen.
+ *
+ * `sharp` runs 0 to 1: at 1 this is a sphere, at 0.35 a rounded box, and
+ * towards 0 it approaches a cube with a crease. Per-vertex displacement plus
+ * `computeVertexNormals` is the same trick `convolute` below uses.
+ */
+function roundedBox(w, h, d, sharp, segW, segH) {
+  const g = new THREE.SphereGeometry(0.5, segW, segH);
+  const p = g.attributes.position;
+  const k = clamp(sharp, 0.05, 1);
+  for (let i = 0; i < p.count; i++) {
+    /* The sphere has radius 0.5, so normalise, shape, and scale to the box. */
+    const x = p.getX(i) * 2, y = p.getY(i) * 2, z = p.getZ(i) * 2;
+    const f = (v) => Math.sign(v) * Math.pow(Math.abs(v), k);
+    p.setXYZ(i, f(x) * w / 2, f(y) * h / 2, f(z) * d / 2);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+/**
  * A convolute: the fabric bellows that lets a pressurised joint bend without
  * changing the volume it encloses. Built as one open cylinder whose rows are
  * pushed out into ribs, which is both cheaper and a better silhouette than
  * stacking separate rings.
  */
 function convolute(r, len, ribs, seg) {
-  const g = new THREE.CylinderGeometry(r, r, len, seg, ribs * 2, true);
+  /* Three rows per rib rather than two: at two the bellows are a zigzag, and
+     the whole point of a convolute is that it reads as folded cloth. */
+  const g = new THREE.CylinderGeometry(r, r, len, seg, ribs * 3, true);
   const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
@@ -303,7 +392,11 @@ function buildThigh(pt, Q, D, s) {
   /* Limb sections run well past the joints they meet, and the convolutes are
      open tubes with nothing inside them. Anywhere the overlap is short, the
      camera finds its way through the fabric and into an empty leg. */
-  put(pt, cyl(0.110, 0.092, 0.340, Q.rad), M_FABRIC, [x, 0.750, 0], null, [1, 1, 0.94]);
+  /* A thigh, not a cone: widest a third of the way down where the quadriceps
+     is, narrowing into the knee. The Z squash is kept — a leg is deeper than
+     it is wide, and a revolve is circular. */
+  put(pt, limb([[0, 0.101], [0.16, 0.112], [0.38, 0.108], [0.72, 0.096], [1, 0.088]],
+               0.340, Q.rad, FOLD(D)), M_FABRIC, [x, 0.750, 0], null, [1, 1, 0.94]);
   /* Crew identification stripes. Apollo added them to the commander's suit
      after Apollo 12, when nobody could tell the two figures apart in the
      photographs, and every programme since has kept the idea. */
@@ -318,7 +411,11 @@ function buildShin(pt, Q, D, s) {
      abrasion on the way down. Apollo's tools were long handled precisely so
      that nobody had to get down there deliberately. */
   if (D >= 1) put(pt, box(0.105, 0.115, 0.032), M_SHELL, [x, 0.630, -0.118]);
-  put(pt, cyl(0.092, 0.072, 0.390, Q.rad), M_FABRIC, [x, 0.385, 0], null, [1, 1, 0.95]);
+  /* The calf carries most of a shin's volume, high and behind the knee, and
+     then runs down to almost nothing at the ankle. This is the single most
+     recognisable silhouette on a leg and a truncated cone has none of it. */
+  put(pt, limb([[0, 0.086], [0.14, 0.095], [0.30, 0.092], [0.62, 0.074], [1, 0.062]],
+               0.390, Q.rad, FOLD(D)), M_FABRIC, [x, 0.385, 0], null, [1, 1, 0.95]);
   put(pt, convolute(0.084, 0.100, 2, Q.rad), M_JOINT, [x, 0.215, 0]);
 }
 
@@ -328,9 +425,19 @@ function buildBoot(pt, Q, D, s) {
      The sole is a separate slab of silicone with a ribbed tread, which is what
      left the famous print, and it is larger than the foot because until
      Surveyor landed nobody knew what the regolith would carry. */
+  /* The sole stays a slab, because a slab is what it is — flat, oversized and
+     square-edged, and it is the thing that left the print. Everything above it
+     was a box too, which is what made the foot read as a brick: a pressurised
+     overboot is a rounded bag laced over the bladder. An ellipsoid is not
+     axisymmetric enough for a lathe but it is exactly a scaled sphere, and the
+     rounded corners are the whole difference. */
   put(pt, box(0.158, 0.034, 0.330), M_DARK, [x, 0.029, -0.045]);
-  put(pt, box(0.142, 0.130, 0.215), M_FABRIC, [x, 0.111, -0.020]);
-  put(pt, box(0.132, 0.074, 0.115), M_FABRIC, [x, 0.086, -0.146], [0.13, 0, 0]);
+  put(pt, new THREE.SphereGeometry(0.5, Q.sphW, Q.sphH), M_FABRIC,
+      [x, 0.108, -0.020], null, [0.148, 0.150, 0.235]);
+  /* The toe, lower and pushed forward, so the boot has a front rather than
+     ending in a corner. */
+  put(pt, new THREE.SphereGeometry(0.5, Q.sphW, Math.max(6, Q.sphH >> 1)), M_FABRIC,
+      [x, 0.078, -0.150], [0.13, 0, 0], [0.136, 0.088, 0.140]);
   if (D >= 1) put(pt, tube(0.088, 0.030, Q.rad), M_METAL, [x, 0.182, -0.020]);
   if (D >= 2) {
     for (let i = 0; i < 5; i++)
@@ -385,8 +492,10 @@ function buildTorso(pt, Q, D) {
      heaviest single thing a crew member carries and all of it hangs behind the
      shoulder blades, which is the entire reason this figure leans forward when
      it moves. The crews did the same, and for the same reason. */
-  put(pt, box(0.420, 0.460, 0.200), M_SHELL, [0, 1.290, 0.225]);
-  put(pt, box(0.380, 0.400, 0.048), M_SHELL, [0, 1.290, 0.348]);
+  put(pt, roundedBox(0.420, 0.460, 0.200, 0.32, Q.sphW, Q.sphH), M_SHELL,
+      [0, 1.290, 0.225]);
+  put(pt, roundedBox(0.380, 0.400, 0.048, 0.30, Q.sphW, Q.sphH), M_SHELL,
+      [0, 1.290, 0.348]);
   put(pt, box(0.400, 0.050, 0.220), M_SHELL, [0, 1.545, 0.225]);
   put(pt, box(0.400, 0.042, 0.210), M_DARK, [0, 1.040, 0.225]);
   if (D >= 1) {
@@ -417,14 +526,19 @@ function buildTorso(pt, Q, D) {
 function buildUpperArm(pt, Q, D, s) {
   const x = s * SHLD_X;
   put(pt, convolute(0.082, 0.140, Q.ribs, Q.rad), M_JOINT, [x, 1.362, -0.010]);
-  put(pt, cyl(0.076, 0.068, 0.250, Q.rad), M_FABRIC, [x, 1.215, -0.010]);
+  /* The deltoid swell at the top, then a taper into the elbow. */
+  put(pt, limb([[0, 0.070], [0.18, 0.079], [0.45, 0.074], [1, 0.066]],
+               0.250, Q.rad, FOLD(D)), M_FABRIC, [x, 1.215, -0.010]);
   if (D >= 2) put(pt, tube(0.078, 0.052, Q.rad), M_ACCENT, [x, 1.245, -0.010]);
 }
 
 function buildForearm(pt, Q, D, s) {
   const x = s * SHLD_X;
   put(pt, convolute(0.073, 0.130, Q.ribs, Q.rad), M_JOINT, [x, 1.098, -0.010]);
-  put(pt, cyl(0.066, 0.056, 0.250, Q.rad), M_FABRIC, [x, 0.975, -0.010]);
+  /* A forearm is thickest just below the elbow and narrows all the way to the
+     wrist bearing. */
+  put(pt, limb([[0, 0.062], [0.20, 0.068], [0.55, 0.060], [1, 0.052]],
+               0.250, Q.rad, FOLD(D)), M_FABRIC, [x, 0.975, -0.010]);
   /* Wrist bearing. The one bearing that matters most: without it you cannot
      turn a bolt, you can only push it. */
   put(pt, tube(0.058, 0.032, Q.rad), M_METAL, [x, 0.848, -0.010]);
@@ -437,14 +551,22 @@ function buildGlove(pt, Q, D, s) {
   const x = s * SHLD_X;
   const inward = -s;      // the thumb side
   put(pt, convolute(0.052, 0.055, 2, Q.rad), M_JOINT, [x, 0.818, -0.010]);
-  put(pt, box(0.078, 0.105, 0.062), M_FABRIC, [x, 0.735, -0.014]);
+  /* A mitt, revolved and then flattened, rather than a cube. A pressurised
+     glove is close to a rounded bag with a thumb on it — the fingers are
+     stubby and there is no knuckle line to speak of — and two boxes stacked
+     was the most obviously wrong thing on the whole figure at arm's length. */
+  put(pt, limb([[0, 0.035], [0.18, 0.046], [0.55, 0.047], [0.85, 0.040], [1, 0.024]],
+               0.105, Q.rad), M_FABRIC, [x, 0.735, -0.014], null, [1, 1, 0.78]);
   /* The palm and finger pads are a different, grippier material, and they are
      the part that wears out: Apollo 17 came home with the outer layer worn
      through at the fingertips. */
-  put(pt, box(0.076, 0.070, 0.052), M_DARK, [x, 0.672, -0.026], [0.38, 0, 0]);
+  put(pt, limb([[0, 0.040], [0.4, 0.043], [1, 0.030]], 0.070, Q.rad),
+      M_DARK, [x, 0.672, -0.026], [0.38, 0, 0], [1, 1, 0.72]);
   if (D >= 1) {
-    put(pt, cyl(0.017, 0.015, 0.058, 6), M_DARK,
-        [x + inward * 0.042, 0.706, -0.030], [0.5, 0, inward * 0.5]);
+    /* The thumb, which on a pressurised glove is the only articulated digit
+       worth modelling and is what makes a mitt read as a hand. */
+    put(pt, limb([[0, 0.016], [0.5, 0.018], [1, 0.011]], 0.058, Math.max(6, Q.rad >> 1)),
+        M_DARK, [x + inward * 0.042, 0.706, -0.030], [0.5, 0, inward * 0.5]);
   }
 }
 

@@ -39,9 +39,9 @@ that spot. Then land.
 | space | jump, brake, or skip the landing |
 | J | jetpack (hold) |
 | G | on foot, or the free camera |
-| F | view: first person, first person with the helmet, third |
+| F | view: first person, helmet, third — or the rover's chase camera |
 | L | suit lamps: off, flood and head, all three |
-| R | get on and off the rover |
+| R | get on and off the rover, or right it after a roll |
 | E | the ship's hatch, at the ladder |
 | C | rover canopy: open, or sealed and pressurised |
 | M | site markers |
@@ -136,7 +136,25 @@ from the Apollo Lunar Roving Vehicle record and from regolith soil mechanics,
 the suit's consumables from the Apollo portable life support system and the
 published xEMU requirements, and the locomotion from the Apollo film analyses.
 
-Three departures, which are deliberate and worth naming.
+Five departures, which are deliberate and worth naming.
+
+**There is a walk, and it is a compromise.** The Froude number says a true
+walk goes unstable above 0.74 m/s, and it is right: above that a person on the
+Moon has to bound, and every Apollo crew did. But a bound is airborne half the
+time by construction, and airborne a boot has nothing to push against — so
+when the slowest speed on offer was 2.6 m/s, every step you took was
+ballistic, effective deceleration was 0.61 m/s², and stopping took four
+seconds and five and a half metres. The default gait is now 1.4 m/s with a
+much shorter flight phase, which keeps a boot down about four fifths of the
+time and stops in a metre. It is a brisk half-committed shuffle that nobody
+has ever actually done on the Moon. Hold shift and you get the real thing.
+
+**And the suit trims your velocity in flight**, at about a third of what a
+boot could manage on the ground. In a vacuum there is nothing to push against,
+so this is the maneuvering unit the jetpack belongs to, running at a trickle
+instead of in a burn. It halves a bound's stopping distance. A body that
+cannot use it — one that has fallen — conserves its speed exactly, and there
+is a test for that.
 
 **Life support runs on the clock on your wall.** Fast-forward the sky and your
 oxygen does not go with it. This is a departure from consistency and it is the
@@ -194,8 +212,11 @@ steps, which is why every Apollo crew ended up loping.
 
 Traction is a sixth too. Regolith's friction angle is around 37 degrees, so a
 boot can push with about 0.8 of your weight and your weight is already a sixth.
-Acceleration tops out near 1.3 m/s², and only while a foot is down. Stopping
-from a lope takes four metres.
+Acceleration tops out near 1.3 m/s², and only while a foot is down — which is
+the sting, because a bound is airborne half the time. Walking, a boot is down
+about four fifths of the time and you stop in a metre. Loping, you stop in
+just under six, and the suit's maneuvering unit is doing a third of that work;
+without it the figure is 10.6 m, which is what it was.
 
 Your mass is not a sixth. The suit and backpack together mass more than you do,
 and inertia does not care which planet it is on.

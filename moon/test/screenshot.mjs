@@ -219,6 +219,48 @@ const DEFAULT_SHOTS = [
   ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&yaw=300&lamps=2&quality=balanced'],
   ['farside', 'site=farside_highlands&mode=eva&t=2026-09-08T09:00Z&rate=0&quality=balanced'],
   ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&help=0&quality=balanced'],
+  /* The rover's chase camera, and the only shot that draws the vehicle from
+     outside while somebody is in it. Worth having as a picture rather than as
+     an assertion: this is the view that made the levitation visible in the
+     first place, and a rover twenty metres above a terrain mesh it is not
+     standing on is obvious here and invisible from the seat. */
+  ['rover-chase', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.vehicle || !s.eva) return false;
+      /* Climb aboard, look behind, and drive for a few seconds. */
+      if (!s.driving) {
+        s.eva.player.place(s.vehicle.rover.lat, s.vehicle.rover.lon, 0.1);
+        s.board();
+        s.vehicle.view = 'chase';
+        window.__t = Date.now();
+        return false;
+      }
+      s.vehicle.rover.speed = 6;
+      return Date.now() - window.__t > 3000;
+    })()`],
+  /* The featured-site gallery, with the previews drawn. The wait is the
+     assertion: `drawPreviews` only marks a card done once the colour mosaic is
+     in it as well as the relief, so this cannot go green on thirteen grey
+     rectangles. */
+  ['site-gallery', 'site=tycho&view=orbit&alt=900000&t=2026-09-22T14:00Z&rate=0&quality=balanced',
+   `(() => {
+      const cards = document.querySelectorAll('#orbit-presets canvas');
+      if (cards.length < 10) return false;
+      let drawn = 0;
+      for (const c of cards) {
+        try {
+          const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+          let lit = 0;
+          for (let i = 0; i < d.length; i += 4 * 211) if (d[i] > 24) lit++;
+          if (lit > 4) drawn++;
+        } catch (e) { /* a tainted canvas is not a failed preview */ }
+      }
+      if (drawn < cards.length) return false;
+      const side = document.querySelector('#orbit .side');
+      if (side) side.scrollTop = 560;
+      return true;
+    })()`],
   ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],
   /* Through the visor. The bubble, the gold coating's warm cast, and the Sun
      on the glass where the Sun is standing. */
