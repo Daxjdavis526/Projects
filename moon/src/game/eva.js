@@ -356,9 +356,24 @@ export class EVA {
     }
   }
 
-  /** Stand the astronaut model up at the player's position. */
-  updateModel(origin, dt) {
+  /**
+   * Stand the astronaut model up at the player's position.
+   *
+   * @param {object} origin the render origin to place against
+   * @param {number} dt seconds
+   * @param {boolean} [seated] the figure is parented into the rover's seat, so
+   *   the vehicle owns its transform and this must not touch it. It still gets
+   *   animated -- in the seated pose, because `step` is not running while
+   *   driving and a gait left frozen at the moment of boarding is what put a
+   *   T-posed astronaut in the driver's chair.
+   */
+  updateModel(origin, dt, seated = false) {
     if (!this.model) return;
+    if (seated) {
+      this.model.animate({ gait: 'seated', speed: 0, grounded: false, dt });
+      this.showDust();
+      return;
+    }
     const p = this.player;
     const u = p.up();
     const b = enuBasis(p.llh.lat, p.llh.lon);
@@ -375,10 +390,15 @@ export class EVA {
       gait: p.gait, speed: p.speed, stepPhase: p.stepPhase, grounded: p.grounded,
       jetOn: p.jetOn, exertion: p.exertion, dt,
     });
-    /* What the Moon has done to the suit, on the suit. Only when it has moved
-       enough to see: this touches material colours, and doing that every frame
-       for a hundredth of a shade is work for nothing. */
-    if (this.model.setDust && Math.abs(this.suit.dust - (this._shownDust ?? -1)) > 0.01) {
+    this.showDust();
+  }
+
+  /* What the Moon has done to the suit, on the suit. Only when it has moved
+     enough to see: this touches material colours, and doing that every frame
+     for a hundredth of a shade is work for nothing. */
+  showDust() {
+    if (!this.model || !this.model.setDust) return;
+    if (Math.abs(this.suit.dust - (this._shownDust ?? -1)) > 0.01) {
       this._shownDust = this.suit.dust;
       this.model.setDust(this.suit.dust);
     }

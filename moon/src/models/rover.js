@@ -1267,6 +1267,7 @@ function buildInterior(ctx, root, cowlY, cowlZ) {
      rather than for a person: nobody sits down in a hard upper torso, they get
      into it. */
   const seats = [];
+  const riders = [];
   for (const s of [-1, 1]) {
     const seat = new THREE.Object3D();
     seat.position.set(s * 0.50, Y_SEAT, 0.10);
@@ -1289,6 +1290,22 @@ function buildInterior(ctx, root, cowlY, cowlZ) {
     eye.position.set(s * 0.50, Y_EYE, 0.02);
     cab.add(eye);
     seats.push(eye);
+
+    /* Where a crew member's HIP JOINT goes, which is what an astronaut model
+       has to be hung from: models/astronaut.js is built with its origin at the
+       boot soles and its hips a metre above that, so an anchor at the seat pan
+       would bury the figure to the waist. The pan surface is at Y_SEAT + 0.055
+       and a suited backside sits about 0.14 above it.
+
+       This exists because the rider used to be placed at the vehicle's centre,
+       0.9 m above a single heightfield sample -- a different reference surface
+       from the one the body is drawn on, which is why the figure bounced
+       against its own seat over every bump. Parented here it cannot. */
+    const rider = new THREE.Object3D();
+    rider.name = 'rider.' + (s < 0 ? 'L' : 'R');
+    rider.position.set(s * 0.50, Y_SEAT + 0.195, 0.06);
+    cab.add(rider);
+    riders.push(rider);
   }
 
   /* Lockers along the rear bulkhead and the bunk that folds down over the
@@ -1317,7 +1334,7 @@ function buildInterior(ctx, root, cowlY, cowlZ) {
      something to brace against under braking. */
   box(ctx, cab, M.struct, 1.60, 0.05, 0.10, 0, Y_DECK + 0.10, -0.86);
 
-  return { seats };
+  return { seats, riders };
 }
 
 /* --- assembly --------------------------------------------------------------- */
@@ -1358,6 +1375,10 @@ function countTriangles(root) {
  *                   that and spins about X; tyre is the mesh, for dust or for
  *                   a raycast.
  *   seats           two THREE.Object3D at the crew eye positions, unrotated.
+ *   riders          two THREE.Object3D at the crew HIP positions, for hanging
+ *                   an astronaut model from. Not the same as `seats`: that is
+ *                   eye height, this is 0.78 m lower, because astronaut.js is
+ *                   built with its origin at the boot soles.
  *   interiorAnchor  THREE.Object3D between the crew at eye height, unrotated,
  *                   so a camera parented to it looks forward with no offset.
  *   colliders       ten { type:'box', centre, half } in model space, describing
@@ -1706,6 +1727,7 @@ export function buildRover(opts = {}) {
     wheels: corners.map(c => ({ hub: c.hub, tyre: c.tyre,
                                 steerPivot: c.steer, suspension: c.susp })),
     seats: cabin.seats,
+    riders: cabin.riders,
     interiorAnchor,
     colliders,
     setCanopy,

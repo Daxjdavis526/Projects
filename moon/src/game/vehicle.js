@@ -45,14 +45,29 @@ export class Vehicle {
     this._u = new THREE.Vector3();
     this._s = new THREE.Vector3();
     this._p = { x: 0, y: 0, z: 0 };
+    /* The lean and the rollover twist, allocated once. `place` runs every
+       frame and everything else in it already works this way. */
+    this._lean = new THREE.Quaternion();
+    this._leanE = new THREE.Euler(0, 0, 0, 'XZY');
+    this._twist = new THREE.Quaternion();
+    this._rollAxis = new THREE.Vector3(0, 0, 1);
     this.dust = 0;
     this.canopyEdge = false;
+    this.rider = null;              // an astronaut model parented into the seat
+    this.riderHome = null;          // where to put it back on dismount
   }
 
   setModel(model) {
+    /* A rider is parented into the old model's seat, so it has to come out
+       before that model is thrown away or it goes with it -- which is what
+       changing quality tier mid-drive would otherwise do. */
+    const rider = this.rider;
+    const home = this.riderHome;
+    if (rider) this.releaseRider();
     if (this.model) this.group.remove(this.model.group);
     this.model = model;
     if (model) this.group.add(model.group);
+    if (rider) this.seatRider(rider, home);
   }
 
   /** Near enough to climb on? */
@@ -149,15 +164,31 @@ export class Vehicle {
     this._u.set(b.u.x, b.u.y, b.u.z);
     this._m.makeBasis(this._e, this._u, this._s);
     this.model.group.quaternion.setFromRotationMatrix(this._m);
-    /* Lean with the ground. Pitch is about the vehicle's own right-hand axis
-       and roll about its nose, both already worked out by the physics. */
-    const lean = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(-r.pitch, 0, -r.roll, 'XZY'));
-    this.model.group.quaternion.multiply(lean);
+    /* Lean with the ground, in the vehicle's own frame: pitch about its right
+       hand axis, roll about its nose. The physics fits a plane through the four
+       contact patches and hands both over already, with positive pitch meaning
+       nose up and negative roll meaning the right side is the low one.
+
+       Both of these used to be negated here, which drew the lean backwards:
+       climbing a twenty degree slope the physics said twenty degrees nose up
+       and the model was drawn twenty degrees nose DOWN, a forty degree error
+       against the hill, with the uphill wheels buried and the downhill pair in
+       the air. The signs are worth stating rather than re-deriving, because
+       this is the second time they have been got wrong here. In this frame
+       (+X east, +Y up, +Z south, nose at -Z):
+
+         a rotation of +t about +X sends the nose (0,0,-1) to (0, sin t, -cos t)
+         a rotation of +f about +Z sends the right (1,0,0) to (cos f, sin f, 0)
+
+       so nose-up wants +pitch and right-side-low wants the already negative
+       +roll. Both pass through untouched. `test/vehicle.test.mjs` pins it. */
+    this._leanE.set(r.pitch, 0, r.roll, 'XZY');
+    this._lean.setFromEuler(this._leanE);
+    this.model.group.quaternion.multiply(this._lean);
     /* Rolled over is a real state, not a message: put it on its side. */
     if (r.rolled) {
-      this.model.group.quaternion.multiply(
-        new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI * 0.42));
+      this._twist.setFromAxisAngle(this._rollAxis, Math.PI * 0.42);
+      this.model.group.quaternion.multiply(this._twist);
     }
 
     const ground = r.meanGround ?? this.hf.heightAt(r.lat, r.lon);
@@ -171,6 +202,52 @@ export class Vehicle {
     });
     this.model.setCanopy(r.canopy);
     this.model.setDust(this.dust);
+  }
+
+  /**
+   * Hang an astronaut model in the driver's seat.
+   *
+   * Reparenting rather than placing. The rider used to be positioned every
+   * frame from the player's own coordinates -- at the vehicle's centre with no
+   * seat offset, 0.9 m above a single `heightAt` sample while the vehicle body
+   * was drawn from the mean of its four contact patches, and yawed to the
+   * mouse rather than to the rover. Two different ground references meant the
+   * figure floated and sank against its own seat over every bump and stayed on
+   * the ground whenever the rover got air.
+   *
+   * Parented to the seat, none of that arithmetic exists to get wrong: the
+   * rider inherits the body's position, its heading, its lean and its
+   * suspension squat because it is part of it.
+   *
+   * @param {object} model an astronaut model, or null to release the current one
+   * @param {THREE.Object3D} home where to put it back when it gets out
+   */
+  seatRider(model, home) {
+    if (this.rider && this.rider !== model) this.releaseRider();
+    const anchor = this.model && this.model.riders && this.model.riders[0];
+    if (!model || !anchor) return false;
+    this.rider = model;
+    this.riderHome = home || null;
+    anchor.add(model.group);
+    /* The anchor is the hip joint and the model is built with its origin at
+       the boot soles a metre below that. Facing the nose, which is -Z in the
+       vehicle's frame and the model's own forward too, so no rotation. */
+    model.group.position.set(0, -1.0, 0);
+    model.group.quaternion.identity();
+    model.group.scale.setScalar(1);
+    return true;
+  }
+
+  /** Put the rider back in the world, standing on its own again. */
+  releaseRider() {
+    const model = this.rider;
+    if (!model) return null;
+    if (this.riderHome) this.riderHome.add(model.group);
+    else model.group.removeFromParent();
+    model.group.position.set(0, 0, 0);
+    this.rider = null;
+    this.riderHome = null;
+    return model;
   }
 
   /**

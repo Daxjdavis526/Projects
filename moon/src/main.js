@@ -21,6 +21,7 @@ import { Stage } from './render/stage.js';
 import { TerrainSystem } from './render/terrain.js';
 import { Sky } from './render/sky.js';
 import { DustField } from './render/dust.js';
+import { Beacons } from './render/beacons.js';
 import { Exposure } from './render/exposure.js';
 import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime, nextDaylight } from './physics/ephemeris.js';
 import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
@@ -56,6 +57,8 @@ import { Save } from './game/save.js';
 import { Photo } from './ui/photo.js';
 import { Settings } from './ui/settings.js';
 import { Nav } from './ui/nav.js';
+import { MapView } from './ui/map.js';
+import { Compass } from './ui/compass.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -333,6 +336,17 @@ async function start() {
   const track = new Track();
   const bootTrack = new Track();
   const nav = new Nav({ waypoints: [], track, heightfield });
+  /* The map, the compass and the light columns all read the SAME waypoint
+     array the nav console mutates and the save round-trips. One list, four
+     things looking at it, so a mark placed anywhere shows up everywhere. */
+  const mapView = new MapView({
+    heightfield, waypoints: nav.waypoints,
+    tracks: { boots: bootTrack, wheels: track },
+    sites: (sites.sites || []).filter(x => x.name)
+      .map(x => ({ lat: x.lat, lon: x.lon, name: x.name })),
+  });
+  const compassHud = new Compass({ waypoints: nav.waypoints });
+  const beacons = new Beacons(stage, { heightfield, waypoints: nav.waypoints });
   /* Eating, sleeping, and waiting for the Sun, which on a body with a
      29 and a half day rotation is a real thing to want to do. */
   const shelter = new Shelter({
@@ -934,6 +948,17 @@ async function start() {
     /* The settings panel is buttons, and buttons need a pointer, so opening it
        hands the pointer back. Clicking the canvas afterwards takes it again. */
     if (e.code === 'KeyO') { releaseLook(); settings.toggle(); sound.beep('select'); }
+    /* The map. `releaseLook` first for the same reason the settings panel does
+       it: with the pointer locked for looking around, nothing in an overlay
+       can be clicked. Inert while the orbital picker is up, which is a
+       different map of the same Moon and owns the screen. */
+    if (e.code === 'KeyN' && mode !== 'orbit') {
+      releaseLook();
+      const on = mapView.toggle();
+      sound.beep('select');
+      if (on) say('click the map to mark somewhere · scroll to zoom', 3500);
+    }
+    if (e.code === 'Escape' && mapView.visible) { mapView.show(false); return; }
     if (e.code === 'KeyK') {
       state.showLog = !state.showLog;
       el('log').classList.toggle('on', state.showLog);
@@ -1209,13 +1234,23 @@ async function start() {
       /* `+=` on the yaw: see game/eva.js, which had the same sign backwards. */
       cam.yaw += look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
+      /* Back on the stick is the brake while you are rolling forwards, and
+         reverse only once you have very nearly stopped. It used to be reverse
+         throttle at any speed, which sounds reasonable and was useless: the
+         throttle and the brake were clamped to the same traction limit, so S
+         and space slowed you at exactly the same rate and neither of them
+         slowed you much. Now the brake has its own authority, so the pedal you
+         reach for first should be the one that uses it. */
+      const ahead = clamp1(moveAhead() + pad.forward);
+      const rolling = vehicle.rover.speed > 1.0;
+      const backBrakes = ahead < -0.02 && rolling;
       vehicle.step(dt, {
         /* The stick is analogue where the physics takes an analogue value, so
            easing along a rim at walking pace is something a pad can ask for
            and a key cannot. */
-        throttle: clamp1(moveAhead() + pad.forward),
+        throttle: backBrakes ? 0 : ahead,
         steer: clamp1(moveSide() + pad.strafe),
-        brake: keys.has('Space') || pad.held.has('jump'),
+        brake: backBrakes || keys.has('Space') || pad.held.has('jump'),
         boost: keys.has('ShiftLeft') || keys.has('ShiftRight') || pad.run,
         toggleCanopy: canopyPress,
       }, true);
@@ -1235,9 +1270,12 @@ async function start() {
          drawn a couple of hundred metres from where it was and vanished for a
          frame. The camera does not need it: `camera()` works from the rover's
          coordinates, not from its mesh. */
-      /* The player goes where the rover goes. */
+      /* The player goes where the rover goes -- for the terrain streamer, the
+         suit and the consumables. The MODEL no longer follows from this: it is
+         parented into the seat on boarding, so it is drawn by the vehicle. The
+         yaw is deliberately not written here either; it used to be set to
+         `cam.yaw`, which spun the rider in his seat as you looked around. */
       eva.player.place(vehicle.rover.lat, vehicle.rover.lon, 0.9);
-      eva.player.yaw = cam.yaw;
       eva.suit.step(dt, {
         exertion: 0.12, sunlit: local.sunEl > 0, lights: eva.lampMode > 0,
         inShelter: vehicle.rover.pressure > 0.9,
@@ -1387,6 +1425,13 @@ async function start() {
        a thin sheet outwards rather than a cloud upwards. */
     dust.update(dt, rebased ? stage.origin.lastShift : null);
     dust.setPixelScale(stage.renderer.domElement.height, stage.camera.fov);
+    /* Grains as bright as the ground they came off, rather than a constant six
+       stops over it. Outside `mode === 'surface'` too, because the descent
+       plume is dust as well. */
+    dust.setLight({
+      mu0: Math.sin(local.sunEl * Math.PI / 180),
+      albedo: albedoAt(geology, cam.lat, cam.lon),
+    });
     /* Boot prints, recorded wherever you actually walk rather than only in the
        rover. Both lines are drawn by the same ribbon. */
     if (eva && !driving && eva.player.grounded) {
@@ -1412,7 +1457,7 @@ async function start() {
         dust.burst({
           at: { x: eva.player.pos.x - o.x, y: eva.player.pos.y - o.y, z: eva.player.pos.z - o.z },
           up: u, count: eva.player.speed > 2 ? 14 : 6,
-          speed: 0.7 + eva.player.speed * 0.35, angle: 26, spread: 0.7, size: 13,
+          speed: 0.7 + eva.player.speed * 0.35, angle: 26, spread: 0.7, size: 0.018,
         });
       }
     }
@@ -1459,7 +1504,7 @@ async function start() {
                 z: p.z - o.z + fz * axle + ez * halfTrack * side },
           up: b.u,
           count: hard ? 7 : 3, speed: 1.0 + Math.abs(r.speed) * 0.5,
-          angle: 34, spread: 0.8, size: 15,
+          angle: 34, spread: 0.8, size: 0.030,
           forward: back, bias: hard ? 0.8 : 0.55,
         });
       }
@@ -1474,18 +1519,31 @@ async function start() {
       dust.burst({
         at: { x: p.x - o.x, y: p.y - o.y, z: p.z - o.z }, up: b.u,
         count: Math.round(26 * descent.dust), speed: 9 + 26 * descent.dust,
-        angle: 2.5, spread: 0.9, size: 10,
+        angle: 2.5, spread: 0.9, size: 0.045,
       });
+    }
+
+    /* Who is in the seat, settled in one place rather than on the board and
+       dismount edges. `driving` is set from four of them -- the R key, a save
+       being restored, the blackout recovery and the test harness -- and an
+       edge handler on one of those is a bug in the other three. This is an
+       identity check per frame and it is idempotent, so it also covers the
+       model arriving late: `seatRider` declines until the vehicle has one. */
+    if (vehicle && eva && eva.model) {
+      const want = driving ? eva.model : null;
+      if (want && vehicle.rider !== want) vehicle.seatRider(want, stage.world);
+      else if (!want && vehicle.rider) vehicle.releaseRider();
     }
 
     if (eva) {
       eva.updateLights(stage.origin.origin, camFrame);
-      eva.updateModel(stage.origin.origin, dt);
+      /* Driving, the model is parented into the rover's seat and the vehicle
+         puts it where it goes, so the walker's own placement has to keep its
+         hands off it -- it would drag the figure back out to a world position
+         computed from the player. It still gets animated, in the seated pose. */
+      eva.updateModel(stage.origin.origin, dt, !!(driving && vehicle && vehicle.rider));
       /* Third person on foot, and also whenever the chase camera is looking at
-         the rover — a driverless vehicle bounding across a mare is the wrong
-         picture. The pose is the walker's rather than a seated one, which is a
-         known cheat: at chase distance the figure is a metre tall on screen
-         and the alternative is a rig this model does not have. */
+         the rover — a driverless vehicle crossing a mare is the wrong picture. */
       if (eva.model) {
         eva.model.group.visible = driving
           ? !!(vehicle && vehicle.view === 'chase')
@@ -1516,6 +1574,11 @@ async function start() {
     }
 
     historic.update(cam.lat, cam.lon, stage.origin.origin, dt, local.sunDir, state.simMs);
+    /* The light columns over marked waypoints. Here rather than anywhere
+       earlier for the reason spelled out below about the rover: this is after
+       `setEye`, so it is placed against the origin everything else is placed
+       against. */
+    beacons.place(stage.origin.origin, cam);
     if (base) {
       base.step(dt, eva ? eva.player.llh : null);
       base.place(stage.origin.origin);
@@ -1688,6 +1751,26 @@ async function start() {
         nearest: near ? { name: near.f[0], km: near.km } : null,
       });
     }
+
+    /* The compass and the map, on foot as well as driving — which is the whole
+       point of them. Heading is the vehicle's when you are in it and your own
+       when you are not; `player.heading` has been in the snapshot since the
+       player was written and until now nothing read it. */
+    const heading = driving && vehicle
+      ? vehicle.rover.heading
+      : (eva ? eva.player.heading : cam.yaw * 180 / Math.PI);
+    compassHud.show(mode === 'surface' && !photo.active && !mapView.visible);
+    compassHud.update({
+      heading, lat: cam.lat, lon: cam.lon,
+      walked: eva ? eva.player.distance : 0,
+      driven: vehicle ? vehicle.rover.distance : 0,
+      driving,
+    });
+    mapView.update({
+      lat: cam.lat, lon: cam.lon, heading,
+      home: base ? { lat: base.lat, lon: base.lon } : null,
+    });
+
     suitHud.update(photo.active ? null : evaSnap);
     prompts();
     if (photo.active) {
@@ -1746,6 +1829,15 @@ async function start() {
     get driving() { return driving; },
     board() { driving = true; },
     get descent() { return descent; },
+    /* For the harness. Dust is emitted from footfalls and wheels deep inside
+       the frame loop, and there is no way to make a screenshot walk, so the
+       only way to test the thing is to throw some directly. */
+    get dust() { return dust; },
+    get stage() { return stage; },
+    /* The one waypoint list — the nav console, the map, the compass and the
+       light columns all read it, and the save round-trips it. */
+    get marks() { return nav.waypoints; },
+    get map() { return mapView; },
     get mode() { return mode; },
     land(lat, lon) { land({ lat, lon }); },
     /* Where the sun is from where you are standing, for tests that care

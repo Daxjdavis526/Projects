@@ -207,26 +207,53 @@ export const ROVER = {
      critical, because a bouncing rover in low gravity takes a very long time
      to settle. */
   suspTravel: 0.42, suspK: 5200, suspC: 2600,            // N/m, N.s/m per wheel
-  motorForce: 3600, brakeForce: 5200,                    // N total
-  speedMax: 16.7, speedBoost: 30.6,                      // m/s (60 / 110 km/h)
+  /* Ratings, not limits. Both sit above what the ground below will accept on
+     flat ground with all four wheels down, so traction is still what decides
+     the vehicle's behaviour -- which is what the rest of this block is about.
+     They bind where the traction limit rises above them, which happens when
+     the limit is scaled down by partial contact: on two wheels over a crest
+     the motor rating is suddenly the smaller number, and it should be. */
+  motorForce: 9000, brakeForce: 6500,                    // N total
+  coastDrag: 620,                                        // N, foot off the throttle
+  speedMax: 22.2, speedBoost: 41.7,                      // m/s (80 / 150 km/h)
   /* Traction, and the reason the numbers above are reachable at all.
      -----------------------------------------------------------------------
-     Drive force is clamped to grip x mass x g (physics/rover.js), and in a
-     sixth of a gravity that is a very small number: at the 0.62 measured for
-     Apollo wheels on regolith it comes to 1.46 kN against a 3.6 kN motor, so
-     the vehicle is traction-limited at about 1 m/s^2 and always was. The old
-     `boostFactor` multiplied the motor, which the clamp then threw away
-     before it reached the ground -- so the boost raised the top speed and
-     changed the acceleration by exactly nothing.
-     0.78 is a deliberate fiction and the one place this vehicle's numbers
-     leave the literature: an engineered tyre with a compliant mesh and a
-     contact patch designed for this, rather than the wire mesh of 1971.
-     `boostGrip` is the drive using more of what is there, and it is applied
-     to the traction limit because that is the only term that can matter.
-     Everything the rover drives over is still measured; only the rubber is
-     invented. LABEL.FICTIONAL, and README.md says so. */
+     Every force the rover applies is clamped to a grip figure times mass times
+     g (physics/rover.js), and in a sixth of a gravity that is a very small
+     number: at the 0.62 measured for Apollo wheels on regolith it comes to
+     1.46 kN against the motor rating, so the vehicle is traction-limited at
+     about 1 m/s^2 and always was. An older `boostFactor` multiplied the motor,
+     which the clamp then threw away before it reached the ground -- so the
+     boost raised the top speed and changed the acceleration by exactly
+     nothing.
+
+     `grip` is the honest-ish one and it does the honest work: it alone decides
+     what a SLOPE does to you, and whether the parking brake can hold. The
+     friction angle falls out of it as atan(grip), about 38 degrees, and past
+     that the vehicle slides whatever it is asked. 0.78 is already a small
+     fiction -- an engineered tyre with a compliant mesh and a contact patch
+     designed for this, rather than the wire mesh of 1971.
+
+     The four below are the vehicle, and they are a much larger fiction. One
+     clamp used to serve drive, brake, parking and cornering all at once, and
+     the arithmetic of that was brutal: 1.27 m/s^2 for everything, so the brake
+     was no stronger than the throttle, stopping from 60 km/h took 110 m, and
+     cornering authority fell as 1/v to a 220 m radius at cruise. The vehicle
+     was unsteerable at the speeds it could reach. Splitting the one number
+     into four named ones is what makes it drivable, and naming them separately
+     is what keeps each departure visible instead of hiding four fictions
+     inside one plausible-looking coefficient.
+
+     What has NOT changed is the ground. Slopes, the friction angle, the
+     parking brake and the rollover are all still judged on `grip`, so a crater
+     wall is still a decision and a 44 degree slope still slides you down it.
+     Nothing the rover drives over is invented; rather more of the vehicle now
+     is. LABEL.FICTIONAL, and README.md says which is which. */
   grip: 0.78,                                            // FICTIONAL: 0.62 measured
-  boostGrip: 1.25,                                       // FICTIONAL: torque vectoring
+  driveGrip: 1.8,                                        // FICTIONAL: hub motors, better tyre
+  boostGrip: 4.0,                                        // FICTIONAL: high-power drive mode
+  brakeGrip: 2.8,                                        // FICTIONAL: regen through four hubs
+  lateralGrip: 4.5,                                      // FICTIONAL: torque vectoring
   /* No `slopeMax` here either, for the reason above: what a wheel can do on a
      slope falls out of the traction limit, which is the friction coefficient
      times the normal load, and the normal load is what a sixth of a gravity
@@ -236,7 +263,16 @@ export const ROVER = {
      than stored as a number nothing reads. */
   pressuriseTime: 45,                                    // s
   supplies: { o2: 34, co2: 40, water: 120, food: 14 },   // kg, kg, kg, days-of-food
-  boostHeatUp: 0.09, boostHeatDown: 0.05,
+  /* Boost used to cut out after 11 s, having taken 8.8 s to reach the ceiling
+     it was raising -- about two seconds of use, then twenty of cooldown, which
+     is why it read as doing nothing. Thirty seconds is long enough to be worth
+     pressing. */
+  boostHeatUp: 0.033, boostHeatDown: 0.05,
+  /* How hard the drive's own limiter pulls you back to the cruise ceiling when
+     you let go of the boost. About ten seconds from 150 km/h to 80, so the
+     speed decays instead of vanishing in one frame the way it used to. */
+  limiterDecel: 2.0,                                     // m/s^2
+  steerRate: 7,                                          // 1/s, how fast the wheels answer
 };
 
 /* The ship as models/ship.js actually builds it. NASA's habitable volume

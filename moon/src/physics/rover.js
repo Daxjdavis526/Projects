@@ -64,6 +64,7 @@ export class Rover {
     this.pressure = 0;
     this.boost = false;
     this.boostHeat = 0;
+    this.boostLocked = false;       // overheated, and not yet cooled enough to reset
     this.rolled = false;
     this.distance = 0;
     this.airborneFor = 0;
@@ -106,15 +107,31 @@ export class Rover {
    * torque: multiplying a force that is already being clamped away changes
    * nothing at all, and for a long time that is exactly what it did.
    *
-   * Boosting therefore raises the effective grip, not the torque -- the drive
-   * shifting torque between wheels to use what the surface will actually
-   * take. That is the fiction, and it is a small one.
+   * Everything the vehicle does therefore has to work here rather than on the
+   * torque.
+   *
+   * Called bare, this is the HONEST limit: what the surface alone will accept,
+   * `grip` and nothing else. That is deliberately the default, because it is
+   * the figure the slope, the friction angle and the parking brake are judged
+   * against, and those must not move when the vehicle gets better brakes.
+   *
+   * The named modes are the vehicle, and they are fictions of different sizes
+   * -- see the block in config.js. Each control gets its own so that improving
+   * the brakes cannot quietly turn a 44 degree slope into a car park, which is
+   * exactly what one shared number would have done.
+   *
+   * @param {string} [mode] 'surface' (default), 'drive', 'boost', 'brake', 'turn'
+   * @returns {number} newtons
    */
-  tractionLimit(boosting = this.boost) {
+  tractionLimit(mode = 'surface') {
     const g = GM_MOON / Math.pow(R_MOON + this.altitude, 2);
     const onGround = this.contact.reduce((n, c) => n + (c ? 1 : 0), 0) / 4;
-    const grip = ROVER.grip * (boosting ? ROVER.boostGrip : 1);
-    return grip * ROVER.mass * g * onGround;
+    const k = mode === 'drive' ? ROVER.driveGrip
+      : mode === 'boost' ? ROVER.boostGrip
+        : mode === 'brake' ? ROVER.brakeGrip
+          : mode === 'turn' ? ROVER.lateralGrip
+            : 1;
+    return ROVER.grip * k * ROVER.mass * g * onGround;
   }
 
   /**
@@ -266,52 +283,105 @@ export class Rover {
     /* --- drive -------------------------------------------------------------
        Nothing here is limited by the motors. It is limited by the ground,
        which can only accept about a tenth of a gravity's worth of push. */
-    this.boost = !!input.boost && this.boostHeat < 1;
+    /* A thermal cutout with a reset point, rather than a bare threshold. With
+       just `boostHeat < 1` there was no hysteresis: the moment the drive hit
+       its limit it cooled a fraction, granted another frame of boost, and
+       settled into a duty cycle of boostHeatDown / (up + down) -- which is 60
+       per cent, forever. That was invisible while boost was too weak to hold
+       its own ceiling and became "boost never actually cuts out" as soon as it
+       was not. Overheat now means overheated until it has genuinely cooled. */
+    if (this.boostHeat >= 1) this.boostLocked = true;
+    else if (this.boostHeat <= 0.35) this.boostLocked = false;
+    this.boost = !!input.boost && !this.boostLocked;
     /* The slope is wanted twice -- once for what the wheels can push against
        and once for what gravity is doing to you -- so it is measured here,
        above both, rather than only in front of the second. */
     const slopeDeg = this.ground.slopeAt ? this.ground.slopeAt(this.lat, this.lon, 4) : 0;
     const slope = slopeDeg * Math.PI / 180;
-    const limit = this.tractionLimit() * Math.cos(slope);
+    /* Four limits off one normal load. `surface` is the honest one and is what
+       the slope and the parking brake below are measured against; the other
+       three are what this particular vehicle can do with its four driven hubs.
+       Keeping them apart is the whole point -- one shared number is what made
+       the brake no stronger than the throttle. */
+    const lean = Math.cos(slope);
+    const surface = this.tractionLimit() * lean;
+    /* Past the friction angle the regolith itself shears, and no amount of
+       clever torque distribution across four hubs helps with that: the soil
+       is the thing that has run out. So on ground steeper than atan(grip) --
+       about 38 degrees -- every one of the vehicle's fictional figures falls
+       back to what the surface alone will give, and it slides down whatever it
+       is asked for.
+
+       This is the line that keeps a crater wall a decision. Without it a
+       driveGrip of 1.8 would let the rover power up a fifty degree slope, and
+       the parking brake would be releasing at 38 degrees on ground the thing
+       could drive straight up, which is incoherent as well as dull. */
+    const beyond = Math.tan(slope) > ROVER.grip;
+    const cap = (n) => (beyond ? Math.min(n, surface) : n);
+    const driveLimit = cap(this.tractionLimit(this.boost ? 'boost' : 'drive') * lean);
+    const brakeLimit = cap(this.tractionLimit('brake') * lean);
+    const turnLimit = cap(this.tractionLimit('turn') * lean);
     const maxSpeed = this.boost ? ROVER.speedBoost : ROVER.speedMax;
     const throttle = Math.max(-1, Math.min(1, input.throttle || 0));
     let force = throttle * ROVER.motorForce;
+    let limit = driveLimit;
     /* Whether the parking brake is actually winning. It matters twice: once
        for pinning the vehicle at a standstill, and once below, where the
        anti-jitter guard must not become a second, unconditional parking brake
        that holds it on ground no wheel could hold it on. */
     let holding = false;
-    if (input.brake) force = -Math.sign(this.speed) * ROVER.brakeForce;
-    else if (Math.abs(throttle) < 0.02) {
+    if (input.brake) {
+      force = -Math.sign(this.speed) * ROVER.brakeForce;
+      limit = brakeLimit;
+    } else if (Math.abs(throttle) < 0.02) {
       /* Coasting, or parked. With nobody aboard this is the parking brake, and
-         it needs to be a real one: the residual drag is 0.12 of the brake
-         force, which over 1450 kg is 0.43 m/s^2, and gravity down a slope beats
-         that from fifteen degrees. So a rover left on anything but the flat
-         drove itself away, and because the ship flattens sixteen metres of pad
-         around itself you only ever saw it after parking somewhere real.
+         it needs to be a real one: the coasting drag alone is 0.43 m/s^2, and
+         gravity down a slope beats that from fifteen degrees. So a rover left
+         on anything but the flat drove itself away, and because the ship
+         flattens sixteen metres of pad around itself you only ever saw it
+         after parking somewhere real.
          Parked it gets the whole brake, and is held at a standstill only where
-         the ground can actually hold it: the wheels can resist `limit` and
-         gravity is pulling with mg·sin(slope), so past the friction angle the
-         pin is released and it slides, brake or no brake. Pinning
-         unconditionally would have made a 48 degree slope as good as a
-         car park. */
+         THE GROUND can actually hold it -- `surface`, not `brakeLimit`. The
+         wheels can resist what the regolith gives and gravity is pulling with
+         mg·sin(slope), so past the friction angle the pin is released and it
+         slides, brake or no brake. Judging this on the brake's own fictional
+         figure instead would push the friction angle past fifty degrees and
+         make a 44 degree slope as good as a car park, which is the whole
+         reason these limits are kept apart. */
       const parked = input.parked === true;
-      force = -Math.sign(this.speed) * ROVER.brakeForce * (parked ? 1 : 0.12);
+      force = -Math.sign(this.speed) * (parked ? ROVER.brakeForce : ROVER.coastDrag);
+      limit = parked ? brakeLimit : surface;
       const downhill = ROVER.mass * g * Math.sin(slope);
-      holding = parked && downhill <= limit;
+      holding = parked && downhill <= surface;
       if (holding && Math.abs(this.speed) < 0.05) {
         this.speed = 0;
         force = 0;
       }
     }
-    /* Grip saturation: ask for more than the surface can give and the wheels
-       spin, which on the Moon throws a rooster tail and gets you nowhere. */
+    /* Grip saturation: ask for more than the wheels can put down and they spin,
+       which on the Moon throws a rooster tail and gets you nowhere. `limit` is
+       whichever of the four is in play -- drive, boost or brake -- already
+       capped back to the bare surface on ground too steep to hold. */
     this.slipping = Math.abs(force) > limit;
     force = Math.max(-limit, Math.min(limit, force));
 
     const before = this.speed;
+    /* The drive will not push past its own ceiling, which is what `speedMax`
+       and `speedBoost` actually are: a power limit, not a wall in the road. */
+    if (Math.abs(this.speed) >= maxSpeed && !input.brake
+        && Math.sign(force) === Math.sign(this.speed)) force = 0;
     this.speed += force / ROVER.mass * dt;
-    if (Math.abs(this.speed) > maxSpeed) this.speed = Math.sign(this.speed) * maxSpeed;
+    /* And a ceiling that has just DROPPED is eased down to rather than snapped
+       to. This used to be a hard clamp, which was survivable when boost was
+       barely reachable and is not now: letting go of the boost took the
+       vehicle from 41.7 m/s to 22.2 in a single frame, deleting 19.5 m/s of
+       speed you had spent eight seconds earning, with no force anywhere in the
+       model accounting for it. The limiter dragging you back down is a
+       believable thing for a drive to do; teleporting is not. */
+    if (Math.abs(this.speed) > maxSpeed) {
+      const over = Math.abs(this.speed) - maxSpeed;
+      this.speed -= Math.sign(this.speed) * Math.min(over, ROVER.limiterDecel * dt);
+    }
     /* A brake that overshoots through zero should stop, not reverse. But only
        where something is holding it: on ground past the friction angle this
        guard was quietly pinning a sliding vehicle at a standstill every frame,
@@ -339,11 +409,18 @@ export class Rover {
 
     /* --- steering ----------------------------------------------------------
        All four wheels steer, so it turns tightly, but the cornering force is
-       the same traction budget the drive is spending. Ask for too much and it
-       understeers, then slides. */
-    this.steer += ((input.steer || 0) - this.steer) * Math.min(1, dt * 4);
+       still a traction budget. Ask for too much and it understeers, then
+       slides -- and that is still true, just at a speed you can actually drive
+       at. On the shared limit the budget was 1.27 m/s^2, which above 1.8 m/s
+       made authority fall as 1/v: a 220 m turning circle at cruise, 739 m on
+       boost, and `sliding` pinned true on nearly every frame so the cue for
+       being at the limit meant nothing. `lateralGrip` is its own figure now.
+
+       The wheels also answer faster than they did. A quarter of a second of
+       ease-in is a long time when you are trying to miss a boulder. */
+    this.steer += ((input.steer || 0) - this.steer) * Math.min(1, dt * ROVER.steerRate);
     const speedAbs = Math.abs(this.speed);
-    const maxLateral = limit / ROVER.mass;
+    const maxLateral = turnLimit / ROVER.mass;
     const wanted = this.steer * speedAbs / (ROVER.wheelBase * 0.85);
     const lateral = wanted * speedAbs;
     this.sliding = Math.abs(lateral) > maxLateral;

@@ -362,6 +362,56 @@ canvas{display:block;position:fixed;inset:0}
   text-align:right;text-shadow:0 1px 3px #000;
 }
 
+/* ---- the compass, across the top ---- */
+/* No panel behind it: it is an instrument, and the ground should show
+   through. Top centre was the one corner of the HUD nothing else wanted. */
+#compass{
+  position:fixed;top:8px;left:50%;transform:translateX(-50%);
+  z-index:11;display:block;pointer-events:none;text-align:center;
+  text-shadow:0 1px 4px #000,0 0 12px #000;
+}
+/* `canvas` is `position:fixed;inset:0` globally, for the one that fills the
+   window. Every other canvas in this file has to undo it — the site preview
+   thumbnails stacked on top of each other for exactly this reason. */
+#compass-tape{
+  display:block;position:static;inset:auto;
+  width:460px;max-width:66vw;height:40px;
+}
+#compass .line{
+  display:flex;gap:14px;justify-content:center;align-items:baseline;
+  font-size:10px;letter-spacing:.12em;color:rgba(216,213,207,.72);
+}
+#compass-deg{font-size:12px;letter-spacing:.16em;color:var(--warm)}
+#compass-mark{color:#8fb8e8}
+
+/* ---- the map ---- */
+#map{
+  position:fixed;inset:0;z-index:22;display:none;
+  background:rgba(4,4,6,.93);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  flex-direction:column;padding:14px;gap:10px;pointer-events:auto;
+}
+#map .bar{
+  display:flex;align-items:center;gap:14px;flex:0 0 auto;
+  font-size:10px;letter-spacing:.1em;color:rgba(216,213,207,.7);
+}
+#map .bar .grow{flex:1 1 auto}
+#map .bar b{
+  font-family:Michroma,sans-serif;font-size:11px;letter-spacing:.22em;
+  color:var(--warm);font-weight:400;
+}
+#map button{
+  font:inherit;font-size:10px;letter-spacing:.1em;cursor:pointer;
+  color:rgba(216,213,207,.8);background:rgba(232,201,160,.07);
+  border:1px solid rgba(232,201,160,.22);padding:4px 10px;
+}
+#map button:hover{background:rgba(232,201,160,.16);color:#fff}
+#map .frame{flex:1 1 auto;position:relative;min-height:0;border:1px solid rgba(232,201,160,.18)}
+#map-canvas{
+  display:block;position:absolute;inset:0;
+  width:100%;height:100%;cursor:crosshair;
+}
+#map-where{font-variant-numeric:tabular-nums}
+
 #blackout{
   position:fixed;inset:0;z-index:30;background:#000;opacity:0;
   pointer-events:none;transition:opacity 2.5s ease;
@@ -486,6 +536,7 @@ canvas{display:block;position:fixed;inset:0}
     <div class="row"><span class="k">F</span><span>view: first, helmet, third — or the rover's chase camera</span></div>
     <div class="row"><span class="k">L</span><span>suit lamps</span></div>
     <div class="row"><span class="k">R</span><span>get on / off the rover, or right it</span></div>
+    <div class="row"><span class="k">N</span><span>the map — click it to mark somewhere, scroll to zoom</span></div>
     <div class="row"><span class="k">E</span><span>ship hatch, at the ladder</span></div>
     <div class="row"><span class="k">C</span><span>rover canopy</span></div>
     <div class="row"><span class="k">Q / E</span><span>down / up (free camera)</span></div>
@@ -757,6 +808,32 @@ canvas{display:block;position:fixed;inset:0}
   <span id="blackout-why">The suit could no longer hold pressure.</span>
   <em>press R to be recovered to the ship</em>
 </div></div>
+<div id="compass">
+  <canvas id="compass-tape"></canvas>
+  <div class="line">
+    <span id="compass-deg">000° N</span>
+    <span id="compass-dist">0.00 km walked</span>
+    <span id="compass-mark"></span>
+  </div>
+</div>
+
+<div id="map">
+  <div class="bar">
+    <b>THE GROUND</b>
+    <span id="map-scale">—</span>
+    <span id="map-relief">—</span>
+    <span id="map-where">—</span>
+    <span class="grow"></span>
+    <span id="map-note"></span>
+    <button id="map-in">zoom in</button>
+    <button id="map-out">zoom out</button>
+    <button id="map-here">centre on me</button>
+    <button id="map-clear">clear marks</button>
+    <button id="map-close">close</button>
+  </div>
+  <div class="frame"><canvas id="map-canvas"></canvas></div>
+</div>
+
 <div id="fatal"></div>
 <div id="notice" title="click to dismiss"></div>
 

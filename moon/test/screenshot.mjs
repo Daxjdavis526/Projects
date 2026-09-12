@@ -290,6 +290,100 @@ const DEFAULT_SHOTS = [
      is the only test of it: if the portal ever stops writing its mark the hole
      fills in with wall and the frame still renders perfectly happily. */
   ['cave-mouth', 'site=8.3355,33.222833&mode=eva&t=2026-09-22T00:00Z&rate=0&yaw=270&pitch=4&lamps=2&quality=balanced'],
+
+  /* The rover standing on a slope, which is the shot the inverted lean would
+     have failed outright. test/vehicle.test.mjs is the real guard on the signs
+     — it reads the drawn quaternion and compares it to the ground — but the
+     thing that was actually reported was how it LOOKED, and a vehicle pitched
+     twenty degrees into a hill with two wheels in the air is obvious here and
+     nowhere else. Tycho's flank for a slope that is measured rather than
+     arranged. */
+  ['rover-slope', 'site=tycho&mode=eva&ship=1&t=2026-09-22T14:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.vehicle || !s.eva) return false;
+      if (!window.__rs) {
+        window.__rs = 1;
+        /* PUT it on the flank rather than drive it there. Driving off the pad
+           was the first attempt and it does not work: the ship flattens
+           sixteen metres around itself and immediately outside that Tycho's
+           central peak is steeper than the friction angle, so the vehicle
+           slid back and the chase camera spent the whole shot looking at the
+           ship's landing gear. rover.place also clears everything the
+           suspension remembers, which is exactly what a teleport wants. */
+        const R = 1737400, D = 180 / Math.PI;
+        const r = s.vehicle.rover;
+        /* Bearing 70, not 205: the Sun is at azimuth 66 here, so the outward
+           slope on that side is the LIT one. The first attempt put it on the
+           south-west flank, which at a 24 degree Sun is in full shadow, and
+           the harness correctly refused the frame for having no ground in it. */
+        const m = 260, brg = 70 / D;
+        const lat = r.lat + Math.cos(brg) * m / R * D;
+        const lon = r.lon + Math.sin(brg) * m / R * D / Math.cos(r.lat / D);
+        r.place(lat, lon, 160);
+        s.eva.player.place(lat, lon, 0.1);
+        s.board();
+        s.vehicle.view = 'chase';
+        window.__t = Date.now();
+        return false;
+      }
+      /* Long enough for the suspension and the pitch/roll filters to settle,
+         and for the terrain under it to have refined. */
+      return Date.now() - window.__t > 5000;
+    })()`],
+
+  /* The map, at a scale where the Moon is doing something. Tycho is 85 km
+     across with four kilometres of relief, so if the hillshade, the band
+     limit or the aspect ratio are wrong this stops looking like a crater —
+     which all three of them did, in that order, while it was being written. */
+  ['map-tycho', 'site=tycho&mode=eva&ship=1&t=2026-09-22T14:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.map || !s.eva) return false;
+      if (!s.map.visible) {
+        s.map.show(true);
+        s.map.spanIndex = 12;
+        window.__mt = Date.now();
+        return false;
+      }
+      /* Wait for the relief to be drawn rather than for a clock: the caption
+         only gets a number once drawRelief has returned one. */
+      const r = document.getElementById('map-relief');
+      return !!r && /[0-9]/.test(r.textContent) && Date.now() - window.__mt > 1200;
+    })()`],
+
+  /* A marked waypoint, from the ground: the compass tape with the pip on it,
+     and the column standing where the mark is. Two marks, one close and one
+     five kilometres out, so the range scaling is in frame as well. */
+  ['waypoint-beam', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.marks || !s.eva) return false;
+      if (!window.__wp) {
+        window.__wp = 1;
+        const R = 1737400, D = 180 / Math.PI;
+        /* Step clear of the ship first. Standing at the ladder the landing
+           gear fills the frame and the nearer of the two columns is behind a
+           leg, which was the first version of this shot. */
+        {
+          const me = s.eva.player.llh;
+          s.eva.place(me.lat, me.lon - 100 / R * D / Math.cos(me.lat / D), 0.1);
+        }
+        /* Offsets in degrees, small-angle, which is plenty at these ranges. */
+        const at = (brg, m) => {
+          const b = brg / D;
+          const dn = Math.cos(b) * m / R * D, de = Math.sin(b) * m / R * D;
+          return { lat: s.eva.player.llh.lat + dn,
+                   lon: s.eva.player.llh.lon + de / Math.cos(s.eva.player.llh.lat / D) };
+        };
+        s.marks.length = 0;
+        s.marks.push(at(320, 300), at(338, 5000));
+        s.eva.player.yaw = 328 / D;
+        window.__wt = Date.now();
+        return false;
+      }
+      return Date.now() - window.__wt > 2500;
+    })()`],
 ];
 
 /* `--shot name:query`, or `--shot name:query::waitExpression` to hold the
@@ -301,7 +395,20 @@ const shots = args.filter((a, i) => args[i - 1] === '--shot')
     const cut = rest.indexOf('::');
     return cut < 0 ? [name, rest] : [name, rest.slice(0, cut), rest.slice(cut + 2)];
   });
-const SHOTS = shots.length ? shots : DEFAULT_SHOTS;
+/* `--only tycho` runs just the default shots whose name contains that, which
+   is what you want when one of twenty-eight needs iterating on: the whole run
+   is a quarter of an hour and `--shot` defines a NEW shot rather than picking
+   an existing one, so re-running one of these used to mean copying its whole
+   wait expression onto a command line. Comma-separated for a few at once. */
+const only = argOf('only', '');
+const picked = only
+  ? DEFAULT_SHOTS.filter(s => only.split(',').some(k => s[0].includes(k.trim())))
+  : DEFAULT_SHOTS;
+if (only && !picked.length) {
+  console.error(`--only ${only} matched none of: ${DEFAULT_SHOTS.map(s => s[0]).join(' ')}`);
+  process.exit(2);
+}
+const SHOTS = shots.length ? shots : picked;
 
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
