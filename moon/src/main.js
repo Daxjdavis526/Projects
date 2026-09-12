@@ -21,6 +21,7 @@ import { Stage } from './render/stage.js';
 import { TerrainSystem } from './render/terrain.js';
 import { Sky } from './render/sky.js';
 import { DustField } from './render/dust.js';
+import { Beacons } from './render/beacons.js';
 import { Exposure } from './render/exposure.js';
 import { ephemerisAt, skyAt, jdFromUnixMs, localSolarTime, nextDaylight } from './physics/ephemeris.js';
 import { llhToXyz, xyzToLlh, enuBasis, llToUnit, horizonDistance,
@@ -56,6 +57,8 @@ import { Save } from './game/save.js';
 import { Photo } from './ui/photo.js';
 import { Settings } from './ui/settings.js';
 import { Nav } from './ui/nav.js';
+import { MapView } from './ui/map.js';
+import { Compass } from './ui/compass.js';
 
 /* Absolute, because the terrain workers resolve it against their own URL. */
 const DATA = new URL('../data/', import.meta.url).href;
@@ -333,6 +336,17 @@ async function start() {
   const track = new Track();
   const bootTrack = new Track();
   const nav = new Nav({ waypoints: [], track, heightfield });
+  /* The map, the compass and the light columns all read the SAME waypoint
+     array the nav console mutates and the save round-trips. One list, four
+     things looking at it, so a mark placed anywhere shows up everywhere. */
+  const mapView = new MapView({
+    heightfield, waypoints: nav.waypoints,
+    tracks: { boots: bootTrack, wheels: track },
+    sites: (sites.sites || []).filter(x => x.name)
+      .map(x => ({ lat: x.lat, lon: x.lon, name: x.name })),
+  });
+  const compassHud = new Compass({ waypoints: nav.waypoints });
+  const beacons = new Beacons(stage, { heightfield, waypoints: nav.waypoints });
   /* Eating, sleeping, and waiting for the Sun, which on a body with a
      29 and a half day rotation is a real thing to want to do. */
   const shelter = new Shelter({
@@ -934,6 +948,17 @@ async function start() {
     /* The settings panel is buttons, and buttons need a pointer, so opening it
        hands the pointer back. Clicking the canvas afterwards takes it again. */
     if (e.code === 'KeyO') { releaseLook(); settings.toggle(); sound.beep('select'); }
+    /* The map. `releaseLook` first for the same reason the settings panel does
+       it: with the pointer locked for looking around, nothing in an overlay
+       can be clicked. Inert while the orbital picker is up, which is a
+       different map of the same Moon and owns the screen. */
+    if (e.code === 'KeyN' && mode !== 'orbit') {
+      releaseLook();
+      const on = mapView.toggle();
+      sound.beep('select');
+      if (on) say('click the map to mark somewhere · scroll to zoom', 3500);
+    }
+    if (e.code === 'Escape' && mapView.visible) { mapView.show(false); return; }
     if (e.code === 'KeyK') {
       state.showLog = !state.showLog;
       el('log').classList.toggle('on', state.showLog);
@@ -1549,6 +1574,11 @@ async function start() {
     }
 
     historic.update(cam.lat, cam.lon, stage.origin.origin, dt, local.sunDir, state.simMs);
+    /* The light columns over marked waypoints. Here rather than anywhere
+       earlier for the reason spelled out below about the rover: this is after
+       `setEye`, so it is placed against the origin everything else is placed
+       against. */
+    beacons.place(stage.origin.origin, cam);
     if (base) {
       base.step(dt, eva ? eva.player.llh : null);
       base.place(stage.origin.origin);
@@ -1721,6 +1751,26 @@ async function start() {
         nearest: near ? { name: near.f[0], km: near.km } : null,
       });
     }
+
+    /* The compass and the map, on foot as well as driving — which is the whole
+       point of them. Heading is the vehicle's when you are in it and your own
+       when you are not; `player.heading` has been in the snapshot since the
+       player was written and until now nothing read it. */
+    const heading = driving && vehicle
+      ? vehicle.rover.heading
+      : (eva ? eva.player.heading : cam.yaw * 180 / Math.PI);
+    compassHud.show(mode === 'surface' && !photo.active && !mapView.visible);
+    compassHud.update({
+      heading, lat: cam.lat, lon: cam.lon,
+      walked: eva ? eva.player.distance : 0,
+      driven: vehicle ? vehicle.rover.distance : 0,
+      driving,
+    });
+    mapView.update({
+      lat: cam.lat, lon: cam.lon, heading,
+      home: base ? { lat: base.lat, lon: base.lon } : null,
+    });
+
     suitHud.update(photo.active ? null : evaSnap);
     prompts();
     if (photo.active) {
@@ -1784,6 +1834,10 @@ async function start() {
        only way to test the thing is to throw some directly. */
     get dust() { return dust; },
     get stage() { return stage; },
+    /* The one waypoint list — the nav console, the map, the compass and the
+       light columns all read it, and the save round-trips it. */
+    get marks() { return nav.waypoints; },
+    get map() { return mapView; },
     get mode() { return mode; },
     land(lat, lon) { land({ lat, lon }); },
     /* Where the sun is from where you are standing, for tests that care
