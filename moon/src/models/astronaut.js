@@ -765,6 +765,38 @@ export function buildAstronaut(opts = {}) {
     spinePitch: 0.30, neckPitch: 0.10,
   });
 
+  /* Sitting in the rover. The figure used to be drawn with whatever gait it had
+     the instant you pressed R -- and since `eva.step` is not called while
+     driving, that pose then froze. Board mid-bound and you got `poseFlight`,
+     which abducts both shoulders to 0.88, about fifty degrees, with the elbows
+     nearly straight: a T-pose, riding along unchanged for the rest of the
+     drive.
+
+     Hung from the seat's hip anchor rather than standing on the ground, so
+     `bodyY` stays at zero and the hips are wherever models/rover.js put them.
+     Knees a little apart, because a pressurised garment will not let them
+     close, and the gloves out on the hand controllers. The ankles are not
+     neutral: a suited boot on a pedal keeps some dorsiflexion.
+
+     The hip is flexed a few degrees PAST square, so the thighs run very
+     slightly uphill and the knees sit above the hip line. That is not a
+     stylistic choice, it is what makes the boots land on the floor pan: the
+     figure is 1.0 m from sole to hip, the seat pan is 0.40 m above the deck,
+     and with the thighs level the shins hang 5 cm through the floor. Raising
+     the knees takes up the difference without moving the head, which wants to
+     stay at the seated eye height the cabin was drawn around. It is also how
+     the Apollo crews sat in the LRV, for the same reason -- the footwell is
+     not deep.
+
+     Nothing here is a claim about anything. It is a person sitting down. */
+  const SEATED = Object.assign({}, tgt, {
+    hipL: 1.70, hipR: 1.70, kneeL: 1.70, kneeR: 1.70, ankleL: 0.25, ankleR: 0.25,
+    abdL: 0.20, abdR: 0.18,
+    shPitchL: 0.78, shPitchR: 0.74, shAbdL: 0.24, shAbdR: 0.22,
+    elbowL: 1.02, elbowR: 1.06,
+    spinePitch: 0.12, neckPitch: 0.02,
+  });
+
   let time = 0;          // s since build, for the oscillations that are not gait
   let lopePhase = 0;     // stride carried on internally through the airborne half
   let lopeHold = 0;      // how much longer that is allowed to continue
@@ -953,7 +985,8 @@ export function buildAstronaut(opts = {}) {
     for (let i = 0; i < KEYS.length; i++) tgt[KEYS[i]] = 0;
 
     downW = 0;
-    if (gait === 'walk') poseWalk(tgt, phase, speed);
+    if (gait === 'seated') blendKey(tgt, SEATED, 1);
+    else if (gait === 'walk') poseWalk(tgt, phase, speed);
     else if (gait === 'lope') poseLope(tgt, phase, speed);
     else if (gait === 'flight' || gait === 'jet')
       poseFlight(tgt, speed, gait === 'jet' || !!p.jetOn);
@@ -1005,7 +1038,14 @@ export function buildAstronaut(opts = {}) {
     /* While the chest is on the ground there is no boot to stand on, so the
        planting fades out with the prone keyframe and comes back as the figure
        gets its feet underneath itself. */
-    const want = gait === 'fallen' ? 1 - downW : p.grounded === false ? 0 : 1;
+    /* Seated, there is no ground under the boots to be held onto and the seat
+       is carrying the figure, so the planting is off outright rather than left
+       to whatever `grounded` happens to say. Left on, it drops the body by the
+       distance from the hip to the lowest sole and stands the rider up out of
+       the chair. */
+    const want = gait === 'seated' ? 0
+      : gait === 'fallen' ? 1 - downW
+        : p.grounded === false ? 0 : 1;
     plant += (want - plant) * Math.min(1, dt / 0.18);
     const drop = Math.max(dL, dR) - (HIP_Y * Math.cos(cur.bodyPitch) - SOLE_Y0);
 

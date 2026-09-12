@@ -1245,9 +1245,12 @@ async function start() {
          drawn a couple of hundred metres from where it was and vanished for a
          frame. The camera does not need it: `camera()` works from the rover's
          coordinates, not from its mesh. */
-      /* The player goes where the rover goes. */
+      /* The player goes where the rover goes -- for the terrain streamer, the
+         suit and the consumables. The MODEL no longer follows from this: it is
+         parented into the seat on boarding, so it is drawn by the vehicle. The
+         yaw is deliberately not written here either; it used to be set to
+         `cam.yaw`, which spun the rider in his seat as you looked around. */
       eva.player.place(vehicle.rover.lat, vehicle.rover.lon, 0.9);
-      eva.player.yaw = cam.yaw;
       eva.suit.step(dt, {
         exertion: 0.12, sunlit: local.sunEl > 0, lights: eva.lampMode > 0,
         inShelter: vehicle.rover.pressure > 0.9,
@@ -1488,14 +1491,27 @@ async function start() {
       });
     }
 
+    /* Who is in the seat, settled in one place rather than on the board and
+       dismount edges. `driving` is set from four of them -- the R key, a save
+       being restored, the blackout recovery and the test harness -- and an
+       edge handler on one of those is a bug in the other three. This is an
+       identity check per frame and it is idempotent, so it also covers the
+       model arriving late: `seatRider` declines until the vehicle has one. */
+    if (vehicle && eva && eva.model) {
+      const want = driving ? eva.model : null;
+      if (want && vehicle.rider !== want) vehicle.seatRider(want, stage.world);
+      else if (!want && vehicle.rider) vehicle.releaseRider();
+    }
+
     if (eva) {
       eva.updateLights(stage.origin.origin, camFrame);
-      eva.updateModel(stage.origin.origin, dt);
+      /* Driving, the model is parented into the rover's seat and the vehicle
+         puts it where it goes, so the walker's own placement has to keep its
+         hands off it -- it would drag the figure back out to a world position
+         computed from the player. It still gets animated, in the seated pose. */
+      eva.updateModel(stage.origin.origin, dt, !!(driving && vehicle && vehicle.rider));
       /* Third person on foot, and also whenever the chase camera is looking at
-         the rover — a driverless vehicle bounding across a mare is the wrong
-         picture. The pose is the walker's rather than a seated one, which is a
-         known cheat: at chase distance the figure is a metre tall on screen
-         and the alternative is a rig this model does not have. */
+         the rover — a driverless vehicle crossing a mare is the wrong picture. */
       if (eva.model) {
         eva.model.group.visible = driving
           ? !!(vehicle && vehicle.view === 'chase')
