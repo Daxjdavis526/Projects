@@ -1209,13 +1209,23 @@ async function start() {
       /* `+=` on the yaw: see game/eva.js, which had the same sign backwards. */
       cam.yaw += look.yaw; cam.pitch = clampPitch(cam.pitch - look.pitch);
       look.yaw = look.pitch = 0;
+      /* Back on the stick is the brake while you are rolling forwards, and
+         reverse only once you have very nearly stopped. It used to be reverse
+         throttle at any speed, which sounds reasonable and was useless: the
+         throttle and the brake were clamped to the same traction limit, so S
+         and space slowed you at exactly the same rate and neither of them
+         slowed you much. Now the brake has its own authority, so the pedal you
+         reach for first should be the one that uses it. */
+      const ahead = clamp1(moveAhead() + pad.forward);
+      const rolling = vehicle.rover.speed > 1.0;
+      const backBrakes = ahead < -0.02 && rolling;
       vehicle.step(dt, {
         /* The stick is analogue where the physics takes an analogue value, so
            easing along a rim at walking pace is something a pad can ask for
            and a key cannot. */
-        throttle: clamp1(moveAhead() + pad.forward),
+        throttle: backBrakes ? 0 : ahead,
         steer: clamp1(moveSide() + pad.strafe),
-        brake: keys.has('Space') || pad.held.has('jump'),
+        brake: backBrakes || keys.has('Space') || pad.held.has('jump'),
         boost: keys.has('ShiftLeft') || keys.has('ShiftRight') || pad.run,
         toggleCanopy: canopyPress,
       }, true);

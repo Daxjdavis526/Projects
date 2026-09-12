@@ -45,6 +45,12 @@ export class Vehicle {
     this._u = new THREE.Vector3();
     this._s = new THREE.Vector3();
     this._p = { x: 0, y: 0, z: 0 };
+    /* The lean and the rollover twist, allocated once. `place` runs every
+       frame and everything else in it already works this way. */
+    this._lean = new THREE.Quaternion();
+    this._leanE = new THREE.Euler(0, 0, 0, 'XZY');
+    this._twist = new THREE.Quaternion();
+    this._rollAxis = new THREE.Vector3(0, 0, 1);
     this.dust = 0;
     this.canopyEdge = false;
   }
@@ -149,15 +155,31 @@ export class Vehicle {
     this._u.set(b.u.x, b.u.y, b.u.z);
     this._m.makeBasis(this._e, this._u, this._s);
     this.model.group.quaternion.setFromRotationMatrix(this._m);
-    /* Lean with the ground. Pitch is about the vehicle's own right-hand axis
-       and roll about its nose, both already worked out by the physics. */
-    const lean = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(-r.pitch, 0, -r.roll, 'XZY'));
-    this.model.group.quaternion.multiply(lean);
+    /* Lean with the ground, in the vehicle's own frame: pitch about its right
+       hand axis, roll about its nose. The physics fits a plane through the four
+       contact patches and hands both over already, with positive pitch meaning
+       nose up and negative roll meaning the right side is the low one.
+
+       Both of these used to be negated here, which drew the lean backwards:
+       climbing a twenty degree slope the physics said twenty degrees nose up
+       and the model was drawn twenty degrees nose DOWN, a forty degree error
+       against the hill, with the uphill wheels buried and the downhill pair in
+       the air. The signs are worth stating rather than re-deriving, because
+       this is the second time they have been got wrong here. In this frame
+       (+X east, +Y up, +Z south, nose at -Z):
+
+         a rotation of +t about +X sends the nose (0,0,-1) to (0, sin t, -cos t)
+         a rotation of +f about +Z sends the right (1,0,0) to (cos f, sin f, 0)
+
+       so nose-up wants +pitch and right-side-low wants the already negative
+       +roll. Both pass through untouched. `test/vehicle.test.mjs` pins it. */
+    this._leanE.set(r.pitch, 0, r.roll, 'XZY');
+    this._lean.setFromEuler(this._leanE);
+    this.model.group.quaternion.multiply(this._lean);
     /* Rolled over is a real state, not a message: put it on its side. */
     if (r.rolled) {
-      this.model.group.quaternion.multiply(
-        new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI * 0.42));
+      this._twist.setFromAxisAngle(this._rollAxis, Math.PI * 0.42);
+      this.model.group.quaternion.multiply(this._twist);
     }
 
     const ground = r.meanGround ?? this.hf.heightAt(r.lat, r.lon);
