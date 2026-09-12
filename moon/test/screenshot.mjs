@@ -290,6 +290,75 @@ const DEFAULT_SHOTS = [
      is the only test of it: if the portal ever stops writing its mark the hole
      fills in with wall and the frame still renders perfectly happily. */
   ['cave-mouth', 'site=8.3355,33.222833&mode=eva&t=2026-09-22T00:00Z&rate=0&yaw=270&pitch=4&lamps=2&quality=balanced'],
+
+  /* The rover standing on a slope, which is the shot the inverted lean would
+     have failed outright. test/vehicle.test.mjs is the real guard on the signs
+     — it reads the drawn quaternion and compares it to the ground — but the
+     thing that was actually reported was how it LOOKED, and a vehicle pitched
+     twenty degrees into a hill with two wheels in the air is obvious here and
+     nowhere else. Tycho's flank for a slope that is measured rather than
+     arranged. */
+  ['rover-slope', 'site=tycho&mode=eva&ship=1&t=2026-09-22T14:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.vehicle || !s.eva) return false;
+      if (!s.driving) {
+        s.eva.player.place(s.vehicle.rover.lat, s.vehicle.rover.lon, 0.1);
+        s.board();
+        s.vehicle.view = 'chase';
+        window.__t = Date.now();
+        return false;
+      }
+      /* Drive off the pad and onto real ground, where there is a gradient. */
+      s.vehicle.rover.speed = 9;
+      return Date.now() - window.__t > 6000;
+    })()`],
+
+  /* The map, at a scale where the Moon is doing something. Tycho is 85 km
+     across with four kilometres of relief, so if the hillshade, the band
+     limit or the aspect ratio are wrong this stops looking like a crater —
+     which all three of them did, in that order, while it was being written. */
+  ['map-tycho', 'site=tycho&mode=eva&ship=1&t=2026-09-22T14:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.map || !s.eva) return false;
+      if (!s.map.visible) {
+        s.map.show(true);
+        s.map.spanIndex = 12;
+        window.__mt = Date.now();
+        return false;
+      }
+      /* Wait for the relief to be drawn rather than for a clock: the caption
+         only gets a number once drawRelief has returned one. */
+      const r = document.getElementById('map-relief');
+      return !!r && /[0-9]/.test(r.textContent) && Date.now() - window.__mt > 1200;
+    })()`],
+
+  /* A marked waypoint, from the ground: the compass tape with the pip on it,
+     and the column standing where the mark is. Two marks, one close and one
+     five kilometres out, so the range scaling is in frame as well. */
+  ['waypoint-beam', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.marks || !s.eva) return false;
+      if (!window.__wp) {
+        window.__wp = 1;
+        const R = 1737400, D = 180 / Math.PI;
+        /* Offsets in degrees, small-angle, which is plenty at these ranges. */
+        const at = (brg, m) => {
+          const b = brg / D;
+          const dn = Math.cos(b) * m / R * D, de = Math.sin(b) * m / R * D;
+          return { lat: s.eva.player.llh.lat + dn,
+                   lon: s.eva.player.llh.lon + de / Math.cos(s.eva.player.llh.lat / D) };
+        };
+        s.marks.length = 0;
+        s.marks.push(at(320, 300), at(338, 5000));
+        s.eva.player.yaw = 328 / D;
+        window.__wt = Date.now();
+        return false;
+      }
+      return Date.now() - window.__wt > 2500;
+    })()`],
 ];
 
 /* `--shot name:query`, or `--shot name:query::waitExpression` to hold the

@@ -34,14 +34,15 @@ that spot. Then land.
 | Input | Action |
 |---|---|
 | click | look. Escape gives the pointer back. In orbit, drag to turn the Moon |
-| W A S D | walk, or drive. The arrow keys do the same |
+| W A S D | walk, or drive. The arrow keys do the same. Driving, back is the brake |
 | shift | lope, or the rover's boost mode |
-| space | jump, brake, or skip the landing |
+| space | jump, the rover's brake, or skip the landing |
 | J | jetpack (hold) |
 | G | on foot, or the free camera |
 | F | view: first person, helmet, third — or the rover's chase camera |
 | L | suit lamps: off, flood and head, all three |
 | R | get on and off the rover, or right it after a roll |
+| N | the map. Click it to mark somewhere, scroll to zoom, drag to pan |
 | E | the ship's hatch, at the ladder |
 | C | rover canopy: open, or sealed and pressurised |
 | M | site markers |
@@ -136,7 +137,7 @@ from the Apollo Lunar Roving Vehicle record and from regolith soil mechanics,
 the suit's consumables from the Apollo portable life support system and the
 published xEMU requirements, and the locomotion from the Apollo film analyses.
 
-Five departures, which are deliberate and worth naming.
+Six departures, which are deliberate and worth naming.
 
 **There is a walk, and it is a compromise.** The Froude number says a true
 walk goes unstable above 0.74 m/s, and it is right: above that a person on the
@@ -164,17 +165,41 @@ speed. A tank holds what it holds for as long as you are actually out there,
 which also means the endurance on the HUD is a number you can trust — nine
 hours is nine hours.
 
-**The rover's tyres grip better than Apollo's did**, 0.78 against the 0.62
-measured for wire mesh on regolith. In a sixth of a gravity traction, not
-torque, is what decides everything: the vehicle weighs 2.3 kN, so grip alone
-sets how hard it can accelerate, how steep a slope it holds — the friction
-angle falls out as atan(0.78), about 38° — and how far it takes to stop, which
-at 60 km/h is over a hundred metres. Boosting raises the grip again rather than
-the torque, because multiplying a force that is already being clamped away
-changes nothing at all.
+**The rover is a much better vehicle than any that has been there**, and this
+is now the largest departure in the project. In a sixth of a gravity traction,
+not torque, decides everything: the vehicle weighs 2.3 kN, so grip alone sets
+how hard it can accelerate, how hard it can brake, how tightly it can corner
+and how steep a slope it holds. On the 0.62 measured for wire mesh on regolith
+that comes to about 1 m/s² for all four of those at once, which is honest and
+was unplayable — a brake no stronger than the throttle, over a hundred metres
+to stop from 60 km/h, and a turning circle at cruise of 220 m.
 
-**And it is fast**: 60 km/h, 110 boosted, against the real rover's 13. Nothing
-it drives over is invented; only the vehicle is.
+So there are five grip figures now rather than one, and four of them are
+invented: 1.8 for driving, 4.0 for the boost, 2.8 for braking and 4.5 for
+cornering, all as multiples of a tyre that is itself already a fiction at 0.78.
+That buys 80 km/h cruising and 150 boosted, ten seconds to either, seventy
+metres to stop and an 86 m turning circle. None of it is a claim about
+anything; it is a machine nobody has built, on ground that is measured.
+
+**What the fiction is not allowed to touch is the ground.** Slopes, the
+friction angle and the parking brake are all still judged on the 0.78 alone,
+and past that angle — atan(0.78), about 38° — every one of the vehicle's
+figures falls back to what the surface will give, because the soil is the thing
+that has run out and no amount of torque across four hubs is a substitute for
+shear strength. So a slope you cannot park on is one you cannot drive up
+either: full throttle and boost will not climb 40°, and a crater wall is still
+a decision.
+
+**And it is fast**: 80 km/h, 150 boosted, against the real rover's 13. Nothing
+it drives over is invented; rather a lot of the vehicle is.
+
+**A marked waypoint throws a blue column four kilometres into the sky.** This
+is the only object in the game that is pure furniture, and it is drawn in a
+colour nothing on the Moon is — the surface runs from charcoal to bone and
+there is no blue anywhere in it — so it can never be mistaken for something
+measured. Apollo 11's marker, which is about a real place, is a 1.86 m
+surveyor's post with no glow and nothing that turns to face you. The
+difference is deliberate.
 
 ## Not landing on the hardware
 
@@ -221,11 +246,11 @@ without it the figure is 10.6 m, which is what it was.
 Your mass is not a sixth. The suit and backpack together mass more than you do,
 and inertia does not care which planet it is on.
 
-The rover has the same problem an order of magnitude larger. It accelerates and
-brakes at about a tenth of a gravity whatever the motors are asked for, so it
-takes 13 seconds to reach 60 km/h and over a hundred metres to stop again,
-slides rather than turns if you ask too much of a corner, climbs twenty degrees
-at half the rate it crosses flat ground, and slides back down forty five.
+The rover had the same problem an order of magnitude larger, and the section
+above says what was done about it. What survives is the shape of it: it still
+slides rather than turns if you ask too much of a corner, it still needs
+seventy metres to stop from cruise and two hundred and fifty from a boost, and
+it still cannot climb past the friction angle however hard it is asked.
 
 It also gets air, and that is not decoration either. Hit a ten degree rise at
 the boost ceiling and the vehicle keeps the vertical speed it had while it was
@@ -420,6 +445,15 @@ goes through the hatch with you, and the cabin says so in words on the shelter
 panel. Nothing about it harms anyone. The honest version of dust mitigation is
 a chore, not a penalty.
 
+A boot or a wheel also throws grains, and they are ballistic and nothing else:
+launched, falling at 1.62 m/s², stopping when they reach the ground. No drag,
+no billow, no hanging. What makes it read as dust rather than gravel is that
+the fine fraction goes fastest and flattest, which is what the Apollo crews
+described watching the descent engine — a transparent sheet moving radially
+outward, not a cloud. Until recently none of it was visible: the grains were
+being drawn a thousand times too large and were being depth-rejected over the
+ground, so the whole effect only ever appeared as white discs in the sky.
+
 Boot prints and wheel ruts stay where you put them. There is no wind here and
 no rain, so the only things that erase a mark are micrometeorite gardening and
 the solar wind, both working on a scale of ten million years: what you leave,
@@ -427,6 +461,34 @@ you leave for longer than the species has existed. They are drawn darker than
 the ground because compaction reduces the shadow-hiding in the porous top
 layer, which is why Apollo boot prints photograph dark on grey and why the LRV
 tracks are visible from orbit.
+
+## Finding your way
+
+There is no minimap and no quest arrow. What there is, is a compass, a map and
+a light.
+
+The **compass** is a heading tape across the top of the screen, with the
+distance you have walked and driven beside it. It has no panel behind it,
+because a compass is an instrument and the ground should show through.
+
+`N` opens the **map**: the real elevation, shaded by slope rather than coloured
+by height — inside a single crater a height ramp tells you nothing you did not
+already know — from four hundred metres across to the whole Moon, north up and
+not rotating. It draws where you are, where the ship is, every metre you have
+walked and driven, and the named features once the view is wide enough for them
+to mean anything. Click it to mark somewhere, right-click a mark to remove it,
+drag to pan, scroll to zoom. It says so in its own caption when it is showing
+you more ground than the measurements can resolve, which past about 60 km
+across they cannot: the global elevation is 1.9 km a pixel and a smooth sheet
+would be implying detail that is not there.
+
+A mark then stands a column of blue light where it is, which you can steer at
+without looking at anything, and shows up as a pip on the compass tape with its
+range. That column is the least honest thing in the project and the section on
+fiction says so.
+
+Nothing on the map is revealed by exploring. It is measured ground and it was
+always there.
 
 ## Where you have been
 
@@ -452,6 +514,14 @@ shadows are in the right places and the geometry underneath them is measured
 LOLA topography at 36 m; the edges between them are quantised. Sixteen azimuths
 would halve it and double the per-vertex cost, which is a trade worth measuring
 before making.
+
+Two smaller things, both honest gaps rather than artefacts. The suit's fabric
+has no texture: `merge()` writes UVs and nothing reads them, so the quilting and
+the seams that would sell it at close range are not there, and the figure reads
+as shaped rather than woven. And the map's relief above about 60 km across is
+regional — the global elevation is 1.9 km a pixel, so a wide view is a sketch
+of the landforms and not a survey of them. The map says so in its own caption
+rather than letting a smooth sheet imply otherwise.
 
 ## The pits, and the cave
 
@@ -608,6 +678,23 @@ There are no quests and there will not be any. The Moon is the content.
 Every one of these was invisible in a stack trace and obvious in a picture,
 which is why the screenshot harness is a test rather than a convenience.
 
+- The rover was drawn leaning the wrong way. The physics fits a plane through
+  the four wheel contact patches and reports a correct attitude; the renderer
+  applied it negated, on the line directly below a comment correctly
+  documenting the frame. A twenty degree climb was drawn twenty degrees
+  nose-DOWN — forty degrees out, uphill wheels buried, downhill pair in the
+  air — and it is the chase camera that makes that obvious rather than any
+  number.
+- The sky flashed white when you walked. The dust field's grain size was
+  documented in pixels and read by the shader as metres, so a footfall was an
+  eighteen-metre sphere about a thousand pixels across; and the material never
+  asked for the logarithmic depth chunks the renderer needs, so every grain
+  failed the depth test over terrain and passed only against the cleared sky.
+  Which means the effect had never once been visible where it was supposed to
+  be, and the only dust anyone ever saw was the artefact.
+- The map was stretched. Both axes were divided by the span regardless of the
+  canvas shape, which is the same thing on the square nav console it came from
+  and a 1.59x squash on a full-screen one: Tycho came out as an ellipse.
 - The colour map was being read as an albedo. Tycho came out at 0.76
   reflectance, which pushed whole frames into the top of the tone curve, and
   filmic response turns bright neutral grey into warm sand. The Moon looked
