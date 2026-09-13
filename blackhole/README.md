@@ -31,6 +31,7 @@ Google Fonts, which degrade gracefully).
 | `Shift` / `Ctrl` | boost ×8 / precision ×0.12 |
 | `T` | guided tour |
 | `P` | pause disk motion |
+| `F` | fullscreen, interface hidden — pure sim (F or Esc to leave) |
 | `H` | hide interface |
 | `Esc` | leave orbit / free-fall / tour |
 
