@@ -175,11 +175,26 @@ was unplayable — a brake no stronger than the throttle, over a hundred metres
 to stop from 60 km/h, and a turning circle at cruise of 220 m.
 
 So there are five grip figures now rather than one, and four of them are
-invented: 1.8 for driving, 4.0 for the boost, 2.8 for braking and 4.5 for
+invented: 1.8 for driving, 4.0 for the boost, 4.0 for braking and 4.5 for
 cornering, all as multiples of a tyre that is itself already a fiction at 0.78.
-That buys 80 km/h cruising and 150 boosted, ten seconds to either, seventy
-metres to stop and an 86 m turning circle. None of it is a claim about
-anything; it is a machine nobody has built, on ground that is measured.
+That buys 80 km/h cruising and 150 boosted, ten seconds to either, and about
+fifty metres to stop. Braking is deliberately set equal to the boost's
+acceleration — the same friction budget forwards and back — because a vehicle
+that accelerates harder than it stops is one you cannot get out of trouble in.
+None of it is a claim about anything; it is a machine nobody has built, on
+ground that is measured.
+
+**Steering is proportional, which took two goes.** The cornering budget is
+constant and the geometric demand of a given steering angle grows with speed,
+so clamping the demand meant that above about four metres a second the clamp
+bound for any stick position at all and the result had no steering input left
+in it: five per cent of lock and full lock both turned 58 degrees in four
+seconds. One turn rate, no control, and the slip warning permanently lit. The
+stick moves the available authority now. At 80 km/h a quarter of it is a 286 m
+corner, half is 143, four fifths is 89 — the tightest the tyres will hold — and
+the last fifth is the part where you slide. Under about four metres a second
+the geometry is the limit instead, so full lock parks in a 2.7 m circle and
+cannot slide at all.
 
 **What the fiction is not allowed to touch is the ground.** Slopes, the
 friction angle and the parking brake are all still judged on the 0.78 alone,
@@ -249,8 +264,8 @@ and inertia does not care which planet it is on.
 The rover had the same problem an order of magnitude larger, and the section
 above says what was done about it. What survives is the shape of it: it still
 slides rather than turns if you ask too much of a corner, it still needs
-seventy metres to stop from cruise and two hundred and fifty from a boost, and
-it still cannot climb past the friction angle however hard it is asked.
+fifty metres to stop from cruise and a hundred and seventy from a boost, and it
+still cannot climb past the friction angle however hard it is asked.
 
 It also gets air, and that is not decoration either. Hit a ten degree rise at
 the boost ceiling and the vehicle keeps the vertical speed it had while it was
@@ -515,7 +530,13 @@ LOLA topography at 36 m; the edges between them are quantised. Sixteen azimuths
 would halve it and double the per-vertex cost, which is a trade worth measuring
 before making.
 
-Two smaller things, both honest gaps rather than artefacts. The suit's fabric
+Three smaller things, all honest gaps rather than artefacts. The rover's seat
+camera and the seat the crew model sits in disagree by about a quarter of a
+metre: the camera puts your eyes 1.05 m above the hull reference while the
+cabin's own drawing puts a seated crew member's eyes at 1.88 m above the model
+origin. It has no symptom in play, because the figure is hidden in the seat
+view and the camera is not drawn in the chase view, but the two should be
+reading the same number out of one place. The suit's fabric
 has no texture: `merge()` writes UVs and nothing reads them, so the quilting and
 the seams that would sell it at close range are not there, and the figure reads
 as shaped rather than woven. And the map's relief above about 60 km across is
@@ -678,6 +699,13 @@ There are no quests and there will not be any. The Moon is the content.
 Every one of these was invisible in a stack trace and obvious in a picture,
 which is why the screenshot harness is a test rather than a convenience.
 
+- The steering had no proportional control, and this one a screenshot could
+  NOT have found — it needed a number. Cornering authority was computed by
+  clamping a demand that grows with speed against a budget that does not, so
+  above walking pace the clamp always bound and the clamped value had no
+  steering input left in it. Full lock and five per cent of lock turned
+  identically. Every turning-circle test passed, because they were all measured
+  at full lock, which was the only thing that worked.
 - The rover was drawn leaning the wrong way. The physics fits a plane through
   the four wheel contact patches and reports a correct attitude; the renderer
   applied it negated, on the line directly below a comment correctly

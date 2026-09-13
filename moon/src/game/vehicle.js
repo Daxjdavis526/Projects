@@ -55,6 +55,7 @@ export class Vehicle {
     this.canopyEdge = false;
     this.rider = null;              // an astronaut model parented into the seat
     this.riderHome = null;          // where to put it back on dismount
+    this.rollSide = 0;              // which way it went over, latched while rolled
   }
 
   setModel(model) {
@@ -185,10 +186,18 @@ export class Vehicle {
     this._leanE.set(r.pitch, 0, r.roll, 'XZY');
     this._lean.setFromEuler(this._leanE);
     this.model.group.quaternion.multiply(this._lean);
-    /* Rolled over is a real state, not a message: put it on its side. */
+    /* Rolled over is a real state, not a message: put it on its side. On the
+       side it actually went over — this was a bare `+0.42 PI` regardless, so a
+       vehicle that dropped its right wheels and tipped right was drawn lying
+       on its left. The direction is latched when it goes over rather than read
+       live, because `roll` keeps moving afterwards and the wreck should not
+       roll back and forth under the camera. */
     if (r.rolled) {
-      this._twist.setFromAxisAngle(this._rollAxis, Math.PI * 0.42);
+      if (!this.rollSide) this.rollSide = (r.roll || 0) <= 0 ? -1 : 1;
+      this._twist.setFromAxisAngle(this._rollAxis, this.rollSide * Math.PI * 0.42);
       this.model.group.quaternion.multiply(this._twist);
+    } else if (this.rollSide) {
+      this.rollSide = 0;
     }
 
     const ground = r.meanGround ?? this.hf.heightAt(r.lat, r.lon);

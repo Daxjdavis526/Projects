@@ -370,7 +370,11 @@ export class EVA {
   updateModel(origin, dt, seated = false) {
     if (!this.model) return;
     if (seated) {
-      this.model.animate({ gait: 'seated', speed: 0, grounded: false, dt });
+      /* `grounded` is left alone: a rider in a seat is neither standing on the
+         ground nor falling through the air, and saying "not grounded" to get
+         the boot planting switched off would be getting the right behaviour
+         from the wrong claim. The 'seated' gait suppresses planting itself. */
+      this.model.animate({ gait: 'seated', speed: 0, dt });
       this.showDust();
       return;
     }
