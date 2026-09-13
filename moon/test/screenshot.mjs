@@ -114,6 +114,37 @@ async function inspect(file, want) {
     const y0 = Math.round(h * 0.55), y1 = Math.round(h * 0.80);
     if (uniform(x0, y0, x1, y1)) return 'no ground drawn: the probe region is one flat colour';
   }
+  if (want.sky) {
+    /* Nothing on the Moon is white in the sky.
+       -----------------------------------------------------------------------
+       There is no atmosphere to scatter, so above the horizon there is black,
+       stars, the Sun at half a degree, and Earth at one. Anything else filling
+       a chunk of the upper frame is a bug, and this project has had one: the
+       dust field drew every grain about a thousand times too large AND failed
+       the depth test over terrain, so the only place any of it could appear
+       was against the sky, as white discs hundreds of pixels wide. It was
+       reported by a player, not by this harness, which watched it happen
+       twenty-five times and called every frame good.
+
+       So: sample the top eighth, away from the compass tape in the middle, and
+       fail on a large fraction of near-white. The Sun is 0.53 degrees across,
+       which at this framing is well under a tenth of one per cent, so a real
+       Sun cannot trip this and a disc of dust cannot hide from it. */
+    const y0 = Math.round(h * 0.03), y1 = Math.round(h * 0.15);
+    let hot = 0, n = 0;
+    for (let y = y0; y < y1; y += 2) {
+      for (let x = 0; x < w; x += 2) {
+        /* Skip the middle third, where the compass tape lives. */
+        if (x > w * 0.33 && x < w * 0.67) continue;
+        const i = (y * w + x) * bpp;
+        n++;
+        if (data[i] > 232 && data[i + 1] > 232 && data[i + 2] > 232) hot++;
+      }
+    }
+    if (n && hot / n > 0.02) {
+      return `something is white in the sky: ${(100 * hot / n).toFixed(1)}% of the upper frame`;
+    }
+  }
   return '';
 }
 
@@ -123,6 +154,11 @@ function expect(name, query) {
   const eva = query.includes('mode=eva');
   return {
     ground,
+    /* Standing on the surface, the sky above the horizon is black and stays
+       black. Not checked from orbit, where the Moon itself legitimately fills
+       the top of the frame, nor for the map, which is a full-screen overlay
+       and covers the sky with a hillshade on purpose. */
+    sky: eva && ground && !/map/.test(name),
     triangles: ground ? 120000 : 80000,
     finestLevel: eva ? 14 : 0,
     /* Rocks are only scattered on tiles fine enough to stand on, and only when
@@ -330,6 +366,36 @@ const DEFAULT_SHOTS = [
       /* Long enough for the suspension and the pitch/roll filters to settle,
          and for the terrain under it to have refined. */
       return Date.now() - window.__t > 5000;
+    })()`],
+
+  /* Dust over the surface, which until recently had never once been drawn
+     where it was supposed to be. Two bugs cancelled into one symptom: grains
+     about a thousand times too large, and a material that never asked for the
+     logarithmic depth encoding, so every grain failed the depth test over
+     terrain and passed ONLY against the sky. The result was white discs
+     hundreds of pixels wide hanging above the horizon, and this harness
+     watched it happen twenty-five times and called every frame good.
+
+     So the shot exists to give `inspect`'s sky probe something to look at.
+     Burst a few hundred grains a few metres ahead, low, so they straddle the
+     horizon and some of them are over ground and some over sky. Reinstating
+     either half of the old bug turns the top of this frame white and fails it.
+     The dust field is reachable because main.js exposes it for exactly this:
+     dust comes off boots and wheels deep inside the frame loop and a
+     screenshot cannot walk. */
+  ['dust-boots', 'site=apollo11&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=200&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.dust || !s.eva || !s.stage) return false;
+      const cam = s.stage.camera;
+      const fwd = new cam.position.constructor(0, 0, -1).applyQuaternion(cam.quaternion);
+      const at = cam.position.clone().add(fwd.multiplyScalar(6));
+      const u = s.eva.player.up();
+      s.dust.burst({ at, up: { x: u.x, y: u.y, z: u.z }, count: 260, speed: 2.2,
+                     angle: 80, spread: 0.45, size: 0.018 });
+      /* Shutter immediately: the grains are up for about two and a half
+         seconds and the point is to catch them in the air. */
+      return true;
     })()`],
 
   /* The map, at a scale where the Moon is doing something. Tycho is 85 km

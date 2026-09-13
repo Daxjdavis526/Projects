@@ -77,7 +77,7 @@ console.log('speed and boost');
 {
   const r = new Rover({ lat: 0, lon: 0, ground: flat });
   drive(r, 60, { throttle: 1 });
-  check('flat out is 60 km/h, which the Apollo rover would not recognise',
+  check('flat out is 80 km/h, which the Apollo rover would not recognise',
     Math.abs(r.speed - ROVER.speedMax) < 0.1, (r.speed * 3.6).toFixed(1) + ' km/h');
 
   const b = new Rover({ lat: 0, lon: 0, ground: flat });
@@ -147,11 +147,15 @@ console.log('stopping');
      throttle and neither Space nor S slowed you meaningfully at all. The brake
      has its own authority now, `brakeGrip`, which is a deliberate fiction and
      is why those two assertions no longer hold. What has to stay true is that
-     it is still a heavy thing on loose ground: seventy metres from 80 km/h is
-     about twice what a car needs from the same speed, and still enough to make
-     boosting downhill towards a rim a decision. */
-  check('stopping from cruise takes about seventy metres',
-    d > 45 && d < 110, `${d.toFixed(0)} m from ${(v0 * 3.6).toFixed(0)} km/h`);
+     it is still a heavy thing on loose ground: about fifty metres from 80 km/h
+     is getting on for twice what a car needs from the same speed, and 170 from
+     a boost is still enough to make boosting downhill towards a rim a
+     decision. The brake is deliberately set equal to the boost's acceleration
+     -- the same friction budget forwards and back -- because a vehicle that
+     can accelerate harder than it can stop is one you cannot get out of
+     trouble in, whatever the config says about regenerative hubs. */
+  check('stopping from cruise takes about fifty metres',
+    d > 35 && d < 75, `${d.toFixed(0)} m from ${(v0 * 3.6).toFixed(0)} km/h`);
   const onEarth = v0 * v0 / (2 * 0.9 * 9.81);
   check('which is still about twice what a car on tarmac would need',
     d > onEarth * 1.4 && d < onEarth * 3.5,
@@ -202,6 +206,58 @@ console.log('steering');
     rCruise < 120, `${rCruise.toFixed(0)} m radius at ${(ROVER.speedMax * 3.6).toFixed(0)} km/h`);
   check('and going faster still costs you the corner',
     rBoost > rCruise * 2, `${rBoost.toFixed(0)} m at ${(ROVER.speedBoost * 3.6).toFixed(0)} km/h`);
+
+  /* The check that should have existed a round earlier, and did not.
+     -------------------------------------------------------------------------
+     Everything above passes perfectly well on a rover with NO PROPORTIONAL
+     STEERING AT ALL, which is exactly what shipped. The geometric demand
+     `steer * v / wheelbase` grows with speed while the cornering budget does
+     not, so above about four metres a second the clamp bound for any stick
+     position at all and the clamped value — budget / v — had no `steer` left
+     in it. Measured at cruise: five per cent of lock and full lock both turned
+     58 degrees in four seconds. One turn rate, no control, and `sliding`
+     flagged on 97 to 100 per cent of frames, so the cue for being at the limit
+     was permanently on.
+
+     A turning-circle number cannot see that, because it is measured at full
+     lock and full lock was the only thing that worked. What sees it is asking
+     whether the stick does anything in between. */
+  const rateAt = (steer, v, boost) => {
+    const c = new Rover({ lat: 0, lon: 0, ground: flat });
+    drive(c, 2, { throttle: 0 });
+    let yaw = 0, slid = 0;
+    const N = 480;
+    for (let i = 0; i < N; i++) {
+      c.speed = v;                                   // hold it, this is about steering
+      c.step(1 / 120, { throttle: 0, steer, boost });
+      yaw += c.yawRate / 120;
+      if (c.sliding) slid++;
+    }
+    return { rate: yaw / (N / 120), sliding: slid / N };
+  };
+
+  for (const [v, boost, label] of [[ROVER.speedMax, false, 'cruise'],
+                                   [ROVER.speedBoost, true, 'boost']]) {
+    const q = rateAt(0.25, v, boost), h = rateAt(0.5, v, boost), f = rateAt(1.0, v, boost);
+    check(`a quarter of the stick turns about a quarter as hard at ${label}`,
+      Math.abs(q.rate / f.rate - 0.25) < 0.06,
+      `${(q.rate / f.rate).toFixed(3)} of full lock`);
+    check(`and half turns about half at ${label}`,
+      Math.abs(h.rate / f.rate - 0.5) < 0.06, `${(h.rate / f.rate).toFixed(3)}`);
+    check(`gentle steering at ${label} does not slide`,
+      q.sliding < 0.02 && h.sliding < 0.02,
+      `${(100 * q.sliding).toFixed(0)}% at a quarter, ${(100 * h.sliding).toFixed(0)}% at a half`);
+    check(`but full lock at ${label} still does`,
+      f.sliding > 0.5, `${(100 * f.sliding).toFixed(0)}% of frames`);
+  }
+
+  /* And at a walking pace the geometry is the limit rather than the grip, so
+     full lock is a tight circle that cannot slide — which is what manoeuvring
+     round a boulder or up to a hatch needs. */
+  const park = rateAt(1.0, 1.5, false);
+  check('parking on full lock is a tight circle and never slides',
+    1.5 / park.rate < 4 && park.sliding === 0,
+    `${(1.5 / park.rate).toFixed(1)} m radius, ${(100 * park.sliding).toFixed(0)}% sliding`);
 }
 
 console.log('slopes');

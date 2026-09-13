@@ -6,10 +6,26 @@
    Driving on the Moon is dominated by one fact. The wheels can only push as
    hard as the ground can hold them down, and the ground holds them down with a
    sixth of the weight it would on Earth. Regolith's friction is not especially
-   low, around 0.6 for a wire mesh wheel, but 0.6 of a sixth is 0.1, so the best
-   acceleration available is about a tenth of a gravity and the best braking is
-   the same. Everything else follows from that: long stopping distances, wide
-   slow corners, and a genuine risk of simply sliding downhill.
+   low, around 0.6 for a wire mesh wheel, but 0.6 of a sixth is 0.1 — so on the
+   measured numbers the best acceleration available, the best braking and the
+   best cornering are all about a tenth of a gravity, and everything follows
+   from that: long stopping distances, wide slow corners, and a genuine risk of
+   simply sliding downhill.
+
+   THIS VEHICLE DOES NOT DRIVE ON THOSE NUMBERS, and the paragraph above used
+   to stop here and imply that it did. It is what the ground gives; what the
+   machine does with it is four named multipliers in config.js, each of them a
+   separate and fairly large fiction, because one tenth of a gravity for all
+   four of drive, brake and corner at once meant a brake no stronger than the
+   throttle and a 220 m turning circle at cruise. See `tractionLimit` below for
+   which figure answers which question.
+
+   What is still true is the shape. Cornering and braking still come out of a
+   budget rather than a wish; the budget still collapses when a wheel unloads;
+   and past the friction angle — atan(grip), about 38 degrees — every one of
+   the vehicle's invented numbers falls back to what the surface alone will
+   give, because the soil is the thing that has run out. A slope you cannot
+   park on is a slope you cannot drive up.
 
    The Apollo crews found all of it. The Lunar Roving Vehicle was rated for
    about 10 km/h, recorded 18 downhill, and averaged 8; John Young got all four
@@ -420,12 +436,37 @@ export class Rover {
        ease-in is a long time when you are trying to miss a boulder. */
     this.steer += ((input.steer || 0) - this.steer) * Math.min(1, dt * ROVER.steerRate);
     const speedAbs = Math.abs(this.speed);
-    const maxLateral = turnLimit / ROVER.mass;
-    const wanted = this.steer * speedAbs / (ROVER.wheelBase * 0.85);
-    const lateral = wanted * speedAbs;
-    this.sliding = Math.abs(lateral) > maxLateral;
-    const capped = this.sliding ? Math.sign(wanted) * maxLateral / Math.max(speedAbs, 0.1) : wanted;
-    this.yawRate = anyContact ? capped : this.yawRate * Math.max(0, 1 - dt);
+    const budget = turnLimit / ROVER.mass;          // m/s^2 of cornering available
+
+    /* The stick has to move the AUTHORITY, not a demand that then gets clamped.
+       This is the whole shape of the bug it replaces, and it survived the last
+       round because the symptom looks like the opposite of what it is.
+
+       The geometric demand is `steer * v / wheelbase`, which grows with speed,
+       while the lateral budget does not. So above a few metres a second the
+       clamp binds for ANY stick position, and the clamped value -- budget / v
+       -- has no `steer` in it at all. Measured at cruise before this change:
+       five per cent of lock and full lock both turned 58 degrees in four
+       seconds, and `sliding` was flagged on 97 to 100 per cent of frames. The
+       rover had exactly one turn rate, no proportional control, and a slip cue
+       that was permanently on and therefore meaningless. Raising the grip
+       moved the speed that starts at from 1.8 m/s to 3.9 and nothing else.
+
+       So: work out the sharpest turn the tyres can actually hold at this
+       speed, allow a little past it, and let the stick pick a fraction of
+       that. Below about 4 m/s the geometry is the smaller of the two and full
+       lock is a 2.6 m circle that cannot slide, which is what parking wants. */
+    const geometric = speedAbs / (ROVER.wheelBase * 0.85);       // full lock, rad/s
+    const holdable = budget * ROVER.corneringMargin / Math.max(speedAbs, 0.1);
+    const authority = Math.min(geometric, holdable);
+    const wanted = this.steer * authority;
+
+    /* And now the flag means something: it is only true in the top fifth of
+       the stick, where the margin above puts the demand past what the surface
+       will hold. You can still overcook a corner -- you just have to actually
+       overcook it. */
+    this.sliding = Math.abs(wanted * speedAbs) > budget;
+    this.yawRate = anyContact ? wanted : this.yawRate * Math.max(0, 1 - dt);
     this.heading = (this.heading + this.yawRate * dt * 180 / Math.PI * Math.sign(this.speed || 1) + 360) % 360;
 
     /* --- move --------------------------------------------------------------- */

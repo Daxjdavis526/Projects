@@ -213,7 +213,7 @@ export const ROVER = {
      They bind where the traction limit rises above them, which happens when
      the limit is scaled down by partial contact: on two wheels over a crest
      the motor rating is suddenly the smaller number, and it should be. */
-  motorForce: 9000, brakeForce: 6500,                    // N total
+  motorForce: 9000, brakeForce: 8000,                    // N total
   coastDrag: 620,                                        // N, foot off the throttle
   speedMax: 22.2, speedBoost: 41.7,                      // m/s (80 / 150 km/h)
   /* Traction, and the reason the numbers above are reachable at all.
@@ -252,7 +252,7 @@ export const ROVER = {
   grip: 0.78,                                            // FICTIONAL: 0.62 measured
   driveGrip: 1.8,                                        // FICTIONAL: hub motors, better tyre
   boostGrip: 4.0,                                        // FICTIONAL: high-power drive mode
-  brakeGrip: 2.8,                                        // FICTIONAL: regen through four hubs
+  brakeGrip: 4.0,                                        // FICTIONAL: regen through four hubs
   lateralGrip: 4.5,                                      // FICTIONAL: torque vectoring
   /* No `slopeMax` here either, for the reason above: what a wheel can do on a
      slope falls out of the traction limit, which is the friction coefficient
@@ -273,6 +273,12 @@ export const ROVER = {
      speed decays instead of vanishing in one frame the way it used to. */
   limiterDecel: 2.0,                                     // m/s^2
   steerRate: 7,                                          // 1/s, how fast the wheels answer
+  /* How far past the cornering budget full lock is allowed to ask. At 1.0 the
+     stick would stop exactly at the limit and the vehicle could never be made
+     to slide by steering; the margin is what leaves a band at the top of the
+     stick where you can overcook a corner on purpose. It is also what makes
+     `sliding` a cue rather than a constant. */
+  corneringMargin: 1.25,
 };
 
 /* The ship as models/ship.js actually builds it. NASA's habitable volume
