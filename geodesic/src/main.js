@@ -20,11 +20,16 @@ import { tidalTensor, tendexFrame, timeDilation } from './physics/relativity.js'
 import { Stage } from './render/scene.js';
 import { BodyViews } from './render/bodies.js';
 import { FieldView, MODES } from './render/field.js';
+import { INTEGRATORS } from './physics/integrators.js';
 
 import * as F from './ui/format.js';
 import { EXPLAIN, HELP } from './ui/explain.js';
 
 const $ = (id) => document.getElementById(id);
+
+/* Input fields get eight significant figures. Full float64 output makes a
+   number box unreadable, and eight is more than enough to type into. */
+const inp = (v) => (v === 0 ? '0' : Number(v.toPrecision(8)).toString());
 
 /* =============================================================================
    STATE
@@ -54,9 +59,15 @@ function boot() {
   stage = new Stage();
   views = new BodyViews(stage);
   field = new FieldView(stage);
-  engine = new Engine({ integrator: 'verlet', relativistic: false });
+  /* Yoshida-4 by default. It is three Verlet steps with the triple-jump
+     coefficients: the same one-force-eval-per-substep cost structure, three
+     times the work per step, and three to four orders of magnitude less
+     energy error at the same step size. On an eccentric orbit that is the
+     difference between a drift of 1e-4 and one of 1e-8. */
+  engine = new Engine({ integrator: 'yoshida4', relativistic: false });
 
   buildPresetMenu();
+  buildIntegratorMenu();
   buildSpeedButtons();
   wireModes();
   wireTransport();
@@ -149,7 +160,7 @@ function frame(now) {
   stage.update(dt);
   views.setSelected(S.selected);
   views.update(snap, { paused: S.paused });
-  field.update(snap);
+  field.update(snap, S.selected);
   updatePlacementArrow();
   stage.render();
 
@@ -169,7 +180,7 @@ function updateUI(snap) {
   const d = snap.diagnostics;
 
   $('r-n').textContent = snap.bodies.length;
-  $('r-integ').textContent = snap.integrator + (snap.relativistic ? ' + 1PN' : '');
+  if ($('r-integ').value !== snap.integrator) $('r-integ').value = snap.integrator;
   $('r-dt').textContent = F.time(snap.dt);
   $('r-steps').textContent = snap.steps.toLocaleString();
   $('r-E').textContent = snap.bodies.length ? F.sci(d.energy, 3) : '—';
@@ -181,6 +192,7 @@ function updateUI(snap) {
     ? 'paused'
     : `${F.time(S.baseRate * S.mult)} / second`;
 
+  refreshModeNote();
   updateSelectedReadout(snap);
   updateInspectorDerived(snap);
   updateWarnings(snap);
@@ -244,10 +256,9 @@ function updateWarnings(snap) {
       `gravity would be pulled apart here. This simulator does not break it up.`);
   }
 
-  if (snap.events.length) {
-    for (const e of snap.events.slice(-2)) {
-      if (e.kind === 'merge') lines.push(e.text ?? 'Two bodies merged.');
-    }
+  for (const e of snap.events.slice(-2)) {
+    if (!e.kind?.startsWith('merge')) continue;
+    lines.push(`${e.text} (at t = ${F.time(e.at ?? snap.t)})`);
   }
 
   if (!lines.length) { el.style.display = 'none'; return; }
@@ -335,30 +346,30 @@ function showInspector(id) {
     <div class="field"><label>material</label>
       <select id="i-mat">${matOpts}</select></div>
     <div class="field"><label>mass · M☉</label>
-      <input type="number" id="i-mass" step="any" value="${b.mass}"></div>
+      <input type="number" id="i-mass" step="any" value="${inp(b.mass)}"></div>
     <div class="field"><label>radius · AU</label>
-      <input type="number" id="i-rad" step="any" value="${b.radius}"></div>
+      <input type="number" id="i-rad" step="any" value="${inp(b.radius)}"></div>
     <div class="field"><label><input type="checkbox" id="i-lock" checked>
       keep density when mass changes</label></div>
     <div class="field"><label>position · AU</label>
       <div style="display:flex;gap:3px">
-        <input type="number" id="i-px" step="any" value="${b.pos[0]}">
-        <input type="number" id="i-py" step="any" value="${b.pos[1]}">
-        <input type="number" id="i-pz" step="any" value="${b.pos[2]}">
+        <input type="number" id="i-px" step="any" value="${inp(b.pos[0])}">
+        <input type="number" id="i-py" step="any" value="${inp(b.pos[1])}">
+        <input type="number" id="i-pz" step="any" value="${inp(b.pos[2])}">
       </div></div>
     <div class="field"><label>velocity · AU/yr</label>
       <div style="display:flex;gap:3px">
-        <input type="number" id="i-vx" step="any" value="${b.vel[0]}">
-        <input type="number" id="i-vy" step="any" value="${b.vel[1]}">
-        <input type="number" id="i-vz" step="any" value="${b.vel[2]}">
+        <input type="number" id="i-vx" step="any" value="${inp(b.vel[0])}">
+        <input type="number" id="i-vy" step="any" value="${inp(b.vel[1])}">
+        <input type="number" id="i-vz" step="any" value="${inp(b.vel[2])}">
       </div></div>
     <div class="field"><label>spin · M☉ AU²/yr</label>
       <div style="display:flex;gap:3px">
-        <input type="number" id="i-sx" step="any" value="${b.spin[0]}">
-        <input type="number" id="i-sy" step="any" value="${b.spin[1]}">
-        <input type="number" id="i-sz" step="any" value="${b.spin[2]}">
+        <input type="number" id="i-sx" step="any" value="${inp(b.spin[0])}">
+        <input type="number" id="i-sy" step="any" value="${inp(b.spin[1])}">
+        <input type="number" id="i-sz" step="any" value="${inp(b.spin[2])}">
       </div></div>
-    <div style="display:flex;gap:5px;margin-top:8px">
+    <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap">
       <button class="btn sm" id="i-circ" title="circular orbit about the dominant mass">Circularise</button>
       <button class="btn sm" id="i-dup">Duplicate</button>
       <button class="btn sm" id="i-del">Delete</button>
@@ -374,7 +385,7 @@ function showInspector(id) {
   on('i-mat', 'change', () => {
     b.material = $('i-mat').value;
     b.radius = Body.radiusFor(b.mass, b.material);
-    $('i-rad').value = b.radius;
+    $('i-rad').value = inp(b.radius);
     engine.touch();
     refreshBodyList();
   });
@@ -384,7 +395,7 @@ function showInspector(id) {
     const v = parseFloat($('i-mass').value);
     if (!isFinite(v) || v <= 0) return;
     b.mass = v;
-    if ($('i-lock').checked) { b.density = rho; $('i-rad').value = b.radius; }
+    if ($('i-lock').checked) { b.density = rho; $('i-rad').value = inp(b.radius); }
     engine.touch();
     pickBaseRate();
     refreshBodyList();
@@ -456,7 +467,7 @@ function updateInspectorDerived(snap) {
 
   const setIf = (id, val) => {
     const e = $(id);
-    if (e && e !== active) e.value = val;
+    if (e && e !== active) e.value = inp(val);
   };
   if (!S.paused) {
     setIf('i-px', b.pos[0]); setIf('i-py', b.pos[1]); setIf('i-pz', b.pos[2]);
@@ -509,11 +520,35 @@ function setMode(mode) {
     btn.classList.toggle('on', btn.dataset.mode === mode);
   }
   $('mode-note').innerHTML = MODES[mode]?.note ?? '';
+  noteBase = MODES[mode]?.note ?? '';
+}
+
+/* Modes that compute numbers append them under the static note. */
+let noteBase = '';
+function refreshModeNote() {
+  const extra = field.info
+    ? `<div style="margin-top:6px;color:var(--ink)">${field.info}</div>` : '';
+  const html = noteBase + extra;
+  if (html !== $('mode-note')._last) {
+    $('mode-note').innerHTML = html;
+    $('mode-note')._last = html;
+  }
 }
 
 /* =============================================================================
    TRANSPORT
    ========================================================================== */
+/* The integrator is selectable because comparing them is part of the point.
+   RK4 is in the list precisely so you can watch a fourth-order method that is
+   not symplectic lose energy while a second-order one that is does not. */
+function buildIntegratorMenu() {
+  const sel = $('r-integ');
+  sel.innerHTML = Object.entries(INTEGRATORS).map(([k, v]) =>
+    `<option value="${k}">${v.label ?? k}${v.symplectic ? '' : ' (drifts)'}</option>`).join('');
+  sel.value = engine.integrator;
+  sel.onchange = () => { engine.integrator = sel.value; engine.touch(); };
+}
+
 function buildSpeedButtons() {
   const host = $('speeds');
   host.innerHTML = SPEEDS
@@ -711,7 +746,8 @@ function updatePlacementArrow() {
 /* =============================================================================
    KEYS
    ========================================================================== */
-const MODE_KEYS = ['none', 'tendex', 'dilation', 'potential', 'field', 'drag', 'embedding'];
+const MODE_KEYS = ['none', 'tendex', 'dilation', 'potential', 'field', 'drag',
+                   'geodesic', 'waves', 'embedding'];
 
 function wireKeys() {
   addEventListener('keydown', (e) => {
@@ -730,6 +766,11 @@ function wireKeys() {
       case 't': case 'T':
         views.showTrails = !views.showTrails;
         break;
+      case 'd': case 'D': {
+        const b = S.selected != null ? engine.get(S.selected) : null;
+        if (b) $('i-dup')?.click();
+        break;
+      }
       case 'Delete': case 'Backspace':
         if (S.selected != null) {
           engine.remove(S.selected); S.selected = null; pickBaseRate();
@@ -737,7 +778,7 @@ function wireKeys() {
         }
         break;
       default:
-        if (e.key >= '1' && e.key <= '7') setMode(MODE_KEYS[+e.key - 1]);
+        if (e.key >= '1' && e.key <= '9') setMode(MODE_KEYS[+e.key - 1]);
     }
   });
 }

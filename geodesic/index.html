@@ -62,12 +62,17 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
 #ui > *{pointer-events:auto}
 
 /* ---- top: visualization modes ------------------------------------------- */
-#modes{top:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px;
+#modebar{
+  position:fixed;top:12px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  max-width:min(94vw,1000px);
+}
+#modes{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;
   background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:5px;
-  backdrop-filter:blur(16px);position:fixed}
+  backdrop-filter:blur(16px)}
 #modes .btn{font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 9px}
 #mode-note{
-  position:fixed;top:50px;left:50%;transform:translateX(-50%);max-width:70ch;
+  max-width:74ch;
   text-align:center;font-size:10px;color:var(--dim);letter-spacing:.03em;
   text-shadow:0 1px 10px #000;line-height:1.6;pointer-events:none;
 }
@@ -88,8 +93,8 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
 #add-row{display:flex;gap:5px;margin-top:8px}
 
 /* ---- left lower: inspector ---------------------------------------------- */
-#inspector{bottom:104px;left:12px;width:212px;max-height:42vh;overflow-y:auto;display:none}
-.field{margin:6px 0}
+#inspector{bottom:62px;left:12px;width:212px;max-height:62vh;overflow-y:auto;display:none}
+.field{margin:5px 0}
 .field label{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.08em;
   text-transform:uppercase;margin-bottom:2px}
 .field input[type=number],.field select{
@@ -164,6 +169,7 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
 
 <div id="ui">
 
+  <div id="modebar">
   <div id="modes">
     <button class="btn on" data-mode="none">Bodies only</button>
     <button class="btn" data-mode="tendex">Tidal curvature</button>
@@ -171,9 +177,12 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
     <button class="btn" data-mode="potential">Potential</button>
     <button class="btn" data-mode="field">Field vectors</button>
     <button class="btn" data-mode="drag">Frame drag</button>
+    <button class="btn" data-mode="geodesic">Geodesics</button>
+    <button class="btn" data-mode="waves">Grav. waves</button>
     <button class="btn" data-mode="embedding">Embedding</button>
   </div>
   <div id="mode-note"></div>
+  </div>
 
   <div class="panel" id="bodies">
     <h2>Bodies</h2>
@@ -192,7 +201,9 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
   <div class="panel" id="readout">
     <h2>System</h2>
     <div class="row"><span class="k">bodies</span><span class="v" id="r-n">0</span></div>
-    <div class="row"><span class="k">integrator</span><span class="v" id="r-integ">—</span></div>
+    <div class="row"><span class="k">integrator</span>
+      <select id="r-integ" style="background:rgba(0,0,0,.4);border:1px solid var(--edge);
+        border-radius:2px;padding:1px 3px;font-size:11px"></select></div>
     <div class="row"><span class="k">timestep</span><span class="v" id="r-dt">—</span></div>
     <div class="row"><span class="k">steps taken</span><span class="v" id="r-steps">0</span></div>
     <div class="sect">

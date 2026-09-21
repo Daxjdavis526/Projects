@@ -150,3 +150,26 @@ Live: https://daxjdavis526.github.io/Projects/cryogenics/
 
 Offline single file in `cryogenics/offline/`. See
 [cryogenics/README.md](cryogenics/README.md).
+
+## geodesic/
+
+**GEODESIC** — an interactive sandbox for gravitational dynamics and spacetime
+curvature. Build a system from an empty universe or one of ten presets, edit
+every body's mass, radius, density, spin and velocity, and look at what its
+gravity does to spacetime nine different ways.
+
+The default visualization is **tendex lines** — the integral curves of the
+tidal tensor `E_ij`, which in the Newtonian limit *is* the leading term of the
+Riemann tensor. Not the rubber sheet, which is here too, as one mode, labelled
+with the four separate reasons it misleads. Orbits are Newtonian N-body with
+an optional post-Newtonian term; exact Schwarzschild geodesics and the
+quadrupole radiation formula are drawn beside them for comparison rather than
+fed back into them, and the UI says which layer every number came from.
+
+81 headless physics checks, each against a measured number: Mercury's 42.98
+arcseconds per century, S2's 13 arcminutes per orbit, the Hulse–Taylor
+pulsar's orbital decay, Gravity Probe B, Saturn's Roche limit.
+
+Live: https://daxjdavis526.github.io/Projects/geodesic/
+
+See [geodesic/README.md](geodesic/README.md) and `geodesic/DESIGN.md`.

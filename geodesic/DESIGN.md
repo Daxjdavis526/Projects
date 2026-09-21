@@ -201,12 +201,12 @@ The bowling-ball-on-a-trampoline picture is wrong in four independent ways:
 
 | Mode | What it shows | Truthfulness |
 |---|---|---|
-| **Tidal tendexes** | eigenvectors of E_ij, coloured by tendicity | **Real and gauge-robust.** This is curvature itself, in 3D, multi-body. |
-| **Time dilation** | dτ/dt as a scalar field on the lattice | **Real.** And it is the component that actually causes orbits. |
-| **Lattice strain** | cells deformed by E_ij | Real deformation *rate* of a freely-falling particle cloud; the lattice itself is a drawing aid. |
-| **Geodesics** | integrated test-particle worldlines | **Exact** for the Schwarzschild/Kerr case. |
-| **Frame drag** | Ω_fd swirl, B_ij vortex lines | **Real**, first-order in spin, weak field. |
-| **Newtonian field/potential** | g and Φ | Real Newtonian quantities, labelled as such — *not* curvature. |
+| **Tidal tendexes** | integral curves of the eigenvector fields of E_ij | **Real and gauge-robust.** This is curvature itself, in 3D, multi-body. |
+| **Time dilation** | iso-surfaces of dτ/dt | **Real.** And it is the component that actually causes orbits. |
+| **Geodesics** | exact Schwarzschild orbit against the Newtonian one | **Exact** for a test particle about a static spherical mass. |
+| **Gravitational waves** | quadrupole radiation *pattern*; amplitude as a number | Pattern is real and static; the wave itself is deliberately not drawn. |
+| **Frame drag** | Ω_fd around spinning mass | **Real**, first-order in spin, weak field. |
+| **Newtonian field/potential** | g and equipotential surfaces of Φ | Real Newtonian quantities, labelled as such — *not* curvature. |
 | **Embedding diagram** | Flamm's paraboloid, z(r) = 2√(r_s(r−r_s)) | **Exactly true** as the geometry of one equatorial spatial slice — and explicitly *not* an explanation of orbits. |
 
 The embedding-diagram mode exists precisely so the familiar picture can be
@@ -216,13 +216,30 @@ than refusing to draw the famous image.
 
 ### 2.3 The honest headline view
 
-The default curvature mode combines the two real, 3D, multi-body quantities:
+Two real, 3D, multi-body quantities carry the argument, in two modes:
 
-- lattice **colour** = gravitational time dilation (why things fall),
-- lattice **cell deformation** = tidal tensor (what curvature actually is).
+- **Tidal curvature** — tendex lines, the integral curves of the eigenvector
+  fields of E_ij. What curvature actually is.
+- **Time dilation** — iso-surfaces of dτ/dt. Why things fall.
 
 Neither requires an embedding dimension, both superpose over many bodies,
 and both are computed from the same potential that moves the bodies.
+
+**As built**, the tendex mode traces genuine integral curves rather than
+drawing a lattice of principal-axis crosses. Two consequences follow, and both
+are stated in the mode's explainer:
+
+- *Length carries nothing.* An integral curve has no natural length. Magnitude
+  is carried by brightness, log-scaled over five decades and anchored to
+  2GM/R³ at the surface of the strongest body — a physical anchor, so
+  brightness means the same thing frame to frame and the r⁻³ falloff is
+  legible rather than chased by an auto-exposure.
+- *The squeeze direction is degenerate.* For a spherical source the two
+  squeezing eigenvalues are exactly equal, so every direction perpendicular to
+  the radius is an eigenvector. The tracer continues in the direction closest
+  to the one it arrived in: one valid integral curve out of infinitely many.
+  The degeneracy is the physics, and the drawing does not pretend to pick a
+  winner.
 
 ---
 
@@ -268,10 +285,27 @@ That is enforced by the test suite existing at all.
 |---|---|---|---|
 | Euler | 1 | no | Energy grows without bound. Never. |
 | RK4 | 4 | no | Accurate per step, but energy drifts secularly — orbits spiral over long runs. Wrong tool for bound orbits. |
-| **Velocity Verlet** | 2 | **yes** | **Default.** Energy error is *bounded and oscillatory*, not cumulative. Time-reversible, cheap, one force evaluation per step. |
-| **Yoshida-4** | 4 | **yes** | Optional high accuracy. Three Verlet sub-steps with the standard w₀,w₁ coefficients. |
+| **Velocity Verlet** | 2 | **yes** | Energy error is *bounded and oscillatory*, not cumulative. Time-reversible, cheap, one force evaluation per step. Selectable. |
+| **Yoshida-4** | 4 | **yes** | **Default, as built.** Three Verlet sub-steps with the standard w₀,w₁ coefficients. |
 | Wisdom–Holman | 2+ | yes | Excellent *if* one mass dominates — it splits Kepler motion from perturbations. Rejected as the default because a sandbox lets users build equal-mass binaries, which violate its premise. |
 | IAS15 / Gauss-Radau | 15 | no (adaptive) | Machine precision, handles close encounters. Reserved as a fallback during encounters. |
+
+**Measured, at the timestep the simulator actually picks** (20,000 steps, relative
+energy error):
+
+| | Earth–Moon | Solar System | Sgr A* / S2 (e = 0.885) | figure-eight |
+|---|---|---|---|---|
+| Velocity Verlet | 1.8e−5 | 9.6e−8 | 7.7e−4 | 8.1e−5 |
+| **Yoshida-4** | **8.4e−9** | **2.9e−11** | **6.0e−8** | **5.6e−8** |
+| RK4 | 2.2e−8 | 2.7e−11 | 2.7e−8 | 5.9e−7 |
+
+Verlet's error is dominated by the eccentric cases, where a fixed step that is
+1/320 of the *mean* dynamical time is far coarser than that near perihelion —
+(1−e)^1.5 is 0.04 for S2. Yoshida-4 costs three force evaluations instead of
+one and buys three to four orders of magnitude, which at these body counts is
+free, so it is the default. RK4 matches it over 20,000 steps and then loses,
+because its error is secular rather than bounded; it is kept in the selector
+so that can be watched happening.
 
 The governing insight is that for long-term orbital work, **symplecticity
 beats order**. A 2nd-order symplectic integrator holds a planet in its orbit
@@ -336,14 +370,20 @@ these toys mislead, so the drift is on screen rather than hidden.
 
 ## 6. Staged implementation
 
-1. **G1** physics core + headless tests (Kepler, energy, Mercury)
-2. **G2** 3D scene, bodies, trails, camera, time control
-3. **G3** sandbox: place, edit, delete, presets, velocity arrow
-4. **G4** tidal tendex field — the headline visualization
-5. **G5** remaining modes + relativistic layer
-6. **G6** explainers, docs, collisions
+1. **G1** physics core + headless tests (Kepler, energy, Mercury) — *done*
+2. **G2** 3D scene, bodies, trails, camera, time control — *done*
+3. **G3** sandbox: place, edit, delete, presets, velocity arrow — *done*
+4. **G4** tidal tendex field — the headline visualization — *done*
+5. **G5** remaining modes + relativistic layer — *done*
+6. **G6** explainers, docs, collisions — *done*
 
 Each stage leaves a working, openable app.
+
+Layer C arrived as `src/physics/geodesic.js`: the Schwarzschild shape equation
+integrated in φ (which is what makes it cheap enough to redraw live) and the
+Peters & Mathews quadrupole formulae. Both are validated in the test suite
+against measured numbers — Mercury to five decimal places against the closed
+form, the Hulse-Taylor decay to 0.2%, GW150914's chirp mass and strain.
 
 ---
 

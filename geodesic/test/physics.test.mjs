@@ -20,6 +20,10 @@ import {
   flammZ, properRadialStretch,
 } from '../src/physics/relativity.js';
 import { totalEnergy, angularMomentum, circularSpeed } from '../src/physics/nbody.js';
+import {
+  traceOrbit, precessionPerOrbit, elements, radiation, eccentricityFactor,
+  radiationPattern,
+} from '../src/physics/geodesic.js';
 import { rocheLimit } from '../src/physics/collisions.js';
 
 let failures = 0, count = 0;
@@ -524,6 +528,131 @@ section('Time curvature dominates');
   const ratio = (vOrb / C) ** 2;
   check('spatial curvature contribution is ~(v/c)^2 = 1e-8 for Earth',
         ratio < 1e-7 && ratio > 1e-9, `(v/c)^2 = ${ratio.toExponential(2)}`);
+}
+
+
+/* =============================================================================
+   13. EXACT SCHWARZSCHILD GEODESICS
+   -----------------------------------------------------------------------------
+   The shape equation d^2u/dphi^2 + u = GM/L^2 + 3GMu^2/c^2 is exact for a
+   timelike geodesic of the Schwarzschild metric. Integrating it must
+   reproduce the closed-form apsidal advance, and dropping its last term must
+   give an orbit that closes exactly.
+
+   Resolving Mercury's shift needs sub-step accuracy: one step of a 40,000
+   step orbit is 32 arcseconds and the answer is 0.1, so the perihelion is
+   located by fitting a parabola to the three samples around the minimum.
+   ========================================================================== */
+section('Exact Schwarzschild geodesics');
+{
+  const a = 0.38709893, e = 0.20563069, M = 1, N = 40000;
+  const rp = a * (1 - e);
+  const vp = Math.sqrt(G * M * (1 + e) / rp);
+
+  const analytic = precessionPerOrbit(M, [rp, 0, 0], [0, 0, vp]) * ARCSEC_PER_RAD;
+  check('analytic apsidal advance for Mercury is 0.1035"/orbit',
+        near(analytic, 0.10352, 1e-3), `${analytic.toFixed(5)}"`);
+
+  const perOrbit = (relativistic) => {
+    const tr = traceOrbit(M, [rp, 0, 0], [0, 0, vp],
+      { turns: 2, stepsPerTurn: N, relativistic });
+    const r = (i) => Math.hypot(tr.points[i * 3], tr.points[i * 3 + 1], tr.points[i * 3 + 2]);
+    let i0 = N, best = Infinity;
+    for (let i = Math.floor(N * 0.9); i < Math.min(tr.count - 1, N * 1.1); i++) {
+      const d = r(i);
+      if (d < best) { best = d; i0 = i; }
+    }
+    const f0 = r(i0 - 1), f1 = r(i0), f2 = r(i0 + 1);
+    const frac = 0.5 * (f0 - f2) / (f0 - 2 * f1 + f2);
+    return ((i0 + frac) / N * 2 * Math.PI - 2 * Math.PI) * ARCSEC_PER_RAD;
+  };
+
+  const gr = perOrbit(true);
+  check('integrated GR orbit reproduces it to 5 decimal places',
+        Math.abs(gr - analytic) < 1e-4, `${gr.toFixed(5)}" vs ${analytic.toFixed(5)}"`);
+
+  const newt = perOrbit(false);
+  check('with the GR term dropped the ellipse closes exactly',
+        Math.abs(newt) < 1e-4, `${newt.toFixed(5)}"`);
+
+  /* A century of Mercury, the number everyone quotes. */
+  const T = Math.sqrt(a ** 3 / M);
+  const perCentury = analytic * 100 / T;
+  check('which is 42.98 arcsec per century', near(perCentury, 42.98, 2e-3),
+        `${perCentury.toFixed(3)}"/century`);
+
+  /* Elements round-trip. */
+  const el = elements(M, [rp, 0, 0], [0, 0, vp]);
+  check('osculating elements recover a and e', near(el.a, a, 1e-9) && near(el.e, e, 1e-9),
+        `a = ${el.a.toFixed(8)}, e = ${el.e.toFixed(8)}`);
+
+  /* Capture: a test particle aimed inside the photon sphere of a black hole
+     with too little angular momentum must not come back out. */
+  const Mbh = 10;
+  const rsBh = 2 * G * Mbh / C2;
+  const cap = traceOrbit(Mbh, [rsBh * 2.2, 0, 0], [0, 0, 0.35 * C], { turns: 3 });
+  check('a low-angular-momentum orbit inside the ISCO is captured', cap.captured,
+        `r_s = ${(rsBh * SI.AU / 1000).toFixed(1)} km`);
+}
+
+/* =============================================================================
+   14. GRAVITATIONAL RADIATION
+   -----------------------------------------------------------------------------
+   Peters & Mathews. Checked against the two systems that made the subject
+   real: the Hulse-Taylor binary pulsar, whose orbital decay was measured to
+   four significant figures, and GW150914.
+   ========================================================================== */
+section('Gravitational radiation');
+{
+  /* PSR B1913+16 */
+  const m1 = 1.438, m2 = 1.390;
+  const aHT = 1.9501e9 / SI.AU, eHT = 0.6171;
+  const M = m1 + m2;
+  const vp = Math.sqrt(G * M * (1 + eHT) / (aHT * (1 - eHT)));
+  const R = radiation(m1, m2, [aHT * (1 - eHT), 0, 0], [0, 0, vp]);
+
+  const Pb = 2 * Math.PI * Math.sqrt(aHT ** 3 / (G * M));
+  check('Hulse-Taylor orbital period is 7.75 hours',
+        near(Pb * 365.25 * 24, 7.7519, 2e-3), `${(Pb * 365.25 * 24).toFixed(4)} h`);
+
+  const Pdot = 1.5 * (R.dadt / R.a) * Pb;
+  check('its orbital decay is the measured -2.40e-12 s/s',
+        near(Pdot, -2.4025e-12, 5e-3), `${Pdot.toExponential(4)}`);
+
+  check('eccentricity enhances the power by 11.9x at e = 0.617',
+        near(eccentricityFactor(eHT), 11.86, 5e-3), eccentricityFactor(eHT).toFixed(3));
+  check('a circular orbit has no enhancement', eccentricityFactor(0) === 1);
+
+  /* GW150914, at the moment the dominant wave passed 150 Hz. */
+  const Mpc = 3.0857e22 / SI.AU;
+  const mA = 36, mB = 29, Mtot = mA + mB;
+  const fOrb = 75 * SI.YR;                       // 150 Hz GW = 75 Hz orbital
+  const aGW = Math.cbrt(G * Mtot / (2 * Math.PI * fOrb) ** 2);
+  const vGW = Math.sqrt(G * Mtot / aGW);
+  const R2 = radiation(mA, mB, [aGW, 0, 0], [0, 0, vGW], { distance: 410 * Mpc });
+
+  check('GW150914 chirp mass is 28 solar masses', near(R2.chirp, 28.1, 2e-2),
+        `${R2.chirp.toFixed(2)} Msun`);
+  check('its dominant wave is at 150 Hz', near(R2.fGwHz, 150, 1e-6),
+        `${R2.fGwHz.toFixed(1)} Hz`);
+  check('optimally-oriented strain at 410 Mpc is ~2e-21', R2.strain > 1e-21 && R2.strain < 4e-21,
+        `h = ${R2.strain.toExponential(2)} (LIGO measured ~1e-21 after the antenna pattern)`);
+  check('their separation there is a few hundred km',
+        aGW * SI.AU / 1000 > 300 && aGW * SI.AU / 1000 < 400,
+        `${(aGW * SI.AU / 1000).toFixed(0)} km`);
+
+  /* The Earth-Sun system radiates, but nothing anyone will ever detect. */
+  const rad = radiation(1, M_EARTH_MSUN, [1, 0, 0], [0, 0, Math.sqrt(G)]);
+  const watts = rad.power * SI.M_SUN * SI.AU ** 2 / SI.YR ** 3;
+  check('the Earth radiates about 200 W in gravitational waves',
+        watts > 150 && watts < 250, `${watts.toFixed(0)} W`);
+  check('so it would take far longer than the age of the universe to spiral in',
+        rad.tMerge > 1e20, `${rad.tMerge.toExponential(2)} yr`);
+
+  /* The radiation pattern: eight times stronger along the axis. */
+  check('GW power is 8x stronger along the orbital axis than in the plane',
+        near(radiationPattern(1) / radiationPattern(0), 8, 1e-9),
+        `${(radiationPattern(1) / radiationPattern(0)).toFixed(3)}x`);
 }
 
 /* ========================================================================== */

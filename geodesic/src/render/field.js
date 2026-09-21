@@ -28,7 +28,9 @@ import {
   tidalTensor, tendexFrame, timeDilation, potential,
   gravitationalField, frameDragOmega, flammZ,
 } from '../physics/relativity.js';
-import { C, G } from '../physics/constants.js';
+import { C, G, SI, ARCSEC_PER_RAD } from '../physics/constants.js';
+import { traceOrbit, precessionPerOrbit, elements, radiation, radiationPattern }
+  from '../physics/geodesic.js';
 
 export const MODES = {
   none: {
@@ -62,6 +64,24 @@ export const MODES = {
     note: '<b>Lense–Thirring frame dragging</b> around spinning masses. ' +
           'Purely relativistic — unlike the tidal field, this has no Newtonian counterpart. ' +
           'Give a body spin in the inspector to see anything.',
+  },
+  geodesic: {
+    label: 'Geodesics',
+    note: '<b>Exact Schwarzschild orbit</b> of the selected body (amber) against ' +
+          'the same initial conditions in <b>Newtonian gravity</b> (grey). Where ' +
+          'the two separate is general relativity. For Mercury the gap is 0.1 ' +
+          'arcseconds per orbit and you will not see it; near a black hole it is ' +
+          'obvious. <span class="warn">This is a comparison, not the running ' +
+          'simulation</span> — the bodies are still moving Newtonian.',
+  },
+  waves: {
+    label: 'Gravitational waves',
+    note: '<b>Quadrupole radiation pattern</b> of the dominant pair — the lobe ' +
+          'radius is relative radiated power, eight times stronger along the ' +
+          'orbital axis than in the plane. It is <span class="warn">not a wave ' +
+          'and not a distance</span>. The amplitude is given as a number instead, ' +
+          'because a visible ripple at this scale would be off by twenty orders ' +
+          'of magnitude.',
   },
   embedding: {
     label: 'Embedding',
@@ -106,7 +126,12 @@ export class FieldView {
     this._buildScalar();
     this._buildVectors();
     this._buildEmbedding();
+    this._buildGeodesic();
+    this._buildWaves();
     this.setMode('none');
+
+    /* Mode-specific numbers for the UI to print under the note. */
+    this.info = '';
 
     /* scratch, reused every frame */
     this._E = new Float64Array(9);
@@ -201,6 +226,9 @@ export class FieldView {
     this.scalar.visible = mode === 'dilation' || mode === 'potential';
     this.vectors.visible = mode === 'field' || mode === 'drag';
     this.embedding.visible = mode === 'embedding';
+    this.geoGR.visible = this.geoNewt.visible = this.geoRings.visible = mode === 'geodesic';
+    this.waves.visible = mode === 'waves';
+    if (mode !== 'geodesic' && mode !== 'waves') this.info = '';
   }
 
   /* Lattice extent follows the camera so the field is always where you are
@@ -210,7 +238,7 @@ export class FieldView {
     return Math.max(d * 0.55, 1e-6);
   }
 
-  update(snapshot) {
+  update(snapshot, selectedId = null) {
     if (this.mode === 'none' || !snapshot.bodies.length) return;
     const bodies = snapshot.bodies.map(b => ({
       pos: b.pos, mass: b.mass, radius: b.radius, spin: b.spin,
@@ -226,6 +254,8 @@ export class FieldView {
       case 'field':    this._updateVectors(bodies, centre, 'field'); break;
       case 'drag':     this._updateVectors(bodies, centre, 'drag'); break;
       case 'embedding':this._updateEmbedding(snapshot); break;
+      case 'geodesic': this._updateGeodesic(snapshot, selectedId); break;
+      case 'waves':    this._updateWaves(snapshot); break;
     }
   }
 
@@ -660,6 +690,247 @@ export class FieldView {
   }
 }
 
+
+/* ===========================================================================
+   Methods appended to FieldView: the two comparison modes.
+   ======================================================================== */
+const GEO_TURNS = 3;
+const GEO_STEPS = 540;
+const GEO_HZ = 8;
+
+Object.assign(FieldView.prototype, {
+
+  /* -------------------------------------------------------------------------
+     GEODESICS. Two curves from one set of initial conditions: the exact
+     Schwarzschild orbit and the Newtonian one. Drawing them together is the
+     only way to make "relativity corrects Newton" a thing you can look at
+     rather than a thing you are told.
+
+     Both are TEST-PARTICLE orbits about the dominant mass, so they ignore
+     every other body in the system. The running simulation does not: its
+     orbits are the full N-body solution. Where the drawn curve and the trail
+     disagree, that difference is other planets, not relativity.
+  --------------------------------------------------------------------------*/
+  _buildGeodesic() {
+    const mk = (color, opacity, width) => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position',
+        new THREE.BufferAttribute(new Float32Array((GEO_TURNS * GEO_STEPS + 1) * 3), 3));
+      g.setDrawRange(0, 0);
+      const l = new THREE.Line(g, new THREE.LineBasicMaterial({
+        color, transparent: true, opacity, depthWrite: false,
+      }));
+      l.frustumCulled = false;
+      this.group.add(l);
+      return l;
+    };
+    this.geoGR = mk(0xffd166, 0.95);
+    this.geoNewt = mk(0x9aa3ad, 0.5);
+
+    const rg = new THREE.BufferGeometry();
+    rg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(3 * 129 * 3), 3));
+    rg.setAttribute('color', new THREE.BufferAttribute(new Float32Array(3 * 129 * 3), 3));
+    rg.setDrawRange(0, 0);
+    this.geoRings = new THREE.LineSegments(rg, new THREE.LineBasicMaterial({
+      vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false,
+    }));
+    this.geoRings.frustumCulled = false;
+    this.group.add(this.geoRings);
+  },
+
+  _updateGeodesic(snapshot, selectedId) {
+    const now = performance.now();
+    if (this._geoAt && now - this._geoAt < 1000 / GEO_HZ) return;
+    this._geoAt = now;
+
+    const bodies = snapshot.bodies;
+    let prim = null;
+    for (const b of bodies) if (!prim || b.mass > prim.mass) prim = b;
+
+    /* Probe: whatever is selected, else the body with the deepest orbit — the
+       one where the difference will be largest and therefore worth drawing. */
+    let probe = selectedId != null ? bodies.find(b => b.id === selectedId) : null;
+    if (probe === prim) probe = null;
+    if (!probe) {
+      let best = Infinity;
+      for (const b of bodies) {
+        if (b === prim) continue;
+        const d = Math.hypot(b.pos[0] - prim.pos[0], b.pos[1] - prim.pos[1], b.pos[2] - prim.pos[2]);
+        if (d < best) { best = d; probe = b; }
+      }
+    }
+    if (!probe || !prim || probe === prim) {
+      this.geoGR.geometry.setDrawRange(0, 0);
+      this.geoNewt.geometry.setDrawRange(0, 0);
+      this.geoRings.geometry.setDrawRange(0, 0);
+      this.info = 'Select a body other than the dominant mass to compare its orbit.';
+      return;
+    }
+
+    const rel = [probe.pos[0] - prim.pos[0], probe.pos[1] - prim.pos[1], probe.pos[2] - prim.pos[2]];
+    const vel = [probe.vel[0] - prim.vel[0], probe.vel[1] - prim.vel[1], probe.vel[2] - prim.vel[2]];
+    const opts = { turns: GEO_TURNS, stepsPerTurn: GEO_STEPS };
+
+    const gr = traceOrbit(prim.mass, rel, vel, { ...opts, relativistic: true });
+    const nw = traceOrbit(prim.mass, rel, vel, { ...opts, relativistic: false });
+
+    const fill = (line, tr) => {
+      const arr = line.geometry.attributes.position.array;
+      for (let i = 0; i < tr.count; i++) {
+        arr[i * 3]     = prim.pos[0] + tr.points[i * 3];
+        arr[i * 3 + 1] = prim.pos[1] + tr.points[i * 3 + 1];
+        arr[i * 3 + 2] = prim.pos[2] + tr.points[i * 3 + 2];
+      }
+      line.geometry.attributes.position.needsUpdate = true;
+      line.geometry.setDrawRange(0, tr.count);
+    };
+    fill(this.geoGR, gr);
+    fill(this.geoNewt, nw);
+
+    /* Photon sphere (1.5 r_s) and ISCO (3 r_s), at true scale. They are the
+       two radii where the Newtonian picture has nothing to say at all: one is
+       where light orbits, the other is where orbiting stops being possible. */
+    const rings = this.geoRings.geometry;
+    const rp = rings.attributes.position.array;
+    const rc = rings.attributes.color.array;
+    let w = 0;
+    const circle = (radius, col) => {
+      for (let i = 0; i < 128; i++) {
+        for (const k of [i, i + 1]) {
+          const a = (k / 128) * Math.PI * 2;
+          const o = w * 3;
+          rp[o] = prim.pos[0] + Math.cos(a) * radius;
+          rp[o + 1] = prim.pos[1];
+          rp[o + 2] = prim.pos[2] + Math.sin(a) * radius;
+          rc[o] = col[0]; rc[o + 1] = col[1]; rc[o + 2] = col[2];
+          w++;
+        }
+      }
+    };
+    circle(prim.rs * 1.5, [1.0, 0.55, 0.30]);
+    circle(prim.rs * 3.0, [0.50, 0.90, 0.78]);
+    if (prim.isBlackHole) circle(prim.rs, [1.0, 0.35, 0.30]);
+    rings.attributes.position.needsUpdate = true;
+    rings.attributes.color.needsUpdate = true;
+    rings.setDrawRange(0, w);
+
+    const el = elements(prim.mass, rel, vel);
+    const dphi = precessionPerOrbit(prim.mass, rel, vel);
+    const arcsec = dphi * ARCSEC_PER_RAD;
+    const T = el.a > 0 ? Math.sqrt(el.a ** 3 / prim.mass) : NaN;
+    this.info =
+      `${probe.name} about ${prim.name}: a = ${el.a.toExponential(3)} AU, e = ${el.e.toFixed(4)} · ` +
+      `apsidal advance <b>${fmtArcsec(arcsec)} per orbit</b>` +
+      (isFinite(T) && T > 0 ? ` (${fmtArcsec(arcsec * 100 / T)} per century)` : '') +
+      (gr.captured ? ' · <span class="warn">this orbit ends inside the horizon</span>' : '') +
+      (gr.escaped ? ' · <span class="warn">unbound on this trace</span>' : '');
+  },
+
+  /* -------------------------------------------------------------------------
+     GRAVITATIONAL WAVES.
+
+     What is honest to draw is the ANGULAR PATTERN of the radiated power,
+     which is a real, static, direction-dependent quantity. What is not
+     honest to draw is the wave itself: the strain of a binary star at any
+     distance you could stand is of order 1e-20, so an animated ripple would
+     need an exaggeration factor of 1e20 and would teach the viewer something
+     false about how big the effect is. The amplitude is printed instead.
+  --------------------------------------------------------------------------*/
+  _buildWaves() {
+    const RN = 26, TN = 52;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array((RN + 1) * TN * 3);
+    const col = new Float32Array((RN + 1) * TN * 3);
+    const idx = [];
+    for (let i = 0; i < RN; i++) {
+      for (let j = 0; j < TN; j++) {
+        const a = i * TN + j, b = i * TN + ((j + 1) % TN);
+        const c = (i + 1) * TN + j, d = (i + 1) * TN + ((j + 1) % TN);
+        idx.push(a, b, c, b, d, c);
+      }
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    geo.setIndex(idx);
+    this.waves = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+      vertexColors: true, transparent: true, opacity: 0.16, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    }));
+    this.waves.frustumCulled = false;
+    this.waves.userData.RN = RN;
+    this.waves.userData.TN = TN;
+    this.group.add(this.waves);
+  },
+
+  _updateWaves(snapshot) {
+    const bodies = snapshot.bodies;
+    if (bodies.length < 2) {
+      this.waves.visible = false;
+      this.info = 'Gravitational radiation needs at least two bodies.';
+      return;
+    }
+    this.waves.visible = true;
+
+    /* The dominant pair: the two heaviest bodies. */
+    const sorted = [...bodies].sort((a, b) => b.mass - a.mass);
+    const [A, B] = sorted;
+    const rel = [B.pos[0] - A.pos[0], B.pos[1] - A.pos[1], B.pos[2] - A.pos[2]];
+    const vel = [B.vel[0] - A.vel[0], B.vel[1] - A.vel[1], B.vel[2] - A.vel[2]];
+    const R = radiation(A.mass, B.mass, rel, vel);
+    if (!R) { this.waves.visible = false; this.info = 'That pair is not bound.'; return; }
+
+    /* Orbital axis. */
+    const n = normalise(cross(rel, vel));
+    const e1 = normalise(cross(n, [0, 1, 0.0001]));
+    const e2 = cross(n, e1);
+
+    const sep = Math.hypot(...rel);
+    const scale = sep * 0.45;
+    const mt = A.mass + B.mass;
+    const cx = (A.pos[0] * A.mass + B.pos[0] * B.mass) / mt;
+    const cy = (A.pos[1] * A.mass + B.pos[1] * B.mass) / mt;
+    const cz = (A.pos[2] * A.mass + B.pos[2] * B.mass) / mt;
+
+    const { RN, TN } = this.waves.userData;
+    const pos = this.waves.geometry.attributes.position.array;
+    const col = this.waves.geometry.attributes.color.array;
+    for (let i = 0; i <= RN; i++) {
+      const th = (i / RN) * Math.PI;
+      const ct = Math.cos(th), st = Math.sin(th);
+      const p = radiationPattern(ct);
+      for (let j = 0; j < TN; j++) {
+        const ph = (j / TN) * Math.PI * 2;
+        const r = p * scale;
+        const dx = n[0] * ct + (e1[0] * Math.cos(ph) + e2[0] * Math.sin(ph)) * st;
+        const dy = n[1] * ct + (e1[1] * Math.cos(ph) + e2[1] * Math.sin(ph)) * st;
+        const dz = n[2] * ct + (e1[2] * Math.cos(ph) + e2[2] * Math.sin(ph)) * st;
+        const o = (i * TN + j) * 3;
+        pos[o] = cx + dx * r; pos[o + 1] = cy + dy * r; pos[o + 2] = cz + dz * r;
+        col[o] = 0.55 + 0.45 * p; col[o + 1] = 0.35 + 0.30 * p; col[o + 2] = 0.95;
+      }
+    }
+    this.waves.geometry.attributes.position.needsUpdate = true;
+    this.waves.geometry.attributes.color.needsUpdate = true;
+    this.waves.geometry.computeBoundingSphere();
+
+    const watts = R.power * SI.M_SUN * SI.AU ** 2 / SI.YR ** 3;
+    this.info =
+      `${A.name} + ${B.name}: f<sub>GW</sub> = ${R.fGwHz.toExponential(2)} Hz · ` +
+      `radiating ${watts.toExponential(2)} W · ` +
+      `strain h = ${R.strain.toExponential(2)} at 100 kpc (optimally oriented) · ` +
+      `coalescence in ${R.tMerge.toExponential(2)} yr — ` +
+      `<span class="warn">which this simulation will never reach: there is no ` +
+      `radiation reaction in the integrator, so the orbit you see does not shrink.</span>`;
+  },
+});
+
+function fmtArcsec(a) {
+  const x = Math.abs(a);
+  if (x >= 3600) return `${(a / 3600).toFixed(3)}°`;
+  if (x >= 60) return `${(a / 60).toFixed(3)}′`;
+  if (x >= 0.01) return `${a.toFixed(3)}″`;
+  return `${a.toExponential(2)}″`;
+}
 
 /* =============================================================================
    TRACING HELPERS

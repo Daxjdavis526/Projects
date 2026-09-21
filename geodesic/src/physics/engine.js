@@ -107,6 +107,9 @@ export class Engine {
       if (this.collisions) {
         const merged = resolveCollisions(this.bodies);
         if (merged.length) {
+          /* Stamp the simulation time so the UI can say when it happened
+             rather than leaving a merge notice on screen forever. */
+          for (const e of merged) e.at = this.t;
           this.events.push(...merged);
           this._invalidate();
         }

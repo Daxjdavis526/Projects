@@ -23,8 +23,16 @@ export function num(v, d = 3) {
 export function dist(au) {
   if (!isFinite(au)) return '—';
   const km = au * SI.AU / 1000;
-  if (km < 1) return `${(km * 1000).toFixed(1)} m`;
-  if (km < 1e6) return `${num(km, 1)} km`;
+  const m = km * 1000;
+  /* Sub-metre matters: the Schwarzschild radius of the Earth is 8.9 mm, and
+     rounding it to "0.0 m" would throw away the whole point of showing it. */
+  if (Math.abs(m) < 1e-6) return `${sci(m * 1e9, 2)} nm`;
+  if (Math.abs(m) < 1e-3) return `${(m * 1e6).toFixed(1)} µm`;
+  if (Math.abs(m) < 1) return `${(m * 1000).toFixed(2)} mm`;
+  if (km < 1) return `${m.toFixed(1)} m`;
+  /* Below a million km, print the number rather than an exponent: 384,400 km
+     is instantly recognisable and 3.8x10^5 km is not. */
+  if (km < 1e6) return `${km >= 1e4 ? Math.round(km).toLocaleString('en-US') : num(km, 1)} km`;
   if (au < 0.01) return `${sci(km, 2)} km`;
   if (au < 1e4) return `${num(au, 3)} AU`;
   return `${num(au * SI.AU / 9.4607e15, 3)} ly`;
