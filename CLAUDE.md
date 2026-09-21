@@ -40,6 +40,7 @@ touching the others.
 | `moon/` | SELENE — open-world exploration of the real Moon at full scale |
 | `propulsion/` | rocket propulsion engineering course (Markdown, no code to run beyond the example checker) |
 | `cryogenics/` | cryogenic propulsion hardware & safety course (Markdown + hand-authored SVG, browser reader) |
+| `geodesic/` | spacetime curvature & gravitational dynamics sandbox |
 
 ## Conventions
 
