@@ -54,6 +54,11 @@ export class Engine {
 
   get(id) { return this.bodies.find(b => b.id === id) ?? null; }
 
+  /* Call after editing a body in place: re-picks the timestep for the new
+     configuration and re-baselines the conservation diagnostics, so the drift
+     readout measures drift since the edit rather than since the last preset. */
+  touch() { this._invalidate(); }
+
   /* Place a body in a circular orbit around another. Uses the two-body value
      sqrt(G(M+m)/r), not the test-particle sqrt(GM/r), because for comparable
      masses the latter does not actually close the orbit. */

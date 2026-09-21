@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GEODESIC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Tendex semantics, straight from the literature: negative tendicity
+     stretches (red), positive squeezes (blue). Used consistently everywhere
+     curvature is drawn, so the colours mean one thing only. */
+  --stretch:#ff5a4e;
+  --squeeze:#4ea8ff;
+  --time:#ffd166;        /* time dilation */
+  --drag:#b77dff;        /* frame dragging */
+
+  --ink:#dcd8d2;
+  --dim:#87817a;
+  --faint:#3d3935;
+  --hot:#fffaf3;
+  --panel:rgba(9,10,13,.72);
+  --edge:rgba(220,216,210,.13);
+  --accent:#7fe6c8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#05060a;overflow:hidden}
+body{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:300;
+  color:var(--ink);-webkit-font-smoothing:antialiased;
+  font-size:12px;
+}
+canvas{display:block;position:fixed;inset:0}
+
+.panel{
+  position:fixed;background:var(--panel);border:1px solid var(--edge);
+  border-radius:3px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  padding:11px 13px;line-height:1.55;letter-spacing:.02em;
+}
+h2{
+  font-family:Michroma,sans-serif;font-size:8.5px;font-weight:400;
+  letter-spacing:.2em;color:var(--dim);margin:0 0 9px;text-transform:uppercase;
+}
+.row{display:flex;justify-content:space-between;gap:10px;white-space:nowrap;margin:1px 0}
+.row .k{color:var(--dim)}
+.row .v{color:var(--ink);font-variant-numeric:tabular-nums}
+.sect{margin-top:9px;padding-top:8px;border-top:1px solid var(--faint)}
+.note{color:var(--faint);font-size:9px;line-height:1.5;letter-spacing:.04em}
+
+button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
+.btn{
+  background:rgba(12,13,17,.7);border:1px solid var(--edge);border-radius:2px;
+  padding:5px 10px;cursor:pointer;transition:border-color .15s,color .15s,background .15s;
+}
+.btn:hover{border-color:var(--accent);color:var(--hot)}
+.btn.on{border-color:var(--accent);color:var(--accent);background:rgba(127,230,200,.08)}
+.btn.sm{padding:3px 7px;font-size:10px}
+
+#ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+#ui > *{pointer-events:auto}
+
+/* ---- top: visualization modes ------------------------------------------- */
+#modes{top:12px;left:50%;transform:translateX(-50%);display:flex;gap:5px;
+  background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:5px;
+  backdrop-filter:blur(16px);position:fixed}
+#modes .btn{font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 9px}
+#mode-note{
+  position:fixed;top:50px;left:50%;transform:translateX(-50%);max-width:70ch;
+  text-align:center;font-size:10px;color:var(--dim);letter-spacing:.03em;
+  text-shadow:0 1px 10px #000;line-height:1.6;pointer-events:none;
+}
+#mode-note b{color:var(--accent);font-weight:400}
+#mode-note .warn{color:var(--stretch)}
+
+/* ---- left: bodies ------------------------------------------------------- */
+#bodies{top:12px;left:12px;width:212px;max-height:52vh;overflow-y:auto}
+.body-row{
+  display:flex;align-items:center;gap:7px;padding:3px 4px;border-radius:2px;
+  cursor:pointer;margin:1px 0;
+}
+.body-row:hover{background:rgba(255,255,255,.04)}
+.body-row.sel{background:rgba(127,230,200,.1);outline:1px solid rgba(127,230,200,.3)}
+.swatch{width:9px;height:9px;border-radius:50%;flex:none}
+.body-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+.body-row .mass{color:var(--dim);font-size:10px}
+#add-row{display:flex;gap:5px;margin-top:8px}
+
+/* ---- left lower: inspector ---------------------------------------------- */
+#inspector{bottom:104px;left:12px;width:212px;max-height:42vh;overflow-y:auto;display:none}
+.field{margin:6px 0}
+.field label{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:2px}
+.field input[type=number],.field select{
+  width:100%;background:rgba(0,0,0,.4);border:1px solid var(--edge);
+  border-radius:2px;padding:3px 5px;font-size:11px;
+}
+.field input[type=range]{width:100%}
+.field .unit{color:var(--faint);font-size:9px;margin-left:3px}
+.derived{margin-top:8px;padding-top:7px;border-top:1px solid var(--faint)}
+.warnrow{color:var(--stretch);font-size:9.5px;line-height:1.5;margin-top:5px}
+
+/* ---- right: readouts ---------------------------------------------------- */
+#readout{top:12px;right:12px;width:246px}
+#warnings{position:fixed;top:calc(12px + var(--readout-h,300px));right:12px;width:246px;
+  display:none}
+#warnings .warnrow{margin:3px 0}
+
+/* ---- bottom: transport -------------------------------------------------- */
+#transport{
+  left:50%;bottom:12px;transform:translateX(-50%);display:flex;align-items:center;
+  gap:9px;position:fixed;background:var(--panel);border:1px solid var(--edge);
+  border-radius:3px;padding:7px 11px;backdrop-filter:blur(16px);
+}
+#speeds{display:flex;gap:3px}
+#speeds .btn{font-size:9.5px;padding:3px 7px;min-width:34px}
+#tclock{font-variant-numeric:tabular-nums;color:var(--hot);min-width:132px;text-align:center}
+#tsub{font-size:9px;color:var(--dim);text-align:center;margin-top:1px}
+
+/* ---- scale bar ---------------------------------------------------------- */
+#scalebar{position:fixed;right:14px;bottom:14px;text-align:right;pointer-events:none}
+#sb-line{height:2px;background:var(--ink);opacity:.7;margin-left:auto}
+#sb-label{font-size:10px;color:var(--dim);margin-top:3px;letter-spacing:.06em}
+
+/* ---- explainer modal ---------------------------------------------------- */
+#modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;
+  justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(7px)}
+#modal.open{display:flex}
+#modal-card{width:min(680px,92vw);max-height:84vh;overflow:auto;
+  background:rgba(10,11,15,.95);border:1px solid var(--edge);border-radius:4px;
+  padding:26px 30px;line-height:1.75}
+#modal-card h3{font-family:Michroma,sans-serif;font-size:11px;letter-spacing:.18em;
+  color:var(--accent);text-transform:uppercase;margin:20px 0 10px}
+#modal-card h3:first-child{margin-top:0}
+#modal-card p{margin:9px 0}
+#modal-card ul{padding-left:18px}
+#modal-card li{margin:7px 0}
+#modal-card b{color:var(--hot);font-weight:500}
+#modal-card .good{color:var(--accent)}
+#modal-card .bad{color:var(--stretch)}
+#modal-card code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:2px;
+  font-size:11px;color:var(--time)}
+#modal-close{position:absolute;top:14px;right:18px;font-size:22px;color:var(--dim);
+  background:none;border:none;cursor:pointer}
+#modal-close:hover{color:var(--hot)}
+#modal-inner{position:relative}
+
+#help-btn{position:fixed;bottom:12px;left:12px;display:flex;gap:5px}
+
+#fatal{position:fixed;inset:0;z-index:90;display:none;align-items:center;
+  justify-content:center;padding:40px;background:#05060a;color:#ff8f7a;
+  font-size:12px;line-height:1.8;white-space:pre-wrap}
+
+/* ---- placement hint ----------------------------------------------------- */
+#hint{
+  position:fixed;left:50%;bottom:78px;transform:translateX(-50%);
+  font-size:11px;color:var(--accent);letter-spacing:.06em;
+  text-shadow:0 1px 10px #000;display:none;pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+
+  <div id="modes">
+    <button class="btn on" data-mode="none">Bodies only</button>
+    <button class="btn" data-mode="tendex">Tidal curvature</button>
+    <button class="btn" data-mode="dilation">Time dilation</button>
+    <button class="btn" data-mode="potential">Potential</button>
+    <button class="btn" data-mode="field">Field vectors</button>
+    <button class="btn" data-mode="drag">Frame drag</button>
+    <button class="btn" data-mode="embedding">Embedding</button>
+  </div>
+  <div id="mode-note"></div>
+
+  <div class="panel" id="bodies">
+    <h2>Bodies</h2>
+    <div id="body-list"></div>
+    <div id="add-row">
+      <button class="btn sm" id="btn-add">+ Add</button>
+      <select class="btn sm" id="preset-select" style="flex:1"></select>
+    </div>
+  </div>
+
+  <div class="panel" id="inspector">
+    <h2>Inspector</h2>
+    <div id="insp-body"></div>
+  </div>
+
+  <div class="panel" id="readout">
+    <h2>System</h2>
+    <div class="row"><span class="k">bodies</span><span class="v" id="r-n">0</span></div>
+    <div class="row"><span class="k">integrator</span><span class="v" id="r-integ">—</span></div>
+    <div class="row"><span class="k">timestep</span><span class="v" id="r-dt">—</span></div>
+    <div class="row"><span class="k">steps taken</span><span class="v" id="r-steps">0</span></div>
+    <div class="sect">
+      <div class="row"><span class="k">total energy</span><span class="v" id="r-E">—</span></div>
+      <div class="row"><span class="k">energy drift</span><span class="v" id="r-Edrift">—</span></div>
+      <div class="row"><span class="k">ang. momentum</span><span class="v" id="r-L">—</span></div>
+      <div class="note">Drift is shown because a gravity toy that silently stops
+        conserving energy is the main way these things mislead.</div>
+    </div>
+    <div class="sect" id="sel-readout" style="display:none">
+      <div class="row"><span class="k">selected</span><span class="v" id="s-name">—</span></div>
+      <div class="row"><span class="k">speed</span><span class="v" id="s-v">—</span></div>
+      <div class="row"><span class="k">accel</span><span class="v" id="s-a">—</span></div>
+      <div class="row"><span class="k">dist to primary</span><span class="v" id="s-r">—</span></div>
+      <div class="row"><span class="k">clock rate dτ/dt</span><span class="v" id="s-td">—</span></div>
+      <div class="row"><span class="k">tidal stretch</span><span class="v" id="s-tide">—</span></div>
+    </div>
+  </div>
+
+  <div class="panel" id="warnings"></div>
+
+  <div id="transport">
+    <button class="btn sm" id="t-reset" title="reset to t = 0">⟲</button>
+    <button class="btn sm" id="t-back" title="step back">◀|</button>
+    <button class="btn" id="t-play" title="play / pause (space)">▶</button>
+    <button class="btn sm" id="t-fwd" title="step forward">|▶</button>
+    <div>
+      <div id="tclock">0.000 yr</div>
+      <div id="tsub">paused</div>
+    </div>
+    <div id="speeds"></div>
+    <button class="btn sm" id="t-relativity" title="first post-Newtonian correction">1PN</button>
+  </div>
+
+  <div id="hint"></div>
+
+  <div id="scalebar">
+    <div id="sb-line" style="width:120px"></div>
+    <div id="sb-label">—</div>
+  </div>
+
+  <div id="help-btn">
+    <button class="btn sm" id="btn-why">Why is it doing this?</button>
+    <button class="btn sm" id="btn-help">?</button>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="modal-card"><div id="modal-inner">
+    <button id="modal-close">×</button>
+    <div id="modal-body"></div>
+  </div></div>
+</div>
+
+<div id="fatal"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/jsm/"
+  }
+}
+</script>
+<script type="module">
+  addEventListener('error', e => {
+    const el = document.getElementById('fatal');
+    el.style.display = 'flex';
+    el.textContent = 'GEODESIC failed to start\n\n' + (e.error?.stack || e.message);
+  });
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
