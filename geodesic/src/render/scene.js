@@ -18,6 +18,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { maxPixelRatio, LIGHT } from '../ui/device.js';
 
 export class Stage {
   constructor() {
@@ -25,7 +26,11 @@ export class Stage {
       antialias: true, powerPreference: 'high-performance',
       logarithmicDepthBuffer: true,
     });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    /* A phone reports a device pixel ratio of 3 and has a fraction of the
+       fill rate to back it up. Capping it is the single biggest thing that
+       keeps the expensive modes smooth on a handset, and nobody can see the
+       difference at arm's length. */
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, maxPixelRatio));
     this.renderer.setSize(innerWidth, innerHeight);
     this.renderer.setClearColor(0x05060a, 1);
     document.body.appendChild(this.renderer.domElement);
@@ -40,6 +45,13 @@ export class Stage {
     this.controls.minDistance = 1e-7;
     this.controls.maxDistance = 1e7;
     this.controls.zoomSpeed = 1.1;
+    /* One finger orbits, two pinch to zoom and pan — the gestures anyone
+       would try first on a touch screen. */
+    this.controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN,
+    };
+    if (LIGHT) this.controls.rotateSpeed = 0.55;   // a thumb is coarser than a mouse
 
     /* Follow target: when set, the camera's orbit centre tracks a body, which
        is how "body-centred frame" is implemented. */

@@ -24,14 +24,25 @@ import { LatticeView } from './render/lattice.js';
 import { Lattice } from './physics/lattice.js';
 import { INTEGRATORS } from './physics/integrators.js';
 
+import { q, SMALL, LIGHT } from './ui/device.js';
 import * as F from './ui/format.js';
 import { EXPLAIN, HELP } from './ui/explain.js';
 
 const $ = (id) => document.getElementById(id);
 
-/* Input fields get eight significant figures. Full float64 output makes a
-   number box unreadable, and eight is more than enough to type into. */
-const inp = (v) => (v === 0 ? '0' : Number(v.toPrecision(8)).toString());
+/* Input fields get eight significant figures, and exponent form once the
+   magnitude gets away from you. An Earth mass in solar units is
+   0.0000030033996, which is a wall of zeros to read and worse to retype;
+   3.0033996e-6 says the same thing and a number input accepts it verbatim.
+   This matters most on a phone, where the field is a thumb wide. */
+const inp = (v) => {
+  if (v === 0) return '0';
+  const a = Math.abs(v);
+  if (a < 1e-3 || a >= 1e7) {
+    return v.toExponential(7).replace(/\.?0+e/, 'e');
+  }
+  return Number(v.toPrecision(8)).toString();
+};
 
 /* =============================================================================
    STATE
@@ -57,7 +68,10 @@ const CHECKPOINTS = 120;
    Rather than let it silently fall behind or quietly coarsen its timestep —
    either of which would make the volume law a lie — grid mode caps the time
    multiplier and says so. */
-const GRID_N = 13;
+/* 13^3 is 2197 markers and 6084 edges. A phone integrates and re-uploads
+   that every frame alongside everything else, so it gets 9^3 = 729 — still
+   enough cells to read the deformation, at a third of the work. */
+const GRID_N = q(9, 13);
 const GRID_MAX_MULT = 100;
 
 /* The lattice has its own natural clock, and it is nothing like the orbital
@@ -99,6 +113,7 @@ function boot() {
   wireTransport();
   wireModal();
   wireGrid();
+  wireSheets();
   wirePointer();
   wireKeys();
 
@@ -212,6 +227,9 @@ function frame(now) {
 
   uiAccum += dt;
   if (uiAccum > 0.1) { uiAccum = 0; updateUI(snap); }
+
+  /* We are up. From here the failure panel stands down — see index.html. */
+  window.__geodesicRunning = true;
 }
 
 function pushCheckpoint() {
@@ -308,8 +326,13 @@ function updateWarnings(snap) {
     lines.push(`${e.text} (at t = ${F.time(e.at ?? snap.t)})`);
   }
 
-  if (!lines.length) { el.style.display = 'none'; return; }
-  el.style.display = 'block';
+  if (!lines.length) {
+    document.body.classList.remove('has-warn');
+    el.style.display = 'none';
+    return;
+  }
+  document.body.classList.add('has-warn');
+  el.style.display = SMALL ? '' : 'block';
   el.innerHTML = '<h2>Warnings</h2>' +
     lines.map(t => `<div class="warnrow">${t}</div>`).join('');
   document.documentElement.style.setProperty(
@@ -376,12 +399,17 @@ function showInspector(id) {
   const panel = $('inspector');
   const host = $('insp-body');
   if (id == null || !engine.get(id)) {
+    document.body.classList.remove('has-sel');
     panel.style.display = 'none';
     insp = null;
+    if (document.body.dataset.sheet === 'inspector') closeSheet();
+    syncTabs();
     return;
   }
   const b = engine.get(id);
-  panel.style.display = 'block';
+  document.body.classList.add('has-sel');
+  panel.style.display = SMALL ? '' : 'block';
+  syncTabs();
 
   const matOpts = Object.entries(MATERIALS)
     .map(([k, m]) => `<option value="${k}"${k === b.material ? ' selected' : ''}>${m.label}</option>`)
@@ -566,6 +594,7 @@ function setMode(mode) {
   field.setMode(mode);
   latticeView.visible = mode === 'grid';
   $('grid-controls').style.display = mode === 'grid' ? 'flex' : 'none';
+  syncTabs();
   if (entering) reseedLattice();
   for (const btn of document.querySelectorAll('#modes .btn')) {
     btn.classList.toggle('on', btn.dataset.mode === mode);
@@ -584,6 +613,72 @@ function refreshModeNote() {
     $('mode-note').innerHTML = html;
     $('mode-note')._last = html;
   }
+}
+
+/* =============================================================================
+   PHONE CHROME — bottom sheets and the tab bar
+   -----------------------------------------------------------------------------
+   On a wide screen every panel is on screen at once and none of this runs:
+   the tab bar is display:none and the sheet state is simply never set. On a
+   narrow one the same panels become bottom sheets, one at a time, because
+   five of them side by side on a 390px display is what the layout was doing
+   before and it was unusable.
+
+   The state lives in a single data attribute on <body>, which the stylesheet
+   reads. Nothing is moved in the DOM — every panel keeps its listeners and
+   its identity, and the desktop layout is one media query away at all times.
+   ========================================================================== */
+
+function openSheet(name) {
+  if (document.body.dataset.sheet === name) return closeSheet();
+  document.body.dataset.sheet = name;
+  syncTabs();
+}
+
+function closeSheet() {
+  delete document.body.dataset.sheet;
+  syncTabs();
+}
+
+function syncTabs() {
+  const open = document.body.dataset.sheet;
+  for (const b of document.querySelectorAll('#tabbar button[data-sheet]')) {
+    b.classList.toggle('on', b.dataset.sheet === open);
+    /* Nothing is selected, so there is nothing to edit. Saying so with a
+       disabled tab beats opening an empty sheet. */
+    if (b.dataset.sheet === 'inspector') {
+      b.disabled = !document.body.classList.contains('has-sel');
+    }
+  }
+}
+
+function wireSheets() {
+  for (const b of document.querySelectorAll('#tabbar button[data-sheet]')) {
+    b.onclick = () => openSheet(b.dataset.sheet);
+  }
+  $('tab-help').onclick = () => { closeSheet(); openModal(HELP); };
+
+  /* The top strip is truncated to three lines on a phone. Tapping it opens
+     the full explainer for whatever mode is running, which is the same thing
+     the "Why is it doing this?" button does on a desktop. */
+  $('mode-note').onclick = () => {
+    if (!SMALL) return;
+    openModal(EXPLAIN[S.mode] ?? EXPLAIN.none);
+  };
+
+  /* One button instead of four: a phone has no room for a row of speeds. */
+  $('speed-cycle').onclick = () => {
+    setMult(SPEEDS[(SPEEDS.indexOf(S.mult) + 1) % SPEEDS.length]);
+  };
+
+  /* Choosing a view should show you the view, not leave you staring at the
+     sheet you chose it from. */
+  for (const btn of document.querySelectorAll('#modes .btn')) {
+    btn.addEventListener('click', () => { if (SMALL) closeSheet(); });
+  }
+  $('preset-select').addEventListener('change', () => { if (SMALL) closeSheet(); });
+
+  syncTabs();
 }
 
 /* =============================================================================
@@ -793,6 +888,7 @@ function setMult(m) {
   for (const b of $('speeds').querySelectorAll('.btn')) {
     b.classList.toggle('on', parseFloat(b.dataset.mult) === m);
   }
+  $('speed-cycle').textContent = `${m}×`;
 }
 
 function wireTransport() {
@@ -862,13 +958,19 @@ function planePoint(ev) {
 
 function beginPlacement() {
   S.placing = { stage: 'position', pos: null, vel: [0, 0, 0] };
-  $('hint').style.display = '';
-  $('hint').textContent = 'Click on the grid to place the mass — Esc to cancel';
+  /* A class, not an inline style. `#hint` is display:none in the stylesheet,
+     so clearing an inline display just falls back to that and the hint never
+     appears — which is exactly what it did until this was noticed. */
+  document.body.classList.add('placing');
+  $('hint').textContent = SMALL
+    ? 'Tap the grid to place a mass, then drag to launch it'
+    : 'Click on the grid to place the mass — Esc to cancel';
+  if (SMALL) closeSheet();          // you cannot aim at a scene you cannot see
 }
 
 function endPlacement() {
   S.placing = null;
-  $('hint').style.display = 'none';
+  document.body.classList.remove('placing');
   stage.controls.enabled = true;
   if (arrow) { stage.scene.remove(arrow); arrow = null; }
 }
@@ -884,8 +986,9 @@ function wirePointer() {
       S.placing.pos = p;
       S.placing.stage = 'velocity';
       stage.controls.enabled = false;
-      $('hint').textContent =
-        'Drag out a velocity — release on the spot for a circular orbit';
+      $('hint').textContent = SMALL
+        ? 'Drag to set its velocity — release here for a circular orbit'
+        : 'Drag out a velocity — release on the spot for a circular orbit';
       return;
     }
     /* plain click: select */

@@ -299,6 +299,12 @@ numerical relativity exists for and this simulator does not attempt.</li>
 
 export const HELP = `
 <h3>Controls</h3>
+<p><b>On a phone:</b> one finger orbits, two fingers pinch to zoom and pan, a
+tap selects a body. The five tabs along the bottom open the panels one at a
+time — <b>View</b> picks the visualization, <b>Bodies</b> holds the list and
+the preset picker, <b>Edit</b> the selected body, <b>Data</b> the numbers.
+Tap the strip at the top of the screen for the full explanation of whatever
+mode is running.</p>
 <ul>
 <li><b>Drag</b> to orbit, <b>scroll</b> to zoom, <b>click a body</b> to select it.</li>
 <li><b>Space</b> play/pause. The transport buttons step forward and rewind;
