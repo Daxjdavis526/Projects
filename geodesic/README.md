@@ -40,6 +40,16 @@ and they come out as radial red rays (stretch) and blue curves lying on
 spheres (squeeze) around a single mass — which is a picture of gravity you can
 read directly, and which bends toward a companion the moment you add one.
 
+The **3D grid** mode makes the same point a different way. Every node is a
+freely falling test particle, so the grid is allowed to bend: the things it is
+made of are falling, along paths that diverge. It stretches toward a mass and
+squeezes across it in the ratio 2 : 1 — E_ij is trace-free, so one stretching
+direction must balance two squeezing ones — and its volume is conserved in
+vacuum but shrinks at `−4πG⟨ρ⟩` where mass is enclosed, which is Einstein's
+equation in the form Baez states it. Both numbers are on screen, and both are
+checked in the test suite. You can also watch it in the Gullstrand–Painlevé
+infall frame, where space genuinely pours inward at the escape velocity.
+
 The rubber sheet is still in here, as the **Embedding** mode. It draws Flamm's
 paraboloid, which is a genuinely exact object: the isometric embedding of one
 equatorial spatial slice of Schwarzschild. The mode exists to show you the
@@ -74,13 +84,14 @@ equation of a known metric, and that is what it does.
 |---|---|---|---|
 | 1 | Bodies only | masses, orbits, trails | yes |
 | 2 | Tidal curvature | tendex lines — integral curves of `E_ij` | **this is curvature** |
-| 3 | Time dilation | iso-surfaces of `dτ/dt` | exact Schwarzschild outside a body |
-| 4 | Potential | equipotential surfaces of `Φ` | Newtonian, shown for comparison |
-| 5 | Field vectors | `g = −∇Φ` | coordinate-dependent, and labelled so |
-| 6 | Frame drag | Lense–Thirring `Ω` around spinning mass | far-field form, not Kerr |
-| 7 | Geodesics | exact Schwarzschild orbit vs the Newtonian one | exact, but test-particle |
-| 8 | Gravitational waves | quadrupole radiation *pattern*, amplitude as a number | pattern real, no ripple drawn |
-| 9 | Embedding | Flamm's paraboloid | exact geometry, wrong lesson |
+| 3 | 3D grid | a cube of freely falling markers, deforming | **real and measurable** |
+| 4 | Time dilation | iso-surfaces of `dτ/dt` | exact Schwarzschild outside a body |
+| 5 | Potential | equipotential surfaces of `Φ` | Newtonian, shown for comparison |
+| 6 | Field vectors | `g = −∇Φ` | coordinate-dependent, and labelled so |
+| 7 | Frame drag | Lense–Thirring `Ω` around spinning mass | far-field form, not Kerr |
+| 8 | Geodesics | exact Schwarzschild orbit vs the Newtonian one | exact, but test-particle |
+| 9 | Gravitational waves | quadrupole radiation *pattern*, amplitude as a number | pattern real, no ripple drawn |
+| 10 | Embedding | Flamm's paraboloid | exact geometry, wrong lesson |
 
 Every mode has a **"Why is it doing this?"** panel that says what is drawn,
 what it means, and where it stops corresponding to general relativity.
@@ -100,6 +111,8 @@ Real, and checked against a measured number:
 - Saturn's fluid Roche limit at 129,000 km
 - the Moon's tide being 2.18× the Sun's
 - `E_ij` against a numerically differentiated Hessian of the potential
+- a falling lattice conserving its volume in vacuum, shrinking at −4πGρ inside
+  matter, and stretching to squeezing in the ratio 2.008 : 1
 - the Earth radiating 196 W in gravitational waves
 
 Approximated, and stated in the UI wherever it matters:
@@ -153,7 +166,7 @@ from the convenient fiction that `G = 4π²` exactly.
 ## Testing
 
 ```
-node test/physics.test.mjs      # 81 checks, no browser
+node test/physics.test.mjs      # 92 checks, no browser
 ```
 
 The physics layer imports no DOM and no three.js, which is what makes that

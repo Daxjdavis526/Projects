@@ -62,6 +62,7 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
 #ui > *{pointer-events:auto}
 
 /* ---- top: visualization modes ------------------------------------------- */
+#grid-controls{display:flex;gap:5px}
 #modebar{
   position:fixed;top:12px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:7px;
@@ -177,11 +178,17 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
     <button class="btn" data-mode="potential">Potential</button>
     <button class="btn" data-mode="field">Field vectors</button>
     <button class="btn" data-mode="drag">Frame drag</button>
+    <button class="btn" data-mode="grid">3D grid</button>
     <button class="btn" data-mode="geodesic">Geodesics</button>
     <button class="btn" data-mode="waves">Grav. waves</button>
     <button class="btn" data-mode="embedding">Embedding</button>
   </div>
   <div id="mode-note"></div>
+  <div id="grid-controls" style="display:none;gap:5px">
+    <button class="btn sm on" id="g-tidal" title="draw the lattice in its own falling frame">Tidal</button>
+    <button class="btn sm" id="g-infall" title="draw the markers where they actually go">Infall</button>
+    <button class="btn sm" id="g-reset" title="release a fresh lattice from rest">Re-release</button>
+  </div>
   </div>
 
   <div class="panel" id="bodies">
