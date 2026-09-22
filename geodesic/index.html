@@ -290,7 +290,7 @@ body.placing #hint{display:block}
     position:fixed;left:0;right:0;bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px);
     justify-content:center;z-index:34;padding:0 10px;
   }
-  #grid-controls .btn{flex:1;max-width:33%}
+  #grid-controls .btn{flex:1;max-width:none;padding:8px 4px;font-size:10.5px}
   #warnings{
     position:fixed;top:auto;left:8px;right:8px;
     bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px);
@@ -351,8 +351,9 @@ body.placing #hint{display:block}
   </div>
   <div id="mode-note"></div>
   <div id="grid-controls" style="display:none;gap:5px">
-    <button class="btn sm on" id="g-tidal" title="draw the lattice in its own falling frame">Tidal</button>
-    <button class="btn sm" id="g-infall" title="draw the markers where they actually go">Infall</button>
+    <button class="btn sm on" id="g-space" title="markers everywhere you are looking">Space</button>
+    <button class="btn sm" id="g-local" title="one small cube beside the mass, where the 2:1 ratio is measurable">Local</button>
+    <button class="btn sm" id="g-frame" title="frame the lattice is drawn in">Infall</button>
     <button class="btn sm" id="g-reset" title="release a fresh lattice from rest">Re-release</button>
   </div>
   </div>

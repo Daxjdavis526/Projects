@@ -57,6 +57,17 @@ export class Lattice {
     this.vel = new Float64Array(c * 3);
     this.acc = new Float64Array(c * 3);
     this.seedPos = new Float64Array(c * 3);
+    /* A marker that has reached a surface has arrived. It stops there rather
+       than continuing to the centre and out the other side. */
+    this.parked = new Uint8Array(c);
+    /* Markers released inside a body. This is a DRAWING flag, not a physical
+       one: the renderer leaves a hole the shape of the planet rather than
+       scribbling a grid through solid rock. They still fall, on the interior
+       field g ∝ r, because the inside of a matter distribution is precisely
+       where -4 pi G rho is a statement about anything. What they are exempt
+       from is LANDING — they are already in the interior regime and have no
+       surface above them to arrive at. */
+    this.buried = new Uint8Array(c);
     this.centre = [0, 0, 0];
     this.halfWidth = 1;
     this.t = 0;                      // time since the lattice was seeded
@@ -71,7 +82,7 @@ export class Lattice {
   /* Lay the markers out on a cube and release them from rest. Rest is a
      choice, and a declared one: it means everything you then see is the
      field acting, with no initial motion of ours mixed in. */
-  seed(centre, halfWidth) {
+  seed(centre, halfWidth, bodies = null) {
     const { n, pos, vel, seedPos } = this;
     this.centre = [...centre];
     this.halfWidth = halfWidth;
@@ -89,17 +100,39 @@ export class Lattice {
         }
       }
     }
+    this.parked.fill(0);
+    this.buried.fill(0);
+    this._primed = false;
+    if (bodies) this.markBuried(bodies);
     this.seedCentroid = this.centroid();
     return this;
   }
 
   index(i, j, k) { return (i * this.n + j) * this.n + k; }
 
+  markBuried(bodies) {
+    const { pos, count, buried } = this;
+    let n = 0;
+    for (let i = 0; i < count; i++) {
+      const o = i * 3;
+      if (surfaceHit(bodies, pos[o], pos[o + 1], pos[o + 2])) { buried[i] = 1; n++; }
+    }
+    this.buriedCount = n;
+    return n;
+  }
+
+  /* Markers still in free fall — neither buried at release nor landed since. */
+  freeCount() {
+    let n = 0;
+    for (let i = 0; i < this.count; i++) if (!this.parked[i]) n++;
+    return n;
+  }
+
   /* Velocity Verlet, same scheme as the bodies, so the markers and the
      masses are integrated to the same order and a discrepancy between them
      is physics rather than a mismatch of methods. */
   step(bodies, dt) {
-    const { pos, vel, acc, count, _g: g } = this;
+    const { pos, vel, acc, count, parked, _g: g } = this;
 
     if (!this._primed) {
       for (let i = 0; i < count; i++) {
@@ -111,6 +144,7 @@ export class Lattice {
 
     const h = dt, h2 = 0.5 * dt;
     for (let i = 0; i < count; i++) {
+      if (parked[i]) continue;
       const o = i * 3;
       vel[o]     += h2 * acc[o];
       vel[o + 1] += h2 * acc[o + 1];
@@ -120,7 +154,25 @@ export class Lattice {
       pos[o + 2] += h * vel[o + 2];
     }
     for (let i = 0; i < count; i++) {
+      if (parked[i]) continue;
       const o = i * 3;
+
+      /* Landing. A test particle falling onto a planet reaches the ground and
+         stops; it does not sail through the rock, oscillate about the centre
+         and come back out the far side. Letting it do that is not a harmless
+         simplification either — every lattice edge joining a node inside the
+         body to one outside then gets drawn as a streak across the view. */
+      const land = this.buried[i]
+        ? null
+        : surfaceHit(bodies, pos[o], pos[o + 1], pos[o + 2]);
+      if (land) {
+        pos[o] = land[0]; pos[o + 1] = land[1]; pos[o + 2] = land[2];
+        vel[o] = vel[o + 1] = vel[o + 2] = 0;
+        acc[o] = acc[o + 1] = acc[o + 2] = 0;
+        parked[i] = 1;
+        continue;
+      }
+
       gravitationalField(bodies, [pos[o], pos[o + 1], pos[o + 2]], g);
       acc[o] = g[0]; acc[o + 1] = g[1]; acc[o + 2] = g[2];
       vel[o]     += h2 * g[0];
@@ -128,6 +180,14 @@ export class Lattice {
       vel[o + 2] += h2 * g[2];
     }
     this.t += dt;
+  }
+
+  /* Markers that have fallen far enough to reach a surface. Ones that were
+     already inside a body at release do not count — they never fell. */
+  landedCount() {
+    let n = 0;
+    for (let i = 0; i < this.count; i++) if (this.parked[i] && !this.buried[i]) n++;
+    return n;
   }
 
   centroid() {
@@ -291,6 +351,26 @@ function buildEdges(n) {
   return Uint32Array.from(e);
 }
 
+
+/* If (x,y,z) is inside a body, return the point on that body's surface along
+   the line from its centre — where the marker would actually have come to
+   rest. A black hole has no surface to land on, so the horizon stands in for
+   one: nothing that crosses it comes back, and drawing it continuing inward
+   would be a claim this simulator cannot support. */
+function surfaceHit(bodies, x, y, z) {
+  for (const b of bodies) {
+    if (b.alive === false) continue;
+    const rr = b.isBlackHole ? b.schwarzschildRadius : b.radius;
+    if (!(rr > 0)) continue;
+    const dx = x - b.pos[0], dy = y - b.pos[1], dz = z - b.pos[2];
+    const d = Math.hypot(dx, dy, dz);
+    if (d >= rr) continue;
+    if (d === 0) return [b.pos[0] + rr, b.pos[1], b.pos[2]];
+    const k = rr / d;
+    return [b.pos[0] + dx * k, b.pos[1] + dy * k, b.pos[2] + dz * k];
+  }
+  return null;
+}
 
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];

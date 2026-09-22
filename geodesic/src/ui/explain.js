@@ -168,6 +168,23 @@ and they fall along different paths. The equation for how those paths separate
 is <code>d²ξ/dt² = −E·ξ</code> — geodesic deviation. Watching the cube distort
 is watching the tidal tensor act, with no analogy in between.</p>
 
+<h3>Two scopes</h3>
+<ul>
+<li><b class="good">Space</b> fills whatever you are looking at. The masses sit
+inside the lattice, so the markers nearest them visibly pour in while the
+distant ones barely stir — which is what a field that exists everywhere and
+falls off with distance actually looks like. Brightness is strain, so flat
+fabric is nearly dark and the grid lights up exactly where gravity is doing
+something to it. It is released again every half tidal time, because after
+that the inner markers have crossed each other's paths and the picture is a
+thicket rather than a flow.</li>
+<li><b>Local</b> is a small cube placed beside the dominant mass. It exists
+because the two checkable numbers below — the 2 : 1 ratio and volume
+conservation in vacuum — are <i>local</i> statements, and a lattice spanning
+the whole screen is the opposite of local. If you want to see the arithmetic
+work, look here.</li>
+</ul>
+
 <h3>Two frames</h3>
 <ul>
 <li><b class="good">Tidal</b> subtracts the cube's own centroid motion, which
@@ -203,19 +220,32 @@ measured rate beside the predicted one.</p>
 pull on nothing, including each other. A real dust cloud would also collapse
 under its own weight, and this one never does.</li>
 <li><b>The cube is not infinitesimal.</b> Both statements above are local, and
-this cube is about a fifth as wide as its distance from the mass — so the
+the Local cube is about a fifth as wide as its distance from the mass — so the
 ratio reads nearer 1.9 : 1 than 2 : 1, and a few percent of volume change
 shows up in vacuum where the true answer is zero. That residual is the cube's
 own width, not physics. The sharp version is in the test suite, where the cube
-can be made as small as the argument needs.</li>
+can be made as small as the argument needs. In <b>Space</b> the lattice spans
+the whole view and those numbers are not quoted at all, because a linear fit
+across the screen would be inventing a precision the geometry cannot carry.</li>
+<li><b>A marker that reaches a surface stops there.</b> It has landed. Letting
+it carry on through the rock and out the far side is not a harmless
+simplification: it draws every edge spanning the surface as a streak across
+the view, which is what this mode used to do. Markers released <i>inside</i> a
+body are exempt, because the interior is exactly where −4πGρ is a statement
+about anything — they keep falling, they are simply not drawn, so the fabric
+has a hole the shape of the planet.</li>
+<li><b>Edges that have stretched past about three times their released length
+are dropped.</b> The markers are the real objects; the line between two of
+them is a drawing aid, and past that point the aid stops helping.</li>
 <li><b>Time runs on the lattice's clock here</b>, not the orbits'. Deformation
 becomes obvious after roughly one tidal time, which near the Earth is days and
 near a black hole is microseconds — so in this mode the planets barely move,
 and the time multiplier is capped so the markers stay as carefully integrated
 as the bodies.</li>
 <li><b>It re-releases itself</b> once it has deformed as far as it can and
-still be read. Press <b>R</b> or <i>Re-release</i> to do it by hand, after
-moving the camera somewhere new.</li>
+still be read, and again whenever you zoom far enough that the old lattice no
+longer fills the view. Press <b>R</b> or <i>Re-release</i> to do it by
+hand.</li>
 <li>The field is the Newtonian one, as everywhere else in the simulator. Close
 to a compact object the exact Schwarzschild tidal field differs.</li>
 </ul>`,
@@ -373,9 +403,10 @@ how much gravity there is and how compact the source is.</li>
 <li>Load <b>Sgr A* and S2</b> and switch to <b>Geodesics</b>. The gap between
 the amber and grey curves is 13 arcminutes per orbit, and it was measured in
 2020.</li>
-<li>Open the <b>3D grid</b> and watch a cube of falling markers stretch toward
-the mass and squeeze across it, in the ratio 2 : 1. Then switch it to
-<b>Infall</b> and watch the same cube pour into the planet.</li>
+<li>Open the <b>3D grid</b> and watch the fabric pour into the planet. Then
+press <b>Local</b> to put a small cube beside the mass instead, where the
+stretch and squeeze come out in the ratio 2 : 1 and the panel does the
+arithmetic.</li>
 <li>Compare <b>Embedding</b> with <b>Time dilation</b>. The famous funnel is a
 picture of <i>space</i>; the orbits are caused by the curvature of <i>time</i>.
 That is why the rubber sheet cannot explain them.</li>
