@@ -202,7 +202,7 @@ The bowling-ball-on-a-trampoline picture is wrong in four independent ways:
 | Mode | What it shows | Truthfulness |
 |---|---|---|
 | **Tidal tendexes** | integral curves of the eigenvector fields of E_ij | **Real and gauge-robust.** This is curvature itself, in 3D, multi-body. |
-| **Free-fall lattice** | a cube of test particles, integrated and drawn | **Real and measurable.** The nodes are objects, not coordinates, so the deformation is an observation. Volume conserved in vacuum, shrinking at −4πG⟨ρ⟩ where mass is enclosed. |
+| **Free-fall lattice** | test particles filling the view, integrated and drawn | **Real and measurable.** The nodes are objects, not coordinates, so the deformation is an observation. Volume conserved in vacuum, shrinking at −4πG⟨ρ⟩ where mass is enclosed. Brightness is strain, so the fabric is dark where it is flat. |
 | **Time dilation** | iso-surfaces of dτ/dt | **Real.** And it is the component that actually causes orbits. |
 | **Geodesics** | exact Schwarzschild orbit against the Newtonian one | **Exact** for a test particle about a static spherical mass. |
 | **Gravitational waves** | quadrupole radiation *pattern*; amplitude as a number | Pattern is real and static; the wave itself is deliberately not drawn. |

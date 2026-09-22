@@ -683,7 +683,7 @@ section('The free-fall lattice');
   const tidal = G * 1 / 1 ** 3;                  // GM/r^3 at 1 AU, the scale to beat
 
   const run = (bodies, centre, hw, t, steps) => {
-    const L = new Lattice(9).seed(centre, hw);
+    const L = new Lattice(9).seed(centre, hw, bodies);
     for (let i = 0; i < steps; i++) L.step(bodies, t / steps);
     return { L, coeff: 2 * (L.volumeRatio() - 1) / (t * t) };
   };
@@ -736,16 +736,49 @@ section('The free-fall lattice');
         `<ρ> = ${enc.rho.toExponential(3)} M☉/AU³`);
 
   /* --- 4. Bookkeeping --------------------------------------------------- */
-  const L = new Lattice(13).seed([0, 0, 0], 1);
+  const L = new Lattice(13).seed([0, 0, 0], 1, []);
   check('a 13³ lattice has 2197 nodes and 6084 edges',
         L.count === 2197 && L.edges.length / 2 === 3 * 13 * 13 * 12,
         `${L.count} nodes, ${L.edges.length / 2} edges`);
   check('an unperturbed lattice has unit volume and a centred centroid',
         near(L.volumeRatio(), 1, 1e-12) && Math.hypot(...L.centroid()) < 1e-12);
 
+  /* --- 5. Landing ------------------------------------------------------- */
+  {
+    /* A marker released in vacuum above a planet falls, reaches the ground,
+       and stops there. It does not sail through the rock, oscillate about the
+       centre and come back out the far side — which is what it did before
+       this test existed, and which drew every lattice edge spanning the
+       surface as a streak across the view. */
+    const earth = new Body({ name: 'Earth', material: 'terrestrial', mass: M_EARTH_MSUN });
+    const L = new Lattice(5).seed([0, 0, 0], earth.radius * 3, [earth]);
+    const started = L.count - L.buriedCount;   // the ones actually in vacuum
+    for (let i = 0; i < 60000 && L.landedCount() < started; i++) L.step([earth], 2e-7);
+
+    check('markers released above a surface all reach it', L.landedCount() === started,
+          `${L.landedCount()} of ${started}`);
+
+    let deepest = 0;
+    for (let i = 0; i < L.count; i++) {
+      if (L.buried[i]) continue;
+      const o = i * 3;
+      const d = Math.hypot(L.pos[o], L.pos[o + 1], L.pos[o + 2]);
+      deepest = Math.max(deepest, earth.radius - d);
+    }
+    check('and none of them ends up below it',
+          deepest < 1e-18, `deepest = ${(deepest * SI.AU / 1000).toExponential(2)} km`);
+
+    /* A marker released INSIDE matter is exempt: the interior is where
+       -4 pi G rho is a statement about anything, so it keeps falling. */
+    const inside = new Lattice(5).seed([0, 0, 0], earth.radius * 0.3, [earth]);
+    check('markers released inside matter are exempt and keep falling',
+          inside.buriedCount === inside.count && inside.landedCount() === 0,
+          `${inside.buriedCount} buried, ${inside.landedCount()} landed`);
+  }
+
   /* The markers are massless: they must not move the bodies. */
   const before = [...sun.pos];
-  const L2 = new Lattice(7).seed([0.5, 0, 0], 0.1);
+  const L2 = new Lattice(7).seed([0.5, 0, 0], 0.1, [sun]);
   for (let i = 0; i < 200; i++) L2.step([sun], 1e-5);
   check('test particles do not move the masses they fall toward',
         sun.pos.every((v, i) => v === before[i]));

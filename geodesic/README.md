@@ -42,7 +42,9 @@ read directly, and which bends toward a companion the moment you add one.
 
 The **3D grid** mode makes the same point a different way. Every node is a
 freely falling test particle, so the grid is allowed to bend: the things it is
-made of are falling, along paths that diverge. It stretches toward a mass and
+made of are falling, along paths that diverge. It fills whatever you are
+looking at, and brightness is strain — flat fabric is nearly dark, and the
+grid lights up exactly where gravity is doing something to it. It stretches toward a mass and
 squeezes across it in the ratio 2 : 1 — E_ij is trace-free, so one stretching
 direction must balance two squeezing ones — and its volume is conserved in
 vacuum but shrinks at `−4πG⟨ρ⟩` where mass is enclosed, which is Einstein's
@@ -84,7 +86,7 @@ equation of a known metric, and that is what it does.
 |---|---|---|---|
 | 1 | Bodies only | masses, orbits, trails | yes |
 | 2 | Tidal curvature | tendex lines — integral curves of `E_ij` | **this is curvature** |
-| 3 | 3D grid | a cube of freely falling markers, deforming | **real and measurable** |
+| 3 | 3D grid | freely falling markers filling the view, deforming | **real and measurable** |
 | 4 | Time dilation | iso-surfaces of `dτ/dt` | exact Schwarzschild outside a body |
 | 5 | Potential | equipotential surfaces of `Φ` | Newtonian, shown for comparison |
 | 6 | Field vectors | `g = −∇Φ` | coordinate-dependent, and labelled so |
@@ -113,6 +115,7 @@ Real, and checked against a measured number:
 - `E_ij` against a numerically differentiated Hessian of the potential
 - a falling lattice conserving its volume in vacuum, shrinking at −4πGρ inside
   matter, and stretching to squeezing in the ratio 2.008 : 1
+- markers released above a surface all reaching it and none ending below it
 - the Earth radiating 196 W in gravitational waves
 
 Approximated, and stated in the UI wherever it matters:
@@ -166,7 +169,7 @@ from the convenient fiction that `G = 4π²` exactly.
 ## Testing
 
 ```
-node test/physics.test.mjs      # 92 checks, no browser
+node test/physics.test.mjs      # 95 checks, no browser
 ```
 
 The physics layer imports no DOM and no three.js, which is what makes that
