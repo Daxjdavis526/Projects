@@ -65,6 +65,15 @@ export const MODES = {
           'Purely relativistic — unlike the tidal field, this has no Newtonian counterpart. ' +
           'Give a body spin in the inspector to see anything.',
   },
+  grid: {
+    label: '3D grid',
+    note: '<b>A cube of freely falling markers</b> — real test particles, not a ' +
+          'coordinate grid. Red edges stretch, blue ones squeeze. In vacuum the ' +
+          'volume is <b>conserved exactly</b>; inside matter it shrinks at −4πGρ. ' +
+          '<span class="warn">Not the rubber sheet</span> — nothing is bent into ' +
+          'an extra dimension.',
+  },
+
   geodesic: {
     label: 'Geodesics',
     note: '<b>Exact Schwarzschild orbit</b> of the selected body (amber) against ' +

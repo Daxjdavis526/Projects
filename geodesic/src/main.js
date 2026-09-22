@@ -20,6 +20,8 @@ import { tidalTensor, tendexFrame, timeDilation } from './physics/relativity.js'
 import { Stage } from './render/scene.js';
 import { BodyViews } from './render/bodies.js';
 import { FieldView, MODES } from './render/field.js';
+import { LatticeView } from './render/lattice.js';
+import { Lattice } from './physics/lattice.js';
 import { INTEGRATORS } from './physics/integrators.js';
 
 import * as F from './ui/format.js';
@@ -38,6 +40,8 @@ const S = {
   paused: true,
   mult: 1,                  // multiplier on baseRate
   baseRate: 1,              // simulated years per wall second at 1x
+  gridRate: 1e-3,           // ditto, but paced by the lattice's tidal time
+  gridDt: 1e-6,             // the lattice's own timestep
   mode: 'none',
   selected: null,
   presetKey: 'earthMoon',
@@ -48,7 +52,25 @@ const S = {
 const SPEEDS = [1, 10, 100, 1000];
 const CHECKPOINTS = 120;
 
-let stage, views, field, engine;
+/* The lattice is 2197 markers integrated on the same clock as the bodies, so
+   it costs about as much per step as a nine-body system does per thousand.
+   Rather than let it silently fall behind or quietly coarsen its timestep —
+   either of which would make the volume law a lie — grid mode caps the time
+   multiplier and says so. */
+const GRID_N = 13;
+const GRID_MAX_MULT = 100;
+
+/* The lattice has its own natural clock, and it is nothing like the orbital
+   one. Deformation becomes order-one after about one tidal time,
+   1/sqrt(|E|) — which near the Earth is a few minutes and near a stellar
+   black hole is microseconds. Running the grid at the orbital rate would
+   collapse it in the first frame, so in this mode time is paced by the
+   lattice instead, and the grid re-releases itself once it has deformed as
+   far as it can while still being readable. */
+const GRID_TIDAL_FRACTION = 0.12;   // tidal times per wall second at 1x
+const GRID_RELEASE_STRAIN = 0.85;   // re-release once the stretch reaches this
+
+let stage, views, field, engine, lattice, latticeView;
 const ring = [];            // rewind checkpoints
 let lastSnap = null;
 
@@ -66,12 +88,17 @@ function boot() {
      difference between a drift of 1e-4 and one of 1e-8. */
   engine = new Engine({ integrator: 'yoshida4', relativistic: false });
 
+  lattice = new Lattice(GRID_N);
+  latticeView = new LatticeView(stage).attach(lattice);
+  latticeView.visible = false;
+
   buildPresetMenu();
   buildIntegratorMenu();
   buildSpeedButtons();
   wireModes();
   wireTransport();
   wireModal();
+  wireGrid();
   wirePointer();
   wireKeys();
 
@@ -116,6 +143,7 @@ function loadPreset(key) {
   S.paused = true;
   pickBaseRate();
   frameSystem();
+  reseedLattice();
   refreshBodyList();
   showInspector(null);
   $('t-play').textContent = '▶';
@@ -142,8 +170,25 @@ function frame(now) {
   const dt = Math.min((now - prev) / 1000, 0.05);
   prev = now;
 
+  const grid = S.mode === 'grid';
+  const mult = grid ? Math.min(S.mult, GRID_MAX_MULT) : S.mult;
+  const rate = grid ? S.gridRate : S.baseRate;
   if (!S.paused && engine.bodies.length) {
-    engine.advance(dt, S.baseRate * S.mult);
+    const adv = engine.advance(dt, rate * mult);
+    if (grid) {
+      const elapsed = dt * rate * mult;
+      const n = Math.min(Math.ceil(elapsed / S.gridDt), 250);
+      const h = elapsed / n;
+      for (let k = 0; k < n; k++) lattice.step(engine.bodies, h);
+      /* Once the markers have moved far enough that the picture stops being
+         readable, let them go again. The deformation is the point; a
+         collapsed tangle is not. */
+      const g = lattice.strainAxes();
+      const stretch = Math.max(Math.abs(g[0] - 1), Math.abs(g[4] - 1), Math.abs(g[8] - 1));
+      if (lattice.t > 0 && (!(lattice.volumeRatio() > 0.2) || stretch > GRID_RELEASE_STRAIN)) {
+        reseedLattice();
+      }
+    }
     pushCheckpoint();
   }
 
@@ -158,6 +203,7 @@ function frame(now) {
   }
 
   stage.update(dt);
+  if (S.mode === 'grid') { latticeView.update(); updateGridInfo(); }
   views.setSelected(S.selected);
   views.update(snap, { paused: S.paused });
   field.update(snap, S.selected);
@@ -190,7 +236,8 @@ function updateUI(snap) {
   $('tclock').textContent = F.time(snap.t);
   $('tsub').textContent = S.paused
     ? 'paused'
-    : `${F.time(S.baseRate * S.mult)} / second`;
+    : `${F.time((S.mode === 'grid' ? S.gridRate : S.baseRate) *
+                 (S.mode === 'grid' ? Math.min(S.mult, GRID_MAX_MULT) : S.mult))} / second`;
 
   refreshModeNote();
   updateSelectedReadout(snap);
@@ -514,8 +561,12 @@ function wireModes() {
 }
 
 function setMode(mode) {
+  const entering = mode === 'grid' && S.mode !== 'grid';
   S.mode = mode;
   field.setMode(mode);
+  latticeView.visible = mode === 'grid';
+  $('grid-controls').style.display = mode === 'grid' ? 'flex' : 'none';
+  if (entering) reseedLattice();
   for (const btn of document.querySelectorAll('#modes .btn')) {
     btn.classList.toggle('on', btn.dataset.mode === mode);
   }
@@ -533,6 +584,184 @@ function refreshModeNote() {
     $('mode-note').innerHTML = html;
     $('mode-note')._last = html;
   }
+}
+
+/* =============================================================================
+   THE 3D GRID
+   ========================================================================== */
+
+/* Release a fresh cube of markers from rest, sized and centred on what the
+   camera is looking at. Rest is a declared choice: it means everything that
+   happens afterwards is the field acting, with none of our own motion mixed
+   in. */
+function reseedLattice() {
+  const t = stage.controls.target;
+  /* Small enough relative to its distance from the mass that the tidal
+     approximation it is illustrating actually holds across it: the field
+     varies by a factor of eight from the near face to the far one at this
+     ratio, rather than the hundreds you get from a cube draped over the
+     whole view. */
+  const hw0 = stage.camDistance * 0.12;
+  let c = [t.x, t.y, t.z];
+
+  /* Put the cube BESIDE the dominant mass rather than around it.
+
+     Centred on a mass, the markers all fall inward and the picture is an
+     implosion: true, but dominated by bulk infall, and in the tidal frame
+     that is most of what gets subtracted. Offset, you get the picture worth
+     showing — the near face falling faster than the far one, so the cube
+     stretches along the line to the mass and squeezes across it, which is
+     geodesic deviation and nothing else. The camera target is usually sitting
+     right on top of the dominant body, so without this the good case never
+     comes up. */
+  let host = null;
+  for (const b of engine.bodies) if (!host || b.mass > host.mass) host = b;
+  if (host) {
+    const d = [c[0] - host.pos[0], c[1] - host.pos[1], c[2] - host.pos[2]];
+    const dist = Math.hypot(...d);
+    if (dist < hw0 * 2.6) {
+      /* Slide it out along the camera's own right vector, so wherever you are
+         looking from, the offset is across the screen rather than into it. */
+      const cam = stage.camera;
+      const right = [cam.matrixWorld.elements[0], cam.matrixWorld.elements[1], cam.matrixWorld.elements[2]];
+      const rn = Math.hypot(...right) || 1;
+      const push = hw0 * 4;
+      c = [
+        host.pos[0] + right[0] / rn * push,
+        host.pos[1] + right[1] / rn * push,
+        host.pos[2] + right[2] / rn * push,
+      ];
+    }
+  }
+  lattice.seed(c, hw0);
+  lattice._probe = null;
+
+  /* Pace the mode by the tidal time at the lattice centre: the timescale on
+     which curvature actually does something to a falling object there. */
+  const bodies = engine.bodies.map(b => ({
+    pos: b.pos, mass: b.mass, radius: b.radius,
+    isBlackHole: b.isBlackHole, schwarzschildRadius: b.schwarzschildRadius,
+    alive: true,
+  }));
+  /* Sample the tidal field across the whole lattice, not just at its centre.
+     The centre is the one place that can read zero for a reason that has
+     nothing to do with the field being weak: at the exact centre of a body
+     E_ij vanishes by symmetry, and pacing the mode off that number makes the
+     grid collapse in a single frame. */
+  const hw = lattice.halfWidth;
+  const samples = [];
+  if (bodies.length) {
+    const E = new Float64Array(9);
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        for (let k = -1; k <= 1; k++) {
+          tidalTensor(bodies, [c[0] + i * hw * 0.8, c[1] + j * hw * 0.8, c[2] + k * hw * 0.8], E);
+          samples.push(Math.abs(tendexFrame(E)[0].tendicity));
+        }
+      }
+    }
+  }
+  /* The MEDIAN, not the maximum. One sample can sit deep inside a body —
+     the Earth-Moon barycentre is 1700 km below the Earth's surface, so the
+     centre sample routinely does — where the tidal field is five orders of
+     magnitude stronger than anywhere else in the box. Pacing the whole mode
+     off that one number slows it to a crawl and nothing on screen moves. The
+     median tracks the field across the lattice, which is what is actually
+     being drawn. */
+  samples.sort((a, b) => a - b);
+  const lambda = samples.length ? samples[samples.length >> 1] : 0;
+  /* The markers are integrated on their own clock, not the bodies'. A step
+     of the orbital integrator can be longer than the whole tidal timescale —
+     near a black hole it is longer by many orders of magnitude — so tying
+     the two together would either freeze the lattice or shatter it. */
+  const tTidal = lambda > 0 ? 1 / Math.sqrt(lambda) : 1;
+  S.gridRate = GRID_TIDAL_FRACTION * tTidal;
+  S.gridDt = tTidal / 300;
+  lattice.tTidal = tTidal;
+  latticeView.update();
+}
+
+function wireGrid() {
+  const setFrame = (f) => {
+    latticeView.frame = f;
+    $('g-tidal').classList.toggle('on', f === 'tidal');
+    $('g-infall').classList.toggle('on', f === 'infall');
+    latticeView.update();
+  };
+  $('g-tidal').onclick = () => setFrame('tidal');
+  $('g-infall').onclick = () => setFrame('infall');
+  $('g-reset').onclick = () => reseedLattice();
+}
+
+/* The numbers that make the mode checkable rather than merely pretty.
+
+   Two claims, reported differently because they can be measured to
+   differently well:
+
+     - THE SHAPE is crisp. Stretch along the line to the mass, squeeze across
+       it, in the ratio 2 : 1 because E_ij is trace-free. It comes out around
+       1.9 : 1 for the cube this mode draws, and the shortfall is the cube's
+       own size — it is a fifth of its distance from the mass, so the field is
+       not quite uniform across it.
+
+     - THE VOLUME is exact only in the limit of a small cube over a short
+       time. Where a mass is enclosed the effect is large and the measurement
+       is meaningful, so it is quoted against Gauss. In vacuum the true answer
+       is zero and what is measured is the finite-cube residual, so it is
+       quoted as a fraction of the tidal scale and named for what it is
+       rather than dressed up as a precision result. The sharp version of the
+       vacuum claim lives in test/physics.test.mjs, where the cube can be made
+       as small as the argument needs.
+*/
+function updateGridInfo() {
+  const { rho, enclosedMass, d2VoverV } =
+    Lattice.predictedVolumeAcceleration(engine.bodies, lattice.centre, lattice.halfWidth);
+  const V = lattice.cellVolumeRatio();
+  const t = lattice.t;
+
+  /* d^2V/dt^2 is a rate at the instant of release, so it is latched early and
+     held: once the cube has visibly deformed the quadratic term is long gone
+     and a live reading would only look like a disagreement. */
+  if (lattice._probe == null && t >= 0.02 * (lattice.tTidal ?? Infinity)) {
+    lattice._probe = 2 * (V - 1) / (t * t);
+  }
+  const measured = lattice._probe;
+  const tidalScale = lattice.tTidal ? 1 / lattice.tTidal ** 2 : 0;
+
+  const grad = lattice.strainAxes();
+  const d = [grad[0] - 1, grad[4] - 1, grad[8] - 1].sort((a, b) => b - a);
+  const squeeze = -(d[1] + d[2]) / 2;
+
+  let s = `${F.time(t)} since release · centre cell at ` +
+          `<b>${(V * 100).toFixed(3)}%</b> of its released volume · `;
+
+  if (squeeze > 1e-12) {
+    s += `stretch : squeeze = <b>${(d[0] / squeeze).toFixed(2)} : 1</b> ` +
+         `(2 : 1 exactly, for a cube small enough) · `;
+  }
+
+  if (rho > 0 && measured != null) {
+    s += `<b>${F.mass(enclosedMass)}</b> enclosed, ⟨ρ⟩ = ${fmtRho(rho)}, so Gauss ` +
+         `gives d²V/V = <b>${d2VoverV.toExponential(3)}</b> /yr² — measured ` +
+         `<b>${measured.toExponential(3)}</b>`;
+  } else if (measured != null) {
+    const rel = tidalScale > 0 ? Math.abs(measured) / tidalScale : 0;
+    s += `nothing enclosed, so the volume is conserved. What is left is ` +
+         `${(rel * 100).toFixed(1)}% of the tidal scale that is visibly ` +
+         `deforming the cube, and it is the cube's own width, not matter`;
+  } else {
+    s += 'releasing…';
+  }
+
+  if (S.mult > GRID_MAX_MULT) {
+    s += ` · <span class="warn">time capped at ${GRID_MAX_MULT}× here, so the ` +
+         `markers stay as accurately integrated as the bodies</span>`;
+  }
+  field.info = s;
+}
+
+function fmtRho(rhoInternal) {
+  return F.density(rhoInternal * 1.98847e30 / (1.495978707e11 ** 3));
 }
 
 /* =============================================================================
@@ -747,7 +976,7 @@ function updatePlacementArrow() {
    KEYS
    ========================================================================== */
 const MODE_KEYS = ['none', 'tendex', 'dilation', 'potential', 'field', 'drag',
-                   'geodesic', 'waves', 'embedding'];
+                   'grid', 'geodesic', 'waves', 'embedding'];
 
 function wireKeys() {
   addEventListener('keydown', (e) => {
@@ -779,6 +1008,8 @@ function wireKeys() {
         break;
       default:
         if (e.key >= '1' && e.key <= '9') setMode(MODE_KEYS[+e.key - 1]);
+        else if (e.key === '0') setMode(MODE_KEYS[9]);
+        else if ((e.key === 'r' || e.key === 'R') && S.mode === 'grid') reseedLattice();
     }
   });
 }

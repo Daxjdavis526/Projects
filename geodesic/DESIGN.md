@@ -202,6 +202,7 @@ The bowling-ball-on-a-trampoline picture is wrong in four independent ways:
 | Mode | What it shows | Truthfulness |
 |---|---|---|
 | **Tidal tendexes** | integral curves of the eigenvector fields of E_ij | **Real and gauge-robust.** This is curvature itself, in 3D, multi-body. |
+| **Free-fall lattice** | a cube of test particles, integrated and drawn | **Real and measurable.** The nodes are objects, not coordinates, so the deformation is an observation. Volume conserved in vacuum, shrinking at −4πG⟨ρ⟩ where mass is enclosed. |
 | **Time dilation** | iso-surfaces of dτ/dt | **Real.** And it is the component that actually causes orbits. |
 | **Geodesics** | exact Schwarzschild orbit against the Newtonian one | **Exact** for a test particle about a static spherical mass. |
 | **Gravitational waves** | quadrupole radiation *pattern*; amplitude as a number | Pattern is real and static; the wave itself is deliberately not drawn. |
@@ -376,8 +377,18 @@ these toys mislead, so the drift is on screen rather than hidden.
 4. **G4** tidal tendex field — the headline visualization — *done*
 5. **G5** remaining modes + relativistic layer — *done*
 6. **G6** explainers, docs, collisions — *done*
+7. **G7** the 3D grid: a free-fall lattice, in both the tidal and the
+   Gullstrand–Painlevé infall frames — *done*
 
 Each stage leaves a working, openable app.
+
+The grid mode is the one §2.2 originally called *lattice strain* and the
+first build shipped without. It resolves the tension the whole document is
+about — how to draw a grid that responds to mass without telling the
+rubber-sheet lie — by drawing a grid that is not a coordinate grid at all.
+The nodes are test particles; their deformation is geodesic deviation; and it
+carries two checkable statements, the 2 : 1 stretch-to-squeeze ratio and the
+volume law, both pinned down in the test suite.
 
 Layer C arrived as `src/physics/geodesic.js`: the Schwarzschild shape equation
 integrated in φ (which is what makes it cheap enough to redraw live) and the

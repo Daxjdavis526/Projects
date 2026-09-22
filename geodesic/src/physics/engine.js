@@ -124,10 +124,19 @@ export class Engine {
   /* Advance by a wall-clock frame at a given time multiplier, capped so the
      simulation never silently integrates garbage to keep up. */
   advance(wallDt, multiplier, maxSteps = 20000) {
-    const target = wallDt * multiplier;               // simulated years wanted
-    const want = Math.max(0, Math.round(target / this.dt));
-    const n = Math.min(want, maxSteps);
-    if (n > 0) this.step(n);
+    /* The remainder is carried, not discarded. Rounding it away is harmless
+       when a frame is worth hundreds of steps and fatal when it is worth a
+       fraction of one: the simulation simply stops, silently, and every
+       readout keeps saying zero. That is exactly what happens at the slow
+       rates the lattice mode runs at. */
+    this._carry = (this._carry ?? 0) + wallDt * multiplier;
+    const want = Math.floor(this._carry / this.dt);
+    const n = Math.min(Math.max(0, want), maxSteps);
+    if (n > 0) {
+      this._carry -= n * this.dt;
+      this.step(n);
+    }
+    if (want > maxSteps) this._carry = 0;             // do not build a backlog
     return { requested: want, taken: n, limited: n < want };
   }
 

@@ -24,6 +24,7 @@ import {
   traceOrbit, precessionPerOrbit, elements, radiation, eccentricityFactor,
   radiationPattern,
 } from '../src/physics/geodesic.js';
+import { Lattice } from '../src/physics/lattice.js';
 import { rocheLimit } from '../src/physics/collisions.js';
 
 let failures = 0, count = 0;
@@ -653,6 +654,101 @@ section('Gravitational radiation');
   check('GW power is 8x stronger along the orbital axis than in the plane',
         near(radiationPattern(1) / radiationPattern(0), 8, 1e-9),
         `${(radiationPattern(1) / radiationPattern(0)).toFixed(3)}x`);
+}
+
+
+/* =============================================================================
+   15. THE FREE-FALL LATTICE
+   -----------------------------------------------------------------------------
+   The 3D grid mode draws a cube of freely falling test particles. Two claims
+   are made for it on screen, and both are checked here rather than merely
+   asserted in a caption.
+
+   The volume is measured by the determinant of the deformation gradient F,
+   least-squares fitted over every node. Two effects keep the measurement from
+   being exact, and both are geometry rather than error, so both are pinned
+   down with their own numbers below:
+
+     - second order in the strain itself: a cell stretched by (1+e) and
+       squeezed by (1-e/2) twice has volume 1 - 0.75 e^2, not 1. That is real;
+       volume conservation is a statement about the INSTANTANEOUS rate.
+     - finite lattice extent: F is a linear fit, and the tidal field varies
+       across a lattice of non-zero size, so the fit leaves a residual of
+       order (halfWidth/r)^2.
+   ========================================================================== */
+section('The free-fall lattice');
+{
+  /* --- 1. In vacuum the volume is conserved: E_ij is trace-free ---------- */
+  const sun = new Body({ name: 'Sun', material: 'star', mass: 1 });
+  const tidal = G * 1 / 1 ** 3;                  // GM/r^3 at 1 AU, the scale to beat
+
+  const run = (bodies, centre, hw, t, steps) => {
+    const L = new Lattice(9).seed(centre, hw);
+    for (let i = 0; i < steps; i++) L.step(bodies, t / steps);
+    return { L, coeff: 2 * (L.volumeRatio() - 1) / (t * t) };
+  };
+
+  const vac = run([sun], [1, 0, 0], 0.005, 2e-3, 400);
+  check('in vacuum a falling lattice conserves its volume',
+        Math.abs(vac.coeff) < 1e-3 * tidal,
+        `|d²V/V| = ${Math.abs(vac.coeff).toExponential(2)} vs tidal scale ${tidal.toFixed(1)} /yr²`);
+
+  /* What residual there is, is the second-order-in-strain term and nothing
+     else — so it is predictable, not noise. */
+  const secondOrder = -1.5 * tidal * tidal * (2e-3) ** 2;
+  check('and the residual is the known second-order-in-strain term',
+        near(vac.coeff, secondOrder, 0.1),
+        `${vac.coeff.toExponential(3)} vs -1.5(GM/r³)²t² = ${secondOrder.toExponential(3)}`);
+
+  /* --- 2. The shape: stretched at the mass, squeezed across it, -2:+1:+1 - */
+  const big = run([sun], [1, 0, 0], 0.005, 0.02, 2000);
+  const F = big.L.strainAxes();
+  check('the lattice stretches along the line to the mass',
+        F[0] > 1 && F[4] < 1 && F[8] < 1,
+        `diag(F) = ${F[0].toFixed(5)}, ${F[4].toFixed(5)}, ${F[8].toFixed(5)}`);
+  check('and shears not at all, because the field is radial',
+        Math.max(Math.abs(F[1]), Math.abs(F[2]), Math.abs(F[5])) < 1e-6,
+        `max |off-diagonal| = ${Math.max(Math.abs(F[1]), Math.abs(F[2]), Math.abs(F[5])).toExponential(1)}`);
+  const meanSqueeze = 0.5 * ((1 - F[4]) + (1 - F[8]));
+  const ratio = (F[0] - 1) / meanSqueeze;
+  check('stretch and squeeze are in the ratio -2 : +1',
+        near(ratio, 2, 0.02), `${ratio.toFixed(4)} : 1`);
+
+  /* --- 3. Inside matter the volume shrinks, at exactly -4 pi G rho ------- */
+  const rock = new Body({ name: 'Rock', material: 'rock', mass: 1e-3 });
+  const hw = rock.radius * 0.2;
+  const pred = Lattice.predictedVolumeAcceleration([rock], [0, 0, 0], hw);
+  const tFree = 1 / Math.sqrt(G * rock.density);
+  const mat = run([rock], [0, 0, 0], hw, tFree * 0.014, 100);
+  check('inside matter it shrinks at -4πGρ, Einstein\'s equation in one line',
+        near(mat.coeff, pred.d2VoverV, 5e-3),
+        `${mat.coeff.toExponential(5)} vs ${pred.d2VoverV.toExponential(5)} /yr²`);
+  check('and vacuum predicts exactly zero shrinkage',
+        Lattice.predictedVolumeAcceleration([sun], [1, 0, 0], 0.005).d2VoverV === 0);
+
+  /* Gauss, for a cube with a whole body loose inside it: the mean density is
+     the body's mass over the cube's volume, however small the body is. */
+  const box = 0.05;
+  const enc = Lattice.predictedVolumeAcceleration([sun], [0, 0, 0], box);
+  check('a cube enclosing a mass implodes at -4πG(M/V), however small the mass is',
+        near(enc.rho, 1 / (2 * box) ** 3, 1e-12) &&
+        near(enc.d2VoverV, -4 * Math.PI * G / (2 * box) ** 3, 1e-12),
+        `<ρ> = ${enc.rho.toExponential(3)} M☉/AU³`);
+
+  /* --- 4. Bookkeeping --------------------------------------------------- */
+  const L = new Lattice(13).seed([0, 0, 0], 1);
+  check('a 13³ lattice has 2197 nodes and 6084 edges',
+        L.count === 2197 && L.edges.length / 2 === 3 * 13 * 13 * 12,
+        `${L.count} nodes, ${L.edges.length / 2} edges`);
+  check('an unperturbed lattice has unit volume and a centred centroid',
+        near(L.volumeRatio(), 1, 1e-12) && Math.hypot(...L.centroid()) < 1e-12);
+
+  /* The markers are massless: they must not move the bodies. */
+  const before = [...sun.pos];
+  const L2 = new Lattice(7).seed([0.5, 0, 0], 0.1);
+  for (let i = 0; i < 200; i++) L2.step([sun], 1e-5);
+  check('test particles do not move the masses they fall toward',
+        sun.pos.every((v, i) => v === before[i]));
 }
 
 /* ========================================================================== */

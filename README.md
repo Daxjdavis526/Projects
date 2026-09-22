@@ -166,7 +166,13 @@ an optional post-Newtonian term; exact Schwarzschild geodesics and the
 quadrupole radiation formula are drawn beside them for comparison rather than
 fed back into them, and the UI says which layer every number came from.
 
-81 headless physics checks, each against a measured number: Mercury's 42.98
+The **3D grid** mode is the honest version of the bending grid: a cube of
+freely falling test particles, which deforms because its nodes are objects on
+diverging paths rather than coordinates on a fabric. It stretches toward a
+mass and squeezes across it 2 : 1, and its volume is conserved in vacuum but
+shrinks at −4πG⟨ρ⟩ where mass is enclosed.
+
+92 headless physics checks, each against a measured number: Mercury's 42.98
 arcseconds per century, S2's 13 arcminutes per orbit, the Hulse–Taylor
 pulsar's orbital decay, Gravity Probe B, Saturn's Roche limit.
 

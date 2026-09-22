@@ -154,6 +154,72 @@ plane only.</li>
 <p>The vertical scale here is exaggerated by the factor shown on screen — for
 an ordinary star the true dip is far too shallow to see.</p>`,
 
+  grid: `
+<h3>The 3D grid — and why it is allowed to bend</h3>
+<p>Every node is a <b>freely falling test particle</b>. Not a coordinate, not a
+point on a fabric: a marker, released from rest, that then does nothing but
+fall. When this grid deforms, the deformation is a measurement — something you
+could go out and confirm with real markers and a stopwatch.</p>
+<p>That is the whole difference between this and the rubber sheet. A
+coordinate grid must never bend, because bending one says space is a substance
+with a shape, and then explains orbits by appealing to a gravity outside the
+picture. This grid bends because the things it is made of are <i>falling</i>,
+and they fall along different paths. The equation for how those paths separate
+is <code>d²ξ/dt² = −E·ξ</code> — geodesic deviation. Watching the cube distort
+is watching the tidal tensor act, with no analogy in between.</p>
+
+<h3>Two frames</h3>
+<ul>
+<li><b class="good">Tidal</b> subtracts the cube's own centroid motion, which
+is to say it draws the markers in their own falling frame. The bulk fall
+disappears and pure deformation is left. This is the equivalence principle as
+a picture: take away the part any change of frame can remove, and what remains
+is curvature.</li>
+<li><b>Infall</b> draws the markers where they actually go. For a single body
+this is exactly the Gullstrand–Painlevé <i>river</i> picture, in which space
+falls inward at the escape velocity — an exact rewriting of the Schwarzschild
+metric, not a cartoon. It shreds eventually, and that is true too.</li>
+</ul>
+
+<h3>The two things it proves</h3>
+<p><b>The shape.</b> Stretch along the line to the mass, squeeze across it, in
+the ratio <code>2 : 1</code> — because E<sub>ij</sub> is trace-free, so the one
+stretching direction must exactly balance the two squeezing ones. This is why
+anything falling into a black hole becomes a cigar and never a pancake, and
+why there are two tides a day rather than one.</p>
+<p><b>The volume.</b> In vacuum the cell volume is conserved <i>exactly</i>.
+Where matter is present it shrinks, at</p>
+<p><code>(1/V) d²V/dt² = −4πG⟨ρ⟩</code></p>
+<p>which is Einstein's field equation in the form John Baez states it: mass is
+the thing that makes a ball of freely falling particles begin to lose volume.
+For a cube of any size the ⟨ρ⟩ is the <i>mean</i> density inside it, which
+follows from Gauss — so the same expression covers empty space, a cube immersed
+in rock, and a cube with a planet loose inside it. The panel reports the
+measured rate beside the predicted one.</p>
+
+<h3>Where it stops being literal</h3>
+<ul>
+<li><b>The markers are massless.</b> They fall in the field of the bodies but
+pull on nothing, including each other. A real dust cloud would also collapse
+under its own weight, and this one never does.</li>
+<li><b>The cube is not infinitesimal.</b> Both statements above are local, and
+this cube is about a fifth as wide as its distance from the mass — so the
+ratio reads nearer 1.9 : 1 than 2 : 1, and a few percent of volume change
+shows up in vacuum where the true answer is zero. That residual is the cube's
+own width, not physics. The sharp version is in the test suite, where the cube
+can be made as small as the argument needs.</li>
+<li><b>Time runs on the lattice's clock here</b>, not the orbits'. Deformation
+becomes obvious after roughly one tidal time, which near the Earth is days and
+near a black hole is microseconds — so in this mode the planets barely move,
+and the time multiplier is capped so the markers stay as carefully integrated
+as the bodies.</li>
+<li><b>It re-releases itself</b> once it has deformed as far as it can and
+still be read. Press <b>R</b> or <i>Re-release</i> to do it by hand, after
+moving the camera somewhere new.</li>
+<li>The field is the Newtonian one, as everywhere else in the simulator. Close
+to a compact object the exact Schwarzschild tidal field differs.</li>
+</ul>`,
+
   geodesic: `
 <h3>Geodesics — Newton against Einstein, same initial conditions</h3>
 <p>Two curves are drawn from the selected body's current position and velocity
@@ -240,7 +306,7 @@ rewind restores a saved state rather than running the integrator backwards.</li>
 <li><b>[</b> and <b>]</b> change the time multiplier. Accelerating time takes
 <i>more</i> steps, never bigger ones — a symplectic integrator loses its
 conservation the moment the step size varies.</li>
-<li><b>1</b>–<b>9</b> switch visualization mode.</li>
+<li><b>1</b>–<b>0</b> switch visualization mode. In the <b>3D grid</b>, <b>R</b> releases a fresh cube of markers.</li>
 <li><b>+ Add</b> then click on the grid to place a body; drag before releasing
 to give it a velocity, or release on the spot for a circular orbit.</li>
 <li><b>F</b> follow the selected body (body-centred frame), <b>T</b> trails,
@@ -301,6 +367,9 @@ how much gravity there is and how compact the source is.</li>
 <li>Load <b>Sgr A* and S2</b> and switch to <b>Geodesics</b>. The gap between
 the amber and grey curves is 13 arcminutes per orbit, and it was measured in
 2020.</li>
+<li>Open the <b>3D grid</b> and watch a cube of falling markers stretch toward
+the mass and squeeze across it, in the ratio 2 : 1. Then switch it to
+<b>Infall</b> and watch the same cube pour into the planet.</li>
 <li>Compare <b>Embedding</b> with <b>Time dilation</b>. The famous funnel is a
 picture of <i>space</i>; the orbits are caused by the curvature of <i>time</i>.
 That is why the rubber sheet cannot explain them.</li>
