@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
 <title>GEODESIC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +34,7 @@ body{
   color:var(--ink);-webkit-font-smoothing:antialiased;
   font-size:12px;
 }
-canvas{display:block;position:fixed;inset:0}
+canvas{display:block;position:fixed;inset:0;touch-action:none}
 
 .panel{
   position:fixed;background:var(--panel);border:1px solid var(--edge);
@@ -164,6 +166,170 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
   font-size:11px;color:var(--accent);letter-spacing:.06em;
   text-shadow:0 1px 10px #000;display:none;pointer-events:none;
 }
+body.placing #hint{display:block}
+
+/* ===========================================================================
+   DESKTOP-ONLY CHROME
+   The tab bar and the compact speed button exist only for touch layouts.
+   ======================================================================== */
+#tabbar{display:none}
+#speed-cycle{display:none}
+
+/* ===========================================================================
+   PHONES AND SMALL TABLETS
+   ---------------------------------------------------------------------------
+   The desktop layout puts five panels around the edges of a wide screen. On a
+   390px phone they land on top of each other and the transport alone is
+   wider than the display. So the small-screen layout is a different shape,
+   not a squeezed version of the same one:
+
+     - the scene keeps the whole screen, because the scene IS the app
+     - one slim strip at the top says what you are looking at
+     - a transport bar and a tab bar sit at the bottom, above the home
+       indicator
+     - everything else is a bottom sheet, one at a time, summoned by a tab
+
+   Tap targets are at least 44px, which is the smallest thing a finger hits
+   reliably and roughly twice what the desktop buttons are.
+   ======================================================================== */
+@media (max-width: 860px){
+  :root{ --bar:56px; --tp:60px; --safe:env(safe-area-inset-bottom,0px); }
+  body{font-size:13px}
+
+  /* --- top strip: what you are looking at, tap for the full explainer --- */
+  #modebar{
+    top:0;left:0;right:0;transform:none;max-width:none;
+    /* Not flex here. A flex item gets its display blockified, which turns
+       -webkit-box into block and silently kills the line clamp below — the
+       strip then grows to five lines and eats the scene. Its other two
+       children are position:fixed on this layout anyway. */
+    display:block;
+  }
+  #modes{display:none}            /* lives in the View sheet instead */
+  #mode-note{
+    pointer-events:auto;cursor:pointer;text-align:left;max-width:none;
+    padding:calc(env(safe-area-inset-top,0px) + 9px) 14px 14px;
+    background:linear-gradient(180deg,rgba(5,6,10,.92) 0%,rgba(5,6,10,.75) 55%,rgba(5,6,10,0) 100%);
+    font-size:11px;line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  #mode-note:empty{display:none}
+
+  /* --- bottom sheets ---------------------------------------------------- */
+  #bodies,#inspector,#readout,#modes{
+    position:fixed;top:auto;left:0;right:0;width:auto;
+    /* Stops at the top of the transport rather than sliding under it, so
+       nothing a sheet contains is ever hidden behind a solid bar and the
+       transport stays usable with a sheet open. */
+    bottom:calc(var(--bar) + var(--tp) + var(--safe));
+    max-height:min(58vh,520px);overflow-y:auto;-webkit-overflow-scrolling:touch;
+    border-radius:16px 16px 0 0;border-bottom:none;
+    padding:16px 16px 18px;
+    display:none;z-index:30;box-shadow:0 -24px 48px rgba(0,0,0,.65);
+  }
+  /* The sheet the tab bar has open wins, but the inspector still needs
+     something selected and the modes sheet is always available. */
+  body[data-sheet="bodies"] #bodies,
+  body[data-sheet="data"] #readout,
+  body.has-sel[data-sheet="inspector"] #inspector{display:block}
+  body[data-sheet="modes"] #modes{
+    display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;
+    background:var(--panel);border:1px solid var(--edge);border-bottom:none;
+  }
+  body[data-sheet="modes"] #modes .btn{flex:1 1 44%;min-height:46px;font-size:10px}
+
+  h2{font-size:10px;margin-bottom:12px}
+
+  /* --- everything you can tap is finger-sized --------------------------- */
+  #ui .btn{min-height:44px;padding:10px 14px}
+  #ui .btn.sm{min-height:44px;padding:8px 12px;font-size:12px}
+  .body-row{padding:11px 6px;gap:10px}
+  .body-row .nm{font-size:13px}
+  .swatch{width:11px;height:11px}
+  #add-row{gap:8px;margin-top:12px}
+  .field input[type=number],.field select,#r-integ{
+    padding:10px 8px;
+    font-size:16px;        /* 16px or iOS zooms the page on focus */
+  }
+  .field label{font-size:10.5px;margin-bottom:4px}
+  .field input[type=checkbox]{width:22px;height:22px;vertical-align:-5px;margin-right:6px}
+  .field{margin:10px 0}
+  .row{margin:4px 0}
+
+  /* --- transport: one row, no wrapping ---------------------------------- */
+  #transport{
+    left:0;right:0;bottom:calc(var(--bar) + var(--safe));transform:none;
+    border-radius:0;border-left:none;border-right:none;border-bottom:none;
+    justify-content:space-between;gap:4px;padding:7px 8px;z-index:35;
+  }
+  #speeds{display:none}
+  #speed-cycle{display:block;min-width:56px}
+  #t-relativity{min-width:52px}
+  #tclock{min-width:0;font-size:12.5px;white-space:nowrap}
+  #tsub{font-size:9.5px}
+  #transport .btn{padding:9px 10px;min-width:44px}   /* a finger, not a cursor */
+
+  /* --- tab bar ---------------------------------------------------------- */
+  #tabbar{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:rgba(6,7,10,.96);border-top:1px solid var(--edge);
+    padding-bottom:var(--safe);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  }
+  #tabbar button{
+    flex:1;min-height:var(--bar);background:none;border:none;color:var(--dim);
+    font-family:inherit;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    cursor:pointer;padding:0;
+  }
+  #tabbar button.on{color:var(--accent);box-shadow:inset 0 2px 0 var(--accent)}
+  #tabbar button:disabled{opacity:.35}
+
+  /* --- the rest --------------------------------------------------------- */
+  #help-btn{display:none}
+  #grid-controls{
+    position:fixed;left:0;right:0;bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px);
+    justify-content:center;z-index:34;padding:0 10px;
+  }
+  #grid-controls .btn{flex:1;max-width:33%}
+  #warnings{
+    position:fixed;top:auto;left:8px;right:8px;
+    bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px);
+    width:auto;max-height:26vh;overflow-y:auto;z-index:33;
+    display:none;border-radius:8px;
+  }
+  body.has-warn #warnings{display:block}
+  body.has-warn[data-sheet] #warnings{display:none}   /* a sheet takes the room */
+  #scalebar{right:10px;bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px)}
+  body[data-sheet] #scalebar{display:none}   /* a sheet owns the lower screen */
+  #sb-label{font-size:11px}
+  #hint{
+    bottom:calc(var(--bar) + var(--tp) + var(--safe) + 56px);
+    left:8px;right:8px;transform:none;text-align:center;font-size:12px;
+  }
+
+  /* --- modal ------------------------------------------------------------ */
+  #modal{align-items:flex-end}
+  #modal-card{
+    width:100%;max-height:88vh;border-radius:16px 16px 0 0;
+    padding:22px 18px calc(28px + var(--safe));font-size:13px;
+  }
+  #modal-close{top:10px;right:12px;font-size:30px;padding:6px 10px}
+  #modal-card h3{font-size:12px}
+  #modal-card code{font-size:12px}
+}
+
+/* Landscape phones are short, not narrow: give the sheets less height and
+   keep the top strip to a single line so the scene survives. */
+@media (max-width: 860px) and (max-height: 460px){
+  /* A landscape phone is 340px tall. Two full-height bars would take a third
+     of that, so the tab bar loses its padding and the sheets get a bigger
+     share of what is left. The buttons stay at 44px. */
+  :root{ --bar:46px; --tp:56px; }
+  #tabbar button{min-height:var(--bar)}
+  #bodies,#inspector,#readout,#modes{max-height:68vh}
+  #mode-note{-webkit-line-clamp:1;padding-bottom:10px}
+  #modes .btn{min-height:44px}
+}
 </style>
 </head>
 <body>
@@ -242,6 +408,7 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
       <div id="tsub">paused</div>
     </div>
     <div id="speeds"></div>
+    <button class="btn sm" id="speed-cycle" title="cycle time multiplier">1×</button>
     <button class="btn sm" id="t-relativity" title="first post-Newtonian correction">1PN</button>
   </div>
 
@@ -256,6 +423,16 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
     <button class="btn sm" id="btn-why">Why is it doing this?</button>
     <button class="btn sm" id="btn-help">?</button>
   </div>
+
+  <!-- Phone navigation. Hidden entirely on desktop; there it would only be
+       in the way of a layout that already has room for every panel. -->
+  <nav id="tabbar">
+    <button data-sheet="modes">View</button>
+    <button data-sheet="bodies">Bodies</button>
+    <button data-sheet="inspector">Edit</button>
+    <button data-sheet="data">Data</button>
+    <button id="tab-help">Help</button>
+  </nav>
 </div>
 
 <div id="modal">
@@ -276,7 +453,13 @@ button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
 }
 </script>
 <script type="module">
+  /* The full-screen failure panel is for FAILING TO START — a 404 on a
+     vendored module is otherwise completely silent. Once the first frame has
+     rendered it stands down and logs instead, because a stray runtime error
+     (a pointer-capture race during a two-finger gesture is the usual one)
+     should not blank a session that is otherwise working. */
   addEventListener('error', e => {
+    if (window.__geodesicRunning) { console.error('GEODESIC:', e.error || e.message); return; }
     const el = document.getElementById('fatal');
     el.style.display = 'flex';
     el.textContent = 'GEODESIC failed to start\n\n' + (e.error?.stack || e.message);

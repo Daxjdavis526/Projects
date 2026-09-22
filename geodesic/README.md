@@ -182,6 +182,21 @@ python3 -m http.server
 
 No build step, no npm install. three.js is vendored locally.
 
+## On a phone
+
+The desktop layout puts five panels around the edges of a wide screen. Below
+860px it becomes a different shape rather than a squeezed version of the same
+one: the scene keeps the whole display, a slim strip at the top says what you
+are looking at, and everything else is a bottom sheet summoned by one of five
+tabs. One finger orbits, two pinch, a tap selects. Every control is at least
+44px.
+
+The expensive modes also scale themselves down on touch devices — a smaller
+lattice, fewer tendex seeds, coarser iso-surfaces, and a capped device pixel
+ratio, since rendering at three physical pixels per CSS pixel triples the fill
+cost for a difference nobody can see at arm's length. Measured 37–60 fps
+across every mode and preset on a phone viewport.
+
 ## Sources
 
 Misner, Thorne & Wheeler, *Gravitation* · Hartle, *Gravity* · Nichols et al.,

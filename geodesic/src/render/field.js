@@ -29,6 +29,7 @@ import {
   gravitationalField, frameDragOmega, flammZ,
 } from '../physics/relativity.js';
 import { C, G, SI, ARCSEC_PER_RAD } from '../physics/constants.js';
+import { q } from '../ui/device.js';
 import { traceOrbit, precessionPerOrbit, elements, radiation, radiationPattern }
   from '../physics/geodesic.js';
 
@@ -100,28 +101,28 @@ export const MODES = {
   },
 };
 
-const LATTICE_N = 11;         // per axis; 11^3 = 1331 samples
+const LATTICE_N = q(9, 11);   // per axis; 11^3 = 1331 samples, 9^3 = 729
 
 /* Tendex line tracing. Each seed is integrated both ways along the eigenvector
    field, so a line passes through its seed rather than starting there. */
-const STRETCH_SEEDS = 40;
-const SQUEEZE_SEEDS = 14;
+const STRETCH_SEEDS = q(24, 40);
+const SQUEEZE_SEEDS = q(10, 14);
 const SQUEEZE_SHELLS = [0.5, 1.0, 2.0];
-const STRETCH_STEPS = 90;
+const STRETCH_STEPS = q(60, 90);
 /* A squeeze curve closes on itself, so a long trace just draws the same arc
    again. A third of a turn is enough to read it as "around", not "along". */
-const SQUEEZE_STEPS = 30;
+const SQUEEZE_STEPS = q(22, 30);
 const TENDEX_STEPS = Math.max(STRETCH_STEPS, SQUEEZE_STEPS);
-const TENDEX_HZ = 20;         // field retraces at this rate, not every frame
+const TENDEX_HZ = q(12, 20);         // field retraces at this rate, not every frame
 
 /* Iso-surface tracing for the scalar modes. */
-const ISO_LEVELS = 5;
-const ISO_ROWS = 22;          // polar divisions
-const ISO_COLS = 44;          // azimuthal divisions
-const ISO_HZ = 12;
+const ISO_LEVELS = q(4, 5);
+const ISO_ROWS = q(16, 22);          // polar divisions
+const ISO_COLS = q(30, 44);          // azimuthal divisions
+const ISO_HZ = q(8, 12);
 
 /* Vector modes. */
-const VEC_N = 7;              // 7^3 = 343 arrows, which is as many as reads
+const VEC_N = q(5, 7);              // 7^3 = 343 arrows, which is as many as reads
 
 export class FieldView {
   constructor(stage) {
@@ -704,8 +705,8 @@ export class FieldView {
    Methods appended to FieldView: the two comparison modes.
    ======================================================================== */
 const GEO_TURNS = 3;
-const GEO_STEPS = 540;
-const GEO_HZ = 8;
+const GEO_STEPS = q(360, 540);
+const GEO_HZ = q(5, 8);
 
 Object.assign(FieldView.prototype, {
 
