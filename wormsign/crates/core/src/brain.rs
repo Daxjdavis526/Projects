@@ -320,7 +320,9 @@ impl Brain {
                 }
             }
             State::Pass => {
-                if t - self.since > 9.0 {
+                // Fed on a thumper it lingers near the surface longer — the
+                // window for getting on.
+                if t - self.since > if self.thumper { 16.0 } else { 9.0 } {
                     self.enter(State::Search, t);
                 }
             }

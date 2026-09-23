@@ -37,6 +37,7 @@ impl Plugin for WormsPlugin {
         app.add_systems(Startup, spawn_population.after(crate::player::spawn))
             .add_systems(Update, simulate.in_set(Phase::Simulate).in_set(SimSet).after(crate::player::simulate))
             .init_resource::<Danger>()
+            .add_systems(Update, recycle.in_set(Phase::Simulate).after(SimSet))
             .add_systems(Update, (draw_bodies, draw_wakes, approach).in_set(Phase::View));
     }
 }
@@ -95,19 +96,22 @@ pub fn spawn_population(
         let heading = if web::has_flag("wormface") { (p.z - at.z).atan2(p.x - at.x) } else { right.z.atan2(right.x) };
         placed.push((at, heading, depth));
     }
-    // The resident population: two, somewhere out there.
-    while placed.len() < 3 {
+    // The resident population: a few, somewhere out there, and one giant
+    // much further off.
+    let residents = placed.len() + 3;
+    while placed.len() < residents + 1 {
+        let giant = placed.len() == residents;
         let a = rng.range(0.0, std::f64::consts::TAU);
-        let d = rng.range(2500.0, 4500.0);
+        let d = if giant { rng.range(6500.0, 8500.0) } else { rng.range(2500.0, 4500.0) };
         let at = p + DVec3::new(a.cos(), 0.0, a.sin()) * d;
-        if desert.0.rock_near(at.x, at.z, 200.0).is_some() {
+        if desert.0.rock_near(at.x, at.z, if giant { 600.0 } else { 200.0 }).is_some() {
             continue;
         }
-        placed.push((at, rng.range(-3.1, 3.1), 26.0));
+        placed.push((at, rng.range(-3.1, 3.1), if giant { 70.0 } else { 26.0 }));
     }
 
     for (i, (at, heading, depth)) in placed.into_iter().enumerate() {
-        let spec = WormSpec::standard();
+        let spec = if i == residents { WormSpec::giant() } else { WormSpec::standard() };
         let d = desert.clone();
         let worm = Worm::new(spec, at.x, at.z, heading, depth, move |x, z| d.0.sand(x, z));
         let tube = meshes.add(empty_mesh());
@@ -603,4 +607,44 @@ fn approach(
 
 fn fx_rand(x: f64) -> f64 {
     ((x * 12.9898 + 78.233).sin() * 43758.5453).fract().abs()
+}
+
+/// Worms are never spawned on a timer, but on a long ride the ones you left
+/// behind would otherwise be gone forever. A worm more than 9 km away that
+/// nobody is on is quietly moved to somewhere 3.5 to 5 km from you, deep,
+/// roaming. It never happens within sight: the fog closes at about 15 km
+/// for terrain, but a deep worm leaves nothing to see.
+fn recycle(
+    desert: Res<Desert>,
+    riding: Res<crate::rider::Riding>,
+    player: Query<&PlayerBody>,
+    mut worms: Query<(Entity, &mut WormBody)>,
+    mut rng: Local<Option<Rng>>,
+) {
+    let Ok(pl) = player.single() else { return };
+    let p = pl.0.pos;
+    let rng = rng.get_or_insert_with(|| Rng::new(0x5EC7));
+    for (e, mut wb) in &mut worms {
+        if riding.worm == Some(e) {
+            continue;
+        }
+        let far = if wb.worm.spec.length > 500.0 { 14_000.0 } else { 9_000.0 };
+        if (wb.worm.head() - p).length() < far {
+            continue;
+        }
+        for _ in 0..20 {
+            let a = rng.range(0.0, std::f64::consts::TAU);
+            let at = p + DVec3::new(a.cos(), 0.0, a.sin()) * rng.range(3500.0, 5000.0) * if wb.worm.spec.length > 500.0 { 1.8 } else { 1.0 };
+            if desert.0.rock_near(at.x, at.z, 250.0).is_none() {
+                let spec = wb.worm.spec;
+                let d = desert.clone();
+                let depth = spec.radius * 2.4;
+                wb.worm = Worm::new(spec, at.x, at.z, rng.range(-3.1, 3.1), depth, move |x, z| d.0.sand(x, z));
+                let seed = rng.next_u64();
+                wb.brain = Brain::new(seed);
+                wb.ear = Listener::new(seed ^ 1);
+                break;
+            }
+        }
+    }
 }

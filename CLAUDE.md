@@ -13,6 +13,9 @@ context for zero insight.
 ```
 */vendor/**              three.js and friends — do not read
 helios/three.min.js      same, older layout
+wormsign/dist/*.wasm     compiled game binary, tens of MB — do not read
+wormsign/dist/*.js       generated wasm-bindgen glue — do not read
+wormsign/target*/        Rust build output (untracked) — do not read
 ```
 
 `moon/data/` is 47 MB of vendored NASA rasters. They are data, not code: read
@@ -41,6 +44,7 @@ touching the others.
 | `propulsion/` | rocket propulsion engineering course (Markdown, no code to run beyond the example checker) |
 | `cryogenics/` | cryogenic propulsion hardware & safety course (Markdown + hand-authored SVG, browser reader) |
 | `geodesic/` | spacetime curvature & gravitational dynamics sandbox |
+| `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (the one project with a build step; `dist/` is committed at milestones) |
 
 ## Conventions
 

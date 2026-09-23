@@ -7,9 +7,17 @@ license.workspace = true
 [dependencies]
 wormsign_core = { path = "../core" }
 glam.workspace = true
-# `3d` and `ui` are Bevy's own tested bundles. Audio is left out: every sound
-# in this game is synthesised at startup, and played through kira.
-bevy = { version = "0.19.1", default-features = false, features = ["3d", "ui", "tonemapping_luts"] }
+# Only what the game uses. Bevy's `3d` bundle would add glTF, animation,
+# scenes, picking, gamepads and image formats, all dead weight in a download.
+# No `audio`: every sound is synthesised on the Web Audio graph.
+bevy = { version = "0.19.1", default-features = false, features = [
+  "std", "async_executor", "bevy_asset", "bevy_log",
+  "bevy_winit", "bevy_window", "default_font", "webgl2", "x11",
+  "bevy_camera", "bevy_color", "bevy_gizmos", "bevy_gizmos_render", "bevy_image",
+  "bevy_mesh", "bevy_shader", "bevy_material", "bevy_text", "hdr",
+  "bevy_light", "bevy_render", "bevy_core_pipeline", "bevy_pbr", "tonemapping_luts", "zstd_rust",
+  "bevy_ui", "bevy_ui_render",
+] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 bevy = { version = "0.19.1", default-features = false, features = ["web"] }

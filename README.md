@@ -179,3 +179,19 @@ pulsar's orbital decay, Gravity Probe B, Saturn's Roche limit.
 Live: https://daxjdavis526.github.io/Projects/geodesic/
 
 See [geodesic/README.md](geodesic/README.md) and `geodesic/DESIGN.md`.
+
+## wormsign/
+
+**WORMSIGN** — a sandworm-riding game. Cross an enormous procedural desert on
+foot without being heard, plant a caller to drum a worm in, get onto it as it
+passes, hook in and ride it for kilometres — or run carelessly across open
+sand and get eaten. Worms hunt purely by the vibration your feet put into the
+sand, rhythm and all; sandwalking breaks your rhythm, rock is refuge. Written
+in Rust and compiled to WebAssembly; every sound is synthesised. Desktop only
+(keyboard + mouse).
+
+Live: https://daxjdavis526.github.io/Projects/wormsign/
+
+See [wormsign/README.md](wormsign/README.md) for controls, how the systems
+work, and what is physical versus invented.
+

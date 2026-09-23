@@ -6,6 +6,7 @@ mod death;
 mod fx;
 mod ground;
 mod hud;
+mod menu;
 mod player;
 mod quake;
 mod rider;
@@ -30,6 +31,6 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin, worms::WormsPlugin, fx::FxPlugin, death::DeathPlugin, caller::CallerPlugin, audio::AudioPlugin, rider::RiderPlugin))
+        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin, worms::WormsPlugin, fx::FxPlugin, death::DeathPlugin, caller::CallerPlugin, audio::AudioPlugin, rider::RiderPlugin, menu::MenuPlugin))
         .run();
 }

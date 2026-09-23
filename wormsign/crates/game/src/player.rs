@@ -48,6 +48,8 @@ pub struct Look {
     pub view: View,
     pub distance: f32,
     pub sensitivity: f32,
+    /// Field of view at rest, degrees; it widens with riding speed.
+    pub base_fov: f32,
     /// Smoothed third-person camera position, world space.
     smooth: Option<DVec3>,
     /// Head-bob amplitude, eased between gaits.
@@ -63,6 +65,7 @@ impl Default for Look {
             view: if web::flag_value("view").as_deref() == Some("first") { View::First } else { View::Third },
             distance: web::flag_f32("dist").unwrap_or(5.0),
             sensitivity: 0.0022,
+            base_fov: 70.0,
             smooth: None,
             bob: 0.0,
         }
@@ -328,7 +331,7 @@ pub fn camera(
     let dt0 = time.delta_secs();
     *ride_ease += ((mounted as i32 as f32) - *ride_ease) * (1.0 - (-dt0 * 1.5).exp());
     if let Projection::Perspective(pp) = &mut *proj {
-        let want = (70.0 + 12.0 * (riding.speed as f32 / 36.0).min(1.0)).to_radians();
+        let want = (look.base_fov + 12.0 * (riding.speed as f32 / 36.0).min(1.0)).to_radians();
         pp.fov += (want - pp.fov) * (1.0 - (-dt0 * 2.0).exp());
     }
     shake.rumble = shake.rumble.max(*ride_ease * (riding.speed as f32 / 36.0).min(1.0) * 0.7);

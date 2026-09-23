@@ -9,7 +9,7 @@ use wormsign_core::rng::Rng;
 
 use crate::world::{Desert, Origin, Phase};
 
-const POOL: usize = 900;
+const POOL: usize = 1100;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Kind {
@@ -21,6 +21,8 @@ pub enum Kind {
     Blood,
     /// A dark patch on the sand, for a long while.
     Stain,
+    /// A footprint: a shallow dent, darker where the crust is broken.
+    Print,
 }
 
 #[derive(Clone, Copy)]
@@ -32,6 +34,8 @@ struct Particle {
     size: f32,
     kind: Kind,
     live: bool,
+    /// Heading, for things that lie on the ground pointing somewhere.
+    yaw: f32,
 }
 
 #[derive(Resource)]
@@ -39,7 +43,7 @@ pub struct Fx {
     parts: Vec<Particle>,
     entities: Vec<Entity>,
     next: usize,
-    mats: [Handle<StandardMaterial>; 4],
+    mats: [Handle<StandardMaterial>; 5],
     /// Ball for solid bits, soft quad for dust.
     meshes: [Handle<Mesh>; 2],
     rng: Rng,
@@ -73,7 +77,7 @@ pub struct FxPlugin;
 
 impl Plugin for FxPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup).add_systems(Update, update.in_set(Phase::View));
+        app.add_systems(Startup, setup).add_systems(Update, (update, ambient, footprints).in_set(Phase::View));
     }
 }
 
@@ -99,6 +103,7 @@ fn setup(
         }),
         mats.add(StandardMaterial { base_color: Color::srgb(0.30, 0.01, 0.01), perceptual_roughness: 0.35, reflectance: 0.5, ..default() }),
         mats.add(StandardMaterial { base_color: Color::srgb(0.20, 0.03, 0.02), perceptual_roughness: 0.7, ..default() }),
+        mats.add(StandardMaterial { base_color: Color::linear_rgb(0.36, 0.21, 0.10), perceptual_roughness: 1.0, ..default() }),
     ];
     let mut entities = Vec::with_capacity(POOL);
     for _ in 0..POOL {
@@ -108,7 +113,7 @@ fn setup(
                 .id(),
         );
     }
-    let dead = Particle { pos: DVec3::ZERO, vel: DVec3::ZERO, age: 0.0, life: 0.0, size: 0.0, kind: Kind::Sand, live: false };
+    let dead = Particle { pos: DVec3::ZERO, vel: DVec3::ZERO, age: 0.0, life: 0.0, size: 0.0, kind: Kind::Sand, live: false, yaw: 0.0 };
     commands.insert_resource(Fx { parts: vec![dead; POOL], entities, next: 0, mats: m, meshes: [ball, quad], rng: Rng::new(0xF1) });
 }
 
@@ -116,8 +121,15 @@ impl Fx {
     pub fn emit(&mut self, kind: Kind, pos: DVec3, vel: DVec3, size: f32, life: f32) {
         let i = self.next;
         self.next = (self.next + 1) % POOL;
-        self.parts[i] = Particle { pos, vel, age: 0.0, life, size, kind, live: true };
+        self.parts[i] = Particle { pos, vel, age: 0.0, life, size, kind, live: true, yaw: 0.0 };
         // Material is swapped lazily in `update` when the kind changes.
+    }
+
+    /// Emit something that lies on the ground facing `yaw`.
+    pub fn emit_facing(&mut self, kind: Kind, pos: DVec3, size: f32, life: f32, yaw: f32) {
+        self.emit(kind, pos, DVec3::ZERO, size, life);
+        let i = (self.next + POOL - 1) % POOL;
+        self.parts[i].yaw = yaw;
     }
 
     /// A breach: sand hurled up and out in a ring, and a dust cloud.
@@ -211,23 +223,26 @@ fn update(
                 p.vel.y += 0.3 * dtd;
                 p.pos += p.vel * dtd;
             }
-            Kind::Stain => {}
+            Kind::Stain | Kind::Print => {}
         }
         if kinds[i] != Some(p.kind) {
             kinds[i] = Some(p.kind);
             mat.0 = fx.mats[p.kind as usize].clone();
             mesh.0 = fx.meshes[(p.kind == Kind::Dust) as usize].clone();
         }
-        // Dust quads always face the camera.
+        // Dust quads always face the camera; prints point the way you went.
         if p.kind == Kind::Dust {
             t.rotation = cam_rot;
+        } else if p.kind == Kind::Print {
+            t.rotation = Quat::from_rotation_y(p.yaw);
         }
         let k = p.age / p.life;
         let scale = match p.kind {
             // Dust swells as it spreads and thins out.
             Kind::Dust => Vec3::splat(p.size * (1.0 + 2.5 * k) * (1.0 - k * k).max(0.05)),
-            // Stains lie flat.
+            // Stains and prints lie flat and fade by shrinking at the end.
             Kind::Stain => Vec3::new(p.size, 0.02, p.size) * (1.0 - (k - 0.9).max(0.0) * 10.0),
+            Kind::Print => Vec3::new(p.size * 0.55, 0.012, p.size) * (1.0 - k.powi(4)),
             _ => Vec3::splat(p.size),
         };
         t.translation = origin.to_render(p.pos);
@@ -238,5 +253,57 @@ fn update(
     }
     for (k, pos, vel, size, life) in spawn {
         fx.emit(k, pos, vel, size, life);
+    }
+}
+
+/// Sand lifting off the crests and drifting downwind around you.
+fn ambient(
+    time: Res<Time>,
+    desert: Res<Desert>,
+    mut fx: ResMut<Fx>,
+    player: Query<&crate::player::PlayerBody>,
+    mut acc: Local<f64>,
+) {
+    let Ok(pb) = player.single() else { return };
+    *acc += time.delta_secs_f64() * 3.0;
+    let (wx, wz) = desert.0.wind();
+    let wind = DVec3::new(wx, 0.0, wz);
+    while *acc >= 1.0 {
+        *acc -= 1.0;
+        let a = fx.rng.range(0.0, std::f64::consts::TAU);
+        let d = fx.rng.range(15.0, 140.0);
+        let x = pb.0.pos.x + a.cos() * d;
+        let z = pb.0.pos.z + a.sin() * d;
+        let y = desert.0.height(x, z) as f64 + fx.rng.range(0.2, 1.5);
+        let v = wind * fx.rng.range(3.0, 7.0) + DVec3::Y * fx.rng.range(0.0, 0.6);
+        let size = fx.rng.range(1.5, 4.0) as f32;
+        let life = fx.rng.range(4.0, 7.0) as f32;
+        fx.emit(Kind::Dust, DVec3::new(x, y, z), v, size, life);
+    }
+}
+
+/// Every footfall on sand leaves a print that slowly fills in.
+fn footprints(
+    desert: Res<Desert>,
+    quakes: Res<crate::quake::Quakes>,
+    mut fx: ResMut<Fx>,
+    player: Query<&crate::player::PlayerBody>,
+    look: Res<crate::player::Look>,
+    mut left: Local<bool>,
+) {
+    let Ok(pb) = player.single() else { return };
+    for ev in &quakes.events {
+        if ev.kind != wormsign_core::vibration::SourceKind::Step || (ev.pos - pb.0.pos).length() > 3.0 {
+            continue;
+        }
+        let g = desert.0.sample(ev.pos.x, ev.pos.z);
+        if g.rock > 0.5 || (ev.pos.y - g.height as f64).abs() > 0.3 {
+            // No prints on rock, or on a worm's back.
+            continue;
+        }
+        *left = !*left;
+        let yaw = look.yaw as f64;
+        let side = DVec3::new(yaw.cos(), 0.0, -yaw.sin()) * if *left { -0.13 } else { 0.13 };
+        fx.emit_facing(Kind::Print, DVec3::new(ev.pos.x, g.height as f64 + 0.01, ev.pos.z) + side, 0.28, 45.0, look.yaw);
     }
 }
