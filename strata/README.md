@@ -385,7 +385,7 @@ walkable cells in a short radius and re-plan as you move.
 Nothing here needs a person to check it.
 
     godot --headless --path . -- --test                # 636 checks, in a couple of seconds
-    godot --path . -- --selftest OUTDIR                # plays the game; SELFTEST_COUNT checks and screenshots
+    godot --path . -- --selftest OUTDIR                # plays the game; 79 checks and screenshots
     godot --headless --path . -- --bench               # pipeline costs per column
     godot --headless --path . -- --music OUTDIR        # the soundtrack as WAV files (--stems: melody, accompaniment, pad apart)
 
