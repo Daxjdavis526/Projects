@@ -77,7 +77,10 @@ impl Figure {
         let p = self.pose.as_ref()?;
         let head = p.j[j::HEAD];
         let up = (head - p.j[j::NECK]).normalize_or_zero();
-        Some(head + p.look * 0.07 + up * 0.03)
+        // In front of the face whichever way it looks, never down into the
+        // collar.
+        let flat = DVec3::new(p.look.x, 0.0, p.look.z).normalize_or(p.fwd);
+        Some(head + flat * 0.08 + up * 0.03)
     }
 }
 
@@ -457,7 +460,16 @@ fn animate(
         landed: steps.landed.take(),
         activity,
     };
-    let pose = fig.anim.update(&input, dt, ground);
+    // Long frames (a hitch, a slow machine) are taken in short steps, so the
+    // gait and the landing spring stay stable; events go in with the first.
+    let n = ((dt * 60.0).ceil() as usize).clamp(1, 15);
+    let mut input = input;
+    let mut pose = fig.anim.update(&input, dt / n as f64, &ground);
+    for _ in 1..n {
+        input.strike = None;
+        input.landed = None;
+        pose = fig.anim.update(&input, dt / n as f64, &ground);
+    }
     fig.hands = [pose.j[j::WRIST[LEFT]], pose.j[j::WRIST[RIGHT]]];
     fig.pose = Some(pose);
     let _ = pr;

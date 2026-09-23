@@ -679,8 +679,8 @@ impl Animator {
                     let amp = moving_w * (0.18 + 0.1 * self.speed.min(2.0) + 0.45 * self.run);
                     let mut swing = amp * (std::f64::consts::TAU * self.phase).cos() * side_of(f);
                     swing *= 1.0 - 0.7 * self.sneak;
-                    let abduct = 0.1 + 0.35 * self.sneak + 0.12 * self.crouch + 0.1 * self.air;
-                    let flex = 0.25 + 1.2 * self.run + 0.5 * self.sneak + 0.6 * self.crouch + 0.3 * self.air;
+                    let abduct = 0.15 + 0.3 * self.sneak + 0.12 * self.crouch + 0.1 * self.air;
+                    let flex = 0.32 + 1.15 * self.run + 0.5 * self.sneak + 0.6 * self.crouch + 0.3 * self.air;
                     let mut upper = rotate(-up, chest_right, swing);
                     upper = rotate(upper, chest_fwd, s * abduct).normalize();
                     // Special actions override one or both arms.

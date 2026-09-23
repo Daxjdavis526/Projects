@@ -189,7 +189,8 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
                 ring(l - s(0.035), s(0.062), s(0.058), s(0.004)),
                 ring(l + s(0.02), s(0.056), s(0.054), s(0.006)),
             ];
-            suit.loft(&rings, 30, 120.0, (0.0, 0.0), |y, th| {
+            // Closed at the neck, so first person never looks down into it.
+            suit.loft(&rings, 30, 120.0, (0.0, 0.8), |y, th| {
                 let mut lk = suit_look(&pal, y, th, s(0.034));
                 let strap = harness(y, th);
                 if strap > 0.0 {
