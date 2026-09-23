@@ -147,6 +147,7 @@ fn status(
     origin: Res<Origin>,
     look: Res<Look>,
     body: Query<&PlayerBody>,
+    worms: Query<&crate::worms::WormBody>,
     mut text: Query<&mut Text, With<StatusText>>,
     time: Res<Time>,
     mut last_log: Local<f32>,
@@ -158,9 +159,15 @@ fn status(
         .and_then(|d| d.smoothed())
         .unwrap_or(0.0);
     let speed = p.vel.x.hypot(p.vel.z);
+    let worm = crate::worms::nearest(worms.iter(), p.pos)
+        .map(|(w, d)| {
+            let i = w.brain.track.and_then(|id| w.ear.track(id)).map(|t| t.interest(t.last_time)).unwrap_or(0.0);
+            format!("worm {:?} {:.0} m  {:.0} m/s  depth {:.0}  interest {:.0}", w.brain.state, d, w.worm.speed, w.worm.depth, i)
+        })
+        .unwrap_or_default();
     t.0 = if debug.0 {
         format!(
-            "{fps:.0} fps  ·  {} tiles\n{:?}  {speed:.1} m/s  {:?}\nx {:.0}  y {:.1}  z {:.0}  (origin {:.0}, {:.0})",
+            "{fps:.0} fps  ·  {} tiles\n{:?}  {speed:.1} m/s  {:?}\nx {:.0}  y {:.1}  z {:.0}  (origin {:.0}, {:.0})\n{worm}",
             tiles.live_count(),
             p.gait,
             look.view,
@@ -176,6 +183,6 @@ fn status(
     let now = time.elapsed_secs();
     if debug.0 && now - *last_log > 2.0 {
         *last_log = now;
-        info!("debug pos=({:.1},{:.1},{:.1}) gait={:?} fps={fps:.0} tiles={}", p.pos.x, p.pos.y, p.pos.z, p.gait, tiles.live_count());
+        info!("debug pos=({:.1},{:.1},{:.1}) gait={:?} fps={fps:.0} tiles={} {worm}", p.pos.x, p.pos.y, p.pos.z, p.gait, tiles.live_count());
     }
 }

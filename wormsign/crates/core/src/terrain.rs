@@ -122,6 +122,14 @@ impl Terrain {
     }
 
     pub fn sample(&self, x: f64, z: f64) -> Ground {
+        let sand = self.sand(x, z);
+        let (rock_h, rock_w) = self.rock_at(x, z, sand);
+        let height = sand.max(rock_h);
+        Ground { height: height as f32, rock: rock_w as f32 }
+    }
+
+    /// The sand surface alone, ignoring rock: what a worm swims through.
+    pub fn sand(&self, x: f64, z: f64) -> f64 {
         let dune = self.duniness(x, z);
 
         // --- primary dunes -------------------------------------------------
@@ -151,12 +159,27 @@ impl Terrain {
         let swell = self.swell.get_noise_2d(x, z) as f64 * 32.0;
         let rough = self.rough.get_noise_2d(x, z) as f64 * 0.35 * (1.0 - dune);
 
-        let sand = h1 + h2 + swell + rough;
+        h1 + h2 + swell + rough
+    }
 
-        // --- rock islands ------------------------------------------------------
-        let (rock_h, rock_w) = self.rock_at(x, z, sand);
-        let height = sand.max(rock_h);
-        Ground { height: height as f32, rock: rock_w as f32 }
+    /// The nearest rock whose footprint, grown by `margin`, contains (x, z).
+    /// Rock outlines wobble by up to ~28%, so the footprint used here is the
+    /// generous one: a worm steering by it never grazes stone.
+    pub fn rock_near(&self, x: f64, z: f64, margin: f64) -> Option<Rock> {
+        let cx = (x / ROCK_CELL).floor() as i64;
+        let cz = (z / ROCK_CELL).floor() as i64;
+        let mut best: Option<(f64, Rock)> = None;
+        for dz in -1..=1 {
+            for dx in -1..=1 {
+                let Some(r) = self.rock_in_cell(cx + dx, cz + dz) else { continue };
+                let d = ((x - r.x).powi(2) + (z - r.z).powi(2)).sqrt();
+                let reach = r.radius * 1.3 + margin;
+                if d < reach && best.as_ref().map_or(true, |b| d - reach < b.0) {
+                    best = Some((d - reach, r));
+                }
+            }
+        }
+        best.map(|b| b.1)
     }
 
     /// Height only, for callers that do not care about material.

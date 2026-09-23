@@ -7,10 +7,13 @@
 
 pub use glam;
 
+pub mod brain;
 pub mod gait;
 pub mod lod;
+pub mod path;
 pub mod player;
 pub mod rng;
 pub mod terrain;
 pub mod tilemesh;
 pub mod vibration;
+pub mod worm;

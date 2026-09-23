@@ -7,6 +7,7 @@ mod quake;
 mod sky;
 mod web;
 mod world;
+mod worms;
 
 use bevy::prelude::*;
 
@@ -24,6 +25,6 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin))
+        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin, worms::WormsPlugin))
         .run();
 }

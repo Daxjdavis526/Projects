@@ -55,6 +55,11 @@ pub struct Tiles {
 }
 
 impl Tiles {
+    /// The sand material, shared with anything that must match the ground.
+    pub fn material(&self) -> Handle<StandardMaterial> {
+        self.material.clone()
+    }
+
     pub fn live_count(&self) -> usize {
         self.live.len()
     }

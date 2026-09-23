@@ -17,6 +17,8 @@ use wormsign_core::vibration::{sources, SourceKind, VibrationEvent};
 
 use crate::web;
 use crate::quake::Quakes;
+use crate::worms::WormBody;
+use wormsign_core::worm::Worm;
 use crate::world::{Desert, Origin, OriginAnchor, Phase, SimSet, Tick, WorldPos};
 
 pub struct PlayerPlugin;
@@ -79,7 +81,7 @@ pub struct Feet(pub Stride);
 #[derive(Component)]
 struct BodyMesh;
 
-fn spawn(mut commands: Commands, desert: Res<Desert>, mut meshes: ResMut<Assets<Mesh>>, mut mats: ResMut<Assets<StandardMaterial>>) {
+pub fn spawn(mut commands: Commands, desert: Res<Desert>, mut meshes: ResMut<Assets<Mesh>>, mut mats: ResMut<Assets<StandardMaterial>>) {
     let (x, z) = spawn_point(&desert);
     let y = desert.0.height(x, z) as f64;
     let body = Player::new(DVec3::new(x, y + 0.5, z));
@@ -187,20 +189,25 @@ fn read_input(
     i.jump |= keys.just_pressed(KeyCode::Space);
 }
 
-pub fn ground_at(desert: &Desert, x: f64, z: f64) -> GroundHit {
-    let h = desert.0.height(x, z) as f64;
-    let n = desert.0.normal(x, z);
-    GroundHit::still(h, DVec3::new(n[0] as f64, n[1] as f64, n[2] as f64))
+/// Sand, rock, and any worm mound under (x, z).
+pub fn ground_at(desert: &Desert, worms: &[&Worm], x: f64, z: f64) -> GroundHit {
+    let h = |x, z| crate::worms::ground_height(desert, worms, x, z);
+    let e = 0.6;
+    let (hx0, hx1, hz0, hz1) = (h(x - e, z), h(x + e, z), h(x, z - e), h(x, z + e));
+    let n = DVec3::new(hx0 - hx1, 2.0 * e, hz0 - hz1).normalize();
+    GroundHit::still(h(x, z), n)
 }
 
-fn simulate(
+pub fn simulate(
     tick: Res<Tick>,
     desert: Res<Desert>,
     mut controls: ResMut<Controls>,
     mut quakes: ResMut<Quakes>,
     mut q: Query<(&mut PlayerBody, &mut Feet, &mut WorldPos)>,
+    worms: Query<&WormBody>,
 ) {
     let Ok((mut body, mut feet, mut wp)) = q.single_mut() else { return };
+    let worms: Vec<&Worm> = worms.iter().map(|w| &w.worm).collect();
     for k in 0..tick.n {
         let t = tick.time(k);
         let mut input = controls.0;
@@ -208,7 +215,7 @@ fn simulate(
         let f = feet.0.speed_factor(body.0.gait);
         input.forward *= f;
         input.right *= f;
-        let report = body.0.step(&input, tick.dt, |x, z| ground_at(&desert, x, z));
+        let report = body.0.step(&input, tick.dt, |x, z| ground_at(&desert, &worms, x, z));
         controls.0.jump = false;
 
         let p = &body.0;

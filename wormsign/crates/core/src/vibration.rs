@@ -188,8 +188,11 @@ impl Listener {
         let est = DVec3::new(at.x + range * bearing.cos(), ev.pos.y, at.z + range * bearing.sin());
         let sigma = r * ((0.35 / root).clamp(0.02, 0.6) + (0.4 / root).clamp(0.03, 0.6)) * 0.7 + 2.0;
 
-        // Same source as an existing track? Judge by estimated position.
-        let gate = |tr: &Track| (tr.sigma + sigma).max(40.0).min(0.35 * r + 60.0);
+        // Same source as an existing track? Judge by estimated position,
+        // allowing for both fixes' uncertainty (a 2.5-sigma gate). At range
+        // the gate is wide, so two sources close together merge — the worm
+        // cannot tell them apart any better than that.
+        let gate = |tr: &Track| (2.5 * tr.sigma.hypot(sigma)).max(40.0);
         let pick = self
             .tracks
             .iter()
@@ -333,5 +336,26 @@ mod tests {
         assert!(en.sigma < ef.sigma);
         // One thumper, one track.
         assert_eq!(near.tracks.len(), 1);
+    }
+
+    #[test]
+    fn one_moving_runner_is_one_track() {
+        // A runner crossing 450 m away: one source, so it should not shatter
+        // into many weak tracks that never add up.
+        let mut ear = Listener::new(11);
+        ear.self_noise = 1.4;
+        let at = DVec3::new(450.0, 0.0, 0.0);
+        let mut t = 0.0;
+        let mut max_tracks = 0;
+        while t < 30.0 {
+            let src = DVec3::new(0.0, 0.0, -80.0 + 5.5 * t);
+            let ev = VibrationEvent { pos: src, energy: RUN_ENERGY, freq: RUN_FREQ, coupling: 1.0, time: t, kind: SourceKind::Step };
+            ear.hear(at, &ev);
+            max_tracks = max_tracks.max(ear.tracks.len());
+            t += 0.36;
+        }
+        assert!(max_tracks <= 2, "{max_tracks} tracks");
+        let best = ear.best(t).unwrap();
+        assert!(best.interest(t) > 30.0, "interest {:.1}", best.interest(t));
     }
 }
