@@ -233,16 +233,30 @@ public partial class SelfTest : Node
         var settings = new Settings { RenderDistance = 6, ViewBobbing = false };
         var meta = WorldSave.Create("selftest " + DateTime.Now.ToString("HHmmss"), "selftest");
         _folder = meta.Folder;
+        // The soundtrack: a title piece comes on first, as it would on the title screen.
+        var music = new MusicPlayer { Name = "Music", Volume = () => 1f };
+        AddChild(music);
+        music.EnterMenu();
+        Check(await Until(() => music.Current != null, 30f), $"a title piece starts ({music.Current?.Title})");
+        Check(music.Current != null && Array.IndexOf(music.Current.Moods, MusicMood.Menu) >= 0, "and it is one meant for the title screen");
+
         G = new Game { AutoCapture = false };
         G.Begin(meta, settings);
         AddChild(new Sfx());
         AddChild(G);
+        music.EnterGame(firstWait: 3f);
+        // The fade runs on frame time, and frames are long while a world opens under a software renderer.
+        Check(await Until(() => music.Current == null, 30f), "the title piece fades out as the world opens");
 
         Check(await Until(() => G.State == GameState.Playing, 90f), "world loads and the player arrives");
         await Seconds(1f);
         Check(P.Body.OnGround, "standing on the ground after arrival");
         var arrival = P.Body.Position;
         await Shot("arrival");
+        // The world picks the music now: a piece for the place and the hour.
+        Check(await Until(() => music.Current != null, 30f), $"a piece for the world starts ({music.Current?.Title})");
+        Check(music.Mood != MusicMood.Menu && music.Current != null && Array.IndexOf(music.Current.Moods, music.Mood) >= 0,
+            $"it suits where the player is ({music.Mood})");
 
         // Walk forward a little with real input, in a direction with nothing in the way.
         P.Yaw = ClearHeading();

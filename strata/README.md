@@ -195,7 +195,9 @@ cliffs or into lava; animals avoid water. Creatures spawn only where the light
 is right (animals on sunlit grass, hunters in darkness) and never within 18
 blocks of you; animals and hunters each have a cap on how many can be around,
 and creatures despawn once you are far away. Animals you have fed or bred stay
-forever. Their eyes give the hunters away in the dark.
+forever. Their eyes give the hunters away in the dark once they are close,
+within about a dozen blocks; further off a hunter is only a shape, so the
+night sky is not dotted with little lights.
 
 ## Survival
 
@@ -281,7 +283,7 @@ of a save cannot leave a world unloadable.
     src/Entity/                  player, collision, ray casts, creatures and their AI, dropped items
     src/Render/                  procedural textures and icons, sky and atmosphere, particles, weather, overlays
     src/UI/                      HUD, inventory and crafting screens, menus
-    src/Audio/                   synthesised sound effects, ambience and music
+    src/Audio/                   synthesised sound effects and ambience; the piano, the hall and the soundtrack
 
 **Data-driven registries.** Blocks, items, recipes, smelting, creatures, loot
 tables and biomes are tables in `src/Data`, `src/Entity/MobDefs.cs` and
@@ -325,8 +327,48 @@ and the creatures' coloured-box models are generated the same way.
 **Sound** is synthesised at start-up at 22 kHz from oscillators, noise and
 envelopes: footsteps, digging, breaking and placing per material, splashes and
 swimming, hits and hurts, eating, doors, crates, thunder, a voice (idle, hurt,
-death) for each of the eight creatures, loops of wind, rain, cave air and
-underwater murk, and slow generative music for day, night and underground.
+death) for each of the eight creatures, and loops of wind, rain, cave air and
+underwater murk.
+
+**Music** is seven original pieces for a soft piano in a large hall: quiet,
+unhurried, mostly major sevenths and ninths, a melody over a gently rolling
+left hand. They are written out in `src/Audio/Music.cs` as chord symbols and
+melody lines (`Dmaj9 Gmaj7 Bm7 Aadd9`, `F#5:3 E5:1 | D5:2 B4:1 D5:1 |`) and
+performed by code. The left hand plays each chord in a pattern, with the
+chord's notes moved as little as possible from the last chord's. The melody
+sits a touch behind the beat, the pedal lifts at every change of chord, the
+last two bars slow down and the final chord is rolled. Timing and touch vary
+by a few milliseconds, the same way every time.
+
+| Piece | Plays | Key, time, tempo |
+|---|---|---|
+| Hearthlight | title screen, day | D major, 4/4, 64 |
+| Morning Field | title screen, day | G major, 4/4, 72 |
+| Clearwater | day | C major, 3/4, 84 |
+| Long Road | day | F major, 4/4, 60 |
+| Lanterns | night, deep underground | E minor, 4/4, 58 |
+| Night Garden | night | B minor, 3/4, 66 |
+| Undercroft | deep underground | A minor, 4/4, 48 |
+
+The piano (`Piano.cs`) is additive synthesis. Each note is up to two dozen
+partials of a stiff string, which sit a little sharp of true harmonics. It is
+played on two strings about a cent apart, so the tone beats slowly as it
+rings. The felt hammer strikes about a seventh of the way along the string,
+which weakens every seventh partial, and a harder blow wakes more of the
+upper ones. The sound falls quickly and then rings on, for longer in the
+bass. The hall (`Reverb.cs`) is a Schroeder–Moorer reverb: eight damped combs
+and four all-passes a side. The lows below about 220 Hz are rolled off before
+the reverb, so the tail stays clear. A few pieces add a quiet two-voice pad
+under the chords.
+
+`MusicPlayer` picks a piece a couple of seconds after the title screen
+opens, then after 40–90 s of quiet. In a world it waits 30–75 s, then leaves
+2–5 minutes between pieces, choosing by where you are: deep underground (out
+of the sky's reach, well below sea level), night or day. It never plays the
+same piece twice running and fades out when you leave for the menu or a world.
+Each piece is rendered on a worker thread when it is wanted (two to six
+seconds of one core, about 20 MB) and let go when it ends. Nothing is
+recorded, sampled or loaded from disk.
 
 **Physics** is swept axis-aligned boxes in double precision against the voxel
 grid, one axis at a time, with step-up, sneak edges, ladders and swimming. It
@@ -342,9 +384,10 @@ walkable cells in a short radius and re-plan as you move.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 494 checks, in a couple of seconds
-    godot --path . -- --selftest OUTDIR                # plays the game; 61 checks and screenshots
+    godot --headless --path . -- --test                # 636 checks, in a couple of seconds
+    godot --path . -- --selftest OUTDIR                # plays the game; SELFTEST_COUNT checks and screenshots
     godot --headless --path . -- --bench               # pipeline costs per column
+    godot --headless --path . -- --music OUTDIR        # the soundtrack as WAV files (--stems: melody, accompaniment, pad apart)
 
 `--test` covers coordinates and indexing, column storage, seed repeatability,
 generation being deterministic and independent of load order, save and load of
@@ -353,12 +396,15 @@ stacking and every kind of click, exact crafting, smelting, break times and
 harvest rules, ray casts, incremental light against a full recompute,
 collision (landing, walls, speed, stepping), survival rules, the mesher's
 culling and merging, loot tables, creature AI at 4, 8 and 30 fps, water
-flow (including flows saved mid-way), armour and arrows, and lumen circuits
+flow (including flows saved mid-way), armour and arrows, lumen circuits
 (strength, range, breaks, steps, roofs, and a plate-worked door that will not
-close on you).
+close on you), and the music: the notation reader, every piece's bars and
+melodies lining up, piano notes that ring down cleanly, and an excerpt that
+renders in stereo without clipping and fades to silence.
 
 `--selftest` starts a real world with real rendering and plays the core loop
-with scripted input, the way a person would: chop a tree, craft planks through
+with scripted input, the way a person would: hear a title piece start and fade
+as the world opens, then a piece chosen for the place, chop a tree, craft planks through
 the screen, drag a stack and hotkey it, build a worktable, make tools, dig to
 stone, build a furnace and smelt, hunt, put on armour and shoot a bow, cook and
 eat, pour water into a channel, wire a switch to a lamp and a plate to a door,
@@ -423,6 +469,13 @@ copied.
   Trees grow from saplings the same way.
 - **Sound** is synthesised; it is recognisable (a splash sounds like a
   splash) but it will not fool anyone.
+- **The piano** is a model of a soft felt piano, not a recording of one. It
+  has no sympathetic resonance between strings and no pedal or key noise. A
+  note struck again while it still rings adds a second voice rather than
+  restarting the string. It is pleasant, but close listening gives it away.
+- **The music** is written in the calm, sparse piano style that block games
+  made familiar, but every melody and chord progression here is new. None of
+  it is an arrangement of, or borrowed from, any existing soundtrack.
 
 ## Known limitations
 

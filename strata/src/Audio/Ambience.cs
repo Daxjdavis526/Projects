@@ -5,13 +5,12 @@ namespace Strata;
 
 /// <summary>
 /// Looping beds under everything: wind on open ground, rain when it rains,
-/// drips and hum underground, and an occasional slow phrase of music.
-/// Each loop fades in and out rather than switching.
+/// drips and hum underground. Each loop fades in and out rather than
+/// switching. (The music is played by <see cref="MusicPlayer"/>.)
 /// </summary>
 public sealed partial class Ambience : Node
 {
-    private AudioStreamPlayer _wind, _rain, _cave, _water, _music;
-    private float _musicTimer = 90f;
+    private AudioStreamPlayer _wind, _rain, _cave, _water;
 
     public override void _Ready()
     {
@@ -19,8 +18,6 @@ public sealed partial class Ambience : Node
         _rain = Loop("amb_rain");
         _cave = Loop("amb_cave");
         _water = Loop("amb_underwater");
-        _music = new AudioStreamPlayer { VolumeDb = -80 };
-        AddChild(_music);
     }
 
     private AudioStreamPlayer Loop(string name)
@@ -54,17 +51,8 @@ public sealed partial class Ambience : Node
         Fade(_cave, under ? 0f : (1f - open) * (b.Y < 55 ? 0.35f : 0.1f) * vol, dt);
         Fade(_water, under ? 0.5f * vol : 0f, dt * 4f);
 
-        _musicTimer -= dt;
-        if (_musicTimer <= 0f && !_music.Playing)
-        {
-            _musicTimer = 240f + (float)GD.RandRange(0, 360);
-            var track = SoundBank.Music(new Random().Next(1000), g.View.Sky.IsNight, sky < 4);
-            if (track != null && g.Settings.MusicVolume > 0.01f)
-            {
-                _music.Stream = track;
-                _music.VolumeDb = Mathf.LinearToDb(Math.Max(0.0001f, g.Settings.MusicVolume * vol * 0.6f));
-                _music.Play();
-            }
-        }
+        // Which pieces suit the place: the deep ones out of the sky's reach well below sea level, else by the hour.
+        if (MusicPlayer.I != null)
+            MusicPlayer.I.Mood = sky < 4 && b.Y < V.SeaLevel - 6 ? MusicMood.Deep : g.View.Sky.IsNight ? MusicMood.Night : MusicMood.Day;
     }
 }

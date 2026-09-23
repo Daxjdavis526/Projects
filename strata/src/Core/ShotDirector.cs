@@ -70,6 +70,7 @@ public partial class ShotDirector : Node3D
             var ring = new Vector3(sx + 6, gen.SurfaceY(sx + 6, sz - 4) + 1, sz - 4);
             _shots.Add(("creatures_day", ring + new Vector3(-7, 3.5f, 7), ring, 0.25f, 1f));
             _shots.Add(("creatures_night", ring + new Vector3(-7, 3.5f, 7), ring, 0.72f, 1f));
+            _shots.Add(("creatures_night_far", ring + new Vector3(-30, 5f, 30), ring, 0.72f, 1f));
         }
         else BuildTour(gen, sx, sz);
 

@@ -10,6 +10,8 @@ namespace Strata;
 /// end-to-end self test, the screenshot director, or the game.
 ///   --test                 run the headless unit tests and exit
 ///   --bench                time generation, lighting, meshing and saving per column
+///   --music DIR [ID...]    render the soundtrack (or the named pieces) to WAV files; --stems
+///                          adds each piece's melody, accompaniment and pad apart, at the mix's level
 ///   --selftest [dir]       play through the core loop with scripted input
 ///   --shots [dir]          fly a camera through viewpoints and save pictures
 ///   --capture SECS PATH    save a screenshot after SECS seconds and quit
@@ -59,6 +61,12 @@ public partial class GameBootstrap : Node
             GetTree().Quit();
             return;
         }
+        if (args.Contains("--music"))
+        {
+            RenderMusic(args);
+            GetTree().Quit();
+            return;
+        }
         if (args.Contains("--bench"))
         {
             Tests.Bench();
@@ -82,6 +90,33 @@ public partial class GameBootstrap : Node
             return;
         }
         AddChild(new App { Name = "App" });
+    }
+
+    /// <summary>--music DIR [ID...]: every piece (or the named ones) as a WAV file, with its length and levels.</summary>
+    private static void RenderMusic(string[] args)
+    {
+        int at = Array.IndexOf(args, "--music");
+        string dir = at + 1 < args.Length ? args[at + 1] : "music";
+        var only = args[(at + 2)..].Where(a => !a.StartsWith("--")).ToArray();
+        bool stems = args.Contains("--stems");
+        System.IO.Directory.CreateDirectory(dir);
+        foreach (var piece in Music.All)
+        {
+            if (only.Length > 0 && !only.Contains(piece.Id)) continue;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var r = Music.Render(piece);
+            long ms = sw.ElapsedMilliseconds;
+            string path = System.IO.Path.Combine(dir, piece.Id + ".wav");
+            MusicPlayer.Stream(r).SaveToWav(path);
+            GD.Print($"{piece.Title,-14} {string.Join("/", piece.Moods),-10} {(int)r.Seconds / 60}:{(int)r.Seconds % 60:00}  rms {20 * Math.Log10(r.Rms):0.0} dBFS  rendered in {ms} ms  -> {path}");
+            if (!stems) continue;
+            foreach (var (stem, keep, pad) in new (string, Func<NoteEvent, bool>, bool)[] { ("lead", n => n.Lead, false), ("accomp", n => !n.Lead, false), ("pad", n => false, true) })
+            {
+                if (pad && piece.Pad <= 0) continue;
+                var (sl, sr) = Music.Mix(piece, keep: keep, pad: pad);
+                MusicPlayer.Stream(Music.Level(piece.Id, sl, sr, r.Gain)).SaveToWav(System.IO.Path.Combine(dir, $"{piece.Id}_{stem}.wav"));
+            }
+        }
     }
 
     /// <summary>--sheet OUT.jpg COLS [--tile WxH] IN1.png IN2.png ...: tiles screenshots into one picture for review.</summary>

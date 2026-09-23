@@ -124,6 +124,8 @@ public static class Tests
         Test("water flows, falls and recedes", WaterFlow);
         Test("armour turns blows; arrows fly true", ArmourAndBow);
         Test("lumen circuits carry, fade and switch", Circuits);
+        Test("music notation reads, and every piece is well formed", MusicNotation);
+        Test("piano notes ring and fade; a piece renders clean", MusicRender);
         GD.Print($"\n{_pass} checks passed, {_fail} failed");
         foreach (var f in _failures) GD.Print("  - " + f);
         return _fail;
@@ -803,6 +805,99 @@ public static class Tests
         for (int i = 0; i < 60 && !stray.Dead; i++) mgr.Step(1f / 60f, null);
         Check(stray.Dead && stray.Pos.Z < 12.1f, "an arrow stops at a wall");
         mgr.Free();
+    }
+
+    private static bool Same(int[] a, params int[] b)
+    {
+        if (a.Length != b.Length) return false;
+        for (int i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
+        return true;
+    }
+
+    private static void MusicNotation()
+    {
+        Check(Notation.Note("C4") == 60 && Notation.Note("A4") == 69 && Notation.Note("F#5") == 78 && Notation.Note("Bb3") == 58, "note names");
+        var (bass, pcs) = Notation.Chord("Dmaj7/F#");
+        Check(bass == 6 && Same(pcs, 2, 6, 9, 1), "a slash chord keeps its bass apart");
+        Check(Same(Notation.Chord("Em9").pcs, 4, 7, 11, 2, 6) && Same(Notation.Chord("C").pcs, 0, 4, 7), "ninths and triads");
+        Check(Notation.Chord("Bbmaj7").bass == 10 && Same(Notation.Chord("F#sus4").pcs, 6, 11, 1), "flats, sharps and suspensions");
+        bool threw = false;
+        try { Notation.Melody("C5:3 | D5:1 |", 4, 0.5f); } catch (FormatException) { threw = true; }
+        Check(threw, "a bar line that is not on the bar is caught");
+        threw = false;
+        try { Notation.Chord("Cmaj13"); } catch (FormatException) { threw = true; }
+        Check(threw, "an unknown chord is caught");
+        var mel = Notation.Melody("r:2 A4:1 D5+F#5:1@0.7 |", 4, 0.5f);
+        Check(mel.Count == 2 && mel[0].beat == 2 && mel[1].notes.Length == 2 && Math.Abs(mel[1].vel - 0.7f) < 1e-6f, "rests, dyads and loudness");
+
+        var ids = new HashSet<string>();
+        foreach (var piece in Music.All)
+        {
+            Check(ids.Add(piece.Id), $"{piece.Id}: one of a kind");
+            Check(piece.Moods.Length > 0 && piece.Form.Length > 0, $"{piece.Id}: has moods and a form");
+            foreach (var name in piece.Form) Check(piece.Sections.ContainsKey(name), $"{piece.Id}: section {name} exists");
+            foreach (var (name, sec) in piece.Sections)
+            {
+                var bars = Notation.Bars(sec.Chords);
+                foreach (var bar in bars)
+                    foreach (var sym in bar) Notation.Chord(sym);                     // throws on anything unreadable
+                if (sec.Melody.Length == 0) continue;
+                double len = Notation.Length(sec.Melody);
+                Check(Math.Abs(len - bars.Count * piece.Beats) < 1e-6, $"{piece.Id}.{name}: melody lasts {len} beats over {bars.Count} bars of {piece.Beats}");
+                int low = 127, high = 0;
+                foreach (var (_, _, notes, _) in Notation.Melody(sec.Melody, piece.Beats, sec.Lead))
+                    foreach (int m in notes) { low = Math.Min(low, m); high = Math.Max(high, m); }
+                Check(low >= 55 && high <= 90, $"{piece.Id}.{name}: melody from {low} to {high}, a singing range");
+            }
+            var (arranged, chords, seconds) = Music.Arrange(piece);
+            bool sane = arranged.Count > 50;
+            foreach (var n in arranged) sane &= n.Midi >= 21 && n.Midi <= 108 && n.KeyUp > n.Start && n.Start >= 0 && n.Start < seconds;
+            Check(sane, $"{piece.Id}: {arranged.Count} notes, all playable, all released");
+            Check(seconds > 90 && seconds < 200, $"{piece.Id}: {seconds:0} s long");
+            // The close slows: the last chord lasts longer than the first.
+            Check(chords[^1].end - chords[^1].start > (chords[0].end - chords[0].start) * 1.1, $"{piece.Id}: slows at the close");
+        }
+        foreach (MusicMood mood in Enum.GetValues(typeof(MusicMood)))
+        {
+            int count = 0;
+            foreach (var _ in Music.For(mood)) count++;
+            Check(count >= 2, $"{mood}: {count} pieces, so none plays twice running");
+        }
+    }
+
+    private static void MusicRender()
+    {
+        var cache = new Dictionary<int, float[]>();
+        foreach (int midi in new[] { 26, 45, 60, 88 })
+        {
+            var s = Piano.Note(midi, 1, cache);
+            bool finite = true;
+            float peak = 0f;
+            foreach (var v in s) { finite &= float.IsFinite(v); peak = Math.Max(peak, Math.Abs(v)); }
+            double early = 0, late = 0;
+            int w = Piano.Rate / 5;
+            for (int i = 0; i < w; i++) { early += s[i] * s[i]; late += s[s.Length - 1 - i] * s[s.Length - 1 - i]; }
+            Check(finite && peak > 0.01f && peak < 1f, $"piano {midi}: finite, peak {peak:0.000}");
+            Check(late < early * 1e-4, $"piano {midi}: rings down (tail {10 * Math.Log10(late / early):0} dB)");
+        }
+        Check(ReferenceEquals(Piano.Note(60, 1, cache), Piano.Note(60, 1, cache)), "a render reuses its notes");
+
+        var piece = Music.All.Find(p => p.Id == "clearwater");
+        var r = Music.Render(piece, maxBars: 3);
+        int differ = 0, loudest = 0;
+        for (int i = 0; i < r.Frames; i++)
+        {
+            short l = (short)(r.Pcm[i * 4] | r.Pcm[i * 4 + 1] << 8), rr = (short)(r.Pcm[i * 4 + 2] | r.Pcm[i * 4 + 3] << 8);
+            if (l != rr) differ++;
+            loudest = Math.Max(loudest, Math.Max(Math.Abs((int)l), Math.Abs((int)rr)));
+        }
+        Check(r.Frames == (int)(r.Seconds * Piano.Rate) && r.Pcm.Length == r.Frames * 4, "excerpt: 16-bit stereo frames");
+        Check(r.Rms > 0.02f, $"excerpt: not silent (rms {r.Rms:0.000})");
+        Check(loudest < 32000 && r.Peak <= Music.MaxPeak + 1e-3f, $"excerpt: no clipping (peak {loudest})");
+        Check(differ > r.Frames / 2, "excerpt: stereo, the hall differs left and right");
+        int lastQuarter = 0;
+        for (int i = r.Frames - Piano.Rate / 4; i < r.Frames; i++) lastQuarter = Math.Max(lastQuarter, Math.Abs((int)(short)(r.Pcm[i * 4] | r.Pcm[i * 4 + 1] << 8)));
+        Check(lastQuarter < 40, $"excerpt: the tail fades to nothing ({lastQuarter})");
     }
 
     private static void Circuits()

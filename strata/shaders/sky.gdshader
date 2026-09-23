@@ -30,8 +30,9 @@ vec3 stars(vec3 d) {
     if (h < 0.965) return vec3(0.0);
     vec3 center = cell + 0.5 + (vec3(hash3(cell + 1.3), hash3(cell + 2.7), hash3(cell + 4.1)) - 0.5) * 0.6;
     float dist = length(g - center);
-    float size = mix(0.12, 0.3, hash3(cell + 7.7));
-    float twinkle = 0.75 + 0.25 * sin(TIME * (1.0 + h * 3.0) + h * 40.0);
+    // Wide enough to cover a couple of pixels, so turning the view does not make them flicker.
+    float size = mix(0.22, 0.38, hash3(cell + 7.7));
+    float twinkle = 0.9 + 0.1 * sin(TIME * (0.4 + h) + h * 40.0);
     vec3 tint = mix(vec3(0.8, 0.85, 1.0), vec3(1.0, 0.9, 0.75), hash3(cell + 9.1));
     return tint * smoothstep(size, 0.0, dist) * twinkle * 2.2;
 }

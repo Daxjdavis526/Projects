@@ -7,24 +7,16 @@ namespace Strata;
 /// <summary>
 /// Every sound in the game, synthesised at startup from oscillators, filtered
 /// noise and envelopes: the knock of wood and the grind of stone, footsteps on
-/// each surface, eight creature voices, rain, wind, cave air, and a few slow
-/// generative pieces of music. Nothing is recorded or loaded.
+/// each surface, eight creature voices, rain, wind and cave air. Nothing is
+/// recorded or loaded. (The music is separate: see <see cref="Music"/>.)
 /// </summary>
 public static class SoundBank
 {
     public const int Rate = 22050;
     private static readonly Dictionary<string, AudioStreamWav> _bank = new();
-    private static readonly List<AudioStreamWav> _music = new();
     private static bool _built;
 
     public static AudioStreamWav Get(string name) => _bank.TryGetValue(name, out var s) ? s : null;
-
-    public static AudioStreamWav Music(int seed, bool night, bool deep)
-    {
-        if (_music.Count == 0) return null;
-        int i = deep ? 2 : night ? 1 : 0;
-        return _music[Math.Min(i, _music.Count - 1)];
-    }
 
     public static void Build()
     {
@@ -82,11 +74,7 @@ public static class SoundBank
         AddLoop("amb_rain", RainLoop(6f));
         AddLoop("amb_cave", CaveLoop(12f));
         AddLoop("amb_underwater", UnderwaterLoop(6f));
-
-        _music.Add(Piece(1, new[] { 0, 2, 4, 7, 9 }, 57, 72f, bright: true));   // day, major pentatonic on A
-        _music.Add(Piece(2, new[] { 0, 3, 5, 7, 10 }, 52, 80f, bright: false)); // night, minor pentatonic on E
-        _music.Add(Piece(3, new[] { 0, 1, 5, 7, 8 }, 45, 70f, bright: false));  // deep, darker mode
-        GD.Print($"sound bank: {_bank.Count} sounds and {_music.Count} pieces in {sw.ElapsedMilliseconds} ms");
+        GD.Print($"sound bank: {_bank.Count} sounds in {sw.ElapsedMilliseconds} ms");
     }
 
     // --- plumbing -----------------------------------------------------------------------
@@ -727,61 +715,5 @@ public static class SoundBank
             s[i] = f.Low(n.Next()) * (0.7f + 0.3f * MathF.Sin(t * 0.9f)) * 0.9f;
         }
         return Seamless(s, 1f);
-    }
-
-    // --- music --------------------------------------------------------------------------------
-
-    /// <summary>
-    /// A slow piece: a pad walking through four chords of a pentatonic set,
-    /// and a sparse bell melody over it that rests more than it plays.
-    /// </summary>
-    private static AudioStreamWav Piece(uint seed, int[] scale, int rootMidi, float seconds, bool bright)
-    {
-        var s = Buf(seconds);
-        var rng = new Rng(seed * 7919);
-        float Hz(int midi) => 440f * MathF.Pow(2f, (midi - 69) / 12f);
-        int chords = 4;
-        float chordLen = seconds / (chords * 2);
-        // Pad.
-        for (int c = 0; c < chords * 2; c++)
-        {
-            int degree = new[] { 0, 3, 1, 4 }[c % 4];
-            int[] notes = { scale[degree % 5], scale[(degree + 2) % 5] + (degree + 2 >= 5 ? 12 : 0), scale[(degree + 4) % 5] + (degree + 4 >= 5 ? 12 : 0) };
-            float start = c * chordLen;
-            for (int i = (int)(start * Rate); i < Math.Min(s.Length, (int)((start + chordLen * 1.4f) * Rate)); i++)
-            {
-                float t = i / (float)Rate - start;
-                float env = MathF.Min(1f, t / 2.5f) * MathF.Min(1f, MathF.Max(0f, chordLen * 1.4f - t) / 2.5f);
-                float v = 0;
-                foreach (int note in notes)
-                {
-                    float hz = Hz(rootMidi - 12 + note);
-                    v += MathF.Sin(t * hz * MathF.Tau) + 0.5f * MathF.Sin(t * hz * 1.003f * MathF.Tau) + (bright ? 0.2f : 0.1f) * MathF.Sin(t * hz * 2f * MathF.Tau);
-                }
-                s[i] += v * env * 0.05f;
-            }
-        }
-        // Melody.
-        float time = 2f;
-        while (time < seconds - 4f)
-        {
-            if (rng.Chance(0.35f)) { time += rng.Range(1.5f, 4f); continue; }
-            int note = scale[rng.Int(0, 4)] + (rng.Chance(0.3f) ? 12 : 0);
-            float hz = Hz(rootMidi + note);
-            float len = rng.Range(1.2f, 2.5f);
-            for (int i = (int)(time * Rate); i < Math.Min(s.Length, (int)((time + len) * Rate)); i++)
-            {
-                float t = i / (float)Rate - time;
-                // A soft bell: a sine with a slightly inharmonic overtone and a long tail.
-                float v = MathF.Sin(t * hz * MathF.Tau + MathF.Sin(t * hz * 2.01f * MathF.Tau) * 0.6f * MathF.Exp(-t * 3f));
-                s[i] += v * Env(t, 0.01f, 0.9f) * 0.12f;
-            }
-            time += rng.Range(0.8f, 2f);
-        }
-        // A little room: a single echo.
-        int delay = (int)(0.37f * Rate);
-        for (int i = s.Length - 1; i >= delay; i--) s[i] += s[i - delay] * 0.25f;
-        FadeEdges(s, 1500f);
-        return ToWav(s, false);
     }
 }

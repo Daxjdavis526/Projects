@@ -9,6 +9,7 @@ public sealed partial class App : Node
     private MainMenu _menu;
     private Game _game;
     private Sfx _sfx;
+    private MusicPlayer _music;
 
     public override void _Ready()
     {
@@ -19,6 +20,8 @@ public sealed partial class App : Node
         _sfx = new Sfx { Name = "Sfx" };
         AddChild(_sfx);
         _sfx.SetVolume(Settings.MasterVolume);
+        _music = new MusicPlayer { Name = "Music", Volume = () => Settings.MusicVolume };
+        AddChild(_music);
         GetTree().AutoAcceptQuit = false;
         ShowMenu();
     }
@@ -26,6 +29,7 @@ public sealed partial class App : Node
     public void ShowMenu()
     {
         _game = null;
+        _music.EnterMenu();
         Input.MouseMode = Input.MouseModeEnum.Visible;
         _menu = new MainMenu { App = this, Name = "Menu" };
         AddChild(_menu);
@@ -35,6 +39,7 @@ public sealed partial class App : Node
     {
         _menu?.QueueFree();
         _menu = null;
+        _music.EnterGame();
         _game = new Game { App = this, Name = "Game" };
         _game.Begin(meta, Settings);
         AddChild(_game);
