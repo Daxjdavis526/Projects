@@ -1,0 +1,32 @@
+[package]
+name = "wormsign"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+wormsign_core = { path = "../core" }
+glam.workspace = true
+# Only what the game uses. Bevy's `3d` bundle would add glTF, animation,
+# scenes, picking, gamepads and image formats, all dead weight in a download.
+# No `audio`: every sound is synthesised on the Web Audio graph.
+bevy = { version = "0.19.1", default-features = false, features = [
+  "std", "async_executor", "bevy_asset", "bevy_log",
+  "bevy_winit", "bevy_window", "default_font", "webgl2", "x11",
+  "bevy_camera", "bevy_color", "bevy_gizmos", "bevy_gizmos_render", "bevy_image",
+  "bevy_mesh", "bevy_shader", "bevy_material", "bevy_text", "hdr",
+  "bevy_light", "bevy_render", "bevy_core_pipeline", "bevy_pbr", "tonemapping_luts", "zstd_rust",
+  "bevy_ui", "bevy_ui_render",
+] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+bevy = { version = "0.19.1", default-features = false, features = ["web"] }
+wasm-bindgen = "0.2.128"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = [
+  "AudioContext", "BaseAudioContext", "AudioNode", "AudioParam", "GainNode",
+  "BiquadFilterNode", "BiquadFilterType", "OscillatorNode", "OscillatorType",
+  "AudioBuffer", "AudioBufferSourceNode", "AudioScheduledSourceNode",
+  "AudioDestinationNode", "StereoPannerNode", "DynamicsCompressorNode",
+  "AudioContextState",
+] }

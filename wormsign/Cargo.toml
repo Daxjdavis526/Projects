@@ -1,0 +1,53 @@
+# WORMSIGN — a sandworm-riding game.
+#
+# Two crates, deliberately:
+#   wormsign_core  pure Rust, no Bevy. Terrain, vibration, worm path and AI,
+#                  constraints, ragdoll, audio synthesis. `cargo test` runs it
+#                  in seconds, with no GPU and no browser.
+#   wormsign       the Bevy game: rendering, input, streaming, UI, playback.
+[workspace]
+resolver = "3"
+members = ["crates/core", "crates/game"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+license = "MIT"
+
+[workspace.dependencies]
+glam = "0.32"
+fastnoise-lite = { version = "1.1", features = ["f64"] }
+
+# Bevy is unusable at opt-level 0: the renderer alone drops to a few frames a
+# second. Optimising every dependency once while keeping our own code at 1
+# gives a debug build that runs, and incremental rebuilds that stay quick.
+[profile.dev]
+opt-level = 1
+[profile.dev.package."*"]
+opt-level = 3
+
+# What gets published. Thin LTO is most of the speed of fat LTO for a fraction
+# of the link time, and link time is the bottleneck on four cores.
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+panic = "abort"
+strip = "debuginfo"
+
+# What gets published: small first (it is a download), except the hot paths
+# — terrain noise and the game's own simulation — which stay fully optimised.
+[profile.web]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+
+[profile.web.package.wormsign_core]
+opt-level = 3
+
+[profile.web.package.fastnoise-lite]
+opt-level = 3
+
+[profile.web.package.glam]
+opt-level = 3
