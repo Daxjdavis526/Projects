@@ -32,7 +32,11 @@ impl Plugin for CallerPlugin {
         app.insert_resource(Pack { thumpers: CARRIED })
             .add_systems(Startup, setup)
             .add_systems(Update, plant.in_set(Phase::Simulate).before(SimSet))
-            .add_systems(Update, (drum, taken).chain().in_set(Phase::Simulate).in_set(SimSet).after(crate::worms::simulate))
+            // Emitters must run before the worms listen: this frame's events
+            // are gone by the next one. (Running `drum` after the worms once
+            // meant no worm ever heard a caller.)
+            .add_systems(Update, drum.in_set(Phase::Simulate).in_set(SimSet).before(crate::worms::simulate))
+            .add_systems(Update, taken.in_set(Phase::Simulate).in_set(SimSet).after(crate::worms::simulate))
             .add_systems(Update, animate.in_set(Phase::View));
     }
 }

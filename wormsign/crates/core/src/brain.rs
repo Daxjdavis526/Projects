@@ -336,8 +336,15 @@ impl Brain {
                 self.wander = wrap_angle(self.wander + self.rng.gauss() * 0.08 * dt.sqrt());
                 (self.wander, s.cruise, 2.4 * r)
             }
-            State::Investigate => (bearing(head, self.target), s.cruise + 0.3 * (s.max_speed - s.cruise), 2.0 * r),
-            State::Track => (bearing(head, self.target), s.cruise + 0.65 * (s.max_speed - s.cruise), 1.6 * r),
+            // A caller's drumming is irresistible: it comes flat out.
+            State::Investigate => {
+                let k = if self.thumper { 0.8 } else { 0.3 };
+                (bearing(head, self.target), s.cruise + k * (s.max_speed - s.cruise), 2.0 * r)
+            }
+            State::Track => {
+                let k = if self.thumper { 1.0 } else { 0.65 };
+                (bearing(head, self.target), s.cruise + k * (s.max_speed - s.cruise), 1.6 * r)
+            }
             State::Charge => (bearing(head, self.target), s.max_speed, 1.15 * r),
             // The breach: the head rears out of the sand on the way in, then
             // comes down so the open mouth arrives at ground level over the
@@ -519,7 +526,7 @@ mod tests {
         assert!(states.contains(&State::Track), "{states:?}");
         assert!(states.contains(&State::Charge), "{states:?}");
         let t = attack.expect("should attack");
-        assert!(t > 60.0 && t < 300.0, "attack after {t:.0} s");
+        assert!(t > 40.0 && t < 130.0, "attack after {t:.0} s");
         assert!(closest < 25.0, "missed by {closest:.0} m");
     }
 

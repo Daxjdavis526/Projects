@@ -39,7 +39,7 @@ impl WormSpec {
             radius: 11.0,
             cruise: 9.0,
             max_speed: 36.0,
-            accel: 1.6,
+            accel: 2.5,
             min_turn_radius: 70.0,
             turn_accel: 0.035,
             climb: 9.0,
@@ -479,7 +479,7 @@ mod tests {
         for _ in 0..60 {
             w.step(1.0 / 60.0, flat);
         }
-        assert!(w.speed < w.spec.cruise + 2.0, "a second of acceleration: {}", w.speed);
+        assert!(w.speed < w.spec.cruise + 3.0, "a second of acceleration: {}", w.speed);
         for _ in 0..60 * 30 {
             w.step(1.0 / 60.0, flat);
         }

@@ -104,7 +104,7 @@ pub fn spawn_population(
     while placed.len() < residents + 1 {
         let giant = placed.len() == residents;
         let a = rng.range(0.0, std::f64::consts::TAU);
-        let d = if giant { rng.range(6500.0, 8500.0) } else { rng.range(2500.0, 4500.0) };
+        let d = if giant { rng.range(5000.0, 7000.0) } else { rng.range(1500.0, 3000.0) };
         let at = p + DVec3::new(a.cos(), 0.0, a.sin()) * d;
         if desert.0.rock_near(at.x, at.z, if giant { 600.0 } else { 200.0 }).is_some() {
             continue;
@@ -630,13 +630,13 @@ fn recycle(
         if riding.worm == Some(e) {
             continue;
         }
-        let far = if wb.worm.spec.length > 500.0 { 14_000.0 } else { 9_000.0 };
+        let far = if wb.worm.spec.length > 500.0 { 12_000.0 } else { 6_000.0 };
         if (wb.worm.head() - p).length() < far {
             continue;
         }
         for _ in 0..20 {
             let a = rng.range(0.0, std::f64::consts::TAU);
-            let at = p + DVec3::new(a.cos(), 0.0, a.sin()) * rng.range(3500.0, 5000.0) * if wb.worm.spec.length > 500.0 { 1.8 } else { 1.0 };
+            let at = p + DVec3::new(a.cos(), 0.0, a.sin()) * rng.range(1500.0, 3000.0) * if wb.worm.spec.length > 500.0 { 2.5 } else { 1.0 };
             if desert.0.rock_near(at.x, at.z, 250.0).is_none() {
                 let spec = wb.worm.spec;
                 let d = desert.clone();
