@@ -188,7 +188,7 @@ fn grab_pointer(
     }
 }
 
-fn read_input(
+pub fn read_input(
     keys: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     motion: Res<AccumulatedMouseMotion>,
@@ -227,13 +227,23 @@ fn read_input(
     i.jump |= keys.just_pressed(KeyCode::Space);
 }
 
-/// Sand, rock, and any worm mound under (x, z).
-pub fn ground_at(desert: &Desert, worms: &[&Worm], x: f64, z: f64) -> GroundHit {
+/// Sand, rock, any worm mound under (x, z) — or a worm's back, if one is
+/// there and the player (at height `y_near`) is on top of it.
+pub fn ground_at(desert: &Desert, worms: &[&Worm], x: f64, z: f64, y_near: f64) -> GroundHit {
     let h = |x, z| crate::worms::ground_height(desert, worms, x, z);
     let e = 0.6;
     let (hx0, hx1, hz0, hz1) = (h(x - e, z), h(x + e, z), h(x, z - e), h(x, z + e));
     let n = DVec3::new(hx0 - hx1, 2.0 * e, hz0 - hz1).normalize();
-    GroundHit::still(h(x, z), n)
+    let sand = GroundHit::still(h(x, z), n);
+    let mut best = sand;
+    for w in worms {
+        if let Some((hh, nn, v, _)) = w.back_ground(x, z, y_near + 0.5) {
+            if hh > best.height {
+                best = GroundHit::hide(hh, nn, v);
+            }
+        }
+    }
+    best
 }
 
 pub fn simulate(
@@ -242,14 +252,17 @@ pub fn simulate(
     mut controls: ResMut<Controls>,
     mut quakes: ResMut<Quakes>,
     mut q: Query<(&mut PlayerBody, &mut Feet, &mut WorldPos)>,
-    worms: Query<&WormBody>,
+    worms_q: Query<(Entity, &WormBody)>,
     fate: Res<crate::death::Fate>,
+    mut riding: ResMut<crate::rider::Riding>,
+    look: Res<Look>,
 ) {
     if !fate.alive() {
         return;
     }
     let Ok((mut body, mut feet, mut wp)) = q.single_mut() else { return };
-    let worms: Vec<&Worm> = worms.iter().map(|w| &w.worm).collect();
+    let with_ids: Vec<(Entity, &WormBody)> = worms_q.iter().collect();
+    let worms: Vec<&Worm> = with_ids.iter().map(|w| &w.1.worm).collect();
     for k in 0..tick.n {
         let t = tick.time(k);
         let mut input = controls.0;
@@ -257,8 +270,12 @@ pub fn simulate(
         let f = feet.0.speed_factor(body.0.gait);
         input.forward *= f;
         input.right *= f;
-        let report = body.0.step(&input, tick.dt, |x, z| ground_at(&desert, &worms, x, z));
+        let y_near = body.0.pos.y;
+        let report = body.0.step(&input, tick.dt, |x, z| ground_at(&desert, &worms, x, z, y_near));
         controls.0.jump = false;
+        crate::rider::step_hooks(&mut riding, &mut body.0, &look, &with_ids, |x, z| desert.0.height(x, z) as f64, tick.dt);
+        let y_now = body.0.pos.y;
+        riding.on_back = body.0.grounded && ground_at(&desert, &worms, body.0.pos.x, body.0.pos.z, y_now).worm;
 
         let p = &body.0;
         let on_rock = desert.0.sample(p.pos.x, p.pos.z).rock > 0.5;
@@ -298,11 +315,23 @@ pub fn camera(
     desert: Res<Desert>,
     mut look: ResMut<Look>,
     body: Query<(&PlayerBody, &Feet)>,
-    mut cam: Query<&mut Transform, With<Camera3d>>,
+    mut cam: Query<(&mut Transform, &mut Projection), With<Camera3d>>,
     mut shake: ResMut<Shake>,
     fate: Res<crate::death::Fate>,
+    riding: Res<crate::rider::Riding>,
+    mut ride_ease: Local<f32>,
 ) {
-    let (Ok((body, feet)), Ok(mut t)) = (body.single(), cam.single_mut()) else { return };
+    let (Ok((body, feet)), Ok((mut t, mut proj))) = (body.single(), cam.single_mut()) else { return };
+    // Mounted, the camera pulls back to take in the animal, and the view
+    // widens with its speed.
+    let mounted = riding.riding() || riding.on_back;
+    let dt0 = time.delta_secs();
+    *ride_ease += ((mounted as i32 as f32) - *ride_ease) * (1.0 - (-dt0 * 1.5).exp());
+    if let Projection::Perspective(pp) = &mut *proj {
+        let want = (70.0 + 12.0 * (riding.speed as f32 / 36.0).min(1.0)).to_radians();
+        pp.fov += (want - pp.fov) * (1.0 - (-dt0 * 2.0).exp());
+    }
+    shake.rumble = shake.rumble.max(*ride_ease * (riding.speed as f32 / 36.0).min(1.0) * 0.7);
     let (jolt, roll) = shake.sample(time.delta_secs());
     if !fate.alive() {
         // The death camera drives; it still shakes.
@@ -329,8 +358,9 @@ pub fn camera(
     let world = match look.view {
         View::First => eye,
         View::Third => {
-            let target = p.pos + DVec3::new(0.0, 1.55, 0.0);
-            let back = (rot * Vec3::Z * look.distance).as_dvec3();
+            let target = p.pos + DVec3::new(0.0, 1.55 + 1.5 * *ride_ease as f64, 0.0);
+            let dist = look.distance + (look.distance.max(16.0) - look.distance) * *ride_ease;
+            let back = (rot * Vec3::Z * dist).as_dvec3();
             let mut want = target + back;
             // Keep the camera out of the sand.
             let floor = desert.0.height(want.x, want.z) as f64 + 0.4;

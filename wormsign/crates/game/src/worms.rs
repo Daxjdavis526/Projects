@@ -151,20 +151,30 @@ fn empty_mesh() -> Mesh {
         .with_inserted_indices(Indices::U32(vec![0, 1, 2]))
 }
 
-pub fn simulate(tick: Res<Tick>, desert: Res<Desert>, quakes: Res<Quakes>, mut worms: Query<&mut WormBody>) {
+pub fn simulate(
+    tick: Res<Tick>,
+    desert: Res<Desert>,
+    quakes: Res<Quakes>,
+    riding: Res<crate::rider::Riding>,
+    mut worms: Query<(Entity, &mut WormBody)>,
+) {
     if tick.n == 0 {
         return;
     }
     let rocks = DesertRocks(&desert);
     let sand = |x: f64, z: f64| desert.0.sand(x, z);
-    for mut wb in &mut worms {
+    for (e, mut wb) in &mut worms {
         let wb = &mut *wb;
         let head = wb.worm.head();
         for ev in &quakes.events {
             wb.ear.hear(head, ev);
         }
         let t = tick.time(tick.n - 1);
-        wb.brain.think(&mut wb.worm, &mut wb.ear, t, tick.dt * tick.n as f64, &rocks);
+        if riding.worm == Some(e) && !riding.reins.hooks.is_empty() {
+            wb.brain.ride(&mut wb.worm, &riding.reins, t, tick.dt * tick.n as f64);
+        } else {
+            wb.brain.think(&mut wb.worm, &mut wb.ear, t, tick.dt * tick.n as f64, &rocks);
+        }
         for _ in 0..tick.n {
             wb.worm.step(tick.dt, sand);
         }

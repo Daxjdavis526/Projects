@@ -410,7 +410,14 @@ impl Worm {
                 continue;
             }
             let a = bulge(r) * (0.55 + 0.45 * (-r.d / 60.0).exp());
-            h = h.max(a * (-d2 / (w * w)).exp());
+            let mut hi = a * (-d2 / (w * w)).exp();
+            // Where the body itself is out of the sand, the heap slumps just
+            // under its skin rather than burying it.
+            if d2 < r.radius * r.radius {
+                let skin = r.centre.y + (r.radius * r.radius - d2).sqrt();
+                hi = hi.min((skin - r.sand - 0.8).max(0.0));
+            }
+            h = h.max(hi);
         }
         // A bow wave shoved ahead of a fast-moving head.
         let fwd = self.forward();
@@ -575,5 +582,21 @@ mod tests {
         w.roll = 0.5;
         let p1 = w.skin_point(100.0, a);
         assert!((p0 - p1).length() > 3.0);
+    }
+
+    #[test]
+    fn the_heap_never_buries_an_exposed_back() {
+        let w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 0.62 * 11.0, flat);
+        for s in [0.0, 3.0, 6.0, 9.0] {
+            let sand = w.wake(-100.0, s);
+            let back = w.back_ground(-100.0, s, 20.0).map(|g| g.0).unwrap_or(f64::MIN);
+            if back < 0.5 {
+                // That part of the flank is under the sand; the heap is on it.
+                continue;
+            }
+            assert!(sand < back - 0.5, "at {s} m across: heap {sand:.1} vs back {back:.1}");
+        }
+        // Beside the body the heap is still there to run up.
+        assert!(w.wake(-100.0, 13.0) > 1.0);
     }
 }

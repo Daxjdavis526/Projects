@@ -475,7 +475,7 @@ fn overlay(fate: Res<Fate>, mut o: Query<&mut Visibility, With<Overlay>>, mut li
         if let Ok(mut t) = line.single_mut() {
             let (secs, m) = fate.last_life;
             let s = format!(
-                "survived {}:{:02}  ·  {:.1} km on foot\n\npress any key to walk again",
+                "survived {}:{:02}  |  {:.1} km on foot\n\npress any key to walk again",
                 (secs / 60.0) as u32,
                 (secs % 60.0) as u32,
                 m / 1000.0

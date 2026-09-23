@@ -37,8 +37,9 @@ struct LivingHud;
 #[derive(Component)]
 struct GaitText;
 
-const CONTROLS: &str = "click to look  ·  WASD move  ·  shift run  ·  space jump\n\
-C crouch  ·  hold Q sandwalk  ·  T plant / lift caller  ·  V view  ·  wheel zoom";
+const CONTROLS: &str = "click to look  |  WASD move  |  shift run  |  space jump\n\
+C crouch  |  hold Q sandwalk  |  T plant / lift caller  |  V view  |  wheel zoom\n\
+mouse L / R (or Z / X) throw hooks  |  R / F reel  |  E let go  |  G brace / walk";
 
 fn setup(mut commands: Commands) {
     spawn_meter(&mut commands);
@@ -172,7 +173,7 @@ fn status(
         .unwrap_or_default();
     t.0 = if debug.0 {
         format!(
-            "{fps:.0} fps  ·  {} tiles\n{:?}  {speed:.1} m/s  {:?}\nx {:.0}  y {:.1}  z {:.0}  (origin {:.0}, {:.0})\n{worm}",
+            "{fps:.0} fps  |  {} tiles\n{:?}  {speed:.1} m/s  {:?}\nx {:.0}  y {:.1}  z {:.0}  (origin {:.0}, {:.0})\n{worm}",
             tiles.live_count(),
             p.gait,
             look.view,

@@ -8,6 +8,7 @@ mod ground;
 mod hud;
 mod player;
 mod quake;
+mod rider;
 mod sky;
 mod web;
 mod world;
@@ -29,6 +30,6 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin, worms::WormsPlugin, fx::FxPlugin, death::DeathPlugin, caller::CallerPlugin, audio::AudioPlugin))
+        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin, worms::WormsPlugin, fx::FxPlugin, death::DeathPlugin, caller::CallerPlugin, audio::AudioPlugin, rider::RiderPlugin))
         .run();
 }
