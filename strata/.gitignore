@@ -1,0 +1,6 @@
+# Godot and .NET build output
+.godot/
+bin/
+obj/
+*.tmp
+export/

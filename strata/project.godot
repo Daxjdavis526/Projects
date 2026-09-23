@@ -1,0 +1,102 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+
+config_version=5
+
+[application]
+
+config/name="Strata"
+config/description="An original voxel survival sandbox."
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+
+[dotnet]
+
+project/assembly_name="Strata"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+
+[physics]
+
+common/physics_ticks_per_second=60
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+anti_aliasing/quality/msaa_3d=0
+environment/defaults/default_clear_color=Color(0.55, 0.7, 0.9, 1)
+
+[shader_globals]
+
+daylight={
+"type": "float",
+"value": 1.0
+}
+sky_tint={
+"type": "color",
+"value": Color(1, 1, 1, 1)
+}
+torch_tint={
+"type": "color",
+"value": Color(1, 0.82, 0.6, 1)
+}
+fog_color={
+"type": "color",
+"value": Color(0.72, 0.82, 0.95, 1)
+}
+fog_start={
+"type": "float",
+"value": 90.0
+}
+fog_end={
+"type": "float",
+"value": 128.0
+}
+brightness={
+"type": "float",
+"value": 1.0
+}
+underwater={
+"type": "float",
+"value": 0.0
+}
+sun_dir={
+"type": "vec3",
+"value": Vector3(0.3, 0.9, 0.2)
+}
+moon_dir={
+"type": "vec3",
+"value": Vector3(-0.3, -0.9, -0.2)
+}
+sky_top={
+"type": "color",
+"value": Color(0.3, 0.52, 0.88, 1)
+}
+sky_horizon={
+"type": "color",
+"value": Color(0.7, 0.82, 0.96, 1)
+}
+sun_glow={
+"type": "color",
+"value": Color(1, 0.7, 0.4, 1)
+}
+star_alpha={
+"type": "float",
+"value": 0.0
+}
+cloud_cover={
+"type": "float",
+"value": 0.45
+}
+cloud_shade={
+"type": "color",
+"value": Color(1, 1, 1, 1)
+}
+moon_phase={
+"type": "float",
+"value": 0.5
+}
