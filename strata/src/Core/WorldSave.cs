@@ -17,6 +17,7 @@ public sealed class PlayerSave
     public float Health = 20, Hunger = 20, Saturation = 5, Air = 10;
     public int Selected;
     public List<SlotSave> Inventory = new();
+    public List<SlotSave> Armor = new();
     public double SpawnX, SpawnY, SpawnZ;
     public bool BedSpawn;
 }
@@ -121,6 +122,9 @@ public static class WorldSave
             chars.Add(char.IsLetterOrDigit(c) ? c : '_');
         string baseName = new string(chars.ToArray()).Trim('_');
         if (baseName.Length == 0) baseName = "world";
+        // Windows reserves a few device names for folders, whatever the case.
+        if (baseName is "con" or "prn" or "aux" or "nul" || (baseName.Length == 4 && (baseName.StartsWith("com") || baseName.StartsWith("lpt")) && char.IsDigit(baseName[3])))
+            baseName += "_world";
         Directory.CreateDirectory(Root);
         string folder = baseName;
         for (int i = 2; Directory.Exists(DirOf(folder)); i++) folder = $"{baseName}_{i}";

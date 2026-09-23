@@ -4,10 +4,10 @@ using Godot;
 
 namespace Strata;
 
-public enum RenderKind : byte { None, Cube, Cross, Crop, Liquid, Torch, Ladder, Door, Low }
-public enum ToolKind : byte { None, Pick, Axe, Shovel, Hoe, Blade }
+public enum RenderKind : byte { None, Cube, Cross, Crop, Liquid, Torch, Ladder, Door, Low, Trace }
+public enum ToolKind : byte { None, Pick, Axe, Shovel, Hoe, Blade, Bow }
 public enum SoundKind : byte { Stone, Wood, Dirt, Grass, Sand, Gravel, Glass, Snow, Metal, Plant, Cloth }
-public enum BlockUse : byte { None, Worktable, Furnace, Crate, Door, Bed, BerryBush }
+public enum BlockUse : byte { None, Worktable, Furnace, Crate, Door, Bed, BerryBush, Switch }
 
 /// <summary>Texture names to array layers. Painting happens later, in Textures.</summary>
 public static class Tex
@@ -69,6 +69,7 @@ public sealed class BlockDef
     public int CropStages;               // > 0: crop family with this many stages
     public float GrowChance;             // per random tick
     public bool Ripe;
+    public bool NoItem;                  // a state of another block (lit, pressed, powered): no item of its own
 
     public bool Air => Id == 0;
     public bool Breakable => Hardness >= 0f;
@@ -108,6 +109,14 @@ public static class Blocks
         Water, Lava, StoneBricks, CarvedStone, ClayBricks, AshBricks, DressedSandstone, Glass, Thatch,
         CopperBlock, IronBlock, SilverBlock, GoldBlock, StarmetalBlock, LumenBlock, LumenLamp, SlateTiles,
         Worktable, Crate, Bedroll, TilledSoil, Torch;
+    public static ushort LumenTrace;   // base of 16: signal strength 0..15
+    public static ushort Switch, SwitchOn, TreadPlate, TreadPlateDown, SignalLamp, SignalLampOn;
+
+    public static bool IsTrace(ushort id) => id >= LumenTrace && id < LumenTrace + 16 && LumenTrace != 0;
+    public static int TraceLevel(ushort id) => IsTrace(id) ? id - LumenTrace : 0;
+    /// <summary>Anything that takes part in a lumen circuit.</summary>
+    public static bool IsCircuit(ushort id) => IsTrace(id) || id == Switch || id == SwitchOn || id == TreadPlate
+        || id == TreadPlateDown || id == SignalLamp || id == SignalLampOn;
     public static ushort Furnace;      // base of 4 facings
     public static ushort FurnaceLit;   // base of 4 lit facings
     public static ushort TorchWall;    // base of 4 wall torches (by support direction)
@@ -179,6 +188,8 @@ public static class Blocks
             P(b, 0.83f, 0.74f, 0.52f);
         });
         Gravel = Add("gravel", "Gravel", b => Earth(b, "gravel", 0.6f, SoundKind.Gravel, 0.48f, 0.46f, 0.45f));
+        All[Gravel].DropKey = "gravel";          // extras replace the self-drop unless it is named
+        All[Gravel].Extra = new[] { ("flint", 0.15f, 1, 1) };
         Clay = Add("clay", "Clay", b =>
         {
             Earth(b, "clay", 0.6f, SoundKind.Dirt, 0.6f, 0.63f, 0.68f);
@@ -254,7 +265,9 @@ public static class Blocks
         Frostbell = Plant("frostbell", "Frostbell", true, 0.45f, 0.6f, 0.95f);
         // The wild parents of two crops: an emberbloom sometimes comes up with its root,
         // and a frostbell sheds the seeds of its cultivated cousin.
+        All[Emberbloom].DropKey = "emberbloom";
         All[Emberbloom].Extra = new[] { ("emberroot", 0.3f, 1, 1) };
+        All[Frostbell].DropKey = "frostbell";
         All[Frostbell].Extra = new[] { ("frostleaf_seeds", 0.35f, 1, 2) };
         Moonlace = Plant("moonlace", "Moonlace", true, 0.92f, 0.92f, 0.95f);
         Reeds = Plant("reeds", "Reeds", false, 0.5f, 0.6f, 0.3f);
@@ -341,6 +354,27 @@ public static class Blocks
             b.Faces(Tex.Get("lumen_lamp")); b.Light = 15; b.Hardness = 0.6f; b.Sound = SoundKind.Glass;
             b.Emissive = true; P(b, 1f, 0.9f, 0.7f);
         });
+
+        // --- lumen circuits ---------------------------------------------------
+        // A trace carries a signal, strongest (15) beside a live switch or plate and one weaker per block.
+        for (int level = 0; level < 16; level++)
+        {
+            int lv = level;
+            ushort id = Add(level == 0 ? "lumen_trace" : "lumen_trace_" + level, "Lumen Trace", b =>
+            {
+                b.Render = RenderKind.Trace; b.Solid = false; b.Opaque = false; b.Hardness = 0f; b.Sound = SoundKind.Glass;
+                b.Faces(Tex.Get(lv > 0 ? "lumen_trace_on" : "lumen_trace_off")); b.Emissive = lv > 0;
+                b.NeedsSupportBelow = true; b.Variant = lv; b.DropKey = "lumen_trace"; b.NoItem = lv > 0;
+                b.Box = new Aabb(Vector3.Zero, new Vector3(1, 1f / 16f, 1)); P(b, 0.4f, 0.9f, 0.85f);
+            });
+            if (level == 0) LumenTrace = id;
+        }
+        Switch = Add("switch", "Switch", b => SwitchDef(b, false));
+        SwitchOn = Add("switch_on", "Switch", b => SwitchDef(b, true));
+        TreadPlate = Add("tread_plate", "Tread Plate", b => PlateDef(b, false));
+        TreadPlateDown = Add("tread_plate_down", "Tread Plate", b => PlateDef(b, true));
+        SignalLamp = Add("signal_lamp", "Signal Lamp", b => LampDef(b, false));
+        SignalLampOn = Add("signal_lamp_on", "Signal Lamp", b => LampDef(b, true));
 
         // --- stations and furniture -----------------------------------------
         Worktable = Add("worktable", "Worktable", b =>
@@ -564,6 +598,32 @@ public static class Blocks
     }
 
     public static bool IsDoor(ushort id) => id >= Door && id < Door + 16;
+
+    private static void SwitchDef(BlockDef b, bool on)
+    {
+        b.Render = RenderKind.Low; b.Opaque = false; b.Solid = false; b.Hardness = 0.3f; b.Sound = SoundKind.Stone;
+        b.Faces(Tex.Get("switch_side"), Tex.Get(on ? "switch_top_on" : "switch_top_off"), Tex.Get("switch_side"));
+        b.Box = new Aabb(new Vector3(0.25f, 0, 0.25f), new Vector3(0.5f, 0.2f, 0.5f)); b.Height = 0.2f;
+        b.Use = BlockUse.Switch; b.NeedsSupportBelow = true; b.DropKey = "switch"; b.NoItem = on; b.Variant = on ? 1 : 0;
+        P(b, 0.5f, 0.5f, 0.52f);
+    }
+
+    private static void PlateDef(BlockDef b, bool down)
+    {
+        float h = down ? 1f / 32f : 1f / 16f;
+        b.Render = RenderKind.Low; b.Opaque = false; b.Solid = false; b.Hardness = 0.5f; b.Sound = SoundKind.Wood; b.Tool = ToolKind.Axe;
+        b.Faces(Tex.Get("tread_plate"));
+        b.Box = new Aabb(new Vector3(1f / 16f, 0, 1f / 16f), new Vector3(14f / 16f, h, 14f / 16f)); b.Height = h;
+        b.NeedsSupportBelow = true; b.DropKey = "tread_plate"; b.NoItem = down; b.Variant = down ? 1 : 0;
+        P(b, 0.62f, 0.47f, 0.3f);
+    }
+
+    private static void LampDef(BlockDef b, bool on)
+    {
+        b.Faces(Tex.Get(on ? "signal_lamp_on" : "signal_lamp_off")); b.Hardness = 0.6f; b.Sound = SoundKind.Glass;
+        b.Light = (byte)(on ? 15 : 0); b.Emissive = on; b.DropKey = "signal_lamp"; b.NoItem = on; b.Variant = on ? 1 : 0;
+        if (on) P(b, 1f, 0.85f, 0.55f); else P(b, 0.55f, 0.5f, 0.45f);
+    }
     public static bool IsLeaves(ushort id) => ById[id].CullGroup == 1;
     public static bool IsLog(ushort id) => id == ElmLog || id == IronwoodLog || id == PineLog || id == WillowLog;
     public static bool IsSoilLike(ushort id) =>

@@ -67,6 +67,20 @@ public static class Recipes
             ToolRecipe(I(key + "_blade"), head, 2, 1);
         }
         Add(Station.Worktable, "tools", Items.SilverBlade, 1, (Items.SilverIngot, 2), (Items.Stick, 1), (Items.Cord, 1));
+        Add(Station.Worktable, "tools", Items.Bow, 1, (Items.Stick, 3), (Items.Cord, 2));
+        Add(Station.Worktable, "tools", Items.Arrow, 4, (Items.Stick, 1), (Items.Flint, 1), (Items.Feather, 1));
+
+        // --- armour ------------------------------------------------------------
+        var armorMaterial = new Dictionary<string, ushort>
+        {
+            ["hide"] = Items.Hide, ["copper"] = Items.CopperIngot, ["iron"] = Items.IronIngot, ["starmetal"] = Items.StarmetalIngot,
+        };
+        int[] armorCost = { 5, 8, 7, 4 };
+        foreach (var id in Items.ByTag["armor"])
+        {
+            var d = Items.Get(id);
+            Add(Station.Worktable, "armour", id, 1, (armorMaterial[d.Key[..d.Key.IndexOf('_')]], armorCost[d.ArmorSlot]));
+        }
 
         // --- stations and furniture --------------------------------------------
         Add(Station.Worktable, "stations", Items.Furnace, 1, ("cobble", 8));
@@ -99,6 +113,12 @@ public static class Recipes
             Add(Station.Worktable, "building", I(block), 1, (ingot, 9));
             Add(Station.Hand, "basics", ingot, 9, (I(block), 1));
         }
+
+        // --- lumen circuits ------------------------------------------------------
+        Add(Station.Hand, "circuits", I("lumen_trace"), 8, (Items.LumenShard, 1));
+        Add(Station.Hand, "circuits", I("switch"), 1, (Items.Stick, 1), ("cobble", 1));
+        Add(Station.Worktable, "circuits", I("tread_plate"), 1, ("planks", 2));
+        Add(Station.Worktable, "circuits", I("signal_lamp"), 1, (I("glass"), 1), (Items.LumenShard, 1), (Items.CopperIngot, 1));
 
         // --- food ----------------------------------------------------------------
         Add(Station.Worktable, "food", Items.HearthBread, 1, (Items.Grain, 3));

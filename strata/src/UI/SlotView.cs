@@ -16,6 +16,7 @@ public sealed partial class SlotView : Control
     public object Tag;
     public bool Highlight;
     public bool ShowTooltip = true;
+    public Texture2D Ghost;              // faint picture of what belongs here, shown while empty
     public float Size = 52f;
     private ItemStack _shown = new(ushort.MaxValue, -1);
     private bool _hover;
@@ -54,6 +55,11 @@ public sealed partial class SlotView : Control
         var r = new Rect2(Vector2.Zero, new Vector2(Size, Size));
         var border = Highlight ? UiStyle.Accent : _hover && Clicked != null ? new Color(0.55f, 0.58f, 0.66f) : UiStyle.Border;
         DrawStyleBox(UiStyle.Box(UiStyle.SlotBg, border, Highlight ? 3 : 2, 5), r);
+        if (_shown.IsEmpty && Ghost != null)
+        {
+            float pad = Size * 0.16f;
+            DrawTextureRect(Ghost, new Rect2(r.Position + new Vector2(pad, pad), r.Size - new Vector2(pad * 2, pad * 2)), false, new Color(0.1f, 0.1f, 0.12f, 0.55f));
+        }
         DrawStack(this, _shown, r);
     }
 
@@ -75,7 +81,7 @@ public sealed partial class SlotView : Control
             ci.DrawString(font, p, t, HorizontalAlignment.Left, -1, fs, Colors.White);
         }
         var d = s.Def;
-        if (d.IsTool && s.Wear > 0)
+        if (d.Wears && s.Wear > 0)
         {
             float f = 1f - (float)s.Wear / d.Durability;
             var bar = new Rect2(r.Position + new Vector2(pad * 0.8f, r.Size.Y - pad * 0.9f), new Vector2((r.Size.X - pad * 1.6f), 4));
@@ -89,9 +95,19 @@ public sealed partial class SlotView : Control
         var d = s.Def;
         var sb = new StringBuilder();
         sb.Append(d.Name);
-        if (d.IsTool)
+        if (d.Tool == ToolKind.Bow)
+        {
+            sb.Append($"\nDraws in {Player.BowDrawTime:0.#} s  ·  up to 9 damage at full draw");
+            sb.Append($"\nDurability {d.Durability - s.Wear} / {d.Durability}");
+        }
+        else if (d.IsTool)
         {
             sb.Append($"\n{Items.TierNames[Math.Clamp(d.Tier, 0, 5)]} tier  ·  {d.Damage:0.#} damage");
+            sb.Append($"\nDurability {d.Durability - s.Wear} / {d.Durability}");
+        }
+        if (d.IsArmor)
+        {
+            sb.Append($"\n{Items.ArmorSlotNames[d.ArmorSlot]} armour  ·  {d.Armor} protection");
             sb.Append($"\nDurability {d.Durability - s.Wear} / {d.Durability}");
         }
         if (d.IsFood) sb.Append($"\nRestores {d.Food / 2f:0.#} hunger");

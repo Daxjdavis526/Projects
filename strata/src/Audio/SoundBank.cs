@@ -63,6 +63,11 @@ public static class SoundBank
         Add("flap", Flap());
         Add("spit", Spit());
         Add("slam", Thud(45, 0.7f, 1f));
+        Add("bow", Twang());
+        Add("arrow_hit", Knocks(1, 620, 0.05f));
+        Add("equip", Rustle());
+        Add("switch", Knocks(2, 950, 0.025f));
+        Add("plate", Knocks(1, 380, 0.06f));
 
         Voice("mossback", 85, 0.7f, 380, 760, grunt: true);
         Voice("brindle", 118, 0.95f, 520, 900, vibrato: true);
@@ -449,6 +454,44 @@ public static class SoundBank
             float t = i / (float)Rate;
             float beat = MathF.Max(0, MathF.Sin(t * 12 * MathF.Tau));
             s[i] = f.Band(n.Next()) * beat * beat * Env(t, 0.01f, 0.25f);
+        }
+        return s;
+    }
+
+    /// <summary>A plucked bowstring (a Karplus-Strong string) and the hiss of the arrow leaving.</summary>
+    private static float[] Twang()
+    {
+        var s = Buf(0.45f);
+        var n = new Noise(83);
+        int period = Rate / 118;
+        var line = new float[period];
+        for (int i = 0; i < period; i++) line[i] = n.Next();
+        int p = 0;
+        var air = new Svf(900, 0.9f);
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            int q = (p + 1) % period;
+            float v = line[p];
+            line[p] = (line[p] + line[q]) * 0.5f * 0.994f;
+            p = q;
+            air.Set(1600 - t * 2400, 0.9f);
+            s[i] = v * Env(t, 0.001f, 0.12f) * 0.8f + air.Band(n.Next()) * Env(t, 0.01f, 0.06f) * 0.5f;
+        }
+        return s;
+    }
+
+    /// <summary>Cloth and buckles: armour going on.</summary>
+    private static float[] Rustle()
+    {
+        var s = Buf(0.3f);
+        var n = new Noise(97);
+        var f = new Svf(2200, 1.4f);
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            f.Set(1800 + 1400 * MathF.Sin(t * 30f), 1.4f);
+            s[i] = f.Band(n.Next()) * Env(t, 0.02f, 0.08f) * 0.9f + MathF.Sin(t * 1850f * MathF.Tau) * Env(t, 0.004f, 0.05f) * 0.12f;
         }
         return s;
     }

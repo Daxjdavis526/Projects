@@ -14,6 +14,7 @@ public sealed partial class App : Node
     {
         Settings = Settings.Load();
         Settings.ApplyDisplay();
+        if (DisplayServer.GetName() != "headless") DisplayServer.SetIcon(AppIcon.Paint());
         InputSetup.Ensure();
         _sfx = new Sfx { Name = "Sfx" };
         AddChild(_sfx);

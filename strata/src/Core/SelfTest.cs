@@ -197,6 +197,25 @@ public partial class SelfTest : Node
         await Frames(2);
     }
 
+    /// <summary>Presses on one control, moves across, and lets go over another.</summary>
+    private async Task Drag(Control a, Control b)
+    {
+        var pa = a.GetGlobalRect().GetCenter();
+        var pb = b.GetGlobalRect().GetCenter();
+        Input.WarpMouse(pa);
+        Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = true, Position = pa, GlobalPosition = pa });
+        await Frames(2);
+        for (int k = 1; k <= 4; k++)
+        {
+            var p = pa.Lerp(pb, k / 4f);
+            Input.WarpMouse(p);
+            Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p, ButtonMask = MouseButtonMask.Left });
+            await Frames(1);
+        }
+        Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = false, Position = pb, GlobalPosition = pb });
+        await Frames(2);
+    }
+
     private static List<T> FindAll<T>(Node root) where T : Node
     {
         var list = new List<T>();
@@ -275,6 +294,30 @@ public partial class SelfTest : Node
         int planks = 0;
         foreach (var s in P.Inventory.Slots) if (!s.IsEmpty && Items.HasTag(s.Id, "planks")) planks += s.Count;
         Check(planks >= 4, $"planks crafted through the screen ({planks})");
+        // Drag a stack to another slot, then send it to the hotbar with a number key.
+        {
+            var views = FindAll<SlotView>(G.Screen).FindAll(v => (string)v.Tag == "player");
+            var from = views.Find(v => !P.Inventory[v.Index].IsEmpty && Items.HasTag(P.Inventory[v.Index].Id, "planks"));
+            var to = views.Find(v => v.Index >= 9 && P.Inventory[v.Index].IsEmpty);
+            if (from != null && to != null)
+            {
+                var item = P.Inventory[from.Index];
+                await Drag(from, to);
+                Check(P.Inventory[to.Index].Id == item.Id && P.Inventory[to.Index].Count == item.Count && P.Inventory[from.Index].IsEmpty,
+                    "a stack dragged onto another slot lands there");
+                var over = to.GetGlobalRect().GetCenter();
+                Input.WarpMouse(over);
+                Input.ParseInputEvent(new InputEventMouseMotion { Position = over, GlobalPosition = over });
+                await Frames(2);
+                var third = P.Inventory[2];
+                Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.Key3, Keycode = Key.Key3, Pressed = true });
+                await Frames(1);
+                Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.Key3, Keycode = Key.Key3, Pressed = false });
+                await Frames(2);
+                Check(P.Inventory[2].Id == item.Id && P.Inventory[to.Index].Equals(third), "hovering a slot and pressing 3 swaps it into the hotbar");
+            }
+            else Check(false, "slots to drag between");
+        }
         G.CloseScreen();
         await Frames(2);
         Check(Recipes.TryCraft(P.Inventory, RecipeFor("worktable"), out var table), "worktable crafted");
@@ -430,6 +473,55 @@ public partial class SelfTest : Node
         int meat = P.Inventory.Count(Items.RawMossback);
         Check(meat >= 1, $"raw meat picked up ({meat})");
 
+        // --- armour and the bow -------------------------------------------------------------
+        {
+            ushort cuirass = Items.ByKey["copper_cuirass"];
+            Give(Items.Bow, 1);
+            Give(Items.Arrow, 8);
+            Give(cuirass, 1);
+            Hold(cuirass);
+            Aim(P.Camera.GlobalPosition + new Vector3(0, 1, 0.01f));   // at the sky, so the click is not a block use
+            await Frames(2);
+            await Press("use");
+            Check(P.Armor[1].Id == cuirass && P.ArmorPoints == 4, $"right-click puts on a copper cuirass ({P.ArmorPoints} protection)");
+            // A short, flat firing range: a stone floor with the air cleared above it.
+            float ry = MathF.Round(ClearHeading() / 90f) * 90f - 90f;
+            float rr = Mathf.DegToRad(ry);
+            var lane = new Vector3I(-(int)MathF.Round(MathF.Sin(rr)), 0, -(int)MathF.Round(MathF.Cos(rr)));
+            var from = new Vector3I(V.FloorToInt(P.Body.X), V.FloorToInt(P.Body.Y), V.FloorToInt(P.Body.Z));
+            for (int k = 0; k <= 10; k++)
+            {
+                var c = from + lane * k;
+                W.SetBlock(c.X, c.Y - 1, c.Z, Blocks.Stone);
+                for (int dy = 0; dy <= 2; dy++) W.SetBlock(c.X, c.Y + dy, c.Z, Blocks.Air);
+            }
+            await GameSeconds(0.3f);
+            Vector3? range = new Vector3(from.X + lane.X * 9 + 0.5f, from.Y, from.Z + lane.Z * 9 + 0.5f);
+            if (range.HasValue)
+            {
+                var mark = G.Mobs.SpawnMob(MobKind.Brindle, range.Value);
+                mark.SetState(MobState.Idle, 1e6f);
+                float hp = mark.Health;
+                int arrows = P.Inventory.Count(Items.Arrow);
+                Hold(Items.Bow);
+                var at = mark.Position + new Vector3(0, 0.8f, 0);
+                float dist = (at - P.Camera.GlobalPosition).Length();
+                Aim(at + new Vector3(0, 0.5f * 16f * (dist / 48f) * (dist / 48f), 0));    // allow for the drop
+                await Frames(2);
+                Input.ActionPress("use");
+                await GameSeconds(1.1f);
+                Check(P.Draw >= 1f, "holding right-click draws the bow fully");
+                await Shot("bow_drawn");
+                Input.ActionRelease("use");
+                bool hit = await UntilGame(() => mark.Health < hp, 2f);
+                Check(P.Inventory.Count(Items.Arrow) == arrows - 1, "letting go looses one arrow");
+                Check(hit, $"and it strikes a brindle {dist:0} blocks off ({hp - mark.Health:0.#} damage)");
+                mark.Removed = true;
+            }
+            else Check(false, "open ground for archery");
+            Hold(Items.ByKey["stone_blade"]);
+        }
+
         // --- cooking and eating -----------------------------------------------------------
         var fe2 = fe;
         fe2.Inv[FurnaceEntity.In] = new ItemStack(Items.RawMossback, Math.Max(1, meat));
@@ -574,6 +666,59 @@ public partial class SelfTest : Node
             await Shot("running_water");
         }
 
+        // --- a lumen circuit ---------------------------------------------------------------
+        {
+            // Switch, four traces and a lamp in a line; a tread plate beside a door off to one side.
+            // (At right angles to the water channel, which runs along the clearest heading.)
+            float yaw = MathF.Round(ClearHeading() / 90f) * 90f + 90f;
+            float r = Mathf.DegToRad(yaw);
+            var along = new Vector3I(-(int)MathF.Round(MathF.Sin(r)), 0, -(int)MathF.Round(MathF.Cos(r)));
+            var side = new Vector3I(along.Z, 0, along.X);
+            var here = new Vector3I(V.FloorToInt(P.Body.X), V.FloorToInt(P.Body.Y), V.FloorToInt(P.Body.Z));
+            void Ground(Vector3I c, ushort id)
+            {
+                W.SetBlock(c.X, c.Y - 1, c.Z, Blocks.Stone);
+                for (int dy = 0; dy <= 2; dy++) W.SetBlock(c.X, c.Y + dy, c.Z, Blocks.Air);
+                if (id != 0) W.SetBlock(c.X, c.Y, c.Z, id);
+            }
+            var sw = here + along * 2;
+            Ground(sw, Blocks.Switch);
+            for (int k = 3; k <= 6; k++) Ground(here + along * k, Blocks.LumenTrace);
+            var lamp = here + along * 7;
+            Ground(lamp, Blocks.SignalLamp);
+            P.Yaw = yaw;
+            await GameSeconds(0.3f);
+            Aim(new Vector3(sw.X + 0.5f, sw.Y + 0.1f, sw.Z + 0.5f));
+            await Frames(2);
+            await Press("use");
+            await GameSeconds(0.4f);
+            Check(W.GetBlock(sw.X, sw.Y, sw.Z) == Blocks.SwitchOn, "right-click throws the switch");
+            Check(W.GetBlock(lamp.X, lamp.Y, lamp.Z) == Blocks.SignalLampOn && Blocks.TraceLevel(W.GetBlock(here.X + along.X * 6, here.Y, here.Z + along.Z * 6)) == 12,
+                "the traces carry it and the lamp lights");
+            Aim(new Vector3(lamp.X + 0.5f, lamp.Y + 0.3f, lamp.Z + 0.5f));
+            await Shot("circuit");
+            Aim(new Vector3(sw.X + 0.5f, sw.Y + 0.1f, sw.Z + 0.5f));
+            await Frames(2);
+            await Press("use");
+            await GameSeconds(0.4f);
+            Check(W.GetBlock(lamp.X, lamp.Y, lamp.Z) == Blocks.SignalLamp, "and goes out when it is thrown back");
+
+            // Stand on a plate and the door beside it opens; step off and it shuts.
+            var plate = here - along * 2;
+            var door = plate + side;
+            Ground(plate, Blocks.TreadPlate);
+            Ground(door, 0);
+            W.SetBlock(door.X, door.Y, door.Z, (ushort)Blocks.Door);
+            W.SetBlock(door.X, door.Y + 1, door.Z, (ushort)(Blocks.Door + 8));
+            await GameSeconds(0.3f);
+            P.Teleport(new Vector3(plate.X + 0.5f, plate.Y, plate.Z + 0.5f));
+            bool opened = await UntilGame(() => (Blocks.Get(W.GetBlock(door.X, door.Y, door.Z)).Variant & 4) != 0, 2f);
+            Check(opened, "standing on a tread plate opens the door beside it");
+            P.Teleport(new Vector3(here.X + 0.5f, here.Y, here.Z + 0.5f));
+            bool shut = await UntilGame(() => (Blocks.Get(W.GetBlock(door.X, door.Y, door.Z)).Variant & 4) == 0, 3f);
+            Check(shut, "and stepping off lets it swing shut");
+        }
+
         // --- a night visitor ------------------------------------------------------------
         G.View.Sky.Time = Math.Floor(G.View.Sky.Time) + 0.72;
         await Seconds(0.5f);
@@ -636,6 +781,11 @@ public partial class SelfTest : Node
         // --- save, quit, reload ---------------------------------------------------------
         P.Teleport(deathPos);
         await Seconds(2.5f);
+        // Put the cuirass back on, so the save has to carry worn armour as well.
+        ushort cuirassId = Items.ByKey["copper_cuirass"];
+        for (int i = 0; i < P.Inventory.Size; i++)
+            if (P.Inventory[i].Id == cuirassId) { P.Armor[1] = P.Inventory[i]; P.Inventory[i] = ItemStack.Empty; break; }
+        Check(P.Armor[1].Id == cuirassId, "the cuirass was dropped at death and picked up again");
         int invItems = 0;
         foreach (var s in P.Inventory.Slots) invItems += s.Count;
         var savedPos = P.Body.Position;
@@ -660,6 +810,7 @@ public partial class SelfTest : Node
         var crate2 = W.GetEntity(ccell.X, ccell.Y, ccell.Z) as CrateEntity;
         Check(crate2 != null && crate2.Inv.Count(Items.IronIngot) >= 5, "and the crate still holds the ingots");
         Check(Math.Abs(G.View.Sky.Time - savedTime) < 0.01, "the clock carried over");
+        Check(P.Armor[1].Id == cuirassId, "worn armour came back on");
         await Shot("reloaded");
 
         await Finish();
@@ -691,18 +842,20 @@ public partial class SelfTest : Node
     /// A standable cell about dist blocks from the player, level with the feet
     /// give or take one, with a clear line of sight between the two.
     /// </summary>
-    private Vector3? OpenGroundInView(float dist)
+    private Vector3? OpenGroundInView(float dist, float span = 2f, int rise = 1)
     {
         var p = P.Body.Position;
+        var rises = new List<int> { 0 };
+        for (int k = 1; k <= rise; k++) { rises.Add(k); rises.Add(-k); }
         for (int k = 0; k < 16; k++)
         {
             float r = Mathf.DegToRad(P.Yaw + k * 22.5f);
             var d = new Vector3(-MathF.Sin(r), 0, -MathF.Cos(r));
-            for (float s = dist; s <= dist + 2f; s += 1f)
+            for (float s = dist; s <= dist + span; s += 1f)
             {
                 var q = p + d * s;
                 int x = V.FloorToInt(q.X), z = V.FloorToInt(q.Z), y0 = V.FloorToInt(p.Y);
-                foreach (int dy in new[] { 0, 1, -1 })
+                foreach (int dy in rises)
                 {
                     int y = y0 + dy;
                     if (!W.GetDef(x, y - 1, z).Solid || W.GetDef(x, y, z).Solid || W.GetDef(x, y + 1, z).Solid) continue;

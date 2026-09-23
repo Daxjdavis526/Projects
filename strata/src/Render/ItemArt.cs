@@ -20,8 +20,25 @@ public static class ItemArt
         p.Clear(Clear);
         var t = d.Tint;
         if (d.Tool != ToolKind.None) { Tool(p, d.Tool, t, d.Key == "silver_blade"); p.Outline(C(0x1a1410)); return p; }
+        if (d.IsArmor) { Armor(p, d.ArmorSlot, t, !d.Key.StartsWith("hide")); p.Outline(C(0x1a1410)); return p; }
         switch (d.Key)
         {
+            case "lumen_trace":
+                // A pinch of crushed crystal, strewn in a line.
+                for (int k = 0; k < 12; k++)
+                {
+                    int x = 2 + k, y = 12 - k + (k % 3 == 1 ? 1 : 0);
+                    p.Set(x, y, Pixel.Shade(t, 0.8f + p.Hash(k, 3) * 0.5f));
+                    p.Set(x, y + 1, Pixel.Shade(t, 0.6f + p.Hash(k, 5) * 0.3f));
+                    if (p.Hash(k, 7) > 0.55f) p.Set(x + 1, y - 1, C(0xeafffc));
+                }
+                break;
+            case "arrow":
+                // Shaft corner to corner, a knapped head, grey-white fletching.
+                p.Line(3, 12, 11, 4, Wood); p.Line(4, 12, 12, 4, WoodDark);
+                p.Rect(11, 2, 3, 3, C(0x5a5a62)); p.Set(13, 1, C(0x8a8a94)); p.Set(14, 2, C(0x8a8a94)); p.Set(11, 2, C(0x3a3a42));
+                p.Line(1, 12, 3, 14, C(0xe8e8ee)); p.Line(2, 11, 4, 13, C(0xd0d0d8)); p.Line(3, 10, 5, 12, C(0xe8e8ee));
+                break;
             case "stick": Handle(p, 3, 13, 12, 4); break;
             case "fiber":
                 for (int k = 0; k < 5; k++) p.Line(4 + k * 2, 14, 6 + k, 2 + (k % 3), Pixel.Shade(t, 0.8f + k * 0.08f));
@@ -184,6 +201,20 @@ public static class ItemArt
                 Handle(p, 3, 14, 11, 6);
                 p.Line(9, 3, 14, 3, head); p.Line(9, 4, 13, 4, hd); p.Line(13, 3, 14, 6, head); p.Set(9, 2, hl);
                 break;
+            case ToolKind.Bow:
+            {
+                // A recurve stave bowed toward the top-left, strung corner to corner.
+                p.Line(4, 13, 13, 4, C(0xd8d4c8));
+                for (float s = 0; s <= 1.001f; s += 0.01f)
+                {
+                    float x = (1 - s) * (1 - s) * 4 + 2 * (1 - s) * s * 1.5f + s * s * 14;
+                    float y = (1 - s) * (1 - s) * 14 + 2 * (1 - s) * s * 1.5f + s * s * 4;
+                    var col = s > 0.4f && s < 0.6f ? WoodDark : Math.Abs(s - 0.5f) > 0.42f ? WoodLight : head;
+                    p.Set((int)x, (int)y, col);
+                    p.Set((int)x + 1, (int)y + 1, Pixel.Shade(col, 0.75f));
+                }
+                break;
+            }
             case ToolKind.Blade:
                 // Grip, guard, blade from bottom-left to top-right.
                 p.Line(2, 14, 4, 12, WoodDark); p.Line(3, 14, 5, 12, Wood);
@@ -195,6 +226,61 @@ public static class ItemArt
                     p.Set(6 + k, 9 - k, hl);
                 }
                 p.Set(14, 1, hl);
+                break;
+        }
+    }
+
+    /// <summary>Head, chest, legs or feet, in hide (stitched) or metal (with a polished edge).</summary>
+    private static void Armor(Pixel p, int slot, Color t, bool metal)
+    {
+        var hl = Pixel.Shade(t, metal ? 1.35f : 1.15f);
+        var dk = Pixel.Shade(t, 0.7f);
+        switch (slot)
+        {
+            case 0:     // a dome with a T-shaped opening
+                for (int y = 2; y < 13; y++)
+                    for (int x = 2; x < 14; x++)
+                    {
+                        float dx = (x - 7.5f) / 5.6f, dy = (y - 8.5f) / 6.2f;
+                        if (dx * dx + dy * dy >= 1f || y > 12) continue;
+                        p.Set(x, y, y < 5 ? hl : x > 10 ? dk : t);
+                    }
+                for (int x = 4; x < 12; x++) p.Set(x, 8, Clear);
+                for (int y = 9; y < 13; y++) { p.Set(7, y, Clear); p.Set(8, y, Clear); }
+                if (!metal) for (int x = 3; x < 13; x += 2) p.Set(x, 6, dk);
+                break;
+            case 1:     // a tunic with shoulders and a neck
+                for (int y = 3; y < 15; y++)
+                    for (int x = 1; x < 15; x++)
+                    {
+                        bool body = x >= 4 && x <= 11;
+                        bool sleeve = y <= 7 && (x <= 3 || x >= 12);
+                        if (!body && !sleeve) continue;
+                        if (y <= 4 && x >= 6 && x <= 9) continue;
+                        p.Set(x, y, y == 3 || (sleeve && y == 4) ? hl : x >= 10 || y >= 13 ? dk : t);
+                    }
+                if (metal) { p.Line(7, 6, 7, 12, hl); p.Line(8, 6, 8, 12, dk); }
+                else for (int y = 6; y < 13; y += 2) p.Set(7, y, dk);
+                break;
+            case 2:     // a waist and two legs
+                for (int y = 2; y < 15; y++)
+                    for (int x = 3; x < 13; x++)
+                    {
+                        if (y >= 5 && (x == 7 || x == 8)) continue;
+                        p.Set(x, y, y <= 3 ? hl : x == 6 || x == 12 ? dk : t);
+                    }
+                if (!metal) for (int y = 6; y < 14; y += 2) { p.Set(4, y, dk); p.Set(10, y, dk); }
+                break;
+            default:    // a pair of boots
+                for (int k = 0; k < 2; k++)
+                {
+                    int ox = k == 0 ? 1 : 8, oy = k == 0 ? 1 : 0;
+                    p.Rect(ox, 5 + oy, 4, 6, t);
+                    p.Rect(ox, 10 + oy, 7, 3, t);
+                    p.Rect(ox, 5 + oy, 4, 1, hl);
+                    p.Rect(ox, 12 + oy, 7, 1, dk);
+                    if (metal) p.Line(ox + 1, 7 + oy, ox + 1, 10 + oy, hl);
+                }
                 break;
         }
     }

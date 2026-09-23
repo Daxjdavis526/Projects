@@ -20,10 +20,11 @@ public sealed partial class InventoryScreen : Control
     public Vector3I Cell;
     public BlockEntity Entity;
     public ItemStack Cursor;
+    private SlotView _dragFrom;          // a stack picked up by pressing here may be dropped by releasing elsewhere
 
     private Inventory Inv => Game.Player.Inventory;
     private VBoxContainer _recipes;
-    private Label _title, _station;
+    private Label _title, _station, _armorLabel;
     private readonly List<(Recipe recipe, Button button, SlotView icon)> _recipeRows = new();
     private int _lastVersion = -1;
     private Control _furnaceGauges;
@@ -67,6 +68,24 @@ public sealed partial class InventoryScreen : Control
         rbox.AddThemeConstantOverride("separation", 8);
         right.AddChild(rbox);
         rbox.AddChild(UiStyle.Label("Inventory", 22, UiStyle.Accent));
+        // Armour: head, chest, legs, feet, and what it adds up to.
+        var armorRow = new HBoxContainer();
+        armorRow.AddThemeConstantOverride("separation", 4);
+        rbox.AddChild(armorRow);
+        string[] ghosts = { "hide_hood", "hide_jerkin", "hide_breeches", "hide_boots" };
+        for (int a = 0; a < 4; a++)
+        {
+            int k = a;
+            armorRow.AddChild(new SlotView
+            {
+                Index = k, Tag = "armor", Source = () => Game.Player.Armor[k], Clicked = OnSlot,
+                Ghost = Icons.Get(Items.ByKey[ghosts[k]]), TooltipText = Items.ArmorSlotNames[k],
+            });
+        }
+        armorRow.AddChild(UiStyle.Spacer(10));
+        _armorLabel = UiStyle.Label("", 15, UiStyle.TextDim);
+        _armorLabel.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+        armorRow.AddChild(_armorLabel);
         var grid = new GridContainer { Columns = 9 };
         grid.AddThemeConstantOverride("h_separation", 4);
         grid.AddThemeConstantOverride("v_separation", 4);
@@ -98,10 +117,11 @@ public sealed partial class InventoryScreen : Control
     {
         _title.Text = AtWorktable ? "Worktable" : "Crafting";
         _station.Text = AtWorktable ? "Every recipe is open here." : "Hand recipes. Build a worktable (4 planks) for tools and more.";
-        var filters = new HBoxContainer();
-        filters.AddThemeConstantOverride("separation", 4);
+        var filters = new HFlowContainer();
+        filters.AddThemeConstantOverride("h_separation", 4);
+        filters.AddThemeConstantOverride("v_separation", 4);
         box.AddChild(filters);
-        foreach (var (key, label) in new[] { ("all", "All"), ("basics", "Basics"), ("tools", "Tools"), ("building", "Building"), ("stations", "Stations"), ("food", "Food") })
+        foreach (var (key, label) in new[] { ("all", "All"), ("basics", "Basics"), ("tools", "Tools"), ("building", "Building"), ("stations", "Stations"), ("armour", "Armour"), ("circuits", "Circuits"), ("food", "Food") })
         {
             var b = new Button { Text = label, CustomMinimumSize = new Vector2(0, 32), ToggleMode = true, ButtonPressed = key == _filter };
             b.AddThemeFontSizeOverride("font_size", 14);
@@ -263,9 +283,16 @@ public sealed partial class InventoryScreen : Control
 
     // --- clicks -----------------------------------------------------------------------------
 
-    private Inventory InvFor(SlotView s) => (string)s.Tag == "entity"
-        ? Entity is CrateEntity c ? c.Inv : ((FurnaceEntity)Entity).Inv
-        : Inv;
+    private Inventory InvFor(SlotView s) => (string)s.Tag switch
+    {
+        "entity" => Entity is CrateEntity c ? c.Inv : ((FurnaceEntity)Entity).Inv,
+        "armor" => Game.Player.Armor,
+        _ => Inv,
+    };
+
+    /// <summary>Only the right piece goes in an armour slot.</summary>
+    private static bool Fits(SlotView view, in ItemStack s) =>
+        (string)view.Tag != "armor" || s.IsEmpty || (s.Def.IsArmor && s.Def.ArmorSlot == view.Index);
 
     private void OnSlot(SlotView view, MouseButton button, bool shift)
     {
@@ -280,6 +307,8 @@ public sealed partial class InventoryScreen : Control
             return;
         }
         var slot = inv.Slots[i];
+        if (!Fits(view, Cursor)) { Sfx.Ui("click", 0.3f, 0.6f); return; }
+        if ((string)view.Tag == "armor") button = MouseButton.Left;     // armour does not split
         if (furnaceOut)
         {
             // Output only comes out.
@@ -289,10 +318,39 @@ public sealed partial class InventoryScreen : Control
             Sfx.Ui("click", 0.4f, 1.2f);
             return;
         }
+        bool wasEmpty = Cursor.IsEmpty;
         if (button == MouseButton.Left) SlotOps.LeftClick(ref Cursor, ref slot);
         else SlotOps.RightClick(ref Cursor, ref slot);
         inv[i] = slot;
+        _dragFrom = button == MouseButton.Left && wasEmpty && !Cursor.IsEmpty ? view : null;
         Sfx.Ui("click", 0.35f, 1.1f);
+    }
+
+    private bool IsOutput(SlotView v) => Kind == ScreenKind.Furnace && (string)v.Tag == "entity" && v.Index == FurnaceEntity.Out;
+
+    /// <summary>Releasing a dragged stack over another slot drops it there; whatever was there goes back where the drag began.</summary>
+    private void EndDrag(Vector2 at)
+    {
+        var from = _dragFrom;
+        _dragFrom = null;
+        if (from == null || Cursor.IsEmpty) return;
+        var target = SlotAt(this, at);
+        if (target == null || target == from || target.Clicked == null) return;
+        OnSlot(target, MouseButton.Left, false);
+        _dragFrom = null;
+        var back = InvFor(from);
+        if (!Cursor.IsEmpty && !IsOutput(from) && back[from.Index].IsEmpty && Fits(from, Cursor)) { back[from.Index] = Cursor; Cursor = ItemStack.Empty; }
+    }
+
+    private static SlotView SlotAt(Node n, Vector2 at)
+    {
+        if (n is SlotView { Visible: true } s && s.GetGlobalRect().HasPoint(at)) return s;
+        foreach (var c in n.GetChildren())
+        {
+            var found = SlotAt(c, at);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     private void QuickMove(Inventory from, int i, SlotView view)
@@ -314,6 +372,13 @@ public sealed partial class InventoryScreen : Control
             int target = Smelting.Has(s.Id) ? FurnaceEntity.In : s.Def.Fuel > 0 ? FurnaceEntity.FuelSlot : -1;
             if (target < 0) return;
             left = f.Inv.Add(s, target, target + 1);
+        }
+        else if (s.Def.IsArmor && Game.Player.Armor[s.Def.ArmorSlot].IsEmpty)
+        {
+            // Straight on.
+            Game.Player.Armor[s.Def.ArmorSlot] = s;
+            left = ItemStack.Empty;
+            Sfx.Ui("equip", 0.6f);
         }
         else
         {
@@ -339,6 +404,7 @@ public sealed partial class InventoryScreen : Control
     /// <summary>Hovering a slot and pressing 1-9 swaps it with that hotbar slot.</summary>
     public override void _Input(InputEvent e)
     {
+        if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: false } up) { EndDrag(up.GlobalPosition); return; }
         if (e is not InputEventKey { Pressed: true, Echo: false }) return;
         for (int n = 1; n <= 9; n++)
         {
@@ -350,6 +416,7 @@ public sealed partial class InventoryScreen : Control
             if (inv == Inv && i == h) return;
             bool furnaceOut = Kind == ScreenKind.Furnace && (string)view.Tag == "entity" && i == FurnaceEntity.Out;
             if (furnaceOut && !Inv[h].IsEmpty) return;      // output only comes out
+            if (!Fits(view, Inv[h])) return;
             (inv[i], Inv[h]) = (Inv[h], inv[i]);
             Sfx.Ui("click", 0.35f, 1.2f);
             GetViewport().SetInputAsHandled();
@@ -381,6 +448,11 @@ public sealed partial class InventoryScreen : Control
 
     public override void _Process(double delta)
     {
+        if (_armorLabel != null)
+        {
+            int pts = Game.Player.ArmorPoints;
+            _armorLabel.Text = pts > 0 ? $"Protection {pts}  ·  {Math.Min(80, pts * 4)}% of each blow" : "No armour";
+        }
         if (_recipes != null && Inv.Version != _lastVersion)
         {
             _lastVersion = Inv.Version;

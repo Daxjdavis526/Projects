@@ -16,7 +16,8 @@ public sealed class Fluids
     private readonly World _w;
     private readonly Queue<(int x, int y, int z)> _now = new();
     private readonly HashSet<long> _queued = new();
-    private float _timer;
+    private readonly List<(int x, int y, int z)> _waiting = new();   // cells at the edge of the loaded world
+    private float _timer, _waitTimer;
     public const float Interval = 0.25f;
     public int MaxPerStep = 400;
     public int Pending => _now.Count;
@@ -30,6 +31,15 @@ public sealed class Fluids
             Schedule(x, y, z);
             for (int d = 0; d < 6; d++) Schedule(x + Dir.DX[d], y + Dir.DY[d], z + Dir.DZ[d]);
         };
+        // Water saved mid-flow picks up where it left off.
+        _w.ColumnReady += c =>
+        {
+            if (!c.Modified) return;       // straight from the generator: nothing moving
+            ushort lo = Blocks.WaterFalling, hi = Blocks.WaterLast;
+            var b = c.Blocks;
+            for (int i = 0; i < b.Length; i++)
+                if (b[i] >= lo && b[i] <= hi) Schedule(c.X * V.Size + (i & 15), i >> 8, c.Z * V.Size + ((i >> 4) & 15));
+        };
     }
 
     private static long Key(int x, int y, int z) => ((long)(x & 0x3FFFFFF) << 34) | ((long)(z & 0x3FFFFFF) << 8) | (long)(y & 0xFF);
@@ -42,6 +52,14 @@ public sealed class Fluids
 
     public void Step(float dt)
     {
+        _waitTimer += dt;
+        if (_waitTimer > 2f && _waiting.Count > 0)
+        {
+            _waitTimer = 0f;
+            var retry = _waiting.ToArray();
+            _waiting.Clear();
+            foreach (var (x, y, z) in retry) if (_w.ChunkAt(x, z) != null) Schedule(x, y, z);
+        }
         _timer += dt;
         if (_timer < Interval) return;
         _timer = 0f;
@@ -91,7 +109,12 @@ public sealed class Fluids
 
     private void Update(int x, int y, int z)
     {
-        if (!_w.IsReady(x, z)) return;
+        // A cell whose neighbours are not all loaded cannot know where its feed is: try again later.
+        if (!_w.IsReady(x, z) || !_w.IsReady(x + 1, z) || !_w.IsReady(x - 1, z) || !_w.IsReady(x, z + 1) || !_w.IsReady(x, z - 1))
+        {
+            if (_w.ChunkAt(x, z) != null && _waiting.Count < 20000) _waiting.Add((x, y, z));
+            return;
+        }
         ushort id = _w.GetBlock(x, y, z);
         bool isWater = Blocks.IsWater(id);
         if (!isWater && !Open(x, y, z)) return;

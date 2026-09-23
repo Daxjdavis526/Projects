@@ -19,6 +19,7 @@ public sealed partial class Player : Node3D
     public readonly VoxelBody Body = new();
     public readonly Vitals Vitals = new();
     public readonly Inventory Inventory = new(36);
+    public readonly Inventory Armor = new(4);         // head, chest, legs, feet
     public int Selected;
     public Camera3D Camera;
     public float Yaw, Pitch;
@@ -33,11 +34,14 @@ public sealed partial class Player : Node3D
     public Mob TargetMob;
     public float BreakProgress;             // 0..1 on the targeted block
     public float Eating;                    // seconds into eating
+    public float Draw;                      // 0..1: how far the bow is drawn
+    public const float BowDrawTime = 0.9f;
     public int Kills, BlocksMined, BlocksPlaced;
     public int BreakResets;                 // times the mining target changed (diagnostics)
 
     private float _coyote, _jumpBuffer, _eye = EyeHeight, _bob, _bobAmount, _fovKick, _tilt, _swing, _swingSpeed = 6f;
-    private float _placeCooldown, _instantCooldown, _hitSoundTimer, _attackTimer = 10f, _stepDist;
+    private float _stepLag;              // the camera eases up a step instead of snapping
+    private float _placeCooldown, _instantCooldown, _hitSoundTimer, _attackTimer = 10f, _stepDist, _noArrowsNote;
     private bool _wasOnGround = true, _wasInWater;
     private double _fallStartY;
     private Vector3I _breakCell = new(int.MinValue, 0, 0);
@@ -49,6 +53,15 @@ public sealed partial class Player : Node3D
     private World W => Game.I.World;
 
     public ItemStack HeldStack => Inventory[Selected];
+    public int ArmorPoints
+    {
+        get
+        {
+            int n = 0;
+            for (int i = 0; i < Armor.Size; i++) if (!Armor[i].IsEmpty) n += Armor[i].Def.Armor;
+            return n;
+        }
+    }
     public ItemDef HeldDef => HeldStack.IsEmpty ? null : HeldStack.Def;
     public Vector3 EyePosition => Body.Position + new Vector3(0, _eye, 0);
     public Vector3 Forward => -Camera.GlobalTransform.Basis.Z;
@@ -69,6 +82,11 @@ public sealed partial class Player : Node3D
         _held = new MeshInstance3D { CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
         Camera.AddChild(_held);
         Vitals.Hurt += OnHurt;
+    }
+
+    public Player()
+    {
+        Vitals.ArmorStruck += WearArmor;
     }
 
     public void Teleport(Vector3 feet)
@@ -117,6 +135,8 @@ public sealed partial class Player : Node3D
     public void Step(float dt)
     {
         if (Dead) return;
+        Vitals.ArmorPoints = ArmorPoints;
+        _noArrowsNote = Math.Max(0f, _noArrowsNote - dt);
         // Physics in small steps so a slow frame never changes how far a jump goes.
         int steps = Math.Clamp((int)MathF.Ceiling(dt / (1f / 60f)), 1, 8);
         float h = dt / steps;
@@ -129,7 +149,7 @@ public sealed partial class Player : Node3D
 
         UpdateCamera(dt);
         if (!G.InputBlocked) Hands(dt);
-        else { BreakProgress = 0; Eating = 0; }
+        else { BreakProgress = 0; Eating = 0; Draw = 0; }
         UpdateViewmodel(dt);
     }
 
@@ -143,7 +163,7 @@ public sealed partial class Player : Node3D
         var input = blocked ? Vector2.Zero : Input.GetVector("move_left", "move_right", "move_forward", "move_back");
         bool jump = !blocked && Input.IsActionPressed("jump");
         Sneaking = !blocked && Input.IsActionPressed("sneak") && !b.InWater;
-        if (!blocked && Input.IsActionPressed("sprint") && input.Y < -0.5f && !Sneaking && Vitals.CanSprint && Eating <= 0) Sprinting = true;
+        if (!blocked && Input.IsActionPressed("sprint") && input.Y < -0.5f && !Sneaking && Vitals.CanSprint && Eating <= 0 && Draw <= 0) Sprinting = true;
         if (input.Y > -0.3f || Sneaking || !Vitals.CanSprint || (b.HitX || b.HitZ) && b.OnGround) Sprinting = false;
 
         float yaw = Mathf.DegToRad(Yaw);
@@ -185,7 +205,7 @@ public sealed partial class Player : Node3D
         else
         {
             float speed = Sneaking ? SneakSpeed : Sprinting ? SprintSpeed : WalkSpeed;
-            if (Eating > 0) speed = Math.Min(speed, SneakSpeed * 1.2f);
+            if (Eating > 0 || Draw > 0) speed = Math.Min(speed, SneakSpeed * 1.2f);
             float accel = b.OnGround ? 16f : 3.2f;
             float k = 1f - MathF.Exp(-dt * accel);
             var target = wish * speed;
@@ -208,6 +228,8 @@ public sealed partial class Player : Node3D
         double y0 = b.Y;
         bool groundedBefore = b.OnGround;
         var moved = b.Move(W, v.X * dt, v.Y * dt, v.Z * dt, sneakEdge: Sneaking && b.OnGround);
+        double rose = b.Y - y0;
+        if (groundedBefore && rose > 0.02 && rose <= b.StepHeight + 0.01 && v.Y <= 0.01f) _stepLag = Math.Min(0.6f, _stepLag + (float)rose);
 
         // Walking effort and footsteps.
         float horiz = new Vector2(moved.X, moved.Z).Length();
@@ -299,13 +321,14 @@ public sealed partial class Player : Node3D
         _fovKick = Mathf.Lerp(_fovKick, Sprinting ? 1f : 0f, 1f - MathF.Exp(-dt * 6f));
 
         var bobOff = new Vector3(MathF.Cos(_bob) * 0.035f, MathF.Abs(MathF.Sin(_bob)) * 0.055f, 0) * _bobAmount;
+        _stepLag *= MathF.Exp(-dt * 14f);
         Position = Body.Position;
-        Camera.Position = new Vector3(0, _eye, 0);
+        Camera.Position = new Vector3(0, _eye - _stepLag, 0);
         var basis = Basis.FromEuler(new Vector3(Mathf.DegToRad(Pitch), Mathf.DegToRad(Yaw), 0), EulerOrder.Yxz);
         float roll = MathF.Sin(_tilt * MathF.PI) * 0.08f * (_tilt > 0 ? 1 : 0) + MathF.Sin(_bob) * 0.006f * _bobAmount;
         Camera.Basis = basis * new Basis(Vector3.Back, roll);
         Camera.Position += basis * bobOff;
-        Camera.Fov = G.Settings.Fov * (1f + 0.1f * _fovKick) * (Body.HeadInWater ? 0.92f : 1f);
+        Camera.Fov = G.Settings.Fov * (1f + 0.1f * _fovKick) * (Body.HeadInWater ? 0.92f : 1f) * (1f - 0.12f * Draw * Draw);
     }
 
     // --- hands ---------------------------------------------------------------------------------
@@ -336,8 +359,26 @@ public sealed partial class Player : Node3D
         else { BreakProgress = 0; _breakCell = new Vector3I(int.MinValue, 0, 0); }
         if (attackPressed && TargetMob == null && !Target.Hit) Swing();
 
-        // Eating is a held action; everything else on the use button is a click.
         var held = HeldDef;
+        bool aimingAtUsable = Target.Hit && IsUsable(Target.Id) && !Sneaking;
+
+        // The bow: hold to draw, let go to loose. Doors and crates still open with it in hand.
+        if (held != null && held.Tool == ToolKind.Bow && !(usePressed && aimingAtUsable && Draw <= 0f))
+        {
+            Eating = 0;
+            bool arrows = Inventory.Count(Items.Arrow) > 0;
+            if (use && arrows && (Draw > 0f || usePressed)) { Draw = Math.Min(1f, Draw + dt / BowDrawTime); return; }
+            if (Draw > 0f && !use) Loose(Draw);
+            Draw = 0f;
+            if (usePressed && !arrows && _noArrowsNote <= 0f) { G.Toast("No arrows"); _noArrowsNote = 2f; }
+            return;
+        }
+        Draw = 0f;
+
+        // Armour goes on with a right-click.
+        if (usePressed && held != null && held.IsArmor && !aimingAtUsable) { WearHeld(); _placeCooldown = 0.25f; return; }
+
+        // Eating is a held action; everything else on the use button is a click.
         bool edible = held != null && held.IsFood && (Vitals.Hungry || held.Leftover != 0);
         if (use && edible && !(Target.Hit && IsUsable(Target.Id) && !Sneaking))
         {
@@ -350,6 +391,50 @@ public sealed partial class Player : Node3D
             if (UseOrPlace()) { _placeCooldown = 0.22f; Swing(); }
             else if (usePressed) _placeCooldown = 0.1f;
         }
+    }
+
+    /// <summary>Puts the held piece of armour on, swapping out whatever was there.</summary>
+    public void WearHeld()
+    {
+        var s = Inventory[Selected];
+        if (s.IsEmpty || !s.Def.IsArmor) return;
+        int slot = s.Def.ArmorSlot;
+        Inventory[Selected] = Armor[slot];
+        Armor[slot] = s;
+        Sfx.Play("equip", EyePosition, 0.7f);
+    }
+
+    /// <summary>A blow the armour turned: every worn piece takes some wear, and may give out.</summary>
+    private void WearArmor(float blow)
+    {
+        int wear = Math.Max(1, (int)(blow / 4f));
+        for (int i = 0; i < Armor.Size; i++)
+        {
+            var a = Armor[i];
+            if (a.IsEmpty) continue;
+            a.Wear += wear;
+            if (a.Wear >= a.Def.Durability)
+            {
+                Armor[i] = ItemStack.Empty;
+                Sfx.Play("tool_break", EyePosition, 0.9f);
+                G?.Toast($"Your {a.Def.Name} fell apart");
+            }
+            else Armor[i] = a;
+        }
+    }
+
+    /// <summary>Lets an arrow fly: faster and harder the further the bow was drawn.</summary>
+    private void Loose(float draw)
+    {
+        if (draw < 0.15f || Inventory.Remove(Items.Arrow, 1) < 1) return;
+        var dir = Forward;
+        float speed = 14f + 34f * draw;
+        float damage = 1.5f + 7.5f * draw * draw;
+        var from = Camera.GlobalPosition + dir * 0.35f - Camera.GlobalTransform.Basis.Y * 0.08f;
+        G.Mobs.ShootArrow(from, dir * speed, damage, 1.5f + 3f * draw);
+        Sfx.Play("bow", EyePosition, 0.8f, 0.9f + 0.25f * draw);
+        Wear(1);
+        Vitals.Exhaust(0.05f);
     }
 
     private void Swing()
@@ -459,7 +544,7 @@ public sealed partial class Player : Node3D
     public static bool IsUsable(ushort id)
     {
         var u = Blocks.Get(id).Use;
-        return u is BlockUse.Worktable or BlockUse.Furnace or BlockUse.Crate or BlockUse.Door or BlockUse.Bed
+        return u is BlockUse.Worktable or BlockUse.Furnace or BlockUse.Crate or BlockUse.Door or BlockUse.Bed or BlockUse.Switch
             || (u == BlockUse.BerryBush && Blocks.Get(id).Ripe);
     }
 
@@ -612,6 +697,10 @@ public sealed partial class Player : Node3D
                 Sfx.Play((lv & 4) != 0 ? "door_open" : "door_close", CellCenter(cell), 0.7f);
                 return true;
             }
+            case BlockUse.Switch:
+                W.SetBlock(cell.X, cell.Y, cell.Z, Target.Id == Strata.Blocks.Switch ? Strata.Blocks.SwitchOn : Strata.Blocks.Switch, false);
+                Sfx.Play("switch", CellCenter(cell), 0.7f, Target.Id == Strata.Blocks.Switch ? 1.1f : 0.9f);
+                return true;
             case BlockUse.Bed:
                 G.TrySleep(cell);
                 return true;
@@ -704,7 +793,17 @@ public sealed partial class Player : Node3D
         var rot = cube
             ? new Vector3(0.1f - arc * 0.8f, 0.8f, 0f)
             : new Vector3(-arc * 1.2f, 1.45f, 0.35f - arc * 0.6f);
-        _held.Position = basePos + new Vector3(-arc * 0.1f - (cube ? 0.04f : 0f), arc * 0.08f, -arc * 0.18f);
+        var pos = basePos + new Vector3(-arc * 0.1f - (cube ? 0.04f : 0f), arc * 0.08f, -arc * 0.18f);
+        if (d.Tool == ToolKind.Bow && Draw > 0f)
+        {
+            // Raised upright just right of centre, facing you, and pulled back as it draws; a tremble at full draw.
+            float k = Math.Min(1f, Draw * 2.5f);
+            float shake = Draw >= 1f ? MathF.Sin(Time.GetTicksMsec() / 45f) * 0.004f : 0f;
+            pos = pos.Lerp(new Vector3(0.14f, -0.1f + shake, -0.66f + Draw * 0.06f), k);
+            rot = rot.Lerp(new Vector3(0f, 0.25f, 0.785f), k);
+            scale = Mathf.Lerp(scale, 0.36f, k);
+        }
+        _held.Position = pos;
         _held.Basis = Basis.FromEuler(rot).Scaled(new Vector3(scale, scale, scale));
         _held.SetInstanceShaderParameter("light_level", light);
     }

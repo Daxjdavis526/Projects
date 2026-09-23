@@ -122,6 +122,8 @@ public static class Tests
         Test("loot tables fill crates", LootFill);
         Test("hunters find and strike; grazers flee", CreatureAi);
         Test("water flows, falls and recedes", WaterFlow);
+        Test("armour turns blows; arrows fly true", ArmourAndBow);
+        Test("lumen circuits carry, fade and switch", Circuits);
         GD.Print($"\n{_pass} checks passed, {_fail} failed");
         foreach (var f in _failures) GD.Print("  - " + f);
         return _fail;
@@ -316,6 +318,7 @@ public static class Tests
             m.Player.Inventory.Add(new SlotSave { Slot = 3, Item = "torch", Count = 12 });
             m.Drops.Add(new DropSave { Item = "stick", Count = 2, X = 1, Y = 2, Z = 3, Age = 5 });
             m.Mobs.Add(new MobSave { Kind = "Brindle", X = 4, Y = 65, Z = 9, Health = 7, Scale = 0.55f, Persistent = true });
+            m.Player.Armor.Add(new SlotSave { Slot = 1, Item = "iron_cuirass", Count = 1, Wear = 5 });
             m.Time = 3.7;
             WorldSave.Write(m);
             var back = WorldSave.TryLoad(m.Folder);
@@ -324,6 +327,9 @@ public static class Tests
             Check(back.Drops.Count == 1 && back.Drops[0].Item == "stick", "drops persisted");
             Check(back.Mobs.Count == 1 && back.Mobs[0].Kind == "Brindle" && back.Mobs[0].Persistent && Math.Abs(back.Mobs[0].Scale - 0.55f) < 1e-6f,
                 "creatures persisted, a bred calf still small");
+            var worn = new Inventory(4);
+            WorldSave.LoadInventory(worn, back.Player.Armor);
+            Check(worn[1].Id == Items.ByKey["iron_cuirass"] && worn[1].Wear == 5, "worn armour persisted, wear and all");
             Check(Math.Abs(back.Time - 3.7) < 1e-9, "clock persisted");
             // A damaged world.json falls back to the backup.
             WorldSave.Write(m);
@@ -405,6 +411,10 @@ public static class Tests
         Check(!Recipes.TryCraft(inv, sticks, out _), "no planks, no sticks");
         Check(inv.Count(Items.ByKey["pine_log"]) == 1 && inv.Count(Items.ByKey["worktable"]) == 1, "failed craft changes nothing");
         Check(!Recipes.Available(pick, atWorktable: false) && Recipes.Available(pick, atWorktable: true), "tools need a worktable");
+        // Blocks with bonus drops still drop themselves where they should.
+        foreach (var k in new[] { "gravel", "emberbloom", "frostbell" })
+            Check(Blocks.Get(Blocks.ByKey[k]).DropItem == Items.ByKey[k] && Blocks.Get(Blocks.ByKey[k]).ExtraResolved?.Length > 0, $"{k} drops itself and a bonus");
+        Check(Blocks.Get(Blocks.TallGrass).DropItem == 0, "tall grass drops only its extras");
         int tools = 0;
         foreach (var r in Recipes.All) if (r.Output.Def.IsTool) tools++;
         Check(tools >= 25, $"every tier has its tools ({tools})");
@@ -723,6 +733,152 @@ public static class Tests
         w.SetBlock(5, 64, 5, Blocks.Air, false);
         for (int i = 0; i < 40; i++) f.Step(Fluids.Interval);
         Check(w.GetBlock(5, 64, 5) == Blocks.Water, "a gap between sources refills with a source");
+
+        // Water saved mid-flow carries on when its column is loaded again: here, a trickle with no source drains.
+        var w2 = Flat(-1, -1, 3);
+        var f2 = new Fluids(w2);
+        var col = w2.GetChunk(0, 0);
+        for (int x = 3; x <= 6; x++) col.SetRaw(x, 65, 3, Blocks.FlowingWater(x - 2));
+        col.Modified = true;
+        w2.RaiseColumnReady(col);
+        Check(f2.Pending > 0, "a loaded column's moving water is picked up");
+        for (int i = 0; i < 100; i++) f2.Step(Fluids.Interval);
+        Check(!Blocks.IsWater(w2.GetBlock(4, 65, 3)) && !Blocks.IsWater(w2.GetBlock(6, 65, 3)), "and a trickle saved without its source drains away");
+    }
+
+    private static void ArmourAndBow()
+    {
+        // Armour takes 4% a point off blows from creatures, not off falls.
+        var v = new Vitals { ArmorPoints = 10 };
+        float struck = 0;
+        v.ArmorStruck += a => struck += a;
+        v.Damage(10f, DamageKind.Mob);
+        Check(Math.Abs(v.Health - 14f) < 1e-4f && struck == 10f, $"ten points of armour take 40% off a creature's blow ({20 - v.Health})");
+        v.Invulnerable = 0; struck = 0;
+        v.Damage(4f, DamageKind.Fall);
+        Check(Math.Abs(v.Health - 10f) < 1e-4f && struck == 0f, "but nothing off a fall");
+        v.Invulnerable = 0;
+        v.ArmorPoints = 40;
+        v.Damage(10f, DamageKind.Projectile);
+        Check(Math.Abs(v.Health - 8f) < 1e-4f, "and never more than 80%");
+
+        // Sets, recipes, and wear on the wearer.
+        int pieces = 0, starmetal = 0;
+        foreach (var id in Items.ByTag["armor"])
+        {
+            pieces++;
+            if (Items.Get(id).Key.StartsWith("starmetal")) starmetal += Items.Get(id).Armor;
+        }
+        int armourRecipes = 0;
+        foreach (var r in Recipes.All) if (r.Group == "armour") armourRecipes++;
+        Check(pieces == 16 && armourRecipes == 16, $"four sets of four, each with a recipe ({pieces}, {armourRecipes})");
+        Check(starmetal == 18, $"a full starmetal set is 18 points ({starmetal})");
+        var p = new Player();
+        p.Armor[1] = new ItemStack(Items.ByKey["copper_cuirass"]);
+        p.Armor[3] = new ItemStack(Items.ByKey["copper_sabatons"]);
+        p.Vitals.ArmorPoints = p.ArmorPoints;
+        Check(p.ArmorPoints == 5, $"a cuirass and sabatons are worth 5 ({p.ArmorPoints})");
+        p.Vitals.Damage(8f, DamageKind.Mob);
+        Check(p.Armor[1].Wear == 2 && p.Armor[3].Wear == 2, "every worn piece wears when it turns a blow");
+        p.Inventory[0] = new ItemStack(Items.ByKey["iron_helm"]);
+        p.Selected = 0;
+        p.WearHeld();
+        Check(p.Armor[0].Id == Items.ByKey["iron_helm"] && p.Inventory[0].IsEmpty, "right-click puts armour on");
+        p.Free();
+
+        // An arrow crosses open ground and finds a mossback; one into a wall just stops.
+        var w = Flat(-1, -1, 3);
+        var mgr = new MobManager { World = w, SpawningEnabled = false, Daylight = 1f };
+        var moss = mgr.SpawnMob(MobKind.Mossback, new Vector3(20.5f, 65f, 8.5f));
+        moss.SetState(MobState.Idle, 1e6f);
+        float hp = moss.Health;
+        var from = new Vector3(4.5f, 66.2f, 8.5f);
+        var aim = moss.Position + new Vector3(0, 0.6f, 0) - from;
+        float speed = 48f, t = aim.Length() / speed;
+        var arrow = mgr.ShootArrow(from, aim / t + new Vector3(0, 0.5f * 16f * t, 0), 9f, 4.5f);
+        for (int i = 0; i < 120 && !arrow.Dead; i++) mgr.Step(1f / 60f, null);
+        Check(moss.Health <= hp - 9f + 1e-3f, $"a full-draw arrow hits for 9 ({hp - moss.Health})");
+        var stray = mgr.ShootArrow(new Vector3(8.5f, 65.5f, 8.5f), new Vector3(0, 0, 30f), 5f, 2f);
+        w.SetBlock(8, 65, 12, Blocks.Stone, false);
+        for (int i = 0; i < 60 && !stray.Dead; i++) mgr.Step(1f / 60f, null);
+        Check(stray.Dead && stray.Pos.Z < 12.1f, "an arrow stops at a wall");
+        mgr.Free();
+    }
+
+    private static void Circuits()
+    {
+        var w = Flat(-1, -1, 3);
+        var sig = new Signals(w);
+        void Settle(Vector3[] feet = null) { for (int i = 0; i < 6; i++) sig.Step(0.05f, feet); }
+
+        // A switch, ten traces, a lamp.
+        w.SetBlock(2, 65, 5, Blocks.Switch, false);
+        for (int x = 3; x <= 12; x++) w.SetBlock(x, 65, 5, Blocks.LumenTrace, false);
+        w.SetBlock(13, 65, 5, Blocks.SignalLamp, false);
+        Settle();
+        Check(w.GetBlock(13, 65, 5) == Blocks.SignalLamp && Blocks.TraceLevel(w.GetBlock(5, 65, 5)) == 0, "an idle circuit stays dark");
+        w.SetBlock(2, 65, 5, Blocks.SwitchOn, false);
+        Settle();
+        Check(Blocks.TraceLevel(w.GetBlock(3, 65, 5)) == 15 && Blocks.TraceLevel(w.GetBlock(12, 65, 5)) == 6,
+            $"a switch powers the line, one weaker a block ({Blocks.TraceLevel(w.GetBlock(3, 65, 5))} .. {Blocks.TraceLevel(w.GetBlock(12, 65, 5))})");
+        Check(w.GetBlock(13, 65, 5) == Blocks.SignalLampOn, "and the lamp at the end lights");
+        w.SetBlock(2, 65, 5, Blocks.Switch, false);
+        Settle();
+        Check(w.GetBlock(13, 65, 5) == Blocks.SignalLamp && Blocks.TraceLevel(w.GetBlock(3, 65, 5)) == 0, "switched off, it all goes dark");
+
+        // A break in the line: power stops there.
+        w.SetBlock(2, 65, 5, Blocks.SwitchOn, false);
+        Settle();
+        w.SetBlock(7, 65, 5, Blocks.Air, false);
+        Settle();
+        Check(Blocks.TraceLevel(w.GetBlock(6, 65, 5)) > 0 && Blocks.TraceLevel(w.GetBlock(8, 65, 5)) == 0 && w.GetBlock(13, 65, 5) == Blocks.SignalLamp,
+            "a broken line carries only as far as the break");
+
+        // Range: sixteen blocks out is too far.
+        w.SetBlock(2, 65, 9, Blocks.SwitchOn, false);
+        for (int x = 3; x <= 22; x++) w.SetBlock(x, 65, 9, Blocks.LumenTrace, false);
+        w.SetBlock(23, 65, 9, Blocks.SignalLamp, false);
+        Settle();
+        Check(Blocks.TraceLevel(w.GetBlock(17, 65, 9)) == 1 && Blocks.TraceLevel(w.GetBlock(18, 65, 9)) == 0 && w.GetBlock(23, 65, 9) == Blocks.SignalLamp,
+            "fifteen blocks is as far as a signal reaches");
+
+        // A step up onto a block, and back down.
+        w.SetBlock(2, 65, 13, Blocks.SwitchOn, false);
+        w.SetBlock(3, 65, 13, Blocks.LumenTrace, false);
+        w.SetBlock(4, 65, 13, Blocks.Stone, false);
+        w.SetBlock(4, 66, 13, Blocks.LumenTrace, false);
+        w.SetBlock(5, 65, 13, Blocks.LumenTrace, false);
+        Settle();
+        Check(Blocks.TraceLevel(w.GetBlock(4, 66, 13)) == 14 && Blocks.TraceLevel(w.GetBlock(5, 65, 13)) == 13, "traces climb a step and come down it");
+        w.SetBlock(3, 66, 13, Blocks.Stone, false);      // a roof over the lower trace cuts the climb
+        Settle();
+        Check(Blocks.TraceLevel(w.GetBlock(4, 66, 13)) == 0, "but not under a roof");
+
+        // A tread plate opens a door while something stands on it, and lets it close after.
+        w.SetBlock(3, 65, 17, Blocks.TreadPlate, false);
+        w.SetBlock(4, 65, 17, Blocks.LumenTrace, false);
+        w.SetBlock(5, 65, 17, (ushort)Blocks.Door, false);
+        w.SetBlock(5, 66, 17, (ushort)(Blocks.Door + 8), false);
+        var onPlate = new[] { new Vector3(3.5f, 65f, 17.5f) };
+        Settle(onPlate);
+        Check(w.GetBlock(3, 65, 17) == Blocks.TreadPlateDown && (Blocks.Get(w.GetBlock(5, 65, 17)).Variant & 4) != 0, "stepping on a plate opens the door");
+        var inDoor = new[] { new Vector3(5.5f, 65f, 17.5f) };
+        for (int i = 0; i < 30; i++) sig.Step(0.05f, inDoor);
+        Check((Blocks.Get(w.GetBlock(5, 65, 17)).Variant & 4) != 0, "it will not shut on someone in the doorway");
+        for (int i = 0; i < 30; i++) sig.Step(0.05f, null);
+        Check(w.GetBlock(3, 65, 17) == Blocks.TreadPlate && (Blocks.Get(w.GetBlock(5, 65, 17)).Variant & 4) == 0, "stepping off lets it close");
+        // A door opened by hand, with nothing powering it, stays open.
+        w.SetBlock(5, 65, 17, (ushort)(Blocks.Door + 4), false);
+        w.SetBlock(5, 66, 17, (ushort)(Blocks.Door + 4 + 8), false);
+        Settle();
+        Check((Blocks.Get(w.GetBlock(5, 65, 17)).Variant & 4) != 0, "a door opened by hand is left open");
+        // A lone door that nothing ever powered is left alone too.
+        w.SetBlock(12, 65, 20, (ushort)(Blocks.Door + 4), false);
+        w.SetBlock(12, 66, 20, (ushort)(Blocks.Door + 4 + 8), false);
+        Settle();
+        Check((Blocks.Get(w.GetBlock(12, 65, 20)).Variant & 4) != 0, "and so is one no circuit touches");
+        Check(!Blocks.Get(Blocks.TreadPlateDown).Solid && Items.ByKey.ContainsKey("lumen_trace") && !Items.ByKey.ContainsKey("lumen_trace_5"),
+            "states such as a lit lamp or a strong trace are not items of their own");
     }
 
     private static void LootFill()

@@ -104,6 +104,7 @@ public static class Mesher
     private static byte[] _tintOfLayer;           // 0 none, 1 grass, 2 foliage
     private static bool[] _lava;
     private static byte[] _liquidTop;             // surface height in sixteenths with nothing on top
+    private static bool[] _trace, _linkable;      // lumen traces, and what a trace reaches toward
 
     public static void Init()
     {
@@ -111,6 +112,7 @@ public static class Mesher
         _opq = new bool[n]; _cull = new byte[n]; _kind = new byte[n]; _cutout = new bool[n];
         _emissive = new bool[n]; _sway = new bool[n]; _tex = new int[n * 6]; _lava = new bool[n];
         _liquidTop = new byte[n];
+        _trace = new bool[n]; _linkable = new bool[n];
         for (int i = 0; i < n; i++)
         {
             var b = Blocks.ById[i];
@@ -128,6 +130,8 @@ public static class Mesher
             _sway[i] = b.Sway;
             _lava[i] = i == Blocks.Lava;
             _liquidTop[i] = (byte)(b.Render == RenderKind.Liquid ? Blocks.LiquidTop16((ushort)i) : 16);
+            _trace[i] = Blocks.IsTrace((ushort)i);
+            _linkable[i] = Blocks.IsCircuit((ushort)i) || Blocks.IsDoor((ushort)i);
             for (int f = 0; f < 6; f++) _tex[i * 6 + f] = b.Tex[f];
         }
         _tintOfLayer = new byte[Math.Max(256, Tex.Count)];
@@ -558,6 +562,37 @@ public static class Mesher
                 cu.Quad(a, b, c, d, new(0, 1), new(0, 0), new(1, 0), new(1, 1), info, col, col, col, col, false);
                 break;
             }
+            case RenderKind.Trace:
+            {
+                // A line on the floor: a centre spot, with an arm toward each neighbour it connects to
+                // (another trace, one a step up or down, or anything that takes part in a circuit).
+                const float w = 0.13f, lift = 1f / 32f;
+                float Y = y + lift;
+                var tinfo = new Vector2(layer, (flags & ~7) | Dir.PY);
+                bool any = false;
+                for (int k = 0; k < 4; k++)
+                {
+                    int off = k switch { 0 => 1, 1 => -1, 2 => P, _ => -P };
+                    int n = pi + off;
+                    bool link = _linkable[_pb[n]] || (_trace[_pb[n - PP]] && !_opq[_pb[n]]) || (_trace[_pb[n + PP]] && !_opq[_pb[pi + PP]]);
+                    if (!link) continue;
+                    any = true;
+                    float x0, x1, z0, z1;
+                    switch (k)
+                    {
+                        case 0: x0 = 0.5f - w; x1 = 1f; z0 = 0.5f - w; z1 = 0.5f + w; break;
+                        case 1: x0 = 0f; x1 = 0.5f + w; z0 = 0.5f - w; z1 = 0.5f + w; break;
+                        case 2: x0 = 0.5f - w; x1 = 0.5f + w; z0 = 0.5f - w; z1 = 1f; break;
+                        default: x0 = 0.5f - w; x1 = 0.5f + w; z0 = 0f; z1 = 0.5f + w; break;
+                    }
+                    FloorQuad(op, x, Y, z, x0, x1, z0, z1, tinfo, col);
+                }
+                // Alone, or at the end of a line: a small cross so it reads as a trace.
+                float r = any ? w : 0.3f;
+                FloorQuad(op, x, Y, z, 0.5f - r, 0.5f + r, 0.5f - w, 0.5f + w, tinfo, col);
+                if (!any) FloorQuad(op, x, Y, z, 0.5f - w, 0.5f + w, 0.5f - r, 0.5f + r, tinfo, col);
+                break;
+            }
             case RenderKind.Door:
             case RenderKind.Low:
             default:
@@ -570,6 +605,13 @@ public static class Mesher
                 break;
             }
         }
+    }
+
+    /// <summary>A flat, upward-facing rectangle inside a cell, textured by its position in the cell.</summary>
+    private static void FloorQuad(MeshBuffers mb, int x, float Y, int z, float x0, float x1, float z0, float z1, Vector2 info, Color col)
+    {
+        mb.Quad(new(x + x0, Y, z + z0), new(x + x1, Y, z + z0), new(x + x1, Y, z + z1), new(x + x0, Y, z + z1),
+            new(x0, z0), new(x1, z0), new(x1, z1), new(x0, z1), info, col, col, col, col, false);
     }
 
     private static void Cross(MeshBuffers mb, float cx, float y, float cz, float r, float ht, Vector2 info, Color col)

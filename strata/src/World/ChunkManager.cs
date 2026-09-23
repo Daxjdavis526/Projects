@@ -75,8 +75,10 @@ public sealed class ChunkManager : IDisposable
             InFlightLight--;
             if (!World.Chunks.TryGetValue(l.c.Key, out var live) || live != l.c) continue;
             l.c.Light = l.light;
+            bool first = !l.c.LightedOnce;
             l.c.LightedOnce = true;
             l.c.State = ChunkState.Lit;
+            if (first) World.RaiseColumnReady(l.c);
             AdvanceAround(l.c.X, l.c.Z);
         }
         while (_meshDone.TryPeek(out var m))

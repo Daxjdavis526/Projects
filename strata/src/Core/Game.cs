@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Godot;
 
@@ -25,6 +26,8 @@ public sealed partial class Game : Node3D
     public Particles Particles;
     public MobManager Mobs;
     public Fluids Fluids;
+    public Signals Signals;
+    private readonly List<Vector3> _feet = new();
     public Weather Weather;
     public BlockOverlay Overlay;
     public Hud Hud;
@@ -59,6 +62,7 @@ public sealed partial class Game : Node3D
         I = this;
         World = new World(Meta.Seed);
         Fluids = new Fluids(World);
+        Signals = new Signals(World);
         Store = new ChunkStore(WorldSave.ChunkDir(Meta.Folder));
 
         Player = new Player { Name = "Player" };
@@ -102,6 +106,7 @@ public sealed partial class Game : Node3D
             v.Health = ps.Health; v.Hunger = ps.Hunger; v.Saturation = ps.Saturation; v.Air = ps.Air;
             Player.Selected = Math.Clamp(ps.Selected, 0, 8);
             WorldSave.LoadInventory(Player.Inventory, ps.Inventory);
+            WorldSave.LoadInventory(Player.Armor, ps.Armor ?? new());
             Player.Spawn = new Vector3((float)ps.SpawnX, (float)ps.SpawnY, (float)ps.SpawnZ);
             Player.HasBedSpawn = ps.BedSpawn;
             if (v.Health <= 0) v.Health = 1;
@@ -180,6 +185,10 @@ public sealed partial class Game : Node3D
             Weather.Step(dt, this);
             World.TickEntities(dt);
             Fluids.Step(dt);
+            _feet.Clear();
+            if (State == GameState.Playing && !Player.Dead) _feet.Add(Player.Body.Position);
+            foreach (var m in Mobs.All) if (!m.Removed && !m.Dead) _feet.Add(m.Body.Position);
+            Signals.Step(dt, _feet);
             // Three random ticks per section per twentieth of a second.
             _tickAccum += dt;
             while (_tickAccum >= 0.05f)
@@ -277,13 +286,16 @@ public sealed partial class Game : Node3D
         // Everything you carried stays where you fell.
         var at = Player.Body.Position + new Vector3(0, 0.6f, 0);
         var rng = new Random();
-        for (int i = 0; i < Player.Inventory.Size; i++)
+        foreach (var inv in new[] { Player.Inventory, Player.Armor })
         {
-            var s = Player.Inventory[i];
-            if (s.IsEmpty) continue;
-            Drops.Spawn(s, at, new Vector3((float)rng.NextDouble() * 4 - 2, 3f, (float)rng.NextDouble() * 4 - 2), 1f);
+            for (int i = 0; i < inv.Size; i++)
+            {
+                var s = inv[i];
+                if (s.IsEmpty) continue;
+                Drops.Spawn(s, at, new Vector3((float)rng.NextDouble() * 4 - 2, 3f, (float)rng.NextDouble() * 4 - 2), 1f);
+            }
+            inv.Clear();
         }
-        Player.Inventory.Clear();
         Sfx.Ui("death", 0.9f);
         Input.MouseMode = Input.MouseModeEnum.Visible;
         DeathScreen = Menus.Death(this, kind);
@@ -475,6 +487,7 @@ public sealed partial class Game : Node3D
         ps.Health = Math.Max(v.Health, State == GameState.Dead ? 20 : 1); ps.Hunger = v.Hunger; ps.Saturation = v.Saturation; ps.Air = v.Air;
         ps.Selected = Player.Selected;
         ps.Inventory = WorldSave.SaveInventory(Player.Inventory);
+        ps.Armor = WorldSave.SaveInventory(Player.Armor);
         ps.SpawnX = Player.Spawn.X; ps.SpawnY = Player.Spawn.Y; ps.SpawnZ = Player.Spawn.Z;
         ps.BedSpawn = Player.HasBedSpawn;
         if (State == GameState.Dead) { ps.X = Player.Spawn.X; ps.Y = Player.Spawn.Y + 0.5; ps.Z = Player.Spawn.Z; ps.Health = 20; }
@@ -539,7 +552,7 @@ public sealed partial class Game : Node3D
         sb.AppendLine($"columns loaded {World.Chunks.Count}   radius {c.Radius}   queued gen {c.InFlightGen} light {c.InFlightLight} mesh {c.InFlightMesh}   jobs {c.Jobs.Pending}");
         sb.AppendLine($"triangles {c.Triangles:N0} world, {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame):N0} drawn   draw calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0}");
         sb.AppendLine($"memory {GC.GetTotalMemory(false) / 1048576.0:0} MB managed, {OS.GetStaticMemoryUsage() / 1048576.0:0} MB engine");
-        sb.AppendLine($"creatures {Mobs.All.Count} ({Mobs.CountPassive} passive, {Mobs.CountHostile} hostile)   drops {Drops.All.Count}   fluid queue {Fluids.Pending}   weather {(Weather.State == 0 ? "clear" : Weather.State == 1 ? "rain" : "storm")} {Weather.Intensity:0.00}");
+        sb.AppendLine($"creatures {Mobs.All.Count} ({Mobs.CountPassive} passive, {Mobs.CountHostile} hostile)   drops {Drops.All.Count}   fluid queue {Fluids.Pending}   circuits {Signals.Pending}   weather {(Weather.State == 0 ? "clear" : Weather.State == 1 ? "rain" : "storm")} {Weather.Intensity:0.00}");
         if (Player.Target.Hit)
         {
             var t = Player.Target;

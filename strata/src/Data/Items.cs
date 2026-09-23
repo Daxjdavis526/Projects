@@ -28,6 +28,9 @@ public sealed class ItemDef
     public float Speed = 1f;             // mining multiplier with the right tool
     public float NightBonus;             // extra damage multiplier against night creatures
 
+    public int ArmorSlot = -1;           // 0 head, 1 chest, 2 legs, 3 feet; -1 not armour
+    public int Armor;                    // protection points while worn
+
     public int Food;                     // hunger restored (half-shanks)
     public float Saturation;
     public ushort Leftover;              // what is left after eating (a bowl)
@@ -40,6 +43,8 @@ public sealed class ItemDef
     public Color Tint = Colors.White;    // sprite palette hint
 
     public bool IsTool => Tool != ToolKind.None && Durability > 0;
+    public bool IsArmor => ArmorSlot >= 0;
+    public bool Wears => Durability > 0;
     public bool IsFood => Food > 0;
     public bool Stackable => MaxStack > 1;
 }
@@ -92,7 +97,8 @@ public static class Items
         GrainSeeds, FrostleafSeeds, Grain, EmberrootItem, FrostleafItem, Berries,
         RawMossback, MossbackSteak, RawBrisket, SearedBrisket, RawKit, RoastKit, RawFowl, RoastFowl,
         RoastedEmberroot, HearthBread, BerryTart, MushroomStew, FrostleafStew, Umbercap, Blushcap,
-        Furnace, Torch, Ladder, Door, SilverBlade, Spitgland;
+        Furnace, Torch, Ladder, Door, SilverBlade, Spitgland, Bow, Arrow;
+    public static readonly string[] ArmorSlotNames = { "Head", "Chest", "Legs", "Feet" };
 
     public static ItemDef Get(ushort id) => All[id];
     public static ushort Id(string key) => ByKey.TryGetValue(key, out var id) ? id : (ushort)0;
@@ -228,6 +234,37 @@ public static class Items
         Get(SilverBlade).Durability = 300;
         Get(SilverBlade).Info = "Twice as hard on things that walk at night.";
 
+        // --- the hunting bow ---------------------------------------------------
+        Bow = Add("hunting_bow", "Hunting Bow", d =>
+        {
+            d.Tool = ToolKind.Bow; d.Tier = 1; d.Durability = 250; d.MaxStack = 1; d.Damage = 1f; d.Cooldown = 0.5f;
+            d.Tint = new Color(0.62f, 0.44f, 0.26f);
+            d.Info = "Hold right-click to draw, let go to shoot. Needs arrows.";
+        });
+        Arrow = Add("arrow", "Arrow", d => { d.Tint = new Color(0.55f, 0.4f, 0.25f); d.Info = "For the hunting bow. Often survives the landing."; });
+
+        // --- armour --------------------------------------------------------------
+        // Protection points per piece (head, chest, legs, feet); each point turns aside 4% of a blow.
+        var armorSets = new (string key, string name, Color c, int life, int[] points, string[] pieces)[]
+        {
+            ("hide", "Hide", new Color(0.6f, 0.45f, 0.3f), 70, new[] { 1, 2, 2, 1 }, new[] { "Hood", "Jerkin", "Breeches", "Boots" }),
+            ("copper", "Copper", tierColor[3], 150, new[] { 2, 4, 3, 1 }, new[] { "Helm", "Cuirass", "Greaves", "Sabatons" }),
+            ("iron", "Iron", tierColor[4], 240, new[] { 2, 5, 4, 2 }, new[] { "Helm", "Cuirass", "Greaves", "Sabatons" }),
+            ("starmetal", "Starmetal", tierColor[5], 700, new[] { 3, 7, 5, 3 }, new[] { "Helm", "Cuirass", "Greaves", "Sabatons" }),
+        };
+        float[] lifeScale = { 0.85f, 1.2f, 1.1f, 0.8f };
+        foreach (var (key, name, c, life, points, pieces) in armorSets)
+            for (int slot = 0; slot < 4; slot++)
+            {
+                int sl = slot;
+                ushort id = Add($"{key}_{pieces[slot].ToLowerInvariant()}", $"{name} {pieces[slot]}", d =>
+                {
+                    d.ArmorSlot = sl; d.Armor = points[sl]; d.Durability = (int)(life * lifeScale[sl]); d.MaxStack = 1; d.Tint = c;
+                    d.Info = "Right-click to wear it.";
+                });
+                Tag(id, "armor");
+            }
+
         // Fuel values for placeable wood.
         foreach (var d in All)
         {
@@ -239,13 +276,22 @@ public static class Items
         Get(Ladder).Fuel = 5f;
         Get(ByKey["dead_bush"]).Fuel = 2f;
 
+        // --- lumen circuits ------------------------------------------------------
+        Get(ByKey["lumen_trace"]).Info = "Lay it on the ground to carry a signal up to fifteen blocks.";
+        Get(ByKey["lumen_trace"]).Icon = IconKind.Sprite;
+        Get(ByKey["lumen_trace"]).Tint = new Color(0.33f, 0.94f, 0.89f);
+        Get(ByKey["switch"]).Info = "Right-click to turn a circuit on or off.";
+        Get(ByKey["tread_plate"]).Info = "Powers a circuit while anything stands on it.";
+        Get(ByKey["signal_lamp"]).Info = "Lights up when powered. Doors open when powered, too.";
+        Get(ByKey["tread_plate"]).Fuel = 5f;
+
         ById = All.ToArray();
         Blocks.LinkItems();
     }
 
     private static bool HoldsAsItself(BlockDef b)
     {
-        if (b.Id == Blocks.Air || b.Liquid || b.Id == Blocks.Rootstone) return false;
+        if (b.Id == Blocks.Air || b.Liquid || b.Id == Blocks.Rootstone || b.NoItem) return false;
         if (b.CropStages > 0 || b.IsLit) return false;
         if (b.Use == BlockUse.Furnace || b.Use == BlockUse.Door) return false;
         if (b.Render == RenderKind.Torch || b.Render == RenderKind.Ladder) return false;

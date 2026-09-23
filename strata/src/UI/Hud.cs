@@ -20,7 +20,7 @@ public sealed partial class Hud : Control
     private float _itemNameTime;
     private int _lastSelected = -1;
     private ushort _lastHeld;
-    private Texture2D _heart, _heartHalf, _heartEmpty, _food, _foodHalf, _foodEmpty, _bubble, _bubblePop;
+    private Texture2D _heart, _heartHalf, _heartEmpty, _food, _foodHalf, _foodEmpty, _bubble, _bubblePop, _shield, _shieldHalf, _shieldEmpty;
     private ColorRect _hurt, _water, _fade;
     public float Fade;                 // sleeping and loading fades
 
@@ -189,6 +189,21 @@ public sealed partial class Hud : Control
             DrawTextureRect(_heartEmpty, new Rect2(x0 + i * step, hy + shake, icon, icon), false);
             if (tex != _heartEmpty) DrawTextureRect(tex, new Rect2(x0 + i * step, hy + shake, icon, icon), false);
         }
+        // Armour above health, only when worn: a shield for every two points.
+        int armor = p.ArmorPoints;
+        if (armor > 0)
+            for (int i = 0; i < 10; i++)
+            {
+                int a = armor - i * 2;
+                var tex = a >= 2 ? _shield : a >= 1 ? _shieldHalf : _shieldEmpty;
+                DrawTextureRect(tex, new Rect2(x0 + i * step, hy - step - 2, icon, icon), false);
+            }
+        // Bow draw, under the crosshair.
+        if (p.Draw > 0f && !Game.InputBlocked)
+        {
+            DrawRect(new Rect2(c.X - 20, c.Y + 18, 40, 5), new Color(0, 0, 0, 0.6f));
+            DrawRect(new Rect2(c.X - 20, c.Y + 18, 40 * p.Draw, 5), p.Draw >= 1f ? new Color(1f, 0.85f, 0.4f) : UiStyle.Accent);
+        }
         // Hunger, right to left.
         for (int i = 0; i < 10; i++)
         {
@@ -224,6 +239,9 @@ public sealed partial class Hud : Control
         _foodEmpty = Icon(Ration(new Color(0.2f, 0.16f, 0.12f), 1f, empty: true));
         _bubble = Icon(Bubble(false));
         _bubblePop = Icon(Bubble(true));
+        _shield = Icon(Shield(new Color(0.72f, 0.74f, 0.8f), 1f));
+        _shieldHalf = Icon(Shield(new Color(0.72f, 0.74f, 0.8f), 0.5f));
+        _shieldEmpty = Icon(Shield(new Color(0.16f, 0.16f, 0.2f), 1f, empty: true));
     }
 
     private static ImageTexture Icon(Pixel p) => ImageTexture.CreateFromImage(p.ToImage());
@@ -272,6 +290,26 @@ public sealed partial class Hud : Control
                 p.Set(x, y, col);
             }
         p.Outline(new Color(0.1f, 0.06f, 0.02f));
+        return p;
+    }
+
+    private static Pixel Shield(Color c, float fill, bool empty = false)
+    {
+        // A kite shield: flat top, tapering to a point.
+        var p = new Pixel(9, 9, "shield");
+        p.Clear(new Color(0, 0, 0, 0));
+        for (int y = 1; y < 8; y++)
+        {
+            int half = y < 5 ? 3 : 7 - y;
+            for (int x = 4 - half; x <= 4 + half; x++)
+            {
+                if (!empty && x >= 1 + 7 * fill + 0.01f) continue;
+                var col = empty ? c : x < 4 ? Pixel.Shade(c, 1.2f) : Pixel.Shade(c, 0.85f);
+                if (!empty && y == 1) col = Pixel.Shade(c, 1.35f);
+                p.Set(x, y, col);
+            }
+        }
+        p.Outline(new Color(0.05f, 0.05f, 0.08f));
         return p;
     }
 

@@ -9,7 +9,9 @@ public sealed class Projectile
 {
     public Vector3 Pos, Vel;
     public float Life = 5f, Damage;
+    public float Gravity = 9.8f, Knockback = 3f;
     public Mob Owner;
+    public bool FromPlayer;              // an arrow: hits creatures, not you, and may be picked up again
     public MeshInstance3D Node;
     public bool Dead;
 }
@@ -30,7 +32,7 @@ public sealed partial class MobManager : Node3D
     public bool SpawningEnabled = true;
     private float _spawnTimer = 2f, _rareTimer;
     private readonly Random _rng = new();
-    private ShaderMaterial _thornMat;
+    private ShaderMaterial _thornMat, _arrowMat;
 
     public int CountHostile { get; private set; }
     public int CountPassive { get; private set; }
@@ -275,22 +277,64 @@ public sealed partial class MobManager : Node3D
         Sfx.Play("spit", from, 0.8f);
     }
 
+    /// <summary>Looses an arrow from the player's bow.</summary>
+    public Projectile ShootArrow(Vector3 from, Vector3 vel, float damage, float knockback)
+    {
+        if (_arrowMat == null)
+        {
+            _arrowMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/entity.gdshader") };
+            _arrowMat.SetShaderParameter("tint", new Color(0.62f, 0.46f, 0.3f));
+        }
+        var node = new MeshInstance3D { Mesh = new BoxMesh { Size = new Vector3(0.05f, 0.05f, 0.62f) }, MaterialOverride = _arrowMat };
+        AddChild(node);
+        var s = new Projectile { Pos = from, Vel = vel, Damage = damage, Knockback = knockback, Gravity = 16f, Life = 8f, FromPlayer = true, Node = node };
+        Shots.Add(s);
+        return s;
+    }
+
     private void StepShots(float dt, Player p)
     {
         foreach (var s in Shots)
         {
             s.Life -= dt;
-            s.Vel.Y -= 9.8f * dt;
+            s.Vel.Y -= s.Gravity * dt;
             var next = s.Pos + s.Vel * dt;
-            var hit = VoxelRay.Cast(World, s.Pos, s.Vel.Normalized(), (next - s.Pos).Length());
-            if (hit.Hit && Blocks.Get(hit.Id).Solid) { s.Dead = true; Game?.Particles.Burst(hit.Point, new Color(0.7f, 0.8f, 0.4f), 5, 1.5f, 0.05f); continue; }
-            if (p != null && !p.Dead)
+            float seg = (next - s.Pos).Length();
+            var dir = s.Vel.Normalized();
+            var hit = VoxelRay.Cast(World, s.Pos, dir, seg);
+            bool wall = hit.Hit && Blocks.Get(hit.Id).Solid;
+            if (s.FromPlayer)
+            {
+                var m = Raycast(s.Pos, dir, seg, out float md);
+                if (m != null && (!wall || md < hit.Distance))
+                {
+                    if (m.Hurt(s.Damage, s.Pos - dir, s.Knockback, p))
+                    {
+                        Sfx.Play("hit", m.Position, 0.8f);
+                        if (m.Dead && p != null) p.Kills++;
+                    }
+                    s.Dead = true;
+                    continue;
+                }
+                if (wall)
+                {
+                    // Most arrows survive the landing and can be picked up again.
+                    s.Dead = true;
+                    Sfx.Play("arrow_hit", hit.Point, 0.6f);
+                    Game?.Particles.BlockHit(hit.Cell.X, hit.Cell.Y, hit.Cell.Z, hit.Id, hit.Face);
+                    if (_rng.NextDouble() < 0.75 && Game != null)
+                        Game.Drops.Spawn(new ItemStack(Items.Arrow, 1), hit.Point - dir * 0.2f, Vector3.Zero, 0.3f);
+                    continue;
+                }
+            }
+            else if (wall) { s.Dead = true; Game?.Particles.Burst(hit.Point, new Color(0.7f, 0.8f, 0.4f), 5, 1.5f, 0.05f); continue; }
+            if (!s.FromPlayer && p != null && !p.Dead)
             {
                 var b = p.Body;
                 var box = new Aabb(new Vector3((float)b.X - 0.35f, (float)b.Y, (float)b.Z - 0.35f), new Vector3(0.7f, 1.85f, 0.7f));
                 if (VoxelRay.RayBox(s.Pos, s.Vel.Normalized(), box.Position, box.End, out float tn, out _) && tn <= (next - s.Pos).Length())
                 {
-                    if (p.Vitals.Damage(s.Damage, DamageKind.Projectile)) { p.Knockback(s.Pos - s.Vel, 3f); Sfx.Play("hit_player", p.EyePosition, 0.7f); }
+                    if (p.Vitals.Damage(s.Damage, DamageKind.Projectile)) { p.Knockback(s.Pos - s.Vel, s.Knockback); Sfx.Play("hit_player", p.EyePosition, 0.7f); }
                     s.Dead = true;
                     continue;
                 }
@@ -299,8 +343,12 @@ public sealed partial class MobManager : Node3D
             if (s.Life <= 0) s.Dead = true;
             if (s.Node != null)
             {
-                s.Node.Position = s.Pos;
-                if (s.Vel.LengthSquared() > 0.01f) s.Node.LookAt(s.Pos + s.Vel, Vector3.Up);
+                if (s.Vel.LengthSquared() > 0.01f)
+                {
+                    var fwd = s.Vel.Normalized();
+                    s.Node.Transform = new Transform3D(Basis.LookingAt(fwd, Math.Abs(fwd.Y) > 0.99f ? Vector3.Forward : Vector3.Up), s.Pos);
+                }
+                else s.Node.Position = s.Pos;
                 byte l = World.GetLight(V.FloorToInt(s.Pos.X), V.FloorToInt(s.Pos.Y), V.FloorToInt(s.Pos.Z));
                 s.Node.SetInstanceShaderParameter("light_level", new Vector2((l >> 4) / 15f, (l & 15) / 15f));
             }

@@ -1,9 +1,10 @@
 # STRATA — an original voxel survival sandbox
 
 A complete block-world survival game: an endless generated world of fourteen
-biomes, caves and ores, day and night, weather, eight original creatures, tools
-in five tiers, cooking, smelting, farming, storage, building, and a world that
-saves and loads. Every texture, model, sound, piece of music, name and line of
+biomes, caves and ores, flowing water, day and night, weather, eight original
+creatures, tools in five tiers, armour, a hunting bow, cooking, smelting,
+farming, storage, building, lumen circuits that switch lamps and doors, and a
+world that saves and loads. Every texture, model, sound, piece of music, name and line of
 code was made for this project. No assets, code or names come from any other
 block game, and none of it is a clone of one.
 
@@ -53,7 +54,7 @@ alone will not start. Players do not need Godot or .NET installed.
 | Ctrl (hold, moving forward) | sprint (needs hunger above 6) |
 | Shift | sneak — you will not step off an edge; swim down |
 | left mouse (hold) | mine · attack |
-| right mouse | place · use: open a worktable, furnace, crate or door, till, plant, sleep, feed an animal · hold to eat |
+| right mouse | place · use: open a worktable, furnace, crate or door, throw a switch, till, plant, sleep, feed an animal, put on armour · hold to eat · hold to draw a bow, let go to shoot |
 | middle mouse | pick the block you are looking at into your hand, if you carry it |
 | 1 – 9 · mouse wheel | hotbar slot |
 | E | inventory and crafting |
@@ -97,6 +98,10 @@ as a recipe book.
 8. **Down.** Copper, then iron, then silver and gold, deep lumen crystal, and
    at the very bottom, rarely, starmetal. Each metal tier mines faster, hits
    harder and lasts longer.
+9. **Armour and a bow.** Hide from animals makes a first set of armour;
+   copper, iron and starmetal make better ones. A hunting bow (sticks and
+   cord) shoots arrows made from a stick, a feather and flint — gravel
+   sometimes gives flint when you dig it.
 
 If you die, everything you carried stays where you fell, as items on the
 ground — go back for it before it despawns (five minutes).
@@ -196,6 +201,31 @@ forever. Their eyes give the hunters away in the dark.
 | Falling | one point per metre beyond three. |
 | Hazards | lava, cactus spines, creatures, starvation, drowning. |
 | Death | inventory dropped where you fell; respawn at your bedroll or the world spawn. |
+
+**Armour** has four slots (head, chest, legs, feet) and four sets: hide,
+copper, iron and starmetal, worth 6, 10, 13 and 18 protection points. Each
+point turns aside 4% of a blow from a creature, an arrow or a cactus, up to
+80%; falls, lava, drowning and hunger go straight through. Every piece wears a
+little with each blow it turns, and falls apart when worn out. Right-click a
+piece to put it on, or shift-click it in the inventory.
+
+**The hunting bow** draws in 0.9 seconds while you hold right mouse, slowing
+you to a walk and narrowing your view; let go to shoot. A full draw sends an
+arrow at 48 m/s for 9 damage, a quick one much less. Arrows fall under
+gravity, so aim high at range. Three in four survive hitting the ground or a
+wall and can be picked up again.
+
+**Lumen circuits** are the game's own signal system. Crush a lumen shard into
+eight **lumen traces** and lay them on the ground as wiring. A **switch**
+(right-click to throw it) or a **tread plate** (powered while anything stands
+on it — you, or a creature) drives the traces beside it at strength 15, and
+each trace along the line is one weaker, so a signal carries fifteen blocks.
+Traces join their neighbours on the level and climb or drop one-block steps
+(not under a roof). A **signal lamp** lights, and a **door** swings open,
+while anything beside it is powered. Doors follow *changes* in power, so you
+can still open and shut one by hand, and a door never swings shut on someone
+standing in it. The traces glow when they carry a signal, and draw themselves
+toward whatever they connect to.
 
 Tools have a kind (pick, axe, shovel, hoe, blade), a tier (wooden, stone,
 copper, iron, starmetal) and durability. Mining time depends on the block's
@@ -306,7 +336,7 @@ walkable cells in a short radius and re-plan as you move.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 435 checks, about 30 seconds
+    godot --headless --path . -- --test                # 494 checks, about 30 seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 61 checks and screenshots
     godot --headless --path . -- --bench               # pipeline costs per column
 
@@ -316,15 +346,19 @@ columns and world files (including recovery from a corrupt file), inventory
 stacking and every kind of click, exact crafting, smelting, break times and
 harvest rules, ray casts, incremental light against a full recompute,
 collision (landing, walls, speed, stepping), survival rules, the mesher's
-culling and merging, loot tables, creature AI at 4, 8 and 30 fps, and water
-flow.
+culling and merging, loot tables, creature AI at 4, 8 and 30 fps, water
+flow (including flows saved mid-way), armour and arrows, and lumen circuits
+(strength, range, breaks, steps, roofs, and a plate-worked door that will not
+close on you).
 
 `--selftest` starts a real world with real rendering and plays the core loop
-with scripted input, the way a person would: chop a tree, craft planks and a
-worktable, make tools, dig to stone, build a furnace and smelt, hunt and cook,
-eat, pour water into a channel, fight off a night attacker, light a room,
-store things in a crate, farm, fall, die and respawn, save, quit to the menu,
-reload, and check that everything is where it was.
+with scripted input, the way a person would: chop a tree, craft planks through
+the screen, drag a stack and hotkey it, build a worktable, make tools, dig to
+stone, build a furnace and smelt, hunt, put on armour and shoot a bow, cook and
+eat, pour water into a channel, wire a switch to a lamp and a plate to a door,
+fight off a night attacker, light a room, store
+things in a crate, farm, fall, die and respawn, save, quit to the menu, reload,
+and check that everything is where it was.
 
 `--shots OUTDIR [--tour]` flies a camera through fixed viewpoints — every
 biome, a structure, a cave, dawn, dusk, night, the creatures up close — and
@@ -386,8 +420,10 @@ copied.
 
 ## Known limitations
 
-- Single player only. Armour, bows, automation and multiplayer, the stretch
-  goals, are not built.
+- Single player only. Of the stretch goals, armour, the bow, the bedroll and
+  a small signal system are built; multiplayer is not. Circuits stop at
+  switches, plates, traces, lamps and doors: there are no pistons, timers or
+  logic gates, and a network is capped at 4,096 traces.
 - Water only moves in loaded columns; a flow at the edge of the world you
   have loaded waits until you come back.
 - Columns are 256 tall: nothing above y = 255, and the Rootstone floor at

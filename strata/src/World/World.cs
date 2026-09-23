@@ -20,6 +20,9 @@ public sealed class World
     public event Action<int, int, int, ushort, bool> BlockBroken;
     /// <summary>Any block changed: (x, y, z, old id, new id).</summary>
     public event Action<int, int, int, ushort, ushort> BlockChanged;
+    /// <summary>A column has its light for the first time since it was loaded: ready to play in.</summary>
+    public event Action<Chunk> ColumnReady;
+    public void RaiseColumnReady(Chunk c) => ColumnReady?.Invoke(c);
     /// <summary>A crate or furnace was removed with items inside.</summary>
     public event Action<int, int, int, BlockEntity> EntityRemoved;
 

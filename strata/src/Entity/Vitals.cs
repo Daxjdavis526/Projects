@@ -23,6 +23,7 @@ public sealed class Vitals
     public float LastDamage;            // amount of the last hit, for the red flash
     public DamageKind LastKind;
     public float SinceHurt = 99f;
+    public int ArmorPoints;             // set by the wearer; each point turns aside 4% of a blow, up to 80%
 
     private float _regen, _starve, _drown;
 
@@ -31,6 +32,14 @@ public sealed class Vitals
 
     public event Action<float, DamageKind> Hurt;
     public event Action<DamageKind> Died;
+    public event Action<float> ArmorStruck;     // a blow the armour took some of: it wears
+
+    /// <summary>What armour does to a blow of this kind: creatures, arrows, spines and the like, not falls, fire, drowning or hunger.</summary>
+    public float Mitigated(float amount, DamageKind kind)
+    {
+        bool blocks = kind is DamageKind.Mob or DamageKind.Projectile or DamageKind.Cactus or DamageKind.Generic;
+        return blocks && ArmorPoints > 0 ? amount * (1f - Math.Min(0.8f, ArmorPoints * 0.04f)) : amount;
+    }
 
     public void Tick(float dt, bool headUnderwater)
     {
@@ -91,6 +100,9 @@ public sealed class Vitals
     {
         if (Dead || amount <= 0f) return false;
         if (!ignoreInvuln && Invulnerable > 0f) return false;
+        float taken = Mitigated(amount, kind);
+        if (taken < amount) ArmorStruck?.Invoke(amount);
+        amount = taken;
         Health = Math.Max(0f, Health - amount);
         Invulnerable = 0.5f;
         LastDamage = amount;

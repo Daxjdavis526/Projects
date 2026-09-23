@@ -351,6 +351,59 @@ public static class Textures
                 p.Line(3, 8, 12, 8, C(0x8a6a2a)); p.Line(8, 3, 8, 12, C(0x8a6a2a));
                 return;
 
+            // --- lumen circuits -----------------------------------------------------------------
+            case "lumen_trace_off":
+            case "lumen_trace_on":
+            {
+                // Crushed crystal: speckled teal, dull when idle, bright when it carries a signal.
+                bool on = name.EndsWith("_on");
+                p.Fill((x, y) =>
+                {
+                    float h = p.Hash(x, y);
+                    var c = on ? Pixel.Mix(C(0x54f0e2), C(0xeafffc), h * 0.7f) : Pixel.Mix(C(0x1f4f4c), C(0x3f8a84), h * 0.8f);
+                    return h > 0.86f ? Pixel.Shade(c, on ? 1.1f : 1.35f) : c;
+                });
+                return;
+            }
+            case "switch_side":
+                p.Noise(Tone(C(0x7c7c80), 5, 0.1f), 0.3f, 3, 4);
+                p.Rect(0, 12, 16, 1, C(0x9c9ca2));
+                return;
+            case "switch_top_off":
+            case "switch_top_on":
+            {
+                // A stone base (the middle 8 x 8 is what shows) with a lever thrown one way or the other.
+                bool on = name.EndsWith("_on");
+                p.Noise(Tone(C(0x7c7c80), 5, 0.1f), 0.3f, 3, 4);
+                p.Frame(4, 4, 8, 8, C(0x55555a));
+                var knob = on ? C(0x6ff2e4) : C(0x8a3a2c);
+                if (on) { p.Line(6, 9, 10, 5, C(0x4a3624)); p.Rect(9, 4, 3, 3, knob); }
+                else { p.Line(6, 6, 10, 10, C(0x4a3624)); p.Rect(9, 9, 3, 3, knob); }
+                p.Rect(6, 6, 4, 4, C(0x3c3c40));
+                return;
+            }
+            case "tread_plate":
+                Planks(p, C(0xa27c4c));
+                p.Frame(1, 1, 14, 14, C(0x6e5234));
+                for (int k = 3; k < 13; k += 3) p.Line(3, k, 12, k, C(0x8a6a40));
+                return;
+            case "signal_lamp_off":
+            case "signal_lamp_on":
+            {
+                bool on = name.EndsWith("_on");
+                p.Clear(on ? C(0xfff0c8) : C(0x5a544a));
+                p.Frame(0, 0, 16, 16, C(0x8a5a30));
+                p.Frame(1, 1, 14, 14, C(0xb07a44));
+                for (int y = 2; y < 14; y++)
+                    for (int x = 2; x < 14; x++)
+                    {
+                        float d = MathF.Sqrt((x - 7.5f) * (x - 7.5f) + (y - 7.5f) * (y - 7.5f));
+                        p.Set(x, y, on ? Pixel.Mix(C(0xfffdf0), C(0xffc860), Math.Min(1f, d / 7f)) : Pixel.Mix(C(0x6a6458), C(0x3e3a34), Math.Min(1f, d / 7f)));
+                    }
+                p.Line(2, 7, 13, 7, C(0x8a5a30)); p.Line(7, 2, 7, 13, C(0x8a5a30));
+                return;
+            }
+
             // --- stations --------------------------------------------------------------------
             case "worktable_top":
                 Planks(p, C(0xb08a5a));
