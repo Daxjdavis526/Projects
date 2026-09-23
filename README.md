@@ -97,6 +97,43 @@ Live: https://daxjdavis526.github.io/Projects/primeval/
 See [primeval/README.md](primeval/README.md) for controls, architecture, and a
 blunt account of what is simulated versus faked.
 
+## moon/
+
+**SELENE** — an open-world exploration game on the real Moon, at its real size.
+The whole body is here: LOLA topography for the entire globe, LROC imagery and
+metre-scale stereo models streamed from NASA as you approach, the Sun and the
+Earth where celestial mechanics puts them, Diviner temperatures, and a black
+sky. Land anywhere, get out and walk in a sixth of a gravity, drive a rover to
+the horizon, and walk in to Tranquility Base at its real coordinates, where the
+flag lies on the ground the ascent engine knocked it onto. Walk in, because the
+ship will not land inside two kilometres of it: a descent engine throws regolith
+at kilometres per second and there is a retroreflector there still being ranged
+from Earth. Every value on screen says whether it was measured, interpolated,
+or invented below the resolution of the data.
+
+Climb down into a lava tube skylight. The four mare pits in the LROC Lunar Pits
+Atlas are cut into the ground at the dimensions it published, and the shallowest
+of them has a ramp of collapse debris you can walk down. Under the deepest one
+there is a cave — the only cave on the Moon anybody has evidence for, found in
+Mini-RF radar in 2024 — and it is dark, walkable, and holds a steady seventeen
+degrees Celsius while the surface a hundred metres overhead swings three hundred
+kelvin between noon and midnight.
+
+Choose where and when from orbit — all forty-seven sites in the gazetteer,
+coordinates typed straight into the search box, and a date, because a lunar day
+is twenty-nine and a half Earth days and the same ground is a flat grey plain at
+noon and a landscape of kilometre shadows near sunrise. The suit gets dirty and
+the dust costs you feedwater in sunlight; the boot prints and wheel ruts stay
+where you leave them, because nothing here erases them. `K` keeps a list of the
+real places you have reached. Keyboard, mouse or a gamepad. Desktop only.
+
+Live: https://daxjdavis526.github.io/Projects/moon/
+
+See [moon/README.md](moon/README.md) for the controls and the accuracy table,
+[moon/DATA_SOURCES.md](moon/DATA_SOURCES.md) for every dataset with its
+limitations, and [moon/RESEARCH.md](moon/RESEARCH.md) for the constants with
+their citations.
+
 ## propulsion/
 
 **PROPULSION** — a two-semester-equivalent rocket propulsion engineering
@@ -111,3 +148,51 @@ offline file in `propulsion/offline/`.
 
 Not a browser toy: read it on GitHub or in any Markdown viewer that renders
 LaTeX. Start at [propulsion/README.md](propulsion/README.md).
+
+## cryogenics/
+
+**CRYOGENIC PROPULSION HARDWARE & SAFETY** — a compact course on the hardware,
+physics and hazards of cryogenic propulsion: LOX, liquid methane, LN2 and the
+gases around them. Eight modules of 15–25 minutes, hand-drawn P&ID and
+cross-section diagrams, checkpoint quizzes, a 30-question final, and a capstone
+in which you review a deliberately flawed methalox test system and find its 32
+defects.
+
+Written for someone who wants to hold an intelligent safety conversation with
+propulsion engineers and a university EHS office *before* ever operating this
+hardware. It teaches hazard recognition and design review, not operating
+procedures, and says so plainly.
+
+Live: https://daxjdavis526.github.io/Projects/cryogenics/
+
+Offline single file in `cryogenics/offline/`. See
+[cryogenics/README.md](cryogenics/README.md).
+
+## geodesic/
+
+**GEODESIC** — an interactive sandbox for gravitational dynamics and spacetime
+curvature. Build a system from an empty universe or one of ten presets, edit
+every body's mass, radius, density, spin and velocity, and look at what its
+gravity does to spacetime nine different ways.
+
+The default visualization is **tendex lines** — the integral curves of the
+tidal tensor `E_ij`, which in the Newtonian limit *is* the leading term of the
+Riemann tensor. Not the rubber sheet, which is here too, as one mode, labelled
+with the four separate reasons it misleads. Orbits are Newtonian N-body with
+an optional post-Newtonian term; exact Schwarzschild geodesics and the
+quadrupole radiation formula are drawn beside them for comparison rather than
+fed back into them, and the UI says which layer every number came from.
+
+The **3D grid** mode is the honest version of the bending grid: a cube of
+freely falling test particles, which deforms because its nodes are objects on
+diverging paths rather than coordinates on a fabric. It stretches toward a
+mass and squeezes across it 2 : 1, and its volume is conserved in vacuum but
+shrinks at −4πG⟨ρ⟩ where mass is enclosed.
+
+92 headless physics checks, each against a measured number: Mercury's 42.98
+arcseconds per century, S2's 13 arcminutes per orbit, the Hulse–Taylor
+pulsar's orbital decay, Gravity Probe B, Saturn's Roche limit.
+
+Live: https://daxjdavis526.github.io/Projects/geodesic/
+
+See [geodesic/README.md](geodesic/README.md) and `geodesic/DESIGN.md`.

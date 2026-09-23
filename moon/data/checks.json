@@ -1,0 +1,59 @@
+{
+ "note": "elevations in metres above the 1737.4 km sphere, bilinear from the vendored 16 ppd LOLA layer",
+ "global_min_m": -8981.5,
+ "global_max_m": 10685.5,
+ "points": {
+  "apollo11": -1921.6,
+  "apollo15": -1938.1,
+  "apollo17": -2617.2,
+  "tycho_centre": -1709.6,
+  "copernicus_centre": -3299.3,
+  "imbrium": -2334.5,
+  "orientale": -2785.1,
+  "farside_highlands": 418.9,
+  "south_pole": 594.8,
+  "north_pole": -81.7
+ },
+ "coords": {
+  "apollo11": [
+   0.67415,
+   23.47314
+  ],
+  "apollo15": [
+   26.13237,
+   3.6333
+  ],
+  "apollo17": [
+   20.19108,
+   30.7722
+  ],
+  "tycho_centre": [
+   -43.31014,
+   -11.36192
+  ],
+  "copernicus_centre": [
+   9.62095,
+   -20.07862
+  ],
+  "imbrium": [
+   34.72,
+   -14.91
+  ],
+  "orientale": [
+   -19.87,
+   -94.67
+  ],
+  "farside_highlands": [
+   -10.0,
+   165.0
+  ],
+  "south_pole": [
+   -89.9,
+   0.0
+  ],
+  "north_pole": [
+   89.9,
+   0.0
+  ]
+ }
+}

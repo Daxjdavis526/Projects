@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<title>GEODESIC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Tendex semantics, straight from the literature: negative tendicity
+     stretches (red), positive squeezes (blue). Used consistently everywhere
+     curvature is drawn, so the colours mean one thing only. */
+  --stretch:#ff5a4e;
+  --squeeze:#4ea8ff;
+  --time:#ffd166;        /* time dilation */
+  --drag:#b77dff;        /* frame dragging */
+
+  --ink:#dcd8d2;
+  --dim:#87817a;
+  --faint:#3d3935;
+  --hot:#fffaf3;
+  --panel:rgba(9,10,13,.72);
+  --edge:rgba(220,216,210,.13);
+  --accent:#7fe6c8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#05060a;overflow:hidden}
+body{
+  font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:300;
+  color:var(--ink);-webkit-font-smoothing:antialiased;
+  font-size:12px;
+}
+canvas{display:block;position:fixed;inset:0;touch-action:none}
+
+.panel{
+  position:fixed;background:var(--panel);border:1px solid var(--edge);
+  border-radius:3px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  padding:11px 13px;line-height:1.55;letter-spacing:.02em;
+}
+h2{
+  font-family:Michroma,sans-serif;font-size:8.5px;font-weight:400;
+  letter-spacing:.2em;color:var(--dim);margin:0 0 9px;text-transform:uppercase;
+}
+.row{display:flex;justify-content:space-between;gap:10px;white-space:nowrap;margin:1px 0}
+.row .k{color:var(--dim)}
+.row .v{color:var(--ink);font-variant-numeric:tabular-nums}
+.sect{margin-top:9px;padding-top:8px;border-top:1px solid var(--faint)}
+.note{color:var(--faint);font-size:9px;line-height:1.5;letter-spacing:.04em}
+
+button,select,input{font-family:inherit;font-size:inherit;color:var(--ink)}
+.btn{
+  background:rgba(12,13,17,.7);border:1px solid var(--edge);border-radius:2px;
+  padding:5px 10px;cursor:pointer;transition:border-color .15s,color .15s,background .15s;
+}
+.btn:hover{border-color:var(--accent);color:var(--hot)}
+.btn.on{border-color:var(--accent);color:var(--accent);background:rgba(127,230,200,.08)}
+.btn.sm{padding:3px 7px;font-size:10px}
+
+#ui{position:fixed;inset:0;pointer-events:none;z-index:10}
+#ui > *{pointer-events:auto}
+
+/* ---- top: visualization modes ------------------------------------------- */
+#grid-controls{display:flex;gap:5px}
+#modebar{
+  position:fixed;top:12px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  max-width:min(94vw,1000px);
+}
+#modes{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;
+  background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:5px;
+  backdrop-filter:blur(16px)}
+#modes .btn{font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 9px}
+#mode-note{
+  max-width:74ch;
+  text-align:center;font-size:10px;color:var(--dim);letter-spacing:.03em;
+  text-shadow:0 1px 10px #000;line-height:1.6;pointer-events:none;
+}
+#mode-note b{color:var(--accent);font-weight:400}
+#mode-note .warn{color:var(--stretch)}
+
+/* ---- left: bodies ------------------------------------------------------- */
+#bodies{top:12px;left:12px;width:212px;max-height:52vh;overflow-y:auto}
+.body-row{
+  display:flex;align-items:center;gap:7px;padding:3px 4px;border-radius:2px;
+  cursor:pointer;margin:1px 0;
+}
+.body-row:hover{background:rgba(255,255,255,.04)}
+.body-row.sel{background:rgba(127,230,200,.1);outline:1px solid rgba(127,230,200,.3)}
+.swatch{width:9px;height:9px;border-radius:50%;flex:none}
+.body-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+.body-row .mass{color:var(--dim);font-size:10px}
+#add-row{display:flex;gap:5px;margin-top:8px}
+
+/* ---- left lower: inspector ---------------------------------------------- */
+#inspector{bottom:62px;left:12px;width:212px;max-height:62vh;overflow-y:auto;display:none}
+.field{margin:5px 0}
+.field label{display:block;color:var(--dim);font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:2px}
+.field input[type=number],.field select{
+  width:100%;background:rgba(0,0,0,.4);border:1px solid var(--edge);
+  border-radius:2px;padding:3px 5px;font-size:11px;
+}
+.field input[type=range]{width:100%}
+.field .unit{color:var(--faint);font-size:9px;margin-left:3px}
+.derived{margin-top:8px;padding-top:7px;border-top:1px solid var(--faint)}
+.warnrow{color:var(--stretch);font-size:9.5px;line-height:1.5;margin-top:5px}
+
+/* ---- right: readouts ---------------------------------------------------- */
+#readout{top:12px;right:12px;width:246px}
+#warnings{position:fixed;top:calc(12px + var(--readout-h,300px));right:12px;width:246px;
+  display:none}
+#warnings .warnrow{margin:3px 0}
+
+/* ---- bottom: transport -------------------------------------------------- */
+#transport{
+  left:50%;bottom:12px;transform:translateX(-50%);display:flex;align-items:center;
+  gap:9px;position:fixed;background:var(--panel);border:1px solid var(--edge);
+  border-radius:3px;padding:7px 11px;backdrop-filter:blur(16px);
+}
+#speeds{display:flex;gap:3px}
+#speeds .btn{font-size:9.5px;padding:3px 7px;min-width:34px}
+#tclock{font-variant-numeric:tabular-nums;color:var(--hot);min-width:132px;text-align:center}
+#tsub{font-size:9px;color:var(--dim);text-align:center;margin-top:1px}
+
+/* ---- scale bar ---------------------------------------------------------- */
+#scalebar{position:fixed;right:14px;bottom:14px;text-align:right;pointer-events:none}
+#sb-line{height:2px;background:var(--ink);opacity:.7;margin-left:auto}
+#sb-label{font-size:10px;color:var(--dim);margin-top:3px;letter-spacing:.06em}
+
+/* ---- explainer modal ---------------------------------------------------- */
+#modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;
+  justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(7px)}
+#modal.open{display:flex}
+#modal-card{width:min(680px,92vw);max-height:84vh;overflow:auto;
+  background:rgba(10,11,15,.95);border:1px solid var(--edge);border-radius:4px;
+  padding:26px 30px;line-height:1.75}
+#modal-card h3{font-family:Michroma,sans-serif;font-size:11px;letter-spacing:.18em;
+  color:var(--accent);text-transform:uppercase;margin:20px 0 10px}
+#modal-card h3:first-child{margin-top:0}
+#modal-card p{margin:9px 0}
+#modal-card ul{padding-left:18px}
+#modal-card li{margin:7px 0}
+#modal-card b{color:var(--hot);font-weight:500}
+#modal-card .good{color:var(--accent)}
+#modal-card .bad{color:var(--stretch)}
+#modal-card code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:2px;
+  font-size:11px;color:var(--time)}
+#modal-close{position:absolute;top:14px;right:18px;font-size:22px;color:var(--dim);
+  background:none;border:none;cursor:pointer}
+#modal-close:hover{color:var(--hot)}
+#modal-inner{position:relative}
+
+#help-btn{position:fixed;bottom:12px;left:12px;display:flex;gap:5px}
+
+#fatal{position:fixed;inset:0;z-index:90;display:none;align-items:center;
+  justify-content:center;padding:40px;background:#05060a;color:#ff8f7a;
+  font-size:12px;line-height:1.8;white-space:pre-wrap}
+
+/* ---- placement hint ----------------------------------------------------- */
+#hint{
+  position:fixed;left:50%;bottom:78px;transform:translateX(-50%);
+  font-size:11px;color:var(--accent);letter-spacing:.06em;
+  text-shadow:0 1px 10px #000;display:none;pointer-events:none;
+}
+body.placing #hint{display:block}
+
+/* ===========================================================================
+   DESKTOP-ONLY CHROME
+   The tab bar and the compact speed button exist only for touch layouts.
+   ======================================================================== */
+#tabbar{display:none}
+#speed-cycle{display:none}
+
+/* ===========================================================================
+   PHONES AND SMALL TABLETS
+   ---------------------------------------------------------------------------
+   The desktop layout puts five panels around the edges of a wide screen. On a
+   390px phone they land on top of each other and the transport alone is
+   wider than the display. So the small-screen layout is a different shape,
+   not a squeezed version of the same one:
+
+     - the scene keeps the whole screen, because the scene IS the app
+     - one slim strip at the top says what you are looking at
+     - a transport bar and a tab bar sit at the bottom, above the home
+       indicator
+     - everything else is a bottom sheet, one at a time, summoned by a tab
+
+   Tap targets are at least 44px, which is the smallest thing a finger hits
+   reliably and roughly twice what the desktop buttons are.
+   ======================================================================== */
+@media (max-width: 860px){
+  :root{ --bar:56px; --tp:60px; --safe:env(safe-area-inset-bottom,0px); }
+  body{font-size:13px}
+
+  /* --- top strip: what you are looking at, tap for the full explainer --- */
+  #modebar{
+    top:0;left:0;right:0;transform:none;max-width:none;
+    /* Not flex here. A flex item gets its display blockified, which turns
+       -webkit-box into block and silently kills the line clamp below — the
+       strip then grows to five lines and eats the scene. Its other two
+       children are position:fixed on this layout anyway. */
+    display:block;
+  }
+  #modes{display:none}            /* lives in the View sheet instead */
+  #mode-note{
+    pointer-events:auto;cursor:pointer;text-align:left;max-width:none;
+    padding:calc(env(safe-area-inset-top,0px) + 9px) 14px 14px;
+    background:linear-gradient(180deg,rgba(5,6,10,.92) 0%,rgba(5,6,10,.75) 55%,rgba(5,6,10,0) 100%);
+    font-size:11px;line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  #mode-note:empty{display:none}
+
+  /* --- bottom sheets ---------------------------------------------------- */
+  #bodies,#inspector,#readout,#modes{
+    position:fixed;top:auto;left:0;right:0;width:auto;
+    /* Stops at the top of the transport rather than sliding under it, so
+       nothing a sheet contains is ever hidden behind a solid bar and the
+       transport stays usable with a sheet open. */
+    bottom:calc(var(--bar) + var(--tp) + var(--safe));
+    max-height:min(58vh,520px);overflow-y:auto;-webkit-overflow-scrolling:touch;
+    border-radius:16px 16px 0 0;border-bottom:none;
+    padding:16px 16px 18px;
+    display:none;z-index:30;box-shadow:0 -24px 48px rgba(0,0,0,.65);
+  }
+  /* The sheet the tab bar has open wins, but the inspector still needs
+     something selected and the modes sheet is always available. */
+  body[data-sheet="bodies"] #bodies,
+  body[data-sheet="data"] #readout,
+  body.has-sel[data-sheet="inspector"] #inspector{display:block}
+  body[data-sheet="modes"] #modes{
+    display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;
+    background:var(--panel);border:1px solid var(--edge);border-bottom:none;
+  }
+  body[data-sheet="modes"] #modes .btn{flex:1 1 44%;min-height:46px;font-size:10px}
+
+  h2{font-size:10px;margin-bottom:12px}
+
+  /* --- everything you can tap is finger-sized --------------------------- */
+  #ui .btn{min-height:44px;padding:10px 14px}
+  #ui .btn.sm{min-height:44px;padding:8px 12px;font-size:12px}
+  .body-row{padding:11px 6px;gap:10px}
+  .body-row .nm{font-size:13px}
+  .swatch{width:11px;height:11px}
+  #add-row{gap:8px;margin-top:12px}
+  .field input[type=number],.field select,#r-integ{
+    padding:10px 8px;
+    font-size:16px;        /* 16px or iOS zooms the page on focus */
+  }
+  .field label{font-size:10.5px;margin-bottom:4px}
+  .field input[type=checkbox]{width:22px;height:22px;vertical-align:-5px;margin-right:6px}
+  .field{margin:10px 0}
+  .row{margin:4px 0}
+
+  /* --- transport: one row, no wrapping ---------------------------------- */
+  #transport{
+    left:0;right:0;bottom:calc(var(--bar) + var(--safe));transform:none;
+    border-radius:0;border-left:none;border-right:none;border-bottom:none;
+    justify-content:space-between;gap:4px;padding:7px 8px;z-index:35;
+  }
+  #speeds{display:none}
+  #speed-cycle{display:block;min-width:56px}
+  #t-relativity{min-width:52px}
+  #tclock{min-width:0;font-size:12.5px;white-space:nowrap}
+  #tsub{font-size:9.5px}
+  #transport .btn{padding:9px 10px;min-width:44px}   /* a finger, not a cursor */
+
+  /* --- tab bar ---------------------------------------------------------- */
+  #tabbar{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:rgba(6,7,10,.96);border-top:1px solid var(--edge);
+    padding-bottom:var(--safe);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  }
+  #tabbar button{
+    flex:1;min-height:var(--bar);background:none;border:none;color:var(--dim);
+    font-family:inherit;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    cursor:pointer;padding:0;
+  }
+  #tabbar button.on{color:var(--accent);box-shadow:inset 0 2px 0 var(--accent)}
+  #tabbar button:disabled{opacity:.35}
+
+  /* --- the rest --------------------------------------------------------- */
+  #help-btn{display:none}
+  #grid-controls{
+    position:fixed;left:0;right:0;bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px);
+    justify-content:center;z-index:34;padding:0 10px;
+  }
+  #grid-controls .btn{flex:1;max-width:none;padding:8px 4px;font-size:10.5px}
+  #warnings{
+    position:fixed;top:auto;left:8px;right:8px;
+    bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px);
+    width:auto;max-height:26vh;overflow-y:auto;z-index:33;
+    display:none;border-radius:8px;
+  }
+  body.has-warn #warnings{display:block}
+  body.has-warn[data-sheet] #warnings{display:none}   /* a sheet takes the room */
+  #scalebar{right:10px;bottom:calc(var(--bar) + var(--tp) + var(--safe) + 8px)}
+  body[data-sheet] #scalebar{display:none}   /* a sheet owns the lower screen */
+  #sb-label{font-size:11px}
+  #hint{
+    bottom:calc(var(--bar) + var(--tp) + var(--safe) + 56px);
+    left:8px;right:8px;transform:none;text-align:center;font-size:12px;
+  }
+
+  /* --- modal ------------------------------------------------------------ */
+  #modal{align-items:flex-end}
+  #modal-card{
+    width:100%;max-height:88vh;border-radius:16px 16px 0 0;
+    padding:22px 18px calc(28px + var(--safe));font-size:13px;
+  }
+  #modal-close{top:10px;right:12px;font-size:30px;padding:6px 10px}
+  #modal-card h3{font-size:12px}
+  #modal-card code{font-size:12px}
+}
+
+/* Landscape phones are short, not narrow: give the sheets less height and
+   keep the top strip to a single line so the scene survives. */
+@media (max-width: 860px) and (max-height: 460px){
+  /* A landscape phone is 340px tall. Two full-height bars would take a third
+     of that, so the tab bar loses its padding and the sheets get a bigger
+     share of what is left. The buttons stay at 44px. */
+  :root{ --bar:46px; --tp:56px; }
+  #tabbar button{min-height:var(--bar)}
+  #bodies,#inspector,#readout,#modes{max-height:68vh}
+  #mode-note{-webkit-line-clamp:1;padding-bottom:10px}
+  #modes .btn{min-height:44px}
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+
+  <div id="modebar">
+  <div id="modes">
+    <button class="btn on" data-mode="none">Bodies only</button>
+    <button class="btn" data-mode="tendex">Tidal curvature</button>
+    <button class="btn" data-mode="dilation">Time dilation</button>
+    <button class="btn" data-mode="potential">Potential</button>
+    <button class="btn" data-mode="field">Field vectors</button>
+    <button class="btn" data-mode="drag">Frame drag</button>
+    <button class="btn" data-mode="grid">3D grid</button>
+    <button class="btn" data-mode="geodesic">Geodesics</button>
+    <button class="btn" data-mode="waves">Grav. waves</button>
+    <button class="btn" data-mode="embedding">Embedding</button>
+  </div>
+  <div id="mode-note"></div>
+  <div id="grid-controls" style="display:none;gap:5px">
+    <button class="btn sm on" id="g-space" title="markers everywhere you are looking">Space</button>
+    <button class="btn sm" id="g-local" title="one small cube beside the mass, where the 2:1 ratio is measurable">Local</button>
+    <button class="btn sm" id="g-frame" title="frame the lattice is drawn in">Infall</button>
+    <button class="btn sm" id="g-reset" title="release a fresh lattice from rest">Re-release</button>
+  </div>
+  </div>
+
+  <div class="panel" id="bodies">
+    <h2>Bodies</h2>
+    <div id="body-list"></div>
+    <div id="add-row">
+      <button class="btn sm" id="btn-add">+ Add</button>
+      <select class="btn sm" id="preset-select" style="flex:1"></select>
+    </div>
+  </div>
+
+  <div class="panel" id="inspector">
+    <h2>Inspector</h2>
+    <div id="insp-body"></div>
+  </div>
+
+  <div class="panel" id="readout">
+    <h2>System</h2>
+    <div class="row"><span class="k">bodies</span><span class="v" id="r-n">0</span></div>
+    <div class="row"><span class="k">integrator</span>
+      <select id="r-integ" style="background:rgba(0,0,0,.4);border:1px solid var(--edge);
+        border-radius:2px;padding:1px 3px;font-size:11px"></select></div>
+    <div class="row"><span class="k">timestep</span><span class="v" id="r-dt">—</span></div>
+    <div class="row"><span class="k">steps taken</span><span class="v" id="r-steps">0</span></div>
+    <div class="sect">
+      <div class="row"><span class="k">total energy</span><span class="v" id="r-E">—</span></div>
+      <div class="row"><span class="k">energy drift</span><span class="v" id="r-Edrift">—</span></div>
+      <div class="row"><span class="k">ang. momentum</span><span class="v" id="r-L">—</span></div>
+      <div class="note">Drift is shown because a gravity toy that silently stops
+        conserving energy is the main way these things mislead.</div>
+    </div>
+    <div class="sect" id="sel-readout" style="display:none">
+      <div class="row"><span class="k">selected</span><span class="v" id="s-name">—</span></div>
+      <div class="row"><span class="k">speed</span><span class="v" id="s-v">—</span></div>
+      <div class="row"><span class="k">accel</span><span class="v" id="s-a">—</span></div>
+      <div class="row"><span class="k">dist to primary</span><span class="v" id="s-r">—</span></div>
+      <div class="row"><span class="k">clock rate dτ/dt</span><span class="v" id="s-td">—</span></div>
+      <div class="row"><span class="k">tidal stretch</span><span class="v" id="s-tide">—</span></div>
+    </div>
+  </div>
+
+  <div class="panel" id="warnings"></div>
+
+  <div id="transport">
+    <button class="btn sm" id="t-reset" title="reset to t = 0">⟲</button>
+    <button class="btn sm" id="t-back" title="step back">◀|</button>
+    <button class="btn" id="t-play" title="play / pause (space)">▶</button>
+    <button class="btn sm" id="t-fwd" title="step forward">|▶</button>
+    <div>
+      <div id="tclock">0.000 yr</div>
+      <div id="tsub">paused</div>
+    </div>
+    <div id="speeds"></div>
+    <button class="btn sm" id="speed-cycle" title="cycle time multiplier">1×</button>
+    <button class="btn sm" id="t-relativity" title="first post-Newtonian correction">1PN</button>
+  </div>
+
+  <div id="hint"></div>
+
+  <div id="scalebar">
+    <div id="sb-line" style="width:120px"></div>
+    <div id="sb-label">—</div>
+  </div>
+
+  <div id="help-btn">
+    <button class="btn sm" id="btn-why">Why is it doing this?</button>
+    <button class="btn sm" id="btn-help">?</button>
+  </div>
+
+  <!-- Phone navigation. Hidden entirely on desktop; there it would only be
+       in the way of a layout that already has room for every panel. -->
+  <nav id="tabbar">
+    <button data-sheet="modes">View</button>
+    <button data-sheet="bodies">Bodies</button>
+    <button data-sheet="inspector">Edit</button>
+    <button data-sheet="data">Data</button>
+    <button id="tab-help">Help</button>
+  </nav>
+</div>
+
+<div id="modal">
+  <div id="modal-card"><div id="modal-inner">
+    <button id="modal-close">×</button>
+    <div id="modal-body"></div>
+  </div></div>
+</div>
+
+<div id="fatal"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/jsm/"
+  }
+}
+</script>
+<script type="module">
+  /* The full-screen failure panel is for FAILING TO START — a 404 on a
+     vendored module is otherwise completely silent. Once the first frame has
+     rendered it stands down and logs instead, because a stray runtime error
+     (a pointer-capture race during a two-finger gesture is the usual one)
+     should not blank a session that is otherwise working. */
+  addEventListener('error', e => {
+    if (window.__geodesicRunning) { console.error('GEODESIC:', e.error || e.message); return; }
+    const el = document.getElementById('fatal');
+    el.style.display = 'flex';
+    el.textContent = 'GEODESIC failed to start\n\n' + (e.error?.stack || e.message);
+  });
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

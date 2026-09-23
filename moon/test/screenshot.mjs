@@ -1,0 +1,637 @@
+/* Drive the page in headless Chromium and save screenshots.
+
+   Several rendering bugs in this repository were only ever visible in a
+   picture, never in a stack trace, so this is a first-class test. It starts a
+   static server, waits until the terrain has actually built something, and
+   writes PNGs plus any console errors.
+
+     NODE_PATH=/opt/node22/lib/node_modules node moon/test/screenshot.mjs
+     ... --out /tmp/shots --shot 'apollo11:site=apollo11&view=ground'
+*/
+import { createServer } from 'node:http';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import zlib from 'node:zlib';
+
+const require = createRequire(import.meta.url);
+const { chromium } = require(process.env.NODE_PATH
+  ? path.join(process.env.NODE_PATH.split(':')[0], 'playwright')
+  : 'playwright');
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(here, '..');
+
+const args = process.argv.slice(2);
+const argOf = (name, dflt) => {
+  const i = args.indexOf('--' + name);
+  return i >= 0 ? args[i + 1] : dflt;
+};
+const OUT = argOf('out', path.join(ROOT, '..', 'shots'));
+
+/* --- reading the picture back ---------------------------------------------
+   Playwright writes an 8-bit PNG; nothing in this repo decodes one, so here is
+   the twenty lines that do. Only what is needed: no interlacing, no palettes,
+   no 16-bit — if a future Playwright writes something else this throws rather
+   than guessing, which is the right failure. */
+function decodePng(buf) {
+  if (buf.readUInt32BE(0) !== 0x89504e47) throw new Error('not a PNG');
+  let p = 8, w = 0, h = 0, depth = 0, colour = 0;
+  const idat = [];
+  while (p < buf.length) {
+    const len = buf.readUInt32BE(p), type = buf.toString('latin1', p + 4, p + 8);
+    const body = buf.subarray(p + 8, p + 8 + len);
+    if (type === 'IHDR') {
+      w = body.readUInt32BE(0); h = body.readUInt32BE(4);
+      depth = body[8]; colour = body[9];
+      if (body[12] !== 0) throw new Error('interlaced PNG');
+    } else if (type === 'IDAT') idat.push(body);
+    else if (type === 'IEND') break;
+    p += 12 + len;
+  }
+  if (depth !== 8 || (colour !== 6 && colour !== 2)) {
+    throw new Error(`unsupported PNG: depth ${depth} colour ${colour}`);
+  }
+  const bpp = colour === 6 ? 4 : 3;
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const out = Buffer.alloc(w * h * bpp);
+  const stride = w * bpp;
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (stride + 1)];
+    const line = raw.subarray(y * (stride + 1) + 1, y * (stride + 1) + 1 + stride);
+    const o = y * stride, prev = o - stride;
+    for (let x = 0; x < stride; x++) {
+      const a = x >= bpp ? out[o + x - bpp] : 0;
+      const b = y > 0 ? out[prev + x] : 0;
+      const c = x >= bpp && y > 0 ? out[prev + x - bpp] : 0;
+      let v = line[x];
+      if (f === 1) v += a;
+      else if (f === 2) v += b;
+      else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4) {
+        const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
+        v += (pa <= pb && pa <= pc) ? a : (pb <= pc ? b : c);
+      }
+      out[o + x] = v & 255;
+    }
+  }
+  return { width: w, height: h, bpp, data: out };
+}
+
+/**
+ * Is there a picture here at all?
+ *
+ * Not a perceptual comparison — this is the floor below which the frame is
+ * certainly wrong, and it is the floor several bugs in this project's history
+ * fell through while the harness reported success. A frame of one colour means
+ * nothing rendered; a probe region of one colour, chosen to miss both HUD
+ * panels, means no terrain rendered even though the interface did.
+ *
+ * The test is "perfectly uniform", not "dark", because a lunar night is
+ * legitimately almost black and must still pass.
+ */
+async function inspect(file, want) {
+  let img;
+  try { img = decodePng(await readFile(file)); }
+  catch (e) { return `could not read the screenshot back: ${e.message}`; }
+  const { width: w, height: h, bpp, data } = img;
+  const uniform = (x0, y0, x1, y1) => {
+    const at = (x, y) => (y * w + x) * bpp;
+    const r0 = data[at(x0, y0)], g0 = data[at(x0, y0) + 1], b0 = data[at(x0, y0) + 2];
+    for (let y = y0; y < y1; y++) {
+      for (let x = x0; x < x1; x++) {
+        const i = at(x, y);
+        if (data[i] !== r0 || data[i + 1] !== g0 || data[i + 2] !== b0) return false;
+      }
+    }
+    return true;
+  };
+  if (uniform(0, 0, w, h)) return 'the frame is a single flat colour';
+  if (want.ground) {
+    /* Clear of the position panel (top left) and the suit HUD (bottom centre). */
+    const x0 = Math.round(w * 0.02), x1 = Math.round(w * 0.22);
+    const y0 = Math.round(h * 0.55), y1 = Math.round(h * 0.80);
+    if (uniform(x0, y0, x1, y1)) return 'no ground drawn: the probe region is one flat colour';
+  }
+  if (want.sky) {
+    /* Nothing on the Moon is white in the sky.
+       -----------------------------------------------------------------------
+       There is no atmosphere to scatter, so above the horizon there is black,
+       stars, the Sun at half a degree, and Earth at one. Anything else filling
+       a chunk of the upper frame is a bug, and this project has had one: the
+       dust field drew every grain about a thousand times too large AND failed
+       the depth test over terrain, so the only place any of it could appear
+       was against the sky, as white discs hundreds of pixels wide. It was
+       reported by a player, not by this harness, which watched it happen
+       twenty-five times and called every frame good.
+
+       So: sample the top eighth, away from the compass tape in the middle, and
+       fail on a large fraction of near-white. The Sun is 0.53 degrees across,
+       which at this framing is well under a tenth of one per cent, so a real
+       Sun cannot trip this and a disc of dust cannot hide from it. */
+    const y0 = Math.round(h * 0.03), y1 = Math.round(h * 0.15);
+    let hot = 0, n = 0;
+    for (let y = y0; y < y1; y += 2) {
+      for (let x = 0; x < w; x += 2) {
+        /* Skip the middle third, where the compass tape lives. */
+        if (x > w * 0.33 && x < w * 0.67) continue;
+        const i = (y * w + x) * bpp;
+        n++;
+        if (data[i] > 232 && data[i + 1] > 232 && data[i + 2] > 232) hot++;
+      }
+    }
+    if (n && hot / n > 0.02) {
+      return `something is white in the sky: ${(100 * hot / n).toFixed(1)}% of the upper frame`;
+    }
+  }
+  return '';
+}
+
+/** What each shot has to clear to count as rendered. */
+function expect(name, query) {
+  const ground = !query.includes('view=orbit');
+  const eva = query.includes('mode=eva');
+  return {
+    ground,
+    /* Standing on the surface, the sky above the horizon is black and stays
+       black. Not checked from orbit, where the Moon itself legitimately fills
+       the top of the frame, nor for the map, which is a full-screen overlay
+       and covers the sky with a hillshade on purpose. */
+    sky: eva && ground && !/map/.test(name),
+    triangles: ground ? 120000 : 80000,
+    finestLevel: eva ? 14 : 0,
+    /* Rocks are only scattered on tiles fine enough to stand on, and only when
+       the quality tier asks for them. */
+    rocks: eva && !query.includes('quality=science') ? 150 : 0,
+  };
+}
+const WIDTH = Number(argOf('width', 1600));
+const HEIGHT = Number(argOf('height', 900));
+const TIMEOUT = Number(argOf('timeout', 180000));
+const SETTLE = Number(argOf('settle', 6000));
+
+const DEFAULT_SHOTS = [
+  ['orbit', 'site=apollo11&view=orbit&alt=1200000&t=2026-09-22T14:00Z&rate=0&quality=balanced'],
+  /* Nine kilometres over Tycho rather than over mare, because the point of the
+     shot is horizon curvature and relief, and Mare Tranquillitatis is genuinely
+     flat. Note this one does NOT fly a landing — `view=ground` starts already
+     parked. See `landing` below, which does. */
+  ['descent', 'site=tycho&view=ground&alt=9000&t=2026-09-22T14:00Z&rate=0&yaw=20&quality=balanced'],
+  /* An actual landing, flown all the way in and held until the ship is on the
+     ground: a minute of approach rather than six seconds of settling, which is
+     why this one names a third field to wait for.
+
+     It exists because the touchdown frame threw for everyone who flew a
+     landing on the day this shipped, and no check here could have caught it —
+     every other shot starts on the surface, so the descent branch of the frame
+     loop had never once been executed by a test. What it is watching for is
+     not the picture but the error list: `onDone` sets `mode` before the throw,
+     so waiting on 'surface' alone would have gone green through the bug. */
+  /* Also the one shot that reaches the surface the way a player does, so it is
+     where the controls panel opening itself on first arrival gets checked:
+     assert it is up, then put it away so the photograph is of the Moon rather
+     than of a list of keys. */
+  ['landing', 'site=apollo11&view=descent&t=2026-09-28T00:00Z&rate=0&quality=balanced',
+   `window.SELENE.mode === "surface" && (() => {
+      const h = document.getElementById('help');
+      if (h.style.display !== 'block') return false;
+      h.style.display = 'none';
+      window.SELENE.state.showHelp = false;
+      return true;
+    })()`],
+  /* No `?t=` at all, which is how anyone clicking a bare link arrives. The
+     Moon turns once a month, so "now" is a coin toss, and on the day this was
+     written forty of the forty-seven sites were dark -- Tranquility Base at
+     eighty-two degrees below the horizon. The clock should therefore have
+     moved itself to daylight before the first frame, and the wait expression
+     is the whole assertion: if it does not, this hangs and fails rather than
+     quietly taking a photograph of nothing. */
+  ['daylight', 'site=apollo11&mode=eva&rate=0&quality=balanced',
+   'window.SELENE.skyHere().sunEl > 5'],
+  /* The suit against the clock on the wall. Life support used to be scaled by
+     the time acceleration, so at the old default a nine-hour EVA emptied in
+     fifty-four seconds; here the sky is winding forward at a day a second and
+     the suit must not care. Ten seconds of that is nearly three months of
+     simulated time, and the endurance may not fall by more than a couple of
+     minutes. Held to the end of the run rather than sampled once, because the
+     bug was a rate and not a value.
+     Put the coupling back and this fails, though not always with the message
+     below: the suit empties inside a second, the player passes out, and the
+     blackout overlay trips the "no ground drawn" check first. Either way it
+     is red. The precise guard is in test/suit.test.mjs, which reads the
+     callers and names the offending line. */
+  ['suit-clock', 'site=apollo11&mode=eva&rate=86400&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.eva) return false;
+      window.__t0 = window.__t0 ?? { at: Date.now(), left: s.eva.suit.endurance() };
+      const dt = (Date.now() - window.__t0.at) / 1000;
+      if (dt < 10) return false;
+      const lost = window.__t0.left - s.eva.suit.endurance();
+      if (lost > 240) throw new Error('suit drained ' + lost.toFixed(0) + ' s in ' + dt.toFixed(0) + ' s of wall clock');
+      return true;
+    })()`],
+  /* Offset from the descent stage rather than on top of it: standing at the
+     published coordinates puts the camera inside the spacecraft. */
+  ['tranquility-now', 'site=0.67446,23.47353&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=230&pitch=-2&quality=high'],
+  ['tranquility-1969', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&quality=high'],
+  ['tranquility-earth', 'site=apollo11&mode=eva&t=1969-07-20T20:17:40Z&rate=0&look=earth&fov=14&quality=high'],
+  /* Night, lamps on. The one shot that shows what a lamp is for, and the one
+     that caught the exposure model not knowing they existed. */
+  ['night-lamps', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&lamps=2&pitch=-20&quality=high'],
+  ['third-person', 'site=apollo11&mode=eva&t=1969-07-21T02:56:15Z&rate=0&view3=1&quality=high'],
+  /* On the floor six kilometres north of the centre, looking back at the
+     central peak. Standing on the published centre coordinates puts you on the
+     peak's own flank, where a 30-degree slope fills the frame and you slide
+     down it: true, dramatic, and not a photograph of Tycho. */
+  ['tycho', 'site=-43.1120,-11.36192&mode=eva&t=2026-09-22T14:00Z&rate=0&yaw=180&quality=balanced'],
+  /* The rim of Shackleton never sees the Sun more than about two degrees up,
+     so this is what the place actually looks like: a black world with bright
+     slivers on the sunward slopes, and the lamps are not optional. */
+  /* Looking along the rim rather than into the crater: the floor of Shackleton
+     has not seen the Sun in a billion years and photographs as a rectangle of
+     black, which is true and is not a picture. */
+  ['shackleton', 'site=shackleton_rim&mode=eva&t=2026-09-14T00:00Z&rate=0&yaw=300&lamps=2&quality=balanced'],
+  ['farside', 'site=farside_highlands&mode=eva&t=2026-09-08T09:00Z&rate=0&quality=balanced'],
+  ['base', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&yaw=270&help=0&quality=balanced'],
+  /* The rover's chase camera, and the only shot that draws the vehicle from
+     outside while somebody is in it. Worth having as a picture rather than as
+     an assertion: this is the view that made the levitation visible in the
+     first place, and a rover twenty metres above a terrain mesh it is not
+     standing on is obvious here and invisible from the seat. */
+  ['rover-chase', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.vehicle || !s.eva) return false;
+      /* Climb aboard, look behind, and drive for a few seconds. */
+      if (!s.driving) {
+        s.eva.player.place(s.vehicle.rover.lat, s.vehicle.rover.lon, 0.1);
+        s.board();
+        s.vehicle.view = 'chase';
+        window.__t = Date.now();
+        return false;
+      }
+      s.vehicle.rover.speed = 6;
+      return Date.now() - window.__t > 3000;
+    })()`],
+  /* The featured-site gallery, with the previews drawn. The wait is the
+     assertion: `drawPreviews` only marks a card done once the colour mosaic is
+     in it as well as the relief, so this cannot go green on thirteen grey
+     rectangles. */
+  ['site-gallery', 'site=tycho&view=orbit&alt=900000&t=2026-09-22T14:00Z&rate=0&quality=balanced',
+   `(() => {
+      const cards = document.querySelectorAll('#orbit-presets canvas');
+      if (cards.length < 10) return false;
+      let drawn = 0;
+      for (const c of cards) {
+        try {
+          const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+          let lit = 0;
+          for (let i = 0; i < d.length; i += 4 * 211) if (d[i] > 24) lit++;
+          if (lit > 4) drawn++;
+        } catch (e) { /* a tainted canvas is not a failed preview */ }
+      }
+      if (drawn < cards.length) return false;
+      const side = document.querySelector('#orbit .side');
+      if (side) side.scrollTop = 560;
+      return true;
+    })()`],
+  ['night', 'site=apollo11&mode=eva&t=2026-09-15T00:00Z&rate=0&quality=balanced'],
+  /* Through the visor. The bubble, the gold coating's warm cast, and the Sun
+     on the glass where the Sun is standing. */
+  ['helmet', 'site=apollo11&mode=eva&helmet=1&t=2026-09-19T00:00Z&rate=0&yaw=94&pitch=2&quality=high'],
+  /* Rocks at walking scale, which were generated and thrown away until this
+     branch drew them. Low sun, so they cast. */
+  ['rocks', 'site=apollo11&mode=eva&t=2026-09-17T12:00Z&rate=0&yaw=200&pitch=-14&quality=high'],
+  /* A lava-tube skylight, standing on its floor. The elevation products this
+     game streams still top out at 118 m/px here — nothing has flown that
+     resolves a hole this size in topography — but the LROC Lunar Pits Atlas
+     published the dimensions, so the hole is cut to them. The epoch is chosen
+     for a 21-degree sun, because the first attempt at this shot was at 14:00
+     on 22 September and the harness correctly refused it: Marius Hills is in
+     lunar night then, and a black frame is not a photograph of anywhere. */
+  ['marius', 'site=marius_pit&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=140&pitch=-8&quality=balanced'],
+  /* The deepest pit on the Moon, from its floor, 125 m down. The wall behind is
+     vertical and the boulders are the 1-4 m population Carrer et al. measured
+     off NAC image M155016845R, with the two 8-10 m outliers they named. */
+  ['pit-floor', 'site=8.3358,33.2216&mode=eva&t=2026-09-25T09:00Z&rate=0&yaw=110&pitch=10&quality=balanced'],
+  /* And the reason for all of it: the cave mouth in the WEST wall, at least
+     45 m across, with the lamps on. The epoch is a 69-degree Sun at azimuth
+     115, which is what lights the west wall — the pit's own afternoon leaves
+     that side in shadow and the hole invisible against it.
+
+     A height field is one height per point and cannot draw a ceiling over a
+     void, so what makes this visible at all is a stencil portal, and this shot
+     is the only test of it: if the portal ever stops writing its mark the hole
+     fills in with wall and the frame still renders perfectly happily. */
+  ['cave-mouth', 'site=8.3355,33.222833&mode=eva&t=2026-09-22T00:00Z&rate=0&yaw=270&pitch=4&lamps=2&quality=balanced'],
+
+  /* The rover standing on a slope, which is the shot the inverted lean would
+     have failed outright. test/vehicle.test.mjs is the real guard on the signs
+     — it reads the drawn quaternion and compares it to the ground — but the
+     thing that was actually reported was how it LOOKED, and a vehicle pitched
+     twenty degrees into a hill with two wheels in the air is obvious here and
+     nowhere else. Tycho's flank for a slope that is measured rather than
+     arranged. */
+  ['rover-slope', 'site=tycho&mode=eva&ship=1&t=2026-09-22T14:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.vehicle || !s.eva) return false;
+      if (!window.__rs) {
+        window.__rs = 1;
+        /* PUT it on the flank rather than drive it there. Driving off the pad
+           was the first attempt and it does not work: the ship flattens
+           sixteen metres around itself and immediately outside that Tycho's
+           central peak is steeper than the friction angle, so the vehicle
+           slid back and the chase camera spent the whole shot looking at the
+           ship's landing gear. rover.place also clears everything the
+           suspension remembers, which is exactly what a teleport wants. */
+        const R = 1737400, D = 180 / Math.PI;
+        const r = s.vehicle.rover;
+        /* Bearing 70, not 205: the Sun is at azimuth 66 here, so the outward
+           slope on that side is the LIT one. The first attempt put it on the
+           south-west flank, which at a 24 degree Sun is in full shadow, and
+           the harness correctly refused the frame for having no ground in it. */
+        const m = 260, brg = 70 / D;
+        const lat = r.lat + Math.cos(brg) * m / R * D;
+        const lon = r.lon + Math.sin(brg) * m / R * D / Math.cos(r.lat / D);
+        r.place(lat, lon, 160);
+        s.eva.player.place(lat, lon, 0.1);
+        s.board();
+        s.vehicle.view = 'chase';
+        window.__t = Date.now();
+        return false;
+      }
+      /* Long enough for the suspension and the pitch/roll filters to settle,
+         and for the terrain under it to have refined. */
+      return Date.now() - window.__t > 5000;
+    })()`],
+
+  /* Dust over the surface, which until recently had never once been drawn
+     where it was supposed to be. Two bugs cancelled into one symptom: grains
+     about a thousand times too large, and a material that never asked for the
+     logarithmic depth encoding, so every grain failed the depth test over
+     terrain and passed ONLY against the sky. The result was white discs
+     hundreds of pixels wide hanging above the horizon, and this harness
+     watched it happen twenty-five times and called every frame good.
+
+     So the shot exists to give `inspect`'s sky probe something to look at.
+     Burst a few hundred grains a few metres ahead, low, so they straddle the
+     horizon and some of them are over ground and some over sky. Reinstating
+     either half of the old bug turns the top of this frame white and fails it.
+     The dust field is reachable because main.js exposes it for exactly this:
+     dust comes off boots and wheels deep inside the frame loop and a
+     screenshot cannot walk. */
+  ['dust-boots', 'site=apollo11&mode=eva&t=2026-09-19T00:00Z&rate=0&yaw=200&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.dust || !s.eva || !s.stage) return false;
+      const cam = s.stage.camera;
+      const fwd = new cam.position.constructor(0, 0, -1).applyQuaternion(cam.quaternion);
+      const at = cam.position.clone().add(fwd.multiplyScalar(6));
+      const u = s.eva.player.up();
+      s.dust.burst({ at, up: { x: u.x, y: u.y, z: u.z }, count: 260, speed: 2.2,
+                     angle: 80, spread: 0.45, size: 0.018 });
+      /* Shutter immediately: the grains are up for about two and a half
+         seconds and the point is to catch them in the air. */
+      return true;
+    })()`],
+
+  /* The map, at a scale where the Moon is doing something. Tycho is 85 km
+     across with four kilometres of relief, so if the hillshade, the band
+     limit or the aspect ratio are wrong this stops looking like a crater —
+     which all three of them did, in that order, while it was being written. */
+  ['map-tycho', 'site=tycho&mode=eva&ship=1&t=2026-09-22T14:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.map || !s.eva) return false;
+      if (!s.map.visible) {
+        s.map.show(true);
+        s.map.spanIndex = 12;
+        window.__mt = Date.now();
+        return false;
+      }
+      /* Wait for the relief to be drawn rather than for a clock: the caption
+         only gets a number once drawRelief has returned one. */
+      const r = document.getElementById('map-relief');
+      return !!r && /[0-9]/.test(r.textContent) && Date.now() - window.__mt > 1200;
+    })()`],
+
+  /* A marked waypoint, from the ground: the compass tape with the pip on it,
+     and the column standing where the mark is. Two marks, one close and one
+     five kilometres out, so the range scaling is in frame as well. */
+  ['waypoint-beam', 'site=apollo11&mode=eva&ship=1&t=2026-09-19T00:00Z&rate=0&help=0&quality=balanced',
+   `(() => {
+      const s = window.SELENE;
+      if (!s.marks || !s.eva) return false;
+      if (!window.__wp) {
+        window.__wp = 1;
+        const R = 1737400, D = 180 / Math.PI;
+        /* Step clear of the ship first. Standing at the ladder the landing
+           gear fills the frame and the nearer of the two columns is behind a
+           leg, which was the first version of this shot. */
+        {
+          const me = s.eva.player.llh;
+          s.eva.place(me.lat, me.lon - 100 / R * D / Math.cos(me.lat / D), 0.1);
+        }
+        /* Offsets in degrees, small-angle, which is plenty at these ranges. */
+        const at = (brg, m) => {
+          const b = brg / D;
+          const dn = Math.cos(b) * m / R * D, de = Math.sin(b) * m / R * D;
+          return { lat: s.eva.player.llh.lat + dn,
+                   lon: s.eva.player.llh.lon + de / Math.cos(s.eva.player.llh.lat / D) };
+        };
+        s.marks.length = 0;
+        s.marks.push(at(320, 300), at(338, 5000));
+        s.eva.player.yaw = 328 / D;
+        window.__wt = Date.now();
+        return false;
+      }
+      return Date.now() - window.__wt > 2500;
+    })()`],
+];
+
+/* `--shot name:query`, or `--shot name:query::waitExpression` to hold the
+   capture until something is true on the page. */
+const shots = args.filter((a, i) => args[i - 1] === '--shot')
+  .map(s => {
+    const name = s.split(':')[0];
+    const rest = s.slice(s.indexOf(':') + 1);
+    const cut = rest.indexOf('::');
+    return cut < 0 ? [name, rest] : [name, rest.slice(0, cut), rest.slice(cut + 2)];
+  });
+/* `--only tycho` runs just the default shots whose name contains that, which
+   is what you want when one of twenty-eight needs iterating on: the whole run
+   is a quarter of an hour and `--shot` defines a NEW shot rather than picking
+   an existing one, so re-running one of these used to mean copying its whole
+   wait expression onto a command line. Comma-separated for a few at once. */
+const only = argOf('only', '');
+const picked = only
+  ? DEFAULT_SHOTS.filter(s => only.split(',').some(k => s[0].includes(k.trim())))
+  : DEFAULT_SHOTS;
+if (only && !picked.length) {
+  console.error(`--only ${only} matched none of: ${DEFAULT_SHOTS.map(s => s[0]).join(' ')}`);
+  process.exit(2);
+}
+const SHOTS = shots.length ? shots : picked;
+
+const MIME = {
+  '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
+  '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
+  '.bin': 'application/octet-stream', '.css': 'text/css', '.woff2': 'font/woff2',
+};
+
+/* Relay for NASA Trek. The browser in this sandbox cannot reach the internet
+   directly, but Node can (through the agent proxy), so the harness forwards
+   /nasa/* and hands the bytes back with permissive CORS. In the real game the
+   page talks to trek.nasa.gov itself. */
+async function relay(req, res) {
+  const target = 'https://trek.nasa.gov' + req.url.slice('/nasa'.length);
+  try {
+    const upstream = await fetch(target);
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.writeHead(upstream.status, {
+      'Content-Type': upstream.headers.get('content-type') || 'application/octet-stream',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-store',
+    });
+    res.end(buf);
+  } catch (e) {
+    res.writeHead(502, { 'Access-Control-Allow-Origin': '*' });
+    res.end(String(e));
+  }
+}
+
+async function serve() {
+  const server = createServer(async (req, res) => {
+    if (req.url.startsWith('/nasa/')) return relay(req, res);
+    try {
+      const url = decodeURIComponent(req.url.split('?')[0]);
+      const file = path.join(ROOT, url === '/' ? 'index.html' : url);
+      if (!file.startsWith(ROOT)) { res.writeHead(403).end(); return; }
+      const body = await readFile(file);
+      res.writeHead(200, {
+        'Content-Type': MIME[path.extname(file)] || 'application/octet-stream',
+        'Cache-Control': 'no-store',
+      });
+      res.end(body);
+    } catch {
+      res.writeHead(404).end('not found');
+    }
+  });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  return { server, port: server.address().port };
+}
+
+async function main() {
+  await mkdir(OUT, { recursive: true });
+  const { server, port } = await serve();
+  const browser = await chromium.launch({
+    args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
+           '--disable-lcd-text', '--no-sandbox', '--enable-features=SharedArrayBuffer'],
+  });
+  const report = [];
+  for (const [name, query, until] of SHOTS) {
+    const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT } });
+    const errors = [];
+    /* Warnings count as failures, and that is the whole point of this harness.
+       Every way this game degrades gracefully goes through console.warn: the
+       astronaut, ship and rover model imports, the geology raster, the star
+       catalogue, the stream registry, the temperature maps, the nomenclature,
+       and the Apollo 11 site. Catching only `error` meant all three models
+       could fail to load and this would print "12/12 clean" and exit 0 —
+       no astronaut in the third-person shot, no ship in the base shot, no
+       descent stage at Tranquility, and a green run. */
+    page.on('console', (m) => {
+      if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ${m.text()}`);
+    });
+    page.on('pageerror', (e) => errors.push(String(e)));
+    const relayBase = `http://127.0.0.1:${port}/nasa`;
+    const url = `http://127.0.0.1:${port}/index.html?${query}` +
+      (query.includes('offline=1') ? '' : `&trek=${encodeURIComponent(relayBase)}`);
+    process.stdout.write(`${name.padEnd(20)} ${query}\n`);
+    const t0 = Date.now();
+    let ok = true, note = '';
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForFunction('window.SELENE && window.SELENE.ready === true', null,
+        { timeout: TIMEOUT, polling: 500 });
+      /* A shot may name a third thing to wait for, which is what lets one of
+         them fly a whole landing: `ready` goes true as soon as the ground is
+         drawn, long before the ship is on it. */
+      if (until) {
+        /* Its own budget, and a generous one. A landing is a minute of flying
+           at full speed and rather more than that while the quadtree is still
+           building four hundred tiles under it: the frame clamp at 0.5 s means
+           a page running at two frames a second flies the approach at a third
+           of real time, which is the right behaviour and a slow test. */
+        await page.waitForFunction(until, null, { timeout: TIMEOUT * 2, polling: 500 });
+      }
+      /* Let the quadtree finish refining and the exposure settle. */
+      await page.waitForTimeout(SETTLE);
+    } catch (e) {
+      ok = false;
+      note = String(e).split('\n')[0];
+      const fatal = await page.$eval('#fatal', n => n.textContent).catch(() => '');
+      if (fatal && fatal.trim()) note += ' | ' + fatal.trim().slice(0, 400);
+    }
+    const stats = await page.evaluate(() => (window.SELENE ? window.SELENE.stats() : null)).catch(() => null);
+    const shot = path.join(OUT, name + '.png');
+    /* Inside a try, and with a budget of its own. This used to be a bare await:
+       one slow page threw an unhandled rejection that took the whole process
+       down, so a run of twenty shots reported two and then died -- the failure
+       of one shot destroying the evidence from all the others. A shot that
+       cannot be photographed is a failed shot, not a failed run.
+       The generous timeout is because the heavy shots earn it: a landing at
+       ten frames a second with the quadtree still building under it can leave
+       the compositor unable to produce a frame inside Playwright's default
+       thirty seconds, which says nothing about whether the game is correct. */
+    let photographed = true;
+    try {
+      await page.screenshot({ path: shot, timeout: 120000 });
+    } catch (e) {
+      photographed = false;
+      ok = false;
+      note = (note ? note + ' | ' : '') + 'screenshot: ' + String(e).split('\n')[0];
+    }
+
+    /* Look at the picture. Writing a PNG and never reading it back is not a
+       test: a frame that is entirely black, or entirely one colour, is exactly
+       what several of the bugs in this project's history produced, and every
+       one of them needed a human to open the file. This is not a perceptual
+       comparison — it is the floor below which the frame is certainly wrong. */
+    const want = expect(name, query);
+    if (photographed) {
+      const shotNote = await inspect(shot, want).catch(e => 'inspect: ' + e.message);
+      if (shotNote) { ok = false; note = note ? `${note} | ${shotNote}` : shotNote; }
+    }
+
+    /* And the numbers behind it. Recording stats without asserting them let a
+       run with zero triangles at two frames a second pass. */
+    if (ok && stats) {
+      if (stats.triangles < want.triangles) {
+        ok = false; note = `only ${stats.triangles} triangles, wanted ${want.triangles}`;
+      } else if (want.rocks && (stats.rocks || 0) < want.rocks) {
+        ok = false; note = `only ${stats.rocks || 0} rocks drawn, wanted ${want.rocks}`;
+      } else if (want.finestLevel && stats.finestLevel < want.finestLevel) {
+        ok = false;
+        note = `terrain only refined to level ${stats.finestLevel}, wanted ${want.finestLevel}`;
+      }
+    }
+    report.push({ name, ok, note, errors: errors.slice(0, 6), stats, seconds: (Date.now() - t0) / 1000 });
+    console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${((Date.now() - t0) / 1000).toFixed(1)} s` +
+      (stats ? `  tiles ${stats.tiles} triangles ${(stats.triangles / 1000).toFixed(0)}k fps ${stats.fps.toFixed(1)}` : '') +
+      (note ? `\n       ${note}` : '') +
+      (errors.length ? `\n       console: ${errors.slice(0, 3).join(' | ').slice(0, 400)}` : ''));
+    await page.close();
+  }
+  await browser.close();
+  server.close();
+  await writeFile(path.join(OUT, 'report.json'), JSON.stringify(report, null, 1));
+  const bad = report.filter(r => !r.ok || r.errors.length);
+  console.log(`\n${report.length - bad.length}/${report.length} clean, written to ${OUT}`);
+  process.exit(bad.length ? 1 : 0);
+}
+
+main();
