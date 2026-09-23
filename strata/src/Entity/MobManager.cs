@@ -26,7 +26,7 @@ public sealed partial class MobManager : Node3D
     public readonly List<Projectile> Shots = new();
     public Game Game;
     public World World;
-    public float Daylight = 1f;
+    public float Daylight = 1f;          // sunlight only, 0..1 (see Atmosphere.Sun)
     public bool SpawningEnabled = true;
     private float _spawnTimer = 2f, _rareTimer;
     private readonly Random _rng = new();
@@ -147,7 +147,7 @@ public sealed partial class MobManager : Node3D
                         {
                             int gx = x + _rng.Next(-3, 4), gz = z + _rng.Next(-3, 4);
                             int gy = World.HeightAt(gx, gz);
-                            if (Math.Abs(gy - y) > 2 || World.GetBlock(gx, gy, gz) == Blocks.Water) continue;
+                            if (Math.Abs(gy - y) > 2 || Blocks.IsWater(World.GetBlock(gx, gy, gz))) continue;
                             var m = SpawnMob(kind.Value, new Vector3(gx + 0.5f, gy, gz + 0.5f));
                             if (m.Body.Colliding(World)) { m.Removed = true; continue; }
                             CountPassive++;
@@ -173,7 +173,7 @@ public sealed partial class MobManager : Node3D
             while (y > 2 && !World.GetDef(x, y - 1, z).Solid && tries++ < 24) y--;
             if (!World.GetDef(x, y - 1, z).Solid) continue;
             if (World.GetDef(x, y, z).Solid || World.GetDef(x, y + 1, z).Solid) continue;
-            if (World.GetBlock(x, y, z) == Blocks.Water || World.GetBlock(x, y, z) == Blocks.Lava) continue;
+            if (Blocks.IsWater(World.GetBlock(x, y, z)) || World.GetBlock(x, y, z) == Blocks.Lava) continue;
             int sky = World.SkyLight(x, y, z), blk = World.BlockLight(x, y, z);
             float effectiveSky = sky * Daylight;
             if (blk > 0 || effectiveSky > 4.5f) continue;
@@ -344,9 +344,8 @@ public sealed partial class MobManager : Node3D
             if ((o.Position - m.Position).Length() > 5f) continue;
             o.LoveTimer = 0f; m.LoveTimer = 0f;
             var baby = SpawnMob(m.Def.Kind, (o.Position + m.Position) * 0.5f + new Vector3(0, 0.2f, 0));
-            baby.Scale = 0.55f;
+            baby.SetScale(0.55f);
             baby.Persistent = true;
-            baby.Body.HalfWidth *= 0.55f; baby.Body.Height *= 0.55f;
             Sfx.Play(m.Def.Voice + "_idle", baby.Position, 1f, 1.5f);
             break;
         }

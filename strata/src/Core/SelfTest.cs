@@ -330,7 +330,7 @@ public partial class SelfTest : Node
         {
             var below = new Vector3I(V.FloorToInt(P.Body.X), V.FloorToInt(P.Body.Y - 0.5), V.FloorToInt(P.Body.Z));
             ushort id = W.GetBlock(below.X, below.Y, below.Z);
-            if (id == Blocks.Water || id == Blocks.Lava || id == Blocks.Rootstone) break;
+            if (Blocks.IsWater(id) || id == Blocks.Lava || id == Blocks.Rootstone) break;
             // Dig the block ahead as well as below, so the pit is a staircase we can walk out of.
             var def = Blocks.Get(id);
             if (id == Blocks.Stone && stoneTime < 0)
@@ -546,23 +546,52 @@ public partial class SelfTest : Node
             Check(P.Inventory.Count(Items.Grain) > grain, "harvest gives goldgrain");
         }
 
+        // --- running water -------------------------------------------------------------
+        {
+            // A stone channel along the clearest axis, and one source poured in at its head.
+            float yaw = MathF.Round(ClearHeading() / 90f) * 90f;
+            float r = Mathf.DegToRad(yaw);
+            var along = new Vector3I(-(int)MathF.Round(MathF.Sin(r)), 0, -(int)MathF.Round(MathF.Cos(r)));
+            var side = new Vector3I(along.Z, 0, along.X);
+            var here = new Vector3I(V.FloorToInt(P.Body.X), V.FloorToInt(P.Body.Y), V.FloorToInt(P.Body.Z));
+            var cells = new List<Vector3I>();
+            for (int s = 2; s <= 10; s++) cells.Add(here + along * s + new Vector3I(0, -1, 0));
+            foreach (var c in cells)
+            {
+                W.SetBlock(c.X, c.Y - 1, c.Z, Blocks.Stone);
+                foreach (var b in new[] { c + side, c - side, c + side + new Vector3I(0, -1, 0), c - side + new Vector3I(0, -1, 0) })
+                    if (!W.GetDef(b.X, b.Y, b.Z).Solid) W.SetBlock(b.X, b.Y, b.Z, Blocks.Stone);
+                for (int dy = 0; dy <= 2; dy++) W.SetBlock(c.X, c.Y + dy, c.Z, Blocks.Air);
+            }
+            await GameSeconds(0.5f);
+            W.SetBlock(cells[0].X, cells[0].Y, cells[0].Z, Blocks.Water);
+            P.Yaw = yaw;
+            Aim(new Vector3(cells[4].X + 0.5f, cells[4].Y + 0.5f, cells[4].Z + 0.5f));
+            await GameSeconds(4f);
+            ushort near = W.GetBlock(cells[1].X, cells[1].Y, cells[1].Z), far = W.GetBlock(cells[5].X, cells[5].Y, cells[5].Z);
+            Check(Blocks.IsWater(far), "water poured into a channel runs along it");
+            Check(Blocks.IsWater(near) && Blocks.WaterLevel(near) < Blocks.WaterLevel(far), "and thins as it goes");
+            await Shot("running_water");
+        }
+
         // --- a night visitor ------------------------------------------------------------
         G.View.Sky.Time = Math.Floor(G.View.Sky.Time) + 0.72;
         await Seconds(0.5f);
         Check(G.View.Sky.IsNight, "night falls");
         G.CloseScreen();
-        P.Yaw = ClearHeading();
+        // Stand it on open ground a few steps away, in plain view.
+        var spot = OpenGroundInView(5f);
+        Check(spot.HasValue, "somewhere in view for a visitor to stand");
+        var stand = spot ?? P.Body.Position + new Vector3(0, 0, 5);
+        Aim(stand + new Vector3(0, 1.2f, 0));
         await Frames(2);
-        // Stand it on open ground a few steps in front of the player.
-        float yr = Mathf.DegToRad(P.Yaw);
-        var spot = P.Body.Position + new Vector3(-MathF.Sin(yr), 0, -MathF.Cos(yr)) * 5f;
-        int hy = V.FloorToInt(spot.Y) + 3;
-        while (hy > 2 && !W.GetDef(V.FloorToInt(spot.X), hy - 1, V.FloorToInt(spot.Z)).Solid) hy--;
-        var hollow = G.Mobs.SpawnMob(MobKind.Hollow, new Vector3(spot.X, hy, spot.Z));
+        var hollow = G.Mobs.SpawnMob(MobKind.Hollow, stand);
         P.Vitals.Health = 20;
         float hp0 = P.Vitals.Health;
         await Shot("night_hollow");
-        Check(await UntilGame(() => P.Vitals.Health < hp0, 15f), "the hollow comes for you and strikes");
+        bool struck = await UntilGame(() => P.Vitals.Health < hp0, 15f);
+        if (!struck) GD.Print($"    hollow {hollow.State} at {hollow.Position} (player {P.Body.Position}), path {hollow.Path?.Count ?? -1}, removed {hollow.Removed}");
+        Check(struck, "the hollow comes for you and strikes");
         Hold(Items.ByKey["stone_blade"]);
         for (int k = 0; k < 40 && !hollow.Dead && !hollow.Removed; k++)
         {
@@ -651,11 +680,40 @@ public partial class SelfTest : Node
                 var q = p + d * s;
                 int x = V.FloorToInt(q.X), y = V.FloorToInt(q.Y), z = V.FloorToInt(q.Z);
                 if (W.GetDef(x, y, z).Solid || W.GetDef(x, y + 1, z).Solid || !W.GetDef(x, y - 1, z).Solid && !W.GetDef(x, y - 2, z).Solid) clear = false;
-                if (W.GetBlock(x, y - 1, z) == Blocks.Water) clear = false;
+                if (Blocks.IsWater(W.GetBlock(x, y - 1, z))) clear = false;
             }
             if (clear) return yaw;
         }
         return 0f;
+    }
+
+    /// <summary>
+    /// A standable cell about dist blocks from the player, level with the feet
+    /// give or take one, with a clear line of sight between the two.
+    /// </summary>
+    private Vector3? OpenGroundInView(float dist)
+    {
+        var p = P.Body.Position;
+        for (int k = 0; k < 16; k++)
+        {
+            float r = Mathf.DegToRad(P.Yaw + k * 22.5f);
+            var d = new Vector3(-MathF.Sin(r), 0, -MathF.Cos(r));
+            for (float s = dist; s <= dist + 2f; s += 1f)
+            {
+                var q = p + d * s;
+                int x = V.FloorToInt(q.X), z = V.FloorToInt(q.Z), y0 = V.FloorToInt(p.Y);
+                foreach (int dy in new[] { 0, 1, -1 })
+                {
+                    int y = y0 + dy;
+                    if (!W.GetDef(x, y - 1, z).Solid || W.GetDef(x, y, z).Solid || W.GetDef(x, y + 1, z).Solid) continue;
+                    if (Blocks.IsWater(W.GetBlock(x, y, z)) || Mob.Hazard(W, x, y - 1, z)) continue;
+                    var feet = new Vector3(x + 0.5f, y, z + 0.5f);
+                    if (!G.Mobs.LineOfSight(feet + new Vector3(0, 1.6f, 0), P.EyePosition)) continue;
+                    return feet;
+                }
+            }
+        }
+        return null;
     }
 
     /// <summary>The nearest block of a kind around a point (placements can land a cell off from where a test aimed).</summary>

@@ -103,12 +103,14 @@ public static class Mesher
     private static int[] _tex;                    // id * 6 + face
     private static byte[] _tintOfLayer;           // 0 none, 1 grass, 2 foliage
     private static bool[] _lava;
+    private static byte[] _liquidTop;             // surface height in sixteenths with nothing on top
 
     public static void Init()
     {
         int n = Blocks.ById.Length;
         _opq = new bool[n]; _cull = new byte[n]; _kind = new byte[n]; _cutout = new bool[n];
         _emissive = new bool[n]; _sway = new bool[n]; _tex = new int[n * 6]; _lava = new bool[n];
+        _liquidTop = new byte[n];
         for (int i = 0; i < n; i++)
         {
             var b = Blocks.ById[i];
@@ -125,6 +127,7 @@ public static class Mesher
             _emissive[i] = b.Emissive;
             _sway[i] = b.Sway;
             _lava[i] = i == Blocks.Lava;
+            _liquidTop[i] = (byte)(b.Render == RenderKind.Liquid ? Blocks.LiquidTop16((ushort)i) : 16);
             for (int f = 0; f < 6; f++) _tex[i * 6 + f] = b.Tex[f];
         }
         _tintOfLayer = new byte[Math.Max(256, Tex.Count)];
@@ -251,8 +254,19 @@ public static class Mesher
                     ushort nid = pb[pi + nOff];
                     if (_opq[nid]) continue;
                     byte cg = _cull[id];
-                    if (cg != 0 && cg == _cull[nid]) continue;
-                    if (kind == 2 && _kind[nid] == 2 && !_opq[nid] && _cull[nid] == cg) continue;
+                    int top = 16, bot = 0;
+                    if (kind == 2)
+                    {
+                        top = LiquidTop(pi);
+                        if (_cull[nid] == cg)
+                        {
+                            // Against the same liquid only a side shows, and only the strip where this cell stands higher.
+                            if (axis == 1) continue;
+                            bot = LiquidTop(pi + nOff);
+                            if (bot >= top) continue;
+                        }
+                    }
+                    else if (cg != 0 && cg == _cull[nid]) continue;
 
                     int layer = _tex[id * 6 + face];
                     int flags = face;
@@ -260,7 +274,7 @@ public static class Mesher
                     if (emissive) flags |= FlagEmissive;
                     if (_sway[id] && kind == 1) flags |= FlagSway;
                     int tint = 0;
-                    bool lowered = false;
+                    bool shaped = false;
                     byte tk = _tintOfLayer[layer];
                     if (tk != 0)
                     {
@@ -269,14 +283,15 @@ public static class Mesher
                     }
                     if (kind == 2)
                     {
+                        // Liquids are never tinted, so their tint bits carry the face's top and bottom instead.
                         flags |= FlagLiquid;
-                        // The surface layer's top and sides sit a little low.
-                        lowered = _kind[pb[pi + PP]] != 2;
+                        tint = top | (bot << 5);
+                        shaped = top != 16 || bot != 0;
                     }
 
                     m1[mi] = emissive ? FullBright : Corners(pi + nOff, aS, bS);
                     // Bit 7 of the flags byte marks "a face is here", so an all-zero key never looks like one.
-                    m2[mi] = (uint)layer | ((uint)(flags | 0x80) << 8) | ((uint)(tint & 0x7FFF) << 16) | (lowered ? 0x8000_0000u : 0u);
+                    m2[mi] = (uint)layer | ((uint)(flags | 0x80) << 8) | ((uint)(tint & 0x7FFF) << 16) | (shaped ? 0x8000_0000u : 0u);
                     any = true;
                 }
             if (!any) continue;
@@ -292,8 +307,8 @@ public static class Mesher
                     int w = 1;
                     while (a + w < aCount && m2[mi + w] == k2 && m1[mi + w] == k1) w++;
                     int h = 1;
-                    bool lowered = (k2 & 0x8000_0000u) != 0;
-                    if (!lowered || axis == 1)
+                    bool shaped = (k2 & 0x8000_0000u) != 0;
+                    if (!shaped || axis == 1)
                     {
                         for (; b + h < bCount; h++)
                         {
@@ -312,12 +327,22 @@ public static class Mesher
                     int layer = (int)(k2 & 0xFF);
                     int flags = (int)((k2 >> 8) & 0x7F);
                     int tint = (int)((k2 >> 16) & 0x7FFF);
+                    float top = 1f, bot = 0f;
+                    if ((flags & FlagLiquid) != 0) { top = (tint & 31) / 16f; bot = ((tint >> 5) & 31) / 16f; tint = 0; }
                     ushort id = _pb[((y + 1) * P + (z + 1)) * P + (x + 1)];
                     var target = (flags & FlagLiquid) != 0 && !_lava[id] ? wa : _cutout[id] ? cu : op;
-                    Emit(target, d, x, y0 + y, z, w, h, k1, layer, flags, tint, lowered);
+                    Emit(target, d, x, y0 + y, z, w, h, k1, layer, flags, tint, bot, top);
                     a += w - 1;
                 }
         }
+    }
+
+    /// <summary>Surface of the liquid in a padded cell, in sixteenths: full when the same liquid sits on top.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int LiquidTop(int pi)
+    {
+        ushort id = _pb[pi], up = _pb[pi + PP];
+        return _kind[up] == 2 && _cull[up] == _cull[id] ? 16 : _liquidTop[id];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -374,16 +399,18 @@ public static class Mesher
 
     /// <summary>
     /// Writes a merged rectangle. (x, y, z) is its lowest cell, w and h its size
-    /// along the direction's a and b axes.
+    /// along the direction's a and b axes. Side faces run from bot in the lowest
+    /// cell to top in the highest (fractions of a block, for liquids); a top face
+    /// sits at top.
     /// </summary>
-    private static void Emit(MeshBuffers mb, int d, int x, int y, int z, int w, int h, ulong k1, int layer, int flags, int tint, bool lowered)
+    private static void Emit(MeshBuffers mb, int d, int x, int y, int z, int w, int h, ulong k1, int layer, int flags, int tint, float bot, float top)
     {
         var info = new Vector2(layer, flags | (tint << 8));
         Color c00 = CornerColor(k1, 0), c10 = CornerColor(k1, 1), c11 = CornerColor(k1, 2), c01 = CornerColor(k1, 3);
         float b00 = Brightness(k1, 0), b10 = Brightness(k1, 1), b11 = Brightness(k1, 2), b01 = Brightness(k1, 3);
         bool flip = MathF.Abs(b00 - b11) > MathF.Abs(b10 - b01);
-        const float drop = 2f / 16f;
-        float top = lowered ? 1f - drop : 1f;
+        // Side faces keep one texel per sixteenth however much of the cell they cover.
+        float yb = y + bot, vt = 1f - top, vb = h - bot;
         switch (d)
         {
             case Dir.PY:
@@ -403,29 +430,29 @@ public static class Mesher
             case Dir.PX:
             {
                 float X = x + 1, yt = y + h - 1 + top;
-                mb.Quad(new(X, y, z), new(X, y, z + w), new(X, yt, z + w), new(X, yt, z),
-                    new(w, h), new(0, h), new(0, 0), new(w, 0), info, c00, c10, c11, c01, flip);
+                mb.Quad(new(X, yb, z), new(X, yb, z + w), new(X, yt, z + w), new(X, yt, z),
+                    new(w, vb), new(0, vb), new(0, vt), new(w, vt), info, c00, c10, c11, c01, flip);
                 break;
             }
             case Dir.NX:
             {
                 float X = x, yt = y + h - 1 + top;
-                mb.Quad(new(X, y, z), new(X, yt, z), new(X, yt, z + w), new(X, y, z + w),
-                    new(0, h), new(0, 0), new(w, 0), new(w, h), info, c00, c01, c11, c10, flip);
+                mb.Quad(new(X, yb, z), new(X, yt, z), new(X, yt, z + w), new(X, yb, z + w),
+                    new(0, vb), new(0, vt), new(w, vt), new(w, vb), info, c00, c01, c11, c10, flip);
                 break;
             }
             case Dir.PZ:
             {
                 float Z = z + 1, yt = y + h - 1 + top;
-                mb.Quad(new(x, y, Z), new(x, yt, Z), new(x + w, yt, Z), new(x + w, y, Z),
-                    new(0, h), new(0, 0), new(w, 0), new(w, h), info, c00, c01, c11, c10, flip);
+                mb.Quad(new(x, yb, Z), new(x, yt, Z), new(x + w, yt, Z), new(x + w, yb, Z),
+                    new(0, vb), new(0, vt), new(w, vt), new(w, vb), info, c00, c01, c11, c10, flip);
                 break;
             }
             default:
             {
                 float Z = z, yt = y + h - 1 + top;
-                mb.Quad(new(x, y, Z), new(x + w, y, Z), new(x + w, yt, Z), new(x, yt, Z),
-                    new(w, h), new(0, h), new(0, 0), new(w, 0), info, c00, c10, c11, c01, flip);
+                mb.Quad(new(x, yb, Z), new(x + w, yb, Z), new(x + w, yt, Z), new(x, yt, Z),
+                    new(w, vb), new(0, vb), new(0, vt), new(w, vt), info, c00, c10, c11, c01, flip);
                 break;
             }
         }

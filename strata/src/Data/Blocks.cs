@@ -114,6 +114,21 @@ public static class Blocks
     public static ushort Ladder;       // base of 4
     public static ushort Door;         // base of 16: (lower/upper) x (closed/open) x facing
     public static ushort Grain, Emberroot, Frostleaf; // crop bases (4 stages)
+    public static ushort WaterFalling, WaterLast;     // flowing water: falling, then levels 7..1
+
+    /// <summary>Any kind of water: the still source or a moving level.</summary>
+    public static bool IsWater(ushort id) => id == Water || (id >= WaterFalling && id <= WaterLast);
+
+    /// <summary>How far water has spread to reach a cell: 0 source, 1..7 thinning, 8 falling (acts like fresh).</summary>
+    public static int WaterLevel(ushort id) => id == Water ? 0 : ById[id].Variant;
+
+    public static ushort FlowingWater(int level) => level >= 8 ? WaterFalling : (ushort)(WaterFalling + (8 - level));
+
+    // Surface height of each water level in sixteenths of a block, when nothing liquid sits above.
+    private static readonly int[] WaterTops = { 14, 12, 11, 9, 8, 6, 5, 3, 14 };
+
+    /// <summary>Where a liquid's surface sits in its cell, in sixteenths, with nothing liquid above it.</summary>
+    public static int LiquidTop16(ushort id) => IsWater(id) ? WaterTops[WaterLevel(id)] : 14;
 
     public static BlockDef Get(ushort id) => ById[id];
 
@@ -268,6 +283,20 @@ public static class Blocks
             b.Attenuation = 2; b.Replaceable = true; b.Selectable = false; b.Hardness = -1;
             b.Faces(Tex.Get("water")); b.CullGroup = 3; P(b, 0.2f, 0.4f, 0.8f);
         });
+        // Moving water: variant 8 is a falling column, 1..7 spread out from a source, thinning as they go.
+        for (int level = 8; level >= 1; level--)
+        {
+            int lv = level;
+            ushort id = Add(level == 8 ? "water_falling" : "water_" + level, "Water", b =>
+            {
+                b.Render = RenderKind.Liquid; b.Solid = false; b.Opaque = false; b.Liquid = true;
+                b.Attenuation = 2; b.Replaceable = true; b.Selectable = false; b.Hardness = -1;
+                b.Faces(Tex.Get("water")); b.CullGroup = 3; P(b, 0.2f, 0.4f, 0.8f);
+                b.Variant = lv; b.DropKey = null;
+            });
+            if (level == 8) WaterFalling = id;
+            if (level == 1) WaterLast = (ushort)(id);
+        }
         Lava = Add("lava", "Lava", b =>
         {
             b.Render = RenderKind.Liquid; b.Solid = false; b.Opaque = false; b.Liquid = true;

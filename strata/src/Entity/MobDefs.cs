@@ -174,8 +174,8 @@ public static class MobDefs
         r.Detail("body", new(-0.14f, 0.18f, -0.15f), new(0.28f, 0.3f, 0.04f), C(0x0c0a0a));        // the hollow
         r.Detail("body", new(-0.22f, 0.5f, -0.15f), new(0.44f, 0.08f, 0.3f), ash);
         r.Box("head", "body", new(0, 0.62f, 0), new(-0.17f, 0f, -0.17f), new(0.34f, 0.36f, 0.34f), ash);
-        r.Detail("head", new(-0.12f, 0.16f, -0.18f), new(0.08f, 0.05f, 0.02f), eye);
-        r.Detail("head", new(0.04f, 0.16f, -0.18f), new(0.08f, 0.05f, 0.02f), eye);
+        r.Eye("head", new(-0.12f, 0.16f, -0.18f), new(0.08f, 0.05f, 0.02f), eye);
+        r.Eye("head", new(0.04f, 0.16f, -0.18f), new(0.08f, 0.05f, 0.02f), eye);
         r.Detail("head", new(-0.09f, 0.03f, -0.18f), new(0.18f, 0.04f, 0.02f), C(0x141010));
         r.Box("armL", "body", new(-0.3f, 0.58f, 0), new(-0.07f, -0.66f, -0.07f), new(0.14f, 0.7f, 0.14f), bark);
         r.Box("armR", "body", new(0.3f, 0.58f, 0), new(-0.07f, -0.66f, -0.07f), new(0.14f, 0.7f, 0.14f), bark);
@@ -196,8 +196,8 @@ public static class MobDefs
             float a = k * MathF.Tau / 6f;
             r.Detail("head", new(MathF.Cos(a) * 0.2f - 0.03f, 0.28f, MathF.Sin(a) * 0.2f - 0.03f), new(0.06f, 0.22f, 0.06f), thorn);
         }
-        r.Detail("head", new(-0.16f, 0.2f, -0.27f), new(0.06f, 0.05f, 0.02f), C(0xffd84a));
-        r.Detail("head", new(0.1f, 0.2f, -0.27f), new(0.06f, 0.05f, 0.02f), C(0xffd84a));
+        r.Eye("head", new(-0.16f, 0.2f, -0.27f), new(0.06f, 0.05f, 0.02f), C(0xffd84a));
+        r.Eye("head", new(0.1f, 0.2f, -0.27f), new(0.06f, 0.05f, 0.02f), C(0xffd84a));
         Legs(r, 0.26f, 0.26f, 0.1f, 0.36f, skin);
         return r;
     }
@@ -211,6 +211,8 @@ public static class MobDefs
         r.Detail("head", new(-0.16f, -0.15f, -0.43f), new(0.32f, 0.08f, 0.3f), maw);
         r.Detail("head", new(-0.14f, -0.08f, -0.44f), new(0.03f, 0.08f, 0.03f), C(0xf4f0e8));
         r.Detail("head", new(0.11f, -0.08f, -0.44f), new(0.03f, 0.08f, 0.03f), C(0xf4f0e8));
+        r.Eye("head", new(-0.15f, 0.03f, -0.44f), new(0.06f, 0.04f, 0.02f), C(0xd8ff9a));
+        r.Eye("head", new(0.09f, 0.03f, -0.44f), new(0.06f, 0.04f, 0.02f), C(0xd8ff9a));
         r.Box("tail", "body", new(0, 0.05f, 0.6f), new(-0.06f, -0.06f, 0f), new(0.12f, 0.12f, 0.6f), Pixel.Shade(pale, 0.85f));
         Legs(r, 0.26f, 0.42f, 0.1f, 0.38f, Pixel.Shade(pale, 0.9f));
         return r;
@@ -225,8 +227,8 @@ public static class MobDefs
         r.Box("head", "body", new(0, 0.05f, -0.8f), new(-0.45f, -0.45f, -0.7f), new(0.9f, 0.6f, 0.75f), plate);
         r.Detail("head", new(-0.42f, -0.62f, -0.72f), new(0.84f, 0.24f, 0.7f), hide);    // the jaw
         for (int k = 0; k < 5; k++) r.Detail("head", new(-0.36f + k * 0.17f, -0.42f, -0.73f), new(0.06f, 0.14f, 0.04f), bone);
-        r.Detail("head", new(-0.34f, -0.02f, -0.71f), new(0.14f, 0.1f, 0.02f), eye);
-        r.Detail("head", new(0.2f, -0.02f, -0.71f), new(0.14f, 0.1f, 0.02f), eye);
+        r.Eye("head", new(-0.34f, -0.02f, -0.71f), new(0.14f, 0.1f, 0.02f), eye);
+        r.Eye("head", new(0.2f, -0.02f, -0.71f), new(0.14f, 0.1f, 0.02f), eye);
         r.Detail("head", new(-0.55f, 0.02f, -0.3f), new(0.16f, 0.16f, 0.5f), bone);      // horns
         r.Detail("head", new(0.39f, 0.02f, -0.3f), new(0.16f, 0.16f, 0.5f), bone);
         r.Box("armL", "body", new(-0.8f, 0.3f, -0.4f), new(-0.2f, -1.2f, -0.2f), new(0.4f, 1.3f, 0.4f), hide);

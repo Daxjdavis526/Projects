@@ -51,6 +51,14 @@ public sealed class Mob
         IdleSound = _rng.Range(4f, 14f);
     }
 
+    /// <summary>Resizes the creature, body and all: babies are small, and grow.</summary>
+    public void SetScale(float s)
+    {
+        Scale = s;
+        Body.HalfWidth = Def.Width * 0.5f * s;
+        Body.Height = Def.Height * s;
+    }
+
     public float R(float a, float b) => _rng.Range(a, b);
     public bool Chance(float p) => _rng.Chance(p);
 
@@ -94,7 +102,7 @@ public sealed class Mob
         AttackTimer = Math.Max(0f, AttackTimer - dt);
         AttackAnim = Math.Max(0f, AttackAnim - dt * 3f);
         LoveTimer = Math.Max(0f, LoveTimer - dt);
-        if (Scale < 1f) { GrowTimer += dt; if (GrowTimer > 300f) Scale = 1f; }
+        if (Scale < 1f) { GrowTimer += dt; if (GrowTimer > 300f) SetScale(1f); }
 
         IdleSound -= dt;
         if (IdleSound <= 0f)
@@ -318,8 +326,8 @@ public sealed class Mob
         bool wallHigh = w.GetDef(ax, ay + 1, az).Solid;
         int drop = 0;
         if (!wall)
-            while (drop < 5 && !w.GetDef(ax, ay - 1 - drop, az).Solid && w.GetBlock(ax, ay - 1 - drop, az) != Blocks.Water) drop++;
-        bool water = w.GetBlock(ax, ay - 1 - drop, az) == Blocks.Water && State != MobState.Chase;
+            while (drop < 5 && !w.GetDef(ax, ay - 1 - drop, az).Solid && !Blocks.IsWater(w.GetBlock(ax, ay - 1 - drop, az))) drop++;
+        bool water = Blocks.IsWater(w.GetBlock(ax, ay - 1 - drop, az)) && State != MobState.Chase;
         bool danger = drop > 3 || Hazard(w, ax, ay - 1 - drop, az) || Hazard(w, ax, ay, az) || (water && !Def.Flies && State == MobState.Wander);
         if (danger && Body.OnGround)
         {

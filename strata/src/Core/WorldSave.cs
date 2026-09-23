@@ -8,6 +8,7 @@ namespace Strata;
 
 public sealed class SlotSave { public int Slot; public string Item; public int Count; public int Wear; }
 public sealed class DropSave { public string Item; public int Count; public int Wear; public double X, Y, Z; public float Age; }
+public sealed class MobSave { public string Kind; public double X, Y, Z; public float Yaw, Health, Scale = 1f, Grow; public bool Persistent; }
 
 public sealed class PlayerSave
 {
@@ -38,6 +39,7 @@ public sealed class WorldMeta
     public bool HasPlayer;
     public PlayerSave Player = new();
     public List<DropSave> Drops = new();
+    public List<MobSave> Mobs = new();
     public StatsSave Stats = new();
 
     [System.Text.Json.Serialization.JsonIgnore] public string Folder;

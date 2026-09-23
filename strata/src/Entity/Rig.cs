@@ -15,6 +15,7 @@ public sealed class Rig
     public readonly Dictionary<string, Node3D> Parts = new();
     private readonly List<MeshInstance3D> _meshes = new();
     private static Shader _shader;
+    private static ShaderMaterial _litMat;
     private readonly ShaderMaterial _mat;
     private int _seed;
 
@@ -46,9 +47,20 @@ public sealed class Rig
         AddMesh(Parts[part], min, size, color, noise);
     }
 
-    private void AddMesh(Node3D parent, Vector3 min, Vector3 size, Color color, float noise)
+    /// <summary>A detail that shines by itself, so it shows in the dark: eyes, mostly.</summary>
+    public void Eye(string part, Vector3 min, Vector3 size, Color color)
     {
-        var mi = new MeshInstance3D { Mesh = BoxMesh(min, size, color, noise, _seed++), MaterialOverride = _mat, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
+        if (_litMat == null)
+        {
+            _litMat = new ShaderMaterial { Shader = _shader };
+            _litMat.SetShaderParameter("self_lit", 1f);
+        }
+        AddMesh(Parts[part], min, size, color, 0f, _litMat);
+    }
+
+    private void AddMesh(Node3D parent, Vector3 min, Vector3 size, Color color, float noise, ShaderMaterial mat = null)
+    {
+        var mi = new MeshInstance3D { Mesh = BoxMesh(min, size, color, noise, _seed++), MaterialOverride = mat ?? _mat, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
         parent.AddChild(mi);
         _meshes.Add(mi);
     }

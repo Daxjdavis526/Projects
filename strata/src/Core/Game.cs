@@ -24,6 +24,7 @@ public sealed partial class Game : Node3D
     public DropManager Drops;
     public Particles Particles;
     public MobManager Mobs;
+    public Fluids Fluids;
     public Weather Weather;
     public BlockOverlay Overlay;
     public Hud Hud;
@@ -56,6 +57,7 @@ public sealed partial class Game : Node3D
     {
         I = this;
         World = new World(Meta.Seed);
+        Fluids = new Fluids(World);
         Store = new ChunkStore(WorldSave.ChunkDir(Meta.Folder));
 
         Player = new Player { Name = "Player" };
@@ -117,6 +119,17 @@ public sealed partial class Game : Node3D
                     var drop = Drops.Spawn(new ItemStack(id, d.Count, d.Wear), new Vector3((float)d.X, (float)d.Y + 0.14f, (float)d.Z), Vector3.Zero, 0f);
                     if (drop != null) drop.Age = d.Age;
                 }
+        if (Meta.Mobs != null)
+            foreach (var s in Meta.Mobs)
+                if (Enum.TryParse<MobKind>(s.Kind, out var kind))
+                {
+                    var m = Mobs.SpawnMob(kind, new Vector3((float)s.X, (float)s.Y, (float)s.Z));
+                    m.Yaw = s.Yaw;
+                    m.Health = Math.Clamp(s.Health, 1f, m.Def.Health);
+                    m.Persistent = s.Persistent;
+                    m.GrowTimer = s.Grow;
+                    if (s.Scale < 1f) m.SetScale(s.Scale);
+                }
 
         Settings.ApplyDisplay();
         ApplyGraphics();
@@ -159,12 +172,13 @@ public sealed partial class Game : Node3D
         if (!frozen)
         {
             View.Sky.Update(dt, Player.Camera.GlobalPosition, View.Chunks.Radius * 16f, View.Brightness);
-            Mobs.Daylight = View.Sky.Daylight;
+            Mobs.Daylight = View.Sky.Sun;
             if (State == GameState.Playing) Player.Step(dt);
             Mobs.Step(dt, State == GameState.Playing ? Player : null);
             Drops.Step(dt, World, Player);
             Weather.Step(dt, this);
             World.TickEntities(dt);
+            Fluids.Step(dt);
             // Three random ticks per section per twentieth of a second.
             _tickAccum += dt;
             while (_tickAccum >= 0.05f)
@@ -221,7 +235,7 @@ public sealed partial class Game : Node3D
                         var below = World.GetDef(x, y - 1, z);
                         if (!below.Solid || below.Id == Blocks.Lava) continue;
                         if (World.GetDef(x, y, z).Solid || World.GetDef(x, y + 1, z).Solid) break;
-                        if (World.GetBlock(x, y, z) == Blocks.Lava || Blocks.Get(World.GetBlock(x, y - 1, z)).Id == Blocks.Water) break;
+                        if (World.GetBlock(x, y, z) == Blocks.Lava || Blocks.IsWater(World.GetBlock(x, y - 1, z))) break;
                         Player.Teleport(new Vector3(x + 0.5f, y, z + 0.5f));
                         return;
                     }
@@ -471,6 +485,16 @@ public sealed partial class Game : Node3D
             if (d.Dead || d.Stack.IsEmpty) continue;
             Meta.Drops.Add(new DropSave { Item = d.Stack.Def.Key, Count = d.Stack.Count, Wear = d.Stack.Wear, X = d.Body.X, Y = d.Body.Y, Z = d.Body.Z, Age = d.Age });
         }
+        Meta.Mobs.Clear();
+        foreach (var m in Mobs.All)
+        {
+            if (m.Removed || m.Dead) continue;
+            Meta.Mobs.Add(new MobSave
+            {
+                Kind = m.Def.Kind.ToString(), X = m.Body.X, Y = m.Body.Y, Z = m.Body.Z, Yaw = m.Yaw,
+                Health = m.Health, Scale = m.Scale, Grow = m.GrowTimer, Persistent = m.Persistent,
+            });
+        }
         Stats.Kills = Player.Kills; Stats.Placed = Player.BlocksPlaced;
         Meta.Stats = Stats;
         Meta.LastPlayed = DateTime.Now;
@@ -514,7 +538,7 @@ public sealed partial class Game : Node3D
         sb.AppendLine($"columns loaded {World.Chunks.Count}   radius {c.Radius}   queued gen {c.InFlightGen} light {c.InFlightLight} mesh {c.InFlightMesh}   jobs {c.Jobs.Pending}");
         sb.AppendLine($"triangles {c.Triangles:N0} world, {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame):N0} drawn   draw calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0}");
         sb.AppendLine($"memory {GC.GetTotalMemory(false) / 1048576.0:0} MB managed, {OS.GetStaticMemoryUsage() / 1048576.0:0} MB engine");
-        sb.AppendLine($"creatures {Mobs.All.Count} ({Mobs.CountPassive} passive, {Mobs.CountHostile} hostile)   drops {Drops.All.Count}   weather {(Weather.State == 0 ? "clear" : Weather.State == 1 ? "rain" : "storm")} {Weather.Intensity:0.00}");
+        sb.AppendLine($"creatures {Mobs.All.Count} ({Mobs.CountPassive} passive, {Mobs.CountHostile} hostile)   drops {Drops.All.Count}   fluid queue {Fluids.Pending}   weather {(Weather.State == 0 ? "clear" : Weather.State == 1 ? "rain" : "storm")} {Weather.Intensity:0.00}");
         if (Player.Target.Hit)
         {
             var t = Player.Target;

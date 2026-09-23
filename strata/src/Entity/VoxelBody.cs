@@ -206,12 +206,17 @@ public sealed class VoxelBody
                 for (int x = ix0; x <= ix1; x++)
                 {
                     ushort id = w.GetBlock(x, y, z);
-                    if (id == Blocks.Water) { if (y + 0.9 > y0 + 0.1) InWater = true; }
+                    if (Blocks.IsWater(id)) { if (y + WaterSurface(w, x, y, z, id) > y0 + 0.1) InWater = true; }
                     else if (id == Blocks.Lava) InLava = true;
                     else if (Blocks.ById[id].Climbable) OnLadder = true;
                 }
         double ey = Y + eyeHeight;
-        HeadInWater = w.GetBlock((int)Math.Floor(X), (int)Math.Floor(ey), (int)Math.Floor(Z)) == Blocks.Water
-            && ey - Math.Floor(ey) < 0.88;
+        int hx = (int)Math.Floor(X), hy = (int)Math.Floor(ey), hz = (int)Math.Floor(Z);
+        ushort head = w.GetBlock(hx, hy, hz);
+        HeadInWater = Blocks.IsWater(head) && ey - hy < WaterSurface(w, hx, hy, hz, head) - 0.01;
     }
+
+    /// <summary>How high the water in a cell reaches, 0..1: full when more water sits on top.</summary>
+    private static double WaterSurface(World w, int x, int y, int z, ushort id)
+        => Blocks.IsWater(w.GetBlock(x, y + 1, z)) ? 1.0 : Blocks.LiquidTop16(id) / 16.0;
 }

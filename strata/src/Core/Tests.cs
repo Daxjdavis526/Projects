@@ -54,6 +54,8 @@ public static class Tests
         Test("survival: damage, healing, breath, food", Survival);
         Test("greedy mesher merges and culls", Meshing);
         Test("loot tables fill crates", LootFill);
+        Test("hunters find and strike; grazers flee", CreatureAi);
+        Test("water flows, falls and recedes", WaterFlow);
         GD.Print($"\n{_pass} checks passed, {_fail} failed");
         foreach (var f in _failures) GD.Print("  - " + f);
         return _fail;
@@ -247,12 +249,15 @@ public static class Tests
             m.Player.X = 12.5; m.Player.Y = 70; m.Player.Z = -3.25; m.HasPlayer = true;
             m.Player.Inventory.Add(new SlotSave { Slot = 3, Item = "torch", Count = 12 });
             m.Drops.Add(new DropSave { Item = "stick", Count = 2, X = 1, Y = 2, Z = 3, Age = 5 });
+            m.Mobs.Add(new MobSave { Kind = "Brindle", X = 4, Y = 65, Z = 9, Health = 7, Scale = 0.55f, Persistent = true });
             m.Time = 3.7;
             WorldSave.Write(m);
             var back = WorldSave.TryLoad(m.Folder);
             Check(back != null && back.Seed == Hash.StringSeed("tests"), "seed persisted");
             Check(back.HasPlayer && Math.Abs(back.Player.Z + 3.25) < 1e-9 && back.Player.Inventory.Count == 1 && back.Player.Inventory[0].Count == 12, "player persisted");
             Check(back.Drops.Count == 1 && back.Drops[0].Item == "stick", "drops persisted");
+            Check(back.Mobs.Count == 1 && back.Mobs[0].Kind == "Brindle" && back.Mobs[0].Persistent && Math.Abs(back.Mobs[0].Scale - 0.55f) < 1e-6f,
+                "creatures persisted, a bred calf still small");
             Check(Math.Abs(back.Time - 3.7) < 1e-9, "clock persisted");
             // A damaged world.json falls back to the backup.
             WorldSave.Write(m);
@@ -568,6 +573,90 @@ public static class Tests
         LightAll(w3);
         var m3 = Mesher.Build(w3.Neighbourhood(0, 0, ChunkState.Lit), 0, 1);
         Check(m3.Triangles == 10, $"the face against the next column is culled ({m3.Triangles} triangles)");
+    }
+
+    private static void CreatureAi()
+    {
+        // The game clamps a frame to a quarter second: the hunt must work at any frame rate.
+        foreach (float step in new[] { 1f / 30f, 1f / 8f, 1f / 4f })
+        {
+            var w = Flat(-1, -1, 3);
+            var mgr = new MobManager { World = w, SpawningEnabled = false, Daylight = 0.15f };
+            var p = new Player();
+            p.Body.Position = new Vector3(8.5f, 65f, 8.5f);
+            p.Body.OnGround = true;
+            var hollow = mgr.SpawnMob(MobKind.Hollow, new Vector3(8.5f, 65f, 15.5f));
+            float hp0 = p.Vitals.Health;
+            float t = 0;
+            for (; t < 12f && p.Vitals.Health >= hp0; t += step) mgr.Step(step, p);
+            GD.Print($"    hollow at {1f / step:0} fps: state {hollow.State}, at {hollow.Position}, player hp {p.Vitals.Health} after {t:0.0} s");
+            Check(p.Vitals.Health < hp0, $"a hollow six blocks away closes in and strikes at {1f / step:0} fps ({t:0.0} s)");
+            p.Free(); mgr.Free();
+        }
+
+        // Around a wall: it must path, not push into the stone.
+        var w2 = Flat(-1, -1, 3);
+        for (int x = 2; x <= 14; x++) for (int y = 65; y <= 67; y++) w2.SetBlock(x, y, 12, Blocks.Stone, false);
+        var mgr2 = new MobManager { World = w2, SpawningEnabled = false, Daylight = 0.15f };
+        var p2 = new Player();
+        p2.Body.Position = new Vector3(8.5f, 65f, 8.5f);
+        var h2 = mgr2.SpawnMob(MobKind.Hollow, new Vector3(8.5f, 65f, 15.5f));
+        // It cannot see through the wall: give it the scent directly.
+        h2.SetState(MobState.Chase, 30f);
+        float t2 = 0;
+        for (; t2 < 25f && p2.Vitals.Health >= 20f; t2 += 1f / 30f) mgr2.Step(1f / 30f, p2);
+        GD.Print($"    hollow around a wall: {h2.Position} after {t2:0.0} s, hp {p2.Vitals.Health}");
+        Check(p2.Vitals.Health < 20f, $"and finds its way around a wall ({t2:0.0} s)");
+        p2.Free(); mgr2.Free();
+
+        // A kit bolts from a sprinting player.
+        var w3 = Flat(-1, -1, 3);
+        var mgr3 = new MobManager { World = w3, SpawningEnabled = false, Daylight = 1f };
+        var p3 = new Player();
+        p3.Body.Position = new Vector3(8.5f, 65f, 8.5f);
+        var kit = mgr3.SpawnMob(MobKind.Burrowkit, new Vector3(11.5f, 65f, 8.5f));
+        float d0 = (kit.Position - p3.Body.Position).Length();
+        for (float s = 0; s < 3f; s += 1f / 30f) mgr3.Step(1f / 30f, p3);
+        float d1 = (kit.Position - p3.Body.Position).Length();
+        Check(d1 > d0 + 3f, $"a burrowkit runs from a close player ({d0:0.0} -> {d1:0.0} m)");
+        p3.Free(); mgr3.Free();
+
+        // Nothing walks off a cliff while wandering.
+        var w4 = Flat(-1, -1, 3);
+        for (int x = 12; x <= 30; x++) for (int z = -10; z <= 30; z++) for (int y = 50; y <= 64; y++) w4.SetBlock(x, y, z, Blocks.Air, false);
+        var mgr4 = new MobManager { World = w4, SpawningEnabled = false, Daylight = 1f };
+        var moss = mgr4.SpawnMob(MobKind.Mossback, new Vector3(9.5f, 65f, 8.5f));
+        double lowest = 65;
+        for (float s = 0; s < 60f; s += 1f / 20f) { mgr4.Step(1f / 20f, null); lowest = Math.Min(lowest, moss.Body.Y); }
+        Check(lowest > 64.5, $"a wandering mossback does not step off a 15 m drop (lowest {lowest:0.0})");
+        mgr4.Free();
+    }
+
+    private static void WaterFlow()
+    {
+        var w = Flat(-1, -1, 3);
+        var f = new Fluids(w);
+        // A pond, then a trench dug from it.
+        for (int x = 4; x <= 7; x++) for (int z = 4; z <= 7; z++) { w.SetBlock(x, 64, z, Blocks.Water, false); w.SetBlock(x, 63, z, Blocks.Water, false); }
+        for (int x = 8; x <= 20; x++) w.SetBlock(x, 64, 5, Blocks.Air, false);
+        for (int i = 0; i < 400; i++) f.Step(Fluids.Interval);
+        Check(Blocks.IsWater(w.GetBlock(9, 64, 5)), "water runs into the trench");
+        Check(Blocks.WaterLevel(w.GetBlock(9, 64, 5)) < Blocks.WaterLevel(w.GetBlock(13, 64, 5)), "and thins as it goes");
+        Check(!Blocks.IsWater(w.GetBlock(20, 64, 5)), "but gives out after seven");
+        // A drop below the trench: it pours down.
+        w.SetBlock(10, 63, 5, Blocks.Air, false);
+        w.SetBlock(10, 62, 5, Blocks.Air, false);
+        for (int i = 0; i < 100; i++) f.Step(Fluids.Interval);
+        Check(w.GetBlock(10, 62, 5) == Blocks.WaterFalling || Blocks.IsWater(w.GetBlock(10, 62, 5)), "and falls into a hole");
+        // Cut the feed: the trench drains.
+        for (int y = 63; y <= 64; y++) w.SetBlock(8, y, 5, Blocks.Stone, false);
+        for (int i = 0; i < 400; i++) f.Step(Fluids.Interval);
+        Check(!Blocks.IsWater(w.GetBlock(12, 64, 5)), "cut off, the flow recedes");
+        Check(w.GetBlock(5, 64, 5) == Blocks.Water, "the pond itself stays");
+        // A one-block hole in the pond heals into a source.
+        w.SetBlock(5, 64, 5, Blocks.Air, false);
+        for (int i = 0; i < 40; i++) f.Step(Fluids.Interval);
+        Check(w.GetBlock(5, 64, 5) == Blocks.Water, "a gap between sources refills with a source");
     }
 
     private static void LootFill()

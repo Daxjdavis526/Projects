@@ -19,6 +19,8 @@ public sealed class Atmosphere
     public Biome BiomeHere = Biome.Meadow;
 
     public float Daylight { get; private set; } = 1f;
+    /// <summary>Sunlight alone, 0 at night .. 1 at noon, dimmed by rain: what creatures care about. Moonlight does not count.</summary>
+    public float Sun { get; private set; } = 1f;
     public float SunHeight { get; private set; }
     public Color Horizon { get; private set; }
     public Color SkyTop { get; private set; }
@@ -98,7 +100,8 @@ public sealed class Atmosphere
 
         float dayF = Smooth.Step(-0.14f, 0.28f, s);
         float dusk = 1f - Smooth.Step(0f, 0.38f, MathF.Abs(s + 0.03f));
-        float moonLight = 0.16f + 0.12f * MoonFullness;
+        // Enough moonlight to find your way home by: dim and blue at new moon, silver when full.
+        float moonLight = 0.36f + 0.14f * MoonFullness;
 
         var dayTop = new Color(0.27f, 0.5f, 0.88f);
         var dayHor = new Color(0.66f, 0.8f, 0.96f);
@@ -131,6 +134,7 @@ public sealed class Atmosphere
         }
         Daylight = daylight;
         CurrentDaylight = daylight;
+        Sun = dayF * (1f - 0.32f * Rain - 0.2f * Storm);
         Horizon = hor; SkyTop = top;
 
         var skyTint = Lerp(new Color(0.55f, 0.62f, 0.95f), Colors.White, dayF);

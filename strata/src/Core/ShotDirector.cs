@@ -66,6 +66,10 @@ public partial class ShotDirector : Node3D
             _shots.Add(("spawn_high", p + new Vector3(-40, 45, 40), p + new Vector3(30, -10, -20), 0.2f, 1f));
             _shots.Add(("sunset", p + new Vector3(0, 20, 0), p + new Vector3(-60, 12, 5), 0.47f, 1f));
             _shots.Add(("night", p + new Vector3(0, 2, 0), p + new Vector3(10, 1, -10), 0.72f, 1f));
+            // The creature ring, close, by day and by night.
+            var ring = new Vector3(sx + 6, gen.SurfaceY(sx + 6, sz - 4) + 1, sz - 4);
+            _shots.Add(("creatures_day", ring + new Vector3(-7, 3.5f, 7), ring, 0.25f, 1f));
+            _shots.Add(("creatures_night", ring + new Vector3(-7, 3.5f, 7), ring, 0.72f, 1f));
         }
         else BuildTour(gen, sx, sz);
 
@@ -79,7 +83,10 @@ public partial class ShotDirector : Node3D
                 var at = new Vector3(sx + 6 + MathF.Cos(a) * 5, 0, sz - 4 + MathF.Sin(a) * 5);
                 at.Y = gen.SurfaceY(V.FloorToInt(at.X), V.FloorToInt(at.Z));
                 var m = mobs.SpawnMob(k, at);
-                m.Yaw = a + 2f;
+                // Stand still, facing the close-up camera.
+                var cam = new Vector3(sx + 6 - 7, 0, sz - 4 + 7);
+                m.Yaw = MathF.Atan2(-(cam.X - at.X), -(cam.Z - at.Z)) + (i % 2 == 0 ? 0.35f : -0.35f);
+                m.SetState(MobState.Idle, 1e6f);
             }
         }
         Next();
@@ -181,8 +188,9 @@ public partial class ShotDirector : Node3D
         var s = _shots[_index];
         _view.Sky.Time = 3 + s.time;
         _view.Sky.BiomeHere = _world.Gen.BiomeAt(V.FloorToInt(s.pos.X), V.FloorToInt(s.pos.Z));
-        _view.Sky.Underwater = _world.GetBlock(V.FloorToInt(s.pos.X), V.FloorToInt(s.pos.Y), V.FloorToInt(s.pos.Z)) == Blocks.Water;
+        _view.Sky.Underwater = Blocks.IsWater(_world.GetBlock(V.FloorToInt(s.pos.X), V.FloorToInt(s.pos.Y), V.FloorToInt(s.pos.Z)));
         _view.Step(0, _cam);
+        _mobs.Daylight = 0f;   // no sunburn: the night-walkers are here to be looked at
         _mobs.Step(0.016f, null);
         _wait += delta;
         bool ready = _view.Chunks.AreaReady(_cam.GlobalPosition, 6) && _view.Chunks.Jobs.Pending == 0;
