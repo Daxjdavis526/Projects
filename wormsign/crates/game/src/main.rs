@@ -3,6 +3,7 @@
 mod ground;
 mod hud;
 mod player;
+mod quake;
 mod sky;
 mod web;
 mod world;
@@ -23,6 +24,6 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin))
+        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin))
         .run();
 }

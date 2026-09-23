@@ -4,6 +4,8 @@ use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 
 use crate::ground::Tiles;
+use crate::quake::Meter;
+use wormsign_core::player::Gait;
 use crate::player::{Look, PlayerBody};
 use crate::web;
 use crate::world::{Origin, Phase};
@@ -15,7 +17,7 @@ impl Plugin for HudPlugin {
         app.add_plugins(FrameTimeDiagnosticsPlugin::default())
             .insert_resource(Debug(web::has_flag("debug")))
             .add_systems(Startup, setup)
-            .add_systems(Update, (loading, status).after(Phase::View));
+            .add_systems(Update, (loading, status, meter_ui).after(Phase::View));
     }
 }
 
@@ -25,10 +27,17 @@ pub struct Debug(pub bool);
 #[derive(Component)]
 struct StatusText;
 
+#[derive(Component)]
+struct MeterFill;
+
+#[derive(Component)]
+struct GaitText;
+
 const CONTROLS: &str = "click to look  ·  WASD move  ·  shift run  ·  space jump\n\
 C crouch  ·  hold Q sandwalk  ·  V first/third person  ·  wheel zoom";
 
 fn setup(mut commands: Commands) {
+    spawn_meter(&mut commands);
     let font = TextFont { font_size: FontSize::Px(13.0), ..default() };
     commands.spawn((
         Text::new(CONTROLS),
@@ -43,6 +52,76 @@ fn setup(mut commands: Commands) {
         TextColor(Color::srgba(1.0, 0.95, 0.85, 0.85)),
         Node { position_type: PositionType::Absolute, right: px(14), top: px(10), ..default() },
     ));
+}
+
+/// The signal meter: bottom centre, a thin bar with the gait under it.
+fn spawn_meter(commands: &mut Commands) {
+    commands
+        .spawn(Node {
+            position_type: PositionType::Absolute,
+            bottom: px(54),
+            left: percent(50),
+            margin: UiRect::left(px(-110)),
+            width: px(220),
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Center,
+            row_gap: px(5),
+            ..default()
+        })
+        .with_children(|c| {
+            c.spawn((
+                Text::new("SIGNAL"),
+                TextFont { font_size: FontSize::Px(10.0), ..default() },
+                TextColor(Color::srgba(1.0, 0.95, 0.85, 0.55)),
+            ));
+            c.spawn((
+                Node { width: percent(100), height: px(4), ..default() },
+                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.35)),
+            ))
+            .with_children(|b| {
+                b.spawn((
+                    MeterFill,
+                    Node { width: percent(0), height: percent(100), ..default() },
+                    BackgroundColor(Color::srgb(0.95, 0.8, 0.5)),
+                ));
+            });
+            c.spawn((
+                GaitText,
+                Text::new(""),
+                TextFont { font_size: FontSize::Px(11.0), ..default() },
+                TextColor(Color::srgba(1.0, 0.95, 0.85, 0.8)),
+            ));
+        });
+}
+
+fn meter_ui(
+    meter: Res<Meter>,
+    body: Query<&PlayerBody>,
+    mut fill: Query<(&mut Node, &mut BackgroundColor), With<MeterFill>>,
+    mut gait: Query<&mut Text, With<GaitText>>,
+) {
+    let l = meter.level.clamp(0.0, 1.0);
+    if let Ok((mut n, mut c)) = fill.single_mut() {
+        n.width = percent(l * 100.0);
+        // Sand-pale when quiet, hot red when anything nearby would notice.
+        let quiet = Vec3::new(0.95, 0.8, 0.5);
+        let loud = Vec3::new(0.95, 0.22, 0.12);
+        let k = quiet.lerp(loud, (l * 1.4 - 0.3).clamp(0.0, 1.0));
+        c.0 = Color::srgb(k.x, k.y, k.z);
+    }
+    if let (Ok(b), Ok(mut t)) = (body.single(), gait.single_mut()) {
+        let s = match b.0.gait {
+            Gait::Still => "still",
+            Gait::Walk => "walking",
+            Gait::Run => "running",
+            Gait::Crouch => "crouching",
+            Gait::Sandwalk => "sandwalk",
+            Gait::Air => "",
+        };
+        if t.0 != s {
+            t.0 = s.into();
+        }
+    }
 }
 
 fn loading(tiles: Res<Tiles>, mut last: Local<i32>, mut done: Local<bool>) {

@@ -21,6 +21,30 @@ pub struct Desert(pub Arc<Terrain>);
 #[derive(Resource, Default)]
 pub struct Origin(pub DVec3);
 
+/// Simulation time, seconds, advanced in fixed substeps. Everything that
+/// timestamps vibration uses this, so rhythms are measured exactly and do
+/// not depend on the frame rate.
+#[derive(Resource, Default)]
+pub struct SimClock(pub f64);
+
+/// This frame's share of fixed substeps. Every simulation system loops `n`
+/// times with `dt`, the k-th step happening at `t0 + (k+1)·dt`.
+#[derive(Resource, Default, Clone, Copy)]
+pub struct Tick {
+    pub n: u32,
+    pub dt: f64,
+    pub t0: f64,
+}
+
+impl Tick {
+    pub fn time(&self, k: u32) -> f64 {
+        self.t0 + (k + 1) as f64 * self.dt
+    }
+}
+
+/// Physics substep. Everything is cheap; small steps keep contact crisp.
+pub const SUBSTEP: f64 = 1.0 / 120.0;
+
 /// Authoritative position of anything placed in the world; its `Transform`
 /// translation is derived from this.
 #[derive(Component, Clone, Copy, Default)]
@@ -35,6 +59,10 @@ impl Origin {
 /// Anything the origin should follow. The player.
 #[derive(Component)]
 pub struct OriginAnchor;
+
+/// Systems that advance the simulation by this frame's [`Tick`].
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SimSet;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Phase {
@@ -52,6 +80,9 @@ impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Desert(Arc::new(Terrain::new(SEED))))
             .init_resource::<Origin>()
+            .init_resource::<SimClock>()
+            .init_resource::<Tick>()
+            .add_systems(Update, tick.in_set(Phase::Simulate).before(SimSet))
             .configure_sets(Update, (Phase::Simulate, Phase::Place, Phase::View).chain())
             .add_systems(Update, (recentre, place).chain().in_set(Phase::Place));
     }
@@ -73,4 +104,13 @@ fn place(origin: Res<Origin>, mut q: Query<(Ref<WorldPos>, &mut Transform)>) {
             t.translation = origin.to_render(wp.0);
         }
     }
+}
+
+fn tick(time: Res<Time>, mut clock: ResMut<SimClock>, mut tick: ResMut<Tick>, mut acc: Local<f64>) {
+    // Never try to catch up more than a quarter second after a stall.
+    *acc = (*acc + time.delta_secs_f64()).min(0.25);
+    let n = (*acc / SUBSTEP).floor() as u32;
+    *acc -= n as f64 * SUBSTEP;
+    *tick = Tick { n, dt: SUBSTEP, t0: clock.0 };
+    clock.0 += n as f64 * SUBSTEP;
 }

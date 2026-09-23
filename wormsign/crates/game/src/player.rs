@@ -11,13 +11,13 @@ use bevy::input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll};
 use bevy::prelude::*;
 use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
 use wormsign_core::glam::DVec3;
-use wormsign_core::player::{GroundHit, Player, PlayerInput};
+use wormsign_core::gait::Stride;
+use wormsign_core::player::{Gait, GroundHit, Player, PlayerInput};
+use wormsign_core::vibration::{sources, SourceKind, VibrationEvent};
 
 use crate::web;
-use crate::world::{Desert, Origin, OriginAnchor, Phase, WorldPos};
-
-/// Physics substep. The walker is cheap; small steps keep landings crisp.
-const SUBSTEP: f64 = 1.0 / 120.0;
+use crate::quake::Quakes;
+use crate::world::{Desert, Origin, OriginAnchor, Phase, SimSet, Tick, WorldPos};
 
 pub struct PlayerPlugin;
 
@@ -26,7 +26,8 @@ impl Plugin for PlayerPlugin {
         app.init_resource::<Look>()
             .init_resource::<Controls>()
             .add_systems(Startup, spawn)
-            .add_systems(Update, (grab_pointer, read_input, simulate).chain().in_set(Phase::Simulate))
+            .add_systems(Update, (grab_pointer, read_input).chain().in_set(Phase::Simulate).before(SimSet))
+            .add_systems(Update, simulate.in_set(Phase::Simulate).in_set(SimSet))
             .add_systems(Update, (camera, show_body).chain().in_set(Phase::View));
     }
 }
@@ -46,7 +47,7 @@ pub struct Look {
     pub sensitivity: f32,
     /// Smoothed third-person camera position, world space.
     smooth: Option<DVec3>,
-    /// Head-bob phase, advanced by distance walked.
+    /// Head-bob amplitude, eased between gaits.
     bob: f32,
 }
 
@@ -71,6 +72,10 @@ pub struct Controls(pub PlayerInput);
 #[derive(Component)]
 pub struct PlayerBody(pub Player);
 
+/// The player's feet: when they strike, and how hard.
+#[derive(Component)]
+pub struct Feet(pub Stride);
+
 #[derive(Component)]
 struct BodyMesh;
 
@@ -79,7 +84,7 @@ fn spawn(mut commands: Commands, desert: Res<Desert>, mut meshes: ResMut<Assets<
     let y = desert.0.height(x, z) as f64;
     let body = Player::new(DVec3::new(x, y + 0.5, z));
     commands
-        .spawn((PlayerBody(body), WorldPos(DVec3::new(x, y, z)), OriginAnchor, Transform::default(), Visibility::default()))
+        .spawn((PlayerBody(body), Feet(Stride::new(0xF007)), WorldPos(DVec3::new(x, y, z)), OriginAnchor, Transform::default(), Visibility::default()))
         .with_children(|p| {
             // A stand-in figure: cloak-coloured capsule. Real model later.
             p.spawn((
@@ -189,20 +194,51 @@ pub fn ground_at(desert: &Desert, x: f64, z: f64) -> GroundHit {
 }
 
 fn simulate(
-    time: Res<Time>,
+    tick: Res<Tick>,
     desert: Res<Desert>,
     mut controls: ResMut<Controls>,
-    mut q: Query<(&mut PlayerBody, &mut WorldPos)>,
-    mut acc: Local<f64>,
+    mut quakes: ResMut<Quakes>,
+    mut q: Query<(&mut PlayerBody, &mut Feet, &mut WorldPos)>,
 ) {
-    let Ok((mut body, mut wp)) = q.single_mut() else { return };
-    // Never try to catch up more than a quarter second after a stall.
-    *acc = (*acc + time.delta_secs_f64()).min(0.25);
-    while *acc >= SUBSTEP {
-        *acc -= SUBSTEP;
-        let input = controls.0;
-        body.0.step(&input, SUBSTEP, |x, z| ground_at(&desert, x, z));
+    let Ok((mut body, mut feet, mut wp)) = q.single_mut() else { return };
+    for k in 0..tick.n {
+        let t = tick.time(k);
+        let mut input = controls.0;
+        // Sandwalking moves the body in lurches, one per step.
+        let f = feet.0.speed_factor(body.0.gait);
+        input.forward *= f;
+        input.right *= f;
+        let report = body.0.step(&input, tick.dt, |x, z| ground_at(&desert, x, z));
         controls.0.jump = false;
+
+        let p = &body.0;
+        let on_rock = desert.0.sample(p.pos.x, p.pos.z).rock > 0.5;
+        let coupling = if on_rock { sources::ROCK_COUPLING } else { sources::SAND_COUPLING };
+        let speed = p.vel.x.hypot(p.vel.z);
+        // Sandwalk speed is judged against the gait, not the lurch.
+        let gait_speed = if p.gait == Gait::Sandwalk { speed / f.max(0.1) } else { speed };
+        if let Some(s) = feet.0.update(p.gait, gait_speed, tick.dt) {
+            quakes.emit(VibrationEvent {
+                pos: p.pos,
+                energy: s.energy,
+                freq: s.freq,
+                coupling,
+                time: t,
+                kind: SourceKind::Step,
+            });
+        }
+        if let Some(v) = report.landed {
+            if v > 1.0 {
+                quakes.emit(VibrationEvent {
+                    pos: p.pos,
+                    energy: sources::LANDING_PER_V2 * v * v,
+                    freq: sources::LANDING_FREQ,
+                    coupling,
+                    time: t,
+                    kind: SourceKind::Landing,
+                });
+            }
+        }
     }
     wp.0 = body.0.pos;
 }
@@ -212,21 +248,25 @@ pub fn camera(
     origin: Res<Origin>,
     desert: Res<Desert>,
     mut look: ResMut<Look>,
-    body: Query<&PlayerBody>,
+    body: Query<(&PlayerBody, &Feet)>,
     mut cam: Query<&mut Transform, With<Camera3d>>,
 ) {
-    let (Ok(body), Ok(mut t)) = (body.single(), cam.single_mut()) else { return };
+    let (Ok((body, feet)), Ok(mut t)) = (body.single(), cam.single_mut()) else { return };
     let p = &body.0;
     let rot = Quat::from_euler(EulerRot::YXZ, look.yaw, look.pitch, 0.0);
     let dt = time.delta_secs();
 
-    // Head bob: distance-driven so it matches the feet, not the clock.
-    let hspeed = (p.vel.x.hypot(p.vel.z)) as f32;
-    if p.grounded {
-        look.bob += hspeed * dt * 1.9;
-    }
-    let bob_amp = if p.grounded { (hspeed / 5.5).min(1.0) * 0.045 } else { 0.0 };
-    let bob = (look.bob).sin().abs() * bob_amp;
+    // Head bob follows the actual footstrikes: lowest as a foot lands,
+    // highest mid-stride. Sandwalking's broken rhythm shows up here too.
+    let amp = match p.gait {
+        Gait::Walk => 0.035,
+        Gait::Run => 0.065,
+        Gait::Crouch => 0.02,
+        Gait::Sandwalk => 0.05,
+        Gait::Still | Gait::Air => 0.0,
+    };
+    look.bob += (amp - look.bob) * (1.0 - (-dt * 8.0).exp());
+    let bob = look.bob * ((std::f32::consts::PI * feet.0.phase() as f32).sin() - 0.5);
 
     let eye = p.pos + DVec3::new(0.0, p.eye_height() + bob as f64, 0.0);
     let world = match look.view {

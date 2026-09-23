@@ -45,7 +45,7 @@ impl Plugin for SkyPlugin {
         app.insert_resource(ClearColor(Color::linear_rgb(HORIZON.x, HORIZON.y, HORIZON.z)))
             .insert_resource(GlobalAmbientLight {
                 color: Color::linear_rgb(0.75, 0.70, 0.62),
-                brightness: 260.0,
+                brightness: 520.0,
                 affects_lightmapped_meshes: true,
             })
             .add_systems(Startup, setup)

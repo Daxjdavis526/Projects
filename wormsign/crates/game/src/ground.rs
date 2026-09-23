@@ -183,7 +183,7 @@ fn to_mesh(tm: &wormsign_core::tilemesh::TileMesh) -> Mesh {
     // Real dune sand has an albedo around 0.35-0.45; brighter than that and
     // the tonemapper flattens every dune into the same cream.
     let sand_lit = Vec3::new(0.50, 0.31, 0.15);
-    let sand_steep = Vec3::new(0.40, 0.22, 0.10);
+    let sand_steep = Vec3::new(0.47, 0.28, 0.13);
     let rock_col = Vec3::new(0.12, 0.075, 0.05);
     let colors: Vec<[f32; 4]> = tm
         .normals
