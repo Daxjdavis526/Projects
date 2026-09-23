@@ -1,0 +1,17 @@
+[package]
+name = "wormsign"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+wormsign_core = { path = "../core" }
+glam.workspace = true
+# `3d` and `ui` are Bevy's own tested bundles. Audio is left out: every sound
+# in this game is synthesised at startup, and played through kira.
+bevy = { version = "0.19.1", default-features = false, features = ["3d", "ui", "tonemapping_luts"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+bevy = { version = "0.19.1", default-features = false, features = ["web"] }
+wasm-bindgen = "0.2.128"
+js-sys = "0.3"
