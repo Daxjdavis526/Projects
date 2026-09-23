@@ -44,6 +44,11 @@ A .NET export is the executable plus a `data_Strata_*` folder next to it (the
 .NET runtime and the game's assemblies). Ship the whole folder; the `.exe`
 alone will not start. Players do not need Godot or .NET installed.
 
+GitHub Actions does all of this on every push that touches `strata/`
+(`.github/workflows/strata.yml`): it runs the test suite, exports both
+platforms, and attaches **STRATA-windows** and **STRATA-linux** to the run as
+downloads (Actions tab → "STRATA builds" → the latest run → Artifacts).
+
 ## Controls
 
 | Input | Action |

@@ -1,0 +1,72 @@
+# Builds STRATA (strata/, a Godot 4 .NET game) whenever it changes: runs the
+# headless test suite, then exports Windows and Linux builds and keeps them as
+# downloadable artifacts on the run's page. The rest of this repository is
+# static pages and is not touched by this workflow.
+name: STRATA builds
+
+on:
+  push:
+    paths:
+      - 'strata/**'
+      - '.github/workflows/strata.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GODOT_VERSION: 4.7.2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Fetch Godot .NET and its export templates
+        run: |
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          curl -sSfL --retry 4 -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64.zip"
+          unzip -q godot.zip -d "$RUNNER_TEMP/godot"
+          echo "GODOT=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64/Godot_v${GODOT_VERSION}-stable_mono_linux.x86_64" >> "$GITHUB_ENV"
+          curl -sSfL --retry 4 -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz"
+          dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono"
+          mkdir -p "$dir"
+          unzip -q -j templates.tpz 'templates/version.txt' 'templates/icudt_godot.dat' \
+            'templates/windows_*_x86_64*' 'templates/linux_*.x86_64' -d "$dir"
+          rm godot.zip templates.tpz
+
+      - name: Build and import
+        working-directory: strata
+        run: |
+          dotnet build Strata.csproj -nologo -v q
+          "$GODOT" --headless --path . --import
+
+      - name: Unit tests
+        working-directory: strata
+        run: '"$GODOT" --headless --path . -- --test'
+
+      - name: Export Windows and Linux
+        working-directory: strata
+        run: |
+          mkdir -p build/windows build/linux
+          "$GODOT" --headless --path . --export-release "Windows Desktop" build/windows/Strata.exe
+          "$GODOT" --headless --path . --export-release "Linux" build/linux/Strata.x86_64
+          test -f build/windows/Strata.exe && test -d build/windows/data_Strata_windows_x86_64
+          test -f build/linux/Strata.x86_64 && test -d build/linux/data_Strata_linuxbsd_x86_64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: STRATA-windows
+          path: strata/build/windows
+          retention-days: 90
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: STRATA-linux
+          path: strata/build/linux
+          retention-days: 90
