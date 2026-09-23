@@ -34,3 +34,20 @@ lto = "thin"
 codegen-units = 4
 panic = "abort"
 strip = "debuginfo"
+
+# What gets published: small first (it is a download), except the hot paths
+# — terrain noise and the game's own simulation — which stay fully optimised.
+[profile.web]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+
+[profile.web.package.wormsign_core]
+opt-level = 3
+
+[profile.web.package.fastnoise-lite]
+opt-level = 3
+
+[profile.web.package.glam]
+opt-level = 3

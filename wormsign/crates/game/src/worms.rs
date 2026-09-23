@@ -34,7 +34,9 @@ pub struct WormsPlugin;
 
 impl Plugin for WormsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_population.after(crate::player::spawn))
+        // After the ground's material exists: the wake strip shares it, and
+        // a handle taken before then is Bevy's magenta "missing" material.
+        app.add_systems(Startup, spawn_population.after(crate::player::spawn).after(crate::ground::setup_material))
             .add_systems(Update, simulate.in_set(Phase::Simulate).in_set(SimSet).after(crate::player::simulate))
             .init_resource::<Danger>()
             .add_systems(Update, recycle.in_set(Phase::Simulate).after(SimSet))

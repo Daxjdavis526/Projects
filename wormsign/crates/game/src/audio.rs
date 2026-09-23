@@ -59,6 +59,7 @@ mod web {
         gust: f64,
         states: Vec<State>,
         stage: Stage,
+        hooks: [u8; 2],
     }
 
     /// Picks up the AudioContext the page makes on the first click or key
@@ -170,6 +171,7 @@ mod web {
                 gust: 0.0,
                 states: Vec::new(),
                 stage: Stage::Alive,
+                hooks: [0; 2],
             })
         }
 
@@ -260,6 +262,7 @@ mod web {
         danger: Res<Danger>,
         quakes: Res<Quakes>,
         fate: Res<Fate>,
+        riding: Res<crate::rider::Riding>,
         player: Query<&PlayerBody>,
         cam: Query<&Transform, With<Camera3d>>,
         worms: Query<&WormBody>,
@@ -349,6 +352,28 @@ mod web {
                 }
             }
             e.states[i] = s;
+        }
+
+        // Hooks: a whoosh as one is thrown, a thunk as it bites.
+        for i in 0..2 {
+            use wormsign_core::hook::HookState;
+            let now = match riding.hooks[i].state {
+                HookState::Stowed => 0,
+                HookState::Flying { .. } => 1,
+                HookState::Anchored { .. } => 2,
+            };
+            if now != e.hooks[i] {
+                let pan = if i == 0 { -0.3 } else { 0.3 };
+                match now {
+                    1 => e.burst(0.25, BiquadFilterType::Bandpass, 1400.0, 2.0, 0.18, pan, 1.4),
+                    2 => {
+                        e.thud(190.0, 85.0, 0.14, 0.45, pan, OscillatorType::Triangle);
+                        e.burst(0.06, BiquadFilterType::Highpass, 1800.0, 0.8, 0.25, pan, 1.0);
+                    }
+                    _ => {}
+                }
+                e.hooks[i] = now;
+            }
         }
 
         // Being taken.

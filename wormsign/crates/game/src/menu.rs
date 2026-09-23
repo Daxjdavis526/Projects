@@ -178,7 +178,7 @@ fn card(
     let s = format!(
         "{lead}\n\n\
          WASD move   shift run   space jump   C crouch   hold Q sandwalk\n\
-         T plant or lift a worm caller ({} carried)   V first / third person\n\
+         T plant or lift a worm caller ({} carried)   V first / third person   K cinematic\n\
          mouse L / R throw hooks (Z / X)   R / F reel   E let go   G brace / walk\n\
          riding, braced: A / D pry to turn   W drive   S ease off   space jump clear\n\n\
          Worms hunt by vibration. Rhythm carries; stillness is safe; sandwalking\n\

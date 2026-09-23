@@ -37,9 +37,7 @@ struct LivingHud;
 #[derive(Component)]
 struct GaitText;
 
-const CONTROLS: &str = "click to look  |  WASD move  |  shift run  |  space jump\n\
-C crouch  |  hold Q sandwalk  |  T plant / lift caller  |  V view  |  wheel zoom\n\
-mouse L / R (or Z / X) throw hooks  |  R / F reel  |  E let go  |  G brace / walk";
+const CONTROLS: &str = "Esc: controls and settings";
 
 fn setup(mut commands: Commands) {
     spawn_meter(&mut commands);
@@ -154,6 +152,7 @@ fn status(
     look: Res<Look>,
     body: Query<&PlayerBody>,
     worms: Query<&crate::worms::WormBody>,
+    riding: Res<crate::rider::Riding>,
     mut text: Query<&mut Text, With<StatusText>>,
     time: Res<Time>,
     mut last_log: Local<f32>,
@@ -189,7 +188,12 @@ fn status(
     let now = time.elapsed_secs();
     if debug.0 && now - *last_log > 2.0 {
         *last_log = now;
-        info!("debug pos=({:.1},{:.1},{:.1}) gait={:?} fps={fps:.0} tiles={} {worm}", p.pos.x, p.pos.y, p.pos.z, p.gait, tiles.live_count());
+        let hooks: Vec<String> = riding.hooks.iter().map(|h| match h.state {
+            wormsign_core::hook::HookState::Stowed => "-".to_string(),
+            wormsign_core::hook::HookState::Flying { .. } => "fly".to_string(),
+            wormsign_core::hook::HookState::Anchored { d, len, .. } => format!("in@{d:.0}/{len:.1}"),
+        }).collect();
+        info!("debug pos=({:.1},{:.1},{:.1}) gait={:?} fps={fps:.0} tiles={} {worm} hooks={:?} riding={} back={}", p.pos.x, p.pos.y, p.pos.z, p.gait, tiles.live_count(), hooks, riding.riding(), riding.on_back);
     }
 }
 

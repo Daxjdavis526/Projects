@@ -54,6 +54,9 @@ pub struct Look {
     smooth: Option<DVec3>,
     /// Head-bob amplitude, eased between gaits.
     bob: f32,
+    /// K: a slow orbiting camera, for watching rather than playing.
+    pub cinematic: bool,
+    orbit: f32,
 }
 
 impl Default for Look {
@@ -68,6 +71,8 @@ impl Default for Look {
             base_fov: 70.0,
             smooth: None,
             bob: 0.0,
+            cinematic: false,
+            orbit: 0.0,
         }
     }
 }
@@ -207,6 +212,10 @@ pub fn read_input(
         look.yaw -= d.x;
         look.pitch = (look.pitch - d.y).clamp(-1.45, 1.45);
     }
+    if keys.just_pressed(KeyCode::KeyK) {
+        look.cinematic = !look.cinematic;
+        look.smooth = None;
+    }
     if keys.just_pressed(KeyCode::KeyV) {
         look.view = if look.view == View::First { View::Third } else { View::First };
         look.smooth = None;
@@ -276,7 +285,7 @@ pub fn simulate(
         let y_near = body.0.pos.y;
         let report = body.0.step(&input, tick.dt, |x, z| ground_at(&desert, &worms, x, z, y_near));
         controls.0.jump = false;
-        crate::rider::step_hooks(&mut riding, &mut body.0, &look, &with_ids, |x, z| desert.0.height(x, z) as f64, tick.dt);
+        crate::rider::step_hooks(&mut riding, &mut body.0, &look, &with_ids, |x, z| desert.0.height(x, z) as f64, |x, z| desert.0.sand(x, z), tick.dt);
         let y_now = body.0.pos.y;
         riding.on_back = body.0.grounded && ground_at(&desert, &worms, body.0.pos.x, body.0.pos.z, y_now).worm;
 
@@ -358,6 +367,23 @@ pub fn camera(
     let bob = look.bob * ((std::f32::consts::PI * feet.0.phase() as f32).sin() - 0.5);
 
     let eye = p.pos + DVec3::new(0.0, p.eye_height() + bob as f64, 0.0);
+    if look.cinematic {
+        // Circle slowly, low, taking in the rider and whatever they ride.
+        look.orbit += dt * 0.08;
+        let focus = p.pos + DVec3::new(0.0, 2.0, 0.0);
+        let far = 38.0 + 30.0 * *ride_ease as f64;
+        let a = look.orbit as f64;
+        let mut want = focus + DVec3::new(a.cos() * far, 9.0 + 8.0 * *ride_ease as f64, a.sin() * far);
+        want.y = want.y.max(desert.0.height(want.x, want.z) as f64 + 2.0);
+        let s = match look.smooth {
+            Some(prev) => prev + (want - prev) * (1.0 - (-dt as f64 * 3.0).exp()),
+            None => want,
+        };
+        look.smooth = Some(s);
+        t.translation = origin.to_render(s) + jolt;
+        t.rotation = Transform::default().looking_to((focus - s).as_vec3(), Vec3::Y).rotation;
+        return;
+    }
     let world = match look.view {
         View::First => eye,
         View::Third => {

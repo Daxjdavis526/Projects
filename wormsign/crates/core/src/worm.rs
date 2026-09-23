@@ -151,16 +151,15 @@ impl Worm {
     pub fn new(spec: WormSpec, x: f64, z: f64, heading: f64, depth: f64, sand: impl Fn(f64, f64) -> f64) -> Self {
         let dir = DVec3::new(heading.cos(), 0.0, heading.sin());
         let head = DVec3::new(x, sand(x, z) - depth, z);
-        let mut path = Path::straight(head, dir, spec.length + 20.0);
-        // Lay the initial body along the sand rather than on a flat line.
-        let mut p2 = Path::straight(head - dir * (spec.length + 20.0), dir, 1.0);
-        let n = (spec.length + 20.0) as usize;
-        for i in (0..=n).rev() {
+        // Lay the initial body along the sand at the same depth, by driving
+        // a path up to the head from a body-length behind it.
+        let keep = spec.length + 20.0;
+        let n = keep as usize;
+        let tail = head - dir * n as f64;
+        let mut path = Path::straight(DVec3::new(tail.x, sand(tail.x, tail.z) - depth, tail.z), dir, keep);
+        for i in (0..n).rev() {
             let q = head - dir * i as f64;
-            p2.advance(DVec3::new(q.x, sand(q.x, q.z) - depth, q.z));
-        }
-        if p2.len() > 10 {
-            path = p2;
+            path.advance(DVec3::new(q.x, sand(q.x, q.z) - depth, q.z));
         }
         let ring_spacing = if spec.length > 500.0 { 4.0 } else { 2.0 };
         let mut w = Self {
@@ -598,5 +597,15 @@ mod tests {
         }
         // Beside the body the heap is still there to run up.
         assert!(w.wake(-100.0, 13.0) > 1.0);
+    }
+
+    #[test]
+    fn a_new_worm_lies_along_the_sand() {
+        let dunes = |x: f64, _z: f64| 20.0 * (x / 60.0).sin();
+        let w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, dunes);
+        for r in w.rings.iter().step_by(10) {
+            let want = dunes(r.centre.x, r.centre.z) - 7.0;
+            assert!((r.centre.y - want).abs() < 0.5, "ring at d {:.0}: y {:.1} vs {:.1}", r.d, r.centre.y, want);
+        }
     }
 }

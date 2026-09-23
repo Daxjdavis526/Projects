@@ -129,6 +129,7 @@ pub fn step_hooks(
     look: &Look,
     worms: &[(Entity, &WormBody)],
     ground: impl Fn(f64, f64) -> f64 + Copy,
+    sand: impl Fn(f64, f64) -> f64,
     dt: f64,
 ) {
     let grip = |p: DVec3| p + DVec3::Y * 1.3;
@@ -166,10 +167,11 @@ pub fn step_hooks(
                     riding.hooked[i] = None;
                     continue;
                 };
-                // An anchor dragged under the sand tears out: a diving worm
-                // sheds its rider.
+                // An anchor dragged well under the sand tears out: a diving
+                // worm sheds its rider. (The sand, not rock: worms swim in
+                // sand, and a rock's skirt can stand above it.)
                 if let Some(a) = riding.hooks[i].position(Some(&w.1.worm)) {
-                    if a.y < ground(a.x, a.z) - 1.0 {
+                    if a.y < sand(a.x, a.z) - 2.5 {
                         riding.hooks[i].release();
                         riding.hooked[i] = None;
                         continue;
@@ -344,6 +346,7 @@ fn hud(
 /// `?ride`: start already on the nearest worm's back, both hooks set, at
 /// its speed — for trying the riding without first catching one.
 fn scripted_mount(
+    desert: Res<crate::world::Desert>,
     mut done: Local<bool>,
     mut riding: ResMut<Riding>,
     mut player: Query<&mut PlayerBody>,
@@ -364,10 +367,13 @@ fn scripted_mount(
         return;
     };
     wb.brain.hold = None;
+    // Bring it up to riding depth (the whole body, not just the wanted
+    // depth) and a lope before climbing on.
+    let r = wb.worm.spec.radius;
+    let (spec, head, heading) = (wb.worm.spec, wb.worm.head(), wb.worm.heading);
+    let d2 = desert.clone();
+    wb.worm = wormsign_core::worm::Worm::new(spec, head.x, head.z, heading, 0.62 * r, move |x, z| d2.0.sand(x, z));
     let w = &mut wb.worm;
-    // Bring it up to riding depth and a lope before climbing on.
-    let r = w.spec.radius;
-    w.depth = 0.62 * r;
     w.want_depth = 0.62 * r;
     w.speed = 18.0;
     w.want_speed = 18.0;
@@ -378,7 +384,7 @@ fn scripted_mount(
     pb.0.vel = w.skin_velocity(d, top);
     pb.0.grounded = true;
     for (i, s) in [(0usize, -1.0f64), (1, 1.0)] {
-        let dir = (up * 0.75 + side * s * 0.66).normalize();
+        let dir = (up * 0.9 + side * s * 0.44).normalize();
         let angle = w.skin_angle(d - 6.0, dir);
         riding.hooks[i].state = HookState::Anchored { d: d - 6.0, angle, len: 3.0 };
         riding.hooked[i] = Some(e);

@@ -6,12 +6,15 @@
 #
 # Needs: rustup target add wasm32-unknown-unknown
 #        cargo install wasm-bindgen-cli --version <the wasm-bindgen in Cargo.lock>
-# Optional: wasm-opt (binaryen) on PATH shrinks the output further.
+# Optional: wasm-opt (binaryen) 116 or newer shrinks the output a lot (50 MB
+#   to about 20). Older versions break wasm-bindgen's reference table, so
+#   they are skipped. Point WASM_OPT at a newer one if the system's is old.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-profile=release
-flag=--release
+# The `web` profile is size-optimised (see Cargo.toml); --dev is quick.
+profile=web
+flag="--profile web"
 if [[ "${1:-}" == "--dev" ]]; then profile=debug; flag=; fi
 
 cargo build -p wormsign --target wasm32-unknown-unknown $flag
@@ -28,10 +31,15 @@ rm -rf dist && mkdir -p dist
 wasm-bindgen --target web --no-typescript --out-dir dist --out-name wormsign \
   "target/wasm32-unknown-unknown/$profile/wormsign.wasm"
 
-if [[ "$profile" == release ]] && command -v wasm-opt >/dev/null; then
-  wasm-opt -Oz --enable-bulk-memory --enable-nontrapping-float-to-int \
-    --enable-sign-ext --enable-mutable-globals --enable-reference-types \
-    dist/wormsign_bg.wasm -o dist/wormsign_bg.wasm || echo "wasm-opt failed; keeping unoptimised wasm" >&2
+WASM_OPT="${WASM_OPT:-wasm-opt}"
+if [[ "$profile" == web ]] && command -v "$WASM_OPT" >/dev/null; then
+  v=$("$WASM_OPT" --version | grep -o '[0-9]\+' | head -1)
+  if (( v >= 116 )); then
+    "$WASM_OPT" -Oz --all-features --strip-debug --strip-producers \
+      dist/wormsign_bg.wasm -o dist/wormsign_bg.wasm || echo "wasm-opt failed; keeping unoptimised wasm" >&2
+  else
+    echo "wasm-opt $v is too old (need 116+); skipping. Set WASM_OPT to a newer one." >&2
+  fi
 fi
 
 cp web/index.html dist/

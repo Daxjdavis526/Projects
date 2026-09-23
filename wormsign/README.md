@@ -26,6 +26,7 @@ made for headphones.
 | C (hold) | crouch |
 | Q (hold) | **sandwalk** |
 | V | first / third person |
+| K | cinematic camera: a slow orbit, for watching |
 | mouse wheel | third-person distance |
 | T | plant a worm caller, or pick one up again |
 | left / right mouse (or Z / X) | throw a hook, or let that hook go |
@@ -166,7 +167,7 @@ Blunt, as usual.
   torn plausibly; it has no muscles and no mass distribution to speak of.
 - **The sky** is painted, not scattered. Bevy's physical atmosphere needs
   compute shaders, which WebGL2 does not have.
-- **Missing**: heat haze, sandstorms, day and night, a gamepad, and sound
+- **Missing**: heat haze, sandstorms, day and night, a photo mode, a gamepad, and sound
   off the web (the native build is silent). Footprints fill in after a
   while rather than being blown over.
 

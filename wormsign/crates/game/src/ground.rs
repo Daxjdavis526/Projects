@@ -70,7 +70,7 @@ impl Tiles {
 #[allow(dead_code)]
 pub struct Tile(pub TileKey);
 
-fn setup_material(mut tiles: ResMut<Tiles>, mut materials: ResMut<Assets<StandardMaterial>>) {
+pub fn setup_material(mut tiles: ResMut<Tiles>, mut materials: ResMut<Assets<StandardMaterial>>) {
     tiles.material = materials.add(StandardMaterial {
         base_color: Color::WHITE,
         perceptual_roughness: 0.94,
