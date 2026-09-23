@@ -1,0 +1,10 @@
+[package]
+name = "wormsign_core"
+description = "The game's logic with no engine in it: testable on its own."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+glam.workspace = true
+fastnoise-lite.workspace = true

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WORMSIGN</title>
+<style>
+  :root { --sand: #c9a36b; --ink: #1b130b; --dim: #6b5236; }
+  html, body { margin: 0; height: 100%; background: var(--ink); overflow: hidden; }
+  canvas#wormsign { display: block; width: 100vw; height: 100vh; outline: none; touch-action: none; }
+  #loading {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+    background: radial-gradient(ellipse at 50% 70%, #3a2814 0%, var(--ink) 70%);
+    color: var(--sand); font: 500 14px/1.4 ui-monospace, Menlo, Consolas, monospace;
+    letter-spacing: .3em; transition: opacity .8s; z-index: 10;
+  }
+  #loading h1 { margin: 0; font-size: 34px; letter-spacing: .5em; font-weight: 700; }
+  #loading .bar { width: 220px; height: 2px; background: #3a2a18; overflow: hidden; }
+  #loading .bar i { display: block; height: 100%; width: 0; background: var(--sand); transition: width .2s; }
+  #loading p { margin: 0; color: var(--dim); font-size: 11px; }
+  #loading.gone { opacity: 0; pointer-events: none; }
+  #err { color: #e07a5f; max-width: 80vw; text-align: center; letter-spacing: 0; }
+</style>
+</head>
+<body>
+<canvas id="wormsign" tabindex="0"></canvas>
+<div id="loading">
+  <h1>WORMSIGN</h1>
+  <div class="bar"><i id="prog"></i></div>
+  <p id="status">downloading</p>
+</div>
+<script type="module">
+  import init from './wormsign.js';
+
+  const status = document.getElementById('status');
+  const prog = document.getElementById('prog');
+  const loading = document.getElementById('loading');
+
+  // Stream the wasm ourselves so the bar reflects real bytes, then hand the
+  // bytes to wasm-bindgen's init.
+  async function fetchWithProgress(url) {
+    const res = await fetch(url);
+    const total = +res.headers.get('content-length') || 0;
+    if (!res.body || !total) return res.arrayBuffer();
+    const reader = res.body.getReader();
+    const chunks = []; let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value); got += value.length;
+      prog.style.width = (100 * got / total).toFixed(1) + '%';
+    }
+    const out = new Uint8Array(got); let o = 0;
+    for (const c of chunks) { out.set(c, o); o += c.length; }
+    return out.buffer;
+  }
+
+  // Browsers only allow sound after a gesture, so the audio context is made
+  // here, inside the first click or key press, and the game picks it up.
+  const unlockAudio = () => {
+    try {
+      if (!window.wormsignAudio) window.wormsignAudio = new (window.AudioContext || window.webkitAudioContext)();
+      if (window.wormsignAudio.state === 'suspended') window.wormsignAudio.resume();
+    } catch (e) { /* no audio, no problem */ }
+  };
+  addEventListener('pointerdown', unlockAudio, { capture: true });
+  addEventListener('keydown', unlockAudio, { capture: true });
+
+  // The game calls this once its first frame of terrain is up.
+  window.wormsignReady = () => loading.classList.add('gone');
+  window.wormsignStatus = (s) => { status.textContent = s; };
+
+  try {
+    const bytes = await fetchWithProgress('./wormsign_bg.wasm');
+    status.textContent = 'starting';
+    await init({ module_or_path: bytes });
+  } catch (e) {
+    // Bevy's winit loop throws a control-flow "exception" on purpose; only
+    // report errors that are not that.
+    if (!String(e).includes('Using exceptions for control flow')) {
+      status.innerHTML = '<span id="err">' + String(e) + '</span>';
+      console.error(e);
+    }
+  }
+</script>
+</body>
+</html>
