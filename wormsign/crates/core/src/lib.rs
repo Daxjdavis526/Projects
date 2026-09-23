@@ -7,7 +7,9 @@
 
 pub use glam;
 
+pub mod anim;
 pub mod brain;
+pub mod cloth;
 pub mod gait;
 pub mod hook;
 pub mod lod;

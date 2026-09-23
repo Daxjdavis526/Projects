@@ -236,6 +236,7 @@ fn draw_ropes(
     origin: Res<Origin>,
     riding: Res<Riding>,
     look: Res<Look>,
+    figure: Res<crate::avatar::Figure>,
     player: Query<&PlayerBody>,
     worms: Query<&WormBody>,
     mut ropes: RopeQ,
@@ -252,7 +253,8 @@ fn draw_ropes(
             continue;
         };
         let side = if i == 0 { -0.25 } else { 0.25 };
-        let hand = pb.0.pos + DVec3::Y * 1.25 + right * side;
+        // From the hand holding it.
+        let hand = if figure.hands[i] != DVec3::ZERO { figure.hands[i] } else { pb.0.pos + DVec3::Y * 1.25 + right * side };
         let (a, b) = (origin.to_render(hand), origin.to_render(end));
         let d = b - a;
         let len = d.length().max(0.01);

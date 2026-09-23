@@ -91,6 +91,21 @@ impl Stride {
     pub fn phase(&self) -> f64 {
         (self.since / self.interval.max(0.2)).min(1.0)
     }
+
+    /// Seconds the current step is expected to last.
+    pub fn interval(&self) -> f64 {
+        self.interval.max(0.2)
+    }
+
+    /// Seconds since the last footstrike.
+    pub fn since(&self) -> f64 {
+        self.since
+    }
+
+    /// Which foot struck last (true = left). The other one is swinging.
+    pub fn last_left(&self) -> bool {
+        self.left
+    }
 }
 
 #[cfg(test)]
