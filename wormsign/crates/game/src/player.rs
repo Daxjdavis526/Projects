@@ -27,6 +27,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Look>()
             .init_resource::<Controls>()
+            .init_resource::<Shake>()
             .add_systems(Startup, spawn)
             .add_systems(Update, (grab_pointer, read_input).chain().in_set(Phase::Simulate).before(SimSet))
             .add_systems(Update, simulate.in_set(Phase::Simulate).in_set(SimSet))
@@ -68,8 +69,45 @@ impl Default for Look {
     }
 }
 
+impl Look {
+    /// Forget the smoothed third-person position (after a teleport).
+    pub fn reset_smoothing(&mut self) {
+        self.smooth = None;
+    }
+}
+
 #[derive(Resource, Default)]
 pub struct Controls(pub PlayerInput);
+
+/// Camera shake. Anything violent adds trauma (0..1); it decays, and the
+/// camera shakes by trauma squared, so small bumps are subtle and big ones
+/// are violent. `scale` is the accessibility setting.
+#[derive(Resource)]
+pub struct Shake {
+    pub trauma: f32,
+    /// Continuous low rumble, 0..1, set every frame by whatever causes it.
+    pub rumble: f32,
+    pub scale: f32,
+    t: f32,
+}
+
+impl Default for Shake {
+    fn default() -> Self {
+        Self { trauma: 0.0, rumble: 0.0, scale: 1.0, t: 0.0 }
+    }
+}
+
+impl Shake {
+    /// Offset and roll for this frame.
+    fn sample(&mut self, dt: f32) -> (Vec3, f32) {
+        self.t += dt;
+        self.trauma = (self.trauma - dt * 0.8).max(0.0);
+        let k = (self.trauma * self.trauma + self.rumble * 0.25) * self.scale;
+        let t = self.t;
+        let n = |f: f32, p: f32| (t * f + p).sin() * 0.6 + (t * f * 2.13 + p * 1.7).sin() * 0.4;
+        (Vec3::new(n(23.0, 0.0), n(19.0, 1.3), n(21.0, 2.9)) * 0.35 * k, n(17.0, 4.1) * 0.03 * k)
+    }
+}
 
 #[derive(Component)]
 pub struct PlayerBody(pub Player);
@@ -205,7 +243,11 @@ pub fn simulate(
     mut quakes: ResMut<Quakes>,
     mut q: Query<(&mut PlayerBody, &mut Feet, &mut WorldPos)>,
     worms: Query<&WormBody>,
+    fate: Res<crate::death::Fate>,
 ) {
+    if !fate.alive() {
+        return;
+    }
     let Ok((mut body, mut feet, mut wp)) = q.single_mut() else { return };
     let worms: Vec<&Worm> = worms.iter().map(|w| &w.worm).collect();
     for k in 0..tick.n {
@@ -257,8 +299,16 @@ pub fn camera(
     mut look: ResMut<Look>,
     body: Query<(&PlayerBody, &Feet)>,
     mut cam: Query<&mut Transform, With<Camera3d>>,
+    mut shake: ResMut<Shake>,
+    fate: Res<crate::death::Fate>,
 ) {
     let (Ok((body, feet)), Ok(mut t)) = (body.single(), cam.single_mut()) else { return };
+    let (jolt, roll) = shake.sample(time.delta_secs());
+    if !fate.alive() {
+        // The death camera drives; it still shakes.
+        t.translation += jolt;
+        return;
+    }
     let p = &body.0;
     let rot = Quat::from_euler(EulerRot::YXZ, look.yaw, look.pitch, 0.0);
     let dt = time.delta_secs();
@@ -293,14 +343,17 @@ pub fn camera(
             s
         }
     };
-    t.translation = origin.to_render(world);
-    t.rotation = rot;
+    t.translation = origin.to_render(world) + jolt;
+    t.rotation = rot * Quat::from_rotation_z(roll);
 }
 
-fn show_body(look: Res<Look>, mut q: Query<&mut Visibility, With<BodyMesh>>) {
+fn show_body(look: Res<Look>, fate: Res<crate::death::Fate>, mut q: Query<&mut Visibility, With<BodyMesh>>) {
     // Hidden in first person. (So is its shadow; a proper model that can
     // cast a shadow without being drawn comes with the polish pass.)
     for mut v in &mut q {
-        *v = if look.view == View::First { Visibility::Hidden } else { Visibility::Inherited };
+        let want = if look.view == View::First || !fate.alive() { Visibility::Hidden } else { Visibility::Inherited };
+        if *v != want {
+            *v = want;
+        }
     }
 }

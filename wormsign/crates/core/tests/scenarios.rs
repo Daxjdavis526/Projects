@@ -21,6 +21,8 @@ struct Outcome {
     states: Vec<State>,
     /// Closest the worm's mouth came to the player while attacking.
     strike_miss: Option<f64>,
+    /// When the player was inside an attacking worm's open mouth.
+    eaten_at: Option<f64>,
     ran: f64,
 }
 
@@ -50,7 +52,7 @@ fn scenario(input: PlayerInput, worm_dist: f64, secs: f64, seed: u64) -> Outcome
     let mut t = 0.0;
     let mut k = 0u64;
     let mut pending: Vec<VibrationEvent> = Vec::new();
-    let mut out = Outcome { states: vec![brain.state], strike_miss: None, ran: 0.0 };
+    let mut out = Outcome { states: vec![brain.state], strike_miss: None, eaten_at: None, ran: 0.0 };
     while t < secs {
         let f = feet.speed_factor(player.gait);
         let mut i = input;
@@ -84,6 +86,9 @@ fn scenario(input: PlayerInput, worm_dist: f64, secs: f64, seed: u64) -> Outcome
             if matches!(brain.state, State::Attack | State::Pass) {
                 let d = (worm.head() - player.pos).length();
                 out.strike_miss = Some(out.strike_miss.map_or(d, |m: f64| m.min(d)));
+                if out.eaten_at.is_none() && worm.in_mouth(player.pos + DVec3::new(0.0, 1.2, 0.0)) {
+                    out.eaten_at = Some(t);
+                }
             }
         }
         t += dt;
@@ -98,17 +103,17 @@ fn sprinting_across_open_sand_draws_a_worm_that_strikes() {
     let o = scenario(run, 650.0, 240.0, 1);
     assert!(o.states.contains(&State::Track), "{:?}", o.states);
     let miss = o.strike_miss.expect(&format!("never attacked: {:?}", o.states));
-    eprintln!("sprint: states {:?}, strike missed by {miss:.1} m after running {:.0} m", o.states, o.ran);
-    // It hunts by ear, not by seeing: a moving target can be missed, but it
-    // should be close.
-    assert!(miss < 45.0, "missed by {miss:.0} m; states {:?}", o.states);
+    eprintln!("sprint: states {:?}, closest strike {miss:.1} m, eaten at {:?} s", o.states, o.eaten_at);
+    // It hunts by ear, not by seeing, so it can miss a moving target — but
+    // keep running across open sand and it gets you.
+    assert!(o.eaten_at.is_some(), "never caught; closest {miss:.0} m; states {:?}", o.states);
 }
 
 #[test]
 fn sandwalking_past_a_worm_goes_unnoticed() {
     let sw = PlayerInput { forward: 1.0, sandwalk: true, yaw: 2.4, ..Default::default() };
     let o = scenario(sw, 260.0, 240.0, 2);
-    assert!(o.strike_miss.is_none(), "{:?}", o.states);
+    assert!(o.strike_miss.is_none() && o.eaten_at.is_none(), "{:?}", o.states);
     assert!(o.ran > 100.0, "the sandwalker actually went somewhere: {:.0} m", o.ran);
 }
 

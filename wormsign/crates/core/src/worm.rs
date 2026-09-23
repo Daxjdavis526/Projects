@@ -122,6 +122,12 @@ pub struct Worm {
     /// Sampled body, refreshed by [`Worm::step`].
     pub rings: Vec<Ring>,
     pub ring_spacing: f64,
+    /// 0 closed (a blunt, sealed cone) .. 1 gaping.
+    pub mouth: f64,
+    pub want_mouth: f64,
+    /// Attacking: depth changes are fast and the head can climb steeply,
+    /// so it erupts out of the sand rather than easing up.
+    pub lunge: bool,
 }
 
 pub fn wrap_angle(a: f64) -> f64 {
@@ -165,6 +171,9 @@ impl Worm {
             want_depth: depth,
             rings: Vec::new(),
             ring_spacing,
+            mouth: 0.0,
+            want_mouth: 0.0,
+            lunge: false,
         };
         w.resample(&sand);
         w
@@ -201,16 +210,22 @@ impl Worm {
         self.heading = wrap_angle(self.heading + self.turn_rate * dt);
 
         // Depth: eased, and the head's vertical speed is limited, so it
-        // cannot pop out of the sand instantly.
-        self.depth += (self.want_depth - self.depth) * (1.0 - (-dt * 0.8).exp());
+        // cannot pop out of the sand instantly — unless it is lunging.
+        let (ease, climb) = if self.lunge { (3.0, s.climb * 3.2) } else { (0.8, s.climb) };
+        self.depth += (self.want_depth - self.depth) * (1.0 - (-dt * ease).exp());
+
+        // The mouth opens deliberately and snaps shut.
+        let rate = if self.want_mouth > self.mouth { 1.4 } else { 6.0 };
+        self.mouth += (self.want_mouth - self.mouth).clamp(-rate * dt, rate * dt);
 
         let head = self.head();
         let fwd = self.forward();
         let nx = head.x + fwd.x * self.speed * dt;
         let nz = head.z + fwd.z * self.speed * dt;
         let want_y = sand(nx, nz) - self.depth;
-        let want_vy = ((want_y - head.y) * 1.5).clamp(-s.climb, s.climb);
-        self.vy += (want_vy - self.vy).clamp(-6.0 * dt, 6.0 * dt);
+        let want_vy = ((want_y - head.y) * 1.5).clamp(-climb, climb);
+        let jerk = if self.lunge { 40.0 } else { 6.0 };
+        self.vy += (want_vy - self.vy).clamp(-jerk * dt, jerk * dt);
         let ny = head.y + self.vy * dt;
         self.path.advance(DVec3::new(nx, ny, nz));
         self.resample(&sand);
@@ -230,6 +245,36 @@ impl Worm {
                 sand: sand(c.x, c.z),
             });
         }
+    }
+
+    /// Unit direction the mouth faces: along the body at the head, which
+    /// tilts up during a breach.
+    pub fn facing(&self) -> DVec3 {
+        self.rings[0].tangent
+    }
+
+    /// Centre of the mouth opening.
+    pub fn mouth_centre(&self) -> DVec3 {
+        self.rings[0].centre + self.facing() * self.spec.radius * 0.3
+    }
+
+    /// Radius of the opening right now.
+    pub fn mouth_radius(&self) -> f64 {
+        self.spec.radius * 0.9 * (0.3 + 0.7 * self.mouth)
+    }
+
+    /// Is `p` in the way of the open mouth: close to the opening and not
+    /// behind the head?
+    pub fn in_mouth(&self, p: DVec3) -> bool {
+        if self.mouth < 0.35 {
+            return false;
+        }
+        let c = self.mouth_centre();
+        let f = self.facing();
+        let rel = p - c;
+        let along = rel.dot(f);
+        let across = (rel - f * along).length();
+        along > -self.spec.radius * 0.8 && along < self.spec.radius * 1.2 && across < self.mouth_radius() + 2.5
     }
 
     /// The closest point of the skin to `p`, with its outward normal and the
@@ -404,5 +449,29 @@ mod tests {
         assert!(shallow.wake(-50.0, 60.0) < 0.1 * over, "falls off to the sides");
         assert!(deep.wake(-50.0, 0.0) < 0.01);
         assert!(shallow.wake(5000.0, 0.0) == 0.0);
+    }
+
+    #[test]
+    fn a_lunge_erupts_out_of_the_sand() {
+        let mut w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 13.0, flat);
+        w.speed = 34.0;
+        w.want_speed = 34.0;
+        w.want_depth = -1.4 * w.spec.radius;
+        w.lunge = true;
+        w.want_mouth = 1.0;
+        let mut t: f64 = 0.0;
+        let mut steepest: f64 = 0.0;
+        while w.head().y < w.spec.radius && t < 5.0 {
+            w.step(1.0 / 60.0, flat);
+            steepest = steepest.max(w.facing().y);
+            t += 1.0 / 60.0;
+        }
+        assert!(t < 2.0, "took {t:.1} s to get its head clear of the sand");
+        assert!(steepest > 0.45, "the head rears up as it rises: {steepest:.2}");
+        assert!((w.mouth - (1.4 * t).min(1.0)).abs() < 0.05, "mouth {}", w.mouth);
+        // Something standing just ahead of the mouth is in it.
+        let p = w.mouth_centre() + w.facing() * 2.0;
+        assert!(w.in_mouth(p));
+        assert!(!w.in_mouth(w.mouth_centre() - w.facing() * 40.0));
     }
 }

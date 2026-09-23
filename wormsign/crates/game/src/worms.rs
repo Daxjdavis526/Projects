@@ -90,7 +90,9 @@ pub fn spawn_population(
         let right = DVec3::new(yaw.cos(), 0.0, -yaw.sin());
         let at = p + fwd * d as f64 - right * web::flag_f32("wormside").unwrap_or(120.0) as f64;
         let depth = web::flag_f32("wormdepth").map(|v| v as f64).unwrap_or(26.0);
-        placed.push((at, right.z.atan2(right.x), depth));
+        // `?wormface` points it straight at the player instead.
+        let heading = if web::has_flag("wormface") { (p.z - at.z).atan2(p.x - at.x) } else { right.z.atan2(right.x) };
+        placed.push((at, heading, depth));
     }
     // The resident population: two, somewhere out there.
     while placed.len() < 3 {
@@ -114,12 +116,17 @@ pub fn spawn_population(
             .id();
         let mut brain = Brain::new(100 + i as u64);
         brain.set_wander(heading);
+        if i == 0 && web::has_flag("wormattack") {
+            // `?wormattack`: the test worm is already lunging at the player.
+            brain.attack(p, 0.0);
+        }
         if i == 0 {
             // `?wormhold=speed,depth` pins the test worm, for screenshots.
             if let Some(v) = web::flag_value("wormhold") {
                 let mut it = v.split(',').filter_map(|x| x.parse::<f64>().ok());
                 if let (Some(sp), Some(dp)) = (it.next(), it.next()) {
                     brain.hold = Some((sp, dp));
+                    brain.hold_mouth = it.next().unwrap_or(0.0);
                 }
             }
         }
@@ -219,7 +226,7 @@ fn build_tube(w: &Worm, origin: &Origin, mesh: &mut Mesh) {
             nor.push([radial.x as f32, radial.y as f32, radial.z as f32]);
             // Weathered, sand-scoured grey-brown on top, paler underneath.
             let belly = (-a.cos()).max(0.0);
-            let base = Vec3::new(0.16, 0.12, 0.095).lerp(Vec3::new(0.30, 0.23, 0.17), belly as f32);
+            let base = Vec3::new(0.25, 0.20, 0.16).lerp(Vec3::new(0.38, 0.30, 0.23), belly as f32);
             let cc = base * shade;
             col.push([cc.x, cc.y, cc.z, 1.0]);
         }
@@ -233,22 +240,150 @@ fn build_tube(w: &Worm, origin: &Origin, mesh: &mut Mesh) {
             idx.extend_from_slice(&[a, b, a + 1, a + 1, b, b + 1]);
         }
     }
-    // Cap the mouth end with a dark disc for now; the mouth proper comes
-    // with the breach.
+    // The mouth, in the head ring's frame.
     let r0 = &rings[0];
-    let cap = pos.len() as u32;
-    let c = r0.centre - origin.0 + r0.tangent * 0.5;
-    pos.push([c.x as f32, c.y as f32, c.z as f32]);
-    nor.push([r0.tangent.x as f32, r0.tangent.y as f32, r0.tangent.z as f32]);
-    col.push([0.05, 0.02, 0.02, 1.0]);
-    for k in 0..AROUND as u32 {
-        idx.extend_from_slice(&[cap, k + 1, k]);
-    }
+    let t = r0.tangent;
+    let up0 = {
+        let u = DVec3::Y - t * t.y;
+        if u.length_squared() < 1e-6 { DVec3::X } else { u.normalize() }
+    };
+    let side0 = t.cross(up0);
+    let frame = MouthFrame { c: r0.centre - origin.0, t, up: up0, side: side0, r: r0.radius };
+    build_mouth(&frame, w.mouth, &mut pos, &mut nor, &mut col, &mut idx);
 
     mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, pos);
     mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, nor);
     mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, col);
     mesh.insert_indices(Indices::U32(idx));
+}
+
+struct MouthFrame {
+    c: DVec3,
+    t: DVec3,
+    up: DVec3,
+    side: DVec3,
+    r: f64,
+}
+
+impl MouthFrame {
+    fn radial(&self, a: f64) -> DVec3 {
+        self.up * a.cos() + self.side * a.sin()
+    }
+}
+
+fn push(pos: &mut Vec<[f32; 3]>, nor: &mut Vec<[f32; 3]>, col: &mut Vec<[f32; 4]>, p: DVec3, n: DVec3, c: Vec3) -> u32 {
+    pos.push([p.x as f32, p.y as f32, p.z as f32]);
+    nor.push([n.x as f32, n.y as f32, n.z as f32]);
+    col.push([c.x, c.y, c.z, 1.0]);
+    pos.len() as u32 - 1
+}
+
+/// Three petals that close into a blunt cone and open back like a flower,
+/// two rings of crystal teeth just inside the rim, and a throat that goes
+/// dark a few tens of metres in.
+fn build_mouth(
+    f: &MouthFrame,
+    open: f64,
+    pos: &mut Vec<[f32; 3]>,
+    nor: &mut Vec<[f32; 3]>,
+    col: &mut Vec<[f32; 4]>,
+    idx: &mut Vec<u32>,
+) {
+    use std::f64::consts::{PI, TAU};
+    let skin = Vec3::new(0.24, 0.18, 0.14);
+    let flesh = Vec3::new(0.42, 0.10, 0.08);
+    let flesh_deep = Vec3::new(0.10, 0.02, 0.02);
+    let tooth = Vec3::new(0.80, 0.78, 0.70);
+
+    // --- throat -----------------------------------------------------------
+    let depth_rings = 10;
+    let throat_len = f.r * 2.5;
+    let base = pos.len() as u32;
+    for i in 0..=depth_rings {
+        let u = i as f64 / depth_rings as f64;
+        let rad = f.r * (0.88 - 0.62 * u);
+        let centre = f.c - f.t * (throat_len * u);
+        let shade = flesh.lerp(flesh_deep, (u as f32).powf(0.6));
+        for k in 0..=AROUND {
+            let a = k as f64 / AROUND as f64 * TAU;
+            let rd = f.radial(a);
+            push(pos, nor, col, centre + rd * rad, -rd, shade);
+        }
+    }
+    let w1 = (AROUND + 1) as u32;
+    for i in 0..depth_rings as u32 {
+        for k in 0..AROUND as u32 {
+            let a = base + i * w1 + k;
+            let b = a + w1;
+            // Inward-facing: opposite winding to the hide.
+            idx.extend_from_slice(&[a, a + 1, b, a + 1, b + 1, b]);
+        }
+    }
+
+    // --- teeth --------------------------------------------------------------
+    // Crystalline, curved slightly back into the throat, so whatever goes in
+    // does not come out.
+    let n_teeth = 44;
+    for ring in 0..2 {
+        let back = f.r * (0.12 + 0.28 * ring as f64);
+        let len = f.r * (0.30 - 0.08 * ring as f64) * (0.4 + 0.6 * open);
+        for k in 0..n_teeth {
+            let a = (k as f64 + 0.5 * ring as f64) / n_teeth as f64 * TAU;
+            let rd = f.radial(a);
+            let tang = f.radial(a + PI / 2.0);
+            let root = f.c - f.t * back + rd * f.r * 0.86;
+            let tip = root - rd * len - f.t * len * 0.45;
+            let wid = f.r * 0.045;
+            let b0 = push(pos, nor, col, root + tang * wid, tang, tooth * 0.8);
+            let b1 = push(pos, nor, col, root - tang * wid, -tang, tooth * 0.8);
+            let b2 = push(pos, nor, col, root - f.t * wid * 1.5, -rd, tooth * 0.7);
+            let tp = push(pos, nor, col, tip, -rd, tooth);
+            idx.extend_from_slice(&[b0, b1, tp, b1, b2, tp, b2, b0, tp]);
+        }
+    }
+
+    // --- petals -------------------------------------------------------------
+    // Closed, each petal leans in to meet the others ahead of the head;
+    // open, it swings out and back past the rim like a peeled flower.
+    let lean = (-62.0f64).to_radians() + open * 170f64.to_radians();
+    let (along_n, across_n) = (7usize, 7usize);
+    for petal in 0..3 {
+        let mid = petal as f64 / 3.0 * TAU + PI / 3.0;
+        let half = TAU / 6.0 * 0.98;
+        for face in 0..2 {
+            let base = pos.len() as u32;
+            for i in 0..=along_n {
+                let u = i as f64 / along_n as f64;
+                // Curl: the tip of each petal bends a little more.
+                let phi = lean + u * 0.35 * (1.0 - 2.0 * open).signum() * 0.4;
+                let span = half * (1.0 - 0.55 * u * u);
+                for j in 0..=across_n {
+                    let v = j as f64 / across_n as f64 * 2.0 - 1.0;
+                    let a = mid + v * span;
+                    let rd = f.radial(a);
+                    let dir = f.t * phi.cos() + rd * phi.sin();
+                    let rim = f.c + rd * f.r * 0.98;
+                    let p = rim + dir * f.r * 1.05 * u;
+                    // Outer normal of the petal surface.
+                    let out = (rd * phi.cos() - f.t * phi.sin()).normalize();
+                    let (n, c) = if face == 0 { (out, skin * (0.9 + 0.1 * (1.0 - u as f32))) } else { (-out, flesh.lerp(flesh_deep, 0.3)) };
+                    push(pos, nor, col, p, n, c);
+                }
+            }
+            let w = (across_n + 1) as u32;
+            for i in 0..along_n as u32 {
+                for j in 0..across_n as u32 {
+                    let a = base + i * w + j;
+                    let b = a + w;
+                    if face == 0 {
+                        idx.extend_from_slice(&[a, b, a + 1, a + 1, b, b + 1]);
+                    } else {
+                        idx.extend_from_slice(&[a, a + 1, b, a + 1, b + 1, b]);
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// Rodrigues rotation, for DVec3 without pulling in a quaternion type.

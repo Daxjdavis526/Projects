@@ -17,7 +17,7 @@ impl Plugin for HudPlugin {
         app.add_plugins(FrameTimeDiagnosticsPlugin::default())
             .insert_resource(Debug(web::has_flag("debug")))
             .add_systems(Startup, setup)
-            .add_systems(Update, (loading, status, meter_ui).after(Phase::View));
+            .add_systems(Update, (loading, status, meter_ui, living_hud).after(Phase::View));
     }
 }
 
@@ -30,6 +30,10 @@ struct StatusText;
 #[derive(Component)]
 struct MeterFill;
 
+/// Anything that should vanish while the player is not alive.
+#[derive(Component)]
+struct LivingHud;
+
 #[derive(Component)]
 struct GaitText;
 
@@ -40,6 +44,7 @@ fn setup(mut commands: Commands) {
     spawn_meter(&mut commands);
     let font = TextFont { font_size: FontSize::Px(13.0), ..default() };
     commands.spawn((
+        LivingHud,
         Text::new(CONTROLS),
         font.clone(),
         TextColor(Color::srgba(1.0, 0.95, 0.85, 0.75)),
@@ -57,7 +62,7 @@ fn setup(mut commands: Commands) {
 /// The signal meter: bottom centre, a thin bar with the gait under it.
 fn spawn_meter(commands: &mut Commands) {
     commands
-        .spawn(Node {
+        .spawn((LivingHud, Node {
             position_type: PositionType::Absolute,
             bottom: px(54),
             left: percent(50),
@@ -67,7 +72,7 @@ fn spawn_meter(commands: &mut Commands) {
             align_items: AlignItems::Center,
             row_gap: px(5),
             ..default()
-        })
+        }))
         .with_children(|c| {
             c.spawn((
                 Text::new("SIGNAL"),
@@ -184,5 +189,14 @@ fn status(
     if debug.0 && now - *last_log > 2.0 {
         *last_log = now;
         info!("debug pos=({:.1},{:.1},{:.1}) gait={:?} fps={fps:.0} tiles={} {worm}", p.pos.x, p.pos.y, p.pos.z, p.gait, tiles.live_count());
+    }
+}
+
+fn living_hud(fate: Res<crate::death::Fate>, mut q: Query<&mut Visibility, With<LivingHud>>) {
+    let want = if fate.alive() { Visibility::Inherited } else { Visibility::Hidden };
+    for mut v in &mut q {
+        if *v != want {
+            *v = want;
+        }
     }
 }

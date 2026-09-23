@@ -59,6 +59,10 @@ pub struct Brain {
     /// Test and screenshot override: hold this (speed, depth) and the
     /// current heading, ignoring the ears.
     pub hold: Option<(f64, f64)>,
+    pub hold_mouth: f64,
+    /// Set from outside while it has prey: 1 keeps the mouth open, 0 snaps
+    /// it shut, regardless of state.
+    pub mouth_override: Option<f64>,
 }
 
 /// Everything the brain needs to know about the world besides its ears.
@@ -82,7 +86,16 @@ impl Brain {
             wander,
             rng,
             hold: None,
+            hold_mouth: 0.0,
+            mouth_override: None,
         }
+    }
+
+    /// Commit to an attack on a point right now (scripted scenes and tests).
+    pub fn attack(&mut self, target: DVec3, t: f64) {
+        self.target = target;
+        self.last_signal = t;
+        self.enter(State::Attack, t);
     }
 
     /// Point the roaming drift somewhere in particular.
@@ -102,6 +115,7 @@ impl Brain {
         if let Some((speed, depth)) = self.hold {
             worm.want_speed = speed;
             worm.want_depth = depth;
+            worm.want_mouth = self.hold_mouth;
             return;
         }
         let r = worm.spec.radius;
@@ -201,8 +215,14 @@ impl Brain {
             State::Investigate => (bearing(head, self.target), s.cruise + 0.3 * (s.max_speed - s.cruise), 2.0 * r),
             State::Track => (bearing(head, self.target), s.cruise + 0.65 * (s.max_speed - s.cruise), 1.6 * r),
             State::Charge => (bearing(head, self.target), s.max_speed, 1.15 * r),
-            // The breach: the head climbs out of the sand as it arrives.
-            State::Attack => (bearing(head, self.target).lerp_angle(worm.heading, 0.5), s.max_speed, -0.9 * r),
+            // The breach: the head rears out of the sand on the way in, then
+            // comes down so the open mouth arrives at ground level over the
+            // target.
+            State::Attack => {
+                let along = (self.target - head).dot(worm.forward());
+                let depth = if along > 2.5 * r { -1.2 * r } else { -0.1 * r };
+                (bearing(head, self.target).lerp_angle(worm.heading, 0.5), s.max_speed, depth)
+            }
             // Carried on by momentum, back half out of the sand.
             State::Pass => (worm.heading, s.max_speed * 0.8, 0.35 * r),
             State::Search => {
@@ -220,6 +240,9 @@ impl Brain {
         worm.want_heading = heading;
         worm.want_speed = speed;
         worm.want_depth = depth;
+        worm.lunge = self.state == State::Attack;
+        // Open as the breach begins; shut once it is past.
+        worm.want_mouth = self.mouth_override.unwrap_or(if self.state == State::Attack { 1.0 } else { 0.0 });
     }
 }
 
