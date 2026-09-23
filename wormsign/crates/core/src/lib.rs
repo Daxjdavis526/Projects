@@ -9,6 +9,7 @@ pub use glam;
 
 pub mod brain;
 pub mod gait;
+pub mod hook;
 pub mod lod;
 pub mod path;
 pub mod player;

@@ -40,7 +40,26 @@ pub enum State {
     Attack,
     Pass,
     Search,
+    /// Hooks in its hide and someone on its back.
+    Ridden,
 }
+
+/// What a rider is doing to the worm, from the rider's hooks and hands.
+#[derive(Clone, Debug, Default)]
+pub struct Reins {
+    /// -1 pry for a left turn .. 1 right.
+    pub steer: f64,
+    /// -1 ease off .. 1 drive it on.
+    pub drive: f64,
+    /// Each anchored hook: metres behind the head, and which side of the
+    /// body it is on (-1 left .. 1 right, from the hide angle).
+    pub hooks: Vec<(f64, f64)>,
+}
+
+/// Seconds of being left alone before a ridden worm starts to go down.
+pub const DIVE_AFTER: f64 = 18.0;
+/// Seconds from starting down to fully under.
+const DIVE_TIME: f64 = 14.0;
 
 #[derive(Clone, Debug)]
 pub struct Brain {
@@ -63,6 +82,13 @@ pub struct Brain {
     /// Set from outside while it has prey: 1 keeps the mouth open, 0 snaps
     /// it shut, regardless of state.
     pub mouth_override: Option<f64>,
+    // Riding.
+    ride_speed: f64,
+    last_pried: f64,
+    /// Builds with hard prying, drains with gentle riding. Past 1 it thrashes.
+    pub agitation: f64,
+    thrash_until: f64,
+    last_rider: f64,
 }
 
 /// Everything the brain needs to know about the world besides its ears.
@@ -88,6 +114,94 @@ impl Brain {
             hold: None,
             hold_mouth: 0.0,
             mouth_override: None,
+            ride_speed: 0.0,
+            last_pried: 0.0,
+            agitation: 0.0,
+            thrash_until: f64::NEG_INFINITY,
+            last_rider: f64::NEG_INFINITY,
+        }
+    }
+
+    /// Is it thrashing to throw a rider?
+    pub fn thrashing(&self, t: f64) -> bool {
+        t < self.thrash_until
+    }
+
+    /// Ridden: the rider's hooks and hands decide, through the worm's own
+    /// inertia. Steering sets where it would like to head, not how fast it
+    /// turns; driving builds speed and keeps it up; neglect lets it dive;
+    /// prying too hard makes it roll to throw you.
+    pub fn ride(&mut self, worm: &mut Worm, reins: &Reins, t: f64, dt: f64) {
+        let s = worm.spec;
+        let r = s.radius;
+        if self.state != State::Ridden {
+            self.enter(State::Ridden, t);
+            self.ride_speed = worm.speed.max(s.cruise);
+            self.last_pried = t;
+        }
+        self.last_rider = t;
+        // Authority: hooks near the head pry harder, and a hook on the side
+        // you turn toward does most of the work.
+        let reach = |d: f64| (1.6 - d / (s.length * 0.5)).clamp(0.35, 1.6);
+        let turn_auth: f64 = reins
+            .hooks
+            .iter()
+            .map(|&(d, side)| reach(d) * (0.35 + 0.65 * (side * reins.steer.signum()).max(0.0)))
+            .sum::<f64>()
+            .min(1.5);
+        let drive_auth: f64 = reins.hooks.iter().map(|&(d, _)| reach(d) * 0.7).sum::<f64>().min(1.3);
+
+        let pried = reins.steer.abs() > 0.05 || reins.drive > 0.05;
+        if pried && !reins.hooks.is_empty() {
+            self.last_pried = t;
+        }
+        // Speed: drive builds it, easing off lets it bleed toward a lope.
+        let target = if reins.drive > 0.0 {
+            s.cruise + (s.max_speed - s.cruise) * (0.4 + 0.6 * reins.drive) * drive_auth.min(1.0)
+        } else if reins.drive < 0.0 {
+            s.cruise * 0.7
+        } else {
+            self.ride_speed
+        };
+        self.ride_speed += (target - self.ride_speed).clamp(-3.0 * dt, 3.0 * dt);
+
+        // Hard, sustained prying agitates it; calm riding soothes it.
+        let effort = reins.steer.abs() * turn_auth + reins.drive.max(0.0) * drive_auth * 0.6;
+        self.agitation = (self.agitation + (effort - 0.55).max(-0.4) * 0.05 * dt).max(0.0);
+        if self.agitation > 1.0 && !self.thrashing(t) {
+            self.thrash_until = t + 5.0;
+            self.agitation = 0.35;
+        }
+
+        let mut heading = worm.heading + reins.steer * 0.6 * turn_auth;
+        // Neglected, it goes down again.
+        let idle = t - self.last_pried;
+        let dive = ((idle - DIVE_AFTER) / DIVE_TIME).clamp(0.0, 1.0);
+        let mut depth = 0.62 * r + dive * 1.8 * r;
+        let mut roll = (-worm.turn_rate * 4.0).clamp(-0.35, 0.35);
+        let mut speed = self.ride_speed;
+        if self.thrashing(t) {
+            let k = t - (self.thrash_until - 5.0);
+            roll = 0.95 * (k * std::f64::consts::TAU * 0.33).sin();
+            depth += r * 0.5 * (k * 1.7).sin().max(0.0);
+            speed = s.max_speed;
+            heading += 0.4 * (k * 0.9).sin();
+        }
+        worm.want_heading = heading;
+        worm.want_speed = speed;
+        worm.want_depth = depth;
+        worm.want_roll = roll;
+        worm.lunge = false;
+        worm.want_mouth = 0.0;
+    }
+
+    /// Nobody is holding on any more: go back to being a wild animal, and
+    /// start by looking around where it lost its rider.
+    pub fn unridden(&mut self, worm: &Worm, t: f64) {
+        if self.state == State::Ridden && t - self.last_rider > 3.0 {
+            self.target = worm.head();
+            self.track = None;
+            self.enter(State::Search, t);
         }
     }
 
@@ -118,6 +232,13 @@ impl Brain {
             worm.want_mouth = self.hold_mouth;
             return;
         }
+        if self.state == State::Ridden {
+            self.unridden(worm, t);
+            if self.state == State::Ridden {
+                return;
+            }
+        }
+        worm.want_roll = 0.0;
         let r = worm.spec.radius;
         let head = worm.head();
         // A fast worm hears worse over its own noise.
@@ -203,6 +324,7 @@ impl Brain {
                     self.enter(State::Search, t);
                 }
             }
+            State::Ridden => {}
         }
 
         // What each state wants of the body.
@@ -223,8 +345,11 @@ impl Brain {
                 let depth = if along > 2.5 * r { -1.2 * r } else { -0.1 * r };
                 (bearing(head, self.target).lerp_angle(worm.heading, 0.5), s.max_speed, depth)
             }
-            // Carried on by momentum, back half out of the sand.
-            State::Pass => (worm.heading, s.max_speed * 0.8, 0.35 * r),
+            // Carried on by momentum with its back out of the sand — the
+            // moment to get on. Having fed on a thumper it lopes rather than
+            // races.
+            State::Pass => (worm.heading, s.max_speed * if self.thumper { 0.42 } else { 0.8 }, 0.62 * r),
+            State::Ridden => (worm.heading, worm.speed, worm.depth),
             State::Search => {
                 // Circle the last estimate at a few hundred metres.
                 let to = self.target - head;
@@ -476,5 +601,106 @@ mod tests {
         assert!(states.contains(&State::Track), "{states:?}");
         assert!(attack.is_none(), "{states:?}");
         assert!(closest > 120.0, "came within {closest:.0} m of the centre");
+    }
+
+    fn right_hook() -> Reins {
+        Reins { steer: 0.0, drive: 0.0, hooks: vec![(40.0, 1.0), (40.0, -1.0)] }
+    }
+
+    fn ride_for(w: &mut Worm, b: &mut Brain, reins: &Reins, t0: f64, secs: f64) -> f64 {
+        let dt = 1.0 / 60.0;
+        let mut t = t0;
+        while t < t0 + secs {
+            b.ride(w, reins, t, dt);
+            w.step(dt, flat);
+            t += dt;
+        }
+        t
+    }
+
+    #[test]
+    fn a_ridden_worm_turns_gradually_where_it_is_pried() {
+        let mut w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
+        w.speed = 20.0;
+        let mut b = Brain::new(1);
+        let mut reins = right_hook();
+        reins.steer = 1.0;
+        reins.drive = 0.3;
+        let h0 = w.heading;
+        ride_for(&mut w, &mut b, &reins, 0.0, 4.0);
+        let turned = wrap_angle(w.heading - h0);
+        assert!(turned > 0.05, "turned right: {turned}");
+        assert!(turned < 0.8, "but not like a car: {turned}");
+        assert_eq!(b.state, State::Ridden);
+        // And the other way.
+        let mut w2 = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
+        w2.speed = 20.0;
+        let mut b2 = Brain::new(1);
+        reins.steer = -1.0;
+        ride_for(&mut w2, &mut b2, &reins, 0.0, 4.0);
+        assert!(wrap_angle(w2.heading - h0) < -0.05);
+    }
+
+    #[test]
+    fn driven_it_stays_up_and_left_alone_it_dives() {
+        let mut w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
+        let mut b = Brain::new(2);
+        let mut reins = right_hook();
+        reins.drive = 0.5;
+        let t = ride_for(&mut w, &mut b, &reins, 0.0, 40.0);
+        assert!(w.depth < w.spec.radius, "kept surfaced: depth {}", w.depth);
+        assert!(w.speed > w.spec.cruise + 5.0, "driven on: {}", w.speed);
+        reins.drive = 0.0;
+        ride_for(&mut w, &mut b, &reins, t, DIVE_AFTER + DIVE_TIME + 10.0);
+        assert!(w.depth > 1.8 * w.spec.radius, "went under: depth {}", w.depth);
+    }
+
+    #[test]
+    fn prying_too_hard_makes_it_roll_to_throw_you() {
+        let mut w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
+        w.speed = 20.0;
+        let mut b = Brain::new(3);
+        let mut reins = right_hook();
+        reins.steer = 1.0;
+        reins.drive = 1.0;
+        let dt = 1.0 / 60.0;
+        let mut t = 0.0;
+        let mut max_roll: f64 = 0.0;
+        while t < 90.0 {
+            // Saw back and forth to keep the effort up.
+            reins.steer = if (t / 6.0) as i64 % 2 == 0 { 1.0 } else { -1.0 };
+            b.ride(&mut w, &reins, t, dt);
+            w.step(dt, flat);
+            max_roll = max_roll.max(w.roll.abs());
+            t += dt;
+        }
+        assert!(max_roll > 0.5, "never thrashed: max roll {max_roll}");
+        // Gentle riding does not.
+        let mut w2 = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
+        let mut b2 = Brain::new(3);
+        let mut calm = right_hook();
+        calm.drive = 0.3;
+        calm.steer = 0.2;
+        let mut t = 0.0;
+        let mut calm_roll: f64 = 0.0;
+        while t < 90.0 {
+            b2.ride(&mut w2, &calm, t, dt);
+            w2.step(dt, flat);
+            calm_roll = calm_roll.max(w2.roll.abs());
+            t += dt;
+        }
+        assert!(calm_roll < 0.4, "calm ride rolled {calm_roll}");
+    }
+
+    #[test]
+    fn let_go_and_it_goes_wild_again() {
+        let mut w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
+        let mut b = Brain::new(4);
+        let t = ride_for(&mut w, &mut b, &right_hook(), 0.0, 5.0);
+        let mut ear = Listener::new(4);
+        b.think(&mut w, &mut ear, t + 1.0, 1.0 / 60.0, &Open);
+        assert_eq!(b.state, State::Ridden, "a moment's let-go is not the end");
+        b.think(&mut w, &mut ear, t + 5.0, 1.0 / 60.0, &Open);
+        assert_eq!(b.state, State::Search);
     }
 }

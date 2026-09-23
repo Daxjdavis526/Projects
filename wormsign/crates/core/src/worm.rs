@@ -128,6 +128,11 @@ pub struct Worm {
     /// Attacking: depth changes are fast and the head can climb steeply,
     /// so it erupts out of the sand rather than easing up.
     pub lunge: bool,
+    /// Rotation of the whole body about its own axis, radians. Worms bank
+    /// into turns, and roll hard to shake off what is on their back.
+    pub roll: f64,
+    pub roll_rate: f64,
+    pub want_roll: f64,
 }
 
 pub fn wrap_angle(a: f64) -> f64 {
@@ -174,6 +179,9 @@ impl Worm {
             mouth: 0.0,
             want_mouth: 0.0,
             lunge: false,
+            roll: 0.0,
+            roll_rate: 0.0,
+            want_roll: 0.0,
         };
         w.resample(&sand);
         w
@@ -214,6 +222,11 @@ impl Worm {
         let (ease, climb) = if self.lunge { (3.0, s.climb * 3.2) } else { (0.8, s.climb) };
         self.depth += (self.want_depth - self.depth) * (1.0 - (-dt * ease).exp());
 
+        // Roll: a heavy, damped spring toward the wanted roll.
+        let acc = (self.want_roll - self.roll) * 1.6 - self.roll_rate * 1.8;
+        self.roll_rate += acc.clamp(-1.2, 1.2) * dt;
+        self.roll += self.roll_rate * dt;
+
         // The mouth opens deliberately and snaps shut.
         let rate = if self.want_mouth > self.mouth { 1.4 } else { 6.0 };
         self.mouth += (self.want_mouth - self.mouth).clamp(-rate * dt, rate * dt);
@@ -245,6 +258,70 @@ impl Worm {
                 sand: sand(c.x, c.z),
             });
         }
+    }
+
+    /// Frame of the body `d` metres behind the head, ignoring roll: centre,
+    /// tangent, an "up" perpendicular to the tangent, and a side vector.
+    pub fn frame(&self, d: f64) -> (DVec3, DVec3, DVec3, DVec3, f64) {
+        let i = ((d / self.ring_spacing).floor() as usize).min(self.rings.len() - 2);
+        let (a, b) = (&self.rings[i], &self.rings[i + 1]);
+        let t = ((d - a.d) / (b.d - a.d).max(1e-9)).clamp(0.0, 1.0);
+        let c = a.centre.lerp(b.centre, t);
+        let tan = a.tangent.lerp(b.tangent, t).normalize();
+        let up = {
+            let u = DVec3::Y - tan * tan.y;
+            if u.length_squared() < 1e-9 { DVec3::X } else { u.normalize() }
+        };
+        let side = tan.cross(up);
+        (c, tan, up, side, a.radius * (1.0 - t) + b.radius * t)
+    }
+
+    /// A point fixed in the worm's hide: `d` behind the head, at `angle`
+    /// around the body measured in the hide (so it turns with the roll).
+    pub fn skin_point(&self, d: f64, angle: f64) -> DVec3 {
+        let (c, _, up, side, r) = self.frame(d);
+        let a = angle + self.roll;
+        c + (up * a.cos() + side * a.sin()) * r
+    }
+
+    /// Velocity of the hide at a point `p` on it near `d`: carried along the
+    /// route, plus the roll's sweep.
+    pub fn skin_velocity(&self, d: f64, p: DVec3) -> DVec3 {
+        let (c, tan, _, _, _) = self.frame(d);
+        tan * self.speed + tan.cross(p - c) * self.roll_rate
+    }
+
+    /// The hide angle of an outward direction at `d`, so an anchor made from
+    /// a hit stays put in the hide as the body rolls.
+    pub fn skin_angle(&self, d: f64, outward: DVec3) -> f64 {
+        let (_, _, up, side, _) = self.frame(d);
+        outward.dot(side).atan2(outward.dot(up)) - self.roll
+    }
+
+    /// The worm's back as ground: if (x, z) is over the upper half of the
+    /// body and not far below `y_near`, the height, normal and motion of the
+    /// hide there. This is what a rider stands on.
+    pub fn back_ground(&self, x: f64, z: f64, y_near: f64) -> Option<(f64, DVec3, DVec3, f64)> {
+        let p = DVec3::new(x, y_near, z);
+        let hit = self.surface(p)?;
+        if hit.normal.y < 0.15 {
+            return None;
+        }
+        let (c, tan, _, _, r) = self.frame(hit.d);
+        // Horizontal offset from the centreline, across the body.
+        let across = DVec3::new(-tan.z, 0.0, tan.x).normalize_or_zero();
+        let s = (p - c).dot(across);
+        if s.abs() > r * 0.98 {
+            return None;
+        }
+        let h = c.y + (r * r - s * s).sqrt();
+        if y_near < h - 2.5 {
+            // Underneath or inside, not on top.
+            return None;
+        }
+        let n = (across * s + DVec3::Y * (r * r - s * s).sqrt()).normalize();
+        let top = DVec3::new(x, h, z);
+        Some((h, n, self.skin_velocity(hit.d, top), hit.d))
     }
 
     /// Unit direction the mouth faces: along the body at the head, which
@@ -473,5 +550,30 @@ mod tests {
         let p = w.mouth_centre() + w.facing() * 2.0;
         assert!(w.in_mouth(p));
         assert!(!w.in_mouth(w.mouth_centre() - w.facing() * 40.0));
+    }
+
+    #[test]
+    fn the_back_is_ground_that_moves_and_rolls() {
+        let mut w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 5.0, flat);
+        w.speed = 20.0;
+        // On the crest, 100 m back: height is centre + radius, moving at speed.
+        let (h, n, v, d) = w.back_ground(-100.0, 0.0, 10.0).unwrap();
+        assert!((h - (-5.0 + w.spec.radius_at(100.0))).abs() < 0.3, "h {h}");
+        assert!(n.y > 0.99 && (v - DVec3::new(20.0, 0.0, 0.0)).length() < 0.5 && (d - 100.0).abs() < 2.0);
+        // Off to the side the back slopes away.
+        let (_, n2, _, _) = w.back_ground(-100.0, 7.0, 10.0).unwrap();
+        assert!(n2.y < 0.8 && n2.z > 0.3);
+        // Not ground when you are underneath it.
+        assert!(w.back_ground(-100.0, 0.0, -20.0).is_none());
+        // Rolling sweeps the top sideways.
+        w.roll_rate = 0.3;
+        let (_, _, v3, _) = w.back_ground(-100.0, 0.0, 10.0).unwrap();
+        assert!(v3.z.abs() > 0.3 * w.spec.radius_at(100.0) * 0.9, "roll sweep {}", v3.z);
+        // A hide point turns with the roll.
+        let a = w.skin_angle(100.0, DVec3::Y);
+        let p0 = w.skin_point(100.0, a);
+        w.roll = 0.5;
+        let p1 = w.skin_point(100.0, a);
+        assert!((p0 - p1).length() > 3.0);
     }
 }

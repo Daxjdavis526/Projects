@@ -42,13 +42,29 @@ pub struct GroundHit {
     pub normal: DVec3,
     /// Velocity of the surface itself: zero for sand, the worm's for the worm.
     pub velocity: DVec3,
+    /// How hard feet can push against it, m/s^2.
+    pub grip: f64,
+    /// Steepest it can be stood on.
+    pub repose: f64,
+    /// It is a worm's back.
+    pub worm: bool,
 }
 
 impl GroundHit {
     pub fn still(height: f64, normal: DVec3) -> Self {
-        Self { height, normal, velocity: DVec3::ZERO }
+        Self { height, normal, velocity: DVec3::ZERO, grip: SAND_GRIP, repose: REPOSE, worm: false }
+    }
+
+    /// A worm's hide: slick, curved, and moving.
+    pub fn hide(height: f64, normal: DVec3, velocity: DVec3) -> Self {
+        Self { height, normal, velocity, grip: HIDE_GRIP, repose: HIDE_REPOSE, worm: true }
     }
 }
+
+pub const SAND_GRIP: f64 = 16.0;
+/// Ring-plated hide gives some purchase, much less than sand.
+pub const HIDE_GRIP: f64 = 6.0;
+pub const HIDE_REPOSE: f64 = 26f64.to_radians();
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Gait {
@@ -131,17 +147,19 @@ impl Player {
             }
 
             // Ground friction pulls toward the target velocity.
-            // On a face steeper than repose the sand itself is moving, so
-            // feet get little purchase.
-            let failing = ((slope - REPOSE) / 0.12).clamp(0.0, 1.0);
-            let accel = if moving { 14.0 } else { 18.0 } * (1.0 - 0.85 * failing);
+            // On a face steeper than repose the sand itself is moving (or
+            // the hide is too steep to stand on), so feet get little
+            // purchase. Crouching lowers you and grips better.
+            let failing = ((slope - g.repose) / 0.12).clamp(0.0, 1.0);
+            let stance = 1.0 + 0.6 * self.crouch;
+            let accel = g.grip * if moving { 0.9 } else { 1.1 } * stance * (1.0 - 0.85 * failing);
             let mut hrel = DVec3::new(rel.x, 0.0, rel.z);
             let delta = target - hrel;
             let max = accel * dt;
             hrel += if delta.length() > max { delta.normalize() * max } else { delta };
 
             // Past the angle of repose the sand gives way and you slide.
-            if slope > REPOSE && downhill.length_squared() > 1e-9 {
+            if slope > g.repose && downhill.length_squared() > 1e-9 {
                 hrel += downhill.normalize() * GRAVITY * slope.sin() * failing * dt;
             }
 
@@ -175,6 +193,11 @@ impl Player {
         if self.pos.y <= g2.height {
             if !self.grounded {
                 report.landed = Some((g2.velocity.y - self.vel.y).max(0.0));
+                // The impact itself soaks up part of any mismatch with a
+                // moving surface; the rest is a slide.
+                let rel = self.vel - g2.velocity;
+                let h = DVec3::new(rel.x, 0.0, rel.z);
+                self.vel -= h * 0.45;
             }
             self.pos.y = g2.height;
             self.grounded = true;
@@ -305,7 +328,7 @@ mod tests {
 
     #[test]
     fn carried_by_a_moving_floor() {
-        let belt = |_: f64, _: f64| GroundHit { height: 0.0, normal: DVec3::Y, velocity: DVec3::new(10.0, 0.0, 0.0) };
+        let belt = |_: f64, _: f64| GroundHit { velocity: DVec3::new(10.0, 0.0, 0.0), ..GroundHit::still(0.0, DVec3::Y) };
         let mut p = Player::new(DVec3::ZERO);
         p.grounded = true;
         p.vel = DVec3::new(10.0, 0.0, 0.0);
