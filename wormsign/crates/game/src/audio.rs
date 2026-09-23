@@ -48,15 +48,34 @@ mod web {
     use crate::worms::{Danger, WormBody};
     use crate::world::Origin;
 
+    /// One side of the wind: a brown-noise body, a resonant band that
+    /// whistles as it sweeps, and grains of sand hissing in the strong gusts.
+    struct WindVoice {
+        body_lp: BiquadFilterNode,
+        body: GainNode,
+        whistle_bp: BiquadFilterNode,
+        whistle: GainNode,
+        grit: GainNode,
+        pan: StereoPannerNode,
+        /// Slow random walk, 0..1ish.
+        gust: f64,
+        /// A passing front: occasional stronger gusts with a swell and a fade.
+        front: f64,
+        front_t: f64,
+        front_len: f64,
+        wander: f64,
+        seed: u32,
+    }
+
     pub struct Engine {
         ctx: AudioContext,
         out: GainNode,
         noise: AudioBuffer,
-        wind: (BiquadFilterNode, GainNode),
-        wind_hi: GainNode,
+        wind: [WindVoice; 2],
         rumble: (OscillatorNode, OscillatorNode, BiquadFilterNode, GainNode),
         hiss: (BiquadFilterNode, StereoPannerNode, GainNode),
-        gust: f64,
+        /// Seconds since the continuous parameters were last updated.
+        since_update: f64,
         states: Vec<State>,
         stage: Stage,
         hooks: [u8; 2],
@@ -66,8 +85,25 @@ mod web {
     /// press (browsers only allow sound after a gesture), and builds the
     /// graph once.
     pub fn init(world: &mut World) {
-        if world.get_non_send::<Engine>().is_some() {
-            return;
+        if let Some(e) = world.get_non_send::<Engine>() {
+            use web_sys::AudioContextState as S;
+            match e.ctx.state() {
+                S::Running => return,
+                S::Closed => {
+                    // Gone for good: drop it, and let the page make a new
+                    // context on the next click or key.
+                    let _ = js_sys::Reflect::set(&js_sys::global(), &JsValue::from_str("wormsignAudio"), &JsValue::NULL);
+                    world.remove_non_send::<Engine>();
+                    return;
+                }
+                _ => {
+                    // Suspended (tab hidden, device change, autoplay policy):
+                    // ask to resume. Browsers allow it once the page has had
+                    // a gesture.
+                    let _ = e.ctx.resume();
+                    return;
+                }
+            }
         }
         let Ok(v) = js_sys::Reflect::get(&js_sys::global(), &JsValue::from_str("wormsignAudio")) else { return };
         let Ok(ctx) = v.dyn_into::<AudioContext>() else { return };
@@ -89,6 +125,49 @@ mod web {
                 (s >> 8) as f32 / (1u32 << 24) as f32 * 2.0 - 1.0
             })
             .collect();
+        buf.copy_to_channel(&data, 0).ok()?;
+        Some(buf)
+    }
+
+    /// Brown noise (integrated white, gently leaky): the rumble of moving
+    /// air. Pink noise (Kellet's filter): the body of a band that whistles.
+    fn coloured_buffer(ctx: &AudioContext, pink: bool, seed: u32) -> Option<AudioBuffer> {
+        let rate = ctx.sample_rate();
+        let n = (rate * 7.0) as u32;
+        let buf = ctx.create_buffer(1, n, rate).ok()?;
+        let mut s = seed;
+        let mut white = || {
+            s = s.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+            (s >> 8) as f32 / (1u32 << 24) as f32 * 2.0 - 1.0
+        };
+        let mut data = Vec::with_capacity(n as usize);
+        let (mut b0, mut b1, mut b2, mut b3, mut b4, mut b5, mut b6) = (0f32, 0f32, 0f32, 0f32, 0f32, 0f32, 0f32);
+        let mut brown = 0f32;
+        for _ in 0..n {
+            let w = white();
+            let v = if pink {
+                b0 = 0.99886 * b0 + w * 0.0555179;
+                b1 = 0.99332 * b1 + w * 0.0750759;
+                b2 = 0.96900 * b2 + w * 0.1538520;
+                b3 = 0.86650 * b3 + w * 0.3104856;
+                b4 = 0.55000 * b4 + w * 0.5329522;
+                b5 = -0.7616 * b5 - w * 0.0168980;
+                let p = b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362;
+                b6 = w * 0.115926;
+                p * 0.11
+            } else {
+                brown = (brown + 0.02 * w) * 0.998;
+                brown * 3.5
+            };
+            data.push(v);
+        }
+        // Crossfade the end into the start so the loop has no click.
+        let fade = (rate * 0.25) as usize;
+        let len = data.len();
+        for i in 0..fade {
+            let k = i as f32 / fade as f32;
+            data[len - fade + i] = data[len - fade + i] * (1.0 - k) + data[i] * k;
+        }
         buf.copy_to_channel(&data, 0).ok()?;
         Some(buf)
     }
@@ -129,15 +208,42 @@ mod web {
             let out = gain(&ctx, 0.8)?;
             chain(&[&out, &comp, &ctx.destination()]);
 
-            // Wind: a low band that gusts, and a thin high hiss.
-            let n1 = looped_noise(&ctx, &noise, 1.0)?;
-            let wf = filter(&ctx, BiquadFilterType::Bandpass, 520.0, 0.6)?;
-            let wg = gain(&ctx, 0.0)?;
-            chain(&[&n1, &wf, &wg, &out]);
-            let n2 = looped_noise(&ctx, &noise, 0.83)?;
-            let hf = filter(&ctx, BiquadFilterType::Highpass, 4200.0, 0.5)?;
-            let hg = gain(&ctx, 0.0)?;
-            chain(&[&n2, &hf, &hg, &out]);
+            // Wind: two decorrelated voices, one each side, so it moves
+            // around your head.
+            let brown = [coloured_buffer(&ctx, false, 0xB10E)?, coloured_buffer(&ctx, false, 0x7A3D)?];
+            let pink = [coloured_buffer(&ctx, true, 0x51C2)?, coloured_buffer(&ctx, true, 0x9E47)?];
+            let voice = |i: usize| -> Option<WindVoice> {
+                let pan = ctx.create_stereo_panner().ok()?;
+                pan.pan().set_value(if i == 0 { -0.6 } else { 0.6 });
+                let _ = pan.connect_with_audio_node(&out);
+                let b = looped_noise(&ctx, &brown[i], 1.0)?;
+                let body_lp = filter(&ctx, BiquadFilterType::Lowpass, 260.0, 0.7)?;
+                let body = gain(&ctx, 0.0)?;
+                chain(&[&b, &body_lp, &body, &pan]);
+                let pk = looped_noise(&ctx, &pink[i], 1.0)?;
+                let whistle_bp = filter(&ctx, BiquadFilterType::Bandpass, 600.0, 5.0)?;
+                let whistle = gain(&ctx, 0.0)?;
+                chain(&[&pk, &whistle_bp, &whistle, &pan]);
+                let g = looped_noise(&ctx, &noise, if i == 0 { 1.0 } else { 0.91 })?;
+                let grit_hp = filter(&ctx, BiquadFilterType::Highpass, 2600.0, 0.4)?;
+                let grit = gain(&ctx, 0.0)?;
+                chain(&[&g, &grit_hp, &grit, &pan]);
+                Some(WindVoice {
+                    body_lp,
+                    body,
+                    whistle_bp,
+                    whistle,
+                    grit,
+                    pan,
+                    gust: 0.45,
+                    front: 0.0,
+                    front_t: 0.0,
+                    front_len: 0.0,
+                    wander: i as f64 * 1.7,
+                    seed: 0x1234 + i as u32 * 7919,
+                })
+            };
+            let wind = [voice(0)?, voice(1)?];
 
             // Rumble: two low sines and filtered noise.
             let o1 = ctx.create_oscillator().ok()?;
@@ -164,11 +270,10 @@ mod web {
                 ctx,
                 out,
                 noise,
-                wind: (wf, wg),
-                wind_hi: hg,
+                wind,
                 rumble: (o1, o2, rf, rg),
                 hiss: (sf, sp, sg),
-                gust: 0.0,
+                since_update: 1.0,
                 states: Vec::new(),
                 stage: Stage::Alive,
                 hooks: [0; 2],
@@ -179,9 +284,18 @@ mod web {
             self.ctx.current_time()
         }
 
-        /// Ease a parameter toward a value.
+        /// Glide a parameter toward a value. Old automation is cancelled
+        /// first, so however long the game runs each parameter holds only a
+        /// couple of events (piling them up, one per frame, is what made the
+        /// sound die after a while). Non-finite values are ignored.
         fn ease(&self, p: &web_sys::AudioParam, v: f32, tc: f64) {
-            let _ = p.set_target_at_time(v, self.now(), tc);
+            if !v.is_finite() {
+                return;
+            }
+            let now = self.now();
+            let _ = p.cancel_scheduled_values(now);
+            let _ = p.set_value_at_time(p.value(), now);
+            let _ = p.linear_ramp_to_value_at_time(v, now + tc.max(0.03));
         }
 
         fn panner(&self, pan: f32) -> Option<StereoPannerNode> {
@@ -280,26 +394,68 @@ mod web {
         let near = |p: DVec3, r: f64| (r / (r + (p - ear).length())) as f32;
 
         // --- continuous ---------------------------------------------------
-        e.gust += dt * 0.13;
-        let g = e.gust;
-        let gust = 0.5 + 0.3 * (g * 1.3).sin() + 0.2 * (g * 3.1 + 1.0).sin();
-        let height = ((pb.0.pos.y - 0.0) / 120.0).clamp(0.0, 0.6);
-        e.ease(&e.wind.1.gain(), (0.05 + 0.10 * gust + height * 0.08) as f32, 0.6);
-        e.ease(&e.wind.0.frequency(), (380.0 + 420.0 * gust) as f32, 0.8);
-        e.ease(&e.wind_hi.gain(), (0.008 + 0.018 * gust) as f32, 0.8);
+        // Updated about fifteen times a second, not every frame: each update
+        // is a short glide, and the audio thread does the smoothing.
+        e.since_update += dt;
+        if e.since_update >= 1.0 / 15.0 {
+            let step = e.since_update.min(0.5);
+            e.since_update = 0.0;
+            let lvl = danger.level;
+            // Higher ground is windier; riding is a rush of air.
+            let exposure = (pb.0.pos.y / 90.0).clamp(0.0, 0.5);
+            let rush = (riding.speed / 36.0).clamp(0.0, 1.0);
+            let duck = 1.0 - 0.55 * lvl as f64;
+            let tc = 1.0 / 15.0 * 1.3;
+            for i in 0..2 {
+                let v = &mut e.wind[i];
+                // Ornstein-Uhlenbeck gusting around a middling breeze.
+                let r = |seed: &mut u32| {
+                    *seed = seed.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+                    (*seed >> 8) as f64 / (1u32 << 24) as f64 * 2.0 - 1.0
+                };
+                let noise = r(&mut v.seed) + r(&mut v.seed) + r(&mut v.seed);
+                v.gust += (0.42 - v.gust) * step / 6.0 + noise * 0.16 * step.sqrt();
+                v.gust = v.gust.clamp(0.05, 1.0);
+                // Now and then a front comes through: a swell over a few
+                // seconds and a longer fade.
+                if v.front_t >= v.front_len {
+                    if r(&mut v.seed) > 0.985 {
+                        v.front_t = 0.0;
+                        v.front_len = 6.0 + 8.0 * (r(&mut v.seed) * 0.5 + 0.5);
+                    }
+                } else {
+                    v.front_t += step;
+                }
+                let k = if v.front_len > 0.0 { (v.front_t / v.front_len).min(1.0) } else { 1.0 };
+                v.front = if k < 1.0 { (k * std::f64::consts::PI).sin().powf(0.7) * 0.5 } else { 0.0 };
+                v.wander += step * (0.15 + 0.1 * i as f64);
+                let g = ((v.gust + v.front + exposure * 0.4 + rush * 0.6) * duck).clamp(0.0, 1.6);
+                let (body_lp, body, whistle_bp, whistle, grit, pan) =
+                    (v.body_lp.clone(), v.body.clone(), v.whistle_bp.clone(), v.whistle.clone(), v.grit.clone(), v.pan.clone());
+                let wander = v.wander;
+                let side = if i == 0 { -1.0 } else { 1.0 };
+                e.ease(&body.gain(), (0.07 + 0.22 * g) as f32, tc);
+                e.ease(&body_lp.frequency(), (170.0 + 380.0 * g) as f32, tc);
+                // The whistle rises with the gust and wanders a little.
+                e.ease(&whistle_bp.frequency(), (320.0 + 850.0 * g + 120.0 * wander.sin()) as f32, tc);
+                e.ease(&whistle.gain(), (0.012 + 0.07 * g * g) as f32, tc);
+                // Sand grains only when it really blows.
+                e.ease(&grit.gain(), (0.05 * ((g - 0.65) * 2.5).clamp(0.0, 1.0)) as f32, tc);
+                e.ease(&pan.pan(), (side * (0.55 + 0.25 * (wander * 0.7).sin())) as f32, tc);
+            }
 
-        let lvl = danger.level;
-        // Felt before it is heard: most of the rise is below 60 Hz.
-        e.ease(&e.rumble.3.gain(), (lvl.powf(1.1) * 1.1).min(1.2), 0.25);
-        e.ease(&e.rumble.0.frequency(), 26.0 + 22.0 * lvl, 0.5);
-        e.ease(&e.rumble.1.frequency(), 41.0 + 30.0 * lvl, 0.5);
-        e.ease(&e.rumble.2.frequency(), 80.0 + 140.0 * lvl, 0.4);
+            // Felt before it is heard: most of the rise is below 60 Hz.
+            e.ease(&e.rumble.3.gain(), (lvl.powf(1.1) * 1.1).min(1.2), tc * 2.0);
+            e.ease(&e.rumble.0.frequency(), 26.0 + 22.0 * lvl, tc * 3.0);
+            e.ease(&e.rumble.1.frequency(), 41.0 + 30.0 * lvl, tc * 3.0);
+            e.ease(&e.rumble.2.frequency(), 80.0 + 140.0 * lvl, tc * 3.0);
 
-        let hiss = (lvl * (0.3 + 0.7 * danger.surfaced) * (danger.speed as f32 / 30.0).min(1.0)).min(1.0);
-        e.ease(&e.hiss.2.gain(), hiss * 0.5, 0.3);
-        e.ease(&e.hiss.0.frequency(), 250.0 + 500.0 * hiss, 0.3);
-        let pan = pan_of(ear + danger.bearing * 50.0);
-        e.ease(&e.hiss.1.pan(), pan, 0.2);
+            let hiss = (lvl * (0.3 + 0.7 * danger.surfaced) * (danger.speed as f32 / 30.0).min(1.0)).min(1.0);
+            e.ease(&e.hiss.2.gain(), hiss * 0.5, tc * 2.0);
+            e.ease(&e.hiss.0.frequency(), 250.0 + 500.0 * hiss, tc * 2.0);
+            let pan = pan_of(ear + danger.bearing * 50.0);
+            e.ease(&e.hiss.1.pan(), pan, tc);
+        }
 
         // --- one-shots ------------------------------------------------------
         for ev in &quakes.events {
