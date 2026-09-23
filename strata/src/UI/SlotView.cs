@@ -19,6 +19,7 @@ public sealed partial class SlotView : Control
     public float Size = 52f;
     private ItemStack _shown = new(ushort.MaxValue, -1);
     private bool _hover;
+    public bool Hovered => _hover;
 
     public override void _Ready()
     {

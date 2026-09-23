@@ -130,7 +130,8 @@ public sealed partial class Hud : Control
         }
 
         _clock.Text = Game != null ? $"Day {Game.View.Sky.Day + 1}  {Game.View.Sky.Clock}" : "";
-        _clock.Position = new Vector2(vp.X - 170, 10);
+        if (Game != null && Game.Settings.ShowFps && !ShowDebug) _clock.Text = $"{Game.Fps:0} fps   " + _clock.Text;
+        _clock.Position = new Vector2(vp.X - 12 - _clock.GetMinimumSize().X, 10);
 
         for (int i = _toastList.Count - 1; i >= 0; i--)
         {

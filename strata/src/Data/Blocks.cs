@@ -252,6 +252,10 @@ public static class Blocks
         Emberbloom = Plant("emberbloom", "Emberbloom", true, 0.9f, 0.25f, 0.2f);
         Sunpetal = Plant("sunpetal", "Sunpetal", true, 0.95f, 0.85f, 0.25f);
         Frostbell = Plant("frostbell", "Frostbell", true, 0.45f, 0.6f, 0.95f);
+        // The wild parents of two crops: an emberbloom sometimes comes up with its root,
+        // and a frostbell sheds the seeds of its cultivated cousin.
+        All[Emberbloom].Extra = new[] { ("emberroot", 0.3f, 1, 1) };
+        All[Frostbell].Extra = new[] { ("frostleaf_seeds", 0.35f, 1, 2) };
         Moonlace = Plant("moonlace", "Moonlace", true, 0.92f, 0.92f, 0.95f);
         Reeds = Plant("reeds", "Reeds", false, 0.5f, 0.6f, 0.3f);
         All[Reeds].DropKey = "reed";

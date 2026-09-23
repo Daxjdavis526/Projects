@@ -32,6 +32,72 @@ public static class Tests
         GD.Print($"{(_fail == before ? "ok  " : "FAIL")} {name} ({sw.ElapsedMilliseconds} ms)");
     }
 
+    /// <summary>
+    /// --bench: single-threaded CPU cost of each stage of the column pipeline
+    /// on real terrain, for the README's performance notes.
+    /// </summary>
+    public static void Bench()
+    {
+        const int size = 10;
+        var w = new World(Hash.StringSeed("bench"));
+        // Around the spawn point, so it is land and not open sea.
+        var (sx, _, sz) = w.Gen.FindSpawn();
+        int ox = (sx >> 4) - size / 2, oz = (sz >> 4) - size / 2;
+        // Warm the JIT on a column away from the test area.
+        var warm = new Chunk(ox - 20, oz - 20);
+        w.Gen.Generate(warm);
+        var sw = Stopwatch.StartNew();
+        for (int z = oz; z < oz + size; z++)
+            for (int x = ox; x < ox + size; x++)
+            {
+                var c = new Chunk(x, z);
+                w.Gen.Generate(c);
+                c.State = ChunkState.Generated;
+                w.Chunks[c.Key] = c;
+            }
+        double gen = sw.Elapsed.TotalMilliseconds / (size * size);
+
+        sw.Restart();
+        var lit = new List<(Chunk, byte[])>();
+        int litCount = 0;
+        for (int z = oz + 1; z < oz + size - 1; z++)
+            for (int x = ox + 1; x < ox + size - 1; x++)
+            {
+                var c = w.ChunkAt(x * 16, z * 16);
+                lit.Add((c, Lighting.ComputeColumn(w.Neighbourhood(x, z, ChunkState.Generated))));
+                litCount++;
+            }
+        double light = sw.Elapsed.TotalMilliseconds / litCount;
+        foreach (var (c, l) in lit) { c.Light = l; c.State = ChunkState.Lit; }
+        w.InvalidateCache();
+
+        Mesher.Build(w.Neighbourhood(ox + 2, oz + 2, ChunkState.Lit), 1, 1);   // warm up
+        sw.Restart();
+        int slabs = 0, meshed = 0;
+        long tris = 0;
+        for (int z = oz + 2; z < oz + size - 2; z++)
+            for (int x = ox + 2; x < ox + size - 2; x++)
+            {
+                var n = w.Neighbourhood(x, z, ChunkState.Lit);
+                for (int s = 0; s < Chunk.Slabs; s++) { tris += Mesher.Build(n, s, 1).Triangles; slabs++; }
+                meshed++;
+            }
+        double mesh = sw.Elapsed.TotalMilliseconds / meshed;
+
+        sw.Restart();
+        var blob = new List<byte[]>();
+        foreach (var c in w.Chunks.Values) blob.Add(c.Serialize());
+        double save = sw.Elapsed.TotalMilliseconds / w.Chunks.Count;
+        long bytes = 0;
+        foreach (var b in blob) bytes += b.Length;
+
+        GD.Print($"generate  {gen,6:0.00} ms per column");
+        GD.Print($"light     {light,6:0.00} ms per column");
+        GD.Print($"mesh      {mesh,6:0.00} ms per column ({slabs / meshed} slabs, {tris / meshed} triangles on average)");
+        GD.Print($"encode    {save,6:0.00} ms per column, {bytes / w.Chunks.Count / 1024.0:0.0} KiB on disk");
+        GD.Print($"workers   {System.Environment.ProcessorCount} logical CPUs here");
+    }
+
     public static int RunAll()
     {
         Registry.Init(graphics: false);

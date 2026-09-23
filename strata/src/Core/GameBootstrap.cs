@@ -9,6 +9,7 @@ namespace Strata;
 /// Entry point: builds the registries, then hands over to the unit tests, the
 /// end-to-end self test, the screenshot director, or the game.
 ///   --test                 run the headless unit tests and exit
+///   --bench                time generation, lighting, meshing and saving per column
 ///   --selftest [dir]       play through the core loop with scripted input
 ///   --shots [dir]          fly a camera through viewpoints and save pictures
 ///   --capture SECS PATH    save a screenshot after SECS seconds and quit
@@ -58,6 +59,12 @@ public partial class GameBootstrap : Node
             GetTree().Quit();
             return;
         }
+        if (args.Contains("--bench"))
+        {
+            Tests.Bench();
+            GetTree().Quit();
+            return;
+        }
         if (args.Contains("--test"))
         {
             int failed = Tests.RunAll();
@@ -77,14 +84,21 @@ public partial class GameBootstrap : Node
         AddChild(new App { Name = "App" });
     }
 
-    /// <summary>--sheet OUT.png COLS IN1.png IN2.png ...: tiles screenshots into one picture for review.</summary>
+    /// <summary>--sheet OUT.jpg COLS [--tile WxH] IN1.png IN2.png ...: tiles screenshots into one picture for review.</summary>
     private static void ContactSheet(string[] args)
     {
         int at = Array.IndexOf(args, "--sheet");
         string output = args[at + 1];
         int cols = int.Parse(args[at + 2]);
         var inputs = args[(at + 3)..];
-        const int w = 640, h = 360;
+        int w = 640, h = 360;
+        // Optional tile size: --sheet OUT COLS --tile 1280x720 IN...
+        if (inputs.Length > 1 && inputs[0] == "--tile")
+        {
+            var wh = inputs[1].Split('x');
+            w = int.Parse(wh[0]); h = int.Parse(wh[1]);
+            inputs = inputs[2..];
+        }
         int rows = (inputs.Length + cols - 1) / cols;
         var sheet = Image.CreateEmpty(w * cols, h * rows, false, Image.Format.Rgb8);
         for (int i = 0; i < inputs.Length; i++)

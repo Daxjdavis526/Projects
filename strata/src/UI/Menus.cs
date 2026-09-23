@@ -216,6 +216,7 @@ public static partial class Menus
         SliderRow("Music", 0, 1, 0.05, s.MusicVolume, v => s.MusicVolume = (float)v, v => $"{v * 100:0}%");
         Options("Graphics", global::Strata.Settings.GraphicsNames, s.Graphics, v => s.Graphics = v);
         Toggle("View bobbing", s.ViewBobbing, v => s.ViewBobbing = v);
+        Toggle("Show FPS", s.ShowFps, v => s.ShowFps = v);
         Toggle("VSync", s.VSync, v => { s.VSync = v; s.ApplyDisplay(); });
         Toggle("Fullscreen", s.Fullscreen, v => { s.Fullscreen = v; s.ApplyDisplay(); });
         var res = new List<string> { "Window as is" };

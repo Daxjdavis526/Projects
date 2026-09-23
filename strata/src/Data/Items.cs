@@ -177,13 +177,13 @@ public static class Items
         });
         FrostleafSeeds = Add("frostleaf_seeds", "Frostleaf Seeds", d =>
         {
-            d.Place = PlaceKind.Seed; d.Block = Blocks.Frostleaf; d.Tint = new Color(0.55f, 0.75f, 0.9f); d.Info = "Plant on tilled soil.";
+            d.Place = PlaceKind.Seed; d.Block = Blocks.Frostleaf; d.Tint = new Color(0.55f, 0.75f, 0.9f); d.Info = "Plant on tilled soil. Wild frostbells shed them.";
         });
         Grain = Mat("grain", "Goldgrain", 0.9f, 0.78f, 0.35f);
         EmberrootItem = Add("emberroot", "Emberroot", d =>
         {
             d.Place = PlaceKind.Seed; d.Block = Blocks.Emberroot; d.Food = 2; d.Saturation = 1.2f;
-            d.Tint = new Color(0.85f, 0.35f, 0.15f); d.Info = "Edible raw. Plant on tilled soil.";
+            d.Tint = new Color(0.85f, 0.35f, 0.15f); d.Info = "Edible raw. Plant on tilled soil. Dig up emberblooms to find one.";
         });
         FrostleafItem = Food("frostleaf", "Frostleaf", 1, 0.6f, 0.6f, 0.85f, 0.95f);
         Berries = Food("berries", "Duskberries", 2, 1.2f, 0.45f, 0.2f, 0.55f);

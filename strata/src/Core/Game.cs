@@ -42,6 +42,7 @@ public sealed partial class Game : Node3D
     private double _fpsTime;
     private int _fpsFrames;
     private float _fps;
+    public float Fps => _fps;
     private Ambience _ambience;
 
     public bool Paused => PauseMenu != null;

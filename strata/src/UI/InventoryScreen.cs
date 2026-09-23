@@ -78,7 +78,7 @@ public sealed partial class InventoryScreen : Control
         rbox.AddChild(hot);
         for (int i = 0; i < 9; i++) hot.AddChild(PlayerSlot(i));
         rbox.AddChild(UiStyle.Spacer(6));
-        rbox.AddChild(UiStyle.Label("Left: take / place  ·  Right: split / one  ·  Shift: move across  ·  E or Esc: close", 14, UiStyle.TextDim));
+        rbox.AddChild(UiStyle.Label("Left: take / place  ·  Right: split / one  ·  Shift: move across  ·  1-9: to hotbar  ·  E: close", 14, UiStyle.TextDim));
 
         var v = Game.Player.Vitals;
         rbox.AddChild(UiStyle.Label($"Health {v.Health:0}/20   Hunger {v.Hunger:0}/20   Blocks mined {Game.Player.BlocksMined}   Creatures felled {Game.Player.Kills}", 14, UiStyle.TextDim));
@@ -334,6 +334,38 @@ public sealed partial class InventoryScreen : Control
         var left = Inv.Add(Cursor);
         if (!left.IsEmpty) Game.Player.DropStack(left);
         Cursor = ItemStack.Empty;
+    }
+
+    /// <summary>Hovering a slot and pressing 1-9 swaps it with that hotbar slot.</summary>
+    public override void _Input(InputEvent e)
+    {
+        if (e is not InputEventKey { Pressed: true, Echo: false }) return;
+        for (int n = 1; n <= 9; n++)
+        {
+            if (!e.IsActionPressed("slot_" + n)) continue;
+            var view = HoveredSlot(this);
+            if (view == null || view.Clicked == null) return;
+            var inv = InvFor(view);
+            int i = view.Index, h = n - 1;
+            if (inv == Inv && i == h) return;
+            bool furnaceOut = Kind == ScreenKind.Furnace && (string)view.Tag == "entity" && i == FurnaceEntity.Out;
+            if (furnaceOut && !Inv[h].IsEmpty) return;      // output only comes out
+            (inv[i], Inv[h]) = (Inv[h], inv[i]);
+            Sfx.Ui("click", 0.35f, 1.2f);
+            GetViewport().SetInputAsHandled();
+            return;
+        }
+    }
+
+    private static SlotView HoveredSlot(Node n)
+    {
+        if (n is SlotView { Hovered: true } s) return s;
+        foreach (var c in n.GetChildren())
+        {
+            var found = HoveredSlot(c);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     public override void _GuiInput(InputEvent e)
