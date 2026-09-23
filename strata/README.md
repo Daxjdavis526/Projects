@@ -4,13 +4,14 @@ A complete block-world survival game: an endless generated world of fourteen
 biomes, caves and ores, flowing water, day and night, weather, eight original
 creatures, tools in five tiers, armour, a hunting bow, cooking, smelting,
 farming, storage, building, lumen circuits that switch lamps and doors, and a
-world that saves and loads. Every texture, model, sound, piece of music, name and line of
-code was made for this project. No assets, code or names come from any other
-block game, and none of it is a clone of one.
+world that saves and loads. Every texture, model, sound, piece of music, name
+and line of code was made for this project. No assets, code or names come from
+any other block game, and none of it is a clone of one.
 
 **This one is a desktop game, not a web page.** Unlike everything else in this
 repository it is a Godot 4 project written in C#, so there is no GitHub Pages
-link. It runs on Windows, Linux and macOS.
+link. It is built and tested for Windows and Linux; Godot also targets macOS,
+but that has not been tried.
 
 ![Mirewood: willows, pools and a river under a clear sky](doc/hero.jpg)
 
@@ -341,7 +342,7 @@ walkable cells in a short radius and re-plan as you move.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 494 checks, about 30 seconds
+    godot --headless --path . -- --test                # 494 checks, in a couple of seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 61 checks and screenshots
     godot --headless --path . -- --bench               # pipeline costs per column
 

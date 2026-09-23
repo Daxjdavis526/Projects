@@ -83,6 +83,19 @@ public sealed class Settings
                 DisplayServer.WindowSetPosition((screen - size) / 2);
             }
         }
+        else if (!Fullscreen)
+        {
+            // The default window is 1600 x 900: on a smaller screen, shrink it to fit and centre it.
+            var usable = DisplayServer.ScreenGetUsableRect();
+            var size = DisplayServer.WindowGetSize();
+            if (usable.Size.X > 0 && (size.X > usable.Size.X || size.Y > usable.Size.Y))
+            {
+                float k = Math.Min(usable.Size.X * 0.92f / size.X, usable.Size.Y * 0.92f / size.Y);
+                var fit = new Vector2I((int)(size.X * k), (int)(size.Y * k));
+                DisplayServer.WindowSetSize(fit);
+                DisplayServer.WindowSetPosition(usable.Position + (usable.Size - fit) / 2);
+            }
+        }
         int bus = AudioServer.GetBusIndex("Master");
         AudioServer.SetBusVolumeDb(bus, Mathf.LinearToDb(Math.Max(0.0001f, MasterVolume)));
     }
