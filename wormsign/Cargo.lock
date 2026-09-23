@@ -5731,6 +5731,7 @@ dependencies = [
  "glam",
  "js-sys",
  "wasm-bindgen",
+ "web-sys",
  "wormsign_core",
 ]
 

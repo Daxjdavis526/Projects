@@ -1,5 +1,7 @@
 //! WORMSIGN — entry point.
 
+mod audio;
+mod caller;
 mod death;
 mod fx;
 mod ground;
@@ -27,6 +29,6 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin, worms::WormsPlugin, fx::FxPlugin, death::DeathPlugin))
+        .add_plugins((world::WorldPlugin, sky::SkyPlugin, ground::GroundPlugin, player::PlayerPlugin, hud::HudPlugin, quake::QuakePlugin, worms::WormsPlugin, fx::FxPlugin, death::DeathPlugin, caller::CallerPlugin, audio::AudioPlugin))
         .run();
 }

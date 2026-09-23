@@ -38,7 +38,7 @@ struct LivingHud;
 struct GaitText;
 
 const CONTROLS: &str = "click to look  ·  WASD move  ·  shift run  ·  space jump\n\
-C crouch  ·  hold Q sandwalk  ·  V first/third person  ·  wheel zoom";
+C crouch  ·  hold Q sandwalk  ·  T plant / lift caller  ·  V view  ·  wheel zoom";
 
 fn setup(mut commands: Commands) {
     spawn_meter(&mut commands);

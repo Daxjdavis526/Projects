@@ -56,6 +56,17 @@
     return out.buffer;
   }
 
+  // Browsers only allow sound after a gesture, so the audio context is made
+  // here, inside the first click or key press, and the game picks it up.
+  const unlockAudio = () => {
+    try {
+      if (!window.wormsignAudio) window.wormsignAudio = new (window.AudioContext || window.webkitAudioContext)();
+      if (window.wormsignAudio.state === 'suspended') window.wormsignAudio.resume();
+    } catch (e) { /* no audio, no problem */ }
+  };
+  addEventListener('pointerdown', unlockAudio, { capture: true });
+  addEventListener('keydown', unlockAudio, { capture: true });
+
   // The game calls this once its first frame of terrain is up.
   window.wormsignReady = () => loading.classList.add('gone');
   window.wormsignStatus = (s) => { status.textContent = s; };

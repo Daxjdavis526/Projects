@@ -36,7 +36,8 @@ impl Plugin for WormsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_population.after(crate::player::spawn))
             .add_systems(Update, simulate.in_set(Phase::Simulate).in_set(SimSet).after(crate::player::simulate))
-            .add_systems(Update, (draw_bodies, draw_wakes).in_set(Phase::View));
+            .init_resource::<Danger>()
+            .add_systems(Update, (draw_bodies, draw_wakes, approach).in_set(Phase::View));
     }
 }
 
@@ -498,4 +499,98 @@ pub fn nearest<'a>(worms: impl Iterator<Item = &'a WormBody>, p: DVec3) -> Optio
             let rank = |s: State| if matches!(s, State::Roam) { 1 } else { 0 };
             rank(a.0.brain.state).cmp(&rank(b.0.brain.state)).then(a.1.partial_cmp(&b.1).unwrap())
         })
+}
+
+/// How close and how fast the nearest worm is coming, for shake and sound.
+#[derive(Resource, Default)]
+pub struct Danger {
+    /// 0 nothing near .. 1 right on top of you.
+    pub level: f32,
+    /// Distance to the nearest part of any worm, metres.
+    pub distance: f64,
+    /// Direction to it, world space, flattened.
+    pub bearing: DVec3,
+    pub speed: f64,
+    /// 0..1: how exposed the nearest worm is (1 = back out of the sand).
+    pub surfaced: f32,
+}
+
+/// The build-up. A worm moving fast near the surface throws a plume of dust
+/// you can see for kilometres and sprays sand off its bow; close ones make
+/// the ground shake under you.
+fn approach(
+    time: Res<Time>,
+    mut fx: ResMut<crate::fx::Fx>,
+    mut shake: ResMut<crate::player::Shake>,
+    mut danger: ResMut<Danger>,
+    player: Query<&PlayerBody>,
+    worms: Query<&WormBody>,
+    mut acc: Local<Vec<(f64, f64)>>,
+) {
+    let Ok(pl) = player.single() else { return };
+    let p = pl.0.pos;
+    let dt = time.delta_secs() as f64;
+    let n = worms.iter().count();
+    if acc.len() != n {
+        *acc = vec![(0.0, 0.0); n];
+    }
+    let mut best = Danger { distance: f64::MAX, ..default() };
+    for (i, wb) in worms.iter().enumerate() {
+        let w = &wb.worm;
+        let head = w.head();
+        let r = w.spec.radius;
+        let top_depth = w.rings[0].sand - (head.y + r);
+        let near_surface = top_depth < r * 0.9;
+        let fwd = w.forward();
+        // Dust plume, rate rising with speed.
+        if near_surface && w.speed > 8.0 && (head - p).length() < 6000.0 {
+            acc[i].0 += dt * (w.speed - 6.0) * 0.12;
+            while acc[i].0 >= 1.0 {
+                acc[i].0 -= 1.0;
+                let rng_a = fx_rand(i as f64 + acc[i].1);
+                acc[i].1 += 1.0;
+                let side = DVec3::new(-fwd.z, 0.0, fwd.x) * (rng_a - 0.5) * r * 1.6;
+                let at = DVec3::new(head.x, w.rings[0].sand, head.z) + side - fwd * r * 0.5;
+                let v = DVec3::new(0.0, 3.0 + 4.0 * rng_a, 0.0) - fwd * w.speed * 0.15;
+                fx.emit(crate::fx::Kind::Dust, at, v, (7.0 + 9.0 * rng_a) as f32, (5.0 + 4.0 * rng_a) as f32);
+            }
+        }
+        // Sand thrown off the bow when it is fast and shallow.
+        if top_depth < r * 0.4 && w.speed > 16.0 && (head - p).length() < 1500.0 {
+            acc[i].1 += dt * w.speed * 1.2;
+            let burst = acc[i].1.floor() as usize - (acc[i].1 - dt * w.speed * 1.2).floor() as usize;
+            for k in 0..burst.min(6) {
+                let a = fx_rand(acc[i].1 + k as f64);
+                let side = DVec3::new(-fwd.z, 0.0, fwd.x) * if a > 0.5 { 1.0 } else { -1.0 };
+                let at = DVec3::new(head.x, w.rings[0].sand, head.z) + fwd * r * 0.8 + side * r * 0.9;
+                let v = side * (6.0 + 10.0 * a) + DVec3::Y * (5.0 + 12.0 * a) + fwd * w.speed * 0.5;
+                fx.emit(crate::fx::Kind::Sand, at, v, (0.1 + 0.3 * a * a) as f32, 3.0);
+            }
+        }
+        // Nearest part of the body, from a few samples.
+        let d = w.rings.iter().step_by(8).map(|rg| (rg.centre - p).length() - rg.radius).fold(f64::MAX, f64::min).max(0.0);
+        if d < best.distance {
+            let to = head - p;
+            best = Danger {
+                level: 0.0,
+                distance: d,
+                bearing: DVec3::new(to.x, 0.0, to.z).normalize_or_zero(),
+                speed: w.speed,
+                surfaced: (1.0 - top_depth / (2.0 * r)).clamp(0.0, 1.0) as f32,
+            };
+        }
+    }
+    if best.distance < f64::MAX {
+        let closeness = (1.0 - best.distance / 1200.0).clamp(0.0, 1.0);
+        let pace = (best.speed / 30.0).clamp(0.15, 1.0);
+        best.level = (closeness * closeness * pace) as f32;
+    } else {
+        best.distance = 1e9;
+    }
+    shake.rumble = best.level;
+    *danger = best;
+}
+
+fn fx_rand(x: f64) -> f64 {
+    ((x * 12.9898 + 78.233).sin() * 43758.5453).fract().abs()
 }

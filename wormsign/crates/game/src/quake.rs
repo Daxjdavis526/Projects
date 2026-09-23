@@ -3,7 +3,7 @@
 
 use bevy::prelude::*;
 use wormsign_core::glam::DVec3;
-use wormsign_core::vibration::{Listener, VibrationEvent};
+use wormsign_core::vibration::{Listener, SourceKind, VibrationEvent};
 
 use crate::hud::Debug;
 use crate::player::PlayerBody;
@@ -58,6 +58,11 @@ fn meter(time: Res<Time>, clock: Res<SimClock>, q: Res<Quakes>, mut m: ResMut<Me
     let t = clock.0;
     let at = b.0.pos + DVec3::new(METER_DISTANCE, 0.0, 0.0);
     for ev in &q.events {
+        // Only what your own feet put into the sand; a caller beside you is
+        // its own source.
+        if !matches!(ev.kind, SourceKind::Step | SourceKind::Landing) || (ev.pos - b.0.pos).length() > 3.0 {
+            continue;
+        }
         // The imaginary worm moves with the player, so place each event
         // relative to where the player is now.
         let mut e = *ev;
