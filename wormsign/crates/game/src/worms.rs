@@ -295,9 +295,86 @@ fn push(pos: &mut Vec<[f32; 3]>, nor: &mut Vec<[f32; 3]>, col: &mut Vec<[f32; 4]
     pos.len() as u32 - 1
 }
 
-/// Three petals that close into a blunt cone and open back like a flower,
-/// two rings of crystal teeth just inside the rim, and a throat that goes
-/// dark a few tens of metres in.
+/// Add a triangle wound to face the way its vertices' normals point, so
+/// nothing in the mouth is ever culled from the wrong side.
+fn tri(pos: &[[f32; 3]], nor: &[[f32; 3]], idx: &mut Vec<u32>, a: u32, b: u32, c: u32) {
+    let p = |i: u32| Vec3::from_array(pos[i as usize]);
+    let n = Vec3::from_array(nor[a as usize]) + Vec3::from_array(nor[b as usize]) + Vec3::from_array(nor[c as usize]);
+    if (p(b) - p(a)).cross(p(c) - p(a)).dot(n) >= 0.0 {
+        idx.extend_from_slice(&[a, b, c]);
+    } else {
+        idx.extend_from_slice(&[a, c, b]);
+    }
+}
+
+/// A grid of vertices `w` wide starting at `base`, as triangles.
+fn grid(pos: &[[f32; 3]], nor: &[[f32; 3]], idx: &mut Vec<u32>, base: u32, rows: u32, w: u32, wrap: bool) {
+    let cols = if wrap { w } else { w - 1 };
+    for i in 0..rows {
+        for j in 0..cols {
+            let j1 = if wrap { (j + 1) % w } else { j + 1 };
+            let (a, b, c, d) = (base + i * w + j, base + i * w + j1, base + (i + 1) * w + j, base + (i + 1) * w + j1);
+            tri(pos, nor, idx, a, b, d);
+            tri(pos, nor, idx, a, d, c);
+        }
+    }
+}
+
+/// Cheap deterministic jitter in -1..1.
+fn jit(a: u32, b: u32) -> f64 {
+    let h = (a.wrapping_mul(374761393) ^ b.wrapping_mul(668265263)).wrapping_mul(1274126177);
+    ((h >> 8) as f64 / (1u32 << 24) as f64) * 2.0 - 1.0
+}
+
+/// One curved, back-raked tooth from `root`: out along `-rd` (into the
+/// mouth) and bending back along `-t` (down the throat).
+#[allow(clippy::too_many_arguments)]
+fn tooth(
+    pos: &mut Vec<[f32; 3]>,
+    nor: &mut Vec<[f32; 3]>,
+    col: &mut Vec<[f32; 4]>,
+    idx: &mut Vec<u32>,
+    root: DVec3,
+    inward: DVec3,
+    back: DVec3,
+    len: f64,
+    wid: f64,
+    rake: f64,
+) {
+    const SIDES: usize = 5;
+    let pivot = inward.cross(back).normalize_or(DVec3::X);
+    // Spine of the tooth: a curve from the gum to a point.
+    let spine = |u: f64| root + inward * (len * u) + back * (len * rake * u * u);
+    let base = pos.len() as u32;
+    let rings = [0.0, 0.45, 0.8];
+    let ivory = Vec3::new(0.86, 0.83, 0.72);
+    let yellow = Vec3::new(0.52, 0.44, 0.30);
+    for (ri, &u) in rings.iter().enumerate() {
+        let c = spine(u);
+        let d = (spine(u + 0.05) - c).normalize_or(inward);
+        let side = pivot - d * pivot.dot(d);
+        let side = side.normalize_or(pivot);
+        let other = d.cross(side);
+        let r = wid * (1.0 - u).powf(0.8);
+        let shade = yellow.lerp(ivory, (u as f32 * 1.3).min(1.0));
+        for k in 0..SIDES {
+            let a = k as f64 / SIDES as f64 * std::f64::consts::TAU;
+            let rn = side * a.cos() + other * a.sin();
+            push(pos, nor, col, c + rn * r, rn, shade * if ri == 0 { 0.8 } else { 1.0 });
+        }
+    }
+    let tip = push(pos, nor, col, spine(1.0), (spine(1.0) - spine(0.9)).normalize_or(inward), ivory);
+    grid(pos, nor, idx, base, 2, SIDES as u32, true);
+    let last = base + 2 * SIDES as u32;
+    for k in 0..SIDES as u32 {
+        tri(pos, nor, idx, last + k, last + (k + 1) % SIDES as u32, tip);
+    }
+}
+
+/// The mouth: a thick, folded lip; five petals with ragged, toothed edges
+/// and hooked teeth down their inner faces, closing into a cone and peeling
+/// right back when it opens; and a long ribbed gullet lined with ring after
+/// ring of back-raked teeth, going dark far down.
 fn build_mouth(
     f: &MouthFrame,
     open: f64,
@@ -308,96 +385,142 @@ fn build_mouth(
 ) {
     use std::f64::consts::{PI, TAU};
     let skin = Vec3::new(0.24, 0.18, 0.14);
-    let flesh = Vec3::new(0.42, 0.10, 0.08);
-    let flesh_deep = Vec3::new(0.10, 0.02, 0.02);
-    let tooth = Vec3::new(0.80, 0.78, 0.70);
+    let gum = Vec3::new(0.40, 0.11, 0.10);
+    let flesh = Vec3::new(0.30, 0.05, 0.04);
+    let flesh_deep = Vec3::new(0.05, 0.01, 0.01);
+    let r = f.r;
+    let around = 40usize;
 
-    // --- throat -----------------------------------------------------------
-    let depth_rings = 10;
-    let throat_len = f.r * 2.5;
+    // --- throat -------------------------------------------------------------
+    // Ribbed: a groove behind each ring of teeth.
+    let depth_rings = 48;
+    let throat_len = r * 6.0;
+    let tooth_rings = 6;
+    let ring_u = |k: usize| 0.04 + 0.13 * k as f64;
+    let throat_rad = |u: f64| r * (0.9 - 0.55 * u.powf(0.8));
     let base = pos.len() as u32;
     for i in 0..=depth_rings {
         let u = i as f64 / depth_rings as f64;
-        let rad = f.r * (0.88 - 0.62 * u);
+        let ribs = 1.0 - 0.07 * ((u - 0.04) / 0.13 * PI).sin().abs().powf(0.5);
+        let rad = throat_rad(u) * ribs;
         let centre = f.c - f.t * (throat_len * u);
-        let shade = flesh.lerp(flesh_deep, (u as f32).powf(0.6));
-        for k in 0..=AROUND {
-            let a = k as f64 / AROUND as f64 * TAU;
+        let groove = 1.0 - 0.45 * ((1.0 - ribs) / 0.07) as f32;
+        let shade = flesh.lerp(flesh_deep, (u as f32).powf(0.55)) * groove.clamp(0.4, 1.0);
+        for k in 0..around {
+            let a = k as f64 / around as f64 * TAU;
             let rd = f.radial(a);
-            push(pos, nor, col, centre + rd * rad, -rd, shade);
+            // Wet folds running down the throat.
+            let fold = 1.0 + 0.04 * (a * 9.0 + u * 5.0).sin();
+            push(pos, nor, col, centre + rd * rad * fold, -rd, shade);
         }
     }
-    let w1 = (AROUND + 1) as u32;
-    for i in 0..depth_rings as u32 {
-        for k in 0..AROUND as u32 {
-            let a = base + i * w1 + k;
-            let b = a + w1;
-            // Inward-facing: opposite winding to the hide.
-            idx.extend_from_slice(&[a, a + 1, b, a + 1, b + 1, b]);
+    grid(pos, nor, idx, base, depth_rings as u32, around as u32, true);
+    // Cap it far down: nothing but dark.
+    let end = f.c - f.t * throat_len;
+    let hub = push(pos, nor, col, end - f.t * r * 0.2, f.t, flesh_deep * 0.3);
+    let last = base + depth_rings as u32 * around as u32;
+    for k in 0..around as u32 {
+        tri(pos, nor, idx, last + k, last + (k + 1) % around as u32, hub);
+    }
+
+    // --- teeth down the gullet ---------------------------------------------
+    for ring in 0..tooth_rings {
+        let u = ring_u(ring);
+        let n = 34 - ring * 2;
+        let rad = throat_rad(u) * 0.97;
+        for k in 0..n {
+            let j = jit(ring as u32 * 97 + 1, k as u32);
+            let a = (k as f64 + 0.5 * (ring % 2) as f64 + 0.25 * j) / n as f64 * TAU;
+            let rd = f.radial(a);
+            let root = f.c - f.t * (throat_len * u) + rd * rad;
+            let len = r * (0.34 - 0.035 * ring as f64) * (0.55 + 0.45 * open) * (1.0 + 0.25 * jit(k as u32, ring as u32 + 7));
+            tooth(pos, nor, col, idx, root, -rd, -f.t, len, r * 0.05, 0.9 + 0.3 * j);
         }
     }
 
-    // --- teeth --------------------------------------------------------------
-    // Crystalline, curved slightly back into the throat, so whatever goes in
-    // does not come out.
-    let n_teeth = 44;
-    for ring in 0..2 {
-        let back = f.r * (0.12 + 0.28 * ring as f64);
-        let len = f.r * (0.30 - 0.08 * ring as f64) * (0.4 + 0.6 * open);
-        for k in 0..n_teeth {
-            let a = (k as f64 + 0.5 * ring as f64) / n_teeth as f64 * TAU;
+    // --- lip ----------------------------------------------------------------
+    // A thick fleshy torus joining the hide to the petals and the gullet,
+    // folded all the way round.
+    let lip_rings = 10;
+    let base = pos.len() as u32;
+    for i in 0..=lip_rings {
+        let beta = i as f64 / lip_rings as f64 * TAU;
+        for k in 0..around {
+            let a = k as f64 / around as f64 * TAU;
             let rd = f.radial(a);
-            let tang = f.radial(a + PI / 2.0);
-            let root = f.c - f.t * back + rd * f.r * 0.86;
-            let tip = root - rd * len - f.t * len * 0.45;
-            let wid = f.r * 0.045;
-            let b0 = push(pos, nor, col, root + tang * wid, tang, tooth * 0.8);
-            let b1 = push(pos, nor, col, root - tang * wid, -tang, tooth * 0.8);
-            let b2 = push(pos, nor, col, root - f.t * wid * 1.5, -rd, tooth * 0.7);
-            let tp = push(pos, nor, col, tip, -rd, tooth);
-            idx.extend_from_slice(&[b0, b1, tp, b1, b2, tp, b2, b0, tp]);
+            let lr = r * 0.13 * (1.0 + 0.18 * (a * 23.0).sin() * (a * 7.0).cos());
+            let n = f.t * beta.sin() + rd * beta.cos();
+            let p = f.c + f.t * (r * 0.03) + rd * (r * 0.9) + n * lr;
+            // Hide outside, raw wet gum inside.
+            let inner = (-(beta.cos()) * 0.5 + 0.5) as f32;
+            push(pos, nor, col, p, n, skin.lerp(gum, inner.powf(1.5)));
         }
     }
+    grid(pos, nor, idx, base, lip_rings as u32, around as u32, true);
 
     // --- petals -------------------------------------------------------------
-    // Closed, each petal leans in to meet the others ahead of the head;
-    // open, it swings out and back past the rim like a peeled flower.
-    let lean = (-62.0f64).to_radians() + open * 170f64.to_radians();
-    let (along_n, across_n) = (7usize, 7usize);
-    for petal in 0..3 {
-        let mid = petal as f64 / 3.0 * TAU + PI / 3.0;
-        let half = TAU / 6.0 * 0.98;
+    // Closed, they lean in to a blunt cone ahead of the head; open, they
+    // peel right back past the rim.
+    let petals = 5;
+    let lean = (-66.0f64).to_radians() + open * 185f64.to_radians();
+    let (along_n, across_n) = (9usize, 8usize);
+    for petal in 0..petals {
+        let mid = petal as f64 / petals as f64 * TAU + PI / petals as f64;
+        let half = TAU / (2.0 * petals as f64) * 0.97;
+        let geom = |u: f64, v: f64| -> (DVec3, DVec3) {
+            let curl = u * u * 0.5 * (2.0 * open - 1.0);
+            let phi = lean + curl;
+            // Ragged, serrated edges.
+            let saw = 1.0 - 0.12 * ((u * 7.0).fract() - 0.5).abs() * 2.0;
+            let span = half * (1.0 - 0.7 * u.powf(1.6)) * if v.abs() > 0.8 { saw } else { 1.0 };
+            let a = mid + v * span;
+            let rd = f.radial(a);
+            let dir = f.t * phi.cos() + rd * phi.sin();
+            let rim = f.c + rd * r * 0.96;
+            // Slightly cupped across.
+            let cup = (1.0 - v * v) * r * 0.06;
+            let out = (rd * phi.cos() - f.t * phi.sin()).normalize();
+            (rim + dir * r * 1.15 * u + out * cup, out)
+        };
         for face in 0..2 {
             let base = pos.len() as u32;
             for i in 0..=along_n {
                 let u = i as f64 / along_n as f64;
-                // Curl: the tip of each petal bends a little more.
-                let phi = lean + u * 0.35 * (1.0 - 2.0 * open).signum() * 0.4;
-                let span = half * (1.0 - 0.55 * u * u);
                 for j in 0..=across_n {
                     let v = j as f64 / across_n as f64 * 2.0 - 1.0;
-                    let a = mid + v * span;
-                    let rd = f.radial(a);
-                    let dir = f.t * phi.cos() + rd * phi.sin();
-                    let rim = f.c + rd * f.r * 0.98;
-                    let p = rim + dir * f.r * 1.05 * u;
-                    // Outer normal of the petal surface.
-                    let out = (rd * phi.cos() - f.t * phi.sin()).normalize();
-                    let (n, c) = if face == 0 { (out, skin * (0.9 + 0.1 * (1.0 - u as f32))) } else { (-out, flesh.lerp(flesh_deep, 0.3)) };
+                    let (p, out) = geom(u, v);
+                    let (n, c) = if face == 0 {
+                        (out, skin * (0.85 + 0.15 * (1.0 - u as f32)))
+                    } else {
+                        // Inside: wet, darker in the creases.
+                        (-out, gum.lerp(flesh, (u as f32).sqrt()) * (0.6 + 0.4 * (1.0 - v.abs() as f32)))
+                    };
+                    // Push the inner face a hair inward so the two never fight.
+                    let p = if face == 1 { p - out * r * 0.012 } else { p };
                     push(pos, nor, col, p, n, c);
                 }
             }
-            let w = (across_n + 1) as u32;
-            for i in 0..along_n as u32 {
-                for j in 0..across_n as u32 {
-                    let a = base + i * w + j;
-                    let b = a + w;
-                    if face == 0 {
-                        idx.extend_from_slice(&[a, b, a + 1, a + 1, b, b + 1]);
-                    } else {
-                        idx.extend_from_slice(&[a, a + 1, b, a + 1, b + 1, b]);
-                    }
-                }
+            grid(pos, nor, idx, base, along_n as u32, (across_n + 1) as u32, false);
+        }
+        // Hooked teeth in two rows down the inside of each petal, and a
+        // fringe along its edges.
+        for row in [-0.45f64, 0.45] {
+            for k in 0..5 {
+                let u = 0.18 + 0.15 * k as f64;
+                let (p, out) = geom(u, row);
+                let (p2, _) = geom(u + 0.05, row);
+                let down = (p - p2).normalize_or(-f.t);
+                let len = r * (0.2 - 0.02 * k as f64) * (0.4 + 0.6 * open);
+                tooth(pos, nor, col, idx, p - out * r * 0.01, -out, down, len, r * 0.04, 0.8);
+            }
+        }
+        for edge in [-1.0f64, 1.0] {
+            for k in 0..6 {
+                let u = 0.12 + 0.14 * k as f64;
+                let (p, out) = geom(u, edge * 0.97);
+                let (q, _) = geom(u, edge * 0.7);
+                let sideways = (p - q).normalize_or(out);
+                tooth(pos, nor, col, idx, p, (sideways * 0.6 - out * 0.8).normalize(), -out, r * 0.1 * (0.5 + 0.5 * open), r * 0.025, 0.4);
             }
         }
     }

@@ -174,6 +174,11 @@ struct Foot {
     /// Heel lift while planted (radians), and what it was at lift-off.
     roll: f64,
     lift_roll: f64,
+    /// Where the toe was drawn last frame, and how far the swing's toe was
+    /// from it when the foot left the ground (faded out early in the swing,
+    /// so a foot leaving from an awkward stretch never snaps).
+    last_toe: DVec3,
+    toe_off: Option<DVec3>,
     /// Seconds a corrective (settling) step lasts, if taking one.
     settle: Option<(f64, f64, DVec3)>,
 }
@@ -297,6 +302,8 @@ impl Animator {
             swing: 0.5,
             roll: 0.0,
             lift_roll: 0.0,
+            last_toe: DVec3::ZERO,
+            toe_off: None,
             settle: None,
         };
         Self {
@@ -392,12 +399,12 @@ impl Animator {
         self.interval += (i.step_interval.clamp(0.2, 2.5) - self.interval) * ease(4.0, dt);
         let interval = self.interval.clamp(0.2, 2.5);
         // Fraction of the two-step cycle each foot spends on the ground:
-        // about 0.6 walking, under a third running (so both feet leave the
+        // about 0.6 walking, under a quarter sprinting (so both feet leave the
         // ground between steps), longer when creeping.
-        let beta = (0.6 - 0.32 * self.run + 0.06 * self.sneak + 0.06 * self.crouch).clamp(0.25, 0.75);
+        let beta = (0.6 - 0.38 * self.run + 0.06 * self.sneak + 0.06 * self.crouch).clamp(0.2, 0.75);
         self.speed += (hspeed - self.speed) * ease(8.0, dt);
         // Ground the body covers while a foot is down.
-        let sweep = (self.speed * beta * 2.0 * interval).min(1.6);
+        let sweep = (self.speed * beta * 2.0 * interval).min(2.2);
         // Land ahead of the hip by part of that, less when running (feet
         // land nearly under the body), so the leg can reach both ends.
         let lead = (sweep * (0.45 - 0.1 * self.run)).min(p.leg() * 0.55);
@@ -647,12 +654,17 @@ impl Animator {
             // A swinging toe hangs from wherever the leg actually got to,
             // and never dips into the sand.
             let toe = if foot.planted {
+                foot.toe_off = None;
                 toe
             } else {
                 let mut t = toe + (ankle - ankle_goal);
+                let off = *foot.toe_off.get_or_insert(foot.last_toe - t);
+                let fade = 1.0 - (foot.swing / 0.35).clamp(0.0, 1.0);
+                t += off * (fade * fade * (3.0 - 2.0 * fade));
                 t.y = t.y.max(ground(t.x, t.z) + 0.01);
                 t
             };
+            foot.last_toe = toe;
             jnt[j::HIP[f]] = hip;
             jnt[j::KNEE[f]] = knee;
             jnt[j::ANKLE[f]] = ankle;

@@ -28,14 +28,13 @@ made for headphones.
 | V | first / third person |
 | K | cinematic camera: a slow orbit, for watching |
 | mouse wheel | third-person distance |
-| T | plant a worm caller, or pick one up again |
+| T | plant a worm caller (as many as you like), or pick one up again |
 | left / right mouse (or Z / X) | throw a hook, or let that hook go |
 | R / F (hold) | reel in / pay out |
 | E | let go of both hooks |
 | G | switch between bracing on the ropes and walking the back |
-| riding, braced: A / D | pry to turn left / right |
-| riding, braced: W / S | drive it on / ease off |
-| riding: Space | jump clear |
+| riding: A / D | steer left / right |
+| riding: W / S | drive it on / ease off |
 | 1 / 2, 3 / 4, 5 / 6 | look sensitivity, camera shake, field of view |
 
 ## How to play
@@ -69,13 +68,15 @@ set the second hook. Landing on something moving that fast is a slide, not a
 landing — the hooks are what keep you on. The back is curved and slick: past
 about 26° you slide, and a rolling worm sweeps you toward its flank.
 
-**Riding.** Braced on the ropes (G switches), A and D pry at the rings on one
-side and it turns that way — slowly, through its own enormous inertia; it
-never turns like a car. Hooks near the head give more leverage, and a hook on
-the side you are turning toward does most of the work. W drives it on, S lets
-it ease off. Leave it alone and after a while it starts to go down, and a
-diving worm tears your hooks out. Pry too hard for too long and it gets
-angry, and rolls to throw you off. Crouching grips better.
+**Riding.** Once you are hooked in, A and D steer: the worm answers within
+a second and swings round at up to about 20° a second, the long body
+sweeping along behind the head. Let go of the key and it holds the line it
+is on. Hooks near the head give more leverage, and a hook on the side you
+are turning toward helps. W drives it on, S lets it ease off, E lets go
+(G switches to walking about on its back). Leave it alone and after a while
+it starts to go down, and a diving worm tears your hooks out. Drive and
+wrench it flat out for too long and it gets angry, and rolls to throw you
+off. Crouching grips better.
 
 **Being eaten** is not a fade to black. It is on screen, in slow motion.
 
@@ -87,7 +88,7 @@ The game is two crates:
   in it: the desert's height function, the terrain level-of-detail plan,
   the player's body, footstrikes, the vibration model, the worm's body and
   brain, hooks, the figure's animation and cloak, the ragdoll, the baked dune
-  shadows. 84 tests, run with `cargo test -p wormsign_core`,
+  shadows, the skinning. 87 tests, run with `cargo test -p wormsign_core`,
   including whole-game scenarios on the real terrain: a sprinter gets eaten,
   a sandwalker walks past a worm unnoticed, someone standing still is left
   alone, and a scripted player runs alongside a worm, hooks it, climbs on and
@@ -140,6 +141,11 @@ then bring the open mouth down to ground level on where it thinks you are),
 the pass, searching, and being ridden. It looks ahead along the arc it would
 actually fly and steers off any that would clip rock.
 
+The mouth is a thick folded lip, five petals with serrated, toothed edges
+and hooked teeth down their inner faces that close into a blunt cone and
+peel right back to strike, and a ribbed gullet six body-radii deep lined
+with rings of curved, back-raked teeth, fading to black.
+
 The sand heaped over a shallow worm is the same function for drawing and for
 standing on: you can be lifted by the mound of a passing worm.
 
@@ -161,7 +167,10 @@ origin moves.
 
 A Fremen in a stillsuit, built from lofted meshes — each segment a sweep of
 elliptical sections, tapering and flattening like the body does — to Drillis
-& Contini's segment proportions for a person 1.78 m tall. The suit is ribbed,
+& Contini's segment proportions for a person 1.78 m tall. The segments are
+drawn as one skin: near every joint a vertex follows both bones (linear
+blend skinning, done on the CPU each frame), so knees, elbows, hips and
+shoulders bend as one surface instead of hinged pieces. The suit is ribbed,
 with catchpockets on the thighs, a catchtube from the collar to a mask over
 mouth and nose, boots and gloves; a belt with pouches and a crysknife; a
 harness with the caller and two maker hooks on the back (they leave it when
@@ -227,6 +236,8 @@ Blunt, as usual.
   phase when running) are in the right range; nothing balances, and the body
   has no mass. Feet plant on the height function, so they sit on slopes, but
   there is no deformation of the sand under them beyond the footprint decals.
+- **The skin** is linear blend skinning: at a sharp bend a joint thins a
+  little (the classic "candy wrapper"), as it does in most games.
 - **The cloak** is a coarse Verlet cloth (13 × 11 particles) with no
   self-collision; it can fold through itself in a hard turn. The wind on it is
   a simple drag toward a gusting wind velocity.

@@ -13,6 +13,8 @@ mod geo;
 
 use bevy::camera::visibility::NoFrustumCulling;
 use bevy::math::Mat3;
+use wormsign_core::glam::DMat3;
+use wormsign_core::skin;
 use bevy::prelude::*;
 use wormsign_core::anim::{j, Activity, AnimInput, Animator, Pose, Proportions, LEFT, RIGHT};
 use wormsign_core::cloth::{Capsule, Cloth};
@@ -118,6 +120,9 @@ struct Skeleton {
     shown: [bool; 16],
     /// Red where something was torn off.
     stumps: Vec<DVec3>,
+    /// Per segment: its first joint has been torn through, so the skin
+    /// must not stretch across it.
+    cut: [bool; 16],
 }
 
 impl Skeleton {
@@ -129,6 +134,7 @@ impl Skeleton {
             head_back: -p.look,
             shown: [true; 16],
             stumps: Vec::new(),
+            cut: [false; 16],
         }
     }
 
@@ -202,7 +208,16 @@ impl Skeleton {
             shown[k] = parts.iter().all(|&i| !gone(i));
         }
         let stumps = stumps.into_iter().filter(|s| rag.p.iter().enumerate().any(|(i, q)| !gone(i) && (*q - *s).length() < 0.6)).collect();
-        Self { j: jj, pelvis_back, chest_back, head_back: chest_back, shown, stumps }
+        let mut cut = [false; 16];
+        for (k, seg) in SEGS.iter().enumerate() {
+            cut[k] = match seg {
+                Seg::Thigh(f) => !intact([L_HIP, R_HIP][*f], [L_KNEE, R_KNEE][*f]),
+                Seg::UpperArm(f) => !intact([L_SHOULDER, R_SHOULDER][*f], [L_ELBOW, R_ELBOW][*f]),
+                Seg::Head => !intact(CHEST, HEAD),
+                _ => false,
+            };
+        }
+        Self { j: jj, pelvis_back, chest_back, head_back: chest_back, shown, stumps, cut }
     }
 
     /// Joints and back reference of a segment.
@@ -259,8 +274,70 @@ fn frame(a: DVec3, b: DVec3, back: DVec3) -> (Quat, f64) {
     (Quat::from_mat3(&m).normalize(), len)
 }
 
-#[derive(Component)]
-struct SegNode(usize);
+/// The same frame, in f64, as a skinning bone.
+fn bone(a: DVec3, b: DVec3, back: DVec3, rest: f64) -> skin::Frame {
+    let d = b - a;
+    let len = d.length();
+    let y = if len > 1e-6 { d / len } else { DVec3::Y };
+    let mut z = back - y * back.dot(y);
+    if z.length_squared() < 1e-4 {
+        z = y.any_orthonormal_vector();
+    }
+    let z = z.normalize();
+    let x = y.cross(z);
+    skin::Frame { origin: a, rot: DMat3::from_cols(x, y, z), stretch: (len / rest).clamp(0.3, 3.0) }
+}
+
+fn seg_index(seg: Seg) -> usize {
+    SEGS.iter().position(|s| *s == seg).unwrap()
+}
+
+/// Which bone a segment's skin blends into at its first joint and at its
+/// second, and over how many metres either side of the joint.
+fn neighbours(seg: Seg) -> (Option<(Seg, f64)>, Option<(Seg, f64)>) {
+    match seg {
+        Seg::Pelvis => (None, Some((Seg::Abdomen, 0.05))),
+        Seg::Abdomen => (Some((Seg::Pelvis, 0.05)), Some((Seg::Chest, 0.05))),
+        Seg::Chest => (Some((Seg::Abdomen, 0.05)), Some((Seg::Head, 0.04))),
+        Seg::Head => (Some((Seg::Chest, 0.04)), None),
+        Seg::Thigh(f) => (Some((Seg::Pelvis, 0.07)), Some((Seg::Shank(f), 0.06))),
+        Seg::Shank(f) => (Some((Seg::Thigh(f), 0.06)), Some((Seg::Foot(f), 0.04))),
+        Seg::Foot(f) => (Some((Seg::Shank(f), 0.04)), None),
+        Seg::UpperArm(f) => (Some((Seg::Chest, 0.06)), Some((Seg::Forearm(f), 0.05))),
+        Seg::Forearm(f) => (Some((Seg::UpperArm(f), 0.05)), Some((Seg::Hand(f), 0.03))),
+        Seg::Hand(f) => (Some((Seg::Forearm(f), 0.03)), None),
+    }
+}
+
+/// One vertex of the skin: where it sits in its own bone's frame, and how
+/// much it follows a neighbouring bone.
+#[derive(Clone, Copy)]
+struct SkinVert {
+    local: DVec3,
+    n: DVec3,
+    seg: u8,
+    /// Neighbouring segment and its weight, and whether the blend is across
+    /// the segment's first joint (else its second).
+    nb: Option<(u8, f32, bool)>,
+}
+
+/// All the figure's pieces of one material, as one skinned mesh.
+struct SkinPart {
+    verts: Vec<SkinVert>,
+    col: Vec<[f32; 4]>,
+    idx: Vec<u32>,
+    /// Owning segment of each triangle, for hiding parts.
+    tri_seg: Vec<u8>,
+    mesh: Handle<Mesh>,
+    entity: Entity,
+}
+
+#[derive(Resource)]
+struct Body {
+    parts: Vec<SkinPart>,
+    bind: [skin::Frame; 16],
+    rest: [f64; 16],
+}
 
 #[derive(Component)]
 struct BackHook(usize);
@@ -299,13 +376,87 @@ fn materials(mats: &mut Assets<StandardMaterial>) -> impl Fn(Stuff) -> Handle<St
 fn spawn(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mats: ResMut<Assets<StandardMaterial>>) {
     let p = Proportions::of_height(HEIGHT);
     let mat = materials(&mut mats);
+    // The bind pose: the animator's own standing pose.
+    let bind_pose = {
+        let mut an = Animator::new(p);
+        let mut pose = None;
+        for _ in 0..30 {
+            let input = AnimInput {
+                pos: DVec3::ZERO,
+                vel: DVec3::ZERO,
+                ground_vel: DVec3::ZERO,
+                look_yaw: 0.0,
+                look_pitch: 0.0,
+                gait: wormsign_core::player::Gait::Still,
+                grounded: true,
+                crouch: 0.0,
+                step_interval: 0.55,
+                last_left: false,
+                strike: None,
+                landed: None,
+                activity: Activity::Move,
+            };
+            pose = Some(an.update(&input, 1.0 / 30.0, |_, _| 0.0));
+        }
+        pose.unwrap()
+    };
+    let sk = Skeleton::from_pose(&bind_pose);
+    let mut rest = [0.0; 16];
+    let mut bind = [skin::Frame { origin: DVec3::ZERO, rot: DMat3::IDENTITY, stretch: 1.0 }; 16];
     for (k, seg) in SEGS.iter().enumerate() {
-        commands.spawn((SegNode(k), Transform::default(), Visibility::Hidden)).with_children(|c| {
-            for (stuff, geo) in fremen::build(*seg, &p) {
-                c.spawn((Mesh3d(meshes.add(geo.mesh())), MeshMaterial3d(mat(stuff)), Transform::default()));
-            }
-        });
+        rest[k] = rest_len(*seg, &p);
+        let (a, b, back) = sk.span(*seg);
+        bind[k] = bone(a, b, back, rest[k]);
+        bind[k].stretch = 1.0;
     }
+    let mut parts: Vec<(Stuff, SkinPart)> = Vec::new();
+    for (k, seg) in SEGS.iter().enumerate() {
+        let (start, end) = neighbours(*seg);
+        for (stuff, geo) in fremen::build(*seg, &p) {
+            let at = match parts.iter().position(|(s, _)| *s == stuff) {
+                Some(i) => i,
+                None => {
+                    parts.push((stuff, SkinPart { verts: vec![], col: vec![], idx: vec![], tri_seg: vec![], mesh: Handle::default(), entity: Entity::PLACEHOLDER }));
+                    parts.len() - 1
+                }
+            };
+            let part = &mut parts[at].1;
+            let base = part.verts.len() as u32;
+            for (i, q) in geo.pos.iter().enumerate() {
+                let local = DVec3::new(q[0] as f64, q[1] as f64, q[2] as f64);
+                let n = geo.nor[i];
+                let before = -local.y;
+                let after = local.y - rest[k];
+                let nb = match (start, end) {
+                    (Some((ns, r)), _) if before > -r && (end.is_none() || before >= after) => {
+                        Some((seg_index(ns) as u8, skin::neighbour_weight(before, r) as f32, true))
+                    }
+                    (_, Some((ns, r))) if after > -r => Some((seg_index(ns) as u8, skin::neighbour_weight(after, r) as f32, false)),
+                    _ => None,
+                };
+                part.verts.push(SkinVert { local, n: DVec3::new(n[0] as f64, n[1] as f64, n[2] as f64), seg: k as u8, nb });
+                part.col.push(geo.col[i]);
+            }
+            for t in geo.idx.chunks(3) {
+                part.idx.extend(t.iter().map(|i| i + base));
+                part.tri_seg.push(k as u8);
+            }
+        }
+    }
+    let mut body = Body { parts: Vec::new(), bind, rest };
+    for (stuff, mut part) in parts {
+        let mesh = meshes.add(
+            Mesh::new(bevy::mesh::PrimitiveTopology::TriangleList, bevy::asset::RenderAssetUsages::RENDER_WORLD | bevy::asset::RenderAssetUsages::MAIN_WORLD)
+                .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, vec![[0.0f32; 3]; part.verts.len()])
+                .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0.0f32, 1.0, 0.0]; part.verts.len()])
+                .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, part.col.clone())
+                .with_inserted_indices(bevy::mesh::Indices::U32(part.idx.clone())),
+        );
+        part.entity = commands.spawn((Mesh3d(mesh.clone()), MeshMaterial3d(mat(stuff)), Transform::default(), Visibility::Hidden, NoFrustumCulling)).id();
+        part.mesh = mesh;
+        body.parts.push(part);
+    }
+    commands.insert_resource(body);
     for i in 0..2 {
         commands.spawn((BackHook(i), Transform::default(), Visibility::Hidden)).with_children(|c| {
             for (stuff, geo) in fremen::maker_hook(HEIGHT as f32 / 1.78) {
@@ -374,7 +525,7 @@ fn capsules(sk: &Skeleton) -> Vec<Capsule> {
 #[allow(clippy::too_many_arguments)]
 fn animate(
     time: Res<Time>,
-    keys: Res<ButtonInput<KeyCode>>,
+    mut pack: ResMut<crate::caller::Pack>,
     desert: Res<Desert>,
     look: Res<Look>,
     fate: Res<Fate>,
@@ -405,7 +556,7 @@ fn animate(
         }
         fig.was_stowed[i] = stowed;
     }
-    if keys.just_pressed(KeyCode::KeyT) {
+    if std::mem::take(&mut pack.planted_now) {
         fig.plant = Some(0.0);
     }
     let mut activity = Activity::Move;
@@ -486,10 +637,11 @@ fn draw(
     mut fig: ResMut<Figure>,
     cloak_h: Res<CloakHandle>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut segs: Query<(&SegNode, &mut Transform, &mut Visibility), (Without<BackHook>, Without<CloakMesh>, Without<StumpBall>)>,
-    mut hooks: Query<(&BackHook, &mut Transform, &mut Visibility), (Without<SegNode>, Without<CloakMesh>, Without<StumpBall>)>,
-    mut cloak_q: Query<&mut Visibility, (With<CloakMesh>, Without<SegNode>, Without<BackHook>, Without<StumpBall>)>,
-    mut stumps: Query<(&mut Transform, &mut Visibility), (With<StumpBall>, Without<SegNode>, Without<BackHook>, Without<CloakMesh>)>,
+    body: Res<Body>,
+    mut vis: Query<&mut Visibility, (Without<BackHook>, Without<CloakMesh>, Without<StumpBall>)>,
+    mut hooks: Query<(&BackHook, &mut Transform, &mut Visibility), (Without<CloakMesh>, Without<StumpBall>)>,
+    mut cloak_q: Query<&mut Visibility, (With<CloakMesh>, Without<BackHook>, Without<StumpBall>)>,
+    mut stumps: Query<(&mut Transform, &mut Visibility), (With<StumpBall>, Without<BackHook>, Without<CloakMesh>)>,
 ) {
     let fig = &mut *fig;
     let pr = fig.anim.p;
@@ -513,20 +665,55 @@ fn draw(
             *v = want;
         }
     };
-    let mut chest_frame = (Quat::IDENTITY, Vec3::ZERO);
-    for (node, mut t, mut v) in &mut segs {
-        let seg = SEGS[node.0];
-        let (a, b, back) = sk.span(seg);
-        let (rot, len) = frame(a, b, back);
-        t.translation = origin.to_render(a);
-        t.rotation = rot;
-        t.scale = Vec3::new(1.0, (len / rest_len(seg, &pr)).clamp(0.3, 3.0) as f32, 1.0);
-        if seg == Seg::Chest {
-            chest_frame = (rot, t.translation);
-        }
-        let hide_head = first && seg == Seg::Head;
-        set_vis(&mut v, sk.shown[node.0] && !hide_head);
+    // The skin: every vertex taken through its bone (and, near a joint, its
+    // neighbour's) from the bind pose to this frame's.
+    let mut now = body.bind;
+    for (k, seg) in SEGS.iter().enumerate() {
+        let (a, b, back) = sk.span(*seg);
+        now[k] = bone(a, b, back, body.rest[k]);
     }
+    let mut shown = sk.shown;
+    if first {
+        shown[seg_index(Seg::Head)] = false;
+    }
+    let any = shown.iter().any(|s| *s);
+    for part in &body.parts {
+        if let Ok(mut v) = vis.get_mut(part.entity) {
+            set_vis(&mut v, any);
+        }
+        if !any {
+            continue;
+        }
+        let Some(mut mesh) = meshes.get_mut(&part.mesh) else { continue };
+        let mut pos = Vec::with_capacity(part.verts.len());
+        let mut nor = Vec::with_capacity(part.verts.len());
+        for v in &part.verts {
+            let k = v.seg as usize;
+            let other = v.nb.and_then(|(o, w, at_start)| {
+                let o = o as usize;
+                // Never stretch skin across a torn joint.
+                let torn = if at_start { sk.cut[k] } else { sk.cut[o] };
+                (!torn).then_some((&body.bind[o], &now[o], w as f64))
+            });
+            let p = skin::skin_point(v.local, &body.bind[k], &now[k], other);
+            let n = skin::skin_normal(v.n, &body.bind[k], &now[k], other);
+            pos.push(origin.to_render(p).to_array());
+            nor.push(n.as_vec3().to_array());
+        }
+        let idx: Vec<u32> = if shown.iter().all(|s| *s) {
+            part.idx.clone()
+        } else {
+            part.idx.chunks(3).zip(&part.tri_seg).filter(|(_, s)| shown[**s as usize]).flat_map(|(t, _)| t.iter().copied()).collect()
+        };
+        mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, pos);
+        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, nor);
+        mesh.insert_indices(bevy::mesh::Indices::U32(idx));
+    }
+    let chest_frame = {
+        let (a, b, back) = sk.span(Seg::Chest);
+        let (rot, _) = frame(a, b, back);
+        (rot, origin.to_render(a))
+    };
 
     // The hooks ride on the back until thrown.
     for (h, mut t, mut v) in &mut hooks {

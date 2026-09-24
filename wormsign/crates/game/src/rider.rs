@@ -4,8 +4,8 @@
 //!   R / F (hold)         reel in / pay out
 //!   E                    let go of both
 //!   G                    brace on the ropes and steer, or walk the back
-//!   riding and braced:   A D pry left / right, W drive it on, S ease off,
-//!                        C crouch to grip, Space jump clear
+//!   riding and braced:   A D steer left / right, W drive it on, S ease off,
+//!                        C crouch to grip
 //!
 //! All the physics lives in the core crate; this reads input, says where
 //! hooks are thrown from and to, draws the ropes and says what is going on.
@@ -80,7 +80,14 @@ fn input(
     fate: Res<Fate>,
     mut riding: ResMut<Riding>,
     mut controls: ResMut<Controls>,
+    mut was_riding: Local<bool>,
 ) {
+    // Every ride starts with the keys on the worm, whatever G was left at.
+    let now = riding.riding();
+    if now && !*was_riding {
+        riding.mode = Mode::Steer;
+    }
+    *was_riding = now;
     if !fate.alive() {
         riding.let_go();
         return;
@@ -111,10 +118,8 @@ fn input(
         i.right = 0.0;
         i.run = false;
         i.sandwalk = false;
-        if i.jump {
-            // Jump clear.
-            riding.let_go();
-        }
+        // Braced, Space does nothing: letting go is E, on purpose.
+        i.jump = false;
     } else {
         riding.reins.steer = 0.0;
         riding.reins.drive = 0.0;
@@ -323,7 +328,7 @@ fn hud(
     let mut s = format!("{}     {}", hook(&riding.hooks[0], "L"), hook(&riding.hooks[1], "R"));
     if riding.riding() {
         let mode = match riding.mode {
-            Mode::Steer => "braced - A/D pry, W drive, S ease, space jump clear",
+            Mode::Steer => "A / D steer   W drive   S ease off   E let go",
             Mode::Move => "walking the back - G to brace",
         };
         s.push_str(&format!("\n{:.0} m/s   {mode}", riding.speed));
@@ -331,7 +336,7 @@ fn hud(
             if w.brain.thrashing(clock.0) {
                 s.push_str("\nIT IS ROLLING - hold on, crouch (C)");
             } else if w.worm.depth > w.worm.spec.radius * 0.9 && w.brain.state == State::Ridden {
-                s.push_str("\nit is going under - pry it up (W) or get off");
+                s.push_str("\nit is going under - drive it (W) or get off");
             } else if w.brain.agitation > 0.7 {
                 s.push_str("\nit is getting angry - ease off");
             }

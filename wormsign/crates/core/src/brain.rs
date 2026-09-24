@@ -58,6 +58,8 @@ pub struct Reins {
 
 /// Seconds of being left alone before a ridden worm starts to go down.
 pub const DIVE_AFTER: f64 = 18.0;
+/// How fast a rider pries the heading round at full authority, rad/s.
+pub const RIDE_TURN: f64 = 0.35;
 /// Seconds from starting down to fully under.
 const DIVE_TIME: f64 = 14.0;
 
@@ -89,6 +91,8 @@ pub struct Brain {
     pub agitation: f64,
     thrash_until: f64,
     last_rider: f64,
+    /// Where the rider has pried it round to face.
+    ride_heading: f64,
 }
 
 /// Everything the brain needs to know about the world besides its ears.
@@ -119,6 +123,7 @@ impl Brain {
             agitation: 0.0,
             thrash_until: f64::NEG_INFINITY,
             last_rider: f64::NEG_INFINITY,
+            ride_heading: 0.0,
         }
     }
 
@@ -138,15 +143,17 @@ impl Brain {
             self.enter(State::Ridden, t);
             self.ride_speed = worm.speed.max(s.cruise);
             self.last_pried = t;
+            self.ride_heading = worm.heading;
         }
+        worm.ridden = true;
         self.last_rider = t;
         // Authority: hooks near the head pry harder, and a hook on the side
         // you turn toward does most of the work.
-        let reach = |d: f64| (1.6 - d / (s.length * 0.5)).clamp(0.35, 1.6);
+        let reach = |d: f64| (1.6 - d / (s.length * 0.5)).clamp(0.7, 1.6);
         let turn_auth: f64 = reins
             .hooks
             .iter()
-            .map(|&(d, side)| reach(d) * (0.35 + 0.65 * (side * reins.steer.signum()).max(0.0)))
+            .map(|&(d, side)| reach(d) * (0.6 + 0.4 * (side * reins.steer.signum()).max(0.0)))
             .sum::<f64>()
             .min(1.5);
         let drive_auth: f64 = reins.hooks.iter().map(|&(d, _)| reach(d) * 0.7).sum::<f64>().min(1.3);
@@ -165,15 +172,25 @@ impl Brain {
         };
         self.ride_speed += (target - self.ride_speed).clamp(-3.0 * dt, 3.0 * dt);
 
-        // Hard, sustained prying agitates it; calm riding soothes it.
+        // Only relentless, flat-out prying agitates it; ordinary riding
+        // soothes it.
         let effort = reins.steer.abs() * turn_auth + reins.drive.max(0.0) * drive_auth * 0.6;
-        self.agitation = (self.agitation + (effort - 0.55).max(-0.4) * 0.05 * dt).max(0.0);
+        self.agitation = (self.agitation + (effort - 1.3).max(-0.4) * 0.03 * dt).max(0.0);
         if self.agitation > 1.0 && !self.thrashing(t) {
             self.thrash_until = t + 5.0;
             self.agitation = 0.35;
         }
 
-        let mut heading = worm.heading + reins.steer * 0.6 * turn_auth;
+        // Steering pries the heading round at up to about 20 degrees a second
+        // (more with good hooks); let go and it holds the line it is on.
+        if reins.steer.abs() > 0.05 {
+            let lead = wrap_angle(self.ride_heading - worm.heading).clamp(-0.5, 0.5);
+            self.ride_heading = worm.heading + lead + reins.steer * RIDE_TURN * turn_auth.min(1.2) * dt;
+        } else {
+            // Settle where the turn has brought it: a little past, then hold.
+            self.ride_heading = worm.heading + worm.turn_rate * 0.25;
+        }
+        let mut heading = self.ride_heading;
         // Neglected, it goes down again.
         let idle = t - self.last_pried;
         let dive = ((idle - DIVE_AFTER) / DIVE_TIME).clamp(0.0, 1.0);
@@ -226,6 +243,8 @@ impl Brain {
 
     /// Decide. Call every substep (it is cheap) or every few.
     pub fn think(&mut self, worm: &mut Worm, ear: &mut Listener, t: f64, dt: f64, world: &impl Surroundings) {
+        // Nobody steering: it turns at its own ponderous pace.
+        worm.ridden = false;
         if let Some((speed, depth)) = self.hold {
             worm.want_speed = speed;
             worm.want_depth = depth;
@@ -628,7 +647,7 @@ mod tests {
     }
 
     #[test]
-    fn a_ridden_worm_turns_gradually_where_it_is_pried() {
+    fn a_ridden_worm_turns_where_it_is_pried_and_holds_its_line() {
         let mut w = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
         w.speed = 20.0;
         let mut b = Brain::new(1);
@@ -636,11 +655,19 @@ mod tests {
         reins.steer = 1.0;
         reins.drive = 0.3;
         let h0 = w.heading;
-        ride_for(&mut w, &mut b, &reins, 0.0, 4.0);
+        // It answers within a second...
+        let t = ride_for(&mut w, &mut b, &reins, 0.0, 1.0);
+        assert!(wrap_angle(w.heading - h0) > 0.05, "already turning: {}", wrap_angle(w.heading - h0));
+        let t = ride_for(&mut w, &mut b, &reins, t, 4.0);
         let turned = wrap_angle(w.heading - h0);
-        assert!(turned > 0.05, "turned right: {turned}");
-        assert!(turned < 0.8, "but not like a car: {turned}");
+        // ...and comes round a good way in five, but not like a car.
+        assert!(turned > 45f64.to_radians(), "turned right: {turned}");
+        assert!(turned < 2.0, "not on a pin: {turned}");
         assert_eq!(b.state, State::Ridden);
+        // Let go: it stops turning within about a second.
+        reins.steer = 0.0;
+        ride_for(&mut w, &mut b, &reins, t, 1.5);
+        assert!(w.turn_rate.abs() < 0.05, "still turning at {}", w.turn_rate);
         // And the other way.
         let mut w2 = Worm::new(WormSpec::standard(), 0.0, 0.0, 0.0, 7.0, flat);
         w2.speed = 20.0;

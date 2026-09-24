@@ -18,6 +18,7 @@ pub mod player;
 pub mod ragdoll;
 pub mod rng;
 pub mod shade;
+pub mod skin;
 pub mod terrain;
 pub mod tilemesh;
 pub mod vibration;

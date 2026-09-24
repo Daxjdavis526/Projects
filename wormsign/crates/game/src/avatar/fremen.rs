@@ -130,6 +130,7 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
                 ring(s(-0.01), s(0.172), s(0.11), s(0.008)),
                 ring(l * 0.6, s(0.162), s(0.104), 0.0),
                 ring(l, s(0.148), s(0.098), 0.0),
+                ring(l + s(0.035), s(0.147), s(0.097), 0.0),
             ];
             suit.loft(&rings, 28, 120.0, (0.5, 0.0), |y, th| suit_look(&pal, y, th, s(0.034)));
             // Belt.
@@ -166,7 +167,7 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
         }
         Seg::Abdomen => {
             let l = (p.chest_height - p.waist_height) as f32;
-            let rings = [ring(-s(0.01), s(0.148), s(0.098), 0.0), ring(l * 0.5, s(0.152), s(0.103), -s(0.004)), ring(l + s(0.01), s(0.162), s(0.112), -s(0.008))];
+            let rings = [ring(-s(0.04), s(0.147), s(0.097), 0.0), ring(l * 0.5, s(0.152), s(0.103), -s(0.004)), ring(l + s(0.04), s(0.163), s(0.113), -s(0.008))];
             suit.loft(&rings, 28, 120.0, (0.0, 0.0), |y, th| {
                 let mut lk = suit_look(&pal, y, th, s(0.034));
                 // The two harness straps crossing the belly.
@@ -182,7 +183,7 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
             let l = (p.neck_height - p.chest_height) as f32;
             let sh = (p.shoulder_height - p.chest_height) as f32;
             let rings = [
-                ring(-s(0.01), s(0.162), s(0.112), -s(0.008)),
+                ring(-s(0.04), s(0.161), s(0.111), -s(0.008)),
                 ring(sh * 0.55, s(0.176), s(0.122), -s(0.012)),
                 ring(sh * 0.92, s(0.196), s(0.108), -s(0.002)),
                 ring(sh + s(0.035), s(0.14), s(0.082), 0.0),
@@ -216,7 +217,7 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
             // From the neck joint up the head's axis to its centre, then on
             // to the crown.
             let l = (p.head_centre - p.neck_height) as f32;
-            let neck = [ring(-s(0.02), s(0.052), s(0.05), s(0.006)), ring(l * 0.55, s(0.05), s(0.048), s(0.004))];
+            let neck = [ring(-s(0.045), s(0.054), s(0.052), s(0.006)), ring(l * 0.55, s(0.05), s(0.048), s(0.004))];
             suit.loft(&neck, 18, 120.0, (0.0, 0.0), |y, th| suit_look(&pal, y, th, s(0.02)));
             let head = [
                 ring(l - s(0.1), s(0.045), s(0.05), -s(0.02)),
@@ -292,7 +293,7 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
                 Ring { y: -s(0.02), rx: s(0.088), rz: s(0.092), cx: out * s(0.008), cz: 0.0 },
                 ring(l * 0.3, s(0.08), s(0.086), -s(0.006)),
                 ring(l * 0.75, s(0.064), s(0.068), -s(0.004)),
-                ring(l + s(0.02), s(0.054), s(0.058), 0.0),
+                ring(l + s(0.05), s(0.054), s(0.058), 0.0),
             ];
             suit.loft(&rings, 22, 120.0, (0.6, 0.0), |y, th| suit_look(&pal, y, th, s(0.03)));
             // Catchpocket on the outside of the thigh.
@@ -307,7 +308,7 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
         Seg::Shank(_side) => {
             let l = p.shank as f32;
             let rings = [
-                ring(-s(0.02), s(0.055), s(0.058), -s(0.004)),
+                ring(-s(0.05), s(0.055), s(0.058), -s(0.004)),
                 ring(l * 0.22, s(0.056), s(0.063), s(0.012)),
                 ring(l * 0.45, s(0.05), s(0.054), s(0.006)),
             ];
@@ -366,13 +367,13 @@ pub fn build(seg: Seg, p: &Proportions) -> Vec<(Stuff, Geo)> {
             let rings = [
                 Ring { y: -s(0.01), rx: s(0.06), rz: s(0.062), cx: out * s(0.004), cz: 0.0 },
                 ring(l * 0.4, s(0.052), s(0.056), -s(0.004)),
-                ring(l + s(0.015), s(0.042), s(0.045), 0.0),
+                ring(l + s(0.045), s(0.042), s(0.044), 0.0),
             ];
             suit.loft(&rings, 18, 120.0, (0.8, 0.0), |y, th| suit_look(&pal, y, th, s(0.03)));
         }
         Seg::Forearm(_side) => {
             let l = p.forearm as f32;
-            let rings = [ring(-s(0.015), s(0.043), s(0.045), 0.0), ring(l * 0.3, s(0.045), s(0.044), 0.0), ring(l, s(0.031), s(0.027), 0.0)];
+            let rings = [ring(-s(0.045), s(0.043), s(0.044), 0.0), ring(l * 0.3, s(0.045), s(0.044), 0.0), ring(l, s(0.031), s(0.027), 0.0)];
             suit.loft(&rings, 16, 120.0, (0.6, 0.0), |y, th| suit_look(&pal, y, th, s(0.028)));
             // Glove gauntlet.
             let cuff = [ring(l - s(0.065), s(0.041), s(0.037), 0.0), ring(l + s(0.01), s(0.036), s(0.032), 0.0)];
