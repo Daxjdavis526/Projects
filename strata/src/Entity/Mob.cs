@@ -458,8 +458,7 @@ public sealed class Mob
             root.Rotation = new Vector3(0, Yaw, t * MathF.PI * 0.5f);
         }
         byte l = w.GetLight(V.FloorToInt(Body.X), V.FloorToInt(Body.Y + Def.Height * 0.5f), V.FloorToInt(Body.Z));
-        float glow = Def.Kind == MobKind.Hollow || Def.Kind == MobKind.Gravemaw ? 0f : 0f;
-        Rig.SetLight(new Vector2((l >> 4) / 15f, (l & 15) / 15f), Math.Max(Flash, Dead ? 0.6f : 0f), glow);
+        Rig.SetLight(new Vector2((l >> 4) / 15f, (l & 15) / 15f), Math.Max(Flash, Dead ? 0.6f : 0f));
     }
 
     public Aabb Bounds

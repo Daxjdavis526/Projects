@@ -71,6 +71,12 @@ public partial class ShotDirector : Node3D
             _shots.Add(("creatures_day", ring + new Vector3(-7, 3.5f, 7), ring, 0.25f, 1f));
             _shots.Add(("creatures_night", ring + new Vector3(-7, 3.5f, 7), ring, 0.72f, 1f));
             _shots.Add(("creatures_night_far", ring + new Vector3(-30, 5f, 30), ring, 0.72f, 1f));
+            // The same creatures in mid-morning from across a meadow, where they once showed as glowing blobs.
+            _shots.Add(("creatures_morning_far", ring + new Vector3(-16, 3f, 16), ring, 0.12f, 1f));
+            // The night sky itself, early in the night and again later once it has turned.
+            _shots.Add(("night_sky", p + new Vector3(0, 3, 0), p + new Vector3(26, 34, -15), 0.72f, 1f));
+            _shots.Add(("night_sky_late", p + new Vector3(0, 3, 0), p + new Vector3(26, 34, -15), 0.84f, 1f));
+            _shots.Add(("night_zenith", p + new Vector3(0, 3, 0), p + new Vector3(0.6f, 40, 0.3f), 0.75f, 1f));
         }
         else BuildTour(gen, sx, sz);
 

@@ -4,6 +4,7 @@ render_mode unshaded, fog_disabled, cull_disabled, depth_draw_never, blend_mix, 
 // A flat deck of blocky clouds: value noise sampled on a coarse grid so each
 // cloud is built from square cells, drifting with the wind.
 global uniform float daylight;
+global uniform vec3 sun_dir;
 global uniform vec4 sky_horizon;
 global uniform vec4 sky_top;
 global uniform float cloud_cover;
@@ -37,8 +38,10 @@ void fragment() {
     float fade = 1.0 - smoothstep(260.0, 460.0, dist);
     // Cloud edges catch a little less light than their middles.
     float edge = smoothstep(cover, cover + 0.12, n);
-    vec3 lit = mix(vec3(0.06, 0.07, 0.1), vec3(1.0), clamp(daylight * 1.1, 0.0, 1.0));
+    // By day as bright as the daylight allows; by night dim grey shapes against the stars, lit only by the moon.
+    float day = smoothstep(-0.14, 0.28, sun_dir.y);
+    vec3 lit = mix(vec3(0.028, 0.031, 0.043), vec3(1.0) * clamp(daylight * 1.1, 0.0, 1.0), day);
     vec3 col = mix(sky_horizon.rgb, lit * cloud_shade.rgb, 0.85) * (0.86 + 0.14 * edge);
     ALBEDO = col;
-    ALPHA = 0.82 * fade * (underwater > 0.5 ? 0.0 : 1.0);
+    ALPHA = mix(0.7, 0.82, day) * fade * (underwater > 0.5 ? 0.0 : 1.0);
 }

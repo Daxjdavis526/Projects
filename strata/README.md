@@ -324,6 +324,20 @@ bleeding into neighbours, and mipmaps are built so a layer's coverage survives
 minification (leaves don't dissolve at a distance). Item icons, block icons
 and the creatures' coloured-box models are generated the same way.
 
+**The night sky** is drawn in the sky shader, on a sphere that follows the
+camera. It has three layers of stars: a dust of faint ones, thickest along the
+Milky Way, then common ones, then a few bright ones. The stars vary in
+brightness and colour, from blue-white through white and yellow to orange,
+and shimmer gently. The Milky Way is a band of cloudy light with a dark rift
+of dust down its middle. It arches overhead around midnight, and the whole
+sky turns with the moon through the night. About once every forty seconds a
+shooting star crosses the sky. Every star is drawn at least a pixel and a
+half wide, and one drawn wider than it is gets fainter to match, so turning
+the view never makes stars wink on and off. By night the clouds are dim grey
+shapes that hide the stars behind them.
+
+![Looking straight up at midnight: the Milky Way, a crescent moon, dim clouds](doc/night_sky.jpg)
+
 **Sound** is synthesised at start-up at 22 kHz from oscillators, noise and
 envelopes: footsteps, digging, breaking and placing per material, splashes and
 swimming, hits and hurts, eating, doors, crates, thunder, a voice (idle, hurt,
@@ -378,7 +392,13 @@ exact voxel ray walk (DDA), out to 5 blocks; creatures can be hit out to 3.6.
 
 **Creatures** are small state machines (idle, wander, graze, flee, follow,
 chase, fly) over the same collision as the player. Hunters path with A* over
-walkable cells in a short radius and re-plan as you move.
+walkable cells in a short radius and re-plan as you move. Each creature is
+lit through its own two materials (body and eyes), not through per-instance
+shader parameters: on some graphics drivers those arrived corrupted and
+turned whole herds into glowing white blobs. The creature, item and hand
+shaders also clamp their output to white and replace any invalid pixel. The
+bloom only picks out things brighter than white, so nothing on a creature
+can set it off.
 
 ## Testing
 
@@ -461,7 +481,10 @@ copied.
   lightning. Rain darkens the sky and hides the sun; it does not fill
   anything, and snow does not settle.
 - **The sky** is painted, not simulated: a gradient, a sun and a moon on a
-  fixed tilted path, an eight-day moon cycle, noise stars and layered clouds.
+  fixed tilted path, an eight-day moon cycle and layered clouds. The stars
+  and the Milky Way are procedural noise, not a star catalogue. There are no
+  real constellations, and the sky turns about a horizontal axis, as it
+  would seen from the equator.
 - **Creature AI** plans a few dozen blocks ahead at most. Hunters don't
   cooperate, dig, climb ladders or open doors (so a door really does keep
   them out), and animals don't swim across wide water.

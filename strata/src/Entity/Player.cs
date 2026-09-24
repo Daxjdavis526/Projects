@@ -784,7 +784,7 @@ public sealed partial class Player : Node3D
         {
             _hand.Position = basePos + new Vector3(0.06f - arc * 0.12f, -0.04f + arc * 0.1f, 0.02f - arc * 0.2f);
             _hand.Rotation = new Vector3(-0.2f - arc * 0.9f, -0.15f, 0.1f);
-            _hand.SetInstanceShaderParameter("light_level", light);
+            Rig.SetLight(_hand, light);
             return;
         }
         var d = stack.Def;
@@ -805,6 +805,6 @@ public sealed partial class Player : Node3D
         }
         _held.Position = pos;
         _held.Basis = Basis.FromEuler(rot).Scaled(new Vector3(scale, scale, scale));
-        _held.SetInstanceShaderParameter("light_level", light);
+        Rig.SetLight(_held, light);
     }
 }

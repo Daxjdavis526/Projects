@@ -88,6 +88,10 @@ star_alpha={
 "type": "float",
 "value": 0.0
 }
+sky_spin={
+"type": "float",
+"value": 0.0
+}
 cloud_cover={
 "type": "float",
 "value": 0.45

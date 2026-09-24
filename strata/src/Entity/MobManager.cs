@@ -271,7 +271,7 @@ public sealed partial class MobManager : Node3D
             _thornMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/entity.gdshader") };
             _thornMat.SetShaderParameter("tint", new Color(0.9f, 0.85f, 0.55f));
         }
-        var node = new MeshInstance3D { Mesh = new BoxMesh { Size = new Vector3(0.08f, 0.08f, 0.3f) }, MaterialOverride = _thornMat };
+        var node = new MeshInstance3D { Mesh = new BoxMesh { Size = new Vector3(0.08f, 0.08f, 0.3f) }, MaterialOverride = Rig.Own(_thornMat) };
         AddChild(node);
         Shots.Add(new Projectile { Pos = from, Vel = vel, Damage = m.Def.Damage, Owner = m, Node = node });
         Sfx.Play("spit", from, 0.8f);
@@ -285,7 +285,7 @@ public sealed partial class MobManager : Node3D
             _arrowMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/entity.gdshader") };
             _arrowMat.SetShaderParameter("tint", new Color(0.62f, 0.46f, 0.3f));
         }
-        var node = new MeshInstance3D { Mesh = new BoxMesh { Size = new Vector3(0.05f, 0.05f, 0.62f) }, MaterialOverride = _arrowMat };
+        var node = new MeshInstance3D { Mesh = new BoxMesh { Size = new Vector3(0.05f, 0.05f, 0.62f) }, MaterialOverride = Rig.Own(_arrowMat) };
         AddChild(node);
         var s = new Projectile { Pos = from, Vel = vel, Damage = damage, Knockback = knockback, Gravity = 16f, Life = 8f, FromPlayer = true, Node = node };
         Shots.Add(s);
@@ -350,7 +350,7 @@ public sealed partial class MobManager : Node3D
                 }
                 else s.Node.Position = s.Pos;
                 byte l = World.GetLight(V.FloorToInt(s.Pos.X), V.FloorToInt(s.Pos.Y), V.FloorToInt(s.Pos.Z));
-                s.Node.SetInstanceShaderParameter("light_level", new Vector2((l >> 4) / 15f, (l & 15) / 15f));
+                Rig.SetLight(s.Node, new Vector2((l >> 4) / 15f, (l & 15) / 15f));
             }
         }
         for (int i = Shots.Count - 1; i >= 0; i--)

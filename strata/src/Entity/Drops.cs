@@ -129,7 +129,7 @@ public sealed partial class DropManager : Node3D
             {
                 d.Node?.QueueFree();
                 var (mesh, mat) = ItemMeshes.Get(d.Stack.Id, false);
-                d.Node = new MeshInstance3D { Mesh = mesh, MaterialOverride = mat, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
+                d.Node = new MeshInstance3D { Mesh = mesh, MaterialOverride = Rig.Own(mat), CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
                 AddChild(d.Node);
                 d.NodeItem = d.Stack.Id;
             }
@@ -139,7 +139,7 @@ public sealed partial class DropManager : Node3D
             var p = d.Body.Position + new Vector3(0, 0.14f + bob, 0);
             d.Node.Transform = new Transform3D(new Basis(Vector3.Up, d.Spin).Scaled(new Vector3(s, s, s)), p);
             byte l = world.GetLight(V.FloorToInt(p.X), V.FloorToInt(p.Y), V.FloorToInt(p.Z));
-            d.Node.SetInstanceShaderParameter("light_level", new Vector2((l >> 4) / 15f, (l & 15) / 15f));
+            Rig.SetLight(d.Node, new Vector2((l >> 4) / 15f, (l & 15) / 15f));
             // Blink out in the last few seconds.
             d.Node.Visible = d.Age < Lifetime - 10f || ((int)(d.Age * 6) & 1) == 0;
         }

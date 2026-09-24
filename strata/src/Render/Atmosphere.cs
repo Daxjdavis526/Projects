@@ -166,6 +166,7 @@ public sealed class Atmosphere
         RenderingServer.GlobalShaderParameterSet("sky_horizon", hor.SrgbToLinear());
         RenderingServer.GlobalShaderParameterSet("sun_glow", glow.SrgbToLinear());
         RenderingServer.GlobalShaderParameterSet("star_alpha", (1f - Smooth.Step(-0.28f, 0.04f, s)) * (1f - Rain));
+        RenderingServer.GlobalShaderParameterSet("sky_spin", a);                 // the stars turn with the sun and moon
         RenderingServer.GlobalShaderParameterSet("moon_phase", (Day % 8) / 8f);
         RenderingServer.GlobalShaderParameterSet("cloud_cover", 0.42f + 0.5f * Rain);
         RenderingServer.GlobalShaderParameterSet("cloud_shade", Lerp(Colors.White, new Color(0.55f, 0.57f, 0.62f), Rain).SrgbToLinear());

@@ -13,16 +13,20 @@ public sealed class Rig
 {
     public readonly Node3D Root = new();
     public readonly Dictionary<string, Node3D> Parts = new();
-    private readonly List<MeshInstance3D> _meshes = new();
     private static Shader _shader;
-    private static ShaderMaterial _litMat;
-    private readonly ShaderMaterial _mat;
+    // Each creature has its own two materials, body and eyes, and its light is
+    // set on them: see entity.gdshader for why it is not set per mesh instance.
+    private readonly ShaderMaterial _mat, _eyeMat;
+    private Vector3 _set = new(-1f, -1f, -1f);
+    private float _setGlow = -1f;
     private int _seed;
 
     public Rig(int seed)
     {
         _shader ??= GD.Load<Shader>("res://shaders/entity.gdshader");
         _mat = new ShaderMaterial { Shader = _shader };
+        _eyeMat = new ShaderMaterial { Shader = _shader };
+        _eyeMat.SetShaderParameter("self_lit", 1f);
         _seed = seed;
     }
 
@@ -50,30 +54,38 @@ public sealed class Rig
     /// <summary>A detail that shines by itself, so it shows in the dark: eyes, mostly.</summary>
     public void Eye(string part, Vector3 min, Vector3 size, Color color)
     {
-        if (_litMat == null)
-        {
-            _litMat = new ShaderMaterial { Shader = _shader };
-            _litMat.SetShaderParameter("self_lit", 1f);
-        }
-        AddMesh(Parts[part], min, size, color, 0f, _litMat);
+        AddMesh(Parts[part], min, size, color, 0f, _eyeMat);
     }
 
     private void AddMesh(Node3D parent, Vector3 min, Vector3 size, Color color, float noise, ShaderMaterial mat = null)
     {
         var mi = new MeshInstance3D { Mesh = BoxMesh(min, size, color, noise, _seed++), MaterialOverride = mat ?? _mat, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
         parent.AddChild(mi);
-        _meshes.Add(mi);
     }
 
+    /// <summary>The voxel light where the creature stands (sky, block; 0..1), how red it flashes, and how much it glows.</summary>
     public void SetLight(Vector2 light, float flash, float glow = 0f)
     {
-        foreach (var m in _meshes)
+        var key = new Vector3(light.X, light.Y, flash);
+        if (key == _set && glow == _setGlow) return;
+        _set = key;
+        _setGlow = glow;
+        foreach (var m in new[] { _mat, _eyeMat })
         {
-            m.SetInstanceShaderParameter("light_level", light);
-            m.SetInstanceShaderParameter("flash", flash);
-            m.SetInstanceShaderParameter("glow", glow);
+            m.SetShaderParameter("light_level", light);
+            m.SetShaderParameter("flash", flash);
+            m.SetShaderParameter("glow", glow);
         }
     }
+
+    /// <summary>The same for a lone mesh with a material of its own (a dropped or held item, an arrow, the hand).</summary>
+    public static void SetLight(GeometryInstance3D node, Vector2 light)
+    {
+        if (node?.MaterialOverride is ShaderMaterial m) m.SetShaderParameter("light_level", light);
+    }
+
+    /// <summary>A private copy of a shared material, so a mesh can be lit on its own.</summary>
+    public static Material Own(Material shared) => (Material)shared.Duplicate();
 
     private static readonly float[] FaceShade = { 0.8f, 0.8f, 1f, 0.55f, 0.9f, 0.7f };
 
