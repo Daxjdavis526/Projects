@@ -97,7 +97,7 @@ fn recentre(mut origin: ResMut<Origin>, anchor: Query<&WorldPos, With<OriginAnch
     }
 }
 
-fn place(origin: Res<Origin>, mut q: Query<(Ref<WorldPos>, &mut Transform)>) {
+pub fn place(origin: Res<Origin>, mut q: Query<(Ref<WorldPos>, &mut Transform)>) {
     let all = origin.is_changed();
     for (wp, mut t) in &mut q {
         if all || wp.is_changed() {

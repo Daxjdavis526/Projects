@@ -23,12 +23,12 @@ pub struct DeathPlugin;
 impl Plugin for DeathPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Fate>()
-            .add_systems(Startup, (spawn_ragdoll_parts, spawn_overlay))
+            .add_systems(Startup, spawn_overlay)
             .add_systems(
                 Update,
                 (seize, step_ragdoll).chain().in_set(Phase::Simulate).in_set(SimSet).after(crate::worms::simulate),
             )
-            .add_systems(Update, (death_camera.after(crate::player::camera), draw_ragdoll, overlay, respawn).in_set(Phase::View));
+            .add_systems(Update, (death_camera.after(crate::player::camera), overlay, respawn).in_set(Phase::View));
     }
 }
 
@@ -49,11 +49,13 @@ pub struct Fate {
     pub stage: Stage,
     /// Sim seconds since the current stage began.
     t: f64,
-    rag: Option<Ragdoll>,
+    /// The body, once it is no longer the player's to move. The avatar
+    /// draws it.
+    pub rag: Option<Ragdoll>,
     worm: Option<Entity>,
     /// Joints thrown clear: gravity only, left on the sand.
     flung: Vec<usize>,
-    swallowed: [bool; JOINTS],
+    pub swallowed: [bool; JOINTS],
     cam: Option<DVec3>,
     orbit: f64,
     rng: Option<Rng>,
@@ -82,7 +84,7 @@ fn seize(
     mut fx: ResMut<Fx>,
     mut vtime: ResMut<Time<Virtual>>,
     mut shake: ResMut<Shake>,
-    look: Res<Look>,
+    figure: Res<crate::avatar::Figure>,
     player: Query<&PlayerBody>,
     mut worms: Query<(Entity, &mut WormBody)>,
 ) {
@@ -113,7 +115,11 @@ fn seize(
         let seed = (clock.0 * 1000.0) as u64 ^ 0x5EED;
         let mut rng = Rng::new(seed);
         let dt = crate::world::SUBSTEP;
-        let mut rag = Ragdoll::new(p.pos, look.yaw as f64, p.vel, dt);
+        // The figure as it was this instant becomes the ragdoll.
+        let mut rag = match figure.pose.as_ref() {
+            Some(pose) => Ragdoll::from_joints(crate::avatar::ragdoll_joints(pose), p.vel, dt),
+            None => Ragdoll::new(p.pos, figure.anim.yaw(), p.vel, dt),
+        };
         let side = DVec3::new(rng.gauss(), 0.0, rng.gauss()) * 1.5;
         rag.kick(facing * w.speed * 0.45 + DVec3::new(0.0, rng.range(10.0, 14.0), 0.0) + side, dt);
         let ground = DVec3::new(p.pos.x, p.pos.y, p.pos.z);
@@ -205,11 +211,11 @@ fn step_ragdoll(
                     wb.brain.mouth_override = Some(0.0);
                     let rng = fate.rng.as_mut().unwrap();
                     let mut wounds = Vec::new();
-                    let arm = if rng.chance(0.5) { (ragdoll::CHEST, ragdoll::L_ELBOW) } else { (ragdoll::CHEST, ragdoll::R_ELBOW) };
-                    let leg = if rng.chance(0.5) { (ragdoll::PELVIS, ragdoll::L_KNEE) } else { (ragdoll::PELVIS, ragdoll::R_KNEE) };
+                    let arm = if rng.chance(0.5) { (ragdoll::L_SHOULDER, ragdoll::L_ELBOW) } else { (ragdoll::R_SHOULDER, ragdoll::R_ELBOW) };
+                    let leg = if rng.chance(0.5) { (ragdoll::L_HIP, ragdoll::L_KNEE) } else { (ragdoll::R_HIP, ragdoll::R_KNEE) };
                     let mut torn = vec![arm, leg];
                     if rng.chance(0.5) {
-                        torn.push((ragdoll::HEAD, ragdoll::CHEST));
+                        torn.push((ragdoll::CHEST, ragdoll::HEAD));
                     }
                     for (a, b) in &torn {
                         if let Some(at) = rag.tear_bone(*a, *b) {
@@ -217,14 +223,8 @@ fn step_ragdoll(
                         }
                     }
                     // One piece is flung clear, to land on the sand.
-                    let (fa, fb) = torn[rng.chance(0.5) as usize];
-                    let limb: Vec<usize> = match (fa, fb) {
-                        (_, ragdoll::L_ELBOW) => vec![ragdoll::L_ELBOW, ragdoll::L_HAND],
-                        (_, ragdoll::R_ELBOW) => vec![ragdoll::R_ELBOW, ragdoll::R_HAND],
-                        (_, ragdoll::L_KNEE) => vec![ragdoll::L_KNEE, ragdoll::L_FOOT],
-                        (_, ragdoll::R_KNEE) => vec![ragdoll::R_KNEE, ragdoll::R_FOOT],
-                        _ => vec![],
-                    };
+                    let (_, fb) = torn[rng.chance(0.5) as usize];
+                    let limb: Vec<usize> = ragdoll::limb(fb).to_vec();
                     let side = facing.cross(DVec3::Y).normalize_or_zero() * if rng.chance(0.5) { 1.0 } else { -1.0 };
                     let fling = side * rng.range(9.0, 15.0) + DVec3::Y * rng.range(5.0, 9.0) + wvel * 0.5;
                     for &j in &limb {
@@ -330,98 +330,6 @@ fn death_camera(
     let look = (focus - pos).as_vec3();
     if look.length_squared() > 1e-6 {
         t.rotation = Transform::default().looking_to(look, Vec3::Y).rotation;
-    }
-}
-
-// --- drawing the body ------------------------------------------------------------
-
-#[derive(Component)]
-struct Bone(usize);
-
-#[derive(Component)]
-struct JointBall(usize);
-
-#[derive(Component)]
-struct Stump(usize, bool);
-
-fn spawn_ragdoll_parts(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mats: ResMut<Assets<StandardMaterial>>) {
-    let cloth = mats.add(StandardMaterial { base_color: Color::srgb(0.22, 0.18, 0.15), perceptual_roughness: 0.9, ..default() });
-    let raw = mats.add(StandardMaterial { base_color: Color::srgb(0.45, 0.02, 0.02), perceptual_roughness: 0.3, reflectance: 0.5, ..default() });
-    let cyl = meshes.add(Cylinder::new(1.0, 1.0));
-    let ball = meshes.add(Sphere::new(1.0).mesh().ico(2).unwrap());
-    // One cylinder per possible link; braces never show.
-    for i in 0..16 {
-        commands.spawn((Bone(i), Mesh3d(cyl.clone()), MeshMaterial3d(cloth.clone()), Transform::default(), Visibility::Hidden));
-    }
-    for j in 0..JOINTS {
-        commands.spawn((JointBall(j), Mesh3d(ball.clone()), MeshMaterial3d(cloth.clone()), Transform::default(), Visibility::Hidden));
-    }
-    for i in 0..16 {
-        for end in [false, true] {
-            commands.spawn((Stump(i, end), Mesh3d(ball.clone()), MeshMaterial3d(raw.clone()), Transform::default(), Visibility::Hidden));
-        }
-    }
-}
-
-type BoneQ<'w, 's> = Query<'w, 's, (&'static Bone, &'static mut Transform, &'static mut Visibility), (Without<JointBall>, Without<Stump>)>;
-type BallQ<'w, 's> = Query<'w, 's, (&'static JointBall, &'static mut Transform, &'static mut Visibility), (Without<Bone>, Without<Stump>)>;
-type StumpQ<'w, 's> = Query<'w, 's, (&'static Stump, &'static mut Transform, &'static mut Visibility), (Without<Bone>, Without<JointBall>)>;
-
-fn draw_ragdoll(origin: Res<Origin>, fate: Res<Fate>, mut bones: BoneQ, mut balls: BallQ, mut stumps: StumpQ) {
-    let Some(rag) = fate.rag.as_ref().filter(|_| !fate.alive()) else {
-        for (_, _, mut v) in &mut bones {
-            *v = Visibility::Hidden;
-        }
-        for (_, _, mut v) in &mut balls {
-            *v = Visibility::Hidden;
-        }
-        for (_, _, mut v) in &mut stumps {
-            *v = Visibility::Hidden;
-        }
-        return;
-    };
-    let shown = |j: usize| !fate.swallowed[j];
-    let limb_r = |a: usize, b: usize| if (a, b) == (ragdoll::CHEST, ragdoll::PELVIS) { 0.16 } else { 0.06 };
-    for (bone, mut t, mut v) in &mut bones {
-        let Some(l) = rag.links.get(bone.0) else {
-            *v = Visibility::Hidden;
-            continue;
-        };
-        if !l.bone || !l.intact || !shown(l.a) || !shown(l.b) {
-            *v = Visibility::Hidden;
-            continue;
-        }
-        let (a, b) = (origin.to_render(rag.p[l.a]), origin.to_render(rag.p[l.b]));
-        let d = b - a;
-        let len = d.length().max(0.01);
-        t.translation = (a + b) * 0.5;
-        t.rotation = Quat::from_rotation_arc(Vec3::Y, d / len);
-        let r = limb_r(l.a, l.b);
-        t.scale = Vec3::new(r, len, r);
-        *v = Visibility::Inherited;
-    }
-    for (jb, mut t, mut v) in &mut balls {
-        if !shown(jb.0) {
-            *v = Visibility::Hidden;
-            continue;
-        }
-        t.translation = origin.to_render(rag.p[jb.0]);
-        t.scale = Vec3::splat(rag.radius[jb.0] as f32 * if jb.0 == ragdoll::HEAD { 1.0 } else { 0.9 });
-        *v = Visibility::Inherited;
-    }
-    for (st, mut t, mut v) in &mut stumps {
-        let Some(l) = rag.links.get(st.0) else {
-            *v = Visibility::Hidden;
-            continue;
-        };
-        let j = if st.1 { l.b } else { l.a };
-        if !l.bone || l.intact || !shown(j) {
-            *v = Visibility::Hidden;
-            continue;
-        }
-        t.translation = origin.to_render(rag.p[j]);
-        t.scale = Vec3::splat(0.085);
-        *v = Visibility::Inherited;
     }
 }
 
