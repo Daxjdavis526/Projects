@@ -222,6 +222,16 @@ public sealed partial class MainMenu : Control
             var m = WorldSave.Create(name.Text, seed.Text);
             App.StartGame(m);
         }));
+        col.AddChild(UiStyle.Button("Create Showcase World", () =>
+        {
+            string n = name.Text == "New World" ? "Castle Vorhaal" : name.Text;
+            var m = WorldSave.Create(n, seed.Text, landmarks: true);
+            App.StartGame(m);
+        }));
+        var note = UiStyle.Label("A showcase world has Castle Vorhaal on its crag and a rocket launch complex on the plain beside it. A render distance of 14 or more shows them best.", 14, UiStyle.TextDim);
+        note.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        note.CustomMinimumSize = new Vector2(480, 0);
+        col.AddChild(note);
         col.AddChild(UiStyle.Button("Back", ShowWorlds));
         SetPage(root);
         name.GrabFocus();

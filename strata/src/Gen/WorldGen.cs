@@ -14,6 +14,8 @@ public sealed class WorldGen
     public readonly long Seed;
     public readonly TreeGen Trees;
     public readonly StructureGen Structures;
+    /// <summary>The castle and the launch complex, in a world created with them; null otherwise.</summary>
+    public LandmarkSite Landmarks;
 
     private readonly Simplex _cont, _ero, _ridge, _hills, _rug, _temp, _hum, _river, _warp, _volc, _detail,
         _over, _cheese, _sp1, _sp2, _entrance, _lake, _slate, _patch, _surf, _glow;
@@ -412,6 +414,7 @@ public sealed class WorldGen
         Trees.Place(ch);
         Structures.Place(ch);
         ch.Recount();
+        Landmarks?.Apply(ch);
     }
 
     /// <summary>Per-column grass and foliage colours for the mesher (also needed after loading a saved column).</summary>
@@ -423,6 +426,7 @@ public sealed class WorldGen
                 ch.GrassTint[(lz << 4) | lx] = TintAt(ch.WorldX + lx, ch.WorldZ + lz, out var fol);
                 ch.FoliageTint[(lz << 4) | lx] = fol;
             }
+        Landmarks?.Tint(ch);
     }
 
     private static bool TouchesWater(ushort[] blocks, int ci, int y)

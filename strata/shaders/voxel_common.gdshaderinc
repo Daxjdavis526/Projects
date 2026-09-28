@@ -68,6 +68,9 @@ float fog_amount(vec3 world, vec3 cam) {
     vec3 d = world - cam;
     float dist = length(d.xz) + abs(d.y) * 0.25;
     float f = smoothstep(fog_start, fog_end, dist);
+    // Haze lies low: things standing high above the land (a tower, a peak) show through it
+    // better, while the edge of the loaded world, down at ground level, stays hidden.
+    f *= 1.0 - 0.75 * smoothstep(110.0, 210.0, world.y);
     if (underwater > 0.5) f = max(f, 1.0 - exp(-length(d) * 0.085));
     return f;
 }

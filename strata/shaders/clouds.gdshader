@@ -35,7 +35,7 @@ void fragment() {
     float cover = 1.0 - cloud_cover;
     if (n < cover) discard;
     float dist = length(v_world.xz - CAMERA_POSITION_WORLD.xz);
-    float fade = 1.0 - smoothstep(260.0, 460.0, dist);
+    float fade = 1.0 - smoothstep(320.0, 560.0, dist);
     // Cloud edges catch a little less light than their middles.
     float edge = smoothstep(cover, cover + 0.12, n);
     // By day as bright as the daylight allows; by night dim grey shapes against the stars, lit only by the moon.

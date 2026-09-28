@@ -380,6 +380,33 @@ public static class Loot
             ("starmetal_ingot", 0.25f, 1, 2), ("silver_blade", 0.1f, 1, 1), ("iron_pick", 0.15f, 1, 1), ("iron_blade", 0.15f, 1, 1),
             ("soot", 0.7f, 5, 12), ("seared_brisket", 0.4f, 2, 4), ("frostleaf_seeds", 0.3f, 2, 4),
         },
+        // Castle Vorhaal.
+        ["armory"] = new[]
+        {
+            ("iron_blade", 0.6f, 1, 1), ("silver_blade", 0.3f, 1, 1), ("iron_helm", 0.4f, 1, 1), ("iron_cuirass", 0.35f, 1, 1),
+            ("iron_greaves", 0.35f, 1, 1), ("iron_sabatons", 0.4f, 1, 1), ("hunting_bow", 0.5f, 1, 1), ("arrow", 0.9f, 6, 20),
+            ("iron_ingot", 0.6f, 2, 6), ("cord", 0.5f, 2, 5),
+        },
+        ["treasury"] = new[]
+        {
+            ("gold_ingot", 1f, 6, 16), ("silver_ingot", 0.9f, 4, 12), ("starmetal_ingot", 0.7f, 2, 5), ("lumen_shard", 0.8f, 4, 12),
+            ("starmetal_cuirass", 0.35f, 1, 1), ("starmetal_helm", 0.35f, 1, 1), ("silver_blade", 0.6f, 1, 1),
+        },
+        ["alchemy"] = new[]
+        {
+            ("lumen_shard", 0.8f, 2, 8), ("glowcap", 0.7f, 2, 6), ("blushcap", 0.6f, 2, 6), ("emberroot", 0.6f, 2, 5),
+            ("soot", 0.8f, 4, 12), ("glass", 0.6f, 2, 6), ("bowl", 0.5f, 1, 3), ("frostleaf_seeds", 0.4f, 1, 3),
+        },
+        ["crypt"] = new[]
+        {
+            ("gold_ingot", 0.4f, 1, 3), ("silver_ingot", 0.5f, 1, 3), ("silver_blade", 0.15f, 1, 1), ("bone", 0.8f, 2, 6),
+            ("torch", 0.6f, 2, 6), ("lumen_shard", 0.3f, 1, 3), ("candle", 0f, 0, 0),
+        },
+        ["larder"] = new[]
+        {
+            ("hearth_bread", 0.7f, 2, 5), ("seared_brisket", 0.5f, 1, 4), ("berries", 0.6f, 3, 8), ("berry_tart", 0.4f, 1, 2),
+            ("bowl", 0.6f, 1, 3), ("grain", 0.6f, 3, 9), ("emberroot", 0.5f, 2, 5),
+        },
     };
 
     public static bool Has(string table) => table != null && Tables.ContainsKey(table);

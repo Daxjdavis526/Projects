@@ -26,10 +26,11 @@ public sealed class World
     /// <summary>A crate or furnace was removed with items inside.</summary>
     public event Action<int, int, int, BlockEntity> EntityRemoved;
 
-    public World(long seed)
+    public World(long seed, bool landmarks = false)
     {
         Seed = seed;
         Gen = new WorldGen(seed);
+        if (landmarks) Gen.Landmarks = new LandmarkSite(Gen);
     }
 
     // --- chunk lookup ------------------------------------------------------------

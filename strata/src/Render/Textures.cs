@@ -80,6 +80,7 @@ public static class Textures
 
     private static void Paint(string name, Pixel p)
     {
+        if (PaintLandmark(name, p)) return;
         switch (name)
         {
             case "rootstone":
@@ -509,6 +510,231 @@ public static class Textures
         // Something was registered without a painting: make it loud.
         p.Fill((x, y) => ((x / 4 + y / 4) & 1) == 0 ? new Color(1, 0, 1) : new Color(0, 0, 0));
         GD.PushWarning("no painter for texture " + name);
+    }
+
+    // --- the showcase landmarks: gothic masonry and the launch complex ---------------------------
+
+    private static readonly Color[] DuskPal = { C(0x1c1a20), C(0x242228), C(0x2c2a31), C(0x35323a), C(0x3e3b44), C(0x48444e) };
+    private static readonly Color Clear0 = new(0, 0, 0, 0);
+
+    private static bool PaintLandmark(string name, Pixel p)
+    {
+        switch (name)
+        {
+            case "duskstone": Stone(p, DuskPal, 60); p.Speckle(C(0x5a4a5e), 0.03f, 61); return true;
+            case "dusk_bricks": Bricks(p, DuskPal, C(0x121115), 4, 8); return true;
+            case "cracked_dusk_bricks":
+                Bricks(p, DuskPal, C(0x121115), 4, 8);
+                { int x = 3, y = 0; for (int k = 0; k < 18; k++) { p.Set(x, y, C(0x0c0b0e)); x += p.Hash(k, 2, 62) < 0.45f ? 1 : 0; y += p.Hash(k, 3, 62) < 0.8f ? 1 : 0; } }
+                { int x = 12, y = 5; for (int k = 0; k < 9; k++) { p.Set(x, y, C(0x0c0b0e)); x -= p.Hash(k, 4, 63) < 0.5f ? 1 : 0; y++; } }
+                return true;
+            case "mossy_dusk_bricks":
+                Bricks(p, DuskPal, C(0x121115), 4, 8);
+                p.Fill((x, y) => p.Value(x, y, 4, 64) * 0.7f + p.Hash(x, y, 65) * 0.3f > 0.6f
+                    ? Pixel.Ramp(new[] { C(0x2c3d24), C(0x364a2b), C(0x415833) }, p.Hash(x, y, 66)) : p[x, y]);
+                return true;
+            case "dusk_tiles":
+                p.Fill((x, y) =>
+                {
+                    bool dark = ((x / 8) + (y / 8)) % 2 == 0;
+                    var c = dark ? Pixel.Ramp(DuskPal, 0.1f + p.Hash(x, y, 67) * 0.25f) : Pixel.Ramp(new[] { C(0x4a4550), C(0x55505c), C(0x605a67) }, p.Hash(x, y, 68));
+                    return x % 8 == 0 || y % 8 == 0 ? C(0x141317) : c;
+                });
+                return true;
+            case "dusk_pillar_side":
+                p.Fill((x, y) =>
+                {
+                    var c = Pixel.Ramp(DuskPal, 0.35f + p.Hash(x, y / 4, 69) * 0.2f + p.Hash(x, y, 70) * 0.15f);
+                    if (x == 2 || x == 6 || x == 9 || x == 13) return Pixel.Shade(c, 0.6f);   // flutes
+                    if (x == 3 || x == 10) return Pixel.Shade(c, 1.25f);
+                    return c;
+                });
+                p.Rect(0, 0, 16, 2, C(0x4e4a55)); p.Rect(0, 14, 16, 2, C(0x4e4a55));
+                return true;
+            case "dusk_pillar_top":
+                Stone(p, DuskPal, 71);
+                p.Frame(0, 0, 16, 16, C(0x141317)); p.Frame(3, 3, 10, 10, C(0x4e4a55));
+                return true;
+            case "crimson_roof":
+                p.Fill((x, y) =>
+                {
+                    int row = y / 4, off = (row % 2) * 2;
+                    var c = Pixel.Ramp(new[] { C(0x3d0a10), C(0x520e16), C(0x66141c), C(0x7a1c24) }, 0.3f + p.Hash((x + off) / 4, row, 72) * 0.5f + p.Hash(x, y, 73) * 0.2f);
+                    if (y % 4 == 3) return C(0x220508);
+                    if ((x + off) % 4 == 0) return Pixel.Shade(c, 0.75f);
+                    return c;
+                });
+                return true;
+            case "patina_roof":
+                p.Fill((x, y) =>
+                {
+                    var c = Pixel.Ramp(new[] { C(0x3a6e5e), C(0x4a8472), C(0x5c9a86), C(0x70ad97) }, p.Value(x, y, 4, 74) * 0.5f + p.Hash(x, y, 75) * 0.5f);
+                    if (x % 5 == 0) return Pixel.Shade(c, 0.72f);   // standing seams
+                    if (p.Value(x, y, 8, 76) > 0.78f) return C(0x7a5236);  // bare copper showing through
+                    return c;
+                });
+                return true;
+            case "ember_glass":
+                p.Fill((x, y) =>
+                {
+                    // Leaded diamonds of red and amber glass, bright at the centre of each pane.
+                    int u = (x + y) % 8, v = (x - y + 16) % 8;
+                    if (u == 0 || v == 0) return C(0x1a1214);
+                    float t = 1f - (MathF.Abs(u - 4) + MathF.Abs(v - 4)) / 8f;
+                    bool amber = (((x + y) / 8) + ((x - y + 16) / 8)) % 3 == 0;
+                    var lo = amber ? C(0xb84a12) : C(0x8a1414);
+                    var hi = amber ? C(0xffc050) : C(0xff6a3a);
+                    return Pixel.Mix(lo, hi, t * 0.8f + p.Hash(x, y, 77) * 0.2f);
+                });
+                p.Frame(0, 0, 16, 16, C(0x1a1214));
+                return true;
+            case "crimson_cloth":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0x4a0a10), C(0x5c0e16), C(0x6e141c), C(0x801a22) }, 0.35f + p.Hash(x, y, 78) * 0.3f + ((x + y) % 2) * 0.1f));
+                return true;
+            case "crimson_carpet":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0x5c0e16), C(0x6e141c), C(0x801a22) }, 0.3f + p.Hash(x, y, 79) * 0.4f));
+                p.Frame(0, 0, 16, 16, C(0xb08a3a)); p.Frame(1, 1, 14, 14, C(0x3a060a));
+                return true;
+            case "tapestry":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0x3d0a10), C(0x520e16), C(0x66141c) }, 0.3f + p.Hash(x, y, 80) * 0.5f));
+                p.Frame(1, 0, 14, 16, C(0xa07a30));
+                for (int k = 0; k < 4; k++) { p.Set(8 - k, 4 + k, C(0xc8a048)); p.Set(7 + k, 4 + k, C(0xc8a048)); p.Set(8 - k, 12 - k, C(0xc8a048)); p.Set(7 + k, 12 - k, C(0xc8a048)); }
+                p.Set(7, 8, C(0xe8c060)); p.Set(8, 8, C(0xe8c060));
+                return true;
+            case "bookshelf":
+            {
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0x2a1c16), C(0x35241c), C(0x402c22) }, p.Hash(x, y, 81)));
+                Color[] spines = { C(0x6e1a1a), C(0x1f3a5a), C(0x2d4a26), C(0x6a4a1a), C(0x3a2a4a), C(0x8a7a5a), C(0x4a1010) };
+                foreach (int shelf in new[] { 1, 9 })
+                {
+                    for (int x = 1; x < 15;)
+                    {
+                        int w = 1 + (int)(p.Hash(x, shelf, 82) * 2.2f);
+                        int h = 5 + (int)(p.Hash(x, shelf, 83) * 2.5f);
+                        var c = spines[(int)(p.Hash(x, shelf, 84) * spines.Length) % spines.Length];
+                        for (int k = 0; k < w && x + k < 15; k++)
+                            for (int y = shelf + 7 - h; y < shelf + 7; y++) p.Set(x + k, y, k == 0 ? Pixel.Shade(c, 1.2f) : c);
+                        x += w;
+                    }
+                    p.Rect(0, shelf + 6, 16, 1, C(0x1a100c));
+                }
+                p.Rect(0, 0, 16, 1, C(0x4a3226)); p.Rect(0, 8, 16, 1, C(0x4a3226)); p.Rect(0, 15, 16, 1, C(0x4a3226));
+                return true;
+            }
+            case "crimson_lantern":
+                p.Clear(C(0x1a1214));
+                p.Rect(3, 3, 10, 10, C(0xd8341c)); p.Rect(5, 4, 6, 8, C(0xff7a3a)); p.Rect(6, 6, 4, 4, C(0xffd080));
+                p.Frame(0, 0, 16, 16, C(0x2a2226)); p.Line(8, 3, 8, 12, C(0x3a2a2a)); p.Line(3, 8, 12, 8, C(0x3a2a2a));
+                return true;
+            case "iron_bars":
+                p.Clear(Clear0);
+                for (int x = 1; x < 16; x += 5) { p.Rect(x, 0, 2, 16, C(0x3a3b40)); p.Rect(x, 0, 1, 16, C(0x5e6068)); }
+                p.Rect(0, 1, 16, 2, C(0x3a3b40)); p.Rect(0, 13, 16, 2, C(0x3a3b40)); p.Rect(0, 1, 16, 1, C(0x5e6068));
+                return true;
+            case "chain":
+                p.Clear(Clear0);
+                for (int y = 0; y < 16; y += 4) { p.Frame(6, y, 4, 3, C(0x55565c)); p.Set(7, y, C(0x8a8b92)); p.Rect(7, y + 3, 2, 1, C(0x3a3b40)); }
+                return true;
+            case "cobweb":
+                p.Clear(Clear0);
+                for (int k = 0; k < 16; k++) { p.Set(k, k, C(0xd8d8e0)); p.Set(15 - k, k, C(0xd8d8e0)); p.Set(8, k, C(0xc8c8d0)); p.Set(k, 8, C(0xc8c8d0)); }
+                for (int r = 3; r < 8; r += 2) p.Frame(8 - r, 8 - r, 2 * r, 2 * r, new Color(0.85f, 0.85f, 0.9f, 1f));
+                for (int k = 0; k < p.P.Length; k++) if (p.P[k].A > 0 && p.Hash(k, 0, 85) < 0.25f) p.P[k] = Clear0;
+                return true;
+            case "bones":
+                p.Clear(Clear0);
+                p.Disc(5.5f, 11.5f, 2.6f, C(0xe0d8c4)); p.Set(4, 11, C(0x2a2420)); p.Set(6, 11, C(0x2a2420)); p.Rect(4, 13, 3, 1, C(0xb8ae98));
+                p.Line(8, 15, 14, 9, C(0xd8d0bc)); p.Line(9, 15, 15, 10, C(0xb8ae98)); p.Set(14, 9, C(0xe8e0cc)); p.Set(8, 15, C(0xe8e0cc));
+                p.Line(1, 15, 6, 15, C(0xd0c8b4));
+                return true;
+            case "hearthfire":
+                p.Clear(Clear0);
+                p.Fill((x, y) =>
+                {
+                    float cx = MathF.Abs(x - 7.5f) / 7.5f, h = 1f - y / 16f;
+                    float tongue = p.Value(x, 0, 3, 86) * 0.5f + 0.5f;
+                    if (h > tongue * (1f - cx * cx) + 0.08f) return Clear0;
+                    float heat = (1f - cx) * (1f - h * 0.8f);
+                    return heat > 0.6f ? C(0xfff0a0) : heat > 0.35f ? C(0xffb030) : C(0xe0501a);
+                });
+                p.Rect(2, 14, 12, 2, C(0x3a2418));
+                return true;
+            case "gilded_trim":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0x7a5a1a), C(0x9a7424), C(0xc0962e), C(0xe0b848) }, 0.3f + p.Value(x, y, 4, 87) * 0.4f + p.Hash(x, y, 88) * 0.3f));
+                p.Frame(0, 0, 16, 16, C(0x4a3410)); p.Rect(0, 7, 16, 2, C(0x5a4014));
+                return true;
+            case "candle":
+                p.Clear(Clear0);
+                p.Rect(6, 8, 4, 8, C(0xe8e0cc)); p.Rect(6, 8, 1, 8, C(0xfff8e8)); p.Rect(9, 9, 1, 7, C(0xc8bea8));
+                p.Set(7, 9, C(0xd8cfb8)); p.Rect(7, 16 - 1, 2, 1, C(0xb0a690));
+                p.Rect(7, 4, 2, 4, C(0xffb030)); p.Set(7, 3, C(0xffe070)); p.Set(8, 5, C(0xfff0b0)); p.Set(7, 7, C(0x2a2420));
+                return true;
+            case "banner":
+                p.Clear(Clear0);
+                p.Rect(2, 0, 12, 14, C(0x6e141c));
+                p.Rect(2, 0, 12, 1, C(0x2a2226));
+                for (int x = 2; x < 14; x++) { int h = 14 + (Math.Abs(x - 7) % 3 == 0 ? 1 : 0); p.Rect(x, 13, 1, h - 13, C(0x5c0e16)); }
+                p.Frame(3, 2, 10, 10, C(0xb08a3a));
+                p.Disc(7.5f, 6.5f, 2.2f, C(0x1a1214)); p.Set(6, 6, C(0xc8a048)); p.Set(9, 6, C(0xc8a048));
+                p.Line(4, 10, 11, 10, C(0x1a1214));
+                return true;
+
+            case "concrete":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0xa4a39e), C(0xafaea9), C(0xb9b8b3), C(0xc3c2bd) }, p.Value(x, y, 8, 90) * 0.4f + p.Hash(x, y, 91) * 0.6f));
+                p.Rect(0, 15, 16, 1, C(0x8e8d88)); p.Rect(15, 0, 1, 16, C(0x8e8d88));
+                return true;
+            case "pad_concrete":
+                p.Fill((x, y) =>
+                {
+                    var c = Pixel.Ramp(new[] { C(0x6a6964), C(0x777671), C(0x84837e), C(0x908f8a) }, p.Value(x, y, 8, 92) * 0.4f + p.Hash(x, y, 93) * 0.6f);
+                    return p.Value(x, y, 4, 94) > 0.7f ? Pixel.Shade(c, 0.55f) : c;   // scorch
+                });
+                p.Rect(0, 15, 16, 1, C(0x4a4945));
+                return true;
+            case "asphalt":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0x1f1f21), C(0x262628), C(0x2d2d30), C(0x363638) }, p.Hash(x, y, 95)));
+                return true;
+            case "road_line":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0x1f1f21), C(0x262628), C(0x2d2d30), C(0x363638) }, p.Hash(x, y, 95)));
+                p.Rect(7, 0, 2, 16, C(0xe8c030)); p.Rect(7, 0, 1, 16, C(0xf4d860));
+                return true;
+            case "hazard_stripes":
+                p.Fill((x, y) => ((x + y) / 4) % 2 == 0 ? Pixel.Shade(C(0xe8b820), 0.9f + p.Hash(x, y, 96) * 0.2f) : C(0x1c1c1e));
+                return true;
+            case "steel_truss":
+                p.Clear(Clear0);
+                p.Rect(0, 0, 16, 2, C(0xb8541e)); p.Rect(0, 14, 16, 2, C(0xb8541e)); p.Rect(0, 0, 2, 16, C(0xb8541e)); p.Rect(14, 0, 2, 16, C(0xb8541e));
+                for (int k = 0; k < 16; k++) { p.Set(k, k, C(0xc8642a)); p.Set(Math.Min(15, k + 1), k, C(0x8a3c14)); }
+                p.Rect(0, 0, 16, 1, C(0xe07a38)); p.Rect(0, 0, 1, 16, C(0xe07a38));
+                return true;
+            case "steel_grating":
+                p.Clear(Clear0);
+                for (int k = 0; k < 16; k += 3) { p.Rect(k, 0, 1, 16, C(0x6a6b70)); p.Rect(0, k, 16, 1, C(0x55565c)); }
+                p.Frame(0, 0, 16, 16, C(0x7a7b82));
+                return true;
+            case "steel_plate": MetalBlock(p, Tone(C(0x8a8c92), 5, 0.1f), default); return true;
+            case "hull_panel":
+                p.Fill((x, y) => Pixel.Ramp(new[] { C(0xd8d8d4), C(0xe2e2de), C(0xebebe7) }, p.Hash(x, y, 97) * 0.6f + p.Value(x, y, 8, 98) * 0.4f));
+                p.Frame(0, 0, 16, 16, C(0xa8a8a4));
+                return true;
+            case "warning_lamp":
+                p.Clear(C(0x2a2a2c)); p.Disc(7.5f, 7.5f, 6f, C(0xc01810)); p.Disc(7.5f, 7.5f, 4f, C(0xff4030)); p.Disc(6.5f, 6.5f, 1.5f, C(0xffb0a0));
+                return true;
+            case "flood_lamp":
+                p.Clear(C(0x3a3a3e)); p.Rect(2, 2, 12, 12, C(0xfff4d8)); p.Rect(4, 4, 8, 8, C(0xffffff));
+                for (int x = 2; x < 14; x += 3) p.Rect(x, 2, 1, 12, C(0xd8ccb0));
+                return true;
+            case "console_side":
+                MetalBlock(p, Tone(C(0x4a5058), 5, 0.1f), default);
+                p.Rect(3, 3, 10, 3, C(0x101418)); p.Set(4, 4, C(0x40ff60)); p.Set(6, 4, C(0xffc020)); p.Set(8, 4, C(0xff3020));
+                return true;
+            case "console_top":
+                p.Clear(C(0x30343a));
+                p.Rect(2, 2, 12, 7, C(0x0c1a24)); p.Line(3, 7, 7, 4, C(0x40e0ff)); p.Line(7, 4, 12, 6, C(0x40e0ff));
+                p.Rect(3, 11, 3, 3, C(0xd02010)); p.Rect(8, 11, 2, 2, C(0x40c040)); p.Rect(11, 11, 2, 2, C(0xe0b020));
+                return true;
+        }
+        return false;
     }
 
     // --- recipes --------------------------------------------------------------------------------

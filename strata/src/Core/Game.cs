@@ -47,6 +47,7 @@ public sealed partial class Game : Node3D
     private float _fps;
     public float Fps => _fps;
     private Ambience _ambience;
+    private bool _renderNote;
 
     public bool Paused => PauseMenu != null;
     public bool InputBlocked => State != GameState.Playing || Screen != null || Paused || _sleeping;
@@ -60,7 +61,7 @@ public sealed partial class Game : Node3D
     public override void _Ready()
     {
         I = this;
-        World = new World(Meta.Seed);
+        World = new World(Meta.Seed, Meta.Landmarks);
         Fluids = new Fluids(World);
         Signals = new Signals(World);
         Store = new ChunkStore(WorldSave.ChunkDir(Meta.Folder));
@@ -113,10 +114,28 @@ public sealed partial class Game : Node3D
         }
         else
         {
-            var (sx, sy, sz) = World.Gen.FindSpawn();
-            Player.Spawn = new Vector3(sx + 0.5f, sy, sz + 0.5f);
-            Player.Teleport(Player.Spawn + new Vector3(0, 2, 0));
-            Player.Yaw = 180f;
+            if (World.Gen.Landmarks is LandmarkSite site)
+            {
+                // At the head of the village street, looking up at the castle.
+                Player.Spawn = site.Spawn;
+                Player.Teleport(Player.Spawn + new Vector3(0, 1, 0));
+                Player.Yaw = -13f;
+                Player.Pitch = 12f;
+                // The castle is a long way off: make sure it is loaded and not lost in the fog.
+                if (Settings.RenderDistance < 14)
+                {
+                    Settings.RenderDistance = 14;
+                    Settings.Save();
+                    _renderNote = true;
+                }
+            }
+            else
+            {
+                var (sx, sy, sz) = World.Gen.FindSpawn();
+                Player.Spawn = new Vector3(sx + 0.5f, sy, sz + 0.5f);
+                Player.Teleport(Player.Spawn + new Vector3(0, 2, 0));
+                Player.Yaw = 180f;
+            }
         }
         if (Meta.Drops != null)
             foreach (var d in Meta.Drops)
@@ -224,7 +243,13 @@ public sealed partial class Game : Node3D
         if (!Meta.HasPlayer)
         {
             Hud.Toast($"Welcome to {Meta.Name}", UiStyle.Accent);
-            Hud.Toast("Punch a tree for logs. E opens your bag and the recipe book.", UiStyle.TextDim);
+            if (Meta.Landmarks)
+            {
+                Hud.Toast("Castle Vorhaal stands on the crag ahead; the road winds up the rock spur to its bridge.", UiStyle.TextDim);
+                Hud.Toast("The launch complex lies east, along the paved road.", UiStyle.TextDim);
+                if (_renderNote) Hud.Toast("Render distance raised to 14 to show them (Settings to change it)", UiStyle.TextDim);
+            }
+            else Hud.Toast("Punch a tree for logs. E opens your bag and the recipe book.", UiStyle.TextDim);
             Meta.HasPlayer = true;
         }
         GD.Print($"world ready in {_loadTime:0.0}s at {Player.Body.Position}");

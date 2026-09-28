@@ -7,7 +7,7 @@ namespace Strata;
 public enum RenderKind : byte { None, Cube, Cross, Crop, Liquid, Torch, Ladder, Door, Low, Trace }
 public enum ToolKind : byte { None, Pick, Axe, Shovel, Hoe, Blade, Bow }
 public enum SoundKind : byte { Stone, Wood, Dirt, Grass, Sand, Gravel, Glass, Snow, Metal, Plant, Cloth }
-public enum BlockUse : byte { None, Worktable, Furnace, Crate, Door, Bed, BerryBush, Switch }
+public enum BlockUse : byte { None, Worktable, Furnace, Crate, Door, Bed, BerryBush, Switch, Console }
 
 /// <summary>Texture names to array layers. Painting happens later, in Textures.</summary>
 public static class Tex
@@ -111,6 +111,15 @@ public static class Blocks
         Worktable, Crate, Bedroll, TilledSoil, Torch;
     public static ushort LumenTrace;   // base of 16: signal strength 0..15
     public static ushort Switch, SwitchOn, TreadPlate, TreadPlateDown, SignalLamp, SignalLampOn;
+    // Gothic masonry and furnishings (the showcase castle uses them; any world can).
+    public static ushort Duskstone, DuskBricks, CrackedDuskBricks, MossyDuskBricks, DuskTiles, DuskPillar, DuskSlab,
+        FalseDuskBricks, IronwoodSlab, CrimsonRoof, PatinaRoof, EmberGlass, CrimsonCloth, CrimsonCarpet, Tapestry,
+        Bookshelf, CrimsonLantern, IronBars, Chain, Cobweb, Bones, Hearthfire, Gilded;
+    public static ushort Candle;        // base of 1 (standing)
+    public static ushort Banner;       // base of 4 wall-hung banners (by support direction)
+    // The launch complex.
+    public static ushort Concrete, PadConcrete, Asphalt, RoadLine, Hazard, SteelTruss, SteelGrating, SteelPlate,
+        HullPanel, WarningLamp, FloodLamp, LaunchConsole;
 
     public static bool IsTrace(ushort id) => id >= LumenTrace && id < LumenTrace + 16 && LumenTrace != 0;
     public static int TraceLevel(ushort id) => IsTrace(id) ? id - LumenTrace : 0;
@@ -454,6 +463,135 @@ public static class Blocks
             All[id].Base = Door;
         }
 
+        // --- gothic masonry and furnishings ---------------------------------------
+        Duskstone = Add("duskstone", "Duskstone", b => { Rock(b, "duskstone", 2.2f, 1); P(b, 0.2f, 0.19f, 0.22f); });
+        DuskBricks = Add("dusk_bricks", "Duskstone Bricks", b => { Rock(b, "dusk_bricks", 2.2f, 1); P(b, 0.22f, 0.21f, 0.24f); });
+        CrackedDuskBricks = Add("cracked_dusk_bricks", "Cracked Duskstone Bricks", b => { Rock(b, "cracked_dusk_bricks", 2f, 1); P(b, 0.22f, 0.21f, 0.24f); });
+        MossyDuskBricks = Add("mossy_dusk_bricks", "Mossy Duskstone Bricks", b => { Rock(b, "mossy_dusk_bricks", 2f, 1); P(b, 0.22f, 0.26f, 0.2f); });
+        DuskTiles = Add("dusk_tiles", "Duskstone Tiles", b => { Rock(b, "dusk_tiles", 2f, 1); P(b, 0.25f, 0.23f, 0.26f); });
+        DuskPillar = Add("dusk_pillar", "Duskstone Pillar", b =>
+        {
+            Rock(b, "dusk_pillar_side", 2.2f, 1);
+            b.Faces(Tex.Get("dusk_pillar_side"), Tex.Get("dusk_pillar_top"), Tex.Get("dusk_pillar_top"));
+            P(b, 0.24f, 0.22f, 0.26f);
+        });
+        DuskSlab = Add("dusk_slab", "Duskstone Slab", b =>
+        {
+            Rock(b, "dusk_bricks", 2f, 1); Slab(b, 0.5f); P(b, 0.22f, 0.21f, 0.24f);
+        });
+        // Looks like any other duskstone brick; walks through like air. What the castle's secret passages are made of.
+        FalseDuskBricks = Add("false_dusk_bricks", "Duskstone Bricks", b =>
+        {
+            Rock(b, "dusk_bricks", 0.6f, 0); b.Solid = false; b.DropKey = "dusk_bricks"; b.NoItem = true; P(b, 0.22f, 0.21f, 0.24f);
+        });
+        IronwoodSlab = Add("ironwood_slab", "Ironwood Slab", b =>
+        {
+            b.Faces(Tex.Get("ironwood_planks")); Slab(b, 0.5f);
+            b.Hardness = 2f; b.Tool = ToolKind.Axe; b.Sound = SoundKind.Wood; P(b, 0.3f, 0.24f, 0.22f);
+        });
+        CrimsonRoof = Add("crimson_roof", "Crimson Roof Tiles", b => { Rock(b, "crimson_roof", 2f, 1); P(b, 0.45f, 0.1f, 0.12f); });
+        PatinaRoof = Add("patina_roof", "Weathered Copper Roof", b => { Rock(b, "patina_roof", 3f, 1); b.Sound = SoundKind.Metal; P(b, 0.3f, 0.55f, 0.48f); });
+        // Leaded window glass lit from within: glows ember-red at night and lights the room behind it.
+        EmberGlass = Add("ember_glass", "Ember Glass", b =>
+        {
+            b.Faces(Tex.Get("ember_glass")); b.Opaque = false; b.Cutout = true; b.CullGroup = 5;
+            b.Hardness = 0.4f; b.Sound = SoundKind.Glass; b.Light = 9; b.Emissive = true; P(b, 0.95f, 0.4f, 0.15f);
+        });
+        CrimsonCloth = Add("crimson_cloth", "Crimson Cloth", b =>
+        {
+            b.Faces(Tex.Get("crimson_cloth")); b.Hardness = 0.8f; b.Sound = SoundKind.Cloth; P(b, 0.55f, 0.08f, 0.1f);
+        });
+        CrimsonCarpet = Add("crimson_carpet", "Crimson Carpet", b =>
+        {
+            b.Faces(Tex.Get("crimson_carpet")); Slab(b, 1f / 16f); b.Hardness = 0.1f; b.Sound = SoundKind.Cloth;
+            P(b, 0.55f, 0.08f, 0.1f);
+        });
+        // A heavy hanging: solid-looking, but there is nothing behind the cloth.
+        Tapestry = Add("tapestry", "Old Tapestry", b =>
+        {
+            b.Faces(Tex.Get("tapestry")); b.Solid = false; b.Hardness = 0.5f; b.Sound = SoundKind.Cloth; P(b, 0.5f, 0.12f, 0.12f);
+        });
+        Bookshelf = Add("bookshelf", "Bookshelf", b =>
+        {
+            b.Faces(Tex.Get("bookshelf"), Tex.Get("ironwood_planks"), Tex.Get("ironwood_planks"));
+            b.Hardness = 1.5f; b.Tool = ToolKind.Axe; b.Sound = SoundKind.Wood; P(b, 0.45f, 0.3f, 0.22f);
+        });
+        CrimsonLantern = Add("crimson_lantern", "Crimson Lantern", b =>
+        {
+            b.Faces(Tex.Get("crimson_lantern")); b.Light = 13; b.Emissive = true; b.Hardness = 0.6f; b.Sound = SoundKind.Glass;
+            P(b, 0.95f, 0.3f, 0.2f);
+        });
+        IronBars = Add("iron_bars", "Iron Bars", b =>
+        {
+            b.Faces(Tex.Get("iron_bars")); b.Opaque = false; b.Cutout = true; b.CullGroup = 6;
+            b.Hardness = 4f; b.Tool = ToolKind.Pick; b.MinTier = 1; b.Sound = SoundKind.Metal; P(b, 0.4f, 0.4f, 0.42f);
+        });
+        Chain = Plant("chain", "Chain", false, 0.35f, 0.35f, 0.37f);
+        All[Chain].Sway = false; All[Chain].NeedsSupportBelow = false; All[Chain].Sound = SoundKind.Metal; All[Chain].Hardness = 1f;
+        Cobweb = Plant("cobweb", "Cobweb", false, 0.85f, 0.85f, 0.88f);
+        All[Cobweb].Sway = false; All[Cobweb].NeedsSupportBelow = false;
+        Bones = Plant("bones", "Old Bones", false, 0.85f, 0.82f, 0.72f);
+        All[Bones].Sway = false; All[Bones].Sound = SoundKind.Stone;
+        // Fire in a hearth or a brazier: burns what stands in it.
+        Hearthfire = Plant("hearthfire", "Hearthfire", false, 1f, 0.55f, 0.15f);
+        All[Hearthfire].Light = 15; All[Hearthfire].Emissive = true; All[Hearthfire].ContactDamage = 2f; All[Hearthfire].NoItem = true;
+        All[Hearthfire].DropKey = null;
+        Gilded = Add("gilded_trim", "Gilded Trim", b => { Rock(b, "gilded_trim", 2.5f, 1); b.Sound = SoundKind.Metal; P(b, 0.8f, 0.62f, 0.25f); });
+        Candle = Add("candle", "Candle", b =>
+        {
+            b.Render = RenderKind.Torch; b.Solid = false; b.Opaque = false; b.Light = 11;
+            b.Hardness = 0; b.Sound = SoundKind.Cloth; b.Faces(Tex.Get("candle")); b.NeedsSupportBelow = true;
+            b.Emissive = true; b.DropKey = null; P(b, 0.95f, 0.9f, 0.75f);
+        });
+        {
+            int[] bannerDirs = { Dir.PZ, Dir.NX, Dir.NZ, Dir.PX };
+            for (int f = 0; f < 4; f++)
+            {
+                int ff = f;
+                ushort id = Add("banner_" + f, "Crimson Banner", b =>
+                {
+                    b.Render = RenderKind.Ladder; b.Solid = false; b.Opaque = false;
+                    b.Hardness = 0.3f; b.Sound = SoundKind.Cloth; b.Faces(Tex.Get("banner"));
+                    b.SupportDir = bannerDirs[ff]; b.Variant = ff; b.DropKey = "crimson_cloth"; P(b, 0.55f, 0.08f, 0.1f);
+                });
+                if (f == 0) Banner = id;
+                All[id].Base = Banner;
+            }
+        }
+
+        // --- the launch complex ----------------------------------------------------
+        Concrete = Add("concrete", "Concrete", b => { Rock(b, "concrete", 2.5f, 1); P(b, 0.7f, 0.7f, 0.68f); });
+        PadConcrete = Add("pad_concrete", "Scorched Concrete", b => { Rock(b, "pad_concrete", 3f, 1); P(b, 0.45f, 0.44f, 0.42f); });
+        Asphalt = Add("asphalt", "Asphalt", b => { Rock(b, "asphalt", 1.5f, 0); P(b, 0.16f, 0.16f, 0.17f); });
+        RoadLine = Add("road_line", "Road Marking", b => { Rock(b, "asphalt", 1.5f, 0); b.Faces(Tex.Get("asphalt"), Tex.Get("road_line"), Tex.Get("asphalt")); P(b, 0.16f, 0.16f, 0.17f); });
+        Hazard = Add("hazard_stripes", "Hazard Stripes", b => { Rock(b, "hazard_stripes", 2.5f, 1); P(b, 0.9f, 0.75f, 0.1f); });
+        SteelTruss = Add("steel_truss", "Steel Truss", b =>
+        {
+            b.Faces(Tex.Get("steel_truss")); b.Opaque = false; b.Cutout = true; b.CullGroup = 7;
+            b.Hardness = 4f; b.Tool = ToolKind.Pick; b.MinTier = 1; b.Sound = SoundKind.Metal; P(b, 0.75f, 0.35f, 0.15f);
+        });
+        SteelGrating = Add("steel_grating", "Steel Grating", b =>
+        {
+            b.Faces(Tex.Get("steel_grating")); b.Opaque = false; b.Cutout = true; b.CullGroup = 8;
+            b.Hardness = 3f; b.Tool = ToolKind.Pick; b.Sound = SoundKind.Metal; P(b, 0.5f, 0.5f, 0.52f);
+        });
+        SteelPlate = Add("steel_plate", "Steel Plate", b => { Rock(b, "steel_plate", 4f, 1); b.Sound = SoundKind.Metal; P(b, 0.55f, 0.56f, 0.58f); });
+        HullPanel = Add("hull_panel", "White Panel", b => { Rock(b, "hull_panel", 2f, 0); b.Sound = SoundKind.Metal; P(b, 0.9f, 0.9f, 0.9f); });
+        WarningLamp = Add("warning_lamp", "Warning Lamp", b =>
+        {
+            b.Faces(Tex.Get("warning_lamp")); b.Light = 10; b.Emissive = true; b.Hardness = 0.6f; b.Sound = SoundKind.Glass; P(b, 1f, 0.25f, 0.15f);
+        });
+        FloodLamp = Add("flood_lamp", "Flood Lamp", b =>
+        {
+            b.Faces(Tex.Get("flood_lamp")); b.Light = 15; b.Emissive = true; b.Hardness = 0.6f; b.Sound = SoundKind.Glass; P(b, 1f, 0.97f, 0.85f);
+        });
+        LaunchConsole = Add("launch_console", "Launch Console", b =>
+        {
+            b.Faces(Tex.Get("console_side"), Tex.Get("console_top"), Tex.Get("steel_plate"));
+            b.Hardness = 3f; b.Tool = ToolKind.Pick; b.Sound = SoundKind.Metal; b.Use = BlockUse.Console; b.Light = 6;
+            P(b, 0.4f, 0.45f, 0.5f);
+        });
+
         // --- crops -----------------------------------------------------------
         Grain = Crop("grain", "Goldgrain", 4, 0.035f, "grain", 1, 3, "grain_seeds", 1, 2);
         Emberroot = Crop("emberroot", "Emberroot", 4, 0.03f, "emberroot", 2, 4, null, 0, 0);
@@ -494,6 +632,13 @@ public static class Blocks
     }
 
     private static void P(BlockDef b, float r, float g, float bl) => b.Particle = new Color(r, g, bl);
+
+    /// <summary>A block the full width of its cell but only part of its height: a step you walk up without jumping.</summary>
+    private static void Slab(BlockDef b, float h)
+    {
+        b.Render = RenderKind.Low; b.Height = h; b.Opaque = false;
+        b.Box = new Aabb(Vector3.Zero, new Vector3(1, h, 1));
+    }
 
     private static void Rock(BlockDef b, string tex, float hardness, int tier)
     {

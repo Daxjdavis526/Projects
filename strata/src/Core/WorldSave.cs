@@ -38,6 +38,8 @@ public sealed class WorldMeta
     public float Rain, WeatherTimer = 300f;
     public int WeatherState;
     public bool HasPlayer;
+    /// <summary>Created as a showcase world: Castle Vorhaal and the launch complex stand near the start.</summary>
+    public bool Landmarks;
     public PlayerSave Player = new();
     public List<DropSave> Drops = new();
     public List<MobSave> Mobs = new();
@@ -95,7 +97,7 @@ public static class WorldSave
         return null;
     }
 
-    public static WorldMeta Create(string name, string seedText)
+    public static WorldMeta Create(string name, string seedText, bool landmarks = false)
     {
         name = string.IsNullOrWhiteSpace(name) ? "New World" : name.Trim();
         if (name.Length > 40) name = name[..40];
@@ -108,6 +110,7 @@ public static class WorldSave
             Seed = seed,
             Created = DateTime.Now,
             LastPlayed = DateTime.Now,
+            Landmarks = landmarks,
         };
         m.Folder = UniqueFolder(name);
         Directory.CreateDirectory(ChunkDir(m.Folder));

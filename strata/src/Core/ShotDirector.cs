@@ -27,12 +27,18 @@ public partial class ShotDirector : Node3D
     public override void _Ready()
     {
         var args = OS.GetCmdlineUserArgs();
-        bool tour = false;
+        bool tour = false, landmarks = false;
+        int radius = 10;
+        string only = null;
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "--shots" && i + 1 < args.Length && !args[i + 1].StartsWith("--")) _out = args[i + 1];
             if (args[i] == "--seed" && i + 1 < args.Length) _seed = Hash.StringSeed(args[i + 1]);
             if (args[i] == "--tour") tour = true;
+            if (args[i] == "--landmarks") landmarks = true;
+            if (args[i] == "--radius" && i + 1 < args.Length) radius = int.Parse(args[i + 1]);
+            if (args[i] == "--only" && i + 1 < args.Length) only = args[i + 1];
+            if (args[i] == "--settle" && i + 1 < args.Length) _settle = double.Parse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture);
             if (args[i] == "--look" && i + 6 < args.Length)
             {
                 float F(int k) => float.Parse(args[i + k], System.Globalization.CultureInfo.InvariantCulture);
@@ -43,10 +49,10 @@ public partial class ShotDirector : Node3D
 
         _cam = new Camera3D { Fov = 75, Far = 2400, Near = 0.05f };
         AddChild(_cam);
-        _world = new World(_seed);
+        _world = new World(_seed, landmarks);
         _view = new WorldView();
         AddChild(_view);
-        _view.Init(_world, null, _cam, 10);
+        _view.Init(_world, null, _cam, radius);
         var mobs = new MobManager { World = _world, SpawningEnabled = false };
         AddChild(mobs);
         _mobs = mobs;
@@ -57,8 +63,14 @@ public partial class ShotDirector : Node3D
         var p = new Vector3(sx + 0.5f, sy + 1.7f, sz + 0.5f);
         if (_look.HasValue)
         {
-            _shots.Add(("look", _look.Value.from, _look.Value.to, 0.25f, 1f));
+            _shots.Add(("look", _look.Value.from, _look.Value.to, _lookTime, 1f));
             tour = true;   // no creatures
+        }
+        else if (landmarks)
+        {
+            LandmarkShots(_world.Gen.Landmarks);
+            if (only != null) _shots.RemoveAll(s => !s.name.Contains(only));
+            tour = true;
         }
         else if (!tour)
         {
@@ -97,6 +109,34 @@ public partial class ShotDirector : Node3D
             }
         }
         Next();
+    }
+
+    private float _lookTime = 0.25f;
+    private double _settle;       // minimum seconds at each viewpoint, so distant columns finish meshing
+
+    /// <summary>Viewpoints on the showcase landmarks, in site coordinates.</summary>
+    private void LandmarkShots(LandmarkSite site)
+    {
+        Vector3 L(float x, float y, float z) => new(site.Ox + x, y, site.Oz + z);
+        var spawn = site.Spawn + new Vector3(0, 1.62f, 0);
+        _shots.Add(("vista_morning", spawn, L(0, 150, -29), 0.1f, 1f));
+        _shots.Add(("vista_dusk", spawn, L(0, 150, -29), 0.46f, 1f));
+        _shots.Add(("vista_night", spawn, L(0, 150, -29), 0.7f, 1f));
+        _shots.Add(("keep_from_bailey", L(-30, 122, 40), L(0, 175, -29), 0.2f, 1f));
+        _shots.Add(("vista_far", L(-70, 130, 190), L(0, 150, -29), 0.2f, 1f));
+        _shots.Add(("vista_high_night", spawn, L(0, 150, -29), 0.75f, 1f));
+        _shots.Add(("vista_sunset", spawn, L(0, 150, -29), 0.49f, 1f));
+        _shots.Add(("aerial_sw", L(-110, 175, 130), L(0, 125, 0), 0.14f, 1f));
+        _shots.Add(("aerial_ne", L(110, 180, -110), L(0, 125, 0), 0.3f, 1f));
+        _shots.Add(("aerial_night", L(-110, 175, 130), L(0, 130, 0), 0.72f, 1f));
+        _shots.Add(("spur_road", L(-40, 96, 120), L(6, 110, 90), 0.16f, 1f));
+        _shots.Add(("bridge", L(6, 121, 92), L(6, 128, 40), 0.18f, 1f));
+        _shots.Add(("courtyard", L(-2, 122, 48), L(4, 140, -10), 0.2f, 1f));
+        _shots.Add(("entrance_hall", L(2, 121, 16), L(2, 124, -8), 0.2f, 1f));
+        _shots.Add(("throne_room", L(0, 122, -14), L(0, 126, -40), 0.2f, 1f));
+        _shots.Add(("village", L(-30, 80, 170), L(0, 72, 140), 0.12f, 1f));
+        _shots.Add(("complex", L(170, 110, 110), L(236, 80, 34), 0.24f, 1f));
+        _shots.Add(("complex_night", L(190, 90, 90), L(236, 90, 34), 0.72f, 1f));
     }
 
     private void BuildTour(WorldGen gen, int sx, int sz)
@@ -202,7 +242,7 @@ public partial class ShotDirector : Node3D
         _wait += delta;
         bool ready = _view.Chunks.AreaReady(_cam.GlobalPosition, 6) && _view.Chunks.Jobs.Pending == 0;
         if (ready) _frames++;
-        if ((_frames > 8) || _wait > 120)
+        if ((_frames > 8 && _wait >= _settle) || _wait > 120)
         {
             var img = GetViewport().GetTexture().GetImage();
             string path = System.IO.Path.Combine(_out, $"{_index:00}_{s.name}.png");

@@ -79,7 +79,7 @@ public sealed class Atmosphere
         var cloudMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/clouds.gdshader") };
         _clouds = new MeshInstance3D
         {
-            Mesh = new PlaneMesh { Size = new Vector2(1000, 1000), Material = cloudMat },
+            Mesh = new PlaneMesh { Size = new Vector2(1200, 1200), Material = cloudMat },
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off,
             ExtraCullMargin = 4096f,
         };
@@ -175,7 +175,7 @@ public sealed class Atmosphere
 
         if (_env != null) _env.Environment.BackgroundColor = fog;
         if (_dome != null) _dome.GlobalPosition = cam;
-        if (_clouds != null) _clouds.GlobalPosition = new Vector3(cam.X, 192f, cam.Z);
+        if (_clouds != null) _clouds.GlobalPosition = new Vector3(cam.X, 262f, cam.Z);   // above the build limit, so nothing tall pokes into them
     }
 
     /// <summary>0 at new moon, 1 at full; an eight-day cycle.</summary>
