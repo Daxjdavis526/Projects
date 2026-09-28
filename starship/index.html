@@ -110,6 +110,9 @@ const rim = new THREE.DirectionalLight(0x9fb8ff, 1.4); rim.position.set(-4, 1, -
 
 const steel = new THREE.MeshStandardMaterial({ color: 0xc9ccd1, metalness: 0.55, roughness: 0.38 });
 const tiles = new THREE.MeshStandardMaterial({ color: 0x151517, metalness: 0.0, roughness: 0.85 });
+const raptor = new THREE.MeshStandardMaterial({ color: 0x2a2a2d, metalness: 0.3, roughness: 0.6 });
+const MATERIAL = { super_heavy: steel, starship: steel, heat_shield: tiles,
+                   super_heavy_raptors: raptor, starship_raptors: raptor };
 
 const parts = {};
 let model, framed;   // framed: bounding box of what is on screen
@@ -123,34 +126,37 @@ function frame(objects) {
   const h = Math.max(size.y, size.x * camera.aspect, size.z * camera.aspect);
   const dist = (h / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.18;
   controls.target.copy(centre);
-  camera.position.set(centre.x + dist * 0.8, centre.y + dist * 0.12, centre.z + dist * 0.6);
+  // Default view: near the ship's tile line, under the key light, so both
+  // the steel and the heat shield read.
+  camera.position.set(centre.x + dist * 0.3, centre.y + dist * 0.12, centre.z + dist * 0.95);
   camera.near = dist / 100; camera.far = dist * 20; camera.updateProjectionMatrix();
   controls.update();
 }
 
 function show(view) {
   const ship = view === 'stack' || view === 'starship';
-  parts.super_heavy.visible = view === 'stack' || view === 'super_heavy';
-  parts.starship.visible = ship;
-  parts.heat_shield.visible = ship;
+  parts.super_heavy.visible = parts.super_heavy_raptors.visible = view === 'stack' || view === 'super_heavy';
+  parts.starship.visible = parts.starship_raptors.visible = parts.heat_shield.visible = ship;
   document.querySelectorAll('#views button').forEach(b =>
     b.setAttribute('aria-pressed', String(b.dataset.view === view)));
-  frame(view === 'stack' ? [model] : view === 'super_heavy' ? [parts.super_heavy]
-    : [parts.starship, parts.heat_shield]);
+  frame(view === 'stack' ? [model] : view === 'super_heavy' ? [parts.super_heavy, parts.super_heavy_raptors]
+    : [parts.starship, parts.starship_raptors, parts.heat_shield]);
 }
 
-new GLTFLoader().load('models/starship_stack.glb', gltf => {
+const q = new URLSearchParams(location.search);
+// ?src=file.glb loads another export (a single part, say) for inspection.
+new GLTFLoader().load(q.get('src') || 'models/starship_stack.glb', gltf => {
   model = gltf.scene;
   model.traverse(o => {
-    if (o.name in { super_heavy: 1, starship: 1, heat_shield: 1 }) parts[o.name] = o;
+    if (o.name in MATERIAL) parts[o.name] = o;
   });
   for (const [name, node] of Object.entries(parts)) {
-    node.traverse(o => { if (o.isMesh) o.material = name === 'heat_shield' ? tiles : steel; });
+    node.traverse(o => { if (o.isMesh) o.material = MATERIAL[name]; });
   }
+  if (q.has('src')) model.traverse(o => { if (o.isMesh) o.material = steel; });
   scene.add(model);
   document.getElementById('status').remove();
-  const q = new URLSearchParams(location.search);
-  show(q.get('view') || 'stack');
+  if (q.has('src')) frame([model]); else show(q.get('view') || 'stack');
   if (q.has('az')) {      // ?az=deg&el=deg&zoom=f&y=0..1 — fixed camera, for screenshots
     const off = camera.position.clone().sub(controls.target);
     const r = off.length() / (+q.get('zoom') || 1);

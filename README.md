@@ -235,11 +235,13 @@ how it works, and what it approximates.
 ## starship/
 
 **STARSHIP** — a parametric CAD model of SpaceX's Starship V3 stacked on a
-Super Heavy Block 3 booster: 33 + 6 Raptor 3s in their real layouts,
-lattice grid fins, the hot-staging vents, flaps and a separate heat shield.
-Exported as a coloured STEP assembly and as watertight STLs (the stack, and
-each stage alone) at 1:500, 249 mm tall; any other scale is one flag on the
-CadQuery generator. The live page is a 3D viewer with download links.
+Super Heavy Block 3 booster, built from published figures and measurements
+taken off photographs of the real vehicles. It includes 33 + 6 Raptor 3s in
+their real layouts, the hot-staging truss, the T of lattice grid fins, flaps,
+chines, conduits and a separate heat shield. It exports a true-thickness STEP
+assembly for CAD and watertight STLs for printing (the stack, and each stage
+alone) at 1:500, 249 mm tall; any other scale is one flag on the CadQuery
+generator. The live page is a 3D viewer with download links.
 
 Live: https://daxjdavis526.github.io/Projects/starship/
 

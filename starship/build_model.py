@@ -3,11 +3,12 @@
 STARSHIP — a parametric CAD model of SpaceX's Starship V3 stacked on Super
 Heavy, built with CadQuery (OpenCascade) and exported as STEP and STL.
 
-Everything is modelled at full scale in metres from public figures, then
-scaled down on export. Features too fine to survive the chosen scale (engine
-bell walls, grid fin webs, skirt walls) are thickened to a printable minimum;
-see README.md for what that changes and for every dimension that is an
-estimate rather than a published number.
+Everything is modelled at full scale in metres from SpaceX's published
+figures and from measurements taken off photographs of Ship 39/40 and
+B19/B20, then scaled down on export. The vehicle is built twice: once at true
+thicknesses for the STEP (CAD) and the viewer's GLB, and once for printing,
+with anything thinner than --min-wall thickened and the finest details
+dropped. README.md lists what is published, measured or estimated.
 
     pip install cadquery
     python3 starship/build_model.py              # 1:500, ~249 mm tall
@@ -19,6 +20,7 @@ plane on the centreline.
 """
 
 import argparse
+import gc
 import math
 from pathlib import Path
 
@@ -32,21 +34,9 @@ from cadquery import Vector
 R_HULL = 4.5            # 9 m outer diameter, both stages
 H_BOOSTER = 72.3        # Super Heavy Block 3, engine exits to top of interstage
 H_SHIP = 52.1           # Starship V3 ship (124.4 m stack - 72.3 m booster)
-RAPTOR_LEN = 3.1        # Raptor 3 sea-level engine length
-RAPTOR_DIA = 1.3        # Raptor 3 sea-level engine diameter
+RAPTOR_LEN = 3.1        # Raptor 3 sea-level engine length (3.05 measured)
+RAPTOR_DIA = 1.3        # Raptor 3 sea-level nozzle exit
 
-# ---------------------------------------------------------------------------
-# Estimates from photographs and renders (not published) — see README
-# ---------------------------------------------------------------------------
-RVAC_LEN = 4.6          # Raptor Vacuum overall length
-RVAC_EXIT_R = 1.2       # Raptor Vacuum nozzle exit radius
-NOSE_LEN = 17.0         # ship ogive, base to tip
-
-BOOSTER_SKIRT_BOTTOM = 0.9   # lower lip of the aft skirt, above engine exits
-BOOSTER_AFT_PLATE = 2.3      # engine bay heat shield / thrust puck level
-INTERSTAGE_H = 2.4           # integrated hot-staging adapter at the top
-GRID_FIN_Z = 63.0            # V3 fins moved down the forward tank
-SHIP_SKIRT_H = 3.2           # ship aft skirt that shrouds its six engines
 
 
 class Model:
@@ -57,6 +47,10 @@ class Model:
         self.mm_per_m = 1000.0 / scale_denom
         # Thinnest wall, in real metres, that still prints at this scale.
         self.min_wall = min_wall_mm / self.mm_per_m
+        # How far a painted-on feature (the heat shield, a door outline) must
+        # stand proud or sink to survive printing: 0.2 mm, or nothing for the
+        # true-thickness CAD model.
+        self.relief = 0.2 / self.mm_per_m if min_wall_mm > 0 else 0.0
 
     def wall(self, real_m: float) -> float:
         """A wall thickness: the real value, or the printable minimum."""
@@ -120,7 +114,10 @@ def spin(shape, degrees):
 def fuse(shapes):
     shapes = list(shapes)
     out = shapes[0].fuse(*shapes[1:]) if len(shapes) > 1 else shapes[0]
-    return out.clean()
+    # Merging coplanar faces tidies the STEP, but on a few curved seams it
+    # corrupts the solid; keep the unmerged result when that happens.
+    cleaned = out.clean()
+    return cleaned if cleaned.isValid() else out
 
 
 def wedge(deg_from, deg_to, z0, z1, reach=50.0):
@@ -133,157 +130,297 @@ def wedge(deg_from, deg_to, z0, z1, reach=50.0):
     return prism_xy(pts, z0, z1)
 
 
+def radial_plate(points, t0, t1):
+    """A plate in the X-Z plane given as (radius, z) points, spanning y from
+    t0 to t1: build a feature at azimuth 0 and spin() it into place."""
+    wire = cq.Wire.makePolygon([Vector(x, t0, z) for x, z in points], close=True)
+    return cq.Solid.extrudeLinear(wire, [], Vector(0, t1 - t0, 0))
+
+
+def radial_cylinder(r, z, x0, x1, y=0.0):
+    """A cylinder pointing radially outward at azimuth 0, from x0 to x1."""
+    return cq.Solid.makeCylinder(r, x1 - x0, Vector(x0, y, z), Vector(1, 0, 0))
+
+
+def both_sides(shape, az):
+    """The feature at +az and its mirror image at -az."""
+    placed = spin(shape, az)
+    return [placed, placed.mirror("XZ")]
+
+
 # ---------------------------------------------------------------------------
 # Engines
 # ---------------------------------------------------------------------------
-def engine(m: Model, exit_r, bell_len, head_len, head_r, throat_r):
-    """A Raptor: a bell nozzle with a hollowed exit, capped by a powerhead.
+# Raptor 3 outer silhouette, measured off SpaceX's side-on photo of Raptors
+# 1, 2 and 3 (scaled by the 1.30 m exit). (radius, depth below engine top).
+# Top down: inlet, bolted flange, the upper powerhead block with its bolt
+# ring, the main manifold disk (the widest part of the head), the stacked
+# manifold tori, the neck around the throat, the nozzle manifold band.
+RAPTOR_HEAD = [
+    (0.12, 0.00), (0.12, 0.14), (0.235, 0.14), (0.235, 0.28), (0.24, 0.28),
+    (0.24, 0.63), (0.29, 0.63), (0.29, 0.70), (0.24, 0.70), (0.24, 0.87),
+    (0.34, 0.87), (0.34, 0.99), (0.27, 0.99), (0.29, 1.06), (0.27, 1.13),
+    (0.29, 1.20), (0.26, 1.28), (0.22, 1.31), (0.22, 1.50),
+]
+# Sea-level bell outer jacket below the manifold band, same photo.
+RAPTOR_SL_BELL = [(0.40, 1.72), (0.41, 1.80), (0.50, 1.96), (0.56, 2.12),
+                  (0.61, 2.38), (0.64, 2.66), (0.65, 3.05)]
+# Raptor Vacuum: the same powerhead, a regeneratively cooled section down to
+# a manifold ring, then the long nozzle extension (2.3 m exit, ~4.1 m long).
+RVAC_BELL = [(0.44, 1.72), (0.46, 1.82), (0.60, 2.05), (0.72, 2.35), (0.79, 2.58)]
+RVAC_RING = [(0.79, 2.58), (0.84, 2.60), (0.84, 2.70), (0.80, 2.72)]
+RVAC_EXTENSION = [(0.80, 2.72), (0.93, 3.05), (1.03, 3.40), (1.10, 3.75), (1.15, 4.10)]
 
-    Exit plane at z=0, powerhead on top. The bell is hollowed as deep as the
-    (clamped) wall thickness allows, so the nozzle reads as a nozzle.
+
+def engine(m: Model, bell, extra_rings=(), pipes=True):
+    """A Raptor with its exit plane at z=0 and powerhead on top.
+
+    The bell is hollow to the depth the wall thickness allows. The side pump
+    pod and the hot-gas duct that loops down to the nozzle manifold are added
+    only when they are big enough to exist at this scale.
     """
-    wall = m.wall(0.02)
-    n = 10
-    outer = []
-    for i in range(n + 1):
-        s = i / n                                   # 0 at throat, 1 at exit
-        r = throat_r + (exit_r - throat_r) * s ** 0.6
-        outer.append((r, bell_len * (1 - s)))
-    top = bell_len + head_len
-    prof = [("line", [(0, top), (head_r, top), (head_r, bell_len + 0.15 * head_len),
-                      (throat_r * 1.4, bell_len), (throat_r, bell_len * 0.97)])]
-    outer[0] = (throat_r, bell_len * 0.97)
-    prof.append(("spline", outer))
-    if exit_r - wall > 0.35 * exit_r:
-        # Hollow the bell: inner surface parallel to the outer one, stopping
-        # where it would pinch shut.
-        inner = []
-        for r, z in reversed(outer):
-            if r - wall < 0.3 * exit_r:
-                break
-            inner.append((r - wall, z))
-        stop_z = inner[-1][1]
-        prof.append(("line", [outer[-1], inner[0]]))
+    length = bell[-1][1]
+    zz = lambda d: length - d
+    wall = m.wall(0.025)
+    exit_r = bell[-1][0]
+
+    prof = [("line", [(0, zz(0))] + [(r, zz(d)) for r, d in RAPTOR_HEAD] +
+             [(bell[0][0], zz(bell[0][1]))])]
+    body = [(r, zz(d)) for r, d in bell]
+    prof.append(("spline", body))
+    if exit_r - wall > 0.12:
+        # Hollow the bell with an inner surface parallel to the outer one,
+        # stopping where it would pinch shut.
+        inner = [(r - wall, z) for r, z in reversed(body) if r - wall > 0.12]
+        prof.append(("line", [body[-1], inner[0]]))
         if len(inner) >= 2:
             prof.append(("spline", inner))
-        prof.append(("line", [inner[-1], (0, stop_z), (0, top)]))
+        prof.append(("line", [inner[-1], (0, inner[-1][1]), (0, zz(0))]))
     else:
-        prof.append(("line", [outer[-1], (0, 0), (0, top)]))
-    return revolve(prof)
+        prof.append(("line", [body[-1], (0, 0), (0, zz(0))]))
+    parts = [revolve(prof)]
+    for ring in extra_rings:
+        parts.append(revolve([("line", [(0, zz(ring[0][1]))] + [(r, zz(d)) for r, d in ring]
+                               + [(0, zz(ring[-1][1])), (0, zz(ring[0][1]))])]))
+
+    if pipes and m.min_wall <= 0.12:
+        # Offset turbopump pod, and the hot-gas duct from it down to the
+        # nozzle manifold band (the big black U-pipe in every photo).
+        parts.append(cq.Solid.makeCylinder(0.14, 0.45, Vector(0.40, 0, zz(0.85))))
+        pts = [Vector(0.40, 0, zz(0.84)), Vector(0.50, 0.02, zz(1.10)),
+               Vector(0.44, 0.05, zz(1.45)), Vector(0.30, 0.03, zz(1.72))]
+        path = cq.Wire.assembleEdges([cq.Edge.makeSpline(pts)])
+        tangent = path.tangentAt(0)
+        circle = cq.Wire.makeCircle(max(0.07, m.min_wall / 2), pts[0], tangent)
+        parts.append(cq.Solid.sweep(circle, [], path, True, True))
+    return fuse(parts)
 
 
-def raptor_sl(m: Model):
-    # 1.3 m is the engine's overall diameter; the nozzle exit is a little
-    # smaller, which is what lets 20 of them ring the booster's aft end.
-    return engine(m, exit_r=0.59, bell_len=1.9, head_len=RAPTOR_LEN - 1.9,
-                  head_r=RAPTOR_DIA / 2 * 0.8, throat_r=0.2)
+def raptor_sl(m: Model, pipes=True):
+    return engine(m, RAPTOR_SL_BELL, pipes=pipes)
+
+
+def sl_len():
+    return RAPTOR_SL_BELL[-1][1]
 
 
 def raptor_vac(m: Model):
-    return engine(m, exit_r=RVAC_EXIT_R, bell_len=3.4, head_len=RVAC_LEN - 3.4,
-                  head_r=0.55, throat_r=0.2)
+    return engine(m, RVAC_BELL + RVAC_EXTENSION[1:], extra_rings=[RVAC_RING])
 
 
 # ---------------------------------------------------------------------------
 # Super Heavy
 # ---------------------------------------------------------------------------
-def grid_fin(m: Model):
+# Heights are from the engine exit plane. Azimuths use the ship's frame: the
+# single "rudder" grid fin is on the ship's heat-shield side (0 deg); the
+# tower, and the chopsticks' approach, is at 180 deg.
+BOOSTER_LIP = 2.75       # bottom of the aft barrel: engines hang 2.75 m below it
+HOT_STAGE_H = 3.0        # integrated hot-staging truss, top ring to lower pins
+FIN_TOP_Z = H_BOOSTER - 6.6
+
+
+def grid_fin(m: Model, catch=False):
     """One V3 grid fin in local axes: X radial (0 at the hull), Y across,
-    Z along the flow. Air flows through the lattice cells, so the panel
-    lies flat, normal to the vehicle axis."""
-    span, width, depth = 4.2, 3.6, 0.9      # estimates, 50% up on V2's area
-    frame = m.wall(0.22)
-    web = m.wall(0.07)
-    pitch = max(0.62, 3.5 * web)            # coarsen the lattice if webs grow
-    outer = box(0, span, -width / 2, width / 2, -depth / 2, depth / 2)
-    inner = box(frame, span - frame, -width / 2 + frame, width / 2 - frame,
-                -depth, depth)
-    # Diamond cells: squares rotated 45 degrees in the panel plane.
-    half = (pitch - web * math.sqrt(2)) / 2 * math.sqrt(2)
+    Z along the flow (top face at 0). Air flows through the diamond lattice,
+    so the panel lies flat, normal to the vehicle axis."""
+    span, width, depth = 4.3, 3.5, 0.36            # measured (+-0.3 m)
+    root_w = 1.15                                   # machined root box
+    frame = m.wall(0.14)
+    web = m.wall(0.035)
+    pitch = max(0.30, 3.5 * web)                    # coarsen if webs thicken
+    plan = [(0, -root_w / 2), ((width - root_w) / 2, -width / 2), (span, -width / 2),
+            (span, width / 2), ((width - root_w) / 2, width / 2), (0, root_w / 2)]
+    outer = prism_xy(plan, -depth, 0)
+    # Inset outline for the lattice area, and the root box left solid.
+    c = frame * (1 + math.sqrt(2))
+    inner = prism_xy([(0.8, -root_w / 2 - 0.8 + c), ((width - root_w) / 2 + c - frame, -width / 2 + frame),
+                      (span - frame, -width / 2 + frame), (span - frame, width / 2 - frame),
+                      ((width - root_w) / 2 + c - frame, width / 2 - frame), (0.8, root_w / 2 + 0.8 - c)],
+                     -depth - 1, 1)
+    # Diamond |x|+|y| <= half; neighbours sit (pitch/2, pitch/2) away, so the
+    # web between parallel edges is (pitch - 2*half)/sqrt(2).
+    half = (pitch - web * math.sqrt(2)) / 2
     cells = []
-    nx = int(span / pitch) + 2
-    ny = int(width / pitch) + 2
-    for i in range(-1, nx + 1):
-        for j in range(-ny, ny + 1):
+    for i in range(-1, int(span / pitch) + 3):
+        for j in range(-int(width / pitch) - 3, int(width / pitch) + 4):
             cx = i * pitch + (pitch / 2 if j % 2 else 0)
             cy = j * pitch / 2
-            if not (-pitch < cx < span + pitch and abs(cy) < width / 2 + pitch):
-                continue
-            d = [(cx + half, cy), (cx, cy + half), (cx - half, cy), (cx, cy - half)]
-            cells.append(prism_xy(d, -depth, depth))
-    holes = fuse(cells).intersect(inner)
-    fin = outer.cut(holes)
-    # Root fitting: the hinge and actuator housing against the hull.
-    root = box(-0.4, 0.5, -1.0, 1.0, -1.0, 0.8)
-    return fuse([fin, root])
+            if -pitch < cx < span + pitch and abs(cy) < width / 2 + pitch:
+                cells.append(prism_xy([(cx + half, cy), (cx, cy + half), (cx - half, cy),
+                                       (cx, cy - half)], -depth - 1, 1))
+    fin = outer.cut(fuse(cells).intersect(inner))
+    # Serrated lower edge on the tip and both long sides (the saw-tooth
+    # silhouette in every photo).
+    tooth, tp = 0.23, max(0.30, 2 * m.min_wall)
+    teeth = []
+    edges = [((span - frame / 2, -width / 2), (span - frame / 2, width / 2)),
+             (((width - root_w) / 2, -width / 2 + frame / 2), (span, -width / 2 + frame / 2)),
+             (((width - root_w) / 2, width / 2 - frame / 2), (span, width / 2 - frame / 2))]
+    for (x0, y0), (x1, y1) in edges:
+        L = math.hypot(x1 - x0, y1 - y0)
+        n = max(1, int(L / tp))
+        ux, uy = (x1 - x0) / L, (y1 - y0) / L
+        for k in range(n):
+            a0, a1 = k * L / n, (k + 1) * L / n
+            p0 = Vector(x0 + ux * a0, y0 + uy * a0, -depth)
+            p1 = Vector(x0 + ux * a1, y0 + uy * a1, -depth)
+            pm = Vector(x0 + ux * (a0 + a1) / 2, y0 + uy * (a0 + a1) / 2, -depth - tooth)
+            tri = cq.Wire.makePolygon([p0, p1, pm], close=True)
+            nx, ny = -uy * frame / 2, ux * frame / 2
+            teeth.append(cq.Solid.extrudeLinear(tri, [], Vector(2 * nx, 2 * ny, 0))
+                         .translate(Vector(-nx, -ny, 0)))
+    parts = [fin] + teeth
+    if catch:
+        # The catch shoe under the root that sits on the chopstick rail.
+        parts.append(box(0.1, 0.85, -0.3, 0.3, -depth - 0.2, -depth + 0.05))
+    return fuse(parts)
 
 
 def super_heavy(m: Model):
     top = H_BOOSTER
-    tank_top = top - INTERSTAGE_H
-    skirt_wall = m.wall(0.06)
+    z_eq = top - HOT_STAGE_H                # forward-dome equator, lower truss pins
     parts = []
 
-    # Aft skirt, solid tank body, and the forward dome under the interstage.
-    parts.append(revolve([("line", [
-        (0, BOOSTER_AFT_PLATE), (R_HULL - skirt_wall, BOOSTER_AFT_PLATE),
-        (R_HULL - skirt_wall, BOOSTER_SKIRT_BOTTOM), (R_HULL, BOOSTER_SKIRT_BOTTOM),
-        (R_HULL, tank_top), (R_HULL - 0.05, tank_top)]),
-        ("spline", [(R_HULL - 0.05, tank_top), (3.6, tank_top + 0.8),
-                    (0, tank_top + 1.35)], ((0, 1), (-1, 0))),
-        ("line", [(0, tank_top + 1.35), (0, BOOSTER_AFT_PLATE)])]))
+    # Tank barrel from the aft lip to the forward dome, which rises inside
+    # the truss, exposed to the ship's exhaust (shielded only by a thin
+    # welded steel skin).
+    parts.append(revolve([
+        ("line", [(0, BOOSTER_LIP), (R_HULL, BOOSTER_LIP), (R_HULL, z_eq)]),
+        ("spline", [(R_HULL, z_eq), (3.4, z_eq + 1.75), (1.8, z_eq + 2.4), (0, z_eq + 2.6)],
+         ((0, 1), (-1, 0))),
+        ("line", [(0, z_eq + 2.6), (0, BOOSTER_LIP)])]))
 
-    # Integrated hot-staging adapter: an open ring with vent windows, the
-    # forward dome visible through them.
-    ring_wall = m.wall(0.08)
-    ring = revolve([("line", [(R_HULL - ring_wall, tank_top - 0.2), (R_HULL, tank_top - 0.2),
-                              (R_HULL, top), (R_HULL - ring_wall, top),
-                              (R_HULL - ring_wall, tank_top - 0.2)])])
-    vents = []
-    n_vents = 12
-    for i in range(n_vents):
-        w = 1.35
-        v = box(R_HULL - 1.0, R_HULL + 1.0, -w / 2, w / 2, tank_top + 0.35, top - 0.45)
-        vents.append(spin(v, 360 / n_vents * (i + 0.5)))
-    parts.append(ring.cut(fuse(vents)))
+    # Integrated hot-staging adapter: a Warren truss of 36 spindle struts
+    # between 18 lower nodes (20 deg apart) and 18 upper nodes offset 10 deg,
+    # under the ring the ship sits on.
+    ring_t = m.wall(0.25)
+    parts.append(revolve([("line", [(R_HULL - ring_t, top - 0.3), (R_HULL, top - 0.3), (R_HULL, top),
+                                    (R_HULL - ring_t, top), (R_HULL - ring_t, top - 0.3)])]))
+    strut_r = m.wall(0.2) / 2
+    r_node = R_HULL - max(0.15, strut_r)
+    for i in range(18):
+        # Each strut runs from inside the barrel to inside the ring, so it
+        # overlaps both rather than ending exactly on a face.
+        a = math.radians(20 * i)
+        lo = Vector(r_node * math.cos(a), r_node * math.sin(a), z_eq - 0.25)
+        for da in (-10, 10):
+            b = math.radians(20 * i + da)
+            hi = Vector(r_node * math.cos(b), r_node * math.sin(b), top - 0.12)
+            d = hi - lo
+            parts.append(cq.Solid.makeCylinder(strut_r, d.Length, lo, d.normalized()))
+        # Clevis fork at each lower node.
+        fork = box(R_HULL - 0.2, R_HULL + 0.18, -0.17, 0.17, z_eq - 0.9, z_eq + 0.1)
+        parts.append(spin(fork, 20 * i))
 
-    # 33 Raptor 3s: 3 centre, 10 inner gimballing ring, 20 fixed outer ring.
+    # Round RCS / vent ports with doubler rings, just under the truss.
+    for i in range(8):
+        port = radial_cylinder(0.45, z_eq - 1.3, R_HULL - 0.2, R_HULL + 0.05)
+        if m.min_wall < 0.15:
+            port = port.cut(radial_cylinder(0.25, z_eq - 1.3, R_HULL - 0.1, R_HULL + 0.2))
+        parts.append(spin(port, 22.5 + 45 * i))
+
+    # 33 Raptor 3s: 20 fixed outer engines every 18 deg at r = 4.30 m (their
+    # nozzles overhang the 9 m hull), 10 gimballing inner engines at 2.52 m
+    # splitting each outer pair, 3 centre engines clocked 108/108/144 deg in
+    # line with inner engines. Turbopump pods face outward.
     eng = raptor_sl(m)
-    for n, radius, phase in ((3, 0.92, 90), (10, 2.5, 0), (20, 3.87, 9)):
-        for i in range(n):
-            a = math.radians(phase + 360 * i / n)
-            parts.append(eng.translate(Vector(radius * math.cos(a), radius * math.sin(a), 0)))
+    engines = []
+    top_of_engine = BOOSTER_LIP + 0.3
+    z0 = top_of_engine - sl_len()
+    for n, radius, angles in ((20, 4.30, [18 * i for i in range(20)]),
+                              (10, 2.52, [9 + 36 * i for i in range(10)]),
+                              (3, 0.95, [9, 117, 225])):
+        for deg in angles:
+            a = math.radians(deg)
+            engines.append(spin(eng, deg).translate(Vector(radius * math.cos(a), radius * math.sin(a), z0)))
 
-    # Grid fins: three, 120 degrees apart.
-    fin = grid_fin(m)
-    for a in (60, 180, 300):
-        parts.append(spin(fin.translate(Vector(R_HULL - 0.1, 0, GRID_FIN_Z)), a))
+    # Aft plumbing band: engine commodity ring pipes and one junction box per
+    # outer engine.
+    if m.min_wall <= 0.14:
+        for z in (BOOSTER_LIP + 0.9, BOOSTER_LIP + 1.9, BOOSTER_LIP + 2.2):
+            parts.append(cq.Solid.makeTorus(R_HULL + 0.1, 0.07, Vector(0, 0, z)))
+    for i in range(20):
+        jb = box(R_HULL - 0.1, R_HULL + m.wall(0.2), -m.wall(0.3) / 2, m.wall(0.3) / 2,
+                 BOOSTER_LIP + 1.2, BOOSTER_LIP + 1.7)
+        parts.append(spin(jb, 18 * i + 9))
 
-    # Catch hardpoints under the forward dome, between the fins.
-    for a in (120, 240):
-        hp = box(R_HULL - 0.2, R_HULL + 0.55, -0.45, 0.45, tank_top - 3.3, tank_top - 2.5)
-        parts.append(spin(hp, a))
+    # Grid fins in the V3 "T": the rudder fin on the heat-shield side, two
+    # catch fins at +-90 deg that the chopsticks lift and catch it by. Each
+    # root sits on a round shaft aperture with a toothed doubler.
+    for az, catch in ((0, False), (90, True), (-90, True)):
+        fin = grid_fin(m, catch).translate(Vector(R_HULL - 0.15, 0, FIN_TOP_Z))
+        boss = radial_cylinder(0.6, FIN_TOP_Z - 0.1, R_HULL - 0.2, R_HULL + 0.06)
+        parts += [spin(fin, az), spin(boss, az)]
 
-    # Cable / plumbing raceway, full length on the +X side.
-    rw_h, rw_w = 0.35, 0.9
-    parts.append(prism_xy([(R_HULL - 0.2, -rw_w / 2), (R_HULL + rw_h, -rw_w / 2 + 0.12),
-                           (R_HULL + rw_h, rw_w / 2 - 0.12), (R_HULL - 0.2, rw_w / 2)],
-                          BOOSTER_SKIRT_BOTTOM + 0.3, tank_top - 0.4))
+    # Conduits. A: tower side, full length, with two pointed pods and a pipe
+    # alongside. B: heat-shield side, from the common dome down.
+    def conduit(z_lo, z_hi, w, h):
+        return prism_xy([(R_HULL - 0.2, -w / 2), (R_HULL + h, -w / 2 + 0.08),
+                         (R_HULL + h, w / 2 - 0.08), (R_HULL - 0.2, w / 2)], z_lo, z_hi)
 
-    # Aft chines: two strakes along the LOX tank, tapered at the top.
-    t = m.wall(0.3)
-    for a in (90, 270):
-        chine = plate_yz([(R_HULL - 0.2, BOOSTER_SKIRT_BOTTOM + 0.2), (R_HULL + 0.55, BOOSTER_SKIRT_BOTTOM + 0.2),
-                          (R_HULL + 0.55, 24.0), (R_HULL - 0.2, 28.0)], -t / 2, t)
-        parts.append(spin(chine, a - 90))
+    parts.append(spin(conduit(BOOSTER_LIP + 0.3, z_eq - 1.0, 0.6, 0.3), 180))
+    for z_lo, z_hi in ((top - 9.5, top - 4.5), (top - 29.0, top - 21.0)):
+        pod = radial_plate([(R_HULL - 0.1, z_lo), (R_HULL + 0.55, z_lo + 1.0),
+                            (R_HULL + 0.55, z_hi - 1.0), (R_HULL - 0.1, z_hi)], -0.35, 0.35)
+        parts.append(spin(pod, 180))
+    parts.append(spin(cq.Solid.makeCylinder(m.wall(0.25) / 2, z_eq - 1.5 - BOOSTER_LIP - 2.5,
+                                            Vector(R_HULL + 0.1, 0, BOOSTER_LIP + 2.5)), 187))
+    parts.append(spin(conduit(BOOSTER_LIP + 0.3, top - 25.3, 0.45, 0.3), -3))
 
-    return fuse(parts)
+    # Chines: angular fairings over avionics, pressure bottles and batteries.
+    # Two tall ones close together either side of conduit A, two shorter
+    # ones farther apart on the heat-shield side.
+    def chine(z_top):
+        z_bot = BOOSTER_LIP + 2.0
+        return radial_plate([(R_HULL - 0.2, z_bot), (R_HULL + 0.9, z_bot + 0.8),
+                             (R_HULL + 0.9, z_top - 2.2), (R_HULL - 0.2, z_top)], -0.5, 0.5)
+
+    for az in (150, -125):
+        parts.append(spin(chine(top - 37.4), az))
+    for az in (60, -60):
+        parts.append(spin(chine(top - 45.2), az))
+
+    # The short vertical ribs around the common dome.
+    if m.min_wall <= 0.08:
+        for i in range(96):
+            rib = box(R_HULL - 0.05, R_HULL + 0.06, -0.04, 0.04, top - 24.7, top - 23.4)
+            parts.append(spin(rib, 3.75 * i))
+
+    # The engines are their own body: they are matte black and the hull is
+    # not. Their tops still overlap the hull; build() trims them for CAD.
+    return fuse(parts), fuse(engines)
 
 
 # ---------------------------------------------------------------------------
 # Starship (upper stage)
 # ---------------------------------------------------------------------------
-NOSE_TIP_R = 1.5         # spherical blunting of the ogive tip (estimate)
+# Ship-local z runs up from the bottom of the aft skirt. Azimuth is measured
+# from the windward centreline (+X, 0 deg) toward +Y; leeward is 180 deg.
+NOSE_LEN = 12.5          # ogive, tangent to the barrel (measured, +-0.5)
+NOSE_TIP_R = 0.9         # spherical blunting at the tip (measured, +-0.3)
+SHIP_SKIRT_H = 7.0       # aft skirt, about four 1.83 m rings (measured)
+SHIP_AFT_DOME_Z = 4.3    # lowest point of the aft dome / thrust puck (estimate)
+Z_NOSE = H_SHIP - NOSE_LEN
 
 
 def _nose_geometry():
@@ -307,16 +444,16 @@ def _nose_geometry():
     return rho, zc, ((R - rho) + dx * k, dz * k)
 
 
-def nose_segments(z0, offset=0.0):
-    """Revolve segments for the nose, base (R, z0) to tip on the axis, as two
-    exact arcs. `offset` grows the surface normally (for the heat shield)."""
+def nose_segments(offset=0.0):
+    """Revolve segments for the nose, base (R, Z_NOSE) to tip on the axis, as
+    two exact arcs. `offset` grows the surface normally (for the heat shield)."""
     rho, zc, _ = _nose_geometry()
     cx = R_HULL - rho
     ro, rs = rho + offset, NOSE_TIP_R + offset
+    z0 = Z_NOSE
 
     def on_ogive(t):              # t: 0 at base, 1 at the tangent point
-        a_end = math.atan2(zc, -cx)
-        a = a_end * t
+        a = math.atan2(zc, -cx) * t
         return (cx + ro * math.cos(a), z0 + ro * math.sin(a))
 
     tang = on_ogive(1)
@@ -328,9 +465,10 @@ def nose_segments(z0, offset=0.0):
     ]
 
 
-def nose_radius(z, z0):
+def hull_radius(z):
+    """Outer radius of the ship's steel at ship-local height z."""
     rho, zc, tang = _nose_geometry()
-    h = z - z0
+    h = z - Z_NOSE
     if h <= 0:
         return R_HULL
     if h <= tang[1]:
@@ -338,96 +476,126 @@ def nose_radius(z, z0):
     return math.sqrt(max(NOSE_TIP_R ** 2 - (h - zc) ** 2, 0))
 
 
-def hull_solid(z_bottom, z_nose, offset=0.0):
-    nose = nose_segments(z_nose, offset)
+def ship_envelope(offset=0.0, z_bottom=0.0):
+    """The ship's outer surface as a solid (skirt filled in)."""
+    nose = nose_segments(offset)
     tip = nose[-1][1][-1]
-    return revolve([("line", [(0, z_bottom), (R_HULL + offset, z_bottom), (R_HULL + offset, z_nose)])]
+    return revolve([("line", [(0, z_bottom), (R_HULL + offset, z_bottom), (R_HULL + offset, Z_NOSE)])]
                    + nose + [("line", [tip, (0, z_bottom)])])
 
 
+def aft_flap(m: Model):
+    """V2/V3 aft flap on the +90 deg tile line: straight outer edge, swept
+    leading edge, tapering from ~0.6 m thick at the root to ~0.3 m."""
+    t_root, t_tip = m.wall(0.6), m.wall(0.3)
+    x0, x1 = R_HULL - 0.3, R_HULL + 4.0
+    root = cq.Wire.makePolygon([Vector(x0, -t_root / 2, 0.2), Vector(x0, t_root / 2, 0.2),
+                                Vector(x0, t_root / 2, 14.0), Vector(x0, -t_root / 2, 14.0)], close=True)
+    tip = cq.Wire.makePolygon([Vector(x1, -t_tip / 2, 0.2), Vector(x1, t_tip / 2, 0.2),
+                               Vector(x1, t_tip / 2, 8.5), Vector(x1, -t_tip / 2, 8.5)], close=True)
+    flap = cq.Solid.makeLoft([root, tip], True)
+    # Static hinge fairing ("static aero") on the leeward side, full height,
+    # with a ramped cap. Local +Y becomes leeward once spun to +90 deg.
+    fairing = radial_plate([(R_HULL - 0.3, 0.0), (R_HULL + 0.7, 0.0), (R_HULL + 0.7, 13.2),
+                            (R_HULL - 0.3, 15.0)], t_root / 2 - 0.05, t_root / 2 + 0.7)
+    return fuse([flap, fairing])
+
+
+def forward_flap(m: Model):
+    """V2/V3 forward flap, built at azimuth 0 and spun to +-113 deg: the root
+    follows the ogive, 3 m span, straight 2 m outer edge, swept leading edge."""
+    t = m.wall(0.3)
+    z_lo, z_hi = Z_NOSE + 2.7, Z_NOSE + 8.4          # root: ~5.8 m along the ogive
+    root = [(hull_radius(z_hi - (z_hi - z_lo) * k / 6) - 0.15, z_hi - (z_hi - z_lo) * k / 6)
+            for k in range(7)]
+    outline = root + [(7.5, Z_NOSE + 2.2), (7.5, Z_NOSE + 4.2)]
+    flap = radial_plate(outline, -t / 2, t / 2)
+    # Hinge fairing: a strip hugging the ogive along the root, leeward side.
+    zs = [Z_NOSE + 2.3 + (6.5 * k / 6) for k in range(7)]
+    strip = [(hull_radius(z) - 0.35, z) for z in zs] + \
+            [(hull_radius(z) + 0.45, z) for z in reversed(zs)]
+    fairing = radial_plate(strip, t / 2 - 0.05, t / 2 + 0.85)
+    return fuse([flap, fairing])
+
+
 def starship(m: Model):
-    z_nose = H_SHIP - NOSE_LEN
-    skirt_wall = m.wall(0.06)
+    wall = m.wall(0.02)
     parts = []
 
-    # Aft skirt around the engines, then the solid hull and ogive nose.
-    body = hull_solid(SHIP_SKIRT_H, z_nose)
-    skirt = revolve([("line", [(R_HULL - skirt_wall, 0), (R_HULL, 0), (R_HULL, SHIP_SKIRT_H + 0.1),
-                               (R_HULL - skirt_wall, SHIP_SKIRT_H + 0.1), (R_HULL - skirt_wall, 0)])])
-    parts += [body, skirt]
+    # Hull: open aft skirt, the aft dome hanging into it, tanks, ogive nose.
+    dome = [(0, SHIP_AFT_DOME_Z), (2.3, SHIP_AFT_DOME_Z + 0.36), (3.6, SHIP_AFT_DOME_Z + 1.08),
+            (R_HULL - wall, SHIP_SKIRT_H)]
+    nose = nose_segments()
+    parts.append(revolve([("spline", dome, ((1, 0), (0.3, 1))),
+                          ("line", [(R_HULL - wall, SHIP_SKIRT_H), (R_HULL - wall, 0),
+                                    (R_HULL, 0), (R_HULL, Z_NOSE)])]
+                         + nose + [("line", [nose[-1][1][-1], (0, SHIP_AFT_DOME_Z)])]))
+    # Thrust puck under the dome, carrying the sea-level engines.
+    parts.append(cq.Solid.makeCylinder(1.55, 0.5, Vector(0, 0, SHIP_AFT_DOME_Z - 0.3)))
 
-    # Engines: 3 sea-level Raptors in the middle, 3 Raptor Vacuums outboard.
+    # Engines: three gimballed sea-level Raptors on the puck, and three fixed
+    # Raptor Vacuums on the aft dome, recessed inside the skirt. Clocking is
+    # not known from photos; the SpaceX render lines the rings up.
     sl = raptor_sl(m)
+    engines = []
     for i in range(3):
-        a = math.radians(60 + 120 * i)
-        parts.append(sl.translate(Vector(1.05 * math.cos(a), 1.05 * math.sin(a), 1.0)))
+        a = math.radians(120 * i)
+        engines.append(sl.translate(Vector(0.95 * math.cos(a), 0.95 * math.sin(a),
+                                         SHIP_AFT_DOME_Z - 0.2 - sl_len())))
     vac = raptor_vac(m)
     for i in range(3):
         a = math.radians(120 * i)
-        parts.append(vac.translate(Vector(3.05 * math.cos(a), 3.05 * math.sin(a), 0.1)))
+        engines.append(vac.translate(Vector(3.2 * math.cos(a), 3.2 * math.sin(a), 1.1)))
 
-    # Heat shield: the windward half, a little over 180 degrees, raised off
-    # the steel so it reads as a separate surface (tiles are ~0.08 m thick).
-    shield_t = m.wall(0.08) if m.min_wall < 0.2 else max(0.08, 0.2 / m.mm_per_m)
-    shield = hull_solid(0.4, z_nose, shield_t).intersect(wedge(-96, 96, 0, H_SHIP + 1))
-    shield = shield.cut(hull_solid(0.0, z_nose))
+    # Flaps and their fairings.
+    parts += both_sides(aft_flap(m), 90)
+    parts += both_sides(forward_flap(m), 113)
 
-    # Aft flaps on the tile line (±Y), with their hinge fairings on the
-    # leeward side. The flap plane faces the windward flow.
-    flap_t = m.wall(0.4)
-    for side in (1, -1):
-        pts = [(R_HULL - 0.3, 1.2), (R_HULL + 4.1, 1.2), (R_HULL + 4.1, 8.3), (R_HULL + 1.2, 11.0),
-               (R_HULL - 0.3, 12.6)]
-        flap = plate_yz([(side * y, z) for y, z in pts], -flap_t / 2, flap_t)
-        fairing = box(-1.1, -0.1, R_HULL - 0.4, R_HULL + 0.55, 0.9, 13.4)
-        if side < 0:
-            fairing = fairing.mirror("XZ")
-        parts += [flap, fairing]
+    # Catch pins for the tower, ramp-shaped, on the tile line under the nose.
+    pin = radial_plate([(R_HULL - 0.2, 38.75), (R_HULL + 0.4, 39.35), (R_HULL + 0.4, 39.6),
+                        (R_HULL - 0.2, 39.6)], -0.3, 0.3)
+    parts += both_sides(pin, 90)
 
-    # Forward flaps: smaller, shifted leeward (V2/V3 layout) so the hinges sit
-    # out of the plasma, on the ogive.
-    x_leeward = -1.1
-    ff_t = m.wall(0.3)
-    zf0, zf1 = z_nose + 2.2, z_nose + 11.2
-    for side in (1, -1):
-        root = []
-        for k in range(7):
-            z = zf1 - (zf1 - zf0) * k / 6
-            y = math.sqrt(max(nose_radius(z, z_nose) ** 2 - x_leeward ** 2, 0.1)) - 0.35
-            root.append((y, z))
-        y_root_bottom = root[-1][0]
-        tip = [(y_root_bottom + 3.0, zf0 + 0.2), (y_root_bottom + 3.0, zf0 + 3.6),
-               (root[0][0] + 0.9, zf1 - 0.4)]
-        pts = [root[-1]] + tip + root[:-1]
-        pts = [(side * y, z) for y, z in pts]
-        parts.append(plate_yz(pts, x_leeward - ff_t / 2, ff_t))
-        # Hinge fairing on the leeward face, hugging the ogive along the root.
-        x_f = x_leeward - 0.1
-        edge = []
-        for k in range(7):
-            z = zf0 - 0.3 + (zf1 - zf0 + 0.3) * k / 6
-            y = math.sqrt(max(nose_radius(z, z_nose) ** 2 - x_f ** 2, 0.1))
-            edge.append((y, z))
-        fpts = [(y - 0.4, z) for y, z in edge] + [(y + 0.4, z) for y, z in reversed(edge)]
-        parts.append(plate_yz([(side * y, z) for y, z in fpts], x_leeward - 0.75, 0.65))
-
-    # Chines: low strakes along the tile line between the flaps.
-    ch_t = m.wall(0.3)
-    for side in (1, -1):
-        ch = box(-ch_t / 2, ch_t / 2, R_HULL - 0.2, R_HULL + 0.35, 13.0, z_nose + 0.5)
-        if side < 0:
-            ch = ch.mirror("XZ")
-        parts.append(ch)
-
-    # V3 catch pins for the tower chopsticks, just leeward of the tile line.
-    for side in (1, -1):
-        pin = cq.Solid.makeCylinder(0.35, 1.0, Vector(-1.4, side * (R_HULL - 0.4), z_nose - 1.8),
-                                    Vector(0, side, 0))
-        parts.append(pin)
+    # Leeward plumbing: the two raceways (methane and oxygen side) from the
+    # skirt to the nose, RCS thruster pods at their tops and on the skirt,
+    # and the four docking drogue fittings.
+    for az in (163, -158):
+        pipe = cq.Solid.makeCylinder(m.wall(0.3), 29.0, Vector(R_HULL + 0.05, 0, SHIP_SKIRT_H))
+        parts.append(spin(pipe, az))
+    for z in (36.3, 4.7):
+        parts += both_sides(radial_cylinder(m.wall(0.3), z, R_HULL - 0.3, R_HULL + 0.55), 142.5)
+    for z in (27.5, 9.0):
+        drogue = radial_cylinder(0.55, z, R_HULL - 0.3, R_HULL + 0.18)
+        if m.min_wall < 0.15:
+            drogue = drogue.cut(radial_cylinder(0.35, z, R_HULL + 0.06, R_HULL + 0.3))
+        parts += both_sides(drogue, 133)
 
     steel = fuse(parts)
-    shield = shield.cut(steel)
-    return steel, shield
+    engines = fuse(engines)
+
+    # Starlink dispenser ("Pez") door: a recessed slot on the leeward side.
+    depth = max(0.03, m.relief)
+    door = ship_envelope(0.5).cut(ship_envelope(-depth)) \
+        .intersect(wedge(180 - 47, 180 + 47, 37.9, 39.1))
+    steel = steel.cut(door)
+
+    # Heat shield: the windward half from the skirt lip to the nose, widening
+    # around the forward flaps, and the whole tip. Plus the black leeward
+    # patches seen on Ship 39.
+    t = max(0.08, m.relief)          # tiles plus ablative backing, ~8 cm
+    shell = ship_envelope(t).cut(ship_envelope(0.0))
+    regions = [wedge(-90, 90, 0, Z_NOSE + 1.7), wedge(-117, 117, Z_NOSE + 1.7, Z_NOSE + 9.0),
+               wedge(-180, 180, Z_NOSE + 9.0, H_SHIP + 1)]
+    for az, half, z0, z1 in ((143, 13.4, 28.8, 31.2), (140, 21.6, 13.3, 16.7)):
+        regions.append(wedge(az - half, az + half, z0, z1))
+        regions.append(wedge(-az - half, -az + half, z0, z1))
+    regions = fuse(regions)
+    shield = shell.intersect(regions).cut(steel)
+    # For printing, a version that sinks into the steel wall instead of just
+    # touching it: fusing coincident curved faces is fragile, overlapping
+    # volumes are not.
+    shield_print = ship_envelope(t).cut(ship_envelope(-wall / 2)).intersect(regions)
+    return steel, engines, shield, shield_print
 
 
 # ---------------------------------------------------------------------------
@@ -446,6 +614,30 @@ def drop_degenerate_triangles(path: Path):
     path.write_bytes(data[:80] + len(keep).to_bytes(4, "little") + keep.tobytes())
 
 
+def build(m: Model):
+    """Both stages, stacked and scaled to millimetres, as named bodies."""
+    print("  Super Heavy ...")
+    booster, booster_engines = super_heavy(m)
+    print("  Starship ...")
+    ship, ship_engines, shield, shield_print = starship(m)
+    if m.min_wall == 0:
+        # For CAD, trim each engine to what shows outside the hull, so no two
+        # bodies overlap. For printing they stay overlapping, which fuses
+        # far more reliably than faces that merely touch.
+        booster_engines = booster_engines.cut(booster)
+        ship_engines = ship_engines.cut(ship)
+    s = m.mm_per_m
+    lift = Vector(0, 0, H_BOOSTER)
+    return {
+        "super_heavy": booster.scale(s),
+        "super_heavy_raptors": booster_engines.scale(s),
+        "starship": ship.translate(lift).scale(s),
+        "starship_raptors": ship_engines.translate(lift).scale(s),
+        "heat_shield": shield.translate(lift).scale(s),
+        "heat_shield_print": shield_print.translate(lift).scale(s),
+    }
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--scale", type=float, default=500, help="scale denominator (default 1:500)")
@@ -454,44 +646,45 @@ def main():
     ap.add_argument("--out", type=Path, default=Path(__file__).parent / "models")
     args = ap.parse_args()
 
-    m = Model(args.scale, args.min_wall)
     tag = f"1-{args.scale:g}"
     args.out.mkdir(parents=True, exist_ok=True)
 
-    print(f"scale 1:{args.scale:g}  ({m.mm_per_m:.3f} mm per metre, "
-          f"min wall {m.min_wall:.2f} m real)")
-    print("building Super Heavy ...")
-    booster = super_heavy(m)
-    print("building Starship ...")
-    ship_steel, ship_shield = starship(m)
+    # The CAD model keeps every wall at its real thickness; the print model
+    # thickens what a printer cannot make and coarsens the grid fin lattice.
+    true = Model(args.scale, 0.0)
+    printable = Model(args.scale, args.min_wall)
+    print(f"scale 1:{args.scale:g}  ({true.mm_per_m:.3f} mm per metre)")
 
-    s = m.mm_per_m
-    lift = Vector(0, 0, H_BOOSTER)
-    booster_mm = booster.scale(s)
-    ship_mm = ship_steel.translate(lift).scale(s)
-    shield_mm = ship_shield.translate(lift).scale(s)
-
-    # STEP: an assembly with named, coloured bodies (stainless and tile black).
-    steel = cq.Color(0.78, 0.79, 0.81)
-    tiles = cq.Color(0.08, 0.08, 0.09)
+    print("building the CAD model (true thicknesses) ...")
+    body = build(true)
+    # STEP: an assembly with named, coloured bodies — stainless steel, tile
+    # black, and the Raptors' dark grey.
+    colours = {"steel": cq.Color(0.78, 0.79, 0.81), "tiles": cq.Color(0.08, 0.08, 0.09),
+               "raptor": cq.Color(0.16, 0.16, 0.17)}
     asm = cq.Assembly(name="starship_v3_stack")
-    asm.add(booster_mm, name="super_heavy", color=steel)
-    asm.add(ship_mm, name="starship", color=steel)
-    asm.add(shield_mm, name="heat_shield", color=tiles)
+    for name, colour in (("super_heavy", "steel"), ("super_heavy_raptors", "raptor"),
+                         ("starship", "steel"), ("starship_raptors", "raptor"),
+                         ("heat_shield", "tiles")):
+        asm.add(body[name], name=name, color=colours[colour])
     step_path = args.out / f"starship_stack_{tag}.step"
     asm.export(str(step_path))
     print("wrote", step_path)
     # GLB of the same assembly, for the browser viewer (index.html).
     glb_path = args.out / "starship_stack.glb"
-    asm.export(str(glb_path), tolerance=0.01 * s, angularTolerance=0.12)
+    asm.export(str(glb_path), tolerance=0.02 * true.mm_per_m, angularTolerance=0.2)
     print("wrote", glb_path)
 
     # STL: watertight single bodies for printing — the stack, and each stage
     # on its own (the stack is tall enough that most printers want it split).
+    print(f"building the print model (walls >= {args.min_wall} mm) ...")
+    del asm, body
+    gc.collect()
+    body = build(printable)
     tol = 0.01 * (500 / args.scale) ** 0.5 * 2
-    ship_print = fuse([ship_mm, shield_mm])
-    stack = fuse([booster_mm, ship_print])
-    for shape, name in ((stack, "starship_stack"), (booster_mm, "super_heavy"),
+    booster_print = fuse([body["super_heavy"], body["super_heavy_raptors"]])
+    ship_print = fuse([body["starship"], body["starship_raptors"], body["heat_shield_print"]])
+    stack = fuse([booster_print, ship_print])
+    for shape, name in ((stack, "starship_stack"), (booster_print, "super_heavy"),
                         (ship_print, "starship_ship")):
         path = args.out / f"{name}_{tag}.stl"
         shape.exportStl(str(path), tolerance=tol, angularTolerance=0.15)
