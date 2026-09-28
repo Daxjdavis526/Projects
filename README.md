@@ -231,3 +231,17 @@ the whole survival loop, from the first tree to saving and reloading.
 
 See [strata/README.md](strata/README.md) for controls, how to build and play,
 how it works, and what it approximates.
+
+## starship/
+
+**STARSHIP** — a parametric CAD model of SpaceX's Starship V3 stacked on a
+Super Heavy Block 3 booster: 33 + 6 Raptor 3s in their real layouts,
+lattice grid fins, the hot-staging vents, flaps and a separate heat shield.
+Exported as a coloured STEP assembly and as watertight STLs (the stack, and
+each stage alone) at 1:500, 249 mm tall; any other scale is one flag on the
+CadQuery generator. The live page is a 3D viewer with download links.
+
+Live: https://daxjdavis526.github.io/Projects/starship/
+
+See [starship/README.md](starship/README.md) for printing notes and exactly
+which dimensions are published and which are estimated from photographs.

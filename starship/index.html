@@ -1,0 +1,179 @@
+<!doctype html>
+<!-- =============================================================================
+     STARSHIP — a viewer for the CAD model in models/. The model itself is built
+     by build_model.py (CadQuery); this page only loads the GLB it exports and
+     offers the STEP and STL files for download.
+     ========================================================================== -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STARSHIP</title>
+<meta name="description" content="A CAD model of Starship V3 stacked on Super Heavy, as STEP and STL.">
+<style>
+:root{
+  --ink:#d8d5cf;
+  --dim:#8a857d;
+  --faint:#454039;
+  --warm:#e8c9a0;
+  --panel:rgba(8,8,10,.66);
+  --edge:rgba(216,213,207,.13);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+body{
+  color:var(--ink);
+  font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+  font-weight:300;font-size:12px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+canvas{display:block;position:fixed;inset:0}
+.panel{
+  position:fixed;background:var(--panel);border:1px solid var(--edge);
+  border-radius:2px;padding:12px 14px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+h1{margin:0 0 2px;font-size:12px;font-weight:400;letter-spacing:.42em}
+.sub{color:var(--dim);margin:0 0 10px}
+.row{display:flex;justify-content:space-between;gap:14px;white-space:nowrap}
+.row .k{color:var(--dim)}
+.row .v{font-variant-numeric:tabular-nums}
+#info{top:14px;left:14px;max-width:calc(100vw - 28px);width:260px}
+#views{margin:12px 0 0;display:flex;gap:6px;flex-wrap:wrap}
+button{
+  font:inherit;color:var(--ink);background:transparent;cursor:pointer;
+  border:1px solid var(--edge);border-radius:2px;padding:4px 9px;
+}
+button[aria-pressed="true"]{border-color:var(--warm);color:var(--warm)}
+#files{margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--edge)}
+#files a{display:block;color:var(--ink);text-decoration:none;padding:2px 0}
+#files a:hover{color:var(--warm)}
+#files a span{color:var(--dim)}
+#hint{bottom:14px;left:14px;color:var(--dim)}
+#status{position:fixed;inset:0;display:grid;place-items:center;color:var(--dim)}
+</style>
+</head>
+<body>
+<div id="status">loading model…</div>
+
+<div id="info" class="panel">
+  <h1>STARSHIP</h1>
+  <p class="sub">V3 ship on Super Heavy Block 3</p>
+  <div class="row"><span class="k">stack height</span><span class="v">124.4 m</span></div>
+  <div class="row"><span class="k">diameter</span><span class="v">9.0 m</span></div>
+  <div class="row"><span class="k">model scale</span><span class="v">1:500 · 249 mm</span></div>
+  <div class="row"><span class="k">engines</span><span class="v">33 + 6 Raptor 3</span></div>
+  <div id="views">
+    <button data-view="stack" aria-pressed="true">stack</button>
+    <button data-view="super_heavy" aria-pressed="false">super heavy</button>
+    <button data-view="starship" aria-pressed="false">ship</button>
+  </div>
+  <div id="files">
+    <a href="models/starship_stack_1-500.step" download>starship_stack_1-500.step <span>· CAD</span></a>
+    <a href="models/starship_stack_1-500.stl" download>starship_stack_1-500.stl <span>· print</span></a>
+    <a href="models/super_heavy_1-500.stl" download>super_heavy_1-500.stl</a>
+    <a href="models/starship_ship_1-500.stl" download>starship_ship_1-500.stl</a>
+  </div>
+</div>
+<div id="hint" class="panel">drag to orbit · scroll to zoom · right-drag to pan</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050506);
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 10000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// Studio lighting: a warm key, a cool rim, and a soft fill from below so the
+// tile-black heat shield still shows its edges.
+scene.add(new THREE.HemisphereLight(0xdfe6f0, 0x1a1712, 1.1));
+const key = new THREE.DirectionalLight(0xfff1e0, 2.6); key.position.set(3, 2, 4); scene.add(key);
+const rim = new THREE.DirectionalLight(0x9fb8ff, 1.4); rim.position.set(-4, 1, -3); scene.add(rim);
+
+const steel = new THREE.MeshStandardMaterial({ color: 0xc9ccd1, metalness: 0.55, roughness: 0.38 });
+const tiles = new THREE.MeshStandardMaterial({ color: 0x151517, metalness: 0.0, roughness: 0.85 });
+
+const parts = {};
+let model, framed;   // framed: bounding box of what is on screen
+
+function frame(objects) {
+  const box = new THREE.Box3();
+  objects.forEach(o => box.expandByObject(o));
+  framed = box;
+  const size = box.getSize(new THREE.Vector3());
+  const centre = box.getCenter(new THREE.Vector3());
+  const h = Math.max(size.y, size.x * camera.aspect, size.z * camera.aspect);
+  const dist = (h / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.18;
+  controls.target.copy(centre);
+  camera.position.set(centre.x + dist * 0.8, centre.y + dist * 0.12, centre.z + dist * 0.6);
+  camera.near = dist / 100; camera.far = dist * 20; camera.updateProjectionMatrix();
+  controls.update();
+}
+
+function show(view) {
+  const ship = view === 'stack' || view === 'starship';
+  parts.super_heavy.visible = view === 'stack' || view === 'super_heavy';
+  parts.starship.visible = ship;
+  parts.heat_shield.visible = ship;
+  document.querySelectorAll('#views button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+  frame(view === 'stack' ? [model] : view === 'super_heavy' ? [parts.super_heavy]
+    : [parts.starship, parts.heat_shield]);
+}
+
+new GLTFLoader().load('models/starship_stack.glb', gltf => {
+  model = gltf.scene;
+  model.traverse(o => {
+    if (o.name in { super_heavy: 1, starship: 1, heat_shield: 1 }) parts[o.name] = o;
+  });
+  for (const [name, node] of Object.entries(parts)) {
+    node.traverse(o => { if (o.isMesh) o.material = name === 'heat_shield' ? tiles : steel; });
+  }
+  scene.add(model);
+  document.getElementById('status').remove();
+  const q = new URLSearchParams(location.search);
+  show(q.get('view') || 'stack');
+  if (q.has('az')) {      // ?az=deg&el=deg&zoom=f&y=0..1 — fixed camera, for screenshots
+    const off = camera.position.clone().sub(controls.target);
+    const r = off.length() / (+q.get('zoom') || 1);
+    const az = THREE.MathUtils.degToRad(+q.get('az')), el = THREE.MathUtils.degToRad(+q.get('el') || 0);
+    const t = controls.target;
+    if (q.has('y')) {    // y = height along the stack, 0..1
+      const bb = framed;
+      t.y = bb.min.y + (bb.max.y - bb.min.y) * +q.get('y');
+    }
+    camera.position.set(t.x + r * Math.cos(el) * Math.sin(az), t.y + r * Math.sin(el), t.z + r * Math.cos(el) * Math.cos(az));
+    controls.update();
+  }
+  if (q.has('clean')) document.querySelectorAll('.panel').forEach(p => p.remove());
+  document.body.dataset.ready = '1';
+}, undefined, err => { document.getElementById('status').textContent = 'could not load model: ' + err.message; });
+
+document.querySelectorAll('#views button').forEach(b => b.addEventListener('click', () => show(b.dataset.view)));
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
