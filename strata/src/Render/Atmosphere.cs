@@ -88,6 +88,8 @@ public sealed class Atmosphere
 
     public void SetQuality(bool clouds) { if (_clouds != null) _clouds.Visible = clouds; }
 
+    public void SetBloom(bool on) { if (_env?.Environment != null) _env.Environment.GlowEnabled = on; }
+
     /// <summary>Advances the clock and pushes every colour to the shaders.</summary>
     public void Update(double delta, Vector3 cam, float renderDistance, float brightness)
     {

@@ -23,5 +23,5 @@ void fragment() {
     vec3 col = tex.rgb * light_color(vec4(clamp(light_level, 0.0, 1.0), 1.0, 1.0), 2) * pow(v_shade, 2.2);
     col = mix(col, vec3(1.0, 0.2, 0.15), clamp(flash, 0.0, 1.0) * 0.6);
     col = any(isnan(col)) ? vec3(0.0) : clamp(col, 0.0, 1.0);        // never sets off the bloom: see entity.gdshader
-    ALBEDO = viewmodel ? col : mix(col, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD));
+    ALBEDO = safe_color(viewmodel ? col : mix(col, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD)), 1.0);
 }

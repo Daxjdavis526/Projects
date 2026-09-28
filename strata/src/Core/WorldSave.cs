@@ -53,6 +53,8 @@ public sealed class WorldMeta
     public bool HasPlayer;
     /// <summary>Created as a showcase world: Castle Vorhaal and the launch complex stand near the start.</summary>
     public bool Landmarks;
+    /// <summary>Creative mode: flying, instant building, every block to hand, no harm. Can be switched from the pause menu.</summary>
+    public bool Creative;
     public PlayerSave Player = new();
     public List<DropSave> Drops = new();
     public List<MobSave> Mobs = new();
@@ -113,7 +115,7 @@ public static class WorldSave
         return null;
     }
 
-    public static WorldMeta Create(string name, string seedText, bool landmarks = false)
+    public static WorldMeta Create(string name, string seedText, bool landmarks = false, bool creative = false)
     {
         name = string.IsNullOrWhiteSpace(name) ? "New World" : name.Trim();
         if (name.Length > 40) name = name[..40];
@@ -127,6 +129,7 @@ public static class WorldSave
             Created = DateTime.Now,
             LastPlayed = DateTime.Now,
             Landmarks = landmarks,
+            Creative = creative,
         };
         m.Folder = UniqueFolder(name);
         Directory.CreateDirectory(ChunkDir(m.Folder));

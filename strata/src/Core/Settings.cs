@@ -21,6 +21,7 @@ public sealed class Settings
     public bool ViewBobbing { get; set; } = true;
     public float Brightness { get; set; } = 1f;
     public bool ShowFps { get; set; }
+    public bool Bloom { get; set; } = true;          // the glow round lamps, fire and the sun
 
     public static readonly Vector2I[] Resolutions =
     {

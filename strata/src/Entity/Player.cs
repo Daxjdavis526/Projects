@@ -27,6 +27,10 @@ public sealed partial class Player : Node3D
     public bool HasBedSpawn;
     public bool Frozen = true;              // held still until the ground has loaded
     public Vehicle Riding;                  // aboard a vehicle: it carries you, and your keys fly it
+    public bool Flying;                     // creative mode only
+    public const float FlySpeed = 11f, FlyFastSpeed = 26f;
+    private double _lastJumpTap = -1;
+    private bool Creative => G != null && G.Creative;
 
     public bool Dead => Vitals.Dead;
     public bool Sneaking { get; private set; }
@@ -121,7 +125,17 @@ public sealed partial class Player : Node3D
             if (e.IsActionPressed("slot_" + i)) SelectSlot(i - 1);
         if (e.IsActionPressed("drop")) DropHeld(Input.IsKeyPressed(Key.Ctrl));
         if (e.IsActionPressed("pick")) PickBlock();
-        if (e.IsActionPressed("jump")) _jumpBuffer = JumpBuffer;
+        if (e.IsActionPressed("jump"))
+        {
+            _jumpBuffer = JumpBuffer;
+            // Creative: a double tap of jump takes off or lands.
+            if (Creative)
+            {
+                double now = Time.GetTicksMsec() / 1000.0;
+                if (now - _lastJumpTap < 0.3) { Flying = !Flying; _lastJumpTap = -1; Body.Vel = new Vector3(Body.Vel.X, 0, Body.Vel.Z); }
+                else _lastJumpTap = now;
+            }
+        }
     }
 
     public void SelectSlot(int i)
@@ -175,8 +189,9 @@ public sealed partial class Player : Node3D
         bool blocked = G.InputBlocked;
         var input = blocked ? Vector2.Zero : Input.GetVector("move_left", "move_right", "move_forward", "move_back");
         bool jump = !blocked && Input.IsActionPressed("jump");
-        Sneaking = !blocked && Input.IsActionPressed("sneak") && !b.InWater;
-        if (!blocked && Input.IsActionPressed("sprint") && input.Y < -0.5f && !Sneaking && Vitals.CanSprint && Eating <= 0 && Draw <= 0) Sprinting = true;
+        if (Flying && !Creative) Flying = false;
+        Sneaking = !blocked && Input.IsActionPressed("sneak") && !b.InWater && !Flying;
+        if (!blocked && Input.IsActionPressed("sprint") && input.Y < -0.5f && !Sneaking && !Flying && Vitals.CanSprint && Eating <= 0 && Draw <= 0) Sprinting = true;
         if (input.Y > -0.3f || Sneaking || !Vitals.CanSprint || (b.HitX || b.HitZ) && b.OnGround) Sprinting = false;
 
         float yaw = Mathf.DegToRad(Yaw);
@@ -190,7 +205,20 @@ public sealed partial class Player : Node3D
         if (jump && b.OnGround) _jumpBuffer = Math.Max(_jumpBuffer, dt);
 
         var v = b.Vel;
-        if (b.InWater || b.InLava)
+        if (Flying)
+        {
+            // Creative flight: no gravity; Space climbs, Shift sinks, Ctrl goes fast.
+            float sp = !blocked && Input.IsActionPressed("sprint") ? FlyFastSpeed : FlySpeed;
+            float k = 1f - MathF.Exp(-dt * 9f);
+            v.X += (wish.X * sp - v.X) * k;
+            v.Z += (wish.Z * sp - v.Z) * k;
+            float lift = (jump ? 1f : 0f) - (!blocked && Input.IsActionPressed("sneak") ? 1f : 0f);
+            v.Y += (lift * sp * 0.75f - v.Y) * k;
+            b.FallDistance = 0;
+            _fallStartY = b.Y;
+            _jumpBuffer = 0f;
+        }
+        else if (b.InWater || b.InLava)
         {
             float sp = b.InLava ? SwimSpeed * 0.5f : SwimSpeed * (Sprinting ? 1.5f : 1f);
             float k = 1f - MathF.Exp(-dt * 6f);
@@ -242,6 +270,7 @@ public sealed partial class Player : Node3D
         bool groundedBefore = b.OnGround;
         var moved = b.Move(W, v.X * dt, v.Y * dt, v.Z * dt, sneakEdge: Sneaking && b.OnGround);
         double rose = b.Y - y0;
+        if (Flying && b.OnGround && v.Y < 0f) Flying = false;
         if (groundedBefore && rose > 0.02 && rose <= b.StepHeight + 0.01 && v.Y <= 0.01f) _stepLag = Math.Min(0.6f, _stepLag + (float)rose);
 
         // Walking effort and footsteps.
@@ -461,6 +490,7 @@ public sealed partial class Player : Node3D
     private void Mine(float dt, bool pressed)
     {
         if (!Target.Hit) { BreakProgress = 0; return; }
+        if (Creative) { CreativeBreak(pressed); return; }
         var cell = Target.Cell;
         if (cell != _breakCell) { _breakCell = cell; BreakProgress = 0; _hitSoundTimer = 0; BreakResets++; }
         var def = Blocks.Get(Target.Id);
@@ -485,6 +515,18 @@ public sealed partial class Player : Node3D
         if (BreakProgress >= 1f) Break(cell, def, harvest);
     }
 
+    /// <summary>Creative: any block goes at once (a few a second while held), and nothing drops.</summary>
+    private void CreativeBreak(bool pressed)
+    {
+        BreakProgress = 0;
+        if (!pressed && _instantCooldown > 0f) return;
+        _instantCooldown = 0.15f;
+        var cell = Target.Cell;
+        if (cell.Y <= 0) return;                    // the world's floor stays
+        Swing();
+        if (W.BreakBlock(cell.X, cell.Y, cell.Z, false)) BlocksMined++;
+    }
+
     private void Break(Vector3I cell, BlockDef def, bool harvest)
     {
         BreakProgress = 0;
@@ -498,6 +540,7 @@ public sealed partial class Player : Node3D
     /// <summary>Uses up tool durability; a worn-out tool breaks.</summary>
     public void Wear(int amount)
     {
+        if (Creative) return;
         var s = Inventory[Selected];
         if (s.IsEmpty || !s.Def.IsTool) return;
         s.Wear += amount;
@@ -647,6 +690,7 @@ public sealed partial class Player : Node3D
 
     private void Consume()
     {
+        if (Creative) return;                       // creative: everything in hand is endless
         var s = Inventory[Selected];
         Inventory[Selected] = s.WithCount(s.Count - 1);
     }
@@ -741,6 +785,14 @@ public sealed partial class Player : Node3D
         ushort want = d.DropItem;
         if (Items.ByKey.TryGetValue(Blocks.Get(d.Base).Key, out var same)) want = same;
         if (want == 0) return;
+        if (Creative)
+        {
+            // Creative: whatever you point at, a full stack of it in your hand.
+            for (int i = 0; i < 9; i++)
+                if (!Inventory[i].IsEmpty && Inventory[i].Id == want) { SelectSlot(i); return; }
+            Inventory[Selected] = new ItemStack(want, Items.Get(want).MaxStack);
+            return;
+        }
         for (int i = 0; i < 9; i++)
             if (!Inventory[i].IsEmpty && Inventory[i].Id == want) { SelectSlot(i); return; }
         // From the backpack into the hotbar.

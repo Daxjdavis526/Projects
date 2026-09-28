@@ -110,6 +110,12 @@ void vertex() {
     v_dir = (MODEL_MATRIX * vec4(VERTEX, 0.0)).xyz;
 }
 
+// Not-a-number or infinite pixels (some drivers make them) become black, never a bloom blob.
+vec3 safe_color(vec3 c, float hi) {
+    if (any(isnan(c)) || any(isinf(c))) return vec3(0.0);
+    return clamp(c, vec3(0.0), vec3(hi));
+}
+
 void fragment() {
     vec3 d = normalize(v_dir);
     float pix = max(length(fwidth(d)), 1e-5);   // radians per pixel, taken before anything branches
@@ -177,5 +183,5 @@ void fragment() {
         }
     }
     col += pow(max(md, 0.0), 300.0) * vec3(0.25, 0.28, 0.35) * star_alpha;
-    ALBEDO = underwater > 0.5 ? fog_color.rgb : col + night;
+    ALBEDO = safe_color(underwater > 0.5 ? fog_color.rgb : col + night, 2.0);
 }

@@ -180,6 +180,13 @@ public sealed partial class Hud : Control
         const float icon = 20f, step = 21f;
         var v = p.Vitals;
         float hy = y0 - icon - 8;
+        if (Game.Creative)
+        {
+            // No health or hunger to show: just which mode this is.
+            string mode = p.Flying ? "Creative · flying (Space up, Shift down, Ctrl fast; double-tap Space to land)" : "Creative · double-tap Space to fly · E: every block";
+            DrawString(ThemeDB.FallbackFont, new Vector2(x0, hy + 14), mode, HorizontalAlignment.Center, total, 15, new Color(1f, 1f, 1f, 0.8f));
+            return;
+        }
         // Health, left to right; a shake when low.
         for (int i = 0; i < 10; i++)
         {

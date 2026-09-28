@@ -216,16 +216,21 @@ public sealed partial class MainMenu : Control
         seedRow.AddChild(seed);
         seedRow.AddChild(UiStyle.Button("Random", () => seed.Text = (new Random().NextInt64() & 0x7FFFFFFFFFFFL).ToString(), 130));
         col.AddChild(seedRow);
+        col.AddChild(UiStyle.Label("Game mode", 16, UiStyle.TextDim));
+        var mode = new OptionButton { CustomMinimumSize = new Vector2(480, 40) };
+        mode.AddItem("Survival: gather, craft, stay alive");
+        mode.AddItem("Creative: fly, build instantly, every block to hand");
+        col.AddChild(mode);
         col.AddChild(UiStyle.Spacer(8));
         col.AddChild(UiStyle.Button("Create and Play", () =>
         {
-            var m = WorldSave.Create(name.Text, seed.Text);
+            var m = WorldSave.Create(name.Text, seed.Text, creative: mode.Selected == 1);
             App.StartGame(m);
         }));
         col.AddChild(UiStyle.Button("Create Showcase World", () =>
         {
             string n = name.Text == "New World" ? "Castle Vorhaal" : name.Text;
-            var m = WorldSave.Create(n, seed.Text, landmarks: true);
+            var m = WorldSave.Create(n, seed.Text, landmarks: true, creative: mode.Selected == 1);
             App.StartGame(m);
         }));
         var note = UiStyle.Label("A showcase world has Castle Vorhaal on its crag and a rocket launch complex on the plain beside it. A render distance of 14 or more shows them best.", 14, UiStyle.TextDim);

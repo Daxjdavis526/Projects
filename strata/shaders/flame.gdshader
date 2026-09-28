@@ -18,6 +18,12 @@ void vertex() {
     v_local = VERTEX;
 }
 
+// Not-a-number or infinite pixels (some drivers make them) become black, never a bloom blob.
+vec3 safe_color(vec3 c, float hi) {
+    if (any(isnan(c)) || any(isinf(c))) return vec3(0.0);
+    return clamp(c, vec3(0.0), vec3(hi));
+}
+
 void fragment() {
     float t = clamp(-v_local.y, 0.0, 1.0);
     // Edges of the cone fade: brightest where we look through the most flame.
@@ -34,5 +40,5 @@ void fragment() {
     // Shock diamonds: bright knots along the plume in thick air.
     float diamonds = pow(max(0.0, cos(t * 34.0)), 10.0) * (1.0 - thin) * (1.0 - smoothstep(0.1, 0.6, t)) * 1.6;
     float a = power * fade * flick * body * (1.0 + diamonds) * mix(1.0, 0.55, thin);
-    ALBEDO = c * a * mix(1.6, 2.6, core);
+    ALBEDO = safe_color(c * a * mix(1.6, 2.6, core), 6.0);
 }

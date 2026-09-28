@@ -28,6 +28,12 @@ void vertex() {
     v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
 
+// Not-a-number or infinite pixels (some drivers make them) become black, never a bloom blob.
+vec3 safe_color(vec3 c, float hi) {
+    if (any(isnan(c)) || any(isinf(c))) return vec3(0.0);
+    return clamp(c, vec3(0.0), vec3(hi));
+}
+
 void fragment() {
     vec2 p = v_world.xz + wind * TIME;
     vec2 c = floor(p / cell);
@@ -42,6 +48,6 @@ void fragment() {
     float day = smoothstep(-0.14, 0.28, sun_dir.y);
     vec3 lit = mix(vec3(0.028, 0.031, 0.043), vec3(1.0) * clamp(daylight * 1.1, 0.0, 1.0), day);
     vec3 col = mix(sky_horizon.rgb, lit * cloud_shade.rgb, 0.85) * (0.86 + 0.14 * edge);
-    ALBEDO = col;
+    ALBEDO = safe_color(col, 1.0);
     ALPHA = mix(0.7, 0.82, day) * fade * (underwater > 0.5 ? 0.0 : 1.0);
 }

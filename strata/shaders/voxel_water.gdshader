@@ -29,6 +29,7 @@ void fragment() {
     vec3 skyc = fog_color.rgb * (0.35 + 0.65 * daylight);
     col = mix(col, skyc * 0.9, (1.0 - facing) * 0.35 * v_top);
     if (underwater > 0.5) alpha = 0.55;
-    ALBEDO = mix(col, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD));
+    col = limit_glow(col, v_flags, v_world, CAMERA_POSITION_WORLD);
+    ALBEDO = safe_color(mix(col, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD)), 4.0);
     ALPHA = alpha;
 }

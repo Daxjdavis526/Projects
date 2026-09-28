@@ -64,7 +64,7 @@ void fragment() {
     // A hot core and a cooler rim.
     vec3 c = mix(v_col.rgb, v_col.rgb * vec3(1.0, 0.8, 0.6) + vec3(0.3, 0.25, 0.15), smoothstep(0.5, 0.0, r));
     float f = 1.0 - fog_amount(v_world, CAMERA_POSITION_WORLD);
-    ALBEDO = srgb_to_linear(c) * a * v_col.a * 2.2 * f;
+    ALBEDO = safe_color(srgb_to_linear(c) * a * v_col.a * 2.2 * f, 4.0);
 }
 ",
         };
@@ -92,7 +92,7 @@ void fragment() {
     // Lit from above by the sky, from nearby by the flame; darker underneath.
     float sky = mix(0.18, 1.0, daylight) * mix(0.72, 1.0, smoothstep(0.6, -0.6, d.y));
     vec3 c = srgb_to_linear(v_col.rgb) * (sky_tint.rgb * sky + dyn_light(v_world) * 0.7) * brightness;
-    ALBEDO = mix(c, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD));
+    ALBEDO = safe_color(mix(c, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD)), 1.0);
     ALPHA = a * v_col.a;
 }
 ",

@@ -109,6 +109,11 @@ public static partial class Menus
         col.AddChild(UiStyle.Spacer(6));
         col.AddChild(UiStyle.Button("Resume", () => g.SetPaused(false)));
         col.AddChild(UiStyle.Button("Settings", () => root.AddChild(Settings(g.Settings, () => g.ApplyGraphics()))));
+        col.AddChild(UiStyle.Button(g.Creative ? "Game mode: Creative (switch to Survival)" : "Game mode: Survival (switch to Creative)", () =>
+        {
+            g.SetCreative(!g.Creative);
+            g.SetPaused(false);
+        }));
         col.AddChild(UiStyle.Button("Save", () => { g.Save(); g.Hud.Toast("World saved"); }));
         col.AddChild(UiStyle.Button("Save and Quit to Menu", () => g.QuitToMenu()));
         col.AddChild(UiStyle.Button("Save and Exit Game", () => { g.Save(); g.GetTree().Quit(); }));
@@ -218,6 +223,7 @@ public static partial class Menus
         SliderRow("Volume", 0, 1, 0.05, s.MasterVolume, v => { s.MasterVolume = (float)v; s.ApplyDisplay(); }, v => $"{v * 100:0}%");
         SliderRow("Music", 0, 1, 0.05, s.MusicVolume, v => s.MusicVolume = (float)v, v => $"{v * 100:0}%");
         Options("Graphics", global::Strata.Settings.GraphicsNames, s.Graphics, v => s.Graphics = v);
+        Toggle("Bloom (glow round lights)", s.Bloom, v => s.Bloom = v);
         Toggle("View bobbing", s.ViewBobbing, v => s.ViewBobbing = v);
         Toggle("Show FPS", s.ShowFps, v => s.ShowFps = v);
         Toggle("VSync", s.VSync, v => { s.VSync = v; s.ApplyDisplay(); });

@@ -18,5 +18,6 @@ void fragment() {
     vec3 col = tex.rgb;
     if ((v_flags & FLAG_TINT) != 0) col = mix(col, col * v_tint * 1.8, 1.0 - tex.a);
     col *= light_color(v_light, v_flags);
-    ALBEDO = mix(col, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD));
+    col = limit_glow(col, v_flags, v_world, CAMERA_POSITION_WORLD);
+    ALBEDO = safe_color(mix(col, fog_color.rgb, fog_amount(v_world, CAMERA_POSITION_WORLD)), 4.0);
 }

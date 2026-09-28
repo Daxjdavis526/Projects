@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 
@@ -104,6 +105,7 @@ public partial class FlightTest : Node
         Check(await Until(() => G.State == GameState.Playing, 180f), "the showcase world loads");
         G.View.Sky.Time = 0.2;       // mid-morning
 
+        if (OS.GetCmdlineUserArgs().Contains("--creative")) { await Creative(); await Finish(); return; }
         var site = W.Gen.Landmarks;
         var pad = site.PadWorld;
         var r = G.Vehicles.OnPad();
@@ -236,6 +238,9 @@ public partial class FlightTest : Node
             await Frames(10);
             Check(!P.Body.Colliding(W), "into free space by the hatch");
         }
+        // Creative mode, switched on from the pause menu's button.
+        await Creative();
+
         // Night on the pad.
         G.View.Sky.Time = Math.Floor(G.View.Sky.Time) + 0.75;
         P.Teleport(new Vector3(pad.X - 30, LandmarkSite.Valley + 6, pad.Z + 40));
@@ -285,6 +290,76 @@ public partial class FlightTest : Node
         await WaitLoaded(r.Origin);
         G.Vehicles.Board(r);
         await Frames(5);
+    }
+
+    private async Task Creative()
+    {
+        if (P.Riding != null) G.Vehicles.Exit();
+        var spot = G.Vehicles.Pad.Value + new Vector3(-24, 0, 26);
+        P.Teleport(new Vector3(spot.X, LandmarkSite.Valley, spot.Z));
+        await WaitLoaded(P.Body.Position);
+        G.SetCreative(true);
+        Check(G.Creative && P.Vitals.Immortal, "creative mode switches on");
+        P.Vitals.Damage(50f, DamageKind.Fall, true);
+        Check(!P.Dead && P.Vitals.Health == Vitals.MaxHealth, "nothing hurts in creative");
+        // Double-tap jump: take off; hold it: climb; let go: hover.
+        await Frames(10);
+        // As a key press arrives: an input event (the double tap is read from events, not held state).
+        // (Both taps within one frame: this renderer is slow, and the taps must fall within 0.3 s.)
+        for (int t = 0; t < 2; t++)
+        {
+            Input.ParseInputEvent(new InputEventAction { Action = "jump", Pressed = true });
+            Input.ParseInputEvent(new InputEventAction { Action = "jump", Pressed = false });
+        }
+        await Frames(3);
+        Check(P.Flying, "a double tap of Space takes off");
+        double y0 = P.Body.Y;
+        Input.ActionPress("jump"); await GameSeconds(1.2f); Input.ActionRelease("jump");
+        Check(P.Body.Y > y0 + 5, $"holding Space climbs ({P.Body.Y - y0:0.0} m)");
+        double hover = P.Body.Y;
+        await GameSeconds(1.5f);
+        Check(Math.Abs(P.Body.Y - hover) < 1.0, $"and it hovers without falling ({P.Body.Y - hover:+0.0;-0.0} m)");
+        var h0 = P.Body.Position;
+        P.Pitch = 0f;
+        Input.ActionPress("move_forward"); await GameSeconds(1f); Input.ActionRelease("move_forward");
+        float flown = new Vector2(P.Body.Position.X - h0.X, P.Body.Position.Z - h0.Z).Length();
+        Check(flown > 6f, $"flies forward ({flown:0.0} m in a second)");
+        // Instant breaking, no drops.
+        P.Flying = false;
+        P.Teleport(new Vector3(spot.X, LandmarkSite.Valley, spot.Z));
+        await GameSeconds(0.5f);
+        var below = new Vector3I(V.FloorToInt(spot.X) + 2, LandmarkSite.Valley - 1, V.FloorToInt(spot.Z));
+        ushort was = W.GetBlock(below.X, below.Y, below.Z);
+        int drops = G.Drops.All.Count;
+        var eye = P.Camera.GlobalPosition;
+        var d = (new Vector3(below.X + 0.5f, below.Y + 0.5f, below.Z + 0.5f) - eye).Normalized();
+        P.Pitch = Mathf.RadToDeg(MathF.Asin(d.Y)); P.Yaw = Mathf.RadToDeg(MathF.Atan2(-d.X, -d.Z));
+        await Frames(3);
+        Input.ActionPress("attack"); await Frames(3); Input.ActionRelease("attack"); await Frames(3);
+        Check(was != Blocks.Air && W.GetBlock(below.X, below.Y, below.Z) == Blocks.Air, $"one click breaks {Blocks.Get(was).Key} at once");
+        Check(G.Drops.All.Count == drops, "and drops nothing");
+        // Every block to hand, and placing never runs out.
+        G.OpenScreen(ScreenKind.Inventory, default);
+        await Frames(5);
+        int palette = CountPalette(G.Screen);
+        Check(palette > 100, $"E shows every block ({palette} in the palette)");
+        await Shot("creative_palette");
+        G.CloseScreen();
+        P.Inventory[P.Selected] = new ItemStack(Items.ByKey["crimson_lantern"], 1);
+        await Frames(3);
+        Input.ActionPress("use"); await Frames(3); Input.ActionRelease("use"); await Frames(3);
+        Check(W.GetBlock(below.X, below.Y, below.Z) == Blocks.CrimsonLantern || W.GetBlock(below.X, below.Y + 1, below.Z) == Blocks.CrimsonLantern
+            || W.GetBlock(below.X, below.Y - 1, below.Z) == Blocks.CrimsonLantern, "right-click places it");
+        Check(P.Inventory[P.Selected].Count == 1, "and the stack in hand is not used up");
+        G.SetCreative(false);
+        Check(!P.Vitals.Immortal && !P.Flying, "and back to survival");
+    }
+
+    private static int CountPalette(Node n)
+    {
+        int k = n is SlotView sv && (string)sv.Tag == "palette" ? 1 : 0;
+        foreach (var c in n.GetChildren()) k += CountPalette(c);
+        return k;
     }
 
     private async Task Finish()

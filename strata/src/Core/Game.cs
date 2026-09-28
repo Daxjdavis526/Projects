@@ -52,6 +52,16 @@ public sealed partial class Game : Node3D
     private bool _renderNote;
 
     public bool Paused => PauseMenu != null;
+    public bool Creative => Meta?.Creative == true;
+
+    /// <summary>Switches the world between survival and creative (from the pause menu).</summary>
+    public void SetCreative(bool on)
+    {
+        Meta.Creative = on;
+        Player.Vitals.Immortal = on;
+        if (!on) Player.Flying = false;
+        Hud.Toast(on ? "Creative mode: double-tap Space to fly, E for every block" : "Survival mode", UiStyle.Accent);
+    }
     public bool InputBlocked => State != GameState.Playing || Screen != null || Paused || _sleeping;
 
     public void Begin(WorldMeta meta, Settings settings)
@@ -163,6 +173,7 @@ public sealed partial class Game : Node3D
                 }
 
         Vehicles.Load(Meta);
+        Player.Vitals.Immortal = Creative;
 
         Settings.ApplyDisplay();
         ApplyGraphics();
@@ -179,6 +190,7 @@ public sealed partial class Game : Node3D
         View.Chunks.Radius = Settings.RenderDistance;
         View.Brightness = Settings.Brightness;
         View.Sky.SetQuality(q >= 1);
+        View.Sky.SetBloom(Settings.Bloom);
         Particles.Density = q == 0 ? 0.4f : q == 1 ? 0.7f : 1f;
         Weather.Density = q == 0 ? 0.4f : 1f;
         if (Vehicles?.Exhaust != null) Vehicles.Exhaust.Density = q == 0 ? 0.5f : q == 1 ? 0.75f : 1f;
@@ -259,7 +271,8 @@ public sealed partial class Game : Node3D
                 Hud.Toast("The launch complex lies east, along the paved road.", UiStyle.TextDim);
                 if (_renderNote) Hud.Toast("Render distance raised to 14 to show them (Settings to change it)", UiStyle.TextDim);
             }
-            else Hud.Toast("Punch a tree for logs. E opens your bag and the recipe book.", UiStyle.TextDim);
+            else if (!Creative) Hud.Toast("Punch a tree for logs. E opens your bag and the recipe book.", UiStyle.TextDim);
+            if (Creative) Hud.Toast("Creative mode: double-tap Space to fly, E for every block, left-click breaks at once", UiStyle.TextDim);
             Meta.HasPlayer = true;
         }
         GD.Print($"world ready in {_loadTime:0.0}s at {Player.Body.Position}");

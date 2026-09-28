@@ -41,11 +41,20 @@ public sealed class Vitals
         return blocks && ArmorPoints > 0 ? amount * (1f - Math.Min(0.8f, ArmorPoints * 0.04f)) : amount;
     }
 
+    /// <summary>Creative mode: nothing hurts (but falling out of the world), and hunger and breath never run down.</summary>
+    public bool Immortal;
+
     public void Tick(float dt, bool headUnderwater)
     {
         if (Dead) return;
         Invulnerable = Math.Max(0f, Invulnerable - dt);
         SinceHurt += dt;
+        if (Immortal)
+        {
+            // Creative: never hungry, never out of breath, always whole.
+            Health = MaxHealth; Hunger = MaxHunger; Air = MaxAir; Exhaustion = 0f;
+            return;
+        }
 
         while (Exhaustion >= 4f)
         {
@@ -99,6 +108,7 @@ public sealed class Vitals
     public bool Damage(float amount, DamageKind kind, bool ignoreInvuln = false)
     {
         if (Dead || amount <= 0f) return false;
+        if (Immortal && kind != DamageKind.Void) return false;
         if (!ignoreInvuln && Invulnerable > 0f) return false;
         float taken = Mitigated(amount, kind);
         if (taken < amount) ArmorStruck?.Invoke(amount);

@@ -660,6 +660,10 @@ public sealed class WorldGen
             while (yy > 2 && b[((yy - 1) << 8) | ci] == 0) yy--;
             ushort floor = b[((yy - 1) << 8) | ci];
             if (floor != Blocks.Stone && floor != Blocks.Slatestone && floor != Blocks.Dirt && floor != Blocks.Gravel) continue;
+            // Only under a roof: out in the open, a glowcap is a speck of light on a hillside.
+            bool roofed = false;
+            for (int up = yy + 1; up < V.Height && !roofed; up++) roofed = b[(up << 8) | ci] != 0 && Blocks.ById[b[(up << 8) | ci]].Opaque;
+            if (!roofed) continue;
             float g = _glow.Noise3((ch.WorldX + lx) / 40.0, yy / 30.0, (ch.WorldZ + lz) / 40.0);
             ushort plant = g > 0.35f ? Blocks.Glowcap : rng.Chance(0.4f) ? Blocks.Umbercap : Blocks.Blushcap;
             if (g > 0.35f || rng.Chance(0.3f)) b[(yy << 8) | ci] = plant;

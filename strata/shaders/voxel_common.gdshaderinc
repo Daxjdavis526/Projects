@@ -75,6 +75,26 @@ vec3 light_color(vec4 light, int flags) {
     return c * ao * face_shade(flags & 7) * brightness;
 }
 
+// Self-lit blocks are drawn a little brighter than white so the bloom gives
+// them a glow up close. Far off, a glowing thing is a pixel or less, and the
+// bloom would blow that pixel up into a big white disc that winks on and off
+// as it slips between pixels. So beyond a few blocks they are held to white.
+// Anything that is not self-lit never goes past white, so only lamps and
+// fire can set the bloom off.
+vec3 limit_glow(vec3 col, int flags, vec3 world, vec3 cam) {
+    if ((flags & FLAG_EMISSIVE) == 0) return min(col, vec3(1.0));
+    float far = smoothstep(12.0, 28.0, distance(world, cam));
+    return min(col, vec3(mix(4.0, 1.0, far)));
+}
+
+// The last thing every shader does. A pixel that came out not-a-number or
+// infinite (some graphics drivers produce them where others do not) is drawn
+// black instead: left in, the bloom would spread it into a white disc.
+vec3 safe_color(vec3 c, float hi) {
+    if (any(isnan(c)) || any(isinf(c))) return vec3(0.0);
+    return clamp(c, vec3(0.0), vec3(hi));
+}
+
 float fog_amount(vec3 world, vec3 cam) {
     vec3 d = world - cam;
     float dist = length(d.xz) + abs(d.y) * fog_vertical;

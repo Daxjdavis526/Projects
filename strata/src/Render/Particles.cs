@@ -44,7 +44,9 @@ void vertex() {
     MODELVIEW_MATRIX = mat4(vec4(s,0,0,0), vec4(0,s,0,0), vec4(0,0,s,0), MODELVIEW_MATRIX[3]);
 }
 void fragment() {
-    ALBEDO = pow(COLOR.rgb, vec3(2.2)) * (COLOR.a > 1.5 ? 1.6 : 1.0);
+    vec3 c = pow(max(COLOR.rgb, vec3(0.0)), vec3(2.2)) * (COLOR.a > 1.5 ? 1.6 : 1.0);
+    // Never not-a-number, and only glowing sparks may pass white.
+    ALBEDO = (any(isnan(c)) || any(isinf(c))) ? vec3(0.0) : clamp(c, vec3(0.0), vec3(2.0));
 }
 ",
         };

@@ -57,7 +57,8 @@ public sealed partial class InventoryScreen : Control
         _station = UiStyle.Label("", 15, UiStyle.TextDim);
         leftBox.AddChild(_station);
 
-        if (Kind == ScreenKind.Crate) BuildCrate(leftBox);
+        if (Kind == ScreenKind.Inventory && Game.Creative) BuildPalette(leftBox);
+        else if (Kind == ScreenKind.Crate) BuildCrate(leftBox);
         else if (Kind == ScreenKind.Furnace) BuildFurnace(leftBox);
         else BuildRecipes(leftBox);
 
@@ -107,6 +108,81 @@ public sealed partial class InventoryScreen : Control
     {
         var s = new SlotView { Index = i, Tag = "player", Source = () => Inv[i], Clicked = OnSlot };
         return s;
+    }
+
+    // --- creative palette ---------------------------------------------------------------------
+
+    private readonly List<ushort> _palette = new();
+    private GridContainer _paletteGrid;
+    private string _paletteFilter = "blocks", _search = "";
+
+    private static ItemStack Full(ushort id) => new(id, Items.Get(id).MaxStack);
+
+    /// <summary>Creative: every block and item there is, to take as many of as you like.</summary>
+    private void BuildPalette(VBoxContainer box)
+    {
+        _title.Text = "Creative";
+        _station.Text = "Click to take a stack · shift-click: onto the hotbar · 1-9 over one: into that slot · drop a stack here to throw it away";
+        _station.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+        _station.CustomMinimumSize = new Vector2(400, 0);
+        var filters = new HBoxContainer();
+        filters.AddThemeConstantOverride("separation", 4);
+        box.AddChild(filters);
+        foreach (var (key, label) in new[] { ("blocks", "Blocks"), ("items", "Tools & items"), ("all", "Everything") })
+        {
+            var b = new Button { Text = label, CustomMinimumSize = new Vector2(0, 32), ToggleMode = true, ButtonPressed = key == _paletteFilter };
+            b.AddThemeFontSizeOverride("font_size", 14);
+            b.Pressed += () => { _paletteFilter = key; foreach (var c in filters.GetChildren()) if (c is Button bb) bb.ButtonPressed = bb == b; FillPalette(); };
+            filters.AddChild(b);
+        }
+        var search = new LineEdit { PlaceholderText = "search", CustomMinimumSize = new Vector2(400, 34) };
+        search.TextChanged += t => { _search = t.Trim().ToLowerInvariant(); FillPalette(); };
+        box.AddChild(search);
+        var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(400, 410), HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
+        box.AddChild(scroll);
+        _paletteGrid = new GridContainer { Columns = 7 };
+        _paletteGrid.AddThemeConstantOverride("h_separation", 4);
+        _paletteGrid.AddThemeConstantOverride("v_separation", 4);
+        scroll.AddChild(_paletteGrid);
+        FillPalette();
+    }
+
+    private void FillPalette()
+    {
+        _palette.Clear();
+        foreach (var d in Items.All)
+        {
+            if (d == null || d.Id == 0) continue;
+            bool block = d.Place != PlaceKind.None;
+            if (_paletteFilter == "blocks" && !block || _paletteFilter == "items" && block) continue;
+            if (_search.Length > 0 && !d.Name.ToLowerInvariant().Contains(_search)) continue;
+            _palette.Add(d.Id);
+        }
+        foreach (var c in _paletteGrid.GetChildren()) c.QueueFree();
+        for (int k = 0; k < _palette.Count; k++)
+        {
+            ushort id = _palette[k];
+            var one = new ItemStack(id, 1);
+            _paletteGrid.AddChild(new SlotView { Index = k, Tag = "palette", Source = () => one, Clicked = OnSlot });
+        }
+    }
+
+    private void OnPalette(SlotView view, MouseButton button, bool shift)
+    {
+        // Something already in hand is thrown away; otherwise take a stack (or one, with the right button).
+        if (!Cursor.IsEmpty) { Cursor = ItemStack.Empty; Sfx.Ui("click", 0.3f, 0.7f); return; }
+        if (view.Index >= _palette.Count) return;
+        ushort id = _palette[view.Index];
+        var s = button == MouseButton.Right ? new ItemStack(id, 1) : Full(id);
+        if (shift)
+        {
+            // Onto the hotbar: the first empty slot, or the one in hand.
+            int to = -1;
+            for (int i = 0; i < 9 && to < 0; i++) if (Inv[i].IsEmpty) to = i;
+            Inv[to < 0 ? Game.Player.Selected : to] = Full(id);
+        }
+        else Cursor = s;
+        Sfx.Ui("click", 0.35f, 1.1f);
     }
 
     // --- recipe book -----------------------------------------------------------------------
@@ -296,6 +372,7 @@ public sealed partial class InventoryScreen : Control
 
     private void OnSlot(SlotView view, MouseButton button, bool shift)
     {
+        if ((string)view.Tag == "palette") { OnPalette(view, button, shift); return; }
         var inv = InvFor(view);
         int i = view.Index;
         bool furnaceOut = Kind == ScreenKind.Furnace && (string)view.Tag == "entity" && i == FurnaceEntity.Out;
@@ -411,6 +488,14 @@ public sealed partial class InventoryScreen : Control
             if (!e.IsActionPressed("slot_" + n)) continue;
             var view = HoveredSlot(this);
             if (view == null || view.Clicked == null) return;
+            if ((string)view.Tag == "palette")
+            {
+                // A full stack of it straight into that hotbar slot.
+                if (view.Index < _palette.Count) Inv[n - 1] = Full(_palette[view.Index]);
+                Sfx.Ui("click", 0.35f, 1.2f);
+                GetViewport().SetInputAsHandled();
+                return;
+            }
             var inv = InvFor(view);
             int i = view.Index, h = n - 1;
             if (inv == Inv && i == h) return;

@@ -107,6 +107,7 @@ public static partial class Tests
         Test("seeds are repeatable", Seeds);
         Test("generation is deterministic and order-free", Determinism);
         Test("worldgen produces terrain, caves, ores, plants", WorldgenSanity);
+        Test("glowing mushrooms grow only under a roof", GlowcapsRoofed);
         Test("column save round trip", ChunkRoundTrip);
         Test("world metadata save round trip", MetaRoundTrip);
         Test("inventory stacking", InventoryStacking);
@@ -287,6 +288,36 @@ public static partial class Tests
         Check(sy > V.SeaLevel && col.Biome != Biome.Sea && col.Biome != Biome.DeepSea, $"spawn on dry land ({sx},{sy},{sz} {col.Biome})");
     }
 
+    /// <summary>
+    /// Glowcaps shine brighter than white; out in the open, far off, one is a
+    /// flickering speck the bloom blows up into a white disc. They belong in caves.
+    /// </summary>
+    private static void GlowcapsRoofed()
+    {
+        var w = new World(Hash.StringSeed("glow"));
+        var (sx, _, sz) = w.Gen.FindSpawn();
+        int open = 0, total = 0;
+        string where = "";
+        for (int cz = -8; cz < 8; cz++)
+            for (int cx = -8; cx < 8; cx++)
+            {
+                var c = new Chunk((sx >> 4) + cx, (sz >> 4) + cz);
+                w.Gen.Generate(c);
+                for (int i = 0; i < V.ColumnVolume; i++)
+                {
+                    if (c.Blocks[i] != Blocks.Glowcap) continue;
+                    total++;
+                    int y = i >> 8, ci = i & 255;
+                    bool roof = false;
+                    for (int up = y + 1; up < V.Height && !roof; up++) roof = Blocks.ById[c.Blocks[(up << 8) | ci]].Opaque;
+                    if (!roof) { open++; if (where == "") where = $"{c.WorldX + (ci & 15)} {y} {c.WorldZ + (ci >> 4)}"; }
+                }
+            }
+        GD.Print($"   glowcaps: {total}, open to the sky: {open} {where}");
+        Check(open == 0, $"no glowcap under open sky ({open} of {total}, first at {where})");
+        Check(total > 0, "but they still grow in caves");
+    }
+
     private static void ChunkRoundTrip()
     {
         var gen = new WorldGen(5);
@@ -327,7 +358,7 @@ public static partial class Tests
             m.Mobs.Add(new MobSave { Kind = "Brindle", X = 4, Y = 65, Z = 9, Health = 7, Scale = 0.55f, Persistent = true });
             m.Player.Armor.Add(new SlotSave { Slot = 1, Item = "iron_cuirass", Count = 1, Wear = 5 });
             m.Time = 3.7;
-            m.Landmarks = true; m.RocketRolledOut = true;
+            m.Landmarks = true; m.RocketRolledOut = true; m.Creative = true;
             m.Vehicles.Add(new VehicleSave { Kind = "rocket", X = 100.5, Y = 74, Z = -20.5, Qy = 0.2f, Qw = 0.98f, Vy = 12f, Fuel = 17000f, Health = 63f, Throttle = 0.7f, Occupied = true, Phase = (int)FlightPhase.Flight });
             m.Vehicles.Add(new VehicleSave { Kind = "wreck", Look = "fin", X = 1, Y = 66, Z = 2, Sx = 2.8f, Sy = 5f, Sz = 0.3f });
             WorldSave.Write(m);
@@ -342,6 +373,7 @@ public static partial class Tests
             Check(worn[1].Id == Items.ByKey["iron_cuirass"] && worn[1].Wear == 5, "worn armour persisted, wear and all");
             Check(Math.Abs(back.Time - 3.7) < 1e-9, "clock persisted");
             Check(back.Landmarks && back.RocketRolledOut && back.Vehicles.Count == 2, "a showcase world's vehicles persisted");
+            Check(back.Creative, "creative mode persisted");
             var rs = back.Vehicles[0];
             Check(rs.Kind == "rocket" && rs.Fuel == 17000f && rs.Health == 63f && rs.Occupied && rs.Phase == (int)FlightPhase.Flight && Math.Abs(rs.Qy - 0.2f) < 1e-6f && rs.Vy == 12f,
                 "a rocket in flight comes back with its fuel, damage, pilot, attitude and speed");

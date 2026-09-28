@@ -377,18 +377,39 @@ to charcoal, and cooks every raw meat and emberroot. Crates hold 27 stacks.
 Everything you place, the contents of every crate and furnace, dropped items,
 creatures, the time of day and the weather are saved with the world.
 
+## Creative mode
+
+Pick **Creative** when you make a world, or switch any world over from the
+pause menu (and back again).
+
+| Input | In creative |
+|---|---|
+| Space, twice quickly | take off · land |
+| Space · Shift (flying) | climb · sink; touching the ground lands you |
+| Ctrl (flying) | fly fast (26 m/s instead of 11) |
+| left mouse | break any block at once (hold for about six a second); nothing drops |
+| right mouse | place; the stack in your hand never runs out |
+| middle mouse | a full stack of whatever you are looking at |
+| E | every block and item: click to take a stack, shift-click to put it on the hotbar, hover and press 1–9 to fill that slot, click with something in hand to throw it away; filter by blocks or items, or search by name |
+
+Nothing hurts you in creative (except falling out of the bottom of the world),
+and hunger and breath never run down. Creatures, weather, water, circuits and
+rockets all work as they do in survival.
+
 ## Menus, saving, settings
 
 The main menu lists your worlds with name, seed, time played and when last
-played; creates a world from a name and an optional seed (a word or a number;
-empty or **Random** picks one); deletes with a confirmation. Esc in game opens
-Resume · Settings · Save · Save and Quit to Menu · Save and Exit Game. The world
-also autosaves every five minutes.
+played; creates a world from a name, an optional seed (a word or a number;
+empty or **Random** picks one) and a game mode (survival or creative); deletes
+with a confirmation. Esc in game opens Resume · Settings · Game mode (switch
+between survival and creative at any time) · Save · Save and Quit to Menu ·
+Save and Exit Game. The world also autosaves every five minutes.
 
 Settings (kept in the user data folder, `settings.json`): mouse sensitivity and
 invert Y, field of view, render distance (3–16 columns), brightness, master and
-music volume, graphics quality (Fast · Balanced · Fancy), view bobbing, an FPS
-counter, vsync, fullscreen and resolution.
+music volume, graphics quality (Fast · Balanced · Fancy), bloom (the glow round
+lamps, fire and the sun), view bobbing, an FPS counter, vsync, fullscreen and
+resolution.
 
 Worlds live in the user data folder, under `worlds/<name>/`:
 
@@ -534,7 +555,7 @@ can set it off.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 689 checks, in a few seconds
+    godot --headless --path . -- --test                # 692 checks, in a few seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 79 checks and screenshots
     godot --path . -- --flighttest OUTDIR              # flies rockets at the launch complex; checks and screenshots
     godot --headless --path . -- --bench               # pipeline costs per column
@@ -579,8 +600,10 @@ onto the crew arm, boards through the hatch with the use button, arms and
 counts down with the keys, watches the engine light under the clamps and the
 clamps let go, steers with W, cuts the engine and rides it into the ground
 (checking the wreckage and the crater), then botches a launch on purpose with
-the assist off and full rudder, and finally has a launch held at half
-throttle and climbs out.
+the assist off and full rudder, has a launch held at half
+throttle and climbs out, and then switches to creative mode: takes off with
+a double tap, climbs, hovers and flies, breaks a block with one click (no
+drop), opens the block palette and places a block that is not used up.
 
 `--shots OUTDIR [--tour] [--landmarks]` flies a camera through fixed viewpoints — every
 biome, a structure, a cave, dawn, dusk, night, the creatures up close — and
@@ -622,7 +645,9 @@ copied.
 
 - **Light** is a 16-level flood fill, not physically based. It bends round
   corners and fades one level per block; the sun casts no shadows beyond
-  "open to the sky or not".
+  "open to the sky or not". Lamps, fire and glowing blocks bloom only up close: past
+  about 20 blocks they are held to plain white, since a lamp that is a pixel
+  wide would otherwise bloom into a white disc that winks as you move.
 - **Water** is a cellular automaton ticked four times a second. It has no
   pressure or volume: a source never runs dry, flows fill at most seven blocks
   out, and generated seas and lakes do not move until something nearby
