@@ -9,3 +9,7 @@ helios/three.min.js         linguist-vendored linguist-generated -diff
 
 # Minified bundles are not meaningfully diffable or mergeable.
 *.min.js                    -diff -merge
+
+# Generated CAD output. A STEP file is text, but it is one line per point,
+# curve and surface — 100,000 lines nobody reads. build_model.py is the source.
+starship/models/**          linguist-generated -diff
