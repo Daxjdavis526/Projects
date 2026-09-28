@@ -74,6 +74,17 @@ public static class SoundBank
         AddLoop("amb_rain", RainLoop(6f));
         AddLoop("amb_cave", CaveLoop(12f));
         AddLoop("amb_underwater", UnderwaterLoop(6f));
+
+        // The launch complex and the rocket.
+        AddLoop("rocket_roar", RocketRoar(5f));
+        Add("rocket_ignite", Ignite());
+        Add("clamp_release", Clank());
+        Add("beep", Blip(880, 0.12f, 0.45f));
+        Add("beep_go", Blip(1320, 0.5f, 0.5f));
+        Add("alarm", Alarm());
+        Add("explosion", Explosion(7f, 1));
+        Add("explosion_small", Explosion(2.5f, 2));
+        Add("metal_crunch", Crunch2());
         GD.Print($"sound bank: {_bank.Count} sounds in {sw.ElapsedMilliseconds} ms");
     }
 
@@ -715,5 +726,114 @@ public static class SoundBank
             s[i] = f.Low(n.Next()) * (0.7f + 0.3f * MathF.Sin(t * 0.9f)) * 0.9f;
         }
         return Seamless(s, 1f);
+    }
+
+    // --- rockets --------------------------------------------------------------------------
+
+    /// <summary>
+    /// The roar of a big engine: deep rumble from low-passed noise, a mid-band
+    /// crackle of shock cells (random sharp pops), and a slow flutter. Looped;
+    /// the game sets its volume and pitch from the thrust.
+    /// </summary>
+    private static float[] RocketRoar(float len)
+    {
+        var s = Buf(len + 1f);
+        var n = new Noise(401);
+        var lo = new Svf(90, 0.7f);
+        var mid = new Svf(420, 0.9f);
+        var hi = new Svf(2400, 0.8f);
+        var rng = new Rng(402);
+        float crackle = 0f;
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float x = n.Next();
+            if (rng.Range(0f, 1f) < 0.004f) crackle = rng.Range(0.6f, 1.6f);
+            crackle *= 0.995f;
+            float flutter = 0.85f + 0.15f * MathF.Sin(t * 7.3f) * MathF.Sin(t * 2.1f + 1f);
+            s[i] = (lo.Low(x) * 5f + mid.Band(x) * 1.3f * flutter + hi.Band(n.Next()) * 0.35f * crackle + x * 0.08f * crackle) * 0.5f;
+        }
+        return Seamless(s, 1f);
+    }
+
+    private static float[] Ignite()
+    {
+        var s = Buf(2.2f);
+        var n = new Noise(411);
+        var lo = new Svf(120, 0.7f);
+        var bp = new Svf(900, 1.2f);
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float pop = t < 0.08f ? (1f - t / 0.08f) : 0f;
+            float swell = Smooth.Step(0f, 1.2f, t) * Env(t, 1.2f, 0.6f);
+            float x = n.Next();
+            s[i] = (bp.Band(x) * 2f * pop + lo.Low(x) * 4f * swell + x * 0.3f * pop) * 0.6f;
+        }
+        return s;
+    }
+
+    private static float[] Clank()
+    {
+        var s = Buf(1.2f);
+        var n = new Noise(421);
+        var f = new Svf(1800, 6f);
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float e = Env(t, 0.001f, 0.25f), e2 = t > 0.09f ? Env(t - 0.09f, 0.001f, 0.2f) : 0f;
+            s[i] = (MathF.Sin(t * 310 * MathF.Tau) * 0.5f + MathF.Sin(t * 847 * MathF.Tau) * 0.3f + f.Band(n.Next()) * 0.6f) * (e + e2 * 0.7f)
+                 + MathF.Sin(t * 55 * MathF.Tau) * Env(t, 0.004f, 0.15f) * 0.7f;
+        }
+        return s;
+    }
+
+    private static float[] Alarm()
+    {
+        var s = Buf(0.9f);
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float hz = (int)(t / 0.15f) % 2 == 0 ? 960f : 720f;
+            float sq = MathF.Sign(MathF.Sin(t * hz * MathF.Tau)) * 0.25f + MathF.Sin(t * hz * MathF.Tau) * 0.2f;
+            s[i] = sq * Env(t, 0.01f, 0.5f) * 0.6f;
+        }
+        return s;
+    }
+
+    /// <summary>A blast: a hard crack, then a long rolling low boom with debris crackle falling off.</summary>
+    private static float[] Explosion(float len, uint seed)
+    {
+        var s = Buf(len);
+        var n = new Noise(431 + seed);
+        var lo = new Svf(70, 0.6f);
+        var lo2 = new Svf(180, 0.7f);
+        var crack = new Svf(1600, 0.8f);
+        var rng = new Rng(432 + seed);
+        float grit = 0f;
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float x = n.Next();
+            if (rng.Range(0f, 1f) < 0.002f * Math.Max(0f, 1f - t / (len * 0.7f))) grit = rng.Range(0.3f, 1f);
+            grit *= 0.993f;
+            float boom = lo.Low(x) * 9f * Env(t, 0.004f, len * 0.22f) + lo2.Low(x) * 3f * Env(t, 0.002f, len * 0.08f);
+            float snap = crack.Band(x) * 3f * Env(t, 0.0005f, 0.05f);
+            s[i] = boom + snap + crack.Band(n.Next()) * grit * 0.4f;
+        }
+        return s;
+    }
+
+    private static float[] Crunch2()
+    {
+        var s = Buf(0.6f);
+        var n = new Noise(441);
+        var f = new Svf(700, 2f);
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            s[i] = (f.Band(n.Next()) * 1.5f + MathF.Sin(t * 140 * MathF.Tau) * 0.6f) * Env(t, 0.002f, 0.12f);
+        }
+        return s;
     }
 }

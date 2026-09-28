@@ -10,6 +10,19 @@ public sealed class SlotSave { public int Slot; public string Item; public int C
 public sealed class DropSave { public string Item; public int Count; public int Wear; public double X, Y, Z; public float Age; }
 public sealed class MobSave { public string Kind; public double X, Y, Z; public float Yaw, Health, Scale = 1f, Grow; public bool Persistent; }
 
+/// <summary>A vehicle as saved: where it is, how it is moving, what is left in it, and its state.</summary>
+public sealed class VehicleSave
+{
+    public string Kind, Look;
+    public double X, Y, Z;                           // the reference point (origin) in the world
+    public float Qx, Qy, Qz, Qw = 1f;
+    public float Vx, Vy, Vz, Wx, Wy, Wz;
+    public float Sx, Sy, Sz;                         // a wreck's size
+    public float Fuel, Health = 100f, Throttle = 1f;
+    public bool Clamped, Occupied, Sas = true;
+    public int Phase;
+}
+
 public sealed class PlayerSave
 {
     public double X, Y, Z;
@@ -44,6 +57,9 @@ public sealed class WorldMeta
     public List<DropSave> Drops = new();
     public List<MobSave> Mobs = new();
     public StatsSave Stats = new();
+    public List<VehicleSave> Vehicles = new();
+    /// <summary>The first rocket has been put on the pad (so a destroyed one is not quietly replaced on reload).</summary>
+    public bool RocketRolledOut;
 
     [System.Text.Json.Serialization.JsonIgnore] public string Folder;
     [System.Text.Json.Serialization.JsonIgnore] public string Error;

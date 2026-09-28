@@ -25,6 +25,8 @@ public sealed partial class Game : Node3D
     public DropManager Drops;
     public Particles Particles;
     public MobManager Mobs;
+    public VehicleManager Vehicles;
+    public FlightHud FlightHud;
     public Fluids Fluids;
     public Signals Signals;
     private readonly List<Vector3> _feet = new();
@@ -79,6 +81,8 @@ public sealed partial class Game : Node3D
         AddChild(Drops);
         Mobs = new MobManager { Name = "Mobs", Game = this, World = World };
         AddChild(Mobs);
+        Vehicles = new VehicleManager { Name = "Vehicles", Game = this };
+        AddChild(Vehicles);
         Weather = new Weather { Name = "Weather", State = Meta.WeatherState, Timer = Meta.WeatherTimer, Intensity = Meta.Rain };
         AddChild(Weather);
         Overlay = new BlockOverlay { Name = "Overlay" };
@@ -90,6 +94,8 @@ public sealed partial class Game : Node3D
         AddChild(Ui);
         Hud = new Hud { Game = this };
         Ui.AddChild(Hud);
+        FlightHud = new FlightHud { Game = this };
+        Ui.AddChild(FlightHud);
 
         World.BlockBroken += OnBlockBroken;
         World.EntityRemoved += OnEntityRemoved;
@@ -156,6 +162,8 @@ public sealed partial class Game : Node3D
                     if (s.Scale < 1f) m.SetScale(s.Scale);
                 }
 
+        Vehicles.Load(Meta);
+
         Settings.ApplyDisplay();
         ApplyGraphics();
         LoadingScreen = Menus.Loading(this);
@@ -173,6 +181,7 @@ public sealed partial class Game : Node3D
         View.Sky.SetQuality(q >= 1);
         Particles.Density = q == 0 ? 0.4f : q == 1 ? 0.7f : 1f;
         Weather.Density = q == 0 ? 0.4f : 1f;
+        if (Vehicles?.Exhaust != null) Vehicles.Exhaust.Density = q == 0 ? 0.5f : q == 1 ? 0.75f : 1f;
         Sfx.I?.SetVolume(Settings.MasterVolume);
         GetViewport().Msaa3D = q == 2 ? Viewport.Msaa.Msaa2X : Viewport.Msaa.Disabled;
     }
@@ -200,6 +209,7 @@ public sealed partial class Game : Node3D
             Mobs.Daylight = View.Sky.Sun;
             if (State == GameState.Playing) Player.Step(dt);
             Mobs.Step(dt, State == GameState.Playing ? Player : null);
+            Vehicles.Step(dt);
             Drops.Step(dt, World, Player);
             Weather.Step(dt, this);
             World.TickEntities(dt);
@@ -305,6 +315,8 @@ public sealed partial class Game : Node3D
 
     private void OnDied(DamageKind kind)
     {
+        // Whatever you were flying flies on without you.
+        Vehicles.Unseat();
         State = GameState.Dead;
         Stats.Deaths++;
         CloseScreen();
@@ -424,7 +436,7 @@ public sealed partial class Game : Node3D
             GetViewport().SetInputAsHandled();
             return;
         }
-        if (e.IsActionPressed("inventory") && State == GameState.Playing && !Paused)
+        if (e.IsActionPressed("inventory") && State == GameState.Playing && !Paused && Player.Riding == null)
         {
             if (Screen != null) CloseScreen();
             else OpenScreen(ScreenKind.Inventory, default);
@@ -438,7 +450,7 @@ public sealed partial class Game : Node3D
         if (e is InputEventMouseButton mb && mb.Pressed && !InputBlocked && Input.MouseMode != Input.MouseModeEnum.Captured && AutoCapture)
             Input.MouseMode = Input.MouseModeEnum.Captured;
         // Feeding livestock.
-        if (e.IsActionPressed("use") && !InputBlocked && Player.TargetMob != null && Player.HeldStack.Id == Items.Grain)
+        if (e.IsActionPressed("use") && !InputBlocked && Player.Riding == null && Player.TargetMob != null && Player.HeldStack.Id == Items.Grain)
         {
             if (Mobs.Feed(Player.TargetMob))
             {
@@ -534,6 +546,7 @@ public sealed partial class Game : Node3D
                 Health = m.Health, Scale = m.Scale, Grow = m.GrowTimer, Persistent = m.Persistent,
             });
         }
+        Vehicles.Save(Meta);
         Stats.Kills = Player.Kills; Stats.Placed = Player.BlocksPlaced;
         Meta.Stats = Stats;
         Meta.LastPlayed = DateTime.Now;
@@ -577,6 +590,7 @@ public sealed partial class Game : Node3D
         sb.AppendLine($"columns loaded {World.Chunks.Count}   radius {c.Radius}   queued gen {c.InFlightGen} light {c.InFlightLight} mesh {c.InFlightMesh}   jobs {c.Jobs.Pending}");
         sb.AppendLine($"triangles {c.Triangles:N0} world, {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame):N0} drawn   draw calls {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame):0}");
         sb.AppendLine($"memory {GC.GetTotalMemory(false) / 1048576.0:0} MB managed, {OS.GetStaticMemoryUsage() / 1048576.0:0} MB engine");
+        sb.AppendLine($"vehicles {Vehicles.All.Count}   exhaust puffs {Vehicles.Exhaust.Count}");
         sb.AppendLine($"creatures {Mobs.All.Count} ({Mobs.CountPassive} passive, {Mobs.CountHostile} hostile)   drops {Drops.All.Count}   fluid queue {Fluids.Pending}   circuits {Signals.Pending}   weather {(Weather.State == 0 ? "clear" : Weather.State == 1 ? "rain" : "storm")} {Weather.Intensity:0.00}");
         if (Player.Target.Hit)
         {

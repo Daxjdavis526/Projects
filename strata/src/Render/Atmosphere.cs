@@ -160,6 +160,9 @@ public sealed class Atmosphere
         RenderingServer.GlobalShaderParameterSet("fog_color", fog.SrgbToLinear());
         RenderingServer.GlobalShaderParameterSet("fog_start", fogStart);
         RenderingServer.GlobalShaderParameterSet("fog_end", fogEnd);
+        // Looking straight down from high above (from a rocket), height should not count as distance,
+        // or the ground below vanishes into haze long before it is out of sight.
+        RenderingServer.GlobalShaderParameterSet("fog_vertical", 0.25f * (1f - Smooth.Step(140f, 520f, cam.Y)));
         RenderingServer.GlobalShaderParameterSet("sun_dir", sun);
         RenderingServer.GlobalShaderParameterSet("moon_dir", moon);
         RenderingServer.GlobalShaderParameterSet("sky_top", top.SrgbToLinear());

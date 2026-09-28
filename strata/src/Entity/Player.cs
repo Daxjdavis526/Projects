@@ -26,6 +26,7 @@ public sealed partial class Player : Node3D
     public Vector3 Spawn;
     public bool HasBedSpawn;
     public bool Frozen = true;              // held still until the ground has loaded
+    public Vehicle Riding;                  // aboard a vehicle: it carries you, and your keys fly it
 
     public bool Dead => Vitals.Dead;
     public bool Sneaking { get; private set; }
@@ -109,7 +110,9 @@ public sealed partial class Player : Node3D
             Pitch -= mm.Relative.Y * s * (G.Settings.InvertY ? -1f : 1f);
             Pitch = Math.Clamp(Pitch, -89.5f, 89.5f);
         }
-        else if (e is InputEventMouseButton mb && mb.Pressed)
+        // Aboard, the mouse only looks around; the vehicle takes the keys.
+        if (Riding != null) return;
+        if (e is InputEventMouseButton mb && mb.Pressed)
         {
             if (mb.ButtonIndex == MouseButton.WheelUp) SelectSlot((Selected + 8) % 9);
             else if (mb.ButtonIndex == MouseButton.WheelDown) SelectSlot((Selected + 1) % 9);
@@ -137,6 +140,16 @@ public sealed partial class Player : Node3D
         if (Dead) return;
         Vitals.ArmorPoints = ArmorPoints;
         _noArrowsNote = Math.Max(0f, _noArrowsNote - dt);
+        if (Riding != null)
+        {
+            // Carried: the vehicle places the body and the camera.
+            Vitals.Tick(dt, false);
+            BreakProgress = 0; Eating = 0; Draw = 0;
+            Target = default; TargetMob = null;
+            _hand.Visible = _held.Visible = false;
+            _heldItem = ushort.MaxValue;
+            return;
+        }
         // Physics in small steps so a slow frame never changes how far a jump goes.
         int steps = Math.Clamp((int)MathF.Ceiling(dt / (1f / 60f)), 1, 8);
         float h = dt / steps;
@@ -353,6 +366,9 @@ public sealed partial class Player : Node3D
         bool use = Input.IsActionPressed("use");
         bool usePressed = Input.IsActionJustPressed("use");
 
+        // A rocket's hatch within reach: the use button climbs in.
+        if (usePressed && G.Vehicles?.HatchTarget is Rocket hatch) { G.Vehicles.Board(hatch); _placeCooldown = 0.3f; return; }
+
         // Fighting takes precedence over digging when something is in reach.
         if (attackPressed && TargetMob != null) { Attack(TargetMob); BreakProgress = 0; }
         else if (attack && TargetMob == null) Mine(dt, attackPressed);
@@ -544,7 +560,7 @@ public sealed partial class Player : Node3D
     public static bool IsUsable(ushort id)
     {
         var u = Blocks.Get(id).Use;
-        return u is BlockUse.Worktable or BlockUse.Furnace or BlockUse.Crate or BlockUse.Door or BlockUse.Bed or BlockUse.Switch
+        return u is BlockUse.Worktable or BlockUse.Furnace or BlockUse.Crate or BlockUse.Door or BlockUse.Bed or BlockUse.Switch or BlockUse.Console
             || (u == BlockUse.BerryBush && Blocks.Get(id).Ripe);
     }
 
@@ -703,6 +719,10 @@ public sealed partial class Player : Node3D
                 return true;
             case BlockUse.Bed:
                 G.TrySleep(cell);
+                return true;
+            case BlockUse.Console:
+                Sfx.Play("switch", CellCenter(cell), 0.7f);
+                G.Vehicles?.UseConsole();
                 return true;
             case BlockUse.BerryBush:
                 if (!def.Ripe) return false;

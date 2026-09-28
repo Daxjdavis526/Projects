@@ -138,6 +138,9 @@ public static partial class Menus
             DamageKind.Mob => "Something caught you.",
             DamageKind.Projectile => "A thorn found its mark.",
             DamageKind.Void => "You fell out of the world.",
+            DamageKind.Blast => "You were too close when it blew.",
+            DamageKind.Exhaust => "You stood in the rocket's exhaust.",
+            DamageKind.Crash => "You went down with your rocket.",
             _ => "It happens.",
         };
         col.AddChild(UiStyle.Label(cause, 18, UiStyle.Text, HorizontalAlignment.Center));

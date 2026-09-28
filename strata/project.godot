@@ -32,6 +32,19 @@ environment/defaults/default_clear_color=Color(0.55, 0.7, 0.9, 1)
 
 [shader_globals]
 
+fog_vertical={
+"type": "float",
+"value": 0.25
+}
+dyn_light_pos={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+dyn_light_col={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+
 daylight={
 "type": "float",
 "value": 1.0

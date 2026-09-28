@@ -13,6 +13,7 @@ namespace Strata;
 ///   --music DIR [ID...]    render the soundtrack (or the named pieces) to WAV files; --stems
 ///                          adds each piece's melody, accompaniment and pad apart, at the mix's level
 ///   --selftest [dir]       play through the core loop with scripted input
+///   --flighttest [dir]     board, launch, fly and crash a rocket at the showcase launch complex
 ///   --shots [dir]          fly a camera through viewpoints and save pictures
 ///   --capture SECS PATH    save a screenshot after SECS seconds and quit
 /// </summary>
@@ -82,6 +83,11 @@ public partial class GameBootstrap : Node
         if (args.Contains("--shots"))
         {
             AddChild(new ShotDirector());
+            return;
+        }
+        if (args.Contains("--flighttest"))
+        {
+            AddChild(new FlightTest { Name = "FlightTest" });
             return;
         }
         if (args.Contains("--selftest"))

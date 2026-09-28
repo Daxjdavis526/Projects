@@ -60,7 +60,7 @@ downloads (Actions tab → "STRATA builds" → the latest run → Artifacts).
 | Ctrl (hold, moving forward) | sprint (needs hunger above 6) |
 | Shift | sneak — you will not step off an edge; swim down |
 | left mouse (hold) | mine · attack |
-| right mouse | place · use: open a worktable, furnace, crate or door, throw a switch, till, plant, sleep, feed an animal, put on armour · hold to eat · hold to draw a bow, let go to shoot |
+| right mouse | place · use: open a worktable, furnace, crate or door, throw a switch, till, plant, sleep, feed an animal, put on armour, work a launch console, board a rocket through its hatch · hold to eat · hold to draw a bow, let go to shoot |
 | middle mouse | pick the block you are looking at into your hand, if you carry it |
 | 1 – 9 · mouse wheel | hotbar slot |
 | E | inventory and crafting |
@@ -69,6 +69,8 @@ downloads (Actions tab → "STRATA builds" → the latest run → Artifacts).
 | F1 | hide the HUD |
 | F2 | screenshot (saved under the user data folder, `screenshots/`) |
 | F3 | debug overlay |
+
+Aboard a rocket the keys change: see [Flying the rocket](#flying-the-rocket).
 
 **In the inventory:** left-click picks up, puts down, swaps or merges a stack;
 right-click takes half, or puts down one; shift-click moves a stack straight
@@ -175,6 +177,134 @@ sources spread up to seven blocks across flat ground, thinning as they go, and
 pour straight down any drop. Cut the source and the flow drains away. A
 one-block gap between two sources refills with a new source, so a hole dug in
 a lake heals over. Water washes away plants it runs into.
+
+## The showcase world: Castle Vorhaal and the launch complex
+
+![Castle Vorhaal at sunset from the watchtower; the rocket floodlit on its pad at night; T-1, the engine lit under the clamps; lift-off; a launch botched on purpose, with the assist off; and how that ends](doc/showcase.jpg)
+
+**Create Showcase World** on the title screen makes a world with two large
+builds laid into it by the generator. Everything else about the world (seed,
+biomes, creatures, survival) is normal. You arrive on a watchtower above a dead
+village, looking up at the castle.
+
+**Castle Vorhaal** is the last stop of a dark fantasy game that does not exist:
+a gothic fortress on a crag 50 m above the valley, reached by a road that
+spirals up a rock spur and crosses a gorge on a stone bridge to a gatehouse
+with drum towers and a portcullis. Inside the curtain wall (towers of
+different heights and ages, one of them ruined) are a bailey with a well,
+a graveyard, a mausoleum and a gallows; the entrance hall with galleries and a
+rose window; the throne hall under the keep; a long dining hall and its
+kitchen; an armoury; a library with a gallery and a study behind a tapestry;
+an alchemist's room; a chapel with its bell spire; bedchambers; a dungeon with
+cells and a torture room; crypts, catacombs and an ossuary; hidden passages
+behind false walls, a hidden spiral stair, an escape tunnel out through the
+cliff; the count's chambers near the top of the keep (a coffin under a
+canopy, a treasury nobody is meant to find); and at the very top, the Crimson
+Crown, a boss arena ringed by a moat of lava under four great windows. Crates
+throughout fill from their own loot tables (armoury, treasury, alchemy,
+crypt, larder). Windows glow ember red at night. The castle is built by a
+small procedural toolkit (`src/Gen/Landmarks/Gothic.cs`: towers, spires,
+steep roofs, pointed arches, rose windows, buttresses, spiral stairs,
+furniture) driven by a hand-written plan (`Castle.cs`), so its wings differ
+in masonry, age and state of repair.
+
+**The launch complex** lies east along the paved road: a raised concrete pad
+with a flame trench, a 40 m launch tower with a crew arm, a fuel farm, a water
+tower, a 44 m assembly building, a launch control bunker with blast-slit
+windows, floodlight and lightning masts, roads and a parking lot. A rocket
+stands on the pad, fuelled and clamped down.
+
+## Flying the rocket
+
+The rocket is not an animation. It is a rigid body with mass, inertia and a
+changing centre of mass, pushed by an engine through a gimbal, pulled by
+gravity, pushed back by the air, held by clamps until it can lift itself, and
+stopped by the blocks it hits.
+
+**Getting in.** Climb the ladder in the tower's spine to the crew arm, 24 m
+up, walk to the end of the arm and right-click the hatch. Inside, R arms the
+rocket, G starts a ten-second count. The engine lights at T-3 while the
+hold-down clamps take the thrust; at T-0 the flight computer checks that the
+thrust is more than the weight and lets go, or holds the launch and shuts the
+engine down if it is not (try it at half throttle).
+
+| Key | Aboard the rocket |
+|---|---|
+| R · G · B | arm / disarm · start the countdown · abort |
+| Shift · Ctrl | throttle up · down (hold) |
+| Z · X | full throttle · cut the engine |
+| Space | light or shut down the engine (off the pad) |
+| W S · A D | tip the nose away from you / toward you · left / right (relative to the view) |
+| Q · E | roll |
+| T | stability assist on / off |
+| V | camera: chase · capsule window · pad camera |
+| mouse · wheel | look around · zoom the chase camera |
+| H | show all of this on screen |
+| F | climb out |
+
+**The instruments** show altitude above the pad and above the ground, climb
+rate, speed, throttle, engine state and thrust, propellant and burn time left,
+mass and thrust-to-weight ratio, g-load (what an accelerometer aboard reads),
+dynamic pressure and angle of attack, hull integrity, the clamps' load, and a
+tilt dial with the nose and the flight path on it. Warnings flash for sink
+rate, attitude, low fuel, structural overload and hull damage.
+
+**Things that go wrong.** Land faster than 10 m/s and the hull takes damage in
+proportion to the square of the excess; much faster and it breaks up. Let it
+lean too far on the ground and it topples. Turn hard at high speed and the
+airflow tears it apart. Run the tanks dry and the engine flames out. Whatever
+destroys it, the tank goes up: a blast that grows with the propellant left,
+a crater in the ground (hard blocks resist, bedrock does not go), fire,
+smoke, a flash that lights the landscape, wreckage that tumbles and burns
+(the engine, both tank sections, the capsule, the fins, panels), and damage and
+knock-back to anything nearby, you included. Standing in the exhaust burns.
+The launch console at the foot of the tower (and in the bunker) rolls out a
+new rocket when the pad is empty, or refuels and repairs the one on it.
+
+**How it works.** `src/Vehicle/` is a small general vehicle system; nothing in
+it but `Rocket.cs` and its drawing knows about rockets.
+
+- `RigidBody` — position in double precision, velocity, orientation as a
+  quaternion, angular velocity, mass and principal inertia; forces and
+  torques gathered each step, applied at points; semi-implicit integration
+  with the gyroscopic term.
+- `Vehicle` — a body plus parts plus a hull of contact points, stepped in
+  fixed sub-steps of 1/120 s. Each step it adds up mass and centre of mass
+  from its parts (the tank's contents sink as it drains), applies gravity,
+  lets every part push, integrates, then either holds the body in its clamps
+  or resolves the hull against the blocks. Hard contacts, aerodynamic
+  overload and anything else a subclass checks become damage. At rest it
+  sleeps until something pushes it or the ground under it goes.
+- `VoxelCollider` — hull points found inside solid blocks are pushed out
+  through the nearest open face; the contacts are solved together with a few
+  rounds of sequential impulses (normal and friction, accumulated and
+  clamped), so a box on four corners settles and a toppling rocket rolls
+  instead of jittering.
+- Parts: `PropellantTank`, `Thruster` (throttle with a minimum, spool-up and
+  spool-down, a gimbal that swings at a limited rate, mass flow of thrust ÷
+  exhaust velocity, flame-out when dry), `ReactionControl` (wheels: torque
+  without thrust), `AeroBody` (axial and cross-flow drag and a fin normal
+  force at the centre of pressure, so a finned rocket points into the wind by
+  itself; air thins with height), `Seat`, `HoldDown`.
+- `Rocket` — the configuration, the launch sequence, and a stability-assist
+  loop that turns the stick into turn rates (and holds attitude when the stick
+  is released) by swinging the gimbal and spinning the wheels.
+- `Wreck` — a tumbling box, the same physics; the pieces of a rocket.
+- `Explosions` — the crater. `Exhaust` — fire and smoke puffs that are
+  stopped by blocks one axis at a time and spread along whatever stopped
+  them, so the exhaust runs down the flame trench and billows out of its
+  open end. The flame lights the terrain through a moving light in the voxel
+  shaders.
+
+| The rocket | |
+|---|---|
+| height · diameter · fin span | 33.5 m · 3.4 m · 8.4 m |
+| mass: dry · propellant · full | 26 t · 32 t · 58 t |
+| thrust · exhaust velocity | 2.1 MN · 1,300 m/s (1,615 kg/s at full throttle) |
+| throttle range · gimbal | 30–100 % · ±5° |
+| thrust-to-weight at lift-off · at burn-out | 1.29 · 2.9 |
+| burn time at full throttle · Δv | 20 s · 1,070 m/s |
+| straight up at full throttle | apex about 5.5 km |
 
 ## Creatures
 
@@ -404,8 +534,9 @@ can set it off.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 636 checks, in a couple of seconds
+    godot --headless --path . -- --test                # 689 checks, in a few seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 79 checks and screenshots
+    godot --path . -- --flighttest OUTDIR              # flies rockets at the launch complex; checks and screenshots
     godot --headless --path . -- --bench               # pipeline costs per column
     godot --headless --path . -- --music OUTDIR        # the soundtrack as WAV files (--stems: melody, accompaniment, pad apart)
 
@@ -420,7 +551,18 @@ flow (including flows saved mid-way), armour and arrows, lumen circuits
 (strength, range, breaks, steps, roofs, and a plate-worked door that will not
 close on you), and the music: the notation reader, every piece's bars and
 melodies lining up, piano notes that ring down cleanly, and an excerpt that
-renders in stereo without clipping and fades to silence.
+renders in stereo without clipping and fades to silence. The vehicle physics
+is checked the same way: free fall against ½gt², bounce and rest, a spinning
+body keeping its angular momentum, a nudged post toppling, flung panels
+settling; the rocket's mass and thrust-to-weight, the clamps holding and
+measuring the load, the thrust check holding a weak launch, ignition before
+T-0 and release at it, a climb under its own thrust with the assist keeping
+it upright, mass flow equal to thrust over exhaust velocity, acceleration
+rising as the tanks empty, the stick turning it the right way and the assist
+holding the new attitude, flame-out when dry, the apex of a vertical flight,
+a short drop surviving and a long one not, a leaning rocket toppling, a
+broadside break-up in the airflow, a crater, and a whole flight under uneven
+frames never going not-a-number.
 
 `--selftest` starts a real world with real rendering and plays the core loop
 with scripted input, the way a person would: hear a title piece start and fade
@@ -432,7 +574,15 @@ fight off a night attacker, light a room, store
 things in a crate, farm, fall, die and respawn, save, quit to the menu, reload,
 and check that everything is where it was.
 
-`--shots OUTDIR [--tour]` flies a camera through fixed viewpoints — every
+`--flighttest` makes a showcase world and does what a player would: climbs
+onto the crew arm, boards through the hatch with the use button, arms and
+counts down with the keys, watches the engine light under the clamps and the
+clamps let go, steers with W, cuts the engine and rides it into the ground
+(checking the wreckage and the crater), then botches a launch on purpose with
+the assist off and full rudder, and finally has a launch held at half
+throttle and climbs out.
+
+`--shots OUTDIR [--tour] [--landmarks]` flies a camera through fixed viewpoints — every
 biome, a structure, a cave, dawn, dusk, night, the creatures up close — and
 saves pictures. Screenshots found several bugs that no test could have.
 
@@ -496,6 +646,23 @@ copied.
   has no sympathetic resonance between strings and no pedal or key noise. A
   note struck again while it still rings adds a second voice rather than
   restarting the string. It is pleasant, but close listening gives it away.
+- **The rocket** is a rigid body with real forces, but its numbers are
+  chosen for this world, whose gravity is 28 m/s² (2.9 times Earth's, so
+  that jumping feels right). An exhaust velocity of 1,300 m/s is about a
+  third of a real engine's, which keeps a flight to a few kilometres and a
+  couple of minutes instead of an orbit. The air is a single exponential
+  with a 7 km scale height; drag coefficients are constants with no Mach
+  effects, there is no heating, and the fins' lift is one linear slope with
+  angle of attack. Inertia comes from fixed radii of gyration scaled by the
+  current mass. Only the rocket, its wreckage and the ground collide:
+  rockets do not hit each other, wreckage does not stack, and creatures and
+  players do not stand on them. Rigid bodies touch the world only at their
+  hull points, so a block's corner can poke between two of them.
+- **Explosions** remove blocks inside a ragged sphere shrunk by each block's
+  hardness; nothing is shaken loose beyond that, and there is no fire spread.
+- **Exhaust and smoke** are soft billboards, not a fluid; they are stopped
+  and deflected by whole blocks only, and the flame's light is one moving
+  point light added to the baked voxel light, without shadows.
 - **The music** is written in the calm, sparse piano style that block games
   made familiar, but every melody and chord progression here is new. None of
   it is an arrangement of, or borrowed from, any existing soundtrack.
@@ -506,6 +673,12 @@ copied.
   a small signal system are built; multiplayer is not. Circuits stop at
   switches, plates, traces, lamps and doors: there are no pistons, timers or
   logic gates, and a network is capped at 4,096 traces.
+- The showcase buildings exist only in a showcase world, and only one of
+  each. The rocket is the only vehicle; the vehicle code would take others
+  (a cart, a glider) but none are built.
+- A vehicle over ground that has not loaded yet collides with the terrain
+  the generator would make there (buildings, caves and player changes not
+  included), and a crater there is dug once the ground has loaded.
 - Water only moves in loaded columns; a flow at the edge of the world you
   have loaded waits until you come back.
 - Columns are 256 tall: nothing above y = 255, and the Rootstone floor at

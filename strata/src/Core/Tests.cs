@@ -12,7 +12,7 @@ namespace Strata;
 /// ray casts, light, collision and survival. Run with
 /// godot --headless --path strata -- --test
 /// </summary>
-public static class Tests
+public static partial class Tests
 {
     private static int _pass, _fail;
     private static readonly List<string> _failures = new();
@@ -126,6 +126,11 @@ public static class Tests
         Test("lumen circuits carry, fade and switch", Circuits);
         Test("music notation reads, and every piece is well formed", MusicNotation);
         Test("piano notes ring and fade; a piece renders clean", MusicRender);
+        Test("rigid bodies fall, bounce, tip and rest", RigidBodies);
+        Test("rocket: clamps, countdown, thrust check, lift-off", RocketLaunch);
+        Test("rocket: mass burns off, steering turns it, flight arcs", RocketFlight);
+        Test("rocket: hard landings, topples and blasts", RocketCrash);
+        Test("rocket: a rough flight stays finite", RocketRough);
         GD.Print($"\n{_pass} checks passed, {_fail} failed");
         foreach (var f in _failures) GD.Print("  - " + f);
         return _fail;
@@ -322,6 +327,9 @@ public static class Tests
             m.Mobs.Add(new MobSave { Kind = "Brindle", X = 4, Y = 65, Z = 9, Health = 7, Scale = 0.55f, Persistent = true });
             m.Player.Armor.Add(new SlotSave { Slot = 1, Item = "iron_cuirass", Count = 1, Wear = 5 });
             m.Time = 3.7;
+            m.Landmarks = true; m.RocketRolledOut = true;
+            m.Vehicles.Add(new VehicleSave { Kind = "rocket", X = 100.5, Y = 74, Z = -20.5, Qy = 0.2f, Qw = 0.98f, Vy = 12f, Fuel = 17000f, Health = 63f, Throttle = 0.7f, Occupied = true, Phase = (int)FlightPhase.Flight });
+            m.Vehicles.Add(new VehicleSave { Kind = "wreck", Look = "fin", X = 1, Y = 66, Z = 2, Sx = 2.8f, Sy = 5f, Sz = 0.3f });
             WorldSave.Write(m);
             var back = WorldSave.TryLoad(m.Folder);
             Check(back != null && back.Seed == Hash.StringSeed("tests"), "seed persisted");
@@ -333,6 +341,11 @@ public static class Tests
             WorldSave.LoadInventory(worn, back.Player.Armor);
             Check(worn[1].Id == Items.ByKey["iron_cuirass"] && worn[1].Wear == 5, "worn armour persisted, wear and all");
             Check(Math.Abs(back.Time - 3.7) < 1e-9, "clock persisted");
+            Check(back.Landmarks && back.RocketRolledOut && back.Vehicles.Count == 2, "a showcase world's vehicles persisted");
+            var rs = back.Vehicles[0];
+            Check(rs.Kind == "rocket" && rs.Fuel == 17000f && rs.Health == 63f && rs.Occupied && rs.Phase == (int)FlightPhase.Flight && Math.Abs(rs.Qy - 0.2f) < 1e-6f && rs.Vy == 12f,
+                "a rocket in flight comes back with its fuel, damage, pilot, attitude and speed");
+            Check(back.Vehicles[1].Look == "fin" && back.Vehicles[1].Sy == 5f, "and so does its wreckage");
             // A damaged world.json falls back to the backup.
             WorldSave.Write(m);
             File.WriteAllText(Path.Combine(WorldSave.DirOf(m.Folder), "world.json"), "{ not json");

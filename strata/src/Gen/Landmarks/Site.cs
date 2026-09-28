@@ -37,7 +37,7 @@ public sealed class LandmarkSite
 
     /// <summary>Where a new player starts: at the head of the village street, facing the castle.</summary>
     public Vector3 Spawn => new(Ox + Lookout.X + 0.5f, LookoutTop, Oz + Lookout.Y + 0.5f);
-    public Vector3 PadWorld => new(Ox + PadCentre.X + 0.5f, Valley + 1, Oz + PadCentre.Y + 0.5f);
+    public Vector3 PadWorld => new(Ox + PadCentre.X + 0.5f, LaunchComplex.Deck, Oz + PadCentre.Y + 0.5f);
 
     public LandmarkSite(WorldGen gen)
     {
@@ -179,6 +179,16 @@ public sealed class LandmarkSite
     }
 
     public bool Touches(int cx, int cz) => cx >= _minCx && cx <= _maxCx && cz >= _minCz && cz <= _maxCz;
+
+    /// <summary>The first air above the site's ground at a world column, given the natural one (as <see cref="Apply"/> lays it).</summary>
+    public int GroundAt(int wx, int wz, int natural)
+    {
+        int x = wx - Ox, z = wz - Oz;
+        float w = Weight(x, z);
+        if (w <= 0f) return natural;
+        int site = Height(x, z) + 1;
+        return w >= 0.999f ? site : (int)MathF.Round(Smooth.Lerp(natural, site, Smooth.Step(0f, 1f, w)));
+    }
 
     /// <summary>Reshapes a freshly generated column to the site's terrain and stamps the buildings into it.</summary>
     public void Apply(Chunk ch)

@@ -119,7 +119,7 @@ public static class Blocks
     public static ushort Banner;       // base of 4 wall-hung banners (by support direction)
     // The launch complex.
     public static ushort Concrete, PadConcrete, Asphalt, RoadLine, Hazard, SteelTruss, SteelGrating, SteelPlate,
-        HullPanel, WarningLamp, FloodLamp, LaunchConsole;
+        HullPanel, WarningLamp, FloodLamp, LaunchConsole, ConcreteSlab;
 
     public static bool IsTrace(ushort id) => id >= LumenTrace && id < LumenTrace + 16 && LumenTrace != 0;
     public static int TraceLevel(ushort id) => IsTrace(id) ? id - LumenTrace : 0;
@@ -561,6 +561,7 @@ public static class Blocks
 
         // --- the launch complex ----------------------------------------------------
         Concrete = Add("concrete", "Concrete", b => { Rock(b, "concrete", 2.5f, 1); P(b, 0.7f, 0.7f, 0.68f); });
+        ConcreteSlab = Add("concrete_slab", "Concrete Slab", b => { Rock(b, "concrete", 2.5f, 1); Slab(b, 0.5f); P(b, 0.7f, 0.7f, 0.68f); });
         PadConcrete = Add("pad_concrete", "Scorched Concrete", b => { Rock(b, "pad_concrete", 3f, 1); P(b, 0.45f, 0.44f, 0.42f); });
         Asphalt = Add("asphalt", "Asphalt", b => { Rock(b, "asphalt", 1.5f, 0); P(b, 0.16f, 0.16f, 0.17f); });
         RoadLine = Add("road_line", "Road Marking", b => { Rock(b, "asphalt", 1.5f, 0); b.Faces(Tex.Get("asphalt"), Tex.Get("road_line"), Tex.Get("asphalt")); P(b, 0.16f, 0.16f, 0.17f); });

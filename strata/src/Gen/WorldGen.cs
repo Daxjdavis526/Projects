@@ -149,6 +149,18 @@ public sealed class WorldGen
         return SurfaceY(c, x, z);
     }
 
+    /// <summary>
+    /// First air above the ground as the finished world has it: the natural
+    /// surface, reshaped wherever a landmark site has laid its own ground
+    /// (its buildings are not counted). For things that need the ground
+    /// before its column has been generated, such as a falling vehicle.
+    /// </summary>
+    public int GroundY(int x, int z)
+    {
+        int natural = SurfaceY(x, z);
+        return Landmarks?.GroundAt(x, z, natural) ?? natural;
+    }
+
     public int SurfaceY(in Column c, int x, int z)
     {
         if (c.Overhang <= 0f) return c.Height;
