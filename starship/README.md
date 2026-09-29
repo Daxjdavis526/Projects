@@ -20,20 +20,26 @@ Live viewer: https://daxjdavis526.github.io/Projects/starship/
 
 | file | what |
 |---|---|
-| `models/starship_stack_1-500.step` | The CAD model, with every wall at its real thickness. Named, coloured bodies: `super_heavy`, `super_heavy_raptors`, `starship`, `starship_raptors`, and `heat_shield` (the windward shield plus four leeward tile patches). Units mm. |
+| `models/starship_stack_1-500.step` | The CAD model, with every wall at its real thickness. Named, coloured bodies: `super_heavy`, `super_heavy_raptors`, `starship`, `starship_raptors`, `heat_shield` (the pale backing under the tiles), `flap_aerocovers`, and the `heat_shield_tiles` sub-assembly of 21,120 tiles. Units mm. |
 | `models/starship_stack_1-500.stl` | The print model: the whole stack fused into one watertight body. |
 | `models/super_heavy_1-500.stl` | Booster only, 144.6 mm. |
 | `models/starship_ship_1-500.stl` | Ship only (heat shield fused on), 104.6 mm. |
-| `models/starship_stack.glb` | The CAD model tessellated for `index.html`. |
+| `models/starship_stack.glb` | The CAD model tessellated for `index.html`, without the tiles. |
+| `models/tiles.bin` | Each tile's position and orientation, which the viewer draws as one instanced mesh. |
 | `build_model.py` | The generator. Every file above comes out of it. |
 | `index.html` | A three.js viewer for the GLB, with download links. |
 
-All three STLs have zero non-manifold edges. The STEP re-imports as 46 valid
+All three STLs have zero non-manifold edges. The STEP re-imports as valid
 solids:
-- the booster's steel
-- the ship's steel
-- five heat-shield pieces
+- the booster's steel and the ship's steel
+- the heat-shield backing (five pieces) and the two forward-flap aerocovers
 - the 39 engines, each trimmed to the part that shows outside the hull
+- 21,120 tiles, all instances of one tile part
+
+It is 42 MB. The tiles account for 16 MB of that, because each placement is a
+transform on a shared shape. In SolidWorks the tiles come in as a
+sub-assembly of 21,120 components, which is slow to open. Suppress or hide
+`heat_shield_tiles` if you only need the vehicle.
 
 ## Building
 
@@ -44,14 +50,15 @@ python3 starship/build_model.py --scale 200  # 1:200, 622 mm tall
 python3 starship/build_model.py --scale 350 --min-wall 0.6
 ```
 
-It takes about a minute and under 1 GB of memory. Most of that time goes on
-the grid fin lattices and the 39 engines' plumbing. Geometry is written in
+It takes a few minutes and a few GB of memory. Most of that time goes on
+writing 21,000 tiles into the STEP, the grid fin lattices and the 39 engines'
+plumbing. Geometry is written in
 real metres and scaled only on export.
 
 The script builds the vehicle twice:
 - **The CAD model** (STEP and GLB) keeps real thicknesses and every detail:
   0.3 m lattice cells, the Raptors' pump pods and hot-gas ducts, the aft
-  plumbing rings.
+  plumbing rings, and every heat shield tile.
 - **The print model** (STLs) thickens anything thinner than `--min-wall`
   (default 0.8 mm, two perimeters with a 0.4 mm nozzle). It also coarsens the
   grid fin lattice and drops details too small to print.
@@ -139,13 +146,24 @@ photo measurements within 0.15 m from 0.5 m to 11 m below the tip.
 
 **Forward flaps.**
 - Moved 23° leeward, to ±113°.
-- 3 m span, with the root following the ogive and a leeward hinge fairing.
+- 3 m span, with the root following the ogive.
+- A tiled hinge aerocover on the windward side of each hinge. Moving the flaps
+  leeward is what put the hinge behind this cover, and the tile line runs
+  along it.
 
-**Heat shield.**
-- The windward 180° from the skirt lip up the body.
-- Widening to ±117° around the forward flaps.
-- The whole tip, all the way round, down to 3.5 m below it.
-- The four black tile patches on the leeward side, seen on Ship 39.
+**Heat shield.** 21,120 hexagonal tiles, each its own solid:
+- Tiles are 0.21 m flat to flat and 5 cm thick, with 8 mm gaps. They are
+  pointy end up, in staggered rows, on a 2 cm backing. The size and layout
+  were measured off the B19 pad photo.
+- Coverage is the windward 180° from the skirt lip up the body, widening to
+  the forward flaps' aerocovers, then the whole nose all the way round from
+  3.5 m below the tip.
+- Up the nose the number of tiles per row falls, so the lattice shears, as it
+  does on the real ship. The last 0.4 m of the tip is plain backing.
+- The windward faces of all four flaps are tiled.
+- The four tiled patches on the leeward side, seen on Ship 39.
+- Only whole tiles are placed, so the boundary is a hexagonal zigzag, like
+  the real tile line.
 
 **Leeward side.**
 - Two raceways from the skirt to the nose.
@@ -200,8 +218,11 @@ These are right in proportion but not to the centimetre. Typical error is
 
 - Tank walls are solid; there are no interiors. The booster's forward dome and
   the ship's aft dome exist only as outer surfaces.
-- The heat shield is a smooth shell. A real ship carries ~18,000 hexagonal
-  tiles, which would be 0.3 mm across at 1:500.
+- The tiles are all one size. The real ship has bands of smaller tiles,
+  tapered edge tiles along the tile line, and special tiles at the nose tip
+  and around the flap hinges.
+- The count (21,120) is higher than SpaceX's ~18,000, because the model's
+  tile line is slightly generous.
 - No weld seams, stringers, skirt vents, QD plates, launch-mount clamps,
   engine serial numbers, or the Raptors' smaller plumbing.
 - The grid fins' saw-tooth is modelled on the three outer edges only. On the
@@ -217,7 +238,9 @@ far less of this happens.
   print and the holes stay open.
 - The Raptors' pump pods and ducts, the aft plumbing rings and the common-dome
   ribs are left out.
-- The heat shield stands 0.1 m (0.2 mm) proud of the steel so the tile line
+- There are no individual tiles: at 1:500 a tile is 0.4 mm across and the
+  gaps 0.016 mm, far below what a printer can make. The heat shield is one
+  smooth shell standing 0.1 m (0.2 mm) proud of the steel, so the tile line
   survives as a ridge. This is why the stack measures 249.0 mm rather than
   248.8.
 

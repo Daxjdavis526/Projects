@@ -238,7 +238,7 @@ how it works, and what it approximates.
 Super Heavy Block 3 booster, built from published figures and measurements
 taken off photographs of the real vehicles. It includes 33 + 6 Raptor 3s in
 their real layouts, the hot-staging truss, the T of lattice grid fins, flaps,
-chines, conduits and a separate heat shield. It exports a true-thickness STEP
+chines, conduits, and a heat shield of 21,000 individual hexagonal tiles. It exports a true-thickness STEP
 assembly for CAD and watertight STLs for printing (the stack, and each stage
 alone) at 1:500, 249 mm tall; any other scale is one flag on the CadQuery
 generator. The live page is a 3D viewer with download links.

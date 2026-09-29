@@ -510,12 +510,161 @@ def forward_flap(m: Model):
             for k in range(7)]
     outline = root + [(7.5, Z_NOSE + 2.2), (7.5, Z_NOSE + 4.2)]
     flap = radial_plate(outline, -t / 2, t / 2)
-    # Hinge fairing: a strip hugging the ogive along the root, leeward side.
-    zs = [Z_NOSE + 2.3 + (6.5 * k / 6) for k in range(7)]
-    strip = [(hull_radius(z) - 0.35, z) for z in zs] + \
-            [(hull_radius(z) + 0.45, z) for z in reversed(zs)]
-    fairing = radial_plate(strip, t / 2 - 0.05, t / 2 + 0.85)
-    return fuse([flap, fairing])
+    # Hinge aerocover: the flaps were moved leeward so that this tiled cover
+    # sits on the windward side of the hinge, and the tile line runs along
+    # it. It hugs the ogive, so its edges are splines. Local -Y becomes
+    # windward once spun to +113 deg.
+    z0, z1 = Z_NOSE + 2.3, Z_NOSE + 8.8
+    zs = [z0 + (z1 - z0) * k / 12 for k in range(13)]
+    inner = [Vector(hull_radius(z) - 0.35, 0, z) for z in zs]
+    outer = [Vector(hull_radius(z) + 0.4, 0, z) for z in reversed(zs)]
+    y0 = -t / 2 + 0.05
+    wire = cq.Wire.assembleEdges([
+        cq.Edge.makeSpline([v + Vector(0, y0, 0) for v in inner]),
+        cq.Edge.makeLine(inner[-1] + Vector(0, y0, 0), outer[0] + Vector(0, y0, 0)),
+        cq.Edge.makeSpline([v + Vector(0, y0, 0) for v in outer]),
+        cq.Edge.makeLine(outer[-1] + Vector(0, y0, 0), inner[0] + Vector(0, y0, 0))])
+    fairing = cq.Solid.extrudeLinear(wire, [], Vector(0, -0.9, 0)).cut(flap)
+    return flap, fairing
+
+
+# ---------------------------------------------------------------------------
+# Heat shield tiles
+# ---------------------------------------------------------------------------
+# Hexagonal, pointy end up the vehicle, in staggered rows: 0.21 m flat to
+# flat (measured: 22 px at 106 px/m on the B19 pad photo), which gives the
+# ~18,000 tiles SpaceX quotes over the windward side. Each tile is a flat
+# hexagonal plate on a 2 cm ablative backing.
+TILE_PITCH = 0.21
+TILE_GAP = 0.008
+TILE_T = 0.05
+TILE_BACKING = 0.02
+
+
+def tile_shape():
+    """One tile in its own frame: normal +Z, pointy end +Y, base at z=0."""
+    c = (TILE_PITCH - TILE_GAP) / math.sqrt(3)       # circumradius
+    pts = [Vector(c * math.cos(math.radians(90 + 60 * k)),
+                  c * math.sin(math.radians(90 + 60 * k)), 0) for k in range(6)]
+    return cq.Solid.extrudeLinear(cq.Wire.makePolygon(pts, close=True), [], Vector(0, 0, TILE_T))
+
+
+def _profile(s):
+    """The ship's outer profile by arclength s up from the skirt lip:
+    (r, z, dr/ds, dz/ds)."""
+    rho, zc, (tr, tz) = _nose_geometry()
+    cx = R_HULL - rho
+    if s <= Z_NOSE:
+        return R_HULL, s, 0.0, 1.0
+    a_end = math.atan2(tz, tr - cx)
+    s1 = Z_NOSE + rho * a_end
+    if s <= s1:
+        a = (s - Z_NOSE) / rho
+        return cx + rho * math.cos(a), Z_NOSE + rho * math.sin(a), -math.sin(a), math.cos(a)
+    a0 = math.atan2(tz - zc, tr)
+    a = min(a0 + (s - s1) / NOSE_TIP_R, math.pi / 2)
+    return (NOSE_TIP_R * math.cos(a), Z_NOSE + zc + NOSE_TIP_R * math.sin(a),
+            -math.sin(a), math.cos(a))
+
+
+def _in_polygon(x, y, poly, margin):
+    """Point strictly inside a polygon, at least `margin` from every edge."""
+    inside = False
+    for (x0, y0), (x1, y1) in zip(poly, poly[1:] + poly[:1]):
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            inside = not inside
+        dx, dy = x1 - x0, y1 - y0
+        t = max(0, min(1, ((x - x0) * dx + (y - y0) * dy) / (dx * dx + dy * dy)))
+        if math.hypot(x - x0 - t * dx, y - y0 - t * dy) < margin:
+            return False
+    return inside
+
+
+def ship_tiles(m: Model):
+    """Every tile as (origin, x direction, normal) in ship coordinates: the
+    body of revolution, then the windward faces of the four flaps."""
+    frames = []
+    half = TILE_PITCH / math.sqrt(3) + 0.02          # tile corner radius + clearance
+    row = TILE_PITCH * math.sqrt(3) / 2
+
+    # The body: rows up the meridian, as many tiles around as fit. On the
+    # barrel that is a perfect hexagonal lattice; up the nose the count per
+    # row falls and the lattice shears, as it does on the real ship.
+    patches = [(143, 13.4, 28.8, 31.2), (140, 21.6, 13.3, 16.7)]
+    k, s = 0, 0.25
+    while True:
+        r, z, dr, dz = _profile(s)
+        n = int(2 * math.pi * r / TILE_PITCH)
+        if n < 12 or z > H_SHIP:
+            break
+        m_ang = math.degrees(half / r)
+        for j in range(n):
+            th = 360 * (j + (0.5 if k % 2 else 0)) / n
+            th = (th + 180) % 360 - 180
+            a = abs(th)
+            if z >= Z_NOSE + 9.0:
+                ok = True
+            elif z >= Z_NOSE + 1.7:
+                # Up to the forward flaps' hinge aerocovers.
+                ok = a <= 113 - math.degrees(0.95 / r) - m_ang
+            else:
+                # Clear of the aft flap roots and the catch pins.
+                ok = a <= 90 - m_ang - (math.degrees(0.35 / r) if z < 14.4 or 38.5 < z < 39.9 else 0)
+            for az, hw, z0, z1 in patches:
+                if az - hw + m_ang <= a <= az + hw - m_ang and z0 + half <= z <= z1 - half:
+                    ok = True
+            if not ok:
+                continue
+            c, sn = math.cos(math.radians(th)), math.sin(math.radians(th))
+            normal = Vector(dz * c, dz * sn, -dr)
+            origin = Vector(r * c, r * sn, z) + normal * TILE_BACKING
+            frames.append((origin, Vector(-sn, c, 0), normal))
+        k += 1
+        s += row
+
+    # Flaps: a flat lattice on each windward face, whole tiles only.
+    def flap_tiles(poly, face_y, slope, az, clear):
+        """poly: planform (radius, z); face_y(x): the windward face's local y;
+        slope: d(face_y)/dx; clear(x, z): False where the tile would hit
+        something at the root."""
+        out = []
+        nrm = Vector(slope, -1, 0).normalized()
+        xs = [p[0] for p in poly]
+        zs = [p[1] for p in poly]
+        k = 0
+        z = min(zs)
+        while z <= max(zs):
+            x = min(xs) + (TILE_PITCH / 2 if k % 2 else 0)
+            while x <= max(xs):
+                if _in_polygon(x, z, poly, half) and clear(x, z):
+                    out.append((Vector(x, face_y(x), z), nrm))
+                x += TILE_PITCH
+            z += row
+            k += 1
+        for side in (1, -1):
+            for o, nv in out:
+                o = Vector(o.x, side * o.y, o.z)
+                nv = Vector(nv.x, side * nv.y, nv.z)
+                a = math.radians(side * az)
+                rot = lambda v: Vector(v.x * math.cos(a) - v.y * math.sin(a),
+                                       v.x * math.sin(a) + v.y * math.cos(a), v.z)
+                o2, n2 = rot(o), rot(nv)
+                frames.append((o2, n2.cross(Vector(0, 0, 1)).normalized(), n2))
+
+    t_root, t_tip = m.wall(0.6), m.wall(0.3)
+    x0, x1 = R_HULL - 0.3, R_HULL + 4.0
+    slope = (t_root - t_tip) / 2 / (x1 - x0)
+    flap_tiles([(x0, 0.2), (x1, 0.2), (x1, 8.5), (x0, 14.0)],
+               lambda x: -(t_root + (t_tip - t_root) * (x - x0) / (x1 - x0)) / 2 - TILE_BACKING,
+               slope, 90, lambda x, z: x > R_HULL + 0.1 + half)
+    t = m.wall(0.3)
+    z_lo, z_hi = Z_NOSE + 2.7, Z_NOSE + 8.4
+    root = [(hull_radius(z_hi - (z_hi - z_lo) * k / 6) - 0.15, z_hi - (z_hi - z_lo) * k / 6)
+            for k in range(7)]
+    flap_tiles(root + [(7.5, Z_NOSE + 2.2), (7.5, Z_NOSE + 4.2)],
+               lambda x: -t / 2 - TILE_BACKING, 0.0, 113,
+               lambda x, z: x > hull_radius(z) + 0.4 + half)
+    return frames
 
 
 def starship(m: Model):
@@ -549,7 +698,9 @@ def starship(m: Model):
 
     # Flaps and their fairings.
     parts += both_sides(aft_flap(m), 90)
-    parts += both_sides(forward_flap(m), 113)
+    flap, fairing = forward_flap(m)
+    parts += both_sides(flap, 113)
+    fairings = both_sides(fairing, 113)
 
     # Catch pins for the tower, ramp-shaped, on the tile line under the nose.
     pin = radial_plate([(R_HULL - 0.2, 38.75), (R_HULL + 0.4, 39.35), (R_HULL + 0.4, 39.6),
@@ -582,20 +733,25 @@ def starship(m: Model):
     # Heat shield: the windward half from the skirt lip to the nose, widening
     # around the forward flaps, and the whole tip. Plus the black leeward
     # patches seen on Ship 39.
-    t = max(0.08, m.relief)          # tiles plus ablative backing, ~8 cm
+    # In the CAD model this is the 2 cm ablative backing, and the tiles
+    # (ship_tiles) sit on it; the print model has no tiles, so it is a
+    # single raised shell instead.
+    t = m.relief if m.relief else TILE_BACKING
     shell = ship_envelope(t).cut(ship_envelope(0.0))
-    regions = [wedge(-90, 90, 0, Z_NOSE + 1.7), wedge(-117, 117, Z_NOSE + 1.7, Z_NOSE + 9.0),
+    regions = [wedge(-90, 90, 0, Z_NOSE + 1.7), wedge(-113, 113, Z_NOSE + 1.7, Z_NOSE + 9.0),
                wedge(-180, 180, Z_NOSE + 9.0, H_SHIP + 1)]
     for az, half, z0, z1 in ((143, 13.4, 28.8, 31.2), (140, 21.6, 13.3, 16.7)):
         regions.append(wedge(az - half, az + half, z0, z1))
         regions.append(wedge(-az - half, -az + half, z0, z1))
     regions = fuse(regions)
     shield = shell.intersect(regions).cut(steel)
+    aerocovers = fuse(fairings).cut(steel)
     # For printing, a version that sinks into the steel wall instead of just
     # touching it: fusing coincident curved faces is fragile, overlapping
     # volumes are not.
-    shield_print = ship_envelope(t).cut(ship_envelope(-wall / 2)).intersect(regions)
-    return steel, engines, shield, shield_print
+    shield_print = fuse([ship_envelope(t).cut(ship_envelope(-wall / 2)).intersect(regions)]
+                        + fairings)
+    return steel, engines, shield, aerocovers, shield_print
 
 
 # ---------------------------------------------------------------------------
@@ -619,7 +775,7 @@ def build(m: Model):
     print("  Super Heavy ...")
     booster, booster_engines = super_heavy(m)
     print("  Starship ...")
-    ship, ship_engines, shield, shield_print = starship(m)
+    ship, ship_engines, shield, aerocovers, shield_print = starship(m)
     if m.min_wall == 0:
         # For CAD, trim each engine to what shows outside the hull, so no two
         # bodies overlap. For printing they stay overlapping, which fuses
@@ -634,6 +790,7 @@ def build(m: Model):
         "starship": ship.translate(lift).scale(s),
         "starship_raptors": ship_engines.translate(lift).scale(s),
         "heat_shield": shield.translate(lift).scale(s),
+        "flap_aerocovers": aerocovers.translate(lift).scale(s),
         "heat_shield_print": shield_print.translate(lift).scale(s),
     }
 
@@ -657,27 +814,46 @@ def main():
 
     print("building the CAD model (true thicknesses) ...")
     body = build(true)
-    # STEP: an assembly with named, coloured bodies — stainless steel, tile
-    # black, and the Raptors' dark grey.
-    colours = {"steel": cq.Color(0.78, 0.79, 0.81), "tiles": cq.Color(0.08, 0.08, 0.09),
-               "raptor": cq.Color(0.16, 0.16, 0.17)}
+    # An assembly with named, coloured bodies: stainless steel, the pale
+    # backing that shows in the gaps, the Raptors' dark grey, the tiles.
+    colours = {"steel": cq.Color(0.78, 0.79, 0.81), "backing": cq.Color(0.33, 0.33, 0.35),
+               "raptor": cq.Color(0.16, 0.16, 0.17), "tiles": cq.Color(0.05, 0.05, 0.055)}
     asm = cq.Assembly(name="starship_v3_stack")
     for name, colour in (("super_heavy", "steel"), ("super_heavy_raptors", "raptor"),
                          ("starship", "steel"), ("starship_raptors", "raptor"),
-                         ("heat_shield", "tiles")):
+                         ("heat_shield", "backing"), ("flap_aerocovers", "tiles")):
         asm.add(body[name], name=name, color=colours[colour])
-    step_path = args.out / f"starship_stack_{tag}.step"
-    asm.export(str(step_path))
-    print("wrote", step_path)
-    # GLB of the same assembly, for the browser viewer (index.html).
+    # GLB for the browser viewer (index.html), without the tiles: the viewer
+    # draws those itself, instanced, from tiles.bin.
     glb_path = args.out / "starship_stack.glb"
     asm.export(str(glb_path), tolerance=0.02 * true.mm_per_m, angularTolerance=0.2)
     print("wrote", glb_path)
 
+    # The heat shield tiles: one tile part, placed ~21,000 times as
+    # instances, so the STEP stores the shape once and each placement as a
+    # transform. (A compound of moved copies gets expanded on export, to
+    # ~40 KB a tile.)
+    s = true.mm_per_m
+    lift = Vector(0, 0, H_BOOSTER)
+    frames = [((o + lift) * s, x, n) for o, x, n in ship_tiles(true)]
+    tile = tile_shape().scale(s)
+    tiles = cq.Assembly(name="heat_shield_tiles", color=colours["tiles"])
+    for i, (o, x, n) in enumerate(frames):
+        tiles.add(tile, name=f"tile_{i}", loc=cq.Location(cq.Plane(o, x, n)))
+    asm.add(tiles)
+    step_path = args.out / f"starship_stack_{tag}.step"
+    asm.export(str(step_path))
+    print(f"wrote {step_path}  ({len(frames)} tiles)")
+    # tiles.bin: per tile, origin (mm), x direction and normal, as float32.
+    tiles_path = args.out / "tiles.bin"
+    tiles_path.write_bytes(np.array([[*o.toTuple(), *x.toTuple(), *n.toTuple()]
+                                     for o, x, n in frames], dtype="<f4").tobytes())
+    print("wrote", tiles_path)
+
     # STL: watertight single bodies for printing — the stack, and each stage
     # on its own (the stack is tall enough that most printers want it split).
     print(f"building the print model (walls >= {args.min_wall} mm) ...")
-    del asm, body
+    del asm, body, tiles
     gc.collect()
     body = build(printable)
     tol = 0.01 * (500 / args.scale) ** 0.5 * 2
