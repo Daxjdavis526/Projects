@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- A sheet of the rig's poses at large scale, for tuning figure.js. -->
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#cfc8bb}canvas{display:block}</style>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+import { figure, P, pose, blend } from '../src/figure.js';
+const ctx = document.getElementById('c').getContext('2d');
+const q = new URLSearchParams(location.search);
+const t = Number(q.get('t') || 0);
+const colors = { skin: '#d9b59a', hair: '#3a2a20', top: '#44618f', bottom: '#2f3a52', shoes: '#1c1c22' };
+const cells = [
+  ['stand', 'man', P.stand(t), {}],
+  ['walk .0', 'man', P.walk(0), {}],
+  ['walk .25', 'man', P.walk(0.25), {}],
+  ['walk .5', 'man', P.walk(0.5), {}],
+  ['sit', 'man', P.sit(t), {}],
+  ['huddle', 'man', P.huddle(t), {}],
+  ['brother', 'brother', P.stand(t), { hair: 'buzz' }],
+  ['woman', 'woman', P.stand(t), {}],
+  ['pregnant', 'woman', P.stand(t), { belly: 1 }],
+  ['dress', 'woman', P.stand(t), { dress: '#f4f0ea' }],
+  ['kid', 'kid', P.stand(t), {}],
+  ['front man', 'man', pose({ s1: 0.15, s2: 0.15, h1: 0.05, h2: 0.05 }), { view: 'front', tie: '#222', tag: '#111' }],
+  ['front brother', 'brother', pose({ s1: 0.3, s2: 0.3, e1: 0.2, e2: 0.2, h1: 0.08, h2: 0.08 }), { view: 'front' }],
+  ['front woman', 'woman', pose({ s1: 0.12, s2: 0.12, h1: 0.03, h2: 0.03 }), { view: 'front', dress: '#f4f0ea' }],
+  ['kneel', 'man', P.kneel(), {}],
+  ['lieBack', 'man', P.lieBack(t), {}],
+];
+cells.forEach(([name, b, p, o], i) => {
+  const cx = 130 + (i % 8) * 235, gy = i < 8 ? 480 : 1000;
+  ctx.fillStyle = '#0003'; ctx.fillRect(cx - 110, gy, 220, 2);
+  figure(ctx, b, p, { x: cx, ground: gy, s: 2, colors, ...o, ...(q.has('sil') ? { sil: '#111' } : {}) });
+  ctx.fillStyle = '#333'; ctx.font = '16px sans-serif'; ctx.fillText(name, cx - 100, gy + 24);
+});
+window.__ready = true;
+</script>
