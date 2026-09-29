@@ -32,7 +32,7 @@ from ..core.validate import Severity, has_errors, resolve_profile, validate
 from ..foam import case as foam_case
 from ..foam import parse
 from ..mesh import revolved, sizing
-from ..metrics import Trust, propulsion, verdict
+from ..metrics import Trust, propulsion, recovery_factor, shock_location, verdict
 from ..post import results
 from . import convergence, gates
 from .runner import default_runner
@@ -161,9 +161,20 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     if case.exists():
         shutil.rmtree(case)
     spec = sizing.spec_for(defn, profile)
+    extension = None
+    if foam_case.needs_viscous_work_extension(defn, profile):
+        from ..foam import extensions
+
+        try:
+            extension = extensions.ensure_built(runner, run_dir / "extensions")
+        except extensions.ExtensionBuildError as e:
+            emit(Event("setup", f"ERROR: {e}"))
+            manifest["setup_error"] = str(e)
+            return finish("failed", Trust.NOT_TRUSTWORTHY.value)
+        manifest["extension"] = extension
     t0 = time.time()
     mesh, meta = revolved.build(profile, spec)
-    summary = foam_case.build_case(case, defn, profile, mesh, meta)
+    summary = foam_case.build_case(case, defn, profile, mesh, meta, extension)
     (run_dir / "mesh_meta.json").write_text(json.dumps(meta.to_json()) + "\n", encoding="utf-8")
     manifest["mesh"] = {"generator": "sonicline.mesh.revolved", "form": spec.form.value,
                         "quality": defn.mesh.quality.value, "cells": mesh.n_cells,
@@ -247,7 +258,16 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
             if fields.wall_shear is not None:
                 metrics.setdefault("wall", {})["shear_stress_max"] = float(
                     np.linalg.norm(fields.wall_shear, axis=1).max())
-            _write_json(run_dir / "profiles.json", results.axial_profiles(fields, meta, mesh.cell_centres))
+            profiles = results.axial_profiles(fields, meta, mesh.cell_centres)
+            _write_json(run_dir / "profiles.json", profiles)
+            if metrics["regime"]["shock_area_ratio"]:
+                metrics["shock"] = shock_location(profiles, profile, metrics["regime"]["shock_area_ratio"])
+            if summary.viscous:
+                rf = recovery_factor(profiles, defn.boundaries.inlet.T0,
+                                     profile.throat_x + 0.2 * (profile.x_exit - profile.throat_x),
+                                     profile.x_exit - 0.1 * (profile.x_exit - profile.throat_x))
+                if rf:
+                    metrics.setdefault("wall", {}).update(rf)
         metrics["convergence"] = {"iterations": assessment.iterations, "converged": assessment.converged,
                                   "mass_imbalance": assessment.mass_imbalance,
                                   "residual_drop_orders": assessment.residual_drop}

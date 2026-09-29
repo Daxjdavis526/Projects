@@ -28,13 +28,54 @@ import numpy as np
 from ..core.gas import PerfectGas
 from ..core.model import definition as d
 from ..core.profile import Profile
-from ..core.theory import quasi1d
+from ..core.theory import nozzle, quasi1d
 from ..mesh.polymesh import PolyMesh
 from ..mesh.revolved import Form, MeshMeta
 from . import polymesh_io
 from .dictwriter import Raw, write_dict, write_field
 
-SOLVER = "rhoPimpleFoam"
+PIMPLE_SOLVER = "rhoPimpleFoam"
+CENTRAL_SOLVER = "rhoCentralFoam"
+# Steady-state iteration limits when the definition sets none. rhoCentralFoam
+# is explicit at a Courant number of 0.1.
+DEFAULT_MAX_ITERATIONS = {PIMPLE_SOLVER: 20000, CENTRAL_SOLVER: 60000}
+
+
+def iteration_limit(defn: d.SimulationDefinition, solver: str) -> int:
+    n = defn.numerics.convergence.max_iterations
+    return DEFAULT_MAX_ITERATIONS[solver] if n is None else n
+
+
+def shock_inside(defn: d.SimulationDefinition, profile: Profile) -> bool:
+    """Whether quasi-1D theory expects a shock inside the nozzle: a normal
+    shock in the diverging section, or separation (which stands an oblique
+    shock system inside it)."""
+    gas = defn.gas.model()
+    b = defn.boundaries
+    if not isinstance(b.inlet, d.ReservoirInlet):
+        return False
+    perf = nozzle.analyse(gas, b.inlet.p0, b.inlet.T0, b.ambient.pressure,
+                          profile.throat_area, profile.area(profile.x_exit))
+    return perf.regime is nozzle.Regime.SHOCK_IN_NOZZLE or perf.separation.likely
+
+
+def solver_for(defn: d.SimulationDefinition, profile: Profile) -> str:
+    """The solver a definition runs with (DESIGN.md section 3.2). "auto" is
+    rhoPimpleFoam, except where a shock stands inside the nozzle:
+    rhoPimpleFoam misplaces a normal shock by 30 % of the diverging length
+    (V2, DESIGN.md section 11), rhoCentralFoam places it within 0.3 %."""
+    name = defn.numerics.solver
+    if name == "auto":
+        return CENTRAL_SOLVER if shock_inside(defn, profile) else PIMPLE_SOLVER
+    if name in (PIMPLE_SOLVER, CENTRAL_SOLVER):
+        return name
+    raise ValueError(f"unknown solver {name!r}; use auto, {PIMPLE_SOLVER} or {CENTRAL_SOLVER}")
+
+
+def needs_viscous_work_extension(defn: d.SimulationDefinition, profile: Profile) -> bool:
+    """rhoCentralFoam already carries viscous work (sigmaDotU); rhoPimpleFoam does not."""
+    return (not isinstance(defn.flow.turbulence, d.Inviscid)
+            and solver_for(defn, profile) == PIMPLE_SOLVER)
 
 DIM = {
     "p": "[1 -1 -2 0 0 0 0]",
@@ -66,7 +107,7 @@ class CaseSummary:
     throat_area: float
     inlet_area: float
     initial: quasi1d.Quasi1DSolution
-    p_min_limit: float  # the solver's pressure floor; cells at it are clamped
+    p_min_limit: float | None  # the solver's pressure floor (rhoCentralFoam has none)
 
 
 def _region(meta: MeshMeta, mesh: PolyMesh, which: str) -> tuple[str, str]:
@@ -98,7 +139,10 @@ def build_case(
     profile: Profile,
     mesh: PolyMesh,
     meta: MeshMeta,
+    extension_library: str | None = None,
 ) -> CaseSummary:
+    """``extension_library`` is the viscous-work fvOption library (from
+    sonicline.foam.extensions.ensure_built); viscous cases need it."""
     gas = defn.gas.model()
     b = defn.boundaries
     if not isinstance(b.inlet, d.ReservoirInlet):
@@ -144,12 +188,17 @@ def build_case(
     omega0 = math.sqrt(k0) / (0.09**0.25 * L_mix)
     k_amb, omega_amb = k0, omega0
 
-    _write_constant(case, gas, viscous, ras)
+    solver = solver_for(defn, profile)
+    viscous_work = needs_viscous_work_extension(defn, profile)
+    if viscous_work and extension_library is None:
+        raise ValueError("viscous rhoPimpleFoam cases need the viscous-work extension library")
+    _write_constant(case, gas, viscous, viscous_work, ras)
     _write_fields(case, defn, meta, profile.exit_radius, fields, p_init, T_init, U_init,
                   k0, omega0, k_amb, omega_amb, L_mix)
     exit_region = _region(meta, mesh, "exit")
     throat_region = _region(meta, mesh, "throat")
-    _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region)
+    _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
+                  extension_library if viscous_work else None, solver)
 
     # A wedge of angle theta has flat (chord) faces: its cross-section is
     # r^2 sin(theta)/2, not r^2 theta/2. Scaling by 2 pi / sin(theta) makes
@@ -157,21 +206,22 @@ def build_case(
     sector = 2.0 * math.pi / math.sin(defn.mesh.wedge_angle) if meta.form is Form.WEDGE else 1.0
     (case / "case.foam").write_text("", encoding="utf-8")
     return CaseSummary(
-        path=case, solver=SOLVER, viscous=viscous,
+        path=case, solver=solver, viscous=viscous,
         turbulence=type(turb).TAG, fields=tuple(fields), sector_factor=sector,
         exit_region=exit_region, throat_region=throat_region,
         exit_area=_zone_area(mesh, exit_region) * sector,
         throat_area=_zone_area(mesh, throat_region) * sector,
         inlet_area=_zone_area(mesh, ("patch", "inlet")) * sector,
         initial=q1d,
-        p_min_limit=_p_min(p0),
+        p_min_limit=_p_min(p0) if solver == PIMPLE_SOLVER else None,
     )
 
 
 # --------------------------------------------------------------------------- constant
 
 
-def _write_constant(case: Path, gas: PerfectGas, viscous: bool, ras: bool) -> None:
+def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bool,
+                    ras: bool) -> None:
     transport = ({"As": gas.sutherland_As, "Ts": gas.sutherland_Ts} if viscous
                  else {"mu": 0, "Pr": 0.71})
     write_dict(case / "constant" / "thermophysicalProperties", "thermophysicalProperties", {
@@ -190,14 +240,13 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, ras: bool) -> No
             "transport": transport,
         },
     }, location="constant")
-    # Known limitation (DESIGN.md section 10, finding 12): rhoPimpleFoam's
-    # energy equation is in total-energy form (it carries K) but has no
-    # viscous-work term div(tau & U), so friction never heats the gas and an
-    # adiabatic wall recovers ~40 % of the dynamic temperature instead of
-    # ~85-90 %. ESI's viscousDissipation source is not the fix: it adds
-    # tau:grad(U), correct only for an internal-energy equation, and
-    # over-heats the wall past T0. Thrust and mass flow move by ~0.1 %
-    # between the two; the verdict says so on every viscous run.
+    if viscous_work:
+        # rhoPimpleFoam's total-energy equation lacks the viscous work
+        # div(tau & U); SONICLINE's viscousWork fvOption supplies it (see
+        # foam/extensions/viscousWork/viscousWork.H and DESIGN.md section 10).
+        write_dict(case / "constant" / "fvOptions", "fvOptions", {
+            "viscousWork": {"type": "viscousWork", "active": "yes"},
+        }, location="constant")
     body: dict = {"simulationType": "RAS" if ras else "laminar"}
     if ras:
         body["RAS"] = {"RASModel": "kOmegaSST", "turbulence": "on", "printCoeffs": "on"}
@@ -231,6 +280,8 @@ def _write_fields(case, defn, meta, exit_radius, fields, p_init, T_init, U_init,
     def outlet_p():
         if not plume and pa <= 0.0:
             return {"type": "zeroGradient"}
+        if not plume and b.exit_domain.fixed_pressure:
+            return {"type": "fixedValue", "value": Raw(f"uniform {pa}")}
         # Non-reflecting outflow. The jet core can still be supersonic at the
         # far outlet (Mach ~3 at 20 exit diameters in the 20 bar case), where
         # imposing a static pressure is ill-posed and drove cells to pMin.
@@ -338,6 +389,9 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
                       "writeResidualFields": "false"},
         "Ma": {"type": "MachNo", "libs": ["fieldFunctionObjects"],
                "executeControl": "timeStep", "writeControl": "writeTime"},
+        # |U|^2 for the flux-weighted total temperature T + |U|^2 / 2 cp.
+        "magSqrU": {"type": "magSqr", "libs": ["fieldFunctionObjects"], "field": "U",
+                    "executeControl": "timeStep", "writeControl": "none"},
     }
     regions = {"inlet": ("patch", "inlet"), "throat": throat_region, "exit": exit_region}
     for name in ("outlet", "ambient", "lip"):
@@ -355,7 +409,10 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
     for name in ("throat", "exit"):
         reg = regions[name]
         fos[f"area_avg_{name}"] = _surface(name, reg, "areaAverage", ["p", "T", "Ma"])
-        fos[f"mass_avg_{name}"] = _surface(name, reg, "weightedAverage", ["T", "Ma", "U"], weight="phi")
+        fos[f"mass_avg_{name}"] = _surface(name, reg, "weightedAverage", ["T", "Ma", "U", "magSqr(U)"],
+                                           weight="phi")
+    fos["mass_avg_inlet"] = _surface("inlet", regions["inlet"], "weightedAverage", ["T", "magSqr(U)"],
+                                     weight="phi")
     # The nozzle wall only: with the inlet and exit plane it closes the
     # control volume for the thrust cross-check.
     fos["wall_force"] = {
@@ -371,21 +428,32 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
     return fos
 
 
-def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region):
-    conv = defn.numerics.convergence
+def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
+                  extension_library=None, solver=PIMPLE_SOLVER):
+    n_max = iteration_limit(defn, solver)
     fos = function_objects(defn, meta, viscous, ras, exit_region, throat_region)
     if steady:
         timing = {"startFrom": "latestTime", "startTime": 0, "stopAt": "endTime",
-                  "endTime": conv.max_iterations, "deltaT": 1, "writeControl": "timeStep",
-                  "writeInterval": min(1000, conv.max_iterations), "purgeWrite": 2}
+                  "endTime": n_max, "deltaT": 1, "writeControl": "timeStep",
+                  "writeInterval": min(1000, n_max), "purgeWrite": 2}
     else:
         t = defn.flow.time
         timing = {"startFrom": "latestTime", "startTime": 0, "stopAt": "endTime",
                   "endTime": t.end_time, "deltaT": 1e-9, "writeControl": "adjustableRunTime",
                   "writeInterval": t.end_time / 20, "purgeWrite": 0,
                   "adjustTimeStep": "yes", "maxCo": t.max_courant, "maxDeltaT": 1}
+    if solver == CENTRAL_SOLVER and steady:
+        # rhoCentralFoam reads its local-time-step controls from controlDict.
+        # Its default smoothing (0.02) lets the time step grow only 2 % per
+        # cell away from the throat, which starves the chamber of pseudo-time
+        # and leaves a +-10 % inlet mass-flow oscillation undamped after 30 000
+        # iterations; 1 allows a doubling per cell and damps it. At maxCo 0.2
+        # the exit flux keeps a 2e-3 limit cycle; 0.1 settles it; 0.4
+        # diverges. (DESIGN.md section 11.)
+        timing.update({"maxCo": 0.1, "rDeltaTSmoothingCoeff": 1, "maxDeltaT": 1})
     write_dict(case / "system" / "controlDict", "controlDict", {
-        "application": SOLVER,
+        "application": solver,
+        **({"libs": [Raw(f'"{extension_library}"')]} if extension_library else {}),
         **timing,
         "writeFormat": "ascii",
         "writePrecision": 12,
@@ -396,6 +464,17 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
         "functions": fos,
     }, location="system")
 
+    if solver == CENTRAL_SOLVER:
+        _write_central_numerics(case, ras, steady)
+    else:
+        _write_pimple_numerics(case, ras, steady, p0)
+    write_dict(case / "system" / "decomposeParDict", "decomposeParDict", {
+        "numberOfSubdomains": max(1, defn.numerics.processors),
+        "method": "scotch",
+    }, location="system")
+
+
+def _write_pimple_numerics(case, ras, steady, p0):
     turb_div = ({"div(phi,k)": Raw("Gauss linearUpwind grad(k)"),
                  "div(phi,omega)": Raw("Gauss linearUpwind grad(omega)")} if ras else {})
     write_dict(case / "system" / "fvSchemes", "fvSchemes", {
@@ -438,9 +517,39 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
         "PIMPLE": pimple,
         "relaxationFactors": {"equations": {'".*"': 1}},
     }, location="system")
-    write_dict(case / "system" / "decomposeParDict", "decomposeParDict", {
-        "numberOfSubdomains": max(1, defn.numerics.processors),
-        "method": "scotch",
+
+
+def _write_central_numerics(case, ras, steady):
+    """rhoCentralFoam: density-based, Kurganov-Tadmor central-upwind fluxes
+    with TVD (van Leer) reconstruction. Its energy equation carries the
+    viscous work itself, so it needs no extension."""
+    turb_div = ({"div(phi,k)": Raw("Gauss linearUpwind grad(k)"),
+                 "div(phi,omega)": Raw("Gauss linearUpwind grad(omega)")} if ras else {})
+    write_dict(case / "system" / "fvSchemes", "fvSchemes", {
+        "fluxScheme": "Kurganov",
+        "ddtSchemes": {"default": "localEuler" if steady else "Euler"},
+        "gradSchemes": {"default": Raw("Gauss linear")},
+        "divSchemes": {
+            "default": "none",
+            "div(tauMC)": Raw("Gauss linear"),
+            **turb_div,
+        },
+        "laplacianSchemes": {"default": Raw("Gauss linear corrected")},
+        "interpolationSchemes": {
+            "default": "linear",
+            "reconstruct(rho)": "vanLeer",
+            "reconstruct(U)": "vanLeerV",
+            "reconstruct(T)": "vanLeer",
+        },
+        "snGradSchemes": {"default": "corrected"},
+        "wallDist": {"method": "meshWave"},
+    }, location="system")
+    write_dict(case / "system" / "fvSolution", "fvSolution", {
+        "solvers": {
+            '"(rho|rhoU|rhoE)"': {"solver": "diagonal"},
+            '"(U|e|k|omega)"': {"solver": "smoothSolver", "smoother": "GaussSeidel",
+                               "nSweeps": 2, "tolerance": 1e-12, "relTol": 0.01},
+        },
     }, location="system")
 
 

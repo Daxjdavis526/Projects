@@ -113,12 +113,14 @@ def axial_plot(run_dir: Path, defn: d.SimulationDefinition, profile: Profile) ->
             x, v = clip(cl, key)
             ax.plot(x, v * scale, lw=1.6, label="CFD, axis")
         # With viscous walls the wall-adjacent cell is inside the boundary
-        # layer: its pressure is the wall pressure, but its Mach number is ~0,
-        # and its temperature (the adiabatic wall temperature) is not physical
-        # while the solver omits viscous work (DESIGN.md section 10).
-        if wall.get(key) and not (viscous and key != "p"):
+        # layer: its pressure is the wall pressure and its temperature the
+        # adiabatic wall temperature, but its Mach number is ~0 and not
+        # comparable with the core flow.
+        if wall.get(key) and not (viscous and key == "mach"):
             x, v = clip(wall, key)
-            ax.plot(x, v * scale, lw=1.6, label="CFD, wall pressure" if viscous else "CFD, wall")
+            name = "CFD, wall" if not viscous else (
+                "CFD, wall pressure" if key == "p" else "CFD, adiabatic wall temperature")
+            ax.plot(x, v * scale, lw=1.6, label=name)
         ax.legend(frameon=False, fontsize=9)
         ax.set_ylabel(label)
         ax.grid(alpha=0.3)

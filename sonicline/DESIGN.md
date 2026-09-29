@@ -190,7 +190,7 @@ Findings that shaped this design:
 | situation | primary | cross-check / fallback |
 |---|---|---|
 | **steady**, choked, supersonic exit (vacuum / design operation) | **rhoPimpleFoam**, `transonic yes`, local time stepping (`localEuler`) | rhoCentralFoam + LTS on verification cases |
-| steady, **shock in nozzle** (overexpanded, ground test) | rhoPimpleFoam transonic + LTS, then a short time-accurate continuation to confirm the shock is stationary | rhoCentralFoam (sharper shocks); agreement on shock position is a verification test |
+| steady, **shock in nozzle** (overexpanded, ground test) | **rhoCentralFoam** + LTS (M2: rhoPimpleFoam misplaces normal shocks, section 11) | — ; V2 checks the shock position against theory |
 | **transient** (valve opening, start-up, pulsing) | rhoCentralFoam, Euler time stepping, maxCo 0.2–0.4 | rhoPimpleFoam time-accurate when the low-Mach plenum dynamics dominate |
 | mass flow / Cd accuracy with a large near-stagnant plenum | rhoPimpleFoam (pressure-based, well behaved as M → 0) | — |
 
@@ -209,6 +209,11 @@ Reasons:
   flow with shocks, and LTS PIMPLE covers the same need more robustly.
 - **HiSA** (an implicit density-based solver) is a candidate plug-in later.
   It lags OpenFOAM releases (validated up to v2512) and is weak at low Mach.
+
+**Revised in M2** (section 11): rhoPimpleFoam, transonic or not, steady or
+time-accurate, puts a normal shock in the wrong place, so "auto" chooses
+rhoCentralFoam whenever quasi-1D theory expects a shock or separation
+inside the nozzle, and the verdict refuses a rhoPimpleFoam run there.
 
 The solver is an attribute of the solution strategy, chosen automatically
 from the physics definition. The user never picks an application name; the
@@ -972,3 +977,71 @@ Findings, in the order they bit:
     div(tau & U) source (a coded fvOption, which needs OpenFOAM's compiler
     at run time), and its verification against flat-plate recovery
     (r = Pr^(1/3)) and rhoCentralFoam, which does carry viscous work, are M2.
+
+## 11. M2 record (in progress)
+
+Delivered so far:
+
+- **Viscous work in rhoPimpleFoam** (finding 12). A compiled fvOption,
+  `viscousWork` (foam/extensions/), adds div(τ·U) with τ = −devRhoReff to
+  the energy equation. It is built with wmake into the user's OpenFOAM
+  library directory the first time a viscous run needs it, under a name
+  carrying a hash of its source so a stale build is never loaded. A coded
+  fvOption would have been simpler, but OpenFOAM refuses to compile code at
+  run time as root, which is how containers and CI run. In the 20 bar case
+  it lifts the adiabatic-wall recovery factor from 0.25 to 0.877 (the
+  expected band is Pr^1/2 = 0.83 laminar to Pr^1/3 = 0.88 turbulent), keeps
+  the peak static temperature at 300.006 K for T0 = 300 K, and moves mass
+  flow by −0.008 % and thrust by +0.055 %. Viscous runs now report wall
+  temperature and the recovery factor.
+- **Energy conservation in the verdict.** Flux-weighted total temperature
+  at inlet, throat and exit; with adiabatic walls, exit against inlet must
+  agree to 0.2 %. The missing viscous work did *not* show here (it
+  redistributes energy locally and conserves it globally: −0.06 % with the
+  source, +0.02 % without), which is why the recovery factor is checked
+  separately, against 0.75–0.95.
+- **rhoCentralFoam** as a second solver (`numerics.solver`), with Kurganov
+  fluxes, van Leer reconstruction and local time stepping. It carries
+  viscous work itself and needs no extension.
+- **V7**, rhoPimpleFoam against rhoCentralFoam on the V1 nozzle.
+- **V2**, the NPARC nozzle with a normal shock, on a new tabulated-wall
+  geometry (`wall_profile`) and a fixed-pressure exit
+  (`truncated_at_exit` with `fixed_pressure`).
+
+Findings:
+
+13. **rhoCentralFoam's default local-time-step smoothing leaves the chamber
+    ringing.** With `rDeltaTSmoothingCoeff` 0.02 the time step may grow only
+    2 % per cell away from the throat's small cells; the chamber gets almost
+    no pseudo-time and the inlet mass flow oscillated by ±10 % after 30 000
+    iterations. At 1 (a doubling per cell) the oscillation damps. The exit
+    flux then kept a 2×10⁻³ limit cycle at maxCo 0.2, which 0.1 removes; 0.4
+    diverged. V1 converges in 23 000 iterations (2 minutes on 4 cores for
+    3000 cells), so rhoCentralFoam's default iteration limit is 60 000.
+    Kurganov and Tadmor fluxes agree on mass flow to 0.1 %.
+14. **rhoPimpleFoam misplaces normal shocks.** In the NPARC nozzle
+    (pe/p0 = 0.75, shock at x = 7.562 in by quasi-1D theory), started from
+    the quasi-1D solution with the shock in place:
+    - transonic, local time stepping: the shock leaves the nozzle within
+      50 iterations and stays pinned at the exit plane (thrust control
+      volumes then disagree by 23 %). Courant number 0.2 or three outer
+      correctors only slow it.
+    - transonic, time-accurate: the same drift, 31 % of the diverging length
+      in 1.2 ms.
+    - `transonic no`: it settles, 30 % of the diverging length downstream.
+    - rhoCentralFoam, same mesh: +0.23 % on the axis, −0.11 % at the wall,
+      Cd within 3×10⁻⁵ of Kliegel–Levine, mass balance 8×10⁻⁶.
+
+    The pressure-based solver does not satisfy the jump conditions across a
+    captured shock. That does not touch the design-point cases, whose
+    nozzles are shock-free and whose supersonic exit is blind to the plume;
+    it does mean the shock cells in rhoPimpleFoam's plume images are
+    qualitative. Solver choice changed accordingly (section 3.2).
+15. **Explicit rhoCentralFoam is slow on wall-resolved meshes.** The 20 bar
+    SST case (21 000 cells, y⁺ < 1) managed about 10 iterations a second on
+    4 cores and was still oscillating by 10 % at 4500 iterations, where
+    rhoPimpleFoam converges in 1200. Viscous shock-in-nozzle cases (the
+    overexpanded sea-level nozzle) will need this addressed: a
+    rhoPimpleFoam start followed by rhoCentralFoam, or a coarser wall with
+    wall functions.
+

@@ -28,6 +28,7 @@ from ..model.definition import (
     ReservoirInlet,
     SimulationDefinition,
     TruncatedAtExit,
+    WallProfile,
 )
 from ..profile import Profile
 from ..theory import isentropic as isen
@@ -60,13 +61,17 @@ def has_errors(findings: list[Finding]) -> bool:
     return any(f.severity is Severity.ERROR for f in findings)
 
 
+# The solver names a definition may ask for ("auto" is rhoPimpleFoam).
+SOLVERS = ("auto", "rhoPimpleFoam", "rhoCentralFoam")
+
+
 def _fmt_bar(p: float) -> str:
     return f"{p / 1e5:.3g} bar"
 
 
 def resolve_profile(defn: SimulationDefinition) -> Profile | None:
     """The wall profile, where it is known without geometry processing."""
-    if isinstance(defn.geometry, ConicalNozzle):
+    if isinstance(defn.geometry, (ConicalNozzle, WallProfile)):
         return defn.geometry.profile()
     return None
 
@@ -160,6 +165,12 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                     f"Wall temperature {wall.temperature:.1f} K is not physical for this application."))
     if isinstance(inlet, MassFlowInlet) and inlet.mass_flow <= 0.0:
         add(Finding(Severity.ERROR, "inlet.mass_flow", "Mass flow must be positive."))
+
+    # -- numerics -----------------------------------------------------------
+    solver = defn.numerics.solver
+    if solver not in SOLVERS:
+        add(Finding(Severity.ERROR, "numerics.solver",
+                    f"Unknown solver {solver!r}; choose one of {', '.join(SOLVERS)}."))
     return findings
 
 
@@ -206,6 +217,11 @@ def _regime_findings(gas, perf, p0, pa, profile, exit_domain, add) -> None:
     if isinstance(exit_domain, TruncatedAtExit):
         if pa == 0.0:
             pass
+        elif exit_domain.fixed_pressure:
+            add(Finding(Severity.INFO, "domain.fixed_exit_pressure",
+                        f"The exit plane's static pressure is held at {_fmt_bar(pa)}: the quasi-1D "
+                        "internal-flow problem. Right for verification against it; a thruster "
+                        "exhausting into its surroundings needs a plume region."))
         elif perf.regime is R.UNDEREXPANDED and pe >= 2.0 * pa:
             add(Finding(Severity.WARNING, "domain.truncated_underexpanded",
                         "The domain ends at the exit plane. With an under-expanded exit this is an "

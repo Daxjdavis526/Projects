@@ -70,7 +70,7 @@ def test_every_union_member_round_trips():
         boundaries=m.Boundaries(
             inlet=m.MassFlowInlet(mass_flow=5e-3, T0=270.0),
             ambient=m.Ambient(pressure=0.0),
-            exit_domain=m.TruncatedAtExit(),
+            exit_domain=m.TruncatedAtExit(fixed_pressure=True),
             wall_thermal=m.FixedTemperature(temperature=290.0),
         ),
         flow=m.Flow(time=m.Transient(end_time=1e-3), turbulence=m.Laminar()),
@@ -84,3 +84,34 @@ def test_parametric_geometry_builds_its_profile():
     p = d.geometry.profile()
     assert p.expansion_ratio == pytest.approx(2.88)
     assert math.degrees(d.geometry.diverging_half_angle) == pytest.approx(15.0)
+
+
+def test_wall_profile_round_trips_and_builds():
+    pts = tuple((0.1 * i, 2.0 - 1.5 * math.sin(math.pi * i / 20)) for i in range(21))
+    d = m.SimulationDefinition(name="w", geometry=m.WallProfile(points=pts, length_unit="mm"),
+                               boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=2e6)))
+    back = m.loads(m.dumps(d))
+    assert back == d
+    p = back.geometry.profile()
+    assert p.throat_radius == pytest.approx(0.5e-3, rel=1e-3)  # mm -> m
+    assert p.throat_x == pytest.approx(1e-3, rel=1e-3)
+
+
+@pytest.mark.parametrize("points, message", [
+    ([[0, 1], [1, 1]], "at least three"),
+    ([[0, 1], [1, 0], [2, 1]], "positive"),
+    ([[0, 1], [2, 0.5], [1, 1]], "increasing"),
+    ([[0, 1, 2], [1, 1], [2, 1]], "expected 2 values"),
+])
+def test_bad_wall_profiles_are_rejected(points, message):
+    src = json.loads(json.dumps(MINIMAL))
+    src["geometry"] = {"type": "wall_profile", "points": points}
+    with pytest.raises(m.DefinitionError, match=message):
+        m.loads(json.dumps(src))
+
+
+def test_booleans_are_strict():
+    src = json.loads(json.dumps(MINIMAL))
+    src["boundaries"]["exit_domain"] = {"type": "truncated_at_exit", "fixed_pressure": 1}
+    with pytest.raises(m.DefinitionError, match="true or false"):
+        m.loads(json.dumps(src))

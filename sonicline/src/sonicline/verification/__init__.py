@@ -131,6 +131,63 @@ def _v1_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
     ] + _common_checks(metrics)
 
 
+# ----------------------------------------------------------------------------- V2
+
+
+def nparc_area(x: float) -> float:
+    """The NPARC Alliance transonic diffuser test nozzle ("CDV"), in inches
+    and square inches: inlet area 2.5 at x = 0, throat 1.0 at x = 5, exit 1.5
+    at x = 10, every station meeting its neighbours with zero slope."""
+    if x <= 5.0:
+        return 1.75 - 0.75 * math.cos((0.2 * x - 1.0) * math.pi)
+    return 1.25 - 0.25 * math.cos((0.2 * x - 1.0) * math.pi)
+
+
+def nparc_profile_points(n: int = 200) -> tuple[tuple[float, float], ...]:
+    """The NPARC nozzle revolved: r = sqrt(A / pi), in inches."""
+    return tuple((10.0 * i / n, math.sqrt(nparc_area(10.0 * i / n) / math.pi)) for i in range(n + 1))
+
+
+# NPARC's exit-to-stagnation pressure ratio for the case with a normal shock
+# in the diverging section; quasi-1D theory puts the shock at x = 7.562 in.
+V2_PRESSURE_RATIO = 0.75
+
+
+def _v2_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+    p0 = 2e5
+    return m.SimulationDefinition(
+        name="V2 NPARC nozzle, normal shock in the diverging section",
+        geometry=m.WallProfile(points=nparc_profile_points(), length_unit="in"),
+        boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=p0, T0=300.0),
+                                ambient=m.Ambient(pressure=V2_PRESSURE_RATIO * p0, temperature=300.0),
+                                exit_domain=m.TruncatedAtExit(fixed_pressure=True)),
+        flow=m.Flow(turbulence=m.Inviscid()),
+        mesh=m.MeshSpec(form=m.MeshForm(form), quality=m.MeshQuality(quality)),
+        numerics=TIGHT,
+    )
+
+
+def _v2_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    shock = metrics.get("shock") or {}
+    L = shock.get("diverging_length") or math.nan
+    x_ref = shock.get("x_quasi_1d", math.nan)
+
+    def offset(key):
+        x = shock.get(key)
+        return None if x is None else (x - x_ref) / L
+
+    kl = discharge.kliegel_levine(NITROGEN.gamma, defn.geometry.profile().rc_over_rt)
+    return [
+        Check("shock position on the axis vs quasi-1D (fraction of diverging length)",
+              offset("x_centreline"), 0.0, 2e-2, relative=False,
+              note=f"quasi-1D shock Mach {metrics['regime']['shock_mach']:.3f}"),
+        Check("shock position at the wall vs quasi-1D (fraction of diverging length)",
+              offset("x_wall"), 0.0, 2e-2, relative=False),
+        Check("choked discharge coefficient vs Kliegel-Levine", metrics["discharge_coefficient"]["cfd"],
+              kl, 2e-3, relative=False),
+    ] + _common_checks(metrics)
+
+
 # ----------------------------------------------------------------------------- V4
 
 
@@ -183,6 +240,8 @@ def _v4b_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
 CASES: dict[str, Case] = {
     "V1": Case("V1", "Inviscid conical CD nozzle into vacuum (throat Cd, vacuum thrust)",
                _v1_definition, _v1_checks),
+    "V2": Case("V2", "Inviscid NPARC nozzle with a normal shock in the diverging section",
+               _v2_definition, _v2_checks),
     "V4a": Case("V4a", "Inviscid converging nozzle, choked, sea-level plume",
                 _v4_definition(5e5, "V4a choked converging nozzle", 0.0), _v4a_checks),
     # A converging nozzle ending at a curved throat keeps contracting past its
@@ -195,55 +254,80 @@ CASES: dict[str, Case] = {
 }
 
 
+# Comparison cases run_suite builds from other runs.
+COMPARISONS = ("V6", "V7")
+
 def run_case(case: Case, quality: str, out: Path, processors: int = 1, form: str | None = None,
-             on_event=None) -> tuple[CaseResult, dict | None]:
+             on_event=None, solver: str = "auto") -> tuple[CaseResult, dict | None]:
     import dataclasses
 
     from ..run import pipeline
 
     defn = case.definition(quality, form or case.form)
+    numerics = defn.numerics
     if processors > 1:
-        defn = dataclasses.replace(defn, numerics=dataclasses.replace(defn.numerics, processors=processors))
+        numerics = dataclasses.replace(numerics, processors=processors)
+    if solver != "auto":
+        numerics = dataclasses.replace(numerics, solver=solver)
+    defn = dataclasses.replace(defn, numerics=numerics)
     t0 = time.time()
-    run_dir = out / f"{case.name}-{form or case.form}-{quality}"
+    run_dir = out / (f"{case.name}-{form or case.form}-{quality}"
+                     + ("" if solver == "auto" else f"-{solver}"))
     result = pipeline.run(defn, run_dir, on_event=on_event, render=False)
     checks = [c.evaluate() for c in case.checks(result.metrics, defn)] if result.metrics else []
-    return CaseResult(case.name, case.title, result.status, result.trust, checks,
+    variant = [v for v in ((form if form and form != case.form else None),
+                           (solver if solver != "auto" else None)) if v]
+    label = case.name + (f" ({', '.join(variant)})" if variant else "")
+    title = case.title + "".join(f", {v}" for v in variant)
+    return CaseResult(label, title, result.status, result.trust, checks,
                       round(time.time() - t0, 1), str(run_dir)), result.metrics
 
 
-def wedge_vs_3d(quality: str, out: Path, processors: int, on_event=None) -> list[CaseResult]:
-    """V6: the V1 nozzle as a wedge and as a 3D O-grid with the same axial
-    and wall-normal distribution. Both must agree with each other."""
-    results = []
-    wedge, mw = run_case(CASES["V1"], quality, out, processors, "wedge", on_event)
-    grid, mg = run_case(CASES["V1"], quality, out, processors, "o_grid_3d", on_event)
-    results += [wedge, grid]
-    v6 = CaseResult("V6", "Wedge vs 3D O-grid on the V1 nozzle", "completed"
-                    if wedge.status == grid.status == "completed" else "failed",
-                    "trusted" if wedge.trust == grid.trust == "trusted" else "not_trustworthy")
-    if mw and mg:
-        v6.checks = [
-            Check("3D mass flow vs wedge", mg["mass_flow"]["inlet"], mw["mass_flow"]["inlet"], 2e-3),
-            Check("3D thrust vs wedge", mg["thrust"]["total"], mw["thrust"]["total"], 3e-3),
-        ]
-        for c in v6.checks:
-            c.evaluate()
-    results.append(v6)
-    return results
+def _pair(name: str, title: str, a: tuple[CaseResult, dict | None], b: tuple[CaseResult, dict | None],
+          label: str, mass_tol: float, thrust_tol: float) -> CaseResult:
+    """A comparison case: the second run must agree with the first."""
+    (ra, ma), (rb, mb) = a, b
+    r = CaseResult(name, title, "completed" if ra.status == rb.status == "completed" else "failed",
+                   "trusted" if ra.trust == rb.trust == "trusted" else "not_trustworthy")
+    if ma and mb:
+        r.checks = [c.evaluate() for c in (
+            Check(f"{label} mass flow", mb["mass_flow"]["inlet"], ma["mass_flow"]["inlet"], mass_tol),
+            Check(f"{label} thrust", mb["thrust"]["total"], ma["thrust"]["total"], thrust_tol),
+        )]
+    return r
 
 
 def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
               on_event=None) -> list[CaseResult]:
+    """Runs each case once. V6 (wedge vs 3D O-grid) and V7 (rhoPimpleFoam vs
+    rhoCentralFoam) are comparisons built on V1; V1 runs once whichever of
+    them asks for it."""
     out.mkdir(parents=True, exist_ok=True)
     results: list[CaseResult] = []
+    runs: dict[tuple[str, str, str], tuple[CaseResult, dict | None]] = {}
+
+    def once(case: str, form: str = "wedge", solver: str = "auto"):
+        key = (case, form, solver)
+        if key not in runs:
+            runs[key] = run_case(CASES[case], quality, out, processors, form, on_event, solver)
+            results.append(runs[key][0])
+        return runs[key]
+
     for name in names:
         if name == "V6":
-            results += wedge_vs_3d(quality, out, processors, on_event)
-        elif name == "V1" and "V6" in names:
-            continue  # V6 runs the V1 wedge (with its checks) itself
+            # The 3D O-grid shares the wedge's axial and wall-normal
+            # distribution; the two must agree with each other.
+            results.append(_pair("V6", "Wedge vs 3D O-grid on the V1 nozzle", once("V1"),
+                                 once("V1", "o_grid_3d"), "3D vs wedge:", 2e-3, 3e-3))
+        elif name == "V7":
+            # Two independent discretisations of the same equations: a
+            # pressure-based PIMPLE solver and a density-based central-upwind
+            # (Kurganov-Tadmor) one. Agreement bounds the error neither
+            # reference-based check can see in the other.
+            results.append(_pair("V7", "rhoPimpleFoam vs rhoCentralFoam on the V1 nozzle", once("V1"),
+                                 once("V1", solver="rhoCentralFoam"), "central vs PIMPLE:", 1e-3, 2e-3))
         else:
-            results.append(run_case(CASES[name], quality, out, processors, on_event=on_event)[0])
+            once(name)
     (out / "verification.json").write_text(
         json.dumps([asdict(r) | {"passed": r.passed} for r in results], indent=2, default=str) + "\n",
         encoding="utf-8")

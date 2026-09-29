@@ -22,7 +22,8 @@ from ..mesh.revolved import MeshMeta
 FUNCTION_OBJECTS = (
     "residuals", "mdot_inlet", "mdot_throat", "mdot_exit", "mdot_outlet", "mdot_ambient",
     "mdot_lip", "momentum_inlet", "momentum_exit", "pforce_inlet", "pforce_exit",
-    "area_avg_throat", "area_avg_exit", "mass_avg_throat", "mass_avg_exit", "wall_force",
+    "area_avg_throat", "area_avg_exit", "mass_avg_inlet", "mass_avg_throat", "mass_avg_exit",
+    "wall_force",
 )
 
 
@@ -65,6 +66,7 @@ class Integrals:
     throat_mass_avg: dict[str, float]
     exit_area_avg: dict[str, float]
     exit_mass_avg: dict[str, float]
+    inlet_mass_avg: dict[str, float]
 
 
 def integrals(tables: dict, summary: CaseSummary) -> Integrals:
@@ -104,9 +106,12 @@ def integrals(tables: dict, summary: CaseSummary) -> Integrals:
         wall_force_x=k * float(_final(wf, "total_x")) if wf is not None else math.nan,
         wall_force_viscous_x=k * float(_final(wf, "viscous_x")) if wf is not None else math.nan,
         throat_area_avg=averages("area_avg_throat", ["areaAverage(p)", "areaAverage(T)", "areaAverage(Ma)"]),
-        throat_mass_avg=averages("mass_avg_throat", ["weightedAverage(T)", "weightedAverage(Ma)", "weightedAverage(U)"]),
+        throat_mass_avg=averages("mass_avg_throat", ["weightedAverage(T)", "weightedAverage(Ma)",
+                                                      "weightedAverage(U)", "weightedAverage(magSqr(U))"]),
         exit_area_avg=averages("area_avg_exit", ["areaAverage(p)", "areaAverage(T)", "areaAverage(Ma)"]),
-        exit_mass_avg=averages("mass_avg_exit", ["weightedAverage(T)", "weightedAverage(Ma)", "weightedAverage(U)"]),
+        exit_mass_avg=averages("mass_avg_exit", ["weightedAverage(T)", "weightedAverage(Ma)",
+                                                  "weightedAverage(U)", "weightedAverage(magSqr(U))"]),
+        inlet_mass_avg=averages("mass_avg_inlet", ["weightedAverage(T)", "weightedAverage(magSqr(U))"]),
     )
 
 

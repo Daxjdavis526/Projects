@@ -10,6 +10,8 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass, field
 
+import numpy as np
+
 from ..core import realgas
 from ..core.gas import G0
 from ..core.model import definition as d
@@ -17,6 +19,68 @@ from ..core.profile import Profile
 from ..core.theory import discharge, nozzle
 from ..foam.case import CaseSummary
 from ..post.results import Integrals
+
+
+def recovery_factor(profiles: dict, T0: float, x_start: float, x_end: float) -> dict | None:
+    """Adiabatic-wall recovery r = (T_wall - T_core) / (T0 - T_core) along the
+    diverging section, with the axis temperature standing in for the
+    boundary-layer edge."""
+    wall, core = profiles.get("wall", {}), profiles.get("centreline", {})
+    if not wall.get("T") or not core.get("T"):
+        return None
+    xc = np.asarray(core["x"])
+    Tc = np.asarray(core["T"])
+    r = []
+    for x, Tw in zip(wall["x"], wall["T"]):
+        if x_start < x < x_end:
+            t_core = float(np.interp(x, xc, Tc))
+            if T0 - t_core > 0.05 * T0:
+                r.append((Tw - t_core) / (T0 - t_core))
+    if not r:
+        return None
+    return {"recovery_factor_mean": float(np.mean(r)), "recovery_factor_min": float(np.min(r)),
+            "recovery_factor_max": float(np.max(r))}
+
+
+def shock_front(line: dict, x_start: float, x_end: float) -> float | None:
+    """Axial position of the strongest compression between x_start and
+    x_end along one row of cells: where the pressure crosses halfway between
+    its values at the foot and the head of the steepest rise. A captured
+    shock spreads over a few cells; the midpoint locates it to a fraction of
+    one."""
+    x, p = np.asarray(line.get("x", [])), np.asarray(line.get("p", []))
+    keep = (x > x_start) & (x < x_end)
+    x, p = x[keep], p[keep]
+    if len(x) < 4:
+        return None
+    dp = np.diff(p) / np.diff(x)
+    i = int(np.argmax(dp))
+    if dp[i] <= 0.0:
+        return None
+    lo, hi = i, i
+    while lo > 0 and dp[lo - 1] > 0.05 * dp[i]:
+        lo -= 1
+    while hi < len(dp) - 1 and dp[hi + 1] > 0.05 * dp[i]:
+        hi += 1
+    mid = 0.5 * (p[lo] + p[hi + 1])
+    return float(np.interp(mid, p[lo:hi + 2], x[lo:hi + 2]))
+
+
+def shock_location(profiles: dict, profile: Profile, shock_area_ratio: float) -> dict:
+    """Where the normal shock stands, measured on the axis and along the wall,
+    against quasi-1D theory's station of the same area ratio."""
+    xt, xe = profile.throat_x, profile.x_exit
+    lo, hi = xt, xe
+    for _ in range(80):
+        mid = 0.5 * (lo + hi)
+        if profile.area(mid) / profile.throat_area < shock_area_ratio:
+            lo = mid
+        else:
+            hi = mid
+    return {"x_quasi_1d": 0.5 * (lo + hi),
+            "x_centreline": shock_front(profiles.get("centreline", {}), xt, xe),
+            "x_wall": shock_front(profiles.get("wall", {}), xt, xe),
+            "diverging_length": xe - xt}
 
 
 def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSummary,
@@ -92,12 +156,30 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
             "ideal": {"mach": ideal.exit_mach, "p": ideal.exit_pressure,
                       "T": ideal.exit_temperature, "velocity": ideal.exit_velocity},
         },
+        "solver": summary.solver,
         "regime": {
             "quasi_1d": ideal.regime.value,
+            "shock_area_ratio": ideal.shock_area_ratio,
+            "shock_mach": ideal.shock_mach,
             "separation_expected": ideal.separation.likely,
         },
         "conditions": {"p0": p0, "T0": T0, "ambient_p": pa,
                        "ambient_T": defn.boundaries.ambient.temperature},
+    }
+    # Energy conservation: the flux-weighted total temperature T + |U|^2/2cp
+    # carried through the exit must equal what enters. With adiabatic walls
+    # nothing adds or removes heat between them.
+    def total_T(avg):
+        if "T" not in avg or "magSqr(U)" not in avg:
+            return None
+        return avg["T"] + avg["magSqr(U)"] / (2.0 * gas.cp)
+
+    T0_in, T0_exit = total_T(it.inlet_mass_avg), total_T(it.exit_mass_avg)
+    out["energy"] = {
+        "total_temperature_inlet": T0_in,
+        "total_temperature_throat": total_T(it.throat_mass_avg),
+        "total_temperature_exit": T0_exit,
+        "exit_minus_inlet": (T0_exit - T0_in) / T0_in if T0_in and T0_exit else None,
     }
     if realgas.available():
         bias = realgas.choked_mass_flux(gas, p0, T0).bias
@@ -130,11 +212,12 @@ THRUST_CV_TOLERANCE = 0.005  # exit-plane vs wall+feed thrust
 INVISCID_CD_MARGIN = 0.002  # an inviscid Cd above Kliegel-Levine by more than this is wrong
 MAX_WALL_YPLUS = 2.0  # for a wall-resolved (low-Re) mesh
 PLUME_DRIFT_WARN = 0.01
+ENERGY_TOLERANCE = 0.002  # exit vs inlet flux-weighted total temperature, adiabatic walls
 STAGNATION_MARGIN = 0.005  # static T above T0 by more than this is a numerical error
-VISCOUS_WORK_WARNING = (
-    "the solver's energy equation omits viscous work: wall temperatures are not physical "
-    "(adiabatic recovery ~40 % instead of ~85-90 %); thrust and mass flow carry an estimated "
-    "0.1 % uncertainty from this")
+# Adiabatic-wall recovery factor: ~Pr^1/2 = 0.83 laminar to ~Pr^1/3 = 0.88
+# turbulent for Pr = 0.69, measured against the axis temperature (which only
+# approximates the boundary-layer edge in a 2D nozzle), hence a loose band.
+RECOVERY_RANGE = (0.75, 0.95)
 
 
 def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warnings: list[str],
@@ -171,19 +254,39 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
         if clamped:
             v.warnings.append(f"{clamped} cells sit at the solver's pressure floor; the limiter is "
                               "active there and the local solution is not physical")
+        energy = m.get("energy", {}).get("exit_minus_inlet")
+        adiabatic = isinstance(defn.boundaries.wall_thermal, d.Adiabatic)
+        if energy is not None and adiabatic and abs(energy) > ENERGY_TOLERANCE:
+            v.warnings.append(f"total temperature leaving the nozzle differs from what enters by "
+                              f"{100 * energy:+.2f} %: energy is not conserved (adiabatic walls)")
         cv = m["thrust"]["control_volume_disagreement"]
         if abs(cv) > THRUST_CV_TOLERANCE:
             v.warnings.append(f"exit-plane and wall-force thrust differ by {100 * cv:.2f} %")
-        if m["regime"]["separation_expected"]:
-            v.warnings.append("flow separation is expected in this nozzle; thrust and separation "
-                              "location are sensitive to the turbulence model")
-        if m["regime"]["quasi_1d"] == nozzle.Regime.SHOCK_IN_NOZZLE.value:
-            v.warnings.append("a shock stands in the nozzle; its position is model-sensitive")
-    if convergence is not None and convergence.converged and not convergence.residuals_dropped:
+        shocked = m["regime"]["quasi_1d"] == nozzle.Regime.SHOCK_IN_NOZZLE.value
+        if (shocked or m["regime"]["separation_expected"]) and m.get("solver") == "rhoPimpleFoam":
+            # V2: rhoPimpleFoam puts the NPARC nozzle's normal shock 30 % of
+            # the diverging length downstream of where rhoCentralFoam and
+            # theory agree it stands (DESIGN.md section 11).
+            v.reasons.append("a shock stands inside the nozzle and rhoPimpleFoam misplaces normal "
+                             "shocks; run it with rhoCentralFoam (the automatic choice)")
+        if not isinstance(defn.flow.turbulence, d.Inviscid):
+            # An inviscid shock sits where the jump conditions put it; a
+            # boundary layer makes its position depend on the wall model.
+            if m["regime"]["separation_expected"]:
+                v.warnings.append("flow separation is expected in this nozzle; thrust and separation "
+                                  "location are sensitive to the turbulence model")
+            if shocked:
+                v.warnings.append("a shock stands in the nozzle; its position is model-sensitive")
+    if (convergence is not None and convergence.converged and not convergence.residuals_dropped
+            and convergence.residual_notes):
         v.warnings.append("residuals stalled (" + "; ".join(convergence.residual_notes)
                           + "); the monitored integrals are steady")
-    if not isinstance(defn.flow.turbulence, d.Inviscid):
-        v.warnings.append(VISCOUS_WORK_WARNING)
+    recovery = (metrics or {}).get("wall", {}).get("recovery_factor_mean")
+    if (recovery is not None and isinstance(defn.boundaries.wall_thermal, d.Adiabatic)
+            and not RECOVERY_RANGE[0] <= recovery <= RECOVERY_RANGE[1]):
+        v.warnings.append(f"adiabatic-wall recovery factor {recovery:.2f} is outside the physical "
+                          f"range {RECOVERY_RANGE[0]}-{RECOVERY_RANGE[1]} (Pr^1/2 to Pr^1/3 and "
+                          "turbulent Prandtl effects): wall temperatures are suspect")
     plume_drift = getattr(convergence, "plume_drift", None) if convergence is not None else None
     if plume_drift is not None and plume_drift > PLUME_DRIFT_WARN:
         v.warnings.append(f"the far plume is still developing (outlet flow drifting {100 * plume_drift:.1f} % "

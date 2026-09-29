@@ -160,9 +160,9 @@ def _verify(cases: str, quality: str, out: str, processors: int) -> int:
     from . import verification
 
     names = [c.strip() for c in cases.split(",") if c.strip()]
-    unknown = [n for n in names if n not in verification.CASES and n != "V6"]
+    unknown = [n for n in names if n not in verification.CASES and n not in verification.COMPARISONS]
     if unknown:
-        print(f"error: unknown cases {unknown}; known: {sorted(verification.CASES) + ['V6']}",
+        print(f"error: unknown cases {unknown}; known: {sorted(verification.CASES) + list(verification.COMPARISONS)}",
               file=sys.stderr)
         return 2
     results = verification.run_suite(names, quality, Path(out), processors,
@@ -191,7 +191,7 @@ def main(argv: list[str] | None = None) -> int:
     imp.add_argument("--p0", default="20 bar", help="chamber (stagnation) pressure")
     imp.add_argument("--out", help="definition file to write (default <cad>.json)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V4a,V4b,V6")
+    ver.add_argument("--cases", default="V1,V2,V4a,V4b,V6,V7")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)

@@ -19,8 +19,8 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 from ..gas import NITROGEN, PerfectGas
-from ..profile import Profile, conical
-from ..units import ATM, Dimension
+from ..profile import Profile, conical, from_points
+from ..units import ATM, Dimension, quantity_to_si
 
 SCHEMA_VERSION = 1
 
@@ -89,7 +89,32 @@ class CadFile:
     inlet_end: str = "auto"
 
 
-Geometry = ConicalNozzle | CadFile
+@dataclass(frozen=True)
+class WallProfile:
+    """A tabulated axisymmetric wall: (x, r) points from inlet to exit in
+    ``length_unit``, joined by straight lines. For nozzles defined by a
+    formula or a table, such as the NPARC verification nozzles or a
+    method-of-characteristics contour. The throat is found from the points
+    (see :func:`sonicline.core.profile.from_points`); sample it finely."""
+
+    TAG: ClassVar[str] = "wall_profile"
+    points: tuple[tuple[float, float], ...]
+    length_unit: str = "m"
+
+    def __post_init__(self) -> None:
+        if len(self.points) < 3:
+            raise ValueError("a wall profile needs at least three points")
+        if any(r <= 0.0 for _, r in self.points):
+            raise ValueError("wall radii must be positive")
+        if any(b[0] <= a[0] for a, b in zip(self.points, self.points[1:])):
+            raise ValueError("wall points must be in strictly increasing x, inlet first")
+
+    def profile(self) -> Profile:
+        k = quantity_to_si(f"1 {self.length_unit}", Dimension.LENGTH)
+        return from_points([(k * x, k * r) for x, r in self.points])
+
+
+Geometry = ConicalNozzle | CadFile | WallProfile
 
 
 # --------------------------------------------------------------------------
@@ -160,9 +185,15 @@ class Plume:
 @dataclass(frozen=True)
 class TruncatedAtExit:
     """Domain ends at the exit plane. Physical only when the whole exit plane
-    leaves supersonically into vacuum or a strongly under-expanded jet."""
+    leaves supersonically into vacuum or a strongly under-expanded jet.
+
+    ``fixed_pressure`` instead imposes the ambient pressure as the static
+    pressure of a subsonic exit plane: the quasi-1D internal-flow problem
+    (a shock standing in the nozzle), used for verification. A thruster
+    exhausting into surroundings needs a plume region instead."""
 
     TAG: ClassVar[str] = "truncated_at_exit"
+    fixed_pressure: bool = False
 
 
 ExitDomain = Plume | TruncatedAtExit
@@ -270,7 +301,9 @@ class ConvergenceCriteria:
     integral_window: int = 200  # iterations over which integrals must be flat
     integral_tolerance: float = 1e-4  # relative spread allowed in that window
     mass_imbalance: float = 1e-3  # |inlet - outlet| / inlet
-    max_iterations: int = 20000
+    # None: the solver's own limit (20 000 for rhoPimpleFoam; 60 000 for
+    # the explicit rhoCentralFoam, which V1 needs 23 000 of).
+    max_iterations: int | None = None
 
 
 @dataclass(frozen=True)

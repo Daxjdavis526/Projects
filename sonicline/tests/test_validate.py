@@ -77,3 +77,12 @@ def test_mass_flow_inlet_implies_chamber_pressure():
     f = validate(definition(inlet=m.MassFlowInlet(mass_flow=4.8e-3)))
     implied = [x for x in f if x.code == "inlet.implied_p0"]
     assert implied and "bar" in implied[0].message
+
+
+def test_unknown_solver_is_an_error():
+    import dataclasses
+    d = definition()
+    ok = dataclasses.replace(d, numerics=dataclasses.replace(d.numerics, solver="rhoCentralFoam"))
+    assert "numerics.solver" not in codes(validate(ok))
+    bad = dataclasses.replace(d, numerics=dataclasses.replace(d.numerics, solver="simpleFoam"))
+    assert "numerics.solver" in codes(validate(bad), Severity.ERROR)

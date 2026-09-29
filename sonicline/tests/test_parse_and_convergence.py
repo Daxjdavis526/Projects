@@ -158,3 +158,37 @@ def test_kliegel_levine_bound_only_applies_when_choked():
     assert verdict(defn, "completed", True, [], None, metrics, None).trust is Trust.TRUSTED
     metrics["regime"]["quasi_1d"] = "underexpanded"
     assert verdict(defn, "completed", True, [], None, metrics, None).trust is Trust.NOT_TRUSTWORTHY
+
+
+def test_rhopimplefoam_is_not_trusted_with_a_shock_inside():
+    from sonicline.core import model as m
+    from sonicline.metrics import Trust, verdict
+
+    defn = m.SimulationDefinition(
+        name="t", geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=1.5),
+        boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=2e5)),
+        flow=m.Flow(turbulence=m.Inviscid()))
+    metrics = {"discharge_coefficient": {"cfd": 0.999, "kliegel_levine": 0.9995},
+               "thrust": {"control_volume_disagreement": 0.0}, "solver": "rhoCentralFoam",
+               "regime": {"quasi_1d": "shock_in_nozzle", "separation_expected": False}}
+    v = verdict(defn, "completed", True, [], None, metrics, None)
+    assert v.trust is Trust.TRUSTED and not v.warnings  # inviscid: the shock position is exact
+    metrics["solver"] = "rhoPimpleFoam"
+    v = verdict(defn, "completed", True, [], None, metrics, None)
+    assert v.trust is Trust.NOT_TRUSTWORTHY and "misplaces" in v.reasons[0]
+
+
+def test_shock_front_is_located_between_foot_and_head():
+    import numpy as np
+
+    from sonicline.metrics import shock_front
+
+    x = np.linspace(0.0, 1.0, 101)
+    # Supersonic expansion, a jump spread over three cells centred on 0.605,
+    # then a slow subsonic recompression.
+    p = np.where(x < 0.59, 1.0 - 0.3 * x, np.where(x > 0.62, 2.5 + 0.2 * (x - 0.62), np.nan))
+    ramp = (x >= 0.59) & (x <= 0.62)
+    p[ramp] = np.interp(x[ramp], [0.59, 0.62], [1.0 - 0.3 * 0.59, 2.5])
+    xs = shock_front({"x": list(x), "p": list(p)}, 0.1, 0.95)
+    assert xs == pytest.approx(0.605, abs=0.005)
+    assert shock_front({"x": list(x), "p": list(1.0 - x)}, 0.1, 0.95) is None

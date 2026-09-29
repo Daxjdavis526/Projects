@@ -29,3 +29,15 @@ def test_verification_case(name, tmp_path):
     assert result.trust != "not_trustworthy", metrics.get("verdict")
     failed = [f"{c.name}: {c.value} vs {c.reference} (tol {c.tolerance})" for c in result.checks if not c.passed]
     assert not failed, failed
+
+
+def test_viscous_work_extension_builds(tmp_path):
+    # Compiles against the installed OpenFOAM headers (openfoam2512-dev);
+    # a second call finds the library and does not rebuild.
+    from sonicline.foam import extensions
+
+    runner = LocalRunner()
+    lib = extensions.ensure_built(runner, tmp_path / "a")
+    assert lib == f"{extensions.library_name()}.so"
+    assert extensions.ensure_built(runner, tmp_path / "b") == lib
+    assert not (tmp_path / "b" / "log.wmake").exists()

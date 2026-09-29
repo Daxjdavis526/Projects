@@ -11,10 +11,11 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestone M1 of [DESIGN.md](DESIGN.md) is complete.** The whole
-pipeline runs headless from the command line, from a STEP file or a
-parametric nozzle to verified numbers and images. The desktop interface is
-M3 and M4. Section 10 of the design records what building M1 taught.
+**Status: milestone M1 of [DESIGN.md](DESIGN.md) is complete; M2 is under
+way.** The whole pipeline runs headless from the command line, from a STEP
+file or a parametric nozzle to verified numbers and images. The desktop
+interface is M3 and M4. Sections 10 and 11 of the design record what
+building M1 and M2 taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -55,15 +56,17 @@ Nitrogen at 20 bar and 300 K through a conical nozzle:
 - 45° converge and 15° diverge
 - exhausting into 1 atm through a plume region 20 exit diameters long
 - k-ω SST, wall-resolved (y⁺ max 0.42), a 21 000-cell wedge
-- converged in about 1200 iterations, about 3 minutes on 4 cores
+- converged in about 1500 iterations, about 3 minutes on 4 cores
 
 | | CFD | ideal quasi-1D |
 |---|---|---|
-| mass flow | 14.276 g/s | 14.416 g/s |
+| mass flow | 14.275 g/s | 14.416 g/s |
 | discharge coefficient | 0.990 | — |
-| thrust | 8.358 N (momentum 8.318, pressure +0.041) | 8.621 N |
+| thrust | 8.363 N (momentum 8.323, pressure +0.040) | 8.621 N |
 | Isp | 59.7 s | 61.0 s |
-| exit Mach (mass-averaged) | 2.539 | 2.594 |
+| exit Mach (mass-averaged) | 2.541 | 2.594 |
+| adiabatic-wall recovery factor (diverging section) | 0.877 (0.82–0.90) | 0.83–0.88 (Pr^½–Pr^⅓) |
+| total temperature, exit vs inlet | −0.06 % | 0 |
 | thrust, exit plane vs wall force + feed | agree to 0.02 % | |
 
 Thrust is 97.0 % of ideal. The throat's discharge coefficient accounts for
@@ -73,15 +76,18 @@ overlap, because friction also reduces the exit momentum, and the CFD does
 not separate them. Real nitrogen
 at 20 bar chokes at +0.71 % mass flux against the perfect gas the CFD uses,
 so the real-gas estimate is 14.376 g/s. The same nozzle imported from STEP
-gives the same answer to 0.01 %.
+gave the same answer to 0.01 % (M1).
 
-![The plume's shock cells](doc/sea-level-20bar-plume.png)
-![Axial pressure and Mach against quasi-1D theory](doc/sea-level-20bar-axial.png)
+![The plume's shock cells (their positions are qualitative: see Solvers below)](doc/sea-level-20bar-plume.png)
+![Axial pressure, Mach and temperature against quasi-1D theory, with the adiabatic wall temperature](doc/sea-level-20bar-axial.png)
+
+The wall temperature's last cell drops to 207 K where the boundary layer
+turns and expands around the sharp exit lip.
 
 ## Verification
 
-`sonicline verify` runs these cases on standard meshes; CI runs V1 and V4a
-end to end through OpenFOAM on every change. Every reference is
+`sonicline verify` runs these cases on standard meshes (about 6 minutes on
+4 cores); CI runs V1 and V4a end to end through OpenFOAM on every change. Every reference is
 computed without the CFD.
 
 | case | what | check | error | tolerance |
@@ -90,13 +96,25 @@ computed without the CFD.
 | | | thrust vs 1D × Cd × divergence factor | +0.040 % | 0.5 % |
 | V1 | same, 3D O-grid | Cd vs Kliegel–Levine | −0.055 % | 0.2 % |
 | | | thrust vs 1D × Cd × divergence factor | −0.085 % | 0.5 % |
+| V1 | same, rhoCentralFoam | Cd vs Kliegel–Levine | −0.077 % | 0.2 % |
+| | | thrust vs 1D × Cd × divergence factor | +0.106 % | 0.5 % |
+| V2 | inviscid NPARC nozzle, normal shock in the diverging section (pe/p0 = 0.75) | shock position vs quasi-1D, axis / wall | +0.23 % / −0.11 % of the diverging length | 2 % |
+| | | Cd vs Kliegel–Levine | +0.003 % | 0.2 % |
 | V4a | inviscid converging nozzle, choked, into a sea-level plume | Cd vs Kliegel–Levine | +0.054 % | 0.2 % |
 | V4b | same, subsonic, with a straight throat section | mass flow vs isentropic | −0.16 % | 0.5 % |
 | V6 | 3D O-grid vs wedge on V1 | mass flow / thrust | −0.03 % / −0.12 % | 0.2 % / 0.3 % |
-| all | | mass conservation, inlet vs exit | ≤ 4.5×10⁻⁶ | 10⁻⁴ (3×10⁻⁴ for V4b) |
+| V7 | rhoCentralFoam vs rhoPimpleFoam on V1 | mass flow / thrust | −0.055 % / +0.066 % | 0.1 % / 0.2 % |
+| all | | mass conservation, inlet vs exit | ≤ 2.9×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
 The full table is in [doc/verification-standard.md](doc/verification-standard.md).
+
+**What V2 found.** rhoPimpleFoam, the pressure-based solver SONICLINE
+uses for shock-free nozzles, does not hold this shock. Run steady or
+time-accurate, it either pushes the shock out of the nozzle or settles 30 %
+of the diverging length downstream. rhoCentralFoam puts it within 0.3 %, so
+SONICLINE now picks rhoCentralFoam by itself whenever a shock is expected
+inside the nozzle, and a rhoPimpleFoam run there is marked not trustworthy.
 
 **What V4b found.** A subsonic converging nozzle that ends at its curved
 throat does not deliver quasi-1D mass flow: the streamlines are still
@@ -117,11 +135,21 @@ The house rule: say plainly where the model stops.
     Every run reports this correction.
   - The chamber temperature is not the bottle temperature: throttling from
     300 bar to 20 bar cools nitrogen to about 268 K.
-- **Energy equation.** OpenFOAM's rhoPimpleFoam omits viscous work (checked
-  in its v2512 source). Friction never heats the gas, so **wall temperatures
-  are not physical** and are not reported. Bracketing the missing term moves
-  mass flow by 0.08 % and thrust by 0.13 %, which every viscous run states.
-  Adding it properly is the first job of M2.
+- **Energy equation.** OpenFOAM's rhoPimpleFoam omits viscous work
+  (checked in its v2512 source), so friction never heats the gas. SONICLINE
+  adds the missing term with its own small OpenFOAM extension, compiled on
+  first use (it needs `openfoam2512-dev`).
+  - The adiabatic wall now recovers 0.88 of the dynamic temperature, where
+    0.83–0.88 is physical and 0.25 was the uncorrected value. Viscous runs
+    report wall temperature and the recovery factor.
+  - Every run checks energy conservation: with adiabatic walls, total
+    temperature leaving the nozzle must match what enters to 0.2 %.
+- **Solvers.** rhoPimpleFoam (pressure-based) for shock-free nozzles;
+  rhoCentralFoam (density-based) wherever quasi-1D theory expects a shock or
+  separation inside the nozzle, because rhoPimpleFoam puts a normal shock in
+  the wrong place (30 % of the diverging length off in V2). The two agree to
+  0.05 % on a shock-free nozzle (V7). The shock cells in a rhoPimpleFoam
+  plume image are qualitative; thrust does not depend on them.
 - **Turbulence.** k-ω SST, resolved to the wall.
   - Throat Reynolds numbers of 10⁵–10⁶ put small thrusters where boundary
     layers may be laminar or relaminarising. The pre-flight check says so;
@@ -179,13 +207,13 @@ src/sonicline/
   geometry/     STEP analysis in a worker process; STEP writing
   mesh/         structured revolved meshes (wedge and O-grid, with plume)
   foam/         the only package that knows OpenFOAM syntax: writers, case
-                builder, parsers
+                builder, parsers, and the viscous-work extension (C++)
   run/          runners (local, WSL2), convergence, mesh gates, the pipeline
   post/         integrals from solver fluxes, fields, images
   metrics/      propulsion metrics and the trust verdict
   verification/ the verification cases
   cli.py
-tests/          about 190 tests; the OpenFOAM ones skip without it
+tests/          about 210 tests; the OpenFOAM ones skip without it
 examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD)
 doc/            images and the verification table
 ```
@@ -194,7 +222,9 @@ doc/            images and the verification table
 
 Python 3.11+, and ESI OpenFOAM v2512 for `run` and `verify`.
 
-- **Linux:** `apt install openfoam2512` from the ESI repository.
+- **Linux:** `apt install openfoam2512 openfoam2512-dev` from the ESI
+  repository. The development package compiles SONICLINE's viscous-work
+  extension on the first viscous run.
 - **Windows:** the application runs natively and drives OpenFOAM inside WSL2
   (Ubuntu 24.04 with the same package).
   - The WSL2 runner is built and its command construction is tested.

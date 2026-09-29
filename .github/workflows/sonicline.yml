@@ -56,7 +56,7 @@ jobs:
       - name: Install OpenFOAM v2512 and the libraries gmsh and VTK need
         run: |
           curl -sSfL --retry 4 https://dl.openfoam.com/add-debian-repo.sh | sudo bash
-          sudo apt-get install -y -qq openfoam2512 libglu1-mesa libosmesa6 libxcursor1 \
+          sudo apt-get install -y -qq openfoam2512 openfoam2512-dev libglu1-mesa libosmesa6 libxcursor1 \
             libxinerama1 libxft2
 
       - name: Install
@@ -65,5 +65,5 @@ jobs:
       - name: Geometry (STEP round trip through the CAD kernel)
         run: python -m pytest sonicline/tests/test_geometry.py -v
 
-      - name: OpenFOAM verification (V1, V4a on standard wedge meshes)
+      - name: OpenFOAM (V1, V4a on standard wedge meshes; the viscous-work extension build)
         run: python -m pytest sonicline/tests -v -m openfoam

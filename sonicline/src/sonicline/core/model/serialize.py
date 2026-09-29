@@ -115,6 +115,19 @@ def _build(tp: object, raw: object, path: str) -> object:
         except ValueError:
             allowed = ", ".join(repr(m.value) for m in tp)
             raise DefinitionError(f"{path}: {raw!r} is not one of {allowed}") from None
+    if typing.get_origin(tp) is tuple:
+        args = typing.get_args(tp)
+        if not isinstance(raw, (list, tuple)):
+            raise DefinitionError(f"{path}: expected a list, got {raw!r}")
+        if len(args) == 2 and args[1] is Ellipsis:
+            return tuple(_build(args[0], v, f"{path}[{i}]") for i, v in enumerate(raw))
+        if len(raw) != len(args):
+            raise DefinitionError(f"{path}: expected {len(args)} values, got {len(raw)}")
+        return tuple(_build(a, v, f"{path}[{i}]") for i, (a, v) in enumerate(zip(args, raw)))
+    if tp is bool:
+        if not isinstance(raw, bool):
+            raise DefinitionError(f"{path}: expected true or false, got {raw!r}")
+        return raw
     if tp is float:
         if isinstance(raw, bool) or not isinstance(raw, (int, float)):
             raise DefinitionError(f"{path}: expected a number, got {raw!r}")
