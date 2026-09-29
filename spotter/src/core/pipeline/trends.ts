@@ -2,7 +2,6 @@
  * Trend stage: baselines → clustering → scoring → stage → history.
  */
 import { and, eq, gte, inArray, sql } from 'drizzle-orm'
-import { selectProviders } from '../ai/registry'
 import { LocalAIProvider } from '../ai/local/provider'
 import { computeBaseline, expectedViewsAt, outperformanceRatio, type Baseline, type BaselineSample, type NicheNorms } from '../analytics/baseline'
 import { assignToExisting, cosine, findMerges, formNewClusters, meanVector, type Candidate } from '../analytics/clustering'
@@ -26,6 +25,7 @@ import {
 } from '../db/schema'
 import { PLATFORM_LABEL, type ClusterPattern, type DataOrigin, type Platform, type PatternCount } from '../domain/types'
 import type { RunContext } from './context'
+import { clusteringEmbedder, runProviders } from './providers'
 import { recordEvent } from './store/events'
 
 const HOUR = 3_600_000
@@ -335,7 +335,8 @@ function nichePace(items: Enriched[], now: Date): Partial<Record<Platform, Niche
 // ---------------------------------------------------------------------------
 
 export async function runTrendStage(rc: RunContext): Promise<{ scored: ScoredCluster[]; created: number; merged: number; dormant: number }> {
-  const { ai, embedder } = selectProviders(rc.settings, rc.env)
+  const { ai } = runProviders(rc)
+  const { embedder, note: embeddingNote } = await clusteringEmbedder(rc)
   const fallbackAi = new LocalAIProvider(rc.settings.niche.excludeKeywords)
   const thresholds = embedder.thresholds
   const lookback = rc.settings.trend.lookbackDays
@@ -395,9 +396,18 @@ export async function runTrendStage(rc: RunContext): Promise<{ scored: ScoredClu
     .where(and(eq(trendClusters.creatorProfileId, rc.profile.id), eq(trendClusters.dataMode, rc.dataMode), eq(trendClusters.status, 'active')))
   const current = active.filter((c) => c.embeddingModel === embedder.model)
   // A changed embedding model makes old centroids incomparable: retire those trends.
-  for (const stale of active.filter((c) => c.embeddingModel !== embedder.model)) {
-    await rc.db.update(trendClusters).set({ status: 'dormant', updatedAt: rc.now }).where(eq(trendClusters.id, stale.id))
+  const stale = active.filter((c) => c.embeddingModel !== embedder.model)
+  if (stale.length) {
+    await rc.db.update(trendClusters).set({ status: 'dormant', updatedAt: rc.now }).where(inArray(trendClusters.id, stale.map((c) => c.id)))
+    await recordEvent(rc.db, {
+      profileId: rc.profile.id,
+      level: 'info',
+      category: 'analysis',
+      message: `Trend grouping now uses ${embedder.name} embeddings (${embedder.model}); ${stale.length} trend${stale.length === 1 ? '' : 's'} grouped with the previous model were retired and will re-form on the new one.`,
+      at: rc.now,
+    })
   }
+  if (embeddingNote) await recordEvent(rc.db, { profileId: rc.profile.id, level: 'info', category: 'analysis', message: embeddingNote, at: rc.now })
   const memberRows = current.length
     ? await rc.db.select().from(trendClusterMembers).where(inArray(trendClusterMembers.clusterId, current.map((c) => c.id)))
     : []

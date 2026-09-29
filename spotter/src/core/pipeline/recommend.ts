@@ -10,7 +10,6 @@
 import { randomUUID } from 'node:crypto'
 import { and, desc, eq, gte, inArray } from 'drizzle-orm'
 import { LocalAIProvider } from '../ai/local/provider'
-import { selectProviders } from '../ai/registry'
 import { PROMPT_VERSION, type TrendBrief } from '../ai/types'
 import { cosine } from '../analytics/clustering'
 import { STAGE_LABEL } from '../analytics/lifecycle'
@@ -21,6 +20,7 @@ import { contentEmbeddings, contentItems, recommendations, trendClusters } from 
 import { PLATFORM_LABEL, type EvidenceExample, type RecommendationEvidence } from '../domain/types'
 import { creatorStrengths, draftWithFallback, fitReasons } from './briefs'
 import type { RunContext } from './context'
+import { clusteringEmbedder, runProviders } from './providers'
 import type { PersonalizationResult } from './personalize'
 import { recordEvent } from './store/events'
 import type { ScoredCluster } from './trends'
@@ -44,11 +44,17 @@ export async function recommendationsDue(rc: RunContext): Promise<boolean> {
   return day(latest.createdAt) !== day(rc.now)
 }
 
-async function ownPriorPost(rc: RunContext, centroid: number[], threshold: number, postLifts: Map<string, number>): Promise<RecommendationEvidence['ownPriorPost']> {
+async function ownPriorPost(
+  rc: RunContext,
+  centroid: number[],
+  embedding: { model: string; threshold: number },
+  postLifts: Map<string, number>,
+): Promise<RecommendationEvidence['ownPriorPost']> {
+  const threshold = embedding.threshold
   const rows = await rc.db
     .select({ id: contentItems.id, title: contentItems.title, caption: contentItems.caption, publishedAt: contentItems.publishedAt, vector: contentEmbeddings.vector })
     .from(contentItems)
-    .innerJoin(contentEmbeddings, eq(contentEmbeddings.contentItemId, contentItems.id))
+    .innerJoin(contentEmbeddings, and(eq(contentEmbeddings.contentItemId, contentItems.id), eq(contentEmbeddings.model, embedding.model)))
     .where(and(inArray(contentItems.dataOrigin, rc.origins), eq(contentItems.isOwn, true), gte(contentItems.publishedAt, new Date(rc.now.getTime() - 180 * DAY))))
   let best: { row: (typeof rows)[number]; sim: number } | null = null
   for (const row of rows) {
@@ -69,7 +75,8 @@ export async function runRecommendationStage(
   scored: ScoredCluster[],
   personal: PersonalizationResult,
 ): Promise<{ batchId: string | null; count: number; excluded: number }> {
-  const { ai, embedder } = selectProviders(rc.settings, rc.env)
+  const { ai } = runProviders(rc)
+  const { embedder } = await clusteringEmbedder(rc)
   const fallback = new LocalAIProvider(rc.settings.niche.excludeKeywords)
   const fitContext = {
     weights: rc.settings.fit.weights,
@@ -124,7 +131,7 @@ export async function runRecommendationStage(
   for (const r of ranked) {
     const s = scored.find((x) => x.clusterId === r.clusterId)!
     const fit = fits.get(r.clusterId)!
-    const prior = await ownPriorPost(rc, s.centroid, embedder.thresholds.join, personal.postLifts)
+    const prior = await ownPriorPost(rc, s.centroid, { model: embedder.model, threshold: embedder.thresholds.join }, personal.postLifts)
     const examples: EvidenceExample[] = s.members.slice(0, 5).map((m) => ({
       contentItemId: m.contentItemId,
       platform: m.platform,

@@ -40,6 +40,8 @@ const SECRET_QUERY_PARAMS = [
 const QUERY_PARAM_RE = new RegExp(`([?&#](?:${SECRET_QUERY_PARAMS.join('|')})=)[^&#\\s"']+`, 'gi')
 const FORM_FIELD_RE = new RegExp(`(\\b(?:${SECRET_QUERY_PARAMS.join('|')})["']?\\s*[:=]\\s*["']?)[^&\\s"',}]+`, 'gi')
 const BEARER_RE = /(\bBearer\s+)[A-Za-z0-9._~+/=-]+/gi
+// AI provider API keys (Anthropic sk-ant-…, OpenAI sk-…/sk-proj-…, Voyage pa-…), should one ever be echoed.
+const API_KEY_RE = /\b(?:sk-ant-[A-Za-z0-9_-]{16,}|sk-[A-Za-z0-9_-]{20,}|pa-[A-Za-z0-9_-]{20,})/g
 // Encrypted-at-rest token format produced by core/security/crypto.ts.
 const ENCRYPTED_RE = /\bv1\.[a-f0-9]{8}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g
 
@@ -48,6 +50,7 @@ export function redactString(input: string): string {
     .replace(QUERY_PARAM_RE, `$1${REDACTED}`)
     .replace(FORM_FIELD_RE, `$1${REDACTED}`)
     .replace(BEARER_RE, `$1${REDACTED}`)
+    .replace(API_KEY_RE, REDACTED)
     .replace(ENCRYPTED_RE, REDACTED)
 }
 

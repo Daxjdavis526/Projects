@@ -1,0 +1,9 @@
+{
+  "object": "list",
+  "data": [
+    { "object": "embedding", "embedding": [0.6, 0.8], "index": 0 },
+    { "object": "embedding", "embedding": [0.8, 0.6], "index": 1 }
+  ],
+  "model": "voyage-4-lite",
+  "usage": { "total_tokens": 14 }
+}

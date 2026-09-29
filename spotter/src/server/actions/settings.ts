@@ -129,12 +129,16 @@ export async function saveSettingsSection(_prev: SaveState, form: FormData): Pro
         if (!(AI_PROVIDERS as readonly string[]).includes(provider) || !(EMBEDDING_PROVIDERS as readonly string[]).includes(embeddingProvider)) {
           return { ok: false, message: 'Unknown provider.', section }
         }
+        const model = text(form, 'model', 100) || null
+        const embeddingModel = text(form, 'embeddingModel', 100) || null
+        const mismatch = modelMismatch(provider, model, embeddingProvider, embeddingModel)
+        if (mismatch) return { ok: false, message: mismatch, section }
         patch = {
           ai: {
             provider: provider as AppSettings['ai']['provider'],
-            model: text(form, 'model', 100) || null,
+            model: provider === 'local' ? null : model,
             embeddingProvider: embeddingProvider as AppSettings['ai']['embeddingProvider'],
-            embeddingModel: text(form, 'embeddingModel', 100) || null,
+            embeddingModel: embeddingProvider === 'local' ? null : embeddingModel,
             maxItemsPerRun: num(form, 'maxItemsPerRun'),
           },
         }
@@ -150,7 +154,10 @@ export async function saveSettingsSection(_prev: SaveState, form: FormData): Pro
       note = n ? ` ${n} active trends re-scored with the new weights.` : ''
     }
     if (section === 'ai' && (current.ai.embeddingProvider !== saved.ai.embeddingProvider || current.ai.embeddingModel !== saved.ai.embeddingModel)) {
-      note = ' The embedding model changed: posts will be re-embedded and trends rebuilt on the next run.'
+      note =
+        saved.ai.embeddingProvider === 'local'
+          ? ' Trends switch back to built-in embeddings on the next run and re-form on them.'
+          : ' Posts are embedded with the new model from the next run; trends move to it (and re-form once) when it covers 90% of recent posts.'
     }
     revalidatePath('/', 'layout')
     return { ok: true, message: `Saved.${note}`, section }
@@ -207,4 +214,13 @@ async function queueDemoHistory(profileId: string, now: Date, env: ReturnType<ty
   await db.insert(collectionRuns).values({ creatorProfileId: profileId, dataMode: 'demo', trigger: 'demo_setup', status: 'queued', requestedAt: now })
   const worker = inProcessWorker() ?? (env.RUN_WORKER_IN_WEB ? ensureInProcessWorker(env, getLogger('worker')) : null)
   worker?.wake()
+}
+
+/** A model name that plainly belongs to another provider is a mistake worth catching before a run fails on it. */
+function modelMismatch(provider: string, model: string | null, embeddingProvider: string, embeddingModel: string | null): string | null {
+  if (model && provider === 'anthropic' && !model.startsWith('claude-')) return 'Anthropic model names start with “claude-” (for example claude-opus-5-5).'
+  if (model && provider === 'openai' && model.startsWith('claude-')) return 'That is an Anthropic model; choose Anthropic as the language model, or an OpenAI model name.'
+  if (embeddingModel && embeddingProvider === 'voyage' && !embeddingModel.startsWith('voyage-')) return 'Voyage model names start with “voyage-” (for example voyage-4-lite).'
+  if (embeddingModel && embeddingProvider === 'openai' && embeddingModel.startsWith('voyage-')) return 'That is a Voyage model; choose Voyage AI for embeddings.'
+  return null
 }

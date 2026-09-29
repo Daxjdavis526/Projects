@@ -1,5 +1,5 @@
 {
-  "id": "b03646b5-f9af-423c-92c6-f171c0ec4e56",
+  "id": "fe214dc4-0066-4c83-b68c-aaaaef1490ea",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -516,7 +516,7 @@
         "content_item_id": {
           "name": "content_item_id",
           "type": "uuid",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "provider": {
@@ -557,7 +557,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "content_embeddings_model_idx": {
+          "name": "content_embeddings_model_idx",
+          "columns": [
+            {
+              "expression": "model",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "content_embeddings_content_item_id_content_items_id_fk": {
           "name": "content_embeddings_content_item_id_content_items_id_fk",
@@ -573,7 +589,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "content_embeddings_content_item_id_model_pk": {
+          "name": "content_embeddings_content_item_id_model_pk",
+          "columns": [
+            "content_item_id",
+            "model"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},

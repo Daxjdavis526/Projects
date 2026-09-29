@@ -90,9 +90,13 @@ export const envSchema = z.object({
   AI_MODEL: optionalString,
   ANTHROPIC_API_KEY: optionalString,
   OPENAI_API_KEY: optionalString,
+  /** An OpenAI-compatible server instead of api.openai.com, e.g. http://localhost:11434/v1 (Ollama). */
+  OPENAI_BASE_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
   EMBEDDING_PROVIDER: z.preprocess(emptyToUndefined, z.enum(['local', 'openai', 'voyage']).optional()),
   EMBEDDING_MODEL: optionalString,
   VOYAGE_API_KEY: optionalString,
+  /** JSON overriding clustering thresholds for a remote embedding model, e.g. {"join":0.58}. See `npm run calibrate:embeddings`. */
+  EMBEDDING_THRESHOLDS: optionalString,
 
   /** Optional user-driven capture of posts the creator saw while browsing. Off by default. */
   ASSISTED_DISCOVERY_ENABLED: bool(false),

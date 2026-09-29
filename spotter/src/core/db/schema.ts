@@ -375,17 +375,25 @@ export const aiAnalysis = pgTable(
   (t) => [index('ai_analysis_topic_key_idx').on(t.topicKey)],
 )
 
-export const contentEmbeddings = pgTable('content_embeddings', {
-  contentItemId: uuid('content_item_id')
-    .primaryKey()
-    .references(() => contentItems.id, { onDelete: 'cascade' }),
-  provider: text('provider').notNull(),
-  model: text('model').notNull(),
-  dims: integer('dims').notNull(),
-  vector: real('vector').array().notNull(),
-  inputHash: text('input_hash').notNull(),
-  createdAt: createdAt(),
-})
+/**
+ * One vector per post per embedding model: the local model always, plus the
+ * configured remote model. Only vectors with the same `model` are compared.
+ */
+export const contentEmbeddings = pgTable(
+  'content_embeddings',
+  {
+    contentItemId: uuid('content_item_id')
+      .notNull()
+      .references(() => contentItems.id, { onDelete: 'cascade' }),
+    provider: text('provider').notNull(),
+    model: text('model').notNull(),
+    dims: integer('dims').notNull(),
+    vector: real('vector').array().notNull(),
+    inputHash: text('input_hash').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.contentItemId, t.model] }), index('content_embeddings_model_idx').on(t.model)],
+)
 
 // ---------------------------------------------------------------------------
 // Trends

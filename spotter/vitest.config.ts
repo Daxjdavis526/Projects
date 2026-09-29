@@ -16,7 +16,7 @@ export default defineConfig({
     hookTimeout: 60_000,
     env: {
       NODE_ENV: 'test',
-      LOG_LEVEL: 'warn',
+      LOG_LEVEL: 'error',
       TOKEN_ENCRYPTION_KEY: 'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=',
     },
   },

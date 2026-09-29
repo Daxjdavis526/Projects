@@ -1,5 +1,9 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { FlaskConical, Radio, RotateCcw } from 'lucide-react'
+import { selectProviders } from '@/core/ai/registry'
+import { DEFAULT_ANTHROPIC_MODEL, FALLBACK_MODELS as ANTHROPIC_FALLBACK_MODELS } from '@/core/ai/remote/anthropic'
+import { DEFAULT_OPENAI_EMBEDDING_MODEL, DEFAULT_OPENAI_MODEL } from '@/core/ai/remote/openai'
+import { DEFAULT_VOYAGE_MODEL } from '@/core/ai/remote/voyage'
 import { getEnv } from '@/core/config/env'
 import { parseSettings } from '@/core/config/settings'
 import { isConfigured } from '@/core/connectors/registry'
@@ -70,7 +74,8 @@ export default async function SettingsPage() {
   const zones = timeZoneOptions(profile.timezone)
   const times = [...settings.schedule.times, '', ''].slice(0, Math.max(4, settings.schedule.times.length + 1))
   const liveReady = PLATFORMS.filter((p) => isConfigured(p, env))
-  const keys = { anthropic: !!env.ANTHROPIC_API_KEY, openai: !!env.OPENAI_API_KEY, voyage: !!env.VOYAGE_API_KEY }
+  const keys = { anthropic: !!env.ANTHROPIC_API_KEY, openai: !!env.OPENAI_API_KEY || !!env.OPENAI_BASE_URL, voyage: !!env.VOYAGE_API_KEY }
+  const inUse = selectProviders(settings, env)
 
   return (
     <>
@@ -289,7 +294,7 @@ export default async function SettingsPage() {
               <select name="provider" defaultValue={settings.ai.provider} className={selectClass}>
                 <option value="local">Built-in (offline)</option>
                 <option value="anthropic">Anthropic {keys.anthropic ? '' : '(key not set)'}</option>
-                <option value="openai">OpenAI {keys.openai ? '' : '(key not set)'}</option>
+                <option value="openai">OpenAI or compatible {keys.openai ? '' : '(key not set)'}</option>
               </select>
             </Field>
             <Field label="Model" hint="Blank = provider default">
@@ -309,9 +314,33 @@ export default async function SettingsPage() {
               <input name="maxItemsPerRun" type="number" min={10} max={2000} defaultValue={settings.ai.maxItemsPerRun} className={compactInputClass} />
             </Field>
           </div>
+          <dl className="mt-4 grid gap-x-6 gap-y-1 text-[13px] sm:grid-cols-[auto_1fr]">
+            <dt className="text-muted">In use now</dt>
+            <dd className="font-mono text-[12px] text-ink-2">
+              {inUse.ai.name} · {inUse.ai.model}
+              {inUse.ai.name === 'anthropic' && ANTHROPIC_FALLBACK_MODELS.has(inUse.ai.model) ? ' · refusal fallback on' : ''}
+            </dd>
+            <dt className="text-muted">Embeddings</dt>
+            <dd className="font-mono text-[12px] text-ink-2">
+              {inUse.embedder.name} · {inUse.embedder.model}
+            </dd>
+            <dt className="text-muted">Defaults</dt>
+            <dd className="text-[12px] text-ink-2">
+              <span className="font-mono">{DEFAULT_ANTHROPIC_MODEL}</span> (Anthropic), <span className="font-mono">{DEFAULT_OPENAI_MODEL}</span> (OpenAI); embeddings{' '}
+              <span className="font-mono">{DEFAULT_OPENAI_EMBEDDING_MODEL}</span> or <span className="font-mono">{DEFAULT_VOYAGE_MODEL}</span> at 512 dimensions
+            </dd>
+          </dl>
+          {inUse.notes.length > 0 && (
+            <Callout tone="warning" className="mt-3">
+              {inUse.notes.map((n) => (
+                <p key={n}>{n}</p>
+              ))}
+            </Callout>
+          )}
           <p className="mt-3 text-[12px] text-muted">
             Keys are read from <span className="font-mono">ANTHROPIC_API_KEY</span>, <span className="font-mono">OPENAI_API_KEY</span> and <span className="font-mono">VOYAGE_API_KEY</span> on the
-            server. If a provider fails, SPOTTER falls back to the built-in one for that run and logs it.
+            server (<span className="font-mono">OPENAI_BASE_URL</span> points the OpenAI option at a local server such as Ollama). If a provider fails, SPOTTER uses the built-in one for
+            the affected posts, logs it, and retries next run; a rejected key or rate limit pauses the provider for a few minutes instead of failing post after post.
           </p>
         </SectionForm>
       </div>

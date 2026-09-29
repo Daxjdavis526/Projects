@@ -1,0 +1,16 @@
+{
+  "id": "msg_fixture_analysis",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-opus-5-5",
+  "content": [
+    { "type": "thinking", "thinking": "", "signature": "fixture" },
+    {
+      "type": "text",
+      "text": "{\"results\":[{\"id\":\"p1\",\"topic\":\"Squat depth & range of motion\",\"topicKey\":\"Squat Depth ROM\",\"format\":\"Myth busting\",\"hook\":\"Stop doing half reps on squats.\",\"hookType\":\"Contrarian claim\",\"style\":\"Educational controversy\",\"targetAudience\":\"Intermediate lifters\",\"controversy\":0.8,\"exercises\":[\"Squat\",\"squat\"],\"keywords\":[\"half reps\",\"squat depth\",\"Range of motion\"],\"summary\":\"Argues that full-depth squats build more muscle than half reps.\",\"nicheRelevance\":1.2,\"confidence\":0.91},{\"id\":\"p2\",\"topic\":\"Gym etiquette\",\"topicKey\":\"gym_etiquette\",\"format\":\"Skit / POV\",\"hook\":null,\"hookType\":\"POV\",\"style\":\"Comedy\",\"targetAudience\":\"Gym-goers\",\"controversy\":0.2,\"exercises\":[\"curl\"],\"keywords\":[\"squat rack\",\"curls\"],\"summary\":\"A skit about someone curling in the squat rack.\",\"nicheRelevance\":0.7,\"confidence\":0.84}]}"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": { "input_tokens": 1830, "output_tokens": 412, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 1210 }
+}

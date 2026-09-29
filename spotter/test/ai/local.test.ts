@@ -62,7 +62,7 @@ describe('local classifier', () => {
 
   it('says it does not know rather than forcing unfamiliar content into a topic', () => {
     const a = classifyLocally(input('Japanese walking method for longevity'))
-    expect(a.topicKey.startsWith('other_')).toBe(true)
+    expect(a.topicKey).toBe('general_training')
     expect(a.confidence).toBeLessThan(0.3)
     expect(a.nicheRelevance).toBeLessThan(0.3)
   })

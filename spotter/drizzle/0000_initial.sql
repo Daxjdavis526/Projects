@@ -63,13 +63,14 @@ CREATE TABLE "collection_runs" (
 );
 --> statement-breakpoint
 CREATE TABLE "content_embeddings" (
-	"content_item_id" uuid PRIMARY KEY NOT NULL,
+	"content_item_id" uuid NOT NULL,
 	"provider" text NOT NULL,
 	"model" text NOT NULL,
 	"dims" integer NOT NULL,
 	"vector" real[] NOT NULL,
 	"input_hash" text NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "content_embeddings_content_item_id_model_pk" PRIMARY KEY("content_item_id","model")
 );
 --> statement-breakpoint
 CREATE TABLE "content_items" (
@@ -440,6 +441,7 @@ CREATE INDEX "ai_analysis_topic_key_idx" ON "ai_analysis" USING btree ("topic_ke
 CREATE INDEX "collection_runs_profile_requested_idx" ON "collection_runs" USING btree ("creator_profile_id","requested_at");--> statement-breakpoint
 CREATE INDEX "collection_runs_status_idx" ON "collection_runs" USING btree ("status");--> statement-breakpoint
 CREATE UNIQUE INDEX "collection_runs_schedule_slot_key" ON "collection_runs" USING btree ("creator_profile_id","data_mode","scheduled_for") WHERE "collection_runs"."trigger" = 'schedule';--> statement-breakpoint
+CREATE INDEX "content_embeddings_model_idx" ON "content_embeddings" USING btree ("model");--> statement-breakpoint
 CREATE UNIQUE INDEX "content_items_platform_origin_external_key" ON "content_items" USING btree ("platform","data_origin","external_id");--> statement-breakpoint
 CREATE INDEX "content_items_origin_own_published_idx" ON "content_items" USING btree ("data_origin","is_own","published_at");--> statement-breakpoint
 CREATE INDEX "content_items_creator_idx" ON "content_items" USING btree ("creator_id");--> statement-breakpoint

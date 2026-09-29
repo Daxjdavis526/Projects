@@ -15,7 +15,7 @@ import { analyzablePlatforms } from '../compliance/policy'
 import { aiAnalysis, contentEmbeddings, contentItems, creatorContentPerformance } from '../db/schema'
 import type { Platform } from '../domain/types'
 import type { RunContext } from './context'
-import { selectProviders } from '../ai/registry'
+import { clusteringEmbedder } from './providers'
 
 const HOUR = 3_600_000
 
@@ -30,7 +30,7 @@ export interface PersonalizationResult {
 
 export async function runPersonalizationStage(rc: RunContext): Promise<PersonalizationResult> {
   const platforms = [...analyzablePlatforms(rc.env, rc.dataMode).own] as Platform[]
-  const { embedder } = selectProviders(rc.settings, rc.env)
+  const { embedder } = await clusteringEmbedder(rc)
   const empty: PersonalizationResult = { model: { performanceCentroid: null, centroid: null, topics: [], lifts: [], ownPostCount: 0 }, lifts: [], insights: [], ownPosts: 0, postLifts: new Map() }
   if (platforms.length === 0) return empty
   const rows = await rc.db
@@ -45,6 +45,7 @@ export async function runPersonalizationStage(rc: RunContext): Promise<Personali
       shares: contentItems.latestShareCount,
       saves: contentItems.latestSaveCount,
       topic: aiAnalysis.topic,
+      topicKey: aiAnalysis.topicKey,
       format: aiAnalysis.format,
       hookType: aiAnalysis.hookType,
       style: aiAnalysis.style,
@@ -54,7 +55,7 @@ export async function runPersonalizationStage(rc: RunContext): Promise<Personali
     })
     .from(contentItems)
     .leftJoin(aiAnalysis, and(eq(aiAnalysis.contentItemId, contentItems.id), eq(aiAnalysis.status, 'succeeded')))
-    .leftJoin(contentEmbeddings, eq(contentEmbeddings.contentItemId, contentItems.id))
+    .leftJoin(contentEmbeddings, and(eq(contentEmbeddings.contentItemId, contentItems.id), eq(contentEmbeddings.model, embedder.model)))
     .where(
       and(
         inArray(contentItems.dataOrigin, rc.origins),
@@ -116,7 +117,8 @@ export async function runPersonalizationStage(rc: RunContext): Promise<Personali
       const logLift = Math.max(-2, Math.min(2, Math.log(r.views / expected.expected)))
       vectors.push(r.vector)
       vectorLifts.push(Math.exp(logLift))
-      if (r.topic) {
+      // The catch-all bucket is not a subject the creator posts about; it would make a meaningless "closest topic".
+      if (r.topic && r.topicKey !== 'general_training') {
         const group = byTopic.get(r.topic) ?? { vectors: [], logLifts: [] }
         group.vectors.push(r.vector)
         group.logLifts.push(logLift)

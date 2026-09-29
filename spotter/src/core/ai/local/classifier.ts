@@ -116,20 +116,18 @@ export function classifyLocally(input: ContentAnalysisInput, excludeKeywords: st
   const best = topics[0]
   const runnerUp = topics[1]
 
+  // A topic the lexicon does not know stays "General training content" rather than
+  // a label invented from stray words: an honest bucket beats a misleading name.
+  // (Grouping does not depend on it — trends form from embeddings — and an LLM
+  // provider names new topics properly.)
   let topicKey = 'general_training'
   let topicLabel = 'General training content'
-  let topicConfidence = 0.3
+  let topicConfidence = view.tokens.length > 0 ? 0.2 : 0.3
   if (best && best.score >= 1.5) {
     topicKey = best.key
     topicLabel = best.label
     const margin = runnerUp ? (best.score - runnerUp.score) / best.score : 1
     topicConfidence = Math.min(0.9, 0.35 + 0.35 * margin + 0.2 * Math.min(1, best.score / 6))
-  } else if (view.tokens.length > 0) {
-    // Unknown to the lexicon: describe it by its most distinctive words.
-    const words = topKeywords(view.tokens, [], 3)
-    topicKey = `other_${words.slice(0, 2).join('_') || 'misc'}`
-    topicLabel = words.length ? words.join(' ') : 'Other'
-    topicConfidence = 0.2
   }
 
   const format = bestLabel(view.full, compiledFormats)?.label ?? 'Talking head'

@@ -152,7 +152,9 @@ export interface EmbeddingThresholds {
 
 export interface EmbeddingProvider {
   readonly name: string
+  /** Identifies the vector space: stored with every vector, and only vectors with the same id are compared. */
   readonly model: string
+  /** Vector length; 0 when it is only known from the first response (a local server's native size). */
   readonly dims: number
   readonly remote: boolean
   /** Calibrated for this model's similarity distribution. */
@@ -160,14 +162,28 @@ export interface EmbeddingProvider {
   embed(texts: string[]): Promise<number[][]>
 }
 
+/**
+ * Why a provider call failed. `auth` and `rate_limit` mean the provider cannot
+ * serve anything right now (bad key, exhausted quota): callers stop using it
+ * for the rest of the run instead of failing the same way item after item.
+ */
+export type AIErrorKind = 'auth' | 'rate_limit' | 'unavailable' | 'invalid_request' | 'refusal' | 'truncated' | 'bad_response'
+
 export class AIProviderError extends Error {
   readonly provider: string
+  readonly kind: AIErrorKind
   readonly retryable: boolean
-  constructor(provider: string, message: string, retryable = false) {
+  constructor(provider: string, message: string, kind: AIErrorKind = 'bad_response') {
     super(message)
     this.name = 'AIProviderError'
     this.provider = provider
-    this.retryable = retryable
+    this.kind = kind
+    this.retryable = kind === 'rate_limit' || kind === 'unavailable'
+  }
+
+  /** The provider as a whole is unusable for now, not just this request. */
+  get disablesProvider(): boolean {
+    return this.kind === 'auth' || this.kind === 'rate_limit'
   }
 }
 
