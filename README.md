@@ -253,11 +253,11 @@ which dimensions are published and which are estimated from photographs.
 **ENDURANCE** — a parametric CAD model of the Endurance from *Interstellar*.
 It includes the 64 m ring of twelve modules in their canonical order, nozzle
 bays on the four engine modules, the connector nodes, tunnels and docking
-capsules, the hub with its single spoke, and both Rangers and both landers
-docked. It was built from New Deal Studios' 1/15 miniature, film frames and
-the plan in *The Science of Interstellar*. It exports a STEP assembly and a
-watertight, hollow-moduled STL at 1:300, 213 mm across. The live page is a
-3D viewer with download links.
+capsules, and the hub with its single spoke. The Rangers and landers can be
+docked on with a flag. It was built from New Deal Studios' 1/15 miniature,
+film frames and the plan in *The Science of Interstellar*. It exports a STEP
+assembly and a watertight, hollow-moduled STL at 1:300, 213 mm across and
+28 mm thick. The live page is a 3D viewer with download links.
 
 Live: https://daxjdavis526.github.io/Projects/endurance/
 

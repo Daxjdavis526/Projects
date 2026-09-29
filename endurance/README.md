@@ -1,10 +1,10 @@
 # ENDURANCE
 
 A parametric CAD model of the **Endurance** from *Interstellar* (2014): the
-64 m ring of twelve modules, its hub and single spoke, with both Rangers and
-both landers docked. It exports a STEP file for CAD and a watertight STL for
-printing. The default scale is **1:300**, which makes the ring 213 mm across
-and the whole ship 140 mm along its axis.
+64 m ring of twelve modules and its hub and single spoke. It exports a STEP
+file for CAD and a watertight STL for printing. The default scale is
+**1:300**, which makes the ship 213 mm across and 28 mm thick. `--docked`
+adds the two Rangers and two landers docked at the hub.
 
 Live viewer: https://daxjdavis526.github.io/Projects/endurance/
 
@@ -14,7 +14,7 @@ Live viewer: https://daxjdavis526.github.io/Projects/endurance/
 
 | file | what |
 |---|---|
-| `models/endurance_1-300_step.zip` | The CAD model, zipped. Named, coloured bodies: `ring`, `engine_nozzles`, `hub`, `ranger`, `landers`, `lander_nozzles`. Units mm. |
+| `models/endurance_1-300_step.zip` | The CAD model, zipped. Named, coloured bodies: `ring`, `engine_nozzles`, `hub` (and `ranger`, `landers`, `lander_nozzles` with `--docked`). Units mm. |
 | `models/endurance_1-300.stl` | The print model: everything unioned into one watertight body (checked with manifold3d, 0 non-manifold edges). |
 | `models/endurance.glb` | The CAD model tessellated for `index.html`. |
 | `build_model.py` | The generator. Every file above comes out of it. |
@@ -27,6 +27,7 @@ pip install cadquery manifold3d
 python3 endurance/build_model.py               # 1:300 into endurance/models/
 python3 endurance/build_model.py --scale 250   # 1:250, 256 mm across
 python3 endurance/build_model.py --shell 0     # solid modules
+python3 endurance/build_model.py --docked      # with Rangers and landers (*_docked files)
 ```
 
 It takes about fifteen seconds.
@@ -37,10 +38,10 @@ points at 3 o'clock (+X).
 
 ## Printing
 
-- Print it flat on its aft face, or on its forward face if you want the
-  nozzle bays on top. The docked Rangers stick out 18 m (60 mm) forward and
-  aft of the ring, so support the hub stack or print the Rangers upright as
-  a column.
+- Print it flat, 28 mm tall. Lay it on its forward face if you want the
+  nozzle bays on top. The hub's docking ports stand only 3 m (10 mm) proud of
+  the ring's faces, so the hub needs just a little support. With `--docked`,
+  the Rangers stick out 60 mm forward and aft, so support the hub stack.
 - The twelve ring modules are hollow, with 1/8 in (3.175 mm) walls and closed
   cavities. That is fine for FDM. For resin, drill a drain hole into each
   module, or trapped resin will cure inside and crack them.
@@ -74,7 +75,7 @@ at 75°, 135°, 255° and 315°.
 - A short stub toward the command module, which stops well short of it.
 - Two arms, up and down, carrying the landers.
 
-**Docked craft.**
+**Docked craft (`--docked`).**
 - Two Rangers, 18 m long, sit tail-first on the axial ports, one forward and
   one aft, with their wings toward the landers.
 - Two landers (14.4 × 4.8 × 14 m, faceted, four engines aft) lie along the

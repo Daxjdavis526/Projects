@@ -330,7 +330,9 @@ def lander(side):
 # ---------------------------------------------------------------------------
 # Assembly
 # ---------------------------------------------------------------------------
-def build(m: Model):
+def build(m: Model, docked=False):
+    """The ship: ring, nodes, airlocks, hub and spoke. With docked=True, also
+    the two Rangers and two landers as the film first shows them."""
     ring, dark = [], []
     for theta, kind in MODULES:
         hull, d = module(m, kind)
@@ -342,20 +344,21 @@ def build(m: Model):
         ring.append(at(nd, t))
         ring += tunnels(t)
     ring += [airlock(t) for t in AIRLOCKS]
-    hub = hub_and_spoke()
-    landers, lander_nozzles = [], []
-    for s in (1, -1):
-        b, n = lander(s)
-        landers.append(b)
-        lander_nozzles += n
-    return {
+    parts = {
         "ring": fuse(ring),
         "engine_nozzles": fuse(dark),
-        "hub": hub,
-        "ranger": fuse([ranger(), ranger(aft=True)]),
-        "landers": fuse(landers),
-        "lander_nozzles": fuse(lander_nozzles),
+        "hub": hub_and_spoke(),
     }
+    if docked:
+        landers, lander_nozzles = [], []
+        for s in (1, -1):
+            b, n = lander(s)
+            landers.append(b)
+            lander_nozzles += n
+        parts["ranger"] = fuse([ranger(), ranger(aft=True)])
+        parts["landers"] = fuse(landers)
+        parts["lander_nozzles"] = fuse(lander_nozzles)
+    return parts
 
 
 COLOURS = {
@@ -393,6 +396,8 @@ def main():
     ap.add_argument("--scale", type=float, default=300, help="scale denominator (default 1:300)")
     ap.add_argument("--shell", type=float, default=3.175,
                     help="hollow the ring modules with walls this thick, mm (default 1/8 in; 0 = solid)")
+    ap.add_argument("--docked", action="store_true",
+                    help="add the two Rangers and two landers docked at the hub")
     ap.add_argument("--out", type=Path, default=Path(__file__).parent / "models")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
