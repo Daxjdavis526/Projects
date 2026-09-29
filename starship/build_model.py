@@ -1096,6 +1096,7 @@ def main():
                        (ship_mesh, "starship_ship")):
         path = args.out / f"{name}_{tag}.stl"
         write_stl(mesh, path)
+        drop_degenerate_triangles(path)     # slivers from rounding to float32
         lo, hi = mesh.bounding_box()[:3], mesh.bounding_box()[3:]
         print(f"wrote {path}  ({hi[0] - lo[0]:.1f} x {hi[1] - lo[1]:.1f} x {hi[2] - lo[2]:.1f} mm, "
               f"{mesh.num_tri()} triangles, manifold={mesh.status() == manifold3d.Error.NoError})")
