@@ -27,6 +27,7 @@ pip install -e "./sonicline[geometry,post]"
 sonicline import nozzle.step --p0 "20 bar"     # analyse the CAD, write a definition
 sonicline check  nozzle.json                   # quasi-1D prediction + pre-flight checks
 sonicline run    nozzle.json --processors 4    # mesh, solve, post-process, judge
+sonicline study  nozzle.json --processors 4    # three meshes: grid-convergence index
 sonicline verify                               # verification cases vs analytical theory
 ```
 
@@ -86,7 +87,7 @@ turns and expands around the sharp exit lip.
 
 ## Verification
 
-`sonicline verify` runs these cases on standard meshes (about 6 minutes on
+`sonicline verify` runs these cases on standard meshes (about 18 minutes on
 4 cores); CI runs V1 and V4a end to end through OpenFOAM on every change. Every reference is
 computed without the CFD.
 
@@ -100,11 +101,14 @@ computed without the CFD.
 | | | thrust vs 1D × Cd × divergence factor | +0.106 % | 0.5 % |
 | V2 | inviscid NPARC nozzle, normal shock in the diverging section (pe/p0 = 0.75) | shock position vs quasi-1D, axis / wall | +0.23 % / −0.11 % of the diverging length | 2 % |
 | | | Cd vs Kliegel–Levine | +0.003 % | 0.2 % |
+| V3 | inviscid 20 bar reference nozzle, shock held inside by pb = 10 / 14 bar | shock position vs quasi-1D, axis and wall | within −7.1 % … +6.3 % of the diverging length | 10 % (the shock is curved; see below) |
 | V4a | inviscid converging nozzle, choked, into a sea-level plume | Cd vs Kliegel–Levine | +0.054 % | 0.2 % |
 | V4b | same, subsonic, with a straight throat section | mass flow vs isentropic | −0.16 % | 0.5 % |
+| V5 | inviscid throat Cd, Rc/Rt = 0.625, 1, 2, 4 (three-mesh studies) | extrapolated Cd vs Kliegel–Levine | within 4×10⁻⁵ | 5×10⁻⁴ |
 | V6 | 3D O-grid vs wedge on V1 | mass flow / thrust | −0.03 % / −0.12 % | 0.2 % / 0.3 % |
 | V7 | rhoCentralFoam vs rhoPimpleFoam on V1 | mass flow / thrust | −0.055 % / +0.066 % | 0.1 % / 0.2 % |
-| all | | mass conservation, inlet vs exit | ≤ 2.9×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
+| V10 | V1 nozzle at 30 bar, Peng–Robinson vs perfect gas | mass-flow ratio vs the Peng–Robinson isentrope (+1.314 %) | −0.009 % | 0.02 % |
+| all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
 The full table is in [doc/verification-standard.md](doc/verification-standard.md).
@@ -115,6 +119,18 @@ time-accurate, it either pushes the shock out of the nozzle or settles 30 %
 of the diverging length downstream. rhoCentralFoam puts it within 0.3 %, so
 SONICLINE now picks rhoCentralFoam by itself whenever a shock is expected
 inside the nozzle, and a rhoPimpleFoam run there is marked not trustworthy.
+
+**What V5 found.** On one standard mesh a sharp throat (Rc/Rt = 0.625)
+reads 0.26 % below the Kliegel–Levine Cd. On three systematically refined
+meshes the error falls at order 1.3–1.6, and the extrapolated Cd matches
+the correlation to 4×10⁻⁵ at every curvature tested. The single-mesh
+shortfall is discretisation error: about 0.25 % for a sharp throat and
+0.06 % for a gentle one. `sonicline study` measures it for any case.
+
+**What V3 cannot do.** In a 15° cone the normal shock is curved, 5–10 % of
+the diverging length further downstream on the axis than at the wall. No
+simple theory predicts that shape, so V3 checks the position only to 10 %.
+V2 is the precise test.
 
 **What V4b found.** A subsonic converging nozzle that ends at its curved
 throat does not deliver quasi-1D mass flow: the streamlines are still
@@ -144,6 +160,11 @@ The house rule: say plainly where the model stops.
     report wall temperature and the recovery factor.
   - Every run checks energy conservation: with adiabatic walls, total
     temperature leaving the nozzle must match what enters to 0.2 %.
+- **Real gas in the CFD.** Optional (`"gas": {"equation_of_state":
+  "peng_robinson"}`, shock-free nozzles only). Peng–Robinson over-predicts
+  nitrogen's real-gas mass flux by about a quarter (+0.89 % against the
+  reference equation of state's +0.71 % at 20 bar), so the default stays
+  the perfect gas with the reference correction reported beside it.
 - **Solvers.** rhoPimpleFoam (pressure-based) for shock-free nozzles;
   rhoCentralFoam (density-based) wherever quasi-1D theory expects a shock or
   separation inside the nozzle, because rhoPimpleFoam puts a normal shock in
@@ -213,7 +234,7 @@ src/sonicline/
   metrics/      propulsion metrics and the trust verdict
   verification/ the verification cases
   cli.py
-tests/          about 210 tests; the OpenFOAM ones skip without it
+tests/          about 225 tests; the OpenFOAM ones skip without it
 examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD)
 doc/            images and the verification table
 ```

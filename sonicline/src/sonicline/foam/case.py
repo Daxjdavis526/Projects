@@ -41,6 +41,12 @@ CENTRAL_SOLVER = "rhoCentralFoam"
 DEFAULT_MAX_ITERATIONS = {PIMPLE_SOLVER: 20000, CENTRAL_SOLVER: 60000}
 
 
+def energy_field(defn: d.SimulationDefinition) -> str:
+    """OpenFOAM's energy variable: internal energy e, except enthalpy h for
+    the Peng-Robinson gas (the only form OpenFOAM compiles it in)."""
+    return "h" if defn.gas.peng_robinson else "e"
+
+
 def iteration_limit(defn: d.SimulationDefinition, solver: str) -> int:
     n = defn.numerics.convergence.max_iterations
     return DEFAULT_MAX_ITERATIONS[solver] if n is None else n
@@ -192,7 +198,14 @@ def build_case(
     viscous_work = needs_viscous_work_extension(defn, profile)
     if viscous_work and extension_library is None:
         raise ValueError("viscous rhoPimpleFoam cases need the viscous-work extension library")
-    _write_constant(case, gas, viscous, viscous_work, ras)
+    real_gas = None
+    if defn.gas.peng_robinson:
+        if solver != PIMPLE_SOLVER:
+            raise ValueError("the Peng-Robinson gas runs only with rhoPimpleFoam")
+        from ..core.pengrobinson import PengRobinson
+
+        real_gas = PengRobinson(gas)
+    _write_constant(case, gas, viscous, viscous_work, ras, real_gas)
     _write_fields(case, defn, meta, profile.exit_radius, fields, p_init, T_init, U_init,
                   k0, omega0, k_amb, omega_amb, L_mix)
     exit_region = _region(meta, mesh, "exit")
@@ -221,24 +234,32 @@ def build_case(
 
 
 def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bool,
-                    ras: bool) -> None:
-    transport = ({"As": gas.sutherland_As, "Ts": gas.sutherland_Ts} if viscous
-                 else {"mu": 0, "Pr": 0.71})
+                    ras: bool, real_gas=None) -> None:
+    mixture: dict = {"specie": {"molWeight": gas.molar_mass},
+                     "thermodynamics": {"Cp": gas.cp, "Hf": 0}}
+    if real_gas is None:
+        transport = ({"As": gas.sutherland_As, "Ts": gas.sutherland_Ts} if viscous
+                     else {"mu": 0, "Pr": 0.71})
+        kinds = ("sutherland" if viscous else "const", "perfectGas", "sensibleInternalEnergy")
+    else:
+        # OpenFOAM compiles Peng-Robinson with constant cp only as
+        # sutherland / sensibleEnthalpy; As = 0 makes it inviscid.
+        transport = {"As": gas.sutherland_As if viscous else 0.0, "Ts": gas.sutherland_Ts}
+        kinds = ("sutherland", "PengRobinsonGas", "sensibleEnthalpy")
+        c = real_gas.crit
+        mixture["equationOfState"] = {"Tc": c.Tc, "Vc": c.Vc, "Pc": c.Pc, "omega": c.omega}
+    mixture["transport"] = transport
     write_dict(case / "constant" / "thermophysicalProperties", "thermophysicalProperties", {
         "thermoType": {
             "type": "hePsiThermo",
             "mixture": "pureMixture",
-            "transport": "sutherland" if viscous else "const",
+            "transport": kinds[0],
             "thermo": "hConst",
-            "equationOfState": "perfectGas",
+            "equationOfState": kinds[1],
             "specie": "specie",
-            "energy": "sensibleInternalEnergy",
+            "energy": kinds[2],
         },
-        "mixture": {
-            "specie": {"molWeight": gas.molar_mass},
-            "thermodynamics": {"Cp": gas.cp, "Hf": 0},
-            "transport": transport,
-        },
+        "mixture": mixture,
     }, location="constant")
     if viscous_work:
         # rhoPimpleFoam's total-energy equation lacks the viscous work
@@ -302,7 +323,10 @@ def _write_fields(case, defn, meta, exit_radius, fields, p_init, T_init, U_init,
               if fixed_wall_T else {"type": "zeroGradient"}),
         "k": {"type": "kqRWallFunction", "value": Raw(f"uniform {k0}")},
         "omega": {"type": "omegaWallFunction", "value": Raw(f"uniform {omega0}")},
-        "nut": {"type": "nutLowReWallFunction", "value": Raw("uniform 0")},
+        # Resolved walls (y+ ~ 1) integrate to the wall; coarser ones use
+        # Spalding's law, valid continuously from the sublayer to the log layer.
+        "nut": {"type": "nutLowReWallFunction" if defn.mesh.first_cell_yplus <= 5.0
+                else "nutUSpaldingWallFunction", "value": Raw("uniform 0")},
         "alphat": {"type": "compressible::alphatWallFunction", "Prt": 0.85, "value": Raw("uniform 0")},
     }
     entrain = {
@@ -385,7 +409,7 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
     patches = meta.patches
     fos: dict = {
         "residuals": {"type": "solverInfo", "libs": ["utilityFunctionObjects"],
-                      "fields": ["p", "U", "e"] + (["k", "omega"] if ras else []),
+                      "fields": ["p", "U", energy_field(defn)] + (["k", "omega"] if ras else []),
                       "writeResidualFields": "false"},
         "Ma": {"type": "MachNo", "libs": ["fieldFunctionObjects"],
                "executeControl": "timeStep", "writeControl": "writeTime"},
@@ -467,14 +491,14 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
     if solver == CENTRAL_SOLVER:
         _write_central_numerics(case, ras, steady)
     else:
-        _write_pimple_numerics(case, ras, steady, p0)
+        _write_pimple_numerics(case, ras, steady, p0, energy_field(defn))
     write_dict(case / "system" / "decomposeParDict", "decomposeParDict", {
         "numberOfSubdomains": max(1, defn.numerics.processors),
         "method": "scotch",
     }, location="system")
 
 
-def _write_pimple_numerics(case, ras, steady, p0):
+def _write_pimple_numerics(case, ras, steady, p0, he="e"):
     turb_div = ({"div(phi,k)": Raw("Gauss linearUpwind grad(k)"),
                  "div(phi,omega)": Raw("Gauss linearUpwind grad(omega)")} if ras else {})
     write_dict(case / "system" / "fvSchemes", "fvSchemes", {
@@ -483,7 +507,7 @@ def _write_pimple_numerics(case, ras, steady, p0):
         "divSchemes": {
             "default": "none",
             "div(phi,U)": Raw("Gauss linearUpwindV grad(U)"),
-            "div(phi,e)": Raw("Gauss linearUpwind grad(e)"),
+            f"div(phi,{he})": Raw(f"Gauss linearUpwind grad({he})"),
             "div(phi,K)": Raw("Gauss linear"),
             "div(phid,p)": Raw("Gauss limitedLinear 1"),
             "div(phiv,p)": Raw("Gauss linear"),
@@ -501,7 +525,7 @@ def _write_pimple_numerics(case, ras, steady, p0):
         '"(rho|rhoFinal)"': {"solver": "diagonal"},
         '"(p|pFinal)"': {"solver": "GAMG", "smoother": "GaussSeidel", "tolerance": 1e-12,
                          "relTol": 0.01},
-        '"(U|e|k|omega)(|Final)"': {"solver": "smoothSolver", "smoother": "symGaussSeidel",
+        '"(U|e|h|k|omega)(|Final)"': {"solver": "smoothSolver", "smoother": "symGaussSeidel",
                                    "tolerance": 1e-12, "relTol": 0.01},
     }
     pimple = {"nOuterCorrectors": 1, "nCorrectors": 2, "nNonOrthogonalCorrectors": 0,

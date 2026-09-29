@@ -12,9 +12,10 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from ..core import realgas
+from ..core import pengrobinson, realgas
 from ..core.gas import G0
 from ..core.model import definition as d
+from ..core.pengrobinson import PengRobinson
 from ..core.profile import Profile
 from ..core.theory import discharge, nozzle
 from ..foam.case import CaseSummary
@@ -103,7 +104,12 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
 
     mdot = it.mdot_inlet
     rc = profile.rc_over_rt
-    cd = mdot / ideal.mass_flow
+    # Cd is measured against the ideal flow of the gas model the CFD runs.
+    # For Peng-Robinson that is its own choked flux (core.pengrobinson), so
+    # the Kliegel-Levine comparison still isolates the throat's 2D effect.
+    pr = PengRobinson(gas) if defn.gas.peng_robinson else None
+    pr_bias = pengrobinson.choked_mass_flux(pr, p0, T0).bias if pr and ideal.regime.choked else 0.0
+    cd = mdot / (ideal.mass_flow * (1.0 + pr_bias))
     kl = discharge.kliegel_levine(gas.gamma, rc) if rc else None
 
     out = {
@@ -169,22 +175,35 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     # Energy conservation: the flux-weighted total temperature T + |U|^2/2cp
     # carried through the exit must equal what enters. With adiabatic walls
     # nothing adds or removes heat between them.
-    def total_T(avg):
+    # For Peng-Robinson the enthalpy departure h_dep(p, T) / cp enters too
+    # (about 0.5 % of T0 between a 20 bar chamber and the exit), evaluated
+    # at the plane's area-averaged pressure.
+    def total_T(avg, p_plane):
         if "T" not in avg or "magSqr(U)" not in avg:
             return None
-        return avg["T"] + avg["magSqr(U)"] / (2.0 * gas.cp)
+        t0 = avg["T"] + avg["magSqr(U)"] / (2.0 * gas.cp)
+        if pr is not None and p_plane:
+            t0 += (pr.enthalpy(p_plane, avg["T"]) - gas.cp * avg["T"]) / gas.cp
+        return t0
 
-    T0_in, T0_exit = total_T(it.inlet_mass_avg), total_T(it.exit_mass_avg)
+    p_inlet = it.inlet_pressure_force / inlet_area if inlet_area else None
+    T0_in = total_T(it.inlet_mass_avg, p_inlet)
+    T0_exit = total_T(it.exit_mass_avg, it.exit_area_avg.get("p"))
     out["energy"] = {
         "total_temperature_inlet": T0_in,
-        "total_temperature_throat": total_T(it.throat_mass_avg),
+        "total_temperature_throat": total_T(it.throat_mass_avg, it.throat_area_avg.get("p")),
         "total_temperature_exit": T0_exit,
         "exit_minus_inlet": (T0_exit - T0_in) / T0_in if T0_in and T0_exit else None,
     }
+    out["gas"] = {"equation_of_state": defn.gas.equation_of_state}
+    if pr is not None:
+        out["gas"]["peng_robinson_choked_flux_bias"] = pr_bias
     if realgas.available():
         bias = realgas.choked_mass_flux(gas, p0, T0).bias
-        out["mass_flow"]["real_gas_correction"] = bias
-        out["mass_flow"]["inlet_real_gas_estimate"] = mdot * (1.0 + bias)
+        # From the model the CFD ran to the reference equation of state.
+        correction = (1.0 + bias) / (1.0 + pr_bias) - 1.0
+        out["mass_flow"]["real_gas_correction"] = correction
+        out["mass_flow"]["inlet_real_gas_estimate"] = mdot * (1.0 + correction)
     return out
 
 

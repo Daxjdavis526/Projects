@@ -64,6 +64,17 @@ class Resolution:
             "fine": Resolution(0.025, 16, 1.15, 0.4),
         }[name]
 
+    def refined(self, ratio: float) -> "Resolution":
+        """The same mesh with every cell size divided by ``ratio`` (> 1 is
+        finer): axial and core spacings directly, wall-normal growth as
+        growth^(1/ratio) so the geometric layers subdivide consistently. For
+        grid-convergence studies, which need one refinement ratio in every
+        direction; the named presets are not such a family."""
+        if ratio == 1.0:
+            return self
+        return Resolution(self.throat_spacing / ratio, max(2, round(self.core_cells * ratio)),
+                          self.ring_growth ** (1.0 / ratio), self.plume_far_spacing / ratio)
+
 
 @dataclass(frozen=True)
 class PlumeRegion:

@@ -46,8 +46,8 @@ def spec_for(defn: d.SimulationDefinition, profile: Profile) -> RevolvedMeshSpec
     form = Form.WEDGE if defn.mesh.form is d.MeshForm.WEDGE else Form.O_GRID
     return RevolvedMeshSpec(
         form=form,
-        resolution=Resolution.preset(defn.mesh.quality.value),
-        wall_first_cell=throat_first_cell(defn, profile) if viscous else None,
+        resolution=Resolution.preset(defn.mesh.quality.value).refined(defn.mesh.refinement),
+        wall_first_cell=throat_first_cell(defn, profile) / defn.mesh.refinement if viscous else None,
         wedge_angle=defn.mesh.wedge_angle,
         plume=plume,
     )

@@ -139,3 +139,14 @@ def test_auto_solver_follows_the_physics(tmp_path):
     assert "fixedValue" in outlet and "150000" in outlet
     # Design operation: rhoPimpleFoam.
     assert _build(tmp_path, "auto").solver == "rhoPimpleFoam"
+
+
+def test_peng_robinson_case(tmp_path):
+    s = _build(tmp_path, "pr", {"gas": {"equation_of_state": "peng_robinson"},
+                               "flow": {"turbulence": {"type": "inviscid"}}})
+    thermo = (s.path / "constant/thermophysicalProperties").read_text()
+    for token in ("PengRobinsonGas", "sensibleEnthalpy", "sutherland", "Tc              126.192"):
+        assert token in thermo
+    assert "As              0;" in thermo  # inviscid via zero Sutherland viscosity
+    assert "div(phi,h)" in (s.path / "system/fvSchemes").read_text()
+    assert "(p U h)" in (s.path / "system/controlDict").read_text()

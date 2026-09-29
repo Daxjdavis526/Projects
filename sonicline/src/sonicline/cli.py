@@ -4,6 +4,7 @@
                                         quasi-1D prediction for it
     sonicline import <nozzle.step>      analyse a fluid volume, write a definition
     sonicline run <definition.json>     mesh, solve, post-process and judge it
+    sonicline study <definition.json>   grid-convergence study (three meshes, GCI)
     sonicline verify                    run the verification cases
 
 The same pipeline functions back the desktop UI; the CLI is also how CI and
@@ -154,6 +155,29 @@ def _import(cad: str, unit: str, p0: str, out: str | None) -> int:
     return 0
 
 
+def _study(path: str, out: str | None, processors: int | None, ratio: float) -> int:
+    import dataclasses
+    from pathlib import Path
+
+    from .run import study
+
+    try:
+        defn = model.load(path)
+    except (OSError, model.DefinitionError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    if processors:
+        defn = dataclasses.replace(defn, numerics=dataclasses.replace(defn.numerics, processors=processors))
+    out_dir = Path(out) if out else Path("runs") / f"{Path(path).stem}-study"
+    result = study.run(defn, out_dir, ratio, base_dir=Path(path).resolve().parent,
+                       on_event=lambda e: print(f"[{e.stage}] {e.message}", flush=True)
+                       if e.stage in ("mesh", "done", "verdict") else None)
+    print()
+    print(study.markdown(result))
+    print(f"results in {out_dir}")
+    return 0 if result.valid else 1
+
+
 def _verify(cases: str, quality: str, out: str, processors: int) -> int:
     from pathlib import Path
 
@@ -190,12 +214,23 @@ def main(argv: list[str] | None = None) -> int:
     imp.add_argument("--unit", default="mm", help="length unit for unitless files (STEP carries its own)")
     imp.add_argument("--p0", default="20 bar", help="chamber (stagnation) pressure")
     imp.add_argument("--out", help="definition file to write (default <cad>.json)")
+    stu = sub.add_parser("study", help="grid-convergence study of a definition (three meshes)")
+    stu.add_argument("definition")
+    stu.add_argument("--out", help="study directory (default runs/<definition name>-study)")
+    stu.add_argument("--processors", type=int, help="MPI processes")
+    stu.add_argument("--ratio", type=float, default=2 ** 0.5,
+                     help="refinement ratio between levels (at least 1.3; default sqrt 2)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V2,V4a,V4b,V6,V7")
+    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V10")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)
     args = parser.parse_args(argv)
+    if args.command == "study":
+        if args.ratio < 1.3:
+            print("error: the refinement ratio must be at least 1.3 (Celik et al. 2008)", file=sys.stderr)
+            return 2
+        return _study(args.definition, args.out, args.processors, args.ratio)
     if args.command == "verify":
         return _verify(args.cases, args.quality, args.out, args.processors)
     if args.command == "import":

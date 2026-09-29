@@ -14,6 +14,7 @@ thrust, corrected for divergence, is.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import math
 import time
@@ -66,7 +67,9 @@ class CaseResult:
 
     @property
     def passed(self) -> bool:
-        return self.status == "completed" and all(c.passed for c in self.checks)
+        # A run the verdict does not trust fails whatever its numbers say.
+        return (self.status == "completed" and self.trust != "not_trustworthy"
+                and all(c.passed for c in self.checks))
 
 
 @dataclass(frozen=True)
@@ -114,24 +117,44 @@ def _common_checks(metrics: dict) -> list[Check]:
     ]
 
 
-def _v1_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
-    g = defn.geometry
-    gas = NITROGEN
-    kl = discharge.kliegel_levine(gas.gamma, g.throat_rc_upstream)
-    lam = discharge.conical_divergence_factor(g.diverging_half_angle)
-    At = math.pi * g.throat_radius**2
-    Ae = At * g.expansion_ratio
-    ideal = nozzle.analyse(gas, 10e5, 300.0, 0.0, At, Ae)
-    f_ref = kl * lam * ideal.momentum_thrust + ideal.exit_pressure * Ae
-    return [
-        Check("discharge coefficient vs Kliegel-Levine", metrics["discharge_coefficient"]["cfd"],
-              kl, 2e-3, relative=False, note=f"Rc/Rt = {g.throat_rc_upstream}"),
-        Check("vacuum thrust vs 1D x Cd(K-L) x divergence factor", metrics["thrust"]["total"],
-              f_ref, 5e-3, note=f"lambda = {lam:.5f} for a {math.degrees(g.diverging_half_angle):g} deg cone"),
-    ] + _common_checks(metrics)
+def _v1_checks_at(p0: float, thrust: bool = True) -> Callable[[dict, m.SimulationDefinition], list[Check]]:
+    def checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+        g = defn.geometry
+        gas = NITROGEN
+        kl = discharge.kliegel_levine(gas.gamma, g.throat_rc_upstream)
+        lam = discharge.conical_divergence_factor(g.diverging_half_angle)
+        At = math.pi * g.throat_radius**2
+        Ae = At * g.expansion_ratio
+        ideal = nozzle.analyse(gas, p0, 300.0, 0.0, At, Ae)
+        f_ref = kl * lam * ideal.momentum_thrust + ideal.exit_pressure * Ae
+        out = [Check("discharge coefficient vs Kliegel-Levine", metrics["discharge_coefficient"]["cfd"],
+                     kl, 2e-3, relative=False, note=f"Rc/Rt = {g.throat_rc_upstream}")]
+        if thrust and not defn.gas.peng_robinson:
+            out.append(Check("vacuum thrust vs 1D x Cd(K-L) x divergence factor", metrics["thrust"]["total"],
+                             f_ref, 5e-3, note=f"lambda = {lam:.5f} for a "
+                                              f"{math.degrees(g.diverging_half_angle):g} deg cone"))
+        return out + _common_checks(metrics)
+    return checks
+
+
+_v1_checks = _v1_checks_at(10e5)
 
 
 # ----------------------------------------------------------------------------- V2
+
+
+# Some cases never become strictly steady. An inviscid subsonic jet (V4b):
+# its undamped shear layer feeds back to the exit plane, where the mass
+# flow oscillates by ~2e-4. A captured normal shock (V2, V3) settles into a
+# limit cycle of ~1e-4 as it moves between cells.
+DESIGN_LEVEL = m.Numerics(convergence=m.ConvergenceCriteria(integral_tolerance=1e-4,
+                                                            mass_imbalance=3e-4))
+# A captured shock needs only the drift allowance; its mass balance is as
+# tight as any other case's.
+SHOCK_LEVEL = m.Numerics(convergence=m.ConvergenceCriteria(integral_tolerance=1e-4,
+                                                           mass_imbalance=2e-5))
+
+
 
 
 def nparc_area(x: float) -> float:
@@ -163,39 +186,111 @@ def _v2_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
                                 exit_domain=m.TruncatedAtExit(fixed_pressure=True)),
         flow=m.Flow(turbulence=m.Inviscid()),
         mesh=m.MeshSpec(form=m.MeshForm(form), quality=m.MeshQuality(quality)),
-        numerics=TIGHT,
+        numerics=SHOCK_LEVEL,
     )
 
 
-def _v2_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
-    shock = metrics.get("shock") or {}
-    L = shock.get("diverging_length") or math.nan
-    x_ref = shock.get("x_quasi_1d", math.nan)
+def _shock_checks(tolerance: float) -> Callable[[dict, m.SimulationDefinition], list[Check]]:
+    def checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+        shock = metrics.get("shock") or {}
+        L = shock.get("diverging_length") or math.nan
+        x_ref = shock.get("x_quasi_1d", math.nan)
 
-    def offset(key):
-        x = shock.get(key)
-        return None if x is None else (x - x_ref) / L
+        def offset(key):
+            x = shock.get(key)
+            return None if x is None else (x - x_ref) / L
 
-    kl = discharge.kliegel_levine(NITROGEN.gamma, defn.geometry.profile().rc_over_rt)
-    return [
-        Check("shock position on the axis vs quasi-1D (fraction of diverging length)",
-              offset("x_centreline"), 0.0, 2e-2, relative=False,
-              note=f"quasi-1D shock Mach {metrics['regime']['shock_mach']:.3f}"),
-        Check("shock position at the wall vs quasi-1D (fraction of diverging length)",
-              offset("x_wall"), 0.0, 2e-2, relative=False),
-        Check("choked discharge coefficient vs Kliegel-Levine", metrics["discharge_coefficient"]["cfd"],
-              kl, 2e-3, relative=False),
-    ] + _common_checks(metrics)
+        kl = discharge.kliegel_levine(NITROGEN.gamma, defn.geometry.profile().rc_over_rt)
+        return [
+            Check("shock position on the axis vs quasi-1D (fraction of diverging length)",
+                  offset("x_centreline"), 0.0, tolerance, relative=False,
+                  note=f"quasi-1D shock Mach {metrics['regime']['shock_mach']:.3f}"),
+            Check("shock position at the wall vs quasi-1D (fraction of diverging length)",
+                  offset("x_wall"), 0.0, tolerance, relative=False),
+            Check("choked discharge coefficient vs Kliegel-Levine", metrics["discharge_coefficient"]["cfd"],
+                  kl, 2e-3, relative=False),
+        ] + _common_checks(metrics)
+    return checks
+
+
+_v2_checks = _shock_checks(2e-2)
+
+
+# ----------------------------------------------------------------------------- V3
+
+
+def _v3_definition(pb: float) -> Callable[[str, str], m.SimulationDefinition]:
+    """The 20 bar reference thruster nozzle, inviscid, with a normal shock
+    held inside it by a fixed exit pressure."""
+    def build(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+        return m.SimulationDefinition(
+            name=f"V3 reference nozzle, shock at pb = {pb / 1e5:g} bar",
+            geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=2.88),
+            boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=20e5, T0=300.0),
+                                    ambient=m.Ambient(pressure=pb, temperature=300.0),
+                                    exit_domain=m.TruncatedAtExit(fixed_pressure=True)),
+            flow=m.Flow(turbulence=m.Inviscid()),
+            mesh=m.MeshSpec(form=m.MeshForm(form), quality=m.MeshQuality(quality)),
+            numerics=SHOCK_LEVEL,
+        )
+    return build
+
+
+# A conical nozzle is not one-dimensional: its normal shock is curved,
+# standing further downstream on the axis than at the wall by 4.6 % (pb =
+# 10 bar) to 10 % (14 bar) of the diverging length. Quasi-1D theory places
+# a plane shock and source flow a spherical one (7.5 % axis-to-wall); the
+# subsonic flow behind the shock shapes it and neither is exact. V3 guards
+# the solver on a real thruster geometry within 10 %; V2's near-1D nozzle is
+# the tight test of shock position.
+V3_TOLERANCE = 1e-1
+
+
+# ----------------------------------------------------------------------------- V5
+
+
+# Throat curvature from sharp (0.625, one of Back, Massier and Cuffel's 1965
+# test nozzles) to gentle, with the same radius either side of the throat
+# as Kliegel-Levine assume. On one mesh the sharpest throat reads 0.26 %
+# low; that is discretisation error, falling at order ~1.3, so each ratio
+# runs as a three-level grid study and the check is on the extrapolated,
+# mesh-independent Cd (DESIGN.md section 11).
+V5_RATIOS = (0.625, 1.0, 2.0, 4.0)
+V5_TOLERANCE = 5e-4
+
+
+def _v5_definition(rc: float, quality: str) -> m.SimulationDefinition:
+    d = _v1_definition(quality)
+    return dataclasses.replace(
+        d, name=f"V5 inviscid throat, Rc/Rt = {rc:g}",
+        geometry=dataclasses.replace(d.geometry, throat_rc_upstream=rc, throat_rc_downstream=rc))
+
+
+def throat_cd_study(rc: float, quality: str, out: Path, processors: int = 1,
+                    on_event=None) -> CaseResult:
+    from ..run import study
+
+    defn = _v5_definition(rc, quality)
+    if processors > 1:
+        defn = dataclasses.replace(defn, numerics=dataclasses.replace(defn.numerics, processors=processors))
+    t0 = time.time()
+    run_dir = out / f"V5-rc{rc:g}-{quality}"
+    s = study.run(defn, run_dir, on_event=on_event)
+    kl = discharge.kliegel_levine(NITROGEN.gamma, rc)
+    r = CaseResult(f"V5 (Rc/Rt {rc:g})", f"Inviscid throat Cd, Rc/Rt = {rc:g}, grid study",
+                   "completed" if s.valid else "failed",
+                   "trusted" if all(t == "trusted" for t in s.trust) else "not_trustworthy",
+                   seconds=round(time.time() - t0, 1), run_dir=str(run_dir))
+    if s.valid:
+        g = s.quantity("discharge coefficient").result
+        note = (f"{g.convergence}, p = {g.order:.2f}, GCI {100 * g.gci_fine:.3f} %, "
+                f"finest mesh {g.values[0]:.6f}" if g.order is not None else g.convergence)
+        r.checks = [Check(f"extrapolated Cd vs Kliegel-Levine, Rc/Rt = {rc:g}", g.extrapolated, kl,
+                          V5_TOLERANCE, relative=False, note=note).evaluate()]
+    return r
 
 
 # ----------------------------------------------------------------------------- V4
-
-
-# An inviscid subsonic jet never becomes strictly steady: nothing damps its
-# shear layer, and being subsonic it feeds back to the exit plane, where the
-# mass flow oscillates by ~2e-4. It runs to design-level convergence.
-DESIGN_LEVEL = m.Numerics(convergence=m.ConvergenceCriteria(integral_tolerance=1e-4,
-                                                            mass_imbalance=3e-4))
 
 
 def _v4_definition(p0: float, name: str, throat_length: float,
@@ -237,11 +332,111 @@ def _v4b_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
     ] + common
 
 
+# ----------------------------------------------------------------------------- V9
+
+
+def iso9300_toroidal_cd(re_d: float) -> float:
+    """ISO 9300:2022 discharge coefficient of a toroidal-throat critical-flow
+    venturi, Cd = 0.9959 - 2.720 Re_d^-0.5 for 2.1e4 <= Re_d <= 3.2e7, with
+    Re_d = 4 qm / (pi d mu0) at stagnation viscosity. Its stated
+    uncertainty is 0.3 %. The Re^-0.5 is a laminar boundary layer's
+    displacement thickness: the correlation describes laminar throats."""
+    if not 2.1e4 <= re_d <= 3.2e7:
+        raise ValueError(f"Re_d = {re_d:.3g} is outside ISO 9300's range 2.1e4 to 3.2e7")
+    return 0.9959 - 2.720 * re_d**-0.5
+
+
+ISO9300_UNCERTAINTY = 3e-3
+
+
+def _v9_definition(p0: float, turbulence) -> Callable[[str, str], m.SimulationDefinition]:
+    """An ISO 9300 toroidal-throat venturi: throat curvature radius 2d on
+    both sides (Rc/Rt = 4), a 4 deg conical diffuser longer than d, run
+    choked into vacuum (Cd is independent of the back pressure once choked).
+    The inlet is a 45 deg cone tangent to the toroid where ISO continues the
+    toroid; the flow at the throat does not see the difference."""
+    def build(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+        return m.SimulationDefinition(
+            name=f"V9 ISO 9300 venturi, {p0 / 1e5:g} bar, {turbulence.TAG}",
+            geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=1.3,
+                                     diverging_half_angle=math.radians(4.0),
+                                     throat_rc_upstream=4.0, throat_rc_downstream=4.0),
+            boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=p0, T0=300.0),
+                                    ambient=m.Ambient(pressure=0.0),
+                                    exit_domain=m.TruncatedAtExit()),
+            flow=m.Flow(turbulence=turbulence),
+            mesh=m.MeshSpec(form=m.MeshForm(form), quality=m.MeshQuality(quality)),
+        )
+    return build
+
+
+def throat_reynolds(metrics: dict, defn: m.SimulationDefinition) -> float:
+    d_t = 2.0 * defn.geometry.throat_radius
+    mu0 = defn.gas.model().viscosity(defn.boundaries.inlet.T0)
+    return 4.0 * metrics["mass_flow"]["inlet"] / (math.pi * d_t * mu0)
+
+
+def _v9_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    re_d = throat_reynolds(metrics, defn)
+    return [Check("Cd vs ISO 9300 toroidal venturi", metrics["discharge_coefficient"]["cfd"],
+                  iso9300_toroidal_cd(re_d), ISO9300_UNCERTAINTY,
+                  note=f"Re_d = {re_d:.3g}, {defn.flow.turbulence.TAG}")] + _common_checks(metrics)
+
+
+# ----------------------------------------------------------------------------- V10
+
+
+V10_P0 = 30e5  # the top of the cold-gas band, where the real-gas effect is largest
+
+
+def _v10_definition(eos: str) -> Callable[[str, str], m.SimulationDefinition]:
+    def build(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+        d = _v1_definition(quality, form)
+        return dataclasses.replace(
+            d, name=f"V10 V1 nozzle at 30 bar, {eos}", gas=m.GasSpec(equation_of_state=eos),
+            boundaries=dataclasses.replace(d.boundaries, inlet=m.ReservoirInlet(p0=V10_P0, T0=300.0)))
+    return build
+
+
+def peng_robinson_check(perfect: tuple[CaseResult, dict | None],
+                        real: tuple[CaseResult, dict | None]) -> CaseResult:
+    """V10: the Peng-Robinson CFD against the Peng-Robinson isentrope. The
+    mass-flow ratio of the two runs on the same mesh cancels most of the
+    discretisation error, leaving the equation of state."""
+    from ..core import pengrobinson
+
+    (ra, ma), (rb, mb) = perfect, real
+    r = CaseResult("V10", "Peng-Robinson CFD vs the Peng-Robinson isentrope, 30 bar",
+                   "completed" if ra.status == rb.status == "completed" else "failed",
+                   "trusted" if ra.trust == rb.trust == "trusted" else "not_trustworthy")
+    if ma and mb:
+        pr = pengrobinson.choked_mass_flux(pengrobinson.PengRobinson(NITROGEN), V10_P0, 300.0)
+        r.checks = [Check("mass flow, Peng-Robinson / perfect gas", mb["mass_flow"]["inlet"] / ma["mass_flow"]["inlet"],
+                          1.0 + pr.bias, 2e-4, note=f"isentrope: {100 * pr.bias:+.3f} %").evaluate()]
+    return r
+
+
 CASES: dict[str, Case] = {
     "V1": Case("V1", "Inviscid conical CD nozzle into vacuum (throat Cd, vacuum thrust)",
                _v1_definition, _v1_checks),
     "V2": Case("V2", "Inviscid NPARC nozzle with a normal shock in the diverging section",
                _v2_definition, _v2_checks),
+    "V3a": Case("V3a", "Inviscid reference nozzle, normal shock late in the cone (pb = 10 bar)",
+                _v3_definition(10e5), _shock_checks(V3_TOLERANCE)),
+    "V3b": Case("V3b", "Inviscid reference nozzle, normal shock early in the cone (pb = 14 bar)",
+                _v3_definition(14e5), _shock_checks(V3_TOLERANCE)),
+    "V9a": Case("V9a", "ISO 9300 toroidal venturi, 2 bar (Re_d ~ 5e4), laminar",
+                _v9_definition(2e5, m.Laminar()), _v9_checks),
+    "V9b": Case("V9b", "ISO 9300 toroidal venturi, 10 bar (Re_d ~ 3e5), laminar",
+                _v9_definition(10e5, m.Laminar()), _v9_checks),
+    "V9c": Case("V9c", "ISO 9300 toroidal venturi, 2 bar, k-omega SST",
+                _v9_definition(2e5, m.KOmegaSST()), _v9_checks),
+    "V9d": Case("V9d", "ISO 9300 toroidal venturi, 10 bar, k-omega SST",
+                _v9_definition(10e5, m.KOmegaSST()), _v9_checks),
+    "V10-perfect": Case("V10-perfect", "V1 nozzle at 30 bar, perfect gas", _v10_definition("perfect_gas"),
+                        _v1_checks_at(V10_P0)),
+    "V10-pr": Case("V10-pr", "V1 nozzle at 30 bar, Peng-Robinson", _v10_definition("peng_robinson"),
+                   _v1_checks_at(V10_P0)),
     "V4a": Case("V4a", "Inviscid converging nozzle, choked, sea-level plume",
                 _v4_definition(5e5, "V4a choked converging nozzle", 0.0), _v4a_checks),
     # A converging nozzle ending at a curved throat keeps contracting past its
@@ -255,7 +450,7 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V6", "V7")
+COMPARISONS = ("V5", "V6", "V7", "V10")
 
 def run_case(case: Case, quality: str, out: Path, processors: int = 1, form: str | None = None,
              on_event=None, solver: str = "auto") -> tuple[CaseResult, dict | None]:
@@ -326,6 +521,11 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
             # reference-based check can see in the other.
             results.append(_pair("V7", "rhoPimpleFoam vs rhoCentralFoam on the V1 nozzle", once("V1"),
                                  once("V1", solver="rhoCentralFoam"), "central vs PIMPLE:", 1e-3, 2e-3))
+        elif name == "V10":
+            results.append(peng_robinson_check(once("V10-perfect"), once("V10-pr")))
+        elif name == "V5":
+            for rc in V5_RATIOS:
+                results.append(throat_cd_study(rc, quality, out, processors, on_event))
         else:
             once(name)
     (out / "verification.json").write_text(

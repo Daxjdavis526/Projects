@@ -43,7 +43,7 @@ def _final(table: parse.Table | None, column: str, window: int | None = None):
     if table is None or column not in table.values:
         return None
     v = table.values[column]
-    n = window or max(100, min(1000, len(v) // 10))
+    n = window or max(100, min(1000, len(v) // 10))  # see run.convergence.judgement_window
     return v[-n:].mean(axis=0)
 
 

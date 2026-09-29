@@ -86,3 +86,15 @@ def test_unknown_solver_is_an_error():
     assert "numerics.solver" not in codes(validate(ok))
     bad = dataclasses.replace(d, numerics=dataclasses.replace(d.numerics, solver="simpleFoam"))
     assert "numerics.solver" in codes(validate(bad), Severity.ERROR)
+
+
+def test_peng_robinson_needs_a_shock_free_nozzle():
+    import dataclasses
+    ok = dataclasses.replace(definition(), gas=m.GasSpec(equation_of_state="peng_robinson"))
+    assert "gas.peng_robinson" in codes(validate(ok))
+    shocked = dataclasses.replace(definition(eps=2.88, pa=12e5),
+                                  gas=m.GasSpec(equation_of_state="peng_robinson"))
+    assert "gas.peng_robinson_solver" in codes(validate(shocked), Severity.ERROR)
+    import pytest
+    with pytest.raises(ValueError):
+        m.GasSpec(equation_of_state="van_der_waals")

@@ -123,12 +123,30 @@ Geometry = ConicalNozzle | CadFile | WallProfile
 
 @dataclass(frozen=True)
 class GasSpec:
+    """``equation_of_state``: "perfect_gas" (the default) or "peng_robinson".
+    The perfect gas is what every verification case runs; its real-gas mass
+    flow bias is reported from the reference equation of state. Peng-Robinson
+    puts real-gas density in the CFD itself, but for nitrogen at 300 K it
+    over-predicts that bias by about a quarter (DESIGN.md section 11)."""
+
     species: str = "N2"
+    equation_of_state: str = "perfect_gas"
+
+    def __post_init__(self) -> None:
+        if self.equation_of_state not in EQUATIONS_OF_STATE:
+            raise ValueError(f"equation_of_state must be one of {', '.join(EQUATIONS_OF_STATE)}")
 
     def model(self) -> PerfectGas:
         if self.species != "N2":
             raise ValueError(f"only nitrogen is supported in V1, not {self.species!r}")
         return NITROGEN
+
+    @property
+    def peng_robinson(self) -> bool:
+        return self.equation_of_state == "peng_robinson"
+
+
+EQUATIONS_OF_STATE = ("perfect_gas", "peng_robinson")
 
 
 # --------------------------------------------------------------------------
@@ -288,6 +306,13 @@ class MeshSpec:
     quality: MeshQuality = MeshQuality.STANDARD
     first_cell_yplus: float = 1.0
     wedge_angle: float = _q(Dimension.ANGLE, math.radians(5.0))
+    # Divides every cell size of the quality preset (> 1 is finer), for
+    # grid-convergence studies: `sonicline study` sets it.
+    refinement: float = 1.0
+
+    def __post_init__(self) -> None:
+        if not 0.25 <= self.refinement <= 4.0:
+            raise ValueError("mesh refinement must lie between 0.25 and 4")
 
 
 @dataclass(frozen=True)

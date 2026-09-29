@@ -30,7 +30,7 @@ def test_v1_runs_once_for_v6_and_v7(tmp_path, monkeypatch):
 
 def test_comparisons_are_known_to_the_cli():
     from sonicline import cli
-    assert set(v.COMPARISONS) <= {"V6", "V7"}
+    assert set(v.COMPARISONS) <= {"V5", "V6", "V7", "V10"}
     assert cli.main(["verify", "--cases", "V99"]) == 2
 
 
@@ -50,3 +50,22 @@ def test_nparc_nozzle_matches_its_published_shock_position():
         lo, hi = (mid, hi) if v.nparc_area(mid) < perf.shock_area_ratio else (lo, mid)
     assert lo == pytest.approx(7.562, abs=2e-3)  # NPARC's quasi-1D reference, in inches
     assert math.isclose(perf.shock_mach, 1.61, abs_tol=0.01)
+
+
+@pytest.mark.parametrize("name, fraction", [("V3a", 0.754), ("V3b", 0.408)])
+def test_v3_shocks_stand_inside_the_reference_nozzle(name, fraction):
+    from sonicline.core.theory import nozzle
+    from sonicline.core.validate import resolve_profile
+    from sonicline.foam.case import solver_for
+
+    defn = v.CASES[name].definition("standard", "wedge")
+    prof = resolve_profile(defn)
+    perf = nozzle.analyse(defn.gas.model(), defn.boundaries.inlet.p0, 300.0,
+                          defn.boundaries.ambient.pressure, prof.throat_area, prof.area(prof.x_exit))
+    assert perf.regime is nozzle.Regime.SHOCK_IN_NOZZLE
+    lo, hi = prof.throat_x, prof.x_exit
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if prof.area(mid) / prof.throat_area < perf.shock_area_ratio else (lo, mid)
+    assert (lo - prof.throat_x) / (prof.x_exit - prof.throat_x) == pytest.approx(fraction, abs=2e-3)
+    assert solver_for(defn, prof) == "rhoCentralFoam"

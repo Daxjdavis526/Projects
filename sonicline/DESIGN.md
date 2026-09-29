@@ -1007,6 +1007,15 @@ Delivered so far:
 - **V2**, the NPARC nozzle with a normal shock, on a new tabulated-wall
   geometry (`wall_profile`) and a fixed-pressure exit
   (`truncated_at_exit` with `fixed_pressure`).
+- **Grid-convergence studies** (`sonicline study`, core/gci.py, run/study.py):
+  three meshes refined systematically by one ratio in every direction
+  (`mesh.refinement`; default √2), observed order, Richardson
+  extrapolation and the GCI of Celik et al. (2008), whose worked example
+  the tests reproduce. The quality presets are not such a family (their
+  radial counts go 8/12/16 while axial spacing halves), so a study refines
+  one preset.
+- **V3**, shocks in the 20 bar reference nozzle (pb = 10 and 14 bar), and
+  **V5**, the throat Cd sweep over Rc/Rt = 0.625–4 as grid studies.
 
 Findings:
 
@@ -1044,4 +1053,46 @@ Findings:
     overexpanded sea-level nozzle) will need this addressed: a
     rhoPimpleFoam start followed by rhoCentralFoam, or a coarser wall with
     wall functions.
+16. **Kliegel–Levine assumes one throat radius.** With the standard
+    downstream radius of 0.382 Rt kept while the upstream one varied, CFD
+    minus Kliegel–Levine drifted from −0.21 % (Rc/Rt 0.625) to +0.09 % (4).
+    With both radii equal it is one-signed, −0.26 % to −0.06 % on standard
+    meshes, and roughly halves on the fine preset: discretisation error.
+17. **Extrapolated, the inviscid throat Cd matches Kliegel–Levine to 4×10⁻⁵
+    from Rc/Rt = 0.625 to 4.** Observed orders are 1.3–1.6 (the scheme is
+    nominally second order; limiters near the sonic line cost some of it).
+    Single-mesh Cd on the standard preset is low by about 0.25 % for a sharp
+    throat and 0.06 % for a gentle one, and that is the size of the
+    discretisation error in any single-mesh Cd SONICLINE reports; a study
+    measures it.
+18. **A conical nozzle's normal shock is curved, and no simple theory
+    places it.** In the reference nozzle it stands further downstream on the
+    axis than at the wall by 4.6 % (pb = 10 bar) to 10 % (14 bar) of the
+    diverging length. Quasi-1D theory's plane shock lies within 7 % of
+    both ends but not always between them; source flow predicts a spherical shock with a fixed 7.5 %
+    axis-to-wall offset, which fits neither. The subsonic flow behind the
+    shock shapes it. V3 therefore checks position to 10 % and serves as a
+    regression guard on a real thruster geometry; V2's gently varying
+    nozzle is the tight test.
+19. **A slow oscillation fooled the convergence monitor.** rhoCentralFoam
+    can settle into a limit cycle of ~10⁻⁴ over ~1000 iterations (a shock
+    stepping between cells in V2). A 200-iteration window that lands on a
+    turning point looks flat; the reported integrals, averaged over the last
+    tenth of the run, then disagreed by 5×10⁻⁴ on V2's mass balance, and a
+    V1 run stopped as converged was judged unconverged a hundred iterations
+    later. Steadiness is now judged over the same span the integrals are
+    averaged over (the last tenth, up to 1000 iterations), the solver stops
+    only after the criteria have held for half of it, and the verification
+    suite fails any run the verdict does not trust, whatever its checks say.
+    Shock cases run to a drift tolerance of 10⁻⁴ (the limit cycle's size)
+    with the usual mass balance.
+20. **Peng–Robinson over-predicts nitrogen's real-gas mass flux by about a
+    quarter.** Its compressibility at 300 K is 0.5 % low at 20 bar; along
+    the isentrope its choked-flux bias is +0.89 % against the reference
+    equation of state's +0.71 % (+1.31 % vs +1.05 % at 30 bar). It is
+    available (`gas.equation_of_state`), verified against its own isentrope
+    (V10), and runs with rhoPimpleFoam only: OpenFOAM compiles it with
+    constant cp only in enthalpy form, which rhoCentralFoam cannot use. For
+    mass flow the perfect gas plus the reference-EOS correction remains the
+    more accurate answer, and stays the default.
 

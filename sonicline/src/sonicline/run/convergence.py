@@ -35,7 +35,7 @@ from ..foam.parse import Table
 
 # Residual columns judged; Uz is excluded on wedges (it is the out-of-plane
 # component and carries no information there).
-RESIDUAL_FIELDS = ("p", "Ux", "Uy", "Uz", "e", "k", "omega")
+RESIDUAL_FIELDS = ("p", "Ux", "Uy", "Uz", "e", "h", "k", "omega")
 
 
 # Iteration-to-iteration scatter allowed on a steady integral (std / mean).
@@ -93,6 +93,17 @@ def exit_thrust_series(momentum: Table, pforce: Table) -> tuple[np.ndarray, np.n
 JUDGEMENT_SLACK = 2.0
 
 
+def judgement_window(minimum: int, n: int) -> int:
+    """Iterations over which steadiness is judged: the criteria's window, or
+    the last tenth of the run (at most 1000) if that is longer -- the same
+    span the reported integrals are averaged over (post.results._final).
+    rhoCentralFoam can settle into a slow oscillation, ~0.1 % over ~1000
+    iterations; a 200-iteration window that lands on one of its turning
+    points looks flat while the reported averages are not (DESIGN.md
+    section 11)."""
+    return max(minimum, min(1000, n // 10))
+
+
 def assess(tables: dict[str, Table | None], criteria: ConvergenceCriteria, wedge: bool,
            slack: float = 1.0) -> Assessment:
     """``slack`` multiplies the integral and mass-balance tolerances (1 to
@@ -101,7 +112,7 @@ def assess(tables: dict[str, Table | None], criteria: ConvergenceCriteria, wedge
     if inlet is None or exit_ is None or len(inlet.time) < 2:
         return Assessment(0, False, False, False, False, reasons=["no solver output yet"])
     n = len(inlet.time)
-    window = criteria.integral_window
+    window = judgement_window(criteria.integral_window, n)
     a = Assessment(iterations=int(inlet.time[-1]), converged=False, integrals_flat=False,
                    mass_balanced=False, residuals_dropped=False)
 

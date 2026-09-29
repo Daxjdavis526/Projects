@@ -134,8 +134,10 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
         sev = Severity.WARNING if choke.bias > REAL_GAS_WARN else Severity.INFO
         add(Finding(sev, "gas.real_gas_bias",
                     f"At {_fmt_bar(p0)} and {T0:.0f} K real nitrogen chokes at "
-                    f"{100 * choke.bias:+.2f} % mass flux relative to the perfect-gas model "
-                    "the CFD uses.",
+                    f"{100 * choke.bias:+.2f} % mass flux relative to the perfect-gas model"
+                    + (" (the Peng-Robinson CFD over-shoots this; the reported estimate "
+                       "corrects it to the reference equation of state)." if defn.gas.peng_robinson
+                       else " the CFD uses."),
                     "The perfect-gas mass flow and thrust are reported together with this "
                     "correction." if sev is Severity.WARNING else ""))
         p_b, T_b = TYPICAL_BOTTLE
@@ -165,6 +167,25 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                     f"Wall temperature {wall.temperature:.1f} K is not physical for this application."))
     if isinstance(inlet, MassFlowInlet) and inlet.mass_flow <= 0.0:
         add(Finding(Severity.ERROR, "inlet.mass_flow", "Mass flow must be positive."))
+
+    # -- real gas in the CFD -------------------------------------------------
+    if defn.gas.peng_robinson:
+        # OpenFOAM offers Peng-Robinson with constant cp only in enthalpy
+        # form, which rhoCentralFoam cannot use (it assumes internal energy).
+        central = defn.numerics.solver == "rhoCentralFoam"
+        if p0 is not None and profile is not None and not central:
+            shock = nozzle.analyse(gas, p0, T0, pa, profile.throat_area, profile.area(profile.x_exit))
+            central = shock.regime is nozzle.Regime.SHOCK_IN_NOZZLE or shock.separation.likely
+        if central:
+            add(Finding(Severity.ERROR, "gas.peng_robinson_solver",
+                        "The Peng-Robinson gas runs only with rhoPimpleFoam, and this case needs "
+                        "rhoCentralFoam (a shock stands inside the nozzle, or it was asked for).",
+                        "Use the perfect gas; its real-gas mass-flow correction is reported."))
+        else:
+            add(Finding(Severity.INFO, "gas.peng_robinson",
+                        "The CFD uses the Peng-Robinson equation of state. For nitrogen near 300 K "
+                        "it over-predicts real-gas density: its choked-flux correction is about "
+                        "25 % larger than the reference equation of state's."))
 
     # -- numerics -----------------------------------------------------------
     solver = defn.numerics.solver

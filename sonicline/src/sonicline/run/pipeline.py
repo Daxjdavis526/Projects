@@ -215,16 +215,26 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     assessment = None
     stop_requested = False
     last_report = 0
+    held_since = None  # first iteration of the current unbroken run of passing checks
     while proc.poll() is None:
         time.sleep(poll_seconds)
         tables = results.read_tables(case)
         assessment = convergence.assess(tables, criteria, wedge)
+        # Stop only once the criteria have held for half a judgement window:
+        # a slow oscillation passes a window that lands on its turning point
+        # and fails a few iterations later (DESIGN.md section 11).
+        if not assessment.converged:
+            held_since = None
+        elif held_since is None:
+            held_since = assessment.iterations
+        hold = convergence.judgement_window(criteria.integral_window, assessment.iterations) // 2
+        steady = held_since is not None and assessment.iterations - held_since >= hold
         if assessment.iterations - last_report >= 100:
             last_report = assessment.iterations
             emit(Event("solve", f"iteration {assessment.iterations}",
                        {"spreads": assessment.spreads, "residual_drop": assessment.residual_drop,
                         "mass_imbalance": assessment.mass_imbalance}))
-        if assessment.converged and not stop_requested:
+        if steady and not stop_requested:
             emit(Event("solve", f"converged at iteration {assessment.iterations}; stopping"))
             foam_case.request_stop(case)
             stop_requested = True
