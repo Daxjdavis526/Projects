@@ -87,7 +87,7 @@ turns and expands around the sharp exit lip.
 
 ## Verification
 
-`sonicline verify` runs these cases on standard meshes (about 18 minutes on
+`sonicline verify` runs these cases on standard meshes (about 25 minutes on
 4 cores); CI runs V1 and V4a end to end through OpenFOAM on every change. Every reference is
 computed without the CFD.
 

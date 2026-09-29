@@ -1,5 +1,5 @@
-# The full SONICLINE verification suite (sonicline/: V1-V10 on standard
-# meshes, about 20 minutes on four cores), nightly and on demand. The push
+# The full SONICLINE verification suite (sonicline/: V1-V11 on standard
+# meshes, about 25 minutes on four cores), nightly and on demand. The push
 # workflow (sonicline.yml) runs only the fast tier. The results table is
 # kept as an artifact, and the job fails if any check fails or any run is
 # not trusted.
