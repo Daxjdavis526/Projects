@@ -25,6 +25,7 @@ import math
 from pathlib import Path
 
 import cadquery as cq
+import manifold3d
 import numpy as np
 from cadquery import Vector
 
@@ -910,6 +911,73 @@ def write_tile_texture(path: Path, px=256):
     print("wrote", path)
 
 
+def to_manifold(shape, tol):
+    """Tessellate a solid into a manifold3d mesh, for fast mesh booleans."""
+    verts, tris = shape.tessellate(tol, 0.15)
+    v = np.array([p.toTuple() for p in verts])
+    t = np.array(tris, dtype=np.int64)
+    # OCCT tessellates face by face; weld the seams so the mesh is closed,
+    # and drop the zero-area slivers left where profiles meet the axis.
+    v, inv = np.unique(np.round(v, 5), axis=0, return_inverse=True)
+    t = inv.reshape(-1)[t]
+    t = t[(t[:, 0] != t[:, 1]) & (t[:, 1] != t[:, 2]) & (t[:, 0] != t[:, 2])]
+    m = manifold3d.Manifold(manifold3d.Mesh(vert_properties=v.astype(np.float32),
+                                            tri_verts=t.astype(np.uint32)))
+    if m.status() != manifold3d.Error.NoError:
+        raise RuntimeError(f"tessellation is not manifold: {m.status()}")
+    return m
+
+
+def tile_manifold(m: Model, gap_mm, relief_mm):
+    """The ship's heat shield tiles, printable: every tile as a hexagonal
+    prism standing relief_mm proud of the hull and sunk a little into it,
+    with gaps widened to gap_mm. At the real proportions (8 mm gaps on
+    0.21 m tiles, 5 cm thick) the pattern would be 0.016 mm wide at 1:500
+    and print flat."""
+    s = m.mm_per_m
+    gap = max(TILE_GAP, gap_mm / s)
+    height = max(TILE_T, relief_mm / s)
+    sink = 0.043         # an odd depth, so tile walls never land exactly on hull mesh edges
+    lift = Vector(0, 0, H_BOOSTER)
+    verts, tris = [], []
+    for o, x, n, sc in ship_tiles(m):
+        base = o - n * (TILE_BACKING + sink)
+        y = n.cross(x)
+        c = (TILE_PITCH * sc - gap) / math.sqrt(3)
+        ring = [x * (c * math.cos(math.radians(90 + 60 * k))) +
+                y * (c * math.sin(math.radians(90 + 60 * k))) for k in range(6)]
+        i0 = len(verts)
+        for h in (0.0, TILE_BACKING + sink + height):
+            for rv in ring:
+                verts.append(((base + n * h + rv + lift) * s).toTuple())
+        for k in range(1, 5):                       # caps, as fans
+            tris.append((i0, i0 + k + 1, i0 + k))
+            tris.append((i0 + 6, i0 + 6 + k, i0 + 6 + k + 1))
+        for k in range(6):                          # sides
+            a, b = i0 + k, i0 + (k + 1) % 6
+            tris.append((a, b, b + 6))
+            tris.append((a, b + 6, a + 6))
+    mesh = manifold3d.Manifold(manifold3d.Mesh(vert_properties=np.array(verts, dtype=np.float32),
+                                               tri_verts=np.array(tris, dtype=np.uint32)))
+    if mesh.status() != manifold3d.Error.NoError:
+        raise RuntimeError(f"tile mesh is not manifold: {mesh.status()}")
+    return mesh
+
+
+def write_stl(mesh, path: Path):
+    """A manifold3d mesh as binary STL."""
+    out = mesh.to_mesh()
+    v = np.asarray(out.vert_properties)[:, :3]
+    t = np.asarray(out.tri_verts)
+    tri = v[t]
+    nrm = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-12)
+    rec = np.zeros(len(t), dtype=[("n", "<f4", 3), ("v", "<f4", (3, 3)), ("a", "<u2")])
+    rec["n"], rec["v"] = nrm, tri
+    path.write_bytes(b"STARSHIP print model".ljust(80, b" ") + len(t).to_bytes(4, "little")
+                     + rec.tobytes())
+
+
 def build(m: Model):
     """Both stages, stacked and scaled to millimetres, as named bodies."""
     print("  Super Heavy ...")
@@ -942,6 +1010,10 @@ def main():
                     help="thinnest printable wall at the output scale, mm (default 0.8)")
     ap.add_argument("--shell", type=float, default=3.175,
                     help="hollow both stages with walls this thick, mm (default 3.175 = 1/8 in; 0 = solid)")
+    ap.add_argument("--tile-gap", type=float, default=0.12,
+                    help="gap between heat shield tiles on the print model, mm (default 0.12)")
+    ap.add_argument("--tile-relief", type=float, default=0.15,
+                    help="how far the printed tiles stand proud, mm (default 0.15; 0 = smooth shield)")
     ap.add_argument("--out", type=Path, default=Path(__file__).parent / "models")
     args = ap.parse_args()
 
@@ -1009,17 +1081,24 @@ def main():
     body = build(printable)
     tol = 0.01 * (500 / args.scale) ** 0.5 * 2
     booster_print = fuse([body["super_heavy"], body["super_heavy_raptors"]])
-    ship_print = fuse([body["starship"], body["starship_raptors"], body["heat_shield_print"]])
-    stack = fuse([booster_print, ship_print])
-    for shape, name in ((stack, "starship_stack"), (booster_print, "super_heavy"),
-                        (ship_print, "starship_ship")):
+    if args.tile_relief > 0:
+        # The ship's heat shield as raised tiles: the smooth shell goes, the
+        # aerocovers stay, and the tiles are merged on as a mesh.
+        ship_print = fuse([body["starship"], body["starship_raptors"], body["flap_aerocovers"]])
+    else:
+        ship_print = fuse([body["starship"], body["starship_raptors"], body["heat_shield_print"]])
+    booster_mesh = to_manifold(booster_print, tol)
+    ship_mesh = to_manifold(ship_print, tol)
+    if args.tile_relief > 0:
+        ship_mesh = ship_mesh + tile_manifold(printable, args.tile_gap, args.tile_relief)
+    stack_mesh = booster_mesh + ship_mesh
+    for mesh, name in ((stack_mesh, "starship_stack"), (booster_mesh, "super_heavy"),
+                       (ship_mesh, "starship_ship")):
         path = args.out / f"{name}_{tag}.stl"
-        shape.exportStl(str(path), tolerance=tol, angularTolerance=0.15)
-        drop_degenerate_triangles(path)
-        bb = shape.BoundingBox()
-        print(f"wrote {path}  ({bb.xlen:.1f} x {bb.ylen:.1f} x {bb.zlen:.1f} mm, "
-              f"valid={shape.isValid()})")
-
+        write_stl(mesh, path)
+        lo, hi = mesh.bounding_box()[:3], mesh.bounding_box()[3:]
+        print(f"wrote {path}  ({hi[0] - lo[0]:.1f} x {hi[1] - lo[1]:.1f} x {hi[2] - lo[2]:.1f} mm, "
+              f"{mesh.num_tri()} triangles, manifold={mesh.status() == manifold3d.Error.NoError})")
 
 if __name__ == "__main__":
     main()

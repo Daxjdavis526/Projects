@@ -32,8 +32,10 @@ Live viewer: https://daxjdavis526.github.io/Projects/starship/
 | `index.html` | A three.js viewer for the GLB, with download links. |
 
 Both stages are hollow, with 1/8 in (3.175 mm) walls at 1:500, in the STEPs
-and the STLs alike. All three STLs have zero non-manifold edges, and both STEPs
-re-import as valid solids. The STEPs are zipped because STEP is verbose text
+and the STLs alike. The ship's heat shield tiles are raised geometry in the
+STLs (see Printing). The STLs are built with the manifold3d mesh library,
+which checks them closed and manifold, and both STEPs re-import as valid
+solids. The STEPs are zipped because STEP is verbose text
 that compresses about 7:1.
 
 ### The tiles in SolidWorks (or any CAD program)
@@ -42,9 +44,13 @@ A STEP file can only store 21,000 tiles compactly as 21,000 placements of one
 shape, and every CAD program opens each placement as its own component. That
 is what makes the tiled file slow. Written out as bodies of a single part
 instead, the tiles would be about 27 KB each, or roughly 570 MB. So there are
-two ways in:
+three ways in:
 
-- **Fast: the main STEP plus the texture.** Open `starship_stack_1-500.step`
+- **Fast, with tiles: the STL as a mesh.** In SolidWorks, open
+  `starship_ship_1-500.stl` (or the stack) with *Import as: Graphics Body*.
+  Every tile is there as raised geometry, and a mesh of any size opens
+  quickly. You can't edit it as a solid, but it is exactly what will print.
+- **Fast, editable: the main STEP plus the texture.** Open `starship_stack_1-500.step`
   and apply `tile_texture.png` to the `heat_shield` body as a texture
   appearance.
   - One repeat of the image is one tile across and two rows tall. At 1:500
@@ -103,8 +109,13 @@ skirt then sits on the booster's hot-staging ring, as it does on the pad.
     dome.
   - The ship's cavity runs from above the aft dome to about 2.7 m below the
     nose tip.
-- For colour, paint the heat shield. In the STL it stands 0.2 mm proud of the
-  steel, so the tile line is a ridge you can mask along.
+- The ship's heat shield is 20,699 raised hexagonal tiles, 0.15 mm proud with
+  0.12 mm gaps. That comes out well on a resin printer (≈50 µm pixels). An FDM
+  nozzle is wider than the gaps, so on FDM the tiles blur into a textured
+  band; `--tile-relief` and `--tile-gap` set both, and `--tile-relief 0`
+  gives the old smooth shield.
+- For colour, paint the heat shield. The tiles' zigzag edge is raised, so the
+  tile line is a ridge you can mask along.
 
 ## What is in the model
 
@@ -273,11 +284,10 @@ far less of this happens.
   print and the holes stay open.
 - The Raptors' pump pods and ducts, the aft plumbing rings and the common-dome
   ribs are left out.
-- There are no individual tiles: at 1:500 a tile is 0.4 mm across and the
-  gaps 0.016 mm, far below what a printer can make. The heat shield is one
-  smooth shell standing 0.1 m (0.2 mm) proud of the steel, so the tile line
-  survives as a ridge. This is why the stack measures 249.0 mm rather than
-  248.8.
+- The tiles' gaps are widened from a real 8 mm to 6 cm (0.12 mm at 1:500),
+  and the tiles stand 7.5 cm proud instead of 5 cm (0.15 mm). At true
+  proportions the gaps would be 0.016 mm and would print flat. The tiles sit
+  straight on the steel, with no backing layer.
 
 ## Sources
 
