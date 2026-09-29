@@ -69,7 +69,9 @@ button[aria-pressed="true"]{border-color:var(--warm);color:var(--warm)}
     <button data-view="starship" aria-pressed="false">ship</button>
   </div>
   <div id="files">
-    <a href="models/starship_stack_1-500.step" download>starship_stack_1-500.step <span>· CAD</span></a>
+    <a href="models/starship_stack_1-500_step.zip" download>starship_stack_1-500.step <span>· CAD, zip</span></a>
+    <a href="models/starship_stack_1-500_tiled_step.zip" download>… with 21k tiles <span>· slow, zip</span></a>
+    <a href="models/tile_texture.png" download>tile_texture.png <span>· appearance</span></a>
     <a href="models/starship_stack_1-500.stl" download>starship_stack_1-500.stl <span>· print</span></a>
     <a href="models/super_heavy_1-500.stl" download>super_heavy_1-500.stl</a>
     <a href="models/starship_ship_1-500.stl" download>starship_ship_1-500.stl</a>
@@ -151,12 +153,12 @@ function show(view) {
 const q = new URLSearchParams(location.search);
 // ?src=file.glb loads another export (a single part, say) for inspection.
 // The ~21,000 heat shield tiles, one instanced draw: tiles.bin holds each
-// tile's origin (mm), x direction and normal in the model's own frame, so
+// tile's origin (mm), x direction, normal and size in the model's own frame, so
 // the mesh goes under the GLB's root node and inherits its Z-up rotation.
 async function addTiles(root) {
   if (q.has('src')) return;
   const data = new Float32Array(await (await fetch('models/tiles.bin')).arrayBuffer());
-  const n = data.length / 9;
+  const n = data.length / 10;
   const mmPerM = 2;                                // 1:500
   const r = (0.21 - 0.008) / Math.sqrt(3) * mmPerM, h = 0.05 * mmPerM;
   const geo = new THREE.CylinderGeometry(r, r, h, 6).translate(0, h / 2, 0);
@@ -164,10 +166,10 @@ async function addTiles(root) {
   const m = new THREE.Matrix4(), o = new THREE.Vector3(), x = new THREE.Vector3(),
         y = new THREE.Vector3(), z = new THREE.Vector3(), c = new THREE.Color();
   for (let i = 0; i < n; i++) {
-    const d = data.subarray(9 * i, 9 * i + 9);
+    const d = data.subarray(10 * i, 10 * i + 10);
     o.set(d[0], d[1], d[2]); x.set(d[3], d[4], d[5]); y.set(d[6], d[7], d[8]);
     z.crossVectors(x, y);
-    m.makeBasis(x, y, z).setPosition(o);
+    m.makeBasis(x.multiplyScalar(d[9]), y, z.multiplyScalar(d[9])).setPosition(o);
     mesh.setMatrixAt(i, m);
     // Tiles are not all the same black: a little scatter reads as a field.
     const v = 0.035 + 0.02 * Math.random();
