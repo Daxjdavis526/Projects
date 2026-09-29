@@ -47,6 +47,7 @@ touching the others.
 | `propulsion/` | rocket propulsion engineering course (Markdown, no code to run beyond the example checker) |
 | `cryogenics/` | cryogenic propulsion hardware & safety course (Markdown + hand-authored SVG, browser reader) |
 | `geodesic/` | spacetime curvature & gravitational dynamics sandbox |
+| `redline/` | REDLINE — rocket test-stand operations trainer (cold-gas stand; physics/instruments/control are DOM-free, tested headlessly: `node redline/test/*.test.mjs`) |
 | `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (has a build step; `dist/` is committed at milestones) |
 | `strata/` | STRATA — voxel survival game in Godot 4 + C#. A desktop game, not a web page: Pages serves nothing playable from it. Windows and Linux builds come from GitHub Actions (`.github/workflows/strata.yml`) |
 

@@ -39,6 +39,8 @@ export class ProcedureRunner extends Emitter {
       for (const st of sec.steps) this.steps.push({ ...st, section: sec.id, sectionTitle: sec.title });
     }
     this.byId = new Map(this.steps.map(s => [s.id, s]));
+    const secs = proc.sections.map(x => x.id);
+    for (const st of this.steps) st.secIdx = secs.indexOf(st.section);
     this.state = new Map(this.steps.map(s => [s.id, { status: ST.PENDING, t: null, msg: null, value: null, truthOk: null, note: '' }]));
     this.holds = new Map();
     this.activatedAt = new Map();
@@ -83,12 +85,17 @@ export class ProcedureRunner extends Emitter {
     } catch (e) { return { ok: false, msg: 'check error: ' + e.message }; }
   }
 
-  /* Called by the session a few times a second. */
+  /* Called by the session a few times a second. Action steps complete by
+     themselves when their condition is met — out of order is fine, within
+     reach: the current section and the next. (Without that window the
+     safing steps at the end would tick themselves off at the start, when
+     the stand happens to be safe already.) */
   tick(v) {
+    const reach = (this.active?.secIdx ?? Infinity) + 1;
     for (const step of this.steps) {
       const st = this.state.get(step.id);
       if (st.status !== ST.PENDING) continue;
-      if (step.kind === 'action' && step.check && this._eval(step, v).ok) {
+      if (step.kind === 'action' && step.check && step.secIdx <= reach && (!step.gate || step.gate(v)) && this._eval(step, v).ok) {
         this._set(step.id, ST.COMPLETE, { truthOk: this._audit(step, v) });
       }
       if (step.kind === 'hold') {

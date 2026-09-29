@@ -212,6 +212,27 @@ Live: https://daxjdavis526.github.io/Projects/wormsign/
 See [wormsign/README.md](wormsign/README.md) for controls, how the systems
 work, and what is physical versus invented.
 
+## redline/
+
+**REDLINE** — a rocket-engine test-stand operations trainer. Not a game and
+not an engine designer: a simulated test-control room in which you configure,
+instrument, zero, leak-check, pressurise, poll, arm, fire, abort, safe and
+analyse a nitrogen cold-gas thruster on a load-cell stand, seeing it only
+through its instruments. Underneath is a real-time lumped-parameter model —
+choked and unchoked flow, a regulator that droops and locks up, a solenoid
+whose coil current dips as it strokes, a nozzle that separates at low
+pressure, a thrust stand that rings — and on top of it every sensor has lag,
+offset, noise and a sample rate, so the measured state and the true state
+are never the same thing. Tutorial, guided and independent modes, a go/no-go
+poll, redlines and automatic aborts, cursors and reductions on the recorded
+data, and an engineering notebook. Fictional hardware, generalised
+procedures, and it says so. Desktop only.
+
+Live: https://daxjdavis526.github.io/Projects/redline/
+
+See [redline/README.md](redline/README.md) for the controls, the
+architecture, and what the physics does and does not model.
+
 ## strata/
 
 **STRATA** — an original voxel survival sandbox. An endless generated world

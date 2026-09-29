@@ -15,6 +15,7 @@ const P = v => `${fmt(v, 'pressure')} psig`;
 const near = (a, b, tol) => Number.isFinite(a) && Math.abs(a - b) <= tol;
 const PTS = ['PT-101', 'PT-102', 'PT-201', 'PT-301', 'PT-401'];
 const LP_PTS = ['PT-102', 'PT-201', 'PT-301', 'PT-401'];
+const fired = v => !!v.completedSeq || v.has(e => e.cat === 'ABT' && e.text.startsWith('ABORT'));
 const lastEvent = (v, pred) => { const it = v.events.items; for (let i = it.length - 1; i >= 0; i--) if (pred(it[i])) return it[i]; return null; };
 
 export const request = def => ({
@@ -207,11 +208,11 @@ export function procedure(def) {
           check: v => v.runs.some(r => r.tFire !== null) },
       ] },
       { id: 'L', title: 'Safe the stand', steps: [
-        { id: 'L1', num: '12.1', kind: 'action', station: 'PROP', title: 'PR-101 setpoint → 0', text: 'Dome vented; regulator shuts.',
+        { id: 'L1', gate: fired, num: '12.1', kind: 'action', station: 'PROP', title: 'PR-101 setpoint → 0', text: 'Dome vented; regulator shuts.',
           why: 'Shut off the source of low-side pressure first.', check: v => v.regSet === 0 },
-        { id: 'L2', num: '12.2', kind: 'action', station: 'PROP', title: 'Close IV-101', text: 'Supply isolated. Confirm ZSC.',
+        { id: 'L2', gate: fired, num: '12.2', kind: 'action', station: 'PROP', title: 'Close IV-101', text: 'Supply isolated. Confirm ZSC.',
           why: 'Isolate the stored energy from the test system.', check: v => v.ch('IV-101-ZSC') === 1 },
-        { id: 'L3', num: '12.3', kind: 'action', station: 'PROP', title: 'Open vents VV-201 and VV-101',
+        { id: 'L3', gate: fired, num: '12.3', kind: 'action', station: 'PROP', title: 'Open vents VV-201 and VV-101',
           text: 'Vent the low side and the high side. Watch PT-102: the gas trapped between IV-101 and the shut regulator only leaves through VV-101.',
           why: 'Every section must be vented through its own path. A trapped volume is the classic way to be surprised by pressure in a system you thought was safe.',
           check: v => v.cmd('VV-201') === 1 && v.cmd('VV-101') === 1 },
