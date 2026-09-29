@@ -21,7 +21,7 @@ Live viewer: https://daxjdavis526.github.io/Projects/starship/
 | file | what |
 |---|---|
 | `models/starship_stack_1-500_step.zip` | **The CAD model** (26 MB unzipped). Named, coloured bodies: `super_heavy`, `super_heavy_raptors`, `starship`, `starship_raptors`, `heat_shield` (the tiled area, as the backing the tiles sit on) and `flap_aerocovers`. Units mm. Opens quickly. |
-| `models/starship_stack_1-500_tiled_step.zip` | The same with all 20,845 heat shield tiles as geometry (42 MB unzipped). Slow; see below. |
+| `models/starship_stack_1-500_tiled_step.zip` | The same with all 20,699 heat shield tiles as geometry (42 MB unzipped). Slow; see below. |
 | `models/tile_texture.png` | A seamless image of the tile pattern, to put on `heat_shield` as an appearance instead. |
 | `models/starship_stack_1-500.stl` | The print model: the whole stack fused into one watertight body. |
 | `models/super_heavy_1-500.stl` | Booster only, 144.6 mm. |
@@ -55,7 +55,7 @@ two ways in:
   - The pattern will be right on the barrel. It won't follow the real layout
     over the nose.
 - **Exact: the tiled STEP.** Every tile is real geometry, laid out as
-  described below. It is a sub-assembly (`heat_shield_tiles`) of 20,845
+  described below. It is a sub-assembly (`heat_shield_tiles`) of 20,699
   components. Open it with SolidWorks' Large Design Review, or open it
   normally and hide or suppress that sub-assembly while you work.
 
@@ -178,7 +178,7 @@ photo measurements within 0.15 m from 0.5 m to 11 m below the tip.
   leeward is what put the hinge behind this cover, and the tile line runs
   along it.
 
-**Heat shield.** 20,845 hexagonal tiles, each its own solid:
+**Heat shield.** 20,699 hexagonal tiles, each its own solid:
 - Tiles are 0.21 m flat to flat and 5 cm thick, with 8 mm gaps. They are
   pointy end up, in staggered rows, on a 2 cm backing. The size and layout
   were measured off the B19 pad photo.
@@ -193,7 +193,7 @@ photo measurements within 0.15 m from 0.5 m to 11 m below the tip.
 - **The tip.** The first metre from the tip is one continuous hex lattice,
   mapped conformally over the curve, which is how the real tip is tiled (seen
   from above in the Flight 12 wet dress photo). A conformal map keeps every
-  tile a regular hexagon, so tiles grow toward the tip, up to 1.8× at the
+  tile a regular hexagon, so tiles grow toward the tip, up to 1.4× at the
   centre, as the real ones visibly do.
 - The windward faces of all four flaps are tiled.
 - The four tiled patches on the leeward side, seen on Ship 39.
@@ -256,7 +256,7 @@ These are right in proportion but not to the centimetre. Typical error is
 - Apart from the tip, the tiles are all one size. The real ship has bands of
   smaller tiles, tapered edge tiles along the tile line, and special tiles
   around the flap hinges.
-- The count (20,845) is higher than SpaceX's ~18,000, because the model's
+- The count (20,699) is higher than SpaceX's ~18,000, because the model's
   tile line is slightly generous.
 - No weld seams, stringers, skirt vents, QD plates, launch-mount clamps,
   engine serial numbers, or the Raptors' smaller plumbing.

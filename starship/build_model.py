@@ -642,19 +642,24 @@ def ship_tiles(m: Model):
     # which the real cap does too. u = integral of ds/r is the log-radius of
     # the flat lattice; the surface scale there is r / exp(u).
     # The cap spans the first 1.0 m from the tip, which keeps the tip tiles
-    # to 1.8x normal size; wider, they balloon (4.5x at 3.7 m).
+    # to 1.4x normal size; a wider cap makes them balloon.
     s_tip = _profile_length()
     d_cap = 1.0                                            # cap edge, from the tip
     s_cap = s_tip - d_cap
-    table, u, d, step = [], math.log(0.01), 0.01, 0.005   # (d, u, scale) from the tip
+    # (d, u, scale) from the tip; steps shrink toward the tip, where r -> 0.
+    table, u, d = [], math.log(0.001), 0.001
     while d <= d_cap + 0.5:
         r = _profile(s_tip - d)[0]
         table.append((d, u, r / math.exp(u)))
-        u += step / max(r, 1e-3)
+        step = min(0.005, 0.02 * d)
+        r_mid = _profile(s_tip - d - step / 2)[0]
+        u += step / r_mid
         d += step
     lam_cap = next(sc for dd, uu, sc in table if dd >= d_cap)
     pitch = TILE_PITCH / lam_cap                           # planar lattice pitch
-    rho_cap = math.exp(next(uu for dd, uu, sc in table if dd >= d_cap - half))
+    # Cap tiles run out to d_cap; the first row below starts one tile height
+    # further down, so the two meet without a bare ring between them.
+    rho_cap = math.exp(next(uu for dd, uu, sc in table if dd >= d_cap))
     j = 0
     while j * pitch * math.sqrt(3) / 2 <= rho_cap:
         for sgn in ((1,) if j == 0 else (1, -1)):
@@ -677,6 +682,8 @@ def ship_tiles(m: Model):
                 place(sd, math.degrees(phi), scale, down * math.sin(phi) + circ * math.cos(phi))
         j += 1
 
+    cap_origins = [f[0] for f in frames]
+
     # Below the cap: rows up the meridian. On the barrel that is a perfect
     # hexagonal lattice. Up the ogive the circumference shrinks, so the row
     # count steps down in bands: each band keeps its count (and a clean
@@ -686,15 +693,27 @@ def ship_tiles(m: Model):
     n = int(2 * math.pi * R_HULL / TILE_PITCH)
     while True:
         r, z, dr, dz = _profile(s)
-        if s > s_cap - row / 2:
+        if s > s_cap - 0.21:
             break
         if 2 * math.pi * r / n < TILE_PITCH:
+            # A seam: the new band's first row can't stagger against the
+            # last, so points may meet points. Leave room for that.
+            s += 2 * TILE_PITCH / math.sqrt(3) - row
+            r, z, dr, dz = _profile(s)
             n = int(2 * math.pi * r / (TILE_PITCH * 1.12))
             k = 0
+            if s > s_cap - 0.21:
+                break
         for j in range(n):
             th = 360 * (j + (0.5 if k % 2 else 0)) / n
             th = (th + 180) % 360 - 180
             if covered(th, z, r):
+                if s > s_cap - 1.0:
+                    # Near the join, skip a row tile that would touch a cap tile.
+                    c, sn = math.cos(math.radians(th)), math.sin(math.radians(th))
+                    p = Vector(r * c, r * sn, z)
+                    if any((p - q).Length < TILE_PITCH for q in cap_origins):
+                        continue
                 place(s, th)
         k += 1
         s += row
