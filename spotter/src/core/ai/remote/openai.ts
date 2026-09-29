@@ -125,7 +125,7 @@ export class OpenAIProvider implements AIProvider {
       response_format: { type: 'json_schema', json_schema: { name: schemaName, schema, strict: true } },
       ...(official ? { reasoning_effort: effort, max_completion_tokens: 16_000 } : { max_tokens: 8_000 }),
     }
-    const response = (await postJson({ provider: this.name, url: `${base}/chat/completions`, headers, body, timeoutMs: 5 * 60_000 }, deps)) as ChatCompletion
+    const response = (await postJson({ provider: this.name, url: `${base}/chat/completions`, headers, body, timeoutMs: 3 * 60_000 }, deps)) as ChatCompletion
     return readChatJson(response)
   }
 }

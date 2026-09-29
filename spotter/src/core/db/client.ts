@@ -90,7 +90,7 @@ export async function openDatabase(options: { url?: string | null; pgliteDir?: s
   const url = options.url === undefined ? env.DATABASE_URL : options.url
   const handle = url
     ? await openPostgres(url)
-    : await openPglite(options.pgliteDir === undefined ? path.resolve(process.cwd(), env.PGLITE_DATA_DIR) : options.pgliteDir)
+    : await openPglite(options.pgliteDir === undefined ? path.resolve(/*turbopackIgnore: true*/ process.cwd(), env.PGLITE_DATA_DIR) : options.pgliteDir)
   if (options.runMigrations ?? env.AUTO_MIGRATE) await migrate(handle)
   return handle
 }
@@ -100,6 +100,11 @@ export async function openDatabase(options: { url?: string | null; pgliteDir?: s
 const globalForDb = globalThis as unknown as { __spotterDb?: Promise<DbHandle> }
 
 export function getDbHandle(): Promise<DbHandle> {
+  // `next build` must never open (and migrate) a database: a page that reaches here
+  // while being prerendered has to read request data (cookies, params) first.
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return Promise.reject(new Error('The database is not available during `next build`; this page must read request data before querying.'))
+  }
   if (!globalForDb.__spotterDb) {
     const opening = openDatabase()
     globalForDb.__spotterDb = opening

@@ -136,9 +136,9 @@ export function currentKeyId(): string {
   return getKeyring().current.id
 }
 
-/** For tests only. */
-export function setKeyringForTests(material: string | null): void {
-  keyring = material ? { current: parseKey(material), all: [parseKey(material)] } : null
+/** For tests only: a current key and, optionally, a previous one (a rotation). */
+export function setKeyringForTests(material: string | null, previous?: string): void {
+  keyring = material ? { current: parseKey(material), all: [parseKey(material), ...(previous ? [parseKey(previous)] : [])] } : null
 }
 
 // ---------------------------------------------------------------------------

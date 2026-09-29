@@ -80,6 +80,7 @@ export interface YouTubeConnectorOptions {
 }
 
 const DAY = 86_400_000
+/** IDs per videos.list / channels.list / batchGetStats call. The reference pages state no limit; 50 is the long-standing practical one. */
 const BATCH = 50
 
 function chunk<T>(items: T[], size: number): T[][] {
@@ -308,7 +309,8 @@ export class YouTubeConnector implements PlatformConnector {
         ctx,
         'channels.list',
         this.data('channels'),
-        { part: 'snippet,statistics,contentDetails', id: batch.join(','), maxResults: BATCH },
+        // maxResults "is not supported for use in conjunction with the id parameter".
+        { part: 'snippet,statistics,contentDetails', id: batch.join(',') },
         { bucket: 'youtube.units', units: 1 },
       )
       for (const raw of res.items ?? []) {
@@ -326,7 +328,7 @@ export class YouTubeConnector implements PlatformConnector {
         ctx,
         'videos.list',
         this.data('videos'),
-        { part: 'snippet,contentDetails,statistics,status', id: batch.join(','), maxResults: BATCH },
+        { part: 'snippet,contentDetails,statistics,status', id: batch.join(',') },
         { bucket: 'youtube.units', units: 1 },
         requireUser,
       )

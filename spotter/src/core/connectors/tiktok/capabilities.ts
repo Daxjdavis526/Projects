@@ -12,8 +12,8 @@ export function tiktokCapabilities(ctx: CapabilityContext): CapabilityReport {
   const gate = (scope: string, fallback: CapabilityStatus): CapabilityStatus => {
     if (live && !ctx.configured) return 'not_configured'
     if (ctx.connected && !granted.has(scope)) return 'needs_permission'
-    // Beyond user.info.basic, every scope needs TikTok app review (or Sandbox test users).
-    if (live && !ctx.connected && scope !== 'user.info.basic') return 'needs_review'
+    // TikTok's FAQ: no API access until the app is approved — except for Sandbox target users.
+    if (live && !ctx.connected) return 'needs_review'
     return fallback
   }
   const item = (key: CapabilityItem['key'], status: CapabilityStatus, summary: string, extra: Partial<CapabilityItem> = {}): CapabilityItem => ({
@@ -52,7 +52,7 @@ export function tiktokCapabilities(ctx: CapabilityContext): CapabilityReport {
     item(
       'token_refresh',
       live && !ctx.configured ? 'not_configured' : 'available',
-      'Access tokens (24 h) refresh automatically; rotated refresh tokens are stored. Refresh tokens end 365 days after first authorization, so reconnect yearly.',
+      'Access tokens (24 h) refresh automatically; rotated refresh tokens are stored. Refresh tokens are documented to last 365 days, and it is not documented whether refreshing extends that, so expect to reconnect yearly.',
       { docs: [`${DOCS}/oauth-user-access-token-management`] },
     ),
   ]
@@ -64,7 +64,7 @@ export function tiktokCapabilities(ctx: CapabilityContext): CapabilityReport {
     docsCheckedOn: TIKTOK_DOCS_CHECKED,
     items,
     notes: [
-      'Scopes beyond user.info.basic require TikTok app review; until then only Sandbox target users (up to 10) can connect.',
+      'Until TikTok approves the app, only Sandbox target users (up to 10) can connect; approval is required for any other account.',
       'TikTok’s app review guidelines say apps “must not be for private or personal use”: plan for this before submitting.',
       'Redirect URIs must be absolute https URLs registered exactly (no query string).',
     ],

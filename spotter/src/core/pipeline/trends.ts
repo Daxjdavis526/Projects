@@ -1,7 +1,7 @@
 /**
  * Trend stage: baselines → clustering → scoring → stage → history.
  */
-import { and, eq, gte, inArray, sql } from 'drizzle-orm'
+import { and, eq, gte, inArray, or, sql } from 'drizzle-orm'
 import { LocalAIProvider } from '../ai/local/provider'
 import { computeBaseline, expectedViewsAt, outperformanceRatio, type Baseline, type BaselineSample, type NicheNorms } from '../analytics/baseline'
 import { assignToExisting, cosine, findMerges, formNewClusters, meanVector, type Candidate } from '../analytics/clustering'
@@ -105,7 +105,6 @@ interface Enriched extends CandidateRow {
 
 async function loadCandidates(rc: RunContext, embeddingModel: string, since: Date): Promise<CandidateRow[]> {
   const platforms = [...analyzablePlatforms(rc.env, rc.dataMode).public] as Platform[]
-  if (platforms.length === 0) return []
   const rows = await rc.db
     .select({
       id: contentItems.id,
@@ -144,8 +143,11 @@ async function loadCandidates(rc: RunContext, embeddingModel: string, since: Dat
         inArray(contentItems.dataOrigin, rc.origins),
         eq(contentItems.isOwn, false),
         eq(contentItems.availability, 'available'),
-        inArray(contentItems.platform, platforms),
-        gte(contentItems.publishedAt, since),
+        or(
+          platforms.length ? and(inArray(contentItems.platform, platforms), gte(contentItems.publishedAt, since)) : sql`false`,
+          // Manual captures are the creator's own observations (see analyze.ts), on any platform.
+          and(eq(contentItems.dataOrigin, 'manual'), sql`coalesce(${contentItems.publishedAt}, ${contentItems.firstCollectedAt}) >= ${since}`),
+        ),
       ),
     )
   // Generic training content and off-niche posts are not trend candidates.

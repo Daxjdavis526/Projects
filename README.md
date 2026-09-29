@@ -231,3 +231,25 @@ the whole survival loop, from the first tree to saving and reloading.
 
 See [strata/README.md](strata/README.md) for controls, how to build and play,
 how it works, and what it approximates.
+
+## spotter/
+
+**SPOTTER** — trend intelligence for a fitness creator. It watches fitness and
+lifting content on YouTube, Instagram and TikTok through their official APIs,
+finds what is gaining unusual traction, scores each trend 0–100 with every
+component visible, weighs it against how well it suits the creator's own
+audience, and turns the best 5–10 into video ideas: angle, hook, title,
+caption and a timed outline, with the example posts behind each one. It runs
+on a simulated world before any credentials exist, and says plainly what each
+platform does not expose instead of estimating it.
+
+This one is a **server application** (Next.js, PostgreSQL, a background
+worker) that holds OAuth tokens, so there is no live link: run it with
+`npm install && npm run dev` in `spotter/`, or `docker compose up` for a
+self-hosted deployment.
+
+See [spotter/README.md](spotter/README.md) to run it,
+[spotter/API_SETUP.md](spotter/API_SETUP.md) for connecting real accounts,
+[spotter/CAPABILITIES.md](spotter/CAPABILITIES.md) for what each platform
+allows, and [spotter/ARCHITECTURE.md](spotter/ARCHITECTURE.md) for how it
+works.

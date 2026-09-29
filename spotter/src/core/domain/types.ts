@@ -19,11 +19,13 @@ export type DataMode = 'demo' | 'live'
 /** Where a stored row came from. 'manual' = captured by the user, see assisted discovery. */
 export type DataOrigin = 'demo' | 'live' | 'manual'
 /**
- * Where a metric value came from. Owner insights (private analytics of the
- * creator's own content) and public counters are different measurements and
- * are never mixed within one snapshot.
+ * Where a metric value came from. A snapshot of the creator's own post can
+ * combine the public counters and the owner insights read in the same run
+ * (same moment); it is then marked `owner_insights`, and where both report
+ * the same metric the public counter is kept. Demo rows are told apart by
+ * their data origin, not by this field.
  */
-export type MetricSource = 'public_api' | 'owner_insights' | 'simulated' | 'manual'
+export type MetricSource = 'public_api' | 'owner_insights' | 'manual'
 export type MediaType = 'video' | 'short' | 'reel' | 'image' | 'carousel' | 'story' | 'unknown'
 export type ContentAvailability = 'available' | 'deleted' | 'private' | 'unavailable'
 export type AudioType = 'music' | 'original_sound'

@@ -6,6 +6,7 @@
  * Use this with RUN_WORKER_IN_WEB=false when the web server and the worker
  * run as separate processes (several workers may share one PostgreSQL).
  */
+import './load-env'
 import { getEnv } from '../src/core/config/env'
 import { closeDb, getDbHandle } from '../src/core/db/client'
 import { getLogger } from '../src/core/observability/logger'

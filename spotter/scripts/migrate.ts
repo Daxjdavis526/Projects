@@ -4,6 +4,7 @@
  *
  *   npm run db:migrate
  */
+import './load-env'
 import { openDatabase } from '../src/core/db/client'
 import { getLogger } from '../src/core/observability/logger'
 

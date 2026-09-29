@@ -1,4 +1,4 @@
-import { getEnv } from '@/core/config/env'
+import { getEnv, isProduction } from '@/core/config/env'
 import { closeDb, getDbHandle } from '@/core/db/client'
 import { getLogger } from '@/core/observability/logger'
 import { ensureInProcessWorker, inProcessWorker } from '@/core/pipeline/worker'
@@ -16,6 +16,13 @@ export async function boot(): Promise<void> {
     // Invalid configuration: pages will show the error; do not crash the process.
     log.error('Invalid environment configuration', { error: err })
     return
+  }
+  if (isProduction(env)) {
+    if (!env.TOKEN_ENCRYPTION_KEY) log.error('TOKEN_ENCRYPTION_KEY is not set: connecting accounts will fail until it is (openssl rand -base64 32).')
+    const url = new URL(env.APP_URL)
+    if (url.protocol !== 'https:' && url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
+      log.warn('APP_URL is not https: session cookies are Secure in production, so sign-in only works over HTTPS (or on localhost).', { appUrl: url.origin })
+    }
   }
   try {
     const handle = await getDbHandle()

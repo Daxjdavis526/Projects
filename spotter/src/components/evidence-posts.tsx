@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react'
-import type { EvidenceExample } from '@/core/domain/types'
+import { PLATFORM_LABEL, type EvidenceExample } from '@/core/domain/types'
 import { PlatformDot } from '@/components/ui/primitives'
 import { compact, multiple, relativeTime } from '@/lib/format'
 
@@ -8,6 +8,7 @@ import { compact, multiple, relativeTime } from '@/lib/format'
  * shown, with a link to the post on the platform — never a copy of it.
  * Simulated (demo) posts are not linked: they do not exist anywhere.
  */
+
 export function EvidencePosts({ posts }: { posts: EvidenceExample[]; timeZone?: string }) {
   const now = new Date()
   if (!posts.length) return <p className="text-[13px] text-muted">No example posts are available for this trend.</p>
@@ -30,10 +31,12 @@ export function EvidencePosts({ posts }: { posts: EvidenceExample[]; timeZone?: 
                 )}
               </div>
               <div className="mt-0.5 flex flex-wrap gap-x-2.5 text-[12px] text-muted">
+                <span>{PLATFORM_LABEL[p.platform]}</span>
                 <span>{p.creatorName ?? 'Author not shared by platform'}</span>
                 {p.creatorFollowerCount !== null ? <span>{compact(p.creatorFollowerCount)} followers</span> : null}
                 {p.publishedAt ? <span>{relativeTime(p.publishedAt, now)}</span> : null}
                 {p.dataOrigin === 'demo' ? <span className="text-warning-text">simulated</span> : null}
+                {p.dataOrigin === 'manual' ? <span title="Captured by you; numbers are what you saw at the time">captured by you</span> : null}
               </div>
             </div>
             <div className="shrink-0 text-right text-[12px]">

@@ -5,6 +5,7 @@
  *                                         # (password: SPOTTER_DEMO_PASSWORD, or a random one printed once)
  *   npm run demo:seed -- --days 14
  */
+import './load-env'
 import { eq, isNotNull } from 'drizzle-orm'
 import { getEnv } from '../src/core/config/env'
 import { openDatabase } from '../src/core/db/client'

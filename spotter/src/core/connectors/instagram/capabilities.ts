@@ -45,7 +45,7 @@ export function instagramCapabilities(ctx: CapabilityContext): CapabilityReport 
     fb
       ? item(
           'public_discovery',
-          live && !ctx.configured ? 'not_configured' : hashtagBlocked ? 'limited' : 'limited',
+          live && !ctx.configured ? 'not_configured' : 'limited',
           hashtagBlocked
             ? 'Business Discovery of a watchlist of professional accounts works. Hashtag Search is not approved for this app yet (needs App Review for Instagram Public Content Access and Business Verification).'
             : 'Business Discovery of a watchlist of professional accounts (exact usernames only), plus Hashtag Search (top posts, no authors or views; 30 hashtags per rolling 7 days; requires App Review).',
@@ -54,7 +54,7 @@ export function instagramCapabilities(ctx: CapabilityContext): CapabilityReport 
       : item(
           'public_discovery',
           'unavailable',
-          'Instagram Login cannot read other accounts’ content. Switch to the Facebook Login path (requires a Facebook Page linked to the account) for Business Discovery and Hashtag Search.',
+          'Instagram Login cannot search or read other accounts (only posts that tag or mention you, which SPOTTER does not use). Switch to the Facebook Login path (requires a Facebook Page linked to the account) for Business Discovery and Hashtag Search.',
           { docs: [`${DOCS}/overview`] },
         ),
     item(
@@ -69,8 +69,12 @@ export function instagramCapabilities(ctx: CapabilityContext): CapabilityReport 
       fb ? (live && !ctx.configured ? 'not_configured' : 'limited') : 'unavailable',
       fb ? 'Follower counts for watchlist accounts only; hashtag results never identify the author.' : 'Not available with Instagram Login.',
     ),
-    item('comments', 'unavailable', 'Comment text is not requested: it needs the comment-management permission, which SPOTTER does not ask for.'),
-    item('transcripts', 'unavailable', 'No transcript or caption-track API exists for Instagram media.'),
+    item(
+      'comments',
+      'not_implemented',
+      'The API can return comments on your own posts with a comment-management permission. SPOTTER does not ask for it, so no comment text is read.',
+    ),
+    item('transcripts', 'unavailable', 'No transcript or caption-track API is documented for Instagram media.'),
     item(
       'audio',
       'limited',
@@ -82,14 +86,14 @@ export function instagramCapabilities(ctx: CapabilityContext): CapabilityReport 
       'token_refresh',
       live && !ctx.configured ? 'not_configured' : 'available',
       fb
-        ? 'Long-lived tokens (~60 days) are re-exchanged a week before expiry. Facebook Login data access also lapses after 90 days of inactivity and then needs a reconnect.'
+        ? 'Long-lived tokens last about 60 days. SPOTTER tries to extend them a week before expiry, but Meta documents only the short-to-long exchange, so plan to reconnect about every 60 days. Data access also lapses after 90 days of inactivity.'
         : 'Long-lived tokens (60 days) are refreshed automatically a week before expiry (only once they are 24 hours old).',
     ),
   ]
   const notes = [
     fb ? 'Auth path: Facebook Login for Business (graph.facebook.com).' : 'Auth path: Instagram Login (graph.instagram.com).',
     'Personal (non-professional) Instagram accounts are never accessible.',
-    'media_url is omitted for Reels with licensed audio; thumbnails fall back to thumbnail_url or the permalink.',
+    'media_url is omitted for video with copyrighted or licensed audio, copyright-flagged media and other accounts’ Reels with downloads turned off; thumbnails fall back to thumbnail_url or the permalink.',
   ]
   return {
     platform: 'instagram',

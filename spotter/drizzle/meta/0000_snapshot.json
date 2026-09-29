@@ -1,5 +1,5 @@
 {
-  "id": "fe214dc4-0066-4c83-b68c-aaaaef1490ea",
+  "id": "6d9c2520-b371-4c80-bed0-7addb4301cd2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2012,6 +2012,12 @@
         },
         "disconnected_at": {
           "name": "disconnected_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_lost_at": {
+          "name": "access_lost_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false

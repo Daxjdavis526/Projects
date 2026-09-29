@@ -5,6 +5,7 @@
  *
  * Handy for testing credentials: each platform's steps and errors are listed.
  */
+import './load-env'
 import { eq } from 'drizzle-orm'
 import { getEnv } from '../src/core/config/env'
 import { openDatabase } from '../src/core/db/client'

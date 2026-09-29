@@ -85,7 +85,7 @@ export class AnthropicAIProvider implements AIProvider {
   constructor(options: AnthropicProviderOptions) {
     this.model = options.model?.trim() || DEFAULT_ANTHROPIC_MODEL
     this.niche = options.niche
-    this.client = options.client ?? new Anthropic({ apiKey: options.apiKey, maxRetries: 3, timeout: 5 * 60_000 })
+    this.client = options.client ?? new Anthropic({ apiKey: options.apiKey, maxRetries: 2, timeout: 3 * 60_000 })
   }
 
   async analyzeContent(items: ContentAnalysisInput[]): Promise<AnalysisResult[]> {

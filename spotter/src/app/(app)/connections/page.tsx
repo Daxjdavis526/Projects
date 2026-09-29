@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { ExternalLink, KeyRound, Link2, ShieldCheck, Unplug } from 'lucide-react'
+import { policyFor } from '@/core/compliance/policy'
+import { getEnv } from '@/core/config/env'
 import { CAPABILITY_LABEL, type CapabilityStatus } from '@/core/connectors/types'
 import { describeScope } from '@/core/connectors/scopes'
 import { PLATFORM_LABEL } from '@/core/domain/types'
@@ -18,6 +20,7 @@ const CAP_STATUS: Record<CapabilityStatus, { kind: StatusKind; label: string }> 
   needs_permission: { kind: 'warning', label: 'Permission not granted' },
   needs_review: { kind: 'warning', label: 'Needs app review' },
   not_configured: { kind: 'idle', label: 'Not configured' },
+  not_implemented: { kind: 'idle', label: 'Not used by SPOTTER' },
   unavailable: { kind: 'idle', label: 'Not offered by the API' },
 }
 
@@ -52,6 +55,7 @@ function PlatformCard({ view, demo, timeZone }: { view: ConnectionView; demo: bo
   const health = platformHealth(s)
   const connected = s.state !== 'not_connected'
   const canConnect = demo || view.missingConfiguration.length === 0
+  const policy = policyFor(platform, getEnv(), 'live')
   const granted = new Set(s.grantedScopes)
   return (
     <Card as="article" aria-labelledby={`conn-${platform}`}>
@@ -189,6 +193,20 @@ function PlatformCard({ view, demo, timeZone }: { view: ConnectionView; demo: bo
               <li key={i}>{n}</li>
             ))}
           </ul>
+        ) : null}
+        {!demo && policy.attributionLinks.length ? (
+          <p className="mt-3 text-[12px] text-muted">
+            {platform === 'youtube' ? 'By connecting YouTube you agree to be bound by the ' : `${policy.attribution}: `}
+            {policy.attributionLinks.map((l, i) => (
+              <span key={l.href}>
+                {i > 0 ? ' · ' : ''}
+                <a href={l.href} target="_blank" rel="noreferrer noopener" className="underline decoration-line-strong underline-offset-2 hover:text-ink">
+                  {l.label}
+                </a>
+              </span>
+            ))}
+            {platform === 'youtube' ? '.' : ''}
+          </p>
         ) : null}
         <p className="mt-3 text-[11px] text-muted">Checked against official documentation on {view.capabilities.docsCheckedOn}.</p>
       </div>

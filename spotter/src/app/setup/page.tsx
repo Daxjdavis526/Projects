@@ -73,9 +73,10 @@ async function connected(profile: Profile) {
 }
 
 export default async function SetupPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const db = await getDb()
+  // Request data first (session cookie, search params): the page is per-request, never prerendered at build time.
   const params = await searchParams
   const user = await getSessionUser()
+  const db = await getDb()
   if (!user) {
     if ((await countUsers(db)) > 0) redirect('/login?returnTo=/setup')
     return (

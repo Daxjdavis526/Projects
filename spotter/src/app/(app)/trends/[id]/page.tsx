@@ -211,7 +211,15 @@ export default async function TrendPage({ params }: { params: Promise<{ id: stri
                                 )}
                               </div>
                               <div className="text-[12px] text-muted">
-                                {[m.format, m.hookType ? `${m.hookType.toLowerCase()} hook` : null, m.durationSeconds ? duration(m.durationSeconds) : null].filter(Boolean).join(' · ')}
+                                {[
+                                  PLATFORM_LABEL[m.platform],
+                                  m.format,
+                                  m.hookType ? `${m.hookType.toLowerCase()} hook` : null,
+                                  m.durationSeconds ? duration(m.durationSeconds) : null,
+                                  m.dataOrigin === 'manual' ? 'captured by you' : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' · ')}
                               </div>
                             </div>
                           </div>

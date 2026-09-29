@@ -65,6 +65,9 @@ export async function runAiStage(rc: RunContext, comments: Map<string, string[]>
   const eligible = or(
     ownPlatforms.length ? and(eq(contentItems.isOwn, true), inArray(contentItems.platform, ownPlatforms), sql`${contentItems.publishedAt} >= ${ownSince}`) : sql`false`,
     publicPlatforms.length ? and(eq(contentItems.isOwn, false), inArray(contentItems.platform, publicPlatforms), sql`${contentItems.publishedAt} >= ${publicSince}`) : sql`false`,
+    // Posts the creator captured by hand are their own observations, not platform API data:
+    // the API data policies above do not limit them, on any platform.
+    and(eq(contentItems.dataOrigin, 'manual'), sql`coalesce(${contentItems.publishedAt}, ${contentItems.firstCollectedAt}) >= ${publicSince}`),
   )
   const limit = ai.remote ? rc.settings.ai.maxItemsPerRun : 5_000
   const pending = await rc.db

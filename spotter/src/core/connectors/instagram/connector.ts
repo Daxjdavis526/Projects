@@ -621,14 +621,15 @@ export class InstagramConnector implements PlatformConnector {
           ctx,
           'business_discovery',
           igId,
-          { fields: `business_discovery.username(${username}){id,username,name,followers_count,media_count,media.limit(20){${DISCOVERY_MEDIA_FIELDS}}}` },
+          // Only the fields Meta marks Public on IG User (`name` is not one of them).
+          { fields: `business_discovery.username(${username}){id,username,followers_count,media_count,media.limit(20){${DISCOVERY_MEDIA_FIELDS}}}` },
           token,
         )
         const bd = res.data.business_discovery
         const owner: IgOwner = {
           id: toText(bd?.id) ?? null,
           username: toText(bd?.username) ?? username,
-          name: toText(bd?.name) ?? toText(bd?.username),
+          name: toText(bd?.username),
           followers: toCount(bd?.followers_count),
           avatarUrl: null,
         }

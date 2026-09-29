@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { FlaskConical, LogOut, Radio } from 'lucide-react'
+import { policyFor } from '@/core/compliance/policy'
 import { getEnv } from '@/core/config/env'
 import { PLATFORM_LABEL } from '@/core/domain/types'
 import { requireProfile } from '@/server/auth/session'
@@ -21,6 +22,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const now = new Date()
   const running = !!status.activeRun || (status.demoSetup?.status === 'queued' || status.demoSetup?.status === 'running')
   const trouble = status.platforms.filter((p) => p.state === 'needs_reauth' || p.state === 'error')
+  // Platforms whose data can appear on these pages, with the attribution their terms ask for.
+  const sources =
+    status.dataMode === 'live'
+      ? status.platforms
+          .filter((p) => p.state !== 'not_connected' || (p.platform === 'youtube' && !!env.YOUTUBE_API_KEY))
+          .map((p) => policyFor(p.platform, env, 'live'))
+      : []
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[252px_minmax(0,1fr)]">
@@ -115,6 +123,28 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ) : null}
           {children}
         </main>
+        <footer className="mx-auto w-full max-w-[1320px] px-4 pb-8 text-[12px] text-muted lg:px-8">
+          {status.dataMode === 'demo' ? (
+            <p>Demo data: the creators, posts and numbers are simulated. Nothing here comes from a platform.</p>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {sources.map((policy) => (
+                <li key={policy.platform}>
+                  {policy.attribution}
+                  {policy.attributionLinks.map((l) => (
+                    <span key={l.href}>
+                      {' · '}
+                      <a href={l.href} target="_blank" rel="noreferrer noopener" className="underline decoration-line-strong underline-offset-2 hover:text-ink">
+                        {l.label}
+                      </a>
+                    </span>
+                  ))}
+                  {policy.restrictionNote ? <span className="block text-muted">{policy.restrictionNote}</span> : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </footer>
       </div>
       {running ? <LiveRefresher /> : null}
     </div>

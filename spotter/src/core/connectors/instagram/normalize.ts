@@ -7,8 +7,9 @@
  *   includes paid views — recorded in extraMetrics so it is never mistaken
  *   for organic reach.
  * - Hashtag results never include the author, so creator fields stay null.
- * - media_url is optional (omitted for Reels with licensed audio); the
- *   thumbnail falls back accordingly.
+ * - media_url is optional (omitted for video with copyrighted or licensed
+ *   audio, copyright-flagged media, and others' Reels with downloads off);
+ *   the thumbnail falls back accordingly.
  */
 import type { ContentItem, MediaType, MetricSource } from '../../domain/types'
 import { extractHashtags, toCount, toDate, toText } from '../normalize-utils'

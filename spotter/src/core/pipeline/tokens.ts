@@ -41,6 +41,8 @@ export async function ensureFreshCredentials(rc: RunContext, connector: Platform
   try {
     const tokens = await connector.refreshToken(creds, rc.now)
     await saveTokens(rc.db, account.id, tokens, rc.now)
+    // A refresh that works again means access is back.
+    if (account.status !== 'connected') await setAccountStatus(rc.db, account.id, 'connected', rc.now)
     const rotated = tokens.refreshToken !== null && tokens.refreshToken !== creds.refreshToken
     rc.logger.info('Access token refreshed', { platform: account.platform, refreshTokenRotated: rotated })
     await recordEvent(rc.db, {

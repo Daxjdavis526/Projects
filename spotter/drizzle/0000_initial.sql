@@ -262,6 +262,7 @@ CREATE TABLE "platform_accounts" (
 	"connected_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"last_sync_at" timestamp with time zone,
 	"disconnected_at" timestamp with time zone,
+	"access_lost_at" timestamp with time zone,
 	"metadata" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"discovery_cursor" jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,

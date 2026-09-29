@@ -151,6 +151,8 @@ export const platformAccounts = pgTable(
     connectedAt: ts('connected_at').notNull().defaultNow(),
     lastSyncAt: ts('last_sync_at'),
     disconnectedAt: ts('disconnected_at'),
+    /** When access was first found broken (refresh refused, token revoked); cleared on recovery or reconnect. */
+    accessLostAt: ts('access_lost_at'),
     metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
     /** Discovery rotation state saved between runs (query index, hashtag budget, ...). */
     discoveryCursor: jsonb('discovery_cursor').$type<Record<string, unknown>>(),

@@ -166,6 +166,7 @@ export interface EmbeddingProvider {
  * Why a provider call failed. `auth` and `rate_limit` mean the provider cannot
  * serve anything right now (bad key, exhausted quota): callers stop using it
  * for the rest of the run instead of failing the same way item after item.
+ * `unavailable` (network, timeouts, 5xx after retries) pauses it briefly.
  */
 export type AIErrorKind = 'auth' | 'rate_limit' | 'unavailable' | 'invalid_request' | 'refusal' | 'truncated' | 'bad_response'
 

@@ -49,9 +49,10 @@ export const CAPABILITY_LABEL: Record<CapabilityKey, string> = {
  * - needs_permission: supported, but a required scope was not granted.
  * - needs_review: supported by the API but requires platform app review/approval first.
  * - not_configured: server credentials for this platform are missing.
+ * - not_implemented: the API offers it, but SPOTTER V1 does not use it (said why in `summary`).
  * - unavailable: the official API does not provide this for our use case.
  */
-export type CapabilityStatus = 'available' | 'limited' | 'needs_permission' | 'needs_review' | 'not_configured' | 'unavailable'
+export type CapabilityStatus = 'available' | 'limited' | 'needs_permission' | 'needs_review' | 'not_configured' | 'not_implemented' | 'unavailable'
 
 export interface CapabilityItem {
   key: CapabilityKey

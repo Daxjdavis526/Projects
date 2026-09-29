@@ -197,7 +197,9 @@ export class TikTokOAuthFlow implements OAuthFlow {
       form({
         client_key: this.env.TIKTOK_CLIENT_KEY,
         client_secret: this.env.TIKTOK_CLIENT_SECRET,
-        code: decodeURIComponent(input.code),
+        // TikTok: "The value should be URL decoded." The callback's URL parser already did
+        // that once; decoding again would corrupt (or throw on) a code containing "%".
+        code: input.code,
         grant_type: 'authorization_code',
         redirect_uri: input.redirectUri,
       }),

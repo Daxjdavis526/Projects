@@ -36,6 +36,7 @@ export async function connectAccount(
     status: 'connected' as const,
     connectedAt: input.now,
     disconnectedAt: null,
+    accessLostAt: null,
     metadata: account.metadata,
     updatedAt: input.now,
   }

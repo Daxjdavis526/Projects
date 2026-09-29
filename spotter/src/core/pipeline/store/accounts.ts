@@ -1,12 +1,12 @@
 /**
  * Platform accounts, their encrypted credentials, and connector health.
  */
-import { and, eq, ne } from 'drizzle-orm'
+import { and, eq, ne, sql } from 'drizzle-orm'
 import type { ConnectedAccountInfo, AccessCredentials, TokenSet } from '../../connectors/types'
 import type { Database, Executor } from '../../db/client'
 import { oauthCredentials, platformAccounts, platformConnectorHealth } from '../../db/schema'
 import type { ConnectorMode, Platform, RateLimitInfo } from '../../domain/types'
-import { currentKeyId, decryptSecret, encryptSecret } from '../../security/crypto'
+import { currentKeyId, decryptSecret, encryptSecret, keyIdOf } from '../../security/crypto'
 
 export type AccountRow = typeof platformAccounts.$inferSelect
 export type HealthRow = typeof platformConnectorHealth.$inferSelect
@@ -48,13 +48,17 @@ export async function loadCredentials(db: Database, accountId: string): Promise<
 
 /**
  * Store a token set, encrypted. A missing refresh token or scope list means
- * "unchanged": providers that do not rotate refresh tokens omit them.
+ * "unchanged": providers that do not rotate refresh tokens omit them. An
+ * unchanged refresh token is re-encrypted with the current key, so after a
+ * key rotation every stored secret moves to the new key on its next refresh
+ * and `encryptionKeyId` tells the truth about the whole row.
  */
 export async function saveTokens(db: Executor, accountId: string, tokens: TokenSet, now: Date): Promise<void> {
   const [existing] = await db.select().from(oauthCredentials).where(eq(oauthCredentials.platformAccountId, accountId)).limit(1)
+  const keptRefresh = !tokens.refreshToken && existing?.refreshTokenEnc ? reencrypt(existing.refreshTokenEnc) : null
   const values = {
     accessTokenEnc: encryptSecret(tokens.accessToken),
-    refreshTokenEnc: tokens.refreshToken ? encryptSecret(tokens.refreshToken) : (existing?.refreshTokenEnc ?? null),
+    refreshTokenEnc: tokens.refreshToken ? encryptSecret(tokens.refreshToken) : keptRefresh,
     tokenType: tokens.tokenType ?? existing?.tokenType ?? null,
     scope: tokens.scopes ? tokens.scopes.join(' ') : (existing?.scope ?? null),
     accessTokenExpiresAt: tokens.accessTokenExpiresAt,
@@ -80,8 +84,17 @@ export async function recordRefreshFailure(db: Database, accountId: string, mess
     .where(eq(oauthCredentials.platformAccountId, accountId))
 }
 
+/**
+ * Set an account's status. `accessLostAt` records when access first broke and
+ * is kept through repeated failures (retention counts from it), then cleared
+ * once the account works again.
+ */
 export async function setAccountStatus(db: Database, accountId: string, status: AccountRow['status'], now: Date): Promise<void> {
-  await db.update(platformAccounts).set({ status, updatedAt: now }).where(eq(platformAccounts.id, accountId))
+  const lost = status === 'needs_reauth' || status === 'error'
+  await db
+    .update(platformAccounts)
+    .set({ status, accessLostAt: lost ? sql`coalesce(${platformAccounts.accessLostAt}, ${now})` : null, updatedAt: now })
+    .where(eq(platformAccounts.id, accountId))
 }
 
 export async function saveDiscoveryCursor(db: Database, accountId: string, cursor: Record<string, unknown> | null): Promise<void> {
@@ -159,4 +172,9 @@ export function tokenStatusOf(creds: { accessTokenExpiresAt: Date | null; refres
   if (creds.refreshTokenExpiresAt && creds.refreshTokenExpiresAt.getTime() - now.getTime() < soon) return 'expiring'
   if (!creds.refreshToken && creds.accessTokenExpiresAt && creds.accessTokenExpiresAt.getTime() - now.getTime() < soon) return 'expiring'
   return 'healthy'
+}
+
+/** Re-encrypt a stored secret with the current key (no-op if it already uses it). */
+function reencrypt(payload: string): string {
+  return keyIdOf(payload) === currentKeyId() ? payload : encryptSecret(decryptSecret(payload))
 }

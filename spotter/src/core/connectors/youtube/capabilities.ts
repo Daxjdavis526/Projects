@@ -34,7 +34,7 @@ export function youtubeCapabilities(ctx: CapabilityContext): CapabilityReport {
       scopes: [SCOPE_READONLY],
       docs: ['https://developers.google.com/youtube/v3/docs/channels/list'],
     }),
-    item('own_content', scopeStatus(SCOPE_READONLY, 'available'), 'Every public upload with title, description, tags, duration, publish time and live view/like/comment counts.', {
+    item('own_content', scopeStatus(SCOPE_READONLY, 'available'), 'Your public uploads (the last 180 days on the first sync, then 60; up to 300 per run) with title, description, tags, duration, publish time and live view/like/comment counts. Live and upcoming broadcasts are skipped.', {
       scopes: [SCOPE_READONLY],
       docs: ['https://developers.google.com/youtube/v3/docs/playlistItems/list'],
     }),
@@ -63,7 +63,13 @@ export function youtubeCapabilities(ctx: CapabilityContext): CapabilityReport {
     item('creator_sizes', discoveryConfigured ? 'limited' : 'not_configured', 'Subscriber counts, rounded down to three significant figures, and missing for channels that hide them.', {
       docs: ['https://developers.google.com/youtube/v3/docs/channels'],
     }),
-    item('comments', discoveryConfigured ? 'available' : 'not_configured', 'Top public comments on a video (1 quota unit per call), used only as AI input and never stored.', {
+    item(
+      'comments',
+      !discoveryConfigured ? 'not_configured' : approved ? 'available' : 'needs_review',
+      approved
+        ? 'Top public comments on the fastest-growing videos (1 quota unit per call), used only as AI input and never stored.'
+        : 'Read only once derived analytics on YouTube data are approved (they are AI input); until then SPOTTER does not request them.',
+      {
       docs: ['https://developers.google.com/youtube/v3/docs/commentThreads/list'],
     }),
     item('transcripts', 'unavailable', 'Captions of other creators’ videos cannot be downloaded: captions.download requires permission to edit the video.', {
@@ -72,7 +78,7 @@ export function youtubeCapabilities(ctx: CapabilityContext): CapabilityReport {
     item('audio', 'unavailable', 'The Data API exposes no Shorts sound or music information for any video.', {
       docs: ['https://developers.google.com/youtube/v3/docs/videos'],
     }),
-    item('shares_saves', 'limited', 'Shares only for your own videos (Analytics API). No public share or save counts exist.', {
+    item('shares_saves', scopeStatus(SCOPE_ANALYTICS, 'limited'), 'Shares only for your own videos (Analytics API). No public share or save counts exist.', {
       docs: ['https://developers.google.com/youtube/analytics/metrics'],
     }),
     item(
@@ -85,7 +91,7 @@ export function youtubeCapabilities(ctx: CapabilityContext): CapabilityReport {
 
   const notes = [
     'No official Shorts flag exists; videos are reported with their duration and never classified as Shorts by SPOTTER.',
-    'View counting changed on 2025-03-31 (Shorts) and 2026-08-24 (all formats); views/hour series may step at those dates.',
+    'View counting changed on 2025-03-31 (Shorts) and in late August 2026 (all formats); views/hour series may step at those dates.',
   ]
   if (!approved && live) notes.push('Derived analytics on YouTube data are off until YOUTUBE_DERIVED_METRICS_APPROVED=true (after YouTube approves the III.L use case).')
   return {

@@ -66,7 +66,7 @@ export async function runRetention(db: Database, env: Env, now: Date, logger: Lo
       const lost = await db
         .select({ id: platformAccounts.id })
         .from(platformAccounts)
-        .where(and(eq(platformAccounts.platform, platform), eq(platformAccounts.mode, 'live'), inArray(platformAccounts.status, ['needs_reauth', 'error']), lt(platformAccounts.updatedAt, cutoff)))
+        .where(and(eq(platformAccounts.platform, platform), eq(platformAccounts.mode, 'live'), inArray(platformAccounts.status, ['needs_reauth', 'error']), lt(platformAccounts.accessLostAt, cutoff)))
       for (const account of lost) report.deletedOwnItems += await deleteAuthorizedData(db, account.id)
     }
   }

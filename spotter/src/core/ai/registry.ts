@@ -70,7 +70,7 @@ export function thresholdOverride(env: Env, base: EmbeddingThresholds, notes: st
   }
   const result = thresholdsSchema.safeParse(parsed)
   if (!result.success) {
-    notes.push('EMBEDDING_THRESHOLDS has unknown keys or values outside 0–1; using the provider’s default thresholds.')
+    notes.push('EMBEDDING_THRESHOLDS has unknown keys or values out of range (join, create, merge: 0 to 1; fitLow, fitHigh: −1 to 1); using the provider’s default thresholds.')
     return base
   }
   const merged = { ...base, ...result.data }
@@ -145,8 +145,11 @@ export function selectProviders(settings: AppSettings, env: Env): ProviderSelect
 // Circuit breaker
 // ---------------------------------------------------------------------------
 
-/** How long a provider is paused after a failure of this kind. Other kinds are per-request. */
-const PAUSE_MS: Partial<Record<AIErrorKind, number>> = { auth: 15 * 60_000, rate_limit: 5 * 60_000 }
+/**
+ * How long a provider is paused after a failure of this kind (retries already
+ * spent). Other kinds concern one request and pause nothing.
+ */
+const PAUSE_MS: Partial<Record<AIErrorKind, number>> = { auth: 15 * 60_000, rate_limit: 5 * 60_000, unavailable: 2 * 60_000 }
 const pauses = new Map<string, { until: number; error: AIProviderError }>()
 
 const breakerKey = (name: string, model: string) => `${name}:${model}`
