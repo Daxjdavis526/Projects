@@ -545,7 +545,7 @@ EMBEDDING_THRESHOLDS={"join":0.58,"create":0.62}
 
 ## 6. After you add credentials
 
-1. **Restart SPOTTER**, and the separate worker if you run one. Settings are read only at start-up.
+1. **Restart SPOTTER**, and the separate worker if you run one. Settings are read only at start-up. Then open `APP_URL/privacy` and `APP_URL/terms`, and check they name you and give your contact (`OPERATOR_NAME`, `PRIVACY_CONTACT`).
 2. **Switch to live data.** Settings → Data source → **Switch to live data** takes you to the Connections page. During first-time setup, choose "My real accounts" instead. Switching deletes nothing.
 3. **Connect each platform** on the Connections page. Press **Connect** for the platform, approve on the platform's own page, and you are sent back. Use the browser where you are signed in to SPOTTER, and finish within 10 minutes.
 4. **Read the platform's card.** It shows the connected account, the token status, each permission (granted or not granted), and the list "What SPOTTER can do with YouTube" (or Instagram, or TikTok). Each item in that list has one status:
@@ -633,5 +633,7 @@ EMBEDDING_THRESHOLDS={"join":0.58,"create":0.62}
 | `EMBEDDING_MODEL` | Optional | A model name. Blank means the provider's default (5.1) | No |
 | `VOYAGE_API_KEY` | Optional: Voyage embeddings | Your Voyage AI dashboard (5) | Yes |
 | `EMBEDDING_THRESHOLDS` | Optional | JSON. `npm run calibrate:embeddings` suggests values (5.4) | No |
+| `OPERATOR_NAME` | Recommended: the `/privacy` and `/terms` pages | Your name or business name, as it should appear on those pages (1.3) | No (shown publicly) |
+| `PRIVACY_CONTACT` | Recommended: YouTube III.A.2 requires a privacy contact | An email address or web address where people can reach you about privacy (1.3) | No (shown publicly) |
 | `ASSISTED_DISCOVERY_ENABLED` | Optional | Default `false`. Lets you paste in posts you saw yourself. Nothing is fetched. Captured posts are analysed on any platform | No |
 | `MOCK_FAULTS` | Demo only | Simulated failures, such as `tiktok:rate_limited` | No |

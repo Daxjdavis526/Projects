@@ -123,8 +123,8 @@ export default async function PrivacyPage() {
         <p>Data from your own accounts is kept while the account is connected and deleted as soon as you disconnect it (or remove the app on the platform).</p>
         <p>
           Other creators&apos; YouTube statistics are kept at most {yt.publicStatsRetentionDays} days, and other YouTube data is refreshed or deleted within{' '}
-          {yt.publicMetadataRefreshDays} days. If SPOTTER cannot confirm its access to your YouTube account for {yt.authorizationRecheckDays} days, the data collected
-          through it is deleted. Other platforms&apos; public data is kept up to {policyFor('instagram', env, 'live').publicStatsRetentionDays} days; older measurements
+          {yt.publicMetadataRefreshDays} days. If SPOTTER loses access to your YouTube account and it is not restored, the data collected through it is deleted
+          within {yt.authorizationRecheckDays} days. Other platforms&apos; public data is kept up to {policyFor('instagram', env, 'live').publicStatsRetentionDays} days; older measurements
           are thinned out along the way.
         </p>
       </LegalSection>
