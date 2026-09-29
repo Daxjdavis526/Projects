@@ -6,6 +6,7 @@
     sonicline run <definition.json>     mesh, solve, post-process and judge it
     sonicline study <definition.json>   grid-convergence study (three meshes, GCI)
     sonicline verify                    run the verification cases
+    sonicline ui [project]              the desktop application (the ``ui`` extra)
 
 The same pipeline functions back the desktop UI; the CLI is also how CI and
 the verification suite drive the application.
@@ -83,7 +84,14 @@ def _check(path: str) -> int:
     return 1 if has_errors(findings) else 0
 
 
-def _run(path: str, out: str | None, processors: int | None, no_images: bool) -> int:
+def _json_event(e) -> None:
+    import json
+
+    print(json.dumps({"stage": e.stage, "message": e.message, "data": e.data}, default=str), flush=True)
+
+
+def _run(path: str, out: str | None, processors: int | None, no_images: bool,
+         events: str = "text") -> int:
     import dataclasses
     from pathlib import Path
 
@@ -97,8 +105,12 @@ def _run(path: str, out: str | None, processors: int | None, no_images: bool) ->
     if processors:
         defn = dataclasses.replace(defn, numerics=dataclasses.replace(defn.numerics, processors=processors))
     run_dir = Path(out) if out else Path("runs") / Path(path).stem
-    result = pipeline.run(defn, run_dir, on_event=lambda e: print(f"[{e.stage}] {e.message}", flush=True),
+    on_event = _json_event if events == "json" else (
+        lambda e: print(f"[{e.stage}] {e.message}", flush=True))
+    result = pipeline.run(defn, run_dir, on_event=on_event,
                           render=not no_images, base_dir=Path(path).resolve().parent)
+    if events == "json":
+        return 0 if result.trust != "not_trustworthy" else 1
     if result.metrics:
         m = result.metrics
         print()
@@ -210,6 +222,8 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--out", help="run directory (default runs/<definition name>)")
     run.add_argument("--processors", type=int, help="MPI processes")
     run.add_argument("--no-images", action="store_true", help="skip rendered images")
+    run.add_argument("--events", choices=["text", "json"], default="text",
+                     help="json: one JSON object per line, for the desktop UI")
     imp = sub.add_parser("import", help="analyse a STEP fluid volume and write a starter definition")
     imp.add_argument("cad")
     imp.add_argument("--unit", default="mm", help="length unit for unitless files (STEP carries its own)")
@@ -221,12 +235,22 @@ def main(argv: list[str] | None = None) -> int:
     stu.add_argument("--processors", type=int, help="MPI processes")
     stu.add_argument("--ratio", type=float, default=2 ** 0.5,
                      help="refinement ratio between levels (at least 1.3; default sqrt 2)")
+    ui = sub.add_parser("ui", help="open the desktop application")
+    ui.add_argument("project", nargs="?", help="a .sonicline project folder (created if missing)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
     ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)
     args = parser.parse_args(argv)
+    if args.command == "ui":
+        try:
+            from .ui import main as ui_main
+        except ImportError as e:
+            print(f"error: the desktop application needs the ui extra ({e}): "
+                  "pip install -e \"./sonicline[ui]\"", file=sys.stderr)
+            return 2
+        return ui_main([args.project] if args.project else [])
     if args.command == "study":
         if args.ratio < 1.3:
             print("error: the refinement ratio must be at least 1.3 (Celik et al. 2008)", file=sys.stderr)
@@ -239,7 +263,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "check":
         return _check(args.definition)
     if args.command == "run":
-        return _run(args.definition, args.out, args.processors, args.no_images)
+        return _run(args.definition, args.out, args.processors, args.no_images, args.events)
     return 2
 
 

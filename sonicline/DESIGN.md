@@ -831,7 +831,7 @@ brief's milestone, minus the UI)** — *done; see section 10*
 - **Acceptance:** V0, V1, V4 and V6 pass, with numbers published in the
   README.
 
-**M2 — verification suite and shocks**
+**M2 — verification suite and shocks** (done, with three carry-overs; section 11)
 - Carried over from M1: a wall-resolved 3D O-grid run of the sea-level
   case (the mesh passes its gates; it is about 10⁶ cells and was not run),
   the overexpanded sea-level variant, and exercising the WSL2 runner on a
@@ -850,7 +850,7 @@ brief's milestone, minus the UI)** — *done; see section 10*
 - Physics-hazard validators (section 6).
 - Viscous Cd case V9.
 
-**M3 — desktop application: Geometry → Physics → Mesh → Run**
+**M3 — desktop application: Geometry → Physics → Mesh → Run** (done; section 12)
 - PySide6 shell and project store (save, reopen, run history).
 - Geometry viewport with face picking and confirmation of suggestions.
 - Physics and BC panels with sensible defaults, tooltips and live
@@ -978,7 +978,7 @@ Findings, in the order they bit:
     at run time), and its verification against flat-plate recovery
     (r = Pr^(1/3)) and rhoCentralFoam, which does carry viscous work, are M2.
 
-## 11. M2 record (in progress)
+## 11. M2 record
 
 Delivered so far:
 
@@ -1180,4 +1180,53 @@ Findings:
       3.7 throat heights wide) and the orifice's finite size in a gradient of
       about one p/pt per centimetre. The check allows one orifice outside the
       band and names it.
+
+Not done in M2:
+
+- **The wall-resolved 3D run of the sea-level case.** The standard 3D mesh
+  is 900 000 cells, about two hours on 4 cores. A coarse comparison
+  (268 000 cells) was started twice, and both times the container restarted
+  mid-run. It is still owed. V6 already shows 3D and wedge agreeing
+  inviscidly (0.03 % mass flow).
+- **The WSL2 runner on a Windows machine.** It needs one; it is untested
+  beyond its command construction.
+- **Hunter's nozzle (1998) as a quantitative case.** Its geometry is
+  published exactly, but its wall pressures only as plots. TP-1704 (V11)
+  has tables.
+
+## 12. M3 record: the desktop application
+
+Delivered:
+
+- **A project store** (`sonicline.project`, no Qt), as in section 4.3:
+  `project.json`, content-addressed geometry, simulations, immutable runs,
+  and a run history read from each run's manifest and metrics.
+- **An editable draft** (`sonicline.project.draft`). It holds a definition's
+  JSON, edited by dotted path, and reports three things, all tested without
+  Qt:
+  - whether it parses;
+  - the pre-flight findings;
+  - the quasi-1D prediction.
+- **Plain-data scenes** (`sonicline.post.scene`): the nozzle and a mesh's
+  patches as numpy arrays. The Qt viewport renders them; nothing below the
+  UI knows VTK.
+- **Runs as processes.** The UI starts `sonicline run --events json` and
+  reads JSON event lines. Live plots come from the same function-object
+  tables the convergence monitor reads. Cancelling writes a cancel file that
+  the pipeline polls, so the run stops its solver and records itself as
+  cancelled. That works on Windows too, which lacks the signals a Linux
+  implementation would use. Every stage transition is now in the manifest.
+- **The window.** Project tree, the four stages, a pyvista viewport, the
+  checks panel with per-stage badges, and live pyqtgraph plots. Tested
+  offscreen (10 tests), and screenshot-checked under Xvfb with a real
+  OpenFOAM run started from the UI. That run gave the same numbers as the
+  CLI (V1: 7.1637 g/s, 4.9456 N).
+
+Findings:
+
+27. **pyvista rejects three-digit hex colours** (`#556`); the offscreen tests,
+    which disable the 3D view, could not see it. Only the Xvfb run with the
+    real viewport found it. Screenshot runs stay part of UI changes.
+28. **The pipeline announced "done" after writing its manifest**, so the
+    final transition never reached it. The cancellation test found this.
 

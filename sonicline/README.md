@@ -11,11 +11,12 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestone M1 of [DESIGN.md](DESIGN.md) is complete; M2 is under
-way.** The whole pipeline runs headless from the command line, from a STEP
-file or a parametric nozzle to verified numbers and images. The desktop
-interface is M3 and M4. Sections 10 and 11 of the design record what
-building M1 and M2 taught.
+**Status: milestones M1 and M2 of [DESIGN.md](DESIGN.md) are complete, and
+M3, the desktop application, is working.** The whole pipeline runs from the
+command line or the desktop application, from a STEP file or a parametric
+nozzle to verified numbers and images. Results viewing (contours, slices,
+probes) is M4. Sections 10–12 of the design record what building each
+milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -30,6 +31,35 @@ sonicline run    nozzle.json --processors 4    # mesh, solve, post-process, judg
 sonicline study  nozzle.json --processors 4    # three meshes: grid-convergence index
 sonicline verify                               # verification cases vs analytical theory
 ```
+
+### The desktop application
+
+```
+pip install -e "./sonicline[geometry,post,ui]"
+sonicline ui MyThruster.sonicline        # opens (or creates) a project
+```
+
+A project folder holds its geometry (content-addressed), its simulation
+definitions and every run made from them. The window has four stages:
+
+- **Geometry:** a parametric conical nozzle, or an imported STEP fluid
+  volume. The analysis suggests which end is the inlet; confirm it, or click
+  an end in the 3D view.
+- **Physics:** chamber, surroundings, exit domain, viscous model, gas,
+  solver. The quasi-1D prediction updates as you type.
+- **Mesh:** form, quality, wall resolution, and a preview of the mesh.
+- **Run:** processors, run and cancel, live plots of mass flow, thrust and
+  residuals, the log, and the verdict with its reasons.
+
+The checks panel re-runs every pre-flight check on each edit. Each stage's
+tab carries a badge when a check there warns or blocks. A run is a separate
+process, the same `sonicline run` as the command line, so a solver crash
+never takes the window down. Past runs are listed under their simulation
+with their verdict and thrust.
+
+![The Run stage after a V1 run](doc/ui-run.png)
+
+### What a run produces
 
 `run` produces a self-describing run directory:
 
@@ -259,8 +289,10 @@ src/sonicline/
   post/         integrals from solver fluxes, fields, images
   metrics/      propulsion metrics and the trust verdict
   verification/ the verification cases
+  project/      the project store and the editable draft (no Qt)
+  ui/           the desktop application (PySide6, pyvista, pyqtgraph)
   cli.py
-tests/          about 225 tests; the OpenFOAM ones skip without it
+tests/          about 300 tests; the OpenFOAM and UI ones skip without them
 examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD),
                 planar-tp1704-b1-npr2.46.json (planar, separated)
 doc/            images and the verification table

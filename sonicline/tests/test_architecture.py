@@ -12,7 +12,8 @@ FORBIDDEN_IN_CORE = {"vtk", "vtkmodules", "pyvista", "pyvistaqt", "PySide6", "Py
                      "pyqtgraph", "gmsh", "trimesh", "classy_blocks", "matplotlib"}
 # Sibling packages the core must not depend on.
 FORBIDDEN_SIBLINGS = {"foam", "mesh", "geometry", "run", "monitor", "post", "metrics",
-                      "project", "ui_qt", "cli"}
+                      "project", "ui", "cli"}
+QT = {"PySide6", "PyQt6", "PyQt5", "pyvistaqt", "pyqtgraph"}
 
 
 def _imports(path: Path):
@@ -53,3 +54,11 @@ def test_only_foam_package_mentions_openfoam_dictionaries():
             continue
         text = path.read_text(encoding="utf-8")
         assert "FoamFile" not in text, f"{path} contains OpenFOAM dictionary syntax"
+
+
+@pytest.mark.parametrize("path", sorted(p for p in SRC.rglob("*.py") if "ui" not in p.relative_to(SRC).parts[:1]),
+                         ids=lambda p: str(p.relative_to(SRC)))
+def test_only_the_ui_package_imports_qt(path):
+    """The UI is a client of a UI-free application (DESIGN.md section 3.7)."""
+    for name in _imports(path):
+        assert name.split(".")[0] not in QT, f"{path.relative_to(SRC)} imports {name}"

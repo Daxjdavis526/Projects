@@ -1,8 +1,9 @@
 # Tests SONICLINE (sonicline/, a Python CFD application driving OpenFOAM)
 # whenever it changes. The core runs on Linux and on Windows, because the
-# application is used on Windows. A second job installs ESI OpenFOAM v2512
-# and runs the fast verification tier end to end: mesh, solve, and compare
-# with analytical theory. The rest of the repository is static pages and is
+# application is used on Windows; the desktop application's tests run on
+# Windows and in a Linux job of their own (Qt offscreen). Another job
+# installs ESI OpenFOAM v2512 and runs the fast verification tier end to end:
+# mesh, solve, and compare with analytical theory. The rest of the repository is static pages and is
 # not touched by this workflow.
 name: SONICLINE tests
 
@@ -40,8 +41,37 @@ jobs:
       - name: Install
         run: python -m pip install -e "./sonicline[dev]"
 
+      # The desktop application is used on Windows: its tests run there too
+      # (Qt's offscreen platform, 3D view disabled).
+      - name: Install the desktop application's libraries (Windows)
+        if: runner.os == 'Windows'
+        run: python -m pip install -e "./sonicline[dev,ui]"
+
       - name: Unit and theory tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: python -m pytest sonicline/tests
+
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Libraries Qt needs on a headless Linux runner
+        run: sudo apt-get install -y -qq libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3
+
+      - name: Install
+        run: python -m pip install -e "./sonicline[dev,ui]"
+
+      - name: Desktop application tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest sonicline/tests/test_ui.py -v
 
   openfoam:
     runs-on: ubuntu-24.04

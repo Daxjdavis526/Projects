@@ -45,6 +45,20 @@ class Event:
     data: dict = field(default_factory=dict)
 
 
+# A run is cancelled by creating this file in its run directory: the UI
+# (or anyone) can do it from another process on any platform, and the
+# pipeline stops the solver, records the run as cancelled and returns.
+CANCEL_FILE = "CANCEL"
+
+
+def request_cancel(run_dir: Path) -> None:
+    (Path(run_dir) / CANCEL_FILE).write_text("cancel requested\n", encoding="utf-8")
+
+
+def _cancelled(run_dir: Path) -> bool:
+    return (run_dir / CANCEL_FILE).exists()
+
+
 @dataclass
 class RunResult:
     run_dir: Path
@@ -90,9 +104,18 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         render: bool = True, base_dir: Path | None = None) -> RunResult:
     """Run a definition end to end. ``base_dir`` resolves relative CAD paths
     (normally the directory holding the definition file)."""
-    emit = on_event or (lambda e: None)
+    notify = on_event or (lambda e: None)
     run_dir = Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / CANCEL_FILE).unlink(missing_ok=True)
+    stages: list[dict] = []
+
+    def emit(event: Event) -> None:
+        # Every change of stage is recorded in the manifest (DESIGN.md 4.4).
+        if not stages or stages[-1]["stage"] != event.stage:
+            stages.append({"stage": event.stage, "at": datetime.now(timezone.utc).isoformat()})
+        notify(event)
+
     started = datetime.now(timezone.utc)
     model.save(defn, run_dir / "definition.json")
     manifest: dict = {
@@ -102,13 +125,15 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         "started": started.isoformat(),
         "python": sys.version.split()[0],
         "platform": platform.platform(),
+        "stages": stages,
     }
 
     def finish(status: str, trust: str, metrics=None) -> RunResult:
+        # Announced first, so the final transition is in the manifest too.
+        emit(Event("done", f"{status}; result {trust.replace('_', ' ')}"))
         manifest.update({"status": status, "trust": trust,
                          "finished": datetime.now(timezone.utc).isoformat()})
         _write_json(run_dir / "manifest.json", manifest)
-        emit(Event("done", f"{status}; result {trust.replace('_', ' ')}"))
         return RunResult(run_dir, status, trust, metrics, manifest)
 
     # --- geometry ----------------------------------------------------------------
@@ -215,6 +240,13 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         emit(Event("solve", f"warm start: {n_warm} iterations of {foam_case.PIMPLE_SOLVER}"))
         foam_case.write_warm_start(case, defn, meta, summary)
         warm = runner.start(command(foam_case.PIMPLE_SOLVER), case, case / "log.warmstart")
+        while warm.poll() is None:
+            time.sleep(poll_seconds)
+            if _cancelled(run_dir):
+                warm.terminate()
+                warm.wait()
+                emit(Event("solve", "cancelled during the warm start"))
+                return finish("cancelled", Trust.NOT_TRUSTWORTHY.value)
         code = warm.wait()
         failure = parse.log_failure(warm.log.read_text(encoding="utf-8", errors="replace"))
         manifest["warm_start"] = {"solver": foam_case.PIMPLE_SOLVER, "iterations": n_warm,
@@ -225,6 +257,8 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         # The continuation is judged on its own output only.
         shutil.move(str(case / "postProcessing"), str(case / "postProcessing.warmstart"))
         foam_case.write_continuation(case, defn, meta, summary, n_warm)
+    if _cancelled(run_dir):
+        return finish("cancelled", Trust.NOT_TRUSTWORTHY.value)
     cmd = command(summary.solver)
     emit(Event("solve", f"running {' '.join(cmd)}"))
     proc = runner.start(cmd, case, case / f"log.{summary.solver}")
@@ -233,8 +267,14 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     stop_requested = False
     last_report = 0
     held_since = None  # first iteration of the current unbroken run of passing checks
+    cancelled = False
     while proc.poll() is None:
         time.sleep(poll_seconds)
+        if _cancelled(run_dir):
+            emit(Event("solve", "cancel requested; stopping the solver"))
+            proc.terminate()
+            cancelled = True
+            break
         tables = results.read_tables(case)
         assessment = convergence.assess(tables, criteria, wedge)
         # Stop only once the criteria have held for half a judgement window:
@@ -256,6 +296,9 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
             foam_case.request_stop(case)
             stop_requested = True
     code = proc.wait()
+    if cancelled:
+        manifest["solve_seconds"] = round(time.time() - t_solve, 1)
+        return finish("cancelled", Trust.NOT_TRUSTWORTHY.value)
     log_text = proc.log.read_text(encoding="utf-8", errors="replace")
     failure = parse.log_failure(log_text)
     status = "completed" if code == 0 and failure is None else ("diverged" if failure else "failed")

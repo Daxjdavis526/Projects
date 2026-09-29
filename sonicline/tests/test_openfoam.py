@@ -41,3 +41,23 @@ def test_viscous_work_extension_builds(tmp_path):
     assert lib == f"{extensions.library_name()}.so"
     assert extensions.ensure_built(runner, tmp_path / "b") == lib
     assert not (tmp_path / "b" / "log.wmake").exists()
+
+
+def test_a_running_solve_can_be_cancelled(tmp_path):
+    import json
+
+    from sonicline.run import pipeline
+
+    defn = verification.CASES["V1"].definition("standard", "wedge")
+    run_dir = tmp_path / "run"
+
+    def on_event(e):
+        if e.stage == "solve" and e.message.startswith("running"):
+            pipeline.request_cancel(run_dir)
+
+    result = pipeline.run(defn, run_dir, on_event=on_event, render=False, poll_seconds=0.5)
+    assert result.status == "cancelled" and result.trust == "not_trustworthy"
+    manifest = json.loads((run_dir / "manifest.json").read_text())
+    assert manifest["status"] == "cancelled"
+    stages = [s["stage"] for s in manifest["stages"]]
+    assert "mesh" in stages and "solve" in stages and stages[-1] == "done"
