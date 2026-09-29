@@ -98,6 +98,10 @@ export const envSchema = z.object({
   /** JSON overriding clustering thresholds for a remote embedding model, e.g. {"join":0.58}. See `npm run calibrate:embeddings`. */
   EMBEDDING_THRESHOLDS: optionalString,
 
+  /** Shown on the public /privacy and /terms pages: who runs this installation, and how to reach them about privacy. */
+  OPERATOR_NAME: optionalString,
+  PRIVACY_CONTACT: optionalString,
+
   /** Optional user-driven capture of posts the creator saw while browsing. Off by default. */
   ASSISTED_DISCOVERY_ENABLED: bool(false),
 

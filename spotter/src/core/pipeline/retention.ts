@@ -20,6 +20,8 @@ import { PLATFORMS } from '../domain/types'
 import type { Logger } from '../observability/logger'
 
 const DAY = 86_400_000
+/** Detection lag (up to one schedule gap) plus the daily retention cadence. */
+const LOST_ACCESS_MARGIN_DAYS = 2
 
 export interface RetentionReport {
   deletedSnapshots: number
@@ -61,8 +63,10 @@ export async function runRetention(db: Database, env: Env, now: Date, logger: Lo
       report.deletedItems += deleted.length
     }
     if (policy.authorizationRecheckDays !== null) {
-      // Authorized data whose access could not be re-confirmed for too long.
-      const cutoff = new Date(now.getTime() - policy.authorizationRecheckDays * DAY)
+      // Authorized data whose access could not be re-confirmed for too long. Access loss is only
+      // noticed at the next run and retention runs daily, so delete two days early to stay inside
+      // the platform's window counted from the actual loss.
+      const cutoff = new Date(now.getTime() - (policy.authorizationRecheckDays - LOST_ACCESS_MARGIN_DAYS) * DAY)
       const lost = await db
         .select({ id: platformAccounts.id })
         .from(platformAccounts)

@@ -14,6 +14,7 @@ import { getProfileFor, getSessionUser, type Profile } from '@/server/auth/sessi
 import { connectPlatform } from '@/server/actions/connections'
 import { setupChooseMode, setupFinish, setupNext, setupNiche, setupSchedule } from '@/server/actions/setup'
 import { CreateAccountForm } from '@/components/auth/create-account-form'
+import { LegalLinks } from '@/components/legal-page'
 import { Logo } from '@/components/shell/logo'
 import { Badge, Button, Callout, PlatformDot } from '@/components/ui/primitives'
 import { Field, compactInputClass } from '@/components/ui/fields'
@@ -341,6 +342,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           <Logo />
         </div>
         <div className="rounded-2xl border border-line bg-surface p-6 shadow-card sm:p-8">{children}</div>
+        <LegalLinks className="mt-4" />
       </div>
     </main>
   )

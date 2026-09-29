@@ -352,6 +352,10 @@ pairs in your own data and suggests values for `EMBEDDING_THRESHOLDS`
 - Secrets live only in the environment (`src/core/config/env.ts` validates
   it once and names bad variables without printing values). Scripts load
   `.env` files the way Next.js does (`scripts/load-env.ts`).
+- Policies: `/privacy` and `/terms` are public pages generated from this
+  code and the server's configuration (platforms, AI providers, retention
+  values from `compliance/policy.ts`, `OPERATOR_NAME`, `PRIVACY_CONTACT`),
+  linked from sign-in, account creation and every page's footer.
 - Attribution: every page of a live workspace ends with each connected
   platform's attribution and terms links (and YouTube's restriction note
   until derived metrics are approved), from `compliance/policy.ts`; every
@@ -363,10 +367,12 @@ pairs in your own data and suggests values for `EMBEDDING_THRESHOLDS`
 
 - `test/analytics`: scoring, momentum and stages, baselines, clustering,
   personalization, ranking, calibration.
-- `test/connectors`: each live connector against recorded API responses in
-  `test/fixtures/` (pagination, errors, token refresh and rotation, quota).
+- `test/connectors`: each live connector against fixture responses in
+  `test/fixtures/`, written to the documented response shapes (pagination,
+  errors, token refresh and rotation, quota). They prove the code handles
+  the documented shapes; they are not recordings of live calls.
 - `test/ai`: the built-in provider; Anthropic, OpenAI and Voyage against
-  recorded responses (structured output, refusals, cut-off answers,
+  fixture responses (structured output, refusals, cut-off answers,
   fallbacks, retries, error kinds, no key in messages); provider selection
   and the circuit breaker.
 - `test/pipeline`: the whole pipeline on an in-memory PostgreSQL (PGlite)

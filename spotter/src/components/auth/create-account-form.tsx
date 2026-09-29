@@ -32,6 +32,17 @@ export function CreateAccountForm() {
         </Field>
       </div>
       <p className="text-[12px] text-muted">This account lives only on this server. Your time zone ({timezone}) is used for the collection schedule; you can change it later.</p>
+      <p className="text-[12px] text-muted">
+        By creating an account you agree to the{' '}
+        <a href="/privacy" target="_blank" className="underline decoration-line-strong underline-offset-2 hover:text-ink">
+          privacy policy
+        </a>{' '}
+        and{' '}
+        <a href="/terms" target="_blank" className="underline decoration-line-strong underline-offset-2 hover:text-ink">
+          terms of use
+        </a>
+        , including the YouTube Terms of Service.
+      </p>
       <Button type="submit" variant="primary" size="lg" disabled={pending}>
         {pending ? 'Creating…' : 'Create account'}
       </Button>

@@ -4,6 +4,7 @@ import { countUsers } from '@/core/services/users'
 import { getSessionUser } from '@/server/auth/session'
 import { SignInForm } from '@/components/auth/sign-in-form'
 import { Logo } from '@/components/shell/logo'
+import { LegalLinks } from '@/components/legal-page'
 import { Callout } from '@/components/ui/primitives'
 
 export const metadata = { title: 'Sign in' }
@@ -31,6 +32,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <SignInForm returnTo={returnTo} />
         </div>
         <p className="mt-6 text-center text-[12px] text-muted">SPOTTER runs on your own server. Your data and tokens stay here.</p>
+        <LegalLinks className="mt-3 flex justify-center" />
       </div>
     </main>
   )

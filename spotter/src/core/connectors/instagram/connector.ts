@@ -595,7 +595,7 @@ export class InstagramConnector implements PlatformConnector {
     if (this.authMode !== 'facebook_login') {
       return unsupported(
         'public_discovery',
-        'Instagram Login cannot read other accounts’ content. Business Discovery and Hashtag Search require the Facebook Login path (INSTAGRAM_AUTH_MODE=facebook_login with a Page-linked account).',
+        'Instagram Login cannot search or read other accounts (only posts that tag or mention you, which SPOTTER does not use). Business Discovery and Hashtag Search require the Facebook Login path (INSTAGRAM_AUTH_MODE=facebook_login with a Page-linked account).',
       )
     }
     const token = this.token(ctx, 'business_discovery')

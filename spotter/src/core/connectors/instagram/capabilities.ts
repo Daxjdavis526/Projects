@@ -93,7 +93,7 @@ export function instagramCapabilities(ctx: CapabilityContext): CapabilityReport 
   const notes = [
     fb ? 'Auth path: Facebook Login for Business (graph.facebook.com).' : 'Auth path: Instagram Login (graph.instagram.com).',
     'Personal (non-professional) Instagram accounts are never accessible.',
-    'media_url is omitted for video with copyrighted or licensed audio, copyright-flagged media and other accounts’ Reels with downloads turned off; thumbnails fall back to thumbnail_url or the permalink.',
+    'media_url is omitted for video with copyrighted or licensed audio, copyright-flagged media and other accounts’ Reels with downloads turned off; the thumbnail then comes from thumbnail_url (images use media_url).',
   ]
   return {
     platform: 'instagram',

@@ -6,6 +6,7 @@ import { PLATFORM_LABEL } from '@/core/domain/types'
 import { requireProfile } from '@/server/auth/session'
 import { signOut } from '@/server/auth/actions'
 import { getWorkspaceStatus } from '@/server/queries/workspace'
+import { LegalLinks } from '@/components/legal-page'
 import { Badge, Callout, PlatformDot, buttonClass } from '@/components/ui/primitives'
 import { LiveRefresher } from '@/components/shell/live-refresher'
 import { Logo } from '@/components/shell/logo'
@@ -123,7 +124,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ) : null}
           {children}
         </main>
-        <footer className="mx-auto w-full max-w-[1320px] px-4 pb-8 text-[12px] text-muted lg:px-8">
+        <footer className="mx-auto flex w-full max-w-[1320px] flex-col gap-2 px-4 pb-8 text-[12px] text-muted lg:px-8">
           {status.dataMode === 'demo' ? (
             <p>Demo data: the creators, posts and numbers are simulated. Nothing here comes from a platform.</p>
           ) : (
@@ -144,6 +145,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               ))}
             </ul>
           )}
+          <LegalLinks />
         </footer>
       </div>
       {running ? <LiveRefresher /> : null}

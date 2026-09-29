@@ -67,15 +67,21 @@ sign-in password once).
 
 1. Copy `.env.example` to `.env` **on the machine that runs SPOTTER** and fill
    it in. [API_SETUP.md](API_SETUP.md) walks through each platform in plain
-   English: which console, which buttons, which permissions, and what needs
-   the platform's approval. Secrets belong in that file or your host's
-   environment settings only, never in the app or anywhere else.
-2. Restart, open **Settings → Data source**, switch to live data, and connect
+   English: which console, which settings and permissions, the addresses to
+   register, and what needs the platform's approval. Secrets belong in that
+   file or your host's environment settings only, never in the app or
+   anywhere else.
+2. Set `OPERATOR_NAME` and `PRIVACY_CONTACT`: SPOTTER serves a privacy
+   policy at `/privacy` and terms of use at `/terms`, generated from what this
+   installation actually does. Those are the URLs the platforms ask for when
+   you set up and review your apps.
+3. Restart, open **Settings → Data source**, switch to live data, and connect
    your accounts on **Connections**.
-3. Watch **Collection status** after the first run.
+4. Watch **Collection status** after the first run.
 
 The live connectors are implemented against the official documentation
-(checked 2026-09-29) and tested against recorded API responses. They have
+(checked 2026-09-29) and tested against fixture responses written to the
+documented response shapes. They have
 **not yet been exercised against real accounts**: treat each as
 *implemented, awaiting credentials/approval* until your first live run
 succeeds. Several capabilities also need a platform's review before they work
@@ -199,8 +205,8 @@ few minutes instead of failing post after post.
 ## Testing
 
 `npm test` runs about 160 tests with no network and no credentials: the
-analytics engine, each connector against recorded API responses, the LLM
-providers against recorded responses, and the whole pipeline end to end on an
+analytics engine, each connector and LLM provider against fixture responses
+written to the documented shapes (no live calls), and the whole pipeline end to end on an
 in-memory PostgreSQL (including switching to and losing a remote embedding
 provider), plus OAuth state handling, webhook signatures and token refresh.
 GitHub Actions runs typecheck, lint, tests and a production build on every
@@ -224,5 +230,5 @@ src/
     compliance/        platform data policies as code
 drizzle/               SQL migrations
 scripts/               worker, collect, demo seed, migrate, embedding calibration
-test/                  vitest suites and recorded API fixtures
+test/                  vitest suites and API response fixtures
 ```

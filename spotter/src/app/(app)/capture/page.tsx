@@ -4,6 +4,7 @@ import { listCaptures } from '@/core/assisted/capture'
 import { getDb } from '@/core/db/client'
 import { requireProfile } from '@/server/auth/session'
 import { removeCapture } from '@/server/actions/capture'
+import { PLATFORM_LABEL } from '@/core/domain/types'
 import { Callout, Card, CardHeader, EmptyState, PageHeader, PlatformDot, buttonClass } from '@/components/ui/primitives'
 import { CaptureForm } from '@/components/capture-form'
 import { compact, relativeTime } from '@/lib/format'
@@ -58,7 +59,7 @@ export default async function CapturePage() {
                       <ExternalLink aria-hidden className="size-3 shrink-0 text-muted" />
                     </a>
                     <div className="text-[12px] text-muted">
-                      {r.handle ? `@${r.handle} · ` : ''}
+                      {PLATFORM_LABEL[r.platform]} · {r.handle ? `@${r.handle} · ` : ''}
                       {r.views !== null ? `${compact(r.views)} views · ` : ''}
                       captured {relativeTime(r.capturedAt, now)}
                     </div>

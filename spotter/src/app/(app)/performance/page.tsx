@@ -122,7 +122,9 @@ export default async function PerformancePage() {
                                   (p.title ?? 'Untitled')
                                 )}
                               </div>
-                              <div className="truncate text-[12px] text-muted">{[p.topic, p.format, p.durationSeconds ? duration(p.durationSeconds) : null].filter(Boolean).join(' · ')}</div>
+                              <div className="truncate text-[12px] text-muted">
+                                {[PLATFORM_LABEL[p.platform], p.topic, p.format, p.durationSeconds ? duration(p.durationSeconds) : null].filter(Boolean).join(' · ')}
+                              </div>
                             </div>
                           </div>
                         </td>

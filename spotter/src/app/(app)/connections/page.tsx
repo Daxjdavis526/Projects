@@ -24,6 +24,17 @@ const CAP_STATUS: Record<CapabilityStatus, { kind: StatusKind; label: string }> 
   unavailable: { kind: 'idle', label: 'Not offered by the API' },
 }
 
+/** A short name for a documentation link: its last path segment ("search/list" → "search.list"). */
+function docLabel(url: string): string {
+  try {
+    const parts = new URL(url).pathname.split('/').filter(Boolean)
+    const last = parts.at(-1) ?? 'docs'
+    return /^(list|query|download|batchGetStats)$/.test(last) && parts.length > 1 ? `${parts.at(-2)}.${last}` : last.replace(/[-_]/g, ' ')
+  } catch {
+    return 'docs'
+  }
+}
+
 const OAUTH_ERRORS: Record<string, string> = {
   denied: 'Permission was not granted, so nothing was connected.',
   invalid_state: 'That sign-in attempt was not valid (expired, already used, or started elsewhere). Please try again.',
@@ -177,7 +188,7 @@ function PlatformCard({ view, demo, timeZone }: { view: ConnectionView; demo: bo
                     <span className="ml-1 inline-flex flex-wrap gap-2">
                       {item.docs.map((d) => (
                         <a key={d} href={d} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-0.5 text-[12px] text-accent-text hover:underline">
-                          docs <ExternalLink aria-hidden className="size-3" />
+                          {item.docs!.length > 1 ? docLabel(d) : 'docs'} <ExternalLink aria-hidden className="size-3" />
                         </a>
                       ))}
                     </span>
