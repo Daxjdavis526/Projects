@@ -95,6 +95,11 @@ export const GLOSSARY = [
     body: ['A tank supplying gas without being refilled loses pressure as it empties, and the gas left inside cools because it has done work expanding (about 1.5 K per percent of mass for nitrogen, adiabatically). The walls warm it back slowly. Blowdown sets how long a stand can run and, below the regulator\'s dropout pressure, how long it can run at constant pressure.'],
     see: ['regulator'] },
 
+  { id: 'coriolis-flowmeter', cat: 'instr', title: 'Mass flowmeter (Coriolis)',
+    body: ['Gas flows through a vibrating tube; the Coriolis force twists the tube in proportion to the mass flow, and the twist is measured directly — no assumption about density, temperature or throat area. That makes it the reference against which a calculated flow is checked.',
+      'Its weakness is speed. The output is heavily filtered (FT-201 responds in ~60 ms), so it cannot follow a start transient or a short pulse, and during a start it reads the line filling, not the thruster. Use it in steady state.'],
+    see: ['characteristic-velocity', 'specific-impulse'] },
+
   // ---- operations & safety
   { id: 'redline', cat: 'ops', title: 'Redline',
     body: ['A limit on a measured value beyond which the test is aborted — automatically or by the operator. Each redline has a channel, a threshold, a time window in which it is armed (a low chamber-pressure redline means nothing before the valve opens), and a persistence (how long the value must be over the limit, so that a single noise spike does not abort a test).',
@@ -118,6 +123,10 @@ export const GLOSSARY = [
   { id: 'leak-check', cat: 'ops', title: 'Leak check',
     body: ['Pressurise a section, isolate it, and watch the pressure. A falling pressure in an isolated volume is a leak — or a temperature change, so wait for the gas to settle and judge the slope, not a single reading. A regulator must be shut during the check: a regulating regulator replaces whatever leaks out and hides it. Leak checks are done first at a pressure people may be near, then (remotely) at test pressure; a leak located with snoop liquid is fixed at low pressure, never tightened under pressure.'],
     see: ['trapped-volume'] },
+  { id: 'characterisation', cat: 'ops', title: 'Characterisation and test series',
+    body: ['A single firing answers "what did it do?"; a characterisation answers "how does it behave?" by varying one thing — pressure, pulse width — across a planned test matrix while holding everything else fixed, then fitting the result. The fit is the product: a slope and an intercept with uncertainties, and what they say about the hardware.',
+      'A series is normally run under one go/no-go poll for the approved matrix. Moving between approved points does not need a new poll; anything outside the matrix — a valve, the cell, a technician task — does. And every point starts from the same verified static condition as the first.'],
+    see: ['thrust-coefficient', 'impulse-bit', 'go-no-go'] },
   { id: 'go-no-go', cat: 'ops', title: 'Go / no-go poll',
     body: ['Before arming, the test conductor calls each station; each answers GO or NO-GO from its own data. The poll\'s value is the NO-GO: it is the last point at which a problem costs only time. A good poll is not a ritual — each station states the facts it is basing its call on, and any change to the configuration afterwards invalidates it.'],
     see: ['interlock', 'abort'] },

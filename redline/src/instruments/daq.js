@@ -171,3 +171,13 @@ export class DAQ extends Emitter {
     return out;
   }
 }
+
+/* The channel list a stand's DAQ will produce, without building a DAQ —
+   for looking at recorded runs when no session is running. */
+export function channelList(def) {
+  return [
+    ...def.sensors.map(s => ({ id: s.id, desc: s.desc, quantity: s.quantity, gauge: s.gauge, kind: s.quantity === 'discrete' ? 'discrete' : 'analog' })),
+    ...def.channels.commands.map(c => ({ id: c.id, desc: c.desc, quantity: 'discrete', kind: 'command' })),
+    ...def.channels.derived.map(d => ({ id: d.id, desc: d.desc, quantity: d.quantity, gauge: d.gauge, kind: 'derived' })),
+  ];
+}

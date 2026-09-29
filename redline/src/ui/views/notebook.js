@@ -6,6 +6,7 @@
 import { h, btn, clear } from '../dom.js';
 import { fmt, unitLabel, fmtClock } from '../../lib/units.js';
 import { store } from '../store.js';
+import { history } from '../history.js';
 
 export class NotebookView {
   constructor(host, app) {
@@ -118,9 +119,13 @@ export class NotebookView {
   }
 
   renderEntry(detail, e) {
-    const inMemory = this.app.session?.runs.some(r => r.id === e.id);
+    const inMemory = this.app.session?.runs.some(r => r.id === e.id) || history.index.some(r => r.id === e.id);
     detail.append(h('div.ph', h('span.t', e.id), h('span.sub', `${e.date} · ${e.clock} · ${e.level} · ${e.mode}`), h('span.sp'),
-      inMemory ? btn('Open in analysis', () => { this.app.show('analysis'); this.app.views.analysis.main = e.id; this.app.views.analysis.render(); }, 'sm ghost') : h('span.sub', 'traces not retained from an earlier session')));
+      inMemory ? btn('Open in analysis', async () => {
+        const a = this.app.views.analysis;
+        const entry = a.pool().find(x => x.id === e.id);
+        if (entry && await a.ensure(entry)) { a.mode = 'traces'; a.main = e.id; this.app.show('analysis'); a.render(); }
+      }, 'sm ghost') : h('span.sub', 'traces no longer in test history')));
     const b = h('div.pb', { style: { padding: '12px 18px' } });
     detail.append(b);
     const sec = t => h('div.proc-sec', { style: { padding: '14px 0 6px' } }, t);

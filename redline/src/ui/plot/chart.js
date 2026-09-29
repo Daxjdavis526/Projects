@@ -270,11 +270,11 @@ export class Chart {
       ctx.setLineDash([2, 3]);
       ctx.beginPath(); ctx.moveTo(x, r.y); ctx.lineTo(x, r.y + r.h); ctx.stroke();
       ctx.setLineDash([]);
-      if (x - lastLabelX > 60 && ev.label) {
+      if (ev.label && x > lastLabelX + 8) {
         ctx.fillStyle = ev.color || '#6e7986';
         ctx.textAlign = 'left';
         ctx.fillText(ev.label, x + 3, r.y + r.h - 12);
-        lastLabelX = x;
+        lastLabelX = x + 3 + ctx.measureText(ev.label).width;
       }
     }
 

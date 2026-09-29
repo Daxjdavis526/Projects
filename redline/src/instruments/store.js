@@ -223,6 +223,12 @@ export class RunData {
     this.v = ids.map(() => new GrowArray(Float32Array, 8192));
   }
   push(t, vals) { this.t.push(t); for (let c = 0; c < vals.length; c++) this.v[c].push(vals[c]); }
+  /* Rebuild a finalized run from stored arrays (test history). */
+  static fromArrays(ids, rate, T, V) {
+    const r = Object.create(RunData.prototype);
+    r.ids = ids; r.index = new Map(ids.map((id, i) => [id, i])); r.rate = rate; r.T = T; r.V = V;
+    return r;
+  }
   finalize() {
     this.T = this.t.view().slice();
     this.V = this.v.map(g => g.view().slice());

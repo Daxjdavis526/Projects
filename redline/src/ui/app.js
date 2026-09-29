@@ -14,6 +14,7 @@ import { TrainingView } from './views/training.js';
 import { AnalysisView } from './views/analysis.js';
 import { NotebookView } from './views/notebook.js';
 import { ReferenceView } from './views/reference.js';
+import { history } from './history.js';
 import { openPoll, debrief } from './panels/dialogs.js';
 
 const VIEWS = [['training', 'TRAINING'], ['control', 'CONTROL ROOM'], ['analysis', 'ANALYSIS'], ['notebook', 'NOTEBOOK'], ['reference', 'REFERENCE']];
@@ -103,7 +104,10 @@ export class App {
     const S = this.session;
     S.audioSink = (n, d) => this.audio.play(n, d);
     S.on('recording', e => { if (e.on) { store.data.nextRun[prefix] = S.nextRun; store.save(); } });
-    S.on('run', run => this.notebook.onRun(run));
+    S.on('run', run => {
+      this.notebook.onRun(run);
+      history.save(run, { level: this.level ? `L${this.level.n} ${this.level.title}` : 'Open stand' });
+    });
     S.controller.on('blocked', () => {});
     const host = this.main.querySelector('[data-view="control"]') || this.viewHost('control');
     clear(host);
@@ -180,9 +184,10 @@ export class App {
         h('span.k', 'Force'), sel('force', [['N', 'N'], ['lbf', 'lbf']]),
         h('span.k', 'Temperature'), sel('temperature', [['C', '°C'], ['K', 'K'], ['F', '°F']]),
         h('span.k', 'Sound'), h('label.chk', snd, 'Test-stand sounds'),
-        h('span.k', 'Stored data'), btn('Clear notebook and progress…', () => {
-          if (confirm('Erase the notebook, progress and plot layouts stored in this browser?')) {
+        h('span.k', 'Stored data'), btn('Clear notebook, test history and progress…', () => {
+          if (confirm('Erase the notebook, recorded test history, progress and plot layouts stored in this browser?')) {
             store.data.notebook = []; store.data.progress = {}; store.data.layouts = {}; store.data.sessionNotes = []; store.save();
+            history.clear().then(() => this.views.analysis.render());
             this.views.training.render(); this.notebook.render(); m.close();
           }
         }, 'sm ghost')),
@@ -204,7 +209,6 @@ export class App {
     if (S) {
       S.advance(dt);
       if (this.current === 'control') this.views.control.update();
-      if (this.current === 'analysis') this.views.analysis.update();
       this.topbar();
       // sound follows the physical flow (the cell microphone)
       const net = S.model.net;
@@ -212,6 +216,8 @@ export class App {
       for (const id of ['VV-101', 'VV-201', 'RV-201']) vent += Math.max(0, net.el(id).mdot);
       this.audio.flow({ thrust: S.model.nozzleEl.F, vent });
     }
+    // analysis works on recorded runs, session or not
+    if (this.current === 'analysis') this.views.analysis.update();
     requestAnimationFrame(t => this.frame(t));
   }
 

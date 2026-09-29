@@ -241,8 +241,10 @@ whose coil current dips as it strokes, a nozzle that separates at low
 pressure, a thrust stand that rings — and on top of it every sensor has lag,
 offset, noise and a sample rate, so the measured state and the true state
 are never the same thing. Tutorial, guided and independent modes, a go/no-go
-poll, redlines and automatic aborts, cursors and reductions on the recorded
-data, and an engineering notebook. Fictional hardware, generalised
+poll, redlines and automatic aborts, pressure-characterisation and
+pulse-test campaigns fitted across runs, cursors and reductions on the
+recorded data, test history that outlives the session, and an engineering
+notebook. Fictional hardware, generalised
 procedures, and it says so. Desktop only.
 
 Live: https://daxjdavis526.github.io/Projects/redline/

@@ -14,24 +14,25 @@ and nothing on screen is the truth.
 
 Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366×768 or larger.
 
-## What is here (development phases 1–2)
+## What is here (development phases 1–3)
 
 | | |
 |---|---|
 | **Control room** | P&ID mimic, CCTV view of the cell, configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
 | **Stand** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201 |
 | **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps (below) |
-| **Instruments** | 13 sensors + command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
+| **Instruments** | 14 sensors — including an independent Coriolis mass flowmeter — plus command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
 | **DAQ** | Sample rate 100 Hz – 5 kHz, recording to a run file, auto-stop, zero / tare / shunt calibration |
 | **Control** | Interlocks (hard, warn, or consequence — by mode), firing sequencer (single burn or pulse train, 5 s countdown, hold, cutoff), limits and redlines with persistence, automatic abort sequence |
-| **Procedures** | Data-driven checklist engine; Level 1 (orientation) and Level 2 (full baseline firing, 42 steps) in tutorial, guided and independent modes |
+| **Procedures** | Data-driven checklist engine built from shared sections; Level 1 (orientation), Level 2 (full baseline firing), Level 3 (pressure characterisation, 60–200 psig) and Level 4 (valve response, pulse sweep, minimum impulse bit) in tutorial, guided and independent modes. Test series run under one go/no-go poll for the approved matrix |
 | **Go/no-go** | Six stations reporting from their own data; stations call GO/NO-GO in guided modes, report facts only in independent mode; wrong calls are remembered for the debrief |
-| **Analysis** | Every recorded run at full rate: cursors (A/B, Δ, mean between), automatic reduction (steady Pc and thrust, droop, ΔP across filter and valve, valve delay, rise and fall times, total impulse, mass flow, Isp, Cf, armature pull-in), prediction vs measured, overlay of runs aligned at T-0 |
-| **Notebook** | Automatic entry per run (configuration, results, alarms, aborts), pre- and post-test notes, filed test reports, search. Summaries persist in the browser; traces live for the session |
+| **Analysis** | TRACES: every recorded run at full rate — cursors (A/B, Δ, mean between), automatic reduction (steady Pc and thrust, droop, ΔP across filter and valve, valve delays, rise and fall times, total impulse, calculated AND measured mass flow, Isp, Cf, c*, effective throat diameter from measured flow, armature pull-in; per pulse: impulse bit, delays, fired / reached steady), prediction vs measured, overlays aligned at T-0, CSV export. CAMPAIGN: any per-run quantity against any other across runs and sessions, least-squares line with standard errors and R², what the line means (Cf and −Pa·Ae from F vs absolute Pc; dead time from impulse bit vs width), repeatability statistics with 95 % confidence |
+| **Test history** | Every run, traces included, kept in the browser (IndexedDB, newest 80) — reopen, overlay or fit last week's runs with today's |
+| **Notebook** | Automatic entry per run (configuration, results, alarms, aborts), pre- and post-test notes, filed test reports, search |
 | **Reference** | ~45 concise entries (instrumentation, fluid systems, operations, performance, combustion), stand data and limits, and an honest list of what is modelled |
 | **Sound** | Synthesised: valve clicks, pneumatic actuator, vent hiss, jet, relay, countdown, alarm tones |
 
-Levels 3–12 (pressure characterisation, pulse testing, fault diagnosis, the
+Levels 5–12 (fault diagnosis, the independent test conductor, the
 bipropellant stand) are listed in TRAINING and say which development phase
 brings them. The architecture for them is in place; see *Growing it*.
 
@@ -72,13 +73,15 @@ src/
   instruments/  MEASUREMENT. sensor.js, daq.js, store.js (ring + history tiers)
   control/      controller.js (commands, sequencer, abort, facility),
                 interlocks.js, alarms.js, procedure.js, gonogo.js, eventlog.js
-  analysis/     metrics.js — post-test reductions
+  analysis/     metrics.js — per-run reductions; campaign.js — cross-run fits and statistics
   sim/          session.js — wires the layers, owns the clock
   content/      DATA. stands/ts1-*.js (plumbing, sensors, limits, abort
                 sequence, go/no-go stations, P&ID layout), procedures/,
                 programs.js, glossary.js
   ui/           the only code that touches the DOM
 test/           node redline/test/physics.test.mjs   (38 checks)
+                node redline/test/series.test.mjs    (22 checks: Levels 3 and 4
+                start to finish, the campaign arithmetic)
                 node redline/test/session.test.mjs   (29 checks: a full guided
                 Level-2 test, interlocks, the poll, an automatic abort,
                 a pulse train)
@@ -130,7 +133,22 @@ inlet pressure and its current trace dips as it strokes. The nozzle is solved
 quasi-steadily in four regimes (no flow, subsonic, separated, attached),
 giving the textbook straight line of thrust against chamber pressure with a
 −Pa·Ae intercept. The thrust stand is a damped oscillator near 120 Hz with a
-pressure tare from the feed line.
+pressure tare from the feed line. The regulator is non-relieving: turn its
+setpoint down and the pressure downstream stays until something flows or
+vents — Level 4 makes you bleed it down.
+
+Two measurements of mass flow, deliberately: MDOT-C is what the DAQ
+calculates from chamber pressure and the drawing's throat; FT-201 is a
+Coriolis meter that measures it. They agree while the throat is what the
+drawing says. From the measured flow the analysis infers an effective throat
+diameter (2.50 mm on a nominal stand, at every pressure).
+
+Across the operating range, thrust against absolute chamber pressure is a
+straight line (R² > 0.9999) whose intercept, −1.00 N, is ambient pressure on
+the 3.55 mm exit. Pulses: the valve opens ≈ 5.8 ms after command at 150 psig
+and ≈ 4.6 ms at 60 psig; pulses of 6 ms and longer fire, 5 ms does not open
+the valve at 150 psig; impulse bits scatter by ≈ 0.3–5 % (seeded per-actuation
+valve jitter), more for shorter pulses.
 
 Nominal result at 150 psig: Pc ≈ 137.6 psig, F ≈ 6.2 N, ṁ ≈ 11.7 g/s,
 Isp ≈ 54 s (sea level), valve opening delay ≈ 6 ms, Pc rise ≈ 1.5 ms,
@@ -162,6 +180,7 @@ thruster at sea level. They predict no real hardware. The bipropellant engine
 ```
 node redline/test/physics.test.mjs
 node redline/test/session.test.mjs
+node redline/test/series.test.mjs
 ```
 
 For visual checks, serve the repo with `python3 -m http.server` and drive
@@ -172,7 +191,7 @@ session for scripting.
 
 | phase | brings |
 |---|---|
-| 3 | pressure-characterisation and pulse-test levels (the sequencer and pulse reductions already exist), repeatability campaigns, IndexedDB run storage |
+| 3 | ✓ pressure characterisation and pulse testing, campaign analysis, test history, measured mass flow |
 | 4 | fault engine (hooks exist), inspection interface (throat and exit measurement, continuity, leak test, redundant-sensor compare), diagnosis submission and scored root-cause debrief |
 | 5 | polish of the cold-gas program, independent test-conductor level |
 | 6 | pressure-fed bipropellant stand: two feed systems, injector, purge |
