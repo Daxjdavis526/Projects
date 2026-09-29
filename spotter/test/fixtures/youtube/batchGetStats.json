@@ -1,0 +1,8 @@
+{
+  "kind": "youtube#batchGetStatsResponse",
+  "etag": "etag-b",
+  "items": [
+    { "kind": "youtube#videoStats", "id": "vid-deep-squat", "snippet": { "publishTime": "2026-09-28T14:05:00Z" }, "statistics": { "viewCount": 812000, "likeCount": 45001, "commentCount": 3400 }, "contentDetails": { "duration": "PT48S", "durationMillis": 48000 } }
+  ],
+  "summary": { "requestedVideoCount": 2, "succeededVideoCount": 1, "failedVideoCount": 1, "failedVideoIds": ["vid-deleted"] }
+}

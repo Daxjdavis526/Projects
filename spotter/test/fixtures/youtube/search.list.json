@@ -1,0 +1,8 @@
+{
+  "kind": "youtube#searchListResponse",
+  "pageInfo": { "totalResults": 1000000, "resultsPerPage": 2 },
+  "items": [
+    { "kind": "youtube#searchResult", "id": { "kind": "youtube#video", "videoId": "vid-deep-squat" }, "snippet": { "publishedAt": "2026-09-28T14:05:00Z", "channelId": "UC-small-coach", "title": "How deep should you actually squat?", "channelTitle": "Small Coach", "liveBroadcastContent": "none" } },
+    { "kind": "youtube#searchResult", "id": { "kind": "youtube#video", "videoId": "vid-hidden-likes" }, "snippet": { "publishedAt": "2026-09-27T09:00:00Z", "channelId": "UC-big", "title": "Leg day", "channelTitle": "Big Channel", "liveBroadcastContent": "none" } }
+  ]
+}
