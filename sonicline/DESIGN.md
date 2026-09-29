@@ -7,9 +7,67 @@ backend and nothing more; everything around it (geometry, case building,
 meshing, solver management, monitoring, post-processing, engineering metrics,
 verification and the UI) is ours.
 
-**Status: proposal. No application code exists yet.** This document is the
-plan to be agreed before building. Section 2 records what was actually run
-to back the decisions; everything else is design.
+**Status: agreed plan. M0 is complete (see README.md); M1 is next.**
+Section 2 records what was actually run to back the decisions. Section 0
+records the answers to the open questions, which override anything later
+in this document that assumed otherwise.
+
+---
+
+## 0. Decisions (agreed 2026-09-29)
+
+| question | answer | what it changes |
+|---|---|---|
+| operating condition | **sea level first**, vacuum later | An external plume region is part of M1, not M5 (§3.5, §8). Ambient back pressure 101 325 Pa is the default. |
+| chamber pressures | **15–30 bar** for cold gas (biprop 350–1500 psi later) | The design envelope is below. |
+| platform | **Windows** | §3.8 |
+| distribution | **personal tool** | The GPL process boundaries in §3.9 are hygiene, not obligations. CAD still runs in a worker process, for crash isolation. |
+| name | SONICLINE, `sonicline/` | — |
+
+**Typical cold-gas pressures, checked against hardware.** Moog's flight
+cold-gas thrusters are rated at the following nominal inlet pressures (Moog
+cold gas thruster datasheet, form 500-1171):
+
+| inlet pressure | thrust |
+|---|---|
+| 1.5 bar | 10–40 mN |
+| 6.9 bar | 120 mN |
+| **15.7 bar** | **3.6 N** (SAFER, Pluto Fast Flyby) |
+| 90 bar (blowdown, GEO) | 0.9–1.3 N |
+
+MEOPs run from 10 to 27.6 bar. The course module on cold-gas propulsion
+(`propulsion/part4-coldgas/28`) gives 2–10 bar as the typical *spacecraft*
+plenum range and 2–25 bar at the thruster valves. So 15–30 bar is the top of
+normal practice, where multi-newton thrusters and ground-test rigs live.
+
+**Design envelope for V1:**
+- p₀ from 1 to 50 bar. Validated effort goes to 5–30 bar.
+- T₀ from 200 to 350 K.
+- Throat diameter from 0.3 to 10 mm.
+- ε from 1 (converging only) to 100.
+
+What 15–30 bar at sea level means (N₂, T₀ = 300 K, ideal):
+
+| p₀ | ε for pₑ = pₐ | Mₑ | Tₑ | Isp at sea level | throat Re, Dₜ = 1 / 2 / 4 mm |
+|---|---|---|---|---|---|
+| 15 bar | 2.42 | 2.41 | 139 K | 59.0 s | 2.2×10⁵ / 4.4×10⁵ / 8.9×10⁵ |
+| 20 bar | 2.88 | 2.59 | 128 K | 61.0 s | 3.0×10⁵ / 5.9×10⁵ / 1.2×10⁶ |
+| 30 bar | 3.70 | 2.86 | 114 K | 63.4 s | 4.4×10⁵ / 8.9×10⁵ / 1.8×10⁶ |
+
+Consequences:
+
+- **Sea-level nozzles have low area ratios (about 2–4).** Tₑ stays well
+  above the N₂ saturation temperature at 1 atm (77 K), so **condensation is
+  not a sea-level concern**. It returns with vacuum nozzles.
+- **Running a vacuum nozzle at sea level separates.** ε = 20 at 20 bar exits
+  at 5.2 kPa (pₑ/pₐ = 0.05). The regime classifier (§6) matters from day
+  one.
+- **The laminar-vs-SST bracket is essential.** Throat Re = 2×10⁵–2×10⁶
+  straddles the ~10⁶ transition seen in critical-flow venturis.
+- **Real-gas bias is about 0.5–1 % on mass flow at 15–30 bar.** That is
+  inside the envelope where V1 reports the perfect-gas result together with
+  a real-gas correction from `core/gas` (§3.3). The ESI Peng–Robinson option
+  is scheduled for M2, after it has been verified against NIST.
 
 Priorities, in order, and every trade-off below is decided by them:
 physics correctness → verification → reliability → automation → UX →
@@ -254,6 +312,22 @@ structured hex.** This is the default.
   growth.
 - Wedge and 3D sharing one distribution makes wedge-vs-3D a clean
   consistency test.
+- **External plume region (sea level, the default):**
+  - A cylinder downstream of the exit plane, about 20 Dₑ long and 6 Dₑ in
+    radius (both configurable). It is meshed as structured blocks that
+    continue the nozzle's radial lines and are coarsened outward.
+  - The annulus in the exit plane outside the lip is either an entrainment
+    boundary (a free-standing nozzle, the default) or a wall (a nozzle
+    flush with a plate).
+  - The ambient boundary uses total pressure/temperature with
+    `pressureInletOutletVelocity`, and the far outlet is at ambient
+    pressure.
+  - Without this region, a sea-level result is not physical: the subsonic
+    boundary layer carries the ambient pressure into the nozzle, and a
+    fixed-pressure outlet on the exit plane is ill-posed for a supersonic
+    core. A domain that ends at the exit is allowed only for vacuum or
+    strongly under-expanded runs, where the whole exit plane leaves
+    supersonically; the validator enforces this.
 
 **Tier 2 — arbitrary 3D fluid volumes (side ports, non-round
 features):** snappyHexMesh as an external process.
@@ -370,7 +444,43 @@ fail.
   events and plain-data scene specifications. The Qt layer renders them. A
   trame client could render the same specs later.
 
-### 3.8 Licensing posture
+### 3.8 Windows
+
+The application runs natively on Windows: Python with PySide6, VTK, gmsh
+and trimesh, all of which ship win_amd64 wheels. OpenFOAM is reached
+through a **runner** interface with three backends:
+
+- **WSL2 (default on Windows).**
+  - Runs Ubuntu 24.04 with the same `openfoam2512` apt package that CI
+    tests, so a result on your machine comes from the same binaries as the
+    verification suite.
+  - Commands run as `wsl.exe -d <distro> -- bash -lc "source …/etc/bashrc && …"`.
+  - Case directories live on the WSL ext4 filesystem, because OpenFOAM's
+    many small files are slow on `/mnt/c`.
+  - The app reads results over `\\wsl.localhost\<distro>\…`.
+  - Paths are translated in one place.
+- **Native** (ESI's `OpenFOAM-v2512-windows-mingw.exe`, MS-MPI).
+  - Simplest for the user, but not the build CI tests on Linux.
+  - Enabled once the verification suite has been run against it; a Windows
+    CI job can install it.
+- **Local Linux**, for CI and development.
+
+The app detects which backends exist and reports the OpenFOAM build each
+one gives. The runner is chosen in settings and recorded in every run
+manifest.
+
+Portability rules for our code:
+
+- `pathlib` everywhere.
+- No POSIX-only modules (`fcntl`, `selectors` on pipes).
+- Process output is read on threads.
+- No shell scripts in the pipeline; every stage is a Python call to an
+  OpenFOAM executable.
+- Line endings are written as `\n` explicitly.
+
+### 3.9 Licensing posture
+
+*(Personal tool: see §0. The boundaries below are kept as good hygiene.)*
 
 OpenFOAM, gmsh and cfMesh are GPL and are only ever run as **external
 processes**. PySide6 is LGPL (dynamically linked). VTK, pyvista, trimesh,
@@ -390,8 +500,10 @@ keeps that option open (not legal advice).
 sonicline/
   core/            pure Python + numpy. NO OpenFOAM syntax, NO Qt, NO VTK.
     units.py         SI internally; explicit unit types at every input boundary
-    gas.py           N2 property models (perfect gas, Sutherland, NIST Z table,
-                     saturation/sublimation curve, JT estimate)
+    gas.py           the perfect-gas N2 model the CFD is given (cp, Sutherland)
+    realgas.py       reference-EOS checks via CoolProp: real-gas choked flux,
+                     regulator (Joule-Thomson) cooling, saturation/sublimation line
+    profile.py       axisymmetric wall profiles r(x) from exact lines and arcs
     theory/          quasi-1D isentropic, normal shock, shock-in-nozzle solver,
                      Kliegel-Levine Cd, divergence factor, Fanno, ideal thrust/Cf/Isp
     model/           the simulation definition (4.2) — dataclasses + JSON schema
@@ -405,7 +517,7 @@ sonicline/
     dictwriter.py    deterministic FoamFile writer (sorted, fixed float format)
     esi_v2512/       case builder: SimulationDefinition + Mesh → case directory
     parse/           log parser, checkMesh JSON, function-object .dat readers
-  run/             process runner (local | WSL | Docker | later SSH), job
+  run/             process runner (local Linux | WSL2 | native Windows), job
                    state machine, cancellation, restart, run manifest
   monitor/         incremental tailers for postProcessing/*.dat + log → typed
                    events (Residual, Integral, LogLine, Stage, Finished)
@@ -608,21 +720,33 @@ Build order:
 These came out of the research. They are where a naive tool would report
 confident nonsense:
 
-1. **Sea-level operation of a vacuum nozzle separates.**
-   - The ε = 6.25 reference nozzle at 1 atm has pₑ/pₐ = 0.15, well past the
-     Summerfield separation criterion.
+1. **Sea-level operation of a vacuum nozzle separates.** This is the
+   primary hazard now that sea level comes first.
+   - ε = 20 at 20 bar exits at pₑ/pₐ = 0.05.
+   - The ε = 6.25 reference nozzle at 10 bar has pₑ/pₐ = 0.15.
+   - Both are well past the Summerfield criterion (separation for
+     pₑ/pₐ ≲ 0.25–0.4). For the reference nozzle:
    - Quasi-1D gives 3.06 N attached. Real separated thrust is estimated at
      3.5–3.8 N.
    - With the domain ending at the exit plane and a fixed back pressure,
      the answer is simply wrong.
-   - The validator detects the regime from the 1D back-pressure map. It
-     requires an external plume region with an ambient boundary for
-     overexpanded cases, and marks the result as separation-model-sensitive.
+   - Before any mesh is built, the validator classifies the regime from
+     the 1D back-pressure map: subsonic, shock in nozzle, overexpanded
+     attached, overexpanded likely separated (Summerfield/Schmucker),
+     matched, or underexpanded.
+   - It requires the plume region for anything but vacuum or strongly
+     under-expanded exits.
+   - It marks separated results as model-sensitive (laminar vs SST
+     spread).
 2. **Condensation and supersaturation** at high area ratio (section 3.3).
+   Not reachable by sea-level nozzles at 15–30 bar (Tₑ > 110 K); it
+   matters again for vacuum nozzles.
 3. **Laminar or relaminarising boundary layers** in small thrusters
    (section 3.4).
 4. **Joule–Thomson cooled inlet temperature** (section 3.3).
-5. **Real-gas bias** above about 3 MPa (section 3.3).
+5. **Real-gas bias**: about 0.5–1 % on mass flow at 15–30 bar, and
+   growing above that (section 3.3). It is reported with every result in
+   the envelope.
 6. **JANAF temperature clamping and energy-form mismatch** (section 3.3),
    prevented by construction.
 7. **Unchoked operation mistaken for choked** (back pressure above the first
@@ -639,7 +763,8 @@ confident nonsense:
 | Automatic geometry interpretation is wrong (inlet/outlet swap, wrong cavity) | medium | suggestions only, always confirmed; explicit zero/many failure paths |
 | snappyHexMesh unreliable on arbitrary geometry | medium–high | Tier 1 covers revolved nozzles without snappy; Tier 2 gated by quality + layer coverage; gmsh fallback |
 | OpenFOAM version churn | medium | pin v2512; one adapter package; regression suite gates upgrades |
-| Windows support (OpenFOAM via WSL2/Docker, path translation) | medium | runner abstraction from day one; Linux first; Windows after M4 |
+| Windows support (OpenFOAM via WSL2 or native, path translation) | medium | runner abstraction from day one (§3.8); portable-code rules; Windows CI job for the Python side from M0; WSL2 runner exercised by M3 |
+| Sea-level plume region multiplies cell count and brings separated, model-sensitive flow into the default workflow | high | coarsened structured plume blocks; wedge first; matched-expansion verification before overexpanded cases; E3/E4 validation moved to M2 |
 | Package size (~280 MB compressed with VTK + Qt) | low | acceptable for engineering software; trim VTK modules later |
 | GL problems on user machines (RDP, old drivers) | low–medium | software-rendering switch |
 | Verification tolerance flakiness across machines | medium | integral quantities, pinned decomposition, measured spread-based tolerances |
@@ -670,14 +795,16 @@ tests.
 - Update the root README and CLAUDE.md (a third project with its own
   toolchain).
 
-**M1 — headless end-to-end on a known CD nozzle (the brief's milestone,
-minus the UI)**
+**M1 — headless end-to-end on a known CD nozzle at sea level (the
+brief's milestone, minus the UI)**
 - **Input:** a revolved CD nozzle supplied as a STEP file (generated from a
   known profile, so the true answer is known), plus a JSON definition.
 - **Geometry:** gmsh import → heal → checks → axis, throat and end-face
   detection → profile extraction.
-- **Mesh:** Tier 1 structured mesh, both wedge and 3D O-grid →
-  checkMesh JSON → quality gates.
+- **Mesh:** Tier 1 structured mesh, both wedge and 3D O-grid, **with the
+  external plume region** → checkMesh JSON → quality gates.
+- **Reference case:** N₂ at 20 bar and 300 K, sea-level matched nozzle
+  (ε ≈ 2.9, 2 mm throat). An overexpanded variant (ε ≈ 6) comes second.
 - **Case build:** a deterministic ESI v2512 case with a quasi-1D
   initialisation.
 - **Run:** rhoPimpleFoam transonic LTS, local runner, live monitor events on
@@ -691,6 +818,9 @@ minus the UI)**
 
 **M2 — verification suite and shocks**
 - V2, V3, V5 and V7.
+- Validation cases E3 and E4 (Mason and Hunter): ground-test nozzles with
+  shocks and separation in a plume, the sea-level cases that matter most.
+- A Peng–Robinson real-gas option, verified against NIST N₂ data.
 - The rhoCentralFoam path.
 - Laminar vs SST viscous runs.
 - GCI automation.
@@ -723,14 +853,15 @@ minus the UI)**
 - STL path with surface checks.
 - General STEP fluid volumes.
 - Tier 2 meshing (snappyHexMesh with gates, gmsh fallback).
-- External plume region for sea-level and overexpanded cases.
+- Vacuum operation: domain truncated at the exit, condensation checks
+  live.
 - Mass-flow inlet.
 - Prescribed wall temperature.
 
 **M6 — transient and solid bodies**
 - Transient runs (rhoCentralFoam) with time-series metrics and animation.
 - Previewed solid-to-fluid extraction.
-- Validation cases E1–E4.
+- Validation cases E1 and E2.
 
 **Later:**
 - a real-gas EOS
@@ -743,16 +874,8 @@ minus the UI)**
 
 ---
 
-## 9. Decisions needed from you
+## 9. Decisions
 
-1. **Operating envelope.** Typical chamber pressures, throat sizes, area
-   ratios, and whether you care most about vacuum or ground-test (1 atm)
-   conditions. This sets the verification priorities and whether the plume
-   domain (M5) should move earlier.
-2. **Platforms.** Linux only at first, or is native Windows (with OpenFOAM in
-   WSL2) a requirement for V1?
-3. **Distribution.** Personal/internal tool or distributed binaries? This
-   only affects how strictly the GPL boundaries in 3.8 matter.
-4. **Name and location.** SONICLINE in `sonicline/` in this repository is a
-   working name. It is a Python desktop application, not a Pages site, so
-   like `strata/` it keeps its toolchain and CI to itself.
+Answered on 2026-09-29; see §0. Open for later: bipropellant engines
+(350–1500 psi chambers) need combustion products, not nitrogen. That is a
+separate gas model and a separate validation effort, and it is out of V1.

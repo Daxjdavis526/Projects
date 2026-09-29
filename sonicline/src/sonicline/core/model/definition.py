@@ -1,0 +1,275 @@
+"""The simulation definition: everything needed to reproduce a run, in SI,
+independent of OpenFOAM syntax.
+
+Boundaries are described by *role* (inlet, walls, ambient, exit treatment)
+rather than as a free list of patches. That makes the common inconsistent
+combinations -- two inlets, no wall, a pressure outlet on a supersonic exit
+plane -- unrepresentable rather than merely invalid.
+
+Dimensional fields carry ``metadata={"dim": Dimension.X}`` so the JSON
+loader can accept "20 bar" or {"value": 20, "unit": "bar"} and convert once.
+Every value is stored and written back in SI.
+"""
+
+from __future__ import annotations
+
+import enum
+import math
+from dataclasses import dataclass, field
+from typing import ClassVar
+
+from ..gas import NITROGEN, PerfectGas
+from ..profile import Profile, conical
+from ..units import ATM, Dimension
+
+SCHEMA_VERSION = 1
+
+
+_REQUIRED = object()
+
+
+def _q(dim: Dimension, default: object = _REQUIRED):
+    """A dimensional dataclass field."""
+    if default is _REQUIRED:
+        return field(metadata={"dim": dim})
+    return field(default=default, metadata={"dim": dim})
+
+
+# --------------------------------------------------------------------------
+# Geometry
+
+
+class GeometryKind(enum.Enum):
+    FLUID_VOLUME = "fluid_volume"  # the gas region itself
+    SOLID_BODY = "solid_body"  # thruster hardware; gas volume must be extracted
+
+
+@dataclass(frozen=True)
+class ConicalNozzle:
+    """Parametric conical CD nozzle (see :func:`sonicline.core.profile.conical`).
+
+    Radii of curvature and chamber length are multiples of the throat radius.
+    """
+
+    TAG: ClassVar[str] = "conical_nozzle"
+    throat_radius: float = _q(Dimension.LENGTH)
+    expansion_ratio: float = 4.0
+    contraction_ratio: float = 9.0
+    converging_half_angle: float = _q(Dimension.ANGLE, math.radians(45.0))
+    diverging_half_angle: float = _q(Dimension.ANGLE, math.radians(15.0))
+    throat_rc_upstream: float = 1.5
+    throat_rc_downstream: float = 0.382
+    fillet_radius: float = 1.0
+    chamber_length: float = 2.0
+
+    def profile(self) -> Profile:
+        return conical(
+            self.throat_radius, self.expansion_ratio, self.contraction_ratio,
+            self.converging_half_angle, self.diverging_half_angle,
+            self.throat_rc_upstream, self.throat_rc_downstream,
+            self.fillet_radius, self.chamber_length,
+        )
+
+
+@dataclass(frozen=True)
+class CadFile:
+    """An imported STEP or STL file. ``sha256`` pins the exact content."""
+
+    TAG: ClassVar[str] = "cad_file"
+    path: str
+    sha256: str
+    length_unit: str = "mm"
+    kind: GeometryKind = GeometryKind.FLUID_VOLUME
+
+
+Geometry = ConicalNozzle | CadFile
+
+
+# --------------------------------------------------------------------------
+# Gas
+
+
+@dataclass(frozen=True)
+class GasSpec:
+    species: str = "N2"
+
+    def model(self) -> PerfectGas:
+        if self.species != "N2":
+            raise ValueError(f"only nitrogen is supported in V1, not {self.species!r}")
+        return NITROGEN
+
+
+# --------------------------------------------------------------------------
+# Boundaries
+
+
+@dataclass(frozen=True)
+class ReservoirInlet:
+    """Stagnation (chamber) conditions at the inlet face. T0 is the gas
+    temperature *after* any regulator, which is colder than the bottle."""
+
+    TAG: ClassVar[str] = "reservoir_inlet"
+    p0: float = _q(Dimension.PRESSURE)
+    T0: float = _q(Dimension.TEMPERATURE, 300.0)
+    turbulence_intensity: float = 0.02
+    turbulence_length_fraction: float = 0.1  # mixing length / inlet diameter
+
+
+@dataclass(frozen=True)
+class MassFlowInlet:
+    TAG: ClassVar[str] = "mass_flow_inlet"
+    mass_flow: float = _q(Dimension.MASS_FLOW)
+    T0: float = _q(Dimension.TEMPERATURE, 300.0)
+    turbulence_intensity: float = 0.02
+    turbulence_length_fraction: float = 0.1
+
+
+Inlet = ReservoirInlet | MassFlowInlet
+
+
+@dataclass(frozen=True)
+class Ambient:
+    """Surroundings the thruster exhausts into. pressure = 0 is vacuum."""
+
+    pressure: float = _q(Dimension.PRESSURE, ATM)
+    temperature: float = _q(Dimension.TEMPERATURE, 288.15)
+
+
+class Lip(enum.Enum):
+    ENTRAINMENT = "entrainment"  # free-standing nozzle: ambient gas can enter behind the exit
+    WALL = "wall"  # nozzle exit flush with a plate
+
+
+@dataclass(frozen=True)
+class Plume:
+    """External region downstream of the exit plane (required at sea level)."""
+
+    TAG: ClassVar[str] = "plume"
+    length: float = 20.0  # exit diameters
+    radius: float = 6.0  # exit diameters
+    lip: Lip = Lip.ENTRAINMENT
+
+
+@dataclass(frozen=True)
+class TruncatedAtExit:
+    """Domain ends at the exit plane. Physical only when the whole exit plane
+    leaves supersonically into vacuum or a strongly under-expanded jet."""
+
+    TAG: ClassVar[str] = "truncated_at_exit"
+
+
+ExitDomain = Plume | TruncatedAtExit
+
+
+@dataclass(frozen=True)
+class Adiabatic:
+    TAG: ClassVar[str] = "adiabatic"
+
+
+@dataclass(frozen=True)
+class FixedTemperature:
+    TAG: ClassVar[str] = "fixed_temperature"
+    temperature: float = _q(Dimension.TEMPERATURE)
+
+
+WallThermal = Adiabatic | FixedTemperature
+
+
+@dataclass(frozen=True)
+class Boundaries:
+    inlet: Inlet
+    ambient: Ambient = Ambient()
+    exit_domain: ExitDomain = Plume()
+    wall_thermal: WallThermal = Adiabatic()
+
+
+# --------------------------------------------------------------------------
+# Flow physics
+
+
+@dataclass(frozen=True)
+class Steady:
+    TAG: ClassVar[str] = "steady"
+
+
+@dataclass(frozen=True)
+class Transient:
+    TAG: ClassVar[str] = "transient"
+    end_time: float = _q(Dimension.TIME)
+    max_courant: float = 0.3
+
+
+TimeTreatment = Steady | Transient
+
+
+@dataclass(frozen=True)
+class Laminar:
+    TAG: ClassVar[str] = "laminar"
+
+
+@dataclass(frozen=True)
+class KOmegaSST:
+    TAG: ClassVar[str] = "k_omega_sst"
+
+
+Turbulence = Laminar | KOmegaSST
+
+
+@dataclass(frozen=True)
+class Flow:
+    time: TimeTreatment = Steady()
+    turbulence: Turbulence = KOmegaSST()
+
+
+# --------------------------------------------------------------------------
+# Mesh and numerics
+
+
+class MeshForm(enum.Enum):
+    WEDGE = "wedge"  # axisymmetric, one cell thick: verification and previews
+    O_GRID_3D = "o_grid_3d"  # full 3D structured O-grid
+
+
+class MeshQuality(enum.Enum):
+    COARSE = "coarse"
+    STANDARD = "standard"
+    FINE = "fine"
+
+
+@dataclass(frozen=True)
+class MeshSpec:
+    form: MeshForm = MeshForm.O_GRID_3D
+    quality: MeshQuality = MeshQuality.STANDARD
+    first_cell_yplus: float = 1.0
+    wedge_angle: float = _q(Dimension.ANGLE, math.radians(5.0))
+
+
+@dataclass(frozen=True)
+class ConvergenceCriteria:
+    residual_drop_orders: float = 5.0
+    integral_window: int = 200  # iterations over which integrals must be flat
+    integral_tolerance: float = 1e-4  # relative spread allowed in that window
+    mass_imbalance: float = 1e-3  # |inlet - outlet| / inlet
+    max_iterations: int = 20000
+
+
+@dataclass(frozen=True)
+class Numerics:
+    solver: str = "auto"  # chosen from the physics; see foam/ for the mapping
+    convergence: ConvergenceCriteria = ConvergenceCriteria()
+    processors: int = 1
+
+
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class SimulationDefinition:
+    name: str
+    geometry: Geometry
+    boundaries: Boundaries
+    gas: GasSpec = GasSpec()
+    flow: Flow = Flow()
+    mesh: MeshSpec = MeshSpec()
+    numerics: Numerics = Numerics()
+    schema_version: int = SCHEMA_VERSION

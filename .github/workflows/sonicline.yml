@@ -1,0 +1,43 @@
+# Tests SONICLINE (sonicline/, a Python CFD application driving OpenFOAM)
+# whenever it changes. The core runs on Linux and on Windows, because the
+# application is used on Windows; OpenFOAM-backed verification cases join
+# this workflow from milestone M1. The rest of the repository is static
+# pages and is not touched by this workflow.
+name: SONICLINE tests
+
+on:
+  push:
+    paths:
+      - 'sonicline/**'
+      - '.github/workflows/sonicline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            python: '3.11'
+          - os: ubuntu-24.04
+            python: '3.12'
+          - os: windows-latest
+            python: '3.12'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: python -m pip install -e "./sonicline[dev]"
+
+      - name: Unit and theory tests
+        run: python -m pytest sonicline/tests

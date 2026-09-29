@@ -1,0 +1,9 @@
+# Python build and environment output
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+# Generated cases and runs from local experiments
+runs/
+scratch/

@@ -1,7 +1,8 @@
 # Projects — working notes
 
 A collection of self-contained browser toys, one per directory, published
-straight to GitHub Pages from `main` (plus one desktop game, `strata/`).
+straight to GitHub Pages from `main` (plus one desktop game, `strata/`, and
+one desktop engineering application, `sonicline/`).
 Different ideas on the daily.
 
 ## The one rule that matters
@@ -19,6 +20,7 @@ wormsign/dist/*.js       generated wasm-bindgen glue — do not read
 wormsign/target*/        Rust build output (untracked) — do not read
 strata/.godot/           Godot's import cache and compiled C# (untracked) — do not read
 strata/build/            exported game builds (untracked) — do not read
+sonicline/src/*.egg-info/  pip metadata (untracked) — do not read
 ```
 
 `moon/data/` is 47 MB of vendored NASA rasters. They are data, not code: read
@@ -49,13 +51,15 @@ touching the others.
 | `geodesic/` | spacetime curvature & gravitational dynamics sandbox |
 | `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (has a build step; `dist/` is committed at milestones) |
 | `strata/` | STRATA — voxel survival game in Godot 4 + C#. A desktop game, not a web page: Pages serves nothing playable from it. Windows and Linux builds come from GitHub Actions (`.github/workflows/strata.yml`) |
+| `sonicline/` | SONICLINE — propulsion CFD for nitrogen cold-gas thrusters: a Python desktop application driving OpenFOAM as an external solver. Not a web page. Plan and decisions in `sonicline/DESIGN.md`; tests in `.github/workflows/sonicline.yml` |
 
 ## Conventions
 
 - **No build step** for the browser projects. Everything is static files
   served as-is. No bundler, no npm install, no transpilation.
-  `python3 -m http.server` is the dev loop. The two exceptions, `wormsign/`
-  and `strata/`, keep their builds to themselves; their READMEs say how.
+  `python3 -m http.server` is the dev loop. The three exceptions, `wormsign/`,
+  `strata/` and `sonicline/` (a pip-installable Python package), keep their
+  builds to themselves; their READMEs say how.
 - **Vendor dependencies locally**, do not hotlink a CDN — these pages should
   keep working when a CDN does not.
 - **Prefer the minified build** when vendoring. `three.module.min.js` plus
@@ -77,7 +81,10 @@ is the reference: its physics engine imports no DOM and no three.js, so
 `node supernova/test/physics.test.mjs` validates the simulation headlessly.
 Keep simulation state separate from rendering so this stays possible.
 `strata/` does the same in C#: `godot --headless --path strata -- --test`,
-which CI also runs on every change to it.
+which CI also runs on every change to it. `sonicline/` keeps its physics in
+`sonicline/src/sonicline/core/`, which imports no OpenFOAM, Qt or VTK (a test
+enforces it): `pip install -e ./sonicline[dev] && python -m pytest
+sonicline/tests`, run by CI on Linux and Windows.
 
 For visual verification, drive a headless Chromium (Playwright is available)
 and screenshot the page — several rendering bugs in this repo were only ever

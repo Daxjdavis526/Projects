@@ -231,3 +231,18 @@ the whole survival loop, from the first tree to saving and reloading.
 
 See [strata/README.md](strata/README.md) for controls, how to build and play,
 how it works, and what it approximates.
+
+## sonicline/
+
+**SONICLINE** — a focused CFD application for nitrogen cold-gas thrusters,
+with OpenFOAM as the numerical backend. Drop in a thruster geometry, set the
+chamber pressure and the ambient conditions, and get mass flow, thrust, Isp,
+exit conditions and choking behaviour. Each result comes with a quasi-1D
+analytical cross-check and a verdict on whether the numbers can be trusted.
+Sea-level operation comes first, including the separation and real-gas
+effects that make a naive answer wrong.
+
+A Python desktop application, not a web page, so there is no live link. It
+is being built in milestones; [sonicline/DESIGN.md](sonicline/DESIGN.md) is
+the plan, and [sonicline/README.md](sonicline/README.md) says what works
+today and exactly what is approximated.
