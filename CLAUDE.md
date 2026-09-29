@@ -21,6 +21,7 @@ strata/.godot/           Godot's import cache and compiled C# (untracked) — do
 strata/build/            exported game builds (untracked) — do not read
 starship/models/         generated STEP/STL/GLB, ~100k lines of CAD — do not read
 endurance/models/        generated STEP/STL/GLB — do not read
+ranger/models/           generated STEP/STL/GLB — do not read
 ```
 
 `moon/data/` is 47 MB of vendored NASA rasters. They are data, not code: read
@@ -52,6 +53,7 @@ touching the others.
 | `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (has a build step; `dist/` is committed at milestones) |
 | `starship/` | STARSHIP — parametric CAD model of Starship V3 on Super Heavy (CadQuery → STEP/STL), plus a three.js viewer. `build_model.py` is the source; `models/` is its output |
 | `endurance/` | ENDURANCE — CAD model of the Endurance from Interstellar (CadQuery → STEP/STL), plus a three.js viewer. `build_model.py` is the source; `models/` is its output |
+| `ranger/` | RANGER — CAD model of the Ranger spaceplane from Interstellar (CadQuery → STEP/STL), plus a three.js viewer. `build_model.py` is the source; `models/` is its output |
 | `strata/` | STRATA — voxel survival game in Godot 4 + C#. A desktop game, not a web page: Pages serves nothing playable from it. Windows and Linux builds come from GitHub Actions (`.github/workflows/strata.yml`) |
 
 ## Conventions

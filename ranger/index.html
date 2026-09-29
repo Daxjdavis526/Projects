@@ -1,0 +1,160 @@
+<!doctype html>
+<!-- =============================================================================
+     RANGER — a viewer for the CAD model in models/. The model itself is
+     built by build_model.py (CadQuery); this page only loads the GLB it exports
+     and offers the STEP and STL files for download.
+     ========================================================================== -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RANGER</title>
+<meta name="description" content="A CAD model of the Ranger from Interstellar, as STEP and STL.">
+<style>
+:root{
+  --ink:#d8d5cf;
+  --dim:#8a857d;
+  --warm:#e8c9a0;
+  --panel:rgba(8,8,10,.66);
+  --edge:rgba(216,213,207,.13);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+body{
+  color:var(--ink);
+  font-family:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+  font-weight:300;font-size:12px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+canvas{display:block;position:fixed;inset:0}
+.panel{
+  position:fixed;background:var(--panel);border:1px solid var(--edge);
+  border-radius:2px;padding:12px 14px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+h1{margin:0 0 2px;font-size:12px;font-weight:400;letter-spacing:.42em}
+.sub{color:var(--dim);margin:0 0 10px}
+.row{display:flex;justify-content:space-between;gap:14px;white-space:nowrap}
+.row .k{color:var(--dim)}
+.row .v{font-variant-numeric:tabular-nums}
+#info{top:14px;left:14px;max-width:calc(100vw - 28px);width:260px}
+#views{margin:12px 0 0;display:flex;gap:6px;flex-wrap:wrap}
+button{
+  font:inherit;color:var(--ink);background:transparent;cursor:pointer;
+  border:1px solid var(--edge);border-radius:2px;padding:4px 9px;
+}
+button[aria-pressed="true"]{border-color:var(--warm);color:var(--warm)}
+#files{margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--edge)}
+#files a{display:block;color:var(--ink);text-decoration:none;padding:2px 0}
+#files a:hover{color:var(--warm)}
+#files a span{color:var(--dim)}
+#hint{bottom:14px;left:14px;color:var(--dim)}
+#status{position:fixed;inset:0;display:grid;place-items:center;color:var(--dim)}
+</style>
+</head>
+<body>
+<div id="status">loading model…</div>
+
+<div id="info" class="panel">
+  <h1>RANGER</h1>
+  <p class="sub">Interstellar (2014), the planetary lander</p>
+  <div class="row"><span class="k">length</span><span class="v">18.3 m</span></div>
+  <div class="row"><span class="k">span</span><span class="v">9.2 m</span></div>
+  <div class="row"><span class="k">model scale</span><span class="v">1:72 · 254 mm</span></div>
+  <div id="views">
+    <button data-view="three" aria-pressed="true">3/4</button>
+    <button data-view="top" aria-pressed="false">top</button>
+    <button data-view="side" aria-pressed="false">side</button>
+    <button data-view="rear" aria-pressed="false">rear</button>
+  </div>
+  <div id="files">
+    <a href="models/ranger_1-72_step.zip" download>ranger_1-72.step <span>· CAD, zip</span></a>
+    <a href="models/ranger_1-72.stl" download>ranger_1-72.stl <span>· print, gear down</span></a>
+  </div>
+</div>
+<div id="hint" class="panel">drag to orbit · scroll to zoom · right-drag to pan</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x030304);
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 10000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// A soft overcast key, as on Miller's planet, and a faint fill.
+scene.add(new THREE.HemisphereLight(0xdfe6f0, 0x121212, 0.55));
+const sun = new THREE.DirectionalLight(0xfff6ea, 3.2); sun.position.set(4, 3, 2); scene.add(sun);
+const rim = new THREE.DirectionalLight(0x9fb8ff, 0.6); rim.position.set(-3, -1, -4); scene.add(rim);
+
+// The GLB carries its own colours per body; the materials just get a finish.
+const q = new URLSearchParams(location.search);
+let model, box;
+
+// In the GLB, CAD +X (aft) is three.js +X, CAD +Z (up) is +Y, CAD +Y (port) is -Z.
+const VIEWS = { three: [-0.9, 0.55, 0.9], top: [0.001, 1, 0], side: [0, 0.05, 1], rear: [1, 0.12, 0.001] };
+
+function show(view) {
+  const size = box.getSize(new THREE.Vector3()), centre = box.getCenter(new THREE.Vector3());
+  const r = size.length() / 2;
+  const dist = r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 0.9;
+  const d = new THREE.Vector3(...VIEWS[view]).normalize();
+  controls.target.copy(centre);
+  camera.up.set(0, 1, 0);
+  camera.position.copy(centre).addScaledVector(d, dist);
+  camera.near = dist / 100; camera.far = dist * 20; camera.updateProjectionMatrix();
+  controls.update();
+  document.querySelectorAll('#views button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+}
+
+new GLTFLoader().load('models/ranger.glb', gltf => {
+  model = gltf.scene;
+  model.traverse(o => {
+    if (o.isMesh) {
+      o.material.metalness = 0.15;
+      o.material.roughness = 0.7;
+    }
+  });
+  scene.add(model);
+  box = new THREE.Box3().setFromObject(model);
+  document.getElementById('status').remove();
+  show(q.get('view') || 'three');
+  if (q.has('az')) {      // ?az=deg&el=deg&zoom=f — fixed camera, for screenshots
+    const t = controls.target, r = camera.position.distanceTo(t) / (+q.get('zoom') || 1);
+    const az = THREE.MathUtils.degToRad(+q.get('az')), el = THREE.MathUtils.degToRad(+q.get('el') || 0);
+    camera.up.set(0, 1, 0);
+    camera.position.set(t.x + r * Math.cos(el) * Math.sin(az), t.y + r * Math.sin(el), t.z + r * Math.cos(el) * Math.cos(az));
+    controls.update();
+  }
+  if (q.has('clean')) document.querySelectorAll('.panel').forEach(p => p.remove());
+  document.body.dataset.ready = '1';
+}, undefined, err => { document.getElementById('status').textContent = 'could not load model: ' + err.message; });
+
+document.querySelectorAll('#views button').forEach(b => b.addEventListener('click', () => show(b.dataset.view)));
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>

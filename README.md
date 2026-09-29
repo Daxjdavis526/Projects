@@ -263,3 +263,20 @@ Live: https://daxjdavis526.github.io/Projects/endurance/
 
 See [endurance/README.md](endurance/README.md) for printing notes and which
 dimensions are stated and which are measured.
+
+## ranger/
+
+**RANGER** — a parametric CAD model of the Ranger from *Interstellar*, the
+spaceplane that lands on Miller's and Mann's planets. It is a faceted
+lifting body lofted through measured cross-sections, with canted black wings
+and their blade spikes, the 22-window cockpit web, the nose frame, the rear
+docking hatch between twin engines, belly louvres and deployed landing gear.
+It was built from the full-size prop, the 1/5 miniature and the Moebius 1/72
+kit's paint guide. It exports a STEP assembly and a watertight, hollow STL at
+1:72 (the kit's scale), 254 mm long. The live page is a 3D viewer with
+download links.
+
+Live: https://daxjdavis526.github.io/Projects/ranger/
+
+See [ranger/README.md](ranger/README.md) for printing notes and which
+dimensions are stated and which are measured.
