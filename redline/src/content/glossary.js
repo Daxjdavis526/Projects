@@ -59,7 +59,7 @@ export const GLOSSARY = [
   // ---- fluid systems
   { id: 'regulator', cat: 'fluid', title: 'Pressure regulator',
     body: ['Reduces a high, falling supply pressure to a lower, steady outlet pressure. A poppet is pushed open by the loading (a spring, or a dome pressurised by a controller) and pushed closed by outlet pressure acting on a diaphragm; it settles where the two balance.',
-      'Real regulators droop (outlet falls with flow), lock up slightly above set at zero flow, creep up as the supply falls (supply-pressure effect), and drop out when the supply falls close to the outlet pressure. Failures: seat leakage (outlet creeps up with no flow — the relief valve is the backstop), sticking, and set-point error.'],
+      'Real regulators droop (outlet falls with flow), lock up slightly above set at zero flow, creep up as the supply falls (supply-pressure effect), and drop out when the supply falls close to the outlet pressure. A non-relieving regulator can only add gas downstream: turn its setpoint down and the outlet pressure stays where it was until something downstream flows or vents. A self-relieving one vents the excess through its bonnet. Failures: seat leakage (outlet creeps up with no flow — the relief valve is the backstop), sticking, and set-point error.'],
     see: ['droop', 'lock-up', 'relief-valve'] },
   { id: 'droop', cat: 'fluid', title: 'Regulator droop',
     body: ['The fall in regulator outlet pressure as flow increases. The poppet only opens because the outlet has fallen below the loading; more flow needs more opening, so more fall. Watch PT-201 at the moment the fire valve opens: it steps down a few psi and stays there. Excessive droop means an undersized or failing regulator — or a supply near dropout.'],

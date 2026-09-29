@@ -183,7 +183,11 @@ export class SolenoidValve extends Valve {
     const dP = Math.max(0, a.P - b.P);
     const iPull = (this.iPull0 + this.iPullPerPa * dP) * this.pullScale * this.jitPull;
     const nc = this.normally !== 'open';
-    const pulled = this.u > 0.5 ? this.i > this.iDrop : this.i > iPull;
+    // Magnetic pull rises as the air gap closes (force ∝ i²/gap²), so the
+    // current needed to keep the armature moving falls with travel: from the
+    // pull-in current with the valve shut to the drop-out current when it is
+    // seated open. Once it starts to move it completes the stroke.
+    const pulled = this.i > iPull + (this.iDrop - iPull) * this.u;
     let tgt = nc ? (pulled ? 1 : 0) : (pulled ? 0 : 1);
     if (this.failClosed) tgt = 0;
     tgt = Math.min(tgt, this.maxOpen);

@@ -198,7 +198,7 @@ export class FireControl {
     const p = this.app.session.controller.plan;
     clear(this.fields);
     if (this.mode.value === 'pulse') {
-      this.on = h('input.in', { type: 'number', step: '5', min: 5, value: Math.round(p.on * 1000), style: { width: '54px' } });
+      this.on = h('input.in', { type: 'number', step: '1', min: 2, value: Math.round(p.on * 1000), style: { width: '54px' } });
       this.off = h('input.in', { type: 'number', step: '5', min: 20, value: Math.round(p.off * 1000), style: { width: '54px' } });
       this.cnt = h('input.in', { type: 'number', step: '1', min: 1, max: 50, value: p.count, style: { width: '44px' } });
       this.fields.append(this.on, h('span.lbl', 'ms on'), this.off, h('span.lbl', 'ms off ×'), this.cnt);
@@ -211,7 +211,7 @@ export class FireControl {
   _load() {
     const S = this.app.session;
     let plan;
-    if (this.mode.value === 'pulse') plan = { mode: 'pulse', on: Math.max(0.005, Number(this.on.value) / 1000), off: Math.max(0.02, Number(this.off.value) / 1000), count: Math.max(1, Math.min(50, Math.round(Number(this.cnt.value)))) };
+    if (this.mode.value === 'pulse') plan = { mode: 'pulse', on: Math.max(0.002, Number(this.on.value) / 1000), off: Math.max(0.02, Number(this.off.value) / 1000), count: Math.max(1, Math.min(50, Math.round(Number(this.cnt.value)))) };
     else plan = { mode: 'single', duration: Math.max(0.05, Math.min(S.def.ratings.MAX_BURN, Number(this.dur.value) || 0)) };
     act(S, 'plan', { plan });
   }

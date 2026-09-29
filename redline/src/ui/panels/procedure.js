@@ -112,7 +112,7 @@ export class ProcedurePanel {
         case 'record': {
           const inp = h('input.in', { type: 'number', step: 'any', style: { width: '90px' } });
           inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') confirm(inp.value); });
-          ctl.append(inp, h('span.faint', step.record.unit || ''), btn('Record', () => confirm(inp.value), 'sm primary'));
+          ctl.append(inp, h('span.faint', resolve(step.record.unit, v) || ''), btn('Record', () => confirm(inp.value), 'sm primary'));
           break;
         }
         case 'hold': {

@@ -95,6 +95,13 @@ const sensors = [
   { id: 'EPC-101', kind: 'FB', quantity: 'pressure', gauge: true, signal: 'dome:PR-101',
     desc: 'Regulator dome pressure (EPC feedback)', range: [0, psi(500)], noise: psi(0.05), hum: 0,
     tau: 0.02, zeroSigma: 0, bits: 16, zeroable: false },
+  /* A Coriolis mass flowmeter in the feed line: the one INDEPENDENT flow
+     measurement on the stand. It is slow (its output is heavily filtered,
+     τ ≈ 60 ms), so it misses start transients and sees the line filling,
+     but in steady state it is the reference that MDOT-C — flow CALCULATED
+     from chamber pressure and an assumed throat — can be checked against. */
+  { id: 'FT-201', kind: 'FM', quantity: 'massflow', signal: 'mdot:F-201', desc: 'Feed mass flow (Coriolis meter)',
+    range: [0, 0.030], noise: 0.00002, hum: 0, tau: 0.06, zeroSigma: 0.00002, bits: 16, zeroable: false },
   { id: 'SV-301-I', kind: 'I', quantity: 'current', signal: 'I:SV-301', desc: 'Fire-valve coil current',
     range: [0, 2], noise: 0.003, hum: 0.001, tau: 0.00005, zeroSigma: 0.002, bits: 16, zeroable: false },
   { id: 'IV-101-ZSO', kind: 'ZS', quantity: 'discrete', signal: 'zso:IV-101', desc: 'IV-101 open limit switch' },
@@ -149,8 +156,8 @@ const components = {
     text: 'Vents the high-pressure section between IV-101 and the regulator. Normally-open so that losing power vents the system instead of trapping pressure. It must be commanded CLOSED to pressurise. When the stand is safed with the regulator shut, this is the only way out for the gas trapped between IV-101 and PR-101.',
     ref: ['vent', 'fail-safe', 'trapped-volume'] },
   'PR-101': { tag: 'PR-101', name: 'Dome-loaded pressure regulator', kind: 'Pressure-reducing regulator', commandable: 'setpoint',
-    specs: { 'Inlet rating': '4000 psig', 'Outlet range': '0–250 psig', 'Loading': 'Dome, via EPC-101', 'Lock-up': 'at set pressure', 'Droop': 'a few psi at design flow (spec sheet)' },
-    text: 'Reduces bottle pressure to the test pressure. The setpoint you command is the dome loading pressure; with no flow the outlet locks up at about that value, and with flow it droops a little below it. As the bottle blows down the outlet creeps slightly (supply-pressure effect). If supply falls near the outlet pressure the regulator runs out of authority and the outlet simply follows the supply.',
+    specs: { 'Inlet rating': '4000 psig', 'Outlet range': '0–250 psig', 'Loading': 'Dome, via EPC-101', 'Lock-up': 'at set pressure', 'Droop': 'a few psi at design flow (spec sheet)', 'Relieving': 'No — outlet pressure is only reduced by venting' },
+    text: 'Reduces bottle pressure to the test pressure. The setpoint you command is the dome loading pressure; with no flow the outlet locks up at about that value, and with flow it droops a little below it. As the bottle blows down the outlet creeps slightly (supply-pressure effect). If supply falls near the outlet pressure the regulator runs out of authority and the outlet simply follows the supply. It is NON-RELIEVING: lowering the setpoint does not lower the pressure already downstream — that takes a vent.',
     ref: ['regulator', 'droop', 'lock-up'] },
   'EPC-101': { tag: 'EPC-101', name: 'Electronic pressure controller', kind: 'Dome loader', commandable: 'setpoint',
     specs: { 'Slew': '≈25 psi/s', 'Feedback': 'EPC-101 channel (dome pressure)' },
@@ -186,8 +193,8 @@ const components = {
 const componentSensors = {
   'N2-K': ['TC-101'], 'HV-100': ['PT-101'], 'IV-101': ['IV-101-ZSO', 'IV-101-ZSC', 'PT-101', 'PT-102'],
   'VV-101': ['PT-102'], 'PR-101': ['PT-102', 'PT-201', 'EPC-101'], 'EPC-101': ['EPC-101'],
-  'RV-201': ['PT-201'], 'F-201': ['PT-201', 'PT-301', 'DP-F201'], 'VV-201': ['PT-301'],
-  'SV-301': ['SV-301-I', 'PT-301', 'PT-401'], 'CGT-1': ['PT-401', 'TC-401', 'MDOT-C'], 'LC-501': ['LC-501'],
+  'RV-201': ['PT-201'], 'F-201': ['PT-201', 'PT-301', 'DP-F201', 'FT-201'], 'VV-201': ['PT-301'],
+  'SV-301': ['SV-301-I', 'PT-301', 'PT-401'], 'CGT-1': ['PT-401', 'TC-401', 'MDOT-C', 'FT-201'], 'LC-501': ['LC-501'],
 };
 
 /* ---- limits ----------------------------------------------------------

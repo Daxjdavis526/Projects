@@ -15,6 +15,7 @@
    No DOM; used by the session (headless) and the analysis view. */
 
 import { G0 } from '../lib/units.js';
+import { GASES } from '../physics/gas.js';
 
 function meanIn(T, V, t0, t1) {
   let s = 0, n = 0;
@@ -73,7 +74,9 @@ export function computeMetrics(run, def) {
   const d = run.data, T = d.T;
   const ch = id => d.series(id);
   const Pc = ch('PT-401'), F = ch('LC-501'), Pin = ch('PT-301'), Preg = ch('PT-201'),
-        Psup = ch('PT-101'), md = ch('MDOT-C'), cmd = ch('SV-301-CMD'), Tin = ch('TC-301'), I = ch('SV-301-I');
+        Psup = ch('PT-101'), md = ch('MDOT-C'), cmd = ch('SV-301-CMD'), Tin = ch('TC-301'), I = ch('SV-301-I'),
+        FM = ch('FT-201');
+  const gas = GASES[def.physics.gas];
   if (!Pc || !F || !cmd || T.length < 10) return null;
   const e = edges(T, cmd);
   if (!e.on.length) return { kind: 'none', items: [], note: 'No fire-valve command in this recording.' };
@@ -81,7 +84,8 @@ export function computeMetrics(run, def) {
   const tOff = e.off.find(t => t > tOn) ?? T[T.length - 1];
   const Pa = def.physics.ambient.P;
   const At = Math.PI / 4 * def.nominal.throatDia ** 2;
-  const out = { kind: e.on.length > 1 ? 'pulse' : 'single', tOn, tOff, items: [], windows: {} };
+  const kind = run.plan?.mode === 'pulse' || e.on.length > 1 ? 'pulse' : 'single';
+  const out = { kind, tOn, tOff, items: [], windows: {} };
   const preT0 = Math.max(T[0], tOn - 0.5), preT1 = tOn - 0.02;
   const Fbase = preT1 > preT0 + 0.05 ? meanIn(T, F, preT0, preT1) : NaN;
   const Pcbase = preT1 > preT0 + 0.05 ? meanIn(T, Pc, preT0, preT1) : 0;
@@ -133,7 +137,19 @@ export function computeMetrics(run, def) {
     push('Isp', 'Specific impulse (I / m·g₀)', Itot / (mass * G0), 'isp', 'sea level');
     push('IspSS', 'Specific impulse, steady (F / ṁ·g₀)', FSS / (mdSS * G0), 'isp');
     push('Cf', 'Thrust coefficient F / (Pc·At), nominal At', FSS / ((PcSS + Pa) * At), 'ratio');
-    push('Tin', 'Feed gas temperature, steady (TC-301)', meanIn(T, Tin, ss0, ss1), 'temperature');
+    const TinSS = meanIn(T, Tin, ss0, ss1);
+    push('Tin', 'Feed gas temperature, steady (TC-301)', TinSS, 'temperature');
+    // The independent flow measurement, and what it says about the throat.
+    const fmSS = FM ? meanIn(T, FM, ss0, ss1) : NaN;
+    const CdAt = fmSS * Math.sqrt(gas.R * TinSS) / ((PcSS + Pa) * gas.fChoke);
+    const dEq = Math.sqrt(4 * CdAt / (Math.PI * def.nominal.Cd));
+    if (FM) {
+      push('mdotFM', 'Mass flow, steady (FT-201, measured)', fmSS, 'massflow', 'independent of the throat assumption');
+      push('IspFM', 'Specific impulse from measured flow (F / ṁ·g₀)', FSS / (fmSS * G0), 'isp');
+      push('cstar', 'c* from FT-201 (Pc·At / ṁ, nominal At)', (PcSS + Pa) * At / fmSS, 'velocity');
+      push('dThroat', `Effective throat Ø from FT-201 (at Cd ${def.nominal.Cd})`, dEq, 'length', `drawing: ${(def.nominal.throatDia * 1e3).toFixed(2)} mm`);
+    }
+    push('droop', 'Regulator droop (lock-up − steady)', meanIn(T, Preg, preT0, preT1) - meanIn(T, Preg, ss0, ss1), 'pressure');
     push('sup', 'Supply pressure change over record (PT-101)', meanIn(T, Psup, T[T.length - 1] - 0.3, T[T.length - 1]) - meanIn(T, Psup, T[0], T[0] + 0.3), 'pressure');
     if (I) {
       // The armature pulls in where the coil current stops rising and dips.
@@ -144,29 +160,54 @@ export function computeMetrics(run, def) {
       }
       push('pullin', 'Armature pull-in (current dip)', dipT - tOn, 'time', Number.isNaN(dipT) ? 'dip not resolved — sample rate?' : '');
     }
-    out.summary = { Pc: PcSS, F: FSS, I: Itot, mdot: mdSS, Isp: Itot / (mass * G0), dur: f10 - t10, rise: t90 - t10, delay: t10 - tOn };
+    out.summary = { Pc: PcSS, PcAbs: PcSS + Pa, F: FSS, I: Itot, mdot: mdSS, mdotFM: fmSS, Isp: Itot / (mass * G0), IspFM: FSS / (fmSS * G0),
+                    dur: f10 - t10, rise: t90 - t10, delay: t10 - tOn, sdelay: f90 - tOff, dThroat: dEq, Cf: FSS / ((PcSS + Pa) * At),
+                    droop: meanIn(T, Preg, preT0, preT1) - meanIn(T, Preg, ss0, ss1), Preg: meanIn(T, Preg, ss0, ss1), Pin: meanIn(T, Pin, ss0, ss1) };
   } else {
-    // pulse train: impulse bit and peak per pulse
+    /* Pulse train. Each pulse is judged against the steady chamber pressure
+       the stand WOULD reach (the pre-test prediction, or failing that the
+       highest peak in the train): did the valve open at all, and did the
+       chamber get to steady state before the valve closed again? */
+    const pred = run.meta?.config?.prediction?.Pc;
     const pulses = [];
     for (let i = 0; i < e.on.length; i++) {
       const a = e.on[i], b = e.off.find(t => t > a) ?? a;
       const next = e.on[i + 1] ?? (b + 0.3);
-      const Ib = integrate(T, F, a - 0.002, Math.min(next - 0.002, b + 0.2), base);
+      const w1 = Math.min(next - 0.002, b + 0.2);
+      const Ib = integrate(T, F, a - 0.002, w1, base);
       const pk = maxIn(T, Pc, a, Math.min(next, b + 0.1));
-      const mass = md ? integrate(T, md, a - 0.002, Math.min(next - 0.002, b + 0.2)) : NaN;
-      pulses.push({ n: i + 1, tOn: a, width: b - a, Ibit: Ib, PcPeak: pk.v, mass });
+      const mass = md ? integrate(T, md, a - 0.002, w1) : NaN;
+      pulses.push({ n: i + 1, tOn: a, tOff: b, width: b - a, Ibit: Ib, PcPeak: pk.v - Pcbase, mass, next });
+    }
+    const ref = pred > 0 ? pred : Math.max(...pulses.map(p => p.PcPeak));
+    for (const p of pulses) {
+      p.fired = p.PcPeak > 0.1 * ref;
+      p.steady = p.PcPeak > 0.9 * ref;
+      p.delay = p.fired ? crossing(T, Pc, p.tOn - 0.001, p.next, Pcbase + 0.1 * ref, 1) - p.tOn : NaN;
+      p.close = p.fired ? crossing(T, Pc, p.tOff - 0.001, p.next, Pcbase + 0.1 * ref, -1) - p.tOff : NaN;
+      p.Isp = p.Ibit / (p.mass * G0);
     }
     out.pulses = pulses;
+    out.refPc = ref;
+    const avg = xs => { const f = xs.filter(Number.isFinite); return f.length ? f.reduce((s, x) => s + x, 0) / f.length : NaN; };
     const Ibits = pulses.map(p => p.Ibit);
-    const mean = Ibits.reduce((s, x) => s + x, 0) / Ibits.length;
+    const mean = avg(Ibits);
     const sd = Math.sqrt(Ibits.reduce((s, x) => s + (x - mean) ** 2, 0) / Math.max(1, Ibits.length - 1));
-    push('n', 'Pulses', pulses.length, 'discrete');
+    const fired = pulses.filter(p => p.fired).length, steady = pulses.filter(p => p.steady).length;
+    push('n', 'Pulses commanded', pulses.length, 'discrete');
+    push('nfired', 'Pulses that produced chamber pressure (> 10 % of steady)', fired, 'discrete');
+    push('nsteady', 'Pulses that reached steady Pc (> 90 %)', steady, 'discrete');
     push('width', 'Commanded pulse width', pulses[0].width, 'time');
     push('Ibit', 'Mean impulse bit', mean, 'impulse');
-    push('IbitSd', 'Impulse-bit repeatability (1σ)', sd, 'impulse', `${(100 * sd / mean).toFixed(1)} %`);
+    push('IbitSd', 'Impulse-bit repeatability (1σ)', sd, 'impulse', mean > 0 ? `${(100 * sd / mean).toFixed(2)} % of mean` : '');
     push('I', 'Total impulse, all pulses', Ibits.reduce((s, x) => s + x, 0), 'impulse');
-    push('PcPk', 'Mean peak chamber pressure', pulses.reduce((s, p) => s + p.PcPeak, 0) / pulses.length, 'pressure');
-    out.summary = { I: Ibits.reduce((s, x) => s + x, 0), Ibit: mean };
+    push('PcPk', 'Mean peak chamber pressure', avg(pulses.map(p => p.PcPeak)), 'pressure', `steady reference ${(ref / 6894.757).toFixed(1)} psig`);
+    push('pdelay', 'Mean opening delay (command → Pc 10 %)', avg(pulses.map(p => p.delay)), 'time');
+    push('pclose', 'Mean closing delay (command off → Pc < 10 %)', avg(pulses.map(p => p.close)), 'time');
+    push('pIsp', 'Pulse-mode Isp (I-bit / m·g₀, MDOT-C)', avg(pulses.map(p => p.Isp)), 'isp', 'MDOT-C is only valid while the throat is choked');
+    out.summary = { I: Ibits.reduce((s, x) => s + x, 0), Ibit: mean, IbitSd: sd, IbitCv: mean > 0 ? sd / mean : NaN, width: pulses[0].width,
+                    fired, steady, n: pulses.length, pdelay: avg(pulses.map(p => p.delay)), pclose: avg(pulses.map(p => p.close)),
+                    PcPk: avg(pulses.map(p => p.PcPeak)) };
   }
   return out;
 }

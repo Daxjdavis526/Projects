@@ -16,6 +16,7 @@ const KIND_TEXT = {
   FB: 'Controller feedback signal (not an independent transducer).',
   I: 'Coil-current monitor on the valve driver (shunt resistor).',
   ZS: 'Limit switch: 1 when the valve is at that end of its travel.',
+  FM: 'Coriolis mass flowmeter: measures mass flow directly from the Coriolis force on a vibrating tube. Accurate in steady flow; its output is filtered, so it is slow — it cannot follow a start transient or a short pulse.',
 };
 
 export class Inspector {

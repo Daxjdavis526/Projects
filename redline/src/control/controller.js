@@ -16,7 +16,8 @@ import { standardInterlocks, evaluate } from './interlocks.js';
 import { psi, fmt, fmtT } from '../lib/units.js';
 
 export const COUNTDOWN = 5;          // s from FIRE to T-0
-export const TAIL = 2;               // s after the last shutdown before the sequence is complete
+export const TAIL = 2;
+const EPS = 1e-9;                    // s: event-time comparison tolerance               // s after the last shutdown before the sequence is complete
 
 export class Controller extends Emitter {
   constructor(session) {
@@ -49,7 +50,14 @@ export class Controller extends Emitter {
 
   testTime() { return this.seq ? this.t - this.seq.tFire : null; }
 
-  bump() { this.epoch++; }
+  /* A configuration change invalidates the last go/no-go poll. In a test
+     SERIES (a pressure sweep, a pulse campaign) the poll is taken once for
+     the whole approved test matrix, so moving between points in it — a new
+     setpoint, a new firing plan — does not; anything else still does. */
+  bump(kind = 'config') {
+    if (kind === 'test' && this.s.scenario?.seriesPoll) return;
+    this.epoch++;
+  }
 
   get pollGo() { return this.pollResult && this.pollResult.go && this.pollEpoch === this.epoch; }
 
@@ -123,7 +131,7 @@ export class Controller extends Emitter {
         this.regSet = Math.max(0, a.value);
         m.command(this.def.regulator, this.regSet);
         this.log('CMD', `${this.def.regulator} setpoint → ${fmt(this.regSet, 'pressure')} (EPC-101)`, { id: this.def.regulator, value: this.regSet });
-        this.bump();
+        this.bump('test');
         s.requestPrediction();
         return { ok: true };
       }
@@ -187,7 +195,7 @@ export class Controller extends Emitter {
       case 'plan': {
         this.plan = { ...this.plan, ...a.plan };
         this.log('SEQ', `Firing plan loaded: ${this.planText()}`);
-        this.bump();
+        this.bump('test');
         s.requestPrediction();
         return { ok: true };
       }
@@ -369,13 +377,13 @@ export class Controller extends Emitter {
     const q = this.seq;
     if (q && q.state !== 'ABORTED') {
       const T = t - q.tFire;
-      if (q.state === 'COUNTDOWN' && T >= 0) {
+      if (q.state === 'COUNTDOWN' && T >= -EPS) {
         q.state = 'BURN';
         this.log('SEQ', 'T-0', { level: 'caution' });
         this.emit('sequence', { state: 'BURN' });
       }
       if (q.state === 'BURN') {
-        while (q.next < q.sched.length && T >= q.sched[q.next].T) {
+        while (q.next < q.sched.length && T >= q.sched[q.next].T - EPS) {
           const ev = q.sched[q.next++];
           this._fireValve(ev.v, q.plan.mode === 'pulse' ? `pulse ${Math.floor(q.next / 2 + 0.5)}` : (ev.v ? 'T-0' : 'end of burn'));
         }
@@ -392,6 +400,15 @@ export class Controller extends Emitter {
         this.emit('sequence', { state: 'COMPLETE', seq: q });
       }
     }
+  }
+
+  /* Absolute sim time of the next sequencer event (T-0 or a valve edge). */
+  nextEventTime() {
+    const q = this.seq;
+    if (!q || q.state === 'ABORTED') return Infinity;
+    if (q.state === 'COUNTDOWN') return q.tFire;
+    if (q.state === 'BURN' && q.next < q.sched.length) return q.tFire + q.sched[q.next].T;
+    return Infinity;
   }
 
   /* Seconds since the fire valve was last commanded closed (for limits). */

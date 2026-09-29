@@ -96,7 +96,11 @@ export class Session extends Emitter {
     if (this.frozen) return;
     let span = Math.min(realDt, 0.1) * this.effectiveSpeed;
     while (span > 1e-9) {
-      const d = Math.min(CHUNK, span);
+      // Land exactly on the next scheduled valve event, so a 6 ms pulse is
+      // 6 ms, not whatever the chunk size rounds it to.
+      const tn = this.controller.nextEventTime();
+      let d = Math.min(CHUNK, span);
+      if (tn > this.t + 1e-9 && tn - this.t < d) d = tn - this.t;
       this.model.advance(d, t => this.daq.tick(t));
       this.t = this.model.t;
       this.controller.tick();

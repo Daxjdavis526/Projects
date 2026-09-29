@@ -5,6 +5,8 @@
 import ts1 from './stands/ts1-coldgas.js';
 import orientation from './procedures/cg-orientation.js';
 import basicFiring from './procedures/cg-basic-firing.js';
+import pressureChar from './procedures/cg-pressure-char.js';
+import pulse from './procedures/cg-pulse.js';
 
 export const STANDS = { 'TS-1': ts1 };
 
@@ -25,10 +27,10 @@ export const PROGRAMS = [
         teaches: ['Control-room layout', 'P&ID reading', 'Zero offset and noise', 'Regulator droop and lock-up', 'Trapped volumes'] },
       { n: 2, id: 'cg-basic', title: 'Basic cold-gas firing', scenario: basicFiring, modes: ['tutorial', 'guided', 'independent'],
         teaches: ['Full test procedure', 'Zero, tare and shunt calibration', 'Leak check', 'Go/no-go', 'Arming and firing', 'Safing', 'Data reduction'] },
-      { n: 3, id: 'cg-pressure', title: 'Pressure characterisation', phase: 3,
-        teaches: ['Thrust vs chamber pressure', 'Thrust coefficient', 'Separated vs attached nozzle flow'] },
-      { n: 4, id: 'cg-pulse', title: 'Pulse testing', phase: 3,
-        teaches: ['Valve response', 'Impulse bit', 'Minimum impulse bit', 'Repeatability'] },
+      { n: 3, id: 'cg-pressure', title: 'Pressure characterisation', scenario: pressureChar, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['Test series and series polls', 'Thrust vs absolute chamber pressure', 'Reading nozzle geometry from a fit', 'Measured vs calculated mass flow', 'Regulator characterisation'] },
+      { n: 4, id: 'cg-pulse', title: 'Pulse testing', scenario: pulse, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['Valve response vs inlet pressure', 'Impulse bit', 'Minimum impulse bit', 'Repeatability', 'High-rate DAQ'] },
       { n: 5, id: 'cg-trouble', title: 'Cold-gas troubleshooting', phase: 4,
         teaches: ['Sensor vs system faults', 'Inspection', 'Root-cause diagnosis'] },
       { n: 6, id: 'cg-indep', title: 'Independent cold-gas test conductor', phase: 5,

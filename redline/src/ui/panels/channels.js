@@ -7,6 +7,7 @@ const GROUPS = [
   ['Pressure', c => c.quantity === 'pressure' && c.kind !== 'derived'],
   ['Temperature', c => c.quantity === 'temperature'],
   ['Thrust', c => c.quantity === 'force'],
+  ['Flow', c => c.quantity === 'massflow'],
   ['Derived', c => c.kind === 'derived'],
   ['Electrical', c => c.quantity === 'current'],
   ['Discrete / commands', c => c.quantity === 'discrete'],

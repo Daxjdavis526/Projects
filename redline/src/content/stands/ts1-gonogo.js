@@ -11,9 +11,12 @@ export default [
     items: [
       { label: 'Firing plan', eval: v => ({ value: v.planText, ok: v.plan.mode === 'pulse' || (v.plan.duration > 0 && v.plan.duration <= v.ratings.MAX_BURN) }),
         why: 'The sequencer will do exactly what is loaded. Read it back.' },
-      { label: 'Regulator setpoint vs test request', eval: v => ({
-          value: v.request ? `${P(v.regSet)} commanded / ${P(v.request.regSet)} requested` : `${P(v.regSet)} commanded`,
-          ok: !v.request || Math.abs(v.regSet - v.request.regSet) < psi(1) }),
+      { label: 'Regulator setpoint vs test request', eval: v => {
+          const pts = v.request?.matrix ? v.request.matrix : v.request ? [v.request.regSet] : null;
+          return {
+            value: !pts ? `${P(v.regSet)} commanded` : `${P(v.regSet)} commanded / ${pts.length > 1 ? 'matrix ' + pts.map(x => fmt(x, 'pressure', 0)).join(', ') + ' psig' : P(pts[0]) + ' requested'}`,
+            ok: !pts || pts.some(x => Math.abs(v.regSet - x) < psi(1)) };
+        },
         why: 'Testing at the wrong condition wastes a run and, at worst, exceeds a limit.' },
       { label: 'Unacknowledged alarms', eval: v => ({ value: v.unackedAlarms ? `${v.unackedAlarms} unacknowledged` : 'none', ok: v.unackedAlarms === 0 }),
         why: 'Every alarm must be understood before arming, not just silenced.' },

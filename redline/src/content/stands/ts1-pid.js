@@ -47,6 +47,7 @@ export default {
     { id: 'PT-101', x: 235, y: 300, tap: [235, Y], lab: 'below' },
     { id: 'PT-102', x: 440, y: 300, tap: [440, Y], lab: 'below' },
     { id: 'PT-201', x: 560, y: 300, tap: [560, Y], lab: 'below' },
+    { id: 'FT-201', x: 650, y: 300, tap: [650, Y], lab: 'below' },
     { id: 'PT-301', x: 760, y: 300, tap: [760, Y], lab: 'below' },
     { id: 'TC-301', x: 835, y: 300, tap: [835, Y], lab: 'below' },
     { id: 'PT-401', x: 993, y: 150, tap: [993, Y], lab: 'above' },
