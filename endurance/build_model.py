@@ -144,7 +144,6 @@ def module(m: Model, kind):
     w = WIDTH_ENGINE if kind == "engine" else WIDTH
     body = octagon_prism(w, DEPTH, CHAMFER, R_IN, R_OUT)
     cuts, adds, dark = [], [], []
-    L = R_OUT - R_IN
 
     # Radiator louvres along both side faces, outboard of the tunnels.
     for side in (-1, 1):
