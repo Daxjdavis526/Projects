@@ -56,10 +56,11 @@ def _check(path: str) -> int:
         perf = nozzle.analyse(gas, inlet.p0, inlet.T0, pa, profile.throat_area,
                               profile.area(profile.x_exit))
         rc = profile.rc_over_rt
-        cd = discharge.kliegel_levine(gas.gamma, rc) if rc else None
+        cd = discharge.kliegel_levine(gas.gamma, rc) if rc and not profile.planar_width else None
         print()
         print("quasi-1D prediction (ideal, before CFD)")
-        print(f"  throat diameter     {2e3 * profile.throat_radius:.3f} mm, "
+        size = "height  " if profile.planar_width else "diameter"
+        print(f"  throat {size}     {2e3 * profile.throat_radius:.3f} mm, "
               f"expansion ratio {profile.expansion_ratio:.3f}")
         print(f"  regime              {perf.regime.value}")
         print(f"  mass flow           {1e3 * perf.mass_flow:.4f} g/s"
@@ -221,7 +222,7 @@ def main(argv: list[str] | None = None) -> int:
     stu.add_argument("--ratio", type=float, default=2 ** 0.5,
                      help="refinement ratio between levels (at least 1.3; default sqrt 2)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V10")
+    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)

@@ -129,3 +129,23 @@ def test_distributions():
     a = dist.capped_from_wall(1.0, 1e-4, 1.2, 0.05, 60)
     b = dist.capped_from_wall(1.0, 1e-2, 1.2, 0.05, 60)
     assert a[-1] == pytest.approx(1.0) and b[-1] == pytest.approx(1.0)
+
+
+def test_planar_mesh_is_a_constant_depth_half_channel():
+    import math
+
+    from sonicline.core.profile import conical
+    from sonicline.mesh.revolved import PLANAR_DEPTH, Form, Resolution, RevolvedMeshSpec, build
+
+    import dataclasses
+    prof = dataclasses.replace(conical(0.01, 2.0 ** 2, 3.0 ** 2), planar_width=0.05)
+    assert prof.expansion_ratio == pytest.approx(2.0)  # heights, not radii squared
+    assert prof.throat_area == pytest.approx(2 * 0.05 * 0.01)
+    mesh, meta = build(prof, RevolvedMeshSpec(Form.PLANAR, Resolution.preset("coarse"), None))
+    assert meta.patches["front"] == meta.patches["back"] == "empty"
+    assert meta.patches["axis"] == "symmetryPlane"
+    z = mesh.points[:, 2]
+    assert set(np.round(np.unique(z) / (0.5 * PLANAR_DEPTH * 0.01), 12)) == {-1.0, 1.0}
+    assert mesh.points[:, 1].min() == pytest.approx(0.0, abs=1e-15)
+    assert mesh.points[:, 1].max() == pytest.approx(prof.inlet_radius, rel=1e-12)
+    assert not math.isnan(meta.stations[meta.throat_station])

@@ -110,7 +110,8 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     pr = PengRobinson(gas) if defn.gas.peng_robinson else None
     pr_bias = pengrobinson.choked_mass_flux(pr, p0, T0).bias if pr and ideal.regime.choked else 0.0
     cd = mdot / (ideal.mass_flow * (1.0 + pr_bias))
-    kl = discharge.kliegel_levine(gas.gamma, rc) if rc else None
+    # Kliegel-Levine is for axisymmetric throats; a planar throat has its own.
+    kl = discharge.kliegel_levine(gas.gamma, rc) if rc and profile.planar_width is None else None
 
     out = {
         "mass_flow": {
@@ -237,6 +238,8 @@ STAGNATION_MARGIN = 0.005  # static T above T0 by more than this is a numerical 
 # turbulent for Pr = 0.69, measured against the axis temperature (which only
 # approximates the boundary-layer edge in a 2D nozzle), hence a loose band.
 RECOVERY_RANGE = (0.75, 0.95)
+UNSETTLED_NOISE = 1e-3
+UNCHOKED_MACH_LIMIT = 1.05  # a sharp throat's local supersonic pocket stays below this  # integral scatter above which a converged run is flagged unsettled
 
 
 def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warnings: list[str],
@@ -256,6 +259,17 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
             v.reasons.append(f"discharge coefficient {cd:.4f} exceeds 1: mass is not conserved "
                              "or the throat area is wrong")
         choked = m["regime"]["quasi_1d"] != nozzle.Regime.SUBSONIC.value
+        # Hazard 7 (DESIGN.md section 6): the choking theory predicted must be
+        # the choking the CFD shows.
+        mach_max = m.get("extremes", {}).get("nozzle", {}).get("mach_max")
+        if mach_max is not None:
+            if choked and mach_max < 1.0:
+                v.reasons.append(f"theory predicts a choked throat but the flow inside the nozzle "
+                                 f"stays subsonic (peak Mach {mach_max:.3f})")
+            elif not choked and mach_max > UNCHOKED_MACH_LIMIT:
+                v.warnings.append(f"theory predicts subsonic flow but the nozzle reaches Mach "
+                                  f"{mach_max:.2f}: the throat may be choked, and subsonic theory's "
+                                  "mass flow does not apply")
         if isinstance(defn.flow.turbulence, d.Inviscid) and choked:
             # The Kliegel-Levine bound is on a choked throat; an unchoked
             # nozzle's Cd is measured against the subsonic isentropic flow.
@@ -296,6 +310,12 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
                                   "location are sensitive to the turbulence model")
             if shocked:
                 v.warnings.append("a shock stands in the nozzle; its position is model-sensitive")
+    if convergence is not None and convergence.converged and convergence.noise:
+        worst = max(convergence.noise.values())
+        if worst > UNSETTLED_NOISE:
+            v.warnings.append(f"the flow does not settle: integrals scatter by {worst:.1e} (std/mean); "
+                              "the results are averages over the last iterations of pseudo-time, "
+                              "not a steady or a time-accurate solution")
     if (convergence is not None and convergence.converged and not convergence.residuals_dropped
             and convergence.residual_notes):
         v.warnings.append("residuals stalled (" + "; ".join(convergence.residual_notes)
@@ -310,10 +330,16 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
     if plume_drift is not None and plume_drift > PLUME_DRIFT_WARN:
         v.warnings.append(f"the far plume is still developing (outlet flow drifting {100 * plume_drift:.1f} % "
                           "per window): thrust and mass flow are converged, plume images are not")
-    if (wall_yplus_max is not None and not isinstance(defn.flow.turbulence, d.Inviscid)
-            and wall_yplus_max > MAX_WALL_YPLUS):
-        v.warnings.append(f"maximum wall y+ is {wall_yplus_max:.1f}; the mesh was meant to resolve "
-                          f"the wall (y+ <= {MAX_WALL_YPLUS:g})")
+    target = defn.mesh.first_cell_yplus
+    if wall_yplus_max is not None and not isinstance(defn.flow.turbulence, d.Inviscid):
+        if target <= 5.0 and wall_yplus_max > MAX_WALL_YPLUS:
+            v.warnings.append(f"maximum wall y+ is {wall_yplus_max:.1f}; the mesh was meant to resolve "
+                              f"the wall (y+ <= {MAX_WALL_YPLUS:g})")
+        elif target > 5.0 and wall_yplus_max > 10.0 * target:
+            # Spalding's law spans the sublayer to the log layer; beyond a few
+            # hundred the first cell leaves the boundary layer's inner part.
+            v.warnings.append(f"maximum wall y+ is {wall_yplus_max:.0f} against a target of "
+                              f"{target:g}: the wall function is being stretched")
     if v.reasons:
         v.trust = Trust.NOT_TRUSTWORTHY
     elif v.warnings:

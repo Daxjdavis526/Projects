@@ -107,7 +107,9 @@ computed without the CFD.
 | V5 | inviscid throat Cd, Rc/Rt = 0.625, 1, 2, 4 (three-mesh studies) | extrapolated Cd vs Kliegel–Levine | within 4×10⁻⁵ | 5×10⁻⁴ |
 | V6 | 3D O-grid vs wedge on V1 | mass flow / thrust | −0.03 % / −0.12 % | 0.2 % / 0.3 % |
 | V7 | rhoCentralFoam vs rhoPimpleFoam on V1 | mass flow / thrust | −0.055 % / +0.066 % | 0.1 % / 0.2 % |
+| V9 | ISO 9300 toroidal venturi, Re_d 5×10⁴ and 2.6×10⁵, laminar and SST | Cd vs ISO 9300 | −0.07 % … +0.10 % | 0.3 % (the standard's uncertainty) |
 | V10 | V1 nozzle at 30 bar, Peng–Robinson vs perfect gas | mass-flow ratio vs the Peng–Robinson isentrope (+1.314 %) | −0.009 % | 0.02 % |
+| V11 | **experiment:** NASA TP-1704 planar nozzle B1, NPR 8.91 (attached) and 2.46 (separated), SST with wall functions | wall p/pt at 10 orifices within the test's spanwise spread ± 0.02 | 9 of 10 at both (the miss: 0.6 mm past the sharp throat); separation between the same orifices as the test | 9 of 10 |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
@@ -131,6 +133,17 @@ shortfall is discretisation error: about 0.25 % for a sharp throat and
 the diverging length further downstream on the axis than at the wall. No
 simple theory predicts that shape, so V3 checks the position only to 10 %.
 V2 is the precise test.
+
+**What V11 shows.** Against measured wall pressures in a planar nozzle
+(Mason, Putnam and Re, NASA TP-1704, 1980), the CFD reproduces:
+
+- the attached expansion to within 0.02 at nine of ten orifices;
+- at NPR 2.46, the separation between the same two orifices as the test,
+  and the pressure plateau behind it to 0.015.
+
+The miss is the orifice 0.6 mm past the sharp throat, 0.04–0.05 low on
+every mesh, where a two-dimensional model cannot see the sidewalls. The
+separated case never settles; SONICLINE says so and reports averages.
 
 **What V4b found.** A subsonic converging nozzle that ends at its curved
 throat does not deliver quasi-1D mass flow: the streamlines are still
@@ -173,8 +186,11 @@ The house rule: say plainly where the model stops.
   plume image are qualitative; thrust does not depend on them.
 - **Turbulence.** k-ω SST, resolved to the wall.
   - Throat Reynolds numbers of 10⁵–10⁶ put small thrusters where boundary
-    layers may be laminar or relaminarising. The pre-flight check says so;
-    the laminar-vs-SST comparison is M2.
+    layers may be laminar or relaminarising. Run laminar, the 20 bar case
+    gives +0.07 % mass flow and +0.18 % thrust; that spread is the
+    turbulence-model uncertainty, and the pre-flight check says so.
+  - The ISO 9300 venturi (V9) matches both models within the standard's
+    0.3 %, so discharge coefficients cannot decide between them.
   - Separated flow (a vacuum nozzle at sea level) is flagged as
     model-sensitive before the run.
 - **Axisymmetry.** The default wedge assumes the flow is axisymmetric, which
@@ -213,6 +229,16 @@ process so a malformed file cannot crash the application. The analyser:
 The geometry is pinned by the SHA-256 of the file, so a changed file cannot
 silently change a saved simulation.
 
+Two other ways to give the wall, besides a STEP file or the parametric
+conical nozzle:
+
+- **`wall_profile`:** a table of (x, r) points, for a nozzle defined by a
+  formula or a method-of-characteristics contour.
+- **Planar nozzles** (`"mesh": {"form": "planar", "planar_width": ...}`): a
+  rectangular two-dimensional nozzle. The profile is then the half-height
+  and area ratios are ratios of heights. See
+  `examples/planar-tp1704-b1-npr2.46.json`, the V11 validation nozzle.
+
 A **solid thruster body** (a block with a bore through it) is recognised and
 rejected with advice: export the internal gas volume. Automatic extraction
 is planned as a previewed, user-confirmed step. **Non-revolved** geometry
@@ -235,7 +261,8 @@ src/sonicline/
   verification/ the verification cases
   cli.py
 tests/          about 225 tests; the OpenFOAM ones skip without it
-examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD)
+examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD),
+                planar-tp1704-b1-npr2.46.json (planar, separated)
 doc/            images and the verification table
 ```
 

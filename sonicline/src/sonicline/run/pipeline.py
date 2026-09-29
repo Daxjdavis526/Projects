@@ -202,14 +202,31 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
 
     # --- solve -------------------------------------------------------------------
     nproc = max(1, defn.numerics.processors)
-    wedge = spec.form is revolved.Form.WEDGE
+    wedge = spec.form in (revolved.Form.WEDGE, revolved.Form.PLANAR)  # two-dimensional: no Uz
     if nproc > 1:
         runner.run(["decomposePar", "-force"], case, case / "log.decomposePar")
-        cmd = ["mpirun", "-np", str(nproc), summary.solver, "-parallel"]
-    else:
-        cmd = [summary.solver]
-    emit(Event("solve", f"running {' '.join(cmd)}"))
+
+    def command(solver):
+        return ["mpirun", "-np", str(nproc), solver, "-parallel"] if nproc > 1 else [solver]
+
     t_solve = time.time()
+    if foam_case.needs_warm_start(defn, summary):
+        n_warm = foam_case.WARM_START_ITERATIONS
+        emit(Event("solve", f"warm start: {n_warm} iterations of {foam_case.PIMPLE_SOLVER}"))
+        foam_case.write_warm_start(case, defn, meta, summary)
+        warm = runner.start(command(foam_case.PIMPLE_SOLVER), case, case / "log.warmstart")
+        code = warm.wait()
+        failure = parse.log_failure(warm.log.read_text(encoding="utf-8", errors="replace"))
+        manifest["warm_start"] = {"solver": foam_case.PIMPLE_SOLVER, "iterations": n_warm,
+                                  "exit_code": code, "failure": failure}
+        if code != 0 or failure:
+            emit(Event("solve", f"warm start failed: {failure or f'exit code {code}'}"))
+            return finish("diverged" if failure else "failed", Trust.NOT_TRUSTWORTHY.value)
+        # The continuation is judged on its own output only.
+        shutil.move(str(case / "postProcessing"), str(case / "postProcessing.warmstart"))
+        foam_case.write_continuation(case, defn, meta, summary, n_warm)
+    cmd = command(summary.solver)
+    emit(Event("solve", f"running {' '.join(cmd)}"))
     proc = runner.start(cmd, case, case / f"log.{summary.solver}")
     criteria = defn.numerics.convergence
     assessment = None

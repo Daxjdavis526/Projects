@@ -7,6 +7,9 @@ A 2D cross-section *template* is swept along axial stations x_0..x_N:
 - ``wedge``: a thin sector (one cell circumferentially) straddling the
   x-y plane. Cells on the axis collapse to prisms, so there is no axis
   patch and no singular face.
+- ``planar``: a two-dimensional nozzle's half-channel, one cell deep; the
+  "radius" is the half-height, the axis is a symmetry plane and the front
+  and back are OpenFOAM ``empty`` patches.
 - ``o_grid``: a butterfly disk -- a square core surrounded by four blocks
   whose rays run from the core to the wall. There is no axis singularity.
   The wall is a polygon scaled so every cross-section has the exact area of
@@ -45,6 +48,13 @@ from .polymesh import Patch, PolyMesh, assemble
 class Form(enum.Enum):
     WEDGE = "wedge"
     O_GRID = "o_grid"
+    PLANAR = "planar"
+
+
+# Depth of a planar mesh's single cell layer, in throat half-heights. The
+# depth is constant along the nozzle: OpenFOAM's two-dimensional mode needs
+# its front and back faces in parallel planes.
+PLANAR_DEPTH = 0.1
 
 
 @dataclass(frozen=True)
@@ -142,7 +152,7 @@ def _lip_weight(distance: float, exit_radius: float, scale: float = None) -> flo
 
 
 # Edge tags inside a cross-section template.
-_DISK_EDGE, _ANN_OUTER, _FRONT, _BACK = 1, 2, 3, 4
+_DISK_EDGE, _ANN_OUTER, _FRONT, _BACK, _AXIS = 1, 2, 3, 4, 5
 # Quad edge (a, b) -> local hex face when the quad is swept along x with
 # vertices 0-3 at station i and 4-7 at station i+1.
 _EDGE_TO_FACE = {0: 2, 1: 1, 2: 3, 3: 0}  # edge k joins quad vertices k and k+1
@@ -194,6 +204,34 @@ def _wedge_template(res: Resolution, first_n: float | None, half: float,
         tags.append([_FRONT, _DISK_EDGE if j == n - 2 else 0, _BACK, 0])
     tmpl = _Template(pts, np.array(quads), np.array(tags), np.array([fid[-1], bid[-1]]),
                      np.array([[c, -s], [c, s]]), [], [0], n - 2, ann_periodic=False)
+    return tmpl, n_ring
+
+
+def _planar_template(res: Resolution, first_n: float | None,
+                     n_ring: int | None = None) -> tuple[_Template, int]:
+    """The wedge's ray, extruded in z instead of rotated: points are
+    (y, z) with y the fraction of the half-height and z in throat
+    half-heights (the builder does not scale z)."""
+    eta_c = 0.5
+    n_core = max(2, res.core_cells)
+    core_h = eta_c / n_core
+    if n_ring is None:
+        n_ring = (max(2, round((1.0 - eta_c) / core_h)) if first_n is None else
+                  dist.cells_for_wall_clustering(1.0 - eta_c, first_n, res.ring_growth, core_h))
+    ring = eta_c + (1.0 - eta_c) * _ray_fractions(1.0 - eta_c, first_n, n_ring)
+    eta = np.concatenate([np.linspace(0.0, eta_c, n_core + 1), ring[1:]])
+    n = len(eta)
+    half = 0.5 * PLANAR_DEPTH
+    front = np.column_stack([eta, np.full(n, -half)])
+    back = np.column_stack([eta, np.full(n, half)])
+    pts = np.vstack([front, back])  # front 0..n-1, back n..2n-1
+    fid, bid = np.arange(n), np.arange(n, 2 * n)
+    quads, tags = [], []
+    for j in range(n - 1):
+        quads.append([fid[j], fid[j + 1], bid[j + 1], bid[j]])
+        tags.append([_FRONT, _DISK_EDGE if j == n - 2 else 0, _BACK, _AXIS if j == 0 else 0])
+    tmpl = _Template(pts, np.array(quads), np.array(tags), np.array([fid[-1], bid[-1]]),
+                     np.array([[1.0, -half], [1.0, half]]), [], [0], n - 2, ann_periodic=False)
     return tmpl, n_ring
 
 
@@ -286,8 +324,11 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
     res = spec.resolution
     Rt = profile.throat_radius
     first_n = None if spec.wall_first_cell is None else spec.wall_first_cell / Rt
+    planar = spec.form is Form.PLANAR
     if spec.form is Form.WEDGE:
         make = lambda f, n=None: _wedge_template(res, f, spec.wedge_angle / 2, n)  # noqa: E731
+    elif planar:
+        make = lambda f, n=None: _planar_template(res, f, n)  # noqa: E731
     else:
         make = lambda f, n=None: _ogrid_template(res, f, n)  # noqa: E731
     tmpl, n_ring = make(first_n)
@@ -307,6 +348,8 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
         blk = slice(i * Nd, (i + 1) * Nd)
         pts[blk, 0] = x
         pts[blk, 1:] = tmpl.points * scale[i]
+        if planar:
+            pts[blk, 2] = tmpl.points[:, 1] * Rt  # constant depth
     # Bend the station lines near the wall so they meet it at right angles.
     # On a 45 degree converging cone vertical station lines cut the wall at
     # 45 degrees, and the thin wall-resolved cells become sheared
@@ -317,7 +360,7 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
     # R' = 0 at the inlet and the throat, and the shift is tapered to zero at
     # the exit, so those planes stay exactly planar.
     if spec.wall_first_cell is not None:
-        r_template = np.linalg.norm(tmpl.points, axis=1)
+        r_template = np.abs(tmpl.points[:, 0]) if planar else np.linalg.norm(tmpl.points, axis=1)
         r_wall = r_template.max()  # 1 for the wedge, the area factor for the O-grid
         for i in range(1, i_e):
             slope = profile.slope(xs[i])
@@ -345,6 +388,8 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
             t = min(t * (1.0 + min(_JET_GROWTH - 1.0, 10.0 * t * Re / dx)), t_rel)
             w = (t_rel - t) / (t_rel - t_wall) if t_rel > t_wall else 0.0
             pts[i * Nd : (i + 1) * Nd, 1:] = (w * tmpl.points + (1 - w) * relaxed_points) * scale[i]
+            if planar:
+                pts[i * Nd : (i + 1) * Nd, 2] = tmpl.points[:, 1] * Rt
 
     # ---- annulus points (plume stations only) --------------------------------
     n_ann = 0
@@ -369,7 +414,10 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
             r = Re + d[1:]
             for k in range(n_rays):
                 for rr in r:
-                    ann.append([xs[i], *(tmpl.ann_dirs[k] * rr)])
+                    if planar:  # a slab: height rr, the template's constant depth
+                        ann.append([xs[i], rr, tmpl.ann_dirs[k][1] * Rt])
+                    else:
+                        ann.append([xs[i], *(tmpl.ann_dirs[k] * rr)])
         pts = np.vstack([pts, np.array(ann)])
 
     def disk_id(i, k):
@@ -403,6 +451,9 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
     if spec.form is Form.WEDGE:
         names += ["front", "back"]
         kinds += ["wedge", "wedge"]
+    elif planar:
+        names += ["front", "back", "axis"]
+        kinds += ["empty", "empty", "symmetryPlane"]
     P = {n: i for i, n in enumerate(names)}
     patches = [Patch(n, k) for n, k in zip(names, kinds)]
     has_throat_zone = i_t < i_e
@@ -422,6 +473,8 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
                 fp[f] = P["back"]
             elif tag == _ANN_OUTER:
                 fp[f] = P["ambient"]
+            elif tag == _AXIS:
+                fp[f] = P["axis"]
             elif tag == _DISK_EDGE and interval < i_e:
                 fp[f] = P["wall"]
         if interval == 0:

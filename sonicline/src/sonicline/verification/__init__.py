@@ -416,6 +416,128 @@ def peng_robinson_check(perfect: tuple[CaseResult, dict | None],
     return r
 
 
+# ----------------------------------------------------------------------------- V11
+# Validation against experiment: Mason, Putnam and Re, "The effect of throat
+# contouring on two-dimensional converging-diverging nozzles at static
+# conditions", NASA TP-1704 (1980), nozzle B1 (Fig. 2(b); all lengths cm).
+# Air at Tt ~ 300 K into still air; the CFD runs nitrogen (gamma 1.3995
+# against 1.3997), and compares p / pt,j, which the gas barely changes.
+
+MASON_B1 = {"h_t": 1.37e-2, "h_e": 2.46e-2, "h_i": 3.52e-2, "r_c": 0.68e-2, "width": 10.157e-2,
+            "theta": 20.84, "epsilon": 10.85}
+# Orifice stations x / l_e (x from the throat, l_e the throat-to-exit length).
+# One orifice may miss: 0.6 mm past the sharp throat the CFD reads 0.04-0.05
+# below the test on standard and fine meshes alike, which is not
+# discretisation (DESIGN.md section 11).
+V11_TOLERANCE = 0.02
+V11_ATTACHED_NPR = 2.94  # TP-1704 B1 is attached at every orifice from here up
+MASON_STATIONS = (-0.209, -0.099, 0.011, 0.077, 0.143, 0.286, 0.429, 0.560, 0.736, 0.890)
+# Table III(a): upper-flap static pressure p / pt,j on the centreline
+# (y / (w_t/2) = 0) and at y / (w_t/2) = 0.450, points 2 and 15.
+MASON_B1_UPPER = {
+    2.46: ((.842, .746, .293, .259, .288, .276, .234, .371, .375, .380),
+           (.848, .756, .298, .247, .286, .274, .234, .290, .355, .373)),
+    8.91: ((.842, .743, .295, .256, .288, .273, .234, .187, .141, .112),
+           (.849, .747, .301, .242, .287, .272, .233, .188, .142, .112)),
+}
+
+
+def _v11_definition(npr: float) -> Callable[[str, str], m.SimulationDefinition]:
+    """TP-1704 nozzle B1 as a planar nozzle, k-omega SST with wall functions
+    (throat Re ~3e6 at NPR 8.91: a y+ = 1 first cell is 0.2 micron and makes
+    cells in the lip shear layer 55 000:1)."""
+    g = MASON_B1
+
+    def build(quality: str, form: str = "planar") -> m.SimulationDefinition:
+        return m.SimulationDefinition(
+            name=f"V11 TP-1704 nozzle B1, NPR {npr:g}",
+            geometry=m.ConicalNozzle(
+                throat_radius=g["h_t"], expansion_ratio=g["h_e"] / g["h_t"],
+                contraction_ratio=g["h_i"] / g["h_t"],
+                converging_half_angle=math.radians(g["theta"]),
+                diverging_half_angle=math.radians(g["epsilon"]),
+                throat_rc_upstream=g["r_c"] / g["h_t"], throat_rc_downstream=g["r_c"] / g["h_t"]),
+            boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=npr * ATM, T0=300.0),
+                                    ambient=m.Ambient(pressure=ATM, temperature=300.0),
+                                    exit_domain=m.Plume(length=10.0, radius=4.0)),
+            flow=m.Flow(turbulence=m.KOmegaSST()),
+            mesh=m.MeshSpec(form=m.MeshForm.PLANAR, quality=m.MeshQuality(quality),
+                            planar_width=g["width"], first_cell_yplus=30.0),
+            # Separated (NPR 2.46), the exit flow keeps a 1.7e-3 scatter
+            # while its mean is steady to 1e-4 (DESIGN.md section 11).
+            numerics=m.Numerics(convergence=m.ConvergenceCriteria(
+                noise_tolerance=5e-3 if npr < V11_ATTACHED_NPR else 1e-3)),
+        )
+    return build
+
+
+def wall_pressure_at(metrics_dir: Path, stations: tuple[float, ...]) -> list[float] | None:
+    """CFD wall p / p0 at stations x / l_e, from the run's profiles.json."""
+    f = metrics_dir / "profiles.json"
+    m_f = metrics_dir / "metrics.json"
+    if not f.is_file() or not m_f.is_file():
+        return None
+    import numpy as np
+
+    wall = json.loads(f.read_text(encoding="utf-8"))["wall"]
+    metrics = json.loads(m_f.read_text(encoding="utf-8"))
+    defn = m.load(metrics_dir / "definition.json")
+    prof = defn.geometry.profile(defn.mesh.planar_width or None)
+    le = prof.x_exit - prof.throat_x
+    x = np.asarray(wall["x"])
+    p = np.asarray(wall["p"]) / metrics["conditions"]["p0"]
+    return [float(np.interp(prof.throat_x + s * le, x, p)) for s in stations]
+
+
+def _v11_checks_for(npr: float) -> Callable[[dict, m.SimulationDefinition], list[Check]]:
+    exp_c, exp_q = MASON_B1_UPPER[npr]
+
+    def checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+        cfd = metrics.get("_wall_pressure")
+        if cfd is None:
+            return [Check("wall pressure available", None, 0.0, 0.0)]
+        # The test's own spanwise spread (centreline to y/(w/2) = 0.45) is
+        # part of the comparison: at the separation line it reaches 0.08.
+        lo = [min(a, b) - V11_TOLERANCE for a, b in zip(exp_c, exp_q)]
+        hi = [max(a, b) + V11_TOLERANCE for a, b in zip(exp_c, exp_q)]
+        inside = [lo_ <= c <= hi_ for c, lo_, hi_ in zip(cfd, lo, hi)]
+        rms = math.sqrt(sum((c - e) ** 2 for c, e in zip(cfd, exp_c)) / len(cfd))
+        missed = ", ".join(f"x/l_e {x:g} ({c:.3f} vs {e:.3f})"
+                           for x, c, e, ok in zip(MASON_STATIONS, cfd, exp_c, inside) if not ok)
+        out = [Check(f"orifices within the test's spanwise spread +- {V11_TOLERANCE:g} (of 10)",
+                     float(sum(inside)), 10.0, 1.0, relative=False,
+                     note=f"RMS vs centreline {rms:.3f}; outside: {missed or 'none'}")]
+        if npr == 2.46:
+            # Separated between x/l_e 0.429 (attached, .234) and 0.560 (.371).
+            out.append(Check("separation between the same orifices as the test (p/pt at 0.429 and "
+                             "0.560 either side of 0.30)", float((cfd[6] < 0.30) and (cfd[7] > 0.30)),
+                             1.0, 0.0, relative=False,
+                             note=f"CFD {cfd[6]:.3f} / {cfd[7]:.3f}, test {exp_c[6]:.3f} / {exp_c[7]:.3f}"))
+        return out
+    return checks
+
+
+def run_validation_case(npr: float, quality: str, out: Path, processors: int = 1,
+                        on_event=None) -> CaseResult:
+    name = f"V11 (NPR {npr:g})"
+    case = Case(name, f"TP-1704 nozzle B1 wall pressure, NPR {npr:g}", _v11_definition(npr),
+                _v11_checks_for(npr), form="planar")
+    defn = case.definition(quality, "planar")
+    if processors > 1:
+        defn = dataclasses.replace(defn, numerics=dataclasses.replace(defn.numerics, processors=processors))
+    from ..run import pipeline
+
+    t0 = time.time()
+    run_dir = out / f"V11-npr{npr:g}-{quality}"
+    result = pipeline.run(defn, run_dir, on_event=on_event, render=False)
+    checks = []
+    if result.metrics:
+        metrics = dict(result.metrics, _wall_pressure=wall_pressure_at(run_dir, MASON_STATIONS))
+        checks = [c.evaluate() for c in case.checks(metrics, defn)]
+    return CaseResult(name, case.title, result.status, result.trust, checks,
+                      round(time.time() - t0, 1), str(run_dir))
+
+
 CASES: dict[str, Case] = {
     "V1": Case("V1", "Inviscid conical CD nozzle into vacuum (throat Cd, vacuum thrust)",
                _v1_definition, _v1_checks),
@@ -450,7 +572,7 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11")
 
 def run_case(case: Case, quality: str, out: Path, processors: int = 1, form: str | None = None,
              on_event=None, solver: str = "auto") -> tuple[CaseResult, dict | None]:
@@ -521,6 +643,9 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
             # reference-based check can see in the other.
             results.append(_pair("V7", "rhoPimpleFoam vs rhoCentralFoam on the V1 nozzle", once("V1"),
                                  once("V1", solver="rhoCentralFoam"), "central vs PIMPLE:", 1e-3, 2e-3))
+        elif name == "V11":
+            for npr in sorted(MASON_B1_UPPER):
+                results.append(run_validation_case(npr, quality, out, processors, on_event))
         elif name == "V10":
             results.append(peng_robinson_check(once("V10-perfect"), once("V10-pr")))
         elif name == "V5":

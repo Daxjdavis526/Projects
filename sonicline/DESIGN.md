@@ -1016,6 +1016,16 @@ Delivered so far:
   one preset.
 - **V3**, shocks in the 20 bar reference nozzle (pb = 10 and 14 bar), and
   **V5**, the throat Cd sweep over Rc/Rt = 0.625–4 as grid studies.
+- **Planar nozzles** (`mesh.form` = `planar`, with `planar_width`): the
+  half-channel of a two-dimensional nozzle, one cell deep, a symmetry plane
+  on the axis and `empty` front and back. Profile heights replace radii;
+  area ratios are ratios of heights.
+- **V11**, validation against experiment: NASA TP-1704's nozzle B1 (Mason,
+  Putnam and Re 1980), whose wall pressures are printed in tables.
+- **Wall functions** for coarse walls (`first_cell_yplus` > 5: Spalding's
+  law) and a **warm start** for viscous rhoCentralFoam runs.
+- **Nightly CI** runs the whole verification suite
+  (.github/workflows/sonicline-nightly.yml).
 
 Findings:
 
@@ -1095,4 +1105,79 @@ Findings:
     constant cp only in enthalpy form, which rhoCentralFoam cannot use. For
     mass flow the perfect gas plus the reference-EOS correction remains the
     more accurate answer, and stays the default.
+21. **Laminar vs SST, and what the ISO venturi can and cannot say (V9).**
+    ISO 9300's toroidal-throat venturi (Rc = 2d, Cd = 0.9959 − 2.720 Re^−½,
+    ±0.3 %) on standard meshes:
+
+    | | Re_d | laminar | SST |
+    |---|---|---|---|
+    | 2 bar | 5.1×10⁴ | −0.067 % | −0.069 % |
+    | 10 bar | 2.6×10⁵ | +0.103 % | 0.000 % |
+
+    At 2 bar SST stays effectively laminar through the throat (μt/μ > 1 in
+    278 of 3870 cells, none in the throat boundary layer); at 10 bar it is
+    turbulent almost everywhere and reads 0.10 % below laminar. V5 puts the
+    single-mesh bias for this throat curvature at about −0.06 %. Every
+    result sits inside the correlation's 0.3 %, so a discharge coefficient
+    at these Reynolds numbers cannot tell the two models apart; the
+    correlation's Re^−½ form is itself the laminar boundary layer's. For the
+    20 bar thruster (throat Re ~6×10⁵) laminar gives +0.074 % mass flow,
+    +0.18 % thrust and 0.053 N of wall friction against SST's 0.078 N: the
+    turbulence-model uncertainty is about 0.2 % of thrust, which the
+    pre-flight check states. The recovery factor, measured against the axis
+    temperature, is 0.775 laminar and 0.877 SST (flat plate: 0.83 and 0.88);
+    the axis is only a proxy for the boundary-layer edge in an accelerating
+    conical flow, so the check's band is wide (0.75–0.95). A grid study of
+    the venturi cases was stopped: its finest level converges at 4
+    iterations a second, and the model spread it would resolve is already
+    below the correlation's uncertainty.
+22. **A wall-resolved first cell does not suit a large, high-Reynolds nozzle.**
+    TP-1704's nozzle has a 27 mm throat at Re ~3×10⁶: a y⁺ = 1 first cell is
+    0.2 µm, and the clustering carried into the lip shear layer made cells of
+    aspect ratio 55 000 (determinant 4×10⁻¹⁰). rhoPimpleFoam's energy solve
+    needed 1000 sweeps on the first step and the run diverged on the second.
+    With the first cell at y⁺ = 30 and Spalding's wall law it converges in
+    30 seconds. Wall-resolved remains the default for thruster-sized
+    nozzles; the planar validation runs with wall functions.
+23. **rhoCentralFoam needs limited gradients for k and ω.** With `Gauss
+    linear` gradients feeding linearUpwind convection, ω (which varies as
+    1/y² near a wall) overshot to ±10³² within ten iterations even for
+    attached flow. `cellLimited Gauss linear 1` on grad(k) and grad(ω)
+    (rhoPimpleFoam's setting) cures it.
+24. **rhoCentralFoam cannot start a viscous jet from the quasi-1D field.**
+    Where the jet meets still ambient air across one thin lip cell, its first
+    energy update went negative. Two changes: an overexpanded jet core is
+    initialised at ambient pressure (carried at its 0.28 atm exit pressure it
+    had driven the far outlet to vacuum), and viscous rhoCentralFoam runs
+    start with 1000 iterations of rhoPimpleFoam, whose output is set aside so
+    the continuation is judged on its own.
+25. **A separated nozzle never settles, and the drift test mistook its
+    scatter for drift.** In TP-1704's nozzle at NPR 2.46 the inlet mass flow
+    is steady to 1.2×10⁻⁴ and the exit mean matches it to 10⁻⁴, but the exit
+    flow scatters by 1.7×10⁻³ for 35 000 iterations as the separation shock
+    and shear layer move. Two changes. Drift is now judged beyond what the
+    scatter alone produces: pure noise gives half-window means that differ
+    by ~σ√(4/n), and twice that is allowed. The allowed scatter is a
+    criterion (`noise_tolerance`, 10⁻³ by default), and any run that
+    converges with more than 10⁻³ is flagged: its numbers are averages over
+    pseudo-time, not a steady or a time-accurate solution. V11's separated
+    case allows 5×10⁻³.
+26. **Validation against TP-1704's nozzle B1 (V11).** Planar, SST with wall
+    functions, standard mesh; wall p/pt against the upper-flap tables at ten
+    orifices:
+    - NPR 8.91, attached: nine orifices within 0.02 of the test's spanwise
+      spread, RMS 0.014 against the centreline.
+    - NPR 2.46, separated: separation falls between the same two orifices as
+      in the test (x/l_e 0.429 and 0.560). The plateau behind it is within
+      0.015, and nine orifices are within 0.02 of the spread (RMS 0.024 against
+      the centreline). The orifice at the separation line reads 0.321, between
+      the test's centreline 0.371 and quarter-span 0.290; the separation line
+      is three-dimensional, as TP-1704 notes.
+    - Both miss at x/l_e = 0.011, 0.6 mm past the sharp throat (rc = 0.5 h_t),
+      by 0.04–0.05, on the standard and the fine mesh alike (0.037 and 0.049
+      at NPR 8.91), so not by discretisation. Candidates are what a
+      two-dimensional model omits (sidewall boundary layers in a nozzle only
+      3.7 throat heights wide) and the orifice's finite size in a gradient of
+      about one p/pt per centimetre. The check allows one orifice outside the
+      band and names it.
 

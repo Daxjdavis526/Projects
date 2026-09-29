@@ -30,7 +30,7 @@ from ..core.model import definition as d
 from ..core.profile import Profile
 from ..core.theory import nozzle, quasi1d
 from ..mesh.polymesh import PolyMesh
-from ..mesh.revolved import Form, MeshMeta
+from ..mesh.revolved import PLANAR_DEPTH, Form, MeshMeta
 from . import polymesh_io
 from .dictwriter import Raw, write_dict, write_field
 
@@ -106,7 +106,7 @@ class CaseSummary:
     viscous: bool
     turbulence: str
     fields: tuple[str, ...]
-    sector_factor: float  # multiply wedge integrals by this for the full nozzle
+    sector_factor: float  # multiply wedge or planar integrals by this for the full nozzle
     exit_region: tuple[str, str]  # ("faceZone"|"patch", name) of the exit plane
     throat_region: tuple[str, str]
     exit_area: float  # full-revolution exit area from the mesh, m^2
@@ -179,8 +179,13 @@ def build_case(
         if x <= profile.x_exit:
             s = table[x]
             p_init[c], T_init[c], U_init[c, 0] = s.pressure, s.temperature, s.velocity
-        elif r <= profile.exit_radius:  # jet core, carried unchanged into the plume
-            p_init[c], T_init[c], U_init[c, 0] = exit_state.pressure, exit_state.temperature, exit_state.velocity
+        elif r <= profile.exit_radius:
+            # Jet core, carried into the plume. An overexpanded core starts at
+            # ambient pressure: carried at its exit pressure (0.28 atm for
+            # NPR 2.46 in TP-1704's nozzle) it drives the far outlet to vacuum
+            # before the plume can recompress it.
+            p_init[c] = max(exit_state.pressure, pa)
+            T_init[c], U_init[c, 0] = exit_state.temperature, exit_state.velocity
         else:
             p_init[c], T_init[c] = max(pa, 1e-3 * p0), Ta
     if pa <= 0.0:
@@ -216,7 +221,14 @@ def build_case(
     # A wedge of angle theta has flat (chord) faces: its cross-section is
     # r^2 sin(theta)/2, not r^2 theta/2. Scaling by 2 pi / sin(theta) makes
     # the scaled face areas -- and so every flux integral -- exact.
-    sector = 2.0 * math.pi / math.sin(defn.mesh.wedge_angle) if meta.form is Form.WEDGE else 1.0
+    # A planar half-channel of constant depth stands for both halves of a
+    # nozzle planar_width wide.
+    if meta.form is Form.WEDGE:
+        sector = 2.0 * math.pi / math.sin(defn.mesh.wedge_angle)
+    elif meta.form is Form.PLANAR:
+        sector = 2.0 * defn.mesh.planar_width / (PLANAR_DEPTH * profile.throat_radius)
+    else:
+        sector = 1.0
     (case / "case.foam").write_text("", encoding="utf-8")
     return CaseSummary(
         path=case, solver=solver, viscous=viscous,
@@ -368,8 +380,8 @@ def _write_fields(case, defn, meta, exit_radius, fields, p_init, T_init, U_init,
     for f in fields:
         bf = {}
         for name, kind in patches.items():
-            if kind == "wedge":
-                bf[name] = {"type": "wedge"}
+            if kind in ("wedge", "empty", "symmetryPlane"):
+                bf[name] = {"type": kind}
             elif name == "inlet":
                 bf[name] = inlet[f]
             elif name == "wall" or (name == "lip" and lip_wall):
@@ -452,9 +464,42 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
     return fos
 
 
+# Iterations of rhoPimpleFoam that start a viscous rhoCentralFoam run. The
+# explicit solver cannot survive the quasi-1D start where a jet meets still
+# ambient air across one thin lip cell (it drove internal energy negative on
+# its first step in TP-1704's nozzle); the pressure-based solver can, and a
+# thousand iterations smooth the start (DESIGN.md section 11).
+WARM_START_ITERATIONS = 1000
+
+
+def needs_warm_start(defn: d.SimulationDefinition, summary: "CaseSummary") -> bool:
+    steady = isinstance(defn.flow.time, d.Steady)
+    return steady and summary.solver == CENTRAL_SOLVER and summary.viscous
+
+
+def write_warm_start(case: Path, defn: d.SimulationDefinition, meta: MeshMeta,
+                     summary: "CaseSummary") -> None:
+    """Point the case at rhoPimpleFoam for WARM_START_ITERATIONS, writing
+    the final state. Its fields (p, U, T, k, omega) are rhoCentralFoam's."""
+    _rewrite_system(case, defn, meta, summary, PIMPLE_SOLVER, end=WARM_START_ITERATIONS)
+
+
+def write_continuation(case: Path, defn: d.SimulationDefinition, meta: MeshMeta,
+                       summary: "CaseSummary", start: int) -> None:
+    """Point the case back at its own solver, continuing from ``start``."""
+    _rewrite_system(case, defn, meta, summary, summary.solver, offset=start)
+
+
+def _rewrite_system(case, defn, meta, summary, solver, end=None, offset=0):
+    b = defn.boundaries
+    _write_system(case, defn, meta, summary.viscous, summary.turbulence == d.KOmegaSST.TAG,
+                  isinstance(defn.flow.time, d.Steady), b.inlet.p0, b.ambient.pressure,
+                  summary.exit_region, summary.throat_region, None, solver, end=end, offset=offset)
+
+
 def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
-                  extension_library=None, solver=PIMPLE_SOLVER):
-    n_max = iteration_limit(defn, solver)
+                  extension_library=None, solver=PIMPLE_SOLVER, end=None, offset=0):
+    n_max = end if end is not None else offset + iteration_limit(defn, solver)
     fos = function_objects(defn, meta, viscous, ras, exit_region, throat_region)
     if steady:
         timing = {"startFrom": "latestTime", "startTime": 0, "stopAt": "endTime",
@@ -552,7 +597,12 @@ def _write_central_numerics(case, ras, steady):
     write_dict(case / "system" / "fvSchemes", "fvSchemes", {
         "fluxScheme": "Kurganov",
         "ddtSchemes": {"default": "localEuler" if steady else "Euler"},
-        "gradSchemes": {"default": Raw("Gauss linear")},
+        # k and omega are convected with linearUpwind; their gradients must be
+        # limited, or omega (~1/y^2 near a wall) overshoots and diverges within
+        # ten iterations (DESIGN.md section 11).
+        "gradSchemes": {"default": Raw("Gauss linear"),
+                        **({"grad(k)": Raw("cellLimited Gauss linear 1"),
+                            "grad(omega)": Raw("cellLimited Gauss linear 1")} if ras else {})},
         "divSchemes": {
             "default": "none",
             "div(tauMC)": Raw("Gauss linear"),

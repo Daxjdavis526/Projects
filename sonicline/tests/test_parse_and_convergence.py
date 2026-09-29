@@ -192,3 +192,48 @@ def test_shock_front_is_located_between_foot_and_head():
     xs = shock_front({"x": list(x), "p": list(p)}, 0.1, 0.95)
     assert xs == pytest.approx(0.605, abs=0.005)
     assert shock_front({"x": list(x), "p": list(1.0 - x)}, 0.1, 0.95) is None
+
+
+def test_unsettled_flow_needs_a_noise_allowance_and_is_flagged():
+    from sonicline.core import model as m
+    from sonicline.metrics import Trust, verdict
+
+    tables = _tables(3000)
+    rng = np.random.default_rng(1)
+    scatter = 1.0 + 3e-3 * rng.standard_normal(3000)  # a separated exit plane
+    tables["mdot_exit"] = parse.Table(["sum(phi)"], tables["mdot_exit"].time, {"sum(phi)": scatter})
+    strict = convergence.assess(tables, ConvergenceCriteria(), wedge=True)
+    assert not strict.converged and any("scatters" in r for r in strict.reasons)
+    loose = convergence.assess(tables, ConvergenceCriteria(noise_tolerance=5e-3), wedge=True)
+    assert loose.converged, loose.reasons
+    defn = m.SimulationDefinition(name="t", geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=2.0),
+                                  boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=2e6)))
+    metrics = {"discharge_coefficient": {"cfd": 0.98, "kliegel_levine": None},
+               "thrust": {"control_volume_disagreement": 0.0},
+               "regime": {"quasi_1d": "matched", "separation_expected": False}}
+    v = verdict(defn, "completed", True, [], loose, metrics, None)
+    assert v.trust is Trust.WARNINGS and any("does not settle" in w for w in v.warnings)
+
+
+def test_judgement_window_follows_the_averaging_window():
+    assert convergence.judgement_window(200, 1500) == 200
+    assert convergence.judgement_window(200, 6000) == 600
+    assert convergence.judgement_window(200, 60000) == 1000
+
+
+def test_predicted_and_simulated_choking_must_agree():
+    from sonicline.core import model as m
+    from sonicline.metrics import Trust, verdict
+
+    defn = m.SimulationDefinition(name="t", geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=2.0),
+                                  boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=2e6)))
+    base = {"discharge_coefficient": {"cfd": 0.98, "kliegel_levine": None},
+            "thrust": {"control_volume_disagreement": 0.0}}
+    choked = dict(base, regime={"quasi_1d": "matched", "separation_expected": False},
+                  extremes={"nozzle": {"mach_max": 0.93}})
+    v = verdict(defn, "completed", True, [], None, choked, None)
+    assert v.trust is Trust.NOT_TRUSTWORTHY and "stays subsonic" in v.reasons[0]
+    sub = dict(base, regime={"quasi_1d": "subsonic", "separation_expected": False},
+               extremes={"nozzle": {"mach_max": 1.2}})
+    v = verdict(defn, "completed", True, [], None, sub, None)
+    assert v.trust is Trust.WARNINGS and "may be choked" in v.warnings[0]

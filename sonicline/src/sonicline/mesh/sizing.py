@@ -43,7 +43,8 @@ def spec_for(defn: d.SimulationDefinition, profile: Profile) -> RevolvedMeshSpec
         De = 2.0 * profile.exit_radius
         plume = PlumeRegion(exit_domain.length * De, exit_domain.radius * De,
                             lip_is_wall=exit_domain.lip is d.Lip.WALL)
-    form = Form.WEDGE if defn.mesh.form is d.MeshForm.WEDGE else Form.O_GRID
+    form = {d.MeshForm.WEDGE: Form.WEDGE, d.MeshForm.PLANAR: Form.PLANAR,
+            d.MeshForm.O_GRID_3D: Form.O_GRID}[defn.mesh.form]
     return RevolvedMeshSpec(
         form=form,
         resolution=Resolution.preset(defn.mesh.quality.value).refined(defn.mesh.refinement),

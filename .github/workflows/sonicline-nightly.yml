@@ -1,0 +1,46 @@
+# The full SONICLINE verification suite (sonicline/: V1-V10 on standard
+# meshes, about 20 minutes on four cores), nightly and on demand. The push
+# workflow (sonicline.yml) runs only the fast tier. The results table is
+# kept as an artifact, and the job fails if any check fails or any run is
+# not trusted.
+name: SONICLINE verification (nightly)
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install OpenFOAM v2512
+        run: |
+          curl -sSfL --retry 4 https://dl.openfoam.com/add-debian-repo.sh | sudo bash
+          sudo apt-get install -y -qq openfoam2512 openfoam2512-dev
+
+      - name: Install
+        run: python -m pip install -e "./sonicline[dev]"
+
+      - name: Verification suite
+        run: sonicline verify --processors "$(nproc)" --out verification-runs
+
+      - name: Keep the results table
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonicline-verification
+          path: |
+            verification-runs/verification.md
+            verification-runs/verification.json
+          if-no-files-found: warn

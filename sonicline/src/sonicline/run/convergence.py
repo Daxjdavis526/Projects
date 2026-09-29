@@ -38,10 +38,6 @@ from ..foam.parse import Table
 RESIDUAL_FIELDS = ("p", "Ux", "Uy", "Uz", "e", "h", "k", "omega")
 
 
-# Iteration-to-iteration scatter allowed on a steady integral (std / mean).
-NOISE_TOLERANCE = 1e-3
-
-
 @dataclass
 class Assessment:
     iterations: int
@@ -127,15 +123,20 @@ def assess(tables: dict[str, Table | None], criteria: ConvergenceCriteria, wedge
         for name, s in series.items():
             a.spreads[name] = _drift(s[-window:])
             a.noise[name] = _noise(s[-window:])
-        drifting = [k for k, v in a.spreads.items() if v > slack * criteria.integral_tolerance]
-        noisy = [k for k, v in a.noise.items() if v > slack * NOISE_TOLERANCE]
+        # A drift is judged beyond what the scatter alone would produce: the
+        # half-window means of pure noise differ by ~ sigma sqrt(4 / window),
+        # and a noisy (separated, unsettled) flow must not read as drifting.
+        chance = {k: 2.0 * a.noise[k] * math.sqrt(4.0 / window) for k in a.spreads}
+        drifting = [k for k, v in a.spreads.items()
+                    if v > slack * criteria.integral_tolerance + chance[k]]
+        noisy = [k for k, v in a.noise.items() if v > slack * criteria.noise_tolerance]
         a.integrals_flat = not drifting and not noisy
         for k in drifting:
             a.reasons.append(f"{k} still drifting by {a.spreads[k]:.2e} across the last {window} "
                              f"iterations (tolerance {criteria.integral_tolerance:.0e})")
         for k in noisy:
             a.reasons.append(f"{k} scatters by {a.noise[k]:.2e} (std/mean) over the last {window} "
-                             f"iterations (tolerance {NOISE_TOLERANCE:.0e})")
+                             f"iterations (tolerance {criteria.noise_tolerance:.0e})")
     else:
         a.reasons.append(f"fewer than {window} iterations")
 

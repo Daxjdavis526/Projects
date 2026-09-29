@@ -27,3 +27,10 @@ def test_check_unreadable_definition(tmp_path, capsys):
     path.write_text("{not json", encoding="utf-8")
     assert main(["check", str(path)]) == 2
     assert "not valid JSON" in capsys.readouterr().err
+
+
+def test_planar_example_checks_clean(capsys):
+    assert main(["check", str(EXAMPLES / "planar-tp1704-b1-npr2.46.json")]) == 0
+    out = capsys.readouterr().out
+    assert "throat height" in out and "regime              overexpanded" in out
+    assert "regime.separation_likely" in out

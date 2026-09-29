@@ -150,3 +150,41 @@ def test_peng_robinson_case(tmp_path):
     assert "As              0;" in thermo  # inviscid via zero Sutherland viscosity
     assert "div(phi,h)" in (s.path / "system/fvSchemes").read_text()
     assert "(p U h)" in (s.path / "system/controlDict").read_text()
+
+
+def test_planar_case_scales_integrals_to_the_full_width(tmp_path):
+    from sonicline.mesh.revolved import PLANAR_DEPTH
+
+    s = _build(tmp_path, "planar", {"mesh": {"form": "planar", "planar_width": "5 cm", "quality": "coarse"},
+                                    "flow": {"turbulence": {"type": "inviscid"}}})
+    assert s.sector_factor == pytest.approx(2 * 0.05 / (PLANAR_DEPTH * 1e-3))
+    assert s.throat_area == pytest.approx(2 * 0.05 * 1e-3, rel=1e-9)
+    assert s.exit_area / s.throat_area == pytest.approx(2.88, rel=1e-9)
+    u = (s.path / "0/U").read_text()
+    assert "empty" in u and "symmetryPlane" in u
+
+
+def test_viscous_central_runs_start_on_rhopimplefoam(tmp_path):
+    from sonicline.core.validate import resolve_profile
+    from sonicline.foam import case as fc
+
+    src = json.loads(json.dumps(BASE))
+    src["numerics"] = {"solver": "rhoCentralFoam"}
+    defn = m.loads(json.dumps(src))
+    profile = resolve_profile(defn)
+    mesh, meta = revolved.build(profile, sizing.spec_for(defn, profile))
+    s = build_case(tmp_path / "c", defn, profile, mesh, meta)
+    assert fc.needs_warm_start(defn, s)
+    control = s.path / "system/controlDict"
+    fc.write_warm_start(s.path, defn, meta, s)
+    text = control.read_text()
+    assert "application     rhoPimpleFoam;" in text and "endTime         1000;" in text
+    assert "transonic" in (s.path / "system/fvSolution").read_text()
+    fc.write_continuation(s.path, defn, meta, s, 1000)
+    text = control.read_text()
+    assert "application     rhoCentralFoam;" in text and "endTime         61000;" in text
+    assert "fluxScheme" in (s.path / "system/fvSchemes").read_text()
+    # Inviscid central runs start directly.
+    inv = m.loads(json.dumps(src | {"flow": {"turbulence": {"type": "inviscid"}}}))
+    si = build_case(tmp_path / "i", inv, profile, *revolved.build(profile, sizing.spec_for(inv, profile)))
+    assert not fc.needs_warm_start(inv, si)

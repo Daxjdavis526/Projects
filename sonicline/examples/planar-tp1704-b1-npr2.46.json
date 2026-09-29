@@ -1,0 +1,71 @@
+{
+  "boundaries": {
+    "ambient": {
+      "pressure": 101325.0,
+      "temperature": 300.0
+    },
+    "exit_domain": {
+      "length": 10.0,
+      "lip": "entrainment",
+      "radius": 4.0,
+      "type": "plume"
+    },
+    "inlet": {
+      "T0": 300.0,
+      "p0": 249259.5,
+      "turbulence_intensity": 0.02,
+      "turbulence_length_fraction": 0.1,
+      "type": "reservoir_inlet"
+    },
+    "wall_thermal": {
+      "type": "adiabatic"
+    }
+  },
+  "flow": {
+    "time": {
+      "type": "steady"
+    },
+    "turbulence": {
+      "type": "k_omega_sst"
+    }
+  },
+  "gas": {
+    "equation_of_state": "perfect_gas",
+    "species": "N2"
+  },
+  "geometry": {
+    "chamber_length": 2.0,
+    "contraction_ratio": 2.5693430656934306,
+    "converging_half_angle": 0.3637266161156183,
+    "diverging_half_angle": 0.18936822384138474,
+    "expansion_ratio": 1.7956204379562044,
+    "fillet_radius": 1.0,
+    "throat_length": 0.0,
+    "throat_radius": 0.0137,
+    "throat_rc_downstream": 0.4963503649635036,
+    "throat_rc_upstream": 0.4963503649635036,
+    "type": "conical_nozzle"
+  },
+  "mesh": {
+    "first_cell_yplus": 30.0,
+    "form": "planar",
+    "planar_width": 0.10157,
+    "quality": "standard",
+    "refinement": 1.0,
+    "wedge_angle": 0.08726646259971647
+  },
+  "name": "V11 TP-1704 nozzle B1, NPR 2.46",
+  "numerics": {
+    "convergence": {
+      "integral_tolerance": 0.0001,
+      "integral_window": 200,
+      "mass_imbalance": 0.001,
+      "max_iterations": null,
+      "residual_drop_orders": 3.0,
+      "residual_level": 0.0001
+    },
+    "processors": 1,
+    "solver": "auto"
+  },
+  "schema_version": 1
+}

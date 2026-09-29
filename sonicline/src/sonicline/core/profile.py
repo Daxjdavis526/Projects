@@ -68,6 +68,9 @@ class Profile:
     throat_x: float
     throat_radius: float
     throat_curvature_upstream: float | None = None
+    # A planar (two-dimensional) nozzle of this width: "radius" is then the
+    # half-height, and every area is 2 x width x half-height.
+    planar_width: float | None = None
 
     def __post_init__(self) -> None:
         if not self.segments:
@@ -101,12 +104,15 @@ class Profile:
     def slope(self, x: float) -> float:
         return self._segment(x).slope(x)
 
+    def _area_of(self, r: float) -> float:
+        return math.pi * r * r if self.planar_width is None else 2.0 * self.planar_width * r
+
     def area(self, x: float) -> float:
-        return math.pi * self.radius(x) ** 2
+        return self._area_of(self.radius(x))
 
     @property
     def throat_area(self) -> float:
-        return math.pi * self.throat_radius**2
+        return self._area_of(self.throat_radius)
 
     @property
     def inlet_radius(self) -> float:
@@ -118,11 +124,11 @@ class Profile:
 
     @property
     def expansion_ratio(self) -> float:
-        return (self.exit_radius / self.throat_radius) ** 2
+        return self._area_of(self.exit_radius) / self.throat_area
 
     @property
     def contraction_ratio(self) -> float:
-        return (self.inlet_radius / self.throat_radius) ** 2
+        return self._area_of(self.inlet_radius) / self.throat_area
 
     @property
     def rc_over_rt(self) -> float | None:

@@ -19,11 +19,13 @@ from dataclasses import dataclass
 
 from .. import realgas
 from ..model.definition import (
+    CadFile,
     ConicalNozzle,
     FixedTemperature,
     KOmegaSST,
     Laminar,
     MassFlowInlet,
+    MeshForm,
     Plume,
     ReservoirInlet,
     SimulationDefinition,
@@ -72,7 +74,7 @@ def _fmt_bar(p: float) -> str:
 def resolve_profile(defn: SimulationDefinition) -> Profile | None:
     """The wall profile, where it is known without geometry processing."""
     if isinstance(defn.geometry, (ConicalNozzle, WallProfile)):
-        return defn.geometry.profile()
+        return defn.geometry.profile(defn.mesh.planar_width or None)
     return None
 
 
@@ -187,6 +189,11 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                         "it over-predicts real-gas density: its choked-flux correction is about "
                         "25 % larger than the reference equation of state's."))
 
+    if defn.mesh.form is MeshForm.PLANAR and isinstance(defn.geometry, CadFile):
+        add(Finding(Severity.ERROR, "mesh.planar_cad",
+                    "A planar mesh needs a parametric or tabulated wall; CAD import reads bodies "
+                    "of revolution only.", "Describe the nozzle as a wall_profile."))
+
     # -- numerics -----------------------------------------------------------
     solver = defn.numerics.solver
     if solver not in SOLVERS:
@@ -295,7 +302,8 @@ def _turbulence_findings(defn, gas, p0, T0, profile, add) -> None:
                     "boundary layers turn turbulent in critical-flow nozzles, and the strong "
                     "acceleration near the throat tends to relaminarise them. A fully turbulent "
                     "SST boundary layer may be the wrong physics here.",
-                    "Run the same case laminar as well; the spread is the model uncertainty."))
+                    "Run the same case laminar as well; the spread is the model uncertainty "
+                    "(for the 20 bar reference thruster: +0.07 % mass flow, +0.18 % thrust)."))
     elif isinstance(turb, Laminar) and re_t > 2.0 * LAMINAR_TRANSITION_RE:
         add(Finding(Severity.WARNING, "turbulence.likely_turbulent",
                     f"Throat Reynolds number is {re_t:.2g}; the boundary layer is likely turbulent.",

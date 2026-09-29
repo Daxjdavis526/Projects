@@ -13,6 +13,7 @@ Every value is stored and written back in SI.
 
 from __future__ import annotations
 
+import dataclasses
 import enum
 import math
 from dataclasses import dataclass, field
@@ -63,13 +64,18 @@ class ConicalNozzle:
     chamber_length: float = 2.0
     throat_length: float = 0.0  # straight section after the throat
 
-    def profile(self) -> Profile:
-        return conical(
-            self.throat_radius, self.expansion_ratio, self.contraction_ratio,
+    def profile(self, planar_width: float | None = None) -> Profile:
+        """The wall r(x). For a planar nozzle ``throat_radius`` is the throat
+        half-height and the area ratios are ratios of heights; the profile's
+        areas then follow from ``planar_width``."""
+        square = 2 if planar_width else 1
+        prof = conical(
+            self.throat_radius, self.expansion_ratio**square, self.contraction_ratio**square,
             self.converging_half_angle, self.diverging_half_angle,
             self.throat_rc_upstream, self.throat_rc_downstream,
             self.fillet_radius, self.chamber_length, self.throat_length,
         )
+        return dataclasses.replace(prof, planar_width=planar_width) if planar_width else prof
 
 
 @dataclass(frozen=True)
@@ -109,9 +115,10 @@ class WallProfile:
         if any(b[0] <= a[0] for a, b in zip(self.points, self.points[1:])):
             raise ValueError("wall points must be in strictly increasing x, inlet first")
 
-    def profile(self) -> Profile:
+    def profile(self, planar_width: float | None = None) -> Profile:
         k = quantity_to_si(f"1 {self.length_unit}", Dimension.LENGTH)
-        return from_points([(k * x, k * r) for x, r in self.points])
+        prof = from_points([(k * x, k * r) for x, r in self.points])
+        return dataclasses.replace(prof, planar_width=planar_width) if planar_width else prof
 
 
 Geometry = ConicalNozzle | CadFile | WallProfile
@@ -292,6 +299,7 @@ class Flow:
 class MeshForm(enum.Enum):
     WEDGE = "wedge"  # axisymmetric, one cell thick: verification and previews
     O_GRID_3D = "o_grid_3d"  # full 3D structured O-grid
+    PLANAR = "planar"  # two-dimensional (rectangular) nozzle, half-channel, one cell deep
 
 
 class MeshQuality(enum.Enum):
@@ -309,10 +317,15 @@ class MeshSpec:
     # Divides every cell size of the quality preset (> 1 is finer), for
     # grid-convergence studies: `sonicline study` sets it.
     refinement: float = 1.0
+    # Planar nozzles: the width between the flat sidewalls (which the
+    # two-dimensional model does not resolve).
+    planar_width: float = _q(Dimension.LENGTH, 0.0)
 
     def __post_init__(self) -> None:
         if not 0.25 <= self.refinement <= 4.0:
             raise ValueError("mesh refinement must lie between 0.25 and 4")
+        if (self.form is MeshForm.PLANAR) != (self.planar_width > 0.0):
+            raise ValueError("a planar mesh needs a planar_width > 0, and only a planar mesh takes one")
 
 
 @dataclass(frozen=True)
@@ -326,6 +339,10 @@ class ConvergenceCriteria:
     integral_window: int = 200  # iterations over which integrals must be flat
     integral_tolerance: float = 1e-4  # relative spread allowed in that window
     mass_imbalance: float = 1e-3  # |inlet - outlet| / inlet
+    # Scatter (std / mean) the integrals may keep over the window. A separated
+    # nozzle never settles (its shock and shear layer move); allowing more
+    # here reports pseudo-time averages, and the verdict says so.
+    noise_tolerance: float = 1e-3
     # None: the solver's own limit (20 000 for rhoPimpleFoam; 60 000 for
     # the explicit rhoCentralFoam, which V1 needs 23 000 of).
     max_iterations: int | None = None
