@@ -683,7 +683,8 @@ def ship_tiles(m: Model):
                 place(sd, math.degrees(phi), scale, down * math.sin(phi) + circ * math.cos(phi))
         j += 1
 
-    cap_origins = [f[0] for f in frames]
+    cap = frames[:]
+    del frames[:]
 
     # Below the cap: rows up the meridian. On the barrel that is a perfect
     # hexagonal lattice. Up the ogive the circumference shrinks, so the row
@@ -694,7 +695,7 @@ def ship_tiles(m: Model):
     n = int(2 * math.pi * R_HULL / TILE_PITCH)
     while True:
         r, z, dr, dz = _profile(s)
-        if s > s_cap - 0.21:
+        if s > s_cap:
             break
         if 2 * math.pi * r / n < TILE_PITCH:
             # A seam: the new band's first row can't stagger against the
@@ -703,21 +704,25 @@ def ship_tiles(m: Model):
             r, z, dr, dz = _profile(s)
             n = int(2 * math.pi * r / (TILE_PITCH * 1.12))
             k = 0
-            if s > s_cap - 0.21:
+            if s > s_cap:
                 break
         for j in range(n):
             th = 360 * (j + (0.5 if k % 2 else 0)) / n
             th = (th + 180) % 360 - 180
             if covered(th, z, r):
-                if s > s_cap - 1.0:
-                    # Near the join, skip a row tile that would touch a cap tile.
-                    c, sn = math.cos(math.radians(th)), math.sin(math.radians(th))
-                    p = Vector(r * c, r * sn, z)
-                    if any((p - q).Length < TILE_PITCH for q in cap_origins):
-                        continue
                 place(s, th)
         k += 1
         s += row
+
+    # Join the cap on: the rows are clean circles right up to the cap's edge,
+    # and the cap's ragged outer tiles give way wherever they would touch a
+    # row tile. (Dropping row tiles instead left a bare ring.)
+    near = [f[0] for f in frames if f[0].z > _profile(s_cap)[1] - 0.6]
+    for f in cap:
+        o, sc = f[0], f[3]
+        reach = (TILE_PITCH - TILE_GAP) * (sc + 1) / 2
+        if all((o - q).Length >= reach for q in near):
+            frames.append(f)
 
     # Flaps: a flat lattice on each windward face, whole tiles only.
     def flap_tiles(poly, face_y, slope, az, clear):
