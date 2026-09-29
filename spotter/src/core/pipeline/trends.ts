@@ -578,7 +578,7 @@ export async function runTrendStage(rc: RunContext): Promise<{ scored: ScoredClu
         isBreakout,
         keywords,
         patterns,
-        explanation: evidenceLines.join('. ') + '.',
+        explanation: evidenceLines.join('\n'),
         explanationBy: 'deterministic',
         latestTrendScore: result.trendScore,
         latestConfidence: result.confidence,
@@ -588,6 +588,19 @@ export async function runTrendStage(rc: RunContext): Promise<{ scored: ScoredClu
         updatedAt: rc.now,
       })
       .where(eq(trendClusters.id, cluster.id))
+
+    // Keep each member's latest per-post numbers for the trend page.
+    for (let i = 0; i < members.length; i += 200) {
+      const chunk = members.slice(i, i + 200)
+      await rc.db.execute(sql`
+        UPDATE trend_cluster_members AS m
+           SET outperformance = v.outperformance, outperformance_method = v.method, views_per_hour = v.vph
+          FROM (VALUES ${sql.join(
+            chunk.map((mm) => sql`(${mm.id}::uuid, ${mm.scoring.outperformance}::real, ${mm.scoring.outperformanceMethod}::text, ${mm.scoring.viewsPerHour}::real)`),
+            sql`, `,
+          )}) AS v(content_item_id, outperformance, method, vph)
+         WHERE m.cluster_id = ${cluster.id} AND m.content_item_id = v.content_item_id`)
+    }
 
     const memberViews: MemberView[] = members
       .map((m) => ({

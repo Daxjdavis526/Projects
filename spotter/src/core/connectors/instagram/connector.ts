@@ -239,7 +239,8 @@ export class InstagramLoginFlow implements OAuthFlow {
       followerCount: toCount(me.data.followers_count),
       grantedScopes: permissions,
       authVariant: this.authVariant,
-      metadata: { igUserId: igId, accountType: me.data.account_type ?? null },
+      // `id` is the app-scoped user ID Meta sends in deauthorize/data-deletion callbacks.
+      metadata: { igUserId: igId, appScopedUserId: toText(String(me.data.id ?? '')) ?? null, accountType: me.data.account_type ?? null },
     }
     return { tokens, account }
   }
@@ -349,6 +350,14 @@ export class FacebookLoginFlow implements OAuthFlow {
     }
     const igId = page.instagram_business_account.id
     const me = await this.graph.get<IgUser>(null, 'ig-user', igId, { fields: 'id,username,name,profile_picture_url,followers_count,follows_count,media_count' }, tokens.accessToken)
+    // The Facebook user's app-scoped ID: what Meta sends in deauthorize/data-deletion callbacks. Best effort.
+    let facebookUserId: string | null = null
+    try {
+      const fbMe = await this.graph.get<{ id?: string }>(null, 'me', 'me', { fields: 'id' }, tokens.accessToken)
+      facebookUserId = toText(fbMe.data.id ?? '') ?? null
+    } catch {
+      facebookUserId = null
+    }
     return {
       tokens,
       account: {
@@ -360,7 +369,7 @@ export class FacebookLoginFlow implements OAuthFlow {
         followerCount: toCount(me.data.followers_count),
         grantedScopes: granted,
         authVariant: this.authVariant,
-        metadata: { igUserId: igId, pageId: page.id ?? null, pageName: page.name ?? null },
+        metadata: { igUserId: igId, facebookUserId, pageId: page.id ?? null, pageName: page.name ?? null },
       },
     }
   }

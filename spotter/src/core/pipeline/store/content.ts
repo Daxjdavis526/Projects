@@ -10,7 +10,7 @@ import { createHash } from 'node:crypto'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import type { OwnerItemMetrics } from '../../connectors/types'
 import { rowsOf, type Database } from '../../db/client'
-import { contentItems, contentMetricSnapshots, creators } from '../../db/schema'
+import { accountMetricDays, contentItems, contentMetricSnapshots, creators } from '../../db/schema'
 import type { ContentAvailability, ContentItem, DataOrigin, Platform } from '../../domain/types'
 
 const CHUNK = 200
@@ -306,4 +306,24 @@ export async function creatorsNeedingBaseline(db: Database, platform: Platform, 
     ORDER BY c.last_seen_at DESC
     LIMIT ${limit}`)
   return rowsOf<{ external_id: string }>(result).map((r) => r.external_id)
+}
+
+/** Store the account's daily series (owner analytics). Platforms revise recent days, so the latest write wins. */
+export async function saveAccountSeries(
+  db: Database,
+  platformAccountId: string,
+  origin: DataOrigin,
+  series: Array<{ date: string; metrics: Record<string, number | null> }>,
+  now: Date,
+): Promise<number> {
+  const rows = series
+    .filter((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
+    .map((p) => ({ platformAccountId, dataOrigin: origin, day: p.date, metrics: p.metrics, collectedAt: now }))
+  for (let i = 0; i < rows.length; i += 500) {
+    await db
+      .insert(accountMetricDays)
+      .values(rows.slice(i, i + 500))
+      .onConflictDoUpdate({ target: [accountMetricDays.platformAccountId, accountMetricDays.day], set: { metrics: sql`excluded.metrics`, collectedAt: now } })
+  }
+  return rows.length
 }

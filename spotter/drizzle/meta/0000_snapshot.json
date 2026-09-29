@@ -1,9 +1,74 @@
 {
-  "id": "4aeff9f2-b5dd-4adb-8eb5-92f46c1588e3",
+  "id": "b03646b5-f9af-423c-92c6-f171c0ec4e56",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.account_metric_days": {
+      "name": "account_metric_days",
+      "schema": "",
+      "columns": {
+        "platform_account_id": {
+          "name": "platform_account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_origin": {
+          "name": "data_origin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metrics": {
+          "name": "metrics",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "collected_at": {
+          "name": "collected_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "account_metric_days_platform_account_id_platform_accounts_id_fk": {
+          "name": "account_metric_days_platform_account_id_platform_accounts_id_fk",
+          "tableFrom": "account_metric_days",
+          "tableTo": "platform_accounts",
+          "columnsFrom": [
+            "platform_account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "account_metric_days_platform_account_id_day_pk": {
+          "name": "account_metric_days_platform_account_id_day_pk",
+          "columns": [
+            "platform_account_id",
+            "day"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.ai_analysis": {
       "name": "ai_analysis",
       "schema": "",
@@ -722,6 +787,12 @@
         "latest_impressions": {
           "name": "latest_impressions",
           "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "own_lift": {
+          "name": "own_lift",
+          "type": "real",
           "primaryKey": false,
           "notNull": false
         },
@@ -2192,6 +2263,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'batch'"
+        },
         "cluster_id": {
           "name": "cluster_id",
           "type": "uuid",
@@ -2618,6 +2696,24 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
+        },
+        "outperformance": {
+          "name": "outperformance",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outperformance_method": {
+          "name": "outperformance_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "views_per_hour": {
+          "name": "views_per_hour",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -2844,6 +2940,12 @@
         "latest_fit_score": {
           "name": "latest_fit_score",
           "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latest_fit_components": {
+          "name": "latest_fit_components",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },

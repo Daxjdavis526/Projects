@@ -1,3 +1,12 @@
+CREATE TABLE "account_metric_days" (
+	"platform_account_id" uuid NOT NULL,
+	"data_origin" text NOT NULL,
+	"day" text NOT NULL,
+	"metrics" jsonb NOT NULL,
+	"collected_at" timestamp with time zone NOT NULL,
+	CONSTRAINT "account_metric_days_platform_account_id_day_pk" PRIMARY KEY("platform_account_id","day")
+);
+--> statement-breakpoint
 CREATE TABLE "ai_analysis" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"content_item_id" uuid NOT NULL,
@@ -98,6 +107,7 @@ CREATE TABLE "content_items" (
 	"latest_save_count" bigint,
 	"latest_reach" bigint,
 	"latest_impressions" bigint,
+	"own_lift" real,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "content_items_platform_check" CHECK (platform in ('youtube', 'instagram', 'tiktok'))
@@ -283,6 +293,7 @@ CREATE TABLE "recommendations" (
 	"creator_profile_id" uuid NOT NULL,
 	"data_mode" text NOT NULL,
 	"batch_id" uuid NOT NULL,
+	"source" text DEFAULT 'batch' NOT NULL,
 	"cluster_id" uuid,
 	"rank" integer NOT NULL,
 	"opportunity_score" real NOT NULL,
@@ -335,6 +346,9 @@ CREATE TABLE "trend_cluster_members" (
 	"content_item_id" uuid NOT NULL,
 	"similarity" real NOT NULL,
 	"assigned_at" timestamp with time zone NOT NULL,
+	"outperformance" real,
+	"outperformance_method" text,
+	"views_per_hour" real,
 	CONSTRAINT "trend_cluster_members_cluster_id_content_item_id_pk" PRIMARY KEY("cluster_id","content_item_id")
 );
 --> statement-breakpoint
@@ -365,6 +379,7 @@ CREATE TABLE "trend_clusters" (
 	"latest_trend_score" real,
 	"latest_confidence" real,
 	"latest_fit_score" real,
+	"latest_fit_components" jsonb,
 	"latest_opportunity_score" real,
 	"latest_scored_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -396,6 +411,7 @@ CREATE TABLE "users" (
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
+ALTER TABLE "account_metric_days" ADD CONSTRAINT "account_metric_days_platform_account_id_platform_accounts_id_fk" FOREIGN KEY ("platform_account_id") REFERENCES "public"."platform_accounts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ai_analysis" ADD CONSTRAINT "ai_analysis_content_item_id_content_items_id_fk" FOREIGN KEY ("content_item_id") REFERENCES "public"."content_items"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "collection_runs" ADD CONSTRAINT "collection_runs_creator_profile_id_creator_profiles_id_fk" FOREIGN KEY ("creator_profile_id") REFERENCES "public"."creator_profiles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "content_embeddings" ADD CONSTRAINT "content_embeddings_content_item_id_content_items_id_fk" FOREIGN KEY ("content_item_id") REFERENCES "public"."content_items"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

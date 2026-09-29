@@ -274,7 +274,8 @@ function buildCreators(seed: number): WorldCreator[] {
       creators.push({
         externalId: `demo-${prefix}-creator-${String(i + 1).padStart(2, '0')}`,
         platform,
-        handle: platform === 'youtube' ? `@${slug(name)}` : slug(name).slice(0, 24),
+        // ".demo" keeps simulated handles from colliding with real accounts.
+        handle: platform === 'youtube' ? `@${slug(name)}.demo` : `${slug(name).slice(0, 24)}.demo`,
         displayName: name,
         isOwn: false,
         followersAtAnchor: followers,

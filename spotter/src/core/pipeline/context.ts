@@ -22,7 +22,7 @@ export interface RunContext {
   /** Rows of these origins are "the data" for this mode. */
   origins: DataOrigin[]
   runId: string | null
-  trigger: 'schedule' | 'manual' | 'setup' | 'cli' | 'backfill'
+  trigger: 'schedule' | 'manual' | 'setup' | 'cli' | 'backfill' | 'demo_setup'
   /** The run's notion of now: the wall clock, or a simulated time during demo backfill. */
   now: Date
   clock: () => Date

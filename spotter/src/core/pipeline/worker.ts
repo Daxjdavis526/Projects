@@ -15,6 +15,9 @@ import type { Env } from '../config/env'
 import { getDb } from '../db/client'
 import type { Database } from '../db/client'
 import type { Logger } from '../observability/logger'
+import { eq } from 'drizzle-orm'
+import { collectionRuns } from '../db/schema'
+import { runDemoSetupJob } from '../demo/seed'
 import { runRetention } from './retention'
 import { executeRun } from './runner'
 import { claimNextRun, enqueueDueRuns, recoverStaleRuns } from './scheduler'
@@ -52,7 +55,9 @@ export function startWorker(options: { env: Env; logger: Logger; db?: Database; 
       if (!runId) break
       currentRunId = runId
       try {
-        await executeRun(db, options.env, runId, { logger })
+        const [run] = await db.select({ trigger: collectionRuns.trigger }).from(collectionRuns).where(eq(collectionRuns.id, runId)).limit(1)
+        if (run?.trigger === 'demo_setup') await runDemoSetupJob(db, options.env, runId, logger)
+        else await executeRun(db, options.env, runId, { logger })
       } finally {
         currentRunId = null
       }

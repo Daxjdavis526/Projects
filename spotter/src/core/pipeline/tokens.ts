@@ -45,7 +45,8 @@ export async function ensureFreshCredentials(rc: RunContext, connector: Platform
     rc.logger.info('Access token refreshed', { platform: account.platform, refreshTokenRotated: rotated })
     await recordEvent(rc.db, {
       profileId: rc.profile.id,
-      level: 'info',
+      // Routine: kept for debugging, hidden from the default event log.
+      level: 'debug',
       category: 'auth',
       platform: account.platform,
       message: rotated ? 'Access token refreshed (refresh token rotated).' : 'Access token refreshed.',

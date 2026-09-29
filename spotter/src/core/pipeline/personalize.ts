@@ -6,7 +6,7 @@
  * topic, format, hook, style, controversy, length, posting window, weekday
  * and platform (core/analytics/personalization.ts).
  */
-import { and, eq, gte, inArray } from 'drizzle-orm'
+import { and, eq, gte, inArray, sql } from 'drizzle-orm'
 import { computeBaseline, expectedViewsAt, type BaselineSample } from '../analytics/baseline'
 import { meanVector } from '../analytics/clustering'
 import { buildInsights, computeLifts, lengthBucket, postingWindow, SHRINKAGE_K, weekday, type LiftRecord, type OwnPost } from '../analytics/personalization'
@@ -123,6 +123,15 @@ export async function runPersonalizationStage(rc: RunContext): Promise<Personali
         byTopic.set(r.topic, group)
       }
     }
+  }
+
+  // Per-post lift, for the performance page.
+  for (let i = 0; i < posts.length; i += 200) {
+    const chunk = posts.slice(i, i + 200)
+    await rc.db.execute(sql`
+      UPDATE content_items AS c SET own_lift = v.lift
+        FROM (VALUES ${sql.join(chunk.map((p) => sql`(${p.contentItemId}::uuid, ${p.views / p.expectedViews}::real)`), sql`, `)}) AS v(id, lift)
+       WHERE c.id = v.id`)
   }
 
   const lifts = computeLifts(posts)

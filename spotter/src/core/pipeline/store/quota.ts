@@ -10,12 +10,20 @@ import type { QuotaStore } from '../../connectors/quota'
 import type { QuotaBucket } from '../../connectors/types'
 
 export class DbQuotaStore implements QuotaStore {
-  constructor(private readonly db: Database) {}
+  /**
+   * `namespace` keeps simulated (demo) calls out of the real platforms'
+   * counters: demo usage is recorded as "demo:youtube.units", live as "youtube.units".
+   */
+  constructor(
+    private readonly db: Database,
+    private readonly namespace = '',
+  ) {}
 
   async tryConsume(bucket: QuotaBucket, day: string, units: number, limit: number): Promise<number | null> {
+    const key = `${this.namespace}${bucket}`
     const result = await this.db.execute(sql`
       INSERT INTO api_quota_usage (bucket, quota_day, units_used, call_count, updated_at)
-      VALUES (${bucket}, ${day}, ${units}, 1, now())
+      VALUES (${key}, ${day}, ${units}, 1, now())
       ON CONFLICT (bucket, quota_day) DO UPDATE
         SET units_used = api_quota_usage.units_used + EXCLUDED.units_used,
             call_count = api_quota_usage.call_count + 1,
@@ -33,7 +41,7 @@ export class DbQuotaStore implements QuotaStore {
     const [row] = await this.db
       .select({ units: apiQuotaUsage.unitsUsed })
       .from(apiQuotaUsage)
-      .where(and(eq(apiQuotaUsage.bucket, bucket), eq(apiQuotaUsage.quotaDay, day)))
+      .where(and(eq(apiQuotaUsage.bucket, `${this.namespace}${bucket}`), eq(apiQuotaUsage.quotaDay, day)))
     return row?.units ?? 0
   }
 }

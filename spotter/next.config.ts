@@ -20,6 +20,13 @@ const nextConfig: NextConfig = {
   // its own files, and `pg` has optional native bindings.
   serverExternalPackages: ['@electric-sql/pglite', 'pg'],
   poweredByHeader: false,
+  // Don't let `next dev` write AGENTS.md/CLAUDE.md into the project; the repo keeps one CLAUDE.md at its root.
+  agentRules: false,
+  devIndicators: false,
+  // The dev server logs request URLs. OAuth callbacks carry one-time codes and
+  // state in the query string, and the demo consent page carries state: keep
+  // them out of the terminal, like everything else secret.
+  logging: { incomingRequests: { ignore: [/\/api\/oauth\//, /\/demo\/consent\//, /\/api\/webhooks\//] } },
   typedRoutes: false,
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]

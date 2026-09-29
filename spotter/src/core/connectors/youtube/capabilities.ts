@@ -48,7 +48,7 @@ export function youtubeCapabilities(ctx: CapabilityContext): CapabilityReport {
       'public_discovery',
       !discoveryConfigured ? 'not_configured' : approved ? 'limited' : 'needs_review',
       approved
-        ? 'Keyword search and channel watchlists. search.list is capped at 100 calls a day, so queries rotate across runs.'
+        ? 'Keyword search and channel watchlists. search.list is capped at 100 calls a day: the default 16 queries run on every scheduled run (48 calls a day); longer query lists rotate across runs.'
         : 'Search results are collected and shown as reported. Trend scoring and AI categorisation of YouTube data need YouTube’s Analytics & Reporting approval (Developer Policies III.L).',
       { docs: ['https://developers.google.com/youtube/v3/docs/search/list', 'https://developers.google.com/youtube/terms/derived-metrics-policy'] },
     ),

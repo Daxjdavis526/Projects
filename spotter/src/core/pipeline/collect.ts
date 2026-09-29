@@ -26,7 +26,7 @@ import {
   upsertHealth,
   type AccountRow,
 } from './store/accounts'
-import { creatorsNeedingBaseline, markAvailability, mergeOwnerInsights, trackedItems, upsertItems } from './store/content'
+import { creatorsNeedingBaseline, markAvailability, mergeOwnerInsights, saveAccountSeries, trackedItems, upsertItems } from './store/content'
 import { recordEvent } from './store/events'
 import { DbQuotaStore } from './store/quota'
 import { ensureFreshCredentials } from './tokens'
@@ -73,7 +73,7 @@ export async function collectPlatform(rc: RunContext, target: Target, output: Co
   let fatal: { kind: string; message: string } | null = null
   const connector: PlatformConnector = createConnector(target.platform, target.mode, { env: rc.env, clock: rc.clock, world: rc.world })
   const quota = createQuotaGate({
-    store: new DbQuotaStore(rc.db),
+    store: new DbQuotaStore(rc.db, target.mode === 'mock' ? 'demo:' : ''),
     buckets: quotaBuckets(rc.env),
     reserveFraction: rc.env.YOUTUBE_QUOTA_RESERVE_FRACTION,
     useReserve: useQuotaReserve,
@@ -153,9 +153,10 @@ export async function collectPlatform(rc: RunContext, target: Target, output: Co
       })
       const recentOwn = ownIds.filter((i) => !i.publishedAt || i.publishedAt.getTime() > rc.now.getTime() - 90 * DAY)
       if (recentOwn.length) {
-        await step('own_analytics', () => connector.getCreatorAnalytics(ctx, { items: recentOwn, since }), async (data) =>
-          mergeOwnerInsights(rc.db, target.platform, origin, rc.runId, rc.now, data.items),
-        )
+        await step('own_analytics', () => connector.getCreatorAnalytics(ctx, { items: recentOwn, since }), async (data) => {
+          await saveAccountSeries(rc.db, target.account!.id, origin, data.accountSeries, rc.now)
+          return mergeOwnerInsights(rc.db, target.platform, origin, rc.runId, rc.now, data.items)
+        })
       }
     }
 

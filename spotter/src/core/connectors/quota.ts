@@ -66,12 +66,13 @@ export function nextReset(now: Date, timeZone: string): Date {
       // Refine to the minute.
       let lo = t - 15 * 60_000
       let hi = t
-      while (hi - lo > 60_000) {
+      while (hi - lo > 1_000) {
         const mid = Math.floor((lo + hi) / 2)
         if (quotaDay(new Date(mid), timeZone) === today) lo = mid
         else hi = mid
       }
-      return new Date(Math.ceil(hi / 60_000) * 60_000)
+      // Local midnights fall on whole minutes: snap to the nearest one.
+      return new Date(Math.round(hi / 60_000) * 60_000)
     }
   }
   return new Date(now.getTime() + 24 * 3_600_000)

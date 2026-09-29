@@ -44,13 +44,13 @@ export const DEFAULT_NICHE_KEYWORDS = [
 ]
 
 /**
- * YouTube search queries used for discovery. search.list costs 100 quota
- * units per call against a default budget of 10,000 units a day: all 16
- * queries on each of three daily runs is 4,800 units, leaving room for
- * manual refreshes and stats polling. Running every query every run keeps
- * each trend sampled the same way from one run to the next, which velocity
- * comparisons depend on. With more queries than `maxSearchesPerRun`, the
- * collector rotates through the list instead.
+ * YouTube search queries used for discovery. search.list is metered in its
+ * own bucket (YOUTUBE_SEARCH_DAILY_LIMIT, 100 calls a day by default): all
+ * 16 queries on each of three daily runs is 48 calls, leaving room for manual
+ * refreshes. Running every query every run keeps each trend sampled the same
+ * way from one run to the next, which momentum comparisons depend on. With
+ * more queries than `maxSearchesPerRun`, the collector rotates through the
+ * list instead.
  */
 export const DEFAULT_YOUTUBE_QUERIES = [
   'squat depth hypertrophy',

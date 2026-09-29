@@ -653,6 +653,7 @@ export function describeLocally(input: ClusterDescriptionInput): ClusterDescript
   const topFormat = [...formats.entries()].sort((a, b) => b[1] - a[1])[0]?.[0]
   return {
     label: label.length > 60 ? `${label.slice(0, 59)}…` : label,
-    summary: `${input.members.length} posts about ${label.toLowerCase()}${topFormat ? `, mostly ${topFormat.toLowerCase()}` : ''}.`,
+    // No counts here: the summary is kept until the trend doubles in size, and counts would go stale.
+    summary: `Posts about ${label.toLowerCase()}${topFormat ? `, mostly ${topFormat.toLowerCase()}` : ''}.`,
   }
 }

@@ -279,6 +279,11 @@ export const contentItems = pgTable(
     latestSaveCount: count('latest_save_count'),
     latestReach: count('latest_reach'),
     latestImpressions: count('latest_impressions'),
+    /**
+     * Own posts only: views ÷ what this creator normally gets on the platform by
+     * the same age (set by the personalisation stage; null until 36h old).
+     */
+    ownLift: real('own_lift'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -419,6 +424,8 @@ export const trendClusters = pgTable(
     latestTrendScore: real('latest_trend_score'),
     latestConfidence: real('latest_confidence'),
     latestFitScore: real('latest_fit_score'),
+    /** The Creator Fit breakdown behind latestFitScore, so any trend can show why it does or does not suit. */
+    latestFitComponents: jsonb('latest_fit_components').$type<FitComponents>(),
     latestOpportunityScore: real('latest_opportunity_score'),
     latestScoredAt: ts('latest_scored_at'),
     createdAt: createdAt(),
@@ -441,6 +448,10 @@ export const trendClusterMembers = pgTable(
       .references(() => contentItems.id, { onDelete: 'cascade' }),
     similarity: real('similarity').notNull(),
     assignedAt: ts('assigned_at').notNull(),
+    /** As of the latest scoring run: views ÷ what the creator normally gets by that age, and current views/hour. */
+    outperformance: real('outperformance'),
+    outperformanceMethod: text('outperformance_method'),
+    viewsPerHour: real('views_per_hour'),
   },
   (t) => [
     primaryKey({ columns: [t.clusterId, t.contentItemId] }),
@@ -478,6 +489,8 @@ export const recommendations = pgTable(
     dataMode: text('data_mode').$type<DataMode>().notNull(),
     /** All recommendations produced by one refresh share a batch id. */
     batchId: uuid('batch_id').notNull(),
+    /** 'batch' = part of a scheduled refresh; 'on_demand' = a brief the creator asked for on a trend page. */
+    source: text('source').$type<'batch' | 'on_demand'>().notNull().default('batch'),
     clusterId: uuid('cluster_id').references(() => trendClusters.id, { onDelete: 'set null' }),
     rank: integer('rank').notNull(),
     opportunityScore: real('opportunity_score').notNull(),
@@ -503,6 +516,26 @@ export const recommendations = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('recommendations_profile_mode_created_idx').on(t.creatorProfileId, t.dataMode, t.createdAt)],
+)
+
+/**
+ * Account-level daily metrics from the platforms' own analytics (YouTube
+ * Analytics views/watch time/subscribers, Instagram reach). Owner data of
+ * the connected account only; one row per account per day, last write wins
+ * (the platforms revise recent days).
+ */
+export const accountMetricDays = pgTable(
+  'account_metric_days',
+  {
+    platformAccountId: uuid('platform_account_id')
+      .notNull()
+      .references(() => platformAccounts.id, { onDelete: 'cascade' }),
+    dataOrigin: text('data_origin').$type<DataOrigin>().notNull(),
+    day: text('day').notNull(),
+    metrics: jsonb('metrics').$type<Record<string, number | null>>().notNull(),
+    collectedAt: ts('collected_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.platformAccountId, t.day] })],
 )
 
 /** What works for this creator: lift per topic / format / hook / length / platform / time. */
@@ -542,7 +575,7 @@ export const collectionRuns = pgTable(
       .notNull()
       .references(() => creatorProfiles.id, { onDelete: 'cascade' }),
     dataMode: text('data_mode').$type<DataMode>().notNull(),
-    trigger: text('trigger').$type<'schedule' | 'manual' | 'setup' | 'cli' | 'backfill'>().notNull(),
+    trigger: text('trigger').$type<'schedule' | 'manual' | 'setup' | 'cli' | 'backfill' | 'demo_setup'>().notNull(),
     status: text('status')
       .$type<'queued' | 'running' | 'succeeded' | 'partial' | 'failed' | 'cancelled'>()
       .notNull()

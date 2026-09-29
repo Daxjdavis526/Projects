@@ -114,5 +114,6 @@ export async function deleteAuthorizedData(db: Database, platformAccountId: stri
        AND c.platform_account_id = ${platformAccountId}
        AND ci.is_own = true`)
   await db.execute(sql`DELETE FROM creators WHERE platform_account_id = ${platformAccountId} AND is_own = true`)
+  await db.execute(sql`DELETE FROM account_metric_days WHERE platform_account_id = ${platformAccountId}`)
   return count(result)
 }

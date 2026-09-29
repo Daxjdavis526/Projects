@@ -512,7 +512,7 @@ export class YouTubeConnector implements PlatformConnector {
     const publishedAfter = new Date(ctx.now.getTime() - cfg.publishedWithinDays * DAY)
     const found = new Map<string, string>()
 
-    // Rotate through the query list a few searches per run (search.list: 100 calls/day).
+    // Run up to maxSearchesPerRun queries, rotating when the list is longer (search.list: 100 calls/day).
     const queries = cfg.queries
     const perRun = Math.min(cfg.maxSearchesPerRun, queries.length)
     const start = queries.length ? Number((ctx.cursor as { queryIndex?: number } | null)?.queryIndex ?? 0) % queries.length : 0

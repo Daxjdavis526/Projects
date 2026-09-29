@@ -11,14 +11,15 @@ import { randomUUID } from 'node:crypto'
 import { and, desc, eq, gte, inArray } from 'drizzle-orm'
 import { LocalAIProvider } from '../ai/local/provider'
 import { selectProviders } from '../ai/registry'
-import { PROMPT_VERSION, type RecommendationDraft, type TrendBrief } from '../ai/types'
+import { PROMPT_VERSION, type TrendBrief } from '../ai/types'
 import { cosine } from '../analytics/clustering'
 import { STAGE_LABEL } from '../analytics/lifecycle'
 import { lengthBucket } from '../analytics/personalization'
 import { rankOpportunities, type RankCandidate } from '../analytics/ranking'
 import { creatorFit, opportunityScore } from '../analytics/relevance'
 import { contentEmbeddings, contentItems, recommendations, trendClusters } from '../db/schema'
-import { FIT_COMPONENT_KEYS, PLATFORM_LABEL, type EvidenceExample, type FitComponents, type RecommendationEvidence } from '../domain/types'
+import { PLATFORM_LABEL, type EvidenceExample, type RecommendationEvidence } from '../domain/types'
+import { creatorStrengths, draftWithFallback, fitReasons } from './briefs'
 import type { RunContext } from './context'
 import type { PersonalizationResult } from './personalize'
 import { recordEvent } from './store/events'
@@ -63,15 +64,6 @@ async function ownPriorPost(rc: RunContext, centroid: number[], threshold: numbe
   }
 }
 
-/** The fit components that argue *for* this trend, strongest first, as sentences. */
-function fitReasons(components: FitComponents): string[] {
-  return FIT_COMPONENT_KEYS.map((key) => components[key])
-    .filter((c) => c.score !== null && c.score >= 60 && c.weight > 0)
-    .sort((a, b) => b.score! * b.weight - a.score! * a.weight)
-    .slice(0, 3)
-    .map((c) => c.explanation)
-}
-
 export async function runRecommendationStage(
   rc: RunContext,
   scored: ScoredCluster[],
@@ -94,7 +86,10 @@ export async function runRecommendationStage(
     const fit = creatorFit(s.profile, personal.model, fitContext)
     fits.set(s.clusterId, fit)
     const opportunity = opportunityScore(s.result.trendScore, fit.score, rc.settings.fit.trendWeight)
-    await rc.db.update(trendClusters).set({ latestFitScore: fit.score, latestOpportunityScore: opportunity }).where(eq(trendClusters.id, s.clusterId))
+    await rc.db
+      .update(trendClusters)
+      .set({ latestFitScore: fit.score, latestFitComponents: fit.components, latestOpportunityScore: opportunity })
+      .where(eq(trendClusters.id, s.clusterId))
     candidates.push({
       clusterId: s.clusterId,
       trendScore: s.result.trendScore,
@@ -122,11 +117,7 @@ export async function runRecommendationStage(
     return { batchId: null, count: 0, excluded: excluded.length }
   }
 
-  const liftsBy = (dimension: string) =>
-    personal.lifts.filter((l) => l.dimension === dimension && l.postCount >= 3 && l.lift > 1.05).sort((a, b) => b.shrunkLogLift - a.shrunkLogLift)
-  const bestLength = personal.lifts
-    .filter((l) => l.dimension === 'length' && l.postCount >= 3)
-    .sort((a, b) => b.shrunkLogLift - a.shrunkLogLift)[0]?.value ?? null
+  const strengths = creatorStrengths(personal.lifts)
 
   const batchId = randomUUID()
   let count = 0
@@ -174,23 +165,14 @@ export async function runRecommendationStage(
       creatorInsights: personal.insights,
       fitReasons: fitReasons(fit.components),
       variant: r.rank - 1,
-      creatorBestFormats: liftsBy('format').map((l) => l.value),
-      creatorBestHookTypes: liftsBy('hook_type').map((l) => l.value),
-      targetLength: bestLength ?? lengthBucket(s.profile.medianDurationSeconds),
+      creatorBestFormats: strengths.bestFormats,
+      creatorBestHookTypes: strengths.bestHookTypes,
+      targetLength: strengths.bestLength ?? lengthBucket(s.profile.medianDurationSeconds),
       audience: s.patterns.audiences[0]?.value ?? null,
       ownPriorPost: prior?.title ? `${prior.title}${prior.lift ? ` (${prior.lift.toFixed(1)}× your normal)` : ''}` : null,
     }
-    let draft: RecommendationDraft
-    let generatedBy = `${ai.name}:${ai.model}`
-    let note: string | null = ai.remote ? null : 'Written from SPOTTER’s built-in templates (no LLM configured).'
-    try {
-      draft = await ai.draftRecommendation(brief)
-    } catch (err) {
-      draft = await fallback.draftRecommendation(brief)
-      generatedBy = `${fallback.name}:${fallback.model}`
-      note = `The ${ai.name} provider failed (${err instanceof Error ? err.message : String(err)}); written from built-in templates instead.`
-      await recordEvent(rc.db, { profileId: rc.profile.id, level: 'warn', category: 'ai', message: `Recommendation drafting failed with ${ai.name}; used templates.`, at: rc.now })
-    }
+    const { draft, generatedBy, note, failed } = await draftWithFallback(ai, fallback, brief)
+    if (failed) await recordEvent(rc.db, { profileId: rc.profile.id, level: 'warn', category: 'ai', message: `Recommendation drafting failed with ${ai.name}; used templates.`, at: rc.now })
     const evidence: RecommendationEvidence = {
       itemCount: s.result.metrics.itemCount,
       creatorCount: s.result.metrics.creatorCount,
