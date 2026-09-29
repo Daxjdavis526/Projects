@@ -150,6 +150,31 @@ console.log('automatic abort on a redline');
   check('recording auto-stopped after the abort', s.runs.length === 1 && s.runs[0].aborted);
 }
 
+console.log('pulse train');
+{
+  const s = new Session({ def, mode: 'independent', seed: 13 });
+  const ex = drive(s);
+  ex('daqPower', { on: true }); s.run(5); ex('zero'); ex('tare'); ex('daqRate', { rate: 2000 });
+  ex('tech', { task: 'openHV' }); s.run(9);
+  ex('valve', { id: 'VV-101', open: false }); ex('valve', { id: 'VV-201', open: false });
+  ex('valve', { id: 'IV-101', open: true }); s.run(2);
+  ex('clearCell'); s.run(7);
+  ex('regSet', { value: psi(150) }); s.run(12); ex('tare');
+  ex('plan', { plan: { mode: 'pulse', on: 0.05, off: 0.2, count: 10 } });
+  ex('record', { on: true }); s.run(1);
+  ex('arm'); ex('fire'); s.run(12);
+  const run = s.runs[0], m = run?.metrics;
+  check('ten pulses reduced', m?.kind === 'pulse' && m.pulses.length === 10, m ? `${m.kind}, ${m.pulses?.length}` : 'no metrics');
+  const ib = m?.pulses.map(p => p.Ibit) || [];
+  const mean = ib.reduce((a, b) => a + b, 0) / (ib.length || 1);
+  // a 50 ms pulse is ~40 ms of thrust at ~6 N after the ~6 ms opening delay
+  // 50 ms of command ≈ 50 ms of ~6.2 N, less the ~6 ms opening delay, plus
+  // the ~9 ms shutdown delay and the chamber blowdown
+  check('impulse bit plausible for 50 ms pulses', mean > 0.25 && mean < 0.40, `${(mean * 1e3).toFixed(1)} mN·s`);
+  const sd = Math.sqrt(ib.reduce((a, b) => a + (b - mean) ** 2, 0) / (ib.length - 1));
+  check('impulse bits repeat within a few percent — but not perfectly', sd / mean < 0.05 && sd / mean > 0.001, `${(100 * sd / mean).toFixed(2)} % (1σ)`);
+}
+
 console.log('Level 1 orientation, guided');
 {
   const s = new Session({ def, scenario: orientation, mode: 'guided', seed: 2 });

@@ -42,7 +42,7 @@ export class Session extends Emitter {
     this.rng = new Rng(seed);
     const M = MODELS[def.physics.model];
     if (!M) throw new Error(`no physics model '${def.physics.model}'`);
-    this.model = new M(def);
+    this.model = new M(def, { rng: this.rng });
     this.t = 0;
     this.log = new EventLog();
     this.controller = new Controller(this);

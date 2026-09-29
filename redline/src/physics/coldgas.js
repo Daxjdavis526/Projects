@@ -15,7 +15,7 @@ import { GasNetwork } from './gasnet.js';
 import { GASES } from './gas.js';
 
 export class ColdGasModel {
-  constructor(def) {
+  constructor(def, { rng = null } = {}) {
     const p = def.physics;
     this.def = def;
     this.gas = GASES[p.gas];
@@ -26,6 +26,7 @@ export class ColdGasModel {
       elements: p.elements,
     });
     this.nozzleEl = this.net.el(p.nozzleElement);
+    if (rng) for (const e of this.net.elements) if ('jitPull' in e) e.rng = rng;
     /* Thrust stand: a mass on a stiff flexure with a load cell in the load
        path. It rings when the thrust steps. Its output (in newtons, already
        scaled by the stand's stiffness) is what the load cell feels.

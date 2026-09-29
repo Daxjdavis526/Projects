@@ -53,13 +53,14 @@ export default {
     { id: 'TC-401', x: 1062, y: 150, tap: [1044, 214], lab: 'above' },
     { id: 'TC-101', x: 80, y: 405, tap: [80, 366] },
     { id: 'SV-301-I', x: 928, y: 150, tap: [950, 196], tag: ['IT', '301'], lab: 'above' },
-    { id: 'LC-501', x: 907, y: 380, tap: [907, 273], tag: ['WT', '501'] },
+    { id: 'LC-501', x: 860, y: 388, tap: [907, 287], tag: ['WT', '501'] },
   ],
   labels: [
-    { text: 'HP · 4000 psig CLASS', x: 252, y: 260 },
-    { text: 'LP · MAWP 300 psig', x: 578, y: 260 },
+    // line-class breaks, drawn as brackets under the sections they cover
+    { bracket: [182, 474], y: 438, text: 'HIGH-PRESSURE SECTION · 4000 psig CLASS' },
+    { bracket: [506, 1020], y: 438, text: 'LOW-PRESSURE SECTION · MAWP 300 psig' },
     { text: 'TO VENT STACK', x: 1162, y: 44, anchor: 'start' },
-    { text: 'THRUST STAND', x: 1000, y: 346 },
+    { text: 'THRUST STAND', x: 1000, y: 362 },
     { text: 'EXHAUST', x: 1210, y: 262 },
   ],
   exhaust: { x: 1100, y: Y },

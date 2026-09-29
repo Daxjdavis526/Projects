@@ -79,8 +79,9 @@ src/
                 programs.js, glossary.js
   ui/           the only code that touches the DOM
 test/           node redline/test/physics.test.mjs   (38 checks)
-                node redline/test/session.test.mjs   (26 checks: a full guided
-                Level-2 test, interlocks, the poll, an automatic abort)
+                node redline/test/session.test.mjs   (29 checks: a full guided
+                Level-2 test, interlocks, the poll, an automatic abort,
+                a pulse train)
 ```
 
 The flow of information is one-way, and it is the point of the design:

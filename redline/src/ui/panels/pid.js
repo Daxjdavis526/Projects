@@ -52,7 +52,13 @@ export class PID {
     svg.append(grid);
 
     // labels
-    for (const lb of L.labels) svg.append(s('text.pid-label', { x: lb.x, y: lb.y, 'text-anchor': lb.anchor || 'start' }, lb.text));
+    for (const lb of L.labels) {
+      if (lb.bracket) {
+        const [x0, x1] = lb.bracket, y = lb.y;
+        svg.append(s('path', { d: `M${x0},${y - 6} L${x0},${y} L${x1},${y} L${x1},${y - 6}`, fill: 'none', stroke: '#2a333d' }));
+        svg.append(s('text.pid-label', { x: (x0 + x1) / 2, y: y + 14, 'text-anchor': 'middle' }, lb.text));
+      } else svg.append(s('text.pid-label', { x: lb.x, y: lb.y, 'text-anchor': lb.anchor || 'start' }, lb.text));
+    }
 
     // plume (drawn under the thruster)
     const ex = L.exhaust;
@@ -233,7 +239,7 @@ export class PID {
         break;
       }
       case 'thrustStand': {
-        const py = y + 34;
+        const py = y + 48;
         g.append(s('rect', { x: 925, y: py - 3, width: 190, height: 6, fill: '#11171c', stroke: '#56636f', 'stroke-width': 1 }));
         for (const fx of [948, 1092]) g.append(s('path', { d: `M${fx},${py + 3} L${fx},${py + 54}`, stroke: '#56636f', 'stroke-width': 2 }));
         g.append(s('rect', { x: 890, y: py + 54, width: 240, height: 8, fill: 'url(#hatch)', stroke: 'none' }));

@@ -87,8 +87,10 @@ export function standardInterlocks(def) {
       msg: 'VV-201 is open: the regulator will flow to the vent.',
       why: 'The outlet pressure will sag below setpoint and you will be wasting supply gas.' },
     { id: 'ZERO-PRESS', on: ['zero'], sev: S('block', 'warn', 'allow'),
-      test: (c, x) => (x.ids || c.zeroableIds).some(id => id.startsWith('PT') && Math.abs(c.meas(id)) > psi(5)),
-      msg: 'One or more transducers read above 5 psig.',
+      // "pressurised" relative to each transducer's range: a 5000 psi
+      // transducer's ordinary zero offset is several psi
+      test: (c, x) => (x.ids || c.zeroableIds).some(id => id.startsWith('PT') && Math.abs(c.meas(id)) > Math.max(psi(5), 0.01 * c.fs(id))),
+      msg: 'One or more transducers read well above zero.',
       why: 'A zero must be taken with the true pressure at zero. Zero a pressurised transducer and it will read low by that pressure until re-zeroed.' },
     { id: 'TARE-PRESS', on: ['tare'], sev: S('warn', 'allow', 'allow'),
       test: c => c.seqActive,

@@ -29,6 +29,8 @@ export const request = def => ({
 
 export function procedure(def) {
   const R = def.ratings;
+  // tolerances scale with each transducer's full scale, as a stand's own would
+  const FS = id => { const x = def.sensors.find(q => q.id === id); return x ? x.range[1] - x.range[0] : Infinity; };
   return {
     id: 'cg-basic-firing',
     title: 'TP-CG-002 · Baseline steady-state firing',
@@ -57,7 +59,7 @@ export function procedure(def) {
           text: 'Look at every channel. With the system vented, pressure transducers should read near zero, thermocouples near room temperature and each other, the load cell near zero. Nothing flat-lined, nothing off-scale.',
           why: 'A channel that is dead, disconnected or wildly offset is far cheaper to find now than in the middle of a firing. "Plausible" means: does this number make physical sense for the state the system is in?',
           teach: 'Notice the transducers are not exactly zero, and not all the same. Every sensor starts the day with a small zero offset. That is what the next step removes — but only because you know the true pressure right now is zero.',
-          check: v => v.staleChannels.length === 0 && PTS.every(id => Math.abs(v.ch(id)) < psi(20)) && Math.abs(v.ch('LC-501')) < 0.5 &&
+          check: v => v.staleChannels.length === 0 && PTS.every(id => Math.abs(v.ch(id)) < 0.015 * FS(id)) && Math.abs(v.ch('LC-501')) < 0.5 &&
             ['TC-101', 'TC-301', 'TC-401'].every(id => v.ch(id) > 283 && v.ch(id) < 303),
           failMsg: 'At least one channel is not reading what a vented, ambient system should.' },
         { id: 'B3', num: '2.3', kind: 'verify', station: 'CTL', title: 'Valve position verification',
@@ -67,10 +69,10 @@ export function procedure(def) {
       ] },
       { id: 'C', title: 'Zero and calibration', steps: [
         { id: 'C1', num: '3.1', kind: 'action', station: 'DAQ', title: 'Zero the pressure transducers',
-          text: 'Console ▸ DAQ ▸ ZERO PTs, with everything vented. Afterwards each should read 0.0 ± 0.3 psig.',
+          text: 'Console ▸ DAQ ▸ ZERO PTs, with everything vented. Afterwards each should read zero to within its noise (a few tenths of a psi on the 500 psi transducers, a few psi on the 5000 psi ones).',
           why: 'A zero is only correct if the true pressure is zero when it is taken. Zero a transducer under pressure and that pressure becomes its "zero": it will read low by that amount for the rest of the day.',
-          check: v => { const z = lastEvent(v, e => e.zero); return !!z && PTS.every(id => near(v.ch(id), 0, psi(0.4))); },
-          audit: v => { const z = lastEvent(v, e => e.zero); return !!z && z.zero.every(o => Math.abs(o.removed) < psi(5)); } },
+          check: v => { const z = lastEvent(v, e => e.zero); return !!z && PTS.every(id => near(v.ch(id), 0, 0.002 * FS(id))); },
+          audit: v => { const z = lastEvent(v, e => e.zero); return !!z && z.zero.every(o => Math.abs(o.removed) < Math.max(psi(5), 0.01 * FS(o.id))); } },
         { id: 'C2', num: '3.2', kind: 'action', station: 'DAQ', title: 'Tare the load cell',
           text: 'Console ▸ DAQ ▸ TARE LC. LC-501 should then read 0.00 ± 0.02 N.',
           why: 'Removes the weight of the hardware on the stand and the load cell\'s own offset, so the channel reads only what the thruster adds.',

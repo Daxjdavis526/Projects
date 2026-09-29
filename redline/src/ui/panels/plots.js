@@ -104,7 +104,7 @@ export class PlotStack {
         box.append(h('div', { style: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' } },
           h('b', `Plot ${i + 1}`), h('span.faint', q ? q : 'empty'), h('span', { style: { flex: 1 } }),
           draft.length > 1 ? btn('Remove plot', () => { draft.splice(i, 1); render(); }, 'sm ghost') : null));
-        const grid = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '2px 12px' } });
+        const grid = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2px 12px' } });
         for (const [gq, gname] of GROUPS) {
           const chs = this.channels().filter(c => c.quantity === gq || (gq === 'current' && c.quantity === 'voltage'));
           if (!chs.length) continue;
@@ -116,7 +116,7 @@ export class PlotStack {
               if (cb.checked) pl.channels.push(c.id); else pl.channels = pl.channels.filter(x => x !== c.id);
               render();
             } });
-            grid.append(h('label.chk', { title: c.desc, style: { opacity: disabled ? 0.4 : 1 } }, cb, h('span.mono', c.id), h('span.faint', { style: { fontSize: '10.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, c.desc)));
+            grid.append(h('label.chk', { title: c.desc, style: { opacity: disabled ? 0.4 : 1 } }, cb, h('span.mono', { style: { whiteSpace: 'nowrap' } }, c.id), h('span.faint', { style: { fontSize: '10.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, c.desc)));
           }
         }
         box.append(grid);

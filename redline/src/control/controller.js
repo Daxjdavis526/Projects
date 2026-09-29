@@ -67,6 +67,7 @@ export class Controller extends Emitter {
       regSet: this.regSet,
       pollGo: this.pollGo,
       zeroableIds: s.daq.sensors.filter(x => x.zeroable).map(x => x.id),
+      fs: id => s.daq.sensor(id)?.span ?? Infinity,
     };
   }
 

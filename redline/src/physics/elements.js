@@ -153,9 +153,19 @@ export class SolenoidValve extends Valve {
     this.moving = false;
     this.coilOpen = false;   // fault hook: open coil / broken wire
     this.pullScale = 1;      // fault hook: weak coil / binding armature
+    // Shot-to-shot scatter: no two actuations of a real solenoid are
+    // identical (friction, armature position, coil temperature). Set per
+    // actuation from the model's seeded RNG; absent (nominal predictions)
+    // it is exactly repeatable.
+    this.rng = null;
+    this.jitPull = 1; this.jitStroke = 1;
   }
   command(open) {
     const c = open ? 1 : 0;
+    if (c !== this.cmd && this.rng) {
+      this.jitPull = 1 + 0.012 * this.rng.gauss();
+      this.jitStroke = 1 + 0.05 * this.rng.gauss();
+    }
     this.cmd = c;
     this.drive = this.normally === 'open' ? 1 - c : c;
   }
@@ -171,7 +181,7 @@ export class SolenoidValve extends Valve {
     // mechanical: energised-means-open for a normally-closed valve
     const a = net.state(this.from), b = net.state(this.to);
     const dP = Math.max(0, a.P - b.P);
-    const iPull = (this.iPull0 + this.iPullPerPa * dP) * this.pullScale;
+    const iPull = (this.iPull0 + this.iPullPerPa * dP) * this.pullScale * this.jitPull;
     const nc = this.normally !== 'open';
     const pulled = this.u > 0.5 ? this.i > this.iDrop : this.i > iPull;
     let tgt = nc ? (pulled ? 1 : 0) : (pulled ? 0 : 1);
@@ -179,7 +189,7 @@ export class SolenoidValve extends Valve {
     tgt = Math.min(tgt, this.maxOpen);
     const prev = this.u;
     if (!this.stuck) {
-      const stroke = (tgt > this.u ? this.strokeOpen : this.strokeClose) * this.strokeScale;
+      const stroke = (tgt > this.u ? this.strokeOpen : this.strokeClose) * this.strokeScale * this.jitStroke;
       const rate = dt / stroke;
       if (this.u < tgt) this.u = Math.min(tgt, this.u + rate);
       else if (this.u > tgt) this.u = Math.max(tgt, this.u - rate);
