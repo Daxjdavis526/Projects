@@ -1,0 +1,758 @@
+# SONICLINE — V1 design proposal
+
+A focused CFD application for cold-gas thrusters: drop in thruster geometry,
+set reservoir and ambient conditions, and get a verified OpenFOAM solution
+with the propulsion numbers already extracted. OpenFOAM is the numerical
+backend and nothing more; everything around it (geometry, case building,
+meshing, solver management, monitoring, post-processing, engineering metrics,
+verification and the UI) is ours.
+
+**Status: proposal. No application code exists yet.** This document is the
+plan to be agreed before building. Section 2 records what was actually run
+to back the decisions; everything else is design.
+
+Priorities, in order, and every trade-off below is decided by them:
+physics correctness → verification → reliability → automation → UX →
+visual polish → feature count.
+
+---
+
+## 1. V1 scope
+
+**In:** 3D, compressible, single-phase gaseous nitrogen, non-reacting,
+viscous, laminar or RANS-turbulent, steady and transient, adiabatic walls
+(prescribed wall temperature as an option), subsonic / choked / supersonic
+/ shock-in-nozzle internal flow. STEP and STL input. Reservoir (total
+pressure) inlet, mass-flow inlet, pressure outlet, supersonic outlet,
+no-slip wall, symmetry, and an optional external plume region with an
+ambient boundary.
+
+**Out:** combustion, chemistry, multiphase, condensation modelling,
+droplets, cavitation, radiation, liquids, rarefied/slip flow, adaptive
+refinement, conjugate heat transfer. The architecture leaves room for each;
+none is stubbed.
+
+**Deliberately limited in V1:** automatic extraction of the gas volume from
+a *solid* thruster body. It will exist as a previewed suggestion the user
+must confirm, never silent automation (section 3.6).
+
+---
+
+## 2. Evidence gathered before proposing
+
+### 2.1 Environment
+
+The toolchain installs cleanly on Ubuntu 24.04 in this container:
+
+| component | version found | note |
+|---|---|---|
+| OpenFOAM (ESI/OpenCFD) | **v2512** (apt, final) | v2606 exists but the noble apt build is still `2606.0~rc2` |
+| OpenFOAM (Foundation) | 13 and **14** (apt) | 14 released Jul 2026 |
+| rhoCentralFoam, rhoPimpleFoam, rhoSimpleFoam, snappyHexMesh, cartesianMesh (cfMesh), blockMesh, gmshToFoam, checkMesh, surfaceCheck, foamToVTK | all present in v2512 | |
+| gmsh (pip, OCC kernel) | 4.15.2 | needs `libglu1-mesa` et al. on Linux |
+| pyvista / VTK | 0.49.0 / 9.7.1 | off-screen rendering via OSMesa works; with no GL at all the VTK wheel segfaults |
+| trimesh, meshio, classy_blocks | 5.1.0, 5.3.5, 1.12.0 | classy_blocks has `RevolvedRing`, `Frustum`, `Cylinder`, `Wedge` |
+| PySide6, pyvistaqt, pyqtgraph | 6.11.2, 0.13.1, 0.14.0 | a Qt main window with an embedded VTK viewport and a live pyqtgraph residual plot was prototyped and screenshotted under Xvfb |
+
+So the whole pipeline, including a headless OpenFOAM run, can execute in CI
+on a stock Ubuntu runner.
+
+### 2.2 Solver spike
+
+A throwaway case (scratch only, not in the repo) to test the solver choice
+empirically rather than by reputation:
+
+- Axisymmetric CD nozzle, 5° wedge, 12 000 structured cells, generated with
+  blockMesh. Throat radius 1 mm, exit 2.5 mm (ε = 6.25), inlet 3 mm,
+  cosine-blended contour, Rc/Rt = 1.62 at the throat.
+- N₂, perfect gas, p₀ = 1 MPa, T₀ = 300 K, back pressure 10 kPa (fully
+  supersonic exit). **Inviscid slip walls**, so the exact answer is known.
+
+| quantity | rhoPimpleFoam, transonic, LTS | reference | error |
+|---|---|---|---|
+| mass flow (solver face fluxes) | 7.1678 g/s | 7.2090 g/s (ideal 1D) | −0.57 % |
+| discharge coefficient | 0.99428 | 0.99470 (Kliegel–Levine, Rc/Rt = 1.62) | **−0.04 %** |
+| inlet vs outlet mass flow | identical to 6 significant figures | — | < 10⁻⁵ |
+| mass-averaged exit Mach | 3.4103 | 3.4114 | −0.03 % |
+| vacuum thrust | 5.003 N | 5.052 N (ideal 1D) | −0.97 %, mostly the Cd deficit |
+| cost | converged in ~1000 iterations, **90 s on one core** | | |
+
+Findings that shaped this design:
+
+1. **Both solvers diverged within ten steps from a uniform initial field.**
+   A 100:1 pressure jump at the inlet face is an impulsive shock-tube start.
+   Initialising the interior from the quasi-1D isentropic solution fixed it
+   for both. → The analytical module is also the case **initialiser**.
+2. **rhoCentralFoam is impractically slow to reach steady state.** On the
+   same mesh, after 16 minutes it had covered 5×10⁻⁵ s of physical time.
+   Its inlet mass flow was still swinging by about ±25 % as pressure waves
+   rang through the plenum, and I stopped it there. Its explicit time step is
+   set by the smallest cell and the sound speed. A 3D mesh resolved to
+   y⁺ ≈ 1 has sub-micron cells at the throat wall, which makes this far
+   worse. → Not the steady-state default.
+3. **Integrals must come from the solver's own face fluxes.** Re-integrating
+   the outlet from reconstructed face values of p, T and U showed a false
+   0.13 % mass imbalance that the flux-based function object did not.
+4. **Quasi-1D theory is the right yardstick for integrals, not for local
+   distributions.** At the throat, wall p/p₀ was 0.457 against 0.525 (1D)
+   and 0.498 on the axis. Near the exit the concave wall compresses the
+   flow while the axis over-expands. These are real 2D effects. The
+   verification suite has to compare integrals to 1D theory and
+   distributions to 2D references.
+
+---
+
+## 3. Key technical decisions
+
+### 3.1 OpenFOAM lineage: ESI/OpenCFD, pinned, behind an adapter
+
+- **Target ESI OpenFOAM, pinned to v2512.** Move to v2606 once final debs
+  ship, and only after the regression suite passes on it.
+- **Why ESI over the Foundation:**
+  - ESI application names and dictionary layouts have been stable for about
+    a decade.
+  - It ships `fluxSummary`, `solverInfo`, isentropic total pressure
+    (`pressure` with `mode isentropic`), and `checkMesh -writeChecks json`
+    (since v2312), which gives machine-readable mesh quality.
+  - It builds Peng–Robinson for `hePsiThermo`, a future real-gas path.
+  - It has a native Windows build as well as WSL.
+- **Foundation drawbacks for an automation tool:**
+  - It re-plumbs every year: modular `foamRun` solvers, renamed dictionaries,
+    and new unit syntax in v14.
+  - Its `totalPressureCompressible` is the incompressible p + ½ρU², which is
+    wrong for supersonic flow.
+  - It has no `-writeChecks`.
+  - It publishes no Docker images after v11.
+- **All OpenFOAM syntax lives in one adapter package.** A Foundation adapter
+  can be added later without touching anything else.
+- **Every run records the OpenFOAM version and build** in its manifest.
+
+### 3.2 Solver strategy
+
+| situation | primary | cross-check / fallback |
+|---|---|---|
+| **steady**, choked, supersonic exit (vacuum / design operation) | **rhoPimpleFoam**, `transonic yes`, local time stepping (`localEuler`) | rhoCentralFoam + LTS on verification cases |
+| steady, **shock in nozzle** (overexpanded, ground test) | rhoPimpleFoam transonic + LTS, then a short time-accurate continuation to confirm the shock is stationary | rhoCentralFoam (sharper shocks); agreement on shock position is a verification test |
+| **transient** (valve opening, start-up, pulsing) | rhoCentralFoam, Euler time stepping, maxCo 0.2–0.4 | rhoPimpleFoam time-accurate when the low-Mach plenum dynamics dominate |
+| mass flow / Cd accuracy with a large near-stagnant plenum | rhoPimpleFoam (pressure-based, well behaved as M → 0) | — |
+
+Reasons:
+
+- **The low-Mach plenum.** A cold-gas thruster has a near-stagnant plenum
+  (M ≈ 0.02–0.06) feeding a Mach 3–6 expansion. Pressure-based
+  rhoPimpleFoam handles both ends. The density-based Kurganov–Tadmor scheme
+  in rhoCentralFoam is known to be dissipative and stiff as M → 0, and it
+  is explicit.
+- **rhoCentralFoam keeps its place.** It is the best shock capturer
+  available in stock OpenFOAM and is well validated on nozzles and jets
+  (Nair et al. 2022; Zang et al. 2018), so it stays as the transient solver
+  and the shock cross-check.
+- **rhoSimpleFoam is excluded.** Transonic SIMPLE is fragile for supersonic
+  flow with shocks, and LTS PIMPLE covers the same need more robustly.
+- **HiSA** (an implicit density-based solver) is a candidate plug-in later.
+  It lags OpenFOAM releases (validated up to v2512) and is weak at low Mach.
+
+The solver is an attribute of the solution strategy, chosen automatically
+from the physics definition. The user never picks an application name; the
+advanced mode can override.
+
+### 3.3 Nitrogen thermophysics
+
+- **Default thermophysics:**
+  - `hePsiThermo`, pure mixture, **perfectGas**, **hConst**, **sensibleInternalEnergy**
+  - molWeight 28.0134, Cp 1039.7 J/kg·K (JANAF, 300 K; ideal-gas N₂ cp varies by less than 0.5 % from 30 to 400 K)
+  - **sutherland** transport with As = 1.401×10⁻⁶, Ts = 107 K (N₂, not the
+    air values some tutorials use)
+- **Deliberately not JANAF polynomials.** OpenFOAM's `janafThermo` clamps T
+  to [Tlow, Thigh] with only a warning. The standard N₂ entry has
+  Tlow = 200 K, and cold-gas expansions go far below that, so it would
+  silently corrupt the solution.
+- **`sensibleInternalEnergy` is mandatory.** ESI rhoCentralFoam does not
+  validate the energy form and would silently misread an enthalpy-based
+  thermo. The case builder enforces this, and a unit test asserts it.
+- **Perfect-gas validity is checked, not assumed:**
+
+  | reservoir state | real-gas vs ideal choked mass flux | V1 action |
+  |---|---|---|
+  | 0.5 MPa | +0.2 % | none |
+  | 3 MPa | +1 % | warn |
+  | 10 MPa | +3.3 % | strong warning |
+
+  The Z table and cp/cv come from NIST data. A real-gas equation of state
+  (ESI Peng–Robinson, or tabulated properties) is a later option.
+- **Regulator Joule–Thomson cooling is surfaced.** Regulating from 30 MPa at
+  300 K to 0.5–3 MPa cools the gas to about 265–271 K. The inlet T₀ is
+  therefore an input the user must set deliberately. A helper estimates it
+  from bottle conditions.
+- **Condensation is detected, not modelled.** An isentropic expansion from
+  300 K reaches 37 K at ε = 50, below N₂'s triple point (63 K). The flow
+  crosses the saturation/sublimation line at roughly ε ≈ 15–25 depending on
+  p₀. The post-processor flags every cell with T < T_sat(p), reports the
+  area ratio where that first happens, and labels Isp beyond it as an upper
+  bound for a supersaturated vapour. Sutherland viscosity below about 60 K
+  is flagged as extrapolated.
+
+### 3.4 Turbulence and wall treatment
+
+- **Default: k-ω SST, wall-resolved (y⁺ ≲ 1). Laminar is a first-class
+  option, and the app recommends running both.**
+- **Why not SST alone:** the research didn't simply confirm SST as "the"
+  answer.
+  - Representative throat Reynolds numbers are about 7×10⁴ (1 mm throat,
+    0.5 MPa) to 3×10⁵ (2 mm, 1 MPa).
+  - The favourable pressure gradient near the throat has an acceleration
+    parameter K ≈ 10⁻⁵, above the ~3×10⁻⁶ relaminarisation threshold.
+  - Critical-flow-venturi data show laminar-to-turbulent transition at
+    Re ≈ 10⁶.
+  - So small-thruster boundary layers are likely laminar or relaminarising,
+    and a fully turbulent SST throat boundary layer is the *wrong* physics
+    there.
+- **The model-uncertainty bracket.** The engineering summary shows Cd and
+  thrust from laminar and SST side by side. That spread is a model
+  uncertainty and is reported as such.
+- **Why SST remains the turbulent default:**
+  - It is the best-behaved stock two-equation model for adverse pressure
+    gradients and separation (overexpanded ground tests).
+  - It works wall-resolved.
+  - It is available in both lineages.
+- **Known SST weaknesses, documented in the README:**
+  - separation location in overexpanded nozzles
+  - shock/boundary-layer interaction
+  - jet shear-layer spreading
+- **No stock compressibility correction exists** for SST in either lineage.
+- **Wall treatment:** wall-resolved by default. The mesh generator sizes the
+  first cell from a target y⁺ using the quasi-1D wall shear estimate, then
+  checks the achieved y⁺ from the solution. OpenFOAM has no
+  compressible-transformed wall function, so wall functions (Spalding) are
+  a fallback that is flagged in results.
+- **Swapping models later:** turbulence is a tagged union in the simulation
+  definition (`Laminar | KOmegaSST | SpalartAllmaras | …`). The adapter owns
+  how each maps to dictionaries and to the fields it needs (k, ω, ν̃, νt,
+  αt).
+
+### 3.5 Meshing: tiered, with mesh quality as a hard gate
+
+**Tier 1 — revolved nozzles (the dominant thruster case): generated
+structured hex.** This is the default.
+
+- **Why snappyHexMesh fails here:** its layer addition collapses exactly at
+  a CD throat. The medial-axis thickness limit starves the layers where wall
+  shear peaks. A public CD-nozzle case got 82 % layer coverage and y⁺ up to
+  31 at the throat. Snapped walls are also faceted.
+- **Profile extraction:**
+  - The geometry layer detects a revolved body (coaxial cone, cylinder,
+    torus, plane and revolution faces).
+  - It extracts the meridional profile r(x).
+  - It generates a block-structured mesh with `classy_blocks` (MIT) driving
+    blockMesh.
+- **Two meshes from one point distribution:**
+  - a **5° wedge** for verification and fast previews
+  - a **3D O-grid** (butterfly core, no axis singularity) for production 3D
+    runs
+- **Resolution** is set explicitly: throat, converging and diverging
+  refinement, and first-cell height from the target y⁺ with geometric
+  growth.
+- Wedge and 3D sharing one distribution makes wedge-vs-3D a clean
+  consistency test.
+
+**Tier 2 — arbitrary 3D fluid volumes (side ports, non-round
+features):** snappyHexMesh as an external process.
+
+- Surface and feature refinement are set from the detected throat and exit
+  scales.
+- The mesh is **accepted only if** it passes `checkMesh -writeChecks json`
+  gates **and** the snappy per-patch layer-coverage report meets thresholds
+  (for example ≥ 95 % coverage on nozzle walls, and no uncovered faces near
+  the throat). Otherwise the mesh is rejected with the reason shown.
+- Fallback: gmsh tetrahedra with extruded prism layers → MSH 2.2 ASCII →
+  `gmshToFoam`.
+- cfMesh (`cartesianMesh`, present in the v2512 apt build) is evaluated as
+  an alternative to snappy at this tier.
+
+**Tier 0 is not a mesh:** the quasi-1D solution computed from the detected
+area distribution. It runs instantly, gives the user expected numbers
+before meshing, initialises the solver, and is the reference for the sanity
+checks in section 4.6.
+
+**Mesh-quality gates:**
+
+| type | conditions |
+|---|---|
+| hard fail | any negative volume, wrong face orientation, open cells, more than one connected region, or missing patches |
+| warning | non-orthogonality > 65° |
+| fail | non-orthogonality > 70° unless non-orthogonal correctors are enabled |
+| warning / fail | skewness > 4 |
+| generator bug | any structured Tier-1 mesh with non-orthogonality > ~40° or skewness > ~1 |
+
+Every mesh gets a stored report: cell count, per-type counts, and max/mean
+non-orthogonality, skewness and aspect ratio, plus min determinant and
+region count. The report has a pass/warn/fail verdict. Solving is blocked on
+fail.
+
+### 3.6 Geometry import and validation
+
+- **STEP (preferred)** is read through the gmsh OCC kernel (pip wheel).
+  gmsh gives:
+  - import and healing (sew, fix small edges and faces, make solids)
+  - volumes and areas
+  - inertia axes (which recover the nozzle axis of a rotated part to 10⁻⁷)
+  - face types, booleans
+  - planar slicing for cross-section area
+- **Later:** OCP (OCCT 8 bindings, pip) adds `BRepCheck_Analyzer`, free-edge
+  analysis, self-interference, and `BOPAlgo_MakerVolume` for the "fill"
+  operation. It is added when those checks are needed, not in V1's first
+  cut.
+- **STL:**
+  - trimesh checks watertightness, winding consistency, positive volume,
+    connected components, duplicate faces and degenerate/sliver faces.
+  - OpenFOAM `surfaceCheck` handles self-intersection and multiply-connected
+    edges. trimesh cannot check self-intersection.
+- **Automatic suggestions**, always confirmed by the user in the UI:
+  - **axis:** the distinct principal axis of inertia
+  - **candidate inlet/outlet:** planar end faces normal to the axis at its
+    extremes
+  - **throat:** minimum cross-section area from slicing, refined by golden
+    section
+  - **inlet vs outlet** is *not* decided by area alone, since high-ε exits
+    are larger than chambers. It uses the steeper wall angle beside the
+    throat on the converging side, plus a constant-area chamber section, and
+    is always shown for confirmation.
+- **Fluid volume vs solid body** is classified from topology. A single solid
+  whose faces carry inner hole loops that enclose a passage is a solid body;
+  a closed solid with simple end disks is a fluid volume.
+- **V1 fully supports explicit fluid volumes.** For a solid body it offers a
+  *previewed* extraction:
+  1. Cap the opening loops.
+  2. Fragment against a bounding box.
+  3. Select the cavity containing the throat.
+  4. The user confirms or adjusts it, as in SpaceClaim's and SimScale's
+     seed-face workflows.
+  
+  The step fails loudly when it finds zero or several candidate cavities.
+  Why this is not automatic: blind holes, O-ring grooves, knife-edge exit
+  lips and multi-part assemblies all defeat it, and commercial tools do not
+  automate this either.
+- **gmsh licensing:** gmsh is GPL with a linking exception. It runs in a
+  worker subprocess, not in the UI process, which also isolates crashes in
+  CAD code.
+
+### 3.7 UI and visualization
+
+- **Stack:** PySide6 (LGPL) + pyvista/pyvistaqt (VTK, MIT/BSD) + pyqtgraph.
+- **Layout:** a desktop main window with a large central VTK viewport, a
+  project/run tree dock, and a staged workflow (Geometry → Physics →
+  Mesh → Run → Results) with property panels, tooltips and validation
+  badges.
+- **Plots:** live residual and integral-quantity plots use pyqtgraph.
+  Exported reports and line plots use matplotlib.
+- **Reading results:** the VTK OpenFOAM reader reads results directly (it
+  handles polyhedra, patches, time directories and decomposed cases), so
+  foamToVTK is not needed.
+- **Results tools, all exercised in the prototype:**
+  - slices and cutting planes
+  - glyphs (velocity vectors)
+  - streamlines
+  - line sampling (centreline and axial plots)
+  - point and cell picking (probe)
+  - per-patch actors (hide/show)
+  - scalar bars
+- **Probe values are cell values by default.** VTK point data is
+  interpolated from cells *and* wall patches, which misleads near walls.
+  Interpolated values are labelled as such.
+- **"Open in ParaView"** writes a `case.foam` and launches the user's
+  ParaView as an escape hatch. ParaView is not embedded: it is not
+  pip-installable and is hard to brand.
+- **Rejected:** trame as the V1 UI (trame 4 is three weeks old and the
+  pyvista bridge does not support it yet; it is the path for a later remote
+  client), and Electron + three.js (a second runtime and a hand-rolled
+  renderer).
+- **Decoupling:** the UI is a client of a UI-free core. The core emits typed
+  events and plain-data scene specifications. The Qt layer renders them. A
+  trame client could render the same specs later.
+
+### 3.8 Licensing posture
+
+OpenFOAM, gmsh and cfMesh are GPL and are only ever run as **external
+processes**. PySide6 is LGPL (dynamically linked). VTK, pyvista, trimesh,
+classy_blocks, numpy and scipy are permissive. **foamlib and PyFoam (GPL)
+are not dependencies**: we write our own small dictionary writer and our own
+runner. Neither streams logs the way we need or supports Windows pipes, so
+nothing is lost. If you intend to distribute closed-source builds, this
+keeps that option open (not legal advice).
+
+---
+
+## 4. Architecture
+
+### 4.1 Packages and dependency direction
+
+```
+sonicline/
+  core/            pure Python + numpy. NO OpenFOAM syntax, NO Qt, NO VTK.
+    units.py         SI internally; explicit unit types at every input boundary
+    gas.py           N2 property models (perfect gas, Sutherland, NIST Z table,
+                     saturation/sublimation curve, JT estimate)
+    theory/          quasi-1D isentropic, normal shock, shock-in-nozzle solver,
+                     Kliegel-Levine Cd, divergence factor, Fanno, ideal thrust/Cf/Isp
+    model/           the simulation definition (4.2) — dataclasses + JSON schema
+    validate/        pre-flight rule engine: geometry, BCs, physics, mesh, run
+  geometry/        STEP/STL import (gmsh-OCC, trimesh), healing, checks,
+                   axis/throat/opening detection, revolved-profile extraction,
+                   fluid-volume classification. Runs in a worker process.
+  mesh/            mesh strategies: RevolvedStructured (classy_blocks → blockMesh),
+                   Snappy, GmshTet; quality report + gates
+  foam/            THE ONLY PACKAGE THAT KNOWS OPENFOAM SYNTAX
+    dictwriter.py    deterministic FoamFile writer (sorted, fixed float format)
+    esi_v2512/       case builder: SimulationDefinition + Mesh → case directory
+    parse/           log parser, checkMesh JSON, function-object .dat readers
+  run/             process runner (local | WSL | Docker | later SSH), job
+                   state machine, cancellation, restart, run manifest
+  monitor/         incremental tailers for postProcessing/*.dat + log → typed
+                   events (Residual, Integral, LogLine, Stage, Finished)
+  post/            field access (VTK reader, cell-accurate), derived fields
+                   (isentropic p0, T0, condensation margin), surface integrals
+                   from solver fluxes, line samples
+  metrics/         propulsion metrics + trust verdict (4.6) — pure functions of
+                   post/ outputs and core/theory
+  project/         on-disk project store, run history, reopen
+  ui_qt/           PySide6 application — depends on everything above, nothing
+                   depends on it
+  cli.py           headless entry point: `sonicline run case.json` — the same
+                   pipeline the UI drives
+tests/  verification/  (section 5)
+```
+
+Rules, enforced by an import-linter test:
+
+- `core` imports nothing internal.
+- Only `foam/` writes or parses OpenFOAM syntax.
+- Only `post/` and `ui_qt/` import VTK.
+- Only `ui_qt/` imports Qt.
+- The CLI and the UI call the same pipeline functions.
+
+### 4.2 Simulation definition (independent of OpenFOAM)
+
+A versioned, JSON-serialisable tree of frozen dataclasses. Every
+dimensional value is stored in SI with its unit in the schema. A sketch:
+
+```python
+SimulationDefinition(schema_version=1,
+  geometry = GeometryRef(source_file, sha256, units="mm", kind=FLUID_VOLUME,
+                         axis=Axis(origin, direction), throat=Throat(x, area),
+                         face_groups={"inlet": [...], "outlet": [...], "wall": [...]}),
+  gas      = Gas(species="N2", eos=PerfectGas(), thermo=ConstantCp(1039.7),
+                 transport=Sutherland(As=1.401e-6, Ts=107.0)),
+  boundaries = [ReservoirInlet(patch="inlet", p0=1.0e6, T0=300.0),
+                SupersonicOutlet(patch="outlet") | PressureOutlet(patch, p=101325.0),
+                Wall(patch="wall", thermal=Adiabatic()), Symmetry(...), Ambient(...)],
+  flow     = Flow(time=Steady() | Transient(end_time, max_co),
+                  turbulence=Laminar() | KOmegaSST(inlet_intensity=0.02, ...)),
+  mesh     = MeshSpec(strategy=RevolvedStructured(form=O_GRID_3D | WEDGE),
+                      quality=Quality.STANDARD, first_cell=YPlusTarget(1.0),
+                      refinement={throat: ..., converging: ..., diverging: ...}),
+  numerics = Numerics(strategy="auto", convergence=ConvergenceCriteria(...)),
+  outputs  = Outputs(ambient_for_thrust=[0.0, 101325.0], centerline=True, ...),
+)
+```
+
+The case builder is a pure function:
+`build_case(definition, mesh) → CaseDirectory` with deterministic bytes. The
+same definition gives the same files, which is tested by hashing golden
+cases.
+
+### 4.3 Project on disk
+
+```
+MyThruster.sonicline/
+  project.json                     name, created, app version
+  geometry/<sha256>.step           imported files, content-addressed
+  simulations/<sim-id>/definition.json
+  runs/<run-id>/
+    manifest.json                  definition hash, app version + git commit, OpenFOAM
+                                   version/build, solver + strategy, mesh stats, host,
+                                   nProcs, decomposition, start/end, exit status, verdict
+    case/                          the generated OpenFOAM case (never hand-edited)
+    mesh_report.json   convergence.json   metrics.json   log/
+```
+
+Runs are immutable once finished. Reopening a run reads its manifest and
+metrics; the case directory is there for audit and for ParaView.
+
+### 4.4 Execution and monitoring
+
+- **Execution:**
+  - Each stage (mesh, checkMesh, decompose, solve, reconstruct, post) is a
+    separate subprocess, with the environment sourced from the pinned
+    OpenFOAM install.
+  - The run is a state machine: `Queued → Meshing → MeshChecked → Solving →
+    Converged | NotConverged | Diverged | Failed | Cancelled → PostProcessed`.
+  - Every transition is written to the manifest.
+- **Monitoring sources:**
+  - **Primary:** incremental readers of the function-object `.dat` files
+    (`solverInfo` residuals, and flux-based mass flow at inlet, throat and
+    outlet). They read from saved byte offsets and tolerate a half-written
+    last line.
+  - **Secondary:** the solver log, for the log panel and error extraction.
+  - The process exit code is always checked.
+- **Thrust is monitored live**, computed by our code from function-object
+  outputs.
+
+### 4.5 Metrics (all computed by us, from solver fluxes)
+
+- **Mass flow** at inlet, throat plane and outlet (via `fluxSummary` /
+  `surfaceFieldValue` on phi), their differences, and the mass-conservation
+  error.
+- **Thrust:** F = ∫(ρu·n)u_x dA + ∫(p − p_a) dA over the exit plane, split
+  into momentum and pressure terms. It is cross-checked against the
+  wall-force integral (`forces` on the wall patches) when the domain
+  includes a plume.
+- **Isp** at each requested ambient pressure.
+- **Discharge coefficient** against the ideal 1D value, and against
+  Kliegel–Levine for the detected Rc/Rt.
+- **CFD versus 1D:** thrust, Cf and exit Mach.
+- **Choking:** throat Mach (area-averaged and on the sonic surface),
+  whether the throat is choked, and where the sonic surface lies.
+- **Extremes:** max Mach, max velocity, min/max p and T.
+- **Exit plane:** mass-averaged exit Mach, p, T and u.
+- **Total pressure** from the isentropic relation.
+- **Condensation margin.**
+- **Achieved y⁺.**
+
+### 4.6 The trust verdict
+
+Every run ends with one of **Trusted**, **Trusted with warnings**, or **Not
+trustworthy**, plus the reasons. Numbers from a not-trustworthy run are
+shown greyed with the reason; they are never presented as a result.
+
+The verdict depends on:
+
+- **Convergence:**
+  - residuals dropped by ≥ N orders
+  - monitored integrals (inlet/outlet mass flow, thrust) flat to within a
+    tolerance over the last K iterations
+  - mass imbalance < 0.1 % (target < 10⁻⁵ for verification)
+  - no bounding messages in the last K iterations
+- **Mesh:** gates passed.
+- **Physics sanity:**
+  - An inviscid Cd greater than 1, or above Kliegel–Levine, is a hard fail.
+  - Throat Mach consistent with the choked/unchoked prediction.
+  - Achieved y⁺ consistent with the wall treatment.
+  - Condensation margin.
+  - Perfect-gas validity.
+  - Back-pressure regime: a separated-flow regime is flagged "model-sensitive".
+- **Divergence** (FPE, max iterations exceeded in the T solve, p hitting
+  pMin) is always a hard fail.
+
+---
+
+## 5. Verification and validation
+
+The main deliverable alongside the app. Three kinds of tolerance, kept
+separate:
+
+- **Code verification** compares CFD with exact or near-exact theory on the
+  finest grid, with a GCI estimate.
+- **Validation** compares CFD with experiment, or with theory that carries a
+  known model error.
+- **Regression** compares code with its own verified baseline.
+
+Build order:
+
+| # | case | reference | tolerance (initial) |
+|---|---|---|---|
+| V0 | analytical core unit tests | textbook tables, `propulsion/tools/rocket.py` cross-check | 1e-6 relative |
+| V1 | reference N₂ nozzle, inviscid, supersonic exit (the spike case, formalised) | quasi-1D + Kliegel–Levine Cd | Cd within 0.1 %; exit Mach 1 %; vacuum Cf 0.5 % |
+| V2 | NPARC CDV quasi-1D nozzle: unchoked (p/p₀ = 0.89), shock (0.75), supersonic (0.16) | NASA exact 1D solution files | p/p₀ and M within 1 % away from the shock; shock position within 2 cells or 1 % of divergent length |
+| V3 | shock at a prescribed back pressure in the reference nozzle (400 kPa, 600 kPa) | quasi-1D shock-in-nozzle | shock area ratio within 2 % |
+| V4 | converging nozzle, subsonic and choked | isentropic | 0.2 % mass flow |
+| V5 | throat Cd sweep over Rc/Rt = 0.625…4, inviscid | Kliegel–Levine | 0.1–0.2 % |
+| V6 | wedge vs 3D O-grid on the same distribution | self-consistency | 0.1 % mass flow, 0.3 % thrust |
+| V7 | solver cross-check: rhoPimpleFoam vs rhoCentralFoam on V1 and V3 | each other | 0.2 % mass flow; shock position within 2 cells |
+| V8 | Fanno duct and laminar developing duct flow | analytic / Shah–London | 2–3 % Δp |
+| V9 | viscous Cd of an ISO 9300 toroidal-throat venturi, laminar and SST | ISO 9300 Cd(Re), ±0.3 % | ±0.3 % |
+| E1 | Back, Massier & Gier 30°/15° and 45°/15° conical nozzles (JPL TR 32-654), wall p | digitised figures | 3–5 % divergent, 10 % throat region (tap-size limited) |
+| E2 | Cuffel, Back & Massier 45°/15° | measured Cd = 0.985 | ±1 % |
+| E3 | Mason, Putnam & Re, NASA TP-1704, 2D-CD nozzles (tabulated wall p, Cd, F/Fi) | tables | 0.5 % F/Fi attached |
+| E4 | Hunter 1998 separated 2D-CD nozzle | NASA data | 2–6 % thrust separated; ±5 % separation location |
+| E5 | Whalen NASA TM-100130: low-Re N₂ small nozzles (ε 25–200) | plotted Isp efficiency, Cd | tracked, not gated (low-Re regime) |
+
+**Grid convergence:**
+
+- Every V-case runs on three grids with refinement ratio ≥ 1.3.
+- Observed order and GCI follow Celik et al. (2008).
+- The asymptotic-range check is part of the pass criteria.
+
+**Regression rules:**
+
+- Compare normalised integrals (Cd, Cf, exit Mach, shock position), not raw
+  fields.
+- Pin the OpenFOAM version, nProcs and decomposition method.
+- Tolerance = max(floor, 3–5× the spread measured across machines).
+- Stay away from bistable operating points (the first critical pressure
+  ratio, the shock-at-exit limit, separation onset).
+
+**CI:**
+
+- A fast tier runs on every change to `sonicline/`: unit tests, golden-case
+  byte hashes, and V1/V4 on coarse wedges, a few minutes in total.
+- The full GCI suite runs nightly or on demand.
+- Both run in GitHub Actions on Ubuntu with OpenFOAM v2512 from the ESI apt
+  repo, following the `strata.yml` pattern.
+- A results table (CFD vs reference vs tolerance) is published as a CI
+  artifact.
+
+---
+
+## 6. Physics hazards the app must actively catch
+
+These came out of the research. They are where a naive tool would report
+confident nonsense:
+
+1. **Sea-level operation of a vacuum nozzle separates.**
+   - The ε = 6.25 reference nozzle at 1 atm has pₑ/pₐ = 0.15, well past the
+     Summerfield separation criterion.
+   - Quasi-1D gives 3.06 N attached. Real separated thrust is estimated at
+     3.5–3.8 N.
+   - With the domain ending at the exit plane and a fixed back pressure,
+     the answer is simply wrong.
+   - The validator detects the regime from the 1D back-pressure map. It
+     requires an external plume region with an ambient boundary for
+     overexpanded cases, and marks the result as separation-model-sensitive.
+2. **Condensation and supersaturation** at high area ratio (section 3.3).
+3. **Laminar or relaminarising boundary layers** in small thrusters
+   (section 3.4).
+4. **Joule–Thomson cooled inlet temperature** (section 3.3).
+5. **Real-gas bias** above about 3 MPa (section 3.3).
+6. **JANAF temperature clamping and energy-form mismatch** (section 3.3),
+   prevented by construction.
+7. **Unchoked operation mistaken for choked** (back pressure above the first
+   critical ratio). This is predicted before the solve and checked after.
+
+---
+
+## 7. Technical risks
+
+| risk | likelihood | mitigation |
+|---|---|---|
+| 3D wall-resolved meshes make runs long (10⁶–10⁷ cells) | high | wedge preview first; 90° sector with symmetry planes when the geometry allows; LTS; MPI decomposition; honest runtime estimate before starting |
+| Separated-flow predictions are RANS-model-sensitive | certain | detect the regime, bracket laminar/SST, label as model-sensitive, validate against Hunter/Mason |
+| Automatic geometry interpretation is wrong (inlet/outlet swap, wrong cavity) | medium | suggestions only, always confirmed; explicit zero/many failure paths |
+| snappyHexMesh unreliable on arbitrary geometry | medium–high | Tier 1 covers revolved nozzles without snappy; Tier 2 gated by quality + layer coverage; gmsh fallback |
+| OpenFOAM version churn | medium | pin v2512; one adapter package; regression suite gates upgrades |
+| Windows support (OpenFOAM via WSL2/Docker, path translation) | medium | runner abstraction from day one; Linux first; Windows after M4 |
+| Package size (~280 MB compressed with VTK + Qt) | low | acceptable for engineering software; trim VTK modules later |
+| GL problems on user machines (RDP, old drivers) | low–medium | software-rendering switch |
+| Verification tolerance flakiness across machines | medium | integral quantities, pinned decomposition, measured spread-based tolerances |
+
+---
+
+## 8. Implementation sequence
+
+Each milestone ends in something that runs and is tested. Nothing is
+counted as done until it passes its verification cases.
+
+**I recommend a different first milestone from the brief's.** Build the
+headless pipeline and its verification first, and the desktop UI second.
+The UI is the lowest-risk part: the prototype already embedded a VTK
+viewport and live plots in Qt. The unknowns are physics trust, meshing
+robustness and solver behaviour, and a UI built before those are settled
+would be built on sand. "Basic 3D visualisation" in M1 means off-screen
+pyvista renderings saved with each run, which are also the screenshot
+tests.
+
+**M0 — skeleton and analytical core (small)**
+- Scaffold `sonicline/`: pyproject with pinned dependencies, the package
+  layout above, import-linter rules, pytest, and a CI workflow.
+- Write `core/units`, `core/gas` and `core/theory`: quasi-1D, normal shock,
+  shock-in-nozzle solver, Kliegel–Levine, and the N₂ property tables.
+- Verify against textbook values and `propulsion/tools/rocket.py`.
+- Write the simulation-definition dataclasses with a JSON round-trip.
+- Update the root README and CLAUDE.md (a third project with its own
+  toolchain).
+
+**M1 — headless end-to-end on a known CD nozzle (the brief's milestone,
+minus the UI)**
+- **Input:** a revolved CD nozzle supplied as a STEP file (generated from a
+  known profile, so the true answer is known), plus a JSON definition.
+- **Geometry:** gmsh import → heal → checks → axis, throat and end-face
+  detection → profile extraction.
+- **Mesh:** Tier 1 structured mesh, both wedge and 3D O-grid →
+  checkMesh JSON → quality gates.
+- **Case build:** a deterministic ESI v2512 case with a quasi-1D
+  initialisation.
+- **Run:** rhoPimpleFoam transonic LTS, local runner, live monitor events on
+  the console.
+- **Post-processing:** p, Mach, T, ρ, μ, wall shear, mass flows, thrust
+  split, Isp, Cd vs 1D and Kliegel–Levine, and the trust verdict.
+- **Output:** `metrics.json`, a run manifest, and off-screen renderings of
+  Mach, p and T contours plus centreline plots.
+- **Acceptance:** V0, V1, V4 and V6 pass, with numbers published in the
+  README.
+
+**M2 — verification suite and shocks**
+- V2, V3, V5 and V7.
+- The rhoCentralFoam path.
+- Laminar vs SST viscous runs.
+- GCI automation.
+- A nightly CI tier.
+- Physics-hazard validators (section 6).
+- Viscous Cd case V9.
+
+**M3 — desktop application: Geometry → Physics → Mesh → Run**
+- PySide6 shell and project store (save, reopen, run history).
+- Geometry viewport with face picking and confirmation of suggestions.
+- Physics and BC panels with sensible defaults, tooltips and live
+  validation badges.
+- Mesh stage with progress and a quality report.
+- Run stage with a live residual/integral plot, log panel and cancel.
+- The UI calls the same pipeline as the CLI.
+
+**M4 — Results mode**
+- Field selector and contours on patches.
+- Legend with min/max.
+- Cutting planes and cross-sections.
+- Centreline and axial plots.
+- Vectors and streamlines.
+- Probe (cell values).
+- Hide/show surfaces.
+- Engineering summary panel with the trust verdict.
+- Report export (PDF/PNG + JSON).
+- Screenshot regression tests under Xvfb/OSMesa.
+
+**M5 — broader geometry**
+- STL path with surface checks.
+- General STEP fluid volumes.
+- Tier 2 meshing (snappyHexMesh with gates, gmsh fallback).
+- External plume region for sea-level and overexpanded cases.
+- Mass-flow inlet.
+- Prescribed wall temperature.
+
+**M6 — transient and solid bodies**
+- Transient runs (rhoCentralFoam) with time-series metrics and animation.
+- Previewed solid-to-fluid extraction.
+- Validation cases E1–E4.
+
+**Later:**
+- a real-gas EOS
+- solution-adaptive refinement
+- remote/cloud runner and a trame client
+- a Foundation-lineage adapter
+- other gases (the gas model is already parameterised; only N₂ is
+  validated)
+- an advanced mode exposing numerics
+
+---
+
+## 9. Decisions needed from you
+
+1. **Operating envelope.** Typical chamber pressures, throat sizes, area
+   ratios, and whether you care most about vacuum or ground-test (1 atm)
+   conditions. This sets the verification priorities and whether the plume
+   domain (M5) should move earlier.
+2. **Platforms.** Linux only at first, or is native Windows (with OpenFOAM in
+   WSL2) a requirement for V1?
+3. **Distribution.** Personal/internal tool or distributed binaries? This
+   only affects how strictly the GPL boundaries in 3.8 matter.
+4. **Name and location.** SONICLINE in `sonicline/` in this repository is a
+   working name. It is a Python desktop application, not a Pages site, so
+   like `strata/` it keeps its toolchain and CI to itself.
