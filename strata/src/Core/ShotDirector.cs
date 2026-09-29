@@ -136,6 +136,15 @@ public partial class ShotDirector : Node3D
         _shots.Add(("throne_room", L(0, 122, -14), L(0, 126, -40), 0.2f, 1f));
         _shots.Add(("village", L(-30, 80, 170), L(0, 72, 140), 0.12f, 1f));
         _shots.Add(("complex", L(170, 110, 110), L(236, 80, 34), 0.24f, 1f));
+        // From high up: the planet view.
+        var pad = site.PadWorld;
+        _shots.Add(("planet_1km", pad + new Vector3(-600, 1000, 900), pad + new Vector3(2500, 0, -3000), 0.2f, 1f));
+        _shots.Add(("planet_5km", pad + new Vector3(0, 5000, 0), pad + new Vector3(18000, 0, -9000), 0.2f, 1f));
+        _shots.Add(("planet_20km", pad + new Vector3(0, 20000, 0), pad + new Vector3(40000, 2000, -20000), 0.2f, 1f));
+        _shots.Add(("planet_20km_down", pad + new Vector3(0, 20000, 0), pad + new Vector3(12000, 0, 3000), 0.2f, 1f));
+        _shots.Add(("planet_60km", pad + new Vector3(0, 60000, 0), pad + new Vector3(30000, 0, 0), 0.2f, 1f));
+        _shots.Add(("planet_20km_dusk", pad + new Vector3(0, 20000, 0), pad + new Vector3(-40000, 2000, 5000), 0.49f, 1f));
+        _shots.Add(("planet_20km_night", pad + new Vector3(0, 20000, 0), pad + new Vector3(40000, 2000, -20000), 0.72f, 1f));
         _shots.Add(("complex_night", L(190, 90, 90), L(236, 90, 34), 0.72f, 1f));
     }
 
@@ -240,7 +249,8 @@ public partial class ShotDirector : Node3D
         _mobs.Daylight = 0f;   // no sunburn: the night-walkers are here to be looked at
         _mobs.Step(0.016f, null);
         _wait += delta;
-        bool ready = _view.Chunks.AreaReady(_cam.GlobalPosition, 6) && _view.Chunks.Jobs.Pending == 0;
+        bool high = _view.CameraAboveGround > 2000f;
+        bool ready = high ? _view.Far.Settled : _view.Chunks.AreaReady(_cam.GlobalPosition, 6) && _view.Chunks.Jobs.Pending == 0 && (_view.Lift < 0.01f || _view.Far.Settled);
         if (ready) _frames++;
         if ((_frames > 8 && _wait >= _settle) || _wait > 120)
         {

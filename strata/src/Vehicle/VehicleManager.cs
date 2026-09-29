@@ -23,6 +23,8 @@ public sealed partial class VehicleManager : Node3D
     public CamMode Cam = CamMode.Chase;
     private float _camDist = 70f;
     public Rocket HatchTarget { get; private set; }
+    /// <summary>Raised when the rocket being ridden comes round the planet and the view has to move with it.</summary>
+    public event Action<Vector3> Wrapped;
     public Rocket Riding => Game?.Player?.Riding as Rocket;
 
     private readonly List<AudioStreamPlayer3D> _big = new();
@@ -152,15 +154,31 @@ public sealed partial class VehicleManager : Node3D
         var p = Game.Player;
         if (p.Riding is Rocket r) { r.Seat.Occupant = null; r.Stick = Vector3.Zero; }
         p.Riding = null;
-        p.Camera.Far = 2400f;
         p.Camera.Near = 0.05f;
         p.Camera.Fov = Game.Settings.Fov;
     }
 
+    private float _stepOutArmed;
+
+    /// <summary>F aboard: out onto the ground or the crew arm. Up in space there is nowhere to step (and no suit): it asks twice.</summary>
     public void Exit()
     {
         var p = Game.Player;
         if (p.Riding is not Rocket r) return;
+        bool space = PhysicsWorld.Altitude(r.Body.Y) > PhysicsWorld.SpaceLine * 0.8f && r.Phase != FlightPhase.Landed;
+        if (space)
+        {
+            if (_stepOutArmed <= 0f)
+            {
+                _stepOutArmed = 3f;
+                Game.Hud.Toast(Game.Creative ? "No spacesuit. Press F again to go straight home (creative)" : "No spacesuit! Press F again to step out anyway", UiStyle.Bad);
+                Sfx.Ui("alarm", 0.5f);
+                return;
+            }
+            _stepOutArmed = 0f;
+            GoneForGood(r, "You stepped out into space without a suit.", stepped: true);
+            return;
+        }
         Unseat();
         var at = r.PointWorld(r.Seat.Exit);
         // Out onto the crew arm if there is one; otherwise wherever there is room.
@@ -175,6 +193,35 @@ public sealed partial class VehicleManager : Node3D
         p.Yaw = 90f;                 // facing back toward the hatch
         p.Pitch = 0f;
         Sfx.Play("door_open", at, 0.8f, 0.7f);
+        // Bailing out in flight, you take the seat's parachute with you.
+        if (r.Phase == FlightPhase.Flight && !r.Clamped && p.AboveGround() > 60f)
+        {
+            p.Chute = ChuteState.Packed;
+            Game.Hud.Toast($"Bailed out. The parachute opens by itself {Player.ChuteOpensAt:0} m above the ground", UiStyle.Accent);
+        }
+    }
+
+    /// <summary>
+    /// The rider leaves a rocket that cannot bring them back (stepping out in
+    /// space, or riding off beyond the planet's reach): in survival that is
+    /// the end of them; in creative they are put back on the ground at home.
+    /// </summary>
+    private void GoneForGood(Rocket r, string how, bool stepped)
+    {
+        var p = Game.Player;
+        bool aboard = p.Riding == r;
+        if (!aboard) return;
+        Unseat();
+        if (Game.Creative)
+        {
+            var home = Pad is Vector3 pad ? pad + new Vector3(-30f, 0f, 30f) : p.Spawn;
+            p.Teleport(new Vector3(home.X, Game.World.Gen.GroundY(V.FloorToInt(home.X), V.FloorToInt(home.Z)) + 1, home.Z));
+            Game.Hud.Toast(stepped ? "Back on the ground (creative)" : "The rocket is gone; you are home (creative)", UiStyle.Accent);
+            return;
+        }
+        p.Teleport(r.PointWorld(r.Seat.Local));
+        p.Vitals.Damage(1000f, DamageKind.Space, ignoreInvuln: true);
+        Game.Hud.Toast(how, UiStyle.Bad);
     }
 
     /// <summary>The rocket whose hatch the player is looking at and within reach of.</summary>
@@ -211,11 +258,20 @@ public sealed partial class VehicleManager : Node3D
         HatchTarget = FindHatch();
 
         if (Riding is Rocket ridden) Pilot(ridden, dt);
+        _stepOutArmed = Math.Max(0f, _stepOutArmed - dt);
 
         for (int i = All.Count - 1; i >= 0; i--)
         {
             var v = All[i];
             v.Step(w, dt);
+            if (v.Lost)
+            {
+                if (v is Rocket lost) { HandleEvents(lost); GoneForGood(lost, "You drifted off into the dark. The rocket was never seen again.", stepped: false); }
+                Remove(v);
+                continue;
+            }
+            // Round the planet and back onto the map's lap: whatever travels with it moves too.
+            if (v.Wrapped != Vector3.Zero && Riding == v) Wrapped?.Invoke(v.Wrapped);
             if (v is Rocket r)
             {
                 r.CheckDestroyed();
@@ -285,6 +341,16 @@ public sealed partial class VehicleManager : Node3D
             case Key.G: r.Go(); break;
             case Key.B: r.Abort(); break;
             case Key.T: r.Sas = !r.Sas; Game.Hud.Toast(r.Sas ? "Stability assist on" : "Stability assist OFF: you are flying it by hand", r.Sas ? UiStyle.Text : UiStyle.Bad); break;
+            case Key.P:
+                r.CycleSas();
+                Game.Hud.Toast(r.Mode switch
+                {
+                    SasMode.Prograde => "Assist: PROGRADE (nose along the direction of travel)",
+                    SasMode.Retrograde => "Assist: RETROGRADE (nose against the direction of travel)",
+                    _ => "Assist: hold attitude",
+                }, UiStyle.Text);
+                Sfx.Ui("switch", 0.6f);
+                break;
             case Key.V:
                 Cam = (CamMode)(((int)Cam + 1) % 3);
                 if (Cam == CamMode.Cockpit) { Game.Player.Yaw = -90f; Game.Player.Pitch = 10f; }
@@ -328,6 +394,21 @@ public sealed partial class VehicleManager : Node3D
                     Sfx.Play("slam", r.Origin, 0.9f);
                     if (aboard) Game.Hud.Toast(r.Status, UiStyle.Good);
                     break;
+                case "space":
+                    if (aboard) { Sfx.Ui("beep_go", 0.5f, 0.8f); Game.Hud.Toast("SPACE. Above the air: the sky turns black", UiStyle.Accent); }
+                    break;
+                case "orbit":
+                    if (aboard)
+                    {
+                        Sfx.Ui("beep_go", 0.6f); Sfx.Ui("beep_go", 0.4f, 1.5f);
+                        Game.Hud.Toast(r.Status, UiStyle.Good);
+                        Game.Hud.Toast("You can cut the engine: you will go round and round. To come down, P until RETROGRADE, then burn.", UiStyle.TextDim);
+                    }
+                    break;
+                case "deorbit": if (aboard) Game.Hud.Toast(r.Status, UiStyle.Accent); break;
+                case "lap": if (aboard) { Sfx.Ui("beep", 0.5f, 1.4f); Game.Hud.Toast(r.Status, UiStyle.Good); } break;
+                case "escape": if (aboard) { Sfx.Ui("alarm", 0.6f); Game.Hud.Toast("ESCAPE: faster than the planet can hold. Burn retrograde now or you will not come back", UiStyle.Bad); } break;
+                case "reentry": if (aboard) Game.Hud.Toast("Re-entry: keep the nose into the airflow (prograde)", UiStyle.Accent); break;
             }
         }
         r.Events.Clear();
@@ -346,7 +427,6 @@ public sealed partial class VehicleManager : Node3D
         p.Position = p.Body.Position;
         var cam = p.Camera;
         float agl = (float)(r.Origin.Y - Game.World.Gen.GroundY(V.FloorToInt(r.Origin.X), V.FloorToInt(r.Origin.Z)));
-        cam.Far = Math.Max(2400f, agl * 3f + 800f);
         var look = Basis.FromEuler(new Vector3(Mathf.DegToRad(p.Pitch), Mathf.DegToRad(p.Yaw), 0), EulerOrder.Yxz);
         var centre = r.PointWorld(new Vector3(0, 14f, 0));
         Transform3D t;
@@ -579,7 +659,7 @@ public sealed partial class VehicleManager : Node3D
             };
             if (v is Rocket r)
             {
-                s.Fuel = r.Tank.Amount; s.Throttle = r.Throttle; s.Sas = r.Sas; s.Clamped = r.Clamped;
+                s.Fuel = r.Tank.Amount; s.Throttle = r.Throttle; s.Sas = r.Sas; s.Mode = (int)r.Mode; s.Laps = r.Laps; s.Clamped = r.Clamped;
                 s.Occupied = r.Seat.Occupant != null;
                 // A countdown does not survive a reload: it comes back safe on the pad.
                 s.Phase = (int)(r.Phase == FlightPhase.Countdown ? FlightPhase.Safe : r.Phase);
@@ -605,7 +685,7 @@ public sealed partial class VehicleManager : Node3D
                 var r = new Rocket();
                 r.Tank.Amount = Math.Clamp(s.Fuel, 0f, r.Tank.Capacity);
                 r.Place(origin, rot);
-                r.Throttle = s.Throttle; r.Sas = s.Sas;
+                r.Throttle = s.Throttle; r.Sas = s.Sas; r.Mode = (SasMode)Math.Clamp(s.Mode, 0, 2); r.Laps = s.Laps;
                 r.Health = Math.Clamp(s.Health, 1f, r.MaxHealth);
                 r.Phase = (FlightPhase)s.Phase;
                 if (s.Clamped) r.Clamps.Engage(r); else r.Clamps.Release();

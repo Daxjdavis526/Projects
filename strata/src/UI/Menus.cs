@@ -146,6 +146,7 @@ public static partial class Menus
             DamageKind.Blast => "You were too close when it blew.",
             DamageKind.Exhaust => "You stood in the rocket's exhaust.",
             DamageKind.Crash => "You went down with your rocket.",
+            DamageKind.Space => "You were lost in space.",
             _ => "It happens.",
         };
         col.AddChild(UiStyle.Label(cause, 18, UiStyle.Text, HorizontalAlignment.Center));

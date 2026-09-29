@@ -165,9 +165,16 @@ void fragment() {
 
     public void Clear() { _nf = 0; _ns = 0; }
 
+    /// <summary>Everything in flight moves by this much (the view came round the planet).</summary>
+    public void Shift(Vector3 by)
+    {
+        for (int i = 0; i < _nf; i++) _fire[i].Pos += by;
+        for (int i = 0; i < _ns; i++) _smoke[i].Pos += by;
+    }
+
     public override void _Process(double delta)
     {
-        float dt = Math.Min((float)delta, 0.1f);
+        float dt = Math.Min((float)delta, 0.25f);          // as the game clock, so puffs keep pace with what left them
         Step(_fire, ref _nf, dt);
         Step(_smoke, ref _ns, dt);
         Draw();

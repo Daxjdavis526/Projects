@@ -4,17 +4,6 @@ using Godot;
 
 namespace Strata;
 
-/// <summary>The rules every moving thing in the world shares.</summary>
-public static class PhysicsWorld
-{
-    /// <summary>Gravity, m/s^2. The player, creatures and vehicles all fall by the same rule.</summary>
-    public const float Gravity = 28f;
-    public const float SeaDensity = 1.2f;       // air at sea level, kg/m^3
-    public const float ScaleHeight = 7000f;     // air thins by e every this many metres
-
-    public static float AirDensity(double y) => SeaDensity * MathF.Exp(-(float)Math.Max(0, y - V.SeaLevel) / ScaleHeight);
-}
-
 /// <summary>
 /// A component of a vehicle: something with mass at a place on it that may
 /// push on it each step (an engine, a wing), hold something (a tank, a seat),

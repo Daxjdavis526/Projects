@@ -237,17 +237,23 @@ engine down if it is not (try it at half throttle).
 | W S · A D | tip the nose away from you / toward you · left / right (relative to the view) |
 | Q · E | roll |
 | T | stability assist on / off |
+| P | what the assist holds: the attitude you left it in · prograde (the nose along the path) · retrograde (against it) |
 | V | camera: chase · capsule window · pad camera |
 | mouse · wheel | look around · zoom the chase camera |
 | H | show all of this on screen |
-| F | climb out |
+| F | climb out; in flight, bail out with the seat's parachute (not in space: there is no spacesuit, so it asks twice) |
 
 **The instruments** show altitude above the pad and above the ground, climb
 rate, speed, throttle, engine state and thrust, propellant and burn time left,
 mass and thrust-to-weight ratio, g-load (what an accelerometer aboard reads),
 dynamic pressure and angle of attack, hull integrity, the clamps' load, and a
-tilt dial with the nose and the flight path on it. Warnings flash for sink
-rate, attitude, low fuel, structural overload and hull damage.
+tilt dial with the nose and the flight path on it. Once off the pad they show
+the orbit as well: the highest point of the path and the time to it, the
+lowest point (under the ground, in the air, or clear of it), and the speed
+across the ground against the speed an orbit at this height needs, or, in
+orbit, the time a lap takes and the laps done. Warnings flash for sink rate,
+attitude, low fuel, structural overload, hull damage, re-entry heating and
+escape.
 
 **Things that go wrong.** Land faster than 10 m/s and the hull takes damage in
 proportion to the square of the excess; much faster and it breaks up. Let it
@@ -260,6 +266,58 @@ smoke, a flash that lights the landscape, wreckage that tumbles and burns
 knock-back to anything nearby, you included. Standing in the exhaust burns.
 The launch console at the foot of the tower (and in the bunker) rolls out a
 new rocket when the pad is empty, or refuels and repairs the one on it.
+
+### To orbit and back
+
+![In orbit 21 km up, a lap every seven and a half minutes; the planet from 60 km; dusk on the limb; coming back into the air, the hull glowing; bailing out, 1.2 km up; under the parachute](doc/orbit.jpg)
+
+The world is a flat map of a round planet 40 km in radius, and high up and
+fast the difference starts to matter. Gravity weakens with height (a quarter
+of it one planet-radius up), the air thins out and ends at 18 km, and
+anything moving sideways fast enough finds the ground curving away beneath it
+as fast as it falls. That is an orbit: about 860 m/s, 20 km up, once round the
+planet in seven and a half minutes.
+
+**Getting there.** Lift off at full throttle and, a few hundred metres up,
+tip the nose about ten degrees toward where you want to go (east is a good
+choice: see below), then press P for prograde: the assist holds the nose along the path, and gravity bends the path
+over for you. Watch HIGHEST: when it reaches about 21 km, cut the engine (X)
+and coast up. Near the top, light it again (Space) and burn level until
+LOWEST climbs clear of the air. **IN ORBIT**, the instruments say. A careful
+flight gets there with a tenth to a fifth of the propellant left. Straight up
+at full throttle does not reach orbit: it leaves the planet for good.
+
+**Going round.** In orbit nothing pushes or drags; the engine can stay off
+for as long as you like. The map repeats for anything in orbit, east–west
+and north–south, so the world has a far side you can see and come round
+from. Launched due east (or west, north or south), a lap brings you back over
+the launch complex; on a slant, each lap passes over different ground. The whole planet is drawn below you, out to its limb:
+the generator's own ground, seen from high up, bent round the curve of the
+planet, under a black sky full of stars, with a thin blue rim of air and the
+planet's clouds painted on it. Dusk walks across it as the day goes by.
+
+**Coming home.** Press P until the assist says RETROGRADE, let the nose
+swing round, and burn until LOWEST is well down into the air. Then P round to
+PROGRADE again before the air thickens (a finned rocket wants to fly nose
+first; tail first, the fins try to flip it over, and broadside the air tears
+it apart). Coming back into the air at orbital speed, the hull glows and
+trails plasma. The air slows it less than you might hope: nose first, a
+rocket this heavy and this slim still falls at several hundred metres a
+second near the ground. Landing it on its engine takes more propellant than
+a careful climb to orbit leaves, and a very good hand on the throttle. The
+sure way home is the seat's parachute.
+
+**Leaving.** There is no spacesuit. Above about 14 km, F only warns you;
+pressing it again steps you out into nothing, which in survival is the end of
+you (in creative it sends you home). Below that, F bails out and you take the
+seat's parachute with you. You fall at up to 60 m/s, and the far ground gives
+way to the real one as you come down, loaded before you get there. The
+parachute opens by itself 350 m above the ground and lets you down at
+5.5 m/s (the movement keys steer a little). The rocket goes on without you.
+
+**Too fast.** Burn too long and you pass the planet's escape speed: the
+warning says to cut the engine or burn retrograde, and past 300 km the
+rocket, and you, are not coming back.
 
 **How it works.** `src/Vehicle/` is a small general vehicle system; nothing in
 it but `Rocket.cs` and its drawing knows about rockets.
@@ -275,6 +333,17 @@ it but `Rocket.cs` and its drawing knows about rockets.
   or resolves the hull against the blocks. Hard contacts, aerodynamic
   overload and anything else a subclass checks become damage. At rest it
   sleeps until something pushes it or the ground under it goes.
+- `Planet` — gravity falling off as 1/r², the air (density 1.2 kg/m³ at sea
+  level, thinning by e every 2.5 km, gone at 18 km), circular and escape
+  speeds, and `Orbit`: from a position and a velocity, the highest and lowest
+  points of the path, its period and the time to the top, from its energy
+  and angular momentum. The round planet reaches the flat map through two
+  extra forces on every vehicle: a lift of v²/r from its speed across the
+  ground, and a drag of v·v<sub>up</sub>/r that keeps its angular momentum
+  as it climbs or falls. With those, and ground speed scaled by R/r (a lap
+  up high is longer than one at sea level but crosses the same map), motion
+  on the map is exactly motion round a sphere in the plane of travel. Above
+  12 km a vehicle that runs off one side of the lap comes back on the other.
 - `VoxelCollider` — hull points found inside solid blocks are pushed out
   through the nearest open face; the contacts are solved together with a few
   rounds of sequential impulses (normal and friction, accumulated and
@@ -299,12 +368,21 @@ it but `Rocket.cs` and its drawing knows about rockets.
 | The rocket | |
 |---|---|
 | height · diameter · fin span | 33.5 m · 3.4 m · 8.4 m |
-| mass: dry · propellant · full | 26 t · 32 t · 58 t |
-| thrust · exhaust velocity | 2.1 MN · 1,300 m/s (1,615 kg/s at full throttle) |
-| throttle range · gimbal | 30–100 % · ±5° |
-| thrust-to-weight at lift-off · at burn-out | 1.29 · 2.9 |
-| burn time at full throttle · Δv | 20 s · 1,070 m/s |
-| straight up at full throttle | apex about 5.5 km |
+| mass: dry · propellant · full | 26 t · 50 t · 76 t |
+| thrust · exhaust velocity | 2.8 MN · 2,600 m/s (1,077 kg/s at full throttle) |
+| throttle range · gimbal | 20–100 % · ±5° |
+| thrust-to-weight at lift-off · at burn-out (sea-level gravity) | 1.32 · 3.8 |
+| burn time at full throttle · Δv | 46 s · 2,790 m/s |
+| straight up at full throttle | escapes the planet |
+| a gravity turn to orbit | about 90 s, 10–20 % of the propellant left |
+
+| The planet | |
+|---|---|
+| radius · circumference | 40 km · 251 km |
+| gravity at sea level · 20 km up | 28 m/s² · 12.4 m/s² |
+| air: sea level · scale height · top | 1.2 kg/m³ · 2.5 km · 18 km |
+| circular orbit at 20 km: speed · lap | 864 m/s · 7.3 minutes |
+| escape speed at sea level · at 20 km | 1,497 m/s · 1,222 m/s |
 
 ## Creatures
 
@@ -426,13 +504,13 @@ of a save cannot leave a world unloadable.
 ## How it works
 
     project.godot, Main.tscn     settings and the one node that boots everything
-    shaders/                     voxel (opaque, cutout, water), sky, clouds, creatures, held items
+    shaders/                     voxel (opaque, cutout, water), sky, clouds, the planet from afar, creatures, held items
     src/Core/                    boot, app state, game loop, settings, saving, tests, self test, screenshot tools
     src/Data/                    the block, item and recipe registries; inventories
     src/Gen/                     noise, climate and biomes, terrain and caves, ores, trees, structures
     src/World/                   columns, the column pipeline, lighting, meshing, fluids, disk store
     src/Entity/                  player, collision, ray casts, creatures and their AI, dropped items
-    src/Render/                  procedural textures and icons, sky and atmosphere, particles, weather, overlays
+    src/Render/                  procedural textures and icons, sky and atmosphere, the far terrain, particles, weather, overlays
     src/UI/                      HUD, inventory and crafting screens, menus
     src/Audio/                   synthesised sound effects and ambience; the piano, the hall and the soundtrack
 
@@ -488,6 +566,26 @@ the view never makes stars wink on and off. By night the clouds are dim grey
 shapes that hide the stars behind them.
 
 ![Looking straight up at midnight: the Milky Way, a crescent moon, dim clouds](doc/night_sky.jpg)
+
+**The planet from high up.** On the ground the fog hides the edge of the
+loaded world, as block games do. Climb a few hundred metres and there is no
+hiding it, so the fog lifts and gives way to the air's own haze (worked out
+along the line of sight through air that thins with height over the round
+planet), and the rest of the world is drawn out to the horizon by
+`FarTerrain`: five square rings round the camera, each four times coarser than
+the one inside it (8 m to 2 km between points), sampled from the world
+generator itself on worker threads. Each point stands for the whole cell round
+it (an average of up to nine samples across it, placed at random within it),
+so from high up rivers and clearings do not turn into a mottle of specks.
+Each ring hides where the next finer one is drawn and wherever real block
+columns are loaded, and toward its edge it turns into the next ring out, so
+where one ends and the next begins there is no step and no seam. The shader
+bends the flat map round the planet below the camera, so from a rocket the
+ground curves away to a limb of blue haze; the sky goes black with height, the
+stars come out in daylight, a rim of air glows along the limb, and the
+planet's clouds are painted onto the ground from above. While the camera is
+high, or low and racing past, no new block columns are loaded: the far
+terrain stands in until you come down.
 
 **Sound** is synthesised at start-up at 22 kHz from oscillators, noise and
 envelopes: footsteps, digging, breaking and placing per material, splashes and
@@ -555,9 +653,10 @@ can set it off.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 692 checks, in a few seconds
+    godot --headless --path . -- --test                # 727 checks, in a few seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 79 checks and screenshots
-    godot --path . -- --flighttest OUTDIR              # flies rockets at the launch complex; checks and screenshots
+    godot --path . -- --flighttest OUTDIR              # flies rockets at the launch complex and to orbit; checks and screenshots
+                                                       # (--orbit: only the orbit; --creative: only creative mode)
     godot --headless --path . -- --bench               # pipeline costs per column
     godot --headless --path . -- --music OUTDIR        # the soundtrack as WAV files (--stems: melody, accompaniment, pad apart)
 
@@ -580,10 +679,18 @@ measuring the load, the thrust check holding a weak launch, ignition before
 T-0 and release at it, a climb under its own thrust with the assist keeping
 it upright, mass flow equal to thrust over exhaust velocity, acceleration
 rising as the tanks empty, the stick turning it the right way and the assist
-holding the new attitude, flame-out when dry, the apex of a vertical flight,
-a short drop surviving and a long one not, a leaning rocket toppling, a
-broadside break-up in the airflow, a crater, and a whole flight under uneven
-frames never going not-a-number.
+holding the new attitude, flame-out when dry, a vertical flight leaving the
+planet, a short drop surviving and a long one not, a leaning rocket toppling,
+a broadside break-up in the airflow, a crater, and a whole flight under uneven
+frames never going not-a-number. The planet: gravity and air with height, the
+orbit maths against the textbook (a circle, an ellipse and its period and
+time to the top, a fall, an escape), a body in circular orbit holding its
+height for a whole lap, weightless, and coming back over where it started
+after crossing the seam of the map, and a gravity turn to orbit flown by the
+rocket's own controls, keeping the sideways load well inside the structure's
+limit. The far terrain: it is the generator's ground, it repeats after a lap,
+it has no cliff at the seam, and a ring's edge meets the next ring out
+exactly.
 
 `--selftest` starts a real world with real rendering and plays the core loop
 with scripted input, the way a person would: hear a title piece start and fade
@@ -601,7 +708,12 @@ counts down with the keys, watches the engine light under the clamps and the
 clamps let go, steers with W, cuts the engine and rides it into the ground
 (checking the wreckage and the crater), then botches a launch on purpose with
 the assist off and full rudder, has a launch held at half
-throttle and climbs out, and then switches to creative mode: takes off with
+throttle and climbs out, and then goes to orbit: puts a rocket on a circular
+path 21 km up, checks the instruments call it an orbit, holds prograde with
+P, finds F only warns up there, flies it across the seam of the map (the
+camera and the planet below come with it), brings it back into the air fast
+enough to glow, steps out 6 km up and falls (the ground under the fall is
+loaded before it arrives). Then it switches to creative mode: takes off with
 a double tap, climbs, hovers and flies, breaks a block with one click (no
 drop), opens the block palette and places a block that is not used up.
 
@@ -673,16 +785,41 @@ copied.
   restarting the string. It is pleasant, but close listening gives it away.
 - **The rocket** is a rigid body with real forces, but its numbers are
   chosen for this world, whose gravity is 28 m/s² (2.9 times Earth's, so
-  that jumping feels right). An exhaust velocity of 1,300 m/s is about a
-  third of a real engine's, which keeps a flight to a few kilometres and a
-  couple of minutes instead of an orbit. The air is a single exponential
-  with a 7 km scale height; drag coefficients are constants with no Mach
-  effects, there is no heating, and the fins' lift is one linear slope with
-  angle of attack. Inertia comes from fixed radii of gyration scaled by the
+  that jumping feels right). A single stage with an exhaust velocity of
+  2,600 m/s (a little under a real kerosene engine's in vacuum, and the same
+  at every height) reaches orbit here only because the planet is tiny. The
+  air is a single exponential with a 2.5 km scale height that fades to
+  nothing between 13 and 18 km; drag coefficients are constants with no Mach
+  effects, and the fins' lift is one linear slope with angle of attack.
+  Re-entry heating is a glow and a trail of plasma, worked out from speed and
+  air density, and nothing more: it does no damage, and there is no heat
+  shield to think about (the airflow's sideways load can still break the
+  rocket). The seat's parachute is a limit on how fast you sink, with a
+  little steering: it has no canopy physics, it ignores the wind, and it
+  cannot be packed again. Inertia comes from fixed radii of gyration scaled by the
   current mass. Only the rocket, its wreckage and the ground collide:
   rockets do not hit each other, wreckage does not stack, and creatures and
   players do not stand on them. Rigid bodies touch the world only at their
   hull points, so a block's corner can poke between two of them.
+- **The planet** is round for anything moving fast and high, and flat for
+  everything else. The map is not wrapped onto a sphere: it is a flat plane
+  whose motion is corrected to be motion round a sphere in the plane of
+  travel, which is exact for any one orbit but not for the map as a whole.
+  Flying north and then east is not the same as on a globe, there are no
+  poles, and the map repeats in both directions every 251 km (it is a torus,
+  not a sphere) for anything above 12 km. Walking, the world goes on for ever
+  as before and never repeats; seen from orbit, the ground within 12 km of the
+  seam, 125 km out from the world's centre, is a blend of the two sides so
+  that there is no cliff, and it is not what you would find if you walked
+  there. The planet does not turn, so there is no free speed from launching
+  east and no Coriolis force, and the sun's path does not care where you
+  are. At 40 km across (in radius), it is tiny, so the horizon curves visibly
+  from a kilometre up and the planet looks like a ball from 20 km; a planet
+  the size of the Earth with this gravity would need orbits at 13 km/s. The
+  far terrain seen from above is the generator's ground only: no trees,
+  buildings or changes you made (though forests darken it), coarsening with
+  distance, and the painted clouds from above are not the clouds you fly
+  through near the ground.
 - **Explosions** remove blocks inside a ragged sphere shrunk by each block's
   hardness; nothing is shaken loose beyond that, and there is no fire spread.
 - **Exhaust and smoke** are soft billboards, not a fluid; they are stopped
@@ -704,6 +841,10 @@ copied.
 - A vehicle over ground that has not loaded yet collides with the terrain
   the generator would make there (buildings, caves and player changes not
   included), and a crater there is dug once the ground has loaded.
+- Only vehicles go round the planet: you can not walk or fly (in creative)
+  off the map's lap and come back round, and there is no spacesuit for
+  stepping out in space. A rocket in orbit is saved with the world and is
+  still going round when you come back to it.
 - Water only moves in loaded columns; a flow at the edge of the world you
   have loaded waits until you come back.
 - Columns are 256 tall: nothing above y = 255, and the Rootstone floor at

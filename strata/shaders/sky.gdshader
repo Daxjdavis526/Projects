@@ -16,6 +16,7 @@ global uniform float sky_spin;       // how far the heavens have turned, radians
 global uniform float moon_phase;
 global uniform float underwater;
 global uniform vec4 fog_color;
+global uniform float planet_radius;
 
 float hash3(vec3 p) {
     p = fract(p * vec3(443.897, 441.423, 437.195));
@@ -119,7 +120,13 @@ vec3 safe_color(vec3 c, float hi) {
 void fragment() {
     vec3 d = normalize(v_dir);
     float pix = max(length(fwidth(d)), 1e-5);   // radians per pixel, taken before anything branches
-    float h = d.y;
+    // Height changes the sky. The planet is round, so from high up the horizon (the limb) lies
+    // below level, and the gradient follows it; above the air the sky goes black.
+    float hc = max(CAMERA_POSITION_WORLD.y - 62.0, 0.0);
+    float space = smoothstep(3000.0, 17000.0, hc);
+    float dip = acos(clamp(planet_radius / (planet_radius + hc), 0.0, 1.0));
+    float above = asin(clamp(d.y, -1.0, 1.0)) + dip;          // angle above the limb
+    float h = sin(clamp(above, -1.5707, 1.5707));
     vec3 col = mix(sky_horizon.rgb, sky_top.rgb, smoothstep(-0.02, 0.55, h));
     // Below the horizon: the same haze, a little darker.
     col = mix(col, sky_horizon.rgb * 0.78, 1.0 - smoothstep(-0.25, 0.0, h));
@@ -127,8 +134,12 @@ void fragment() {
     // Glow around the sun, strongest when it is low.
     float sd = dot(d, sun_dir);
     float low = 1.0 - smoothstep(0.0, 0.5, abs(sun_dir.y));
-    col += sun_glow.rgb * pow(max(sd, 0.0), 6.0) * (0.25 + 0.6 * low) * smoothstep(-0.35, 0.05, sun_dir.y);
-    col += sun_glow.rgb * pow(max(sd, 0.0), 64.0) * 0.6;
+    col += sun_glow.rgb * pow(max(sd, 0.0), 6.0) * (0.25 + 0.6 * low) * smoothstep(-0.35, 0.05, sun_dir.y) * (1.0 - 0.8 * space);
+    col += sun_glow.rgb * pow(max(sd, 0.0), 64.0) * 0.6 * (1.0 - 0.5 * space);
+
+    // From high up: black overhead, and the thin shell of air seen edge-on as a bright rim along the limb.
+    float rim = exp(-max(above, 0.0) / mix(0.35, 0.045, space));
+    col = mix(col, sky_horizon.rgb * rim * mix(1.0, 0.95, space), space);
 
     // The sun: a hot disc with a soft rim.
     float disc = smoothstep(0.99955, 0.99975, sd);
@@ -136,11 +147,12 @@ void fragment() {
 
     // The night sky, in its own frame, turning with the sun and moon.
     vec3 night = vec3(0.0);
-    if (star_alpha > 0.001) {
+    float stars = max(star_alpha, space * 0.85);                // no air to hide them in daylight up there
+    if (stars > 0.001) {
         float cs = cos(sky_spin), sn = sin(sky_spin);
         vec3 s = vec3(cs * d.x + sn * d.y, -sn * d.x + cs * d.y, d.z);
         // Stars dim and redden toward the horizon, through more air.
-        float air = smoothstep(-0.03, 0.35, h);
+        float air = mix(smoothstep(-0.03, 0.35, h), smoothstep(-0.005, 0.02, above), space);
         vec3 redden = mix(vec3(1.0, 0.72, 0.55), vec3(1.0), air);
 
         // The Milky Way: a broad band of faint light round a great circle, broken
@@ -163,7 +175,7 @@ void fragment() {
         night += star_layer(s, 55.0, 0.35, 2.0, 41.0, pix);
         night *= redden * air;
         night += meteor(d, pix) * smoothstep(0.05, 0.25, h);
-        night *= star_alpha;
+        night *= stars;
     }
 
     // The moon, with a terminator from its phase and a little surface texture.

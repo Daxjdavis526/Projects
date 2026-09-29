@@ -90,6 +90,12 @@ public sealed class Atmosphere
 
     public void SetBloom(bool on) { if (_env?.Environment != null) _env.Environment.GlowEnabled = on; }
 
+    /// <summary>The sky sits just inside the camera's range, so it is behind everything drawn, however far.</summary>
+    public void SetRange(float far)
+    {
+        if (_dome != null) _dome.Scale = Vector3.One * (far * 0.92f / 1800f);
+    }
+
     /// <summary>Advances the clock and pushes every colour to the shaders.</summary>
     public void Update(double delta, Vector3 cam, float renderDistance, float brightness)
     {
@@ -162,9 +168,9 @@ public sealed class Atmosphere
         RenderingServer.GlobalShaderParameterSet("fog_color", fog.SrgbToLinear());
         RenderingServer.GlobalShaderParameterSet("fog_start", fogStart);
         RenderingServer.GlobalShaderParameterSet("fog_end", fogEnd);
-        // Looking straight down from high above (from a rocket), height should not count as distance,
-        // or the ground below vanishes into haze long before it is out of sight.
-        RenderingServer.GlobalShaderParameterSet("fog_vertical", 0.25f * (1f - Smooth.Step(140f, 520f, cam.Y)));
+        // How much a difference in height counts toward the fog's distance. (High up this fog gives
+        // way to the air's own haze altogether: see WorldView.Frame.)
+        RenderingServer.GlobalShaderParameterSet("fog_vertical", 0.25f);
         RenderingServer.GlobalShaderParameterSet("sun_dir", sun);
         RenderingServer.GlobalShaderParameterSet("moon_dir", moon);
         RenderingServer.GlobalShaderParameterSet("sky_top", top.SrgbToLinear());

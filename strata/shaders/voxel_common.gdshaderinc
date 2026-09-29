@@ -9,6 +9,8 @@ global uniform vec4 fog_color;
 global uniform float fog_start;
 global uniform float fog_end;
 global uniform float fog_vertical;  // how much height difference counts toward fog distance
+global uniform float fog_lift;      // 0 near the ground (the world's edge hidden in fog) .. 1 high up (only the air's own haze)
+global uniform float planet_radius; // the world is a flat map of a round planet this big
 global uniform float brightness;    // player setting
 global uniform float underwater;    // 1 while the camera is submerged
 global uniform vec4 dyn_light_pos;  // a moving light (a rocket's flame, a blast): xyz, and its reach in w (0: none)
@@ -95,6 +97,23 @@ vec3 safe_color(vec3 c, float hi) {
     return clamp(c, vec3(0.0), vec3(hi));
 }
 
+const float SEA_LEVEL = 62.0;
+
+// Haze in the air between the eye and a point: its optical depth through an
+// atmosphere that thins by e every 2.5 km, the line followed over the round
+// planet (so a view along the horizon passes through far more air than one
+// straight down). Sea-level air hides things about 26 km away.
+float air_haze(vec3 world, vec3 cam) {
+    vec3 centre = vec3(cam.x, SEA_LEVEL - planet_radius, cam.z);
+    vec3 a = cam - centre, b = world - centre;
+    float dens = 0.0;
+    for (int i = 0; i < 4; i++) {
+        float t = (float(i) + 0.5) * 0.25;
+        dens += exp(-max(length(mix(a, b, t)) - planet_radius, 0.0) / 2500.0);
+    }
+    return 1.0 - exp(-distance(world, cam) * dens * 0.25 / 26000.0);
+}
+
 float fog_amount(vec3 world, vec3 cam) {
     vec3 d = world - cam;
     float dist = length(d.xz) + abs(d.y) * fog_vertical;
@@ -102,6 +121,9 @@ float fog_amount(vec3 world, vec3 cam) {
     // Haze lies low: things standing high above the land (a tower, a peak) show through it
     // better, while the edge of the loaded world, down at ground level, stays hidden.
     f *= 1.0 - 0.75 * smoothstep(110.0, 210.0, world.y);
+    // High above the ground the edge of the world is no longer a secret (the far terrain fills
+    // it in), and only the air's own haze is left.
+    if (fog_lift > 0.001) f = mix(f, air_haze(world, cam), fog_lift);
     if (underwater > 0.5) f = max(f, 1.0 - exp(-length(d) * 0.085));
     return f;
 }

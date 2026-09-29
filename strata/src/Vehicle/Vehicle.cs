@@ -53,6 +53,12 @@ public abstract class Vehicle
     public Vector3 ProperAccel;                          // what an accelerometer aboard reads (m/s^2, world frame), smoothed
     public float GForce => ProperAccel.Length() / PhysicsWorld.Gravity;
     public bool Asleep;
+    /// <summary>Set for the frame in which the vehicle, in orbit, came round the planet and back onto the map's lap (what it moved by).</summary>
+    public Vector3 Wrapped;
+    /// <summary>Gone beyond the reach of the planet: the game stops simulating it.</summary>
+    public bool Lost;
+    public const float WrapAltitude = 12000f;            // only things this high come round the planet (no ground is loaded up there)
+    public const float LostAltitude = 300000f;           // beyond this a vehicle is given up for lost
 
     private readonly List<Vector3> _hullCom = new();
     private bool _reported;
@@ -144,10 +150,24 @@ public abstract class Vehicle
     public void Step(World w, float dt)
     {
         FrameImpact = 0f;
-        if (Destroyed) return;
+        Wrapped = Vector3.Zero;
+        if (Destroyed || Lost) return;
         int n = Math.Clamp((int)MathF.Ceiling(dt / SubStep), 1, 24);
         float h = dt / n;
         for (int i = 0; i < n && !Destroyed; i++) SubStepOnce(w, h);
+
+        float alt = PhysicsWorld.Altitude(Body.Y);
+        if (alt > LostAltitude) { Lost = true; return; }
+        // In orbit the map repeats: off one side of the lap, back on at the other.
+        if (alt > WrapAltitude)
+        {
+            var shift = PhysicsWorld.WrapShift(Body.X, Body.Z);
+            if (shift != Vector3.Zero)
+            {
+                Body.X += shift.X; Body.Z += shift.Z;
+                Wrapped = shift;
+            }
+        }
     }
 
     private void SubStepOnce(World w, float h)
@@ -166,7 +186,15 @@ public abstract class Vehicle
             else { ProperAccel = new Vector3(0, PhysicsWorld.Gravity, 0); return; }
         }
 
-        Body.AddForce(new Vector3(0, -PhysicsWorld.Gravity * Body.Mass, 0));
+        float g = PhysicsWorld.GravityAt(Body.Y);
+        Body.AddForce(new Vector3(0, -g * Body.Mass, 0));
+        // The round planet on the flat map: sideways speed lifts (the ground curves away beneath it),
+        // and climbing trades sideways speed for height as angular momentum is kept (see PhysicsWorld).
+        double radius = PhysicsWorld.PlanetRadius + PhysicsWorld.Altitude(Body.Y);
+        var vh = new Vector3(Body.Vel.X, 0, Body.Vel.Z);
+        var curve = new Vector3(0, (float)(vh.LengthSquared() / radius), 0) - vh * (float)(Body.Vel.Y / radius);
+        Body.AddForce(curve * Body.Mass);
+        Body.MapScale = (float)(PhysicsWorld.PlanetRadius / radius);
         foreach (var p in Parts) p.Step(this, h);
         var net = Body.PendingForce;
         var v0 = Body.Vel;
@@ -208,8 +236,9 @@ public abstract class Vehicle
             Damage(over * over * ImpactDamage, "hit the ground at " + rep.ImpactSpeed.ToString("0") + " m/s");
         }
 
-        // An accelerometer feels everything but gravity. Smoothed a little, as real ones are.
-        var a = (Body.Vel - v0) / h + new Vector3(0, PhysicsWorld.Gravity, 0);
+        // An accelerometer feels everything but gravity (and the map's curvature terms, which are
+        // gravity's work too): in orbit it reads nothing. Smoothed a little, as real ones are.
+        var a = (Body.Vel - v0) / h - curve + new Vector3(0, g, 0);
         if (a.Length() > PhysicsWorld.Gravity * 60f) a = a.Normalized() * PhysicsWorld.Gravity * 60f;   // one-step contact spikes
         ProperAccel = ProperAccel.Lerp(a, 1f - MathF.Exp(-h * 12f));
         _lastVel = Body.Vel;

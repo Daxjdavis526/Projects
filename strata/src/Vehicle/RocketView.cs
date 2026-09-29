@@ -7,16 +7,19 @@ namespace Strata;
 /// Draws a rocket and everything its engine throws out: the model, the flame
 /// (two glowing cones that lengthen with thrust and spread in thin air), a
 /// glow at the nozzle, fire and smoke puffs (which the pad and the flame
-/// trench deflect), the light the flame casts on the ground around it, and
-/// the roar. Reads the simulation; never changes it.
+/// trench deflect; no smoke where there is no air to hold it), the light the
+/// flame casts on the ground around it, and the roar. Coming back from orbit
+/// fast into the air, the hull glows, the air ahead of it burns white-orange
+/// and a trail of plasma streams off behind. Reads the simulation; never
+/// changes it.
 /// </summary>
 public sealed partial class RocketView : Node3D
 {
     public Rocket Rocket;
-    private MeshInstance3D _body, _flame, _core, _glow;
-    private ShaderMaterial _bodyMat, _flameMat, _coreMat, _glowMat;
+    private MeshInstance3D _body, _flame, _core, _glow, _heat;
+    private ShaderMaterial _bodyMat, _flameMat, _coreMat, _glowMat, _heatMat;
     private AudioStreamPlayer3D _roar;
-    private float _fireAcc, _smokeAcc;
+    private float _fireAcc, _smokeAcc, _plasmaAcc;
     private readonly Random _rng = new();
     private static ArrayMesh _model, _cone;
     private static readonly float[] Probes = { 4f, 12f, 20f, 28f };
@@ -45,6 +48,10 @@ public sealed partial class RocketView : Node3D
         _glowMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/glow_sprite.gdshader") };
         _glow = new MeshInstance3D { Mesh = new QuadMesh { Size = Vector2.One }, MaterialOverride = _glowMat, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off, Visible = false };
         AddChild(_glow);
+        _heatMat = new ShaderMaterial { Shader = _glowMat.Shader };
+        _heatMat.SetShaderParameter("color", new Color(1f, 0.52f, 0.34f));
+        _heat = new MeshInstance3D { Mesh = new QuadMesh { Size = Vector2.One }, MaterialOverride = _heatMat, CastShadow = GeometryInstance3D.ShadowCastingSetting.Off, Visible = false };
+        AddChild(_heat);
 
         _roar = new AudioStreamPlayer3D
         {
@@ -91,7 +98,20 @@ public sealed partial class RocketView : Node3D
         }
         _bodyMat.SetShaderParameter("light_level", new Vector2(sky / 15f, blk / 15f));
         float hurt = 1f - r.Health / r.MaxHealth;
-        _bodyMat.SetShaderParameter("flash", hurt > 0.5f ? (hurt - 0.5f) * 0.4f : 0f);
+        float heat = r.Destroyed ? 0f : r.Heat;
+        _bodyMat.SetShaderParameter("flash", Math.Max(hurt > 0.5f ? (hurt - 0.5f) * 0.4f : 0f, heat * 0.55f));
+
+        // Re-entry: the air rammed ahead of it glows, and plasma streams off the hull behind.
+        _heat.Visible = heat > 0.01f;
+        if (_heat.Visible)
+        {
+            var dir = r.Body.Vel.Normalized();
+            var lead = Leading(r, dir);
+            float hs = 10f + 28f * heat;
+            _heat.GlobalTransform = new Transform3D(Basis.Identity.Scaled(new Vector3(hs, hs, hs)), lead + dir * 1.5f);
+            _heatMat.SetShaderParameter("strength", 0.25f + 0.95f * heat);
+            Plasma(dt, ex, heat, lead, dir);
+        }
 
         float p = Power, thin = Thin;
         bool on = p > 0.005f && !r.Destroyed;
@@ -138,26 +158,69 @@ public sealed partial class RocketView : Node3D
         side = side.Normalized();
         var side2 = d.Cross(side).Normalized();
         Vector3 Disc(float rad) { float a = R(0, MathF.Tau), k = MathF.Sqrt(R(0, 1)) * rad; return side * MathF.Cos(a) * k + side2 * MathF.Sin(a) * k; }
-        var carry = r.Body.Vel;
+        var carry = r.Body.MapVel;
+        // Puffs made now are moved on once more this frame, as far as the rocket went in it:
+        // set them back by that, or at speed they would be drawn ahead of where they left.
+        var lag = carry * dt;
 
         _fireAcc += dt * 110f * p * ex.Density;
         while (_fireAcc >= 1f)
         {
             _fireAcc -= 1f;
             float along = R(0.5f, 6f);
-            ex.Fire(n + d * along + Disc(0.9f), carry + d * R(55f, 95f) + Disc(8f), R(0.25f, 0.5f), R(1.2f, 1.8f), R(3f, 5.5f) * (1f + thin),
+            ex.Fire(n - lag + d * along + Disc(0.9f), carry + d * R(55f, 95f) + Disc(8f), R(0.25f, 0.5f), R(1.2f, 1.8f), R(3f, 5.5f) * (1f + thin),
                 new Color(1f, R(0.6f, 0.85f), R(0.22f, 0.4f)), 2.2f, 3f);
         }
         // Smoke: thick, white and lingering near the ground (the pad's water turns to steam); a thin trail up high.
         float agl = (float)(n.Y - LaunchComplex.Deck);
         bool low = agl < 60f;
-        _smokeAcc += dt * (low ? 48f : 22f) * p * ex.Density * (1f - 0.7f * thin);
+        _smokeAcc += dt * (low ? 48f : 22f) * p * ex.Density * MathF.Sqrt(Math.Max(0f, 1f - thin));
         while (_smokeAcc >= 1f)
         {
             _smokeAcc -= 1f;
             float g = low ? R(0.82f, 0.95f) : R(0.62f, 0.75f);
-            ex.Smoke(n + d * R(3f, 10f) + Disc(1.5f), carry * 0.7f + d * R(30f, 55f) + Disc(6f), low ? R(9f, 16f) : R(4f, 7f),
+            ex.Smoke(n - lag * 0.7f + d * R(3f, 10f) + Disc(1.5f), carry * 0.7f + d * R(30f, 55f) + Disc(6f), low ? R(9f, 16f) : R(4f, 7f),
                 R(2.5f, 4f), low ? R(12f, 22f) : R(6f, 10f), new Color(g, g, g * 0.98f), low ? 0.6f : 0.35f, 1.1f, R(1f, 3f));
+        }
+    }
+
+    /// <summary>The point of the hull furthest along a direction: where the air hits first.</summary>
+    private static Vector3 Leading(Rocket r, Vector3 dir)
+    {
+        var best = r.PointWorld(Vector3.Zero);
+        float most = float.NegativeInfinity;
+        foreach (var h in r.Hull)
+        {
+            var w = r.PointWorld(h);
+            float d = w.Dot(dir);
+            if (d > most) { most = d; best = w; }
+        }
+        return best;
+    }
+
+    /// <summary>
+    /// Plasma off a hull ploughing into the air: bright puffs from the leading
+    /// edge, left behind as the air slows them. They are strewn along the
+    /// stretch the hull covered since the last frame, so the trail is unbroken
+    /// however far it goes in one.
+    /// </summary>
+    private void Plasma(float dt, Exhaust ex, float heat, Vector3 lead, Vector3 dir)
+    {
+        var carry = Rocket.Body.MapVel;
+        var side = dir.Cross(Vector3.Up);
+        if (side.LengthSquared() < 0.01f) side = dir.Cross(Vector3.Right);
+        side = side.Normalized();
+        var side2 = dir.Cross(side).Normalized();
+        _plasmaAcc += dt * 220f * heat * ex.Density;
+        while (_plasmaAcc >= 1f)
+        {
+            _plasmaAcc -= 1f;
+            float a = R(0, MathF.Tau), k = R(1.2f, 3f);
+            var round = side * MathF.Cos(a) * k + side2 * MathF.Sin(a) * k;
+            float white = R(0f, 1f) * heat;
+            float back = R(0f, 1f);
+            ex.Fire(lead + round - carry * dt * (1f + back), carry * R(0.9f, 0.97f) + round * R(3f, 8f), R(0.5f, 1.1f), R(3f, 5f), R(8f, 16f) * (0.6f + heat),
+                new Color(1f, 0.5f + 0.4f * white, 0.35f + 0.5f * white), 1.6f, 0f);
         }
     }
 }

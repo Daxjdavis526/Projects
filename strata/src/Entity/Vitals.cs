@@ -2,7 +2,7 @@ using System;
 
 namespace Strata;
 
-public enum DamageKind : byte { Generic, Fall, Drown, Starve, Lava, Cactus, Mob, Projectile, Void, Blast, Exhaust, Crash }
+public enum DamageKind : byte { Generic, Fall, Drown, Starve, Lava, Cactus, Mob, Projectile, Void, Blast, Exhaust, Crash, Space }
 
 /// <summary>
 /// Health, hunger, saturation and breath. Effort (sprinting, jumping, mining,

@@ -21,6 +21,15 @@ public sealed class RigidBody
     public Vector3 AngVel;                    // rad/s, world frame
     public float Mass = 1f;                   // kg
     public Vector3 Inertia = Vector3.One;     // principal moments about body x, y, z (kg m^2)
+    /// <summary>
+    /// How far across the map one metre of horizontal travel carries it: 1 on
+    /// the ground, R/(R+h) high up, where a lap of the planet is longer than
+    /// its circumference at sea level but crosses the same map.
+    /// </summary>
+    public float MapScale = 1f;
+
+    /// <summary>How fast it moves across the map (what anything left behind by it, drawn on the map, must match).</summary>
+    public Vector3 MapVel => new(Vel.X * MapScale, Vel.Y, Vel.Z * MapScale);
 
     private Vector3 _force, _torque;
     public const float MaxSpin = 60f;             // rad/s: nothing in this world turns faster than this
@@ -99,7 +108,7 @@ public sealed class RigidBody
         float e1 = w1.Dot(InertiaWorld(w1));
         if (e1 > 1e-12f && e0 > 0f) w1 *= MathF.Sqrt(e0 / e1);
         AngVel = (w1 + InvInertiaWorld(_torque) * dt).LimitLength(MaxSpin);
-        X += Vel.X * dt; Y += Vel.Y * dt; Z += Vel.Z * dt;
+        X += Vel.X * dt * MapScale; Y += Vel.Y * dt; Z += Vel.Z * dt * MapScale;
         var w = AngVel;
         var dq = new Quaternion(w.X, w.Y, w.Z, 0f) * Rot;
         Rot = new Quaternion(Rot.X + 0.5f * dq.X * dt, Rot.Y + 0.5f * dq.Y * dt, Rot.Z + 0.5f * dq.Z * dt, Rot.W + 0.5f * dq.W * dt).Normalized();

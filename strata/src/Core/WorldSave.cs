@@ -20,7 +20,7 @@ public sealed class VehicleSave
     public float Sx, Sy, Sz;                         // a wreck's size
     public float Fuel, Health = 100f, Throttle = 1f;
     public bool Clamped, Occupied, Sas = true;
-    public int Phase;
+    public int Phase, Mode, Laps;
 }
 
 public sealed class PlayerSave

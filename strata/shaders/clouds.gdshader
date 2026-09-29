@@ -49,5 +49,8 @@ void fragment() {
     vec3 lit = mix(vec3(0.028, 0.031, 0.043), vec3(1.0) * clamp(daylight * 1.1, 0.0, 1.0), day);
     vec3 col = mix(sky_horizon.rgb, lit * cloud_shade.rgb, 0.85) * (0.86 + 0.14 * edge);
     ALBEDO = safe_color(col, 1.0);
-    ALPHA = mix(0.7, 0.82, day) * fade * (underwater > 0.5 ? 0.0 : 1.0);
+    // A flat deck that follows the camera: from high above it would show as a patch; it fades
+    // out as you climb, and the far terrain paints the planet's own clouds instead.
+    float above = 1.0 - smoothstep(380.0, 820.0, CAMERA_POSITION_WORLD.y);
+    ALPHA = mix(0.7, 0.82, day) * fade * above * (underwater > 0.5 ? 0.0 : 1.0);
 }

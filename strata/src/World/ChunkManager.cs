@@ -19,6 +19,8 @@ public sealed class ChunkManager : IDisposable
     public readonly Node3D Root;
     public readonly JobQueue Jobs;
     public int Radius = 8;
+    /// <summary>High above the ground or racing across it, no new columns are made (they could not be seen, or would be passed before they were ready).</summary>
+    public bool Suspended;
     public Material OpaqueMat, CutoutMat, WaterMat;
 
     private readonly ConcurrentQueue<(Chunk c, bool ok)> _genDone = new();
@@ -96,6 +98,13 @@ public sealed class ChunkManager : IDisposable
         LastUpdateMs = (Time.GetTicksUsec() - t0) / 1000.0;
     }
 
+    /// <summary>Whether a column is loaded, meshed and on show (the far terrain keeps out of these).</summary>
+    public bool Shown(int cx, int cz)
+    {
+        var c = World.GetChunk(cx, cz);
+        return c != null && c.State == ChunkState.Meshed && Dist(cx, cz) <= Radius + 1.2f;
+    }
+
     /// <summary>Whether every column within r of the point is meshed (spawn waits on this).</summary>
     public bool AreaReady(Vector3 p, int r)
     {
@@ -127,7 +136,7 @@ public sealed class ChunkManager : IDisposable
         // Create what is missing, nearest first.
         foreach (var (dx, dz, d) in _ring)
         {
-            if (d > GenRadius) break;
+            if (d > GenRadius || Suspended) break;
             int cx = _pcx + dx, cz = _pcz + dz;
             long key = V.Key(cx, cz);
             if (World.Chunks.ContainsKey(key)) continue;

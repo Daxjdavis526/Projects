@@ -173,6 +173,13 @@ public sealed partial class Game : Node3D
                 }
 
         Vehicles.Load(Meta);
+        Vehicles.Wrapped += by =>
+        {
+            // Round the planet in orbit: the view moves with the rocket (the far terrain repeats, so nothing jumps).
+            View.Shift(by);
+            Vehicles.Exhaust.Shift(by);
+            Particles.Clear();
+        };
         Player.Vitals.Immortal = Creative;
 
         Settings.ApplyDisplay();
@@ -222,6 +229,7 @@ public sealed partial class Game : Node3D
             if (State == GameState.Playing) Player.Step(dt);
             Mobs.Step(dt, State == GameState.Playing ? Player : null);
             Vehicles.Step(dt);
+            View.Frame(Player.Camera, dt);
             Drops.Step(dt, World, Player);
             Weather.Step(dt, this);
             World.TickEntities(dt);

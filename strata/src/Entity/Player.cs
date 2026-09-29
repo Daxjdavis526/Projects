@@ -3,6 +3,9 @@ using Godot;
 
 namespace Strata;
 
+/// <summary>A bail-out parachute: none, packed on your back, or open overhead.</summary>
+public enum ChuteState : byte { None, Packed, Open }
+
 /// <summary>
 /// The person in the world: first-person movement over the voxel body,
 /// mouse look, and everything the hands do — mine, place, use, fight, eat.
@@ -29,6 +32,11 @@ public sealed partial class Player : Node3D
     public Vehicle Riding;                  // aboard a vehicle: it carries you, and your keys fly it
     public bool Flying;                     // creative mode only
     public const float FlySpeed = 11f, FlyFastSpeed = 26f;
+    /// <summary>Bailing out of a rocket in flight you take the seat's parachute, which opens by itself near the ground.</summary>
+    public ChuteState Chute;
+    public const float ChuteOpensAt = 350f, ChuteSink = 5.5f;   // m above the ground; m/s under the canopy
+    private MeshInstance3D _canopy;
+    private float _chuteOpen;               // seconds since it opened (it takes a moment to fill)
     private double _lastJumpTap = -1;
     private bool Creative => G != null && G.Creative;
 
@@ -86,7 +94,48 @@ public sealed partial class Player : Node3D
         Camera.AddChild(_hand);
         _held = new MeshInstance3D { CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
         Camera.AddChild(_held);
+        var canopyMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://shaders/entity.gdshader") };
+        canopyMat.SetShaderParameter("light_level", new Vector2(1f, 0f));
+        _canopy = new MeshInstance3D { Mesh = CanopyMesh(), MaterialOverride = canopyMat, Visible = false, Position = new Vector3(0, 7f, 0), CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
+        AddChild(_canopy);
         Vitals.Hurt += OnHurt;
+    }
+
+    /// <summary>A round canopy in orange and white gores, and the lines down to the harness (both sides of everything drawn).</summary>
+    private static ArrayMesh CanopyMesh()
+    {
+        var st = new SurfaceTool();
+        st.Begin(Mesh.PrimitiveType.Triangles);
+        const int gores = 16, rows = 5;
+        const float radius = 3.8f, height = 1.7f;
+        var orange = new Color(0.96f, 0.46f, 0.12f);
+        var white = new Color(0.95f, 0.93f, 0.88f);
+        var line = new Color(0.82f, 0.82f, 0.8f);
+        Vector3 P(int i, int j)
+        {
+            float a = i * MathF.Tau / gores, t = j / (float)rows * MathF.PI / 2f;
+            return new Vector3(MathF.Cos(a) * radius * MathF.Sin(t), height * MathF.Cos(t), MathF.Sin(a) * radius * MathF.Sin(t));
+        }
+        void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Color col)
+        {
+            foreach (var v in new[] { a, b, c, a, c, d, a, c, b, a, d, c }) { st.SetColor(col); st.AddVertex(v); }
+        }
+        for (int i = 0; i < gores; i++)
+            for (int j = 0; j < rows; j++)
+                Quad(P(i, j), P(i + 1, j), P(i + 1, j + 1), P(i, j + 1), i % 2 == 0 ? orange : white);
+        // The lines run in toward the risers, which meet well above your head (drawn any closer,
+        // a line a few centimetres thick fills the view).
+        var risers = new Vector3(0, -3.3f, 0);
+        for (int i = 0; i < gores; i += 2)
+        {
+            var rim = P(i, rows);
+            var end = rim.Lerp(risers, 0.85f);
+            var across = new Vector3(-rim.Z, 0, rim.X).Normalized() * 0.012f;
+            Quad(rim - across, rim + across, end + across, end - across, line);
+            var outward = new Vector3(rim.X, 0, rim.Z).Normalized() * 0.012f;
+            Quad(rim - outward, rim + outward, end + outward, end - outward, line);
+        }
+        return st.Commit();
     }
 
     public Player()
@@ -100,6 +149,16 @@ public sealed partial class Player : Node3D
         Body.Vel = Vector3.Zero;
         Body.FallDistance = 0;
         _fallStartY = feet.Y;
+        Chute = ChuteState.None;
+    }
+
+    /// <summary>Height of the feet above the ground below (the loaded ground, or the generator's where none is loaded).</summary>
+    public float AboveGround()
+    {
+        int x = V.FloorToInt(Body.X), z = V.FloorToInt(Body.Z);
+        var c = W.ChunkAt(x, z);
+        float ground = c != null && c.State >= ChunkState.Generated ? W.HeightAt(x, z) : W.Gen.GroundY(x, z);
+        return (float)(Body.Y - ground);
     }
 
     // --- input -----------------------------------------------------------------------------
@@ -157,6 +216,8 @@ public sealed partial class Player : Node3D
         if (Riding != null)
         {
             // Carried: the vehicle places the body and the camera.
+            Chute = ChuteState.None;
+            _canopy.Visible = false;
             Vitals.Tick(dt, false);
             BreakProgress = 0; Eating = 0; Draw = 0;
             Target = default; TargetMob = null;
@@ -178,6 +239,19 @@ public sealed partial class Player : Node3D
         if (!G.InputBlocked) Hands(dt);
         else { BreakProgress = 0; Eating = 0; Draw = 0; }
         UpdateViewmodel(dt);
+        UpdateCanopy(dt);
+    }
+
+    /// <summary>The open canopy overhead: it fills out over a moment, then sways a little.</summary>
+    private void UpdateCanopy(float dt)
+    {
+        bool open = Chute == ChuteState.Open;
+        _canopy.Visible = open;
+        if (!open) return;
+        _chuteOpen += dt;
+        float fill = Smooth.Step(0f, 0.8f, _chuteOpen);
+        _canopy.Scale = new Vector3(0.25f + 0.75f * fill, 0.4f + 0.6f * fill, 0.25f + 0.75f * fill);
+        _canopy.Rotation = new Vector3(MathF.Sin(_chuteOpen * 0.9f) * 0.05f, 0f, MathF.Sin(_chuteOpen * 0.7f + 1f) * 0.05f);
     }
 
     private void Physics(float dt)
@@ -254,7 +328,22 @@ public sealed partial class Player : Node3D
             if (!b.OnGround && new Vector2(v.X, v.Z).Length() > speed && wish.LengthSquared() > 0.01f) k *= 0.3f;
             v.X += (target.X - v.X) * k;
             v.Z += (target.Z - v.Z) * k;
-            v.Y = Math.Max(v.Y - Gravity * dt, -TerminalSpeed);
+            if (Chute == ChuteState.Packed && v.Y < -8f && AboveGround() < ChuteOpensAt)
+            {
+                Chute = ChuteState.Open;
+                _chuteOpen = 0f;
+                Sfx.Play("flap", EyePosition, 1f, 0.45f);
+                G.Hud.Toast("Parachute open", UiStyle.Good);
+            }
+            if (Chute == ChuteState.Open)
+            {
+                // Under the canopy: it snatches you down to a gentle sink (a few g for a second or so),
+                // and the keys steer a little. Nothing is fallen from while it holds you.
+                v.Y = v.Y < -ChuteSink ? Mathf.MoveToward(v.Y, -ChuteSink, dt * 40f) : Math.Max(v.Y - Gravity * dt, -ChuteSink);
+                b.FallDistance = 0;
+                _fallStartY = b.Y;
+            }
+            else v.Y = Math.Max(v.Y - Gravity * dt, -TerminalSpeed);
 
             if (_jumpBuffer > 0f && _coyote > 0f)
             {
@@ -287,6 +376,7 @@ public sealed partial class Player : Node3D
         }
 
         // Falling and landing.
+        if (Chute != ChuteState.None && (b.OnGround || b.InWater || Flying)) Chute = ChuteState.None;
         if (b.OnGround)
         {
             if (!groundedBefore || !_wasOnGround)

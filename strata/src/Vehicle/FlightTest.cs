@@ -11,8 +11,11 @@ namespace Strata;
 /// real input: a showcase world is made, the player is put on the crew arm,
 /// boards through the hatch, arms, counts down, lifts off, steers, cuts the
 /// engine and rides it down. A second rocket is rolled out from the console
-/// and held on the pad by a thrust check. Screenshots all the way.
-/// Run with: godot --path strata -- --flighttest [outdir]
+/// and held on the pad by a thrust check. A fourth goes round the planet:
+/// in orbit, across the seam where the map meets itself, back into the air
+/// glowing, and its rider steps out and falls to the ground. Screenshots all
+/// the way.
+/// Run with: godot --path strata -- --flighttest [outdir] [--orbit | --creative]
 /// </summary>
 public partial class FlightTest : Node
 {
@@ -106,12 +109,14 @@ public partial class FlightTest : Node
         G.View.Sky.Time = 0.2;       // mid-morning
 
         if (OS.GetCmdlineUserArgs().Contains("--creative")) { await Creative(); await Finish(); return; }
+        if (OS.GetCmdlineUserArgs().Contains("--orbit")) { await Orbit(); await Finish(); return; }
         var site = W.Gen.Landmarks;
         var pad = site.PadWorld;
         var r = G.Vehicles.OnPad();
         Check(r != null, "a rocket stands on the pad");
         if (r == null) { await Finish(); return; }
         Check(r.Clamped && r.Phase == FlightPhase.Safe && r.Tank.Fraction > 0.999f, "clamped, safe and fuelled");
+        float m0 = r.Body.Mass;
 
         // Up the tower: the crew arm reaches the hatch.
         var exit = r.PointWorld(r.Seat.Exit);
@@ -161,7 +166,7 @@ public partial class FlightTest : Node
         await GameSeconds(2f);
         await Shot("climb_chase");
         float m1 = r.Body.Mass;
-        Check(m1 < 58000f - 5000f, $"propellant is being burned ({m1 / 1000:0.0} t)");
+        Check(m1 < m0 - 5000f, $"propellant is being burned ({m0 / 1000:0.0} t to {m1 / 1000:0.0} t)");
 
         // Steer: W pushes the nose away from the view.
         var up0 = r.Body.Up;
@@ -238,7 +243,10 @@ public partial class FlightTest : Node
             await Frames(10);
             Check(!P.Body.Colliding(W), "into free space by the hatch");
         }
+        // Round the planet.
+        await Orbit();
         // Creative mode, switched on from the pause menu's button.
+        await Revive();
         await Creative();
 
         // Night on the pad.
@@ -250,6 +258,105 @@ public partial class FlightTest : Node
         await Frames(10);
         await Shot("pad_at_night", ui: false);
         await Finish();
+    }
+
+    /// <summary>
+    /// In orbit and back: a rocket put on a circular path above the air stays
+    /// on it; P swings its nose onto the path; F there only warns (no suit);
+    /// half a lap out it crosses the seam where the map meets itself and the
+    /// view comes with it; fast back into the air its hull glows. Then its
+    /// rider steps out 6 km up and falls: the far ground gives way to real
+    /// ground on the way down, loaded before it arrives.
+    /// </summary>
+    private async Task Orbit()
+    {
+        await Revive();
+        var r = Rollout();
+        Check(r != null, "a rocket rolled out for orbit");
+        if (r == null) return;
+        await Board(r);
+        var pad = G.Vehicles.Pad.Value;
+        float high = V.SeaLevel + 21000f;
+        float vc = PhysicsWorld.CircularSpeed(high);
+        Place(r, new Vector3(pad.X, high, pad.Z), new Vector3(vc, 0f, 0f));
+        P.Yaw = -90f; P.Pitch = -18f;                  // behind it, looking along its path
+        await GameSeconds(1.5f);
+        Check(r.Phase == FlightPhase.Flight && r.Path.Stable, $"at {vc:0} m/s level, 21 km up, it is in orbit ({r.Path.Periapsis / 1000:0.0} by {r.Path.Apoapsis / 1000:0.0} km)");
+        await Key(Godot.Key.P);
+        Check(r.Mode == SasMode.Prograde && r.Sas, "P: the assist holds the nose along the path");
+        await GameSeconds(6f);
+        float off = Mathf.RadToDeg(r.Body.Up.AngleTo(r.Body.Vel));
+        Check(off < 6f, $"and swings it round onto it ({off:0.0} degrees off)");
+        double alt0 = r.Altitude;
+        await GameSeconds(6f);
+        Check(Math.Abs(r.Altitude - alt0) < 60.0 && r.Path.Stable, $"going round, neither climbing nor falling ({r.Altitude - alt0:+0;-0} m)");
+        await Key(Godot.Key.F);
+        Check(P.Riding == r, "F up here only warns: there is no spacesuit");
+        Check(await Until(() => G.View.Far.Settled, 90f), "the planet below is drawn");
+        await Shot("orbit_chase");
+        P.Pitch = -65f;
+        await Frames(3);
+        await Shot("orbit_down");
+
+        // Half a lap out, the seam: the map comes round to meet itself.
+        float C = PhysicsWorld.Circumference;
+        Place(r, new Vector3(C / 2f - 2500f, high, pad.Z), new Vector3(vc, 0f, 0f));
+        P.Pitch = -18f;
+        int wraps = 0;
+        var shift = Vector3.Zero;
+        void OnWrap(Vector3 by) { wraps++; shift = by; }
+        G.Vehicles.Wrapped += OnWrap;
+        await Until(() => G.View.Far.Settled, 90f);
+        await Shot("orbit_seam_before");
+        var rel0 = P.Camera.GlobalPosition - r.Origin;
+        bool crossed = await UntilGame(() => wraps > 0, 15f);
+        G.Vehicles.Wrapped -= OnWrap;
+        await Frames(2);
+        var rel1 = P.Camera.GlobalPosition - r.Origin;
+        Check(crossed && Math.Abs(shift.X + C) < 1f, $"across the seam it comes round to the far side of the map ({shift.X / 1000:0.0} km)");
+        Check(r.Origin.X < -C / 2f + 6000f && r.Path.Stable, $"still in orbit, now at x {r.Origin.X / 1000:0.0} km");
+        Check((rel1 - rel0).Length() < 40f && G.View.Far.AnyReady, "the camera comes with it and the planet stays drawn");
+        await GameSeconds(1f);
+        await Shot("orbit_seam_after");
+
+        // Back into the air, fast: the hull glows and trails plasma.
+        Place(r, new Vector3(pad.X + 30000f, V.SeaLevel + 9000f, pad.Z), new Vector3(850f, -60f, 0f));
+        P.Yaw = 0f; P.Pitch = -8f;                     // from the side
+        await GameSeconds(1.2f);
+        Check(r.Heat > 0.2f, $"back in the air at {r.Body.Vel.Length():0} m/s the hull heats ({r.Heat:0.00})");
+        await Shot("reentry");
+
+        // Out 6 km up (below the line a suit would be needed) and down.
+        var drop = pad + new Vector3(1500f, 0f, -1500f);
+        Place(r, new Vector3(drop.X, V.SeaLevel + 6000f, drop.Z), new Vector3(300f, 0f, 0f));
+        await Frames(2);
+        await Key(Godot.Key.F);
+        Check(P.Riding == null && !P.Dead && P.Chute == ChuteState.Packed, "F bails out, 6 km up, with the seat's parachute");
+        P.Pitch = -40f; P.Yaw = 30f;
+        float Agl() => P.AboveGround();
+        foreach (float mark in new[] { 4500f, 2500f, 1200f, 600f, 350f, 200f, 120f, 60f })
+        {
+            if (!await UntilGame(() => P.Dead || Agl() < mark, 150f) || P.Dead) break;
+            if (mark == 200f) Check(P.Chute == ChuteState.Open && P.Body.Vel.Y > -Player.ChuteSink - 1f, $"the parachute opened by itself ({P.Body.Vel.Y:0.0} m/s)");
+            if (mark == 60f) Check(G.View.Chunks.AreaReady(P.Body.Position, 2), "the ground under the fall is loaded before it arrives");
+            if (mark == 200f) { P.Pitch = 70f; await Frames(2); await Shot("under_the_canopy"); P.Pitch = -40f; }
+            await Shot($"fall_{mark:0}m");
+        }
+        Check(await UntilGame(() => P.Dead || P.Body.OnGround || P.Body.InWater, 90f) && !P.Dead && P.Chute == ChuteState.None,
+            $"and comes down alive under it ({P.Vitals.Health:0} health)");
+    }
+
+    /// <summary>Puts a rocket somewhere in flight, nose along its path, as if it had flown there.</summary>
+    private static void Place(Rocket r, Vector3 origin, Vector3 vel)
+    {
+        if (r.Clamped) r.Clamps.Release();
+        r.Phase = FlightPhase.Flight;
+        var rot = vel.LengthSquared() > 1f ? new Quaternion(Vector3.Up, vel.Normalized()) : Quaternion.Identity;
+        r.Body.Rot = rot;
+        r.Body.Position = origin + rot * r.Com;
+        r.Body.Vel = vel;
+        r.Body.AngVel = Vector3.Zero;
+        r.Wake();
     }
 
     /// <summary>Puts the camera at an offset from a point, looking at it, and takes a picture after a wait (wall time: game time stops for the dead).</summary>

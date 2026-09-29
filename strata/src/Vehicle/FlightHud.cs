@@ -6,10 +6,11 @@ namespace Strata;
 /// <summary>
 /// The instruments while flying: altitude, climb rate, speed, throttle and
 /// engine state, propellant, mass and thrust-to-weight, g-load, dynamic
-/// pressure, hull, clamps and assist; a tilt indicator that shows where the
-/// nose and the flight path point; the countdown; and warnings. Out of the
-/// seat it only offers the hatch. Everything shown is read straight from the
-/// simulation.
+/// pressure, hull, clamps and assist; once free of the pad, the orbit (its
+/// highest and lowest points, the sideways speed an orbit needs, the time a
+/// lap takes); a tilt indicator that shows where the nose and the flight path
+/// point; the countdown; and warnings. Out of the seat it only offers the
+/// hatch. Everything shown is read straight from the simulation.
 /// </summary>
 public sealed partial class FlightHud : Control
 {
@@ -76,8 +77,9 @@ public sealed partial class FlightHud : Control
         var e = r.Engine;
 
         // --- the left panel: numbers ---
-        float x0 = 18, y = vp.Y * 0.2f, w = 330, line = 25;
-        DrawRect(new Rect2(x0 - 10, y - 30, w, line * 14 + 26), Back);
+        bool flying = r.Phase == FlightPhase.Flight && !r.Clamped;
+        float x0 = 18, y = vp.Y * 0.16f, w = 350, line = 24;
+        DrawRect(new Rect2(x0 - 10, y - 30, w, line * (flying ? 16 : 14) + 26), Back);
         Text(new Vector2(x0, y - 6), PhaseName(r), 21, r.Phase == FlightPhase.Destroyed ? Alarm : UiStyle.Accent);
         y += line;
         void Row(string label, string value, Color? c = null)
@@ -86,7 +88,7 @@ public sealed partial class FlightHud : Control
             Text(new Vector2(x0 + 86, y), value, 18, c ?? Ink);
             y += line;
         }
-        Row("ALTITUDE", $"{alt - LaunchComplex.Deck:N0} m   ({agl:N0} m above ground)");
+        Row("ALTITUDE", $"{Dist(alt - LaunchComplex.Deck)}   ({Dist(agl)} above ground)");
         Row("CLIMB", $"{(vs >= 0 ? "+" : "")}{vs:0.0} m/s", vs < -25 && agl < 400 ? Alarm : null);
         Row("SPEED", $"{b.Vel.Length():0} m/s");
         Text(new Vector2(x0, y), "THROTTLE", 16, Dim);
@@ -108,13 +110,19 @@ public sealed partial class FlightHud : Control
         Bar(new Vector2(x0 + 86, y - 11), 120, r.Health / r.MaxHealth, r.Health < 50 ? Alarm : UiStyle.Good);
         Text(new Vector2(x0 + 214, y), $"{r.Health:0}%", 18, Ink);
         y += line;
-        Row("CLAMPS", r.Clamped ? $"HELD   load {r.Clamps.Load / 1000:+0;-0} kN" : "released");
-        Row("ASSIST", r.Sas ? "on (holding attitude)" : "OFF", r.Sas ? null : Warn);
-        Row("MISSION", r.Phase == FlightPhase.Flight || r.Phase == FlightPhase.Landed ? $"T+{Clock(r.MissionTime)}   best {r.MaxAltitude - LaunchComplex.Deck:N0} m" : "--");
+        if (flying) OrbitRows(r, x0, ref y, line);
+        else Row("CLAMPS", r.Clamped ? $"HELD   load {r.Clamps.Load / 1000:+0;-0} kN" : "released");
+        Row("ASSIST", !r.Sas ? "OFF" : r.Mode switch
+        {
+            SasMode.Prograde => "PROGRADE: nose along the path",
+            SasMode.Retrograde => "RETROGRADE: nose against it",
+            _ => "on: holding attitude",
+        }, r.Sas ? null : Warn);
+        Row("MISSION", r.Phase == FlightPhase.Flight || r.Phase == FlightPhase.Landed ? $"T+{Clock(r.MissionTime)}   best {Dist(r.MaxAltitude - LaunchComplex.Deck)}" : "--");
 
         // --- top centre: the count, or the status ---
         string big = r.Phase == FlightPhase.Countdown ? (r.T > 0 ? $"T-{Math.Ceiling(r.T):0}" : "T-0") : r.Phase == FlightPhase.Flight && r.MissionTime < 4f ? "LIFT-OFF" : "";
-        float top = vp.Y * 0.2f + 20;
+        float top = vp.Y * 0.16f + 20;
         if (big != "") Text(new Vector2(0, top + 40), big, 54, r.T <= 3 && r.Phase == FlightPhase.Countdown ? UiStyle.Accent : Ink, HorizontalAlignment.Center, vp.X);
         if (r.Status != big && !r.Status.StartsWith("T-")) Text(new Vector2(0, top + (big != "" ? 76 : 20)), r.Status, 20, Ink, HorizontalAlignment.Center, vp.X);
 
@@ -124,6 +132,9 @@ public sealed partial class FlightHud : Control
         if (load > Rocket.AeroLimit) warn = "STRUCTURAL OVERLOAD: STRAIGHTEN UP";
         else if (!r.Clamped && agl < 250 && vs < -12 && vs * -4f > agl) warn = "SINK RATE";
         else if (!r.Clamped && r.Body.Up.Y < 0.2f && agl < 400 && r.Phase == FlightPhase.Flight) warn = "ATTITUDE";
+        else if (r.Heat > 0.35f) warn = "RE-ENTRY HEATING";
+        else if (flying && r.Path.Escaping && alt - V.SeaLevel > PhysicsWorld.SpaceLine * 0.5f)
+            warn = e.Burning ? "ESCAPE SPEED: CUT THE ENGINE" : "LEAVING THE PLANET: BURN RETROGRADE";
         else if (fuel < 0.1f && fuel > 0 && e.Burning) warn = "LOW FUEL";
         else if (r.Health < 40) warn = "HULL DAMAGE";
         if (warn != null && blinkOn) Text(new Vector2(0, vp.Y * 0.33f), warn, 30, Alarm, HorizontalAlignment.Center, vp.X);
@@ -134,21 +145,67 @@ public sealed partial class FlightHud : Control
         string help = ShowHelp
             ? "R arm / disarm   G countdown   B abort   Space engine on/off   X cut throttle   Z full\n" +
               "Shift / Ctrl throttle up / down   W S A D steer (relative to the view)   Q E roll\n" +
-              "T stability assist   V camera (chase, window, pad)   mouse wheel zoom   F climb out   H hide help"
+              "T stability assist   P assist mode (hold, prograde, retrograde)   V camera   mouse wheel zoom\n" +
+              "F climb out   H hide help"
             : "H: controls";
         var lines = help.Split('\n');
         for (int i = 0; i < lines.Length; i++)
             Text(new Vector2(0, vp.Y - 110 - (lines.Length - 1 - i) * 24), lines[i], 17, ShowHelp ? Ink : Dim, HorizontalAlignment.Center, vp.X);
     }
 
+    /// <summary>
+    /// The orbit, once off the pad: how high the path climbs and how low it
+    /// comes down, and how close the sideways speed is to what an orbit at
+    /// this height needs (a lap of the planet, once it is there).
+    /// </summary>
+    private void OrbitRows(Rocket r, float x0, ref float y, float line)
+    {
+        var o = r.Path;
+        float vs = r.Body.Vel.Y;
+        Text(new Vector2(x0, y), "HIGHEST", 16, Dim);
+        if (o.Escaping) Text(new Vector2(x0 + 86, y), "none: leaving the planet", 18, Alarm);
+        else
+        {
+            // (A circle has no highest point to wait for.)
+            string when = o.Apoapsis - o.Periapsis < 200f ? "" : o.Stable || vs > 0f ? $"   in {Clock(o.TimeToApoapsis)}" : "   (passed)";
+            Text(new Vector2(x0 + 86, y), $"{o.Apoapsis / 1000:0.0} km{when}", 18, Ink);
+        }
+        y += line;
+        Text(new Vector2(x0, y), "LOWEST", 16, Dim);
+        string low = o.Periapsis < 0f ? "under the ground: falls back"
+            : o.Periapsis < PhysicsWorld.SpaceLine ? $"{o.Periapsis / 1000:0.0} km: in the air"
+            : $"{o.Periapsis / 1000:0.0} km: clear of the air";
+        Text(new Vector2(x0 + 86, y), low, 18, o.Periapsis >= PhysicsWorld.SpaceLine ? UiStyle.Good : o.Periapsis >= 0f ? Warn : Dim);
+        y += line;
+        Text(new Vector2(x0, y), "ORBIT", 16, Dim);
+        float across = new Vector2(r.Body.Vel.X, r.Body.Vel.Z).Length();
+        if (o.Stable)
+        {
+            Bar(new Vector2(x0 + 86, y - 11), 60, 1f, UiStyle.Good);
+            Text(new Vector2(x0 + 154, y), $"lap {Clock(o.Period)}   done {r.Laps}", 18, UiStyle.Good);
+        }
+        else
+        {
+            Bar(new Vector2(x0 + 86, y - 11), 60, across / Math.Max(1f, o.CircularSpeed), o.Escaping ? Alarm : new Color(0.5f, 0.85f, 0.95f));
+            Text(new Vector2(x0 + 154, y), $"{across:0} of {o.CircularSpeed:0} m/s level", 18, Ink);
+        }
+        y += line;
+    }
+
     private static string Clock(float t) => $"{(int)(t / 60)}:{(int)(t % 60):00}";
+
+    /// <summary>A height or distance: metres close to, kilometres further off.</summary>
+    private static string Dist(float m) => MathF.Abs(m) >= 10000f ? $"{m / 1000:0.0} km" : $"{m:N0} m";
 
     private static string PhaseName(Rocket r) => r.Phase switch
     {
         FlightPhase.Safe => r.Clamped ? "ON THE PAD · SAFE" : "SAFE",
         FlightPhase.Armed => "ARMED",
         FlightPhase.Countdown => "COUNTDOWN",
-        FlightPhase.Flight => r.Engine.Burning ? "POWERED FLIGHT" : "COASTING",
+        FlightPhase.Flight => r.Path.Escaping && PhysicsWorld.Altitude(r.Body.Y) > PhysicsWorld.SpaceLine ? "ESCAPE TRAJECTORY"
+            : r.Path.Stable ? (r.Engine.Burning ? "IN ORBIT · BURNING" : "IN ORBIT")
+            : r.Engine.Burning ? "POWERED FLIGHT"
+            : PhysicsWorld.Altitude(r.Body.Y) > PhysicsWorld.SpaceLine ? "COASTING IN SPACE" : "COASTING",
         FlightPhase.Landed => "LANDED",
         _ => "DESTROYED",
     };
@@ -205,7 +262,8 @@ public sealed partial class FlightHud : Control
             DrawArc(vpnt, 8, 0, MathF.Tau, 16, r.Body.Vel.Y >= 0 ? UiStyle.Good : Alarm, 2f);
         }
         float tiltDeg = Mathf.RadToDeg(MathF.Acos(Math.Clamp(nose.Y, -1f, 1f)));
-        Text(new Vector2(c.X - rad, c.Y + rad + 30), $"TILT {tiltDeg:0}°", 17, tiltDeg > 60 ? Warn : Ink, HorizontalAlignment.Center, rad * 2);
+        bool low = PhysicsWorld.Altitude(r.Body.Y) < 3000f;          // leaning far over is only a worry near the ground
+        Text(new Vector2(c.X - rad, c.Y + rad + 30), $"TILT {tiltDeg:0}°", 17, tiltDeg > 60 && low ? Warn : Ink, HorizontalAlignment.Center, rad * 2);
         Text(new Vector2(c.X - rad, c.Y - rad - 14), "nose ●   path ○", 14, Dim, HorizontalAlignment.Center, rad * 2);
     }
 }

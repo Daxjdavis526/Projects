@@ -6,6 +6,9 @@ namespace Strata;
 
 public enum FlightPhase : byte { Safe, Armed, Countdown, Flight, Landed, Destroyed }
 
+/// <summary>What the stability assist points the rocket at when the stick is let go.</summary>
+public enum SasMode : byte { Hold, Prograde, Retrograde }
+
 /// <summary>
 /// A single-stage liquid-fuelled rocket with a crew capsule: one gimballed
 /// engine fed from one tank, reaction wheels, four fins, a seat, and the pad's
@@ -16,17 +19,20 @@ public enum FlightPhase : byte { Safe, Armed, Countdown, Flight, Landed, Destroy
 ///
 /// The flight computer runs the launch sequence (safe, armed, countdown,
 /// ignition, thrust check, clamp release) and a stability-assist loop that
-/// turns the pilot's stick into rotation rates, and holds attitude when the
-/// stick is let go, by swinging the engine and spinning the wheels. It can be
-/// switched off, and flying with it off is much harder.
+/// turns the pilot's stick into rotation rates, and when the stick is let go
+/// holds the attitude it had, or keeps the nose on the direction of travel
+/// (prograde) or against it (retrograde), by swinging the engine and spinning
+/// the wheels. It can be switched off, and flying with it off is much harder.
 ///
 /// Numbers (in this world, gravity is 28 m/s^2, 2.9 times Earth's):
 ///   height 33.5 m, body radius 1.7 m, fin span 8.4 m
-///   dry 26 t (structure 17, engine 3.5, capsule 5.5), propellant 32 t
-///   thrust 2.1 MN, exhaust velocity 1300 m/s, burn 20 s at full throttle
-///   thrust-to-weight 1.29 at lift-off, 2.9 at burn-out
-///   delta-v 1070 m/s; straight up at full throttle it tops out near 5.5 km
-///   (the thrust check and spool-up on the pad burn about 3 t of that).
+///   dry 26 t (structure 17, engine 3.5, capsule 5.5), propellant 50 t
+///   thrust 2.8 MN, exhaust velocity 2600 m/s, burn 46 s at full throttle
+///   thrust-to-weight 1.32 at lift-off, 3.8 at burn-out; throttles to 20 %
+///   delta-v 2790 m/s. A circular orbit just above the air (18 km) needs
+///   879 m/s; a gravity turn gets there in about a minute and a half with
+///   a tenth to a fifth of the propellant left. Straight up at full
+///   throttle it escapes the planet.
 /// </summary>
 public sealed class Rocket : Vehicle
 {
@@ -46,6 +52,7 @@ public sealed class Rocket : Vehicle
     public float T;                              // countdown: seconds to lift-off (negative after it)
     public float Throttle = 1f;                  // what the pilot has set, 0..1
     public bool Sas = true;
+    public SasMode Mode = SasMode.Hold;
     public Vector3 Stick;                        // pilot's rotation command, world frame: axis × rate fraction (set each frame)
     public float MaxRate = 0.35f, MaxRoll = 0.7f;   // rad/s at full stick
     public float MissionTime;                    // seconds since lift-off
@@ -74,10 +81,10 @@ public sealed class Rocket : Vehicle
         Engine = Add(new Thruster
         {
             Name = "engine", Local = new Vector3(0, 0.8f, 0), DryMass = 3500f,
-            MaxThrust = 2.1e6f, ExhaustVelocity = 1300f, MinThrottle = 0.3f, SpoolUp = 1.6f, SpoolDown = 0.5f,
+            MaxThrust = 2.8e6f, ExhaustVelocity = 2600f, MinThrottle = 0.2f, SpoolUp = 1.6f, SpoolDown = 0.5f,
             GimbalRange = Mathf.DegToRad(5f),
         });
-        Tank = Add(new PropellantTank { Name = "tank", Local = new Vector3(0, (TankBottom + TankTop) / 2, 0), Capacity = 32000f, Amount = 32000f });
+        Tank = Add(new PropellantTank { Name = "tank", Local = new Vector3(0, (TankBottom + TankTop) / 2, 0), Capacity = 50000f, Amount = 50000f });
         Engine.Feeds.Add(Tank);
         Wheels = Add(new ReactionControl { Name = "wheels", Local = new Vector3(0, 26f, 0), MaxTorque = new Vector3(4e5f, 6e4f, 4e5f) });
         Aero = Add(new AeroBody
@@ -122,8 +129,24 @@ public sealed class Rocket : Vehicle
     }
 
     public float Altitude => (float)Origin.Y;
-    public float Weight => Body.Mass * PhysicsWorld.Gravity;
+    public float Weight => Body.Mass * PhysicsWorld.GravityAt(Body.Y);
+
+    /// <summary>The path it is on round the planet (worked out a few times a second).</summary>
+    public Orbit Path { get; private set; }
+    /// <summary>0..1: how hard the air is heating the hull (fast through thick air, as on the way back from orbit).</summary>
+    public float Heat { get; private set; }
+    public int Laps;                                  // times round the planet
+    private float _pathTimer;
+    private bool _inSpace, _inOrbit, _escaping, _hot;
+    private double _lapRun;                           // map distance flown since the last lap
     public float Twr => Engine.MaxThrust * Math.Max(Engine.MinThrottle, Throttle) / Weight;
+
+    public void CycleSas()
+    {
+        Mode = Mode switch { SasMode.Hold => SasMode.Prograde, SasMode.Prograde => SasMode.Retrograde, _ => SasMode.Hold };
+        Sas = true;
+        _holding = false;
+    }
     public bool Clamped => Clamps.Engaged;
 
     protected override bool Active => Engine.Thrust > 0f || Engine.State is EngineState.Starting or EngineState.Running;
@@ -252,6 +275,7 @@ public sealed class Rocket : Vehicle
                 if (MissionTime > 5f && Status == "LIFT-OFF") Status = "";
                 MaxAltitude = Math.Max(MaxAltitude, Altitude);
                 MaxSpeed = Math.Max(MaxSpeed, Body.Vel.Length());
+                Track(dt);
                 if (Engine.Fault == "propellant exhausted" && Engine.State == EngineState.Off && Status != "Flame-out: propellant exhausted")
                     Say("Flame-out: propellant exhausted", "flameout");
                 if (Asleep && Engine.Thrust <= 0f)
@@ -262,6 +286,29 @@ public sealed class Rocket : Vehicle
                 break;
         }
         Steer(dt);
+    }
+
+    /// <summary>The path round the planet, and the milestones on it: space, orbit, escape, laps.</summary>
+    private void Track(float dt)
+    {
+        _lapRun += new Vector2(Body.Vel.X, Body.Vel.Z).Length() * Body.MapScale * dt;
+        if (_lapRun >= PhysicsWorld.Circumference) { _lapRun -= PhysicsWorld.Circumference; Laps++; Say($"Lap {Laps} of the planet complete", "lap"); }
+        _pathTimer -= dt;
+        if (_pathTimer > 0f) return;
+        _pathTimer = 0.2f;
+        Path = Orbit.Of(Body.Vel, Body.Y);
+        float alt = PhysicsWorld.Altitude(Body.Y);
+        bool space = alt > PhysicsWorld.SpaceLine;
+        if (space && !_inSpace) Say("SPACE. The air is gone", "space");
+        if (!space && _inSpace && Body.Vel.Y < 0) Say("Back in the air", "air");
+        _inSpace = space;
+        bool orbit = Path.Stable;
+        if (orbit && !_inOrbit) Say($"ORBIT: {Path.Periapsis / 1000:0.0} by {Path.Apoapsis / 1000:0.0} km, a lap every {Path.Period / 60:0.0} minutes", "orbit");
+        if (!orbit && _inOrbit && !Path.Escaping) Say("Orbit broken: coming down", "deorbit");
+        _inOrbit = orbit;
+        bool escape = Path.Escaping && space;
+        if (escape && !_escaping) Say("ESCAPE: going faster than the planet can hold", "escape");
+        _escaping = escape;
     }
 
     /// <summary>
@@ -281,6 +328,16 @@ public sealed class Rocket : Vehicle
         if (any || !Sas) _holding = false;
         if (Sas && !any)
         {
+            if (Mode != SasMode.Hold && b.Vel.LengthSquared() > 25f)
+            {
+                // Track the direction of travel (or its opposite): the attitude to hold is the one
+                // the nose would have if swung straight round onto it.
+                var dir = b.Vel.Normalized() * (Mode == SasMode.Retrograde ? -1f : 1f);
+                var up = b.Up.Normalized();
+                // (Pointing exactly the wrong way the shortest swing is any half turn: take one about the body's own x.)
+                var swing = up.Dot(dir) < -0.9999f ? new Quaternion(b.DirToWorld(Vector3.Right).Normalized(), MathF.PI) : new Quaternion(up, dir);
+                if (float.IsFinite(swing.W)) { _hold = (swing * b.Rot).Normalized(); _holding = true; }
+            }
             if (!_holding) { _hold = b.Rot; _holding = true; }
             // Attitude error as a small rotation vector, body frame.
             var qe = _hold * b.Rot.Inverse();
@@ -325,6 +382,14 @@ public sealed class Rocket : Vehicle
     protected override void AfterStep(float dt)
     {
         _lastAeroWarn = Math.Max(0f, _lastAeroWarn - dt);
+        // Heating of the hull by the air it rams: grows with the cube of speed and the square root of
+        // density (as at the nose of anything coming back from orbit). It shows only near orbital
+        // speed: a climb to orbit is fast only once the air is thin, and a fall is never that fast.
+        float v = Body.Vel.Length();
+        float heat = MathF.Sqrt(Aero.Density) * v * v * v;
+        Heat = Math.Clamp((heat - 6e7f) / 1.2e8f, 0f, 1f);
+        if (Heat > 0.15f && !_hot) Say("Re-entry: the hull is glowing", "reentry");
+        _hot = Heat > 0.05f;
         float load = Aero.DynamicPressure * MathF.Sin(Math.Min(Aero.AngleOfAttack, MathF.PI / 2));
         if (load > AeroLimit)
         {
