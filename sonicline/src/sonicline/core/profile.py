@@ -151,13 +151,17 @@ def conical(
     throat_rc_downstream: float = 0.382,
     fillet_radius: float = 1.0,
     chamber_length: float = 2.0,
+    throat_length: float = 0.0,
 ) -> Profile:
     """Standard conical CD nozzle with the throat at x = 0.
 
-    Curvature radii and the chamber length are given as multiples of the
-    throat radius, following the common 1.5 Rt / 0.382 Rt throat (Sutton &
-    Biblarz, ch. 3). ``expansion_ratio`` = 1 gives a converging-only nozzle
-    ending at the throat.
+    Curvature radii and the chamber and throat lengths are given as
+    multiples of the throat radius, following the common 1.5 Rt / 0.382 Rt
+    throat (Sutton & Biblarz, ch. 3). ``expansion_ratio`` = 1 gives a
+    converging-only nozzle. ``throat_length`` > 0 inserts a straight
+    cylindrical section after the throat; a converging nozzle ending in one
+    delivers parallel flow at its exit, where the exit-plane pressure of a
+    subsonic jet then equals ambient.
     """
     Rt = throat_radius
     if Rt <= 0.0 or expansion_ratio < 1.0 or contraction_ratio <= 1.0:
@@ -188,14 +192,17 @@ def conical(
         Line(p2[0], p2[1], p1[0], p1[1]),
         Arc(0.0, Rt + Ru, Ru, p1[0], 0.0, upper=False),
     ]
+    Lt = throat_length * Rt
+    if Lt > 0.0:
+        segs.append(Line(0.0, Rt, Lt, Rt))
     if expansion_ratio > 1.0:
-        p3 = (Rd * math.sin(td), Rt + Rd * (1.0 - math.cos(td)))
+        p3 = (Lt + Rd * math.sin(td), Rt + Rd * (1.0 - math.cos(td)))
         if Re <= p3[1]:
             # Exit lies on the downstream throat arc itself.
-            x_e = math.sqrt(Rd * Rd - (Rt + Rd - Re) ** 2)
-            segs.append(Arc(0.0, Rt + Rd, Rd, 0.0, x_e, upper=False))
+            x_e = Lt + math.sqrt(Rd * Rd - (Rt + Rd - Re) ** 2)
+            segs.append(Arc(Lt, Rt + Rd, Rd, Lt, x_e, upper=False))
         else:
-            segs.append(Arc(0.0, Rt + Rd, Rd, 0.0, p3[0], upper=False))
+            segs.append(Arc(Lt, Rt + Rd, Rd, Lt, p3[0], upper=False))
             segs.append(Line(p3[0], p3[1], p3[0] + (Re - p3[1]) / math.tan(td), Re))
     return Profile(tuple(segs), throat_x=0.0, throat_radius=Rt, throat_curvature_upstream=Ru)
 

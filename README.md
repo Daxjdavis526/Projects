@@ -242,7 +242,9 @@ analytical cross-check and a verdict on whether the numbers can be trusted.
 Sea-level operation comes first, including the separation and real-gas
 effects that make a naive answer wrong.
 
-A Python desktop application, not a web page, so there is no live link. It
-is being built in milestones; [sonicline/DESIGN.md](sonicline/DESIGN.md) is
-the plan, and [sonicline/README.md](sonicline/README.md) says what works
+A Python application, not a web page, so there is no live link. It is built
+in milestones. Milestone M1 runs the whole pipeline headless, from a STEP
+file to verified numbers and images, and every verification case passes.
+The desktop interface comes in M3. [sonicline/DESIGN.md](sonicline/DESIGN.md)
+is the plan, and [sonicline/README.md](sonicline/README.md) says what works
 today and exactly what is approximated.

@@ -7,7 +7,7 @@ backend and nothing more; everything around it (geometry, case building,
 meshing, solver management, monitoring, post-processing, engineering metrics,
 verification and the UI) is ours.
 
-**Status: agreed plan. M0 is complete (see README.md); M1 is next.**
+**Status: M0 and M1 are complete (see README.md and section 10); M2 is next.**
 Section 2 records what was actually run to back the decisions. Section 0
 records the answers to the open questions, which override anything later
 in this document that assumed otherwise.
@@ -638,12 +638,16 @@ shown greyed with the reason; they are never presented as a result.
 
 The verdict depends on:
 
-- **Convergence:**
-  - residuals dropped by ≥ N orders
-  - monitored integrals (inlet/outlet mass flow, thrust) flat to within a
-    tolerance over the last K iterations
-  - mass imbalance < 0.1 % (target < 10⁻⁵ for verification)
-  - no bounding messages in the last K iterations
+- **Convergence** (as built in M1; see section 10 for why):
+  - monitored integrals (inlet and exit-plane mass flow, exit-plane thrust)
+    steady over the last window: no drift between its halves, and scatter
+    below 0.1 %
+  - mass imbalance inlet-to-exit below the definition's tolerance (0.1 % by
+    default, 2×10⁻⁵ for verification runs)
+  - residuals down ≥ 3 orders or below 10⁻⁴: recorded and shown as a warning
+    when they stall, but not blocking, because a free jet's shear layer keeps
+    global residuals up while the nozzle is converged
+  - far-plume drift: a warning that plume images are not converged
 - **Mesh:** gates passed.
 - **Physics sanity:**
   - An inviscid Cd greater than 1, or above Kliegel–Levine, is a hard fail.
@@ -652,8 +656,14 @@ The verdict depends on:
   - Condensation margin.
   - Perfect-gas validity.
   - Back-pressure regime: a separated-flow regime is flagged "model-sensitive".
-- **Divergence** (FPE, max iterations exceeded in the T solve, p hitting
-  pMin) is always a hard fail.
+- **Numerical-error signals:** static temperature inside an adiabatic
+  nozzle above the stagnation temperature, and cells sitting at the solver's
+  pressure floor, are reported as warnings with their magnitude.
+- **Momentum consistency:** thrust from the exit plane against thrust from
+  the wall force plus the feed reaction; disagreement above 0.5 % of the
+  largest term is a warning.
+- **Divergence** (a fatal error or stack trace in the solver log, a
+  non-zero exit) is always a hard fail.
 
 ---
 
@@ -673,10 +683,10 @@ Build order:
 | # | case | reference | tolerance (initial) |
 |---|---|---|---|
 | V0 | analytical core unit tests | textbook tables, `propulsion/tools/rocket.py` cross-check | 1e-6 relative |
-| V1 | reference N₂ nozzle, inviscid, supersonic exit (the spike case, formalised) | quasi-1D + Kliegel–Levine Cd | Cd within 0.1 %; exit Mach 1 %; vacuum Cf 0.5 % |
+| V1 | conical N₂ nozzle (ε = 6.25, 15°), inviscid, into vacuum | Kliegel–Levine Cd; quasi-1D thrust × Cd × conical divergence factor | Cd within 0.2 %; vacuum thrust 0.5 %. Exit Mach is reported, not checked: a conical exit plane is not one-dimensional |
 | V2 | NPARC CDV quasi-1D nozzle: unchoked (p/p₀ = 0.89), shock (0.75), supersonic (0.16) | NASA exact 1D solution files | p/p₀ and M within 1 % away from the shock; shock position within 2 cells or 1 % of divergent length |
 | V3 | shock at a prescribed back pressure in the reference nozzle (400 kPa, 600 kPa) | quasi-1D shock-in-nozzle | shock area ratio within 2 % |
-| V4 | converging nozzle, subsonic and choked | isentropic | 0.2 % mass flow |
+| V4 | converging nozzle: (a) choked, (b) subsonic with a straight throat section | Kliegel–Levine Cd; isentropic mass flow with pe = pa | Cd 0.2 %; mass flow 0.5 %. Without the straight section the subsonic jet contracts past the exit (section 10) |
 | V5 | throat Cd sweep over Rc/Rt = 0.625…4, inviscid | Kliegel–Levine | 0.1–0.2 % |
 | V6 | wedge vs 3D O-grid on the same distribution | self-consistency | 0.1 % mass flow, 0.3 % thrust |
 | V7 | solver cross-check: rhoPimpleFoam vs rhoCentralFoam on V1 and V3 | each other | 0.2 % mass flow; shock position within 2 cells |
@@ -796,7 +806,7 @@ tests.
   toolchain).
 
 **M1 — headless end-to-end on a known CD nozzle at sea level (the
-brief's milestone, minus the UI)**
+brief's milestone, minus the UI)** — *done; see section 10*
 - **Input:** a revolved CD nozzle supplied as a STEP file (generated from a
   known profile, so the true answer is known), plus a JSON definition.
 - **Geometry:** gmsh import → heal → checks → axis, throat and end-face
@@ -817,6 +827,13 @@ brief's milestone, minus the UI)**
   README.
 
 **M2 — verification suite and shocks**
+- Carried over from M1: a wall-resolved 3D O-grid run of the sea-level
+  case (the mesh passes its gates; it is about 10⁶ cells and was not run),
+  the overexpanded sea-level variant, and exercising the WSL2 runner on a
+  Windows machine (only its command construction is tested so far).
+- The viscous-work term in the energy equation (section 10, finding 12),
+  verified against adiabatic-wall recovery and rhoCentralFoam. Until then,
+  wall temperatures are not reported.
 - V2, V3, V5 and V7.
 - Validation cases E3 and E4 (Mason and Hunter): ground-test nozzles with
   shocks and separation in a plume, the sea-level cases that matter most.
@@ -879,3 +896,79 @@ brief's milestone, minus the UI)**
 Answered on 2026-09-29; see §0. Open for later: bipropellant engines
 (350–1500 psi chambers) need combustion products, not nitrogen. That is a
 separate gas model and a separate validation effort, and it is out of V1.
+
+---
+
+## 10. M1 record: what was built and what building it taught
+
+Delivered (`sonicline import | check | run | verify`, 200-odd tests, CI with
+OpenFOAM v2512 on Linux):
+
+- STEP fluid volumes read through gmsh's OpenCASCADE in a worker process:
+  solid count, volume, axis from the inertia tensor, fluid volume vs solid
+  body (an annular section means a solid body), roundness, section profile,
+  golden-section throat, inlet end from the steeper wall. A known profile
+  written to STEP and read back recovers its throat to 10⁻⁵ and its length
+  to 10⁻¹³ m.
+- A structured mesh generator written directly to OpenFOAM's polyMesh
+  (not blockMesh). One cross-section template (wedge sector or butterfly
+  O-grid) swept along stations clustered at the throat; wall points exactly
+  on the surface; throat and exit planes are exact stations with face zones;
+  a plume region of annulus blocks. Direct generation was chosen because
+  blockMesh fills a curved block face by interpolating its edges, which puts
+  an O-grid's wall off the surface between block edges.
+- Case builder, local and WSL2 runners, a convergence monitor that stops the
+  solver when the monitored integrals are steady, post-processing from the
+  solver's own face fluxes, propulsion metrics, the trust verdict, a run
+  manifest, and off-screen images.
+
+Findings, in the order they bit:
+
+1. **A 5° wedge's faces are chords.** Its cross-section is r² sin θ/2, so
+   scaling integrals by 2π/θ loses 0.127 % of every flux. The factor is
+   2π/sin θ.
+2. **`areaNormalIntegrate` is for vector fields**; applied to pressure it
+   returns 0 without complaint. The planar inlet and exit use `areaIntegrate`.
+3. **`forces` writes force.dat and moment.dat side by side**; reading "the"
+   .dat file of a function object has to name the file.
+4. **The quasi-1D start makes residual drop an unfair test**: there is less
+   to fall from. Residuals pass on a drop or an absolute level.
+5. **Global residuals stall with a free jet** (its shear layer never settles)
+   while the nozzle's integrals are steady to 10⁻⁶. Integrals decide
+   convergence; stalled residuals are reported.
+6. **A reservoir inlet jitters by ±0.1 % per iteration** under local time
+   stepping while its mean is steady; max-minus-min cannot tell that from
+   drift, so the test is drift between window halves plus a scatter bound.
+7. **Loosening local-time-step smoothing to speed up the plume crashes the
+   first iteration** (`rDeltaTSmoothingCoeff` 1 instead of 0.1). The far plume
+   develops slowly; it does not affect thrust, and the verdict says the plume
+   images are unconverged when they are.
+8. **A subsonic converging nozzle that ends at its curved throat contracts
+   past its exit** (vena contracta): the exit plane sat 7.6 % above ambient
+   and mass flow 5.8 % below the quasi-1D value. The CFD was right and the
+   test case was wrong. With two diameters of straight throat the error is
+   0.16 %.
+9. **Imposing ambient pressure on the far outlet drives a still-supersonic
+   jet core to the solver's pressure floor.** The outlet is non-reflecting;
+   the ambient boundaries pin the plume's pressure level.
+10. **An O-grid's polygonal wall loses 0.29 % of the area at 48 facets**, and
+    choked mass flow with it. The template is scaled so every cross-section
+    has the circle's exact area; wedge and 3D mass flow then agree to 0.03 %.
+11. **Vertical station lines cut a 45° wall at 45°**, and the thin
+    wall-resolved cells there overshot the stagnation temperature by 5 %.
+    Bending station lines to meet the wall at right angles fixed it (peak
+    299.96 K for T0 = 300 K) without moving thrust or mass flow (both
+    within 0.02 %). The verdict now reports both kinds of signal.
+12. **rhoPimpleFoam's energy equation omits viscous work.** It is in
+    total-energy form (it carries the kinetic energy K) with no
+    div(tau & U) term (checked in the v2512 source), so friction never heats
+    the gas: an adiabatic wall in the 20 bar case recovered ~40 % of the
+    dynamic temperature where ~85-90 % is physical. ESI's
+    `viscousDissipation` source adds tau:grad(U), which is right only for an
+    internal-energy equation, and over-heated the wall to 348 K with T0 =
+    300 K. The two bracket the truth and move mass flow by 0.08 % and thrust
+    by 0.13 %. M1 runs without the source, reports that bracket on every
+    viscous run, and does not plot wall temperature. The fix, a
+    div(tau & U) source (a coded fvOption, which needs OpenFOAM's compiler
+    at run time), and its verification against flat-plate recovery
+    (r = Pr^(1/3)) and rhoCentralFoam, which does carry viscous work, are M2.

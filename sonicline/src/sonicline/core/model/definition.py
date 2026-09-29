@@ -61,25 +61,32 @@ class ConicalNozzle:
     throat_rc_downstream: float = 0.382
     fillet_radius: float = 1.0
     chamber_length: float = 2.0
+    throat_length: float = 0.0  # straight section after the throat
 
     def profile(self) -> Profile:
         return conical(
             self.throat_radius, self.expansion_ratio, self.contraction_ratio,
             self.converging_half_angle, self.diverging_half_angle,
             self.throat_rc_upstream, self.throat_rc_downstream,
-            self.fillet_radius, self.chamber_length,
+            self.fillet_radius, self.chamber_length, self.throat_length,
         )
 
 
 @dataclass(frozen=True)
 class CadFile:
-    """An imported STEP or STL file. ``sha256`` pins the exact content."""
+    """An imported STEP or STL file. ``sha256`` pins the exact content.
+
+    ``inlet_end`` confirms which end of the detected axis is the inlet:
+    "auto" accepts the detector's suggestion, "min"/"max" pick the end at
+    the lower/higher axial coordinate.
+    """
 
     TAG: ClassVar[str] = "cad_file"
     path: str
     sha256: str
     length_unit: str = "mm"
     kind: GeometryKind = GeometryKind.FLUID_VOLUME
+    inlet_end: str = "auto"
 
 
 Geometry = ConicalNozzle | CadFile
@@ -203,6 +210,14 @@ TimeTreatment = Steady | Transient
 
 
 @dataclass(frozen=True)
+class Inviscid:
+    """Euler equations: zero viscosity and slip walls. For verification
+    against analytical theory, not for predicting real thrusters."""
+
+    TAG: ClassVar[str] = "inviscid"
+
+
+@dataclass(frozen=True)
 class Laminar:
     TAG: ClassVar[str] = "laminar"
 
@@ -212,7 +227,7 @@ class KOmegaSST:
     TAG: ClassVar[str] = "k_omega_sst"
 
 
-Turbulence = Laminar | KOmegaSST
+Turbulence = Inviscid | Laminar | KOmegaSST
 
 
 @dataclass(frozen=True)
@@ -246,7 +261,12 @@ class MeshSpec:
 
 @dataclass(frozen=True)
 class ConvergenceCriteria:
-    residual_drop_orders: float = 5.0
+    # Pressure-based compressible solvers commonly plateau 3-4 orders down;
+    # the integral criteria below are what decide convergence.
+    residual_drop_orders: float = 3.0
+    # ...or residuals already below this level. Starting from the quasi-1D
+    # solution leaves less to drop from, so a drop alone would be unfair.
+    residual_level: float = 1e-4
     integral_window: int = 200  # iterations over which integrals must be flat
     integral_tolerance: float = 1e-4  # relative spread allowed in that window
     mass_imbalance: float = 1e-3  # |inlet - outlet| / inlet

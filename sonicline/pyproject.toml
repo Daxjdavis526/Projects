@@ -32,3 +32,4 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+markers = ["openfoam: runs OpenFOAM (skipped when it is not installed)"]

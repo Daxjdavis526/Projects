@@ -7,3 +7,4 @@ dist/
 # Generated cases and runs from local experiments
 runs/
 scratch/
+verification-runs/
