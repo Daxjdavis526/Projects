@@ -14,6 +14,7 @@ No Qt; images are rendered off screen (pyvista) and plotted with matplotlib.
 from __future__ import annotations
 
 import json
+import math
 import textwrap
 from pathlib import Path
 
@@ -40,9 +41,10 @@ def _json_safe(o):
     return o
 
 
-def contour_image(results: RunResults, field: str, path: Path, size=(1600, 700)) -> Path:
+def contour_image(results: RunResults, field: str, path: Path, size=(1600, 700),
+                  clim: tuple[float, float] | None = None, caption: str = "") -> Path:
     """The meridian plane coloured by ``field``, zoomed on the nozzle and the
-    near plume."""
+    near plume. ``clim`` fixes the colour range (animation frames share one)."""
     _headless()
     import pyvista as pv
 
@@ -53,9 +55,10 @@ def contour_image(results: RunResults, field: str, path: Path, size=(1600, 700))
     p = pv.Plotter(off_screen=True, window_size=size)
     p.set_background("white")
     title = f"{info.label} [{info.unit}]" if info.unit else info.label
-    p.add_mesh(surf, scalars="shown", cmap=info.colormap, show_edges=False,
+    p.add_mesh(surf, scalars="shown", cmap=info.colormap, show_edges=False, clim=clim,
                scalar_bar_args=SCALAR_BAR | {"title": ""})
-    p.add_text(f"{title}    {results.definition.name}", position="upper_left", font_size=12, color="black")
+    p.add_text(f"{title}    {results.definition.name}{caption}", position="upper_left", font_size=12,
+               color="black")
     p.view_xy()
     p.camera.zoom(1.25)
     p.screenshot(str(path))
@@ -81,6 +84,45 @@ def contour_image_isolated(run_dir: Path, field: str, path: Path, size=(1600, 70
         tail = (proc.stderr or "").strip().splitlines()[-1:] or [f"exit code {proc.returncode}"]
         raise RuntimeError(f"off-screen rendering failed ({tail[0]})")
     return Path(path)
+
+
+def frames_isolated(run_dir: Path, out: Path, field: str = "Mach", size=(1200, 525),
+                    timeout: float = 1800.0) -> list[Path]:
+    """A transient's written times as contour images on one colour range,
+    rendered in a child process (see contour_image_isolated), and an
+    animated GIF of them. Returns the frames, then the GIF."""
+    import subprocess
+    import sys
+
+    code = ("import sys; from pathlib import Path; from sonicline.post import report; "
+            "report._frames(Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3], (int(sys.argv[4]), int(sys.argv[5])))")
+    proc = subprocess.run([sys.executable, "-c", code, str(run_dir), str(out), field, str(size[0]),
+                           str(size[1])], capture_output=True, text=True, timeout=timeout)
+    if proc.returncode != 0:
+        tail = (proc.stderr or "").strip().splitlines()[-1:] or [f"exit code {proc.returncode}"]
+        raise RuntimeError(f"frame rendering failed ({tail[0]})")
+    return sorted(Path(out).glob(f"{field}_*.png")) + sorted(Path(out).glob("*.gif"))
+
+
+def _frames(run_dir: Path, out: Path, field: str, size) -> None:
+    from PIL import Image
+
+    out.mkdir(parents=True, exist_ok=True)
+    times = RunResults(run_dir).times()
+    lo, hi = math.inf, -math.inf
+    for t in times:  # one colour range for every frame
+        r = RunResults(run_dir, t)
+        a, b = r.range(field)
+        lo, hi = min(lo, a), max(hi, b)
+    clim = (lo, hi)  # range() is already in display units
+    paths = []
+    for i, t in enumerate(times):
+        path = out / f"{field}_{i:03d}.png"
+        contour_image(RunResults(run_dir, t), field, path, size, clim=clim, caption=f"    t = {1e3 * t:.4g} ms")
+        paths.append(path)
+    if paths:
+        images = [Image.open(p).convert("P", palette=Image.ADAPTIVE) for p in paths]
+        images[0].save(out / f"{field}.gif", save_all=True, append_images=images[1:], duration=150, loop=0)
 
 
 def axial_image(results: RunResults, path: Path) -> Path | None:

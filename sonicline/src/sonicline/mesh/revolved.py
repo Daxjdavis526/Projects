@@ -116,6 +116,12 @@ class MeshMeta:
     form: Form
     patches: dict[str, str] = field(default_factory=dict)
 
+    @staticmethod
+    def from_json(data: dict) -> "MeshMeta":
+        return MeshMeta(np.asarray(data["stations"]), data["throat_station"], data["exit_station"],
+                        data["centreline_cells"], data["wall_cells"], data["wall_first_cell_at_throat"],
+                        Form(data["form"]), dict(data.get("patches", {})))
+
     def to_json(self) -> dict:
         return {
             "stations": self.stations.tolist(),

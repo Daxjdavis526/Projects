@@ -144,9 +144,11 @@ class GasSpec:
             raise ValueError(f"equation_of_state must be one of {', '.join(EQUATIONS_OF_STATE)}")
 
     def model(self) -> PerfectGas:
-        if self.species != "N2":
-            raise ValueError(f"only nitrogen is supported in V1, not {self.species!r}")
-        return NITROGEN
+        from ..gas import GASES
+
+        if self.species not in GASES:
+            raise ValueError(f"unknown gas {self.species!r}; use one of {', '.join(GASES)}")
+        return GASES[self.species]
 
     @property
     def peng_robinson(self) -> bool:
@@ -257,9 +259,29 @@ class Steady:
 
 @dataclass(frozen=True)
 class Transient:
+    """Time-accurate run to ``end_time``.
+
+    ``initial``: "ambient" starts the thruster from rest -- the whole domain
+    at ambient pressure and temperature, the reservoir opening at t = 0 (a
+    startup); "quasi_1d" starts from the steady quasi-1D estimate.
+    ``ramp_time`` > 0 opens the valve linearly: the inlet total pressure
+    rises from ambient to p0 over that time. Fields are written
+    ``frames`` times over the run (the animation's frames)."""
+
     TAG: ClassVar[str] = "transient"
     end_time: float = _q(Dimension.TIME)
     max_courant: float = 0.3
+    initial: str = "ambient"
+    ramp_time: float = _q(Dimension.TIME, 0.0)
+    frames: int = 40
+
+    def __post_init__(self) -> None:
+        if self.initial not in ("ambient", "quasi_1d"):
+            raise ValueError("transient initial state must be 'ambient' or 'quasi_1d'")
+        if not self.end_time > 0.0 or self.ramp_time < 0.0 or self.ramp_time > self.end_time:
+            raise ValueError("need end_time > 0 and 0 <= ramp_time <= end_time")
+        if not 1 <= self.frames <= 1000:
+            raise ValueError("frames must lie between 1 and 1000")
 
 
 TimeTreatment = Steady | Transient

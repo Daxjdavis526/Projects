@@ -84,9 +84,15 @@ class GeometryPage(Page):
         # Imported CAD.
         self.cad = QtWidgets.QGroupBox("STEP fluid volume")
         c = QtWidgets.QVBoxLayout(self.cad)
-        btn = QtWidgets.QPushButton("Import STEP file...")
+        btn = QtWidgets.QPushButton("Import STEP or STL file...")
         btn.clicked.connect(self._import)
         c.addWidget(btn)
+        self.extract_btn = QtWidgets.QPushButton("Extract the gas passage...")
+        self.extract_btn.setToolTip("The file is a solid thruster body: find the passage through it, show it, "
+                                    "and use it as the fluid volume once you confirm")
+        self.extract_btn.clicked.connect(lambda: self.extract())
+        self.extract_btn.setVisible(False)
+        c.addWidget(self.extract_btn)
         self.cad_file = QtWidgets.QLabel("no file")
         self.cad_report = QtWidgets.QLabel("")
         self.cad_report.setWordWrap(True)
@@ -172,8 +178,56 @@ class GeometryPage(Page):
         w.failed.connect(lambda msg: self.cad_report.setText(f"analysis failed: {msg}"))
         w.start(synchronous)
 
+    def extract(self, synchronous: bool = False) -> None:
+        """Extract a solid body's gas passage and preview it; import it once
+        the user confirms (DESIGN.md section 3.6)."""
+        from .. import geometry
+        from ..geometry import surface as stl_surface
+        from ..post import scene
+
+        rel = self.draft().get("geometry.path")
+        if not rel:
+            return
+        root = self.window.project.root
+        src = root / rel
+        out = root / "geometry" / (Path(rel).stem + "-fluid.step")
+        unit = self.draft().get("geometry.length_unit", "mm")
+
+        def work():
+            rep = geometry.extract_fluid(src, unit, out)
+            surfaces = []
+            if rep["ok"]:
+                stl = geometry.tessellate(out, unit, out.with_suffix(".preview.stl"), 1e9)
+                mesh = stl_surface.load(stl, 1.0)
+                surfaces = [scene.from_triangles(mesh.vertices, mesh.faces, "gas passage")]
+            return rep, surfaces
+
+        self.cad_report.setText("extracting the gas passage...")
+        w = Worker(work)
+        w.done.connect(self._extracted)
+        w.failed.connect(lambda msg: self.cad_report.setText(f"extraction failed: {msg}"))
+        self._extract_target, self._extract_sync = out, synchronous
+        w.start(synchronous)
+
+    def _extracted(self, result):
+        rep, surfaces = result
+        lines = [f"{rep['caps']} openings capped; {len(rep['cavities'])} closed cavities"]
+        lines += [f"<span style='color:#c62828'>{e}</span>" for e in rep["errors"]]
+        if not rep["ok"]:
+            self.cad_report.setText("<br>".join(lines))
+            return
+        vol = 1e9 * rep["chosen"]["volume"]
+        self.window.viewport.show_surfaces(surfaces, f"extracted gas passage, {vol:.3f} mm^3 (preview)",
+                                           view="iso")
+        self.cad_report.setText("<br>".join(lines + [f"passage {vol:.3f} mm^3 between two openings"]))
+        if self.window.ask("Use the extracted gas passage?",
+                           f"The passage through the body ({vol:.3f} mm^3, shown in the 3D view) becomes "
+                           "the fluid volume. Cavities with a single opening (blind holes) are left out."):
+            self.import_file(self._extract_target, synchronous=self._extract_sync)
+
     def _analysed(self, report):
         self.report = report
+        self.extract_btn.setVisible(report.kind == "solid_body")
         lines = [f"{report.kind.replace('_', ' ')}, {report.volumes} solid(s)"]
         lines += [f"<span style='color:#c62828'>{e}</span>" for e in report.errors]
         lines += [f"<span style='color:#c77700'>{w}</span>" for w in report.warnings]

@@ -82,3 +82,30 @@ NITROGEN = PerfectGas(
     sutherland_Ts=107.0,
     coolprop_name="Nitrogen",
 )
+
+
+# Air, for validation against air experiments only (SONICLINE is validated
+# for nitrogen). Cold air: cp 1004.5 J/(kg K), gamma 1.400; Sutherland
+# 1.458e-6 / 110.4 K.
+AIR = PerfectGas(
+    name="air",
+    molar_mass=28.965,
+    cp=1004.5,
+    sutherland_As=1.458e-6,
+    sutherland_Ts=110.4,
+    coolprop_name="Air",
+)
+
+# Air heated to 1500 R (833 K) by burning methanol in it, as in Back,
+# Massier and Gier's JPL nozzle tests (TR 32-654): the report treats the
+# products as air with gamma = 1.35, which fixes cp. No reference equation
+# of state: real-gas checks are skipped for it.
+HEATED_AIR = PerfectGas(
+    name="air_heated",
+    molar_mass=28.965,
+    cp=1.35 / 0.35 * R_UNIVERSAL / 28.965,
+    sutherland_As=1.458e-6,
+    sutherland_Ts=110.4,
+)
+
+GASES = {g.name: g for g in (NITROGEN, AIR, HEATED_AIR)}

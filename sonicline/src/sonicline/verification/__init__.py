@@ -594,6 +594,142 @@ def _v13_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
     ] + _common_checks(metrics)
 
 
+# ----------------------------------------------------------------------------- E1, E2
+
+INCH = 0.0254
+# Back, Massier and Gier, JPL Technical Report 32-654 (1964), Fig. 4: the
+# 45-15-deg conical nozzle. Throat radius 0.800 in, throat radius of
+# curvature 0.500 in (0.625 Rt) on both sides, inlet arc 0.800 in after
+# 0.310 in of 2.5 in chamber; contraction 9.76, expansion 6.63. Throat at
+# z = 2.554 in.
+BMG45 = {"r_t": 0.800, "z_t": 2.554, "cr": 9.76, "er": 6.63, "rc": 0.625, "fillet": 1.0,
+         "chamber": 0.310 / 0.800}
+# Wall p / pt digitised from the scanned Fig. 4 (hot flow, 1500 R, cooled
+# walls; the attached tests, 150-250 psia): marker positions located as the
+# centroids of their hollow symbols after calibrating the axes on the grid
+# lines. (z in, p/pt, half the spread between the overlapping tests at that
+# tap.) Reading error about 0.005 in p/pt and 0.02 in z. Beyond z = 5 only
+# the 199.6 and 250.2 psia tests are attached; those are the points taken.
+BMG45_WALL = (
+    (0.80, 0.998, 0.003), (1.01, 0.998, 0.002), (1.18, 0.994, 0.004), (1.38, 0.993, 0.002),
+    (1.74, 0.988, 0.002), (1.92, 0.974, 0.004), (2.08, 0.950, 0.012), (2.25, 0.854, 0.017),
+    (2.45, 0.510, 0.026), (2.60, 0.218, 0.010), (2.64, 0.242, 0.005), (2.79, 0.197, 0.012),
+    (3.11, 0.181, 0.004), (3.63, 0.126, 0.008), (3.96, 0.095, 0.004), (4.62, 0.059, 0.007),
+    (5.29, 0.035, 0.005), (6.00, 0.023, 0.005),
+)
+# DESIGN.md section 5: 10 % in the throat region (tap size alone moves
+# readings by up to 7 % there: TR 32-654 section V), 5 % elsewhere; never
+# tighter than the tests' own spread plus the reading error.
+E1_THROAT_BAND = 0.35  # in either side of the throat: tangency (2.200) to tangency, and the recompression
+E1_TOL_THROAT, E1_TOL_ELSEWHERE, E1_READING = 0.10, 0.05, 0.005
+E1_Z_READING = 0.02  # in: a tap's axial position as read off the figure
+E1_THROAT_MISSES = 1  # taps in the throat region allowed outside (tap size alone moves them 7 %)
+# Cuffel, Back and Massier (AIAA J. 7(7), 1969): the same nozzle geometry,
+# cold air, measured discharge coefficient.
+E2_CD, E2_TOL = 0.985, 0.01
+
+
+def _bmg45(name: str, gas: str, T0: float, p0: float, wall: object) -> Callable[[str, str], m.SimulationDefinition]:
+    g = BMG45
+
+    def build(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+        return m.SimulationDefinition(
+            name=name,
+            geometry=m.ConicalNozzle(
+                throat_radius=g["r_t"] * INCH, expansion_ratio=g["er"], contraction_ratio=g["cr"],
+                converging_half_angle=math.radians(45.0), diverging_half_angle=math.radians(15.0),
+                throat_rc_upstream=g["rc"], throat_rc_downstream=g["rc"], fillet_radius=g["fillet"],
+                chamber_length=g["chamber"]),
+            gas=m.GasSpec(species=gas),
+            # Into vacuum: the tests exhausted to 1 atm, but at 250 psia the
+            # flow is attached to beyond the last tap, and attached supersonic
+            # flow cannot feel the back pressure; nor can a choked throat's
+            # Cd. (At 1 atm the separation estimate sends the run to the
+            # explicit solver, twenty times slower.)
+            boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=p0, T0=T0),
+                                    ambient=m.Ambient(pressure=0.0, temperature=294.0),
+                                    exit_domain=m.TruncatedAtExit(), wall_thermal=wall),
+            flow=m.Flow(turbulence=m.KOmegaSST()),
+            # Throat Re ~ 4e6: a resolved wall is a 0.1 micron first cell.
+            mesh=m.MeshSpec(form=m.MeshForm(form), quality=m.MeshQuality(quality), first_cell_yplus=30.0),
+            numerics=TIGHT,
+        )
+    return build
+
+
+def wall_pressure_x(run_dir: Path, xs: list[float]) -> list[float] | None:
+    """CFD wall p / p0 at axial positions x (profile coordinates)."""
+    import numpy as np
+
+    f, m_f = Path(run_dir) / "profiles.json", Path(run_dir) / "metrics.json"
+    if not f.is_file() or not m_f.is_file():
+        return None
+    wall = json.loads(f.read_text(encoding="utf-8"))["wall"]
+    p0 = json.loads(m_f.read_text(encoding="utf-8"))["conditions"]["p0"]
+    return [float(np.interp(x, wall["x"], np.asarray(wall["p"]) / p0)) for x in xs]
+
+
+def _e1_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    """Each tap within its tolerance: a relative band (10 % in the throat
+    region, 5 % elsewhere), never tighter than the tests' own spread plus
+    the reading error; the CFD is taken over the tap's position +- its
+    reading error, which matters where the pressure falls steeply."""
+    prof = defn.geometry.profile()
+    run_dir = Path(metrics.get("_run_dir", "."))
+    offsets = (-E1_Z_READING, 0.0, E1_Z_READING)
+    tallies = {"throat": [0, 0, []], "elsewhere": [0, 0, []]}
+    for z, p, spread in BMG45_WALL:
+        xs = [prof.throat_x + (z + dz - BMG45["z_t"]) * INCH for dz in offsets]
+        cfd = wall_pressure_x(run_dir, xs)
+        if cfd is None:
+            return [Check("wall pressure available", None, 0.0, 0.0)]
+        region = "throat" if abs(z - BMG45["z_t"]) <= E1_THROAT_BAND else "elsewhere"
+        rel = E1_TOL_THROAT if region == "throat" else E1_TOL_ELSEWHERE
+        allowed = max(rel * p, spread + E1_READING)
+        ok = min(cfd) - allowed <= p <= max(cfd) + allowed
+        t = tallies[region]
+        t[0] += ok
+        t[1] += 1
+        if not ok:
+            t[2].append(f"z {z:g} in (CFD {cfd[1]:.3f}, test {p:.3f})")
+    th, el = tallies["throat"], tallies["elsewhere"]
+    return [
+        Check(f"wall taps away from the throat within 5 % (of {el[1]})", float(el[0]), float(el[1]), 0.0,
+              relative=False, note="outside: " + (", ".join(el[2]) or "none")),
+        Check(f"throat-region taps within 10 % (of {th[1]}, one may miss)", float(th[0]), float(th[1]),
+              float(E1_THROAT_MISSES), relative=False, note="outside: " + (", ".join(th[2]) or "none")),
+    ] + _common_checks(metrics)
+
+
+def _e2_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    return [Check("discharge coefficient vs Cuffel, Back and Massier (measured)",
+                  metrics["discharge_coefficient"]["cfd"], E2_CD, E2_TOL, relative=False)] + _common_checks(metrics)
+
+
+# ----------------------------------------------------------------------------- V15
+
+V15_END_TIME = 1e-3  # s: the startup's acoustic ringing decays below 1e-4 of the flow by then
+V15_RAMP = 1e-4  # s: the valve opening, a tenth of the run
+
+
+def _v15_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+    d = _v1_definition(quality, form)
+    return dataclasses.replace(d, name="V15 V1 started from vacuum (transient)",
+                               flow=m.Flow(turbulence=m.Inviscid(),
+                                           time=m.Transient(end_time=V15_END_TIME, initial="ambient", ramp_time=V15_RAMP, frames=20)))
+
+
+def _v15_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    """The startup must conserve mass in time and end in V1's steady state."""
+    tr = metrics.get("transient") or {}
+    return [
+        Check("mass conservation in time: domain gain vs integrated net inflow",
+              tr.get("conservation_error"), 0.0, 1e-3, relative=False),
+        Check("settled by the end time (thrust drift over the last tenth)",
+              tr.get("thrust_drift_last_tenth"), 0.0, 0.01, relative=False),
+    ] + _v1_checks_at(10e5)(metrics, defn)
+
+
 CASES: dict[str, Case] = {
     "V1": Case("V1", "Inviscid conical CD nozzle into vacuum (throat Cd, vacuum thrust)",
                _v1_definition, _v1_checks),
@@ -624,6 +760,17 @@ CASES: dict[str, Case] = {
     # parallel flow, where quasi-1D theory with pe = pa applies.
     "V4b": Case("V4b", "Inviscid converging nozzle with straight throat, subsonic, sea-level plume",
                 _v4_definition(1.5e5, "V4b subsonic converging nozzle", 4.0, DESIGN_LEVEL), _v4b_checks),
+    # Air experiments: SONICLINE's gas models include air for these alone.
+    # 250.2 psia (test 351), 1500 R, walls cooled to Tw/Tt 0.40-0.59: the
+    # report's own gamma (1.35) for the methanol-heated air.
+    "E1": Case("E1", "JPL 45-15 conical nozzle (Back, Massier & Gier): wall pressure, heated air",
+               _bmg45("E1 JPL 45-15 nozzle, 250 psia, 1500 R", "air_heated", 833.3, 250.2 * 6894.757,
+                      m.FixedTemperature(temperature=0.5 * 833.3)), _e1_checks),
+    "E2": Case("E2", "JPL 45-15 conical nozzle (Cuffel, Back & Massier): discharge coefficient, cold air",
+               _bmg45("E2 JPL 45-15 nozzle, cold air", "air", 294.0, 250.2 * 6894.757, m.Adiabatic()),
+               _e2_checks),
+    "V15": Case("V15", "V1 started from vacuum, time-accurate: conservation in time and the steady end state",
+                _v15_definition, _v15_checks),
     "V12": Case("V12", "V1 driven by its own mass flow: the CFD must find 10 bar", _v12_definition, _v12_checks),
     "V13": Case("V13", "V1 laminar with a 450 K wall: energy balance with heat transfer",
                 _v13_definition, _v13_checks),
@@ -652,7 +799,8 @@ def run_case(case: Case, quality: str, out: Path, processors: int = 1, form: str
     run_dir = out / (f"{case.name}-{form or case.form}-{quality}"
                      + ("" if solver == "auto" else f"-{solver}"))
     result = pipeline.run(defn, run_dir, on_event=on_event, render=False)
-    checks = [c.evaluate() for c in case.checks(result.metrics, defn)] if result.metrics else []
+    checks = ([c.evaluate() for c in case.checks(dict(result.metrics, _run_dir=str(run_dir)), defn)]
+              if result.metrics else [])
     variant = [v for v in ((form if form and form != case.form else None),
                            (solver if solver != "auto" else None)) if v]
     label = case.name + (f" ({', '.join(variant)})" if variant else "")

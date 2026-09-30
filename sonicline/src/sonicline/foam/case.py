@@ -64,6 +64,11 @@ def shock_inside(defn: d.SimulationDefinition, profile: Profile) -> bool:
     return perf.regime is nozzle.Regime.SHOCK_IN_NOZZLE or perf.separation.likely
 
 
+def start_pressure(defn: d.SimulationDefinition, p0: float) -> float:
+    """Pressure in a transient's still domain at t = 0."""
+    return max(defn.boundaries.ambient.pressure, 1e-3 * p0)
+
+
 def solver_for(defn: d.SimulationDefinition, profile: Profile) -> str:
     """The solver a definition runs with (DESIGN.md section 3.2). "auto" is
     rhoPimpleFoam, except where a shock stands inside the nozzle:
@@ -71,6 +76,10 @@ def solver_for(defn: d.SimulationDefinition, profile: Profile) -> str:
     (V2, DESIGN.md section 11), rhoCentralFoam places it within 0.3 %."""
     name = defn.numerics.solver
     if name == "auto":
+        # Transients are explicit and time-accurate: a startup drives a
+        # shock through the nozzle, which rhoPimpleFoam misplaces.
+        if isinstance(defn.flow.time, d.Transient):
+            return CENTRAL_SOLVER
         return CENTRAL_SOLVER if shock_inside(defn, profile) else PIMPLE_SOLVER
     if name in (PIMPLE_SOLVER, CENTRAL_SOLVER):
         return name
@@ -114,6 +123,24 @@ class CaseSummary:
     initial: quasi1d.Quasi1DSolution
     p_min_limit: float | None  # the solver's pressure floor (rhoCentralFoam has none)
     p0_nominal: float = 0.0  # stated, or for a mass-flow inlet the ideal inversion
+
+    def to_json(self) -> dict:
+        """Everything but the initial estimate, for resuming a run."""
+        return {"path": str(self.path), "solver": self.solver, "viscous": self.viscous,
+                "turbulence": self.turbulence, "fields": list(self.fields),
+                "sector_factor": self.sector_factor, "exit_region": list(self.exit_region),
+                "throat_region": list(self.throat_region), "exit_area": self.exit_area,
+                "throat_area": self.throat_area, "inlet_area": self.inlet_area,
+                "p_min_limit": self.p_min_limit, "p0_nominal": self.p0_nominal}
+
+    @staticmethod
+    def from_json(data: dict) -> "CaseSummary":
+        return CaseSummary(
+            path=Path(data["path"]), solver=data["solver"], viscous=data["viscous"],
+            turbulence=data["turbulence"], fields=tuple(data["fields"]), sector_factor=data["sector_factor"],
+            exit_region=tuple(data["exit_region"]), throat_region=tuple(data["throat_region"]),
+            exit_area=data["exit_area"], throat_area=data["throat_area"], inlet_area=data["inlet_area"],
+            initial=None, p_min_limit=data["p_min_limit"], p0_nominal=data["p0_nominal"])
 
 
 def _region(meta: MeshMeta, mesh: PolyMesh, which: str) -> tuple[str, str]:
@@ -210,6 +237,13 @@ def build_case(
             p_init[c], T_init[c] = max(pa, 1e-3 * p0), Ta
     if pa <= 0.0:
         p_init = np.maximum(p_init, 1e-4 * p0)
+    t = defn.flow.time
+    if isinstance(t, d.Transient) and t.initial == "ambient":
+        # A startup: gas at rest at ambient conditions everywhere (vacuum
+        # stands in as a thousandth of p0: the solvers need a pressure).
+        p_init[:] = start_pressure(defn, p0)
+        T_init[:] = Ta
+        U_init[:] = 0.0
 
     # Turbulence inlet state and a matching initial field.
     u_in = q1d.stations[0].velocity
@@ -395,6 +429,13 @@ def _write_fields(case, defn, meta, exit_radius, fields, p_init, T_init, U_init,
         inlet_U = {"type": "flowRateInletVelocity", "massFlowRate": b.inlet.mass_flow / sector,
                    "rhoInlet": p0 / (defn.gas.model().R * T0), "extrapolateProfile": "false",
                    "value": Raw("uniform (0 0 0)")}
+    elif isinstance(defn.flow.time, d.Transient) and defn.flow.time.ramp_time > 0.0:
+        # The valve opens linearly from the still domain's pressure to p0.
+        tr, p_start = defn.flow.time.ramp_time, start_pressure(defn, p0)
+        inlet_p = {"type": "uniformTotalPressure",
+                   "p0": Raw(f"table ((0 {p_start!r}) ({tr!r} {p0!r}) ({2 * tr + 1.0!r} {p0!r}))"),
+                   "psi": "thermo:psi", "gamma": g, "value": Raw(f"uniform {p_start!r}")}
+        inlet_U = {"type": "pressureInletOutletVelocity", "value": Raw("uniform (0 0 0)")}
     else:
         inlet_p = {"type": "totalPressure", "p0": Raw(f"uniform {p0}"), "psi": "thermo:psi", "gamma": g,
                    "value": Raw(f"uniform {p0}")}
@@ -506,6 +547,12 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
         "CofR": [0, 0, 0], "pRef": defn.boundaries.ambient.pressure,
         "writeControl": "timeStep", "writeInterval": 1,
     }
+    if isinstance(defn.flow.time, d.Transient):
+        # Mass held in the domain: with every boundary's flux it closes the
+        # time-accurate balance dM/dt = sum of inflows (post.timeseries).
+        fos["domain_mass"] = {"type": "volFieldValue", "libs": ["fieldFunctionObjects"], "log": "false",
+                              "writeFields": "false", "regionType": "all", "operation": "volIntegrate",
+                              "fields": ["rho"], "writeControl": "timeStep", "writeInterval": 1}
     if isinstance(defn.boundaries.wall_thermal, d.FixedTemperature):
         # Heat into the gas through the nozzle wall, kappa dT/dn integrated:
         # ESI's alphaEff carries Cp/Cv, so alphaEff grad(e) is kappa grad(T)
@@ -566,7 +613,7 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
         t = defn.flow.time
         timing = {"startFrom": "latestTime", "startTime": 0, "stopAt": "endTime",
                   "endTime": t.end_time, "deltaT": 1e-9, "writeControl": "adjustableRunTime",
-                  "writeInterval": t.end_time / 20, "purgeWrite": 0,
+                  "writeInterval": t.end_time / t.frames, "purgeWrite": 0,
                   "adjustTimeStep": "yes", "maxCo": t.max_courant, "maxDeltaT": 1}
     if solver == CENTRAL_SOLVER and steady:
         # rhoCentralFoam reads its local-time-step controls from controlDict.
@@ -598,19 +645,28 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
         # number: p fell to its floor on the first iteration at 0.5 and not at
         # 0.3 (DESIGN.md section 14).
         max_co = 0.25 if meta.form is Form.UNSTRUCTURED else 0.5
-        _write_pimple_numerics(case, ras, steady, p0, energy_field(defn), max_co)
+        _write_pimple_numerics(case, ras, steady, p0, energy_field(defn), max_co,
+                               grad=UNSTRUCTURED_GRAD if meta.form is Form.UNSTRUCTURED else STRUCTURED_GRAD)
     write_dict(case / "system" / "decomposeParDict", "decomposeParDict", {
         "numberOfSubdomains": max(1, defn.numerics.processors),
         "method": "scotch",
     }, location="system")
 
 
-def _write_pimple_numerics(case, ras, steady, p0, he="e", max_co=0.5):
+# Gauss gradients are inconsistent on irregular polyhedra: on cfMesh's
+# core-to-wall transition cells they put V1's inviscid mass flow 0.93 %
+# high, least squares 0.69 % (DESIGN.md section 15). Structured meshes keep
+# the verified Gauss form.
+STRUCTURED_GRAD = "cellLimited Gauss linear 1"
+UNSTRUCTURED_GRAD = "cellLimited leastSquares 1"
+
+
+def _write_pimple_numerics(case, ras, steady, p0, he="e", max_co=0.5, grad=STRUCTURED_GRAD):
     turb_div = ({"div(phi,k)": Raw("Gauss linearUpwind grad(k)"),
                  "div(phi,omega)": Raw("Gauss linearUpwind grad(omega)")} if ras else {})
     write_dict(case / "system" / "fvSchemes", "fvSchemes", {
         "ddtSchemes": {"default": "localEuler" if steady else "Euler"},
-        "gradSchemes": {"default": Raw("cellLimited Gauss linear 1")},
+        "gradSchemes": {"default": Raw(grad)},
         "divSchemes": {
             "default": "none",
             "div(phi,U)": Raw("Gauss linearUpwindV grad(U)"),
@@ -698,6 +754,14 @@ def request_stop(case: Path) -> None:
     path = case / "system" / "controlDict"
     text = path.read_text(encoding="utf-8")
     text = text.replace("stopAt          endTime;", "stopAt          writeNow;")
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
+def clear_stop(case: Path) -> None:
+    """Undo :func:`request_stop` (resuming a run that was stopped)."""
+    path = case / "system" / "controlDict"
+    text = path.read_text(encoding="utf-8")
+    text = text.replace("stopAt          writeNow;", "stopAt          endTime;")
     path.write_text(text, encoding="utf-8", newline="\n")
 
 

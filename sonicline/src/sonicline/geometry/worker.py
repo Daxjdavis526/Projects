@@ -3,6 +3,7 @@
     python -m sonicline.geometry.worker analyse <file> <scale> <inlet_end> <stations>
     python -m sonicline.geometry.worker write <segments.json> <out.step>
     python -m sonicline.geometry.worker tessellate <file> <scale> <out.stl> <size>
+    python -m sonicline.geometry.worker extract <file> <scale> <out.step>
 
 Run by :mod:`sonicline.geometry` in a subprocess so a kernel crash on a bad
 file cannot take the application down.
@@ -218,8 +219,8 @@ def analyse(path: str, scale: float, inlet_end: str, n_stations: int) -> dict:
         report["kind"] = "solid_body"
         report["errors"].append(
             "this looks like a solid thruster body with a gas passage through it, not the gas "
-            "volume itself. Automatic extraction of the internal gas volume is not available yet: "
-            "export the internal fluid volume from your CAD tool (the passage filled as a solid).")
+            "volume itself: extract the passage (sonicline extract, or Extract in the application) "
+            "and confirm it, or export the internal fluid volume from your CAD tool.")
         return report
     report["kind"] = "fluid_volume"
     report["axisymmetric"] = bool(roundness > 0.995)
@@ -325,8 +326,98 @@ def tessellate(path: str, scale: float, out: str, size: float) -> dict:
     return {"ok": True, "triangles": n}
 
 
+# ----------------------------------------------------------------------------- extract
+
+
+def _loop_extent(gmsh, curves) -> float:
+    lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
+    for c in curves:
+        b = gmsh.model.getBoundingBox(1, abs(c))
+        lo, hi = np.minimum(lo, b[:3]), np.maximum(hi, b[3:])
+    return float(np.linalg.norm(hi - lo))
+
+
+def extract(path: str, scale: float, out: str) -> dict:
+    """The gas passage of a solid thruster body (DESIGN.md section 3.6):
+    cap every hole in the body's planar faces, fragment body and caps inside
+    a box, and keep the cavity bounded by two caps -- a passage through the
+    body, inlet to exit. A cavity with one cap (a blind hole) is not it;
+    the step fails when no cavity or more than one qualifies."""
+    gmsh = _init()
+    occ = gmsh.model.occ
+    report = {"ok": False, "errors": [], "cavities": [], "caps": 0, "chosen": None}
+    if path.lower().endswith((".step", ".stp")):
+        gmsh.option.setString("Geometry.OCCTargetUnit", "M")
+        scale = 1.0
+    occ.importShapes(path)
+    occ.synchronize()
+    if scale != 1.0:
+        occ.dilate(occ.getEntities(), 0, 0, 0, scale, scale, scale)
+        occ.synchronize()
+    vols = occ.getEntities(3)
+    if len(vols) != 1:
+        report["errors"].append(f"expected one solid body, found {len(vols)}")
+        return report
+    body = vols[0][1]
+    caps = []
+    for _, face in gmsh.model.getBoundary([(3, body)], oriented=False):
+        if gmsh.model.getType(2, abs(face)) != "Plane":
+            continue
+        _, loop_curves = occ.getCurveLoops(abs(face))
+        if len(loop_curves) < 2:
+            continue
+        # The largest loop bounds the face; the others are holes in it.
+        extents = [_loop_extent(gmsh, list(c)) for c in loop_curves]
+        outer = int(np.argmax(extents))
+        for i, curves in enumerate(loop_curves):
+            if i != outer:
+                caps.append(occ.addPlaneSurface([occ.addCurveLoop([abs(int(c)) for c in curves])]))
+    occ.synchronize()
+    report["caps"] = len(caps)
+    if not caps:
+        report["errors"].append("the body has no openings in flat faces to cap; export the gas volume "
+                                "from your CAD tool instead")
+        return report
+    b = gmsh.model.getBoundingBox(3, body)
+    pad = 0.1 * max(b[3] - b[0], b[4] - b[1], b[5] - b[2])
+    box = occ.addBox(b[0] - pad, b[1] - pad, b[2] - pad, b[3] - b[0] + 2 * pad, b[4] - b[1] + 2 * pad,
+                     b[5] - b[2] + 2 * pad)
+    tools = [(3, body)] + [(2, c) for c in caps]
+    _, mapping = occ.fragment([(3, box)], tools)
+    occ.synchronize()
+    body_vols = {t for d, t in mapping[1] if d == 3}
+    cap_faces = [{t for d, t in mapping[2 + i] if d == 2} for i in range(len(caps))]
+    candidates = []
+    for _, v in occ.getEntities(3):
+        if v in body_vols:
+            continue
+        bb = gmsh.model.getBoundingBox(3, v)
+        if bb[0] <= b[0] - 0.5 * pad:  # reaches the box: the outside
+            continue
+        faces = {abs(f) for _, f in gmsh.model.getBoundary([(3, v)], oriented=False)}
+        n_caps = sum(1 for cf in cap_faces if cf & faces)
+        candidates.append({"tag": v, "volume": float(occ.getMass(3, v)), "caps": n_caps})
+    report["cavities"] = [{k: c[k] for k in ("volume", "caps")} for c in candidates]
+    through = [c for c in candidates if c["caps"] >= 2]
+    if len(through) != 1:
+        what = "no" if not through else f"{len(through)}"
+        report["errors"].append(f"{what} passage(s) through the body from one opening to another; "
+                                f"{len(candidates)} closed cavities in all")
+        return report
+    keep = through[0]["tag"]
+    occ.remove([(3, v) for _, v in occ.getEntities(3) if v != keep], recursive=True)
+    occ.synchronize()
+    gmsh.write(out)
+    gmsh.finalize()
+    report["chosen"] = {k: through[0][k] for k in ("volume", "caps")}
+    report["ok"] = True
+    return report
+
+
 def main(argv: list[str]) -> int:
-    if argv[0] == "tessellate":
+    if argv[0] == "extract":
+        print(json.dumps(extract(argv[1], float(argv[2]), argv[3])))
+    elif argv[0] == "tessellate":
         print(json.dumps(tessellate(argv[1], float(argv[2]), argv[3], float(argv[4]))))
     elif argv[0] == "write":
         print(json.dumps(write(argv[1], argv[2])))

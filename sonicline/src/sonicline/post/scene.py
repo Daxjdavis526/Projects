@@ -72,3 +72,8 @@ def mesh_boundary(mesh: PolyMesh) -> list[Surface]:
         polys = [[int(remap[v]) for v in f if v >= 0] for f in faces]
         out.append(Surface(patch.name, mesh.points[used], polys, patch.kind))
     return out
+
+
+def from_triangles(points, triangles, name: str, kind: str = "wall") -> Surface:
+    """A triangulated surface (an extracted gas volume's preview)."""
+    return Surface(name, np.asarray(points, dtype=float), [list(map(int, t)) for t in triangles], kind)

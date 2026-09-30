@@ -126,3 +126,12 @@ def check_definition_file(path: Path, expected_sha256: str) -> None:
             f"{path.name} has changed since the simulation was defined "
             f"(sha256 {actual[:12]}..., expected {expected_sha256[:12]}...)"
         )
+
+
+def extract_fluid(path: Path, length_unit: str, out: Path) -> dict:
+    """The gas passage of a solid thruster body, written to ``out`` (STEP):
+    a preview for the user to confirm, never used silently. Returns the
+    worker's report (ok, errors, the cavities found and the one chosen)."""
+    if Path(path).suffix.lower() == ".stl":
+        raise GeometryError("extracting the gas volume needs a STEP body (an STL has no faces to cap)")
+    return _worker(["extract", str(path), str(LENGTH_UNITS[length_unit]), str(out)])

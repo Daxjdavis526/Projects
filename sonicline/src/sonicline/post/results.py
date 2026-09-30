@@ -23,7 +23,7 @@ FUNCTION_OBJECTS = (
     "residuals", "mdot_inlet", "mdot_throat", "mdot_exit", "mdot_outlet", "mdot_ambient",
     "mdot_lip", "momentum_inlet", "momentum_exit", "pforce_inlet", "pforce_exit",
     "area_avg_throat", "area_avg_exit", "mass_avg_inlet", "mass_avg_throat", "mass_avg_exit",
-    "wall_force", "heat_wall",
+    "wall_force", "heat_wall", "domain_mass",
 )
 
 
@@ -81,18 +81,20 @@ def _pressure_force(scaled, name: str) -> float | None:
     return v
 
 
-def integrals(tables: dict, summary: CaseSummary) -> Integrals:
+def integrals(tables: dict, summary: CaseSummary, window: int | None = None) -> Integrals:
+    """``window``: steps averaged at the end (default: the steady-run window;
+    a transient takes its last few steps)."""
     k = summary.sector_factor
 
     def scaled(name, column, sign=1.0):
-        v = _final(tables.get(name), column)
+        v = _final(tables.get(name), column, window)
         return None if v is None else sign * k * v
 
     def averages(name, cols):
         t = tables.get(name)
         out = {}
         for c in cols:
-            v = _final(t, c)
+            v = _final(t, c, window)
             if v is None:
                 continue
             key = c[c.index("(") + 1 : -1]
@@ -115,8 +117,8 @@ def integrals(tables: dict, summary: CaseSummary) -> Integrals:
         exit_pressure_force=_pressure_force(scaled, "pforce_exit"),
         inlet_momentum=float(scaled("momentum_inlet", "weightedSum(U)")[0]),
         inlet_pressure_force=_pressure_force(scaled, "pforce_inlet"),
-        wall_force_x=k * float(_final(wf, "total_x")) if wf is not None else math.nan,
-        wall_force_viscous_x=k * float(_final(wf, "viscous_x")) if wf is not None else math.nan,
+        wall_force_x=k * float(_final(wf, "total_x", window)) if wf is not None else math.nan,
+        wall_force_viscous_x=k * float(_final(wf, "viscous_x", window)) if wf is not None else math.nan,
         throat_area_avg=averages("area_avg_throat", ["areaAverage(p)", "areaAverage(T)", "areaAverage(Ma)"]),
         throat_mass_avg=averages("mass_avg_throat", ["weightedAverage(T)", "weightedAverage(Ma)",
                                                       "weightedAverage(U)", "weightedAverage(magSqr(U))"]),

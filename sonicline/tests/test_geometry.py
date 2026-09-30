@@ -172,3 +172,55 @@ def test_side_port_volume_takes_its_axis_from_the_end_faces():
     assert b.throat_radius == pytest.approx(a.throat_radius, rel=1e-6)
     assert b.expansion_ratio == pytest.approx(a.expansion_ratio, rel=1e-6)
     assert b.x_exit == pytest.approx(a.x_exit, rel=1e-9)
+
+
+def test_gas_passage_is_extracted_from_a_solid_body(tmp_path):
+    """A cylindrical block with the example nozzle bored through it and a
+    blind hole in its inlet face: the passage (two capped openings) is the
+    gas volume, the blind hole (one) is not, and the passage is the nozzle."""
+    import os
+
+    import gmsh
+
+    examples = os.path.join(os.path.dirname(__file__), "..", "examples")
+    body = tmp_path / "body.step"
+    gmsh.initialize(["-noenv"], readConfigFiles=False)
+    gmsh.option.setNumber("General.Terminal", 0)
+    gmsh.option.setString("Geometry.OCCTargetUnit", "MM")
+    occ = gmsh.model.occ
+    noz = occ.importShapes(os.path.join(examples, "nozzle-2mm.step"))
+    occ.synchronize()
+    b = gmsh.model.getBoundingBox(3, noz[0][1])
+    block = occ.addCylinder(b[0], 0, 0, b[3] - b[0], 0, 0, 6.0)
+    solid, _ = occ.cut([(3, block)], noz)
+    solid, _ = occ.cut(solid, [(3, occ.addCylinder(b[0], 4.5, 0, 2.0, 0, 0, 0.5))])
+    occ.synchronize()
+    gmsh.write(str(body))
+    gmsh.finalize()
+
+    assert geometry.analyse(body, stations=20).kind == "solid_body"
+    rep = geometry.extract_fluid(body, "mm", tmp_path / "fluid.step")
+    assert rep["ok"] and rep["caps"] == 3
+    assert sorted(c["caps"] for c in rep["cavities"]) == [1, 2]
+    fluid = geometry.analyse(tmp_path / "fluid.step", stations=60)
+    plain = geometry.analyse(os.path.join(examples, "nozzle-2mm.step"), stations=60)
+    assert fluid.ok and fluid.axisymmetric
+    # 60 stations place the sections differently in the two bodies: 1e-4.
+    assert fluid.profile().expansion_ratio == pytest.approx(plain.profile().expansion_ratio, rel=1e-3)
+    assert fluid.volume == pytest.approx(plain.volume, rel=1e-6)
+
+
+def test_extraction_refuses_a_body_without_a_through_passage(tmp_path):
+    import gmsh
+
+    body = tmp_path / "blind.step"
+    gmsh.initialize(["-noenv"], readConfigFiles=False)
+    gmsh.option.setNumber("General.Terminal", 0)
+    occ = gmsh.model.occ
+    block = occ.addBox(0, 0, 0, 10, 10, 10)
+    occ.cut([(3, block)], [(3, occ.addCylinder(5, 5, 0, 0, 0, 4, 1))])
+    occ.synchronize()
+    gmsh.write(str(body))
+    gmsh.finalize()
+    rep = geometry.extract_fluid(body, "mm", tmp_path / "out.step")
+    assert not rep["ok"] and "no passage" in rep["errors"][0]

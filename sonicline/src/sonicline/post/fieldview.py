@@ -65,8 +65,11 @@ class RunResults:
     """One run directory's results. Reading is lazy: the case is opened on
     first use."""
 
-    def __init__(self, run_dir: Path):
+    def __init__(self, run_dir: Path, time: float | None = None):
+        """``time``: the written time to show (a transient's frame); the
+        latest by default."""
         self.run_dir = Path(run_dir)
+        self.requested_time = time
         self.case = self.run_dir / "case"
         if not (self.case / "case.foam").is_file():
             raise ResultsError(f"{self.run_dir} has no OpenFOAM case to read")
@@ -128,8 +131,11 @@ class RunResults:
                 times = list(reader.time_values)
         if not times:
             raise ResultsError(f"{self.case} has no time directories")
-        reader.set_active_time_value(times[-1])
-        self.time = f"{times[-1]:g}"
+        chosen = times[-1]
+        if self.requested_time is not None:
+            chosen = min(times, key=lambda t: abs(t - self.requested_time))
+        reader.set_active_time_value(chosen)
+        self.time = f"{chosen:g}"
         reader.enable_all_cell_arrays()
         reader.enable_all_patch_arrays()
         data = reader.read()
@@ -161,6 +167,18 @@ class RunResults:
         cd["rho"] = p / (self.R * np.maximum(T, 1e-9))
         cd["T0"] = T + speed**2 / (2.0 * self.cp)
         cd["p0"] = p * (1.0 + 0.5 * (g - 1.0) * mach**2) ** (g / (g - 1.0))
+
+    def times(self) -> list[float]:
+        """Written times with fields (a transient's frames), ascending."""
+        out = []
+        for d in self.case.iterdir():
+            try:
+                t = float(d.name)
+            except ValueError:
+                continue
+            if d.is_dir() and (d / "p").is_file() and t > 0.0:
+                out.append(t)
+        return sorted(out)
 
     @property
     def internal(self):

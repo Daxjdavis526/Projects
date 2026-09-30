@@ -94,7 +94,7 @@ def _json_event(e) -> None:
 
 
 def _run(path: str, out: str | None, processors: int | None, no_images: bool,
-         events: str = "text") -> int:
+         events: str = "text", resume: bool = False) -> int:
     import dataclasses
     from pathlib import Path
 
@@ -111,7 +111,7 @@ def _run(path: str, out: str | None, processors: int | None, no_images: bool,
     on_event = _json_event if events == "json" else (
         lambda e: print(f"[{e.stage}] {e.message}", flush=True))
     result = pipeline.run(defn, run_dir, on_event=on_event,
-                          render=not no_images, base_dir=Path(path).resolve().parent)
+                          render=not no_images, base_dir=Path(path).resolve().parent, resume=resume)
     if events == "json":
         return 0 if result.trust != "not_trustworthy" else 1
     if result.metrics:
@@ -127,6 +127,30 @@ def _run(path: str, out: str | None, processors: int | None, no_images: bool,
         print(f"  verdict        {result.trust}")
     print(f"\nresults in {result.run_dir}")
     return 0 if result.trust != "not_trustworthy" else 1
+
+
+def _extract(body: str, unit: str, out: str | None) -> int:
+    from pathlib import Path
+
+    from . import geometry
+
+    src = Path(body)
+    target = Path(out) if out else src.with_name(src.stem + "-fluid.step")
+    try:
+        rep = geometry.extract_fluid(src, unit, target)
+    except geometry.GeometryError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    print(f"{src.name}: {rep['caps']} openings capped, {len(rep['cavities'])} closed cavities")
+    for c in rep["cavities"]:
+        print(f"  cavity {1e9 * c['volume']:.3f} mm^3 bounded by {c['caps']} cap(s)")
+    for e in rep["errors"]:
+        print(f"  ERROR {e}")
+    if not rep["ok"]:
+        return 1
+    print(f"passage {1e9 * rep['chosen']['volume']:.3f} mm^3 written to {target}: look at it before using it "
+          f"(sonicline import {target.name})")
+    return 0
 
 
 def _import(cad: str, unit: str, p0: str, out: str | None) -> int:
@@ -253,6 +277,8 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--out", help="run directory (default runs/<definition name>)")
     run.add_argument("--processors", type=int, help="MPI processes")
     run.add_argument("--no-images", action="store_true", help="skip rendered images")
+    run.add_argument("--resume", action="store_true",
+                     help="continue the run directory's case from its last written time")
     run.add_argument("--events", choices=["text", "json"], default="text",
                      help="json: one JSON object per line, for the desktop UI")
     imp = sub.add_parser("import", help="analyse a STEP or STL fluid volume and write a starter definition")
@@ -260,6 +286,10 @@ def main(argv: list[str] | None = None) -> int:
     imp.add_argument("--unit", default="mm", help="length unit of an STL file (STEP carries its own)")
     imp.add_argument("--p0", default="20 bar", help="chamber (stagnation) pressure")
     imp.add_argument("--out", help="definition file to write (default <cad>.json)")
+    ext = sub.add_parser("extract", help="extract the gas passage of a solid thruster body (STEP) for review")
+    ext.add_argument("body")
+    ext.add_argument("--unit", default="mm")
+    ext.add_argument("--out", help="STEP file to write (default <body>-fluid.step)")
     stu = sub.add_parser("study", help="grid-convergence study of a definition (three meshes)")
     stu.add_argument("definition")
     stu.add_argument("--out", help="study directory (default runs/<definition name>-study)")
@@ -272,7 +302,7 @@ def main(argv: list[str] | None = None) -> int:
     ui = sub.add_parser("ui", help="open the desktop application")
     ui.add_argument("project", nargs="?", help="a .sonicline project folder (created if missing)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13,V14")
+    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13,V14,V15,E1,E2")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)
@@ -294,12 +324,14 @@ def main(argv: list[str] | None = None) -> int:
         return _study(args.definition, args.out, args.processors, args.ratio)
     if args.command == "verify":
         return _verify(args.cases, args.quality, args.out, args.processors)
+    if args.command == "extract":
+        return _extract(args.body, args.unit, args.out)
     if args.command == "import":
         return _import(args.cad, args.unit, args.p0, args.out)
     if args.command == "check":
         return _check(args.definition)
     if args.command == "run":
-        return _run(args.definition, args.out, args.processors, args.no_images, args.events)
+        return _run(args.definition, args.out, args.processors, args.no_images, args.events, args.resume)
     return 2
 
 

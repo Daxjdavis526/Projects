@@ -34,8 +34,10 @@ from .gas import R_UNIVERSAL, PerfectGas
 from .theory import isentropic as isen
 
 
-def available() -> bool:
-    return _CP is not None
+def available(gas: PerfectGas | None = None) -> bool:
+    """CoolProp is installed and (given a gas) has a reference equation of
+    state for it."""
+    return _CP is not None and (gas is None or bool(gas.coolprop_name))
 
 
 def _fluid(gas: PerfectGas) -> str:

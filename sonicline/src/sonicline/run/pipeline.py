@@ -117,11 +117,21 @@ def _nozzle_surface(defn: d.SimulationDefinition, profile, cad: Path | None, rep
     return tier2.to_frame(stl_surface.load(src, 1.0), report.nozzle_frame())
 
 
+# A transient's final state: the mean over its last steps.
+TRANSIENT_FINAL_STEPS = 10
+
+
+def nproc_of(defn: d.SimulationDefinition) -> int:
+    return max(1, defn.numerics.processors)
+
+
 def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         on_event: Callable[[Event], None] | None = None, poll_seconds: float = 2.0,
-        render: bool = True, base_dir: Path | None = None) -> RunResult:
+        render: bool = True, base_dir: Path | None = None, resume: bool = False) -> RunResult:
     """Run a definition end to end. ``base_dir`` resolves relative CAD paths
-    (normally the directory holding the definition file)."""
+    (normally the directory holding the definition file). ``resume``
+    continues a run directory's existing case from its last written time
+    instead of meshing afresh (when there is one to continue)."""
     notify = on_event or (lambda e: None)
     run_dir = Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -220,82 +230,113 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
 
     # --- mesh and case -----------------------------------------------------------
     case = run_dir / "case"
-    if case.exists():
-        shutil.rmtree(case)
-    extension = None
-    if foam_case.needs_viscous_work_extension(defn, profile):
-        from ..foam import extensions
+    summary_file = run_dir / "case_summary.json"
+    resuming = resume and summary_file.is_file() and (case / "case.foam").is_file()
+    if resuming:
+        # Continue a run that stopped (a killed container, a cancel) from its
+        # last written time, with the mesh and case it already has.
+        from ..foam import polymesh_io
 
-        try:
-            extension = extensions.ensure_built(runner, run_dir / "extensions")
-        except extensions.ExtensionBuildError as e:
-            emit(Event("setup", f"ERROR: {e}"))
-            manifest["setup_error"] = str(e)
-            return finish("failed", Trust.NOT_TRUSTWORTHY.value)
-        manifest["extension"] = extension
-    t0 = time.time()
-    if defn.mesh.form is d.MeshForm.UNSTRUCTURED:
-        from ..mesh import unstructured as tier2
-
-        viscous = not isinstance(defn.flow.turbulence, d.Inviscid)
-        first_cell = sizing.throat_first_cell(defn, profile) / defn.mesh.refinement if viscous else None
-        spec2 = tier2.spec_for(defn, profile, first_cell)
-        try:
-            nozzle_surface = _nozzle_surface(defn, profile, cad if isinstance(defn.geometry, d.CadFile) else None,
-                                             report if isinstance(defn.geometry, d.CadFile) else None,
-                                             run_dir / "mesh", spec2.wall_cell)
-            domain = tier2.domain_surface(nozzle_surface, profile, defn)
-            mesh, meta, t2 = tier2.build(runner, run_dir / "mesh", domain, profile, spec2,
-                                         on_note=lambda text: emit(Event("mesh", text)))
-        except tier2.MeshingError as e:
-            emit(Event("mesh", f"ERROR: {e}"))
-            manifest["mesh"] = {"generator": "sonicline.mesh.unstructured", "error": str(e)}
-            return finish("mesh_failed", Trust.NOT_TRUSTWORTHY.value)
-        for note in t2.notes:
-            emit(Event("mesh", note))
-        mesher_info = {"generator": f"sonicline.mesh.unstructured ({t2.mesher})", "tier2": t2.to_json(),
-                       "first_cell_at_throat": spec2.first_layer, "wall_cell": spec2.wall_cell}
-        form_name, two_d = "unstructured", False
+        summary = foam_case.CaseSummary.from_json(json.loads(summary_file.read_text(encoding="utf-8")))
+        meta = revolved.MeshMeta.from_json(json.loads((run_dir / "mesh_meta.json").read_text(encoding="utf-8")))
+        mesh = polymesh_io.read(case)
+        previous = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8")) \
+            if (run_dir / "manifest.json").is_file() else {}
+        for key in ("mesh", "solver", "extension", "warm_start", "resumed"):
+            if key in previous:
+                manifest[key] = previous[key]
+        report_file = run_dir / "mesh_report.json"
+        prior = json.loads(report_file.read_text(encoding="utf-8")) if report_file.is_file() else {}
+        gate = gates.GateResult(bool(prior.get("gate_ok", True)), list(prior.get("gate_errors", [])),
+                                list(prior.get("gate_warnings", [])))
+        form_name = meta.form.value
+        two_d = meta.form in (revolved.Form.WEDGE, revolved.Form.PLANAR)
+        latest = parse.latest_time(case) or "0"
+        if nproc_of(defn) > 1 and (case / "processor0").is_dir():
+            latest = parse.latest_time(case / "processor0") or latest
+        manifest["resumed"] = manifest.get("resumed", []) + [{"from_time": latest,
+                                                             "at": datetime.now(timezone.utc).isoformat()}]
+        foam_case.clear_stop(case)
+        emit(Event("setup", f"resuming from time {latest}"))
     else:
-        spec = sizing.spec_for(defn, profile)
-        mesh, meta = revolved.build(profile, spec)
-        mesher_info = {"generator": "sonicline.mesh.revolved", "first_cell_at_throat": spec.wall_first_cell}
-        form_name, two_d = spec.form.value, spec.form in (revolved.Form.WEDGE, revolved.Form.PLANAR)
-    summary = foam_case.build_case(case, defn, profile, mesh, meta, extension)
-    (run_dir / "mesh_meta.json").write_text(json.dumps(meta.to_json()) + "\n", encoding="utf-8")
-    manifest["mesh"] = {**mesher_info, "form": form_name, "quality": defn.mesh.quality.value,
-                        "cells": mesh.n_cells, "build_seconds": round(time.time() - t0, 2)}
-    manifest["solver"] = {"application": summary.solver, "turbulence": summary.turbulence,
-                          "steady": isinstance(defn.flow.time, d.Steady)}
-    emit(Event("mesh", f"{mesh.n_cells} cells ({form_name}, {defn.mesh.quality.value})"))
+        if case.exists():
+            shutil.rmtree(case)
+        extension = None
+        if foam_case.needs_viscous_work_extension(defn, profile):
+            from ..foam import extensions
 
-    runner.run(["checkMesh", "-allGeometry", "-allTopology", "-writeChecks", "json"], case,
-               case / "log.checkMesh")
-    check = parse.read_checkmesh(case, (case / "log.checkMesh").read_text(encoding="utf-8", errors="replace"))
-    gate = gates.evaluate(check, viscous=summary.viscous)
-    _write_json(run_dir / "mesh_report.json", {**asdict(check), **gate.to_json()})
-    manifest["mesh"].update({"max_non_orthogonality": check.max_non_orthogonality,
-                             "max_skewness": check.max_skewness, "gate": gate.ok})
-    emit(Event("mesh", f"checkMesh: non-orthogonality {check.max_non_orthogonality:.1f} deg, "
-                       f"skewness {check.max_skewness:.2f} -> {'pass' if gate.ok else 'FAIL'}"))
-    if not gate.ok:
-        for e in gate.errors:
-            emit(Event("mesh", f"ERROR: {e}"))
-        return finish("mesh_failed", Trust.NOT_TRUSTWORTHY.value)
-    if check.max_non_orthogonality > gates.NON_ORTHO_CORRECT:
-        foam_case.set_non_orthogonal_correctors(case, 1)
+            try:
+                extension = extensions.ensure_built(runner, run_dir / "extensions")
+            except extensions.ExtensionBuildError as e:
+                emit(Event("setup", f"ERROR: {e}"))
+                manifest["setup_error"] = str(e)
+                return finish("failed", Trust.NOT_TRUSTWORTHY.value)
+            manifest["extension"] = extension
+        t0 = time.time()
+        if defn.mesh.form is d.MeshForm.UNSTRUCTURED:
+            from ..mesh import unstructured as tier2
+
+            viscous = not isinstance(defn.flow.turbulence, d.Inviscid)
+            first_cell = sizing.throat_first_cell(defn, profile) / defn.mesh.refinement if viscous else None
+            spec2 = tier2.spec_for(defn, profile, first_cell)
+            try:
+                nozzle_surface = _nozzle_surface(defn, profile, cad if isinstance(defn.geometry, d.CadFile) else None,
+                                                 report if isinstance(defn.geometry, d.CadFile) else None,
+                                                 run_dir / "mesh", spec2.wall_cell)
+                domain = tier2.domain_surface(nozzle_surface, profile, defn)
+                mesh, meta, t2 = tier2.build(runner, run_dir / "mesh", domain, profile, spec2,
+                                             on_note=lambda text: emit(Event("mesh", text)))
+            except tier2.MeshingError as e:
+                emit(Event("mesh", f"ERROR: {e}"))
+                manifest["mesh"] = {"generator": "sonicline.mesh.unstructured", "error": str(e)}
+                return finish("mesh_failed", Trust.NOT_TRUSTWORTHY.value)
+            for note in t2.notes:
+                emit(Event("mesh", note))
+            mesher_info = {"generator": f"sonicline.mesh.unstructured ({t2.mesher})", "tier2": t2.to_json(),
+                           "first_cell_at_throat": spec2.first_layer, "wall_cell": spec2.wall_cell}
+            form_name, two_d = "unstructured", False
+        else:
+            spec = sizing.spec_for(defn, profile)
+            mesh, meta = revolved.build(profile, spec)
+            mesher_info = {"generator": "sonicline.mesh.revolved", "first_cell_at_throat": spec.wall_first_cell}
+            form_name, two_d = spec.form.value, spec.form in (revolved.Form.WEDGE, revolved.Form.PLANAR)
+        summary = foam_case.build_case(case, defn, profile, mesh, meta, extension)
+        (run_dir / "mesh_meta.json").write_text(json.dumps(meta.to_json()) + "\n", encoding="utf-8")
+        _write_json(run_dir / "case_summary.json", summary.to_json())
+        manifest["mesh"] = {**mesher_info, "form": form_name, "quality": defn.mesh.quality.value,
+                            "cells": mesh.n_cells, "build_seconds": round(time.time() - t0, 2)}
+        manifest["solver"] = {"application": summary.solver, "turbulence": summary.turbulence,
+                              "steady": isinstance(defn.flow.time, d.Steady)}
+        emit(Event("mesh", f"{mesh.n_cells} cells ({form_name}, {defn.mesh.quality.value})"))
+
+        runner.run(["checkMesh", "-allGeometry", "-allTopology", "-writeChecks", "json"], case,
+                   case / "log.checkMesh")
+        check = parse.read_checkmesh(case, (case / "log.checkMesh").read_text(encoding="utf-8", errors="replace"))
+        gate = gates.evaluate(check, viscous=summary.viscous)
+        _write_json(run_dir / "mesh_report.json", {**asdict(check), **gate.to_json()})
+        manifest["mesh"].update({"max_non_orthogonality": check.max_non_orthogonality,
+                                 "max_skewness": check.max_skewness, "gate": gate.ok})
+        emit(Event("mesh", f"checkMesh: non-orthogonality {check.max_non_orthogonality:.1f} deg, "
+                           f"skewness {check.max_skewness:.2f} -> {'pass' if gate.ok else 'FAIL'}"))
+        if not gate.ok:
+            for e in gate.errors:
+                emit(Event("mesh", f"ERROR: {e}"))
+            return finish("mesh_failed", Trust.NOT_TRUSTWORTHY.value)
+        if check.max_non_orthogonality > gates.NON_ORTHO_CORRECT:
+            foam_case.set_non_orthogonal_correctors(case, 1)
 
     # --- solve -------------------------------------------------------------------
-    nproc = max(1, defn.numerics.processors)
+    nproc = nproc_of(defn)
     wedge = two_d  # two-dimensional: no Uz
-    if nproc > 1:
+    transient = isinstance(defn.flow.time, d.Transient)
+    if nproc > 1 and not (resuming and (case / "processor0").is_dir()):
         runner.run(["decomposePar", "-force"], case, case / "log.decomposePar")
 
     def command(solver):
         return ["mpirun", "-np", str(nproc), solver, "-parallel"] if nproc > 1 else [solver]
 
     t_solve = time.time()
-    if foam_case.needs_warm_start(defn, summary):
+    if foam_case.needs_warm_start(defn, summary) and not (resuming and (case / "postProcessing.warmstart").is_dir()):
         n_warm = foam_case.WARM_START_ITERATIONS
         emit(Event("solve", f"warm start: {n_warm} iterations of {foam_case.PIMPLE_SOLVER}"))
         foam_case.write_warm_start(case, defn, meta, summary)
@@ -328,6 +369,7 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     last_report = 0
     held_since = None  # first iteration of the current unbroken run of passing checks
     cancelled = False
+    end_time = defn.flow.time.end_time if transient else None
     try:
         while proc.poll() is None:
             time.sleep(poll_seconds)
@@ -337,6 +379,16 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                 cancelled = True
                 break
             tables = results.read_tables(case)
+            if transient:
+                # A transient runs to its end time; progress is simulated time.
+                inlet = tables.get("mdot_inlet")
+                if inlet is not None and len(inlet.time):
+                    done = 100.0 * float(inlet.time[-1]) / end_time
+                    if done - last_report >= 5.0:
+                        last_report = done
+                        emit(Event("solve", f"t = {1e3 * float(inlet.time[-1]):.4g} ms ({done:.0f} %)",
+                                   {"time": float(inlet.time[-1]), "fraction": done / 100.0}))
+                continue
             assessment = convergence.assess(tables, criteria, wedge)
             # Stop only once the criteria have held for half a judgement window:
             # a slow oscillation passes a window that lands on its turning point
@@ -373,18 +425,36 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     if failure:
         emit(Event("solve", f"solver failure: {failure}"))
     if nproc > 1 and status == "completed":
-        runner.run(["reconstructPar", "-latestTime"], case, case / "log.reconstructPar")
+        # A transient's every written time is a frame of its animation.
+        runner.run(["reconstructPar"] if transient else ["reconstructPar", "-latestTime"], case,
+                   case / "log.reconstructPar")
 
     tables = results.read_tables(case)
-    assessment = convergence.assess(tables, criteria, wedge, slack=convergence.JUDGEMENT_SLACK)
-    _write_json(run_dir / "convergence.json", asdict(assessment))
+    if transient:
+        assessment = None  # judged on conservation in time, not steadiness
+        if status == "completed":
+            reached = tables.get("mdot_inlet")
+            if reached is None or not len(reached.time) or reached.time[-1] < 0.999 * end_time:
+                status = "failed"
+                emit(Event("solve", "the solver stopped before the end time"))
+    else:
+        assessment = convergence.assess(tables, criteria, wedge, slack=convergence.JUDGEMENT_SLACK)
+        _write_json(run_dir / "convergence.json", asdict(assessment))
 
     # --- post-processing ---------------------------------------------------------
     metrics = None
     yplus_max = None
     if tables.get("mdot_inlet") is not None:
-        it = results.integrals(tables, summary)
+        it = results.integrals(tables, summary, window=TRANSIENT_FINAL_STEPS if transient else None)
         metrics = propulsion(defn, profile, summary, it)
+        if transient:
+            from ..post import timeseries
+
+            ts = timeseries.build(tables, summary.sector_factor, defn.boundaries.ambient.pressure,
+                                  summary.exit_area)
+            if ts is not None:
+                _write_json(run_dir / "timeseries.json", ts.to_json())
+                metrics["transient"] = timeseries.metrics(ts)
         fields = results.read_fields(case)
         if fields is not None:
             metrics["extremes"] = results.extremes(fields, mesh.cell_centres, profile.x_exit,
@@ -408,9 +478,10 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                                      profile.x_exit - 0.1 * (profile.x_exit - profile.throat_x))
                 if rf:
                     metrics.setdefault("wall", {}).update(rf)
-        metrics["convergence"] = {"iterations": assessment.iterations, "converged": assessment.converged,
-                                  "mass_imbalance": assessment.mass_imbalance,
-                                  "residual_drop_orders": assessment.residual_drop}
+        if assessment is not None:
+            metrics["convergence"] = {"iterations": assessment.iterations, "converged": assessment.converged,
+                                      "mass_imbalance": assessment.mass_imbalance,
+                                      "residual_drop_orders": assessment.residual_drop}
     v = verdict(defn, status, gate.ok, gate.warnings, assessment, metrics, yplus_max)
     if metrics is not None:
         metrics["verdict"] = v.to_json()
@@ -426,6 +497,15 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
 
             images = rendering.render_all(run_dir, case, defn, profile, summary)
             manifest["images"] = [str(p.relative_to(run_dir)) for p in images]
+            if transient:
+                from ..post import report as reporting
+
+                try:
+                    frames = reporting.frames_isolated(run_dir, run_dir / "frames")
+                    manifest["animation"] = [str(p.relative_to(run_dir)) for p in frames if p.suffix == ".gif"]
+                    emit(Event("post", f"{len(frames) - 1} animation frames"))
+                except RuntimeError as e:
+                    emit(Event("post", f"animation skipped ({e})"))
         except ImportError as e:
             emit(Event("post", f"images skipped ({e})"))
     for r in v.reasons:

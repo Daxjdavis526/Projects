@@ -241,7 +241,7 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     out["gas"] = {"equation_of_state": defn.gas.equation_of_state}
     if pr is not None:
         out["gas"]["peng_robinson_choked_flux_bias"] = pr_bias
-    if realgas.available():
+    if realgas.available(gas):
         bias = realgas.choked_mass_flux(gas, p0, T0).bias
         # From the model the CFD ran to the reference equation of state.
         correction = (1.0 + bias) / (1.0 + pr_bias) - 1.0
@@ -255,7 +255,7 @@ def condensation(gas, p: np.ndarray, T: np.ndarray, x: np.ndarray, x_exit: float
     temperature at its own pressure: supersaturated vapour, which the
     single-phase CFD cannot condense. Checked cell by cell, in the nozzle
     and in the plume. None without CoolProp."""
-    if not realgas.available():
+    if not realgas.available(gas):
         return None
     T_sat, approx = realgas.saturation_temperatures(gas, p)
     margin = T - T_sat
@@ -304,7 +304,8 @@ STAGNATION_MARGIN = 0.005  # static T above T0 by more than this is a numerical 
 # approximates the boundary-layer edge in a 2D nozzle), hence a loose band.
 RECOVERY_RANGE = (0.75, 0.95)
 UNSETTLED_NOISE = 1e-3
-MASS_FLOW_IMPOSED_TOLERANCE = 0.002  # measured inlet flow vs a mass-flow inlet's setting
+MASS_FLOW_IMPOSED_TOLERANCE = 0.002
+TRANSIENT_CONSERVATION = 1e-3  # domain mass change vs time-integrated net inflow  # measured inlet flow vs a mass-flow inlet's setting
 UNCHOKED_MACH_LIMIT = 1.05  # a sharp throat's local supersonic pocket stays below this  # integral scatter above which a converged run is flagged unsettled
 
 
@@ -318,7 +319,19 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
     v.warnings += mesh_warnings
     if convergence is not None and not convergence.converged:
         v.reasons.append("not converged: " + "; ".join(convergence.reasons))
-    if metrics:
+    transient = (metrics or {}).get("transient")
+    if transient:
+        err = transient.get("conservation_error")
+        if err is not None and abs(err) > TRANSIENT_CONSERVATION:
+            v.reasons.append(f"mass is not conserved in time: the domain gained {transient['mass_gained']:.4g} kg "
+                             f"but {transient['mass_net_inflow']:.4g} kg flowed in ({100 * err:+.2f} %)")
+        if not transient["settled"]:
+            v.warnings.append(
+                f"the flow is still developing at the end time (thrust varies "
+                f"{100 * transient['thrust_drift_last_tenth']:.1f} % over the last tenth of the run): the "
+                "final values are the state at that time, not a steady state, and the steady-state checks "
+                "are not applied")
+    if metrics and (not transient or transient["settled"]):
         m = metrics
         cd = m["discharge_coefficient"]["cfd"]
         if cd > 1.0 + INVISCID_CD_MARGIN:

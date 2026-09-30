@@ -91,6 +91,10 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
         gas = defn.gas.model()
     except ValueError as e:
         return [Finding(Severity.ERROR, "gas.unsupported", str(e))]
+    if gas.name != "N2":
+        add(Finding(Severity.WARNING, "gas.not_nitrogen",
+                    f"The gas is {gas.name} (gamma {gas.gamma:.3f}). SONICLINE is validated for "
+                    "nitrogen; air is provided to compare with air experiments (E1, E2)."))
 
     inlet = defn.boundaries.inlet
     ambient = defn.boundaries.ambient
@@ -131,7 +135,7 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                     f"{T0_SUPPORTED[1]:.0f} K."))
 
     # -- real gas and regulator cooling -------------------------------------
-    if p0 is not None and realgas.available():
+    if p0 is not None and realgas.available(gas):
         choke = realgas.choked_mass_flux(gas, p0, T0)
         sev = Severity.WARNING if choke.bias > REAL_GAS_WARN else Severity.INFO
         add(Finding(sev, "gas.real_gas_bias",
@@ -143,7 +147,7 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                     "The perfect-gas mass flow and thrust are reported together with this "
                     "correction." if sev is Severity.WARNING else ""))
         p_b, T_b = TYPICAL_BOTTLE
-        if p0 < p_b:
+        if p0 < p_b and gas.name == "N2":
             T_reg = realgas.regulator_outlet_temperature(gas, p_b, T_b, p0)
             add(Finding(Severity.INFO, "gas.regulator_cooling",
                         f"T0 is the gas temperature in the chamber. Regulating from a "
@@ -270,7 +274,7 @@ def _regime_findings(gas, perf, p0, pa, profile, exit_domain, add) -> None:
 
 
 def _condensation_findings(gas, perf, add) -> None:
-    if not realgas.available() or perf.regime is nozzle.Regime.SUBSONIC:
+    if not realgas.available(gas) or perf.regime is nozzle.Regime.SUBSONIC:
         return
     sat = realgas.saturation_temperature(gas, perf.exit_pressure)
     margin = perf.exit_temperature - sat.temperature

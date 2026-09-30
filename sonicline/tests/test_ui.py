@@ -211,3 +211,35 @@ def test_switching_to_a_mass_flow_inlet_carries_the_flow_over(window):
     # And back: the implied chamber pressure is the one it started from.
     page.inlet_kind.setCurrentIndex(0)
     assert window.draft.get("boundaries.inlet.p0") == pytest.approx(before.p0, rel=1e-6)
+
+
+def test_a_solid_body_offers_extraction_and_uses_the_confirmed_passage(app, tmp_path):
+    pytest.importorskip("gmsh")
+    pytest.importorskip("trimesh")
+    import gmsh
+
+    from sonicline.ui.main_window import MainWindow
+
+    body = tmp_path / "body.step"
+    gmsh.initialize(["-noenv"], readConfigFiles=False)
+    gmsh.option.setNumber("General.Terminal", 0)
+    gmsh.option.setString("Geometry.OCCTargetUnit", "MM")
+    occ = gmsh.model.occ
+    noz = occ.importShapes(os.path.join(EXAMPLES, "nozzle-2mm.step"))
+    occ.synchronize()
+    b = gmsh.model.getBoundingBox(3, noz[0][1])
+    occ.cut([(3, occ.addCylinder(b[0], 0, 0, b[3] - b[0], 0, 0, 6.0))], noz)
+    occ.synchronize()
+    gmsh.write(str(body))
+    gmsh.finalize()
+
+    asked = []
+    w = MainWindow(Project.create(tmp_path / "P"), ask=lambda title, text: asked.append(title) or True)
+    page = w.geometry_page
+    page.import_file(body, synchronous=True)
+    assert page.report.kind == "solid_body" and not page.extract_btn.isHidden()
+    page.extract(synchronous=True)
+    assert asked == ["Use the extracted gas passage?"]
+    assert w.draft.get("geometry.path").endswith(".step") and page.report.kind == "fluid_volume"
+    assert page.report.ok and w.assessment.runnable
+    w.close()
