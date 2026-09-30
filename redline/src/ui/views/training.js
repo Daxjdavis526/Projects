@@ -30,7 +30,10 @@ export class TrainingView {
     page.append(open);
 
     for (const p of PROGRAMS) {
-      page.append(h('div.prog-head', h('h2', p.title), p.stand ? h('span.tag', p.stand) : h('span.tag', 'planned')));
+      const built = p.levels.filter(l => l.scenario);
+      const earned = built.filter(l => Object.keys(store.data.progress[l.id] || {}).length).length;
+      page.append(h('div.prog-head', h('h2', p.title), p.stand ? h('span.tag', p.stand) : h('span.tag', 'planned'),
+        built.length ? h('span.faint', { style: { fontSize: '11px', marginLeft: '10px' } }, `competency recorded on ${earned} of ${built.length} levels`) : null));
       page.append(h('p.lede', p.blurb));
       const grid = h('div.levels');
       for (const l of p.levels) {
@@ -54,7 +57,7 @@ export class TrainingView {
 
     page.append(h('h2', 'Modes'));
     page.append(h('div.kv', { style: { maxWidth: '100ch', gap: '6px 16px' } },
-      Object.entries(MODES).map(([k, m]) => [h('span.k', m.label), h('span', { style: { color: 'var(--ink-2)' } }, m.text + (k === 'fault' ? ' (development phase 4)' : ''))])));
+      Object.entries(MODES).map(([k, m]) => [h('span.k', m.label), h('span', { style: { color: 'var(--ink-2)' } }, m.text)])));
     host.append(page);
   }
 }

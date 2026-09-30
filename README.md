@@ -246,8 +246,11 @@ pulse-test campaigns fitted across runs, hidden hardware and instrument
 faults to diagnose with technician inspections that return measurements
 (never verdicts), a scored diagnosis and a root-cause debrief, cursors and
 reductions on the
-recorded data, test history that outlives the session, and an engineering
-notebook. Fictional hardware, generalised
+recorded data, test history that outlives the session, an engineering
+notebook and printable test reports. It ends in an unscripted acceptance
+campaign: a test request, no procedure, maybe a hidden fault, and a report
+graded on whether you noticed the data were not what they seemed.
+Fictional hardware, generalised
 procedures, and it says so. Desktop only.
 
 Live: https://daxjdavis526.github.io/Projects/redline/

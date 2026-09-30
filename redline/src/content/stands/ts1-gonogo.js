@@ -12,6 +12,10 @@ export default [
       { label: 'Firing plan', eval: v => ({ value: v.planText, ok: v.plan.mode === 'pulse' || (v.plan.duration > 0 && v.plan.duration <= v.ratings.MAX_BURN) }),
         why: 'The sequencer will do exactly what is loaded. Read it back.' },
       { label: 'Regulator setpoint vs test request', eval: v => {
+          // a campaign request approves a range of setpoints, not a list
+          const rg = v.request?.range;
+          if (rg) return { value: `${P(v.regSet)} commanded / approved ${fmt(rg[0], 'pressure', 0)}–${fmt(rg[1], 'pressure', 0)} psig`,
+                           ok: v.regSet >= rg[0] - psi(1) && v.regSet <= rg[1] + psi(1) };
           const pts = v.request?.matrix ? v.request.matrix : v.request ? [v.request.regSet] : null;
           return {
             value: !pts ? `${P(v.regSet)} commanded` : `${P(v.regSet)} commanded / ${pts.length > 1 ? 'matrix ' + pts.map(x => fmt(x, 'pressure', 0)).join(', ') + ' psig' : P(pts[0]) + ' requested'}`,

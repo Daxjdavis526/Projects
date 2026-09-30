@@ -7,6 +7,7 @@ import { fmt, fmtT, unitLabel, toDisplay, fromDisplay } from '../../lib/units.js
 import { DAQ_RATES } from '../../instruments/daq.js';
 import { act, modal } from '../modal.js';
 import { openDiagnosis, reveal } from './diagnosis.js';
+import { HINT_COST } from '../../faults/engine.js';
 
 export class Console {
   constructor(host, app) {
@@ -67,6 +68,21 @@ export class Console {
     const fb = h('span.stat.muted');
     this.body.append(h('div.line', h('span.muted', 'Setpoint'), inp, unit, btn('SET', go, 'sm primary'), btn('0', () => { inp.value = 0; go(); }, 'sm ghost', { title: 'Setpoint to zero (dome vented)' })));
     this.body.append(h('div.line', fb));
+    // the pressure-decay leak check, for sessions with no procedure to run it
+    this.body.append(h('div.grp', 'Leak check (isolate, 60 s hold)'));
+    const lst = h('span.stat.muted'), bar = h('div.bar', h('i')), lb = btn('START HOLD', () => {
+      const r = S.startLeakCheck();
+      if (!r.ok) this.app.toast('Leak check not started', r.msg, 'info', 4500);
+    }, 'sm');
+    this.body.append(h('div.leak', lb, bar, lst));
+    this.live.push(() => {
+      const run = S.leakRun, res = S.leakCheck;
+      lb.disabled = !!run;
+      bar.firstChild.style.width = run ? `${Math.min(100, 100 * (S.t - run.start) / (run.end - run.start))}%` : '0';
+      bar.style.visibility = run ? 'visible' : 'hidden';
+      setText(lst, run ? `holding — ${Math.max(0, run.end - S.t).toFixed(0)} s` : res ? res.msg : 'not performed');
+      lst.style.color = run ? 'var(--caution)' : res ? (res.ok ? 'var(--good)' : 'var(--warning)') : '';
+    });
     this.live.push(() => {
       setText(fb, `cmd ${fmt(S.controller.regSet, 'pressure')}   EPC fb ${S.daq.online ? fmt(S.daq.latest('EPC-101'), 'pressure') : '----'}   PT-201 ${S.daq.online ? fmt(S.daq.latest('PT-201'), 'pressure') : '----'} ${unitLabel('pressure', true)}`);
       setText(unit, unitLabel('pressure', true));
@@ -180,8 +196,12 @@ export class Console {
         diag = S.faults.diagnosis;
         clear(diagBox);
         if (diag) diagBox.append(btn('Root cause…', () => reveal(this.app), 'sm primary'), h('span.faint', `Diagnosis submitted · ${diag.result.score}/100`));
-        else diagBox.append(btn('Submit diagnosis…', () => openDiagnosis(this.app), S.faults.enabled ? 'sm primary' : 'sm ghost'),
-          h('span.faint', S.faults.enabled ? 'Fault session: diagnose before you leave.' : 'No faults are injected in this session.'));
+        else {
+          diagBox.append(btn('Submit diagnosis…', () => openDiagnosis(this.app), S.faults.enabled ? 'sm primary' : 'sm ghost'),
+            h('span.faint', S.faults.enabled ? 'Fault session: diagnose before you leave.' : 'No faults are injected in this session.'));
+          if (S.faults.enabled && S.mode === 'guided') diagBox.append(btn(`Ask for a hint (−${HINT_COST})`, () => this._hint(), 'sm ghost', { title: 'The senior engineer asks a question. Three at most, each costs points on the diagnosis.' }));
+          for (const x of S.faults.hints) diagBox.append(h('div.hint', h('b', 'SENIOR ENGINEER  '), x.text));
+        }
       }
       if (shown === S.inspections.length) return;
       shown = S.inspections.length;
@@ -193,6 +213,12 @@ export class Console {
           r.text ? h('p.muted', r.text) : null));
       }
     });
+  }
+
+  _hint() {
+    const t = this.S.faults.hint();
+    if (!t) { this.app.toast('No more hints', 'That was the last one — the rest is yours.', 'info'); return; }
+    this.show('INSPECT');
   }
 
   _pa() {

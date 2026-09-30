@@ -4,9 +4,13 @@
    all of it. Summaries persist in the browser; traces live for the session. */
 
 import { h, btn, clear } from '../dom.js';
-import { fmt, unitLabel, fmtClock } from '../../lib/units.js';
+import { fmt, unitLabel, fmtClock, fromDisplay, toDisplay } from '../../lib/units.js';
 import { store } from '../store.js';
-import { history } from '../history.js';
+import { history, download } from '../history.js';
+import { reportHTML } from '../../analysis/reporthtml.js';
+import { sessionReport, gradeCampaign, VALIDITY } from '../../analysis/report.js';
+
+const slug = s => s.replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
 
 export class NotebookView {
   constructor(host, app) {
@@ -22,7 +26,8 @@ export class NotebookView {
 
   get entries() { return store.data.notebook; }
 
-  onSession() { this.pendingNotes = []; this.render(); }
+  onSession() { this.pendingNotes = []; this.draft = null; this.render(); }
+  get reports() { return (store.data.reports ||= []); }
   onShow() { this.render(); }
 
   /* Called by the session when a recording stops. */
@@ -78,12 +83,22 @@ export class NotebookView {
     const list = h('div.pb.list');
     const newNote = h('div.li' + (this.sel === null ? '.sel' : ''), { onclick: () => { this.sel = null; this.render(); } },
       h('div.a', h('b', 'Pre-test notes')), h('div.b', this.pendingNotes.length ? `${this.pendingNotes.length} note(s) waiting for the next run` : 'Write the plan before you record'));
+    const S = this.app.session;
+    const sessRep = S ? h('div.li' + (this.sel === '#report' ? '.sel' : ''), { onclick: () => { this.sel = '#report'; this.render(); } },
+      h('div.a', h('b', 'Session test report'), S.flags.has('session-report') ? h('span.tag', { style: { color: 'var(--good)', borderColor: '#2a6b37' } }, 'FILED') : null),
+      h('div.b', S.request?.title || 'Open-stand session')) : null;
+    const filed = this.reports.filter(r => !this.q || (r.title + ' ' + r.date).toLowerCase().includes(this.q)).map(r =>
+      h('div.li' + (this.sel === 'rep:' + r.id ? '.sel' : ''), { onclick: () => { this.sel = 'rep:' + r.id; this.render(); } },
+        h('div.a', h('b', 'Report'), h('span.faint', `${r.date} ${r.clock}`), r.grade ? h('span.tag', `${r.grade.score}/100`) : null),
+        h('div.b', r.title)));
     this.root.append(h('div.panel', h('div.ph', h('span.t', 'Notebook'), h('span.sp'), h('span.sub', `${this.entries.length} run(s)`)),
-      h('div', { style: { padding: '6px' } }, search), h('div.list', newNote), list));
+      h('div', { style: { padding: '6px' } }, search), h('div.list', newNote, sessRep, ...filed), list));
     this.renderList(list);
     // detail
     const detail = h('div.panel');
     this.root.append(detail);
+    if (this.sel === '#report' && S) { this.renderSession(detail); return; }
+    if (String(this.sel).startsWith('rep:')) { const r = this.reports.find(x => 'rep:' + x.id === this.sel); if (r) { this.renderFiled(detail, r); return; } }
     const e = this.entries.find(x => x.id === this.sel);
     if (!e) this.renderPre(detail); else this.renderEntry(detail, e);
   }
@@ -100,6 +115,104 @@ export class NotebookView {
         h('div.b', `${e.objective} · ${e.config.plan}${F ? ` · F ${fmt(F.value, 'force')} ${unitLabel('force')}` : ''}`)));
     }
     if (!list.childElementCount) list.append(h('div', { style: { padding: '10px', color: 'var(--ink-4)' } }, q ? 'Nothing matches.' : 'No runs yet.'));
+  }
+
+  /* The session test report: facts assembled from the record, conclusions
+     written by the conductor, previewed as the document that will be filed
+     and downloaded. In the campaign, filing also grades it. */
+  renderSession(detail) {
+    const S = this.app.session, campaign = !!S.scenario?.campaign;
+    const d = this.draft ||= { result: '', summary: '', anomalies: '', validity: '', numbers: {} };
+    const meta = this._meta();
+    const frame = h('iframe.report', { title: 'Report preview' });
+    const refresh = () => { frame.srcdoc = reportHTML(sessionReport(S), this._conclusions(), null, meta); };
+    let tm = null;
+    const later = () => { clearTimeout(tm); tm = setTimeout(refresh, 250); };
+    const field = (el, key) => {
+      el.value = d[key] || '';
+      const upd = () => { d[key] = el.value; later(); };
+      el.addEventListener('input', upd); el.addEventListener('change', upd);
+      return el;
+    };
+    const result = field(h('select.in', {}, ['', 'Success', 'Partial', 'Held — not fired', 'Aborted', 'Failed', 'Invalid (no usable data)'].map(x => h('option', { value: x }, x || '— result —'))), 'result');
+    const summary = field(h('textarea.in', { rows: 3, placeholder: 'What was done and what was measured, against the prediction.' }), 'summary');
+    const anomalies = field(h('textarea.in', { rows: 2, placeholder: 'Everything unexpected, however small — and what it means for the data. "None" is an answer.' }), 'anomalies');
+    const form = h('div.kv.repform', h('span.k', 'Result'), result, h('span.k', 'Summary'), summary, h('span.k', 'Anomalies'), anomalies);
+    if (campaign) {
+      const validity = field(h('select.in', {}, [h('option', { value: '' }, '— data validity —'), ...VALIDITY.map(([v, l]) => h('option', { value: v }, l))]), 'validity');
+      // entered in display units; kept in SI
+      const conv = {
+        force: [x => fromDisplay(x, 'force'), x => toDisplay(x, 'force')], pressure: [x => fromDisplay(x, 'pressure'), x => toDisplay(x, 'pressure')],
+        mNs: [x => x / 1e3, x => x * 1e3], pct: [x => x / 100, x => x * 100], plain: [x => x, x => x],
+      };
+      const NUM = [['F', 'Baseline thrust', 'force', unitLabel('force')], ['Pc', 'Baseline chamber pressure', 'pressure', unitLabel('pressure', true)],
+        ['Isp', 'Baseline Isp', 'plain', 's'], ['Cf', 'Thrust coefficient (sweep)', 'plain', ''], ['Ibit', 'Impulse bit, 10 ms', 'mNs', 'mN·s'],
+        ['IbitCv', 'Impulse-bit scatter (1σ/mean)', 'pct', '%']];
+      const nums = h('div.repnums');
+      for (const [k, label, q, u] of NUM) {
+        const inp = h('input.in', { type: 'number', step: 'any' });
+        if (Number.isFinite(d.numbers[k])) inp.value = String(+conv[q][1](d.numbers[k]).toPrecision(5));
+        inp.addEventListener('input', () => { const x = parseFloat(inp.value); d.numbers[k] = Number.isFinite(x) ? conv[q][0](x) : NaN; later(); });
+        nums.append(h('label', h('span', label), inp, h('span.faint', u)));
+      }
+      form.append(h('span.k', 'Data validity'), validity, h('span.k', 'Deliverables'), nums);
+    }
+    const title = S.request?.title || 'Open-stand session';
+    detail.append(h('div.ph', h('span.t', 'Session test report'), h('span.sub', title), h('span.sp'),
+      btn('Download HTML', () => download(`${slug(title)}-report.html`, reportHTML(sessionReport(S), this._conclusions(), null, meta), 'text/html'), 'sm ghost'),
+      btn(S.flags.has('session-report') ? 'File again' : 'File report', () => this._file(), 'sm primary')));
+    detail.append(h('div.pb.repwrap',
+      h('p.muted', { style: { margin: '0 0 8px' } }, campaign
+        ? 'Report the deliverables from YOUR reductions (ANALYSIS), and make the call on whether the data represent the article. Filing grades the report against your data and against what was really wrong with the stand.'
+        : 'The facts are assembled from the record. The conclusions are yours.'),
+      form, frame));
+    refresh();
+  }
+
+  _meta() {
+    const lvl = this.app.level;
+    return { date: new Date().toISOString().slice(0, 10), level: lvl ? `Level ${lvl.n}: ${lvl.title}` : 'Open stand' };
+  }
+
+  _conclusions() {
+    const d = this.draft || {}, campaign = !!this.app.session?.scenario?.campaign;
+    return { result: d.result, summary: d.summary, anomalies: d.anomalies, validity: campaign ? d.validity : undefined, numbers: campaign ? d.numbers : undefined };
+  }
+
+  _file() {
+    const S = this.app.session, c = this._conclusions(), campaign = !!S.scenario?.campaign, meta = this._meta();
+    if (!c.result || (campaign && !c.validity)) { this.app.toast('Incomplete', campaign ? 'State a result and the data validity.' : 'State a result.', 'info'); return; }
+    if (S.faults.enabled && !S.faults.diagnosis && !confirm('No diagnosis has been submitted (Console ▸ INSPECT). File the report without one?')) return;
+    const grade = campaign ? gradeCampaign(S, { ...c.numbers, validity: c.validity }) : null;
+    const n = this.reports.filter(r => r.session === S.uid).length + 1;
+    const id = `${S.uid}-${n}`;
+    const title = S.request?.title || 'Open-stand session';
+    this.reports.unshift({ id, session: S.uid, title, date: meta.date, clock: fmtClock(S.clock),
+      html: reportHTML(sessionReport(S), c, grade, meta), grade: grade ? { score: grade.score, grade: grade.grade } : null });
+    while (this.reports.length > 20) this.reports.pop();
+    store.save();
+    S.flag('session-report');
+    S.flag('report:session');            // satisfies a procedure's "file the test report" step
+    S.note(`Session test report filed: ${c.result}${grade ? ` — review ${grade.score}/100 (${grade.grade})` : ''}`);
+    if (campaign) {
+      S.flag('campaign-report');
+      if (this.app.level && grade.score >= 70) this.app.recordCompetency(this.app.level.id, S.mode);
+    }
+    this.sel = 'rep:' + id;
+    this.render();
+    this.app.toast('Report filed', grade ? `Review: ${grade.score}/100 — ${grade.grade}.` : 'Saved to the notebook.', 'info', 4500);
+  }
+
+  renderFiled(detail, r) {
+    detail.append(h('div.ph', h('span.t', 'Filed report'), h('span.sub', `${r.date} ${r.clock} · ${r.title}`), h('span.sp'),
+      btn('Download HTML', () => download(`${slug(r.title)}-${r.id}.html`, r.html, 'text/html'), 'sm ghost'),
+      btn('Delete', () => {
+        const i = this.reports.indexOf(r);
+        if (i >= 0 && confirm('Delete this filed report?')) { this.reports.splice(i, 1); store.save(); this.sel = null; this.render(); }
+      }, 'sm ghost')));
+    const frame = h('iframe.report.tall', { title: 'Filed report' });
+    frame.srcdoc = r.html;
+    detail.append(h('div.pb.repwrap', frame));
   }
 
   renderPre(detail) {

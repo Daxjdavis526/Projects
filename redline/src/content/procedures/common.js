@@ -11,6 +11,7 @@
    are shaped, not a certified procedure for any real hardware. */
 
 import { psi, fmt } from '../../lib/units.js';
+import { leakPre, leakEval } from '../../control/leakcheck.js';
 
 export const P = v => `${fmt(v, 'pressure')} psig`;
 export const near = (a, b, tol) => Number.isFinite(a) && Math.abs(a - b) <= tol;
@@ -146,15 +147,8 @@ export function supplyLeak(def, sec = 'E') {
       hold: {
         seconds: 60,
         store: 'leakCheck',
-        pre: v => (v.cmd('IV-101') === 0 && v.regSet === 0 && v.cmd('VV-201') === 0 && v.cmd('VV-101') === 0 && v.ch('PT-301') > psi(40))
-          ? { ok: true } : { ok: false, msg: 'Isolate first: IV-101 closed, PR-101 at 0, both vents closed, LP section pressurised.' },
-        evaluate: v => {
-          const lp = v.stats('PT-301', 50), hp = v.stats('PT-102', 50);
-          const rate = lp ? lp.slope : NaN;
-          const perMin = rate * 60 / psi(1);
-          const ok = Number.isFinite(rate) && perMin > -1.0;
-          return { value: rate, hpValue: hp ? hp.slope : NaN, ok, msg: `LP decay ${perMin.toFixed(2)} psi/min${hp ? `, HP ${(hp.slope * 60 / psi(1)).toFixed(1)} psi/min` : ''} — ${ok ? 'within limit' : 'EXCEEDS 1.0 psi/min limit'}` };
-        },
+        pre: leakPre,
+        evaluate: leakEval,
       }, focus: ['IV-101', 'PR-101'] },
   ] };
 }
@@ -242,7 +236,7 @@ export const inspectStep = () => ({ kind: 'action', station: 'PROP', title: 'Tec
   check: v => v.has(e => e.cat === 'TECH' && e.text.startsWith('Post-test visual')) });
 
 export const reportStep = () => ({ kind: 'action', station: 'TC', title: 'File the test report',
-  text: 'NOTEBOOK ▸ a run of this test ▸ write the result and any anomalies ▸ File report.',
+  text: 'NOTEBOOK ▸ Session test report (or a single run) ▸ write the result and any anomalies ▸ File report.',
   why: 'A test that is not written up did not happen. Somebody will need to know, in a year, what was done and what was seen.',
   check: v => [...v.flags].some(f => f.startsWith('report:')) });
 

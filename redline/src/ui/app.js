@@ -38,6 +38,11 @@ export class App {
     this.views.analysis = new AnalysisView(this.viewHost('analysis'), this);
     this.show('training');
     document.addEventListener('pointerdown', () => this.audio.ensure(), { once: true });
+    // a session is not saved: leaving the page ends it
+    window.addEventListener('beforeunload', e => {
+      const S = this.session;
+      if (S && (S.runs.length || S.controller.armed || S.t > 120)) { e.preventDefault(); e.returnValue = ''; }
+    });
     this.last = performance.now();
     requestAnimationFrame(t => this.frame(t));
   }

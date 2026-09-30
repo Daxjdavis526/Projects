@@ -8,6 +8,7 @@ import basicFiring from './procedures/cg-basic-firing.js';
 import pressureChar from './procedures/cg-pressure-char.js';
 import pulse from './procedures/cg-pulse.js';
 import trouble from './procedures/cg-trouble.js';
+import campaign from './procedures/cg-campaign.js';
 
 export const STANDS = { 'TS-1': ts1 };
 
@@ -34,8 +35,8 @@ export const PROGRAMS = [
         teaches: ['Valve response vs inlet pressure', 'Impulse bit', 'Minimum impulse bit', 'Repeatability', 'High-rate DAQ'] },
       { n: 5, id: 'cg-trouble', title: 'Cold-gas troubleshooting', scenario: trouble, modes: ['guided', 'independent'],
         teaches: ['Sensor vs system faults', 'When to hold, abort or continue', 'Inspection', 'Root-cause diagnosis'] },
-      { n: 6, id: 'cg-indep', title: 'Independent cold-gas test conductor', phase: 5,
-        teaches: ['Unscripted campaign', 'Hidden faults', 'Test reports'] },
+      { n: 6, id: 'cg-indep', title: 'Independent cold-gas test conductor', scenario: campaign, modes: ['independent'],
+        teaches: ['Planning a campaign from a test request', 'Unscripted operations', 'Hidden faults', 'Is the data valid?', 'Test reports'] },
     ],
   },
   {

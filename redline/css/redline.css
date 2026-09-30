@@ -522,3 +522,19 @@ label.chk { display: inline-flex; align-items: center; gap: 5px; color: var(--in
 .reveal p { margin: 0 0 6px; line-height: 1.55; color: var(--ink-2); }
 .reveal .kev { display: inline-block; margin: 0 6px 4px 0; padding: 1px 6px; border: 1px solid var(--line); color: var(--ink-4); font-size: 11px; }
 .reveal .kev.hit { color: #7fd18e; border-color: #3c6b46; }
+
+/* ---- phase 5: session test report, console leak check -------------------- */
+.repwrap { padding: 12px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+.repform { gap: 6px 12px; align-items: start; max-width: 860px; }
+.repform textarea, .repform select { width: 100%; box-sizing: border-box; }
+.repnums { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px 14px; }
+.repnums label { display: grid; grid-template-columns: 1fr 96px 40px; gap: 6px; align-items: center; font-size: 11.5px; color: var(--ink-2); }
+.repnums input { width: 100%; box-sizing: border-box; }
+iframe.report { width: 100%; min-height: 520px; flex: 1; border: 1px solid var(--line); background: #fff; }
+iframe.report.tall { min-height: calc(100vh - 150px); }
+.console .leak { display: flex; align-items: center; gap: 8px; padding: 4px 10px; }
+.console .leak .stat { flex: 1; }
+.console .leak .bar { width: 70px; height: 5px; background: #1b232b; position: relative; }
+.console .leak .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gas); }
+.console .hint { flex-basis: 100%; font-size: 11.5px; line-height: 1.5; color: var(--ink-2); border-left: 2px solid var(--gas); padding: 3px 8px; background: #0e1419; }
+.console .hint b { font: 600 9.5px var(--mono); letter-spacing: .12em; color: var(--gas); }

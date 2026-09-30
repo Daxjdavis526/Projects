@@ -28,8 +28,9 @@ import { EventLog } from '../control/eventlog.js';
 import { ProcedureRunner } from '../control/procedure.js';
 import { runPoll, concludePoll } from '../control/gonogo.js';
 import { computeMetrics } from '../analysis/metrics.js';
-import { FaultEngine } from '../faults/engine.js';
+import { FaultEngine, HINT_COST } from '../faults/engine.js';
 import { scoreDiagnosis, abortAssessment } from '../faults/diagnosis.js';
+import { leakPre, leakEval, LEAK_SECONDS } from '../control/leakcheck.js';
 import { FAILURE_MODES, RIGHT_ACTION } from '../content/faults/ts1-faults.js';
 
 const MODELS = { coldgas: ColdGasModel };
@@ -42,6 +43,7 @@ export class Session extends Emitter {
     this.scenario = scenario;
     this.mode = mode;
     this.seed = seed;
+    this.uid = `S${seed.toString(36)}${(Date.now() % 1e6).toString(36)}`;   // names this session's filed reports
     this.rng = new Rng(seed);
     const M = MODELS[def.physics.model];
     if (!M) throw new Error(`no physics model '${def.physics.model}'`);
@@ -65,6 +67,7 @@ export class Session extends Emitter {
     this.speed = 1;
     this.frozen = false;
     this.leakCheck = null;
+    this.leakRun = null;
     this.prediction = null;
     this._predKey = null;
     this._procAcc = 0;
@@ -83,7 +86,9 @@ export class Session extends Emitter {
       this.procedure = new ProcedureRunner(this, scenario.procedure(def));
     } else this.procedure = null;
     this.log.add(0, 'SYS', `Session start — ${def.name} (${def.fictional ? 'fictional configuration' : ''}), ${scenario ? scenario.title : 'open stand'}, ${mode} mode`);
+    // predicted now, so the first thing the operator reads has numbers in it
     this.requestPrediction();
+    this.updatePrediction();
   }
 
   /* The UI may attach a sound engine; the core only names events. */
@@ -186,6 +191,7 @@ export class Session extends Emitter {
       diagnosis: this.faults.diagnosis,
       faultSession: this.faults.enabled,
       flags: this.flags,
+      session: this,
       runs: this.runs,
       lastRun: this.runs[this.runs.length - 1] || null,
       leakCheck: this.leakCheck,
@@ -235,12 +241,38 @@ export class Session extends Emitter {
     this.emit('flag', name);
   }
 
+  /* A leak check from the console, outside any procedure: the same
+     isolation, the same 60 s hold and the same limit as the procedure step.
+     The result is what the PROPULSION station reports at the poll. */
+  startLeakCheck() {
+    if (this.leakRun) return { ok: false, msg: 'A leak check is already running.' };
+    const pre = leakPre(this.view());
+    if (!pre.ok) return pre;
+    this.leakRun = { start: this.t, end: this.t + LEAK_SECONDS };
+    this.log.add(this.t, 'PROC', `Leak check: isolated, ${LEAK_SECONDS} s hold started`);
+    this.later(LEAK_SECONDS, () => {
+      const v = this.view();
+      const r = leakPre(v).ok ? leakEval(v) : { ok: false, value: NaN, msg: 'isolation was broken during the hold — result void' };
+      this.leakCheck = r;
+      this.leakRun = null;
+      this.log.add(this.t, 'PROC', `Leak check complete: ${r.msg}`, { level: r.ok ? 'info' : 'caution' });
+      this.emit('leakCheck', r);
+    });
+    return { ok: true };
+  }
+
   /* The operator's diagnosis. Scores it, keeps it, and unlocks the reveal. */
   submitDiagnosis(sub) {
     if (this.faults.diagnosis) return this.faults.diagnosis;
     const f = this.faults.active;
     const result = scoreDiagnosis(sub, f, { modes: FAILURE_MODES, rightAction: RIGHT_ACTION });
-    const rec = { ...sub, t: this.t, result, abort: abortAssessment(this, f) };
+    const nh = this.faults.hints.length;
+    if (nh) {
+      result.parts.push({ label: 'Hints used', got: -HINT_COST * nh, max: 0, note: `${nh} hint${nh > 1 ? 's' : ''} from the senior engineer.` });
+      result.score = Math.max(0, result.score - HINT_COST * nh);
+      result.grade = result.score >= 85 ? 'Diagnosed' : result.score >= 55 ? 'Partly diagnosed' : 'Missed';
+    }
+    const rec ={ ...sub, t: this.t, result, abort: abortAssessment(this, f) };
     this.faults.diagnosis = rec;
     this.log.add(this.t, 'OPR', `Diagnosis submitted: ${sub.component} — ${FAILURE_MODES.find(m => m[0] === sub.mode)?.[1] || sub.mode}. Score ${result.score}/100.`);
     this.emit('diagnosis', rec);
