@@ -1395,9 +1395,11 @@ Findings:
     A level change right at the snapped wall also left 705 concave cells;
     the whole nozzle is now refined to the wall level.
 38. **Six cells across the throat radius is not enough in 3D.**
-    - At 6 cells (44 k cells) the mass flow read +0.45 % against the wedge.
-    - At 10 cells (174 k) it read −0.14 %, with thrust −0.18 % against the
-      1D reference and Cd 0.08 % below Kliegel–Levine.
+    - At 6 cells (44 k cells) the mass flow read +0.53 % against the
+      standard wedge.
+    - At 10 cells (174 k) it read −0.06 %, with thrust −0.18 % against the
+      1D reference (−0.22 % against the wedge) and Cd 0.08 % below
+      Kliegel–Levine.
 
     The presets are now 10, 14 and 20 cells per throat radius. V14 runs the
     coarse one: the standard one is 480 k cells, too many for a nightly

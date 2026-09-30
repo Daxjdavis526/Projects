@@ -11,11 +11,12 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M4 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M5 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
-STEP file or a parametric nozzle in, verified numbers, field views and a
-report out. Sections 10–13 of the design record what building each
-milestone taught.
+STEP or STL fluid volume (revolved or not) or a parametric nozzle in,
+verified numbers, field views and a report out. It drives either a chamber
+pressure or a mass flow, with adiabatic or prescribed-temperature walls.
+Sections 10–14 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -24,7 +25,7 @@ milestone taught.
 ```
 pip install -e "./sonicline[geometry,post]"
 
-sonicline import nozzle.step --p0 "20 bar"     # analyse the CAD, write a definition
+sonicline import nozzle.step --p0 "20 bar"     # analyse a STEP or STL volume, write a definition
 sonicline check  nozzle.json                   # quasi-1D prediction + pre-flight checks
 sonicline run    nozzle.json --processors 4    # mesh, solve, post-process, judge
 sonicline study  nozzle.json --processors 4    # three meshes: grid-convergence index
@@ -138,8 +139,10 @@ turns and expands around the sharp exit lip.
 
 ## Verification
 
-`sonicline verify` runs these cases on standard meshes (about 25 minutes on
-4 cores); CI runs V1 and V4a end to end through OpenFOAM on every change. Every reference is
+`sonicline verify` runs these cases on standard meshes (about 90 minutes on
+4 cores, most of it V14's 3D unstructured run). CI runs V1 and V4a end to
+end through OpenFOAM on every change, plus all three unstructured meshers on
+the side-port nozzle; the whole suite runs nightly. Every reference is
 computed without the CFD.
 
 | case | what | check | error | tolerance |
@@ -160,6 +163,9 @@ computed without the CFD.
 | V7 | rhoCentralFoam vs rhoPimpleFoam on V1 | mass flow / thrust | −0.055 % / +0.066 % | 0.1 % / 0.2 % |
 | V9 | ISO 9300 toroidal venturi, Re_d 5×10⁴ and 2.6×10⁵, laminar and SST | Cd vs ISO 9300 | −0.07 % … +0.10 % | 0.3 % (the standard's uncertainty) |
 | V10 | V1 nozzle at 30 bar, Peng–Robinson vs perfect gas | mass-flow ratio vs the Peng–Robinson isentrope (+1.314 %) | −0.009 % | 0.02 % |
+| V12 | V1 driven by V1's own mass flow (mass-flow inlet) | chamber pressure found vs 10 bar | −0.06 % | 0.2 % |
+| V13 | V1 laminar with a 450 K wall | total-temperature rise vs wall heat / (ṁ cp) | 4×10⁻⁵ of T0 (the gas gains 0.96 %) | 2×10⁻³ |
+| V14 | V1 on the unstructured mesher (snappyHexMesh, coarse: 10 cells across the throat radius, 174 k cells) vs the structured wedge | mass flow / thrust | −0.06 % / −0.22 % | 0.5 % / 0.5 % |
 | V11 | **experiment:** NASA TP-1704 planar nozzle B1, NPR 8.91 (attached) and 2.46 (separated), SST with wall functions | wall p/pt at 10 orifices within the test's spanwise spread ± 0.02 | 9 of 10 at both (the miss: 0.6 mm past the sharp throat); separation between the same orifices as the test | 9 of 10 |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
@@ -261,9 +267,34 @@ The house rule: say plainly where the model stops.
   tens of percent; the axial plot shows both.
 - **Separation** is estimated before the run (Summerfield and Schmucker),
   not predicted.
-- **Condensation** is detected, not modelled. It does not arise for
-  sea-level nozzles at 15–30 bar, where the exit is at 115–140 K. It does
-  arise for vacuum nozzles beyond an area ratio of about 15–25.
+- **Condensation** is detected, not modelled. After every run each cell's
+  temperature is compared with nitrogen's saturation temperature at its own
+  pressure, in the nozzle and the plume. Supersaturated cells are a
+  warning that says how many, by how much and where; beyond that point the
+  results are bounds. It does not arise for sea-level nozzles at 15–30 bar,
+  where the exit is at 115–140 K. It does arise for vacuum nozzles beyond
+  an area ratio of about 15–25. Below nitrogen's triple point (12.5 kPa) the
+  saturation line is extrapolated (Clausius–Clapeyron), and the warning
+  says so.
+- **Mass-flow inlet.** The flow is imposed and the chamber pressure floats.
+  The run reports the chamber pressure the CFD needed, and Cd and the ideal
+  reference are judged at that pressure. The pressure is the total pressure
+  at the inlet face (area-averaged static, raised by the mass-averaged Mach
+  number, a few hundredths).
+- **Prescribed wall temperature.** Heat through the wall is integrated
+  (κ ∂T/∂n) and must account for the gas's total-temperature change to
+  0.2 %. The wall-temperature and recovery-factor checks apply to adiabatic
+  walls only.
+- **Unstructured meshes** are coarser for their cost than the structured
+  ones: 3D, and snapped or tetrahedral at the wall.
+  - V14 bounds the coarse preset at 0.2 % in mass flow and thrust for an
+    inviscid nozzle.
+  - The throat of a coarse snapped mesh is a 40-sided polygon, 0.4 % short
+    of the circle, and that shows in Cd.
+  - The throat area Cd is judged against is the geometry's, not the mesh's.
+  - For a volume that is not a body of revolution, quasi-1D theory uses the
+    radius of a circle of the same section area. Its "ideal" numbers are a
+    reference, not a prediction.
 
 ## Geometry
 
@@ -335,8 +366,10 @@ DESIGN.md       the plan, decisions, evidence, and the M1 record (section 10)
 src/sonicline/
   core/         units, gas, real gas, profiles, theory, definition, validation
                 (no OpenFOAM, Qt or VTK: tests/test_architecture.py enforces it)
-  geometry/     STEP analysis in a worker process; STEP writing
-  mesh/         structured revolved meshes (wedge and O-grid, with plume)
+  geometry/     STEP analysis in a worker process, STL checks and analysis
+                (trimesh); STEP writing and tessellation
+  mesh/         structured revolved meshes (wedge and O-grid, with plume);
+                unstructured meshes (snappyHexMesh, cfMesh, gmsh) of any volume
   foam/         the only package that knows OpenFOAM syntax: writers, case
                 builder, parsers, and the viscous-work extension (C++)
   run/          runners (local, WSL2), convergence, mesh gates, the pipeline
@@ -346,9 +379,10 @@ src/sonicline/
   project/      the project store and the editable draft (no Qt)
   ui/           the desktop application (PySide6, pyvista, pyqtgraph)
   cli.py
-tests/          about 310 tests; the OpenFOAM, UI and rendering ones skip without them
+tests/          about 350 tests; the OpenFOAM, UI and rendering ones skip without them
 examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD),
-                planar-tp1704-b1-npr2.46.json (planar, separated)
+                nozzle-side-port.step + .json (not revolved; make_side_port.py
+                builds it), planar-tp1704-b1-npr2.46.json (planar, separated)
 doc/            images and the verification table
 ```
 
