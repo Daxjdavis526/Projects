@@ -13,6 +13,23 @@ Open it in Safari on an iPhone and use Share → Add to Home Screen to install i
 as a full-screen app. See [branch/README.md](branch/README.md) for the controls
 and how it works.
 
+## peraspera/
+
+**PER ASPERA** — an animated short film, about nineteen minutes long, about a
+kid who looked up at the stars and didn't think he was cut out for that world:
+a mission in England cut short by COVID, welding with his brother, racing,
+meeting his wife, losing a friend, one sentence from his brother, the darkest
+summer of his life, the driveway at the end of it, rocket engines, a job that
+wasn't him, a model he builds at night, and a farm he hasn't bought yet. After
+the credits there is one more scene — a guess at what happens next. No video
+file and no audio file: every frame is painted and every note synthesised live
+in the browser.
+
+Live: https://daxjdavis526.github.io/Projects/peraspera/
+
+See [peraspera/README.md](peraspera/README.md) for the controls, how it is
+built, and what in it is real.
+
 ## blackhole/
 
 **BLACK HOLE EXPLORER** — a real-time Kerr black hole rendered by tracing
