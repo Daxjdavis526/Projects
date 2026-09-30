@@ -152,7 +152,9 @@ def test_opening_a_project_lists_simulations_and_runs(app, tmp_path):
     sim_item = root.child(0)
     assert sim_item.childCount() == 1 and "trusted" in sim_item.child(0).text(1)
     w._tree_activated(sim_item.child(0))
+    # No case to read: the summary shows on the Run stage, Results says why.
     assert w.tabs.currentIndex() == 3 and "trusted" in w.run_page.summary.text()
+    assert "no fields" in w.results_page.title.text()
     w.close()
 
 
@@ -170,3 +172,29 @@ def test_step_import_suggests_the_inlet_and_a_click_changes_it(window):
     page.analyse = lambda synchronous=False: None  # keep the test on the click's effect
     page.pick(prof.x_exit, 0.0, 0.0)  # a click on the exit end: that end is the inlet
     assert window.draft.get("geometry.inlet_end") == ("max" if suggested == "min" else "min")
+
+
+def test_results_page_on_a_synthetic_run(window, tmp_path):
+    pytest.importorskip("pyvista")
+    sys.path.insert(0, os.path.dirname(__file__))
+    import synthetic_run
+
+    run = tmp_path / "run"
+    synthetic_run.make(run)
+    page = window.results_page
+    assert page.load(run)
+    assert page.current_field() == "Mach" and "min" in page.data_range.text()
+    assert page.field.count() >= 7 and page.table.rowCount() >= 9
+    page.field.setCurrentIndex(1)  # pressure: range follows
+    lo, hi = (float(page.lo.text()), float(page.hi.text()))
+    assert 0.0 < lo < hi <= 10.0  # bar
+    x = page.results.profile.throat_x
+    got = page.probe(x, -3e-4, 0.0)
+    assert got is not None and page.probe_table.rowCount() >= 9
+    for cb in (page.vectors, page.streamlines, page.cut):
+        cb.setChecked(True)  # draws without a 3D view in the test mode
+    assert "plane x" in page.cut_label.text()
+    page.axial_var.setCurrentIndex(1)
+    page.export(tmp_path / "report", synchronous=True)
+    assert (tmp_path / "report" / "report.json").exists() and (tmp_path / "report" / "report.pdf").exists()
+    assert "wrote" in page.export_status.text()

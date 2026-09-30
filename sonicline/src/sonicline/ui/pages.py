@@ -518,3 +518,340 @@ class RunPage(Page):
                 lines.append(f"<span style='color:#c77700'>warning: {w}</span>")
         self.summary.setText("<br>".join(lines))
         self.state.setText(f"<b>finished</b>: {info.status}")
+
+
+# ----------------------------------------------------------------------------- results
+
+
+class ResultsPage(Page):
+    """A finished run's fields: field and range, surfaces, cutting plane,
+    vectors, streamlines, a cell-value probe, axial plots, the engineering
+    summary with its verdict, and report export."""
+
+    AXIAL = [("p / p0", "p"), ("Mach", "mach"), ("T / T0", "T")]
+
+    def __init__(self, window):
+        super().__init__(window)
+        import pyqtgraph as pg
+
+        self.results = None
+        v = QtWidgets.QVBoxLayout(self)
+        self.title = QtWidgets.QLabel("No run selected: pick one in the project tree.")
+        self.title.setWordWrap(True)
+        v.addWidget(self.title)
+
+        box = QtWidgets.QGroupBox("Field")
+        f = QtWidgets.QFormLayout(box)
+        self.field = QtWidgets.QComboBox()
+        self.field.setToolTip("Cell values, as the solver computed them")
+        self.field.currentIndexChanged.connect(lambda *_: self._range_auto())
+        f.addRow("Field", self.field)
+        rng = QtWidgets.QHBoxLayout()
+        self.auto = QtWidgets.QCheckBox("auto")
+        self.auto.setChecked(True)
+        self.auto.toggled.connect(lambda on: self._range_auto() if on else None)
+        self.lo, self.hi = QtWidgets.QLineEdit(), QtWidgets.QLineEdit()
+        for w in (self.lo, self.hi):
+            w.setMaximumWidth(90)
+            w.editingFinished.connect(self._manual_range)
+        rng.addWidget(self.auto)
+        rng.addWidget(self.lo)
+        rng.addWidget(QtWidgets.QLabel("to"))
+        rng.addWidget(self.hi)
+        rng.addStretch(1)
+        f.addRow("Range", rng)
+        self.data_range = QtWidgets.QLabel("")
+        f.addRow("Data", self.data_range)
+        v.addWidget(box)
+
+        box = QtWidgets.QGroupBox("Show")
+        g = QtWidgets.QGridLayout(box)
+        self.meridian = QtWidgets.QCheckBox("Meridian plane")
+        self.meridian.setChecked(True)
+        self.meridian.setToolTip("The plane through the axis; mirrored for axisymmetric and planar runs")
+        g.addWidget(self.meridian, 0, 0)
+        self.vectors = QtWidgets.QCheckBox("Velocity vectors")
+        self.streamlines = QtWidgets.QCheckBox("Streamlines")
+        g.addWidget(self.vectors, 0, 1)
+        g.addWidget(self.streamlines, 1, 1)
+        self.patch_box = QtWidgets.QWidget()
+        self.patch_layout = QtWidgets.QVBoxLayout(self.patch_box)
+        self.patch_layout.setContentsMargins(0, 0, 0, 0)
+        g.addWidget(self.patch_box, 1, 0, 2, 1)
+        self.patch_checks: dict[str, QtWidgets.QCheckBox] = {}
+        cut = QtWidgets.QHBoxLayout()
+        self.cut = QtWidgets.QCheckBox("Cutting plane")
+        self.cut_axis = QtWidgets.QComboBox()
+        self.cut_axis.addItems(["x (cross-section)", "y", "z"])
+        self.cut_pos = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.cut_pos.setRange(0, 1000)
+        self.cut_pos.setValue(500)
+        cut.addWidget(self.cut)
+        cut.addWidget(self.cut_axis)
+        cut.addWidget(self.cut_pos, 1)
+        g.addLayout(cut, 3, 0, 1, 2)
+        self.cut_label = QtWidgets.QLabel("")
+        g.addWidget(self.cut_label, 4, 0, 1, 2)
+        self.extent = QtWidgets.QComboBox()
+        self.extent.addItems(["Nozzle and near plume", "Whole domain"])
+        self.extent.setToolTip("The near plume is three exit diameters; the whole domain includes the far "
+                               "plume, where the nozzle becomes a speck")
+        self.extent.currentIndexChanged.connect(lambda *_: (self.redraw(keep_camera=False), self._axial()))
+        g.addWidget(self.extent, 5, 0, 1, 2)
+        for w in (self.meridian, self.vectors, self.streamlines, self.cut):
+            w.toggled.connect(lambda *_: self.redraw(keep_camera=True))
+        self.cut_axis.currentIndexChanged.connect(lambda *_: self.redraw(keep_camera=True))
+        self.cut_pos.valueChanged.connect(lambda *_: self.redraw(keep_camera=True) if self.cut.isChecked() else None)
+        v.addWidget(box)
+
+        self.probe_table = QtWidgets.QTableWidget(0, 2)
+        self.probe_table.setHorizontalHeaderLabels(["probe", "cell value"])
+        self.probe_table.setToolTip("Click a point in the 3D view to read the cell there")
+        self.probe_table.horizontalHeader().setStretchLastSection(True)
+        self.probe_table.setMaximumHeight(200)
+        v.addWidget(self.probe_table)
+
+        axial = QtWidgets.QHBoxLayout()
+        axial.addWidget(QtWidgets.QLabel("Axial plot"))
+        self.axial_var = QtWidgets.QComboBox()
+        self.axial_var.addItems([a for a, _ in self.AXIAL])
+        self.axial_var.currentIndexChanged.connect(lambda *_: self._axial())
+        axial.addWidget(self.axial_var)
+        axial.addStretch(1)
+        v.addLayout(axial)
+        self.axial_plot = pg.PlotWidget()
+        self.axial_plot.addLegend(offset=(-10, 10))
+        self.axial_plot.setLabel("bottom", "x [mm]")
+        self.axial_plot.setMinimumHeight(220)
+        v.addWidget(self.axial_plot)
+
+        self.summary = QtWidgets.QLabel("")
+        self.summary.setTextFormat(QtCore.Qt.RichText)
+        self.summary.setWordWrap(True)
+        self.summary.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        v.addWidget(self.summary)
+        self.table = QtWidgets.QTableWidget(0, 3)
+        self.table.setHorizontalHeaderLabels(["quantity", "CFD", "ideal / reference"])
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setMinimumHeight(260)
+        v.addWidget(self.table)
+        export = QtWidgets.QPushButton("Export report (PDF, PNG, JSON)...")
+        export.clicked.connect(self._export_dialog)
+        v.addWidget(export)
+        self.export_status = QtWidgets.QLabel("")
+        self.export_status.setWordWrap(True)
+        v.addWidget(self.export_status)
+        v.addStretch(1)
+
+    # -- loading -----------------------------------------------------------------------
+
+    def load(self, run_dir: Path) -> bool:
+        from ..post.fieldview import FIELDS, ResultsError, RunResults
+
+        try:
+            r = RunResults(run_dir)
+            fields = r.fields()
+        except (ResultsError, OSError, KeyError, ValueError) as e:
+            self.results = None
+            self.title.setText(f"<b>{Path(run_dir).name}</b>: no fields to show ({e})")
+            return False
+        self.results = r
+        self.title.setText(f"<b>{r.run_dir.name}</b> - {r.definition.name}, time {r.time}, "
+                           f"{r.form} mesh, {r.internal.n_cells} cells")
+        self.field.blockSignals(True)
+        self.field.clear()
+        for name in fields:
+            info = FIELDS[name]
+            self.field.addItem(f"{info.label}" + (f" [{info.unit}]" if info.unit else ""), name)
+        self.field.blockSignals(False)
+        for w in self.patch_checks.values():
+            w.setParent(None)
+        self.patch_checks = {}
+        for name in r.display_patches():
+            cb = QtWidgets.QCheckBox(f"patch: {name}")
+            cb.setChecked(name == "wall" and r.form == "o_grid")
+            cb.toggled.connect(lambda *_: self.redraw(keep_camera=True))
+            self.patch_layout.addWidget(cb)
+            self.patch_checks[name] = cb
+        self._summary()
+        self._axial()
+        self._range_auto(redraw=False)
+        self.redraw(keep_camera=False)
+        return True
+
+    def current_field(self) -> str | None:
+        return self.field.currentData()
+
+    def _range_auto(self, redraw: bool = True):
+        if self.results is None or not self.current_field():
+            return
+        lo, hi = self.results.range(self.current_field())
+        self.data_range.setText(f"min {lo:.5g}, max {hi:.5g}")
+        if self.auto.isChecked():
+            self.lo.setText(f"{lo:.5g}")
+            self.hi.setText(f"{hi:.5g}")
+        if redraw:
+            self.redraw(keep_camera=True)
+
+    def _manual_range(self):
+        self.auto.setChecked(False)
+        self.redraw(keep_camera=True)
+
+    def clim(self) -> tuple[float, float] | None:
+        try:
+            lo, hi = float(self.lo.text()), float(self.hi.text())
+        except ValueError:
+            return None
+        return (lo, hi) if hi > lo else None
+
+    # -- drawing ------------------------------------------------------------------------
+
+    def redraw(self, keep_camera: bool = False):
+        from ..post.fieldview import FIELDS
+
+        r = self.results
+        field = self.current_field()
+        if r is None or field is None:
+            return
+        info = FIELDS[field]
+        clim = self.clim() or r.range(field)
+        items = []
+        box = None if self.extent.currentIndex() == 1 else r.near_field()
+
+        def framed(ds):
+            return r.clip(ds, box) if box is not None else ds
+
+        def coloured(ds):
+            ds = framed(ds)
+            ds.cell_data["shown"] = np.asarray(ds.cell_data[field], dtype=float) * info.scale
+            return ds, {"scalars": "shown", "cmap": info.colormap, "clim": clim,
+                        "show_scalar_bar": False, "pickable": True}
+
+        if self.meridian.isChecked():
+            items.append(coloured(r.meridian()))
+        for name, cb in self.patch_checks.items():
+            if cb.isChecked():
+                patch = r.patch(name)
+                if patch is not None and field in patch.cell_data:
+                    ds, kw = coloured(patch)
+                    kw["opacity"] = 0.6 if name == "wall" else 1.0
+                    items.append((ds, kw))
+        self.cut_label.setText("")
+        if self.cut.isChecked():
+            b = r.internal.bounds
+            axis = self.cut_axis.currentIndex()
+            t = self.cut_pos.value() / 1000.0
+            lo, hi = b[2 * axis], b[2 * axis + 1]
+            pos = lo + t * (hi - lo)
+            origin = [0.0, 0.0, 0.0]
+            origin[axis] = pos
+            normal = [0.0, 0.0, 0.0]
+            normal[axis] = 1.0
+            plane = r.cutting_plane(tuple(normal), tuple(origin))
+            if plane.n_cells:
+                items.append(coloured(plane))
+            self.cut_label.setText(f"plane {'xyz'[axis]} = {1e3 * pos:.3f} mm"
+                                   + (" (a wedge or planar mesh shows a line here)"
+                                      if r.mirrored and axis == 0 else ""))
+        if self.vectors.isChecked():
+            base = framed(r.meridian())
+            items.append((r.vectors(base), {"color": "#222222", "pickable": False}))
+        if self.streamlines.isChecked():
+            try:
+                lines = framed(r.streamlines())
+                if lines.n_points:
+                    items.append((lines, {"color": "white", "line_width": 1, "pickable": False}))
+            except Exception as e:  # streamlines are a display aid; say why they are missing
+                self.cut_label.setText(f"streamlines unavailable: {e}")
+        lo_d, hi_d = r.range(field)
+        title = info.label + (f" [{info.unit}]" if info.unit else "")
+        self.window.viewport.show_datasets(
+            items, f"{title}: data {lo_d:.5g} to {hi_d:.5g}; shown {clim[0]:.5g} to {clim[1]:.5g}",
+            view=None if keep_camera else ("iso" if r.form == "o_grid" and not self.meridian.isChecked()
+                                           else "side"),
+            legend=(title, clim[0], clim[1]))
+
+    def _axial(self):
+        import pyqtgraph as pg
+
+        self.axial_plot.clear()
+        r = self.results
+        if r is None:
+            return
+        label, key = self.AXIAL[self.axial_var.currentIndex()]
+        inlet = r.definition.boundaries.inlet
+        norm = {"p": inlet.p0, "T": inlet.T0, "mach": 1.0}[key]
+        data = r.axial()
+        self.axial_plot.setLabel("left", label)
+        styles = {"quasi_1d": ("quasi-1D", pg.mkPen("#000000", width=1, style=QtCore.Qt.DashLine)),
+                  "centreline": ("CFD, axis", pg.mkPen("#2d6cdf", width=2)),
+                  "wall": ("CFD, wall" + (" (adiabatic wall T)" if key == "T" else ""),
+                           pg.mkPen("#c77700", width=1.5))}
+        for line, (name, pen) in styles.items():
+            d = data.get(line)
+            if d is None or key not in d or not len(d[key]) or (line == "wall" and key == "mach"):
+                continue
+            self.axial_plot.plot(1e3 * np.asarray(d["x"]), np.asarray(d[key]) / norm, name=name, pen=pen)
+        if self.extent.currentIndex() == 0:  # the same frame as the 3D view
+            box = r.near_field()
+            self.axial_plot.setXRange(1e3 * box[0], 1e3 * box[1], padding=0.02)
+        else:
+            self.axial_plot.enableAutoRange(axis="x")
+
+    def _summary(self):
+        s = self.results.summary()
+        colour = {"trusted": "#2e7d32", "trusted_with_warnings": "#c77700"}.get(s.get("trust"), "#c62828")
+        lines = [f"<b>{s.get('status')}</b>: <span style='color:{colour}'><b>"
+                 f"{(s.get('trust') or 'not trustworthy').replace('_', ' ')}</b></span>"]
+        lines += [f"<span style='color:#c62828'>not trustworthy: {x}</span>" for x in s.get("reasons", [])]
+        lines += [f"<span style='color:#c77700'>warning: {x}</span>" for x in s.get("warnings", [])]
+        self.summary.setText("<br>".join(lines))
+        rows = s.get("rows", [])
+        self.table.setRowCount(len(rows))
+        for i, cells in enumerate(rows):
+            for j, text in enumerate(cells):
+                self.table.setItem(i, j, QtWidgets.QTableWidgetItem(text))
+        self.table.resizeColumnsToContents()
+
+    # -- probe and export -----------------------------------------------------------------
+
+    def probe(self, x: float, y: float, z: float) -> dict | None:
+        from ..post.fieldview import FIELDS
+
+        if self.results is None:
+            return None
+        got = self.results.probe((x, y, z))
+        if got is None:
+            self.probe_table.setRowCount(1)
+            self.probe_table.setItem(0, 0, QtWidgets.QTableWidgetItem("outside the domain"))
+            self.probe_table.setItem(0, 1, QtWidgets.QTableWidgetItem(""))
+            return None
+        rows = [("cell", str(got["cell"])),
+                ("x, r [mm]", f"{1e3 * got['point'][0]:.4f}, {1e3 * math.hypot(*got['point'][1:]):.4f}")]
+        for name, value in got["values"].items():
+            info = FIELDS[name]
+            rows.append((info.label + (f" [{info.unit}]" if info.unit else ""), f"{value:.6g}"))
+        self.probe_table.setRowCount(len(rows))
+        for i, (a, b) in enumerate(rows):
+            self.probe_table.setItem(i, 0, QtWidgets.QTableWidgetItem(a))
+            self.probe_table.setItem(i, 1, QtWidgets.QTableWidgetItem(b))
+        return got
+
+    def _export_dialog(self):
+        if self.results is None:
+            return
+        target = QtWidgets.QFileDialog.getExistingDirectory(self, "Export the report to a folder",
+                                                            str(self.results.run_dir))
+        if target:
+            self.export(Path(target))
+
+    def export(self, target: Path, synchronous: bool = False) -> None:
+        from ..post import report
+
+        run_dir = self.results.run_dir
+        self.export_status.setText("exporting...")
+        w = Worker(lambda: report.export(run_dir, target))
+        w.done.connect(lambda files: self.export_status.setText(
+            f"wrote {len(files)} files to {target}: " + ", ".join(sorted(p.name for p in files.values()))))
+        w.failed.connect(lambda m: self.export_status.setText(f"export failed: {m}"))
+        w.start(synchronous)

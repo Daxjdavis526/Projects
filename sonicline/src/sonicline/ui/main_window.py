@@ -11,7 +11,7 @@ from ..core.validate import Severity
 from ..post import scene
 from ..project import Project, RunInfo
 from ..project.draft import Draft
-from .pages import SEVERITY_STYLE, GeometryPage, MeshPage, PhysicsPage, RunPage
+from .pages import SEVERITY_STYLE, GeometryPage, MeshPage, PhysicsPage, ResultsPage, RunPage
 from .run_control import RunController
 from .viewport import Viewport
 
@@ -67,6 +67,14 @@ class MainWindow(QtWidgets.QMainWindow):
             scroll.setWidget(page)
             self.tabs.addTab(scroll, name)
             page.changed.connect(self._edited)
+        # Results is not a stage of the definition: it shows a run.
+        self.results_page = ResultsPage(self)
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(self.results_page)
+        self.tabs.addTab(scroll, "Results")
+        self.RESULTS_TAB = self.tabs.count() - 1
+        self.tabs.currentChanged.connect(self._tab_changed)
 
         right = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         right.addWidget(self.viewport)
@@ -100,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run.finished.connect(self._run_finished)
         self.run_page.run_btn.clicked.connect(self.start_run)
         self.run_page.cancel_btn.clicked.connect(self.run.cancel)
-        self.viewport.picked.connect(self.geometry_page.pick)
+        self.viewport.picked.connect(self._picked)
         self.viewport.enable_picking()
 
         self._menus()
@@ -267,12 +275,31 @@ class MainWindow(QtWidgets.QMainWindow):
             self._leave_draft()
             self.load_simulation(value)
         elif kind == "run":
-            from ..project import read_run
+            self.show_run(Path(value))
 
-            self.selected_run = Path(value)
-            info = read_run(Path(value))
-            self.run_page.show_result(info)
+    def show_run(self, run_dir: Path) -> None:
+        """A run's summary on the Run stage, and its fields under Results
+        when it has any."""
+        from ..project import read_run
+
+        self.selected_run = Path(run_dir)
+        self.run_page.show_result(read_run(self.selected_run))
+        if self.results_page.load(self.selected_run):
+            self.tabs.setCurrentIndex(self.RESULTS_TAB)
+        else:
             self.tabs.setCurrentIndex(3)
+
+    def _picked(self, x, y, z):
+        if self.tabs.currentIndex() == self.RESULTS_TAB:
+            self.results_page.probe(x, y, z)
+        else:
+            self.geometry_page.pick(x, y, z)
+
+    def _tab_changed(self, index):
+        if index == self.RESULTS_TAB:
+            self.results_page.redraw(keep_camera=False)
+        elif index in (0, 1):
+            self._assess(redraw=True)
 
     # -- runs -----------------------------------------------------------------------
 
@@ -297,6 +324,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.run_page.show_result(info)
         self.refresh_tree()
         self._assess(redraw=False)
+        if info.status == "completed":
+            self.results_page.load(info.path)
 
     def _open_run_folder(self):
         run = getattr(self, "selected_run", None)

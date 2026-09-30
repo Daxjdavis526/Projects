@@ -859,7 +859,7 @@ brief's milestone, minus the UI)** — *done; see section 10*
 - Run stage with a live residual/integral plot, log panel and cancel.
 - The UI calls the same pipeline as the CLI.
 
-**M4 — Results mode**
+**M4 — Results mode** (done; section 13)
 - Field selector and contours on patches.
 - Legend with min/max.
 - Cutting planes and cross-sections.
@@ -1229,4 +1229,63 @@ Findings:
     real viewport found it. Screenshot runs stay part of UI changes.
 28. **The pipeline announced "done" after writing its manifest**, so the
     final transition never reached it. The cancellation test found this.
+
+## 13. M4 record: results
+
+Delivered:
+
+- **`sonicline.post.fieldview`** (pyvista, no Qt). It reads a run's case
+  with VTK's OpenFOAM reader (the latest time, or the processor directories
+  of a run stopped before reconstruction) and provides:
+  - derived fields: Mach, speed, density, total temperature, and total
+    pressure isentropic from p and Mach, labelled as such;
+  - the meridian plane, mirrored for wedge and planar runs;
+  - patches, cutting planes, radial and centreline samples;
+  - direction arrows and streamlines;
+  - a probe that returns the cell's own values, so a click on the mirrored
+    half reads the cell it mirrors;
+  - the engineering summary.
+- **`sonicline.post.report`** and `sonicline report`: report.json, contour,
+  axial and convergence PNGs, and a PDF that opens with the verdict. On a
+  machine that cannot render off screen, the images are listed as missing
+  and the numbers are still written.
+- **The Results stage**, with everything in DESIGN's M4 list:
+  - field selector;
+  - legend and manual range, stating the data's own min and max;
+  - patch visibility;
+  - cutting plane;
+  - vectors and streamlines;
+  - probe;
+  - axial plots;
+  - engineering summary with the verdict;
+  - export.
+
+  The view frames the nozzle and near plume by default.
+- **Tests on a synthetic run.** The case builder's quasi-1D initial fields
+  stand in for results. They check the following without OpenFOAM:
+  - derived fields: T0 and p0 recovered to single precision;
+  - centreline against theory;
+  - mirroring and the probe;
+  - the report;
+  - the UI.
+
+  Contour images are compared with stored references. They match within
+  2/255 mean difference under both OSMesa and Xvfb, while the Mach and
+  pressure pictures differ by more than 20/255.
+
+Findings:
+
+29. **VTK reads OpenFOAM fields in single precision**: exactness tests on
+    what the viewer shows hold to 10⁻⁷, not 10⁻⁹.
+30. **A scalar bar attaches to the last mapper added.** With vectors or
+    streamlines on, the Mach legend showed the velocity range (−75 to 654);
+    it is now bound to the field's own mapper. A title on a horizontal bar
+    also collides with its labels, so the field name is a heading.
+31. **The whole domain is the wrong default frame.** In the sea-level case
+    the plume is 20 exit diameters long and the nozzle a speck; the near
+    field (nozzle plus three exit diameters) is the default for the view,
+    the axial plot and the report images.
+32. **Speed-scaled arrows vanish in the chamber** (Mach 0.04 against 3.4 at
+    the exit). Arrows show direction at one length; the colour carries the
+    magnitude.
 

@@ -11,11 +11,10 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 and M2 of [DESIGN.md](DESIGN.md) are complete, and
-M3, the desktop application, is working.** The whole pipeline runs from the
-command line or the desktop application, from a STEP file or a parametric
-nozzle to verified numbers and images. Results viewing (contours, slices,
-probes) is M4. Sections 10–12 of the design record what building each
+**Status: milestones M1 to M4 of [DESIGN.md](DESIGN.md) are complete.** The
+whole pipeline runs from the command line or the desktop application: a
+STEP file or a parametric nozzle in, verified numbers, field views and a
+report out. Sections 10–13 of the design record what building each
 milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
@@ -29,6 +28,7 @@ sonicline import nozzle.step --p0 "20 bar"     # analyse the CAD, write a defini
 sonicline check  nozzle.json                   # quasi-1D prediction + pre-flight checks
 sonicline run    nozzle.json --processors 4    # mesh, solve, post-process, judge
 sonicline study  nozzle.json --processors 4    # three meshes: grid-convergence index
+sonicline report runs/nozzle                   # PDF, PNG and JSON report of a run
 sonicline verify                               # verification cases vs analytical theory
 ```
 
@@ -58,6 +58,27 @@ never takes the window down. Past runs are listed under their simulation
 with their verdict and thrust.
 
 ![The Run stage after a V1 run](doc/ui-run.png)
+
+The **Results** stage shows a finished run's fields:
+
+- any field, with the range shown and the data's own min and max;
+- the meridian plane (mirrored, so axisymmetric and planar runs show the
+  whole nozzle), each boundary patch on or off, and a cutting plane;
+- velocity vectors and streamlines;
+- a probe: click the view to read the cell there, as the solver computed
+  it (never interpolated);
+- centreline and wall plots against quasi-1D theory;
+- the engineering summary and the verdict;
+- report export.
+
+The view frames the nozzle and three exit diameters of plume; the whole
+domain is one click away. Anything else is in ParaView (File, Open run in
+ParaView).
+
+![The Results stage on the 20 bar reference case](doc/ui-results.png)
+
+`sonicline report <run-dir>` writes the same report without the window:
+report.json, contour and axial PNGs, and a PDF that opens with the verdict.
 
 ### What a run produces
 
@@ -286,13 +307,13 @@ src/sonicline/
   foam/         the only package that knows OpenFOAM syntax: writers, case
                 builder, parsers, and the viscous-work extension (C++)
   run/          runners (local, WSL2), convergence, mesh gates, the pipeline
-  post/         integrals from solver fluxes, fields, images
+  post/         integrals from solver fluxes, field views, reports, images
   metrics/      propulsion metrics and the trust verdict
   verification/ the verification cases
   project/      the project store and the editable draft (no Qt)
   ui/           the desktop application (PySide6, pyvista, pyqtgraph)
   cli.py
-tests/          about 300 tests; the OpenFOAM and UI ones skip without them
+tests/          about 310 tests; the OpenFOAM, UI and rendering ones skip without them
 examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD),
                 planar-tp1704-b1-npr2.46.json (planar, separated)
 doc/            images and the verification table

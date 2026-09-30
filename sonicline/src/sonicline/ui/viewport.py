@@ -77,6 +77,42 @@ class Viewport(QtWidgets.QWidget):
             p.view_isometric()
         p.reset_camera()
 
+    def show_datasets(self, items: list[tuple[object, dict]], caption: str = "",
+                      view: str | None = "side", legend: tuple[str, float, float] | None = None) -> None:
+        """Render pyvista datasets: each item is (dataset, add_mesh keyword
+        arguments). ``legend`` = (title, min, max) adds a scalar bar that
+        states the range shown. ``view`` None keeps the camera."""
+        self.caption.setText(caption)
+        if not self.active:
+            return
+        p = self.plotter
+        p.clear()
+        field_actor = None
+        for ds, kw in items:
+            if ds is None or ds.n_points == 0:
+                continue
+            actor = p.add_mesh(ds, **kw)
+            if field_actor is None and kw.get("scalars"):
+                field_actor = actor
+        if legend is not None and field_actor is not None:
+            # Bound to the field's own mapper: overlays (vectors, lines) must
+            # not take the legend over.
+            # The field's name and ranges are in the caption; a title on the
+            # bar collides with its labels.
+            title, lo, hi = legend
+            p.add_text(title, position="upper_left", font_size=10, color="black")
+            p.add_scalar_bar(title="", mapper=field_actor.mapper, color="black",
+                             vertical=False, position_x=0.15, position_y=0.04, width=0.7,
+                             height=0.05, fmt="%.4g", n_labels=5, label_font_size=12)
+        p.add_axes()
+        if view == "side":
+            p.view_xy()
+            p.reset_camera()
+        elif view == "iso":
+            p.view_isometric()
+            p.reset_camera()
+        p.render()
+
     def enable_picking(self) -> None:
         if self.active:
             self.plotter.enable_point_picking(

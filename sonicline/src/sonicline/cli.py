@@ -6,6 +6,7 @@
     sonicline run <definition.json>     mesh, solve, post-process and judge it
     sonicline study <definition.json>   grid-convergence study (three meshes, GCI)
     sonicline verify                    run the verification cases
+    sonicline report <run-dir>          PDF, PNG and JSON report of a finished run
     sonicline ui [project]              the desktop application (the ``ui`` extra)
 
 The same pipeline functions back the desktop UI; the CLI is also how CI and
@@ -191,6 +192,28 @@ def _study(path: str, out: str | None, processors: int | None, ratio: float) -> 
     return 0 if result.valid else 1
 
 
+def _report(run_dir: str, out: str | None) -> int:
+    import json
+    from pathlib import Path
+
+    try:
+        from .post import fieldview, report
+    except ImportError as e:
+        print(f"error: reports need the post extra ({e})", file=sys.stderr)
+        return 2
+    try:
+        files = report.export(Path(run_dir), Path(out) if out else None)
+    except fieldview.ResultsError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    for role, path in sorted(files.items()):
+        print(f"  {role:14s} {path}")
+    missing = json.loads(files["json"].read_text(encoding="utf-8"))["images"]["missing"]
+    for m in missing:
+        print(f"  image skipped: {m}")
+    return 0
+
+
 def _verify(cases: str, quality: str, out: str, processors: int) -> int:
     from pathlib import Path
 
@@ -235,6 +258,9 @@ def main(argv: list[str] | None = None) -> int:
     stu.add_argument("--processors", type=int, help="MPI processes")
     stu.add_argument("--ratio", type=float, default=2 ** 0.5,
                      help="refinement ratio between levels (at least 1.3; default sqrt 2)")
+    rep = sub.add_parser("report", help="PDF, PNG and JSON report of a finished run")
+    rep.add_argument("run_dir")
+    rep.add_argument("--out", help="folder for the report (default <run-dir>/report)")
     ui = sub.add_parser("ui", help="open the desktop application")
     ui.add_argument("project", nargs="?", help="a .sonicline project folder (created if missing)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
@@ -243,6 +269,8 @@ def main(argv: list[str] | None = None) -> int:
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)
     args = parser.parse_args(argv)
+    if args.command == "report":
+        return _report(args.run_dir, args.out)
     if args.command == "ui":
         try:
             from .ui import main as ui_main
