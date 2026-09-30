@@ -1455,6 +1455,23 @@ Findings:
     - Vertex-averaged face centres put a cube with one hanging node 1.2 %
       off centre; area-weighted centroids do not.
 
+44. **The verdict refused the first sea-level Tier 2 run, rightly.** The
+    side-port nozzle ran at 20 bar into a sea-level plume with k-ω SST and
+    wall functions, on cfMesh at 0.7 of the coarse preset (7 cells across
+    the throat radius, 369 k cells). It converged in 1305 iterations, with
+    an inlet–exit mass balance of −0.017 %.
+    - Cd came out at 1.0103, which a viscous nozzle cannot have.
+    - The mesh's own throat section is within 0.1 % of the geometry's, so
+      the extra mass flux is discretisation error: the throat plane already
+      reads Mach 1.055, so the sonic line has moved upstream.
+    - It follows V14's trend (+0.5 % at 6 cells), made worse by the
+      boundary layer.
+    - The run is marked not trustworthy, with that reason.
+45. **Long runs die with the container.** The container is reclaimed when
+    the session goes idle. Twice a sea-level run was killed mid-solve
+    (at iteration 200, and before its first 100). There is no restart from
+    the last write yet; a run is only as durable as the process driving it.
+
 Not done in M5:
 
 - cfMesh has no verification case of its own: V14 checks snappy
