@@ -117,8 +117,19 @@ def _nozzle_surface(defn: d.SimulationDefinition, profile, cad: Path | None, rep
     return tier2.to_frame(stl_surface.load(src, 1.0), report.nozzle_frame())
 
 
-# A transient's final state: the mean over its last steps.
-TRANSIENT_FINAL_STEPS = 10
+# A transient's final state: the mean over the last tenth of its time, the
+# window its settling is judged on. A chamber rings acoustically long after
+# the exit flow has settled (V15: inlet mass flow +-0.4 % at 1 ms, exit flow
+# steady to 1e-4), so a few steps read one phase of the ringing.
+TRANSIENT_FINAL_FRACTION = 0.1
+
+
+def transient_window(tables: dict) -> int:
+    """Rows of the per-step tables in the last tenth of the run."""
+    import numpy as np
+
+    t = np.asarray(tables["mdot_inlet"].time, dtype=float)
+    return max(1, int(np.count_nonzero(t >= t[-1] - TRANSIENT_FINAL_FRACTION * (t[-1] - t[0]))))
 
 
 def nproc_of(defn: d.SimulationDefinition) -> int:
@@ -445,7 +456,7 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     metrics = None
     yplus_max = None
     if tables.get("mdot_inlet") is not None:
-        it = results.integrals(tables, summary, window=TRANSIENT_FINAL_STEPS if transient else None)
+        it = results.integrals(tables, summary, window=transient_window(tables) if transient else None)
         metrics = propulsion(defn, profile, summary, it)
         if transient:
             from ..post import timeseries

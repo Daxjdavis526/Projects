@@ -1497,3 +1497,164 @@ Not done in M5:
 - Grid-convergence studies (`sonicline study`) run on unstructured meshes,
   but snapped and tetrahedral meshes are not a systematically refined
   family, so their GCI is indicative only.
+
+## 15. M6 record: transients, solid bodies, experiments
+
+Delivered:
+
+- **Transient runs** (`"time": {"transient": {...}}`, `sonicline.post.timeseries`):
+  - rhoCentralFoam, Euler in time, at maxCo 0.3. A transient always runs
+    the explicit solver.
+  - The thruster starts from rest: the domain at ambient pressure and
+    temperature (or 10⁻³ p0 in vacuum, which the solver needs above zero),
+    and the valve opens at t = 0. With `ramp_time` it opens linearly: the
+    inlet is a `uniformTotalPressure` table from the start pressure to p0.
+    `"initial": "quasi_1d"` starts from the steady estimate instead.
+  - A `volFieldValue` function object integrates ρ over the domain every
+    step, beside the existing flux integrals. `timeseries.json` holds
+    thrust, mass flow in and out, and the domain's mass at every step.
+  - The metrics add rise time (10 % and 90 % of final thrust), peak and
+    overshoot, the thrust drift over the last tenth (settled below 1 %),
+    and **conservation in time**: the mass gained between the first and
+    last step against the trapezoidal integral of net inflow. Above 10⁻³
+    the run is not trustworthy. An unsettled run gets a warning, and the
+    steady-state checks are not applied to it.
+  - The final state (Cd, thrust, every steady metric) is the mean over the
+    last tenth of the run (finding 48).
+  - Fields are written `frames` times, reconstructed, and rendered on one
+    colour scale into `frames/Mach.gif` (in a child process, like every
+    render). `sonicline report` makes it for a run that has none.
+  - A pre-flight warning flags an instant opening against more than 100:1
+    (finding 47).
+- **Resume** (`sonicline run --resume`): the run directory's case continues
+  from its last written time, with the saved case summary and mesh, and
+  the manifest records it. It answers finding 45 for runs whose process
+  died; a run is still only as durable as the machine. Tested by killing
+  a 0.3 ms startup mid-solve and resuming from its 0.15 ms write: the
+  stitched time series is monotonic and conserves mass in time to
+  1.8×10⁻⁶ across the restart.
+- **Solid-to-fluid extraction** (`sonicline extract`, and a button on the
+  Geometry stage when the analyser reports a solid body). In the CAD
+  kernel's child process:
+  - each inner wire of a planar face (an opening) is capped with a face;
+  - the body and the caps are fragmented together with a padded box;
+  - the gas passage is the piece that is not the body, does not touch the
+    box, and is bounded by at least two caps.
+
+  None, or more than one, is an error that says why. The UI tessellates
+  the result, shows it in the viewport, and asks before importing it; the
+  import then runs the ordinary analysis on the new STEP.
+- **Gases.** Air (γ 1.4, CoolProp "Air") and heated air (γ 1.35, no
+  real-gas reference) join N₂, only to run E1 and E2. A non-N₂ gas is a
+  warning, and the regulator-cooling and real-gas corrections apply to
+  gases that have a reference.
+- **Least-squares gradients on unstructured meshes** (finding 46).
+- **E1, E2** (validation against experiment) and **V15** (transient
+  verification). They are in the default `verify` list and the nightly run.
+
+Findings:
+
+46. **The Tier 2 mass-flow bias is cfMesh's, not the boundary layer's.**
+    Finding 44 blamed the layers. V1 inviscid on cfMesh settles it:
+    - Gauss gradients, 10 cells across the throat radius (156 k cells):
+      Cd +0.91 % against Kliegel–Levine. snappyHexMesh on the same
+      preset gives −0.06 % (V14).
+    - Two non-orthogonal correctors: unchanged (the mass flow agrees to
+      10⁻⁴).
+    - Least-squares gradients: +0.67 %. They are now the default on
+      unstructured meshes.
+    - Least squares at 7 cells (58 k): +1.03 %. From 7 to 10 cells the
+      error falls about as h¹. Richardson extrapolation at first order
+      puts the limit at −0.2 %, that is, it vanishes with refinement.
+    - `keepCellsIntersectingBoundary` (184 k cells): +1.10 %, worse.
+      Not adopted.
+
+    So cfMesh's cut cells near the throat are first-order, and viscous runs,
+    which cfMesh carries, read about 1 % high at the coarse preset. The
+    standard preset (14 cells) should halve it and has not been run. The
+    verdict still refuses a Cd above 1; below that the bias is unflagged,
+    and the README says so.
+47. **An instant opening into vacuum diverges.** V1 opened at t = 0
+    against its 1 kPa start (1000:1) sent the temperature to 10⁹⁰ in ten
+    steps: the inlet's total-pressure condition imposes a near-vacuum
+    Riemann problem at the boundary face. A 0.1 ms linear opening runs
+    cleanly, so V15 uses one, and the pre-flight check warns above 100:1.
+    A sea-level startup (20:1) has not been tried without a ramp.
+48. **A chamber rings long after the nozzle has settled.** At V15's end
+    (1 ms, 0.9 ms after the valve is fully open) the exit mass flow is
+    steady to 10⁻⁴, but the inlet's rings by ±0.4 % with a period of
+    about 70 µs. That is an acoustic mode between the reflecting
+    total-pressure inlet and the choked throat, undamped in inviscid flow.
+    The steady inlet–exit balance read over the last 10 steps saw one
+    phase of it (1.3×10⁻³). Over the last tenth it is 8.6×10⁻⁵. The
+    final state is therefore that mean.
+49. **Conservation in time closes to solver precision, and a startup
+    ends on the steady solution.**
+    - V15's domain gains 1.15117×10⁻⁶ kg against 1.15116×10⁻⁶ kg of
+      integrated net inflow, an error of 7×10⁻⁷ over 228,505 steps.
+    - The same check on the diverging first attempt read NaN, and the run
+      was marked failed, so the check cannot pass a broken run.
+    - Judged against Kliegel–Levine, V15's end state failed: Cd −0.29 %
+      against the standard mesh's 0.2 %. The steady rhoCentralFoam solve
+      on the same coarse wedge reads −0.28 %, so the error is the mesh's.
+      V15 therefore compares its end state with that steady solve:
+      −0.008 % in mass flow, +0.002 % in thrust.
+    - Thrust reaches 10 % at 22 µs and 90 % at 92 µs of the 100 µs
+      opening, and overshoots by 8 %.
+50. **E1: the JPL 45°–15° nozzle** (Back, Massier and Gier, JPL TR 32-654,
+    1965, NTRS 19650001801).
+    - Wall pressures were digitised from Figure 4. Axes are calibrated
+      piecewise from the printed grid lines, since the scan is not linear
+      over the page. The markers are open symbols, located as the
+      centroids of their holes.
+    - Where the test's repeated runs scatter, the band is their spread.
+      Reading error is taken as 0.005 in p/pt and 0.02 in in position, and
+      the CFD is read over the tap's position ± 0.02 in.
+    - The geometry is reproduced exactly by `ConicalNozzle`: throat radius
+      0.8 in, rc/rt 0.625 on both sides, 45° in and 15° out, a 1.0 in
+      fillet, contraction 9.76, expansion 6.63.
+    - Conditions: heated air at 250.2 psia and 833 K, SST with wall
+      functions, exhausting to vacuum. The report's hot runs had cooled
+      walls, with no wall temperature given; the CFD holds the wall at half
+      the total temperature. The report found the wall pressures
+      insensitive to cooling, and it found tap size alone moved readings
+      by up to 7 % (smaller taps lower), an uncertainty the tolerances do
+      not claim to beat.
+    - Result: 13 of 13 taps away from the throat within 5 %, 4 of 5 near
+      it within 10 %.
+    - The miss is 0.05 in past the throat, where the test shows an
+      over-expansion and recompression that the CFD, on a mesh sized for
+      the throat, smooths out (p/pt 0.296 against 0.218).
+    - Down the cone the CFD reads progressively high, reaching +13 % at
+      the exit. That matches the constant-γ gas model: quasi-1D p/p0 at
+      area ratio 6.63 is 11 % lower at γ 1.4 than at 1.35, and real air
+      approaches 1.4 as it cools. The absolute differences (≤ 0.004) fall
+      within the reading band, so the check passes. The trend is recorded
+      here and in the README rather than hidden by the tolerance.
+    - The first E1 run failed mass conservation (1.1×10⁻⁴) on the default
+      numerics. E1 and E2 now use the tight preset (2.2×10⁻⁶).
+51. **E2: Cd of the same nozzle in cold air** (Cuffel, Back and Massier,
+    AIAA J. 7, 1969: measured 0.985). The CFD gives 0.9776, −0.74 %, with
+    a 1 % tolerance for the measurement and the digitised geometry.
+    - The first attempt, exhausting to 1 atm, was slow on the central
+      solver, whose separation estimate at that pressure ratio forced it.
+    - A choked nozzle's Cd and an attached supersonic wall flow cannot
+      feel the back pressure, so E1 and E2 exhaust to vacuum.
+    - That the CFD sits below the measurement is consistent with V5: a
+      single mesh at rc/rt 0.625 reads about 0.25 % low.
+
+Not done in M6:
+
+- **cfMesh's bias is found, not fixed** (finding 46). Viscous Tier 2
+  results carry about +1 % in mass flow at the coarse preset.
+- **The 30°–15° nozzle** of the same report is not digitised: its figure
+  overlays too many symbol sets to separate reliably. E1 is the 45°–15°
+  nozzle alone.
+- **No variable-γ gas.** E1's divergent-section trend (finding 50) is left
+  explained, not corrected.
+- **The desktop application does not set up transients.** They are
+  defined in the definition JSON or through the API. The Results stage
+  shows the last written time; the time selector exists in
+  `RunResults(time=...)` but not in the window. The animation is a file
+  in the run directory.
+- A startup against a sea-level plume has not been run; V15 is in vacuum.

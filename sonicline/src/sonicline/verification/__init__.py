@@ -713,21 +713,24 @@ V15_RAMP = 1e-4  # s: the valve opening, a tenth of the run
 
 
 def _v15_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
-    d = _v1_definition(quality, form)
+    # Always the coarse wedge, like V14: explicit time steps on the standard
+    # mesh take eight times as long (twice the steps, four times the cells).
+    d = _v1_definition("coarse", form)
     return dataclasses.replace(d, name="V15 V1 started from vacuum (transient)",
                                flow=m.Flow(turbulence=m.Inviscid(),
                                            time=m.Transient(end_time=V15_END_TIME, initial="ambient", ramp_time=V15_RAMP, frames=20)))
 
 
 def _v15_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
-    """The startup must conserve mass in time and end in V1's steady state."""
+    """The startup must conserve mass in time and settle; that it settles
+    on the steady solution is the comparison in run_suite."""
     tr = metrics.get("transient") or {}
     return [
         Check("mass conservation in time: domain gain vs integrated net inflow",
               tr.get("conservation_error"), 0.0, 1e-3, relative=False),
         Check("settled by the end time (thrust drift over the last tenth)",
               tr.get("thrust_drift_last_tenth"), 0.0, 0.01, relative=False),
-    ] + _v1_checks_at(10e5)(metrics, defn)
+    ] + _common_checks(metrics)
 
 
 CASES: dict[str, Case] = {
@@ -769,7 +772,7 @@ CASES: dict[str, Case] = {
     "E2": Case("E2", "JPL 45-15 conical nozzle (Cuffel, Back & Massier): discharge coefficient, cold air",
                _bmg45("E2 JPL 45-15 nozzle, cold air", "air", 294.0, 250.2 * 6894.757, m.Adiabatic()),
                _e2_checks),
-    "V15": Case("V15", "V1 started from vacuum, time-accurate: conservation in time and the steady end state",
+    "V15": Case("V15", "V1 started from vacuum, time-accurate, coarse wedge: conservation in time and the steady end state",
                 _v15_definition, _v15_checks),
     "V12": Case("V12", "V1 driven by its own mass flow: the CFD must find 10 bar", _v12_definition, _v12_checks),
     "V13": Case("V13", "V1 laminar with a 450 K wall: energy balance with heat transfer",
@@ -778,7 +781,9 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15")
+V15_MASS_TOLERANCE = 1e-3  # V7's: the same solver, mesh and equations, reached two ways
+V15_THRUST_TOLERANCE = 2e-3
 V14_MASS_TOLERANCE = 5e-3
 V14_THRUST_TOLERANCE = 5e-3
 
@@ -832,10 +837,13 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
     results: list[CaseResult] = []
     runs: dict[tuple[str, str, str, str], tuple[CaseResult, dict | None]] = {}
 
-    def once(case: str, form: str = "wedge", solver: str = "auto", at: str | None = None):
+    def once(case: str, form: str = "wedge", solver: str = "auto", at: str | None = None, listed: bool = True):
+        """``listed=False``: a reference run only, whose own checks are not
+        reported (the comparison still requires it to complete, trusted)."""
         key = (case, form, solver, at or quality)
         if key not in runs:
             runs[key] = run_case(CASES[case], at or quality, out, processors, form, on_event, solver)
+        if listed and runs[key][0] not in results:
             results.append(runs[key][0])
         return runs[key]
 
@@ -862,6 +870,16 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
             results.append(_pair("V14", "Unstructured (snappyHexMesh, coarse) vs structured wedge on the V1 nozzle",
                                  once("V1"), once("V1", "unstructured", at="coarse"), "unstructured vs wedge:",
                                  V14_MASS_TOLERANCE, V14_THRUST_TOLERANCE))
+        elif name == "V15":
+            # A startup must end where the steady solve lands on the same
+            # (coarse) mesh with the same solver. Against Kliegel-Levine the
+            # coarse mesh's own discretisation error (Cd -0.28 %) would be
+            # judged with the standard mesh's tolerance, so the steady run is
+            # a reference here, not a case.
+            start = once("V15", at="coarse")
+            results.append(_pair("V15 end state", "V15's end state vs the steady rhoCentralFoam solve, coarse wedge",
+                                 once("V1", solver="rhoCentralFoam", at="coarse", listed=False), start,
+                                 "startup end vs steady:", V15_MASS_TOLERANCE, V15_THRUST_TOLERANCE))
         elif name == "V11":
             for npr in sorted(MASON_B1_UPPER):
                 results.append(run_validation_case(npr, quality, out, processors, on_event))

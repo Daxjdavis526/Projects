@@ -113,7 +113,6 @@ def test_stl_reproduces_the_step_analysis(nozzle_step, nozzle_stl):
     """The same nozzle through the STL path: dimensions within the
     faceting error, the same inlet end, and the frame maps the inlet plane
     to x = 0."""
-    import numpy as np
 
     from sonicline.geometry import surface
 

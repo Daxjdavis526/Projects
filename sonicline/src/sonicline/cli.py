@@ -243,6 +243,14 @@ def _report(run_dir: str, out: str | None) -> int:
     missing = json.loads(files["json"].read_text(encoding="utf-8"))["images"]["missing"]
     for m in missing:
         print(f"  image skipped: {m}")
+    if (Path(run_dir) / "timeseries.json").is_file():
+        # A transient's written times are its animation's frames.
+        dest = (Path(out) if out else Path(run_dir)) / "frames"
+        try:
+            gif = report.frames_isolated(Path(run_dir), dest)[-1]
+            print(f"  {'animation':14s} {gif}")
+        except RuntimeError as e:
+            print(f"  animation skipped: {e}")
     return 0
 
 

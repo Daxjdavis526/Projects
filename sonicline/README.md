@@ -11,12 +11,13 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M5 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M6 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
-STEP or STL fluid volume (revolved or not) or a parametric nozzle in,
-verified numbers, field views and a report out. It drives either a chamber
-pressure or a mass flow, with adiabatic or prescribed-temperature walls.
-Sections 10–14 of the design record what building each milestone taught.
+STEP or STL fluid volume (revolved or not, or the gas passage extracted
+from a solid body) or a parametric nozzle in, verified numbers, field views
+and a report out. It drives either a chamber pressure or a mass flow, with
+adiabatic or prescribed-temperature walls, steady or as a startup transient.
+Sections 10–15 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -28,6 +29,8 @@ pip install -e "./sonicline[geometry,post]"
 sonicline import nozzle.step --p0 "20 bar"     # analyse a STEP or STL volume, write a definition
 sonicline check  nozzle.json                   # quasi-1D prediction + pre-flight checks
 sonicline run    nozzle.json --processors 4    # mesh, solve, post-process, judge
+sonicline run    nozzle.json --resume          # continue a killed run from its last write
+sonicline extract body.step                    # a solid body's gas passage, as a STEP volume
 sonicline study  nozzle.json --processors 4    # three meshes: grid-convergence index
 sonicline report runs/nozzle                   # PDF, PNG and JSON report of a run
 sonicline verify                               # verification cases vs analytical theory
@@ -95,6 +98,25 @@ report.json, contour and axial PNGs, and a PDF that opens with the verdict.
 - images: Mach, pressure and temperature on the nozzle and the plume, and
   axial plots against quasi-1D theory
 
+A **transient** run (`"time": {"transient": {"end_time": ..., "ramp_time":
+..., "frames": ...}}`) starts the thruster from rest: the domain at ambient
+pressure (or 1/1000 of p0, in vacuum), the valve opening linearly over
+`ramp_time`. It runs rhoCentralFoam, explicit in time, and adds:
+
+- `timeseries.json`: thrust, mass flow in and out, and the gas in the
+  domain, at every time step;
+- rise time (10 % and 90 % of final thrust), peak and overshoot, and the
+  thrust drift over the last tenth of the run (settled below 1 %);
+- **conservation in time**: the gas the domain gained must equal the time
+  integral of inflow minus outflow, to 10⁻³, or the run is not trustworthy;
+- `frames/Mach.gif`, a Mach-number animation on one colour scale
+  (made by `run`, or by `sonicline report` for a run that has none).
+
+A transient that has not settled by its end time gets a warning, and the
+steady-state checks (Cd, convergence) are not applied to it. An instant
+opening against a large pressure jump is flagged before the run: V1 opened
+instantly into vacuum diverged within ten steps.
+
 Every run ends **trusted**, **trusted with warnings**, or **not trustworthy**,
 with the reasons. A run that did not converge, whose mesh failed its gates,
 or whose inviscid Cd exceeds the theoretical bound is never presented as a
@@ -139,8 +161,9 @@ turns and expands around the sharp exit lip.
 
 ## Verification
 
-`sonicline verify` runs these cases on standard meshes (about 90 minutes on
-4 cores, most of it V14's 3D unstructured run). CI runs V1 and V4a end to
+`sonicline verify` runs these cases on standard meshes (about two hours on
+4 cores, most of it V14's 3D unstructured run and V15's 230,000 time
+steps; both always use the coarse preset). CI runs V1 and V4a end to
 end through OpenFOAM on every change, plus all three unstructured meshers on
 the side-port nozzle; the whole suite runs nightly. Every reference is
 computed without the CFD.
@@ -167,10 +190,48 @@ computed without the CFD.
 | V13 | V1 laminar with a 450 K wall | total-temperature rise vs wall heat / (ṁ cp) | 4×10⁻⁵ of T0 (the gas gains 0.96 %) | 2×10⁻³ |
 | V14 | V1 on the unstructured mesher (snappyHexMesh, coarse: 10 cells across the throat radius, 174 k cells) vs the structured wedge | mass flow / thrust | −0.06 % / −0.22 % | 0.5 % / 0.5 % |
 | V11 | **experiment:** NASA TP-1704 planar nozzle B1, NPR 8.91 (attached) and 2.46 (separated), SST with wall functions | wall p/pt at 10 orifices within the test's spanwise spread ± 0.02 | 9 of 10 at both (the miss: 0.6 mm past the sharp throat); separation between the same orifices as the test | 9 of 10 |
+| V15 | V1 started from vacuum, time-accurate (rhoCentralFoam, coarse wedge, valve opened over 0.1 ms, 1 ms run) | gas gained vs integrated net inflow | 7×10⁻⁷ | 10⁻³ |
+| | | thrust drift over the last tenth (settled) | 0.03 % | 1 % |
+| | | end state vs the steady rhoCentralFoam solve on the same mesh: mass flow / thrust | −0.008 % / +0.002 % | 0.1 % / 0.2 % |
+| E1 | **experiment:** JPL 45°–15° conical nozzle (Back, Massier and Gier, JPL TR 32-654), heated air at 17.2 bar and 833 K, SST | wall p/pt at 18 taps | 13 of 13 away from the throat within 5 %; 4 of 5 near the throat within 10 % | all / one miss |
+| E2 | **experiment:** the same nozzle, air at 294 K (Cuffel, Back and Massier 1969) | Cd vs measured 0.985 | −0.74 % (0.9776) | 1 % |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
 The full table is in [doc/verification-standard.md](doc/verification-standard.md).
+
+**What E1 shows, and what it does not.** Measured wall pressures in a real
+nozzle, digitised from the report's Figure 4 (DESIGN.md §15 has the
+method). Upstream of the throat and through the supersonic cone to z = 3.6
+in the CFD is within 1.5 % of the test, except at z = 2.25 in, 0.3 in ahead of
+the throat, where it reads 6.3 % low (inside the throat region's 10 %). Two
+places it is not:
+
+- **Just past the throat** (z = 2.60 in, 0.05 in downstream) the test
+  reads p/pt 0.218 and the CFD 0.296. The test's taps show a local
+  over-expansion and recompression where the 0.625 in throat radius meets
+  the 15° cone that the CFD does not resolve. That is the tap the throat
+  region is allowed to miss.
+- **Far down the cone** the CFD reads high, and increasingly so: +4.5 % at
+  z = 4 in, +13 % at z = 5.3–6.0 in. The pressures there are small
+  (p/pt 0.02–0.04), so the test's own spread and reading error cover the
+  difference in absolute terms and the check passes, but the trend is
+  real. The likely cause is the gas model: heated air is run at a
+  constant γ of 1.35, and real air's γ rises towards 1.4 as it expands
+  and cools, which lowers the pressure at a given area ratio. At the
+  exit's area ratio of 6.63, quasi-1D theory gives 11 % less pressure at
+  γ 1.4 than at 1.35, the size of the excess. A variable-γ model would
+  settle it; SONICLINE has none, and E1 is not a nitrogen case.
+
+**What V15 shows.** A startup from vacuum, with the valve opening over
+0.1 ms, reaches 10 % of final thrust at 22 µs and 90 % at 92 µs, overshoots
+by 8 %, and settles well inside 1 ms. It ends where the steady solve on the
+same mesh lands, and the gas in the domain accounts for everything that
+flowed in and out to 7×10⁻⁷. The chamber keeps ringing acoustically (inlet
+mass flow ±0.4 % at 1 ms) after the nozzle flow has settled, so a
+transient's final numbers are means over the last tenth of the run, not the
+last step. On this coarse mesh Cd reads 0.28 % below Kliegel–Levine, steady
+or transient; that is the mesh, as V5 measures.
 
 **What V2 found.** rhoPimpleFoam, the pressure-based solver SONICLINE
 uses for shock-free nozzles, does not hold this shock. Run steady or
@@ -216,6 +277,11 @@ The house rule: say plainly where the model stops.
 
 - **Gas.** A calorically perfect gas (cp = 1039.7 J/(kg·K), γ = 1.3995) with
   Sutherland viscosity for N₂. The theory uses the same constants.
+  - Air (γ 1.4) and "heated air" (γ 1.35) exist only to run the air
+    experiments E1 and E2. They are not validated for anything else, and a
+    run with them carries a warning. Heated air's constant γ is a crude
+    stand-in for air at 833 K, whose real γ climbs back towards 1.4 as it
+    expands and cools (E1 shows the result).
   - Real nitrogen chokes at a higher mass flux: +0.36 % at 10 bar, +0.71 % at
     20 bar, +1.05 % at 30 bar (reference equation of state, via CoolProp).
     Every run reports this correction.
@@ -292,12 +358,16 @@ The house rule: say plainly where the model stops.
   - The throat of a coarse snapped mesh is a 40-sided polygon, 0.4 % short
     of the circle, and that shows in Cd.
   - The throat area Cd is judged against is the geometry's, not the mesh's.
-  - **Viscous runs on unstructured meshes are not yet accurate.** On the
-    side-port nozzle at sea level (k-ω SST, cfMesh, coarse preset, 863 k
-    cells) mass flow reads 1.3 % above the structured wedge's result for
-    the same nozzle, which puts Cd above 1. The verdict refuses such runs,
-    so the numbers are never presented as trusted. The cause is open
-    (DESIGN.md finding 44). Inviscid unstructured runs are verified (V14).
+  - **cfMesh over-predicts mass flow at the preset resolutions.** On V1,
+    inviscid, it reads Cd 0.7 % above Kliegel–Levine at 10 cells across
+    the throat radius and 1.0 % at 7; snappyHexMesh at 10 reads −0.06 %
+    (V14). The error falls about linearly with cell size, so it is cfMesh's
+    discretisation near the throat, not the boundary layer M5 suspected
+    (DESIGN.md findings 44 and 46). cfMesh carries the viscous runs, so
+    **viscous runs on unstructured meshes read about 1 % high in mass
+    flow**. Where that puts Cd above 1 the verdict refuses the run; below
+    that it cannot tell. Use the structured meshes for numbers that
+    matter; use `sonicline study` to measure the error on your own case.
   - For a volume that is not a body of revolution, quasi-1D theory uses the
     radius of a circle of the same section area. Its "ideal" numbers are a
     reference, not a prediction.
@@ -361,9 +431,16 @@ conical nozzle:
   and area ratios are ratios of heights. See
   `examples/planar-tp1704-b1-npr2.46.json`, the V11 validation nozzle.
 
-A **solid thruster body** (a block with a bore through it) is recognised and
-rejected with advice: export the internal gas volume. Automatic extraction
-is planned as a previewed, user-confirmed step (M6).
+A **solid thruster body** (a block with a bore through it) is recognised,
+and its gas passage can be extracted: `sonicline extract body.step`, or the
+**Extract gas passage** button on the Geometry stage, which shows the
+extracted volume in the 3D view and asks before using it. The extraction
+caps each opening in the body's planar faces, cuts a box around the lot, and
+keeps the one piece that is neither body nor outside air and is bounded by
+at least two caps. It refuses a body with no such piece, or with several
+(two separate bores: export the one you mean). Openings that are not in
+planar faces cannot be capped; export the gas volume from CAD for those.
+The extracted STEP then goes through the same analysis as any other.
 
 ## Layout
 

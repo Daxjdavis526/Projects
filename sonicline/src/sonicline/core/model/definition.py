@@ -19,7 +19,7 @@ import math
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from ..gas import NITROGEN, PerfectGas
+from ..gas import PerfectGas
 from ..profile import Profile, conical, from_points
 from ..units import ATM, Dimension, quantity_to_si
 

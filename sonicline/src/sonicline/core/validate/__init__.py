@@ -29,6 +29,7 @@ from ..model.definition import (
     Plume,
     ReservoirInlet,
     SimulationDefinition,
+    Transient,
     TruncatedAtExit,
     WallProfile,
 )
@@ -44,6 +45,9 @@ T0_SUPPORTED = (200.0, 350.0)
 REAL_GAS_WARN = 0.005  # mass-flow bias above which the perfect-gas result is flagged
 TYPICAL_BOTTLE = (300e5, 300.0)  # for the regulator-cooling hint
 LAMINAR_TRANSITION_RE = 1.0e6  # throat Re of transition in critical-flow venturis
+# A startup whose inlet jumps by more than this pressure ratio at t = 0 is
+# flagged: V1 opened instantly against its 1000:1 start diverged in ten steps.
+INSTANT_OPENING_RATIO = 100.0
 
 
 class Severity(enum.IntEnum):
@@ -133,6 +137,14 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
         add(Finding(Severity.WARNING, "envelope.T0",
                     f"Chamber temperature {T0:.1f} K is outside {T0_SUPPORTED[0]:.0f}-"
                     f"{T0_SUPPORTED[1]:.0f} K."))
+    time = defn.flow.time
+    if isinstance(time, Transient) and time.initial == "ambient" and time.ramp_time == 0.0 and p0 is not None:
+        start = max(pa, 1e-3 * p0)  # foam.case.start_pressure
+        if p0 / start > INSTANT_OPENING_RATIO:
+            add(Finding(Severity.WARNING, "transient.instant_opening",
+                        f"The valve opens instantly against a {p0 / start:.0f}:1 pressure jump. "
+                        "rhoCentralFoam diverged within ten steps doing this to V1 at 1000:1.",
+                        "Give the valve an opening time (ramp); V15 uses a tenth of the run."))
 
     # -- real gas and regulator cooling -------------------------------------
     if p0 is not None and realgas.available(gas):

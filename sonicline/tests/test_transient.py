@@ -31,6 +31,21 @@ def test_transient_definition_is_checked():
     assert m.loads(m.dumps(d)) == d
 
 
+def test_instant_opening_into_vacuum_is_flagged():
+    from sonicline.core.validate import validate
+
+    def codes(d):
+        return {f.code for f in validate(d, resolve_profile(d))}
+
+    vacuum = m.Boundaries(inlet=m.ReservoirInlet(p0=20e5), ambient=m.Ambient(pressure=0.0),
+                          exit_domain=m.TruncatedAtExit())
+    instant = m.SimulationDefinition(**{**_defn().__dict__, "boundaries": vacuum})
+    assert "transient.instant_opening" in codes(instant)
+    ramped = m.SimulationDefinition(**{**_defn(ramp_time=1e-4).__dict__, "boundaries": vacuum})
+    assert "transient.instant_opening" not in codes(ramped)
+    assert "transient.instant_opening" not in codes(_defn())  # 20:1 at sea level
+
+
 def test_startup_case(tmp_path):
     d = _defn(ramp_time=2e-4, frames=10)
     prof = resolve_profile(d)
