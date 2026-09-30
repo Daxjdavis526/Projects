@@ -1288,4 +1288,10 @@ Findings:
 32. **Speed-scaled arrows vanish in the chamber** (Mach 0.04 against 3.4 at
     the exit). Arrows show direction at one length; the colour carries the
     magnitude.
+33. **Off-screen rendering without a working OpenGL does not raise; it
+    kills the process.** On GitHub's GPU-less Windows runner VTK died with
+    an access violation inside a report export. Report images are now
+    rendered in a child process: a failure there becomes a listed missing
+    image. The pipeline writes its manifest before rendering, so a finished
+    run survives a crash in its image step.
 

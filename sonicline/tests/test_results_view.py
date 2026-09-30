@@ -112,11 +112,10 @@ def test_contour_image_matches_its_reference(run, tmp_path, field):
     """Screenshot regression: the meridian contour of the synthetic run
     against a stored image. SONICLINE_UPDATE_IMAGES=1 rewrites references."""
     d, _ = run
-    r = fieldview.RunResults(d)
     out = tmp_path / f"{field}.png"
-    try:
-        report.contour_image(r, field, out, size=(800, 350))
-    except Exception as e:  # no off-screen OpenGL on this machine
+    try:  # in a child process: without usable OpenGL, VTK crashes rather than raises
+        report.contour_image_isolated(d, field, out, size=(800, 350))
+    except Exception as e:
         pytest.skip(f"off-screen rendering unavailable: {e}")
     ref = IMAGES / f"synthetic_contour_{field}.png"
     if os.environ.get("SONICLINE_UPDATE_IMAGES") == "1" or not ref.exists():

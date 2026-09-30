@@ -63,6 +63,26 @@ def contour_image(results: RunResults, field: str, path: Path, size=(1600, 700))
     return path
 
 
+def contour_image_isolated(run_dir: Path, field: str, path: Path, size=(1600, 700),
+                           timeout: float = 180.0) -> Path:
+    """``contour_image`` in a child process. A broken or missing OpenGL
+    driver does not raise, it kills the process (an access violation on a
+    GPU-less Windows machine); isolated, it costs one image, not the report
+    or the application."""
+    import subprocess
+    import sys
+
+    code = ("import sys; from pathlib import Path; from sonicline.post import report, fieldview; "
+            "report.contour_image(fieldview.RunResults(Path(sys.argv[1])), sys.argv[2], Path(sys.argv[3]), "
+            "(int(sys.argv[4]), int(sys.argv[5])))")
+    proc = subprocess.run([sys.executable, "-c", code, str(run_dir), field, str(path), str(size[0]),
+                           str(size[1])], capture_output=True, text=True, timeout=timeout)
+    if proc.returncode != 0 or not Path(path).is_file():
+        tail = (proc.stderr or "").strip().splitlines()[-1:] or [f"exit code {proc.returncode}"]
+        raise RuntimeError(f"off-screen rendering failed ({tail[0]})")
+    return Path(path)
+
+
 def axial_image(results: RunResults, path: Path) -> Path | None:
     import matplotlib
 
@@ -161,7 +181,7 @@ def export(run_dir: Path, out_dir: Path | None = None, images: bool = True) -> d
         for f in CONTOUR_FIELDS:
             if f in results.fields():
                 try:
-                    files[f"contour_{f}"] = contour_image(results, f, out / f"contour_{f}.png")
+                    files[f"contour_{f}"] = contour_image_isolated(results.run_dir, f, out / f"contour_{f}.png")
                 except Exception as e:
                     missing.append(f"contour_{f}: {type(e).__name__}: {e}")
         for role, make in (("axial", axial_image), ("convergence", convergence_image)):

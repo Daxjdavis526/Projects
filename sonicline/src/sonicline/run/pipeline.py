@@ -346,6 +346,11 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         metrics["verdict"] = v.to_json()
         _write_json(run_dir / "metrics.json", metrics)
     if render and metrics is not None:
+        # Rendering goes through OpenGL, which on a machine with a broken or
+        # missing driver kills the process instead of raising. The run's
+        # outcome is on disk first, so such a crash costs the images only.
+        _write_json(run_dir / "manifest.json", dict(manifest, status=status, trust=v.trust.value,
+                                                    finished=datetime.now(timezone.utc).isoformat()))
         try:
             from ..post import render as rendering
 
