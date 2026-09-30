@@ -7,6 +7,7 @@ import orientation from './procedures/cg-orientation.js';
 import basicFiring from './procedures/cg-basic-firing.js';
 import pressureChar from './procedures/cg-pressure-char.js';
 import pulse from './procedures/cg-pulse.js';
+import trouble from './procedures/cg-trouble.js';
 
 export const STANDS = { 'TS-1': ts1 };
 
@@ -25,14 +26,14 @@ export const PROGRAMS = [
     levels: [
       { n: 1, id: 'cg-orient', title: 'Cold-gas stand orientation', scenario: orientation, modes: ['tutorial', 'guided'],
         teaches: ['Control-room layout', 'P&ID reading', 'Zero offset and noise', 'Regulator droop and lock-up', 'Trapped volumes'] },
-      { n: 2, id: 'cg-basic', title: 'Basic cold-gas firing', scenario: basicFiring, modes: ['tutorial', 'guided', 'independent'],
+      { n: 2, id: 'cg-basic', title: 'Basic cold-gas firing', scenario: basicFiring, modes: ['tutorial', 'guided', 'independent', 'fault'],
         teaches: ['Full test procedure', 'Zero, tare and shunt calibration', 'Leak check', 'Go/no-go', 'Arming and firing', 'Safing', 'Data reduction'] },
-      { n: 3, id: 'cg-pressure', title: 'Pressure characterisation', scenario: pressureChar, modes: ['tutorial', 'guided', 'independent'],
+      { n: 3, id: 'cg-pressure', title: 'Pressure characterisation', scenario: pressureChar, modes: ['tutorial', 'guided', 'independent', 'fault'],
         teaches: ['Test series and series polls', 'Thrust vs absolute chamber pressure', 'Reading nozzle geometry from a fit', 'Measured vs calculated mass flow', 'Regulator characterisation'] },
-      { n: 4, id: 'cg-pulse', title: 'Pulse testing', scenario: pulse, modes: ['tutorial', 'guided', 'independent'],
+      { n: 4, id: 'cg-pulse', title: 'Pulse testing', scenario: pulse, modes: ['tutorial', 'guided', 'independent', 'fault'],
         teaches: ['Valve response vs inlet pressure', 'Impulse bit', 'Minimum impulse bit', 'Repeatability', 'High-rate DAQ'] },
-      { n: 5, id: 'cg-trouble', title: 'Cold-gas troubleshooting', phase: 4,
-        teaches: ['Sensor vs system faults', 'Inspection', 'Root-cause diagnosis'] },
+      { n: 5, id: 'cg-trouble', title: 'Cold-gas troubleshooting', scenario: trouble, modes: ['guided', 'independent'],
+        teaches: ['Sensor vs system faults', 'When to hold, abort or continue', 'Inspection', 'Root-cause diagnosis'] },
       { n: 6, id: 'cg-indep', title: 'Independent cold-gas test conductor', phase: 5,
         teaches: ['Unscripted campaign', 'Hidden faults', 'Test reports'] },
     ],

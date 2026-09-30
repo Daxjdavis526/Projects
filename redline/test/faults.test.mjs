@@ -7,6 +7,7 @@ import { FAULTS, FAILURE_MODES, RIGHT_ACTION } from '../src/content/faults/ts1-f
 import { Session } from '../src/sim/session.js';
 import { scoreDiagnosis } from '../src/faults/diagnosis.js';
 import { psi } from '../src/lib/units.js';
+import trouble from '../src/content/procedures/cg-trouble.js';
 
 let failures = 0, count = 0;
 const check = (label, cond, detail = '') => {
@@ -159,6 +160,46 @@ console.log('diagnosis scoring and the fault lottery');
   check('every fault can be drawn', ids.size === FAULTS.length, `${ids.size}/${FAULTS.length}`);
   const g = new Session({ def, mode: 'guided', seed: 5 });
   check('no faults outside fault sessions', !g.faults.active);
+}
+
+console.log('Level 5: hold on NO-GO, safe, investigate, diagnose');
+{
+  const s = new Session({ def, scenario: trouble, mode: 'guided', seed: 11, fault: 'supply-low' });
+  const ex = (a, x = {}) => s.execute(a, x, { confirmed: true });
+  const P = s.procedure;
+  check('faults are live in a Level 5 session', s.faults.enabled && s.faults.active?.id === 'supply-low');
+  P.confirm('A1'); ex('tech', { task: 'walkdown' }); s.run(21); P.confirm('A3');
+  ex('daqPower', { on: true }); s.run(5); P.confirm('B2'); P.confirm('B3');
+  ex('zero'); ex('tare'); s.run(1);
+  ex('shunt', { on: true }); s.run(0.5); P.confirm('C3', s.daq.latest('LC-501').toFixed(2)); ex('shunt', { on: false }); s.run(0.5);
+  ex('daqRate', { rate: 2000 }); s.run(0.5);
+  ex('tech', { task: 'openHV' }); s.run(9);
+  const sup = s.daq.latest('PT-101') / psi(1);
+  check('the low bottle is visible on PT-101 before anything flows', sup < 420, `${sup.toFixed(0)} psig`);
+  const safing = P.steps.filter(x => x.id.startsWith('K') && x.kind === 'action');
+  check('safing steps wait for a firing or a hold', safing.every(x => P.status(x.id) === 'PENDING'));
+  const poll = s.startPoll();
+  const supplyStation = poll.stations.find(st => st.items.some(it => /supply|PT-101|bottle/i.test(it.label)));
+  check('a station reports the low supply as NO-GO', !!supplyStation && !supplyStation.go, supplyStation?.name);
+  s.concludePoll(poll, Object.fromEntries(poll.stations.map(st => [st.id, st.go ? 'GO' : 'NO-GO'])), 'NO-GO');
+  // the conductor skips what a hold makes moot (and, here, what the test
+  // did not bother to do before the poll)
+  for (const x of P.steps) if (x.id < 'K' && P.status(x.id) === 'PENDING') P.skip(x.id, 'held: NO-GO');
+  ex('regSet', { value: 0 }); ex('valve', { id: 'IV-101', open: false }); ex('valve', { id: 'VV-101', open: true }); ex('valve', { id: 'VV-201', open: true }); s.run(10);
+  check('after a NO-GO the safing steps complete', safing.every(x => P.status(x.id) === 'COMPLETE'), safing.map(x => x.id + ':' + P.status(x.id)).join(' '));
+  ex('enterCell'); s.run(1);
+  ex('inspection', { id: 'bottle-gauge' }); s.run(20);
+  ex('inspection', { id: 'continuity' }); s.run(35);
+  check('two inspections recorded', s.inspections.length === 2);
+  check('the gauge reading comes from the fault', /psig/.test(s.inspections[0].lines[0][1]) && s.inspections[0].lines[0][2].includes('800'), s.inspections[0].lines[0][1]);
+  s.run(0.5);
+  check('the evidence step completes', P.status('L2') === 'COMPLETE', P.status('L2'));
+  const rec = s.submitDiagnosis({ component: 'N2-K', mode: 'supply-low', evidence: ['PT-101', 'go-no-go', 'bottle-gauge'], action: 'supply' });
+  s.run(0.5);
+  check('diagnosis scored and the step completes', rec.result.score === 100 && P.status('L3') === 'COMPLETE', `${rec.result.score} ${P.status('L3')}`);
+  check('abort assessment credits the hold', rec.abort.some(l => /held before firing/.test(l)), rec.abort.join(' | '));
+  const r = s.faults.reveal();
+  check('reveal carries the story', !!r.story.what && !!r.story.expert);
 }
 
 console.log(`\n${count - failures}/${count} passed`);

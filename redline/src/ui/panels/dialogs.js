@@ -3,6 +3,7 @@ import { h, btn, clear, setText } from '../dom.js';
 import { modal, toast } from '../modal.js';
 import { fmt, fmtT, fmtClock, unitLabel } from '../../lib/units.js';
 import { resolve } from '../../control/procedure.js';
+import { openDiagnosis, reveal } from './diagnosis.js';
 
 /* ---- go / no-go -------------------------------------------------------- */
 export function openPoll(app) {
@@ -73,6 +74,7 @@ export class AbortBanner {
     a.steps.forEach((s, i) => this.items[i].classList.toggle('done', s.done));
     if (a.complete && !this.btns.childElementCount) {
       this.btns.append(btn('What happened?', () => whatHappened(this.app, a), 'sm'), btn('Reset abort', () => this.app.session.execute('resetAbort'), 'sm ghost'));
+      if (this.app.session.faults.enabled && !this.app.session.faults.diagnosis) this.btns.append(btn('Diagnose…', () => openDiagnosis(this.app), 'sm ghost'));
     }
   }
 }
@@ -135,8 +137,19 @@ export function debrief(app) {
     for (const sv of S.safetyViolations) ul.append(h('li', `Safety: ${sv.msg}`));
     body.append(ul);
   } else body.append(h('p', { style: { color: '#7fd18e' } }, 'Clean: every check you confirmed was true of the stand, every call was right, no safety rules broken.'));
-  const passed = sum.counts.COMPLETE + sum.counts.SKIPPED === sum.total && S.pollMisses.length === 0 && S.safetyViolations.length === 0 && audits.length === 0;
+  // In a fault session the procedure may rightly stop short (a NO-GO, an
+  // abort, a comparison that fails because the hardware is faulty): the
+  // competency is the diagnosis, made safely.
+  const F = S.faults, dg = F.diagnosis;
+  if (F.enabled) {
+    body.append(h('h4', { style: { margin: '14px 0 4px', fontSize: '10px', letterSpacing: '.14em', color: 'var(--ink-4)' } }, 'DIAGNOSIS'));
+    body.append(dg ? h('p', `${dg.component} — score ${dg.result.score}/100 (${dg.result.grade}).`) : h('p', { style: { color: 'var(--caution)' } }, 'Not yet submitted. A fault session ends with a diagnosis — even if it is "no fault".'));
+  }
+  const clean = S.pollMisses.length === 0 && S.safetyViolations.length === 0;
+  const passed = F.enabled ? clean && !!dg && dg.result.score >= 70
+    : sum.counts.COMPLETE + sum.counts.SKIPPED === sum.total && clean && audits.length === 0;
   if (passed && app.level) app.recordCompetency(app.level.id, S.mode);
   body.append(h('p.faint', { style: { marginTop: '12px' } }, passed ? `Competency recorded: level ${app.level?.n ?? ''}, ${S.mode}.` : 'Competency not recorded this time — see above.'));
-  const m = modal({ title: 'Debrief', narrow: true, body, footer: [btn('Close', () => m.close(), 'primary')] });
+  const extra = F.enabled ? [dg ? btn('Root cause…', () => { m.close(); reveal(app); }, 'ghost') : btn('Submit diagnosis…', () => { m.close(); openDiagnosis(app); }, 'ghost')] : [];
+  const m = modal({ title: 'Debrief', narrow: true, body, footer: [...extra, btn('Close', () => m.close(), 'primary')] });
 }

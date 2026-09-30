@@ -6,6 +6,7 @@ import { h, btn, clear, setText, toggleClass } from '../dom.js';
 import { fmt, fmtT, unitLabel, toDisplay, fromDisplay } from '../../lib/units.js';
 import { DAQ_RATES } from '../../instruments/daq.js';
 import { act, modal } from '../modal.js';
+import { openDiagnosis, reveal } from './diagnosis.js';
 
 export class Console {
   constructor(host, app) {
@@ -17,7 +18,7 @@ export class Console {
     this.tabs = h('div.tabs');
     const head = h('div.ph', h('span.t', 'Console'), h('span.sp'), this.tabs);
     host.append(head, this.body);
-    for (const t of ['STAND', 'DAQ', 'FACILITY']) this.tabs.append(h('button', { onclick: () => this.show(t), dataset: { t } }, t));
+    for (const t of ['STAND', 'DAQ', 'FACILITY', 'INSPECT']) this.tabs.append(h('button', { onclick: () => this.show(t), dataset: { t } }, t));
     this.show('STAND');
   }
   get S() { return this.app.session; }
@@ -27,7 +28,7 @@ export class Console {
     for (const b of this.tabs.children) b.classList.toggle('on', b.dataset.t === t);
     clear(this.body);
     this.live = [];
-    if (t === 'STAND') this._stand(); else if (t === 'DAQ') this._daq(); else this._facility();
+    if (t === 'STAND') this._stand(); else if (t === 'DAQ') this._daq(); else if (t === 'INSPECT') this._inspect(); else this._facility();
     this.update();
   }
 
@@ -148,6 +149,49 @@ export class Console {
       setText(sv, n ? `${n} unreviewed safety violation(s)` : `${S.safetyViolations.length} violation(s), all reviewed`);
       sv.style.color = n ? 'var(--warning)' : 'var(--ink-3)';
       rv.disabled = !n;
+    });
+  }
+
+  /* The inspection workbench: technician tasks that return measurements,
+     never verdicts. Where each can be done is part of the lesson — the
+     rack in the control room, or hands-on in a cell that has been made
+     safe to enter. */
+  _inspect() {
+    const S = this.S, list = S.def.inspections || [];
+    const NEEDS = { rack: 'from the rack', cell: 'cell open', vented: 'cell open, system vented', lowP: 'cell open, low side 20–50 psig' };
+    const st = h('div.line.stat');
+    const diagBox = h('div.line');
+    const res = h('div.iresults');
+    this.body.append(st, diagBox, h('div.grp', 'Results (newest first)'), res);
+    const groups = [...new Set(list.map(i => i.group))];
+    for (const g of groups) {
+      this.body.append(h('div.grp', g));
+      for (const it of list.filter(i => i.group === g)) {
+        const b = btn('RUN', () => act(S, 'inspection', { id: it.id }), 'sm');
+        this.body.append(h('div.row.insp', h('span.nm', it.label, h('span.need', `${NEEDS[it.needs] || it.needs} · ≈${it.dur} s`)), b));
+      }
+    }
+    let shown = -1, diag = undefined;
+    this.live.push(() => {
+      const tech = S.controller.tech;
+      setText(st, tech ? `Technician busy: ${tech.text} — ${Math.max(0, tech.until - S.t).toFixed(0)} s` : `Technician available · cell ${S.controller.facility.area}`);
+      st.style.color = tech ? 'var(--caution)' : '';
+      if (diag !== S.faults.diagnosis) {
+        diag = S.faults.diagnosis;
+        clear(diagBox);
+        if (diag) diagBox.append(btn('Root cause…', () => reveal(this.app), 'sm primary'), h('span.faint', `Diagnosis submitted · ${diag.result.score}/100`));
+        else diagBox.append(btn('Submit diagnosis…', () => openDiagnosis(this.app), S.faults.enabled ? 'sm primary' : 'sm ghost'),
+          h('span.faint', S.faults.enabled ? 'Fault session: diagnose before you leave.' : 'No faults are injected in this session.'));
+      }
+      if (shown === S.inspections.length) return;
+      shown = S.inspections.length;
+      clear(res);
+      if (!shown) res.append(h('p.faint', 'No inspections yet.'));
+      for (const r of [...S.inspections].reverse()) {
+        res.append(h('div.ires', h('div.ih', h('b', r.label), h('span.faint', `session t = ${r.t.toFixed(0)} s`)),
+          h('table', h('tr', h('th', ''), h('th', 'found'), h('th', 'expected')), r.lines.map(l => h('tr', h('td', l[0]), h('td.m', l[1]), h('td.faint', l[2] ?? '')))),
+          r.text ? h('p.muted', r.text) : null));
+      }
     });
   }
 

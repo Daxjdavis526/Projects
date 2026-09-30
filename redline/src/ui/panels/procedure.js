@@ -6,6 +6,9 @@ import { h, btn, clear, setText } from '../dom.js';
 import { resolve, ST } from '../../control/procedure.js';
 import { toast } from '../modal.js';
 
+// fault-injection sessions run under independent rules
+const indep = m => m === 'independent' || m === 'fault';
+
 const ICON = { PENDING: '○', COMPLETE: '✓', FAILED: '✕', SKIPPED: '–' };
 
 export class ProcedurePanel {
@@ -78,14 +81,14 @@ export class ProcedurePanel {
     }
     // P&ID focus follows the expanded step (not in independent mode)
     const step = exp ? P.byId.get(exp) : null;
-    this.app.setFocus(step && S.mode !== 'independent' ? step.focus || [] : []);
+    this.app.setFocus(step && !indep(S.mode) ? step.focus || [] : []);
   }
 
   _body(e, st, v) {
     const S = this.app.session, P = S.procedure, step = e.step, mode = S.mode;
     const b = e.body;
     clear(b);
-    if (mode !== 'independent') {
+    if (!indep(mode)) {
       b.append(h('p', resolve(step.text, v)));
       if (step.why && (mode === 'tutorial' || this.whyOpen.has(step.id))) b.append(h('div.why', h('b', 'WHY  '), step.why));
       if (step.teach && mode === 'tutorial') b.append(h('div.teach', step.teach));
@@ -97,7 +100,7 @@ export class ProcedurePanel {
     const confirm = (input) => {
       const r = P.confirm(step.id, input);
       this.msgs.set(step.id, r.ok ? { ok: true, text: r.note || 'Done.' } : { ok: false, text: r.msg || 'Not satisfied.' });
-      if (!r.ok && r.msg && mode !== 'independent') toast('Not yet', r.msg, 'info', 4200);
+      if (!r.ok && r.msg && !indep(mode)) toast('Not yet', r.msg, 'info', 4200);
       this.render();
     };
     if (st.status === ST.PENDING || st.status === ST.FAILED) {
@@ -105,7 +108,7 @@ export class ProcedurePanel {
       else switch (step.kind) {
         case 'info': ctl.append(btn('Acknowledge', () => confirm(), 'sm primary')); break;
         case 'action':
-          if (mode === 'independent') ctl.append(btn('Mark done', () => confirm(), 'sm'));
+          if (indep(mode)) ctl.append(btn('Mark done', () => confirm(), 'sm'));
           else ctl.append(h('span.faint', { style: { fontSize: '11px' } }, 'Completes when the stand shows it done.'));
           break;
         case 'verify': ctl.append(btn('Verified', () => confirm(), 'sm primary'), btn('Mark failed', () => { P.fail(step.id, 'operator: check not satisfied'); this.render(); }, 'sm ghost')); break;
@@ -134,11 +137,11 @@ export class ProcedurePanel {
       }
       if (st.status === ST.PENDING) {
         if (mode === 'guided' && step.why) ctl.append(h('button.lnk', { onclick: () => { this.whyOpen.has(step.id) ? this.whyOpen.delete(step.id) : this.whyOpen.add(step.id); this.render(); } }, this.whyOpen.has(step.id) ? 'hide why' : 'why?'));
-        if (mode === 'independent' && !this.whyOpen.has(step.id)) ctl.append(h('button.lnk', { onclick: () => { this.whyOpen.add(step.id); this.render(); } }, 'detail'));
+        if (indep(mode) && !this.whyOpen.has(step.id)) ctl.append(h('button.lnk', { onclick: () => { this.whyOpen.add(step.id); this.render(); } }, 'detail'));
         ctl.append(h('button.lnk', { onclick: () => { P.skip(step.id); this.render(); } }, 'skip'));
       }
     }
-    if (mode === 'independent' && this.whyOpen.has(step.id)) {
+    if (indep(mode) && this.whyOpen.has(step.id)) {
       b.prepend(h('p', resolve(step.text, v)));
     }
     b.append(ctl);

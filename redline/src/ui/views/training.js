@@ -25,8 +25,8 @@ export class TrainingView {
       h('div.level',
         h('div.ln', 'TS-1 · SANDBOX'),
         h('div.lt', 'Cold-gas stand, no procedure'),
-        h('ul', h('li', 'Every control available; interlocks and physics still apply'), h('li', 'Write your own plan in the notebook first')),
-        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent'), 'sm'))));
+        h('ul', h('li', 'Every control available; interlocks and physics still apply'), h('li', 'Write your own plan in the notebook first'), h('li', 'Fault injection: a hidden fault may or may not be present; diagnose it from Console ▸ INSPECT')),
+        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent'), 'sm'), btn('Fault injection', () => this.app.start(null, 'fault'), 'sm', { title: MODES.fault.text }))));
     page.append(open);
 
     for (const p of PROGRAMS) {

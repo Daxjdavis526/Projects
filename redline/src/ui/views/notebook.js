@@ -176,6 +176,7 @@ export class NotebookView {
       }, 'sm primary'),
       rep.filed ? h('span.faint', `filed ${rep.at?.slice(0, 16).replace('T', ' ')}`) : null));
     b.append(sec('Diagnosis and root cause'));
-    b.append(h('p.muted', e.diagnosis ? e.diagnosis : 'Diagnosis submission and root-cause reveal arrive with fault-injection training (development phase 4).'));
+    if (e.diagnosis) b.append(h('p', h('b', 'Diagnosis: '), e.diagnosis), h('p', h('b', 'Root cause: '), e.rootCause || '—'));
+    else b.append(h('p.muted', e.mode === 'fault' || /L5/.test(e.level) ? 'No diagnosis submitted yet (Console ▸ INSPECT ▸ Submit diagnosis).' : 'Not a fault-injection session.'));
   }
 }

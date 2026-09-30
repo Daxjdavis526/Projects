@@ -242,7 +242,10 @@ pressure, a thrust stand that rings — and on top of it every sensor has lag,
 offset, noise and a sample rate, so the measured state and the true state
 are never the same thing. Tutorial, guided and independent modes, a go/no-go
 poll, redlines and automatic aborts, pressure-characterisation and
-pulse-test campaigns fitted across runs, cursors and reductions on the
+pulse-test campaigns fitted across runs, hidden hardware and instrument
+faults to diagnose with technician inspections that return measurements
+(never verdicts), a scored diagnosis and a root-cause debrief, cursors and
+reductions on the
 recorded data, test history that outlives the session, and an engineering
 notebook. Fictional hardware, generalised
 procedures, and it says so. Desktop only.
