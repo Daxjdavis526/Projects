@@ -1,8 +1,8 @@
 # Projects — working notes
 
 A collection of self-contained browser toys, one per directory, published
-straight to GitHub Pages from `main` (plus one desktop game, `strata/`).
-Different ideas on the daily.
+straight to GitHub Pages from `main` (plus one desktop game, `strata/`, and
+one server app, `spotter/`). Different ideas on the daily.
 
 ## The one rule that matters
 
@@ -19,6 +19,9 @@ wormsign/dist/*.js       generated wasm-bindgen glue — do not read
 wormsign/target*/        Rust build output (untracked) — do not read
 strata/.godot/           Godot's import cache and compiled C# (untracked) — do not read
 strata/build/            exported game builds (untracked) — do not read
+spotter/node_modules/    npm dependencies (untracked) — do not read
+spotter/.next/           Next.js build output (untracked) — do not read
+spotter/.data/           embedded dev database and dev secrets (untracked) — do not read
 ```
 
 `moon/data/` is 47 MB of vendored NASA rasters. They are data, not code: read
@@ -51,13 +54,15 @@ touching the others.
 | `peraspera/` | PER ASPERA — an animated short film, canvas-drawn and WebAudio-scored live; `test/film.test.mjs`, `tools/frames.mjs` renders frames |
 | `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (has a build step; `dist/` is committed at milestones) |
 | `strata/` | STRATA — voxel survival game in Godot 4 + C#. A desktop game, not a web page: Pages serves nothing playable from it. Windows and Linux builds come from GitHub Actions (`.github/workflows/strata.yml`) |
+| `spotter/` | SPOTTER — trend intelligence for a fitness creator: Next.js + PostgreSQL server app with OAuth connectors for YouTube, Instagram and TikTok. Not a static page: Pages serves nothing usable from it. Checks run in GitHub Actions (`.github/workflows/spotter.yml`) |
 
 ## Conventions
 
 - **No build step** for the browser projects. Everything is static files
   served as-is. No bundler, no npm install, no transpilation.
-  `python3 -m http.server` is the dev loop. The two exceptions, `wormsign/`
-  and `strata/`, keep their builds to themselves; their READMEs say how.
+  `python3 -m http.server` is the dev loop. The three exceptions, `wormsign/`,
+  `strata/` and `spotter/` (npm, Next.js), keep their builds to themselves;
+  their READMEs say how.
 - **Vendor dependencies locally**, do not hotlink a CDN — these pages should
   keep working when a CDN does not.
 - **Prefer the minified build** when vendoring. `three.module.min.js` plus
@@ -79,7 +84,9 @@ is the reference: its physics engine imports no DOM and no three.js, so
 `node supernova/test/physics.test.mjs` validates the simulation headlessly.
 Keep simulation state separate from rendering so this stays possible.
 `strata/` does the same in C#: `godot --headless --path strata -- --test`,
-which CI also runs on every change to it.
+which CI also runs on every change to it. `spotter/` keeps its engine under
+`src/core` free of React and Next.js: `cd spotter && npm test` runs it all
+headlessly, including the whole pipeline on an in-memory PostgreSQL.
 
 For visual verification, drive a headless Chromium (Playwright is available)
 and screenshot the page — several rendering bugs in this repo were only ever

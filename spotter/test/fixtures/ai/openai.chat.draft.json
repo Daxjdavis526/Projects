@@ -1,0 +1,18 @@
+{
+  "id": "chatcmpl-fixture",
+  "object": "chat.completion",
+  "created": 1790000000,
+  "model": "gpt-6-luna",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "refusal": null,
+        "content": "{\"oneLiner\":\"Squat depth is accelerating: 9 new posts in the last 3 days, running 2.4× their creators’ usual views.\",\"whyItMatters\":\"Your myth-busting posts run above your normal, and this debate is built for that format.\",\"suggestedAngle\":\"Film two sets side by side, parallel and full depth, and show what changes on camera.\",\"suggestedHook\":\"I squatted half-depth for a month. Here's what my knees said.\",\"titleConcept\":\"Half reps vs full depth: my honest test\",\"captionConcept\":\"Which side are you on? I tested both.\",\"structure\":[{\"startSec\":0,\"endSec\":4,\"label\":\"Hook\",\"direction\":\"Say the hook to camera mid-set.\"},{\"startSec\":3,\"endSec\":25,\"label\":\"Test\",\"direction\":\"Show both depths from the side.\"},{\"startSec\":25,\"endSec\":40,\"label\":\"Verdict\",\"direction\":\"Give your take and ask for theirs.\"}],\"alternativeAngles\":[\"A coach reacts to viral depth clips\",\"Mobility drills that unlock depth\"]}"
+      }
+    }
+  ],
+  "usage": { "prompt_tokens": 900, "completion_tokens": 260, "total_tokens": 1160 }
+}

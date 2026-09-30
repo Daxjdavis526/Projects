@@ -1,0 +1,43 @@
+{
+  "kind": "youtube#videoListResponse",
+  "etag": "etag-1",
+  "pageInfo": { "totalResults": 3, "resultsPerPage": 3 },
+  "items": [
+    {
+      "kind": "youtube#video",
+      "etag": "etag-a",
+      "id": "vid-deep-squat",
+      "snippet": {
+        "publishedAt": "2026-09-28T14:05:00Z",
+        "channelId": "UC-small-coach",
+        "title": "How deep should you actually squat? #squat",
+        "description": "Full ROM vs partials — what the research says.\n\n#hypertrophy #legday",
+        "thumbnails": { "default": { "url": "https://i.ytimg.com/vi/vid-deep-squat/default.jpg", "width": 120, "height": 90 }, "high": { "url": "https://i.ytimg.com/vi/vid-deep-squat/hqdefault.jpg", "width": 480, "height": 360 } },
+        "channelTitle": "Small Coach",
+        "tags": ["squat depth", "hypertrophy", "#rangeofmotion"],
+        "categoryId": "17",
+        "liveBroadcastContent": "none",
+        "defaultAudioLanguage": "en"
+      },
+      "contentDetails": { "duration": "PT48S", "dimension": "2d", "definition": "hd", "caption": "false", "licensedContent": false, "projection": "rectangular" },
+      "status": { "uploadStatus": "processed", "privacyStatus": "public", "license": "youtube", "embeddable": true, "publicStatsViewable": true, "madeForKids": false },
+      "statistics": { "viewCount": "700412", "likeCount": "41210", "favoriteCount": "0", "commentCount": "3120" }
+    },
+    {
+      "kind": "youtube#video",
+      "id": "vid-hidden-likes",
+      "snippet": { "publishedAt": "2026-09-27T09:00:00Z", "channelId": "UC-big", "title": "Leg day", "description": "", "channelTitle": "Big Channel", "liveBroadcastContent": "none" },
+      "contentDetails": { "duration": "PT1H2M3S" },
+      "status": { "privacyStatus": "public" },
+      "statistics": { "viewCount": "1000000", "favoriteCount": "0", "commentCount": "900" }
+    },
+    {
+      "kind": "youtube#video",
+      "id": "vid-private",
+      "snippet": { "publishedAt": "2026-09-27T09:00:00Z", "channelId": "UC-big", "title": "Draft", "liveBroadcastContent": "none" },
+      "contentDetails": { "duration": "PT30S" },
+      "status": { "privacyStatus": "private" },
+      "statistics": { "viewCount": "0" }
+    }
+  ]
+}

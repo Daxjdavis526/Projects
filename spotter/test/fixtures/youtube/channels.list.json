@@ -1,0 +1,19 @@
+{
+  "kind": "youtube#channelListResponse",
+  "items": [
+    {
+      "kind": "youtube#channel",
+      "id": "UC-small-coach",
+      "snippet": { "title": "Small Coach", "customUrl": "@smallcoach", "thumbnails": { "default": { "url": "https://yt3.ggpht.com/small" } } },
+      "contentDetails": { "relatedPlaylists": { "likes": "", "uploads": "UU-small-coach" } },
+      "statistics": { "viewCount": "5400000", "subscriberCount": "30100", "hiddenSubscriberCount": false, "videoCount": "212" }
+    },
+    {
+      "kind": "youtube#channel",
+      "id": "UC-big",
+      "snippet": { "title": "Big Channel", "customUrl": "bigchannel" },
+      "contentDetails": { "relatedPlaylists": { "uploads": "UU-big" } },
+      "statistics": { "viewCount": "900000000", "subscriberCount": "2400000", "hiddenSubscriberCount": true, "videoCount": "1500" }
+    }
+  ]
+}
