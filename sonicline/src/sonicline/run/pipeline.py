@@ -32,7 +32,7 @@ from ..core.validate import Severity, has_errors, resolve_profile, validate
 from ..foam import case as foam_case
 from ..foam import parse
 from ..mesh import revolved, sizing
-from ..metrics import Trust, propulsion, recovery_factor, shock_location, verdict
+from ..metrics import Trust, condensation, propulsion, recovery_factor, shock_location, verdict
 from ..post import results
 from . import convergence, gates
 from .runner import default_runner
@@ -158,6 +158,12 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
             for e in report.errors:
                 emit(Event("geometry", f"ERROR: {e}"))
             manifest["geometry_error"] = report.errors
+            return finish("rejected", Trust.NOT_TRUSTWORTHY.value)
+        if not report.axisymmetric:
+            msg = ("the geometry is not a body of revolution; it needs the unstructured (Tier 2) "
+                   "mesher, which this build does not have yet")
+            emit(Event("geometry", f"ERROR: {msg}"))
+            manifest["geometry_error"] = [msg]
             return finish("rejected", Trust.NOT_TRUSTWORTHY.value)
         profile = report.profile()
         manifest["geometry"] = {"file": cad.name, "sha256": defn.geometry.sha256, "kind": report.kind,
@@ -328,6 +334,9 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
             if fields.wall_shear is not None:
                 metrics.setdefault("wall", {})["shear_stress_max"] = float(
                     np.linalg.norm(fields.wall_shear, axis=1).max())
+            cond = condensation(defn.gas.model(), fields.p, fields.T, mesh.cell_centres[:, 0], profile.x_exit)
+            if cond is not None:
+                metrics["condensation"] = cond
             profiles = results.axial_profiles(fields, meta, mesh.cell_centres)
             _write_json(run_dir / "profiles.json", profiles)
             if metrics["regime"]["shock_area_ratio"]:

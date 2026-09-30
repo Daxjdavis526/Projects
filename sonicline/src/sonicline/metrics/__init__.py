@@ -84,12 +84,36 @@ def shock_location(profiles: dict, profile: Profile, shock_area_ratio: float) ->
             "diverging_length": xe - xt}
 
 
+def nozzle_p0(defn: d.SimulationDefinition, summary: CaseSummary) -> float:
+    inlet = defn.boundaries.inlet
+    return inlet.p0 if isinstance(inlet, d.ReservoirInlet) else summary.p0_nominal
+
+
+def inlet_total_pressure(gas, it: Integrals, inlet_area: float) -> float | None:
+    """Total pressure at the inlet face: area-averaged static pressure
+    raised by the mass-averaged Mach number. The inlet Mach is a few
+    hundredths, so how the average is taken changes p0 by parts per million."""
+    avg = it.inlet_mass_avg
+    if not inlet_area or "T" not in avg or "magSqr(U)" not in avg or not avg["T"]:
+        return None
+    p = it.inlet_pressure_force / inlet_area
+    g = gas.gamma
+    m2 = avg["magSqr(U)"] / (g * gas.R * avg["T"])
+    return p * (1.0 + 0.5 * (g - 1.0) * m2) ** (g / (g - 1.0))
+
+
 def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSummary,
                it: Integrals) -> dict:
     gas = defn.gas.model()
-    p0, T0 = defn.boundaries.inlet.p0, defn.boundaries.inlet.T0
+    inlet = defn.boundaries.inlet
+    T0 = inlet.T0
     pa = defn.boundaries.ambient.pressure
     At, Ae = summary.throat_area, summary.exit_area
+    mass_flow_inlet = isinstance(inlet, d.MassFlowInlet)
+    p0_cfd = inlet_total_pressure(gas, it, summary.inlet_area)
+    # A reservoir inlet states p0; a mass-flow inlet's p0 is what the CFD
+    # needed to pass the flow, and the ideal nozzle is judged at that p0.
+    p0 = p0_cfd if mass_flow_inlet and p0_cfd else nozzle_p0(defn, summary)
     ideal = nozzle.analyse(gas, p0, T0, pa, At, Ae)
 
     # Thrust from the exit plane: momentum flux plus pressure relative to ambient.
@@ -171,8 +195,14 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
             "separation_expected": ideal.separation.likely,
         },
         "conditions": {"p0": p0, "T0": T0, "ambient_p": pa,
-                       "ambient_T": defn.boundaries.ambient.temperature},
+                       "ambient_T": defn.boundaries.ambient.temperature,
+                       "p0_source": "cfd_inlet" if mass_flow_inlet and p0_cfd else "stated",
+                       "p0_inlet_cfd": p0_cfd},
     }
+    if mass_flow_inlet:
+        out["mass_flow"]["imposed"] = inlet.mass_flow
+        out["mass_flow"]["inlet_minus_imposed"] = (mdot - inlet.mass_flow) / inlet.mass_flow
+        out["conditions"]["p0_nominal"] = summary.p0_nominal
     # Energy conservation: the flux-weighted total temperature T + |U|^2/2cp
     # carried through the exit must equal what enters. With adiabatic walls
     # nothing adds or removes heat between them.
@@ -196,6 +226,18 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
         "total_temperature_exit": T0_exit,
         "exit_minus_inlet": (T0_exit - T0_in) / T0_in if T0_in and T0_exit else None,
     }
+    wall = defn.boundaries.wall_thermal
+    if isinstance(wall, d.FixedTemperature):
+        # The first law across the nozzle: mdot cp (T0_exit - T0_inlet) = Q.
+        q = it.wall_heat
+        expected = q / (mdot * gas.cp * T0_in) if q is not None and T0_in else None
+        e = out["energy"]["exit_minus_inlet"]
+        out["wall_heat"] = {
+            "wall_temperature": wall.temperature,
+            "heat_into_gas": q,
+            "heat_over_enthalpy_flow": expected,
+            "balance_error": (e - expected) if e is not None and expected is not None else None,
+        }
     out["gas"] = {"equation_of_state": defn.gas.equation_of_state}
     if pr is not None:
         out["gas"]["peng_robinson_choked_flux_bias"] = pr_bias
@@ -205,6 +247,29 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
         correction = (1.0 + bias) / (1.0 + pr_bias) - 1.0
         out["mass_flow"]["real_gas_correction"] = correction
         out["mass_flow"]["inlet_real_gas_estimate"] = mdot * (1.0 + correction)
+    return out
+
+
+def condensation(gas, p: np.ndarray, T: np.ndarray, x: np.ndarray, x_exit: float) -> dict | None:
+    """Where the expanded gas is colder than nitrogen's saturation
+    temperature at its own pressure: supersaturated vapour, which the
+    single-phase CFD cannot condense. Checked cell by cell, in the nozzle
+    and in the plume. None without CoolProp."""
+    if not realgas.available():
+        return None
+    T_sat, approx = realgas.saturation_temperatures(gas, p)
+    margin = T - T_sat
+    out = {}
+    for name, mask in (("nozzle", x <= x_exit + 1e-12), ("plume", x > x_exit + 1e-12)):
+        if not mask.any():
+            continue
+        m = margin[mask]
+        i = int(np.argmin(m))
+        cold = m < 0.0
+        out[name] = {"cells": int(mask.sum()), "cells_supersaturated": int(cold.sum()),
+                     "min_margin": float(m[i]), "x_min_margin": float(x[mask][i]),
+                     "p_at_min_margin": float(p[mask][i]), "T_at_min_margin": float(T[mask][i]),
+                     "approximate": bool(approx[mask][cold].any()) if cold.any() else False}
     return out
 
 
@@ -239,6 +304,7 @@ STAGNATION_MARGIN = 0.005  # static T above T0 by more than this is a numerical 
 # approximates the boundary-layer edge in a 2D nozzle), hence a loose band.
 RECOVERY_RANGE = (0.75, 0.95)
 UNSETTLED_NOISE = 1e-3
+MASS_FLOW_IMPOSED_TOLERANCE = 0.002  # measured inlet flow vs a mass-flow inlet's setting
 UNCHOKED_MACH_LIMIT = 1.05  # a sharp throat's local supersonic pocket stays below this  # integral scatter above which a converged run is flagged unsettled
 
 
@@ -279,7 +345,8 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
         ext = m.get("extremes", {})
         T0 = defn.boundaries.inlet.T0
         t_max = ext.get("nozzle", {}).get("T_max")
-        if t_max is not None and t_max > T0 * (1.0 + STAGNATION_MARGIN):
+        adiabatic = isinstance(defn.boundaries.wall_thermal, d.Adiabatic)
+        if adiabatic and t_max is not None and t_max > T0 * (1.0 + STAGNATION_MARGIN):
             v.warnings.append(f"static temperature inside the nozzle reaches {t_max:.1f} K, above the "
                               f"{T0:.1f} K stagnation temperature: a local numerical error (with "
                               "adiabatic walls nothing can heat the gas)")
@@ -288,10 +355,33 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
             v.warnings.append(f"{clamped} cells sit at the solver's pressure floor; the limiter is "
                               "active there and the local solution is not physical")
         energy = m.get("energy", {}).get("exit_minus_inlet")
-        adiabatic = isinstance(defn.boundaries.wall_thermal, d.Adiabatic)
         if energy is not None and adiabatic and abs(energy) > ENERGY_TOLERANCE:
             v.warnings.append(f"total temperature leaving the nozzle differs from what enters by "
                               f"{100 * energy:+.2f} %: energy is not conserved (adiabatic walls)")
+        for region, where in (("nozzle", "inside the nozzle"), ("plume", "in the plume")):
+            c = (m.get("condensation") or {}).get(region)
+            if c and c["cells_supersaturated"]:
+                approx = (" (the saturation line is extrapolated below nitrogen's triple point there)"
+                          if c["approximate"] else "")
+                v.warnings.append(
+                    f"the gas is supersaturated {where}: {c['cells_supersaturated']} cells lie below "
+                    f"nitrogen's saturation temperature, by up to {-c['min_margin']:.1f} K at "
+                    f"x = {1e3 * c['x_min_margin']:.2f} mm{approx}. The single-phase CFD keeps it a "
+                    "vapour; real nitrogen may condense there, and the results beyond that point are "
+                    "bounds, not predictions")
+        heat = m.get("wall_heat")
+        if heat is not None:
+            err = heat.get("balance_error")
+            if err is None:
+                v.warnings.append("the wall heat flux was not recorded; the energy balance with heat "
+                                  "transfer cannot be checked")
+            elif abs(err) > ENERGY_TOLERANCE:
+                v.warnings.append(f"the gas gains {100 * energy:+.2f} % total temperature but the wall "
+                                  f"heat flux accounts for {100 * heat['heat_over_enthalpy_flow']:+.2f} %: "
+                                  "energy is not conserved")
+        imposed = m.get("mass_flow", {}).get("inlet_minus_imposed")
+        if imposed is not None and abs(imposed) > MASS_FLOW_IMPOSED_TOLERANCE:
+            v.warnings.append(f"the inlet passes {100 * imposed:+.2f} % more than the imposed mass flow")
         cv = m["thrust"]["control_volume_disagreement"]
         if abs(cv) > THRUST_CV_TOLERANCE:
             v.warnings.append(f"exit-plane and wall-force thrust differ by {100 * cv:.2f} %")

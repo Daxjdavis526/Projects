@@ -28,6 +28,7 @@ import numpy as np
 from ..core.gas import PerfectGas
 from ..core.model import definition as d
 from ..core.profile import Profile
+from ..core.stagnation import nominal_p0
 from ..core.theory import nozzle, quasi1d
 from ..mesh.polymesh import PolyMesh
 from ..mesh.revolved import PLANAR_DEPTH, Form, MeshMeta
@@ -58,9 +59,7 @@ def shock_inside(defn: d.SimulationDefinition, profile: Profile) -> bool:
     shock system inside it)."""
     gas = defn.gas.model()
     b = defn.boundaries
-    if not isinstance(b.inlet, d.ReservoirInlet):
-        return False
-    perf = nozzle.analyse(gas, b.inlet.p0, b.inlet.T0, b.ambient.pressure,
+    perf = nozzle.analyse(gas, nominal_p0(defn, profile), b.inlet.T0, b.ambient.pressure,
                           profile.throat_area, profile.area(profile.x_exit))
     return perf.regime is nozzle.Regime.SHOCK_IN_NOZZLE or perf.separation.likely
 
@@ -114,6 +113,7 @@ class CaseSummary:
     inlet_area: float
     initial: quasi1d.Quasi1DSolution
     p_min_limit: float | None  # the solver's pressure floor (rhoCentralFoam has none)
+    p0_nominal: float = 0.0  # stated, or for a mass-flow inlet the ideal inversion
 
 
 def _region(meta: MeshMeta, mesh: PolyMesh, which: str) -> tuple[str, str]:
@@ -151,8 +151,6 @@ def build_case(
     sonicline.foam.extensions.ensure_built); viscous cases need it."""
     gas = defn.gas.model()
     b = defn.boundaries
-    if not isinstance(b.inlet, d.ReservoirInlet):
-        raise NotImplementedError("the mass-flow inlet arrives in M5; use a reservoir inlet")
     turb = defn.flow.turbulence
     viscous = not isinstance(turb, d.Inviscid)
     ras = isinstance(turb, d.KOmegaSST)
@@ -163,7 +161,9 @@ def build_case(
     fields = ["p", "T", "U"] + (["k", "omega", "nut", "alphat"] if ras else [])
 
     # --- initial state from quasi-1D theory ---------------------------------
-    p0, T0 = b.inlet.p0, b.inlet.T0
+    # A mass-flow inlet starts from the ideal chamber pressure for its flow;
+    # the solver finds the real one (higher by 1/Cd) on its own.
+    p0, T0 = nominal_p0(defn, profile), b.inlet.T0
     pa, Ta = b.ambient.pressure, b.ambient.temperature
     centres = mesh.cell_centres
     xs_unique = np.unique(np.round(centres[:, 0], 12))
@@ -210,14 +210,6 @@ def build_case(
         from ..core.pengrobinson import PengRobinson
 
         real_gas = PengRobinson(gas)
-    _write_constant(case, gas, viscous, viscous_work, ras, real_gas)
-    _write_fields(case, defn, meta, profile.exit_radius, fields, p_init, T_init, U_init,
-                  k0, omega0, k_amb, omega_amb, L_mix)
-    exit_region = _region(meta, mesh, "exit")
-    throat_region = _region(meta, mesh, "throat")
-    _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
-                  extension_library if viscous_work else None, solver)
-
     # A wedge of angle theta has flat (chord) faces: its cross-section is
     # r^2 sin(theta)/2, not r^2 theta/2. Scaling by 2 pi / sin(theta) makes
     # the scaled face areas -- and so every flux integral -- exact.
@@ -229,6 +221,14 @@ def build_case(
         sector = 2.0 * defn.mesh.planar_width / (PLANAR_DEPTH * profile.throat_radius)
     else:
         sector = 1.0
+    _write_constant(case, gas, viscous, viscous_work, ras, real_gas)
+    _write_fields(case, defn, meta, profile.exit_radius, fields, p_init, T_init, U_init,
+                  k0, omega0, k_amb, omega_amb, L_mix, p0, sector)
+    exit_region = _region(meta, mesh, "exit")
+    throat_region = _region(meta, mesh, "throat")
+    _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
+                  extension_library if viscous_work else None, solver)
+
     (case / "case.foam").write_text("", encoding="utf-8")
     return CaseSummary(
         path=case, solver=solver, viscous=viscous,
@@ -239,6 +239,7 @@ def build_case(
         inlet_area=_zone_area(mesh, ("patch", "inlet")) * sector,
         initial=q1d,
         p_min_limit=_p_min(p0) if solver == PIMPLE_SOLVER else None,
+        p0_nominal=p0,
     )
 
 
@@ -291,13 +292,13 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bo
 
 
 def _write_fields(case, defn, meta, exit_radius, fields, p_init, T_init, U_init,
-                  k0, omega0, k_amb, omega_amb, L_mix):
+                  k0, omega0, k_amb, omega_amb, L_mix, p0, sector):
     b = defn.boundaries
     g = defn.gas.model().gamma
     turb = defn.flow.turbulence
     viscous = not isinstance(turb, d.Inviscid)
     pa, Ta = b.ambient.pressure, b.ambient.temperature
-    p0, T0 = b.inlet.p0, b.inlet.T0
+    T0 = b.inlet.T0
     patches = meta.patches
     lip_wall = patches.get("lip") == "wall"
     plume = "ambient" in patches
@@ -359,11 +360,23 @@ def _write_fields(case, defn, meta, exit_radius, fields, p_init, T_init, U_init,
         "nut": {"type": "calculated", "value": Raw("uniform 0")},
         "alphat": {"type": "calculated", "value": Raw("uniform 0")},
     }
+    if isinstance(b.inlet, d.MassFlowInlet):
+        # The flow is imposed (per wedge or half-channel: the full nozzle's
+        # divided by the sector factor) and the pressure floats: zero
+        # gradient lets the chamber settle at whatever the nozzle needs.
+        # rhoInlet is only a fallback; both solvers register rho.
+        inlet_p = {"type": "zeroGradient"}
+        inlet_U = {"type": "flowRateInletVelocity", "massFlowRate": b.inlet.mass_flow / sector,
+                   "rhoInlet": p0 / (defn.gas.model().R * T0), "extrapolateProfile": "false",
+                   "value": Raw("uniform (0 0 0)")}
+    else:
+        inlet_p = {"type": "totalPressure", "p0": Raw(f"uniform {p0}"), "psi": "thermo:psi", "gamma": g,
+                   "value": Raw(f"uniform {p0}")}
+        inlet_U = {"type": "pressureInletOutletVelocity", "value": Raw("uniform (0 0 0)")}
     inlet = {
-        "p": {"type": "totalPressure", "p0": Raw(f"uniform {p0}"), "psi": "thermo:psi", "gamma": g,
-              "value": Raw(f"uniform {p0}")},
+        "p": inlet_p,
         "T": {"type": "totalTemperature", "T0": Raw(f"uniform {T0}"), "gamma": g, "value": Raw(f"uniform {T0}")},
-        "U": {"type": "pressureInletOutletVelocity", "value": Raw("uniform (0 0 0)")},
+        "U": inlet_U,
         "k": {"type": "turbulentIntensityKineticEnergyInlet",
               "intensity": b.inlet.turbulence_intensity, "value": Raw(f"uniform {k0}")},
         "omega": {"type": "turbulentMixingLengthFrequencyInlet", "mixingLength": L_mix,
@@ -457,6 +470,14 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
         "CofR": [0, 0, 0], "pRef": defn.boundaries.ambient.pressure,
         "writeControl": "timeStep", "writeInterval": 1,
     }
+    if isinstance(defn.boundaries.wall_thermal, d.FixedTemperature):
+        # Heat into the gas through the nozzle wall, kappa dT/dn integrated:
+        # ESI's alphaEff carries Cp/Cv, so alphaEff grad(e) is kappa grad(T)
+        # in the internal-energy form too. Positive into the gas.
+        fos["wallHeatFlux"] = {"type": "wallHeatFlux", "libs": ["fieldFunctionObjects"],
+                               "patches": ["wall"], "executeControl": "timeStep",
+                               "writeControl": "writeTime"}
+        fos["heat_wall"] = _surface("wall", ("patch", "wall"), "areaIntegrate", ["wallHeatFlux"])
     if viscous:
         fos["wallShearStress"] = {"type": "wallShearStress", "libs": ["fieldFunctionObjects"],
                                   "patches": ["wall"], "writeControl": "writeTime"}
@@ -493,7 +514,7 @@ def write_continuation(case: Path, defn: d.SimulationDefinition, meta: MeshMeta,
 def _rewrite_system(case, defn, meta, summary, solver, end=None, offset=0):
     b = defn.boundaries
     _write_system(case, defn, meta, summary.viscous, summary.turbulence == d.KOmegaSST.TAG,
-                  isinstance(defn.flow.time, d.Steady), b.inlet.p0, b.ambient.pressure,
+                  isinstance(defn.flow.time, d.Steady), summary.p0_nominal, b.ambient.pressure,
                   summary.exit_region, summary.throat_region, None, solver, end=end, offset=offset)
 
 

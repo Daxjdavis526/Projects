@@ -2,6 +2,7 @@
 
     python -m sonicline.geometry.worker analyse <file> <scale> <inlet_end> <stations>
     python -m sonicline.geometry.worker write <segments.json> <out.step>
+    python -m sonicline.geometry.worker tessellate <file> <scale> <out.stl> <size>
 
 Run by :mod:`sonicline.geometry` in a subprocess so a kernel crash on a bad
 file cannot take the application down.
@@ -14,6 +15,8 @@ import math
 import sys
 
 import numpy as np
+
+from sonicline.geometry import frame
 
 
 def _init():
@@ -201,12 +204,12 @@ def analyse(path: str, scale: float, inlet_end: str, n_stations: int) -> dict:
         return report
     report["kind"] = "fluid_volume"
     report["axisymmetric"] = bool(roundness > 0.995)
+    report["axis_extent"] = [s_min, s_max]
     if not report["axisymmetric"]:
-        report["errors"].append(
+        report["warnings"].append(
             f"the volume is not a body of revolution (sections reach only {100 * roundness:.1f} % "
-            "of a circle's area); non-revolved geometry needs the general 3D mesher, which is not "
-            "available yet")
-        return report
+            "of a circle's area): it needs the unstructured (Tier 2) mesher, and quasi-1D theory "
+            "sees it through the radius of a circle of the same section area")
     if len(rows) < 10:
         report["errors"].append("too few valid cross-sections; the geometry could not be sliced")
         return report
@@ -258,43 +261,55 @@ def analyse(path: str, scale: float, inlet_end: str, n_stations: int) -> dict:
 
     # Which end is the inlet? The converging side of a thruster nozzle is
     # steeper than the diverging side, and a chamber sits upstream.
-    arr = np.array(rows)
-    slope = np.abs(np.gradient(arr[:, 1], arr[:, 0]))
-    near = np.abs(arr[:, 0] - s_t) < 3.0 * r_t
-    up = slope[(arr[:, 0] < s_t) & near]
-    down = slope[(arr[:, 0] > s_t) & near]
-    steep_min = up.mean() if len(up) else 0.0
-    steep_max = down.mean() if len(down) else 0.0
-    guess = "min" if steep_min >= steep_max else "max"
-    ratio = max(steep_min, steep_max) / max(min(steep_min, steep_max), 1e-12)
-    if inlet_end in ("min", "max"):
-        report["inlet_end"], report["inlet_confidence"] = inlet_end, "user"
-        if inlet_end != guess and ratio > 1.5:
-            report["warnings"].append(f"the inlet was set at the {inlet_end} end, but the steeper "
-                                      "(converging) wall is at the other end")
-    else:
-        report["inlet_end"] = guess
-        report["inlet_confidence"] = "high" if ratio > 1.5 else "low"
-        if ratio <= 1.5:
-            report["warnings"].append("the inlet end could not be identified confidently; "
-                                      "confirm it (inlet_end in the definition)")
+    end, confidence, warnings = frame.choose_inlet_end(rows, s_t, r_t, inlet_end)
+    report["inlet_end"], report["inlet_confidence"] = end, confidence
+    report["warnings"] += warnings
 
     # Nozzle frame: x from the inlet towards the exit.
-    if report["inlet_end"] == "min":
-        prof = [(s - s_min, r) for s, r in rows]
-        report["throat_x"] = float(s_t - s_min)
-    else:
-        prof = sorted((s_max - s, r) for s, r in rows)
-        report["throat_x"] = float(s_max - s_t)
-    report["profile_points"] = prof
+    report["throat_x"] = float(s_t - s_min if end == "min" else s_max - s_t)
+    report["profile_points"] = frame.nozzle_profile(rows, s_min, s_max, end)
     report["throat_radius"] = float(r_t)
     report["ok"] = not report["errors"]
     gmsh.finalize()
     return report
 
 
+# ----------------------------------------------------------------------------- tessellate
+
+
+def tessellate(path: str, scale: float, out: str, size: float) -> dict:
+    """Triangulate the file's surface (metres, in the file's frame) for the
+    unstructured mesher: ``size`` is the largest edge, and curved faces get
+    at least 48 triangles around a full circle."""
+    gmsh = _init()
+    occ = gmsh.model.occ
+    if path.lower().endswith((".step", ".stp")):
+        gmsh.option.setString("Geometry.OCCTargetUnit", "M")
+        scale = 1.0
+    occ.importShapes(path)
+    occ.synchronize()
+    if not occ.getEntities(3):
+        occ.healShapes()
+        occ.synchronize()
+    if scale != 1.0:
+        occ.dilate(occ.getEntities(), 0, 0, 0, scale, scale, scale)
+        occ.synchronize()
+    gmsh.option.setNumber("Mesh.MeshSizeMax", size)
+    gmsh.option.setNumber("Mesh.MeshSizeMin", size / 20.0)
+    gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 48)
+    gmsh.option.setNumber("Mesh.Algorithm", 6)
+    gmsh.model.mesh.generate(2)
+    gmsh.option.setNumber("Mesh.Binary", 0)
+    gmsh.write(out)
+    n = len(gmsh.model.mesh.getElementsByType(2)[0])
+    gmsh.finalize()
+    return {"ok": True, "triangles": n}
+
+
 def main(argv: list[str]) -> int:
-    if argv[0] == "write":
+    if argv[0] == "tessellate":
+        print(json.dumps(tessellate(argv[1], float(argv[2]), argv[3], float(argv[4]))))
+    elif argv[0] == "write":
         print(json.dumps(write(argv[1], argv[2])))
     elif argv[0] == "analyse":
         print(json.dumps(analyse(argv[1], float(argv[2]), argv[3], int(argv[4]))))

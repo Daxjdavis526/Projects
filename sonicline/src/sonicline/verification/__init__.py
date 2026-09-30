@@ -538,6 +538,62 @@ def run_validation_case(npr: float, quality: str, out: Path, processors: int = 1
                       round(time.time() - t0, 1), str(run_dir))
 
 
+# ----------------------------------------------------------------------------- V12, V13
+
+
+def v12_mass_flow() -> float:
+    """What V1's nozzle passes at 10 bar: ideal choked flow times
+    Kliegel-Levine's Cd for its throat."""
+    g = _v1_definition("coarse").geometry
+    At = math.pi * g.throat_radius**2
+    return (discharge.kliegel_levine(NITROGEN.gamma, g.throat_rc_upstream)
+            * isen.choked_mass_flow(NITROGEN.gamma, NITROGEN.R, 10e5, 300.0, At))
+
+
+def _v12_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+    d = _v1_definition(quality, form)
+    return dataclasses.replace(
+        d, name="V12 V1 driven by mass flow",
+        boundaries=dataclasses.replace(d.boundaries, inlet=m.MassFlowInlet(mass_flow=v12_mass_flow(),
+                                                                           T0=300.0)))
+
+
+def _v12_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    """V1 inverted: give the nozzle V1's mass flow and it must find V1's
+    chamber pressure. The tolerance is V1's Cd tolerance carried over, as
+    p0 scales with 1/Cd."""
+    return [
+        Check("chamber pressure found by the CFD vs V1's 10 bar", metrics["conditions"]["p0"], 10e5, 2e-3),
+        Check("inlet mass flow vs imposed", metrics["mass_flow"]["inlet_minus_imposed"], 0.0, 1e-4,
+              relative=False),
+    ] + _v1_checks_at(10e5)(metrics, defn)
+
+
+V13_WALL_T = 450.0
+
+
+def _v13_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+    d = _v1_definition(quality, form)
+    return dataclasses.replace(
+        d, name="V13 V1 laminar with a heated wall",
+        boundaries=dataclasses.replace(d.boundaries, wall_thermal=m.FixedTemperature(temperature=V13_WALL_T)),
+        flow=m.Flow(turbulence=m.Laminar()))
+
+
+def _v13_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    """The first law with heat: the rise in flux-weighted total temperature
+    from inlet to exit is the wall heat flux divided by mdot cp. Nothing
+    external predicts the heat itself, so the check is that the solver's
+    energy equation and its own wall flux agree."""
+    heat = metrics.get("wall_heat", {})
+    return [
+        Check("wall heat flux into the gas (a hot wall heats the gas)",
+              1.0 if (heat.get("heat_into_gas") or 0.0) > 0.0 else 0.0, 1.0, 0.0, relative=False),
+        Check("energy balance: total temperature rise vs wall heat / (mdot cp)",
+              heat.get("balance_error"), 0.0, 2e-3, relative=False),
+    ] + _common_checks(metrics)
+
+
 CASES: dict[str, Case] = {
     "V1": Case("V1", "Inviscid conical CD nozzle into vacuum (throat Cd, vacuum thrust)",
                _v1_definition, _v1_checks),
@@ -568,6 +624,9 @@ CASES: dict[str, Case] = {
     # parallel flow, where quasi-1D theory with pe = pa applies.
     "V4b": Case("V4b", "Inviscid converging nozzle with straight throat, subsonic, sea-level plume",
                 _v4_definition(1.5e5, "V4b subsonic converging nozzle", 4.0, DESIGN_LEVEL), _v4b_checks),
+    "V12": Case("V12", "V1 driven by its own mass flow: the CFD must find 10 bar", _v12_definition, _v12_checks),
+    "V13": Case("V13", "V1 laminar with a 450 K wall: energy balance with heat transfer",
+                _v13_definition, _v13_checks),
 }
 
 

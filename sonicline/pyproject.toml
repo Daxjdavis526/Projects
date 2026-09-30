@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-geometry = ["gmsh>=4.15", "trimesh>=5.0"]
+geometry = ["gmsh>=4.15", "trimesh>=5.0", "shapely>=2.0", "networkx>=3.0", "manifold3d>=3.0"]
 mesh = ["classy_blocks>=1.12"]
 post = ["pyvista>=0.49"]
 ui = ["PySide6>=6.11", "pyvistaqt>=0.13", "pyqtgraph>=0.14"]

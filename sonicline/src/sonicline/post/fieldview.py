@@ -25,6 +25,7 @@ import numpy as np
 
 from ..core import model
 from ..core.profile import Profile
+from ..core.stagnation import run_p0
 from ..core.theory import quasi1d
 from ..core.validate import resolve_profile
 
@@ -94,6 +95,15 @@ class RunResults:
         if prof is None:  # CAD geometry: the recovered profile is not stored
             raise ResultsError("the wall profile of a CAD run is not stored with it")
         return prof
+
+    @property
+    def p0(self) -> float | None:
+        """Chamber pressure: stated, or measured by the CFD for a mass-flow inlet."""
+        try:
+            prof = self.profile
+        except ResultsError:
+            prof = None
+        return run_p0(self.definition, prof, self.metrics)
 
     @property
     def mirrored(self) -> bool:
@@ -302,7 +312,7 @@ class RunResults:
             return out
         inlet = self.definition.boundaries.inlet
         xs = np.linspace(prof.x_inlet, prof.x_exit, 300)
-        q = quasi1d.solve(prof, self.definition.gas.model(), inlet.p0, inlet.T0,
+        q = quasi1d.solve(prof, self.definition.gas.model(), self.p0, inlet.T0,
                           self.definition.boundaries.ambient.pressure, list(xs))
         out["quasi_1d"] = {"x": xs, "p": np.array([s.pressure for s in q.stations]),
                            "T": np.array([s.temperature for s in q.stations]),

@@ -93,7 +93,7 @@ def axial_image(results: RunResults, path: Path) -> Path | None:
     if "centreline" not in ax_data:
         return None
     inlet = results.definition.boundaries.inlet
-    p0, T0 = inlet.p0, inlet.T0
+    p0, T0 = results.p0, inlet.T0
     fig, axes = plt.subplots(3, 1, figsize=(9, 9), sharex=True)
     q = ax_data.get("quasi_1d")
     c, w = ax_data["centreline"], ax_data.get("wall")

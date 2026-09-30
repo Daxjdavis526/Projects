@@ -214,10 +214,21 @@ class PhysicsPage(Page):
         super().__init__(window)
         v = QtWidgets.QVBoxLayout(self)
         b = "boundaries."
-        box = QtWidgets.QGroupBox("Chamber (reservoir inlet)")
+        box = QtWidgets.QGroupBox("Chamber (inlet)")
         f = QtWidgets.QFormLayout(box)
-        row(f, "Stagnation pressure p0", self.bind(QuantityEdit(self.draft, b + "inlet.p0", "bar",
-            minimum=0.0, tooltip="Chamber total pressure")), "bar")
+        self.inlet_kind = QtWidgets.QComboBox()
+        self.inlet_kind.addItems(["Chamber pressure", "Mass flow"])
+        self.inlet_kind.setToolTip("State the chamber pressure and the CFD finds the mass flow, or state "
+                                   "the mass flow and it finds the chamber pressure")
+        self.inlet_kind.currentIndexChanged.connect(self._inlet_changed)
+        f.addRow("Inlet", self.inlet_kind)
+        self.p0 = self.bind(QuantityEdit(self.draft, b + "inlet.p0", "bar", minimum=0.0,
+                                         tooltip="Chamber total pressure"))
+        row(f, "Stagnation pressure p0", self.p0, "bar")
+        self.mass_flow = self.bind(QuantityEdit(self.draft, b + "inlet.mass_flow", "g/s", minimum=0.0,
+                                                tooltip="Mass flow through the nozzle; the chamber pressure "
+                                                "floats to whatever passes it"))
+        row(f, "Mass flow", self.mass_flow, "g/s")
         row(f, "Stagnation temperature T0", self.bind(QuantityEdit(self.draft, b + "inlet.T0", "K",
             minimum=1.0, default=300.0, tooltip="Chamber total temperature. Regulating from a bottle "
             "cools nitrogen (Joule-Thomson); the checks estimate by how much")), "K")
@@ -282,6 +293,10 @@ class PhysicsPage(Page):
     def refresh(self):
         super().refresh()
         d = self.draft()
+        mass_flow = d.get("boundaries.inlet.type") == "mass_flow_inlet"
+        self._set(self.inlet_kind, 1 if mass_flow else 0)
+        self.p0.setEnabled(not mass_flow)
+        self.mass_flow.setEnabled(mass_flow)
         t = d.get("boundaries.exit_domain.type", "plume")
         fixed = bool(d.get("boundaries.exit_domain.fixed_pressure", False))
         self._set(self.exit_kind, 0 if t == "plume" else (2 if fixed else 1))
@@ -298,6 +313,23 @@ class PhysicsPage(Page):
         combo.blockSignals(True)
         combo.setCurrentIndex(i)
         combo.blockSignals(False)
+
+    def _inlet_changed(self, i):
+        """Switch the inlet, carrying over the flow or pressure that
+        quasi-1D theory says the other setting implies."""
+        d = self.draft()
+        old = dict(d.get("boundaries.inlet") or {})
+        pred = getattr(self.window, "assessment", None)
+        pred = pred.prediction if pred is not None else None
+        keep = {k: old[k] for k in ("T0", "turbulence_intensity", "turbulence_length_fraction") if k in old}
+        if i == 1:
+            new = {"type": "mass_flow_inlet", "mass_flow": pred.mass_flow if pred else 5e-3}
+        else:
+            p0 = pred.p0 if pred is not None and getattr(pred, "p0", None) else 20e5
+            new = {"type": "reservoir_inlet", "p0": p0}
+        d.replace("boundaries.inlet", new | keep)
+        self.refresh()
+        self.changed.emit()
 
     def _exit_changed(self, i):
         self.draft().replace("boundaries.exit_domain", [
@@ -327,7 +359,9 @@ class PhysicsPage(Page):
             f"regime: {pred.regime.replace('_', ' ')}<br>"
             f"mass flow {1e3 * pred.mass_flow:.3f} g/s{cd}<br>"
             f"thrust {pred.thrust:.4g} N, Isp {pred.isp:.1f} s<br>"
-            f"exit Mach {pred.exit_mach:.3f}, exit pressure {pred.exit_pressure / 1e5:.4g} bar")
+            f"exit Mach {pred.exit_mach:.3f}, exit pressure {pred.exit_pressure / 1e5:.4g} bar"
+            + (f"<br>chamber pressure {pred.p0 / 1e5:.4g} bar (implied by the mass flow; the CFD "
+               "measures the real one)" if pred.p0 and self.inlet_kind.currentIndex() == 1 else ""))
 
 
 # ----------------------------------------------------------------------------- mesh
@@ -780,7 +814,7 @@ class ResultsPage(Page):
             return
         label, key = self.AXIAL[self.axial_var.currentIndex()]
         inlet = r.definition.boundaries.inlet
-        norm = {"p": inlet.p0, "T": inlet.T0, "mach": 1.0}[key]
+        norm = {"p": r.p0, "T": inlet.T0, "mach": 1.0}[key]
         data = r.axial()
         self.axial_plot.setLabel("left", label)
         styles = {"quasi_1d": ("quasi-1D", pg.mkPen("#000000", width=1, style=QtCore.Qt.DashLine)),

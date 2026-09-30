@@ -198,3 +198,16 @@ def test_results_page_on_a_synthetic_run(window, tmp_path):
     page.export(tmp_path / "report", synchronous=True)
     assert (tmp_path / "report" / "report.json").exists() and (tmp_path / "report" / "report.pdf").exists()
     assert "wrote" in page.export_status.text()
+
+
+def test_switching_to_a_mass_flow_inlet_carries_the_flow_over(window):
+    page = window.physics_page
+    before = window.assessment.prediction
+    page.inlet_kind.setCurrentIndex(1)
+    assert window.draft.get("boundaries.inlet.type") == "mass_flow_inlet"
+    assert window.draft.get("boundaries.inlet.mass_flow") == pytest.approx(before.mass_flow)
+    assert window.assessment.runnable and not page.p0.isEnabled() and page.mass_flow.isEnabled()
+    assert "chamber pressure" in page.prediction.text()
+    # And back: the implied chamber pressure is the one it started from.
+    page.inlet_kind.setCurrentIndex(0)
+    assert window.draft.get("boundaries.inlet.p0") == pytest.approx(before.p0, rel=1e-6)

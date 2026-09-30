@@ -16,6 +16,7 @@ UNITS: dict[str, tuple[Callable[[float], float], Callable[[float], float]]] = {
     "mm": (lambda v: v * 1e-3, lambda v: v * 1e3),
     "bar": (lambda v: v * 1e5, lambda v: v * 1e-5),
     "K": (lambda v: v, lambda v: v),
+    "g/s": (lambda v: v * 1e-3, lambda v: v * 1e3),
     "deg": (math.radians, math.degrees),
     "": (lambda v: v, lambda v: v),
 }

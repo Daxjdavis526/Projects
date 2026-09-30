@@ -115,3 +115,18 @@ def saturation_temperature(gas: PerfectGas, p: float) -> SaturationTemperature:
     r_molar = R_UNIVERSAL / 1000.0  # J/(mol K)
     inv_T = 1.0 / T_trip - math.log(p / p_trip) * r_molar / _DH_SUBLIMATION_N2
     return SaturationTemperature(1.0 / inv_T, approximate=True)
+
+
+def saturation_temperatures(gas: PerfectGas, p) -> tuple["np.ndarray", "np.ndarray"]:
+    """:func:`saturation_temperature` over an array of pressures, from a
+    table in log p (a field has tens of thousands of cells). Returns the
+    temperatures and whether each is the sub-triple-point extrapolation."""
+    import numpy as np
+
+    p = np.maximum(np.asarray(p, dtype=float), 1e-6)
+    lo, hi = float(p.min()), float(p.max())
+    grid = np.geomspace(lo, max(hi, lo * 1.0001), 400)
+    table = [saturation_temperature(gas, float(q)) for q in grid]
+    T = np.interp(np.log(p), np.log(grid), [s.temperature for s in table])
+    p_trip = _CP.PropsSI("ptriple", _fluid(gas))
+    return T, p < p_trip

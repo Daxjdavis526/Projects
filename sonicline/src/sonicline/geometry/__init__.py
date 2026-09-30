@@ -44,6 +44,15 @@ class GeometryReport:
     warnings: list[str] = field(default_factory=list)
     axis_origin: list[float] | None = None
     axis_direction: list[float] | None = None
+    axis_extent: list[float] | None = None  # (min, max) along the axis from axis_origin
+    source: str = "step"  # "step" | "stl"
+    checks: dict = field(default_factory=dict)  # surface checks (STL)
+
+    def nozzle_frame(self):
+        """4x4 transform from the file's frame (metres) to the nozzle frame."""
+        from .frame import to_nozzle_frame
+
+        return to_nozzle_frame(self.axis_origin, self.axis_direction, self.axis_extent, self.inlet_end)
 
     def profile(self) -> Profile:
         return from_points(self.profile_points)
@@ -72,9 +81,24 @@ def analyse(path: Path, length_unit: str = "mm", inlet_end: str = "auto",
         raise GeometryError(f"unknown length unit {length_unit!r}; use one of {sorted(LENGTH_UNITS)}")
     if not Path(path).is_file():
         raise GeometryError(f"no such file: {path}")
+    if Path(path).suffix.lower() == ".stl":
+        from . import surface
+
+        return surface.analyse(Path(path), LENGTH_UNITS[length_unit], inlet_end, stations)
     data = _worker(["analyse", str(path), str(LENGTH_UNITS[length_unit]), inlet_end, str(stations)])
     data["profile_points"] = [tuple(p) for p in data["profile_points"]]
     return GeometryReport(**data)
+
+
+def tessellate(path: Path, length_unit: str, out: Path, size: float) -> Path:
+    """A STEP or STL file's surface as an ASCII STL in metres (file frame)."""
+    if Path(path).suffix.lower() == ".stl":
+        from . import surface
+
+        surface.load(Path(path), LENGTH_UNITS[length_unit]).export(str(out))
+        return Path(out)
+    _worker(["tessellate", str(path), str(LENGTH_UNITS[length_unit]), str(out), repr(size)])
+    return Path(out)
 
 
 def write_revolved_step(profile: Profile, path: Path, n_per_segment: int = 1) -> None:

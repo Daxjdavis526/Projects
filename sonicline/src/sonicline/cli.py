@@ -19,6 +19,7 @@ import argparse
 import sys
 
 from .core import model
+from .core.stagnation import nominal_p0
 from .core.theory import discharge, nozzle
 from .core.validate import Severity, has_errors, resolve_profile, validate
 
@@ -52,10 +53,11 @@ def _check(path: str) -> int:
             return 1
         profile = report.profile()
     inlet = defn.boundaries.inlet
-    if profile is not None and isinstance(inlet, model.ReservoirInlet):
+    p0 = nominal_p0(defn, profile)
+    if profile is not None and p0 is not None:
         gas = defn.gas.model()
         pa = defn.boundaries.ambient.pressure
-        perf = nozzle.analyse(gas, inlet.p0, inlet.T0, pa, profile.throat_area,
+        perf = nozzle.analyse(gas, p0, inlet.T0, pa, profile.throat_area,
                               profile.area(profile.x_exit))
         rc = profile.rc_over_rt
         cd = discharge.kliegel_levine(gas.gamma, rc) if rc and not profile.planar_width else None
@@ -264,7 +266,7 @@ def main(argv: list[str] | None = None) -> int:
     ui = sub.add_parser("ui", help="open the desktop application")
     ui.add_argument("project", nargs="?", help="a .sonicline project folder (created if missing)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11")
+    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)

@@ -218,3 +218,25 @@ def thrust_coefficient(perf: NozzlePerformance, p0: float, throat_area: float) -
 def specific_impulse(perf: NozzlePerformance) -> float:
     """Isp in seconds (standard gravity)."""
     return perf.thrust / (perf.mass_flow * G0)
+
+
+def stagnation_pressure_for(gas: PerfectGas, mass_flow: float, T0: float, pa: float,
+                            throat_area: float, exit_area: float) -> float:
+    """The reservoir pressure at which the ideal nozzle passes ``mass_flow``:
+    the inverse of :func:`analyse`'s mass flow, choked or not. Mass flow
+    rises monotonically with p0, so the root is unique."""
+    if not (mass_flow > 0.0 and T0 > 0.0):
+        raise ValueError("need mass_flow > 0 and T0 > 0")
+    g, R = gas.gamma, gas.R
+    choked = mass_flow * math.sqrt(R * T0) / (isen.gamma_function(g) * throat_area)
+    eps = max(exit_area / throat_area, 1.0)
+    if pa < critical_pressures(g, choked, eps).first:
+        return choked  # choked at the inverted pressure: the choked relation is exact
+
+    def residual(p0: float) -> float:
+        return analyse(gas, p0, T0, pa, throat_area, exit_area).mass_flow - mass_flow
+
+    hi = max(choked, pa) * 2.0
+    while residual(hi) < 0.0:
+        hi *= 2.0
+    return brentq(residual, pa * (1.0 + 1e-12), hi, xtol=1e-9 * hi, rtol=1e-12)

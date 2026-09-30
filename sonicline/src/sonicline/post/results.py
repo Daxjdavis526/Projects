@@ -23,7 +23,7 @@ FUNCTION_OBJECTS = (
     "residuals", "mdot_inlet", "mdot_throat", "mdot_exit", "mdot_outlet", "mdot_ambient",
     "mdot_lip", "momentum_inlet", "momentum_exit", "pforce_inlet", "pforce_exit",
     "area_avg_throat", "area_avg_exit", "mass_avg_inlet", "mass_avg_throat", "mass_avg_exit",
-    "wall_force",
+    "wall_force", "heat_wall",
 )
 
 
@@ -67,6 +67,7 @@ class Integrals:
     exit_area_avg: dict[str, float]
     exit_mass_avg: dict[str, float]
     inlet_mass_avg: dict[str, float]
+    wall_heat: float | None = None  # W into the gas through the nozzle wall (fixed wall temperature)
 
 
 def integrals(tables: dict, summary: CaseSummary) -> Integrals:
@@ -112,6 +113,7 @@ def integrals(tables: dict, summary: CaseSummary) -> Integrals:
         exit_mass_avg=averages("mass_avg_exit", ["weightedAverage(T)", "weightedAverage(Ma)",
                                                   "weightedAverage(U)", "weightedAverage(magSqr(U))"]),
         inlet_mass_avg=averages("mass_avg_inlet", ["weightedAverage(T)", "weightedAverage(magSqr(U))"]),
+        wall_heat=scaled("heat_wall", "areaIntegrate(wallHeatFlux)"),
     )
 
 

@@ -1,6 +1,9 @@
 """STEP round trip: a known profile written as a revolved solid, read back
 and analysed, must reproduce its own dimensions."""
 
+import math
+
+import numpy as np
 import pytest
 
 pytest.importorskip("gmsh")
@@ -77,7 +80,7 @@ def test_two_solids_are_rejected(tmp_path):
     assert not r.ok and r.volumes == 2 and "separate solids" in r.errors[0]
 
 
-def test_non_revolved_body_is_rejected(tmp_path):
+def test_non_revolved_body_gets_an_area_equivalent_profile(tmp_path):
     import gmsh
 
     path = tmp_path / "box.step"
@@ -88,4 +91,65 @@ def test_non_revolved_body_is_rejected(tmp_path):
     gmsh.write(str(path))
     gmsh.finalize()
     r = geometry.analyse(path, stations=20)
-    assert not r.ok and "not a body of revolution" in r.errors[0]
+    # A square duct: sections fill 2/pi of their circumscribed circle, and
+    # quasi-1D theory sees the radius of a circle of the same area.
+    assert r.ok and not r.axisymmetric and r.roundness_min == pytest.approx(2 / math.pi, rel=1e-3)
+    assert any("not a body of revolution" in w for w in r.warnings)
+    radii = [q[1] for q in r.profile_points]
+    assert max(radii) == pytest.approx(min(radii), rel=1e-6)
+    assert math.pi * radii[0] ** 2 == pytest.approx(4e-6, rel=1e-6)  # 2 mm x 2 mm
+
+
+@pytest.fixture(scope="module")
+def nozzle_stl(nozzle_step, tmp_path_factory):
+    pytest.importorskip("trimesh")
+    path = tmp_path_factory.mktemp("stl") / "nozzle.stl"
+    return geometry.tessellate(nozzle_step, "mm", path, 0.15e-3)
+
+
+def test_stl_reproduces_the_step_analysis(nozzle_step, nozzle_stl):
+    """The same nozzle through the STL path: dimensions within the
+    faceting error, the same inlet end, and the frame maps the inlet plane
+    to x = 0."""
+    import numpy as np
+
+    from sonicline.geometry import surface
+
+    step = geometry.analyse(nozzle_step, stations=120)
+    stl = geometry.analyse(nozzle_stl, "m", stations=120)
+    assert stl.ok and stl.source == "stl" and stl.axisymmetric, (stl.errors, stl.warnings)
+    assert stl.checks["watertight"] and stl.checks["components"] == 1
+    a, b = step.profile(), stl.profile()
+    assert b.throat_radius == pytest.approx(a.throat_radius, rel=3e-3)  # chords inside the circle
+    assert b.throat_x == pytest.approx(a.throat_x, abs=0.05e-3)
+    assert b.expansion_ratio == pytest.approx(a.expansion_ratio, rel=5e-3)
+    mesh = surface.load(nozzle_stl, 1.0)
+    T = stl.nozzle_frame()
+    x = (mesh.vertices @ T[:3, :3].T + T[:3, 3])[:, 0]
+    assert x.min() == pytest.approx(0.0, abs=1e-8) and x.max() == pytest.approx(b.x_exit, rel=1e-6)
+
+
+def test_a_punctured_stl_is_rejected(nozzle_stl, tmp_path):
+    from sonicline.geometry import surface
+
+    mesh = surface.load(nozzle_stl, 1.0)
+    mesh.update_faces(np.arange(1, len(mesh.faces)))  # drop one triangle
+    holed = tmp_path / "holed.stl"
+    mesh.export(str(holed))
+    r = geometry.analyse(holed, "m", stations=20)
+    assert not r.ok and "not watertight" in r.errors[0] and r.checks["open_edges"] == 3
+
+
+def test_surface_check_parses_self_intersection(tmp_path):
+    from sonicline.geometry import surface
+
+    class Fake:
+        def __init__(self, text):
+            self.text = text
+
+        def run(self, cmd, cwd, log):
+            assert cmd[:2] == ["surfaceCheck", "-checkSelfIntersection"]
+            log.write_text(self.text)
+
+    assert surface.self_intersection(Fake("Surface is not self-intersecting\n"), "a.stl", tmp_path)[0] is False
+    assert surface.self_intersection(Fake("Surface is self-intersecting\n"), "a.stl", tmp_path)[0] is True

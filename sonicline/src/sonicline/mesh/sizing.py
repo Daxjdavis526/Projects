@@ -15,6 +15,7 @@ import math
 
 from ..core.model import definition as d
 from ..core.profile import Profile
+from ..core.stagnation import nominal_p0
 from ..core.theory import isentropic as isen
 from .revolved import Form, PlumeRegion, Resolution, RevolvedMeshSpec
 
@@ -25,7 +26,7 @@ def throat_first_cell(defn: d.SimulationDefinition, profile: Profile) -> float:
     inlet = defn.boundaries.inlet
     g, R = gas.gamma, gas.R
     T_star = inlet.T0 / isen.T0_over_T(g, 1.0)
-    p_star = inlet.p0 / isen.p0_over_p(g, 1.0)
+    p_star = nominal_p0(defn, profile) / isen.p0_over_p(g, 1.0)
     rho = p_star / (R * T_star)
     u = math.sqrt(g * R * T_star)
     mu = gas.viscosity(T_star)

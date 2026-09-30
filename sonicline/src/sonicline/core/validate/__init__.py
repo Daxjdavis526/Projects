@@ -33,6 +33,7 @@ from ..model.definition import (
     WallProfile,
 )
 from ..profile import Profile
+from ..stagnation import nominal_p0
 from ..theory import isentropic as isen
 from ..theory import nozzle
 
@@ -99,14 +100,13 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
     # -- stagnation state -------------------------------------------------
     if isinstance(inlet, ReservoirInlet):
         p0 = inlet.p0
-    elif profile is not None:
-        # Choked-flow inversion gives the chamber pressure a mass flow needs.
-        p0 = inlet.mass_flow * math.sqrt(gas.R * T0) / (
-            isen.gamma_function(gas.gamma) * profile.throat_area
-        )
+    elif profile is not None and inlet.mass_flow > 0.0:
+        # Quasi-1D inversion gives the chamber pressure a mass flow needs.
+        p0 = nominal_p0(defn, profile)
         add(Finding(Severity.INFO, "inlet.implied_p0",
-                    f"This mass flow implies a chamber pressure of {_fmt_bar(p0)} "
-                    "if the nozzle is choked (ideal, Cd = 1)."))
+                    f"This mass flow implies a chamber pressure of {_fmt_bar(p0)} in the ideal "
+                    "nozzle (Cd = 1); the CFD finds the real one, higher by about 1/Cd, and "
+                    "reports it."))
     else:
         p0 = None
 

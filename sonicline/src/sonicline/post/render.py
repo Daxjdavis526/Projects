@@ -17,6 +17,7 @@ import numpy as np
 
 from ..core.model import definition as d
 from ..core.profile import Profile
+from ..core.stagnation import run_p0
 from ..core.theory import quasi1d
 from ..foam.case import CaseSummary
 
@@ -89,7 +90,9 @@ def axial_plot(run_dir: Path, defn: d.SimulationDefinition, profile: Profile) ->
         return None
     data = json.loads(prof_file.read_text(encoding="utf-8"))
     gas = defn.gas.model()
-    p0, T0 = defn.boundaries.inlet.p0, defn.boundaries.inlet.T0
+    metrics_file = run_dir / "metrics.json"
+    metrics = json.loads(metrics_file.read_text(encoding="utf-8")) if metrics_file.is_file() else None
+    p0, T0 = run_p0(defn, profile, metrics), defn.boundaries.inlet.T0
     pa = defn.boundaries.ambient.pressure
     xs = np.linspace(profile.x_inlet, profile.x_exit, 400)
     q = quasi1d.solve(profile, gas, p0, T0, pa, list(xs))

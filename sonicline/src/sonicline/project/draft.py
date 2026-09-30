@@ -13,6 +13,7 @@ from pathlib import Path
 
 from ..core import model
 from ..core.profile import Profile
+from ..core.stagnation import nominal_p0
 from ..core.theory import discharge, nozzle
 from ..core.validate import Finding, resolve_profile, validate
 
@@ -34,6 +35,7 @@ class Prediction:
     isp: float
     exit_mach: float
     exit_pressure: float
+    p0: float | None = None  # the chamber pressure, stated or (mass-flow inlet) implied
 
 
 @dataclass
@@ -94,16 +96,17 @@ class Draft:
         profile = resolve_profile(defn) or self.cad_profile
         a = Assessment(defn, None, profile, validate(defn, profile))
         inlet = defn.boundaries.inlet
-        if profile is not None and isinstance(inlet, model.ReservoirInlet):
+        p0 = nominal_p0(defn, profile)
+        if profile is not None and p0 is not None:
             gas = defn.gas.model()
-            perf = nozzle.analyse(gas, inlet.p0, inlet.T0, defn.boundaries.ambient.pressure,
+            perf = nozzle.analyse(gas, p0, inlet.T0, defn.boundaries.ambient.pressure,
                                   profile.throat_area, profile.area(profile.x_exit))
             rc = profile.rc_over_rt
             cd = (discharge.kliegel_levine(gas.gamma, rc)
                   if rc and profile.planar_width is None else None)
             a.prediction = Prediction(perf.regime.value, perf.mass_flow,
                                       cd * perf.mass_flow if cd else None, perf.thrust,
-                                      nozzle.specific_impulse(perf), perf.exit_mach, perf.exit_pressure)
+                                      nozzle.specific_impulse(perf), perf.exit_mach, perf.exit_pressure, p0)
         return a
 
     def save(self, path: Path) -> None:
