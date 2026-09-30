@@ -1464,15 +1464,29 @@ Findings:
     - The mesh's own throat section is within 0.1 % of the geometry's, so
       the extra mass flux is discretisation error: the throat plane already
       reads Mach 1.055, so the sonic line has moved upstream.
-    - It follows V14's trend (+0.5 % at 6 cells), made worse by the
-      boundary layer.
     - The run is marked not trustworthy, with that reason.
+    - At the coarse preset (10 cells, cfMesh, 863 k cells) Cd is 1.0029,
+      and the verdict again refuses the run.
+    - Against the structured wedge's SST result for the same nozzle
+      without the port (14.275 g/s, Cd 0.990, 8.363 N), mass flow reads
+      +2.0 % at 7 cells and +1.3 % at 10, and thrust +0.55 % at 10.
+    - Inviscid V14 at 10 cells is within 0.06 % of the wedge, so the bias
+      comes with the boundary layer on these meshes. Its cause is not
+      found. Candidates: the jump from the layer stack (half a wall cell)
+      to the bulk cells, and wall functions on polyhedral wall cells.
+      Until it is found, viscous Tier 2 results are not trustworthy at
+      these resolutions, and the verdict says so.
 45. **Long runs die with the container.** The container is reclaimed when
     the session goes idle. Twice a sea-level run was killed mid-solve
     (at iteration 200, and before its first 100). There is no restart from
     the last write yet; a run is only as durable as the process driving it.
 
 Not done in M5:
+
+- **Viscous Tier 2 is not yet accurate** (finding 44): +1.3 % mass flow at
+  the coarse preset. Inviscid Tier 2 is verified (V14). The first M6 task
+  is to find the bias: the layer-to-core transition, a y+ 1 layer stack,
+  and the standard preset.
 
 - cfMesh has no verification case of its own: V14 checks snappy
   (inviscid). The layered meshes are checked for coverage and quality only.

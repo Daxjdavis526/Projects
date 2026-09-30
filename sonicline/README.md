@@ -292,6 +292,12 @@ The house rule: say plainly where the model stops.
   - The throat of a coarse snapped mesh is a 40-sided polygon, 0.4 % short
     of the circle, and that shows in Cd.
   - The throat area Cd is judged against is the geometry's, not the mesh's.
+  - **Viscous runs on unstructured meshes are not yet accurate.** On the
+    side-port nozzle at sea level (k-ω SST, cfMesh, coarse preset, 863 k
+    cells) mass flow reads 1.3 % above the structured wedge's result for
+    the same nozzle, which puts Cd above 1. The verdict refuses such runs,
+    so the numbers are never presented as trusted. The cause is open
+    (DESIGN.md finding 44). Inviscid unstructured runs are verified (V14).
   - For a volume that is not a body of revolution, quasi-1D theory uses the
     radius of a circle of the same section area. Its "ideal" numbers are a
     reference, not a prediction.
