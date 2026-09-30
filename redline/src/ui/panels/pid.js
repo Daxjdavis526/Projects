@@ -267,6 +267,7 @@ export class PID {
     const ind = {};
     for (const e of def.physics.elements) {
       let st;
+      if (e.hidden) { ind[e.id] = { st: 'closed', open: false }; continue; }   // no HMI knows about a leak
       if (e.id === def.supplyIso) {
         const o = d.latest('IV-101-ZSO'), cl = d.latest('IV-101-ZSC');
         if (!d.online) st = c.cmd[e.id] ? 'open' : 'closed';

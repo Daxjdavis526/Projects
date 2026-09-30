@@ -13,6 +13,8 @@
 import { psi, degC, mm, cc, litre, P_STD } from '../../lib/units.js';
 import gonogo from './ts1-gonogo.js';
 import pid from './ts1-pid.js';
+import { FAULTS } from '../faults/ts1-faults.js';
+import { INSPECTIONS } from '../faults/ts1-inspections.js';
 
 const AMB = { P: P_STD, T: degC(20) };
 const g = x => AMB.P + psi(x);        // psig → Pa absolute
@@ -47,6 +49,9 @@ const physics = {
     { id: 'F-201', type: 'filter', from: 'lp', to: 'feed', CdA: 3.0e-5 },
     { id: 'VV-201', type: 'valve', from: 'feed', to: 'ambient', CdA: 5.0e-6,
       normally: 'open', delay: 0.012, stroke: 0.015 },
+    // A leak path that is normally shut (CdA 0): the SV-301 inlet fitting.
+    // Faults open it; the physics then does the rest.
+    { id: 'LK-301', type: 'orifice', from: 'feed', to: 'ambient', CdA: 0, hidden: true },
     { id: 'SV-301', type: 'solenoid', from: 'feed', to: 'chamber', CdA: 1.45e-5,
       normally: 'closed', strokeOpen: 0.0022, strokeClose: 0.0028,
       coil: { volts: 28, ohms: 24, henry: 0.12, backEmf: 0.04,
@@ -275,6 +280,8 @@ export default {
   ratings,
   gonogo,
   pid,
+  faults: FAULTS,
+  inspections: INSPECTIONS,
   /* Nominal geometry the data system and the test predictions assume. */
   nominal: { throatDia: mm(2.50), exitDia: mm(3.55), Cd: 0.97 },
   /* Which instrument indicates which P&ID line segment (for the HMI's

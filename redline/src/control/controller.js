@@ -136,6 +136,7 @@ export class Controller extends Emitter {
         return { ok: true };
       }
       case 'tech': return this._tech(a.task);
+      case 'inspection': return this._inspection(a.id);
       case 'clearCell': {
         if (this.facility.area !== 'OPEN') return { ok: true, noop: true };
         if (this.tech) return { ok: false, blocked: { msg: 'Technician task in progress.', why: 'Wait for the technician to finish and leave the cell.' } };
@@ -253,6 +254,33 @@ export class Controller extends Emitter {
   }
 
   /* ---- technician ------------------------------------------------------ */
+  /* A workbench inspection: a technician task whose result is read from the
+     hardware (or the active fault) when it finishes. */
+  _inspection(id) {
+    const S = this.s, insp = S.def.inspections?.find(i => i.id === id);
+    if (!insp) throw new Error(`unknown inspection ${id}`);
+    if (this.tech) return { ok: false, blocked: { msg: 'Technician is busy.', why: this.tech.text } };
+    const f = this.facility, net = S.model.net, Pa = S.def.physics.ambient.P;
+    const lpMax = Math.max(...['hp', 'lp', 'feed', 'chamber'].map(v => net.vol(v).P - Pa));
+    const lp = net.vol('lp').P - Pa;
+    if (insp.needs !== 'rack' && f.area !== 'OPEN')
+      return { ok: false, blocked: { msg: 'This inspection is done in the cell.', why: 'Open the cell first — which means safing anything hazardous.' } };
+    if (insp.needs === 'vented' && lpMax > psi(5))
+      return { ok: false, blocked: { msg: `Technician: "Local gauge shows ${(lpMax / psi(1)).toFixed(0)} psig. I'm not opening a pressurised system."`, why: 'Vent every section downstream of IV-101 first.' } };
+    if (insp.needs === 'lowP' && !(lp > psi(20) && lp < psi(55)))
+      return { ok: false, blocked: { msg: 'This check needs the low-pressure side held at 20–50 psig.', why: 'Snoop tests and reference-gauge comparisons need pressure — but no more than people may be near.' } };
+    this.tech = { task: 'inspection', until: this.t + insp.dur, text: insp.label, done: () => {
+      const over = S.faults?.inspectOverride(id);
+      const res = over || insp.run(S);
+      const rec = { id, label: insp.label, group: insp.group, t: this.t, lines: res.lines || [], text: res.text || '' };
+      S.inspections.push(rec);
+      this.log('TECH', `Inspection complete: ${insp.label} — results in the workbench`, { inspection: id });
+      S.emit('inspection', rec);
+    } };
+    this.log('TECH', `${insp.label} (≈${insp.dur} s)`);
+    return { ok: true };
+  }
+
   _tech(task) {
     if (this.tech) return { ok: false, blocked: { msg: 'Technician is busy.', why: this.tech.text } };
     const tasks = {

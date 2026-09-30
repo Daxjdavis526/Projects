@@ -28,12 +28,15 @@ import { EventLog } from '../control/eventlog.js';
 import { ProcedureRunner } from '../control/procedure.js';
 import { runPoll, concludePoll } from '../control/gonogo.js';
 import { computeMetrics } from '../analysis/metrics.js';
+import { FaultEngine } from '../faults/engine.js';
+import { scoreDiagnosis, abortAssessment } from '../faults/diagnosis.js';
+import { FAILURE_MODES, RIGHT_ACTION } from '../content/faults/ts1-faults.js';
 
 const MODELS = { coldgas: ColdGasModel };
 const CHUNK = 0.005;
 
 export class Session extends Emitter {
-  constructor({ def, scenario = null, mode = 'guided', seed = (Date.now() & 0xffffff), runPrefix = null, firstRun = 1, clockStart = 8.5 * 3600 }) {
+  constructor({ def, scenario = null, mode = 'guided', seed = (Date.now() & 0xffffff), runPrefix = null, firstRun = 1, clockStart = 8.5 * 3600, fault = null, faultChanceNone }) {
     super();
     this.def = def;
     this.scenario = scenario;
@@ -67,6 +70,13 @@ export class Session extends Emitter {
     this._procAcc = 0;
     this._audio = null;
     this.request = scenario?.request ? scenario.request(def) : null;
+    this.inspections = [];
+    this.faults = new FaultEngine(this, def.faults || [], {
+      enabled: mode === 'fault' || !!scenario?.faults,
+      chanceNone: faultChanceNone ?? scenario?.faultChanceNone ?? 0.2,
+      pool: scenario?.faultPool || null,
+      forced: fault,
+    });
     this.controller.on('abort', () => this.later(5, () => { if (this.daq.recording) this.stopRecording('auto-stop after abort'); }));
     if (scenario?.setup) scenario.setup(this);
     if (scenario?.procedure) {
@@ -104,6 +114,7 @@ export class Session extends Emitter {
       this.model.advance(d, t => this.daq.tick(t));
       this.t = this.model.t;
       this.controller.tick();
+      this.faults.tick();
       this.alarms.evaluate(this.alarmCtx());
       if (this.timers.length) {
         const due = this.timers.filter(x => x.at <= this.t);
@@ -171,6 +182,9 @@ export class Session extends Emitter {
       events: this.log,
       has: pred => this.log.has(pred),
       inspected: this.inspected,
+      inspections: this.inspections,
+      diagnosis: this.faults.diagnosis,
+      faultSession: this.faults.enabled,
       flags: this.flags,
       runs: this.runs,
       lastRun: this.runs[this.runs.length - 1] || null,
@@ -219,6 +233,18 @@ export class Session extends Emitter {
     if (this.flags.has(name)) return;
     this.flags.add(name);
     this.emit('flag', name);
+  }
+
+  /* The operator's diagnosis. Scores it, keeps it, and unlocks the reveal. */
+  submitDiagnosis(sub) {
+    if (this.faults.diagnosis) return this.faults.diagnosis;
+    const f = this.faults.active;
+    const result = scoreDiagnosis(sub, f, { modes: FAILURE_MODES, rightAction: RIGHT_ACTION });
+    const rec = { ...sub, t: this.t, result, abort: abortAssessment(this, f) };
+    this.faults.diagnosis = rec;
+    this.log.add(this.t, 'OPR', `Diagnosis submitted: ${sub.component} — ${FAILURE_MODES.find(m => m[0] === sub.mode)?.[1] || sub.mode}. Score ${result.score}/100.`);
+    this.emit('diagnosis', rec);
+    return rec;
   }
 
   startPoll() { return runPoll(this); }

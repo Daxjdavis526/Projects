@@ -213,7 +213,7 @@ export class App {
       // sound follows the physical flow (the cell microphone)
       const net = S.model.net;
       let vent = 0;
-      for (const id of ['VV-101', 'VV-201', 'RV-201']) vent += Math.max(0, net.el(id).mdot);
+      for (const id of ['VV-101', 'VV-201', 'RV-201', 'LK-301']) vent += Math.max(0, net.el(id)?.mdot || 0);
       this.audio.flow({ thrust: S.model.nozzleEl.F, vent });
     }
     // analysis works on recorded runs, session or not

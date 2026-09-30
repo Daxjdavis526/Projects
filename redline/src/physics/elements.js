@@ -120,7 +120,9 @@ export class Valve extends Element {
   }
   CdAbound() { return Math.max(this.CdA(), this.pos > 0 || this.u !== this.target ? this.CdAmax * 0.25 : 0); }
   /* Limit-switch truth (the sensor layer decides whether the switch works). */
-  get atOpen() { return this.u >= 0.98; }
+  /* zsoAt: where the open limit switch trips. A fault hook — a misadjusted
+     switch reports OPEN on a valve that is not. */
+  get atOpen() { return this.u >= (this.zsoAt ?? 0.98); }
   get atClosed() { return this.u <= 0.02; }
 }
 
