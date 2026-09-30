@@ -77,7 +77,7 @@ jobs:
 
   openfoam:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
@@ -97,5 +97,5 @@ jobs:
       - name: Geometry (STEP round trip through the CAD kernel)
         run: python -m pytest sonicline/tests/test_geometry.py -v
 
-      - name: OpenFOAM (V1, V4a on standard wedge meshes; the viscous-work extension build)
+      - name: OpenFOAM (V1, V4a on standard wedge meshes; the viscous-work extension build; Tier 2 meshing)
         run: python -m pytest sonicline/tests -v -m openfoam

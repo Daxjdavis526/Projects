@@ -24,7 +24,9 @@ def test_round_trip_recovers_the_profile(nozzle_step):
     assert r.ok and r.kind == "fluid_volume" and r.volumes == 1
     p = r.profile()
     exact = conical(1e-3, 2.88)
-    assert p.throat_radius == pytest.approx(1e-3, rel=1e-5)
+    # OpenCASCADE integrates the section area to ~3e-5 (1.7e-5 in radius
+    # with the axis along +x): far inside any Cd tolerance.
+    assert p.throat_radius == pytest.approx(1e-3, rel=5e-5)
     assert p.expansion_ratio == pytest.approx(2.88, rel=1e-4)
     assert p.contraction_ratio == pytest.approx(9.0, rel=1e-4)
     assert p.x_exit - p.x_inlet == pytest.approx(exact.x_exit - exact.x_inlet, rel=1e-9)
@@ -153,3 +155,20 @@ def test_surface_check_parses_self_intersection(tmp_path):
 
     assert surface.self_intersection(Fake("Surface is not self-intersecting\n"), "a.stl", tmp_path)[0] is False
     assert surface.self_intersection(Fake("Surface is self-intersecting\n"), "a.stl", tmp_path)[0] is True
+
+
+def test_side_port_volume_takes_its_axis_from_the_end_faces():
+    """A pressure-tap port on the chamber skews the inertia tensor; the
+    coaxial inlet and exit faces still give the axis, and the area profile
+    matches the plain nozzle's away from the port."""
+    import os
+
+    examples = os.path.join(os.path.dirname(__file__), "..", "examples")
+    plain = geometry.analyse(os.path.join(examples, "nozzle-2mm.step"))
+    port = geometry.analyse(os.path.join(examples, "nozzle-side-port.step"))
+    assert port.ok and not port.axisymmetric and port.roundness_min < 0.6
+    assert any("end faces" in w for w in port.warnings)
+    a, b = plain.profile(), port.profile()
+    assert b.throat_radius == pytest.approx(a.throat_radius, rel=1e-6)
+    assert b.expansion_ratio == pytest.approx(a.expansion_ratio, rel=1e-6)
+    assert b.x_exit == pytest.approx(a.x_exit, rel=1e-9)

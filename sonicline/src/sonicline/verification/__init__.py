@@ -631,7 +631,9 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10", "V11")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14")
+V14_MASS_TOLERANCE = 5e-3
+V14_THRUST_TOLERANCE = 5e-3
 
 def run_case(case: Case, quality: str, out: Path, processors: int = 1, form: str | None = None,
              on_event=None, solver: str = "auto") -> tuple[CaseResult, dict | None]:
@@ -680,12 +682,12 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
     them asks for it."""
     out.mkdir(parents=True, exist_ok=True)
     results: list[CaseResult] = []
-    runs: dict[tuple[str, str, str], tuple[CaseResult, dict | None]] = {}
+    runs: dict[tuple[str, str, str, str], tuple[CaseResult, dict | None]] = {}
 
-    def once(case: str, form: str = "wedge", solver: str = "auto"):
-        key = (case, form, solver)
+    def once(case: str, form: str = "wedge", solver: str = "auto", at: str | None = None):
+        key = (case, form, solver, at or quality)
         if key not in runs:
-            runs[key] = run_case(CASES[case], quality, out, processors, form, on_event, solver)
+            runs[key] = run_case(CASES[case], at or quality, out, processors, form, on_event, solver)
             results.append(runs[key][0])
         return runs[key]
 
@@ -702,6 +704,16 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
             # reference-based check can see in the other.
             results.append(_pair("V7", "rhoPimpleFoam vs rhoCentralFoam on the V1 nozzle", once("V1"),
                                  once("V1", solver="rhoCentralFoam"), "central vs PIMPLE:", 1e-3, 2e-3))
+        elif name == "V14":
+            # The unstructured (Tier 2) mesher against the structured wedge on
+            # the same nozzle: snapped, faceted walls and polyhedral cells
+            # must still give the wedge's mass flow and thrust.
+            # Always on the coarse unstructured preset (10 cells across the
+            # throat radius, 174k cells): the standard one is three times
+            # the cells of a full 3D run for a nightly check.
+            results.append(_pair("V14", "Unstructured (snappyHexMesh, coarse) vs structured wedge on the V1 nozzle",
+                                 once("V1"), once("V1", "unstructured", at="coarse"), "unstructured vs wedge:",
+                                 V14_MASS_TOLERANCE, V14_THRUST_TOLERANCE))
         elif name == "V11":
             for npr in sorted(MASON_B1_UPPER):
                 results.append(run_validation_case(npr, quality, out, processors, on_event))

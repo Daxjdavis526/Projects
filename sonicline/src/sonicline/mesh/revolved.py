@@ -49,6 +49,7 @@ class Form(enum.Enum):
     WEDGE = "wedge"
     O_GRID = "o_grid"
     PLANAR = "planar"
+    UNSTRUCTURED = "unstructured"  # Tier 2 (sonicline.mesh.unstructured)
 
 
 # Depth of a planar mesh's single cell layer, in throat half-heights. The

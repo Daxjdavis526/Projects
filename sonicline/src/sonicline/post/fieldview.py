@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 
 from ..core import model
-from ..core.profile import Profile
+from ..core.profile import Profile, from_points
 from ..core.stagnation import run_p0
 from ..core.theory import quasi1d
 from ..core.validate import resolve_profile
@@ -92,8 +92,11 @@ class RunResults:
     @property
     def profile(self) -> Profile:
         prof = resolve_profile(self.definition)
-        if prof is None:  # CAD geometry: the recovered profile is not stored
-            raise ResultsError("the wall profile of a CAD run is not stored with it")
+        if prof is None:  # CAD geometry: the profile recovered from the file, stored with the run
+            stored = self._json("profile.json").get("points")
+            if not stored:
+                raise ResultsError("the wall profile of this CAD run is not stored with it")
+            prof = from_points([tuple(p) for p in stored])
         return prof
 
     @property

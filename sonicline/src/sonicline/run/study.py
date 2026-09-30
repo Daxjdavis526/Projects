@@ -85,7 +85,7 @@ def run(defn: d.SimulationDefinition, out: Path, ratio: float = DEFAULT_RATIO,
                 for r in results) and all(cells)
     study = StudyResult([str(r.run_dir) for r in results], cells, levels, trust, valid)
     if valid:
-        dims = 3 if defn.mesh.form is d.MeshForm.O_GRID_3D else 2
+        dims = 2 if defn.mesh.form in (d.MeshForm.WEDGE, d.MeshForm.PLANAR) else 3
         # The domain is the same at every level, so its size cancels in the ratios.
         hs = tuple(gci.representative_spacing(n, 1.0, dims) for n in cells)
         for name, path in QUANTITIES:

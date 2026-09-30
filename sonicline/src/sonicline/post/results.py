@@ -70,6 +70,17 @@ class Integrals:
     wall_heat: float | None = None  # W into the gas through the nozzle wall (fixed wall temperature)
 
 
+def _pressure_force(scaled, name: str) -> float | None:
+    """Axial pressure force on a plane: sum(p |S|) on a structured mesh's
+    flat planes, |sum(p S_x)| (the normal integral of p x) on an
+    unstructured mesh's cut zones."""
+    v = scaled(name, "areaIntegrate(p)")
+    if v is None:
+        v = scaled(name, "areaNormalIntegrate(pAxial)")
+        v = None if v is None else abs(v)
+    return v
+
+
 def integrals(tables: dict, summary: CaseSummary) -> Integrals:
     k = summary.sector_factor
 
@@ -101,9 +112,9 @@ def integrals(tables: dict, summary: CaseSummary) -> Integrals:
         mdot_outlet=scaled("mdot_outlet", "sum(phi)"),
         mdot_entrained=entrained,
         exit_momentum=float(scaled("momentum_exit", "weightedSum(U)")[0]),
-        exit_pressure_force=scaled("pforce_exit", "areaIntegrate(p)"),
+        exit_pressure_force=_pressure_force(scaled, "pforce_exit"),
         inlet_momentum=float(scaled("momentum_inlet", "weightedSum(U)")[0]),
-        inlet_pressure_force=scaled("pforce_inlet", "areaIntegrate(p)"),
+        inlet_pressure_force=_pressure_force(scaled, "pforce_inlet"),
         wall_force_x=k * float(_final(wf, "total_x")) if wf is not None else math.nan,
         wall_force_viscous_x=k * float(_final(wf, "viscous_x")) if wf is not None else math.nan,
         throat_area_avg=averages("area_avg_throat", ["areaAverage(p)", "areaAverage(T)", "areaAverage(Ma)"]),

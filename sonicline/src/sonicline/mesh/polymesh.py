@@ -47,7 +47,7 @@ class Patch:
 @dataclass
 class PolyMesh:
     points: np.ndarray  # (N, 3)
-    faces: np.ndarray  # (F, 4); triangles padded with -1 in the last column
+    faces: np.ndarray  # (F, K) vertex labels, K >= 4; shorter faces padded with -1
     owner: np.ndarray  # (F,)
     neighbour: np.ndarray  # (F_internal,)
     patches: list[Patch]
@@ -58,7 +58,14 @@ class PolyMesh:
 
     @property
     def n_cells(self) -> int:
-        return int(self.owner.max()) + 1 if len(self.owner) else 0
+        if not len(self.owner):
+            return 0
+        # A cell may appear only as a neighbour (OpenFOAM's owner is the
+        # lower-numbered cell of an internal face, not necessarily of all).
+        top = int(self.owner.max())
+        if len(self.neighbour):
+            top = max(top, int(self.neighbour.max()))
+        return top + 1
 
     @property
     def n_internal_faces(self) -> int:
@@ -74,15 +81,30 @@ class MeshAssemblyError(RuntimeError):
 
 
 def _face_geometry(points: np.ndarray, faces: np.ndarray):
-    """Centroid and area vector of quads/triangles (-1 padded)."""
-    tri = faces[:, 3] < 0
-    f = np.where(faces < 0, faces[:, :1], faces)  # pad triangles with vertex 0
-    p0, p1, p2, p3 = (points[f[:, k]] for k in range(4))
-    normal = 0.5 * np.cross(p2 - p0, p3 - p1)
-    normal[tri] = 0.5 * np.cross(p1[tri] - p0[tri], p2[tri] - p0[tri])
-    centre = 0.25 * (p0 + p1 + p2 + p3)
-    centre[tri] = (p0[tri] + p1[tri] + p2[tri]) / 3.0
+    """Vertex centroid and area vector of polygons (-1 padded). The area
+    vector is Newell's sum, exact for any planar polygon (for a quad it is
+    half the cross product of its diagonals)."""
+    valid = faces >= 0
+    n = valid.sum(axis=1)
+    f = np.where(valid, faces, faces[:, :1])
+    p = points[f]  # (F, K, 3)
+    centre = (p * valid[..., None]).sum(axis=1) / n[:, None]
+    # Each vertex paired with the next valid one, the last with the first.
+    k = np.arange(faces.shape[1])
+    nxt = np.where(k[None, :] + 1 < n[:, None], k[None, :] + 1, 0)
+    q = np.take_along_axis(p, nxt[..., None], axis=1)
+    normal = 0.5 * (np.cross(p, q) * valid[..., None]).sum(axis=1)
     return centre, normal
+
+
+def reverse(faces: np.ndarray) -> np.ndarray:
+    """Each (-1 padded) polygon with its vertex order reversed."""
+    out = faces.copy()
+    n = (faces >= 0).sum(axis=1)
+    for size in np.unique(n):
+        rows = n == size
+        out[rows, :size] = faces[rows, :size][:, ::-1]
+    return out
 
 
 def assemble(
@@ -166,9 +188,7 @@ def assemble(
         f = faces[rows].copy()
         centre, normal = _face_geometry(points, f)
         flip = np.einsum("ij,ij->i", normal, centre - centres[own]) < 0.0
-        tri = f[:, 3] < 0
-        f[flip & ~tri] = f[flip & ~tri][:, ::-1]
-        f[flip & tri, :3] = f[flip & tri, :3][:, ::-1]
+        f[flip] = reverse(f[flip])
         return f
 
     # Internal faces in upper-triangular order.

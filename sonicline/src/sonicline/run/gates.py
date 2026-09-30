@@ -47,6 +47,12 @@ def evaluate(check: MeshCheck, viscous: bool) -> GateResult:
         g.errors.append(f"the mesh has {check.regions} disconnected regions")
     for message in check.messages:
         low = message.lower()
+        if "face tets" in low:
+            # The face-tetrahedron decomposition serves particle tracking and
+            # point interpolation, not the finite-volume solve; thin layer
+            # cells with slightly warped faces trip it (cfMesh, snappy).
+            g.warnings.append(f"checkMesh: {message}")
+            continue
         for marker, text in _FATAL_MARKERS:
             if marker in low:
                 g.errors.append(f"{text}: {message}")
@@ -59,6 +65,11 @@ def evaluate(check: MeshCheck, viscous: bool) -> GateResult:
         g.errors.append(f"maximum skewness {check.max_skewness:.1f} exceeds {SKEW_FAIL:g}")
     elif check.max_skewness > SKEW_WARN:
         g.warnings.append(f"maximum skewness {check.max_skewness:.1f}")
+    for message in check.messages:
+        if "concave" in message.lower():
+            # Snapped (Tier 2) meshes can carry them; the solver copes with a
+            # few, and a run that does not is caught by its own failure.
+            g.warnings.append(f"checkMesh: {message}")
     if not viscous and check.max_aspect_ratio > 1000:
         g.warnings.append(f"aspect ratio {check.max_aspect_ratio:.0f} in an inviscid mesh")
     g.ok = not g.errors

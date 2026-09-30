@@ -139,9 +139,19 @@ def _measure(mesh, report: GeometryReport, inlet_end: str, stations: int) -> Non
     axis, symmetric = frame.principal_axis(evals, evecs)
     if not symmetric:
         report.warnings.append("the inertia tensor is not axisymmetric; checking sections")
+    span = float(np.linalg.norm(mesh.extents))
+    # Coaxial planar end faces define the axis better than inertia does
+    # once anything (a side port, a boss) breaks the symmetry.
+    found = frame.end_face_axis(_planar_patches(mesh, span), np.asarray(mesh.vertices), span * 100.0)
+    if found is not None:
+        end_axis, on_axis = found
+        if abs(float(end_axis @ axis)) < 1.0 - 1e-4:
+            report.warnings.append("the axis through the end faces differs from the inertia axis "
+                                   "(the body is not symmetric); the end faces define it")
+        axis = end_axis
+        com = on_axis + float((com - on_axis) @ axis) * axis
     s_all = (mesh.vertices - com) @ axis
     s_min, s_max = float(s_all.min()), float(s_all.max())
-    span = float(np.linalg.norm(mesh.extents))
     report.axis_origin = com.tolist()
     report.axis_direction = axis.tolist()
     report.axis_extent = [s_min, s_max]
@@ -233,3 +243,27 @@ def _measure(mesh, report: GeometryReport, inlet_end: str, stations: int) -> Non
     report.throat_x = float(s_t - s_min if end == "min" else s_max - s_t)
     report.throat_radius = float(r_t)
     report.profile_points = frame.nozzle_profile(rows, s_min, s_max, end)
+
+
+def _planar_patches(mesh, span: float) -> list[tuple[np.ndarray, np.ndarray, float]]:
+    """Connected sets of coplanar triangles (a flat face of the original
+    body), as (unit normal, area centroid, area), for those of a
+    non-negligible size."""
+    import trimesh
+
+    normals = mesh.face_normals
+    offsets = np.einsum("ij,ij->i", normals, mesh.triangles_center)
+    adjacency = mesh.face_adjacency
+    same = ((np.abs(np.einsum("ij,ij->i", normals[adjacency[:, 0]], normals[adjacency[:, 1]]) - 1.0) < 1e-8)
+            & (np.abs(offsets[adjacency[:, 0]] - offsets[adjacency[:, 1]]) < 1e-7 * span))
+    groups = trimesh.graph.connected_components(adjacency[same], nodes=np.arange(len(mesh.faces)))
+    total = float(mesh.area)
+    out = []
+    for g in groups:
+        g = np.asarray(g)
+        area = float(mesh.area_faces[g].sum())
+        if area < 1e-3 * total:
+            continue
+        centre = (mesh.triangles_center[g] * mesh.area_faces[g, None]).sum(axis=0) / area
+        out.append((normals[g[0]], centre, area))
+    return out

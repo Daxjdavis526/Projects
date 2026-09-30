@@ -132,12 +132,31 @@ def analyse(path: str, scale: float, inlet_end: str, n_stations: int) -> dict:
     others = [evals[j] for j in range(3) if j != i_axis]
     if abs(others[0] - others[1]) > 1e-3 * max(abs(others[0]), 1e-300):
         report["warnings"].append("the inertia tensor is not axisymmetric; checking sections")
-    report["axis_origin"] = com.tolist()
-    report["axis_direction"] = axis.tolist()
-
     pts = np.array([gmsh.model.getValue(0, t, []) for _, t in gmsh.model.getEntities(0)])
     bbox = gmsh.model.getBoundingBox(3, tag)
     span = np.linalg.norm(np.array(bbox[3:]) - np.array(bbox[:3]))
+
+    # Coaxial planar end faces define the axis better than inertia does
+    # once anything (a side port, a boss) breaks the symmetry.
+    planes = []
+    for _, face in gmsh.model.getEntities(2):
+        if gmsh.model.getType(2, face) == "Plane":
+            lo, hi = gmsh.model.getParametrizationBounds(2, face)
+            n = np.array(gmsh.model.getNormal(face, [0.5 * (lo[0] + hi[0]), 0.5 * (lo[1] + hi[1])]))
+            planes.append((n / np.linalg.norm(n), np.array(occ.getCenterOfMass(2, face)),
+                           occ.getMass(2, face)))
+    if len(pts):
+        found = frame.end_face_axis(planes, pts, span)
+        if found is not None:
+            end_axis, on_axis = found
+            if abs(float(end_axis @ axis)) < 1.0 - 1e-6:
+                report["warnings"].append("the axis through the end faces differs from the inertia "
+                                          "axis (the body is not symmetric); the end faces define it")
+            axis, perp = _axis_frame(end_axis)
+            # The origin moves onto that axis, level with the centroid.
+            com = on_axis + float((com - on_axis) @ axis) * axis
+    report["axis_origin"] = com.tolist()
+    report["axis_direction"] = axis.tolist()
     if len(pts):
         s_all = (pts - com) @ axis
         s_min, s_max = float(s_all.min()), float(s_all.max())

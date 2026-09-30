@@ -267,20 +267,50 @@ The house rule: say plainly where the model stops.
 
 ## Geometry
 
-STEP fluid volumes are read through gmsh's OpenCASCADE kernel, in a separate
-process so a malformed file cannot crash the application. The analyser:
+**STEP** fluid volumes are read through gmsh's OpenCASCADE kernel, in a
+separate process so a malformed file cannot crash the application.
+**STL** surfaces are read with trimesh and checked before anything is
+measured on them: watertight, manifold, consistently wound, one body, no
+duplicate or zero-area triangles (slivers are counted). OpenFOAM's
+`surfaceCheck` then looks for self-intersection when the run starts, since
+trimesh cannot. An STL file has no units: `--unit` (default mm) says what
+they are.
 
-- checks for exactly one closed solid of positive volume
-- finds the axis from the inertia tensor
-- slices the solid to recover the wall profile and confirm it is a body of
+The analyser, for either format:
+
+- finds the axis: the line through two coaxial planar end faces when there
+  are some (a side port or a boss skews the inertia tensor, and the end
+  faces still say where the nozzle points), otherwise the distinct
+  principal axis of inertia
+- slices the volume to recover the wall profile and whether it is a body of
   revolution
-- refines the throat
+- refines the throat by golden section on the section area
 - picks the inlet end from the steeper wall
 
 The geometry is pinned by the SHA-256 of the file, so a changed file cannot
 silently change a saved simulation.
 
-Two other ways to give the wall, besides a STEP file or the parametric
+**Volumes that are not bodies of revolution** (a side port, a non-round
+section) get the radius of a circle of the same section area as their
+profile. That is what quasi-1D theory, the initial field and the checks use,
+and it is an approximation wherever the section is far from round. They are
+meshed by the **unstructured (Tier 2) mesher**:
+
+- **snappyHexMesh** carves a Cartesian grid aligned with the nozzle axis
+  (grid planes exactly at the throat and exit), refined to 10, 14 or 20
+  cells across the throat radius (coarse, standard, fine).
+- Wall layers are accepted only if they cover 95 % of the wall and every
+  face near the throat. snappy's layer addition collapses to about one
+  layer on these nozzles whatever its settings. That is why DESIGN.md
+  expected it to fail here, and a viscous run usually falls to the next
+  mesher.
+- **gmsh** is the fallback: prism layers extruded from the whole boundary
+  (the first cell set by the y+ target, the stack kept to 0.3 of the wall
+  triangle size) and tetrahedra filling the core.
+- checkMesh gates the result like any other mesh.
+- V14 checks it against the structured wedge on V1.
+
+Two other ways to give the wall, besides a CAD file or the parametric
 conical nozzle:
 
 - **`wall_profile`:** a table of (x, r) points, for a nozzle defined by a
@@ -292,8 +322,7 @@ conical nozzle:
 
 A **solid thruster body** (a block with a bore through it) is recognised and
 rejected with advice: export the internal gas volume. Automatic extraction
-is planned as a previewed, user-confirmed step. **Non-revolved** geometry
-needs the general 3D mesher (M5).
+is planned as a previewed, user-confirmed step (M6).
 
 ## Layout
 

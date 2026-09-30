@@ -99,6 +99,24 @@ def _git_commit() -> str | None:
         return None
 
 
+def _nozzle_surface(defn: d.SimulationDefinition, profile, cad: Path | None, report, work: Path,
+                    size: float):
+    """The nozzle's surface in the nozzle frame (metres), for the
+    unstructured mesher: a CAD file's own, or the analytic profile revolved
+    exactly (through STEP) and triangulated."""
+    from .. import geometry
+    from ..geometry import surface as stl_surface
+    from ..mesh import unstructured as tier2
+
+    work.mkdir(parents=True, exist_ok=True)
+    if cad is None:
+        step = work / "nozzle.step"
+        geometry.write_revolved_step(profile, step)
+        return stl_surface.load(geometry.tessellate(step, "mm", work / "nozzle-source.stl", size), 1.0)
+    src = geometry.tessellate(cad, defn.geometry.length_unit, work / "nozzle-source.stl", size)
+    return tier2.to_frame(stl_surface.load(src, 1.0), report.nozzle_frame())
+
+
 def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         on_event: Callable[[Event], None] | None = None, poll_seconds: float = 2.0,
         render: bool = True, base_dir: Path | None = None) -> RunResult:
@@ -159,17 +177,21 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                 emit(Event("geometry", f"ERROR: {e}"))
             manifest["geometry_error"] = report.errors
             return finish("rejected", Trust.NOT_TRUSTWORTHY.value)
-        if not report.axisymmetric:
-            msg = ("the geometry is not a body of revolution; it needs the unstructured (Tier 2) "
-                   "mesher, which this build does not have yet")
+        if not report.axisymmetric and defn.mesh.form is not d.MeshForm.UNSTRUCTURED:
+            msg = ("the geometry is not a body of revolution: mesh it with the unstructured "
+                   "(Tier 2) mesher (mesh.form = unstructured)")
             emit(Event("geometry", f"ERROR: {msg}"))
             manifest["geometry_error"] = [msg]
             return finish("rejected", Trust.NOT_TRUSTWORTHY.value)
         profile = report.profile()
+        # The recovered profile goes with the run: the results views need it.
+        _write_json(run_dir / "profile.json", {"points": [list(p) for p in report.profile_points],
+                                               "area_equivalent": not report.axisymmetric})
         manifest["geometry"] = {"file": cad.name, "sha256": defn.geometry.sha256, "kind": report.kind,
                                 "inlet_end": report.inlet_end,
                                 "inlet_confidence": report.inlet_confidence}
-        emit(Event("geometry", f"{cad.name}: revolved fluid volume, throat diameter "
+        kind = "revolved fluid volume" if report.axisymmetric else "fluid volume (not revolved)"
+        emit(Event("geometry", f"{cad.name}: {kind}, throat diameter "
                                f"{2e3 * profile.throat_radius:.3f} mm, expansion ratio "
                                f"{profile.expansion_ratio:.3f} (inlet at the {report.inlet_end} end, "
                                f"{report.inlet_confidence} confidence)"))
@@ -186,12 +208,20 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     runner = runner or default_runner()
     manifest["runner"] = runner.describe()
     emit(Event("setup", f"OpenFOAM: {manifest['runner'].get('openfoam', '?')}"))
+    if isinstance(defn.geometry, d.CadFile) and cad.suffix.lower() == ".stl":
+        from ..geometry import surface as stl_surface
+
+        crossing, _ = stl_surface.self_intersection(runner, cad, run_dir / "surfaceCheck")
+        manifest["geometry"]["self_intersecting"] = crossing
+        if crossing:
+            emit(Event("geometry", "ERROR: the surface intersects itself (OpenFOAM surfaceCheck)"))
+            manifest["geometry_error"] = ["self-intersecting surface"]
+            return finish("rejected", Trust.NOT_TRUSTWORTHY.value)
 
     # --- mesh and case -----------------------------------------------------------
     case = run_dir / "case"
     if case.exists():
         shutil.rmtree(case)
-    spec = sizing.spec_for(defn, profile)
     extension = None
     if foam_case.needs_viscous_work_extension(defn, profile):
         from ..foam import extensions
@@ -204,16 +234,40 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
             return finish("failed", Trust.NOT_TRUSTWORTHY.value)
         manifest["extension"] = extension
     t0 = time.time()
-    mesh, meta = revolved.build(profile, spec)
+    if defn.mesh.form is d.MeshForm.UNSTRUCTURED:
+        from ..mesh import unstructured as tier2
+
+        viscous = not isinstance(defn.flow.turbulence, d.Inviscid)
+        first_cell = sizing.throat_first_cell(defn, profile) / defn.mesh.refinement if viscous else None
+        spec2 = tier2.spec_for(defn, profile, first_cell)
+        try:
+            nozzle_surface = _nozzle_surface(defn, profile, cad if isinstance(defn.geometry, d.CadFile) else None,
+                                             report if isinstance(defn.geometry, d.CadFile) else None,
+                                             run_dir / "mesh", spec2.wall_cell)
+            domain = tier2.domain_surface(nozzle_surface, profile, defn)
+            mesh, meta, t2 = tier2.build(runner, run_dir / "mesh", domain, profile, spec2,
+                                         on_note=lambda text: emit(Event("mesh", text)))
+        except tier2.MeshingError as e:
+            emit(Event("mesh", f"ERROR: {e}"))
+            manifest["mesh"] = {"generator": "sonicline.mesh.unstructured", "error": str(e)}
+            return finish("mesh_failed", Trust.NOT_TRUSTWORTHY.value)
+        for note in t2.notes:
+            emit(Event("mesh", note))
+        mesher_info = {"generator": f"sonicline.mesh.unstructured ({t2.mesher})", "tier2": t2.to_json(),
+                       "first_cell_at_throat": spec2.first_layer, "wall_cell": spec2.wall_cell}
+        form_name, two_d = "unstructured", False
+    else:
+        spec = sizing.spec_for(defn, profile)
+        mesh, meta = revolved.build(profile, spec)
+        mesher_info = {"generator": "sonicline.mesh.revolved", "first_cell_at_throat": spec.wall_first_cell}
+        form_name, two_d = spec.form.value, spec.form in (revolved.Form.WEDGE, revolved.Form.PLANAR)
     summary = foam_case.build_case(case, defn, profile, mesh, meta, extension)
     (run_dir / "mesh_meta.json").write_text(json.dumps(meta.to_json()) + "\n", encoding="utf-8")
-    manifest["mesh"] = {"generator": "sonicline.mesh.revolved", "form": spec.form.value,
-                        "quality": defn.mesh.quality.value, "cells": mesh.n_cells,
-                        "first_cell_at_throat": spec.wall_first_cell,
-                        "build_seconds": round(time.time() - t0, 2)}
+    manifest["mesh"] = {**mesher_info, "form": form_name, "quality": defn.mesh.quality.value,
+                        "cells": mesh.n_cells, "build_seconds": round(time.time() - t0, 2)}
     manifest["solver"] = {"application": summary.solver, "turbulence": summary.turbulence,
                           "steady": isinstance(defn.flow.time, d.Steady)}
-    emit(Event("mesh", f"{mesh.n_cells} cells ({spec.form.value}, {defn.mesh.quality.value})"))
+    emit(Event("mesh", f"{mesh.n_cells} cells ({form_name}, {defn.mesh.quality.value})"))
 
     runner.run(["checkMesh", "-allGeometry", "-allTopology", "-writeChecks", "json"], case,
                case / "log.checkMesh")
@@ -233,7 +287,7 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
 
     # --- solve -------------------------------------------------------------------
     nproc = max(1, defn.numerics.processors)
-    wedge = spec.form in (revolved.Form.WEDGE, revolved.Form.PLANAR)  # two-dimensional: no Uz
+    wedge = two_d  # two-dimensional: no Uz
     if nproc > 1:
         runner.run(["decomposePar", "-force"], case, case / "log.decomposePar")
 

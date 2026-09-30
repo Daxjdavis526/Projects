@@ -138,8 +138,8 @@ class GeometryPage(Page):
         self.changed.emit()
 
     def _import(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Import a STEP fluid volume", "",
-                                                        "STEP files (*.step *.stp)")
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Import a fluid volume", "",
+                                                        "STEP or STL (*.step *.stp *.stl)")
         if path:
             self.import_file(Path(path))
         else:
@@ -185,6 +185,15 @@ class GeometryPage(Page):
                          f"Rc/Rt {rc:.2f}" if rc else "")
             lines.append(f"<b>suggested inlet: the {report.inlet_end} end "
                          f"({report.inlet_confidence} confidence)</b> - confirm below")
+            if not report.axisymmetric:
+                # Only the unstructured mesher can mesh it.
+                self.draft().set("mesh.form", "unstructured")
+                self.draft().set("mesh.planar_width", None)
+                lines.append("not a body of revolution: the mesh is unstructured (Tier 2), and "
+                             "quasi-1D theory uses the area-equivalent radius")
+            if report.source == "stl":
+                lines.append(f"STL surface: {report.checks.get('triangles')} triangles, watertight, "
+                             "one body (self-intersection is checked when the run starts)")
             self.window.draft.cad_profile = p
         else:
             self.window.draft.cad_profile = None
@@ -374,9 +383,18 @@ class MeshPage(Page):
         box = QtWidgets.QGroupBox("Mesh")
         f = QtWidgets.QFormLayout(box)
         self.form = self.bind(ChoiceBox(self.draft, "mesh.form",
-            [("Axisymmetric wedge", "wedge"), ("3D O-grid", "o_grid_3d"), ("Planar (2D nozzle)", "planar")],
-            default="o_grid_3d", tooltip="The wedge is exact for axisymmetric flow and runs in minutes"))
+            [("Axisymmetric wedge", "wedge"), ("3D O-grid", "o_grid_3d"), ("Planar (2D nozzle)", "planar"),
+             ("Unstructured 3D (any volume)", "unstructured")],
+            default="o_grid_3d", tooltip="The wedge is exact for axisymmetric flow and runs in minutes; "
+            "unstructured meshes any fluid volume with snappyHexMesh (gmsh as the fallback)"))
         f.addRow("Form", self.form)
+        self.mesher = self.bind(ChoiceBox(self.draft, "mesh.mesher",
+            [("Automatic (snappyHexMesh / cfMesh / gmsh)", "auto"), ("snappyHexMesh only", "snappy"),
+             ("cfMesh only", "cfmesh"), ("gmsh only", "gmsh")], default="auto",
+            tooltip="Automatic tries snappyHexMesh first for inviscid runs and cfMesh first for viscous "
+            "ones (its wall layers cover the wall), then the others; a mesh whose layers miss the "
+            "wall is rejected"))
+        row(f, "Unstructured mesher", self.mesher)
         self.width = self.bind(QuantityEdit(self.draft, "mesh.planar_width", "mm", minimum=0.0,
                                             tooltip="Planar nozzles: the width between the flat sidewalls"))
         row(f, "Planar width", self.width, "mm")
@@ -400,6 +418,7 @@ class MeshPage(Page):
     def refresh(self):
         super().refresh()
         self.width.setEnabled(self.draft().get("mesh.form") == "planar")
+        self.mesher.setEnabled(self.draft().get("mesh.form") == "unstructured")
 
     def _form_changed(self):
         d = self.draft()
@@ -419,6 +438,10 @@ class MeshPage(Page):
             self.stats.setText("The definition is incomplete; see the checks.")
             return
         defn, profile = a.definition, a.profile
+        if defn.mesh.form.value == "unstructured":
+            self.stats.setText("The unstructured mesh is built by snappyHexMesh (OpenFOAM) when the run "
+                               "starts; its wall-layer coverage and checkMesh gate are reported then.")
+            return
 
         def build():
             mesh, meta = revolved.build(profile, sizing.spec_for(defn, profile))

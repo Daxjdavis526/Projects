@@ -300,6 +300,10 @@ class MeshForm(enum.Enum):
     WEDGE = "wedge"  # axisymmetric, one cell thick: verification and previews
     O_GRID_3D = "o_grid_3d"  # full 3D structured O-grid
     PLANAR = "planar"  # two-dimensional (rectangular) nozzle, half-channel, one cell deep
+    UNSTRUCTURED = "unstructured"  # Tier 2: snappyHexMesh (gmsh fallback), any fluid volume
+
+
+MESHERS = ("auto", "snappy", "cfmesh", "gmsh")
 
 
 class MeshQuality(enum.Enum):
@@ -320,8 +324,13 @@ class MeshSpec:
     # Planar nozzles: the width between the flat sidewalls (which the
     # two-dimensional model does not resolve).
     planar_width: float = _q(Dimension.LENGTH, 0.0)
+    # Tier 2 only: "auto" tries snappyHexMesh (inviscid) or cfMesh (viscous)
+    # first, then the other, then gmsh.
+    mesher: str = "auto"
 
     def __post_init__(self) -> None:
+        if self.mesher not in MESHERS:
+            raise ValueError(f"unknown mesher {self.mesher!r}; use one of {', '.join(MESHERS)}")
         if not 0.25 <= self.refinement <= 4.0:
             raise ValueError("mesh refinement must lie between 0.25 and 4")
         if (self.form is MeshForm.PLANAR) != (self.planar_width > 0.0):

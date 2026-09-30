@@ -61,3 +61,82 @@ def test_a_running_solve_can_be_cancelled(tmp_path):
     assert manifest["status"] == "cancelled"
     stages = [s["stage"] for s in manifest["stages"]]
     assert "mesh" in stages and "solve" in stages and stages[-1] == "done"
+
+
+def _side_port_domain(exit_domain, turbulence=None):
+    """The side-port example (not a body of revolution) in the nozzle frame."""
+    pytest.importorskip("gmsh")
+    pytest.importorskip("manifold3d")
+    import os
+    import tempfile
+    from pathlib import Path
+
+    from sonicline import geometry
+    from sonicline.core import model as m
+    from sonicline.geometry import surface
+    from sonicline.mesh import unstructured as U
+
+    step = Path(os.path.dirname(__file__)) / ".." / "examples" / "nozzle-side-port.step"
+    report = geometry.analyse(step)
+    profile = report.profile()
+    stl = geometry.tessellate(step, "mm", Path(tempfile.mkdtemp()) / "s.stl", 0.15e-3)
+    nozzle = U.to_frame(surface.load(stl, 1.0), report.nozzle_frame())
+    defn = m.SimulationDefinition(
+        name="t", geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=2.88),
+        boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=20e5), exit_domain=exit_domain,
+                                ambient=m.Ambient(pressure=0.0 if isinstance(exit_domain, m.TruncatedAtExit)
+                                                  else 101325.0)),
+        flow=m.Flow(turbulence=turbulence or m.Inviscid()),
+        mesh=m.MeshSpec(form=m.MeshForm.UNSTRUCTURED, quality=m.MeshQuality.COARSE,
+                        first_cell_yplus=1.0 if turbulence is None else 30.0))
+    return U.domain_surface(nozzle, profile, defn), profile, defn, stl
+
+
+@pytest.mark.parametrize("mesher", ["snappy", "cfmesh", "gmsh"])
+def test_unstructured_mesh_of_a_side_port_nozzle(mesher, tmp_path):
+    """Tier 2 on a volume Tier 1 cannot mesh: a plume for snappy (inviscid)
+    and cfMesh (SST with wall functions: its layers must cover the wall),
+    the truncated domain for gmsh. All pass checkMesh's gate and carry a
+    throat zone."""
+
+    from sonicline.core import model as m
+    from sonicline.foam import case as foam_case
+    from sonicline.foam import parse
+    from sonicline.mesh import unstructured as U
+    from sonicline.run import gates
+
+    from sonicline.mesh.sizing import throat_first_cell
+
+    exit_domain = m.Plume(length=6.0, radius=3.0) if mesher != "gmsh" else m.TruncatedAtExit()
+    surface, profile, defn, _ = _side_port_domain(exit_domain, m.KOmegaSST() if mesher == "cfmesh" else None)
+    viscous = mesher == "cfmesh"
+    spec = U.spec_for(defn, profile, throat_first_cell(defn, profile) if viscous else None)
+    spec.mesher = mesher
+    runner = LocalRunner()
+    mesh, meta, report = U.build(runner, tmp_path / "mesh", surface, profile, spec)
+    assert report.accepted and report.mesher == {"snappy": "snappyHexMesh", "cfmesh": "cfMesh", "gmsh": "gmsh"}[mesher]
+    if viscous:
+        assert report.layer_coverage >= 0.95 and report.throat_layer_coverage == 1.0
+    zones = {"throat"} | ({"exit"} if mesher != "gmsh" else set())
+    assert set(mesh.face_zones) == zones
+    s = foam_case.build_case(tmp_path / "case", defn, profile, mesh, meta, "libtest.so" if viscous else None)
+    # Cd is judged against the geometry's throat; the mesh's own cut through
+    # the throat meets the wall within a cell of it (wider there).
+    assert s.throat_area == profile.throat_area
+    zone = foam_case._zone_area(mesh, ("faceZone", "throat"))
+    assert 0.99 * profile.throat_area < zone < 1.03 * profile.throat_area
+    runner.run(["checkMesh", "-allGeometry", "-allTopology", "-writeChecks", "json"], s.path,
+               s.path / "log.checkMesh")
+    check = parse.read_checkmesh(s.path, (s.path / "log.checkMesh").read_text())
+    assert gates.evaluate(check, viscous=viscous).ok and check.regions == 1
+
+
+def test_surface_check_on_a_clean_stl():
+    from sonicline.geometry import surface as stl_surface
+    from sonicline.core import model as m
+    import tempfile
+    from pathlib import Path
+
+    _, _, _, stl = _side_port_domain(m.TruncatedAtExit())
+    crossing, log = stl_surface.self_intersection(LocalRunner(), stl, Path(tempfile.mkdtemp()))
+    assert crossing is False, log[-500:]

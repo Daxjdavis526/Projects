@@ -1295,3 +1295,141 @@ Findings:
     image. The pipeline writes its manifest before rendering, so a finished
     run survives a crash in its image step.
 
+
+## 14. M5 record: broader geometry and boundary conditions
+
+Delivered:
+
+- **Mass-flow inlet.** `flowRateInletVelocity` carries the flow (per wedge
+  or half-channel, divided by the sector factor), the inlet pressure floats
+  (zero gradient), and the total temperature is held.
+  - The solver starts from the ideal quasi-1D chamber pressure for that
+    flow: `nozzle.stagnation_pressure_for`, choked or not.
+  - The CFD's own inlet total pressure becomes p0 in the metrics, and Cd
+    and the ideal reference are judged at it.
+  - **V12** gives V1's nozzle V1's mass flow. The CFD finds 9.994 bar
+    against 10 bar (−0.06 %; tolerance 0.2 %, V1's Cd tolerance carried
+    over, since p0 scales with 1/Cd).
+  - The UI switches between chamber pressure and mass flow, carrying the
+    implied value across.
+- **Prescribed wall temperature.** A `wallHeatFlux` function object
+  integrates the heat into the gas, and the first law is checked with it:
+  mdot cp (T0,exit − T0,inlet) = Q.
+  - **V13** runs V1 laminar with a 450 K wall. The gas gains 0.96 % in
+    total temperature, and the balance closes to 4×10⁻⁵.
+  - Stagnation-temperature and recovery-factor checks now apply only to
+    adiabatic walls.
+- **Condensation, checked live.** After the run, every cell's temperature
+  is compared with nitrogen's saturation temperature at its own pressure
+  (CoolProp above the triple point, Clausius–Clapeyron below it, tabulated
+  in log p). The nozzle and the plume are checked separately. A
+  supersaturated region is a verdict warning that names how many cells, by
+  how much and where. The pre-flight exit-plane estimate stays.
+- **STL input.** trimesh checks:
+  - watertight;
+  - manifold;
+  - winding;
+  - one body;
+  - duplicate, zero-area and sliver triangles.
+
+  An inside-out file is flipped with a warning. OpenFOAM's
+  `surfaceCheck -checkSelfIntersection` runs when the run starts, and a
+  self-intersecting surface is rejected. The analysis then matches the STEP
+  analyser: the example nozzle's STL agrees with its STEP to 0.02 % in
+  throat radius and 0.2 % in area ratio.
+- **General (non-revolved) fluid volumes.** STEP or STL volumes that are
+  not bodies of revolution are analysed, not rejected. Their profile is the
+  area-equivalent radius, and they are meshed by Tier 2.
+  `examples/nozzle-side-port.step` (made by `make_side_port.py`) is the
+  2 mm example nozzle with a closed pressure-tap port on its chamber.
+- **Tier 2 meshing** (`sonicline.mesh.unstructured`, `"form":
+  "unstructured"`, `"mesher": "auto" | "snappy" | "gmsh"`):
+  - The surface is moved into the canonical nozzle frame and split into
+    patches by position and normal (inlet, wall, outlet; lip, ambient and
+    far outlet when a plume cylinder is fused on with manifold3d).
+  - The snappyHexMesh background grid has planes exactly at the throat and
+    exit.
+  - The throat and exit face zones are cut in Python: internal faces
+    between cells on either side of the plane, oriented along +x.
+  - The layer-coverage gate is at least 95 % of wall faces with a layer,
+    and all faces within two throat radii of the throat.
+  - The gmsh fallback builds prism layers and a tetrahedral core, through
+    MSH 2.2 and `gmshToFoam`.
+  - The polyMesh reader and writer now handle polygons of any size.
+  - Cell centres are volume centroids, from face centroids by triangle fan.
+- **V14** compares the unstructured mesher with the structured wedge on the
+  V1 nozzle.
+
+Findings:
+
+34. **The inertia axis is wrong as soon as symmetry breaks.** A 1.2 mm
+    side port on the example nozzle's chamber tilted the principal axes
+    enough to read a 47 µm "throat". The axis now comes from two coaxial
+    planar end faces at the body's extremes when there are any, and from
+    inertia otherwise. With it the side-port nozzle reads the plain
+    nozzle's throat and area ratio to 10⁻⁶.
+35. **A tessellated body's inertia axis is good to about 10⁻⁵ rad**, not
+    the 10⁻⁷ of an exact solid. End-face detection with 10⁻⁶ tolerances
+    missed an STL's end disks: 3 mm × 10⁻⁵ is 3×10⁻⁸ m, above the old
+    positional tolerance. Those disks decide the inlet end, so the missed
+    detection reversed the STL nozzle.
+36. **ESI's wall heat flux is right in the internal-energy form.**
+    `wallHeatFlux` integrates alphaEff ∂e/∂n. alphaEff carries Cp/Cv
+    (heThermo), so that is κ ∂T/∂n, and rhoPimpleFoam's energy equation
+    uses the same product. V13's closure confirms it.
+37. **Snapped cells do not survive the structured meshes' start.** On the
+    first iteration p fell to its floor in wall cells of the supersonic
+    cone. They sit at the four azimuths where the Cartesian grid meets the
+    wall tangentially and snapping leaves thin cells (determinant ~0.02).
+    Upwinding did not help. maxCo 0.3 survived and 0.5 did not, so
+    unstructured meshes run at 0.25.
+    A level change right at the snapped wall also left 705 concave cells;
+    the whole nozzle is now refined to the wall level.
+38. **Six cells across the throat radius is not enough in 3D.**
+    - At 6 cells (44 k cells) the mass flow read +0.45 % against the wedge.
+    - At 10 cells (174 k) it read −0.14 %, with thrust −0.18 % against the
+      1D reference and Cd 0.08 % below Kliegel–Levine.
+
+    The presets are now 10, 14 and 20 cells per throat radius. V14 runs the
+    coarse one: the standard one is 480 k cells, too many for a nightly
+    check.
+39. **A cut through cells is not a plane.**
+    - The throat zone of a tetrahedral mesh meets the wall up to a cell away
+      from the throat, where the nozzle is wider: its projected area read
+      1.8 % above the throat's. Cd on unstructured meshes is therefore
+      measured against the geometry's throat. The mesh's faceting (a
+      40-sided throat on the coarse snapped mesh is 0.4 % small) then shows
+      in Cd, where it belongs.
+    - The pressure force on such a zone is the normal integral of p x̂
+      (`exprField`, `areaNormalIntegrate`), not ∫p|dS|, which over-counts
+      a jagged surface.
+    - Mass flow through any closed cut is exact, since it is the solver's
+      own face fluxes.
+40. **snappyHexMesh cannot layer these nozzles.** Whatever the settings
+    (layer count, feature angle, medial-axis ratio, relaxed tetrahedron
+    quality), it averaged about one layer. On the example nozzle with wall
+    functions, 47 % of the wall and 34 % of the throat faces carried one.
+    The gate rejects such a mesh. Too thick a stack is part of it (23
+    layers at 1.2 growth stack three wall cells deep), but not all.
+41. **gmsh prism layers work if the stack stays thin.** Extruding the
+    whole boundary inwards, the tetrahedral core failed with "a segment
+    and a facet intersect" once the stack reached the wall triangle size.
+    Extrusions from neighbouring patches cross at the sharp inlet and exit
+    rims. The stack is kept to 0.3 of the triangle size: 10 layers for a
+    wall-function first cell of 1.6 µm, and up to 40 for a wall-resolved
+    one.
+42. **Two latent mesh-reader bugs.**
+    - The cell count was taken from the owner list alone; OpenFOAM's last
+      cell can appear only as a neighbour.
+    - Vertex-averaged face centres put a cube with one hanging node 1.2 %
+      off centre; area-weighted centroids do not.
+
+Not done in M5:
+
+- cfMesh (`cartesianMesh`) was not evaluated against snappy.
+- The Tier 2 comparison runs on the coarse preset only. The standard
+  preset's 480 k-cell V1 has not been run.
+- OCP's `BRepCheck_Analyzer` checks for STEP were not needed and not added.
+- Grid-convergence studies (`sonicline study`) run on unstructured meshes,
+  but snapped and tetrahedral meshes are not a systematically refined
+  family, so their GCI is indicative only.

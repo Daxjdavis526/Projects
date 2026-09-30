@@ -162,12 +162,18 @@ def _import(cad: str, unit: str, p0: str, out: str | None) -> int:
                      "length_unit": unit, "inlet_end": report.inlet_end},
         "boundaries": {"inlet": {"type": "reservoir_inlet", "p0": p0, "T0": "300 K"}},
         # Axisymmetric flow in a revolved nozzle: the wedge is exact and runs in
-        # minutes. Set "o_grid_3d" for a full 3D run.
-        "mesh": {"form": "wedge", "quality": "standard"},
+        # minutes. Set "o_grid_3d" for a full 3D run. Anything else needs the
+        # unstructured mesher, with wall functions: its tetrahedral fallback
+        # has no wall layers.
+        "mesh": ({"form": "wedge", "quality": "standard"} if report.axisymmetric else
+                 {"form": "unstructured", "quality": "standard", "first_cell_yplus": 30.0}),
     }
+    if not report.axisymmetric:
+        print("  not a body of revolution: the unstructured (Tier 2) mesher, SST with wall functions")
     target = Path(out) if out else path.with_suffix(".json")
     target.write_text(json.dumps(defn, indent=2) + "\n", encoding="utf-8")
-    print(f"\ndefinition written to {target} (sea level, plume region, k-omega SST, wedge mesh)")
+    form = "wedge mesh" if report.axisymmetric else "unstructured mesh"
+    print(f"\ndefinition written to {target} (sea level, plume region, k-omega SST, {form})")
     return 0
 
 
@@ -249,9 +255,9 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--no-images", action="store_true", help="skip rendered images")
     run.add_argument("--events", choices=["text", "json"], default="text",
                      help="json: one JSON object per line, for the desktop UI")
-    imp = sub.add_parser("import", help="analyse a STEP fluid volume and write a starter definition")
+    imp = sub.add_parser("import", help="analyse a STEP or STL fluid volume and write a starter definition")
     imp.add_argument("cad")
-    imp.add_argument("--unit", default="mm", help="length unit for unitless files (STEP carries its own)")
+    imp.add_argument("--unit", default="mm", help="length unit of an STL file (STEP carries its own)")
     imp.add_argument("--p0", default="20 bar", help="chamber (stagnation) pressure")
     imp.add_argument("--out", help="definition file to write (default <cad>.json)")
     stu = sub.add_parser("study", help="grid-convergence study of a definition (three meshes)")
@@ -266,7 +272,7 @@ def main(argv: list[str] | None = None) -> int:
     ui = sub.add_parser("ui", help="open the desktop application")
     ui.add_argument("project", nargs="?", help="a .sonicline project folder (created if missing)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13")
+    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13,V14")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)

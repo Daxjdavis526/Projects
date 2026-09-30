@@ -85,3 +85,36 @@ def to_nozzle_frame(origin, direction, extent, inlet_end: str) -> np.ndarray:
 
 def equivalent_radius(area: float) -> float:
     return math.sqrt(max(area, 0.0) / math.pi)
+
+
+def end_face_axis(planes: list[tuple[np.ndarray, np.ndarray, float]], points: np.ndarray,
+                  span: float) -> tuple[np.ndarray, np.ndarray] | None:
+    """The thruster axis from its end faces: two parallel planar faces at
+    the two extremes of the body along their common normal, the line
+    through their centroids along that normal. It is what defines a
+    nozzle's axis even when a side port or a boss skews the inertia
+    tensor. ``planes`` holds (normal, centroid, area) per planar face.
+    Returns (unit axis, a point on it) for the widest-apart pair, or None."""
+    tol = 1e-6 * span
+    best = None
+    for i in range(len(planes)):
+        ni, ci, _ = planes[i]
+        for j in range(i + 1, len(planes)):
+            nj, cj, _ = planes[j]
+            if abs(abs(float(ni @ nj)) - 1.0) > 1e-6:
+                continue
+            d = cj - ci
+            length = float(np.linalg.norm(d))
+            if length < tol:
+                continue
+            u = d / length
+            if abs(abs(float(u @ ni)) - 1.0) > 1e-6:
+                continue  # offset sideways: not coaxial end faces
+            proj = points @ u
+            if abs(float(ci @ u) - proj.min()) > tol or abs(float(cj @ u) - proj.max()) > tol:
+                continue
+            if best is None or length > best[0]:
+                best = (length, u, ci)
+    if best is None:
+        return None
+    return best[1], best[2]

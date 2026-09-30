@@ -125,18 +125,25 @@ def _region(meta: MeshMeta, mesh: PolyMesh, which: str) -> tuple[str, str]:
 
 
 def _zone_area(mesh: PolyMesh, region: tuple[str, str]) -> float:
+    """Axial projection of a zone or patch: the signed sum over its
+    (consistently oriented) faces, which is the enclosed cross-section even
+    for the jagged cut through a tetrahedral mesh."""
     kind, name = region
-    faces = mesh.face_zones[name][0] if kind == "faceZone" else mesh.patch_faces(name)
+    if kind == "faceZone":
+        faces, flip = mesh.face_zones[name]
+    else:
+        faces = mesh.patch_faces(name)
+        flip = np.zeros(len(faces), dtype=bool)
     pts = mesh.points
     f = mesh.faces[faces]
     total = 0.0
-    for row in f:
+    for row, flipped in zip(f, flip):
         v = pts[row[row >= 0]]
         n = np.zeros(3)
         for i in range(len(v)):
             n += np.cross(v[i], v[(i + 1) % len(v)])
-        total += 0.5 * abs(n[0])
-    return total
+        total += -0.5 * n[0] if flipped else 0.5 * n[0]
+    return abs(total)
 
 
 def build_case(
@@ -168,8 +175,22 @@ def build_case(
     centres = mesh.cell_centres
     xs_unique = np.unique(np.round(centres[:, 0], 12))
     xs_nozzle = [x for x in xs_unique if x <= profile.x_exit]
+    # A structured mesh has a few hundred stations, solved exactly; every
+    # cell of an unstructured mesh has its own x, so theory is solved on
+    # 2000 stations there and interpolated.
+    if len(xs_nozzle) > 2000:
+        xs_nozzle = list(np.linspace(max(min(xs_nozzle), profile.x_inlet), profile.x_exit, 2000))
     q1d = quasi1d.solve(profile, gas, p0, T0, pa, xs_nozzle)
     table = {round(s.x, 12): s for s in q1d.stations}
+    q_x = np.array([s.x for s in q1d.stations])
+    q_p, q_T, q_u = (np.array([getattr(s, k) for s in q1d.stations]) for k in ("pressure", "temperature", "velocity"))
+
+    def station(x):
+        s = table.get(x)
+        if s is not None:
+            return s.pressure, s.temperature, s.velocity
+        return float(np.interp(x, q_x, q_p)), float(np.interp(x, q_x, q_T)), float(np.interp(x, q_x, q_u))
+
     exit_state = q1d.stations[-1]
     r_cell = np.hypot(centres[:, 1], centres[:, 2])
     p_init = np.empty(len(centres))
@@ -177,8 +198,7 @@ def build_case(
     U_init = np.zeros((len(centres), 3))
     for c, (x, r) in enumerate(zip(np.round(centres[:, 0], 12), r_cell)):
         if x <= profile.x_exit:
-            s = table[x]
-            p_init[c], T_init[c], U_init[c, 0] = s.pressure, s.temperature, s.velocity
+            p_init[c], T_init[c], U_init[c, 0] = station(x)
         elif r <= profile.exit_radius:
             # Jet core, carried into the plume. An overexpanded core starts at
             # ambient pressure: carried at its exit pressure (0.28 atm for
@@ -235,7 +255,13 @@ def build_case(
         turbulence=type(turb).TAG, fields=tuple(fields), sector_factor=sector,
         exit_region=exit_region, throat_region=throat_region,
         exit_area=_zone_area(mesh, exit_region) * sector,
-        throat_area=_zone_area(mesh, throat_region) * sector,
+        # The throat Cd is measured against: an unstructured mesh's throat
+        # zone is a cut through its cells that meets the wall up to a cell
+        # away from the throat, where the nozzle is wider (1.8 % too large
+        # on a coarse tetrahedral mesh), so the geometry's own throat is
+        # used. Faceting of the mesh wall then shows in Cd, as it should.
+        throat_area=(profile.throat_area if meta.form is Form.UNSTRUCTURED
+                     else _zone_area(mesh, throat_region) * sector),
         inlet_area=_zone_area(mesh, ("patch", "inlet")) * sector,
         initial=q1d,
         p_min_limit=_p_min(p0) if solver == PIMPLE_SOLVER else None,
@@ -432,6 +458,7 @@ def _surface(name: str, region: tuple[str, str], operation: str, fields: list[st
 
 def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> dict:
     patches = meta.patches
+    unstructured = meta.form is Form.UNSTRUCTURED
     fos: dict = {
         "residuals": {"type": "solverInfo", "libs": ["utilityFunctionObjects"],
                       "fields": ["p", "U", energy_field(defn)] + (["k", "omega"] if ras else []),
@@ -442,6 +469,10 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
         "magSqrU": {"type": "magSqr", "libs": ["fieldFunctionObjects"], "field": "U",
                     "executeControl": "timeStep", "writeControl": "none"},
     }
+    if unstructured:
+        fos["pAxial"] = {"type": "exprField", "libs": ["fieldFunctionObjects"], "field": "pAxial",
+                         "expression": '"vector(p, 0, 0)"', "dimensions": Raw("[1 -1 -2 0 0 0 0]"),
+                         "executeControl": "timeStep", "writeControl": "none"}
     regions = {"inlet": ("patch", "inlet"), "throat": throat_region, "exit": exit_region}
     for name in ("outlet", "ambient", "lip"):
         if name in patches:
@@ -454,7 +485,12 @@ def function_objects(defn, meta, viscous, ras, exit_region, throat_region) -> di
         # The inlet and exit planes are planar with normals along x, so the
         # area integral of p is exactly the axial pressure force.
         # (areaNormalIntegrate is for vector fields and returns 0 for p.)
-        fos[f"pforce_{name}"] = _surface(name, reg, "areaIntegrate", ["p"])
+        # An unstructured mesh's exit zone is a cut through its cells, not a
+        # plane: there the axial force is the normal integral of p x.
+        if unstructured:
+            fos[f"pforce_{name}"] = _surface(name, reg, "areaNormalIntegrate", ["pAxial"])
+        else:
+            fos[f"pforce_{name}"] = _surface(name, reg, "areaIntegrate", ["p"])
     for name in ("throat", "exit"):
         reg = regions[name]
         fos[f"area_avg_{name}"] = _surface(name, reg, "areaAverage", ["p", "T", "Ma"])
@@ -557,14 +593,19 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
     if solver == CENTRAL_SOLVER:
         _write_central_numerics(case, ras, steady)
     else:
-        _write_pimple_numerics(case, ras, steady, p0, energy_field(defn))
+        # Snapped cells beside a curved wall (thin, determinant ~0.02) do
+        # not survive the quasi-1D start at the structured meshes' Courant
+        # number: p fell to its floor on the first iteration at 0.5 and not at
+        # 0.3 (DESIGN.md section 14).
+        max_co = 0.25 if meta.form is Form.UNSTRUCTURED else 0.5
+        _write_pimple_numerics(case, ras, steady, p0, energy_field(defn), max_co)
     write_dict(case / "system" / "decomposeParDict", "decomposeParDict", {
         "numberOfSubdomains": max(1, defn.numerics.processors),
         "method": "scotch",
     }, location="system")
 
 
-def _write_pimple_numerics(case, ras, steady, p0, he="e"):
+def _write_pimple_numerics(case, ras, steady, p0, he="e", max_co=0.5):
     turb_div = ({"div(phi,k)": Raw("Gauss linearUpwind grad(k)"),
                  "div(phi,omega)": Raw("Gauss linearUpwind grad(omega)")} if ras else {})
     write_dict(case / "system" / "fvSchemes", "fvSchemes", {
@@ -597,7 +638,7 @@ def _write_pimple_numerics(case, ras, steady, p0, he="e"):
     pimple = {"nOuterCorrectors": 1, "nCorrectors": 2, "nNonOrthogonalCorrectors": 0,
               "transonic": "yes", "pMin": p_min, "pMax": 2.0 * p0}
     if steady:
-        pimple.update({"maxCo": 0.5, "rDeltaTSmoothingCoeff": 0.1, "rDeltaTDampingCoeff": 1,
+        pimple.update({"maxCo": max_co, "rDeltaTSmoothingCoeff": 0.1, "rDeltaTDampingCoeff": 1,
                        "maxDeltaT": 1})
     else:
         solvers['"(p|pFinal)"']["relTol"] = 0
