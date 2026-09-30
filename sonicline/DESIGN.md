@@ -1343,7 +1343,7 @@ Delivered:
   `examples/nozzle-side-port.step` (made by `make_side_port.py`) is the
   2 mm example nozzle with a closed pressure-tap port on its chamber.
 - **Tier 2 meshing** (`sonicline.mesh.unstructured`, `"form":
-  "unstructured"`, `"mesher": "auto" | "snappy" | "gmsh"`):
+  "unstructured"`, `"mesher": "auto" | "snappy" | "cfmesh" | "gmsh"`):
   - The surface is moved into the canonical nozzle frame and split into
     patches by position and normal (inlet, wall, outlet; lip, ambient and
     far outlet when a plume cylinder is fused on with manifold3d).
@@ -1351,10 +1351,19 @@ Delivered:
     exit.
   - The throat and exit face zones are cut in Python: internal faces
     between cells on either side of the plane, oriented along +x.
-  - The layer-coverage gate is at least 95 % of wall faces with a layer,
-    and all faces within two throat radii of the throat.
-  - The gmsh fallback builds prism layers and a tetrahedral core, through
-    MSH 2.2 and `gmshToFoam`.
+  - Three meshers, all external processes:
+    - snappyHexMesh, the first choice for inviscid runs;
+    - cfMesh (`cartesianMesh`), the first choice for viscous runs;
+    - gmsh, the last resort: prism layers on the nozzle's closed shell and
+      a tetrahedral core, the plume as a second volume through the shared
+      exit disk, via MSH 2.2 and `gmshToFoam`.
+
+    A rejected mesh passes the run to the next mesher, with the reason
+    recorded.
+  - Layer coverage is measured on the mesh, whichever mesher made it: a
+    wall face is covered when its cell is no taller than 1.5 × the target
+    first cell. The gate needs 95 % of the wall and every face within two
+    throat radii of the throat.
   - The polyMesh reader and writer now handle polygons of any size.
   - Cell centres are volume centroids, from face centroids by triangle fan.
 - **V14** compares the unstructured mesher with the structured wedge on the
@@ -1405,20 +1414,40 @@ Findings:
       a jagged surface.
     - Mass flow through any closed cut is exact, since it is the solver's
       own face fluxes.
-40. **snappyHexMesh cannot layer these nozzles.** Whatever the settings
-    (layer count, feature angle, medial-axis ratio, relaxed tetrahedron
-    quality), it averaged about one layer. On the example nozzle with wall
-    functions, 47 % of the wall and 34 % of the throat faces carried one.
-    The gate rejects such a mesh. Too thick a stack is part of it (23
-    layers at 1.2 growth stack three wall cells deep), but not all.
-41. **gmsh prism layers work if the stack stays thin.** Extruding the
-    whole boundary inwards, the tetrahedral core failed with "a segment
-    and a facet intersect" once the stack reached the wall triangle size.
-    Extrusions from neighbouring patches cross at the sharp inlet and exit
-    rims. The stack is kept to 0.3 of the triangle size: 10 layers for a
-    wall-function first cell of 1.6 µm, and up to 40 for a wall-resolved
-    one.
-42. **Two latent mesh-reader bugs.**
+40. **snappyHexMesh cannot layer these nozzles; cfMesh can.**
+    - snappy averaged about one layer whatever the settings (layer count,
+      feature angle, medial-axis ratio, relaxed tetrahedron quality). On the
+      example nozzle with wall functions, 47 % of the wall and 34 % of the
+      throat faces carried one. That is the collapse §3.5 anticipated, and
+      the gate rejects such a mesh.
+    - cfMesh inserts its layers by splitting the boundary cells, and put the
+      1.6 µm wall-function first cell on every wall face, throat included.
+      On the side-port nozzle with a sea-level plume: 863 k cells, median
+      first cell 1.51 µm, non-orthogonality 45°.
+    - cfMesh must be asked to fill half a wall cell: asked to fill a whole
+      one, it made the first layer half the target.
+    - cfMesh writes the neighbour list padded to every face with −1; the
+      reader cuts it at the first patch.
+41. **gmsh prism layers work only while the stack stays thin, and not
+    against a plume.**
+    - Extruding the whole boundary inwards, the tetrahedral core failed
+      ("a segment and a facet intersect") once the stack approached the
+      wall triangle size: extrusions from neighbouring patches cross at the
+      sharp inlet and exit rims. The stack is kept to 0.3 of the triangle
+      size.
+    - With a plume, extruding over the plume's large boundaries gave 3.9 M
+      cells and degenerate faces. As two volumes sharing the exit disk it
+      gave 2 M cells, and 90° non-orthogonality where the thin exit-disk
+      prisms meet the plume tetrahedra. The gate rejects that mesh, so for
+      sea-level runs gmsh is a fallback in name only; cfMesh carries them.
+    - For a truncated (vacuum) domain it gives a gated mesh: 455 k cells
+      with 10 prism layers on the side-port nozzle.
+42. **checkMesh's "face tets" error is not a negative volume.** The
+    face-tetrahedron decomposition serves particle tracking and point
+    interpolation, not the finite-volume solve. Thin layer cells with
+    slightly warped faces trip it (17,790 faces on a cfMesh layer mesh), so
+    it is a gate warning.
+43. **Two latent mesh-reader bugs.**
     - The cell count was taken from the owner list alone; OpenFOAM's last
       cell can appear only as a neighbour.
     - Vertex-averaged face centres put a cube with one hanging node 1.2 %
@@ -1426,7 +1455,9 @@ Findings:
 
 Not done in M5:
 
-- cfMesh (`cartesianMesh`) was not evaluated against snappy.
+- cfMesh has no verification case of its own: V14 checks snappy
+  (inviscid). The layered meshes are checked for coverage and quality only.
+- The gmsh fallback cannot mesh a plume with layers (finding 41).
 - The Tier 2 comparison runs on the coarse preset only. The standard
   preset's 480 k-cell V1 has not been run.
 - OCP's `BRepCheck_Analyzer` checks for STEP were not needed and not added.

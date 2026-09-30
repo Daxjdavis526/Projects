@@ -79,8 +79,15 @@ def exit_thrust_series(momentum: Table, pforce: Table) -> tuple[np.ndarray, np.n
     mi = np.searchsorted(momentum.time, t)
     pi = np.searchsorted(pforce.time, t)
     mom = momentum.values["weightedSum(U)"][mi, 0]
-    pf = pforce.values["areaIntegrate(p)"][pi]
-    return t, mom + pf
+    return t, mom + pressure_force_column(pforce)[pi]
+
+
+def pressure_force_column(pforce: Table) -> np.ndarray:
+    """The axial pressure force per iteration: sum(p |S|) on a flat plane,
+    |sum(p S_x)| on an unstructured mesh's cut zone (foam.case)."""
+    if "areaIntegrate(p)" in pforce.values:
+        return pforce.values["areaIntegrate(p)"]
+    return np.abs(pforce.values["areaNormalIntegrate(pAxial)"])
 
 
 # The solver is stopped when the integrals meet their tolerance and judged

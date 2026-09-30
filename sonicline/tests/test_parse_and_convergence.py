@@ -237,3 +237,19 @@ def test_predicted_and_simulated_choking_must_agree():
                extremes={"nozzle": {"mach_max": 1.2}})
     v = verdict(defn, "completed", True, [], None, sub, None)
     assert v.trust is Trust.WARNINGS and "may be choked" in v.warnings[0]
+
+
+def test_thrust_series_reads_either_pressure_force_column():
+    """Structured meshes integrate p|S| on a flat plane; unstructured ones
+    the normal integral of p x on a cut zone (negative on an inflow-facing
+    zone), and both give the same force."""
+    import numpy as np
+
+    from sonicline.foam.parse import Table
+
+    t = np.arange(1.0, 4.0)
+    mom = Table(["weightedSum(U)"], t, {"weightedSum(U)": np.array([[1.0, 0, 0], [2.0, 0, 0], [3.0, 0, 0]])})
+    flat = Table(["areaIntegrate(p)"], t, {"areaIntegrate(p)": np.array([10.0, 10.0, 10.0])})
+    cut = Table(["areaNormalIntegrate(pAxial)"], t, {"areaNormalIntegrate(pAxial)": np.array([-10.0, -10.0, -10.0])})
+    assert np.allclose(convergence.exit_thrust_series(mom, flat)[1], [11, 12, 13])
+    assert np.allclose(convergence.exit_thrust_series(mom, cut)[1], [11, 12, 13])

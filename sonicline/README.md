@@ -300,13 +300,17 @@ meshed by the **unstructured (Tier 2) mesher**:
   (grid planes exactly at the throat and exit), refined to 10, 14 or 20
   cells across the throat radius (coarse, standard, fine).
 - Wall layers are accepted only if they cover 95 % of the wall and every
-  face near the throat. snappy's layer addition collapses to about one
-  layer on these nozzles whatever its settings. That is why DESIGN.md
-  expected it to fail here, and a viscous run usually falls to the next
-  mesher.
-- **gmsh** is the fallback: prism layers extruded from the whole boundary
-  (the first cell set by the y+ target, the stack kept to 0.3 of the wall
-  triangle size) and tetrahedra filling the core.
+  face near the throat, measured on the finished mesh. snappy's layer
+  addition collapses to about one layer on these nozzles, whatever its
+  settings.
+- **cfMesh** (`cartesianMesh`) is therefore the first choice for viscous
+  runs. Its layers put the wall-function first cell (1.6 µm at 20 bar) on
+  every wall face, throat included.
+- **gmsh** is the last resort: prism layers on the nozzle and tetrahedra
+  filling the rest. Its layered meshes pass the gate in vacuum but not
+  against a sea-level plume.
+- A rejected mesh passes the run to the next mesher, with the reason
+  recorded.
 - checkMesh gates the result like any other mesh.
 - V14 checks it against the structured wedge on V1.
 
