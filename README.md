@@ -255,7 +255,10 @@ water through each side of the injector to measure what the drawing only
 estimated, then hot — a spark igniter, start sequences that light smoothly
 or hard, an uncooled copper chamber that sets the burn time and soaks back
 after shutdown, chug when the injector goes soft, and a campaign to hit a
-mixture ratio by trimming two tank pressures.
+mixture ratio by trimming two tank pressures. A second engine on that
+stand is regeneratively cooled: its fuel crosses the chamber wall first, so
+it burns as long as the propellant lasts — as long as the coolant does not
+boil, coke, or leak through a cracked liner.
 Fictional hardware, generalised
 procedures, and it says so. Desktop only.
 

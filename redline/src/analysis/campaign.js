@@ -83,9 +83,21 @@ QUANTITIES_CATALOG.push(...[
   { key: 'TthPeak', label: 'Throat peak after shutdown', q: 'temperature', get: r => s(r).TthPeak },
   { key: 'Ishut', label: 'Shutdown impulse', q: 'impulse', get: r => s(r).Ishut },
 ].map(q => ({ ...q, kind: 'hotfire', stand: 'TS-2' })));
+/* BPE-2's cooling jacket. */
+QUANTITIES_CATALOG.push(...[
+  { key: 'dPjkt', label: 'Cooling-jacket ΔP', q: 'pressure', get: r => s(r).dPjkt },
+  { key: 'CdAjkt', label: 'Cooling-jacket CdA (water)', q: 'area', get: r => s(r).CdAjkt },
+  { key: 'Tcout', label: 'Coolant outlet temperature', q: 'temperature', get: r => s(r).Tcout },
+  { key: 'dTc', label: 'Coolant temperature rise (K)', q: 'ratio', get: r => s(r).dTc },
+  { key: 'Qjkt', label: 'Heat into the coolant', q: 'power', get: r => s(r).Qjkt },
+  { key: 'boilMargin', label: 'Boiling margin at jacket outlet (K)', q: 'ratio', get: r => s(r).boilMargin },
+  { key: 'TthSteady', label: 'Throat liner temperature, steady', q: 'temperature', get: r => s(r).TthSteady },
+  { key: 'mdotFuK', label: 'Fuel (coolant) flow', q: 'massflow', get: r => s(r).mdotFu },
+].map(q => ({ ...q, kind: 'hotfire', stand: 'TS-2R' })));
 for (const q of QUANTITIES_CATALOG) q.stand ??= 'TS-1';
 
-export const quantitiesFor = stand => QUANTITIES_CATALOG.filter(q => q.stand === (stand || 'TS-1'));
+/* A stand's quantities: its family's (TS-2R is a TS-2) and its own. */
+export const quantitiesFor = (stand, family = null) => QUANTITIES_CATALOG.filter(q => q.stand === (stand || 'TS-1') || (family && q.stand === family));
 
 const s = r => r.metrics?.summary || {};
 const num = x => (typeof x === 'number' && Number.isFinite(x) ? x : NaN);

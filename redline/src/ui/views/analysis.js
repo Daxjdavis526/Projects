@@ -41,6 +41,12 @@ const PRESETS_BP = [
   ['Hot: stiffness vs Pc', 'hPc', 'stiffFu'],
   ['Hot: overshoot vs lead', 'lead', 'over'],
 ];
+const PRESETS_RG = [
+  ['Regen: heat vs Pc', 'hPc', 'Qjkt'],
+  ['Regen: coolant rise vs flow', 'mdotFuK', 'dTc'],
+  ['Regen: boiling margin vs Pc', 'hPc', 'boilMargin'],
+  ['Regen: throat liner vs MR', 'MR', 'TthSteady'],
+];
 const PRESETS = [
   ['F vs Pc (abs)', 'PcAbs', 'F'],
   ['ṁ (FT-201) vs Pc (abs)', 'PcAbs', 'mdotFM'],
@@ -264,7 +270,7 @@ export class AnalysisView {
     const standId = this.S?.def.id || (pool.find(e => e.rec.metrics) ? standOf(pool.find(e => e.rec.metrics)) : 'TS-1');
     const usable = pool.filter(e => e.rec.metrics && !e.rec.aborted && standOf(e) === standId);
     const def = STANDS[standId] || STANDS['TS-1'];
-    const QS = quantitiesFor(def.id), presets = def.id === 'TS-2' ? PRESETS_BP : PRESETS;
+    const fam = def.family || def.id, QS = quantitiesFor(def.id, def.family), presets = def.id === 'TS-2R' ? [...PRESETS_RG, ...PRESETS_BP] : fam === 'TS-2' ? PRESETS_BP : PRESETS;
     if (!QS.some(q => q.key === this.xKey) || !QS.some(q => q.key === this.yKey)) [, this.xKey, this.yKey] = presets[0];
     const qx = QS.find(q => q.key === this.xKey), qy = QS.find(q => q.key === this.yKey);
     const sel = (cur, set) => {
@@ -285,7 +291,7 @@ export class AnalysisView {
     this.scatter = new Scatter(plotHost);
     this.scatter.set({ points: pts, fit, xq: qx.q, yq: qy.q, xKey: this.xKey, yKey: this.yKey, xLabel: qx.label, yLabel: qy.label,
       zeroX: this.xKey === 'PcAbs' || this.xKey === 'width',
-      empty: usable.length ? `No included run has both "${qx.label}" and "${qy.label}". ${def.id === 'TS-2' ? 'Ox quantities need a flow of the oxidiser side, fuel quantities the fuel side.' : 'Pulse quantities need pulse trains; steady quantities need single burns.'}` : 'No reduced runs yet.' });
+      empty: usable.length ? `No included run has both "${qx.label}" and "${qy.label}". ${(def.family || def.id) === 'TS-2' ? 'Ox quantities need a flow of the oxidiser side, fuel quantities the fuel side.' : 'Pulse quantities need pulse trains; steady quantities need single burns.'}` : 'No reduced runs yet.' });
     // table
     const tbl = h('table.metrics');
     tbl.append(h('tr.hd', h('td', 'Run'), h('td', 'Plan'), h('td', 'x'), h('td', 'y'), h('td', 'residual')));

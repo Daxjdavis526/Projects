@@ -80,6 +80,7 @@ export const QUANTITIES = {
   ratio:    { base: '', units: { '': { to: v => v, from: v => v, dp: 3, label: '' } } },
   accel:    { base: 'g', units: { g: { to: v => v, from: v => v, dp: 2, label: 'g' } } },
   area:     { base: 'm²', units: { 'mm²': { to: v => v * 1e6, from: v => v / 1e6, dp: 3, label: 'mm²' } } },
+  power:    { base: 'W', units: { kW: { to: v => v / 1e3, from: v => v * 1e3, dp: 2, label: 'kW' } } },
   rate:     { base: 'Pa/s', units: { 'psi/min': { to: v => v / PSI * 60, from: v => v * PSI / 60, dp: 2, label: 'psi/min' } } },
 };
 
@@ -102,6 +103,7 @@ export const DISPLAY = {
   area: 'mm²',
   accel: 'g',
   rate: 'psi/min',
+  power: 'kW',
 };
 
 export function unitOf(quantity) {

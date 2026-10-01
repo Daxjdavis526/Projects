@@ -147,7 +147,7 @@ export class NotebookView {
       // entered in display units; kept in SI
       const conv = {
         force: [x => fromDisplay(x, 'force'), x => toDisplay(x, 'force')], pressure: [x => fromDisplay(x, 'pressure'), x => toDisplay(x, 'pressure')],
-        mNs: [x => x / 1e3, x => x * 1e3], pct: [x => x / 100, x => x * 100], plain: [x => x, x => x],
+        mNs: [x => x / 1e3, x => x * 1e3], pct: [x => x / 100, x => x * 100], plain: [x => x, x => x], kW: [x => x * 1e3, x => x / 1e3],
       };
       const NUM = campaignSpec(S).fields.map(([k, label, q, u]) => [k, label, q, u ?? (q === 'force' ? unitLabel('force') : q === 'pressure' ? unitLabel('pressure', true) : '')]);
       const nums = h('div.repnums');

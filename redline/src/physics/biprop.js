@@ -16,6 +16,7 @@ import { GasNetwork } from './gasnet.js';
 import { GASES } from './gas.js';
 import { LiquidLine } from './liquid.js';
 import { Chamber } from './combustion.js';
+import { RegenJacket, tsatFU } from './cooling.js';
 
 const G0 = 9.80665;
 
@@ -35,6 +36,9 @@ export class BipropModel {
     this.chamber = p.chamber ? new Chamber(p.chamber, { ambient: p.ambient, rng }) : null;
     this.chVol = this.chamber ? this.net.vol('chamber') : null;
     if (this.chamber) this._syncChamber();
+    // a regeneratively cooled engine: the fuel line runs through the jacket
+    this.jacket = p.regen ? new RegenJacket(p.regen, { ambient: p.ambient }) : null;
+    this.coolLine = p.regen ? this.lineById.get(p.regen.line) : null;
     const ts = p.thrustStand;
     this.stand = { w: 2 * Math.PI * ts.fn, z: ts.zeta, y: 0, yd: 0, preload: ts.preload ?? 0 };
     this.scales = structuredClone(p.scales || {});   // per session: the DAQ's meter calibration can be changed          // tank weigh scales: pressure tare, kg per Pa
@@ -78,7 +82,7 @@ export class BipropModel {
       s['Qm:' + id] = () => (l.mdot / l.rho) * (sc.rhoCal ?? l.rho);
       // the tank scale: liquid plus a pressure tare from the flex lines
       s['W:' + id] = () => l.mL + (sc.dry ?? 0) + (sc.tarePerPa ?? 0) * (net.volumes[l.tank].P - Pa);
-      s['Tl:' + id] = () => net.ambient.T;
+      s['Tl:' + id] = () => net.ambient.T + (id === 'fu' ? this.fuelTempOffset || 0 : 0);
       valveSignals(l.valve);
     }
     const C = this.chamber;
@@ -93,6 +97,16 @@ export class BipropModel {
       // an accelerometer's RMS converter: combustion roughness plus any instability
       s['vib'] = () => (C.burning ? 0.6 * C.P / C.spec.Pnom + 45 * C.chug.A + 600 * C.hf.A : 0.02);
       s['cmd:IGN-901'] = () => C.igniter.cmd;
+    }
+    const J = this.jacket;
+    if (J) {
+      const l = this.coolLine;
+      s['P:jin'] = () => l.Pjin;
+      s['Pg:jin'] = () => l.Pjin - Pa;
+      s['Tc:jout'] = () => J.Tout;
+      s['Tc:jin'] = () => J.Tin;
+      s['Q:jkt'] = () => J.Q;
+      for (const sg of J.seg) { s['Tw:' + sg.id] = () => sg.Tw; s['Twg:' + sg.id] = () => sg.Twg; }
     }
     s['F:stand'] = () => this.stand.y;
     s['F:true'] = () => this.thrust;
@@ -147,8 +161,22 @@ export class BipropModel {
       // injector stiffness: the softer of the sides that are flowing
       let stiff = Infinity;
       for (const l of this.lines) if (l.mdotInj > 0.02) stiff = Math.min(stiff, (this.net.volumes[l.man].P - Pc) / Pc);
-      C.step(dt, { ox: this.lineById.get('ox').mdotInj, fu: this.lineById.get('fu').mdotInj }, this.chVol.dm, stiff);
+      const fu = this.lineById.get('fu');
+      C.etaLeak = fu.mdotLeak > 0 && fu.mdotInj > 1e-3 ? 1 - 0.6 * fu.mdotLeak / fu.mdotInj : 1;
+      C.step(dt, { ox: this.lineById.get('ox').mdotInj, fu: fu.mdotInj }, this.chVol.dm, stiff);
       this._syncChamber();
+    }
+    const J = this.jacket;
+    if (J) {
+      const l = this.coolLine, C = this.chamber;
+      // what flows through the channels: the line flow, or — valve shut —
+      // whatever the purge is pushing out of them
+      const md = Math.max(l.mdot, l.mdotInj, 0);
+      J.step(dt, { burning: C.burning, P: C.P, Tgas: C.Tgas, film: C.film, hfA: C.hf.A }, md, Math.max(l.Pjin, this.net.volumes[l.man].P),
+        this.net.volumes[l.man].P, this.net.ambient.T + (this.fuelTempOffset || 0));
+      const sc = J.seg_(this.def.physics.regen.chamberSeg), st = J.seg_(this.def.physics.regen.throatSeg);
+      C.walls.ch = sc.Tw; C.walls.th = st.Tw;
+      if (J.breached && !l.jacketLeak) l.jacketLeak = this.def.physics.regen.breachCdA;
     }
     const st = this.stand, F = this.thrust;
     st.yd += dt * (st.w * st.w * (F + st.preload - st.y) - 2 * st.z * st.w * st.yd);

@@ -91,6 +91,13 @@ export function computeMetricsBP(run, def) {
     push('droop' + sd.key, `${n} tank droop (lock-up − flowing)`, Plock - Ptank, 'pressure');
     push('dPline' + sd.key, `${n} feed-line ΔP (tank − manifold)`, Ptank - pm, 'pressure');
     push('surge' + sd.key, `${n} valve-inlet surge at shutdown (${sd.vi})`, surge, 'pressure', 'water hammer');
+    if (sd.key === 'Fu' && ch('PT-727')) {
+      // a regeneratively cooled engine: the fuel crosses the jacket first
+      S.dPjkt = meanIn(T, ch('PT-727'), ss0, ss1) - pm;
+      S.CdAjkt = S.dPjkt > 0 && mdot > 0 ? mdot / Math.sqrt(2 * rho * S.dPjkt) : NaN;
+      push('dPjkt', 'Cooling-jacket ΔP (PT-727 − PT-725)', S.dPjkt, 'pressure');
+      push('CdAjkt', 'Cooling-jacket CdA, measured (water)', S.CdAjkt, 'area');
+    }
   }
   if (!out.sides.length) return { kind: 'none', items: [], note: 'No main-valve command in this recording.' };
   out.tOn = tFirst; out.tOff = tLast;
@@ -242,6 +249,27 @@ export function computeMetricsHot(run, def) {
     push('TthShut', 'Throat temperature at shutdown (TC-803)', S.TthShut, 'temperature');
     push('TthPeak', 'Throat temperature peak after shutdown (soak-back)', S.TthPeak, 'temperature', tEnd - tShut < 3 ? 'recording ended early — peak may be later' : '');
     push('TchPeak', 'Chamber wall peak (TC-802)', S.TchPeak, 'temperature');
+  }
+  // the cooling jacket (a regeneratively cooled engine)
+  const rg = def.physics.regen;
+  if (rg && ch('TC-728')) {
+    const jin = ch('PT-727'), tout = ch('TC-728'), tin = ch('TC-727'), marg = ch('TSAT-M'), th2 = ch('TC-803');
+    S.dPjkt = meanIn(T, jin, ss0, ss1) - meanIn(T, ch('PT-725'), ss0, ss1);
+    S.Tcout = meanIn(T, tout, ss0, ss1);
+    S.dTc = S.Tcout - meanIn(T, tin, ss0, ss1);
+    S.Qjkt = S.mdotFu * rg.cp * S.dTc;
+    S.qPerPc = S.Qjkt / Pabs;
+    S.boilMargin = marg ? maxIn(T, marg, ss0, ss1, 0, -1).v : NaN;
+    S.TthMax = th2 ? maxIn(T, th2, tOn, tShut + 0.1).v : NaN;
+    S.TthSteady = th2 ? meanIn(T, th2, ss0, ss1) : NaN;
+    push('dPjkt', 'Cooling-jacket ΔP (PT-727 − PT-725)', S.dPjkt, 'pressure', `design ${(def.design.dPjacket / 6894.757).toFixed(0)} psi at the design flow`);
+    push('Tcout', 'Coolant outlet temperature (TC-728)', S.Tcout, 'temperature');
+    push('dTc', 'Coolant temperature rise (TC-728 − TC-727)', S.dTc, 'ratio', 'kelvin');
+    push('Qjkt', 'Heat into the coolant, ṁ·cp·ΔT', S.Qjkt, 'power', 'FT-724 · cp · ΔT');
+    push('boilMargin', 'Smallest boiling margin at the jacket outlet (TSAT-M)', S.boilMargin, 'ratio', S.boilMargin < 30 ? 'kelvin — SMALL' : 'kelvin');
+    push('TthSteady', 'Throat liner, steady (TC-803)', S.TthSteady, 'temperature');
+    push('TthMax', 'Throat liner, peak while burning', S.TthMax, 'temperature');
+    if (S.boilMargin < 30) out.flags.push('cooling-margin');
   }
   // shutdown
   S.Itot = integrate(T, F, tOn, Math.min(tEnd, tOff + 1.0));

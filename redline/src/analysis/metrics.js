@@ -28,10 +28,11 @@ export function stdIn(T, V, t0, t1) {
   for (let k = lowerBound(T, t0); k < T.length && T[k] <= t1; k++) { const v = V[k]; if (!Number.isNaN(v)) { s += (v - m) ** 2; n++; } }
   return n > 1 ? Math.sqrt(s / (n - 1)) : NaN;
 }
-export function maxIn(T, V, t0, t1, off = 0) {
+/* Largest value of V − off in [t0, t1]; sign −1 gives the smallest. */
+export function maxIn(T, V, t0, t1, off = 0, sign = 1) {
   let m = -Infinity, tm = NaN;
-  for (let k = lowerBound(T, t0); k < T.length && T[k] <= t1; k++) { const v = V[k] - off; if (v > m) { m = v; tm = T[k]; } }
-  return { v: m, t: tm };
+  for (let k = lowerBound(T, t0); k < T.length && T[k] <= t1; k++) { const v = sign * (V[k] - off); if (v > m) { m = v; tm = T[k]; } }
+  return { v: sign * m, t: tm };
 }
 export function lowerBound(T, x) {
   let lo = 0, hi = T.length;

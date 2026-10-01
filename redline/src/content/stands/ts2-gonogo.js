@@ -62,9 +62,12 @@ export default [
       { label: 'Fuel tank PT-720 vs setpoint', eval: v => ({ value: `${P(v.ch('PT-720'))} (set ${P(v.sp['PR-620'])})`,
           ok: !flowsFu(v) || (v.sp['PR-620'] > psi(5) && near(v.ch('PT-720'), v.sp['PR-620'], psi(10))) }) },
       { label: 'Liquid on board (WT-716 / WT-726)', eval: v => {
-          const need = 0.25 * v.plan.duration + v.ratings.TANK_RESERVE;
-          return { value: `ox ${kg(v.ch('WT-716'))}, fuel ${kg(v.ch('WT-726'))} (need > ${need.toFixed(1)} kg each side flowed)`,
-            ok: (!flowsOx(v) || v.ch('WT-716') > need) && (!flowsFu(v) || v.ch('WT-726') > need) };
+          // the predicted flow over the burn, a 10 % allowance, and the reserve
+          const p = v.prediction || {}, dur = v.plan.duration;
+          const needOx = (p.mdotOx > 0 ? 1.1 * p.mdotOx * dur : 0.25 * dur) + v.ratings.TANK_RESERVE;
+          const needFu = (p.mdotFu > 0 ? 1.1 * p.mdotFu * dur : 0.25 * dur) + v.ratings.TANK_RESERVE;
+          return { value: `ox ${kg(v.ch('WT-716'))} (need ${needOx.toFixed(1)}), fuel ${kg(v.ch('WT-726'))} (need ${needFu.toFixed(1)})`,
+            ok: (!flowsOx(v) || v.ch('WT-716') > needOx) && (!flowsFu(v) || v.ch('WT-726') > needFu) };
         }, why: 'Run a tank dry and the line ingests pressurant: the flow collapses and the data from the end of the run is garbage. Budget the flow plus a reserve.' },
       { label: 'Purge pressure PT-630', eval: v => ({ value: P(v.ch('PT-630')),
           ok: v.ch('PT-630') >= v.ratings.PURGE_MIN && v.ch('PT-630') <= v.ratings.PURGE_MAX }),

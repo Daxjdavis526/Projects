@@ -14,7 +14,7 @@ const F = v => `${fmt(v, 'force')} ${unitLabel('force')}`;
 const num = (v, dp) => (Number.isFinite(v) ? v.toFixed(dp) : '—');
 const pct = (a, b) => (Number.isFinite(a) && Number.isFinite(b) && b ? `${(100 * (a / b - 1)).toFixed(1)} %` : '—');
 
-const FQ = { mNs: 'impulse', pct: 'percent', plain: 'ratio' };
+const FQ = { mNs: 'impulse', pct: 'percent', plain: 'ratio', kW: 'power' };
 export function fmtQ(v, q) {
   if (!Number.isFinite(v)) return '—';
   if (q === 'percent') return `${(100 * v).toFixed(1)} %`;
@@ -22,6 +22,7 @@ export function fmtQ(v, q) {
   if (q === 'isp') return `${v.toFixed(1)} s`;
   if (q === 'ratio') return v.toFixed(3);
   if (q === 'velocity') return `${v.toFixed(0)} m/s`;
+  if (q === 'power') return `${(v / 1e3).toFixed(2)} kW`;
   if (q === 'pressure') return P(v);
   if (q === 'force') return F(v);
   return String(v);

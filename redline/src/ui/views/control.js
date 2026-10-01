@@ -49,7 +49,7 @@ export class ControlView {
 
     // panels
     this.pid = new PID(this.pidWrap, app);
-    this.stand = S.def.program === 'biprop' ? new StandViewBP(this.standWrap, app) : new StandView(this.standWrap, app);
+    this.stand = S.def.physics.model === 'biprop' ? new StandViewBP(this.standWrap, app) : new StandView(this.standWrap, app);
     this.inspector = new Inspector(stage, app);
     this.abort = new AbortBanner(stage, app);
     const key = S.def.id;

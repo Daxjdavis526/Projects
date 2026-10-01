@@ -28,10 +28,17 @@ export class TrainingView {
         h('ul', h('li', 'Every control available; interlocks and physics still apply'), h('li', 'Write your own plan in the notebook first'), h('li', 'Fault injection: a hidden fault may or may not be present; diagnose it from Console ▸ INSPECT')),
         h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent'), 'sm'), btn('Fault injection', () => this.app.start(null, 'fault'), 'sm', { title: MODES.fault.text }))),
       h('div.level',
-        h('div.ln', 'TS-2 · SANDBOX'),
-        h('div.lt', 'Bipropellant stand, cold flow, no procedure'),
-        h('ul', h('li', 'Load the tanks, pressurise, flow water through either or both sides'), h('li', 'Tare the tank scales while the tanks are empty'), h('li', 'No fault injection on this stand yet')),
-        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-2'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-2'), 'sm'))));
+        h('div.ln', 'TS-2 · SANDBOX · BPE-1'),
+        h('div.lt', 'Bipropellant stand, heat-sink engine, no procedure'),
+        h('ul', h('li', 'Water cold flows or hot fires on OX-1 / FU-1'), h('li', 'Tare the tank scales while the tanks are empty; set the meters for what is in the tanks'), h('li', 'Fault injection: igniter, injector, combustion, feed and instrument faults')),
+        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-2'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-2'), 'sm'),
+          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-2'), 'sm', { title: MODES.fault.text }))),
+      h('div.level',
+        h('div.ln', 'TS-2 · SANDBOX · BPE-2'),
+        h('div.lt', 'Bipropellant stand, regeneratively cooled engine, no procedure'),
+        h('ul', h('li', 'The fuel cools the chamber on its way to the injector: long burns, if the coolant keeps up'), h('li', 'Watch TC-728, the boiling margin and the liner temperatures'), h('li', 'Fault injection: everything TS-2 has, plus cooling faults')),
+        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-2R'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-2R'), 'sm'),
+          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-2R'), 'sm', { title: MODES.fault.text }))));
     page.append(open);
 
     for (const p of PROGRAMS) {

@@ -292,6 +292,12 @@ export class PID {
         g.append(s('path.act', { d: `M${x + 4},${y - 26} L${x + 4},${y + 26}` }));
         g.append(s('path.body', { d: `M${x + 56},${y - 26} L${x + 70},${y - 9} L${x + 112},${y - 22} L${x + 112},${y + 22} L${x + 70},${y + 9} L${x + 56},${y + 26} Z` }));
         g.append(s('text.lbl', { x: x + 30, y: y + 4, 'text-anchor': 'middle' }, sy.id));
+        if (sy.regen) {
+          // the cooling jacket: coolant in at the nozzle end, out at the injector
+          g.append(s('path.seg.liq.thin', { d: `M${x + 6},${y - 31} L${x + 56},${y - 31} L${x + 70},${y - 14} L${x + 112},${y - 27}` }));
+          g.append(s('path.seg.liq.thin', { d: `M${x + 6},${y + 31} L${x + 56},${y + 31} L${x + 70},${y + 14} L${x + 112},${y + 27}` }));
+          g.append(s('text.lbl2', { x: x + 84, y: y - 34, 'text-anchor': 'middle' }, 'REGEN'));
+        }
         g.append(hl(120, 60, 56, 0));
         break;
       }

@@ -28,7 +28,7 @@ export function predictHot(def, { Pox, Pfu, cdaOx, cdaFu, eta } = {}) {
   const lo = def.physics.lines.find(l => l.id === 'ox'), lf = def.physics.lines.find(l => l.id === 'fu');
   const R = (rho, a) => 1 / (2 * rho * a * a);
   const RO = R(rOx, lo.CdAline) + R(rOx, lo.valve.CdA) + R(rOx, cdaOx ?? D.CdAox);
-  const RF = R(rFu, lf.CdAline) + R(rFu, lf.valve.CdA) + R(rFu, cdaFu ?? D.CdAfu);
+  const RF = R(rFu, lf.CdAline) + R(rFu, lf.valve.CdA) + R(rFu, cdaFu ?? D.CdAfu) + (lf.jacket ? R(rFu, lf.jacket.CdA) : 0);
   const e = eta ?? D.etaCstar;
   let Pc = 0.6 * Math.min(Pox, Pfu), mo = 0, mf = 0, MR = 1.5;
   for (let i = 0; i < 200; i++) {
@@ -65,7 +65,7 @@ export function predictBiprop(S) {
     const ln = def.physics.lines.find(l => l.id === lineId);
     const P = c.sp?.[regId] > 6894.757 * 5 ? c.sp[regId] : reqP ?? 0;
     const R = a => 1 / (2 * rho * a * a);
-    const Rl = R(ln.CdAline), Rv = R(ln.valve.CdA), Ri = R(cdaInj);
+    const Rl = R(ln.CdAline) + (ln.jacket ? R(ln.jacket.CdA) : 0), Rv = R(ln.valve.CdA), Ri = R(cdaInj);
     const mdot = P > 0 ? Math.sqrt(P / (Rl + Rv + Ri)) : 0;
     return { P, mdot, dPinj: Ri * mdot * mdot, dPline: (Rl + Rv) * mdot * mdot };
   };

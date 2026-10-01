@@ -73,6 +73,14 @@ export class LiquidLine {
     // fault hooks
     this.injBlockage = 0;                          // fraction of orifice area plugged
     this.lineBlockage = 0;
+    // a regeneratively cooled engine: the fuel crosses the cooling jacket
+    // between the valve and the injector manifold (its volume is part of
+    // Vman, its resistance is in series)
+    this.CdAjacket = spec.jacket?.CdA ?? 0;
+    this.jacketBlockage = 0;                       // fault hook: channels blocked (flow area)
+    this.jacketLeak = 0;                           // fault hook: CdA of a liner crack into the chamber
+    this.mdotLeak = 0;
+    this.Pjin = 0;                                 // Pa abs, jacket inlet
     this._applyVolumes(net, true);
   }
 
@@ -128,7 +136,9 @@ export class LiquidLine {
     this.valve.update(dt, net);
     const aV = this.valve.CdA();
     const aL = this.CdAline * (1 - this.lineBlockage);
-    const Rtot = aV > 1e-12 ? this.R(aL) + this.R(aV) : Infinity;
+    const aJ = this.CdAjacket * (1 - 0.6 * this.jacketBlockage);
+    const Rj = this.CdAjacket ? this.R(aJ) : 0;
+    const Rtot = aV > 1e-12 ? this.R(aL) + this.R(aV) + Rj : Infinity;
     // a dry tank drives nothing (the line would ingest gas: the run is over)
     const Pup = this.mL > 1e-3 ? vt.P : vm.P;
     const prev = this.mdot;
@@ -148,6 +158,11 @@ export class LiquidLine {
     const dPi = vm.P - Pc;
     const aI = this.CdAinj * (1 - this.injBlockage);
     this.mdotInj = dPi > 0 && this.Vl > 0 ? this.w * aI * Math.sqrt(2 * this.rho * dPi) : 0;
+    // jacket inlet pressure, and fuel escaping through a cracked liner
+    this.Pjin = vm.P + Rj * this.mdot * Math.abs(this.mdot);
+    const dPl = vm.P + 0.5 * Rj * this.mdot * Math.abs(this.mdot) - Pc;
+    this.mdotLeak = this.jacketLeak > 0 && this.Vl > 0 && dPl > 0 ? Math.min(this.jacketLeak * Math.sqrt(2 * this.rho * dPl), 0.5 * this.Vl * this.rho / dt) : 0;
+    this.mdotInj += this.mdotLeak;
     // what the orifices do not pass, purge gas blows out (and, slowly,
     // gravity drains): this is what a post-shutdown purge is for
     const gasOut = this.gasEl ? Math.max(0, this.gasEl.mdot) : 0;

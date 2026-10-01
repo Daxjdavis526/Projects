@@ -4,6 +4,12 @@
 
 import ts1 from './stands/ts1-coldgas.js';
 import ts2 from './stands/ts2-biprop.js';
+import ts2r from './stands/ts2-regen.js';
+import rgColdflow from './procedures/rg-coldflow.js';
+import rgHotfire from './procedures/rg-hotfire.js';
+import rgMargins from './procedures/rg-margins.js';
+import rgTrouble from './procedures/rg-trouble.js';
+import rgCampaign from './procedures/rg-campaign.js';
 import bpOrientation from './procedures/bp-orientation.js';
 import bpColdflow from './procedures/bp-coldflow.js';
 import bpHotfire from './procedures/bp-hotfire.js';
@@ -17,7 +23,7 @@ import pulse from './procedures/cg-pulse.js';
 import trouble from './procedures/cg-trouble.js';
 import campaign from './procedures/cg-campaign.js';
 
-export const STANDS = { 'TS-1': ts1, 'TS-2': ts2 };
+export const STANDS = { 'TS-1': ts1, 'TS-2': ts2, 'TS-2R': ts2r };
 
 export const MODES = {
   tutorial:    { label: 'Tutorial', text: 'Every step explained. Strict interlocks. Stations make their own go/no-go calls and say why.' },
@@ -62,6 +68,22 @@ export const PROGRAMS = [
         teaches: ['Igniter faults', 'Injector faults', 'Combustion instability', 'Cooling faults', 'False redlines'] },
       { n: 12, id: 'bp-campaign', title: 'Independent test campaign', scenario: bpCampaign, modes: ['independent'],
         teaches: ['Mixture-ratio and Pc targets', 'Throttling and injector stiffness', 'Campaign planning', 'Data validity'] },
+    ],
+  },
+  {
+    id: 'regen', title: 'Regeneratively cooled engine', stand: 'TS-2R',
+    blurb: 'BPE-2 on the same stand: the same size and propellants as BPE-1, but its fuel flows through channels in the chamber wall on the way to the injector. No heat sink to fill — the burn lasts as long as the propellant, as long as the coolant keeps up: does not boil at the wall, does not coke, and has the pressure left over to feed the injector.',
+    levels: [
+      { n: 13, id: 'rg-coldflow', title: 'Cooling-jacket cold flow', scenario: rgColdflow, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['Jacket ΔP and flow coefficient', 'Priming a jacket', 'Choosing a valve lead from priming times'] },
+      { n: 14, id: 'rg-hotfire', title: 'First regen hot fire', scenario: rgHotfire, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['Fuel lead', 'Coolant temperature rise and heat load', 'Boiling margin', 'A cooled wall reaches steady state'] },
+      { n: 15, id: 'rg-margins', title: 'Cooling margins', scenario: rgMargins, modes: ['guided', 'independent'],
+        teaches: ['Mixture ratio and coolant flow', 'Throttling a regen engine', 'Finding the limiting point'] },
+      { n: 16, id: 'rg-faults', title: 'Regen engine fault diagnosis', scenario: rgTrouble, modes: ['guided', 'independent'],
+        teaches: ['Blocked channels', 'Coking', 'Liner cracks', 'Coolant temperature', 'Instruments that lie about margin'] },
+      { n: 17, id: 'rg-campaign', title: 'Long-duration acceptance campaign', scenario: rgCampaign, modes: ['independent'],
+        teaches: ['20 s at the design point', 'Propellant and coolant budgets', 'Cooling deliverables', 'Data validity'] },
     ],
   },
 ];

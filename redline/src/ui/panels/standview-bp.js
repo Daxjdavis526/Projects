@@ -91,7 +91,7 @@ export class StandViewBP {
       s('rect', { x: 944, y: 282, width: 14, height: 48, fill: '#5f686e', stroke: '#8d969c' }),          // injector
       s('rect', { x: 958, y: 286, width: 56, height: 40, fill: '#6f777c', stroke: '#8d969c' }),          // chamber
       s('path', { d: 'M1014,288 L1030,300 L1080,290 L1080,322 L1030,312 L1014,324 Z', fill: '#7d868b', stroke: '#9aa3a8' }),
-      s('text', { x: 986, y: 310, fill: '#1a1f23', 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 700 }, 'BPE-1'));
+      s('text', { x: 986, y: 310, fill: '#1a1f23', 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 700 }, (this.S.def.article || 'BPE-1').split(' ')[0]));
     svg.append(this.lc, this.engine);
     // water spray out of the nozzle and the purge puff
     this.spray = s('path', { d: 'M1080,296 L1250,250 L1250,370 L1080,316 Z', fill: 'url(#sprayB)', opacity: 0 });

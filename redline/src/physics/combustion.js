@@ -86,6 +86,7 @@ export class Chamber {
     this.hf = { A: 0, phase: 0, drive: 0 };                        // fault hook: drive (1/s)
     this.walls = { ch: ambient.T, th: ambient.T };
     this.film = 1;                                                 // fault hook: >1 = film cooling lost
+    this.etaLeak = 1;                                              // fuel entering off the injector burns poorly
     this.mdotOut = 0; this.F = 0; this.burnRate = 0; this.MRb = NaN;
     this.Pobs = this.Pa;
     this.impulse = 0;
@@ -154,7 +155,7 @@ export class Chamber {
     // gas in
     if (b > 0) {
       const MR = Math.min(8, Math.max(0.25, bo / Math.max(bf, 1e-9)));
-      const cs = this.eta * this.cstar(MR);
+      const cs = this.eta * this.etaLeak * this.cstar(MR);
       const RTp = (cs * Gam(GAM_P)) ** 2;
       this.mP += b * dt;
       this.Q += b * RTp * dt;
@@ -204,15 +205,19 @@ export class Chamber {
     else hf.A *= Math.max(0, 1 - 200 * dt);
     hf.phase += 2 * Math.PI * (this.spec.fHF ?? 3300) * dt;
     this.Pobs = P * (1 + hf.A * Math.sin(hf.phase) + (this.burning ? 0.004 * (this.rng ? this.rng.gauss() : 0) : 0));
-    // walls
-    const Pn = this.spec.Pnom;
-    const flux = this.burning ? Math.pow(Math.max(P, this.Pa) / Pn, 0.8) * this.film * (1 + 4 * hf.A) : 0.02;
-    const Taw = this.burning ? 0.85 * this.Tgas : this.Tgas;
-    const W = this.walls, k = this.spec.wall;
-    const qch = k.hAch * flux * (Taw - W.ch), qth = k.hAth * flux * (Taw - W.th);
-    const cond = k.Gcond * (W.th - W.ch);
-    W.ch += dt * (qch + cond - k.Gamb * (W.ch - this.Ta)) / k.Cch;
-    W.th += dt * (qth - cond - 0.3 * k.Gamb * (W.th - this.Ta)) / k.Cth;
+    // walls: a heat-sink chamber's own; a regeneratively cooled one is
+    // stepped by its jacket (cooling.js), which writes walls.ch / walls.th
+    if (!this.spec.regen) {
+      const Pn = this.spec.Pnom;
+      const flux = this.burning ? Math.pow(Math.max(P, this.Pa) / Pn, 0.8) * this.film * (1 + 4 * hf.A) : 0.02;
+      const Taw = this.burning ? 0.85 * this.Tgas : this.Tgas;
+      const W = this.walls, k = this.spec.wall;
+      const qch = k.hAch * flux * (Taw - W.ch), qth = k.hAth * flux * (Taw - W.th);
+      const cond = k.Gcond * (W.th - W.ch);
+      W.ch += dt * (qch + cond - k.Gamb * (W.ch - this.Ta)) / k.Cch;
+      W.th += dt * (qth - cond - 0.3 * k.Gamb * (W.th - this.Ta)) / k.Cth;
+    }
+    const W = this.walls;
     const pk = this.peak;
     if (P > pk.P) pk.P = P; if (hf.A > pk.hf) pk.hf = hf.A; if (ch.A > pk.chug) pk.chug = ch.A; if (W.th > pk.Tth) pk.Tth = W.th;
   }
