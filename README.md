@@ -229,6 +229,44 @@ Live: https://daxjdavis526.github.io/Projects/wormsign/
 See [wormsign/README.md](wormsign/README.md) for controls, how the systems
 work, and what is physical versus invented.
 
+## redline/
+
+**REDLINE** — a rocket-engine test-stand operations trainer. Not a game and
+not an engine designer: a simulated test-control room in which you configure,
+instrument, zero, leak-check, pressurise, poll, arm, fire, abort, safe and
+analyse a nitrogen cold-gas thruster on a load-cell stand, seeing it only
+through its instruments. Underneath is a real-time lumped-parameter model —
+choked and unchoked flow, a regulator that droops and locks up, a solenoid
+whose coil current dips as it strokes, a nozzle that separates at low
+pressure, a thrust stand that rings — and on top of it every sensor has lag,
+offset, noise and a sample rate, so the measured state and the true state
+are never the same thing. Tutorial, guided and independent modes, a go/no-go
+poll, redlines and automatic aborts, pressure-characterisation and
+pulse-test campaigns fitted across runs, hidden hardware and instrument
+faults to diagnose with technician inspections that return measurements
+(never verdicts), a scored diagnosis and a root-cause debrief, cursors and
+reductions on the
+recorded data, test history that outlives the session, an engineering
+notebook and printable test reports. It ends in an unscripted acceptance
+campaign: a test request, no procedure, maybe a hidden fault, and a report
+graded on whether you noticed the data were not what they seemed. A
+second stand adds a pressure-fed bipropellant engine: run cold first,
+water through each side of the injector to measure what the drawing only
+estimated, then hot — a spark igniter, start sequences that light smoothly
+or hard, an uncooled copper chamber that sets the burn time and soaks back
+after shutdown, chug when the injector goes soft, and a campaign to hit a
+mixture ratio by trimming two tank pressures. A second engine on that
+stand is regeneratively cooled: its fuel crosses the chamber wall first, so
+it burns as long as the propellant lasts — as long as the coolant does not
+boil, coke, or leak through a cracked liner.
+Fictional hardware, generalised
+procedures, and it says so. Desktop only.
+
+Live: https://daxjdavis526.github.io/Projects/redline/
+
+See [redline/README.md](redline/README.md) for the controls, the
+architecture, and what the physics does and does not model.
+
 ## strata/
 
 **STRATA** — an original voxel survival sandbox. An endless generated world
