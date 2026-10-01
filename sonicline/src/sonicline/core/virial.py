@@ -68,21 +68,24 @@ class Virial:
         return p / (self.gas.R * T + B * p + D * p * p)
 
     def enthalpy(self, p: float, T: float) -> float:
-        """Sensible enthalpy, J/kg, relative to the ideal gas at 0 K."""
+        """Sensible enthalpy, J/kg, relative to the ideal gas at 0 K (the
+        ideal part from the gas: constant cp, or cp(T) for heated gas)."""
         B, B1, _, D, D1, _ = self._coeffs(T)
-        return self.gas.cp * T + p * (B - T * B1) + 0.5 * p * p * (D - T * D1)
+        return self.gas.enthalpy(T) + p * (B - T * B1) + 0.5 * p * p * (D - T * D1)
 
     def entropy(self, p: float, T: float) -> float:
         """Specific entropy, J/(kg K), up to a constant."""
         _, B1, _, _, D1, _ = self._coeffs(T)
-        return self.gas.cp * math.log(T) - self.gas.R * math.log(p) - p * B1 - 0.5 * p * p * D1
+        return self.gas.ideal_entropy(T) - self.gas.R * math.log(p) - p * B1 - 0.5 * p * p * D1
 
     def cp(self, p: float, T: float) -> float:
         _, _, B2, _, _, D2 = self._coeffs(T)
-        return self.gas.cp - T * (p * B2 + 0.5 * p * p * D2)
+        return self.gas.cp_at(T) - T * (p * B2 + 0.5 * p * p * D2)
 
 
 def for_gas(gas: PerfectGas) -> Virial:
+    """The virial gas for this gas's species; its ideal part (constant cp
+    or cp(T)) is the gas's own."""
     if gas.name not in COEFFICIENTS:
         raise ValueError(f"no virial coefficients for {gas.name}; the virial gas is fitted for nitrogen only")
     b, c = COEFFICIENTS[gas.name]

@@ -78,6 +78,14 @@ class PerfectGas:
                 break
         return T
 
+    def ideal_entropy(self, T: float) -> float:
+        """Temperature part of the ideal-gas entropy, J/(kg K): the integral
+        of cp/T (s = this - R ln p, up to a constant)."""
+        if self.janaf is None:
+            return self.cp * math.log(T)
+        a = self.janaf
+        return self.R * (a[0] * math.log(T) + a[1] * T + a[2] * T**2 / 2 + a[3] * T**3 / 3 + a[4] * T**4 / 4)
+
     def total_temperature(self, T: float, speed_squared: float) -> float:
         """Stagnation temperature: h(T0) = h(T) + |U|^2 / 2."""
         if self.janaf is None:
@@ -158,3 +166,45 @@ HOT_AIR = PerfectGas(
 )
 
 GASES = {g.name: g for g in (NITROGEN, AIR, HEATED_AIR, HOT_AIR)}
+
+# Temperature-dependent ideal-gas cp, for heated gas: cp/R = sum a_k T^k,
+# fitted to CoolProp's ideal-gas cp from 100 K to 1100 K (within 0.23 % for
+# nitrogen, 0.3 % for air). Nitrogen's cp is constant to 0.14 % up to 350 K
+# and rises 3.4 % by 600 K, 7.9 % by 800 K and 12 % by 1000 K, so a cold
+# thruster keeps the constant value and a heated one needs this.
+JANAF = {
+    "N2": (3.5273538815, -2.0738276444e-04, -3.5600099685e-09, 1.6069145544e-09, -9.8644706128e-13),
+    "air": _AIR_JANAF,
+}
+HEATED_T0 = 350.0  # K: above this chamber temperature, "auto" heat capacity is cp(T)
+
+
+def with_cp_of_temperature(gas: PerfectGas, reference_temperature: float) -> PerfectGas:
+    """The gas with its cp(T) polynomial; ``cp`` becomes the value at the
+    reference temperature (the chamber's), which the constant-gamma theory
+    uses."""
+    import dataclasses
+
+    if gas.janaf is not None:
+        return gas
+    if gas.name not in JANAF:
+        raise ValueError(f"no temperature-dependent cp for {gas.name}")
+    hot = dataclasses.replace(gas, janaf=JANAF[gas.name])
+    return dataclasses.replace(hot, cp=hot.cp_at(reference_temperature))
+
+
+@dataclass(frozen=True)
+class IdealGasCpT:
+    """The ideal gas with cp(T), as a model with the real-gas models'
+    interface (enthalpy, entropy, density), for its exact isentrope."""
+
+    gas: PerfectGas
+
+    def density(self, p: float, T: float) -> float:
+        return p / (self.gas.R * T)
+
+    def enthalpy(self, p: float, T: float) -> float:
+        return self.gas.enthalpy(T)
+
+    def entropy(self, p: float, T: float) -> float:
+        return self.gas.ideal_entropy(T) - self.gas.R * math.log(p)

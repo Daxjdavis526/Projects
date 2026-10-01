@@ -32,6 +32,7 @@ from ..model.definition import (
     Transient,
     TruncatedAtExit,
     WallProfile,
+    resolve_gas,
 )
 from ..profile import Profile
 from ..stagnation import nominal_p0
@@ -41,7 +42,8 @@ from ..theory import nozzle
 # The envelope V1 is built and verified for (DESIGN.md section 0).
 P0_VALIDATED = (5e5, 3e6)
 P0_SUPPORTED = (1e5, 5e6)
-T0_SUPPORTED = (200.0, 350.0)
+T0_SUPPORTED = (200.0, 350.0)  # cold gas, constant cp
+HEATED_T0_SUPPORTED = 1100.0  # K: the top of the cp(T) fits
 REAL_GAS_WARN = 0.005  # mass-flow bias above which the perfect-gas result is flagged
 TYPICAL_BOTTLE = (300e5, 300.0)  # for the regulator-cooling hint
 LAMINAR_TRANSITION_RE = 1.0e6  # throat Re of transition in critical-flow venturis
@@ -91,6 +93,10 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
     add = findings.append
     if profile is None:
         profile = resolve_profile(defn)
+    try:
+        defn = resolve_gas(defn)
+    except ValueError as e:
+        return [Finding(Severity.ERROR, "gas.unsupported", str(e))]
 
     try:
         gas = defn.gas.model()
@@ -134,10 +140,18 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
             add(Finding(Severity.INFO, "envelope.p0_unvalidated",
                         f"Chamber pressure {_fmt_bar(p0)} is supported but outside the "
                         f"verified band {_fmt_bar(P0_VALIDATED[0])}-{_fmt_bar(P0_VALIDATED[1])}."))
-    if not T0_SUPPORTED[0] <= T0 <= T0_SUPPORTED[1]:
+    heated = gas.janaf is not None
+    t_max = HEATED_T0_SUPPORTED if heated else T0_SUPPORTED[1]
+    if not T0_SUPPORTED[0] <= T0 <= t_max:
         add(Finding(Severity.WARNING, "envelope.T0",
-                    f"Chamber temperature {T0:.1f} K is outside {T0_SUPPORTED[0]:.0f}-"
-                    f"{T0_SUPPORTED[1]:.0f} K."))
+                    f"Chamber temperature {T0:.1f} K is outside {T0_SUPPORTED[0]:.0f}-{t_max:.0f} K"
+                    + ("." if heated else " for constant cp; a heated gas needs cp(T) "
+                       "(heat_capacity \"temperature_dependent\" or \"auto\").")))
+    elif heated:
+        add(Finding(Severity.INFO, "gas.heated",
+                    f"Heated gas: cp varies with temperature (cp(T), {gas.cp_at(T0):.0f} J/(kg K) at "
+                    f"{T0:.0f} K against {gas.cp_at(300.0):.0f} at 300 K). The quasi-1D prediction "
+                    "takes cp at the chamber temperature; the CFD and its checks use cp(T)."))
     time = defn.flow.time
     if isinstance(time, Transient) and time.initial == "ambient" and time.ramp_time == 0.0 and p0 is not None:
         start = max(pa, 1e-3 * p0)  # foam.case.start_pressure
@@ -157,8 +171,6 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                     + (" (the Peng-Robinson CFD over-shoots this; the reported estimate "
                        "corrects it to the reference equation of state)." if defn.gas.peng_robinson
                        else " (the virial CFD includes it)." if defn.gas.virial
-                       else " (the automatic choice puts it in the CFD wherever rhoPimpleFoam runs)."
-                       if defn.gas.equation_of_state == "auto"
                        else " the CFD uses."),
                     "The perfect-gas mass flow and thrust are reported together with this "
                     "correction; the virial equation of state puts it in the CFD."
@@ -195,11 +207,18 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
     if defn.gas.virial and gas.name != "N2":
         add(Finding(Severity.ERROR, "gas.virial_species",
                     f"The virial equation of state is fitted for nitrogen only, not {gas.name}."))
-    elif defn.gas.real_gas:
-        # OpenFOAM offers real-gas equations of state with constant cp only
-        # in enthalpy form, which rhoCentralFoam cannot use (it assumes
-        # internal energy).
-        name = "virial" if defn.gas.virial else "Peng-Robinson"
+    elif defn.gas.virial:
+        add(Finding(Severity.INFO, "gas.virial",
+                    "The CFD uses the virial equation of state, fitted to nitrogen's reference "
+                    "equation: real-gas choked flux within about 0.01 % up to 30 bar."))
+        if p0 is not None and p0 > VIRIAL_VERIFIED_P0:
+            add(Finding(Severity.WARNING, "gas.virial_pressure",
+                        f"Above {_fmt_bar(VIRIAL_VERIFIED_P0)} the truncated virial series loses "
+                        "accuracy (0.07 % in choked flux at 50 bar and 250 K)."))
+    elif defn.gas.peng_robinson:
+        # OpenFOAM offers Peng-Robinson with constant cp only in enthalpy
+        # form, which rhoCentralFoam cannot use (it assumes internal energy).
+        name = "Peng-Robinson"
         central = defn.numerics.solver == "rhoCentralFoam"
         if p0 is not None and profile is not None and not central:
             shock = nozzle.analyse(gas, p0, T0, pa, profile.throat_area, profile.area(profile.x_exit))
@@ -208,15 +227,7 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
             add(Finding(Severity.ERROR, "gas.real_gas_solver",
                         f"The {name} gas runs only with rhoPimpleFoam, and this case needs "
                         "rhoCentralFoam (a shock stands inside the nozzle, or it was asked for).",
-                        "Use the perfect gas; its real-gas mass-flow correction is reported."))
-        elif defn.gas.virial:
-            add(Finding(Severity.INFO, "gas.virial",
-                        "The CFD uses the virial equation of state, fitted to nitrogen's reference "
-                        "equation: real-gas choked flux within about 0.01 % up to 30 bar."))
-            if p0 is not None and p0 > VIRIAL_VERIFIED_P0:
-                add(Finding(Severity.WARNING, "gas.virial_pressure",
-                            f"Above {_fmt_bar(VIRIAL_VERIFIED_P0)} the truncated virial series loses "
-                            "accuracy (0.07 % in choked flux at 50 bar and 250 K)."))
+                        "Use the virial gas, which runs on both solvers and is closer."))
         else:
             add(Finding(Severity.INFO, "gas.peng_robinson",
                         "The CFD uses the Peng-Robinson equation of state. For nitrogen near 300 K "

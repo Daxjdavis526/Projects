@@ -338,13 +338,18 @@ class PhysicsPage(Page):
                                              default=300.0))
         row(f, "Wall temperature", self.wall_T, "K")
         row(f, "Equation of state", self.bind(ChoiceBox(self.draft, "gas.equation_of_state",
-            [("Automatic (virial real gas where possible)", "auto"), ("Perfect gas", "perfect_gas"),
+            [("Automatic (virial real gas for nitrogen)", "auto"), ("Perfect gas", "perfect_gas"),
              ("Virial real gas (nitrogen)", "virial"), ("Peng-Robinson", "peng_robinson")],
-            default="perfect_gas", tooltip="Automatic runs the virial gas wherever rhoPimpleFoam runs and "
-            "the perfect gas where a shock needs rhoCentralFoam. The virial gas puts nitrogen's real-gas behaviour in the CFD, "
+            default="perfect_gas", tooltip="Automatic runs the virial gas for nitrogen, on either solver. "
+            "The virial gas puts nitrogen's real-gas behaviour in the CFD, "
             "within about 0.01 % of the reference equation's choked flux up to 30 bar. Peng-Robinson "
             "over-predicts the real-gas effect by about a quarter. The perfect gas reports the reference "
             "correction beside its results")))
+        row(f, "Heat capacity", self.bind(ChoiceBox(self.draft, "gas.heat_capacity",
+            [("Automatic (cp(T) above 350 K)", "auto"), ("Constant (cold gas)", "constant"),
+             ("Temperature-dependent cp(T)", "temperature_dependent")],
+            default="auto", tooltip="A cold gas has a constant cp (nitrogen's moves 0.14 % up to 350 K). "
+            "A heated one does not: +3.4 % at 600 K, +12 % at 1000 K, worth up to 1.4 % in mass flow")))
         row(f, "Solver", self.bind(ChoiceBox(self.draft, "numerics.solver",
             [("Automatic", "auto"), ("rhoPimpleFoam", "rhoPimpleFoam"), ("rhoCentralFoam", "rhoCentralFoam")],
             default="auto", tooltip="Automatic picks rhoCentralFoam when a shock or separation is "

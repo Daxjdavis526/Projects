@@ -1939,3 +1939,88 @@ Not done in M8:
   cp(T) as well.
 - rhoCentralFoam cannot run a real gas. Shocked nozzles still run the
   perfect gas with the correction reported.
+
+## 18. M9 record: the real gas on both solvers, and heated gas
+
+M9 closes two items M8 left open: rhoCentralFoam could not run a real gas,
+and the ideal-gas cp was constant everywhere. It also adds what heated
+thrusters need, cp(T), while leaving cold gas on the constant cp that is
+right for it.
+
+Delivered:
+
+- **The virial gas in internal-energy form.** The virial-gas library now
+  compiles all eight combinations of const/Sutherland transport,
+  hConst/janaf thermo and sensibleInternalEnergy/sensibleEnthalpy.
+  - OpenFOAM derives internal energy for any equation of state as
+    e = h − p/ρ and cv = cp − (cp − cv)_EOS. Both are exact for the virial
+    gas, so it runs in e on both solvers. rhoCentralFoam needs that form,
+    since it solves for ρE.
+  - `auto` now picks the virial gas for nitrogen whatever the solver,
+    shocked nozzles included.
+  - Peng–Robinson keeps its rhoPimpleFoam-only limit (enthalpy form only).
+- **Heat capacity** (`"heat_capacity"`: `auto`, `constant` or
+  `temperature_dependent`).
+  - `auto`, the default, is cp(T) above a 350 K chamber for a gas with a
+    cp(T) fit (nitrogen, air) and constant below it.
+  - cp(T) is a quartic in T fitted to CoolProp's ideal-gas cp from 100 to
+    1100 K, within 0.23 % for nitrogen. The constant-gamma theory takes cp
+    at the chamber temperature, which `resolve_gas` records as
+    `reference_temperature`.
+  - The CFD runs janaf thermo, alone or under the virial gas.
+  - SONICLINE's total temperatures, wall-heat balance, T0 field and Cd
+    reference all use h(T). The Cd reference is the gas's own isentrope,
+    through `IdealGasCpT` or the virial twin.
+  - The supported chamber temperature rises to 1100 K for a heated gas.
+- **`resolve_gas`** (core) settles both automatic choices. The pipeline
+  applies it before validation and records requested and used choices in
+  the manifest; validation and the desktop app's prediction use it too.
+- **V19** (V18 on rhoCentralFoam) and **V20** (heated nitrogen at 800 K)
+  join the default list. V20 also runs in CI's OpenFOAM tier.
+
+Findings:
+
+63. **Cold gas needs no cp(T); heated gas does.** Nitrogen's ideal-gas cp
+    (CoolProp) is 1038.9 J/(kg K) at 100 K, 1039.7 at 300 K and 1041.2 at
+    350 K. Above that it climbs: 1074.8 at 600 K, 1122.1 at 800 K, 1167.3 at
+    1000 K. Choked mass flux at 20 bar against the reference equation of
+    state:
+
+    | chamber | virial + cp(T) | cp(T), ideal gas | constant cold cp |
+    |---|---|---|---|
+    | 300 K | +0.016 % | −0.68 % | −0.70 % |
+    | 600 K | −0.005 % | +0.07 % | +0.39 % |
+    | 800 K | +0.020 % | +0.14 % | +0.94 % |
+    | 1000 K | −0.004 % | +0.12 % | +1.4 % |
+
+    - Hot, cp(T) matters more than the real gas.
+    - Cold, the real gas matters and cp(T) does not.
+    - The virial fit (70–500 K) extrapolates well: density within 2×10⁻⁴
+      of the reference up to 1000 K and 50 bar.
+64. **The real gas on rhoCentralFoam is as accurate as on rhoPimpleFoam.**
+    V19's virial/perfect mass-flow ratio on rhoCentralFoam is 1.01029. The
+    virial isentrope gives 1.01044 (−0.015 %) and the reference equation
+    1.0105 (−0.021 %). V18 on rhoPimpleFoam, now also in internal-energy
+    form, gives −0.014 % and −0.020 %.
+    - rhoCentralFoam's wave speed is √(γ/ψ), exact for a perfect gas only.
+      It sets the Kurganov–Tadmor scheme's dissipation, not what it
+      conserves, and the results show no cost.
+    - With psiThermo, p = ρ/ψ(p, T) lags one iteration, which a converged
+      steady state removes.
+65. **A shock barely notices the real gas.** V3a (20 bar, normal shock held
+    in the cone by 10 bar) with the virial gas:
+    - shock on the axis −2.46 % of the diverging length against quasi-1D,
+      against −2.54 % for the perfect gas; at the wall −7.10 % against
+      −7.11 %;
+    - Cd 0.99317 against 0.99326, measured against each gas's own isentrope;
+    - every check passes, and the run is trusted.
+
+Not done in M9:
+
+- Virial and cp(T) coefficients exist for nitrogen (virial and cp(T)) and
+  air (cp(T)); other gases need their own fits.
+- The quasi-1D prediction in the desktop app keeps constant gamma at the
+  chamber temperature. For a heated gas it is a guide; the CFD and its
+  checks use cp(T).
+- Heated runs are verified against theory (V20) and against air
+  experiments at 833 K (E1). There is no heated-nitrogen experiment.

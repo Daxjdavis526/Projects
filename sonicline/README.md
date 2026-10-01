@@ -11,13 +11,13 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M8 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M9 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
-Sections 10–17 of the design record what building each milestone taught.
+Sections 10–18 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -187,7 +187,9 @@ computed without the CFD.
 | V7 | rhoCentralFoam vs rhoPimpleFoam on V1 | mass flow / thrust | −0.055 % / +0.066 % | 0.1 % / 0.2 % |
 | V9 | ISO 9300 toroidal venturi, Re_d 5×10⁴ and 2.6×10⁵, laminar and SST | Cd vs ISO 9300 | −0.07 % … +0.10 % | 0.3 % (the standard's uncertainty) |
 | V10 | V1 nozzle at 30 bar, Peng–Robinson vs perfect gas | mass-flow ratio vs the Peng–Robinson isentrope (+1.314 %) | −0.009 % | 0.02 % |
-| V18 | V1 nozzle at 30 bar, virial gas vs perfect gas | mass-flow ratio vs the virial isentrope (+1.044 %) / vs the reference equation of state (+1.050 %) | −0.010 % / −0.015 % | 0.02 % / 0.05 % |
+| V18 | V1 nozzle at 30 bar, virial gas vs perfect gas | mass-flow ratio vs the virial isentrope (+1.044 %) / vs the reference equation of state (+1.050 %) | −0.014 % / −0.020 % | 0.02 % / 0.05 % |
+| V19 | the same on rhoCentralFoam | the same | −0.015 % / −0.021 % | 0.02 % / 0.05 % |
+| V20 | V1 nozzle with heated nitrogen, 20 bar and 800 K, virial gas with cp(T) | Cd vs Kliegel–Levine (own isentrope) / total temperature exit vs inlet | −0.024 % / 9×10⁻⁷ | 0.2 % / 2×10⁻³ |
 | V12 | V1 driven by V1's own mass flow (mass-flow inlet) | chamber pressure found vs 10 bar | −0.06 % | 0.2 % |
 | V13 | V1 laminar with a 450 K wall | total-temperature rise vs wall heat / (ṁ cp) | 4×10⁻⁵ of T0 (the gas gains 0.96 %) | 2×10⁻³ |
 | V14 | V1 on the unstructured mesher (snappyHexMesh, coarse: 10 cells across the throat radius, 174 k cells) vs the structured wedge | mass flow / thrust | −0.06 % / −0.22 % | 0.5 % / 0.5 % |
@@ -304,23 +306,49 @@ The house rule: say plainly where the model stops.
   - Every run checks energy conservation: with adiabatic walls, total
     temperature leaving the nozzle must match what enters to 0.2 %.
 - **Real gas in the CFD: the virial gas.** New simulations use
-  `"equation_of_state": "auto"`, which runs nitrogen as a virial gas
-  wherever the solver is rhoPimpleFoam. The perfect gas is used where a
-  shock needs rhoCentralFoam, with the reference correction reported beside
-  its numbers.
+  `"equation_of_state": "auto"`, which runs nitrogen as a virial gas on
+  either solver, shocked nozzles included. Other gases run as perfect gases
+  with the reference correction reported beside their numbers.
   - The virial equation, v = RT/p + B(T) + D(T)·p, has B and C fitted to
     the reference equation of state from 70 to 500 K. SONICLINE compiles it
     into OpenFOAM as its own small library, like the viscous-work term.
   - Its choked mass flux matches the reference equation to 0.013 % from 10
     to 30 bar, and 0.07 % at 50 bar (a warning above 30 bar). In the CFD at
-    30 bar it lands 0.015 % from the reference (V18).
-  - It keeps nitrogen's ideal-gas cp constant, as the perfect gas does.
-    That is right to 0.5 % from 30 K to 400 K.
+    30 bar it lands 0.020 % from the reference on rhoPimpleFoam (V18) and
+    0.021 % on rhoCentralFoam (V19).
+  - Through a normal shock (V3a, 20 bar into 10 bar) it moves the shock by
+    0.001 of the diverging length against the perfect gas, and every check
+    still passes.
   - Peng–Robinson is still available. It over-predicts the real-gas effect
     by about a quarter (+0.89 % against the reference equation's +0.71 % at
     20 bar).
   - Verification cases state their gas explicitly, mostly the perfect gas,
     since that is what the theory they are checked against assumes.
+- **Heat capacity: constant for cold gas, cp(T) for heated gas.** A cold
+  thruster's nitrogen has a constant ideal-gas cp, within 0.14 % up to
+  350 K. Heated nitrogen does not: +3.4 % at 600 K, +7.9 % at 800 K, +12 %
+  at 1000 K.
+  - `"heat_capacity": "auto"`, the default, uses constant cp up to a 350 K
+    chamber and cp(T) above it. `"constant"` and `"temperature_dependent"`
+    force either.
+  - cp(T) is a polynomial fitted to CoolProp's ideal-gas cp from 100 to
+    1100 K: within 0.23 % for nitrogen and 0.3 % for air. OpenFOAM gets it as
+    JANAF thermo, with or without the virial gas.
+  - SONICLINE's own total temperatures, energy checks and Cd reference use
+    the same h(T).
+  - Choked mass flux of heated nitrogen at 20 bar against the reference
+    equation of state:
+
+    | chamber | virial + cp(T) | constant cold cp |
+    |---|---|---|
+    | 600 K | −0.005 % | +0.39 % |
+    | 800 K | +0.020 % | +0.94 % |
+    | 1000 K | −0.004 % | +1.4 % |
+
+    V20 runs V1 at 800 K. Cd is 0.024 % from Kliegel–Levine against its
+    own isentrope, and total temperature is conserved to 10⁻⁶.
+  - The quasi-1D prediction in the window takes cp at the chamber
+    temperature, so for a heated gas it is a guide, not a reference.
 - **Solvers.** rhoPimpleFoam (pressure-based) for shock-free nozzles;
   rhoCentralFoam (density-based) wherever quasi-1D theory expects a shock or
   separation inside the nozzle, because rhoPimpleFoam puts a normal shock in

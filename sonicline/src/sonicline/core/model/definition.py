@@ -131,31 +131,59 @@ Geometry = ConicalNozzle | CadFile | WallProfile
 @dataclass(frozen=True)
 class GasSpec:
     """``equation_of_state``: "perfect_gas" (the default), "virial",
-    "peng_robinson" or "auto". "auto" runs the virial gas for nitrogen
-    wherever the solver is rhoPimpleFoam and the perfect gas (with the
-    reported reference correction) otherwise; the pipeline resolves it once
-    the geometry is known (foam.case.resolve_equation_of_state). New
-    simulations start from it. The perfect gas is what most verification cases run;
+    "peng_robinson" or "auto". "auto" runs the virial gas for nitrogen (on
+    either solver) and the perfect gas, with the reported reference
+    correction, for other gases. New simulations start from it. The
+    perfect gas is what most verification cases run;
     its real-gas mass flow bias is reported from the reference equation of
     state. The virial gas (nitrogen only) puts real-gas behaviour in the CFD
     itself and matches the reference equation's choked flux to about 0.01 %
     up to 30 bar (DESIGN.md section 17). Peng-Robinson does too, but for
     nitrogen at 300 K it over-predicts the real-gas bias by about a quarter
-    (section 11)."""
+    (section 11).
+
+    ``heat_capacity``: "auto" (the default), "constant" or
+    "temperature_dependent". A cold gas has a constant ideal-gas cp
+    (nitrogen's moves 0.14 % up to 350 K); a heated one does not (+3.4 % at
+    600 K, +12 % at 1000 K). "auto" is cp(T) when the chamber is above
+    350 K and constant otherwise. ``reference_temperature`` is the
+    temperature the constant-gamma theory takes cp at (the chamber's),
+    filled in by resolve_gas."""
 
     species: str = "N2"
     equation_of_state: str = "perfect_gas"
+    heat_capacity: str = "auto"
+    reference_temperature: float | None = None
 
     def __post_init__(self) -> None:
         if self.equation_of_state not in EQUATIONS_OF_STATE:
             raise ValueError(f"equation_of_state must be one of {', '.join(EQUATIONS_OF_STATE)}")
+        if self.heat_capacity not in HEAT_CAPACITIES:
+            raise ValueError(f"heat_capacity must be one of {', '.join(HEAT_CAPACITIES)}")
 
     def model(self) -> PerfectGas:
-        from ..gas import GASES
+        from ..gas import GASES, with_cp_of_temperature
 
         if self.species not in GASES:
             raise ValueError(f"unknown gas {self.species!r}; use one of {', '.join(GASES)}")
-        return GASES[self.species]
+        gas = GASES[self.species]
+        if self.heat_capacity == "temperature_dependent":
+            gas = with_cp_of_temperature(gas, self.reference_temperature or 300.0)
+        return gas
+
+    def isentrope_model(self):
+        """The gas the CFD runs, as a model whose isentrope gives its own
+        choked flux: the real-gas model, the ideal gas with cp(T), or None
+        for the constant-cp perfect gas (whose isentrope is the theory's)."""
+        model = self.cfd_model()
+        if model is not None:
+            return model
+        gas = self.model()
+        if gas.janaf is not None:
+            from ..gas import IdealGasCpT
+
+            return IdealGasCpT(gas)
+        return None
 
     @property
     def peng_robinson(self) -> bool:
@@ -185,6 +213,7 @@ class GasSpec:
 
 
 EQUATIONS_OF_STATE = ("perfect_gas", "virial", "peng_robinson", "auto")
+HEAT_CAPACITIES = ("auto", "constant", "temperature_dependent")
 
 
 # --------------------------------------------------------------------------
@@ -428,3 +457,33 @@ class SimulationDefinition:
     mesh: MeshSpec = MeshSpec()
     numerics: Numerics = Numerics()
     schema_version: int = SCHEMA_VERSION
+
+
+def resolve_gas(defn: SimulationDefinition) -> SimulationDefinition:
+    """Settle the gas's "auto" choices for a definition:
+
+    - equation of state: the virial gas for a species with virial
+      coefficients (nitrogen), the perfect gas otherwise;
+    - heat capacity: cp(T) above HEATED_T0 for a species with a cp(T)
+      fit, constant otherwise; the reference temperature is the chamber's.
+
+    Idempotent; a stated choice is kept."""
+    import dataclasses
+
+    from ..gas import HEATED_T0, JANAF
+    from ..virial import COEFFICIENTS
+
+    gas = defn.gas
+    eos = gas.equation_of_state
+    if eos == "auto":
+        eos = "virial" if gas.species in COEFFICIENTS else "perfect_gas"
+    hc = gas.heat_capacity
+    T0 = defn.boundaries.inlet.T0
+    if hc == "auto":
+        hc = "temperature_dependent" if T0 > HEATED_T0 and gas.species in JANAF else "constant"
+    ref = T0 if hc == "temperature_dependent" else gas.reference_temperature
+    if (eos, hc, ref) == (gas.equation_of_state, gas.heat_capacity, gas.reference_temperature):
+        return defn
+    return dataclasses.replace(defn, gas=dataclasses.replace(gas, equation_of_state=eos, heat_capacity=hc,
+                                                             reference_temperature=ref))
+

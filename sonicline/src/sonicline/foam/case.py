@@ -44,8 +44,10 @@ DEFAULT_MAX_ITERATIONS = {PIMPLE_SOLVER: 20000, CENTRAL_SOLVER: 60000}
 
 def energy_field(defn: d.SimulationDefinition) -> str:
     """OpenFOAM's energy variable: internal energy e, except enthalpy h for
-    the Peng-Robinson gas (the only form OpenFOAM compiles it in)."""
-    return "h" if defn.gas.real_gas else "e"
+    the Peng-Robinson gas (the only form OpenFOAM compiles it in). The
+    virial gas is compiled in both and runs in e, which rhoCentralFoam
+    needs."""
+    return "h" if defn.gas.peng_robinson else "e"
 
 
 def iteration_limit(defn: d.SimulationDefinition, solver: str) -> int:
@@ -84,21 +86,6 @@ def solver_for(defn: d.SimulationDefinition, profile: Profile) -> str:
     if name in (PIMPLE_SOLVER, CENTRAL_SOLVER):
         return name
     raise ValueError(f"unknown solver {name!r}; use auto, {PIMPLE_SOLVER} or {CENTRAL_SOLVER}")
-
-
-def resolve_equation_of_state(defn: d.SimulationDefinition, profile: Profile) -> d.SimulationDefinition:
-    """``auto``: the virial gas for nitrogen where rhoPimpleFoam runs (a
-    real-gas equation of state needs its enthalpy form, which rhoCentralFoam
-    cannot use), the perfect gas otherwise."""
-    import dataclasses
-
-    if defn.gas.equation_of_state != "auto":
-        return defn
-    from ..core.virial import COEFFICIENTS
-
-    virial = defn.gas.species in COEFFICIENTS and solver_for(defn, profile) == PIMPLE_SOLVER
-    return dataclasses.replace(defn, gas=dataclasses.replace(
-        defn.gas, equation_of_state="virial" if virial else "perfect_gas"))
 
 
 def needs_viscous_work_extension(defn: d.SimulationDefinition, profile: Profile) -> bool:
@@ -201,6 +188,7 @@ def build_case(
     ``real_gas_library`` the virial-gas thermophysics library (both from
     sonicline.foam.extensions.ensure_built); viscous cases need the first,
     virial-gas cases the second."""
+    defn = d.resolve_gas(defn)
     gas = defn.gas.model()
     b = defn.boundaries
     turb = defn.flow.turbulence
@@ -276,8 +264,8 @@ def build_case(
     if viscous_work and extension_library is None:
         raise ValueError("viscous rhoPimpleFoam cases need the viscous-work extension library")
     real_gas = defn.gas.cfd_model()
-    if real_gas is not None and solver != PIMPLE_SOLVER:
-        raise ValueError("a real-gas equation of state runs only with rhoPimpleFoam")
+    if defn.gas.peng_robinson and solver != PIMPLE_SOLVER:
+        raise ValueError("the Peng-Robinson gas runs only with rhoPimpleFoam")
     if defn.gas.virial and real_gas_library is None:
         raise ValueError("the virial gas needs its extension library")
     # A wedge of angle theta has flat (chord) faces: its cross-section is
@@ -328,8 +316,9 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bo
     mixture: dict = {"specie": {"molWeight": gas.molar_mass},
                      "thermodynamics": {"Cp": gas.cp, "Hf": 0}}
     thermo = "hConst"
-    if gas.janaf is not None and real_gas is None:
-        # One polynomial on both sides of Tcommon; the enthalpy and entropy
+    if gas.janaf is not None and not hasattr(real_gas, "crit"):
+        # cp(T) (heated gas), also under the virial gas; Peng-Robinson is
+        # compiled with constant cp only. One polynomial on both sides of Tcommon; the enthalpy and entropy
         # constants are zero (sensible energy and psiThermo use neither).
         # OpenFOAM clamps T to [Tlow, Thigh].
         coeffs = list(gas.janaf) + [0.0, 0.0]
@@ -350,11 +339,12 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bo
         c = real_gas.crit
         mixture["equationOfState"] = {"Tc": c.Tc, "Vc": c.Vc, "Pc": c.Pc, "omega": c.omega}
     else:
-        # The virial gas (foam/extensions/virialGas), in enthalpy form like
-        # Peng-Robinson; its library compiles const and sutherland transport.
+        # The virial gas (foam/extensions/virialGas) in internal-energy form,
+        # which both solvers use; its library compiles every combination of
+        # const/sutherland, hConst/janaf and e/h.
         transport = ({"As": gas.sutherland_As, "Ts": gas.sutherland_Ts} if viscous
                      else {"mu": 0, "Pr": 0.71})
-        kinds = ("sutherland" if viscous else "const", "virialGas", "sensibleEnthalpy")
+        kinds = ("sutherland" if viscous else "const", "virialGas", "sensibleInternalEnergy")
         mixture["equationOfState"] = {
             "B": Raw("( " + " ".join(f"{c!r}" for c in real_gas.b) + " )"),
             "C": Raw("( " + " ".join(f"{c!r}" for c in real_gas.c) + " )")}

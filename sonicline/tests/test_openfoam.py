@@ -53,6 +53,14 @@ def test_virial_gas_runs_and_matches_its_isentrope(tmp_path):
     assert v18.passed and not failed, (v18, failed)
 
 
+def test_heated_nitrogen_with_cp_of_t(tmp_path):
+    """V20: nitrogen at 800 K, virial gas with cp(T) (janaf thermo in the
+    virial-gas library): Cd against its own isentrope and the first law."""
+    result, metrics = verification.run_case(verification.CASES["V20"], "standard", tmp_path)
+    failed = [f"{c.name}: {c.value} vs {c.reference}" for c in result.checks if not c.passed]
+    assert result.passed and not failed, (result, failed)
+
+
 def test_a_running_solve_can_be_cancelled(tmp_path):
     import json
 
