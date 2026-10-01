@@ -97,6 +97,12 @@ class Draft:
             return Assessment(None, str(e))
         profile = resolve_profile(defn) or self.cad_profile
         a = Assessment(defn, None, profile, validate(defn, profile))
+        # The prediction uses the gas the run will (cp at the chamber
+        # temperature for a heated gas); the definition stays as written.
+        try:
+            defn = model.resolve_gas(defn)
+        except ValueError:
+            pass
         inlet = defn.boundaries.inlet
         p0 = nominal_p0(defn, profile)
         if profile is not None and p0 is not None:

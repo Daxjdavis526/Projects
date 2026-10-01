@@ -217,12 +217,20 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                                f"{profile.expansion_ratio:.3f} (inlet at the {report.inlet_end} end, "
                                f"{report.inlet_confidence} confidence)"))
 
-    # --- equation of state ------------------------------------------------------
-    if defn.gas.equation_of_state == "auto" and profile is not None:
-        defn = foam_case.resolve_equation_of_state(defn, profile)
+    # --- gas: equation of state and heat capacity ----------------------------------
+    resolved = d.resolve_gas(defn)
+    if resolved != defn:
+        requested = defn.gas
+        defn = resolved
         model.save(defn, run_dir / "definition.json")
-        manifest["equation_of_state"] = {"requested": "auto", "used": defn.gas.equation_of_state}
-        emit(Event("validate", f"equation of state: {defn.gas.equation_of_state.replace('_', ' ')} (automatic)"))
+        manifest["gas"] = {"requested": {"equation_of_state": requested.equation_of_state,
+                                         "heat_capacity": requested.heat_capacity},
+                           "used": {"equation_of_state": defn.gas.equation_of_state,
+                                    "heat_capacity": defn.gas.heat_capacity,
+                                    "reference_temperature": defn.gas.reference_temperature}}
+        emit(Event("validate", f"gas: {defn.gas.species}, {defn.gas.equation_of_state.replace('_', ' ')}, "
+                               f"{'cp(T)' if defn.gas.heat_capacity == 'temperature_dependent' else 'constant cp'}"
+                               " (automatic)"))
 
     # --- validation ------------------------------------------------------------
     findings = validate(defn, profile)

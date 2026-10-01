@@ -103,6 +103,7 @@ def inlet_total_pressure(gas, it: Integrals, inlet_area: float) -> float | None:
 
 def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSummary,
                it: Integrals) -> dict:
+    defn = d.resolve_gas(defn)
     gas = defn.gas.model()
     inlet = defn.boundaries.inlet
     T0 = inlet.T0
@@ -130,8 +131,9 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     # Cd is measured against the ideal flow of the gas model the CFD runs.
     # For Peng-Robinson that is its own choked flux (core.pengrobinson), so
     # the Kliegel-Levine comparison still isolates the throat's 2D effect.
-    # The same holds for the virial gas: its isentrope, same routine.
-    pr = defn.gas.cfd_model()
+    # The same holds for the virial gas and for cp(T) (heated gas): their
+    # own isentropes, same routine.
+    pr = defn.gas.isentrope_model()
     pr_bias = pengrobinson.choked_mass_flux(pr, p0, T0).bias if pr and ideal.regime.choked else 0.0
     cd = mdot / (ideal.mass_flow * (1.0 + pr_bias))
     # Kliegel-Levine is for axisymmetric throats; a planar throat has its own.
@@ -206,16 +208,15 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     # Energy conservation: the flux-weighted total temperature T + |U|^2/2cp
     # carried through the exit must equal what enters. With adiabatic walls
     # nothing adds or removes heat between them.
-    # For Peng-Robinson the enthalpy departure h_dep(p, T) / cp enters too
-    # (about 0.5 % of T0 between a 20 bar chamber and the exit), evaluated
-    # at the plane's area-averaged pressure.
+    # For a real gas the enthalpy departure h_dep(p, T) enters too (about
+    # 0.5 % of T0 between a 20 bar chamber and the exit), evaluated at the
+    # plane's area-averaged pressure; with cp(T), h(T) is not cp T.
     def total_T(avg, p_plane):
         if "T" not in avg or "magSqr(U)" not in avg:
             return None
-        t0 = gas.total_temperature(avg["T"], avg["magSqr(U)"])
-        if pr is not None and p_plane:
-            t0 += (pr.enthalpy(p_plane, avg["T"]) - gas.cp * avg["T"]) / gas.cp
-        return t0
+        T = avg["T"]
+        dep = pr.enthalpy(p_plane, T) - gas.enthalpy(T) if pr is not None and p_plane else 0.0
+        return gas.temperature_from_enthalpy(gas.enthalpy(T) + 0.5 * avg["magSqr(U)"] + dep)
 
     p_inlet = it.inlet_pressure_force / inlet_area if inlet_area else None
     T0_in = total_T(it.inlet_mass_avg, p_inlet)

@@ -424,16 +424,19 @@ def peng_robinson_check(perfect: tuple[CaseResult, dict | None],
 
 
 def virial_check(perfect: tuple[CaseResult, dict | None],
-                 real: tuple[CaseResult, dict | None]) -> CaseResult:
-    """V18: the virial-gas CFD against its own isentrope and against the
-    reference equation of state, as the mass-flow ratio to the perfect gas
-    on the same mesh (V10's method)."""
+                 real: tuple[CaseResult, dict | None], name: str = "V18",
+                 title: str = "Virial-gas CFD vs its isentrope and the reference equation of state, 30 bar"
+                 ) -> CaseResult:
+    """V18 (rhoPimpleFoam) and V19 (rhoCentralFoam): the virial-gas CFD
+    against its own isentrope and against the reference equation of state,
+    as the mass-flow ratio to the perfect gas on the same mesh and solver
+    (V10's method)."""
     from ..core import pengrobinson, realgas, virial
 
     (ra, ma), (rb, mb) = perfect, real
     rank = ("not_trustworthy", "trusted_with_warnings", "trusted")
     trust = min((ra.trust, rb.trust), key=lambda t: rank.index(t) if t in rank else -1)
-    r = CaseResult("V18", "Virial-gas CFD vs its isentrope and the reference equation of state, 30 bar",
+    r = CaseResult(name, title,
                    "completed" if ra.status == rb.status == "completed" else "failed",
                    trust if trust in rank else "not_trustworthy")
     if ma and mb:
@@ -448,6 +451,29 @@ def virial_check(perfect: tuple[CaseResult, dict | None],
                                 note=f"reference: {100 * ref.bias:+.3f} %"))
         r.checks = [c.evaluate() for c in checks]
     return r
+
+
+V20_T0 = 800.0  # K
+
+
+def _v20_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+    d = _v1_definition(quality, form)
+    return dataclasses.replace(
+        d, name="V20 V1 nozzle, heated nitrogen at 800 K",
+        gas=m.GasSpec(equation_of_state="virial", heat_capacity="temperature_dependent"),
+        boundaries=dataclasses.replace(d.boundaries, inlet=m.ReservoirInlet(p0=20e5, T0=V20_T0)))
+
+
+def _v20_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    """Cd against Kliegel-Levine, measured against the gas's own isentrope
+    (virial with cp(T)), plus energy conservation with h(T): the heated gas
+    must close its first law as the cold one does."""
+    kl = metrics["discharge_coefficient"]["kliegel_levine"]
+    e = (metrics.get("energy") or {}).get("exit_minus_inlet")
+    return [Check("discharge coefficient vs Kliegel-Levine (own isentrope)",
+                  metrics["discharge_coefficient"]["cfd"], kl, 2e-3, relative=False),
+            Check("total temperature, exit vs inlet (h(T) with cp(T))", e, 0.0, 2e-3, relative=False)
+            ] + _common_checks(metrics)
 
 
 V18_REFERENCE_TOLERANCE = 5e-4  # the isentrope's 2e-4 plus the fit's 1.3e-4 and the real gas's cp(T)
@@ -806,6 +832,8 @@ CASES: dict[str, Case] = {
                         _v1_checks_at(V10_P0)),
     "V10-virial": Case("V10-virial", "V1 nozzle at 30 bar, virial gas", _v10_definition("virial"),
                        _v1_checks_at(V10_P0)),
+    "V20": Case("V20", "V1 nozzle with heated nitrogen (20 bar, 800 K): virial gas with cp(T)",
+                _v20_definition, _v20_checks),
     "V10-pr": Case("V10-pr", "V1 nozzle at 30 bar, Peng-Robinson", _v10_definition("peng_robinson"),
                    _v1_checks_at(V10_P0)),
     "V4a": Case("V4a", "Inviscid converging nozzle, choked, sea-level plume",
@@ -839,7 +867,7 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18", "V19")
 V15_MASS_TOLERANCE = 1e-3  # V7's: the same solver, mesh and equations, reached two ways
 V15_THRUST_TOLERANCE = 2e-3
 V14_MASS_TOLERANCE = 5e-3
@@ -961,6 +989,12 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
                 results.append(run_validation_case(npr, quality, out, processors, on_event))
         elif name == "V18":
             results.append(virial_check(once("V10-perfect"), once("V10-virial")))
+        elif name == "V19":
+            # The same on rhoCentralFoam: the virial gas in internal-energy
+            # form, as the density-based solver needs.
+            results.append(virial_check(once("V10-perfect", solver="rhoCentralFoam"), once("V10-virial", solver="rhoCentralFoam"),
+                                        "V19", "Virial-gas CFD on rhoCentralFoam vs its isentrope and the "
+                                        "reference equation of state, 30 bar"))
         elif name == "V10":
             results.append(peng_robinson_check(once("V10-perfect"), once("V10-pr")))
         elif name == "V5":
