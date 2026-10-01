@@ -1,5 +1,7 @@
 # SPOTTER
 
+> **New here? Read [GUIDE.md](GUIDE.md)** — what SPOTTER is and how to use it, in plain English.
+
 **Trend intelligence for one fitness creator.** SPOTTER watches fitness and
 lifting content on YouTube, Instagram and TikTok through their official APIs,
 finds the subjects gaining unusual traction, works out which of them suit
