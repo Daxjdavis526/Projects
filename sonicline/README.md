@@ -11,13 +11,13 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M6 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M7 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
-Sections 10–15 of the design record what building each milestone taught.
+Sections 10–16 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -194,6 +194,9 @@ computed without the CFD.
 | V15 | V1 started from vacuum, time-accurate (rhoCentralFoam, coarse wedge, valve opened over 0.1 ms, 1 ms run) | gas gained vs integrated net inflow | 7×10⁻⁷ | 10⁻³ |
 | | | thrust drift over the last tenth (settled) | 0.03 % | 1 % |
 | | | end state vs the steady rhoCentralFoam solve on the same mesh: mass flow / thrust | −0.008 % / +0.002 % | 0.1 % / 0.2 % |
+| V16 | V4a started from rest into its sea-level plume (5 bar, coarse wedge, valve opened over 0.1 ms, 1 ms run) | gas gained vs integrated net inflow, through open boundaries | 3×10⁻⁷ | 10⁻³ |
+| | | end state vs the steady rhoCentralFoam solve on the same mesh: mass flow / thrust | −0.001 % / +0.003 % | 0.1 % / 0.2 % |
+| V17 | V1 on cfMesh (coarse, throat refined, 551 k cells) vs the structured wedge; run by name, not nightly | mass flow / thrust | −0.025 % / −0.05 % | 0.5 % / 0.5 % |
 | E1 | **experiment:** JPL 45°–15° conical nozzle (Back, Massier and Gier, JPL TR 32-654), heated air (cp(T)) at 17.2 bar and 833 K, SST | wall p/pt at 18 taps | 13 of 13 away from the throat within 5 %; 4 of 5 near the throat within 10 % | all / one miss |
 | E2 | **experiment:** the same nozzle, air at 294 K (Cuffel, Back and Massier 1969) | Cd vs measured 0.985 | −0.74 % (0.9776) | 1 % |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
@@ -361,16 +364,18 @@ The house rule: say plainly where the model stops.
   - The throat of a coarse snapped mesh is a 40-sided polygon, 0.4 % short
     of the circle, and that shows in Cd.
   - The throat area Cd is judged against is the geometry's, not the mesh's.
-  - **cfMesh over-predicts mass flow at the preset resolutions.** On V1,
-    inviscid, it reads Cd 0.7 % above Kliegel–Levine at 10 cells across
-    the throat radius and 1.0 % at 7; snappyHexMesh at 10 reads −0.06 %
-    (V14). The error falls about linearly with cell size, so it is cfMesh's
-    discretisation near the throat, not the boundary layer M5 suspected
-    (DESIGN.md findings 44 and 46). cfMesh carries the viscous runs, so
-    **viscous runs on unstructured meshes read about 1 % high in mass
-    flow**. Where that puts Cd above 1 the verdict refuses the run; below
-    that it cannot tell. Use the structured meshes for numbers that
-    matter; use `sonicline study` to measure the error on your own case.
+  - **cfMesh needs a finer throat than snappy.** Its mass-flow error is
+    first order in the cell size around the throat. At the preset
+    resolution it read 0.7 % high (1.3 % in a viscous run), so cfMesh now
+    refines a cone around the throat to half the wall cell size. With it,
+    V1 on cfMesh matches the structured wedge to −0.025 % in mass flow
+    inviscid (V17) and +0.032 % with k-ω SST, thrust within 0.05 %
+    (DESIGN.md findings 46 and 52–54). The refinement costs cells: about
+    three times as many as before at the coarse preset.
+  - Wall shear on cfMesh read 6 % below the wedge's in that viscous test,
+    because cfMesh made its layers thinner than asked; that is 0.1 % of
+    thrust there. A viscous cfMesh run against a sea-level plume has not
+    been repeated since the fix.
   - For a volume that is not a body of revolution, quasi-1D theory uses the
     radius of a circle of the same section area. Its "ideal" numbers are a
     reference, not a prediction.

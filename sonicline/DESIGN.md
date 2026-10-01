@@ -1691,7 +1691,9 @@ Delivered:
 - **V16**: V4a's choked converging nozzle at 5 bar, started from rest into
   a sea-level plume.
 - **cfMesh**: the whole nozzle interior is refined to the wall cell size
-  (finding 52). M7_CFMESH_DELIVERED
+  (finding 52), and a cone around the throat to half of it (finding 53),
+  which removes the bias. **V17** (manual: about 550 k cells) checks cfMesh
+  against the structured wedge on V1.
 
 Findings:
 
@@ -1718,4 +1720,75 @@ Findings:
       the pressure-based solver from the mesh, did not converge: its mass
       flow still swung ±30 % after 3,000 local-time-step iterations. That
       test is inconclusive.
-M7_FINDINGS_MORE
+53. **Refining the throat removes it.** A cfMesh `cone` refinement from
+    1.0 throat radius upstream of the throat to 0.5 downstream, radius
+    1.3 r_t, at half the wall cell size:
+    - Cd −0.05 % against Kliegel–Levine, where it was +0.66 %;
+    - against the standard structured wedge, mass flow −0.025 % and thrust
+      −0.05 % (V17; V14's tolerances are 0.5 %);
+    - inlet–exit balance 1×10⁻⁵, trusted.
+
+    So the error is first-order discretisation error in the transonic
+    region, and cfMesh's cells there need to be finer than snappy's for
+    the same accuracy. The cost is cells: 551 k instead of 168 k. cfMesh's
+    octree balancing spreads the refinement well beyond the cone (a cone of
+    radius 2 r_t, 2.5 r_t long, gave 977 k). Snappy is unchanged and stays
+    the inviscid first choice; the refinement applies to cfMesh, which
+    carries the viscous runs.
+54. **The fix carries over to viscous runs.** The test was V1 with k-ω
+    SST and wall functions (target y+ 30), exhausting to vacuum: cfMesh
+    at the coarse preset (988 k cells, layers included) against the
+    standard structured wedge.
+    - Results: mass flow +0.032 %, thrust −0.017 %, Cd 0.9891 against
+      0.9888. Before the throat refinement, the comparable viscous error
+      was +1.3 % (finding 44, on the side-port nozzle at sea level).
+    - Residual difference: wall viscous drag reads 6 % lower on cfMesh
+      (0.068 N against 0.073 N). cfMesh made the layers thinner than asked
+      (median first cell 0.65 µm against a 2.94 µm target), so the wall
+      functions sit nearer the buffer layer. Here that is 0.1 % of thrust.
+    - The run's integrals were steady to 10⁻⁵ by iteration 2,000, but the
+      convergence test, held by a near-zero force component, had not
+      stopped it at 3,200. The numbers above are the pipeline's own
+      metrics, computed from its integrals at that point.
+55. **A sea-level startup conserves mass in time through open
+    boundaries.** V16 starts V4a's 5 bar converging nozzle from rest into
+    its sea-level plume, valve opening over 0.1 ms, 1 ms run (233,182 steps
+    on 1,885 cells).
+    - Gas leaves through the outlet and is entrained through the ambient
+      boundary throughout (2.2 g/s entrained against 3.6 g/s through the
+      nozzle at the end). The domain's gain still matches the integrated
+      net inflow to 3×10⁻⁷.
+    - Thrust overshoots by 11 % and settles to 1.2×10⁻⁴ drift.
+    - The end state matches the steady rhoCentralFoam solve on the same
+      mesh to −0.001 % in mass flow and +0.003 % in thrust.
+    - The steady solve carried a warning (its far plume was still drifting
+      1.7 % per window, with thrust and mass flow converged). The
+      comparison then reported a failure, because a pair demanded two fully
+      trusted runs. A pair now takes the worse of its two verdicts, as a
+      single case would.
+56. **An instant opening at sea level is fine.** At 20 bar into 1 atm
+    (20:1) with no valve ramp, the startup ran cleanly and conserved mass
+    in time to 3.5×10⁻⁶. The 1000:1 opening into vacuum that diverged
+    (finding 47) is a different regime. The 100:1 warning threshold
+    stands. The thrust overshoot was 81 %, a real pressure surge from the
+    sudden opening.
+57. **cp(T) air fixes most of E1's drift down the cone.** With constant γ
+    1.35, the CFD read +1.3 % at z = 3.6 in, +4.5 % at 4.0 and +13 % at
+    5.3–6.0. With cp(T) it reads −2.1 % to +0.8 % from z = 2.64 to 4.62
+    and +6 % at the last two taps. Those taps sit at p/pt 0.024–0.037, so
+    6 % is 0.0015, inside the digitising's 0.005.
+    - Quasi-1D theory had predicted the size: at area ratio 6.63, variable
+      cp lowers p/p0 by 9 % against γ 1.35.
+    - The rest of the nozzle barely moved (≤ 0.4 %).
+    - The miss just past the throat (+34 %) is unchanged; it is not a gas
+      effect.
+
+Not done in M7:
+
+- The viscous result above is one nozzle in vacuum. A viscous run against
+  a sea-level plume on the refined cfMesh mesh has not been repeated (the
+  M5 one was 863 k cells before the refinement).
+- V17 is not in the nightly list (its cfMesh run alone is about 550 k
+  cells); run it by name.
+- snappy keeps 10 cells per throat radius and no throat refinement, since
+  V14 shows it does not need them.
