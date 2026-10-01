@@ -130,8 +130,12 @@ Geometry = ConicalNozzle | CadFile | WallProfile
 
 @dataclass(frozen=True)
 class GasSpec:
-    """``equation_of_state``: "perfect_gas" (the default), "virial" or
-    "peng_robinson". The perfect gas is what most verification cases run;
+    """``equation_of_state``: "perfect_gas" (the default), "virial",
+    "peng_robinson" or "auto". "auto" runs the virial gas for nitrogen
+    wherever the solver is rhoPimpleFoam and the perfect gas (with the
+    reported reference correction) otherwise; the pipeline resolves it once
+    the geometry is known (foam.case.resolve_equation_of_state). New
+    simulations start from it. The perfect gas is what most verification cases run;
     its real-gas mass flow bias is reported from the reference equation of
     state. The virial gas (nitrogen only) puts real-gas behaviour in the CFD
     itself and matches the reference equation's choked flux to about 0.01 %
@@ -163,8 +167,9 @@ class GasSpec:
 
     @property
     def real_gas(self) -> bool:
-        """The CFD itself runs a real-gas equation of state."""
-        return self.equation_of_state != "perfect_gas"
+        """The CFD itself runs a real-gas equation of state ("auto" is not
+        resolved yet, so not)."""
+        return self.equation_of_state in ("virial", "peng_robinson")
 
     def cfd_model(self):
         """The real-gas model the CFD runs (enthalpy, entropy, density), or None."""
@@ -179,7 +184,7 @@ class GasSpec:
         return None
 
 
-EQUATIONS_OF_STATE = ("perfect_gas", "virial", "peng_robinson")
+EQUATIONS_OF_STATE = ("perfect_gas", "virial", "peng_robinson", "auto")
 
 
 # --------------------------------------------------------------------------

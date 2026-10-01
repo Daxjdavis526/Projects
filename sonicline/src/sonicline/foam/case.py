@@ -86,6 +86,21 @@ def solver_for(defn: d.SimulationDefinition, profile: Profile) -> str:
     raise ValueError(f"unknown solver {name!r}; use auto, {PIMPLE_SOLVER} or {CENTRAL_SOLVER}")
 
 
+def resolve_equation_of_state(defn: d.SimulationDefinition, profile: Profile) -> d.SimulationDefinition:
+    """``auto``: the virial gas for nitrogen where rhoPimpleFoam runs (a
+    real-gas equation of state needs its enthalpy form, which rhoCentralFoam
+    cannot use), the perfect gas otherwise."""
+    import dataclasses
+
+    if defn.gas.equation_of_state != "auto":
+        return defn
+    from ..core.virial import COEFFICIENTS
+
+    virial = defn.gas.species in COEFFICIENTS and solver_for(defn, profile) == PIMPLE_SOLVER
+    return dataclasses.replace(defn, gas=dataclasses.replace(
+        defn.gas, equation_of_state="virial" if virial else "perfect_gas"))
+
+
 def needs_viscous_work_extension(defn: d.SimulationDefinition, profile: Profile) -> bool:
     """rhoCentralFoam already carries viscous work (sigmaDotU); rhoPimpleFoam does not."""
     return (not isinstance(defn.flow.turbulence, d.Inviscid)

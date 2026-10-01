@@ -71,3 +71,29 @@ def test_virial_case_loads_its_library(tmp_path):
     foam_case.write_continuation(s.path, d, meta, s, 100)
     assert foam_case._loaded_libraries(s.path) == ["libvirial_test.so"]
     assert math.isfinite(s.p0_nominal)
+
+
+def test_auto_resolves_by_solver():
+    """auto: virial where rhoPimpleFoam runs, perfect gas where a shock
+    needs rhoCentralFoam; never refused for the solver."""
+    from sonicline.core.validate import resolve_profile, validate
+    from sonicline.foam.case import resolve_equation_of_state
+
+    def defn(pa, er):
+        return m.SimulationDefinition(
+            name="a", geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=er),
+            boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=20e5), ambient=m.Ambient(pressure=pa)),
+            flow=m.Flow(turbulence=m.Inviscid()), gas=m.GasSpec(equation_of_state="auto"))
+    matched = defn(101325.0, 2.88)
+    assert not matched.gas.real_gas and matched.gas.cfd_model() is None
+    assert resolve_equation_of_state(matched, resolve_profile(matched)).gas.equation_of_state == "virial"
+    shocked = defn(14e5, 2.88)  # a normal shock stands inside: rhoCentralFoam
+    prof = resolve_profile(shocked)
+    assert resolve_equation_of_state(shocked, prof).gas.equation_of_state == "perfect_gas"
+    assert "gas.real_gas_solver" not in {f.code for f in validate(shocked, prof)}
+
+
+def test_new_simulations_start_on_auto():
+    from sonicline.project.draft import DEFAULT
+
+    assert DEFAULT["gas"]["equation_of_state"] == "auto"

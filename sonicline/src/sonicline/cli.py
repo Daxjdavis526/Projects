@@ -153,6 +153,9 @@ def _extract(body: str, unit: str, out: str | None) -> int:
     return 0
 
 
+IMPORT_YPLUS = 6.0  # first-cell y+ for imported volumes meshed with wall functions
+
+
 def _import(cad: str, unit: str, p0: str, out: str | None) -> int:
     import json
     from pathlib import Path
@@ -188,9 +191,13 @@ def _import(cad: str, unit: str, p0: str, out: str | None) -> int:
         # Axisymmetric flow in a revolved nozzle: the wedge is exact and runs in
         # minutes. Set "o_grid_3d" for a full 3D run. Anything else needs the
         # unstructured mesher, with wall functions: its tetrahedral fallback
-        # has no wall layers.
+        # has no wall layers. At y+ 6 the Spalding wall function's drag is
+        # within 2.4 % of a wall-resolved run's; at y+ 30 it is 6.4 % high
+        # (DESIGN.md finding 59).
         "mesh": ({"form": "wedge", "quality": "standard"} if report.axisymmetric else
-                 {"form": "unstructured", "quality": "standard", "first_cell_yplus": 30.0}),
+                 {"form": "unstructured", "quality": "standard", "first_cell_yplus": IMPORT_YPLUS}),
+        # Real-gas nitrogen wherever the solver allows (the virial gas).
+        "gas": {"species": "N2", "equation_of_state": "auto"},
     }
     if not report.axisymmetric:
         print("  not a body of revolution: the unstructured (Tier 2) mesher, SST with wall functions")

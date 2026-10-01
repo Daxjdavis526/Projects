@@ -459,7 +459,7 @@ def finish(mesh: PolyMesh, surface: DomainSurface) -> PolyMesh:
 
 
 THROAT_REFINEMENT = 0.5  # cfMesh cell size around the throat, in wall cells
-THROAT_CORE = 0.8  # radius of the refined core, in throat radii
+THROAT_CONE = 1.3  # radius of the refined cone, in throat radii (it reaches the wall)
 
 
 def _cfmesh_dict(surface: DomainSurface, spec: UnstructuredSpec) -> dict:
@@ -471,15 +471,17 @@ def _cfmesh_dict(surface: DomainSurface, spec: UnstructuredSpec) -> dict:
              "inlet": {"cellSize": 2 * h}}
     objects = {}
     r_t = _throat_radius(surface) or 10 * h
-    # The transonic core at half the wall size: cfMesh's mass-flow error is
-    # first order in the cell size there (DESIGN.md findings 46, 53). The
-    # cone stays inside the wall (radius THROAT_CORE r_t), so the boundary
-    # cells keep the wall size and the layers cut from them their intended
-    # height; reaching the wall, it squeezed them to a fifth (finding 58).
+    # The transonic region at half the wall size, wall cells included:
+    # cfMesh's mass-flow error is first order in the cell size there
+    # (DESIGN.md findings 46, 53). Kept off the wall (radius 0.8 r_t) the
+    # wall layers had their full height but mass flow read 0.26 % and thrust
+    # 0.42 % low (finding 58); reaching it, the throat's layers are a fifth
+    # of the target, which the Spalding wall function covers (it holds from
+    # the sublayer to the log layer).
     objects["throat"] = {"type": "cone", "cellSize": THROAT_REFINEMENT * h,
                          "p0": Raw(f"({surface.x_throat - 1.0 * r_t!r} 0 0)"),
                          "p1": Raw(f"({surface.x_throat + 0.5 * r_t!r} 0 0)"),
-                         "radius0": THROAT_CORE * r_t, "radius1": THROAT_CORE * r_t}
+                         "radius0": THROAT_CONE * r_t, "radius1": THROAT_CONE * r_t}
     if surface.x_end > surface.x_exit:
         re = max(surface.r_exit, h)
         local["lip"] = {"cellSize": 4 * h}

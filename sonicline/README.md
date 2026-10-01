@@ -187,6 +187,7 @@ computed without the CFD.
 | V7 | rhoCentralFoam vs rhoPimpleFoam on V1 | mass flow / thrust | −0.055 % / +0.066 % | 0.1 % / 0.2 % |
 | V9 | ISO 9300 toroidal venturi, Re_d 5×10⁴ and 2.6×10⁵, laminar and SST | Cd vs ISO 9300 | −0.07 % … +0.10 % | 0.3 % (the standard's uncertainty) |
 | V10 | V1 nozzle at 30 bar, Peng–Robinson vs perfect gas | mass-flow ratio vs the Peng–Robinson isentrope (+1.314 %) | −0.009 % | 0.02 % |
+| V18 | V1 nozzle at 30 bar, virial gas vs perfect gas | mass-flow ratio vs the virial isentrope (+1.044 %) / vs the reference equation of state (+1.050 %) | −0.010 % / −0.015 % | 0.02 % / 0.05 % |
 | V12 | V1 driven by V1's own mass flow (mass-flow inlet) | chamber pressure found vs 10 bar | −0.06 % | 0.2 % |
 | V13 | V1 laminar with a 450 K wall | total-temperature rise vs wall heat / (ṁ cp) | 4×10⁻⁵ of T0 (the gas gains 0.96 %) | 2×10⁻³ |
 | V14 | V1 on the unstructured mesher (snappyHexMesh, coarse: 10 cells across the throat radius, 174 k cells) vs the structured wedge | mass flow / thrust | −0.06 % / −0.22 % | 0.5 % / 0.5 % |
@@ -302,11 +303,24 @@ The house rule: say plainly where the model stops.
     report wall temperature and the recovery factor.
   - Every run checks energy conservation: with adiabatic walls, total
     temperature leaving the nozzle must match what enters to 0.2 %.
-- **Real gas in the CFD.** Optional (`"gas": {"equation_of_state":
-  "peng_robinson"}`, shock-free nozzles only). Peng–Robinson over-predicts
-  nitrogen's real-gas mass flux by about a quarter (+0.89 % against the
-  reference equation of state's +0.71 % at 20 bar), so the default stays
-  the perfect gas with the reference correction reported beside it.
+- **Real gas in the CFD: the virial gas.** New simulations use
+  `"equation_of_state": "auto"`, which runs nitrogen as a virial gas
+  wherever the solver is rhoPimpleFoam. The perfect gas is used where a
+  shock needs rhoCentralFoam, with the reference correction reported beside
+  its numbers.
+  - The virial equation, v = RT/p + B(T) + D(T)·p, has B and C fitted to
+    the reference equation of state from 70 to 500 K. SONICLINE compiles it
+    into OpenFOAM as its own small library, like the viscous-work term.
+  - Its choked mass flux matches the reference equation to 0.013 % from 10
+    to 30 bar, and 0.07 % at 50 bar (a warning above 30 bar). In the CFD at
+    30 bar it lands 0.015 % from the reference (V18).
+  - It keeps nitrogen's ideal-gas cp constant, as the perfect gas does.
+    That is right to 0.5 % from 30 K to 400 K.
+  - Peng–Robinson is still available. It over-predicts the real-gas effect
+    by about a quarter (+0.89 % against the reference equation's +0.71 % at
+    20 bar).
+  - Verification cases state their gas explicitly, mostly the perfect gas,
+    since that is what the theory they are checked against assumes.
 - **Solvers.** rhoPimpleFoam (pressure-based) for shock-free nozzles;
   rhoCentralFoam (density-based) wherever quasi-1D theory expects a shock or
   separation inside the nozzle, because rhoPimpleFoam puts a normal shock in
@@ -372,10 +386,20 @@ The house rule: say plainly where the model stops.
     inviscid (V17) and +0.032 % with k-ω SST, thrust within 0.05 %
     (DESIGN.md findings 46 and 52–54). The refinement costs cells: about
     three times as many as before at the coarse preset.
-  - Wall shear on cfMesh read 6 % below the wedge's in that viscous test,
-    because cfMesh made its layers thinner than asked; that is 0.1 % of
-    thrust there. A viscous cfMesh run against a sea-level plume has not
-    been repeated since the fix.
+  - **Wall functions at y⁺ 30 overestimate wall drag.** On V1 with k-ω SST
+    against a wall-resolved run (y⁺ 1):
+    - wall functions at y⁺ 30: drag +6.4 %, thrust −0.07 %;
+    - at y⁺ 6: drag −2.4 %, thrust +0.02 %.
+
+    The Spalding wall function SONICLINE uses holds from the viscous
+    sublayer to the log layer, so a thinner first cell is closer, not
+    worse. `sonicline import` now asks for y⁺ 6 when it picks wall
+    functions. The default for definitions is wall-resolved (y⁺ 1).
+  - cfMesh's layers come out thinner than asked at the throat, around y⁺ 6
+    for a y⁺ 30 target. Its viscous drag on V1 is 0.4 % from the
+    wall-resolved value. Keeping the throat refinement off the wall to
+    restore the layers cost 0.26 % in mass flow and 0.42 % in thrust, so it
+    stays (DESIGN.md findings 58 and 59).
   - For a volume that is not a body of revolution, quasi-1D theory uses the
     radius of a circle of the same section area. Its "ideal" numbers are a
     reference, not a prediction.

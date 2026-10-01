@@ -23,6 +23,8 @@ DEFAULT = {
     "geometry": {"type": "conical_nozzle", "throat_radius": 1e-3, "expansion_ratio": 2.88},
     "boundaries": {"inlet": {"type": "reservoir_inlet", "p0": 20e5, "T0": 300.0}},
     "mesh": {"form": "wedge", "quality": "standard"},
+    # Real-gas nitrogen wherever the solver allows (the virial gas).
+    "gas": {"species": "N2", "equation_of_state": "auto"},
 }
 
 

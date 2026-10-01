@@ -217,6 +217,13 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                                f"{profile.expansion_ratio:.3f} (inlet at the {report.inlet_end} end, "
                                f"{report.inlet_confidence} confidence)"))
 
+    # --- equation of state ------------------------------------------------------
+    if defn.gas.equation_of_state == "auto" and profile is not None:
+        defn = foam_case.resolve_equation_of_state(defn, profile)
+        model.save(defn, run_dir / "definition.json")
+        manifest["equation_of_state"] = {"requested": "auto", "used": defn.gas.equation_of_state}
+        emit(Event("validate", f"equation of state: {defn.gas.equation_of_state.replace('_', ' ')} (automatic)"))
+
     # --- validation ------------------------------------------------------------
     findings = validate(defn, profile)
     manifest["preflight"] = [asdict(f) | {"severity": f.severity.name} for f in findings]

@@ -157,6 +157,8 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                     + (" (the Peng-Robinson CFD over-shoots this; the reported estimate "
                        "corrects it to the reference equation of state)." if defn.gas.peng_robinson
                        else " (the virial CFD includes it)." if defn.gas.virial
+                       else " (the automatic choice puts it in the CFD wherever rhoPimpleFoam runs)."
+                       if defn.gas.equation_of_state == "auto"
                        else " the CFD uses."),
                     "The perfect-gas mass flow and thrust are reported together with this "
                     "correction; the virial equation of state puts it in the CFD."
