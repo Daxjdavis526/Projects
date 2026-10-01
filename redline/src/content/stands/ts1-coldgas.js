@@ -13,7 +13,7 @@
 import { psi, degC, mm, cc, litre, P_STD } from '../../lib/units.js';
 import gonogo from './ts1-gonogo.js';
 import pid from './ts1-pid.js';
-import { FAULTS } from '../faults/ts1-faults.js';
+import { FAULTS, DIAGNOSIS } from '../faults/ts1-faults.js';
 import { INSPECTIONS } from '../faults/ts1-inspections.js';
 import { interlocks } from './ts1-interlocks.js';
 import { predictColdGas } from '../../physics/predict.js';
@@ -283,6 +283,7 @@ export default {
   gonogo,
   pid,
   faults: FAULTS,
+  diagnosis: DIAGNOSIS,
   inspections: INSPECTIONS,
   /* Nominal geometry the data system and the test predictions assume. */
   nominal: { throatDia: mm(2.50), exitDia: mm(3.55), Cd: 0.97 },

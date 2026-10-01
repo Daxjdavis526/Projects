@@ -250,10 +250,12 @@ recorded data, test history that outlives the session, an engineering
 notebook and printable test reports. It ends in an unscripted acceptance
 campaign: a test request, no procedure, maybe a hidden fault, and a report
 graded on whether you noticed the data were not what they seemed. A
-second stand adds a pressure-fed bipropellant engine run cold: water
-through each side of the injector to measure what the drawing only
-estimated, liquid lines that prime and hammer, purge, and two of every
-mistake.
+second stand adds a pressure-fed bipropellant engine: run cold first,
+water through each side of the injector to measure what the drawing only
+estimated, then hot — a spark igniter, start sequences that light smoothly
+or hard, an uncooled copper chamber that sets the burn time and soaks back
+after shutdown, chug when the injector goes soft, and a campaign to hit a
+mixture ratio by trimming two tank pressures.
 Fictional hardware, generalised
 procedures, and it says so. Desktop only.
 

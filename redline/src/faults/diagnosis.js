@@ -11,7 +11,7 @@
 export function scoreDiagnosis(sub, fault, { modes, rightAction }) {
   const parts = [];
   const cat = m => modes.find(x => x[0] === m)?.[2];
-  const isSensorComp = id => /^(PT|TC|LC|FT|EPC|DAQ)/.test(id || '');
+  const isSensorComp = id => /^(PT|TC|LC|FT|EPC|DAQ|WT|OD|VIB|IGN-I\b)/.test(id || '');
   if (!fault) {
     const saidNone = sub.mode === 'none' || sub.component === 'NONE';
     parts.push({ label: 'Fault present?', got: saidNone ? 70 : 0, max: 70, note: saidNone ? 'Correct: nothing was wrong.' : 'There was no fault. The stand and instruments were nominal.' });

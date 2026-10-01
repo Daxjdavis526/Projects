@@ -126,6 +126,18 @@ export class Console {
       shunt));
     const zs = h('div.line.faint', { style: { fontSize: '11px' } });
     this.body.append(zs);
+    // turbine meters: the density the DAQ converts volume flow to mass with
+    const meterSel = [];
+    if (S.def.actions?.meterCal) {
+      const fl = Object.entries(S.def.fluids);
+      const mk = (line, tag) => {
+        const sl = h('select.in', { title: `Density ${tag} is converted to mass flow with`, onchange: () => { const r = act(S, 'meterCal', { line, fluid: sl.value }); if (!r.ok) sl.value = S.controller.meterFluid[line]; } },
+          fl.map(([id, f]) => h('option', { value: id }, `${id} (${f.rho})`)));
+        meterSel.push([sl, line]);
+        return h('span', { style: { display: 'inline-flex', gap: '4px', alignItems: 'center' } }, h('span.lbl', tag), sl);
+      };
+      this.body.append(h('div.line', h('span.muted', { style: { width: '70px' } }, 'Meter fluid'), mk('ox', 'FT-714'), mk('fu', 'FT-724')));
+    }
     this.live.push(() => {
       pw.children[0].classList.toggle('on', d.powered); pw.children[1].classList.toggle('on', !d.powered);
       setText(pst, d.online ? 'ONLINE' : d.powered ? 'BOOTING…' : 'OFF');
@@ -144,6 +156,7 @@ export class Console {
       toggleClass(shunt, 'on', d.sensor(lc).shunt);
       const z = d.sensors.filter(x => x.kind === 'PT');
       setText(zs, z.some(x => x.zeroCorr) ? 'PT zero corrections are applied (see each channel\'s faceplate).' : 'No PT zero taken this session.');
+      for (const [sl, line] of meterSel) if (document.activeElement !== sl) sl.value = S.controller.meterFluid?.[line] || 'water';
     });
   }
 
@@ -257,14 +270,16 @@ export class FireControl {
     // a liquid stand plans flows (which sides, which valve leads); a
     // thruster stand plans burns and pulse trains
     this.liquid = !!S.def.sequence;
-    const opts = this.liquid ? [['both', 'Both sides'], ['ox', 'Oxidiser only'], ['fuel', 'Fuel only']] : [['single', 'Single burn'], ['pulse', 'Pulse train']];
+    this.hotCapable = !!S.def.physics.chamber;
+    const opts = this.liquid ? [['both', 'Cold flow · both'], ['ox', 'Cold flow · ox only'], ['fuel', 'Cold flow · fuel only'], ...(this.hotCapable ? [['hot', 'HOT FIRE']] : [])]
+      : [['single', 'Single burn'], ['pulse', 'Pulse train']];
     const mode = h('select.in', { onchange: () => this._planFields() }, opts.map(([v, l]) => h('option', { value: v }, l)));
-    this.fields = h('span', { style: { display: 'inline-flex', gap: '6px', alignItems: 'center' } });
+    this.fields = h('span', { style: { display: 'inline-flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' } });
     this.mode = mode;
     const plan = h('div.plan', mode, this.fields, btn('LOAD', () => this._load(), 'sm'));
     this.loaded = h('div.loaded');
     host.append(plan, this.loaded);
-    mode.value = this.liquid ? (S.controller.plan.sides || 'both') : S.controller.plan.mode;
+    mode.value = this.liquid ? (S.controller.plan.mode === 'hot' ? 'hot' : S.controller.plan.sides || 'both') : S.controller.plan.mode;
     this._planFields();
     // keys
     this.pollB = h('button.keybtn', { onclick: () => app.openPoll() }, 'POLL');
@@ -286,7 +301,18 @@ export class FireControl {
   _planFields() {
     const p = this.app.session.controller.plan;
     clear(this.fields);
-    if (this.liquid) {
+    const num = (v, step, w, title) => h('input.in', { type: 'number', step, value: v, style: { width: w }, title });
+    if (this.liquid && this.mode.value === 'hot') {
+      this.dur = num(p.duration.toFixed(1), '0.1', '58px', 'Burn duration, s (later main valve open → first closes)');
+      this.lead = num(Math.round((p.lead ?? 0) * 1000), '10', '58px', 'Oxidiser lead, ms (negative: fuel leads)');
+      this.ign = num((p.ignLead ?? 0.5).toFixed(2), '0.05', '62px', 'Igniter on, seconds BEFORE T-0');
+      this.chk = num((p.ignCheck ?? 0.5).toFixed(2), '0.05', '62px', 'Ignition check (Pc confirmed), seconds AFTER T-0');
+      this.shut = h('select.in', { title: 'Shutdown order (50 ms apart)' }, [['ox-first', 'ox first'], ['fuel-first', 'fuel first']].map(([v, l]) => h('option', { value: v }, l)));
+      this.shut.value = p.shutdown || 'ox-first';
+      this.pp = num((p.postPurge ?? 3).toFixed(0), '1', '44px', 'Post-purge, s');
+      this.fields.append(this.dur, h('span.lbl', 's'), this.lead, h('span.lbl', 'ms ox lead'), h('span.lbl', 'IGN T−'), this.ign,
+        h('span.lbl', 'check T+'), this.chk, this.shut, this.pp, h('span.lbl', 's purge'));
+    } else if (this.liquid) {
       this.dur = h('input.in', { type: 'number', step: '0.5', min: 0.5, value: p.duration.toFixed(1), style: { width: '50px' } });
       this.lead = h('input.in', { type: 'number', step: '10', value: Math.round((p.lead ?? 0) * 1000), style: { width: '50px' }, title: 'Oxidiser lead, ms (negative: fuel leads)' });
       this.pp = h('input.in', { type: 'number', step: '1', min: 0, value: (p.postPurge ?? 3).toFixed(0), style: { width: '38px' }, title: 'Post-purge, s' });
@@ -307,7 +333,12 @@ export class FireControl {
   _load() {
     const S = this.app.session;
     let plan;
-    if (this.liquid) plan = { mode: 'single', sides: this.mode.value, duration: Math.max(0.5, Math.min(S.def.ratings.MAX_BURN, Number(this.dur.value) || 0)),
+    if (this.liquid && this.mode.value === 'hot') {
+      const chk = Math.max(0.1, Math.min(3, Number(this.chk.value) || 0.5));
+      plan = { mode: 'hot', sides: 'both', duration: Math.max(0.2, Math.min(S.def.ratings.MAX_BURN, Number(this.dur.value) || 0)),
+        lead: Math.max(-1, Math.min(1, (Number(this.lead.value) || 0) / 1000)), ignLead: Math.max(0, Math.min(3, Number(this.ign.value) || 0)),
+        ignCheck: chk, ignOff: Math.max(1.0, chk + 0.5), shutdown: this.shut.value, shutLag: 0.05, postPurge: Math.max(0, Math.min(30, Number(this.pp.value) || 0)) };
+    } else if (this.liquid) plan = { mode: 'single', sides: this.mode.value, duration: Math.max(0.5, Math.min(S.def.ratings.MAX_BURN, Number(this.dur.value) || 0)),
       lead: this.mode.value === 'both' ? Math.max(-1, Math.min(1, (Number(this.lead.value) || 0) / 1000)) : 0, postPurge: Math.max(0, Math.min(30, Number(this.pp.value) || 0)) };
     else if (this.mode.value === 'pulse') plan = { mode: 'pulse', on: Math.max(0.002, Number(this.on.value) / 1000), off: Math.max(0.02, Number(this.off.value) / 1000), count: Math.max(1, Math.min(50, Math.round(Number(this.cnt.value)))) };
     else plan = { mode: 'single', duration: Math.max(0.05, Math.min(S.def.ratings.MAX_BURN, Number(this.dur.value) || 0)) };
@@ -319,9 +350,16 @@ export class FireControl {
   update() {
     const S = this.app.session, c = S.controller;
     const p = S.prediction;
+    // a plan loaded from elsewhere (a procedure, the API) re-syncs the editor
+    if (c.plan !== this._planRef) {
+      this._planRef = c.plan;
+      const want = this.liquid ? (c.plan.mode === 'hot' ? 'hot' : c.plan.sides || 'both') : c.plan.mode;
+      if (!this.mode.contains(document.activeElement) && !this.fields.contains(document.activeElement) && [...this.mode.options].some(o => o.value === want)) { this.mode.value = want; this._planFields(); }
+    }
     this.loaded.innerHTML = '';
     const pt = !p ? '' : p.kind === 'coldflow'
       ? `  ·  pred. (drawing) ox ${fmt(p.mdotOx, 'massflow')}, fuel ${fmt(p.mdotFu, 'massflow')} ${unitLabel('massflow')} water`
+      : p.kind === 'hotfire' ? (p.Pc > 0 ? `  ·  pred. (drawing) Pc ${fmt(p.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(p.F, 'force')} ${unitLabel('force')}, MR ${p.MR.toFixed(2)}` : '')
       : `  ·  pred. Pc ${fmt(p.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(p.F, 'force')} ${unitLabel('force')}`;
     this.loaded.append('Loaded: ', h('b', c.planText()), pt ? h('span', pt) : null);
     toggleClass(this.armB, 'on', c.armed);

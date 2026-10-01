@@ -15,6 +15,7 @@
 import { GasNetwork } from './gasnet.js';
 import { GASES } from './gas.js';
 import { LiquidLine } from './liquid.js';
+import { Chamber } from './combustion.js';
 
 const G0 = 9.80665;
 
@@ -29,16 +30,25 @@ export class BipropModel {
     this.lineById = new Map(this.lines.map(l => [l.id, l]));
     this.valveToLine = new Map(this.lines.map(l => [l.valve.id, l]));
     this.nozzleEl = p.nozzleElement ? this.net.el(p.nozzleElement) : null;
+    /* The combustion chamber owns the 'chamber' volume's state: the network
+       delivers purge gas into it, the chamber model does the rest. */
+    this.chamber = p.chamber ? new Chamber(p.chamber, { ambient: p.ambient, rng }) : null;
+    this.chVol = this.chamber ? this.net.vol('chamber') : null;
+    if (this.chamber) this._syncChamber();
     const ts = p.thrustStand;
     this.stand = { w: 2 * Math.PI * ts.fn, z: ts.zeta, y: 0, yd: 0, preload: ts.preload ?? 0 };
-    this.scales = p.scales || {};          // tank weigh scales: pressure tare, kg per Pa
+    this.scales = structuredClone(p.scales || {});   // per session: the DAQ's meter calibration can be changed          // tank weigh scales: pressure tare, kg per Pa
     this.t = 0;
     this.impulse = 0;
     this.signals = this._buildSignals();
   }
 
   get time() { return this.t; }
-  get thrust() { return (this.nozzleEl?.F || 0) + this.lines.reduce((s, l) => s + l.Fjet, 0); }
+  get thrust() {
+    const jets = this.lines.reduce((s, l) => s + l.Fjet, 0);
+    if (this.chamber) return this.chamber.F + (this.chamber.burning ? 0 : jets);
+    return (this.nozzleEl?.F || 0) + jets;
+  }
 
   _buildSignals() {
     const net = this.net, s = {}, Pa = net.ambient.P;
@@ -71,6 +81,19 @@ export class BipropModel {
       s['Tl:' + id] = () => net.ambient.T;
       valveSignals(l.valve);
     }
+    const C = this.chamber;
+    if (C) {
+      s['Tw:ch'] = () => C.walls.ch;
+      s['Tw:th'] = () => C.walls.th;
+      s['Tg:ch'] = () => C.Tgas;
+      // the spark exciter draws current whenever commanded, spark or no spark
+      s['I:IGN'] = () => (C.igniter.cmd ? (C.igniter.open ? 0 : 1.8) : 0);
+      // a photodiode looking into the chamber: flame, spark, or dark
+      s['flame'] = () => (C.burning ? 7.5 * Math.min(1, C.P / (0.5 * C.spec.Pnom)) + 0.4 : C.igniter.on ? 0.6 : 0.05);
+      // an accelerometer's RMS converter: combustion roughness plus any instability
+      s['vib'] = () => (C.burning ? 0.6 * C.P / C.spec.Pnom + 45 * C.chug.A + 600 * C.hf.A : 0.02);
+      s['cmd:IGN-901'] = () => C.igniter.cmd;
+    }
     s['F:stand'] = () => this.stand.y;
     s['F:true'] = () => this.thrust;
     s['Pamb'] = () => Pa;
@@ -85,6 +108,7 @@ export class BipropModel {
   }
 
   command(id, value) {
+    if (this.chamber && id === this.def.physics.chamber.igniter) { this.chamber.igniter.cmd = value ? 1 : 0; return; }
     const line = this.valveToLine.get(id);
     if (line) { line.valve.command(!!value, this.net); return; }
     const e = this.net.el(id);
@@ -94,10 +118,23 @@ export class BipropModel {
   }
 
   element(id) { return this.valveToLine.get(id)?.valve || this.net.el(id) || null; }
+
+  /* Technician: load the run tanks — with the simulant or the propellants. */
+  load(fluids, masses) {
+    for (const l of this.lines) { l.setFluid(fluids[l.id]); l.setLiquid(this.net, masses[l.id]); }
+  }
+
+  _syncChamber() {
+    // the network sees the chamber at its (observed, oscillating) pressure;
+    // reverse flow into a manifold arrives cold, which is near enough
+    const v = this.chVol, C = this.chamber, g = this.net.gas;
+    v.P = C.Pobs; v.T = this.net.ambient.T; v.m = v.P * v.V / (g.R * v.T); v.U = v.m * g.cv * v.T;
+  }
   line(id) { return this.lineById.get(id); }
 
   stableDt() {
     let dt = Math.min(this.net.stableDt(), 0.25 / this.stand.w);
+    if (this.chamber) dt = Math.min(dt, this.chamber.stableDt());
     for (const l of this.lines) dt = Math.min(dt, l.stableDt(this.net));
     return Math.max(dt, 2e-6);
   }
@@ -105,6 +142,14 @@ export class BipropModel {
   step(dt) {
     for (const l of this.lines) l.step(dt, this.net);
     this.net.step(dt);
+    if (this.chamber) {
+      const C = this.chamber, Pc = C.P;
+      // injector stiffness: the softer of the sides that are flowing
+      let stiff = Infinity;
+      for (const l of this.lines) if (l.mdotInj > 0.02) stiff = Math.min(stiff, (this.net.volumes[l.man].P - Pc) / Pc);
+      C.step(dt, { ox: this.lineById.get('ox').mdotInj, fu: this.lineById.get('fu').mdotInj }, this.chVol.dm, stiff);
+      this._syncChamber();
+    }
     const st = this.stand, F = this.thrust;
     st.yd += dt * (st.w * st.w * (F + st.preload - st.y) - 2 * st.z * st.w * st.yd);
     st.y += dt * st.yd;

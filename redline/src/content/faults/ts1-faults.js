@@ -462,3 +462,21 @@ export const RIGHT_ACTION = {
   'int-leak': ['repair'], slow: ['repair'], 'fail-closed-mech': ['repair'], 'fail-closed-elec': ['wiring', 'repair'],
   bias: ['recal'], cal: ['recal'], sensitivity: ['config', 'recal', 'repair'], drift: ['repair', 'recal'], failed: ['wiring', 'repair'], noise: ['wiring'], disconnected: ['wiring'],
 };
+
+/* Comparisons and checks an operator can cite, beyond channels and
+   inspections. Ids match the fault answer keys. */
+export const CHECKS = [
+  ['go-no-go', 'Go/no-go poll data'],
+  ['prediction', 'Comparison with the pre-test prediction'],
+  ['static-agreement', 'Static agreement between transducers'],
+  ['leak-check', 'Pressure-decay leak check'],
+  ['shunt-cal', 'Shunt calibration of LC-501'],
+  ['droop', 'Regulator droop (lock-up vs flowing)'],
+  ['rise-time', 'Chamber-pressure rise / decay time'],
+  ['dPv', 'Pressure drop across the fire valve'],
+  ['dThroat', 'Effective throat from the reduction'],
+  ['sound', 'What the cell sounded like'],
+  ['cctv', 'Cell camera'],
+];
+export const CATEGORIES = { none: 'No fault', control: 'Pressure control and supply', flow: 'Flow path', actuation: 'Actuation', sensor: 'Instrument' };
+export const DIAGNOSIS = { modes: FAILURE_MODES, actions: ACTIONS, rightAction: RIGHT_ACTION, checks: CHECKS, categories: CATEGORIES };

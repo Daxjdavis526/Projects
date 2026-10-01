@@ -30,6 +30,7 @@ export class Controller extends Emitter {
       if (e.type === 'valve' || e.type === 'solenoid') this.cmd[e.id] = e.initial ?? (e.normally === 'open' ? 1 : 0);
     }
     for (const l of def.physics.lines || []) this.cmd[l.valve.id] = l.valve.normally === 'open' ? 1 : 0;
+    for (const id of def.physics.auxCommands || []) this.cmd[id] = 0;
     // every regulator's EPC command; `regSet` is the primary regulator's
     this.regIds = (def.regulators || [{ id: def.regulator }]).map(r => r.id);
     this.sp = Object.fromEntries(this.regIds.map(id => [id, 0]));
@@ -46,6 +47,7 @@ export class Controller extends Emitter {
     this.epoch = 0;               // bumps on every configuration change
     this.pollEpoch = -1;
     this.pollResult = null;
+    if (def.initController) def.initController(this);
   }
 
   get t() { return this.s.t; }
@@ -80,6 +82,8 @@ export class Controller extends Emitter {
       regSet: this.regSet,
       sp: this.sp,
       plan: this.plan,
+      loaded: this.loaded ?? null,
+      wallT: id => s.daq.latest(id),
       pollGo: this.pollGo,
       zeroableIds: s.daq.sensors.filter(x => x.zeroable).map(x => x.id),
       fs: id => s.daq.sensor(id)?.span ?? Infinity,
@@ -223,6 +227,7 @@ export class Controller extends Emitter {
         this.armed = false;
         if (this.facility.area === 'SECURED') this.facility.beacon = 'AMBER';
         for (const id of this.mainValves) if (this.cmd[id]) this._cmdValve(id, 0, 'fire circuit disarmed');
+        this._auxOff('fire circuit disarmed');
         if (this.seq) { this.log('SEQ', 'Sequence terminated by DISARM', { level: 'caution' }); this.seq = null; }
         this.log('SEQ', 'Fire circuit SAFE (disarmed)');
         return { ok: true };
@@ -232,6 +237,7 @@ export class Controller extends Emitter {
         if (!this.seq || this.seq.state !== 'COUNTDOWN') return { ok: true, noop: true };
         this.log('SEQ', `HOLD at ${fmtT(this.t - this.seq.tFire, 1)} — countdown recycled, fire valve never opened`, { level: 'caution' });
         this.seq = null;
+        this._auxOff('hold');
         return { ok: true };
       }
       case 'cutoff': {
@@ -262,7 +268,9 @@ export class Controller extends Emitter {
         return { ok: true };
       }
       case 'pa': { this.log('FAC', `PA: "${a.text}"`); return { ok: true }; }
-      default: throw new Error(`unknown action ${action}`);
+      default:
+        if (this.def.actions?.[action]) { const r = this.def.actions[action](this, a); if (r?.ok) this.bump(); return r; }
+        throw new Error(`unknown action ${action}`);
     }
   }
 
@@ -284,6 +292,8 @@ export class Controller extends Emitter {
     const lp = net.vol(this.def.lowPVolume || 'lp').P - Pa;
     if (insp.needs !== 'rack' && f.area !== 'OPEN')
       return { ok: false, blocked: { msg: 'This inspection is done in the cell.', why: 'Open the cell first — which means safing anything hazardous.' } };
+    const guard = this.def.inspectGuard?.(this, insp);
+    if (guard) return { ok: false, blocked: guard };
     if (insp.needs === 'vented' && lpMax > psi(5))
       return { ok: false, blocked: { msg: `Technician: "Local gauge shows ${(lpMax / psi(1)).toFixed(0)} psig. I'm not opening a pressurised system."`, why: 'Vent every section downstream of IV-101 first.' } };
     if (insp.needs === 'lowP' && !(lp > psi(20) && lp < psi(55)))
@@ -377,6 +387,10 @@ export class Controller extends Emitter {
     }
     this.s.audio('valve', { id, open: !!v });
   }
+  /* Sequencer-only outputs that are not valves (an igniter) go off whenever
+     the sequence is stopped. */
+  _auxOff(why) { for (const id of this.def.physics.auxCommands || []) if (this.cmd[id]) this._cmdValve(id, 0, why); }
+
   _fireValve(v, why) { this._cmdValve(this.def.fireValve, v, why); }
 
   /* ---- abort ----------------------------------------------------------- */
@@ -439,6 +453,8 @@ export class Controller extends Emitter {
     const q = this.seq;
     if (q && q.state !== 'ABORTED') {
       const T = t - q.tFire;
+      // events scheduled before T-0 (an igniter that must be sparking first)
+      if (q.state === 'COUNTDOWN') this._runEvents(q, T);
       if (q.state === 'COUNTDOWN' && T >= -EPS) {
         q.state = 'BURN';
         this.log('SEQ', 'T-0', { level: 'caution' });
@@ -476,7 +492,7 @@ export class Controller extends Emitter {
   nextEventTime() {
     const q = this.seq;
     if (!q || q.state === 'ABORTED') return Infinity;
-    if (q.state === 'COUNTDOWN') return q.tFire;
+    if (q.state === 'COUNTDOWN') return Math.min(q.tFire, q.next < q.sched.length ? q.tFire + q.sched[q.next].T : Infinity);
     if ((q.state === 'BURN' || q.state === 'TAIL') && q.next < q.sched.length) return q.tFire + q.sched[q.next].T;
     return Infinity;
   }

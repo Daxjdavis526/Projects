@@ -31,7 +31,7 @@ import { computeMetrics } from '../analysis/metrics.js';
 import { FaultEngine, HINT_COST } from '../faults/engine.js';
 import { scoreDiagnosis, abortAssessment } from '../faults/diagnosis.js';
 import { leakPre, leakEval, LEAK_SECONDS } from '../control/leakcheck.js';
-import { FAILURE_MODES, RIGHT_ACTION } from '../content/faults/ts1-faults.js';
+import { DIAGNOSIS as TS1_DIAGNOSIS } from '../content/faults/ts1-faults.js';
 
 const MODELS = { coldgas: ColdGasModel, biprop: BipropModel };
 const CHUNK = 0.005;
@@ -196,6 +196,7 @@ export class Session extends Emitter {
       runs: this.runs,
       lastRun: this.runs[this.runs.length - 1] || null,
       leakCheck: this.leakCheck,
+      loaded: c.loaded ?? null, meterFluid: c.meterFluid || null, sparkChecked: !!c.sparkChecked,
       pollGo: c.pollGo,
       lastPoll: this.polls[this.polls.length - 1] || null,
       pollAfter: t => this.polls.some(p => p.tEnd >= t),
@@ -263,7 +264,8 @@ export class Session extends Emitter {
   submitDiagnosis(sub) {
     if (this.faults.diagnosis) return this.faults.diagnosis;
     const f = this.faults.active;
-    const result = scoreDiagnosis(sub, f, { modes: FAILURE_MODES, rightAction: RIGHT_ACTION });
+    const D = this.def.diagnosis || TS1_DIAGNOSIS;
+    const result = scoreDiagnosis(sub, f, { modes: D.modes, rightAction: D.rightAction });
     const nh = this.faults.hints.length;
     if (nh) {
       result.parts.push({ label: 'Hints used', got: -HINT_COST * nh, max: 0, note: `${nh} hint${nh > 1 ? 's' : ''} from the senior engineer.` });
@@ -272,7 +274,7 @@ export class Session extends Emitter {
     }
     const rec ={ ...sub, t: this.t, result, abort: abortAssessment(this, f) };
     this.faults.diagnosis = rec;
-    this.log.add(this.t, 'OPR', `Diagnosis submitted: ${sub.component} — ${FAILURE_MODES.find(m => m[0] === sub.mode)?.[1] || sub.mode}. Score ${result.score}/100.`);
+    this.log.add(this.t, 'OPR', `Diagnosis submitted: ${sub.component} — ${D.modes.find(m => m[0] === sub.mode)?.[1] || sub.mode}. Score ${result.score}/100.`);
     this.emit('diagnosis', rec);
     return rec;
   }
@@ -320,6 +322,7 @@ export class Session extends Emitter {
       regSet: c.regSet, plan: { ...c.plan }, rate: d.rate,
       supply: d.latest(this.def.supplyChannel || 'PT-101'),
       sp: { ...c.sp },
+      loaded: c.loaded ?? null, meterFluid: c.meterFluid ? { ...c.meterFluid } : null,
       valves: { ...c.cmd },
       prediction: this.prediction ? { ...this.prediction } : null,
     };

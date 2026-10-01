@@ -30,6 +30,9 @@ export function sessionReport(S) {
       Ibit: m.Ibit, IbitCv: m.IbitCv, n: m.n,
       coldflow: r.metrics?.kind === 'coldflow' ? { mdotOx: m.mdotOx, mdotFu: m.mdotFu, CdAOx: m.CdAOx, CdAFu: m.CdAFu, MR: m.MR, MRhot: m.MRhot, errOx: m.errOx, errFu: m.errFu,
         pOx: r.meta.config.prediction?.mdotOx, pFu: r.meta.config.prediction?.mdotFu, sides: r.plan?.sides || 'both' } : null,
+      hotfire: r.metrics?.kind === 'hotfire' ? { ignited: m.ignited, Pc: m.Pc, F: m.F, MR: m.MR, MRw: m.MRw, cstar: m.cstar, eta: m.etaCstar, Isp: m.Isp, start: m.start,
+        overshoot: m.overshoot, ignDelay: m.ignDelay, TthPeak: m.TthPeak, unburned: m.unburned, flags: r.metrics.flags || [],
+        pPc: r.meta.config.prediction?.Pc, pF: r.meta.config.prediction?.F, pMR: r.meta.config.prediction?.MR, oxP: r.meta.config.sp?.['PR-610'], fuP: r.meta.config.sp?.['PR-620'] } : null,
       pred: r.meta.config.prediction ? { F: r.meta.config.prediction.F, Pc: r.meta.config.prediction.Pc, Isp: r.meta.config.prediction.Isp } : null,
     };
   });
@@ -113,35 +116,28 @@ export const VALIDITY = [
    invalidate the data they touch. A few faults leave the deliverables
    standing, and then "valid with anomalies" is right too. */
 const ALSO_ANOMALIES = new Set(['pt301-bias', 'tc301-fail', 'pt401-noise', 'lc-intermittent', 'fitting-leak', 'sv-seat-leak', 'reg-creep']);
-export function expectedValidity(fault, applied) {
+export function expectedValidity(fault, applied, also = ALSO_ANOMALIES) {
   if (!fault || !applied) return ['valid'];
   const main = fault.category === 'sensor' ? 'invalid-inst' : 'invalid-hw';
-  return ALSO_ANOMALIES.has(fault.id) ? [main, 'anomalies'] : [main];
+  return also.has(fault.id) ? [main, 'anomalies'] : [main];
 }
 
-/* rep: { F, Pc, Isp, Cf, Ibit, IbitCv (fraction), validity, anomalies } in SI. */
-export function gradeCampaign(S, rep, def = S.def) {
-  const f = campaignFindings(S, def);
-  const parts = [];
-  // `ref` and `q` let the UI show the reduction's value in display units
-  const num = (label, got, ref, rel, max, q) => {
-    if (!Number.isFinite(ref)) { parts.push({ label, got: 0, max, note: 'No qualifying run recorded — the deliverable is missing.' }); return; }
-    const ok = Number.isFinite(got) && Math.abs(got - ref) <= rel * Math.abs(ref);
-    parts.push({ label, got: ok ? max : 0, max, ref, q, reported: got, note: ok ? 'Agrees with your reduction.' : Number.isFinite(got) ? 'Does not agree with your own reduction.' : 'Not reported.' });
-  };
-  num('Baseline thrust', rep.F, f.baseline?.F, 0.03, 8, 'force');
-  num('Baseline chamber pressure', rep.Pc, f.baseline?.Pc, 0.03, 8, 'pressure');
-  num('Baseline Isp', rep.Isp, f.baseline?.Isp, 0.03, 6, 'isp');
-  num('Thrust coefficient from the sweep', rep.Cf, f.sweep.ok ? f.sweep.Cf : NaN, 0.03, 8, 'ratio');
-  num('Impulse bit at 10 ms', rep.Ibit, f.pulse?.Ibit, 0.05, 6, 'impulse');
-  num('Impulse-bit scatter', rep.IbitCv, f.pulse?.IbitCv, 0.25, 4, 'percent');
-  // validity against the truth
+/* A deliverable number against the conductor's own reduction. */
+export function numPart(parts, label, got, ref, rel, max, q) {
+  if (!Number.isFinite(ref)) { parts.push({ label, got: 0, max, note: 'No qualifying run recorded — the deliverable is missing.' }); return; }
+  const ok = Number.isFinite(got) && Math.abs(got - ref) <= rel * Math.abs(ref);
+  parts.push({ label, got: ok ? max : 0, max, ref, q, reported: got, note: ok ? 'Agrees with your reduction.' : Number.isFinite(got) ? 'Does not agree with your own reduction.' : 'Not reported.' });
+}
+
+/* The parts every campaign grade shares: the call on the data, the
+   diagnosis, the safety record. */
+export function commonParts(S, parts, validity, also) {
   const fault = S.faults.active, applied = S.faults.applied;
-  const exp = expectedValidity(fault, applied);
+  const exp = expectedValidity(fault, applied, also);
   let v = 0, vn;
-  if (exp.includes(rep.validity)) { v = 30; vn = 'Right call on the data.'; }
-  else if (exp[0] !== 'valid' && rep.validity && rep.validity !== 'valid') { v = 15; vn = `Something was wrong, and you said so — but the better call was "${VALIDITY.find(x => x[0] === exp[0])[1]}".`; }
-  else if (exp[0] === 'valid' && rep.validity === 'anomalies') { v = 10; vn = 'The stand was nominal: the anomalies you noted were ordinary scatter or your own actions.'; }
+  if (exp.includes(validity)) { v = 30; vn = 'Right call on the data.'; }
+  else if (exp[0] !== 'valid' && validity && validity !== 'valid') { v = 15; vn = `Something was wrong, and you said so — but the better call was "${VALIDITY.find(x => x[0] === exp[0])[1]}".`; }
+  else if (exp[0] === 'valid' && validity === 'anomalies') { v = 10; vn = 'The stand was nominal: the anomalies you noted were ordinary scatter or your own actions.'; }
   else vn = exp[0] === 'valid' ? 'The stand was nominal; the data were good.' : 'The data were not what they seemed. Reporting them as valid is how a bad number reaches a design review.';
   parts.push({ label: 'Data validity', got: v, max: 30, note: vn });
   const dg = S.faults.diagnosis;
@@ -149,6 +145,30 @@ export function gradeCampaign(S, rep, def = S.def) {
   parts.push({ label: 'Diagnosis', got: d, max: 20, note: dg ? `Diagnosis scored ${dg.result.score}/100.` : 'No diagnosis submitted.' });
   const safe = S.safetyViolations.length === 0 && S.pollMisses.length === 0;
   parts.push({ label: 'Safety and go/no-go record', got: safe ? 10 : 0, max: 10, note: safe ? 'Clean.' : `${S.safetyViolations.length} safety violation(s), ${S.pollMisses.length} wrong poll call(s).` });
-  const score = parts.reduce((s, p) => s + p.got, 0);
-  return { score, parts, findings: f, expected: exp, grade: score >= 85 ? 'Qualified' : score >= 60 ? 'Qualified with remarks' : 'Not yet' };
+  return exp;
 }
+export const gradeOf = score => (score >= 85 ? 'Qualified' : score >= 60 ? 'Qualified with remarks' : 'Not yet');
+
+/* rep: { F, Pc, Isp, Cf, Ibit, IbitCv (fraction), validity, anomalies } in SI. */
+export function gradeCampaign(S, rep, def = S.def) {
+  const f = campaignFindings(S, def);
+  const parts = [];
+  const num = (...a) => numPart(parts, ...a);
+  num('Baseline thrust', rep.F, f.baseline?.F, 0.03, 8, 'force');
+  num('Baseline chamber pressure', rep.Pc, f.baseline?.Pc, 0.03, 8, 'pressure');
+  num('Baseline Isp', rep.Isp, f.baseline?.Isp, 0.03, 6, 'isp');
+  num('Thrust coefficient from the sweep', rep.Cf, f.sweep.ok ? f.sweep.Cf : NaN, 0.03, 8, 'ratio');
+  num('Impulse bit at 10 ms', rep.Ibit, f.pulse?.Ibit, 0.05, 6, 'impulse');
+  num('Impulse-bit scatter', rep.IbitCv, f.pulse?.IbitCv, 0.25, 4, 'percent');
+  const exp = commonParts(S, parts, rep.validity);
+  const score = parts.reduce((s, p) => s + p.got, 0);
+  return { score, parts, findings: f, expected: exp, grade: gradeOf(score) };
+}
+
+/* What the Level 6 report form asks for: [key, label, conversion, unit]. */
+export const CAMPAIGN_SPEC = {
+  fields: [['F', 'Baseline thrust', 'force'], ['Pc', 'Baseline chamber pressure', 'pressure'], ['Isp', 'Baseline Isp', 'plain', 's'],
+    ['Cf', 'Thrust coefficient (sweep)', 'plain', ''], ['Ibit', 'Impulse bit, 10 ms', 'mNs', 'mN·s'], ['IbitCv', 'Impulse-bit scatter (1σ/mean)', 'pct', '%']],
+  findings: campaignFindings,
+  grade: gradeCampaign,
+};

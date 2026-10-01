@@ -79,6 +79,10 @@ export class LiquidLine {
   get Vliq() { return this.mL / this.rho; }
   get fill() { return this.Vl / this.Vman; }
 
+  /* What the tank holds. Changing it changes the density everything else
+     uses — the injector, the line, the meter. */
+  setFluid(fluid) { this.fluid = fluid; this.rho = fluid.rho; }
+
   /* Load or unload the tank (a technician task, with the tank vented). The
      fill takes a minute, so the gas the liquid displaces leaves through the
      open vent as it goes: the ullage changes size at constant pressure, not
@@ -147,7 +151,7 @@ export class LiquidLine {
     // what the orifices do not pass, purge gas blows out (and, slowly,
     // gravity drains): this is what a post-shutdown purge is for
     const gasOut = this.gasEl ? Math.max(0, this.gasEl.mdot) : 0;
-    const blow = this.Vl > 0 ? this.Vl * this.rho * (Math.min(1, gasOut / 0.002) / 0.4 + 1 / 30) : 0;
+    const blow = this.Vl > 0 ? this.Vl * this.rho * (Math.min(1, gasOut / 0.002) / 0.15 + 1 / 30) : 0;
     this.mdotInj += Math.min(blow, this.Vl * this.rho / dt);
     // liquid inventory
     this.mL = Math.max(0, this.mL - this.mdot * dt);

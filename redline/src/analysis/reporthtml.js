@@ -14,12 +14,14 @@ const F = v => `${fmt(v, 'force')} ${unitLabel('force')}`;
 const num = (v, dp) => (Number.isFinite(v) ? v.toFixed(dp) : '—');
 const pct = (a, b) => (Number.isFinite(a) && Number.isFinite(b) && b ? `${(100 * (a / b - 1)).toFixed(1)} %` : '—');
 
+const FQ = { mNs: 'impulse', pct: 'percent', plain: 'ratio' };
 export function fmtQ(v, q) {
   if (!Number.isFinite(v)) return '—';
   if (q === 'percent') return `${(100 * v).toFixed(1)} %`;
   if (q === 'impulse') return `${(v * 1e3).toFixed(2)} mN·s`;
   if (q === 'isp') return `${v.toFixed(1)} s`;
   if (q === 'ratio') return v.toFixed(3);
+  if (q === 'velocity') return `${v.toFixed(0)} m/s`;
   if (q === 'pressure') return P(v);
   if (q === 'force') return F(v);
   return String(v);
@@ -53,12 +55,22 @@ export function reportHTML(data, c = {}, grade = null, meta = {}) {
     ${runs.map(r => row([
       `<b>${esc(r.id)}</b>`, fmtClock(r.clock), esc(r.plan), P(r.regSet),
       !r.fired ? '<span class="m">no firing</span>'
+        : r.hotfire ? (r.hotfire.ignited ? `Pc ${P(r.hotfire.Pc)}, F ${F(r.hotfire.F)}, MR ${num(r.hotfire.MR, 2)}` : '<span class="bad">no ignition</span>')
         : r.coldflow ? [Number.isFinite(r.coldflow.mdotOx) ? `ox ${fmt(r.coldflow.mdotOx, 'massflow')} g/s` : '', Number.isFinite(r.coldflow.mdotFu) ? `fuel ${fmt(r.coldflow.mdotFu, 'massflow')} g/s` : ''].filter(Boolean).join(', ')
         : r.pulse ? `I-bit ${fmtQ(r.Ibit, 'impulse')}, scatter ${fmtQ(r.IbitCv, 'percent')} (${r.n ?? '—'} pulses)`
         : `F ${F(r.F)}, Pc ${P(r.Pc)}, Isp ${num(r.Isp, 1)} s`,
       r.aborted ? `<span class="bad">ABORT</span> ${esc(r.abort || '')}` : r.alarms.length ? `<span class="warn">${r.alarms.length} alarm(s)</span>` : 'OK',
     ])).join('')}</table>` : '<p class="m">No runs recorded.</p>'));
   const cold = runs.filter(r => r.coldflow && !r.aborted);
+  const hot = runs.filter(r => r.hotfire);
+  if (hot.length) out.push(sec(4, 'Hot-fire results', `<table>
+    ${head(['Run', 'Tanks ox / fuel', 'Start', 'Pc', 'pred.', 'Thrust', 'pred.', 'MR', 'pred.', 'η c*', 'Isp', 'Throat peak'])}
+    ${hot.map(r => { const x = r.hotfire;
+      if (!x.ignited) return row([esc(r.id), `${P(x.oxP)} / ${P(x.fuP)}`, '<span class="bad">NO IGNITION</span>', '—', '—', '—', '—', '—', '—', '—', '—', `${num((x.unburned ?? NaN) * 1e3, 0)} g unburned`]);
+      return row([esc(r.id), `${P(x.oxP)} / ${P(x.fuP)}`, `${esc(x.start)} (${num(100 * x.overshoot, 0)} %)`, P(x.Pc), P(x.pPc), F(x.F), F(x.pF),
+        `${num(x.MR, 3)}${Number.isFinite(x.MRw) ? ` <span class="m">(w ${num(x.MRw, 3)})</span>` : ''}`, num(x.pMR, 3), num(x.eta, 3), `${num(x.Isp, 1)} s`,
+        Number.isFinite(x.TthPeak) ? `${fmt(x.TthPeak, 'temperature')} °C` : '—']); }).join('')}</table>
+    <p class="m">Predictions use the injector drawing and the design c* efficiency. MR from the turbine meters; (w) from the tank scales. Start: smooth / rough / hard by the overshoot of chamber pressure over steady.</p>`));
   if (cold.length) out.push(sec(4, 'Cold-flow results', `<table>
     ${head(['Run', 'Sides', 'Ox flow', 'pred. (drawing)', 'Ox CdA', 'Fuel flow', 'pred. (drawing)', 'Fuel CdA', 'Meter vs scale'])}
     ${cold.map(r => { const c = r.coldflow, mm = v => (Number.isFinite(v) ? `${(v * 1e6).toFixed(3)} mm²` : '—'), g = v => (Number.isFinite(v) ? fmt(v, 'massflow') + ' g/s' : '—');
@@ -66,7 +78,7 @@ export function reportHTML(data, c = {}, grade = null, meta = {}) {
         [c.errOx, c.errFu].filter(Number.isFinite).map(x => `${(100 * x).toFixed(2)} %`).join(' / ') || '—']); }).join('')}</table>
     ${cold.some(r => Number.isFinite(r.coldflow.MRhot)) ? `<p>Hot-fire mixture ratio predicted from these flow coefficients: <b>${cold.filter(r => Number.isFinite(r.coldflow.MRhot)).map(r => r.coldflow.MRhot.toFixed(3)).join(', ')}</b> (design 1.50).</p>` : ''}
     <p class="m">Predictions use the injector DRAWING flow areas. The measured CdA is the as-built injector.</p>`));
-  else out.push(sec(4, 'Results against prediction', single.length ? `<table>
+  else if (!hot.length) out.push(sec(4, 'Results against prediction', single.length ? `<table>
     ${head(['Run', 'Setpoint', 'Thrust', 'pred.', 'Δ', 'Chamber', 'pred.', 'Δ', 'Isp', 'pred.'])}
     ${single.map(r => row([esc(r.id), P(r.regSet), F(r.F), r.pred ? F(r.pred.F) : '—', pct(r.F, r.pred?.F),
       P(r.Pc), r.pred ? P(r.pred.Pc) : '—', pct(r.Pc, r.pred?.Pc), `${num(r.Isp, 1)} s`, r.pred ? `${num(r.pred.Isp, 1)} s` : '—'])).join('')}</table>
@@ -91,9 +103,10 @@ export function reportHTML(data, c = {}, grade = null, meta = {}) {
   out.push(sec(8, 'Conclusions of the test conductor', `<table class="kv">
     ${c.result ? row(['Result', `<b>${esc(c.result)}</b>`]) : ''}
     ${vLabel ? row(['Data validity', `<b>${esc(vLabel)}</b>`]) : ''}
-    ${n ? row(['Baseline', `F ${fmtQ(n.F, 'force')}, Pc ${fmtQ(n.Pc, 'pressure')}, Isp ${fmtQ(n.Isp, 'isp')}`]) : ''}
-    ${n ? row(['Thrust coefficient', fmtQ(n.Cf, 'ratio')]) : ''}
-    ${n ? row(['Impulse bit, 10 ms', `${fmtQ(n.Ibit, 'impulse')}, scatter ${fmtQ(n.IbitCv, 'percent')}`]) : ''}
+    ${n && c.fields ? c.fields.map(([k, label, q, u]) => row([esc(label), fmtQ(n[k], u === 's' ? 'isp' : FQ[q] || q)])).join('') : ''}
+    ${n && !c.fields ? row(['Baseline', `F ${fmtQ(n.F, 'force')}, Pc ${fmtQ(n.Pc, 'pressure')}, Isp ${fmtQ(n.Isp, 'isp')}`]) : ''}
+    ${n && !c.fields ? row(['Thrust coefficient', fmtQ(n.Cf, 'ratio')]) : ''}
+    ${n && !c.fields ? row(['Impulse bit, 10 ms', `${fmtQ(n.Ibit, 'impulse')}, scatter ${fmtQ(n.IbitCv, 'percent')}`]) : ''}
     ${row(['Summary', esc(c.summary || '—')])}
     ${row(['Anomalies', esc(c.anomalies || '—')])}</table>`));
   if (grade) out.push(sec(9, 'Review', `<p><b>${grade.score}/100 — ${esc(grade.grade)}</b></p><table>

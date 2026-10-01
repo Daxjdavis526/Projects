@@ -8,7 +8,8 @@ import { fmt, unitLabel, fmtClock, fromDisplay, toDisplay } from '../../lib/unit
 import { store } from '../store.js';
 import { history, download } from '../history.js';
 import { reportHTML } from '../../analysis/reporthtml.js';
-import { sessionReport, gradeCampaign, VALIDITY } from '../../analysis/report.js';
+import { sessionReport, CAMPAIGN_SPEC, VALIDITY } from '../../analysis/report.js';
+const campaignSpec = S => S.scenario?.campaignSpec || CAMPAIGN_SPEC;
 
 const slug = s => s.replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
 
@@ -52,6 +53,7 @@ export class NotebookView {
       pulses: run.metrics?.pulses?.length || 0,
       prediction: !cfg.prediction ? null : cfg.prediction.kind === 'coldflow'
         ? { kind: 'coldflow', mdotOx: cfg.prediction.mdotOx, mdotFu: cfg.prediction.mdotFu, dPox: cfg.prediction.dPox, dPfu: cfg.prediction.dPfu }
+        : cfg.prediction.kind === 'hotfire' ? { kind: 'hotfire', Pc: cfg.prediction.Pc, F: cfg.prediction.F, MR: cfg.prediction.MR, Isp: cfg.prediction.Isp }
         : { Pc: cfg.prediction.Pc, F: cfg.prediction.F, mdot: cfg.prediction.mdot, Isp: cfg.prediction.Isp },
       alarms: run.alarms,
       aborted: run.aborted,
@@ -147,9 +149,7 @@ export class NotebookView {
         force: [x => fromDisplay(x, 'force'), x => toDisplay(x, 'force')], pressure: [x => fromDisplay(x, 'pressure'), x => toDisplay(x, 'pressure')],
         mNs: [x => x / 1e3, x => x * 1e3], pct: [x => x / 100, x => x * 100], plain: [x => x, x => x],
       };
-      const NUM = [['F', 'Baseline thrust', 'force', unitLabel('force')], ['Pc', 'Baseline chamber pressure', 'pressure', unitLabel('pressure', true)],
-        ['Isp', 'Baseline Isp', 'plain', 's'], ['Cf', 'Thrust coefficient (sweep)', 'plain', ''], ['Ibit', 'Impulse bit, 10 ms', 'mNs', 'mN·s'],
-        ['IbitCv', 'Impulse-bit scatter (1σ/mean)', 'pct', '%']];
+      const NUM = campaignSpec(S).fields.map(([k, label, q, u]) => [k, label, q, u ?? (q === 'force' ? unitLabel('force') : q === 'pressure' ? unitLabel('pressure', true) : '')]);
       const nums = h('div.repnums');
       for (const [k, label, q, u] of NUM) {
         const inp = h('input.in', { type: 'number', step: 'any' });
@@ -178,14 +178,15 @@ export class NotebookView {
 
   _conclusions() {
     const d = this.draft || {}, campaign = !!this.app.session?.scenario?.campaign;
-    return { result: d.result, summary: d.summary, anomalies: d.anomalies, validity: campaign ? d.validity : undefined, numbers: campaign ? d.numbers : undefined };
+    return { result: d.result, summary: d.summary, anomalies: d.anomalies, validity: campaign ? d.validity : undefined, numbers: campaign ? d.numbers : undefined,
+      fields: campaign ? campaignSpec(this.app.session).fields : undefined };
   }
 
   _file() {
     const S = this.app.session, c = this._conclusions(), campaign = !!S.scenario?.campaign, meta = this._meta();
     if (!c.result || (campaign && !c.validity)) { this.app.toast('Incomplete', campaign ? 'State a result and the data validity.' : 'State a result.', 'info'); return; }
     if (S.faults.enabled && !S.faults.diagnosis && !confirm('No diagnosis has been submitted (Console ▸ INSPECT). File the report without one?')) return;
-    const grade = campaign ? gradeCampaign(S, { ...c.numbers, validity: c.validity }) : null;
+    const grade = campaign ? campaignSpec(S).grade(S, { ...c.numbers, validity: c.validity }) : null;
     const n = this.reports.filter(r => r.session === S.uid).length + 1;
     const id = `${S.uid}-${n}`;
     const title = S.request?.title || 'Open-stand session';
@@ -258,6 +259,8 @@ export class NotebookView {
     if (e.prediction) b.append(h('div.faint', { style: { fontSize: '11px', marginTop: '4px' } },
       e.prediction.kind === 'coldflow'
         ? `Prediction (injector drawing): ox ${fmt(e.prediction.mdotOx, 'massflow')}, fuel ${fmt(e.prediction.mdotFu, 'massflow')} ${unitLabel('massflow')} of water`
+        : e.prediction.kind === 'hotfire'
+        ? `Prediction (injector drawing): Pc ${fmt(e.prediction.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(e.prediction.F, 'force')} ${unitLabel('force')}, MR ${e.prediction.MR?.toFixed(2)}, Isp ${e.prediction.Isp?.toFixed(0)} s`
         : `Prediction: Pc ${fmt(e.prediction.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(e.prediction.F, 'force')} ${unitLabel('force')}, ṁ ${fmt(e.prediction.mdot, 'massflow')} g/s, Isp ${e.prediction.Isp?.toFixed(1)} s`));
     b.append(sec('Results'));
     if (!e.results.length) b.append(h('p.muted', 'No firing reduced in this recording.'));

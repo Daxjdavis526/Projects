@@ -15,7 +15,8 @@
    ratio the same injector will give on the real propellants at the design
    injector ΔP — the reason anyone does a cold flow. */
 
-import { meanIn, stdIn, maxIn, crossing, edges } from './metrics.js';
+import { meanIn, stdIn, maxIn, crossing, edges, integrate } from './metrics.js';
+import { G0 } from '../lib/units.js';
 
 const SIDES = [
   { key: 'Ox', name: 'Oxidiser', cmd: 'MOV-713-CMD', man: 'PT-715', vi: 'PT-713', tank: 'PT-710', ft: 'FT-714', wt: 'WT-716', fluid: 'oxidiser' },
@@ -39,6 +40,7 @@ export function computeMetricsBP(run, def) {
   const d = run.data, T = d.T;
   const ch = id => d.series(id);
   if (T.length < 10) return null;
+  if (run.meta?.config?.loaded === 'propellants') return computeMetricsHot(run, def);
   const Pc = ch('PT-801');
   const D = def.design, rho = def.fluids[D.simulant].rho;
   const out = { kind: 'coldflow', items: [], windows: {}, summary: {}, sides: [] };
@@ -108,5 +110,144 @@ export function computeMetricsBP(run, def) {
     S.MRhot = S.mdotHotOx / S.mdotHotFu;
     push('MRhot', 'Hot-fire mixture ratio, predicted from this cold flow', S.MRhot, 'ratio', `design ${D.MR.toFixed(2)}`);
   }
+  return out;
+}
+
+/* Hot-fire data reduction for TS-2. No DOM.
+
+   · ignition: the flame detector (OD-804) crossing 3 V, timed from the
+     later of the two main-valve commands — the moment both propellants
+     were on their way. A late light is a pool of unburned propellant.
+   · start: chamber pressure from 10 % to 90 % of steady (rise time) and
+     its peak in the first 0.3 s above steady (overshoot). A big overshoot
+     is a HARD START.
+   · steady state, over the window: Pc, thrust, both flows (meter and
+     scale), mixture ratio, injector ΔP and stiffness (ΔP/Pc),
+         c*  = Pc·Cd·At / ṁ          (the engine's own figure of merit)
+         η_c* = c* / c*_ideal(MR)     (how well it mixes and burns)
+         Cf  = F / (Pc·Cd·At)         (the nozzle's)
+         Isp = F / (ṁ·g0)
+     with Pc absolute and At from the drawing. Every one of these inherits
+     the flowmeters' calibration: a meter still set for water reads OX-1
+     and FU-1 wrong, and so does everything computed from it.
+   · roughness (σ/mean of PT-801) and vibration level.
+   · walls: throat and chamber temperature at shutdown and their peak
+     afterwards (soak-back), and the impulse after the valves closed. */
+const IGN_V = 3;
+
+export function computeMetricsHot(run, def) {
+  const d = run.data, T = d.T, ch = id => d.series(id);
+  const D = def.design, C = def.physics.chamber, Pa = def.physics.ambient.P;
+  const CdAt = C.Cd * Math.PI / 4 * C.throatDia ** 2;
+  const out = { kind: 'hotfire', items: [], windows: {}, summary: {}, sides: [], flags: [] };
+  const S = out.summary;
+  const push = (key, label, value, quantity, note = '') => out.items.push({ key, label, value, quantity, note });
+  const eo = edges(T, ch('MOV-713-CMD')), ef = edges(T, ch('MFV-723-CMD'));
+  if (!eo.on.length && !ef.on.length) return { kind: 'none', items: [], note: 'No main-valve command in this recording.' };
+  const tEnd = T[T.length - 1];
+  const onO = eo.on[0] ?? NaN, onF = ef.on[0] ?? NaN;
+  const offO = eo.off.find(t => t > onO) ?? tEnd, offF = ef.off.find(t => t > onF) ?? tEnd;
+  const tBoth = Math.max(onO, onF);
+  const tOn = Math.min(onO, onF), tOff = Math.max(offO || 0, offF || 0), tShut = Math.min(offO, offF);
+  out.tOn = tOn; out.tOff = tOff;
+  S.dur = tShut - tBoth;
+  S.lead = onF - onO;                          // + : oxidiser first
+  const fire = run.tFire ?? tOn;
+  const Pc = ch('PT-801'), F = ch('LC-901'), od = ch('OD-804');
+  const meter = run.meta?.config?.meterFluid || {};
+  S.meterOk = meter.ox === D.oxidiser && meter.fu === D.fuel;
+  push('lead', 'Oxidiser lead (MOV-713 cmd before MFV-723 cmd)', S.lead, 'time', S.lead > 0 ? 'ox first' : S.lead < 0 ? 'fuel first' : 'together');
+  // ignition
+  const tIgn = od ? crossing(T, od, tOn, tOff + 0.2, IGN_V, 1) : NaN;
+  S.ignited = Number.isFinite(tIgn);
+  S.ignDelay = tIgn - tBoth;
+  if (!S.ignited) {
+    out.flags.push('no-ignition');
+    const mOx = integrate(T, ch('FT-714'), tOn, tOff + 0.3), mFu = integrate(T, ch('FT-724'), tOn, tOff + 0.3);
+    S.unburned = mOx + mFu;
+    push('ignDelay', 'Ignition (OD-804 > 3 V)', NaN, 'time', 'NO IGNITION');
+    push('unburned', 'Propellant injected without ignition (FT, integrated)', S.unburned, 'mass', 'went through the nozzle unburned — purge and wait before anything else');
+    out.windows.steady = [tOn, tOff];
+    return out;
+  }
+  push('ignDelay', 'Valve-to-flame time (later main valve cmd → OD-804 > 3 V)', S.ignDelay, 'time', 'priming time plus ignition delay');
+  push('tIgn', 'Ignition after T-0', tIgn - fire, 'time');
+  // steady window
+  const dur = tShut - tIgn;
+  const ss0 = tIgn + Math.min(Math.max(0.4, 0.3 * dur), 0.7 * dur), ss1 = tShut - Math.min(0.05, 0.1 * dur);
+  out.windows.steady = [ss0, ss1];
+  const pc = meanIn(T, Pc, ss0, ss1), f = meanIn(T, F, ss0, ss1);
+  S.Pc = pc; S.F = f;
+  // start transient
+  const t10 = crossing(T, Pc, tOn, ss1, 0.1 * pc, 1), t90 = crossing(T, Pc, tOn, ss1, 0.9 * pc, 1);
+  S.rise = t90 - t10;
+  const pk = maxIn(T, Pc, tIgn - 0.01, tIgn + 0.3);
+  // overshoot against the run's own steady level — or, if it never got
+  // there (aborted in the start), against the prediction
+  const pred = run.meta?.config?.prediction;
+  const ref = dur > 0.6 && pc > 0 ? pc : pred?.kind === 'hotfire' && pred.Pc > 0 ? pred.Pc : pc;
+  S.Pmax = pk.v; S.overshoot = ref > 0 ? pk.v / ref - 1 : NaN;
+  // a priming surge arriving into a lit chamber makes some overshoot normal
+  // on this engine; an overpressure abort in the start is a hard start
+  const hardAbort = /overpressure/.test(run.abort || '');
+  S.start = hardAbort || S.overshoot > 0.8 ? 'hard' : S.overshoot > 0.45 ? 'rough' : 'smooth';
+  if (S.start === 'hard') out.flags.push('hard-start');
+  push('rise', 'Pc rise time (10 → 90 % of steady)', S.rise, 'time');
+  push('Pmax', 'Peak chamber pressure in the start (PT-801)', S.Pmax, 'pressure');
+  push('overshoot', 'Start overshoot (peak ÷ steady − 1)', S.overshoot, 'ratio', S.start === 'hard' ? 'HARD START' : S.start === 'rough' ? 'rough start' : 'smooth start');
+  push('Pc', 'Chamber pressure, steady (PT-801)', pc, 'pressure', `design ${(D.Pc / 6894.757).toFixed(0)} psig`);
+  push('F', 'Thrust, steady (LC-901)', f, 'force', `design ${D.F} N`);
+  // flows
+  const sides = [['Ox', 'Oxidiser', 'FT-714', 'WT-716', 'PT-715'], ['Fu', 'Fuel', 'FT-724', 'WT-726', 'PT-725']];
+  for (const [k, n, ft, wt, man] of sides) {
+    const m = meanIn(T, ch(ft), ss0, ss1), mw = -slopeIn(T, ch(wt), ss0, ss1);
+    const dP = meanIn(T, ch(man), ss0, ss1) - pc;
+    Object.assign(S, { ['mdot' + k]: m, ['mdotW' + k]: mw, ['dP' + k]: dP, ['stiff' + k]: dP / (pc + Pa) });
+    push('mdot' + k, `${n} flow, steady (${ft})`, m, 'massflow', `meter set for ${meter[k === 'Ox' ? 'ox' : 'fu'] ?? '?'}`);
+    push('mdotW' + k, `${n} flow, weighed (−d${wt}/dt)`, mw, 'massflow', 'independent of the meter');
+    push('dP' + k, `${n} injector ΔP (${man} − PT-801)`, dP, 'pressure');
+    push('stiff' + k, `${n} injector stiffness (ΔP ÷ Pc abs)`, S['stiff' + k], 'ratio', S['stiff' + k] < 0.15 ? 'SOFT — chug territory' : '');
+  }
+  const md = S.mdotOx + S.mdotFu, mdw = S.mdotWOx + S.mdotWFu;
+  S.MR = S.mdotOx / S.mdotFu; S.MRw = S.mdotWOx / S.mdotWFu;
+  const Pabs = pc + Pa;
+  S.cstar = Pabs * CdAt / md; S.cstarW = Pabs * CdAt / mdw;
+  S.etaCstar = S.cstar / C.cstar(S.MR); S.etaCstarW = S.cstarW / C.cstar(S.MRw);
+  S.Cf = f / (Pabs * CdAt);
+  S.Isp = f / (md * G0); S.IspW = f / (mdw * G0);
+  push('MR', 'Mixture ratio (FT-714 / FT-724)', S.MR, 'ratio', `design ${D.MR.toFixed(2)}`);
+  push('MRw', 'Mixture ratio (weighed)', S.MRw, 'ratio');
+  push('cstar', 'c* = Pc·Cd·At / ṁ (meters)', S.cstar, 'velocity');
+  push('etaCstar', 'c* efficiency vs ideal c*(MR) (meters)', S.etaCstar, 'ratio', `design assumed ${D.etaCstar}`);
+  push('cstarW', 'c* (weighed flows)', S.cstarW, 'velocity');
+  push('etaCstarW', 'c* efficiency (weighed flows)', S.etaCstarW, 'ratio');
+  push('Cf', 'Thrust coefficient F / (Pc·Cd·At)', S.Cf, 'ratio');
+  push('Isp', 'Specific impulse, sea level (meters)', S.Isp, 'time');
+  push('IspW', 'Specific impulse (weighed flows)', S.IspW, 'time');
+  // roughness
+  S.rough = stdIn(T, Pc, ss0, ss1) / pc;
+  const vib = ch('VIB-805');
+  S.vib = vib ? meanIn(T, vib, ss0, ss1) : NaN;
+  S.vibMax = vib ? maxIn(T, vib, tIgn, tShut).v : NaN;
+  if (S.rough > 0.03 || S.vibMax > 4) out.flags.push('rough');
+  push('rough', 'Combustion roughness (σ / mean of PT-801)', S.rough, 'ratio', S.rough > 0.03 ? 'ROUGH' : '');
+  push('vib', 'Vibration, steady (VIB-805)', S.vib, 'accel');
+  push('vibMax', 'Vibration, peak while burning', S.vibMax, 'accel');
+  // walls
+  const th = ch('TC-803'), cw = ch('TC-802');
+  if (th) {
+    S.TthShut = meanIn(T, th, tShut - 0.05, tShut);
+    S.TthPeak = maxIn(T, th, tShut, tEnd).v;
+    S.TchPeak = cw ? maxIn(T, cw, tOn, tEnd).v : NaN;
+    push('TthShut', 'Throat temperature at shutdown (TC-803)', S.TthShut, 'temperature');
+    push('TthPeak', 'Throat temperature peak after shutdown (soak-back)', S.TthPeak, 'temperature', tEnd - tShut < 3 ? 'recording ended early — peak may be later' : '');
+    push('TchPeak', 'Chamber wall peak (TC-802)', S.TchPeak, 'temperature');
+  }
+  // shutdown
+  S.Itot = integrate(T, F, tOn, Math.min(tEnd, tOff + 1.0));
+  S.Ishut = integrate(T, F, tShut, Math.min(tEnd, tOff + 1.0));
+  push('Itot', 'Total impulse (LC-901)', S.Itot, 'impulse');
+  push('Ishut', 'Shutdown impulse (first valve closed → +1 s)', S.Ishut, 'impulse');
+  if (!S.meterOk) out.flags.push('meter-cal');
   return out;
 }

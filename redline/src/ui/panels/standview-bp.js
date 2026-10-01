@@ -21,6 +21,9 @@ export class StandViewBP {
       s('linearGradient', { id: 'cylB', x1: 0, x2: 1 }, s('stop', { offset: 0, 'stop-color': '#2b3136' }), s('stop', { offset: 0.45, 'stop-color': '#59626a' }), s('stop', { offset: 1, 'stop-color': '#1e2327' })),
       s('linearGradient', { id: 'tankB', x1: 0, x2: 1 }, s('stop', { offset: 0, 'stop-color': '#3a4045' }), s('stop', { offset: 0.5, 'stop-color': '#79828a' }), s('stop', { offset: 1, 'stop-color': '#2e3439' })),
       s('linearGradient', { id: 'sprayB', x1: 0, x2: 1 }, s('stop', { offset: 0, 'stop-color': '#e9f7ff', 'stop-opacity': 0.85 }), s('stop', { offset: 1, 'stop-color': '#bfe3f5', 'stop-opacity': 0 })),
+      s('linearGradient', { id: 'flameB', x1: 0, x2: 1 }, s('stop', { offset: 0, 'stop-color': '#fff6d8', 'stop-opacity': 0.95 }), s('stop', { offset: 0.25, 'stop-color': '#ffb347', 'stop-opacity': 0.85 }),
+        s('stop', { offset: 0.7, 'stop-color': '#ff6a2b', 'stop-opacity': 0.35 }), s('stop', { offset: 1, 'stop-color': '#7a3cff', 'stop-opacity': 0 })),
+      s('radialGradient', { id: 'glowB' }, s('stop', { offset: 0, 'stop-color': '#ffb347', 'stop-opacity': 0.45 }), s('stop', { offset: 1, 'stop-color': '#ffb347', 'stop-opacity': 0 })),
       s('radialGradient', { id: 'beamB' }, s('stop', { offset: 0, 'stop-color': '#fff', 'stop-opacity': 0.5 }), s('stop', { offset: 1, 'stop-color': '#fff', 'stop-opacity': 0 })),
       s('filter', { id: 'blurB' }, s('feGaussianBlur', { stdDeviation: 3 })),
       s('filter', { id: 'grainB' }, s('feTurbulence', { type: 'fractalNoise', baseFrequency: 0.9, numOctaves: 1, seed: 5 }), s('feColorMatrix', { values: '0 0 0 0 0.5  0 0 0 0 0.55  0 0 0 0 0.5  0 0 0 0.06 0' }))));
@@ -95,6 +98,12 @@ export class StandViewBP {
     this.drip = s('path', { d: 'M1090,320 Q1150,360 1210,398', fill: 'none', stroke: '#bfe3f5', 'stroke-width': 3, opacity: 0 });
     this.puff = s('ellipse', { cx: 1110, cy: 306, rx: 30, ry: 14, fill: '#dfeff7', opacity: 0, filter: 'url(#blurB)' });
     svg.append(this.spray, this.drip, this.puff);
+    // fire: the plume, the light it throws on the cell, shock diamonds, the spark
+    this.glow = s('ellipse', { cx: 1150, cy: 306, rx: 260, ry: 160, fill: 'url(#glowB)', opacity: 0 });
+    this.flame = s('path', { d: 'M1080,294 C1140,286 1200,272 1270,262 L1270,350 C1200,340 1140,326 1080,318 Z', fill: 'url(#flameB)', opacity: 0 });
+    this.diamonds = s('g', { opacity: 0 }, ...[1108, 1134, 1160].map((x, i) => s('path', { d: `M${x},306 l10,-${7 - i} l10,${7 - i} l-10,${7 - i} Z`, fill: '#fff3c4', opacity: 0.8 - 0.2 * i })));
+    this.sparkFx = s('circle', { cx: 1060, cy: 300, r: 5, fill: '#cfe3ff', opacity: 0, filter: 'url(#blurB)' });
+    svg.append(this.glow, this.flame, this.diamonds, this.sparkFx);
     this.pool = s('ellipse', { cx: 1200, cy: 400, rx: 10, ry: 3, fill: '#5fc6d8', opacity: 0.5 });
     svg.append(this.pool, T(1250, 425, 'CATCH AREA', 'end'));
     // people
@@ -119,8 +128,8 @@ export class StandViewBP {
     this.door.setAttribute('opacity', open ? 0.5 : 1);
     this.people.style.display = open ? '' : 'none';
     const tech = c.tech?.task;
-    this.p1.setAttribute('transform', `translate(${tech === 'openHV' || tech === 'closeHV' ? 228 : tech === 'fillTanks' || tech === 'drainTanks' ? 470 : 110},0)`);
-    this.p2.setAttribute('transform', `translate(${tech === 'walkdown' || tech === 'inspect' ? 1140 : 860},0)`);
+    this.p1.setAttribute('transform', `translate(${tech === 'openHV' || tech === 'closeHV' ? 228 : tech === 'fillTanks' || tech === 'drainTanks' || tech === 'loadPropellants' ? 470 : 110},0)`);
+    this.p2.setAttribute('transform', `translate(${tech === 'walkdown' || tech === 'inspect' || tech === 'inspection' ? 1140 : 860},0)`);
     const col = { GREEN: '#2fb344', AMBER: '#f2b21c', RED: '#e5484d' }[f.beacon];
     const blink = f.beacon === 'RED' ? (Math.floor(performance.now() / 400) % 2) : 1;
     this.beacon.setAttribute('fill', blink ? col : '#3a2222');
@@ -134,10 +143,21 @@ export class StandViewBP {
       const l = m.line(t.line), fr = Math.min(1, l.mL / (l.Vtank * l.rho));
       t.lv.setAttribute('y', (356 - 116 * fr).toFixed(1)); t.lv.setAttribute('height', (116 * fr).toFixed(1));
     }
-    // water: what the camera sees leaving the injector
+    // liquid: what the camera sees leaving the injector — unless it is burning
+    const C = m.chamber, lit = !!C?.burning;
     const q = m.lines.reduce((a, l) => a + l.mdotInj, 0);
-    const k = Math.min(1, q / 0.35), flick = 0.88 + 0.12 * Math.sin(performance.now() / 19);
+    const k = lit ? 0 : Math.min(1, q / 0.35), flick = 0.88 + 0.12 * Math.sin(performance.now() / 19);
     this.spray.setAttribute('opacity', (k * 0.8 * flick).toFixed(3));
+    if (C) {
+      const kp = lit ? Math.min(1.2, C.P / C.spec.Pnom) : 0, tnow = performance.now();
+      // a rough engine flickers; a screeching one shakes
+      const rough = 1 + 3 * C.chug.A * Math.sin(tnow / 9) + 0.08 * Math.sin(tnow / 23) + 6 * C.hf.A * Math.sin(tnow / 3);
+      this.flame.setAttribute('opacity', (Math.min(1, kp) * Math.max(0.3, Math.min(1, rough))).toFixed(3));
+      this.flame.setAttribute('transform', `translate(1080,306) scale(${(0.6 + 0.5 * kp).toFixed(3)},${(0.8 + 0.3 * kp).toFixed(3)}) translate(-1080,-306)`);
+      this.diamonds.setAttribute('opacity', (kp > 0.6 ? 0.7 * Math.min(1, (kp - 0.6) / 0.3) : 0).toFixed(3));
+      this.glow.setAttribute('opacity', (0.9 * Math.min(1, kp) * (0.92 + 0.08 * Math.sin(tnow / 31))).toFixed(3));
+      this.sparkFx.setAttribute('opacity', C.igniter.on && !lit ? (Math.floor(tnow / 60) % 2 ? 0.9 : 0.2) : 0);
+    }
     this.drip.setAttribute('opacity', (Math.min(1, q / 0.02) * 0.5).toFixed(3));
     this.poolSize = Math.min(60, this.poolSize + q * 0.02);
     this.pool.setAttribute('rx', (10 + this.poolSize).toFixed(1));

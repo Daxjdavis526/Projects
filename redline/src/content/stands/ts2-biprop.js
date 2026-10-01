@@ -7,10 +7,12 @@
    valve. The engine, BPE-1, is an invented 500 N-class research engine with
    an impinging-doublet injector.
 
-   Phase 6 runs it COLD: both tanks hold water (the simulant), the chamber
-   is open to the cell, and nothing burns. The propellants BPE-1 is designed
-   for — OX-1 and FU-1 — are fictional too; their densities are what
-   turns a cold-flow result into a hot-fire prediction.
+   It runs COLD with water in both tanks (cold flow: nothing burns, the
+   chamber is open to the cell) or HOT with the propellants BPE-1 is
+   designed for, OX-1 and FU-1 — fictional, a storable oxidiser and an
+   alcohol-like fuel, with an invented c*(MR) curve. A spark igniter lights
+   them; the chamber is an uncooled copper heat sink, so burn time is
+   limited by how hot its throat gets.
 
    Same shape as TS-1: one data file is the stand. */
 
@@ -20,6 +22,8 @@ import pid from './ts2-pid.js';
 import { interlocks } from './ts2-interlocks.js';
 import { predictBiprop } from '../../physics/predict-bp.js';
 import { computeMetricsBP } from '../../analysis/metrics-bp.js';
+import { FAULTS, DIAGNOSIS } from '../faults/ts2-faults.js';
+import { INSPECTIONS } from '../faults/ts2-inspections.js';
 
 const AMB = { P: P_STD, T: degC(20) };
 const g = x => AMB.P + psi(x);
@@ -40,9 +44,27 @@ export const DESIGN = {
   CdAox: 3.28e-6, CdAfu: 2.62e-6,
   mdotOx: 0.130, mdotFu: 0.087, MR: 1.50, dPinj: psi(100),
   oxidiser: 'OX-1', fuel: 'FU-1', simulant: 'water',
-  throatDia: mm(14.4),
+  throatDia: mm(14.4), exitDia: mm(28),
+  etaCstar: 0.95,                 // what the design assumed; the as-built engine is a little worse
+  Pc: psi(275), F: 495,           // design point, sea level
+  burnLimit: 5,                   // s, heat-sink chamber at the design point
 };
-const AS_BUILT = { ox: 0.94, fu: 1.03 };
+const AS_BUILT = { ox: 0.94, fu: 1.03, etaCstar: 0.94 };
+
+/* The propellant pair's ideal characteristic velocity and flame temperature
+   against mixture ratio (equilibrium-like, invented, shaped like an
+   alcohol/oxygen-rich storable pair: peak c* a little fuel-rich of
+   stoichiometric). */
+const MR_T = [0.5, 0.8, 1.0, 1.2, 1.4, 1.5, 1.6, 1.8, 2.0, 2.5, 3.0, 4.0, 6.0, 8.0];
+const CS_T = [1050, 1320, 1460, 1565, 1625, 1640, 1642, 1622, 1585, 1480, 1370, 1180, 900, 750];
+const TC_T = [1300, 2000, 2450, 2850, 3120, 3200, 3240, 3250, 3200, 3050, 2850, 2450, 1800, 1400];
+const interp = (xs, ys) => x => {
+  if (!(x > xs[0])) return ys[0];
+  for (let i = 1; i < xs.length; i++) if (x <= xs[i]) return ys[i - 1] + (ys[i] - ys[i - 1]) * (x - xs[i - 1]) / (xs[i] - xs[i - 1]);
+  return ys[ys.length - 1];
+};
+export const CSTAR = interp(MR_T, CS_T);
+export const TFLAME = interp(MR_T, TC_T);
 
 const tankWall = { C: 15000, hA: 8, hAflow: 120, hAamb: 10 };
 const small = { C: 300, hA: 0.4, hAflow: 80, hAamb: 1 };
@@ -64,7 +86,9 @@ const physics = {
     { id: 'fupl', V: cc(10), wall: small },
     { id: 'oxman', V: cc(25), wall: small },              // ox injector manifold (gas part)
     { id: 'fuman', V: cc(20), wall: small },              // fuel injector manifold (gas part)
-    { id: 'chamber', V: litre(0.4), wall: { C: 3000, hA: 0.5, hAflow: 40, hAamb: 2 } },
+    // owned by the combustion model (physics/combustion.js); the network
+    // only delivers purge gas into it
+    { id: 'chamber', V: litre(0.4), external: true },
   ],
   elements: [
     { id: 'HV-600', type: 'valve', from: 'tank', to: 'sup', CdA: 2.0e-5, normally: 'closed', stroke: 2.5 },
@@ -87,8 +111,6 @@ const physics = {
     // (area driven by the liquid model each step)
     { id: 'INJ-OXG', type: 'orifice', from: 'oxman', to: 'chamber', CdA: 3.6e-6, hidden: true },
     { id: 'INJ-FUG', type: 'orifice', from: 'fuman', to: 'chamber', CdA: 2.9e-6, hidden: true },
-    { id: 'NZ-801', type: 'nozzle', from: 'chamber', to: 'ambient',
-      nozzle: { throatDia: DESIGN.throatDia, exitDia: mm(28), Cd: 0.98, halfAngleDeg: 15 } },
   ],
   lines: [
     { id: 'ox', fluid: FLUIDS.water, tank: 'oxu', manifold: 'oxman', chamber: 'chamber', gasPath: 'INJ-OXG',
@@ -100,7 +122,14 @@ const physics = {
       CdAinj: DESIGN.CdAfu * AS_BUILT.fu, CdAinjGas: 2.9e-6,
       valve: { id: 'MFV-723', CdA: 4.0e-5, normally: 'closed', delay: 0.05, strokeOpen: 0.25, strokeClose: 0.2, char: 'ball' } },
   ],
-  nozzleElement: 'NZ-801',
+  chamber: {
+    V: litre(0.4), throatDia: DESIGN.throatDia, exitDia: DESIGN.exitDia, Cd: 0.98,
+    cstar: CSTAR, etaCstar: AS_BUILT.etaCstar, Pnom: 2.1e6, igniter: 'IGN-901',
+    fChug: 110, fHF: 3300,
+    // copper heat sink: chamber wall and throat as two thermal nodes (J/K, W/K)
+    wall: { Cch: 800, Cth: 250, hAch: 30, hAth: 18, Gcond: 4, Gamb: 3 },
+  },
+  auxCommands: ['IGN-901'],
   thrustStand: { fn: 60, zeta: 0.08 },
   // tank scales: zero is set by taring; the flex lines put a pressure tare on them
   scales: { ox: { tarePerPa: 0.030 / psi(100), rhoCal: 998 }, fu: { tarePerPa: 0.025 / psi(100), rhoCal: 998 } },
@@ -148,6 +177,14 @@ const sensors = [
   TC('TC-717', 'Tl:ox', 'Oxidiser liquid temperature', 2.0),
   TC('TC-727', 'Tl:fu', 'Fuel liquid temperature', 2.0),
   TC('TC-601', 'Tw:tank', 'Pressurant bottle skin temperature', 4.0),
+  TC('TC-802', 'Tw:ch', 'Chamber wall temperature (embedded)', 0.6),
+  TC('TC-803', 'Tw:th', 'Throat wall temperature (embedded)', 0.6),
+  { id: 'OD-804', kind: 'OD', quantity: 'voltage', signal: 'flame', desc: 'Flame detector (photodiode up the nozzle)',
+    range: [0, 10], noise: 0.02, hum: 0.01, tau: 0.002, zeroSigma: 0, bits: 16, zeroable: false },
+  { id: 'IGN-I', kind: 'I', quantity: 'current', signal: 'I:IGN', desc: 'Igniter exciter current',
+    range: [0, 3], noise: 0.01, hum: 0, tau: 0.001, zeroSigma: 0, bits: 16, zeroable: false },
+  { id: 'VIB-805', kind: 'ACC', quantity: 'accel', signal: 'vib', desc: 'Engine vibration (accelerometer, RMS converter)',
+    range: [0, 100], noise: 0.03, hum: 0, tau: 0.05, zeroSigma: 0, bits: 16, zeroable: false },
   { id: 'LC-901', kind: 'LC', quantity: 'force', signal: 'F:stand', desc: 'Engine thrust load cell',
     range: [-1000, 1000], noise: 0.08, hum: 0.05, tau: 0, zeroSigma: 1.5, bits: 24, shuntCal: 500 },
   EPC('EPC-610', 'PR-610'), EPC('EPC-620', 'PR-620'), EPC('EPC-630', 'PR-630'),
@@ -167,12 +204,17 @@ const channels = {
     { id: 'IV-601-CMD', target: 'IV-601', desc: 'Pressurant isolation command' },
     { id: 'VV-711-CMD', target: 'VV-711', desc: 'Oxidiser tank vent command (1 = open)' },
     { id: 'VV-721-CMD', target: 'VV-721', desc: 'Fuel tank vent command (1 = open)' },
+    { id: 'IGN-901-CMD', target: 'IGN-901', desc: 'Igniter command' },
   ],
   derived: [
     { id: 'DP-OXI', quantity: 'pressure', gauge: false, desc: 'Oxidiser injector ΔP (PT-715 − PT-801)', inputs: ['PT-715', 'PT-801'], fn: ([a, b]) => a - b },
     { id: 'DP-FUI', quantity: 'pressure', gauge: false, desc: 'Fuel injector ΔP (PT-725 − PT-801)', inputs: ['PT-725', 'PT-801'], fn: ([a, b]) => a - b },
     { id: 'DP-OXL', quantity: 'pressure', gauge: false, desc: 'Oxidiser feed-line ΔP (PT-710 − PT-715)', inputs: ['PT-710', 'PT-715'], fn: ([a, b]) => a - b },
     { id: 'DP-FUL', quantity: 'pressure', gauge: false, desc: 'Fuel feed-line ΔP (PT-720 − PT-725)', inputs: ['PT-720', 'PT-725'], fn: ([a, b]) => a - b },
+    /* Characteristic velocity from chamber pressure and the meters:
+       c* = Pc·Cd·At / ṁ. Only as good as the meters' calibration fluid. */
+    { id: 'CSTAR-C', quantity: 'velocity', desc: 'c*, from PT-801 and FT-714 + FT-724', inputs: ['PT-801', 'FT-714', 'FT-724'],
+      fn: ([p, o, f], k) => (o + f > 0.05 && p > 6894.757 * 20 ? (p + k.Pamb) * k.CdAt / (o + f) : 0) },
     { id: 'MR-C', quantity: 'ratio', desc: 'Mixture ratio, FT-714 / FT-724 (as measured)', inputs: ['FT-714', 'FT-724'], fn: ([o, f]) => safeDiv(o, f) },
     /* Flow coefficient of each injector side, from the flowmeter and the
        injector ΔP, assuming the SIMULANT density. Valid in steady cold flow
@@ -230,7 +272,9 @@ const components = {
   'BPE-1': V('BPE-1', 'Bipropellant research engine (fictional)', 'Test article', {
       'Injector': 'Impinging doublets', 'Design point (hot)': 'OX-1 0.130 kg/s, FU-1 0.087 kg/s, MR 1.50',
       'Design injector ΔP': '100 psi', 'Ox injector CdA (drawing)': '3.28 mm²', 'Fuel injector CdA (drawing)': '2.62 mm²', 'Throat': 'Ø 14.4 mm' },
-    'In phase 6 it is flowed cold: water through both sides, the chamber open to the cell. The flow coefficients on its drawing are estimates; the cold flow measures the real ones.', { ref: ['injector', 'mixture-ratio', 'cold-flow'] }),
+    'Flowed cold with water to measure its injector, then fired on OX-1 / FU-1. The chamber is uncooled copper: it soaks up heat during a burn and keeps getting hotter at the throat for a while after it. Its flow coefficients on the drawing are estimates; the cold flow measures the real ones.', { ref: ['injector', 'mixture-ratio', 'cold-flow', 'hard-start', 'heat-sink-chamber'] }),
+  'IGN-901': V('IGN-901', 'Spark igniter', 'Spark-torch igniter with exciter', { 'Exciter current': '≈1.8 A when firing', 'Commanded by': 'the sequencer' },
+    'Lights the engine. It must be sparking BEFORE the propellants arrive, and confirmed after: by chamber pressure and the flame detector. A spark that is not there still draws exciter current — current proves the exciter, not the spark.', { ref: ['ignition', 'hard-start'] }),
   'LC-901': V('LC-901', 'Engine thrust load cell', '±1000 N load cell', { 'Shunt cal': '500 N' },
     'Sized for hot fire. In cold flow it sees only the momentum of the water jets — a few newtons in a 1000 N cell.'),
 };
@@ -241,8 +285,9 @@ const componentSensors = {
   'T-710': ['PT-710', 'WT-716', 'TC-717'], 'T-720': ['PT-720', 'WT-726', 'TC-727'], 'VV-711': ['PT-710'], 'VV-721': ['PT-720'],
   'MOV-713': ['MOV-713-ZSO', 'MOV-713-ZSC', 'PT-713', 'PT-715', 'FT-714'], 'MFV-723': ['MFV-723-ZSO', 'MFV-723-ZSC', 'PT-723', 'PT-725', 'FT-724'],
   'PV-631': ['PT-630', 'PT-715'], 'PV-632': ['PT-630', 'PT-725'], 'BPE-1': ['PT-715', 'PT-725', 'PT-801', 'DP-OXI', 'DP-FUI', 'CDA-OX', 'CDA-FU', 'MR-C'],
-  'LC-901': ['LC-901'],
+  'LC-901': ['LC-901'], 'IGN-901': ['IGN-I', 'OD-804'],
 };
+componentSensors['BPE-1'].push('TC-802', 'TC-803', 'OD-804', 'VIB-805', 'CSTAR-C');
 
 /* ---- limits --------------------------------------------------------- */
 const limits = [
@@ -258,7 +303,19 @@ const limits = [
     when: c => c.burning && c.cmd['MOV-713'] === 1 && c.Tburn > 1.0 && c.predDpOx > 0, text: 'Oxidiser manifold pressure low during flow' },
   { id: 'PT725-LO', channel: 'PT-725', lo: c => 0.4 * c.predDpFu, level: 'warning', persist: 0.3,
     when: c => c.burning && c.cmd['MFV-723'] === 1 && c.Tburn > 1.0 && c.predDpFu > 0, text: 'Fuel manifold pressure low during flow' },
-  { id: 'PT801-RL', channel: 'PT-801', hi: psi(60), level: 'redline', action: 'abort', persist: 0.05, text: 'chamber pressure in a cold-flow test' },
+  { id: 'PT801-RL', channel: 'PT-801', hi: psi(60), level: 'redline', action: 'abort', persist: 0.05, when: c => !c.hot, text: 'chamber pressure in a cold-flow test' },
+  /* hot fire */
+  // the chamber's structural limit, not a band around the prediction: a
+  // start overshoot is normal, a hard start is not
+  { id: 'PT801-HI', channel: 'PT-801', hi: psi(475), level: 'redline', action: 'abort', persist: 0,
+    when: c => c.hot && c.firing, text: 'chamber overpressure (hard start?)' },
+  { id: 'PT801-LO', channel: 'PT-801', lo: c => (c.T < c.ignCheck + 0.3 ? 0.3 : 0.6) * c.predPc, level: 'redline', action: 'abort', persist: 0.02,
+    when: c => c.hot && c.burning && c.T >= c.ignCheck && c.predPc > 0, text: 'chamber pressure low — no ignition, or flameout' },
+  { id: 'TC803-HI', channel: 'TC-803', hi: degC(450), level: 'caution', persist: 0.2, text: 'Throat temperature high' },
+  { id: 'TC803-RL', channel: 'TC-803', hi: degC(600), level: 'redline', action: 'abort', persist: 0.1, when: c => c.burning, text: 'throat over temperature' },
+  { id: 'TC802-HI', channel: 'TC-802', hi: degC(350), level: 'caution', persist: 0.2, text: 'Chamber wall temperature high' },
+  { id: 'VIB805-RL', channel: 'VIB-805', hi: 15, level: 'redline', action: 'abort', persist: 0.08, when: c => c.burning && c.hot, text: 'engine vibration — combustion instability' },
+  { id: 'VIB805-HI', channel: 'VIB-805', hi: 4, level: 'caution', persist: 0.15, when: c => c.burning && c.hot, text: 'Engine vibration above normal (roughness)' },
   { id: 'FT714-DEV', channel: 'FT-714', lo: c => 0.8 * c.predOx, hi: c => 1.2 * c.predOx, level: 'caution', persist: 0.3,
     when: c => c.burning && c.cmd['MOV-713'] === 1 && c.Tburn > 1.0 && c.predOx > 0.02, text: 'Oxidiser flow out of family (±20 % of prediction)' },
   { id: 'FT724-DEV', channel: 'FT-724', lo: c => 0.8 * c.predFu, hi: c => 1.2 * c.predFu, level: 'caution', persist: 0.3,
@@ -270,6 +327,7 @@ const limits = [
    left sitting in a manifold. */
 const abortSequence = [
   { at: 0.00, id: 'MOV-713', value: 0, text: 'MOV-713 main oxidiser valve CLOSE' },
+  { at: 0.00, id: 'IGN-901', value: 0, text: 'Igniter OFF' },
   { at: 0.00, id: 'MFV-723', value: 0, text: 'MFV-723 main fuel valve CLOSE' },
   { at: 0.05, id: 'PV-631', value: 1, text: 'PV-631 oxidiser-side purge OPEN' },
   { at: 0.05, id: 'PV-632', value: 1, text: 'PV-632 fuel-side purge OPEN' },
@@ -284,15 +342,21 @@ const abortSequence = [
 
 const ratings = {
   TANK_MEOP: psi(600), RELIEF_TANK: psi(660), MAWP_TANK: psi(750),
-  PERSONNEL_MAX: psi(50), REG_MAX_CMD: psi(620), PURGE_MIN: psi(100), PURGE_MAX: psi(300),
+  PERSONNEL_MAX: psi(50), REG_MAX_CMD: psi(620), PURGE_MIN: psi(100), PURGE_MAX: psi(300), WALL_REFIRE: degC(150),
   SUPPLY_MIN: psi(1000), VENTED: psi(3), MAX_BURN: 30, TANK_RESERVE: 1.5,
   FILL_OX: 10.0, FILL_FU: 8.0,
 };
 
-/* The sequence a cold-flow (later: hot-fire) plan turns into. T is
-   relative to T-0. `lead` > 0 opens the oxidiser first. Purge is on until
-   the main valves open and comes back on as they close. */
+/* The sequence a plan turns into. T is relative to T-0; a hot fire has
+   events before it (the igniter starts sparking first).
+   Cold flow: `lead` > 0 opens the oxidiser first; purge is on until the
+   main valves open and comes back on as they close.
+   Hot fire: igniter on at −ignLead; main valves with the lead; igniter off at
+   ignOff; shutdown oxidiser-first (fuel-rich) or fuel-first, the second
+   valve `shutLag` later; post-purge. Ignition is CONFIRMED by a redline
+   (PT801-LO) armed at ignCheck: no chamber pressure by then, abort. */
 function sequence(p) {
+  if (p.mode === 'hot') return hotSequence(p);
   const ev = [], ox = p.sides !== 'fuel', fu = p.sides !== 'ox';
   const lead = ox && fu ? (p.lead ?? 0) : 0;
   const tOx = Math.max(0, -lead), tFu = Math.max(0, lead), dur = p.duration;
@@ -307,7 +371,28 @@ function sequence(p) {
   if (fu) ev.push({ T: tp, id: 'PV-632', v: 0, why: 'post-purge end' });
   return ev.sort((a, b) => a.T - b.T);
 }
+function hotSequence(p) {
+  const lead = p.lead ?? 0, tOx = Math.max(0, -lead), tFu = Math.max(0, lead), dur = p.duration;
+  const ev = [
+    { T: -(p.ignLead ?? 0.5), id: 'IGN-901', v: 1, why: 'igniter on' },
+    { T: tOx, id: 'PV-631', v: 0, why: 'purge off' }, { T: tOx, id: 'MOV-713', v: 1, why: 'T-0 ox', main: true },
+    { T: tFu, id: 'PV-632', v: 0, why: 'purge off' }, { T: tFu, id: 'MFV-723', v: 1, why: 'T-0 fuel', main: true },
+    { T: p.ignOff ?? 1.0, id: 'IGN-901', v: 0, why: 'igniter off' },
+  ];
+  const end = Math.max(tOx, tFu) + dur, lag = p.shutLag ?? 0.05;
+  const [first, second] = (p.shutdown || 'ox-first') === 'ox-first' ? [['MOV-713', 'PV-631'], ['MFV-723', 'PV-632']] : [['MFV-723', 'PV-632'], ['MOV-713', 'PV-631']];
+  ev.push({ T: end, id: first[0], v: 0, why: 'shutdown', main: true }, { T: end + 0.05, id: first[1], v: 1, why: 'post-purge' },
+          { T: end + lag, id: second[0], v: 0, why: 'shutdown', main: true }, { T: end + lag + 0.05, id: second[1], v: 1, why: 'post-purge' });
+  const tp = end + lag + 0.05 + (p.postPurge ?? 3);
+  ev.push({ T: tp, id: 'PV-631', v: 0, why: 'post-purge end' }, { T: tp, id: 'PV-632', v: 0, why: 'post-purge end' });
+  return ev.sort((a, b) => a.T - b.T);
+}
+
 function planText(p) {
+  if (p.mode === 'hot') {
+    const lead = p.lead ?? 0;
+    return `hot fire, ${p.duration.toFixed(2)} s, ${lead >= 0 ? 'ox' : 'fuel'} lead ${Math.abs(Math.round(lead * 1000))} ms, igniter T−${(p.ignLead ?? 0.5).toFixed(2)} → T+${(p.ignOff ?? 1).toFixed(1)} s, ignition check T+${(p.ignCheck ?? 0.5).toFixed(2)} s, ${(p.shutdown || 'ox-first').replace('-', ' ')} shutdown, post-purge ${(p.postPurge ?? 3).toFixed(0)} s`;
+  }
   const sides = p.sides === 'ox' ? 'oxidiser side only' : p.sides === 'fuel' ? 'fuel side only' : 'both sides';
   const lead = p.sides === 'both' || !p.sides ? `, ${(p.lead ?? 0) >= 0 ? 'ox' : 'fuel'} lead ${Math.abs(Math.round((p.lead ?? 0) * 1000))} ms` : '';
   return `cold flow, ${sides}, ${p.duration.toFixed(2)} s${lead}, post-purge ${(p.postPurge ?? 3).toFixed(0)} s`;
@@ -318,12 +403,18 @@ export default {
   program: 'biprop',
   name: 'TS-2 Bipropellant Engine Stand',
   short: 'TS-2 · pressure-fed biprop',
-  article: 'BPE-1 S/N 001 · cold-flow configuration',
+  article: 'BPE-1 S/N 001 · heat-sink chamber',
   fictional: true,
   physics, sensors, channels, components, componentSensors, limits, abortSequence, ratings, gonogo, pid,
   interlocks,
-  faults: [],
-  inspections: [],
+  faults: FAULTS,
+  diagnosis: DIAGNOSIS,
+  inspections: INSPECTIONS,
+  /* the engine and the meters do not come off a stand with propellants in it */
+  inspectGuard(ctrl, insp) {
+    if (insp.dry && ctrl.loaded === 'propellants') return { msg: 'Technician: "Not with propellants in the tanks. Drain and purge first."', why: 'Breaking into the engine or a meter run means opening the propellant system.' };
+    return null;
+  },
   nominal: { throatDia: DESIGN.throatDia, Cd: 0.98 },
   design: DESIGN,
   fluids: FLUIDS,
@@ -365,33 +456,57 @@ export default {
   },
   plots: [['PT-710', 'PT-720', 'PT-630'], ['PT-715', 'PT-725', 'MOV-713-CMD', 'MFV-723-CMD'], ['FT-714', 'FT-724']],
   analysisPlots: [['PT-713', 'PT-715', 'MOV-713-CMD'], ['PT-723', 'PT-725', 'MFV-723-CMD'], ['FT-714', 'FT-724'], ['WT-716', 'WT-726']],
-  defaultPlan: { mode: 'single', duration: 3.0, sides: 'both', lead: 0.1, postPurge: 3 },
+  analysisPlotsHot: [['PT-801', 'MOV-713-CMD', 'MFV-723-CMD'], ['PT-715', 'PT-725', 'PT-710', 'PT-720'], ['FT-714', 'FT-724'], ['LC-901'], ['OD-804', 'VIB-805', 'IGN-I'], ['TC-802', 'TC-803']],
+  defaultPlan: { mode: 'single', duration: 3.0, sides: 'both', lead: 0, postPurge: 3, ignLead: 0.5, ignOff: 1.0, ignCheck: 0.5, shutdown: 'ox-first', shutLag: 0.05 },
   sequence, planText,
   predict: predictBiprop,
   metrics: computeMetricsBP,
   alarmCtx(S, base) {
     const c = S.controller, p = S.prediction || {};
-    return { ...base, sp: c.sp, cmd: c.cmd,
-      predOx: p.mdotOx || 0, predFu: p.mdotFu || 0, predDpOx: p.dPox || 0, predDpFu: p.dPfu || 0 };
+    return { ...base, sp: c.sp, cmd: c.cmd, hot: c.loaded === 'propellants', plan: c.plan, ignCheck: c.plan.ignCheck ?? 0.5,
+      predOx: p.mdotOx || 0, predFu: p.mdotFu || 0, predDpOx: p.dPox || 0, predDpFu: p.dPfu || 0, predPc: p.kind === 'hotfire' ? p.Pc : 0 };
   },
+  /* Stand-specific operator actions. */
+  actions: {
+    // the DAQ's density for converting a turbine meter's volume flow to mass
+    meterCal(ctrl, a) {
+      const sc = ctrl.s.model.scales[a.line];
+      if (!sc) return { ok: false, blocked: { msg: `No meter on ${a.line}.`, why: '' } };
+      sc.rhoCal = FLUIDS[a.fluid].rho;
+      ctrl.meterFluid[a.line] = a.fluid;
+      ctrl.log('DAQ', `${a.line === 'ox' ? 'FT-714' : 'FT-724'} calibration fluid set to ${a.fluid} (ρ ${FLUIDS[a.fluid].rho} kg/m³)`);
+      return { ok: true };
+    },
+  },
+  initController(ctrl) { ctrl.loaded = null; ctrl.meterFluid = { ox: 'water', fu: 'water' }; },
   /* Technician tasks only this stand has. */
   techTasks(ctrl) {
     const S = ctrl.s, m = S.model, R = ratings;
-    const fill = (load) => ({ dur: 60, text: load ? 'Loading both run tanks with water' : 'Draining both run tanks', pre: () => {
+    const fill = (load, prop = false) => ({ dur: prop ? 120 : 60, text: !load ? 'Draining both run tanks' : prop ? 'Loading propellants: OX-1 into T-710, FU-1 into T-720' : 'Loading both run tanks with water', pre: () => {
       const hi = ['oxu', 'fuu'].map(v => m.net.vol(v).P - S.def.physics.ambient.P);
       if (hi.some(p => p > R.VENTED)) return 'Technician: "Tank gauges show pressure. Vent both tanks before I open a fill port."';
       if (ctrl.cmd['VV-711'] !== 1 || ctrl.cmd['VV-721'] !== 1) return 'Technician: "Both tank vents must be open while I fill — the gas has to go somewhere."';
+      if (load && m.lines.some(l => l.mL > 0.5)) return 'Technician: "There is already liquid in the tanks. Drain them first — I am not mixing fluids."';
       return null;
     }, done: () => {
-      m.line('ox').setLiquid(m.net, load ? R.FILL_OX : 0);
-      m.line('fu').setLiquid(m.net, load ? R.FILL_FU : 0);
+      const fl = prop ? { ox: FLUIDS['OX-1'], fu: FLUIDS['FU-1'] } : { ox: FLUIDS.water, fu: FLUIDS.water };
+      m.load(fl, load ? { ox: R.FILL_OX * fl.ox.rho / 998, fu: R.FILL_FU * fl.fu.rho / 998 } : { ox: 0, fu: 0 });
+      ctrl.loaded = load ? (prop ? 'propellants' : 'water') : null;
       ctrl.bump();
-      ctrl.log('TECH', load ? `Tanks loaded with water: about ${R.FILL_OX.toFixed(0)} kg in T-710, ${R.FILL_FU.toFixed(0)} kg in T-720 (sight-glass estimate). Fill ports capped.` : 'Tanks drained; fill ports capped.');
+      S.requestPrediction();
+      ctrl.log('TECH', !load ? 'Tanks drained; fill ports capped.' : prop
+        ? `Propellants loaded: about ${(R.FILL_OX * 1.14).toFixed(1)} kg OX-1 in T-710, ${(R.FILL_FU * 0.8).toFixed(1)} kg FU-1 in T-720. Fill ports capped. The stand is now a propellant hazard.`
+        : `Tanks loaded with water: about ${R.FILL_OX.toFixed(0)} kg in T-710, ${R.FILL_FU.toFixed(0)} kg in T-720 (sight-glass estimate). Fill ports capped.`);
     } });
-    return { fillTanks: fill(true), drainTanks: fill(false) };
+    return {
+      fillTanks: fill(true), drainTanks: fill(false), loadPropellants: fill(true, true),
+    };
   },
   inspectionVolumes: ['hp', 'oxu', 'fuu', 'purge', 'oxman', 'fuman'],
-  techButtons: [['fillTanks', 'Load tanks', 'Load both run tanks with water (tanks vented, vents open)'], ['drainTanks', 'Drain tanks', 'Drain both run tanks']],
+  lowPVolume: 'oxu',
+  techButtons: [['fillTanks', 'Load water', 'Load both run tanks with water (tanks vented, vents open)'],
+    ['loadPropellants', 'Load propellants', 'Load OX-1 and FU-1 for a hot fire (tanks vented and empty, vents open)'],
+    ['drainTanks', 'Drain tanks', 'Drain both run tanks']],
   /* Leak check: both tanks pressurised and isolated (pressurant shut off,
      all three regulators at zero, vents shut), 60 s hold. A 12-litre ullage
      hides a small leak far better than TS-1's few cubic centimetres: the

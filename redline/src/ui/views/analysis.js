@@ -35,6 +35,11 @@ const PRESETS_BP = [
   ['Fuel CdA vs tank P', 'PtFu', 'CdAFu'],
   ['Meter vs scale (ox)', 'mdotWOx', 'mdotOx'],
   ['Meter vs scale (fuel)', 'mdotWFu', 'mdotFu'],
+  ['Hot: MR vs tank ΔP', 'spDiff', 'MR'],
+  ['Hot: Pc vs ox tank', 'spOx', 'hPc'],
+  ['Hot: c* eff. vs MR', 'MR', 'eta'],
+  ['Hot: stiffness vs Pc', 'hPc', 'stiffFu'],
+  ['Hot: overshoot vs lead', 'lead', 'over'],
 ];
 const PRESETS = [
   ['F vs Pc (abs)', 'PcAbs', 'F'],
@@ -159,7 +164,7 @@ export class AnalysisView {
     centre.append(h('div', { style: { padding: '3px 10px', fontSize: '11px', color: 'var(--ink-4)', borderTop: '1px solid var(--line)' } }, 'Click: cursor A · shift-click: cursor B · drag a cursor to move it · wheel: zoom · drag: pan · dbl-click: full record'));
     const chans = channelList(def);
     this.stack = new PlotStack(body, this.app, {
-      layout: this._layoutFor(def), live: false,
+      layout: this._layoutFor(def, run), live: false,
       channels: () => chans,
       makeTraces: (m, color) => [
         { id: m.id, source: run.data, color, label: m.id, quantity: m.quantity, gauge: m.gauge, discrete: m.quantity === 'discrete', desc: m.desc, shift: 0 },
@@ -180,7 +185,7 @@ export class AnalysisView {
   }
 
   reduction(run, overlays, def, right) {
-    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? ({ pulse: 'pulse train', coldflow: 'cold flow' }[run.metrics.kind] || 'single burn') : '')));
+    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? ({ pulse: 'pulse train', coldflow: 'cold flow', hotfire: 'hot fire' }[run.metrics.kind] || 'single burn') : '')));
     const rb = h('div.pb');
     right.append(rb);
     this.cursorBox = h('div');
@@ -208,6 +213,21 @@ export class AnalysisView {
       pt.append(h('tr', h('td', 'Isp (FT-201)'), h('td.v', pred.Isp.toFixed(1)), h('td.v', Number.isFinite(m.IspFM) ? m.IspFM.toFixed(1) : '----'), h('td.v', `${(100 * (m.IspFM / pred.Isp - 1)).toFixed(1)} %`)));
       rb.append(pt);
     }
+    if (pred?.kind === 'hotfire' && run.metrics?.kind === 'hotfire' && run.metrics.summary?.ignited && pred.Pc > 0) {
+      const m = run.metrics.summary;
+      rb.append(h('div.proc-sec', 'Prediction vs measured'));
+      const pt = h('table.metrics');
+      pt.append(h('tr.hd', h('td', ''), h('td', 'pred.'), h('td', 'meas.'), h('td', 'Δ')));
+      const row = (l, p, x, q) => pt.append(h('tr', h('td', l), h('td.v', q === 'ratio' ? p.toFixed(3) : fmt(p, q)), h('td.v', q === 'ratio' ? x.toFixed(3) : fmt(x, q)), h('td.v', `${(100 * (x / p - 1)).toFixed(1)} %`)));
+      row('Chamber pressure', pred.Pc, m.Pc, 'pressure');
+      row('Thrust', pred.F, m.F, 'force');
+      row('Ox flow (FT-714)', pred.mdotOx, m.mdotOx, 'massflow');
+      row('Fuel flow (FT-724)', pred.mdotFu, m.mdotFu, 'massflow');
+      row('Mixture ratio', pred.MR, m.MR, 'ratio');
+      row('Isp', pred.Isp, m.Isp, 'ratio');
+      rb.append(pt, h('p.faint', { style: { fontSize: '11px', margin: '4px 0' } }, 'The prediction uses the injector drawing and the design c* efficiency.'));
+    }
+    if (run.metrics?.flags?.length) rb.append(h('div.proc-sec', 'Flags'), h('p', { style: { color: 'var(--caution)', fontSize: '12px', margin: '2px 10px' } }, run.metrics.flags.join(' · ')));
     if (run.metrics?.pulses) {
       rb.append(h('div.proc-sec', 'Pulses'));
       const pt = h('table.metrics');
@@ -230,8 +250,10 @@ export class AnalysisView {
     rb.append(h('div', { style: { padding: '8px 10px' } }, btn('Open in notebook', () => { this.app.show('notebook'); this.app.notebook.select(run.id); }, 'sm ghost')));
   }
 
-  _layoutFor(def) {
-    return (this.layouts[def.id] ||= def.analysisPlots ? def.analysisPlots.map(p => ({ channels: [...p] })) : DEFAULT());
+  _layoutFor(def, run = null) {
+    const hot = run?.metrics?.kind === 'hotfire' && def.analysisPlotsHot;
+    const src = hot ? def.analysisPlotsHot : def.analysisPlots;
+    return (this.layouts[def.id + (hot ? ':hot' : '')] ||= src ? src.map(p => ({ channels: [...p] })) : DEFAULT());
   }
 
   /* ---- CAMPAIGN ------------------------------------------------------- */
@@ -339,7 +361,7 @@ export class AnalysisView {
     t.append(h('tr.hd', h('td', 'Channel'), h('td', 'A'), h('td', 'B'), h('td', 'B − A'), h('td', 'mean A…B')));
     const fmtT2 = x => (x === null ? '—' : fmtT(x - ref, 4));
     t.append(h('tr', h('td', 'Time'), h('td.v', fmtT2(A)), h('td.v', fmtT2(B)), h('td.v', A !== null && B !== null ? `${((B - A) * 1e3).toFixed(2)} ms` : '—'), h('td', '')));
-    const ids = [...new Set(this._layoutFor(def).flatMap(p => p.channels))];
+    const ids = [...new Set(this._layoutFor(def, run).flatMap(p => p.channels))];
     for (const id of ids) {
       const ch = meta.get(id);
       if (!ch || ch.quantity === 'discrete') continue;

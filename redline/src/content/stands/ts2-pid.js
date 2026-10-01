@@ -78,6 +78,7 @@ export default {
     { id: 'MOV-713', type: 'ballValve', x: 662, y: OX, actuator: 'pneumatic', zs: 'MOV-713', below: true },
     { id: 'MFV-723', type: 'ballValve', x: 930, y: FU, actuator: 'pneumatic', zs: 'MFV-723', below: true },
     { id: 'BPE-1', type: 'engine', x: 1120, y: 304 },
+    { id: 'IGN-901', type: 'igniter', x: 1072, y: 232, to: [1134, 280] },
     { id: 'LC-901', type: 'thrustStand', x: 1120, y: 304, span: [1104, 1240], lc: [1090, 352] },
   ],
   instruments: [
@@ -95,6 +96,11 @@ export default {
     { id: 'PT-725', x: 1040, y: 352, tap: [1040, FU], lab: 'above' },
     { id: 'PT-630', x: 1150, y: 166, tap: [1150, B], lab: 'below' },
     { id: 'PT-801', x: 1150, y: 262, tap: [1132, 282], lab: 'above' },
+    // engine instruments, hot fire: along the bottom, under the stand
+    { id: 'TC-802', x: 1040, y: 470, tap: [1150, 318], lab: 'below' },
+    { id: 'TC-803', x: 1100, y: 470, tap: [1196, 312], lab: 'below' },
+    { id: 'VIB-805', x: 1160, y: 470, tap: [1140, 326], tag: ['VIB', '805'], lab: 'below' },
+    { id: 'OD-804', x: 1220, y: 470, tap: [1236, 304], tag: ['OD', '804'], lab: 'below' },
   ],
   labels: [
     { text: 'PRESSURANT HEADER · 4000 psig CLASS', x: 800, y: 38, anchor: 'middle' },

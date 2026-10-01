@@ -55,6 +55,7 @@ export class GasNetwork {
       wallC: w.C ?? 0, hA0: w.hA ?? 0, hAk: w.hAflow ?? 0, hAamb: w.hAamb ?? 0,
       Tw: w.T0 ?? this.ambient.T,
       extQ: 0,                                   // external heat, W (fault/test hook)
+      external: !!v.external,                    // state owned by another model; the network only reports dm
     };
   }
 
@@ -81,7 +82,7 @@ export class GasNetwork {
       if (e.from >= 0) { const v = this.volumes[e.from]; v._lam += G * g.R * v.T / v.V; }
       if (e.to >= 0) { const v = this.volumes[e.to]; v._lam += G * g.R * v.T / v.V; }
     }
-    for (const v of this.volumes) if (v._lam > worst) worst = v._lam;
+    for (const v of this.volumes) if (!v.external && v._lam > worst) worst = v._lam;
     if (worst <= 0) return this.dtMax;
     return Math.max(this.dtMin, Math.min(this.dtMax, 0.4 / worst));
   }
@@ -105,6 +106,7 @@ export class GasNetwork {
     const Ta = this.ambient.T;
     for (let i = 0; i < vols.length; i++) {
       const v = vols[i];
+      if (v.external) continue;          // its owner integrates v.dm (kg/s net in) itself
       if (v.wallC > 0) {
         const hA = v.hA0 + v.hAk * v.through;
         const Q = hA * (v.Tw - v.T);

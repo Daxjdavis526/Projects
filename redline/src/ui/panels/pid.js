@@ -295,6 +295,17 @@ export class PID {
         g.append(hl(120, 60, 56, 0));
         break;
       }
+      case 'igniter': {
+        // spark plug and exciter, wired to the chamber
+        const [tx, ty] = sy.to;
+        g.append(s('path.seg.thin', { d: `M${x},${y + 14} L${x},${ty - 8} L${tx},${ty - 8} L${tx},${ty}` }));
+        g.append(s('rect.body', { x: x - 34, y: y - 12, width: 68, height: 26, rx: 3 }));
+        g.append(s('text.lbl', { x, y: y + 5, 'text-anchor': 'middle' }, sy.id));
+        this.spark = s('path', { d: `M${tx - 6},${ty - 18} l6,5 l-4,3 l7,6`, fill: 'none', stroke: '#ffd25a', 'stroke-width': 2, opacity: 0 });
+        g.append(this.spark);
+        g.append(hl(74, 32, 0, 1));
+        break;
+      }
       case 'thrustStand': {
         if (sy.span) {
           const [a, b] = sy.span, py = y + 44;
@@ -460,9 +471,12 @@ export class PID {
     const pc = d.latest(ex.channel || 'PT-401');
     const k = d.online && pc > psi(3) ? Math.min(1, pc / psi(160)) : 0;
     this.plume.style.opacity = (0.15 + 0.7 * k) * (k > 0 ? 1 : 0);
+    // the spark: from the exciter current (what the console actually knows)
+    if (this.spark) this.spark.setAttribute('opacity', d.online && d.latest('IGN-I') > 0.5 ? (0.4 + 0.6 * (Math.floor(performance.now() / 70) % 2)).toFixed(2) : 0);
     if (this.spray) {
       const pm = Math.max(...ex.spray.map(id => d.latest(id)).filter(Number.isFinite), 0);
-      const ks = d.online && pm > psi(20) ? Math.min(1, pm / psi(250)) : 0;
+      // spray only while nothing burns: a lit chamber is the plume
+      const ks = d.online && pm > psi(20) && !(pc > psi(30)) ? Math.min(1, pm / psi(250)) : 0;
       this.spray.style.opacity = ks ? 0.15 + 0.6 * ks : 0;
     }
   }

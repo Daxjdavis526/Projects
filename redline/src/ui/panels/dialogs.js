@@ -132,6 +132,16 @@ export function debrief(app) {
         h('span.k', 'Ox injector CdA (latest)'), h('span.v', `${cda('CdAOx')}  (drawing ${(S.def.design.CdAox * 1e6).toFixed(2)})`),
         h('span.k', 'Fuel injector CdA (latest)'), h('span.v', `${cda('CdAFu')}  (drawing ${(S.def.design.CdAfu * 1e6).toFixed(2)})`),
         h('span.k', 'Hot-fire MR predicted'), h('span.v', Number.isFinite(last('MRhot')) ? `${last('MRhot').toFixed(3)}  (design ${S.def.design.MR.toFixed(2)})` : '—')));
+    } else if (run.metrics.kind === 'hotfire') {
+      const ok = m.ignited;
+      body.append(h('div.kv',
+        h('span.k', 'Ignition'), h('span.v', ok ? `${(m.ignDelay * 1e3).toFixed(0)} ms valve-to-flame, ${m.start} start (${(100 * m.overshoot).toFixed(0)} % overshoot)` : 'NO IGNITION'),
+        ...(ok ? [
+          h('span.k', 'Chamber pressure'), h('span.v', `${fmt(m.Pc, 'pressure')} ${unitLabel('pressure', true)}${p?.Pc > 0 ? `  (pred. ${fmt(p.Pc, 'pressure')})` : ''}`),
+          h('span.k', 'Thrust'), h('span.v', `${fmt(m.F, 'force')} ${unitLabel('force')}${p?.F > 0 ? `  (pred. ${fmt(p.F, 'force')})` : ''}`),
+          h('span.k', 'Mixture ratio'), h('span.v', `${m.MR.toFixed(3)}${p?.MR ? `  (pred. ${p.MR.toFixed(3)})` : ''}`),
+          h('span.k', 'c* efficiency'), h('span.v', m.etaCstar.toFixed(3)),
+          h('span.k', 'Throat peak (soak-back)'), h('span.v', Number.isFinite(m.TthPeak) ? `${fmt(m.TthPeak, 'temperature')} °C` : '—')] : [])));
     } else body.append(h('div.kv',
       h('span.k', 'Chamber pressure'), h('span.v', `${fmt(m.Pc, 'pressure')} ${unitLabel('pressure', true)}${p ? `  (pred. ${fmt(p.Pc, 'pressure')})` : ''}`),
       h('span.k', 'Thrust'), h('span.v', `${fmt(m.F, 'force')} ${unitLabel('force')}${p ? `  (pred. ${fmt(p.F, 'force')})` : ''}`),

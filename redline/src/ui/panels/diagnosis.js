@@ -9,29 +9,14 @@
 import { h, btn } from '../dom.js';
 import { modal, toast } from '../modal.js';
 import { store } from '../store.js';
-import { FAILURE_MODES, ACTIONS } from '../../content/faults/ts1-faults.js';
+import { DIAGNOSIS } from '../../content/faults/ts1-faults.js';
 
-/* Comparisons and checks an operator can cite, beyond channels and
-   inspections. Ids match the fault answer keys. */
-const CHECKS = [
-  ['go-no-go', 'Go/no-go poll data'],
-  ['prediction', 'Comparison with the pre-test prediction'],
-  ['static-agreement', 'Static agreement between transducers'],
-  ['leak-check', 'Pressure-decay leak check'],
-  ['shunt-cal', 'Shunt calibration of LC-501'],
-  ['droop', 'Regulator droop (lock-up vs flowing)'],
-  ['rise-time', 'Chamber-pressure rise / decay time'],
-  ['dPv', 'Pressure drop across the fire valve'],
-  ['dThroat', 'Effective throat from the reduction'],
-  ['sound', 'What the cell sounded like'],
-  ['cctv', 'Cell camera'],
-];
-
-const CAT_LABEL = { none: 'No fault', control: 'Pressure control and supply', flow: 'Flow path', actuation: 'Actuation', sensor: 'Instrument' };
+const vocab = def => def.diagnosis || DIAGNOSIS;
 
 export function openDiagnosis(app) {
   const S = app.session, def = S.def;
   if (S.faults.diagnosis) return reveal(app);
+  const { modes: FAILURE_MODES, actions: ACTIONS, checks: CHECKS, categories: CAT_LABEL } = vocab(def);
   const sel = (opts, groups) => {
     const s = h('select.in', { style: { width: '100%' } });
     s.append(h('option', { value: '' }, '— choose —'));
@@ -86,6 +71,7 @@ export function openDiagnosis(app) {
 }
 
 function recordInNotebook(app, rec) {
+  const { modes: FAILURE_MODES, actions: ACTIONS } = vocab(app.session.def);
   const S = app.session, r = S.faults.reveal();
   const modeLabel = id => FAILURE_MODES.find(x => x[0] === id)?.[1] || id;
   const diag = `${rec.component} — ${modeLabel(rec.mode)}. Action: ${ACTIONS.find(a => a[0] === rec.action)?.[1] || rec.action}. Evidence: ${rec.evidence.join(', ') || 'none cited'}.${rec.notes ? ' Reasoning: ' + rec.notes : ''} Score ${rec.result.score}/100 (${rec.result.grade}).`;
@@ -99,6 +85,7 @@ function recordInNotebook(app, rec) {
 }
 
 export function reveal(app) {
+  const { modes: FAILURE_MODES } = vocab(app.session.def);
   const S = app.session, rec = S.faults.diagnosis, r = S.faults.reveal();
   if (!rec || !r) return;
   const sec = (t, x, cls = '') => x ? [h('h4' + cls, t), typeof x === 'string' ? h('p', x) : x] : [];

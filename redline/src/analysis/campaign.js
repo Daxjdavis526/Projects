@@ -64,6 +64,25 @@ QUANTITIES_CATALOG.push(...[
   { key: 'surgeOx', label: 'Ox shutdown surge', q: 'pressure', get: r => s(r).surgeOx },
   { key: 'droopOx', label: 'Ox tank droop', q: 'pressure', get: r => s(r).droopOx },
 ].map(q => ({ ...q, kind: 'coldflow', stand: 'TS-2' })));
+/* TS-2 hot-fire quantities (the flows, ΔPs and MR above serve both). */
+QUANTITIES_CATALOG.push(...[
+  { key: 'spDiff', label: 'Tank setpoints, ox − fuel', q: 'pressure', get: r => sp(r, 'PR-610') - sp(r, 'PR-620') },
+  { key: 'lead', label: 'Main-valve lead (+ ox first)', q: 'time', get: r => r.plan?.lead ?? 0 },
+  { key: 'hPc', label: 'Chamber pressure, steady (hot)', q: 'pressure', get: r => s(r).Pc },
+  { key: 'hF', label: 'Thrust, steady (hot)', q: 'force', get: r => s(r).F },
+  { key: 'cstar', label: 'c* (meters)', q: 'velocity', get: r => s(r).cstar },
+  { key: 'eta', label: 'c* efficiency (meters)', q: 'ratio', get: r => s(r).etaCstar },
+  { key: 'etaW', label: 'c* efficiency (weighed)', q: 'ratio', get: r => s(r).etaCstarW },
+  { key: 'hIsp', label: 'Isp, sea level (hot)', q: 'time', get: r => s(r).Isp },
+  { key: 'hCf', label: 'Thrust coefficient (hot)', q: 'ratio', get: r => s(r).Cf },
+  { key: 'stiffOx', label: 'Ox injector stiffness ΔP/Pc', q: 'ratio', get: r => s(r).stiffOx },
+  { key: 'stiffFu', label: 'Fuel injector stiffness ΔP/Pc', q: 'ratio', get: r => s(r).stiffFu },
+  { key: 'rough', label: 'Roughness σ/mean (PT-801)', q: 'ratio', get: r => s(r).rough },
+  { key: 'over', label: 'Start overshoot', q: 'ratio', get: r => s(r).overshoot },
+  { key: 'ignDelay', label: 'Valve-to-flame time', q: 'time', get: r => s(r).ignDelay },
+  { key: 'TthPeak', label: 'Throat peak after shutdown', q: 'temperature', get: r => s(r).TthPeak },
+  { key: 'Ishut', label: 'Shutdown impulse', q: 'impulse', get: r => s(r).Ishut },
+].map(q => ({ ...q, kind: 'hotfire', stand: 'TS-2' })));
 for (const q of QUANTITIES_CATALOG) q.stand ??= 'TS-1';
 
 export const quantitiesFor = stand => QUANTITIES_CATALOG.filter(q => q.stand === (stand || 'TS-1'));
@@ -81,6 +100,7 @@ export function value(run, key) {
 
 export function runKind(run) {
   if (run.metrics?.kind === 'coldflow') return 'coldflow';
+  if (run.metrics?.kind === 'hotfire') return 'hotfire';
   return run.plan?.mode === 'pulse' ? 'pulse' : run.metrics?.kind === 'pulse' ? 'pulse' : 'single';
 }
 

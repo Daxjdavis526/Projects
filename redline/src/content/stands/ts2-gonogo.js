@@ -3,7 +3,7 @@
    and two things the cold-gas stand did not have at all: purge, and how
    much liquid is in each tank. */
 
-import { psi, fmt } from '../../lib/units.js';
+import { psi, fmt, degC } from '../../lib/units.js';
 
 const P = v => (Number.isFinite(v) ? `${fmt(v, 'pressure')} psig` : 'NO DATA');
 const kg = v => (Number.isFinite(v) ? `${v.toFixed(2)} kg` : 'NO DATA');
@@ -11,6 +11,8 @@ const near = (a, b, tol) => Number.isFinite(a) && Math.abs(a - b) <= tol;
 const ind = (v, id) => (v.ch(id + '-ZSO') === 1 && v.ch(id + '-ZSC') === 0 ? 'OPEN' : v.ch(id + '-ZSC') === 1 && v.ch(id + '-ZSO') === 0 ? 'CLOSED' : 'NO INDICATION');
 const flowsOx = v => v.plan.sides !== 'fuel';
 const flowsFu = v => v.plan.sides !== 'ox';
+const hot = v => v.plan.mode === 'hot';
+const LOAD = { propellants: ['OX-1', 'FU-1'], water: ['water', 'water'] };
 
 export default [
   { id: 'TC', name: 'Test Conductor', role: 'Owns the procedure and the final call',
@@ -27,6 +29,12 @@ export default [
           return { value: want.length ? `${txt} / requested ${want.map(([, p]) => P(p)).join(', ')}` : txt,
             ok: want.every(([id, p]) => near(v.sp[id], p, psi(1))) };
         }, why: 'Flowing at the wrong tank pressure wastes the run — and the water.' },
+      { label: 'Run type vs what is in the tanks', eval: v => ({ value: `${hot(v) ? 'HOT FIRE' : 'COLD FLOW'} plan / tanks: ${v.loaded || 'empty'}`,
+          ok: hot(v) ? v.loaded === 'propellants' : v.loaded === 'water' }),
+        why: 'A cold-flow plan with propellants loaded sprays them unlit into the cell; a hot plan with water aborts at the ignition check.' },
+      { label: 'Burn duration vs heat-sink limit', eval: v => ({ value: hot(v) ? `${v.plan.duration.toFixed(1)} s planned / ${v.session.def.design.burnLimit} s limit` : 'n/a (cold flow)',
+          ok: !hot(v) || v.plan.duration <= v.session.def.design.burnLimit }),
+        why: 'The copper chamber is a heat sink: the burn ends before the throat gets too hot, or the redline ends it for you.' },
       { label: 'Unacknowledged alarms', eval: v => ({ value: v.unackedAlarms ? `${v.unackedAlarms} unacknowledged` : 'none', ok: v.unackedAlarms === 0 }) },
       { label: 'Active alarms', eval: v => ({ value: v.activeAlarms.length ? v.activeAlarms.join(', ') : 'none', ok: v.activeAlarms.length === 0 }) },
     ] },
@@ -40,6 +48,10 @@ export default [
       { label: 'Flowmeters at zero flow', eval: v => ({ value: `FT-714 ${fmt(v.ch('FT-714'), 'massflow')}, FT-724 ${fmt(v.ch('FT-724'), 'massflow')} g/s`,
           ok: Math.abs(v.ch('FT-714')) < 0.003 && Math.abs(v.ch('FT-724')) < 0.003 }),
         why: 'No flow should read no flow. A meter that reads flow with the valves shut is either leaking past a valve or lying.' },
+      { label: 'Flowmeter calibration fluid', eval: v => {
+          const want = LOAD[v.loaded] || ['water', 'water'], mf = v.meterFluid || {};
+          return { value: `FT-714 ${mf.ox || '?'}, FT-724 ${mf.fu || '?'} / tanks hold ${want[0] === 'water' ? 'water' : `${want[0]}, ${want[1]}`}`, ok: mf.ox === want[0] && mf.fu === want[1] };
+        }, why: 'A turbine meter measures volume; the DAQ makes it mass with the density you set. Set for water, it reads OX-1 low and FU-1 high — and every mixture ratio and c* after it.' },
     ] },
   { id: 'PROP', name: 'Propulsion', role: 'Fluid system state',
     items: [
@@ -73,6 +85,9 @@ export default [
       { label: 'Purge valves', eval: v => ({ value: `PV-631 ${v.cmd('PV-631') ? 'OPEN' : 'CLOSED'}, PV-632 ${v.cmd('PV-632') ? 'OPEN' : 'CLOSED'}`,
           ok: !v.cmd('PV-631') && !v.cmd('PV-632') }),
         why: 'The sequencer owns the purges during a run. Left open by hand, they are flowing gas into the manifold the liquid is about to fill.' },
+      { label: 'Igniter', eval: v => ({ value: hot(v) ? `spark check ${v.sparkChecked ? 'done' : 'NOT DONE'}; exciter ${v.ch('IGN-I') > 0.5 ? 'ON' : 'off'}` : 'n/a (cold flow)',
+          ok: !hot(v) || (v.sparkChecked && v.ch('IGN-I') < 0.5) }),
+        why: 'An igniter that does not spark lights nothing — or lights late, after the chamber has filled. Someone must have SEEN it spark.' },
       { label: 'Abort sequence', eval: v => ({ value: v.abortActive ? 'ABORT NOT RESET' : 'loaded, reset', ok: !v.abortActive }) },
       { label: 'EPC feedback', eval: v => {
           const bad = ['610', '620', '630'].filter(n => !near(v.ch('EPC-' + n), v.sp['PR-' + n], psi(4)));
@@ -83,6 +98,8 @@ export default [
     items: [
       { label: 'Facility power', eval: () => ({ value: 'normal (UPS on line)', ok: true }) },
       { label: 'Catch area and drains', eval: () => ({ value: 'catch pan in place, drain open', ok: true }) },
+      { label: 'Engine throat TC-803', eval: v => ({ value: `${fmt(v.ch('TC-803'), 'temperature')} °C`, ok: !hot(v) || v.ch('TC-803') < v.ratings.WALL_REFIRE }),
+        why: 'A heat-sink chamber starts each burn from where the last left it. Fire it warm and the throat redline comes early.' },
       { label: 'Technician', eval: v => ({ value: v.techBusy ? 'task in progress' : 'out of cell, in control room', ok: !v.techBusy }) },
     ] },
   { id: 'SAF', name: 'Safety', role: 'People and hazards',
