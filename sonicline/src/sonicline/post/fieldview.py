@@ -386,6 +386,23 @@ class RunResults:
         rf = g("wall", "recovery_factor_mean")
         if rf is not None:
             rows.append(("Adiabatic-wall recovery factor", fmt(rf, ".3f"), "0.83-0.88"))
+        ub = m.get("uncertainty") or {}
+        if ub and "error" not in ub:
+            # About 95 %; the components are in metrics.json (core.uncertainty).
+            for key, label, scale, unit, spec in (("mass_flow", "mass flow", 1e3, "g/s", ".4f"),
+                                                  ("thrust", "thrust", 1.0, "N", ".4f"),
+                                                  ("specific_impulse", "Isp", 1.0, "s", ".2f")):
+                b = ub.get(key) or {}
+                if b.get("absolute") is None:
+                    continue
+                comps = b.get("components") or {}
+                top = max(comps, key=comps.get) if comps else "-"
+                rows.append((f"Uncertainty, {label} (95 %)",
+                             f"+- {scale * b['absolute']:{spec}} {unit} ({100 * b['relative']:.2f} %)",
+                             f"largest: {top}"))
+            notes = sorted({n for b in ub.values() for n in (b.get("unquantified") or [])})
+            for n in notes:
+                rows.append(("  not bounded", n, ""))
         tr = m.get("transient")
         if tr:
             # A startup: the steady rows above are its end state (the mean

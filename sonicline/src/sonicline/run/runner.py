@@ -72,6 +72,10 @@ class LocalRunner:
             if hasattr(os, "geteuid") and os.geteuid() == 0:  # containers run as root
                 env.setdefault("OMPI_ALLOW_RUN_AS_ROOT", "1")
                 env.setdefault("OMPI_ALLOW_RUN_AS_ROOT_CONFIRM", "1")
+            # Open MPI counts physical cores as slots, so on a machine with
+            # hyperthreads (a CI runner: 4 vCPUs, 2 cores) "-np <cpus>" is
+            # refused outright. The process count is the user's choice.
+            env.setdefault("OMPI_MCA_rmaps_base_oversubscribe", "1")
             self._env = env
         return self._env
 
@@ -121,6 +125,7 @@ class WSLRunner:
 
     def command(self, args: list[str], cwd: Path) -> list[str]:
         inner = (f"source {shlex.quote(self.bashrc)} >/dev/null 2>&1 && "
+                 f"export OMPI_MCA_rmaps_base_oversubscribe=${{OMPI_MCA_rmaps_base_oversubscribe:-1}} && "
                  f"cd {shlex.quote(windows_to_wsl(cwd))} && exec "
                  + " ".join(shlex.quote(str(a)) for a in args))
         return ["wsl.exe", "-d", self.distro, "--", "bash", "-c", inner]

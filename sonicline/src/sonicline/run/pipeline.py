@@ -461,6 +461,13 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     manifest["solve_seconds"] = round(time.time() - t_solve, 1)
     if failure:
         emit(Event("solve", f"solver failure: {failure}"))
+    elif code != 0:
+        # Say why: an MPI launch refusal or a missing library leaves no
+        # solver failure text, only the last lines of the log.
+        tail = [l.strip() for l in log_text.splitlines() if l.strip() and not set(l.strip()) <= set("-*=")]
+        detail = "; ".join(tail[-3:]) if tail else "empty log"
+        manifest["solver_exit"] = {"exit_code": code, "log_tail": tail[-20:]}
+        emit(Event("solve", f"solver exited with code {code}: {detail[:400]}"))
     if nproc > 1 and status == "completed":
         # A transient's every written time is a frame of its animation.
         runner.run(["reconstructPar"] if transient else ["reconstructPar", "-latestTime"], case,
@@ -522,6 +529,12 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     v = verdict(defn, status, gate.ok, gate.warnings, assessment, metrics, yplus_max)
     if metrics is not None:
         metrics["verdict"] = v.to_json()
+        try:
+            from ..core import uncertainty
+
+            metrics["uncertainty"] = uncertainty.to_json(uncertainty.budgets(defn, profile, metrics))
+        except (KeyError, TypeError, ValueError, ZeroDivisionError) as e:  # never costs the run
+            metrics["uncertainty"] = {"error": f"{type(e).__name__}: {e}"}
         _write_json(run_dir / "metrics.json", metrics)
     if render and metrics is not None:
         # Rendering goes through OpenGL, which on a machine with a broken or

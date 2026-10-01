@@ -116,11 +116,21 @@ def _run(path: str, out: str | None, processors: int | None, no_images: bool,
         return 0 if result.trust != "not_trustworthy" else 1
     if result.metrics:
         m = result.metrics
+        u = m.get("uncertainty") or {}
+
+        def pm(key, scale, spec):
+            a = (u.get(key) or {}).get("absolute")
+            return f" +- {scale * a:{spec}}" if a is not None else ""
         print()
-        print(f"  mass flow      {1e3 * m['mass_flow']['inlet']:.4f} g/s   "
+        print(f"  mass flow      {1e3 * m['mass_flow']['inlet']:.4f}{pm('mass_flow', 1e3, '.4f')} g/s   "
               f"(ideal {1e3 * m['mass_flow']['ideal']:.4f}; Cd {m['discharge_coefficient']['cfd']:.4f})")
-        print(f"  thrust         {m['thrust']['total']:.4f} N   (ideal {m['thrust']['ideal']:.4f})")
-        print(f"  Isp            {m['specific_impulse']['cfd']:.2f} s")
+        print(f"  thrust         {m['thrust']['total']:.4f}{pm('thrust', 1.0, '.4f')} N   "
+              f"(ideal {m['thrust']['ideal']:.4f})")
+        print(f"  Isp            {m['specific_impulse']['cfd']:.2f}{pm('specific_impulse', 1.0, '.2f')} s")
+        if u and "error" not in u:
+            print("                 (+- : about 95 % uncertainty; the budget is in metrics.json)")
+            for note in sorted({n for b in u.values() for n in b.get("unquantified", [])}):
+                print(f"  not bounded    {note}")
         print(f"  exit Mach      {m['exit']['mach_mass_avg']:.4f}   (quasi-1D {m['exit']['ideal']['mach']:.4f})")
         print(f"  throat Mach    {m['throat']['mach_area_avg']:.4f} (area-averaged)")
         print(f"  mass balance   {100 * m['mass_flow']['imbalance_inlet_exit']:+.4f} % inlet-exit")

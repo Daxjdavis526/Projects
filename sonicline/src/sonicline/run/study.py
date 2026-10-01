@@ -97,10 +97,38 @@ def run(defn: d.SimulationDefinition, out: Path, ratio: float = DEFAULT_RATIO,
             coarse = (abs(vals[2] - g.extrapolated) / abs(g.extrapolated)
                       if g.extrapolated else None)
             study.quantities.append(QuantityStudy(name, g, coarse))
+        _measured_uncertainty(defn, results[2], study)
     (out / "study.json").write_text(json.dumps(dataclasses.asdict(study), indent=2) + "\n",
                                     encoding="utf-8")
     (out / "study.md").write_text(markdown(study), encoding="utf-8")
     return study
+
+
+UNCERTAINTY_KEYS = {"mass flow [kg/s]": "mass_flow", "thrust [N]": "thrust",
+                    "specific impulse [s]": "specific_impulse"}
+
+
+def _measured_uncertainty(defn: d.SimulationDefinition, base, study: StudyResult) -> None:
+    """Rewrite the base run's uncertainty budget with the discretisation
+    error this study measured (its GCI-based base-mesh error) in place of
+    the verification estimate."""
+    from ..core import uncertainty
+    from ..core.profile import from_points
+    from ..core.validate import resolve_profile
+
+    measured = {UNCERTAINTY_KEYS[q.name]: q.coarse_error for q in study.quantities
+                if q.name in UNCERTAINTY_KEYS and q.coarse_error is not None}
+    run_dir = Path(base.run_dir)
+    f = run_dir / "metrics.json"
+    if not measured or not f.is_file():
+        return
+    metrics = json.loads(f.read_text(encoding="utf-8"))
+    profile = resolve_profile(defn)
+    pf = run_dir / "profile.json"
+    if profile is None and pf.is_file():
+        profile = from_points([tuple(p) for p in json.loads(pf.read_text(encoding="utf-8"))["points"]])
+    metrics["uncertainty"] = uncertainty.to_json(uncertainty.budgets(defn, profile, metrics, measured))
+    pipeline._write_json(f, metrics)
 
 
 def markdown(s: StudyResult) -> str:

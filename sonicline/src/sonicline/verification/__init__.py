@@ -769,6 +769,63 @@ def _e2_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
                   metrics["discharge_coefficient"]["cfd"], E2_CD, E2_TOL, relative=False)] + _common_checks(metrics)
 
 
+# ----------------------------------------------------------------------------- E3
+# Measured thrust of cold nitrogen: Whalen, "Low Reynolds Number Nozzle Flow
+# Study", NASA TM-100130 (1987). Conical nozzles from a 9.40 mm chamber,
+# 45 deg convergence, a 1.524 mm throat with a 1.524 mm straight section
+# blended at about 2.67 throat radii (table I), area ratio 50 (exit 10.77 mm
+# at 20 deg, 10.78 mm at 25 deg; figure 4). Unheated nitrogen (22 C) into a
+# vacuum tank; thrust corrected to hard vacuum, C_T = F / (p_c A*), with
+# p_c the measured inlet total pressure. Table IV, the rows whose columns
+# agree with the table's own percent differences (the 15 deg area-ratio-50
+# rows do not: 1.25 measured against 1.524 computed is listed as +3.1 %).
+# Re = 4 mdot / (pi mu d), mu at throat conditions. Stated measurement
+# error: 5 % below Re 2000.
+
+WHALEN_D = 1.524e-3  # m, throat diameter
+WHALEN_T0 = 295.0  # K
+WHALEN = {"E3a": (20.0, 1830, 1.51), "E3b": (25.0, 1848, 1.50)}  # half-angle, Re, measured C_T
+E3_TOLERANCE = 0.05  # the stated measurement error below Re 2000
+
+
+def _whalen_definition(half_angle: float, reynolds: float) -> Callable[[str, str], m.SimulationDefinition]:
+    def build(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+        g = NITROGEN
+        T_throat = WHALEN_T0 * 2.0 / (g.gamma + 1.0)
+        mdot = reynolds * math.pi * g.viscosity(T_throat) * WHALEN_D / 4.0
+        rt = WHALEN_D / 2.0
+        return m.SimulationDefinition(
+            name=f"E3 Whalen {half_angle:g} deg conical nozzle, area ratio 50, Re {reynolds}",
+            geometry=m.ConicalNozzle(
+                throat_radius=rt, expansion_ratio=(10.77e-3 if half_angle == 20.0 else 10.78e-3) ** 2 / WHALEN_D**2,
+                contraction_ratio=(9.40e-3 / WHALEN_D) ** 2, converging_half_angle=math.radians(45.0),
+                diverging_half_angle=math.radians(half_angle), throat_rc_upstream=2.67, throat_rc_downstream=2.67,
+                fillet_radius=1.524e-3 / rt, throat_length=1.524e-3 / rt),
+            gas=m.GasSpec(equation_of_state="auto"),
+            boundaries=m.Boundaries(inlet=m.MassFlowInlet(mass_flow=mdot, T0=WHALEN_T0),
+                                    ambient=m.Ambient(pressure=0.0, temperature=WHALEN_T0),
+                                    exit_domain=m.TruncatedAtExit()),
+            # Re ~ 1800: laminar, the wall resolved.
+            flow=m.Flow(turbulence=m.Laminar()),
+            mesh=m.MeshSpec(form=m.MeshForm(form), quality=m.MeshQuality(quality)),
+            numerics=TIGHT,
+        )
+    return build
+
+
+def _whalen_checks(name: str) -> Callable[[dict, m.SimulationDefinition], list[Check]]:
+    measured = WHALEN[name][2]
+
+    def checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+        p_c = metrics["conditions"]["p0"]
+        At = math.pi * (WHALEN_D / 2.0) ** 2
+        ct = metrics["thrust"]["total"] / (p_c * At)
+        return [Check("thrust coefficient F / (p_c A*) vs measured (NASA TM-100130)", ct, measured,
+                      E3_TOLERANCE, note=f"p_c {p_c:.0f} Pa from the CFD at the measured Reynolds number")
+                ] + _common_checks(metrics)
+    return checks
+
+
 # ----------------------------------------------------------------------------- V15
 
 V15_END_TIME = 1e-3  # s: the startup's acoustic ringing decays below 1e-4 of the flow by then
@@ -834,6 +891,10 @@ CASES: dict[str, Case] = {
                        _v1_checks_at(V10_P0)),
     "V20": Case("V20", "V1 nozzle with heated nitrogen (20 bar, 800 K): virial gas with cp(T)",
                 _v20_definition, _v20_checks),
+    "E3a": Case("E3a", "Whalen (NASA TM-100130) 20 deg conical nozzle, cold nitrogen, Re 1830: measured thrust",
+                _whalen_definition(20.0, 1830), _whalen_checks("E3a")),
+    "E3b": Case("E3b", "Whalen (NASA TM-100130) 25 deg conical nozzle, cold nitrogen, Re 1848: measured thrust",
+                _whalen_definition(25.0, 1848), _whalen_checks("E3b")),
     "V10-pr": Case("V10-pr", "V1 nozzle at 30 bar, Peng-Robinson", _v10_definition("peng_robinson"),
                    _v1_checks_at(V10_P0)),
     "V4a": Case("V4a", "Inviscid converging nozzle, choked, sea-level plume",
