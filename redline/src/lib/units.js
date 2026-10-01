@@ -63,6 +63,7 @@ export const QUANTITIES = {
   mass: {
     base: 'kg',
     units: {
+      kg:  { to: v => v, from: v => v, dp: 3, label: 'kg' },
       g:   { to: v => v * 1e3, from: v => v / 1e3, dp: 1, label: 'g' },
       lbm: { to: v => v / LBM, from: v => v * LBM, dp: 4, label: 'lbm' },
     },
@@ -77,6 +78,7 @@ export const QUANTITIES = {
                                     'lbf·s': { to: v => v / LBF, from: v => v * LBF, dp: 4, label: 'lbf·s' } } },
   isp:      { base: 's', units: { s: { to: v => v, from: v => v, dp: 1, label: 's' } } },
   ratio:    { base: '', units: { '': { to: v => v, from: v => v, dp: 3, label: '' } } },
+  area:     { base: 'm²', units: { 'mm²': { to: v => v * 1e6, from: v => v / 1e6, dp: 3, label: 'mm²' } } },
   rate:     { base: 'Pa/s', units: { 'psi/min': { to: v => v / PSI * 60, from: v => v * PSI / 60, dp: 2, label: 'psi/min' } } },
 };
 
@@ -86,7 +88,7 @@ export const DISPLAY = {
   force: 'N',
   temperature: 'C',
   massflow: 'g/s',
-  mass: 'g',
+  mass: 'kg',
   velocity: 'm/s',
   current: 'A',
   voltage: 'V',
@@ -96,6 +98,7 @@ export const DISPLAY = {
   impulse: 'N·s',
   isp: 's',
   ratio: '',
+  area: 'mm²',
   rate: 'psi/min',
 };
 

@@ -15,6 +15,8 @@ import gonogo from './ts1-gonogo.js';
 import pid from './ts1-pid.js';
 import { FAULTS } from '../faults/ts1-faults.js';
 import { INSPECTIONS } from '../faults/ts1-inspections.js';
+import { interlocks } from './ts1-interlocks.js';
+import { predictColdGas } from '../../physics/predict.js';
 
 const AMB = { P: P_STD, T: degC(20) };
 const g = x => AMB.P + psi(x);        // psig → Pa absolute
@@ -300,4 +302,27 @@ export default {
   regulator: 'PR-101',
   fireValve: 'SV-301',
   supplyIso: 'IV-101',
+  supplyChannel: 'PT-101',
+  loadCell: 'LC-501',
+  lpChannels: ['PT-102', 'PT-201', 'PT-301', 'PT-401'],
+  ventElements: ['VV-101', 'VV-201', 'RV-201', 'LK-301'],
+  pneumaticValves: ['IV-101'],
+  interlocks,
+  /* The prediction: the nominal stand at the measured supply (or the
+     request's assumption) and the commanded setpoint. */
+  predict(S) {
+    const supply = S.request?.supplyAssumed ?? psi(2200);
+    let sup = S.daq.online ? S.daq.latest('PT-101') : NaN;
+    if (!(sup > psi(300))) sup = supply;
+    const c = S.controller;
+    const regSet = c.regSet > psi(5) ? c.regSet : (S.request?.regSet ?? psi(150));
+    return predictColdGas(S.def, { supplyGauge: sup, regSet });
+  },
+  alarmCtx(S, base) {
+    const c = S.controller;
+    return { ...base,
+      domeSettled: Math.abs(S.daq.latest('EPC-101') - c.regSet) < psi(5),
+      flowing: base.svCmd || c.cmd['VV-101'] === 1 || c.cmd['VV-201'] === 1,
+      predF: S.prediction ? S.prediction.F : 0 };
+  },
 };

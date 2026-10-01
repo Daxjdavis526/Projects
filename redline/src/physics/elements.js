@@ -295,6 +295,29 @@ export class ReliefValve extends Element {
   CdA() { return this.CdAmax * this.lift + this.leakCdA; }
 }
 
+/* A spring-loaded check valve: closed until the forward pressure difference
+   beats its cracking pressure, full open a little above it, and shut against
+   reverse flow (bar a seat leak). Purge lines need them so propellant cannot
+   back up into the purge gas; pressurant lines so the two tanks cannot talk
+   to each other through the regulators. */
+export class CheckValve extends Element {
+  constructor(spec, net) {
+    super(spec, net);
+    this.CdAmax = spec.CdA;
+    this.crack = spec.crack ?? 3447;         // Pa (≈ 0.5 psid)
+    this.span = spec.span ?? 4 * this.crack; // Pa above cracking to full open
+    this.lift = 0;
+    this.stuckOpen = false;                  // fault hook: will not reseat
+  }
+  update(dt, net) {
+    const dP = net.state(this.from).P - net.state(this.to).P;
+    const tgt = this.stuckOpen ? 1 : clamp01((dP - this.crack) / this.span);
+    this.lift += (tgt - this.lift) * Math.min(1, dt / 0.002);
+  }
+  CdA() { return this.CdAmax * this.lift * (1 - this.blockage) + this.leakCdA; }
+  CdAbound() { return Math.max(this.CdA(), this.CdAmax * 0.25); }
+}
+
 /* The thruster's nozzle, venting a volume to atmosphere and producing thrust. */
 export class NozzleElement extends Element {
   constructor(spec, net) {
@@ -319,5 +342,6 @@ export const ELEMENT_TYPES = {
   solenoid: SolenoidValve,
   regulator: Regulator,
   relief: ReliefValve,
+  check: CheckValve,
   nozzle: NozzleElement,
 };

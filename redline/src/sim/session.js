@@ -20,7 +20,7 @@ import { Emitter } from '../lib/emitter.js';
 import { Rng } from '../lib/rng.js';
 import { psi, fmt } from '../lib/units.js';
 import { ColdGasModel } from '../physics/coldgas.js';
-import { predictColdGas } from '../physics/predict.js';
+import { BipropModel } from '../physics/biprop.js';
 import { DAQ } from '../instruments/daq.js';
 import { Controller } from '../control/controller.js';
 import { Alarms } from '../control/alarms.js';
@@ -33,7 +33,7 @@ import { scoreDiagnosis, abortAssessment } from '../faults/diagnosis.js';
 import { leakPre, leakEval, LEAK_SECONDS } from '../control/leakcheck.js';
 import { FAILURE_MODES, RIGHT_ACTION } from '../content/faults/ts1-faults.js';
 
-const MODELS = { coldgas: ColdGasModel };
+const MODELS = { coldgas: ColdGasModel, biprop: BipropModel };
 const CHUNK = 0.005;
 
 export class Session extends Emitter {
@@ -144,23 +144,23 @@ export class Session extends Emitter {
 
   /* ---- context objects ---------------------------------------------- */
 
+  /* What the limits may depend on: the sequence state, generically; the
+     stand adds its own (setpoints, predictions, which valves are open). */
   alarmCtx() {
     const c = this.controller, q = c.seq;
     const T = q ? this.t - q.tFire : null;
-    const svCmd = !!c.cmd[this.def.fireValve];
+    const svCmd = c.mainValves.some(id => !!c.cmd[id]);
     const burning = !!q && q.state === 'BURN' && svCmd;
     let Tburn = null;
     if (burning) Tburn = this.t - (c.lastSvOn ?? q.tFire);
-    return {
+    const base = {
       armed: c.armed, seqActive: !!q,
       firing: !!q && (q.state === 'BURN' || q.state === 'TAIL'),
       burning, Tburn, T,
       regSet: c.regSet,
-      domeSettled: Math.abs(this.daq.latest('EPC-101') - c.regSet) < psi(5),
-      flowing: svCmd || c.cmd['VV-101'] === 1 || c.cmd['VV-201'] === 1,
-      predF: this.prediction ? this.prediction.F : 0,
       svCmd, sinceSvOff: c.sinceSvOff(),
     };
+    return this.def.alarmCtx ? this.def.alarmCtx(this, base) : base;
   }
 
   /* The read-only view that procedures and the go/no-go poll use: measured
@@ -174,6 +174,7 @@ export class Session extends Emitter {
       stats: (id, span) => d.store.stats(id, span),
       cmd: id => c.cmd[id],
       regSet: c.regSet,
+      sp: c.sp,
       armed: c.armed,
       plan: c.plan, planText: c.planText(),
       seq: c.seq, abortActive: !!(c.abort && !c.abort.reset),
@@ -215,11 +216,7 @@ export class Session extends Emitter {
   updatePrediction() {
     if (!this._predWanted) return this.prediction;
     this._predWanted = false;
-    const supply = this.request?.supplyAssumed ?? psi(2200);
-    let sup = this.daq.online ? this.daq.latest('PT-101') : NaN;
-    if (!(sup > psi(300))) sup = supply;
-    const regSet = this.controller.regSet > psi(5) ? this.controller.regSet : (this.request?.regSet ?? psi(150));
-    this.prediction = predictColdGas(this.def, { supplyGauge: sup, regSet });
+    this.prediction = this.def.predict(this);
     this.emit('prediction', this.prediction);
     return this.prediction;
   }
@@ -246,13 +243,14 @@ export class Session extends Emitter {
      The result is what the PROPULSION station reports at the poll. */
   startLeakCheck() {
     if (this.leakRun) return { ok: false, msg: 'A leak check is already running.' };
-    const pre = leakPre(this.view());
+    const L = this.def.leak || { pre: leakPre, eval: leakEval };
+    const pre = L.pre(this.view());
     if (!pre.ok) return pre;
     this.leakRun = { start: this.t, end: this.t + LEAK_SECONDS };
     this.log.add(this.t, 'PROC', `Leak check: isolated, ${LEAK_SECONDS} s hold started`);
     this.later(LEAK_SECONDS, () => {
       const v = this.view();
-      const r = leakPre(v).ok ? leakEval(v) : { ok: false, value: NaN, msg: 'isolation was broken during the hold — result void' };
+      const r = L.pre(v).ok ? L.eval(v) : { ok: false, value: NaN, msg: 'isolation was broken during the hold — result void' };
       this.leakCheck = r;
       this.leakRun = null;
       this.log.add(this.t, 'PROC', `Leak check complete: ${r.msg}`, { level: r.ok ? 'info' : 'caution' });
@@ -320,7 +318,8 @@ export class Session extends Emitter {
     return {
       stand: this.def.id, article: this.def.article,
       regSet: c.regSet, plan: { ...c.plan }, rate: d.rate,
-      supply: d.latest('PT-101'),
+      supply: d.latest(this.def.supplyChannel || 'PT-101'),
+      sp: { ...c.sp },
       valves: { ...c.cmd },
       prediction: this.prediction ? { ...this.prediction } : null,
     };
@@ -341,7 +340,7 @@ export class Session extends Emitter {
       cutoff: !!seq?.cutoff, aborted: aborts.length > 0, abort: aborts[0]?.text || null,
       alarms, events, notes: [], clock: rec.meta.clock,
     };
-    run.metrics = run.tFire !== null ? computeMetrics(run, this.def) : null;
+    run.metrics = run.tFire !== null ? (this.def.metrics || computeMetrics)(run, this.def) : null;
     this.runs.push(run);
     this.log.add(this.t, 'DAQ', `Recording STOPPED — ${run.id}, ${(run.stop - run.start).toFixed(1)} s, ${run.data.n} samples (${reason})`, { runId: run.id });
     this.emit('run', run);

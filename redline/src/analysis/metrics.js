@@ -17,18 +17,18 @@
 import { G0 } from '../lib/units.js';
 import { GASES } from '../physics/gas.js';
 
-function meanIn(T, V, t0, t1) {
+export function meanIn(T, V, t0, t1) {
   let s = 0, n = 0;
   for (let k = lowerBound(T, t0); k < T.length && T[k] <= t1; k++) { const v = V[k]; if (!Number.isNaN(v)) { s += v; n++; } }
   return n ? s / n : NaN;
 }
-function stdIn(T, V, t0, t1) {
+export function stdIn(T, V, t0, t1) {
   const m = meanIn(T, V, t0, t1);
   let s = 0, n = 0;
   for (let k = lowerBound(T, t0); k < T.length && T[k] <= t1; k++) { const v = V[k]; if (!Number.isNaN(v)) { s += (v - m) ** 2; n++; } }
   return n > 1 ? Math.sqrt(s / (n - 1)) : NaN;
 }
-function maxIn(T, V, t0, t1, off = 0) {
+export function maxIn(T, V, t0, t1, off = 0) {
   let m = -Infinity, tm = NaN;
   for (let k = lowerBound(T, t0); k < T.length && T[k] <= t1; k++) { const v = V[k] - off; if (v > m) { m = v; tm = T[k]; } }
   return { v: m, t: tm };
@@ -51,7 +51,7 @@ export function crossing(T, V, t0, t1, level, dir) {
   }
   return NaN;
 }
-function integrate(T, V, t0, t1, off = 0) {
+export function integrate(T, V, t0, t1, off = 0) {
   let s = 0;
   for (let k = Math.max(1, lowerBound(T, t0)); k < T.length && T[k] <= t1; k++) {
     const a = V[k - 1] - off, b = V[k] - off;
@@ -61,7 +61,7 @@ function integrate(T, V, t0, t1, off = 0) {
   return s;
 }
 /* Rising and falling edges of a 0/1 channel. */
-function edges(T, V) {
+export function edges(T, V) {
   const on = [], off = [];
   for (let k = 1; k < T.length; k++) {
     if (V[k - 1] < 0.5 && V[k] >= 0.5) on.push(T[k]);

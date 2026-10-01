@@ -29,12 +29,15 @@ export class Controller extends Emitter {
     for (const e of def.physics.elements) {
       if (e.type === 'valve' || e.type === 'solenoid') this.cmd[e.id] = e.initial ?? (e.normally === 'open' ? 1 : 0);
     }
-    this.regSet = 0;
+    for (const l of def.physics.lines || []) this.cmd[l.valve.id] = l.valve.normally === 'open' ? 1 : 0;
+    // every regulator's EPC command; `regSet` is the primary regulator's
+    this.regIds = (def.regulators || [{ id: def.regulator }]).map(r => r.id);
+    this.sp = Object.fromEntries(this.regIds.map(id => [id, 0]));
     this.armed = false;
     this.seq = null;
     this.abort = null;
     this.lastAbort = null;
-    this.plan = { mode: 'single', duration: 3.0, on: 0.1, off: 0.4, count: 10 };
+    this.plan = { mode: 'single', duration: 3.0, on: 0.1, off: 0.4, count: 10, ...(def.defaultPlan || {}) };
     this.autoStop = true;
     this.recordTail = 3.0;
     this.facility = { area: 'OPEN', personnel: 2, door: 'OPEN', beacon: 'GREEN', until: null, pa: false };
@@ -46,6 +49,8 @@ export class Controller extends Emitter {
   }
 
   get t() { return this.s.t; }
+  get regSet() { return this.sp[this.def.regulator] ?? 0; }
+  set regSet(v) { this.sp[this.def.regulator] = v; }
   log(cat, text, extra) { return this.s.log.add(this.t, cat, text, { T: this.testTime(), ...extra }); }
 
   testTime() { return this.seq ? this.t - this.seq.tFire : null; }
@@ -73,6 +78,8 @@ export class Controller extends Emitter {
       daqOnline: s.daq.online,
       recording: !!s.daq.recording,
       regSet: this.regSet,
+      sp: this.sp,
+      plan: this.plan,
       pollGo: this.pollGo,
       zeroableIds: s.daq.sensors.filter(x => x.zeroable).map(x => x.id),
       fs: id => s.daq.sensor(id)?.span ?? Infinity,
@@ -109,7 +116,7 @@ export class Controller extends Emitter {
   describe(action, a) {
     switch (action) {
       case 'valve': return `${a.id} ${a.open ? 'OPEN' : 'CLOSE'}`;
-      case 'regSet': return `${this.def.regulator} setpoint ${fmt(a.value, 'pressure')} psig`;
+      case 'regSet': return `${a.id || this.def.regulator} setpoint ${fmt(a.value, 'pressure')} psig`;
       case 'tech': return `technician: ${a.task}`;
       default: return action;
     }
@@ -128,9 +135,12 @@ export class Controller extends Emitter {
         return { ok: true };
       }
       case 'regSet': {
-        this.regSet = Math.max(0, a.value);
-        m.command(this.def.regulator, this.regSet);
-        this.log('CMD', `${this.def.regulator} setpoint → ${fmt(this.regSet, 'pressure')} (EPC-101)`, { id: this.def.regulator, value: this.regSet });
+        const id = a.id || this.def.regulator;
+        if (!(id in this.sp)) throw new Error(`no regulator ${id}`);
+        this.sp[id] = Math.max(0, a.value);
+        m.command(id, this.sp[id]);
+        const epc = this.def.regulators?.find(r => r.id === id)?.epc || 'EPC-101';
+        this.log('CMD', `${id} setpoint → ${fmt(this.sp[id], 'pressure')} (${epc})`, { id, value: this.sp[id] });
         this.bump('test');
         s.requestPrediction();
         return { ok: true };
@@ -182,13 +192,13 @@ export class Controller extends Emitter {
         return { ok: true, out };
       }
       case 'tare': {
-        const out = s.daq.zero(a.ids || ['LC-501']);
+        const out = s.daq.zero(a.ids || this.def.tareIds || [this.def.loadCell || 'LC-501']);
         const txt = out.map(o => `${o.id} ${o.removed >= 0 ? '−' : '+'}${fmt(Math.abs(o.removed), o.quantity)}`).join(', ');
         this.log('DAQ', `Load cell tared: ${txt || 'nothing'}`, { tare: out });
         return { ok: true, out };
       }
       case 'shunt': {
-        const lc = s.daq.sensor(a.id || 'LC-501');
+        const lc = s.daq.sensor(a.id || this.def.loadCell || 'LC-501');
         lc.shunt = !!a.on;
         this.log('DAQ', `${lc.id} shunt calibration ${a.on ? 'ON (expect +' + lc.shuntValue.toFixed(2) + ' N)' : 'OFF'}`);
         return { ok: true };
@@ -212,7 +222,7 @@ export class Controller extends Emitter {
         if (!this.armed) return { ok: true, noop: true };
         this.armed = false;
         if (this.facility.area === 'SECURED') this.facility.beacon = 'AMBER';
-        if (this.cmd[this.def.fireValve]) this._fireValve(0, 'fire circuit disarmed');
+        for (const id of this.mainValves) if (this.cmd[id]) this._cmdValve(id, 0, 'fire circuit disarmed');
         if (this.seq) { this.log('SEQ', 'Sequence terminated by DISARM', { level: 'caution' }); this.seq = null; }
         this.log('SEQ', 'Fire circuit SAFE (disarmed)');
         return { ok: true };
@@ -227,9 +237,17 @@ export class Controller extends Emitter {
       case 'cutoff': {
         if (!this.seq || this.seq.state !== 'BURN') return { ok: true, noop: true };
         this.log('SEQ', `Manual CUTOFF (normal shutdown) at ${fmtT(this.t - this.seq.tFire)}`, { level: 'caution' });
-        this._fireValve(0, 'manual cutoff');
+        for (const id of this.mainValves) if (this.cmd[id]) this._cmdValve(id, 0, 'manual cutoff');
+        // what the plan does after its shutdown (a post-purge) still runs —
+        // brought forward to start now
+        const q = this.seq, Tnow = this.t - q.tFire, shift = q.tEnd - Tnow;
+        const rest = q.sched.slice(q.next).filter(ev => !ev.main);
+        for (const ev of rest) if (!ev.main && ev.T >= q.tEnd - EPS) ev.T -= shift;
+        rest.sort((x, y) => x.T - y.T);
+        q.sched = [...q.sched.slice(0, q.next), ...rest];
+        if (q.tLast !== undefined) q.tLast -= shift;
         this.seq.state = 'TAIL';
-        this.seq.tEnd = this.t - this.seq.tFire;
+        this.seq.tEnd = Tnow;
         this.seq.cutoff = true;
         return { ok: true };
       }
@@ -249,6 +267,7 @@ export class Controller extends Emitter {
   }
 
   planText(p = this.plan) {
+    if (this.def.planText) return this.def.planText(p);
     if (p.mode === 'pulse') return `pulse train, ${p.count} × ${Math.round(p.on * 1000)} ms on / ${Math.round(p.off * 1000)} ms off`;
     return `single burn, ${p.duration.toFixed(2)} s`;
   }
@@ -261,8 +280,8 @@ export class Controller extends Emitter {
     if (!insp) throw new Error(`unknown inspection ${id}`);
     if (this.tech) return { ok: false, blocked: { msg: 'Technician is busy.', why: this.tech.text } };
     const f = this.facility, net = S.model.net, Pa = S.def.physics.ambient.P;
-    const lpMax = Math.max(...['hp', 'lp', 'feed', 'chamber'].map(v => net.vol(v).P - Pa));
-    const lp = net.vol('lp').P - Pa;
+    const lpMax = Math.max(...(this.def.inspectionVolumes || ['hp', 'lp', 'feed', 'chamber']).map(v => net.vol(v).P - Pa));
+    const lp = net.vol(this.def.lowPVolume || 'lp').P - Pa;
     if (insp.needs !== 'rack' && f.area !== 'OPEN')
       return { ok: false, blocked: { msg: 'This inspection is done in the cell.', why: 'Open the cell first — which means safing anything hazardous.' } };
     if (insp.needs === 'vented' && lpMax > psi(5))
@@ -283,33 +302,38 @@ export class Controller extends Emitter {
 
   _tech(task) {
     if (this.tech) return { ok: false, blocked: { msg: 'Technician is busy.', why: this.tech.text } };
+    const B = this.def.bottle || { valve: 'HV-100', volume: 'tank' }, txt = this.def.text || {};
     const tasks = {
-      openHV: { dur: 5, text: 'Opening bottle valve HV-100', done: () => {
-        this.s.model.command('HV-100', 1); this.cmd['HV-100'] = 1; this.bump();
+      openHV: { dur: 5, text: `Opening bottle valve ${B.valve}`, done: () => {
+        this.s.model.command(B.valve, 1); this.cmd[B.valve] = 1; this.bump();
         this.s.later(3.0, () => {
           // the bottle's own dial gauge, read by eye to the nearest 50 psi —
-          // an independent (and coarse) cross-check of PT-101
-          const Pt = this.s.model.net.vol('tank').P - this.def.physics.ambient.P;
-          this.log('TECH', `HV-100 open. Bottle dial gauge reads about ${Math.round(Pt / psi(50)) * 50} psig.`);
+          // an independent (and coarse) cross-check of the supply transducer
+          const Pt = this.s.model.net.vol(B.volume).P - this.def.physics.ambient.P;
+          this.log('TECH', `${B.valve} open. Bottle dial gauge reads about ${Math.round(Pt / psi(50)) * 50} psig.`);
         });
       } },
-      closeHV: { dur: 5, text: 'Closing bottle valve HV-100', done: () => {
-        this.s.model.command('HV-100', 0); this.cmd['HV-100'] = 0; this.bump();
-        this.s.later(2.6, () => this.log('TECH', 'HV-100 closed, hand-tight.'));
+      closeHV: { dur: 5, text: `Closing bottle valve ${B.valve}`, done: () => {
+        this.s.model.command(B.valve, 0); this.cmd[B.valve] = 0; this.bump();
+        this.s.later(2.6, () => this.log('TECH', `${B.valve} closed, hand-tight.`));
       } },
       walkdown: { dur: 20, text: 'Stand walkdown', done: () => {
-        this.log('TECH', 'Walkdown complete: fittings torque-striped, tubing supported, thruster exhaust path clear, load-cell cable secured, no tools on the stand.');
+        this.log('TECH', txt.walkdown || 'Walkdown complete: fittings torque-striped, tubing supported, thruster exhaust path clear, load-cell cable secured, no tools on the stand.');
       } },
       inspect: { dur: 25, text: 'Post-test visual inspection of the test article', done: () => {
         // A quick look, not a measurement. The full inspection interface is
         // a separate tool; this is what a technician says after a glance.
+        if (txt.inspect) { this.log('TECH', txt.inspect(this.s)); return; }
         const Tw = this.s.model.net.vol('chamber').Tw - 273.15;
         const frost = Tw < 2 ? ' Light frost on the nozzle and valve body — melting.' : Tw < 12 ? ' Thruster body cold to the touch.' : '';
         this.log('TECH', `Post-test visual: thruster, fire valve and feed line intact, no loose fittings, load cell cable secure, exhaust path clear.${frost}`);
       } },
+      ...(this.def.techTasks ? this.def.techTasks(this) : {}),
     };
     const t = tasks[task];
     if (!t) throw new Error(`unknown technician task ${task}`);
+    const refuse = t.pre?.();
+    if (refuse) return { ok: false, blocked: { msg: refuse, why: '' } };
     this.tech = { task, until: this.t + t.dur, text: t.text, done: t.done };
     this.log('TECH', `${t.text} (≈${t.dur} s)`);
     return { ok: true };
@@ -318,8 +342,9 @@ export class Controller extends Emitter {
   /* ---- firing sequencer ------------------------------------------------ */
   _startSequence() {
     const p = this.plan;
-    const sched = [];
-    if (p.mode === 'pulse') {
+    let sched = [];
+    if (this.def.sequence) sched = this.def.sequence(p);
+    else if (p.mode === 'pulse') {
       for (let k = 0; k < p.count; k++) {
         const t0 = k * (p.on + p.off);
         sched.push({ T: t0, v: 1 }, { T: t0 + p.on, v: 0 });
@@ -327,23 +352,32 @@ export class Controller extends Emitter {
     } else {
       sched.push({ T: 0, v: 1 }, { T: p.duration, v: 0 });
     }
+    // the default schedule drives the one fire valve
+    if (!this.def.sequence) sched = sched.map(ev => ({ id: this.def.fireValve, main: true, ...ev }));
     this.seq = { state: 'COUNTDOWN', tFire: this.t + COUNTDOWN, plan: { ...p }, sched, next: 0,
-                 tEnd: sched[sched.length - 1].T, runId: this.s.daq.recording?.meta.runId ?? null };
+                 tEnd: Math.max(...sched.filter(ev => ev.main).map(ev => ev.T)), tLast: sched[sched.length - 1].T, runId: this.s.daq.recording?.meta.runId ?? null };
     this.log('SEQ', `FIRE: automatic sequence started — ${this.planText()}. T-0 in ${COUNTDOWN} s`, { level: 'caution' });
     this.s.audio('countdown');
     this.emit('sequence', { state: 'COUNTDOWN' });
     return { ok: true };
   }
 
-  _fireValve(v, why) {
-    const id = this.def.fireValve;
+  /* The valves the sequencer owns as "the" valves of a firing: the fire
+     valve on TS-1, both main valves on TS-2. */
+  get mainValves() { return this.def.mainValves || [this.def.fireValve]; }
+
+  _cmdValve(id, v, why) {
     this.cmd[id] = v;
     this.s.model.command(id, v);
     this.log('CMD', `${id} ${v ? 'OPEN' : 'CLOSE'} (${why})`, { id, value: v });
-    this.lastSvOff = v ? null : this.t;
-    if (v) this.lastSvOn = this.t;
+    if (this.mainValves.includes(id)) {
+      // "burning" starts with the first main valve and ends with the last
+      if (v) { if (this.mainValves.every(m => m === id || !this.cmd[m])) this.lastSvOn = this.t; this.lastSvOff = null; }
+      else if (this.mainValves.every(m => !this.cmd[m])) this.lastSvOff = this.t;
+    }
     this.s.audio('valve', { id, open: !!v });
   }
+  _fireValve(v, why) { this._cmdValve(this.def.fireValve, v, why); }
 
   /* ---- abort ----------------------------------------------------------- */
   triggerAbort(reason, source, detail = {}) {
@@ -381,10 +415,10 @@ export class Controller extends Emitter {
         if (st.id === 'DISARM') {
           this.armed = false;
           if (f.area === 'SECURED') f.beacon = 'AMBER';
-        } else if (st.id === this.def.regulator) {
-          this.regSet = st.value; this.s.model.command(st.id, st.value);
-        } else if (st.id === this.def.fireValve) {
-          if (this.cmd[st.id]) this._fireValve(0, 'abort');
+        } else if (st.id in this.sp) {
+          this.sp[st.id] = st.value; this.s.model.command(st.id, st.value);
+        } else if (this.mainValves.includes(st.id)) {
+          if (this.cmd[st.id]) this._cmdValve(st.id, 0, 'abort');
         } else {
           if (this.cmd[st.id] !== st.value) {
             this.cmd[st.id] = st.value; this.s.model.command(st.id, st.value);
@@ -411,13 +445,12 @@ export class Controller extends Emitter {
         this.emit('sequence', { state: 'BURN' });
       }
       if (q.state === 'BURN') {
-        while (q.next < q.sched.length && T >= q.sched[q.next].T - EPS) {
-          const ev = q.sched[q.next++];
-          this._fireValve(ev.v, q.plan.mode === 'pulse' ? `pulse ${Math.floor(q.next / 2 + 0.5)}` : (ev.v ? 'T-0' : 'end of burn'));
-        }
-        if (q.next >= q.sched.length) { q.state = 'TAIL'; this.emit('sequence', { state: 'TAIL' }); }
+        this._runEvents(q, T);
+        if (!q.sched.slice(q.next).some(ev => ev.main)) { q.state = 'TAIL'; this.emit('sequence', { state: 'TAIL' }); }
       }
-      if (q.state === 'TAIL' && T >= q.tEnd + TAIL) {
+      // events after the last main-valve one (post-purge) run in the tail
+      if (q.state === 'TAIL') this._runEvents(q, T);
+      if (q.state === 'TAIL' && T >= Math.max(q.tEnd + TAIL, (q.tLast ?? 0) + 0.05) && q.next >= q.sched.length) {
         q.state = 'COMPLETE';
         this.log('SEQ', `Sequence complete${q.cutoff ? ' (manual cutoff)' : ''}. Fire circuit safed.`);
         this.armed = false;
@@ -430,12 +463,21 @@ export class Controller extends Emitter {
     }
   }
 
+  _runEvents(q, T) {
+    while (q.next < q.sched.length && T >= q.sched[q.next].T - EPS) {
+      const ev = q.sched[q.next++];
+      if (q.cutoff && ev.main) continue;           // a cutoff already closed them
+      const why = ev.why || (q.plan.mode === 'pulse' ? `pulse ${Math.floor(q.next / 2 + 0.5)}` : (ev.v ? 'T-0' : 'end of burn'));
+      if (this.cmd[ev.id] !== ev.v) this._cmdValve(ev.id, ev.v, why);
+    }
+  }
+
   /* Absolute sim time of the next sequencer event (T-0 or a valve edge). */
   nextEventTime() {
     const q = this.seq;
     if (!q || q.state === 'ABORTED') return Infinity;
     if (q.state === 'COUNTDOWN') return q.tFire;
-    if (q.state === 'BURN' && q.next < q.sched.length) return q.tFire + q.sched[q.next].T;
+    if ((q.state === 'BURN' || q.state === 'TAIL') && q.next < q.sched.length) return q.tFire + q.sched[q.next].T;
     return Infinity;
   }
 
