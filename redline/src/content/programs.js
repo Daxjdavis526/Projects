@@ -3,6 +3,9 @@
    built yet say so plainly, and which development phase brings them. */
 
 import ts1 from './stands/ts1-coldgas.js';
+import ts2 from './stands/ts2-biprop.js';
+import bpOrientation from './procedures/bp-orientation.js';
+import bpColdflow from './procedures/bp-coldflow.js';
 import orientation from './procedures/cg-orientation.js';
 import basicFiring from './procedures/cg-basic-firing.js';
 import pressureChar from './procedures/cg-pressure-char.js';
@@ -10,7 +13,7 @@ import pulse from './procedures/cg-pulse.js';
 import trouble from './procedures/cg-trouble.js';
 import campaign from './procedures/cg-campaign.js';
 
-export const STANDS = { 'TS-1': ts1 };
+export const STANDS = { 'TS-1': ts1, 'TS-2': ts2 };
 
 export const MODES = {
   tutorial:    { label: 'Tutorial', text: 'Every step explained. Strict interlocks. Stations make their own go/no-go calls and say why.' },
@@ -40,11 +43,13 @@ export const PROGRAMS = [
     ],
   },
   {
-    id: 'biprop', title: 'Liquid bipropellant engine testing', stand: null,
-    blurb: 'A small pressure-fed research engine on fictional propellants: two feed systems, an injector, ignition, a cooled chamber, and a much less forgiving start.',
+    id: 'biprop', title: 'Liquid bipropellant engine testing', stand: 'TS-2',
+    blurb: 'A small pressure-fed research engine on fictional propellants: two feed systems, an injector, purge, and — before anything is lit — cold flows with water to find out what the injector really does.',
     levels: [
-      { n: 7, id: 'bp-orient', title: 'Bipropellant stand orientation', phase: 6, teaches: ['Separate fuel and oxidiser systems', 'Purge'] },
-      { n: 8, id: 'bp-coldflow', title: 'Bipropellant cold-flow test', phase: 6, teaches: ['Injector pressure drop', 'Mixture ratio', 'Flow calibration'] },
+      { n: 7, id: 'bp-orient', title: 'Bipropellant stand orientation', scenario: bpOrientation, modes: ['tutorial', 'guided'],
+        teaches: ['Separate oxidiser and fuel systems', 'Loading and tank scales', 'Pressure tare', 'Purge', 'Trapped volumes, twice'] },
+      { n: 8, id: 'bp-coldflow', title: 'Bipropellant cold-flow test', scenario: bpColdflow, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['Injector pressure drop and CdA', 'Priming and water hammer', 'Flowmeter vs tank scale', 'Mixture ratio from cold flow', 'Single-side flows'] },
       { n: 9, id: 'bp-hotfire', title: 'First hot fire', phase: 7, teaches: ['Ignition timing and confirmation', 'Valve sequencing', 'Hard start'] },
       { n: 10, id: 'bp-transients', title: 'Startup/shutdown analysis', phase: 7, teaches: ['Start and shutdown transients', 'Residual propellant'] },
       { n: 11, id: 'bp-faults', title: 'Bipropellant fault diagnosis', phase: 7, teaches: ['Combustion instability', 'Cooling faults', 'False redlines'] },

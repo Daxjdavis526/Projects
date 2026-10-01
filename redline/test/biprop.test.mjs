@@ -5,6 +5,8 @@ import def from '../src/content/stands/ts2-biprop.js';
 import { BipropModel } from '../src/physics/biprop.js';
 import { Session } from '../src/sim/session.js';
 import { psi } from '../src/lib/units.js';
+import bpOrientation from '../src/content/procedures/bp-orientation.js';
+import bpColdflow from '../src/content/procedures/bp-coldflow.js';
 
 let failures = 0, count = 0;
 const check = (label, cond, detail = '') => {
@@ -183,6 +185,98 @@ console.log('stand rules');
   const tPurge = cmds.find(e => /PV-631 OPEN \(post-purge\)/.test(e.text))?.t;
   check('after a cutoff the post-purge follows at once', tPurge - tCut < 0.2, `${(tPurge - tCut).toFixed(3)} s`);
   check('and the sequence completes without waiting for the planned 10 s', !s.controller.seq && s.controller.completed?.cutoff);
+}
+
+console.log('Level 7 — orientation, tutorial');
+{
+  const s = new Session({ def, scenario: bpOrientation, mode: 'tutorial', seed: 12 });
+  const ex = (a, x = {}) => s.execute(a, x, { confirmed: true });
+  const P = s.procedure;
+  for (const id of ['A1', 'A2']) P.confirm(id);
+  for (const st of P.steps.filter(x => x.id.startsWith('K-'))) s.inspect(st.id.slice(2));
+  ex('daqPower', { on: true }); s.run(5); ex('zero'); ex('tare', { ids: ['WT-716', 'WT-726'] }); s.run(0.5);
+  ex('tech', { task: 'fillTanks' }); s.run(61);
+  ex('tech', { task: 'openHV' }); s.run(9);
+  for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: false });
+  ex('valve', { id: 'IV-601', open: true }); s.run(2);
+  ex('regSet', { id: 'PR-610', value: psi(40) }); ex('regSet', { id: 'PR-620', value: psi(40) }); s.run(10);
+  ex('regSet', { id: 'PR-630', value: psi(40) }); s.run(5);
+  ex('valve', { id: 'PV-631', open: true }); s.run(3); ex('valve', { id: 'PV-631', open: false }); s.run(1);
+  for (const id of ['PR-610', 'PR-620', 'PR-630']) ex('regSet', { id, value: 0 });
+  ex('valve', { id: 'IV-601', open: false }); s.run(2);
+  ex('valve', { id: 'VV-711', open: true }); ex('valve', { id: 'VV-721', open: true }); s.run(15);
+  const trapped = P.confirm('E3');
+  check('verify catches the trapped header and purge line', !trapped.ok, trapped.msg);
+  P.reopen('E3');
+  ex('valve', { id: 'VV-601', open: true }); ex('valve', { id: 'PV-631', open: true }); s.run(6); ex('valve', { id: 'PV-631', open: false }); s.run(1);
+  P.confirm('E3'); P.confirm('E4'); s.run(0.5);
+  const sum = P.summary();
+  check('orientation completes with every step COMPLETE', sum.counts.COMPLETE === sum.total,
+        P.steps.filter(x => P.status(x.id) !== 'COMPLETE').map(x => x.id + ':' + P.status(x.id)).join(' '));
+  check('no safety violations', s.safetyViolations.length === 0, s.safetyViolations.map(v => v.msg).join('; '));
+}
+
+console.log('Level 8 — cold flow, guided, start to finish');
+{
+  const s = new Session({ def, scenario: bpColdflow, mode: 'guided', seed: 21 });
+  const ex = (a, x = {}) => s.execute(a, x, { confirmed: true });
+  const P = s.procedure;
+  P.confirm('A1'); ex('tech', { task: 'walkdown' }); s.run(21); P.confirm('A3');
+  ex('daqPower', { on: true }); s.run(5);
+  ex('zero', { ids: def.sensors.filter(x => x.kind === 'PT').map(x => x.id) }); ex('tare', { ids: ['WT-716', 'WT-726'] }); s.run(0.5);
+  ex('tech', { task: 'fillTanks' }); s.run(61);
+  P.confirm('C2', s.daq.latest('WT-716').toFixed(2));
+  ex('daqRate', { rate: 1000 });
+  ex('tech', { task: 'openHV' }); s.run(9);
+  for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: false });
+  ex('valve', { id: 'IV-601', open: true }); s.run(2);
+  ex('regSet', { id: 'PR-610', value: psi(50) }); ex('regSet', { id: 'PR-620', value: psi(50) }); s.run(12);
+  ex('valve', { id: 'IV-601', open: false }); ex('regSet', { id: 'PR-610', value: 0 }); ex('regSet', { id: 'PR-620', value: 0 });
+  ex('valve', { id: 'VV-601', open: true }); s.run(2);
+  const hold = P.startHold('E5'); s.run(61); P.confirm('E5', true);
+  check('leak-check hold accepted', hold?.ok && P.status('E5') === 'COMPLETE', P.state.get('E5').msg || JSON.stringify(hold));
+  ex('valve', { id: 'VV-601', open: false }); ex('valve', { id: 'IV-601', open: true }); s.run(2);
+  ex('clearCell'); s.run(7); ex('pa', { text: 'cold flow' });
+  ex('regSet', { id: 'PR-630', value: psi(150) }); s.run(8);
+  ex('regSet', { id: 'PR-610', value: psi(150) }); ex('regSet', { id: 'PR-620', value: psi(150) }); s.run(14);
+  ex('tare', { ids: ['LC-901'] }); s.run(0.5);
+  ex('record', { on: true }); s.run(0.3);
+  const poll = s.startPoll();
+  check('poll all GO before the matrix', poll.allGo, poll.stations.filter(x => !x.go).map(x => x.id + ': ' + x.items.filter(i => !i.ok).map(i => `${i.label} = ${i.value}`).join('; ')).join(' | '));
+  s.concludePoll(poll, Object.fromEntries(poll.stations.map(x => [x.id, x.go ? 'GO' : 'NO-GO'])), 'GO');
+  ex('record', { on: false }); s.run(0.3);
+  const flow = (sides, setP = null, lead = 0.1) => {
+    if (setP) { ex('regSet', { id: 'PR-610', value: setP }); ex('regSet', { id: 'PR-620', value: setP }); s.run(14); }
+    ex('plan', { plan: { mode: 'single', duration: 3, sides, lead, postPurge: 3 } });
+    ex('record', { on: true }); s.run(0.5);
+    const arm = s.execute('arm');
+    ex('fire'); s.run(17);
+    return arm;
+  };
+  const arm1 = flow('ox');
+  check('series poll still valid between points (no re-poll needed)', arm1.ok, JSON.stringify(arm1.confirm || arm1.blocked));
+  flow('fuel'); flow('ox', psi(300)); flow('fuel'); flow('both');
+  check('five flows recorded, none aborted', s.runs.filter(r => r.tFire !== null && !r.aborted).length === 5, s.runs.map(r => r.id + (r.aborted ? '!' + r.abort : '')).join(' '));
+  // safe
+  ex('regSet', { id: 'PR-610', value: 0 }); ex('regSet', { id: 'PR-620', value: 0 }); ex('valve', { id: 'IV-601', open: false }); s.run(2);
+  for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: true }); s.run(15);
+  ex('regSet', { id: 'PR-630', value: 0 }); ex('valve', { id: 'PV-631', open: true }); s.run(8); ex('valve', { id: 'PV-631', open: false }); s.run(1);
+  P.confirm('K4');
+  // data
+  for (const r of s.runs) s.flag('analysis:' + r.id);
+  s.run(0.5);
+  const fl = s.runs.filter(r => r.tFire !== null);
+  const S3 = fl.find(r => r.plan.sides === 'ox' && r.meta.config.sp['PR-610'] > psi(250)).metrics.summary;
+  const S4 = fl.find(r => r.plan.sides === 'fuel' && r.meta.config.sp['PR-620'] > psi(250)).metrics.summary;
+  const S5 = fl.find(r => r.plan.sides === 'both').metrics.summary;
+  P.confirm('L2', (S3.CdAOx * 1e6).toFixed(3)); P.confirm('L3', (S4.CdAFu * 1e6).toFixed(3));
+  P.confirm('L4'); P.confirm('L5'); P.confirm('L6', S5.MRhot.toFixed(3));
+  s.flag('report:session'); s.run(0.5);
+  const sum = P.summary();
+  check('cold-flow procedure completes, every step COMPLETE', sum.counts.COMPLETE === sum.total,
+        P.steps.filter(x => P.status(x.id) !== 'COMPLETE').map(x => `${x.id}:${P.status(x.id)}${P.state.get(x.id).msg ? '(' + P.state.get(x.id).msg + ')' : ''}`).join(' '));
+  check('no safety violations, no wrong poll calls', s.safetyViolations.length === 0 && s.pollMisses.length === 0);
+  check('CdA repeatable 150 → 300 psig', Math.abs(fl[0].metrics.summary.CdAOx / S3.CdAOx - 1) < 0.02, `${(fl[0].metrics.summary.CdAOx * 1e6).toFixed(3)} vs ${(S3.CdAOx * 1e6).toFixed(3)} mm²`);
 }
 
 console.log(`\n${count - failures}/${count} passed`);
