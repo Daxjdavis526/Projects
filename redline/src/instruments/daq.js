@@ -36,8 +36,9 @@ export class DAQ extends Emitter {
                    kind: s.discrete ? 'discrete' : 'analog', sensor: s, range: s.range, sensorKind: s.kind });
     }
     for (const c of def.channels.commands) {
-      chans.push({ id: c.id, desc: c.desc, quantity: 'discrete', kind: 'command',
-                   get: () => (commandState(c.target) ? 1 : 0), range: [0, 1] });
+      // most commands are open/close; a positioner's is a fraction (quantity 'ratio')
+      chans.push({ id: c.id, desc: c.desc, quantity: c.quantity || 'discrete', kind: 'command',
+                   get: c.quantity ? () => commandState(c.target) ?? 0 : () => (commandState(c.target) ? 1 : 0), range: [0, 1] });
     }
     const g = model.gas, nom = def.nominal;
     const k = { Pamb: def.physics.ambient.P, R: g.R, fChoke: g.fChoke,

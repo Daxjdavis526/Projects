@@ -61,7 +61,7 @@ export class Session extends Emitter {
     this.flags = new Set();          // UI milestones the procedures can check (analysis opened, report filed)
     this.timers = [];
     this.runs = [];
-    this.runPrefix = runPrefix || `${def.id.replace('-', '')}-${def.program === 'coldgas' ? 'CG' : 'BP'}`;
+    this.runPrefix = runPrefix || `${def.id.replace('-', '')}-${({ coldgas: 'CG', turbopump: 'TP' })[def.program] || 'BP'}`;
     this.nextRun = firstRun;
     this.clockStart = clockStart;
     this.speed = 1;
@@ -317,6 +317,7 @@ export class Session extends Emitter {
 
   configSnapshot() {
     const c = this.controller, d = this.daq;
+    this.updatePrediction();          // a plan just loaded is what this record is for
     return {
       stand: this.def.id, article: this.def.article,
       regSet: c.regSet, plan: { ...c.plan }, rate: d.rate,

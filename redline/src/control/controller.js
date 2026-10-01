@@ -16,7 +16,8 @@ import { standardInterlocks, evaluate } from './interlocks.js';
 import { psi, fmt, fmtT, unitLabel } from '../lib/units.js';
 
 // an igniter is switched, not opened
-const word = (id, on) => (/^IGN-/.test(id) ? (on ? 'ON' : 'OFF') : (on ? 'OPEN' : 'CLOSE'));
+// a throttle valve goes to a position
+const word = (id, on) => (/^IGN-/.test(id) ? (on ? 'ON' : 'OFF') : /^FCV-/.test(id) ? `→ ${Math.round(on * 100)} %` : (on ? 'OPEN' : 'CLOSE'));
 
 export const COUNTDOWN = 5;          // s from FIRE to T-0
 export const TAIL = 2;
@@ -480,12 +481,16 @@ export class Controller extends Emitter {
         this.emit('sequence', { state: 'COMPLETE', seq: q });
       }
     }
+    // closed-loop controls a stand runs on its own clock (TS-3's speed control)
+    if (this.def.controlTick) this.def.controlTick(this);
   }
 
   _runEvents(q, T) {
     while (q.next < q.sched.length && T >= q.sched[q.next].T - EPS) {
       const ev = q.sched[q.next++];
       if (q.cutoff && ev.main) continue;           // a cutoff already closed them
+      // a stand's own sequenced action (a speed controller, a setpoint ramp)
+      if (ev.hook) { this.def.onEvent?.(this, ev); continue; }
       const why = ev.why || (q.plan.mode === 'pulse' ? `pulse ${Math.floor(q.next / 2 + 0.5)}` : (ev.v ? 'T-0' : 'end of burn'));
       if (this.cmd[ev.id] !== ev.v) this._cmdValve(ev.id, ev.v, why);
     }

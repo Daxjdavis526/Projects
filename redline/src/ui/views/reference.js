@@ -23,7 +23,7 @@ export class ReferenceView {
 
   renderList() {
     clear(this.list);
-    const pages = [['__stand', 'TS-1 stand data'], ['__stand2', 'TS-2 stand data'], ['__stand2r', 'TS-2 with BPE-2 (regen) data'], ['__honest', 'What is simulated, what is approximated']];
+    const pages = [['__stand', 'TS-1 stand data'], ['__stand2', 'TS-2 stand data'], ['__stand2r', 'TS-2 with BPE-2 (regen) data'], ['__stand3', 'TS-3 turbopump stand data'], ['__honest', 'What is simulated, what is approximated']];
     for (const [id, t] of pages) if (!this.q || t.toLowerCase().includes(this.q)) this.list.append(h('div.li', { onclick: () => this.go(id) }, h('div.a', h('span', t))));
     for (const [cat, name] of CATEGORIES) {
       const items = GLOSSARY.filter(g => g.cat === cat && (!this.q || (g.title + ' ' + g.body.join(' ')).toLowerCase().includes(this.q)));
@@ -44,7 +44,7 @@ export class ReferenceView {
           g.see?.length ? h('div.see', 'See also: ', g.see.map(s => h('a', { onclick: () => this.go(s) }, this.app.refTitle(s)))) : null));
       }
     }
-    this.doc.append(this.standPage(), this.standPage2(), this.standPage2R(), this.honestPage());
+    this.doc.append(this.standPage(), this.standPage2(), this.standPage2R(), this.standPage3(), this.honestPage());
   }
 
   standPage() {
@@ -125,6 +125,27 @@ export class ReferenceView {
     return el;
   }
 
+  standPage3() {
+    const def = STANDS['TS-3'], R = def.ratings, TP = def.physics.turbopump, D = def.design;
+    const el = h('div.gl-entry', { id: 'ref-__stand3' }, h('h3', 'TS-3 turbopump component stand (fictional)'));
+    el.append(h('p', 'A 300 L nitrogen bank → HV-300 → IV-301 → a header feeding two RELIEVING tank regulators (PR-410, PR-420) and the turbine drive regulator PR-330. Each 40 L run tank feeds its pump of TPA-1 through a short suction line; each pump discharges through a ball valve (DV-414 / DV-424), a turbine flowmeter and a throttle valve (FCV-418 / FCV-428) into the catch tank. The drive gas reaches the turbine through TSV-332 and leaves up the exhaust stack. The speed controller SC-330 holds the planned speed by moving PR-330\'s dome.'));
+    const t = h('table.metrics', { style: { maxWidth: '640px' } });
+    const row = (a, b) => t.append(h('tr', h('td', a), h('td.v', b)));
+    const P = x => `${fmt(x, 'pressure', 0)} ${unitLabel('pressure', true)}`;
+    row('Design speed / redline', `${TP.Nd.toLocaleString('en-US')} rpm / ${Math.round(R.N_REDLINE).toLocaleString('en-US')} rpm (110 %); plans limited to 105 %`);
+    row('Ox pump (designed for OX-1)', `${D.ox.H0} m at ${(D.ox.mdot / D.ox.rho * 1e3).toFixed(2)} L/s, efficiency ${D.ox.eta}, NPSH required ${D.ox.npshr0} m at design`);
+    row('Fuel pump (designed for FU-1)', `${D.fu.H0} m at ${(D.fu.mdot / D.fu.rho * 1e3).toFixed(2)} L/s, efficiency ${D.fu.eta}, NPSH required ${D.fu.npshr0} m at design`);
+    row('Turbine', `impulse, mean blade radius ${(TP.turbine.rm * 1e3).toFixed(0)} mm, nozzle CdA ${(def.physics.elements.find(e => e.id === 'TNZ-337').CdA * 1e6).toFixed(0)} mm²`);
+    row('Rotor inertia', `${TP.J.toExponential(2)} kg·m²`);
+    row('Tank MEOP / relief / MAWP', `${P(R.TANK_MEOP)} / ${P(R.RELIEF_TANK)} / ${P(R.MAWP_TANK)}`);
+    row('Drive regulator EPC limit / relief', `${P(R.DRIVE_MAX)} / ${P(def.physics.elements.find(e => e.id === 'RV-331').set)}`);
+    row('Minimum tank pressure (except a suction test)', P(R.NPSH_MIN_TANK));
+    row('Water per tank / reserve', `${R.FILL_OX} kg / ${R.TANK_RESERVE} kg above the 4 kg low-level redline`);
+    el.append(t);
+    el.append(...this.limitsTable(def.limits));
+    return el;
+  }
+
   honestPage() {
     const el = h('div.gl-entry', { id: 'ref-__honest' }, h('h3', 'What is simulated, and what is approximated'));
     const items = [
@@ -133,8 +154,9 @@ export class ReferenceView {
       ['Liquid feed (TS-2)', 'Incompressible liquid lines with lumped inertance (so a closing valve raises the upstream pressure — water hammer as a lumped surge, not a travelling wave); square-law resistances for line, valve and injector; a manifold that fills from dry while its gas escapes through the orifices, then cushions the liquid with the gas left trapped; tank ullage that grows and cools as liquid leaves. Not modelled: cavitation, two-phase flow beyond that fill fraction, line elasticity and acoustic modes, temperature-dependent liquid properties, the time the liquid takes to cross the chamber. The as-built injector differs from its drawing by a fixed few per cent — by design, so the cold flow has something to find.'],
       ['Combustion (TS-2)', 'One lumped chamber holding combustion products and nitrogen; products enter with the energy their characteristic velocity implies, from an invented c*(mixture ratio) table at 94 % efficiency; choked or unchoked throat; ideal nozzle with crude separation. Ignition is a rule (spark on, both propellants present in a flammable ratio, a few milliseconds of delay), not chemistry. Unlit liquid is spray that leaves in milliseconds plus a share that wets the wall and lingers; lit, it burns as fast as it can vaporise and pair — which is what makes a late light a hard start. Chug is an onset criterion on injector stiffness (ΔP/Pc below 0.2), screech appears only when a fault drives it; neither is a solution of the governing equations. The copper walls are two thermal nodes tuned to a 5 s burn limit with soak-back. The flame detector and accelerometer read invented functions of the chamber state.'],
       ['Regenerative cooling (BPE-2)', 'The liner is seven axial zones, each a thin copper-alloy node and the fuel in its channels, integrated implicitly. Gas-side heat transfer scales as Bartz\'s correlation does (Pc^0.8, area ratio^-0.9) with a tuned constant; coolant side as Dittus–Boelter (flow^0.8) with zone constants. FU-1 boils on an invented alcohol-like saturation curve; nucleate boiling helps, past a lumped critical heat flux (falling with less flow and less subcooling) a vapour film forms and holds until the wall cools. Coking is an empirical deposit rate above a threshold temperature; damage and cracking are a running overtemperature integral. The fuel\'s density does not change as it warms; its heat goes back to the chamber only in spirit (c* is not raised by it).'],
+      ['Turbopump (TS-3)', 'Each pump is a parabolic head–flow curve scaled by the affinity laws (head ∝ speed², flow ∝ speed), added as a pressure source to its liquid line\'s momentum equation; its shaft power is a shutoff share plus a share rising with flow, so efficiency emerges rather than being looked up. Cavitation is a single factor on head (and partly on torque) from NPSH available against an NPSH required that scales with speed² and flow — no bubble dynamics, no inducer backflow, no rotating cavitation. The pump casing holds a lumped mass of liquid that heats with the power not delivered as head. The turbine is a one-dimensional impulse stage: Euler torque from a spouting velocity, a nozzle velocity coefficient, a blade-velocity coefficient and one lumped loss factor; the drive gas leaves colder by exactly the work done. The shaft has one inertia, two bearings with linear friction and lumped thermal nodes, and windage. Vibration is an invented RMS figure (imbalance ∝ speed², cavitation, bearing distress). No rotordynamics: no critical speeds, no whirl, no axial thrust balance. The speed controller is a PI loop with feed-forward from the steady prediction, acting on the DAQ\'s readings.'],
       ['Instruments', 'Every channel passes through a sensor model: response lag, zero offset, noise that grows with bandwidth, mains pickup, an anti-alias filter set by the sample rate, ADC quantisation and amplifier saturation. Zeroing is a software offset after conversion, as in a real DAQ.'],
-      ['Not claimed', 'Numbers are plausible for a small research cold-gas thruster at sea level; they are not a prediction of any real hardware. The stand, the thruster, the engine, its propellants (OX-1, FU-1) and the procedures are invented.'],
+      ['Not claimed', 'Numbers are plausible for a small research cold-gas thruster, engine and turbopump at sea level; they are not a prediction of any real hardware. The stands, the thruster, the engines, the turbopump, the propellants (OX-1, FU-1) and the procedures are invented.'],
     ];
     for (const [k, v] of items) el.append(h('p', h('b', k + '. '), v));
     return el;

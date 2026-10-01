@@ -58,6 +58,7 @@ export class Sensor {
     this.open = false;           // open circuit: reads off-scale
     this.intermittent = 0;       // probability per sample of a dropout starting
     this.dropN = 0;              // samples left in the current dropout
+    this.dropValue = NaN;        // what a dropout reads: no data — or, for a frequency counter that has lost its pulses, zero
     this.lagScale = 1;
     // state
     const v0 = this.discrete ? getter() : getter() * this.mechGain;
@@ -114,8 +115,8 @@ export class Sensor {
     }
     // a loose connector drops out in bursts of a few to tens of ms, not
     // single samples
-    if (this.dropN > 0) { this.dropN--; v = NaN; }
-    else if (this.intermittent && this.rng.chance(this.intermittent)) { this.dropN = 20 + Math.floor(this.rng.next() * 200); v = NaN; }
+    if (this.dropN > 0) { this.dropN--; v = this.dropValue; }
+    else if (this.intermittent && this.rng.chance(this.intermittent)) { this.dropN = 20 + Math.floor(this.rng.next() * 200); v = this.dropValue; }
     this.value = v;
     return v;
   }

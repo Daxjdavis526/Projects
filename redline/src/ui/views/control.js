@@ -4,6 +4,7 @@ import { h, btn } from '../dom.js';
 import { PID } from '../panels/pid.js';
 import { StandView } from '../panels/standview.js';
 import { StandViewBP } from '../panels/standview-bp.js';
+import { StandViewTP } from '../panels/standview-tp.js';
 import { Inspector } from '../panels/inspector.js';
 import { PlotStack, eventMarkers, limitLines } from '../panels/plots.js';
 import { ChannelTable } from '../panels/channels.js';
@@ -49,7 +50,7 @@ export class ControlView {
 
     // panels
     this.pid = new PID(this.pidWrap, app);
-    this.stand = S.def.physics.model === 'biprop' ? new StandViewBP(this.standWrap, app) : new StandView(this.standWrap, app);
+    this.stand = S.def.physics.turbopump ? new StandViewTP(this.standWrap, app) : S.def.physics.model === 'biprop' ? new StandViewBP(this.standWrap, app) : new StandView(this.standWrap, app);
     this.inspector = new Inspector(stage, app);
     this.abort = new AbortBanner(stage, app);
     const key = S.def.id;
