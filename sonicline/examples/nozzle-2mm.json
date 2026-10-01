@@ -1,0 +1,21 @@
+{
+  "name": "nozzle-2mm",
+  "geometry": {
+    "type": "cad_file",
+    "path": "nozzle-2mm.step",
+    "sha256": "f2e0327764e5039fc2ae7daf373aa8371062b5d4682f60eac65f332695f19a5a",
+    "length_unit": "mm",
+    "inlet_end": "max"
+  },
+  "boundaries": {
+    "inlet": {
+      "type": "reservoir_inlet",
+      "p0": "20 bar",
+      "T0": "300 K"
+    }
+  },
+  "mesh": {
+    "form": "wedge",
+    "quality": "standard"
+  }
+}

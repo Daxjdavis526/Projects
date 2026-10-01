@@ -1,0 +1,108 @@
+# Tests SONICLINE (sonicline/, a Python CFD application driving OpenFOAM)
+# whenever it changes. The core runs on Linux and on Windows, because the
+# application is used on Windows; the desktop application's tests run on
+# Windows and in a Linux job of their own (Qt offscreen). Another job
+# installs ESI OpenFOAM v2512 and runs the fast verification tier end to end:
+# mesh, solve, and compare with analytical theory. The rest of the repository is static pages and is
+# not touched by this workflow.
+name: SONICLINE tests
+
+on:
+  push:
+    paths:
+      - 'sonicline/**'
+      - '.github/workflows/sonicline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            python: '3.11'
+          - os: ubuntu-24.04
+            python: '3.12'
+          - os: windows-latest
+            python: '3.12'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: python -m pip install -e "./sonicline[dev]"
+
+      # The desktop application is used on Windows: its tests run there too
+      # (Qt's offscreen platform, 3D view disabled).
+      - name: Install the desktop application's libraries (Windows)
+        if: runner.os == 'Windows'
+        run: python -m pip install -e "./sonicline[dev,ui]"
+
+      - name: Unit and theory tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest sonicline/tests
+
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Libraries Qt and off-screen VTK need on a headless Linux runner
+        run: sudo apt-get install -y -qq libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3 libosmesa6
+
+      - name: Install
+        run: python -m pip install -e "./sonicline[dev,ui,post]"
+
+      # Results views and report export run on a synthetic run (no OpenFOAM);
+      # contour images are compared with stored references (OSMesa).
+      - name: Desktop application, results views and image regression
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest sonicline/tests/test_ui.py sonicline/tests/test_results_view.py -v
+
+  openfoam:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install OpenFOAM v2512 and the libraries gmsh and VTK need
+        # The package host has served HTML instead of the index for hours at
+        # a time; retry the whole step a few minutes apart before failing.
+        run: |
+          for attempt in 1 2 3 4; do
+            curl -sSfL --retry 4 https://dl.openfoam.com/add-debian-repo.sh | sudo bash &&
+              sudo apt-get install -y -qq openfoam2512 openfoam2512-dev libglu1-mesa libosmesa6 libxcursor1 \
+                libxinerama1 libxft2 && exit 0
+            echo "OpenFOAM install attempt $attempt failed; retrying"
+            sleep $((attempt * 60))
+          done
+          exit 1
+
+      - name: Install
+        run: python -m pip install -e "./sonicline[dev,geometry,post]"
+
+      - name: Geometry (STEP round trip through the CAD kernel)
+        run: python -m pytest sonicline/tests/test_geometry.py -v
+
+      - name: OpenFOAM (V1, V4a on standard wedge meshes; the viscous-work extension build; Tier 2 meshing)
+        run: python -m pytest sonicline/tests -v -m openfoam

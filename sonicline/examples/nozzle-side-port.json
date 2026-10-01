@@ -1,0 +1,22 @@
+{
+  "name": "nozzle-side-port",
+  "geometry": {
+    "type": "cad_file",
+    "path": "nozzle-side-port.step",
+    "sha256": "738afc828d05a8603376ec2bac631731b4123e1235338ef63631f142905208cc",
+    "length_unit": "mm",
+    "inlet_end": "min"
+  },
+  "boundaries": {
+    "inlet": {
+      "type": "reservoir_inlet",
+      "p0": "20 bar",
+      "T0": "300 K"
+    }
+  },
+  "mesh": {
+    "form": "unstructured",
+    "quality": "standard",
+    "first_cell_yplus": 30.0
+  }
+}
