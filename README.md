@@ -13,6 +13,23 @@ Open it in Safari on an iPhone and use Share → Add to Home Screen to install i
 as a full-screen app. See [branch/README.md](branch/README.md) for the controls
 and how it works.
 
+## peraspera/
+
+**PER ASPERA** — an animated short film, about nineteen minutes long, about a
+kid who looked up at the stars and didn't think he was cut out for that world:
+a mission in England cut short by COVID, welding with his brother, racing,
+meeting his wife, losing a friend, one sentence from his brother, the darkest
+summer of his life, the driveway at the end of it, rocket engines, a job that
+wasn't him, a model he builds at night, and a farm he hasn't bought yet. After
+the credits there is one more scene — a guess at what happens next. No video
+file and no audio file: every frame is painted and every note synthesised live
+in the browser.
+
+Live: https://daxjdavis526.github.io/Projects/peraspera/
+
+See [peraspera/README.md](peraspera/README.md) for the controls, how it is
+built, and what in it is real.
+
 ## blackhole/
 
 **BLACK HOLE EXPLORER** — a real-time Kerr black hole rendered by tracing
@@ -212,6 +229,44 @@ Live: https://daxjdavis526.github.io/Projects/wormsign/
 See [wormsign/README.md](wormsign/README.md) for controls, how the systems
 work, and what is physical versus invented.
 
+## redline/
+
+**REDLINE** — a rocket-engine test-stand operations trainer. Not a game and
+not an engine designer: a simulated test-control room in which you configure,
+instrument, zero, leak-check, pressurise, poll, arm, fire, abort, safe and
+analyse a nitrogen cold-gas thruster on a load-cell stand, seeing it only
+through its instruments. Underneath is a real-time lumped-parameter model —
+choked and unchoked flow, a regulator that droops and locks up, a solenoid
+whose coil current dips as it strokes, a nozzle that separates at low
+pressure, a thrust stand that rings — and on top of it every sensor has lag,
+offset, noise and a sample rate, so the measured state and the true state
+are never the same thing. Tutorial, guided and independent modes, a go/no-go
+poll, redlines and automatic aborts, pressure-characterisation and
+pulse-test campaigns fitted across runs, hidden hardware and instrument
+faults to diagnose with technician inspections that return measurements
+(never verdicts), a scored diagnosis and a root-cause debrief, cursors and
+reductions on the
+recorded data, test history that outlives the session, an engineering
+notebook and printable test reports. It ends in an unscripted acceptance
+campaign: a test request, no procedure, maybe a hidden fault, and a report
+graded on whether you noticed the data were not what they seemed. A
+second stand adds a pressure-fed bipropellant engine: run cold first,
+water through each side of the injector to measure what the drawing only
+estimated, then hot — a spark igniter, start sequences that light smoothly
+or hard, an uncooled copper chamber that sets the burn time and soaks back
+after shutdown, chug when the injector goes soft, and a campaign to hit a
+mixture ratio by trimming two tank pressures. A second engine on that
+stand is regeneratively cooled: its fuel crosses the chamber wall first, so
+it burns as long as the propellant lasts — as long as the coolant does not
+boil, coke, or leak through a cracked liner.
+Fictional hardware, generalised
+procedures, and it says so. Desktop only.
+
+Live: https://daxjdavis526.github.io/Projects/redline/
+
+See [redline/README.md](redline/README.md) for the controls, the
+architecture, and what the physics does and does not model.
+
 ## strata/
 
 **STRATA** — an original voxel survival sandbox. An endless generated world
@@ -242,9 +297,32 @@ analytical cross-check and a verdict on whether the numbers can be trusted.
 Sea-level operation comes first, including the separation and real-gas
 effects that make a naive answer wrong.
 
-A Python application, not a web page, so there is no live link. It is built
-in milestones. Milestone M1 runs the whole pipeline headless, from a STEP
-file to verified numbers and images, and every verification case passes.
-The desktop interface comes in M3. [sonicline/DESIGN.md](sonicline/DESIGN.md)
-is the plan, and [sonicline/README.md](sonicline/README.md) says what works
-today and exactly what is approximated.
+A Python desktop application, not a web page, so there is no live link. It
+runs from the command line or its own window: a STEP or STL volume (or the
+gas passage of a solid body) in; mesh, solve, verified numbers, field views,
+startup animations and a report out. Real-gas nitrogen runs in the CFD
+itself. [sonicline/DESIGN.md](sonicline/DESIGN.md) is the plan and the record
+of each milestone, and [sonicline/README.md](sonicline/README.md) says what
+works today and exactly what is approximated.
+
+## spotter/
+
+**SPOTTER** — trend intelligence for a fitness creator. It watches fitness and
+lifting content on YouTube, Instagram and TikTok through their official APIs,
+finds what is gaining unusual traction, scores each trend 0–100 with every
+component visible, weighs it against how well it suits the creator's own
+audience, and turns the best 5–10 into video ideas: angle, hook, title,
+caption and a timed outline, with the example posts behind each one. It runs
+on a simulated world before any credentials exist, and says plainly what each
+platform does not expose instead of estimating it.
+
+This one is a **server application** (Next.js, PostgreSQL, a background
+worker) that holds OAuth tokens, so there is no live link: run it with
+`npm install && npm run dev` in `spotter/`, or `docker compose up` for a
+self-hosted deployment.
+
+See [spotter/README.md](spotter/README.md) to run it,
+[spotter/API_SETUP.md](spotter/API_SETUP.md) for connecting real accounts,
+[spotter/CAPABILITIES.md](spotter/CAPABILITIES.md) for what each platform
+allows, and [spotter/ARCHITECTURE.md](spotter/ARCHITECTURE.md) for how it
+works.

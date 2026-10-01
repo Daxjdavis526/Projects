@@ -1,0 +1,45 @@
+# Checks SPOTTER (spotter/, a Next.js server app) whenever it changes:
+# typecheck, lint, the test suite (including the end-to-end pipeline on an
+# in-memory PostgreSQL) and a production build. No secrets are needed: every
+# test runs against recorded fixtures and the simulated demo world. The rest
+# of this repository is static pages and is not touched by this workflow.
+name: SPOTTER checks
+
+on:
+  push:
+    paths:
+      - 'spotter/**'
+      - '.github/workflows/spotter.yml'
+  pull_request:
+    paths:
+      - 'spotter/**'
+      - '.github/workflows/spotter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: spotter
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: spotter/package-lock.json
+
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - name: Production build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'

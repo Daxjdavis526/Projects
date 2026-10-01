@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+      "id": "17895695668004550",
+      "caption": "Stop cueing chest up on squats. Here's what to think about instead 👇 #squat #formcheck",
+      "media_type": "VIDEO",
+      "permalink": "https://www.instagram.com/reel/abc123/",
+      "thumbnail_url": "https://scontent.cdninstagram.com/thumb.jpg",
+      "timestamp": "2026-09-27T18:30:00+0000",
+      "like_count": 5837,
+      "comments_count": 50,
+      "media_audio_type": "ORIGINAL_SOUND",
+      "shortcode": "abc123"
+    },
+    {
+      "id": "17895695668004551",
+      "caption": "Leg day carousel",
+      "media_type": "CAROUSEL_ALBUM",
+      "media_url": "https://scontent.cdninstagram.com/carousel.jpg",
+      "permalink": "https://www.instagram.com/p/def456/",
+      "timestamp": "2026-09-20T12:00:00+0000",
+      "comments_count": 12
+    }
+  ],
+  "paging": { "cursors": { "before": "QVFI", "after": "QVFJ" } }
+}

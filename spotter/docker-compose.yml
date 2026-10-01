@@ -1,0 +1,45 @@
+# PostgreSQL for SPOTTER, and optionally SPOTTER itself.
+#
+#   docker compose up -d db              just the database; then `npm run dev` on
+#                                        the host with DATABASE_URL from .env.example
+#   docker compose up -d --build         database + SPOTTER on http://localhost:3000
+#
+# SPOTTER reads its secrets from .env (copy .env.example). The database
+# password below is for a database reachable only from this machine; change
+# it (here and in DATABASE_URL) before exposing anything.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: spotter
+      POSTGRES_PASSWORD: spotter
+      POSTGRES_DB: spotter
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spotter -d spotter"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgres://spotter:spotter@db:5432/spotter
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:?Set TOKEN_ENCRYPTION_KEY in .env first (openssl rand -base64 32)}
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
