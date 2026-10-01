@@ -48,6 +48,7 @@ LAMINAR_TRANSITION_RE = 1.0e6  # throat Re of transition in critical-flow ventur
 # A startup whose inlet jumps by more than this pressure ratio at t = 0 is
 # flagged: V1 opened instantly against its 1000:1 start diverged in ten steps.
 INSTANT_OPENING_RATIO = 100.0
+VIRIAL_VERIFIED_P0 = 30e5  # Pa: the virial gas's choked flux is within 0.013 % up to here
 
 
 class Severity(enum.IntEnum):
@@ -155,9 +156,11 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
                     f"{100 * choke.bias:+.2f} % mass flux relative to the perfect-gas model"
                     + (" (the Peng-Robinson CFD over-shoots this; the reported estimate "
                        "corrects it to the reference equation of state)." if defn.gas.peng_robinson
+                       else " (the virial CFD includes it)." if defn.gas.virial
                        else " the CFD uses."),
                     "The perfect-gas mass flow and thrust are reported together with this "
-                    "correction." if sev is Severity.WARNING else ""))
+                    "correction; the virial equation of state puts it in the CFD."
+                    if sev is Severity.WARNING and not defn.gas.real_gas else ""))
         p_b, T_b = TYPICAL_BOTTLE
         if p0 < p_b and gas.name == "N2":
             T_reg = realgas.regulator_outlet_temperature(gas, p_b, T_b, p0)
@@ -187,18 +190,31 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
         add(Finding(Severity.ERROR, "inlet.mass_flow", "Mass flow must be positive."))
 
     # -- real gas in the CFD -------------------------------------------------
-    if defn.gas.peng_robinson:
-        # OpenFOAM offers Peng-Robinson with constant cp only in enthalpy
-        # form, which rhoCentralFoam cannot use (it assumes internal energy).
+    if defn.gas.virial and gas.name != "N2":
+        add(Finding(Severity.ERROR, "gas.virial_species",
+                    f"The virial equation of state is fitted for nitrogen only, not {gas.name}."))
+    elif defn.gas.real_gas:
+        # OpenFOAM offers real-gas equations of state with constant cp only
+        # in enthalpy form, which rhoCentralFoam cannot use (it assumes
+        # internal energy).
+        name = "virial" if defn.gas.virial else "Peng-Robinson"
         central = defn.numerics.solver == "rhoCentralFoam"
         if p0 is not None and profile is not None and not central:
             shock = nozzle.analyse(gas, p0, T0, pa, profile.throat_area, profile.area(profile.x_exit))
             central = shock.regime is nozzle.Regime.SHOCK_IN_NOZZLE or shock.separation.likely
         if central:
-            add(Finding(Severity.ERROR, "gas.peng_robinson_solver",
-                        "The Peng-Robinson gas runs only with rhoPimpleFoam, and this case needs "
+            add(Finding(Severity.ERROR, "gas.real_gas_solver",
+                        f"The {name} gas runs only with rhoPimpleFoam, and this case needs "
                         "rhoCentralFoam (a shock stands inside the nozzle, or it was asked for).",
                         "Use the perfect gas; its real-gas mass-flow correction is reported."))
+        elif defn.gas.virial:
+            add(Finding(Severity.INFO, "gas.virial",
+                        "The CFD uses the virial equation of state, fitted to nitrogen's reference "
+                        "equation: real-gas choked flux within about 0.01 % up to 30 bar."))
+            if p0 is not None and p0 > VIRIAL_VERIFIED_P0:
+                add(Finding(Severity.WARNING, "gas.virial_pressure",
+                            f"Above {_fmt_bar(VIRIAL_VERIFIED_P0)} the truncated virial series loses "
+                            "accuracy (0.07 % in choked flux at 50 bar and 250 K)."))
         else:
             add(Finding(Severity.INFO, "gas.peng_robinson",
                         "The CFD uses the Peng-Robinson equation of state. For nitrogen near 300 K "

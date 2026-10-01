@@ -45,7 +45,7 @@ DEFAULT_MAX_ITERATIONS = {PIMPLE_SOLVER: 20000, CENTRAL_SOLVER: 60000}
 def energy_field(defn: d.SimulationDefinition) -> str:
     """OpenFOAM's energy variable: internal energy e, except enthalpy h for
     the Peng-Robinson gas (the only form OpenFOAM compiles it in)."""
-    return "h" if defn.gas.peng_robinson else "e"
+    return "h" if defn.gas.real_gas else "e"
 
 
 def iteration_limit(defn: d.SimulationDefinition, solver: str) -> int:
@@ -180,9 +180,12 @@ def build_case(
     mesh: PolyMesh,
     meta: MeshMeta,
     extension_library: str | None = None,
+    real_gas_library: str | None = None,
 ) -> CaseSummary:
-    """``extension_library`` is the viscous-work fvOption library (from
-    sonicline.foam.extensions.ensure_built); viscous cases need it."""
+    """``extension_library`` is the viscous-work fvOption library and
+    ``real_gas_library`` the virial-gas thermophysics library (both from
+    sonicline.foam.extensions.ensure_built); viscous cases need the first,
+    virial-gas cases the second."""
     gas = defn.gas.model()
     b = defn.boundaries
     turb = defn.flow.turbulence
@@ -257,13 +260,11 @@ def build_case(
     viscous_work = needs_viscous_work_extension(defn, profile)
     if viscous_work and extension_library is None:
         raise ValueError("viscous rhoPimpleFoam cases need the viscous-work extension library")
-    real_gas = None
-    if defn.gas.peng_robinson:
-        if solver != PIMPLE_SOLVER:
-            raise ValueError("the Peng-Robinson gas runs only with rhoPimpleFoam")
-        from ..core.pengrobinson import PengRobinson
-
-        real_gas = PengRobinson(gas)
+    real_gas = defn.gas.cfd_model()
+    if real_gas is not None and solver != PIMPLE_SOLVER:
+        raise ValueError("a real-gas equation of state runs only with rhoPimpleFoam")
+    if defn.gas.virial and real_gas_library is None:
+        raise ValueError("the virial gas needs its extension library")
     # A wedge of angle theta has flat (chord) faces: its cross-section is
     # r^2 sin(theta)/2, not r^2 theta/2. Scaling by 2 pi / sin(theta) makes
     # the scaled face areas -- and so every flux integral -- exact.
@@ -281,7 +282,8 @@ def build_case(
     exit_region = _region(meta, mesh, "exit")
     throat_region = _region(meta, mesh, "throat")
     _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
-                  extension_library if viscous_work else None, solver)
+                  [lib for lib in (extension_library if viscous_work else None,
+                                   real_gas_library if defn.gas.virial else None) if lib], solver)
 
     (case / "case.foam").write_text("", encoding="utf-8")
     return CaseSummary(
@@ -325,13 +327,22 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bo
         transport = ({"As": gas.sutherland_As, "Ts": gas.sutherland_Ts} if viscous
                      else {"mu": 0, "Pr": 0.71})
         kinds = ("sutherland" if viscous else "const", "perfectGas", "sensibleInternalEnergy")
-    else:
+    elif hasattr(real_gas, "crit"):
         # OpenFOAM compiles Peng-Robinson with constant cp only as
         # sutherland / sensibleEnthalpy; As = 0 makes it inviscid.
         transport = {"As": gas.sutherland_As if viscous else 0.0, "Ts": gas.sutherland_Ts}
         kinds = ("sutherland", "PengRobinsonGas", "sensibleEnthalpy")
         c = real_gas.crit
         mixture["equationOfState"] = {"Tc": c.Tc, "Vc": c.Vc, "Pc": c.Pc, "omega": c.omega}
+    else:
+        # The virial gas (foam/extensions/virialGas), in enthalpy form like
+        # Peng-Robinson; its library compiles const and sutherland transport.
+        transport = ({"As": gas.sutherland_As, "Ts": gas.sutherland_Ts} if viscous
+                     else {"mu": 0, "Pr": 0.71})
+        kinds = ("sutherland" if viscous else "const", "virialGas", "sensibleEnthalpy")
+        mixture["equationOfState"] = {
+            "B": Raw("( " + " ".join(f"{c!r}" for c in real_gas.b) + " )"),
+            "C": Raw("( " + " ".join(f"{c!r}" for c in real_gas.c) + " )")}
     mixture["transport"] = transport
     write_dict(case / "constant" / "thermophysicalProperties", "thermophysicalProperties", {
         "thermoType": {
@@ -605,15 +616,29 @@ def write_continuation(case: Path, defn: d.SimulationDefinition, meta: MeshMeta,
     _rewrite_system(case, defn, meta, summary, summary.solver, offset=start)
 
 
+def _loaded_libraries(case: Path) -> list[str]:
+    """The extension libraries the case's controlDict already loads."""
+    import re
+
+    f = case / "system" / "controlDict"
+    m = re.search(r"^libs\s*\(([^)]*)\)", f.read_text(encoding="utf-8"), re.M) if f.is_file() else None
+    return re.findall(r'"([^"]+)"', m.group(1)) if m else []
+
+
 def _rewrite_system(case, defn, meta, summary, solver, end=None, offset=0):
     b = defn.boundaries
+    # Keep the libraries: the thermophysics of a virial-gas case lives in one.
     _write_system(case, defn, meta, summary.viscous, summary.turbulence == d.KOmegaSST.TAG,
                   isinstance(defn.flow.time, d.Steady), summary.p0_nominal, b.ambient.pressure,
-                  summary.exit_region, summary.throat_region, None, solver, end=end, offset=offset)
+                  summary.exit_region, summary.throat_region, _loaded_libraries(case), solver,
+                  end=end, offset=offset)
 
 
 def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
-                  extension_library=None, solver=PIMPLE_SOLVER, end=None, offset=0):
+                  libraries=(), solver=PIMPLE_SOLVER, end=None, offset=0):
+    if isinstance(libraries, str):
+        libraries = [libraries]
+    libraries = list(libraries or [])
     n_max = end if end is not None else offset + iteration_limit(defn, solver)
     fos = function_objects(defn, meta, viscous, ras, exit_region, throat_region)
     if steady:
@@ -637,7 +662,7 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
         timing.update({"maxCo": 0.1, "rDeltaTSmoothingCoeff": 1, "maxDeltaT": 1})
     write_dict(case / "system" / "controlDict", "controlDict", {
         "application": solver,
-        **({"libs": [Raw(f'"{extension_library}"')]} if extension_library else {}),
+        **({"libs": [Raw(f'"{lib}"') for lib in libraries]} if libraries else {}),
         **timing,
         "writeFormat": "ascii",
         "writePrecision": 12,

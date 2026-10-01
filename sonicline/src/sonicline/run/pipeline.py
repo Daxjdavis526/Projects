@@ -283,6 +283,17 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                 manifest["setup_error"] = str(e)
                 return finish("failed", Trust.NOT_TRUSTWORTHY.value)
             manifest["extension"] = extension
+        real_gas_library = None
+        if defn.gas.virial:
+            from ..foam import extensions
+
+            try:
+                real_gas_library = extensions.ensure_built(runner, run_dir / "extensions", "virialGas")
+            except extensions.ExtensionBuildError as e:
+                emit(Event("setup", f"ERROR: {e}"))
+                manifest["setup_error"] = str(e)
+                return finish("failed", Trust.NOT_TRUSTWORTHY.value)
+            manifest["real_gas_library"] = real_gas_library
         t0 = time.time()
         if defn.mesh.form is d.MeshForm.UNSTRUCTURED:
             from ..mesh import unstructured as tier2
@@ -311,7 +322,7 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
             mesh, meta = revolved.build(profile, spec)
             mesher_info = {"generator": "sonicline.mesh.revolved", "first_cell_at_throat": spec.wall_first_cell}
             form_name, two_d = spec.form.value, spec.form in (revolved.Form.WEDGE, revolved.Form.PLANAR)
-        summary = foam_case.build_case(case, defn, profile, mesh, meta, extension)
+        summary = foam_case.build_case(case, defn, profile, mesh, meta, extension, real_gas_library)
         (run_dir / "mesh_meta.json").write_text(json.dumps(meta.to_json()) + "\n", encoding="utf-8")
         _write_json(run_dir / "case_summary.json", summary.to_json())
         manifest["mesh"] = {**mesher_info, "form": form_name, "quality": defn.mesh.quality.value,

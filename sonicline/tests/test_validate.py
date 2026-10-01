@@ -94,7 +94,7 @@ def test_peng_robinson_needs_a_shock_free_nozzle():
     assert "gas.peng_robinson" in codes(validate(ok))
     shocked = dataclasses.replace(definition(eps=2.88, pa=12e5),
                                   gas=m.GasSpec(equation_of_state="peng_robinson"))
-    assert "gas.peng_robinson_solver" in codes(validate(shocked), Severity.ERROR)
+    assert "gas.real_gas_solver" in codes(validate(shocked), Severity.ERROR)
     import pytest
     with pytest.raises(ValueError):
         m.GasSpec(equation_of_state="van_der_waals")

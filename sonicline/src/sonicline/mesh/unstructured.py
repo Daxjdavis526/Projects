@@ -459,6 +459,7 @@ def finish(mesh: PolyMesh, surface: DomainSurface) -> PolyMesh:
 
 
 THROAT_REFINEMENT = 0.5  # cfMesh cell size around the throat, in wall cells
+THROAT_CORE = 0.8  # radius of the refined core, in throat radii
 
 
 def _cfmesh_dict(surface: DomainSurface, spec: UnstructuredSpec) -> dict:
@@ -470,12 +471,15 @@ def _cfmesh_dict(surface: DomainSurface, spec: UnstructuredSpec) -> dict:
              "inlet": {"cellSize": 2 * h}}
     objects = {}
     r_t = _throat_radius(surface) or 10 * h
-    # The transonic region at half the wall size: cfMesh's mass-flow error
-    # is first order in the cell size there (DESIGN.md findings 46, 53).
+    # The transonic core at half the wall size: cfMesh's mass-flow error is
+    # first order in the cell size there (DESIGN.md findings 46, 53). The
+    # cone stays inside the wall (radius THROAT_CORE r_t), so the boundary
+    # cells keep the wall size and the layers cut from them their intended
+    # height; reaching the wall, it squeezed them to a fifth (finding 58).
     objects["throat"] = {"type": "cone", "cellSize": THROAT_REFINEMENT * h,
                          "p0": Raw(f"({surface.x_throat - 1.0 * r_t!r} 0 0)"),
                          "p1": Raw(f"({surface.x_throat + 0.5 * r_t!r} 0 0)"),
-                         "radius0": 1.3 * r_t, "radius1": 1.3 * r_t}
+                         "radius0": THROAT_CORE * r_t, "radius1": THROAT_CORE * r_t}
     if surface.x_end > surface.x_exit:
         re = max(surface.r_exit, h)
         local["lip"] = {"cellSize": 4 * h}
@@ -504,14 +508,16 @@ def _cfmesh_dict(surface: DomainSurface, spec: UnstructuredSpec) -> dict:
     return body
 
 
-def cfmesh_layers(spec: UnstructuredSpec) -> int:
-    """Layers that fill half a wall cell at the growth rate from the
-    first-cell height (cfMesh splits the boundary cell into them; asked to
-    fill a whole one it made the first layer half the target)."""
+def cfmesh_layers(spec: UnstructuredSpec, wall_cell: float | None = None) -> int:
+    """Layers that fill half a wall cell (``wall_cell``, by default the
+    spec's) at the growth rate from the first-cell height (cfMesh splits the
+    boundary cell into them; asked to fill a whole one it made the first
+    layer half the target)."""
     if not spec.first_layer:
         return 0
     g = LAYER_GROWTH
-    n = math.ceil(math.log(1.0 + 0.5 * spec.wall_cell * (g - 1.0) / spec.first_layer) / math.log(g))
+    h = wall_cell or spec.wall_cell
+    n = math.ceil(math.log(1.0 + 0.5 * h * (g - 1.0) / spec.first_layer) / math.log(g))
     return int(min(max(n, 1), GMSH_MAX_LAYERS))
 
 

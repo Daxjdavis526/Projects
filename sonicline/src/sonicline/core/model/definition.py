@@ -130,11 +130,14 @@ Geometry = ConicalNozzle | CadFile | WallProfile
 
 @dataclass(frozen=True)
 class GasSpec:
-    """``equation_of_state``: "perfect_gas" (the default) or "peng_robinson".
-    The perfect gas is what every verification case runs; its real-gas mass
-    flow bias is reported from the reference equation of state. Peng-Robinson
-    puts real-gas density in the CFD itself, but for nitrogen at 300 K it
-    over-predicts that bias by about a quarter (DESIGN.md section 11)."""
+    """``equation_of_state``: "perfect_gas" (the default), "virial" or
+    "peng_robinson". The perfect gas is what most verification cases run;
+    its real-gas mass flow bias is reported from the reference equation of
+    state. The virial gas (nitrogen only) puts real-gas behaviour in the CFD
+    itself and matches the reference equation's choked flux to about 0.01 %
+    up to 30 bar (DESIGN.md section 17). Peng-Robinson does too, but for
+    nitrogen at 300 K it over-predicts the real-gas bias by about a quarter
+    (section 11)."""
 
     species: str = "N2"
     equation_of_state: str = "perfect_gas"
@@ -154,8 +157,29 @@ class GasSpec:
     def peng_robinson(self) -> bool:
         return self.equation_of_state == "peng_robinson"
 
+    @property
+    def virial(self) -> bool:
+        return self.equation_of_state == "virial"
 
-EQUATIONS_OF_STATE = ("perfect_gas", "peng_robinson")
+    @property
+    def real_gas(self) -> bool:
+        """The CFD itself runs a real-gas equation of state."""
+        return self.equation_of_state != "perfect_gas"
+
+    def cfd_model(self):
+        """The real-gas model the CFD runs (enthalpy, entropy, density), or None."""
+        if self.peng_robinson:
+            from ..pengrobinson import PengRobinson
+
+            return PengRobinson(self.model())
+        if self.virial:
+            from ..virial import for_gas
+
+            return for_gas(self.model())
+        return None
+
+
+EQUATIONS_OF_STATE = ("perfect_gas", "virial", "peng_robinson")
 
 
 # --------------------------------------------------------------------------

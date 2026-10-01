@@ -136,7 +136,7 @@ def _v1_checks_at(p0: float, thrust: bool = True) -> Callable[[dict, m.Simulatio
         f_ref = kl * lam * ideal.momentum_thrust + ideal.exit_pressure * Ae
         out = [Check("discharge coefficient vs Kliegel-Levine", metrics["discharge_coefficient"]["cfd"],
                      kl, 2e-3, relative=False, note=f"Rc/Rt = {g.throat_rc_upstream}")]
-        if thrust and not defn.gas.peng_robinson:
+        if thrust and not defn.gas.real_gas:
             out.append(Check("vacuum thrust vs 1D x Cd(K-L) x divergence factor", metrics["thrust"]["total"],
                              f_ref, 5e-3, note=f"lambda = {lam:.5f} for a "
                                               f"{math.degrees(g.diverging_half_angle):g} deg cone"))
@@ -421,6 +421,36 @@ def peng_robinson_check(perfect: tuple[CaseResult, dict | None],
         r.checks = [Check("mass flow, Peng-Robinson / perfect gas", mb["mass_flow"]["inlet"] / ma["mass_flow"]["inlet"],
                           1.0 + pr.bias, 2e-4, note=f"isentrope: {100 * pr.bias:+.3f} %").evaluate()]
     return r
+
+
+def virial_check(perfect: tuple[CaseResult, dict | None],
+                 real: tuple[CaseResult, dict | None]) -> CaseResult:
+    """V18: the virial-gas CFD against its own isentrope and against the
+    reference equation of state, as the mass-flow ratio to the perfect gas
+    on the same mesh (V10's method)."""
+    from ..core import pengrobinson, realgas, virial
+
+    (ra, ma), (rb, mb) = perfect, real
+    rank = ("not_trustworthy", "trusted_with_warnings", "trusted")
+    trust = min((ra.trust, rb.trust), key=lambda t: rank.index(t) if t in rank else -1)
+    r = CaseResult("V18", "Virial-gas CFD vs its isentrope and the reference equation of state, 30 bar",
+                   "completed" if ra.status == rb.status == "completed" else "failed",
+                   trust if trust in rank else "not_trustworthy")
+    if ma and mb:
+        ratio = mb["mass_flow"]["inlet"] / ma["mass_flow"]["inlet"]
+        own = pengrobinson.choked_mass_flux(virial.for_gas(NITROGEN), V10_P0, 300.0)
+        checks = [Check("mass flow, virial / perfect gas, vs the virial isentrope", ratio, 1.0 + own.bias,
+                        2e-4, note=f"isentrope: {100 * own.bias:+.3f} %")]
+        if realgas.available(NITROGEN):
+            ref = realgas.choked_mass_flux(NITROGEN, V10_P0, 300.0)
+            checks.append(Check("mass flow, virial / perfect gas, vs the reference equation of state", ratio,
+                                1.0 + ref.bias, V18_REFERENCE_TOLERANCE,
+                                note=f"reference: {100 * ref.bias:+.3f} %"))
+        r.checks = [c.evaluate() for c in checks]
+    return r
+
+
+V18_REFERENCE_TOLERANCE = 5e-4  # the isentrope's 2e-4 plus the fit's 1.3e-4 and the real gas's cp(T)
 
 
 # ----------------------------------------------------------------------------- V11
@@ -774,6 +804,8 @@ CASES: dict[str, Case] = {
                 _v9_definition(10e5, m.KOmegaSST()), _v9_checks),
     "V10-perfect": Case("V10-perfect", "V1 nozzle at 30 bar, perfect gas", _v10_definition("perfect_gas"),
                         _v1_checks_at(V10_P0)),
+    "V10-virial": Case("V10-virial", "V1 nozzle at 30 bar, virial gas", _v10_definition("virial"),
+                       _v1_checks_at(V10_P0)),
     "V10-pr": Case("V10-pr", "V1 nozzle at 30 bar, Peng-Robinson", _v10_definition("peng_robinson"),
                    _v1_checks_at(V10_P0)),
     "V4a": Case("V4a", "Inviscid converging nozzle, choked, sea-level plume",
@@ -807,7 +839,7 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18")
 V15_MASS_TOLERANCE = 1e-3  # V7's: the same solver, mesh and equations, reached two ways
 V15_THRUST_TOLERANCE = 2e-3
 V14_MASS_TOLERANCE = 5e-3
@@ -927,6 +959,8 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
         elif name == "V11":
             for npr in sorted(MASON_B1_UPPER):
                 results.append(run_validation_case(npr, quality, out, processors, on_event))
+        elif name == "V18":
+            results.append(virial_check(once("V10-perfect"), once("V10-virial")))
         elif name == "V10":
             results.append(peng_robinson_check(once("V10-perfect"), once("V10-pr")))
         elif name == "V5":

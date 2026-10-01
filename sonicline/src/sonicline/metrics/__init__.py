@@ -15,7 +15,6 @@ import numpy as np
 from ..core import pengrobinson, realgas
 from ..core.gas import G0
 from ..core.model import definition as d
-from ..core.pengrobinson import PengRobinson
 from ..core.profile import Profile
 from ..core.theory import discharge, nozzle
 from ..foam.case import CaseSummary
@@ -131,7 +130,8 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     # Cd is measured against the ideal flow of the gas model the CFD runs.
     # For Peng-Robinson that is its own choked flux (core.pengrobinson), so
     # the Kliegel-Levine comparison still isolates the throat's 2D effect.
-    pr = PengRobinson(gas) if defn.gas.peng_robinson else None
+    # The same holds for the virial gas: its isentrope, same routine.
+    pr = defn.gas.cfd_model()
     pr_bias = pengrobinson.choked_mass_flux(pr, p0, T0).bias if pr and ideal.regime.choked else 0.0
     cd = mdot / (ideal.mass_flow * (1.0 + pr_bias))
     # Kliegel-Levine is for axisymmetric throats; a planar throat has its own.
@@ -243,7 +243,9 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
         }
     out["gas"] = {"equation_of_state": defn.gas.equation_of_state}
     if pr is not None:
-        out["gas"]["peng_robinson_choked_flux_bias"] = pr_bias
+        out["gas"]["cfd_model_choked_flux_bias"] = pr_bias
+        if defn.gas.peng_robinson:
+            out["gas"]["peng_robinson_choked_flux_bias"] = pr_bias
     if realgas.available(gas):
         bias = realgas.choked_mass_flux(gas, p0, T0).bias
         # From the model the CFD ran to the reference equation of state.

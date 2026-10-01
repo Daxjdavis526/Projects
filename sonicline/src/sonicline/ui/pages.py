@@ -338,9 +338,12 @@ class PhysicsPage(Page):
                                              default=300.0))
         row(f, "Wall temperature", self.wall_T, "K")
         row(f, "Equation of state", self.bind(ChoiceBox(self.draft, "gas.equation_of_state",
-            [("Perfect gas (default)", "perfect_gas"), ("Peng-Robinson", "peng_robinson")],
-            default="perfect_gas", tooltip="Peng-Robinson over-predicts nitrogen's real-gas mass flux by "
-            "about a quarter; the perfect gas plus the reported reference correction is more accurate")))
+            [("Perfect gas (default)", "perfect_gas"), ("Virial real gas (nitrogen)", "virial"),
+             ("Peng-Robinson", "peng_robinson")],
+            default="perfect_gas", tooltip="The virial gas puts nitrogen's real-gas behaviour in the CFD, "
+            "within about 0.01 % of the reference equation's choked flux up to 30 bar. Peng-Robinson "
+            "over-predicts the real-gas effect by about a quarter. The perfect gas reports the reference "
+            "correction beside its results")))
         row(f, "Solver", self.bind(ChoiceBox(self.draft, "numerics.solver",
             [("Automatic", "auto"), ("rhoPimpleFoam", "rhoPimpleFoam"), ("rhoCentralFoam", "rhoCentralFoam")],
             default="auto", tooltip="Automatic picks rhoCentralFoam when a shock or separation is "

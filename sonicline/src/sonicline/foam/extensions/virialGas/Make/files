@@ -1,0 +1,3 @@
+virialGasThermos.C
+
+LIB = $(FOAM_USER_LIBBIN)/libsoniclineVirialGas
