@@ -10,10 +10,11 @@
    Generalised for training on a fictional stand. It is how such procedures
    are shaped, not a certified procedure for any real hardware. */
 
-import { psi, fmt } from '../../lib/units.js';
+import { psi, fmt, unitLabel } from '../../lib/units.js';
 import { leakPre, leakEval } from '../../control/leakcheck.js';
 
-export const P = v => `${fmt(v, 'pressure')} psig`;
+export const PSIG = () => unitLabel('pressure', true);
+export const P = v => `${fmt(v, 'pressure')} ${PSIG()}`;
 export const near = (a, b, tol) => Number.isFinite(a) && Math.abs(a - b) <= tol;
 export const PTS = ['PT-101', 'PT-102', 'PT-201', 'PT-301', 'PT-401'];
 export const LP_PTS = ['PT-102', 'PT-201', 'PT-301', 'PT-401'];
@@ -245,7 +246,7 @@ export const reportStep = () => ({ kind: 'action', station: 'TC', title: 'File t
    which recorded run belongs to this point. */
 export function firingPoint(def, { label, regSet, planText, match, sec }) {
   return [
-    { kind: 'action', station: 'PROP', title: `${label}: PR-101 → ${fmt(regSet, 'pressure', 0)} psig, locked up`,
+    { kind: 'action', station: 'PROP', title: `${label}: PR-101 → ${fmt(regSet, 'pressure', 0)} ${PSIG()}, locked up`,
       text: 'Command the setpoint, wait for PT-201 to lock up, and look at PT-301 and PT-401 before you go on.',
       why: 'Every point starts from a verified static condition — the same checks as before the first firing, faster.',
       check: v => near(v.regSet, regSet, psi(1)) && near(v.ch('PT-201'), regSet, psi(5)) && Math.abs(v.ch('PT-401')) < psi(2) },

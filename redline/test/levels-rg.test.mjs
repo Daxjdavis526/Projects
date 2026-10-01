@@ -49,6 +49,7 @@ const safe = (s, ex) => {
   for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: true }); s.run(15);
   ex('regSet', { id: 'PR-630', value: 0 }); ex('valve', { id: 'PV-631', open: true }); s.run(8); ex('valve', { id: 'PV-631', open: false }); s.run(1);
 };
+const enter = (s, ex) => { ex('enterCell'); s.run(1); ex('tech', { task: 'closeHV' }); s.run(6); };
 
 console.log('Level 14 — first regen hot fire, guided, start to finish');
 {
@@ -71,7 +72,7 @@ console.log('Level 14 — first regen hot fire, guided, start to finish');
   check('a full 10 s, lit and clean', r && !r.aborted && r.metrics.summary.ignited && r.metrics.summary.dur > 9.5, r?.abort || '');
   P.confirm('M1'); P.confirm('M2');
   safe(s, ex);
-  P.confirm('N4');
+  P.confirm('N4'); enter(s, ex);
   for (const x of s.runs) s.flag('analysis:' + x.id);
   s.run(0.5);
   const S = r.metrics.summary;

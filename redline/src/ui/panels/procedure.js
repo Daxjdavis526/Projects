@@ -5,6 +5,7 @@
 import { h, btn, clear, setText } from '../dom.js';
 import { resolve, ST } from '../../control/procedure.js';
 import { toast } from '../modal.js';
+import { DISPLAY, PSI, fromDisplay, unitLabel } from '../../lib/units.js';
 
 // fault-injection sessions run under independent rules
 const indep = m => m === 'independent' || m === 'fault';
@@ -28,7 +29,7 @@ export class ProcedurePanel {
     this.els = new Map();
     let sec = null;
     for (const st of P.steps) {
-      if (st.section !== sec) { sec = st.section; this.body.append(h('div.proc-sec', `${st.section} · ${st.sectionTitle}`)); }
+      if (st.section !== sec) { sec = st.section; this.body.append(h('div.proc-sec', `${st.sectionLabel ?? st.section} · ${st.sectionTitle}`)); }
       const ic = h('span.ic'), tt = h('span.tt');
       const row = h('div.sr', { onclick: () => { this.open = this.open === st.id ? '__none' : st.id; this.render(); } }, ic, h('span.n', st.num || ''), tt, h('span.stn', st.station || ''));
       const body = h('div.body.hidden');
@@ -114,8 +115,13 @@ export class ProcedurePanel {
         case 'verify': ctl.append(btn('Verified', () => confirm(), 'sm primary'), btn('Mark failed', () => { P.fail(step.id, 'operator: check not satisfied'); this.render(); }, 'sm ghost')); break;
         case 'record': {
           const inp = h('input.in', { type: 'number', step: 'any', style: { width: '90px' } });
-          inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') confirm(inp.value); });
-          ctl.append(inp, h('span.faint', resolve(step.record.unit, v) || ''), btn('Record', () => confirm(inp.value), 'sm primary'));
+          // validators work in psi; an operator displaying kPa or bar types in those
+          let unit = resolve(step.record.unit, v) || '';
+          const pu = /^psig?$/.test(unit) && DISPLAY.pressure !== 'psi';
+          if (pu) unit = unit === 'psig' ? unitLabel('pressure', true) : unitLabel('pressure');
+          const value = () => pu && inp.value !== '' ? String(fromDisplay(+inp.value, 'pressure') / PSI) : inp.value;
+          inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') confirm(value()); });
+          ctl.append(inp, h('span.faint', unit), btn('Record', () => confirm(value()), 'sm primary'));
           break;
         }
         case 'hold': {

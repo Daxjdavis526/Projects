@@ -50,6 +50,7 @@ const safe = (s, ex) => {
   for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: true }); s.run(15);
   ex('regSet', { id: 'PR-630', value: 0 }); ex('valve', { id: 'PV-631', open: true }); s.run(8); ex('valve', { id: 'PV-631', open: false }); s.run(1);
 };
+const enter = (s, ex) => { ex('enterCell'); s.run(1); ex('tech', { task: 'closeHV' }); s.run(6); };
 
 console.log('Level 9 — first hot fire, guided, start to finish');
 {
@@ -73,7 +74,7 @@ console.log('Level 9 — first hot fire, guided, start to finish');
   s.run(15);                                     // soak-back peak passes
   P.confirm('M1'); P.confirm('M2');
   safe(s, ex);
-  P.confirm('N4');
+  P.confirm('N4'); enter(s, ex);
   for (const x of s.runs) s.flag('analysis:' + x.id);
   s.run(0.5);
   const S = r.metrics.summary;

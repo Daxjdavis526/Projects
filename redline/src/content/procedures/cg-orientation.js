@@ -30,7 +30,7 @@ export function procedure(def) {
           text: 'Keep asking: What state is the system in? What should happen next? What do the instruments say? Do those measurements make physical sense? Is the system safe to continue? Should I abort? What does the data say happened?',
           why: 'This is the whole skill. The rest is detail.' },
       ] },
-      { id: 'K', title: 'The hardware, source to nozzle', steps: [
+      { id: 'K', label: 'A', title: 'The hardware, source to nozzle', steps: [
         click('N2-K', 'The pressurant source: N₂ K-bottle', 'Where the energy is stored. Everything downstream exists to release it in a controlled way.'),
         click('HV-100', 'The bottle hand valve', 'Some valves can only be worked by a person standing next to them. That constrains the order of the whole procedure.'),
         click('IV-101', 'The remote isolation valve', 'The main remote shut-off between stored gas and the test system. Note its fail position and its limit switches.'),
@@ -41,7 +41,7 @@ export function procedure(def) {
         click('SV-301', 'The fire valve', 'Opened only by the sequencer, only when armed. It has no position sensor.'),
         click('CGT-1', 'The test article', 'A fictional thruster, deliberately simple.'),
         click('LC-501', 'The thrust stand', 'A mass on a spring with a load cell in the load path. It rings.'),
-      ] },
+      ].map((st, i) => ({ ...st, num: `1.${4 + i}` })) },
       { id: 'B', title: 'Instruments', steps: [
         { id: 'B1', num: '3.1', kind: 'action', station: 'DAQ', title: 'Power up the DAQ', text: 'Console ▸ DAQ ▸ Power ON; wait for ONLINE.',
           why: 'The DAQ is your eyes. It takes a few seconds to boot.', check: v => v.daq.online },

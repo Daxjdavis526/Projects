@@ -2,9 +2,10 @@
    station would see it — measured values and states, never the physics —
    and whether that fact is acceptable for the planned firing. */
 
-import { psi, fmt } from '../../lib/units.js';
+import { psi, fmt, unitLabel } from '../../lib/units.js';
+const PSIG = () => unitLabel('pressure', true);
 
-const P = v => (Number.isFinite(v) ? `${fmt(v, 'pressure')} psig` : 'NO DATA');
+const P = v => (Number.isFinite(v) ? `${fmt(v, 'pressure')} ${PSIG()}` : 'NO DATA');
 
 export default [
   { id: 'TC', name: 'Test Conductor', role: 'Owns the procedure and the final call',
@@ -14,7 +15,7 @@ export default [
       { label: 'Regulator setpoint vs test request', eval: v => {
           // a campaign request approves a range of setpoints, not a list
           const rg = v.request?.range;
-          if (rg) return { value: `${P(v.regSet)} commanded / approved ${fmt(rg[0], 'pressure', 0)}–${fmt(rg[1], 'pressure', 0)} psig`,
+          if (rg) return { value: `${P(v.regSet)} commanded / approved ${fmt(rg[0], 'pressure', 0)}–${fmt(rg[1], 'pressure', 0)} ${PSIG()}`,
                            ok: v.regSet >= rg[0] - psi(1) && v.regSet <= rg[1] + psi(1) };
           const pts = v.request?.matrix ? v.request.matrix : v.request ? [v.request.regSet] : null;
           return {

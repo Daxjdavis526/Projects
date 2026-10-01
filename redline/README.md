@@ -19,7 +19,7 @@ Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366
 | | |
 |---|---|
 | **Control room** | P&ID mimic, CCTV view of the cell, configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
-| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-727 at its inlet, TC-728 at its outlet) before reaching the injector |
+| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector |
 | **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves; and a lumped combustion chamber — ignition, start transients, hard starts, chug and screech onset, a heat-sink wall that soaks back after shutdown (below) |
 | **Instruments** | 14 sensors — including an independent Coriolis mass flowmeter — plus command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
 | **DAQ** | Sample rate 100 Hz – 5 kHz, recording to a run file, auto-stop, zero / tare / shunt calibration |
@@ -161,20 +161,17 @@ src/
                 grading; report-bp.js — Levels 12 and 17; reporthtml.js — the document
   sim/          session.js — wires the layers, owns the clock; predict-test.js —
                 a planned test run start to finish, headless
-  content/      DATA. stands/ts1-*.js and ts2-*.js (ts2-regen.js is TS-2
-                with BPE-2: it imports TS-2 and overrides the engine) (plumbing, sensors,
+  content/      DATA. stands/ts1-*.js and ts2-*.js: plumbing, sensors,
                 limits, abort sequence, interlocks, go/no-go stations, P&ID
-                layout, and the stand's own hooks: prediction, reductions,
-                sequence, leak check), procedures/, programs.js, glossary.js;
-                hardware/ — the custom-hardware schema and presets
+                layout, and the stand's own hooks (prediction, reductions,
+                sequence, leak check). ts2-regen.js is TS-2 with BPE-2: it
+                imports TS-2 and overrides the engine. Also procedures/ (one
+                file per level, cg-*, bp-*, rg-*), programs.js, glossary.js,
+                and hardware/ — the custom-hardware schema and presets
                 (stands/custom-coldgas.js builds a stand from one)
   ui/           the only code that touches the DOM
-test/           node redline/test/physics.test.mjs   (38 checks)
-                node redline/test/series.test.mjs    (22 checks: Levels 3 and 4
-                start to finish, the campaign arithmetic)
-                node redline/test/session.test.mjs   (29 checks: a full guided
-                Level-2 test, interlocks, the poll, an automatic abort,
-                a pulse train)
+test/           twelve headless suites, node redline/test/<name>.test.mjs
+                (see Tests below)
 ```
 
 The flow of information is one-way, and it is the point of the design:
@@ -417,6 +414,11 @@ node redline/test/levels-rg.test.mjs
 node redline/test/custom.test.mjs
 ```
 
+`physics.test.mjs` checks the gas network against hand calculations;
+`session.test.mjs` flies a full guided Level 2, the interlocks, the poll, an
+automatic abort and a pulse train; `series.test.mjs` walks Levels 3 and 4
+start to finish and checks the campaign arithmetic.
+
 `faults.test.mjs` forces every fault in turn through the same standard firing
 and checks that it leaves the fingerprint its answer key claims *in the
 measured data* — a fault the instruments cannot see is not a fair exercise —
@@ -443,16 +445,17 @@ burn limit with and without film cooling, and the rules that keep a
 cold-flow plan away from loaded propellants. `faults-bp.test.mjs` forces
 each TS-2 fault through a standard hot fire and checks its fingerprint in
 the measured data, plus the inspections and the diagnosis vocabulary.
+`levels-bp.test.mjs` walks Level 9 start to finish and flies Level 12's two
+points, grading reports against them.
+
 `regen.test.mjs` checks BPE-2: the fuel's boiling curve, a water flow
 through the jacket (its CdA recovered), a 5 s hot fire against the as-built
 prediction with the jacket in the fuel budget, the coolant heat balance
 against the model, the start with and without a fuel lead, a 25 s burn that
 stays steady, throttling (less heat, less margin), and each cooling fault's
 fingerprint in the measured data. `levels-rg.test.mjs` walks Level 14 and
-flies Level 17's 21 s and throttled points.
-`levels-bp.test.mjs` walks Level 9 start to finish and flies Level 12's two
-points, grading reports against them. Each of the three takes a few minutes:
-a lit chamber needs 50 µs steps.
+flies Level 17's 21 s and throttled points. The hot-fire suites take a few
+minutes each: a lit chamber needs 50 µs steps.
 
 `custom.test.mjs` checks custom hardware: the reference configuration
 reproduces TS-1 within 1.5 %, the Cv, orifice and coil conversions, every

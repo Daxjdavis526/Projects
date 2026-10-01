@@ -241,7 +241,7 @@ export class App {
       let st = c.stateLabel;
       if (!st) {
         if (!d.online) st = 'NO DATA';
-        else st = (S.def.lpChannels || []).some(id => d.latest(id) > S.def.ratings.VENTED) ? 'PRESSURIZED' : 'SAFE';
+        else st = (S.def.lpChannels || []).some(id => d.latest(id) > S.def.ratings.VENTED) ? 'PRESSURISED' : 'SAFE';
       }
       setText(this.tb.state, st);
       this.tb.state.className = 'v state-badge state-' + st.replace(' ', '');

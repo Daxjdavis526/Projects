@@ -3,9 +3,10 @@
    and two things the cold-gas stand did not have at all: purge, and how
    much liquid is in each tank. */
 
-import { psi, fmt, degC } from '../../lib/units.js';
+import { psi, fmt, degC, unitLabel } from '../../lib/units.js';
+const PSIG = () => unitLabel('pressure', true);
 
-const P = v => (Number.isFinite(v) ? `${fmt(v, 'pressure')} psig` : 'NO DATA');
+const P = v => (Number.isFinite(v) ? `${fmt(v, 'pressure')} ${PSIG()}` : 'NO DATA');
 const kg = v => (Number.isFinite(v) ? `${v.toFixed(2)} kg` : 'NO DATA');
 const near = (a, b, tol) => Number.isFinite(a) && Math.abs(a - b) <= tol;
 const ind = (v, id) => (v.ch(id + '-ZSO') === 1 && v.ch(id + '-ZSC') === 0 ? 'OPEN' : v.ch(id + '-ZSC') === 1 && v.ch(id + '-ZSO') === 0 ? 'CLOSED' : 'NO INDICATION');
@@ -24,7 +25,7 @@ export default [
           const want = [flowsOx(v) && r.oxP != null ? ['PR-610', r.oxP] : null, flowsFu(v) && r.fuP != null ? ['PR-620', r.fuP] : null].filter(Boolean);
           const rg = r.range;
           const txt = `ox ${P(v.sp['PR-610'])}, fuel ${P(v.sp['PR-620'])}`;
-          if (rg) return { value: `${txt} / approved ${fmt(rg[0], 'pressure', 0)}–${fmt(rg[1], 'pressure', 0)} psig`,
+          if (rg) return { value: `${txt} / approved ${fmt(rg[0], 'pressure', 0)}–${fmt(rg[1], 'pressure', 0)} ${PSIG()}`,
             ok: (!flowsOx(v) || (v.sp['PR-610'] >= rg[0] - psi(1) && v.sp['PR-610'] <= rg[1] + psi(1))) && (!flowsFu(v) || (v.sp['PR-620'] >= rg[0] - psi(1) && v.sp['PR-620'] <= rg[1] + psi(1))) };
           return { value: want.length ? `${txt} / requested ${want.map(([, p]) => P(p)).join(', ')}` : txt,
             ok: want.every(([id, p]) => near(v.sp[id], p, psi(1))) };

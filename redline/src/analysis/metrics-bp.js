@@ -91,11 +91,11 @@ export function computeMetricsBP(run, def) {
     push('droop' + sd.key, `${n} tank droop (lock-up − flowing)`, Plock - Ptank, 'pressure');
     push('dPline' + sd.key, `${n} feed-line ΔP (tank − manifold)`, Ptank - pm, 'pressure');
     push('surge' + sd.key, `${n} valve-inlet surge at shutdown (${sd.vi})`, surge, 'pressure', 'water hammer');
-    if (sd.key === 'Fu' && ch('PT-727')) {
+    if (sd.key === 'Fu' && ch('PT-729')) {
       // a regeneratively cooled engine: the fuel crosses the jacket first
-      S.dPjkt = meanIn(T, ch('PT-727'), ss0, ss1) - pm;
+      S.dPjkt = meanIn(T, ch('PT-729'), ss0, ss1) - pm;
       S.CdAjkt = S.dPjkt > 0 && mdot > 0 ? mdot / Math.sqrt(2 * rho * S.dPjkt) : NaN;
-      push('dPjkt', 'Cooling-jacket ΔP (PT-727 − PT-725)', S.dPjkt, 'pressure');
+      push('dPjkt', 'Cooling-jacket ΔP (PT-729 − PT-725)', S.dPjkt, 'pressure');
       push('CdAjkt', 'Cooling-jacket CdA, measured (water)', S.CdAjkt, 'area');
     }
   }
@@ -253,7 +253,7 @@ export function computeMetricsHot(run, def) {
   // the cooling jacket (a regeneratively cooled engine)
   const rg = def.physics.regen;
   if (rg && ch('TC-728')) {
-    const jin = ch('PT-727'), tout = ch('TC-728'), tin = ch('TC-727'), marg = ch('TSAT-M'), th2 = ch('TC-803');
+    const jin = ch('PT-729'), tout = ch('TC-728'), tin = ch('TC-727'), marg = ch('TSAT-M'), th2 = ch('TC-803');
     S.dPjkt = meanIn(T, jin, ss0, ss1) - meanIn(T, ch('PT-725'), ss0, ss1);
     S.Tcout = meanIn(T, tout, ss0, ss1);
     S.dTc = S.Tcout - meanIn(T, tin, ss0, ss1);
@@ -262,7 +262,7 @@ export function computeMetricsHot(run, def) {
     S.boilMargin = marg ? maxIn(T, marg, ss0, ss1, 0, -1).v : NaN;
     S.TthMax = th2 ? maxIn(T, th2, tOn, tShut + 0.1).v : NaN;
     S.TthSteady = th2 ? meanIn(T, th2, ss0, ss1) : NaN;
-    push('dPjkt', 'Cooling-jacket ΔP (PT-727 − PT-725)', S.dPjkt, 'pressure', `design ${(def.design.dPjacket / 6894.757).toFixed(0)} psi at the design flow`);
+    push('dPjkt', 'Cooling-jacket ΔP (PT-729 − PT-725)', S.dPjkt, 'pressure', `design ${(def.design.dPjacket / 6894.757).toFixed(0)} psi at the design flow`);
     push('Tcout', 'Coolant outlet temperature (TC-728)', S.Tcout, 'temperature');
     push('dTc', 'Coolant temperature rise (TC-728 − TC-727)', S.dTc, 'ratio', 'kelvin');
     push('Qjkt', 'Heat into the coolant, ṁ·cp·ΔT', S.Qjkt, 'power', 'FT-724 · cp · ΔT');
@@ -275,7 +275,7 @@ export function computeMetricsHot(run, def) {
   S.Itot = integrate(T, F, tOn, Math.min(tEnd, tOff + 1.0));
   S.Ishut = integrate(T, F, tShut, Math.min(tEnd, tOff + 1.0));
   push('Itot', 'Total impulse (LC-901)', S.Itot, 'impulse');
-  push('Ishut', 'Shutdown impulse (first valve closed → +1 s)', S.Ishut, 'impulse');
+  push('Ishut', 'Shutdown impulse (first valve closing → 1 s after the last)', S.Ishut, 'impulse');
   if (!S.meterOk) out.flags.push('meter-cal');
   return out;
 }

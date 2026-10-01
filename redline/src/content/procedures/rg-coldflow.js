@@ -12,7 +12,7 @@
 
 import { psi } from '../../lib/units.js';
 import { near, daqConfig, pollSection, reportStep, finalize } from './common.js';
-import { bpPretest, bpInstrumentation, bpLoad, bpPressurantLeak, bpClearCell, bpPurge, bpSafe, flowPoint, flowsWhere } from './bp-common.js';
+import { bpRecordStep, bpPretest, bpInstrumentation, bpLoad, bpPressurantLeak, bpClearCell, bpPurge, bpSafe, flowPoint, flowsWhere } from './bp-common.js';
 
 const at = (r, id, p) => near(r.meta.config.sp?.[id], p, psi(2));
 const side = s => r => (r.plan?.sides || 'both') === s;
@@ -47,17 +47,18 @@ export function procedure(def) {
         { kind: 'action', station: 'PROP', title: 'Both tanks → 200 psig',
           text: 'PR-610 and PR-620 to 200 psig; wait for lock-up.',
           check: v => near(v.ch('PT-710'), psi(200), psi(6)) && near(v.ch('PT-720'), psi(200), psi(6)) },
+        bpRecordStep(),
       ] },
       pollSection('I', { text: 'One poll for the matrix (200–350 psig).' }),
       { id: 'J', title: 'The flows', steps: [
         { kind: 'info', station: 'TC', title: 'Where the new transducer is',
-          text: 'PT-727 is at the jacket INLET, at the nozzle end; PT-725 at its outlet, in the injector manifold. Their difference is the jacket ΔP. The fuel flow passes FT-724 before either.',
+          text: 'PT-729 is at the jacket INLET, at the nozzle end; PT-725 at its outlet, in the injector manifold. Their difference is the jacket ΔP. The fuel flow passes FT-724 before either.',
           why: 'Every component in a flow path has its own pressure drop, and the only way to know each is a transducer on each side of it.' },
         ...flows] },
       bpSafe(def, 'K', v => !!runOf(v, 3)),
       { id: 'L', title: 'Data', steps: [
         { kind: 'action', station: 'TC', title: 'Open the flows in ANALYSIS',
-          text: 'PT-727 and PT-725 through each fuel flow; the manifold pressures rising after each valve opens.',
+          text: 'PT-729 and PT-725 through each fuel flow; the manifold pressures rising after each valve opens.',
           check: v => [...v.flags].some(f => f.startsWith('analysis:')) },
         { kind: 'record', station: 'TC', title: 'Record the jacket CdA (Flow 2), mm²',
           record: { unit: 'mm²', validate: (x, v) => {
@@ -87,7 +88,7 @@ export function procedure(def) {
           record: { unit: 'ms', validate: (x, v) => {
             const a = runOf(v, 2), b = runOf(v, 3); if (!a || !b) return { ok: false, msg: 'Flows 2 and 3 are both needed.' };
             const d = (a.metrics.summary.primeFu - b.metrics.summary.primeOx) * 1e3;
-            return near(x, d, 60) ? { ok: true, msg: `${d.toFixed(0)} ms from the priming times; the reference sequence uses 200 ms.` } : { ok: false, msg: `The priming times differ by ${d.toFixed(0)} ms.` };
+            return near(x, d, 60) ? { ok: true, msg: `${d.toFixed(0)} ms from the priming times. The reference hot-fire sequence uses 200 ms, deliberately less: priming time is measured to 90 % of steady flow, but the fuel is already reaching the face well before that, and a lead long enough to fill the chamber with fuel first is a hard start of its own. The difference is the margin the hot fire trims away.` } : { ok: false, msg: `The priming times differ by ${d.toFixed(0)} ms.` };
           } } },
         reportStep(),
       ] },

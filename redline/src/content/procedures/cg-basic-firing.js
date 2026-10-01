@@ -77,7 +77,7 @@ export function procedure(def) {
           text: 'From the analysis view (baseline-corrected, steady window).',
           why: 'Reading a number off a reduction is the start. Knowing which window, which baseline and which assumptions produced it is the job.',
           record: { unit: 'N', validate: (x, v) => {
-            const run = v.runs.find(r => r.metrics?.summary?.F !== undefined);
+            const run = v.runs.findLast(r => r.metrics?.summary?.F !== undefined);
             if (!run) return { ok: false, msg: 'No reduced run yet.' };
             const F = run.metrics.summary.F;
             return near(x, F, Math.max(0.05, 0.03 * F)) ? { ok: true, msg: `${F.toFixed(2)} N` } : { ok: false, msg: `Reduction gives ${F.toFixed(2)} N.` };
@@ -85,7 +85,7 @@ export function procedure(def) {
         { kind: 'verify', station: 'TC', title: 'Compare with prediction',
           text: 'Is the measured thrust within ±10 % of the pre-test prediction? If not, the test is not complete — it is an investigation.',
           why: 'This comparison is the verdict on the test.',
-          check: v => { const run = v.runs.find(r => r.metrics?.summary?.F !== undefined); const p = run?.meta.config.prediction;
+          check: v => { const run = v.runs.findLast(r => r.metrics?.summary?.F !== undefined); const p = run?.meta.config.prediction;
             return !!run && !!p && Math.abs(run.metrics.summary.F / p.F - 1) < 0.10; },
           failMsg: 'Measured thrust is not within ±10 % of the prediction. Something is not nominal.' },
         reportStep(),

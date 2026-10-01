@@ -51,7 +51,7 @@ export const INSPECTIONS = [
       return { lines: [
         ['Exciter current', ig.open ? '0.0 A' : `${(1.8 + S.rng.gauss() * 0.03).toFixed(2)} A`, '≈ 1.8 A'],
         ['Spark at the plug', ig.open ? 'none — exciter dead' : ig.fail ? 'none (exciter buzzing)' : 'regular, strong, blue', 'regular, strong, blue']],
-        text: 'Purge flowing, propellant valves shut, everyone else clear of the nozzle.' };
+        text: 'Propellant valves shut, chamber dry, everyone else clear of the nozzle. (On the day the spark is also checked against the hot-fire sequence, with purge flowing — this check is the plug and exciter alone.)' };
     } },
 
   /* ---- feed system ----------------------------------------------------- */

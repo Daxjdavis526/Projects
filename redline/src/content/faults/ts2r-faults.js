@@ -18,7 +18,7 @@ export const REGEN_FAULTS = [
   { id: 'jkt-blocked', component: 'JKT-2', mode: 'restricted', category: 'system', hazard: true, onset: 'start',
     params: rng => ({ b: 0.45 + rng.uniform(0, 0.12) }),
     apply: (S, p) => { S.model.jacket.seg_('th').block = p.b; S.model.jacket.seg_('cv').block = 0.5 * p.b; S.model.line('fu').jacketBlockage = 0.35 * p.b; },
-    evidence: ['TC-803', 'DP-JKT', 'PT-727', 'jacket-flow', 'jacket-xray', 'prediction'],
+    evidence: ['TC-803', 'DP-JKT', 'PT-729', 'jacket-flow', 'jacket-xray', 'prediction'],
     inspect: { 'jacket-flow': (S, p) => ({ lines: [
       ['Jacket CdA, water, 100 psid', `${(S.model.line('fu').CdAjacket * (1 - 0.6 * 0.35 * p.b) * 1e6).toFixed(2)} mm²`, `${(S.model.line('fu').CdAjacket * 1e6).toFixed(2)} mm² (acceptance)`],
       ['Thermal-transient zone check', `throat zone ${Math.round(100 * (1 - p.b))} % of nominal flow; convergent ${Math.round(100 * (1 - 0.5 * p.b))} %`, 'all zones 95–105 %']],
@@ -27,7 +27,7 @@ export const REGEN_FAULTS = [
         text: 'Machining swarf from the closeout, never flushed out of the channels.' }) },
     story: p => ({
       what: `About ${Math.round(100 * p.b)} % of the throat-zone channels were obstructed by machining debris. The jacket as a whole flowed nearly normally — so the outlet temperature hardly moved — but the throat, the highest heat flux on the engine, got a fraction of its coolant.`,
-      indicators: 'TC-803 (throat liner) ran far hotter than on earlier runs while TC-802 (barrel) and TC-728 (coolant out) were nearly normal; the jacket ΔP (PT-727 − PT-725) was a little higher than the cold-flow value. A local problem, seen by the one instrument in the right place.',
+      indicators: 'TC-803 (throat liner) ran far hotter than on earlier runs while TC-802 (barrel) and TC-728 (coolant out) were nearly normal; the jacket ΔP (PT-729 − PT-725) was a little higher than the cold-flow value. A local problem, seen by the one instrument in the right place.',
       misleading: 'The coolant outlet temperature and the heat balance both look healthy: they average over the whole jacket. Cooling is lost locally, and a bulk number cannot see it.',
       notice: 'The jacket ΔP against the cold flow, before any fire; then TC-803 against the reference run in the first second of the burn.',
       abort: 'A genuine hazard: a starved zone goes to film boiling and burns through. The throat redline was right; firing again before the jacket is cleared would not be.',
@@ -57,7 +57,7 @@ export const REGEN_FAULTS = [
       'borescope-liner': () => ({ lines: [['Liner, barrel', 'axial crack ≈ 9 mm long, streaked downstream', 'no cracks'], ['Throat', 'normal heat tint', 'normal']], text: 'A thermal-fatigue crack between two channels.' }) },
     story: () => ({
       what: 'The liner had a thermal-fatigue crack between two cooling channels. Fuel leaked from the jacket straight into the chamber, bypassing the injector: it burned poorly along the wall, the injector got less fuel than the meter said, and c* efficiency fell.',
-      indicators: 'FT-724 higher than the fuel injector ΔP accounts for (the injector\'s apparent CdA rose); PT-725 low against PT-727 — a bigger jacket ΔP for the flow; c* efficiency down a few per cent; a fuel-rich streak in the plume.',
+      indicators: 'FT-724 higher than the fuel injector ΔP accounts for (the injector\'s apparent CdA rose); PT-725 low against PT-729 — a bigger jacket ΔP for the flow; c* efficiency down a few per cent; a fuel-rich streak in the plume.',
       misleading: 'More fuel flow and lower performance look like an injector or mixture-ratio problem. The meter is right: the fuel went somewhere the injector did not send it.',
       notice: 'Flow and pressure must close around every component: the fuel meter, the jacket ΔP and the injector ΔP should tell one story. Here they did not.',
       abort: 'A hazard: a crack grows, and fuel against a hot wall in a fuel-rich streak is how liners burn through. Stop and leak-check.',

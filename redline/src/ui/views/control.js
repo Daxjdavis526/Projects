@@ -41,8 +41,8 @@ export class ControlView {
     const logP = h('div.panel.center-log');
     root.append(h('div.col', top, plotsP, logP));
     // right
-    const chP = h('div.panel', { style: { flex: '1 1 0', minHeight: '140px' } });
-    const conP = h('div.panel', { style: { flex: '0 0 auto', maxHeight: '44%' } });
+    const chP = h('div.panel', { style: { flex: '1 1 0', minHeight: '96px' } });
+    const conP = h('div.panel', { style: { flex: '0 1 auto', minHeight: '150px', maxHeight: '44%' } });
     const fireP = h('div.panel.firectl');
     root.append(h('div.col', chP, conP, fireP));
     host.append(root);

@@ -8,9 +8,10 @@
 
    Everything here happens in a few milliseconds, so the DAQ runs at 5 kHz. */
 
-import { psi, fmt } from '../../lib/units.js';
-import { near, finalize, pretest, instrumentation, zeroCal, daqConfig, supplyLeak, clearCell,
+import { psi, fmt, unitLabel } from '../../lib/units.js';
+import { near, lastEvent, finalize, pretest, instrumentation, zeroCal, daqConfig, supplyLeak, clearCell,
          pressurise, safeStand, returnSafe, inspectStep, reportStep, runsWhere } from './common.js';
+const PSIG = () => unitLabel('pressure', true);
 
 const HI = psi(150), LO = psi(60);
 const VR = 0.5;                                  // s, valve-response burn
@@ -18,7 +19,7 @@ const WIDTHS = [0.020, 0.010, 0.006, 0.005];     // s, pulse sweep
 const OFF = 0.2, COUNT = 10;
 
 const matchBurn = p => r => near(r.meta.config.regSet, p, psi(1)) && r.plan?.mode === 'single' && near(r.plan.duration, VR, 0.01) && r.meta.config.rate >= 5000;
-const matchTrain = w => r => near(r.meta.config.regSet, HI, psi(1)) && r.plan?.mode === 'pulse' && near(r.plan.on, w, 0.0003) && r.plan.count >= 5 && r.meta.config.rate >= 2000;
+const matchTrain = w => r => near(r.meta.config.regSet, HI, psi(1)) && r.plan?.mode === 'pulse' && near(r.plan.on, w, 0.0003) && r.plan.count >= COUNT && r.meta.config.rate >= 5000;
 const burn = (v, p) => runsWhere(v, matchBurn(p)).pop();
 const train = (v, w) => runsWhere(v, matchTrain(w)).pop();
 const done = v => WIDTHS.every(w => train(v, w));
@@ -30,16 +31,17 @@ export const request = def => ({
   duration: VR,
   supplyAssumed: psi(2200),
   title: 'CGT-1 valve response and pulse performance',
-  text: `Characterise SV-301 and CGT-1 in pulse mode at ≥ 5000 Hz. (1) Valve response: a ${VR} s burn at ${fmt(HI, 'pressure', 0)} psig and at ${fmt(LO, 'pressure', 0)} psig — opening and shutdown delays. (2) Pulse sweep at ${fmt(HI, 'pressure', 0)} psig: ${COUNT} pulses each at ${WIDTHS.map(ms).join(', ')} ms on, ${OFF * 1e3} ms off — impulse bit, repeatability, and the minimum pulse that fires.`,
+  text: `Characterise SV-301 and CGT-1 in pulse mode at ≥ 5000 Hz. (1) Valve response: a ${VR} s burn at ${fmt(HI, 'pressure', 0)} ${PSIG()} and at ${fmt(LO, 'pressure', 0)} ${PSIG()} — opening and shutdown delays. (2) Pulse sweep at ${fmt(HI, 'pressure', 0)} ${PSIG()}: ${COUNT} pulses each at ${WIDTHS.map(ms).join(', ')} ms on, ${OFF * 1e3} ms off — impulse bit, repeatability, and the minimum pulse that fires.`,
   success: 'Valve delays at both pressures; impulse bit and its scatter at every width; the minimum firing pulse width identified.',
 });
 
 export function procedure(def) {
-  const train0 = { id: 'J', title: `Pulse sweep — ${fmt(HI, 'pressure', 0)} psig`, steps: [
-    { kind: 'action', station: 'PROP', title: `PR-101 back to ${fmt(HI, 'pressure', 0)} psig, locked up, LC re-tared`,
+  const train0 = { id: 'J', title: `Pulse sweep — ${fmt(HI, 'pressure', 0)} ${PSIG()}`, steps: [
+    { kind: 'action', station: 'PROP', title: `PR-101 back to ${fmt(HI, 'pressure', 0)} ${PSIG()}, locked up, LC re-tared`,
       text: 'Pulses are fired at the higher pressure. Re-tare the load cell once the regulator has locked up.',
       why: 'The same static checks as before every firing.',
-      check: v => near(v.regSet, HI, psi(1)) && near(v.ch('PT-201'), HI, psi(5)) && !!burn(v, LO) } ,
+      check: v => { const t = lastEvent(v, e => e.tare), sp = lastEvent(v, e => e.cat === 'CMD' && /setpoint/.test(e.text));
+        return near(v.regSet, HI, psi(1)) && near(v.ch('PT-201'), HI, psi(5)) && !!burn(v, LO) && !!t && t.t > (sp?.t ?? Infinity); } },
     ...WIDTHS.map(w => ({ kind: 'action', station: 'TC', title: `Pulse train: ${COUNT} × ${ms(w)} ms on / ${OFF * 1e3} ms off`,
       text: `FIRE CONTROL ▸ Pulse train ▸ ${ms(w)} ms on, ${OFF * 1e3} ms off × ${COUNT} ▸ LOAD. Record, arm, fire.`,
       why: w >= 0.01 ? 'Long enough for the chamber to reach steady pressure: the impulse bit should scale with width.'
@@ -72,9 +74,9 @@ export function procedure(def) {
           why: 'Series testing: poll once for the approved matrix.' },
       ] },
       { id: 'I', title: 'Valve response', steps: [
-        { kind: 'action', station: 'TC', title: `Fire ${VR} s at ${fmt(HI, 'pressure', 0)} psig`,
+        { kind: 'action', station: 'TC', title: `Fire ${VR} s at ${fmt(HI, 'pressure', 0)} ${PSIG()}`,
           text: 'Arm and fire.', why: 'Baseline valve response at the working pressure.', check: v => !!burn(v, HI) },
-        { kind: 'record', station: 'TC', title: `Opening delay at ${fmt(HI, 'pressure', 0)} psig (ms)`,
+        { kind: 'record', station: 'TC', title: `Opening delay at ${fmt(HI, 'pressure', 0)} ${PSIG()} (ms)`,
           text: 'ANALYSIS ▸ the run ▸ "Start" preset. Command to 10 % of steady chamber pressure. Check the automatic value with the cursors: A on the command edge, B where PT-401 starts to rise.',
           why: 'The delay is electrical (the coil current has to build) and mechanical (the armature has to move). Look at SV-301-I: the dip in the current marks the armature moving.',
           record: { unit: 'ms', validate: (x, v) => {
@@ -82,14 +84,14 @@ export function procedure(def) {
             const d = r.metrics.summary.delay * 1e3;
             return near(x, d, 0.3) ? { ok: true, msg: `${d.toFixed(2)} ms` } : { ok: false, msg: `The reduction gives ${d.toFixed(2)} ms.` };
           } } },
-        { kind: 'action', station: 'PROP', title: `Lower the feed to ${fmt(LO, 'pressure', 0)} psig: set PR-101, then bleed through VV-201`,
-          text: `Set PR-101 to ${fmt(LO, 'pressure', 0)} psig and watch PT-201: it does not move — and after a second the "regulator outlet above setpoint" caution trips. Expected, and you know why: acknowledge it. PR-101 is a NON-RELIEVING regulator — it can only add gas downstream, never remove it. Open VV-201 until PT-201 falls to about ${fmt(LO, 'pressure', 0)} psig (the regulator will catch it there and flow to the vent), then close VV-201 and let it lock up. Re-tare LC-501. Operating a vent is outside the approved matrix, so the series poll no longer covers the stand: poll again before you arm.`,
+        { kind: 'action', station: 'PROP', title: `Lower the feed to ${fmt(LO, 'pressure', 0)} ${PSIG()}: set PR-101, then bleed through VV-201`,
+          text: `Set PR-101 to ${fmt(LO, 'pressure', 0)} ${PSIG()} and watch PT-201: it does not move — and after a second the "regulator outlet above setpoint" caution trips. Expected, and you know why: acknowledge it. PR-101 is a NON-RELIEVING regulator — it can only add gas downstream, never remove it. Open VV-201 until PT-201 falls to about ${fmt(LO, 'pressure', 0)} ${PSIG()} (the regulator will catch it there and flow to the vent), then close VV-201 and let it lock up. Re-tare LC-501. Operating a vent is outside the approved matrix, so the series poll no longer covers the stand: poll again before you arm.`,
           why: 'Going down in pressure takes a vent. Fire without bleeding down and the "low-pressure" run is really at the old pressure — a whole data point quietly at the wrong condition.',
           teach: 'Many regulators are self-relieving (they vent excess outlet pressure through the bonnet); PR-101 is not. Know which kind you have before you plan a sweep that goes downward.',
           check: v => near(v.regSet, LO, psi(1)) && near(v.ch('PT-201'), LO, psi(4)) && v.cmd('VV-201') === 0, focus: ['PR-101', 'VV-201'] },
-        { kind: 'action', station: 'TC', title: `Fire ${VR} s at ${fmt(LO, 'pressure', 0)} psig`,
+        { kind: 'action', station: 'TC', title: `Fire ${VR} s at ${fmt(LO, 'pressure', 0)} ${PSIG()}`,
           text: 'Arm and fire.', why: '', check: v => !!burn(v, LO) },
-        { kind: 'record', station: 'TC', title: `Opening delay at ${fmt(LO, 'pressure', 0)} psig (ms)`,
+        { kind: 'record', station: 'TC', title: `Opening delay at ${fmt(LO, 'pressure', 0)} ${PSIG()} (ms)`,
           text: 'Same measurement, lower pressure.', why: '',
           record: { unit: 'ms', validate: (x, v) => {
             const r = burn(v, LO); if (!r) return { ok: false, msg: 'Fire the burn first.' };

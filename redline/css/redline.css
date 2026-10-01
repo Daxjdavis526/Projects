@@ -80,7 +80,7 @@ a { color: var(--gas-hi); }
 .tb-cell .v { font-family: var(--mono); font-size: 12px; color: var(--ink); }
 .state-badge { font-family: var(--mono); font-weight: 700; letter-spacing: .1em; font-size: 11.5px; padding: 1px 0; }
 .state-SAFE { color: var(--good); }
-.state-PRESSURIZED { color: var(--gas-hi); }
+.state-PRESSURISED { color: var(--gas-hi); }
 .state-ARMED, .state-COUNTDOWN { color: var(--caution); }
 .state-FIRING { color: var(--warning); }
 .state-ABORT, .state-ABORTED { color: var(--redline); }
@@ -103,6 +103,7 @@ a { color: var(--gas-hi); }
 .tb-icon:hover { color: var(--ink); background: var(--panel); }
 @media (max-width: 1780px) { .brand span { display: none; } }
 @media (max-width: 1500px) { .tb-cell.opt { display: none; } .master .mtxt { display: none; } }
+@media (max-width: 1440px) { .nav button { padding: 0 9px; letter-spacing: .08em; } .tb-cell { padding: 0 8px; } .brand { padding: 0 10px; } }
 
 .view { min-height: 0; overflow: hidden; }
 .hidden { display: none !important; }
@@ -212,6 +213,7 @@ label.chk { display: inline-flex; align-items: center; gap: 5px; color: var(--in
 .pid-label { fill: var(--ink-4); font: 600 10px var(--sans); letter-spacing: .14em; }
 .plume { fill: url(#plumeGrad); opacity: 0; transition: opacity .08s; pointer-events: none; }
 .pid-legend { position: absolute; left: 10px; top: 8px; display: flex; gap: 12px; font-size: 10px; color: var(--ink-4); pointer-events: none; }
+.pid-legend.bottom { top: auto; bottom: 6px; flex-direction: column; gap: 1px; }
 .pid-legend i { display: inline-block; width: 16px; height: 3px; vertical-align: middle; margin-right: 4px; }
 
 /* inspector (faceplate) */
@@ -301,6 +303,12 @@ label.chk { display: inline-flex; align-items: center; gap: 5px; color: var(--in
 
 /* fire control */
 .firectl { flex: none; }
+@media (max-height: 820px) {
+  .firectl .plan { padding: 4px 10px; gap: 4px; }
+  .firectl .keys { padding: 5px 10px; }
+  .keybtn { height: 32px; }
+  .firectl .abort { height: 38px; margin-bottom: 6px; }
+}
 .firectl .plan { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .firectl .plan .lbl { color: var(--ink-4); font-size: 10.5px; }
 .firectl .plan input { width: 64px; }

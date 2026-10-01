@@ -106,7 +106,8 @@ export class PID {
       g.append(s('text.t1', { x: it.x, y: it.y - 4 }, a));
       g.append(s('text.t2', { x: it.x, y: it.y + 10 }, b));
       const lab = it.lab || 'right';
-      const pos = lab === 'above' ? { x: it.x, y: it.y - 22, a: 'middle' } : lab === 'below' ? { x: it.x, y: it.y + 33, a: 'middle' } : { x: it.x + 20, y: it.y + 5, a: 'start' };
+      const pos = lab === 'above' ? { x: it.x, y: it.y - 22, a: 'middle' } : lab === 'below' ? { x: it.x, y: it.y + 33, a: 'middle' }
+        : lab === 'left' ? { x: it.x - 20, y: it.y + 5, a: 'end' } : { x: it.x + 20, y: it.y + 5, a: 'start' };
       const rd = s('text.rd', { x: pos.x, y: pos.y, 'text-anchor': pos.a }, '----');
       const ru = s('tspan.ru', { dx: 3 }, '');
       rd.append(ru);
@@ -128,7 +129,7 @@ export class PID {
     svg.append(symLayer, instLayer);
     svg.addEventListener('click', () => this.app.inspect(null));
     this.host.append(svg);
-    this.host.append(h('div.pid-legend',
+    this.host.append(h(L.legend === 'bottom' ? 'div.pid-legend.bottom' : 'div.pid-legend',
       h('span', h('i', { style: { background: '#8fd0ee' } }), 'pressurised (from PT)'),
       h('span', h('i', { style: { background: '#39424c' } }), 'vented'),
       h('span', h('i', { style: { background: 'repeating-linear-gradient(90deg,#3a2f2f 0 2px,transparent 2px 6px)' } }), 'no data'),

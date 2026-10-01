@@ -137,7 +137,7 @@ const channels = {
         if (Pc < k.Pamb / 0.528) return 0;
         return k.CdAt * Pc * k.fChoke / Math.sqrt(k.R * tc);
       } },
-    { id: 'DP-F201', quantity: 'pressure', gauge: false, desc: 'ΔP across F-201 + feed line (PT-201 − PT-301)',
+    { id: 'DP-F201', quantity: 'pressure', gauge: 'd', desc: 'ΔP across F-201 + feed line (PT-201 − PT-301)',
       inputs: ['PT-201', 'PT-301'], fn: ([a, b]) => a - b },
   ],
 };

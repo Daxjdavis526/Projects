@@ -23,7 +23,7 @@ export class ReferenceView {
 
   renderList() {
     clear(this.list);
-    const pages = [['__stand', 'TS-1 stand data'], ['__stand2', 'TS-2 stand data'], ['__honest', 'What is simulated, what is approximated']];
+    const pages = [['__stand', 'TS-1 stand data'], ['__stand2', 'TS-2 stand data'], ['__stand2r', 'TS-2 with BPE-2 (regen) data'], ['__honest', 'What is simulated, what is approximated']];
     for (const [id, t] of pages) if (!this.q || t.toLowerCase().includes(this.q)) this.list.append(h('div.li', { onclick: () => this.go(id) }, h('div.a', h('span', t))));
     for (const [cat, name] of CATEGORIES) {
       const items = GLOSSARY.filter(g => g.cat === cat && (!this.q || (g.title + ' ' + g.body.join(' ')).toLowerCase().includes(this.q)));
@@ -44,7 +44,7 @@ export class ReferenceView {
           g.see?.length ? h('div.see', 'See also: ', g.see.map(s => h('a', { onclick: () => this.go(s) }, this.app.refTitle(s)))) : null));
       }
     }
-    this.doc.append(this.standPage(), this.standPage2(), this.honestPage());
+    this.doc.append(this.standPage(), this.standPage2(), this.standPage2R(), this.honestPage());
   }
 
   standPage() {
@@ -54,12 +54,12 @@ export class ReferenceView {
     el.append(h('p', 'Nitrogen K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 thruster on a flexure thrust stand (LC-501). Vents VV-101 (regulator inlet) and VV-201 (feed line) are normally open; RV-201 protects the low-pressure side.'));
     const t = h('table.metrics', { style: { maxWidth: '640px' } });
     const row = (a, b) => t.append(h('tr', h('td', a), h('td.v', b)));
-    row('MEOP, low-pressure side', `${fmt(R.MEOP_LP, 'pressure', 0)} psig`);
-    row('RV-201 set', `${fmt(R.RELIEF_LP, 'pressure', 0)} psig`);
-    row('MAWP, low-pressure side', `${fmt(R.MAWP_LP, 'pressure', 0)} psig`);
-    row('Personnel limit (cell open)', `${fmt(R.PERSONNEL_MAX, 'pressure', 0)} psig`);
-    row('EPC command limit', `${fmt(R.REG_MAX_CMD, 'pressure', 0)} psig`);
-    row('Minimum supply for a test', `${fmt(R.SUPPLY_MIN, 'pressure', 0)} psig`);
+    row('MEOP, low-pressure side', `${fmt(R.MEOP_LP, 'pressure', 0)} ${unitLabel('pressure', true)}`);
+    row('RV-201 set', `${fmt(R.RELIEF_LP, 'pressure', 0)} ${unitLabel('pressure', true)}`);
+    row('MAWP, low-pressure side', `${fmt(R.MAWP_LP, 'pressure', 0)} ${unitLabel('pressure', true)}`);
+    row('Personnel limit (cell open)', `${fmt(R.PERSONNEL_MAX, 'pressure', 0)} ${unitLabel('pressure', true)}`);
+    row('EPC command limit', `${fmt(R.REG_MAX_CMD, 'pressure', 0)} ${unitLabel('pressure', true)}`);
+    row('Minimum supply for a test', `${fmt(R.SUPPLY_MIN, 'pressure', 0)} ${unitLabel('pressure', true)}`);
     row('Longest single burn', `${R.MAX_BURN} s`);
     row('Throat / exit (drawing)', `${(def.nominal.throatDia * 1e3).toFixed(2)} / ${(def.physics.elements.find(e => e.type === 'nozzle').nozzle.exitDia * 1e3).toFixed(2)} mm`);
     el.append(t);
@@ -82,7 +82,7 @@ export class ReferenceView {
     el.append(h('p', 'Nitrogen K-bottle → HV-600 → IV-601 → a header feeding three dome-loaded regulators: PR-610 (oxidiser tank T-710, 12 L), PR-620 (fuel tank T-720, 10 L) and PR-630 (purge). Each tank: check valve in, vent and relief, weigh scale under it, run line → main ball valve (MOV-713 / MFV-723) → turbine meter → injector manifold of BPE-1. Purge reaches each manifold through PV-631/632 and check valves CV-633/634.'));
     const t = h('table.metrics', { style: { maxWidth: '640px' } });
     const row = (a, b) => t.append(h('tr', h('td', a), h('td.v', b)));
-    const P = x => `${fmt(x, 'pressure', 0)} psig`;
+    const P = x => `${fmt(x, 'pressure', 0)} ${unitLabel('pressure', true)}`;
     row('Tank MEOP / relief / MAWP', `${P(R.TANK_MEOP)} / ${P(R.RELIEF_TANK)} / ${P(R.MAWP_TANK)}`);
     row('Personnel limit (cell open)', P(R.PERSONNEL_MAX));
     row('EPC limits: tanks / purge', `${P(R.REG_MAX_CMD)} / ${P(R.PURGE_MAX)}`);
@@ -92,14 +92,36 @@ export class ReferenceView {
     row('Propellant load (hot fire)', `T-710 ≈ ${(R.FILL_OX * 1.14).toFixed(1)} kg ${D.oxidiser}, T-720 ≈ ${(R.FILL_FU * 0.8).toFixed(1)} kg ${D.fuel}`);
     row('Throat / exit diameter', `${(D.throatDia * 1e3).toFixed(1)} / ${(D.exitDia * 1e3).toFixed(1)} mm (heat-sink copper chamber, uncooled)`);
     row('Burn limit / re-fire throat temperature', `${D.burnLimit} s at the design point / below ${fmt(R.WALL_REFIRE, 'temperature', 0)} °C`);
-    row('Design point (hot)', `${D.oxidiser} ${(D.mdotOx * 1e3).toFixed(0)} g/s, ${D.fuel} ${(D.mdotFu * 1e3).toFixed(0)} g/s, MR ${D.MR.toFixed(2)}, injector ΔP ${fmt(D.dPinj, 'pressure', 0)} psi`);
+    row('Design point (hot)', `${D.oxidiser} ${(D.mdotOx * 1e3).toFixed(0)} g/s, ${D.fuel} ${(D.mdotFu * 1e3).toFixed(0)} g/s, MR ${D.MR.toFixed(2)}, injector ΔP ${fmt(D.dPinj, 'pressure', 0)} ${unitLabel('pressure', 'd')}`);
     row('Propellant densities (fictional)', `${D.oxidiser} ${def.fluids[D.oxidiser].rho} kg/m³, ${D.fuel} ${def.fluids[D.fuel].rho} kg/m³, water ${def.fluids.water.rho} kg/m³`);
     el.append(t);
-    el.append(h('p', { style: { marginTop: '14px' } }, h('b', 'Limits')));
+    el.append(...this.limitsTable(def.limits));
+    return el;
+  }
+
+  limitsTable(limits) {
     const lt = h('table.metrics', { style: { maxWidth: '760px' } });
     lt.append(h('tr.hd', h('td', 'Limit'), h('td', 'Channel'), h('td', 'Level'), h('td', 'Action')));
-    for (const L of def.limits) lt.append(h('tr', h('td', L.text), h('td.v', L.channel), h('td', L.level), h('td', L.action === 'abort' ? 'AUTO-ABORT' : 'alarm')));
-    el.append(lt);
+    for (const L of limits) lt.append(h('tr', h('td', L.text), h('td.v', L.channel), h('td', L.level), h('td', L.action === 'abort' ? 'AUTO-ABORT' : 'alarm')));
+    return [h('p', { style: { marginTop: '14px' } }, h('b', 'Limits')), lt];
+  }
+
+  standPage2R() {
+    const def = STANDS['TS-2R'], D = def.design, J = def.physics.regen, R = def.ratings;
+    const el = h('div.gl-entry', { id: 'ref-__stand2r' }, h('h3', 'TS-2 with BPE-2, regeneratively cooled (fictional)'));
+    el.append(h('p', 'The same stand as TS-2 with BPE-2 in place of BPE-1. All the fuel runs through a milled-channel jacket from the nozzle exit to the injector before it is injected: PT-729 at the jacket inlet, PT-725 and TC-728 at the injector fuel manifold, TC-727 on the fuel run line. Tanks, regulators, valves and purge are TS-2\'s.'));
+    const t = h('table.metrics', { style: { maxWidth: '640px' } });
+    const row = (a, b) => t.append(h('tr', h('td', a), h('td.v', b)));
+    const C = x => `${fmt(x, 'temperature', 0)} ${unitLabel('temperature')}`;
+    row('Jacket', `${J.segments.length} zones, ${(J.Vjacket * 1e6).toFixed(0)} cc, counterflow, copper liner ${(J.liner.t * 1e3).toFixed(1)} mm`);
+    row('Jacket ΔP at the design fuel flow', `${fmt(D.dPjacket, 'pressure', 0)} ${unitLabel('pressure', 'd')}`);
+    row('Coolant inlet temperature, maximum', C(R.COOLANT_MAX_IN));
+    row('Coking onset (FU-1 film on the wall)', C(J.Tcoke));
+    row('Liner damage above (hot face)', C(J.Tdamage));
+    row('Critical heat flux at design flow, saturated', `${(J.qchf0 / 1e6).toFixed(1)} MW/m²`);
+    row('Burn limit', `${D.burnLimit} s (no heat sink to fill: the tanks and the stand rating set it)`);
+    el.append(t);
+    el.append(...this.limitsTable(def.limits));
     return el;
   }
 

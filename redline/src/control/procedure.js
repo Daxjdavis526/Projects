@@ -36,7 +36,7 @@ export class ProcedureRunner extends Emitter {
     this.proc = proc;
     this.steps = [];
     for (const sec of proc.sections) {
-      for (const st of sec.steps) this.steps.push({ ...st, section: sec.id, sectionTitle: sec.title });
+      for (const st of sec.steps) this.steps.push({ ...st, section: sec.id, sectionLabel: sec.label ?? sec.id, sectionTitle: sec.title });
     }
     this.byId = new Map(this.steps.map(s => [s.id, s]));
     const secs = proc.sections.map(x => x.id);
