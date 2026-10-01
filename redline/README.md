@@ -14,13 +14,13 @@ and nothing on screen is the truth.
 
 Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366×768 or larger.
 
-## What is here (development phases 1–5: the cold-gas program)
+## What is here (development phases 1–6)
 
 | | |
 |---|---|
 | **Control room** | P&ID mimic, CCTV view of the cell, configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
-| **Stand** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201 |
-| **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps (below) |
+| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold: water through both sides |
+| **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves (below) |
 | **Instruments** | 14 sensors — including an independent Coriolis mass flowmeter — plus command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
 | **DAQ** | Sample rate 100 Hz – 5 kHz, recording to a run file, auto-stop, zero / tare / shunt calibration |
 | **Control** | Interlocks (hard, warn, or consequence — by mode), firing sequencer (single burn or pulse train, 5 s countdown, hold, cutoff), limits and redlines with persistence, automatic abort sequence |
@@ -38,9 +38,13 @@ Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366
 | **Reference** | ~45 concise entries (instrumentation, fluid systems, operations, performance, combustion), stand data and limits, and an honest list of what is modelled |
 | **Sound** | Synthesised: valve clicks, pneumatic actuator, vent hiss, jet, relay, countdown, alarm tones |
 
-The cold-gas program (Levels 1–6) is complete. Levels 7–12 (the
-bipropellant stand) are listed in TRAINING and say which development phase
-brings them. The architecture for them is in place; see *Growing it*.
+The cold-gas program (Levels 1–6) is complete. On the bipropellant stand,
+Level 7 (orientation: two feed systems, loading, tank scales, pressure tare,
+purge, two trapped volumes) and Level 8 (water cold flow of the injector:
+each side alone at two tank pressures, then both; CdA per side, meters
+against scales, and the hot-fire mixture ratio the injector will give) are
+built. Levels 9–12 (hot fire) are listed in TRAINING and say which
+development phase brings them. The architecture for them is in place; see *Growing it*.
 
 ## Controls
 
@@ -50,12 +54,12 @@ or the open stand.
 | where | what |
 |---|---|
 | P&ID | click a component or instrument bubble for its faceplate (commands where it has them) |
-| Console ▸ STAND | valve OPEN/CLOSE, regulator setpoint, pressure-decay leak check (60 s hold) |
+| Console ▸ STAND | valve OPEN/CLOSE, regulator setpoint(s) — one on TS-1, three on TS-2 — pressure-decay leak check (60 s hold) |
 | Console ▸ DAQ | power, sample rate, RECORD, ZERO PTs, TARE LC, SHUNT CAL |
-| Console ▸ FACILITY | clear/enter the cell, PA, technician tasks (walkdown, bottle valve, inspection), safety record |
+| Console ▸ FACILITY | clear/enter the cell, PA, technician tasks (walkdown, bottle valve, inspection; on TS-2 load and drain the tanks), safety record |
 | Console ▸ INSPECT | the inspection workbench and its results; submit a diagnosis; the root cause afterwards; hints (guided) |
 | Notebook | pre-test notes; the session test report (conclusions, preview, File, Download HTML); filed reports; every run |
-| Fire control | load plan, POLL, ARM, FIRE, HOLD, CUTOFF; ABORT: lift the cover, then press |
+| Fire control | load plan (TS-1: burn or pulse train; TS-2: which sides, duration, oxidiser lead, post-purge), POLL, ARM, FIRE, HOLD, CUTOFF; ABORT: lift the cover, then press |
 | Strip charts | wheel: zoom time · shift+wheel: zoom y · drag: pan · shift+drag: pan y · double-click: reset · ⚙: channels |
 | Analysis | click: cursor A · shift+click: cursor B · drag a cursor to move it |
 | Top bar | ❚❚ freezes the simulation; 1×–10× sim speed (locked to 1× while armed, firing or aborting); MASTER ALARM acknowledges all |
@@ -78,16 +82,21 @@ src/
   physics/      TRUTH. gas.js (isentropic orifice flow), nozzle.js,
                 elements.js (valve, solenoid, regulator, relief, nozzle),
                 gasnet.js (volumes + elements, adaptive explicit integrator),
-                coldgas.js (network + thrust stand), predict.js
+                coldgas.js (network + thrust stand), predict.js;
+                liquid.js (feed line: inertance, valve, priming manifold,
+                injector), biprop.js (gas network + two liquid lines +
+                stand), predict-bp.js (cold flow from the injector drawing)
   instruments/  MEASUREMENT. sensor.js, daq.js, store.js (ring + history tiers)
   control/      controller.js (commands, sequencer, abort, facility),
                 interlocks.js, alarms.js, procedure.js, gonogo.js, eventlog.js
-  analysis/     metrics.js — per-run reductions; campaign.js — cross-run fits and statistics;
+  analysis/     metrics.js — per-run reductions (metrics-bp.js for cold flows);
+                campaign.js — cross-run fits and statistics;
                 report.js — the session report and the Level 6 grading; reporthtml.js — the document
   sim/          session.js — wires the layers, owns the clock
-  content/      DATA. stands/ts1-*.js (plumbing, sensors, limits, abort
-                sequence, go/no-go stations, P&ID layout), procedures/,
-                programs.js, glossary.js
+  content/      DATA. stands/ts1-*.js and ts2-*.js (plumbing, sensors,
+                limits, abort sequence, interlocks, go/no-go stations, P&ID
+                layout, and the stand's own hooks: prediction, reductions,
+                sequence, leak check), procedures/, programs.js, glossary.js
   ui/           the only code that touches the DOM
 test/           node redline/test/physics.test.mjs   (38 checks)
                 node redline/test/series.test.mjs    (22 checks: Levels 3 and 4
@@ -113,11 +122,14 @@ the CCTV view and the cell microphone (sound) see and hear the real gas.
 
 ### Growing it
 
-- **A new stand** is a data file like `content/stands/ts1-coldgas.js` (volumes,
-  elements, sensors, limits, abort sequence, go/no-go stations) plus a P&ID
+- **A new stand** is a data file like `content/stands/ts2-biprop.js` (volumes,
+  elements, liquid lines, sensors, limits, abort sequence, interlocks,
+  go/no-go stations, its regulators and main valves, and hooks for its
+  prediction, reductions, firing sequence and leak check) plus a P&ID
   layout. A physics model publishes named signals (`P:feed`, `F:stand`,
-  `I:SV-301`); sensors bind to them by name, so the bipropellant model only
-  has to publish its own.
+  `mdotL:ox`, `W:fu`); sensors bind to them by name. TS-2 was added this
+  way: the controller, DAQ, alarms, procedures, poll, reports and every
+  panel are shared with TS-1.
 - **A new fault** is an entry in `content/faults/ts1-faults.js`: the
   component, failure mode, onset, randomised parameters, an `apply` that sets
   fault hooks, the key evidence, any inspection readings physics cannot
@@ -184,9 +196,28 @@ rate, ADC quantisation, amplifier rails at −5 %/+10 % of range, and zeroing as
 a software offset applied after conversion (as in a real DAQ). The calculated
 mass-flow channel assumes the drawing's throat, as a real one would.
 
+**Liquid feed (TS-2).** Each propellant line is incompressible liquid with
+a lumped inertance — I·dṁ/dt = P_tank − P_manifold − R·ṁ|ṁ| — and square-law
+resistances for the line, the main valve and the injector
+(ṁ = CdA·√(2ρΔP)). Close a valve and the decelerating column raises the
+valve-inlet pressure: water hammer, as a lumped surge rather than a wave
+travelling at the speed of sound. The manifold between valve and injector
+starts dry; incoming liquid squeezes its gas out through the orifices until
+the liquid reaches them (priming), and what gas is left trapped is the
+manifold's compliance. The tank ullage grows by the volume of liquid that
+leaves, does p·dV work, cools, and the regulator refills it (droop). Purge gas
+blows a wet manifold dry; a check valve keeps liquid out of the purge line.
+Not modelled: cavitation, two-phase flow beyond that fill fraction, line
+elasticity and acoustics, liquid property changes with temperature. The
+as-built injector differs from its drawing by a fixed −6 % (ox) and +3 %
+(fuel) — on purpose, so a cold flow has something to discover; real
+injectors differ by amounts like these, for reasons like burrs and edge
+radii.
+
 **Not claimed.** The numbers are plausible for a small research cold-gas
-thruster at sea level. They predict no real hardware. The bipropellant engine
-(phases 6–7) will be a lumped, quasi-steady model and will say so.
+thruster and a small pressure-fed engine flowing water at sea level. They
+predict no real hardware. Combustion (phase 7) will be a lumped,
+quasi-steady model and will say so.
 
 ### The faults, and how honest they are
 
@@ -223,6 +254,7 @@ node redline/test/session.test.mjs
 node redline/test/series.test.mjs
 node redline/test/faults.test.mjs
 node redline/test/campaign.test.mjs
+node redline/test/biprop.test.mjs
 ```
 
 `faults.test.mjs` forces every fault in turn through the same standard firing
@@ -235,6 +267,12 @@ console, a three-point sweep, a pulse train — and grades reports against it,
 nominal and with a load-cell fault; it also checks the report document and
 the hints.
 
+`biprop.test.mjs` checks the liquid physics (mass conservation, the √ΔP law,
+priming, water hammer growing with closing speed, purge, ullage growth), a
+full cold flow through the session and its reductions (the measured CdA is
+the as-built injector, not the drawing), the stand's rules, and Levels 7 and
+8 driven start to finish.
+
 For visual checks, serve the repo with `python3 -m http.server` and drive
 `/redline/` in headless Chromium; `window.redline` exposes the app and its
 session for scripting.
@@ -246,5 +284,5 @@ session for scripting.
 | 3 | ✓ pressure characterisation and pulse testing, campaign analysis, test history, measured mass flow |
 | 4 | ✓ fault engine and 26 cold-gas faults, inspection workbench, diagnosis submission, scored root-cause debrief, Level 5, fault-injection mode |
 | 5 | ✓ Level 6 independent campaign with graded report, session test report document, console leak check, guided hints, polish |
-| 6 | pressure-fed bipropellant stand: two feed systems, injector, purge |
+| 6 | ✓ pressure-fed bipropellant stand TS-2 (liquid feed physics, two feed systems, injector, purge), cold flow, Levels 7 and 8, the core generalised to more than one stand |
 | 7 | hot fire: ignition and confirmation, valve sequencing, mixture ratio, thermal response, combustion faults |

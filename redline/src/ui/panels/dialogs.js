@@ -122,7 +122,17 @@ export function debrief(app) {
     const p = run.meta.config.prediction;
     const m = run.metrics.summary;
     body.append(h('h4', { style: { margin: '10px 0 4px', fontSize: '10px', letterSpacing: '.14em', color: 'var(--ink-4)' } }, `RESULT — ${run.id}`));
-    body.append(h('div.kv',
+    if (run.metrics.kind === 'coldflow') {
+      // a cold flow's result is flows and flow coefficients, not thrust
+      const runs = S.runs.filter(r => r.metrics?.kind === 'coldflow' && !r.aborted);
+      const last = k => [...runs].reverse().find(r => Number.isFinite(r.metrics.summary[k]))?.metrics.summary[k];
+      const cda = k => (Number.isFinite(last(k)) ? `${(last(k) * 1e6).toFixed(3)} mm²` : '—');
+      body.append(h('div.kv',
+        h('span.k', 'Cold flows recorded'), h('span.v', String(runs.length)),
+        h('span.k', 'Ox injector CdA (latest)'), h('span.v', `${cda('CdAOx')}  (drawing ${(S.def.design.CdAox * 1e6).toFixed(2)})`),
+        h('span.k', 'Fuel injector CdA (latest)'), h('span.v', `${cda('CdAFu')}  (drawing ${(S.def.design.CdAfu * 1e6).toFixed(2)})`),
+        h('span.k', 'Hot-fire MR predicted'), h('span.v', Number.isFinite(last('MRhot')) ? `${last('MRhot').toFixed(3)}  (design ${S.def.design.MR.toFixed(2)})` : '—')));
+    } else body.append(h('div.kv',
       h('span.k', 'Chamber pressure'), h('span.v', `${fmt(m.Pc, 'pressure')} ${unitLabel('pressure', true)}${p ? `  (pred. ${fmt(p.Pc, 'pressure')})` : ''}`),
       h('span.k', 'Thrust'), h('span.v', `${fmt(m.F, 'force')} ${unitLabel('force')}${p ? `  (pred. ${fmt(p.F, 'force')})` : ''}`),
       h('span.k', 'Total impulse'), h('span.v', `${fmt(m.I, 'impulse')} N·s`),

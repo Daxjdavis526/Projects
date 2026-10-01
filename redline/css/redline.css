@@ -538,3 +538,11 @@ iframe.report.tall { min-height: calc(100vh - 150px); }
 .console .leak .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gas); }
 .console .hint { flex-basis: 100%; font-size: 11.5px; line-height: 1.5; color: var(--ink-2); border-left: 2px solid var(--gas); padding: 3px 8px; background: #0e1419; }
 .console .hint b { font: 600 9.5px var(--mono); letter-spacing: .12em; color: var(--gas); }
+
+/* ---- phase 6: liquid lines, run tanks, spray ------------------------------ */
+.seg.liq { stroke-width: 4.5; }
+.seg.liq.s-liqv { stroke: #2b4744; }
+.seg.liq.s-nodata { stroke: #3a2f2f; }
+.sym .liquid { fill: rgba(80, 190, 168, 0.32); stroke: none; transition: y .3s, height .3s; }
+.sym .body.tank { fill: none; }
+.spray { fill: rgba(150, 220, 230, 0.55); opacity: 0; transition: opacity .1s; pointer-events: none; }

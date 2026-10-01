@@ -249,7 +249,11 @@ reductions on the
 recorded data, test history that outlives the session, an engineering
 notebook and printable test reports. It ends in an unscripted acceptance
 campaign: a test request, no procedure, maybe a hidden fault, and a report
-graded on whether you noticed the data were not what they seemed.
+graded on whether you noticed the data were not what they seemed. A
+second stand adds a pressure-fed bipropellant engine run cold: water
+through each side of the injector to measure what the drawing only
+estimated, liquid lines that prime and hammer, purge, and two of every
+mistake.
 Fictional hardware, generalised
 procedures, and it says so. Desktop only.
 

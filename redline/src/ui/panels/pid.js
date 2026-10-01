@@ -19,7 +19,13 @@ function pressureColor(pg) {
   return `rgb(${c0.map((c, i) => Math.round(lerp(c, c1[i], t))).join(',')})`;
 }
 
-const MAIN_LINE = new Set(['HV-100', 'IV-101', 'PR-101', 'F-201', 'SV-301', 'NZ-401']);
+function liquidColor(pg) {
+  const t = Math.max(0, Math.min(1, Math.log10(Math.max(pg, psi(3)) / psi(3)) / 2.4));
+  const c0 = [40, 92, 86], c1 = [96, 214, 186];
+  return `rgb(${c0.map((c, i) => Math.round(lerp(c, c1[i], t))).join(',')})`;
+}
+
+const TS1_MAIN_LINE = ['HV-100', 'IV-101', 'PR-101', 'F-201', 'SV-301', 'NZ-401'];
 
 export class PID {
   constructor(host, app) {
@@ -34,6 +40,8 @@ export class PID {
 
   build() {
     const def = this.session.def, L = def.pid;
+    this.mainLine = new Set(L.mainLine || TS1_MAIN_LINE);
+    this.zsMarks = new Map(); this.regSp = new Map(); this.epcFb = new Map(); this.tankLv = new Map();
     clear(this.host);
     const [vx, vy, vw, vh] = L.viewBox;
     const svg = s('svg', { viewBox: `${vx} ${vy} ${vw} ${vh}`, preserveAspectRatio: 'xMidYMid meet' });
@@ -64,13 +72,18 @@ export class PID {
     const ex = L.exhaust;
     this.plume = s('path.plume', { d: `M${ex.x},${ex.y - 9} L${ex.x + 110},${ex.y - 30} L${ex.x + 110},${ex.y + 30} L${ex.x},${ex.y + 9} Z` });
     svg.append(this.plume);
+    if (ex.spray) {
+      // water spray from the injector in a cold flow (an HMI cue from the manifold pressures)
+      this.spray = s('path.spray', { d: `M${ex.x - 70},${ex.y - 8} L${ex.x + 60},${ex.y - 34} L${ex.x + 60},${ex.y + 34} L${ex.x - 70},${ex.y + 8} Z` });
+      svg.append(this.spray);
+    }
 
     // segments
     this.segs = [];
     const segLayer = s('g'), flowLayer = s('g');
     for (const sg of L.segments) {
       const d = 'M' + sg.pts.map(p => p.join(',')).join(' L');
-      const path = s('path.seg' + (sg.thin ? '.thin' : ''), { d });
+      const path = s('path.seg' + (sg.thin ? '.thin' : '') + (sg.liquid ? '.liq' : ''), { d });
       const flow = s('path.flow', { d });
       segLayer.append(path); flowLayer.append(flow);
       this.segs.push({ def: sg, path, flow, branchTo: this._branchTarget(sg) });
@@ -144,10 +157,11 @@ export class PID {
       case 'bottle': {
         g.append(s('rect.body', { x: x - sy.w / 2, y: y - sy.h / 2, width: sy.w, height: sy.h, rx: sy.w / 2 }));
         g.append(s('rect', { x: x - 10, y: y - sy.h / 2 - 12, width: 20, height: 12, fill: '#0d1216', stroke: '#7d8a97', 'stroke-width': 1.2 }));
-        g.append(s('path', { d: `M${x + sy.w / 2 - 6},${230} L${x + sy.w / 2},${230}`, stroke: '#7d8a97', 'stroke-width': 1.2 }));
-        g.append(s('text.lbl', { x, y: y - 10, 'text-anchor': 'middle' }, 'N₂'));
+        const port = sy.port ?? 230;
+        g.append(s('path', { d: `M${x + sy.w / 2 - 6},${port} L${x + sy.w / 2},${port}`, stroke: '#7d8a97', 'stroke-width': 1.2 }));
+        g.append(s('text.lbl', { x, y: y - 10, 'text-anchor': 'middle' }, sy.gas || 'N₂'));
         g.append(s('text.lbl2', { x, y: y + 6, 'text-anchor': 'middle' }, 'K-BOTTLE'));
-        g.append(s('text.lbl2', { x, y: y + 18, 'text-anchor': 'middle' }, '49 L'));
+        g.append(s('text.lbl2', { x, y: y + 18, 'text-anchor': 'middle' }, sy.size || '49 L'));
         g.append(hl(sy.w + 10, sy.h + 26, 0, -6));
         break;
       }
@@ -164,9 +178,10 @@ export class PID {
         g.append(s('circle.act', { cx: x, cy: y, r: 4.5 }));
         g.append(s('path.act', { d: `M${x},${y - 5} L${x},${y - 20}` }));
         g.append(s('path.act', { d: `M${x - 13},${y - 20} L${x + 13},${y - 20} A13,11 0 0 0 ${x - 13},${y - 20} Z` }));
-        this._zso = s('text.lbl2', { x: x + 17, y: y - 30 }, 'ZSO');
-        this._zsc = s('text.lbl2', { x: x + 17, y: y - 20 }, 'ZSC');
-        g.append(this._zso, this._zsc);
+        const zso = s('text.lbl2', { x: x + 17, y: y - 30 }, 'ZSO');
+        const zsc = s('text.lbl2', { x: x + 17, y: y - 20 }, 'ZSC');
+        g.append(zso, zsc);
+        this.zsMarks.set(sy.zs || sy.id, { zso, zsc });
         g.append(s('text.lbl', { x, y: y + 28, 'text-anchor': 'middle' }, sy.id));
         g.append(s('text.lbl2', { x, y: y + 39, 'text-anchor': 'middle' }, 'FC'));
         g.append(hl(46, 76, 0, 2));
@@ -200,16 +215,18 @@ export class PID {
         g.append(s('path.act', { d: `M${x - 14},${y - 14} L${x + 14},${y - 14} A14,12 0 0 0 ${x - 14},${y - 14} Z` }));
         g.append(s('path.leader', { d: `M${x + 14},${y - 18} L${x + 30},${y - 18} L${x + 30},${y}` }));
         g.append(s('text.lbl', { x, y: y + 28, 'text-anchor': 'middle' }, sy.id));
-        this._regSp = s('text.lbl2', { x, y: y + 39, 'text-anchor': 'middle' }, 'SP 0.0');
-        g.append(this._regSp);
+        const sp = s('text.lbl2', { x, y: y + 39, 'text-anchor': 'middle' }, 'SP 0.0');
+        this.regSp.set(sy.id, sp);
+        g.append(sp);
         g.append(hl(50, 76, 4, 2));
         break;
       }
       case 'epc': {
         g.append(s('rect.body', { x: x - 34, y: y - 18, width: 68, height: 36 }));
-        g.append(s('text.lbl', { x, y: y - 5, 'text-anchor': 'middle' }, 'EPC-101'));
-        this._epc = s('text.lbl2', { x, y: y + 9, 'text-anchor': 'middle' }, '----');
-        g.append(this._epc);
+        g.append(s('text.lbl', { x, y: y - 5, 'text-anchor': 'middle' }, sy.id));
+        const fb = s('text.lbl2', { x, y: y + 9, 'text-anchor': 'middle' }, '----');
+        this.epcFb.set(sy.channel || 'EPC-101', fb);
+        g.append(fb);
         g.append(hl(78, 44));
         break;
       }
@@ -219,7 +236,7 @@ export class PID {
         g.append(s('path.act', { d: `M${x},${y - 4} L${x},${y + 4}` }));
         g.append(s('path.act', { d: `M${x + 4},${y} l6,-6 l6,6 l6,-6 l6,6`, fill: 'none' }));
         g.append(s('text.lbl', { x: x - 16, y: y + 3, 'text-anchor': 'end' }, sy.id));
-        g.append(s('text.lbl2', { x: x - 16, y: y + 14, 'text-anchor': 'end' }, 'SET 250'));
+        g.append(s('text.lbl2', { x: x - 16, y: y + 14, 'text-anchor': 'end' }, `SET ${sy.set || '250'}`));
         g.append(hl(92, 54, -10, 0));
         break;
       }
@@ -238,7 +255,59 @@ export class PID {
         g.append(hl(88, 40, 40, 0));
         break;
       }
+      case 'checkValve': {
+        // a ball against a seat, flow toward the bar
+        if (sy.vertical) {
+          g.append(s('path.fillable', { d: `M${x - 10},${y - 10} L${x + 10},${y - 10} L${x},${y + 8} Z` }));
+          g.append(s('path.act', { d: `M${x - 10},${y + 10} L${x + 10},${y + 10}` }));
+          g.append(s('text.lbl', { x: x - 15, y: y + 4, 'text-anchor': 'end' }, sy.id));
+          g.append(hl(64, 30, -16, 0));
+        } else {
+          g.append(s('path.fillable', { d: `M${x - 10},${y - 10} L${x - 10},${y + 10} L${x + 8},${y} Z` }));
+          g.append(s('path.act', { d: `M${x + 10},${y - 10} L${x + 10},${y + 10}` }));
+          g.append(s('text.lbl', { x, y: y + 26, 'text-anchor': 'middle' }, sy.id));
+          g.append(hl(36, 50, 0, 6));
+        }
+        break;
+      }
+      case 'tank': {
+        const w = sy.w, hh = sy.h, x0 = x - w / 2, y0 = y - hh / 2;
+        const clip = 'clip-' + sy.id;
+        g.append(s('clipPath', { id: clip }, s('rect', { x: x0 + 2, y: y0 + 2, width: w - 4, height: hh - 4, rx: 16 })));
+        g.append(s('rect', { x: x0, y: y0, width: w, height: hh, rx: 18, fill: '#0d1216' }));
+        const lv = s('rect.liquid', { x: x0, y: y + hh / 2, width: w, height: 0, 'clip-path': `url(#${clip})` });
+        g.append(lv);
+        g.append(s('rect.body.tank', { x: x0, y: y0, width: w, height: hh, rx: 18 }));
+        g.append(s('text.lbl', { x, y: y - 14, 'text-anchor': 'middle' }, sy.label || sy.id));
+        g.append(s('text.lbl2', { x, y: y + 2, 'text-anchor': 'middle' }, sy.sub || ''));
+        const lt = s('text.lbl2', { x, y: y + 16, 'text-anchor': 'middle' }, '');
+        g.append(lt);
+        this.tankLv.set(sy.id, { lv, lt, sy, y0, hh });
+        g.append(hl(w + 10, hh + 10));
+        break;
+      }
+      case 'engine': {
+        // injector face at x; chamber, throat, nozzle to the right
+        g.append(s('rect.body', { x, y: y - 26, width: 56, height: 52, rx: 3 }));
+        g.append(s('path.act', { d: `M${x + 4},${y - 26} L${x + 4},${y + 26}` }));
+        g.append(s('path.body', { d: `M${x + 56},${y - 26} L${x + 70},${y - 9} L${x + 112},${y - 22} L${x + 112},${y + 22} L${x + 70},${y + 9} L${x + 56},${y + 26} Z` }));
+        g.append(s('text.lbl', { x: x + 30, y: y + 4, 'text-anchor': 'middle' }, sy.id));
+        g.append(hl(120, 60, 56, 0));
+        break;
+      }
       case 'thrustStand': {
+        if (sy.span) {
+          const [a, b] = sy.span, py = y + 44;
+          g.append(s('rect', { x: a, y: py - 3, width: b - a, height: 6, fill: '#11171c', stroke: '#56636f', 'stroke-width': 1 }));
+          for (const fx of [a + 16, b - 16]) g.append(s('path', { d: `M${fx},${py + 3} L${fx},${py + 40}`, stroke: '#56636f', 'stroke-width': 2 }));
+          g.append(s('rect', { x: a - 16, y: py + 40, width: b - a + 32, height: 8, fill: 'url(#hatch)', stroke: 'none' }));
+          const [lx, ly] = sy.lc;
+          g.append(s('rect.body', { x: lx - 11, y: ly - 9, width: 22, height: 18 }));
+          g.append(s('text.lbl2', { x: lx, y: ly + 3.5, 'text-anchor': 'middle' }, 'LC'));
+          g.append(s('path.act', { d: `M${lx + 11},${ly} L${a},${ly}` }));
+          g.append(s('rect.hl', { x: lx - 16, y: ly - 14, width: 32, height: 28 }));
+          break;
+        }
         const py = y + 48;
         g.append(s('rect', { x: 925, y: py - 3, width: 190, height: 6, fill: '#11171c', stroke: '#56636f', 'stroke-width': 1 }));
         for (const fx of [948, 1092]) g.append(s('path', { d: `M${fx},${py + 3} L${fx},${py + 54}`, stroke: '#56636f', 'stroke-width': 2 }));
@@ -268,8 +337,9 @@ export class PID {
     for (const e of def.physics.elements) {
       let st;
       if (e.hidden) { ind[e.id] = { st: 'closed', open: false }; continue; }   // no HMI knows about a leak
-      if (e.id === def.supplyIso) {
-        const o = d.latest('IV-101-ZSO'), cl = d.latest('IV-101-ZSC');
+      const ix = (def.indications || []).find(q => q.valve === e.id);
+      if (ix) {
+        const o = d.latest(ix.zso), cl = d.latest(ix.zsc);
         if (!d.online) st = c.cmd[e.id] ? 'open' : 'closed';
         else st = o === 1 && cl === 0 ? 'open' : cl === 1 && o === 0 ? 'closed' : 'travel';
         const disagree = S.alarms.byId.get('DISAGREE-' + e.id)?.active;
@@ -281,6 +351,12 @@ export class PID {
         const p = Pg(e.from);
         ind[e.id] = { st: p >= e.set * 0.97 ? 'open' : 'closed', open: p >= e.set * 0.97 };
       } else ind[e.id] = { st: 'open', open: true };
+    }
+    for (const l of def.physics.lines || []) {
+      const ix = (def.indications || []).find(q => q.valve === l.valve.id);
+      const o = ix ? d.latest(ix.zso) : NaN, cl = ix ? d.latest(ix.zsc) : NaN;
+      const st = !d.online || !ix ? (c.cmd[l.valve.id] ? 'open' : 'closed') : o === 1 && cl === 0 ? 'open' : cl === 1 && o === 0 ? 'closed' : 'travel';
+      ind[l.valve.id] = { st, open: st !== 'closed', disagree: S.alarms.byId.get('DISAGREE-' + l.valve.id)?.active };
     }
     // HMI flow inference: from each open exit with pressure behind it, walk
     // upstream through open elements while pressure rises.
@@ -313,21 +389,26 @@ export class PID {
     // segments
     for (const sg of this.segs) {
       const vol = sg.def.vol;
-      let cls = 'seg', color = null, on = false;
+      let cls = sg.def.liquid ? 'seg liq' : 'seg', color = null, on = false;
       if (vol === 'vent') {
         cls += ' s-vent';
-        on = sg.def.from ? flowing.has(sg.def.from) : ['VV-101', 'VV-201', 'RV-201'].some(id => flowing.has(id));
+        on = sg.def.from ? flowing.has(sg.def.from) : (def.ventElements || []).some(id => flowing.has(id));
       } else if (vol === 'tank') {
         cls += ' s-unknown';
-        on = flowing.has('HV-100');
+        on = flowing.has(def.bottle?.valve || 'HV-100');
       } else {
         const p = vol === 'dome' ? d.latest('EPC-101') : Pg(vol);
         if (!d.online || Number.isNaN(p)) cls += ' s-nodata';
+        else if (sg.def.liquid) { if (p >= vented) color = liquidColor(p); else cls += ' s-liqv'; }
         else if (p < vented) cls += ' s-vent';
         else color = pressureColor(p);
-        if (sg.branchTo) on = flowing.has(sg.branchTo);
+        if (sg.def.liquid) {
+          // a liquid line flows when its flowmeter says so
+          const fch = vol.startsWith('ox') ? 'FT-714' : 'FT-724';
+          on = d.online && d.latest(fch) > 0.01;
+        } else if (sg.branchTo) on = flowing.has(sg.branchTo);
         else if (vol !== 'dome') {
-          on = def.physics.elements.some(e => MAIN_LINE.has(e.id) && (e.from === vol || e.to === vol) && flowing.has(e.id));
+          on = def.physics.elements.some(e => this.mainLine.has(e.id) && (e.from === vol || e.to === vol) && flowing.has(e.id));
         }
         if (vol === 'hp' || vol === 'sup') { if (p > psi(1000)) sg.path.style.strokeWidth = '4'; else sg.path.style.strokeWidth = ''; }
       }
@@ -348,12 +429,19 @@ export class PID {
       if (this.focus.has(id)) cls += ' focus';
       if (g.getAttribute('class') !== cls) g.setAttribute('class', cls);
     }
-    if (this._zso) {
-      const o = d.latest('IV-101-ZSO') === 1, cl = d.latest('IV-101-ZSC') === 1;
-      this._zso.style.fill = o ? '#8fd0ee' : ''; this._zsc.style.fill = cl ? '#c7d0d8' : '';
+    for (const [v, m] of this.zsMarks) {
+      const o = d.latest(v + '-ZSO') === 1, cl = d.latest(v + '-ZSC') === 1;
+      m.zso.style.fill = o ? '#8fd0ee' : ''; m.zsc.style.fill = cl ? '#c7d0d8' : '';
     }
-    if (this._regSp) this._regSp.textContent = `SP ${fmt(c.regSet, 'pressure')}`;
-    if (this._epc) this._epc.textContent = d.online ? `${fmt(d.latest('EPC-101'), 'pressure')} fb` : '----';
+    for (const [id, t] of this.regSp) t.textContent = `SP ${fmt(c.sp[id] ?? 0, 'pressure')}`;
+    for (const [ch, t] of this.epcFb) t.textContent = d.online ? `${fmt(d.latest(ch), 'pressure')} fb` : '----';
+    // run-tank level: from the SCALE, as the HMI would draw it
+    for (const { lv, lt, sy, y0, hh } of this.tankLv.values()) {
+      const kg = d.online ? d.latest(sy.scale) : NaN;
+      const f = Number.isFinite(kg) ? Math.max(0, Math.min(1, kg / sy.capacity)) : 0;
+      lv.setAttribute('y', y0 + hh * (1 - f)); lv.setAttribute('height', hh * f);
+      lt.textContent = Number.isFinite(kg) ? `${kg.toFixed(2)} kg` : '---- kg';
+    }
 
     // instruments
     for (const [id, it] of this.insts) {
@@ -368,8 +456,14 @@ export class PID {
     }
 
     // exhaust glow from measured chamber pressure (an HMI cue, not a camera)
-    const pc = d.latest('PT-401');
+    const ex = def.pid.exhaust;
+    const pc = d.latest(ex.channel || 'PT-401');
     const k = d.online && pc > psi(3) ? Math.min(1, pc / psi(160)) : 0;
     this.plume.style.opacity = (0.15 + 0.7 * k) * (k > 0 ? 1 : 0);
+    if (this.spray) {
+      const pm = Math.max(...ex.spray.map(id => d.latest(id)).filter(Number.isFinite), 0);
+      const ks = d.online && pm > psi(20) ? Math.min(1, pm / psi(250)) : 0;
+      this.spray.style.opacity = ks ? 0.15 + 0.6 * ks : 0;
+    }
   }
 }

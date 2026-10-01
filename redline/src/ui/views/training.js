@@ -26,7 +26,12 @@ export class TrainingView {
         h('div.ln', 'TS-1 · SANDBOX'),
         h('div.lt', 'Cold-gas stand, no procedure'),
         h('ul', h('li', 'Every control available; interlocks and physics still apply'), h('li', 'Write your own plan in the notebook first'), h('li', 'Fault injection: a hidden fault may or may not be present; diagnose it from Console ▸ INSPECT')),
-        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent'), 'sm'), btn('Fault injection', () => this.app.start(null, 'fault'), 'sm', { title: MODES.fault.text }))));
+        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent'), 'sm'), btn('Fault injection', () => this.app.start(null, 'fault'), 'sm', { title: MODES.fault.text }))),
+      h('div.level',
+        h('div.ln', 'TS-2 · SANDBOX'),
+        h('div.lt', 'Bipropellant stand, cold flow, no procedure'),
+        h('ul', h('li', 'Load the tanks, pressurise, flow water through either or both sides'), h('li', 'Tare the tank scales while the tanks are empty'), h('li', 'No fault injection on this stand yet')),
+        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-2'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-2'), 'sm'))));
     page.append(open);
 
     for (const p of PROGRAMS) {

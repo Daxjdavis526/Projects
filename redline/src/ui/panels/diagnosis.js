@@ -40,7 +40,8 @@ export function openDiagnosis(app) {
     return s;
   };
   const hw = Object.entries(def.components).map(([id, c]) => [id, `${id} — ${c.name}`]);
-  hw.splice(hw.findIndex(x => x[0] === 'SV-301'), 0, ['FEED-LINE', 'Feed tubing and fittings']);
+  const at = hw.findIndex(x => x[0] === 'SV-301');
+  if (at >= 0) hw.splice(at, 0, ['FEED-LINE', 'Feed tubing and fittings']);
   const inst = def.sensors.map(s => [s.id, `${s.id} — ${s.desc || s.kind || ''}`]).concat([['DAQ', 'DAQ / signal conditioning']]);
   const comp = sel(null, [['Nothing', [['NONE', 'No fault — stand nominal']]], ['Hardware', hw], ['Instruments', inst]]);
   const modeGroups = {};

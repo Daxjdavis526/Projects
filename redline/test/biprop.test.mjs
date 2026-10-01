@@ -88,6 +88,16 @@ console.log('liquid feed physics');
   check('the tank droops a little while flowing', P(gauge(m, 'oxu')) < 299 && P(gauge(m, 'oxu')) > 280, `${P(gauge(m, 'oxu')).toFixed(1)} psig`);
 }
 
+{
+  // loading takes a minute through a vented fill: the displaced gas leaves as it goes
+  const s = new Session({ def, mode: 'independent', seed: 6 });
+  s.execute('daqPower', { on: true }); s.run(5); s.execute('zero', {}, { confirmed: true }); s.run(0.5);
+  s.execute('tech', { task: 'fillTanks' });
+  let pk = 0;
+  for (let k = 0; k < 70; k++) { s.run(1); pk = Math.max(pk, s.daq.latest('PT-710'), s.daq.latest('PT-720')); }
+  check('loading the tanks does not pressurise them', pk < psi(2), `peak ${P(pk).toFixed(2)} psig`);
+}
+
 console.log('a cold flow through the session');
 function coldFlow({ sides = 'both', p = 300, tareAfterFill = false, plan = {} } = {}) {
   const s = new Session({ def, mode: 'independent', seed: 4 });

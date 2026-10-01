@@ -16,7 +16,7 @@ import { PlotStack } from '../panels/plots.js';
 import { Scatter } from '../plot/scatter.js';
 import { fmt, unitLabel, fmtT, toDisplay } from '../../lib/units.js';
 import { lowerBound } from '../../analysis/metrics.js';
-import { QUANTITIES_CATALOG, value, linfit, stats, interpret, runKind } from '../../analysis/campaign.js';
+import { QUANTITIES_CATALOG, quantitiesFor, value, linfit, stats, interpret, runKind } from '../../analysis/campaign.js';
 import { channelList } from '../../instruments/daq.js';
 import { STANDS } from '../../content/programs.js';
 import { history, runCSV, download } from '../history.js';
@@ -28,6 +28,14 @@ const DEFAULT = () => ([
   { channels: ['SV-301-I', 'SV-301-CMD'] },
 ]);
 
+const PRESETS_BP = [
+  ['Ox flow vs √ΔP', 'sqdPOx', 'mdotOx'],
+  ['Fuel flow vs √ΔP', 'sqdPFu', 'mdotFu'],
+  ['Ox CdA vs tank P', 'PtOx', 'CdAOx'],
+  ['Fuel CdA vs tank P', 'PtFu', 'CdAFu'],
+  ['Meter vs scale (ox)', 'mdotWOx', 'mdotOx'],
+  ['Meter vs scale (fuel)', 'mdotWFu', 'mdotFu'],
+];
 const PRESETS = [
   ['F vs Pc (abs)', 'PcAbs', 'F'],
   ['ṁ (FT-201) vs Pc (abs)', 'PcAbs', 'mdotFM'],
@@ -52,7 +60,7 @@ export class AnalysisView {
     this.withHistory = true;
     this.xKey = 'PcAbs'; this.yKey = 'F';
     this.cursors = { A: null, B: null };
-    this.layout = DEFAULT();
+    this.layouts = {};
     this.root = h('div.split', { style: { gridTemplateColumns: '260px 1fr 430px' } });
     host.append(this.root);
     history.refresh().then(() => this.render());
@@ -151,7 +159,7 @@ export class AnalysisView {
     centre.append(h('div', { style: { padding: '3px 10px', fontSize: '11px', color: 'var(--ink-4)', borderTop: '1px solid var(--line)' } }, 'Click: cursor A · shift-click: cursor B · drag a cursor to move it · wheel: zoom · drag: pan · dbl-click: full record'));
     const chans = channelList(def);
     this.stack = new PlotStack(body, this.app, {
-      layout: this.layout, live: false,
+      layout: this._layoutFor(def), live: false,
       channels: () => chans,
       makeTraces: (m, color) => [
         { id: m.id, source: run.data, color, label: m.id, quantity: m.quantity, gauge: m.gauge, discrete: m.quantity === 'discrete', desc: m.desc, shift: 0 },
@@ -172,7 +180,7 @@ export class AnalysisView {
   }
 
   reduction(run, overlays, def, right) {
-    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? (run.metrics.kind === 'pulse' ? 'pulse train' : 'single burn') : '')));
+    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? ({ pulse: 'pulse train', coldflow: 'cold flow' }[run.metrics.kind] || 'single burn') : '')));
     const rb = h('div.pb');
     right.append(rb);
     this.cursorBox = h('div');
@@ -222,22 +230,30 @@ export class AnalysisView {
     rb.append(h('div', { style: { padding: '8px 10px' } }, btn('Open in notebook', () => { this.app.show('notebook'); this.app.notebook.select(run.id); }, 'sm ghost')));
   }
 
+  _layoutFor(def) {
+    return (this.layouts[def.id] ||= def.analysisPlots ? def.analysisPlots.map(p => ({ channels: [...p] })) : DEFAULT());
+  }
+
   /* ---- CAMPAIGN ------------------------------------------------------- */
   campaign(pool, centre, right, tabs) {
     this.S?.flag('campaign');
-    const usable = pool.filter(e => e.rec.metrics && !e.rec.aborted);
-    const inc = usable.filter(e => !this.excluded.has(e.id));
-    const def = STANDS[inc[0]?.rec.meta.config.stand] || STANDS['TS-1'];
-    const qx = QUANTITIES_CATALOG.find(q => q.key === this.xKey), qy = QUANTITIES_CATALOG.find(q => q.key === this.yKey);
+    // one stand's runs at a time: the current session's, or the newest run's
+    const standOf = e => e.rec.meta.config.stand || 'TS-1';
+    const standId = this.S?.def.id || (pool.find(e => e.rec.metrics) ? standOf(pool.find(e => e.rec.metrics)) : 'TS-1');
+    const usable = pool.filter(e => e.rec.metrics && !e.rec.aborted && standOf(e) === standId);
+    const def = STANDS[standId] || STANDS['TS-1'];
+    const QS = quantitiesFor(def.id), presets = def.id === 'TS-2' ? PRESETS_BP : PRESETS;
+    if (!QS.some(q => q.key === this.xKey) || !QS.some(q => q.key === this.yKey)) [, this.xKey, this.yKey] = presets[0];
+    const qx = QS.find(q => q.key === this.xKey), qy = QS.find(q => q.key === this.yKey);
     const sel = (cur, set) => {
       const s = h('select.in', { style: { fontFamily: 'var(--sans)', maxWidth: '210px' }, onchange: () => { set(s.value); this.render(); } },
-        QUANTITIES_CATALOG.map(q => h('option', { value: q.key }, q.label)));
+        QS.map(q => h('option', { value: q.key }, q.label)));
       s.value = cur; return s;
     };
     centre.append(h('div.ph', tabs, h('span.sp'),
       h('span.sub', 'x'), sel(this.xKey, v => (this.xKey = v)), h('span.sub', 'y'), sel(this.yKey, v => (this.yKey = v))));
     centre.append(h('div', { style: { padding: '5px 10px', borderBottom: '1px solid var(--line)' } },
-      h('div.filters', { style: { flexWrap: 'wrap' } }, PRESETS.map(([l, x, y]) => h('button' + (this.xKey === x && this.yKey === y ? '.on' : ''), { onclick: () => { this.xKey = x; this.yKey = y; this.render(); } }, l)))));
+      h('div.filters', { style: { flexWrap: 'wrap' } }, presets.map(([l, x, y]) => h('button' + (this.xKey === x && this.yKey === y ? '.on' : ''), { onclick: () => { this.xKey = x; this.yKey = y; this.render(); } }, l)))));
     const pts = usable.map(e => ({ id: e.id, label: short(e.id), x: value(e.rec, this.xKey), y: value(e.rec, this.yKey), included: !this.excluded.has(e.id), kind: runKind(e.rec) }))
       .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
     const fitPts = pts.filter(p => p.included);
@@ -247,13 +263,14 @@ export class AnalysisView {
     this.scatter = new Scatter(plotHost);
     this.scatter.set({ points: pts, fit, xq: qx.q, yq: qy.q, xKey: this.xKey, yKey: this.yKey, xLabel: qx.label, yLabel: qy.label,
       zeroX: this.xKey === 'PcAbs' || this.xKey === 'width',
-      empty: usable.length ? `No included run has both "${qx.label}" and "${qy.label}". Pulse quantities need pulse trains; steady quantities need single burns.` : 'No reduced runs yet.' });
+      empty: usable.length ? `No included run has both "${qx.label}" and "${qy.label}". ${def.id === 'TS-2' ? 'Ox quantities need a flow of the oxidiser side, fuel quantities the fuel side.' : 'Pulse quantities need pulse trains; steady quantities need single burns.'}` : 'No reduced runs yet.' });
     // table
     const tbl = h('table.metrics');
     tbl.append(h('tr.hd', h('td', 'Run'), h('td', 'Plan'), h('td', 'x'), h('td', 'y'), h('td', 'residual')));
     for (const p of pts) {
       const e = usable.find(u => u.id === p.id);
-      tbl.append(h('tr', { style: { opacity: p.included ? 1 : 0.45 } }, h('td', p.id), h('td.n', e.rec.plan?.mode === 'pulse' ? `pulse ${(e.rec.plan.on * 1e3).toFixed(0)} ms` : `${(e.rec.plan?.duration ?? 0).toFixed(1)} s @ ${fmt(e.rec.meta.config.regSet, 'pressure', 0)}`),
+      tbl.append(h('tr', { style: { opacity: p.included ? 1 : 0.45 } }, h('td', p.id), h('td.n', e.rec.metrics?.kind === 'coldflow' ? `${e.rec.plan?.sides || 'both'} ${(e.rec.plan?.duration ?? 0).toFixed(1)} s @ ${fmt(e.rec.meta.config.sp?.['PR-610'], 'pressure', 0)}/${fmt(e.rec.meta.config.sp?.['PR-620'], 'pressure', 0)}`
+          : e.rec.plan?.mode === 'pulse' ? `pulse ${(e.rec.plan.on * 1e3).toFixed(0)} ms` : `${(e.rec.plan?.duration ?? 0).toFixed(1)} s @ ${fmt(e.rec.meta.config.regSet, 'pressure', 0)}`),
         h('td.v', qfmt(p.x, qx.q)), h('td.v', qfmt(p.y, qy.q)), h('td.v', fit && p.included ? qfmt(p.y - fit.at(p.x), qy.q) : '')));
     }
     centre.append(h('div.pb', { style: { flex: '0 0 auto', maxHeight: '34%', borderTop: '1px solid var(--line)' } }, tbl));
@@ -322,7 +339,7 @@ export class AnalysisView {
     t.append(h('tr.hd', h('td', 'Channel'), h('td', 'A'), h('td', 'B'), h('td', 'B − A'), h('td', 'mean A…B')));
     const fmtT2 = x => (x === null ? '—' : fmtT(x - ref, 4));
     t.append(h('tr', h('td', 'Time'), h('td.v', fmtT2(A)), h('td.v', fmtT2(B)), h('td.v', A !== null && B !== null ? `${((B - A) * 1e3).toFixed(2)} ms` : '—'), h('td', '')));
-    const ids = [...new Set(this.layout.flatMap(p => p.channels))];
+    const ids = [...new Set(this._layoutFor(def).flatMap(p => p.channels))];
     for (const id of ids) {
       const ch = meta.get(id);
       if (!ch || ch.quantity === 'discrete') continue;

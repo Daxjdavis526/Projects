@@ -202,6 +202,10 @@ const components = {
     'Holds the fuel tank ullage at its setpoint.', { commandable: 'setpoint' }),
   'PR-630': V('PR-630', 'Purge regulator', 'Dome-loaded regulator', { 'Dome': 'EPC-630', 'Typical setting': '150 psig' },
     'Sets the purge pressure. Purge must be ABOVE the manifold pressure it is meant to clear, and must be available before anything is armed.', { commandable: 'setpoint' }),
+  'EPC-610': V('EPC-610', 'Electronic pressure controller (ox tank)', 'Dome loader', { 'Slew': '≈40 psi/s', 'Feedback': 'EPC-610 channel' },
+    'Loads PR-610\'s dome. What you type is a command to this box; the EPC feedback is what the dome actually got.', { commandable: 'setpoint' }),
+  'EPC-620': V('EPC-620', 'Electronic pressure controller (fuel tank)', 'Dome loader', { 'Slew': '≈40 psi/s' }, 'Loads PR-620\'s dome.', { commandable: 'setpoint' }),
+  'EPC-630': V('EPC-630', 'Electronic pressure controller (purge)', 'Dome loader', { 'Slew': '≈40 psi/s', 'Limit': '300 psig' }, 'Loads PR-630\'s dome.', { commandable: 'setpoint' }),
   'CV-611': V('CV-611', 'Ox pressurant check valve', 'Spring check valve', { 'Cracking': '≈1 psid' },
     'Stops oxidiser vapour or liquid reaching the regulator and, through the header, the fuel side.'),
   'CV-621': V('CV-621', 'Fuel pressurant check valve', 'Spring check valve', { 'Cracking': '≈1 psid' }, 'The fuel side\'s equivalent of CV-611.'),
@@ -232,6 +236,7 @@ const components = {
 };
 const componentSensors = {
   'N2-K': ['TC-601'], 'HV-600': ['PT-601'], 'IV-601': ['IV-601-ZSO', 'IV-601-ZSC', 'PT-601', 'PT-602'], 'VV-601': ['PT-602'],
+  'EPC-610': ['EPC-610', 'PT-710'], 'EPC-620': ['EPC-620', 'PT-720'], 'EPC-630': ['EPC-630', 'PT-630'],
   'PR-610': ['PT-602', 'PT-710', 'EPC-610'], 'PR-620': ['PT-602', 'PT-720', 'EPC-620'], 'PR-630': ['PT-602', 'PT-630', 'EPC-630'],
   'T-710': ['PT-710', 'WT-716', 'TC-717'], 'T-720': ['PT-720', 'WT-726', 'TC-727'], 'VV-711': ['PT-710'], 'VV-721': ['PT-720'],
   'MOV-713': ['MOV-713-ZSO', 'MOV-713-ZSC', 'PT-713', 'PT-715', 'FT-714'], 'MFV-723': ['MFV-723-ZSO', 'MFV-723-ZSC', 'PT-723', 'PT-725', 'FT-724'],
@@ -358,6 +363,8 @@ export default {
     walkdown: 'Walkdown complete: both run tanks secured, flex lines supported, fittings torque-striped, purge and pressurant check valves installed in the right direction, catch area under the engine clear, load-cell cables secured.',
     inspect: () => 'Post-test visual: engine and injector face intact, water in the catch area, no leaks at the main valves or flowmeters, purge lines secure.',
   },
+  plots: [['PT-710', 'PT-720', 'PT-630'], ['PT-715', 'PT-725', 'MOV-713-CMD', 'MFV-723-CMD'], ['FT-714', 'FT-724']],
+  analysisPlots: [['PT-713', 'PT-715', 'MOV-713-CMD'], ['PT-723', 'PT-725', 'MFV-723-CMD'], ['FT-714', 'FT-724'], ['WT-716', 'WT-726']],
   defaultPlan: { mode: 'single', duration: 3.0, sides: 'both', lead: 0.1, postPurge: 3 },
   sequence, planText,
   predict: predictBiprop,
@@ -384,6 +391,7 @@ export default {
     return { fillTanks: fill(true), drainTanks: fill(false) };
   },
   inspectionVolumes: ['hp', 'oxu', 'fuu', 'purge', 'oxman', 'fuman'],
+  techButtons: [['fillTanks', 'Load tanks', 'Load both run tanks with water (tanks vented, vents open)'], ['drainTanks', 'Drain tanks', 'Drain both run tanks']],
   /* Leak check: both tanks pressurised and isolated (pressurant shut off,
      all three regulators at zero, vents shut), 60 s hold. A 12-litre ullage
      hides a small leak far better than TS-1's few cubic centimetres: the

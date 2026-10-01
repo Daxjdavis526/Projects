@@ -92,11 +92,13 @@ export class Inspector {
       return h('div.cmds', seg, st, h('div.note', 'Commanded state is highlighted; the indication to the right is what the hardware reports.'));
     }
     if (info.commandable === 'setpoint') {
-      const inp = h('input.in', { type: 'number', step: '1', style: { width: '80px' }, value: toDisplay(S.controller.regSet, 'pressure').toFixed(0) });
-      const go = () => act(S, 'regSet', { value: fromDisplay(Number(inp.value) || 0, 'pressure') });
+      // the regulator this card is for (an EPC card commands its regulator)
+      const rg = (S.def.regulators || [{ id: S.def.regulator, epc: 'EPC-101' }]).find(r => r.id === id || r.epc === id) || { id: S.def.regulator, epc: 'EPC-101' };
+      const inp = h('input.in', { type: 'number', step: '1', style: { width: '80px' }, value: toDisplay(S.controller.sp[rg.id], 'pressure').toFixed(0) });
+      const go = () => act(S, 'regSet', { id: rg.id, value: fromDisplay(Number(inp.value) || 0, 'pressure') });
       inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
       const fb = h('span.mono.muted');
-      this.live.push(() => setText(fb, `cmd ${fmt(S.controller.regSet, 'pressure')} · fb ${S.daq.online ? fmt(S.daq.latest('EPC-101'), 'pressure') : '----'} ${unitLabel('pressure', true)}`));
+      this.live.push(() => setText(fb, `${rg.id} cmd ${fmt(S.controller.sp[rg.id], 'pressure')} · ${rg.epc} fb ${S.daq.online ? fmt(S.daq.latest(rg.epc), 'pressure') : '----'} ${unitLabel('pressure', true)}`));
       return h('div', h('div.cmds', h('span.muted', 'Setpoint'), inp, h('span.faint', unitLabel('pressure', true)), btn('SET', go, 'sm primary')), h('div.note', fb));
     }
     if (info.commandable === 'tech') {

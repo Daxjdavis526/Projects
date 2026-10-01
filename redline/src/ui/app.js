@@ -92,14 +92,14 @@ export class App {
   }
 
   /* ---- sessions -------------------------------------------------------- */
-  start(levelId, mode) {
+  start(levelId, mode, standId = null) {
     const found = levelId ? findLevel(levelId) : null;
     const scenario = found?.level.scenario || null;
-    const def = STANDS[found?.program.stand || 'TS-1'];
+    const def = STANDS[found?.program.stand || standId || 'TS-1'];
     if (this.session && !this._confirmedLeave) {
       const m = modal({ title: 'Start a new session?', narrow: true,
         body: h('p', 'The current session ends. Its runs stay in the notebook; their recorded data (the traces) do not survive a new session.'),
-        footer: [btn('Cancel', () => m.close(), 'ghost'), btn('Start new session', () => { m.close(); this._confirmedLeave = true; this.start(levelId, mode); this._confirmedLeave = false; }, 'primary')] });
+        footer: [btn('Cancel', () => m.close(), 'ghost'), btn('Start new session', () => { m.close(); this._confirmedLeave = true; this.start(levelId, mode, standId); this._confirmedLeave = false; }, 'primary')] });
       return;
     }
     if (this.views.control) { this.views.control.destroy(); }
@@ -107,7 +107,8 @@ export class App {
     this.session = new Session({ def, scenario, mode, runPrefix: prefix, firstRun: store.data.nextRun[prefix] || 1 });
     this.level = found?.level || null;
     const S = this.session;
-    S.audioSink = (n, d) => this.audio.play(n, d);
+    S.audioSink = (n, d) => this.audio.play(n, n === 'valve'
+      ? { ...d, pneumatic: (def.pneumaticValves || []).includes(d.id), hand: d.id === (def.bottle?.valve || 'HV-100') } : d);
     S.on('recording', e => { if (e.on) { store.data.nextRun[prefix] = S.nextRun; store.save(); } });
     S.on('run', run => {
       this.notebook.onRun(run);
@@ -147,8 +148,9 @@ export class App {
 
   indication(id) {
     const S = this.session, d = S.daq, c = S.controller;
-    if (id === S.def.supplyIso && d.online) {
-      const o = d.latest('IV-101-ZSO'), cl = d.latest('IV-101-ZSC');
+    const ix = (S.def.indications || []).find(x => x.valve === id);
+    if (ix && d.online) {
+      const o = d.latest(ix.zso), cl = d.latest(ix.zsc);
       const st = o === 1 && cl === 0 ? 'open' : cl === 1 && o === 0 ? 'closed' : 'travel';
       return { st, text: st === 'travel' ? 'TRAVEL' : st.toUpperCase(), src: 'ZS' };
     }
@@ -218,8 +220,8 @@ export class App {
       // sound follows the physical flow (the cell microphone)
       const net = S.model.net;
       let vent = 0;
-      for (const id of ['VV-101', 'VV-201', 'RV-201', 'LK-301']) vent += Math.max(0, net.el(id)?.mdot || 0);
-      this.audio.flow({ thrust: S.model.nozzleEl.F, vent });
+      for (const id of S.def.ventElements || []) vent += Math.max(0, net.el(id)?.mdot || 0);
+      this.audio.flow({ thrust: S.model.thrust ?? S.model.nozzleEl.F, vent });
     }
     // analysis works on recorded runs, session or not
     if (this.current === 'analysis') this.views.analysis.update();
@@ -230,11 +232,11 @@ export class App {
     const S = this.session, c = S.controller, d = S.daq;
     if (!this._tbAt || performance.now() - this._tbAt > 100) {
       this._tbAt = performance.now();
-      setText(this.tb.sess, this.level ? `L${this.level.n} · ${S.mode}` : `open stand · ${S.mode}`);
+      setText(this.tb.sess, this.level ? `L${this.level.n} · ${S.mode}` : `${S.def.id} open · ${S.mode}`);
       let st = c.stateLabel;
       if (!st) {
         if (!d.online) st = 'NO DATA';
-        else st = ['PT-102', 'PT-201', 'PT-301', 'PT-401'].some(id => d.latest(id) > S.def.ratings.VENTED) ? 'PRESSURIZED' : 'SAFE';
+        else st = (S.def.lpChannels || []).some(id => d.latest(id) > S.def.ratings.VENTED) ? 'PRESSURIZED' : 'SAFE';
       }
       setText(this.tb.state, st);
       this.tb.state.className = 'v state-badge state-' + st.replace(' ', '');

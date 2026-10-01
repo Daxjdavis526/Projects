@@ -73,8 +73,8 @@ export class Audio {
     if (!this.enabled || !this.ensure()) return;
     switch (name) {
       case 'valve':
-        if (data.id === 'IV-101') { this._burst(0.18, 'bandpass', 900, 0.8, 0.12); this._tone(90, 0.08, 0.25, 0.55); this._burst(0.02, 'highpass', 2000, 0.7, 0.2, 0.55); }
-        else if (data.id === 'HV-100') break;
+        if (data.pneumatic) { this._burst(0.18, 'bandpass', 900, 0.8, 0.12); this._tone(90, 0.08, 0.25, 0.55); this._burst(0.02, 'highpass', 2000, 0.7, 0.2, 0.55); }
+        else if (data.hand) break;
         else { this._burst(0.012, 'bandpass', 3200, 1.2, 0.35); this._tone(140, 0.04, 0.18); }
         break;
       case 'arm': this._burst(0.015, 'bandpass', 1800, 1, 0.4); this._burst(0.015, 'bandpass', 1500, 1, 0.3, 0.05); break;

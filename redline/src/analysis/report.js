@@ -28,6 +28,8 @@ export function sessionReport(S) {
       alarms: [...new Set(r.alarms)],
       F: m.F, Pc: m.Pc, Isp: Number.isFinite(m.IspFM) ? m.IspFM : m.Isp, mdot: m.mdotFM, dur: m.dur,
       Ibit: m.Ibit, IbitCv: m.IbitCv, n: m.n,
+      coldflow: r.metrics?.kind === 'coldflow' ? { mdotOx: m.mdotOx, mdotFu: m.mdotFu, CdAOx: m.CdAOx, CdAFu: m.CdAFu, MR: m.MR, MRhot: m.MRhot, errOx: m.errOx, errFu: m.errFu,
+        pOx: r.meta.config.prediction?.mdotOx, pFu: r.meta.config.prediction?.mdotFu, sides: r.plan?.sides || 'both' } : null,
       pred: r.meta.config.prediction ? { F: r.meta.config.prediction.F, Pc: r.meta.config.prediction.Pc, Isp: r.meta.config.prediction.Isp } : null,
     };
   });

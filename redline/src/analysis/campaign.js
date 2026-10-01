@@ -38,6 +38,36 @@ export const QUANTITIES_CATALOG = [
   { key: 'fracSteady', label: 'Fraction of pulses reaching steady Pc', q: 'ratio', kind: 'pulse', get: r => (s(r).n ? s(r).steady / s(r).n : NaN) },
 ];
 
+/* TS-2 cold-flow quantities. A run carries its stand in meta.config.stand;
+   the catalogue offers each stand only its own quantities. */
+const sq = x => (x > 0 ? Math.sqrt(x) : NaN);
+const sp = (r, id) => r.meta?.config?.sp?.[id];
+QUANTITIES_CATALOG.push(...[
+  { key: 'spOx', label: 'Ox tank setpoint (PR-610)', q: 'pressure', get: r => sp(r, 'PR-610') },
+  { key: 'spFu', label: 'Fuel tank setpoint (PR-620)', q: 'pressure', get: r => sp(r, 'PR-620') },
+  { key: 'PtOx', label: 'Ox tank pressure, flowing', q: 'pressure', get: r => s(r).PtOx },
+  { key: 'PtFu', label: 'Fuel tank pressure, flowing', q: 'pressure', get: r => s(r).PtFu },
+  { key: 'mdotOx', label: 'Ox flow, steady (FT-714)', q: 'massflow', get: r => s(r).mdotOx },
+  { key: 'mdotFu', label: 'Fuel flow, steady (FT-724)', q: 'massflow', get: r => s(r).mdotFu },
+  { key: 'mdotWOx', label: 'Ox flow, weighed (WT-716)', q: 'massflow', get: r => s(r).mdotWOx },
+  { key: 'mdotWFu', label: 'Fuel flow, weighed (WT-726)', q: 'massflow', get: r => s(r).mdotWFu },
+  { key: 'dPOx', label: 'Ox injector ΔP', q: 'pressure', get: r => s(r).dPOx },
+  { key: 'dPFu', label: 'Fuel injector ΔP', q: 'pressure', get: r => s(r).dPFu },
+  { key: 'sqdPOx', label: '√(ox injector ΔP)  [√Pa]', q: 'ratio', get: r => sq(s(r).dPOx) },
+  { key: 'sqdPFu', label: '√(fuel injector ΔP)  [√Pa]', q: 'ratio', get: r => sq(s(r).dPFu) },
+  { key: 'CdAOx', label: 'Ox injector CdA (water)', q: 'area', get: r => s(r).CdAOx },
+  { key: 'CdAFu', label: 'Fuel injector CdA (water)', q: 'area', get: r => s(r).CdAFu },
+  { key: 'MR', label: 'Mixture ratio as flowed', q: 'ratio', get: r => s(r).MR },
+  { key: 'MRhot', label: 'Hot-fire MR predicted', q: 'ratio', get: r => s(r).MRhot },
+  { key: 'primeOx', label: 'Ox priming time', q: 'time', get: r => s(r).primeOx },
+  { key: 'primeFu', label: 'Fuel priming time', q: 'time', get: r => s(r).primeFu },
+  { key: 'surgeOx', label: 'Ox shutdown surge', q: 'pressure', get: r => s(r).surgeOx },
+  { key: 'droopOx', label: 'Ox tank droop', q: 'pressure', get: r => s(r).droopOx },
+].map(q => ({ ...q, kind: 'coldflow', stand: 'TS-2' })));
+for (const q of QUANTITIES_CATALOG) q.stand ??= 'TS-1';
+
+export const quantitiesFor = stand => QUANTITIES_CATALOG.filter(q => q.stand === (stand || 'TS-1'));
+
 const s = r => r.metrics?.summary || {};
 const num = x => (typeof x === 'number' && Number.isFinite(x) ? x : NaN);
 
@@ -50,6 +80,7 @@ export function value(run, key) {
 }
 
 export function runKind(run) {
+  if (run.metrics?.kind === 'coldflow') return 'coldflow';
   return run.plan?.mode === 'pulse' ? 'pulse' : run.metrics?.kind === 'pulse' ? 'pulse' : 'single';
 }
 
@@ -125,6 +156,12 @@ export function interpret(xKey, yKey, fit, def) {
   }
   if (yKey === 'droop' || (yKey === 'Preg' && xKey === 'regSet')) {
     out.push({ label: 'Slope', value: fit.a, q: 'ratio', note: 'Regulator characterisation: how outlet and droop change with setpoint.' });
+  }
+  for (const sd of ['Ox', 'Fu']) if (yKey === 'mdot' + sd && xKey === 'sqdP' + sd) {
+    const rho = def.fluids?.[def.design?.simulant]?.rho ?? 998;
+    out.push({ label: 'Slope ÷ √(2ρ) — the injector CdA', value: fit.a / Math.sqrt(2 * rho), q: 'area',
+               note: 'ṁ = CdA·√(2ρ)·√ΔP: a straight line through the origin if the injector is a fixed restriction.' });
+    out.push({ label: 'Intercept (should be ≈ 0)', value: fit.b, q: 'massflow' });
   }
   if (yKey === 'Ibit' && xKey === 'width') {
     out.push({ label: 'Slope (≈ steady thrust once the valve is fully open)', value: fit.a, q: 'force' });

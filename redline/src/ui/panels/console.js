@@ -59,15 +59,29 @@ export class Console {
         st.append(h('span.src', ind.src));
       });
     }
-    this.body.append(h('div.grp', 'Regulator PR-101 (via EPC-101)'));
-    const inp = h('input.in', { type: 'number', step: '1', min: 0, style: { width: '70px' } });
-    inp.value = toDisplay(S.controller.regSet, 'pressure').toFixed(0);
-    const go = () => act(S, 'regSet', { value: fromDisplay(Number(inp.value) || 0, 'pressure') });
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
-    const unit = h('span.faint', unitLabel('pressure', true));
-    const fb = h('span.stat.muted');
-    this.body.append(h('div.line', h('span.muted', 'Setpoint'), inp, unit, btn('SET', go, 'sm primary'), btn('0', () => { inp.value = 0; go(); }, 'sm ghost', { title: 'Setpoint to zero (dome vented)' })));
-    this.body.append(h('div.line', fb));
+    // one setpoint row per regulator (TS-1 has one; TS-2 has three)
+    const regs = def.regulators || [{ id: def.regulator, label: 'Setpoint', epc: 'EPC-101', out: 'PT-201', title: `Regulator ${def.regulator} (via EPC-101)` }];
+    this.body.append(h('div.grp', regs.length > 1 ? 'Regulators (via EPCs)' : regs[0].title));
+    for (const rg of regs) {
+      const inp = h('input.in', { type: 'number', step: '1', min: 0, style: { width: '64px' } });
+      inp.value = toDisplay(S.controller.sp[rg.id], 'pressure').toFixed(0);
+      const go = () => act(S, 'regSet', { id: rg.id, value: fromDisplay(Number(inp.value) || 0, 'pressure') });
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+      const unit = h('span.faint', unitLabel('pressure', true));
+      const fb = h('span.stat.muted');
+      this.body.append(h('div.line', h('span.muted', { style: { minWidth: regs.length > 1 ? '118px' : '' } }, rg.label), inp, unit,
+        btn('SET', go, 'sm primary'), btn('0', () => { inp.value = 0; go(); }, 'sm ghost', { title: 'Setpoint to zero (dome vented)' })));
+      this.body.append(h('div.line', fb));
+      let shown = S.controller.sp[rg.id];
+      this.live.push(() => {
+        // the box follows the command (set here, by a procedure or by an abort) unless being typed in
+        const cur = S.controller.sp[rg.id];
+        if (cur !== shown && document.activeElement !== inp) { inp.value = toDisplay(cur, 'pressure').toFixed(0); shown = cur; }
+        const on = S.daq.online, q = x => (on ? fmt(S.daq.latest(x), 'pressure') : '----');
+        setText(fb, `cmd ${fmt(S.controller.sp[rg.id], 'pressure')}   ${rg.epc} fb ${q(rg.epc)}   ${rg.out} ${q(rg.out)} ${unitLabel('pressure', true)}`);
+        setText(unit, unitLabel('pressure', true));
+      });
+    }
     // the pressure-decay leak check, for sessions with no procedure to run it
     this.body.append(h('div.grp', 'Leak check (isolate, 60 s hold)'));
     const lst = h('span.stat.muted'), bar = h('div.bar', h('i')), lb = btn('START HOLD', () => {
@@ -82,10 +96,6 @@ export class Console {
       bar.style.visibility = run ? 'visible' : 'hidden';
       setText(lst, run ? `holding — ${Math.max(0, run.end - S.t).toFixed(0)} s` : res ? res.msg : 'not performed');
       lst.style.color = run ? 'var(--caution)' : res ? (res.ok ? 'var(--good)' : 'var(--warning)') : '';
-    });
-    this.live.push(() => {
-      setText(fb, `cmd ${fmt(S.controller.regSet, 'pressure')}   EPC fb ${S.daq.online ? fmt(S.daq.latest('EPC-101'), 'pressure') : '----'}   PT-201 ${S.daq.online ? fmt(S.daq.latest('PT-201'), 'pressure') : '----'} ${unitLabel('pressure', true)}`);
-      setText(unit, unitLabel('pressure', true));
     });
   }
 
@@ -106,10 +116,13 @@ export class Console {
     this.body.append(h('div.line', h('span.muted', { style: { width: '70px' } }, 'Record'), rec, rst));
     this.body.append(h('div.line', h('label.chk', auto, `Auto-stop ${S.controller.recordTail.toFixed(0)} s after the sequence ends`)));
     this.body.append(h('div.grp', 'Zero and calibration'));
-    const shunt = btn('SHUNT CAL', () => act(S, 'shunt', { id: 'LC-501', on: !d.sensor('LC-501').shunt }), 'sm');
+    const lc = S.def.loadCell || 'LC-501';
+    const scales = d.sensors.filter(x => x.kind === 'WT').map(x => x.id);
+    const shunt = btn('SHUNT CAL', () => act(S, 'shunt', { id: lc, on: !d.sensor(lc).shunt }), 'sm');
     this.body.append(h('div.line',
       btn('ZERO PTs', () => act(S, 'zero', { ids: d.sensors.filter(x => x.kind === 'PT').map(x => x.id) }), 'sm', { title: 'Take the current reading of every pressure transducer as zero' }),
-      btn('TARE LC', () => act(S, 'tare', { ids: ['LC-501'] }), 'sm', { title: 'Take the current load-cell reading as zero' }),
+      btn('TARE LC', () => act(S, 'tare', { ids: [lc] }), 'sm', { title: `Take the current ${lc} reading as zero` }),
+      scales.length ? btn('TARE SCALES', () => act(S, 'tare', { ids: scales }), 'sm', { title: `Take the current ${scales.join(' / ')} readings as zero — with the tanks EMPTY` }) : null,
       shunt));
     const zs = h('div.line.faint', { style: { fontSize: '11px' } });
     this.body.append(zs);
@@ -128,7 +141,7 @@ export class Console {
         setText(rst, S.runs.length ? `last: ${S.runs[S.runs.length - 1].id}` : 'not recording'); rst.style.color = '';
       }
       rec.disabled = !d.online && !d.recording;
-      toggleClass(shunt, 'on', d.sensor('LC-501').shunt);
+      toggleClass(shunt, 'on', d.sensor(lc).shunt);
       const z = d.sensors.filter(x => x.kind === 'PT');
       setText(zs, z.some(x => x.zeroCorr) ? 'PT zero corrections are applied (see each channel\'s faceplate).' : 'No PT zero taken this session.');
     });
@@ -143,11 +156,13 @@ export class Console {
     this.body.append(h('div.line', clr, ent, btn('PA announcement', () => this._pa(), 'sm ghost')));
     this.body.append(h('div.grp', 'Technician (in cell)'));
     const tst = h('div.line.faint', { style: { fontSize: '11px' } });
+    const hv = S.def.bottle?.valve || 'HV-100';
     this.body.append(h('div.line',
       btn('Walkdown', () => act(S, 'tech', { task: 'walkdown' }), 'sm'),
-      btn('Open HV-100', () => act(S, 'tech', { task: 'openHV' }), 'sm'),
-      btn('Close HV-100', () => act(S, 'tech', { task: 'closeHV' }), 'sm'),
-      btn('Inspect article', () => act(S, 'tech', { task: 'inspect' }), 'sm')));
+      btn(`Open ${hv}`, () => act(S, 'tech', { task: 'openHV' }), 'sm'),
+      btn(`Close ${hv}`, () => act(S, 'tech', { task: 'closeHV' }), 'sm'),
+      btn('Inspect article', () => act(S, 'tech', { task: 'inspect' }), 'sm'),
+      ...(S.def.techButtons || []).map(([task, label, title]) => btn(label, () => act(S, 'tech', { task }), 'sm', { title }))));
     this.body.append(tst);
     this.body.append(h('div.grp', 'Safety record'));
     const sv = h('span.stat');
@@ -239,13 +254,17 @@ export class FireControl {
     this.clock = h('span.mono', { style: { color: 'var(--ink)', fontSize: '12px', letterSpacing: '.04em' } }, '');
     host.append(h('div.ph', h('span.t', 'Fire control'), h('span.sp'), this.clock));
     // plan
-    const mode = h('select.in', { onchange: () => this._planFields() }, h('option', { value: 'single' }, 'Single burn'), h('option', { value: 'pulse' }, 'Pulse train'));
+    // a liquid stand plans flows (which sides, which valve leads); a
+    // thruster stand plans burns and pulse trains
+    this.liquid = !!S.def.sequence;
+    const opts = this.liquid ? [['both', 'Both sides'], ['ox', 'Oxidiser only'], ['fuel', 'Fuel only']] : [['single', 'Single burn'], ['pulse', 'Pulse train']];
+    const mode = h('select.in', { onchange: () => this._planFields() }, opts.map(([v, l]) => h('option', { value: v }, l)));
     this.fields = h('span', { style: { display: 'inline-flex', gap: '6px', alignItems: 'center' } });
     this.mode = mode;
     const plan = h('div.plan', mode, this.fields, btn('LOAD', () => this._load(), 'sm'));
     this.loaded = h('div.loaded');
     host.append(plan, this.loaded);
-    mode.value = S.controller.plan.mode;
+    mode.value = this.liquid ? (S.controller.plan.sides || 'both') : S.controller.plan.mode;
     this._planFields();
     // keys
     this.pollB = h('button.keybtn', { onclick: () => app.openPoll() }, 'POLL');
@@ -267,7 +286,14 @@ export class FireControl {
   _planFields() {
     const p = this.app.session.controller.plan;
     clear(this.fields);
-    if (this.mode.value === 'pulse') {
+    if (this.liquid) {
+      this.dur = h('input.in', { type: 'number', step: '0.5', min: 0.5, value: p.duration.toFixed(1), style: { width: '50px' } });
+      this.lead = h('input.in', { type: 'number', step: '10', value: Math.round((p.lead ?? 0) * 1000), style: { width: '50px' }, title: 'Oxidiser lead, ms (negative: fuel leads)' });
+      this.pp = h('input.in', { type: 'number', step: '1', min: 0, value: (p.postPurge ?? 3).toFixed(0), style: { width: '38px' }, title: 'Post-purge, s' });
+      this.fields.append(this.dur, h('span.lbl', 's'));
+      if (this.mode.value === 'both') this.fields.append(this.lead, h('span.lbl', 'ms ox lead'));
+      this.fields.append(this.pp, h('span.lbl', 's purge'));
+    } else if (this.mode.value === 'pulse') {
       this.on = h('input.in', { type: 'number', step: '1', min: 2, value: Math.round(p.on * 1000), style: { width: '54px' } });
       this.off = h('input.in', { type: 'number', step: '5', min: 20, value: Math.round(p.off * 1000), style: { width: '54px' } });
       this.cnt = h('input.in', { type: 'number', step: '1', min: 1, max: 50, value: p.count, style: { width: '44px' } });
@@ -281,7 +307,9 @@ export class FireControl {
   _load() {
     const S = this.app.session;
     let plan;
-    if (this.mode.value === 'pulse') plan = { mode: 'pulse', on: Math.max(0.002, Number(this.on.value) / 1000), off: Math.max(0.02, Number(this.off.value) / 1000), count: Math.max(1, Math.min(50, Math.round(Number(this.cnt.value)))) };
+    if (this.liquid) plan = { mode: 'single', sides: this.mode.value, duration: Math.max(0.5, Math.min(S.def.ratings.MAX_BURN, Number(this.dur.value) || 0)),
+      lead: this.mode.value === 'both' ? Math.max(-1, Math.min(1, (Number(this.lead.value) || 0) / 1000)) : 0, postPurge: Math.max(0, Math.min(30, Number(this.pp.value) || 0)) };
+    else if (this.mode.value === 'pulse') plan = { mode: 'pulse', on: Math.max(0.002, Number(this.on.value) / 1000), off: Math.max(0.02, Number(this.off.value) / 1000), count: Math.max(1, Math.min(50, Math.round(Number(this.cnt.value)))) };
     else plan = { mode: 'single', duration: Math.max(0.05, Math.min(S.def.ratings.MAX_BURN, Number(this.dur.value) || 0)) };
     act(S, 'plan', { plan });
   }
@@ -292,8 +320,10 @@ export class FireControl {
     const S = this.app.session, c = S.controller;
     const p = S.prediction;
     this.loaded.innerHTML = '';
-    this.loaded.append('Loaded: ', h('b', c.planText()),
-      p ? h('span', `  ·  pred. Pc ${fmt(p.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(p.F, 'force')} ${unitLabel('force')}`) : null);
+    const pt = !p ? '' : p.kind === 'coldflow'
+      ? `  ·  pred. (drawing) ox ${fmt(p.mdotOx, 'massflow')}, fuel ${fmt(p.mdotFu, 'massflow')} ${unitLabel('massflow')} water`
+      : `  ·  pred. Pc ${fmt(p.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(p.F, 'force')} ${unitLabel('force')}`;
+    this.loaded.append('Loaded: ', h('b', c.planText()), pt ? h('span', pt) : null);
     toggleClass(this.armB, 'on', c.armed);
     setText(this.armB, c.armed ? 'ARMED' : 'ARM');
     this.fireB.disabled = !!c.seq || !c.armed;

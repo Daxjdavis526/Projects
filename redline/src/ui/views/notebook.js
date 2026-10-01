@@ -43,14 +43,16 @@ export class NotebookView {
       objective: run.meta.objective,
       stand: `${S.def.name} · ${S.def.article}`,
       config: {
-        regSet: cfg.regSet, plan: S.controller.planText(run.plan || cfg.plan), rate: cfg.rate, supply: cfg.supply,
+        regSet: cfg.regSet, sp: cfg.sp, plan: S.controller.planText(run.plan || cfg.plan), rate: cfg.rate, supply: cfg.supply,
         valves: Object.entries(cfg.valves).map(([k, v]) => `${k} ${v ? 'OPEN' : 'CLOSED'}`).join(', '),
       },
       commanded: run.plan?.mode === 'single' ? run.plan.duration : null,
       actual: run.metrics?.summary?.dur ?? null,
       results: run.metrics?.items?.map(i => ({ label: i.label, value: i.value, quantity: i.quantity })) || [],
       pulses: run.metrics?.pulses?.length || 0,
-      prediction: cfg.prediction ? { Pc: cfg.prediction.Pc, F: cfg.prediction.F, mdot: cfg.prediction.mdot, Isp: cfg.prediction.Isp } : null,
+      prediction: !cfg.prediction ? null : cfg.prediction.kind === 'coldflow'
+        ? { kind: 'coldflow', mdotOx: cfg.prediction.mdotOx, mdotFu: cfg.prediction.mdotFu, dPox: cfg.prediction.dPox, dPfu: cfg.prediction.dPfu }
+        : { Pc: cfg.prediction.Pc, F: cfg.prediction.F, mdot: cfg.prediction.mdot, Isp: cfg.prediction.Isp },
       alarms: run.alarms,
       aborted: run.aborted,
       abort: run.abort,
@@ -244,7 +246,9 @@ export class NotebookView {
     const sec = t => h('div.proc-sec', { style: { padding: '14px 0 6px' } }, t);
     b.append(h('p', { style: { margin: '0 0 6px' } }, h('b', e.objective)), h('p.muted', { style: { margin: 0 } }, e.stand));
     b.append(sec('Configuration'), h('div.kv',
-      h('span.k', 'Regulator setpoint'), h('span.v', `${fmt(e.config.regSet, 'pressure')} ${unitLabel('pressure', true)}`),
+      ...(e.config.sp && Object.keys(e.config.sp).length > 1
+        ? [h('span.k', 'Regulator setpoints'), h('span.v', Object.entries(e.config.sp).map(([k, v]) => `${k} ${fmt(v, 'pressure')}`).join(', ') + ' ' + unitLabel('pressure', true))]
+        : [h('span.k', 'Regulator setpoint'), h('span.v', `${fmt(e.config.regSet, 'pressure')} ${unitLabel('pressure', true)}`)]),
       h('span.k', 'Supply at start'), h('span.v', `${fmt(e.config.supply, 'pressure')} ${unitLabel('pressure', true)}`),
       h('span.k', 'Firing plan'), h('span.v', e.config.plan),
       h('span.k', 'Commanded / actual'), h('span.v', `${e.commanded !== null ? e.commanded.toFixed(3) + ' s' : '—'} / ${e.actual !== null && Number.isFinite(e.actual) ? e.actual.toFixed(3) + ' s' : '—'}`),
@@ -252,7 +256,9 @@ export class NotebookView {
       h('span.k', 'Valve line-up at record start'), h('span.v', { style: { whiteSpace: 'normal' } }, e.config.valves),
       h('span.k', 'Recording ended'), h('span.v', e.reason || '—')));
     if (e.prediction) b.append(h('div.faint', { style: { fontSize: '11px', marginTop: '4px' } },
-      `Prediction: Pc ${fmt(e.prediction.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(e.prediction.F, 'force')} ${unitLabel('force')}, ṁ ${fmt(e.prediction.mdot, 'massflow')} g/s, Isp ${e.prediction.Isp.toFixed(1)} s`));
+      e.prediction.kind === 'coldflow'
+        ? `Prediction (injector drawing): ox ${fmt(e.prediction.mdotOx, 'massflow')}, fuel ${fmt(e.prediction.mdotFu, 'massflow')} ${unitLabel('massflow')} of water`
+        : `Prediction: Pc ${fmt(e.prediction.Pc, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(e.prediction.F, 'force')} ${unitLabel('force')}, ṁ ${fmt(e.prediction.mdot, 'massflow')} g/s, Isp ${e.prediction.Isp?.toFixed(1)} s`));
     b.append(sec('Results'));
     if (!e.results.length) b.append(h('p.muted', 'No firing reduced in this recording.'));
     else {

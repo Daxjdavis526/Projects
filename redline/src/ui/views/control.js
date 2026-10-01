@@ -3,6 +3,7 @@
 import { h, btn } from '../dom.js';
 import { PID } from '../panels/pid.js';
 import { StandView } from '../panels/standview.js';
+import { StandViewBP } from '../panels/standview-bp.js';
 import { Inspector } from '../panels/inspector.js';
 import { PlotStack, eventMarkers, limitLines } from '../panels/plots.js';
 import { ChannelTable } from '../panels/channels.js';
@@ -48,11 +49,11 @@ export class ControlView {
 
     // panels
     this.pid = new PID(this.pidWrap, app);
-    this.stand = new StandView(this.standWrap, app);
+    this.stand = S.def.program === 'biprop' ? new StandViewBP(this.standWrap, app) : new StandView(this.standWrap, app);
     this.inspector = new Inspector(stage, app);
     this.abort = new AbortBanner(stage, app);
     const key = S.def.id;
-    const layout = store.data.layouts[key] || DEFAULT_LAYOUT();
+    const layout = store.data.layouts[key] || (S.def.plots ? S.def.plots.map(c => ({ channels: [...c] })) : DEFAULT_LAYOUT());
     this.plots = new PlotStack(plotsP, app, {
       layout,
       window: 30,

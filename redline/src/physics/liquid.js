@@ -79,10 +79,16 @@ export class LiquidLine {
   get Vliq() { return this.mL / this.rho; }
   get fill() { return this.Vl / this.Vman; }
 
-  /* Load or unload the tank (a technician task, with the tank vented). */
+  /* Load or unload the tank (a technician task, with the tank vented). The
+     fill takes a minute, so the gas the liquid displaces leaves through the
+     open vent as it goes: the ullage changes size at constant pressure, not
+     by compression. */
   setLiquid(net, kg) {
     this.mL = Math.max(0, Math.min(kg, 0.95 * this.Vtank * this.rho));
-    this._applyVolumes(net);
+    const v = net.volumes[this.tank], g = net.gas;
+    v.V = Math.max(0.02 * this.Vtank, this.Vtank - this.Vliq);
+    v.m = v.P * v.V / (g.R * v.T);
+    v.U = v.m * g.cv * v.T;
   }
 
   /* Ullage and manifold gas volumes follow the liquid. Changing a gas

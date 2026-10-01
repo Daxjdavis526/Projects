@@ -53,11 +53,20 @@ export function reportHTML(data, c = {}, grade = null, meta = {}) {
     ${runs.map(r => row([
       `<b>${esc(r.id)}</b>`, fmtClock(r.clock), esc(r.plan), P(r.regSet),
       !r.fired ? '<span class="m">no firing</span>'
+        : r.coldflow ? [Number.isFinite(r.coldflow.mdotOx) ? `ox ${fmt(r.coldflow.mdotOx, 'massflow')} g/s` : '', Number.isFinite(r.coldflow.mdotFu) ? `fuel ${fmt(r.coldflow.mdotFu, 'massflow')} g/s` : ''].filter(Boolean).join(', ')
         : r.pulse ? `I-bit ${fmtQ(r.Ibit, 'impulse')}, scatter ${fmtQ(r.IbitCv, 'percent')} (${r.n ?? '—'} pulses)`
         : `F ${F(r.F)}, Pc ${P(r.Pc)}, Isp ${num(r.Isp, 1)} s`,
       r.aborted ? `<span class="bad">ABORT</span> ${esc(r.abort || '')}` : r.alarms.length ? `<span class="warn">${r.alarms.length} alarm(s)</span>` : 'OK',
     ])).join('')}</table>` : '<p class="m">No runs recorded.</p>'));
-  out.push(sec(4, 'Results against prediction', single.length ? `<table>
+  const cold = runs.filter(r => r.coldflow && !r.aborted);
+  if (cold.length) out.push(sec(4, 'Cold-flow results', `<table>
+    ${head(['Run', 'Sides', 'Ox flow', 'pred. (drawing)', 'Ox CdA', 'Fuel flow', 'pred. (drawing)', 'Fuel CdA', 'Meter vs scale'])}
+    ${cold.map(r => { const c = r.coldflow, mm = v => (Number.isFinite(v) ? `${(v * 1e6).toFixed(3)} mm²` : '—'), g = v => (Number.isFinite(v) ? fmt(v, 'massflow') + ' g/s' : '—');
+      return row([esc(r.id), esc(c.sides), g(c.mdotOx), g(c.sides === 'fuel' ? NaN : c.pOx), mm(c.CdAOx), g(c.mdotFu), g(c.sides === 'ox' ? NaN : c.pFu), mm(c.CdAFu),
+        [c.errOx, c.errFu].filter(Number.isFinite).map(x => `${(100 * x).toFixed(2)} %`).join(' / ') || '—']); }).join('')}</table>
+    ${cold.some(r => Number.isFinite(r.coldflow.MRhot)) ? `<p>Hot-fire mixture ratio predicted from these flow coefficients: <b>${cold.filter(r => Number.isFinite(r.coldflow.MRhot)).map(r => r.coldflow.MRhot.toFixed(3)).join(', ')}</b> (design 1.50).</p>` : ''}
+    <p class="m">Predictions use the injector DRAWING flow areas. The measured CdA is the as-built injector.</p>`));
+  else out.push(sec(4, 'Results against prediction', single.length ? `<table>
     ${head(['Run', 'Setpoint', 'Thrust', 'pred.', 'Δ', 'Chamber', 'pred.', 'Δ', 'Isp', 'pred.'])}
     ${single.map(r => row([esc(r.id), P(r.regSet), F(r.F), r.pred ? F(r.pred.F) : '—', pct(r.F, r.pred?.F),
       P(r.Pc), r.pred ? P(r.pred.Pc) : '—', pct(r.Pc, r.pred?.Pc), `${num(r.Isp, 1)} s`, r.pred ? `${num(r.pred.Isp, 1)} s` : '—'])).join('')}</table>
