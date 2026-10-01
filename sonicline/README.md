@@ -11,13 +11,13 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M7 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M8 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
-Sections 10–16 of the design record what building each milestone taught.
+Sections 10–17 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 

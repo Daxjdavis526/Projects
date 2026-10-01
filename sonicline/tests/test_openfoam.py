@@ -43,6 +43,16 @@ def test_viscous_work_extension_builds(tmp_path):
     assert not (tmp_path / "b" / "log.wmake").exists()
 
 
+def test_virial_gas_runs_and_matches_its_isentrope(tmp_path):
+    """V18 end to end: the virial-gas extension builds, OpenFOAM selects
+    its thermophysics, and the real-gas mass flow at 30 bar matches the
+    isentrope (and the reference equation of state, with CoolProp)."""
+    results = verification.run_suite(["V18"], "standard", tmp_path, processors=1)
+    v18 = [r for r in results if r.case == "V18"][0]
+    failed = [f"{c.name}: {c.value} vs {c.reference}" for c in v18.checks if not c.passed]
+    assert v18.passed and not failed, (v18, failed)
+
+
 def test_a_running_solve_can_be_cancelled(tmp_path):
     import json
 

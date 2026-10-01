@@ -1792,3 +1792,115 @@ Not done in M7:
   cells); run it by name.
 - snappy keeps 10 cells per throat radius and no throat refinement, since
   V14 shows it does not need them.
+
+## 17. M8 record: real-gas nitrogen in the CFD, and wall treatment
+
+M8 set out to close M7's two gaps (cfMesh's thin layers; a viscous cfMesh
+run at sea level) and to remove the largest remaining systematic error for
+nitrogen thrusters: the CFD's perfect gas.
+
+Delivered:
+
+- **The virial gas** (`"equation_of_state": "virial"`;
+  `foam/extensions/virialGas`, `core/virial.py`).
+  - An OpenFOAM equation of state SONICLINE compiles on first use, like
+    the viscous-work fvOption. It is pressure-explicit,
+    v = RT/p + B(T) + D(T)·p with D = (C − B²)/(RT).
+  - B and C are quartics in 1/T, fitted to nitrogen's reference equation
+    (Span et al. 2000, through CoolProp) from 70 K to 500 K.
+  - Density is explicit, so psiThermo needs no root finding.
+  - The enthalpy, entropy, cp and cp − cv departures are the analytic
+    integrals of v(p, T). A test checks them against finite differences.
+  - It runs as hePsiThermo / hConst / sensibleEnthalpy with constant or
+    Sutherland transport.
+  - The Python twin (`Virial`) supplies predictions, the metrics' own
+    isentrope and V18's reference. It shares Peng–Robinson's choked-flux
+    routine.
+- **`"auto"`**, the default for new simulations and imports. It runs the
+  virial gas wherever rhoPimpleFoam runs (nitrogen) and the perfect gas,
+  with the reference correction reported, where a shock needs
+  rhoCentralFoam. A real-gas equation of state needs the enthalpy form,
+  which rhoCentralFoam cannot use. The pipeline resolves `auto` once the
+  geometry is known and records the choice in the manifest. Verification
+  cases name their gas explicitly.
+- **V18**: V1 at 30 bar, virial against perfect gas on the same mesh. It is
+  in the default and nightly list.
+- **Rewritten controlDicts keep the case's libraries.** The warm start and
+  continuations rewrite system/controlDict; they dropped `libs` before,
+  which a virial case cannot survive.
+- **`sonicline import` asks for y⁺ 6**, not 30, when it chooses wall
+  functions (finding 59).
+- **CI retries the OpenFOAM install** four times, minutes apart.
+  OpenFOAM's package host served a JavaScript page in place of its apt
+  index for hours on 2026-10-01, failing every OpenFOAM job at install.
+
+Findings:
+
+58. **cfMesh's thin throat layers are the price of its accuracy, and
+    harmless.** cfMesh cuts its layers from the boundary cells. The throat
+    cone (finding 53) halves those, and the layers came out at 0.20 of the
+    target first-cell height there, 0.8–0.9 elsewhere. Two attempts to
+    restore them:
+    - A separate wall patch for the throat, with its own layer count and
+      refinement: cfMesh refined the band around the patch and not the
+      patch itself, and the layers stayed at 0.39.
+      `allowDiscontinuity 1` changed nothing.
+    - Keeping the refined cone off the wall (radius 0.8 r_t): the layers
+      came back (0.71–0.92 everywhere, 579 k cells instead of 988 k), but
+      V17 failed its own Cd check. Mass flow read −0.26 % and thrust
+      −0.42 % against the wedge, where the cone reaching the wall gives
+      −0.025 % and −0.05 %. The wall cells at the throat need the
+      refinement as much as the core.
+
+    The cone reaches the wall again (radius 1.3 r_t). Finding 59 shows the
+    thin layers cost nothing.
+59. **Wall functions at y⁺ 30 overestimate drag by 6 %.** The test was V1
+    with k-ω SST on the standard wedge, against a wall-resolved run (y⁺ 1,
+    low-Re treatment) as the reference.
+
+    | first cell | mass flow | thrust | wall drag |
+    |---|---|---|---|
+    | y⁺ 1 (resolved) | 7.12998 g/s | 4.90580 N | 0.06831 N |
+    | y⁺ 6, Spalding | +0.008 % | +0.02 % | −2.4 % |
+    | y⁺ 30, Spalding | −0.04 % | −0.07 % | +6.4 % |
+    | cfMesh, thin throat layers | −0.008 % | −0.09 % | −0.4 % |
+
+    - The 6 % drag gap M7 attributed to cfMesh's layers (finding 54) was
+      the y⁺ 30 wedge being high. cfMesh, with its throat cells near y⁺ 6,
+      is the closer of the two.
+    - The Spalding law holds through the buffer layer, so a thinner first
+      cell is better with it, not worse.
+    - Thrust moves by under 0.1 % either way, because drag is 1.4 % of
+      thrust here.
+60. **The virial gas is fifteen times closer than Peng–Robinson.**
+    Choked mass flux against the reference equation of state, from the
+    isentropes:
+
+    | p0 / T0 | real-gas effect | virial error | Peng–Robinson error |
+    |---|---|---|---|
+    | 10 bar / 300 K | +0.356 % | −0.006 % | |
+    | 20 bar / 300 K | +0.705 % | −0.006 % | +0.18 % |
+    | 30 bar / 300 K | +1.050 % | −0.006 % | +0.26 % |
+    | 20 bar / 250 K | +1.346 % | −0.001 % | |
+    | 50 bar / 250 K | +3.403 % | +0.073 % | |
+
+    - In the CFD (V18, 30 bar, standard wedge), the mass-flow ratio to the
+      perfect gas on the same mesh is 1.01035. The virial isentrope gives
+      1.01044 (−0.010 %) and the reference equation 1.0105 (−0.015 %).
+      Peng–Robinson's V10 sits at +1.31 %.
+    - Above 30 bar the truncated series loses accuracy; validation warns
+      there.
+    - B alone (no C) was enough to 20 bar but 0.1 % high at 50 bar.
+    - Both coefficients must be fitted with a relative weight; an
+      unweighted fit let the 60 K end dominate.
+61. VISCOUS_SEA_LEVEL
+
+Not done in M8:
+
+- The virial coefficients exist for nitrogen only; air (E1, E2) and other
+  gases run as perfect gases.
+- The ideal-gas cp stays constant in the virial gas. For nitrogen that
+  costs under 0.5 % in cp between 30 and 400 K, but a hot gas would need
+  cp(T) as well.
+- rhoCentralFoam cannot run a real gas. Shocked nozzles still run the
+  perfect gas with the correction reported.
