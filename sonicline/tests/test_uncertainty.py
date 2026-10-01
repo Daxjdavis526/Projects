@@ -64,6 +64,18 @@ def test_sharp_throats_and_coarse_meshes_cost_more():
     assert U.discretisation_estimate(coarse, resolve_profile(coarse))["thrust"] == pytest.approx(2.8 * 1.5e-3)
 
 
+def test_wall_drag_adds_to_the_thrust_discretisation_of_a_viscous_run():
+    # E3-like: laminar, drag a quarter of thrust (finding 67)
+    lam = _defn(flow=m.Flow(turbulence=m.Laminar()))
+    prof = resolve_profile(lam)
+    viscous = {"thrust": {"total": 1.0, "wall_viscous_drag": 0.25}}
+    e = U.discretisation_estimate(lam, prof, viscous)
+    assert e["thrust"] == pytest.approx(math.hypot(1.5e-3, 0.026 * 0.25))
+    assert e["mass_flow"] == U.discretisation_estimate(lam, prof)["mass_flow"]
+    inviscid = _defn(flow=m.Flow(turbulence=m.Inviscid()))
+    assert U.discretisation_estimate(inviscid, resolve_profile(inviscid), viscous)["thrust"] == pytest.approx(1.5e-3)
+
+
 def test_input_tolerances_carry_through_quasi_1d():
     d = _defn(tolerances=m.Tolerances(p0_relative=0.01, T0=3.0, throat_diameter=0.01e-3))
     prof = resolve_profile(d)

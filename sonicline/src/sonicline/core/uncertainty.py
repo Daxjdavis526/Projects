@@ -58,6 +58,14 @@ UNSTRUCTURED_THRUST = 2.5e-3
 QUALITY_FACTOR = {"coarse": 2.8, "standard": 1.0, "fine": 0.5}
 UNSTRUCTURED_QUALITY_FACTOR = {"coarse": 1.0, "standard": 0.7, "fine": 0.5}  # V14/V17 ran coarse
 
+# Wall drag on the mesh, relative to the drag, at the standard preset
+# (finding 67): E3 (laminar, Re 1800, drag 26 % of thrust) moved thrust
+# +0.29 % coarse to standard and +0.34 % standard to fine while its Cd held
+# to 3e-4. The drag is still changing by 1.3 % per preset, not yet
+# shrinking, so standard is taken as two such steps from converged. It
+# matters where drag is a large part of thrust: low Reynolds numbers.
+DRAG_DISCRETISATION = 0.026
+
 # Gas model, relative error in choked mass flux against the reference
 # equation of state (findings 60, 63).
 VIRIAL_MDOT = {30e5: 2.1e-4, 50e5: 7.3e-4}  # up to the pressure; V18/V19 at 30 bar
@@ -110,9 +118,11 @@ def _interp(points, x: float) -> float:
     return points[-1][1]
 
 
-def discretisation_estimate(defn: d.SimulationDefinition, profile: Profile | None) -> dict[str, float]:
+def discretisation_estimate(defn: d.SimulationDefinition, profile: Profile | None,
+                            metrics: dict | None = None) -> dict[str, float]:
     """Relative discretisation uncertainty by mesh form and preset, from the
-    verification record (no study on this case)."""
+    verification record (no study on this case). A viscous run's metrics add
+    the wall drag's share."""
     q = defn.mesh.quality.value
     if defn.mesh.form is d.MeshForm.UNSTRUCTURED:
         f = UNSTRUCTURED_QUALITY_FACTOR[q] / max(defn.mesh.refinement, 1e-9)
@@ -124,6 +134,10 @@ def discretisation_estimate(defn: d.SimulationDefinition, profile: Profile | Non
         t = min(max(math.log(rc / 0.625) / math.log(2.0 / 0.625), 0.0), 1.0)
         mdot = f * (STRUCTURED_MDOT_SHARP + t * (STRUCTURED_MDOT_GENTLE - STRUCTURED_MDOT_SHARP))
         thrust = f * STRUCTURED_THRUST
+    drag = _get(metrics or {}, "thrust", "wall_viscous_drag")
+    total = _get(metrics or {}, "thrust", "total")
+    if drag and total and not isinstance(defn.flow.turbulence, d.Inviscid):
+        thrust = math.hypot(thrust, QUALITY_FACTOR[q] * DRAG_DISCRETISATION * abs(drag / total))
     return {"mass_flow": mdot, "thrust": thrust, "specific_impulse": math.hypot(mdot, thrust)}
 
 
@@ -213,7 +227,7 @@ def budgets(defn: d.SimulationDefinition, profile: Profile | None, metrics: dict
     out = {k: Budget(k, v) for k, v in values.items()}
 
     # discretisation
-    est = discretisation_estimate(defn, profile)
+    est = discretisation_estimate(defn, profile, metrics)
     for k, b in out.items():
         if study and study.get(k) is not None:
             b.components["discretisation"] = abs(study[k])

@@ -772,8 +772,8 @@ def _e2_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
 # ----------------------------------------------------------------------------- E3
 # Measured thrust of cold nitrogen: Whalen, "Low Reynolds Number Nozzle Flow
 # Study", NASA TM-100130 (1987). Conical nozzles from a 9.40 mm chamber,
-# 45 deg convergence, a 1.524 mm throat with a 1.524 mm straight section
-# blended at about 2.67 throat radii (table I), area ratio 50 (exit 10.77 mm
+# 45 deg convergence, a 1.524 mm throat whose 1.524 mm land is blended
+# away at about 2.67 throat radii (figure 4, table I), area ratio 50 (exit 10.77 mm
 # at 20 deg, 10.78 mm at 25 deg; figure 4). Unheated nitrogen (22 C) into a
 # vacuum tank; thrust corrected to hard vacuum, C_T = F / (p_c A*), with
 # p_c the measured inlet total pressure. Table IV, the rows whose columns
@@ -800,7 +800,10 @@ def _whalen_definition(half_angle: float, reynolds: float) -> Callable[[str, str
                 throat_radius=rt, expansion_ratio=(10.77e-3 if half_angle == 20.0 else 10.78e-3) ** 2 / WHALEN_D**2,
                 contraction_ratio=(9.40e-3 / WHALEN_D) ** 2, converging_half_angle=math.radians(45.0),
                 diverging_half_angle=math.radians(half_angle), throat_rc_upstream=2.67, throat_rc_downstream=2.67,
-                fillet_radius=1.524e-3 / rt, throat_length=1.524e-3 / rt),
+                # The 1.524 mm throat land of figure 4 is "before blending":
+                # the 2.67 r_t blend spans 2.1 mm between the cones and
+                # consumes it, as table I's geometry (no land) says.
+                fillet_radius=1.524e-3 / rt, throat_length=0.0),
             gas=m.GasSpec(equation_of_state="auto"),
             boundaries=m.Boundaries(inlet=m.MassFlowInlet(mass_flow=mdot, T0=WHALEN_T0),
                                     ambient=m.Ambient(pressure=0.0, temperature=WHALEN_T0),
@@ -820,8 +823,11 @@ def _whalen_checks(name: str) -> Callable[[dict, m.SimulationDefinition], list[C
         p_c = metrics["conditions"]["p0"]
         At = math.pi * (WHALEN_D / 2.0) ** 2
         ct = metrics["thrust"]["total"] / (p_c * At)
+        cd = metrics["discharge_coefficient"]["cfd"]
         return [Check("thrust coefficient F / (p_c A*) vs measured (NASA TM-100130)", ct, measured,
-                      E3_TOLERANCE, note=f"p_c {p_c:.0f} Pa from the CFD at the measured Reynolds number")
+                      E3_TOLERANCE, note=f"p_c {p_c:.0f} Pa from the CFD at the measured Reynolds number; "
+                                         f"CFD Cd {cd:.3f} against about 0.98 measured through a "
+                                         "hydrogen-calibrated flowmeter (figure 13; not checked, DESIGN.md section 19)")
                 ] + _common_checks(metrics)
     return checks
 

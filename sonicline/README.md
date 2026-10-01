@@ -11,13 +11,14 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M9 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M10 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
-Sections 10–18 of the design record what building each milestone taught.
+Every number comes with an uncertainty budget.
+Sections 10–19 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -118,6 +119,26 @@ steady-state checks (Cd, convergence) are not applied to it. An instant
 opening against a large pressure jump is flagged before the run: V1 opened
 instantly into vacuum diverged within ten steps.
 
+Every run reports an **uncertainty budget** (`metrics.json` →
+`uncertainty`): mass flow, thrust and Isp, each as ± an expanded (about
+95 %) uncertainty, with the components listed:
+
+- **discretisation**: estimated from the verification record for the mesh
+  form and preset, or measured by `sonicline study` on the case;
+- **iterative**: the run's own mass balance and thrust cross-check;
+- **gas model**: the equation of state and cp against the reference;
+- **wall treatment**: by y⁺ and the share of thrust that is wall drag;
+- **inputs**: from an optional `"tolerances"` block (`p0_relative`, `T0`,
+  `throat_diameter`, `mass_flow_relative`) carried through this nozzle's
+  quasi-1D sensitivities.
+
+What evidence cannot bound is listed instead of given a number: the missing
+boundary layer of an inviscid run, a shock or separation inside the nozzle,
+and a transient's history. For the 20 bar reference thruster, with ±1 % on
+chamber pressure, ±3 K and ±0.01 mm on the throat, it reads 14.37 ± 0.22
+g/s, 8.37 ± 0.13 N, Isp 59.35 ± 0.32 s. The inputs dominate: the
+calculation itself is good to about 0.1 %.
+
 Every run ends **trusted**, **trusted with warnings**, or **not trustworthy**,
 with the reasons. A run that did not converge, whose mesh failed its gates,
 or whose inviscid Cd exceeds the theoretical bound is never presented as a
@@ -202,6 +223,7 @@ computed without the CFD.
 | V17 | V1 on cfMesh (coarse, throat refined, 551 k cells) vs the structured wedge; run by name, not nightly | mass flow / thrust | −0.025 % / −0.05 % | 0.5 % / 0.5 % |
 | E1 | **experiment:** JPL 45°–15° conical nozzle (Back, Massier and Gier, JPL TR 32-654), heated air (cp(T)) at 17.2 bar and 833 K, SST | wall p/pt at 18 taps | 13 of 13 away from the throat within 5 %; 4 of 5 near the throat within 10 % | all / one miss |
 | E2 | **experiment:** the same nozzle, air at 294 K (Cuffel, Back and Massier 1969) | Cd vs measured 0.985 | −0.74 % (0.9776) | 1 % |
+| E3 | **experiment:** unheated nitrogen, 20° and 25° cones, area ratio 50, throat Re ≈ 1800, laminar (Whalen, NASA TM-100130) | thrust coefficient F/(p_c A*) vs measured 1.51 / 1.50 | −0.31 % / +0.55 % | 5 % (the report's) |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
@@ -230,6 +252,27 @@ air's γ climbs back towards 1.4 as it expands and cools, which lowers the
 pressure at a given area ratio. Air with cp(T) halved that excess and
 brought the middle of the cone from +4.5 % to within 2 %, which is why E1
 uses it (DESIGN.md §16).
+
+**What E3 shows, and what it does not.** This is the thruster SONICLINE is
+for (cold nitrogen into vacuum) against a thrust stand, at a low Reynolds
+number (1800) where the boundary layer is a large part of the nozzle and
+wall drag is a quarter of the thrust. The CFD's thrust coefficient is within
+0.6 % of the test on every mesh, against a stated measurement error of 5 %.
+
+- **Mass flow is not checked.** The CFD passes about 6 % less gas for the
+  measured chamber pressure than the test's flowmeter recorded (Cd 0.924
+  against about 0.98), so it predicts 6 % more Isp than the test. The
+  flowmeter was calibrated for hydrogen. The same figure shows Cd of 1.00
+  where no real nozzle reaches it, and the report's own viscous code also
+  passes less gas than measured. The doubt sits with the measurement, but
+  nothing settles it. DESIGN.md §19 has the detail.
+- The chamber gauge reads to ±16 % of these pressures, so the 0.3–0.6 %
+  agreement is better than the test can confirm.
+- The first version of E3 kept a 1.5 mm straight throat land that the
+  drawing dimensions "before blending". At this Reynolds number the extra
+  length cost 6 % in Cd and thrust coefficient. Small throats are this
+  sensitive, so model a real throat as it was finished, not as drawn
+  before blending.
 
 **What V15 shows.** A startup from vacuum, with the valve opening over
 0.1 ms, reaches 10 % of final thrust at 22 µs and 90 % at 92 µs, overshoots
