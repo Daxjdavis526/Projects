@@ -448,6 +448,26 @@ class Numerics:
 
 
 @dataclass(frozen=True)
+class Tolerances:
+    """What the inputs may be off by, for the run's uncertainty budget
+    (core.uncertainty): chamber pressure and a stated mass flow as fractions
+    (0.01 = 1 %), chamber temperature in kelvin (a difference: write a
+    number, not "2 degC"), throat diameter as a length ("0.01 mm"). Each
+    is optional; a tolerance not given contributes nothing."""
+
+    p0_relative: float | None = None
+    T0: float | None = None
+    throat_diameter: float | None = _q(Dimension.LENGTH, None)
+    mass_flow_relative: float | None = None
+
+    def __post_init__(self) -> None:
+        for name in ("p0_relative", "T0", "throat_diameter", "mass_flow_relative"):
+            v = getattr(self, name)
+            if v is not None and not v >= 0.0:
+                raise ValueError(f"tolerance {name} must be a non-negative number")
+
+
+@dataclass(frozen=True)
 class SimulationDefinition:
     name: str
     geometry: Geometry
@@ -456,6 +476,7 @@ class SimulationDefinition:
     flow: Flow = Flow()
     mesh: MeshSpec = MeshSpec()
     numerics: Numerics = Numerics()
+    tolerances: Tolerances | None = None
     schema_version: int = SCHEMA_VERSION
 
 

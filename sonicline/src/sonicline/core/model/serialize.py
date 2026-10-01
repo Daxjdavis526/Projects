@@ -63,7 +63,7 @@ def _build(tp: object, raw: object, path: str) -> object:
     if members is not None:
         if raw is None and type(None) in typing.get_args(tp):
             return None
-        tagged = [m for m in members if dataclasses.is_dataclass(m)]
+        tagged = [m for m in members if dataclasses.is_dataclass(m) and hasattr(m, "TAG")]
         if tagged:
             if not isinstance(raw, dict) or "type" not in raw:
                 tags = ", ".join(m.TAG for m in tagged)
@@ -73,6 +73,9 @@ def _build(tp: object, raw: object, path: str) -> object:
                     return _build(m, {k: v for k, v in raw.items() if k != "type"}, path)
             tags = ", ".join(m.TAG for m in tagged)
             raise DefinitionError(f"{path}: unknown type {raw['type']!r}; expected one of: {tags}")
+        plain = [m for m in members if dataclasses.is_dataclass(m)]
+        if len(members) == 1 and plain:  # an optional block such as Tolerances | None
+            return _build(plain[0], raw, path)
         for m in members:  # plain unions such as float | None
             try:
                 return _build(m, raw, path)

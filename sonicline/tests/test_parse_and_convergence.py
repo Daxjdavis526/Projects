@@ -142,6 +142,10 @@ def test_wsl_command_and_paths():
     cmd = WSLRunner().command(["rhoPimpleFoam"], Path(r"C:\runs\a b"))
     assert cmd[:3] == ["wsl.exe", "-d", "Ubuntu-24.04"]
     assert "cd '/mnt/c/runs/a b'" in cmd[-1] and cmd[-1].endswith("exec rhoPimpleFoam")
+    # Open MPI counts physical cores, not hyperthreads, as slots: "-np <cpus>"
+    # is refused on a hyperthreaded machine unless oversubscription is allowed
+    # (the first nightly verification run failed every parallel case on it).
+    assert "OMPI_MCA_rmaps_base_oversubscribe" in cmd[-1]
 
 
 def test_kliegel_levine_bound_only_applies_when_choked():

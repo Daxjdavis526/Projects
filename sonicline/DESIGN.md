@@ -2024,3 +2024,117 @@ Not done in M9:
   checks use cp(T).
 - Heated runs are verified against theory (V20) and against air
   experiments at 833 K (E1). There is no heated-nitrogen experiment.
+
+## 19. M10 record: uncertainty on every number, and cold-nitrogen thrust against a test
+
+M10 attaches an honest error bar to every result and compares cold-nitrogen
+thrust with a measurement for the first time. Until now the thruster SONICLINE
+is built for had only been checked against theory.
+
+Delivered:
+
+- **Uncertainty budgets** (`core/uncertainty.py`). Every run's
+  `metrics.json` now carries `uncertainty`: mass flow, thrust and specific
+  impulse, each with an expanded (about 95 %) relative uncertainty. The
+  components are combined by root sum of squares, and each one names its
+  source:
+  - **discretisation**: a grid study's GCI when `sonicline study` has run
+    on the case, which replaces the estimate. Otherwise an estimate from the
+    verification record:
+    - structured meshes: Cd 0.25 % (sharp throat) to 0.06 % (gentle), thrust
+      0.15 %, scaled by the preset;
+    - unstructured meshes: 0.1 % and 0.25 %;
+    - viscous runs add the wall drag's share (finding 67).
+  - **iterative**: the run's own inlet–exit mass balance and its
+    control-volume thrust disagreement.
+  - **gas model**: the equation of state against the reference (virial
+    2×10⁻⁴ to 30 bar; a perfect gas, its own real-gas correction), and for
+    heated gas the cp(T) fit, or the table of finding 63 when cp is held
+    constant. Thrust feels a density error at 2.5 % of its size (V18).
+  - **wall treatment**: wall functions misplace drag by 6.4 % at y⁺ 30,
+    2.4 % at 6 and 1 % resolved (finding 59), weighted by drag/thrust.
+  - **inputs**: an optional `tolerances` block on the definition (chamber
+    pressure, chamber temperature, throat diameter, or a stated mass flow)
+    is carried through quasi-1D sensitivities of this nozzle.
+  - What has no evidence-based bound is listed rather than given a number:
+    an inviscid run's missing boundary layer, a shock or separation inside
+    the nozzle, and a transient's thrust history.
+  - The CLI summary prints "± absolute" per quantity, and the desktop app's
+    summary shows the total with its largest component.
+- **E3: Whalen, NASA TM-100130 (1987).** Unheated nitrogen through 20° and
+  25° conical nozzles (throat 1.524 mm, area ratio 50) into a vacuum tank at
+  a throat Reynolds number of about 1800, laminar. The check is the thrust
+  coefficient F/(p_c A*) against the measured 1.51 and 1.50, to the report's
+  stated 5 %. E3a and E3b join the default verification list.
+- **The nightly verification runs.** Its first run failed every case in
+  seconds, without a word on why (finding 68).
+
+Findings:
+
+66. **The coarse-mesh estimate needed a larger factor.** A study of V1 on
+    the coarse wedge measured a base-mesh error of 0.30 % in mass flow. The
+    first estimate (twice standard) gave 0.21 %, so coarse now takes 2.8×
+    standard. The study's measured values replace the estimate on that run,
+    as intended.
+67. **E3: thrust agrees; mass flow does not, and the gauge is the likely
+    reason.**
+    - The first E3 geometry kept the 1.524 mm throat land of the report's
+      figure 4 as a straight section between the blends. It gave C_T 1.420
+      and 1.423 (−6.0 %, −5.2 %) and Cd 0.870. The drawing dimensions that
+      land "before blending", and table I's code geometry has no land: the
+      2.67 r_t blend spans 2.1 mm between the 45° and 20° cones and
+      consumes it. At Re 1800 a laminar boundary layer grows fast enough
+      that 1.5 mm of extra throat cost 6 % in Cd.
+    - Without the land:
+
+      | case | mesh | C_T, CFD | measured | error |
+      |---|---|---|---|---|
+      | E3a (20°) | coarse | 1.5010 | 1.51 | −0.60 % |
+      | E3a (20°) | standard | 1.5053 | 1.51 | −0.31 % |
+      | E3a (20°) | fine | 1.5104 | 1.51 | +0.02 % |
+      | E3b (25°) | standard | 1.5082 | 1.50 | +0.55 % |
+
+    - Cd holds to 3×10⁻⁴ across the meshes (0.9235 to 0.9237). Thrust
+      moves about 0.3 % per preset because wall drag is 26 % of thrust at
+      this Reynolds number and is still changing by 1.3 % of itself per
+      preset. The thrust discretisation estimate of a viscous run therefore
+      adds 2.6 % of drag/thrust (at standard, scaled by preset). E3a's
+      standard budget is ±0.70 %, which covers the 0.34 % step to fine.
+    - **Mass flow is not checked.** The CFD's Cd is 0.924; the report's
+      figure 13 reads about 0.98 at this Reynolds number. So the CFD gives
+      the measured thrust for the measured chamber pressure, but about 6 %
+      less flow (and 6 % more Isp). Three things point at the measured
+      flow rather than the CFD:
+      - the flowmeter was calibrated for hydrogen and read nitrogen through
+        the maker's correction factor;
+      - figure 13 shows Cd of 1.00 at higher Reynolds numbers, above
+        anything a nozzle with a boundary layer passes;
+      - the report's own viscous code (Rae's slender-channel method, table
+        II) also passes less flow than measured at this condition (3.5 %),
+        with C_T 1.6–2.9 % above the test.
+      Nothing here proves the CFD's mass flow at Re 1800. It is an open
+      question, not a pass.
+    - The chamber pressure gauge reads to 1 % of its full scale, about ±16 %
+      of these readings, so C_T is not known to better than the report's
+      5 % either. A 0.5 % agreement is partly luck: E3 shows that no
+      modelling error larger than the measurement's is visible, nothing
+      finer.
+68. **Open MPI counts cores, not hardware threads.** The nightly ran
+    `mpirun -np $(nproc)`: 4 on a runner with 2 cores and 4 threads. Open
+    MPI refuses more ranks than slots, and its slots are physical cores, so
+    every parallel solve exited within two seconds. The pipeline reported
+    only "the solver did not complete". The runner now allows
+    oversubscription (on Linux and inside WSL: the process count is the
+    user's choice). A solver that exits non-zero without a recognised
+    failure now reports its exit code and the end of its log.
+
+Not done in M10:
+
+- E3's mass-flow question stays open. A low-Reynolds-number Cd measurement
+  with a gravimetric or nitrogen-calibrated flowmeter would settle it.
+- The budget's estimates come from the verification cases. A case far from
+  them (a different gas, a shocked nozzle, a large plume domain) should run
+  `sonicline study` for a measured discretisation term.
+- Rarefaction is not modelled. At E3's conditions the Knudsen number is
+  about 10⁻³ at both the throat and the exit, and slip is negligible; below
+  Re of a few hundred it is not.

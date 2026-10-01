@@ -116,11 +116,21 @@ def _run(path: str, out: str | None, processors: int | None, no_images: bool,
         return 0 if result.trust != "not_trustworthy" else 1
     if result.metrics:
         m = result.metrics
+        u = m.get("uncertainty") or {}
+
+        def pm(key, scale, spec):
+            a = (u.get(key) or {}).get("absolute")
+            return f" +- {scale * a:{spec}}" if a is not None else ""
         print()
-        print(f"  mass flow      {1e3 * m['mass_flow']['inlet']:.4f} g/s   "
+        print(f"  mass flow      {1e3 * m['mass_flow']['inlet']:.4f}{pm('mass_flow', 1e3, '.4f')} g/s   "
               f"(ideal {1e3 * m['mass_flow']['ideal']:.4f}; Cd {m['discharge_coefficient']['cfd']:.4f})")
-        print(f"  thrust         {m['thrust']['total']:.4f} N   (ideal {m['thrust']['ideal']:.4f})")
-        print(f"  Isp            {m['specific_impulse']['cfd']:.2f} s")
+        print(f"  thrust         {m['thrust']['total']:.4f}{pm('thrust', 1.0, '.4f')} N   "
+              f"(ideal {m['thrust']['ideal']:.4f})")
+        print(f"  Isp            {m['specific_impulse']['cfd']:.2f}{pm('specific_impulse', 1.0, '.2f')} s")
+        if u and "error" not in u:
+            print("                 (+- : about 95 % uncertainty; the budget is in metrics.json)")
+            for note in sorted({n for b in u.values() for n in b.get("unquantified", [])}):
+                print(f"  not bounded    {note}")
         print(f"  exit Mach      {m['exit']['mach_mass_avg']:.4f}   (quasi-1D {m['exit']['ideal']['mach']:.4f})")
         print(f"  throat Mach    {m['throat']['mach_area_avg']:.4f} (area-averaged)")
         print(f"  mass balance   {100 * m['mass_flow']['imbalance_inlet_exit']:+.4f} % inlet-exit")
@@ -317,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
     ui = sub.add_parser("ui", help="open the desktop application")
     ui.add_argument("project", nargs="?", help="a .sonicline project folder (created if missing)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13,V14,V15,V16,V18,V19,V20,E1,E2")
+    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13,V14,V15,V16,V18,V19,V20,E1,E2,E3a,E3b")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)

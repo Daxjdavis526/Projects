@@ -164,7 +164,8 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
     # -- real gas and regulator cooling -------------------------------------
     if p0 is not None and realgas.available(gas):
         choke = realgas.choked_mass_flux(gas, p0, T0)
-        sev = Severity.WARNING if choke.bias > REAL_GAS_WARN else Severity.INFO
+        # A warning only when the CFD leaves the effect out.
+        sev = Severity.WARNING if choke.bias > REAL_GAS_WARN and not defn.gas.real_gas else Severity.INFO
         add(Finding(sev, "gas.real_gas_bias",
                     f"At {_fmt_bar(p0)} and {T0:.0f} K real nitrogen chokes at "
                     f"{100 * choke.bias:+.2f} % mass flux relative to the perfect-gas model"
