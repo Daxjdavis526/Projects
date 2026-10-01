@@ -5,10 +5,11 @@
    Generalised for training on a fictional stand; how such procedures are
    shaped, not a certified procedure for any real hardware. */
 
-import { psi, fmt } from '../../lib/units.js';
+import { psi, fmt, unitLabel } from '../../lib/units.js';
 import { near, lastEvent, fullScale } from './common.js';
+const PSIG = () => unitLabel('pressure', true);
 
-export const P = v => `${fmt(v, 'pressure')} psig`;
+export const P = v => `${fmt(v, 'pressure')} ${PSIG()}`;
 export const SYS_PTS = ['PT-602', 'PT-710', 'PT-720', 'PT-630', 'PT-713', 'PT-723', 'PT-715', 'PT-725', 'PT-801'];
 export const ALL_PTS = ['PT-601', ...SYS_PTS];
 export const flowed = v => !!v.completedSeq || v.has(e => e.cat === 'ABT' && e.text.startsWith('ABORT'));
@@ -56,7 +57,7 @@ export function bpInstrumentation(def, sec = 'B') {
 export function bpLoad(def, sec = 'C') {
   return { id: sec, title: 'Load the simulant', steps: [
     { kind: 'action', station: 'PROP', title: 'Technician: load both tanks with water',
-      text: 'Console ▸ FACILITY ▸ Technician ▸ Load tanks. Vents open, tanks vented. Watch WT-716 and WT-726 rise.',
+      text: 'Console ▸ FACILITY ▸ Technician ▸ Load water. Vents open, tanks vented. Watch WT-716 and WT-726 rise.',
       why: 'Liquid goes in through a fill port with the tank vented; the gas it displaces leaves through the vent. A cold flow uses water: same hydraulics, none of the hazard.',
       check: v => v.ch('WT-716') > 5 && v.ch('WT-726') > 4, focus: ['T-710', 'T-720'] },
     { kind: 'record', station: 'PROP', title: 'Record the oxidiser-side load (WT-716)',
@@ -97,7 +98,7 @@ export function bpClearCell(def, sec = 'F') {
     { kind: 'action', station: 'SAF', title: 'Clear and secure the test cell', text: 'Console ▸ FACILITY ▸ Clear cell.',
       why: 'Above 50 psig nobody is in the cell.', check: v => v.facility.area === 'SECURED' },
     { kind: 'action', station: 'SAF', title: 'Warning announcement', text: 'Console ▸ FACILITY ▸ PA.',
-      why: 'A cold flow is a loud spray of water at 300 psi.', check: v => v.paMade },
+      why: 'Everyone near the cell must know a test is coming: a cold flow is a loud spray of liquid at hundreds of psi, a hot fire is a flame and propellants under pressure.', check: v => v.paMade },
   ] };
 }
 
@@ -116,7 +117,7 @@ export function flowPoint(def, { label, oxP = null, fuP = null, sides, lead = 0.
   const steps = [];
   const regs = [oxP != null ? ['PR-610', oxP, 'PT-710'] : null, fuP != null ? ['PR-620', fuP, 'PT-720'] : null].filter(Boolean);
   if (regs.length) steps.push({ kind: 'action', station: 'PROP',
-    title: `${label}: ${regs.map(([id, p]) => `${id} → ${fmt(p, 'pressure', 0)}`).join(', ')} psig, locked up`,
+    title: `${label}: ${regs.map(([id, p]) => `${id} → ${fmt(p, 'pressure', 0)}`).join(', ')} ${PSIG()}, locked up`,
     text: 'Set the tank pressure(s) and wait for lock-up. The regulators do not relieve: going DOWN in pressure means venting the tank a little.',
     why: 'Each point starts from a verified static condition.',
     check: v => regs.every(([id, p, ch]) => near(v.sp[id], p, psi(1)) && near(v.ch(ch), p, psi(6))) });
@@ -146,8 +147,18 @@ export function bpSafe(def, sec = 'S', done = flowed) {
       why: 'Vented means verified vented, everywhere.',
       check: v => SYS_PTS.every(id => v.ch(id) < R.VENTED),
       failMsg: 'A section is still pressurised. Find which transducer and which volume.' },
+    { gate: done, kind: 'action', station: 'PROP', title: 'Enter the cell; technician closes HV-600',
+      text: 'FACILITY ▸ Enter cell, then Technician ▸ Close HV-600. Propellants, if loaded, stay in their vented tanks under the facility\'s storage rules — or drain them (Technician ▸ Drain tanks).',
+      why: 'Stored gas stays in the bottle, not in the lines. And nobody walks up to an engine that has not been safed.',
+      check: v => v.cmd('HV-600') === 0 && done(v) },
   ] };
 }
+
+/* Recording starts before the poll: the DAQ station reports it. */
+export const bpRecordStep = () => ({ kind: 'action', station: 'DAQ', title: 'Start DAQ recording',
+  text: 'Console ▸ DAQ ▸ RECORD. With auto-stop on it stops a few seconds after each sequence; press RECORD again before each later firing.',
+  why: 'The live strip charts are not a record. The DAQ station reports recording at the poll.',
+  check: v => v.daq.recording || v.runs.some(r => r.tFire !== null) });
 
 /* ---- hot fire ---------------------------------------------------------- */
 
@@ -208,6 +219,7 @@ export function bpPressuriseHot(def, sec, { oxP, fuP, title = 'Pressurise' } = {
     { kind: 'action', station: 'DAQ', title: 'Tare LC-901 at pressure',
       text: 'Console ▸ DAQ ▸ TARE LC.', why: 'Feed-line stiffness changes with pressure; tare where you fire.',
       check: v => v.has(e => e.tare && e.tare.some(o => o.id === 'LC-901')) },
+    bpRecordStep(),
   ] };
 }
 
@@ -225,7 +237,7 @@ export function hotFirePoint(def, { label, want, match }) {
   const R = def.ratings;
   return [
     { kind: 'action', station: 'TC', title: `${label}: load the plan — ${want.duration.toFixed(1)} s, ${leadText(want.lead)}, ${(want.shutdown || 'ox-first').replace('-', ' ')} shutdown`,
-      text: `FIRE CONTROL ▸ mode HOT ▸ duration ${want.duration.toFixed(1)} s, lead ${Math.round((want.lead ?? 0) * 1000)} ms, igniter on T−${(want.ignLead ?? 0.5).toFixed(2)} s, ignition check T+${(want.ignCheck ?? 0.5).toFixed(2)} s ▸ LOAD.`,
+      text: `FIRE CONTROL ▸ HOT FIRE ▸ duration ${want.duration.toFixed(1)} s, "ms ox lead" ${Math.round((want.lead ?? 0) * 1000)}${(want.lead ?? 0) < 0 ? ' (negative: the FUEL valve opens first)' : ''}, IGN T− ${(want.ignLead ?? 0.5).toFixed(2)} s, check T+ ${(want.ignCheck ?? 0.5).toFixed(2)} s ▸ LOAD.`,
       why: 'The plan is the start and shutdown sequence. Read it back before it is armed.',
       check: v => hotPlanOk(v, want) || hotWhere(v, match, { aborted: true }).length > 0 },
     { kind: 'verify', station: 'PROP', title: `${label}: engine cool (TC-803 < ${(R.WALL_REFIRE - 273.15).toFixed(0)} °C)`,

@@ -106,7 +106,8 @@ export class PID {
       g.append(s('text.t1', { x: it.x, y: it.y - 4 }, a));
       g.append(s('text.t2', { x: it.x, y: it.y + 10 }, b));
       const lab = it.lab || 'right';
-      const pos = lab === 'above' ? { x: it.x, y: it.y - 22, a: 'middle' } : lab === 'below' ? { x: it.x, y: it.y + 33, a: 'middle' } : { x: it.x + 20, y: it.y + 5, a: 'start' };
+      const pos = lab === 'above' ? { x: it.x, y: it.y - 22, a: 'middle' } : lab === 'below' ? { x: it.x, y: it.y + 33, a: 'middle' }
+        : lab === 'left' ? { x: it.x - 20, y: it.y + 5, a: 'end' } : { x: it.x + 20, y: it.y + 5, a: 'start' };
       const rd = s('text.rd', { x: pos.x, y: pos.y, 'text-anchor': pos.a }, '----');
       const ru = s('tspan.ru', { dx: 3 }, '');
       rd.append(ru);
@@ -120,6 +121,7 @@ export class PID {
     const symLayer = s('g');
     for (const sy of L.symbols) {
       const g = this._symbol(sy);
+      if (sy.notFitted) { g.style.opacity = 0.25; g.append(s('text.lbl2', { x: sy.x, y: sy.y + 46, 'text-anchor': 'middle' }, 'NOT FITTED')); }
       g.addEventListener('click', e => { e.stopPropagation(); this.app.inspect(sy.id, 'component'); });
       symLayer.append(g);
       this.syms.set(sy.id, { g, def: sy });
@@ -127,7 +129,7 @@ export class PID {
     svg.append(symLayer, instLayer);
     svg.addEventListener('click', () => this.app.inspect(null));
     this.host.append(svg);
-    this.host.append(h('div.pid-legend',
+    this.host.append(h(L.legend === 'bottom' ? 'div.pid-legend.bottom' : 'div.pid-legend',
       h('span', h('i', { style: { background: '#8fd0ee' } }), 'pressurised (from PT)'),
       h('span', h('i', { style: { background: '#39424c' } }), 'vented'),
       h('span', h('i', { style: { background: 'repeating-linear-gradient(90deg,#3a2f2f 0 2px,transparent 2px 6px)' } }), 'no data'),
@@ -244,7 +246,7 @@ export class PID {
         g.append(s('path.fillable', { d: `M${x - 15},${y} L${x},${y - 15} L${x + 15},${y} L${x},${y + 15} Z` }));
         g.append(s('path', { d: `M${x},${y - 15} L${x},${y + 15}`, stroke: '#7d8a97', 'stroke-dasharray': '2 2' }));
         g.append(s('text.lbl', { x, y: y + 30, 'text-anchor': 'middle' }, sy.id));
-        g.append(s('text.lbl2', { x, y: y + 41, 'text-anchor': 'middle' }, '10 µm'));
+        g.append(s('text.lbl2', { x, y: y + 41, 'text-anchor': 'middle' }, sy.sub ?? '10 µm'));
         g.append(hl(40, 72, 0, 8));
         break;
       }

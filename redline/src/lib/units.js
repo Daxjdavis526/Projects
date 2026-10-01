@@ -119,6 +119,7 @@ export const fromDisplay = (v, quantity) => unitOf(quantity).from(v);
 /* Unit label, with a g/a suffix on pressure when the caller knows which. */
 export function unitLabel(quantity, gauge) {
   const u = unitOf(quantity);
+  if (quantity === 'pressure' && gauge === 'd') return u.label === 'psi' ? 'psid' : u.label;
   if (quantity === 'pressure' && gauge !== undefined && u.label !== 'kPa') return u.label + (gauge ? 'g' : 'a');
   return u.label;
 }
@@ -147,3 +148,7 @@ export function fmtClock(seconds) {
   const h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60, ss = s % 60;
   return [h, m, ss].map(x => String(x).padStart(2, '0')).join(':');
 }
+
+/* A reduction that is a pressure DIFFERENCE (a ΔP, a droop, a change) is
+   labelled psid, not psig. */
+export const pressureKind = label => (/ΔP|droop|change over|surge/.test(label || '') ? 'd' : true);

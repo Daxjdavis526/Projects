@@ -74,13 +74,15 @@ export class FaultEngine {
     // must not say "nothing is wrong" about a fault still waiting for the burn
     const f = this.active;
     const n = this.hints.length;
+    const liquid = this.S.def.physics?.model === 'biprop';
     let text;
     if (n === 0) text = 'Locate before you name. When did the first thing look wrong — at rest, on pressurisation, or only with flow? Which channels show it, and which channels that should show it do not?';
     else if (n === 1) text = !f
-      ? 'Every anomaly needs an ordinary explanation before it needs a fault: scatter, your own actions, the non-relieving regulator, the pressure tare. Check that each thing you noticed has one.'
+      ? (liquid ? 'Every anomaly needs an ordinary explanation before it needs a fault: scatter, your own actions, the tank pressure drooping as the ullage grows, priming, the as-built injector. Check that each thing you noticed has one.'
+        : 'Every anomaly needs an ordinary explanation before it needs a fault: scatter, your own actions, the non-relieving regulator, the pressure tare. Check that each thing you noticed has one.')
       : f.category === 'sensor'
         ? 'Ask whether the physics agrees. A real change shows on every channel connected to it — pressure, thrust and flow move together. One channel disagreeing with its neighbours is usually the instrument, not the stand.'
-        : 'The instruments agree with one another, so believe them: something in the hardware is not as drawn. Follow the gas — where along the flow path does the pressure or the flow stop matching the prediction?';
+        : `The instruments agree with one another, so believe them: something in the hardware is not as drawn. Follow the ${liquid ? 'propellant' : 'gas'} — where along the flow path does the pressure or the flow stop matching the prediction?`;
     else {
       const ch = f?.evidence.find(e => /^[A-Z]/.test(e));
       const ins = f?.evidence.find(e => /^[a-z]/.test(e) && this.S.def.inspections?.some(i => i.id === e));

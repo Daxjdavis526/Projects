@@ -39,6 +39,11 @@ export class TrainingView {
         h('ul', h('li', 'The fuel cools the chamber on its way to the injector: long burns, if the coolant keeps up'), h('li', 'Watch TC-728, the boiling margin and the liner temperatures'), h('li', 'Fault injection: everything TS-2 has, plus cooling faults')),
         h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-2R'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-2R'), 'sm'),
           btn('Fault injection', () => this.app.start(null, 'fault', 'TS-2R'), 'sm', { title: MODES.fault.text }))));
+    open.append(h('div.level',
+      h('div.ln', 'YOUR HARDWARE'),
+      h('div.lt', 'A cold-gas stand built from your parts'),
+      h('ul', h('li', 'Enter your regulator, solenoid, lines, thruster and instruments from their datasheets'), h('li', 'Pre-test checks and a predicted test: Pc, thrust, flow, droop, valve timing'), h('li', 'Then run it in the control room')),
+      h('div.modes', btn('Open HARDWARE', () => this.app.show('hardware'), 'sm'))));
     page.append(open);
 
     for (const p of PROGRAMS) {

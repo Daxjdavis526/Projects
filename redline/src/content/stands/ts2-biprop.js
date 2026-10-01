@@ -46,7 +46,7 @@ export const DESIGN = {
   oxidiser: 'OX-1', fuel: 'FU-1', simulant: 'water',
   throatDia: mm(14.4), exitDia: mm(28),
   etaCstar: 0.95,                 // what the design assumed; the as-built engine is a little worse
-  Pc: psi(275), F: 495,           // design point, sea level
+  Pc: psi(275), F: 460,           // design point, sea level (what predictHot gives on the drawing)
   burnLimit: 5,                   // s, heat-sink chamber at the design point
 };
 const AS_BUILT = { ox: 0.94, fu: 1.03, etaCstar: 0.94 };
@@ -207,10 +207,10 @@ const channels = {
     { id: 'IGN-901-CMD', target: 'IGN-901', desc: 'Igniter command' },
   ],
   derived: [
-    { id: 'DP-OXI', quantity: 'pressure', gauge: false, desc: 'Oxidiser injector ΔP (PT-715 − PT-801)', inputs: ['PT-715', 'PT-801'], fn: ([a, b]) => a - b },
-    { id: 'DP-FUI', quantity: 'pressure', gauge: false, desc: 'Fuel injector ΔP (PT-725 − PT-801)', inputs: ['PT-725', 'PT-801'], fn: ([a, b]) => a - b },
-    { id: 'DP-OXL', quantity: 'pressure', gauge: false, desc: 'Oxidiser feed-line ΔP (PT-710 − PT-715)', inputs: ['PT-710', 'PT-715'], fn: ([a, b]) => a - b },
-    { id: 'DP-FUL', quantity: 'pressure', gauge: false, desc: 'Fuel feed-line ΔP (PT-720 − PT-725)', inputs: ['PT-720', 'PT-725'], fn: ([a, b]) => a - b },
+    { id: 'DP-OXI', quantity: 'pressure', gauge: 'd', desc: 'Oxidiser injector ΔP (PT-715 − PT-801)', inputs: ['PT-715', 'PT-801'], fn: ([a, b]) => a - b },
+    { id: 'DP-FUI', quantity: 'pressure', gauge: 'd', desc: 'Fuel injector ΔP (PT-725 − PT-801)', inputs: ['PT-725', 'PT-801'], fn: ([a, b]) => a - b },
+    { id: 'DP-OXL', quantity: 'pressure', gauge: 'd', desc: 'Oxidiser feed-line ΔP (PT-710 − PT-715)', inputs: ['PT-710', 'PT-715'], fn: ([a, b]) => a - b },
+    { id: 'DP-FUL', quantity: 'pressure', gauge: 'd', desc: 'Fuel feed-line ΔP (PT-720 − PT-725)', inputs: ['PT-720', 'PT-725'], fn: ([a, b]) => a - b },
     /* Characteristic velocity from chamber pressure and the meters:
        c* = Pc·Cd·At / ṁ. Only as good as the meters' calibration fluid. */
     { id: 'CSTAR-C', quantity: 'velocity', desc: 'c*, from PT-801 and FT-714 + FT-724', inputs: ['PT-801', 'FT-714', 'FT-724'],
@@ -219,9 +219,9 @@ const channels = {
     /* Flow coefficient of each injector side, from the flowmeter and the
        injector ΔP, assuming the SIMULANT density. Valid in steady cold flow
        only; meaningless while the manifold is priming. */
-    { id: 'CDA-OX', quantity: 'area', desc: 'Oxidiser injector CdA, FT-714 / √(2ρΔP), water', inputs: ['FT-714', 'DP-OXI'],
+    { id: 'CDA-OX', quantity: 'area', desc: 'Oxidiser injector CdA, FT-714 / √(2ρΔP) at water density — cold flow only', inputs: ['FT-714', 'DP-OXI'],
       fn: ([m, dp]) => (dp > 6894.757 * 5 && m > 0.01 ? m / Math.sqrt(2 * RHO_SIM * dp) : 0) },
-    { id: 'CDA-FU', quantity: 'area', desc: 'Fuel injector CdA, FT-724 / √(2ρΔP), water', inputs: ['FT-724', 'DP-FUI'],
+    { id: 'CDA-FU', quantity: 'area', desc: 'Fuel injector CdA, FT-724 / √(2ρΔP) at water density — cold flow only', inputs: ['FT-724', 'DP-FUI'],
       fn: ([m, dp]) => (dp > 6894.757 * 5 && m > 0.01 ? m / Math.sqrt(2 * RHO_SIM * dp) : 0) },
   ],
 };

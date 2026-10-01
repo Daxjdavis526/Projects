@@ -31,7 +31,7 @@ export class ControlView {
     // centre
     const top = h('div.panel.center-top');
     this.viewTabs = h('div.tabs');
-    const tabHead = h('div.ph', this.viewTabs, h('span.sp'), h('span.sub', `${S.def.article} · FICTIONAL`));
+    const tabHead = h('div.ph', this.viewTabs, h('span.sp'), h('span.sub', `${S.def.article} · ${S.def.fictional === false ? 'CUSTOM HARDWARE' : 'FICTIONAL'}`));
     this.pidWrap = h('div.pid-wrap');
     this.standWrap = h('div.stand-wrap.hidden');
     const stage = h('div', { style: { position: 'relative', flex: '1', minHeight: 0, display: 'flex' } }, this.pidWrap, this.standWrap);
@@ -41,8 +41,8 @@ export class ControlView {
     const logP = h('div.panel.center-log');
     root.append(h('div.col', top, plotsP, logP));
     // right
-    const chP = h('div.panel', { style: { flex: '1 1 0', minHeight: '140px' } });
-    const conP = h('div.panel', { style: { flex: '0 0 auto', maxHeight: '44%' } });
+    const chP = h('div.panel', { style: { flex: '1 1 0', minHeight: '96px' } });
+    const conP = h('div.panel', { style: { flex: '0 1 auto', minHeight: '150px', maxHeight: '44%' } });
     const fireP = h('div.panel.firectl');
     root.append(h('div.col', chP, conP, fireP));
     host.append(root);

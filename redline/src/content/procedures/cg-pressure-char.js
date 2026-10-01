@@ -14,6 +14,7 @@ import { psi, fmt, fromDisplay, unitLabel } from '../../lib/units.js';
 import { linfit, value } from '../../analysis/campaign.js';
 import { P, near, finalize, pretest, instrumentation, zeroCal, daqConfig, supplyLeak, clearCell,
          pressurise, pollSection, safeStand, returnSafe, inspectStep, reportStep, firingPoint, runsWhere } from './common.js';
+const PSIG = () => unitLabel('pressure', true);
 
 const MATRIX = [60, 100, 150, 200].map(psi);
 const DUR = 2.0;
@@ -29,7 +30,7 @@ export const request = def => ({
   duration: DUR,
   supplyAssumed: psi(2200),
   title: 'CGT-1 thrust vs chamber pressure',
-  text: `Characterise CGT-1 S/N 002 (nozzle N-02) across its operating range: one ${DUR.toFixed(1)} s steady burn at each regulator setpoint of ${MATRIX.map(x => fmt(x, 'pressure', 0)).join(', ')} psig, recorded at ≥ 1000 Hz. Fit thrust against absolute chamber pressure; compare slope, intercept and effective throat with the drawing.`,
+  text: `Characterise CGT-1 S/N 002 (nozzle N-02) across its operating range: one ${DUR.toFixed(1)} s steady burn at each regulator setpoint of ${MATRIX.map(x => fmt(x, 'pressure', 0)).join(', ')} ${PSIG()}, recorded at ≥ 1000 Hz. Fit thrust against absolute chamber pressure; compare slope, intercept and effective throat with the drawing.`,
   success: 'Four clean runs; linear fit with R² > 0.999; nozzle exit and throat inferred from the data within a few percent of the drawing.',
 });
 
@@ -64,7 +65,7 @@ export function procedure(def) {
           text: 'One poll for the whole test matrix: moving between the approved setpoints does not invalidate it. Anything else — a valve, the cell, a technician task — does.',
           why: 'Polling before every point of a routine sweep adds nothing; polling once for the approved matrix, and again if anything outside it changes, is how series testing is normally run.' },
       ] },
-      ...pts.map(({ id, p, label }) => ({ id, title: `${label} — ${fmt(p, 'pressure', 0)} psig`, steps: [
+      ...pts.map(({ id, p, label }) => ({ id, title: `${label} — ${fmt(p, 'pressure', 0)} ${PSIG()}`, steps: [
         ...firingPoint(def, { label, regSet: p, planText: `${DUR.toFixed(1)} s`, match: matchPoint(p) }),
         { kind: 'verify', station: 'PROP', title: `${label}: check the run`,
           text: 'In ANALYSIS: steady chamber pressure and thrust reduced, no alarms or aborts, the burn the length you asked for.',

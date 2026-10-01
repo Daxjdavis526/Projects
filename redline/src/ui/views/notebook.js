@@ -4,7 +4,7 @@
    all of it. Summaries persist in the browser; traces live for the session. */
 
 import { h, btn, clear } from '../dom.js';
-import { fmt, unitLabel, fmtClock, fromDisplay, toDisplay } from '../../lib/units.js';
+import { fmt, unitLabel, pressureKind, fmtClock, fromDisplay, toDisplay } from '../../lib/units.js';
 import { store } from '../store.js';
 import { history, download } from '../history.js';
 import { reportHTML } from '../../analysis/reporthtml.js';
@@ -45,9 +45,9 @@ export class NotebookView {
       stand: `${S.def.name} · ${S.def.article}`,
       config: {
         regSet: cfg.regSet, sp: cfg.sp, plan: S.controller.planText(run.plan || cfg.plan), rate: cfg.rate, supply: cfg.supply,
-        valves: Object.entries(cfg.valves).map(([k, v]) => `${k} ${v ? 'OPEN' : 'CLOSED'}`).join(', '),
+        valves: Object.entries(cfg.valves).map(([k, v]) => `${k} ${/^IGN-/.test(k) ? (v ? 'ON' : 'OFF') : v ? 'OPEN' : 'CLOSED'}`).join(', '),
       },
-      commanded: run.plan?.mode === 'single' ? run.plan.duration : null,
+      commanded: run.plan && run.plan.mode !== 'pulse' ? run.plan.duration ?? null : null,
       actual: run.metrics?.summary?.dur ?? null,
       results: run.metrics?.items?.map(i => ({ label: i.label, value: i.value, quantity: i.quantity })) || [],
       pulses: run.metrics?.pulses?.length || 0,
@@ -266,7 +266,7 @@ export class NotebookView {
     if (!e.results.length) b.append(h('p.muted', 'No firing reduced in this recording.'));
     else {
       const t = h('table.metrics', { style: { maxWidth: '640px' } });
-      for (const r of e.results) t.append(h('tr', h('td', r.label), h('td.v', r.quantity === 'discrete' ? String(r.value) : fmt(r.value, r.quantity, r.quantity === 'time' ? 4 : undefined)), h('td.u', r.quantity === 'time' ? 's' : unitLabel(r.quantity, r.quantity === 'pressure' ? true : undefined))));
+      for (const r of e.results) t.append(h('tr', h('td', r.label), h('td.v', r.quantity === 'discrete' ? String(r.value) : fmt(r.value, r.quantity, r.quantity === 'time' ? 4 : undefined)), h('td.u', r.quantity === 'time' ? 's' : unitLabel(r.quantity, r.quantity === 'pressure' ? pressureKind(r.label) : undefined))));
       b.append(t);
     }
     b.append(sec('Alarms and aborts'));

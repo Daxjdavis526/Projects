@@ -63,7 +63,7 @@ console.log('a cold flow through the jacket (water, fuel side)');
   ex('record', { on: true }); s.run(0.5); ex('arm'); ex('fire'); s.run(18);
   const r = s.runs[s.runs.length - 1], S = r.metrics.summary;
   const want = s.model.line('fu').CdAjacket;
-  check('the jacket ΔP is measured (PT-727 − PT-725)', S.dPjkt > psi(20), `${P(S.dPjkt).toFixed(1)} psi`);
+  check('the jacket ΔP is measured (PT-729 − PT-725)', S.dPjkt > psi(20), `${P(S.dPjkt).toFixed(1)} psi`);
   check('the jacket CdA is recovered from water (±3 %)', Math.abs(S.CdAjkt / want - 1) < 0.03, `${(S.CdAjkt * 1e6).toFixed(2)} vs ${(want * 1e6).toFixed(2)} mm²`);
   check('the fuel side primes slower than BPE-1\'s: the jacket fills first', S.primeFu > 0.3, `${(S.primeFu * 1e3).toFixed(0)} ms`);
 }

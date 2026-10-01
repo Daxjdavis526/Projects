@@ -14,7 +14,7 @@ import { ColdGasModel } from './coldgas.js';
 const cache = new Map();
 
 export function predictColdGas(def, { supplyGauge, regSet }) {
-  const key = `${def.id}|${Math.round(supplyGauge / 3.4e5)}|${Math.round(regSet / 3.4e3)}`;
+  const key = `${def.predictKey || def.id}|${Math.round(supplyGauge / 3.4e5)}|${Math.round(regSet / 3.4e3)}`;
   if (cache.has(key)) return cache.get(key);
   const m = new ColdGasModel(def);
   const net = m.net, Pa = def.physics.ambient.P;

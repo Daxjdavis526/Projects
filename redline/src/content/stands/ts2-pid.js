@@ -14,6 +14,7 @@ const FU = 392;         // fuel run line
 
 export default {
   viewBox: [0, 0, 1280, 520],
+  legend: 'bottom',          // the top-left is busy with the header and vents
   main: H,
   mainLine: ['HV-600', 'IV-601', 'PR-610', 'PR-620', 'PR-630', 'CV-611', 'CV-621', 'PV-631', 'PV-632', 'CV-633', 'CV-634', 'MOV-713', 'MFV-723'],
   segments: [
@@ -78,12 +79,12 @@ export default {
     { id: 'MOV-713', type: 'ballValve', x: 662, y: OX, actuator: 'pneumatic', zs: 'MOV-713', below: true },
     { id: 'MFV-723', type: 'ballValve', x: 930, y: FU, actuator: 'pneumatic', zs: 'MFV-723', below: true },
     { id: 'BPE-1', type: 'engine', x: 1120, y: 304 },
-    { id: 'IGN-901', type: 'igniter', x: 1072, y: 232, to: [1134, 280] },
+    { id: 'IGN-901', type: 'igniter', x: 1000, y: 215, to: [1134, 280] },
     { id: 'LC-901', type: 'thrustStand', x: 1120, y: 304, span: [1104, 1240], lc: [1090, 352] },
   ],
   instruments: [
     { id: 'PT-601', x: 150, y: 318, tap: [150, 262], lab: 'below' },
-    { id: 'PT-602', x: 196, y: 150, tap: [232, 150], lab: 'above' },
+    { id: 'PT-602', x: 196, y: 150, tap: [232, 150], lab: 'left' },
     { id: 'PT-710', x: 470, y: 268, tap: [498, 268], lab: 'below' },
     { id: 'WT-716', x: 470, y: 340, tap: [498, 310], tag: ['WT', '716'], lab: 'below' },
     { id: 'PT-720', x: 750, y: 268, tap: [778, 268], lab: 'below' },
@@ -91,7 +92,7 @@ export default {
     { id: 'PT-713', x: 600, y: 478, tap: [600, OX], lab: 'below' },
     { id: 'FT-714', x: 760, y: 478, tap: [760, OX], lab: 'below' },
     { id: 'PT-715', x: 880, y: 478, tap: [880, OX], lab: 'below' },
-    { id: 'PT-723', x: 872, y: 352, tap: [872, FU], lab: 'above' },
+    { id: 'PT-723', x: 872, y: 352, tap: [872, FU], lab: 'left' },
     { id: 'FT-724', x: 990, y: 418, tap: [990, FU], lab: 'right' },
     { id: 'PT-725', x: 1040, y: 352, tap: [1040, FU], lab: 'above' },
     { id: 'PT-630', x: 1150, y: 166, tap: [1150, B], lab: 'below' },

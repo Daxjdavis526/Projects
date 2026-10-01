@@ -21,13 +21,13 @@ export function procedure(def) {
     sections: [
       { id: 'A', title: 'TS-2', steps: [
         { id: 'A1', num: '1.1', kind: 'info', station: 'TC', title: 'A pressure-fed engine stand',
-          text: 'TS-2 feeds a small (fictional) bipropellant engine, BPE-1, from two run tanks pushed by nitrogen. There is no pump: the tank pressure IS the feed pressure. In this phase the tanks hold water and nothing burns — a cold flow.',
+          text: 'TS-2 feeds a small (fictional) bipropellant engine, BPE-1, from two run tanks pushed by nitrogen. There is no pump: the tank pressure IS the feed pressure. This level runs it cold: the tanks hold water and nothing burns. Hot fires come later (Level 9).',
           why: 'Every hot fire is preceded by cold flows. The plumbing, the instruments and the procedure are the same; only the consequences are different.' },
         { id: 'A2', num: '1.2', kind: 'info', station: 'TC', title: 'Read the P&ID',
           text: 'Top: the pressurant header from the K-bottle to three regulators — oxidiser tank, fuel tank, purge. Middle: the two run tanks, each with a vent, a relief and a scale under it. Bottom: two liquid lines (drawn thicker) through the main valves and flowmeters to the injector. Right: the purge system, which can blow gas into either manifold.',
           why: 'Two of everything means two of every mistake: the right setpoint on the wrong regulator, the right valve on the wrong side.' },
       ] },
-      { id: 'K', title: 'The hardware', steps: [
+      { id: 'K', label: 'A', title: 'The hardware', steps: [
         click('N2-K', 'The pressurant bottle', 'The energy source for both tanks and the purge.'),
         click('PR-610', 'The oxidiser tank regulator', 'In a pressure-fed engine, the regulator sets the injector flow. Droop here is flow lost at the engine.'),
         click('CV-611', 'A pressurant check valve', 'Keeps the two tanks from talking to each other through the shared header.'),
@@ -35,7 +35,7 @@ export function procedure(def) {
         click('MOV-713', 'The main oxidiser valve', 'Sequencer-only. How fast it moves decides how hard the liquid hammers when it stops.'),
         click('PV-631', 'A purge valve', 'Clears the manifold before and after a flow, and in an abort.'),
         click('BPE-1', 'The engine', 'Its injector\'s flow coefficients are on the drawing. Whether they are true is what a cold flow finds out.'),
-      ] },
+      ].map((st, i) => ({ ...st, num: `1.${3 + i}` })) },
       { id: 'B', title: 'Instruments', steps: [
         { id: 'B1', num: '3.1', kind: 'action', station: 'DAQ', title: 'Power up the DAQ', text: 'Console ▸ DAQ ▸ Power ON.', check: v => v.daq.online },
         { id: 'B2', num: '3.2', kind: 'action', station: 'DAQ', title: 'Zero the pressure transducers', text: 'Console ▸ DAQ ▸ ZERO PTs. Everything is vented.',
@@ -47,7 +47,7 @@ export function procedure(def) {
       ] },
       { id: 'C', title: 'Load', steps: [
         { id: 'C1', num: '4.1', kind: 'action', station: 'PROP', title: 'Technician: load both tanks with water',
-          text: 'FACILITY ▸ Technician ▸ Load tanks (the vents are open). Watch the scales.',
+          text: 'FACILITY ▸ Technician ▸ Load water (the vents are open). Watch the scales.',
           why: 'Filling displaces gas: the vent must be open.', check: v => v.ch('WT-716') > 5 && v.ch('WT-726') > 4 },
       ] },
       { id: 'D', title: 'Pressurise (≤ 50 psig)', steps: [

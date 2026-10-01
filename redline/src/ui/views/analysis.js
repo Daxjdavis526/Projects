@@ -14,7 +14,7 @@
 import { h, btn, clear } from '../dom.js';
 import { PlotStack } from '../panels/plots.js';
 import { Scatter } from '../plot/scatter.js';
-import { fmt, unitLabel, fmtT, toDisplay } from '../../lib/units.js';
+import { fmt, unitLabel, pressureKind, fmtT, toDisplay } from '../../lib/units.js';
 import { lowerBound } from '../../analysis/metrics.js';
 import { QUANTITIES_CATALOG, quantitiesFor, value, linfit, stats, interpret, runKind } from '../../analysis/campaign.js';
 import { channelList } from '../../instruments/daq.js';
@@ -89,6 +89,15 @@ export class AnalysisView {
     for (const r of (this.S?.runs || [])) { out.push({ id: r.id, run: r, rec: r, live: true }); seen.add(r.id); }
     if (this.withHistory) for (const rec of history.index) if (!seen.has(rec.id)) out.push({ id: rec.id, run: history.cache.get(rec.id) || null, rec, live: false });
     return out;
+  }
+
+  /* Show one run (a prediction just made, say), loading it from history. */
+  async focus(id) {
+    this.withHistory = true;
+    await history.refresh();
+    const e = this.pool().find(x => x.id === id);
+    if (e && await this.ensure(e)) { this.mode = 'traces'; this.main = id; this.overlay.clear(); this.cursors = { A: null, B: null }; }
+    this.render();
   }
 
   async ensure(entry) {
@@ -202,7 +211,7 @@ export class AnalysisView {
     if (!run.metrics || !run.metrics.items.length) t.append(h('tr', h('td.n', run.metrics?.note || 'No firing in this recording.')));
     else for (const it of run.metrics.items) {
       t.append(h('tr', { title: it.note || '' }, h('td', it.label), h('td.v', it.quantity === 'discrete' ? String(it.value) : fmt(it.value, it.quantity, it.quantity === 'time' ? 4 : undefined)),
-        h('td.u', it.quantity === 'time' ? 's' : unitLabel(it.quantity, it.quantity === 'pressure' ? true : undefined))));
+        h('td.u', it.quantity === 'time' ? 's' : unitLabel(it.quantity, it.quantity === 'pressure' ? pressureKind(it.label) : undefined))));
       if (it.note) t.append(h('tr', h('td.n', { colSpan: 3, style: { paddingTop: 0 } }, it.note)));
     }
     rb.append(t);

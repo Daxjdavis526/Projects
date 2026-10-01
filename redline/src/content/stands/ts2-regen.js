@@ -14,7 +14,7 @@
    meters, the sequencer, the go/no-go stations — is TS-2's, imported, not
    copied. What changes: the fuel line runs through the jacket (more
    resistance, a bigger volume to prime — the fuel side now needs a LEAD),
-   two new instruments (PT-727 jacket inlet, TC-728 jacket outlet), wall
+   two new instruments (PT-729 jacket inlet, TC-728 jacket outlet), wall
    thermocouples that read a cooled liner, new limits, faults and
    inspections. */
 
@@ -90,7 +90,7 @@ const TC = (id, sig, desc, tau) => ({
 const sensors = [
   ...base.sensors.map(s => (s.id === 'TC-802' ? { ...s, desc: 'Chamber liner temperature (embedded, barrel)', tau: 0.3 }
     : s.id === 'TC-803' ? { ...s, desc: 'Throat liner temperature (embedded)', tau: 0.3 } : s)),
-  PT('PT-727', 'Pg:jin', 'Fuel cooling-jacket inlet pressure', 1000, { tau: 0.0003 }),
+  PT('PT-729', 'Pg:jin', 'Fuel cooling-jacket inlet pressure', 1000, { tau: 0.0003 }),
   TC('TC-728', 'Tc:jout', 'Fuel temperature, jacket outlet (coolant out)', 0.25),
 ];
 
@@ -98,7 +98,7 @@ const channels = {
   commands: base.channels.commands,
   derived: [
     ...base.channels.derived,
-    { id: 'DP-JKT', quantity: 'pressure', gauge: false, desc: 'Cooling-jacket ΔP (PT-727 − PT-725)', inputs: ['PT-727', 'PT-725'], fn: ([a, b]) => a - b },
+    { id: 'DP-JKT', quantity: 'pressure', gauge: 'd', desc: 'Cooling-jacket ΔP (PT-729 − PT-725)', inputs: ['PT-729', 'PT-725'], fn: ([a, b]) => a - b },
     /* Heat picked up by the coolant: ṁ·cp·ΔT. Only meaningful in steady
        flow with the meter set for FU-1. */
     { id: 'Q-JKT', quantity: 'power', desc: 'Heat into the coolant, FT-724·cp·(TC-728 − TC-727)', inputs: ['FT-724', 'TC-728', 'TC-727'],
@@ -121,13 +121,13 @@ components['BPE-2'] = V('BPE-2', 'Regeneratively cooled research engine (fiction
   'The same size and propellants as BPE-1, but cooled by its own fuel. The fuel picks up the heat the wall would otherwise store, so the burn can run as long as the tanks last — as long as the fuel keeps up: flow it too little, too hot or at too low a pressure and it boils against the wall, and a boiling wall is a burning wall.',
   { ref: ['regenerative-cooling', 'injector', 'mixture-ratio', 'hard-start', 'critical-heat-flux'] });
 components['JKT-2'] = V('JKT-2', 'Regenerative cooling jacket', 'Milled channels in the liner, closed out by an electroformed shell',
-  { 'Inlet': 'nozzle end (PT-727)', 'Outlet': 'injector fuel manifold (PT-725, TC-728)', 'Volume': '≈55 cc', 'Coolant': 'FU-1, all of it' },
+  { 'Inlet': 'nozzle end (PT-729)', 'Outlet': 'injector fuel manifold (PT-725, TC-728)', 'Volume': '≈55 cc', 'Coolant': 'FU-1, all of it' },
   'Every gram of fuel the engine burns crosses this jacket first. It adds a pressure drop the fuel tank must supply and a volume the fuel must fill before it reaches the injector — so the fuel side primes later than the oxidiser side, and the start sequence must allow for it.',
   { ref: ['regenerative-cooling', 'coking', 'priming'] });
 
 const componentSensors = { ...base.componentSensors };
-componentSensors['BPE-2'] = [...base.componentSensors['BPE-1'], 'PT-727', 'TC-728'];
-componentSensors['JKT-2'] = ['PT-727', 'PT-725', 'TC-728', 'TC-727', 'DP-JKT', 'Q-JKT', 'TSAT-M'];
+componentSensors['BPE-2'] = [...base.componentSensors['BPE-1'], 'PT-729', 'TC-728'];
+componentSensors['JKT-2'] = ['PT-729', 'PT-725', 'TC-728', 'TC-727', 'DP-JKT', 'Q-JKT', 'TSAT-M'];
 delete componentSensors['BPE-1'];
 
 const limits = [
@@ -143,7 +143,13 @@ const limits = [
 const ratings = { ...base.ratings, COOLANT_MAX_IN: degC(35) };
 
 /* The go/no-go: TS-2's stations, plus the coolant. */
-const gonogo = base.gonogo.map(st => (st.id !== 'PROP' ? st : { ...st, items: [...st.items,
+const REWORD = {
+  'Burn duration vs heat-sink limit': { label: 'Burn duration vs stand limit',
+    why: 'BPE-2 is cooled, so heat does not end the burn: the propellant load and the stand rating do. A planned burn longer than that runs a tank dry with the engine lit.' },
+  'Engine throat TC-803': { why: 'A cooled engine reaches steady temperature, but starts are gentler from cold: a liner still hot from the last burn means hotter fuel in the jacket at the start.' },
+};
+const reword = st => ({ ...st, items: st.items.map(it => (REWORD[it.label] ? { ...it, ...REWORD[it.label] } : it)) });
+const gonogo = base.gonogo.map(reword).map(st => (st.id !== 'PROP' ? st : { ...st, items: [...st.items,
   { label: 'Fuel (coolant) inlet temperature TC-727', eval: v => ({ value: `${(v.ch('TC-727') - 273.15).toFixed(1)} °C (limit ${(v.ratings.COOLANT_MAX_IN - 273.15).toFixed(0)} °C)`,
       ok: v.plan.mode !== 'hot' || v.ch('TC-727') <= v.ratings.COOLANT_MAX_IN }),
     why: 'The fuel is the coolant. Every degree it starts warmer is a degree of boiling margin gone at the throat.' },
@@ -153,8 +159,9 @@ const gonogo = base.gonogo.map(st => (st.id !== 'PROP' ? st : { ...st, items: [.
 const pid = {
   ...basePid,
   symbols: basePid.symbols.map(sy => (sy.id === 'BPE-1' ? { ...sy, id: 'BPE-2', regen: true } : sy)),
+  labels: basePid.labels.map(l => (l.text === 'CATCH AREA' ? { ...l, x: 1150 } : l)),
   instruments: [...basePid.instruments,
-    { id: 'PT-727', x: 1196, y: 226, tap: [1218, 288], lab: 'above' },
+    { id: 'PT-729', x: 1176, y: 424, tap: [1222, 316], lab: 'right' },
     { id: 'TC-728', x: 980, y: 470, tap: [1120, 292], lab: 'below' }],
 };
 
@@ -171,9 +178,9 @@ export default {
   diagnosis: REGEN_DIAGNOSIS,
   inspections: [...BASE_INSPECTIONS, ...REGEN_INSPECTIONS],
   design: DESIGN2,
-  plots: [['PT-710', 'PT-720', 'PT-630'], ['PT-715', 'PT-725', 'PT-727', 'MOV-713-CMD', 'MFV-723-CMD'], ['FT-714', 'FT-724']],
-  analysisPlotsHot: [['PT-801', 'MOV-713-CMD', 'MFV-723-CMD'], ['PT-715', 'PT-725', 'PT-727'], ['FT-714', 'FT-724'], ['LC-901'],
+  plots: [['PT-710', 'PT-720', 'PT-630'], ['PT-715', 'PT-725', 'PT-729', 'MOV-713-CMD', 'MFV-723-CMD'], ['FT-714', 'FT-724']],
+  analysisPlotsHot: [['PT-801', 'MOV-713-CMD', 'MFV-723-CMD'], ['PT-715', 'PT-725', 'PT-729'], ['FT-714', 'FT-724'], ['LC-901'],
     ['TC-728', 'TC-727'], ['TC-802', 'TC-803'], ['OD-804', 'VIB-805', 'IGN-I']],
-  analysisPlots: [['PT-713', 'PT-715', 'MOV-713-CMD'], ['PT-723', 'PT-727', 'PT-725', 'MFV-723-CMD'], ['FT-714', 'FT-724'], ['WT-716', 'WT-726']],
-  segmentSensors: { ...base.segmentSensors, fuline: 'PT-727' },
+  analysisPlots: [['PT-713', 'PT-715', 'MOV-713-CMD'], ['PT-723', 'PT-729', 'PT-725', 'MFV-723-CMD'], ['FT-714', 'FT-724'], ['WT-716', 'WT-726']],
+  segmentSensors: { ...base.segmentSensors, fuline: 'PT-729' },
 };

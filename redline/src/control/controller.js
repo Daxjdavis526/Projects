@@ -13,7 +13,10 @@
 
 import { Emitter } from '../lib/emitter.js';
 import { standardInterlocks, evaluate } from './interlocks.js';
-import { psi, fmt, fmtT } from '../lib/units.js';
+import { psi, fmt, fmtT, unitLabel } from '../lib/units.js';
+
+// an igniter is switched, not opened
+const word = (id, on) => (/^IGN-/.test(id) ? (on ? 'ON' : 'OFF') : (on ? 'OPEN' : 'CLOSE'));
 
 export const COUNTDOWN = 5;          // s from FIRE to T-0
 export const TAIL = 2;
@@ -119,8 +122,8 @@ export class Controller extends Emitter {
 
   describe(action, a) {
     switch (action) {
-      case 'valve': return `${a.id} ${a.open ? 'OPEN' : 'CLOSE'}`;
-      case 'regSet': return `${a.id || this.def.regulator} setpoint ${fmt(a.value, 'pressure')} psig`;
+      case 'valve': return `${a.id} ${word(a.id, a.open)}`;
+      case 'regSet': return `${a.id || this.def.regulator} setpoint ${fmt(a.value, 'pressure')} ${unitLabel('pressure', true)}`;
       case 'tech': return `technician: ${a.task}`;
       default: return action;
     }
@@ -133,7 +136,7 @@ export class Controller extends Emitter {
         if (this.cmd[a.id] === (a.open ? 1 : 0)) return { ok: true, noop: true };
         this.cmd[a.id] = a.open ? 1 : 0;
         m.command(a.id, a.open ? 1 : 0);
-        this.log('CMD', `${a.id} ${a.open ? 'OPEN' : 'CLOSE'}`, { id: a.id, value: this.cmd[a.id] });
+        this.log('CMD', `${a.id} ${word(a.id, a.open)}`, { id: a.id, value: this.cmd[a.id] });
         this.bump();
         s.audio('valve', { id: a.id, open: a.open });
         return { ok: true };
@@ -157,7 +160,7 @@ export class Controller extends Emitter {
         this.facility.area = 'CLEARING';
         this.facility.until = this.t + 6;
         this.facility.beacon = 'AMBER';
-        this.log('FAC', 'Cell clearing: sweep, headcount, door to close. PA: "Test cell TS-1 is being cleared."');
+        this.log('FAC', `Cell clearing: sweep, headcount, door to close. PA: "${this.def.custom ? 'The test cell' : `Test cell ${this.def.family || this.def.id}`} is being cleared."`);
         this.bump();
         return { ok: true };
       }
@@ -198,7 +201,7 @@ export class Controller extends Emitter {
       case 'tare': {
         const out = s.daq.zero(a.ids || this.def.tareIds || [this.def.loadCell || 'LC-501']);
         const txt = out.map(o => `${o.id} ${o.removed >= 0 ? '−' : '+'}${fmt(Math.abs(o.removed), o.quantity)}`).join(', ');
-        this.log('DAQ', `Load cell tared: ${txt || 'nothing'}`, { tare: out });
+        this.log('DAQ', `Tared: ${txt || 'nothing'}`, { tare: out });
         return { ok: true, out };
       }
       case 'shunt': {
@@ -379,7 +382,7 @@ export class Controller extends Emitter {
   _cmdValve(id, v, why) {
     this.cmd[id] = v;
     this.s.model.command(id, v);
-    this.log('CMD', `${id} ${v ? 'OPEN' : 'CLOSE'} (${why})`, { id, value: v });
+    this.log('CMD', `${id} ${word(id, v)} (${why})`, { id, value: v });
     if (this.mainValves.includes(id)) {
       // "burning" starts with the first main valve and ends with the last
       if (v) { if (this.mainValves.every(m => m === id || !this.cmd[m])) this.lastSvOn = this.t; this.lastSvOff = null; }

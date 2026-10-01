@@ -66,7 +66,7 @@ export function procedure(def) {
           check: v => { const r = first(v); return !!r && !r.aborted && r.metrics.summary.ignited && r.metrics.summary.dur > 9.5; },
           failMsg: 'Not a full-duration lit run. Look at the abort and the start before anything else.' },
         { kind: 'action', station: 'TC', title: 'Open the run in ANALYSIS',
-          text: 'The start (PT-727, PT-725, PT-715 and PT-801 in the first second), the coolant (TC-728 levelling off), the liner (TC-802, TC-803).',
+          text: 'The start (PT-729, PT-725, PT-715 and PT-801 in the first second), the coolant (TC-728 levelling off), the liner (TC-802, TC-803).',
           check: v => [...v.flags].some(f => f.startsWith('analysis:')) },
         { kind: 'verify', station: 'TC', title: 'Pc within 5 % of the prediction',
           check: v => { const r = first(v), p = r?.meta.config.prediction; return !!r && r.metrics.summary.ignited && p?.Pc > 0 && Math.abs(r.metrics.summary.Pc / p.Pc - 1) < 0.05; },

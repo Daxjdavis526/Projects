@@ -13,7 +13,7 @@
 import { psi } from '../../lib/units.js';
 import { near, pollSection, reportStep, finalize } from './common.js';
 import { bpPretest, bpInstrumentation, bpPressurantLeak, bpClearCell, bpPurge, bpSafe, P,
-         bpLoadPropellants, bpHotDaq, bpSparkCheck, hotFirePoint, bpAfterFire, hotWhere } from './bp-common.js';
+         bpLoadPropellants, bpHotDaq, bpSparkCheck, bpPressuriseHot, hotFirePoint, bpAfterFire, hotWhere } from './bp-common.js';
 import { WANT_RG } from './rg-hotfire.js';
 
 const WANT = { ...WANT_RG, duration: 6.0 };
@@ -41,6 +41,10 @@ export function procedure(def) {
       text: 'The tank regulators do not relieve. To go DOWN in pressure: setpoint to 0, crack the tank vent until the tank is below the new value, close it, then set.',
       why: 'Two tank pressures set two flows: their ratio is the mixture ratio, their level is the thrust.',
       check: v => near(v.sp['PR-610'], psi(p.ox), psi(1)) && near(v.sp['PR-620'], psi(p.fu), psi(1)) && near(v.ch('PT-710'), psi(p.ox), psi(8)) && near(v.ch('PT-720'), psi(p.fu), psi(8)) || !!runOf(v, p.n) });
+    // venting a tank is a configuration change: the poll no longer stands
+    if (p.n > 1) steps.push({ kind: 'poll', station: 'TC', title: `${p.label}: re-poll after the tank change`,
+      text: 'Console ▸ FIRE CONTROL ▸ POLL. Venting a tank to come down in pressure changed the stand\'s configuration.',
+      why: 'A poll is a statement about the stand as it is. Open a vent, and the stand is not what was polled.' });
     steps.push(...hotFirePoint(def, { label: p.label, want: WANT, match: r => at(r, p) }));
   }
   const rec = n => ({ kind: 'record', station: 'TC', title: `Record the boiling margin of ${POINTS[n - 1].label}, K`,
@@ -60,11 +64,12 @@ export function procedure(def) {
       bpPressurantLeak(def, 'F'),
       bpClearCell(def, 'G'),
       bpPurge(def, 'H'),
-      pollSection('I', { text: 'One poll for the survey; between burns only the tank pressures and the plan change.' }),
-      { id: 'J', title: 'The burns', steps },
-      bpAfterFire(def, 'K', allFired),
-      bpSafe(def, 'L', allFired),
-      { id: 'M', title: 'Data', steps: [
+      bpPressuriseHot(def, 'I', { oxP: psi(420), fuP: psi(480), title: 'Pressurise to the first point' }),
+      pollSection('J', { text: 'The poll for Fire 1. Later points need venting a tank — a configuration change — and their own poll.' }),
+      { id: 'K', title: 'The burns', steps },
+      bpAfterFire(def, 'L', allFired),
+      bpSafe(def, 'M', allFired),
+      { id: 'N', title: 'Data', steps: [
         { kind: 'action', station: 'TC', title: 'Compare the three in ANALYSIS ▸ CAMPAIGN',
           text: 'Try the regen presets: heat against Pc, coolant rise against flow, boiling margin against Pc.',
           check: v => v.flags.has('campaign') },

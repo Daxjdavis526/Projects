@@ -148,6 +148,7 @@ export class SolenoidValve extends Valve {
     this.iPull0 = e.pullIn ?? 0.55;          // A at zero ΔP
     this.iPullPerPa = e.pullInPerPa ?? 1.8e-7; // A per Pa of seat ΔP
     this.iDrop = e.dropOut ?? 0.33;
+    this.pilotMinDP = spec.pilotMinDP ?? 0;  // Pa; 0 = direct-acting
     this.Vdiode = 0.7;
     this.i = 0;
     this.drive = 0;          // driver output, 0/1 (the command, with no dead time)
@@ -193,6 +194,9 @@ export class SolenoidValve extends Valve {
     let tgt = nc ? (pulled ? 1 : 0) : (pulled ? 0 : 1);
     if (this.failClosed) tgt = 0;
     tgt = Math.min(tgt, this.maxOpen);
+    // a pilot-operated valve needs the line pressure to lift its main
+    // poppet: below its minimum differential it opens only partway
+    if (this.pilotMinDP > 0 && nc && tgt > 0) tgt = Math.min(tgt, Math.max(0.03, dP / this.pilotMinDP));
     const prev = this.u;
     if (!this.stuck) {
       const stroke = (tgt > this.u ? this.strokeOpen : this.strokeClose) * this.strokeScale * this.jitStroke;

@@ -41,6 +41,7 @@ export function procedure(def) {
         { kind: 'info', station: 'TC', title: 'Read the test request', text: v => v.request.text,
           teach: 'Budget the propellant: a 20 s burn takes about 1.8 kg of fuel and 2.7 kg of oxidiser, and the go/no-go wants a reserve on top. Budget the coolant too: the throttled point has the least boiling margin.' },
         { kind: 'action', station: 'TC', title: 'Write the test plan in the notebook',
+          text: 'NOTEBOOK ▸ Pre-test notes: the burns, the tank pressures and why, the margin you expect to find at each point (coolant temperature rise, boiling margin), and what would make you stop.',
           check: v => v.has(e => e.cat === 'OPR' && e.text.startsWith('Pre-test note')) },
       ] },
       { id: 'B', title: 'Deliverables', steps: [

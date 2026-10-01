@@ -10,7 +10,7 @@
 
 import { psi } from '../../lib/units.js';
 import { near, daqConfig, pollSection, reportStep, finalize } from './common.js';
-import { bpPretest, bpInstrumentation, bpLoad, bpPressurantLeak, bpClearCell, bpPurge, bpSafe, flowPoint, flowsWhere, P } from './bp-common.js';
+import { bpRecordStep, bpPretest, bpInstrumentation, bpLoad, bpPressurantLeak, bpClearCell, bpPurge, bpSafe, flowPoint, flowsWhere, P } from './bp-common.js';
 
 const at = (r, id, p) => near(r.meta.config.sp?.[id], p, psi(2));
 const side = s => r => (r.plan?.sides || 'both') === s;
@@ -53,6 +53,7 @@ export function procedure(def) {
         { kind: 'action', station: 'DAQ', title: 'Tare LC-901 at pressure',
           text: 'Console ▸ DAQ ▸ TARE LC.', why: 'The engine load cell will see a few newtons of jet momentum. Its zero has to be good to well under that.',
           check: v => v.has(e => e.tare && e.tare.some(o => o.id === 'LC-901')) },
+        bpRecordStep(),
       ] },
       pollSection('I', { text: 'One poll for the whole approved matrix (150–300 psig). Anything outside it — a valve, the cell, a technician — needs a new one.' }),
       { id: 'J', title: 'The flows', steps: flows },

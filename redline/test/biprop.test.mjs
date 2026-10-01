@@ -272,6 +272,8 @@ console.log('Level 8 — cold flow, guided, start to finish');
   for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: true }); s.run(15);
   ex('regSet', { id: 'PR-630', value: 0 }); ex('valve', { id: 'PV-631', open: true }); s.run(8); ex('valve', { id: 'PV-631', open: false }); s.run(1);
   P.confirm('K4');
+  ex('enterCell'); s.run(1); ex('tech', { task: 'closeHV' }); s.run(6);
+  check('the stand is returned to safe (HV-600 closed)', P.status('K5') === 'COMPLETE', P.status('K5'));
   // data
   for (const r of s.runs) s.flag('analysis:' + r.id);
   s.run(0.5);

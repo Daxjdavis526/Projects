@@ -29,7 +29,7 @@ export const request = () => ({
   oxP: psi(400), fuP: psi(400),
   duration: 1.5,
   title: 'BPE-1 start-transient characterisation',
-  text: 'Characterise the BPE-1 start and shutdown at 400/400 psig. Three 1.5 s burns, identical except for the main-valve lead: zero; oxidiser 50 ms first; fuel 50 ms first. Igniter T−0.5 s, ignition check T+0.5 s, oxidiser-first shutdown. Cool the throat below 150 °C between burns. Deliverables per run: valve-to-flame time, Pc rise time, start overshoot; for the zero-lead run, the shutdown impulse.',
+  text: 'Characterise the BPE-1 start and shutdown at 400/400 psig. Three 1.5 s burns, identical except for the main-valve lead: zero; oxidiser 50 ms first; fuel 50 ms first. Igniter T−0.5 s, ignition check T+0.5 s, oxidiser-first shutdown. Cool the throat below 150 °C between burns. Deliverables: the start overshoot with zero lead and with an oxidiser lead, and the shutdown impulse of the zero-lead run, recorded here; valve-to-flame time and Pc rise time for every run, in the report.',
   success: 'Three lit runs; the start overshoot and valve-to-flame time of each reported; a recommendation on the lead for the campaign.',
 });
 

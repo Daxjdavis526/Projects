@@ -250,7 +250,8 @@ export class Console {
   }
 
   _pa() {
-    const inp = h('input.in', { style: { width: '100%' }, value: 'Attention: test cell TS-1 is hazardous. Stay clear of the cell until further notice.' });
+    const d = this.S.def, cell = d.custom ? 'the test cell' : `test cell ${d.family || d.id}`;
+    const inp = h('input.in', { style: { width: '100%' }, value: `Attention: ${cell} is hazardous. Stay clear of the cell until further notice.` });
     const m = modal({ title: 'PA announcement', narrow: true, body: [h('p.muted', 'Announcement to the facility:'), inp],
       footer: [btn('Cancel', () => m.close(), 'ghost'), btn('Announce', () => { this.S.execute('pa', { text: inp.value }); m.close(); }, 'primary')] });
   }
