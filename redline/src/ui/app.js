@@ -108,7 +108,7 @@ export class App {
       return;
     }
     if (this.views.control) { this.views.control.destroy(); }
-    const prefix = `${def.id.replace('-', '')}-${def.program === 'coldgas' ? 'CG' : 'BP'}`;
+    const prefix = `${def.id.replace('-', '')}-${({ coldgas: 'CG', turbopump: 'TP' })[def.program] || 'BP'}`;
     this.session = new Session({ def, scenario, mode, runPrefix: prefix, firstRun: store.data.nextRun[prefix] || 1 });
     this.level = found?.level || null;
     const S = this.session;

@@ -14,33 +14,34 @@ and nothing on screen is the truth.
 
 Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366×768 or larger.
 
-## What is here (development phases 1–8)
+## What is here (development phases 1–9)
 
 | | |
 |---|---|
 | **Control room** | P&ID mimic, CCTV view of the cell, configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
-| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector |
-| **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves; and a lumped combustion chamber — ignition, start transients, hard starts, chug and screech onset, a heat-sink wall that soaks back after shutdown (below) |
+| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector. **TS-3** (phase 9): a turbopump component stand — a 300 L nitrogen bank, two run tanks on RELIEVING regulators, and TPA-1, a fictional turbopump for a pump-fed engine (an oxidiser and a fuel centrifugal pump with inducers and an impulse turbine on one shaft, 36 000 rpm at design), its pumps flowing water through discharge valves, turbine flowmeters and throttle valves to a catch tank, its turbine driven by cold nitrogen through a turbine start valve and a speed controller (SC-330) |
+| **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves; and a lumped combustion chamber — ignition, start transients, hard starts, chug and screech onset, a heat-sink wall that soaks back after shutdown; on TS-3, centrifugal pumps on the affinity laws with suction-limited cavitation and casing heating, an impulse turbine, and a shaft with bearings and vibration (below) |
 | **Instruments** | 14 sensors — including an independent Coriolis mass flowmeter — plus command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
 | **DAQ** | Sample rate 100 Hz – 5 kHz, recording to a run file, auto-stop, zero / tare / shunt calibration |
 | **Control** | Interlocks (hard, warn, or consequence — by mode), firing sequencer (single burn or pulse train, 5 s countdown, hold, cutoff), limits and redlines with persistence, automatic abort sequence |
 | **Procedures** | Data-driven checklist engine built from shared sections; Level 1 (orientation), Level 2 (full baseline firing), Level 3 (pressure characterisation, 60–200 psig) Level 4 (valve response, pulse sweep, minimum impulse bit) in tutorial, guided and independent modes, Level 5 (return-to-service firing and troubleshooting, guided or independent) and Level 6 (the independent test conductor: an acceptance campaign from a test request, no procedure, a hidden fault or none, a graded campaign report). Levels 2–4 and the open stand also run in fault-injection mode. Test series run under one go/no-go poll for the approved matrix or range |
 | **Go/no-go** | Six stations reporting from their own data; stations call GO/NO-GO in guided modes, report facts only in independent mode; wrong calls are remembered for the debrief |
-| **Faults** | BPE-2 adds 5 cooling faults to TS-2's: a blocked throat-zone channel, a coked jacket, a cracked liner leaking fuel into the chamber, fuel loaded hot, a coolant thermocouple wired with the wrong extension. TS-2 adds 13 hot-fire faults: an igniter that does not spark, one whose exciter is dead, one that sparks late (a hard start); an oxidiser injector partly plugged, a fuel injector eroded (soft — it chugs); screech; lost film cooling; a drooping oxidiser regulator, a mis-set fuel regulator, a slow main fuel valve; a flowmeter with another meter's calibration, a chamber transducer whose zero shifted, a throat thermocouple that breaks mid-burn (a false redline). TS-1 has 26 hidden faults, hardware and instrument: regulator set wrong, drooping, creeping, sticking; low bottle; isolation valve not fully open; blocked filter; kinked line; leaking fitting; fire valve slow, partly open, stuck, open coil, leaking seat; wrong nozzle, eroded throat, obstructed throat; transducer bias, failure and noise; thermocouple open circuit; load-cell calibration, load-path, drift and intermittent connector. Each applies at a realistic moment (from the start, on pressurisation, or seconds into the burn) through the physics or the sensor chain. About one fault session in five has no fault at all |
-| **Inspections** | BPE-2 adds 6: water-flow and zone-check the jacket, pressure-decay it, radiograph it for blockage and deposit, borescope the liner, hand-probe the fuel, compare thermocouples with a reference probe. TS-2 has 12 of its own — the injector face, a water flow bench for each side, a borescope of the chamber and throat, the igniter plug, a spark check, regulator bench, valve stroke timing, meter K-factors, reference gauge, loop check, thermocouples, connectors; opening the engine or a meter needs the propellants drained first. TS-1 has 15 technician tasks (Console ▸ INSPECT): pin-gauge the throat, measure the exit, pull the filter, walk the line, snoop-test, bench-check the regulator and fire valve, stroke IV-101, read the bottle gauge, inspect connectors, loop check from the rack, compare the PTs with a reference gauge, dead-weight the thrust stand. Each has preconditions (from the rack; cell open; system vented; low side held at 20–50 psig), takes time, and returns measurements beside the expected value — never "fault found". Several find nothing, which is evidence too |
+| **Faults** | TS-3 has 11 of its own: a pump-end bearing in distress, a seal rub, a worn ox wear ring, a damaged fuel inducer, a turbine nozzle blocked with ice, damaged turbine blades, a speed pickup with a loose connector and one configured for the wrong tooth count (both of which drive the real shaft fast through the speed controller), a flowmeter K-factor, a leaking relief seat on a tank regulator, a discharge valve that only partly opens. BPE-2 adds 5 cooling faults to TS-2's: a blocked throat-zone channel, a coked jacket, a cracked liner leaking fuel into the chamber, fuel loaded hot, a coolant thermocouple wired with the wrong extension. TS-2 adds 13 hot-fire faults: an igniter that does not spark, one whose exciter is dead, one that sparks late (a hard start); an oxidiser injector partly plugged, a fuel injector eroded (soft — it chugs); screech; lost film cooling; a drooping oxidiser regulator, a mis-set fuel regulator, a slow main fuel valve; a flowmeter with another meter's calibration, a chamber transducer whose zero shifted, a throat thermocouple that breaks mid-burn (a false redline). TS-1 has 26 hidden faults, hardware and instrument: regulator set wrong, drooping, creeping, sticking; low bottle; isolation valve not fully open; blocked filter; kinked line; leaking fitting; fire valve slow, partly open, stuck, open coil, leaking seat; wrong nozzle, eroded throat, obstructed throat; transducer bias, failure and noise; thermocouple open circuit; load-cell calibration, load-path, drift and intermittent connector. Each applies at a realistic moment (from the start, on pressurisation, or seconds into the burn) through the physics or the sensor chain. About one fault session in five has no fault at all |
+| **Inspections** | TS-3 has 10, plus turning the rotor by hand: bearings, wear-ring clearances, inducer and turbine borescopes, rotor runout and breakaway torque, the speed pickups on a scope, the DAQ's speed-channel configuration, the meter K-factors, the regulators' relief seats, the discharge valves' travel. BPE-2 adds 6: water-flow and zone-check the jacket, pressure-decay it, radiograph it for blockage and deposit, borescope the liner, hand-probe the fuel, compare thermocouples with a reference probe. TS-2 has 12 of its own — the injector face, a water flow bench for each side, a borescope of the chamber and throat, the igniter plug, a spark check, regulator bench, valve stroke timing, meter K-factors, reference gauge, loop check, thermocouples, connectors; opening the engine or a meter needs the propellants drained first. TS-1 has 15 technician tasks (Console ▸ INSPECT): pin-gauge the throat, measure the exit, pull the filter, walk the line, snoop-test, bench-check the regulator and fire valve, stroke IV-101, read the bottle gauge, inspect connectors, loop check from the rack, compare the PTs with a reference gauge, dead-weight the thrust stand. Each has preconditions (from the rack; cell open; system vented; low side held at 20–50 psig), takes time, and returns measurements beside the expected value — never "fault found". Several find nothing, which is evidence too |
 | **Diagnosis** | Component, failure mode, cited evidence (channels, comparisons, the inspections actually done) and recommended action, scored 40/30/20/10 with partial credit. Then the reveal: what failed, which measurements showed it, which misled, what should have been noticed, whether stopping was right, and how an expert would have gone about it. Diagnosis and root cause are written into the notebook entries of the session's runs |
 | **Analysis** | TRACES: every recorded run at full rate — cursors (A/B, Δ, mean between), automatic reduction (steady Pc and thrust, droop, ΔP across filter and valve, valve delays, rise and fall times, total impulse, calculated AND measured mass flow, Isp, Cf, c*, effective throat diameter from measured flow, armature pull-in; per pulse: impulse bit, delays, fired / reached steady), prediction vs measured, overlays aligned at T-0, CSV export. CAMPAIGN: any per-run quantity against any other across runs and sessions, least-squares line with standard errors and R², what the line means (Cf and −Pa·Ae from F vs absolute Pc; dead time from impulse bit vs width), repeatability statistics with 95 % confidence |
 | **Test history** | Every run, traces included, kept in the browser (IndexedDB, newest 80) — reopen, overlay or fit last week's runs with today's |
 | **Notebook** | Automatic entry per run (configuration, results, alarms, aborts), pre- and post-test notes, per-run reports, search |
 | **Test report** | NOTEBOOK ▸ Session test report: the request, conduct, run log, results against prediction, anomalies, inspections, diagnosis and root cause assembled from the record; the conductor's conclusions added; previewed as the printable document it becomes; filed in the notebook (newest 20) and downloadable as standalone HTML. In Level 6 filing grades it (below) |
+| **Level 23 grading** | A design-point spin (both pump heads, ox flow, turbine efficiency, coast-down), a map at design speed and the ox pump's NPSH required — 40; data validity — 30; diagnosis — 20; safety — 10 |
 | **Level 17 grading** | As Level 12, at a 20 s design point and a 210 psig throttled point, plus two cooling deliverables: the heat into the coolant at the design point and the boiling margin at the throttled point |
 | **Level 12 grading** | Two hot-fire points set by targets, not setpoints — MR 1.50 ± 0.05 at Pc 275 ± 15 psig, and a throttled point at 220 psig — reported from the conductor's own reductions (Pc, thrust, MR, c* efficiency, Isp; c* efficiency at the throttled point) — 40; data validity — 30; diagnosis — 20; safety — 10 |
 | **Level 6 grading** | Deliverables (baseline F, Pc, Isp; the thrust coefficient from a ≥ 3-point sweep; the 10 ms impulse bit and scatter) checked against the conductor's OWN reductions — 40; the call on data validity against what was really wrong with the stand — 30; the diagnosis — 20; the safety and go/no-go record — 10 |
 | **Hints** | In guided fault sessions, up to three questions from a senior engineer, each more specific, each −5 on the diagnosis |
-| **Reference** | ~64 concise entries (instrumentation, fluid systems, operations, performance, combustion), stand data and limits, and an honest list of what is modelled |
+| **Reference** | ~76 concise entries (instrumentation, fluid systems, operations, performance, combustion, turbomachinery), stand data and limits, and an honest list of what is modelled |
 | **Sound** | Synthesised: valve clicks, pneumatic actuator, vent hiss, jet, relay, countdown, alarm tones |
 
-Three programs are complete: cold gas, Levels 1–6; bipropellant (BPE-1), Levels 7–12; regeneratively cooled engine (BPE-2), Levels 13–17.
+Four programs are complete: cold gas, Levels 1–6; bipropellant (BPE-1), Levels 7–12; regeneratively cooled engine (BPE-2), Levels 13–17; turbopump component testing (TPA-1), Levels 18–23.
 Level 7 is the stand orientation; Level 8 the water cold flow of the
 injector (each side alone at two tank pressures, then both; CdA per side,
 meters against scales, and the mixture ratio the injector will give hot).
@@ -63,6 +64,21 @@ and throttled. Level 16 is the return-to-service fire with a hidden fault
 from BPE-2's catalogue. Level 17 is the independent long-duration
 acceptance: 20 s at the design point and a throttled point, graded on the
 performance and the cooling.
+
+On TS-3, Level 18 is the orientation: what spins, what drives it and what
+loads it; turning the rotor by hand; why a pump makes head, not pressure;
+and a tank regulator that can bring its tank DOWN. Level 19 is TPA-1's
+first spin, at half speed and then at design: the two speed pickups
+agreeing on the way up, the head of each pump against the prediction, the
+affinity laws (four times the head at twice the speed), the turbine's
+efficiency from its temperature drop, the coast-down. Level 20 maps both
+pumps by stepping the throttles at constant speed, at 100 % and 75 %, and
+refers the two maps to design speed. Level 21 is the suction test: hold the
+speed and ramp one tank down until the head breaks — the NPSH required.
+Level 22 is the return-to-service spin with a hidden fault from TS-3's
+catalogue. Level 23 is the independent acceptance campaign: a design-point
+spin, a map and a suction test, the water and gas budgeted by the
+conductor, graded.
 
 ## Your own hardware (HARDWARE)
 
@@ -149,9 +165,11 @@ src/
                 pools, products and nitrogen, throat, nozzle, chug/screech
                 onset, heat-sink walls), cooling.js (a regenerative
                 jacket: zones, boiling, critical heat flux, coking),
-                biprop.js (gas network + two
-                liquid lines + chamber + stand), predict-bp.js (cold flow
-                and hot fire from the injector drawing)
+                turbopump.js (pumps, impulse turbine, shaft, bearings),
+                biprop.js (gas network + two liquid lines + chamber or
+                turbopump + stand), predict-bp.js (cold flow and hot fire
+                from the injector drawing), predict-tp.js (a turbopump's
+                steady point, at a speed or at a drive pressure)
   instruments/  MEASUREMENT. sensor.js, daq.js, store.js (ring + history tiers)
   control/      controller.js (commands, sequencer, abort, facility),
                 interlocks.js, alarms.js, procedure.js, gonogo.js, eventlog.js
@@ -363,8 +381,48 @@ Approximated, bluntly:
   primes in ≈ 0.6 s instead of ≈ 0.2 s) and its resistance to the fuel line;
   it is one lumped restriction, not seven.
 
+### The turbopump (TS-3), and how honest it is
+
+Modelled:
+- **Pumps.** Each is a head–flow curve, H/H0 = a0·n² + a1·n·q − a2·q² (n
+  speed, q flow, both as fractions of design), scaled by the affinity laws
+  and added as a pressure source to its liquid line's momentum equation —
+  so the flow, the line's inertia, the throttle and the pump settle
+  together, and a stopped pump is just a restriction. Shaft power is a
+  shutoff share (40 % at zero flow) plus a share rising with flow;
+  efficiency emerges, it is not looked up. Head, not pressure: ΔP = ρgH.
+- **Cavitation** is one factor on the head (and, partly, the torque) from
+  NPSH available against an NPSH required that scales with speed² and flow,
+  defined — as the real one is — by a 3 % head drop. A cavitating pump
+  unloads, and the turbine speeds up.
+- **Casing heat.** A few hundred grams of liquid in each casing take the
+  shaft power not delivered as head. With flow it hardly warms; deadheaded
+  it heats tens of degrees a minute, and its vapour pressure rises with it.
+- **Turbine.** One impulse stage on the drive gas leaving the network
+  through its nozzles: spouting velocity from the inlet state, Euler torque
+  with a nozzle and a blade velocity coefficient and one lumped loss, so the
+  torque is highest stalled and the efficiency peaks near u/c0 ≈ 0.45. The
+  gas leaves colder by exactly the work done — which is how the stand
+  measures the turbine's efficiency.
+- **Shaft.** One inertia; two bearings with linear friction, each a thermal
+  node cooled by the propellant through it; windage. The speed pickups count
+  teeth; a counter that loses its pulses reads zero.
+- **Speed control.** A PI loop with a feed-forward from the steady
+  prediction, acting on the DAQ's readings (the mean of the two pickups),
+  through a fast EPC on the drive regulator.
+
+Approximated, bluntly: the pump curves and NPSH scaling are textbook shapes
+with invented constants; there is no inducer backflow, no rotating
+cavitation, no surge in the rising part of a curve (the curves are drawn
+falling everywhere to avoid it), no rotordynamics — no critical speeds,
+whirl or axial thrust. Vibration is an invented RMS figure: imbalance ∝ n²,
+plus cavitation and bearing terms. Water's properties do not change with
+temperature except its vapour pressure. The redline overshoot after a
+genuine overspeed (≈ 115 % with the turbine valve's 90 ms) is real
+behaviour of the model, not a tuned number.
+
 **Not claimed.** The numbers are plausible for a small research cold-gas
-thruster and a small pressure-fed engine at sea level. They predict no real
+thruster, a small pressure-fed engine and a small turbopump at sea level. They predict no real
 hardware, and OX-1 and FU-1 are not real propellants.
 
 ### The faults, and how honest they are
@@ -412,6 +470,9 @@ node redline/test/levels-bp.test.mjs
 node redline/test/regen.test.mjs
 node redline/test/levels-rg.test.mjs
 node redline/test/custom.test.mjs
+node redline/test/turbopump.test.mjs
+node redline/test/faults-tp.test.mjs
+node redline/test/levels-tp.test.mjs
 ```
 
 `physics.test.mjs` checks the gas network against hand calculations;
@@ -464,6 +525,20 @@ altitude, and a predicted test for each preset — clean, matching the steady
 prediction, with droop following the datasheet point and the opening delay
 of the order of the stated response time.
 
+`turbopump.test.mjs` checks TPA-1: the affinity laws in the pump model, a
+stopped pump as a restriction, head scaling with density, the steady
+prediction against the simulation at three drive points, cavitation at low
+tank pressure, the runaway of a deadheaded pump and its casing heating,
+the turbine's energy balance; then a design-speed spin, a five-point map
+and a suction test through the session and their reductions against the
+prediction, the stand's rules, and the overspeed abort. `faults-tp.test.mjs`
+forces each TS-3 fault through a standard spin (the damaged inducer
+through a suction test, the only place it shows) and checks its fingerprint
+in the measured data, the inspections and the diagnosis vocabulary.
+`levels-tp.test.mjs` walks Levels 18 and 19 start to finish and flies
+Level 23's three deliverables — refilling the tanks between runs, as the
+water budget demands — and grades a report against them.
+
 For visual checks, serve the repo with `python3 -m http.server` and drive
 `/redline/` in headless Chromium; `window.redline` exposes the app and its
 session for scripting.
@@ -478,5 +553,5 @@ session for scripting.
 | 6 | ✓ pressure-fed bipropellant stand TS-2 (liquid feed physics, two feed systems, injector, purge), cold flow, Levels 7 and 8, the core generalised to more than one stand |
 | 7 | ✓ hot fire: combustion chamber, spark ignition and confirmation, start sequencing and hard starts, chug and screech onset, heat-sink thermal limit and soak-back, hot-fire reductions, 13 TS-2 faults and 12 inspections, Levels 9–12 |
 | 8 | ✓ BPE-2, a regeneratively cooled engine on TS-2: cooling jacket physics (boiling, critical heat flux, coking, liner damage), jacket instruments and reductions, 5 cooling faults and 6 inspections, Levels 13–17 |
-| 9 | TS-3, a turbopump stand — component tests: a pump on water (head, flow, cavitation), a turbine on cold gas (spin-up, overspeed, bearings) |
+| 9 | ✓ TS-3, a turbopump component stand: pumps on water and a turbine on cold nitrogen, speed control, the affinity laws, maps, suction tests, bearings, vibration and overspeed, 11 faults and 10 inspections, Levels 18–23 |
 | 10 | TS-3 integrated: a gas-generator cycle engine, bootstrap start |

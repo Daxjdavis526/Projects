@@ -38,7 +38,13 @@ export class TrainingView {
         h('div.lt', 'Bipropellant stand, regeneratively cooled engine, no procedure'),
         h('ul', h('li', 'The fuel cools the chamber on its way to the injector: long burns, if the coolant keeps up'), h('li', 'Watch TC-728, the boiling margin and the liner temperatures'), h('li', 'Fault injection: everything TS-2 has, plus cooling faults')),
         h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-2R'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-2R'), 'sm'),
-          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-2R'), 'sm', { title: MODES.fault.text }))));
+          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-2R'), 'sm', { title: MODES.fault.text }))),
+      h('div.level',
+        h('div.ln', 'TS-3 · SANDBOX · TPA-1'),
+        h('div.lt', 'Turbopump component stand, no procedure'),
+        h('ul', h('li', 'Spins, maps and suction tests on water and cold nitrogen'), h('li', 'Speed or drive-pressure control; watch both pickups'), h('li', 'Fault injection: bearings, rubs, worn rings, blading, pickups, meters')),
+        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-3'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-3'), 'sm'),
+          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-3'), 'sm', { title: MODES.fault.text }))));
     open.append(h('div.level',
       h('div.ln', 'YOUR HARDWARE'),
       h('div.lt', 'A cold-gas stand built from your parts'),

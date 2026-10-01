@@ -553,6 +553,11 @@ iframe.report.tall { min-height: calc(100vh - 150px); }
 .seg.liq.s-nodata { stroke: #3a2f2f; }
 .sym .liquid { fill: rgba(80, 190, 168, 0.32); stroke: none; transition: y .3s, height .3s; }
 .sym .body.tank { fill: none; }
+.sym .shaft { fill: none; stroke: #4a5560; stroke-width: 1.6; }
+.sym.running .shaft { stroke: var(--gas-hi); }
+.sym .vane { fill: none; stroke: #6c7885; stroke-width: 1.6; stroke-linecap: round; }
+.sym.running .vane { stroke: var(--gas-hi); }
+.sym.running .body.pump, .sym.running .body.turb { stroke: var(--gas-hi); }
 .spray { fill: rgba(150, 220, 230, 0.55); opacity: 0; transition: opacity .1s; pointer-events: none; }
 
 /* HARDWARE: the custom-stand editor */

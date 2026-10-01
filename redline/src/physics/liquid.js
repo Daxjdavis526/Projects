@@ -81,6 +81,14 @@ export class LiquidLine {
     this.jacketLeak = 0;                           // fault hook: CdA of a liner crack into the chamber
     this.mdotLeak = 0;
     this.Pjin = 0;                                 // Pa abs, jacket inlet
+    // a pump-fed line: the turbopump attaches its Pump here (physics/turbopump.js);
+    // a throttle valve downstream scales the "injector" (on a pump test stand
+    // the discharge throttle, not an injector, is what the line flows through)
+    this.pump = null;
+    this.Tliq = null;                              // K, liquid temperature (set by the model)
+    this.thr = spec.throttle ? (spec.throttle.initial ?? 1) : 1;
+    this.thrCmd = this.thr;
+    this.thrRate = spec.throttle?.rate ?? 0.5;     // fraction per second
     this._applyVolumes(net, true);
   }
 
@@ -138,25 +146,40 @@ export class LiquidLine {
     const aL = this.CdAline * (1 - this.lineBlockage);
     const aJ = this.CdAjacket * (1 - 0.6 * this.jacketBlockage);
     const Rj = this.CdAjacket ? this.R(aJ) : 0;
-    const Rtot = aV > 1e-12 ? this.R(aL) + this.R(aV) + Rj : Infinity;
+    const pmp = this.pump;
+    const pt = pmp ? pmp.terms(this.rho, this.mdot) : { src: 0, Rq: 0 };
+    const Rs = pmp?.CdAsuc ? this.R(pmp.CdAsuc) : 0;
+    const Rtot = aV > 1e-12 ? this.R(aL) + this.R(aV) + Rj + pt.Rq + Rs : Infinity;
     // a dry tank drives nothing (the line would ingest gas: the run is over)
-    const Pup = this.mL > 1e-3 ? vt.P : vm.P;
+    const dry = this.mL <= 1e-3;
+    const Pup = !dry ? vt.P : vm.P;
     const prev = this.mdot;
     if (!Number.isFinite(Rtot)) this.mdot = 0;
     else {
       const k = dt / this.I;
-      this.mdot = (this.mdot + k * (Pup - vm.P)) / (1 + k * Rtot * Math.abs(this.mdot));
+      this.mdot = (this.mdot + k * (Pup + pt.src - vm.P)) / (1 + k * Rtot * Math.abs(this.mdot));
     }
     if (this.mdot > 0 && this.mL <= 0) this.mdot = 0;
     this.mdotDot = (this.mdot - prev) / dt;
-    // valve inlet pressure: tank, less the upstream share of friction and the
-    // force needed to decelerate (or accelerate) the upstream column
-    const Rup = this.R(aL) * 0.7;
-    this.Pvi = Pup - Rup * this.mdot * Math.abs(this.mdot) - this.Iup * this.mdotDot;
+    if (pmp) {
+      // the valve sits on the pump discharge
+      pmp.update(dt, this, vt.P, this.Tliq ?? net.ambient.T, net.ambient.T, dry);
+      this.Pvi = pmp.Pd;
+    } else {
+      // valve inlet pressure: tank, less the upstream share of friction and the
+      // force needed to decelerate (or accelerate) the upstream column
+      const Rup = this.R(aL) * 0.7;
+      this.Pvi = Pup - Rup * this.mdot * Math.abs(this.mdot) - this.Iup * this.mdotDot;
+    }
+    // discharge throttle, slewing to its command
+    if (this.thr !== this.thrCmd) {
+      const d = this.thrCmd - this.thr, st = this.thrRate * dt;
+      this.thr += Math.abs(d) <= st ? d : Math.sign(d) * st;
+    }
     // injector
     this.w = smooth((this.fill - this.wetFrom) / (1 - this.cushion - this.wetFrom));
     const dPi = vm.P - Pc;
-    const aI = this.CdAinj * (1 - this.injBlockage);
+    const aI = this.CdAinj * this.thr * (1 - this.injBlockage);
     this.mdotInj = dPi > 0 && this.Vl > 0 ? this.w * aI * Math.sqrt(2 * this.rho * dPi) : 0;
     // jacket inlet pressure, and fuel escaping through a cracked liner
     this.Pjin = vm.P + Rj * this.mdot * Math.abs(this.mdot);
@@ -178,7 +201,7 @@ export class LiquidLine {
     if (this.Vl < 0) this.Vl = 0;
     this.drained += this.mdotInj * dt;
     // gas escapes through the orifices the liquid has not reached
-    if (this.gasEl) this.gasEl.CdA0 = this.CdAinjGas * (1 - this.injBlockage) * (1 - this.w);
+    if (this.gasEl) this.gasEl.CdA0 = this.CdAinjGas * this.thr * (1 - this.injBlockage) * (1 - this.w);
     this._applyVolumes(net);
     // jet momentum on the thrust stand
     const v = dPi > 0 ? this.jetCv * Math.sqrt(2 * dPi / this.rho) : 0;
@@ -192,7 +215,7 @@ export class LiquidLine {
     const Vg = Math.max(vm.V, 1e-9);
     const Pc = net.state(this.ch).P;
     const dPi = Math.max(vm.P - Pc, 2e3);
-    const kInj = this.w * this.CdAinj * Math.sqrt(2 * this.rho) / (2 * Math.sqrt(dPi));
+    const kInj = this.w * this.CdAinj * this.thr * Math.sqrt(2 * this.rho) / (2 * Math.sqrt(dPi));
     const lam = (kInj / this.rho) * (vm.P / Vg);
     return lam > 0 ? 0.35 / lam : Infinity;
   }

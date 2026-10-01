@@ -81,6 +81,10 @@ export const QUANTITIES = {
   accel:    { base: 'g', units: { g: { to: v => v, from: v => v, dp: 2, label: 'g' } } },
   area:     { base: 'm²', units: { 'mm²': { to: v => v * 1e6, from: v => v / 1e6, dp: 3, label: 'mm²' } } },
   power:    { base: 'W', units: { kW: { to: v => v / 1e3, from: v => v * 1e3, dp: 2, label: 'kW' } } },
+  speed:    { base: 'rpm', units: { rpm: { to: v => v, from: v => v, dp: 0, label: 'rpm' },
+                                    krpm: { to: v => v / 1e3, from: v => v * 1e3, dp: 2, label: 'krpm' } } },
+  head:     { base: 'm', units: { m: { to: v => v, from: v => v, dp: 1, label: 'm' },
+                                  ft: { to: v => v / 0.3048, from: v => v * 0.3048, dp: 1, label: 'ft' } } },
   rate:     { base: 'Pa/s', units: { 'psi/min': { to: v => v / PSI * 60, from: v => v * PSI / 60, dp: 2, label: 'psi/min' } } },
 };
 
@@ -104,6 +108,8 @@ export const DISPLAY = {
   accel: 'g',
   rate: 'psi/min',
   power: 'kW',
+  speed: 'rpm',
+  head: 'm',
 };
 
 export function unitOf(quantity) {

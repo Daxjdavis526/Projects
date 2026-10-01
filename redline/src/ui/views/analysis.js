@@ -200,7 +200,7 @@ export class AnalysisView {
   }
 
   reduction(run, overlays, def, right) {
-    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? ({ pulse: 'pulse train', coldflow: 'cold flow', hotfire: 'hot fire' }[run.metrics.kind] || 'single burn') : '')));
+    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? ({ pulse: 'pulse train', coldflow: 'cold flow', hotfire: 'hot fire', pump: `turbopump ${run.metrics.mode}` }[run.metrics.kind] || 'single burn') : '')));
     const rb = h('div.pb');
     right.append(rb);
     this.cursorBox = h('div');

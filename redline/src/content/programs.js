@@ -5,6 +5,13 @@
 import ts1 from './stands/ts1-coldgas.js';
 import ts2 from './stands/ts2-biprop.js';
 import ts2r from './stands/ts2-regen.js';
+import ts3 from './stands/ts3-turbopump.js';
+import tpOrientation from './procedures/tp-orientation.js';
+import tpSpin from './procedures/tp-spin.js';
+import tpMap from './procedures/tp-map.js';
+import tpSuction from './procedures/tp-suction.js';
+import tpTrouble from './procedures/tp-trouble.js';
+import tpCampaign from './procedures/tp-campaign.js';
 import rgColdflow from './procedures/rg-coldflow.js';
 import rgHotfire from './procedures/rg-hotfire.js';
 import rgMargins from './procedures/rg-margins.js';
@@ -23,7 +30,7 @@ import pulse from './procedures/cg-pulse.js';
 import trouble from './procedures/cg-trouble.js';
 import campaign from './procedures/cg-campaign.js';
 
-export const STANDS = { 'TS-1': ts1, 'TS-2': ts2, 'TS-2R': ts2r };
+export const STANDS = { 'TS-1': ts1, 'TS-2': ts2, 'TS-2R': ts2r, 'TS-3': ts3 };
 
 export const MODES = {
   tutorial:    { label: 'Tutorial', text: 'Every step explained. Strict interlocks. Stations make their own go/no-go calls and say why.' },
@@ -84,6 +91,24 @@ export const PROGRAMS = [
         teaches: ['Blocked channels', 'Coking', 'Liner cracks', 'Coolant temperature', 'Instruments that lie about margin'] },
       { n: 17, id: 'rg-campaign', title: 'Long-duration acceptance campaign', scenario: rgCampaign, modes: ['independent'],
         teaches: ['20 s at the design point', 'Propellant and coolant budgets', 'Cooling deliverables', 'Data validity'] },
+    ],
+  },
+  {
+    id: 'turbopump', title: 'Turbopump component testing', stand: 'TS-3',
+    blurb: 'TPA-1, the turbopump for a pump-fed engine, on the bench: two centrifugal pumps on water and an impulse turbine on cold nitrogen, one shaft at 36 000 rpm. Speed control, the affinity laws, head–flow maps, suction performance, bearings and vibration — and the runaway that follows when a pump loses its load.',
+    levels: [
+      { n: 18, id: 'tp-orient', title: 'Turbopump stand orientation', scenario: tpOrientation, modes: ['tutorial', 'guided'],
+        teaches: ['What spins, what drives it, what loads it', 'Turning the rotor by hand', 'Head, not pressure', 'Relieving regulators'] },
+      { n: 19, id: 'tp-spin', title: 'First spin', scenario: tpSpin, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['Speed control and its feed-forward', 'Two speed pickups', 'The affinity laws', 'Turbine efficiency from temperatures', 'Coast-down'] },
+      { n: 20, id: 'tp-map', title: 'Pump map', scenario: tpMap, modes: ['guided', 'independent'],
+        teaches: ['Head–flow curves', 'Throttle steps at constant speed', 'Referring data to design speed', 'Power balance'] },
+      { n: 21, id: 'tp-suction', title: 'Suction performance (NPSH)', scenario: tpSuction, modes: ['guided', 'independent'],
+        teaches: ['NPSH available and required', 'The 3 % head-drop definition', 'Cavitation and unloading', 'Testing past an edge on purpose'] },
+      { n: 22, id: 'tp-faults', title: 'Turbopump fault diagnosis', scenario: tpTrouble, modes: ['guided', 'independent'],
+        teaches: ['Bearings, rubs and imbalance', 'Worn rings and damaged blading', 'Instrument faults inside a control loop', 'Reading a controller\'s output'] },
+      { n: 23, id: 'tp-campaign', title: 'Turbopump acceptance campaign', scenario: tpCampaign, modes: ['independent'],
+        teaches: ['Planning runs, water and gas', 'Design point, map and suction deliverables', 'Data validity'] },
     ],
   },
 ];

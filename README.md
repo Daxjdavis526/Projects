@@ -258,7 +258,13 @@ after shutdown, chug when the injector goes soft, and a campaign to hit a
 mixture ratio by trimming two tank pressures. A second engine on that
 stand is regeneratively cooled: its fuel crosses the chamber wall first, so
 it burns as long as the propellant lasts — as long as the coolant does not
-boil, coke, or leak through a cracked liner.
+boil, coke, or leak through a cracked liner. A third stand puts the
+turbopump for a pump-fed engine on the bench — two centrifugal pumps on
+water, an impulse turbine on cold nitrogen, one shaft at 36 000 rpm held by
+a speed controller — for spins, head–flow maps referred by the affinity
+laws, suction tests that drive the pumps into cavitation on purpose, and the
+runaway that follows when a pump loses its load or a speed pickup lies to
+the controller.
 Fictional hardware, generalised
 procedures, and it says so. Desktop only.
 

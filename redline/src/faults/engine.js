@@ -78,7 +78,8 @@ export class FaultEngine {
     let text;
     if (n === 0) text = 'Locate before you name. When did the first thing look wrong — at rest, on pressurisation, or only with flow? Which channels show it, and which channels that should show it do not?';
     else if (n === 1) text = !f
-      ? (liquid ? 'Every anomaly needs an ordinary explanation before it needs a fault: scatter, your own actions, the tank pressure drooping as the ullage grows, priming, the as-built injector. Check that each thing you noticed has one.'
+      ? (this.S.def.physics?.turbopump ? 'Every anomaly needs an ordinary explanation before it needs a fault: scatter, your own actions, the speed controller\'s corrections, the bank blowing down under the turbine, the tank regulators relieving. Check that each thing you noticed has one.'
+        : liquid ? 'Every anomaly needs an ordinary explanation before it needs a fault: scatter, your own actions, the tank pressure drooping as the ullage grows, priming, the as-built injector. Check that each thing you noticed has one.'
         : 'Every anomaly needs an ordinary explanation before it needs a fault: scatter, your own actions, the non-relieving regulator, the pressure tare. Check that each thing you noticed has one.')
       : f.category === 'sensor'
         ? 'Ask whether the physics agrees. A real change shows on every channel connected to it — pressure, thrust and flow move together. One channel disagreeing with its neighbours is usually the instrument, not the stand.'

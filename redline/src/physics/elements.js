@@ -339,7 +339,32 @@ export class NozzleElement extends Element {
   CdA() { return this.nozzle.Cd * this.nozzle.Ae; }
 }
 
+/* The vent port of a tank-pressure controller: TS-3's tank regulators are
+   RELIEVING — when the tank rises above the regulator's own setpoint (by
+   `offset`), this port bleeds it to the cell. Turning the setpoint down then
+   brings the tank down, slowly, which is what a suction-performance test
+   needs. (TS-2's regulators are non-relieving: going down means venting.) */
+export class RelievingPort extends Element {
+  constructor(spec, net) {
+    super(spec, net);
+    this.CdAmax = spec.CdA;
+    this.reg = spec.reg;
+    this.offset = spec.offset ?? 2e4;
+    this.band = spec.band ?? 3.5e4;
+    this.x = 0;
+  }
+  update(dt, net) {
+    const R = net.el(this.reg);
+    const Pg = net.state(this.from).P - net.ambient.P;
+    const xt = clamp01((Pg - (R.dome + R.setBias) - this.offset) / this.band);
+    this.x += (xt - this.x) * Math.min(1, dt / 0.02);
+  }
+  CdA() { return this.CdAmax * this.x * (1 - this.blockage) + this.leakCdA; }
+  CdAbound() { return Math.max(this.CdA(), 0.25 * this.CdAmax); }
+}
+
 export const ELEMENT_TYPES = {
+  relieving: RelievingPort,
   orifice: Orifice,
   filter: Orifice,
   valve: Valve,

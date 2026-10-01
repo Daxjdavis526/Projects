@@ -41,7 +41,7 @@ export class PID {
   build() {
     const def = this.session.def, L = def.pid;
     this.mainLine = new Set(L.mainLine || TS1_MAIN_LINE);
-    this.zsMarks = new Map(); this.regSp = new Map(); this.epcFb = new Map(); this.tankLv = new Map();
+    this.zsMarks = new Map(); this.regSp = new Map(); this.epcFb = new Map(); this.tankLv = new Map(); this.thrPos = new Map(); this.rotors = [];
     clear(this.host);
     const [vx, vy, vw, vh] = L.viewBox;
     const svg = s('svg', { viewBox: `${vx} ${vy} ${vw} ${vh}`, preserveAspectRatio: 'xMidYMid meet' });
@@ -70,9 +70,9 @@ export class PID {
 
     // plume (drawn under the thruster)
     const ex = L.exhaust;
-    this.plume = s('path.plume', { d: `M${ex.x},${ex.y - 9} L${ex.x + 110},${ex.y - 30} L${ex.x + 110},${ex.y + 30} L${ex.x},${ex.y + 9} Z` });
-    svg.append(this.plume);
-    if (ex.spray) {
+    this.plume = ex ? s('path.plume', { d: `M${ex.x},${ex.y - 9} L${ex.x + 110},${ex.y - 30} L${ex.x + 110},${ex.y + 30} L${ex.x},${ex.y + 9} Z` }) : null;
+    if (this.plume) svg.append(this.plume);
+    if (ex?.spray) {
       // water spray from the injector in a cold flow (an HMI cue from the manifold pressures)
       this.spray = s('path.spray', { d: `M${ex.x - 70},${ex.y - 8} L${ex.x + 60},${ex.y - 34} L${ex.x + 60},${ex.y + 34} L${ex.x - 70},${ex.y + 8} Z` });
       svg.append(this.spray);
@@ -136,6 +136,11 @@ export class PID {
       h('span', h('b', { style: { color: '#9d8cf0', fontFamily: 'var(--mono)', fontSize: '9px', marginRight: '4px' } }, 'C'), 'command-only indication')));
   }
 
+  _meterOf(vol) {
+    const M = this.session.def.pid.flowMeters || { ox: 'FT-714', fu: 'FT-724' };
+    return M[vol.startsWith('ox') ? 'ox' : 'fu'];
+  }
+
   _branchTarget(sg) {
     if (sg.from) return sg.from;
     // a branch off the main line toward a vent/relief element
@@ -196,8 +201,9 @@ export class PID {
           g.append(s('path.act', { d: `M${x},${y} L${x + 20},${y}` }));
           g.append(s('rect.act', { x: x + 20, y: y - 8, width: 16, height: 16 }));
           g.append(s('text.lbl2', { x: x + 28, y: y + 3.5, 'text-anchor': 'middle' }, 'S'));
-          g.append(s('text.lbl', { x: x - 16, y: y + 3, 'text-anchor': 'end' }, sy.id));
-          g.append(s('text.lbl2', { x: x - 16, y: y + 14, 'text-anchor': 'end' }, sy.vent ? 'NO' : 'NC'));
+          const lx = sy.labRight ? x + 40 : x - 16, la = sy.labRight ? 'start' : 'end';
+          g.append(s('text.lbl', { x: lx, y: y + 3 + (sy.labRight ? 12 : 0), 'text-anchor': la }, sy.id));
+          g.append(s('text.lbl2', { x: lx, y: y + 14 + (sy.labRight ? 12 : 0), 'text-anchor': la }, sy.vent && !sy.nc ? 'NO' : 'NC'));
           g.append(s('text.cmdmark', { x: x + 40, y: y - 8 }, 'C'));
           g.append(hl(96, 34, -10, 0));
         } else {
@@ -237,8 +243,13 @@ export class PID {
         g.append(s('path.fillable', { d: `M${x - 10},${y - 22} L${x + 10},${y - 22} L${x},${y - 4} Z` }));
         g.append(s('path.act', { d: `M${x},${y - 4} L${x},${y + 4}` }));
         g.append(s('path.act', { d: `M${x + 4},${y} l6,-6 l6,6 l6,-6 l6,6`, fill: 'none' }));
-        g.append(s('text.lbl', { x: x - 16, y: y + 3, 'text-anchor': 'end' }, sy.id));
-        g.append(s('text.lbl2', { x: x - 16, y: y + 14, 'text-anchor': 'end' }, `SET ${sy.set || '250'}`));
+        if (sy.labBelow) {
+          g.append(s('text.lbl', { x, y: y + 36, 'text-anchor': 'middle' }, sy.id));
+          g.append(s('text.lbl2', { x, y: y + 47, 'text-anchor': 'middle' }, `SET ${sy.set || '250'}`));
+        } else {
+          g.append(s('text.lbl', { x: x - 16, y: y + 3, 'text-anchor': 'end' }, sy.id));
+          g.append(s('text.lbl2', { x: x - 16, y: y + 14, 'text-anchor': 'end' }, `SET ${sy.set || '250'}`));
+        }
         g.append(hl(92, 54, -10, 0));
         break;
       }
@@ -314,6 +325,61 @@ export class PID {
         g.append(hl(74, 32, 0, 1));
         break;
       }
+      case 'shaft': {
+        // the turbopump rotor: a double line from the first pump to the turbine
+        const x1 = sy.x1;
+        g.append(s('path.shaft', { d: `M${x},${y - 3} L${x1},${y - 3} M${x},${y + 3} L${x1},${y + 3}` }));
+        const txt = s('text.lbl2', { x: (x + x1) / 2 + 60, y: y - 10, 'text-anchor': 'middle' }, '---- rpm');
+        g.append(s('text.lbl', { x: (x + x1) / 2 - 40, y: y - 10, 'text-anchor': 'middle' }, sy.label || sy.id), txt);
+        this.rotors.push({ g, txt, x, y });
+        g.append(s('rect.hl', { x: x + 22, y: y - 26, width: x1 - x - 44, height: 34 }));
+        break;
+      }
+      case 'pump': {
+        // a centrifugal pump: casing circle, impeller vanes that turn, inlet from above
+        g.append(s('circle.body.pump', { cx: x, cy: y, r: 22 }));
+        const spin = s('g');
+        for (let k = 0; k < 4; k++) {
+          const a = k * Math.PI / 2;
+          spin.append(s('path.vane', { d: `M${x},${y} Q${x + 9 * Math.cos(a + 0.6)},${y + 9 * Math.sin(a + 0.6)} ${x + 16 * Math.cos(a)},${y + 16 * Math.sin(a)}` }));
+        }
+        g.append(spin);
+        g.append(s('text.lbl', { x: x - 28, y: y + 32, 'text-anchor': 'end' }, sy.id));
+        g.append(s('text.lbl2', { x: x - 28, y: y + 43, 'text-anchor': 'end' }, sy.label || ''));
+        this.rotors.push({ g, spin, x, y });
+        g.append(hl(54, 54));
+        break;
+      }
+      case 'turbine': {
+        // an impulse turbine: a trapezoid, gas in at the narrow side
+        g.append(s('path.body.turb', { d: `M${x - 22},${y - 14} L${x + 32},${y - 26} L${x + 32},${y + 26} L${x - 22},${y + 14} Z` }));
+        const spin = s('g');
+        for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; spin.append(s('path.vane', { d: `M${x + 6 + 5 * Math.cos(a)},${y + 5 * Math.sin(a)} L${x + 6 + 14 * Math.cos(a)},${y + 14 * Math.sin(a)}` })); }
+        g.append(spin);
+        g.append(s('text.lbl', { x: x + 4, y: y + 44, 'text-anchor': 'middle' }, 'TURBINE'));
+        this.rotors.push({ g, spin, x: x + 6, y });
+        g.append(hl(64, 64, 6, 6));
+        break;
+      }
+      case 'throttle': {
+        // a globe valve with a positioner: the number is ITS feedback
+        g.append(bow(x, y, false, 10));
+        g.append(s('path.act', { d: `M${x},${y} L${x},${y - 16}` }));
+        g.append(s('rect.act', { x: x - 11, y: y - 30, width: 22, height: 14 }));
+        g.append(s('text.lbl2', { x, y: y - 20, 'text-anchor': 'middle' }, 'P'));
+        g.append(s('text.lbl', { x, y: y + 26, 'text-anchor': 'middle' }, sy.id));
+        const pos = s('text.lbl2', { x: x + 16, y: y - 20 }, '---- %');
+        this.thrPos.set(sy.pos, pos);
+        g.append(pos);
+        g.append(hl(48, 66, 0, 0));
+        break;
+      }
+      case 'catch': {
+        g.append(s('path.body', { d: `M${x - 16},${y - 50} L${x - 16},${y + 50} L${x + 26},${y + 50} L${x + 26},${y - 50}` }));
+        g.append(s('text.lbl2', { x: x + 5, y: y + 66, 'text-anchor': 'middle' }, 'CATCH'));
+        g.append(hl(50, 112, 5, 0));
+        break;
+      }
       case 'thrustStand': {
         if (sy.span) {
           const [a, b] = sy.span, py = y + 44;
@@ -355,7 +421,8 @@ export class PID {
     const ind = {};
     for (const e of def.physics.elements) {
       let st;
-      if (e.hidden) { ind[e.id] = { st: 'closed', open: false }; continue; }   // no HMI knows about a leak
+      // no HMI knows about a leak — but a turbine's nozzles are a known, fixed exit
+      if (e.hidden) { const known = e.id === 'TNZ-337'; ind[e.id] = { st: known ? 'open' : 'closed', open: known }; continue; }
       const ix = (def.indications || []).find(q => q.valve === e.id);
       if (ix) {
         const o = d.latest(ix.zso), cl = d.latest(ix.zsc);
@@ -409,7 +476,11 @@ export class PID {
     for (const sg of this.segs) {
       const vol = sg.def.vol;
       let cls = sg.def.liquid ? 'seg liq' : 'seg', color = null, on = false;
-      if (vol === 'vent') {
+      if (vol === 'vent' && sg.def.liquid) {
+        // liquid to a catch tank: flowing when the line's meter says so
+        cls += ' liq s-liqv';
+        on = d.online && d.latest(this._meterOf(sg.def.from.includes('OX') ? 'ox' : 'fu')) > 0.01;
+      } else if (vol === 'vent') {
         cls += ' s-vent';
         on = sg.def.from ? flowing.has(sg.def.from) : (def.ventElements || []).some(id => flowing.has(id));
       } else if (vol === 'tank') {
@@ -423,8 +494,7 @@ export class PID {
         else color = pressureColor(p);
         if (sg.def.liquid) {
           // a liquid line flows when its flowmeter says so
-          const fch = vol.startsWith('ox') ? 'FT-714' : 'FT-724';
-          on = d.online && d.latest(fch) > 0.01;
+          on = d.online && d.latest(this._meterOf(vol)) > 0.01;
         } else if (sg.branchTo) on = flowing.has(sg.branchTo);
         else if (vol !== 'dome') {
           on = def.physics.elements.some(e => this.mainLine.has(e.id) && (e.from === vol || e.to === vol) && flowing.has(e.id));
@@ -476,9 +546,27 @@ export class PID {
 
     // exhaust glow from measured chamber pressure (an HMI cue, not a camera)
     const ex = def.pid.exhaust;
-    const pc = d.latest(ex.channel || 'PT-401');
+    const pc = ex ? d.latest(ex.channel || 'PT-401') : NaN;
     const k = d.online && pc > psi(3) ? Math.min(1, pc / psi(160)) : 0;
-    this.plume.style.opacity = (0.15 + 0.7 * k) * (k > 0 ? 1 : 0);
+    if (this.plume) this.plume.style.opacity = (0.15 + 0.7 * k) * (k > 0 ? 1 : 0);
+    // turbomachinery: the shaft and the rotors turn with the MEASURED speed,
+    // throttles show their position feedback
+    if (this.rotors.length) {
+      const n = d.online ? d.latest(def.pid.speedChannel || 'SPD') : NaN;
+      const on = Number.isFinite(n) && n > 300;
+      const now = performance.now(), dt = Math.min(0.1, (now - (this._rt || now)) / 1000); this._rt = now;
+      // a stroboscope, not a tachometer: a slow visible rotation that grows with speed
+      this._ang = ((this._ang || 0) + dt * 40 * Math.sqrt(Math.max(0, n || 0) / 1000)) % 360;
+      for (const r of this.rotors) {
+        r.g.classList.toggle('running', on);
+        if (r.spin) r.spin.setAttribute('transform', `rotate(${this._ang.toFixed(1)} ${r.x} ${r.y})`);
+        if (r.txt) r.txt.textContent = Number.isFinite(n) ? `${fmt(n, 'speed')} rpm` : '---- rpm';
+      }
+    }
+    for (const [ch, t] of this.thrPos) {
+      const v = d.online ? d.latest(ch) : NaN;
+      t.textContent = Number.isFinite(v) ? `${Math.round(100 * v)} %` : '---- %';
+    }
     // the spark: from the exciter current (what the console actually knows)
     if (this.spark) this.spark.setAttribute('opacity', d.online && d.latest('IGN-I') > 0.5 ? (0.4 + 0.6 * (Math.floor(performance.now() / 70) % 2)).toFixed(2) : 0);
     if (this.spray) {

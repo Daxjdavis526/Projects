@@ -17,6 +17,7 @@ import { GASES } from './gas.js';
 import { LiquidLine } from './liquid.js';
 import { Chamber } from './combustion.js';
 import { RegenJacket, tsatFU } from './cooling.js';
+import { Turbopump } from './turbopump.js';
 
 const G0 = 9.80665;
 
@@ -39,6 +40,9 @@ export class BipropModel {
     // a regeneratively cooled engine: the fuel line runs through the jacket
     this.jacket = p.regen ? new RegenJacket(p.regen, { ambient: p.ambient }) : null;
     this.coolLine = p.regen ? this.lineById.get(p.regen.line) : null;
+    // a pump-fed stand: two pumps on the lines, a turbine on the drive gas
+    this.tp = p.turbopump ? new Turbopump(p.turbopump, { ambient: p.ambient, lines: this.lines, net: this.net }) : null;
+    this.throttleOf = new Map(this.lines.filter(l => l.spec.throttle).map(l => [l.spec.throttle.id, l]));
     const ts = p.thrustStand;
     this.stand = { w: 2 * Math.PI * ts.fn, z: ts.zeta, y: 0, yd: 0, preload: ts.preload ?? 0 };
     this.scales = structuredClone(p.scales || {});   // per session: the DAQ's meter calibration can be changed          // tank weigh scales: pressure tare, kg per Pa
@@ -108,6 +112,21 @@ export class BipropModel {
       s['Q:jkt'] = () => J.Q;
       for (const sg of J.seg) { s['Tw:' + sg.id] = () => sg.Tw; s['Twg:' + sg.id] = () => sg.Twg; }
     }
+    const TP = this.tp;
+    if (TP) {
+      s['N:tp'] = () => TP.rpm;
+      s['vib:tp'] = () => TP.vib;
+      s['Tb:pb'] = () => TP.brg.pb;
+      s['Tb:tb'] = () => TP.brg.tb;
+      s['T:texh'] = () => TP.Texh;
+      for (const [side, p] of Object.entries(TP.pumps)) {
+        s['Pgin:' + side] = () => p.Pin - Pa;
+        s['Pgd:' + side] = () => p.Pd - Pa;
+        s['Tc:' + side] = () => p.Tc ?? net.ambient.T;
+        s['cav:' + side] = () => p.f;
+      }
+      for (const l of this.lines) if (l.spec.throttle) { s['thr:' + l.id] = () => l.thr; s['cmd:' + l.spec.throttle.id] = () => l.thrCmd; }
+    }
     s['F:stand'] = () => this.stand.y;
     s['F:true'] = () => this.thrust;
     s['Pamb'] = () => Pa;
@@ -123,6 +142,8 @@ export class BipropModel {
 
   command(id, value) {
     if (this.chamber && id === this.def.physics.chamber.igniter) { this.chamber.igniter.cmd = value ? 1 : 0; return; }
+    const thr = this.throttleOf?.get(id);
+    if (thr) { thr.thrCmd = Math.max(0, Math.min(1, value)); return; }
     const line = this.valveToLine.get(id);
     if (line) { line.valve.command(!!value, this.net); return; }
     const e = this.net.el(id);
@@ -132,6 +153,9 @@ export class BipropModel {
   }
 
   element(id) { return this.valveToLine.get(id)?.valve || this.net.el(id) || null; }
+
+  /* The liquid temperature each line delivers (the fuel can be warmed by a fault). */
+  _liquidTemps() { for (const l of this.lines) l.Tliq = this.net.ambient.T + (l.id === 'fu' ? this.fuelTempOffset || 0 : 0); }
 
   /* Technician: load the run tanks — with the simulant or the propellants. */
   load(fluids, masses) {
@@ -154,8 +178,10 @@ export class BipropModel {
   }
 
   step(dt) {
+    if (this.tp) this._liquidTemps();
     for (const l of this.lines) l.step(dt, this.net);
     this.net.step(dt);
+    if (this.tp) this.tp.step(dt);
     if (this.chamber) {
       const C = this.chamber, Pc = C.P;
       // injector stiffness: the softer of the sides that are flowing
