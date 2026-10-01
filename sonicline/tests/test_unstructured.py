@@ -127,6 +127,41 @@ def test_plane_zone_is_a_closed_cut_through_a_hex_block():
     assert len(faces) == ny * nz and np.allclose(oriented.sum(axis=0), [ny * nz, 0, 0])
 
 
+def test_a_jagged_cut_is_oriented_upstream_to_downstream():
+    """Where the cut runs along faces parallel to the axis (a jagged cut
+    through a cut-cell mesh), the orientation comes from which side each
+    cell is on, not from the sign of the normal's x component."""
+    from sonicline.mesh import polymesh
+
+    nx, ny, nz = 4, 2, 2
+    pts = np.array([(i, j, k) for k in range(nz + 1) for j in range(ny + 1) for i in range(nx + 1)], float)
+    idx = lambda i, j, k: i + (nx + 1) * (j + (ny + 1) * k)  # noqa: E731
+    ijk = [(i, j, k) for k in range(nz) for j in range(ny) for i in range(nx)]
+    cells = [[idx(i, j, k), idx(i + 1, j, k), idx(i + 1, j + 1, k), idx(i, j + 1, k),
+              idx(i, j, k + 1), idx(i + 1, j, k + 1), idx(i + 1, j + 1, k + 1), idx(i, j + 1, k + 1)]
+             for i, j, k in ijk]
+    fp = -np.ones((len(cells), 6), dtype=int)
+    for c, (i, j, k) in enumerate(ijk):
+        for face, edge in ((0, i == 0), (1, i == nx - 1), (2, j == 0), (3, j == ny - 1),
+                           (4, k == 0), (5, k == nz - 1)):
+            if edge:
+                fp[c, face] = 0
+    mesh = polymesh.assemble(pts, np.array(cells), fp, [polymesh.Patch("walls", "wall")])
+    # Pull the cells of column i = 1 at j = 0 across the cut: the cut then
+    # also runs along faces normal to y, owned by the downstream cell.
+    for c, (i, j, k) in enumerate(ijk):
+        if i == 1 and j == 0:
+            mesh.cell_centres[c, 0] = 2.5
+    faces, flip = U.plane_zone(mesh, 2.0)
+    _, normals = polymesh._face_geometry(mesh.points, mesh.faces[faces])
+    oriented = np.where(flip, -1.0, 1.0)[:, None] * normals
+    up = mesh.cell_centres[:, 0] < 2.0
+    own, nei = mesh.owner[faces], mesh.neighbour[faces]
+    down_minus_up = np.where(up[own][:, None], 1.0, -1.0) * (mesh.cell_centres[nei] - mesh.cell_centres[own])
+    assert np.any(np.abs(normals[:, 0]) < 1e-12)  # the cut has faces parallel to the axis
+    assert (np.einsum("ij,ij->i", oriented, down_minus_up) > 0).all()
+
+
 def test_polyhedral_faces_round_trip(tmp_path):
     """Faces of five and more vertices (snappy's split hexes) survive
     writing and reading, and the cell centre is the volume centroid."""

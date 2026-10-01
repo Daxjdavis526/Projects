@@ -399,13 +399,17 @@ def _throat_radius(surface: DomainSurface) -> float:
 
 def plane_zone(mesh: PolyMesh, x: float) -> tuple[np.ndarray, np.ndarray]:
     """Internal faces between cells on either side of the plane at x: a
-    closed cut through the duct, oriented along +x."""
+    closed cut through the duct, oriented from the upstream side to the
+    downstream one. A face is flipped when its owner is downstream (its
+    normal points owner to neighbour). The sign of the normal's x
+    component is not enough: on a jagged cut many faces are nearly radial,
+    and behind a diverging cone they carry flux. Oriented that way, an exit
+    cut on a cfMesh mesh lost 1 % of the mass flow (DESIGN.md finding 62)."""
     c = mesh.cell_centres
     own, nei = mesh.owner[: mesh.n_internal_faces], mesh.neighbour
     a, b = c[own, 0] < x, c[nei, 0] < x
     idx = np.nonzero(a != b)[0]
-    _, normals = _face_geometry(mesh.points, mesh.faces[idx])
-    return idx, normals[:, 0] < 0.0
+    return idx, ~a[idx]
 
 
 def metadata(mesh: PolyMesh, surface: DomainSurface, profile: Profile, spec: UnstructuredSpec) -> MeshMeta:

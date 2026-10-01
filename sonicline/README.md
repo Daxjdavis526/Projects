@@ -384,8 +384,14 @@ The house rule: say plainly where the model stops.
     refines a cone around the throat to half the wall cell size. With it,
     V1 on cfMesh matches the structured wedge to −0.025 % in mass flow
     inviscid (V17) and +0.032 % with k-ω SST, thrust within 0.05 %
-    (DESIGN.md findings 46 and 52–54). The refinement costs cells: about
-    three times as many as before at the coarse preset.
+    (DESIGN.md findings 46 and 52–54). At sea level with k-ω SST, against
+    the wedge, mass flow reads +0.046 % and thrust +0.018 % (finding 61).
+    The refinement costs cells: about three times as many as before at the
+    coarse preset (1.7 M for a sea-level run).
+  - Throat and exit planes on cfMesh and gmsh meshes are jagged cuts
+    through cells. Before M8 they were oriented by the wrong rule, and a
+    sea-level exit plane lost 1 % of the mass flow (finding 62). Runs
+    affected were refused by the verdict's mass balance; it is fixed.
   - **Wall functions at y⁺ 30 overestimate wall drag.** On V1 with k-ω SST
     against a wall-resolved run (y⁺ 1):
     - wall functions at y⁺ 30: drag +6.4 %, thrust −0.07 %;

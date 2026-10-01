@@ -1893,7 +1893,42 @@ Findings:
     - B alone (no C) was enough to 20 bar but 0.1 % high at 50 bar.
     - Both coefficients must be fitted with a relative weight; an
       unweighted fit let the 60 K end dominate.
-61. VISCOUS_SEA_LEVEL
+61. **Viscous cfMesh at sea level now matches the wedge.** The test was
+    the 20 bar sea-level reference nozzle with k-ω SST, wall functions at
+    y⁺ 30, a plume 8 × 4 exit diameters and the perfect gas: cfMesh at the
+    coarse preset (1.70 M cells) against the standard structured wedge
+    (8,298 cells).
+    - Mass flow: +0.046 % (14.2745 against 14.2679 g/s). M5's cfMesh run of
+      this kind read +1.3 % (finding 44).
+    - Thrust from wall forces and feed: +0.018 % (8.3464 against 8.3449 N).
+    - Wall drag: −10 %, the y⁺ effect of finding 59 (cfMesh's throat
+      cells sit near y⁺ 6).
+    - Exit-plane thrust read −1.35 %, and the inlet–exit mass balance was
+      off by 0.95 %. That was a fault in the exit plane itself
+      (finding 62), not in the flow.
+    - The run took 2,000 iterations at about 10 s each on 4 cores. Its far
+      plume never met the convergence test, as the wedge's did not either.
+      The numbers are the pipeline's own metrics from its integrals at
+      iteration 1,900, steady for the last 1,000 iterations.
+62. **Face zones on cut-cell meshes were oriented by the wrong rule.**
+    `plane_zone` collects the internal faces between cells on either side
+    of x. It oriented them by the sign of each face normal's x component,
+    which is right for a planar cut (snappy's grid has planes at the throat
+    and exit). On cfMesh and gmsh meshes the cut is jagged, and many faces
+    are nearly radial.
+    - At the throat, where the flow is axial, that cost 2×10⁻⁵.
+    - Behind a 15° cone the radial faces carry flux, and the exit zone lost
+      0.97 % of the mass flow and 1.35 % of thrust.
+    - A face is now flipped exactly when its owner cell is downstream. On
+      the same run's fluxes, the exit zone then agrees with the inlet to
+      2.8×10⁻⁴ (the run's own unconvergence), against −9.7×10⁻³ before.
+    - A unit test builds a jagged cut with downstream-owned radial faces.
+      It fails on the old rule.
+    - Mass flow and Cd come from the inlet patch and were never affected.
+      Exit-plane thrust on cfMesh and gmsh meshes at sea level was, M5's
+      +0.55 % for the side-port nozzle included (finding 44). The verdict's
+      mass-balance check would have refused such a run as not trustworthy,
+      which is the safe failure.
 
 Not done in M8:
 
