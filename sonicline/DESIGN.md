@@ -1658,3 +1658,64 @@ Not done in M6:
   `RunResults(time=...)` but not in the window. The animation is a file
   in the run directory.
 - A startup against a sea-level plume has not been run; V15 is in vacuum.
+
+## 16. M7 record: closing M6's gaps
+
+M7 was not in the original plan. It takes the "not done" list of §15:
+the cfMesh bias, transients in the desktop application, a sea-level
+startup, and E1's gas model.
+
+Delivered:
+
+- **Transients in the desktop application.**
+  - The Physics stage has a Time group: steady state or a startup, with
+    end time, valve opening and frame count. A startup defaults to V15's
+    settings (1 ms, opening over 0.1 ms, 40 frames). The frame field takes
+    whole numbers only.
+  - The Results stage has a time slider over a run's written times, shown
+    only when there is more than one. Moving it reloads the fields at that
+    time and keeps the field, range and view. An Animation button opens
+    `frames/Mach.gif`.
+  - The engineering summary adds the startup rows: end time, 10 % and
+    90 % thrust times, peak and overshoot, settling, and conservation in
+    time.
+- **Air with cp(T)** (`"species": "air_hot"`): a NASA-form polynomial fit
+  of CoolProp's ideal-gas cp for air, within 0.3 % from 100 K to 1100 K.
+  - OpenFOAM gets it as `janaf` thermo, one coefficient set on both sides
+    of Tcommon.
+  - SONICLINE's own total temperatures, the first-law wall-heat balance and
+    the T0 field use the same enthalpy (`PerfectGas.enthalpy`,
+    `total_temperature`), so the energy checks stay exact.
+  - The quasi-1D theory keeps the constant-cp value at 833 K.
+  - Nitrogen stays at constant cp (§3.3).
+- **V16**: V4a's choked converging nozzle at 5 bar, started from rest into
+  a sea-level plume.
+- **cfMesh**: the whole nozzle interior is refined to the wall cell size
+  (finding 52). M7_CFMESH_DELIVERED
+
+Findings:
+
+52. **The cfMesh bias is not the converging section's coarse core.**
+    cfMesh refined only within a throat radius of the wall, which left the
+    3 mm chamber of V1 coarse. Refining the whole nozzle interior added
+    12 k cells (168 k) and cut the worst non-orthogonality from 52.7° to
+    36.7°, but Cd still read +0.66 %, as before (+0.67 %). The refinement
+    is kept for the mesh quality.
+    - The wall is not it either. Wall-face centroids sit within 0.05 % of
+      the throat radius of the true wall on both cfMesh and snappy meshes,
+      worth 0.1 % in area at most.
+    - Energy is conserved (T0 exit − inlet: 4×10⁻⁶).
+    - The flux exceeds the isentropic choked maximum while the
+      plane-averaged total pressure at the throat does not. Cell by cell,
+      however, total pressure computed from p, T and U exceeds p0 in
+      1,155 cells, by up to 10.6 %. These cells lie in the core of the
+      converging section and the throat, not at the wall. The snappy mesh
+      has the same artefact, weaker: 807 cells, up to 3.8 %.
+    - Both meshers over-predict at coarse resolution (snappy +0.53 % at 6
+      cells per throat radius, −0.06 % at 10); cfMesh converges more
+      slowly.
+    - A steady rhoCentralFoam solve on the cfMesh mesh, meant to separate
+      the pressure-based solver from the mesh, did not converge: its mass
+      flow still swung ±30 % after 3,000 local-time-step iterations. That
+      test is inconclusive.
+M7_FINDINGS_MORE

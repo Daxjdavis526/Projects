@@ -212,7 +212,7 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     def total_T(avg, p_plane):
         if "T" not in avg or "magSqr(U)" not in avg:
             return None
-        t0 = avg["T"] + avg["magSqr(U)"] / (2.0 * gas.cp)
+        t0 = gas.total_temperature(avg["T"], avg["magSqr(U)"])
         if pr is not None and p_plane:
             t0 += (pr.enthalpy(p_plane, avg["T"]) - gas.cp * avg["T"]) / gas.cp
         return t0
@@ -230,7 +230,10 @@ def propulsion(defn: d.SimulationDefinition, profile: Profile, summary: CaseSumm
     if isinstance(wall, d.FixedTemperature):
         # The first law across the nozzle: mdot cp (T0_exit - T0_inlet) = Q.
         q = it.wall_heat
-        expected = q / (mdot * gas.cp * T0_in) if q is not None and T0_in else None
+        # (h(T0_exit) - h(T0_inlet)) mdot = Q; for constant cp that is
+        # mdot cp (T0_exit - T0_inlet).
+        expected = ((gas.temperature_from_enthalpy(gas.enthalpy(T0_in) + q / mdot) - T0_in) / T0_in
+                    if q is not None and T0_in else None)
         e = out["energy"]["exit_minus_inlet"]
         out["wall_heat"] = {
             "wall_temperature": wall.temperature,

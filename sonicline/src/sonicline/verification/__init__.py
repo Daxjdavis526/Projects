@@ -105,6 +105,13 @@ def _v1_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
     )
 
 
+def _v1_cfmesh_definition(quality: str, form: str = "unstructured") -> m.SimulationDefinition:
+    """V1 on cfMesh, the mesher viscous unstructured runs use (V17)."""
+    d = _v1_definition(quality, "unstructured")
+    return dataclasses.replace(d, name="V1 on cfMesh",
+                               mesh=dataclasses.replace(d.mesh, mesher="cfmesh"))
+
+
 def _common_checks(metrics: dict) -> list[Check]:
     return [
         Check("mass conservation, inlet vs exit", metrics["mass_flow"]["imbalance_inlet_exit"],
@@ -733,6 +740,21 @@ def _v15_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
     ] + _common_checks(metrics)
 
 
+# ----------------------------------------------------------------------------- V16
+
+V16_END_TIME = 1e-3  # s: the plume is established and the thrust steady to 1e-4 well before
+
+
+def _v16_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+    # V4a's choked converging nozzle at 5 bar, started from rest into a
+    # sea-level plume: gas leaves and is entrained through the open ambient
+    # boundaries throughout. Coarse wedge, like V15.
+    d = _v4_definition(5e5, "V16 V4a started at sea level (transient)", 0.0)("coarse", form)
+    return dataclasses.replace(d, flow=m.Flow(turbulence=m.Inviscid(),
+                                              time=m.Transient(end_time=V16_END_TIME, initial="ambient",
+                                                               ramp_time=V15_RAMP, frames=20)))
+
+
 CASES: dict[str, Case] = {
     "V1": Case("V1", "Inviscid conical CD nozzle into vacuum (throat Cd, vacuum thrust)",
                _v1_definition, _v1_checks),
@@ -767,13 +789,17 @@ CASES: dict[str, Case] = {
     # 250.2 psia (test 351), 1500 R, walls cooled to Tw/Tt 0.40-0.59: the
     # report's own gamma (1.35) for the methanol-heated air.
     "E1": Case("E1", "JPL 45-15 conical nozzle (Back, Massier & Gier): wall pressure, heated air",
-               _bmg45("E1 JPL 45-15 nozzle, 250 psia, 1500 R", "air_heated", 833.3, 250.2 * 6894.757,
+               _bmg45("E1 JPL 45-15 nozzle, 250 psia, 1500 R", "air_hot", 833.3, 250.2 * 6894.757,
                       m.FixedTemperature(temperature=0.5 * 833.3)), _e1_checks),
     "E2": Case("E2", "JPL 45-15 conical nozzle (Cuffel, Back & Massier): discharge coefficient, cold air",
                _bmg45("E2 JPL 45-15 nozzle, cold air", "air", 294.0, 250.2 * 6894.757, m.Adiabatic()),
                _e2_checks),
     "V15": Case("V15", "V1 started from vacuum, time-accurate, coarse wedge: conservation in time and the steady end state",
                 _v15_definition, _v15_checks),
+    "V1-cfmesh": Case("V1-cfmesh", "V1 on cfMesh (unstructured)", _v1_cfmesh_definition, _v1_checks,
+                      form="unstructured"),
+    "V16": Case("V16", "V4a started at sea level, time-accurate, coarse wedge: conservation in time "
+                "through open boundaries and the steady end state", _v16_definition, _v15_checks),
     "V12": Case("V12", "V1 driven by its own mass flow: the CFD must find 10 bar", _v12_definition, _v12_checks),
     "V13": Case("V13", "V1 laminar with a 450 K wall: energy balance with heat transfer",
                 _v13_definition, _v13_checks),
@@ -781,7 +807,7 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17")
 V15_MASS_TOLERANCE = 1e-3  # V7's: the same solver, mesh and equations, reached two ways
 V15_THRUST_TOLERANCE = 2e-3
 V14_MASS_TOLERANCE = 5e-3
@@ -818,8 +844,13 @@ def _pair(name: str, title: str, a: tuple[CaseResult, dict | None], b: tuple[Cas
           label: str, mass_tol: float, thrust_tol: float) -> CaseResult:
     """A comparison case: the second run must agree with the first."""
     (ra, ma), (rb, mb) = a, b
+    # The worse of the two verdicts: a warning (e.g. a far plume still
+    # drifting while thrust and mass flow have converged) passes, as it does
+    # for a single case.
+    rank = ("not_trustworthy", "trusted_with_warnings", "trusted")
+    trust = min((ra.trust, rb.trust), key=lambda t: rank.index(t) if t in rank else -1)
     r = CaseResult(name, title, "completed" if ra.status == rb.status == "completed" else "failed",
-                   "trusted" if ra.trust == rb.trust == "trusted" else "not_trustworthy")
+                   trust if trust in rank else "not_trustworthy")
     if ma and mb:
         r.checks = [c.evaluate() for c in (
             Check(f"{label} mass flow", mb["mass_flow"]["inlet"], ma["mass_flow"]["inlet"], mass_tol),
@@ -879,6 +910,19 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
             start = once("V15", at="coarse")
             results.append(_pair("V15 end state", "V15's end state vs the steady rhoCentralFoam solve, coarse wedge",
                                  once("V1", solver="rhoCentralFoam", at="coarse", listed=False), start,
+                                 "startup end vs steady:", V15_MASS_TOLERANCE, V15_THRUST_TOLERANCE))
+        elif name == "V17":
+            # cfMesh, which carries the viscous unstructured runs, against
+            # the structured wedge. Coarse preset (with the throat refined
+            # to half the wall size, about 550 k cells); not in the nightly
+            # list for its cost.
+            results.append(_pair("V17", "Unstructured (cfMesh, coarse) vs structured wedge on the V1 nozzle",
+                                 once("V1"), once("V1-cfmesh", "unstructured", at="coarse"),
+                                 "cfMesh vs wedge:", V14_MASS_TOLERANCE, V14_THRUST_TOLERANCE))
+        elif name == "V16":
+            start = once("V16", at="coarse")
+            results.append(_pair("V16 end state", "V16's end state vs the steady rhoCentralFoam solve, coarse wedge",
+                                 once("V4a", solver="rhoCentralFoam", at="coarse", listed=False), start,
                                  "startup end vs steady:", V15_MASS_TOLERANCE, V15_THRUST_TOLERANCE))
         elif name == "V11":
             for npr in sorted(MASON_B1_UPPER):

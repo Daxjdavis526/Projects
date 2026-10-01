@@ -377,6 +377,15 @@ def snappy(runner, work: Path, surface: DomainSurface, spec: UnstructuredSpec) -
     return mesh, UnstructuredReport("snappyHexMesh", mesh.n_cells, layers_requested=spec.layers)
 
 
+def _nozzle_radius(surface: DomainSurface) -> float:
+    """Largest distance of the nozzle's wall from the axis (the canonical
+    frame's x axis)."""
+    if surface.nozzle is None:
+        return 0.0
+    v = np.asarray(surface.nozzle.vertices)
+    return float(np.hypot(v[:, 1], v[:, 2]).max())
+
+
 def _throat_radius(surface: DomainSurface) -> float:
     sec = surface.nozzle.section(plane_origin=[surface.x_throat, 0, 0], plane_normal=[1, 0, 0])
     if sec is None:
@@ -449,11 +458,24 @@ def finish(mesh: PolyMesh, surface: DomainSurface) -> PolyMesh:
 # --------------------------------------------------------------------------- cfMesh
 
 
+THROAT_REFINEMENT = 0.5  # cfMesh cell size around the throat, in wall cells
+
+
 def _cfmesh_dict(surface: DomainSurface, spec: UnstructuredSpec) -> dict:
     h = spec.wall_cell
-    local = {"wall": {"cellSize": h, "refinementThickness": _throat_radius(surface) or 10 * h},
+    # The whole nozzle at the wall size, as snappy has it: refined only
+    # within a throat radius of the wall, the converging section's core was
+    # coarse and mass flow read 0.7-0.9 % high (DESIGN.md finding 46).
+    local = {"wall": {"cellSize": h, "refinementThickness": _nozzle_radius(surface) or 10 * h},
              "inlet": {"cellSize": 2 * h}}
     objects = {}
+    r_t = _throat_radius(surface) or 10 * h
+    # The transonic region at half the wall size: cfMesh's mass-flow error
+    # is first order in the cell size there (DESIGN.md findings 46, 53).
+    objects["throat"] = {"type": "cone", "cellSize": THROAT_REFINEMENT * h,
+                         "p0": Raw(f"({surface.x_throat - 1.0 * r_t!r} 0 0)"),
+                         "p1": Raw(f"({surface.x_throat + 0.5 * r_t!r} 0 0)"),
+                         "radius0": 1.3 * r_t, "radius1": 1.3 * r_t}
     if surface.x_end > surface.x_exit:
         re = max(surface.r_exit, h)
         local["lip"] = {"cellSize": 4 * h}

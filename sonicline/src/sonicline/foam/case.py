@@ -310,6 +310,17 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bo
                     ras: bool, real_gas=None) -> None:
     mixture: dict = {"specie": {"molWeight": gas.molar_mass},
                      "thermodynamics": {"Cp": gas.cp, "Hf": 0}}
+    thermo = "hConst"
+    if gas.janaf is not None and real_gas is None:
+        # One polynomial on both sides of Tcommon; the enthalpy and entropy
+        # constants are zero (sensible energy and psiThermo use neither).
+        # OpenFOAM clamps T to [Tlow, Thigh].
+        coeffs = list(gas.janaf) + [0.0, 0.0]
+        lo, hi = gas.janaf_range
+        thermo = "janaf"
+        mixture["thermodynamics"] = {"Tlow": lo, "Thigh": hi, "Tcommon": hi,
+                                     "highCpCoeffs": Raw("( " + " ".join(f"{c!r}" for c in coeffs) + " )"),
+                                     "lowCpCoeffs": Raw("( " + " ".join(f"{c!r}" for c in coeffs) + " )")}
     if real_gas is None:
         transport = ({"As": gas.sutherland_As, "Ts": gas.sutherland_Ts} if viscous
                      else {"mu": 0, "Pr": 0.71})
@@ -327,7 +338,7 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bo
             "type": "hePsiThermo",
             "mixture": "pureMixture",
             "transport": kinds[0],
-            "thermo": "hConst",
+            "thermo": thermo,
             "equationOfState": kinds[1],
             "specie": "specie",
             "energy": kinds[2],

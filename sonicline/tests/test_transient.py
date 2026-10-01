@@ -107,3 +107,29 @@ def test_transient_verdict():
     assert v.trust is Trust.WARNINGS and "still developing" in v.warnings[0]  # steady checks skipped
     leak = dict(developing, transient=dict(developing["transient"], conservation_error=0.05))
     assert verdict(d, "completed", True, [], None, leak, None).trust is Trust.NOT_TRUSTWORTHY
+
+
+def test_variable_cp_air():
+    """The cp(T) fit: gamma 1.40 cold and 1.35 at 833 K, enthalpy its
+    integral, total temperature inverted exactly, and OpenFOAM given janaf."""
+    from sonicline.core.gas import AIR, HOT_AIR
+
+    g = HOT_AIR
+    gamma = lambda T: g.cp_at(T) / (g.cp_at(T) - g.R)  # noqa: E731
+    assert gamma(300.0) == pytest.approx(1.400, abs=2e-3) and gamma(833.3) == pytest.approx(1.350, abs=2e-3)
+    assert g.cp == pytest.approx(g.cp_at(833.3))
+    dh = g.enthalpy(600.0) - g.enthalpy(500.0)
+    assert dh == pytest.approx(np.mean([g.cp_at(t) for t in np.linspace(500, 600, 1001)]) * 100.0, rel=1e-6)
+    T0 = g.total_temperature(300.0, 400.0**2)
+    assert g.enthalpy(T0) - g.enthalpy(300.0) == pytest.approx(400.0**2 / 2, rel=1e-9)
+    assert AIR.total_temperature(300.0, 100.0**2) == pytest.approx(300.0 + 100.0**2 / (2 * AIR.cp))
+
+
+def test_variable_cp_case_writes_janaf(tmp_path):
+    d = _defn()
+    d = m.SimulationDefinition(**{**d.__dict__, "gas": m.GasSpec(species="air_hot")})
+    prof = resolve_profile(d)
+    mesh, meta = revolved.build(prof, sizing.spec_for(d, prof))
+    s = foam_case.build_case(tmp_path / "c", d, prof, mesh, meta)
+    text = (s.path / "constant/thermophysicalProperties").read_text()
+    assert "janaf" in text and "lowCpCoeffs" in text and "hConst" not in text

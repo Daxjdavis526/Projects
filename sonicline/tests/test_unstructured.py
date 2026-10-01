@@ -165,7 +165,11 @@ def test_cfmesh_dictionary_and_layer_counts(profile):
     d = U._cfmesh_dict(s, spec)
     assert d["boundaryLayers"]["patchBoundaryLayers"]["wall"]["maxFirstLayerThickness"] == 1.6e-6
     assert d["renameBoundary"]["newPatchNames"]["wall"]["type"] == "wall"
-    assert set(d["objectRefinements"]) == {"jet0", "jet1"}
+    assert set(d["objectRefinements"]) == {"throat", "jet0", "jet1"}
+    # The transonic region at half the wall size (DESIGN.md finding 53).
+    throat = d["objectRefinements"]["throat"]
+    assert throat["cellSize"] == pytest.approx(0.5 * spec.wall_cell)
+    assert d["localRefinement"]["wall"]["refinementThickness"] >= profile.inlet_radius * 0.99
     assert "boundaryLayers" not in U._cfmesh_dict(s, U.spec_for(_defn(m.Plume()), profile, None))
 
 

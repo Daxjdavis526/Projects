@@ -81,6 +81,7 @@ class RunResults:
         self.form = self.mesh_meta.get("form", "wedge")
         gas = self.definition.gas.model()
         self.gamma, self.R, self.cp = gas.gamma, gas.R, gas.cp
+        self.gas = gas
         self._internal = None
         self._patches: dict | None = None
         self.time: str | None = None
@@ -165,7 +166,10 @@ class RunResults:
         cd["speed"] = speed
         cd["Mach"] = mach
         cd["rho"] = p / (self.R * np.maximum(T, 1e-9))
-        cd["T0"] = T + speed**2 / (2.0 * self.cp)
+        if self.gas.janaf is None:
+            cd["T0"] = T + speed**2 / (2.0 * self.cp)
+        else:
+            cd["T0"] = np.array([self.gas.total_temperature(t, u * u) for t, u in zip(T, speed)])
         cd["p0"] = p * (1.0 + 0.5 * (g - 1.0) * mach**2) ** (g / (g - 1.0))
 
     def times(self) -> list[float]:
@@ -382,6 +386,21 @@ class RunResults:
         rf = g("wall", "recovery_factor_mean")
         if rf is not None:
             rows.append(("Adiabatic-wall recovery factor", fmt(rf, ".3f"), "0.83-0.88"))
+        tr = m.get("transient")
+        if tr:
+            # A startup: the steady rows above are its end state (the mean
+            # over the last tenth of the run).
+            us = lambda v: fmt(None if v is None else 1e6 * v, ".1f") + " µs"  # noqa: E731
+            rows += [
+                ("Startup: end time", fmt(1e3 * tr["end_time"], ".4g") + " ms", ""),
+                ("  10 % / 90 % of final thrust", f"{us(tr.get('time_to_10_percent_thrust'))} / "
+                 f"{us(tr.get('time_to_90_percent_thrust'))}", ""),
+                ("  peak thrust (overshoot)", fmt(tr.get("thrust_peak"), ".4f")
+                 + f" N ({fmt(100 * (tr.get('thrust_overshoot') or math.nan), '+.1f')} %)", ""),
+                ("  settled (thrust drift, last tenth)", ("yes" if tr.get("settled") else "no")
+                 + f" ({fmt(100 * (tr.get('thrust_drift_last_tenth') or math.nan), '.2f')} %)", "< 1 %"),
+                ("  mass conservation in time", fmt(tr.get("conservation_error"), ".1e"), "< 1e-3"),
+            ]
         verdict = m.get("verdict", {})
         return {"status": self.manifest.get("status", "unknown"), "trust": verdict.get("trust"),
                 "rows": rows, "reasons": verdict.get("reasons", []), "warnings": verdict.get("warnings", []),

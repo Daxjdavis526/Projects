@@ -50,7 +50,8 @@ definitions and every run made from them. The window has four stages:
   volume. The analysis suggests which end is the inlet; confirm it, or click
   an end in the 3D view.
 - **Physics:** chamber, surroundings, exit domain, viscous model, gas,
-  solver. The quasi-1D prediction updates as you type.
+  solver, and steady state or a startup (end time, valve opening, frames).
+  The quasi-1D prediction updates as you type.
 - **Mesh:** form, quality, wall resolution, and a preview of the mesh.
 - **Run:** processors, run and cancel, live plots of mass flow, thrust and
   residuals, the log, and the verdict with its reasons.
@@ -193,7 +194,7 @@ computed without the CFD.
 | V15 | V1 started from vacuum, time-accurate (rhoCentralFoam, coarse wedge, valve opened over 0.1 ms, 1 ms run) | gas gained vs integrated net inflow | 7×10⁻⁷ | 10⁻³ |
 | | | thrust drift over the last tenth (settled) | 0.03 % | 1 % |
 | | | end state vs the steady rhoCentralFoam solve on the same mesh: mass flow / thrust | −0.008 % / +0.002 % | 0.1 % / 0.2 % |
-| E1 | **experiment:** JPL 45°–15° conical nozzle (Back, Massier and Gier, JPL TR 32-654), heated air at 17.2 bar and 833 K, SST | wall p/pt at 18 taps | 13 of 13 away from the throat within 5 %; 4 of 5 near the throat within 10 % | all / one miss |
+| E1 | **experiment:** JPL 45°–15° conical nozzle (Back, Massier and Gier, JPL TR 32-654), heated air (cp(T)) at 17.2 bar and 833 K, SST | wall p/pt at 18 taps | 13 of 13 away from the throat within 5 %; 4 of 5 near the throat within 10 % | all / one miss |
 | E2 | **experiment:** the same nozzle, air at 294 K (Cuffel, Back and Massier 1969) | Cd vs measured 0.985 | −0.74 % (0.9776) | 1 % |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
@@ -202,26 +203,27 @@ The full table is in [doc/verification-standard.md](doc/verification-standard.md
 
 **What E1 shows, and what it does not.** Measured wall pressures in a real
 nozzle, digitised from the report's Figure 4 (DESIGN.md §15 has the
-method). Upstream of the throat and through the supersonic cone to z = 3.6
-in the CFD is within 1.5 % of the test, except at z = 2.25 in, 0.3 in ahead of
-the throat, where it reads 6.3 % low (inside the throat region's 10 %). Two
-places it is not:
+method). The gas is air with its real, temperature-dependent cp. Upstream
+of the throat and down the supersonic cone to z = 4.6 in the CFD is within
+2.1 % of the test, except at z = 2.25 in, 0.3 in ahead of the throat, where
+it reads 6.1 % low (inside the throat region's 10 %). Two places it is
+not:
 
 - **Just past the throat** (z = 2.60 in, 0.05 in downstream) the test
   reads p/pt 0.218 and the CFD 0.296. The test's taps show a local
   over-expansion and recompression where the 0.625 in throat radius meets
   the 15° cone that the CFD does not resolve. That is the tap the throat
   region is allowed to miss.
-- **Far down the cone** the CFD reads high, and increasingly so: +4.5 % at
-  z = 4 in, +13 % at z = 5.3–6.0 in. The pressures there are small
-  (p/pt 0.02–0.04), so the test's own spread and reading error cover the
-  difference in absolute terms and the check passes, but the trend is
-  real. The likely cause is the gas model: heated air is run at a
-  constant γ of 1.35, and real air's γ rises towards 1.4 as it expands
-  and cools, which lowers the pressure at a given area ratio. At the
-  exit's area ratio of 6.63, quasi-1D theory gives 11 % less pressure at
-  γ 1.4 than at 1.35, the size of the excess. A variable-γ model would
-  settle it; SONICLINE has none, and E1 is not a nitrogen case.
+- **The last two taps** (z = 5.3 and 6.0 in) read 6 % high. The
+  pressures there are small (p/pt 0.024–0.037), so 6 % is 0.0015, inside
+  the digitising's reading error of 0.005, and the check passes.
+
+With a constant γ of 1.35 (the report's own value for the heated air) the
+CFD read increasingly high down the cone, reaching +13 % at the exit: real
+air's γ climbs back towards 1.4 as it expands and cools, which lowers the
+pressure at a given area ratio. Air with cp(T) halved that excess and
+brought the middle of the cone from +4.5 % to within 2 %, which is why E1
+uses it (DESIGN.md §16).
 
 **What V15 shows.** A startup from vacuum, with the valve opening over
 0.1 ms, reaches 10 % of final thrust at 22 µs and 90 % at 92 µs, overshoots
@@ -277,11 +279,12 @@ The house rule: say plainly where the model stops.
 
 - **Gas.** A calorically perfect gas (cp = 1039.7 J/(kg·K), γ = 1.3995) with
   Sutherland viscosity for N₂. The theory uses the same constants.
-  - Air (γ 1.4) and "heated air" (γ 1.35) exist only to run the air
-    experiments E1 and E2. They are not validated for anything else, and a
-    run with them carries a warning. Heated air's constant γ is a crude
-    stand-in for air at 833 K, whose real γ climbs back towards 1.4 as it
-    expands and cools (E1 shows the result).
+  - Air (γ 1.4), "hot air" (cp(T), a fit to air's ideal-gas cp within
+    0.3 % from 100 to 1100 K, given to OpenFOAM as a JANAF polynomial) and
+    "heated air" (constant γ 1.35) exist only to run the air experiments
+    E1 and E2. They are not validated for anything else, and a run with
+    them carries a warning. Nitrogen keeps its constant cp: between 30 K
+    and 400 K it varies by under 0.5 %.
   - Real nitrogen chokes at a higher mass flux: +0.36 % at 10 bar, +0.71 % at
     20 bar, +1.05 % at 30 bar (reference equation of state, via CoolProp).
     Every run reports this correction.

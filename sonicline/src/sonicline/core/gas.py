@@ -37,6 +37,11 @@ class PerfectGas:
     sutherland_As: float  # Pa s / K^0.5
     sutherland_Ts: float  # K
     coolprop_name: str | None = None  # fluid name for the real-gas reference
+    # Optional temperature-dependent cp: cp/R = a0 + a1 T + ... + a4 T^4
+    # (NASA/JANAF form), valid over ``janaf_range``. ``cp`` is then the value
+    # at the reference state, used by the quasi-1D theory and the checks.
+    janaf: tuple[float, float, float, float, float] | None = None
+    janaf_range: tuple[float, float] = (100.0, 1100.0)
 
     @property
     def R(self) -> float:
@@ -50,6 +55,34 @@ class PerfectGas:
     @property
     def gamma(self) -> float:
         return self.cp / self.cv
+
+    def cp_at(self, T: float) -> float:
+        if self.janaf is None:
+            return self.cp
+        return self.R * sum(a * T**k for k, a in enumerate(self.janaf))
+
+    def enthalpy(self, T: float) -> float:
+        """Sensible enthalpy above 0 K, J/kg (cp T for constant cp)."""
+        if self.janaf is None:
+            return self.cp * T
+        return self.R * sum(a * T ** (k + 1) / (k + 1) for k, a in enumerate(self.janaf))
+
+    def temperature_from_enthalpy(self, h: float) -> float:
+        if self.janaf is None:
+            return h / self.cp
+        T = h / self.cp
+        for _ in range(50):
+            step = (self.enthalpy(T) - h) / self.cp_at(T)
+            T -= step
+            if abs(step) < 1e-10 * T:
+                break
+        return T
+
+    def total_temperature(self, T: float, speed_squared: float) -> float:
+        """Stagnation temperature: h(T0) = h(T) + |U|^2 / 2."""
+        if self.janaf is None:
+            return T + speed_squared / (2.0 * self.cp)
+        return self.temperature_from_enthalpy(self.enthalpy(T) + 0.5 * speed_squared)
 
     def viscosity(self, T: float) -> float:
         """Dynamic viscosity, Pa s."""
@@ -108,4 +141,20 @@ HEATED_AIR = PerfectGas(
     sutherland_Ts=110.4,
 )
 
-GASES = {g.name: g for g in (NITROGEN, AIR, HEATED_AIR)}
+# Air with its real (ideal-gas) cp(T), for the same heated-air tests: a fit
+# of cp/R to CoolProp's ideal-gas cp of air from 100 K to 1100 K, within
+# 0.3 % throughout. gamma falls from 1.40 at 300 K to 1.35 at 833 K, so a
+# hot expansion's gamma rises as it cools, which the constant-gamma
+# HEATED_AIR cannot follow (DESIGN.md section 16). cp below is the 833 K
+# value, the reference for the quasi-1D theory and the checks.
+_AIR_JANAF = (3.54529035, -5.838799171e-4, 1.5080222534e-6, -1.6481919814e-10, -3.2699809503e-13)
+HOT_AIR = PerfectGas(
+    name="air_hot",
+    molar_mass=28.965,
+    cp=R_UNIVERSAL / 28.965 * sum(a * 833.3**k for k, a in enumerate(_AIR_JANAF)),
+    sutherland_As=1.458e-6,
+    sutherland_Ts=110.4,
+    janaf=_AIR_JANAF,
+)
+
+GASES = {g.name: g for g in (NITROGEN, AIR, HEATED_AIR, HOT_AIR)}

@@ -243,3 +243,60 @@ def test_a_solid_body_offers_extraction_and_uses_the_confirmed_passage(app, tmp_
     assert w.draft.get("geometry.path").endswith(".step") and page.report.kind == "fluid_volume"
     assert page.report.ok and w.assessment.runnable
     w.close()
+
+
+def test_physics_page_sets_up_a_startup(window):
+    page = window.physics_page
+    assert not page.end_time.isEnabled()
+    page.time_kind.setCurrentIndex(1)
+    assert window.draft.get("flow.time.type") == "transient"
+    assert page.end_time.isEnabled() and page.end_time.text() == "1"  # ms
+    page.ramp_time.setText("0.2")
+    page.ramp_time.editingFinished.emit()
+    assert window.draft.get("flow.time.ramp_time") == pytest.approx(2e-4)
+    page.frames.setText("12.5")  # not a whole number: refused
+    page.frames.editingFinished.emit()
+    assert window.draft.get("flow.time.frames") == 40
+    page.frames.setText("12")
+    page.frames.editingFinished.emit()
+    assert window.draft.get("flow.time.frames") == 12 and isinstance(window.draft.get("flow.time.frames"), int)
+    assert window.assessment.runnable
+    page.time_kind.setCurrentIndex(0)
+    assert window.draft.get("flow.time.type") == "steady" and not page.end_time.isEnabled()
+
+
+def test_results_page_steps_through_a_transients_times(window, tmp_path):
+    pytest.importorskip("pyvista")
+    import shutil
+
+    sys.path.insert(0, os.path.dirname(__file__))
+    import synthetic_run
+
+    run = tmp_path / "run"
+    synthetic_run.make(run)
+    # Two written times, the first at half the pressure.
+    case = run / "case"
+    for t, scale in (("0.0001", 0.5), ("0.0002", 1.0)):
+        shutil.copytree(case / "0", case / t)
+        text = (case / t / "p").read_text()
+        if scale != 1.0:
+            head, sep, body = text.partition("(\n")
+            values, close, tail = body.partition("\n)")
+            text = head + sep + "\n".join(f"{scale * float(v)!r}" for v in values.split()) + close + tail
+        (case / t / "p").write_text(text)
+    metrics = json.loads((run / "metrics.json").read_text())
+    metrics["transient"] = {"end_time": 2e-4, "thrust_peak": 5.3, "thrust_overshoot": 0.08, "settled": True,
+                            "thrust_drift_last_tenth": 3e-4, "time_to_10_percent_thrust": 2.2e-5,
+                            "time_to_90_percent_thrust": 9.2e-5, "conservation_error": 7e-7}
+    (run / "metrics.json").write_text(json.dumps(metrics))
+    page = window.results_page
+    assert page.load(run)
+    assert page.time_row.isVisibleTo(page) and page.time_slider.maximum() == 1
+    assert page.time_value.text() == "0.2 ms" and not page.animation_btn.isEnabled()
+    rows = [page.table.item(i, 0).text() for i in range(page.table.rowCount())]
+    assert "Startup: end time" in rows and "  mass conservation in time" in rows
+    page.field.setCurrentIndex(page.field.findData("p"))
+    late = float(page.hi.text())
+    page.show_time(0)
+    assert page.results.time == "0.0001" and page.current_field() == "p"
+    assert float(page.hi.text()) == pytest.approx(0.5 * late, rel=1e-3)

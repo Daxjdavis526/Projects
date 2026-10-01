@@ -347,6 +347,29 @@ class PhysicsPage(Page):
             "expected inside the nozzle")))
         v.addWidget(box)
 
+        box = QtWidgets.QGroupBox("Time")
+        f = QtWidgets.QFormLayout(box)
+        self.time_kind = QtWidgets.QComboBox()
+        self.time_kind.addItems(["Steady state", "Startup (time-accurate)"])
+        self.time_kind.setToolTip("A startup opens the valve on a domain at rest and follows the flow in "
+                                  "time with rhoCentralFoam: rise time, overshoot, settling, an animation")
+        self.time_kind.currentIndexChanged.connect(self._time_changed)
+        f.addRow("Run", self.time_kind)
+        t = "flow.time."
+        self.end_time = self.bind(QuantityEdit(self.draft, t + "end_time", "ms", minimum=1e-6, default=1e-3,
+                                               tooltip="How long to follow the startup. It must settle "
+                                               "by then for the end state to count as steady"))
+        self.ramp_time = self.bind(QuantityEdit(self.draft, t + "ramp_time", "ms", minimum=0.0, default=0.0,
+                                                tooltip="Valve opening time: the chamber pressure rises "
+                                                "linearly from ambient to p0. An instant opening into vacuum "
+                                                "can diverge"))
+        self.frames = self.bind(QuantityEdit(self.draft, t + "frames", minimum=1.0, default=40, integer=True,
+                                             tooltip="Fields written over the run: the animation's frames"))
+        row(f, "End time", self.end_time, "ms")
+        row(f, "Valve opening", self.ramp_time, "ms")
+        row(f, "Frames", self.frames)
+        v.addWidget(box)
+
         self.prediction = QtWidgets.QLabel("")
         self.prediction.setTextFormat(QtCore.Qt.RichText)
         self.prediction.setWordWrap(True)
@@ -370,6 +393,10 @@ class PhysicsPage(Page):
         wt = d.get("boundaries.wall_thermal.type", "adiabatic")
         self._set(self.wall, 1 if wt == "fixed_temperature" else 0)
         self.wall_T.setEnabled(wt == "fixed_temperature")
+        transient = d.get("flow.time.type", "steady") == "transient"
+        self._set(self.time_kind, 1 if transient else 0)
+        for w in (self.end_time, self.ramp_time, self.frames):
+            w.setEnabled(transient)
 
     @staticmethod
     def _set(combo, i):
@@ -403,6 +430,13 @@ class PhysicsPage(Page):
 
     def _turb_changed(self, i):
         self.draft().replace("flow.turbulence", {"type": self._turb[i][1]})
+        self.changed.emit()
+
+    def _time_changed(self, i):
+        # A startup defaults to V15's: 1 ms, the valve opening over a tenth.
+        self.draft().replace("flow.time", {"type": "steady"} if i == 0 else
+                             {"type": "transient", "end_time": 1e-3, "ramp_time": 1e-4, "frames": 40})
+        self.refresh()
         self.changed.emit()
 
     def _wall_changed(self, i):
@@ -673,6 +707,24 @@ class ResultsPage(Page):
         f.addRow("Range", rng)
         self.data_range = QtWidgets.QLabel("")
         f.addRow("Data", self.data_range)
+        # A transient's written times; hidden for a steady run (one time).
+        self.time_row = QtWidgets.QWidget()
+        tr = QtWidgets.QHBoxLayout(self.time_row)
+        tr.setContentsMargins(0, 0, 0, 0)
+        self.time_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.time_slider.setToolTip("Written times of the run; the fields are reloaded at the one chosen")
+        self.time_slider.sliderReleased.connect(lambda: self.show_time(self.time_slider.value()))
+        self.time_slider.valueChanged.connect(self._time_label)
+        self.time_value = QtWidgets.QLabel("")
+        self.animation_btn = QtWidgets.QPushButton("Animation...")
+        self.animation_btn.setToolTip("Open the run's Mach-number animation (frames/Mach.gif)")
+        self.animation_btn.clicked.connect(self._open_animation)
+        tr.addWidget(self.time_slider, 1)
+        tr.addWidget(self.time_value)
+        tr.addWidget(self.animation_btn)
+        f.addRow("Time", self.time_row)
+        self.time_row.setVisible(False)
+        self._times: list[float] = []
         v.addWidget(box)
 
         box = QtWidgets.QGroupBox("Show")
@@ -756,11 +808,12 @@ class ResultsPage(Page):
 
     # -- loading -----------------------------------------------------------------------
 
-    def load(self, run_dir: Path) -> bool:
+    def load(self, run_dir: Path, time: float | None = None) -> bool:
         from ..post.fieldview import FIELDS, ResultsError, RunResults
 
+        keep = self.current_field() if time is not None else None
         try:
-            r = RunResults(run_dir)
+            r = RunResults(run_dir, time=time)
             fields = r.fields()
         except (ResultsError, OSError, KeyError, ValueError) as e:
             self.results = None
@@ -774,7 +827,26 @@ class ResultsPage(Page):
         for name in fields:
             info = FIELDS[name]
             self.field.addItem(f"{info.label}" + (f" [{info.unit}]" if info.unit else ""), name)
+        if keep is not None and self.field.findData(keep) >= 0:
+            self.field.setCurrentIndex(self.field.findData(keep))
         self.field.blockSignals(False)
+        self._times = r.times()
+        self.time_row.setVisible(len(self._times) > 1)
+        if len(self._times) > 1:
+            self.time_slider.blockSignals(True)
+            self.time_slider.setRange(0, len(self._times) - 1)
+            now = min(range(len(self._times)), key=lambda i: abs(self._times[i] - float(r.time)))
+            self.time_slider.setValue(now)
+            self.time_slider.blockSignals(False)
+            self._time_label(now)
+            self.animation_btn.setEnabled((r.run_dir / "frames" / "Mach.gif").is_file())
+        if keep is not None:
+            # Another time of the same run: keep the view, the range (when
+            # fixed) and the surfaces as they are.
+            if self.auto.isChecked():
+                self._range_auto(redraw=False)
+            self.redraw(keep_camera=True)
+            return True
         for w in self.patch_checks.values():
             w.setParent(None)
         self.patch_checks = {}
@@ -789,6 +861,19 @@ class ResultsPage(Page):
         self._range_auto(redraw=False)
         self.redraw(keep_camera=False)
         return True
+
+    def show_time(self, index: int) -> None:
+        if self.results is not None and 0 <= index < len(self._times):
+            self.load(self.results.run_dir, time=self._times[index])
+
+    def _time_label(self, index: int) -> None:
+        if 0 <= index < len(self._times):
+            self.time_value.setText(f"{1e3 * self._times[index]:.4g} ms")
+
+    def _open_animation(self) -> None:
+        if self.results is not None:
+            gif = self.results.run_dir / "frames" / "Mach.gif"
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(gif)))
 
     def current_field(self) -> str | None:
         return self.field.currentData()

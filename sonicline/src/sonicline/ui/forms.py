@@ -18,6 +18,7 @@ UNITS: dict[str, tuple[Callable[[float], float], Callable[[float], float]]] = {
     "K": (lambda v: v, lambda v: v),
     "g/s": (lambda v: v * 1e-3, lambda v: v * 1e3),
     "deg": (math.radians, math.degrees),
+    "ms": (lambda v: v * 1e-3, lambda v: v * 1e3),
     "": (lambda v: v, lambda v: v),
 }
 
@@ -30,10 +31,11 @@ class QuantityEdit(QtWidgets.QLineEdit):
 
     def __init__(self, draft_getter: Callable[[], Draft], path: str, unit: str = "",
                  tooltip: str = "", scale: float = 1.0, minimum: float | None = None,
-                 default: float | None = None, parent=None):
+                 default: float | None = None, integer: bool = False, parent=None):
         super().__init__(parent)
         self._draft = draft_getter
         self.path, self.unit, self.scale, self.minimum, self.default = path, unit, scale, minimum, default
+        self.integer = integer
         self.setToolTip(tooltip)
         self.setMaximumWidth(120)
         self.editingFinished.connect(self._commit)
@@ -56,6 +58,8 @@ class QuantityEdit(QtWidgets.QLineEdit):
             return None
         if not math.isfinite(v) or (self.minimum is not None and v < self.minimum):
             return None
+        if self.integer and v != int(v):
+            return None
         return v
 
     def _commit(self) -> None:
@@ -64,7 +68,8 @@ class QuantityEdit(QtWidgets.QLineEdit):
             self._mark(False)
             return
         self._mark(True)
-        self._draft().set(self.path, UNITS[self.unit][0](v * self.scale))
+        si = UNITS[self.unit][0](v * self.scale)
+        self._draft().set(self.path, int(si) if self.integer else si)
         self.edited.emit()
 
     def _mark(self, ok: bool) -> None:
