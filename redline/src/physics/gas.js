@@ -32,6 +32,7 @@ export const GASES = {
         muJT: 0.14e-5 },
   He: { id: 'He', name: 'Helium', R: 2077.1, gamma: 1.667, muJT: -0.006e-5 },
   AIR: { id: 'AIR', name: 'Air', R: 287.05, gamma: 1.400, muJT: 0.2e-5 },
+  AR: { id: 'AR', name: 'Argon', R: 208.13, gamma: 1.667, muJT: 0.3e-5 },
 };
 
 const LIN = 0.04;

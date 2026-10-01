@@ -14,10 +14,11 @@ import { TrainingView } from './views/training.js';
 import { AnalysisView } from './views/analysis.js';
 import { NotebookView } from './views/notebook.js';
 import { ReferenceView } from './views/reference.js';
+import { HardwareView } from './views/hardware.js';
 import { history } from './history.js';
 import { openPoll, debrief } from './panels/dialogs.js';
 
-const VIEWS = [['training', 'TRAINING'], ['control', 'CONTROL ROOM'], ['analysis', 'ANALYSIS'], ['notebook', 'NOTEBOOK'], ['reference', 'REFERENCE']];
+const VIEWS = [['training', 'TRAINING'], ['hardware', 'HARDWARE'], ['control', 'CONTROL ROOM'], ['analysis', 'ANALYSIS'], ['notebook', 'NOTEBOOK'], ['reference', 'REFERENCE']];
 
 export class App {
   constructor(root) {
@@ -34,6 +35,7 @@ export class App {
     this.views = {};
     this.views.training = new TrainingView(this.viewHost('training'), this);
     this.views.reference = new ReferenceView(this.viewHost('reference'), this);
+    this.views.hardware = new HardwareView(this.viewHost('hardware'), this);
     this.views.notebook = this.notebook = new NotebookView(this.viewHost('notebook'), this);
     this.views.analysis = new AnalysisView(this.viewHost('analysis'), this);
     this.show('training');
@@ -92,14 +94,17 @@ export class App {
   }
 
   /* ---- sessions -------------------------------------------------------- */
+  /* An open-stand session on a stand definition built elsewhere (HARDWARE). */
+  startDef(def, mode) { STANDS[def.id] = def; this._startDef = def; this.start(null, mode, def.id); this._startDef = null; }
+
   start(levelId, mode, standId = null) {
     const found = levelId ? findLevel(levelId) : null;
     const scenario = found?.level.scenario || null;
-    const def = STANDS[found?.program.stand || standId || 'TS-1'];
+    const def = this._startDef || STANDS[found?.program.stand || standId || 'TS-1'];
     if (this.session && !this._confirmedLeave) {
       const m = modal({ title: 'Start a new session?', narrow: true,
         body: h('p', 'The current session ends. Its runs stay in the notebook; their recorded data (the traces) do not survive a new session.'),
-        footer: [btn('Cancel', () => m.close(), 'ghost'), btn('Start new session', () => { m.close(); this._confirmedLeave = true; this.start(levelId, mode, standId); this._confirmedLeave = false; }, 'primary')] });
+        footer: [btn('Cancel', () => m.close(), 'ghost'), btn('Start new session', () => { m.close(); this._confirmedLeave = true; this._startDef = def; this.start(levelId, mode, standId); this._startDef = null; this._confirmedLeave = false; }, 'primary')] });
       return;
     }
     if (this.views.control) { this.views.control.destroy(); }

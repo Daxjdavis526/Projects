@@ -546,3 +546,15 @@ iframe.report.tall { min-height: calc(100vh - 150px); }
 .sym .liquid { fill: rgba(80, 190, 168, 0.32); stroke: none; transition: y .3s, height .3s; }
 .sym .body.tank { fill: none; }
 .spray { fill: rgba(150, 220, 230, 0.55); opacity: 0; transition: opacity .1s; pointer-events: none; }
+
+/* HARDWARE: the custom-stand editor */
+.hwf { display: grid; grid-template-columns: minmax(220px, 1.3fr) 120px 86px 150px minmax(120px, 1fr); gap: 6px; align-items: center; padding: 3px 10px; border-bottom: 1px solid #10151a; font-size: 12px; border-left: 3px solid transparent; }
+.hwf .l { color: var(--ink-2); }
+.hwf .l .q { color: var(--ink-4); cursor: help; }
+.hwf .u { color: var(--ink-4); font-size: 11px; }
+.hwf .in { width: 100%; box-sizing: border-box; }
+.hwf .note { font-family: var(--sans); font-size: 11px; }
+.hwf[data-src="default"] { border-left-color: #3a3f46; }
+.hwf[data-src="estimate"] { border-left-color: var(--caution); }
+.hwf[data-src="datasheet"] { border-left-color: var(--good); }
+.hwf[data-src="measured"] { border-left-color: #5aa9e6; }

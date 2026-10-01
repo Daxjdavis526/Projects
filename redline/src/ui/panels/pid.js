@@ -120,6 +120,7 @@ export class PID {
     const symLayer = s('g');
     for (const sy of L.symbols) {
       const g = this._symbol(sy);
+      if (sy.notFitted) { g.style.opacity = 0.25; g.append(s('text.lbl2', { x: sy.x, y: sy.y + 46, 'text-anchor': 'middle' }, 'NOT FITTED')); }
       g.addEventListener('click', e => { e.stopPropagation(); this.app.inspect(sy.id, 'component'); });
       symLayer.append(g);
       this.syms.set(sy.id, { g, def: sy });
@@ -244,7 +245,7 @@ export class PID {
         g.append(s('path.fillable', { d: `M${x - 15},${y} L${x},${y - 15} L${x + 15},${y} L${x},${y + 15} Z` }));
         g.append(s('path', { d: `M${x},${y - 15} L${x},${y + 15}`, stroke: '#7d8a97', 'stroke-dasharray': '2 2' }));
         g.append(s('text.lbl', { x, y: y + 30, 'text-anchor': 'middle' }, sy.id));
-        g.append(s('text.lbl2', { x, y: y + 41, 'text-anchor': 'middle' }, '10 µm'));
+        g.append(s('text.lbl2', { x, y: y + 41, 'text-anchor': 'middle' }, sy.sub ?? '10 µm'));
         g.append(hl(40, 72, 0, 8));
         break;
       }

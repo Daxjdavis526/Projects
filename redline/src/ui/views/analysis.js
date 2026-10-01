@@ -91,6 +91,15 @@ export class AnalysisView {
     return out;
   }
 
+  /* Show one run (a prediction just made, say), loading it from history. */
+  async focus(id) {
+    this.withHistory = true;
+    await history.refresh();
+    const e = this.pool().find(x => x.id === id);
+    if (e && await this.ensure(e)) { this.mode = 'traces'; this.main = id; this.overlay.clear(); this.cursors = { A: null, B: null }; }
+    this.render();
+  }
+
   async ensure(entry) {
     if (entry.run) return entry.run;
     const r = await history.load(entry.id);

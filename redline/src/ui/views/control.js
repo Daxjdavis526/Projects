@@ -31,7 +31,7 @@ export class ControlView {
     // centre
     const top = h('div.panel.center-top');
     this.viewTabs = h('div.tabs');
-    const tabHead = h('div.ph', this.viewTabs, h('span.sp'), h('span.sub', `${S.def.article} · FICTIONAL`));
+    const tabHead = h('div.ph', this.viewTabs, h('span.sp'), h('span.sub', `${S.def.article} · ${S.def.fictional === false ? 'CUSTOM HARDWARE' : 'FICTIONAL'}`));
     this.pidWrap = h('div.pid-wrap');
     this.standWrap = h('div.stand-wrap.hidden');
     const stage = h('div', { style: { position: 'relative', flex: '1', minHeight: 0, display: 'flex' } }, this.pidWrap, this.standWrap);

@@ -64,6 +64,49 @@ from BPE-2's catalogue. Level 17 is the independent long-duration
 acceptance: 20 s at the design point and a throttled point, graded on the
 performance and the cooling.
 
+## Your own hardware (HARDWARE)
+
+A cold-gas stand built from your parts. HARDWARE is an editor for every value
+a datasheet gives — gas and site pressure; bottle; supply line and isolation
+valve; regulator (Cv, loading, outlet range, one point off its flow curve,
+supply-pressure effect); relief; feed line and filter; fire solenoid (Cv or
+orifice, coil voltage and power, MOPD, response times, direct or
+pilot-operated); thruster (throat, exit, half-angle, Cd, plenum); thrust
+stand; transducers; ratings — each value tagged with where it came from
+(datasheet, measured, estimate, default) and a note. From it REDLINE builds a
+stand of TS-1's shape (`stands/custom-coldgas.js`) and gives you:
+
+- **pre-test checks** — a relief set above the MAWP, a test pressure above
+  the solenoid's MOPD or below a pilot valve's minimum differential, a load
+  cell or transducer out of range, a fire valve too small for the throat, a
+  regulator asked for more than half its capacity, an over-expanded nozzle;
+- **a steady-state estimate** as you type;
+- **a predicted test** — your planned burn or pulse train run start to
+  finish through the same instruments, DAQ and reductions as a real one,
+  saved to test history and opened in ANALYSIS, where a real run can later
+  be overlaid on it;
+- **the open stand** on your hardware, in the control room.
+
+Configurations live in the browser and export/import as JSON.
+
+**How accurate it is.** Steady state — chamber pressure, thrust, flow — is
+set by things you can measure: the gas, the pressure the regulator delivers
+under flow, the losses on the way, the throat area and the nozzle. With the
+throat measured and the regulator's flow curve known, expect a few per cent.
+The two big unknowns are the regulator's droop at your flow (often not on
+the datasheet) and the throat discharge coefficient (0.90–0.99, rarely known
+until you test). Transients — valve opening delay, line fill, tail-off —
+come out the right shape and order of magnitude, but they depend on numbers
+vendors rarely publish (solenoid response at your pressure, every fitting's
+volume), so treat them as ±30 %. The conversions, all estimates where the
+datasheet is silent: Cv → CdA = Cv × 16.97 mm²; tubing K = 0.02·L/D + 0.9
+per fitting + 1.5; the regulator's band calibrated from the flow-curve
+point; the coil's inductance from the opening time (65 % electrical delay,
+35 % stroke); the pull-in current's growth with pressure from the MOPD.
+The way to make it accurate is to calibrate it against your own first test.
+It is a planning and data-checking tool: your hardware's ratings, reliefs
+and procedures govern the real stand, not this.
+
 ## Controls
 
 Everything is mouse-driven. Start from **TRAINING**: pick a level and a mode,
@@ -116,12 +159,15 @@ src/
                 flows and hot fires); campaign.js — cross-run fits and
                 statistics; report.js — the session report and the Level 6
                 grading; report-bp.js — Levels 12 and 17; reporthtml.js — the document
-  sim/          session.js — wires the layers, owns the clock
+  sim/          session.js — wires the layers, owns the clock; predict-test.js —
+                a planned test run start to finish, headless
   content/      DATA. stands/ts1-*.js and ts2-*.js (ts2-regen.js is TS-2
                 with BPE-2: it imports TS-2 and overrides the engine) (plumbing, sensors,
                 limits, abort sequence, interlocks, go/no-go stations, P&ID
                 layout, and the stand's own hooks: prediction, reductions,
-                sequence, leak check), procedures/, programs.js, glossary.js
+                sequence, leak check), procedures/, programs.js, glossary.js;
+                hardware/ — the custom-hardware schema and presets
+                (stands/custom-coldgas.js builds a stand from one)
   ui/           the only code that touches the DOM
 test/           node redline/test/physics.test.mjs   (38 checks)
                 node redline/test/series.test.mjs    (22 checks: Levels 3 and 4
@@ -368,6 +414,7 @@ node redline/test/faults-bp.test.mjs
 node redline/test/levels-bp.test.mjs
 node redline/test/regen.test.mjs
 node redline/test/levels-rg.test.mjs
+node redline/test/custom.test.mjs
 ```
 
 `faults.test.mjs` forces every fault in turn through the same standard firing
@@ -406,6 +453,13 @@ flies Level 17's 21 s and throttled points.
 `levels-bp.test.mjs` walks Level 9 start to finish and flies Level 12's two
 points, grading reports against them. Each of the three takes a few minutes:
 a lit chamber needs 50 µs steps.
+
+`custom.test.mjs` checks custom hardware: the reference configuration
+reproduces TS-1 within 1.5 %, the Cv, orifice and coil conversions, every
+pre-test check, a pilot valve below its minimum differential, helium and
+altitude, and a predicted test for each preset — clean, matching the steady
+prediction, with droop following the datasheet point and the opening delay
+of the order of the stated response time.
 
 For visual checks, serve the repo with `python3 -m http.server` and drive
 `/redline/` in headless Chromium; `window.redline` exposes the app and its
