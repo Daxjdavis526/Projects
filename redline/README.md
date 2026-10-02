@@ -14,11 +14,11 @@ and nothing on screen is the truth.
 
 Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366×768 or larger.
 
-## What is here (development phases 1–9)
+## What is here (development phases 1–9, and the cameras)
 
 | | |
 |---|---|
-| **Control room** | P&ID mimic, CCTV view of the cell, configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
+| **Control room** | P&ID mimic, CCTV view of the cell, **3D cameras on the cell and the FIRE VIEW** (below), configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
 | **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector. **TS-3** (phase 9): a turbopump component stand — a 300 L nitrogen bank, two run tanks on RELIEVING regulators, and TPA-1, a fictional turbopump for a pump-fed engine (an oxidiser and a fuel centrifugal pump with inducers and an impulse turbine on one shaft, 36 000 rpm at design), its pumps flowing water through discharge valves, turbine flowmeters and throttle valves to a catch tank, its turbine driven by cold nitrogen through a turbine start valve and a speed controller (SC-330) |
 | **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves; and a lumped combustion chamber — ignition, start transients, hard starts, chug and screech onset, a heat-sink wall that soaks back after shutdown; on TS-3, centrifugal pumps on the affinity laws with suction-limited cavitation and casing heating, an impulse turbine, and a shaft with bearings and vibration (below) |
 | **Instruments** | 14 sensors — including an independent Coriolis mass flowmeter — plus command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
@@ -140,6 +140,95 @@ or the open stand.
 | Strip charts | wheel: zoom time · shift+wheel: zoom y · drag: pan · shift+drag: pan y · double-click: reset · ⚙: channels |
 | Analysis | click: cursor A · shift+click: cursor B · drag a cursor to move it |
 | Top bar | ❚❚ freezes the simulation; 1×–10× sim speed (locked to 1× while armed, firing or aborting); MASTER ALARM acknowledges all |
+| Cameras (3D) | the third tab over the schematic. Keys 1–5 (or the buttons) pick a camera; FREE orbits (drag, wheel); ⛶ or F opens the FIRE VIEW, Esc leaves it; REPLAY 1× / ¼× / ⅒× / 1/50× plays the last run back off the cell's tape |
+| Settings | units, sound, and whether the countdown switches to the FIRE VIEW by itself (on by default) |
+
+## The cameras (3D)
+
+The control room has always had a CCTV picture of the cell — a flat
+cartoon, there to show the evidence a camera gives (a valve's position flag,
+a puff from the vent stack, people in the cell). The **Cameras (3D)** tab
+is the real thing: the test site in three dimensions, built from the stand's
+own definition — the engine turned on a lathe from its real throat and exit
+diameters, the tanks sized from their real volumes, the valves and their
+position flags where the plumbing has them — and five cameras on it:
+
+| camera | where |
+|---|---|
+| CAM 1 · CELL | on the roof corner, the whole stand |
+| CAM 2 · NOZZLE (TPA-1 on TS-3) | a close-up beside the engine, looking across the plume |
+| CAM 3 · DOWNRANGE (CATCH TANK on TS-3) | out on the apron, looking back up the plume |
+| CAM 4 · BUNKER | the blockhouse's long lens, 50 m away. The sound arrives a seventh of a second late, as it does out there |
+| FREE | orbit anywhere |
+
+When the countdown starts, the screen becomes the **FIRE VIEW**: the camera
+fills it, with the T-clock, the readouts that matter for the run, the
+sequence state and a guarded ABORT (lift the cover, then press). When the
+sequence ends it hands you back to the console. After every run the cell's
+tape (the scene at 100 frames a second, from a second before T-0 until a few
+seconds after the sequence) can be replayed at speed or slowed to a tenth or
+a fiftieth — a high-speed camera on the ignition transient.
+
+Everything on these cameras comes from the true state of the model through
+`sim/visual.js`, the same way the CCTV and the cell microphone always have:
+
+- **The plume is the engine that is running.** Its regime comes from the
+  nozzle's area ratio and the chamber pressure: subsonic at the very start,
+  separated inside the nozzle while Pc is low (ragged, flapping, a Mach
+  disk), then flowing full — overexpanded at BPE-1's design point, so a
+  little pinched, with shock diamonds; underexpanded if you run it hot. The
+  diamonds are spaced as the theory spaces them and are as bright as the
+  pressure mismatch makes them. Its colour follows the burning mixture
+  ratio (fuel-rich is sootier, and afterburns orange at its edge); its
+  brightness, the chamber pressure; it flickers with chug and shakes with
+  screech. A hard start flashes, bangs and throws sparks; a burnt-through
+  regen liner throws sparks from the wall.
+- **Cold gas is invisible**, as it is: TS-1's jet shows only as a faint
+  condensation fog in the cold expanded nitrogen. **Water** from a cold flow
+  leaves the nozzle as spray and rains on the apron. **Purge** puffs. The
+  **vent stack** puffs white when cold nitrogen comes out of it. On TS-3
+  the turbine exhaust fogs (it is −70 °C), the catch tank churns, and the
+  speed-pickup wheel turns — strobing on video above 30 revolutions a
+  second, as it would.
+- **A heat-sink chamber glows** after a long burn — dull red past ~750 K,
+  brighter as it heats — from the model's own wall temperatures, and keeps
+  glowing during soak-back.
+- **The sun** follows the session's clock (sessions start at 08:30); the
+  beacon is the facility's own (green, amber, red and turning); the gate is
+  open while the cell is; technicians are where their task puts them.
+- **The sound** (on any view) is driven by the same state: a roar as loud as
+  the jet's acoustic power, balanced by its noise peak frequency (a small
+  jet hisses, a big one rumbles), supersonic crackle, the chug and screech
+  at the chamber's own frequencies, the turbopump's whine at its shaft and
+  blade-passing frequencies with cavitation crackle and bearing grind.
+  In the console you hear the cell microphone on a speaker; on a camera,
+  the full range; from the bunker, late and dull.
+
+The cameras load three.js (vendored, r180) only when first opened; the rest
+of REDLINE does not need it. If the browser has no WebGL, the tab says so
+and the 2D CCTV still works.
+
+### The cameras, and how honest they are
+
+- **Physics:** the plume's regime, its fully expanded Mach number and
+  diameter, the shock-cell spacing (L ≈ 1.306·Dj·√(Mj² − 1), the
+  vortex-sheet result), whether there is a Mach disk, how much of the nozzle
+  has separated (Summerfield's ~0.4·Pa), the exit temperature, the jet's
+  mechanical power (½·ṁ·U²) and from it the sound level (≈ 0.5 % of it
+  radiated, the textbook figure for rockets), the hot-wall colour (a
+  blackbody fit) and the delay of sound to the bunker.
+- **Shaped by eye:** the supersonic core length (an empirical fit,
+  x/Dj ≈ 4.2 + 1.1·Mj², good to tens of percent), the luminous length and
+  spread past it, the flame's colours (a clean alcohol-like flame is drawn
+  faintly blue-violet with yellow-white diamonds; soot and afterburning are
+  scaled from how fuel-rich the mixture is), the turbulence (slowed and
+  smeared — real eddies cross the frame in a fraction of a millisecond, and
+  a 60 Hz camera would smear them just as much), every particle of steam,
+  smoke, spray and fog, the camera shake, the auto-exposure and the CCTV
+  look, and all of the synthesis in the sound.
+- **Not modelled:** radiation from the plume's gas bands, its infrared,
+  shock–boundary-layer detail, the nozzle's side loads beyond a shake, noise
+  directivity, reflections off the walls.
 
 ## Modes
 
@@ -150,8 +239,9 @@ or the open stand.
 
 ## Architecture
 
-Static files, ES modules, no build step, no dependencies. The layers are
-separate, and everything but `ui/` runs in Node.
+Static files, ES modules, no build step. One dependency, vendored:
+three.js for the 3D cameras, fetched only when they are opened. The layers
+are separate, and everything but `ui/` runs in Node.
 
 ```
 src/
@@ -178,7 +268,10 @@ src/
                 statistics; report.js — the session report and the Level 6
                 grading; report-bp.js — Levels 12 and 17; reporthtml.js — the document
   sim/          session.js — wires the layers, owns the clock; predict-test.js —
-                a planned test run start to finish, headless
+                a planned test run start to finish, headless; visual.js —
+                what a camera and a microphone in the cell would pick up
+                (plume regime and shock cells, flame colour, hot walls,
+                sound levels), its events, and the cell's tape
   content/      DATA. stands/ts1-*.js and ts2-*.js: plumbing, sensors,
                 limits, abort sequence, interlocks, go/no-go stations, P&ID
                 layout, and the stand's own hooks (prediction, reductions,
@@ -187,8 +280,13 @@ src/
                 file per level, cg-*, bp-*, rg-*), programs.js, glossary.js,
                 and hardware/ — the custom-hardware schema and presets
                 (stands/custom-coldgas.js builds a stand from one)
-  ui/           the only code that touches the DOM
-test/           twelve headless suites, node redline/test/<name>.test.mjs
+  ui/           the only code that touches the DOM; ui/cell/ is the 3D
+                test site (environment, stands, the ray-marched plume,
+                particles, the camera panel and FIRE VIEW)
+vendor/three/   three.js r180 and the addons the cameras use
+tools/          cell-shots.mjs: screenshots of the cameras during real runs,
+                in headless Chromium
+test/           sixteen headless suites, node redline/test/<name>.test.mjs
                 (see Tests below)
 ```
 
@@ -204,7 +302,8 @@ Nothing the operator sees reads the physics directly. Even the P&ID colours a
 line from the transducer on it, and draws a valve from its limit switches if
 it has them or from its command (marked **C**) if it does not — a lying
 transducer makes a lying P&ID. The exceptions are deliberate and physical:
-the CCTV view and the cell microphone (sound) see and hear the real gas.
+the CCTV view, the 3D cameras and the cell microphone (sound) see and hear
+the real gas, the real flame and the real rotor.
 
 ### Growing it
 
@@ -473,6 +572,7 @@ node redline/test/custom.test.mjs
 node redline/test/turbopump.test.mjs
 node redline/test/faults-tp.test.mjs
 node redline/test/levels-tp.test.mjs
+node redline/test/visual.test.mjs
 ```
 
 `physics.test.mjs` checks the gas network against hand calculations;
@@ -541,9 +641,19 @@ without a worn ox pump) and flies Level 23's three deliverables — refilling
 the tanks between runs, as the water budget demands — and grades a report
 against them. It is the slow one: about seven minutes.
 
-For visual checks, serve the repo with `python3 -m http.server` and drive
-`/redline/` in headless Chromium; `window.redline` exposes the app and its
-session for scripting.
+`visual.test.mjs` checks what the cameras and the microphone are given,
+without a browser: the plume's regimes against chamber pressure on BPE-1
+(subsonic, separated with a Mach disk, overexpanded, matched,
+underexpanded), the shock-cell spacing, the cold-gas jet, the hot-wall
+colour, the flame's look; and cellState and its events through a real hot
+fire, a hard start, a cold flow, a TS-1 firing and a TS-3 spin, and the
+cell's tape.
+
+For visual checks, `node redline/tools/cell-shots.mjs [hot|regen|cold|coldgas|tp|all] [outdir]`
+serves the project, drives real runs in headless Chromium (software WebGL)
+and photographs each camera mid-run. More generally, serve the repo with
+`python3 -m http.server` and drive `/redline/` in headless Chromium;
+`window.redline` exposes the app and its session for scripting.
 
 ## Roadmap
 
@@ -556,4 +666,5 @@ session for scripting.
 | 7 | ✓ hot fire: combustion chamber, spark ignition and confirmation, start sequencing and hard starts, chug and screech onset, heat-sink thermal limit and soak-back, hot-fire reductions, 13 TS-2 faults and 12 inspections, Levels 9–12 |
 | 8 | ✓ BPE-2, a regeneratively cooled engine on TS-2: cooling jacket physics (boiling, critical heat flux, coking, liner damage), jacket instruments and reductions, 5 cooling faults and 6 inspections, Levels 13–17 |
 | 9 | ✓ TS-3, a turbopump component stand: pumps on water and a turbine on cold nitrogen, speed control, the affinity laws, maps, suction tests, bearings, vibration and overspeed, 11 faults and 10 inspections, Levels 18–23 |
+| — | ✓ the cameras: a 3D test site built from each stand's definition, a plume that follows the running engine, the FIRE VIEW, replay with slow motion, sound from the physics |
 | 10 | TS-3 integrated: a gas-generator cycle engine, bootstrap start |
