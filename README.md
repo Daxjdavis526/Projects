@@ -264,7 +264,14 @@ water, an impulse turbine on cold nitrogen, one shaft at 36 000 rpm held by
 a speed controller — for spins, head–flow maps referred by the affinity
 laws, suction tests that drive the pumps into cavitation on purpose, and the
 runaway that follows when a pump loses its load or a speed pickup lies to
-the controller. Every stand can also be watched in 3D: a test site built
+the controller. Then that turbopump feeds an engine: a gas-generator cycle,
+where a small fuel-rich burner taps a few per cent of the propellant to
+drive the turbine — started on nitrogen until the engine can bootstrap
+itself, a start that hangs if the start gas runs out too soon and
+overspeeds if it stays too long, throttled on the gas generator alone, an
+ablative chamber whose throat erodes as it burns, and an engine whose Isp
+sits below its own chamber's by the gas it throws away. Every stand can
+also be watched in 3D: a test site built
 from the stand's own definition, cameras in the cell, downrange and in the
 bunker, and a plume that is the engine actually running — its shock
 diamonds spaced by the jet's Mach number, separating inside the nozzle at

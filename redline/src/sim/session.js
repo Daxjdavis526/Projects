@@ -62,7 +62,7 @@ export class Session extends Emitter {
     this.timers = [];
     this.samplers = new Set();       // called every physics chunk (the cell's tape recorder)
     this.runs = [];
-    this.runPrefix = runPrefix || `${def.id.replace('-', '')}-${({ coldgas: 'CG', turbopump: 'TP' })[def.program] || 'BP'}`;
+    this.runPrefix = runPrefix || `${def.id.replace('-', '')}-${({ coldgas: 'CG', turbopump: 'TP', ggengine: 'GG' })[def.program] || 'BP'}`;
     this.nextRun = firstRun;
     this.clockStart = clockStart;
     this.speed = 1;

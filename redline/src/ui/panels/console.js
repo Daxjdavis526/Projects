@@ -272,8 +272,10 @@ export class FireControl {
     // thruster stand plans burns and pulse trains
     this.liquid = !!S.def.sequence;
     this.hotCapable = !!S.def.physics.chamber;
-    this.pump = !!S.def.planForm;
-    const opts = this.pump ? [['spin', 'Spin (hold speed)'], ['map', 'Pump map (throttle steps)'], ['suction', 'Suction test (tank ramp)']]
+    this.gg = S.def.planForm === 'gg';
+    this.pump = !!S.def.planForm && !this.gg;
+    const opts = this.gg ? [['hot', 'HOT FIRE'], ['cold', 'Pump-fed cold flow (water)']]
+      : this.pump ? [['spin', 'Spin (hold speed)'], ['map', 'Pump map (throttle steps)'], ['suction', 'Suction test (tank ramp)']]
       : this.liquid ? [['both', 'Cold flow · both'], ['ox', 'Cold flow · ox only'], ['fuel', 'Cold flow · fuel only'], ...(this.hotCapable ? [['hot', 'HOT FIRE']] : [])]
       : [['single', 'Single burn'], ['pulse', 'Pulse train']];
     const mode = h('select.in', { onchange: () => this._planFields() }, opts.map(([v, l]) => h('option', { value: v }, l)));
@@ -282,7 +284,7 @@ export class FireControl {
     const plan = h('div.plan', mode, this.fields, btn('LOAD', () => this._load(), 'sm'));
     this.loaded = h('div.loaded');
     host.append(plan, this.loaded);
-    mode.value = this.pump ? S.controller.plan.mode : this.liquid ? (S.controller.plan.mode === 'hot' ? 'hot' : S.controller.plan.sides || 'both') : S.controller.plan.mode;
+    mode.value = this.gg || this.pump ? S.controller.plan.mode : this.liquid ? (S.controller.plan.mode === 'hot' ? 'hot' : S.controller.plan.sides || 'both') : S.controller.plan.mode;
     this._planFields();
     // keys
     this.pollB = h('button.keybtn', { onclick: () => app.openPoll() }, 'POLL');
@@ -305,7 +307,36 @@ export class FireControl {
     const p = this.app.session.controller.plan;
     clear(this.fields);
     const num = (v, step, w, title) => h('input.in', { type: 'number', step, value: v, style: { width: w }, title });
-    if (this.pump) {
+    const L = t => h('span.lbl', t);
+    if (this.gg) {
+      // a gas-generator engine: the start is the plan — start gas, the
+      // order and timing of the valves, the igniters — then the throttle
+      const PSI = 6894.757, hot = this.mode.value === 'hot';
+      this.dur = num((p.duration ?? 10).toFixed(1), '0.5', '62px', hot ? 'Burn duration, s (T-0 → GG shutdown); ignored when throttle steps are given' : 'Run duration, s (start valve open → shut)');
+      this.sgp = num(((p.startP ?? 220 * PSI) / PSI).toFixed(0), '5', '58px', 'Start gas pressure (PR-330, set by the sequencer at T-3), psig: 120–400');
+      this.mo = num((p.mainOpen ?? (hot ? 0.45 : 0.3)).toFixed(2), '0.05', '64px', 'Main valves open, s after T-0');
+      this.pp = num((p.postPurge ?? 4).toFixed(0), '1', '48px', 'Post-purge, s');
+      if (!hot) {
+        this.fields.append(this.dur, L('s'), L('start gas'), this.sgp, L('psig'), L('mains T+'), this.mo, this.pp, L('s purge'));
+        return;
+      }
+      const t0 = p.thrSteps?.length ? p.thrSteps[0] : (p.thr ?? 1);
+      this.tox = num(Math.round(100 * (p.thrOx ?? t0)), '1', '56px', 'GG oxidiser throttle GCV-417, % (60–100)');
+      this.tfu = num(Math.round(100 * (p.thrFu ?? t0)), '1', '56px', 'GG fuel throttle GCV-427, % (60–100). Equal to the oxidiser side keeps the GG mixture ratio');
+      this.steps = h('input.in', { value: p.thrSteps?.length > 1 ? p.thrSteps.map(x => Math.round(x * 100)).join(',') : '', placeholder: 'e.g. 100,85,70', style: { width: '104px' },
+        title: 'Throttle profile: GG throttle positions in %, both legs together. Blank: one point at the throttles on the left' });
+      this.settle = num((p.settle ?? 4).toFixed(0), '1', '46px', 'Profile: seconds at the first point (it includes the start)');
+      this.dwell = num((p.dwell ?? 4).toFixed(0), '1', '46px', 'Profile: seconds at each later point');
+      this.go = num((p.ggOpen ?? 0.75).toFixed(2), '0.05', '64px', 'Gas generator valves open, s after T-0 (fuel 30 ms ahead of oxidiser)');
+      this.se = num((p.spinEnd ?? 1.1).toFixed(2), '0.05', '64px', 'Start gas off (TSV-332 shut), s after T-0 — bootstrap');
+      this.ign = num((p.ignLead ?? 0.5).toFixed(2), '0.05', '64px', 'Both igniters on, s BEFORE T-0');
+      this.ioff = num((p.ignOff ?? 2).toFixed(1), '0.1', '56px', 'Both igniters off, s after T-0');
+      this.lag = num(Math.round((p.shutLag ?? 0.25) * 1000), '10', '60px', 'Shutdown: main valves this many ms after the gas generator');
+      this.fields.append(this.dur, L('s · GG thr ox'), this.tox, L('fu'), this.tfu, L('% · profile'), this.steps, this.settle, L('/'), this.dwell, L('s'),
+        h('span', { style: { flexBasis: '100%', height: 0 } }),
+        L('start gas'), this.sgp, L('psig to T+'), this.se, L('· mains T+'), this.mo, L('GG T+'), this.go,
+        L('· IGN T−'), this.ign, L('→ T+'), this.ioff, L('· mains'), this.lag, L('ms after GG ·'), this.pp, L('s purge'));
+    } else if (this.pump) {
       // a turbopump run: how the speed is held, what speed, the throttles,
       // and what the run does with them
       const m = this.mode.value;
@@ -361,7 +392,21 @@ export class FireControl {
   _load() {
     const S = this.app.session;
     let plan;
-    if (this.pump) {
+    if (this.gg) {
+      const PSI = 6894.757, R = S.def.ratings, n = (el, d) => (Number.isFinite(Number(el.value)) && el.value !== '' ? Number(el.value) : d);
+      const common = { duration: Math.max(2, Math.min(R.MAX_BURN, n(this.dur, 10))), startP: n(this.sgp, 220) * PSI,
+        mainOpen: Math.max(0, Math.min(3, n(this.mo, 0.45))), postPurge: Math.max(0, Math.min(30, n(this.pp, 4))), thrSteps: null };
+      if (this.mode.value === 'cold') plan = { mode: 'cold', ...common };
+      else {
+        const ox = Math.max(0, Math.min(1, n(this.tox, 100) / 100)), fu = Math.max(0, Math.min(1, n(this.tfu, 100) / 100));
+        const steps = this.steps.value.split(/[ ,;]+/).map(Number).filter(x => x > 0 && x <= 100).map(x => x / 100);
+        plan = { mode: 'hot', ...common, thr: Math.max(ox, fu), thrOx: ox === fu ? null : ox, thrFu: ox === fu ? null : fu,
+          thrSteps: steps.length > 1 ? steps : null, settle: Math.max(3, Math.min(20, n(this.settle, 4))), dwell: Math.max(2, Math.min(20, n(this.dwell, 4))),
+          ggOpen: Math.max(0, Math.min(3, n(this.go, 0.75))), spinEnd: Math.max(0, Math.min(5, n(this.se, 1.1))),
+          ignLead: Math.max(0, Math.min(3, n(this.ign, 0.5))), ignOff: Math.max(0, Math.min(10, n(this.ioff, 2))), shutLag: Math.max(0, Math.min(1, n(this.lag, 250) / 1000)) };
+        if (plan.thrSteps) { plan.thrOx = null; plan.thrFu = null; }
+      }
+    } else if (this.pump) {
       const m = this.mode.value, PSI = 6894.757;
       plan = { mode: m, ctl: this.ctl.value, speed: Math.max(0, Number(this.spd.value) || 0), ramp: 3, settle: 3 };
       if (m === 'map') {
@@ -393,11 +438,15 @@ export class FireControl {
     // a plan loaded from elsewhere (a procedure, the API) re-syncs the editor
     if (c.plan !== this._planRef) {
       this._planRef = c.plan;
-      const want = this.pump ? c.plan.mode : this.liquid ? (c.plan.mode === 'hot' ? 'hot' : c.plan.sides || 'both') : c.plan.mode;
+      const want = this.gg || this.pump ? c.plan.mode : this.liquid ? (c.plan.mode === 'hot' ? 'hot' : c.plan.sides || 'both') : c.plan.mode;
       if (!this.mode.contains(document.activeElement) && !this.fields.contains(document.activeElement) && [...this.mode.options].some(o => o.value === want)) { this.mode.value = want; this._planFields(); }
     }
     this.loaded.innerHTML = '';
-    const pt = !p ? '' : p.kind === 'pump'
+    const pt = !p ? '' : p.kind === 'gg'
+      ? `  ·  pred. (drawing) ${Math.round(p.rpm)} rpm, Pc ${fmt(p.Pc - 101325, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(p.F, 'force')} ${unitLabel('force')}, MR ${p.MR.toFixed(2)}, TIT ${Math.round(p.TIT)} K`
+      : p.kind === 'ggcold'
+      ? `  ·  pred. (drawing) ${Math.round(p.rpm)} rpm on start gas, ox ${fmt(p.mdotOx, 'massflow')}, fuel ${fmt(p.mdotFu, 'massflow')} ${unitLabel('massflow')} water`
+      : p.kind === 'pump'
       ? `  ·  pred. ${Math.round(p.rpm)} rpm: heads ${p.headOx.toFixed(0)} / ${p.headFu.toFixed(0)} m, drive ${fmt(p.Ptin, 'pressure', 0)} ${unitLabel('pressure', true)}`
       : p.kind === 'coldflow'
       ? `  ·  pred. (drawing) ox ${fmt(p.mdotOx, 'massflow')}, fuel ${fmt(p.mdotFu, 'massflow')} ${unitLabel('massflow')} water`

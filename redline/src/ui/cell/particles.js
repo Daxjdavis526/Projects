@@ -18,6 +18,8 @@ const KINDS = {
   vent:   { c: [0.9, 0.93, 0.96], a: 0.25, g: 1.4, b: 0.2, d: 2.0, life: 2.2 },
   dust:   { c: [0.55, 0.47, 0.36], a: 0.25, g: 1.0, b: 0.1, d: 1.6, life: 3.0 },
   spark:  { c: [1.0, 0.55, 0.15], a: 1.0, g: 0.0, b: -9.81, d: 0.3, life: 0.9, add: true },
+  // a fuel-rich exhaust finishing its burn in the air: an orange, flickering flame
+  fire:   { c: [1.0, 0.48, 0.12], a: 0.42, g: 1.8, b: 1.2, d: 1.6, life: 0.6, add: true },
   ember:  { c: [1.0, 0.35, 0.08], a: 0.9, g: 0.0, b: 0.4, d: 1.0, life: 1.2, add: true },
 };
 

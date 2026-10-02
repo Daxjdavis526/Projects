@@ -4,7 +4,7 @@
    drives a session through the same commands an operator would give, and
    photographs each camera at chosen moments.
 
-     node redline/tools/cell-shots.mjs [hot|cold|coldgas|regen|tp|all] [outdir]
+     node redline/tools/cell-shots.mjs [hot|cold|coldgas|regen|tp|gg|all] [outdir]
 
    Needs Playwright (npm i -g playwright, or NODE_PATH pointing at it). */
 import http from 'node:http';
@@ -80,7 +80,7 @@ async function fireAndShoot(tag, tShot, cams = [0, 1, 2, 3, 4], { full = true, p
     await page.evaluate(c => window.redline.views.control.cell.setCam(c), c);
     await page.waitForTimeout(1500);
     const f = path.join(out, `${tag}-cam${c + 1}.png`);
-    await page.screenshot({ path: f });
+    await page.screenshot({ path: f, timeout: 180000 });
     console.log('wrote', f);
   }
   await page.evaluate(() => { window.redline.session.frozen = false; const cv = window.redline.views.control.cell; if (cv.full) cv.toggleFull(false); });
@@ -153,6 +153,28 @@ if (which === 'tp' || which === 'all') {
     ex('regSet', { id: 'PR-410', value: psi(50) }); ex('regSet', { id: 'PR-420', value: psi(50) }); S.run(25);
     ex('plan', { plan: { mode: 'spin', ctl: 'speed', speed: 36000, ramp: 3, duration: 8, thr: 0.66 } });`);
   await fireAndShoot('tp', 6.0, [0, 1, 2]);
+}
+if (which === 'gg' || which === 'all') {
+  await prepare('TS-3G', `
+    ex('daqPower', { on: true }); S.run(5);
+    ex('zero', { ids: S.def.sensors.filter(x => x.kind === 'PT').map(x => x.id) }); ex('tare', { ids: ['WT-411', 'WT-421'] });
+    ex('daqRate', { rate: 2000 });
+    ex('tech', { task: 'loadPropellants' }); S.run(151);
+    ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+    ex('inspection', { id: 'spark-check' }); S.run(41);
+    ex('tech', { task: 'openHV' }); S.run(9);
+    for (const id of ['VV-301', 'VV-413', 'VV-423']) ex('valve', { id, open: false });
+    ex('valve', { id: 'IV-301', open: true }); S.run(2); ex('clearCell'); S.run(7);
+    ex('regSet', { id: 'PR-410', value: psi(50) }); ex('regSet', { id: 'PR-420', value: psi(50) }); ex('regSet', { id: 'PR-630', value: psi(150) }); S.run(30);
+    ex('tare', { ids: ['LC-501'] });
+    ex('plan', { plan: { mode: 'hot', duration: 8, thrSteps: null } });`);
+  await fireAndShoot('gg', 4.0);
+  // the start, on tape: the gas generator lighting, the start gas going off
+  await page.evaluate(() => { const S = window.redline.session; S.run(14); const cv = window.redline.views.control.cell; cv.toggleFull(true); cv.setCam(0); cv.startReplay(0.1); if (cv.rep) cv.rep.t += 0.9; });
+  await page.waitForTimeout(2500);
+  await page.screenshot({ path: path.join(out, 'gg-replay-cam1.png'), timeout: 180000 });
+  console.log('wrote', path.join(out, 'gg-replay-cam1.png'));
+  await page.evaluate(() => { const cv = window.redline.views.control.cell; cv.stopReplay(); cv.toggleFull(false); });
 }
 
 await browser.close();

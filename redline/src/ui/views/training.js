@@ -44,7 +44,13 @@ export class TrainingView {
         h('div.lt', 'Turbopump component stand, no procedure'),
         h('ul', h('li', 'Spins, maps and suction tests on water and cold nitrogen'), h('li', 'Speed or drive-pressure control; watch both pickups'), h('li', 'Fault injection: bearings, rubs, worn rings, blading, pickups, meters')),
         h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-3'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-3'), 'sm'),
-          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-3'), 'sm', { title: MODES.fault.text }))));
+          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-3'), 'sm', { title: MODES.fault.text }))),
+      h('div.level',
+        h('div.ln', 'TS-3G · SANDBOX · BPE-3'),
+        h('div.lt', 'Gas-generator engine on TPA-1, no procedure'),
+        h('ul', h('li', 'Pump-fed cold flows on water, or hot fires on OX-1 / FU-1'), h('li', 'Your start sequence: start gas, valve timing, the bootstrap — and the throttle'), h('li', 'Fault injection: GG orifices and igniters, start gas, liner and throat, inducer, instruments')),
+        h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-3G'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-3G'), 'sm'),
+          btn('Fault injection', () => this.app.start(null, 'fault', 'TS-3G'), 'sm', { title: MODES.fault.text }))));
     open.append(h('div.level',
       h('div.ln', 'YOUR HARDWARE'),
       h('div.lt', 'A cold-gas stand built from your parts'),

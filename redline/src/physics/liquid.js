@@ -86,6 +86,16 @@ export class LiquidLine {
     // the discharge throttle, not an injector, is what the line flows through)
     this.pump = null;
     this.Tliq = null;                              // K, liquid temperature (set by the model)
+    // a side branch off the pump discharge — a gas generator's feed: its own
+    // valve, a throttle, and a lumped orifice (the GG injector) to a chamber
+    // whose pressure the model sets each step (tapP). Quasi-steady, with a
+    // few milliseconds of lag for the short line.
+    this.tap = spec.tap ? {
+      CdA: spec.tap.CdA, mdot: 0, blockage: 0, erosion: 0,
+      valve: new Valve({ ...spec.tap.valve, type: 'valve', from: 'ambient', to: 'ambient' }, net),
+      thr: spec.tap.throttle?.initial ?? 1, thrCmd: spec.tap.throttle?.initial ?? 1, thrRate: spec.tap.throttle?.rate ?? 0.5,
+    } : null;
+    this.tapP = net.ambient.P;
     this.thr = spec.throttle ? (spec.throttle.initial ?? 1) : 1;
     this.thrCmd = this.thr;
     this.thrRate = spec.throttle?.rate ?? 0.5;     // fraction per second
@@ -147,23 +157,27 @@ export class LiquidLine {
     const aJ = this.CdAjacket * (1 - 0.6 * this.jacketBlockage);
     const Rj = this.CdAjacket ? this.R(aJ) : 0;
     const pmp = this.pump;
-    const pt = pmp ? pmp.terms(this.rho, this.mdot) : { src: 0, Rq: 0 };
-    const Rs = pmp?.CdAsuc ? this.R(pmp.CdAsuc) : 0;
-    const Rtot = aV > 1e-12 ? this.R(aL) + this.R(aV) + Rj + pt.Rq + Rs : Infinity;
     // a dry tank drives nothing (the line would ingest gas: the run is over)
     const dry = this.mL <= 1e-3;
+    const B = this._tap(dt, net, dry);
+    const pt = pmp ? pmp.terms(this.rho, this.mdot + B) : { src: 0, Rq: 0 };
+    const Rs = pmp?.CdAsuc ? this.R(pmp.CdAsuc) : 0;
+    const Rtot = aV > 1e-12 ? this.R(aL) + this.R(aV) + Rj + pt.Rq + Rs : Infinity;
+    // the branch's flow shares the suction line and the pump: its share of
+    // their losses, explicit
+    const extra = B > 0 ? (pt.Rq + Rs) * B * (2 * Math.abs(this.mdot) + B) : 0;
     const Pup = !dry ? vt.P : vm.P;
     const prev = this.mdot;
     if (!Number.isFinite(Rtot)) this.mdot = 0;
     else {
       const k = dt / this.I;
-      this.mdot = (this.mdot + k * (Pup + pt.src - vm.P)) / (1 + k * Rtot * Math.abs(this.mdot));
+      this.mdot = (this.mdot + k * (Pup + pt.src - extra - vm.P)) / (1 + k * Rtot * Math.abs(this.mdot));
     }
     if (this.mdot > 0 && this.mL <= 0) this.mdot = 0;
     this.mdotDot = (this.mdot - prev) / dt;
     if (pmp) {
       // the valve sits on the pump discharge
-      pmp.update(dt, this, vt.P, this.Tliq ?? net.ambient.T, net.ambient.T, dry);
+      pmp.update(dt, this, vt.P, this.Tliq ?? net.ambient.T, net.ambient.T, dry, this.mdot + B);
       this.Pvi = pmp.Pd;
     } else {
       // valve inlet pressure: tank, less the upstream share of friction and the
@@ -192,7 +206,7 @@ export class LiquidLine {
     const blow = this.Vl > 0 ? this.Vl * this.rho * (Math.min(1, gasOut / 0.002) / 0.15 + 1 / 30) : 0;
     this.mdotInj += Math.min(blow, this.Vl * this.rho / dt);
     // liquid inventory
-    this.mL = Math.max(0, this.mL - this.mdot * dt);
+    this.mL = Math.max(0, this.mL - (this.mdot + B) * dt);
     this.Vl += (this.mdot - this.mdotInj) * dt / this.rho;
     // the trapped gas is squeezed, not removed: its pressure is what stops
     // the liquid (only a sliver of volume is kept as a numerical floor)
@@ -206,6 +220,22 @@ export class LiquidLine {
     // jet momentum on the thrust stand
     const v = dPi > 0 ? this.jetCv * Math.sqrt(2 * dPi / this.rho) : 0;
     this.Fjet = this.mdotInj * v * this.jetAxial;
+  }
+
+  /* The side branch: through its valve and orifice from the pump discharge
+     (last step's) to the chamber it feeds. */
+  _tap(dt, net, dry) {
+    const T = this.tap;
+    if (!T) return 0;
+    T.valve.update(dt, net);
+    if (T.thr !== T.thrCmd) { const d = T.thrCmd - T.thr, st = T.thrRate * dt; T.thr += Math.abs(d) <= st ? d : Math.sign(d) * st; }
+    const aV = T.valve.CdA(), aO = T.CdA * T.thr * (1 - T.blockage) * (1 + T.erosion);
+    const Pd = this.pump ? this.pump.Pd : this.Pvi;
+    const dP = Pd - this.tapP;
+    let want = 0;
+    if (!dry && aV > 1e-12 && aO > 1e-12 && dP > 0) want = Math.sqrt(dP / (this.R(aV) + this.R(aO)));
+    T.mdot += (want - T.mdot) * Math.min(1, dt / 0.004);
+    return T.mdot;
   }
 
   /* Largest stable explicit step for the manifold: the gas cushion against

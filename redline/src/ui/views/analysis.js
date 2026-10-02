@@ -47,6 +47,15 @@ const PRESETS_RG = [
   ['Regen: boiling margin vs Pc', 'hPc', 'boilMargin'],
   ['Regen: throat liner vs MR', 'MR', 'TthSteady'],
 ];
+const PRESETS_GG = [
+  ['GG: Pc vs throttle', 'ggThr', 'ggPc'],
+  ['GG: thrust vs speed', 'ggN', 'ggF'],
+  ['GG: TIT vs GG mixture ratio', 'ggMRgg', 'ggTIT'],
+  ['GG: engine vs chamber Isp', 'ggIspC', 'ggIspE'],
+  ['GG: mainstage time vs start gas', 'ggStartP', 'ggTms'],
+  ['GG: peak speed vs start-gas cut-off', 'ggSpinEnd', 'ggNpk'],
+  ['GG: Pc drift vs burn length', 'ggDur', 'ggDrift'],
+];
 const PRESETS = [
   ['F vs Pc (abs)', 'PcAbs', 'F'],
   ['ṁ (FT-201) vs Pc (abs)', 'PcAbs', 'mdotFM'],
@@ -200,7 +209,7 @@ export class AnalysisView {
   }
 
   reduction(run, overlays, def, right) {
-    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? ({ pulse: 'pulse train', coldflow: 'cold flow', hotfire: 'hot fire', pump: `turbopump ${run.metrics.mode}` }[run.metrics.kind] || 'single burn') : '')));
+    right.append(h('div.ph', h('span.t', 'Reduction'), h('span.sp'), h('span.sub', run.metrics ? ({ pulse: 'pulse train', coldflow: 'cold flow', hotfire: 'hot fire', pump: `turbopump ${run.metrics.mode}`, gg: 'gas-generator engine hot fire', ggcold: 'pump-fed cold flow' }[run.metrics.kind] || 'single burn') : '')));
     const rb = h('div.pb');
     right.append(rb);
     this.cursorBox = h('div');
@@ -242,6 +251,33 @@ export class AnalysisView {
       row('Isp', pred.Isp, m.Isp, 'ratio');
       rb.append(pt, h('p.faint', { style: { fontSize: '11px', margin: '4px 0' } }, 'The prediction uses the injector drawing and the design c* efficiency.'));
     }
+    const gp = run.metrics?.points?.[0];
+    if (pred?.kind === 'gg' && run.metrics?.kind === 'gg' && gp) {
+      rb.append(h('div.proc-sec', 'Prediction vs measured (first point)'));
+      const pt = h('table.metrics');
+      pt.append(h('tr.hd', h('td', ''), h('td', 'pred.'), h('td', 'meas.'), h('td', 'Δ')));
+      const row = (l, p, x, q) => pt.append(h('tr', h('td', l), h('td.v', q === 'ratio' ? p.toFixed(3) : q === 'K' ? p.toFixed(0) : fmt(p, q)), h('td.v', q === 'ratio' ? x.toFixed(3) : q === 'K' ? x.toFixed(0) : fmt(x, q)), h('td.v', `${(100 * (x / p - 1)).toFixed(1)} %`)));
+      const g0 = pred.steps?.[0] || pred;
+      row('Speed, rpm', g0.rpm, gp.N, 'speed');
+      row('Chamber pressure', g0.Pc - 101325, gp.Pc, 'pressure');
+      row('GG pressure (PT-333)', g0.Pgg - 101325, gp.Pgg, 'pressure');
+      row('Turbine inlet, K', g0.TIT, gp.TIT, 'K');
+      row('Thrust', g0.F, gp.F, 'force');
+      row('Main mixture ratio', g0.MR, gp.MR, 'ratio');
+      row('GG mixture ratio', g0.MRgg, gp.MRgg, 'ratio');
+      row('Isp, engine (s)', g0.Isp, gp.IspE, 'ratio');
+      rb.append(pt, h('p.faint', { style: { fontSize: '11px', margin: '4px 0' } }, 'The prediction is the drawing: its injector and orifice areas, its c* efficiencies, solved for the speed where the turbine\'s power meets the pumps\'.'));
+    }
+    if (pred?.kind === 'ggcold' && run.metrics?.kind === 'ggcold' && gp) {
+      rb.append(h('div.proc-sec', 'Prediction vs measured'));
+      const pt = h('table.metrics');
+      pt.append(h('tr.hd', h('td', ''), h('td', 'pred.'), h('td', 'meas.'), h('td', 'Δ')));
+      const row = (l, p, x, q) => pt.append(h('tr', h('td', l), h('td.v', fmt(p, q)), h('td.v', fmt(x, q)), h('td.v', `${(100 * (x / p - 1)).toFixed(1)} %`)));
+      row('Speed on start gas, rpm', pred.rpm, gp.N, 'speed');
+      row('Ox water flow', pred.mdotOx, gp.mdotOx, 'massflow');
+      row('Fuel water flow', pred.mdotFu, gp.mdotFu, 'massflow');
+      rb.append(pt);
+    }
     if (run.metrics?.flags?.length) rb.append(h('div.proc-sec', 'Flags'), h('p', { style: { color: 'var(--caution)', fontSize: '12px', margin: '2px 10px' } }, run.metrics.flags.join(' · ')));
     if (run.metrics?.pulses) {
       rb.append(h('div.proc-sec', 'Pulses'));
@@ -255,8 +291,14 @@ export class AnalysisView {
     if (overlays.length) {
       rb.append(h('div.proc-sec', 'Run comparison'));
       const ct = h('table.metrics');
-      ct.append(h('tr.hd', h('td', 'Run'), h('td', 'Pc'), h('td', 'F'), h('td', 'I'), h('td', 'Isp')));
-      for (const r of [run, ...overlays]) {
+      if (run.metrics?.kind === 'gg') {
+        ct.append(h('tr.hd', h('td', 'Run'), h('td', 'rpm'), h('td', 'Pc'), h('td', 'F'), h('td', 'TIT K')));
+        for (const r of [run, ...overlays]) {
+          const q = r.metrics?.points?.[0] || {};
+          ct.append(h('tr', h('td', short(r.id)), h('td.v', fmt(q.N, 'speed')), h('td.v', fmt(q.Pc, 'pressure')), h('td.v', fmt(q.F, 'force')), h('td.v', Number.isFinite(q.TIT) ? q.TIT.toFixed(0) : '----')));
+        }
+      } else ct.append(h('tr.hd', h('td', 'Run'), h('td', 'Pc'), h('td', 'F'), h('td', 'I'), h('td', 'Isp')));
+      if (run.metrics?.kind !== 'gg') for (const r of [run, ...overlays]) {
         const m = r.metrics?.summary || {};
         ct.append(h('tr', h('td', short(r.id)), h('td.v', fmt(m.Pc, 'pressure')), h('td.v', fmt(m.F, 'force')), h('td.v', fmt(m.I, 'impulse')), h('td.v', Number.isFinite(m.IspFM) ? m.IspFM.toFixed(1) : '----')));
       }
@@ -279,7 +321,7 @@ export class AnalysisView {
     const standId = this.S?.def.id || (pool.find(e => e.rec.metrics) ? standOf(pool.find(e => e.rec.metrics)) : 'TS-1');
     const usable = pool.filter(e => e.rec.metrics && !e.rec.aborted && standOf(e) === standId);
     const def = STANDS[standId] || STANDS['TS-1'];
-    const fam = def.family || def.id, QS = quantitiesFor(def.id, def.family), presets = def.id === 'TS-2R' ? [...PRESETS_RG, ...PRESETS_BP] : fam === 'TS-2' ? PRESETS_BP : PRESETS;
+    const fam = def.family || def.id, QS = quantitiesFor(def.id, def.family), presets = def.id === 'TS-3G' ? PRESETS_GG : def.id === 'TS-2R' ? [...PRESETS_RG, ...PRESETS_BP] : fam === 'TS-2' ? PRESETS_BP : PRESETS;
     if (!QS.some(q => q.key === this.xKey) || !QS.some(q => q.key === this.yKey)) [, this.xKey, this.yKey] = presets[0];
     const qx = QS.find(q => q.key === this.xKey), qy = QS.find(q => q.key === this.yKey);
     const sel = (cur, set) => {

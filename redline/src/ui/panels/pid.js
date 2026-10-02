@@ -41,7 +41,7 @@ export class PID {
   build() {
     const def = this.session.def, L = def.pid;
     this.mainLine = new Set(L.mainLine || TS1_MAIN_LINE);
-    this.zsMarks = new Map(); this.regSp = new Map(); this.epcFb = new Map(); this.tankLv = new Map(); this.thrPos = new Map(); this.rotors = [];
+    this.zsMarks = new Map(); this.regSp = new Map(); this.epcFb = new Map(); this.tankLv = new Map(); this.thrPos = new Map(); this.rotors = []; this.sparks = []; this.ggGlow = [];
     clear(this.host);
     const [vx, vy, vw, vh] = L.viewBox;
     const svg = s('svg', { viewBox: `${vx} ${vy} ${vw} ${vh}`, preserveAspectRatio: 'xMidYMid meet' });
@@ -50,6 +50,9 @@ export class PID {
       s('linearGradient', { id: 'plumeGrad', x1: '0', x2: '1', y1: '0', y2: '0' },
         s('stop', { offset: '0', 'stop-color': '#bfe6f7', 'stop-opacity': '0.55' }),
         s('stop', { offset: '1', 'stop-color': '#bfe6f7', 'stop-opacity': '0' })),
+      s('linearGradient', { id: 'stackGrad', x1: '0', x2: '0', y1: '1', y2: '0' },
+        s('stop', { offset: '0', 'stop-color': '#ffb15a', 'stop-opacity': '0.75' }),
+        s('stop', { offset: '1', 'stop-color': '#ff7a2a', 'stop-opacity': '0' })),
       s('pattern', { id: 'hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' },
         s('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: '#2a333d', 'stroke-width': 1.2 })));
     svg.append(defs);
@@ -70,8 +73,14 @@ export class PID {
 
     // plume (drawn under the thruster)
     const ex = L.exhaust;
-    this.plume = ex ? s('path.plume', { d: `M${ex.x},${ex.y - 9} L${ex.x + 110},${ex.y - 30} L${ex.x + 110},${ex.y + 30} L${ex.x},${ex.y + 9} Z` }) : null;
+    const pl = ex?.len ?? 110;
+    this.plume = ex ? s('path.plume', { d: `M${ex.x},${ex.y - 9} L${ex.x + pl},${ex.y - 30} L${ex.x + pl},${ex.y + 30} L${ex.x},${ex.y + 9} Z` }) : null;
     if (this.plume) svg.append(this.plume);
+    // a gas generator's turbine exhaust, going up to the berm: lit from the
+    // measured exhaust temperature
+    const st = L.stack;
+    this.stack = st ? s('path', { d: `M${st.x - 5},${st.y} L${st.x - 18},${st.y - 62} L${st.x + 18},${st.y - 62} L${st.x + 5},${st.y} Z`, fill: 'url(#stackGrad)', opacity: 0 }) : null;
+    if (this.stack) svg.append(this.stack);
     if (ex?.spray) {
       // water spray from the injector in a cold flow (an HMI cue from the manifold pressures)
       this.spray = s('path.spray', { d: `M${ex.x - 70},${ex.y - 8} L${ex.x + 60},${ex.y - 34} L${ex.x + 60},${ex.y + 34} L${ex.x - 70},${ex.y + 8} Z` });
@@ -305,6 +314,11 @@ export class PID {
         g.append(s('path.act', { d: `M${x + 4},${y - 26} L${x + 4},${y + 26}` }));
         g.append(s('path.body', { d: `M${x + 56},${y - 26} L${x + 70},${y - 9} L${x + 112},${y - 22} L${x + 112},${y + 22} L${x + 70},${y + 9} L${x + 56},${y + 26} Z` }));
         g.append(s('text.lbl', { x: x + 30, y: y + 4, 'text-anchor': 'middle' }, sy.id));
+        if (sy.ablative) {
+          // the ablative liner: a band inside the chamber and throat walls
+          g.append(s('path', { d: `M${x + 6},${y - 21} L${x + 56},${y - 21} L${x + 68},${y - 6} M${x + 6},${y + 21} L${x + 56},${y + 21} L${x + 68},${y + 6}`, fill: 'none', stroke: '#8a6a4a', 'stroke-width': 3, 'stroke-dasharray': '3 2' }));
+          g.append(s('text.lbl2', { x: x + 84, y: y - 30, 'text-anchor': 'middle' }, 'ABLATIVE'));
+        }
         if (sy.regen) {
           // the cooling jacket: coolant in at the nozzle end, out at the injector
           g.append(s('path.seg.liq.thin', { d: `M${x + 6},${y - 31} L${x + 56},${y - 31} L${x + 70},${y - 14} L${x + 112},${y - 27}` }));
@@ -317,12 +331,26 @@ export class PID {
       case 'igniter': {
         // spark plug and exciter, wired to the chamber
         const [tx, ty] = sy.to;
-        g.append(s('path.seg.thin', { d: `M${x},${y + 14} L${x},${ty - 8} L${tx},${ty - 8} L${tx},${ty}` }));
+        g.append(s('path.seg.thin', { d: ty > y ? `M${x},${y + 14} L${x},${ty - 8} L${tx},${ty - 8} L${tx},${ty}` : `M${x},${y - 12} L${x},${ty} L${tx},${ty}` }));
         g.append(s('rect.body', { x: x - 34, y: y - 12, width: 68, height: 26, rx: 3 }));
         g.append(s('text.lbl', { x, y: y + 5, 'text-anchor': 'middle' }, sy.id));
-        this.spark = s('path', { d: `M${tx - 6},${ty - 18} l6,5 l-4,3 l7,6`, fill: 'none', stroke: '#ffd25a', 'stroke-width': 2, opacity: 0 });
-        g.append(this.spark);
+        const spark = s('path', { d: ty > y ? `M${tx - 6},${ty - 18} l6,5 l-4,3 l7,6` : `M${tx - 14},${ty - 12} l6,5 l-4,3 l7,6`, fill: 'none', stroke: '#ffd25a', 'stroke-width': 2, opacity: 0 });
+        g.append(spark);
+        this.sparks.push({ el: spark, ch: this.session.def.pid.sparks?.[sy.id] || 'IGN-I' });
         g.append(hl(74, 32, 0, 1));
+        break;
+      }
+      case 'gg': {
+        // the gas generator: a small combustor can; it glows with the
+        // measured turbine inlet temperature
+        g.append(s('rect.body', { x: x - 20, y: y - 28, width: 40, height: 56, rx: 7 }));
+        const glow = s('rect', { x: x - 15, y: y - 22, width: 30, height: 44, rx: 5, fill: '#ff9a3c', opacity: 0 });
+        g.append(glow);
+        g.append(s('path.act', { d: `M${x - 20},${y + 18} L${x + 20},${y + 18}` }));
+        g.append(s('text.lbl', { x, y: y + 4, 'text-anchor': 'middle' }, 'GG'));
+        g.append(s('text.lbl2', { x: x + 24, y: y - 34 }, 'GAS GEN.'));
+        this.ggGlow.push({ el: glow, ch: sy.channel || 'TT-334' });
+        g.append(hl(50, 66));
         break;
       }
       case 'shaft': {
@@ -438,11 +466,12 @@ export class PID {
         ind[e.id] = { st: p >= e.set * 0.97 ? 'open' : 'closed', open: p >= e.set * 0.97 };
       } else ind[e.id] = { st: 'open', open: true };
     }
-    for (const l of def.physics.lines || []) {
-      const ix = (def.indications || []).find(q => q.valve === l.valve.id);
+    for (const l of def.physics.lines || []) for (const v of [l.valve, l.tap?.valve]) {
+      if (!v) continue;
+      const ix = (def.indications || []).find(q => q.valve === v.id);
       const o = ix ? d.latest(ix.zso) : NaN, cl = ix ? d.latest(ix.zsc) : NaN;
-      const st = !d.online || !ix ? (c.cmd[l.valve.id] ? 'open' : 'closed') : o === 1 && cl === 0 ? 'open' : cl === 1 && o === 0 ? 'closed' : 'travel';
-      ind[l.valve.id] = { st, open: st !== 'closed', disagree: S.alarms.byId.get('DISAGREE-' + l.valve.id)?.active };
+      const st = !d.online || !ix ? (c.cmd[v.id] ? 'open' : 'closed') : o === 1 && cl === 0 ? 'open' : cl === 1 && o === 0 ? 'closed' : 'travel';
+      ind[v.id] = { st, open: st !== 'closed', disagree: S.alarms.byId.get('DISAGREE-' + v.id)?.active };
     }
     // HMI flow inference: from each open exit with pressure behind it, walk
     // upstream through open elements while pressure rises.
@@ -482,7 +511,8 @@ export class PID {
         on = d.online && d.latest(this._meterOf(sg.def.from.includes('OX') ? 'ox' : 'fu')) > 0.01;
       } else if (vol === 'vent') {
         cls += ' s-vent';
-        on = sg.def.from ? flowing.has(sg.def.from) : (def.ventElements || []).some(id => flowing.has(id));
+        on = sg.def.flowIf ? d.online && d.latest(sg.def.flowIf[0]) > psi(sg.def.flowIf[1])
+          : sg.def.from ? flowing.has(sg.def.from) : (def.ventElements || []).some(id => flowing.has(id));
       } else if (vol === 'tank') {
         cls += ' s-unknown';
         on = flowing.has(def.bottle?.valve || 'HV-100');
@@ -493,8 +523,9 @@ export class PID {
         else if (p < vented) cls += ' s-vent';
         else color = pressureColor(p);
         if (sg.def.liquid) {
-          // a liquid line flows when its flowmeter says so
-          on = d.online && d.latest(this._meterOf(vol)) > 0.01;
+          // a liquid line flows when its flowmeter says so (a gas generator
+          // tap: its inferred flow, a few grams a second)
+          on = d.online && (sg.def.meter ? d.latest(sg.def.meter) > 0.002 : d.latest(this._meterOf(vol)) > 0.01);
         } else if (sg.branchTo) on = flowing.has(sg.branchTo);
         else if (vol !== 'dome') {
           on = def.physics.elements.some(e => this.mainLine.has(e.id) && (e.from === vol || e.to === vol) && flowing.has(e.id));
@@ -568,7 +599,16 @@ export class PID {
       t.textContent = Number.isFinite(v) ? `${Math.round(100 * v)} %` : '---- %';
     }
     // the spark: from the exciter current (what the console actually knows)
-    if (this.spark) this.spark.setAttribute('opacity', d.online && d.latest('IGN-I') > 0.5 ? (0.4 + 0.6 * (Math.floor(performance.now() / 70) % 2)).toFixed(2) : 0);
+    const blink = (0.4 + 0.6 * (Math.floor(performance.now() / 70) % 2)).toFixed(2);
+    for (const sp of this.sparks) sp.el.setAttribute('opacity', d.online && d.latest(sp.ch) > 0.5 ? blink : 0);
+    for (const gw of this.ggGlow) {
+      const T = d.online ? d.latest(gw.ch) : NaN;
+      gw.el.setAttribute('opacity', Number.isFinite(T) && T > 420 ? Math.min(0.85, (T - 420) / 600).toFixed(2) : 0);
+    }
+    if (this.stack) {
+      const st = def.pid.stack, T = d.online ? d.latest(st.channel) : NaN;
+      this.stack.setAttribute('opacity', Number.isFinite(T) && T > st.lo ? Math.min(1, (T - st.lo) / (st.hi - st.lo)).toFixed(2) : 0);
+    }
     if (this.spray) {
       const pm = Math.max(...ex.spray.map(id => d.latest(id)).filter(Number.isFinite), 0);
       // spray only while nothing burns: a lit chamber is the plume

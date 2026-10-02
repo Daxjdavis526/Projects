@@ -6,12 +6,19 @@ import ts1 from './stands/ts1-coldgas.js';
 import ts2 from './stands/ts2-biprop.js';
 import ts2r from './stands/ts2-regen.js';
 import ts3 from './stands/ts3-turbopump.js';
+import ts3g from './stands/ts3g-engine.js';
 import tpOrientation from './procedures/tp-orientation.js';
 import tpSpin from './procedures/tp-spin.js';
 import tpMap from './procedures/tp-map.js';
 import tpSuction from './procedures/tp-suction.js';
 import tpTrouble from './procedures/tp-trouble.js';
 import tpCampaign from './procedures/tp-campaign.js';
+import ggOrientation from './procedures/gg-orientation.js';
+import ggColdflow from './procedures/gg-coldflow.js';
+import ggFirstfire from './procedures/gg-firstfire.js';
+import ggThrottle from './procedures/gg-throttle.js';
+import ggTrouble from './procedures/gg-trouble.js';
+import ggCampaign from './procedures/gg-campaign.js';
 import rgColdflow from './procedures/rg-coldflow.js';
 import rgHotfire from './procedures/rg-hotfire.js';
 import rgMargins from './procedures/rg-margins.js';
@@ -30,7 +37,7 @@ import pulse from './procedures/cg-pulse.js';
 import trouble from './procedures/cg-trouble.js';
 import campaign from './procedures/cg-campaign.js';
 
-export const STANDS = { 'TS-1': ts1, 'TS-2': ts2, 'TS-2R': ts2r, 'TS-3': ts3 };
+export const STANDS = { 'TS-1': ts1, 'TS-2': ts2, 'TS-2R': ts2r, 'TS-3': ts3, 'TS-3G': ts3g };
 
 export const MODES = {
   tutorial:    { label: 'Tutorial', text: 'Every step explained. Strict interlocks. Stations make their own go/no-go calls and say why.' },
@@ -109,6 +116,24 @@ export const PROGRAMS = [
         teaches: ['Bearings, rubs and imbalance', 'Worn rings and damaged blading', 'Instrument faults inside a control loop', 'Reading a controller\'s output'] },
       { n: 23, id: 'tp-campaign', title: 'Turbopump acceptance campaign', scenario: tpCampaign, modes: ['independent'],
         teaches: ['Planning runs, water and gas', 'Design point, map and suction deliverables', 'Data validity'] },
+    ],
+  },
+  {
+    id: 'ggengine', title: 'Gas-generator cycle engine', stand: 'TS-3G',
+    blurb: 'BPE-3 on TPA-1: the turbopump from TS-3 now feeds an engine, and a small fuel-rich gas generator burning 5 % of the propellant drives its turbine. Start gas, bootstrap, two igniters, a start that can hang or overspeed, throttling on the gas generator, an ablative chamber that erodes as it burns — and the Isp the cycle costs.',
+    levels: [
+      { n: 24, id: 'gg-orient', title: 'Gas-generator engine stand orientation', scenario: ggOrientation, modes: ['tutorial', 'guided'],
+        teaches: ['The gas-generator cycle', 'Bootstrap and the start sequence', 'Two igniters', 'Three purges', 'Reading a start on paper'] },
+      { n: 25, id: 'gg-coldflow', title: 'Pump-fed cold flow', scenario: ggColdflow, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['A turbine on start gas alone', 'The injector under pump feed', 'Drawing vs as-built CdA', 'Coast-down with the valves open'] },
+      { n: 26, id: 'gg-firstfire', title: 'First gas-generator hot fire', scenario: ggFirstfire, modes: ['tutorial', 'guided', 'independent'],
+        teaches: ['Bootstrap', 'Start checks: light, light, speed', 'Turbine inlet temperature', 'Inferred GG flows', 'Engine vs chamber Isp'] },
+      { n: 27, id: 'gg-throttle', title: 'Throttling and duration', scenario: ggThrottle, modes: ['guided', 'independent'],
+        teaches: ['Throttling on the gas generator', 'GG mixture ratio and TIT', 'Injector stiffness at low thrust', 'Ablative throat erosion', 'Case soak-back'] },
+      { n: 28, id: 'gg-faults', title: 'Gas-generator engine fault diagnosis', scenario: ggTrouble, modes: ['guided', 'independent'],
+        teaches: ['Faults coupled through the shaft', 'GG orifices and igniters', 'Start gas faults', 'Liner and throat', 'Instruments inferring flows'] },
+      { n: 29, id: 'gg-campaign', title: 'Engine acceptance campaign', scenario: ggCampaign, modes: ['independent'],
+        teaches: ['Cold flow before hot fire', 'Propellant and gas budgets', 'Design point and throttle deliverables', 'Data validity'] },
     ],
   },
 ];

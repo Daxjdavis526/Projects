@@ -23,7 +23,7 @@ export class ReferenceView {
 
   renderList() {
     clear(this.list);
-    const pages = [['__stand', 'TS-1 stand data'], ['__stand2', 'TS-2 stand data'], ['__stand2r', 'TS-2 with BPE-2 (regen) data'], ['__stand3', 'TS-3 turbopump stand data'], ['__honest', 'What is simulated, what is approximated']];
+    const pages = [['__stand', 'TS-1 stand data'], ['__stand2', 'TS-2 stand data'], ['__stand2r', 'TS-2 with BPE-2 (regen) data'], ['__stand3', 'TS-3 turbopump stand data'], ['__stand3g', 'TS-3G gas-generator engine data'], ['__honest', 'What is simulated, what is approximated']];
     for (const [id, t] of pages) if (!this.q || t.toLowerCase().includes(this.q)) this.list.append(h('div.li', { onclick: () => this.go(id) }, h('div.a', h('span', t))));
     for (const [cat, name] of CATEGORIES) {
       const items = GLOSSARY.filter(g => g.cat === cat && (!this.q || (g.title + ' ' + g.body.join(' ')).toLowerCase().includes(this.q)));
@@ -44,7 +44,7 @@ export class ReferenceView {
           g.see?.length ? h('div.see', 'See also: ', g.see.map(s => h('a', { onclick: () => this.go(s) }, this.app.refTitle(s)))) : null));
       }
     }
-    this.doc.append(this.standPage(), this.standPage2(), this.standPage2R(), this.standPage3(), this.honestPage());
+    this.doc.append(this.standPage(), this.standPage2(), this.standPage2R(), this.standPage3(), this.standPage3G(), this.honestPage());
   }
 
   standPage() {
@@ -146,6 +146,34 @@ export class ReferenceView {
     return el;
   }
 
+  standPage3G() {
+    const def = STANDS['TS-3G'], R = def.ratings, D = def.design, ph = def.physics, G = ph.gg, C = ph.chamber;
+    const el = h('div.gl-entry', { id: 'ref-__stand3g' }, h('h3', 'TS-3G gas-generator engine stand (fictional)'));
+    el.append(h('p', 'TS-3 rebuilt to fire BPE-3. TPA-1 takes OX-1 and FU-1 from the 60 L run tanks at about 50 psig and delivers them through the main valves MOV-414 and MFV-424 to the main injector. Off each pump discharge a tap runs through a GG valve (GOV-416, GFV-426), a GG throttle (GCV-417, GCV-427) and a calibrated orifice into the gas generator, whose outlet is the turbine manifold; the turbine exhausts up a duct to the berm. For the start, PR-330 and the turbine start valve TSV-332 put nitrogen into the gas generator volume. PR-630 feeds three purges: both main injector manifolds and the gas generator.'));
+    const t = h('table.metrics', { style: { maxWidth: '640px' } });
+    const row = (a, b) => t.append(h('tr', h('td', a), h('td.v', b)));
+    const P = x => `${fmt(x, 'pressure', 0)} ${unitLabel('pressure', true)}`;
+    const mm2 = x => `${(x * 1e6).toFixed(2)} mm²`;
+    row('Design point (drawing)', `${Math.round(ph.turbopump.Nd).toLocaleString('en-US')} rpm, Pc ${(D.Pc / 1e6).toFixed(1)} MPa abs, MR ${D.MR}, GG MR ≈ 0.37 at ≈ 850 K`);
+    row('Main chamber', `ablative, silica-phenolic liner ${(C.ablative.t * 1e3).toFixed(0)} mm in a steel case; throat Ø ${(D.throatDia * 1e3).toFixed(1)} mm, exit Ø ${(D.exitDia * 1e3).toFixed(0)} mm; design burn ${R.MAX_BURN} s`);
+    row('Main injector CdA (drawing)', `ox ${mm2(D.CdAox)}, fuel ${mm2(D.CdAfu)}; as built ox ${Math.round((def.asBuilt.ox - 1) * 100)} %, fuel +${Math.round((def.asBuilt.fu - 1) * 100)} %`);
+    row('GG orifice CdA (drawing)', `ox ${mm2(D.CdAggOx)}, fuel ${mm2(D.CdAggFu)}; the GG flow channels GGF-OX / GGF-FU are inferred from these`);
+    row('Gas generator', `${(G.V * 1e6).toFixed(0)} cc; its throat is the turbine nozzle, Ø ${(D.turbNozzleDia * 1e3).toFixed(2)} mm equivalent; c* efficiency ${def.asBuilt.etaGG}`);
+    row('Turbine inlet redline / caution', `${R.TIT_REDLINE} K / 960 K (TT-334)`);
+    row('Speed redline', `${Math.round(R.N_REDLINE).toLocaleString('en-US')} rpm (110 %)`);
+    row('Start gas', `${P(psi(120))} – ${P(R.START_MAX)} (PR-330, set by the sequencer); relief RV-331 at 500 psig`);
+    row('Standard start', 'start gas T−3; pre-purge T−2; igniters T−0.5; TSV-332 T0; main valves T+0.45; GG fuel T+0.72, GG oxidiser T+0.75; start gas off T+1.10; igniters off T+2.0');
+    row('Start checks (aborts)', 'Pc by T+0.9 (main light); TT-334 above 450 K by T+1.25 (GG light); speed above 80 % of the predicted mainstage between T+2.5 and T+3.5 (start hang)');
+    row('Shutdown', 'GG oxidiser, GG fuel 30 ms later, main oxidiser 250 ms after the GG, main fuel 50 ms after that; three post-purges');
+    row('Throttle range', `GG throttles ${Math.round(R.THR_MIN * 100)} – 100 %`);
+    row('Propellant load', `${R.FILL_OX} kg OX-1, ${R.FILL_FU} kg FU-1; water fill ${R.FILL_WATER} kg each`);
+    row('Tank MEOP / minimum for the pumps', `${P(R.TANK_MEOP)} / ${P(R.NPSH_MIN_TANK)}`);
+    row('Case re-fire limit', `TC-503 below ${(R.CASE_REFIRE - 273.15).toFixed(0)} °C`);
+    el.append(t);
+    el.append(...this.limitsTable(def.limits));
+    return el;
+  }
+
   honestPage() {
     const el = h('div.gl-entry', { id: 'ref-__honest' }, h('h3', 'What is simulated, and what is approximated'));
     const items = [
@@ -155,6 +183,7 @@ export class ReferenceView {
       ['Combustion (TS-2)', 'One lumped chamber holding combustion products and nitrogen; products enter with the energy their characteristic velocity implies, from an invented c*(mixture ratio) table at 94 % efficiency; choked or unchoked throat; ideal nozzle with crude separation. Ignition is a rule (spark on, both propellants present in a flammable ratio, a few milliseconds of delay), not chemistry. Unlit liquid is spray that leaves in milliseconds plus a share that wets the wall and lingers; lit, it burns as fast as it can vaporise and pair — which is what makes a late light a hard start. Chug is an onset criterion on injector stiffness (ΔP/Pc below 0.2), screech appears only when a fault drives it; neither is a solution of the governing equations. The copper walls are two thermal nodes tuned to a 5 s burn limit with soak-back. The flame detector and accelerometer read invented functions of the chamber state.'],
       ['Regenerative cooling (BPE-2)', 'The liner is seven axial zones, each a thin copper-alloy node and the fuel in its channels, integrated implicitly. Gas-side heat transfer scales as Bartz\'s correlation does (Pc^0.8, area ratio^-0.9) with a tuned constant; coolant side as Dittus–Boelter (flow^0.8) with zone constants. FU-1 boils on an invented alcohol-like saturation curve; nucleate boiling helps, past a lumped critical heat flux (falling with less flow and less subcooling) a vapour film forms and holds until the wall cools. Coking is an empirical deposit rate above a threshold temperature; damage and cracking are a running overtemperature integral. The fuel\'s density does not change as it warms; its heat goes back to the chamber only in spirit (c* is not raised by it).'],
       ['Turbopump (TS-3)', 'Each pump is a parabolic head–flow curve scaled by the affinity laws (head ∝ speed², flow ∝ speed), added as a pressure source to its liquid line\'s momentum equation; its shaft power is a shutoff share plus a share rising with flow, so efficiency emerges rather than being looked up. Cavitation is a single factor on head (and partly on torque) from NPSH available against an NPSH required that scales with speed² and flow — no bubble dynamics, no inducer backflow, no rotating cavitation. The pump casing holds a lumped mass of liquid that heats with the power not delivered as head. The turbine is a one-dimensional impulse stage: Euler torque from a spouting velocity, a nozzle velocity coefficient, a blade-velocity coefficient and one lumped loss factor; the drive gas leaves colder by exactly the work done. The shaft has one inertia, two bearings with linear friction and lumped thermal nodes, and windage. Vibration is an invented RMS figure (imbalance ∝ speed², cavitation, bearing distress). No rotordynamics: no critical speeds, no whirl, no axial thrust balance. The speed controller is a PI loop with feed-forward from the steady prediction, acting on the DAQ\'s readings.'],
+      ['Gas-generator engine (TS-3G)', 'The gas generator is a second lumped chamber of the same kind as the main one, burning fuel-rich: its temperature comes from an invented temperature-versus-mixture-ratio table (no equilibrium chemistry, no soot), its gas has one fixed γ and gas constant, and the turbine is fed straight from it — the turbine nozzle is its throat. The taps are quasi-steady orifice flows off each pump discharge, lagged a few milliseconds; the pumps see the main and the tap flow together. The cycle closes through the shaft with nothing else: no turbine-inlet duct dynamics, no heat lost from the gas generator\'s gas to its walls worth the name, no afterburning in the exhaust (that flame on the cameras is drawn, not computed). The start gas and the gas generator\'s gas mix in one volume. The ablative chamber is one char front with a fixed rate law scaled by chamber pressure, a throat that erodes at a fixed rate, and a case node behind a conductance that grows as the liner thins — no pyrolysis gas, no spalling, no uneven char. The steady predictor balances turbine and pump power by bisection on speed; the transient model is a separate integration and agrees with it to a few per cent, which is the honest size of the difference.'],
       ['Instruments', 'Every channel passes through a sensor model: response lag, zero offset, noise that grows with bandwidth, mains pickup, an anti-alias filter set by the sample rate, ADC quantisation and amplifier saturation. Zeroing is a software offset after conversion, as in a real DAQ.'],
       ['Not claimed', 'Numbers are plausible for a small research cold-gas thruster, engine and turbopump at sea level; they are not a prediction of any real hardware. The stands, the thruster, the engines, the turbopump, the propellants (OX-1, FU-1) and the procedures are invented.'],
     ];

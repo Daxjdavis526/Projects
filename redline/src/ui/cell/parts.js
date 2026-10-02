@@ -173,21 +173,21 @@ export function beam(a, b, { w = 0.08, h = 0.08, mat = MAT.paintYellow() } = {})
    hot: { chamber, nozzle } materials whose emissive the wall temperature
    drives, inner: the nozzle's inside surface }. The engine axis is +x,
    the injector at x = 0. */
-export function engine({ Dt, De, regen = false, heatSink = true, name = '' }) {
+export function engine({ Dt, De, regen = false, heatSink = true, ablative = false, name = '' }) {
   const g = new THREE.Group();
   const rt = Dt / 2, re = De / 2;
   const rc = rt * 2.2;                                       // contraction ratio ≈ 4.8
   const Lc = rt * 7.5;                                       // cylindrical chamber
   const Lcv = (rc - rt) / Math.tan(30 * Math.PI / 180);      // 30° convergence
   const Ldv = (re - rt) / Math.tan(15 * Math.PI / 180);      // 15° cone
-  const wall = heatSink ? rt * 1.6 : rt * 0.35;              // a copper heat sink is THICK
+  const wall = heatSink ? rt * 1.6 : ablative ? rt * 1.1 : rt * 0.35;   // a copper heat sink is THICK; an ablative liner in its case nearly so
   const xT = Lc + Lcv, xE = xT + Ldv;
   // outside profile (Vector2(radius, x)), lathe revolves about y → rotate later
   const outer = [];
   const ro = rc + wall;
   outer.push(new THREE.Vector2(0.0001, 0), new THREE.Vector2(ro * 1.08, 0), new THREE.Vector2(ro * 1.08, rt * 1.2));
   outer.push(new THREE.Vector2(ro, rt * 1.2), new THREE.Vector2(ro, Lc));
-  if (heatSink) { outer.push(new THREE.Vector2(ro, xT + rt * 0.5)); outer.push(new THREE.Vector2(re + rt * 0.25, xE - rt * 0.2)); }
+  if (heatSink || ablative) { outer.push(new THREE.Vector2(ro, xT + rt * 0.5)); outer.push(new THREE.Vector2(re + rt * 0.25, xE - rt * 0.2)); }
   else { outer.push(new THREE.Vector2(rt + wall * 2.2, xT)); outer.push(new THREE.Vector2(re + wall, xE)); }
   outer.push(new THREE.Vector2(re + rt * 0.08, xE), new THREE.Vector2(re, xE));
   const inner = [];
@@ -195,11 +195,13 @@ export function engine({ Dt, De, regen = false, heatSink = true, name = '' }) {
     const x = xT + Ldv * i / 24;
     inner.push(new THREE.Vector2(rt + (re - rt) * i / 24, x));
   }
-  const matBody = regen ? new THREE.MeshStandardMaterial({ color: 0x9aa0a2, metalness: 0.85, roughness: 0.42, emissive: 0x000000 }) : MAT.copper();
+  const matBody = regen ? new THREE.MeshStandardMaterial({ color: 0x9aa0a2, metalness: 0.85, roughness: 0.42, emissive: 0x000000 })
+    : ablative ? new THREE.MeshStandardMaterial({ color: 0x4d5257, metalness: 0.55, roughness: 0.55, emissive: 0x000000 }) : MAT.copper();
   const body = new THREE.Mesh(new THREE.LatheGeometry(outer, 48), matBody);
   body.castShadow = body.receiveShadow = true;
   // the nozzle's inside: what the downrange camera looks into
-  const innerMat = new THREE.MeshStandardMaterial({ color: regen ? 0x6b6f71 : 0x8a5a3c, metalness: 0.6, roughness: 0.5, side: THREE.BackSide, emissive: 0x000000 });
+  // an ablative's inside is charred phenolic: black, matte
+  const innerMat = new THREE.MeshStandardMaterial({ color: regen ? 0x6b6f71 : ablative ? 0x1d1a18 : 0x8a5a3c, metalness: ablative ? 0.05 : 0.6, roughness: ablative ? 0.95 : 0.5, side: THREE.BackSide, emissive: 0x000000 });
   const innerMesh = new THREE.Mesh(new THREE.LatheGeometry(inner.map(v => new THREE.Vector2(v.x * 0.999, v.y)), 48), innerMat);
   const lathe = new THREE.Group();
   lathe.add(body, innerMesh);
@@ -214,6 +216,11 @@ export function engine({ Dt, De, regen = false, heatSink = true, name = '' }) {
     // coolant inlet manifold near the exit, outlet at the injector end
     g.add(mesh(new THREE.TorusGeometry(re + wall * 1.4, rt * 0.3, 10, 40), man, { x: xE - rt * 0.8, ry: Math.PI / 2 }));
     g.add(mesh(new THREE.TorusGeometry(ro * 1.04, rt * 0.3, 10, 40), man, { x: rt * 1.6, ry: Math.PI / 2 }));
+  }
+  if (ablative) {
+    // the phenolic exit lip, and the case thermocouple at the throat plane
+    g.add(mesh(new THREE.TorusGeometry(re + rt * 0.16, rt * 0.12, 8, 40), new THREE.MeshStandardMaterial({ color: 0x2a221c, roughness: 0.95 }), { x: xE - rt * 0.05, ry: Math.PI / 2 }));
+    g.add(mesh(new THREE.CylinderGeometry(rt * 0.12, rt * 0.12, rt * 1.6, 6), MAT.stainless(), { x: xT, y: ro + rt * 0.5 }));
   }
   if (heatSink) {
     // embedded thermocouples along the wall

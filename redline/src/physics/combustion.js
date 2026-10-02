@@ -67,7 +67,18 @@ export class Chamber {
     this.Ae = Math.PI / 4 * spec.exitDia ** 2;
     this.eps = this.Ae / this.At;
     this.Cd = spec.Cd ?? 0.98;
-    this.peP = pressureRatio(this.eps, GAM_P);
+    // the products' own gas properties and flammable range, if the chamber
+    // has its own (a fuel-rich gas generator runs far from the main chamber's)
+    this.gP = spec.gammaP ?? GAM_P;
+    this.Rp = spec.Rp ?? R_P;
+    this.mrMin = spec.mrMin ?? MR_MIN;
+    this.mrMax = spec.mrMax ?? MR_MAX;
+    // a bigger engine vaporises and burns more per second (the spray's
+    // ceiling scales with the injector), and a small one needs less
+    // propellant in it before a spark can light it
+    this.burnScale = spec.burnScale ?? 1;
+    this.ignMin = spec.ignMin ?? 2e-4;
+    this.peP = pressureRatio(this.eps, this.gP);
     this.peN = pressureRatio(this.eps, GAM_N2);
     this.cstar = spec.cstar;                       // (MR) => ideal c*, m/s
     this.eta = spec.etaCstar ?? 0.94;              // as built: mixing and vaporisation efficiency
@@ -92,13 +103,21 @@ export class Chamber {
     this.impulse = 0;
     this.peak = { P: this.Pa, hf: 0, chug: 0, Tth: ambient.T };   // what the hardware has been through (for inspections)
     this.t = 0;
+    // an ablative liner: the char front advances into it while the engine
+    // burns, the throat erodes, and the outer case heats as the liner thins
+    if (spec.ablative) {
+      this.Dt0 = spec.throatDia;
+      this.abl = { char: 0, eroded: 0, surf: ambient.T, through: false };
+    }
   }
 
   get m() { return this.mN + this.mP; }
   get P() { return this.Q / this.V; }
-  get gamma() { const m = this.m; return m > 0 ? (this.mP * GAM_P + this.mN * GAM_N2) / m : GAM_N2; }
+  get gamma() { const m = this.m; return m > 0 ? (this.mP * this.gP + this.mN * GAM_N2) / m : GAM_N2; }
+  get R() { const m = this.m; return m > 0 ? (this.mP * this.Rp + this.mN * R_N2) / m : R_N2; }
+  get cp() { const g = this.gamma; return g * this.R / (g - 1); }
   get RT() { return this.Q / Math.max(this.m, 1e-12); }
-  get Tgas() { const m = this.m; return this.RT / (m > 0 ? (this.mP * R_P + this.mN * R_N2) / m : R_N2); }
+  get Tgas() { return this.RT / this.R; }
 
   /* One step. inj = { ox: kg/s, fu: kg/s } of liquid; n2 = kg/s of nitrogen
      in (from the network, already integrated by it); stiffness = smallest
@@ -115,7 +134,7 @@ export class Chamber {
     const MRp = pf > 1e-9 ? po / pf : Infinity;
     // ignition
     if (!this.burning) {
-      const ready = ig.on && po > 2e-4 && pf > 2e-4 && MRp > 0.25 && MRp < 8;
+      const ready = ig.on && po > this.ignMin && pf > this.ignMin && MRp > Math.min(0.25, 0.6 * this.mrMin) && MRp < 8;
       if (ready && this.ignAt === null) this.ignAt = this.t + 0.006 + (this.rng ? this.rng.next() * 0.006 : 0.003) + ig.weak;
       if (!ready) this.ignAt = null;
       if (this.ignAt !== null && this.t >= this.ignAt) { this.burning = true; this.ignAt = null; this.quiet = 0; }
@@ -126,17 +145,18 @@ export class Chamber {
       // vaporisation: the spray in a time that grows with its size, the
       // puddle as fast as the flame can boil it — accumulated propellant
       // burns as fast as it can, which is not instantly
-      const vap = k => { const s = this.pool[k], w = this.puddle[k]; return s / (0.0025 + 3 * s) + w / (0.004 + 2 * w); };
+      const K = this.burnScale;
+      const vap = k => { const s = this.pool[k], w = this.puddle[k]; return s / (0.0025 + 3 * s / K) + w / (0.004 + 2 * w / K); };
       // chug: burn rate modulated at the feed-coupled frequency
       const mod = 1 + this.chug.A * Math.sin(this.chug.phase);
       const vo = vap('ox') * mod, vf = vap('fu') * mod;
       // a propellant burns only with the other: vapour beyond the
       // flammable mixture range waits (or leaves unburned)
-      bo = Math.max(0, Math.min(vo, MR_MAX * vf)); bf = Math.max(0, Math.min(vf, vo / MR_MIN));
+      bo = Math.max(0, Math.min(vo, this.mrMax * vf)); bf = Math.max(0, Math.min(vf, vo / this.mrMin));
       const take = (k, v, b) => {
         if (v <= 0) return;
         const f = b / v, s = this.pool[k], w = this.puddle[k];
-        const ds = s / (0.0025 + 3 * s), dw = w / (0.004 + 2 * w), tot = ds + dw || 1;
+        const ds = s / (0.0025 + 3 * s / this.burnScale), dw = w / (0.004 + 2 * w / this.burnScale), tot = ds + dw || 1;
         this.pool[k] = Math.max(0, s - Math.min(s, f * v * (ds / tot) * dt) - (1 - f) * s * dt / TAU_SPRAY);
         this.puddle[k] = Math.max(0, w - Math.min(w, f * v * (dw / tot) * dt));
       };
@@ -154,9 +174,9 @@ export class Chamber {
     this.MRb = bf > 1e-9 ? bo / bf : NaN;
     // gas in
     if (b > 0) {
-      const MR = Math.min(8, Math.max(0.25, bo / Math.max(bf, 1e-9)));
+      const MR = Math.min(8, Math.max(Math.min(0.25, this.mrMin), bo / Math.max(bf, 1e-9)));
       const cs = this.eta * this.etaLeak * this.cstar(MR);
-      const RTp = (cs * Gam(GAM_P)) ** 2;
+      const RTp = (cs * Gam(this.gP)) ** 2;
       this.mP += b * dt;
       this.Q += b * RTp * dt;
     }
@@ -177,7 +197,7 @@ export class Chamber {
     this.Q -= out * RT;
     // the gas cools toward the wall when there is no combustion to feed it
     const Tw = this.walls.ch;
-    const RTwall = (this.mP * R_P + this.mN * R_N2) * Tw;
+    const RTwall = (this.mP * this.Rp + this.mN * R_N2) * Tw;
     if (!this.burning) this.Q += (RTwall - this.Q) * Math.min(1, dt / 0.05);
     if (this.Q < 1) this.Q = 1;
     this.mdotOut = mdot;
@@ -207,7 +227,8 @@ export class Chamber {
     this.Pobs = P * (1 + hf.A * Math.sin(hf.phase) + (this.burning ? 0.004 * (this.rng ? this.rng.gauss() : 0) : 0));
     // walls: a heat-sink chamber's own; a regeneratively cooled one is
     // stepped by its jacket (cooling.js), which writes walls.ch / walls.th
-    if (!this.spec.regen) {
+    if (this.abl) this._ablative(dt, P);
+    else if (!this.spec.regen) {
       const Pn = this.spec.Pnom;
       const flux = this.burning ? Math.pow(Math.max(P, this.Pa) / Pn, 0.8) * this.film * (1 + 4 * hf.A) : 0.02;
       const Taw = this.burning ? 0.85 * this.Tgas : this.Tgas;
@@ -220,6 +241,27 @@ export class Chamber {
     const W = this.walls;
     const pk = this.peak;
     if (P > pk.P) pk.P = P; if (hf.A > pk.hf) pk.hf = hf.A; if (ch.A > pk.chug) pk.chug = ch.A; if (W.th > pk.Tth) pk.Tth = W.th;
+  }
+
+  /* An ablative liner, lumped. walls.th is the char surface (hot while it
+     burns, cooling after); walls.ch is the outer case, where the
+     thermocouples are: it is insulated by whatever virgin liner is left,
+     so it barely warms early in a burn and climbs late in a long one —
+     and after shutdown it keeps climbing for a while (the char's heat
+     soaks outward). Burn through the liner and the case sees the gas. */
+  _ablative(dt, P) {
+    const A = this.spec.ablative, a = this.abl, W = this.walls;
+    const q = this.burning ? Math.pow(Math.max(P, this.Pa) / this.spec.Pnom, 0.8) * this.film * (1 + 4 * this.hf.A) : 0;
+    a.char = Math.min(A.t, a.char + A.rate * q * dt);
+    a.eroded += A.erode * q * dt;
+    this.At = Math.PI / 4 * (this.Dt0 + a.eroded) ** 2;
+    const Tsurf = this.burning ? A.Tsurf * Math.min(1, 0.4 + 0.6 * q) : this.Ta;
+    a.surf += (Tsurf - a.surf) * Math.min(1, dt / (this.burning ? 0.6 : 25));
+    const virgin = A.t - a.char;
+    if (virgin <= 1e-5 && this.burning) a.through = true;
+    const G = A.G * Math.exp(-virgin / A.lam) * (a.through ? 8 : 1);
+    W.th = a.surf;
+    W.ch += dt * (G * (a.surf - W.ch) - A.Gamb * (W.ch - this.Ta)) / A.C;
   }
 
   /* Largest stable step for the chamber and the oscillators. */

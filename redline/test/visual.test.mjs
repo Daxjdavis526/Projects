@@ -8,6 +8,7 @@ import { Session } from '../src/sim/session.js';
 import ts1 from '../src/content/stands/ts1-coldgas.js';
 import ts2 from '../src/content/stands/ts2-biprop.js';
 import ts3 from '../src/content/stands/ts3-turbopump.js';
+import ts3g from '../src/content/stands/ts3g-engine.js';
 import { psi } from '../src/lib/units.js';
 
 let failures = 0, count = 0;
@@ -181,6 +182,36 @@ console.log('a TS-3 spin');
   check('a spin-up event', evs.includes('spinup'));
   for (let t = 0; t < 30; t += 0.1) { s.run(0.1, 0.05); st = cellState(s); for (const e of ev.update(st)) evs.push(e.type); }
   check('and a spin-down after the coast', evs.includes('spindown') && st.tp.rpm < 300, `${st.tp.rpm.toFixed(0)} rpm`);
+}
+
+console.log('a TS-3G hot fire: the start gas, then the gas generator, then the engine');
+{
+  const { s, ex } = ready(ts3g, (s, ex) => {
+    ex('daqPower', { on: true }); s.run(5);
+    ex('tech', { task: 'loadPropellants' }); s.run(151);
+    ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+    ex('inspection', { id: 'spark-check' }); s.run(41);
+    ex('tech', { task: 'openHV' }); s.run(9);
+    for (const id of ['VV-301', 'VV-413', 'VV-423']) ex('valve', { id, open: false });
+    ex('valve', { id: 'IV-301', open: true }); s.run(2); ex('clearCell'); s.run(7);
+    ex('regSet', { id: 'PR-410', value: psi(50) }); ex('regSet', { id: 'PR-420', value: psi(50) }); ex('regSet', { id: 'PR-630', value: psi(150) }); s.run(30);
+  });
+  const ev = new CellEvents(), evs = [];
+  ex('plan', { plan: { mode: 'hot', duration: 6, thrSteps: null } }); ex('arm'); ex('fire');
+  let st, spin = null;
+  for (let t = 0; t < 9.6; t += 0.05) {   // a 5 s countdown, then T+4.6: mainstage
+    s.run(0.05, 0.05); st = cellState(s); for (const e of ev.update(st)) evs.push(e.type);
+    // T+0.3: the turbine on start gas alone — cold nitrogen out of the duct, nothing lit
+    if (!spin && s.controller.seq?.tFire != null && s.t - s.controller.seq.tFire > 0.3) spin = st;
+  }
+  check('on start gas the turbine spins and its exhaust is unlit nitrogen', spin && spin.tp.rpm > 3000 && spin.tp.exhaust.mdot > 0.01 && !spin.tp.exhaust.lit && !spin.gg.lit,
+    spin ? `${spin.tp.rpm.toFixed(0)} rpm, ${spin.tp.exhaust.mdot.toFixed(3)} kg/s` : 'no snapshot');
+  check('at mainstage the gas generator burns and its exhaust is lit (the afterburning flame)', st.gg.lit && st.tp.exhaust.lit && st.tp.exhaust.mdot > 0.02, `${st.tp.exhaust.mdot.toFixed(3)} kg/s at ${st.tp.exhaust.T.toFixed(0)} K`);
+  check('the gas generator\'s can does not glow: its steel stays far below the Draper point', st.gg.glow < 0.05 && st.gg.T > 700, `${st.gg.glow.toFixed(3)}, gas ${st.gg.T.toFixed(0)} K`);
+  check('the main chamber is lit, its plume flowing full', st.jet.lit && st.jet.regime !== 'separated' && st.jet.diamonds > 0, `${st.jet.regime}, Mj ${st.jet.Mj.toFixed(2)}`);
+  check('the camera sees the tap valves and the main valves open', st.valves['GOV-416'] > 0.9 && st.valves['GFV-426'] > 0.9 && st.valves['MOV-414'] > 0.9, JSON.stringify({ gov: st.valves['GOV-416'], mov: st.valves['MOV-414'] }));
+  check('no liquid sound while the chamber burns', st.sound.liquid === 0, String(st.sound.liquid));
+  check('ignition and spin-up events', evs.includes('ignition') && evs.includes('spinup'), evs.join(','));
 }
 
 console.log(`\n${count - failures}/${count} passed`);

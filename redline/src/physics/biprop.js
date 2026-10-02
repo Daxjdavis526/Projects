@@ -43,6 +43,19 @@ export class BipropModel {
     // a pump-fed stand: two pumps on the lines, a turbine on the drive gas
     this.tp = p.turbopump ? new Turbopump(p.turbopump, { ambient: p.ambient, lines: this.lines, net: this.net }) : null;
     this.throttleOf = new Map(this.lines.filter(l => l.spec.throttle).map(l => [l.spec.throttle.id, l]));
+    /* A gas-generator engine: a second, fuel-rich chamber fed by taps off
+       the pump discharges. It owns its network volume the way the main
+       chamber does (the turbine start gas arrives in it through the
+       network), and the turbine runs on whatever is in it. */
+    this.gg = p.gg ? new Chamber(p.gg, { ambient: p.ambient, rng }) : null;
+    this.ggVol = this.gg ? this.net.vol(p.gg.volume) : null;
+    this.tapValve = new Map(this.lines.filter(l => l.tap).map(l => [l.spec.tap.valve.id, l]));
+    this.tapThrottle = new Map(this.lines.filter(l => l.spec.tap?.throttle).map(l => [l.spec.tap.throttle.id, l]));
+    if (this.gg) {
+      const G = this.gg;
+      this._syncGG();
+      if (this.tp) this.tp.source = () => ({ P: G.P, T: G.Tgas, Tw: G.walls.ch, mdot: G.mdotOut, cp: G.cp, gamma: G.gamma });
+    }
     const ts = p.thrustStand;
     this.stand = { w: 2 * Math.PI * ts.fn, z: ts.zeta, y: 0, yd: 0, preload: ts.preload ?? 0 };
     this.scales = structuredClone(p.scales || {});   // per session: the DAQ's meter calibration can be changed          // tank weigh scales: pressure tare, kg per Pa
@@ -127,6 +140,23 @@ export class BipropModel {
       }
       for (const l of this.lines) if (l.spec.throttle) { s['thr:' + l.id] = () => l.thr; s['cmd:' + l.spec.throttle.id] = () => l.thrCmd; }
     }
+    const G = this.gg;
+    if (G) {
+      s['Pg:gg'] = () => G.P - Pa;
+      s['Tg:gg'] = () => G.Tgas;                              // turbine inlet gas temperature
+      s['Tw:gg'] = () => G.walls.ch;
+      s['mdot:gg'] = () => G.mdotOut;
+      s['I:GGIGN'] = () => (G.igniter.cmd ? (G.igniter.open ? 0 : 1.6) : 0);
+      s['flame:gg'] = () => (G.burning ? 6 * Math.min(1, G.P / (0.5 * G.spec.Pnom)) + 0.3 : G.igniter.on ? 0.5 : 0.05);
+      s['cmd:' + this.def.physics.gg.igniter] = () => G.igniter.cmd;
+    }
+    for (const l of this.lines) if (l.tap) {
+      s['mdotT:' + l.id] = () => l.tap.mdot;
+      valveSignals(l.tap.valve);
+      const th = l.spec.tap.throttle;
+      if (th) { s['thr:' + th.id] = () => l.tap.thr; s['cmd:' + th.id] = () => l.tap.thrCmd; }
+    }
+    if (C?.abl) { s['abl:char'] = () => C.abl.char; s['abl:Dt'] = () => C.Dt0 + C.abl.eroded; }
     s['F:stand'] = () => this.stand.y;
     s['F:true'] = () => this.thrust;
     s['Pamb'] = () => Pa;
@@ -142,6 +172,11 @@ export class BipropModel {
 
   command(id, value) {
     if (this.chamber && id === this.def.physics.chamber.igniter) { this.chamber.igniter.cmd = value ? 1 : 0; return; }
+    if (this.gg && id === this.def.physics.gg.igniter) { this.gg.igniter.cmd = value ? 1 : 0; return; }
+    const tl = this.tapValve.get(id);
+    if (tl) { tl.tap.valve.command(!!value, this.net); return; }
+    const tt = this.tapThrottle.get(id);
+    if (tt) { tt.tap.thrCmd = Math.max(0, Math.min(1, value)); return; }
     const thr = this.throttleOf?.get(id);
     if (thr) { thr.thrCmd = Math.max(0, Math.min(1, value)); return; }
     const line = this.valveToLine.get(id);
@@ -152,7 +187,7 @@ export class BipropModel {
     else e.command(!!value, this.net);
   }
 
-  element(id) { return this.valveToLine.get(id)?.valve || this.net.el(id) || null; }
+  element(id) { return this.valveToLine.get(id)?.valve || this.tapValve.get(id)?.tap.valve || this.net.el(id) || null; }
 
   /* The liquid temperature each line delivers (the fuel can be warmed by a fault). */
   _liquidTemps() { for (const l of this.lines) l.Tliq = this.net.ambient.T + (l.id === 'fu' ? this.fuelTempOffset || 0 : 0); }
@@ -168,11 +203,16 @@ export class BipropModel {
     const v = this.chVol, C = this.chamber, g = this.net.gas;
     v.P = C.Pobs; v.T = this.net.ambient.T; v.m = v.P * v.V / (g.R * v.T); v.U = v.m * g.cv * v.T;
   }
+  _syncGG() {
+    const v = this.ggVol, G = this.gg, g = this.net.gas;
+    v.P = G.Pobs; v.T = this.net.ambient.T; v.m = v.P * v.V / (g.R * v.T); v.U = v.m * g.cv * v.T;
+  }
   line(id) { return this.lineById.get(id); }
 
   stableDt() {
     let dt = Math.min(this.net.stableDt(), 0.25 / this.stand.w);
     if (this.chamber) dt = Math.min(dt, this.chamber.stableDt());
+    if (this.gg) dt = Math.min(dt, this.gg.stableDt());
     for (const l of this.lines) dt = Math.min(dt, l.stableDt(this.net));
     return Math.max(dt, 2e-6);
   }
@@ -191,6 +231,14 @@ export class BipropModel {
       C.etaLeak = fu.mdotLeak > 0 && fu.mdotInj > 1e-3 ? 1 - 0.6 * fu.mdotLeak / fu.mdotInj : 1;
       C.step(dt, { ox: this.lineById.get('ox').mdotInj, fu: fu.mdotInj }, this.chVol.dm, stiff);
       this._syncChamber();
+    }
+    if (this.gg) {
+      const G = this.gg;
+      let stiff = Infinity;
+      for (const l of this.lines) if (l.tap && l.tap.mdot > 2e-3) stiff = Math.min(stiff, ((l.pump?.Pd ?? l.Pvi) - G.P) / G.P);
+      G.step(dt, { ox: this.lineById.get('ox').tap?.mdot || 0, fu: this.lineById.get('fu').tap?.mdot || 0 }, this.ggVol.dm, stiff);
+      this._syncGG();
+      for (const l of this.lines) if (l.tap) l.tapP = G.Pobs;
     }
     const J = this.jacket;
     if (J) {
