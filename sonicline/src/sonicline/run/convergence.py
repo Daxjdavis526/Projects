@@ -107,6 +107,17 @@ def judgement_window(minimum: int, n: int) -> int:
     return max(minimum, min(1000, n // 10))
 
 
+def held_long_enough(held_since: int | None, iterations: int, criteria: ConvergenceCriteria) -> bool:
+    """Whether the stopping criteria have held long enough to stop the
+    solver: a whole judgement window. Half a window was not enough: a slow
+    rhoCentralFoam oscillation (~1000 iterations) let V1 stop on its flat
+    half and then fail the final judgement over the full window (DESIGN.md
+    finding 69)."""
+    if held_since is None:
+        return False
+    return iterations - held_since >= judgement_window(criteria.integral_window, iterations)
+
+
 def assess(tables: dict[str, Table | None], criteria: ConvergenceCriteria, wedge: bool,
            slack: float = 1.0) -> Assessment:
     """``slack`` multiplies the integral and mass-balance tolerances (1 to

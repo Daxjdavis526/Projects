@@ -233,3 +233,21 @@ def test_wall_coverage_is_measured_on_the_mesh():
     thick = U.UnstructuredReport("t", 3)
     U.wall_coverage(mesh, surface, SimpleNamespace(first_layer=1e-7), thick)
     assert not thick.accepted and thick.layer_coverage == 0.0 and "cover 0.0 %" in thick.reasons[0]
+
+
+def test_each_mesher_keeps_the_gradient_scheme_it_was_verified_with():
+    # snappyHexMesh: Gauss (V14, finding 70); cfMesh: least squares (V17,
+    # finding 46); structured meshes: Gauss. The mesher survives the
+    # metadata's JSON round trip, which continuation runs rewrite from.
+    import numpy as np
+
+    from sonicline.foam.case import STRUCTURED_GRAD, UNSTRUCTURED_GRAD, gradient_scheme
+    from sonicline.mesh.revolved import Form, MeshMeta
+
+    def meta(form, mesher=""):
+        return MeshMeta(np.zeros(2), 0, 1, [[0]], [0], 1e-5, form, {}, mesher)
+
+    assert gradient_scheme(meta(Form.UNSTRUCTURED, "snappyHexMesh")) == STRUCTURED_GRAD
+    assert gradient_scheme(meta(Form.UNSTRUCTURED, "cfMesh")) == UNSTRUCTURED_GRAD
+    assert gradient_scheme(meta(Form.WEDGE)) == STRUCTURED_GRAD
+    assert MeshMeta.from_json(meta(Form.UNSTRUCTURED, "cfMesh").to_json()).mesher == "cfMesh"

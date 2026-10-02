@@ -687,7 +687,7 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
         # 0.3 (DESIGN.md section 14).
         max_co = 0.25 if meta.form is Form.UNSTRUCTURED else 0.5
         _write_pimple_numerics(case, ras, steady, p0, energy_field(defn), max_co,
-                               grad=UNSTRUCTURED_GRAD if meta.form is Form.UNSTRUCTURED else STRUCTURED_GRAD)
+                               grad=gradient_scheme(meta))
     write_dict(case / "system" / "decomposeParDict", "decomposeParDict", {
         "numberOfSubdomains": max(1, defn.numerics.processors),
         "method": "scotch",
@@ -696,10 +696,20 @@ def _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, t
 
 # Gauss gradients are inconsistent on irregular polyhedra: on cfMesh's
 # core-to-wall transition cells they put V1's inviscid mass flow 0.93 %
-# high, least squares 0.69 % (DESIGN.md section 15). Structured meshes keep
-# the verified Gauss form.
+# high, least squares 0.69 % (DESIGN.md section 15), and cfMesh has been
+# verified with least squares since (V17). On snappyHexMesh's hex-dominant
+# mesh least squares costs instead: V14's Cd read -0.42 % against -0.06 %
+# with Gauss (finding 70). Each mesher keeps the scheme it was verified
+# with; structured meshes keep Gauss.
 STRUCTURED_GRAD = "cellLimited Gauss linear 1"
 UNSTRUCTURED_GRAD = "cellLimited leastSquares 1"
+GAUSS_MESHERS = ("snappyHexMesh",)
+
+
+def gradient_scheme(meta: MeshMeta) -> str:
+    if meta.form is Form.UNSTRUCTURED and meta.mesher not in GAUSS_MESHERS:
+        return UNSTRUCTURED_GRAD
+    return STRUCTURED_GRAD
 
 
 def _write_pimple_numerics(case, ras, steady, p0, he="e", max_co=0.5, grad=STRUCTURED_GRAD):

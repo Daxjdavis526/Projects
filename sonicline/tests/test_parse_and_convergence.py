@@ -219,6 +219,15 @@ def test_unsettled_flow_needs_a_noise_allowance_and_is_flagged():
     assert v.trust is Trust.WARNINGS and any("does not settle" in w for w in v.warnings)
 
 
+def test_the_solver_stops_only_after_a_whole_judgement_window():
+    from sonicline.core.model import ConvergenceCriteria
+    c = ConvergenceCriteria()
+    w = convergence.judgement_window(c.integral_window, 20000)  # 1000
+    assert not convergence.held_long_enough(None, 20000, c)
+    assert not convergence.held_long_enough(20000 - w // 2, 20000, c)  # half a window: not yet
+    assert convergence.held_long_enough(20000 - w, 20000, c)
+
+
 def test_judgement_window_follows_the_averaging_window():
     assert convergence.judgement_window(200, 1500) == 200
     assert convergence.judgement_window(200, 6000) == 600
