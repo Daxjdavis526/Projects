@@ -128,7 +128,7 @@ export class CellView {
     const V = (x, y, z) => new THREE.Vector3(x, y, z);
     const near = k === 'coldgas' ? 0.38 : k === 'turbopump' ? 1.9 : 1.35;
     const list = [
-      k === 'gg' ? { id: 'CAM 1', name: 'CELL', pos: V(-3.0, 2.9, 4.8), tgt: V(E.x - 0.9, 1.75, -1.2), fov: 54, mic: 'camera' }
+      k === 'gg' ? { id: 'CAM 1', name: 'CELL', pos: V(-3.25, 3.3, 3.55), tgt: V(E.x - 0.7, 1.55, -1.1), fov: 54, mic: 'camera' }
         : { id: 'CAM 1', name: 'CELL', pos: V(-3.25, 3.3, 3.55), tgt: V(E.x - 0.2, 0.85, -0.6), fov: k === 'coldgas' ? 34 : 46, mic: 'camera' },
       k === 'turbopump'
         ? { id: 'CAM 2', name: 'TPA-1', pos: V(0.1, 1.45, 1.55), tgt: V(-0.1, 0.95, -0.4), fov: 40, mic: 'camera' }

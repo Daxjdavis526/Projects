@@ -224,9 +224,9 @@ Everything on these cameras comes from the true state of the model through
   second, as it would. On TS-3G the turbine exhaust is white fog while the
   start gas spins it and, once the gas generator lights, an orange, sooty
   flame at the top of its duct — fuel-rich gas finishing its burn in the
-  air (drawn, not computed: see below); the gas generator's can warms
-  toward a dull red; inside BPE-3's nozzle the flame lights the charred
-  liner.
+  air (drawn, not computed: see below); the gas generator's steel can
+  stays dark — fuel-rich gas at 850 K does not heat it to a visible glow;
+  inside BPE-3's nozzle the flame lights the charred liner.
 - **A heat-sink chamber glows** after a long burn — dull red past ~750 K,
   brighter as it heats — from the model's own wall temperatures, and keeps
   glowing during soak-back.

@@ -207,7 +207,7 @@ console.log('a TS-3G hot fire: the start gas, then the gas generator, then the e
   check('on start gas the turbine spins and its exhaust is unlit nitrogen', spin && spin.tp.rpm > 3000 && spin.tp.exhaust.mdot > 0.01 && !spin.tp.exhaust.lit && !spin.gg.lit,
     spin ? `${spin.tp.rpm.toFixed(0)} rpm, ${spin.tp.exhaust.mdot.toFixed(3)} kg/s` : 'no snapshot');
   check('at mainstage the gas generator burns and its exhaust is lit (the afterburning flame)', st.gg.lit && st.tp.exhaust.lit && st.tp.exhaust.mdot > 0.02, `${st.tp.exhaust.mdot.toFixed(3)} kg/s at ${st.tp.exhaust.T.toFixed(0)} K`);
-  check('the gas generator\'s can is warming', st.gg.glow >= 0, st.gg.glow.toFixed(3));
+  check('the gas generator\'s can does not glow: its steel stays far below the Draper point', st.gg.glow < 0.05 && st.gg.T > 700, `${st.gg.glow.toFixed(3)}, gas ${st.gg.T.toFixed(0)} K`);
   check('the main chamber is lit, its plume flowing full', st.jet.lit && st.jet.regime !== 'separated' && st.jet.diamonds > 0, `${st.jet.regime}, Mj ${st.jet.Mj.toFixed(2)}`);
   check('the camera sees the tap valves and the main valves open', st.valves['GOV-416'] > 0.9 && st.valves['GFV-426'] > 0.9 && st.valves['MOV-414'] > 0.9, JSON.stringify({ gov: st.valves['GOV-416'], mov: st.valves['MOV-414'] }));
   check('no liquid sound while the chamber burns', st.sound.liquid === 0, String(st.sound.liquid));

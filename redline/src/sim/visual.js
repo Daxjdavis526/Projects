@@ -221,7 +221,7 @@ export function cellState(S) {
     if (!C) st.sound.liquid = (m.lines || []).reduce((a, l) => a + Math.max(0, l.mdotInj), 0);
   }
   const G = m.gg;
-  if (G) st.gg = { lit: !!G.burning, T: G.Tgas, P: G.P, mdot: Math.max(0, G.mdotOut), igniter: !!G.igniter.on, glow: G.burning ? glow(Math.min(1100, 0.55 * G.Tgas + 0.45 * G.walls.ch)) : glow(G.walls.ch) };
+  if (G) st.gg = { lit: !!G.burning, T: G.Tgas, P: G.P, mdot: Math.max(0, G.mdotOut), igniter: !!G.igniter.on, glow: glow(G.walls.ch) };   // the can's steel, not the gas inside it
   st.load = m.stand?.y ?? 0;
   return st;
 }

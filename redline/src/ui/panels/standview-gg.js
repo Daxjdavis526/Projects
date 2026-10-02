@@ -1,8 +1,8 @@
 /* TS-3G on CCTV: the gas-generator engine cell. What a camera would show —
-   the sight glasses, the valve flags, the shaft's blur, the gas generator's
-   can going dull red, the turbine exhaust at the top of its duct (white fog
-   on start gas, a sooty orange afterburning flame once the gas generator
-   has lit: its gas is fuel-rich and finishes burning in the air), and BPE-3
+   the sight glasses, the valve flags, the shaft's blur, the turbine
+   exhaust at the top of its duct (white fog on start gas, a sooty orange
+   afterburning flame once the gas generator has lit: its gas is fuel-rich
+   and finishes burning in the air), and BPE-3
    on its thrust stand with its plume — never a number. */
 
 import { s, h, clear } from '../dom.js';
@@ -176,9 +176,9 @@ export class StandViewGG {
     this.blur.setAttribute('opacity', Math.min(0.75, tp.n * 0.8).toFixed(3));
     const sh = Math.min(3, tp.vib * 0.25) * Math.sin(now / 11);
     this.turb.setAttribute('transform', `translate(${sh.toFixed(2)},0)`);
-    // the gas generator: its can glows with the gas inside; its spark
-    const Tg = G.Tgas || 300;
-    this.ggHeat.setAttribute('opacity', (G.burning ? Math.min(0.75, Math.max(0, (Tg - 500) / 700)) : 0).toFixed(3));
+    // the gas generator's can: its steel would glow only well past 700 K —
+    // which, cooled by fuel-rich gas at 850 K, it never reaches; its spark
+    this.ggHeat.setAttribute('opacity', Math.min(0.75, Math.max(0, (G.walls.ch - 720) / 400)).toFixed(3));
     this.ggSpark.setAttribute('opacity', G.igniter.on && !G.burning ? (Math.floor(now / 60) % 2 ? 0.9 : 0.2) : 0);
     // the turbine exhaust at the top of the duct: start gas is a cold white
     // fog; the gas generator's fuel-rich gas finishes burning in the air —
