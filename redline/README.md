@@ -535,9 +535,11 @@ prediction, the stand's rules, and the overspeed abort. `faults-tp.test.mjs`
 forces each TS-3 fault through a standard spin (the damaged inducer
 through a suction test, the only place it shows) and checks its fingerprint
 in the measured data, the inspections and the diagnosis vocabulary.
-`levels-tp.test.mjs` walks Levels 18 and 19 start to finish and flies
-Level 23's three deliverables — refilling the tanks between runs, as the
-water budget demands — and grades a report against them.
+`levels-tp.test.mjs` walks Levels 18 to 22 start to finish (the pump map,
+both suction runs on one tank load, and the troubleshooting spin with and
+without a worn ox pump) and flies Level 23's three deliverables — refilling
+the tanks between runs, as the water budget demands — and grades a report
+against them. It is the slow one: about seven minutes.
 
 For visual checks, serve the repo with `python3 -m http.server` and drive
 `/redline/` in headless Chromium; `window.redline` exposes the app and its

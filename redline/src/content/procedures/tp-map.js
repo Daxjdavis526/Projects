@@ -9,7 +9,7 @@
 
 import { psi } from '../../lib/units.js';
 import { near, pollSection, reportStep, finalize } from './common.js';
-import { tpPretest, tpInstrumentation, tpFill, tpRotor, tpDaq, tpSupply, tpClearCell, tpPressurise,
+import { tpPretest, tpInstrumentation, tpFill, tpRotor, tpDaq, tpSupply, tpLeak, tpClearCell, tpPressurise,
          tpRunSteps, tpFireSteps, tpSafe, pumpRuns } from './tp-common.js';
 
 const STEPS = [0.4, 0.55, 0.7, 0.85, 1.0];
@@ -38,13 +38,14 @@ export function procedure(def) {
       tpRotor(def, 'D'),
       tpDaq(def, 'E'),
       tpSupply(def, 'F'),
-      tpClearCell(def, 'G'),
-      tpPressurise(def, 'H', psi(50)),
-      { id: 'I', title: 'Map at design speed', steps: tpRunSteps(def, { label: 'Map 1 (36 000 rpm)', want: MAP_HI, match: at(MAP_HI) }) },
-      pollSection('J', { text: 'POLL. The poll covers both map runs: the second differs only in speed.' }),
-      { id: 'K', title: 'Map 1 — fire', steps: tpFireSteps(def, { label: 'Map 1', match: at(MAP_HI) }) },
-      { id: 'L', title: 'Map at 75 % speed', steps: [...tpRunSteps(def, { label: 'Map 2 (27 000 rpm)', want: MAP_LO, match: at(MAP_LO) }), ...tpFireSteps(def, { label: 'Map 2', match: at(MAP_LO) })] },
-      { id: 'M', title: 'Data', steps: [
+      tpLeak(def, 'G'),
+      tpClearCell(def, 'H'),
+      tpPressurise(def, 'I', psi(50)),
+      { id: 'J', title: 'Map at design speed', steps: tpRunSteps(def, { label: 'Map 1 (36 000 rpm)', want: MAP_HI, match: at(MAP_HI) }) },
+      pollSection('K', { text: 'POLL. The poll covers both map runs: the second differs only in speed.' }),
+      { id: 'L', title: 'Map 1 — fire', steps: tpFireSteps(def, { label: 'Map 1', match: at(MAP_HI) }) },
+      { id: 'M', title: 'Map at 75 % speed', steps: [...tpRunSteps(def, { label: 'Map 2 (27 000 rpm)', want: MAP_LO, match: at(MAP_LO) }), ...tpFireSteps(def, { label: 'Map 2', match: at(MAP_LO) })] },
+      { id: 'N', title: 'Data', steps: [
         { kind: 'action', station: 'TC', title: 'Open both runs in ANALYSIS; look at the map table',
           text: 'Each throttle step is a row: head referred to design speed (H/n²) and flow referred to design speed (Q/n).',
           check: v => pumpRuns(v, r => r.metrics.mode === 'map').filter(r => v.flags.has('analysis:' + r.id)).length >= 2 },
@@ -61,8 +62,8 @@ export function procedure(def) {
             return { ok: true, msg: `${p.HnOx.toFixed(1)} m${q ? ` against ${q.HnOx.toFixed(1)} m at design speed — ${Math.abs(p.HnOx / q.HnOx - 1) < 0.02 ? 'similarity holds' : 'they do NOT agree: why?'}` : ''}.` };
           } } },
       ] },
-      tpSafe(def, 'N'),
-      { id: 'O', title: 'Report', steps: [reportStep()] },
+      tpSafe(def, 'O'),
+      { id: 'P', title: 'Report', steps: [reportStep()] },
     ],
   });
 }

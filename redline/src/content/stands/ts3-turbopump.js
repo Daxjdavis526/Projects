@@ -163,9 +163,9 @@ const components = {
     'Holds the shaft at the planned speed by adjusting the drive pressure. It trusts its feedback completely: if a speed pickup lies, the controller acts on the lie.', { ref: ['speed-control'] }),
   'CV-411': V('CV-411', 'Ox-side pressurant check valve', 'Spring check valve', { 'Cracking': '≈1 psid' }, 'Keeps water out of the regulator.'),
   'CV-421': V('CV-421', 'Fuel-side pressurant check valve', 'Spring check valve', { 'Cracking': '≈1 psid' }, 'The fuel side\'s CV-411.'),
-  'T-410': V('T-410', 'Ox-side run tank', 'Pressure vessel', { 'Volume': '40 L', 'MEOP': '120 psig', 'Relief': 'RV-412 at 150 psig', 'Load': 'water' },
+  'T-410': V('T-410', 'Ox-side run tank', 'Pressure vessel', { 'Volume': '60 L', 'MEOP': '120 psig', 'Relief': 'RV-412 at 150 psig', 'Load': 'water' },
     'Feeds the ox pump. Weighed by WT-411. Run it dry and the pump loses its load in a fraction of a second.', { ref: ['npsh'] }),
-  'T-420': V('T-420', 'Fuel-side run tank', 'Pressure vessel', { 'Volume': '40 L', 'MEOP': '120 psig', 'Relief': 'RV-422 at 150 psig', 'Load': 'water' }, 'Feeds the fuel pump. Weighed by WT-421.', { ref: ['npsh'] }),
+  'T-420': V('T-420', 'Fuel-side run tank', 'Pressure vessel', { 'Volume': '60 L', 'MEOP': '120 psig', 'Relief': 'RV-422 at 150 psig', 'Load': 'water' }, 'Feeds the fuel pump. Weighed by WT-421.', { ref: ['npsh'] }),
   'VV-413': V('VV-413', 'Ox-side tank vent', 'Solenoid vent, normally OPEN', { 'Fail position': 'OPEN' }, 'Vents T-410.', { commandable: 'remote' }),
   'VV-423': V('VV-423', 'Fuel-side tank vent', 'Solenoid vent, normally OPEN', { 'Fail position': 'OPEN' }, 'Vents T-420.', { commandable: 'remote' }),
   'RV-412': V('RV-412', 'Ox-side tank relief', 'Spring relief', { 'Set': '150 psig' }, 'Last line of defence for the tank.'),
@@ -268,7 +268,7 @@ const abortSequence = [
 const ratings = {
   TANK_MEOP: psi(120), RELIEF_TANK: psi(150), MAWP_TANK: psi(200),
   PERSONNEL_MAX: psi(50), REG_MAX_CMD: psi(125), DRIVE_MAX: psi(420), SUPPLY_MIN: psi(1200), VENTED: psi(3),
-  MAX_BURN: 60, TANK_RESERVE: 5, FILL_OX: 36, FILL_FU: 36,
+  MAX_BURN: 60, TANK_RESERVE: 5, FILL_OX: 54, FILL_FU: 54,
   N_DESIGN: ND, N_MAX_PLAN: 1.05 * ND, N_REDLINE: 1.10 * ND,
   NPSH_MIN_TANK: psi(30),
 };
