@@ -241,6 +241,33 @@ def _study(path: str, out: str | None, processors: int | None, ratio: float) -> 
     return 0 if result.valid else 1
 
 
+def _sweep(path: str, axes: list[str], out: str | None, processors: int | None, predict: bool) -> int:
+    from pathlib import Path
+
+    from .run import sweep
+
+    try:
+        defn = model.load(path)
+        parsed = [sweep.Axis.parse(a) for a in axes]
+    except (OSError, model.DefinitionError, sweep.SweepError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    out_dir = Path(out) if out else Path("runs") / f"{Path(path).stem}-sweep"
+    try:
+        result = sweep.run(defn, parsed, out_dir, predict_only=predict, processors=processors,
+                           base_dir=Path(path).resolve().parent,
+                           on_event=lambda e: print(f"[{e.stage}] {e.message}", flush=True)
+                           if e.stage in ("sweep", "done", "verdict") else None)
+    except sweep.SweepError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    print()
+    print(sweep.markdown(result))
+    print(f"results in {out_dir} (sweep.md, sweep.csv, sweep.json"
+          + (", sweep.png)" if (out_dir / "sweep.png").is_file() else ")"))
+    return 0 if result.ok else 1
+
+
 def _report(run_dir: str, out: str | None) -> int:
     import json
     from pathlib import Path
@@ -321,6 +348,15 @@ def main(argv: list[str] | None = None) -> int:
     stu.add_argument("--processors", type=int, help="MPI processes")
     stu.add_argument("--ratio", type=float, default=2 ** 0.5,
                      help="refinement ratio between levels (at least 1.3; default sqrt 2)")
+    swp = sub.add_parser("sweep", help="run a definition over a grid of parameter values")
+    swp.add_argument("definition")
+    swp.add_argument("--set", dest="axes", action="append", default=[], metavar="PATH=V1,V2,...",
+                     help="an axis: a dotted path into the definition and its values, e.g. "
+                          "'boundaries.inlet.p0=5 bar,10 bar,20 bar' (repeat for a grid)")
+    swp.add_argument("--out", help="sweep directory (default runs/<definition name>-sweep)")
+    swp.add_argument("--processors", type=int, help="MPI processes per run")
+    swp.add_argument("--predict", action="store_true",
+                     help="quasi-1D prediction only, no CFD (seconds; for choosing points to run)")
     rep = sub.add_parser("report", help="PDF, PNG and JSON report of a finished run")
     rep.add_argument("run_dir")
     rep.add_argument("--out", help="folder for the report (default <run-dir>/report)")
@@ -347,6 +383,8 @@ def main(argv: list[str] | None = None) -> int:
             print("error: the refinement ratio must be at least 1.3 (Celik et al. 2008)", file=sys.stderr)
             return 2
         return _study(args.definition, args.out, args.processors, args.ratio)
+    if args.command == "sweep":
+        return _sweep(args.definition, args.axes, args.out, args.processors, args.predict)
     if args.command == "verify":
         return _verify(args.cases, args.quality, args.out, args.processors)
     if args.command == "extract":

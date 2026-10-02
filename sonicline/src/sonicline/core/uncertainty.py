@@ -296,6 +296,16 @@ def budgets(defn: d.SimulationDefinition, profile: Profile | None, metrics: dict
         out["thrust"].unquantified.append(
             "a shock or separation stands in the nozzle: verification bounds its position (V2, V3), not "
             "its effect on thrust; a grid study measures the discretisation part")
+    kn = _get(metrics, "rarefaction", "max")
+    if kn is not None and kn > 1e-3 and not isinstance(defn.flow.turbulence, d.Inviscid):
+        # Slip lowers wall friction where the gas is rarefied; how much of the
+        # drag that is depends on where the shear is, which a local Knudsen
+        # number does not say (core.rarefaction).
+        for k in ("thrust", "specific_impulse"):
+            out[k].unquantified.append(
+                f"rarefaction: Knudsen number up to {kn:.2g} near the wall; no-slip walls overstate the "
+                "friction there (by about 8 Kn of it in tube flow), so thrust reads low by an amount "
+                "not bounded here")
     if isinstance(defn.flow.time, d.Transient):
         for k in QUANTITIES:
             out[k].unquantified.append("transient: the values are the end state's; the budget is for that state")

@@ -2165,6 +2165,100 @@ Not done in M10:
 - The budget's estimates come from the verification cases. A case far from
   them (a different gas, a shocked nozzle, a large plume domain) should run
   `sonicline study` for a measured discretisation term.
-- Rarefaction is not modelled. At E3's conditions the Knudsen number is
-  about 10⁻³ at both the throat and the exit, and slip is negligible; below
-  Re of a few hundred it is not.
+- Rarefaction is not modelled. M10 said E3's Knudsen number was about
+  10⁻³ and slip negligible. That holds on the axis (7×10⁻⁴ at the throat,
+  2.5×10⁻³ at the exit) but not at the wall near the exit, where it reaches
+  0.024 (M11, finding 71).
+
+## 20. M11 record: design sweeps, and where the continuum ends
+
+M11 points SONICLINE at designing thrusters rather than checking one. It
+also adds the first check on whether the continuum model applies at all,
+which small cold-gas thrusters can leave behind.
+
+Delivered:
+
+- **`sonicline sweep`** (`run/sweep.py`). One definition over a grid of
+  parameters, each axis a dotted path into the definition and its values
+  as a definition writes them
+  (`--set "boundaries.inlet.p0=5 bar,10 bar,20 bar" --set
+  "geometry.expansion_ratio=2,4,8"`).
+  - Every point is built through the desktop editor's draft. It is
+    therefore parsed, validated and given the quasi-1D prediction exactly as
+    a definition file is.
+  - An invalid point is listed and not run. A misspelt path, which makes
+    every point invalid the same way, stops the sweep.
+  - `--predict` runs no CFD: quasi-1D with the Kliegel–Levine Cd and the
+    regime of each point (over-expanded, shock in nozzle), in seconds, to
+    choose the points worth a CFD run.
+  - Output: `sweep.md`, `sweep.csv` and `sweep.json`, plus `sweep.png`
+    (thrust and Isp against the first axis, one line per value of the
+    others) when matplotlib is installed. Values given with units are
+    plotted at their parsed SI values.
+  - Each CFD point carries its run's uncertainty budget and verdict. A point
+    that is not trustworthy stays in the table, marked, and is left out of
+    the plot: a sweep is read as a trend, and a bad point draws a false one.
+- **Rarefaction** (`core/rarefaction.py`). The Knudsen number is the
+  hard-sphere mean free path (Bird 1994, eq. 4.52, written with the gas's
+  viscosity) over the local diameter.
+  - Every run evaluates it along the axis and the wall rows of its
+    profiles (`metrics.json` → `rarefaction`).
+  - The pre-flight check estimates it at the throat and the exit by
+    quasi-1D.
+  - Above 0.01 (slip), a viscous run warns. An inviscid run's walls slip
+    already, so it gets no slip warning.
+  - Above 0.1 (transition), the run is not trustworthy and the pre-flight
+    check is an error.
+  - The uncertainty budget lists slip as not bounded. A local maximum of Kn
+    does not say how much of the drag it touches.
+- **A definition that describes no nozzle** (an expansion ratio below 1, for
+  instance) parsed, then raised while the profile was built. The desktop
+  editor would have crashed on it. It is now the draft's error, like any
+  other invalid definition.
+- **V13** gets a mass-conservation tolerance of its own (finding 72).
+
+Findings:
+
+71. **E3's wall is in the slip regime.** Kn on E3a's axis is 7×10⁻⁴ at the
+    throat and 2.5×10⁻³ at the exit, but 0.024 in the hot, thin gas against
+    the wall near the exit. M10 called slip negligible there; it is not, at
+    the wall.
+    - First-order slip in fully developed tube flow carries about 8 Kn more
+      flow at the same pressure drop. So no-slip may overstate the friction
+      in E3's last few millimetres by up to about 20 %, where the shear is
+      already small.
+    - E3's thrust coefficient agrees with the test to 0.3–0.6 %. The slip
+      error is inside that, or offset by something else; nothing here
+      separates the two. Slip walls (Maxwell's velocity slip and
+      Smoluchowski's temperature jump, both in OpenFOAM's rhoCentralFoam
+      boundary-condition library) would, and are the
+      next step for thrusters this small.
+    - The mean free path reproduces Bird's 59 nm for nitrogen at 273 K and
+      1 atm (59.7 nm).
+72. **V13 conserved mass to 10⁻⁴ only while it stopped early.** The first
+    complete nightly run with finding 69's stopping rule failed V13's mass
+    check: 2.1×10⁻⁴ against 10⁻⁴. Run locally to 14,000 iterations:
+    - the inlet mass flow is steady to 10⁻⁶ from 1500 iterations on;
+    - the exit stays 0.7–2.9×10⁻⁴ low in every 1000-iteration window (mean
+      1.9×10⁻⁴), and the wall heat wanders ±1 % about 0.325 W.
+    - The earlier passes (2×10⁻⁵) were stops at about 1700 iterations, a
+      lucky phase.
+    - Monitoring the wall heat as a convergence integral was tried and
+      dropped. It never settles to 10⁻⁴, so V13 would always fail, and the
+      energy balance V13 exists to check holds to 10⁻⁵–9×10⁻⁴ (tolerance
+      2×10⁻³) whichever phase the run stops in.
+    - V13's mass tolerance is now 5×10⁻⁴: above every window measured,
+      below the solver's own 10⁻³ criterion, as V4b's 3×10⁻⁴ is. The
+      deficit is unexplained. The adiabatic laminar E3, also cut off at its
+      exit, conserves mass to 5×10⁻⁶. The likely cause is the outflow
+      condition across a boundary layer the 450 K wall has thickened, and
+      it is open.
+
+Not done in M11:
+
+- Slip walls. The check says where they are needed; the CFD does not have
+  them.
+- The gradient-length Knudsen number, which finds breakdown inside a thin
+  shock or in the far plume.
+- Sweeps in the desktop app. The CLI writes the table and plot, and each
+  point's run directory opens in the app as any run does.

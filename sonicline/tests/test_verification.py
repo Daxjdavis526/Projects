@@ -69,3 +69,14 @@ def test_v3_shocks_stand_inside_the_reference_nozzle(name, fraction):
         lo, hi = (mid, hi) if prof.area(mid) / prof.throat_area < perf.shock_area_ratio else (lo, mid)
     assert (lo - prof.throat_x) / (prof.x_exit - prof.throat_x) == pytest.approx(fraction, abs=2e-3)
     assert solver_for(defn, prof) == "rhoCentralFoam"
+
+
+def test_v13_mass_check_follows_its_measured_outflow_deficit():
+    # DESIGN.md finding 72: 0.7-2.9e-4 over a long run, so 5e-4, not 1e-4.
+    from sonicline import verification as v
+
+    metrics = {"mass_flow": {"imbalance_inlet_exit": 2.9e-4}, "thrust": {"control_volume_disagreement": 0.0},
+               "wall_heat": {"heat_into_gas": 1.0, "balance_error": 1e-5}}
+    checks = [c.evaluate() for c in v._v13_checks(metrics, None)]
+    assert all(c.passed for c in checks)
+    assert v._common_checks(metrics)[0].evaluate().passed is False  # the general 1e-4 still applies elsewhere

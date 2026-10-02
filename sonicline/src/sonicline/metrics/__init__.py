@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from ..core import pengrobinson, realgas
+from ..core import pengrobinson, rarefaction, realgas
 from ..core.gas import G0
 from ..core.model import definition as d
 from ..core.profile import Profile
@@ -388,6 +388,20 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
                     f"x = {1e3 * c['x_min_margin']:.2f} mm{approx}. The single-phase CFD keeps it a "
                     "vapour; real nitrogen may condense there, and the results beyond that point are "
                     "bounds, not predictions")
+        rare = m.get("rarefaction")
+        if rare:
+            where = f"{rare['where_max']} at x = {1e3 * rare['x_max']:.2f} mm"
+            if rare["max"] > rarefaction.TRANSITION:
+                v.reasons.append(
+                    f"the gas is rarefied: Knudsen number {rare['max']:.3g} ({where}) is in the "
+                    "transition regime, where the Navier-Stokes equations fail; continuum CFD is not a "
+                    "prediction here (DSMC is)")
+            elif rare["max"] > rarefaction.SLIP_WARNING and not isinstance(defn.flow.turbulence, d.Inviscid):
+                # (an inviscid run's walls slip already)
+                v.warnings.append(
+                    f"Knudsen number {rare['max']:.3g} ({where}) is in the slip regime: the gas slips "
+                    "along the walls, which the no-slip CFD leaves out, so wall friction and heat "
+                    "transfer are overstated and thrust and Cd read somewhat low")
         heat = m.get("wall_heat")
         if heat is not None:
             err = heat.get("balance_error")
