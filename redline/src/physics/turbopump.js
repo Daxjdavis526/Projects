@@ -102,8 +102,8 @@ export class Pump {
 
   /* After the line has its new flow: inlet and discharge pressures, the
      suction margin, the torque, the casing temperature. */
-  update(dt, line, Pup, Tin, Tamb, dry) {
-    const rho = line.rho, md = line.mdot, n = this.n;
+  update(dt, line, Pup, Tin, Tamb, dry, md = line.mdot) {
+    const rho = line.rho, n = this.n;
     const q = Math.max(0, md) / (rho * this.Q0);
     const Rs = this.CdAsuc > 0 ? 1 / (2 * rho * this.CdAsuc * this.CdAsuc) : 0;
     this.Pin = Pup - Rs * md * Math.abs(md) - this.Isuc * line.mdotDot;
@@ -161,6 +161,9 @@ export class Turbopump {
     this.gas = net.gas;
     this.ambient = ambient;
     this.tauT = 0; this.Pt = 0; this.c0 = 0;
+    // what drives the turbine: by default the stand's gas (its inlet volume
+    // and nozzle element); an engine's model plugs in its gas generator
+    this.source = null;
     this.Texh = ambient.T;
     const B = spec.bearings;
     this.brg = { pb: ambient.T, tb: ambient.T };
@@ -179,8 +182,9 @@ export class Turbopump {
   get rpm() { return this.w * 60 / TAU; }
 
   step(dt) {
-    const T = this.tur, g = this.gas, Pa = this.ambient.P;
-    const v = this.inlet, md = Math.max(0, this.nozzle.mdot);
+    const T = this.tur, Pa = this.ambient.P;
+    const v = this.source ? this.source() : { P: this.inlet.P, T: this.inlet.T, Tw: this.inlet.Tw, mdot: this.nozzle.mdot, cp: this.gas.cp, gamma: this.gas.gamma };
+    const g = { cp: v.cp, gamma: v.gamma }, md = Math.max(0, v.mdot);
     // spouting velocity of the drive gas, inlet to the exhaust duct
     const Pex = Pa * (1 + 0.05 * Math.min(1, md / (T.mdotD || 0.1)));
     const pr = Pex / Math.max(v.P, 1);

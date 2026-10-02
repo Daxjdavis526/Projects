@@ -51,7 +51,11 @@ export class NotebookView {
       actual: run.metrics?.summary?.dur ?? null,
       results: run.metrics?.items?.map(i => ({ label: i.label, value: i.value, quantity: i.quantity })) || [],
       pulses: run.metrics?.pulses?.length || 0,
-      prediction: !cfg.prediction ? null : cfg.prediction.kind === 'pump'
+      prediction: !cfg.prediction ? null : cfg.prediction.kind === 'gg'
+        ? { kind: 'gg', rpm: cfg.prediction.rpm, Pc: cfg.prediction.Pc, F: cfg.prediction.F, MR: cfg.prediction.MR, TIT: cfg.prediction.TIT, Isp: cfg.prediction.Isp, IspChamber: cfg.prediction.IspChamber }
+        : cfg.prediction.kind === 'ggcold'
+        ? { kind: 'ggcold', rpm: cfg.prediction.rpm, mdotOx: cfg.prediction.mdotOx, mdotFu: cfg.prediction.mdotFu }
+        : cfg.prediction.kind === 'pump'
         ? { kind: 'pump', rpm: cfg.prediction.rpm, headOx: cfg.prediction.headOx, headFu: cfg.prediction.headFu, mdotOx: cfg.prediction.mdotOx, mdotFu: cfg.prediction.mdotFu, Ptin: cfg.prediction.Ptin }
         : cfg.prediction.kind === 'coldflow'
         ? { kind: 'coldflow', mdotOx: cfg.prediction.mdotOx, mdotFu: cfg.prediction.mdotFu, dPox: cfg.prediction.dPox, dPfu: cfg.prediction.dPfu }
@@ -259,7 +263,11 @@ export class NotebookView {
       h('span.k', 'Valve line-up at record start'), h('span.v', { style: { whiteSpace: 'normal' } }, e.config.valves),
       h('span.k', 'Recording ended'), h('span.v', e.reason || '—')));
     if (e.prediction) b.append(h('div.faint', { style: { fontSize: '11px', marginTop: '4px' } },
-      e.prediction.kind === 'pump'
+      e.prediction.kind === 'gg'
+        ? `Prediction (the drawing): ${Math.round(e.prediction.rpm)} rpm, Pc ${fmt(e.prediction.Pc - 101325, 'pressure')} ${unitLabel('pressure', true)}, F ${fmt(e.prediction.F, 'force')} ${unitLabel('force')}, MR ${e.prediction.MR?.toFixed(2)}, turbine inlet ${Math.round(e.prediction.TIT)} K, Isp ${e.prediction.IspChamber?.toFixed(0)} s chamber / ${e.prediction.Isp?.toFixed(0)} s engine`
+        : e.prediction.kind === 'ggcold'
+        ? `Prediction (the drawing, start gas only): ${Math.round(e.prediction.rpm)} rpm, ox ${fmt(e.prediction.mdotOx, 'massflow')}, fuel ${fmt(e.prediction.mdotFu, 'massflow')} ${unitLabel('massflow')} of water`
+        : e.prediction.kind === 'pump'
         ? `Prediction at ${Math.round(e.prediction.rpm)} rpm: ox pump ${e.prediction.headOx?.toFixed(0)} m and ${fmt(e.prediction.mdotOx, 'massflow')}, fuel pump ${e.prediction.headFu?.toFixed(0)} m and ${fmt(e.prediction.mdotFu, 'massflow')} ${unitLabel('massflow')}; drive ${fmt(e.prediction.Ptin, 'pressure', 0)} ${unitLabel('pressure', true)}`
         : e.prediction.kind === 'coldflow'
         ? `Prediction (injector drawing): ox ${fmt(e.prediction.mdotOx, 'massflow')}, fuel ${fmt(e.prediction.mdotFu, 'massflow')} ${unitLabel('massflow')} of water`

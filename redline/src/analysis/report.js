@@ -19,7 +19,10 @@ const valid = r => r.tFire !== null && !r.aborted && !!r.metrics?.summary;
 export function sessionReport(S) {
   const c = S.controller;
   const runs = S.runs.map(r => {
-    const m = r.metrics?.summary || {};
+    // a gas-generator engine's run reports its first mainstage point (speed
+    // and the start are in its own rows)
+    const gp = r.metrics?.kind === 'gg' ? r.metrics.points?.[0] : null;
+    const m = gp ? { ...r.metrics.summary, F: gp.F, Pc: gp.Pc, Isp: gp.IspE } : r.metrics?.summary || {};
     const pulse = r.plan?.mode === 'pulse';
     return {
       id: r.id, clock: r.clock, plan: c.planText(r.plan || r.meta.config.plan), pulse,
@@ -33,7 +36,7 @@ export function sessionReport(S) {
       hotfire: r.metrics?.kind === 'hotfire' ? { ignited: m.ignited, Pc: m.Pc, F: m.F, MR: m.MR, MRw: m.MRw, cstar: m.cstar, eta: m.etaCstar, Isp: m.Isp, start: m.start,
         overshoot: m.overshoot, ignDelay: m.ignDelay, TthPeak: m.TthPeak, unburned: m.unburned, flags: r.metrics.flags || [],
         pPc: r.meta.config.prediction?.Pc, pF: r.meta.config.prediction?.F, pMR: r.meta.config.prediction?.MR, oxP: r.meta.config.sp?.['PR-610'], fuP: r.meta.config.sp?.['PR-620'] } : null,
-      pred: r.meta.config.prediction ? { F: r.meta.config.prediction.F, Pc: r.meta.config.prediction.Pc, Isp: r.meta.config.prediction.Isp } : null,
+      pred: r.meta.config.prediction ? { F: r.meta.config.prediction.F, Pc: r.meta.config.prediction.kind === 'gg' ? r.meta.config.prediction.Pc - 101325 : r.meta.config.prediction.Pc, Isp: r.meta.config.prediction.Isp } : null,
     };
   });
   const anomalies = [];

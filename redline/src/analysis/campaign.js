@@ -94,6 +94,31 @@ QUANTITIES_CATALOG.push(...[
   { key: 'TthSteady', label: 'Throat liner temperature, steady', q: 'temperature', get: r => s(r).TthSteady },
   { key: 'mdotFuK', label: 'Fuel (coolant) flow', q: 'massflow', get: r => s(r).mdotFu },
 ].map(q => ({ ...q, kind: 'hotfire', stand: 'TS-2R' })));
+/* TS-3G, the gas-generator engine: from each run's first mainstage point,
+   its start, and its plan. */
+const p0 = r => r.metrics?.points?.[0] || {};
+const PSI = 6894.757;
+QUANTITIES_CATALOG.push(...[
+  { key: 'ggThr', label: 'GG throttle (plan, first point)', q: 'ratio', get: r => p0(r).thr ?? r.plan?.thr },
+  { key: 'ggStartP', label: 'Start gas pressure (plan), psig', q: 'ratio', get: r => (r.plan?.startP ?? NaN) / PSI },
+  { key: 'ggSpinEnd', label: 'Start gas off (plan), s', q: 'time', get: r => r.plan?.spinEnd ?? 1.1 },
+  { key: 'ggN', label: 'Speed, mainstage', q: 'speed', get: r => p0(r).N },
+  { key: 'ggPc', label: 'Chamber pressure, mainstage', q: 'pressure', get: r => p0(r).Pc },
+  { key: 'ggF', label: 'Thrust, mainstage', q: 'force', get: r => p0(r).F },
+  { key: 'ggTIT', label: 'Turbine inlet temperature (K)', q: 'ratio', get: r => p0(r).TIT },
+  { key: 'ggMR', label: 'Main mixture ratio (meters)', q: 'ratio', get: r => p0(r).MR },
+  { key: 'ggMRgg', label: 'GG mixture ratio (inferred)', q: 'ratio', get: r => p0(r).MRgg },
+  { key: 'ggEta', label: 'c* efficiency', q: 'ratio', get: r => p0(r).etaCstar },
+  { key: 'ggIspE', label: 'Isp, engine (s)', q: 'ratio', get: r => p0(r).IspE },
+  { key: 'ggIspC', label: 'Isp, main chamber (s)', q: 'ratio', get: r => p0(r).IspC },
+  { key: 'ggFrac', label: 'GG flow fraction', q: 'ratio', get: r => p0(r).ggFrac },
+  { key: 'ggTms', label: 'Time to mainstage', q: 'time', get: r => s(r).tMainstage },
+  { key: 'ggNpk', label: 'Peak speed in the start', q: 'speed', get: r => s(r).Npeak },
+  { key: 'ggTITpk', label: 'Peak TIT in the start (K)', q: 'ratio', get: r => s(r).TITpeak },
+  { key: 'ggDrift', label: 'Pc drift, % per 10 s', q: 'ratio', get: r => 100 * s(r).PcDrift },
+  { key: 'ggCase', label: 'Case temperature at shutdown', q: 'temperature', get: r => s(r).caseShut },
+  { key: 'ggDur', label: 'Burn duration', q: 'time', get: r => s(r).dur },
+].map(q => ({ ...q, kind: 'hotfire', stand: 'TS-3G' })));
 for (const q of QUANTITIES_CATALOG) q.stand ??= 'TS-1';
 
 /* A stand's quantities: its family's (TS-2R is a TS-2) and its own. */
@@ -112,7 +137,8 @@ export function value(run, key) {
 
 export function runKind(run) {
   if (run.metrics?.kind === 'coldflow') return 'coldflow';
-  if (run.metrics?.kind === 'hotfire') return 'hotfire';
+  if (run.metrics?.kind === 'hotfire' || run.metrics?.kind === 'gg') return 'hotfire';
+  if (run.metrics?.kind === 'ggcold') return 'coldflow';
   return run.plan?.mode === 'pulse' ? 'pulse' : run.metrics?.kind === 'pulse' ? 'pulse' : 'single';
 }
 

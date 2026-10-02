@@ -33,7 +33,10 @@ export class Controller extends Emitter {
     for (const e of def.physics.elements) {
       if (e.type === 'valve' || e.type === 'solenoid') this.cmd[e.id] = e.initial ?? (e.normally === 'open' ? 1 : 0);
     }
-    for (const l of def.physics.lines || []) this.cmd[l.valve.id] = l.valve.normally === 'open' ? 1 : 0;
+    for (const l of def.physics.lines || []) {
+      this.cmd[l.valve.id] = l.valve.normally === 'open' ? 1 : 0;
+      if (l.tap?.valve) this.cmd[l.tap.valve.id] = l.tap.valve.normally === 'open' ? 1 : 0;
+    }
     for (const id of def.physics.auxCommands || []) this.cmd[id] = 0;
     // every regulator's EPC command; `regSet` is the primary regulator's
     this.regIds = (def.regulators || [{ id: def.regulator }]).map(r => r.id);
@@ -87,6 +90,7 @@ export class Controller extends Emitter {
       sp: this.sp,
       plan: this.plan,
       loaded: this.loaded ?? null,
+      sparkChecked: !!this.sparkChecked,
       wallT: id => s.daq.latest(id),
       pollGo: this.pollGo,
       zeroableIds: s.daq.sensors.filter(x => x.zeroable).map(x => x.id),
@@ -247,12 +251,22 @@ export class Controller extends Emitter {
       case 'cutoff': {
         if (!this.seq || this.seq.state !== 'BURN') return { ok: true, noop: true };
         this.log('SEQ', `Manual CUTOFF (normal shutdown) at ${fmtT(this.t - this.seq.tFire)}`, { level: 'caution' });
-        for (const id of this.mainValves) if (this.cmd[id]) this._cmdValve(id, 0, 'manual cutoff');
+        const q = this.seq, Tnow = this.t - q.tFire, shift = q.tEnd - Tnow;
+        // a stand may shut its main valves in stages (a gas-generator engine
+        // takes the power off the turbine before it shuts the main valves)
+        const staged = [];
+        if (this.def.cutoffStages) {
+          for (const [dt, ids] of this.def.cutoffStages) for (const id of ids) {
+            if (!this.cmd[id]) continue;
+            if (dt <= 0) this._cmdValve(id, 0, 'manual cutoff');
+            else staged.push({ T: Tnow + dt, id, v: 0, why: 'manual cutoff (staged)' });
+          }
+        } else for (const id of this.mainValves) if (this.cmd[id]) this._cmdValve(id, 0, 'manual cutoff');
         // what the plan does after its shutdown (a post-purge) still runs —
         // brought forward to start now
-        const q = this.seq, Tnow = this.t - q.tFire, shift = q.tEnd - Tnow;
         const rest = q.sched.slice(q.next).filter(ev => !ev.main);
-        for (const ev of rest) if (!ev.main && ev.T >= q.tEnd - EPS) ev.T -= shift;
+        for (const ev of rest) if (ev.T >= q.tEnd - EPS) ev.T -= shift;
+        rest.push(...staged);
         rest.sort((x, y) => x.T - y.T);
         q.sched = [...q.sched.slice(0, q.next), ...rest];
         if (q.tLast !== undefined) q.tLast -= shift;

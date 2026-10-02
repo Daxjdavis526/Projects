@@ -14,34 +14,35 @@ and nothing on screen is the truth.
 
 Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366×768 or larger.
 
-## What is here (development phases 1–9, and the cameras)
+## What is here (development phases 1–10, and the cameras)
 
 | | |
 |---|---|
 | **Control room** | P&ID mimic, CCTV view of the cell, **3D cameras on the cell and the FIRE VIEW** (below), configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
-| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector. **TS-3** (phase 9): a turbopump component stand — a 300 L nitrogen bank, two run tanks on RELIEVING regulators, and TPA-1, a fictional turbopump for a pump-fed engine (an oxidiser and a fuel centrifugal pump with inducers and an impulse turbine on one shaft, 36 000 rpm at design), its pumps flowing water through discharge valves, turbine flowmeters and throttle valves to a catch tank, its turbine driven by cold nitrogen through a turbine start valve and a speed controller (SC-330) |
-| **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves; and a lumped combustion chamber — ignition, start transients, hard starts, chug and screech onset, a heat-sink wall that soaks back after shutdown; on TS-3, centrifugal pumps on the affinity laws with suction-limited cavitation and casing heating, an impulse turbine, and a shaft with bearings and vibration (below) |
+| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector. **TS-3** (phase 9): a turbopump component stand — a 300 L nitrogen bank, two run tanks on RELIEVING regulators, and TPA-1, a fictional turbopump for a pump-fed engine (an oxidiser and a fuel centrifugal pump with inducers and an impulse turbine on one shaft, 36 000 rpm at design), its pumps flowing water through discharge valves, turbine flowmeters and throttle valves to a catch tank, its turbine driven by cold nitrogen through a turbine start valve and a speed controller (SC-330). **TS-3G** (phase 10): TS-3 rebuilt as an engine stand — TPA-1 now feeds **BPE-3**, a fictional 1.7 kN gas-generator cycle engine: OX-1 and FU-1 from the 60 L tanks at about 50 psig through the pumps to the main valves MOV-414 / MFV-424 and an ablatively cooled chamber; two small taps off the pump discharges through GG valves (GOV-416 / GFV-426), GG throttles (GCV-417 / GCV-427) and calibrated orifices into a fuel-rich **gas generator** whose ~850 K gas drives the turbine and leaves up a duct to the berm; nitrogen start gas (PR-330, TSV-332) for the bootstrap; two spark igniters; three purges |
+| **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves; and a lumped combustion chamber — ignition, start transients, hard starts, chug and screech onset, a heat-sink wall that soaks back after shutdown; on TS-3, centrifugal pumps on the affinity laws with suction-limited cavitation and casing heating, an impulse turbine, and a shaft with bearings and vibration; on TS-3G a second combustor — the gas generator — fed from the pump discharges and feeding the turbine, so the whole cycle closes through the shaft, and an ablative chamber whose liner chars and whose throat erodes (below) |
 | **Instruments** | 14 sensors — including an independent Coriolis mass flowmeter — plus command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
 | **DAQ** | Sample rate 100 Hz – 5 kHz, recording to a run file, auto-stop, zero / tare / shunt calibration |
 | **Control** | Interlocks (hard, warn, or consequence — by mode), firing sequencer (single burn or pulse train, 5 s countdown, hold, cutoff), limits and redlines with persistence, automatic abort sequence |
 | **Procedures** | Data-driven checklist engine built from shared sections; Level 1 (orientation), Level 2 (full baseline firing), Level 3 (pressure characterisation, 60–200 psig) Level 4 (valve response, pulse sweep, minimum impulse bit) in tutorial, guided and independent modes, Level 5 (return-to-service firing and troubleshooting, guided or independent) and Level 6 (the independent test conductor: an acceptance campaign from a test request, no procedure, a hidden fault or none, a graded campaign report). Levels 2–4 and the open stand also run in fault-injection mode. Test series run under one go/no-go poll for the approved matrix or range |
 | **Go/no-go** | Six stations reporting from their own data; stations call GO/NO-GO in guided modes, report facts only in independent mode; wrong calls are remembered for the debrief |
-| **Faults** | TS-3 has 11 of its own: a pump-end bearing in distress, a seal rub, a worn ox wear ring, a damaged fuel inducer, a turbine nozzle blocked with ice, damaged turbine blades, a speed pickup with a loose connector and one configured for the wrong tooth count (both of which drive the real shaft fast through the speed controller), a flowmeter K-factor, a leaking relief seat on a tank regulator, a discharge valve that only partly opens. BPE-2 adds 5 cooling faults to TS-2's: a blocked throat-zone channel, a coked jacket, a cracked liner leaking fuel into the chamber, fuel loaded hot, a coolant thermocouple wired with the wrong extension. TS-2 adds 13 hot-fire faults: an igniter that does not spark, one whose exciter is dead, one that sparks late (a hard start); an oxidiser injector partly plugged, a fuel injector eroded (soft — it chugs); screech; lost film cooling; a drooping oxidiser regulator, a mis-set fuel regulator, a slow main fuel valve; a flowmeter with another meter's calibration, a chamber transducer whose zero shifted, a throat thermocouple that breaks mid-burn (a false redline). TS-1 has 26 hidden faults, hardware and instrument: regulator set wrong, drooping, creeping, sticking; low bottle; isolation valve not fully open; blocked filter; kinked line; leaking fitting; fire valve slow, partly open, stuck, open coil, leaking seat; wrong nozzle, eroded throat, obstructed throat; transducer bias, failure and noise; thermocouple open circuit; load-cell calibration, load-path, drift and intermittent connector. Each applies at a realistic moment (from the start, on pressurisation, or seconds into the burn) through the physics or the sensor chain. About one fault session in five has no fault at all |
-| **Inspections** | TS-3 has 10, plus turning the rotor by hand: bearings, wear-ring clearances, inducer and turbine borescopes, rotor runout and breakaway torque, the speed pickups on a scope, the DAQ's speed-channel configuration, the meter K-factors, the regulators' relief seats, the discharge valves' travel. BPE-2 adds 6: water-flow and zone-check the jacket, pressure-decay it, radiograph it for blockage and deposit, borescope the liner, hand-probe the fuel, compare thermocouples with a reference probe. TS-2 has 12 of its own — the injector face, a water flow bench for each side, a borescope of the chamber and throat, the igniter plug, a spark check, regulator bench, valve stroke timing, meter K-factors, reference gauge, loop check, thermocouples, connectors; opening the engine or a meter needs the propellants drained first. TS-1 has 15 technician tasks (Console ▸ INSPECT): pin-gauge the throat, measure the exit, pull the filter, walk the line, snoop-test, bench-check the regulator and fire valve, stroke IV-101, read the bottle gauge, inspect connectors, loop check from the rack, compare the PTs with a reference gauge, dead-weight the thrust stand. Each has preconditions (from the rack; cell open; system vented; low side held at 20–50 psig), takes time, and returns measurements beside the expected value — never "fault found". Several find nothing, which is evidence too |
+| **Faults** | TS-3G has 11: an eroded GG oxidiser orifice and a partly blocked GG fuel orifice (a hot turbine that the inferred GG mixture ratio cannot see), a start gas regulator that droops under flow (a slow start, or a hang), a weak GG igniter (a hard start in the gas generator), a main igniter that does not spark, a liner already thinned by unlogged burns, an eroded throat, a damaged ox inducer (it cavitates at mainstage), the turbine inlet thermocouple on the wrong extension wire (it reads low — and so hides the redline), a slow GG oxidiser valve (a nominal burn and a hot shutdown), a flowmeter K-factor. TS-3 has 11 of its own: a pump-end bearing in distress, a seal rub, a worn ox wear ring, a damaged fuel inducer, a turbine nozzle blocked with ice, damaged turbine blades, a speed pickup with a loose connector and one configured for the wrong tooth count (both of which drive the real shaft fast through the speed controller), a flowmeter K-factor, a leaking relief seat on a tank regulator, a discharge valve that only partly opens. BPE-2 adds 5 cooling faults to TS-2's: a blocked throat-zone channel, a coked jacket, a cracked liner leaking fuel into the chamber, fuel loaded hot, a coolant thermocouple wired with the wrong extension. TS-2 adds 13 hot-fire faults: an igniter that does not spark, one whose exciter is dead, one that sparks late (a hard start); an oxidiser injector partly plugged, a fuel injector eroded (soft — it chugs); screech; lost film cooling; a drooping oxidiser regulator, a mis-set fuel regulator, a slow main fuel valve; a flowmeter with another meter's calibration, a chamber transducer whose zero shifted, a throat thermocouple that breaks mid-burn (a false redline). TS-1 has 26 hidden faults, hardware and instrument: regulator set wrong, drooping, creeping, sticking; low bottle; isolation valve not fully open; blocked filter; kinked line; leaking fitting; fire valve slow, partly open, stuck, open coil, leaking seat; wrong nozzle, eroded throat, obstructed throat; transducer bias, failure and noise; thermocouple open circuit; load-cell calibration, load-path, drift and intermittent connector. Each applies at a realistic moment (from the start, on pressurisation, or seconds into the burn) through the physics or the sensor chain. About one fault session in five has no fault at all |
+| **Inspections** | TS-3G has 12: spark-check both igniters, pull the plugs, ultrasonic the ablative liner, pin-gauge the throat, flow the GG orifices on the bench, borescope the GG injector and the turbine manifold, the inducers, the bearings, the start regulator on a flow bench, TT-334 against a reference probe, the meter K-factors, the sequenced valves' stroke times. TS-3 has 10, plus turning the rotor by hand: bearings, wear-ring clearances, inducer and turbine borescopes, rotor runout and breakaway torque, the speed pickups on a scope, the DAQ's speed-channel configuration, the meter K-factors, the regulators' relief seats, the discharge valves' travel. BPE-2 adds 6: water-flow and zone-check the jacket, pressure-decay it, radiograph it for blockage and deposit, borescope the liner, hand-probe the fuel, compare thermocouples with a reference probe. TS-2 has 12 of its own — the injector face, a water flow bench for each side, a borescope of the chamber and throat, the igniter plug, a spark check, regulator bench, valve stroke timing, meter K-factors, reference gauge, loop check, thermocouples, connectors; opening the engine or a meter needs the propellants drained first. TS-1 has 15 technician tasks (Console ▸ INSPECT): pin-gauge the throat, measure the exit, pull the filter, walk the line, snoop-test, bench-check the regulator and fire valve, stroke IV-101, read the bottle gauge, inspect connectors, loop check from the rack, compare the PTs with a reference gauge, dead-weight the thrust stand. Each has preconditions (from the rack; cell open; system vented; low side held at 20–50 psig), takes time, and returns measurements beside the expected value — never "fault found". Several find nothing, which is evidence too |
 | **Diagnosis** | Component, failure mode, cited evidence (channels, comparisons, the inspections actually done) and recommended action, scored 40/30/20/10 with partial credit. Then the reveal: what failed, which measurements showed it, which misled, what should have been noticed, whether stopping was right, and how an expert would have gone about it. Diagnosis and root cause are written into the notebook entries of the session's runs |
 | **Analysis** | TRACES: every recorded run at full rate — cursors (A/B, Δ, mean between), automatic reduction (steady Pc and thrust, droop, ΔP across filter and valve, valve delays, rise and fall times, total impulse, calculated AND measured mass flow, Isp, Cf, c*, effective throat diameter from measured flow, armature pull-in; per pulse: impulse bit, delays, fired / reached steady), prediction vs measured, overlays aligned at T-0, CSV export. CAMPAIGN: any per-run quantity against any other across runs and sessions, least-squares line with standard errors and R², what the line means (Cf and −Pa·Ae from F vs absolute Pc; dead time from impulse bit vs width), repeatability statistics with 95 % confidence |
 | **Test history** | Every run, traces included, kept in the browser (IndexedDB, newest 80) — reopen, overlay or fit last week's runs with today's |
 | **Notebook** | Automatic entry per run (configuration, results, alarms, aborts), pre- and post-test notes, per-run reports, search |
 | **Test report** | NOTEBOOK ▸ Session test report: the request, conduct, run log, results against prediction, anomalies, inspections, diagnosis and root cause assembled from the record; the conductor's conclusions added; previewed as the printable document it becomes; filed in the notebook (newest 20) and downloadable as standalone HTML. In Level 6 filing grades it (below) |
+| **Level 29 grading** | A pump-fed water cold flow (both main injector CdAs), a design-point hot fire of at least 20 s (Pc, thrust, mixture ratio, turbine inlet temperature, c* efficiency, engine Isp) and a GG throttle profile down to 70 % (thrust at the bottom) — 40; data validity — 30; diagnosis — 20; safety — 10 |
 | **Level 23 grading** | A design-point spin (both pump heads, ox flow, turbine efficiency, coast-down), a map at design speed and the ox pump's NPSH required — 40; data validity — 30; diagnosis — 20; safety — 10 |
 | **Level 17 grading** | As Level 12, at a 20 s design point and a 210 psig throttled point, plus two cooling deliverables: the heat into the coolant at the design point and the boiling margin at the throttled point |
 | **Level 12 grading** | Two hot-fire points set by targets, not setpoints — MR 1.50 ± 0.05 at Pc 275 ± 15 psig, and a throttled point at 220 psig — reported from the conductor's own reductions (Pc, thrust, MR, c* efficiency, Isp; c* efficiency at the throttled point) — 40; data validity — 30; diagnosis — 20; safety — 10 |
 | **Level 6 grading** | Deliverables (baseline F, Pc, Isp; the thrust coefficient from a ≥ 3-point sweep; the 10 ms impulse bit and scatter) checked against the conductor's OWN reductions — 40; the call on data validity against what was really wrong with the stand — 30; the diagnosis — 20; the safety and go/no-go record — 10 |
 | **Hints** | In guided fault sessions, up to three questions from a senior engineer, each more specific, each −5 on the diagnosis |
-| **Reference** | ~76 concise entries (instrumentation, fluid systems, operations, performance, combustion, turbomachinery), stand data and limits, and an honest list of what is modelled |
+| **Reference** | ~82 concise entries (instrumentation, fluid systems, operations, performance, combustion, turbomachinery), stand data and limits, and an honest list of what is modelled |
 | **Sound** | Synthesised: valve clicks, pneumatic actuator, vent hiss, jet, relay, countdown, alarm tones |
 
-Four programs are complete: cold gas, Levels 1–6; bipropellant (BPE-1), Levels 7–12; regeneratively cooled engine (BPE-2), Levels 13–17; turbopump component testing (TPA-1), Levels 18–23.
+Five programs are complete: cold gas, Levels 1–6; bipropellant (BPE-1), Levels 7–12; regeneratively cooled engine (BPE-2), Levels 13–17; turbopump component testing (TPA-1), Levels 18–23; gas-generator cycle engine (BPE-3 on TPA-1), Levels 24–29.
 Level 7 is the stand orientation; Level 8 the water cold flow of the
 injector (each side alone at two tank pressures, then both; CdA per side,
 meters against scales, and the mixture ratio the injector will give hot).
@@ -79,6 +80,37 @@ Level 22 is the return-to-service spin with a hidden fault from TS-3's
 catalogue. Level 23 is the independent acceptance campaign: a design-point
 spin, a map and a suction test, the water and gas budgeted by the
 conductor, graded.
+
+On TS-3G, Level 24 is the orientation: the gas-generator cycle, a start
+sequence read on paper second by second, both igniters spark-checked, and
+the purge pushed through the engine at the personnel limit — and the
+purge line that stays trapped after its regulator goes to zero. Level 25
+is a pump-fed cold flow: water in both tanks, the turbine on start gas
+alone for the whole run, the main injector measured under pump feed — and
+found a few per cent small on the ox side, which is why the engine will run
+leaner than its drawing. Level 26 is the first hot fire: the bootstrap
+start (start gas at T-0, the main chamber at T+0.45, the gas generator at
+T+0.75, the start gas off at T+1.1 and the speed still RISING), the time
+to mainstage, the turbine inlet temperature, and what the cycle costs —
+the engine's Isp about 11 s below the main chamber's, because 5 % of the
+propellant went through the turbine and overboard. Level 27 throttles the
+engine on the gas generator alone (100, 85, 70 % — the speed, Pc and
+thrust follow; the turbine inlet temperature does not, because both legs
+move together) and then burns 30 s on the ablative chamber: the throat
+erodes and Pc drifts down; the case warms late. Level 28 is the
+return-to-service fire with a hidden fault from TS-3G's catalogue. Level 29
+is the independent acceptance campaign: cold flow, drain and load, a
+design-point fire and a throttle profile, budgeted by the conductor and
+graded.
+
+The start sequence is the plan, and every part of it is yours to change in
+FIRE CONTROL: the start gas pressure, when the main valves open, when the
+gas generator opens, when the start gas shuts, the igniter window, the
+shutdown lag, the two GG throttles separately or a whole throttle profile.
+Too little start gas, cut too early, and the engine hangs short of
+mainstage; too much, left on too long, and it overspeeds; a gas generator
+that lights late lights hard; a fuel-starved one runs hot. The three start
+checks (main light, GG light, mainstage speed) are automatic aborts.
 
 ## Your own hardware (HARDWARE)
 
@@ -189,7 +221,12 @@ Everything on these cameras comes from the true state of the model through
   **vent stack** puffs white when cold nitrogen comes out of it. On TS-3
   the turbine exhaust fogs (it is −70 °C), the catch tank churns, and the
   speed-pickup wheel turns — strobing on video above 30 revolutions a
-  second, as it would.
+  second, as it would. On TS-3G the turbine exhaust is white fog while the
+  start gas spins it and, once the gas generator lights, an orange, sooty
+  flame at the top of its duct — fuel-rich gas finishing its burn in the
+  air (drawn, not computed: see below); the gas generator's can warms
+  toward a dull red; inside BPE-3's nozzle the flame lights the charred
+  liner.
 - **A heat-sink chamber glows** after a long burn — dull red past ~750 K,
   brighter as it heats — from the model's own wall temperatures, and keeps
   glowing during soak-back.
@@ -520,8 +557,48 @@ temperature except its vapour pressure. The redline overshoot after a
 genuine overspeed (≈ 115 % with the turbine valve's 90 ms) is real
 behaviour of the model, not a tuned number.
 
+### The gas-generator engine (TS-3G), and how honest it is
+
+Modelled:
+- **The gas generator** is a second lumped chamber of the same kind as the
+  main one — mass and energy, ignition by a spark and a flammable pairing,
+  a hard start when it lights late — burning very fuel-rich. Its gas is
+  the turbine's drive: the turbine nozzle is its throat, so its pressure
+  is set by how much gas the turbine passes. Start gas and its own
+  products share its volume.
+- **The taps** are orifice flows off each pump discharge (valve, throttle,
+  orifice in series), quasi-steady with a few milliseconds' lag; each pump
+  delivers the main flow plus its tap, and the tank drains both.
+- **The cycle closes through the shaft and nothing else**: a hotter gas
+  generator spins the pumps faster, which raises the gas generator's own
+  feed pressure. That loop gain is real: a 5 % larger oxidiser orifice
+  makes the engine about 3 % faster and the turbine 30 K hotter; 16 % takes
+  it to the overspeed redline.
+- **The steady prediction** (`physics/predict-gg.js`) balances turbine
+  power against pump power by bisection on speed, with the chamber
+  pressures solved inside. The pre-test prediction uses the DRAWING (its
+  injector and orifice areas, its c* efficiencies); the hardware is built
+  a few per cent off it, so the first fire comes in about 1–3 % under.
+- **The ablative chamber**: a char front advancing at a rate proportional
+  to chamber pressure, a throat eroding at a fixed rate (so Pc drifts down
+  about half a per cent per 10 s), and a steel case behind a conductance
+  that grows as the liner thins — the case thermocouple warms late and
+  soaks back after.
+
+Approximated, bluntly: the gas generator's temperature comes from an
+invented temperature-versus-mixture-ratio table with one γ and one gas
+constant — no equilibrium chemistry, no soot, no heat lost to its walls
+worth the name. Its flows are inferred on the console from the orifices'
+pressure drops at the drawing's flow coefficient, which is exactly why two
+of the faults hide from them. The afterburning flame at the top of the
+exhaust duct is drawn from the gas generator's flow and temperature, not
+computed. The ablative has no pyrolysis gas, no spalling, no uneven char.
+The transient model and the steady predictor are separate calculations
+and agree to a few per cent, which is the honest size of the difference.
+
 **Not claimed.** The numbers are plausible for a small research cold-gas
-thruster, a small pressure-fed engine and a small turbopump at sea level. They predict no real
+thruster, a small pressure-fed engine, a small turbopump and a small
+gas-generator engine at sea level. They predict no real
 hardware, and OX-1 and FU-1 are not real propellants.
 
 ### The faults, and how honest they are
@@ -572,6 +649,9 @@ node redline/test/custom.test.mjs
 node redline/test/turbopump.test.mjs
 node redline/test/faults-tp.test.mjs
 node redline/test/levels-tp.test.mjs
+node redline/test/gg.test.mjs
+node redline/test/faults-gg.test.mjs
+node redline/test/levels-gg.test.mjs
 node redline/test/visual.test.mjs
 ```
 
@@ -641,6 +721,22 @@ without a worn ox pump) and flies Level 23's three deliverables — refilling
 the tanks between runs, as the water budget demands — and grades a report
 against them. It is the slow one: about seven minutes.
 
+`gg.test.mjs` checks BPE-3: the steady operating point (the drawing
+balances at design speed; the as-built engine a little slower), the
+gas generator's mixture ratio and temperature, the Isp the cycle costs;
+then through the session a nominal bootstrap start against the
+prediction, a three-point throttle profile, a fuel-starved gas generator,
+the starts that go wrong (a hang, an overspeed, no light in either chamber,
+a late gas-generator light that lights hard), a slow GG valve's hot
+shutdown, the staged manual cutoff, a 55 s burn on the ablative chamber,
+and a pump-fed cold flow. `faults-gg.test.mjs` forces each TS-3G fault
+through the reference fire and checks its fingerprint in the measured
+data, the inspections and the diagnosis vocabulary. `levels-gg.test.mjs`
+walks Levels 24 to 28 start to finish (Level 28 with and without an eroded
+GG orifice) and flies Level 29's cold flow, drain-and-load, design point
+and throttle profile, grading a report against them. These are the slow
+ones — ten to twenty minutes each: two lit chambers and a turbopump.
+
 `visual.test.mjs` checks what the cameras and the microphone are given,
 without a browser: the plume's regimes against chamber pressure on BPE-1
 (subsonic, separated with a Mach disk, overexpanded, matched,
@@ -649,7 +745,7 @@ colour, the flame's look; and cellState and its events through a real hot
 fire, a hard start, a cold flow, a TS-1 firing and a TS-3 spin, and the
 cell's tape.
 
-For visual checks, `node redline/tools/cell-shots.mjs [hot|regen|cold|coldgas|tp|all] [outdir]`
+For visual checks, `node redline/tools/cell-shots.mjs [hot|regen|cold|coldgas|tp|gg|all] [outdir]`
 serves the project, drives real runs in headless Chromium (software WebGL)
 and photographs each camera mid-run. More generally, serve the repo with
 `python3 -m http.server` and drive `/redline/` in headless Chromium;
@@ -667,4 +763,5 @@ and photographs each camera mid-run. More generally, serve the repo with
 | 8 | ✓ BPE-2, a regeneratively cooled engine on TS-2: cooling jacket physics (boiling, critical heat flux, coking, liner damage), jacket instruments and reductions, 5 cooling faults and 6 inspections, Levels 13–17 |
 | 9 | ✓ TS-3, a turbopump component stand: pumps on water and a turbine on cold nitrogen, speed control, the affinity laws, maps, suction tests, bearings, vibration and overspeed, 11 faults and 10 inspections, Levels 18–23 |
 | — | ✓ the cameras: a 3D test site built from each stand's definition, a plume that follows the running engine, the FIRE VIEW, replay with slow motion, sound from the physics |
-| 10 | TS-3 integrated: a gas-generator cycle engine, bootstrap start |
+| 10 | ✓ TS-3G, a gas-generator cycle engine on TPA-1: a gas generator and its taps, the bootstrap start (hang, overspeed, hard light), throttling on the gas generator, an ablative chamber, the Isp the cycle costs, 11 faults and 12 inspections, Levels 24–29, its P&ID, CCTV and 3D cell |
+| next | your own hardware: real part numbers into a configuration; then CSV import of real test data and calibration against it |

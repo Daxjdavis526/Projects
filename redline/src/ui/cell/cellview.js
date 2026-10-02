@@ -48,7 +48,7 @@ const CCTV = {
     }`,
 };
 
-const HUD_CH = { coldgas: ['PT-401', 'LC-501'], biprop: ['PT-801', 'LC-901', 'FT-714', 'FT-724'], turbopump: ['SPD', 'PT-414', 'PT-424', 'VIB-345'] };
+const HUD_CH = { coldgas: ['PT-401', 'LC-501'], biprop: ['PT-801', 'LC-901', 'FT-714', 'FT-724'], turbopump: ['SPD', 'PT-414', 'PT-424', 'VIB-345'], gg: ['SPD', 'PT-501', 'PT-333', 'TT-334', 'LC-501'] };
 
 export class CellView {
   constructor(host, app) {
@@ -128,14 +128,17 @@ export class CellView {
     const V = (x, y, z) => new THREE.Vector3(x, y, z);
     const near = k === 'coldgas' ? 0.38 : k === 'turbopump' ? 1.9 : 1.35;
     const list = [
-      { id: 'CAM 1', name: 'CELL', pos: V(-3.25, 3.3, 3.55), tgt: V(E.x - 0.2, 0.85, -0.6), fov: k === 'coldgas' ? 34 : 46, mic: 'camera' },
+      k === 'gg' ? { id: 'CAM 1', name: 'CELL', pos: V(-3.0, 2.9, 4.8), tgt: V(E.x - 0.9, 1.75, -1.2), fov: 54, mic: 'camera' }
+        : { id: 'CAM 1', name: 'CELL', pos: V(-3.25, 3.3, 3.55), tgt: V(E.x - 0.2, 0.85, -0.6), fov: k === 'coldgas' ? 34 : 46, mic: 'camera' },
       k === 'turbopump'
         ? { id: 'CAM 2', name: 'TPA-1', pos: V(0.1, 1.45, 1.55), tgt: V(-0.1, 0.95, -0.4), fov: 40, mic: 'camera' }
         : { id: 'CAM 2', name: 'NOZZLE', pos: V(E.x + near * 0.25, E.y + near * 0.06, near), tgt: V(E.x + near * 0.4, E.y, 0), fov: k === 'coldgas' ? 30 : 40, mic: 'camera' },
       k === 'turbopump'
         ? { id: 'CAM 3', name: 'CATCH TANK', pos: V(5.0, 2.6, 4.8), tgt: V(1.4, 1.0, 0.2), fov: 40, mic: 'camera' }
         : { id: 'CAM 3', name: 'DOWNRANGE', pos: V(E.x + (k === 'coldgas' ? 2.2 : 4.5), E.y + 0.3, k === 'coldgas' ? 0.5 : 1.0), tgt: V(E.x - 0.05, E.y, 0), fov: k === 'coldgas' ? 7 : 20, mic: 'camera' },
-      { id: 'CAM 4', name: 'BUNKER', pos: V(-25, 2.2, 39.2), tgt: V(E.x + 0.6, 1.2, 0), fov: 9, mic: 'far', dist: 48 },
+      // on a gas-generator engine the far camera frames the turbine exhaust's flame at the roof too
+      k === 'gg' ? { id: 'CAM 4', name: 'BUNKER', pos: V(-25, 2.2, 39.2), tgt: V(E.x - 0.4, 2.0, -1.0), fov: 12, mic: 'far', dist: 48 }
+        : { id: 'CAM 4', name: 'BUNKER', pos: V(-25, 2.2, 39.2), tgt: V(E.x + 0.6, 1.2, 0), fov: 9, mic: 'far', dist: 48 },
       { id: 'FREE', name: 'ORBIT', pos: V(E.x + 2.2, 1.9, 3.2), tgt: V(E.x, E.y, 0), fov: 45, mic: 'camera', free: true },
     ];
     return list;
@@ -331,8 +334,13 @@ export class CellView {
     const tp = st.tp;
     if (tp) {
       const ex = tp.exhaust, top = this.stand.stackTop;
-      if (ex.mdot > 1e-4) P.emit('texh', ex.T < 275 ? 'fog' : 'vent', Math.min(120, ex.mdot * 1500), dt, [top.x, top.y, top.z], [0.3, 4 + ex.mdot * 60, 0], { spread: 0.8, size: 0.14 });
-      const q = Object.values(tp.discharge).reduce((a, b) => a + b, 0);
+      if (ex.lit) {
+        // a gas generator's fuel-rich exhaust meets the air at the top of
+        // the duct and finishes burning: an orange flame and a column of soot
+        P.emit('tfire', 'fire', Math.min(220, ex.mdot * 4500), dt, [top.x, top.y + 0.05, top.z], [0.2, 3 + ex.mdot * 80, 0], { spread: 0.9, size: 0.18, jitter: 0.06 });
+        P.emit('tsoot', 'smoke', Math.min(90, ex.mdot * 1800), dt, [top.x, top.y + 0.6, top.z], [0.4, 3.5, 0], { spread: 0.8, size: 0.3, jitter: 0.15 });
+      } else if (ex.mdot > 1e-4) P.emit('texh', ex.T < 275 ? 'fog' : 'vent', Math.min(120, ex.mdot * 1500), dt, [top.x, top.y, top.z], [0.3, 4 + ex.mdot * 60, 0], { spread: 0.8, size: 0.14 });
+      const q = this.stand.catchTop ? Object.values(tp.discharge).reduce((a, b) => a + b, 0) : 0;
       if (q > 0.01) {
         const ct = this.stand.catchTop;
         P.emit('catch', 'mist', Math.min(60, q * 70), dt, [ct.x, ct.y, ct.z], [0, 0.8, 0], { spread: 0.5, size: 0.2, jitter: 0.3 });

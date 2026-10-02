@@ -152,7 +152,10 @@ export function cellState(S) {
     sound: { jetPower: 0, chug: 0, chugF: 0, hf: 0, hfF: 0, sep: 0, gas: 0, vent: 0, rpm: 0, cav: 0, grind: 0, liquid: 0 },
   };
   for (const e of net.elements) if ('pos' in e) st.valves[e.id] = e.pos;
-  for (const l of m.lines || []) { st.valves[l.valve.id] = l.valve.pos; if (l.spec.throttle) st.valves[l.spec.throttle.id] = l.thr; }
+  for (const l of m.lines || []) {
+    st.valves[l.valve.id] = l.valve.pos; if (l.spec.throttle) st.valves[l.spec.throttle.id] = l.thr;
+    if (l.tap) { st.valves[l.tap.valve.id] = l.tap.valve.pos; if (l.spec.tap?.throttle) st.valves[l.spec.tap.throttle.id] = l.tap.thr; }
+  }
   for (const l of m.lines || []) st.tanks.push({ line: l.id, fill: clamp01(l.mL / (l.Vtank * l.rho)), fluid: l.fluid.name });
   for (const v of net.volumes) if (v.T < 268 && v.id !== 'ambient') st.frost[v.id] = clamp01((268 - v.T) / 60);
   let vent = 0;
@@ -202,10 +205,12 @@ export function cellState(S) {
   const tp = m.tp;
   if (tp) {
     const pumps = Object.fromEntries(Object.entries(tp.pumps).map(([k, pu]) => [k, { cav: clamp01(1 - pu.f), dP: pu.dP, Tc: pu.Tc }]));
-    const tn = tp.nozzle;
+    const tn = tp.nozzle, G = m.gg;
     st.tp = {
       rpm: tp.n * tp.spec.Nd, n: tp.n, vib: tp.vib, pumps,
-      exhaust: { mdot: Math.max(0, tn?.mdot || 0), T: tp.Texh },
+      // on a gas-generator engine the turbine's nozzles are the gas
+      // generator's throat: its outflow is the exhaust, burning or not
+      exhaust: { mdot: Math.max(0, (G ? G.mdotOut : tn?.mdot) || 0), T: tp.Texh, lit: !!G?.burning && tp.Texh > 500 },
       discharge: Object.fromEntries((m.lines || []).map(l => [l.id, Math.max(0, l.mdotInj)])),
       brg: tp.brgFactor, rub: tp.rub, seized: tp.seized,
     };
@@ -213,8 +218,10 @@ export function cellState(S) {
     st.sound.cav = Math.max(...Object.values(pumps).map(x => x.cav), 0);
     st.sound.grind = clamp01((tp.brgFactor - 1) / 3 + tp.rub * 20);
     st.sound.gas = st.tp.exhaust.mdot;
-    st.sound.liquid = (m.lines || []).reduce((a, l) => a + Math.max(0, l.mdotInj), 0);
+    if (!C) st.sound.liquid = (m.lines || []).reduce((a, l) => a + Math.max(0, l.mdotInj), 0);
   }
+  const G = m.gg;
+  if (G) st.gg = { lit: !!G.burning, T: G.Tgas, P: G.P, mdot: Math.max(0, G.mdotOut), igniter: !!G.igniter.on, glow: G.burning ? glow(Math.min(1100, 0.55 * G.Tgas + 0.45 * G.walls.ch)) : glow(G.walls.ch) };
   st.load = m.stand?.y ?? 0;
   return st;
 }
