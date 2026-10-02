@@ -2376,3 +2376,62 @@ Not done in M12:
   transition still needs DSMC.
 - A rarefied-nozzle measurement precise enough to test slip. Whalen's 5 %
   is not.
+
+## 22. M13 record: wall slip on rhoCentralFoam
+
+M12 kept slip off rhoCentralFoam, so a small nozzle with a shock inside, or
+a startup transient, could not have slip walls. M13 lifts that.
+
+Delivered:
+
+- **SONICLINE's build of rhoCentralFoam for slip walls**
+  (`foam/extensions`, `slipCentralFoam`). No OpenFOAM source is kept in
+  the repository.
+  - The first slip run on rhoCentralFoam copies the installed solver's own
+    source (`$FOAM_SOLVERS/compressible/rhoCentralFoam`). It applies one
+    patch and builds the result with wmake into `$FOAM_USER_APPBIN`, under
+    a name that carries a hash of the patch.
+  - The patch sets the viscous work `sigmaDotU` to zero on wall faces,
+    which is finding 73's fix in rhoCentralFoam's own energy equation.
+  - Each edit is anchored. If its anchor is not found exactly once (a
+    different OpenFOAM version), the build stops and says the patch needs
+    review rather than patching blind.
+  - The extension builder now makes applications as well as libraries.
+- **The pipeline runs it** for any viscous slip run whose solver is
+  rhoCentralFoam, and records the executable in the manifest. Runs without
+  slip keep the stock solver, so every verified run is unchanged.
+- **Validation** no longer refuses slip with a shock, a transient or
+  rhoCentralFoam asked for; it notes the build instead.
+- **A CI test** builds the solver and applies the patch afresh to the
+  installed source.
+
+Findings:
+
+76. **Stock rhoCentralFoam leaks the slip friction exactly as rhoPimpleFoam
+    did, and the patch closes it.** Both runs started from the same
+    converged E3a slip state and ran 4000 steps:
+
+    | solver | exit total temperature | thrust |
+    |---|---|---|
+    | stock rhoCentralFoam | 295.0 → 287.4 K (−2.6 %) | −0.8 % |
+    | SONICLINE's build | 295.0 → 294.99 K | unchanged |
+
+    - Over full runs, the build conserves total temperature to 4×10⁻⁵ (no
+      slip) and 8×10⁻⁵ (slip). That is better than rhoPimpleFoam's
+      1.4–1.6×10⁻³ on the same nozzle.
+    - **rhoCentralFoam does not converge on E3a in 61,000 steps, slip or
+      not.** Inlet and exit mass flow are still 0.15 % apart and thrust is
+      creeping up by 0.07 % per 5000 steps, so both runs are refused.
+    - At that point the slip effect on C_T is −0.34 % on rhoCentralFoam
+      against rhoPimpleFoam's converged −0.16 %. The sign agrees; the size
+      cannot be judged from unconverged runs.
+    - The density-based solver's slow convergence on very viscous, low-Re
+      flow is M14's subject. A converged cross-check of the slip effect
+      between the solvers (V22) waits for it.
+
+Not done in M13:
+
+- V22, the converged rhoCentralFoam / rhoPimpleFoam comparison of the slip
+  effect (finding 76).
+- The Maxwell curvature term. rhoCentralFoam has the `tauMC` it needs, but
+  it stays off so that both solvers apply the same condition V21 verified.

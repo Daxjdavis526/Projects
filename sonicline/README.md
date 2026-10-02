@@ -11,14 +11,14 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M12 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M13 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
 Every number comes with an uncertainty budget.
-Sections 10–21 of the design record what building each milestone taught.
+Sections 10–22 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -380,9 +380,12 @@ The house rule: say plainly where the model stops.
       jump on a fixed-temperature wall.
     - It is verified against an analytical microchannel solution (V21), to
       0.2 %.
-    - It runs on rhoPimpleFoam only. rhoCentralFoam would carry the slip
-      friction out through the wall (DESIGN.md finding 73), so a slip case
-      with a shock in the nozzle is refused.
+    - It runs on both solvers. Stock OpenFOAM carries the slip friction
+      out through the wall as work (DESIGN.md findings 73 and 76).
+      SONICLINE's viscous-work term keeps it in for rhoPimpleFoam. For
+      rhoCentralFoam, which a shock in the nozzle or a transient needs, the
+      first slip run builds SONICLINE's own copy of the installed solver
+      with that one change.
   - **What slip does to a nozzle.** It cuts wall friction, but it also
     thins the boundary layer, so the gas expands further and pushes less on
     the diverging wall. In Whalen's nozzles the second effect wins: slip

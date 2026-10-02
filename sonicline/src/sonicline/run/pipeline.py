@@ -398,7 +398,21 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         foam_case.write_continuation(case, defn, meta, summary, n_warm)
     if _cancelled(run_dir):
         return finish("cancelled", Trust.NOT_TRUSTWORTHY.value)
-    cmd = command(summary.solver)
+    executable = summary.solver
+    if (summary.solver == foam_case.CENTRAL_SOLVER and summary.viscous
+            and defn.boundaries.wall_slip is not None):
+        # Stock rhoCentralFoam takes the slip friction out through the wall
+        # (DESIGN.md finding 73): slip runs on SONICLINE's build of it.
+        from ..foam import extensions
+
+        try:
+            executable = extensions.ensure_built(runner, run_dir / "extensions", "slipCentralFoam")
+        except extensions.ExtensionBuildError as e:
+            emit(Event("setup", f"ERROR: {e}"))
+            manifest["setup_error"] = str(e)
+            return finish("failed", Trust.NOT_TRUSTWORTHY.value)
+        manifest.setdefault("solver", {})["executable"] = executable
+    cmd = command(executable)
     emit(Event("solve", f"running {' '.join(cmd)}"))
     proc = runner.start(cmd, case, case / f"log.{summary.solver}")
     criteria = defn.numerics.convergence

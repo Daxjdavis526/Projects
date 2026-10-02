@@ -282,12 +282,12 @@ def build_case(
         sector = 2.0 * defn.mesh.planar_width / (PLANAR_DEPTH * profile.throat_radius)
     else:
         sector = 1.0
+    # With slip, stock rhoCentralFoam's energy equation takes the viscous work
+    # through the wall face and drains the sliding friction out of the gas
+    # (DESIGN.md finding 73): the pipeline runs SONICLINE's build of it
+    # (foam/extensions, slipCentralFoam); viscousWork does the same for
+    # rhoPimpleFoam.
     slip = defn.boundaries.wall_slip if viscous else None
-    if slip is not None and solver != PIMPLE_SOLVER:
-        # rhoCentralFoam's energy equation takes the viscous work through the
-        # wall face, which with slip drains the sliding friction out of the
-        # gas (DESIGN.md finding 73); viscousWork keeps it in for rhoPimpleFoam.
-        raise ValueError("wall slip runs only on rhoPimpleFoam")
     _write_constant(case, gas, viscous, viscous_work, ras, real_gas,
                     gas.prandtl(defn.boundaries.inlet.T0) if slip is not None else None)
     _write_fields(case, defn, meta, profile.exit_radius, fields, p_init, T_init, U_init,
