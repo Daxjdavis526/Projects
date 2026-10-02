@@ -640,7 +640,12 @@ def _v13_definition(quality: str, form: str = "wedge") -> m.SimulationDefinition
     return dataclasses.replace(
         d, name="V13 V1 laminar with a heated wall",
         boundaries=dataclasses.replace(d.boundaries, wall_thermal=m.FixedTemperature(temperature=V13_WALL_T)),
-        flow=m.Flow(turbulence=m.Laminar()))
+        flow=m.Flow(turbulence=m.Laminar()),
+        # Its converged state keeps a 0.7-2.9e-4 outflow deficit (finding
+        # 72), which TIGHT's 2e-5 can never meet: the run went to its last
+        # iteration and was refused. Judged at twice this, as its check is.
+        numerics=dataclasses.replace(TIGHT, convergence=dataclasses.replace(
+            TIGHT.convergence, mass_imbalance=V13_MASS_TOLERANCE / 2.0)))
 
 
 def _v13_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:

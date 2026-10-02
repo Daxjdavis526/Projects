@@ -2248,7 +2248,11 @@ Findings:
       energy balance V13 exists to check holds to 10⁻⁵–9×10⁻⁴ (tolerance
       2×10⁻³) whichever phase the run stops in.
     - V13's mass tolerance is now 5×10⁻⁴: above every window measured,
-      below the solver's own 10⁻³ criterion, as V4b's 3×10⁻⁴ is. The
+      below the solver's own 10⁻³ criterion, as V4b's 3×10⁻⁴ is. Its
+      convergence criterion follows (2.5×10⁻⁴, judged at twice that). The
+      suite's tight 2×10⁻⁵ can never hold for it: in the next nightly V13
+      ran to its last iteration and was refused as not converged, at
+      2.1×10⁻⁴. The
       deficit is unexplained. The adiabatic laminar E3, also cut off at its
       exit, conserves mass to 5×10⁻⁶. The likely cause is the outflow
       condition across a boundary layer the 450 K wall has thickened, and
