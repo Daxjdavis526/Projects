@@ -30,7 +30,7 @@ def test_v1_runs_once_for_v6_and_v7(tmp_path, monkeypatch):
 
 def test_comparisons_are_known_to_the_cli():
     from sonicline import cli
-    assert set(v.COMPARISONS) <= {"V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18", "V19"}
+    assert set(v.COMPARISONS) <= {"V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18", "V19", "V21"}
     assert cli.main(["verify", "--cases", "V99"]) == 2
 
 

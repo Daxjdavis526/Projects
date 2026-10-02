@@ -797,18 +797,23 @@ def _e2_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
 
 WHALEN_D = 1.524e-3  # m, throat diameter
 WHALEN_T0 = 295.0  # K
-WHALEN = {"E3a": (20.0, 1830, 1.51), "E3b": (25.0, 1848, 1.50)}  # half-angle, Re, measured C_T
+# half-angle, Re, measured C_T (table IV). E3c and E3d, at a quarter of the
+# Reynolds number, have four times the Knudsen number: the slip cases.
+WHALEN = {"E3a": (20.0, 1830, 1.51), "E3b": (25.0, 1848, 1.50),
+          "E3c": (20.0, 458, 1.40), "E3d": (25.0, 458, 1.34)}
 E3_TOLERANCE = 0.05  # the stated measurement error below Re 2000
 
 
-def _whalen_definition(half_angle: float, reynolds: float) -> Callable[[str, str], m.SimulationDefinition]:
+def _whalen_definition(half_angle: float, reynolds: float,
+                       slip: bool = False) -> Callable[[str, str], m.SimulationDefinition]:
     def build(quality: str, form: str = "wedge") -> m.SimulationDefinition:
         g = NITROGEN
         T_throat = WHALEN_T0 * 2.0 / (g.gamma + 1.0)
         mdot = reynolds * math.pi * g.viscosity(T_throat) * WHALEN_D / 4.0
         rt = WHALEN_D / 2.0
         return m.SimulationDefinition(
-            name=f"E3 Whalen {half_angle:g} deg conical nozzle, area ratio 50, Re {reynolds}",
+            name=f"E3 Whalen {half_angle:g} deg conical nozzle, area ratio 50, Re {reynolds}"
+                 + (", Maxwell slip" if slip else ""),
             geometry=m.ConicalNozzle(
                 throat_radius=rt, expansion_ratio=(10.77e-3 if half_angle == 20.0 else 10.78e-3) ** 2 / WHALEN_D**2,
                 contraction_ratio=(9.40e-3 / WHALEN_D) ** 2, converging_half_angle=math.radians(45.0),
@@ -820,8 +825,9 @@ def _whalen_definition(half_angle: float, reynolds: float) -> Callable[[str, str
             gas=m.GasSpec(equation_of_state="auto"),
             boundaries=m.Boundaries(inlet=m.MassFlowInlet(mass_flow=mdot, T0=WHALEN_T0),
                                     ambient=m.Ambient(pressure=0.0, temperature=WHALEN_T0),
-                                    exit_domain=m.TruncatedAtExit()),
-            # Re ~ 1800: laminar, the wall resolved.
+                                    exit_domain=m.TruncatedAtExit(),
+                                    wall_slip=m.WallSlip() if slip else None),
+            # Re 460-1850: laminar, the wall resolved.
             flow=m.Flow(turbulence=m.Laminar()),
             mesh=m.MeshSpec(form=m.MeshForm(form), quality=m.MeshQuality(quality)),
             numerics=TIGHT,
@@ -830,7 +836,7 @@ def _whalen_definition(half_angle: float, reynolds: float) -> Callable[[str, str
 
 
 def _whalen_checks(name: str) -> Callable[[dict, m.SimulationDefinition], list[Check]]:
-    measured = WHALEN[name][2]
+    measured = WHALEN[name.removesuffix("-slip")][2]
 
     def checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
         p_c = metrics["conditions"]["p0"]
@@ -843,6 +849,97 @@ def _whalen_checks(name: str) -> Callable[[dict, m.SimulationDefinition], list[C
                                          "hydrogen-calibrated flowmeter (figure 13; not checked, DESIGN.md section 19)")
                 ] + _common_checks(metrics)
     return checks
+
+
+# ----------------------------------------------------------------------------- V21
+# First-order wall slip against Arkilic, Schmidt and Breuer's long-channel
+# solution (core.theory.microchannel): a planar channel 20 um high and 25
+# heights long between 300 K walls, 36 kPa upstream and 20 kPa held at its
+# exit (outlet Kn 0.017, Mach ~0.3). The solution holds between any two
+# stations of the developed channel, so it is applied between 20 % and 90 %
+# of its length with the CFD's own centreline pressures there; the entrance
+# and the exit stay out of the comparison. At Re H / L ~ 0.75 the gas's
+# acceleration takes 4 % of the pressure drop, which Arkilic's formula gives
+# to friction: the reference keeps the momentum flux (DESIGN.md finding 74).
+# V21-noslip is the same channel without slip, against compressible
+# Poiseuille flow with the same inertia term.
+
+V21_H = 20e-6
+V21_LENGTH = 50.0  # throat radii (25 heights)
+V21_WIDTH = 1e-3
+V21_T = 300.0
+V21_STATIONS = (0.2, 0.9)
+V21_TOLERANCE = 5e-3
+V21_EFFECT_TOLERANCE = 3e-3  # the slip effect, with the no-slip run's error removed
+
+
+def _v21_definition(slip: bool) -> Callable[[str, str], m.SimulationDefinition]:
+    def build(quality: str, form: str = "planar") -> m.SimulationDefinition:
+        return m.SimulationDefinition(
+            name=f"V21 Arkilic microchannel, {'Maxwell slip' if slip else 'no slip'}",
+            geometry=m.ConicalNozzle(throat_radius=V21_H / 2.0, expansion_ratio=1.0, contraction_ratio=4.0,
+                                     throat_length=V21_LENGTH),
+            boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=36e3, T0=V21_T),
+                                    ambient=m.Ambient(pressure=20e3, temperature=V21_T),
+                                    exit_domain=m.TruncatedAtExit(fixed_pressure=True),
+                                    wall_thermal=m.FixedTemperature(temperature=V21_T),
+                                    wall_slip=m.WallSlip() if slip else None),
+            flow=m.Flow(turbulence=m.Laminar()),
+            # Always the coarse planar mesh: the channel is 25 heights long.
+            mesh=m.MeshSpec(form=m.MeshForm.PLANAR, quality=m.MeshQuality.COARSE, planar_width=V21_WIDTH),
+            numerics=TIGHT,
+        )
+    return build
+
+
+def v21_reference(run_dir: Path, slip: bool) -> tuple[float, float, float] | None:
+    """Arkilic's mass flow between the V21 stations, from the run's own
+    centreline pressures: (mass flow, p_a, p_b)."""
+    import numpy as np
+
+    from ..core.theory import microchannel
+
+    f = Path(run_dir) / "profiles.json"
+    if not f.is_file():
+        return None
+    c = json.loads(f.read_text(encoding="utf-8"))["centreline"]
+    L = V21_LENGTH * V21_H / 2.0
+    xa, xb = (s * L for s in V21_STATIONS)
+    pa, pb = (float(np.interp(x, c["x"], c["p"])) for x in (xa, xb))
+    mdot = microchannel.mass_flow_with_inertia(V21_H, V21_WIDTH, xb - xa, pa, pb, NITROGEN.viscosity(V21_T),
+                                               NITROGEN.R, V21_T, 1.0 if slip else None)
+    return mdot, pa, pb
+
+
+def _v21_checks(slip: bool) -> Callable[[dict, m.SimulationDefinition], list[Check]]:
+    def checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+        ref = v21_reference(Path(metrics.get("_run_dir", ".")), slip)
+        what = ("Arkilic et al. (first-order slip), with inertia" if slip
+                else "compressible Poiseuille (no slip), with inertia")
+        return [Check(f"mass flow vs {what}", metrics["mass_flow"]["inlet"], ref[0] if ref else None,
+                      V21_TOLERANCE, note=(f"between p {ref[1]:.0f} and {ref[2]:.0f} Pa" if ref else ""))
+                ] + _common_checks(metrics)
+    return checks
+
+
+def v21_check(noslip: tuple["CaseResult", dict | None], slip: tuple["CaseResult", dict | None]) -> "CaseResult":
+    """The slip effect alone: the slip run against Arkilic, scaled by the
+    no-slip run's own ratio to Poiseuille (the mesh's error, which both
+    runs share)."""
+    (rn, mn), (rs, ms) = noslip, slip
+    rank = ("not_trustworthy", "trusted_with_warnings", "trusted")
+    trust = min((rn.trust, rs.trust), key=lambda t: rank.index(t) if t in rank else -1)
+    r = CaseResult("V21", "Wall slip: the slip effect on mass flow vs Arkilic et al.",
+                   "completed" if rn.status == rs.status == "completed" else "failed",
+                   trust if trust in rank else "not_trustworthy")
+    if mn and ms:
+        ref_n, ref_s = v21_reference(Path(rn.run_dir), False), v21_reference(Path(rs.run_dir), True)
+        if ref_n and ref_s:
+            mesh = mn["mass_flow"]["inlet"] / ref_n[0]
+            r.checks = [Check("slip run vs Arkilic x the no-slip run's mesh error", ms["mass_flow"]["inlet"],
+                              ref_s[0] * mesh, V21_EFFECT_TOLERANCE,
+                              note=f"mesh error {100 * (mesh - 1):+.2f} %").evaluate()]
+    return r
 
 
 # ----------------------------------------------------------------------------- V15
@@ -914,6 +1011,15 @@ CASES: dict[str, Case] = {
                 _whalen_definition(20.0, 1830), _whalen_checks("E3a")),
     "E3b": Case("E3b", "Whalen (NASA TM-100130) 25 deg conical nozzle, cold nitrogen, Re 1848: measured thrust",
                 _whalen_definition(25.0, 1848), _whalen_checks("E3b")),
+    **{f"{n}{suffix}": Case(f"{n}{suffix}", f"Whalen (NASA TM-100130) {WHALEN[n][0]:g} deg conical nozzle, cold "
+                            f"nitrogen, Re {WHALEN[n][1]}{', Maxwell slip' if slip else ''}: measured thrust",
+                            _whalen_definition(WHALEN[n][0], WHALEN[n][1], slip), _whalen_checks(n + suffix))
+       for n in ("E3a", "E3b", "E3c", "E3d") for suffix, slip in (("", False), ("-slip", True))
+       if not (suffix == "" and n in ("E3a", "E3b"))},
+    "V21-noslip": Case("V21-noslip", "Planar microchannel, no slip: mass flow vs compressible Poiseuille",
+                       _v21_definition(False), _v21_checks(False), form="planar"),
+    "V21-slip": Case("V21-slip", "Planar microchannel, Maxwell slip: mass flow vs Arkilic et al.",
+                     _v21_definition(True), _v21_checks(True), form="planar"),
     "V10-pr": Case("V10-pr", "V1 nozzle at 30 bar, Peng-Robinson", _v10_definition("peng_robinson"),
                    _v1_checks_at(V10_P0)),
     "V4a": Case("V4a", "Inviscid converging nozzle, choked, sea-level plume",
@@ -947,7 +1053,7 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18", "V19")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18", "V19", "V21")
 V15_MASS_TOLERANCE = 1e-3  # V7's: the same solver, mesh and equations, reached two ways
 V15_THRUST_TOLERANCE = 2e-3
 V14_MASS_TOLERANCE = 5e-3
@@ -1069,6 +1175,8 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
                 results.append(run_validation_case(npr, quality, out, processors, on_event))
         elif name == "V18":
             results.append(virial_check(once("V10-perfect"), once("V10-virial")))
+        elif name == "V21":
+            results.append(v21_check(once("V21-noslip", "planar"), once("V21-slip", "planar")))
         elif name == "V19":
             # The same on rhoCentralFoam: the virial gas in internal-energy
             # form, as the density-based solver needs.

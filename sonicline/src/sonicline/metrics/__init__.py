@@ -396,8 +396,9 @@ def verdict(defn: d.SimulationDefinition, status: str, mesh_ok: bool, mesh_warni
                     f"the gas is rarefied: Knudsen number {rare['max']:.3g} ({where}) is in the "
                     "transition regime, where the Navier-Stokes equations fail; continuum CFD is not a "
                     "prediction here (DSMC is)")
-            elif rare["max"] > rarefaction.SLIP_WARNING and not isinstance(defn.flow.turbulence, d.Inviscid):
-                # (an inviscid run's walls slip already)
+            elif (rare["max"] > rarefaction.SLIP_WARNING and not isinstance(defn.flow.turbulence, d.Inviscid)
+                  and defn.boundaries.wall_slip is None):
+                # (an inviscid run's walls slip already; a slip-wall run models it)
                 v.warnings.append(
                     f"Knudsen number {rare['max']:.3g} ({where}) is in the slip regime: the gas slips "
                     "along the walls, which the no-slip CFD leaves out, so wall friction and heat "

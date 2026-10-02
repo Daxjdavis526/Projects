@@ -32,6 +32,7 @@ from ..core.validate import Severity, has_errors, resolve_profile, validate
 from ..foam import case as foam_case
 from ..foam import parse
 from ..mesh import revolved, sizing
+from ..core import rarefaction
 from ..metrics import Trust, condensation, propulsion, recovery_factor, shock_location, verdict
 from ..post import results
 from . import convergence, gates
@@ -514,6 +515,9 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                 metrics["condensation"] = cond
             profiles = results.axial_profiles(fields, meta, mesh.cell_centres)
             _write_json(run_dir / "profiles.json", profiles)
+            rare = rarefaction.along_nozzle(defn.gas.model(), profiles, profile)
+            if rare is not None:
+                metrics["rarefaction"] = rare
             if metrics["regime"]["shock_area_ratio"]:
                 metrics["shock"] = shock_location(profiles, profile, metrics["regime"]["shock_area_ratio"])
             if summary.viscous:

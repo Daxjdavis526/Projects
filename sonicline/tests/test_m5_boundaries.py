@@ -130,3 +130,58 @@ def test_run_p0_prefers_what_the_cfd_measured():
     assert run_p0(defn, prof, {"conditions": {"p0": 20.3e5}}) == 20.3e5
     assert run_p0(defn, prof, None) == pytest.approx(nominal_p0(defn, prof))
     json.dumps(m.dumps(defn))  # the definition still serialises
+
+
+def _slip_defn(wall=None, solver="auto", time=None):
+    d = _defn(m.ReservoirInlet(p0=20e5), wall, m.Laminar())
+    return m.SimulationDefinition(
+        name="s", geometry=d.geometry,
+        boundaries=m.Boundaries(inlet=d.boundaries.inlet, wall_thermal=d.boundaries.wall_thermal,
+                                wall_slip=m.WallSlip(accommodation=0.9)),
+        flow=m.Flow(turbulence=m.Laminar(), time=time or m.Steady()), mesh=d.mesh,
+        numerics=m.Numerics(solver=solver))
+
+
+def _wall(path) -> str:
+    """The wall patch's entry in a field file, whitespace-collapsed."""
+    import re
+
+    block = re.search(r"^\s*wall\s*\{([^}]*)\}", path.read_text(), re.M).group(1)
+    return " ".join(block.split())
+
+
+def test_slip_walls_write_maxwell_and_smoluchowski(tmp_path):
+    s = _build(tmp_path, _slip_defn(m.FixedTemperature(temperature=400.0)))
+    U = _wall(s.path / "0/U")
+    assert "type maxwellSlipU" in U and "accommodationCoeff 0.9" in U and "curvature false" in U
+    T = _wall(s.path / "0/T")
+    assert "type smoluchowskiJumpT" in T and "Twall uniform 400" in T
+    assert "librhoCentralFoam.so" in (s.path / "system/controlDict").read_text()
+    import re
+    thermo = (s.path / "constant/thermophysicalProperties").read_text()
+    assert re.search(r"transport\s*\{[^}]*\bPr\b", thermo)  # smoluchowskiJumpT reads it
+    # an adiabatic wall slips but has no temperature jump
+    a = _build(tmp_path / "a", _slip_defn())
+    assert "zeroGradient" in _wall(a.path / "0/T")
+    # no slip asked: the walls are unchanged
+    plain = _build(tmp_path / "p", _defn(m.ReservoirInlet(p0=20e5), None, m.Laminar()))
+    assert "noSlip" in (plain.path / "0/U").read_text()
+    assert "librhoCentralFoam" not in (plain.path / "system/controlDict").read_text()
+
+
+def test_slip_is_refused_where_rhocentralfoam_would_run_it(tmp_path):
+    with pytest.raises(ValueError, match="rhoPimpleFoam"):
+        _build(tmp_path, _slip_defn(solver="rhoCentralFoam"))
+    codes = {f.code: f.severity for f in validate(_slip_defn(solver="rhoCentralFoam"))}
+    from sonicline.core.validate import Severity
+    assert codes["wall.slip_solver"] is Severity.ERROR
+    assert "wall.slip_solver" not in {f.code for f in validate(_slip_defn())}
+    with pytest.raises(ValueError):
+        m.WallSlip(accommodation=0.0)
+
+
+def test_slip_round_trips_through_json():
+    d = _slip_defn()
+    back = m.loads(m.dumps(d))
+    assert back.boundaries.wall_slip == m.WallSlip(accommodation=0.9)
+    assert m.loads(m.dumps(_defn(m.ReservoirInlet(p0=20e5)))).boundaries.wall_slip is None

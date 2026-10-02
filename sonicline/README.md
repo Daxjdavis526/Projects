@@ -11,14 +11,14 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M11 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M12 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
 Every number comes with an uncertainty budget.
-Sections 10–20 of the design record what building each milestone taught.
+Sections 10–21 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -255,6 +255,8 @@ computed without the CFD.
 | E1 | **experiment:** JPL 45°–15° conical nozzle (Back, Massier and Gier, JPL TR 32-654), heated air (cp(T)) at 17.2 bar and 833 K, SST | wall p/pt at 18 taps | 13 of 13 away from the throat within 5 %; 4 of 5 near the throat within 10 % | all / one miss |
 | E2 | **experiment:** the same nozzle, air at 294 K (Cuffel, Back and Massier 1969) | Cd vs measured 0.985 | −0.74 % (0.9776) | 1 % |
 | E3 | **experiment:** unheated nitrogen, 20° and 25° cones, area ratio 50, throat Re ≈ 1800, laminar (Whalen, NASA TM-100130) | thrust coefficient F/(p_c A*) vs measured 1.51 / 1.50 | −0.31 % / +0.55 % | 5 % (the report's) |
+| E3c, E3d | **experiment:** the same nozzles at Re ≈ 458 (wall Kn 0.05–0.06), without and with wall slip | thrust coefficient vs measured 1.40 / 1.34 | no slip −3.25 % / +1.62 %; slip −4.97 % / −0.10 % | 5 % |
+| V21 | planar microchannel, 20 µm, outlet Kn 0.017: Maxwell slip vs Arkilic, Schmidt and Breuer (1997) with the streamwise momentum flux | mass flow: no slip / slip / the slip effect alone | −0.20 % / −0.04 % / +0.16 % | 0.5 % / 0.5 % / 0.3 % |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
@@ -372,6 +374,22 @@ The house rule: say plainly where the model stops.
   - The slip error is listed in the uncertainty budget, not given a
     number. E3, the low-Reynolds test, reaches 0.024 at the wall near its
     exit.
+  - **Wall slip** models the slip regime: `"wall_slip": {"accommodation":
+    1.0}` on the boundaries.
+    - It applies Maxwell's velocity slip, and Smoluchowski's temperature
+      jump on a fixed-temperature wall.
+    - It is verified against an analytical microchannel solution (V21), to
+      0.2 %.
+    - It runs on rhoPimpleFoam only. rhoCentralFoam would carry the slip
+      friction out through the wall (DESIGN.md finding 73), so a slip case
+      with a shock in the nozzle is refused.
+  - **What slip does to a nozzle.** It cuts wall friction, but it also
+    thins the boundary layer, so the gas expands further and pushes less on
+    the diverging wall. In Whalen's nozzles the second effect wins: slip
+    lowers the thrust coefficient by 0.2 % at Re 1830 and 1.8 % at Re 458.
+  - **Whether it should be on.** The test data (±5 %) cannot say which is
+    closer, so slip is opt-in. For a small, low-pressure thruster, run both
+    and treat the difference as part of the uncertainty.
 
 - **Gas.** A calorically perfect gas (cp = 1039.7 J/(kg·K), γ = 1.3995) with
   Sutherland viscosity for N₂. The theory uses the same constants.

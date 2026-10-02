@@ -29,6 +29,10 @@ def test_verification_case(name, tmp_path):
     assert result.trust != "not_trustworthy", metrics.get("verdict")
     failed = [f"{c.name}: {c.value} vs {c.reference} (tol {c.tolerance})" for c in result.checks if not c.passed]
     assert not failed, failed
+    # every run records where it stands against the continuum (M11; the
+    # first commit of it lost the line that computes this, unnoticed)
+    assert metrics["rarefaction"]["max"] > 0 and metrics["rarefaction"]["regime"] == "continuum"
+    assert set(metrics["uncertainty"]) == {"mass_flow", "thrust", "specific_impulse"}
 
 
 def test_viscous_work_extension_builds(tmp_path):
@@ -158,3 +162,12 @@ def test_surface_check_on_a_clean_stl():
     _, _, _, stl = _side_port_domain(m.TruncatedAtExit())
     crossing, log = stl_surface.self_intersection(LocalRunner(), stl, Path(tempfile.mkdtemp()))
     assert crossing is False, log[-500:]
+
+
+def test_slip_walls_run_and_conserve_energy(tmp_path):
+    # V21's no-slip / slip pair on its coarse planar channel, and E3a with
+    # slip: the viscous-work extension keeps the slip friction in the gas
+    # (DESIGN.md finding 73).
+    results = verification.run_suite(["V21"], "standard", tmp_path, 2)
+    pair = next(r for r in results if r.case == "V21")
+    assert pair.passed, [(c.name, c.value, c.reference) for c in pair.checks]

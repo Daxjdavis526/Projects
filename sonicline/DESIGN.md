@@ -2262,3 +2262,113 @@ Not done in M11:
   shock or in the far plume.
 - Sweeps in the desktop app. The CLI writes the table and plot, and each
   point's run directory opens in the app as any run does.
+
+## 21. M12 record: wall slip
+
+M11 measured where SONICLINE's no-slip walls stop being right. M12 models
+what happens there for the slip regime: Knudsen numbers from about 0.001 to
+0.1, which small cold-gas thrusters at low chamber pressure reach.
+
+Delivered:
+
+- **`"wall_slip"`** on the boundaries (`{"accommodation": 1.0,
+  "thermal_creep": true}`, off unless given):
+  - OpenFOAM's Maxwell velocity slip (`maxwellSlipU`). The slip length is
+    (2 − σ)/σ λ, with λ = μ/p √(πRT/2) and σ the accommodation coefficient
+    (1 is fully diffuse reflection, usual for machined metal).
+  - On a fixed-temperature wall, Smoluchowski's temperature jump
+    (`smoluchowskiJumpT`). An adiabatic wall has no jump.
+  - Both conditions live in rhoCentralFoam's boundary-condition library,
+    which any solver can load.
+  - The curvature term needs rhoCentralFoam's `tauMC` and is off.
+  - The jump reads a Prandtl number that Sutherland transport does not
+    carry, so SONICLINE writes the gas's own at the chamber temperature.
+- **Slip runs on rhoPimpleFoam only** (finding 73). A slip case that needs
+  rhoCentralFoam (a shock in the nozzle, a transient, or that solver asked
+  for) is a pre-flight error.
+- **The verdict and budget know about slip.** With slip modelled, the
+  slip-regime warning becomes a note. Transition (Kn > 0.1) still refuses
+  the run. The uncertainty budget lists the slip model's own error as not
+  bounded, rather than the missing slip.
+- **V21**, a verification against an analytical solution (finding 74),
+  and **E3c, E3d**, Whalen's measurements at Re ≈ 458, each with and
+  without slip (finding 75). All join the default list.
+- **M11's per-run Knudsen record was not in its commit.** Reverting the
+  wall-heat experiment of finding 72 with `git checkout` also reverted the
+  line in the pipeline that computes it. The verdict and the budget read a
+  field no run wrote, and nothing failed. It is restored, and the OpenFOAM
+  tier now asserts it on every CI run.
+
+Findings:
+
+73. **With slip, OpenFOAM's energy equation drains the gas through the
+    wall.** The viscous work across a wall face is τ·U, zero at a no-slip
+    wall and τ·u_slip with slip. The energy equation counts it as work done
+    on the wall.
+    - At a still, adiabatic wall that sliding friction is heat that must
+      stay in the gas, but it left. E3a with slip lost 2.6 % of its total
+      temperature (294.6 K → 287.0 K), and its thrust fell 1.4 %.
+    - SONICLINE's viscous-work term (M1) now carries no flux across a wall.
+      That changes nothing with no slip, where U = 0 there. With slip, E3a's
+      exit total temperature is within 0.06 K of the no-slip run's.
+    - rhoCentralFoam builds its own viscous work from face velocities, which
+      SONICLINE cannot change. That is why slip is restricted to
+      rhoPimpleFoam.
+74. **V21: Maxwell slip in a microchannel, against Arkilic, Schmidt and
+    Breuer (1997).** Planar channel, 20 µm high and 25 heights long,
+    300 K walls, 36 kPa to 20 kPa; outlet Kn 0.017, Mach about 0.3. The
+    reference is applied between 20 % and 90 % of the length, with the
+    CFD's own pressures there.
+    - The formula gives the whole pressure drop to friction. At this
+      channel's Re·H/L of 0.75, accelerating the gas takes 4 % of the drop,
+      so the CFD read 4.2 % (no slip) and 4.5 % (slip) below it.
+    - With the streamwise momentum flux added (same model, profile factor
+      6/5, flatter with slip; `core.theory.microchannel`):
+
+      | run | CFD vs reference |
+      |---|---|
+      | no slip vs compressible Poiseuille | −0.20 % |
+      | slip vs Arkilic | −0.04 % |
+      | the slip effect, the no-slip run's error removed | +0.16 % (tolerance 0.3 %) |
+
+    - Slip adds about 7 % to the flow here. The CFD gets that increment
+      right to 2 % of itself.
+    - Only the coarse preset converges. The 100-height channel (Mach 0.1)
+      and the standard mesh of this one did not: SONICLINE's steady
+      settings, tuned for transonic nozzles, handle slow internal flow
+      poorly. That is a limit on slow flows generally, not on slip.
+75. **Whalen at Re ≈ 458: slip changes thrust by less than the test can
+    see.** Thrust coefficient F/(p_c A*), CFD against table IV:
+
+    | case | Re | no slip | slip | measured |
+    |---|---|---|---|---|
+    | E3a, 20° | 1830 | 1.5053 (−0.31 %) | 1.5028 (−0.48 %) | 1.51 |
+    | E3b, 25° | 1848 | 1.5082 (+0.55 %) | 1.5042 (+0.28 %) | 1.50 |
+    | E3c, 20° | 458 | 1.3545 (−3.25 %) | 1.3304 (−4.97 %) | 1.40 |
+    | E3d, 25° | 458 | 1.3617 (+1.62 %) | 1.3387 (−0.10 %) | 1.34 |
+
+    - Wall Kn reaches 0.05–0.06 at Re 458, against 0.026 at Re 1830.
+    - Slip lowers C_T every time, by 0.2–1.8 %. It cuts the wall friction
+      (6 % less viscous drag on E3a), but it also thins the displacement
+      layer: the core expands further, the pressure on the diverging wall
+      falls, and that loss is the larger one. (Thermal creep contributes
+      nothing measurable.)
+    - Against the tests, slip helps E3d and hurts E3c. The tests put the 20°
+      nozzle 4.5 % above the 25° at Re 458, where the CFD puts them within
+      0.5 % of each other, slip or not. That spread is inside the stated 5 %
+      error. These data cannot choose between slip and no slip, and slip
+      stays opt-in.
+    - At Re 458 the exit total temperature reads 0.44–0.58 % low without
+      slip, and 0.61–0.82 % with it. The runs are trusted with that warning.
+      It is the viscous-work discretisation in a layer that fills half the
+      nozzle, not the wall, and it costs about a quarter of a percent in
+      exhaust velocity.
+
+Not done in M12:
+
+- Slip on rhoCentralFoam (finding 73), so slip and a shock in the nozzle
+  cannot be modelled together.
+- Second-order slip and the Knudsen layer, which matter from Kn about 0.1:
+  transition still needs DSMC.
+- A rarefied-nozzle measurement precise enough to test slip. Whalen's 5 %
+  is not.

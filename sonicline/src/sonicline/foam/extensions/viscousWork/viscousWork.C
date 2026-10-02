@@ -6,6 +6,7 @@
 #include "viscousWork.H"
 #include "fvMatrices.H"
 #include "fvcDiv.H"
+#include "wallFvPatch.H"
 #include "turbulentFluidThermoModel.H"
 #include "basicThermo.H"
 #include "addToRunTimeSelectionTable.H"
@@ -58,7 +59,22 @@ void Foam::fv::viscousWork::addSup
 
     // tau & U with tau = -devRhoReff, integrated over each cell's faces.
     const volVectorField tauU(-(turb.devRhoReff() & U));
-    eqn += fvc::div(fvc::interpolate(tauU) & mesh_.Sf());
+    surfaceScalarField work(fvc::interpolate(tauU) & mesh_.Sf());
+
+    // No work crosses a stationary wall. With no slip U = 0 there and this
+    // changes nothing; with velocity slip the face carries tau & U_slip,
+    // which would leave the gas as work on the wall. At a still wall that
+    // sliding friction is dissipated where the gas meets it and stays in the
+    // gas (SONICLINE DESIGN.md finding 73: with it removed, slip cost E3a
+    // 2.6 % of its total temperature through an adiabatic wall).
+    forAll(mesh_.boundary(), patchi)
+    {
+        if (isA<wallFvPatch>(mesh_.boundary()[patchi]))
+        {
+            work.boundaryFieldRef()[patchi] = Zero;
+        }
+    }
+    eqn += fvc::div(work);
 }
 
 

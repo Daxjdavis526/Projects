@@ -303,9 +303,12 @@ def budgets(defn: d.SimulationDefinition, profile: Profile | None, metrics: dict
         # number does not say (core.rarefaction).
         for k in ("thrust", "specific_impulse"):
             out[k].unquantified.append(
+                f"rarefaction: Knudsen number up to {kn:.2g} near the wall; first-order slip walls model "
+                "it, and their own error (second order in Kn) is not bounded here"
+                if defn.boundaries.wall_slip is not None else
                 f"rarefaction: Knudsen number up to {kn:.2g} near the wall; no-slip walls overstate the "
-                "friction there (by about 8 Kn of it in tube flow), so thrust reads low by an amount "
-                "not bounded here")
+                "friction there (by about 8 Kn of it in tube flow) and the slip effect on thrust is "
+                "not bounded here (wall slip models it)")
     if isinstance(defn.flow.time, d.Transient):
         for k in QUANTITIES:
             out[k].unquantified.append("transient: the values are the end state's; the budget is for that state")
