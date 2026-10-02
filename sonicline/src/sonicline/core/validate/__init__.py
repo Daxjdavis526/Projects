@@ -17,11 +17,12 @@ import enum
 import math
 from dataclasses import dataclass
 
-from .. import realgas
+from .. import rarefaction, realgas
 from ..model.definition import (
     CadFile,
     ConicalNozzle,
     FixedTemperature,
+    Inviscid,
     KOmegaSST,
     Laminar,
     MassFlowInlet,
@@ -190,6 +191,7 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
         perf = nozzle.analyse(gas, p0, T0, pa, profile.throat_area, profile.area(profile.x_exit))
         _regime_findings(gas, perf, p0, pa, profile, exit_domain, add)
         _condensation_findings(gas, perf, add)
+        _rarefaction_findings(gas, perf, p0, T0, profile, add, defn)
         _turbulence_findings(defn, gas, p0, T0, profile, add)
     elif isinstance(exit_domain, TruncatedAtExit) and pa > 0.0:
         add(Finding(Severity.WARNING, "domain.truncated_unchecked",
@@ -333,6 +335,56 @@ def _condensation_findings(gas, perf, add) -> None:
         add(Finding(Severity.INFO, "gas.condensation_margin",
                     f"Exit static temperature {perf.exit_temperature:.1f} K is {margin:.0f} K above "
                     f"saturation{approx}."))
+
+
+def _rarefaction_findings(gas, perf, p0, T0, profile, add, defn=None) -> None:
+    """Knudsen number at the throat and the exit by quasi-1D (core.rarefaction),
+    and the slip walls' own conditions."""
+    slip = defn is not None and defn.boundaries.wall_slip is not None
+    if slip:
+        if isinstance(defn.flow.turbulence, Inviscid):
+            add(Finding(Severity.WARNING, "wall.slip_inviscid",
+                        "Wall slip is set on an inviscid run, whose walls slip freely already: it is ignored."))
+        elif (defn.numerics.solver == "rhoCentralFoam" or isinstance(defn.flow.time, Transient)
+              or perf.regime is nozzle.Regime.SHOCK_IN_NOZZLE):
+            add(Finding(Severity.ERROR, "wall.slip_solver",
+                        "Wall slip runs only on rhoPimpleFoam, and this case needs rhoCentralFoam (a "
+                        "shock inside the nozzle, a transient, or it was asked for). rhoCentralFoam's "
+                        "energy equation would carry the slip friction out through the wall.",
+                        "Run without slip, or as a steady run without a shock in the nozzle."))
+    g = gas.gamma
+    p_star = p0 * (2.0 / (g + 1.0)) ** (g / (g - 1.0))
+    T_star = T0 * 2.0 / (g + 1.0)
+    kn_t = rarefaction.knudsen(gas, p_star, T_star, 2.0 * profile.throat_radius)
+    kn_e = (rarefaction.knudsen(gas, perf.exit_pressure, perf.exit_temperature, 2.0 * profile.exit_radius)
+            if perf.exit_pressure > 0 and perf.exit_temperature > 0 else 0.0)
+    worst = max(kn_t, kn_e)
+    where = "throat" if kn_t >= kn_e else "exit"
+    if worst > rarefaction.TRANSITION:
+        add(Finding(Severity.ERROR, "flow.rarefied",
+                    f"Knudsen number about {worst:.2g} at the {where} (quasi-1D): the gas is in the "
+                    "transition regime, where continuum CFD does not apply.",
+                    "Raise the chamber pressure or enlarge the nozzle; or model it with DSMC."))
+    elif worst > rarefaction.SLIP_WARNING and slip:
+        add(Finding(Severity.INFO, "flow.slip_modelled",
+                    f"Knudsen number about {worst:.2g} at the {where} (quasi-1D): slip flow, modelled by "
+                    "the first-order slip walls this run has."))
+    elif worst > rarefaction.SLIP_WARNING:
+        add(Finding(Severity.WARNING, "flow.slip",
+                    f"Knudsen number about {worst:.2g} at the {where} (quasi-1D): slip flow. The CFD's "
+                    "no-slip walls overstate friction and heat transfer there; thrust and Cd read low.",
+                    "A larger nozzle or a higher chamber pressure lowers it."))
+    elif worst > rarefaction.CONTINUUM:
+        if slip:
+            add(Finding(Severity.INFO, "flow.knudsen",
+                        f"Knudsen number about {worst:.1g} at the {where} (quasi-1D): first-order slip "
+                        "walls model the slip there."))
+            return
+        add(Finding(Severity.INFO, "flow.knudsen",
+                    f"Knudsen number about {worst:.1g} at the {where} (quasi-1D, on the axis): the "
+                    "edge of the slip regime. No-slip walls overstate the wall friction by roughly "
+                    f"{800 * worst:.0f} % there; the hotter gas at the wall runs higher, and the run "
+                    "reports it."))
 
 
 def _turbulence_findings(defn, gas, p0, T0, profile, add) -> None:

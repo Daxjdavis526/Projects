@@ -95,7 +95,10 @@ class Draft:
             defn = model.loads(json.dumps(self.data))
         except model.DefinitionError as e:
             return Assessment(None, str(e))
-        profile = resolve_profile(defn) or self.cad_profile
+        try:
+            profile = resolve_profile(defn) or self.cad_profile
+        except ValueError as e:  # parses, but describes no nozzle (an expansion ratio below 1)
+            return Assessment(None, str(e))
         a = Assessment(defn, None, profile, validate(defn, profile))
         # The prediction uses the gas the run will (cp at the chamber
         # temperature for a heated gas); the definition stays as written.

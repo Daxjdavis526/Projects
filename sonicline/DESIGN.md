@@ -2165,6 +2165,214 @@ Not done in M10:
 - The budget's estimates come from the verification cases. A case far from
   them (a different gas, a shocked nozzle, a large plume domain) should run
   `sonicline study` for a measured discretisation term.
-- Rarefaction is not modelled. At E3's conditions the Knudsen number is
-  about 10⁻³ at both the throat and the exit, and slip is negligible; below
-  Re of a few hundred it is not.
+- Rarefaction is not modelled. M10 said E3's Knudsen number was about
+  10⁻³ and slip negligible. That holds on the axis (7×10⁻⁴ at the throat,
+  2.5×10⁻³ at the exit) but not at the wall near the exit, where it reaches
+  0.024 (M11, finding 71).
+
+## 20. M11 record: design sweeps, and where the continuum ends
+
+M11 points SONICLINE at designing thrusters rather than checking one. It
+also adds the first check on whether the continuum model applies at all,
+which small cold-gas thrusters can leave behind.
+
+Delivered:
+
+- **`sonicline sweep`** (`run/sweep.py`). One definition over a grid of
+  parameters, each axis a dotted path into the definition and its values
+  as a definition writes them
+  (`--set "boundaries.inlet.p0=5 bar,10 bar,20 bar" --set
+  "geometry.expansion_ratio=2,4,8"`).
+  - Every point is built through the desktop editor's draft. It is
+    therefore parsed, validated and given the quasi-1D prediction exactly as
+    a definition file is.
+  - An invalid point is listed and not run. A misspelt path, which makes
+    every point invalid the same way, stops the sweep.
+  - `--predict` runs no CFD: quasi-1D with the Kliegel–Levine Cd and the
+    regime of each point (over-expanded, shock in nozzle), in seconds, to
+    choose the points worth a CFD run.
+  - Output: `sweep.md`, `sweep.csv` and `sweep.json`, plus `sweep.png`
+    (thrust and Isp against the first axis, one line per value of the
+    others) when matplotlib is installed. Values given with units are
+    plotted at their parsed SI values.
+  - Each CFD point carries its run's uncertainty budget and verdict. A point
+    that is not trustworthy stays in the table, marked, and is left out of
+    the plot: a sweep is read as a trend, and a bad point draws a false one.
+- **Rarefaction** (`core/rarefaction.py`). The Knudsen number is the
+  hard-sphere mean free path (Bird 1994, eq. 4.52, written with the gas's
+  viscosity) over the local diameter.
+  - Every run evaluates it along the axis and the wall rows of its
+    profiles (`metrics.json` → `rarefaction`).
+  - The pre-flight check estimates it at the throat and the exit by
+    quasi-1D.
+  - Above 0.01 (slip), a viscous run warns. An inviscid run's walls slip
+    already, so it gets no slip warning.
+  - Above 0.1 (transition), the run is not trustworthy and the pre-flight
+    check is an error.
+  - The uncertainty budget lists slip as not bounded. A local maximum of Kn
+    does not say how much of the drag it touches.
+- **A definition that describes no nozzle** (an expansion ratio below 1, for
+  instance) parsed, then raised while the profile was built. The desktop
+  editor would have crashed on it. It is now the draft's error, like any
+  other invalid definition.
+- **V13** gets a mass-conservation tolerance of its own (finding 72).
+
+Findings:
+
+71. **E3's wall is in the slip regime.** Kn on E3a's axis is 7×10⁻⁴ at the
+    throat and 2.5×10⁻³ at the exit, but 0.024 in the hot, thin gas against
+    the wall near the exit. M10 called slip negligible there; it is not, at
+    the wall.
+    - First-order slip in fully developed tube flow carries about 8 Kn more
+      flow at the same pressure drop. So no-slip may overstate the friction
+      in E3's last few millimetres by up to about 20 %, where the shear is
+      already small.
+    - E3's thrust coefficient agrees with the test to 0.3–0.6 %. The slip
+      error is inside that, or offset by something else; nothing here
+      separates the two. Slip walls (Maxwell's velocity slip and
+      Smoluchowski's temperature jump, both in OpenFOAM's rhoCentralFoam
+      boundary-condition library) would, and are the
+      next step for thrusters this small.
+    - The mean free path reproduces Bird's 59 nm for nitrogen at 273 K and
+      1 atm (59.7 nm).
+72. **V13 conserved mass to 10⁻⁴ only while it stopped early.** The first
+    complete nightly run with finding 69's stopping rule failed V13's mass
+    check: 2.1×10⁻⁴ against 10⁻⁴. Run locally to 14,000 iterations:
+    - the inlet mass flow is steady to 10⁻⁶ from 1500 iterations on;
+    - the exit stays 0.7–2.9×10⁻⁴ low in every 1000-iteration window (mean
+      1.9×10⁻⁴), and the wall heat wanders ±1 % about 0.325 W.
+    - The earlier passes (2×10⁻⁵) were stops at about 1700 iterations, a
+      lucky phase.
+    - Monitoring the wall heat as a convergence integral was tried and
+      dropped. It never settles to 10⁻⁴, so V13 would always fail, and the
+      energy balance V13 exists to check holds to 10⁻⁵–9×10⁻⁴ (tolerance
+      2×10⁻³) whichever phase the run stops in.
+    - V13's mass tolerance is now 5×10⁻⁴: above every window measured,
+      below the solver's own 10⁻³ criterion, as V4b's 3×10⁻⁴ is. Its
+      convergence criterion follows (2.5×10⁻⁴, judged at twice that). The
+      suite's tight 2×10⁻⁵ can never hold for it: in the next nightly V13
+      ran to its last iteration and was refused as not converged, at
+      2.1×10⁻⁴. The
+      deficit is unexplained. The adiabatic laminar E3, also cut off at its
+      exit, conserves mass to 5×10⁻⁶. The likely cause is the outflow
+      condition across a boundary layer the 450 K wall has thickened, and
+      it is open.
+
+Not done in M11:
+
+- Slip walls. The check says where they are needed; the CFD does not have
+  them.
+- The gradient-length Knudsen number, which finds breakdown inside a thin
+  shock or in the far plume.
+- Sweeps in the desktop app. The CLI writes the table and plot, and each
+  point's run directory opens in the app as any run does.
+
+## 21. M12 record: wall slip
+
+M11 measured where SONICLINE's no-slip walls stop being right. M12 models
+what happens there for the slip regime: Knudsen numbers from about 0.001 to
+0.1, which small cold-gas thrusters at low chamber pressure reach.
+
+Delivered:
+
+- **`"wall_slip"`** on the boundaries (`{"accommodation": 1.0,
+  "thermal_creep": true}`, off unless given):
+  - OpenFOAM's Maxwell velocity slip (`maxwellSlipU`). The slip length is
+    (2 − σ)/σ λ, with λ = μ/p √(πRT/2) and σ the accommodation coefficient
+    (1 is fully diffuse reflection, usual for machined metal).
+  - On a fixed-temperature wall, Smoluchowski's temperature jump
+    (`smoluchowskiJumpT`). An adiabatic wall has no jump.
+  - Both conditions live in rhoCentralFoam's boundary-condition library,
+    which any solver can load.
+  - The curvature term needs rhoCentralFoam's `tauMC` and is off.
+  - The jump reads a Prandtl number that Sutherland transport does not
+    carry, so SONICLINE writes the gas's own at the chamber temperature.
+- **Slip runs on rhoPimpleFoam only** (finding 73). A slip case that needs
+  rhoCentralFoam (a shock in the nozzle, a transient, or that solver asked
+  for) is a pre-flight error.
+- **The verdict and budget know about slip.** With slip modelled, the
+  slip-regime warning becomes a note. Transition (Kn > 0.1) still refuses
+  the run. The uncertainty budget lists the slip model's own error as not
+  bounded, rather than the missing slip.
+- **V21**, a verification against an analytical solution (finding 74),
+  and **E3c, E3d**, Whalen's measurements at Re ≈ 458, each with and
+  without slip (finding 75). All join the default list.
+- **M11's per-run Knudsen record was not in its commit.** Reverting the
+  wall-heat experiment of finding 72 with `git checkout` also reverted the
+  line in the pipeline that computes it. The verdict and the budget read a
+  field no run wrote, and nothing failed. It is restored, and the OpenFOAM
+  tier now asserts it on every CI run.
+
+Findings:
+
+73. **With slip, OpenFOAM's energy equation drains the gas through the
+    wall.** The viscous work across a wall face is τ·U, zero at a no-slip
+    wall and τ·u_slip with slip. The energy equation counts it as work done
+    on the wall.
+    - At a still, adiabatic wall that sliding friction is heat that must
+      stay in the gas, but it left. E3a with slip lost 2.6 % of its total
+      temperature (294.6 K → 287.0 K), and its thrust fell 1.4 %.
+    - SONICLINE's viscous-work term (M1) now carries no flux across a wall.
+      That changes nothing with no slip, where U = 0 there. With slip, E3a's
+      exit total temperature is within 0.06 K of the no-slip run's.
+    - rhoCentralFoam builds its own viscous work from face velocities, which
+      SONICLINE cannot change. That is why slip is restricted to
+      rhoPimpleFoam.
+74. **V21: Maxwell slip in a microchannel, against Arkilic, Schmidt and
+    Breuer (1997).** Planar channel, 20 µm high and 25 heights long,
+    300 K walls, 36 kPa to 20 kPa; outlet Kn 0.017, Mach about 0.3. The
+    reference is applied between 20 % and 90 % of the length, with the
+    CFD's own pressures there.
+    - The formula gives the whole pressure drop to friction. At this
+      channel's Re·H/L of 0.75, accelerating the gas takes 4 % of the drop,
+      so the CFD read 4.2 % (no slip) and 4.5 % (slip) below it.
+    - With the streamwise momentum flux added (same model, profile factor
+      6/5, flatter with slip; `core.theory.microchannel`):
+
+      | run | CFD vs reference |
+      |---|---|
+      | no slip vs compressible Poiseuille | −0.20 % |
+      | slip vs Arkilic | −0.04 % |
+      | the slip effect, the no-slip run's error removed | +0.16 % (tolerance 0.3 %) |
+
+    - Slip adds about 7 % to the flow here. The CFD gets that increment
+      right to 2 % of itself.
+    - Only the coarse preset converges. The 100-height channel (Mach 0.1)
+      and the standard mesh of this one did not: SONICLINE's steady
+      settings, tuned for transonic nozzles, handle slow internal flow
+      poorly. That is a limit on slow flows generally, not on slip.
+75. **Whalen at Re ≈ 458: slip changes thrust by less than the test can
+    see.** Thrust coefficient F/(p_c A*), CFD against table IV:
+
+    | case | Re | no slip | slip | measured |
+    |---|---|---|---|---|
+    | E3a, 20° | 1830 | 1.5053 (−0.31 %) | 1.5028 (−0.48 %) | 1.51 |
+    | E3b, 25° | 1848 | 1.5082 (+0.55 %) | 1.5042 (+0.28 %) | 1.50 |
+    | E3c, 20° | 458 | 1.3545 (−3.25 %) | 1.3304 (−4.97 %) | 1.40 |
+    | E3d, 25° | 458 | 1.3617 (+1.62 %) | 1.3387 (−0.10 %) | 1.34 |
+
+    - Wall Kn reaches 0.05–0.06 at Re 458, against 0.026 at Re 1830.
+    - Slip lowers C_T every time, by 0.2–1.8 %. It cuts the wall friction
+      (6 % less viscous drag on E3a), but it also thins the displacement
+      layer: the core expands further, the pressure on the diverging wall
+      falls, and that loss is the larger one. (Thermal creep contributes
+      nothing measurable.)
+    - Against the tests, slip helps E3d and hurts E3c. The tests put the 20°
+      nozzle 4.5 % above the 25° at Re 458, where the CFD puts them within
+      0.5 % of each other, slip or not. That spread is inside the stated 5 %
+      error. These data cannot choose between slip and no slip, and slip
+      stays opt-in.
+    - At Re 458 the exit total temperature reads 0.44–0.58 % low without
+      slip, and 0.61–0.82 % with it. The runs are trusted with that warning.
+      It is the viscous-work discretisation in a layer that fills half the
+      nozzle, not the wall, and it costs about a quarter of a percent in
+      exhaust velocity.
+
+Not done in M12:
+
+- Slip on rhoCentralFoam (finding 73), so slip and a shock in the nozzle
+  cannot be modelled together.
+- Second-order slip and the Knudsen layer, which matter from Kn about 0.1:
+  transition still needs DSMC.
+- A rarefied-nozzle measurement precise enough to test slip. Whalen's 5 %
+  is not.

@@ -299,11 +299,30 @@ WallThermal = Adiabatic | FixedTemperature
 
 
 @dataclass(frozen=True)
+class WallSlip:
+    """First-order rarefied-gas wall conditions (core.rarefaction): Maxwell
+    velocity slip, and on a fixed-temperature wall Smoluchowski temperature
+    jump. ``accommodation`` is the fraction of molecules reflected diffusely
+    (1: fully diffuse, usual for engineering surfaces; smoother surfaces
+    slip more). ``thermal_creep`` adds the slip driven by the temperature
+    gradient along the wall. For the slip regime, Knudsen numbers up to about
+    0.1; it runs on rhoPimpleFoam."""
+
+    accommodation: float = 1.0
+    thermal_creep: bool = True
+
+    def __post_init__(self) -> None:
+        if not 0.0 < self.accommodation <= 1.0:
+            raise ValueError("the accommodation coefficient must lie in (0, 1]")
+
+
+@dataclass(frozen=True)
 class Boundaries:
     inlet: Inlet
     ambient: Ambient = Ambient()
     exit_domain: ExitDomain = Plume()
     wall_thermal: WallThermal = Adiabatic()
+    wall_slip: WallSlip | None = None  # no slip unless given
 
 
 # --------------------------------------------------------------------------

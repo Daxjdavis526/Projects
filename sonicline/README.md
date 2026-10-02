@@ -11,14 +11,14 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M10 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M12 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
 Every number comes with an uncertainty budget.
-Sections 10–19 of the design record what building each milestone taught.
+Sections 10–21 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -33,6 +33,8 @@ sonicline run    nozzle.json --processors 4    # mesh, solve, post-process, judg
 sonicline run    nozzle.json --resume          # continue a killed run from its last write
 sonicline extract body.step                    # a solid body's gas passage, as a STEP volume
 sonicline study  nozzle.json --processors 4    # three meshes: grid-convergence index
+sonicline sweep  nozzle.json --set "boundaries.inlet.p0=5 bar,10 bar,20 bar" \
+                 --set "geometry.expansion_ratio=2,4,8" --predict   # design grid, quasi-1D in seconds
 sonicline report runs/nozzle                   # PDF, PNG and JSON report of a run
 sonicline verify                               # verification cases vs analytical theory
 ```
@@ -144,6 +146,35 @@ with the reasons. A run that did not converge, whose mesh failed its gates,
 or whose inviscid Cd exceeds the theoretical bound is never presented as a
 result.
 
+### Design sweeps
+
+`sonicline sweep` runs one definition over a grid of values. Each axis is a
+dotted path into the definition with its values, written as the definition
+writes them. Start with `--predict` (quasi-1D theory, in seconds) to see the
+trends and the regime of each point. Then run the CFD on the points that
+matter:
+
+```
+sonicline sweep thruster.json --set "boundaries.inlet.p0=15 bar,20 bar" --processors 4
+```
+
+| p0 | mass flow [g/s] | thrust [N] | Isp [s] | verdict |
+|---|---|---|---|---|
+| 15 bar | 10.756 ± 0.066 (1D 10.75) | 6.037 ± 0.026 (1D 6.236) | 57.24 ± 0.43 (1D 58.81) | trusted with warnings |
+| 20 bar | 14.401 ± 0.11 (1D 14.33) | 8.358 ± 0.036 (1D 8.621) | 59.18 ± 0.52 (1D 60.98) | trusted with warnings |
+
+That is the reference thruster below at the coarse preset; the warnings
+are about the far plume's images. The ± is each run's uncertainty budget.
+
+The quasi-1D column has no cone-divergence or wall-friction loss, so it
+reads 3 % high in thrust. The CFD's mass flow is above it because real
+nitrogen chokes at a higher flux.
+
+The sweep writes `sweep.md`, `sweep.csv`, `sweep.json` and, with
+matplotlib, `sweep.png`: thrust and Isp against the first axis with error
+bars. A point that is not trustworthy stays in the table, marked, and is
+left out of the plot. An invalid point is listed, not run.
+
 ## The reference case: 20 bar at sea level
 
 Nitrogen at 20 bar and 300 K through a conical nozzle:
@@ -224,6 +255,8 @@ computed without the CFD.
 | E1 | **experiment:** JPL 45°–15° conical nozzle (Back, Massier and Gier, JPL TR 32-654), heated air (cp(T)) at 17.2 bar and 833 K, SST | wall p/pt at 18 taps | 13 of 13 away from the throat within 5 %; 4 of 5 near the throat within 10 % | all / one miss |
 | E2 | **experiment:** the same nozzle, air at 294 K (Cuffel, Back and Massier 1969) | Cd vs measured 0.985 | −0.74 % (0.9776) | 1 % |
 | E3 | **experiment:** unheated nitrogen, 20° and 25° cones, area ratio 50, throat Re ≈ 1800, laminar (Whalen, NASA TM-100130) | thrust coefficient F/(p_c A*) vs measured 1.51 / 1.50 | −0.31 % / +0.55 % | 5 % (the report's) |
+| E3c, E3d | **experiment:** the same nozzles at Re ≈ 458 (wall Kn 0.05–0.06), without and with wall slip | thrust coefficient vs measured 1.40 / 1.34 | no slip −3.25 % / +1.62 %; slip −4.97 % / −0.10 % | 5 % |
+| V21 | planar microchannel, 20 µm, outlet Kn 0.017: Maxwell slip vs Arkilic, Schmidt and Breuer (1997) with the streamwise momentum flux | mass flow: no slip / slip / the slip effect alone | −0.20 % / −0.04 % / +0.16 % | 0.5 % / 0.5 % / 0.3 % |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
@@ -325,6 +358,38 @@ is 0.16 %.
 ## What is exact and what is approximated
 
 The house rule: say plainly where the model stops.
+
+- **Continuum, no-slip walls.** SONICLINE solves the Navier–Stokes
+  equations with the gas stuck to the walls. That stops holding as the
+  molecules' mean free path becomes comparable with the nozzle: small
+  throats, low chamber pressures, and the thin gas near the exit.
+  - Every run reports the Knudsen number (mean free path over the local
+    diameter) along the axis and the wall, and the pre-flight check
+    estimates it.
+  - Above 0.01 (slip flow), a viscous run warns. The real gas slips along
+    the wall, so the CFD overstates friction and heat transfer, and thrust
+    and Cd read somewhat low.
+  - Above 0.1 (transition), the run is not trustworthy: continuum CFD does
+    not apply there, and DSMC does.
+  - The slip error is listed in the uncertainty budget, not given a
+    number. E3, the low-Reynolds test, reaches 0.024 at the wall near its
+    exit.
+  - **Wall slip** models the slip regime: `"wall_slip": {"accommodation":
+    1.0}` on the boundaries.
+    - It applies Maxwell's velocity slip, and Smoluchowski's temperature
+      jump on a fixed-temperature wall.
+    - It is verified against an analytical microchannel solution (V21), to
+      0.2 %.
+    - It runs on rhoPimpleFoam only. rhoCentralFoam would carry the slip
+      friction out through the wall (DESIGN.md finding 73), so a slip case
+      with a shock in the nozzle is refused.
+  - **What slip does to a nozzle.** It cuts wall friction, but it also
+    thins the boundary layer, so the gas expands further and pushes less on
+    the diverging wall. In Whalen's nozzles the second effect wins: slip
+    lowers the thrust coefficient by 0.2 % at Re 1830 and 1.8 % at Re 458.
+  - **Whether it should be on.** The test data (±5 %) cannot say which is
+    closer, so slip is opt-in. For a small, low-pressure thruster, run both
+    and treat the difference as part of the uncertainty.
 
 - **Gas.** A calorically perfect gas (cp = 1039.7 J/(kg·K), γ = 1.3995) with
   Sutherland viscosity for N₂. The theory uses the same constants.

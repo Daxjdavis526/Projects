@@ -37,6 +37,9 @@ from .dictwriter import Raw, write_dict, write_field
 
 PIMPLE_SOLVER = "rhoPimpleFoam"
 CENTRAL_SOLVER = "rhoCentralFoam"
+# OpenFOAM's rarefied-gas wall conditions (maxwellSlipU, smoluchowskiJumpT)
+# live in rhoCentralFoam's boundary-condition library; any solver can load it.
+SLIP_LIBRARY = "librhoCentralFoam.so"
 # Steady-state iteration limits when the definition sets none. rhoCentralFoam
 # is explicit at a Courant number of 0.1.
 DEFAULT_MAX_ITERATIONS = {PIMPLE_SOLVER: 20000, CENTRAL_SOLVER: 60000}
@@ -279,14 +282,23 @@ def build_case(
         sector = 2.0 * defn.mesh.planar_width / (PLANAR_DEPTH * profile.throat_radius)
     else:
         sector = 1.0
-    _write_constant(case, gas, viscous, viscous_work, ras, real_gas)
+    slip = defn.boundaries.wall_slip if viscous else None
+    if slip is not None and solver != PIMPLE_SOLVER:
+        # rhoCentralFoam's energy equation takes the viscous work through the
+        # wall face, which with slip drains the sliding friction out of the
+        # gas (DESIGN.md finding 73); viscousWork keeps it in for rhoPimpleFoam.
+        raise ValueError("wall slip runs only on rhoPimpleFoam")
+    _write_constant(case, gas, viscous, viscous_work, ras, real_gas,
+                    gas.prandtl(defn.boundaries.inlet.T0) if slip is not None else None)
     _write_fields(case, defn, meta, profile.exit_radius, fields, p_init, T_init, U_init,
                   k0, omega0, k_amb, omega_amb, L_mix, p0, sector)
     exit_region = _region(meta, mesh, "exit")
     throat_region = _region(meta, mesh, "throat")
     _write_system(case, defn, meta, viscous, ras, steady, p0, pa, exit_region, throat_region,
                   [lib for lib in (extension_library if viscous_work else None,
-                                   real_gas_library if defn.gas.virial else None) if lib], solver)
+                                   real_gas_library if defn.gas.virial else None,
+                                   SLIP_LIBRARY if viscous and defn.boundaries.wall_slip else None) if lib],
+                  solver)
 
     (case / "case.foam").write_text("", encoding="utf-8")
     return CaseSummary(
@@ -312,7 +324,7 @@ def build_case(
 
 
 def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bool,
-                    ras: bool, real_gas=None) -> None:
+                    ras: bool, real_gas=None, slip_prandtl: float | None = None) -> None:
     mixture: dict = {"specie": {"molWeight": gas.molar_mass},
                      "thermodynamics": {"Cp": gas.cp, "Hf": 0}}
     thermo = "hConst"
@@ -348,6 +360,10 @@ def _write_constant(case: Path, gas: PerfectGas, viscous: bool, viscous_work: bo
         mixture["equationOfState"] = {
             "B": Raw("( " + " ".join(f"{c!r}" for c in real_gas.b) + " )"),
             "C": Raw("( " + " ".join(f"{c!r}" for c in real_gas.c) + " )")}
+    if viscous and slip_prandtl is not None and "Pr" not in transport:
+        # smoluchowskiJumpT reads the Prandtl number from the transport
+        # dictionary; Sutherland transport has none of its own (and ignores it).
+        transport = {**transport, "Pr": slip_prandtl}
     mixture["transport"] = transport
     write_dict(case / "constant" / "thermophysicalProperties", "thermophysicalProperties", {
         "thermoType": {
@@ -416,11 +432,27 @@ def _write_fields(case, defn, meta, exit_radius, fields, p_init, T_init, U_init,
         return {"type": "totalPressure", "p0": Raw(f"uniform {pa}"), "psi": "thermo:psi",
                 "gamma": g, "value": Raw(f"uniform {pa}")}
 
+    slip = b.wall_slip if viscous else None
+    wall_U = {"type": "noSlip"} if viscous else {"type": "slip"}
+    wall_T = ({"type": "fixedValue", "value": Raw(f"uniform {fixed_wall_T}")}
+              if fixed_wall_T else {"type": "zeroGradient"})
+    if slip is not None:
+        # First-order rarefied-gas walls (rhoCentralFoam's boundary library,
+        # loaded by _write_system): Maxwell slip, with the slip length
+        # (2 - sigma)/sigma lambda, lambda = mu/p sqrt(pi R T / 2). The
+        # curvature term needs rhoCentralFoam's tauMC and is off.
+        wall_U = {"type": "maxwellSlipU", "accommodationCoeff": slip.accommodation,
+                  "Uwall": Raw("uniform (0 0 0)"), "thermalCreep": "true" if slip.thermal_creep else "false",
+                  "curvature": "false", "value": Raw("uniform (0 0 0)")}
+        if fixed_wall_T:
+            # An adiabatic wall has no jump: its normal gradient is zero.
+            wall_T = {"type": "smoluchowskiJumpT", "accommodationCoeff": slip.accommodation,
+                      "Twall": Raw(f"uniform {fixed_wall_T}"), "gamma": g,
+                      "value": Raw(f"uniform {fixed_wall_T}")}
     wall_types = {
-        "U": {"type": "noSlip"} if viscous else {"type": "slip"},
+        "U": wall_U,
         "p": {"type": "zeroGradient"},
-        "T": ({"type": "fixedValue", "value": Raw(f"uniform {fixed_wall_T}")}
-              if fixed_wall_T else {"type": "zeroGradient"}),
+        "T": wall_T,
         "k": {"type": "kqRWallFunction", "value": Raw(f"uniform {k0}")},
         "omega": {"type": "omegaWallFunction", "value": Raw(f"uniform {omega0}")},
         # Resolved walls (y+ ~ 1) integrate to the wall; coarser ones use
