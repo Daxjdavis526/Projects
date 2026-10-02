@@ -412,7 +412,8 @@ def plane_zone(mesh: PolyMesh, x: float) -> tuple[np.ndarray, np.ndarray]:
     return idx, ~a[idx]
 
 
-def metadata(mesh: PolyMesh, surface: DomainSurface, profile: Profile, spec: UnstructuredSpec) -> MeshMeta:
+def metadata(mesh: PolyMesh, surface: DomainSurface, profile: Profile, spec: UnstructuredSpec,
+             mesher: str = "") -> MeshMeta:
     """Axial stations with the cells nearest the axis and one wall row (the
     wall faces closest to the +y meridian), as the post-processor expects."""
     c = mesh.cell_centres
@@ -446,7 +447,7 @@ def metadata(mesh: PolyMesh, surface: DomainSurface, profile: Profile, spec: Uns
     return MeshMeta(stations=stations, throat_station=int(np.argmin(np.abs(stations - surface.x_throat))),
                     exit_station=n_noz, centreline_cells=centreline, wall_cells=wall_cells,
                     wall_first_cell_at_throat=spec.first_layer or spec.wall_cell,
-                    form=Form.UNSTRUCTURED, patches=dict(surface.kinds))
+                    form=Form.UNSTRUCTURED, patches=dict(surface.kinds), mesher=mesher)
 
 
 def finish(mesh: PolyMesh, surface: DomainSurface) -> PolyMesh:
@@ -654,7 +655,7 @@ def build(runner, work: Path, surface: DomainSurface, profile: Profile, spec: Un
             if len(attempts) > 1:
                 report.notes += [f"{a.mesher} rejected: {'; '.join(a.reasons)}" for a in attempts[:-1]]
             mesh = finish(mesh, surface)
-            return mesh, metadata(mesh, surface, profile, spec), report
+            return mesh, metadata(mesh, surface, profile, spec, report.mesher), report
         on_note(f"{mesher} mesh rejected: {'; '.join(report.reasons)}")
     raise MeshingError("no acceptable mesh: " + " | ".join(
         f"{a.mesher}: {'; '.join(a.reasons)}" for a in attempts))

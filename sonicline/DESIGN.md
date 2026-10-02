@@ -2128,6 +2128,36 @@ Findings:
     user's choice). A solver that exits non-zero without a recognised
     failure now reports its exit code and the end of its log.
 
+69. **Stopping on half a window let a slow oscillation through.** With
+    MPI fixed, the first complete nightly run marked V1 on rhoCentralFoam
+    (and with it V7) not converged. Every check passed, but the final
+    judgement found inlet mass flow drifting 1.13×10⁻⁴ over the last 1000
+    iterations, against 1×10⁻⁴. V11's separated case failed the same way.
+    - The solver was stopped once the criteria had held for half a judgement
+      window. rhoCentralFoam's slow oscillation (about 1000 iterations)
+      passes on its flat half. A different round-off on the runner put the
+      stop there, and the full window judged afterwards caught the swing.
+    - The criteria must now hold for a whole window before the stop. V1 on
+      rhoCentralFoam then runs to 37,563 iterations instead of 24,225, and
+      its final drift falls from 3.6×10⁻⁵ to 2.8×10⁻⁶: the criteria had
+      broken and reset in between, so the earlier stops were early.
+70. **Least-squares gradients were never verified on snappyHexMesh.**
+    Finding 46 made them the default on every unstructured mesh to reduce
+    cfMesh's bias. V14 (snappy) had been verified with Gauss gradients and
+    was not re-run until the nightly. With least squares its Cd read −0.42 %
+    and thrust −0.59 % against the wedge, beyond the 0.5 % tolerance. The
+    mesh and the definition were identical to M5's, and only the gradient
+    scheme differed.
+    - Each mesher now keeps the scheme it was verified with: Gauss on
+      snappyHexMesh, least squares on cfMesh (V17) and gmsh. The mesher is
+      recorded in the mesh metadata, so a continuation run rewrites the
+      same scheme.
+    - V14 is back to −0.056 % in mass flow and −0.22 % in thrust.
+    - The lesson: a default changed for one mesher must be re-verified on
+      every mesher that inherits it. The nightly run exists to catch this.
+
+The first complete nightly run passed every other case, E1 and E2 included.
+
 Not done in M10:
 
 - E3's mass-flow question stays open. A low-Reynolds-number Cd measurement

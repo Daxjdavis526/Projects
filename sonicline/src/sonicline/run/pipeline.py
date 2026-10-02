@@ -427,15 +427,15 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                                    {"time": float(inlet.time[-1]), "fraction": done / 100.0}))
                 continue
             assessment = convergence.assess(tables, criteria, wedge)
-            # Stop only once the criteria have held for half a judgement window:
-            # a slow oscillation passes a window that lands on its turning point
-            # and fails a few iterations later (DESIGN.md section 11).
+            # Stop only once the criteria have held for a whole judgement
+            # window: a slow oscillation passes a window that lands on its
+            # turning point and fails a few iterations later (DESIGN.md
+            # section 11, finding 69).
             if not assessment.converged:
                 held_since = None
             elif held_since is None:
                 held_since = assessment.iterations
-            hold = convergence.judgement_window(criteria.integral_window, assessment.iterations) // 2
-            steady = held_since is not None and assessment.iterations - held_since >= hold
+            steady = convergence.held_long_enough(held_since, assessment.iterations, criteria)
             if assessment.iterations - last_report >= 100:
                 last_report = assessment.iterations
                 emit(Event("solve", f"iteration {assessment.iterations}",

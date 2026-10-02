@@ -115,12 +115,13 @@ class MeshMeta:
     wall_first_cell_at_throat: float
     form: Form
     patches: dict[str, str] = field(default_factory=dict)
+    mesher: str = ""  # the unstructured mesher that made it ("" for the structured forms)
 
     @staticmethod
     def from_json(data: dict) -> "MeshMeta":
         return MeshMeta(np.asarray(data["stations"]), data["throat_station"], data["exit_station"],
                         data["centreline_cells"], data["wall_cells"], data["wall_first_cell_at_throat"],
-                        Form(data["form"]), dict(data.get("patches", {})))
+                        Form(data["form"]), dict(data.get("patches", {})), data.get("mesher", ""))
 
     def to_json(self) -> dict:
         return {
@@ -132,6 +133,7 @@ class MeshMeta:
             "wall_first_cell_at_throat": self.wall_first_cell_at_throat,
             "form": self.form.value,
             "patches": self.patches,
+            "mesher": self.mesher,
         }
 
 
