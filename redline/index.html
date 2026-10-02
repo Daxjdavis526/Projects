@@ -14,6 +14,16 @@
 <body>
 <div id="app"></div>
 <noscript>REDLINE needs JavaScript (ES modules).</noscript>
+<!-- three.js (vendored, r180) for the 3D cell cameras; fetched only when
+     the cameras are first opened -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/jsm/"
+  }
+}
+</script>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>

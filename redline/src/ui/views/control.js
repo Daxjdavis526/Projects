@@ -35,9 +35,10 @@ export class ControlView {
     const tabHead = h('div.ph', this.viewTabs, h('span.sp'), h('span.sub', `${S.def.article} · ${S.def.fictional === false ? 'CUSTOM HARDWARE' : 'FICTIONAL'}`));
     this.pidWrap = h('div.pid-wrap');
     this.standWrap = h('div.stand-wrap.hidden');
-    const stage = h('div', { style: { position: 'relative', flex: '1', minHeight: 0, display: 'flex' } }, this.pidWrap, this.standWrap);
+    this.cellWrap = h('div.cell-wrap.hidden');
+    const stage = h('div', { style: { position: 'relative', flex: '1', minHeight: 0, display: 'flex' } }, this.pidWrap, this.standWrap, this.cellWrap);
     top.append(tabHead, stage);
-    for (const [k, lbl] of [['pid', 'Schematic'], ['stand', 'Test cell (CCTV)']]) this.viewTabs.append(h('button', { dataset: { k }, onclick: () => this.showStage(k) }, lbl));
+    for (const [k, lbl] of [['pid', 'Schematic'], ['stand', 'Test cell (CCTV)'], ['cell', 'Cameras (3D)']]) this.viewTabs.append(h('button', { dataset: { k }, onclick: () => this.showStage(k) }, lbl));
     const plotsP = h('div.panel.center-plots');
     const logP = h('div.panel.center-log');
     root.append(h('div.col', top, plotsP, logP));
@@ -86,7 +87,20 @@ export class ControlView {
     S.controller.on('abortComplete', a => setTimeout(() => { if (app.session === S && !a.reset) whatHappened(app, a); }, 1500));
     S.controller.on('sequence', e => {
       if (e.state === 'COUNTDOWN' && this.plots.axis.live && this.plots.axis.window > 10) this.plots.axis.setWindow(10);
+      // the cameras: the countdown brings up the fire view (a setting)
+      if (e.state === 'COUNTDOWN' && store.data.settings.autoCam !== false) this.ensureCell().then(c => c?.onSequence(e.state));
+      else this.cell?.onSequence(e.state);
     });
+  }
+
+  /* The 3D cameras load three.js on first use. */
+  ensureCell() {
+    if (!this._cellP) {
+      this._cellP = import('../cell/cellview.js')
+        .then(m => { if (this.dead) return null; this.cell = new m.CellView(this.cellWrap, this.app); this.cell.setVisible(this.stage === 'cell'); return this.cell; })
+        .catch(err => { console.error(err); this.cellWrap.textContent = 'The 3D cameras could not be loaded.'; return null; });
+    }
+    return this._cellP;
   }
 
   showStage(k) {
@@ -94,6 +108,9 @@ export class ControlView {
     for (const b of this.viewTabs.children) b.classList.toggle('on', b.dataset.k === k);
     this.pidWrap.classList.toggle('hidden', k !== 'pid');
     this.standWrap.classList.toggle('hidden', k !== 'stand');
+    this.cellWrap.classList.toggle('hidden', k !== 'cell');
+    if (k === 'cell') this.ensureCell().then(c => c?.setVisible(true));
+    else this.cell?.setVisible(false);
   }
 
   _timeRef() {
@@ -117,6 +134,7 @@ export class ControlView {
     const S = this.app.session;
     this.every('pid', 66, () => { if (this.stage === 'pid') this.pid.update(); });
     this.every('stand', 50, () => { if (this.stage === 'stand') this.stand.update(); });
+    if (this.cell && (this.stage === 'cell' || this.cell.full)) this.cell.update(this.app.cellSt);
     this.every('ch', 120, () => this.channels.update());
     this.every('con', 150, () => this.console.update());
     this.every('fire', 100, () => this.fire.update());
@@ -127,5 +145,5 @@ export class ControlView {
     this.every('plots', 33, () => this.plots.draw(S.daq.online ? S.daq.store.tLast : S.t, t => S.daq.latest(t.id)));
   }
 
-  destroy() { this.plots.charts.forEach(c => c.destroy()); this.host.innerHTML = ''; }
+  destroy() { this.dead = true; this.cell?.destroy(); this.plots.charts.forEach(c => c.destroy()); this.host.innerHTML = ''; }
 }

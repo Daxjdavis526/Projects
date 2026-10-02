@@ -128,7 +128,7 @@ export class ReferenceView {
   standPage3() {
     const def = STANDS['TS-3'], R = def.ratings, TP = def.physics.turbopump, D = def.design;
     const el = h('div.gl-entry', { id: 'ref-__stand3' }, h('h3', 'TS-3 turbopump component stand (fictional)'));
-    el.append(h('p', 'A 300 L nitrogen bank → HV-300 → IV-301 → a header feeding two RELIEVING tank regulators (PR-410, PR-420) and the turbine drive regulator PR-330. Each 40 L run tank feeds its pump of TPA-1 through a short suction line; each pump discharges through a ball valve (DV-414 / DV-424), a turbine flowmeter and a throttle valve (FCV-418 / FCV-428) into the catch tank. The drive gas reaches the turbine through TSV-332 and leaves up the exhaust stack. The speed controller SC-330 holds the planned speed by moving PR-330\'s dome.'));
+    el.append(h('p', 'A 300 L nitrogen bank → HV-300 → IV-301 → a header feeding two RELIEVING tank regulators (PR-410, PR-420) and the turbine drive regulator PR-330. Each 60 L run tank feeds its pump of TPA-1 through a short suction line; each pump discharges through a ball valve (DV-414 / DV-424), a turbine flowmeter and a throttle valve (FCV-418 / FCV-428) into the catch tank. The drive gas reaches the turbine through TSV-332 and leaves up the exhaust stack. The speed controller SC-330 holds the planned speed by moving PR-330\'s dome.'));
     const t = h('table.metrics', { style: { maxWidth: '640px' } });
     const row = (a, b) => t.append(h('tr', h('td', a), h('td.v', b)));
     const P = x => `${fmt(x, 'pressure', 0)} ${unitLabel('pressure', true)}`;

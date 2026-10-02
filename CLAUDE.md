@@ -52,7 +52,7 @@ touching the others.
 | `propulsion/` | rocket propulsion engineering course (Markdown, no code to run beyond the example checker) |
 | `cryogenics/` | cryogenic propulsion hardware & safety course (Markdown + hand-authored SVG, browser reader) |
 | `geodesic/` | spacetime curvature & gravitational dynamics sandbox |
-| `redline/` | REDLINE — rocket test-stand operations trainer (cold-gas stand TS-1, bipropellant stand TS-2 — cold flow and hot fire, heat-sink and regeneratively cooled engines — and turbopump component stand TS-3; physics/instruments/control are DOM-free, tested headlessly: `node redline/test/*.test.mjs`) |
+| `redline/` | REDLINE — rocket test-stand operations trainer (cold-gas stand TS-1, bipropellant stand TS-2 — cold flow and hot fire, heat-sink and regeneratively cooled engines — and turbopump component stand TS-3; a 3D cell with cameras whose plume follows the running engine — three.js vendored, loaded only when the cameras open; physics/instruments/control and what the cameras are given (`src/sim/visual.js`) are DOM-free, tested headlessly: `node redline/test/*.test.mjs`; `redline/tools/cell-shots.mjs` screenshots the cameras) |
 | `peraspera/` | PER ASPERA — an animated short film, canvas-drawn and WebAudio-scored live; `test/film.test.mjs`, `tools/frames.mjs` renders frames |
 | `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (has a build step; `dist/` is committed at milestones) |
 | `strata/` | STRATA — voxel survival game in Godot 4 + C#. A desktop game, not a web page: Pages serves nothing playable from it. Windows and Linux builds come from GitHub Actions (`.github/workflows/strata.yml`) |

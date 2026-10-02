@@ -55,7 +55,7 @@ export function tpInstrumentation(def, sec = 'B') {
 export function tpFill(def, sec = 'C') {
   return { id: sec, title: 'Fill the run tanks', steps: [
     { kind: 'action', station: 'PROP', title: 'Technician: fill both tanks with water',
-      text: 'Console ▸ FACILITY ▸ Technician ▸ Fill tanks (vents open). About 36 kg each, from the catch tank.',
+      text: 'Console ▸ FACILITY ▸ Technician ▸ Fill tanks (vents open). About 54 kg each, from the catch tank.',
       why: 'The water is the pumps\' load. Without it there is nothing to stop the turbine running the shaft away.',
       check: v => v.ch('WT-411') > 30 && v.ch('WT-421') > 30, focus: ['T-410', 'T-420'] },
     { kind: 'record', station: 'PROP', title: 'Record the ox-side load (WT-411), kg',

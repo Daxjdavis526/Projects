@@ -8,6 +8,7 @@ import { STANDS, PROGRAMS, MODES, findLevel } from '../content/programs.js';
 import { GLOSSARY } from '../content/glossary.js';
 import { store } from './store.js';
 import { Audio } from './audio.js';
+import { cellState, CellEvents, Tape } from '../sim/visual.js';
 import { modal, toast } from './modal.js';
 import { ControlView } from './views/control.js';
 import { TrainingView } from './views/training.js';
@@ -111,7 +112,10 @@ export class App {
     const prefix = `${def.id.replace('-', '')}-${({ coldgas: 'CG', turbopump: 'TP' })[def.program] || 'BP'}`;
     this.session = new Session({ def, scenario, mode, runPrefix: prefix, firstRun: store.data.nextRun[prefix] || 1 });
     this.level = found?.level || null;
+    this.cellEv = new CellEvents();
     const S = this.session;
+    this.tape = new Tape();
+    S.samplers.add(this.tape.sampler);
     S.audioSink = (n, d) => this.audio.play(n, n === 'valve'
       ? { ...d, pneumatic: (def.pneumaticValves || []).includes(d.id), hand: d.id === (def.bottle?.valve || 'HV-100') } : d);
     S.on('recording', e => { if (e.on) { store.data.nextRun[prefix] = S.nextRun; store.save(); } });
@@ -189,6 +193,7 @@ export class App {
       return s;
     };
     const snd = h('input', { type: 'checkbox', checked: st.sound, onchange: () => { st.sound = snd.checked; store.save(); this.audio.setEnabled(snd.checked); } });
+    const cam = h('input', { type: 'checkbox', checked: st.autoCam !== false, onchange: () => { st.autoCam = cam.checked; store.save(); } });
     const m = modal({
       title: 'Settings', narrow: true,
       body: h('div.kv', { style: { gap: '8px 16px', alignItems: 'center' } },
@@ -196,6 +201,7 @@ export class App {
         h('span.k', 'Force'), sel('force', [['N', 'N'], ['lbf', 'lbf']]),
         h('span.k', 'Temperature'), sel('temperature', [['C', '°C'], ['K', 'K'], ['F', '°F']]),
         h('span.k', 'Sound'), h('label.chk', snd, 'Test-stand sounds'),
+        h('span.k', 'Cameras'), h('label.chk', cam, 'Switch to the fire view at the countdown'),
         h('span.k', 'Stored data'), btn('Clear notebook, test history and progress…', () => {
           if (confirm('Erase the notebook, recorded test history, progress and plot layouts stored in this browser?')) {
             store.data.notebook = []; store.data.progress = {}; store.data.layouts = {}; store.data.sessionNotes = []; store.save();
@@ -222,11 +228,13 @@ export class App {
       S.advance(dt);
       if (this.current === 'control') this.views.control.update();
       this.topbar();
-      // sound follows the physical flow (the cell microphone)
-      const net = S.model.net;
-      let vent = 0;
-      for (const id of S.def.ventElements || []) vent += Math.max(0, net.el(id)?.mdot || 0);
-      this.audio.flow({ thrust: S.model.thrust ?? S.model.nozzleEl.F, vent });
+      // the cell as a camera and a microphone would have it: the 3D view
+      // draws it, the sound engine plays it
+      const st = this.cellSt = cellState(S);
+      // a replay plays its own sound at full speed; slowed down, it is silent
+      const rep = this.views.control?.cell?.replaying;
+      this.audio.cell(rep ? (rep.speed === 1 ? rep.st : null) : st);
+      for (const e of this.cellEv.update(st)) if (e.type !== 'spinup' && e.type !== 'spindown') this.audio.play(e.type, e);
     }
     // analysis works on recorded runs, session or not
     if (this.current === 'analysis') this.views.analysis.update();

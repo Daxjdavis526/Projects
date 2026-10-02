@@ -60,6 +60,7 @@ export class Session extends Emitter {
     this.inspected = new Set();
     this.flags = new Set();          // UI milestones the procedures can check (analysis opened, report filed)
     this.timers = [];
+    this.samplers = new Set();       // called every physics chunk (the cell's tape recorder)
     this.runs = [];
     this.runPrefix = runPrefix || `${def.id.replace('-', '')}-${({ coldgas: 'CG', turbopump: 'TP' })[def.program] || 'BP'}`;
     this.nextRun = firstRun;
@@ -119,6 +120,7 @@ export class Session extends Emitter {
       this.model.advance(d, t => this.daq.tick(t));
       this.t = this.model.t;
       this.controller.tick();
+      if (this.samplers.size) for (const f of this.samplers) f(this);
       this.faults.tick();
       this.alarms.evaluate(this.alarmCtx());
       if (this.timers.length) {

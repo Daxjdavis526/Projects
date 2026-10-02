@@ -264,7 +264,13 @@ water, an impulse turbine on cold nitrogen, one shaft at 36 000 rpm held by
 a speed controller — for spins, head–flow maps referred by the affinity
 laws, suction tests that drive the pumps into cavitation on purpose, and the
 runaway that follows when a pump loses its load or a speed pickup lies to
-the controller.
+the controller. Every stand can also be watched in 3D: a test site built
+from the stand's own definition, cameras in the cell, downrange and in the
+bunker, and a plume that is the engine actually running — its shock
+diamonds spaced by the jet's Mach number, separating inside the nozzle at
+low chamber pressure, sooty when the mixture runs rich — with sound from
+the same physics, a full-screen fire view at the countdown, and a
+slow-motion replay of every run.
 Fictional hardware, generalised
 procedures, and it says so. Desktop only.
 

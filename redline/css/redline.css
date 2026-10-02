@@ -237,6 +237,52 @@ label.chk { display: inline-flex; align-items: center; gap: 5px; color: var(--in
 .stand-wrap svg { width: 100%; height: 100%; display: block; }
 .cctv { position: absolute; left: 10px; top: 8px; font: 600 10px var(--mono); color: #9fb0a5; letter-spacing: .1em; text-shadow: 0 0 4px #000; pointer-events: none; }
 
+/* the 3D cell cameras and the fire view */
+.cell-wrap { position: relative; flex: 1; min-height: 0; background: #000; }
+.cell3d { position: absolute; inset: 0; background: #000; overflow: hidden; }
+.cell3d canvas { display: block; width: 100%; height: 100%; }
+.fireview { position: fixed; inset: 0; z-index: 900; background: #000; }
+.fireview .cell3d { position: absolute; inset: 0; }
+.cell3d-err { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; color: var(--ink-3); text-align: center; }
+.cell-hud { position: absolute; inset: 0; pointer-events: none; font-family: var(--mono); color: #e9ece6; text-shadow: 0 1px 3px #000, 0 0 6px #000; }
+.cell-hud button { pointer-events: auto; }
+.cell-cap { position: absolute; left: 10px; top: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .1em; color: #c5d2c8; }
+.cell-clock { position: absolute; right: 12px; top: 6px; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cell-clock.cd { color: var(--caution); } .cell-clock.run { color: var(--warning); }
+.cell-state { position: absolute; right: 12px; top: 34px; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: #aab4ad; }
+.cell-state.s-ARMED, .cell-state.s-COUNTDOWN { color: var(--caution); }
+.cell-state.s-FIRING { color: var(--warning); }
+.cell-state.s-ABORT, .cell-state.s-ABORTED { color: var(--redline); }
+.cell-read { position: absolute; left: 10px; bottom: 9px; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; max-width: 62%; }
+.cell-read em { font-style: normal; color: #93a19a; margin-right: 5px; }
+.cell-read b { font-size: 14px; font-variant-numeric: tabular-nums; }
+.cell-read i { font-style: normal; color: #93a19a; margin-left: 3px; font-size: 10px; }
+.cell-bar { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 3px; }
+.cell-bar button { background: rgba(10,13,16,.72); border: 1px solid rgba(120,135,130,.35); color: #c9d2cc; font: 700 10.5px var(--mono); padding: 3px 8px; border-radius: 3px; cursor: pointer; }
+.cell-bar button:hover { border-color: #9fb0a5; color: #fff; }
+.cell-bar button.on { background: rgba(60,75,70,.85); color: #fff; border-color: #9fb0a5; }
+.cell-close { position: absolute; left: 10px; top: 30px; background: rgba(10,13,16,.72); border: 1px solid rgba(120,135,130,.35); color: #c9d2cc; font: 700 10.5px var(--mono); padding: 4px 10px; border-radius: 3px; cursor: pointer; }
+.cell-abortwrap { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); }
+.cell-cover { background: repeating-linear-gradient(-45deg, #d9a91a 0 10px, #1d1d1d 10px 20px); color: #fff; border: 2px solid #e8c34a; font: 800 13px var(--mono); letter-spacing: .14em; padding: 12px 34px; border-radius: 6px; cursor: pointer; text-shadow: 0 0 4px #000; }
+.cell-abort { display: none; background: var(--redline); color: #fff; border: 3px solid #ff8a8d; font: 900 18px var(--mono); letter-spacing: .2em; padding: 14px 44px; border-radius: 50px; cursor: pointer; box-shadow: 0 0 22px rgba(229,72,77,.65); }
+.cell-abortwrap.open .cell-cover { display: none; }
+.cell-abortwrap.open .cell-abort { display: block; }
+.cell-clock.rep { color: #8fd3ff; }
+.cell-rep { position: absolute; right: 8px; bottom: 40px; display: flex; align-items: center; gap: 3px; }
+.cell-rep em { font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: #8fd3ff; margin-right: 4px; }
+.cell-rep .rp { display: flex; align-items: center; gap: 3px; }
+.cell-rep button { background: rgba(10,13,16,.72); border: 1px solid rgba(120,160,190,.4); color: #cfe6f5; font: 700 10.5px var(--mono); padding: 3px 7px; border-radius: 3px; cursor: pointer; }
+.cell-rep button:hover { border-color: #8fd3ff; color: #fff; }
+.fireview .cell-rep { right: 14px; bottom: 52px; }
+.fireview .cell-cap { font-size: 12.5px; top: 12px; left: 14px; }
+.fireview .cell-clock { font-size: 46px; right: 18px; top: 10px; }
+.fireview .cell-state { font-size: 13px; right: 18px; top: 66px; }
+.fireview .cell-read { left: 14px; bottom: 14px; font-size: 12px; gap: 6px 22px; }
+.fireview .cell-read b { font-size: 24px; }
+.fireview .cell-close { top: 38px; left: 14px; }
+.fireview .cell-bar { right: 14px; bottom: 14px; }
+.fireview .cell-bar button { font-size: 12px; padding: 5px 11px; }
+
 /* ---- plots ------------------------------------------------------------ */
 .plots { display: flex; flex-direction: column; flex: 1; min-height: 0; background: var(--plot-bg); }
 .plot { position: relative; flex: 1 1 0; min-height: 70px; border-bottom: 1px solid var(--line); }
