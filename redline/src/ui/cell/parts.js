@@ -392,6 +392,66 @@ export function engine({ Dt, De, regen = false, heatSink = true, ablative = fals
   return { group: g, exit: xE, throat: xT, length: xE, rOut: ro * 1.08, rFlange: rf, back: xBack - inL, body: matBody, inner: innerMat, inlets };
 }
 
+/* TPA-1: an oxidiser pump, a fuel pump and an impulse turbine on one shaft
+   (axis along x, centred at the origin's height). Each pump is a cast
+   volute — a disc casing with its scroll growing round to a tangential,
+   flanged discharge — with an axial inlet over the inducer; the turbine a
+   larger casing with its inlet torus and an exhaust collector; bolted
+   bearing housings between; feet for the skid. Returns the group and the
+   speed-pickup wheel (its stripe is what the camera sees turning). */
+export function turbopumpAssembly({ XO, XF, XT, oxColor = 0xa7b0b4, fuColor = 0xb0aa9e }) {
+  const g = new THREE.Group();
+  const cast = c => new THREE.MeshStandardMaterial({ color: c, metalness: 0.55, roughness: 0.55 });
+  const ss = MAT.stainless();
+  const volute = (x, R, col) => {
+    const v = new THREE.Group(), m = cast(col);
+    // the casing: a lathe profile, thicker at the hub
+    const prof = [new THREE.Vector2(0.03, -0.045), new THREE.Vector2(R * 0.75, -0.04), new THREE.Vector2(R, -0.02), new THREE.Vector2(R, 0.02), new THREE.Vector2(R * 0.75, 0.04), new THREE.Vector2(0.035, 0.05)];
+    const casing = mesh(new THREE.LatheGeometry(prof, 40), m, { rz: Math.PI / 2 }); v.add(casing);
+    // the scroll, three arcs of growing section, and its discharge
+    const arcs = [[0, 0.7, 0.16], [0.7, 0.7, 0.21], [1.4, 0.55, 0.26]];
+    for (const [a0, da, k] of arcs) {
+      const t = mesh(new THREE.TorusGeometry(R * (0.98 + k * 0.25), R * k, 12, 24, Math.PI * da), m, { ry: Math.PI / 2 });
+      t.rotateZ(Math.PI * a0); v.add(t);
+    }
+    v.add(mesh(new THREE.CylinderGeometry(R * 0.26, R * 0.26, R * 0.7, 16), m, { y: R * 1.15, z: R * 0.38 }));
+    v.add(mesh(new THREE.CylinderGeometry(R * 0.42, R * 0.42, 0.016, 20), ss, { y: R * 1.5, z: R * 0.38 }));
+    // the inlet: inducer housing and its flange
+    v.add(mesh(new THREE.CylinderGeometry(R * 0.32, R * 0.36, 0.09, 20), m, { x: -0.09, rz: Math.PI / 2 }));
+    v.add(mesh(new THREE.CylinderGeometry(R * 0.5, R * 0.5, 0.016, 24), ss, { x: -0.135, rz: Math.PI / 2 }));
+    v.add(boltCircle([-0.127, 0, 0], [-1, 0, 0], R * 0.42, 6, 0.008));
+    v.add(boltCircle([0.05, 0, 0], [1, 0, 0], R * 0.85, 10, 0.008, { stud: false }));
+    v.position.x = x;
+    return v;
+  };
+  g.add(volute(XO, 0.12, oxColor), volute(XF, 0.11, fuColor));
+  // the turbine: casing, inlet torus (the nozzle manifold), exhaust collector
+  const tm = cast(0x8a8f93);
+  const tprof = [new THREE.Vector2(0.03, -0.06), new THREE.Vector2(0.15, -0.055), new THREE.Vector2(0.17, -0.03), new THREE.Vector2(0.17, 0.04), new THREE.Vector2(0.13, 0.065), new THREE.Vector2(0.04, 0.07)];
+  g.add(mesh(new THREE.LatheGeometry(tprof, 44), tm, { x: XT, rz: Math.PI / 2 }));
+  g.add(mesh(new THREE.TorusGeometry(0.175, 0.032, 12, 40), ss, { x: XT - 0.035, ry: Math.PI / 2 }));
+  g.add(mesh(new THREE.CylinderGeometry(0.12, 0.09, 0.08, 28), tm, { x: XT + 0.1, rz: Math.PI / 2 }));
+  g.add(mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.16, 18), tm, { x: XT + 0.1, y: -0.12 }));            // exhaust outlet, down to the duct
+  g.add(boltCircle([XT + 0.068, 0, 0], [1, 0, 0], 0.15, 12, 0.008, { stud: false }));
+  // bearing housings between the stages, the shaft and its coupling guard
+  const bh = cast(0x6f767b);
+  for (const x of [XO + 0.17, (XF + XT) / 2 + 0.02]) {
+    g.add(mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.09, 28), bh, { x, rz: Math.PI / 2 }));
+    g.add(boltCircle([x + 0.046, 0, 0], [1, 0, 0], 0.06, 6, 0.006, { stud: false }));
+    g.add(mesh(new THREE.BoxGeometry(0.11, 0.07, 0.2), bh, { x, y: -0.09 }));                               // foot
+  }
+  g.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, XT - XO + 0.2, 18), ss, { x: (XO + XT) / 2, rz: Math.PI / 2 }));
+  g.add(mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.12, 20, 1, true), new THREE.MeshStandardMaterial({ color: 0xd8a51c, metalness: 0.3, roughness: 0.5, side: THREE.DoubleSide }), { x: (XO + XF) / 2 + 0.05, rz: Math.PI / 2 }));
+  // the speed-pickup wheel: a disc with a white stripe, and the two pickups aimed at it
+  const wheel = new THREE.Group();
+  wheel.add(mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 30), MAT.darkSteel(), { rz: Math.PI / 2 }));
+  wheel.add(mesh(new THREE.BoxGeometry(0.022, 0.06, 0.012), MAT.white(), { y: 0.035, x: 0.006 }));
+  wheel.position.set(XT - 0.24, 0, 0);
+  g.add(wheel);
+  for (const a of [0.6, 2.2]) g.add(mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.06, 8), ss, { x: XT - 0.24, y: Math.cos(a) * 0.1, z: Math.sin(a) * 0.1, rx: a }));
+  return { group: g, wheel };
+}
+
 /* People: coveralls, a hi-vis vest, boots, a hard hat with its brim. */
 export function person({ vest = 0xf26b1d } = {}) {
   const g = new THREE.Group();

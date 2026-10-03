@@ -117,13 +117,22 @@ export class Environment {
       const b = mesh(new THREE.IcosahedronGeometry(0.3 + r() * 0.5, 0), bushM, { x: Math.cos(a) * d, y: 0.2, z: Math.sin(a) * d });
       b.scale.y = 0.6; g.add(b);
     }
-    // distant hills
-    const hillM = new THREE.MeshStandardMaterial({ color: 0x8d7c66, roughness: 1, flatShading: true });
-    for (let i = 0; i < 18; i++) {
-      const a = i / 18 * Math.PI * 2 + 0.2, d = 520 + (i % 3) * 60;
-      const hh = 30 + ((i * 37) % 50);
-      const hill = mesh(new THREE.ConeGeometry(90 + (i * 13) % 60, hh, 6, 1), hillM, { x: Math.cos(a) * d, y: hh / 2 - 2, z: Math.sin(a) * d, cast: false });
-      g.add(hill);
+    // distant terrain: a ring of rolling desert hills, heights from layered
+    // noise, smooth-shaded so the fog and the low sun model them
+    {
+      const inner = 300, outer = 900, segR = 18, segA = 160;
+      const geo = new THREE.RingGeometry(inner, outer, segA, segR);
+      const pos = geo.attributes.position;
+      const nz = (x, y) => Math.sin(x * 0.011 + 1.3) * Math.cos(y * 0.013 - 0.4) + 0.5 * Math.sin(x * 0.029 - y * 0.021 + 2.1) + 0.25 * Math.cos(x * 0.061 + y * 0.047);
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), y = pos.getY(i), d = Math.hypot(x, y);
+        const t = Math.min(1, Math.max(0, (d - inner) / 220));
+        const hgt = t * (38 + 30 * nz(x, y)) * (0.6 + 0.4 * Math.sin(Math.atan2(y, x) * 3 + 0.7) ** 2);
+        pos.setZ(i, Math.max(0, hgt));
+      }
+      geo.computeVertexNormals();
+      const terrain = mesh(geo, new THREE.MeshStandardMaterial({ color: 0x9a8566, roughness: 1 }), { rx: -Math.PI / 2, y: -0.5, cast: false });
+      g.add(terrain);
     }
     // the sun, its sky light
     this.sun = new THREE.DirectionalLight(0xffffff, 2);

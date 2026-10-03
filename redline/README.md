@@ -183,7 +183,25 @@ a puff from the vent stack, people in the cell). The **Cameras (3D)** tab
 is the real thing: the test site in three dimensions, built from the stand's
 own definition — the engine turned on a lathe from its real throat and exit
 diameters, the tanks sized from their real volumes, the valves and their
-position flags where the plumbing has them — and five cameras on it:
+position flags where the plumbing has them — and five cameras on it.
+
+The hardware is modelled the way it is built. Each engine sits on a
+**flexure thrust stand**: a concrete plinth with cast-in anchors, a base of
+wide-flange beams, a gusseted thrust-takeout plate on box columns, and a
+machined cradle hung on four thin stainless flexure blades, with the load
+cell on rod ends between the cradle and the takeout. The engine's injector
+head passes through a mount plate and bolts to it by its flange; braided
+flex hoses carry the propellants onto the moving cradle; the spark plug has
+its lead. The run tanks have legs, weld seams, nozzles and a relief valve,
+and stand on checker-plate weigh scales; the gas panel carries tagged
+dome-loaded regulators with their gauges; the bottles stand chained in a
+rack; the turbopump has cast volutes, bolted flanges and bearing housings on
+a steel skid; long pipe runs sit on supports. The structural steel is real
+section shapes (I-beams, channels, box sections) and the bolts are there.
+Metal is lit by an environment map of the sky and the bay, rebuilt as the
+sun moves. `tools/stand-preview.mjs` renders a still of any stand from any
+viewpoint, headless, for working on the models.
+
 
 | camera | where |
 |---|---|

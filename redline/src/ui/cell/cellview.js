@@ -132,7 +132,9 @@ export class CellView {
         : { id: 'CAM 1', name: 'CELL', pos: V(-3.25, 3.3, 3.55), tgt: V(E.x - 0.2, 0.85, -0.6), fov: k === 'coldgas' ? 34 : 46, mic: 'camera' },
       k === 'turbopump'
         ? { id: 'CAM 2', name: 'TPA-1', pos: V(0.1, 1.45, 1.55), tgt: V(-0.1, 0.95, -0.4), fov: 40, mic: 'camera' }
-        : { id: 'CAM 2', name: 'NOZZLE', pos: V(E.x + near * 0.25, E.y + near * 0.06, near), tgt: V(E.x + near * 0.4, E.y, 0), fov: k === 'coldgas' ? 30 : 40, mic: 'camera' },
+        : k === 'coldgas'
+          ? { id: 'CAM 2', name: 'NOZZLE', pos: V(E.x - 0.02, E.y + 0.09, 0.4), tgt: V(E.x + 0.1, E.y - 0.03, 0), fov: 36, mic: 'camera' }
+          : { id: 'CAM 2', name: 'NOZZLE', pos: V(E.x + near * 0.25, E.y + near * 0.06, near), tgt: V(E.x + near * 0.4, E.y, 0), fov: 40, mic: 'camera' },
       k === 'turbopump'
         ? { id: 'CAM 3', name: 'CATCH TANK', pos: V(5.0, 2.6, 4.8), tgt: V(1.4, 1.0, 0.2), fov: 40, mic: 'camera' }
         : { id: 'CAM 3', name: 'DOWNRANGE', pos: V(E.x + (k === 'coldgas' ? 2.2 : 4.5), E.y + 0.3, k === 'coldgas' ? 0.5 : 1.0), tgt: V(E.x - 0.05, E.y, 0), fov: k === 'coldgas' ? 7 : 20, mic: 'camera' },

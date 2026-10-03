@@ -6,7 +6,7 @@
        update(st, dt, time), emit(st, dt, P) — particles, focus points }.
    The engine fires along +x. */
 import * as THREE from 'three';
-import { mesh, MAT, vessel, weighScale, bottle, gauge, tag, tube, hose, ballValve, solenoid, regulator, transducer, beam, engine } from './parts.js';
+import { mesh, MAT, vessel, weighScale, bottle, gauge, tag, tube, hose, ballValve, solenoid, regulator, transducer, beam, engine, turbopumpAssembly } from './parts.js';
 import { label, concrete, hazard } from './textures.js';
 import { member, iSection, rhsSection, plate, gusset, bolts, boltCircle, boltGrid } from './structure.js';
 
@@ -195,6 +195,51 @@ function feedHoses(g, E, x0, y, oxOut, fuOut, r) {
   }
 }
 
+/* The turbopump's skid: channel rails on the floor with cross members,
+   two pedestals of box section with a machined top plate under each
+   bearing foot, gusseted, bolted down. */
+function tpaSkid(g, xa, xb, z, yAxis, feet) {
+  const frame = paintFrame(), primer = paintPrimer(), al = alu();
+  for (const dz of [-0.22, 0.22]) g.add(member(iSection(0.1, 0.1, 0.006, 0.009), [xa, 0.05, z + dz], [xb, 0.05, z + dz], primer));
+  for (const x of [xa + 0.05, xb - 0.05]) g.add(member(iSection(0.1, 0.1, 0.006, 0.009), [x, 0.05, z - 0.17], [x, 0.05, z + 0.17], primer));
+  const top = yAxis - 0.125;
+  for (const x of feet) {
+    for (const dz of [-0.13, 0.13]) g.add(member(rhsSection(0.08, 0.08, 0.006), [x, 0.1, z + dz], [x, top - 0.02, z + dz], frame));
+    const tp = plate({ w: 0.2, h: 0.36, t: 0.02, mat: al, rc: 0.01 }); tp.rotation.x = -Math.PI / 2; tp.position.set(x, top - 0.01, z); g.add(tp);
+    for (const dz of [-0.13, 0.13]) { const gs = gusset({ a: 0.12, b: 0.2, t: 0.01, mat: frame }); gs.rotation.y = -Math.PI / 2; gs.position.set(x, 0.1, z + dz + Math.sign(dz) * 0.04); g.add(gs); }
+    g.add(boltGrid([x, top, z], [0, 1, 0], [1, 0, 0], [0, 0, 1], 0.12, 0.28, 2, 2, 0.01));
+  }
+  const anchors = [];
+  for (const x of [xa + 0.05, xb - 0.05]) for (const dz of [-0.22, 0.22]) anchors.push([x, 0.1, z + dz]);
+  g.add(bolts(anchors, [0, 1, 0], 0.014));
+}
+
+/* A pipe run: the tubing, and a support under every long, low horizontal
+   stretch (a box-section post on a base plate with a U-clamp) — pipe does
+   not float. Runs on the back wall (the panel) need none. */
+const supMat = () => new THREE.MeshStandardMaterial({ color: 0x6d7276, metalness: 0.4, roughness: 0.55 });
+function run(points, opts = {}) {
+  const grp = new THREE.Group();
+  grp.add(tube(points, opts));
+  const r = opts.r ?? 0.0127, m = supMat();
+  for (let i = 1; i < points.length; i++) {
+    const A = new THREE.Vector3(...points[i - 1]), B = new THREE.Vector3(...points[i]);
+    const L = A.distanceTo(B);
+    if (L < 0.9 || Math.abs(A.y - B.y) > 0.02 || A.y > 2.4 || A.y < 0.12 || Math.max(A.z, B.z) < -3.7) continue;
+    const n = Math.floor(L / 1.1);
+    for (let k = 1; k <= n; k++) {
+      const P = A.clone().lerp(B, k / (n + 1)), h = P.y - r - 0.006;
+      grp.add(mesh(new THREE.BoxGeometry(0.04, h, 0.04), m, { x: P.x, y: h / 2, z: P.z }));
+      grp.add(mesh(new THREE.BoxGeometry(0.12, 0.008, 0.12), m, { x: P.x, y: 0.004, z: P.z }));
+      const dir = B.clone().sub(A).normalize();
+      const clamp = mesh(new THREE.TorusGeometry(r + 0.003, 0.003, 6, 16, Math.PI), MAT.steel(), { x: P.x, y: P.y, z: P.z });
+      clamp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir); grp.add(clamp);
+      grp.add(mesh(new THREE.BoxGeometry(Math.abs(dir.x) > 0.5 ? 0.03 : r * 2 + 0.03, 0.01, Math.abs(dir.z) > 0.5 ? 0.03 : r * 2 + 0.03), m, { x: P.x, y: h + 0.001, z: P.z }));
+    }
+  }
+  return grp;
+}
+
 function makePeopleSpots(map) { return task => (map[task] || map.default).map(p => p.clone()); }
 
 /* ---- TS-1 (and custom cold-gas stands) -------------------------------- */
@@ -216,12 +261,15 @@ export function buildColdGas(def) {
   // fire valve right behind it, the feed line from the panel
   const sv = solenoid({ size: 1.4 }); sv.position.set(exitX - bodyL * 0.35 - bodyL - 0.06, y, 0); g.add(sv);
   thrustStand(g, exitX - bodyL * 0.35 - bodyL - 0.15, y, bodyL + 0.15, Math.max(bodyR, 0.04));
-  g.add(tube([[-4.2, 1.35, -4.08], [-3.4, 1.35, -4.0], [-3.4, 1.35, -0.6], [-1.0, 1.35, -0.6], [-1.0, y, -0.2], [sv.position.x - 0.05, y, 0]], { r: 0.0048 }));
+  const xTO = exitX - bodyL * 0.35 - bodyL - 0.15 - 0.46;                 // the thrust takeout plate
+  g.add(run([[-4.2, 1.35, -4.08], [-3.4, 1.35, -4.0], [-3.4, 1.35, -0.6], [-1.0, 1.35, -0.6], [xTO - 0.12, y + 0.25, -0.42]], { r: 0.0048 }));
+  // a flex hose round the takeout and onto the cradle, into the fire valve
+  g.add(hose([[xTO - 0.12, y + 0.25, -0.42], [xTO + 0.15, y + 0.22, -0.4], [sv.position.x - 0.12, y + 0.04, -0.12], [sv.position.x - 0.05, y, 0]], { r: 0.006 }));
   const pt = transducer(); pt.position.set(-1.0, 1.35, -0.6); g.add(pt);
   // bottle, its hand valve, the panel
   const [b] = bottles(g, 1, -7.4, -3.6);
   const hv = handValve(); hv.position.set(-7.4, b.userData.top + 0.03, -3.6); g.add(hv);
-  g.add(tube([[-7.4, b.userData.top + 0.05, -3.6], [-7.4, 1.9, -3.8], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0048 }));
+  g.add(run([[-7.4, b.userData.top + 0.05, -3.6], [-7.4, 1.9, -3.8], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0048 }));
   const P = gasPanel(g, -4.7, [{ id: 'IV-101', pneumatic: true }, { id: 'PR-101', kind: 'reg' }, { id: 'F-201', kind: 'reg' }, { id: 'VV-101', kind: 'sol' }, { id: 'VV-201', kind: 'sol' }]);
   const valves = { 'HV-100': hv, 'SV-301': sv, ...P };
   const exit = V3(exitX + 0.0005, y, 0);
@@ -259,19 +307,19 @@ export function buildBiprop(def) {
   const mov = ballValve({ size: 1.2 }), mfv = ballValve({ size: 1.2 });
   mov.position.set(x0 - 0.65, y + 0.18, -0.35); mfv.position.set(x0 - 0.65, y - 0.18, -0.35);
   g.add(mov, mfv);
-  g.add(tube([[-3.3, 0.35, -2.75], [-3.3, 0.35, -1.2], [x0 - 1.2, 0.35, -1.2], [x0 - 1.2, y + 0.18, -0.35], [x0 - 0.72, y + 0.18, -0.35]], { r: 0.0095 }));
+  g.add(run([[-3.3, 0.35, -2.75], [-3.3, 0.35, -1.2], [x0 - 1.2, 0.35, -1.2], [x0 - 1.2, y + 0.18, -0.35], [x0 - 0.72, y + 0.18, -0.35]], { r: 0.0095 }));
   feedHoses(g, E, x0, y, [x0 - 0.58, y + 0.18, -0.35], [x0 - 0.58, y - 0.18, -0.35], 0.0095);
-  g.add(tube([[-1.9, 0.35, -2.75], [-1.9, 0.25, -1.0], [x0 - 1.0, 0.25, -1.0], [x0 - 1.0, y - 0.18, -0.35], [x0 - 0.72, y - 0.18, -0.35]], { r: 0.0095 }));
+  g.add(run([[-1.9, 0.35, -2.75], [-1.9, 0.25, -1.0], [x0 - 1.0, 0.25, -1.0], [x0 - 1.0, y - 0.18, -0.35], [x0 - 0.72, y - 0.18, -0.35]], { r: 0.0095 }));
   // purge valves and their lines
   const pv1 = solenoid(), pv2 = solenoid();
   pv1.position.set(x0 - 0.4, y + 0.36, -0.2); pv2.position.set(x0 - 0.4, y - 0.36, -0.2); g.add(pv1, pv2);
   // bottle and panel
   const [b] = bottles(g, 1, -7.4, -3.6);
   const hv = handValve(); hv.position.set(-7.4, b.userData.top + 0.03, -3.6); g.add(hv);
-  g.add(tube([[-7.4, b.userData.top + 0.05, -3.6], [-7.4, 1.9, -3.8], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0063 }));
+  g.add(run([[-7.4, b.userData.top + 0.05, -3.6], [-7.4, 1.9, -3.8], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0063 }));
   const P = gasPanel(g, -4.7, [{ id: 'IV-601' }, { id: 'PR-610', kind: 'reg' }, { id: 'PR-620', kind: 'reg' }, { id: 'PR-630', kind: 'reg' }, { id: 'VV-601', kind: 'sol' }]);
-  g.add(tube([[-3.7, 1.35, -4.08], [-3.3, 1.35, -3.6], [-3.3, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
-  g.add(tube([[-3.7, 1.25, -4.08], [-1.9, 1.25, -3.6], [-1.9, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  g.add(run([[-3.7, 1.35, -4.08], [-3.3, 1.35, -3.6], [-3.3, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  g.add(run([[-3.7, 1.25, -4.08], [-1.9, 1.25, -3.6], [-1.9, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
   const valves = { 'HV-600': hv, 'MOV-713': mov, 'MFV-723': mfv, 'PV-631': pv1, 'PV-632': pv2, 'VV-711': tanks.oxV, 'VV-721': tanks.fuV, ...P };
   const exit = V3(exitX, y, 0);
   const hotC = new THREE.Color();
@@ -310,7 +358,7 @@ export function buildTurbopump(def) {
   // nitrogen bank: six K-bottles
   bottles(g, 6, -7.5, -3.65);
   const hv = handValve(); hv.position.set(-7.2, 1.5, -3.5); g.add(hv);
-  g.add(tube([[-7.2, 1.5, -3.5], [-7.0, 1.9, -3.9], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0095 }));
+  g.add(run([[-7.2, 1.5, -3.5], [-7.0, 1.9, -3.9], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0095 }));
   const P = gasPanel(g, -4.7, [{ id: 'IV-301' }, { id: 'PR-410', kind: 'reg' }, { id: 'PR-420', kind: 'reg' }, { id: 'PR-330', kind: 'reg' }, { id: 'VV-301', kind: 'sol' }]);
   // run tanks
   const tanks = {};
@@ -322,39 +370,17 @@ export function buildTurbopump(def) {
     g.add(v); tanks[id] = v;
     const vv = solenoid({ size: 1.1 }); vv.position.copy(v.userData.ventAt).add(v.position); g.add(vv); tanks[id + 'V'] = vv;
   });
-  g.add(tube([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
-  g.add(tube([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
-  // TPA-1 on its pedestal: ox pump, fuel pump, turbine on one shaft (as on the P&ID)
-  const tpa = new THREE.Group();
+  g.add(run([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  g.add(run([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  // TPA-1 on its skid: ox pump, fuel pump, turbine on one shaft (as on the P&ID)
   const XO = -0.7, XF = -0.15, XT = 0.45;
-  g.add(mesh(new THREE.BoxGeometry(1.8, y - 0.16, 0.6), new THREE.MeshStandardMaterial({ map: null, color: 0x7d7f7c, roughness: 0.9 }), { x: -0.1, y: (y - 0.16) / 2, z: -0.4 }));
-  const volute = (x, r, col) => {
-    const v = new THREE.Group();
-    v.add(mesh(new THREE.CylinderGeometry(r, r, 0.08, 32), new THREE.MeshStandardMaterial({ color: col, metalness: 0.6, roughness: 0.4 }), { rz: Math.PI / 2 }));
-    v.add(mesh(new THREE.TorusGeometry(r * 0.95, r * 0.22, 12, 32, Math.PI * 1.6), new THREE.MeshStandardMaterial({ color: col, metalness: 0.6, roughness: 0.4 }), { ry: Math.PI / 2 }));
-    v.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.14, 14), MAT.stainless(), { x: -0.09, rz: Math.PI / 2 }));       // inlet
-    v.add(mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.16, 12), MAT.stainless(), { y: r * 0.9, z: 0.06, rx: 0.3 }));  // discharge
-    v.position.set(x, 0, 0);
-    return v;
-  };
-  tpa.add(volute(XO, 0.12, 0x9fa8ad), volute(XF, 0.11, 0xa8a49a));
-  // turbine: a bigger disc housing with its inlet manifold
-  tpa.add(mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.1, 36), MAT.steel(), { x: XT, rz: Math.PI / 2 }));
-  tpa.add(mesh(new THREE.TorusGeometry(0.17, 0.03, 10, 36), MAT.stainless(), { x: XT - 0.03, ry: Math.PI / 2 }));
-  // shaft, bearings, coupling guard
-  tpa.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, XT - XO + 0.2, 18), MAT.stainless(), { x: (XO + XT) / 2, rz: Math.PI / 2 }));
-  for (const x of [XO + 0.17, XT - 0.15]) tpa.add(mesh(new THREE.BoxGeometry(0.1, 0.12, 0.14), MAT.darkSteel(), { x, y: -0.02 }));
-  // the speed-pickup wheel: a disc with a white stripe the camera sees turning
-  const wheel = new THREE.Group();
-  wheel.add(mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 30), MAT.darkSteel(), { rz: Math.PI / 2 }));
-  wheel.add(mesh(new THREE.BoxGeometry(0.022, 0.06, 0.012), MAT.white(), { y: 0.035, x: 0.006 }));
-  wheel.position.set(XT - 0.24, 0, 0);
-  tpa.add(wheel);
+  tpaSkid(g, XO - 0.3, XT + 0.35, -0.4, y, [XO + 0.17, (XF + XT) / 2 + 0.02]);
+  const { group: tpa, wheel } = turbopumpAssembly({ XO, XF, XT });
   tpa.position.set(0, y, -0.4);
   g.add(tpa);
   // suction lines from the tank bottoms into the pump inlets
-  g.add(tube([[-3.4, 0.3, -2.75], [-3.4, 0.3, -0.4], [XO - 0.4, 0.3, -0.4], [XO - 0.4, y, -0.4], [XO - 0.16, y, -0.4]], { r: 0.022 }));
-  g.add(tube([[-2.0, 0.22, -2.75], [-2.0, 0.22, -1.2], [XF - 0.35, 0.22, -1.2], [XF - 0.35, y, -0.4], [XF - 0.16, y, -0.4]], { r: 0.022 }));
+  g.add(run([[-3.4, 0.3, -2.75], [-3.4, 0.3, -0.4], [XO - 0.4, 0.3, -0.4], [XO - 0.4, y, -0.4], [XO - 0.16, y, -0.4]], { r: 0.022 }));
+  g.add(run([[-2.0, 0.22, -2.75], [-2.0, 0.22, -1.2], [XF - 0.35, 0.22, -1.2], [XF - 0.35, y, -0.4], [XF - 0.16, y, -0.4]], { r: 0.022 }));
   // discharge: valves and throttles, then down into the catch tank
   const dv = { ox: ballValve({ size: 1.3 }), fu: ballValve({ size: 1.3 }) };
   const fcv = { ox: ballValve({ size: 1.1 }), fu: ballValve({ size: 1.1 }) };
@@ -362,9 +388,9 @@ export function buildTurbopump(def) {
   [['ox', XO, 1.55], ['fu', XF, 1.4]].forEach(([id, x, yy]) => {
     dv[id].position.set(x + 0.4, yy, 0.6); fcv[id].position.set(x + 1.6, yy, 0.6);
     g.add(dv[id], fcv[id]);
-    g.add(tube([[x, y + 0.13, -0.33], [x, yy, -0.2], [x, yy, 0.6], [x + 0.33, yy, 0.6]], { r: 0.016 }));
-    g.add(tube([[x + 0.47, yy, 0.6], [x + 1.53, yy, 0.6]], { r: 0.016 }));
-    g.add(tube([[x + 1.67, yy, 0.6], [CT.x - 0.2 + (id === 'ox' ? -0.1 : 0.1), yy, CT.z - 0.1], [CT.x - 0.2 + (id === 'ox' ? -0.1 : 0.1), 1.2, CT.z - 0.1]], { r: 0.016 }));
+    g.add(run([[x, y + 0.13, -0.33], [x, yy, -0.2], [x, yy, 0.6], [x + 0.33, yy, 0.6]], { r: 0.016 }));
+    g.add(run([[x + 0.47, yy, 0.6], [x + 1.53, yy, 0.6]], { r: 0.016 }));
+    g.add(run([[x + 1.67, yy, 0.6], [CT.x - 0.2 + (id === 'ox' ? -0.1 : 0.1), yy, CT.z - 0.1], [CT.x - 0.2 + (id === 'ox' ? -0.1 : 0.1), 1.2, CT.z - 0.1]], { r: 0.016 }));
   });
   // catch tank
   const ct = new THREE.Group();
@@ -375,10 +401,10 @@ export function buildTurbopump(def) {
   // turbine drive line and exhaust stack
   const tsv = ballValve({ size: 1.3 }); tsv.position.set(XT + 0.1, 2.1, -1.8); g.add(tsv);
   const vv338 = solenoid(); vv338.position.set(XT - 0.5, 2.1, -2.4); g.add(vv338);
-  g.add(tube([[-3.7, 1.15, -4.08], [-1.0, 1.15, -3.6], [-1.0, 2.1, -2.4], [XT + 0.03, 2.1, -1.8]], { r: 0.0095 }));
-  g.add(tube([[XT + 0.17, 2.1, -1.8], [XT + 0.3, 2.1, -1.8], [XT + 0.3, y + 0.05, -0.62], [XT - 0.03, y, -0.58]], { r: 0.0127 }));
+  g.add(run([[-3.7, 1.15, -4.08], [-1.0, 1.15, -3.6], [-1.0, 2.1, -2.4], [XT + 0.03, 2.1, -1.8]], { r: 0.0095 }));
+  g.add(run([[XT + 0.17, 2.1, -1.8], [XT + 0.3, 2.1, -1.8], [XT + 0.3, y + 0.05, -0.62], [XT - 0.03, y, -0.58]], { r: 0.0127 }));
   const stackX = 1.6, stackZ = -2.4;
-  g.add(tube([[XT + 0.05, y - 0.05, -0.42], [XT + 0.5, y - 0.05, -0.42], [stackX, y - 0.05, stackZ], [stackX, 4.6, stackZ]], { r: 0.045, mat: MAT.steel() }));
+  g.add(run([[XT + 0.05, y - 0.05, -0.42], [XT + 0.5, y - 0.05, -0.42], [stackX, y - 0.05, stackZ], [stackX, 4.6, stackZ]], { r: 0.045, mat: MAT.steel() }));
   const stackTop = V3(stackX, 4.65, stackZ);
   const valves = { 'HV-300': hv, 'DV-414': dv.ox, 'DV-424': dv.fu, 'FCV-418': fcv.ox, 'FCV-428': fcv.fu, 'TSV-332': tsv, 'VV-338': vv338, 'VV-413': tanks.oxV, 'VV-423': tanks.fuV, ...P };
   let ang = 0;
@@ -419,7 +445,7 @@ export function buildGG(def) {
   // the bank and the gas panel
   bottles(g, 6, -7.5, -3.65);
   const hv = handValve(); hv.position.set(-7.2, 1.5, -3.5); g.add(hv);
-  g.add(tube([[-7.2, 1.5, -3.5], [-7.0, 1.9, -3.9], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0095 }));
+  g.add(run([[-7.2, 1.5, -3.5], [-7.0, 1.9, -3.9], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0095 }));
   const P = gasPanel(g, -4.7, [{ id: 'IV-301' }, { id: 'PR-410', kind: 'reg' }, { id: 'PR-420', kind: 'reg' }, { id: 'PR-330', kind: 'reg' }, { id: 'PR-630', kind: 'reg' }]);
   // run tanks on their scales
   const tanks = {};
@@ -431,31 +457,12 @@ export function buildGG(def) {
     g.add(v); tanks[id] = v;
     const vv = solenoid({ size: 1.1 }); vv.position.copy(v.userData.ventAt).add(v.position); g.add(vv); tanks[id + 'V'] = vv;
   });
-  g.add(tube([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
-  g.add(tube([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
-  // TPA-1 on its pedestal behind the engine: ox pump, fuel pump, turbine
+  g.add(run([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  g.add(run([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  // TPA-1 on its skid behind the engine: ox pump, fuel pump, turbine
   const yT = 0.95, zT = -1.3, XO = -1.9, XF = -1.35, XT = -0.75;
-  const tpa = new THREE.Group();
-  g.add(mesh(new THREE.BoxGeometry(1.8, yT - 0.16, 0.6), new THREE.MeshStandardMaterial({ color: 0x7d7f7c, roughness: 0.9 }), { x: (XO + XT) / 2, y: (yT - 0.16) / 2, z: zT }));
-  const volute = (x, r, col) => {
-    const v = new THREE.Group();
-    v.add(mesh(new THREE.CylinderGeometry(r, r, 0.08, 32), new THREE.MeshStandardMaterial({ color: col, metalness: 0.6, roughness: 0.4 }), { rz: Math.PI / 2 }));
-    v.add(mesh(new THREE.TorusGeometry(r * 0.95, r * 0.22, 12, 32, Math.PI * 1.6), new THREE.MeshStandardMaterial({ color: col, metalness: 0.6, roughness: 0.4 }), { ry: Math.PI / 2 }));
-    v.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.14, 14), MAT.stainless(), { x: -0.09, rz: Math.PI / 2 }));
-    v.add(mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.16, 12), MAT.stainless(), { y: r * 0.9, z: 0.06, rx: 0.3 }));
-    v.position.set(x, 0, 0);
-    return v;
-  };
-  tpa.add(volute(XO, 0.12, 0x9fa8ad), volute(XF, 0.11, 0xa8a49a));
-  tpa.add(mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.1, 36), MAT.steel(), { x: XT, rz: Math.PI / 2 }));
-  tpa.add(mesh(new THREE.TorusGeometry(0.17, 0.03, 10, 36), MAT.stainless(), { x: XT - 0.03, ry: Math.PI / 2 }));
-  tpa.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, XT - XO + 0.2, 18), MAT.stainless(), { x: (XO + XT) / 2, rz: Math.PI / 2 }));
-  for (const x of [XO + 0.17, XT - 0.15]) tpa.add(mesh(new THREE.BoxGeometry(0.1, 0.12, 0.14), MAT.darkSteel(), { x, y: -0.02 }));
-  const wheel = new THREE.Group();
-  wheel.add(mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 30), MAT.darkSteel(), { rz: Math.PI / 2 }));
-  wheel.add(mesh(new THREE.BoxGeometry(0.022, 0.06, 0.012), MAT.white(), { y: 0.035, x: 0.006 }));
-  wheel.position.set(XT - 0.24, 0, 0);
-  tpa.add(wheel);
+  tpaSkid(g, XO - 0.3, XT + 0.35, zT, yT, [XO + 0.17, (XF + XT) / 2 + 0.02]);
+  const { group: tpa, wheel } = turbopumpAssembly({ XO, XF, XT });
   // the gas generator: a small can on the turbine's inlet manifold; its
   // steel goes dull red when it has been burning a while
   const ggMat = new THREE.MeshStandardMaterial({ color: 0x8c9296, metalness: 0.75, roughness: 0.4, emissive: 0x000000 });
@@ -469,24 +476,24 @@ export function buildGG(def) {
   tpa.position.set(0, yT, zT);
   g.add(tpa);
   // suction lines from the tank bottoms
-  g.add(tube([[-3.4, 0.3, -2.75], [-3.4, 0.3, zT], [XO - 0.4, 0.3, zT], [XO - 0.4, yT, zT], [XO - 0.16, yT, zT]], { r: 0.022 }));
-  g.add(tube([[-2.0, 0.22, -2.75], [-2.0, 0.22, -2.0], [XF - 0.35, 0.22, -2.0], [XF - 0.35, yT, zT], [XF - 0.16, yT, zT]], { r: 0.022 }));
+  g.add(run([[-3.4, 0.3, -2.75], [-3.4, 0.3, zT], [XO - 0.4, 0.3, zT], [XO - 0.4, yT, zT], [XO - 0.16, yT, zT]], { r: 0.022 }));
+  g.add(run([[-2.0, 0.22, -2.75], [-2.0, 0.22, -2.0], [XF - 0.35, 0.22, -2.0], [XF - 0.35, yT, zT], [XF - 0.16, yT, zT]], { r: 0.022 }));
   // the main lines: pump discharges → main valves → the injector
   const mov = ballValve({ size: 1.2 }), mfv = ballValve({ size: 1.2 });
   mov.position.set(x0 - 0.55, y + 0.2, -0.32); mfv.position.set(x0 - 0.55, y - 0.2, -0.32);
   g.add(mov, mfv);
-  g.add(tube([[XO, yT + 0.13, zT + 0.07], [XO, y + 0.2, zT + 0.3], [XO, y + 0.2, -0.32], [x0 - 0.62, y + 0.2, -0.32]], { r: 0.0127 }));
+  g.add(run([[XO, yT + 0.13, zT + 0.07], [XO, y + 0.2, zT + 0.3], [XO, y + 0.2, -0.32], [x0 - 0.62, y + 0.2, -0.32]], { r: 0.0127 }));
   feedHoses(g, E, x0, y, [x0 - 0.48, y + 0.2, -0.32], [x0 - 0.48, y - 0.2, -0.32], 0.0127);
-  g.add(tube([[XF, yT + 0.12, zT + 0.07], [XF, y - 0.2, zT + 0.3], [XF, y - 0.2, -0.32], [x0 - 0.62, y - 0.2, -0.32]], { r: 0.0127 }));
+  g.add(run([[XF, yT + 0.12, zT + 0.07], [XF, y - 0.2, zT + 0.3], [XF, y - 0.2, -0.32], [x0 - 0.62, y - 0.2, -0.32]], { r: 0.0127 }));
   // the gas generator's taps: thin lines from the discharges to the can
   const gov = ballValve({ size: 0.8 }), gfv = ballValve({ size: 0.8 });
   const ggX = XT + 0.02, ggY = yT + 0.3;
   gov.position.set(ggX - 0.25, ggY - 0.1, zT + 0.18); gfv.position.set(ggX - 0.25, ggY - 0.22, zT + 0.18);
   g.add(gov, gfv);
-  g.add(tube([[XO, y + 0.2, zT + 0.3], [ggX - 0.45, ggY - 0.1, zT + 0.18], [ggX - 0.3, ggY - 0.1, zT + 0.18]], { r: 0.004 }));
-  g.add(tube([[ggX - 0.2, ggY - 0.1, zT + 0.18], [ggX - 0.04, ggY - 0.05, zT + 0.04]], { r: 0.004 }));
-  g.add(tube([[XF, y - 0.2, zT + 0.3], [ggX - 0.45, ggY - 0.22, zT + 0.18], [ggX - 0.3, ggY - 0.22, zT + 0.18]], { r: 0.004 }));
-  g.add(tube([[ggX - 0.2, ggY - 0.22, zT + 0.18], [ggX - 0.04, ggY - 0.1, zT + 0.04]], { r: 0.004 }));
+  g.add(run([[XO, y + 0.2, zT + 0.3], [ggX - 0.45, ggY - 0.1, zT + 0.18], [ggX - 0.3, ggY - 0.1, zT + 0.18]], { r: 0.004 }));
+  g.add(run([[ggX - 0.2, ggY - 0.1, zT + 0.18], [ggX - 0.04, ggY - 0.05, zT + 0.04]], { r: 0.004 }));
+  g.add(run([[XF, y - 0.2, zT + 0.3], [ggX - 0.45, ggY - 0.22, zT + 0.18], [ggX - 0.3, ggY - 0.22, zT + 0.18]], { r: 0.004 }));
+  g.add(run([[ggX - 0.2, ggY - 0.22, zT + 0.18], [ggX - 0.04, ggY - 0.1, zT + 0.04]], { r: 0.004 }));
   // purge valves at the engine and at the gas generator
   const pv1 = solenoid(), pv2 = solenoid(), pv5 = solenoid();
   pv1.position.set(x0 - 0.35, y + 0.38, -0.2); pv2.position.set(x0 - 0.35, y - 0.38, -0.2); pv5.position.set(ggX + 0.12, ggY + 0.22, zT);
@@ -494,11 +501,11 @@ export function buildGG(def) {
   // start gas: from the panel through TSV-332 into the top of the gas generator
   const tsv = ballValve({ size: 1.3 }); tsv.position.set(ggX - 0.1, 2.1, -1.9); g.add(tsv);
   const vv338 = solenoid(); vv338.position.set(ggX - 0.7, 2.1, -2.4); g.add(vv338);
-  g.add(tube([[-3.7, 1.15, -4.08], [-1.6, 1.15, -3.6], [-1.6, 2.1, -2.4], [ggX - 0.17, 2.1, -1.9]], { r: 0.0095 }));
-  g.add(tube([[ggX - 0.03, 2.1, -1.9], [ggX, 2.1, -1.9], [ggX, ggY + 0.2, zT], [ggX, ggY + 0.15, zT]], { r: 0.0127 }));
+  g.add(run([[-3.7, 1.15, -4.08], [-1.6, 1.15, -3.6], [-1.6, 2.1, -2.4], [ggX - 0.17, 2.1, -1.9]], { r: 0.0095 }));
+  g.add(run([[ggX - 0.03, 2.1, -1.9], [ggX, 2.1, -1.9], [ggX, ggY + 0.2, zT], [ggX, ggY + 0.15, zT]], { r: 0.0127 }));
   // the turbine exhaust duct, up the back wall to the berm side of the roof
   const stackX = 0.35, stackZ = -2.6;
-  g.add(tube([[XT + 0.05, yT - 0.05, zT - 0.02], [XT + 0.5, yT - 0.05, zT - 0.02], [stackX, yT - 0.05, stackZ], [stackX, 3.4, stackZ]], { r: 0.05, mat: MAT.steel() }));
+  g.add(run([[XT + 0.05, yT - 0.05, zT - 0.02], [XT + 0.5, yT - 0.05, zT - 0.02], [stackX, yT - 0.05, stackZ], [stackX, 3.4, stackZ]], { r: 0.05, mat: MAT.steel() }));
   const stackTop = V3(stackX, 3.45, stackZ);
   const valves = { 'HV-300': hv, 'MOV-414': mov, 'MFV-424': mfv, 'GOV-416': gov, 'GFV-426': gfv, 'TSV-332': tsv, 'VV-338': vv338,
     'PV-631': pv1, 'PV-632': pv2, 'PV-635': pv5, 'VV-413': tanks.oxV, 'VV-423': tanks.fuV, ...P };
