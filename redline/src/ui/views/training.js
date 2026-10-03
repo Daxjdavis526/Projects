@@ -30,7 +30,7 @@ export class TrainingView {
       h('div.level',
         h('div.ln', 'TS-2 · SANDBOX · BPE-1'),
         h('div.lt', 'Bipropellant stand, heat-sink engine, no procedure'),
-        h('ul', h('li', 'Water cold flows or hot fires on OX-1 / FU-1'), h('li', 'Tare the tank scales while the tanks are empty; set the meters for what is in the tanks'), h('li', 'Fault injection: igniter, injector, combustion, feed and instrument faults')),
+        h('ul', h('li', 'Water cold flows or hot fires on LOX / ethanol'), h('li', 'Tare the tank scales while the tanks are empty; set the meters for what is in the tanks'), h('li', 'Fault injection: igniter, injector, combustion, feed and instrument faults')),
         h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-2'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-2'), 'sm'),
           btn('Fault injection', () => this.app.start(null, 'fault', 'TS-2'), 'sm', { title: MODES.fault.text }))),
       h('div.level',
@@ -48,7 +48,7 @@ export class TrainingView {
       h('div.level',
         h('div.ln', 'TS-3G · SANDBOX · BPE-3'),
         h('div.lt', 'Gas-generator engine on TPA-1, no procedure'),
-        h('ul', h('li', 'Pump-fed cold flows on water, or hot fires on OX-1 / FU-1'), h('li', 'Your start sequence: start gas, valve timing, the bootstrap — and the throttle'), h('li', 'Fault injection: GG orifices and igniters, start gas, liner and throat, inducer, instruments')),
+        h('ul', h('li', 'Pump-fed cold flows on water, or hot fires on LOX / ethanol'), h('li', 'Your start sequence: start gas, valve timing, the bootstrap — and the throttle'), h('li', 'Fault injection: GG orifices and igniters, start gas, liner and throat, inducer, instruments')),
         h('div.modes', btn('Guided rules', () => this.app.start(null, 'guided', 'TS-3G'), 'sm'), btn('Independent rules', () => this.app.start(null, 'independent', 'TS-3G'), 'sm'),
           btn('Fault injection', () => this.app.start(null, 'fault', 'TS-3G'), 'sm', { title: MODES.fault.text }))));
     open.append(h('div.level',

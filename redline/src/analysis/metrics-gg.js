@@ -24,7 +24,7 @@
    feed. */
 
 import { meanIn, maxIn, edges, crossing } from './metrics.js';
-import { CSTAR } from '../content/stands/ts2-biprop.js';
+import { GAS_MAIN } from '../physics/propellants.js';
 
 const G0 = 9.80665, PSI = 6894.757;
 const RHO_W = 998;
@@ -132,7 +132,7 @@ export function computeMetricsGG(run, def) {
     pt.mdotMain = pt.mdotOx + pt.mdotFu; pt.mdotGG = pt.ggOx + pt.ggFu;
     pt.ggFrac = pt.mdotGG / (pt.mdotMain + pt.mdotGG);
     pt.cstar = m('CSTAR-C');
-    pt.etaCstar = pt.cstar / CSTAR(pt.MR);
+    pt.etaCstar = pt.cstar / GAS_MAIN.cstar(pt.MR, pt.Pc + 101325);
     pt.IspC = pt.F / (G0 * pt.mdotMain); pt.IspE = pt.F / (G0 * (pt.mdotMain + pt.mdotGG));
     pt.PdOx = m('PT-414'); pt.PdFu = m('PT-424'); pt.PinOx = m('PT-413'); pt.PinFu = m('PT-423');
     pt.npshOx = m('NPSH-OX'); pt.npshFu = m('NPSH-FU');

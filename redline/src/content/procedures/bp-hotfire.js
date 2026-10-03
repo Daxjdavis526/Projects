@@ -1,6 +1,6 @@
 /* LEVEL 9 — First hot fire.
 
-   OX-1 and FU-1 instead of water, and a spark. The same stand and the same
+   LOX and ethanol instead of water, and a spark. The same stand and the same
    feed system the cold flow characterised; the new things are the igniter
    (which must be sparking before the propellants arrive and confirmed
    after), the start sequence, the ignition check, a burn-time limit set by
@@ -25,7 +25,7 @@ export const request = () => ({
   oxP: psi(400), fuP: psi(400),
   duration: 2.0,
   title: 'BPE-1 first hot fire',
-  text: 'First ignition of BPE-1 S/N 001 on OX-1 / FU-1. One 2.0 s burn, both tanks at 400 psig, zero valve lead, igniter on at T−0.5 s, ignition check at T+0.5 s, oxidiser-first shutdown with 50 ms lag, 3 s post-purge. Deliverables: confirmed ignition, steady chamber pressure, thrust and mixture ratio against the pre-test prediction, c* efficiency, and the throat temperature peak after shutdown.',
+  text: 'First ignition of BPE-1 S/N 001 on LOX / ethanol. One 2.0 s burn, both tanks at 400 psig, zero valve lead, igniter on at T−0.5 s, ignition check at T+0.5 s, oxidiser-first shutdown with 50 ms lag, 3 s post-purge. Deliverables: confirmed ignition, steady chamber pressure, thrust and mixture ratio against the pre-test prediction, c* efficiency, and the throat temperature peak after shutdown.',
   success: 'A clean start and a full-duration burn; Pc within 5 % of prediction; c* efficiency reported; throat peak below the 600 °C limit.',
 });
 

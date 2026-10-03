@@ -21,8 +21,13 @@
                   fire, and the pools keep filling.
      Gas          Two species — products and nitrogen — in one volume.
                   P·V = Σ m·R·T, carried as the single quantity Q = P·V;
-                  products arrive with R·T = (η·c*(MR)·Γ)², the definition of
-                  characteristic velocity; nitrogen arrives cold.
+                  products arrive with R·T = (η·c*(MR, Pc)·Γ(γ))², the
+                  definition of characteristic velocity; nitrogen arrives
+                  cold. With a propellant gas (propellants.js: NASA CEA
+                  tables) c*, γ and R are those of the products at the
+                  mixture ratio and pressure they burn at, and the products
+                  in the chamber carry the mass-weighted mix of what has
+                  arrived; without one, fixed γ and R.
      Throat       Choked or subsonic flow of the mixture, Γ from a mass-
                   weighted γ. Thrust from an ideal nozzle at the throat's
                   conditions, with a crude allowance for separation.
@@ -69,8 +74,10 @@ export class Chamber {
     this.Cd = spec.Cd ?? 0.98;
     // the products' own gas properties and flammable range, if the chamber
     // has its own (a fuel-rich gas generator runs far from the main chamber's)
-    this.gP = spec.gammaP ?? GAM_P;
-    this.Rp = spec.Rp ?? R_P;
+    this.gas = spec.gas || null;                   // { cstar, gamma, R }(MR, P): real products
+    const MR0 = spec.MRnom ?? 1.5, P0 = spec.Pnom ?? 2e6;
+    this.gP = this.gas ? this.gas.gamma(MR0, P0) : spec.gammaP ?? GAM_P;
+    this.Rp = this.gas ? this.gas.R(MR0, P0) : spec.Rp ?? R_P;
     this.mrMin = spec.mrMin ?? MR_MIN;
     this.mrMax = spec.mrMax ?? MR_MAX;
     // a bigger engine vaporises and burns more per second (the spray's
@@ -79,8 +86,9 @@ export class Chamber {
     this.burnScale = spec.burnScale ?? 1;
     this.ignMin = spec.ignMin ?? 2e-4;
     this.peP = pressureRatio(this.eps, this.gP);
+    this.gPe = this.gP;                            // the γ peP was solved for
     this.peN = pressureRatio(this.eps, GAM_N2);
-    this.cstar = spec.cstar;                       // (MR) => ideal c*, m/s
+    this.cstar = spec.cstar ?? this.gas.cstar;     // (MR, P) => ideal c*, m/s
     this.eta = spec.etaCstar ?? 0.94;              // as built: mixing and vaporisation efficiency
     this.rng = rng;
     // state: chamber starts full of cell air (treated as nitrogen)
@@ -175,8 +183,18 @@ export class Chamber {
     // gas in
     if (b > 0) {
       const MR = Math.min(8, Math.max(Math.min(0.25, this.mrMin), bo / Math.max(bf, 1e-9)));
-      const cs = this.eta * this.etaLeak * this.cstar(MR);
-      const RTp = (cs * Gam(this.gP)) ** 2;
+      const Pb = Math.max(this.P, this.Pa);
+      let gIn = this.gP;
+      if (this.gas) {
+        // the products arriving now, mixed by mass into those already here
+        gIn = this.gas.gamma(MR, Pb);
+        const w = b * dt / (this.mP + b * dt);
+        this.gP += w * (gIn - this.gP);
+        this.Rp += w * (this.gas.R(MR, Pb) - this.Rp);
+        if (Math.abs(this.gP - this.gPe) > 0.003) { this.peP = pressureRatio(this.eps, this.gP); this.gPe = this.gP; }
+      }
+      const cs = this.eta * this.etaLeak * this.cstar(MR, Pb);
+      const RTp = (cs * Gam(gIn)) ** 2;
       this.mP += b * dt;
       this.Q += b * RTp * dt;
     }

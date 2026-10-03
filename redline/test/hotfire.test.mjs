@@ -26,7 +26,7 @@ function ready({ p = 400, seed = 3, meterCal = true, fault = null } = {}) {
   ex('zero', { ids: def.sensors.filter(x => x.kind === 'PT').map(x => x.id) });
   ex('tare', { ids: ['WT-716', 'WT-726'] }); ex('daqRate', { rate: 2000 });
   ex('tech', { task: 'loadPropellants' }); s.run(121);
-  if (meterCal) { ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' }); }
+  if (meterCal) { ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' }); }
   ex('tech', { task: 'openHV' }); s.run(9);
   for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: false });
   ex('valve', { id: 'IV-601', open: true }); s.run(2); ex('clearCell'); s.run(7);
@@ -79,8 +79,8 @@ console.log('a clean hot fire against its prediction');
 console.log('the meter calibration fluid');
 {
   const { M, S } = hotFire({ meterCal: false });
-  check('a meter still set for water reads OX-1 low', S.mdotOx / S.mdotWOx < 0.92, `meter/scale ${(S.mdotOx / S.mdotWOx).toFixed(3)}`);
-  check('…and FU-1 high, so the metered mixture ratio is badly wrong', S.mdotFu / S.mdotWFu > 1.15 && Math.abs(S.MR / S.MRw - 1) > 0.2, `MR ${S.MR.toFixed(2)} metered, ${S.MRw.toFixed(2)} weighed`);
+  check('a meter still set for water reads LOX low', S.mdotOx / S.mdotWOx < 0.92, `meter/scale ${(S.mdotOx / S.mdotWOx).toFixed(3)}`);
+  check('…and ethanol high, so the metered mixture ratio is badly wrong', S.mdotFu / S.mdotWFu > 1.15 && Math.abs(S.MR / S.MRw - 1) > 0.2, `MR ${S.MR.toFixed(2)} metered, ${S.MRw.toFixed(2)} weighed`);
   check('the scales still give the right c* efficiency', Math.abs(S.etaCstarW - 0.94) < 0.025, S.etaCstarW.toFixed(3));
   check('the reduction flags the meter calibration', M.flags.includes('meter-cal'));
 }

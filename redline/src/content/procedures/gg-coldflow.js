@@ -49,7 +49,7 @@ export function procedure(def) {
         { kind: 'info', station: 'TC', title: 'What a pump-fed cold flow is',
           text: 'The start gas drives the turbine for the whole run — no gas generator, no igniters. The main valves open early, at T+0.30 s, so the pumps take their load before they are fast. The injector sees water at the pressure the pumps make, as it will see propellant on a hot fire: a few hundred psi across it.',
           why: 'A pressure-fed cold flow tests the injector at the tank pressure. A pump-fed one tests it in the system it will fire in — and spins the pumps against the real load for the first time.',
-          teach: 'Water is denser than FU-1 and lighter than OX-1: the pumps make more pressure on it than on the fuel, less than on the oxidiser, and the flows differ from a hot fire\'s. The CdA does not: it is geometry, and that is why it is the deliverable.' },
+          teach: 'Water is denser than ethanol and lighter than LOX: the pumps make more pressure on it than on the fuel, less than on the oxidiser, and the flows differ from a hot fire\'s. The CdA does not: it is geometry, and that is why it is the deliverable.' },
         ...ggPlanSteps(def, { label: 'Cold flow', want: COLD, match }),
       ] },
       pollSection('L', { text: 'Console ▸ FIRE CONTROL ▸ POLL. Water in both tanks and the meters on water; a cold-flow plan; no igniters to check.' }),

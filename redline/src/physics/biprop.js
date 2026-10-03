@@ -99,7 +99,7 @@ export class BipropModel {
       s['Qm:' + id] = () => (l.mdot / l.rho) * (sc.rhoCal ?? l.rho);
       // the tank scale: liquid plus a pressure tare from the flex lines
       s['W:' + id] = () => l.mL + (sc.dry ?? 0) + (sc.tarePerPa ?? 0) * (net.volumes[l.tank].P - Pa);
-      s['Tl:' + id] = () => net.ambient.T + (id === 'fu' ? this.fuelTempOffset || 0 : 0);
+      s['Tl:' + id] = () => l.Tliq ?? net.ambient.T + (id === 'fu' ? this.fuelTempOffset || 0 : 0);
       valveSignals(l.valve);
     }
     const C = this.chamber;
@@ -189,12 +189,52 @@ export class BipropModel {
 
   element(id) { return this.valveToLine.get(id)?.valve || this.tapValve.get(id)?.tap.valve || this.net.el(id) || null; }
 
-  /* The liquid temperature each line delivers (the fuel can be warmed by a fault). */
-  _liquidTemps() { for (const l of this.lines) l.Tliq = this.net.ambient.T + (l.id === 'fu' ? this.fuelTempOffset || 0 : 0); }
+  /* What the tanks hold, thermally. A storable liquid sits at the cell's
+     temperature (the fuel can be loaded warm: a fault). LOX is a cryogen,
+     loaded boiling at about 90 K, and heat leaks into it through the tank's
+     insulation, UA·(T_cell − T): with the ullage at or below its vapour
+     pressure it BOILS — the heat goes into vapour, which joins the ullage
+     gas (an open vent lets it go; a shut one lets the tank self-pressurise)
+     and the liquid stays at saturation. Pressurised above its vapour
+     pressure it is SUBCOOLED and the heat warms it instead. Its density
+     and vapour pressure follow its temperature. Lumped: one temperature per
+     tank, no stratification; the vapour is counted as more nitrogen (the
+     network has one gas); the pressurant does not cool on the liquid. */
+  _liquidThermal(dt) {
+    const Ta = this.net.ambient.T, g = this.net.gas;
+    for (const l of this.lines) {
+      const f = l.fluid;
+      if (!f.cryo) l.Tliq = Ta + (l.id === 'fu' ? this.fuelTempOffset || 0 : 0);
+      else {
+        if (l.Tliq == null) l.Tliq = f.Tload;
+        const v = this.net.volumes[l.tank];
+        let T = l.Tliq;
+        if (l.mL > 1e-3) {
+          T += dt * (l.spec.heatLeak ?? 0.6) * (Ta - T) / (Math.max(l.mL, 0.2) * f.cp);
+          const Ts = f.tsat(v.P);
+          if (T > Ts) {
+            const dm = Math.min(0.5 * l.mL, (T - Ts) * l.mL * f.cp / f.hfg);
+            l.mL -= dm; T = Ts;
+            v.m += dm; v.U += dm * g.cv * T;               // vapour, at the liquid's temperature
+          }
+        }
+        l.Tliq = T;
+      }
+      if (f.rhoAt) l.rho = f.rhoAt(l.Tliq);
+    }
+  }
 
   /* Technician: load the run tanks — with the simulant or the propellants. */
   load(fluids, masses) {
-    for (const l of this.lines) { l.setFluid(fluids[l.id]); l.setLiquid(this.net, masses[l.id]); }
+    for (const l of this.lines) {
+      l.setFluid(fluids[l.id]);
+      // a cryogen arrives at its boiling point (and a cryogenic pump is
+      // chilled down with it); anything else at the cell's temperature
+      l.Tliq = l.fluid.cryo ? l.fluid.Tload : null;
+      if (l.pump) l.pump.Tc = null;
+      this._liquidThermal(0);
+      l.setLiquid(this.net, masses[l.id]);
+    }
   }
 
   _syncChamber() {
@@ -218,7 +258,7 @@ export class BipropModel {
   }
 
   step(dt) {
-    if (this.tp) this._liquidTemps();
+    this._liquidThermal(dt);
     for (const l of this.lines) l.step(dt, this.net);
     this.net.step(dt);
     if (this.tp) this.tp.step(dt);

@@ -8,7 +8,7 @@
      pump        ΔP = ρ g H0 (a0 n² + a1 n q) − Rq ṁ²,  q = ṁ_total / (ρ Q0)
      main feed   ṁ = √(2ρ (Pd − Pc) / ΣR)   (line, valve, injector in series)
      GG tap      ṁ = √(2ρ (Pd − Pgg) / ΣR)  (valve, throttle, orifice)
-     chambers    Pc = ṁ η c*(MR) / (Cd At)
+     chambers    Pc = ṁ η c*(MR, Pc) / (Cd At)
      turbine     τ = ṁ_gg r (φ c0 cos α − u)(1 + ψ) η_x,  c0 from the GG gas
 
    The same equations the transient model integrates, solved for d/dt = 0:
@@ -37,7 +37,9 @@ export function steadyGG(def, opts = {}) {
   const C = p.chamber, GG = p.gg;
   const At = opts.At ?? Math.PI / 4 * C.throatDia ** 2, AtG = Math.PI / 4 * GG.throatDia ** 2;
   const eta = opts.eta ?? C.etaCstar, etaG = opts.etaGG ?? GG.etaCstar;
-  const gG = GG.gammaP ?? 1.22, RG = GG.Rp ?? 340;
+  // the products' γ and R: from the propellant tables if the chambers have
+  // them, fixed otherwise
+  const gasOf = (ch, MR, P) => (ch.gas ? { g: ch.gas.gamma(MR, P), R: ch.gas.R(MR, P) } : { g: ch.gammaP ?? 1.22, R: ch.Rp ?? 340 });
   const pumps = {};
   for (const side of ['ox', 'fu']) {
     const s = TP.pumps[side], rho = fl[side].rho;
@@ -76,8 +78,8 @@ export function steadyGG(def, opts = {}) {
       }
       const mo = out.ox.mm, mf = out.fu.mm, go = out.ox.mt, gf = out.fu.mt;
       const MR = mo / Math.max(mf, 1e-9), MRg = go / Math.max(gf, 1e-9);
-      const PcN = (mo + mf) * eta * C.cstar(MR) / ((C.Cd ?? 0.98) * At);
-      const PgN = (go + gf) * etaG * GG.cstar(MRg) / ((GG.Cd ?? 0.98) * AtG);
+      const PcN = (mo + mf) * eta * C.cstar(MR, Pc) / ((C.Cd ?? 0.98) * At);
+      const PgN = (go + gf) * etaG * GG.cstar(MRg, Pg) / ((GG.Cd ?? 0.98) * AtG);
       if (opts.cold) { Pc = A; Pg = opts.cold.P; if (it > 0) break; continue; }
       const done = Math.abs(PcN - Pc) < 50 && Math.abs(PgN - Pg) < 50;
       Pc += 0.5 * (Math.max(A, PcN) - Pc); Pg += 0.5 * (Math.max(A, PgN) - Pg);
@@ -96,7 +98,8 @@ export function steadyGG(def, opts = {}) {
     } else {
       mg = h.ox.mt + h.fu.mt;
       const MRg = h.ox.mt / Math.max(h.fu.mt, 1e-9);
-      const cs = etaG * GG.cstar(MRg), RTg = (cs * Gam(gG)) ** 2;
+      const { g: gG, R: RG } = gasOf(GG, MRg, h.Pg);
+      const cs = etaG * GG.cstar(MRg, h.Pg), RTg = (cs * Gam(gG)) ** 2;
       Tg = RTg / RG; cp = gG * RG / (gG - 1); gx = gG;
     }
     const Pex = A * (1 + 0.05 * Math.min(1, mg / (T.mdotD || 0.1)));
@@ -127,12 +130,12 @@ export function steadyGG(def, opts = {}) {
   const mo = h.ox.mm, mf = h.fu.mm, MR = mo / Math.max(mf, 1e-9);
   const mdotMain = mo + mf, mdotGG = h.ox.mt + h.fu.mt;
   // thrust from an ideal nozzle at the throat conditions (as the chamber model)
-  const g = 1.22, Ae = Math.PI / 4 * C.exitDia ** 2, eps = Ae / At;
+  const g = gasOf(C, MR, h.Pc).g, Ae = Math.PI / 4 * C.exitDia ** 2, eps = Ae / At;
   const area = M => (1 / M) * Math.pow((2 / (g + 1)) * (1 + (g - 1) / 2 * M * M), (g + 1) / (2 * (g - 1)));
   let lo = 1.0001, hi = 10;
   for (let i = 0; i < 80; i++) { const m = 0.5 * (lo + hi); if (area(m) > eps) hi = m; else lo = m; }
   const Me = 0.5 * (lo + hi), pe = h.Pc * Math.pow(1 + (g - 1) / 2 * Me * Me, -g / (g - 1));
-  const cs = eta * C.cstar(MR), RT = (cs * Gam(g)) ** 2;
+  const cs = eta * C.cstar(MR, h.Pc), RT = (cs * Gam(g)) ** 2;
   const Ve = Math.sqrt(2 * g / (g - 1) * RT * (1 - Math.pow(pe / h.Pc, (g - 1) / g)));
   const F = Math.max(0, mdotMain * Ve + (pe - A) * Ae);
   if (opts.cold) return {

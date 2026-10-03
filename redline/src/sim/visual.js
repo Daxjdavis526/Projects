@@ -156,7 +156,9 @@ export function cellState(S) {
     st.valves[l.valve.id] = l.valve.pos; if (l.spec.throttle) st.valves[l.spec.throttle.id] = l.thr;
     if (l.tap) { st.valves[l.tap.valve.id] = l.tap.valve.pos; if (l.spec.tap?.throttle) st.valves[l.spec.tap.throttle.id] = l.tap.thr; }
   }
-  for (const l of m.lines || []) st.tanks.push({ line: l.id, fill: clamp01(l.mL / (l.Vtank * l.rho)), fluid: l.fluid.name });
+  // a tank of a cryogen frosts over (the cell's moisture freezing on it)
+  for (const l of m.lines || []) st.tanks.push({ line: l.id, fill: clamp01(l.mL / (l.Vtank * l.rho)), fluid: l.fluid.name,
+    T: l.Tliq ?? Ta, frost: l.fluid.cryo && l.mL > 0.05 ? clamp01((268 - l.Tliq) / 60) : 0 });
   for (const v of net.volumes) if (v.T < 268 && v.id !== 'ambient') st.frost[v.id] = clamp01((268 - v.T) / 60);
   let vent = 0;
   for (const id of def.ventElements || []) {
@@ -173,7 +175,7 @@ export function cellState(S) {
     const g = C.gamma, burning = C.burning;
     const Dt = C.spec.throatDia, De = C.spec.exitDia;
     const fP = C.m > 0 ? C.mP / C.m : 0;
-    const j = jetState({ Pc: C.P, Pa, Tc: Math.max(C.Tgas, 1), g, R: fP * 340 + (1 - fP) * 296.8, Dt, De });
+    const j = jetState({ Pc: C.P, Pa, Tc: Math.max(C.Tgas, 1), g, R: C.R, Dt, De });
     const look = flameLook({ Tc: C.Tgas, MR: C.MRb, MRst: def.flame?.MRst ?? 2.0, soot: def.flame?.soot ?? 0.25 });
     const lum = burning ? clamp01(C.P / (C.spec.Pnom || C.P)) * Math.pow(Math.min(1.2, C.Tgas / 3000), 2) * fP : 0;
     st.jet = { ...j, lit: burning, products: fP, mdot: C.mdotOut, F: C.F, Pc: C.P, Pnom: C.spec.Pnom, peakP: C.peak.P, Tc: C.Tgas, MR: C.MRb, Dt, De, look: { ...look, lum },

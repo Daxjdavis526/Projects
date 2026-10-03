@@ -60,13 +60,16 @@ export class StandViewBP {
     for (const [x, id, line, lab] of [[400, 'T-710', 'ox', 'OX'], [560, 'T-720', 'fu', 'FUEL']]) {
       svg.append(s('path', { d: `M${x - 20},180 L${x - 20},228`, stroke: '#8d969c', 'stroke-width': 2 }));
       svg.append(s('rect', { x: x - 45, y: 228, width: 90, height: 140, rx: 30, fill: 'url(#tankB)', stroke: '#3a4248' }));
+      // frost: a tank of LOX is white with it
+      const fr = s('rect', { x: x - 45, y: 228, width: 90, height: 140, rx: 30, fill: '#eef5f8', opacity: 0 });
+      svg.append(fr);
       svg.append(s('rect', { x: x + 50, y: 240, width: 8, height: 116, fill: '#0c1216', stroke: '#46525a' }));
       const lv = s('rect', { x: x + 51, y: 356, width: 6, height: 0, fill: '#5fc6d8' });
       svg.append(lv, s('text', { x, y: 300, fill: '#c7ced3', 'font-size': 12, 'text-anchor': 'middle', 'font-weight': 700 }, lab), T(x, 316, id));
       svg.append(s('rect', { x: x - 40, y: 368, width: 80, height: 10, fill: '#30373c' }), T(x, 392, id === 'T-710' ? 'WT-716' : 'WT-726'));
       // run line to the engine
       svg.append(s('path', { d: `M${x},368 L${x},${line === 'ox' ? 384 : 376} L${line === 'ox' ? 905 : 905},${line === 'ox' ? 384 : 376} L905,${line === 'ox' ? 314 : 296} L940,${line === 'ox' ? 314 : 296}`, fill: 'none', stroke: '#6f8c86', 'stroke-width': 4 }));
-      this.tanks.push({ lv, line });
+      this.tanks.push({ lv, line, fr });
     }
     // main valves with position flags
     this.mv = [];
@@ -142,6 +145,7 @@ export class StandViewBP {
     for (const t of this.tanks) {
       const l = m.line(t.line), fr = Math.min(1, l.mL / (l.Vtank * l.rho));
       t.lv.setAttribute('y', (356 - 116 * fr).toFixed(1)); t.lv.setAttribute('height', (116 * fr).toFixed(1));
+      t.fr.setAttribute('opacity', (l.fluid.cryo && l.mL > 0.05 ? 0.75 * Math.min(1, (268 - l.Tliq) / 60) : 0).toFixed(2));
     }
     // liquid: what the camera sees leaving the injector — unless it is burning
     const C = m.chamber, lit = !!C?.burning;

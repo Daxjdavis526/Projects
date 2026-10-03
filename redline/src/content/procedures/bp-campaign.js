@@ -23,7 +23,7 @@ export const request = () => ({
   oxP: psi(400), fuP: psi(400),
   duration: 2.0,
   title: 'BPE-1 performance campaign',
-  text: 'Performance acceptance of BPE-1 S/N 001 on OX-1 / FU-1. Deliverables: (1) a burn of at least 2.0 s at the DESIGN POINT — mixture ratio 1.50 ± 0.05 and chamber pressure 275 ± 15 psig — giving chamber pressure, thrust, mixture ratio, c* efficiency and specific impulse; (2) a burn of at least 1.5 s at a THROTTLED POINT — chamber pressure 220 ± 15 psig, mixture ratio 1.50 ± 0.08 — giving its c* efficiency. The tank pressures are yours to choose. Heat-sink chamber: 5 s burn limit, throat below 150 °C before each burn. Report whether the data represent the engine.',
+  text: 'Performance acceptance of BPE-1 S/N 001 on LOX / ethanol. Deliverables: (1) a burn of at least 2.0 s at the DESIGN POINT — mixture ratio 1.50 ± 0.05 and chamber pressure 275 ± 15 psig — giving chamber pressure, thrust, mixture ratio, c* efficiency and specific impulse; (2) a burn of at least 1.5 s at a THROTTLED POINT — chamber pressure 220 ± 15 psig, mixture ratio 1.50 ± 0.08 — giving its c* efficiency. The tank pressures are yours to choose. Heat-sink chamber: 5 s burn limit, throat below 150 °C before each burn. Report whether the data represent the engine.',
   success: 'Both points hit and reduced; a campaign report filed with the results and an honest call on the data; a diagnosis submitted (including "no fault"); the stand left safe.',
 });
 

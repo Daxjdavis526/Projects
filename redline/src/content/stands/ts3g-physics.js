@@ -1,8 +1,8 @@
 /* TS-3 rebuilt as an engine stand: BPE-3, a gas-generator cycle engine on
    TPA-1. Physics data. FICTIONAL.
 
-   The nitrogen bank and header are TS-3's. The two run tanks now hold OX-1
-   and FU-1 at low pressure (the pumps need only enough suction head to
+   The nitrogen bank and header are TS-3's. The two run tanks now hold LOX
+   and ethanol at low pressure (the pumps need only enough suction head to
    keep their inducers out of cavitation). Each pump discharges through a
    main valve (MOV-414, MFV-424) to the main injector; a tap off each
    discharge feeds the GAS GENERATOR through its own valve (GOV-416,
@@ -21,46 +21,26 @@
 
 import { psi, degC, cc, litre, mm, P_STD } from '../../lib/units.js';
 import { TPA } from './ts3-physics.js';
-import { CSTAR } from './ts2-biprop.js';
+import { FLUIDS, GAS_MAIN, GAS_GG } from '../../physics/propellants.js';
 
 export const AMB = { P: P_STD, T: degC(20) };
 const g = x => AMB.P + psi(x);
 
-/* Vapour pressure curves (Antoine form). FU-1 is alcohol-like (boils at
-   78 °C); OX-1 is invented, a little more volatile than water. */
-const antoine = (A, B, C) => T => 133.322 * Math.pow(10, A - B / (C + Math.max(-30, Math.min(T - 273.15, 200))));
-export const FLUIDS_G = {
-  water: { name: 'Water (simulant)', rho: 998, cp: 4180, pvap: antoine(8.07131, 1730.63, 233.426) },
-  'OX-1': { name: 'OX-1 oxidiser (fictional)', rho: 1140, cp: 1800, pvap: antoine(7.95, 1600, 230) },
-  'FU-1': { name: 'FU-1 fuel (fictional)', rho: 800, cp: 2400, pvap: antoine(8.20417, 1642.89, 230.3) },
-};
-
-/* The gas generator's gas: very fuel-rich, so cool, light and with a high
-   heat capacity. Temperature against mixture ratio (invented, shaped like
-   an alcohol/oxygen pair far on the fuel side), and c* consistent with it
-   for the GG's own gas properties. */
-export const GG_GAS = { gamma: 1.26, R: 420 };
-const MRG = [0.12, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.8, 1.0, 1.5, 3.0];
-const TG = [480, 560, 660, 760, 860, 950, 1040, 1280, 1500, 1950, 2400, 3100, 2800];
-const gam = GG_GAS.gamma, GAMG = Math.sqrt(gam) * Math.pow(2 / (gam + 1), (gam + 1) / (2 * (gam - 1)));
-const interp = (xs, ys) => x => {
-  if (!(x > xs[0])) return ys[0];
-  for (let i = 1; i < xs.length; i++) if (x <= xs[i]) return ys[i - 1] + (ys[i] - ys[i - 1]) * (x - xs[i - 1]) / (xs[i] - xs[i - 1]);
-  return ys[ys.length - 1];
-};
-export const TGG = interp(MRG, TG);
-export const CSTAR_GG = MR => Math.sqrt(GG_GAS.R * TGG(MR)) / GAMG;      // c* = √(RT)/Γ
+/* Fluids: water, and the real propellants (physics/propellants.js). The
+   main chamber burns on CEA's equilibrium tables; the gas generator on its
+   fuel-rich table, with soot and methane suppressed. */
+export const FLUIDS_G = FLUIDS;
 
 /* The engine as drawn (what the prediction uses; the as-built engine
    differs a little — it always does). */
 export const DESIGN_G = {
-  throatDia: mm(25.6), exitDia: mm(52), etaCstar: 0.95, etaGG: 0.93,
+  throatDia: mm(26.2), exitDia: mm(57), etaCstar: 0.95, etaGG: 0.97,
   Pc: 2.4e6, MR: 1.6, MRgg: 0.33,
-  CdAox: 6.41e-6, CdAfu: 5.48e-6,               // main injector
-  CdAggOx: 1.17e-7, CdAggFu: 4.14e-7,           // GG orifices (with its injector)
+  CdAox: 6.41e-6, CdAfu: 5.58e-6,               // main injector
+  CdAggOx: 1.01e-7, CdAggFu: 3.63e-7,           // GG orifices (with its injector)
   turbNozzleDia: mm(6.35),                      // TPA-1's turbine nozzles as one equivalent throat
 };
-export const AS_BUILT_G = { ox: 0.97, fu: 1.02, ggOx: 1.0, ggFu: 1.0, etaCstar: 0.94, etaGG: 0.92 };
+export const AS_BUILT_G = { ox: 0.97, fu: 1.02, ggOx: 1.0, ggFu: 1.0, etaCstar: 0.94, etaGG: 0.96 };
 
 const tankWall = { C: 40000, hA: 12, hAflow: 150, hAamb: 15 };
 const small = { C: 300, hA: 0.4, hAflow: 80, hAamb: 1 };
@@ -119,7 +99,7 @@ export const physics = {
   ],
   lines: [
     { id: 'ox', fluid: FLUIDS_G.water, tank: 'oxu', manifold: 'oxman', chamber: 'chamber', gasPath: 'INJ-OXG',
-      Vtank: litre(60), Vman: cc(60), inertance: 2.0e4, CdAline: 4.0e-5,
+      Vtank: litre(60), Vman: cc(60), inertance: 2.0e4, CdAline: 4.0e-5, heatLeak: 1.5,   // W/K, insulated tank (LOX)
       CdAinj: DESIGN_G.CdAox * AS_BUILT_G.ox, CdAinjGas: 8.0e-6, wetFrom: 0.5,
       valve: { id: 'MOV-414', CdA: 1.2e-4, normally: 'closed', delay: 0.05, strokeOpen: 0.3, strokeClose: 0.2, char: 'ball' },
       tap: { CdA: DESIGN_G.CdAggOx * AS_BUILT_G.ggOx,
@@ -135,15 +115,15 @@ export const physics = {
   ],
   chamber: {
     V: litre(0.7), throatDia: DESIGN_G.throatDia, exitDia: DESIGN_G.exitDia, Cd: 0.98,
-    cstar: CSTAR, etaCstar: AS_BUILT_G.etaCstar, Pnom: DESIGN_G.Pc, igniter: 'IGN-501',
+    gas: GAS_MAIN, cstar: GAS_MAIN.cstar, MRnom: DESIGN_G.MR, etaCstar: AS_BUILT_G.etaCstar, Pnom: DESIGN_G.Pc, igniter: 'IGN-501',
     fChug: 160, fHF: 2400, burnScale: 4,
     // silica-phenolic liner, 14 mm: char rate and throat erosion at Pnom
     ablative: { t: mm(14), rate: mm(0.15), erode: mm(0.008), Tsurf: 1900, lam: mm(3), G: 40, C: 3000, Gamb: 3 },
   },
   gg: {
     volume: 'ggc', V: cc(250), throatDia: DESIGN_G.turbNozzleDia, exitDia: DESIGN_G.turbNozzleDia, Cd: 0.98,
-    cstar: CSTAR_GG, etaCstar: AS_BUILT_G.etaGG, Pnom: 1.2e6, igniter: 'IGN-502',
-    gammaP: GG_GAS.gamma, Rp: GG_GAS.R, mrMin: 0.12, mrMax: 3, ignMin: 2e-5,
+    gas: GAS_GG, cstar: GAS_GG.cstar, MRnom: DESIGN_G.MRgg, etaCstar: AS_BUILT_G.etaGG, Pnom: 1.2e6, igniter: 'IGN-502',
+    mrMin: 0.12, mrMax: 3, ignMin: 2e-5,
     fChug: 260, fHF: 6000,
     // a small steel can: heat-sink walls (they hardly matter at 900 K)
     wall: { Cch: 600, Cth: 200, hAch: 6, hAth: 4, Gcond: 3, Gamb: 2 },

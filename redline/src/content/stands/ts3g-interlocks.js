@@ -19,7 +19,7 @@ export function interlocks(def) {
     { id: 'FIRE-COLD-PROP', on: ['arm', 'fire'], sev: ALL_BLOCK, safety: true,
       test: c => c.loaded === 'propellants' && plan(c).mode === 'cold',
       msg: 'A cold-flow plan with propellants in the tanks.',
-      why: 'Pumping OX-1 and FU-1 through the injector with the igniters off fills the chamber and the cell with unburned propellant. Drain and load water for a cold flow.' },
+      why: 'Pumping LOX and ethanol through the injector with the igniters off fills the chamber and the cell with unburned propellant. Drain and load water for a cold flow.' },
     { id: 'FIRE-HOT-WATER', on: ['arm', 'fire'], sev: ALL_BLOCK,
       test: c => c.loaded === 'water' && plan(c).mode === 'hot',
       msg: 'A hot-fire plan with water in the tanks.',

@@ -11,7 +11,7 @@
    coefficient, falls with flow along a drooping curve, and at n = 0 the
    only term left is −a2·q² — a stopped pump is a restriction. A pump makes
    HEAD (energy per unit weight of liquid), not pressure: the same impeller
-   at the same speed makes 14 % more ΔP pumping OX-1 than water.
+   at the same speed makes 14 % more ΔP pumping LOX than water.
 
    Shaft power is P0·(ρ/ρ0)·(c0·n³ + c1·n²·q): a radial pump still draws
    about 40 % of its design power at zero flow, all of it going into the
@@ -53,9 +53,9 @@ const G0 = 9.80665;
 const TAU = 2 * Math.PI;
 const smooth = x => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
-/* Vapour pressure of the liquid in the pump, Pa, by fluid name. Water: the
-   Antoine fit (1–100 °C, extrapolated beyond). The fictional propellants
-   carry their own `pvap` function. */
+/* Vapour pressure of the liquid in the pump, Pa. Water: the Antoine fit
+   (1–100 °C, extrapolated beyond). The propellants carry their own `pvap`
+   function (physics/propellants.js). */
 export function pvapWater(T) {
   const c = T - 273.15;
   return 133.322 * Math.pow(10, 8.07131 - 1730.63 / (233.426 + Math.max(-20, Math.min(c, 250))));
@@ -133,7 +133,10 @@ export class Pump {
     // the casing: shaft power not delivered as head is heat in the liquid
     const cp = line.fluid.cp || 4180;
     const heat = Math.max(0, this.Pshaft - Math.max(0, this.dP) * Math.max(0, md) / rho);
-    const dTc = (heat - Math.max(0, md) * cp * (this.Tc - Tin) - this.hAc * (this.Tc - Tamb)) / (this.mc * cp);
+    // (a cryogenic pump is kept chilled down — a bleed, not modelled, holds
+    // its casing at the liquid's temperature — so the cell's heat is not counted)
+    const hAc = line.fluid.cryo ? 0 : this.hAc;
+    const dTc = (heat - Math.max(0, md) * cp * (this.Tc - Tin) - hAc * (this.Tc - Tamb)) / (this.mc * cp);
     // implicit in the through-flow term (a large flow pins it to the inlet)
     const a = Math.max(0, md) * cp / (this.mc * cp);
     this.Tc = (this.Tc + dt * (dTc + a * this.Tc)) / (1 + dt * a);

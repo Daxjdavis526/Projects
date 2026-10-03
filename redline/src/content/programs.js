@@ -68,7 +68,7 @@ export const PROGRAMS = [
   },
   {
     id: 'biprop', title: 'Liquid bipropellant engine testing', stand: 'TS-2',
-    blurb: 'A small pressure-fed research engine on fictional propellants: two feed systems, an injector, purge, cold flows with water to find out what the injector really does — and then fire: a spark igniter, start sequences, an uncooled copper chamber, and the faults that come with combustion.',
+    blurb: 'A small pressure-fed research engine on liquid oxygen and ethanol: two feed systems, an injector, purge, cold flows with water to find out what the injector really does — and then fire: a spark igniter, start sequences, an uncooled copper chamber, and the faults that come with combustion.',
     levels: [
       { n: 7, id: 'bp-orient', title: 'Bipropellant stand orientation', scenario: bpOrientation, modes: ['tutorial', 'guided'],
         teaches: ['Separate oxidiser and fuel systems', 'Loading and tank scales', 'Pressure tare', 'Purge', 'Trapped volumes, twice'] },

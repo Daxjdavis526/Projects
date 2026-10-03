@@ -13,7 +13,7 @@ const ind = (v, id) => (v.ch(id + '-ZSO') === 1 && v.ch(id + '-ZSC') === 0 ? 'OP
 const flowsOx = v => v.plan.sides !== 'fuel';
 const flowsFu = v => v.plan.sides !== 'ox';
 const hot = v => v.plan.mode === 'hot';
-const LOAD = { propellants: ['OX-1', 'FU-1'], water: ['water', 'water'] };
+const LOAD = { propellants: ['LOX', 'ethanol'], water: ['water', 'water'] };
 
 export default [
   { id: 'TC', name: 'Test Conductor', role: 'Owns the procedure and the final call',
@@ -52,7 +52,7 @@ export default [
       { label: 'Flowmeter calibration fluid', eval: v => {
           const want = LOAD[v.loaded] || ['water', 'water'], mf = v.meterFluid || {};
           return { value: `FT-714 ${mf.ox || '?'}, FT-724 ${mf.fu || '?'} / tanks hold ${want[0] === 'water' ? 'water' : `${want[0]}, ${want[1]}`}`, ok: mf.ox === want[0] && mf.fu === want[1] };
-        }, why: 'A turbine meter measures volume; the DAQ makes it mass with the density you set. Set for water, it reads OX-1 low and FU-1 high — and every mixture ratio and c* after it.' },
+        }, why: 'A turbine meter measures volume; the DAQ makes it mass with the density you set. Set for water, it reads LOX low and ethanol high — and every mixture ratio and c* after it.' },
     ] },
   { id: 'PROP', name: 'Propulsion', role: 'Fluid system state',
     items: [

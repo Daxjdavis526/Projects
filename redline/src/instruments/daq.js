@@ -42,7 +42,9 @@ export class DAQ extends Emitter {
     }
     const g = model.gas, nom = def.nominal;
     const k = { Pamb: def.physics.ambient.P, R: g.R, fChoke: g.fChoke,
-                CdAt: nom.Cd * Math.PI / 4 * nom.throatDia ** 2 };
+                CdAt: nom.Cd * Math.PI / 4 * nom.throatDia ** 2,
+                // what the tanks were loaded with (the DAQ is configured for it)
+                fluidOf: side => model.line?.(side)?.fluid ?? null };
     for (const d of def.channels.derived) {
       chans.push({ id: d.id, desc: d.desc, quantity: d.quantity, gauge: d.gauge, kind: 'derived',
                    inputs: d.inputs, fn: d.fn, k, range: null });

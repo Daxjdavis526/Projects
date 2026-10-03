@@ -189,7 +189,7 @@ console.log('a TS-3G hot fire: the start gas, then the gas generator, then the e
   const { s, ex } = ready(ts3g, (s, ex) => {
     ex('daqPower', { on: true }); s.run(5);
     ex('tech', { task: 'loadPropellants' }); s.run(151);
-    ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+    ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' });
     ex('inspection', { id: 'spark-check' }); s.run(41);
     ex('tech', { task: 'openHV' }); s.run(9);
     for (const id of ['VV-301', 'VV-413', 'VV-423']) ex('valve', { id, open: false });

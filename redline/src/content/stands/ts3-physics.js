@@ -10,7 +10,7 @@
    exhaust duct to the cell.
 
    The turbopump, TPA-1, is designed for the pump-fed engine to come: an
-   oxidiser pump for OX-1 and a fuel pump for FU-1 on one shaft, 36 000 rpm
+   oxidiser pump for LOX and a fuel pump for ethanol on one shaft, 36 000 rpm
    at design. On TS-3 both pumps are run on WATER and the turbine on cold
    nitrogen: a component test. */
 
@@ -27,8 +27,8 @@ export const FLUIDS3 = {
 /* The turbopump as designed: duty points for the engine propellants. */
 export const TPA = {
   Nd: 36000,                       // rpm
-  ox: { fluid: 'OX-1', rho: 1140, mdot: 0.54, H0: 390, eta: 0.42, npshr0: 20 },
-  fu: { fluid: 'FU-1', rho: 800, mdot: 0.36, H0: 480, eta: 0.40, npshr0: 18 },
+  ox: { fluid: 'LOX', rho: 1141, mdot: 0.54, H0: 390, eta: 0.42, npshr0: 20 },
+  fu: { fluid: 'ethanol', rho: 789, mdot: 0.36, H0: 480, eta: 0.40, npshr0: 18 },
   // the throttles sized so the design flow on WATER is at 2/3 travel
   thrDesign: 0.66,
 };

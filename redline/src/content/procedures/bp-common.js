@@ -170,16 +170,16 @@ export const hotFired = v => v.runs.some(r => r.tFire !== null && r.meta?.config
 
 export function bpLoadPropellants(def, sec = 'C') {
   return { id: sec, title: 'Load propellants', steps: [
-    { kind: 'action', station: 'PROP', title: 'Technician: load OX-1 and FU-1',
+    { kind: 'action', station: 'PROP', title: 'Technician: load LOX and ethanol',
       text: 'Console ▸ FACILITY ▸ Technician ▸ Load propellants. Tanks empty and vented, vents open. Two minutes.',
       why: 'From here the stand is a propellant hazard: everything that holds or moves liquid holds or moves something that burns — or makes something else burn.',
-      teach: 'OX-1 and FU-1 are fictional, with densities chosen where a storable oxidiser and an alcohol fuel would sit (1140 and 800 kg/m³). Nothing here is hypergolic: no spark, no fire.',
+      teach: 'Liquid oxygen and ethanol — the V-2\'s propellants. LOX boils at −183 °C: in its tank, vented, it boils off steadily, and if the vent is shut before the tank is pressurised the vapour pressurises the tank by itself — that is what the relief valve is for. Ethanol is an ordinary flammable liquid. Oxygen-enriched air near a LOX leak makes clothing, grease and asphalt burn violently: no oil on anything that touches oxygen. Nothing here is hypergolic: no spark, no fire.',
       check: v => v.loaded === 'propellants' && v.ch('WT-716') > 5, focus: ['T-710', 'T-720'] },
     { kind: 'record', station: 'PROP', title: 'Record the oxidiser load (WT-716)',
       text: 'From the scale.', why: 'Budget: the burn plus a reserve, on each side.',
       record: { channel: 'WT-716', unit: 'kg', validate: (x, v) => {
         const m = v.ch('WT-716');
-        return near(x, m, 0.05) ? { ok: true, msg: `${m.toFixed(2)} kg of OX-1 on board.` } : { ok: false, msg: `WT-716 reads ${m.toFixed(2)} kg.` };
+        return near(x, m, 0.05) ? { ok: true, msg: `${m.toFixed(2)} kg of LOX on board.` } : { ok: false, msg: `WT-716 reads ${m.toFixed(2)} kg.` };
       } } },
   ] };
 }
@@ -189,10 +189,10 @@ export function bpHotDaq(def, sec = 'D') {
     { kind: 'action', station: 'DAQ', title: 'Sample rate ≥ 2000 Hz',
       text: 'Console ▸ DAQ ▸ Rate.', why: 'The start transient — flame, the pressure overshoot, a hard-start spike — lasts a few tens of milliseconds. The overpressure redline is only as fast as the samples it sees.',
       check: v => v.daq.rate >= 2000 },
-    { kind: 'action', station: 'DAQ', title: 'Flowmeter calibration fluid: FT-714 → OX-1, FT-724 → FU-1',
+    { kind: 'action', station: 'DAQ', title: 'Flowmeter calibration fluid: FT-714 → LOX, FT-724 → ethanol',
       text: 'Console ▸ DAQ ▸ Meter fluid (one per meter).',
-      why: 'A turbine meter counts volume. The DAQ multiplies by the density it was told. Left on water, FT-714 reads OX-1 12 % low and FT-724 reads FU-1 25 % high — and every mixture ratio, c* and Isp computed from them is wrong.',
-      check: v => v.meterFluid?.ox === 'OX-1' && v.meterFluid?.fu === 'FU-1' },
+      why: 'A turbine meter counts volume. The DAQ multiplies by the density it was told. Left on water, FT-714 reads LOX 12 % low and FT-724 reads ethanol 25 % high — and every mixture ratio, c* and Isp computed from them is wrong.',
+      check: v => v.meterFluid?.ox === 'LOX' && v.meterFluid?.fu === 'ethanol' },
   ] };
 }
 

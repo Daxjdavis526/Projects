@@ -30,7 +30,7 @@ function leadIn(s, P, { confirm = true } = {}) {
   ex('tech', { task: 'loadPropellants' }); s.run(121);
   if (confirm) P.confirm('C2', s.daq.latest('WT-716').toFixed(2));
   ex('daqRate', { rate: 2000 });
-  ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+  ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' });
   ex('inspection', { id: 'spark-check' }); s.run(21); if (confirm) P.confirm('E2');
   ex('tech', { task: 'openHV' }); s.run(9);
   for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: false });
