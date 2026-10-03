@@ -106,7 +106,7 @@ console.log('throttling on the gas generator');
     const [a, b, c] = M.points;
     check('speed, Pc and thrust fall with each step', a.N > b.N && b.N > c.N && a.Pc > b.Pc && b.Pc > c.Pc && a.F > b.F && b.F > c.F,
       M.points.map(p => `${p.N.toFixed(0)} rpm ${P(p.Pc)} ${p.F.toFixed(0)} N`).join(' → '));
-    check('the GG mixture ratio — and so the TIT — stays put when both legs move together', Math.abs(c.TIT - a.TIT) < 30, `${a.TIT.toFixed(0)} → ${c.TIT.toFixed(0)} K`);
+    check('the GG mixture ratio stays put when both legs move together, so the TIT moves little (fuel-rich products cool a touch with pressure)', Math.abs(c.TIT - a.TIT) < 45, `${a.TIT.toFixed(0)} → ${c.TIT.toFixed(0)} K`);
     check('70 % on the GG is still well above half thrust', c.F / a.F > 0.5, `${(100 * c.F / a.F).toFixed(0)} %`);
   }
 }

@@ -105,7 +105,7 @@ export const FAULTS = [
     evidence: ['PT-414', 'VIB-345', 'MR-C', 'PT-501', 'TT-334', 'NPSH-OX', 'inducer-borescope'],
     story: p => ({
       what: `The oxidiser pump's inducer blade tips had been nicked (foreign object damage): it needed about ${pct(p.k - 1)} more suction head than the drawing.`,
-      indicators: 'At mainstage the ox pump was cavitating: PT-414 a few per cent low, VIB-345 up, the ox flow and the main mixture ratio down, Pc down — and the turbine inlet temperature DOWN as well, because the gas generator\'s oxidiser comes from the same pump. The speed hardly moved: the pump unloaded the shaft at the same moment as its own gas generator lost power. Raising the ox tank pressure cures it.',
+      indicators: 'At mainstage the ox pump was cavitating: PT-414 a few per cent low, VIB-345 up, the ox flow and the main mixture ratio down, Pc down — and the turbine inlet temperature DOWN as well, because the gas generator\'s oxidiser comes from the same pump. The speed moved little — a couple of per cent up: the cavitating pump unloaded the shaft more than its gas generator lost power. Raising the ox tank pressure cures it.',
       misleading: 'NPSH-OX on the console read exactly as it always does: it is the suction head the pump HAS, computed from the inlet pressure. What the damage changed is the head the pump NEEDS — which no instrument on the stand reads.',
       notice: 'One pump\'s discharge low with the other\'s normal, at a normal speed, with the vibration up: that pump is losing its grip. The ox side, not the fuel side, says which inducer to borescope.',
       abort: 'A hazard: a cavitating pump on a GG engine is a step on the way to an overspeed.',

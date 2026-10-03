@@ -93,7 +93,7 @@ const cases = {
   'ox-inducer': f => [
     ['the ox pump discharge low against the reference, the fuel pump\'s not', f.pt.PdOx < 0.975 * R.PdOx && Math.abs(f.pt.PdFu / R.PdFu - 1) < 0.02, `${f0(P(f.pt.PdOx))} vs ${f0(P(R.PdOx))} psig`],
     ['the main chamber pressure, mixture ratio and turbine inlet temperature down', f.pt.Pc < R.Pc && f.pt.MR < R.MR - 0.03 && f.pt.TIT < R.TIT - 8, `${f0(P(f.pt.Pc))} psig, MR ${f3(f.pt.MR)}, ${f0(f.pt.TIT)} K`],
-    ['the TPA vibration up, the speed barely moved', f.pt.vibTP > R.vibTP + 0.25 && Math.abs(f.pt.N / R.N - 1) < 0.015, `${f.pt.vibTP.toFixed(2)} vs ${R.vibTP.toFixed(2)} g, ${f0(f.pt.N)} rpm`],
+    ['the TPA vibration up, the speed moved little (a cavitating pump unloads: a touch faster)', f.pt.vibTP > R.vibTP + 0.25 && Math.abs(f.pt.N / R.N - 1) < 0.03, `${f.pt.vibTP.toFixed(2)} vs ${R.vibTP.toFixed(2)} g, ${f0(f.pt.N)} rpm`],
   ],
   'tt334-low': f => [
     ['TT-334 reads well below the reference', f.pt.TIT < R.TIT - 40, `${f0(f.pt.TIT)} vs ${f0(R.TIT)} K`],

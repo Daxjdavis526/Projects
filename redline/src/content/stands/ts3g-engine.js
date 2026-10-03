@@ -120,6 +120,10 @@ const sensors = [
    propellants. On a water cold flow the NPSH and GG-flow channels are off
    by the density ratio — and say so. */
 const RHO = { ox: FLUIDS_G.LOX.rho, fu: FLUIDS_G.ethanol.rho };
+const npsh = (p, T, k, side, dflt) => {
+  const f = k.fluidOf?.(side) || dflt;
+  return (p + k.Pamb - f.pvap(T)) / ((f.rhoAt ? f.rhoAt(T) : f.rho) * G0);
+};
 const safeDiv = (a, b) => (Math.abs(b) > 0.005 ? a / b : 0);
 const ggFlow = (CdA, rho) => ([pd, pg]) => (pd > pg + psi(5) ? CdA * Math.sqrt(2 * rho * (pd - pg)) : 0);
 const channels = {
@@ -143,10 +147,11 @@ const channels = {
     { id: 'SPD-PCT', quantity: 'ratio', desc: 'Shaft speed, fraction of design (36 000 rpm)', inputs: ['SPD'], fn: ([n]) => n / ND },
     { id: 'DP-OXP', quantity: 'pressure', gauge: 'd', desc: 'Ox pump ΔP (PT-414 − PT-413)', inputs: ['PT-414', 'PT-413'], fn: ([a, b]) => a - b },
     { id: 'DP-FUP', quantity: 'pressure', gauge: 'd', desc: 'Fuel pump ΔP (PT-424 − PT-423)', inputs: ['PT-424', 'PT-423'], fn: ([a, b]) => a - b },
-    { id: 'NPSH-OX', quantity: 'head', desc: 'Ox pump NPSH available at LOX properties, (PT-413 + Pamb − Pv(TT-412))/(ρg)', inputs: ['PT-413', 'TT-412'],
-      fn: ([p, T], k) => (p + k.Pamb - FLUIDS_G.LOX.pvap(T)) / (RHO.ox * G0) },
-    { id: 'NPSH-FU', quantity: 'head', desc: 'Fuel pump NPSH available at ethanol properties, (PT-423 + Pamb − Pv(TT-422))/(ρg)', inputs: ['PT-423', 'TT-422'],
-      fn: ([p, T], k) => (p + k.Pamb - FLUIDS_G.ethanol.pvap(T)) / (RHO.fu * G0) },
+    // at the properties of what is in the tank (water in a cold flow), from its measured temperature
+    { id: 'NPSH-OX', quantity: 'head', desc: 'Ox pump NPSH available at the loaded liquid\'s properties, (PT-413 + Pamb − Pv(TT-412))/(ρg)', inputs: ['PT-413', 'TT-412'],
+      fn: ([p, T], k) => npsh(p, T, k, 'ox', FLUIDS_G.LOX) },
+    { id: 'NPSH-FU', quantity: 'head', desc: 'Fuel pump NPSH available at the loaded liquid\'s properties, (PT-423 + Pamb − Pv(TT-422))/(ρg)', inputs: ['PT-423', 'TT-422'],
+      fn: ([p, T], k) => npsh(p, T, k, 'fu', FLUIDS_G.ethanol) },
     { id: 'DP-OXI', quantity: 'pressure', gauge: 'd', desc: 'Main oxidiser injector ΔP (PT-415 − PT-501)', inputs: ['PT-415', 'PT-501'], fn: ([a, b]) => a - b },
     { id: 'DP-FUI', quantity: 'pressure', gauge: 'd', desc: 'Main fuel injector ΔP (PT-425 − PT-501)', inputs: ['PT-425', 'PT-501'], fn: ([a, b]) => a - b },
     { id: 'MR-C', quantity: 'ratio', desc: 'Main chamber mixture ratio, FT-416 / FT-426 (as measured)', inputs: ['FT-416', 'FT-426'], fn: ([o, f]) => safeDiv(o, f) },

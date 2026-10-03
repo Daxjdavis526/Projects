@@ -16,7 +16,7 @@ const segName = { c1: 'barrel, injector end', c2: 'barrel', c3: 'barrel, aft', c
 
 export const REGEN_FAULTS = [
   { id: 'jkt-blocked', component: 'JKT-2', mode: 'restricted', category: 'system', hazard: true, onset: 'start',
-    params: rng => ({ b: 0.45 + rng.uniform(0, 0.12) }),
+    params: rng => ({ b: 0.55 + rng.uniform(0, 0.12) }),
     apply: (S, p) => { S.model.jacket.seg_('th').block = p.b; S.model.jacket.seg_('cv').block = 0.5 * p.b; S.model.line('fu').jacketBlockage = 0.35 * p.b; },
     evidence: ['TC-803', 'DP-JKT', 'PT-729', 'jacket-flow', 'jacket-xray', 'prediction'],
     inspect: { 'jacket-flow': (S, p) => ({ lines: [

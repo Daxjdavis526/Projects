@@ -250,7 +250,9 @@ recorded data, test history that outlives the session, an engineering
 notebook and printable test reports. It ends in an unscripted acceptance
 campaign: a test request, no procedure, maybe a hidden fault, and a report
 graded on whether you noticed the data were not what they seemed. A
-second stand adds a pressure-fed bipropellant engine: run cold first,
+second stand adds a pressure-fed bipropellant engine on liquid oxygen and
+ethanol, its combustion taken from NASA CEA tables and its LOX boiling off
+in a frosted tank: run cold first,
 water through each side of the injector to measure what the drawing only
 estimated, then hot — a spark igniter, start sequences that light smoothly
 or hard, an uncooled copper chamber that sets the burn time and soaks back
@@ -278,8 +280,8 @@ diamonds spaced by the jet's Mach number, separating inside the nozzle at
 low chamber pressure, sooty when the mixture runs rich — with sound from
 the same physics, a full-screen fire view at the countdown, and a
 slow-motion replay of every run.
-Fictional hardware, generalised
-procedures, and it says so. Desktop only.
+Fictional hardware, real propellants,
+generalised procedures, and it says so. Desktop only.
 
 Live: https://daxjdavis526.github.io/Projects/redline/
 
