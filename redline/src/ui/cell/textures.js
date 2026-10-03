@@ -88,3 +88,16 @@ export function puff() {
   const t = new THREE.CanvasTexture(c);
   return t;
 }
+
+/* Stainless wire braid over a hose: a fine diagonal weave. */
+export function braid({ repeat = [1, 30] } = {}) {
+  const [c, g] = canvas(64, 64);
+  g.fillStyle = '#8d9296'; g.fillRect(0, 0, 64, 64);
+  for (let k = -64; k < 128; k += 8) {
+    g.strokeStyle = 'rgba(220,224,226,0.9)'; g.lineWidth = 2.2;
+    g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 64, 64); g.stroke();
+    g.strokeStyle = 'rgba(70,74,78,0.8)'; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(k + 64, 0); g.lineTo(k, 64); g.stroke();
+  }
+  return tex(c, { repeat });
+}

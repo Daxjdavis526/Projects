@@ -6,36 +6,69 @@
        update(st, dt, time), emit(st, dt, P) — particles, focus points }.
    The engine fires along +x. */
 import * as THREE from 'three';
-import { mesh, MAT, vessel, bottle, tube, ballValve, solenoid, regulator, transducer, beam, engine } from './parts.js';
-import { label } from './textures.js';
+import { mesh, MAT, vessel, weighScale, bottle, gauge, tag, tube, hose, ballValve, solenoid, regulator, transducer, beam, engine } from './parts.js';
+import { label, concrete, hazard } from './textures.js';
+import { member, iSection, rhsSection, plate, gusset, bolts, boltCircle, boltGrid } from './structure.js';
 
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 
-/* Gas panel on the back wall: a steel plate with regulators and valves. */
+/* Gas panel on the back wall: a painted panel on standoffs; each regulator
+   with its outlet gauge, every component tagged; the header in neat
+   stainless runs with clamps; the supply gauge at the inlet. */
 function gasPanel(g, x0, items) {
-  const plate = mesh(new THREE.BoxGeometry(2.2, 1.5, 0.04), MAT.paintGrey(), { x: x0, y: 1.45, z: -4.17 });
-  g.add(plate);
-  const lab = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.16), new THREE.MeshStandardMaterial({ map: label('GAS PANEL', { fg: '#ddd', bg: '#2b3238', font: 'bold 60px monospace' }), roughness: 0.6 }));
-  lab.position.set(x0, 2.1, -4.145); g.add(lab);
+  const pm = new THREE.MeshStandardMaterial({ color: 0x5b646b, metalness: 0.3, roughness: 0.55 });
+  const pl = plate({ w: 2.3, h: 1.4, t: 0.012, mat: pm, rc: 0.03 }); pl.position.set(x0, 1.45, -4.16); g.add(pl);
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) g.add(mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.05, 10), MAT.steel(), { x: x0 + sx * 1.05, y: 1.45 + sy * 0.6, z: -4.185, rx: Math.PI / 2 }));
+  const lab = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.12), new THREE.MeshStandardMaterial({ map: label('GAS PANEL · N2 4000 PSIG', { w: 1024, h: 112, fg: '#f1f1ec', bg: '#1d2328', font: 'bold 64px monospace' }), roughness: 0.6 }));
+  lab.position.set(x0, 2.02, -4.152); g.add(lab);
   const out = {};
+  const z = -4.1, yH = 1.35;
+  const xs = items.map((it, i) => x0 - 0.85 + i * (1.7 / Math.max(1, items.length - 1)));
   items.forEach((it, i) => {
     const o = it.kind === 'reg' ? regulator({ size: 1.4 }) : it.kind === 'sol' ? solenoid({ size: 1.3 }) : ballValve({ size: 1.1, pneumatic: it.pneumatic !== false });
-    o.position.set(x0 - 0.85 + i * (1.7 / Math.max(1, items.length - 1)), it.y ?? 1.35, -4.08);
+    o.position.set(xs[i], it.y ?? yH, z);
     g.add(o); out[it.id] = o;
+    const t = tag(it.id); t.position.set(xs[i], yH - 0.13, -4.152); g.add(t);
+    if (it.kind === 'reg') {
+      const gg = gauge({ size: 0.075, frac: 0.25 + 0.1 * i }); gg.position.set(xs[i] + 0.09, yH + 0.2, -4.12); g.add(gg);
+      g.add(tube([[xs[i] + 0.03, yH, z], [xs[i] + 0.09, yH + 0.06, z], [xs[i] + 0.09, yH + 0.16, -4.12]], { r: 0.003 }));
+    }
   });
-  g.add(tube([[x0 - 1.0, 1.35, -4.08], [x0 + 1.0, 1.35, -4.08]], { r: 0.008 }));
+  // header and the supply gauge at its inlet
+  g.add(tube([[x0 - 1.05, yH, z], [x0 + 1.05, yH, z]], { r: 0.0064 }));
+  const sg = gauge({ size: 0.11, frac: 0.6 }); sg.position.set(x0 - 1.0, yH + 0.32, -4.12); g.add(sg);
+  g.add(tube([[x0 - 1.0, yH, z], [x0 - 1.0, yH + 0.25, -4.12]], { r: 0.003 }));
+  const st = tag('PI-SUPPLY', { w: 0.11 }); st.position.set(x0 - 1.0, yH + 0.22, -4.152); g.add(st);
+  // tube clamps on the header
+  for (let k = 0; k < items.length + 1; k++) {
+    const x = x0 - 0.98 + k * (1.96 / items.length);
+    g.add(mesh(new THREE.BoxGeometry(0.02, 0.03, 0.05), MAT.black(), { x, y: yH, z: -4.13 }));
+  }
   return out;
 }
 
-/* A bottle rack against the rear wall. */
+/* A bottle rack against the rear wall: an angle-steel frame, the
+   cylinders chained to it, a manifold pigtail to each. */
 function bottles(g, n, x0 = -7.5, z0 = -3.6) {
   const out = [];
+  const frame = MAT.paintYellow();
+  const cols = Math.min(3, n), rows = Math.ceil(n / 3);
+  const w = cols * 0.3, d = rows * 0.3;
   for (let i = 0; i < n; i++) {
     const b = bottle();
-    b.position.set(x0 + (i % 3) * 0.3, 0, z0 + Math.floor(i / 3) * 0.3);
+    b.position.set(x0 + (i % 3) * 0.3, 0.02, z0 + Math.floor(i / 3) * 0.3);
+    b.rotation.y = i * 1.3;
     g.add(b); out.push(b);
   }
-  g.add(beam([x0 - 0.2, 0.9, z0 - 0.2], [x0 + 0.8, 0.9, z0 - 0.2], { w: 0.04, h: 0.04, mat: MAT.paintYellow() }));
+  const xa = x0 - 0.17, xb = x0 - 0.17 + w + 0.04, za = z0 - 0.17, zb2 = z0 - 0.17 + d + 0.04;
+  for (const [x, zz] of [[xa, za], [xb, za], [xa, zb2], [xb, zb2]]) g.add(member(rhsSection(0.04, 0.04, 0.004), [x, 0, zz], [x, 1.2, zz], frame));
+  for (const yy of [0.55, 1.05]) {
+    g.add(member(rhsSection(0.035, 0.035, 0.004), [xa, yy, za], [xb, yy, za], frame));
+    g.add(member(rhsSection(0.035, 0.035, 0.004), [xa, yy, zb2], [xb, yy, zb2], frame));
+    // the chains: dark links across the bottles' faces
+    for (const zz of [za + 0.02, zb2 - 0.02]) g.add(tube([[xa, yy - 0.05, zz], [xb, yy - 0.05, zz]], { r: 0.004, mat: MAT.darkSteel() }));
+  }
+  g.add(mesh(new THREE.BoxGeometry(w + 0.08, 0.02, d + 0.08), MAT.darkSteel(), { x: (xa + xb) / 2, y: 0.01, z: (za + zb2) / 2 }));
   return out;
 }
 
@@ -48,23 +81,118 @@ function handValve() {
   return g;
 }
 
-/* A thrust stand: base, uprights, a cradle and a load cell behind the
-   injector. x0 = injector face, y = axis height. */
+/* A thrust stand, as small engine stands are built: a concrete plinth with
+   cast-in anchors; a welded base of wide-flange beams; a THRUST TAKEOUT — a
+   heavy plate on two box columns, gusseted back to the base, that the
+   thrust is reacted into; a machined CRADLE that carries the engine,
+   hung on four thin stainless FLEXURE blades so it moves freely along the
+   axis and not at all across it; the engine's injector flange bolted to a
+   mount plate on the cradle, a saddle and strap under the chamber; and
+   between the mount plate and the takeout, in line with the thrust, the
+   LOAD CELL on two rod ends. x0 = injector face, y = axis height,
+   len = engine length, r = its outer radius. */
+const paintFrame = () => new THREE.MeshStandardMaterial({ color: 0x2f4b63, metalness: 0.35, roughness: 0.48 });
+const paintPrimer = () => new THREE.MeshStandardMaterial({ color: 0x4a4d4f, metalness: 0.4, roughness: 0.62 });
+const alu = () => new THREE.MeshStandardMaterial({ color: 0xb8bcbf, metalness: 0.8, roughness: 0.32 });
 function thrustStand(g, x0, y, len, r) {
-  const yel = MAT.paintYellow();
-  g.add(mesh(new THREE.BoxGeometry(len + 0.7, 0.05, 0.9), MAT.darkSteel(), { x: x0 + len / 2 - 0.15, y: 0.03 }));
-  for (const dz of [-0.32, 0.32]) {
-    g.add(beam([x0 - 0.25, 0.05, dz], [x0 - 0.25, y + r + 0.12, dz], { w: 0.07, h: 0.07, mat: yel }));
-    g.add(beam([x0 + len * 0.55, 0.05, dz], [x0 + len * 0.55, y - r - 0.02, dz], { w: 0.05, h: 0.05, mat: yel }));
+  const yel = MAT.paintYellow(), frame = paintFrame(), primer = paintPrimer(), al = alu(), ss = MAT.stainless();
+  const xa = x0 - 0.62, xb = x0 + Math.max(len, 0.12) + 0.28;          // base extent along the axis
+  const zb = 0.24;                                                      // base beams at ±zb
+  // concrete plinth, chamfered top edge
+  const yP = 0.32;
+  const plinthM = new THREE.MeshStandardMaterial({ map: concrete({ seed: 41, base: [158, 155, 148], repeat: [1, 1] }), roughness: 0.92 });
+  const pl = mesh(new THREE.BoxGeometry(xb - xa + 0.3, yP, 0.86), plinthM, { x: (xa + xb) / 2, y: yP / 2 });
+  g.add(pl);
+  g.add(mesh(new THREE.PlaneGeometry(xb - xa + 0.34, 0.06), new THREE.MeshStandardMaterial({ map: hazard({ repeat: [10, 1] }), roughness: 0.7 }), { x: (xa + xb) / 2, y: yP - 0.03, z: 0.431, cast: false }));
+  // base: two W100 beams along the axis, cross beams at the ends, on base plates with anchor bolts
+  const d = 0.1, yB = yP + d;                                           // top of the base steel
+  for (const z of [-zb, zb]) g.add(member(iSection(d, 0.1, 0.006, 0.009), [xa, yP + d / 2, z], [xb, yP + d / 2, z], primer));
+  for (const x of [xa + 0.05, xb - 0.05]) g.add(member(iSection(d, 0.1, 0.006, 0.009), [x, yP + d / 2, -zb + 0.05], [x, yP + d / 2, zb - 0.05], primer));
+  const anchors = [];
+  for (const x of [xa + 0.05, (xa + xb) / 2, xb - 0.05]) for (const z of [-zb, zb]) {
+    const bp = plate({ w: 0.18, h: 0.18, t: 0.012, mat: primer }); bp.rotation.x = -Math.PI / 2; bp.position.set(x, yP + 0.006, z); g.add(bp);
+    for (const dx of [-0.065, 0.065]) for (const dz of [-0.065, 0.065]) anchors.push([x + dx, yP + 0.012, z + dz]);
   }
-  g.add(beam([x0 - 0.25, y + r + 0.12, -0.32], [x0 - 0.25, y + r + 0.12, 0.32], { w: 0.07, h: 0.07, mat: yel }));
-  g.add(mesh(new THREE.BoxGeometry(0.05, r * 2 + 0.2, 0.7), yel, { x: x0 - 0.25, y }));
-  // load cell between the thrust block and the engine mount
-  g.add(mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.09, 18), MAT.stainless(), { x: x0 - 0.17, y, rz: Math.PI / 2 }));
-  g.add(mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.3, 6), MAT.black(), { x: x0 - 0.17, y: y + 0.15, z: 0.03 }));
-  // flexures under the cradle
-  for (const dx of [0.05, len * 0.6]) for (const dz of [-0.2, 0.2]) g.add(mesh(new THREE.BoxGeometry(0.004, y - r - 0.06, 0.06), MAT.stainless(), { x: x0 + dx, y: (y - r) / 2 + 0.02, z: dz }));
-  g.add(mesh(new THREE.BoxGeometry(len * 0.75, 0.03, 0.5), MAT.darkSteel(), { x: x0 + len * 0.35, y: y - r - 0.03 }));
+  g.add(bolts(anchors, [0, 1, 0], 0.016));
+  // the thrust takeout: two box columns, a 25 mm plate across them, gussets behind
+  const xT = x0 - 0.46, top = y + Math.max(0.16, r + 0.1);
+  for (const z of [-zb, zb]) {
+    g.add(member(rhsSection(0.08, 0.08, 0.006), [xT - 0.06, yB, z], [xT - 0.06, top, z], frame));
+    const gs = gusset({ a: 0.3, b: 0.32, t: 0.012, mat: frame }); gs.rotation.y = Math.PI; gs.position.set(xT - 0.1, yB, z); g.add(gs);
+  }
+  g.add(member(rhsSection(0.08, 0.08, 0.006), [xT - 0.06, top + 0.04, -zb - 0.04], [xT - 0.06, top + 0.04, zb + 0.04], frame));
+  const tp = plate({ w: 2 * zb + 0.12, h: top - yB - 0.06, t: 0.025, mat: yel, rc: 0.012 });
+  tp.rotation.y = Math.PI / 2; tp.position.set(xT, (yB + top) / 2 + 0.01, 0); g.add(tp);
+  g.add(boltGrid([xT + 0.013, (yB + top) / 2 + 0.01, 0], [1, 0, 0], [0, 0, 1], [0, 1, 0], 2 * zb, top - yB - 0.16, 2, 4, 0.014));
+  // flexure pedestals on the base beams, the blades, the cradle
+  const yC = y - Math.max(r, 0.03) - 0.06;                              // cradle underside
+  const tC = 0.02, flexL = 0.11;
+  const cx0 = x0 - 0.3, cx1 = x0 + Math.max(len, 0.12) * 0.95;
+  const cw = Math.max(0.26, 2 * (r + 0.09));
+  const fx = [cx0 + 0.06, cx1 - 0.06], fz = [-zb, zb];
+  for (const x of fx) for (const z of fz) {
+    g.add(member(rhsSection(0.06, 0.06, 0.005), [x, yB, z], [x, yC - flexL - 0.03, z], frame));
+    // clamp blocks top and bottom, the blade between (thin: it bends, so the cradle can move along x)
+    g.add(mesh(new THREE.BoxGeometry(0.03, 0.03, 0.07), ss, { x, y: yC - flexL - 0.015, z }));
+    g.add(mesh(new THREE.BoxGeometry(0.03, 0.03, 0.07), ss, { x, y: yC - 0.015, z }));
+    g.add(mesh(new THREE.BoxGeometry(0.0025, flexL - 0.02, 0.055), new THREE.MeshStandardMaterial({ color: 0xd2d6d8, metalness: 0.95, roughness: 0.18 }), { x, y: yC - flexL / 2 - 0.015, z }));
+    g.add(bolts([[x + 0.016, yC - 0.015, z - 0.02], [x + 0.016, yC - 0.015, z + 0.02], [x + 0.016, yC - flexL - 0.015, z - 0.02], [x + 0.016, yC - flexL - 0.015, z + 0.02]], [1, 0, 0], 0.008, { stud: false }));
+  }
+  const cr = plate({ w: cx1 - cx0, h: Math.max(cw, 2 * zb + 0.08), t: tC, mat: al, rc: 0.01 });
+  cr.rotation.x = -Math.PI / 2; cr.position.set((cx0 + cx1) / 2, yC + tC / 2, 0); g.add(cr);
+  // engine mount plate: the injector flange bolts to it
+  const mh = (y + Math.max(r, 0.03) + 0.05) - (yC + tC);
+  const mw = Math.max(0.18, 2 * r + 0.1);
+  // a bore for the injector head: the engine's flange bolts to the plate's front face
+  const mp = plate({ w: mw, h: mh, t: 0.016, mat: al, rc: 0.012, holes: [[0, (y - (yC + tC + mh / 2)), Math.max(0.012, r * 1.05)]] });
+  mp.rotation.y = Math.PI / 2; mp.position.set(x0 - 0.035, yC + tC + mh / 2, 0); g.add(mp);
+  for (const z of [-mw / 2 + 0.012, mw / 2 - 0.012]) {
+    const gs = gusset({ a: 0.08, b: Math.min(0.1, mh * 0.6), t: 0.01, mat: al }); gs.rotation.y = Math.PI; gs.position.set(x0 - 0.045, yC + tC, z); g.add(gs);
+  }
+  g.add(boltGrid([x0 - 0.035, yC + tC + 0.012, 0], [0, 1, 0], [0, 0, 1], [1, 0, 0], mw - 0.05, 0, 3, 1, 0.009, { stud: false }));
+  // saddle and strap under the chamber
+  const xs = x0 + Math.max(len, 0.06) * 0.32, sh = y - Math.max(r, 0.012) - (yC + tC);
+  if (sh > 0.01) {
+    g.add(mesh(new THREE.BoxGeometry(0.03, sh, Math.max(0.05, r * 1.6)), al, { x: xs, y: yC + tC + sh / 2 }));
+    g.add(mesh(new THREE.TorusGeometry(Math.max(r, 0.012) + 0.003, 0.0035, 6, 24, Math.PI), ss, { x: xs, y, ry: Math.PI / 2 }));
+  }
+  // the load cell, in line with the cradle just above it (the injector is
+  // in the way on the axis): clevis, rod end, stinger, cell, rod end, clevis
+  // on a bracket at the cradle's back edge
+  const lc = new THREE.Group();
+  const yL = yC + tC + 0.045, xm = cx0 + 0.012, span = xm - (xT + 0.0125);
+  const bh = yL + 0.03 - (yC + tC);
+  const br = plate({ w: 0.09, h: bh, t: 0.012, mat: al, rc: 0.006 }); br.rotation.y = Math.PI / 2; br.position.set(cx0 + 0.006, yC + tC + bh / 2, 0); g.add(br);
+  const cl = (x, dir) => {                                              // a clevis: two lugs and a pin
+    for (const dz of [-0.016, 0.016]) lc.add(mesh(new THREE.BoxGeometry(0.035, 0.04, 0.006), ss, { x: x + dir * 0.0175, y, z: dz }));
+    lc.add(mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.045, 10), MAT.steel(), { x: x + dir * 0.024, y, rx: Math.PI / 2 }));
+  };
+  cl(xT + 0.0125, 1); cl(xm, -1);
+  const rod = (xa2, xb2, rr) => lc.add(mesh(new THREE.CylinderGeometry(rr, rr, Math.abs(xb2 - xa2), 12), ss, { x: (xa2 + xb2) / 2, y, rz: Math.PI / 2 }));
+  const cellL = 0.07, cellR = 0.032, xc = xT + 0.0125 + span * 0.55;
+  rod(xT + 0.04, xc - cellL / 2, 0.006);
+  rod(xc + cellL / 2, xm - 0.03, 0.006);
+  for (const x of [xT + 0.04, xm - 0.03]) lc.add(mesh(new THREE.SphereGeometry(0.009, 12, 8), ss, { x, y }));
+  lc.add(mesh(new THREE.CylinderGeometry(cellR, cellR, cellL, 28), new THREE.MeshStandardMaterial({ color: 0xc9cdcf, metalness: 0.9, roughness: 0.22 }), { x: xc, y, rz: Math.PI / 2 }));
+  for (const dx of [-cellL / 2, cellL / 2]) lc.add(mesh(new THREE.TorusGeometry(cellR, 0.0025, 6, 28), ss, { x: xc + dx, y, ry: Math.PI / 2 }));
+  lc.add(mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.02, 10), MAT.black(), { x: xc, y: y + cellR + 0.008 }));
+  lc.add(mesh(new THREE.PlaneGeometry(0.045, 0.02), new THREE.MeshStandardMaterial({ map: label(['LC-1', '2 kN'], { fg: '#111', bg: '#d9dcd8', font: 'bold 44px monospace' }), roughness: 0.6 }), { x: xc, y: y + 0.005, z: cellR + 0.0005 }));
+  lc.position.y = yL - y;
+  g.add(lc);
+  g.add(tube([[xc, yL + cellR + 0.018, 0], [xc, yL + cellR + 0.05, 0.02], [xT + 0.05, yL + 0.2, zb], [xT - 0.02, top - 0.02, zb + 0.06], [xT - 0.02, yB + 0.02, zb + 0.1]], { r: 0.0032, mat: MAT.black(), bend: 0.05 }));
+}
+
+/* Flex hoses from the main valves' outlets (ox above, fuel below, beside
+   the takeout) forward past it and in to the engine's inlet fittings. */
+function feedHoses(g, E, x0, y, oxOut, fuOut, r) {
+  const at = k => E.inlets[k].clone().add(E.group.position);
+  for (const [k, o] of [['ox', oxOut], ['fu', fuOut]]) {
+    const P = at(k), front = P.x > x0;                                  // a regen engine takes its fuel at the nozzle end
+    const pts = front
+      ? [o, [x0 - 0.2, o[1], o[2] - 0.02], [x0 + 0.02, P.y - 0.03, o[2] + 0.12], [P.x, P.y - 0.03, P.z - 0.05], [P.x, P.y, P.z]]
+      : [o, [x0 - 0.22, o[1], o[2] - 0.03], [P.x - 0.1, (o[1] + P.y) / 2, P.z - 0.12], [P.x - 0.03, P.y, P.z]].concat([[P.x, P.y, P.z]]);
+    g.add(hose(pts, { r }));
+  }
 }
 
 function makePeopleSpots(map) { return task => (map[task] || map.default).map(p => p.clone()); }
@@ -122,19 +250,18 @@ export function buildBiprop(def) {
     const L = lines.find(l => l.id === id);
     const v = vessel({ V: L.Vtank, aspect: 2.4, color: col, text: [tag, id === 'ox' ? 'LOX' : 'ETHANOL'] });
     v.position.set(x, 0.12, -3.0);
-    g.add(mesh(new THREE.BoxGeometry(0.7, 0.1, 0.7), MAT.darkSteel(), { x, y: 0.06, z: -3.0 }));
+    { const sc = weighScale(Math.max(0.6, v.userData.r * 2.6)); sc.position.set(x, 0, -3.0); g.add(sc); }
     g.add(v); tanks[id] = v;
     // vent valve on top
-    const vv = solenoid({ size: 1.1 }); vv.position.set(x + 0.08, 0.12 + v.userData.top + 0.05, -3.0); g.add(vv); tanks[id + 'V'] = vv;
+    const vv = solenoid({ size: 1.1 }); vv.position.copy(v.userData.ventAt).add(v.position); g.add(vv); tanks[id + 'V'] = vv;
   });
   // feed lines to the main valves and the injector
   const mov = ballValve({ size: 1.2 }), mfv = ballValve({ size: 1.2 });
   mov.position.set(x0 - 0.65, y + 0.18, -0.35); mfv.position.set(x0 - 0.65, y - 0.18, -0.35);
   g.add(mov, mfv);
   g.add(tube([[-3.3, 0.35, -2.75], [-3.3, 0.35, -1.2], [x0 - 1.2, 0.35, -1.2], [x0 - 1.2, y + 0.18, -0.35], [x0 - 0.72, y + 0.18, -0.35]], { r: 0.0095 }));
-  g.add(tube([[x0 - 0.58, y + 0.18, -0.35], [x0 - 0.3, y + 0.18, -0.35], [x0 - 0.1, y + E.rOut * 0.8, -0.05]], { r: 0.0095 }));
+  feedHoses(g, E, x0, y, [x0 - 0.58, y + 0.18, -0.35], [x0 - 0.58, y - 0.18, -0.35], 0.0095);
   g.add(tube([[-1.9, 0.35, -2.75], [-1.9, 0.25, -1.0], [x0 - 1.0, 0.25, -1.0], [x0 - 1.0, y - 0.18, -0.35], [x0 - 0.72, y - 0.18, -0.35]], { r: 0.0095 }));
-  g.add(tube([[x0 - 0.58, y - 0.18, -0.35], [x0 - 0.3, y - 0.18, -0.35], [x0 - 0.1, y - E.rOut * 0.8, -0.05]], { r: 0.0095 }));
   // purge valves and their lines
   const pv1 = solenoid(), pv2 = solenoid();
   pv1.position.set(x0 - 0.4, y + 0.36, -0.2); pv2.position.set(x0 - 0.4, y - 0.36, -0.2); g.add(pv1, pv2);
@@ -143,8 +270,8 @@ export function buildBiprop(def) {
   const hv = handValve(); hv.position.set(-7.4, b.userData.top + 0.03, -3.6); g.add(hv);
   g.add(tube([[-7.4, b.userData.top + 0.05, -3.6], [-7.4, 1.9, -3.8], [-6.2, 1.9, -4.08], [-5.6, 1.35, -4.08]], { r: 0.0063 }));
   const P = gasPanel(g, -4.7, [{ id: 'IV-601' }, { id: 'PR-610', kind: 'reg' }, { id: 'PR-620', kind: 'reg' }, { id: 'PR-630', kind: 'reg' }, { id: 'VV-601', kind: 'sol' }]);
-  g.add(tube([[-3.7, 1.35, -4.08], [-3.3, 1.35, -3.6], [-3.3, 0.12 + tanks.ox.userData.top, -3.0]], { r: 0.0063 }));
-  g.add(tube([[-3.7, 1.25, -4.08], [-1.9, 1.25, -3.6], [-1.9, 0.12 + tanks.fu.userData.top, -3.0]], { r: 0.0063 }));
+  g.add(tube([[-3.7, 1.35, -4.08], [-3.3, 1.35, -3.6], [-3.3, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  g.add(tube([[-3.7, 1.25, -4.08], [-1.9, 1.25, -3.6], [-1.9, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
   const valves = { 'HV-600': hv, 'MOV-713': mov, 'MFV-723': mfv, 'PV-631': pv1, 'PV-632': pv2, 'VV-711': tanks.oxV, 'VV-721': tanks.fuV, ...P };
   const exit = V3(exitX, y, 0);
   const hotC = new THREE.Color();
@@ -191,12 +318,12 @@ export function buildTurbopump(def) {
     const L = p.lines.find(l => l.id === id);
     const v = vessel({ V: L.Vtank, aspect: 2.2, color: 0xdfe3e2, text: [tag, 'WATER'] });
     v.position.set(x, 0.12, -3.0);
-    g.add(mesh(new THREE.BoxGeometry(0.8, 0.1, 0.8), MAT.darkSteel(), { x, y: 0.06, z: -3.0 }));
+    { const sc = weighScale(Math.max(0.6, v.userData.r * 2.6)); sc.position.set(x, 0, -3.0); g.add(sc); }
     g.add(v); tanks[id] = v;
-    const vv = solenoid({ size: 1.1 }); vv.position.set(x + 0.08, 0.12 + v.userData.top + 0.05, -3.0); g.add(vv); tanks[id + 'V'] = vv;
+    const vv = solenoid({ size: 1.1 }); vv.position.copy(v.userData.ventAt).add(v.position); g.add(vv); tanks[id + 'V'] = vv;
   });
-  g.add(tube([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.top, -3.0]], { r: 0.0063 }));
-  g.add(tube([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.top, -3.0]], { r: 0.0063 }));
+  g.add(tube([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  g.add(tube([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
   // TPA-1 on its pedestal: ox pump, fuel pump, turbine on one shaft (as on the P&ID)
   const tpa = new THREE.Group();
   const XO = -0.7, XF = -0.15, XT = 0.45;
@@ -300,12 +427,12 @@ export function buildGG(def) {
     const L = p.lines.find(l => l.id === id);
     const v = vessel({ V: L.Vtank, aspect: 2.2, color: col, text: [tag, fl] });
     v.position.set(x, 0.12, -3.0);
-    g.add(mesh(new THREE.BoxGeometry(0.8, 0.1, 0.8), MAT.darkSteel(), { x, y: 0.06, z: -3.0 }));
+    { const sc = weighScale(Math.max(0.6, v.userData.r * 2.6)); sc.position.set(x, 0, -3.0); g.add(sc); }
     g.add(v); tanks[id] = v;
-    const vv = solenoid({ size: 1.1 }); vv.position.set(x + 0.08, 0.12 + v.userData.top + 0.05, -3.0); g.add(vv); tanks[id + 'V'] = vv;
+    const vv = solenoid({ size: 1.1 }); vv.position.copy(v.userData.ventAt).add(v.position); g.add(vv); tanks[id + 'V'] = vv;
   });
-  g.add(tube([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.top, -3.0]], { r: 0.0063 }));
-  g.add(tube([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.top, -3.0]], { r: 0.0063 }));
+  g.add(tube([[-3.7, 1.35, -4.08], [-3.4, 1.35, -3.6], [-3.4, 0.12 + tanks.ox.userData.pressAt.y, -3.0]], { r: 0.0063 }));
+  g.add(tube([[-3.7, 1.25, -4.08], [-2.0, 1.25, -3.6], [-2.0, 0.12 + tanks.fu.userData.pressAt.y, -3.0]], { r: 0.0063 }));
   // TPA-1 on its pedestal behind the engine: ox pump, fuel pump, turbine
   const yT = 0.95, zT = -1.3, XO = -1.9, XF = -1.35, XT = -0.75;
   const tpa = new THREE.Group();
@@ -349,9 +476,8 @@ export function buildGG(def) {
   mov.position.set(x0 - 0.55, y + 0.2, -0.32); mfv.position.set(x0 - 0.55, y - 0.2, -0.32);
   g.add(mov, mfv);
   g.add(tube([[XO, yT + 0.13, zT + 0.07], [XO, y + 0.2, zT + 0.3], [XO, y + 0.2, -0.32], [x0 - 0.62, y + 0.2, -0.32]], { r: 0.0127 }));
-  g.add(tube([[x0 - 0.48, y + 0.2, -0.32], [x0 - 0.25, y + 0.2, -0.32], [x0 - 0.08, y + E.rOut * 0.8, -0.05]], { r: 0.0127 }));
+  feedHoses(g, E, x0, y, [x0 - 0.48, y + 0.2, -0.32], [x0 - 0.48, y - 0.2, -0.32], 0.0127);
   g.add(tube([[XF, yT + 0.12, zT + 0.07], [XF, y - 0.2, zT + 0.3], [XF, y - 0.2, -0.32], [x0 - 0.62, y - 0.2, -0.32]], { r: 0.0127 }));
-  g.add(tube([[x0 - 0.48, y - 0.2, -0.32], [x0 - 0.25, y - 0.2, -0.32], [x0 - 0.08, y - E.rOut * 0.8, -0.05]], { r: 0.0127 }));
   // the gas generator's taps: thin lines from the discharges to the can
   const gov = ballValve({ size: 0.8 }), gfv = ballValve({ size: 0.8 });
   const ggX = XT + 0.02, ggY = yT + 0.3;

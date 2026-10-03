@@ -259,6 +259,8 @@ export class CellView {
     }
     // daylight, facility, hardware
     const light = this.env.setTime(st.clock);
+    // reflections follow the light: rebuild them every few minutes of clock
+    if (!(Math.abs(st.clock - (this._envClock ?? -1e9)) < 300)) { this.env.applyEnvironment(this.renderer, this.scene); this._envClock = st.clock; }
     const spots = this.stand.people?.(st.tech || 'default');
     this.env.setFacility(st, time, spots);
     this.stand.update(st, dt, time);
