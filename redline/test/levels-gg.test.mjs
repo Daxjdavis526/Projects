@@ -73,7 +73,7 @@ function prepare(s, P, { hot = true } = {}) {
   const brk = s.log.items.filter(e => e.cat === 'TECH' && /breakaway/.test(e.text)).pop().text.match(/breakaway (\d+)/)[1];
   P.confirm('D2', brk); P.confirm('D3');
   ex('daqRate', { rate: 2000 });
-  if (hot) { ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' }); }
+  if (hot) { ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' }); }
   if (hot) { ex('inspection', { id: 'spark-check' }); s.run(41); P.confirm('F2'); }
   ex('tech', { task: 'openHV' }); s.run(9);
   P.confirm(L.sup + '2', (s.daq.latest('PT-301') / psi(1)).toFixed(0));
@@ -248,7 +248,7 @@ console.log('Level 29 — acceptance campaign: cold flow, drain, load, design po
   const dr = ex('tech', { task: 'drainTanks' }); s.run(91);
   const ld = ex('tech', { task: 'loadPropellants' }); s.run(151);
   check('drain and load accepted between the cold flow and the hot fires', dr.ok && ld.ok && s.controller.loaded === 'propellants');
-  ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+  ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' });
   for (const id of ['VV-301', 'VV-413', 'VV-423', 'VV-338']) ex('valve', { id, open: false });
   ex('valve', { id: 'IV-301', open: true }); s.run(2); ex('clearCell'); s.run(7); ex('pa', { text: 'x' });
   ex('regSet', { id: 'PR-630', value: psi(150) });

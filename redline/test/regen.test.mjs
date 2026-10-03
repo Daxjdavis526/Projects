@@ -19,7 +19,7 @@ const check = (label, cond, detail = '') => {
 };
 const P = x => x / psi(1), C = k => `${(k - 273.15).toFixed(0)} °C`;
 
-function ready({ ox = 420, fu = 480, seed = 5, fault = null, load = 'loadPropellants', meters = ['OX-1', 'FU-1'] } = {}) {
+function ready({ ox = 420, fu = 480, seed = 5, fault = null, load = 'loadPropellants', meters = ['LOX', 'ethanol'] } = {}) {
   const s = new Session({ def, mode: 'independent', seed, fault });
   const ex = (a, x = {}) => s.execute(a, x, { confirmed: true });
   ex('daqPower', { on: true }); s.run(5);
@@ -51,7 +51,7 @@ function hot(opts = {}, plan = {}) {
 
 console.log('cooling physics');
 {
-  check('FU-1 boils near 78 °C at one atmosphere', Math.abs(tsatFU(101325) - degC(78)) < 3, C(tsatFU(101325)));
+  check('ethanol boils near 78 °C at one atmosphere', Math.abs(tsatFU(101325) - degC(78)) < 3, C(tsatFU(101325)));
   check('…and near 200 °C at 3 MPa (alcohol-like)', Math.abs(tsatFU(3e6) - degC(200)) < 12, C(tsatFU(3e6)));
   check('no boiling above the critical pressure', tsatFU(7e6) === Infinity);
 }

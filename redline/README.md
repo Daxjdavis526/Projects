@@ -19,7 +19,7 @@ Live: https://daxjdavis526.github.io/Projects/redline/ — desktop browser, 1366
 | | |
 |---|---|
 | **Control room** | P&ID mimic, CCTV view of the cell, **3D cameras on the cell and the FIRE VIEW** (below), configurable strip charts, live channel table, console (valves, regulator, DAQ, facility, technician), fire control with a guarded ABORT, event log and alarm list, component faceplates |
-| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): OX-1 / FU-1, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector. **TS-3** (phase 9): a turbopump component stand — a 300 L nitrogen bank, two run tanks on RELIEVING regulators, and TPA-1, a fictional turbopump for a pump-fed engine (an oxidiser and a fuel centrifugal pump with inducers and an impulse turbine on one shaft, 36 000 rpm at design), its pumps flowing water through discharge valves, turbine flowmeters and throttle valves to a catch tank, its turbine driven by cold nitrogen through a turbine start valve and a speed controller (SC-330). **TS-3G** (phase 10): TS-3 rebuilt as an engine stand — TPA-1 now feeds **BPE-3**, a fictional 1.7 kN gas-generator cycle engine: OX-1 and FU-1 from the 60 L tanks at about 50 psig through the pumps to the main valves MOV-414 / MFV-424 and an ablatively cooled chamber; two small taps off the pump discharges through GG valves (GOV-416 / GFV-426), GG throttles (GCV-417 / GCV-427) and calibrated orifices into a fuel-rich **gas generator** whose ~850 K gas drives the turbine and leaves up a duct to the berm; nitrogen start gas (PR-330, TSV-332) for the bootstrap; two spark igniters; three purges |
+| **Stands** | TS-1: N₂ K-bottle → HV-100 bottle valve → IV-101 remote isolation → PR-101 dome-loaded regulator (EPC-101) → F-201 filter → SV-301 fire valve → CGT-1 cold-gas thruster on a flexure thrust stand. Vents VV-101/VV-201 (normally open), relief RV-201. **TS-2** (phase 6): a pressure-fed bipropellant stand — N₂ bottle → IV-601 → three dome-loaded regulators (oxidiser tank, fuel tank, purge); two run tanks with vents, reliefs, check valves and weigh scales; main ball valves MOV-713 / MFV-723 with limit switches; turbine flowmeters; purge valves and check valves into each injector manifold; BPE-1, a fictional 500 N-class engine with an impinging-doublet injector, on a thrust stand. Run cold — water through both sides — and then hot (phase 7): LOX / ethanol, a spark igniter IGN-901, an uncooled copper heat-sink chamber with embedded thermocouples, a flame detector and an accelerometer. **BPE-2** (phase 8) is a second engine for the same stand, chosen in TRAINING: the same size and propellants, regeneratively cooled — all the fuel crosses a milled-channel jacket in the chamber wall (PT-729 at its inlet, TC-728 at its outlet) before reaching the injector. **TS-3** (phase 9): a turbopump component stand — a 300 L nitrogen bank, two run tanks on RELIEVING regulators, and TPA-1, a fictional turbopump for a pump-fed engine (an oxidiser and a fuel centrifugal pump with inducers and an impulse turbine on one shaft, 36 000 rpm at design), its pumps flowing water through discharge valves, turbine flowmeters and throttle valves to a catch tank, its turbine driven by cold nitrogen through a turbine start valve and a speed controller (SC-330). **TS-3G** (phase 10): TS-3 rebuilt as an engine stand — TPA-1 now feeds **BPE-3**, a fictional 1.7 kN gas-generator cycle engine: LOX and ethanol from the 60 L tanks at about 50 psig through the pumps to the main valves MOV-414 / MFV-424 and an ablatively cooled chamber; two small taps off the pump discharges through GG valves (GOV-416 / GFV-426), GG throttles (GCV-417 / GCV-427) and calibrated orifices into a fuel-rich **gas generator** whose ~850 K gas drives the turbine and leaves up a duct to the berm; nitrogen start gas (PR-330, TSV-332) for the bootstrap; two spark igniters; three purges |
 | **Physics** | Lumped-parameter gas network, real-time, sub-millisecond steps; on TS-2 coupled to liquid feed lines with inertance (water hammer), a manifold that primes from dry against a trapped-gas cushion, and tank ullage that grows as liquid leaves; and a lumped combustion chamber — ignition, start transients, hard starts, chug and screech onset, a heat-sink wall that soaks back after shutdown; on TS-3, centrifugal pumps on the affinity laws with suction-limited cavitation and casing heating, an impulse turbine, and a shaft with bearings and vibration; on TS-3G a second combustor — the gas generator — fed from the pump discharges and feeding the turbine, so the whole cycle closes through the shaft, and an ablative chamber whose liner chars and whose throat erodes (below) |
 | **Instruments** | 14 sensors — including an independent Coriolis mass flowmeter — plus command and derived channels, each with lag, zero offset, noise, mains pickup, anti-aliasing, quantisation, saturation. Real state and measured state are separate objects |
 | **DAQ** | Sample rate 100 Hz – 5 kHz, recording to a run file, auto-stop, zero / tare / shunt calibration |
@@ -164,7 +164,7 @@ or the open stand.
 |---|---|
 | P&ID | click a component or instrument bubble for its faceplate (commands where it has them) |
 | Console ▸ STAND | valve OPEN/CLOSE, regulator setpoint(s) — one on TS-1, three on TS-2 — pressure-decay leak check (60 s hold) |
-| Console ▸ DAQ | power, sample rate, RECORD, ZERO PTs, TARE LC, SHUNT CAL; on TS-2 TARE SCALES and each turbine meter's calibration fluid (water, OX-1, FU-1) |
+| Console ▸ DAQ | power, sample rate, RECORD, ZERO PTs, TARE LC, SHUNT CAL; on TS-2 TARE SCALES and each turbine meter's calibration fluid (water, LOX, ethanol) |
 | Console ▸ FACILITY | clear/enter the cell, PA, technician tasks (walkdown, bottle valve, inspection; on TS-2 load water or propellants, drain the tanks), safety record |
 | Console ▸ INSPECT | the inspection workbench and its results; submit a diagnosis; the root cause afterwards; hints (guided) |
 | Notebook | pre-test notes; the session test report (conclusions, preview, File, Download HTML); filed reports; every run |
@@ -442,16 +442,15 @@ radii.
 
 **Combustion (TS-2, phase 7).** One lumped chamber volume holding two
 species — combustion products and nitrogen — carried as P·V = Σ m·R·T.
-Products arrive with R·T = (η·c*(MR)·Γ)², which is the definition of
-characteristic velocity turned around; c*(MR) and the flame temperature come
-from a small invented table shaped like a storable oxidiser with an alcohol
-fuel (peak c* ≈ 1640 m/s a little fuel-rich), and the as-built engine
-reaches 94 % of it. Gas leaves through a choked (or, early and late,
-unchoked) throat; thrust is an ideal nozzle at the throat's conditions with
-the same crude Summerfield allowance for separation as TS-1. Steady state
-lands within a per cent of an independent quasi-steady prediction:
-276 psig, 448 N, MR 1.37, Isp ≈ 217 s at 400/400 psig on the as-built
-injector.
+Products arrive with R·T = (η·c*·Γ(γ))², which is the definition of
+characteristic velocity turned around, with c*, γ and the gas constant of
+the products taken from NASA CEA for the mixture ratio and pressure they
+burned at (see *The propellants*, below); the as-built engine reaches 94 %
+of CEA's c*. Gas leaves through a choked (or, early and late, unchoked)
+throat; thrust is an ideal nozzle at the throat's conditions with the same
+crude Summerfield allowance for separation as TS-1. Steady state lands
+within a per cent of an independent quasi-steady prediction:
+@@BP_STEADY@@ on the as-built injector.
 
 Approximated, bluntly:
 - **Ignition** is a rule, not chemistry: the spark must be on, both
@@ -502,7 +501,7 @@ Approximated, bluntly:
 - **Coolant side** is Dittus–Boelter's ṁ^0.8 with a constant per zone. Fuel
   properties (density, cp) do not change with temperature, and the heat it
   carries does not raise c*.
-- **Boiling.** FU-1 saturates on an invented alcohol-like curve (78 °C at one
+- **Boiling.** The ethanol saturates on its own curve, an Antoine fit (78 °C at one
   atmosphere, ≈ 196 °C at 3 MPa, critical at 6.1 MPa). Past saturation at
   the wall, nucleate boiling helps; past a lumped critical heat flux — which
   falls with less flow and less subcooling — a vapour film forms and holds
@@ -516,6 +515,76 @@ Approximated, bluntly:
 - The **jacket** adds its volume to the fuel manifold (so the fuel side
   primes in ≈ 0.6 s instead of ≈ 0.2 s) and its resistance to the fuel line;
   it is one lumped restriction, not seven.
+
+### The propellants, and how honest they are
+
+The engines burn **liquid oxygen and ethanol** — real propellants, the V-2's
+pair and a common one for small engines since.
+
+- **Combustion** comes from NASA's Chemical Equilibrium with Applications
+  program (CEA, through RocketCEA), run once by `tools/cea_tables.py` and
+  committed as tables (`src/physics/cea-lox-ethanol.js`): c*, chamber
+  temperature, molecular weight and γ for LOX at 90.18 K and ethanol at
+  298.15 K, at mixture ratios 0.2–8 and chamber pressures 2–60 bar. The
+  browser interpolates them (bilinear in ln Pc and MR); it never runs CEA.
+  At BPE-1's design point (MR 1.5, 20 bar) that is c* @@CSTAR_BP@@ m/s,
+  @@TC_BP@@ K and γ @@GAMMA_BP@@ — the peak of LOX/ethanol's c*, a little
+  fuel-rich of stoichiometric (MR 2.08).
+- **Equilibrium in the chamber, a single γ through the nozzle.** CEA's
+  equilibrium γ is used for the whole expansion — between frozen and
+  shifting flow, which is about as good as a one-γ model gets. No kinetics,
+  no two-dimensional losses beyond the c* efficiency.
+- **The gas the model carries is built from c* and γ**, so its gas constant
+  is the *effective* one, (c*·Γ(γ))²/Tc. It matches CEA's molecular weight to
+  a per cent everywhere except very fuel-rich in the main table (MR ≤ 0.5:
+  CEA's equilibrium contains solid carbon there), where c* and the
+  temperature are kept right and the molecular weight is not.
+- **The gas generator** uses a second CEA table with **methane and solid
+  carbon removed** from the products. Full equilibrium that fuel-rich
+  makes soot and methane and holds above 1000 K at any mixture ratio; in a
+  real gas generator that chemistry is too slow for the time the gas
+  spends there, and suppressing those species is the usual way to make CEA
+  approximate it. Even so the result is an approximation, and a
+  distinctive one: CEA's fuel-rich LOX/ethanol temperature is flat — about
+  880 K at MR 0.3, 920 K at 0.4, 950 K at 0.5 — until the free hydrocarbons
+  run out near MR 0.55 and it climbs steeply. So on BPE-3 a richer or
+  leaner gas generator changes the turbine's *flow* more than its
+  *temperature*, and the overtemperature redline guards that knee. A real
+  fuel-rich gas generator's temperature is set by kinetics and measured on
+  its own stand.
+- **The engines were redrawn for the real propellants**, as a designer
+  would: throats re-sized to hold their design chamber pressures with CEA's
+  c* (BPE-1/2 14.4 → 14.75 mm, BPE-3 25.6 → 26.2 mm), exits re-sized for
+  CEA's γ to expand to about one atmosphere (BPE-1/2 28 → 30 mm, BPE-3
+  52 → 57 mm), the fuel injectors opened a per cent for ethanol's density,
+  and BPE-3's gas-generator orifices closed about 12 % (its products, at
+  γ ≈ 1.14, carry nearly twice the enthalpy per kelvin of the invented
+  gas) to hold 35 944 rpm at a turbine inlet of about 850 K. Thrust and Isp
+  rose by 6–7 %, which is what the real propellants are worth over the
+  invented ones.
+- **LOX is a cryogen, modelled simply.** Loaded at its boiling point
+  (90.2 K), its density (NIST saturated-liquid table) and vapour pressure
+  (NIST's Antoine fit, to the critical point at 154.6 K) follow its
+  temperature. Heat leaks into each tank through its insulation, UA·ΔT
+  (0.6 W/K for TS-2's 12 L tank, 1.5 W/K for TS-3G's 60 L). Vented, it
+  boils: the heat makes vapour (≈ 0.55 g/s from TS-2's tank), which leaves
+  through the vent — or, with the vent shut, pressurises the tank by
+  itself, which is what the relief valve is for. Pressurised above its
+  vapour pressure it is subcooled and warms instead. One temperature per
+  tank, well mixed — so a sealed tank pressurises slowly (a few psi in five
+  minutes: the whole liquid has to warm with its boiling point); a real
+  tank stratifies, its warm surface layer sets the pressure, and it rises
+  much faster. No
+  geysering; the vapour is counted as nitrogen (the network has one gas);
+  the pressurant does not cool or condense on the liquid; the lines and
+  injector are not chilled down (the first LOX into a warm manifold does
+  not flash), and the LOX pump is assumed kept chilled by a bleed that is
+  not modelled. Its suction margin is a real one: ≈ 1 bar of vapour
+  pressure at 90 K takes about 8 m off the pump's NPSH at 50 psig, and the
+  pump's own heat (a few kelvin) raises it further.
+- **Ethanol** is anhydrous: density linear in temperature (789 kg/m³ at
+  20 °C), vapour pressure from an Antoine fit (it boils at 78 °C), the same
+  curve the regenerative jacket boils it on.
 
 ### The turbopump (TS-3), and how honest it is
 
@@ -569,11 +638,11 @@ Modelled:
 - **The taps** are orifice flows off each pump discharge (valve, throttle,
   orifice in series), quasi-steady with a few milliseconds' lag; each pump
   delivers the main flow plus its tap, and the tank drains both.
-- **The cycle closes through the shaft and nothing else**: a hotter gas
-  generator spins the pumps faster, which raises the gas generator's own
-  feed pressure. That loop gain is real: a 5 % larger oxidiser orifice
-  makes the engine about 3 % faster and the turbine 30 K hotter; 16 % takes
-  it to the overspeed redline.
+- **The cycle closes through the shaft and nothing else**: more or hotter
+  gas-generator gas spins the pumps faster, which raises the gas
+  generator's own feed pressure. That loop gain is real: a 5 % larger
+  oxidiser orifice makes the engine about 3 % faster and the turbine about
+  10 K hotter; 16 % makes it 9 % faster, close to the overspeed redline.
 - **The steady prediction** (`physics/predict-gg.js`) balances turbine
   power against pump power by bisection on speed, with the chamber
   pressures solved inside. The pre-test prediction uses the DRAWING (its
@@ -585,9 +654,9 @@ Modelled:
   that grows as the liner thins — the case thermocouple warms late and
   soaks back after.
 
-Approximated, bluntly: the gas generator's temperature comes from an
-invented temperature-versus-mixture-ratio table with one γ and one gas
-constant — no equilibrium chemistry, no soot, no heat lost to its walls
+Approximated, bluntly: the gas generator's gas is CEA's fuel-rich
+equilibrium with methane and soot suppressed (see *The propellants*) — no
+kinetics, no heat lost to its walls
 worth the name. Its flows are inferred on the console from the orifices'
 pressure drops at the drawing's flow coefficient, which is exactly why two
 of the faults hide from them. The afterburning flame at the top of the
@@ -598,8 +667,9 @@ and agree to a few per cent, which is the honest size of the difference.
 
 **Not claimed.** The numbers are plausible for a small research cold-gas
 thruster, a small pressure-fed engine, a small turbopump and a small
-gas-generator engine at sea level. They predict no real
-hardware, and OX-1 and FU-1 are not real propellants.
+gas-generator engine at sea level. They predict no real hardware: the
+stands, engines and turbopump are invented. The propellants are real, and
+their combustion is NASA CEA's — with the approximations listed above.
 
 ### The faults, and how honest they are
 
@@ -653,7 +723,17 @@ node redline/test/gg.test.mjs
 node redline/test/faults-gg.test.mjs
 node redline/test/levels-gg.test.mjs
 node redline/test/visual.test.mjs
+node redline/test/propellants.test.mjs
 ```
+
+`propellants.test.mjs` checks the real propellants: the CEA tables read
+back exactly, c* peaking near MR 1.5 at a value LOX/ethanol is known for,
+c* = √(R·Tc)/Γ(γ) holding everywhere with the effective gas constant, the
+gas generator table's knee; LOX's and ethanol's boiling points and
+densities; a chamber on the CEA gas landing on CEA's temperature and c*;
+and a tank of LOX on TS-2 — boiling off at heat leak ÷ latent heat while
+vented, pressurising itself when sealed, subcooled and slowly warming when
+pressurised.
 
 `physics.test.mjs` checks the gas network against hand calculations;
 `session.test.mjs` flies a full guided Level 2, the interlocks, the poll, an

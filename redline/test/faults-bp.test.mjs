@@ -28,7 +28,7 @@ function standardHot(fault, seed = 11) {
   ex('zero', { ids: def.sensors.filter(x => x.kind === 'PT').map(x => x.id) });
   ex('tare', { ids: ['WT-716', 'WT-726'] }); ex('daqRate', { rate: 2000 });
   ex('tech', { task: 'loadPropellants' }); s.run(121);
-  ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+  ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' });
   ex('tech', { task: 'openHV' }); s.run(9);
   for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: false });
   ex('valve', { id: 'IV-601', open: true }); s.run(2); ex('clearCell'); s.run(7);

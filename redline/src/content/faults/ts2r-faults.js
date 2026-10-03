@@ -67,10 +67,10 @@ export const REGEN_FAULTS = [
     params: rng => ({ dT: 42 + rng.uniform(0, 18) }),
     apply: (S, p) => { S.model.fuelTempOffset = p.dT; },
     evidence: ['TC-727', 'TC-728', 'TSAT-M', 'go-no-go', 'fuel-temp'],
-    inspect: { 'fuel-temp': (S, p) => ({ lines: [['FU-1 temperature, hand probe in the tank', C(S.def.physics.ambient.T + p.dT), '15–30 °C'], ['Conditioning skid log', 'heater stuck on for 6 h overnight', 'off']],
+    inspect: { 'fuel-temp': (S, p) => ({ lines: [['Ethanol temperature, hand probe in the tank', C(S.def.physics.ambient.T + p.dT), '15–30 °C'], ['Conditioning skid log', 'heater stuck on for 6 h overnight', 'off']],
       text: 'The propellant conditioning skid\'s heater contactor welded shut overnight.' }) },
     story: p => ({
-      what: `FU-1 was loaded about ${p.dT.toFixed(0)} K hotter than usual: the conditioning skid's heater had stuck on. The fuel is the coolant, and every degree it starts warmer is a degree less margin to boiling at the hottest point of the jacket.`,
+      what: `The ethanol was loaded about ${p.dT.toFixed(0)} K hotter than usual: the conditioning skid's heater had stuck on. The fuel is the coolant, and every degree it starts warmer is a degree less margin to boiling at the hottest point of the jacket.`,
       indicators: 'TC-727 (fuel in the tank) well above ambient before anything flowed — a static reading, there for anyone to see. In the burn, TC-728 (coolant out) high and the boiling margin (TSAT-M) small, with Pc, flows and thrust all normal.',
       misleading: 'The engine performs perfectly. Nothing about Pc, MR, c* or thrust says anything is wrong.',
       notice: 'The go/no-go PROP item for the coolant inlet temperature, before arming.',
@@ -127,7 +127,7 @@ export const REGEN_INSPECTIONS = [
         ['Hottest the liner has been (temper colour)', `≈ ${C(Math.round(J.peakTwg / 25) * 25)}`, '< 400 °C']] };
     } },
   { id: 'fuel-temp', group: 'Cooling jacket', label: 'Hand-probe the fuel temperature; check the conditioning log', needs: 'cell', dur: 30,
-    run: S => ({ lines: [['FU-1 temperature, hand probe', C(S.def.physics.ambient.T + (S.model.fuelTempOffset || 0) + S.rng.gauss() * 0.3), '15–30 °C'],
+    run: S => ({ lines: [['Ethanol temperature, hand probe', C(S.def.physics.ambient.T + (S.model.fuelTempOffset || 0) + S.rng.gauss() * 0.3), '15–30 °C'],
       ['Conditioning skid log', (S.model.fuelTempOffset || 0) > 10 ? 'heater ON overnight' : 'normal', 'normal']] }) },
   { id: 'reference-tc', group: 'Instrumentation', label: 'Compare cell thermocouples with a reference probe (at rest)', needs: 'cell', dur: 60,
     run: S => {

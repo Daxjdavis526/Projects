@@ -28,7 +28,7 @@ export const request = () => ({
   range: [psi(150), psi(300)],
   duration: 3.0,
   title: 'BPE-1 injector cold flow',
-  text: 'Water cold flow of the BPE-1 injector, S/N 001, as built. Five 3 s flows: oxidiser side alone and fuel side alone at 150 psig tank pressure, then each alone at 300 psig, then both together at 300 psig with a 100 ms oxidiser lead. Deliverables: the measured flow coefficient (CdA) of each injector side, a check of each turbine meter against its tank scale, and the hot-fire mixture ratio this injector will give on OX-1 / FU-1 at the design injector ΔP (100 psi).',
+  text: 'Water cold flow of the BPE-1 injector, S/N 001, as built. Five 3 s flows: oxidiser side alone and fuel side alone at 150 psig tank pressure, then each alone at 300 psig, then both together at 300 psig with a 100 ms oxidiser lead. Deliverables: the measured flow coefficient (CdA) of each injector side, a check of each turbine meter against its tank scale, and the hot-fire mixture ratio this injector will give on LOX / ethanol at the design injector ΔP (100 psi).',
   success: 'Five clean flows; CdA from each side repeatable between 150 and 300 psig within 2 %; meters within 2 % of the scales; hot-fire MR reported against the design value of 1.50.',
 });
 

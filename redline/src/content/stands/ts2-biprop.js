@@ -9,10 +9,11 @@
 
    It runs COLD with water in both tanks (cold flow: nothing burns, the
    chamber is open to the cell) or HOT with the propellants BPE-1 is
-   designed for, OX-1 and FU-1 — fictional, a storable oxidiser and an
-   alcohol-like fuel, with an invented c*(MR) curve. A spark igniter lights
-   them; the chamber is an uncooled copper heat sink, so burn time is
-   limited by how hot its throat gets.
+   designed for: liquid oxygen and ethanol, the pair of the V-2 and of many
+   amateur and university engines since. Their combustion is NASA CEA's
+   (physics/propellants.js). A spark igniter lights them; the chamber is an
+   uncooled copper heat sink, so burn time is limited by how hot its throat
+   gets.
 
    Same shape as TS-1: one data file is the stand. */
 
@@ -21,6 +22,7 @@ import gonogo from './ts2-gonogo.js';
 import pid from './ts2-pid.js';
 import { interlocks } from './ts2-interlocks.js';
 import { predictBiprop } from '../../physics/predict-bp.js';
+import { FLUIDS as REAL_FLUIDS, GAS_MAIN, MR_STOICH } from '../../physics/propellants.js';
 import { computeMetricsBP } from '../../analysis/metrics-bp.js';
 import { FAULTS, DIAGNOSIS } from '../faults/ts2-faults.js';
 import { INSPECTIONS } from '../faults/ts2-inspections.js';
@@ -28,43 +30,25 @@ import { INSPECTIONS } from '../faults/ts2-inspections.js';
 const AMB = { P: P_STD, T: degC(20) };
 const g = x => AMB.P + psi(x);
 
-/* Fluids. Water is real; OX-1 and FU-1 are invented, with densities chosen
-   to sit where a storable oxidiser and an alcohol fuel would. */
-export const FLUIDS = {
-  water: { name: 'Water (simulant)', rho: 998 },
-  'OX-1': { name: 'OX-1 oxidiser (fictional)', rho: 1140 },
-  'FU-1': { name: 'FU-1 fuel (fictional)', rho: 800 },
-};
+/* Fluids: water, and the real propellants (physics/propellants.js). */
+export const FLUIDS = REAL_FLUIDS;
 
 /* The injector as DRAWN: design flow areas, sized for the hot-fire point
-   (ṁ_ox 0.130 kg/s OX-1, ṁ_f 0.087 kg/s FU-1, 100 psi injector ΔP). The
+   (ṁ_ox 0.130 kg/s LOX, ṁ_f 0.087 kg/s ethanol, 100 psi injector ΔP). The
    as-built hardware differs — it always does — and finding by how much is
-   what a cold flow is for. */
+   what a cold flow is for. The throat is sized for the design chamber
+   pressure at those flows with CEA's c* (MR 1.5 is close to the peak of
+   LOX/ethanol's c*, a little fuel-rich of stoichiometric, 2.08). */
 export const DESIGN = {
-  CdAox: 3.28e-6, CdAfu: 2.62e-6,
+  CdAox: 3.28e-6, CdAfu: 2.64e-6,
   mdotOx: 0.130, mdotFu: 0.087, MR: 1.50, dPinj: psi(100),
-  oxidiser: 'OX-1', fuel: 'FU-1', simulant: 'water',
-  throatDia: mm(14.4), exitDia: mm(28),
+  oxidiser: 'LOX', fuel: 'ethanol', simulant: 'water',
+  throatDia: mm(14.75), exitDia: mm(30),
   etaCstar: 0.95,                 // what the design assumed; the as-built engine is a little worse
-  Pc: psi(275), F: 460,           // design point, sea level (what predictHot gives on the drawing)
+  Pc: psi(275), F: 490,           // design point, sea level (what predictHot gives on the drawing)
   burnLimit: 5,                   // s, heat-sink chamber at the design point
 };
 const AS_BUILT = { ox: 0.94, fu: 1.03, etaCstar: 0.94 };
-
-/* The propellant pair's ideal characteristic velocity and flame temperature
-   against mixture ratio (equilibrium-like, invented, shaped like an
-   alcohol/oxygen-rich storable pair: peak c* a little fuel-rich of
-   stoichiometric). */
-const MR_T = [0.5, 0.8, 1.0, 1.2, 1.4, 1.5, 1.6, 1.8, 2.0, 2.5, 3.0, 4.0, 6.0, 8.0];
-const CS_T = [1050, 1320, 1460, 1565, 1625, 1640, 1642, 1622, 1585, 1480, 1370, 1180, 900, 750];
-const TC_T = [1300, 2000, 2450, 2850, 3120, 3200, 3240, 3250, 3200, 3050, 2850, 2450, 1800, 1400];
-const interp = (xs, ys) => x => {
-  if (!(x > xs[0])) return ys[0];
-  for (let i = 1; i < xs.length; i++) if (x <= xs[i]) return ys[i - 1] + (ys[i] - ys[i - 1]) * (x - xs[i - 1]) / (xs[i] - xs[i - 1]);
-  return ys[ys.length - 1];
-};
-export const CSTAR = interp(MR_T, CS_T);
-export const TFLAME = interp(MR_T, TC_T);
 
 const tankWall = { C: 15000, hA: 8, hAflow: 120, hAamb: 10 };
 const small = { C: 300, hA: 0.4, hAflow: 80, hAamb: 1 };
@@ -124,7 +108,7 @@ const physics = {
   ],
   chamber: {
     V: litre(0.4), throatDia: DESIGN.throatDia, exitDia: DESIGN.exitDia, Cd: 0.98,
-    cstar: CSTAR, etaCstar: AS_BUILT.etaCstar, Pnom: 2.1e6, igniter: 'IGN-901',
+    gas: GAS_MAIN, cstar: GAS_MAIN.cstar, MRnom: DESIGN.MR, etaCstar: AS_BUILT.etaCstar, Pnom: 2.1e6, igniter: 'IGN-901',
     fChug: 110, fHF: 3300,
     // copper heat sink: chamber wall and throat as two thermal nodes (J/K, W/K)
     wall: { Cch: 800, Cth: 250, hAch: 30, hAth: 18, Gcond: 4, Gamb: 3 },
@@ -270,9 +254,9 @@ const components = {
   'CV-633': V('CV-633', 'Ox purge check valve', 'Spring check valve', { 'Cracking': '≈2 psid' }, 'Keeps oxidiser out of the purge system when the manifold is full and the purge is off.'),
   'CV-634': V('CV-634', 'Fuel purge check valve', 'Spring check valve', { 'Cracking': '≈2 psid' }, 'Keeps fuel out of the purge system — and so out of the oxidiser side.'),
   'BPE-1': V('BPE-1', 'Bipropellant research engine (fictional)', 'Test article', {
-      'Injector': 'Impinging doublets', 'Design point (hot)': 'OX-1 0.130 kg/s, FU-1 0.087 kg/s, MR 1.50',
-      'Design injector ΔP': '100 psi', 'Ox injector CdA (drawing)': '3.28 mm²', 'Fuel injector CdA (drawing)': '2.62 mm²', 'Throat': 'Ø 14.4 mm' },
-    'Flowed cold with water to measure its injector, then fired on OX-1 / FU-1. The chamber is uncooled copper: it soaks up heat during a burn and keeps getting hotter at the throat for a while after it. Its flow coefficients on the drawing are estimates; the cold flow measures the real ones.', { ref: ['injector', 'mixture-ratio', 'cold-flow', 'hard-start', 'heat-sink-chamber'] }),
+      'Injector': 'Impinging doublets', 'Design point (hot)': 'LOX 0.130 kg/s, ethanol 0.087 kg/s, MR 1.50',
+      'Design injector ΔP': '100 psi', 'Ox injector CdA (drawing)': '3.28 mm²', 'Fuel injector CdA (drawing)': '2.64 mm²', 'Throat / exit': 'Ø 14.75 / 30 mm' },
+    'Flowed cold with water to measure its injector, then fired on LOX / ethanol. The chamber is uncooled copper: it soaks up heat during a burn and keeps getting hotter at the throat for a while after it. Its flow coefficients on the drawing are estimates; the cold flow measures the real ones.', { ref: ['injector', 'mixture-ratio', 'cold-flow', 'hard-start', 'heat-sink-chamber'] }),
   'IGN-901': V('IGN-901', 'Spark igniter', 'Spark-torch igniter with exciter', { 'Exciter current': '≈1.8 A when firing', 'Commanded by': 'the sequencer' },
     'Lights the engine. It must be sparking BEFORE the propellants arrive, and confirmed after: by chamber pressure and the flame detector. A spark that is not there still draws exciter current — current proves the exciter, not the spark.', { ref: ['ignition', 'hard-start'] }),
   'LC-901': V('LC-901', 'Engine thrust load cell', '±1000 N load cell', { 'Shunt cal': '500 N' },
@@ -418,6 +402,8 @@ export default {
   nominal: { throatDia: DESIGN.throatDia, Cd: 0.98 },
   design: DESIGN,
   fluids: FLUIDS,
+  // what the cameras draw: LOX/ethanol burns clean (little soot) — stoichiometric MR 2.08
+  flame: { MRst: MR_STOICH, soot: 0.12 },
   segmentSensors: { sup: 'PT-601', hp: 'PT-602', oxreg: 'PT-710', fureg: 'PT-720', oxu: 'PT-710', fuu: 'PT-720', purge: 'PT-630',
     oxpl: 'PT-630', fupl: 'PT-630', oxman: 'PT-715', fuman: 'PT-725', chamber: 'PT-801', oxline: 'PT-713', fuline: 'PT-723' },
   consoleValves: [
@@ -482,20 +468,20 @@ export default {
   /* Technician tasks only this stand has. */
   techTasks(ctrl) {
     const S = ctrl.s, m = S.model, R = ratings;
-    const fill = (load, prop = false) => ({ dur: prop ? 120 : 60, text: !load ? 'Draining both run tanks' : prop ? 'Loading propellants: OX-1 into T-710, FU-1 into T-720' : 'Loading both run tanks with water', pre: () => {
+    const fill = (load, prop = false) => ({ dur: prop ? 120 : 60, text: !load ? 'Draining both run tanks' : prop ? 'Loading propellants: LOX into T-710, ethanol into T-720' : 'Loading both run tanks with water', pre: () => {
       const hi = ['oxu', 'fuu'].map(v => m.net.vol(v).P - S.def.physics.ambient.P);
       if (hi.some(p => p > R.VENTED)) return 'Technician: "Tank gauges show pressure. Vent both tanks before I open a fill port."';
       if (ctrl.cmd['VV-711'] !== 1 || ctrl.cmd['VV-721'] !== 1) return 'Technician: "Both tank vents must be open while I fill — the gas has to go somewhere."';
       if (load && m.lines.some(l => l.mL > 0.5)) return 'Technician: "There is already liquid in the tanks. Drain them first — I am not mixing fluids."';
       return null;
     }, done: () => {
-      const fl = prop ? { ox: FLUIDS['OX-1'], fu: FLUIDS['FU-1'] } : { ox: FLUIDS.water, fu: FLUIDS.water };
+      const fl = prop ? { ox: FLUIDS.LOX, fu: FLUIDS.ethanol } : { ox: FLUIDS.water, fu: FLUIDS.water };
       m.load(fl, load ? { ox: R.FILL_OX * fl.ox.rho / 998, fu: R.FILL_FU * fl.fu.rho / 998 } : { ox: 0, fu: 0 });
       ctrl.loaded = load ? (prop ? 'propellants' : 'water') : null;
       ctrl.bump();
       S.requestPrediction();
       ctrl.log('TECH', !load ? 'Tanks drained; fill ports capped.' : prop
-        ? `Propellants loaded: about ${(R.FILL_OX * 1.14).toFixed(1)} kg OX-1 in T-710, ${(R.FILL_FU * 0.8).toFixed(1)} kg FU-1 in T-720. Fill ports capped. The stand is now a propellant hazard.`
+        ? `Propellants loaded: about ${(R.FILL_OX * fl.ox.rho / 998).toFixed(1)} kg LOX in T-710 (boiling at about 90 K while its vent is open), ${(R.FILL_FU * fl.fu.rho / 998).toFixed(1)} kg ethanol in T-720. Fill ports capped. The stand is now a propellant hazard.`
         : `Tanks loaded with water: about ${R.FILL_OX.toFixed(0)} kg in T-710, ${R.FILL_FU.toFixed(0)} kg in T-720 (sight-glass estimate). Fill ports capped.`);
     } });
     return {
@@ -505,7 +491,7 @@ export default {
   inspectionVolumes: ['hp', 'oxu', 'fuu', 'purge', 'oxman', 'fuman'],
   lowPVolume: 'oxu',
   techButtons: [['fillTanks', 'Load water', 'Load both run tanks with water (tanks vented, vents open)'],
-    ['loadPropellants', 'Load propellants', 'Load OX-1 and FU-1 for a hot fire (tanks vented and empty, vents open)'],
+    ['loadPropellants', 'Load propellants', 'Load LOX and ethanol for a hot fire (tanks vented and empty, vents open)'],
     ['drainTanks', 'Drain tanks', 'Drain both run tanks']],
   /* Leak check: both tanks pressurised and isolated (pressurant shut off,
      all three regulators at zero, vents shut), 60 s hold. A 12-litre ullage

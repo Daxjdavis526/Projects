@@ -63,15 +63,18 @@ export class StandViewGG {
     }
     // run tanks with sight glasses
     this.tanks = [];
-    for (const [x, line, lab] of [[400, 'ox', 'OX-1'], [520, 'fu', 'FU-1']]) {
+    for (const [x, line, lab] of [[400, 'ox', 'LOX'], [520, 'fu', 'ETHANOL']]) {
       svg.append(s('path', { d: `M${x - 20},152 L${x - 20},200`, stroke: '#8d969c', 'stroke-width': 2 }));
       svg.append(s('rect', { x: x - 44, y: 200, width: 88, height: 130, rx: 28, fill: 'url(#tankG)', stroke: '#3a4248' }));
+      // frost: a tank of LOX is white with it
+      const fr = s('rect', { x: x - 44, y: 200, width: 88, height: 130, rx: 28, fill: '#eef5f8', opacity: 0 });
+      svg.append(fr);
       svg.append(s('rect', { x: x + 48, y: 212, width: 8, height: 106, fill: '#0c1216', stroke: '#46525a' }));
       const lv = s('rect', { x: x + 49, y: 318, width: 6, height: 0, fill: line === 'ox' ? '#9ec7e0' : '#c9b56a' });
       svg.append(lv, s('text', { x, y: 270, fill: '#c7ced3', 'font-size': 12, 'text-anchor': 'middle', 'font-weight': 700 }, lab));
       svg.append(s('rect', { x: x - 38, y: 330, width: 76, height: 10, fill: '#30373c' }));
       svg.append(s('path', { d: `M${x},340 L${x},352 L${line === 'ox' ? 640 : 720},352 L${line === 'ox' ? 640 : 720},356`, fill: 'none', stroke: '#6f8c86', 'stroke-width': 6 }));
-      this.tanks.push({ lv, line });
+      this.tanks.push({ lv, line, fr });
     }
     // the turbopump skid
     svg.append(s('rect', { x: 600, y: 392, width: 330, height: 8, fill: '#262c30', stroke: '#394148' }));
@@ -171,6 +174,7 @@ export class StandViewGG {
     for (const t of this.tanks) {
       const l = m.line(t.line), fr = Math.min(1, l.mL / (l.Vtank * l.rho));
       t.lv.setAttribute('y', (318 - 106 * fr).toFixed(1)); t.lv.setAttribute('height', (106 * fr).toFixed(1));
+      t.fr.setAttribute('opacity', (l.fluid.cryo && l.mL > 0.05 ? 0.75 * Math.min(1, (268 - l.Tliq) / 60) : 0).toFixed(2));
     }
     // the shaft and the skid
     this.blur.setAttribute('opacity', Math.min(0.75, tp.n * 0.8).toFixed(3));

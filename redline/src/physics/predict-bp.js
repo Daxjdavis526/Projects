@@ -17,7 +17,7 @@ import { Gam, GAM_P } from './combustion.js';
    flow against:
 
        ṁ_i = √((P_tank,i − Pc) / ΣR_i)            (each side, propellant ρ)
-       Pc  = ṁ_total · η·c*(MR) / (Cd·At)
+       Pc  = ṁ_total · η·c*(MR, Pc) / (Cd·At)
 
    solved by damped iteration. Drawing CdA values and the DESIGN c*
    efficiency unless told otherwise; the as-built engine is neither. */
@@ -34,10 +34,10 @@ export function predictHot(def, { Pox, Pfu, cdaOx, cdaFu, eta } = {}) {
   for (let i = 0; i < 200; i++) {
     mo = Math.sqrt(Math.max(0, Pox - Pc) / RO); mf = Math.sqrt(Math.max(0, Pfu - Pc) / RF);
     MR = mf > 0 ? mo / mf : 8;
-    const PcNew = Math.max(0, (mo + mf) * e * ch.cstar(MR) / (ch.Cd * At) - Pa);
+    const PcNew = Math.max(0, (mo + mf) * e * ch.cstar(MR, Pc + Pa) / (ch.Cd * At) - Pa);
     Pc += 0.3 * (PcNew - Pc);
   }
-  const Pabs = Pc + Pa, g = GAM_P;
+  const Pabs = Pc + Pa, g = ch.gas ? ch.gas.gamma(MR, Pabs) : GAM_P;
   // ideal Cf for the drawing's expansion ratio at sea level
   const eps = Ae / At;
   let lo2 = 1.0001, hi = 10;
@@ -48,7 +48,7 @@ export function predictHot(def, { Pox, Pfu, cdaOx, cdaFu, eta } = {}) {
   const F = ch.Cd * Cf * Pabs * At;
   const md = mo + mf;
   return { kind: 'hotfire', Pc, F, mdotOx: mo, mdotFu: mf, MR, Cf, Isp: md > 0 ? F / (md * 9.80665) : 0,
-    cstar: e * ch.cstar(MR), dPox: mo * mo * R(rOx, cdaOx ?? D.CdAox), dPfu: mf * mf * R(rFu, cdaFu ?? D.CdAfu), Pox, Pfu };
+    cstar: e * ch.cstar(MR, Pabs), dPox: mo * mo * R(rOx, cdaOx ?? D.CdAox), dPfu: mf * mf * R(rFu, cdaFu ?? D.CdAfu), Pox, Pfu };
 }
 
 export function predictBiprop(S) {

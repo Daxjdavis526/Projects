@@ -42,7 +42,7 @@ export default [
       { label: 'Speed pickups at rest', eval: v => ({ value: `SE-341 ${fmt(v.ch('SE-341'), 'speed')}, SE-342 ${fmt(v.ch('SE-342'), 'speed')} rpm`,
           ok: Math.abs(v.ch('SE-341')) < 100 && Math.abs(v.ch('SE-342')) < 100 }) },
       { label: 'Flowmeter calibration fluid', eval: v => {
-          const want = hot(v) ? ['OX-1', 'FU-1'] : ['water', 'water'];
+          const want = hot(v) ? ['LOX', 'ethanol'] : ['water', 'water'];
           const got = [v.meterFluid?.ox, v.meterFluid?.fu];
           return { value: `FT-416 ${got[0]}, FT-426 ${got[1]}`, ok: got[0] === want[0] && got[1] === want[1] };
         }, why: 'A turbine meter measures volume; the DAQ converts with the density it was told.' },
@@ -103,7 +103,7 @@ export default [
       { label: 'Test cell', eval: v => ({ value: `${v.facility.area}, headcount ${v.facility.personnel}`, ok: v.facility.area === 'SECURED' && v.facility.personnel === 0 }) },
       { label: 'Door interlock', eval: v => ({ value: v.facility.door, ok: v.facility.door === 'LOCKED' }) },
       { label: 'Warning announcement', eval: v => ({ value: v.paMade ? 'made' : 'not made', ok: v.paMade }) },
-      { label: 'Propellant hazard', eval: v => ({ value: hot(v) ? 'OX-1 and FU-1 on board' : v.loaded === 'water' ? 'water only' : 'tanks empty', ok: true }) },
+      { label: 'Propellant hazard', eval: v => ({ value: hot(v) ? 'LOX and ethanol on board' : v.loaded === 'water' ? 'water only' : 'tanks empty', ok: true }) },
       { label: 'Safety violations this session', eval: v => ({ value: v.safetyViolations ? `${v.safetyViolations} logged` : 'none', ok: v.safetyViolations === 0 }) },
     ] },
 ];

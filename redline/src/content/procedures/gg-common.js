@@ -107,13 +107,13 @@ export function ggLoad(def, sec = 'C', { prop = true } = {}) {
       record: { unit: 'kg', validate: (x, v) => (near(x, v.ch('WT-411'), 0.5) ? { ok: true, msg: `${v.ch('WT-411').toFixed(1)} kg.` } : { ok: false, msg: `WT-411 reads ${v.ch('WT-411').toFixed(1)} kg.` }) } },
   ] };
   return { id: sec, title: 'Load propellants', steps: [
-    { kind: 'action', station: 'PROP', title: 'Technician: load OX-1 and FU-1',
-      text: `Console ▸ FACILITY ▸ Technician ▸ Load propellants. Tanks empty and vented, vents open. About ${R.FILL_OX} kg of OX-1 and ${R.FILL_FU} kg of FU-1.`,
+    { kind: 'action', station: 'PROP', title: 'Technician: load LOX and ethanol',
+      text: `Console ▸ FACILITY ▸ Technician ▸ Load propellants. Tanks empty and vented, vents open. About ${R.FILL_OX} kg of LOX and ${R.FILL_FU} kg of ethanol.`,
       why: 'From here the stand is a propellant hazard — and the gas generator drinks from the same two tanks as the main chamber.',
       check: v => v.loaded === 'propellants' && v.ch('WT-411') > 30, focus: ['T-410', 'T-420'] },
     { kind: 'record', station: 'PROP', title: 'Record the oxidiser load (WT-411), kg',
-      why: 'The budget for the day: about 0.55 kg/s of OX-1 at mainstage, the gas generator\'s share included, plus a reserve the tank-empty redline keeps.',
-      record: { unit: 'kg', validate: (x, v) => (near(x, v.ch('WT-411'), 0.5) ? { ok: true, msg: `${v.ch('WT-411').toFixed(1)} kg of OX-1 on board.` } : { ok: false, msg: `WT-411 reads ${v.ch('WT-411').toFixed(1)} kg.` }) } },
+      why: 'The budget for the day: about 0.47 kg/s of LOX at mainstage, the gas generator\'s share included, plus a reserve the tank-empty redline keeps.',
+      record: { unit: 'kg', validate: (x, v) => (near(x, v.ch('WT-411'), 0.5) ? { ok: true, msg: `${v.ch('WT-411').toFixed(1)} kg of LOX on board.` } : { ok: false, msg: `WT-411 reads ${v.ch('WT-411').toFixed(1)} kg.` }) } },
   ] };
 }
 
@@ -121,7 +121,7 @@ export function ggRotor(def, sec = 'D') { return tpRotor(def, sec); }
 
 /* DAQ rate, and the meter calibration fluid for what is in the tanks. */
 export function ggDaq(def, sec, { prop = true } = {}) {
-  const want = prop ? ['OX-1', 'FU-1'] : ['water', 'water'];
+  const want = prop ? ['LOX', 'ethanol'] : ['water', 'water'];
   return { id: sec, title: prop ? 'DAQ for a hot fire' : 'DAQ for a cold flow', steps: [
     { kind: 'action', station: 'DAQ', title: 'Sample rate ≥ 2000 Hz', text: 'Console ▸ DAQ ▸ Rate.',
       why: 'The whole start is over in two seconds. A gas generator hard start is a spike of a few tens of milliseconds, and the overspeed redline has about as long to act.',

@@ -91,7 +91,7 @@ const READY_HOT = `
   ex('zero', { ids: S.def.sensors.filter(x => x.kind === 'PT').map(x => x.id) });
   ex('tare', { ids: ['WT-716', 'WT-726'] }); ex('daqRate', { rate: 2000 });
   ex('tech', { task: 'loadPropellants' }); S.run(121);
-  ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+  ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' });
   ex('tech', { task: 'openHV' }); S.run(9);
   for (const id of ['VV-601', 'VV-711', 'VV-721']) ex('valve', { id, open: false });
   ex('valve', { id: 'IV-601', open: true }); S.run(2); ex('clearCell'); S.run(7);
@@ -160,7 +160,7 @@ if (which === 'gg' || which === 'all') {
     ex('zero', { ids: S.def.sensors.filter(x => x.kind === 'PT').map(x => x.id) }); ex('tare', { ids: ['WT-411', 'WT-421'] });
     ex('daqRate', { rate: 2000 });
     ex('tech', { task: 'loadPropellants' }); S.run(151);
-    ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+    ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' });
     ex('inspection', { id: 'spark-check' }); S.run(41);
     ex('tech', { task: 'openHV' }); S.run(9);
     for (const id of ['VV-301', 'VV-413', 'VV-423']) ex('valve', { id, open: false });

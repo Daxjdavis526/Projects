@@ -120,7 +120,7 @@ export function buildBiprop(def) {
   const tanks = {};
   [['ox', -3.3, 'T-710', 0xdfe4e0], ['fu', -1.9, 'T-720', 0xe2ddd2]].forEach(([id, x, tag, col]) => {
     const L = lines.find(l => l.id === id);
-    const v = vessel({ V: L.Vtank, aspect: 2.4, color: col, text: [tag, id === 'ox' ? (def.oxidiser || 'OX-1') : (def.fuel || 'FU-1')] });
+    const v = vessel({ V: L.Vtank, aspect: 2.4, color: col, text: [tag, id === 'ox' ? 'LOX' : 'ETHANOL'] });
     v.position.set(x, 0.12, -3.0);
     g.add(mesh(new THREE.BoxGeometry(0.7, 0.1, 0.7), MAT.darkSteel(), { x, y: 0.06, z: -3.0 }));
     g.add(v); tanks[id] = v;
@@ -155,7 +155,7 @@ export function buildBiprop(def) {
       walkdown: [V3(0.3, 0, 1.0), V3(-4.5, 0, -3.2)], inspect: [V3(0.9, 0, 0.8), V3(-0.4, 0, 1.0)], inspection: [V3(0.9, 0, 0.8), V3(-0.4, 0, 1.0)], default: [V3(-6, 0, 3.4), V3(-5.2, 0, 3.6)] }),
     update(st, dt, time) {
       for (const [id, o] of Object.entries(valves)) if (o.userData.set && st.valves[id] != null) o.userData.set(st.valves[id]);
-      for (const t of st.tanks) tanks[t.line]?.userData.level?.(t.fill);
+      for (const t of st.tanks) { tanks[t.line]?.userData.level?.(t.fill); tanks[t.line]?.userData.frost?.(t.frost || 0); }
       // the wall: a heat-sink chamber glows after a long burn; inside the
       // nozzle, the flame lights the wall
       const w = st.walls, j = st.jet;
@@ -264,7 +264,7 @@ export function buildTurbopump(def) {
       inspect: [V3(-0.2, 0, 0.4), V3(0.6, 0, 0.6)], inspection: [V3(-0.2, 0, 0.4), V3(0.6, 0, 0.6)], default: [V3(-6, 0, 3.4), V3(-5.2, 0, 3.6)] }),
     update(st, dt) {
       for (const [id, o] of Object.entries(valves)) if (o.userData.set && st.valves[id] != null) o.userData.set(st.valves[id]);
-      for (const t of st.tanks) tanks[t.line]?.userData.level?.(t.fill);
+      for (const t of st.tanks) { tanks[t.line]?.userData.level?.(t.fill); tanks[t.line]?.userData.frost?.(t.frost || 0); }
       const tp = st.tp;
       if (tp) {
         // the camera samples the wheel 60 times a second: above 30 rev/s it
@@ -296,7 +296,7 @@ export function buildGG(def) {
   const P = gasPanel(g, -4.7, [{ id: 'IV-301' }, { id: 'PR-410', kind: 'reg' }, { id: 'PR-420', kind: 'reg' }, { id: 'PR-330', kind: 'reg' }, { id: 'PR-630', kind: 'reg' }]);
   // run tanks on their scales
   const tanks = {};
-  [['ox', -3.4, 'T-410', 0xdfe4e0, def.fluids?.['OX-1'] ? 'OX-1' : 'OX'], ['fu', -2.0, 'T-420', 0xe2ddd2, 'FU-1']].forEach(([id, x, tag, col, fl]) => {
+  [['ox', -3.4, 'T-410', 0xdfe4e0, 'LOX'], ['fu', -2.0, 'T-420', 0xe2ddd2, 'ETHANOL']].forEach(([id, x, tag, col, fl]) => {
     const L = p.lines.find(l => l.id === id);
     const v = vessel({ V: L.Vtank, aspect: 2.2, color: col, text: [tag, fl] });
     v.position.set(x, 0.12, -3.0);
@@ -386,7 +386,7 @@ export function buildGG(def) {
       inspect: [V3(1.4, 0, 0.8), V3(-0.2, 0, 1.0)], inspection: [V3(1.4, 0, 0.8), V3(-1.2, 0, -0.6)], default: [V3(-6, 0, 3.4), V3(-5.2, 0, 3.6)] }),
     update(st, dt) {
       for (const [id, o] of Object.entries(valves)) if (o.userData.set && st.valves[id] != null) o.userData.set(st.valves[id]);
-      for (const t of st.tanks) tanks[t.line]?.userData.level?.(t.fill);
+      for (const t of st.tanks) { tanks[t.line]?.userData.level?.(t.fill); tanks[t.line]?.userData.frost?.(t.frost || 0); }
       const tp = st.tp;
       if (tp) {
         ang = (ang + tp.rpm / 60 * Math.PI * 2 * dt) % (Math.PI * 2);

@@ -28,7 +28,7 @@ function standard(fault, plan = {}, { seed = 5 } = {}) {
   ex('zero', { ids: def.sensors.filter(x => x.kind === 'PT').map(x => x.id) });
   ex('tare', { ids: ['WT-411', 'WT-421'] });
   ex('tech', { task: 'loadPropellants' }); S.run(151);
-  ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' });
+  ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' });
   ex('inspection', { id: 'spark-check' }); S.run(41);
   ex('tech', { task: 'openHV' }); S.run(9);
   for (const id of ['VV-301', 'VV-413', 'VV-423']) ex('valve', { id, open: false });
@@ -56,13 +56,16 @@ const R336 = ref.mean('PT-336', 0.3, 0.9), SP = def.defaultPlan.startP;
 
 const cases = {
   'gg-ox-eroded': f => [
-    ['the turbine inlet runs well above the reference', f.pt.TIT > R.TIT + 22, `${f0(f.pt.TIT)} vs ${f0(R.TIT)} K`],
+    // LOX/ethanol's fuel-rich temperature is flat in MR: the TIT moves a little, the speed a lot
+    ['the turbine inlet runs above the reference', f.pt.TIT > R.TIT + 6, `${f0(f.pt.TIT)} vs ${f0(R.TIT)} K`],
     ['and the engine runs faster, at a higher Pc — without an overspeed', f.pt.N > R.N * 1.025 && f.pt.Pc > R.Pc && !f.run.aborted, `${f0(f.pt.N)} vs ${f0(R.N)} rpm`],
     ['while the INFERRED GG mixture ratio barely moves (the orifice inference is blind to it)', Math.abs(f.pt.MRgg / R.MRgg - 1) < 0.06, `${f3(f.pt.MRgg)} vs ${f3(R.MRgg)}`],
   ],
   'gg-fu-blocked': f => [
-    ['the turbine inlet runs above the reference', f.pt.TIT > R.TIT + 30, `${f0(f.pt.TIT)} vs ${f0(R.TIT)} K`],
-    ['the inferred GG fuel flow does not show the blockage (within 5 %)', Math.abs(f.pt.ggFu / R.ggFu - 1) < 0.05, `${f3(f.pt.ggFu)} vs ${f3(R.ggFu)} kg/s`],
+    ['the turbine inlet runs above the reference', f.pt.TIT > R.TIT + 8, `${f0(f.pt.TIT)} vs ${f0(R.TIT)} K`],
+    ['while the engine runs SLOW — less gas — and Pc low', f.pt.N < R.N * 0.98 && f.pt.Pc < R.Pc, `${f0(f.pt.N)} vs ${f0(R.N)} rpm`],
+    // the orifice ΔP falls with the slower pumps, but not by the 14–22 % blocked: the inference hides it
+    ['the inferred GG mixture ratio does not show the blockage (within 5 %)', Math.abs(f.pt.MRgg / R.MRgg - 1) < 0.05, `${f3(f.pt.MRgg)} vs ${f3(R.MRgg)}`],
   ],
   'pr330-droop': f => [
     ['the start gas pressure (PT-336) sags below its setpoint 2.5× as far as the reference while TSV-332 is open', SP - f.mean('PT-336', 0.3, 0.9) > 2.5 * (SP - R336), `${f0(P(f.mean('PT-336', 0.3, 0.9)))} vs ${f0(P(R336))} psig, set ${f0(P(SP))}`],

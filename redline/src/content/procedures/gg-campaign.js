@@ -28,7 +28,7 @@ export function procedure(def) {
     sections: [
       { id: 'A', title: 'Plan', steps: [
         { kind: 'info', station: 'TC', title: 'Read the test request', text: v => v.request.text,
-          teach: 'Cold flow first: it needs water in the tanks and the meters on water, and it tells you what the injector will do before the hot fires. Then drain, load propellants, put the meters on OX-1 and FU-1, spark-check. Budget the propellant: about 0.47 kg/s of OX-1 and 0.33 kg/s of FU-1 at mainstage, the gas generator\'s share included, plus the start and the reserve. Let the case cool below 60 °C between long burns.' },
+          teach: 'Cold flow first: it needs water in the tanks and the meters on water, and it tells you what the injector will do before the hot fires. Then drain, load propellants, put the meters on LOX and ethanol, spark-check. Budget the propellant: about 0.47 kg/s of LOX and 0.33 kg/s of ethanol at mainstage, the gas generator\'s share included, plus the start and the reserve. Let the case cool below 60 °C between long burns.' },
         { kind: 'action', station: 'TC', title: 'Write the test plan in the notebook',
           text: 'NOTEBOOK ▸ Pre-test notes: the runs in order, the propellant and gas budget, the checks before the first fire, what would make you stop.',
           check: v => v.has(e => e.cat === 'OPR' && e.text.startsWith('Pre-test note')) },

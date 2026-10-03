@@ -10,6 +10,7 @@
    loop moved first. */
 
 import { FAILURE_MODES as BASE_MODES, ACTIONS, RIGHT_ACTION as BASE_RIGHT, CHECKS as BASE_CHECKS, CATEGORIES as BASE_CATS } from './ts2-faults.js';
+import { DESIGN_G } from '../stands/ts3g-physics.js';
 
 const pct = x => `${Math.round(100 * x)} %`;
 
@@ -19,10 +20,10 @@ export const FAULTS = [
     apply: (S, p) => { S.model.line('ox').tap.erosion = p.e; },
     evidence: ['TT-334', 'MR-GG', 'SPD', 'PT-501', 'PT-333', 'gg-orifice-flow', 'prediction'],
     story: p => ({
-      what: `The gas generator's oxidiser orifice had eroded about ${pct(p.e)} oversize. The GG ran richer in oxidiser than designed — hotter — and the hotter gas drove the turbine harder.`,
-      indicators: 'Turbine inlet temperature (TT-334) 30–50 K above the last good run from the start onward; speed, pump pressures and chamber pressure all a few per cent high too (the loop amplifies a hot GG into a fast engine: a few per cent more orifice is several per cent more speed); the GG pressure up.',
+      what: `The gas generator's oxidiser orifice had eroded about ${pct(p.e)} oversize. The GG passed more oxidiser than designed: more gas, and a little hotter, so the turbine had more power and the whole engine ran fast.`,
+      indicators: 'Speed, pump pressures and chamber pressure all a few per cent above the prediction from the start onward (the loop amplifies a stronger GG into a faster engine: a few per cent more orifice is several per cent more speed); the GG pressure up; turbine inlet temperature (TT-334) 10–20 K above the last good run — LOX/ethanol\'s fuel-rich temperature is flat in mixture ratio, so the TIT says little and the speed says a lot.',
       misleading: 'The GG\'s mixture ratio on the console (MR-GG) is INFERRED from the pressure drop across the orifices at the drawing\'s flow coefficient — so an eroded orifice reports the flow it was designed to pass, not what it passes. MR-GG looked nominal while the GG ran hot.',
-      notice: 'TT-334 against the prediction at mainstage. Everything else on the engine being high in proportion says the turbine had more power — then ask why. A water flow of the GG orifices on the bench measures their real flow coefficient.',
+      notice: 'Speed and PT-333 against the prediction at mainstage, with TT-334 a little high. Everything on the engine being high in proportion says the turbine had more power — then ask why. A water flow of the GG orifices on the bench measures their real flow coefficient.',
       abort: 'A real hazard if it grows: the turbine inlet redline is the thing a GG engine most often trips on, and an eroding orifice only gets worse.',
       expert: 'Flow-check the GG orifices after every few hot fires; trend TT-334 at mainstage run to run — a slow climb is an orifice going.',
     }) },
@@ -31,11 +32,11 @@ export const FAULTS = [
     apply: (S, p) => { S.model.line('fu').tap.blockage = p.b; },
     evidence: ['TT-334', 'MR-GG', 'GGF-FU', 'PT-333', 'SPD', 'gg-orifice-flow', 'gg-injector-inspect'],
     story: p => ({
-      what: `About ${pct(p.b)} of the gas generator's fuel orifice area was blocked (debris from the last fuel load). Less fuel at the same oxidiser flow: the GG ran less fuel-rich, and hotter.`,
-      indicators: 'TT-334 above the prediction; the speed and chamber pressure near or a little above it; PT-333 a little low for the speed.',
-      misleading: 'The inferred GG fuel flow (GGF-FU) reads from the pressure drop across the orifice — and a partly blocked orifice has the SAME drop for LESS flow, so GGF-FU looked normal. Only the temperature told the truth.',
-      notice: 'TT-334 high with the inferred GG mixture ratio normal: the inference is wrong somewhere. The bench flow of the orifices finds which one.',
-      abort: 'Hazardous as it grows: more blockage, hotter turbine.',
+      what: `About ${pct(p.b)} of the gas generator's fuel orifice area was blocked (debris from the last fuel load). Less fuel at the same oxidiser flow: the GG ran less fuel-rich — a little hotter — and passed less gas, so the turbine had less power and the engine ran slow.`,
+      indicators: 'Speed, pump pressures, chamber pressure and PT-333 all a few per cent below the prediction — and TT-334 not low with them but 10–25 K ABOVE it: less gas, and hotter.',
+      misleading: 'The inferred GG fuel flow (GGF-FU) reads from the pressure drop across the orifice — and a partly blocked orifice has the SAME drop for LESS flow, so GGF-FU fell only as far as everything else did, and the inferred GG mixture ratio looked normal. A slow engine looks like a tired pump or a weak turbine; only the temperature, high when everything else was low, said the gas was short of fuel.',
+      notice: 'A slow engine with TT-334 high and the inferred GG mixture ratio normal: the inference is wrong somewhere. The bench flow of the orifices finds which one.',
+      abort: 'Hazardous as it grows: past a GG mixture ratio of about 0.55 the temperature climbs steeply, and a blocked orifice only gets worse.',
       expert: 'Filter the GG feed separately and finer than the main feed: a GG orifice is a few tenths of a millimetre, and a flake of anything blocks a measurable fraction of it.',
     }) },
   { id: 'pr330-droop', component: 'PR-330', mode: 'droop', category: 'control', hazard: false, onset: 'start',
@@ -91,7 +92,7 @@ export const FAULTS = [
     apply: (S, p) => { const C = S.model.chamber; C.abl.eroded = p.e; C.At = Math.PI / 4 * (C.Dt0 + p.e) ** 2; },
     evidence: ['PT-501', 'CSTAR-C', 'LC-501', 'throat-gauge', 'prediction'],
     story: p => ({
-      what: `The throat had eroded to ${((25.6e-3 + p.e) * 1000).toFixed(2)} mm (drawing 25.60 mm) over earlier burns — ${pct((1 + p.e / 25.6e-3) ** 2 - 1)} more throat area.`,
+      what: `The throat had eroded to ${((DESIGN_G.throatDia + p.e) * 1000).toFixed(2)} mm (drawing ${(DESIGN_G.throatDia * 1000).toFixed(2)} mm) over earlier burns — ${pct((1 + p.e / DESIGN_G.throatDia) ** 2 - 1)} more throat area.`,
       indicators: 'Chamber pressure below the prediction by about the area ratio; thrust a little low; flows nominal (the pumps barely notice).',
       misleading: 'c* on the console is computed with the DRAWING throat, so it read low — as if combustion were poor. Combustion was fine; the throat was bigger.',
       notice: 'Pc low with the flows nominal; c* low with nothing else wrong with combustion; a pin gauge in the throat.',

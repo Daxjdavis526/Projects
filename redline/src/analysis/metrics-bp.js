@@ -135,8 +135,8 @@ export function computeMetricsBP(run, def) {
          Cf  = F / (Pc·Cd·At)         (the nozzle's)
          Isp = F / (ṁ·g0)
      with Pc absolute and At from the drawing. Every one of these inherits
-     the flowmeters' calibration: a meter still set for water reads OX-1
-     and FU-1 wrong, and so does everything computed from it.
+     the flowmeters' calibration: a meter still set for water reads LOX
+     and ethanol wrong, and so does everything computed from it.
    · roughness (σ/mean of PT-801) and vibration level.
    · walls: throat and chamber temperature at shutdown and their peak
      afterwards (soak-back), and the impulse after the valves closed. */
@@ -219,7 +219,7 @@ export function computeMetricsHot(run, def) {
   S.MR = S.mdotOx / S.mdotFu; S.MRw = S.mdotWOx / S.mdotWFu;
   const Pabs = pc + Pa;
   S.cstar = Pabs * CdAt / md; S.cstarW = Pabs * CdAt / mdw;
-  S.etaCstar = S.cstar / C.cstar(S.MR); S.etaCstarW = S.cstarW / C.cstar(S.MRw);
+  S.etaCstar = S.cstar / C.cstar(S.MR, Pabs); S.etaCstarW = S.cstarW / C.cstar(S.MRw, Pabs);
   S.Cf = f / (Pabs * CdAt);
   S.Isp = f / (md * G0); S.IspW = f / (mdw * G0);
   push('MR', 'Mixture ratio (FT-714 / FT-724)', S.MR, 'ratio', `design ${D.MR.toFixed(2)}`);

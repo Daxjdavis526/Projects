@@ -25,11 +25,12 @@ import { FAULTS as BASE_FAULTS } from '../faults/ts2-faults.js';
 import { REGEN_FAULTS, REGEN_INSPECTIONS, REGEN_DIAGNOSIS } from '../faults/ts2r-faults.js';
 import { INSPECTIONS as BASE_INSPECTIONS } from '../faults/ts2-inspections.js';
 import { tsatFU } from '../../physics/cooling.js';
+import { FLUIDS } from '../../physics/propellants.js';
 
 /* The as-built BPE-2 injector differs from the drawing differently from
    BPE-1's: every injector is its own. */
 const AS_BUILT2 = { ox: 0.97, fu: 0.985, etaCstar: 0.95 };
-const CP_FU = 2500;          // J/kg/K, FU-1 (fictional, alcohol-like)
+const ETH = FLUIDS.ethanol;   // the coolant
 
 export const DESIGN2 = {
   ...DESIGN,
@@ -59,7 +60,7 @@ const regen = {
   hg0: 3000,                 // W/m²/K at the throat, at Pnom
   Pnom: 2.1e6,
   mdotNom: 0.090,
-  cp: CP_FU, rho: 800,
+  cp: ETH.cp, rho: ETH.rho,
   Vjacket: cc(55),
   Tcoke: degC(240), cokeRate: 2e-7,
   qchf0: 3e6,                // W/m², critical heat flux at design flow, saturated
@@ -71,7 +72,7 @@ const regen = {
 const physics = {
   ...base.physics,
   lines: base.physics.lines.map(l => (l.id === 'fu'
-    ? { ...l, Vman: cc(20 + 55), wetFrom: 0.78, jacket: { CdA: DESIGN.mdotFu / Math.sqrt(2 * 800 * DESIGN2.dPjacket) }, CdAinj: DESIGN.CdAfu * AS_BUILT2.fu }
+    ? { ...l, Vman: cc(20 + 55), wetFrom: 0.78, jacket: { CdA: DESIGN.mdotFu / Math.sqrt(2 * ETH.rho * DESIGN2.dPjacket) }, CdAinj: DESIGN.CdAfu * AS_BUILT2.fu }
     : { ...l, CdAinj: DESIGN.CdAox * AS_BUILT2.ox })),
   chamber: { ...base.physics.chamber, etaCstar: AS_BUILT2.etaCstar, regen: true },
   regen,
@@ -100,10 +101,10 @@ const channels = {
     ...base.channels.derived,
     { id: 'DP-JKT', quantity: 'pressure', gauge: 'd', desc: 'Cooling-jacket ΔP (PT-729 − PT-725)', inputs: ['PT-729', 'PT-725'], fn: ([a, b]) => a - b },
     /* Heat picked up by the coolant: ṁ·cp·ΔT. Only meaningful in steady
-       flow with the meter set for FU-1. */
+       flow with the meter set for ethanol. */
     { id: 'Q-JKT', quantity: 'power', desc: 'Heat into the coolant, FT-724·cp·(TC-728 − TC-727)', inputs: ['FT-724', 'TC-728', 'TC-727'],
-      fn: ([m, a, b]) => (m > 0.01 ? m * CP_FU * (a - b) : 0) },
-    /* Boiling margin at the jacket outlet: saturation temperature of FU-1 at
+      fn: ([m, a, b]) => (m > 0.01 ? m * ETH.cp * (a - b) : 0) },
+    /* Boiling margin at the jacket outlet: saturation temperature of ethanol at
        the manifold pressure, minus the coolant temperature. The outlet is
        the hottest coolant and the lowest pressure in the jacket. */
     { id: 'TSAT-M', quantity: 'ratio', desc: 'Boiling margin at jacket outlet, Tsat(PT-725) − TC-728, kelvin', inputs: ['PT-725', 'TC-728'],
@@ -115,13 +116,13 @@ const V = (tag, name, kind, specs, text, extra = {}) => ({ tag, name, kind, spec
 const components = { ...base.components };
 delete components['BPE-1'];
 components['BPE-2'] = V('BPE-2', 'Regeneratively cooled research engine (fictional)', 'Test article', {
-    'Injector': 'Impinging doublets (BPE-1 pattern)', 'Design point (hot)': 'OX-1 0.130 kg/s, FU-1 0.087 kg/s, MR 1.50',
-    'Design injector ΔP': '100 psi', 'Cooling': 'FU-1 through 7-zone milled channels, counterflow', 'Jacket ΔP (design)': '≈60 psi',
-    'Liner': 'Copper alloy, 1.0 mm', 'Throat': 'Ø 14.4 mm', 'Burn limit': 'propellant on board (stand rating 30 s)' },
+    'Injector': 'Impinging doublets (BPE-1 pattern)', 'Design point (hot)': 'LOX 0.130 kg/s, ethanol 0.087 kg/s, MR 1.50',
+    'Design injector ΔP': '100 psi', 'Cooling': 'ethanol through 7-zone milled channels, counterflow', 'Jacket ΔP (design)': '≈60 psi',
+    'Liner': 'Copper alloy, 1.0 mm', 'Throat': 'Ø 14.75 mm', 'Burn limit': 'propellant on board (stand rating 30 s)' },
   'The same size and propellants as BPE-1, but cooled by its own fuel. The fuel picks up the heat the wall would otherwise store, so the burn can run as long as the tanks last — as long as the fuel keeps up: flow it too little, too hot or at too low a pressure and it boils against the wall, and a boiling wall is a burning wall.',
   { ref: ['regenerative-cooling', 'injector', 'mixture-ratio', 'hard-start', 'critical-heat-flux'] });
 components['JKT-2'] = V('JKT-2', 'Regenerative cooling jacket', 'Milled channels in the liner, closed out by an electroformed shell',
-  { 'Inlet': 'nozzle end (PT-729)', 'Outlet': 'injector fuel manifold (PT-725, TC-728)', 'Volume': '≈55 cc', 'Coolant': 'FU-1, all of it' },
+  { 'Inlet': 'nozzle end (PT-729)', 'Outlet': 'injector fuel manifold (PT-725, TC-728)', 'Volume': '≈55 cc', 'Coolant': 'ethanol, all of it' },
   'Every gram of fuel the engine burns crosses this jacket first. It adds a pressure drop the fuel tank must supply and a volume the fuel must fill before it reaches the injector — so the fuel side primes later than the oxidiser side, and the start sequence must allow for it.',
   { ref: ['regenerative-cooling', 'coking', 'priming'] });
 

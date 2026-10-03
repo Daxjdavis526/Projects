@@ -19,8 +19,9 @@
    temperature.
 
    What makes it interesting is the fuel:
-   · it BOILS at a temperature set by the local pressure (an invented,
-     alcohol-like vapour-pressure curve). Where the coolant-side wall passes
+   · it BOILS at a temperature set by the local pressure (ethanol's own
+     vapour-pressure curve, an Antoine fit, extrapolated past its range
+     toward the critical point at 6.1 MPa). Where the coolant-side wall passes
      saturation, nucleate boiling helps; where the heat flux passes the
      CRITICAL HEAT FLUX — lower with less flow, less subcooling — a vapour
      film forms, the coefficient collapses and the liner burns out.
@@ -31,10 +32,10 @@
    Both integrations are implicit per segment (backward Euler), so a thin
    liner is no constraint on the step. */
 
-const ANT = { A: 8.20417, B: 1642.89, C: 230.3 };     // ethanol-like, mmHg/°C — FU-1 is fictional
+const ANT = { A: 8.20417, B: 1642.89, C: 230.3 };     // ethanol, Antoine, mmHg/°C
 const MMHG = 133.322, P_CRIT = 6.1e6;
 
-/* Saturation temperature (K) of FU-1 at pressure P (Pa abs); above the
+/* Saturation temperature (K) of ethanol at pressure P (Pa abs); above the
    critical pressure it does not boil at all. */
 export function tsatFU(P) {
   if (P >= P_CRIT) return Infinity;

@@ -65,7 +65,11 @@ export function vessel({ V, aspect = 2.6, color = 0xd9dcd8, text = null, sight =
     lab.position.set(0, skirt + r * 0.5 + L * 0.62, r + 0.002);
     g.add(lab);
   }
-  g.userData = { r, height: skirt + r + L, top: skirt + r + L + 0.1, level };
+  // frost (a cryogen inside): the shell whitens and goes matte
+  const base = new THREE.Color(color), rime = new THREE.Color(0xf1f6f9);
+  let fk = -1;
+  const frost = k => { if (Math.abs(k - fk) < 0.01) return; fk = k; mat.color.copy(base).lerp(rime, 0.9 * k); mat.roughness = 0.45 + 0.5 * k; mat.metalness = 0.35 * (1 - k); };
+  g.userData = { r, height: skirt + r + L, top: skirt + r + L + 0.1, level, frost };
   return g;
 }
 

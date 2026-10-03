@@ -2,7 +2,7 @@
    engine on TPA-1. FICTIONAL.
 
    The turbopump that was spun on water and cold nitrogen in Levels 18–23
-   now feeds an engine. Its pumps take OX-1 and FU-1 from low-pressure run
+   now feeds an engine. Its pumps take LOX and ethanol from low-pressure run
    tanks and push them, at several hundred psi, into the main injector —
    and through two small taps into the GAS GENERATOR, a fuel-rich burner
    whose 850 K gas drives the turbine and leaves through the exhaust duct.
@@ -24,6 +24,7 @@ import gonogo from './ts3g-gonogo.js';
 import pid from './ts3g-pid.js';
 import { interlocks } from './ts3g-interlocks.js';
 import { steadyGG } from '../../physics/predict-gg.js';
+import { MR_STOICH } from '../../physics/propellants.js';
 import { computeMetricsGG } from '../../analysis/metrics-gg.js';
 import { FAULTS, DIAGNOSIS } from '../faults/ts3g-faults.js';
 import { INSPECTIONS } from '../faults/ts3g-inspections.js';
@@ -118,7 +119,7 @@ const sensors = [
 /* Densities and vapour pressures the DAQ's derived channels assume: the
    propellants. On a water cold flow the NPSH and GG-flow channels are off
    by the density ratio — and say so. */
-const RHO = { ox: FLUIDS_G['OX-1'].rho, fu: FLUIDS_G['FU-1'].rho };
+const RHO = { ox: FLUIDS_G.LOX.rho, fu: FLUIDS_G.ethanol.rho };
 const safeDiv = (a, b) => (Math.abs(b) > 0.005 ? a / b : 0);
 const ggFlow = (CdA, rho) => ([pd, pg]) => (pd > pg + psi(5) ? CdA * Math.sqrt(2 * rho * (pd - pg)) : 0);
 const channels = {
@@ -142,10 +143,10 @@ const channels = {
     { id: 'SPD-PCT', quantity: 'ratio', desc: 'Shaft speed, fraction of design (36 000 rpm)', inputs: ['SPD'], fn: ([n]) => n / ND },
     { id: 'DP-OXP', quantity: 'pressure', gauge: 'd', desc: 'Ox pump ΔP (PT-414 − PT-413)', inputs: ['PT-414', 'PT-413'], fn: ([a, b]) => a - b },
     { id: 'DP-FUP', quantity: 'pressure', gauge: 'd', desc: 'Fuel pump ΔP (PT-424 − PT-423)', inputs: ['PT-424', 'PT-423'], fn: ([a, b]) => a - b },
-    { id: 'NPSH-OX', quantity: 'head', desc: 'Ox pump NPSH available at OX-1 properties, (PT-413 + Pamb − Pv(TT-412))/(ρg)', inputs: ['PT-413', 'TT-412'],
-      fn: ([p, T], k) => (p + k.Pamb - FLUIDS_G['OX-1'].pvap(T)) / (RHO.ox * G0) },
-    { id: 'NPSH-FU', quantity: 'head', desc: 'Fuel pump NPSH available at FU-1 properties, (PT-423 + Pamb − Pv(TT-422))/(ρg)', inputs: ['PT-423', 'TT-422'],
-      fn: ([p, T], k) => (p + k.Pamb - FLUIDS_G['FU-1'].pvap(T)) / (RHO.fu * G0) },
+    { id: 'NPSH-OX', quantity: 'head', desc: 'Ox pump NPSH available at LOX properties, (PT-413 + Pamb − Pv(TT-412))/(ρg)', inputs: ['PT-413', 'TT-412'],
+      fn: ([p, T], k) => (p + k.Pamb - FLUIDS_G.LOX.pvap(T)) / (RHO.ox * G0) },
+    { id: 'NPSH-FU', quantity: 'head', desc: 'Fuel pump NPSH available at ethanol properties, (PT-423 + Pamb − Pv(TT-422))/(ρg)', inputs: ['PT-423', 'TT-422'],
+      fn: ([p, T], k) => (p + k.Pamb - FLUIDS_G.ethanol.pvap(T)) / (RHO.fu * G0) },
     { id: 'DP-OXI', quantity: 'pressure', gauge: 'd', desc: 'Main oxidiser injector ΔP (PT-415 − PT-501)', inputs: ['PT-415', 'PT-501'], fn: ([a, b]) => a - b },
     { id: 'DP-FUI', quantity: 'pressure', gauge: 'd', desc: 'Main fuel injector ΔP (PT-425 − PT-501)', inputs: ['PT-425', 'PT-501'], fn: ([a, b]) => a - b },
     { id: 'MR-C', quantity: 'ratio', desc: 'Main chamber mixture ratio, FT-416 / FT-426 (as measured)', inputs: ['FT-416', 'FT-426'], fn: ([o, f]) => safeDiv(o, f) },
@@ -186,9 +187,9 @@ const components = {
   'EPC-420': V('EPC-420', 'Electronic pressure controller (fuel tank)', 'Dome loader', {}, 'Loads PR-420\'s dome.', { commandable: 'setpoint' }),
   'EPC-330': V('EPC-330', 'Electronic pressure controller (start gas)', 'Fast dome loader', {}, 'Loads PR-330\'s dome.', { commandable: 'setpoint' }),
   'EPC-630': V('EPC-630', 'Electronic pressure controller (purge)', 'Dome loader', {}, 'Loads PR-630\'s dome.', { commandable: 'setpoint' }),
-  'T-410': V('T-410', 'Oxidiser run tank', 'Pressure vessel', { 'Volume': '60 L', 'MEOP': '120 psig', 'Relief': 'RV-412 at 150 psig', 'Propellant load': '≈60 kg OX-1' },
+  'T-410': V('T-410', 'Oxidiser run tank', 'Pressure vessel', { 'Volume': '60 L', 'MEOP': '120 psig', 'Relief': 'RV-412 at 150 psig', 'Propellant load': '≈60 kg LOX' },
     'Feeds the oxidiser pump. Weighed by WT-411.', { ref: ['npsh'] }),
-  'T-420': V('T-420', 'Fuel run tank', 'Pressure vessel', { 'Volume': '60 L', 'MEOP': '120 psig', 'Relief': 'RV-422 at 150 psig', 'Propellant load': '≈42 kg FU-1' },
+  'T-420': V('T-420', 'Fuel run tank', 'Pressure vessel', { 'Volume': '60 L', 'MEOP': '120 psig', 'Relief': 'RV-422 at 150 psig', 'Propellant load': '≈42 kg ethanol' },
     'Feeds the fuel pump. Weighed by WT-421.', { ref: ['npsh'] }),
   'VV-413': V('VV-413', 'Oxidiser tank vent', 'Solenoid vent, normally OPEN', {}, 'Vents T-410.', { commandable: 'remote' }),
   'VV-423': V('VV-423', 'Fuel tank vent', 'Solenoid vent, normally OPEN', {}, 'Vents T-420.', { commandable: 'remote' }),
@@ -197,11 +198,11 @@ const components = {
     'Admits the start gas to the turbine manifold at T-0 and shuts it once the gas generator has taken over. Open too long, and the turbine has two drives.', { ref: ['bootstrap', 'overspeed'] }),
   'TPA-1': V('TPA-1', 'Turbopump assembly', 'Turbomachinery', { 'Design speed': '36 000 rpm', 'Redline': '39 600 rpm (110 %)', 'Turbine drive': 'GG gas at ≈850 K (start: GN₂)' },
     'The turbopump from TS-3, now driven by the gas generator. On hot gas its turbine sees more than twice the spouting velocity it had on cold nitrogen — far above its best blade speed ratio, so it is less efficient, but it needs a third of the flow.', { ref: ['turbine', 'overspeed', 'gas-generator-cycle'] }),
-  'P-OX': V('P-OX', 'Oxidiser pump', 'Centrifugal, inducer + impeller', { 'Design': '390 m at 0.54 kg/s OX-1' }, 'Feeds the main injector and, through GOV-416, the gas generator.', { ref: ['centrifugal-pump', 'npsh'] }),
-  'P-FU': V('P-FU', 'Fuel pump', 'Centrifugal, inducer + impeller', { 'Design': '480 m at 0.36 kg/s FU-1' }, 'Feeds the main injector and, through GFV-426, the gas generator.', { ref: ['centrifugal-pump', 'npsh'] }),
+  'P-OX': V('P-OX', 'Oxidiser pump', 'Centrifugal, inducer + impeller', { 'Design': '390 m at 0.54 kg/s LOX' }, 'Feeds the main injector and, through GOV-416, the gas generator.', { ref: ['centrifugal-pump', 'npsh'] }),
+  'P-FU': V('P-FU', 'Fuel pump', 'Centrifugal, inducer + impeller', { 'Design': '480 m at 0.36 kg/s ethanol' }, 'Feeds the main injector and, through GFV-426, the gas generator.', { ref: ['centrifugal-pump', 'npsh'] }),
   'TURB': V('TURB', 'Turbine', 'Single-stage impulse, partial admission', { 'Inlet': 'the gas generator\'s gas (TT-334, PT-333)' },
     'Its nozzles are the gas generator\'s throat: the GG\'s pressure is set by how much gas the turbine nozzles pass.', { ref: ['turbine'] }),
-  'GG': V('GG', 'Gas generator', 'Fuel-rich combustor, spark ignited', { 'Mixture ratio': '≈0.37 (very fuel-rich)', 'Outlet': '≈850 K, ≈155 psig', 'Flow': '≈0.04 kg/s — 5 % of the engine', 'Redline': 'TT-334 1050 K' },
+  'GG': V('GG', 'Gas generator', 'Fuel-rich combustor, spark ignited', { 'Mixture ratio': '≈0.37 (very fuel-rich)', 'Outlet': '≈840 K, ≈150 psig', 'Flow': '≈0.035 kg/s — 4 % of the engine', 'Redline': 'TT-334 1050 K' },
     'Burns a few percent of the propellants very fuel-rich — cool enough for an uncooled turbine — and dumps its gas overboard after the turbine. That gas is what the cycle pays for its simplicity: propellant that makes no thrust in the main chamber. Its mixture ratio sets its temperature; its temperature is the turbine\'s redline.', { ref: ['gas-generator-cycle', 'turbine-inlet-temperature'] }),
   'GOV-416': V('GOV-416', 'GG oxidiser valve', 'Fast pneumatic valve, normally closed', { 'Stroke': '≈60 ms', 'Operated by': 'the sequencer' },
     'Opens the oxidiser tap to the gas generator. It opens after the fuel side is flowing and shuts first: an oxidiser-rich gas generator is a hot one.', { ref: ['gas-generator-cycle'] }),
@@ -216,8 +217,8 @@ const components = {
   'PV-632': V('PV-632', 'Main fuel-side purge', 'Solenoid valve, normally closed', {}, 'Purges the main fuel manifold.', { commandable: 'remote', ref: ['purge'] }),
   'PV-635': V('PV-635', 'Gas generator purge', 'Solenoid valve, normally closed', {}, 'Purges the gas generator and the turbine manifold: unburned fuel left there after a shutdown is the next start\'s hard start.', { commandable: 'remote', ref: ['purge'] }),
   'BPE-3': V('BPE-3', 'Gas-generator cycle engine (fictional)', 'Test article', {
-      'Thrust (sea level)': '≈1.7 kN', 'Chamber pressure': '≈2.3 MPa (330 psig)', 'Mixture ratio': '1.6 (main), 0.37 (GG)',
-      'Throat / exit': 'Ø 25.6 / 52 mm', 'Chamber': 'ablative: silica-phenolic liner in a steel case', 'Design burn': '60 s' },
+      'Thrust (sea level)': '≈1.8 kN', 'Chamber pressure': '≈2.3 MPa (330 psig)', 'Mixture ratio': '1.6 (main), 0.37 (GG)',
+      'Throat / exit': 'Ø 26.2 / 57 mm', 'Chamber': 'ablative: silica-phenolic liner in a steel case', 'Design burn': '60 s' },
     'Fed by TPA-1. The main chamber is ablatively cooled: its liner chars and erodes as it burns, the throat grows, and the chamber pressure drifts down through a long burn. The case thermocouple watches the liner thin.', { ref: ['gas-generator-cycle', 'ablative-chamber', 'bootstrap'] }),
   'IGN-501': V('IGN-501', 'Main chamber igniter', 'Spark-torch', { 'Exciter current': '≈1.8 A' }, 'Lights the main chamber.', { ref: ['ignition'] }),
   'IGN-502': V('IGN-502', 'Gas generator igniter', 'Spark plug', { 'Exciter current': '≈1.6 A' },
@@ -444,7 +445,7 @@ export default {
   design: DESIGN_G,
   asBuilt: AS_BUILT_G,
   fluids: FLUIDS_G,
-  flame: { MRst: 2.0, soot: 0.3 },
+  flame: { MRst: MR_STOICH, soot: 0.12 },
   segmentSensors: { bank: 'PT-301', sup: 'PT-301', hp: 'PT-302', oxreg: 'PT-410', fureg: 'PT-420', oxu: 'PT-410', fuu: 'PT-420',
     treg: 'PT-336', ggc: 'PT-333', purge: 'PT-630', oxpl: 'PT-630', fupl: 'PT-630', oxman: 'PT-415', fuman: 'PT-425', chamber: 'PT-501',
     oxsuc: 'PT-413', fusuc: 'PT-423', oxdis: 'PT-414', fudis: 'PT-424' },
@@ -530,7 +531,7 @@ export default {
   },
   techTasks(ctrl) {
     const S = ctrl.s, m = S.model, R = ratings;
-    const fill = (load, prop = false) => ({ dur: prop ? 150 : 90, text: !load ? 'Draining both run tanks' : prop ? 'Loading propellants: OX-1 into T-410, FU-1 into T-420' : 'Filling both run tanks with water', pre: () => {
+    const fill = (load, prop = false) => ({ dur: prop ? 150 : 90, text: !load ? 'Draining both run tanks' : prop ? 'Loading propellants: LOX into T-410, ethanol into T-420' : 'Filling both run tanks with water', pre: () => {
       const hi = ['oxu', 'fuu'].map(v => m.net.vol(v).P - AMB.P);
       if (hi.some(p => p > R.VENTED)) return 'Technician: "Tank gauges show pressure. Vent both tanks before I open a fill port."';
       if (ctrl.cmd['VV-413'] !== 1 || ctrl.cmd['VV-423'] !== 1) return 'Technician: "Both tank vents must be open while I fill."';
@@ -538,13 +539,13 @@ export default {
       if (load && m.lines.some(l => l.mL > 0.5)) return 'Technician: "There is already liquid in the tanks. Drain them first — I am not mixing fluids."';
       return null;
     }, done: () => {
-      const fl = prop ? { ox: FLUIDS_G['OX-1'], fu: FLUIDS_G['FU-1'] } : { ox: FLUIDS_G.water, fu: FLUIDS_G.water };
+      const fl = prop ? { ox: FLUIDS_G.LOX, fu: FLUIDS_G.ethanol } : { ox: FLUIDS_G.water, fu: FLUIDS_G.water };
       m.load(fl, load ? (prop ? { ox: R.FILL_OX, fu: R.FILL_FU } : { ox: R.FILL_WATER, fu: R.FILL_WATER }) : { ox: 0, fu: 0 });
       ctrl.loaded = load ? (prop ? 'propellants' : 'water') : null;
       ctrl.bump();
       S.requestPrediction();
       ctrl.log('TECH', !load ? 'Tanks drained; fill ports capped.' : prop
-        ? `Propellants loaded: about ${R.FILL_OX} kg OX-1 in T-410, ${R.FILL_FU} kg FU-1 in T-420. Fill ports capped. The stand is now a propellant hazard.`
+        ? `Propellants loaded: about ${R.FILL_OX} kg LOX in T-410, ${R.FILL_FU} kg ethanol in T-420. Fill ports capped. The stand is now a propellant hazard.`
         : `Tanks filled with water: about ${R.FILL_WATER} kg in each. Fill ports capped.`);
     } });
     return {
@@ -562,7 +563,7 @@ export default {
   inspectionVolumes: ['hp', 'oxu', 'fuu', 'treg', 'purge', 'oxman', 'fuman'],
   lowPVolume: 'oxu',
   techButtons: [['fillTanks', 'Fill tanks (water)', 'Fill both run tanks with water (tanks vented, vents open)'],
-    ['loadPropellants', 'Load propellants', 'Load OX-1 and FU-1 for a hot fire (tanks vented and empty, vents open)'],
+    ['loadPropellants', 'Load propellants', 'Load LOX and ethanol for a hot fire (tanks vented and empty, vents open)'],
     ['drainTanks', 'Drain tanks', 'Drain both run tanks'],
     ['turnRotor', 'Turn rotor', 'Turn the TPA-1 rotor by hand and feel for drag, rub, grit']],
   leak: {

@@ -18,7 +18,7 @@ const check = (label, cond, detail = '') => {
   if (!cond) failures++;
 };
 const A = 101325, P = x => (x / psi(1)).toFixed(0) + ' psig';
-const PROP = { ox: FLUIDS_G['OX-1'], fu: FLUIDS_G['FU-1'] };
+const PROP = { ox: FLUIDS_G['LOX'], fu: FLUIDS_G['ethanol'] };
 
 /* A stand ready to fire: loaded, igniters checked, tanks at 50 psig, purge up. */
 function ready({ seed = 3, prop = true, fault = null } = {}) {
@@ -28,7 +28,7 @@ function ready({ seed = 3, prop = true, fault = null } = {}) {
   ex('zero', { ids: def.sensors.filter(x => x.kind === 'PT').map(x => x.id) }); ex('tare', { ids: ['LC-501', 'WT-411', 'WT-421'] });
   ex('daqRate', { rate: 2000 });
   ex('tech', { task: prop ? 'loadPropellants' : 'fillTanks' }); s.run(prop ? 151 : 91);
-  if (prop) { ex('meterCal', { line: 'ox', fluid: 'OX-1' }); ex('meterCal', { line: 'fu', fluid: 'FU-1' }); ex('inspection', { id: 'spark-check' }); s.run(41); }
+  if (prop) { ex('meterCal', { line: 'ox', fluid: 'LOX' }); ex('meterCal', { line: 'fu', fluid: 'ethanol' }); ex('inspection', { id: 'spark-check' }); s.run(41); }
   ex('tech', { task: 'openHV' }); s.run(9);
   for (const id of ['VV-301', 'VV-413', 'VV-423']) ex('valve', { id, open: false });
   ex('valve', { id: 'IV-301', open: true }); s.run(2); ex('clearCell'); s.run(7);
@@ -64,11 +64,14 @@ console.log('the steady operating point');
   const lo = steadyGG(def, { fluids: PROP, thrGG: 0.7 });
   check('closing the GG throttles slows the pumps and drops Pc', lo.rpm < r.rpm && lo.Pc < r.Pc && lo.F < r.F, `${lo.rpm.toFixed(0)} rpm, ${P(lo.Pc - A)}, ${lo.F.toFixed(0)} N`);
   const hot = steadyGG(def, { fluids: PROP, thrGGfu: 0.85 });
-  check('starving the GG of fuel raises the turbine inlet temperature', hot.TIT > r.TIT + 60, `${hot.TIT.toFixed(0)} K`);
+  // CEA's fuel-rich products are only gently hotter with more oxygen (≈ 35 K per 0.1 of MR here), so
+  // the lost GG flow wins: the engine slows, and the turbine runs a little hotter
+  check('starving the GG of fuel raises the turbine inlet temperature a little and slows the engine', hot.TIT > ab.TIT + 8 && hot.rpm < ab.rpm, `${hot.TIT.toFixed(0)} K vs ${ab.TIT.toFixed(0)} K, ${hot.rpm.toFixed(0)} rpm`);
   const cold = steadyGG(def, { fluids: { ox: FLUIDS_G.water, fu: FLUIDS_G.water }, cold: { P: A + psi(200), T: 293 } });
   check('cold flow: start gas alone spins the pumps on water', cold.kind === 'ggcold' && cold.n > 0.7 && cold.n < 1.05, `${cold.rpm.toFixed(0)} rpm, ${cold.mdotOx.toFixed(2)} / ${cold.mdotFu.toFixed(2)} kg/s`);
 }
 
+let NOM = null;                       // the nominal fire's mainstage point
 console.log('a nominal hot fire: the bootstrap start and mainstage');
 {
   const { s, run, M, S, trace, armed } = fire({});
@@ -78,6 +81,7 @@ console.log('a nominal hot fire: the bootstrap start and mainstage');
   check('the gas generator lit within 0.4 s of its valves', S.tIgnGG > 0 && S.tIgnGG < 0.4, `${(S.tIgnGG * 1e3).toFixed(0)} ms`);
   check('the main chamber lit within 0.3 s of its valves', S.tIgnMain > 0 && S.tIgnMain < 0.3, `${(S.tIgnMain * 1e3).toFixed(0)} ms`);
   const p0 = M.points[0], pred = run.meta.config.prediction;
+  NOM = p0;
   check('mainstage speed within 3 % of the drawing prediction', Math.abs(p0.N / pred.rpm - 1) < 0.03, `${p0.N.toFixed(0)} vs ${pred.rpm.toFixed(0)} rpm`);
   check('chamber pressure within 6 % of the drawing prediction', Math.abs(p0.Pc / (pred.Pc - A) - 1) < 0.06, `${P(p0.Pc)} vs ${P(pred.Pc - A)}`);
   const ab = steadyGG(def, { fluids: PROP });
@@ -111,7 +115,8 @@ console.log('the gas generator mixture ratio');
 {
   const { run, M } = fire({ thrFu: 0.88, thrOx: 1.0 });
   const p0 = M.points[0];
-  check('less GG fuel: a hotter turbine inlet, and a faster engine', p0 && p0.TIT > 900 && !run.aborted, `${p0?.TIT.toFixed(0)} K, ${p0?.N.toFixed(0)} rpm ${run.abort || ''}`);
+  check('less GG fuel: a slightly hotter turbine inlet, but less gas — a slower engine', p0 && NOM && p0.TIT > NOM.TIT + 5 && p0.N < 0.98 * NOM.N && !run.aborted,
+    `${p0?.TIT.toFixed(0)} K, ${p0?.N.toFixed(0)} rpm vs ${NOM?.TIT.toFixed(0)} K, ${NOM?.N.toFixed(0)} rpm ${run.abort || ''}`);
 }
 
 console.log('starts that go wrong');
