@@ -169,15 +169,27 @@ def test_slip_walls_write_maxwell_and_smoluchowski(tmp_path):
     assert "librhoCentralFoam" not in (plain.path / "system/controlDict").read_text()
 
 
-def test_slip_is_refused_where_rhocentralfoam_would_run_it(tmp_path):
-    with pytest.raises(ValueError, match="rhoPimpleFoam"):
-        _build(tmp_path, _slip_defn(solver="rhoCentralFoam"))
-    codes = {f.code: f.severity for f in validate(_slip_defn(solver="rhoCentralFoam"))}
+def test_slip_on_rhocentralfoam_is_written_and_noted(tmp_path):
+    # M13: rhoCentralFoam takes slip too; the pipeline runs SONICLINE's build
+    # of it (foam/extensions slipCentralFoam), whose patch is checked below.
+    s = _build(tmp_path, _slip_defn(solver="rhoCentralFoam"))
+    assert "maxwellSlipU" in _wall(s.path / "0/U")
     from sonicline.core.validate import Severity
-    assert codes["wall.slip_solver"] is Severity.ERROR
-    assert "wall.slip_solver" not in {f.code for f in validate(_slip_defn())}
+    codes = {f.code: f.severity for f in validate(_slip_defn(solver="rhoCentralFoam"))}
+    assert codes["wall.slip_central"] is Severity.INFO
+    assert "wall.slip_central" not in {f.code for f in validate(_slip_defn())}
     with pytest.raises(ValueError):
         m.WallSlip(accommodation=0.0)
+
+
+def test_the_central_solver_patch_is_anchored_and_named():
+    from sonicline.foam import extensions as e
+
+    assert "slipCentralFoam" in e.APPLICATIONS
+    assert e.library_name("slipCentralFoam").startswith("soniclineCentralFoam_")
+    (f1, a1, r1), (f2, a2, r2) = e.PATCHES["slipCentralFoam"]
+    assert f1 == f2 == "rhoCentralFoam.C"
+    assert "wallFvPatch.H" in r1 and r2.startswith(a2) and "sigmaDotU.boundaryFieldRef()" in r2
 
 
 def test_slip_round_trips_through_json():

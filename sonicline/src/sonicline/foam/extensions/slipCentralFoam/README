@@ -1,0 +1,8 @@
+SONICLINE's build of OpenFOAM's rhoCentralFoam for slip walls (GPL-3.0-or-later,
+as OpenFOAM). Nothing of OpenFOAM is kept here: the installed solver's source
+($FOAM_SOLVERS/compressible/rhoCentralFoam) is copied at build time and
+foam/extensions/__init__.py (PATCHES) applies one change, checked against its
+anchor: the viscous work sigmaDotU carries no flux across a wall. With
+velocity slip a wall face holds tau & U_slip, which rhoCentralFoam's energy
+equation would otherwise take out of the gas as work on the wall (SONICLINE
+DESIGN.md findings 73 and 76). With no slip U = 0 there and nothing changes.

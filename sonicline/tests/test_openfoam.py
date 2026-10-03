@@ -171,3 +171,22 @@ def test_slip_walls_run_and_conserve_energy(tmp_path):
     results = verification.run_suite(["V21"], "standard", tmp_path, 2)
     pair = next(r for r in results if r.case == "V21")
     assert pair.passed, [(c.name, c.value, c.reference) for c in pair.checks]
+
+
+def test_slip_central_solver_builds_from_the_installed_source(tmp_path):
+    # M13: SONICLINE's rhoCentralFoam for slip walls is the installed
+    # solver's own source with one patch (no viscous work through walls);
+    # the patch must fit this OpenFOAM, and a second call reuses the build.
+    from sonicline.foam import extensions
+
+    runner = LocalRunner()
+    exe = extensions.ensure_built(runner, tmp_path / "a", "slipCentralFoam")
+    assert exe == extensions.library_name("slipCentralFoam")
+    assert extensions.ensure_built(runner, tmp_path / "b", "slipCentralFoam") == exe
+    assert not (tmp_path / "b" / "log.wmake").exists()
+    # the patch, applied afresh to the installed source
+    patched = tmp_path / "p"
+    patched.mkdir()
+    extensions._from_openfoam(runner, patched, "slipCentralFoam", tmp_path / "log.copy")
+    source = (patched / "rhoCentralFoam.C").read_text()
+    assert source.count("sigmaDotU.boundaryFieldRef()[patchi] = Zero") == 1

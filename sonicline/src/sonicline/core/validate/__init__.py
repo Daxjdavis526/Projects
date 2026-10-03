@@ -347,11 +347,10 @@ def _rarefaction_findings(gas, perf, p0, T0, profile, add, defn=None) -> None:
                         "Wall slip is set on an inviscid run, whose walls slip freely already: it is ignored."))
         elif (defn.numerics.solver == "rhoCentralFoam" or isinstance(defn.flow.time, Transient)
               or perf.regime is nozzle.Regime.SHOCK_IN_NOZZLE):
-            add(Finding(Severity.ERROR, "wall.slip_solver",
-                        "Wall slip runs only on rhoPimpleFoam, and this case needs rhoCentralFoam (a "
-                        "shock inside the nozzle, a transient, or it was asked for). rhoCentralFoam's "
-                        "energy equation would carry the slip friction out through the wall.",
-                        "Run without slip, or as a steady run without a shock in the nozzle."))
+            add(Finding(Severity.INFO, "wall.slip_central",
+                        "This case runs on rhoCentralFoam: with slip walls SONICLINE builds and runs its "
+                        "own copy of it, whose energy equation keeps the slip friction in the gas (the "
+                        "first slip run builds it, which needs OpenFOAM's development package)."))
     g = gas.gamma
     p_star = p0 * (2.0 / (g + 1.0)) ** (g / (g - 1.0))
     T_star = T0 * 2.0 / (g + 1.0)
