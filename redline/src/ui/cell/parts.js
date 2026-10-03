@@ -65,10 +65,15 @@ export function vessel({ V, aspect = 2.6, color = 0xd9dcd8, text = null, sight =
     lab.position.set(0, skirt + r * 0.5 + L * 0.62, r + 0.002);
     g.add(lab);
   }
-  // frost (a cryogen inside): the shell whitens and goes matte
-  const base = new THREE.Color(color), rime = new THREE.Color(0xf1f6f9);
+  // frost (a cryogen inside): the shell goes a pale icy blue and matte, with a
+  // faint cold glow so it reads in a dim cell (rime ice over a 90 K wall)
+  const base = new THREE.Color(color), rime = new THREE.Color(0xb9dcf2), glow = new THREE.Color(0x10283a);
   let fk = -1;
-  const frost = k => { if (Math.abs(k - fk) < 0.01) return; fk = k; mat.color.copy(base).lerp(rime, 0.9 * k); mat.roughness = 0.45 + 0.5 * k; mat.metalness = 0.35 * (1 - k); };
+  const frost = k => {
+    if (Math.abs(k - fk) < 0.01) return; fk = k;
+    mat.color.copy(base).lerp(rime, 0.95 * k); mat.roughness = 0.45 + 0.5 * k; mat.metalness = 0.35 * (1 - k);
+    mat.emissive.copy(glow).multiplyScalar(k);
+  };
   g.userData = { r, height: skirt + r + L, top: skirt + r + L + 0.1, level, frost };
   return g;
 }

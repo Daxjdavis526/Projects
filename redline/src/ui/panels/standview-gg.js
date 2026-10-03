@@ -67,7 +67,7 @@ export class StandViewGG {
       svg.append(s('path', { d: `M${x - 20},152 L${x - 20},200`, stroke: '#8d969c', 'stroke-width': 2 }));
       svg.append(s('rect', { x: x - 44, y: 200, width: 88, height: 130, rx: 28, fill: 'url(#tankG)', stroke: '#3a4248' }));
       // frost: a tank of LOX is white with it
-      const fr = s('rect', { x: x - 44, y: 200, width: 88, height: 130, rx: 28, fill: '#eef5f8', opacity: 0 });
+      const fr = s('rect', { x: x - 44, y: 200, width: 88, height: 130, rx: 28, fill: '#bfe0f5', opacity: 0 });
       svg.append(fr);
       svg.append(s('rect', { x: x + 48, y: 212, width: 8, height: 106, fill: '#0c1216', stroke: '#46525a' }));
       const lv = s('rect', { x: x + 49, y: 318, width: 6, height: 0, fill: line === 'ox' ? '#9ec7e0' : '#c9b56a' });
