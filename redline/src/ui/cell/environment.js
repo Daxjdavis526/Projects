@@ -59,7 +59,7 @@ export class Environment {
     g.add(mesh(new THREE.BoxGeometry(5.6, 0.25, 8.8), wallMat, { x: -5.6, y: 3.72, z: -0.2 }));
     g.add(mesh(new THREE.BoxGeometry(0.35, 3.6, 0.35), wallMat, { x: -3.0, y: 1.8, z: 4.0 }));
     // blast-wall stencil
-    const st = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.55), new THREE.MeshStandardMaterial({ map: label(['TEST STAND', 'TS-1  ·  TS-2  ·  TS-3'], { fg: '#2a2a28', font: 'bold 44px monospace', h: 128 }), transparent: true, roughness: 0.9 }));
+    const st = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.62), new THREE.MeshStandardMaterial({ map: label(['TEST STAND', 'TS-1  ·  TS-2  ·  TS-3'], { w: 1024, h: 200, fg: '#2a2a28', font: 'bold 72px monospace' }), transparent: true, roughness: 0.9 }));
     st.position.set(-1.2, 2.7, -4.19); g.add(st);
     this.standSign = st;
     // hazard edge along the bay
@@ -117,13 +117,22 @@ export class Environment {
       const b = mesh(new THREE.IcosahedronGeometry(0.3 + r() * 0.5, 0), bushM, { x: Math.cos(a) * d, y: 0.2, z: Math.sin(a) * d });
       b.scale.y = 0.6; g.add(b);
     }
-    // distant hills
-    const hillM = new THREE.MeshStandardMaterial({ color: 0x8d7c66, roughness: 1, flatShading: true });
-    for (let i = 0; i < 18; i++) {
-      const a = i / 18 * Math.PI * 2 + 0.2, d = 520 + (i % 3) * 60;
-      const hh = 30 + ((i * 37) % 50);
-      const hill = mesh(new THREE.ConeGeometry(90 + (i * 13) % 60, hh, 6, 1), hillM, { x: Math.cos(a) * d, y: hh / 2 - 2, z: Math.sin(a) * d, cast: false });
-      g.add(hill);
+    // distant terrain: a ring of rolling desert hills, heights from layered
+    // noise, smooth-shaded so the fog and the low sun model them
+    {
+      const inner = 300, outer = 900, segR = 18, segA = 160;
+      const geo = new THREE.RingGeometry(inner, outer, segA, segR);
+      const pos = geo.attributes.position;
+      const nz = (x, y) => Math.sin(x * 0.011 + 1.3) * Math.cos(y * 0.013 - 0.4) + 0.5 * Math.sin(x * 0.029 - y * 0.021 + 2.1) + 0.25 * Math.cos(x * 0.061 + y * 0.047);
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), y = pos.getY(i), d = Math.hypot(x, y);
+        const t = Math.min(1, Math.max(0, (d - inner) / 220));
+        const hgt = t * (38 + 30 * nz(x, y)) * (0.6 + 0.4 * Math.sin(Math.atan2(y, x) * 3 + 0.7) ** 2);
+        pos.setZ(i, Math.max(0, hgt));
+      }
+      geo.computeVertexNormals();
+      const terrain = mesh(geo, new THREE.MeshStandardMaterial({ color: 0x9a8566, roughness: 1 }), { rx: -Math.PI / 2, y: -0.5, cast: false });
+      g.add(terrain);
     }
     // the sun, its sky light
     this.sun = new THREE.DirectionalLight(0xffffff, 2);
@@ -141,12 +150,41 @@ export class Environment {
     this._ppl = [new THREE.Vector3(-6, 0, 3.4), new THREE.Vector3(-5.2, 0, 3.6)];
   }
 
+  /* Image-based lighting: a small scene of the same sky over the desert
+     and the bay's concrete, prefiltered into an environment map so metal
+     reflects something — without it every metallic surface renders as flat
+     grey. Rebuilt when the light changes (the cell view calls it every few
+     minutes of session clock). */
+  applyEnvironment(renderer, scene) {
+    if (!this.pmrem) this.pmrem = new THREE.PMREMGenerator(renderer);
+    if (!this._envScene) {
+      const es = this._envScene = new THREE.Scene();
+      es.add(new THREE.Mesh(new THREE.SphereGeometry(60, 32, 16), new THREE.ShaderMaterial({ uniforms: this.skyU, vertexShader: skyVert, fragmentShader: skyFrag, side: THREE.BackSide, depthWrite: false })));
+      this._envGround = new THREE.MeshBasicMaterial({ color: 0x9c8a6c });
+      this._envWall = new THREE.MeshBasicMaterial({ color: 0x7a776f });
+      this._envRoof = new THREE.MeshBasicMaterial({ color: 0x4a4844 });
+      const gnd = new THREE.Mesh(new THREE.CircleGeometry(55, 32), this._envGround); gnd.rotation.x = -Math.PI / 2; gnd.position.y = -1.1; es.add(gnd);
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 0.4), this._envWall); wall.position.set(-1, 0.7, -4.6); es.add(wall);
+      const side = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4, 9), this._envWall); side.position.set(-8.4, 0.7, 0); es.add(side);
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.25, 9), this._envRoof); roof.position.set(-5.6, 2.6, 0); es.add(roof);
+    }
+    const k = 0.15 + 0.85 * (this._light ?? 1);
+    this._envGround.color.setRGB(0.61, 0.54, 0.42).multiplyScalar(k);
+    this._envWall.color.setRGB(0.48, 0.47, 0.44).multiplyScalar(k);
+    this._envRoof.color.setRGB(0.25, 0.24, 0.23).multiplyScalar(k);
+    const rt = this.pmrem.fromScene(this._envScene, 0.015);
+    if (this._envRT) this._envRT.dispose();
+    this._envRT = rt;
+    scene.environment = rt.texture;
+  }
+
   /* clock → sun, sky, light levels. Returns the ambient level (0–1). */
   setTime(clock) {
     const { dir, light } = sunAt(clock);
+    this._light = light;
     this.sun.position.copy(dir).multiplyScalar(40).add(this.sun.target.position);
     this.sun.intensity = 2.6 * light;
-    this.hemi.intensity = 0.15 + 0.95 * light;
+    this.hemi.intensity = 0.08 + 0.3 * light;
     const warm = Math.max(0, 1 - dir.y * 3.5);                // low sun: warmer, redder
     this.sun.color.setRGB(1, 0.92 - 0.25 * warm, 0.82 - 0.45 * warm);
     const z = new THREE.Color(0.22, 0.42, 0.72).multiplyScalar(0.25 + 0.75 * light);
