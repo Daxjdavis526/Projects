@@ -30,12 +30,13 @@ from ..core import model
 from ..core.model import definition as d
 from ..core.validate import Severity, has_errors, resolve_profile, validate
 from ..foam import case as foam_case
+from ..foam import fields as foam_fields
 from ..foam import parse
 from ..mesh import revolved, sizing
 from ..core import rarefaction
 from ..metrics import Trust, condensation, propulsion, recovery_factor, shock_location, verdict
 from ..post import results
-from . import convergence, gates
+from . import acceleration, convergence, gates
 from .runner import default_runner
 
 
@@ -414,7 +415,14 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         manifest.setdefault("solver", {})["executable"] = executable
     cmd = command(executable)
     emit(Event("solve", f"running {' '.join(cmd)}"))
-    proc = runner.start(cmd, case, case / f"log.{summary.solver}")
+    starts = [0]
+
+    def start_solver():
+        # One log per start: a corrected run restarts (run.acceleration).
+        suffix = "" if len(starts) == 1 else f".{len(starts)}"
+        return runner.start(cmd, case, case / f"log.{summary.solver}{suffix}")
+
+    proc = start_solver()
     criteria = defn.numerics.convergence
     assessment = None
     stop_requested = False
@@ -422,44 +430,111 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
     held_since = None  # first iteration of the current unbroken run of passing checks
     cancelled = False
     end_time = defn.flow.time.end_time if transient else None
+    # Convergence aids (run.acceleration): a stalled steady rhoPimpleFoam
+    # run steps its Courant number down; a mass-flow-driven rhoCentralFoam
+    # nozzle has its chamber pressure corrected between restarts.
+    steps_courant = not transient and summary.solver == foam_case.PIMPLE_SOLVER
+    corrects_mass = (not transient and summary.solver == foam_case.CENTRAL_SOLVER
+                     and isinstance(defn.boundaries.inlet, d.MassFlowInlet)
+                     and summary.throat_region is not None)
+    aids = {"courant": [], "pressure_tolerance": [], "mass_corrections": []}
+    unbalanced_since = None  # first iteration of a steady but unbalanced stretch
+    # Iteration of the last change made by an aid; a warm-started run's own
+    # output begins after the warm start.
+    settings_since = foam_case.WARM_START_ITERATIONS if "warm_start" in manifest else 0
+    correction = None  # factor awaiting the solver's stop
     try:
-        while proc.poll() is None:
-            time.sleep(poll_seconds)
-            if _cancelled(run_dir):
-                emit(Event("solve", "cancel requested; stopping the solver"))
-                proc.terminate()
-                cancelled = True
+        while True:
+            while proc.poll() is None:
+                time.sleep(poll_seconds)
+                if _cancelled(run_dir):
+                    emit(Event("solve", "cancel requested; stopping the solver"))
+                    proc.terminate()
+                    cancelled = True
+                    break
+                tables = results.read_tables(case)
+                if transient:
+                    # A transient runs to its end time; progress is simulated time.
+                    inlet = tables.get("mdot_inlet")
+                    if inlet is not None and len(inlet.time):
+                        done = 100.0 * float(inlet.time[-1]) / end_time
+                        if done - last_report >= 5.0:
+                            last_report = done
+                            emit(Event("solve", f"t = {1e3 * float(inlet.time[-1]):.4g} ms ({done:.0f} %)",
+                                       {"time": float(inlet.time[-1]), "fraction": done / 100.0}))
+                    continue
+                assessment = convergence.assess(tables, criteria, wedge)
+                # Stop only once the criteria have held for a whole judgement
+                # window: a slow oscillation passes a window that lands on its
+                # turning point and fails a few iterations later (DESIGN.md
+                # section 11, finding 69).
+                if not assessment.converged:
+                    held_since = None
+                elif held_since is None:
+                    held_since = assessment.iterations
+                steady = convergence.held_long_enough(held_since, assessment.iterations, criteria)
+                if assessment.iterations - last_report >= 100:
+                    last_report = assessment.iterations
+                    emit(Event("solve", f"iteration {assessment.iterations}",
+                               {"spreads": assessment.spreads, "residual_drop": assessment.residual_drop,
+                                "mass_imbalance": assessment.mass_imbalance}))
+                if steady and not stop_requested:
+                    emit(Event("solve", f"converged at iteration {assessment.iterations}; stopping"))
+                    foam_case.request_stop(case)
+                    stop_requested = True
+                if stop_requested or correction is not None:
+                    continue
+                if steps_courant and not aids["pressure_tolerance"]:
+                    if not assessment.integrals_flat or assessment.mass_balanced:
+                        unbalanced_since = None
+                    elif unbalanced_since is None:
+                        unbalanced_since = assessment.iterations
+                    if acceleration.unbalanced(assessment, unbalanced_since, criteria):
+                        rel_tol = acceleration.TIGHT_PRESSURE_REL_TOL
+                        foam_case.set_pressure_tolerance(case, rel_tol)
+                        aids["pressure_tolerance"].append({"iteration": assessment.iterations,
+                                                           "rel_tol": rel_tol,
+                                                           "mass_imbalance": assessment.mass_imbalance})
+                        emit(Event("solve", f"steady, but inlet and exit mass flow differ by "
+                                            f"{100 * assessment.mass_imbalance:.3f} %: pressure solved to "
+                                            f"{rel_tol:g} of its residual from here"))
+                        settings_since, held_since = assessment.iterations, None
+                if steps_courant and not assessment.converged:
+                    why = acceleration.stalled(tables, criteria, settings_since)
+                    now = foam_case.courant(case) if why else None
+                    lower = acceleration.next_courant(now) if now else None
+                    if lower is not None:
+                        foam_case.set_courant(case, lower)
+                        aids["courant"].append({"iteration": assessment.iterations, "from": now, "to": lower,
+                                                "reason": why})
+                        emit(Event("solve", f"{why}; Courant number {now:g} -> {lower:g}"))
+                        settings_since, held_since = assessment.iterations, None
+                if corrects_mass and len(aids["mass_corrections"]) < acceleration.MAX_CORRECTIONS:
+                    factor = acceleration.mass_storage_factor(tables, criteria, settings_since)
+                    if factor is not None:
+                        emit(Event("solve", f"chamber short of the inflow by {100 * (factor - 1):+.3f} %: "
+                                            "stopping to correct its pressure"))
+                        foam_case.request_stop(case)
+                        correction = factor
+            if correction is None or cancelled or proc.wait() != 0:
                 break
-            tables = results.read_tables(case)
-            if transient:
-                # A transient runs to its end time; progress is simulated time.
-                inlet = tables.get("mdot_inlet")
-                if inlet is not None and len(inlet.time):
-                    done = 100.0 * float(inlet.time[-1]) / end_time
-                    if done - last_report >= 5.0:
-                        last_report = done
-                        emit(Event("solve", f"t = {1e3 * float(inlet.time[-1]):.4g} ms ({done:.0f} %)",
-                                   {"time": float(inlet.time[-1]), "fraction": done / 100.0}))
-                continue
-            assessment = convergence.assess(tables, criteria, wedge)
-            # Stop only once the criteria have held for a whole judgement
-            # window: a slow oscillation passes a window that lands on its
-            # turning point and fails a few iterations later (DESIGN.md
-            # section 11, finding 69).
-            if not assessment.converged:
-                held_since = None
-            elif held_since is None:
-                held_since = assessment.iterations
-            steady = convergence.held_long_enough(held_since, assessment.iterations, criteria)
-            if assessment.iterations - last_report >= 100:
-                last_report = assessment.iterations
-                emit(Event("solve", f"iteration {assessment.iterations}",
-                           {"spreads": assessment.spreads, "residual_drop": assessment.residual_drop,
-                            "mass_imbalance": assessment.mass_imbalance}))
-            if steady and not stop_requested:
-                emit(Event("solve", f"converged at iteration {assessment.iterations}; stopping"))
-                foam_case.request_stop(case)
-                stop_requested = True
+            # The solver has written its state and stopped: scale the nozzle's
+            # pressure so the throat passes the inflow, and carry on.
+            try:
+                fixed = foam_fields.scale_pressure(case, correction,
+                                                    mesh.cell_centres[:, 0] <= profile.x_exit + 1e-9)
+            except (OSError, ValueError) as e:
+                # Judged as it stands: stopped, so not converged.
+                emit(Event("solve", f"could not correct the chamber pressure: {e}"))
+                aids["mass_corrections"].append({"error": str(e)})
+                break
+            aids["mass_corrections"].append({"iteration": int(float(fixed["time"])), "factor": correction,
+                                             "cells": fixed["cells"]})
+            settings_since, held_since = int(float(fixed["time"])), None
+            correction = None
+            foam_case.clear_stop(case)
+            starts.append(settings_since)
+            proc = start_solver()
     except BaseException:
         # Whatever breaks the monitoring (a bug, Ctrl-C) must not leave
         # the solver running on its own.
@@ -467,6 +542,8 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         proc.wait()
         raise
     code = proc.wait()
+    if any(aids.values()):
+        manifest["convergence_aids"] = aids
     if cancelled:
         manifest["solve_seconds"] = round(time.time() - t_solve, 1)
         return finish("cancelled", Trust.NOT_TRUSTWORTHY.value)
@@ -487,6 +564,7 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
         # A transient's every written time is a frame of its animation.
         runner.run(["reconstructPar"] if transient else ["reconstructPar", "-latestTime"], case,
                    case / "log.reconstructPar")
+        foam_fields.repair_reconstructed(case)
 
     tables = results.read_tables(case)
     if transient:

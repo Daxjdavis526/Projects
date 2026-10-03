@@ -848,6 +848,36 @@ def clear_stop(case: Path) -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+def courant(case: Path) -> float | None:
+    """The steady rhoPimpleFoam run's Courant number (PIMPLE maxCo)."""
+    import re
+
+    m = re.search(r"^\s*maxCo\s+([^;\s]+);", (case / "system" / "fvSolution").read_text(encoding="utf-8"), re.M)
+    return float(m.group(1)) if m else None
+
+
+def set_courant(case: Path, value: float) -> None:
+    """Change a running rhoPimpleFoam's Courant number: it rereads
+    fvSolution when the file changes (runTimeModifiable)."""
+    import re
+
+    path = case / "system" / "fvSolution"
+    text = path.read_text(encoding="utf-8")
+    text = re.sub(r"^(\s*maxCo\s+)[^;\s]+;", rf"\g<1>{value:g};", text, count=1, flags=re.M)
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
+def set_pressure_tolerance(case: Path, rel_tol: float) -> None:
+    """Change a running rhoPimpleFoam's pressure-solver relative tolerance
+    (read afresh at every solve)."""
+    import re
+
+    path = case / "system" / "fvSolution"
+    text = path.read_text(encoding="utf-8")
+    text = re.sub(r'("\(p\|pFinal\)"\s*\{[^}]*?relTol\s+)[^;\s]+;', rf"\g<1>{rel_tol:g};", text, count=1)
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
 def set_non_orthogonal_correctors(case: Path, n: int) -> None:
     path = case / "system" / "fvSolution"
     text = path.read_text(encoding="utf-8")

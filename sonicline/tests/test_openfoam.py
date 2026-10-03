@@ -165,10 +165,10 @@ def test_surface_check_on_a_clean_stl():
 
 
 def test_slip_walls_run_and_conserve_energy(tmp_path):
-    # V21's no-slip / slip pair on its coarse planar channel, and E3a with
-    # slip: the viscous-work extension keeps the slip friction in the gas
-    # (DESIGN.md finding 73).
-    results = verification.run_suite(["V21"], "standard", tmp_path, 2)
+    # V21's no-slip / slip pair on its coarse planar channel (the nightly
+    # runs the standard one): the viscous-work extension keeps the slip
+    # friction in the gas (DESIGN.md finding 73).
+    results = verification.run_suite(["V21"], "coarse", tmp_path, 2)
     pair = next(r for r in results if r.case == "V21")
     assert pair.passed, [(c.name, c.value, c.reference) for c in pair.checks]
 

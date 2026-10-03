@@ -2435,3 +2435,157 @@ Not done in M13:
   effect (finding 76).
 - The Maxwell curvature term. rhoCentralFoam has the `tauMC` it needs, but
   it stays off so that both solvers apply the same condition V21 verified.
+
+## 23. M14 record: convergence for slow and very viscous flows
+
+SONICLINE's steady settings were tuned on transonic nozzles. Three flows
+defeated them: rhoCentralFoam on Whalen's E3a nozzle (0.16 % short of mass
+balance after 61,000 iterations, finding 76), the V21 microchannel on the
+standard mesh, and the 100-height channel (neither converged in 20,000).
+M14 found three different slow modes behind them and gives each a
+convergence aid. Every aid fires only when a run shows that mode, so runs
+that converged before keep their settings. Every aid is recorded in the
+manifest under `convergence_aids` and reported as the run goes.
+
+Delivered:
+
+- **`run/acceleration.py`**, the three aids, decided from the same tables
+  the convergence monitor reads; `foam/fields.py` edits a stopped run's
+  fields.
+  1. A steady rhoPimpleFoam run whose mass flows keep scattering beyond
+     the noise tolerance over two consecutive 1000-iteration windows (a
+     limit cycle) has its Courant number stepped down, 0.5 → 0.2 → 0.1,
+     while it runs (finding 77).
+  2. A steady rhoPimpleFoam run whose integrals are flat but whose mass
+     does not balance, for a whole judgement window, has its pressure
+     equation solved to 10⁻⁴ of its residual instead of 10⁻² from there on
+     (finding 78).
+  3. A steady rhoCentralFoam run with a mass-flow inlet and a choked
+     throat, whose throat passes a steady but different flow from the
+     inflow, is stopped and has its whole nozzle's pressure scaled by
+     inflow / throat flow (temperature and velocity kept), then continues;
+     up to 12 times (finding 79).
+- **V21 runs at the requested mesh quality**: the nightly now runs the
+  standard planar mesh, which did not converge before.
+- **V22**, the converged cross-check of wall slip between the solvers that
+  M13 deferred (finding 80).
+- **Reconstructed slip-wall fields are repaired** after `reconstructPar`
+  (finding 81).
+
+Findings:
+
+77. **rhoPimpleFoam's local time step ignores viscosity, and a slow channel
+    sits in a limit cycle.** The step comes from the flow speed alone, so
+    in near-stagnant cells it grows far past the viscous and acoustic time
+    scales. In the V21 channel on the standard mesh these are in the corner
+    of the inlet contraction, where the pressure, temperature and velocity
+    of the Courant-0.5 run differed from the converged state by 3 %, 1.6 %
+    and 5 %.
+    - At Courant 0.5 the inlet mass flow scattered by 0.9 % for good, about
+      a mean 3.8 % too high. From the same state, 0.2 converged in under
+      2000 iterations, with inflow and outflow 10⁻⁶ apart. 0.1 also
+      converged, more slowly.
+    - Two outer correctors instead of one made it worse: the mass flows
+      swung by 30–70 %.
+    - Through the pipeline, V21 now converges on the standard mesh in about
+      5900 iterations, no slip and slip:
+
+      | mesh | no slip vs Poiseuille | slip vs Arkilic | the slip effect alone |
+      |---|---|---|---|
+      | coarse (M12) | −0.20 % | −0.04 % | +0.16 % |
+      | standard | −0.29 % | −0.12 % | +0.17 % |
+
+    - The 100-height channel with its plume (Mach 0.1) converges in about
+      14,000 iterations, no slip and slip. Slip carries 7.05 % more flow.
+    - The aid needs 1000-iteration windows. Over 200 the start of the
+      channel, still scattering by 3–6 % as it settled, read as a limit
+      cycle and stepped down twice.
+78. **A loose pressure solve gives rhoPimpleFoam a steady state that does
+    not conserve mass.** The 100-height channel at Courant 0.2 came to rest
+    with inflow and outflow 1.34×10⁻³ apart. Both were flat to 10⁻⁶ for
+    4000 iterations, and the inflow was 0.08 % above the converged value.
+    - From that state, with the pressure solved to 10⁻⁴ of its initial
+      residual each iteration (instead of 10⁻²), the imbalance fell to
+      1×10⁻⁴ within 700 iterations and kept falling. Twice the pressure
+      correctors also moved it, more slowly; Courant 0.1 more slowly still.
+    - The tighter solve costs about 15 % per iteration, so it is an aid
+      rather than the default. It also bounds what the mass check alone
+      would have to catch.
+    - **It explains most of finding 72.** V13 at the suite's tight
+      criterion: the aid fired at 4500 iterations, and V13's deficit fell
+      from 1.2–1.8×10⁻⁴ to 1.3–2.7×10⁻⁵ in every 1000-iteration window
+      after. It ended trusted at 1.7×10⁻⁵, with its energy balance at
+      2×10⁻⁶.
+    - V13's mass check is the suite's 10⁻⁴ again, not finding 72's 5×10⁻⁴.
+      It stops at 5×10⁻⁵, which sits above what it holds with the tighter
+      solve and below its old deficit, so the deficit sets the tighter
+      solve going.
+79. **rhoCentralFoam fills a slow chamber at the speed of sound.** With
+    the inflow fixed, E3a's chamber pressure must rise until the choked
+    throat passes that flow. The explicit solver advances one acoustic
+    Courant number per iteration while the chamber gas moves at Mach 0.01.
+    The deficit decayed with an e-folding of about 32,000 iterations.
+    - A choked throat passes a flow proportional to the stagnation
+      pressure, so scaling the nozzle's pressure by inflow / throat flow
+      does that in one step. From M13's 61,000-iteration state, scaling by
+      1.0014 brought throat and exit within 5×10⁻⁵ of the inflow in 1300
+      iterations.
+    - A correction is taken only when the throat flow is steady to a tenth
+      of the deficit over 2 × 200 iterations. Without that guard, V12
+      corrected twelve times during its start, alternating in sign.
+    - **It changes nothing a run converges to.** V12 (V1 driven by its own
+      mass flow) on rhoCentralFoam, with and without corrections: chamber
+      pressure 6×10⁻⁷ apart, Cd 10⁻⁶, thrust 10⁻⁵. With the guard, V12
+      took no corrections at all: its chamber is not slow.
+    - **E3a on rhoCentralFoam now has a converged thrust, but not a
+      converged mass balance.** After 12 corrections the mass imbalance was
+      1.4×10⁻⁴ at 60,000 iterations, against 1.6×10⁻³ before. Thrust has
+      been steady to 2×10⁻⁵ since 31,000.
+    - What remains is the chamber's own flow developing, convected at Mach
+      0.01 by a solver stepping at the speed of sound. It moved the throat
+      flow by 3×10⁻⁴ over 10,000 iterations with the pressure held. No
+      pressure correction reaches it. Low-Mach preconditioning would, and
+      OpenFOAM's rhoCentralFoam has none.
+    - rhoPimpleFoam, which has no such stiffness, converges E3a to the
+      suite's tight criterion in 2400–3400 iterations. It remains the
+      default solver for flows like this. rhoCentralFoam runs them when
+      asked, as a cross-check, or when a shock needs it.
+80. **V22: on E3a's discharge coefficient the two solvers agree on what
+    slip does; on thrust they cannot be compared.** Both solvers ran E3a
+    with and without slip, rhoCentralFoam with the chamber correction:
+
+    | | rhoPimpleFoam | rhoCentralFoam |
+    |---|---|---|
+    | C_T no slip | 1.5053 | 1.5116 |
+    | C_T slip | 1.5028 | 1.5064 |
+    | slip effect on C_T | −0.164 % | −0.343 % |
+    | slip effect on Cd | +0.372 % | +0.388 % |
+    | exit-plane pressure force, no slip | 2.05 mN | 2.38 mN |
+
+    - The thrust coefficients differ by 0.42 % before slip enters, and the
+      exit-plane pressure force by 16 %. The truncated outlet carries a
+      subsonic wall layer out, and each solver's outflow condition treats it
+      differently. Slip changes that layer, so its effect on C_T inherits
+      the difference. Its effect on Cd is set at the throat, far from the
+      outlet, and the solvers agree on it to 1.6×10⁻⁴.
+    - V22 checks the Cd effect to 5×10⁻⁴ and reports the C_T effects. Its
+      rhoCentralFoam runs are stopped at a mass imbalance of 2.5×10⁻⁴ and
+      judged at twice that (finding 79). Their thrust is steady to
+      2×10⁻⁵.
+    - The −0.34 % of finding 76 was not an artefact of the unconverged
+      runs: converged, rhoCentralFoam gives the same.
+81. **OpenFOAM v2512 writes slip-wall temperature fields it cannot read
+    back.** One of `smoluchowskiJumpT`'s copy constructors does not copy the
+    field names it was given. `reconstructPar` copies fields that way, so
+    the reconstructed T carries `U ;`, `rho ;`, `psi ;` and `mu ;`, and
+    every OpenFOAM tool that reads it stops. The solver's own processor
+    files are intact. SONICLINE removes the empty entries after
+    reconstruction.
+
+Not done in M14:
+
+- Low-Mach preconditioning for the density-based solver (finding 79).
+- The outflow treatment of a subsonic wall layer at a truncated exit, which
+  sets the solvers' 0.4 % disagreement on E3a's thrust (finding 80). The
+  solvers have not been compared on E3a with its plume modelled, and the
+  uncertainty budget does not carry that 0.4 %.
