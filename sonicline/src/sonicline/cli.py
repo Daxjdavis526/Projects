@@ -363,7 +363,7 @@ def main(argv: list[str] | None = None) -> int:
     ui = sub.add_parser("ui", help="open the desktop application")
     ui.add_argument("project", nargs="?", help="a .sonicline project folder (created if missing)")
     ver = sub.add_parser("verify", help="run verification cases against analytical references")
-    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13,V14,V15,V16,V18,V19,V20,V21,E1,E2,E3a,E3b,E3c,E3d,E3c-slip,E3d-slip")
+    ver.add_argument("--cases", default="V1,V2,V3a,V3b,V4a,V4b,V5,V6,V7,V9a,V9b,V9c,V9d,V10,V11,V12,V13,V14,V15,V16,V18,V19,V20,V21,V22,E1,E2,E3a,E3b,E3c,E3d,E3c-slip,E3d-slip")
     ver.add_argument("--quality", default="standard", choices=["coarse", "standard", "fine"])
     ver.add_argument("--out", default="verification-runs")
     ver.add_argument("--processors", type=int, default=1)

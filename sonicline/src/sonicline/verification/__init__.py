@@ -662,14 +662,16 @@ def _v13_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
     ] + _v13_common(metrics)
 
 
-V13_MASS_TOLERANCE = 5e-4
+# The suite's 10^-4 again since M14 (DESIGN.md finding 78). With the 450 K
+# wall the converged state kept an outflow deficit of 0.7-2.9e-4 (finding
+# 72), which needed 5e-4 here: the pressure solve's 1 % tolerance left a
+# fixed point that does not conserve mass. Stopped at half the tolerance,
+# above the 1.3-2.7e-5 it holds with the tighter solve and below the old
+# deficit, so the deficit sets that solve going.
+V13_MASS_TOLERANCE = 1e-4
 
 
 def _v13_common(metrics: dict) -> list[Check]:
-    # With the 450 K wall the converged state keeps an outflow deficit at the
-    # truncated exit: inlet steady to 1e-6, exit 0.7-2.9e-4 low over every
-    # 1000-iteration window of a 14,000-iteration run (mean 1.9e-4). It
-    # passed at 1e-4 only while the run stopped early (DESIGN.md finding 72).
     common = _common_checks(metrics)
     common[0].tolerance = V13_MASS_TOLERANCE
     return common
@@ -890,8 +892,9 @@ def _v21_definition(slip: bool) -> Callable[[str, str], m.SimulationDefinition]:
                                     wall_thermal=m.FixedTemperature(temperature=V21_T),
                                     wall_slip=m.WallSlip() if slip else None),
             flow=m.Flow(turbulence=m.Laminar()),
-            # Always the coarse planar mesh: the channel is 25 heights long.
-            mesh=m.MeshSpec(form=m.MeshForm.PLANAR, quality=m.MeshQuality.COARSE, planar_width=V21_WIDTH),
+            # Planar, at the requested quality: until M14's convergence aids
+            # only the coarse mesh converged (DESIGN.md finding 77).
+            mesh=m.MeshSpec(form=m.MeshForm.PLANAR, quality=m.MeshQuality(quality), planar_width=V21_WIDTH),
             numerics=TIGHT,
         )
     return build
@@ -944,6 +947,76 @@ def v21_check(noslip: tuple["CaseResult", dict | None], slip: tuple["CaseResult"
             r.checks = [Check("slip run vs Arkilic x the no-slip run's mesh error", ms["mass_flow"]["inlet"],
                               ref_s[0] * mesh, V21_EFFECT_TOLERANCE,
                               note=f"mesh error {100 * (mesh - 1):+.2f} %").evaluate()]
+    return r
+
+
+# ----------------------------------------------------------------------------- V22
+
+# rhoCentralFoam on E3a: with M14's chamber correction its thrust settles to
+# 2e-5 by 40 000 iterations, but the chamber's own flow (Mach 0.01) keeps
+# developing for longer than any run here and leaves inflow and outflow
+# 1-3e-4 apart (DESIGN.md finding 79). Its runs are stopped at 2.5e-4 and
+# judged at twice that, like V13.
+V22_MASS_TOLERANCE = 5e-4
+# On Cd(slip) / Cd(no slip), absolute: the effect is ~+0.38 %, and the
+# solvers agree on it to 0.016 % (DESIGN.md finding 80).
+V22_EFFECT_TOLERANCE = 5e-4
+
+
+def _v22_definition(slip: bool) -> Callable[[str, str], m.SimulationDefinition]:
+    whalen = _whalen_definition(20.0, 1830.0, slip)
+
+    def build(quality: str, form: str = "wedge") -> m.SimulationDefinition:
+        d = whalen(quality, form)
+        return dataclasses.replace(
+            d, name=d.name + ", rhoCentralFoam",
+            numerics=m.Numerics(solver="rhoCentralFoam", convergence=m.ConvergenceCriteria(
+                integral_tolerance=TIGHT.convergence.integral_tolerance,
+                mass_imbalance=V22_MASS_TOLERANCE / 2.0)))
+    return build
+
+
+def _v22_run_checks(metrics: dict, defn: m.SimulationDefinition) -> list[Check]:
+    common = _common_checks(metrics)
+    common[0].tolerance = V22_MASS_TOLERANCE
+    return common
+
+
+def _thrust_coefficient(metrics: dict) -> float:
+    return metrics["thrust"]["total"] / (metrics["conditions"]["p0"] * math.pi * (WHALEN_D / 2.0) ** 2)
+
+
+def v22_check(pimple: tuple[tuple["CaseResult", dict | None], tuple["CaseResult", dict | None]],
+              central: tuple[tuple["CaseResult", dict | None], tuple["CaseResult", dict | None]]) -> "CaseResult":
+    """The slip effect on E3a's discharge coefficient, Cd(slip) / Cd(no
+    slip), from SONICLINE's slip build of rhoCentralFoam against
+    rhoPimpleFoam. Cd is set at the throat, where slip thins the boundary
+    layer's displacement. The effect on the thrust coefficient is reported
+    but not checked: the solvers already differ by 0.4 % in C_T without
+    slip, at the exit plane, where a subsonic wall layer leaves through the
+    truncated outlet and each solver's outflow condition treats it
+    differently (DESIGN.md finding 80)."""
+    runs = [*pimple, *central]
+    rank = ("not_trustworthy", "trusted_with_warnings", "trusted")
+    trust = min((r.trust for r, _ in runs), key=lambda t: rank.index(t) if t in rank else -1)
+    r = CaseResult("V22", "Wall slip on rhoCentralFoam vs rhoPimpleFoam: the slip effect on E3a's Cd",
+                   "completed" if all(x.status == "completed" for x, _ in runs) else "failed",
+                   trust if trust in rank else "not_trustworthy")
+    if all(mx for _, mx in runs):
+        (_, pn), (_, ps) = pimple
+        (_, cn), (_, cs) = central
+
+        def cd(mx):
+            return mx["discharge_coefficient"]["cfd"]
+
+        effect_p, effect_c = cd(ps) / cd(pn), cd(cs) / cd(cn)
+        ct_p = _thrust_coefficient(ps) / _thrust_coefficient(pn)
+        ct_c = _thrust_coefficient(cs) / _thrust_coefficient(cn)
+        r.checks = [Check("slip effect on Cd, rhoCentralFoam vs rhoPimpleFoam", effect_c, effect_p,
+                          V22_EFFECT_TOLERANCE, relative=False,
+                          note=f"Cd: rhoPimpleFoam {100 * (effect_p - 1):+.3f} %, rhoCentralFoam "
+                               f"{100 * (effect_c - 1):+.3f} %; C_T (not checked): {100 * (ct_p - 1):+.3f} % "
+                               f"and {100 * (ct_c - 1):+.3f} %").evaluate()]
     return r
 
 
@@ -1025,6 +1098,10 @@ CASES: dict[str, Case] = {
                        _v21_definition(False), _v21_checks(False), form="planar"),
     "V21-slip": Case("V21-slip", "Planar microchannel, Maxwell slip: mass flow vs Arkilic et al.",
                      _v21_definition(True), _v21_checks(True), form="planar"),
+    "V22-noslip": Case("V22-noslip", "E3a on rhoCentralFoam, no slip (V22's reference run)",
+                       _v22_definition(False), _v22_run_checks),
+    "V22-slip": Case("V22-slip", "E3a on rhoCentralFoam with Maxwell slip, SONICLINE's build (V22)",
+                     _v22_definition(True), _v22_run_checks),
     "V10-pr": Case("V10-pr", "V1 nozzle at 30 bar, Peng-Robinson", _v10_definition("peng_robinson"),
                    _v1_checks_at(V10_P0)),
     "V4a": Case("V4a", "Inviscid converging nozzle, choked, sea-level plume",
@@ -1058,7 +1135,7 @@ CASES: dict[str, Case] = {
 
 
 # Comparison cases run_suite builds from other runs.
-COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18", "V19", "V21")
+COMPARISONS = ("V5", "V6", "V7", "V10", "V11", "V14", "V15", "V16", "V17", "V18", "V19", "V21", "V22")
 V15_MASS_TOLERANCE = 1e-3  # V7's: the same solver, mesh and equations, reached two ways
 V15_THRUST_TOLERANCE = 2e-3
 V14_MASS_TOLERANCE = 5e-3
@@ -1182,6 +1259,8 @@ def run_suite(names: list[str], quality: str, out: Path, processors: int = 1,
             results.append(virial_check(once("V10-perfect"), once("V10-virial")))
         elif name == "V21":
             results.append(v21_check(once("V21-noslip", "planar"), once("V21-slip", "planar")))
+        elif name == "V22":
+            results.append(v22_check((once("E3a"), once("E3a-slip")), (once("V22-noslip"), once("V22-slip"))))
         elif name == "V19":
             # The same on rhoCentralFoam: the virial gas in internal-energy
             # form, as the density-based solver needs.

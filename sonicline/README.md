@@ -11,14 +11,14 @@ meshing, case generation, solver control, monitoring, post-processing, the
 propulsion calculations, verification and (from M3) the interface are this
 project.
 
-**Status: milestones M1 to M13 of [DESIGN.md](DESIGN.md) are complete.** The
+**Status: milestones M1 to M14 of [DESIGN.md](DESIGN.md) are complete.** The
 whole pipeline runs from the command line or the desktop application: a
 STEP or STL fluid volume (revolved or not, or the gas passage extracted
 from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
 Every number comes with an uncertainty budget.
-Sections 10–22 of the design record what building each milestone taught.
+Sections 10–23 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -256,7 +256,8 @@ computed without the CFD.
 | E2 | **experiment:** the same nozzle, air at 294 K (Cuffel, Back and Massier 1969) | Cd vs measured 0.985 | −0.74 % (0.9776) | 1 % |
 | E3 | **experiment:** unheated nitrogen, 20° and 25° cones, area ratio 50, throat Re ≈ 1800, laminar (Whalen, NASA TM-100130) | thrust coefficient F/(p_c A*) vs measured 1.51 / 1.50 | −0.31 % / +0.55 % | 5 % (the report's) |
 | E3c, E3d | **experiment:** the same nozzles at Re ≈ 458 (wall Kn 0.05–0.06), without and with wall slip | thrust coefficient vs measured 1.40 / 1.34 | no slip −3.25 % / +1.62 %; slip −4.97 % / −0.10 % | 5 % |
-| V21 | planar microchannel, 20 µm, outlet Kn 0.017: Maxwell slip vs Arkilic, Schmidt and Breuer (1997) with the streamwise momentum flux | mass flow: no slip / slip / the slip effect alone | −0.20 % / −0.04 % / +0.16 % | 0.5 % / 0.5 % / 0.3 % |
+| V21 | planar microchannel, 20 µm, outlet Kn 0.017: Maxwell slip vs Arkilic, Schmidt and Breuer (1997) with the streamwise momentum flux | mass flow: no slip / slip / the slip effect alone | −0.29 % / −0.12 % / +0.17 % | 0.5 % / 0.5 % / 0.3 % |
+| V22 | E3a with and without slip on both solvers (rhoCentralFoam with SONICLINE's slip build) | the slip effect on Cd, rhoCentralFoam vs rhoPimpleFoam (+0.372 %) | +0.016 % (the effect on C_T, −0.34 % against −0.16 %, is reported, not checked: see below the table) | 0.05 % |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
@@ -306,6 +307,20 @@ wall drag is a quarter of the thrust. The CFD's thrust coefficient is within
   length cost 6 % in Cd and thrust coefficient. Small throats are this
   sensitive, so model a real throat as it was finished, not as drawn
   before blending.
+
+**What V22 shows, and what it does not.** Both solvers agree on what slip
+does at E3a's throat: it thins the displacement layer and raises Cd by
+0.37–0.39 %. They do not agree on what it does to thrust (−0.16 % on
+rhoPimpleFoam, −0.34 % on rhoCentralFoam), and that comparison is not a
+fair test of slip. Without slip the solvers' thrust coefficients already
+differ by 0.4 %, nearly all of it in the exit-plane pressure force, which
+differs by 16 %. E3a's model ends at the exit plane, where a subsonic wall
+layer leaves the domain, and the two solvers' outflow conditions treat that
+layer differently. Slip changes that layer, so its effect on thrust carries
+the disagreement with it. A thrust prediction for a nozzle this viscous,
+cut at its exit plane, carries that 0.4 % of uncertainty. A run with the
+plume modelled does not cut the layer there, but the solvers have not yet
+been compared that way (DESIGN.md §23, finding 80).
 
 **What V15 shows.** A startup from vacuum, with the valve opening over
 0.1 ms, reaches 10 % of final thrust at 22 µs and 90 % at 92 µs, overshoots
@@ -487,6 +502,23 @@ The house rule: say plainly where the model stops.
   that is reported, not hidden. The far plume develops long after the
   nozzle. It does not affect thrust, but plume images from such a run are
   labelled unconverged.
+- **Convergence aids** (M14) take over when a steady run shows one of three
+  slow modes. Each fires only on that signature, so a run that converges
+  without it is untouched, and each is listed in the manifest and the
+  run's messages.
+  - A rhoPimpleFoam run stuck in a limit cycle (a slow, very viscous
+    channel) has its Courant number stepped down, 0.5 → 0.2 → 0.1.
+  - A rhoPimpleFoam run that is steady but does not balance mass has its
+    pressure solved a hundred times tighter (to 10⁻⁴ of its residual): the
+    looser solve leaves a fixed point that leaks 10⁻⁴–10⁻³ of the flow.
+  - A rhoCentralFoam run driven by a mass flow has its chamber pressure
+    corrected so the choked throat passes the inflow. The explicit solver
+    otherwise fills a Mach-0.01 chamber at the speed of sound.
+  - What none of them fixes: on a chamber that slow (Whalen's E3a),
+    rhoCentralFoam's thrust settles but its mass balance stays 1–3×10⁻⁴
+    off, because the chamber's own flow still develops one acoustic step at
+    a time. rhoPimpleFoam converges the same nozzle in 3000 iterations and
+    is the solver for such flows.
 - **Quasi-1D theory** is exact for integral quantities of an ideal nozzle and
   wrong for local ones. At the throat the wall pressure departs from it by
   tens of percent; the axial plot shows both.
@@ -632,14 +664,15 @@ src/sonicline/
                 unstructured meshes (snappyHexMesh, cfMesh, gmsh) of any volume
   foam/         the only package that knows OpenFOAM syntax: writers, case
                 builder, parsers, and the viscous-work extension (C++)
-  run/          runners (local, WSL2), convergence, mesh gates, the pipeline
+  run/          runners (local, WSL2), convergence and its aids, mesh gates,
+                the pipeline
   post/         integrals from solver fluxes, field views, reports, images
   metrics/      propulsion metrics and the trust verdict
   verification/ the verification cases
   project/      the project store and the editable draft (no Qt)
   ui/           the desktop application (PySide6, pyvista, pyqtgraph)
   cli.py
-tests/          about 350 tests; the OpenFOAM, UI and rendering ones skip without them
+tests/          about 420 tests; the OpenFOAM, UI and rendering ones skip without them
 examples/       sea-level-20bar.json (parametric), nozzle-2mm.step + .json (CAD),
                 nozzle-side-port.step + .json (not revolved; make_side_port.py
                 builds it), planar-tp1704-b1-npr2.46.json (planar, separated)
