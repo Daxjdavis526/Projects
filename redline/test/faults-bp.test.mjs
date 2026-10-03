@@ -85,7 +85,8 @@ check('ox-reg-droop: ox tank sags in flow, MR down', base.pt710run - r('ox-reg-d
   `PT-710 flowing ${P(r('ox-reg-droop').pt710run).toFixed(0)} vs ${P(base.pt710run).toFixed(0)} psig`);
 check('pr620-set: fuel tank locks up off setpoint, EPC at setpoint', Math.abs(r('pr620-set').lock720 - psi(400)) > psi(20) && Math.abs(r('pr620-set').epc620 - psi(400)) < psi(5),
   `PT-720 ${P(r('pr620-set').lock720).toFixed(0)} psig, EPC-620 ${P(r('pr620-set').epc620).toFixed(0)}`);
-check('mfv-slow: fuel valve open switch late, start not smooth', r('mfv-slow').zsoLag > 0.3 && S('mfv-slow').start !== 'smooth',
+// (hard enough, the start aborts before the slow valve ever reaches its open switch: later than late)
+check('mfv-slow: fuel valve open switch late (or never, aborted), start not smooth', (r('mfv-slow').zsoLag > 0.3 || (!(r('mfv-slow').zsoLag >= 0) && /hard start/.test(r('mfv-slow').abort || ''))) && S('mfv-slow').start !== 'smooth',
   `ZSO lag ${(r('mfv-slow').zsoLag * 1e3).toFixed(0)} ms, ${S('mfv-slow').start}, ${r('mfv-slow').abort || 'no abort'}`);
 check('ft724-kfactor: fuel meter disagrees with the scale, ox does not', Math.abs(S('ft724-kfactor').mdotFu / S('ft724-kfactor').mdotWFu - 1) > 0.08 && Math.abs(S('ft724-kfactor').mdotOx / S('ft724-kfactor').mdotWOx - 1) < 0.02,
   `fuel meter/scale ${f2(S('ft724-kfactor').mdotFu / S('ft724-kfactor').mdotWFu)}`);
