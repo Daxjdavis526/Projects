@@ -2574,6 +2574,8 @@ Findings:
       2×10⁻⁵.
     - The −0.34 % of finding 76 was not an artefact of the unconverged
       runs: converged, rhoCentralFoam gives the same.
+    - With the plume modelled the C_T effects agree as well (finding 82):
+      the disagreement was the cut at the exit plane.
 81. **OpenFOAM v2512 writes slip-wall temperature fields it cannot read
     back.** One of `smoluchowskiJumpT`'s copy constructors does not copy the
     field names it was given. `reconstructPar` copies fields that way, so
@@ -2582,10 +2584,49 @@ Findings:
     files are intact. SONICLINE removes the empty entries after
     reconstruction.
 
+82. **With its plume modelled, E3a's thrust drops 0.9 %, and the two
+    solvers agree on it and on what slip does to it.** All four E3a runs
+    (both solvers, with and without slip) were repeated with a plume region
+    3 exit diameters long and 2 in radius. The tank is at 3 Pa: Whalen's
+    was about 0.1 Pa, and SONICLINE's pressure floor here is 1 Pa. Thrust is
+    taken to vacuum (+ p_a A_e). At 1.5 Pa the rhoPimpleFoam C_T values
+    were the same to four decimals.
+
+    | | cut at the exit plane | plume |
+    |---|---|---|
+    | C_T, rhoPimpleFoam, no slip / slip | 1.5053 / 1.5028 | 1.4915 / 1.4986 |
+    | C_T, rhoCentralFoam, no slip / slip | 1.5116 / 1.5064 | 1.4875 / 1.4941 |
+    | thrust, rhoCentralFoam vs rhoPimpleFoam (no slip) | +0.61 % | −0.10 % |
+    | exit-plane pressure force, the same | +16 % | +3.4 % |
+    | slip effect on C_T, rhoPimpleFoam / rhoCentralFoam | −0.16 % / −0.34 % | +0.47 % / +0.45 % |
+    | slip effect on Cd, the same | +0.37 % / +0.39 % | +0.37 % / +0.38 % |
+
+    - Cd does not change: the throat does not see the exit.
+    - Cutting the domain at the exit plane put rhoPimpleFoam's thrust
+      0.9 % high. With the plume, the subsonic wall layer turns around the
+      lip and expands, the exit-plane pressure falls 24 %, and part of it
+      returns as momentum. The outflow condition at a cut cannot do that,
+      and each solver's version of it gave a different wrong answer:
+      finding 80's 0.4 % was that difference.
+    - With the plume the solvers' thrusts agree to 0.10 %. Their C_T values
+      differ by 0.27 %, most of it the 0.17 % between their discharge
+      coefficients (the chamber pressure divides C_T).
+    - The slip effect on thrust changes sign. With the plume, slip raises
+      C_T by 0.45–0.47 % on both solvers, 2.8×10⁻⁴ apart. Cut at the exit,
+      the cut decided the sign.
+    - Against Whalen's measured 1.51, the plume runs read −1.2 % (no slip)
+      and −0.75 % (slip). Both are well inside the test's 5 %, so E3 still
+      cannot choose between slip and no slip. E3 stays cut at the exit,
+      which is what it has always been checked with.
+    - Every viscous run cut at its exit plane now lists this in its
+      uncertainty budget as unquantified, with E3a's 0.9 %. V22 keeps
+      checking the Cd effect. Its plume version would agree on C_T too, but
+      its two rhoCentralFoam runs (about 33,000 iterations each) do not fit
+      the nightly suite's time.
+
 Not done in M14:
 
 - Low-Mach preconditioning for the density-based solver (finding 79).
-- The outflow treatment of a subsonic wall layer at a truncated exit, which
-  sets the solvers' 0.4 % disagreement on E3a's thrust (finding 80). The
-  solvers have not been compared on E3a with its plume modelled, and the
-  uncertainty budget does not carry that 0.4 %.
+- A bound on the exit-cut error for a general nozzle. It is measured on
+  E3a (0.9 %, finding 82) and depends on how much of the exit plane the
+  subsonic wall layer occupies.

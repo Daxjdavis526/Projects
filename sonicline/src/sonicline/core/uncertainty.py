@@ -309,6 +309,17 @@ def budgets(defn: d.SimulationDefinition, profile: Profile | None, metrics: dict
                 f"rarefaction: Knudsen number up to {kn:.2g} near the wall; no-slip walls overstate the "
                 "friction there (by about 8 Kn of it in tube flow) and the slip effect on thrust is "
                 "not bounded here (wall slip models it)")
+    ed = defn.boundaries.exit_domain
+    if (isinstance(ed, d.TruncatedAtExit) and not ed.fixed_pressure
+            and not isinstance(defn.flow.turbulence, d.Inviscid)):
+        # The wall layer's subsonic part leaves through an outflow condition
+        # at the cut; on Whalen's E3a (Re 1830) that read thrust 0.9 % high
+        # against the same run with its plume (DESIGN.md finding 82).
+        for k in ("thrust", "specific_impulse"):
+            out[k].unquantified.append(
+                "domain cut at the exit plane: the subsonic part of the wall boundary layer leaves through "
+                "an outflow condition there instead of turning around the lip; on a low-Reynolds nozzle "
+                "(Whalen's, Re 1830) that put thrust 0.9 % high. Model the plume to remove it")
     if isinstance(defn.flow.time, d.Transient):
         for k in QUANTITIES:
             out[k].unquantified.append("transient: the values are the end state's; the budget is for that state")

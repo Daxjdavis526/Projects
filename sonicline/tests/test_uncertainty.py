@@ -112,3 +112,18 @@ def test_gas_model_sizes():
     assert u == pytest.approx(math.hypot(2.1e-4, 9.4e-3))  # constant cp on an 800 K gas
     to_json = U.to_json(U.budgets(hot, resolve_profile(hot), mh))
     assert to_json["thrust"]["relative"] > 0 and "components" in to_json["thrust"]
+
+
+def test_a_viscous_run_cut_at_its_exit_says_so():
+    # DESIGN.md finding 82: the cut put E3a's thrust 0.9 % high against its plume.
+    vac = m.Boundaries(inlet=m.ReservoirInlet(p0=20e5, T0=300.0), ambient=m.Ambient(pressure=0.0),
+                       exit_domain=m.TruncatedAtExit())
+    cut = _defn(boundaries=vac)
+    b = U.budgets(cut, resolve_profile(cut), METRICS)
+    assert any("cut at the exit plane" in n for n in b["thrust"].unquantified)
+    assert not any("cut at the exit plane" in n for n in b["mass_flow"].unquantified)
+    inviscid = _defn(boundaries=vac, flow=m.Flow(turbulence=m.Inviscid()))
+    assert not any("cut at the exit" in n
+                   for n in U.budgets(inviscid, resolve_profile(inviscid), METRICS)["thrust"].unquantified)
+    plume = _defn()  # sea level, with its plume
+    assert not any("cut at the exit" in n for n in U.budgets(plume, resolve_profile(plume), METRICS)["thrust"].unquantified)

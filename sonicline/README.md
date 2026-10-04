@@ -39,6 +39,21 @@ sonicline report runs/nozzle                   # PDF, PNG and JSON report of a r
 sonicline verify                               # verification cases vs analytical theory
 ```
 
+### Two dimensions or three
+
+A run is axisymmetric (the wedge, one cell thick: minutes), planar (a 2D
+nozzle) or fully three-dimensional:
+
+- **3D O-grid**: a structured mesh of the whole revolved nozzle, with no
+  symmetry assumed. It agrees with the wedge to 0.03 % in mass flow on V1
+  (V6), and is the desktop application's default.
+- **Unstructured 3D**: any fluid volume from a STEP or STL file (a side
+  port, a non-round section), meshed by snappyHexMesh, cfMesh or gmsh.
+
+![V1 on the 3D O-grid, a quarter cut away](doc/3d-o-grid.png)
+
+![A STEP nozzle fed from a side port, unstructured 3D, cut through its axis](doc/3d-side-port.png)
+
 ### The desktop application
 
 ```
@@ -257,7 +272,7 @@ computed without the CFD.
 | E3 | **experiment:** unheated nitrogen, 20° and 25° cones, area ratio 50, throat Re ≈ 1800, laminar (Whalen, NASA TM-100130) | thrust coefficient F/(p_c A*) vs measured 1.51 / 1.50 | −0.31 % / +0.55 % | 5 % (the report's) |
 | E3c, E3d | **experiment:** the same nozzles at Re ≈ 458 (wall Kn 0.05–0.06), without and with wall slip | thrust coefficient vs measured 1.40 / 1.34 | no slip −3.25 % / +1.62 %; slip −4.97 % / −0.10 % | 5 % |
 | V21 | planar microchannel, 20 µm, outlet Kn 0.017: Maxwell slip vs Arkilic, Schmidt and Breuer (1997) with the streamwise momentum flux | mass flow: no slip / slip / the slip effect alone | −0.29 % / −0.12 % / +0.17 % | 0.5 % / 0.5 % / 0.3 % |
-| V22 | E3a with and without slip on both solvers (rhoCentralFoam with SONICLINE's slip build) | the slip effect on Cd, rhoCentralFoam vs rhoPimpleFoam (+0.372 %) | +0.016 % (the effect on C_T, −0.34 % against −0.16 %, is reported, not checked: see below the table) | 0.05 % |
+| V22 | E3a with and without slip on both solvers (rhoCentralFoam with SONICLINE's slip build) | the slip effect on Cd, rhoCentralFoam vs rhoPimpleFoam (+0.372 %) | +0.016 % (the effect on C_T is reported, not checked: see below the table) | 0.05 % |
 | all | | mass conservation, inlet vs exit | ≤ 2×10⁻⁵ | 10⁻⁴ (3×10⁻⁴ for V4b) |
 | all | | thrust, exit plane vs wall + feed | ≤ 0.04 % | 0.5 % |
 
@@ -293,6 +308,10 @@ number (1800) where the boundary layer is a large part of the nozzle and
 wall drag is a quarter of the thrust. The CFD's thrust coefficient is within
 0.6 % of the test on every mesh, against a stated measurement error of 5 %.
 
+- E3 cuts the domain at the exit plane. With the plume modelled the CFD
+  reads 0.9 % lower: −1.2 % against the test, or −0.75 % with wall slip.
+  That is still well inside 5 % (DESIGN.md finding 82).
+
 - **Mass flow is not checked.** The CFD passes about 6 % less gas for the
   measured chamber pressure than the test's flowmeter recorded (Cd 0.924
   against about 0.98), so it predicts 6 % more Isp than the test. The
@@ -310,17 +329,18 @@ wall drag is a quarter of the thrust. The CFD's thrust coefficient is within
 
 **What V22 shows, and what it does not.** Both solvers agree on what slip
 does at E3a's throat: it thins the displacement layer and raises Cd by
-0.37–0.39 %. They do not agree on what it does to thrust (−0.16 % on
-rhoPimpleFoam, −0.34 % on rhoCentralFoam), and that comparison is not a
-fair test of slip. Without slip the solvers' thrust coefficients already
-differ by 0.4 %, nearly all of it in the exit-plane pressure force, which
-differs by 16 %. E3a's model ends at the exit plane, where a subsonic wall
-layer leaves the domain, and the two solvers' outflow conditions treat that
-layer differently. Slip changes that layer, so its effect on thrust carries
-the disagreement with it. A thrust prediction for a nozzle this viscous,
-cut at its exit plane, carries that 0.4 % of uncertainty. A run with the
-plume modelled does not cut the layer there, but the solvers have not yet
-been compared that way (DESIGN.md §23, finding 80).
+0.37–0.39 %. With E3a cut at its exit plane, as the suite runs it, they do
+not agree on what slip does to thrust (−0.16 % against −0.34 %). That
+disagreement comes from the cut, not from slip. Rerun with the plume
+modelled (DESIGN.md §23, finding 82):
+
+- both solvers' thrust falls about 0.9 %: at the cut, the slow gas next to
+  the wall cannot turn around the lip and expand as it does in reality;
+- the two solvers' thrusts agree to 0.1 % (0.6 % apart when cut);
+- slip raises thrust by 0.47 % and 0.45 %, nearly the same on both.
+
+So for a small, low-Reynolds nozzle, model the plume when thrust matters.
+A viscous run cut at its exit plane says so in its uncertainty budget.
 
 **What V15 shows.** A startup from vacuum, with the valve opening over
 0.1 ms, reaches 10 % of final thrust at 22 µs and 90 % at 92 µs, overshoots
