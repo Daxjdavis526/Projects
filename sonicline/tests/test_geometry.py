@@ -223,3 +223,29 @@ def test_extraction_refuses_a_body_without_a_through_passage(tmp_path):
     gmsh.finalize()
     rep = geometry.extract_fluid(body, "mm", tmp_path / "out.step")
     assert not rep["ok"] and "no passage" in rep["errors"][0]
+
+
+def test_a_stepped_bore_is_one_passage(tmp_path):
+    """A pilot drilled through to a wider bore: the flat floor at the step
+    has the pilot as a hole in it, but that hole is inside the passage, not
+    an opening. Capping it split the passage in two and the extraction
+    refused the body; the two halves are one passage."""
+    import math
+
+    import gmsh
+
+    body = tmp_path / "stepped.step"
+    gmsh.initialize(["-noenv"], readConfigFiles=False)
+    gmsh.option.setNumber("General.Terminal", 0)
+    gmsh.option.setString("Geometry.OCCTargetUnit", "MM")
+    occ = gmsh.model.occ
+    block = occ.addBox(-5, -5, 0, 10, 10, 10)
+    occ.cut([(3, block)], [(3, occ.addCylinder(0, 0, -1, 0, 0, 6, 1.0)),
+                           (3, occ.addCylinder(0, 0, 5, 0, 0, 6, 2.0))])
+    occ.synchronize()
+    gmsh.write(str(body))
+    gmsh.finalize()
+    rep = geometry.extract_fluid(body, "mm", tmp_path / "fluid.step")
+    assert rep["ok"], rep["errors"]
+    assert rep["internal_caps"] == 1 and [c["caps"] for c in rep["cavities"]] == [2]
+    assert rep["chosen"]["volume"] == pytest.approx(math.pi * (1.0 * 5 + 4.0 * 5) * 1e-9, rel=1e-6)  # m^3

@@ -387,25 +387,57 @@ def extract(path: str, scale: float, out: str) -> dict:
     occ.synchronize()
     body_vols = {t for d, t in mapping[1] if d == 3}
     cap_faces = [{t for d, t in mapping[2 + i] if d == 2} for i in range(len(caps))]
-    candidates = []
+    outside, cavities = set(), []
     for _, v in occ.getEntities(3):
         if v in body_vols:
             continue
         bb = gmsh.model.getBoundingBox(3, v)
         if bb[0] <= b[0] - 0.5 * pad:  # reaches the box: the outside
-            continue
-        faces = {abs(f) for _, f in gmsh.model.getBoundary([(3, v)], oriented=False)}
-        n_caps = sum(1 for cf in cap_faces if cf & faces)
-        candidates.append({"tag": v, "volume": float(occ.getMass(3, v)), "caps": n_caps})
+            outside.add(v)
+        else:
+            cavities.append(v)
+    # A hole in a flat face is not always an opening. A stepped bore (a
+    # pilot drilled through to a wider entry) has a flat floor at the step
+    # with the pilot as a hole in it, and its cap lies inside the passage,
+    # with gas on both sides: it splits one passage into two cavities. Such
+    # caps are internal: the cavities they separate are one, and only caps
+    # with the outside on one side count as openings.
+    group = {v: v for v in cavities}
+
+    def root(v):
+        while group[v] != v:
+            group[v] = group[group[v]]
+            v = group[v]
+        return v
+
+    openings: dict[int, set[int]] = {}  # cavity -> caps it opens to the outside through
+    for i, faces in enumerate(cap_faces):
+        for f in faces:
+            up = set(gmsh.model.getAdjacencies(2, f)[0])
+            inner = [v for v in up if v in group]
+            if len(inner) == 2:
+                group[root(inner[0])] = root(inner[1])
+            elif len(inner) == 1 and up & outside:
+                openings.setdefault(inner[0], set()).add(i)
+    members: dict[int, list[int]] = {}
+    for v in cavities:
+        members.setdefault(root(v), []).append(v)
+    candidates = []
+    for r, vs in members.items():
+        n_caps = len(set().union(*(openings.get(v, set()) for v in vs)))
+        candidates.append({"tags": vs, "volume": float(sum(occ.getMass(3, v) for v in vs)), "caps": n_caps})
     report["cavities"] = [{k: c[k] for k in ("volume", "caps")} for c in candidates]
+    report["internal_caps"] = sum(len(vs) - 1 for vs in members.values())
     through = [c for c in candidates if c["caps"] >= 2]
     if len(through) != 1:
         what = "no" if not through else f"{len(through)}"
         report["errors"].append(f"{what} passage(s) through the body from one opening to another; "
                                 f"{len(candidates)} closed cavities in all")
         return report
-    keep = through[0]["tag"]
-    occ.remove([(3, v) for _, v in occ.getEntities(3) if v != keep], recursive=True)
+    keep = through[0]["tags"]
+    occ.remove([(3, v) for _, v in occ.getEntities(3) if v not in keep], recursive=True)
+    if len(keep) > 1:
+        occ.fuse([(3, keep[0])], [(3, v) for v in keep[1:]])
     occ.synchronize()
     gmsh.write(out)
     gmsh.finalize()
