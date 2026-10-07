@@ -213,6 +213,10 @@ class GasSpec:
 
 
 EQUATIONS_OF_STATE = ("perfect_gas", "virial", "peng_robinson", "auto")
+# The virial gas is not chosen automatically for an expansion colder than
+# this at the exit: its fit (core.virial.FIT_RANGE) starts at 70 K, and
+# the margin covers the expansion overshooting the ideal in places.
+VIRIAL_COLDEST = 80.0
 HEAT_CAPACITIES = ("auto", "constant", "temperature_dependent")
 
 
@@ -499,11 +503,29 @@ class SimulationDefinition:
     schema_version: int = SCHEMA_VERSION
 
 
-def resolve_gas(defn: SimulationDefinition) -> SimulationDefinition:
+def coldest_ideal_temperature(defn: SimulationDefinition, profile=None) -> float | None:
+    """The static temperature at the nozzle exit of the ideal (isentropic,
+    quasi-1D) expansion: the coldest gas a steady run should hold. None
+    without a profile."""
+    if profile is None or not getattr(profile, "expansion_ratio", None):
+        return None
+    from ..theory import isentropic
+
+    gamma = defn.gas.model().gamma
+    M = isentropic.mach_from_area_ratio(gamma, profile.expansion_ratio, supersonic=True)
+    return defn.boundaries.inlet.T0 / isentropic.T0_over_T(gamma, M)
+
+
+def resolve_gas(defn: SimulationDefinition, profile=None) -> SimulationDefinition:
     """Settle the gas's "auto" choices for a definition:
 
     - equation of state: the virial gas for a species with virial
-      coefficients (nitrogen), the perfect gas otherwise;
+      coefficients (nitrogen), the perfect gas otherwise. Not the virial
+      gas when the ideal expansion leaves its fit (below 70 K at the exit,
+      ``profile`` permitting): its coefficients diverge there, and a 4 N
+      space nozzle (area ratio 40, 40 K at the exit) stopped the solver on
+      its first iterations. At those pressures nitrogen is ideal to 0.3 %,
+      which the reported real-gas correction carries;
     - heat capacity: cp(T) above HEATED_T0 for a species with a cp(T)
       fit, constant otherwise; the reference temperature is the chamber's.
 
@@ -517,6 +539,9 @@ def resolve_gas(defn: SimulationDefinition) -> SimulationDefinition:
     eos = gas.equation_of_state
     if eos == "auto":
         eos = "virial" if gas.species in COEFFICIENTS else "perfect_gas"
+        cold = coldest_ideal_temperature(defn, profile) if eos == "virial" else None
+        if cold is not None and cold < VIRIAL_COLDEST:
+            eos = "perfect_gas"
     hc = gas.heat_capacity
     T0 = defn.boundaries.inlet.T0
     if hc == "auto":

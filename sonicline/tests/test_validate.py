@@ -98,3 +98,29 @@ def test_peng_robinson_needs_a_shock_free_nozzle():
     import pytest
     with pytest.raises(ValueError):
         m.GasSpec(equation_of_state="van_der_waals")
+
+
+def test_a_cold_expansion_does_not_get_the_virial_gas():
+    # A 4 N space nozzle (area ratio 40, 293 K) reaches 40 K at its exit,
+    # below the virial fit: "auto" takes the perfect gas, and asking for
+    # the virial gas there is refused.
+    import dataclasses
+
+    from sonicline.core import model as m
+    from sonicline.core.validate import Severity, resolve_profile, validate
+
+    def nozzle(er, eos):
+        return m.SimulationDefinition(
+            name="cold", geometry=m.ConicalNozzle(throat_radius=1e-3, expansion_ratio=er),
+            boundaries=m.Boundaries(inlet=m.ReservoirInlet(p0=8e5, T0=293.15), ambient=m.Ambient(pressure=0.0),
+                                    exit_domain=m.TruncatedAtExit()),
+            gas=m.GasSpec(species="N2", equation_of_state=eos))
+
+    space, bench = nozzle(40.0, "auto"), nozzle(1.7, "auto")
+    assert m.resolve_gas(space, resolve_profile(space)).gas.equation_of_state == "perfect_gas"
+    assert m.resolve_gas(bench, resolve_profile(bench)).gas.equation_of_state == "virial"
+    assert m.resolve_gas(space).gas.equation_of_state == "virial"  # no profile: unchanged rule
+    forced = nozzle(40.0, "virial")
+    codes = {f.code: f.severity for f in validate(forced, resolve_profile(forced))}
+    assert codes.get("gas.virial_cold") is Severity.ERROR
+    assert "gas.virial_cold" not in {f.code for f in validate(space, resolve_profile(space))}

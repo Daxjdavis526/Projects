@@ -33,6 +33,8 @@ from ..model.definition import (
     Transient,
     TruncatedAtExit,
     WallProfile,
+    VIRIAL_COLDEST,
+    coldest_ideal_temperature,
     resolve_gas,
 )
 from ..profile import Profile
@@ -95,7 +97,7 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
     if profile is None:
         profile = resolve_profile(defn)
     try:
-        defn = resolve_gas(defn)
+        defn = resolve_gas(defn, profile)
     except ValueError as e:
         return [Finding(Severity.ERROR, "gas.unsupported", str(e))]
 
@@ -214,6 +216,13 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
         add(Finding(Severity.INFO, "gas.virial",
                     "The CFD uses the virial equation of state, fitted to nitrogen's reference "
                     "equation: real-gas choked flux within about 0.01 % up to 30 bar."))
+        cold = coldest_ideal_temperature(defn, profile)
+        if cold is not None and cold < VIRIAL_COLDEST:
+            add(Finding(Severity.ERROR, "gas.virial_cold",
+                        f"The ideal expansion reaches {cold:.0f} K at the exit, below the virial fit "
+                        f"(from {VIRIAL_COLDEST - 10:.0f} K): its coefficients diverge and the solver "
+                        "stops. Use the perfect gas (\"auto\" does); at these pressures nitrogen is ideal "
+                        "to a fraction of a percent, and the real-gas correction is reported."))
         if p0 is not None and p0 > VIRIAL_VERIFIED_P0:
             add(Finding(Severity.WARNING, "gas.virial_pressure",
                         f"Above {_fmt_bar(VIRIAL_VERIFIED_P0)} the truncated virial series loses "

@@ -220,7 +220,7 @@ def run(defn: d.SimulationDefinition, run_dir: Path, runner=None,
                                f"{report.inlet_confidence} confidence)"))
 
     # --- gas: equation of state and heat capacity ----------------------------------
-    resolved = d.resolve_gas(defn)
+    resolved = d.resolve_gas(defn, profile)
     if resolved != defn:
         requested = defn.gas
         defn = resolved
