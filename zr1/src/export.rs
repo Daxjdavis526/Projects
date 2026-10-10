@@ -60,6 +60,39 @@ impl Sink {
 }
 
 /// Write the parts as one coloured STEP assembly.
+/// The triangles of each connected piece of a mesh (pieces joined by a
+/// shared vertex are one piece).
+fn pieces(nv: usize, tris: &[[u32; 3]]) -> Vec<Vec<usize>> {
+    let mut parent: Vec<u32> = (0..nv as u32).collect();
+    fn find(p: &mut [u32], mut x: u32) -> u32 {
+        while p[x as usize] != x {
+            p[x as usize] = p[p[x as usize] as usize];
+            x = p[x as usize];
+        }
+        x
+    }
+    for t in tris {
+        let a = find(&mut parent, t[0]);
+        for &o in &t[1..] {
+            let b = find(&mut parent, o);
+            if a != b {
+                parent[b as usize] = a;
+            }
+        }
+    }
+    let mut index = std::collections::HashMap::new();
+    let mut out: Vec<Vec<usize>> = Vec::new();
+    for (i, t) in tris.iter().enumerate() {
+        let r = find(&mut parent, t[0]);
+        let k = *index.entry(r).or_insert_with(|| {
+            out.push(Vec::new());
+            out.len() - 1
+        });
+        out[k].push(i);
+    }
+    out
+}
+
 pub fn write_step(
     parts: &[Built],
     scale: f64,
@@ -138,29 +171,39 @@ pub fn write_step(
                 ))
             })
             .collect();
-        // Faces: planar triangles bounded by poly loops.
+        // Faces: planar triangles bounded by poly loops, one closed shell
+        // and one faceted solid per connected piece (a closed shell must be
+        // connected: eight dive planes in one shell read back as three
+        // invalid solids).
         let vs = part.step_mesh.vertices_mm();
-        let mut faces: Vec<usize> = Vec::with_capacity(part.step_mesh.triangle_count());
-        for t in part.step_mesh.triangles() {
-            let [a, b, c] = t.map(|i| vs[i as usize]);
-            let n = (b - a).cross(c - a);
-            let n = n.normalized().unwrap_or(Vec3::new(0.0, 0.0, 1.0));
-            let dir = s.add(&format!("DIRECTION('',({},{},{}))", r(n.x, 6), r(n.y, 6), r(n.z, 6)));
-            let ax = s.add(&format!("AXIS2_PLACEMENT_3D('',#{},#{dir},$)", pts[t[0] as usize]));
-            let pl = s.add(&format!("PLANE('',#{ax})"));
-            let lp = s.add(&format!(
-                "POLY_LOOP('',(#{},#{},#{}))",
-                pts[t[0] as usize], pts[t[1] as usize], pts[t[2] as usize]
-            ));
-            let fb = s.add(&format!("FACE_OUTER_BOUND('',#{lp},.T.)"));
-            faces.push(s.add(&format!("FACE_SURFACE('',(#{fb}),#{pl},.T.)")));
+        let tris = part.step_mesh.triangles();
+        let mut breps: Vec<usize> = Vec::new();
+        for piece in pieces(vs.len(), tris) {
+            let mut faces: Vec<usize> = Vec::with_capacity(piece.len());
+            for &ti in &piece {
+                let t = tris[ti];
+                let [a, b, c] = t.map(|i| vs[i as usize]);
+                let n = (b - a).cross(c - a);
+                let n = n.normalized().unwrap_or(Vec3::new(0.0, 0.0, 1.0));
+                let dir = s.add(&format!("DIRECTION('',({},{},{}))", r(n.x, 6), r(n.y, 6), r(n.z, 6)));
+                let ax = s.add(&format!("AXIS2_PLACEMENT_3D('',#{},#{dir},$)", pts[t[0] as usize]));
+                let pl = s.add(&format!("PLANE('',#{ax})"));
+                let lp = s.add(&format!(
+                    "POLY_LOOP('',(#{},#{},#{}))",
+                    pts[t[0] as usize], pts[t[1] as usize], pts[t[2] as usize]
+                ));
+                let fb = s.add(&format!("FACE_OUTER_BOUND('',#{lp},.T.)"));
+                faces.push(s.add(&format!("FACE_SURFACE('',(#{fb}),#{pl},.T.)")));
+            }
+            let list: Vec<String> = faces.iter().map(|f| format!("#{f}")).collect();
+            let shell = s.add(&format!("CLOSED_SHELL('',({}))", list.join(",")));
+            breps.push(s.add(&format!("FACETED_BREP('{pname}',#{shell})")));
         }
-        let list: Vec<String> = faces.iter().map(|f| format!("#{f}")).collect();
-        let shell = s.add(&format!("CLOSED_SHELL('',({}))", list.join(",")));
-        let brep = s.add(&format!("FACETED_BREP('{pname}',#{shell})"));
         let ax = placement(&mut s);
+        let items: Vec<String> = std::iter::once(format!("#{ax}")).chain(breps.iter().map(|b| format!("#{b}"))).collect();
         let rep = s.add(&format!(
-            "FACETED_BREP_SHAPE_REPRESENTATION('{pname}',(#{ax},#{brep}),#{ctx})"
+            "FACETED_BREP_SHAPE_REPRESENTATION('{pname}',({}),#{ctx})",
+            items.join(",")
         ));
         s.add(&format!("SHAPE_DEFINITION_REPRESENTATION(#{ds},#{rep})"));
         // Place it in the assembly (identity).
@@ -190,7 +233,9 @@ pub fn write_step(
         let sss = s.add(&format!("SURFACE_SIDE_STYLE('',(#{ssfa}))"));
         let ssu = s.add(&format!("SURFACE_STYLE_USAGE(.BOTH.,#{sss})"));
         let psa = s.add(&format!("PRESENTATION_STYLE_ASSIGNMENT((#{ssu}))"));
-        styled.push(s.add(&format!("STYLED_ITEM('color',(#{psa}),#{brep})")));
+        for b in &breps {
+            styled.push(s.add(&format!("STYLED_ITEM('color',(#{psa}),#{b})")));
+        }
     }
     let list: Vec<String> = styled.iter().map(|f| format!("#{f}")).collect();
     s.add(&format!(
