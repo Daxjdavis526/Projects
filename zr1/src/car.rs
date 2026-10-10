@@ -217,6 +217,9 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
     let vx = |base: f64| base * detail;
     let rs = regions::load();
     let r = E::R;
+    // measured regions are tested at the foot point on the skin, so their
+    // walls are square to it (see `fields::E`)
+    let foot = E::Foot;
     let and = |a: E, b: E| E::Max(vec![a, b]);
     let mut out = Vec::new();
 
@@ -226,21 +229,21 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
         cuts.push(r(a.field));
     }
     if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Glass, 0.0) {
-        cuts.push(and(r(g), E::layer(CABIN_WALL + 1.0)));
+        cuts.push(and(foot(g), E::layer(CABIN_WALL + 1.0)));
     }
     if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Inlay, 0.0) {
-        cuts.push(and(r(g), E::layer(SKIN_T)));
+        cuts.push(and(foot(g), E::layer(SKIN_T)));
     }
     for x in rs.iter() {
         if let Treat::Pocket(d) = treat(x) {
-            cuts.push(and(r(x.field(0.0, 0.0)), E::layer(d + LINER)));
+            cuts.push(and(foot(x.field(0.0, 0.0)), E::layer(d + LINER)));
         }
     }
     push(&mut out, "Body", "Arctic White (G8G)", ARCTIC_WHITE, body.over(E::minus(E::S(0.0), E::Min(cuts))), vx(4.0), 0.6, Some(1));
 
-    let inlay = |mat: &str| -> Option<F> { region_union(&rs, |x| x.material == mat, 0.0).map(|g| body.over(and(r(g), E::layer(SKIN_T)))) };
+    let inlay = |mat: &str| -> Option<F> { region_union(&rs, |x| x.material == mat, 0.0).map(|g| body.over(and(foot(g), E::layer(SKIN_T)))) };
     if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Glass, 0.0) {
-        push(&mut out, "Glass", "Tinted glass", GLASS, body.over(and(r(g), E::layer(GLASS_T))), vx(2.5), 0.4, None);
+        push(&mut out, "Glass", "Tinted glass", GLASS, body.over(and(foot(g), E::layer(GLASS_T))), vx(2.5), 0.4, None);
     }
     if let Some(f) = inlay("carbon") {
         push(&mut out, "Carbon panels", "Visible carbon fiber", CARBON, f, vx(2.5), 0.4, None);
@@ -264,12 +267,12 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
             if x.material == "plate" {
                 continue;
             }
-            liners.push(and(r(x.field(0.0, 0.0)), E::band(d, d + LINER)));
+            liners.push(and(foot(x.field(0.0, 0.0)), E::band(d, d + LINER)));
         }
     }
     push(&mut out, "Vents and liners", "Satin black", SATIN_BLACK, body.over(E::Min(liners)), vx(3.0), 0.5, None);
     if let Some(p) = region_union(&rs, |x| x.material == "plate", 0.0) {
-        push(&mut out, "Plate", "Licence plate blank", PLATE, body.over(and(r(p), E::band(12.0, 12.0 + 4.0))), vx(1.5), 0.3, None);
+        push(&mut out, "Plate", "Licence plate blank", PLATE, body.over(and(foot(p), E::band(12.0, 12.0 + 4.0))), vx(1.5), 0.3, None);
     }
     push(
         &mut out,

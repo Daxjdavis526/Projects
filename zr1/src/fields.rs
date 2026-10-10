@@ -401,14 +401,32 @@ pub fn spline(keys: &[(f64, f64)], t: f64) -> f64 {
 /// An expression over ONE expensive surface field `f` (the body) and any
 /// number of cheap region fields, evaluated with `f` read once per point.
 /// `S(d)` is `f + d` — the solid lying deeper than `d` under the surface
-/// (`S(0)` is the body itself); `R` a region; `Min` union, `Max`
-/// intersection, `Neg` complement. Every operation keeps the
-/// 1-Lipschitz property, so the kernel's bake culls on it soundly.
+/// (`S(0)` is the body itself); `R` a region; `Foot` a region tested at
+/// the point's foot on the surface; `Min` union, `Max` intersection, `Neg`
+/// complement.
+///
+/// `R`, `S`, `Min`, `Max` and `Neg` keep the 1-Lipschitz property. `Foot`
+/// is there because a measured region is a prism along ONE direction, and
+/// where the surface turns away from that direction (the rear valance and
+/// the front openings wrap around the corners) the prism's wall meets the
+/// skin almost tangentially: the panel cut by it ends in a knife edge
+/// thinner than any voxel, which no mesher can close. Tested at the foot
+/// `p - f(p)·∇f(p)` instead, the region's wall is the surface's normal
+/// line through its outline, square to the skin everywhere, and on the
+/// skin the region is unchanged (a surface point is its own foot). The
+/// foot map stretches tangential distances by R/(R − δ) at depth δ under
+/// a convex surface of radius R, so the value is divided by
+/// `FOOT_SCALE`: 1-Lipschitz again wherever δ ≤ 2R/3. Beyond
+/// `FOOT_BAND` from the surface the term is the constant `FOOT_CAP`, so it
+/// must only ever be intersected with a layer no deeper than
+/// `FOOT_BAND - FOOT_CAP` (every use in `car.rs` is: 70 mm at most).
 pub enum E {
     /// The surface solid offset inward by `d`.
     S(f64),
     /// A region.
     R(F),
+    /// A region tested at the foot point on the surface.
+    Foot(F),
     /// Union.
     Min(Vec<E>),
     /// Intersection.
@@ -417,17 +435,62 @@ pub enum E {
     Neg(Box<E>),
 }
 
+/// See [`E`]: the foot-tested region's value divisor, the distance from
+/// the surface beyond which it is not tested, and its value there (mm).
+pub const FOOT_SCALE: f64 = 3.0;
+pub const FOOT_BAND: f64 = 150.0;
+pub const FOOT_CAP: f64 = 50.0;
+/// Finite-difference step for the surface gradient (mm).
+const FOOT_STEP: f64 = 0.25;
+
+/// What one evaluation has read of the surface so far.
+#[derive(Default)]
+struct At {
+    f: Option<f64>,
+    foot: Option<Option<Vec3>>,
+}
+
+impl At {
+    fn f(&mut self, p: Vec3, surf: &dyn Field) -> f64 {
+        *self.f.get_or_insert_with(|| surf.eval_mm(p))
+    }
+    /// The nearest surface point, or None beyond `FOOT_BAND`.
+    fn foot(&mut self, p: Vec3, surf: &dyn Field) -> Option<Vec3> {
+        if let Some(q) = self.foot {
+            return q;
+        }
+        let f = self.f(p, surf);
+        let q = if f.abs() > FOOT_BAND {
+            None
+        } else {
+            let g = Vec3::new(
+                surf.eval_mm(p + Vec3::new(FOOT_STEP, 0.0, 0.0)) - f,
+                surf.eval_mm(p + Vec3::new(0.0, FOOT_STEP, 0.0)) - f,
+                surf.eval_mm(p + Vec3::new(0.0, 0.0, FOOT_STEP)) - f,
+            );
+            // on the medial axis the gradient can vanish; any foot will do
+            Some(match g.normalized() {
+                Some(n) => p - n * f,
+                None => p,
+            })
+        };
+        self.foot = Some(q);
+        q
+    }
+}
+
 impl E {
-    fn eval(&self, p: Vec3, f: &mut Option<f64>, surf: &dyn Field) -> f64 {
+    fn eval(&self, p: Vec3, at: &mut At, surf: &dyn Field) -> f64 {
         match self {
-            E::S(d) => {
-                let v = *f.get_or_insert_with(|| surf.eval_mm(p));
-                v + d
-            }
+            E::S(d) => at.f(p, surf) + d,
             E::R(r) => r.eval_mm(p),
-            E::Min(v) => v.iter().map(|e| e.eval(p, f, surf)).fold(f64::INFINITY, f64::min),
-            E::Max(v) => v.iter().map(|e| e.eval(p, f, surf)).fold(f64::NEG_INFINITY, f64::max),
-            E::Neg(e) => -e.eval(p, f, surf),
+            E::Foot(r) => match at.foot(p, surf) {
+                Some(q) => (r.eval_mm(q) / FOOT_SCALE).min(FOOT_CAP),
+                None => FOOT_CAP,
+            },
+            E::Min(v) => v.iter().map(|e| e.eval(p, at, surf)).fold(f64::INFINITY, f64::min),
+            E::Max(v) => v.iter().map(|e| e.eval(p, at, surf)).fold(f64::NEG_INFINITY, f64::max),
+            E::Neg(e) => -e.eval(p, at, surf),
         }
     }
     /// `a` minus `b`.
@@ -456,8 +519,7 @@ pub struct OverSurface {
 
 impl Field for OverSurface {
     fn eval_mm(&self, p: Vec3) -> f64 {
-        let mut f = None;
-        self.expr.eval(p, &mut f, &*self.surf)
+        self.expr.eval(p, &mut At::default(), &*self.surf)
     }
     fn exactness(&self) -> Exactness {
         Exactness::Bound
