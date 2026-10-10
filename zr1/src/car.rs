@@ -100,6 +100,8 @@ const LINING: f64 = 20.0;
 const LINER: f64 = 10.0;
 /// Blend radius of the body's cuts, mm (see `parts`).
 const CUT_BLEND: f64 = 8.0;
+/// Rounding of the recess liners, mm (see `parts`).
+const LINER_ROUND: f64 = 6.0;
 
 /// The skin as one shared surface field and the expression wrapper, with
 /// its table: channel 0 the recess allowance, channel 1 + i the label of
@@ -309,7 +311,13 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
             if x.material == "plate" {
                 continue;
             }
-            liners.push(and(E::Lab(vec![i + 1]), E::rband(d, d + LINER)));
+            // a recess shallower than its liner (the depth allowance runs
+            // to nothing at some edges) would taper the liner to a knife
+            // edge: the smooth intersection trims what is under ~6 mm
+            liners.push(E::SMax(
+                LINER_ROUND,
+                vec![E::Lab(vec![i + 1]), E::S(0.0), E::SA(d + LINER, -LINER), E::Neg(Box::new(E::SA(d + LINER, 0.0)))],
+            ));
         }
     }
     push(&mut out, "Vents and liners", "Satin black", SATIN_BLACK, body.over(E::Min(liners)), vx(3.0), 0.5, None);

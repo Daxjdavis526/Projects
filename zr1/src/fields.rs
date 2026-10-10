@@ -452,6 +452,10 @@ pub enum E {
     /// boundaries cross. Its gradient is a convex combination of the
     /// operands', so it keeps the 1-Lipschitz property.
     SMin(f64, Vec<E>),
+    /// Smooth intersection `SMax(k, v)`, the mirror of `SMin`: a piece
+    /// thinner than about k between two of the operands' boundaries is
+    /// trimmed away and the edge they make is rounded.
+    SMax(f64, Vec<E>),
     /// Intersection.
     Max(Vec<E>),
     /// Complement.
@@ -542,6 +546,10 @@ impl E {
             E::SMin(k, v) => v.iter().map(|e| e.eval(p, at, cx)).fold(f64::INFINITY, |a, b| {
                 let h = (k - (a - b).abs()).max(0.0) / k;
                 a.min(b) - h * h * k / 4.0
+            }),
+            E::SMax(k, v) => v.iter().map(|e| e.eval(p, at, cx)).fold(f64::NEG_INFINITY, |a, b| {
+                let h = (k - (a - b).abs()).max(0.0) / k;
+                a.max(b) + h * h * k / 4.0
             }),
             E::Max(v) => v.iter().map(|e| e.eval(p, at, cx)).fold(f64::NEG_INFINITY, f64::max),
             E::Neg(e) => -e.eval(p, at, cx),
