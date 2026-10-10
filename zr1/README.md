@@ -181,6 +181,23 @@ them, so their depth is unknown, and the surface fitted there is whatever
 the outline fit left). Colours are close matches, not
 paint codes.
 
+**Known flaws** (2026-10-10), measured against the references:
+
+- The body surface is softer and wavier than the car's. Its silhouette
+  matches every view to a few millimetres, but its shading explains only
+  about 60 % of the paint shading the renders show (R² 0.61 in deg01, 0.48
+  head-on): sharp creases (the V lines on the hood, the fascia's edges, the
+  corner fins) are rounded off, and the panels carry gentle waves the car
+  does not have. Reading finer shape from the shading of white paint is
+  where the method stops (see `tools/measure/README.md`).
+- The front splitter's corner tips and end plates sit up to about 100 mm
+  ahead of the real ones in some views.
+- Two small holes in the rear valance beside the exhaust tips show white
+  body (the valance outline left them).
+- Overall length: the body is 4,635 mm full size and matches the renders'
+  silhouettes; GM's published overall length is 186.7 in (4,742 mm), so
+  GM's figure must include something beyond the body.
+
 **Left out:** badges and lettering, door handles and shut lines, grille
 mesh patterns, louvre slats, the engine under the hatch, wipers.
 
