@@ -45,10 +45,13 @@ fn seat(ys: f64) -> F {
     let (up, fwd) = back_frame();
     let back_c = v3(BACK_X, ys, BACK_Z);
     let side = v3(0.0, 1.0, 0.0);
-    let mut parts = vec![oriented_box(back_c, up, fwd, v3(300.0, BACK_HT, 205.0), 35.0)];
+    // the shell reaches well down into the cushion: ending on its top
+    // face would leave a hairline gap there
+    let mut parts = vec![oriented_box(back_c - up * 40.0, up, fwd, v3(340.0, BACK_HT, 205.0), 35.0)];
     for s in [-1.0, 1.0] {
         // side bolsters (lower than the Competition Sport seat's)
-        parts.push(oriented_box(back_c + fwd * 30.0 + side * (s * 185.0) - up * 80.0, up, fwd, v3(200.0, 45.0, 35.0), 22.0));
+        // (reaching well into the cushion bolsters, not ending on them)
+        parts.push(oriented_box(back_c + fwd * 30.0 + side * (s * 185.0) - up * 100.0, up, fwd, v3(220.0, 45.0, 35.0), 22.0));
         // shoulder wings
         parts.push(oriented_box(back_c + fwd * 25.0 + side * (s * 170.0) + up * 215.0, up, fwd, v3(95.0, 50.0, 45.0), 22.0));
     }
@@ -136,13 +139,17 @@ pub fn black() -> F {
     // outboard of the wheel
     let to_driver = v3(0.94, -0.34, 0.25);
     v.push(display(v3(650.0, SEAT_Y[0], 862.0), v3(0.0, 1.0, 0.0), v3(1.0, 0.0, 0.3), 160.0, 58.0));
-    v.push(display(v3(640.0, -95.0, 850.0), v3(0.34, 0.94, 0.0), to_driver, 140.0, 76.0));
+    // (clear of the driver display's end: two plates meeting at a slant
+    // would leave a sliver between them)
+    v.push(display(v3(640.0, -70.0, 850.0), v3(0.34, 0.94, 0.0), to_driver, 130.0, 76.0));
     v.push(display(v3(640.0, -640.0, 835.0), v3(-0.34, 0.94, 0.0), v3(0.94, 0.34, 0.25), 70.0, 40.0));
     // console: the tub between the seats, the shifter and cupholder deck
     // rising to the dash, and the armrest
     v.push(rbox(v3(1050.0, 0.0, 430.0), v3(620.0, 115.0, 130.0), 30.0));
-    v.push(oriented_box(v3(760.0, 0.0, 600.0), v3(1.0, 0.0, -0.25), v3(0.25, 0.0, 1.0), v3(200.0, 35.0, 110.0), 25.0));
-    v.push(rbox(v3(1250.0, 0.0, 595.0), v3(170.0, 95.0, 38.0), 30.0));
+    // (deep, so its underside is inside the tub, not a hair above it)
+    let deck_n = v3(0.25, 0.0, 1.0).normalized().expect("deck normal");
+    v.push(oriented_box(v3(760.0, 0.0, 600.0) - deck_n * 75.0, v3(1.0, 0.0, -0.25), deck_n, v3(200.0, 110.0, 110.0), 25.0));
+    v.push(rbox(v3(1250.0, 0.0, 580.0), v3(170.0, 95.0, 53.0), 30.0));
     v.push(steering_wheel());
     // buckles
     for ys in SEAT_Y {
