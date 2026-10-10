@@ -61,6 +61,22 @@ The pipeline scripts run from a work directory holding the intermediate
 files (`fit_views2.pkl`, the cage pickles, the curve point arrays); they
 are a record of what was run, not a one-command tool.
 
+**Tried after the skin was fitted, not adopted** (2026-10-10): a
+second-order fairness relaxed along creases found in the clay images
+(`skinfit.SkinFit(order=2)`, `run_psfit.py` with `ORDER`/`CREASE`,
+`pipeline/crease.py`), a per-vertex brightness factor in the normal solve
+(`psnorm.solve_k`), and a separate light per spin frame. None raised the
+fitted surface's agreement with the observed shading (R² 0.61 in deg01
+before, 0.60–0.65 after). Measured on the fitted surface, no single
+lighting function explains the spin: one light in camera coordinates
+explains 58 % of its shading, one in world coordinates 59 %, world plus
+camera with a gain and offset per frame 68 %, a separate light per frame
+72 % — the renders' lighting is neither fixed to the camera nor to the
+car, and what is left after any of them is mostly the surface's own
+error. The limit is reading fine shape from the shading of white paint
+with a nine-term lighting model; the creases the eye sees in the clay
+images are sharper than the normals it yields.
+
 **Superseded experiments**, kept because their results informed the
 pipeline: `bsfit*.py`, `bsurf.py` (B-spline body), `fit.py`, `fairfit.py`
 (direct mesh fits), `photofit.py`, `turntable.py` (first photometric
