@@ -228,9 +228,16 @@ fn treat(r: &Region) -> Treat {
     match r.material.as_str() {
         "glass" => Treat::Glass,
         "carbon" | "headlamp" | "taillamp" | "black" | "diffuser" => Treat::Inlay,
+        // The front openings are a flush satin-black panel, not a recess:
+        // the renders show only black inside them, so the surface fitted
+        // there is whatever the outline fit left — bulges and folds — and
+        // a recess cut under it meets itself across them (two liners with
+        // a sheet of body between). Their outline is what was measured,
+        // and the panel keeps exactly that.
+        "grille" => Treat::Inlay,
         "plate" => Treat::Pocket(12.0),
         "hatch" => Treat::Pocket(30.0),
-        "grille" | "intake" => Treat::Pocket(60.0),
+        "intake" => Treat::Pocket(60.0),
         _ => Treat::Pocket(45.0),
     }
 }
@@ -319,6 +326,9 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
                 vec![E::Lab(vec![i + 1]), E::S(0.0), E::SA(d + LINER, -LINER), E::Neg(Box::new(E::SA(d + LINER, 0.0)))],
             ));
         }
+    }
+    if let Some(g) = lab(&rs, |x| x.material == "grille") {
+        liners.push(and(g, E::layer(SKIN_T)));
     }
     push(&mut out, "Vents and liners", "Satin black", SATIN_BLACK, body.over(E::Min(liners)), vx(3.0), 0.5, None);
     if let Some(p) = lab(&rs, |x| x.material == "plate") {
