@@ -24,6 +24,8 @@ sonicline/src/*.egg-info/  pip metadata (untracked) — do not read
 spotter/node_modules/    npm dependencies (untracked) — do not read
 spotter/.next/           Next.js build output (untracked) — do not read
 spotter/.data/           embedded dev database and dev secrets (untracked) — do not read
+zr1/target/              Rust build output (untracked) — do not read
+zr1/model/*              generated STEP/3MF/GLB, tens of MB — do not read
 ```
 
 `moon/data/` is 47 MB of vendored NASA rasters. They are data, not code: read
@@ -57,6 +59,7 @@ touching the others.
 | `wormsign/` | WORMSIGN — sandworm-riding game in Rust, compiled to WebAssembly (has a build step; `dist/` is committed at milestones) |
 | `strata/` | STRATA — voxel survival game in Godot 4 + C#. A desktop game, not a web page: Pages serves nothing playable from it. Windows and Linux builds come from GitHub Actions (`.github/workflows/strata.yml`) |
 | `sonicline/` | SONICLINE — propulsion CFD for nitrogen cold-gas thrusters: a Python desktop application driving OpenFOAM as an external solver. Not a web page. Plan and decisions in `sonicline/DESIGN.md`; tests in `.github/workflows/sonicline.yml` |
+| `zr1/` | ZR1 — a 1:15.3 C8 Corvette ZR1 (ZTK, Arctic White and carbon) generated in Rust on the Orbital Dawn geometry kernel, which it references by path (`../../Orbital-Dawn-Astronautics`, private; never copied here). Outputs `model/zr1.{step,3mf,glb}` and a three.js viewer; `cargo run --release` in `zr1/` |
 | `spotter/` | SPOTTER — trend intelligence for a fitness creator: Next.js + PostgreSQL server app with OAuth connectors for YouTube, Instagram and TikTok. Not a static page: Pages serves nothing usable from it. Checks run in GitHub Actions (`.github/workflows/spotter.yml`) |
 
 ## Conventions

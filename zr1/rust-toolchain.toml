@@ -1,0 +1,3 @@
+# The kernel is pinned to this compiler in its own repository; build it with the same one.
+[toolchain]
+channel = "1.94.1"

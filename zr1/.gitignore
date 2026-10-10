@@ -1,0 +1,5 @@
+target/
+out/
+shots/
+model/test.*
+model/zr1-partial.*
