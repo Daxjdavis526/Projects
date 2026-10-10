@@ -3,7 +3,7 @@ views beside the reference images.  usage: render_parts.py out.png views [cache 
 import sys, os, glob, struct, pickle, numpy as np, cv2
 sys.path.insert(0, __import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), '..'))
 import paint
-from render import shade_multi
+from render import shade_multi_z as shade_multi
 from addon_obs import cam_of
 COL = {  # linear-ish sRGB from car.rs finishes, shown a little lifted
     'Body': (0.95, 0.95, 0.94), 'Mirrors': (0.95, 0.95, 0.94), 'Glass': (0.10, 0.11, 0.12),

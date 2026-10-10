@@ -59,7 +59,7 @@ def triangles(Q):
 
 
 class SkinFit:
-    def __init__(self, X0, Q):
+    def __init__(self, X0, Q, order=1):
         self.X0 = X0
         self.Q = Q
         self.F = triangles(Q)
@@ -67,6 +67,12 @@ class SkinFit:
         self.n = len(X0)
         self.mirror = mirror_map(X0)
         self.L = umbrella(self.F, self.n)
+        if order == 2:
+            # second order: the change of the Laplacian, not the Laplacian.
+            # A panel of even curvature costs nothing (the first-order term
+            # pulls every panel toward flat, which between measured points
+            # makes blobs and flattens creases); a wave costs a lot.
+            self.L = (self.L @ self.L).tocsr()
         self.ef = edge_face_map(self.F)
         self.d = np.zeros(self.n)
         self.target = np.zeros_like(X0)      # L x the fairness aims at (0: plain thin plate)

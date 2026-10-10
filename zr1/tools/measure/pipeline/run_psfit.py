@@ -11,7 +11,7 @@ use_views = os.environ.get('SIL', '1') == '1'
 C, Vc = pickle.load(open(cage_pkl, 'rb'))[:2]
 Q, S, _ = subdivide(C.Q, C.n, 3)
 X0 = S @ Vc
-fit = SkinFit(X0, np.asarray(Q))
+fit = SkinFit(X0, np.asarray(Q), order=int(os.environ.get('ORDER', '1')))
 if os.environ.get('INIT_D'):
     fit.d = pickle.load(open(os.environ['INIT_D'], 'rb'))[2]
 views = pickle.load(open('fit_views2.pkl', 'rb')) if use_views else []
@@ -31,6 +31,18 @@ if os.environ.get('COV_ALL') and views:
         mz = cv2.dilate(mz, np.ones((13, 13), np.uint8)) > 0
         vd.cov_ok = ~mz
 P = np.load('curves_mls.npy')
+# fairness relaxed where the clay images show a crease (crease.py): there
+# the surface may bend sharply
+fair_w = None
+if os.environ.get('CREASE'):
+    cs = np.load(os.environ['CREASE'])[:, 0]
+    cs = np.maximum(cs, cs[fit.mirror])
+    fair_w = np.clip(1.0 - cs / float(os.environ.get('CREASE_T', '0.4')), float(os.environ.get('CREASE_MIN', '0.05')), 1.0)
+    # one ring wider: a crease bends across its neighbours
+    import scipy.sparse as sp
+    A = (fit.L != 0).astype(float)
+    fair_w = np.minimum(fair_w, (A @ fair_w) / np.maximum(A.sum(1).A1, 1))
+    print(f"crease relaxation on {(fair_w < 0.5).sum()} verts", flush=True)
 groups = {'spin': [(frame_camera(J.rig, k, 1500, 750),) + psnorm.image(k) for k in range(1, 31)]}
 if os.environ.get('CFG', '1') == '1':
     for v in ['deg01', 'deg02', 'deg03', 'deg04', 'deg05', 'deg07', 'deg42', 'deg43']:
@@ -56,7 +68,7 @@ for rnd in range(rounds):
     print(f"round {rnd}: lights R2 " + ' '.join(f'{k}:{v:.2f}' for k, v in r2.items()) +
           f"; normals on {int((wn > 0).sum())} verts, tilt med {np.median(tilt):.1f} p90 {np.percentile(tilt, 90):.1f}  ({time.time()-t0:.0f}s)", flush=True)
     for it in range(steps):
-        s = fit.step(views, P, w_pt=1.0, cut=25.0, lam=lam, max_step=15, normals=(Nps2, wn), w_n=w_n)
+        s = fit.step(views, P, w_pt=1.0, cut=25.0, lam=lam, max_step=15, normals=(Nps2, wn), w_n=w_n, fair_w=fair_w)
         print(f"  step {it}: pts {s['pts'][1]:.2f}/{s['pts'][2]:.2f} nrm {s.get('nrm', (0, 0))[1]:.2f} sil {s['sil'][0]:.2f}/{s['sil'][1]:.2f} step {s['step']:.1f} ({time.time()-t0:.0f}s)", flush=True)
     pickle.dump((C, Vc, fit.d), open(out + '.pkl', 'wb'))
     trimesh.Trimesh(fit.X(), fit.F, process=False).export(out + '.ply')

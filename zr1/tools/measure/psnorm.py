@@ -115,3 +115,65 @@ def solve(obs, prior_n, lights, prior=0.15, iters=5, min_obs=4, max_tilt_deg=35.
     Nn /= np.linalg.norm(Nn, axis=1, keepdims=True)
     rms = np.sqrt(sse / np.maximum(cnt, 1))
     return Nn, cnt, rms
+
+
+def solve_k(obs, prior_n, lights, prior=0.15, iters=6, min_obs=4, max_tilt_deg=35.0, k_range=(0.4, 1.6)):
+    """As `solve`, with one brightness factor k per vertex shared by all the
+    images that see it: intensity = k · f_view(n).
+
+    The renders carry occlusion and soft shadow (under overhangs, inside the
+    wheel arches, along panel gaps) that no lighting function of the normal
+    alone explains; fitted with k = 1, the solve turns the normal away from
+    the light to make such a spot darker, and the surface integrates that
+    into dents and bulges. With k free, a spot that is darker in every view
+    by the same factor costs nothing; the normal is decided by how the
+    shading CHANGES from view to view, which is what the geometry controls.
+    Returns (normals, k, observation count, rms residual)."""
+    n = len(prior_n)
+    a = np.where(np.abs(prior_n[:, 0:1]) < 0.9, np.array([[1.0, 0, 0]]), np.array([[0, 1.0, 0]]))
+    t1 = np.cross(prior_n, a); t1 /= np.linalg.norm(t1, axis=1, keepdims=True)
+    t2 = np.cross(prior_n, t1)
+    cnt = np.zeros(n)
+    for _, vis, _, _ in obs:
+        cnt[vis] += 1
+    d = np.zeros((n, 2)); lk = np.zeros(n)          # tangent offset, log k
+    lim = np.tan(np.radians(max_tilt_deg))
+    ok = cnt >= min_obs
+    for _ in range(iters):
+        Nn = prior_n + d[:, 0:1] * t1 + d[:, 1:2] * t2
+        Nn /= np.linalg.norm(Nn, axis=1, keepdims=True)
+        k = np.exp(lk)
+        H = np.zeros((n, 3, 3)); g = np.zeros((n, 3)); sse = np.zeros(n)
+        for grp, vis, Ik, R in obs:
+            c = lights[grp]
+            nc = Nn[vis] @ R.T
+            f = photo.sh_basis(nc) @ c
+            r = Ik - k[vis] * f
+            gw = np.einsum('k,nkd->nd', c, photo.sh_grad(nc)) @ R
+            J = np.stack([k[vis] * (gw * t1[vis]).sum(1), k[vis] * (gw * t2[vis]).sum(1), k[vis] * f], 1)
+            s = 1.4826 * np.median(np.abs(r)) + 1e-6
+            w = np.where(np.abs(r) < 2 * s, 1.0, 2 * s / np.abs(r))
+            for i in range(3):
+                for j in range(i, 3):
+                    np.add.at(H, (vis, i, j), w * J[:, i] * J[:, j])
+                np.add.at(g, (vis, i), w * J[:, i] * r)
+            np.add.at(sse, vis, r * r)
+        for i in range(3):
+            for j in range(i):
+                H[:, i, j] = H[:, j, i]
+        kp = prior * np.median((H[:, 0, 0] + H[:, 1, 1])[ok]) / 2 + 1e-9
+        # prior on the TOTAL tangent offset (pull to the mesh normal); a
+        # weak one on log k (pull to 1)
+        A = H.copy()
+        A[:, 0, 0] += kp; A[:, 1, 1] += kp; A[:, 2, 2] += 0.05 * np.median(H[ok, 2, 2]) + 1e-9
+        b = g.copy()
+        b[:, 0] -= kp * d[:, 0]; b[:, 1] -= kp * d[:, 1]; b[:, 2] -= 0.05 * np.median(H[ok, 2, 2]) * lk
+        step = np.linalg.solve(A + 1e-12 * np.eye(3)[None], b[:, :, None])[:, :, 0]
+        dn = d + step[:, :2]
+        nrm = np.linalg.norm(dn, axis=1, keepdims=True)
+        dn = np.where(nrm > lim, dn * lim / np.maximum(nrm, 1e-12), dn)
+        d[ok] = dn[ok]
+        lk[ok] = np.clip(lk[ok] + step[ok, 2], np.log(k_range[0]), np.log(k_range[1]))
+    Nn = prior_n + d[:, 0:1] * t1 + d[:, 1:2] * t2
+    Nn /= np.linalg.norm(Nn, axis=1, keepdims=True)
+    return Nn, np.exp(lk), cnt, np.sqrt(sse / np.maximum(cnt, 1))
