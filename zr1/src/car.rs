@@ -40,7 +40,7 @@ const fn fin(rgb: [f32; 3], metallic: f32, roughness: f32) -> Finish {
 /// slightly warm, as paint swatches show it.
 pub const ARCTIC_WHITE: Finish = fin([0.95, 0.95, 0.94], 0.0, 0.25);
 /// Visible carbon fibre (STEP and GLB carry a colour, not the weave).
-pub const CARBON: Finish = fin([0.065, 0.066, 0.072], 0.25, 0.32);
+pub const CARBON: Finish = fin([0.05, 0.051, 0.056], 0.1, 0.4);
 /// Gloss black trim, grille mesh, wheel liners.
 pub const GLOSS_BLACK: Finish = fin([0.02, 0.02, 0.022], 0.0, 0.18);
 /// Jet Black interior (leather and suede).
@@ -223,11 +223,51 @@ fn windows() -> F {
     ])
 }
 
+/// The turbo-air inlets on the rear hatch: transverse louvre slots in
+/// the carbon beside and behind the two glass panes (GM: "carbon inlets
+/// on top of the rear hatch"). Slots 28 mm wide on an 85 mm pitch.
+fn hatch_louvres() -> F {
+    use regions::*;
+    let mut slots = Vec::new();
+    // (the first slot starts clear of the glass panes' front corners: a
+    // slot end meeting a pane's margin at a point leaves a pinch of
+    // carbon the mesh gate refuses)
+    let mut x = 2121.5;
+    while x < 2990.0 {
+        slots.push(plan(&[[x, -600.0], [x + 28.0, -600.0], [x + 28.0, 600.0], [x, 600.0]], 850.0, 1400.0));
+        x += 85.0;
+    }
+    // inside the hatch, outside the glass panes and the centre spine
+    let spine = plan(&[[1900.0, -70.0], [3100.0, -70.0], [3100.0, 70.0], [1900.0, 70.0]], 850.0, 1400.0);
+    isect(
+        isect(uni_all(slots), plan(&sym(HATCH), 850.0, 1400.0)),
+        bx(odawn_geo::ops::Difference {
+            a: bx(odawn_geo::primitives::Cuboid::new(v3(5000.0, 5000.0, 5000.0)).expect("all space")),
+            b: uni(mirror_y(plan(&grow(REAR_GLASS, 25.0), 850.0, 1400.0)), spine),
+        }),
+    )
+}
+
+/// A plan outline pushed outward by `d` about its own centroid (enough
+/// for the small margins it is used for).
+fn grow(poly: &[[f64; 2]], d: f64) -> Vec<[f64; 2]> {
+    let n = poly.len() as f64;
+    let c = poly.iter().fold([0.0, 0.0], |s, p| [s[0] + p[0] / n, s[1] + p[1] / n]);
+    poly.iter()
+        .map(|p| {
+            let (dx, dy) = (p[0] - c[0], p[1] - c[1]);
+            let l = (dx * dx + dy * dy).sqrt().max(1e-9);
+            [p[0] + dx / l * d, p[1] + dy / l * d]
+        })
+        .collect()
+}
+
 /// Recessed vents: hood extractor, fender-top slots, side intakes,
-/// lower grille, rear vents.
+/// lower grille, rear vents, hatch louvres.
 fn vents() -> F {
     use regions::*;
     uni_all(vec![
+        hatch_louvres(),
         plan(&sym(HOOD_VENT), 550.0, 1000.0),
         mirror_y(plan(FENDER_SLOT, 800.0, 1200.0)),
         side(SIDE_INTAKE, 650.0, 1200.0),
@@ -331,7 +371,7 @@ pub fn parts(detail: f64) -> Vec<Part> {
         finish: CARBON,
         field: over(E::minus(
             and(r(carbon_regions()), E::layer(SKIN_T)),
-            E::Min(vec![r(mirror_y(plan(regions::REAR_GLASS, 900.0, 1400.0))), r(arches(true))]),
+            E::Min(vec![r(mirror_y(plan(regions::REAR_GLASS, 900.0, 1400.0))), r(arches(true)), r(vents())]),
         )),
         voxel_mm: vx(2.5),
         band_mm: 0.4,

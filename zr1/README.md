@@ -44,11 +44,16 @@ repositories side by side and:
 
 ```
 cd zr1
-cargo run --release            # all parts → model/zr1.{step,3mf,glb}, ~20 min
-cargo run --release -- body    # one part (name match)
-cargo run --release -- preview # the body loft alone → out/preview.glb, seconds
-ZR1_DETAIL=2 cargo run --release   # every voxel doubled: a quick draft
+cargo run --release                       # all 20 parts → model/zr1.{step,3mf,glb}, ~50 min on 4 cores
+cargo run --release -- "=Body,Glass"      # rebuild some parts, reuse the rest from out/parts/
+cargo run --release -- assemble           # re-write the three files from out/parts/ only
+cargo run --release -- preview            # the body loft alone → out/preview.glb, seconds
+ZR1_DETAIL=2 cargo run --release          # every voxel doubled: a quick draft (its own cache)
 ```
+
+Every built part is cached in `out/parts/`; a cached part goes back
+through the kernel's gate when it is read, so a stale or damaged cache
+file is refused, never written into the model.
 
 What this crate adds on top of the kernel (`src/`):
 
@@ -61,10 +66,12 @@ What this crate adds on top of the kernel (`src/`):
   Creases are points of high tension in a closed cardinal spline. The
   loft is gated by the kernel and becomes the kernel's exact `MeshField`.
 - `car.rs` — every part as a field: the body less its wheel arches,
-  window openings, recessed vents and the panels given to other parts;
+  window openings, recessed vents (hood extractor, hatch louvres, fender
+  slots, side intakes, grilles) and the panels given to other parts;
   glass and carbon panels as layers of the body's own surface inside
-  traced outlines; wheels, tyres, rotors and calipers as solids of
-  revolution and rotational arrays; the wing as a lofted section.
+  traced outlines; wheels, tyres, cross-drilled rotors and calipers as
+  solids of revolution and rotational arrays; the wing as a lofted
+  section on two uprights; the splitter, dive planes and hood Gurney.
 - `fields.rs` — prisms (extruded outlines, exact), rigid placements,
   mirroring, and `OverSurface`: an expression over the body surface that
   reads the expensive mesh field once per point however many layers the

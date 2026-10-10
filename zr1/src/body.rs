@@ -51,7 +51,7 @@ const ROWS: &[Row] = &[
     (2800.0, [[0.0, 1.0], [0.38, 0.985], [0.62, 0.95], [0.86, 0.92], [1.0, 0.70], [0.95, 0.25], [0.88, 0.0]]),
     // tail: a flat deck ending in the ducktail
     (3400.0, [[0.0, 1.0], [0.48, 0.995], [0.78, 0.97], [0.95, 0.88], [1.0, 0.62], [0.96, 0.25], [0.80, 0.0]]),
-    (3640.0, [[0.0, 1.0], [0.42, 0.98], [0.76, 0.86], [0.92, 0.70], [1.0, 0.50], [0.90, 0.25], [0.60, 0.0]]),
+    (3640.0, [[0.0, 1.0], [0.48, 0.99], [0.78, 0.94], [0.94, 0.82], [1.0, 0.55], [0.96, 0.22], [0.82, 0.0]]),
 ];
 
 /// Crease tension of A..H (0 smooth, 1 sharp).
@@ -76,8 +76,8 @@ const UNDER: &[(f64, f64)] = &[
     (3300.0, 230.0),
     (3450.0, 290.0),
     (3560.0, 320.0),
-    (3600.0, 345.0),
-    (3640.0, 420.0),
+    (3600.0, 330.0),
+    (3640.0, 345.0),
 ];
 
 /// Side-silhouette top, plan half-width and underbody at x.
@@ -90,8 +90,29 @@ pub fn envelope(x: f64) -> (f64, f64, f64) {
     let zt = BODY[i].1 * (1.0 - t) + BODY[i + 1].1 * t;
     let w = BODY[i].2 * (1.0 - t) + BODY[i + 1].2 * t;
     let zb = spline(UNDER, x);
+    if x > TAIL[0].0 {
+        // The tail is a near-vertical face (the drawing's side profile:
+        // x 3550–3640 mm from 350 to 900 mm up), so the last stations
+        // keep their size and the loft is capped flat, not drawn to a point.
+        let zt_t: Vec<(f64, f64)> = TAIL.iter().map(|k| (k.0, k.1)).collect();
+        let w_t: Vec<(f64, f64)> = TAIL.iter().map(|k| (k.0, k.2)).collect();
+        let blend = ((x - TAIL[0].0) / 40.0).min(1.0);
+        return (
+            zt * (1.0 - blend) + spline(&zt_t, x) * blend,
+            w * (1.0 - blend) + spline(&w_t, x) * blend,
+            zb,
+        );
+    }
     (zt, w, zb)
 }
+
+/// The tail: x, side-silhouette top, plan half-width.
+const TAIL: &[(f64, f64, f64)] = &[
+    (3480.0, 918.0, 925.0),
+    (3540.0, 905.0, 905.0),
+    (3590.0, 892.0, 885.0),
+    (3640.0, 872.0, 860.0),
+];
 
 /// The template's fractions at x (interpolated between key rows).
 fn fractions(x: f64) -> [[f64; 2]; 7] {
@@ -142,7 +163,19 @@ pub fn rings(dx: f64, per_span: usize) -> Vec<Vec<Vec3>> {
     let mut rings = Vec::with_capacity(n + 1);
     for i in 0..=n {
         let x = NOSE_X + (TAIL_X - NOSE_X) * i as f64 / n as f64;
-        let sec = section(x, per_span);
+        let mut sec = section(x, per_span);
+        // Round the tail's edge: the last 40 mm of sections are drawn in
+        // toward their centre (a ~25 mm radius at the cap).
+        let into = x - (TAIL_X - 40.0);
+        if into > 0.0 {
+            let t = into / 40.0;
+            let f = 1.0 - 0.035 * t * t;
+            let n = sec.len() as f64;
+            let c = sec.iter().fold([0.0, 0.0], |s, p| [s[0] + p[0] / n, s[1] + p[1] / n]);
+            for p in &mut sec {
+                *p = [c[0] + (p[0] - c[0]) * f, c[1] + (p[1] - c[1]) * f];
+            }
+        }
         rings.push(sec.iter().map(|p| Vec3::new(x, p[0], p[1])).collect());
     }
     rings
