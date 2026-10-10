@@ -80,11 +80,11 @@ fn seat_carbon(ys: f64) -> F {
     uni_all(v)
 }
 
-/// The steering wheel's rim, a squircle |y/a|^4 + |z/b|^4 = 1 in its
-/// local (y, z) plane, as capsules between samples; `carbon` picks the
-/// flat top and bottom (true) or the leather sides (false).
-fn rim(carbon: bool) -> Vec<F> {
-    let (a, b) = (178.0, 158.0);
+/// The steering wheel in its own frame: the rim, a squircle
+/// |y/a|^4 + |z/b|^4 = 1 in the (y, z) plane, as capsules between
+/// samples; the hub, three spokes and the column.
+fn wheel() -> F {
+    let (a, b) = (WHEEL_A, WHEEL_B);
     let n = 24;
     let pts: Vec<Vec3> = (0..n)
         .map(|i| {
@@ -93,13 +93,24 @@ fn rim(carbon: bool) -> Vec<F> {
             v3(0.0, a * c.signum() * c.abs().sqrt(), b * s.signum() * s.abs().sqrt())
         })
         .collect();
-    (0..n)
-        .filter(|i| {
-            let t = std::f64::consts::TAU * (*i as f64 + 0.5) / n as f64;
-            (t.sin().abs() > 0.75) == carbon
-        })
-        .map(|i| capsule(pts[i], pts[(i + 1) % n], 16.0))
-        .collect()
+    let mut v: Vec<F> = (0..n).map(|i| capsule(pts[i], pts[(i + 1) % n], 16.0)).collect();
+    v.push(rbox(Vec3::ZERO, v3(35.0, 75.0, 60.0), 20.0));
+    v.push(capsule(v3(0.0, -60.0, 0.0), v3(0.0, -a + 5.0, -10.0), 12.0));
+    v.push(capsule(v3(0.0, 60.0, 0.0), v3(0.0, a - 5.0, -10.0), 12.0));
+    v.push(capsule(v3(0.0, 0.0, -50.0), v3(0.0, 0.0, -b + 5.0), 12.0));
+    v.push(capsule(v3(-20.0, 0.0, 0.0), v3(-230.0, 0.0, -10.0), 30.0));
+    uni_all(v)
+}
+
+/// Rim half-width, half-height (mm).
+const WHEEL_A: f64 = 178.0;
+const WHEEL_B: f64 = 158.0;
+
+/// The leather band of the wheel: between two planes across it; above
+/// and below them the rim is carbon. A plane split leaves the two parts
+/// meeting on flat faces, never overlapping and never a sliver.
+fn wheel_band() -> F {
+    rbox(Vec3::ZERO, v3(400.0, 400.0, 0.8 * WHEEL_B), 0.0)
 }
 
 /// The wheel in place: the top of the rim leans forward.
@@ -108,16 +119,7 @@ fn wheel_place(f: F) -> F {
 }
 
 fn steering_wheel() -> F {
-    let (a, b) = (178.0, 158.0);
-    let mut v = rim(false);
-    v.push(rbox(Vec3::ZERO, v3(35.0, 75.0, 60.0), 20.0));
-    v.push(capsule(v3(0.0, -60.0, 0.0), v3(0.0, -a + 5.0, -10.0), 12.0));
-    v.push(capsule(v3(0.0, 60.0, 0.0), v3(0.0, a - 5.0, -10.0), 12.0));
-    v.push(capsule(v3(0.0, 0.0, -50.0), v3(0.0, 0.0, -b + 5.0), 12.0));
-    v.push(capsule(v3(-20.0, 0.0, 0.0), v3(-230.0, 0.0, -10.0), 30.0));
-    // the carbon rim segments are their own part: the leather keeps out
-    // of them, so the two never overlap
-    wheel_place(sub(uni_all(v), uni_all(rim(true))))
+    wheel_place(isect(wheel(), wheel_band()))
 }
 
 /// A thin display: centre, the direction its width runs, the direction
@@ -162,7 +164,7 @@ pub fn black() -> F {
 /// Visible carbon interior trim: the steering wheel's flat top and bottom
 /// and the GT2 seats' shoulder trim.
 pub fn carbon() -> F {
-    uni_all(vec![wheel_place(uni_all(rim(true))), seat_carbon(SEAT_Y[0]), seat_carbon(SEAT_Y[1])])
+    uni_all(vec![wheel_place(sub(wheel(), wheel_band())), seat_carbon(SEAT_Y[0]), seat_carbon(SEAT_Y[1])])
 }
 
 /// Santorini Blue three-point belts (RPO 3A9).
