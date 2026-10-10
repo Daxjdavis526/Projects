@@ -41,8 +41,11 @@ const fn fin(rgb: [f32; 3], metallic: f32, roughness: f32) -> Finish {
 pub const ARCTIC_WHITE: Finish = fin([0.95, 0.95, 0.94], 0.0, 0.25);
 /// Visible carbon fibre (STEP and GLB carry a colour, not the weave).
 pub const CARBON: Finish = fin([0.05, 0.051, 0.056], 0.1, 0.4);
-/// Gloss black trim, grille mesh, wheel liners.
+/// Gloss black trim: mirror bases, lug nuts.
 pub const GLOSS_BLACK: Finish = fin([0.02, 0.02, 0.022], 0.0, 0.18);
+/// Satin black: grille mesh, vent liners, wheel-arch liners. Gloss here
+/// threw a white highlight off the forward-facing grille floor.
+pub const SATIN_BLACK: Finish = fin([0.015, 0.015, 0.017], 0.0, 0.7);
 /// Jet Black interior (leather and suede).
 pub const INTERIOR_BLACK: Finish = fin([0.05, 0.05, 0.055], 0.0, 0.75);
 /// Tension Blue belts (RPO 3A9; "Santorini Blue" for 2026).
@@ -60,12 +63,12 @@ pub const RUBBER: Finish = fin([0.09, 0.09, 0.09], 0.0, 0.85);
 pub const CERAMIC: Finish = fin([0.36, 0.36, 0.37], 0.4, 0.6);
 /// "Blue" calipers (RPO J6B).
 pub const CALIPER_BLUE: Finish = fin([0.05, 0.32, 0.78], 0.1, 0.3);
-/// Clear headlamp lens over chrome reflectors.
-pub const HEADLAMP: Finish = fin([0.80, 0.82, 0.85], 0.8, 0.15);
+/// Headlamp: smoked lens over dark housings (the owner's photos).
+pub const HEADLAMP: Finish = fin([0.16, 0.16, 0.17], 0.7, 0.18);
 /// Tail lamp red.
 pub const TAILLAMP: Finish = fin([0.62, 0.03, 0.04], 0.1, 0.25);
-/// Chrome (lug nuts).
-pub const CHROME: Finish = fin([0.85, 0.86, 0.88], 1.0, 0.12);
+/// Carbon Flash Metallic (SOG wheels): near-black, a little metallic.
+pub const CARBON_FLASH: Finish = fin([0.075, 0.072, 0.072], 0.55, 0.28);
 /// Exhaust tips.
 pub const EXHAUST: Finish = fin([0.15, 0.15, 0.16], 0.9, 0.3);
 
@@ -161,6 +164,12 @@ mod regions {
         [-241.0, 497.0], [-199.0, 466.0], [-235.0, 368.0], [-262.0, 276.0], [-290.0, 120.0],
         [-295.0, 0.0],
     ];
+    /// The tall hood Gurney's footprint: a 16 mm band along the hood
+    /// vent's front edge, plan, right half from the centre line out and back.
+    pub const HOOD_LIP: &[[f64; 2]] = &[
+        [-552.0, 0.0], [-508.0, 150.0], [-463.0, 288.0], [-408.0, 400.0], [-338.0, 462.0], [-259.0, 503.0],
+        [-243.0, 503.0], [-322.0, 462.0], [-392.0, 400.0], [-447.0, 288.0], [-492.0, 150.0], [-536.0, 0.0],
+    ];
     /// Slot intake on top of each rear fender (right), plan.
     pub const FENDER_SLOT: &[[f64; 2]] = &[
         [2111.0, 767.0], [2494.0, 650.0], [2584.0, 657.0], [2733.0, 706.0], [2721.0, 724.0],
@@ -168,9 +177,13 @@ mod regions {
     ];
     /// Side intake behind the door, side view (x, z).
     pub const SIDE_INTAKE: &[[f64; 2]] = &[
-        [1407.0, 797.0], [1630.0, 737.0], [1840.0, 689.0], [1918.0, 647.0], [1924.0, 617.0],
-        [1804.0, 455.0], [1828.0, 467.0], [1990.0, 659.0], [2176.0, 701.0], [2212.0, 755.0],
-        [2152.0, 755.0], [1822.0, 743.0], [1486.0, 803.0],
+        // fattened to the owner's side photo: a thick blade from the door's
+        // rear upper corner to above the rear wheel, and the deep scoop
+        // running down the door's trailing edge
+        [1420.0, 802.0], [1650.0, 794.0], [1900.0, 776.0], [2120.0, 780.0], [2235.0, 762.0],
+        [2205.0, 722.0], [2010.0, 702.0], [1965.0, 662.0], [1905.0, 560.0], [1858.0, 468.0],
+        [1806.0, 468.0], [1835.0, 560.0], [1862.0, 648.0], [1805.0, 706.0], [1600.0, 738.0],
+        [1452.0, 772.0],
     ];
     /// Headlamp, plan (right side, x, y).
     pub const HEADLAMP_PLAN: &[[f64; 2]] = &[
@@ -186,6 +199,11 @@ mod regions {
     pub const GRILLE: &[[f64; 2]] = &[
         [0.0, 150.0], [845.0, 150.0], [839.0, 515.0], [591.0, 485.0], [412.0, 443.0],
         [152.0, 425.0], [0.0, 425.0],
+    ];
+    /// The body-colour "fang" between the centre opening and each side
+    /// intake of the lower grille (front view, right side, y, z).
+    pub const FANG: &[[f64; 2]] = &[
+        [395.0, 100.0], [500.0, 100.0], [490.0, 415.0], [430.0, 430.0], [400.0, 400.0],
     ];
     /// Tail lamp, rear view (right, y, z).
     pub const TAILLAMP_REAR: &[[f64; 2]] = &[
@@ -271,7 +289,7 @@ fn vents() -> F {
         plan(&sym(HOOD_VENT), 550.0, 1000.0),
         mirror_y(plan(FENDER_SLOT, 800.0, 1200.0)),
         side(SIDE_INTAKE, 650.0, 1200.0),
-        end_whole(GRILLE, -1100.0, -650.0),
+        grille(-1100.0),
         end(REAR_VENT, 3300.0, 3700.0),
     ])
 }
@@ -315,6 +333,17 @@ pub fn cabin_box() -> F {
 const CABIN_WALL: f64 = 30.0;
 const LINING: f64 = 20.0;
 const VENT_DEPTH: f64 = 45.0;
+/// Where the lower grille's cut ends, behind the nose.
+const GRILLE_BACK_X: f64 = -650.0;
+
+/// The lower grille from `x0` back to its end, less the white fangs. The
+/// fangs run past both ends so no end face is shared: a difference of two
+/// prisms ending on one plane leaves a zero sheet there, which the mesh
+/// gate refuses as non-manifold.
+fn grille(x0: f64) -> F {
+    use regions::*;
+    sub(end_whole(GRILLE, x0, GRILLE_BACK_X), end(FANG, -1150.0, GRILLE_BACK_X + 50.0))
+}
 const SKIN_T: f64 = 8.0;
 const GLASS_T: f64 = 10.0;
 
@@ -380,10 +409,13 @@ pub fn parts(detail: f64) -> Vec<Part> {
     });
     out.push(Part {
         name: "Vents and liners",
-        material: "Gloss black",
-        finish: GLOSS_BLACK,
+        material: "Satin black",
+        finish: SATIN_BLACK,
         field: over(E::Min(vec![
             and(r(vents()), E::band(VENT_DEPTH, VENT_DEPTH + 12.0)),
+            // The lower grille's cut runs back along the underside; close
+            // its far end with a black wall so no white shows through.
+            and(r(grille(GRILLE_BACK_X - 12.0)), E::layer(VENT_DEPTH + 12.0)),
             E::minus(and(E::S(0.0), r(arches(true))), r(arches(false))),
         ])),
         voxel_mm: vx(3.0),
@@ -406,7 +438,7 @@ pub fn parts(detail: f64) -> Vec<Part> {
     });
     out.push(Part {
         name: "Headlamps",
-        material: "Clear lens, chrome",
+        material: "Smoked lens, black housing",
         finish: HEADLAMP,
         field: over(and(r(headlamps()), E::layer(SKIN_T))),
         voxel_mm: vx(2.0),
@@ -433,6 +465,19 @@ pub fn parts(detail: f64) -> Vec<Part> {
         band_mm: 0.3,
         sharp: false,
         shells: None,
+    });
+    out.push(Part {
+        name: "Hood Gurney",
+        material: "Visible carbon fiber",
+        finish: CARBON,
+        // the ZTK tall hood Gurney: a curved carbon blade standing 40 mm
+        // proud along the front edge of the hood vent (owner's photos),
+        // following the hood's own surface
+        field: over(and(E::band(-40.0, 6.0), r(plan(&sym(regions::HOOD_LIP), 500.0, 1000.0)))),
+        voxel_mm: vx(1.5),
+        band_mm: 0.3,
+        sharp: false,
+        shells: Some(1),
     });
     out.push(Part {
         name: "Wing",
@@ -508,8 +553,8 @@ pub fn parts(detail: f64) -> Vec<Part> {
     let (rims, tyres, rotors, calipers, lugs) = running_gear();
     out.push(Part {
         name: "Lug nuts",
-        material: "Chrome",
-        finish: CHROME,
+        material: "Gloss black",
+        finish: GLOSS_BLACK,
         field: lugs,
         voxel_mm: vx(1.2),
         band_mm: 0.2,
@@ -518,8 +563,8 @@ pub fn parts(detail: f64) -> Vec<Part> {
     });
     out.push(Part {
         name: "Wheels",
-        material: "Visible carbon fiber (SU1)",
-        finish: CARBON,
+        material: "Carbon Flash Metallic forged aluminum, 20-spoke (SOG)",
+        finish: CARBON_FLASH,
         field: rims,
         voxel_mm: vx(2.0),
         band_mm: 0.25,
@@ -624,8 +669,8 @@ pub fn wing() -> F {
     uni_all(vec![wing, endplates, uprights])
 }
 
-/// The front carbon: splitter, dive planes (one per side, on the fascia
-/// corners ahead of the front wheels) and the tall hood Gurney.
+/// The front carbon: splitter and dive planes (one per side, on the
+/// fascia corners ahead of the front wheels).
 pub fn front_aero() -> F {
     let splitter = plan(
         &sym(&[
@@ -636,8 +681,7 @@ pub fn front_aero() -> F {
         178.0,
     );
     let dive_planes = side(&[[-760.0, 330.0], [-745.0, 350.0], [-575.0, 432.0], [-568.0, 414.0]], 900.0, 990.0);
-    let hood_gurney = prism(&[[-205.0, 690.0], [-185.0, 690.0], [-185.0, 795.0], [-200.0, 795.0]], Ax::Y, -430.0, 430.0);
-    uni_all(vec![splitter, dive_planes, hood_gurney])
+    uni_all(vec![splitter, dive_planes])
 }
 
 /// Quad centre-exit tips.
@@ -721,14 +765,27 @@ fn running_gear() -> (F, F, F, F, F) {
             vec![[0.0, hub_dy - 40.0], [115.0, hub_dy - 40.0], [115.0, hub_dy], [70.0, hub_dy + 10.0], [0.0, hub_dy + 14.0]],
             c,
         );
-        // Five split spokes: each a V of two spokes from the hub to the rim.
+        // The ZR1 forged wheel (owner's photos): ten spokes, each forking
+        // into a Y about two thirds of the way out, twenty rim
+        // attachments in all; slightly concave.
         let rr = b - 30.0;
-        let spread = 9f64.to_radians();
-        let hub_p = v3(0.0, hub_dy - 5.0, 105.0);
-        let rim_a = v3(rr * spread.sin(), rh - 6.0, rr * spread.cos());
-        let rim_b = v3(-rr * spread.sin(), rh - 6.0, rr * spread.cos());
-        let vpair = uni(capsule(hub_p, rim_a, 13.0), capsule(hub_p, rim_b, 13.0));
-        let spokes = bx(RotationalArray::new(vpair, 5, Vec3::ZERO, v3(0.0, 1.0, 0.0)).expect("spoke array"));
+        let fork_r = 0.68 * rr;
+        let arm = 10.5f64.to_radians();
+        let hub_p = v3(0.0, hub_dy - 5.0, 100.0);
+        let fork = v3(0.0, rh - 30.0, fork_r);
+        let rim_a = v3(rr * arm.sin(), rh - 8.0, rr * arm.cos());
+        let rim_b = v3(-rr * arm.sin(), rh - 8.0, rr * arm.cos());
+        // Three arrays — stems, left arms, right arms — because the
+        // kernel's fit check measures an element's angular width from its
+        // bounding box, and a whole Y's box is wider than its 36° sector.
+        let ring = |el: F| -> F {
+            bx(RotationalArray::new(el, 10, Vec3::ZERO, v3(0.0, 1.0, 0.0)).expect("spoke array"))
+        };
+        let spokes = uni_all(vec![
+            ring(capsule(hub_p, fork, 10.5)),
+            ring(capsule(fork, rim_a, 7.5)),
+            ring(capsule(fork, rim_b, 7.5)),
+        ]);
         let lugs_el = capsule(v3(0.0, hub_dy, 62.0), v3(0.0, hub_dy + 16.0, 62.0), 11.0);
         let lugs = bx(RotationalArray::new(lugs_el, 5, Vec3::ZERO, v3(0.0, 1.0, 0.0)).expect("lug array"));
         rims.push(uni_all(vec![rim, hub, at(spokes, c)]));

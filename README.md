@@ -351,9 +351,10 @@ works.
 ## zr1/
 
 **ZR1** — a 1:15.3 scale C8 Corvette ZR1 coupe, every box ticked: 3LZ,
-ZTK + Carbon Fiber Aero (tall wing, dive planes, tall hood Gurney), SU1
-carbon wheels, Arctic White with the visible-carbon roof and hatch, Blue
-calipers, Jet Black interior with Tension Blue belts. Seven-inch wheelbase.
+ZTK + Carbon Fiber Aero (tall wing, dive planes, tall hood Gurney),
+20-spoke Carbon Flash wheels, Arctic White with the visible-carbon roof and
+hatch, Blue calipers, Jet Black interior with Tension Blue belts, matched to
+the owner's photos. Seven-inch wheelbase.
 Generated in Rust on the Orbital Dawn geometry kernel (signed distance
 fields → sparse bake → gated mesh); download it as a coloured **STEP**
 assembly (SolidWorks), a **3MF** for multi-colour printing, or a **GLB**.

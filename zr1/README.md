@@ -2,10 +2,11 @@
 
 A scale model of a **C8 Corvette ZR1 coupe** with everything ticked: 3LZ,
 the **ZTK Performance Package** with the **TOM Carbon Fiber Aero** package
-(tall wing, dive planes, tall hood Gurney), **SU1 visible carbon-fibre
-wheels**, **Arctic White (G8G)** paint with the visible-carbon roof,
+(tall wing, dive planes, tall hood Gurney), the **20-spoke forged wheels in
+Carbon Flash (SOG)**, **Arctic White (G8G)** paint with the visible-carbon roof,
 split-window spine and hatch inlets, **Blue calipers (J6B)**, a **Jet
-Black** interior with **Tension Blue belts (3A9)**. Scaled so the wheelbase
+Black** interior with **Tension Blue belts (3A9)** — matched to the owner's
+own photos of the car. Scaled so the wheelbase
 is **7.0 in** (1:15.31): the model is about 12.2 in long.
 
 Live viewer: https://daxjdavis526.github.io/Projects/zr1/
@@ -44,7 +45,7 @@ repositories side by side and:
 
 ```
 cd zr1
-cargo run --release                       # all 20 parts → model/zr1.{step,3mf,glb}, ~50 min on 4 cores
+cargo run --release                       # all 21 parts → model/zr1.{step,3mf,glb}, ~50 min on 4 cores
 cargo run --release -- "=Body,Glass"      # rebuild some parts, reuse the rest from out/parts/
 cargo run --release -- assemble           # re-write the three files from out/parts/ only
 cargo run --release -- preview            # the body loft alone → out/preview.glb, seconds
@@ -118,8 +119,13 @@ re-calibrated to GM's numbers (the drawing's own height is 1.2 % off). The
 drawing is a commercial product and is not included here; only the traced
 curves are.
 
-**Approximated (by eye, from GM's photos and Chevrolet's configurator
-renders of this exact build):** the shape of every cross-section between
+**Matched to the owner's photos of the car:** the wheel design (ten spokes
+forking into Ys, black, black lug nuts), the white fangs in the lower
+grille, the hood Gurney on the vent's front edge, white mirrors on black
+bases, smoked headlamps.
+
+**Approximated (by eye, from those photos, GM's photos and Chevrolet's
+configurator renders of the same build):** the shape of every cross-section between
 the silhouettes — crowns, creases, the dish of the hood, the scoop of the
 doors; the wing's section (a NACA-style 12 % section; GM publishes no
 profile); the interior (no interior dimensions are published — seats,
@@ -128,8 +134,8 @@ shape; spoke shape. Colours are close matches, not paint codes — GM
 publishes none.
 
 **Left out:** badges and lettering, door handles and shut lines, the
-louvre slats of the hatch inlets, the grille mesh pattern, the cross-
-drilling of the rotors, the engine under the glass, wipers.
+louvre slats of the hatch inlets, the grille mesh pattern, the engine
+under the glass, wipers.
 
 **Model year.** For 2026 the ZTK package brings Alcon calipers (10-piston
 front, 6-piston rear) on 16.5 in rotors; this model has the 2025 brakes

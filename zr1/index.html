@@ -101,6 +101,7 @@ scene.add(floor);
 
 const views = {
   '34': [250, 85, 300], '34r': [-260, 110, -300], side: [520, 40, 0], front: [0, 40, 520], rear: [0, 55, -520], top: [0, 560, 1],
+  photo1: [205, 38, 330], photo2: [520, 48, 150],
 };
 function setView(k) {
   const v = views[k];
@@ -123,7 +124,7 @@ new GLTFLoader().load(MODEL, (g) => {
     o.castShadow = true; o.receiveShadow = true;
     const m = o.material;
     if (m.transparent) { glassMats.push(m); m.depthWrite = false; }
-    if (/^(Body|Glass|Carbon.panels|Vents|Headlamps|Tail.lamps|Mirrors|Mirror.stalks|Front.aero|Wing|Interior.lining)/.test(o.name)) bodyNodes.push(o);
+    if (/^(Body|Glass|Carbon.panels|Vents|Headlamps|Tail.lamps|Mirrors|Mirror.stalks|Front.aero|Hood.Gurney|Wing|Interior.lining)/.test(o.name)) bodyNodes.push(o);
     const row = document.createElement('label');
     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true;
     cb.onchange = () => { o.visible = cb.checked; };
