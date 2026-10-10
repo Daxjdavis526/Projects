@@ -1,0 +1,8 @@
+target/
+out/
+shots/
+model/test.*
+model/zr1-partial.*
+__pycache__/
+tools/measure/refs
+*.pkl

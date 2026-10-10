@@ -1,0 +1,27 @@
+[package]
+name = "zr1"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "A 1:15.3 scale C8 Corvette ZR1 (ZTK, Arctic White and carbon) generated on the Orbital Dawn geometry kernel"
+
+# Standalone: not part of any other workspace in this repository.
+[workspace]
+
+[dependencies]
+# The Orbital Dawn geometry kernel (signed distance fields, sparse bake,
+# mesher, mesh gate, simplifier). It lives in its own PRIVATE repository
+# and is referenced, never copied: clone Orbital-Dawn-Astronautics next to
+# Projects (both under one parent directory) to build this crate.
+odawn-geo = { path = "../../Orbital-Dawn-Astronautics/crates/odawn-geo" }
+rayon = "1.10"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+serde_json = "1"
+
+[profile.release]
+debug = false
+
+# Debug builds keep every kernel assertion (including its audit of the
+# sparse bake's culling) but are optimised enough to bake a car.
+[profile.dev]
+opt-level = 1

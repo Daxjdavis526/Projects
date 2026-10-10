@@ -347,3 +347,22 @@ See [spotter/README.md](spotter/README.md) to run it,
 [spotter/CAPABILITIES.md](spotter/CAPABILITIES.md) for what each platform
 allows, and [spotter/ARCHITECTURE.md](spotter/ARCHITECTURE.md) for how it
 works.
+
+## zr1/
+
+**ZR1** — a 1:15.3 scale C8 Corvette ZR1 coupe, every box ticked: 3LZ,
+ZTK + Carbon Fiber Aero (tall wing, dive planes, splitter, hood Gurney),
+20-spoke Carbon Flash wheels, Arctic White with the visible-carbon roof,
+Blue calipers, Jet Black interior with blue belts. Seven-inch wheelbase.
+Measured, not drawn: the body, every paint/glass/carbon boundary and the
+aero parts come from Chevrolet's renders of this exact build through
+calibrated cameras (silhouettes, triangulated feature lines and
+photometric stereo on the paint's shading). Built in Rust on the Orbital
+Dawn geometry kernel (signed distance fields → sparse bake → gated mesh);
+download it as a coloured **STEP** assembly (SolidWorks), a **3MF** for
+multi-colour printing, or a **GLB**.
+
+Live: https://daxjdavis526.github.io/Projects/zr1/
+
+See [zr1/README.md](zr1/README.md) for the files, how it is measured and
+built, and what is measured versus approximated.

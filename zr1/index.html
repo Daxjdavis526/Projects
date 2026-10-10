@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZR1 — 1:15.3 model</title>
+<style>
+  :root { --fg: #e9e9ec; --dim: #9a9aa3; --panel: rgba(16,16,20,.82); --accent: #2f6fe0; }
+  html, body { margin: 0; height: 100%; background: #0d0d10; color: var(--fg);
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #hud { position: fixed; left: 12px; top: 12px; max-width: min(360px, calc(100vw - 24px));
+    background: var(--panel); border-radius: 10px; padding: 10px 12px; backdrop-filter: blur(6px); }
+  #hud h1 { font-size: 15px; margin: 0 0 4px; letter-spacing: .02em; }
+  #hud p { margin: 2px 0; color: var(--dim); font-size: 12px; }
+  #hud .row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  button, a.btn { background: #24242b; color: var(--fg); border: 1px solid #34343d; border-radius: 7px;
+    padding: 6px 9px; font: inherit; font-size: 12px; cursor: pointer; text-decoration: none; }
+  button.on { background: var(--accent); border-color: var(--accent); }
+  #parts { position: fixed; right: 12px; top: 12px; background: var(--panel); border-radius: 10px;
+    padding: 8px 10px; font-size: 12px; max-height: 60vh; overflow: auto; }
+  #parts label { display: flex; align-items: center; gap: 6px; padding: 2px 0; white-space: nowrap; }
+  #parts i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; border: 1px solid #555; }
+  #msg { position: fixed; inset: 0; display: grid; place-items: center; color: var(--dim); pointer-events: none; }
+  @media (max-width: 640px) { #parts { top: auto; bottom: 12px; right: 12px; max-height: 32vh; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/three.module.min.js",
+  "three/addons/": "./vendor/three/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="hud">
+  <h1>Corvette ZR1 · 1:15.3</h1>
+  <p>C8 ZR1 coupe, 3LZ, ZTK + Carbon Fiber Aero, Arctic White, visible carbon, Blue calipers. 7.0 in wheelbase. Measured from Chevrolet's renders of this build.</p>
+  <p id="dims"></p>
+  <div class="row">
+    <button id="glass">Clear glass</button>
+    <button id="cut">Hide body</button>
+    <button data-view="34">3/4</button>
+    <button data-view="side">Side</button>
+    <button data-view="front">Front</button>
+    <button data-view="rear">Rear</button>
+    <button data-view="top">Top</button>
+  </div>
+  <div class="row">
+    <a class="btn" href="model/zr1.step" download>STEP</a>
+    <a class="btn" href="model/zr1.3mf" download>3MF</a>
+    <a class="btn" href="model/zr1.glb" download>GLB</a>
+  </div>
+</div>
+<div id="parts"></div>
+<div id="msg">loading model…</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const SHOT = location.search.includes('shot');
+const renderer = new THREE.WebGLRenderer({ antialias: !SHOT, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = !SHOT;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1f);
+const pmrem = new THREE.PMREMGenerator(renderer);
+const CLAYMODE = location.search.includes('clay');
+scene.environment = CLAYMODE ? null : pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// Units: millimetres at model scale.
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 1, 20000);
+const controls = new OrbitControls(camera, renderer.domElement);
+// A light riding on the camera, so every view is lit from where it is seen.
+const head = new THREE.DirectionalLight(0xffffff, CLAYMODE ? 1.6 : 0.6);
+head.position.set(0.3, 0.6, 1);
+camera.add(head);
+scene.add(camera);
+controls.enableDamping = true;
+controls.target.set(0, 25, 0);
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.position.set(-300, 600, 400);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -250, right: 250, top: 250, bottom: -250, near: 10, far: 2000 });
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x303035, 0.5));
+
+const floor = new THREE.Mesh(new THREE.CircleGeometry(900, 64),
+  new THREE.MeshStandardMaterial({ color: 0x2a2a30, roughness: 0.9 }));
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const views = {
+  '34': [250, 85, 300], '34r': [-260, 110, -300], side: [520, 40, 0], front: [0, 40, 520], rear: [0, 55, -520], top: [0, 560, 1],
+  photo1: [205, 38, 330], photo2: [520, 48, 150],
+};
+function setView(k) {
+  const v = views[k];
+  camera.position.set(v[0], v[1], v[2]);
+  controls.target.set(0, 25, 0);
+  controls.update();
+}
+setView('34');
+
+let glassMats = [], bodyNodes = [];
+const MODEL = new URLSearchParams(location.search).get('model') || 'model/zr1.glb';
+new GLTFLoader().load(MODEL, (g) => {
+  document.getElementById('msg').remove();
+  const root = g.scene;
+  const parts = document.getElementById('parts');
+  const CLAY = location.search.includes('clay');
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    if (CLAY) o.material = new THREE.MeshStandardMaterial({ color: 0x9a9a9a, roughness: 0.55, metalness: 0 });
+    o.castShadow = true; o.receiveShadow = true;
+    const m = o.material;
+    if (m.transparent) { glassMats.push(m); m.depthWrite = false; }
+    if (/^(Body|Glass|Carbon.panels|Vents|Headlamps|Tail.lamps|Mirrors|Mirror.stalks|Front.aero|Hood.Gurney|Wing|Interior.lining)/.test(o.name)) bodyNodes.push(o);
+    const row = document.createElement('label');
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true;
+    cb.onchange = () => { o.visible = cb.checked; };
+    const sw = document.createElement('i'); sw.style.background = '#' + m.color.clone().convertLinearToSRGB().getHexString();
+    row.append(cb, sw, document.createTextNode(o.name.replace(/_/g, " ")));
+    parts.appendChild(row);
+  });
+  scene.add(root);
+  const box = new THREE.Box3().setFromObject(root), s = box.getSize(new THREE.Vector3());
+  document.getElementById('dims').textContent =
+    `Model: ${(s.z / 25.4).toFixed(2)} × ${(s.x / 25.4).toFixed(2)} × ${(s.y / 25.4).toFixed(2)} in (L × W × H, incl. wing and mirrors)`;
+}, undefined, (e) => { document.getElementById('msg').textContent = 'could not load model/zr1.glb'; console.error(e); });
+
+document.querySelectorAll('[data-view]').forEach((b) => b.onclick = () => setView(b.dataset.view));
+window.zr1 = { setView, click: (id) => document.getElementById(id).click() };
+document.getElementById('glass').onclick = (e) => {
+  const on = e.target.classList.toggle('on');
+  glassMats.forEach((m) => m.opacity = on ? 0.08 : 0.35);
+};
+document.getElementById('cut').onclick = (e) => {
+  const on = e.target.classList.toggle('on');
+  bodyNodes.forEach((o) => o.visible = !on);
+};
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+if (SHOT) window.zr1.render = () => { controls.update(); renderer.render(scene, camera); };
+else renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
