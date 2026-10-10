@@ -95,7 +95,7 @@ signed distance to the outline where it faces the region's direction,
 filled in smoothly from its neighbours where it does not. A point under
 the skin is tested by the labels at its nearest skin point, so every
 region's wall runs straight in, square to the skin. Recesses (vents,
-intakes, grilles, the hatch, the plate) go no deeper than the skin's own
+intakes, the hatch, the plate) go no deeper than the skin's own
 curvature allows: under a tight bump a deeper recess would come out
 nearer the far face than its own, so each vertex's depth is limited to
 three quarters of where that happens (less 3 mm), changing by at most
@@ -175,9 +175,10 @@ placed by eye from the renders); caliper shape; the interior (no interior
 dimensions are published — the GT2 seats, the 2026 dash with its three
 displays, the console and the wheel are shaped by eye from Chevrolet's
 2026 interior renders and placed to fit the cabin); the exhaust housing's
-outline; the inside of the nose openings, where the renders show only
-black and the fitted surface there is whatever the outline fit left
-(recessed, so it reads as an opening). Colours are close matches, not
+outline; the front openings, which are a flush satin-black panel on the
+measured outline rather than holes (the renders show only black inside
+them, so their depth is unknown, and the surface fitted there is whatever
+the outline fit left). Colours are close matches, not
 paint codes.
 
 **Left out:** badges and lettering, door handles and shut lines, grille
