@@ -102,28 +102,37 @@ const LINER: f64 = 10.0;
 /// The skin as one shared surface field and the expression wrapper.
 pub struct Body {
     surf: Arc<dyn Field>,
+    allow: Arc<SurfaceTable>,
     bounds: Aabb,
 }
 
 impl Body {
     pub fn load(levels: usize) -> Result<Body, String> {
         let cage = skin::Cage::load()?;
-        let f = skin::field(&cage, levels)?;
+        let mesh = skin::mesh(&cage, levels)?;
+        let f = odawn_geo::MeshField::new(&mesh);
         let bounds = f.bounds_mm().ok_or("skin has no bounds")?.inflated(30.0);
-        Ok(Body { surf: Arc::new(f), bounds })
+        let allow = skin::pocket_allowance(&mesh, &f);
+        let a = allow.values();
+        let limited: Vec<f64> = a.iter().copied().filter(|x| *x < 80.0).collect();
+        eprintln!(
+            "  skin: {} vertices, recess allowance under 80 mm at {} ({:.1} %), least {:.1} mm",
+            a.len(),
+            limited.len(),
+            100.0 * limited.len() as f64 / a.len() as f64,
+            limited.iter().copied().fold(f64::INFINITY, f64::min)
+        );
+        Ok(Body { surf: Arc::new(f), allow: Arc::new(allow), bounds })
     }
     fn over(&self, expr: E) -> F {
-        bx(OverSurface {
-            surf: self.surf.clone(),
-            expr,
-            bounds: self.bounds,
-        })
+        self.over_in(expr, self.bounds)
     }
     /// An expression whose result lies inside `bounds` (e.g. a part clipped
     /// to the outside of the body lies inside the part).
     fn over_in(&self, expr: E, bounds: Aabb) -> F {
         bx(OverSurface {
             surf: self.surf.clone(),
+            allow: Some(self.allow.clone()),
             expr,
             bounds,
         })
@@ -218,7 +227,9 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
     let rs = regions::load();
     let r = E::R;
     // measured regions are tested at the foot point on the skin, so their
-    // walls are square to it (see `fields::E`)
+    // walls are square to it (see `fields::E`); recesses go no deeper than
+    // the skin's curvature allows (`skin::pocket_allowance`), flush panels
+    // keep their full thickness
     let foot = E::Foot;
     let and = |a: E, b: E| E::Max(vec![a, b]);
     let mut out = Vec::new();
@@ -229,14 +240,17 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
         cuts.push(r(a.field));
     }
     if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Glass, 0.0) {
-        cuts.push(and(foot(g), E::layer(CABIN_WALL + 1.0)));
+        // well past the cabin's wall: a cut ending where the cabin box's
+        // side does (30 vs 31 mm at the foot of the side windows) leaves a
+        // millimetre sliver of body between them
+        cuts.push(and(foot(g), E::layer(CABIN_WALL + 20.0)));
     }
     if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Inlay, 0.0) {
         cuts.push(and(foot(g), E::layer(SKIN_T)));
     }
     for x in rs.iter() {
         if let Treat::Pocket(d) = treat(x) {
-            cuts.push(and(foot(x.field(0.0, 0.0)), E::layer(d + LINER)));
+            cuts.push(and(foot(x.field(0.0, 0.0)), E::rlayer(d + LINER)));
         }
     }
     push(&mut out, "Body", "Arctic White (G8G)", ARCTIC_WHITE, body.over(E::minus(E::S(0.0), E::Min(cuts))), vx(4.0), 0.6, Some(1));
@@ -267,12 +281,12 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
             if x.material == "plate" {
                 continue;
             }
-            liners.push(and(foot(x.field(0.0, 0.0)), E::band(d, d + LINER)));
+            liners.push(and(foot(x.field(0.0, 0.0)), E::rband(d, d + LINER)));
         }
     }
     push(&mut out, "Vents and liners", "Satin black", SATIN_BLACK, body.over(E::Min(liners)), vx(3.0), 0.5, None);
     if let Some(p) = region_union(&rs, |x| x.material == "plate", 0.0) {
-        push(&mut out, "Plate", "Licence plate blank", PLATE, body.over(and(foot(p), E::band(12.0, 12.0 + 4.0))), vx(1.5), 0.3, None);
+        push(&mut out, "Plate", "Licence plate blank", PLATE, body.over(and(foot(p), E::rband(12.0, 12.0 + 4.0))), vx(1.5), 0.3, None);
     }
     push(
         &mut out,

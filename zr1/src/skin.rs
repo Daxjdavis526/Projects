@@ -248,3 +248,92 @@ pub fn mesh(cage: &Cage, levels: usize) -> Result<ValidMesh, String> {
 pub fn field(cage: &Cage, levels: usize) -> Result<MeshField, String> {
     Ok(MeshField::new(&mesh(cage, levels)?))
 }
+
+/// How deep a recess may go under each vertex of the skin (mm).
+///
+/// Straight in from a point of the skin, the point stays nearest to where
+/// it started only until it reaches the skin's medial surface — about
+/// the radius of curvature under a convex bump or crease. A region tested
+/// at the foot point (`fields::E::Foot`) is cut down to its depth only up
+/// to there: deeper, the foot jumps to the far face, and a recess deeper
+/// than that leaves wedge-shaped islands of body inside it. So every
+/// vertex gets the depth at which its inward normal line first comes
+/// within 0.9 × its length of some other part of the skin, three
+/// quarters of that less 3 mm is the allowance, and the allowance is
+/// limited to change by at most `ALLOWANCE_SLOPE` per millimetre along
+/// the skin (Dijkstra over the mesh edges) so a floor that follows it is
+/// smooth. Where the line goes `ALLOWANCE_PROBE` deep without meeting
+/// anything the vertex is unconstrained.
+pub const ALLOWANCE_PROBE: f64 = 96.0;
+pub const ALLOWANCE_SLOPE: f64 = 0.3;
+pub const ALLOWANCE_NONE: f64 = 1000.0;
+
+/// Returned with the vertex normals, which `fields::E::Foot` reads too.
+pub fn pocket_allowance(mesh: &ValidMesh, field: &MeshField) -> crate::fields::SurfaceTable {
+    use odawn_geo::Field;
+    use rayon::prelude::*;
+    use std::cmp::Ordering;
+    use std::collections::BinaryHeap;
+    let v = mesh.vertices_mm();
+    let t = mesh.triangles();
+    let mut n = vec![Vec3::ZERO; v.len()];
+    for f in t {
+        let fnrm = (v[f[1] as usize] - v[f[0] as usize]).cross(v[f[2] as usize] - v[f[0] as usize]);
+        for i in f {
+            n[*i as usize] = n[*i as usize] + fnrm;
+        }
+    }
+    let step = 3.0;
+    let a0: Vec<f64> = (0..v.len())
+        .into_par_iter()
+        .map(|i| {
+            let Some(ni) = n[i].normalized() else { return ALLOWANCE_NONE };
+            let mut d = step;
+            while d <= ALLOWANCE_PROBE {
+                if field.eval_mm(v[i] - ni * d) > -0.9 * d {
+                    return (0.75 * d - 3.0).max(0.0);
+                }
+                d += step;
+            }
+            ALLOWANCE_NONE
+        })
+        .collect();
+    // limit the slope: a(w) <= a(u) + slope * |uw| over the edges
+    let mut adj: Vec<Vec<u32>> = vec![Vec::new(); v.len()];
+    for f in t {
+        for k in 0..3 {
+            let (a, b) = (f[k], f[(k + 1) % 3]);
+            adj[a as usize].push(b);
+            adj[b as usize].push(a);
+        }
+    }
+    #[derive(PartialEq)]
+    struct Item(f64, u32);
+    impl Eq for Item {}
+    impl PartialOrd for Item {
+        fn partial_cmp(&self, o: &Self) -> Option<Ordering> {
+            Some(self.cmp(o))
+        }
+    }
+    impl Ord for Item {
+        fn cmp(&self, o: &Self) -> Ordering {
+            o.0.total_cmp(&self.0) // smallest first
+        }
+    }
+    let mut a = a0;
+    let mut heap: BinaryHeap<Item> = a.iter().enumerate().filter(|(_, x)| **x < ALLOWANCE_NONE).map(|(i, x)| Item(*x, i as u32)).collect();
+    while let Some(Item(x, i)) = heap.pop() {
+        if x > a[i as usize] {
+            continue;
+        }
+        for &j in &adj[i as usize] {
+            let y = x + ALLOWANCE_SLOPE * (v[j as usize] - v[i as usize]).length();
+            if y < a[j as usize] {
+                a[j as usize] = y;
+                heap.push(Item(y, j));
+            }
+        }
+    }
+    let normals = n.iter().map(|x| x.normalized().unwrap_or(Vec3::ZERO)).collect();
+    crate::fields::SurfaceTable::new(v.to_vec(), normals, a, 15.0)
+}
