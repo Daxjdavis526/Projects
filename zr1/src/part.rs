@@ -85,6 +85,61 @@ pub struct Built {
 }
 
 /// Count closed shells by flood fill over shared vertices.
+/// Where the shells of a mesh are, all but the largest: " [shell at
+/// (x, y, z) w × d × h mm, n triangles; …]" — for a refusal that expected
+/// fewer.
+fn shell_sites(v: &[odawn_geo::Vec3], tris: &[[u32; 3]]) -> String {
+    let mut parent: Vec<u32> = (0..v.len() as u32).collect();
+    fn find(p: &mut [u32], mut x: u32) -> u32 {
+        while p[x as usize] != x {
+            p[x as usize] = p[p[x as usize] as usize];
+            x = p[x as usize];
+        }
+        x
+    }
+    for t in tris {
+        let a = find(&mut parent, t[0]);
+        for &o in &t[1..] {
+            let b = find(&mut parent, o);
+            if a != b {
+                parent[b as usize] = a;
+            }
+        }
+    }
+    let mut groups: std::collections::HashMap<u32, (usize, [f64; 3], [f64; 3])> = std::collections::HashMap::new();
+    for t in tris {
+        let r = find(&mut parent, t[0]);
+        let e = groups.entry(r).or_insert((0, [f64::INFINITY; 3], [f64::NEG_INFINITY; 3]));
+        e.0 += 1;
+        for &i in t {
+            let p = v[i as usize];
+            for (k, c) in [p.x, p.y, p.z].into_iter().enumerate() {
+                e.1[k] = e.1[k].min(c);
+                e.2[k] = e.2[k].max(c);
+            }
+        }
+    }
+    let mut g: Vec<_> = groups.into_values().collect();
+    g.sort_by(|a, b| b.0.cmp(&a.0));
+    let parts: Vec<String> = g
+        .iter()
+        .skip(1)
+        .take(8)
+        .map(|(n, lo, hi)| {
+            format!(
+                "shell at ({:.0}, {:.0}, {:.0}) {:.0} x {:.0} x {:.0} mm, {n} triangles",
+                (lo[0] + hi[0]) / 2.0,
+                (lo[1] + hi[1]) / 2.0,
+                (lo[2] + hi[2]) / 2.0,
+                hi[0] - lo[0],
+                hi[1] - lo[1],
+                hi[2] - lo[2]
+            )
+        })
+        .collect();
+    if parts.is_empty() { String::new() } else { format!(" [{}]", parts.join("; ")) }
+}
+
 fn count_shells(nv: usize, tris: &[[u32; 3]]) -> usize {
     let mut parent: Vec<u32> = (0..nv as u32).collect();
     fn find(p: &mut [u32], mut x: u32) -> u32 {
@@ -334,9 +389,13 @@ fn mesh_and_gate(part: &Part, grid: &SparseGrid) -> Result<(ValidMesh, usize, us
             Some(s) => s,
             None => count_shells(raw.vertices_mm.len(), &raw.triangles),
         };
+        let where_shells = match part.shells {
+            Some(s) if count_shells(raw.vertices_mm.len(), &raw.triangles) != s => shell_sites(&raw.vertices_mm, &raw.triangles),
+            _ => String::new(),
+        };
         let m = raw
             .validate(Some(grid), shells)
-            .map_err(|e| format!("{name}: gate (as meshed): {e}{where_bad}"))?;
+            .map_err(|e| format!("{name}: gate (as meshed): {e}{where_bad}{where_shells}"))?;
         Ok((m, shells, raw_tris))
     };
     let plain = || -> Result<(ValidMesh, usize, usize), String> {
