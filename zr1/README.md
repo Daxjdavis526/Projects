@@ -1,11 +1,11 @@
 # ZR1 — a 1:15.3 C8 Corvette ZR1
 
-A scale model of a **C8 Corvette ZR1 coupe** with everything ticked: 3LZ,
-the **ZTK Performance Package** with the **TOM Carbon Fiber Aero** package
-(tall wing, dive planes, splitter, hood Gurney), the **20-spoke forged
-wheels in Carbon Flash (SOG)**, **Arctic White (G8G)** with the
-visible-carbon roof, **Blue calipers (J6B)**, a **Jet Black** interior with
-blue belts (3A9). Scaled so the wheelbase is **7.0 in** (1:15.31): the model
+A scale model of a **2026 C8 Corvette ZR1 coupe** with everything ticked:
+3LZ, the **ZTK Performance Package** with the **TOM Carbon Fiber Aero**
+package (tall wing, dive planes, splitter, hood Gurney), the **20-spoke
+forged wheels in Carbon Flash (SOG)**, **Arctic White (G8G)** with the
+visible-carbon roof, **Blue calipers (J6B)**, and a **Jet Black** interior
+with **GT2 seats (AH2)** and Santorini Blue belts (3A9). Scaled so the wheelbase is **7.0 in** (1:15.31): the model
 is about 12.2 in long.
 
 This is the second model. The first was traced from a four-view drawing and
@@ -86,6 +86,21 @@ probability's sub-face iso-contour (`regions.py`) → `data/regions.json`.
 The lower fascia is decided from the head-on view alone (elsewhere the
 splitter hides it).
 
+A region is stored as an outline in a plane, projected onto the skin along
+the region's mean normal. The build does not cut along that projection
+(where the skin turns away from it — the valance and the front openings
+wrap around corners — the cut would end in a knife edge no voxel can
+mesh). Instead every vertex of the skin carries a label per region: its
+signed distance to the outline where it faces the region's direction,
+filled in smoothly from its neighbours where it does not. A point under
+the skin is tested by the labels at its nearest skin point, so every
+region's wall runs straight in, square to the skin. Recesses (vents,
+intakes, grilles, the hatch, the plate) go no deeper than the skin's own
+curvature allows: under a tight bump a deeper recess would come out
+nearer the far face than its own, so each vertex's depth is limited to
+three quarters of where that happens (less 3 mm), changing by at most
+0.3 mm per mm along the skin.
+
 **Add-on parts** (`data/addons.json`): the **wing** — main plane,
 endplates and uprights — is a parametric model whose projected outline is
 optimised against the carbon pixels of fifteen views; the **mirrors** are a
@@ -120,13 +135,20 @@ ZR1_DETAIL=2 cargo run --release          # every voxel doubled: a quick draft (
 - `regions.rs` — the measured regions as oriented prisms.
 - `car.rs` — every part: the body (skin less the arches, the cabin, the
   glass and inlays, the recessed grilles, intakes and vents, and the space
-  the splitter and Gurney take), glass, carbon, lamps, liners, valance; the
-  fitted add-ons; wheels, tyres, cross-drilled rotors and calipers placed
-  at the measured hubs.
+  the splitter and Gurney take, the cuts blended over 8 mm so two that
+  nearly touch leave no sliver between them), glass, carbon, lamps,
+  liners, valance; the fitted add-ons; wheels, tyres, cross-drilled rotors
+  and calipers placed at the measured hubs.
 - `fields.rs` — prisms, placements, mirroring, and `OverSurface`, an
   expression over the body surface that reads the expensive mesh field once
-  per point however many layers a part uses.
-- `interior.rs` — seats, dash, console, wheel, belts.
+  per point however many layers a part uses, with the skin table (region
+  labels and recess allowance per vertex) read at the point's foot.
+- `skin.rs` also computes the recess allowance; `regions.rs` the labels.
+- `interior.rs` — GT2 seats, the 2026 dash and displays, console, wheel,
+  belts.
+- `cargo run --release -- slice <part> <x|y|z> <at> <c1,c2> <half> <px>
+  <out.pgm>` writes a part's field on a plane as an image — how the mesh
+  gate's refusals were diagnosed.
 - `export.rs` — STEP (AP214, coloured assembly), 3MF and GLB writers.
 
 ## What is accurate, and what is not
@@ -150,12 +172,21 @@ of anything seen from one side only (made symmetric); detail finer than
 about 2 cm on the body — the measured surface is smooth, so sharp creases
 are slightly rounded; the wheel spoke shape (ten spokes forking into Ys,
 placed by eye from the renders); caliper shape; the interior (no interior
-dimensions are published — seats, dash and wheel are placed to fit the
-cabin); the exhaust housing's outline. Colours are close matches, not
+dimensions are published — the GT2 seats, the 2026 dash with its three
+displays, the console and the wheel are shaped by eye from Chevrolet's
+2026 interior renders and placed to fit the cabin); the exhaust housing's
+outline; the inside of the nose openings, where the renders show only
+black and the fitted surface there is whatever the outline fit left
+(recessed, so it reads as an opening). Colours are close matches, not
 paint codes.
 
 **Left out:** badges and lettering, door handles and shut lines, grille
 mesh patterns, louvre slats, the engine under the hatch, wipers.
 
-**Model year.** The renders are of the 2025 build (J58 brakes, polished
-tips); for 2026 the ZTK brakes and belt colour name changed.
+**Model year.** This is the 2026 car. The body was measured from the 2025
+configurator renders and the colorizer's spin; Chevrolet's 2026 and 2027
+renders of the same option set show the identical exterior (the 2026
+ZTK's J59 carbon-ceramic brakes render exactly as 2025's J58; 2027 renders
+black exhaust tips). The 2026 interior is new — three displays across the
+dash, no "button wall" on the console — and the model follows the 2026
+interior renders, with the GT2 seats (AH2) that are the 3LZ default.

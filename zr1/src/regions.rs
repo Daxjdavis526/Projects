@@ -13,6 +13,7 @@ use odawn_geo::{Mat3, Vec3};
 use serde_json::Value;
 
 use crate::fields::{bx, mirror_y, Ax, Placed, Prism, F};
+use crate::skin::SkinGraph;
 
 #[derive(Clone, Debug)]
 pub struct Region {
@@ -73,6 +74,67 @@ impl Region {
         let placed = bx(Placed::new(bx(prism), rot, o));
         if self.mirror { mirror_y(placed) } else { placed }
     }
+}
+
+impl Region {
+    /// How squarely a surface normal at `p` faces the region's direction
+    /// (the cosine; for a mirrored region, the direction on `p`'s side).
+    pub fn facing(&self, p: Vec3, normal: Vec3) -> f64 {
+        if self.mirror && p.y > 0.0 {
+            Vec3::new(normal.x, -normal.y, normal.z).dot(self.n)
+        } else {
+            normal.dot(self.n)
+        }
+    }
+}
+
+/// Where a vertex faces the region's direction at least this squarely,
+/// its label is the prism's signed distance; less squarely, the
+/// projection onto the outline's plane is too oblique to be trusted and
+/// the label is filled in from the neighbours. Facing away more than
+/// `LABEL_BACK`, the vertex is on the far side of the prism: outside.
+pub const LABEL_FACING: f64 = 0.3;
+pub const LABEL_BACK: f64 = -0.5;
+/// Labels further outside than this are kept as they are (mm).
+pub const LABEL_FAR: f64 = 40.0;
+
+/// Per region, a label per skin vertex: the signed distance to the
+/// region's outline (negative inside), from its prism where the vertex
+/// faces the region's direction, and elsewhere the harmonic fill of its
+/// neighbours' labels (Gauss–Seidel on the mesh graph), so it varies
+/// smoothly across skin the projection cannot resolve — the side walls of
+/// the shapes inside the nose opening face square to that region's
+/// direction and would otherwise fray its outline into fragments.
+pub fn labels(rs: &[Region], g: &SkinGraph) -> Vec<Vec<f64>> {
+    use odawn_geo::Field;
+    use rayon::prelude::*;
+    rs.par_iter()
+        .map(|r| {
+            let f = r.field(0.0, 0.0);
+            let mut m: Vec<f64> = g.v.iter().map(|p| f.eval_mm(*p)).collect();
+            let mut free = Vec::new();
+            for i in 0..m.len() {
+                if m[i] > LABEL_FAR {
+                    continue;
+                }
+                let c = r.facing(g.v[i], g.n[i]);
+                if c < LABEL_BACK {
+                    m[i] = LABEL_FAR;
+                } else if c < LABEL_FACING {
+                    free.push(i);
+                }
+            }
+            for _ in 0..400 {
+                for &i in &free {
+                    let a = &g.adj[i];
+                    if !a.is_empty() {
+                        m[i] = a.iter().map(|j| m[*j as usize]).sum::<f64>() / a.len() as f64;
+                    }
+                }
+            }
+            m
+        })
+        .collect()
 }
 
 /// Offset a counter-clockwise polygon outward by `d` (miter at vertices,

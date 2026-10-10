@@ -249,64 +249,96 @@ pub fn field(cage: &Cage, levels: usize) -> Result<MeshField, String> {
     Ok(MeshField::new(&mesh(cage, levels)?))
 }
 
+/// The skin's vertices, unit normals (area-weighted) and neighbours.
+pub struct SkinGraph {
+    pub v: Vec<Vec3>,
+    pub n: Vec<Vec3>,
+    pub adj: Vec<Vec<u32>>,
+}
+
+impl SkinGraph {
+    pub fn new(mesh: &ValidMesh) -> SkinGraph {
+        let v = mesh.vertices_mm().to_vec();
+        let t = mesh.triangles();
+        let mut n = vec![Vec3::ZERO; v.len()];
+        let mut adj: Vec<Vec<u32>> = vec![Vec::new(); v.len()];
+        for f in t {
+            let fnrm = (v[f[1] as usize] - v[f[0] as usize]).cross(v[f[2] as usize] - v[f[0] as usize]);
+            for k in 0..3 {
+                n[f[k] as usize] = n[f[k] as usize] + fnrm;
+                let (a, b) = (f[k], f[(k + 1) % 3]);
+                if !adj[a as usize].contains(&b) {
+                    adj[a as usize].push(b);
+                    adj[b as usize].push(a);
+                }
+            }
+        }
+        let n = n.into_iter().map(|x| x.normalized().unwrap_or(Vec3::ZERO)).collect();
+        SkinGraph { v, n, adj }
+    }
+}
+
 /// How deep a recess may go under each vertex of the skin (mm).
 ///
 /// Straight in from a point of the skin, the point stays nearest to where
 /// it started only until it reaches the skin's medial surface — about
 /// the radius of curvature under a convex bump or crease. A region tested
-/// at the foot point (`fields::E::Foot`) is cut down to its depth only up
-/// to there: deeper, the foot jumps to the far face, and a recess deeper
-/// than that leaves wedge-shaped islands of body inside it. So every
-/// vertex gets the depth at which its inward normal line first comes
-/// within 0.9 × its length of some other part of the skin, three
-/// quarters of that less 3 mm is the allowance, and the allowance is
-/// limited to change by at most `ALLOWANCE_SLOPE` per millimetre along
-/// the skin (Dijkstra over the mesh edges) so a floor that follows it is
-/// smooth. Where the line goes `ALLOWANCE_PROBE` deep without meeting
-/// anything the vertex is unconstrained.
+/// at the foot point (`fields::E::Lab`) is cut down to its depth only up
+/// to there: deeper, the foot jumps to the far face, and if that face is
+/// not in the recess the point is body again, leaving wedge-shaped islands
+/// of body inside the recess. So every vertex under a recess gets the
+/// depth at which its inward normal line first comes within 0.9 × its
+/// length of another part of the skin that is NOT in a recess (`in_recess`
+/// tells, at a foot point; within `ALLOWANCE_EDGE` of its edge counts as
+/// outside) — a crease inside the recess does not count,
+/// both of its faces being cut alike — three quarters of that less 3 mm
+/// is the allowance, and the allowance is limited to change by at most
+/// `ALLOWANCE_SLOPE` per millimetre along the skin (Dijkstra over the mesh
+/// edges) so a floor that follows it is smooth. Elsewhere the vertex is
+/// unconstrained.
 pub const ALLOWANCE_PROBE: f64 = 96.0;
 pub const ALLOWANCE_SLOPE: f64 = 0.3;
 pub const ALLOWANCE_NONE: f64 = 1000.0;
+/// A far face within this distance of a recess's edge counts as outside
+/// it (mm): where an edge runs along a groove, the face across the groove
+/// is barely out, and the label's smoothing may put it barely in.
+pub const ALLOWANCE_EDGE: f64 = 8.0;
 
-/// Returned with the vertex normals, which `fields::E::Foot` reads too.
-pub fn pocket_allowance(mesh: &ValidMesh, field: &MeshField) -> crate::fields::SurfaceTable {
+pub fn pocket_allowance(g: &SkinGraph, field: &MeshField, in_recess: &(dyn Fn(Vec3) -> f64 + Sync)) -> Vec<f64> {
     use odawn_geo::Field;
     use rayon::prelude::*;
     use std::cmp::Ordering;
     use std::collections::BinaryHeap;
-    let v = mesh.vertices_mm();
-    let t = mesh.triangles();
-    let mut n = vec![Vec3::ZERO; v.len()];
-    for f in t {
-        let fnrm = (v[f[1] as usize] - v[f[0] as usize]).cross(v[f[2] as usize] - v[f[0] as usize]);
-        for i in f {
-            n[*i as usize] = n[*i as usize] + fnrm;
-        }
-    }
+    let (v, n) = (&g.v, &g.n);
     let step = 3.0;
+    let h = 0.25;
     let a0: Vec<f64> = (0..v.len())
         .into_par_iter()
         .map(|i| {
-            let Some(ni) = n[i].normalized() else { return ALLOWANCE_NONE };
+            if n[i] == Vec3::ZERO || in_recess(v[i]) > 30.0 {
+                return ALLOWANCE_NONE;
+            }
             let mut d = step;
             while d <= ALLOWANCE_PROBE {
-                if field.eval_mm(v[i] - ni * d) > -0.9 * d {
-                    return (0.75 * d - 3.0).max(0.0);
+                let p = v[i] - n[i] * d;
+                let f = field.eval_mm(p);
+                if f > -0.9 * d {
+                    // nearer to another part of the skin: is that part cut too?
+                    let g = Vec3::new(
+                        field.eval_mm(p + Vec3::new(h, 0.0, 0.0)) - f,
+                        field.eval_mm(p + Vec3::new(0.0, h, 0.0)) - f,
+                        field.eval_mm(p + Vec3::new(0.0, 0.0, h)) - f,
+                    );
+                    let q = g.normalized().map_or(p, |g| p - g * f);
+                    if in_recess(q) > -ALLOWANCE_EDGE {
+                        return (0.75 * d - 3.0).max(0.0);
+                    }
                 }
                 d += step;
             }
             ALLOWANCE_NONE
         })
         .collect();
-    // limit the slope: a(w) <= a(u) + slope * |uw| over the edges
-    let mut adj: Vec<Vec<u32>> = vec![Vec::new(); v.len()];
-    for f in t {
-        for k in 0..3 {
-            let (a, b) = (f[k], f[(k + 1) % 3]);
-            adj[a as usize].push(b);
-            adj[b as usize].push(a);
-        }
-    }
     #[derive(PartialEq)]
     struct Item(f64, u32);
     impl Eq for Item {}
@@ -326,7 +358,7 @@ pub fn pocket_allowance(mesh: &ValidMesh, field: &MeshField) -> crate::fields::S
         if x > a[i as usize] {
             continue;
         }
-        for &j in &adj[i as usize] {
+        for &j in &g.adj[i as usize] {
             let y = x + ALLOWANCE_SLOPE * (v[j as usize] - v[i as usize]).length();
             if y < a[j as usize] {
                 a[j as usize] = y;
@@ -334,6 +366,5 @@ pub fn pocket_allowance(mesh: &ValidMesh, field: &MeshField) -> crate::fields::S
             }
         }
     }
-    let normals = n.iter().map(|x| x.normalized().unwrap_or(Vec3::ZERO)).collect();
-    crate::fields::SurfaceTable::new(v.to_vec(), normals, a, 15.0)
+    a
 }

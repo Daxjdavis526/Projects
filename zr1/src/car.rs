@@ -98,12 +98,22 @@ const GLASS_T: f64 = 10.0;
 const CABIN_WALL: f64 = 30.0;
 const LINING: f64 = 20.0;
 const LINER: f64 = 10.0;
+/// Blend radius of the body's cuts, mm (see `parts`).
+const CUT_BLEND: f64 = 8.0;
 
-/// The skin as one shared surface field and the expression wrapper.
+/// The skin as one shared surface field and the expression wrapper, with
+/// its table: channel 0 the recess allowance, channel 1 + i the label of
+/// region i of `regions::load()` (see `fields::E`).
 pub struct Body {
     surf: Arc<dyn Field>,
-    allow: Arc<SurfaceTable>,
+    table: Arc<SurfaceTable>,
     bounds: Aabb,
+}
+
+/// The table channel of each region passing `keep`, as one region term.
+fn lab(rs: &[Region], keep: impl Fn(&Region) -> bool) -> Option<E> {
+    let c: Vec<usize> = rs.iter().enumerate().filter(|(_, x)| keep(x)).map(|(i, _)| i + 1).collect();
+    if c.is_empty() { None } else { Some(E::Lab(c)) }
 }
 
 impl Body {
@@ -112,17 +122,38 @@ impl Body {
         let mesh = skin::mesh(&cage, levels)?;
         let f = odawn_geo::MeshField::new(&mesh);
         let bounds = f.bounds_mm().ok_or("skin has no bounds")?.inflated(30.0);
-        let allow = skin::pocket_allowance(&mesh, &f);
-        let a = allow.values();
-        let limited: Vec<f64> = a.iter().copied().filter(|x| *x < 80.0).collect();
+        let g = skin::SkinGraph::new(&mesh);
+        let rs = regions::load();
+        let mut channels = vec![vec![skin::ALLOWANCE_NONE; g.v.len()]];
+        channels.extend(regions::labels(&rs, &g));
+        let mut table = SurfaceTable::new(g.v.clone(), g.n.clone(), channels, 15.0);
+        let pockets: Vec<usize> = rs.iter().enumerate().filter(|(_, x)| matches!(treat(x), Treat::Pocket(_))).map(|(i, _)| i + 1).collect();
+        let allow = {
+            let t = &table;
+            let in_recess = |q: Vec3| -> f64 { t.near(q).map_or(f64::INFINITY, |n| pockets.iter().map(|c| t.value(&n, *c)).fold(f64::INFINITY, f64::min)) };
+            skin::pocket_allowance(&g, &f, &in_recess)
+        };
+        let limited: Vec<f64> = allow.iter().copied().filter(|x| *x < 80.0).collect();
         eprintln!(
-            "  skin: {} vertices, recess allowance under 80 mm at {} ({:.1} %), least {:.1} mm",
-            a.len(),
+            "  skin: {} vertices, {} region labels, recess allowance under 80 mm at {} ({:.1} %), least {:.1} mm",
+            allow.len(),
+            rs.len(),
             limited.len(),
-            100.0 * limited.len() as f64 / a.len() as f64,
+            100.0 * limited.len() as f64 / allow.len() as f64,
             limited.iter().copied().fold(f64::INFINITY, f64::min)
         );
-        Ok(Body { surf: Arc::new(f), allow: Arc::new(allow), bounds })
+        table.set_channel(0, allow);
+        if let Ok(path) = std::env::var("ZR1_DUMP_TABLE") {
+            // every channel, f32 little-endian, vertex-major: a diagnostic
+            let mut b = Vec::new();
+            for i in 0..g.v.len() {
+                for c in 0..=rs.len() {
+                    b.extend_from_slice(&(table.channel(c)[i] as f32).to_le_bytes());
+                }
+            }
+            std::fs::write(path, b).map_err(|e| e.to_string())?;
+        }
+        Ok(Body { surf: Arc::new(f), table: Arc::new(table), bounds })
     }
     fn over(&self, expr: E) -> F {
         self.over_in(expr, self.bounds)
@@ -132,7 +163,7 @@ impl Body {
     fn over_in(&self, expr: E, bounds: Aabb) -> F {
         bx(OverSurface {
             surf: self.surf.clone(),
-            allow: Some(self.allow.clone()),
+            table: Some(self.table.clone()),
             expr,
             bounds,
         })
@@ -202,12 +233,6 @@ fn treat(r: &Region) -> Treat {
     }
 }
 
-/// The union of the regions passing `keep`, each grown by `grow`.
-fn region_union(rs: &[Region], keep: impl Fn(&Region) -> bool, grow: f64) -> Option<F> {
-    let v: Vec<F> = rs.iter().filter(|r| keep(r)).map(|r| r.field(grow, 0.0)).collect();
-    if v.is_empty() { None } else { Some(uni_all(v)) }
-}
-
 fn push(out: &mut Vec<Part>, name: &'static str, material: &'static str, finish: Finish, field: F, voxel: f64, band: f64, shells: Option<usize>) {
     out.push(Part {
         name,
@@ -226,11 +251,10 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
     let vx = |base: f64| base * detail;
     let rs = regions::load();
     let r = E::R;
-    // measured regions are tested at the foot point on the skin, so their
-    // walls are square to it (see `fields::E`); recesses go no deeper than
-    // the skin's curvature allows (`skin::pocket_allowance`), flush panels
-    // keep their full thickness
-    let foot = E::Foot;
+    // measured regions are read from their labels on the skin at the
+    // foot point, so their walls are square to it (see `fields::E`);
+    // recesses go no deeper than the skin's curvature allows
+    // (`skin::pocket_allowance`), flush panels keep their full thickness
     let and = |a: E, b: E| E::Max(vec![a, b]);
     let mut out = Vec::new();
 
@@ -239,25 +263,29 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
     for a in addons().into_iter().filter(|a| a.cut_body) {
         cuts.push(r(a.field));
     }
-    if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Glass, 0.0) {
+    if let Some(g) = lab(&rs, |x| treat(x) == Treat::Glass) {
         // well past the cabin's wall: a cut ending where the cabin box's
         // side does (30 vs 31 mm at the foot of the side windows) leaves a
         // millimetre sliver of body between them
-        cuts.push(and(foot(g), E::layer(CABIN_WALL + 20.0)));
+        cuts.push(and(g, E::layer(CABIN_WALL + 20.0)));
     }
-    if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Inlay, 0.0) {
-        cuts.push(and(foot(g), E::layer(SKIN_T)));
+    if let Some(g) = lab(&rs, |x| treat(x) == Treat::Inlay) {
+        cuts.push(and(g, E::layer(SKIN_T)));
     }
-    for x in rs.iter() {
+    for (i, x) in rs.iter().enumerate() {
         if let Treat::Pocket(d) = treat(x) {
-            cuts.push(and(foot(x.field(0.0, 0.0)), E::rlayer(d + LINER)));
+            cuts.push(and(E::Lab(vec![i + 1]), E::rlayer(d + LINER)));
         }
     }
-    push(&mut out, "Body", "Arctic White (G8G)", ARCTIC_WHITE, body.over(E::minus(E::S(0.0), E::Min(cuts))), vx(4.0), 0.6, Some(1));
+    // the cuts blend over CUT_BLEND: where two come within a few
+    // millimetres (the hood Gurney's slot runs along the hood vent's back
+    // edge) the body between them goes too, instead of a sliver no voxel
+    // can mesh
+    push(&mut out, "Body", "Arctic White (G8G)", ARCTIC_WHITE, body.over(E::minus(E::S(0.0), E::SMin(CUT_BLEND, cuts))), vx(4.0), 0.6, Some(1));
 
-    let inlay = |mat: &str| -> Option<F> { region_union(&rs, |x| x.material == mat, 0.0).map(|g| body.over(and(foot(g), E::layer(SKIN_T)))) };
-    if let Some(g) = region_union(&rs, |x| treat(x) == Treat::Glass, 0.0) {
-        push(&mut out, "Glass", "Tinted glass", GLASS, body.over(and(foot(g), E::layer(GLASS_T))), vx(2.5), 0.4, None);
+    let inlay = |mat: &str| -> Option<F> { lab(&rs, |x| x.material == mat).map(|g| body.over(and(g, E::layer(SKIN_T)))) };
+    if let Some(g) = lab(&rs, |x| treat(x) == Treat::Glass) {
+        push(&mut out, "Glass", "Tinted glass", GLASS, body.over(and(g, E::layer(GLASS_T))), vx(2.5), 0.4, None);
     }
     if let Some(f) = inlay("carbon") {
         push(&mut out, "Carbon panels", "Visible carbon fiber", CARBON, f, vx(2.5), 0.4, None);
@@ -276,17 +304,17 @@ pub fn parts(detail: f64, body: &Body) -> Vec<Part> {
     }
     // pocket floors and the wheel-arch liners
     let mut liners = vec![E::minus(and(E::S(0.0), r(arches(LINER))), r(arches(0.0)))];
-    for x in rs.iter() {
+    for (i, x) in rs.iter().enumerate() {
         if let Treat::Pocket(d) = treat(x) {
             if x.material == "plate" {
                 continue;
             }
-            liners.push(and(foot(x.field(0.0, 0.0)), E::rband(d, d + LINER)));
+            liners.push(and(E::Lab(vec![i + 1]), E::rband(d, d + LINER)));
         }
     }
     push(&mut out, "Vents and liners", "Satin black", SATIN_BLACK, body.over(E::Min(liners)), vx(3.0), 0.5, None);
-    if let Some(p) = region_union(&rs, |x| x.material == "plate", 0.0) {
-        push(&mut out, "Plate", "Licence plate blank", PLATE, body.over(and(foot(p), E::rband(12.0, 12.0 + 4.0))), vx(1.5), 0.3, None);
+    if let Some(p) = lab(&rs, |x| x.material == "plate") {
+        push(&mut out, "Plate", "Licence plate blank", PLATE, body.over(and(p, E::rband(12.0, 12.0 + 4.0))), vx(1.5), 0.3, None);
     }
     push(
         &mut out,

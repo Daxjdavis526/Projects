@@ -77,6 +77,35 @@ fn main() {
     let body = car::Body::load(SKIN_LEVELS).expect("body skin");
     let cache = Path::new(if detail == 1.0 { "out/parts" } else { "out/parts-draft" });
 
+    if args.get(1).map(String::as_str) == Some("slice") {
+        // slice <part> <x|y|z> <coord> <c1,c2> <half> <px> <out.pgm>: the
+        // part's field on a plane, inside dark (a diagnostic for the gate)
+        let a = |i: usize| args.get(i).cloned().unwrap_or_default();
+        let (name, axis, coord) = (a(2), a(3), a(4).parse::<f64>().expect("coord"));
+        let c: Vec<f64> = a(5).split(',').map(|x| x.parse().expect("centre")).collect();
+        let (half, px) = (a(6).parse::<f64>().expect("half"), a(7).parse::<f64>().expect("px"));
+        let part = car::parts(detail, &body).into_iter().find(|p| p.name == name).expect("no such part");
+        let n = (2.0 * half / px).round() as usize;
+        let mut img = vec![0u8; n * n];
+        use rayon::prelude::*;
+        img.par_chunks_mut(n).enumerate().for_each(|(row, line)| {
+            let v = c[1] + half - (row as f64 + 0.5) * px;
+            for (col, out) in line.iter_mut().enumerate() {
+                let u = c[0] - half + (col as f64 + 0.5) * px;
+                let q = match axis.as_str() {
+                    "x" => odawn_geo::Vec3::new(coord, u, v),
+                    "y" => odawn_geo::Vec3::new(u, coord, v),
+                    _ => odawn_geo::Vec3::new(u, v, coord),
+                };
+                let f = part.field.eval_mm(q);
+                *out = if f < 0.0 { (60.0 + (-f).min(30.0) * 2.0) as u8 } else { (200.0 + f.min(25.0)) as u8 };
+            }
+        });
+        let mut bytes = format!("P5\n{n} {n}\n255\n").into_bytes();
+        bytes.extend_from_slice(&img);
+        std::fs::write(a(8), bytes).expect("write");
+        return;
+    }
     if args.get(1).map(String::as_str) == Some("stl") {
         let filter = args.get(2).cloned().unwrap_or_default();
         std::fs::create_dir_all("out").expect("out dir");

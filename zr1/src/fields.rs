@@ -401,39 +401,57 @@ pub fn spline(keys: &[(f64, f64)], t: f64) -> f64 {
 /// An expression over ONE expensive surface field `f` (the body) and any
 /// number of cheap region fields, evaluated with `f` read once per point.
 /// `S(d)` is `f + d` — the solid lying deeper than `d` under the surface
-/// (`S(0)` is the body itself); `R` a region; `Foot` a region tested at
-/// the point's foot on the surface; `Min` union, `Max` intersection, `Neg`
-/// complement.
+/// (`S(0)` is the body itself); `R` a region (any field); `Lab` measured
+/// regions, read on the surface at the point's foot; `SA` the surface
+/// offset by the local recess allowance; `Min` union, `Max` intersection,
+/// `Neg` complement.
 ///
-/// `R`, `S`, `Min`, `Max` and `Neg` keep the 1-Lipschitz property. `Foot`
-/// is there because a measured region is a prism along ONE direction, and
-/// where the surface turns away from that direction (the rear valance and
-/// the front openings wrap around the corners) the prism's wall meets the
-/// skin almost tangentially: the panel cut by it ends in a knife edge
-/// thinner than any voxel, which no mesher can close. Tested at the foot
-/// `p - f(p)·∇f(p)` instead, the region's wall is the surface's normal
-/// line through its outline, square to the skin everywhere, and on the
-/// skin the region is unchanged (a surface point is its own foot). The
-/// foot map stretches tangential distances by R/(R − δ) at depth δ under
-/// a convex surface of radius R, so the value is divided by
-/// `FOOT_SCALE`: 1-Lipschitz again wherever δ ≤ 2R/3. Beyond
-/// `FOOT_BAND` from the surface the term is the constant `FOOT_CAP`, so it
-/// must only ever be intersected with a layer no deeper than
-/// `FOOT_BAND - FOOT_CAP` (every use in `car.rs` is: 70 mm at most).
+/// `R`, `S`, `Min`, `Max` and `Neg` keep the 1-Lipschitz property.
+///
+/// `Lab` is there because a measured region is an outline in a plane,
+/// projected onto the skin along ONE direction, and two things go wrong
+/// with the prism that projection sweeps out. Where the surface turns
+/// away from the direction (the rear valance and the front openings wrap
+/// around the corners) the prism's wall meets the skin almost
+/// tangentially: the panel cut by it ends in a knife edge thinner than
+/// any voxel, which no mesher can close. And skin that faces square to
+/// the direction (the side walls of the shapes inside the nose opening)
+/// projects onto a line, so the outline frays there into fragments. So
+/// every vertex of the skin carries, per region, a label (the signed
+/// distance to the outline, from the prism where the vertex faces the
+/// direction, filled in smoothly from its neighbours where it does not;
+/// `regions::labels`), and a point is tested by the labels at its foot
+/// `p - f(p)·n`: the region's wall is then the surface's normal line
+/// through its outline, square to the skin everywhere. The foot map
+/// stretches tangential distances by R/(R − δ) at depth δ under a convex
+/// surface of radius R, so the value is divided by `FOOT_SCALE`:
+/// 1-Lipschitz again wherever δ ≤ 2R/3. Beyond `FOOT_BAND` from the
+/// surface the term is the constant `FOOT_CAP`, so it must only ever be
+/// intersected with a layer no deeper than `FOOT_BAND - FOOT_CAP` (every
+/// use in `car.rs` is: 70 mm at most).
 pub enum E {
     /// The surface solid offset inward by `d`.
     S(f64),
     /// A region.
     R(F),
-    /// A region tested at the foot point on the surface.
-    Foot(F),
+    /// The union of the measured regions in these channels of the surface
+    /// table, read at the foot point.
+    Lab(Vec<usize>),
     /// `SA(max, off)`: the surface offset inward by the local recess
-    /// allowance (`skin::pocket_allowance`) but never deeper than `max`,
-    /// then by `off` more; halved, because the allowance read at the foot
-    /// point may change by up to 0.3 × 3 mm per mm.
+    /// allowance (channel 0 of the surface table, `skin::pocket_allowance`)
+    /// but never deeper than `max`, then by `off` more; halved, because
+    /// the allowance read at the foot point may change by up to 0.3 × 3 mm
+    /// per mm.
     SA(f64, f64),
     /// Union.
     Min(Vec<E>),
+    /// Smooth union `SMin(k, v)`: the quadratic polynomial blend of radius
+    /// `k` (mm), folded over `v`. Two cuts whose boundaries come within
+    /// about k/2 of each other merge instead of leaving a sliver between
+    /// them; elsewhere it is the union, at most k/4 deeper where two
+    /// boundaries cross. Its gradient is a convex combination of the
+    /// operands', so it keeps the 1-Lipschitz property.
+    SMin(f64, Vec<E>),
     /// Intersection.
     Max(Vec<E>),
     /// Complement.
@@ -452,64 +470,55 @@ const FOOT_STEP: f64 = 0.25;
 #[derive(Default)]
 struct At {
     f: Option<f64>,
-    foot: Option<Option<Vec3>>,
-    allow: Option<f64>,
+    near: Option<Option<Near>>,
 }
 
-/// The surface and its recess allowance, as an expression sees them.
+/// The surface and its table, as an expression sees them.
 struct Cx<'a> {
     surf: &'a dyn Field,
-    allow: Option<&'a SurfaceTable>,
+    table: Option<&'a SurfaceTable>,
 }
 
 impl At {
-    /// The recess allowance at the foot (read with its normal).
-    fn allowance(&mut self, p: Vec3, cx: &Cx) -> f64 {
-        self.foot(p, cx);
-        self.allow.unwrap_or(f64::INFINITY)
-    }
     fn f(&mut self, p: Vec3, surf: &dyn Field) -> f64 {
         *self.f.get_or_insert_with(|| surf.eval_mm(p))
     }
-    /// The nearest surface point, or None beyond `FOOT_BAND`. The exact
-    /// field's gradient gives a first foot; the table's normal there,
-    /// interpolated across the facets, gives the foot used. (Straight from
-    /// the gradient, the foot of a point deep under a facet edge jumps
-    /// from one facet to the next, and a 55 mm deep wall steps by
-    /// depth × dihedral angle, a millimetre or more, at every edge.)
-    fn foot(&mut self, p: Vec3, cx: &Cx) -> Option<Vec3> {
-        if let Some(q) = self.foot {
-            return q;
+    /// The table's weights at the foot point; None beyond `FOOT_BAND` or
+    /// off the table. The exact field's gradient gives a first foot; the
+    /// table's normal there, interpolated across the facets, gives the
+    /// foot used. (Straight from the gradient, the foot of a point deep
+    /// under a facet edge jumps from one facet to the next, and a 55 mm
+    /// deep wall steps by depth × dihedral angle, a millimetre or more,
+    /// at every edge.)
+    fn near(&mut self, p: Vec3, cx: &Cx) -> Option<&Near> {
+        if self.near.is_none() {
+            let n = self.find_near(p, cx);
+            self.near = Some(n);
         }
+        self.near.as_ref().and_then(|n| n.as_ref())
+    }
+    fn find_near(&mut self, p: Vec3, cx: &Cx) -> Option<Near> {
+        let t = cx.table?;
         let surf = cx.surf;
         let f = self.f(p, surf);
-        let q = if f.abs() > FOOT_BAND {
-            None
-        } else {
-            let g = Vec3::new(
-                surf.eval_mm(p + Vec3::new(FOOT_STEP, 0.0, 0.0)) - f,
-                surf.eval_mm(p + Vec3::new(0.0, FOOT_STEP, 0.0)) - f,
-                surf.eval_mm(p + Vec3::new(0.0, 0.0, FOOT_STEP)) - f,
-            );
-            // on the medial axis the gradient can vanish; any foot will do
-            let q0 = match g.normalized() {
-                Some(n) => p - n * f,
-                None => p,
-            };
-            let smooth = cx.allow.and_then(|t| t.at(q0)).map(|(a, n)| {
-                self.allow = Some(a);
-                n
-            });
-            Some(match smooth.and_then(|n| n.normalized()) {
-                Some(n) => p - n * f,
-                None => q0,
-            })
-        };
-        if q.is_none() || self.allow.is_none() {
-            self.allow = Some(f64::INFINITY);
+        if f.abs() > FOOT_BAND {
+            return None;
         }
-        self.foot = Some(q);
-        q
+        let g = Vec3::new(
+            surf.eval_mm(p + Vec3::new(FOOT_STEP, 0.0, 0.0)) - f,
+            surf.eval_mm(p + Vec3::new(0.0, FOOT_STEP, 0.0)) - f,
+            surf.eval_mm(p + Vec3::new(0.0, 0.0, FOOT_STEP)) - f,
+        );
+        // on the medial axis the gradient can vanish; any foot will do
+        let q0 = match g.normalized() {
+            Some(n) => p - n * f,
+            None => p,
+        };
+        let n0 = t.near(q0)?;
+        match t.normal(&n0).normalized() {
+            Some(n) => t.near(p - n * f).or(Some(n0)),
+            None => Some(n0),
+        }
     }
 }
 
@@ -518,15 +527,22 @@ impl E {
         match self {
             E::S(d) => at.f(p, cx.surf) + d,
             E::SA(max, off) => {
-                let a = at.allowance(p, cx);
+                let a = match (cx.table, at.near(p, cx)) {
+                    (Some(t), Some(n)) => t.value(n, 0),
+                    _ => f64::INFINITY,
+                };
                 0.5 * (at.f(p, cx.surf) + max.min(a) + off)
             }
             E::R(r) => r.eval_mm(p),
-            E::Foot(r) => match at.foot(p, cx) {
-                Some(q) => (r.eval_mm(q) / FOOT_SCALE).min(FOOT_CAP),
-                None => FOOT_CAP,
+            E::Lab(chs) => match (cx.table, at.near(p, cx)) {
+                (Some(t), Some(n)) => (chs.iter().map(|c| t.value(n, *c)).fold(f64::INFINITY, f64::min) / FOOT_SCALE).min(FOOT_CAP),
+                _ => FOOT_CAP,
             },
             E::Min(v) => v.iter().map(|e| e.eval(p, at, cx)).fold(f64::INFINITY, f64::min),
+            E::SMin(k, v) => v.iter().map(|e| e.eval(p, at, cx)).fold(f64::INFINITY, |a, b| {
+                let h = (k - (a - b).abs()).max(0.0) / k;
+                a.min(b) - h * h * k / 4.0
+            }),
             E::Max(v) => v.iter().map(|e| e.eval(p, at, cx)).fold(f64::NEG_INFINITY, f64::max),
             E::Neg(e) => -e.eval(p, at, cx),
         }
@@ -544,7 +560,7 @@ impl E {
         E::minus(E::S(d0), E::S(d1))
     }
     /// The outer layer `d` thick, or as thick as the recess allowance
-    /// lets it be (see [`E::SA`]): the cut a measured region makes.
+    /// lets it be (see [`E::SA`]): the cut a measured recess makes.
     pub fn rlayer(d: f64) -> E {
         E::minus(E::S(0.0), E::SA(d, 0.0))
     }
@@ -560,8 +576,9 @@ impl E {
 pub struct OverSurface {
     /// The expensive surface.
     pub surf: std::sync::Arc<dyn Field>,
-    /// Its recess allowance, if the expression uses one.
-    pub allow: Option<std::sync::Arc<SurfaceTable>>,
+    /// Its table (recess allowance, region labels), if the expression
+    /// reads one.
+    pub table: Option<std::sync::Arc<SurfaceTable>>,
     /// The expression.
     pub expr: E,
     /// A box containing the result.
@@ -570,7 +587,7 @@ pub struct OverSurface {
 
 impl Field for OverSurface {
     fn eval_mm(&self, p: Vec3) -> f64 {
-        let cx = Cx { surf: &*self.surf, allow: self.allow.as_deref() };
+        let cx = Cx { surf: &*self.surf, table: self.table.as_deref() };
         self.expr.eval(p, &mut At::default(), &cx)
     }
     fn exactness(&self) -> Exactness {
@@ -640,55 +657,73 @@ pub fn closed_curve_tension(ctrl: &[[f64; 2]], tension: &[f64], per: usize) -> V
     out
 }
 
-/// A value and a normal per vertex of a surface, read at points on it by
+/// Values and a normal per vertex of a surface, read at points on it by
 /// compactly supported inverse-distance weights over the vertices within
 /// `radius` (Wendland's (1 - r²/ρ²)²): smooth across the mesh's facets,
-/// where the exact distance field's gradient is not.
+/// where the exact distance field's gradient is not. Each channel is one
+/// value per vertex.
 pub struct SurfaceTable {
     radius: f64,
     grid: std::collections::HashMap<(i32, i32, i32), Vec<u32>>,
     verts: Vec<Vec3>,
     normals: Vec<Vec3>,
-    values: Vec<f64>,
+    channels: Vec<Vec<f64>>,
+}
+
+/// The vertices near a point and their weights.
+pub struct Near {
+    ids: Vec<(u32, f64)>,
+    sw: f64,
 }
 
 impl SurfaceTable {
-    pub fn new(verts: Vec<Vec3>, normals: Vec<Vec3>, values: Vec<f64>, radius: f64) -> SurfaceTable {
+    pub fn new(verts: Vec<Vec3>, normals: Vec<Vec3>, channels: Vec<Vec<f64>>, radius: f64) -> SurfaceTable {
         let mut grid: std::collections::HashMap<(i32, i32, i32), Vec<u32>> = std::collections::HashMap::new();
         for (i, p) in verts.iter().enumerate() {
             grid.entry(Self::cell(*p, radius)).or_default().push(i as u32);
         }
-        SurfaceTable { radius, grid, verts, normals, values }
+        SurfaceTable { radius, grid, verts, normals, channels }
     }
     fn cell(p: Vec3, r: f64) -> (i32, i32, i32) {
         ((p.x / r).floor() as i32, (p.y / r).floor() as i32, (p.z / r).floor() as i32)
     }
-    pub fn values(&self) -> &[f64] {
-        &self.values
+    pub fn channel(&self, c: usize) -> &[f64] {
+        &self.channels[c]
     }
-    /// The value and the (unnormalised) surface normal at `q`; `None`
-    /// where no vertex is near.
-    pub fn at(&self, q: Vec3) -> Option<(f64, Vec3)> {
+    pub fn set_channel(&mut self, c: usize, v: Vec<f64>) {
+        self.channels[c] = v;
+    }
+    /// The vertices within the radius of `q`; `None` where there are none.
+    pub fn near(&self, q: Vec3) -> Option<Near> {
         let (cx, cy, cz) = Self::cell(q, self.radius);
         let r2 = self.radius * self.radius;
-        let (mut sw, mut sv, mut sn) = (0.0, 0.0, Vec3::ZERO);
+        let mut ids = Vec::new();
+        let mut sw = 0.0;
         for dx in -1..=1 {
             for dy in -1..=1 {
                 for dz in -1..=1 {
-                    if let Some(ids) = self.grid.get(&(cx + dx, cy + dy, cz + dz)) {
-                        for &i in ids {
+                    if let Some(cell) = self.grid.get(&(cx + dx, cy + dy, cz + dz)) {
+                        for &i in cell {
                             let d2 = (self.verts[i as usize] - q).length_squared();
                             if d2 < r2 {
                                 let w = (1.0 - d2 / r2).powi(2);
                                 sw += w;
-                                sv += w * self.values[i as usize];
-                                sn = sn + self.normals[i as usize] * w;
+                                ids.push((i, w));
                             }
                         }
                     }
                 }
             }
         }
-        if sw > 0.0 { Some((sv / sw, sn)) } else { None }
+        if sw > 0.0 { Some(Near { ids, sw }) } else { None }
+    }
+    /// Channel `c` at the point `n` was taken at.
+    pub fn value(&self, n: &Near, c: usize) -> f64 {
+        let ch = &self.channels[c];
+        n.ids.iter().map(|(i, w)| w * ch[*i as usize]).sum::<f64>() / n.sw
+    }
+    /// The (unnormalised) surface normal there.
+    pub fn normal(&self, n: &Near) -> Vec3 {
+        n.ids.iter().fold(Vec3::ZERO, |a, (i, w)| a + self.normals[*i as usize] * *w)
     }
 }

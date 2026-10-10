@@ -350,10 +350,11 @@ works.
 
 ## zr1/
 
-**ZR1** — a 1:15.3 scale C8 Corvette ZR1 coupe, every box ticked: 3LZ,
+**ZR1** — a 1:15.3 scale 2026 C8 Corvette ZR1 coupe, every box ticked: 3LZ,
 ZTK + Carbon Fiber Aero (tall wing, dive planes, splitter, hood Gurney),
 20-spoke Carbon Flash wheels, Arctic White with the visible-carbon roof,
-Blue calipers, Jet Black interior with blue belts. Seven-inch wheelbase.
+Blue calipers, Jet Black interior with GT2 seats and blue belts.
+Seven-inch wheelbase.
 Measured, not drawn: the body, every paint/glass/carbon boundary and the
 aero parts come from Chevrolet's renders of this exact build through
 calibrated cameras (silhouettes, triangulated feature lines and
