@@ -222,6 +222,12 @@ def _measure(mesh, report: GeometryReport, inlet_end: str, stations: int) -> Non
     r_t = f(s_t)
     rows.append((s_t, r_t))
 
+    def radius_at(s):
+        sec = section(s)
+        return None if sec is None else frame.equivalent_radius(sec[0])
+
+    rows = frame.refine_sections(rows, radius_at)
+
     # End faces: triangles normal to the axis at either extreme.
     normals, centres = mesh.face_normals, mesh.triangles_center
     s_face = (centres - com) @ axis

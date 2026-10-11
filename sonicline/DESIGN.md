@@ -392,6 +392,9 @@ fail.
     extremes
   - **throat:** minimum cross-section area from slicing, refined by golden
     section
+  - **wall profile:** the sections joined by straight lines, with sections
+    added wherever the wall at a chord's midpoint is more than 10⁻⁴ of its
+    radius off the chord (finding 83)
   - **inlet vs outlet** is *not* decided by area alone, since high-ε exits
     are larger than chambers. It uses the steeper wall angle beside the
     throat on the converging side, plus a constant-area chamber section, and
@@ -2630,3 +2633,79 @@ Not done in M14:
 - A bound on the exit-cut error for a general nozzle. It is measured on
   E3a (0.9 %, finding 82) and depends on how much of the exit plane the
   subsonic wall layer occupies.
+
+## 24. A real thruster, from the CAD body to a vacuum result
+
+After M14, a 4 N, 8 bar nitrogen thruster for use in space went through
+SONICLINE from its CAD file: a solid body with a bore through it and
+cosmetic threads outside, a 30° convergence, Rc = 4 r_t on both sides of a
+1.95 mm throat, a 15° cone to an area ratio of 40, 51 mm long. The passage
+was extracted, then run in vacuum (SST at y⁺ < 0.4, laminar, inviscid, a
+colder chamber), with a plume, and through a grid study. An audit of those
+runs found four things, each fixed or measured here.
+
+Findings:
+
+83. **A CAD profile is a polyline, and a long nozzle's throat came out
+    polygonal.** The analyser slices the volume at 240 evenly spaced
+    stations and joins the sections with straight lines. On this nozzle
+    they were 0.214 mm apart, and a chord h long stands off a wall of
+    radius R by up to h²/8R: 1.5 µm on the 3.9 mm throat arcs, 0.15 % of
+    the throat radius, everywhere outside the wall. The throat itself was
+    exact (the golden-section point is a vertex) and so was the wall
+    curvature fitted there (Rc/Rt 4.0000), yet the inviscid run passed
+    1.0007 times the ideal flow, where Kliegel–Levine gives 0.9988 and
+    V5's exact Rc/Rt = 4 nozzle reads 0.9982 on the same mesh preset: the
+    flow near the sonic line follows the wall, not just the minimum area.
+    - Chords are now halved until the section at each midpoint is within
+      10⁻⁴ of its radius of the chord, at most six times (a step or a
+      sharp corner never gets there): `geometry.frame.refine_sections`,
+      used by both the STEP and the STL analysers.
+    - On this nozzle that took 287 sections instead of 243 and analysis
+      still took 3 s. The old polyline stood up to 0.22 % of r_t outside
+      the new one within two throat radii of the throat (0.08 % on
+      average).
+    - The inviscid run is being repeated on the refined profile; its
+      result goes here.
+    - The round-trip test nozzle sliced at 40 stations had its throat arc
+      0.73 % of r_t off; it is now within 2×10⁻⁴, and a test holds it
+      there.
+    - The first thruster through SONICLINE (18 mm long, sections
+      0.075 mm apart, the same Rc/Rt) had its old polyline 0.006 % of r_t
+      outside the new one on average, a thirteenth of this nozzle's.
+
+84. **The virial gas cannot follow a vacuum expansion.** The ideal
+    expansion to an area ratio of 40 reaches 40 K. The virial gas is fitted
+    from 70 K, and its T⁻⁴ terms make the density negative near 10–15 K;
+    the first iterations of a run overshoot that far, and the solver
+    stopped with a floating-point exception. `resolve_gas` now takes the
+    nozzle: "auto" picks the perfect gas when the ideal exit temperature is
+    below 80 K (the fit's 70 K plus a margin for overshoot), and an explicit
+    virial request there is refused (`gas.virial_cold`). At 8 bar and
+    293 K the real-gas effect on mass flow is 0.31 %, reported beside the
+    result as for any perfect-gas run. Whalen's E3 nozzles (area ratio 50,
+    37 K at the exit) now run as perfect gases too; at their few-kPa
+    chambers the real-gas effect is of order 10⁻⁵.
+
+85. **A stepped bore came out as two passages.** The extraction caps every
+    hole in the body's planar faces. A pilot drilled through to a wider
+    entry leaves a flat floor at the step with the pilot as a hole in it,
+    and that cap lies inside the passage with gas on both sides. The two
+    pieces it made each had one opening, and the extraction refused the
+    body. A cap with a cavity on each side is now internal: the cavities
+    it separates are joined (union-find over the caps) and fused into one
+    volume, and only caps with the outside on one side count as openings.
+    A test holds a stepped block to one passage of the right volume.
+
+86. **On a high-Reynolds nozzle, cutting the domain at the exit costs
+    0.01 %.** The SST vacuum run was repeated with a plume region and a
+    100 Pa ambient, its thrust taken to vacuum (+ p_a A_e): 3.9826 N
+    against 3.9832 N cut at the exit, −0.013 %. The exit-plane pressure
+    force fell 3.3 % (the wall layer turning around the lip, as on E3a) and
+    the momentum flux rose 0.08 %, which returned most of it. The throat
+    Reynolds number is 2.3×10⁵ against E3a's 1830, and the subsonic layer
+    is a correspondingly thin part of the exit. 181 cells sat at the
+    pressure floor, all in the expansion fan outside the lip (r > 1.1 r_e,
+    x > x_e + 1.3 mm). Every cut viscous run's budget now quotes both
+    points.
+

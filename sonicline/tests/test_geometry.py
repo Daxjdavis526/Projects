@@ -34,6 +34,18 @@ def test_round_trip_recovers_the_profile(nozzle_step):
     assert r.inlet_confidence == "high"
 
 
+def test_the_profile_follows_a_curved_wall_between_sections(nozzle_step):
+    """Uniform sections join into chords that cut inside a curved wall's
+    arc: at 40 stations the throat arc was polygonal by 0.7 % of the throat
+    radius. Sections are added until each chord holds to the wall."""
+    r = geometry.analyse(nozzle_step, stations=40)
+    p, exact = r.profile(), conical(1e-3, 2.88)
+    xs = np.linspace(p.x_inlet, p.x_exit, 4001)
+    dev = np.array([p.radius(x) - exact.radius(exact.x_inlet + x) for x in xs])
+    near = np.abs(xs - p.throat_x) < 1e-3
+    assert np.abs(dev[near]).max() < 2e-4 * 1e-3
+
+
 def test_inlet_override_is_respected(nozzle_step):
     auto = geometry.analyse(nozzle_step, stations=60)
     other = "min" if auto.inlet_end == "max" else "max"

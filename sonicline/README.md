@@ -18,7 +18,7 @@ from a solid body) or a parametric nozzle in, verified numbers, field views
 and a report out. It drives either a chamber pressure or a mass flow, with
 adiabatic or prescribed-temperature walls, steady or as a startup transient.
 Every number comes with an uncertainty budget.
-Sections 10–23 of the design record what building each milestone taught.
+Sections 10–24 of the design record what building each milestone taught.
 
 ![Mach number in and behind a 20 bar nitrogen thruster at sea level](doc/sea-level-20bar-mach.png)
 
@@ -465,6 +465,13 @@ The house rule: say plainly where the model stops.
   - Through a normal shock (V3a, 20 bar into 10 bar) it moves the shock by
     0.001 of the diverging length against the perfect gas, and every check
     still passes.
+  - Not for a cold expansion. When the ideal expansion is colder than 80 K
+    at the exit (a vacuum nozzle of area ratio 40 reaches 40 K), "auto"
+    picks the perfect gas, and asking for the virial gas is refused. The
+    fit starts at 70 K, and its T⁻⁴ terms make the density negative near
+    10–15 K, which a run's first iterations reached: the solver stopped.
+    The real-gas effect on mass flow (0.3 % at 8 bar) is then reported
+    beside the result, as for any perfect-gas run.
   - Peng–Robinson is still available. It over-predicts the real-gas effect
     by about a quarter (+0.89 % against the reference equation's +0.71 % at
     20 bar).
@@ -619,7 +626,8 @@ The analyser, for either format:
   faces still say where the nozzle points), otherwise the distinct
   principal axis of inertia
 - slices the volume to recover the wall profile and whether it is a body of
-  revolution
+  revolution, adding slices wherever the wall curves away from the straight
+  line between two (the profile is a polyline: DESIGN.md finding 83)
 - refines the throat by golden section on the section area
 - picks the inlet end from the steeper wall
 
@@ -667,7 +675,10 @@ extracted volume in the 3D view and asks before using it. The extraction
 caps each opening in the body's planar faces, cuts a box around the lot, and
 keeps the one piece that is neither body nor outside air and is bounded by
 at least two caps. It refuses a body with no such piece, or with several
-(two separate bores: export the one you mean). Openings that are not in
+(two separate bores: export the one you mean). A stepped bore (a pilot
+drilled through to a wider entry) is one passage: the cap on the floor of
+the step has gas on both sides, and the two pieces it splits are joined.
+Openings that are not in
 planar faces cannot be capped; export the gas volume from CAD for those.
 The extracted STEP then goes through the same analysis as any other.
 

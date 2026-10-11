@@ -65,6 +65,39 @@ def nozzle_profile(rows: list[tuple[float, float]], s_min: float, s_max: float,
     return sorted((s_max - s, r) for s, r in rows)
 
 
+# A sampled profile is a polyline, and a straight chord h long stands off a
+# wall of curvature radius R by up to h^2 / 8R. Uniform sections every
+# 0.21 mm along a 51 mm nozzle left a 3.9 mm throat arc polygonal by 0.15 %
+# of the throat radius, and its inviscid discharge coefficient read 0.25 %
+# above an exact arc's on the same mesh (DESIGN.md finding 83). Chords are
+# halved until the wall at each midpoint is within this fraction of its
+# radius of the chord.
+CHORD_TOLERANCE = 1e-4
+# How many times one chord may be halved: a step or a sharp corner never
+# meets the tolerance, and 64 halves of a 240th of the body is enough.
+MAX_HALVINGS = 6
+
+
+def refine_sections(rows: list[tuple[float, float]], radius_at) -> list[tuple[float, float]]:
+    """The section rows (axial position, radius) with sections added where
+    the wall curves away from the chords between them. ``radius_at(s)`` is
+    the section radius at s, or None where there is no section."""
+    rows = sorted(rows)
+    out = list(rows)
+    stack = [(a, b, 0) for a, b in zip(rows, rows[1:])]
+    while stack:
+        (sa, ra), (sb, rb), depth = stack.pop()
+        if depth >= MAX_HALVINGS:
+            continue
+        sm = 0.5 * (sa + sb)
+        rm = radius_at(sm)
+        if rm is None or abs(rm - 0.5 * (ra + rb)) <= CHORD_TOLERANCE * 0.5 * (ra + rb):
+            continue
+        out.append((sm, rm))
+        stack += [((sa, ra), (sm, rm), depth + 1), ((sm, rm), (sb, rb), depth + 1)]
+    return sorted(out)
+
+
 def to_nozzle_frame(origin, direction, extent, inlet_end: str) -> np.ndarray:
     """4x4 transform from the file's frame (metres) to the nozzle frame.
     ``origin`` is the point on the axis the extent is measured from (the

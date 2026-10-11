@@ -313,13 +313,15 @@ def budgets(defn: d.SimulationDefinition, profile: Profile | None, metrics: dict
     if (isinstance(ed, d.TruncatedAtExit) and not ed.fixed_pressure
             and not isinstance(defn.flow.turbulence, d.Inviscid)):
         # The wall layer's subsonic part leaves through an outflow condition
-        # at the cut; on Whalen's E3a (Re 1830) that read thrust 0.9 % high
-        # against the same run with its plume (DESIGN.md finding 82).
+        # at the cut; on Whalen's E3a (throat Re 1830) that read thrust 0.9 %
+        # high against the same run with its plume (DESIGN.md finding 82), on
+        # a 4 N vacuum thruster (Re 2.3e5) 0.013 % (finding 86).
         for k in ("thrust", "specific_impulse"):
             out[k].unquantified.append(
                 "domain cut at the exit plane: the subsonic part of the wall boundary layer leaves through "
-                "an outflow condition there instead of turning around the lip; on a low-Reynolds nozzle "
-                "(Whalen's, Re 1830) that put thrust 0.9 % high. Model the plume to remove it")
+                "an outflow condition there instead of turning around the lip. That put thrust 0.9 % high "
+                "on a low-Reynolds nozzle (Whalen's, throat Re 1830) and 0.013 % high on a 4 N thruster "
+                "(Re 2.3e5). Model the plume to remove it")
     if isinstance(defn.flow.time, d.Transient):
         for k in QUANTITIES:
             out[k].unquantified.append("transient: the values are the end state's; the budget is for that state")

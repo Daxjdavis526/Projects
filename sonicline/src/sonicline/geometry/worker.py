@@ -257,6 +257,12 @@ def analyse(path: str, scale: float, inlet_end: str, n_stations: int) -> dict:
     r_t = f(s_t)
     rows.append((s_t, r_t))
 
+    def radius_at(s):
+        sec = section(s)
+        return None if sec is None else math.sqrt(sec[0] / math.pi)
+
+    rows = frame.refine_sections(rows, radius_at)
+
     # End faces: planar faces normal to the axis at either end.
     ends = {}
     for _, face in gmsh.model.getEntities(2):
