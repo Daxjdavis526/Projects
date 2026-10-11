@@ -2745,3 +2745,14 @@ Findings:
       now.
     - The comment beside the bend said δ was 10 % of the radius; it has
       been 30 % since M1.
+
+With all of it fixed, the thruster's SST vacuum run on the standard mesh
+gives 3.9775 N, 5.479 g/s and an Isp of 74.02 s with the perfect gas
+(real nitrogen adds 0.31 % to the mass flow and takes it off the Isp).
+Against the old profile, thrust and mass flow fell 0.14 % and Isp did not
+move. A grid study down from that mesh (refinement 0.5, 0.71 and 1, all
+three converged) measured its discretisation error as a GCI of 0.041 % on
+mass flow and 0.077 % on thrust (monotone, observed orders 1.4 and 0.9).
+Isp moved by 4×10⁻⁵ across the three meshes, which the study's table calls
+divergent only because the differences are noise. The budget's estimates
+for a standard wedge mesh, 0.06 % and 0.15 %, hold.
