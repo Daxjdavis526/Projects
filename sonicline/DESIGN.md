@@ -2710,6 +2710,15 @@ Findings:
     pressure floor, all in the expansion fan outside the lip (r > 1.1 r_e,
     x > x_e + 1.3 mm). Every cut viscous run's budget now quotes both
     points.
+    - On a mesh twice as fine (118,524 cells) the cut run did not settle.
+      From iteration 2500 to 4400 its exit flow scattered 0.15–0.36 % in
+      each 250-iteration window, with a period of about 170 iterations, at
+      Courant 0.2 and then 0.1. Inlet and throat flows were steady to
+      10⁻⁴ throughout, and 39 of the 102 exit faces carried the subsonic
+      wall layer (1.7 % of the exit radius, no backflow). The unsteadiness
+      sits at the cut, where this finding's error does. That level was
+      stopped, and the grid study taken down from the standard mesh
+      instead (refinement 0.5, 0.71, 1).
 
 87. **Fixing the profile broke the mesh: a sharp corner inverted the
     structured mesher's wall cells.** The grid study on the refined profile
