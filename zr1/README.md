@@ -105,9 +105,12 @@ three quarters of where that happens (less 3 mm), changing by at most
 endplates and uprights — is a parametric model whose projected outline is
 optimised against the carbon pixels of fifteen views; the **mirrors** are a
 visual hull carved from every view in which they show against the
-background; the **dive planes, splitter corners, side skirts, exhaust tips
-and hood Gurney** are placed from points triangulated in two to four
-calibrated views (reprojection error mostly under 3 px, i.e. a few mm). The
+background; the **dive planes** a visual hull carved by the background and
+by the white paint behind them (a black blade would hide it) in all 38
+views, each slice then thinned to a plate on its long axis
+(`pipeline/hull_paint.py`, `blade_rings.py`); the **splitter, side
+skirts, exhaust tips and hood Gurney** are placed from points triangulated
+in two to four calibrated views (reprojection error mostly under 3 px, i.e. a few mm). The
 **wheel arches** are measured edge points (`data/arches.json`).
 
 ## How it is built — `src/`
@@ -190,10 +193,10 @@ paint codes.
   corner fins) are rounded off, and the panels carry gentle waves the car
   does not have. Reading finer shape from the shading of white paint is
   where the method stops (see `tools/measure/README.md`).
-- The front splitter's corner tips and end plates sit up to about 100 mm
-  ahead of the real ones in some views.
-- Two small holes in the rear valance beside the exhaust tips show white
-  body (the valance outline left them).
+- The dive planes are carved from the views and thinned to 8 mm plates;
+  each starts a little further back along the bumper than the real one,
+  whose front end the measured bumper (which bulges slightly too far out
+  at that corner) hides.
 - Overall length: the body is 4,635 mm full size and matches the renders'
   silhouettes; GM's published overall length is 186.7 in (4,742 mm), so
   GM's figure must include something beyond the body.
