@@ -9,13 +9,12 @@
 //     each plate steps a little further out and turns a little, and each new
 //     cluster starts sharply round from the last, leaning out the other way.
 //     That gives the model its fanned, tiered, twisting look;
-//   - the top of the body steps in quickly as a small pyramid of squares
-//     round the rod;
-//   - above it rises a triangle of long plates: one end of each stands
-//     straight over the last, beside the rod, while the other steps back on a
-//     diagonal - the tall triangle of the pen sketch. The acrylic model stops
-//     part-way up it; here it is carried on to its point, and the mast (the
-//     model's brass rod) stands on top.
+//   - above it, the blade the pen sketch ends in (the acrylic model is
+//     missing its top, so the drawing decides it): a tall glazed triangle
+//     standing on one vertical edge straight over the rod, its long diagonal
+//     running down to the corner of the body, with a narrow fin folding out
+//     the other way near the top. The mast - the model's brass rod - carries
+//     the vertical edge on up.
 //
 // Built for real, each plate becomes a floor: a slab whose edge reads as the
 // plate, with a storey of glass beneath it set back a little.
@@ -45,16 +44,17 @@ export const PARAMS = {
   bodySide: [[0, 54], [6, 60], [16, 76], [22, 76], [27, 68], [30, 58]],
   bodyAspect: 1.25,    // long side / short side
   // the pyramid of squares that caps the body: side by floor
-  pyramid: [[29, 52], [37, 10]],
-  // the triangle: plates from floor 26 up to its point
-  sailFrom: 26,
-  sailTo: 62,
-  sailBack: 9,         // its vertical edge stands this far behind the rod
-  sailWidth: 22,
-  sailTurn: 1,         // degrees each sail plate turns
-  sailTurn0: 200,      // the sail's direction at its foot, degrees
-  // length of a sail plate from its vertical edge, by floor
-  sailLength: [[26, 58], [33, 50], [48, 26], [62, 5]],
+  pyramid: null,       // the model's little stepped cap; the drawing's blade replaces it
+  // the blade on top, as the pen sketch draws it: a tall glazed triangle
+  // standing on one vertical edge straight over the rod, its long diagonal
+  // running down to the corner of the body, with a narrow fin folding out
+  // the other way near the top
+  sailFrom: 24,        // the floor its foot stands on, down in the body's top cluster
+  sailHeight: 150,     // foot to tip (about 0.8 of the body, as drawn)
+  sailBase: 42,        // the main face's width at its foot: a quarter of its height
+  sailDepth: 10,       // the blade's thickness at its foot
+  sailFacing: 35.5,    // the main face's direction, degrees (the sketch's view)
+  fin: { from: 0.58, at: 0.8, reach: 18, depth: 5 }, // as fractions of the height, metres
   mast: 46,
   cables: 0,
 };
@@ -136,40 +136,68 @@ export function plates(p = PARAMS) {
       plate: { reach: long / 2 + out_, back: long / 2 - out_, width: short, offset: 0, angle: theta },
     });
   }
-  for (let f = p.pyramid[0][0]; f <= p.pyramid[1][0]; f++) {
+  if (p.pyramid) for (let f = p.pyramid[0][0]; f <= p.pyramid[1][0]; f++) {
     const side = curve(p.pyramid, f);
     out.push({
       name: `pyramid${f}`, floor: f, part: 'pyramid',
       plate: { reach: side / 2, back: side / 2, width: side, angle: rad(f * p.turn) },
     });
   }
-  for (let f = p.sailFrom; f <= p.sailTo; f++) {
-    out.push({
-      name: `sail${f}`, floor: f, part: 'sail',
-      plate: {
-        reach: curve(p.sailLength, f) - p.sailBack, back: p.sailBack, width: p.sailWidth,
-        angle: rad(p.sailTurn0 + (f - p.sailFrom) * p.sailTurn),
-      },
-    });
-  }
   return out;
+}
+
+// Counter-clockwise from above, as the loft wants it.
+function ccw(poly) {
+  let a = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const [x0, , z0] = poly[i], [x1, , z1] = poly[(i + 1) % poly.length];
+    a += x0 * z1 - x1 * z0;
+  }
+  // with x right and z toward the viewer, counter-clockwise from above is a
+  // negative sum here (the core's square, read the same way, is negative)
+  return a > 0 ? [...poly].reverse() : poly;
+}
+
+// The blade. Its vertical edge stands on the rod (x = z = 0). The main face
+// runs out along `sailFacing`, shrinking to nothing at the tip; behind it the
+// blade has a little depth; the fin folds out on the other side of the edge,
+// from part-way up to the tip.
+export function sail(p = PARAMS) {
+  const y0 = p.plaza + p.sailFrom * p.floor, y1 = y0 + p.sailHeight;
+  const a = rad(p.sailFacing);
+  const along = [Math.cos(a), -Math.sin(a)];     // rotY of +x
+  const toward = [Math.sin(a), Math.cos(a)];     // toward the sketch's viewer
+  const pt = (u, w, y) => [along[0] * u - toward[0] * w, y, along[1] * u - toward[1] * w];
+  const tip = 0.4;                               // the tip, a hair wide so the loft closes
+  const blade = loft(
+    ccw([pt(0, 0, y0), pt(p.sailBase, 0, y0), pt(0, p.sailDepth, y0)]),
+    ccw([pt(0, 0, y1), pt(tip, 0, y1), pt(0, tip, y1)]),
+  );
+  const f = p.fin, yf0 = y0 + f.from * p.sailHeight, yf1 = y0 + f.at * p.sailHeight;
+  // the fin's profile at a height: a thin wedge out the other side of the edge
+  const finAt = (reach, depth, y) => ccw([pt(0, 0.3, y), pt(-reach, depth * 0.5, y), pt(0, depth, y)]);
+  const finLow = loft(finAt(0.6, 0.6, yf0), finAt(f.reach, f.depth, yf1));
+  const finHigh = loft(finAt(f.reach, f.depth, yf1), finAt(0.6, 0.6, y1 - 2));
+  return [
+    { name: 'sail', kind: 'sail', part: 'sail', ...blade },
+    { name: 'fin.low', kind: 'sail', part: 'sail', ...finLow },
+    { name: 'fin.high', kind: 'sail', part: 'sail', ...finHigh },
+  ];
 }
 
 export function buildTower(p = PARAMS) {
   const all = plates(p);
   const solids = all.flatMap(({ name, plate, floor, part }) =>
     floorSolids(name, plate, floor, p).map(s => ({ ...s, part })));
-  // the mast stands on the triangle's last plate, on its vertical edge
-  const top = all.filter(x => x.part === 'sail').at(-1);
-  const edge = rotY([-top.plate.back + 1.2, 0, 0], top.plate.angle);
-  const yTop = p.plaza + (top.floor + 1) * p.floor;
-  const mastBase = [edge[0], yTop, edge[2]];
+  solids.push(...sail(p));
+  // the mast carries the blade's vertical edge on up: the model's brass rod
+  const yTop = p.plaza + p.sailFrom * p.floor + p.sailHeight;
   return {
     params: p,
     plates: all,
     solids,
     cables: [],
-    mast: { from: mastBase, to: [edge[0], yTop + p.mast, edge[2]], radius: 0.9 },
+    mast: { from: [0, yTop, 0], to: [0, yTop + p.mast, 0], radius: 0.9 },
     height: yTop + p.mast,
   };
 }

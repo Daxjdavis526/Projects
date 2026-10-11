@@ -47,7 +47,8 @@ controls.maxPolarAngle = Math.PI * 0.497;
 controls.autoRotateSpeed = 0.35;
 
 // The sketch's own viewpoint: standing back on the far shore, eye level.
-const SKETCH_VIEW = { az: 0.62, dist: 660, height: 30 };
+// facing the blade's main face, as the pen sketch does
+const SKETCH_VIEW = { az: PARAMS.sailFacing * Math.PI / 180, dist: 660, height: 30 };
 function setView({ az, dist, height }) {
   // stand further back on a tall narrow screen, so the title has sky to sit in
   dist *= camera.aspect < 1 ? 1.3 : 1;
@@ -286,8 +287,9 @@ function facadeMaterial() {
           // spandrel: the bottom fifth of every floor is opaque
           if (!(roof || soffit)) slab = 1.0 - smoothstep(0.17, 0.17 + fwidth(g.y) * 1.5, fract(g.y));
           // a plate tower's floors are separate solids: the slab is its own
-          // band, so the glass carries mullions only
-          if (!core) slab = 0.0;
+          // band, so their glass carries mullions only (the blade, one solid,
+          // keeps its floor lines: the squares of the sketch)
+          if (!core && vKind < 1.5) slab = 0.0;
           gFrame = clamp(max(mull, slab), 0.0, 1.0);
           // coated glass: a tinted mirror, slightly different pane to pane
           vec3 glass = mix(vec3(0.34, 0.42, 0.5), vec3(0.42, 0.5, 0.56), h);
@@ -340,8 +342,9 @@ function facadeMaterial() {
 
 const towerGeo = towerGeometry(tower);
 const glassMat = facadeMaterial();
-const slabMesh = new THREE.Mesh(towerGeometry(tower, s => s.kind === 'slab'), glassMat);
-const storeyMesh = new THREE.Mesh(towerGeometry(tower, s => s.kind !== 'slab'), glassMat);
+const solidPart = s => s.kind === 'slab' || s.kind === 'sail';
+const slabMesh = new THREE.Mesh(towerGeometry(tower, solidPart), glassMat);
+const storeyMesh = new THREE.Mesh(towerGeometry(tower, s => !solidPart(s)), glassMat);
 for (const m of [slabMesh, storeyMesh]) { m.castShadow = m.receiveShadow = true; real.add(m); }
 
 // "Model": the building as his acrylic study model at full size - the slabs

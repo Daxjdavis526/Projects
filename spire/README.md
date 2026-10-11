@@ -15,9 +15,9 @@ query string can't be passed, `#by-Jane-Doe` does the same.
 ## Where the form comes from
 
 The design came as a pen sketch, a white 3D print and a stacked acrylic study
-model. The **acrylic model is the master**: the tower is built from it plate
-by plate, one plate a floor, and the model's missing top is carried on to
-where it would finish. `src/tower.js` reads it as:
+model. The **acrylic model is the master** for the body, built from it plate
+by plate, one plate a floor; the **pen sketch** decides the top, which the
+model is missing. `src/tower.js` reads them as:
 
 - **the body**: one big, nearly square plate a level, threaded on the rod off
   centre. The plates come in clusters of about six. Within a cluster each
@@ -25,22 +25,25 @@ where it would finish. `src/tower.js` reads it as:
   starts sharply round from the last and leans out the other way. That is the
   model's fanned, tiered, twisting body, narrower at the foot and widest about
   halfway up;
-- **a small stepped pyramid** of squares round the rod where the body ends;
-- **the triangle**: long plates rising above the body, one end of each
-  standing straight over the last beside the rod, the other stepping back on
-  a diagonal. It is the tall triangle of the pen sketch. The acrylic model
-  stops part-way up it (about floor 48); here it carries on to its point at
-  floor 62, so the triangle rises as far again as the body is tall;
-- **the mast**, standing where the model's brass rod comes out of the top.
+- **the blade on top, as the pen sketch draws it.** The acrylic model is
+  missing its top, so the drawing decides it: a tall glazed triangle standing
+  on one vertical edge straight over the rod, its long diagonal running down
+  into the body's top cluster, gridded like the drawing, with a narrow fin
+  folding out the other way high up. It is about 0.8 of the body's height,
+  as drawn, and its foot about a quarter of its height;
+- **the mast** carrying the vertical edge on up, where the model's brass rod
+  comes out of the top.
 
 Built for real, each plate becomes a floor: a pale slab whose edge reads as
-the acrylic plate, with a storey of glass set back beneath it. **Model** shows
-the same plates as frosted acrylic on a brass rod, like his.
+the acrylic plate, with a storey of glass set back beneath it; the blade is one
+glazed form. **Model** shows the plates and the blade as frosted acrylic on a
+brass rod, like his.
 
 The plate sizes, offsets and angles were measured by eye from photographs and
 checked by rendering the model from the same angles as the photos. They are
-close, not exact: there are no drawings with dimensions. The scale (4 m a
-floor, about 300 m to the mast tip) is a plausible guess.
+close, not exact: there are no drawings with dimensions. The blade was
+checked the same way against the sketch. The scale (4 m a floor, about 290 m
+to the mast tip) is a plausible guess.
 
 ## Controls
 
@@ -61,9 +64,9 @@ No build step: static files, three.js r180 vendored under `vendor/`.
 - `src/tower.js`: the form, as plain polyhedra. Imports nothing, so it is
   checked headlessly: `node spire/test/tower.test.mjs` (closed, outward-wound
   solids; every plate a floor with its glass set back under the slab; every
-  plate threaded on the rod; the body turning one way; the triangle standing
-  straight on one edge and stepping in to a point; the finished top rising as
-  far again as the body).
+  plate threaded on the rod; the body turning one way; the blade standing on
+  a vertical edge over the rod with the mast carrying it on; the fin on the
+  far side, high up; the blade in the drawing's proportion to the body).
 - `src/build.js`: turns the polyhedra into flat-shaded geometry, each face
   carrying a "facade" coordinate (along the face, and height) that both the
   glass and the ink shaders draw their grids from.

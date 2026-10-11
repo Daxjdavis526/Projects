@@ -66,21 +66,38 @@ test('the body turns one way, cluster by cluster', () => {
   for (let i = 1; i < body.length; i++) assert.ok(body[i].plate.angle > body[i - 1].plate.angle);
 });
 
-test('the triangle: one edge straight up, the other stepping in to a point', () => {
-  const sail = all.filter(p => p.part === 'sail');
-  for (let i = 1; i < sail.length; i++) {
-    const a = sail[i - 1].plate, b = sail[i].plate;
-    assert.ok(b.reach < a.reach, 'the diagonal edge steps in');
-    assert.equal(b.back, a.back, 'the vertical edge stands straight');
-  }
-  assert.ok(sail.at(-1).plate.reach + sail.at(-1).plate.back < 8, 'it comes to a point');
+test('the blade, as drawn: one vertical edge straight over the rod, carried on by the mast', () => {
+  const blade = t.solids.find(s => s.name === 'sail');
+  const y0 = PARAMS.plaza + PARAMS.sailFrom * PARAMS.floor, y1 = y0 + PARAMS.sailHeight;
+  const on = (y) => blade.verts.some(([x, vy, z]) => Math.hypot(x, z) < 1e-9 && Math.abs(vy - y) < 1e-9);
+  assert.ok(on(y0) && on(y1), 'the vertical edge runs from foot to tip over the rod');
+  assert.deepEqual([t.mast.from[0], t.mast.from[2]], [0, 0]);
+  assert.equal(t.mast.from[1], y1);
+  // its main face is sailBase wide at the foot and comes to a point
+  const foot = blade.verts.filter(v => Math.abs(v[1] - y0) < 1e-9).map(([x, , z]) => Math.hypot(x, z));
+  const tip = blade.verts.filter(v => Math.abs(v[1] - y1) < 1e-9).map(([x, , z]) => Math.hypot(x, z));
+  assert.ok(Math.abs(Math.max(...foot) - PARAMS.sailBase) < 1e-9);
+  assert.ok(Math.max(...tip) < 1);
 });
 
-test('finished above the model: the triangle rises as far again as the body', () => {
+test('the fin folds out the other way, high on the blade', () => {
+  const a = PARAMS.sailFacing * Math.PI / 180, along = [Math.cos(a), -Math.sin(a)];
+  const y0 = PARAMS.plaza + PARAMS.sailFrom * PARAMS.floor;
+  for (const name of ['fin.low', 'fin.high']) {
+    const fin = t.solids.find(s => s.name === name);
+    for (const [x, y, z] of fin.verts) {
+      assert.ok(x * along[0] + z * along[1] <= 1e-9, `${name} reaches the main face's side`);
+      assert.ok(y >= y0 + 0.5 * PARAMS.sailHeight, `${name} starts too low`);
+    }
+  }
+});
+
+test('finished above the model, in the drawing\'s proportions', () => {
   const top = Math.max(...t.solids.flatMap(s => s.verts.map(v => v[1])));
-  const bodyTop = PARAMS.plaza + PARAMS.bodyFloors * PARAMS.floor;
-  assert.ok(top - bodyTop >= bodyTop - PARAMS.plaza, 'the top is no shorter than the body');
-  assert.ok(PARAMS.sailTo > 48 * 1.25, 'carried well past where the acrylic model stops');
+  const foot = PARAMS.plaza + PARAMS.sailFrom * PARAMS.floor;
+  // drawn, the blade is about 0.8 of the body beneath it
+  assert.ok(PARAMS.sailHeight >= 0.75 * (foot - PARAMS.plaza), 'the blade is not cut short');
+  assert.ok(top > PARAMS.plaza + 48 * PARAMS.floor * 1.15, 'carried well past where the acrylic model stops');
   assert.ok(Math.abs(t.mast.from[1] - top) < 1e-9 && t.height === t.mast.to[1]);
 });
 
