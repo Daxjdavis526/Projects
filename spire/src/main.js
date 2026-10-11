@@ -47,7 +47,7 @@ controls.maxPolarAngle = Math.PI * 0.497;
 controls.autoRotateSpeed = 0.35;
 
 // The sketch's own viewpoint: standing back on the far shore, eye level.
-const SKETCH_VIEW = { az: 0.62, dist: 900, height: 30 };
+const SKETCH_VIEW = { az: 0.62, dist: 660, height: 30 };
 function setView({ az, dist, height }) {
   // stand further back on a tall narrow screen, so the title has sky to sit in
   dist *= camera.aspect < 1 ? 1.3 : 1;
@@ -274,7 +274,7 @@ function facadeMaterial() {
       .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
         {
           bool roof = vWN.y > 0.7, soffit = vWN.y < -0.7;
-          bool core = vKind < 0.5, leg = vKind > 2.5;
+          bool core = vKind < 0.5, leg = vKind > 2.5 && vKind < 3.5, slabK = vKind > 3.5;
           float mw = core ? 1.6 : 3.0;            // the core gets tighter vertical fins
           float fl = 4.2;
           vec2 g = vec2(vFacade.x / mw, vFacade.y / fl);
@@ -285,6 +285,9 @@ function facadeMaterial() {
           float slab = (roof || soffit) ? fline(g.y, 0.04) : 1.0 - smoothstep(0.0, 0.2 + fwidth(g.y), fract(g.y) - 0.0) ;
           // spandrel: the bottom fifth of every floor is opaque
           if (!(roof || soffit)) slab = 1.0 - smoothstep(0.17, 0.17 + fwidth(g.y) * 1.5, fract(g.y));
+          // a plate tower's floors are separate solids: the slab is its own
+          // band, so the glass carries mullions only
+          if (!core) slab = 0.0;
           gFrame = clamp(max(mull, slab), 0.0, 1.0);
           // coated glass: a tinted mirror, slightly different pane to pane
           vec3 glass = mix(vec3(0.34, 0.42, 0.5), vec3(0.42, 0.5, 0.56), h);
@@ -304,6 +307,12 @@ function facadeMaterial() {
           if (roof) {
             diffuseColor.rgb = mix(frame * 0.92, frame * 0.7, gFrame);
             metalnessFactor = 0.08; roughnessFactor = 0.62;
+          }
+          // the slabs: the acrylic plates made solid, a pale band at every floor
+          if (slabK) {
+            diffuseColor.rgb = vec3(0.86, 0.85, 0.82);
+            metalnessFactor = 0.05; roughnessFactor = 0.55;
+            gPanel = 0.0;
           }
 
           // after dark: some rooms lit, warm or cool, a few flickering screens
@@ -331,15 +340,31 @@ function facadeMaterial() {
 
 const towerGeo = towerGeometry(tower);
 const glassMat = facadeMaterial();
-// "Model": the same building as a white massing model, the way the 3D print
-// shows it - form only, no glass.
-const clayMat = new THREE.MeshStandardMaterial({ color: 0xf1efe9, roughness: 0.85 });
-const towerMesh = new THREE.Mesh(towerGeo, glassMat);
-towerMesh.castShadow = towerMesh.receiveShadow = true;
-real.add(towerMesh);
+const slabMesh = new THREE.Mesh(towerGeometry(tower, s => s.kind === 'slab'), glassMat);
+const storeyMesh = new THREE.Mesh(towerGeometry(tower, s => s.kind !== 'slab'), glassMat);
+for (const m of [slabMesh, storeyMesh]) { m.castShadow = m.receiveShadow = true; real.add(m); }
+
+// "Model": the building as his acrylic study model at full size - the slabs
+// alone, as frosted clear plates, threaded on a brass rod.
+const acrylicMat = new THREE.MeshPhysicalMaterial({
+  color: 0xf4f8f7, metalness: 0, roughness: 0.42, transmission: 0.55, thickness: 1.3, ior: 1.49,
+  specularIntensity: 1, envMapIntensity: 1.2, attenuationColor: new THREE.Color(0xd8efe9), attenuationDistance: 40,
+});
+const brass = new THREE.MeshStandardMaterial({ color: 0xb08d4a, metalness: 1, roughness: 0.3 });
+const rod = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, tower.mast.from[1], 12), brass);
+rod.position.set(tower.mast.from[0], tower.mast.from[1] / 2, tower.mast.from[2]);
+rod.visible = false;
+real.add(rod);
+function setLook(model) {
+  slabMesh.material = model ? acrylicMat : glassMat;
+  slabMesh.castShadow = !model;
+  storeyMesh.visible = !model;
+  rod.visible = model;
+}
 
 // Mast, cables, anchors.
 const steel = new THREE.MeshStandardMaterial({ color: 0x3a3e44, metalness: 0.9, roughness: 0.35 });
+// the mast is the model's brass rod, carried on above the top
 {
   const m = tower.mast;
   const len = m.to[1] - m.from[1];
@@ -373,7 +398,6 @@ const beacons = [];
     real.add(m); beacons.push(m);
   };
   add(tower.mast.to, 1.4);
-  for (const s of tower.solids) if (s.kind === 'wing' && s.index % 4 === 3) add(s.verts[5], 0.9);
 }
 
 // ---------------------------------------------------- the plinth and park --
@@ -677,7 +701,7 @@ function setMode(m) {
   ui.sketchBtn.classList.toggle('on', m === 'sketch');
   ui.modelBtn.classList.toggle('on', m === 'model');
   ui.builtBtn.classList.toggle('on', m === 'built');
-  towerMesh.material = m === 'model' ? clayMat : glassMat;
+  setLook(m === 'model');
   if (m !== 'sketch') ui.life.classList.add('gone');
 }
 ui.life.addEventListener('click', () => { setMode('built'); orbiting = true; ui.orbit.classList.add('on'); });
@@ -781,8 +805,9 @@ window.__spire = {
     if (o.progress !== undefined) { progress = target = o.progress; }
     if (o.view) setView({ ...SKETCH_VIEW, ...o.view });
     if (o.draw !== undefined) draw = o.draw;
-    if (o.clay !== undefined) towerMesh.material = o.clay ? clayMat : glassMat;
+    if (o.clay !== undefined) setLook(o.clay);
     if (o.pos) { camera.position.set(...o.pos); controls.target.set(...(o.target || FOCUS.toArray())); }
+    if (o.fov) { camera.fov = o.fov; camera.updateProjectionMatrix(); }
   },
   debug: { inkMesh, inkEdges, mirrorGroup },
   ready: true,

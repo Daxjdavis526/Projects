@@ -81,7 +81,10 @@ export function inkFaceMaterial({ mirror = false } = {}) {
         float tone = clamp(0.62 - lam * 0.75, 0.0, 1.0);
         // undersides of the wings are where the sketch is darkest
         tone = max(tone, smoothstep(-0.3, -0.85, n.y) * 0.95);
-        if (vKind > 2.5) tone = max(tone, 0.7);         // the legs, in shadow
+        if (vKind > 2.5 && vKind < 3.5) tone = max(tone, 0.7);   // legs, in shadow
+        // the glass storeys between the plates: hatched lightly, so the
+        // plates themselves carry the drawing
+        if (vKind > 0.5 && vKind < 1.5) tone *= 0.62;
         vec2 p = gl_FragCoord.xy / uDpr;
         float ink = 0.0;
         ink = max(ink, hatch(p, 0.95, 6.0, 1.0) * smoothstep(0.30, 0.42, tone));

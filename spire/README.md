@@ -14,31 +14,33 @@ query string can't be passed, `#by-Jane-Doe` does the same.
 
 ## Where the form comes from
 
-The design came as three things: a pen sketch, a white 3D print and a stacked
-acrylic study model (which is missing its top section, so it is no guide to
-the height). They share one idea, a spiral, and that is what `src/tower.js`
-builds:
+The design came as a pen sketch, a white 3D print and a stacked acrylic study
+model. The **acrylic model is the master**: the tower is built from it plate
+by plate, one plate a floor, and the model's missing top is carried on to
+where it would finish. `src/tower.js` reads it as:
 
-- a **square core** that rises and tapers;
-- **two bands of building winding up round it together**, half a turn apart.
-  Each band climbs a quarter turn at a time: one length runs along a face of
-  the core and on past the corner, and the next length starts where it ended,
-  as high as it ended, on the next face. Seen from any side, the bands are the
-  steep diagonal strips climbing the sketch, with the core in the recess under
-  each one. At the foot they are its two legs. From above they make the
-  pinwheel of the print's top view;
-- a slight extra twist on every quarter turn, so the whole spiral turns as it
-  rises;
-- each band's **last length drawn up into a sail**: its leading edge stands
-  straight up, and its top climbs on the spiral's own diagonal to the tip. The
-  tall one carries the **mast**; the other stops lower beside it;
-- **cables** fanning from the lower turns to anchors on the ground, as in the
-  sketch.
+- **the body**: one big, nearly square plate a level, threaded on the rod off
+  centre. The plates come in clusters of about six. Within a cluster each
+  plate steps a little further out and turns a few degrees; each new cluster
+  starts sharply round from the last and leans out the other way. That is the
+  model's fanned, tiered, twisting body, narrower at the foot and widest about
+  halfway up;
+- **a small stepped pyramid** of squares round the rod where the body ends;
+- **the triangle**: long plates rising above the body, one end of each
+  standing straight over the last beside the rod, the other stepping back on
+  a diagonal. It is the tall triangle of the pen sketch. The acrylic model
+  stops part-way up it (about floor 48); here it carries on to its point at
+  floor 62, so the triangle rises as far again as the body is tall;
+- **the mast**, standing where the model's brass rod comes out of the top.
 
-The numbers are mine, not his. The drawings have no dimensions, so the
-proportions were tuned by eye against the photographs. The scale is a
-plausible guess rather than anything he specified: about 455 m to the mast
-tip, a full turn of each band every 120 m, 4.2 m floors and 3 m mullions.
+Built for real, each plate becomes a floor: a pale slab whose edge reads as
+the acrylic plate, with a storey of glass set back beneath it. **Model** shows
+the same plates as frosted acrylic on a brass rod, like his.
+
+The plate sizes, offsets and angles were measured by eye from photographs and
+checked by rendering the model from the same angles as the photos. They are
+close, not exact: there are no drawings with dimensions. The scale (4 m a
+floor, about 300 m to the mast tip) is a plausible guess.
 
 ## Controls
 
@@ -46,7 +48,7 @@ tip, a full turn of each band every 120 m, 4.2 m floors and 3 m mullions.
 |---|---|
 | drag | turn around the tower |
 | scroll / pinch | approach |
-| **Sketch · Model · Built** | the drawing; a white massing model like the 3D print; the building |
+| **Sketch · Model · Built** | the drawing; the plates as frosted acrylic on a brass rod, like his model; the building |
 | time slider | dawn → midday → golden hour → dusk → night |
 | **Orbit** (O) | a slow turn around the tower |
 | **Save image** | downloads the current view as a PNG |
@@ -58,14 +60,15 @@ No build step: static files, three.js r180 vendored under `vendor/`.
 
 - `src/tower.js`: the form, as plain polyhedra. Imports nothing, so it is
   checked headlessly: `node spire/test/tower.test.mjs` (closed, outward-wound
-  solids; each band rises, turns one way, narrows and is continuous from one
-  length to the next; the bands start together at the ground; cables sag to
-  anchors on the plinth).
+  solids; every plate a floor with its glass set back under the slab; every
+  plate threaded on the rod; the body turning one way; the triangle standing
+  straight on one edge and stepping in to a point; the finished top rising as
+  far again as the body).
 - `src/build.js`: turns the polyhedra into flat-shaded geometry, each face
   carrying a "facade" coordinate (along the face, and height) that both the
   glass and the ink shaders draw their grids from.
-- `src/ink.js`: the drawing. Edges are screen-space ribbons that overshoot
-  their corners the way ruled pen lines do, with an order so the drawing can
+- `src/ink.js`: the drawing. Each plate's outline is a screen-space ribbon
+  that overshoots its corners the way ruled pen lines do, with an order so the drawing can
   be put down from the ground up. Faces carry a lightly ruled glazing grid
   and screen-space hatching that thickens on faces turned from the light. The
   reflection in the water is the same drawing, flipped and broken into dashes.
@@ -93,7 +96,7 @@ the building at several hours, headless.
 - **The water is a mirror with ripples.** Real reflection of the scene,
   with ripples that flatten with distance to avoid aliasing. There are no
   waves and no wake.
-- **The trees, plinth, steps and anchors are invented** to give the tower
-  something to stand on and a sense of size. None of them are in the sketch.
+- **The trees, plinth and steps are invented** to give the tower something to
+  stand on and a sense of size. None of them are in his drawings or models.
 - **The hatching is laid in screen space**, as a hand would hatch it, so it
   stays put while the building turns under it. That is deliberate.

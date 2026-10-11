@@ -1,17 +1,24 @@
 // =============================================================================
 // The tower, as numbers.
 //
-// Read from three things: a pen sketch, a 3D print and an acrylic study model
-// (the acrylic one is missing its top, so its height is not a guide). What
-// they share is a spiral: two continuous bands of building winding up round a
-// square core together, half a turn apart, a quarter turn at a time, each
-// length running along one face of the core and out past the corner, rising
-// all the way. From any side they read as the steep diagonal strips climbing
-// the sketch, with the core glimpsed in the recess under each one; at the
-// foot they are its two legs; from above they are the pinwheel of the print's
-// top view. At the top one band's last length is drawn up into a tall glazed
-// sail, and a mast stands on its leading edge. Cables fan out from the lower
-// turns to anchors on the plinth.
+// The master is the architect's acrylic study model: a stack of clear plates
+// on a brass rod, one plate a floor. Read from it, plate by plate:
+//
+//   - the body: one big, nearly square plate a level, threaded on the rod
+//     off centre. The plates come in clusters of about six: within a cluster
+//     each plate steps a little further out and turns a little, and each new
+//     cluster starts sharply round from the last, leaning out the other way.
+//     That gives the model its fanned, tiered, twisting look;
+//   - the top of the body steps in quickly as a small pyramid of squares
+//     round the rod;
+//   - above it rises a triangle of long plates: one end of each stands
+//     straight over the last, beside the rod, while the other steps back on a
+//     diagonal - the tall triangle of the pen sketch. The acrylic model stops
+//     part-way up it; here it is carried on to its point, and the mast (the
+//     model's brass rod) stands on top.
+//
+// Built for real, each plate becomes a floor: a slab whose edge reads as the
+// plate, with a storey of glass beneath it set back a little.
 //
 // This module imports nothing - no DOM, no three.js - so the form can be
 // checked headlessly (node spire/test/tower.test.mjs). It returns plain
@@ -22,23 +29,48 @@
 
 export const PARAMS = {
   plaza: 1.6,          // top of the stone plinth the tower stands on
-  coreBase: 20,        // half-width of the core at the ground
-  coreTop: 7,          // half-width at the top of the core
-  strands: 2,          // bands winding up together, evenly spaced round the core
-  segments: 10,        // lengths per band, one per face, a quarter turn each
-  rise: 30,            // how far a band climbs along one length (120 m a full turn)
-  band: 46,            // a band's height; with two bands each face gets one every
-                       // 60 m, and the 14 m between is the recess
-  depth: 1.05,         // how far a band stands out from the core, x the core half-width
-  depthAdd: 4,         // ... plus this much
-  turn: Math.PI / 2,   // one face per length
-  twist: 0.03,         // and a slight extra turn each time, so the whole spiral twists
-  sail: 96,            // the sail's tip above the top of the bands
-  mast: 42,            // mast above the sail
-  cables: 6,
+  floor: 4.0,          // one plate, one floor
+  slab: 1.3,           // the slab's share of it (the acrylic plate's thickness)
+  inset: 0.9,          // how far the glass sits back from the slab edge
+  // body: one big, nearly square plate a level, threaded on the rod off
+  // centre. The plates come in clusters: within a cluster each plate steps a
+  // little further out and turns a little; each new cluster starts sharply
+  // round from the last. That is the model's tiered, fanned look.
+  bodyFloors: 31,
+  cluster: 6,          // plates per cluster
+  clusterTurn: 58,     // degrees between one cluster and the next
+  turn: 5,             // degrees each plate turns within a cluster
+  shift: 6,            // the first plate of a cluster sits this far off the rod
+  step: 2.6,           // and each plate after it this much further out
+  bodySide: [[0, 54], [6, 60], [16, 76], [22, 76], [27, 68], [30, 58]],
+  bodyAspect: 1.25,    // long side / short side
+  // the pyramid of squares that caps the body: side by floor
+  pyramid: [[29, 52], [37, 10]],
+  // the triangle: plates from floor 26 up to its point
+  sailFrom: 26,
+  sailTo: 62,
+  sailBack: 9,         // its vertical edge stands this far behind the rod
+  sailWidth: 22,
+  sailTurn: 1,         // degrees each sail plate turns
+  sailTurn0: 200,      // the sail's direction at its foot, degrees
+  // length of a sail plate from its vertical edge, by floor
+  sailLength: [[26, 58], [33, 50], [48, 26], [62, 5]],
+  mast: 46,
+  cables: 0,
 };
 
 const lerp = (a, b, t) => a + (b - a) * t;
+const rad = d => d * Math.PI / 180;
+
+// Piecewise-linear lookup in a [[x, y], ...] table.
+export function curve(table, x) {
+  if (x <= table[0][0]) return table[0][1];
+  for (let i = 1; i < table.length; i++) {
+    const [x1, y1] = table[i];
+    if (x <= x1) { const [x0, y0] = table[i - 1]; return lerp(y0, y1, (x - x0) / (x1 - x0)); }
+  }
+  return table[table.length - 1][1];
+}
 
 function rotY([x, y, z], a) {
   const c = Math.cos(a), s = Math.sin(a);
@@ -62,110 +94,83 @@ export function loft(bottom, top) {
   return { verts, faces };
 }
 
-// Top of the band (and of the core inside it), before the sail.
-export function bandTopY(p = PARAMS) {
-  return p.plaza + (p.segments - 1) * p.rise + p.band;
+// A plate's outline: a rectangle running along direction `angle` from `-back`
+// to `reach` past the rod, `width` across, shifted sideways by `offset`.
+// Counter-clockwise from above, in the order the loft expects.
+export function plateOutline({ reach, back, width, offset = 0, angle }) {
+  const h = width / 2;
+  return [[reach, offset + h], [reach, offset - h], [-back, offset - h], [-back, offset + h]]
+    .map(([x, z]) => rotY([x, 0, z], angle));
 }
 
-export function coreTopY(p = PARAMS) {
-  return bandTopY(p) - p.band * 0.35;
+function shrink(pl, d) {
+  return { ...pl, reach: pl.reach - d, back: pl.back - d, width: pl.width - 2 * d };
 }
 
-export function coreHalf(y, p = PARAMS) {
-  return lerp(p.coreBase, p.coreTop, Math.min(1, Math.max(0, y / coreTopY(p))));
+// One plate as a floor: glass storey below, slab on top.
+function floorSolids(name, plate, f, p) {
+  // the glass starts a hair above the slab below, so no two faces share a plane
+  const base = p.plaza + f * p.floor, y2 = base + p.floor;
+  const y0 = base + 0.05, y1 = y2 - p.slab - 0.05;
+  const at = (outline, y) => outline.map(([x, , z]) => [x, y, z]);
+  const glass = plateOutline(shrink(plate, p.inset));
+  const slab = plateOutline(plate);
+  return [
+    { name: `${name}.glass`, kind: 'glass', floor: f, ...loft(at(glass, y0), at(glass, y1)) },
+    { name: `${name}.slab`, kind: 'slab', floor: f, plate, ...loft(at(slab, y2 - p.slab), at(slab, y2)) },
+  ];
 }
 
-// The square core, from the plinth up inside the last turn.
-function core(p) {
-  const y0 = p.plaza, y1 = coreTopY(p);
-  const sq = (h, y) => [[h, y, h], [h, y, -h], [-h, y, -h], [-h, y, h]];
-  return { name: 'core', kind: 'core', ...loft(sq(coreHalf(y0, p), y0), sq(coreHalf(y1, p), y1)) };
-}
-
-// One length of the spiral band. Built in a local frame where it runs along
-// the core face x = +h, travelling toward -z: it starts just behind the corner
-// it shares with the length below and runs on past the next corner, out to
-// the band's outer face, so each length owns the corner it turns at - the
-// print's pinwheel. Its underside and top climb steadily along the run, so
-// where one length ends the next begins at the same height.
-export function segmentPlan(j, p = PARAMS, strand = 0) {
-  const yb = p.plaza + j * p.rise;
-  const h = coreHalf(yb + p.band / 2, p);
-  const d = h * p.depth + p.depthAdd;
-  const xi = h * 0.85, xo = h + d;          // inner edge buried in the core
-  const zt = h + 1.5, zl = -(h + d);        // trailing end, leading end
-  const angle = j * (p.turn + p.twist) + strand * 2 * Math.PI / p.strands;
-  return { yb, h, d, xi, xo, zt, zl, angle };
-}
-
-export function segment(j, p = PARAMS, strand = 0) {
-  const { yb, xi, xo, zt, zl, angle } = segmentPlan(j, p, strand);
-  const y = z => yb + p.rise * (zt - z) / (zt - zl);
-  // counter-clockwise from above: outer-trailing, outer-leading (the tip),
-  // inner-leading, inner-trailing - the same order as the core's square
-  const plan = [[xo, zt], [xo, zl], [xi, zl], [xi, zt]];
-  const bottom = plan.map(([x, z]) => rotY([x, y(z), z], angle));
-  const top = plan.map(([x, z]) => rotY([x, y(z) + p.band, z], angle));
-  return { name: `band${strand}.${j}`, kind: 'wing', strand, index: j, angle, ...loft(bottom, top) };
-}
-
-// A band's last length, drawn up into a sail: its trailing end keeps the
-// band's height, its leading end stands straight up to the tip, so its top is
-// one long edge climbing on the spiral's own diagonal - the sketch's triangle.
-// The first band ends in the tall sail that carries the mast; the second in a
-// lower one beside it.
-function sail(p, strand, height) {
-  const j = p.segments - 1;
-  const { yb, xi, xo, zt, zl, angle } = segmentPlan(j, p, strand);
-  const y = z => yb + p.rise * (zt - z) / (zt - zl);
-  const tipY = bandTopY(p) + height;
-  const plan = [[xo, zt], [xo, zl], [xi, zl], [xi, zt]];
-  const bottom = plan.map(([x, z]) => rotY([x, y(z), z], angle));
-  const top = [
-    [xo, y(zt) + p.band, zt],
-    [xo, tipY, zl],
-    [xo - 2.6, tipY, zl],          // pinched to a short edge at the tip
-    [xi, y(zt) + p.band, zt],
-  ].map(v => rotY(v, angle));
-  return {
-    name: `sail${strand}`, kind: 'sail', strand, index: j, angle,
-    ...loft(bottom, top),
-    tip: rotY([xo - 1.3, tipY, zl], angle),
-  };
-}
-
-// Stays: from the band tips of the first full turn down to anchors on the
-// plinth, sagging a little under their own weight.
-function cables(p, segs) {
+// Every plate in the tower, as { name, floor, part, plate }.
+export function plates(p = PARAMS) {
   const out = [];
-  const lower = segs.filter(s => s.index >= 2 && s.index <= 4);
-  for (let k = 0; k < p.cables; k++) {
-    const w = lower[k % lower.length];
-    const tip = w.verts[5]; // top polygon, tip vertex
-    const a = Math.atan2(tip[2], tip[0]) + 0.25;
-    const r = 80 + 6 * (k % 2);
-    out.push({ from: [tip[0], tip[1] - 2, tip[2]], to: [Math.cos(a) * r, p.plaza, Math.sin(a) * r], sag: 0.025 });
+  for (let f = 0; f < p.bodyFloors; f++) {
+    const side = curve(p.bodySide, f), long = side * Math.sqrt(p.bodyAspect), short = side / Math.sqrt(p.bodyAspect);
+    const g = Math.floor(f / p.cluster), j = f % p.cluster;
+    const theta = rad(g * p.clusterTurn + j * p.turn);
+    // each cluster pushes out along its plates' long direction, alternating
+    // ends, so successive tiers lean out to opposite sides
+    const out_ = (p.shift + j * p.step) * (g % 2 ? -1 : 1);
+    out.push({
+      name: `body${f}`, floor: f, part: 'body',
+      plate: { reach: long / 2 + out_, back: long / 2 - out_, width: short, offset: 0, angle: theta },
+    });
+  }
+  for (let f = p.pyramid[0][0]; f <= p.pyramid[1][0]; f++) {
+    const side = curve(p.pyramid, f);
+    out.push({
+      name: `pyramid${f}`, floor: f, part: 'pyramid',
+      plate: { reach: side / 2, back: side / 2, width: side, angle: rad(f * p.turn) },
+    });
+  }
+  for (let f = p.sailFrom; f <= p.sailTo; f++) {
+    out.push({
+      name: `sail${f}`, floor: f, part: 'sail',
+      plate: {
+        reach: curve(p.sailLength, f) - p.sailBack, back: p.sailBack, width: p.sailWidth,
+        angle: rad(p.sailTurn0 + (f - p.sailFrom) * p.sailTurn),
+      },
+    });
   }
   return out;
 }
 
 export function buildTower(p = PARAMS) {
-  // every band's last length becomes a sail
-  const segs = [];
-  for (let k = 0; k < p.strands; k++) {
-    for (let j = 0; j < p.segments - 1; j++) segs.push(segment(j, p, k));
-  }
-  const sails = [...Array(p.strands).keys()].map(k => sail(p, k, k === 0 ? p.sail : p.sail * 0.32));
-  const s = sails[0];
-  const solids = [core(p), ...segs, ...sails];
-  const mastBase = s.tip;
-  const mastTop = [mastBase[0], mastBase[1] + p.mast, mastBase[2]];
+  const all = plates(p);
+  const solids = all.flatMap(({ name, plate, floor, part }) =>
+    floorSolids(name, plate, floor, p).map(s => ({ ...s, part })));
+  // the mast stands on the triangle's last plate, on its vertical edge
+  const top = all.filter(x => x.part === 'sail').at(-1);
+  const edge = rotY([-top.plate.back + 1.2, 0, 0], top.plate.angle);
+  const yTop = p.plaza + (top.floor + 1) * p.floor;
+  const mastBase = [edge[0], yTop, edge[2]];
   return {
     params: p,
+    plates: all,
     solids,
-    cables: cables(p, segs),
-    mast: { from: mastBase, to: mastTop, radius: 0.9 },
-    height: mastTop[1],
+    cables: [],
+    mast: { from: mastBase, to: [edge[0], yTop + p.mast, edge[2]], radius: 0.9 },
+    height: yTop + p.mast,
   };
 }
 

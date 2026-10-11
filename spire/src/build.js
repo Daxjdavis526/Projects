@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { faceNormal, cablePoint } from './tower.js';
 
-const KIND = { core: 0, wing: 1, sail: 2, leg: 3 };
+const KIND = { core: 0, wing: 1, sail: 2, leg: 3, glass: 1, slab: 4 };
 
 // Simple deterministic hash so a rebuild draws the same building.
 export function hash(n) {
@@ -54,8 +54,8 @@ export function solidGeometry(solid, solidIndex) {
   return g;
 }
 
-export function towerGeometry(tower) {
-  const parts = tower.solids.map((s, i) => solidGeometry(s, i));
+export function towerGeometry(tower, keep = () => true) {
+  const parts = tower.solids.map((s, i) => keep(s) ? solidGeometry(s, i) : null).filter(Boolean);
   return mergeNonIndexed(parts);
 }
 
@@ -73,16 +73,22 @@ function mergeNonIndexed(list) {
   return out;
 }
 
-// The architectural edges: every polygon edge of every solid, once each.
-// Returned as [a, b] pairs, ordered from the ground up - the order a hand
-// would draw them in.
+// The edges a hand would draw: every plate's outline, top and bottom, once
+// each (the glass behind is left to the hatching), ordered from the ground
+// up - the order a hand would draw them in.
 export function towerEdges(tower) {
   const segs = [];
   for (const s of tower.solids) {
+    if (s.kind === 'glass') continue;
     const seen = new Set();
     for (const f of s.faces) {
       for (let i = 0; i < f.length; i++) {
         const a = f[i], b = f[(i + 1) % f.length];
+        // plate outlines only: the top edge of each slab, nothing else
+        if (s.kind === 'slab') {
+          const top = Math.max(...s.verts.map(v => v[1]));
+          if (s.verts[a][1] < top - 1e-6 || s.verts[b][1] < top - 1e-6) continue;
+        }
         const k = a < b ? `${a},${b}` : `${b},${a}`;
         if (seen.has(k)) continue;
         seen.add(k);
