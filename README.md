@@ -17,9 +17,9 @@ and how it works.
 
 **SPIRE**: a tower from an architect's sketchbook. It opens as an ink drawing
 that puts itself down stroke by stroke, then washes into the built tower:
-glass on a stone plinth in a calm bay, from dawn to night. Its twisting body is
-built plate by plate from his acrylic study model; its top, the tall glazed
-blade and mast, follows his pen sketch.
+glass on a stone plinth in a calm bay, from dawn to night. It is built plate
+by plate from his acrylic study model: clusters of floor plates twisting up,
+growing smaller toward a short steeple and mast.
 
 Live: https://daxjdavis526.github.io/Projects/spire/
 

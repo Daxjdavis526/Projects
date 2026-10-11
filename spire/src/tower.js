@@ -4,17 +4,15 @@
 // The master is the architect's acrylic study model: a stack of clear plates
 // on a brass rod, one plate a floor. Read from it, plate by plate:
 //
-//   - the body: one big, nearly square plate a level, threaded on the rod
-//     off centre. The plates come in clusters of about six: within a cluster
-//     each plate steps a little further out and turns a little, and each new
-//     cluster starts sharply round from the last, leaning out the other way.
-//     That gives the model its fanned, tiered, twisting look;
-//   - above it, the blade the pen sketch ends in (the acrylic model is
-//     missing its top, so the drawing decides it): a tall glazed triangle
-//     standing on one vertical edge straight over the rod, its long diagonal
-//     running down to the corner of the body, with a narrow fin folding out
-//     the other way near the top. The mast - the model's brass rod - carries
-//     the vertical edge on up.
+//   - one big, nearly square plate a level, threaded on the rod off centre.
+//     The plates come in clusters of about six: within a cluster each plate
+//     steps a little further out and turns a little, and each new cluster
+//     starts sharply round from the last, leaning out the other way. That
+//     gives the model its fanned, tiered, twisting look;
+//   - the model is missing its top, so above where it stops the clusters
+//     simply carry on, smaller and shorter in proportion, until the last
+//     plate carries a short steeple, and the mast - the model's brass rod -
+//     stands on that.
 //
 // Built for real, each plate becomes a floor: a slab whose edge reads as the
 // plate, with a storey of glass beneath it set back a little.
@@ -31,31 +29,25 @@ export const PARAMS = {
   floor: 4.0,          // one plate, one floor
   slab: 1.3,           // the slab's share of it (the acrylic plate's thickness)
   inset: 0.9,          // how far the glass sits back from the slab edge
-  // body: one big, nearly square plate a level, threaded on the rod off
-  // centre. The plates come in clusters: within a cluster each plate steps a
-  // little further out and turns a little; each new cluster starts sharply
-  // round from the last. That is the model's tiered, fanned look.
-  bodyFloors: 31,
-  cluster: 6,          // plates per cluster
+  // one big, nearly square plate a level, threaded on the rod off centre.
+  // The plates come in clusters: within a cluster each plate steps a little
+  // further out and turns a little; each new cluster starts sharply round
+  // from the last and leans out the other way. That is the model's tiered,
+  // fanned look. Above where the model stops, the clusters carry on, smaller
+  // and shorter in proportion, up to a short steeple.
+  clusters: [6, 6, 6, 6, 6, 6, 5, 5, 5, 4, 4], // plates in each cluster, bottom up
   clusterTurn: 58,     // degrees between one cluster and the next
   turn: 5,             // degrees each plate turns within a cluster
   shift: 6,            // the first plate of a cluster sits this far off the rod
   step: 2.6,           // and each plate after it this much further out
-  bodySide: [[0, 54], [6, 60], [16, 76], [22, 76], [27, 68], [30, 58]],
+  // (both at full size; they shrink with the plates)
+  fullSide: 66,
+  bodySide: [[0, 54], [6, 60], [16, 76], [22, 76], [27, 68], [30, 58],
+             [36, 48], [41, 40], [46, 33], [51, 26], [55, 21], [58, 17]],
   bodyAspect: 1.25,    // long side / short side
-  // the pyramid of squares that caps the body: side by floor
-  pyramid: null,       // the model's little stepped cap; the drawing's blade replaces it
-  // the blade on top, as the pen sketch draws it: a tall glazed triangle
-  // standing on one vertical edge straight over the rod, its long diagonal
-  // running down to the corner of the body, with a narrow fin folding out
-  // the other way near the top
-  sailFrom: 24,        // the floor its foot stands on, down in the body's top cluster
-  sailHeight: 150,     // foot to tip (about 0.8 of the body, as drawn)
-  sailBase: 42,        // the main face's width at its foot: a quarter of its height
-  sailDepth: 10,       // the blade's thickness at its foot
-  sailFacing: 35.5,    // the main face's direction, degrees (the sketch's view)
-  fin: { from: 0.58, at: 0.8, reach: 18, depth: 5 }, // as fractions of the height, metres
-  mast: 46,
+  steeple: 44,         // the short steeple on the last plate
+  steepleBase: 0.85,   // its base, as a fraction of the last plate's short side
+  mast: 30,
   cables: 0,
 };
 
@@ -124,80 +116,51 @@ function floorSolids(name, plate, f, p) {
 // Every plate in the tower, as { name, floor, part, plate }.
 export function plates(p = PARAMS) {
   const out = [];
-  for (let f = 0; f < p.bodyFloors; f++) {
-    const side = curve(p.bodySide, f), long = side * Math.sqrt(p.bodyAspect), short = side / Math.sqrt(p.bodyAspect);
-    const g = Math.floor(f / p.cluster), j = f % p.cluster;
-    const theta = rad(g * p.clusterTurn + j * p.turn);
-    // each cluster pushes out along its plates' long direction, alternating
-    // ends, so successive tiers lean out to opposite sides
-    const out_ = (p.shift + j * p.step) * (g % 2 ? -1 : 1);
-    out.push({
-      name: `body${f}`, floor: f, part: 'body',
-      plate: { reach: long / 2 + out_, back: long / 2 - out_, width: short, offset: 0, angle: theta },
-    });
-  }
-  if (p.pyramid) for (let f = p.pyramid[0][0]; f <= p.pyramid[1][0]; f++) {
-    const side = curve(p.pyramid, f);
-    out.push({
-      name: `pyramid${f}`, floor: f, part: 'pyramid',
-      plate: { reach: side / 2, back: side / 2, width: side, angle: rad(f * p.turn) },
-    });
-  }
+  let f = 0;
+  p.clusters.forEach((n, g) => {
+    for (let j = 0; j < n; j++, f++) {
+      const side = curve(p.bodySide, f), long = side * Math.sqrt(p.bodyAspect), short = side / Math.sqrt(p.bodyAspect);
+      const theta = rad(g * p.clusterTurn + j * p.turn);
+      // each cluster pushes out along its plates' long direction, alternating
+      // ends, so successive tiers lean out to opposite sides; how far scales
+      // with the plates, so the small clusters up top keep the same rhythm
+      const scale = side / p.fullSide;
+      const out_ = (p.shift + j * p.step) * scale * (g % 2 ? -1 : 1);
+      out.push({
+        name: `body${f}`, floor: f, part: 'body', cluster: g,
+        plate: { reach: long / 2 + out_, back: long / 2 - out_, width: short, offset: 0, angle: theta },
+      });
+    }
+  });
   return out;
 }
 
-// Counter-clockwise from above, as the loft wants it.
-function ccw(poly) {
-  let a = 0;
-  for (let i = 0; i < poly.length; i++) {
-    const [x0, , z0] = poly[i], [x1, , z1] = poly[(i + 1) % poly.length];
-    a += x0 * z1 - x1 * z0;
-  }
-  // with x right and z toward the viewer, counter-clockwise from above is a
-  // negative sum here (the core's square, read the same way, is negative)
-  return a > 0 ? [...poly].reverse() : poly;
+export function floorCount(p = PARAMS) {
+  return p.clusters.reduce((a, b) => a + b, 0);
 }
 
-// The blade. Its vertical edge stands on the rod (x = z = 0). The main face
-// runs out along `sailFacing`, shrinking to nothing at the tip; behind it the
-// blade has a little depth; the fin folds out on the other side of the edge,
-// from part-way up to the tip.
-export function sail(p = PARAMS) {
-  const y0 = p.plaza + p.sailFrom * p.floor, y1 = y0 + p.sailHeight;
-  const a = rad(p.sailFacing);
-  const along = [Math.cos(a), -Math.sin(a)];     // rotY of +x
-  const toward = [Math.sin(a), Math.cos(a)];     // toward the sketch's viewer
-  const pt = (u, w, y) => [along[0] * u - toward[0] * w, y, along[1] * u - toward[1] * w];
-  const tip = 0.4;                               // the tip, a hair wide so the loft closes
-  const blade = loft(
-    ccw([pt(0, 0, y0), pt(p.sailBase, 0, y0), pt(0, p.sailDepth, y0)]),
-    ccw([pt(0, 0, y1), pt(tip, 0, y1), pt(0, tip, y1)]),
-  );
-  const f = p.fin, yf0 = y0 + f.from * p.sailHeight, yf1 = y0 + f.at * p.sailHeight;
-  // the fin's profile at a height: a thin wedge out the other side of the edge
-  const finAt = (reach, depth, y) => ccw([pt(0, 0.3, y), pt(-reach, depth * 0.5, y), pt(0, depth, y)]);
-  const finLow = loft(finAt(0.6, 0.6, yf0), finAt(f.reach, f.depth, yf1));
-  const finHigh = loft(finAt(f.reach, f.depth, yf1), finAt(0.6, 0.6, y1 - 2));
-  return [
-    { name: 'sail', kind: 'sail', part: 'sail', ...blade },
-    { name: 'fin.low', kind: 'sail', part: 'sail', ...finLow },
-    { name: 'fin.high', kind: 'sail', part: 'sail', ...finHigh },
-  ];
+// The steeple: a slender square pyramid on the rod, standing on the last
+// plate and turned with it.
+export function steeple(p = PARAMS, last) {
+  const y0 = p.plaza + floorCount(p) * p.floor, y1 = y0 + p.steeple;
+  const h = last.plate.width * p.steepleBase / 2, tip = 0.4;
+  const sq = (r, y) => [[r, y, r], [r, y, -r], [-r, y, -r], [-r, y, r]].map(v => rotY(v, last.plate.angle));
+  return { name: 'steeple', kind: 'sail', part: 'steeple', ...loft(sq(h, y0), sq(tip, y1)) };
 }
 
 export function buildTower(p = PARAMS) {
   const all = plates(p);
   const solids = all.flatMap(({ name, plate, floor, part }) =>
     floorSolids(name, plate, floor, p).map(s => ({ ...s, part })));
-  solids.push(...sail(p));
-  // the mast carries the blade's vertical edge on up: the model's brass rod
-  const yTop = p.plaza + p.sailFrom * p.floor + p.sailHeight;
+  solids.push(steeple(p, all.at(-1)));
+  // the mast stands on the steeple: the model's brass rod, carried on up
+  const yTop = p.plaza + floorCount(p) * p.floor + p.steeple;
   return {
     params: p,
     plates: all,
     solids,
     cables: [],
-    mast: { from: [0, yTop, 0], to: [0, yTop + p.mast, 0], radius: 0.9 },
+    mast: { from: [0, yTop, 0], to: [0, yTop + p.mast, 0], radius: 0.8 },
     height: yTop + p.mast,
   };
 }

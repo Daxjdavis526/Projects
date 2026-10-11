@@ -1,6 +1,6 @@
 // Headless checks on the tower's form: node spire/test/tower.test.mjs
 import assert from 'node:assert/strict';
-import { buildTower, plates, plateOutline, volume, isClosed, faceNormal, PARAMS } from '../src/tower.js';
+import { buildTower, plates, plateOutline, floorCount, volume, isClosed, faceNormal, PARAMS } from '../src/tower.js';
 
 let n = 0;
 const test = (name, fn) => { fn(); n++; console.log('ok', name); };
@@ -53,52 +53,38 @@ test('every plate is a floor: glass set back under a slab', () => {
 });
 
 test('every plate is threaded on the rod, as in the model', () => {
-  const [mx, , mz] = t.mast.from;
-  for (const { name, part, plate } of all) {
-    const [x, z] = part === 'sail' ? [mx, mz] : [0, 0];
-    assert.ok(inside(plateOutline(plate), x, z), `${name} misses the rod`);
-  }
+  for (const { name, plate } of all) assert.ok(inside(plateOutline(plate), 0, 0), `${name} misses the rod`);
 });
 
-test('the body turns one way, cluster by cluster', () => {
-  const body = all.filter(p => p.part === 'body');
-  assert.equal(body.length, PARAMS.bodyFloors);
-  for (let i = 1; i < body.length; i++) assert.ok(body[i].plate.angle > body[i - 1].plate.angle);
+test('the clusters turn one way, all the way up', () => {
+  assert.equal(all.length, floorCount());
+  for (let i = 1; i < all.length; i++) assert.ok(all[i].plate.angle > all[i - 1].plate.angle);
 });
 
-test('the blade, as drawn: one vertical edge straight over the rod, carried on by the mast', () => {
-  const blade = t.solids.find(s => s.name === 'sail');
-  const y0 = PARAMS.plaza + PARAMS.sailFrom * PARAMS.floor, y1 = y0 + PARAMS.sailHeight;
-  const on = (y) => blade.verts.some(([x, vy, z]) => Math.hypot(x, z) < 1e-9 && Math.abs(vy - y) < 1e-9);
-  assert.ok(on(y0) && on(y1), 'the vertical edge runs from foot to tip over the rod');
-  assert.deepEqual([t.mast.from[0], t.mast.from[2]], [0, 0]);
-  assert.equal(t.mast.from[1], y1);
-  // its main face is sailBase wide at the foot and comes to a point
-  const foot = blade.verts.filter(v => Math.abs(v[1] - y0) < 1e-9).map(([x, , z]) => Math.hypot(x, z));
-  const tip = blade.verts.filter(v => Math.abs(v[1] - y1) < 1e-9).map(([x, , z]) => Math.hypot(x, z));
-  assert.ok(Math.abs(Math.max(...foot) - PARAMS.sailBase) < 1e-9);
-  assert.ok(Math.max(...tip) < 1);
+test('above the model the clusters carry on, each smaller than the last', () => {
+  const area = ({ plate }) => (plate.reach + plate.back) * plate.width;
+  const byCluster = PARAMS.clusters.map((_, g) => all.filter(p => p.cluster === g));
+  const mean = c => c.reduce((a, p) => a + area(p), 0) / c.length;
+  // from the widest cluster up, every cluster is smaller in plan than the one below
+  const widest = byCluster.map(mean).indexOf(Math.max(...byCluster.map(mean)));
+  for (let g = widest + 1; g < byCluster.length; g++) assert.ok(mean(byCluster[g]) < mean(byCluster[g - 1]), `cluster ${g} is not smaller`);
+  // and no taller: clusters shorten as they shrink
+  for (let g = 1; g < PARAMS.clusters.length; g++) assert.ok(PARAMS.clusters[g] <= PARAMS.clusters[g - 1]);
+  assert.ok(floorCount() > 48 * 1.15, 'carried well past where the acrylic model stops');
 });
 
-test('the fin folds out the other way, high on the blade', () => {
-  const a = PARAMS.sailFacing * Math.PI / 180, along = [Math.cos(a), -Math.sin(a)];
-  const y0 = PARAMS.plaza + PARAMS.sailFrom * PARAMS.floor;
-  for (const name of ['fin.low', 'fin.high']) {
-    const fin = t.solids.find(s => s.name === name);
-    for (const [x, y, z] of fin.verts) {
-      assert.ok(x * along[0] + z * along[1] <= 1e-9, `${name} reaches the main face's side`);
-      assert.ok(y >= y0 + 0.5 * PARAMS.sailHeight, `${name} starts too low`);
-    }
-  }
-});
-
-test('finished above the model, in the drawing\'s proportions', () => {
+test('a short steeple on the last plate, centred on the rod, the mast on top', () => {
+  const st = t.solids.find(s => s.name === 'steeple');
+  const y0 = PARAMS.plaza + floorCount() * PARAMS.floor;
+  const base = st.verts.filter(v => Math.abs(v[1] - y0) < 1e-9);
+  assert.equal(base.length, 4, 'it stands on the last slab');
+  const cx = base.reduce((a, v) => a + v[0], 0) / 4, cz = base.reduce((a, v) => a + v[2], 0) / 4;
+  assert.ok(Math.hypot(cx, cz) < 1e-9, 'centred on the rod');
   const top = Math.max(...t.solids.flatMap(s => s.verts.map(v => v[1])));
-  const foot = PARAMS.plaza + PARAMS.sailFrom * PARAMS.floor;
-  // drawn, the blade is about 0.8 of the body beneath it
-  assert.ok(PARAMS.sailHeight >= 0.75 * (foot - PARAMS.plaza), 'the blade is not cut short');
-  assert.ok(top > PARAMS.plaza + 48 * PARAMS.floor * 1.15, 'carried well past where the acrylic model stops');
-  assert.ok(Math.abs(t.mast.from[1] - top) < 1e-9 && t.height === t.mast.to[1]);
+  assert.ok(top - y0 < 0.2 * (y0 - PARAMS.plaza), 'short: a steeple, not a second tower');
+  assert.ok(inside(plateOutline(all.at(-1).plate), ...base.slice(0, 1).map(v => [v[0], v[2]])[0]), 'it sits within the last plate');
+  assert.deepEqual([t.mast.from[0], t.mast.from[1], t.mast.from[2]], [0, top, 0]);
+  assert.equal(t.height, t.mast.to[1]);
 });
 
 test('the form is deterministic', () => {
