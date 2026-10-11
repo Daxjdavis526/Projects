@@ -286,7 +286,6 @@ function facadeMaterial() {
           // spandrel: the bottom fifth of every floor is opaque
           if (!(roof || soffit)) slab = 1.0 - smoothstep(0.17, 0.17 + fwidth(g.y) * 1.5, fract(g.y));
           gFrame = clamp(max(mull, slab), 0.0, 1.0);
-          // each pane a slightly different tint, as real glass batches are
           // coated glass: a tinted mirror, slightly different pane to pane
           vec3 glass = mix(vec3(0.34, 0.42, 0.5), vec3(0.42, 0.5, 0.56), h);
           if (core) glass *= vec3(0.62, 0.66, 0.7);
@@ -300,6 +299,12 @@ function facadeMaterial() {
           if (soffit) roughnessFactor = 0.6;
           metalnessFactor = mix(0.72, 0.35, gFrame);
           gPanel = (1.0 - gFrame) * ((roof || soffit || leg) ? 0.0 : 1.0);
+          // the bands' sloping tops are clad in the frames' pale metal, so
+          // the spiral reads as ribbons winding up the glass
+          if (roof) {
+            diffuseColor.rgb = mix(frame * 0.92, frame * 0.7, gFrame);
+            metalnessFactor = 0.08; roughnessFactor = 0.62;
+          }
 
           // after dark: some rooms lit, warm or cool, a few flickering screens
           float lit = step(0.42, fh(gCell + 3.1)) * uNight * uNight;
@@ -368,7 +373,7 @@ const beacons = [];
     real.add(m); beacons.push(m);
   };
   add(tower.mast.to, 1.4);
-  for (const s of tower.solids) if (s.kind === 'wing') add(s.verts[5], 0.9);
+  for (const s of tower.solids) if (s.kind === 'wing' && s.index % 4 === 3) add(s.verts[5], 0.9);
 }
 
 // ---------------------------------------------------- the plinth and park --

@@ -29,40 +29,49 @@ test('nothing goes below the plinth', () => {
   for (const s of t.solids) for (const v of s.verts) assert.ok(v[1] >= PARAMS.plaza - 1e-9, `${s.name} dips to ${v[1]}`);
 });
 
-test('the wings climb, turn and shrink', () => {
-  const wings = t.solids.filter(s => s.kind === 'wing');
-  assert.equal(wings.length, PARAMS.wings);
-  for (let i = 1; i < wings.length; i++) {
-    const lo = Math.min(...wings[i].verts.map(v => v[1])), prev = Math.min(...wings[i - 1].verts.map(v => v[1]));
-    assert.ok(lo > prev, 'wings rise');
-    assert.ok(wings[i].angle > wings[i - 1].angle, 'wings turn one way');
-    assert.ok(volume(wings[i]) < volume(wings[i - 1]), 'wings get smaller going up');
+test('each band climbs, turns one way and narrows', () => {
+  for (let k = 0; k < PARAMS.strands; k++) {
+    const band = t.solids.filter(s => s.strand === k).sort((a, b) => a.index - b.index);
+    assert.equal(band.length, PARAMS.segments);
+    for (let i = 1; i < band.length; i++) {
+      const lo = Math.min(...band[i].verts.map(v => v[1])), prev = Math.min(...band[i - 1].verts.map(v => v[1]));
+      assert.ok(lo > prev, 'bands rise');
+      assert.ok(band[i].angle > band[i - 1].angle, 'bands turn one way');
+    }
+    assert.ok(volume(band[1]) < volume(band[0]) && volume(band[PARAMS.segments - 2]) < volume(band[1]), 'bands narrow going up');
   }
 });
 
-test('each wing wraps the core, so it hangs from it', () => {
-  // the tower's axis passes through every wing's plan, top and bottom
-  const contains = (poly) => {
-    let sign = 0;
-    for (let i = 0; i < poly.length; i++) {
-      const [ax, , az] = poly[i], [bx, , bz] = poly[(i + 1) % poly.length];
-      const c = (bx - ax) * (0 - az) - (bz - az) * (0 - ax);
-      if (sign === 0) sign = Math.sign(c); else if (Math.sign(c) !== sign) return false;
+test('each band is continuous: a length starts as high as the last one ended', () => {
+  for (let k = 0; k < PARAMS.strands; k++) {
+    const band = t.solids.filter(s => s.kind === 'wing' && s.strand === k).sort((a, b) => a.index - b.index);
+    for (let i = 1; i < band.length; i++) {
+      const end = Math.max(...band[i - 1].verts.slice(0, 4).map(v => v[1]));
+      const start = Math.min(...band[i].verts.slice(0, 4).map(v => v[1]));
+      assert.ok(Math.abs(end - start) < 1e-9, `${band[i].name} starts at ${start}, last ended at ${end}`);
+      // and it starts where the last one turned the corner: the previous
+      // length's tip and this length's outer trailing corner are close
+      const tip = band[i - 1].verts[1], tail = band[i].verts[0];
+      assert.ok(Math.hypot(tip[0] - tail[0], tip[2] - tail[2]) < 25, `${band[i].name} is not next to the last length`);
     }
-    return true;
-  };
-  for (const w of t.solids.filter(s => s.kind === 'wing')) {
-    assert.ok(contains(w.verts.slice(0, 4)) && contains(w.verts.slice(4)), `${w.name} floats free of the core`);
   }
+});
+
+test('the bands start together at the ground, half a turn apart', () => {
+  const firsts = t.solids.filter(s => s.index === 0);
+  assert.equal(firsts.length, PARAMS.strands);
+  for (const f of firsts) assert.equal(Math.min(...f.verts.map(v => v[1])), PARAMS.plaza);
+  assert.ok(Math.abs(Math.abs(firsts[1].angle - firsts[0].angle) - Math.PI) < 1e-9);
 });
 
 test('the sail is the highest solid and the mast stands on it', () => {
   const top = Math.max(...t.solids.flatMap(s => s.verts.map(v => v[1])));
-  const sail = t.solids.find(s => s.kind === 'sail');
+  const sail = t.solids.find(s => s.name === 'sail0');
   assert.equal(Math.max(...sail.verts.map(v => v[1])), top);
   assert.ok(Math.abs(t.mast.from[1] - top) < 1e-9);
   assert.ok(t.mast.to[1] > t.mast.from[1]);
   assert.equal(t.height, t.mast.to[1]);
+  assert.ok(t.height > 400, 'tall: the acrylic model is missing its top, so it is no guide to height');
 });
 
 test('cables run from the wings down to anchors on the plinth, sagging', () => {

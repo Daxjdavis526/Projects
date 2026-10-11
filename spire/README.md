@@ -15,28 +15,30 @@ query string can't be passed, `#by-Jane-Doe` does the same.
 ## Where the form comes from
 
 The design came as three things: a pen sketch, a white 3D print and a stacked
-acrylic study model. They agree on one idea, and that idea is what
-`src/tower.js` builds:
+acrylic study model (which is missing its top section, so it is no guide to
+the height). They share one idea, a spiral, and that is what `src/tower.js`
+builds:
 
 - a **square core** that rises and tapers;
-- six **wings**, blocks wider than the core and pushed off-centre so each
-  cantilevers out on one side, every one turned a quarter turn (and a little
-  more) past the one below. That is the pinwheel in the print's top view;
-- each wing's top and underside **tilted along its face**. Seen from any side
-  these read as the bands climbing in a spiral that dominate the sketch;
-- each wing **reaching further at its top than at its underside**, so it
-  steps out as it rises, like the stacked plates of the acrylic model, and
-  turned slightly between underside and top, like the twisted faces of the
-  print;
-- the core finishing in a tall glazed **sail** with one vertical edge, and a
-  **mast** on it;
-- **legs** carrying the core down to the plinth, and **cables** fanning from
-  the lower wings to anchors on the ground, as in the sketch.
+- **two bands of building winding up round it together**, half a turn apart.
+  Each band climbs a quarter turn at a time: one length runs along a face of
+  the core and on past the corner, and the next length starts where it ended,
+  as high as it ended, on the next face. Seen from any side, the bands are the
+  steep diagonal strips climbing the sketch, with the core in the recess under
+  each one. At the foot they are its two legs. From above they make the
+  pinwheel of the print's top view;
+- a slight extra twist on every quarter turn, so the whole spiral turns as it
+  rises;
+- each band's **last length drawn up into a sail**: its leading edge stands
+  straight up, and its top climbs on the spiral's own diagonal to the tip. The
+  tall one carries the **mast**; the other stops lower beside it;
+- **cables** fanning from the lower turns to anchors on the ground, as in the
+  sketch.
 
 The numbers are mine, not his. The drawings have no dimensions, so the
-proportions were tuned by eye against the photographs, and the scale (about
-430 m to the mast tip, 4.2 m floors, 3 m mullions) is a plausible guess
-rather than anything he specified.
+proportions were tuned by eye against the photographs. The scale is a
+plausible guess rather than anything he specified: about 455 m to the mast
+tip, a full turn of each band every 120 m, 4.2 m floors and 3 m mullions.
 
 ## Controls
 
@@ -56,8 +58,9 @@ No build step: static files, three.js r180 vendored under `vendor/`.
 
 - `src/tower.js`: the form, as plain polyhedra. Imports nothing, so it is
   checked headlessly: `node spire/test/tower.test.mjs` (closed, outward-wound
-  solids; wings rise, turn and shrink; every wing wraps the core; cables sag
-  to anchors on the plinth).
+  solids; each band rises, turns one way, narrows and is continuous from one
+  length to the next; the bands start together at the ground; cables sag to
+  anchors on the plinth).
 - `src/build.js`: turns the polyhedra into flat-shaded geometry, each face
   carrying a "facade" coordinate (along the face, and height) that both the
   glass and the ink shaders draw their grids from.
