@@ -2642,7 +2642,7 @@ cosmetic threads outside, a 30° convergence, Rc = 4 r_t on both sides of a
 1.95 mm throat, a 15° cone to an area ratio of 40, 51 mm long. The passage
 was extracted, then run in vacuum (SST at y⁺ < 0.4, laminar, inviscid, a
 colder chamber), with a plume, and through a grid study. An audit of those
-runs found four things, each fixed or measured here.
+runs found five things, each fixed or measured here.
 
 Findings:
 
@@ -2711,3 +2711,28 @@ Findings:
     x > x_e + 1.3 mm). Every cut viscous run's budget now quotes both
     points.
 
+87. **Fixing the profile broke the mesh: a sharp corner inverted the
+    structured mesher's wall cells.** The grid study on the refined profile
+    failed checkMesh at all three levels (inverted faces, non-orthogonality
+    up to 180°). The cells sat where the 7.1 mm chamber bore meets the 30°
+    cone with no fillet. The mesher bends each station line near the wall
+    so that it meets the wall at right angles, by d R'(x) (1 − d/δ)² at a
+    depth d, with δ 30 % of the local radius. At a sharp corner R' jumps
+    from 0 to −tan 30° between two stations, and in a long chamber the
+    stations are close enough there for lines bent by 0 and by tan 30° to
+    cross. The old chords had blunted the corner over 0.21 mm, which only
+    just passed (non-orthogonality 74°, against a gate of 80°).
+    - R' is now the wall's mean slope over x ± δ/2, so the normals fan out
+      across a corner instead of turning between two stations. The throat
+      station is held unbent (its plane stays planar, as on an analytic
+      nozzle, where R' = 0 there anyway).
+    - The three study meshes now pass at 36°. The wall lines on the
+      analytic V1 and Whalen nozzles meet the wall no worse than before
+      (13.5° and 17.9° at worst, both in the exit taper). Averaging over
+      ± δ instead bent the lines in a 1 r_t chamber fillet 26° off its
+      normal, which is why the window is half that.
+    - A test meshes a long chamber, a sharp 30° corner and a 40:1 cone,
+      sliced as the analyser slices it: 11 inverted faces before, none
+      now.
+    - The comment beside the bend said δ was 10 % of the radius; it has
+      been 30 % since M1.

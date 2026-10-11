@@ -306,6 +306,12 @@ def _ogrid_template(res: Resolution, first_n: float | None,
     return tmpl, n_ring
 
 
+def _mean_slope(profile: Profile, x: float, half: float) -> float:
+    """The wall's mean slope over [x - half, x + half], within the nozzle."""
+    a, b = max(x - half, profile.x_inlet), min(x + half, profile.x_exit)
+    return (profile.radius(b) - profile.radius(a)) / (b - a)
+
+
 def _stations(profile: Profile, res: Resolution, plume: PlumeRegion | None):
     Rt = profile.throat_radius
     h_t = res.throat_spacing * Rt
@@ -364,20 +370,27 @@ def build(profile: Profile, spec: RevolvedMeshSpec) -> tuple[PolyMesh, MeshMeta]
     # 45 degrees, and the thin wall-resolved cells become sheared
     # parallelograms (in the 20 bar case their temperature overshot the
     # stagnation value by 5 %). A point a distance d inside the wall moves
-    # axially by d R'(x) (1 - d/delta)^2: along the wall normal at the wall,
-    # blending back to the vertical line by delta = 10 % of the local radius.
-    # R' = 0 at the inlet and the throat, and the shift is tapered to zero at
-    # the exit, so those planes stay exactly planar.
+    # axially by d R' (1 - d/delta)^2: along the wall normal at the wall,
+    # blending back to the vertical line by delta = 30 % of the local radius.
+    # R' is the wall's mean slope over x +- delta/2. On a smooth wall that is
+    # its slope; at a sharp corner the normals fan out over delta instead of
+    # turning between two stations, where lines bent by 0 and by tan 30
+    # crossed and inverted faces (a CAD chamber meeting its 30 degree cone,
+    # DESIGN.md finding 87). Over +- delta the fan also bent the lines in a
+    # 1 r_t chamber fillet up to 26 degrees off its normal (18 before); over
+    # +- delta/2 no line meets the wall worse than before. The inlet and
+    # throat stations are not moved and the shift is tapered to zero at the
+    # exit, so those planes stay planar.
     if spec.wall_first_cell is not None:
         r_template = np.abs(tmpl.points[:, 0]) if planar else np.linalg.norm(tmpl.points, axis=1)
         r_wall = r_template.max()  # 1 for the wedge, the area factor for the O-grid
         for i in range(1, i_e):
-            slope = profile.slope(xs[i])
+            delta = _ORTHOGONAL_DEPTH * scale[i]
+            slope = 0.0 if i == i_t else _mean_slope(profile, xs[i], 0.5 * delta)
             if slope == 0.0:
                 continue
             taper = min(1.0, (xs[i_e] - xs[i]) / Rt)
             d = (r_wall - r_template) * scale[i]  # distance inside the wall
-            delta = _ORTHOGONAL_DEPTH * scale[i]
             w = np.clip(1.0 - d / delta, 0.0, None) ** 2
             pts[i * Nd : (i + 1) * Nd, 0] += d * slope * w * taper
 

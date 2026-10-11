@@ -98,6 +98,39 @@ def test_zone_areas_are_exact(built):
     assert area == pytest.approx(math.pi * PROFILE.throat_radius**2, rel=1e-12)
 
 
+def _inverted_pyramids(mesh):
+    """Faces whose owner (neighbour) centre is not behind (in front of)
+    them: checkMesh's "incorrectly oriented faces"."""
+    centre, normal = _face_geometry(mesh.points, mesh.faces)
+    n_int = mesh.n_internal_faces
+    cc, n = np.zeros((mesh.n_cells, 3)), np.zeros(mesh.n_cells)
+    np.add.at(cc, mesh.owner, centre)
+    np.add.at(n, mesh.owner, 1)
+    np.add.at(cc, mesh.neighbour, centre[:n_int])
+    np.add.at(n, mesh.neighbour, 1)
+    cc /= n[:, None]
+    own = np.einsum("ij,ij->i", centre - cc[mesh.owner], normal) <= 0
+    nei = np.einsum("ij,ij->i", centre[:n_int] - cc[mesh.neighbour], normal[:n_int]) >= 0
+    return int(own.sum() + nei.sum())
+
+
+def test_a_sharp_corner_in_a_cad_profile_meshes_cleanly():
+    """A long chamber bore meeting a 30 degree cone without a fillet, sliced
+    the way the CAD analyser slices it: the wall slope jumps from 0 to
+    -tan 30 between two closely spaced stations, and station lines bent by
+    the local slope crossed and inverted 11 faces (DESIGN.md finding 87)."""
+    from sonicline.core.profile import from_points
+    from sonicline.geometry import frame
+
+    exact = conical(1e-3, 40.0, contraction_ratio=13.3, converging_half_angle=math.radians(30.0),
+                    throat_rc_upstream=4.0, throat_rc_downstream=4.0, fillet_radius=1e-3, chamber_length=26.0)
+    rows = [(x, exact.radius(x)) for x in np.linspace(exact.x_inlet, exact.x_exit, 240)]
+    profile = from_points(frame.refine_sections(rows, exact.radius))
+    spec = RevolvedMeshSpec(Form.WEDGE, Resolution.preset("standard"), 2e-7, WEDGE, None)
+    mesh, _ = build(profile, spec)
+    assert _inverted_pyramids(mesh) == 0
+
+
 def test_wedge_has_no_axis_faces():
     mesh, _ = mesh_for(Form.WEDGE, False, False)
     r = np.hypot(*_face_geometry(mesh.points, mesh.faces)[0][:, 1:].T)
