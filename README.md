@@ -13,6 +13,18 @@ Open it in Safari on an iPhone and use Share → Add to Home Screen to install i
 as a full-screen app. See [branch/README.md](branch/README.md) for the controls
 and how it works.
 
+## spire/
+
+**SPIRE**: a tower from an architect's sketchbook. It opens as an ink drawing
+that puts itself down stroke by stroke, then washes into the built tower:
+glass on a stone plinth in a calm bay, from dawn to night. The form comes from
+his pen sketch, 3D print and acrylic study model.
+
+Live: https://daxjdavis526.github.io/Projects/spire/
+
+See [spire/README.md](spire/README.md) for the controls, how the form was read
+from the drawings, and what is painted rather than simulated.
+
 ## peraspera/
 
 **PER ASPERA** — an animated short film, about nineteen minutes long, about a
