@@ -2665,8 +2665,10 @@ Findings:
       still took 3 s. The old polyline stood up to 0.22 % of r_t outside
       the new one within two throat radii of the throat (0.08 % on
       average).
-    - The inviscid run is being repeated on the refined profile; its
-      result goes here.
+    - On the refined profile the inviscid run reads Cd 0.99879 against
+      Kliegel–Levine's 0.99881. Mass flow and thrust both fell 0.186 %, and
+      Isp did not move (74.28 s): the polygon had widened the nozzle, not
+      changed how it expands.
     - The round-trip test nozzle sliced at 40 stations had its throat arc
       0.73 % of r_t off; it is now within 2×10⁻⁴, and a test holds it
       there.

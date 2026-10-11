@@ -68,10 +68,10 @@ def nozzle_profile(rows: list[tuple[float, float]], s_min: float, s_max: float,
 # A sampled profile is a polyline, and a straight chord h long stands off a
 # wall of curvature radius R by up to h^2 / 8R. Uniform sections every
 # 0.21 mm along a 51 mm nozzle left a 3.9 mm throat arc polygonal by 0.15 %
-# of the throat radius, and its inviscid discharge coefficient read 0.25 %
-# above an exact arc's on the same mesh (DESIGN.md finding 83). Chords are
-# halved until the wall at each midpoint is within this fraction of its
-# radius of the chord.
+# of the throat radius, and its inviscid discharge coefficient read 0.19 %
+# high; refined, it matched Kliegel-Levine to 2e-5 (DESIGN.md finding 83).
+# Chords are halved until the wall at each midpoint is within this fraction
+# of its radius of the chord.
 CHORD_TOLERANCE = 1e-4
 # How many times one chord may be halved: a step or a sharp corner never
 # meets the tolerance, and 64 halves of a 240th of the body is enough.
