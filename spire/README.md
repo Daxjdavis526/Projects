@@ -9,7 +9,8 @@ a calm bay, under a sky you can move from dawn to night.
 Live: https://daxjdavis526.github.io/Projects/spire/
 
 Add `?by=Name` to the URL to put the architect's name on the title card
-(`?title=` renames the tower). For example `spire/?by=Jane%20Doe`.
+(`?title=` renames the tower). For example `spire/?by=Jane%20Doe`. Where a
+query string can't be passed, `#by-Jane-Doe` does the same.
 
 ## Where the form comes from
 

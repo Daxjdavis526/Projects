@@ -656,7 +656,9 @@ const ui = {
   orbit: document.getElementById('orbit'),
   snap: document.getElementById('snap'),
 };
-const by = qs.get('by');
+// ?by=Jane%20Doe, or #by-Jane-Doe where a query string cannot be passed
+const hashBy = /^#by-([\w.~-]+)$/.exec(location.hash);
+const by = qs.get('by') || (hashBy && hashBy[1].replace(/-/g, ' '));
 if (by) document.getElementById('by').textContent = `Designed by ${by}`;
 if (qs.get('title')) document.getElementById('title').textContent = qs.get('title');
 
@@ -693,7 +695,7 @@ ui.orbit.addEventListener('click', () => { orbiting = !orbiting; ui.orbit.classL
 controls.addEventListener('start', () => { orbiting = false; ui.orbit.classList.remove('on'); });
 
 let snapNext = false;
-ui.snap.addEventListener('click', () => { snapNext = true; });
+ui.snap?.addEventListener('click', () => { snapNext = true; });
 
 window.addEventListener('keydown', (e) => {
   if (e.key === ' ') { setMode(target ? 'sketch' : 'built'); e.preventDefault(); }
