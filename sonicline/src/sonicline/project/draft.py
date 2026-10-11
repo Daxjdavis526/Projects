@@ -103,7 +103,7 @@ class Draft:
         # The prediction uses the gas the run will (cp at the chamber
         # temperature for a heated gas); the definition stays as written.
         try:
-            defn = model.resolve_gas(defn)
+            defn = model.resolve_gas(defn, profile)
         except ValueError:
             pass
         inlet = defn.boundaries.inlet

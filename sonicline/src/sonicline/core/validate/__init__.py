@@ -38,6 +38,7 @@ from ..model.definition import (
     resolve_gas,
 )
 from ..profile import Profile
+from ..virial import FIT_RANGE as VIRIAL_FIT
 from ..stagnation import nominal_p0
 from ..theory import isentropic as isen
 from ..theory import nozzle
@@ -220,9 +221,11 @@ def validate(defn: SimulationDefinition, profile: Profile | None = None) -> list
         if cold is not None and cold < VIRIAL_COLDEST:
             add(Finding(Severity.ERROR, "gas.virial_cold",
                         f"The ideal expansion reaches {cold:.0f} K at the exit, below the virial fit "
-                        f"(from {VIRIAL_COLDEST - 10:.0f} K): its coefficients diverge and the solver "
-                        "stops. Use the perfect gas (\"auto\" does); at these pressures nitrogen is ideal "
-                        "to a fraction of a percent, and the real-gas correction is reported."))
+                        f"(from {VIRIAL_FIT[0]:.0f} K, with a margin to {VIRIAL_COLDEST:.0f} K): its T^-4 "
+                        "terms make the density negative near 10-15 K, which the solver's first "
+                        "iterations can reach, and it stops. Use the perfect gas (\"auto\" does); at these "
+                        "pressures nitrogen is ideal to a fraction of a percent, and the real-gas "
+                        "correction is reported."))
         if p0 is not None and p0 > VIRIAL_VERIFIED_P0:
             add(Finding(Severity.WARNING, "gas.virial_pressure",
                         f"Above {_fmt_bar(VIRIAL_VERIFIED_P0)} the truncated virial series loses "

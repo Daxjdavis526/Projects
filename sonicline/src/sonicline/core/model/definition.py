@@ -214,8 +214,10 @@ class GasSpec:
 
 EQUATIONS_OF_STATE = ("perfect_gas", "virial", "peng_robinson", "auto")
 # The virial gas is not chosen automatically for an expansion colder than
-# this at the exit: its fit (core.virial.FIT_RANGE) starts at 70 K, and
-# the margin covers the expansion overshooting the ideal in places.
+# this at the exit: its fit (core.virial.FIT_RANGE) starts at 70 K, and its
+# T^-4 terms make the density negative near 10-15 K, which a run's first
+# iterations can reach from a 40 K expansion at ~1 kPa (it stopped the
+# solver); the margin covers the expansion overshooting the ideal.
 VIRIAL_COLDEST = 80.0
 HEAT_CAPACITIES = ("auto", "constant", "temperature_dependent")
 
