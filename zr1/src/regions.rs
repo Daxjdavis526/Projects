@@ -132,9 +132,58 @@ pub fn labels(rs: &[Region], g: &SkinGraph) -> Vec<Vec<f64>> {
                     }
                 }
             }
+            fill_islands(&mut m, g);
             m
         })
         .collect()
+}
+
+/// Islands of a label smaller than this many skin vertices (about 80 ×
+/// 100 mm² at the third subdivision) are filled in from what surrounds
+/// them: the outline's iso-contour leaves a few specks — two small holes in
+/// the rear valance, white body showing through the black — that are not
+/// on the car.
+pub const LABEL_ISLAND: usize = 80;
+
+fn fill_islands(m: &mut [f64], g: &SkinGraph) {
+    for sign in [1.0, -1.0] {
+        let mut seen = vec![false; m.len()];
+        for start in 0..m.len() {
+            if seen[start] || m[start] * sign <= 0.0 {
+                continue;
+            }
+            let mut comp = vec![start];
+            seen[start] = true;
+            let mut k = 0;
+            while k < comp.len() {
+                let i = comp[k];
+                k += 1;
+                for &j in &g.adj[i] {
+                    let j = j as usize;
+                    if !seen[j] && m[j] * sign > 0.0 {
+                        seen[j] = true;
+                        comp.push(j);
+                    }
+                }
+            }
+            if comp.len() >= LABEL_ISLAND {
+                continue;
+            }
+            // harmonic fill from the surroundings, then make sure the sign
+            // has turned
+            for _ in 0..200 {
+                for &i in &comp {
+                    let a = &g.adj[i];
+                    m[i] = a.iter().map(|j| m[*j as usize]).sum::<f64>() / a.len().max(1) as f64;
+                }
+            }
+            for &i in &comp {
+                if m[i] * sign > 0.0 {
+                    m[i] = -sign * 0.5;
+                }
+            }
+        }
+    }
 }
 
 /// Offset a counter-clockwise polygon outward by `d` (miter at vertices,
