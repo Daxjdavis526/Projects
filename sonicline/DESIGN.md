@@ -2642,7 +2642,8 @@ cosmetic threads outside, a 30° convergence, Rc = 4 r_t on both sides of a
 1.95 mm throat, a 15° cone to an area ratio of 40, 51 mm long. The passage
 was extracted, then run in vacuum (SST at y⁺ < 0.4, laminar, inviscid, a
 colder chamber), with a plume, and through a grid study. An audit of those
-runs found five things, each fixed or measured here.
+runs found five things, each fixed or measured here (findings 83–87);
+verifying the fixes found a sixth, older one, which is open (finding 88).
 
 Findings:
 
@@ -2756,3 +2757,48 @@ mass flow and 0.077 % on thrust (monotone, observed orders 1.4 and 0.9).
 Isp moved by 4×10⁻⁵ across the three meshes, which the study's table calls
 divergent only because the differences are noise. The budget's estimates
 for a standard wedge mesh, 0.06 % and 0.15 %, hold.
+
+88. **V13 is not steady, and whether it passes depends on the machine
+    (open).** Both verification runs of this branch failed V13 (V1, laminar,
+    450 K wall) on mass balance: 1.6 and 1.8×10⁻⁴ against 10⁻⁴, not
+    converged after 20,000 iterations. main's scheduled runs pass it, yet
+    the branch writes a byte-identical V13 case (af4f224 against 098cebc,
+    mesh, settings and initial fields), and run here main's own code failed
+    it while the branch's passed.
+    - The run never settles. Its inlet and exit flows flicker by 3–5×10⁻⁴
+      with a period of about 8 iterations, and the mean imbalance over
+      500-iteration windows wanders between −2×10⁻⁴ and +6×10⁻⁵ for
+      thousands of iterations. It is declared converged when a judgement
+      window happens to hold: at iteration 1639 with no aid in one run, at
+      4156, 11,669 or never in others.
+    - The tighter pressure solve (finding 78) is applied when the monitor,
+      which polls by wall clock, sees a steady but unbalanced window. The
+      iteration it lands on depends on the machine (1115, 2246, 4547 in
+      three runs here), which is why identical inputs give different
+      outcomes. With it, the pressure is solved to 10⁻⁴ as intended; the
+      imbalance does not go away.
+    - Saving 24 consecutive iterations put the largest swings in the
+      recirculating corner where the chamber meets its 45° cone, against
+      the hot wall: the axial velocity there changes sign from one
+      iteration to the next and the temperature swings ±4 K.
+    - It is not the local time step running away in stagnant gas. The
+      largest step in the domain is 1.05×10⁻⁵ s (the step smoothing bounds
+      it), 4.9×10⁻⁶ s in that corner; capping it at 1.3×10⁻⁵ s changed
+      nothing at Courant 0.2, and a 10⁻⁵ s cap at Courant 0.5 that seemed
+      to settle the run touched only a few cells, so its better windows
+      were another trajectory, not a cure. That aid was written and
+      withdrawn.
+    - The mean mass flow depends on the Courant number: 9.8449×10⁻⁵ kg/s
+      per wedge at 0.5 in three runs, 9.8588×10⁻⁵ at 0.2 with or without
+      the cap, 0.14 % apart. A steady solution would not move with the
+      size of its pseudo-time step; this one is the average of a
+      fluctuating state. V13 checks the energy balance (4×10⁻⁶–8×10⁻⁴
+      across runs, against 2×10⁻³) and mass conservation, not the mass
+      flow itself.
+    - Not affected: the adiabatic runs. V1, the thruster runs and the grid
+      study of section 24 settle with inlet flows steady to 10⁻⁴ or better.
+    - Open: whether a heated wall's laminar corner is genuinely unsteady
+      (a time-accurate run of V13 would say), or the steady settings
+      cannot hold it. Until then V13 is a known intermittent failure on
+      every branch, main included, and heated-wall laminar mass flows carry
+      a 0.14 % Courant dependence.
