@@ -75,9 +75,24 @@ surface normal, fitted to three kinds of evidence at once (`skinfit.py`,
   normal from the same normal turned about that axis together with the
   light), and the surface is then bent to agree with those normals.
 
-The fit alternates normals and surface for fourteen rounds. The Rust crate
-rebuilds the same surface from `data/body_cage.json` (cage + offsets) to
-within 0.01 mm of the fitted one.
+The fit alternates normals and surface for fourteen rounds.
+
+**The model's body surface** is not that fitted surface itself
+(2026-10-12). The measured surface matches the outlines to 4–5 mm but
+carries waves and soft lumps the car does not have; the first model's body
+(a loft of smooth sections drawn by eye, commit `bede119`) had clean panels
+but proportions taken from a four-view drawing. The two are combined: the
+first model's loft is carried onto the measured surface by a smooth space
+warp — a 20 × 9 × 8 cubic B-spline lattice (cells about 290 × 360 × 250 mm)
+fitted by closest points both ways (`pipeline/ffd_warp.py`) — so shape that
+varies over more than about half a metre is the measured one and anything
+finer is the loft's clean surface. The measured cage is then refitted to
+that surface with no offset layer (`pipeline/cage_smooth.py`: every point
+of the measured skin targets its nearest point on the warped loft), and the
+material regions are traced again on it from every view
+(`pipeline/combine_skin.sh`). The Rust crate rebuilds the surface from
+`data/body_cage.json` (the cage, and per-vertex offsets when the file has
+them) to within 0.01 mm of the fitted one.
 
 **Materials.** Each view is projected onto the skin; the unpainted regions
 are named by where they sit (glass, carbon roof, louvred hatch, lamps,
@@ -162,18 +177,18 @@ Honest accounting, in the house style.
 275/30ZR20 and 345/25ZR21 on 20×10 and 21×13 wheels; carbon-ceramic rotors
 400×38 / 390×34 mm; option content, codes and colour names.
 
-**Measured from the renders:** the body's shape (outline within about
-4–5 mm RMS full size in most views — 0.3 mm on the model; the shading of
-the fitted surface explains 55–72 % of the observed paint shading per
-view), every paint/glass/carbon/lamp boundary, the wheel arches, hub
+**Measured from the renders:** the body's proportions and outline (within
+about 9 mm RMS full size in the median view — 0.6 mm on the model — on the
+combined surface; the measured surface itself is within 4.5 mm), every
+paint/glass/carbon/lamp boundary, the wheel arches, hub
 heights and wheel offsets, the wing, mirrors and the other add-ons. The
 renders are Chevrolet's CGI of the car, so the model reproduces GM's own
 model of it, at the resolution of those images.
 
 **Approximated:** the underbody (never seen; a fair surface); the far side
-of anything seen from one side only (made symmetric); detail finer than
-about 2 cm on the body — the measured surface is smooth, so sharp creases
-are slightly rounded; the wheel spoke shape (ten spokes forking into Ys,
+of anything seen from one side only (made symmetric); the body's surface
+detail — anything that varies over less than about half a metre is the
+first model's loft, drawn by eye, not measured; the wheel spoke shape (ten spokes forking into Ys,
 placed by eye from the renders); caliper shape; the interior (no interior
 dimensions are published — the GT2 seats, the 2026 dash with its three
 displays, the console and the wheel are shaped by eye from Chevrolet's
@@ -186,13 +201,17 @@ paint codes.
 
 **Known flaws** (2026-10-10), measured against the references:
 
-- The body surface is softer and wavier than the car's. Its silhouette
-  matches every view to a few millimetres, but its shading explains only
-  about 60 % of the paint shading the renders show (R² 0.61 in deg01, 0.48
-  head-on): sharp creases (the V lines on the hood, the fascia's edges, the
-  corner fins) are rounded off, and the panels carry gentle waves the car
-  does not have. Reading finer shape from the shading of white paint is
-  where the method stops (see `tools/measure/README.md`).
+- The body surface is clean but simpler than the car's. Its panels are
+  the first model's loft carried onto the measured shape, so they have no
+  waves, but the car's sharp creases (the V lines on the hood, the fascia's
+  edges, the corner fins) are absent or rounded, the outline sits about
+  9 mm RMS from the renders where the measured surface, which had the
+  waves, sat 4.5 mm, and its shading explains 43–59 % of the paint shading
+  the renders show where the measured surface explained 48–72 % — some of
+  what the measured surface carried was the car's real shape, not noise
+  (2026-10-12; the measured surface is commit `d73ffe6`, the first model
+  `bede119`). Reading fine shape from the shading of white
+  paint is where the measurement stops (see `tools/measure/README.md`).
 - The dive planes are carved from the views and thinned to 8 mm plates;
   each starts a little further back along the bumper than the real one,
   whose front end the measured bumper (which bulges slightly too far out

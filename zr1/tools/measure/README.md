@@ -6,7 +6,7 @@ renders of the exact build into the crate's data files:
 | data file | what | made by |
 |---|---|---|
 | `data/cameras.json` | the solved cameras of all 38 reference views, hub heights, wheel offsets, landmarks | `joint.py` (+ `spin.py`, `hubs.py`, `landmarks.py`, `bundle.py`) |
-| `data/body_cage.json` | body cage + per-vertex displacement of its 3rd subdivision | `cage.py`, `cagefit.py` → `skinfit.py` + `psnorm.py` (`pipeline/run_psfit.py`) → `export_cage.py` |
+| `data/body_cage.json` | body cage: the measured cage refitted to the first model's loft warped onto the measured skin (until 2026-10-12: the measured cage + per-vertex displacement of its 3rd subdivision) | `cage.py`, `cagefit.py` → `skinfit.py` + `psnorm.py` (`pipeline/run_psfit.py`) → `pipeline/ffd_warp.py` → `pipeline/cage_smooth.py` → `export_cage.py` (`pipeline/combine_skin.sh`) |
 | `data/regions.json` | glass / carbon / lamp / grille / vent regions as oriented prisms | `texmap.py`, `segment.py`, `regions.py` (`pipeline/run_regions2.py`) |
 | `data/arches.json` | wheel-arch edges | measured on the skin against the views |
 | `data/addons.json` | wing, splitter, dive planes, mirrors, skirts, exhaust, Gurney | `pipeline/fit_wing.py`, `pipeline/fit_addon.py`, `pipeline/tri.py`, `hullpart.py`, `pipeline/write_addons.py` |
@@ -45,6 +45,12 @@ Point `ZR1_REFS` at a directory laid out as `paint.py` expects
    silhouettes, the feature lines and photometric-stereo normals, in
    rounds; `pipeline/finish_skin.sh` writes it out, gates it in the crate,
    and re-traces the regions.
+5b. **Combined surface** (2026-10-12) — `pipeline/combine_skin.sh`: the
+   first model's body loft (`zr1 preview` at commit `bede119` writes it as
+   `out/body_loft.stl`) warped onto the measured skin by a 20 × 9 × 8 cubic
+   B-spline lattice (`ffd_warp.py`), the measured cage refitted to the
+   warped loft with no displacement (`cage_smooth.py`, sixth argument),
+   then the regions re-traced and the splitter rebuilt.
 6. **Regions** — `texmap.py` projects every view onto the skin, `segment.py`
    finds the unpainted regions, `regions.py` outlines them by the paint
    probability's iso-contour (`pipeline/run_regions2.py`).
@@ -76,6 +82,22 @@ car, and what is left after any of them is mostly the surface's own
 error. The limit is reading fine shape from the shading of white paint
 with a nine-term lighting model; the creases the eye sees in the clay
 images are sharper than the normals it yields.
+
+**Tried for the combined surface, not adopted** (2026-10-12): refitting
+the cage to the measured skin with a bi-Laplacian fairness weight on the
+control net (`cage_smooth.py` without a sixth argument): at weights up to
+30 it keeps the lumps (within 0.7–1.3 mm of the measured surface), from
+300 up it rounds the whole car toward a blob (2.4 / 8.4 / 17 mm at the
+50th / 90th / 99th percentile at 300; outline 7.2 mm RMS in the median
+view against the measured 4.5), because it
+penalises every wavelength alike. A coarse cage (36 stations, 4 + 4 + 4
+segments per half loop, `coarse_cage.py`): smooth, but it follows every
+measured lump wider than its spacing. Blending per vertex, the measured
+skin's low frequencies plus the loft's high (`blend_skin.py`): stripes
+where nearest-point correspondences jump between the two. And a
+closest-point refit of the full cage to the warped loft (`coarse_cage.py`
+with `pre` 0) folds at the nose and tail caps, where the loft is a wedge
+and a flat end; fixed correspondences from the measured skin do not.
 
 **Superseded experiments**, kept because their results informed the
 pipeline: `bsfit*.py`, `bsurf.py` (B-spline body), `fit.py`, `fairfit.py`

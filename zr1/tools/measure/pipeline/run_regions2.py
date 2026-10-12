@@ -88,6 +88,9 @@ def emit(name, mat, ids, mirror, cond=None):
     if not loops: print('no loop', name); return
     loop = max(loops, key=lambda l: np.linalg.norm(np.diff(np.vstack([l, l[:1]]), axis=0), axis=1).sum())
     pr = R.region_prism_loop(V, F, faces, loop)
+    if pr['area_mm2'] < 0.5e4:
+        # the same floor as name_of's: a split-off speck, not a region
+        print(f'{name:16s} skipped: {pr["area_mm2"] / 1e4:.2f} dm2'); return
     pr.update(name=name, material=mat, mirror=mirror)
     out.append(pr)
     print(f'{name:16s} {mat:9s} faces {len(faces):6d} area {pr["area_mm2"]/1e4:6.1f} dm2 poly {len(pr["poly"]):4d} n {np.round(pr["n"], 2)}')

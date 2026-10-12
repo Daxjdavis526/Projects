@@ -111,11 +111,10 @@ def splitter_skin():
     d = json.load(open('splitter_skin.json'))
     return dict(name='Front splitter', material='Visible carbon fiber (ZTK front splitter)', finish='carbon', voxel_mm=1.5,
                 cut_body=True,
-                prisms=[dict(axis='z', outline=d['outline'], lo=d['z0'], hi=d['z0'] + d['t']),
-                        # the corner end plates rising from the tips (front view:
-                        # outer edge at |y| 950, top z 330; side view: from the tip back ~90 mm)
-                        dict(axis='y', outline=[[-895.0, 110.0], [-795.0, 110.0], [-800.0, 330.0], [-858.0, 336.0]],
-                             lo=932.0, hi=952.0, mirror=True)])
+                # the plate only: the corner end plates once placed here (rising
+                # from the tips to z 330) are the dive planes' business, and with
+                # them the splitter stood two tall fins off the bumper corners
+                prisms=[dict(axis='z', outline=d['outline'], lo=d['z0'], hi=d['z0'] + d['t'])])
 if __name__ == '__main__':
     what = sys.argv[1]
     if what == 'wing':

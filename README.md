@@ -355,10 +355,11 @@ ZTK + Carbon Fiber Aero (tall wing, dive planes, splitter, hood Gurney),
 20-spoke Carbon Flash wheels, Arctic White with the visible-carbon roof,
 Blue calipers, Jet Black interior with GT2 seats and blue belts.
 Seven-inch wheelbase.
-Measured, not drawn: the body, every paint/glass/carbon boundary and the
-aero parts come from Chevrolet's renders of this exact build through
-calibrated cameras (silhouettes, triangulated feature lines and
-photometric stereo on the paint's shading). Built in Rust on the Orbital
+Measured, not drawn: the body's shape, every paint/glass/carbon boundary
+and the aero parts come from Chevrolet's renders of this exact build
+through calibrated cameras (silhouettes, triangulated feature lines and
+photometric stereo on the paint's shading); the body's panels are the
+first model's clean loft, warped onto that measured shape. Built in Rust on the Orbital
 Dawn geometry kernel (signed distance fields → sparse bake → gated mesh);
 download it as a coloured **STEP** assembly (SolidWorks), a **3MF** for
 multi-colour printing, or a **GLB**.
