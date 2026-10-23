@@ -39,7 +39,7 @@ impl WormSpec {
             radius: 11.0,
             cruise: 9.0,
             max_speed: 36.0,
-            accel: 1.6,
+            accel: 2.5,
             min_turn_radius: 70.0,
             turn_accel: 0.035,
             climb: 9.0,
@@ -133,7 +133,15 @@ pub struct Worm {
     pub roll: f64,
     pub roll_rate: f64,
     pub want_roll: f64,
+    /// Someone has hooks in it and is steering: it answers the ropes far
+    /// quicker than it would turn on its own.
+    pub ridden: bool,
 }
+
+/// Turn rate ceiling of a ridden standard worm, rad/s (about 25 deg/s).
+pub const RIDDEN_TURN_RATE: f64 = 0.44;
+/// How fast a ridden standard worm's turn rate can change, rad/s^2.
+pub const RIDDEN_TURN_ACCEL: f64 = 0.9;
 
 pub fn wrap_angle(a: f64) -> f64 {
     let t = std::f64::consts::TAU;
@@ -181,6 +189,7 @@ impl Worm {
             roll: 0.0,
             roll_rate: 0.0,
             want_roll: 0.0,
+            ridden: false,
         };
         w.resample(&sand);
         w
@@ -210,9 +219,15 @@ impl Worm {
         // Heading: aim the turn rate at the error, but the turn rate itself
         // has inertia and a speed-dependent ceiling.
         let err = wrap_angle(self.want_heading - self.heading);
-        let ceiling = self.max_turn_rate();
-        let want_rate = (err * 0.6).clamp(-ceiling, ceiling);
-        let dr = (want_rate - self.turn_rate).clamp(-s.turn_accel * dt, s.turn_accel * dt);
+        let (ceiling, gain, accel) = if self.ridden {
+            // Pried round by the hooks: about 25 degrees a second at most,
+            // reached in well under a second.
+            (RIDDEN_TURN_RATE * (11.0 / s.radius).min(1.0), 1.8, RIDDEN_TURN_ACCEL * (11.0 / s.radius).min(1.0))
+        } else {
+            (self.max_turn_rate(), 0.6, s.turn_accel)
+        };
+        let want_rate = (err * gain).clamp(-ceiling, ceiling);
+        let dr = (want_rate - self.turn_rate).clamp(-accel * dt, accel * dt);
         self.turn_rate = (self.turn_rate + dr).clamp(-ceiling, ceiling);
         self.heading = wrap_angle(self.heading + self.turn_rate * dt);
 
@@ -479,7 +494,7 @@ mod tests {
         for _ in 0..60 {
             w.step(1.0 / 60.0, flat);
         }
-        assert!(w.speed < w.spec.cruise + 2.0, "a second of acceleration: {}", w.speed);
+        assert!(w.speed < w.spec.cruise + 3.0, "a second of acceleration: {}", w.speed);
         for _ in 0..60 * 30 {
             w.step(1.0 / 60.0, flat);
         }

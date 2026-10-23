@@ -6,16 +6,16 @@
 //! which is why the ground reports its own velocity.
 //!
 //! Speeds are deliberately slow. Soft sand is hard going, and the player is
-//! meant to feel small: a run is 5.5 m/s, a dune slip face is barely
+//! meant to feel small: a flat-out sprint is 7 m/s, a dune slip face is barely
 //! climbable, and a 60 m dune is a real obstacle.
 
 use glam::DVec3;
 
 pub const GRAVITY: f64 = 9.81;
 pub const WALK: f64 = 1.7;
-pub const RUN: f64 = 5.5;
+pub const RUN: f64 = 7.0;
 pub const CROUCH: f64 = 0.9;
-pub const SANDWALK: f64 = 1.15;
+pub const SANDWALK: f64 = 1.6;
 pub const JUMP_SPEED: f64 = 4.3;
 /// Loose dry sand will not stand steeper than about this.
 pub const REPOSE: f64 = 33f64.to_radians();

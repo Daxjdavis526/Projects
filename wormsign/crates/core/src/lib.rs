@@ -7,7 +7,9 @@
 
 pub use glam;
 
+pub mod anim;
 pub mod brain;
+pub mod cloth;
 pub mod gait;
 pub mod hook;
 pub mod lod;
@@ -15,6 +17,8 @@ pub mod path;
 pub mod player;
 pub mod ragdoll;
 pub mod rng;
+pub mod shade;
+pub mod skin;
 pub mod terrain;
 pub mod tilemesh;
 pub mod vibration;

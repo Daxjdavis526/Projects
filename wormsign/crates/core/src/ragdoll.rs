@@ -19,7 +19,30 @@ pub const L_KNEE: usize = 7;
 pub const L_FOOT: usize = 8;
 pub const R_KNEE: usize = 9;
 pub const R_FOOT: usize = 10;
-pub const JOINTS: usize = 11;
+pub const L_SHOULDER: usize = 11;
+pub const R_SHOULDER: usize = 12;
+pub const L_HIP: usize = 13;
+pub const R_HIP: usize = 14;
+pub const L_TOE: usize = 15;
+pub const R_TOE: usize = 16;
+pub const JOINTS: usize = 17;
+
+/// A joint and everything beyond it on the same limb: what comes away when
+/// the bone above it is torn.
+pub fn limb(j: usize) -> &'static [usize] {
+    match j {
+        L_ELBOW => &[L_ELBOW, L_HAND],
+        R_ELBOW => &[R_ELBOW, R_HAND],
+        L_KNEE => &[L_KNEE, L_FOOT, L_TOE],
+        R_KNEE => &[R_KNEE, R_FOOT, R_TOE],
+        L_FOOT => &[L_FOOT, L_TOE],
+        R_FOOT => &[R_FOOT, R_TOE],
+        HEAD => &[HEAD],
+        L_HAND => &[L_HAND],
+        R_HAND => &[R_HAND],
+        _ => &[],
+    }
+}
 
 #[derive(Clone, Copy, Debug)]
 pub struct Link {
@@ -56,6 +79,12 @@ fn rest_pose() -> [DVec3; JOINTS] {
         v(-0.12, 0.06), // l foot
         v(0.11, 0.52),  // r knee
         v(0.12, 0.06),  // r foot
+        v(-0.19, 1.45), // l shoulder
+        v(0.19, 1.45),  // r shoulder
+        v(-0.09, 0.95), // l hip
+        v(0.09, 0.95),  // r hip
+        DVec3::new(-0.12, 0.03, -0.16), // l toe
+        DVec3::new(0.12, 0.03, -0.16),  // r toe
     ]
 }
 
@@ -66,20 +95,55 @@ impl Ragdoll {
         let (s, c) = yaw.sin_cos();
         let rot = |v: DVec3| DVec3::new(v.x * c + v.z * s, v.y, -v.x * s + v.z * c);
         let p: Vec<DVec3> = rest_pose().iter().map(|v| feet + rot(*v)).collect();
+        let mut j = [DVec3::ZERO; JOINTS];
+        j.copy_from_slice(&p);
+        Self::from_joints(j, vel, dt)
+    }
+
+    /// A ragdoll taking over a body posed at `j` (indexed by the constants
+    /// above), moving at `vel`. Bone lengths are whatever the pose has, so a
+    /// figure drawn from the animated skeleton keeps its shape when it falls.
+    pub fn from_joints(j: [DVec3; JOINTS], vel: DVec3, dt: f64) -> Self {
+        let p: Vec<DVec3> = j.to_vec();
         let prev = p.iter().map(|q| *q - vel * dt).collect();
         let bones = [
-            (HEAD, CHEST),
+            (CHEST, HEAD),
             (CHEST, PELVIS),
-            (CHEST, L_ELBOW),
+            (L_SHOULDER, L_ELBOW),
             (L_ELBOW, L_HAND),
-            (CHEST, R_ELBOW),
+            (R_SHOULDER, R_ELBOW),
             (R_ELBOW, R_HAND),
-            (PELVIS, L_KNEE),
+            (L_HIP, L_KNEE),
             (L_KNEE, L_FOOT),
-            (PELVIS, R_KNEE),
+            (R_HIP, R_KNEE),
             (R_KNEE, R_FOOT),
+            (L_FOOT, L_TOE),
+            (R_FOOT, R_TOE),
         ];
-        let braces = [(HEAD, PELVIS), (L_KNEE, R_KNEE), (L_ELBOW, PELVIS), (R_ELBOW, PELVIS), (L_KNEE, CHEST), (R_KNEE, CHEST)];
+        // Girdles hold shoulders and hips square to the spine; the rest
+        // keep limbs from folding through the body.
+        let braces = [
+            (CHEST, L_SHOULDER),
+            (CHEST, R_SHOULDER),
+            (L_SHOULDER, R_SHOULDER),
+            (L_SHOULDER, PELVIS),
+            (R_SHOULDER, PELVIS),
+            (PELVIS, L_HIP),
+            (PELVIS, R_HIP),
+            (L_HIP, R_HIP),
+            (L_HIP, CHEST),
+            (R_HIP, CHEST),
+            (HEAD, PELVIS),
+            (HEAD, L_SHOULDER),
+            (HEAD, R_SHOULDER),
+            (L_KNEE, R_KNEE),
+            (L_ELBOW, PELVIS),
+            (R_ELBOW, PELVIS),
+            (L_KNEE, CHEST),
+            (R_KNEE, CHEST),
+            (L_KNEE, L_TOE),
+            (R_KNEE, R_TOE),
+        ];
         let mut links = Vec::new();
         for (a, b) in bones {
             links.push(Link { a, b, len: (p[a] - p[b]).length(), bone: true, intact: true });
@@ -91,6 +155,10 @@ impl Ragdoll {
         radius[HEAD] = 0.12;
         radius[CHEST] = 0.16;
         radius[PELVIS] = 0.14;
+        radius[L_TOE] = 0.04;
+        radius[R_TOE] = 0.04;
+        radius[L_SHOULDER] = 0.08;
+        radius[R_SHOULDER] = 0.08;
         Self { p, prev, links, radius }
     }
 
@@ -160,15 +228,17 @@ impl Ragdoll {
         out
     }
 
-    /// Tear a specific bone (by its endpoints), if still attached.
+    /// Tear a specific bone (by its endpoints, body side first), if still
+    /// attached. Everything beyond `b` on its limb comes away with it.
     pub fn tear_bone(&mut self, a: usize, b: usize) -> Option<DVec3> {
         for l in &mut self.links {
             if l.intact && ((l.a == a && l.b == b) || (l.a == b && l.b == a)) {
                 l.intact = false;
-                // Braces holding this limb on go too.
+                // Braces holding the limb on go too; those within it stay.
                 let (pa, pb) = (self.p[a], self.p[b]);
+                let piece = limb(b);
                 for m in self.links.iter_mut() {
-                    if !m.bone && m.intact && (m.a == b || m.b == b) {
+                    if !m.bone && m.intact && (piece.contains(&m.a) != piece.contains(&m.b)) {
                         m.intact = false;
                     }
                 }
@@ -206,8 +276,8 @@ mod tests {
     #[test]
     fn torn_limbs_come_away() {
         let mut r = Ragdoll::new(DVec3::new(0.0, 0.0, 0.0), 0.0, DVec3::ZERO, 1.0 / 120.0);
-        assert!(r.tear_bone(CHEST, L_ELBOW).is_some());
-        assert!(r.tear_bone(CHEST, L_ELBOW).is_none(), "cannot tear twice");
+        assert!(r.tear_bone(L_SHOULDER, L_ELBOW).is_some());
+        assert!(r.tear_bone(L_SHOULDER, L_ELBOW).is_none(), "cannot tear twice");
         // Pull the arm away hard; it should go, the torso should not follow.
         for _ in 0..240 {
             r.step(1.0 / 120.0, |_, _| -100.0, |i, _| if i == L_ELBOW || i == L_HAND { DVec3::new(-60.0, 0.0, 0.0) } else { DVec3::ZERO });

@@ -66,6 +66,12 @@
   };
   addEventListener('pointerdown', unlockAudio, { capture: true });
   addEventListener('keydown', unlockAudio, { capture: true });
+  // Coming back to the tab: browsers may have suspended the sound.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && window.wormsignAudio && window.wormsignAudio.state === 'suspended') {
+      window.wormsignAudio.resume().catch(() => {});
+    }
+  });
 
   // The game calls this once its first frame of terrain is up.
   window.wormsignReady = () => loading.classList.add('gone');

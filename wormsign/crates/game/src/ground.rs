@@ -19,9 +19,13 @@ use bevy::platform::time::Instant;
 use bevy::prelude::*;
 use wormsign_core::glam::DVec3;
 use wormsign_core::lod::{desired_tiles, TileKey};
-use wormsign_core::tilemesh::build_tile;
+use wormsign_core::shade::HeightCache;
+use wormsign_core::tilemesh::build_tile_shaded;
+use bevy::pbr::{ExtendedMaterial, MaterialExtension};
+use bevy::render::render_resource::{AsBindGroup, ShaderType};
+use bevy::shader::ShaderRef;
 
-use crate::world::{Desert, OriginAnchor, Phase, WorldPos};
+use crate::world::{Desert, Origin, OriginAnchor, Phase, WorldPos};
 
 /// Milliseconds of tile building per frame once the game is running.
 const BUDGET_MS: f64 = 4.0;
@@ -34,9 +38,12 @@ pub struct GroundPlugin;
 
 impl Plugin for GroundPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<Tiles>()
+        bevy::asset::embedded_asset!(app, "sand.wgsl");
+        app.add_plugins(MaterialPlugin::<SandMaterial>::default())
+            .init_resource::<Tiles>()
             .add_systems(Startup, setup_material)
-            .add_systems(Update, stream.after(Phase::Simulate).before(Phase::Place));
+            .add_systems(Update, stream.after(Phase::Simulate).before(Phase::Place))
+            .add_systems(Update, sand_params.in_set(Phase::View));
     }
 }
 
@@ -46,7 +53,9 @@ pub struct Tiles {
     desired: Vec<TileKey>,
     desired_set: HashSet<TileKey>,
     planned_at: Option<DVec3>,
-    material: Handle<StandardMaterial>,
+    material: Handle<SandMaterial>,
+    /// Heights shared between tiles for the shadow march.
+    cache: HeightCache,
     /// True once everything wanted at startup has been built.
     pub ready: bool,
     /// Fraction of the desired set that is built, for the loading bar.
@@ -56,7 +65,7 @@ pub struct Tiles {
 
 impl Tiles {
     /// The sand material, shared with anything that must match the ground.
-    pub fn material(&self) -> Handle<StandardMaterial> {
+    pub fn material(&self) -> Handle<SandMaterial> {
         self.material.clone()
     }
 
@@ -70,13 +79,85 @@ impl Tiles {
 #[allow(dead_code)]
 pub struct Tile(pub TileKey);
 
-pub fn setup_material(mut tiles: ResMut<Tiles>, mut materials: ResMut<Assets<StandardMaterial>>) {
-    tiles.material = materials.add(StandardMaterial {
-        base_color: Color::WHITE,
-        perceptual_roughness: 0.94,
-        reflectance: 0.18,
-        ..default()
+/// The ground's material: standard lighting plus the sand shader.
+pub type SandMaterial = ExtendedMaterial<StandardMaterial, SandExt>;
+
+#[derive(Asset, AsBindGroup, Reflect, Debug, Clone, Default)]
+pub struct SandExt {
+    #[uniform(100)]
+    pub p: SandParams,
+}
+
+/// Mirrors `SandParams` in sand.wgsl.
+#[derive(ShaderType, Reflect, Debug, Clone, Default)]
+pub struct SandParams {
+    pub sun: Vec4,
+    pub wind: Vec4,
+    pub ripple: Vec4,
+    pub n0: Vec4,
+    pub n1: Vec4,
+    pub n2: Vec4,
+    pub n3: Vec4,
+    pub fade: Vec4,
+}
+
+impl MaterialExtension for SandExt {
+    fn fragment_shader() -> ShaderRef {
+        "embedded://wormsign/sand.wgsl".into()
+    }
+}
+
+/// Noise frequencies and ripple wavelengths; must match sand.wgsl.
+const FREQS: [f64; 4] = [0.476, 0.0526, 0.00435, 0.303];
+const RIPPLES: [f64; 2] = [0.32, 1.9];
+
+impl SandParams {
+    /// Everything that depends on where the floating origin is, split so the
+    /// shader's noise stays put in the world when the origin moves.
+    fn at_origin(origin: DVec3, wind: (f64, f64)) -> Self {
+        let s = wormsign_core::shade::sun_dir();
+        let split = |f: f64| {
+            let (x, z) = (origin.x * f, origin.z * f);
+            Vec4::new((x - x.floor()) as f32, (z - z.floor()) as f32, x.floor() as f32, z.floor() as f32)
+        };
+        let along = origin.x * wind.0 + origin.z * wind.1;
+        let ph = |l: f64| ((along / l) - (along / l).floor()) as f32;
+        Self {
+            // Lit is ambient + direct; the ratio sets how dark baked shade is.
+            sun: Vec4::new(s[0] as f32, s[1] as f32, s[2] as f32, 7.5),
+            wind: Vec4::new(wind.0 as f32, wind.1 as f32, -wind.1 as f32, wind.0 as f32),
+            ripple: Vec4::new(ph(RIPPLES[0]), ph(RIPPLES[1]), 0.0, 0.0),
+            n0: split(FREQS[0]),
+            n1: split(FREQS[1]),
+            n2: split(FREQS[2]),
+            n3: split(FREQS[3]),
+            // The shadow map covers ~800 m; baked shade takes over beyond.
+            fade: Vec4::new(420.0, 720.0, 0.0, 0.0),
+        }
+    }
+}
+
+pub fn setup_material(mut tiles: ResMut<Tiles>, desert: Res<Desert>, mut materials: ResMut<Assets<SandMaterial>>) {
+    tiles.material = materials.add(ExtendedMaterial {
+        base: StandardMaterial {
+            base_color: Color::WHITE,
+            perceptual_roughness: 0.92,
+            reflectance: 0.2,
+            ..default()
+        },
+        extension: SandExt { p: SandParams::at_origin(DVec3::ZERO, desert.0.wind()) },
     });
+}
+
+/// Keep the shader's world-space noise anchored when the origin jumps.
+fn sand_params(origin: Res<Origin>, desert: Res<Desert>, tiles: Res<Tiles>, mut materials: ResMut<Assets<SandMaterial>>, mut last: Local<Option<DVec3>>) {
+    if *last == Some(origin.0) {
+        return;
+    }
+    if let Some(mut m) = materials.get_mut(&tiles.material) {
+        m.extension.p = SandParams::at_origin(origin.0, desert.0.wind());
+        *last = Some(origin.0);
+    }
 }
 
 /// Does one tile overlap the other? In a quadtree, only if one contains the
@@ -121,7 +202,10 @@ fn stream(
         if built_now > 0 && start.elapsed().as_secs_f64() * 1000.0 > budget {
             break;
         }
-        let tm = build_tile(&desert.0, key);
+        let tm = {
+            let t = &mut *tiles;
+            build_tile_shaded(&desert.0, key, &mut t.cache)
+        };
         let mesh = to_mesh(&tm);
         let (ox, oz) = key.origin();
         let e = commands
@@ -190,21 +274,23 @@ fn to_mesh(tm: &wormsign_core::tilemesh::TileMesh) -> Mesh {
     let sand_lit = Vec3::new(0.50, 0.31, 0.15);
     let sand_steep = Vec3::new(0.47, 0.28, 0.13);
     let rock_col = Vec3::new(0.12, 0.075, 0.05);
-    let colors: Vec<[f32; 4]> = tm
-        .normals
-        .iter()
-        .zip(&tm.rock)
-        .map(|(n, &r)| {
+    // Colour in rgb, the baked sun visibility in alpha; rock weight and
+    // curvature ride in the UV for the shader.
+    let colors: Vec<[f32; 4]> = (0..tm.positions.len())
+        .map(|i| {
+            let n = tm.normals[i];
             let steep = ((1.0 - n[1]) * 3.2).clamp(0.0, 1.0);
             let sand = sand_lit.lerp(sand_steep, steep);
-            let c = sand.lerp(rock_col, r.clamp(0.0, 1.0));
-            [c.x, c.y, c.z, 1.0]
+            let c = sand.lerp(rock_col, tm.rock[i].clamp(0.0, 1.0));
+            [c.x, c.y, c.z, tm.sun[i]]
         })
         .collect();
+    let uvs: Vec<[f32; 2]> = (0..tm.positions.len()).map(|i| [tm.rock[i], tm.curv[i].clamp(-2.0, 2.0)]).collect();
     Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::RENDER_WORLD)
         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, tm.positions.clone())
         .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, tm.normals.clone())
         .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
         .with_inserted_indices(Indices::U32(tm.indices.clone()))
 }
 
