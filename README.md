@@ -30,6 +30,24 @@ Live: https://daxjdavis526.github.io/Projects/peraspera/
 See [peraspera/README.md](peraspera/README.md) for the controls, how it is
 built, and what in it is real.
 
+## worldline/
+
+**WORLDLINE** — an animated short film, about twenty-one minutes long, that
+teaches general relativity: special relativity from a light clock, spacetime
+and the twins, the equivalence principle and GPS, curvature, the metric and
+Einstein's equations, black holes, gravitational waves, cosmology, the
+evidence and the open problems. The pictures are computed from the equations
+they illustrate (light clocks, Lorentz transformations, light rays and orbits
+around a Schwarzschild black hole, the inspiral chirp, ΛCDM expansion), the
+equations are typeset with KaTeX, and the light clocks, the clocks near the
+black hole and the gravitational-wave chirp are audible. Companion to the
+guide in `reports/`.
+
+Live: https://daxjdavis526.github.io/Projects/worldline/
+
+See [worldline/README.md](worldline/README.md) for the controls, how it is
+built, and what in it is computed versus drawn.
+
 ## blackhole/
 
 **BLACK HOLE EXPLORER** — a real-time Kerr black hole rendered by tracing

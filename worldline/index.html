@@ -1,0 +1,109 @@
+<!doctype html>
+<!-- =============================================================================
+     WORLDLINE — a short film about general relativity, drawn and scored live in
+     the browser. Every frame is painted on a canvas from src/scenes/, every
+     moving picture is computed by src/physics.js, the equations are typeset by
+     KaTeX, and every sound is synthesised by src/score.js.
+     ========================================================================== -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Worldline</title>
+<meta name="description" content="A short animated film that teaches general relativity: light clocks, spacetime, the equivalence principle, curvature, Einstein's equations, black holes, gravitational waves, cosmology and the open questions.">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<style>
+@font-face{font-family:"Cormorant Garamond";font-style:normal;font-weight:300 700;font-display:block;src:url(vendor/fonts/CormorantGaramond.woff2) format("woff2")}
+@font-face{font-family:"Cormorant Garamond";font-style:italic;font-weight:300 700;font-display:block;src:url(vendor/fonts/CormorantGaramond-Italic.woff2) format("woff2")}
+@font-face{font-family:Jost;font-style:normal;font-weight:100 900;font-display:block;src:url(vendor/fonts/Jost.woff2) format("woff2")}
+
+:root{--ink:#eaf0f8;--dim:#8f9bb3;--accent:#6fa8ff;--gold:#f2c14e}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;color:var(--ink);
+  font-family:Jost,"Avenir Next","Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+canvas{display:block;position:fixed;inset:0}
+body.still #ui{display:none}
+
+/* the typeset equations, laid out in the film's 1920 × 1080 frame */
+#eqs{position:fixed;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;pointer-events:none;overflow:hidden}
+.eq{position:absolute;transform:translate(-50%,-50%);color:#eef3fb;white-space:nowrap;visibility:hidden;text-shadow:0 0 18px rgba(0,0,0,.9)}
+.eq .katex-display{margin:0}
+.eq.box{background:rgba(9,15,30,.84);border:1px solid rgba(143,179,227,.32);border-left:4px solid var(--accent);border-radius:12px;padding:.32em .7em;text-shadow:none}
+
+#ui{position:fixed;inset:0;pointer-events:none}
+#ui button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;pointer-events:auto}
+
+#intro{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 60%,rgba(20,32,64,.6),rgba(0,0,0,.94) 70%);transition:opacity 1.6s ease;pointer-events:auto;text-align:center;padding:0 16px}
+#ui.started #intro{opacity:0;pointer-events:none}
+#intro h1{margin:0;font-family:"Cormorant Garamond",Georgia,serif;font-weight:400;font-size:clamp(44px,8vw,104px);letter-spacing:.24em;text-indent:.24em}
+#intro .sub{margin:.5em 0 2.6em;font-family:"Cormorant Garamond",Georgia,serif;font-style:italic;font-size:clamp(18px,2.4vw,28px);color:var(--dim)}
+#start{border:1px solid rgba(234,240,248,.35)!important;border-radius:999px;padding:.85em 2.3em;letter-spacing:.3em;text-indent:.3em;font-size:14px;text-transform:uppercase;transition:background .3s,border-color .3s}
+#start:hover,#start:focus-visible{background:rgba(234,240,248,.08);border-color:var(--gold)!important;outline:none}
+#intro .note{margin-top:2.2em;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#66708a}
+
+#bar-wrap{position:absolute;left:0;right:0;bottom:0;padding:40px max(16px,4vw) max(18px,env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,rgba(0,0,0,.7));opacity:0;transition:opacity .6s ease;pointer-events:none}
+#ui.started.awake #bar-wrap,#ui.started:not(.playing) #bar-wrap{opacity:1;pointer-events:auto}
+#bar{position:relative;height:18px;cursor:pointer;touch-action:none}
+#track{position:absolute;left:0;right:0;top:8px;height:2px;background:rgba(234,240,248,.18)}
+#fill{position:absolute;left:0;top:0;bottom:0;background:var(--gold)}
+#ticks i{position:absolute;top:5px;width:1px;height:8px;background:rgba(234,240,248,.45)}
+#row{display:flex;align-items:center;gap:18px;margin-top:8px;font-size:13px;letter-spacing:.12em}
+#row .grow{flex:1;color:var(--dim);text-transform:uppercase;font-size:12px;letter-spacing:.24em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#time{color:var(--dim);font-variant-numeric:tabular-nums}
+#row button{width:32px;height:32px;display:grid;place-items:center;opacity:.85}
+#row button:hover{opacity:1}
+#row svg{width:18px;height:18px;fill:currentColor}
+#play .pause{display:none}
+#ui.playing #play .pause{display:block}
+#ui.playing #play .tri{display:none}
+#mute.off .on{display:none}
+#mute:not(.off) .offi{display:none}
+
+#end{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);opacity:0;transition:opacity 2s ease 1s;pointer-events:none}
+#ui.ended #end{opacity:1;pointer-events:auto}
+#replay{border:1px solid rgba(234,240,248,.3)!important;border-radius:999px;padding:.7em 2em;letter-spacing:.3em;font-size:12px;text-transform:uppercase;white-space:nowrap}
+
+@media (max-width:620px){#row{gap:10px}#row .grow{letter-spacing:.14em}}
+</style>
+</head>
+<body>
+<canvas id="film" aria-label="Worldline, an animated short film about general relativity"></canvas>
+<div id="eqs" aria-hidden="true"></div>
+
+<div id="ui">
+  <div id="intro">
+    <h1>WORLDLINE</h1>
+    <p class="sub">a short film about general relativity</p>
+    <button id="start" autofocus>Begin</button>
+    <p class="note">About twenty minutes &middot; sound on &middot; F for full screen</p>
+  </div>
+
+  <div id="end"><button id="replay">Watch again</button></div>
+
+  <div id="bar-wrap">
+    <div id="bar"><div id="track"><div id="fill"></div></div><div id="ticks"></div></div>
+    <div id="row">
+      <button id="play" aria-label="Play or pause">
+        <svg class="tri" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg>
+        <svg class="pause" viewBox="0 0 24 24"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg>
+      </button>
+      <span id="time">0:00</span>
+      <span class="grow" id="chapter"></span>
+      <button id="mute" aria-label="Sound on or off">
+        <svg class="on" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M4 9h4l5-4v14l-5-4H4z"/></svg>
+        <svg class="offi" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+      <button id="fs" aria-label="Full screen">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/katex/katex.min.js"></script>
+<script type="module" src="src/film.js"></script>
+</body>
+</html>
