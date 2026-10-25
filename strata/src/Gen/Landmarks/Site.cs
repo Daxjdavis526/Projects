@@ -3,10 +3,20 @@ using Godot;
 
 namespace Strata;
 
+/// <summary>What a world's landmark site holds.</summary>
+public enum SiteKind
+{
+    /// <summary>Castle Vorhaal on its crag, the dead village, and the launch complex.</summary>
+    Showcase,
+    /// <summary>The launch complex and an observatory, under Gargantua: no castle.</summary>
+    Gargantua,
+}
+
 /// <summary>
 /// The showcase landmarks of a world created with them: Castle Vorhaal on
 /// its crag above a dead village, and the launch complex out on the plain to
-/// the east. The site reshapes the terrain under both (a mountain with sheer
+/// the east. A Gargantua world keeps only the launch complex, and adds an
+/// observatory on the plain south-west of it where a new player arrives. The site reshapes the terrain under both (a mountain with sheer
 /// cliffs, a rock spur for the approach road, a gorge, a flat plain) and
 /// stamps the buildings into every column it touches as that column is
 /// generated. Everything is laid out once, deterministically, the first time
@@ -27,6 +37,11 @@ public sealed class LandmarkSite
     public const int LookoutTop = 99;        // first air on the watchtower's platform, where a new player arrives
     public static readonly Vector2I PadCentre = new(236, 34);      // the rocket stands here
     public static readonly Vector2I ComplexCentre = new(236, 34);
+    public static readonly Vector2I Observatory = new(170, 150);    // a Gargantua world's arrival tower
+    public const int ObservatoryTop = Valley + 17;                  // first air on its deck
+
+    public readonly SiteKind Kind;
+    public bool HasCastle => Kind == SiteKind.Showcase;
 
     public readonly WorldGen Gen;
     public readonly int Ox, Oz;             // world position of the local origin
@@ -35,13 +50,16 @@ public sealed class LandmarkSite
     private volatile Canvas _canvas;
     private readonly int _minCx, _maxCx, _minCz, _maxCz;
 
-    /// <summary>Where a new player starts: at the head of the village street, facing the castle.</summary>
-    public Vector3 Spawn => new(Ox + Lookout.X + 0.5f, LookoutTop, Oz + Lookout.Y + 0.5f);
+    /// <summary>Where a new player starts: on the watchtower above the village facing the castle, or on the observatory's deck.</summary>
+    public Vector3 Spawn => HasCastle
+        ? new(Ox + Lookout.X + 0.5f, LookoutTop, Oz + Lookout.Y + 0.5f)
+        : new(Ox + Observatory.X + 0.5f, ObservatoryTop, Oz + Observatory.Y + 0.5f);
     public Vector3 PadWorld => new(Ox + PadCentre.X + 0.5f, LaunchComplex.Deck, Oz + PadCentre.Y + 0.5f);
 
-    public LandmarkSite(WorldGen gen)
+    public LandmarkSite(WorldGen gen, SiteKind kind = SiteKind.Showcase)
     {
         Gen = gen;
+        Kind = kind;
         _n1 = new Simplex(gen.Seed * 7 + 101);
         _n2 = new Simplex(gen.Seed * 7 + 102);
         _n3 = new Simplex(gen.Seed * 7 + 103);
@@ -78,6 +96,13 @@ public sealed class LandmarkSite
     /// <summary>How much of the site's terrain replaces the natural terrain here: 1 inside, falling to 0 at the edge.</summary>
     public float Weight(int lx, int lz)
     {
+        if (!HasCastle)
+        {
+            float pad = 1f - Smooth.Step(125f, 170f, Dist(lx, lz, ComplexCentre.X, ComplexCentre.Y));
+            float tower = 1f - Smooth.Step(40f, 80f, Dist(lx, lz, Observatory.X, Observatory.Y));
+            float way = 1f - Smooth.Step(40f, 70f, SegDist(lx, lz, Observatory.X, Observatory.Y, ComplexCentre.X, ComplexCentre.Y));
+            return Math.Max(pad, Math.Max(tower, way));
+        }
         float castle = 1f - Smooth.Step(185f, 235f, Dist(lx, lz, 0, 40));
         float complex = 1f - Smooth.Step(125f, 170f, Dist(lx, lz, ComplexCentre.X, ComplexCentre.Y));
         float corridor = 1f - Smooth.Step(60f, 100f, SegDist(lx, lz, 20, 130, ComplexCentre.X - 60, ComplexCentre.Y + 20));
@@ -100,6 +125,13 @@ public sealed class LandmarkSite
         float hills = _n2.Fbm2(lx / 90.0, lz / 90.0, 3) * 4f + _n3.Fbm2(lx / 23.0, lz / 23.0, 2) * 1.2f;
         float flat = Math.Max(1f - Smooth.Step(95f, 125f, Dist(lx, lz, ComplexCentre.X, ComplexCentre.Y)),
             1f - Smooth.Step(28f, 44f, Dist(lx, lz, VillageCentre.X, VillageCentre.Y)) * 0.8f);
+        if (!HasCastle)
+        {
+            // Open plain: flat round the complex and the observatory, gently rolling between.
+            float level = Math.Max(1f - Smooth.Step(95f, 125f, Dist(lx, lz, ComplexCentre.X, ComplexCentre.Y)),
+                1f - Smooth.Step(22f, 40f, Dist(lx, lz, Observatory.X, Observatory.Y)));
+            return Math.Clamp((int)MathF.Floor(Valley + hills * (1f - level) - 0.5f), 5, V.Height - 20);
+        }
         float h = Valley + hills * (1f - flat) - 0.5f;
 
         // The crag: a flat top, sheer cliffs with ledges, a skirt of scree.
@@ -141,7 +173,7 @@ public sealed class LandmarkSite
     }
 
     /// <summary>Near the castle the land is dead: greys and browns instead of green.</summary>
-    public float Gloom(int lx, int lz) => 1f - Smooth.Step(150f, 210f, Dist(lx, lz, 0, 30));
+    public float Gloom(int lx, int lz) => HasCastle ? 1f - Smooth.Step(150f, 210f, Dist(lx, lz, 0, 30)) : 0f;
 
     private static float Dist(float x, float z, float cx, float cz) => MathF.Sqrt((x - cx) * (x - cx) + (z - cz) * (z - cz));
 
@@ -166,10 +198,14 @@ public sealed class LandmarkSite
                 {
                     var sw = System.Diagnostics.Stopwatch.StartNew();
                     var c = new Canvas(Ox, Oz);
-                    var rng = new Rng(Hash.Of(Gen.Seed, 0x5A17E, 0, 0));
-                    new Surroundings(this, c, rng).Build();
-                    new Castle(this, c, new Rng(Hash.Of(Gen.Seed, 0xCA571E, 0, 0))).Build();
+                    if (HasCastle)
+                    {
+                        var rng = new Rng(Hash.Of(Gen.Seed, 0x5A17E, 0, 0));
+                        new Surroundings(this, c, rng).Build();
+                        new Castle(this, c, new Rng(Hash.Of(Gen.Seed, 0xCA571E, 0, 0))).Build();
+                    }
                     new LaunchComplex(this, c, new Rng(Hash.Of(Gen.Seed, 0x1A0C4, 0, 0))).Build();
+                    if (!HasCastle) new Observatory(this, c, new Rng(Hash.Of(Gen.Seed, 0x0B5E7, 0, 0))).Build();
                     _canvas = c;
                     GD.Print($"landmarks laid out: {c.Cells} blocks in {c.Columns.Count} columns, {sw.ElapsedMilliseconds} ms, at {Ox}, {Oz}");
                 }
@@ -252,7 +288,7 @@ public sealed class LandmarkSite
     private void Rebuild(ushort[] b, int ci, int x, int z, int ground, int clearTo, float w)
     {
         float u = CragU(x, z);
-        bool crag = u < 1.8f || Dist(x, z, SpurCentre.X, SpurCentre.Y) < SpurRadius + 17;
+        bool crag = HasCastle && (u < 1.8f || Dist(x, z, SpurCentre.X, SpurCentre.Y) < SpurRadius + 17);
         // Steepness from the neighbours, to put bare rock on cliffs and soil on flats.
         int hx = Height(x + 1, z), hz = Height(x, z + 1), hx0 = Height(x - 1, z), hz0 = Height(x, z - 1);
         int slope = Math.Max(Math.Max(Math.Abs(hx - hx0), Math.Abs(hz - hz0)), 0);

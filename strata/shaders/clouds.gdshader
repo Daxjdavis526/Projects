@@ -10,6 +10,9 @@ global uniform vec4 sky_top;
 global uniform float cloud_cover;
 global uniform vec4 cloud_shade;
 global uniform float underwater;
+global uniform float bh_on;
+global uniform vec3 bh_centre;
+global uniform float bh_m;
 
 uniform vec2 wind = vec2(1.6, 0.6);
 uniform float cell = 12.0;
@@ -50,4 +53,14 @@ void fragment() {
     vec3 col = mix(sky_horizon.rgb, lit * cloud_shade.rgb, 0.85) * (0.86 + 0.14 * edge);
     ALBEDO = safe_color(col, 1.0);
     ALPHA = mix(0.7, 0.82, day) * fade * (underwater > 0.5 ? 0.0 : 1.0);
+    // The deck parts round Gargantua, wherever it is seen from: cloud past it (looking down from up
+    // near it) would be hidden or bent round it, and cloud across it from the ground would break up
+    // its shape. (The second is a liberty: real cloud would cross in front.)
+    if (bh_on > 0.5) {
+        vec3 ro = CAMERA_POSITION_WORLD;
+        vec3 d = normalize(v_world - ro);
+        vec3 oc = bh_centre - ro;
+        float tc = dot(oc, d);
+        if (tc > 0.0) ALPHA *= smoothstep(16.0, 24.0, length(oc - d * tc) / bh_m);
+    }
 }

@@ -233,7 +233,14 @@ public sealed partial class MainMenu : Control
             var m = WorldSave.Create(n, seed.Text, landmarks: true, creative: mode.Selected == 1);
             App.StartGame(m);
         }));
-        var note = UiStyle.Label("A showcase world has Castle Vorhaal on its crag and a rocket launch complex on the plain beside it. A render distance of 14 or more shows them best.", 14, UiStyle.TextDim);
+        col.AddChild(UiStyle.Button("Create Gargantua World", () =>
+        {
+            string n = name.Text == "New World" ? "Gargantua" : name.Text;
+            var m = WorldSave.Create(n, seed.Text, creative: mode.Selected == 1, gargantua: true);
+            App.StartGame(m);
+        }));
+        var note = UiStyle.Label("A showcase world has Castle Vorhaal on its crag and a rocket launch complex on the plain beside it. A render distance of 14 or more shows them best. "
+            + "A Gargantua world has a supermassive black hole in the sky over a launch complex: fly a rocket (or yourself, in creative) through its event horizon.", 14, UiStyle.TextDim);
         note.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         note.CustomMinimumSize = new Vector2(480, 0);
         col.AddChild(note);

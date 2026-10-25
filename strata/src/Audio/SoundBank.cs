@@ -85,6 +85,12 @@ public static class SoundBank
         Add("explosion", Explosion(7f, 1));
         Add("explosion_small", Explosion(2.5f, 2));
         Add("metal_crunch", Crunch2());
+
+        // Gargantua and the tesseract.
+        AddLoop("amb_gargantua", GargantuaRumble(10f));
+        AddLoop("tesseract_drone", TesseractDrone(16f));
+        Add("horizon", HorizonRush());
+        Add("tesseract_fold", Fold());
         GD.Print($"sound bank: {_bank.Count} sounds in {sw.ElapsedMilliseconds} ms");
     }
 
@@ -726,6 +732,118 @@ public static class SoundBank
             s[i] = f.Low(n.Next()) * (0.7f + 0.3f * MathF.Sin(t * 0.9f)) * 0.9f;
         }
         return Seamless(s, 1f);
+    }
+
+    // --- Gargantua and the tesseract ----------------------------------------------------------
+
+    /// <summary>A frequency rounded to a whole number of cycles in `len` seconds, so a loop of that length has no seam.</summary>
+    private static float Whole(float hz, float len) => MathF.Max(1f, MathF.Round(hz * len)) / len;
+
+    /// <summary>The black hole's presence: a deep, slow-beating rumble with a faint hiss of hot gas above it.</summary>
+    private static float[] GargantuaRumble(float len)
+    {
+        var s = Buf(len + 1f);
+        var n = new Noise(501);
+        var lo = new Svf(55, 0.7f);
+        var hiss = new Svf(3200, 0.6f);
+        float a = Whole(31f, len), b = Whole(46.5f, len), beat = Whole(0.2f, len);
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float swell = 0.7f + 0.3f * MathF.Sin(t * beat * MathF.Tau);
+            s[i] = lo.Low(n.Next()) * 2.2f * swell
+                + (MathF.Sin(t * a * MathF.Tau) * 0.35f + MathF.Sin(t * b * MathF.Tau) * 0.18f) * swell
+                + hiss.Band(n.Next()) * 0.05f;
+        }
+        return Seamless(s, 1f);
+    }
+
+    /// <summary>
+    /// The tesseract's drone: an organ-like chord on A (A1 E2 A2 B2 E3 F#3 A3)
+    /// built from partials, each voice doubled a fraction of a hertz apart so it
+    /// beats slowly, each swelling at its own slow rate; over it a high shimmer
+    /// that comes and goes. Every frequency is a whole number of cycles in the
+    /// loop, so it repeats without a seam (the breath of noise under it is cross-faded across the join).
+    /// </summary>
+    private static float[] TesseractDrone(float len)
+    {
+        var s = Buf(len + 1f);
+        float[] notes = { 55f, 82.41f, 110f, 123.47f, 164.81f, 185f, 220f };
+        float[] level = { 0.55f, 0.4f, 0.35f, 0.18f, 0.22f, 0.12f, 0.12f };
+        var n = new Noise(611);
+        var air = new Svf(900, 0.7f);
+        for (int v = 0; v < notes.Length; v++)
+        {
+            float swell = Whole(0.05f + 0.025f * v, len), phase = v * 1.7f;
+            for (int k = 1; k <= 5; k++)
+            {
+                float amp = level[v] / (k * k * 0.8f + 0.2f) * (k == 2 ? 1.3f : 1f);
+                float f1 = Whole(notes[v] * k, len), f2 = Whole(notes[v] * k + 0.18f + 0.06f * v, len);
+                for (int i = 0; i < s.Length; i++)
+                {
+                    float t = i / (float)Rate;
+                    float env = 0.55f + 0.45f * MathF.Sin(t * swell * MathF.Tau + phase);
+                    s[i] += (MathF.Sin(t * f1 * MathF.Tau) + MathF.Sin(t * f2 * MathF.Tau + k)) * amp * env * 0.5f;
+                }
+            }
+        }
+        float[] glints = { 1760f, 2217.5f, 2637f, 3322f };
+        for (int g = 0; g < glints.Length; g++)
+        {
+            float f = Whole(glints[g], len), tr = Whole(5.5f + g, len), come = Whole(0.125f * (g + 1), len);
+            for (int i = 0; i < s.Length; i++)
+            {
+                float t = i / (float)Rate;
+                float on = MathF.Max(0f, MathF.Sin(t * come * MathF.Tau + g * 2f));
+                s[i] += MathF.Sin(t * f * MathF.Tau) * (0.6f + 0.4f * MathF.Sin(t * tr * MathF.Tau)) * on * on * on * 0.035f;
+            }
+        }
+        // A breath of air under it all.
+        for (int i = 0; i < s.Length; i++) s[i] += air.Band(n.Next()) * 0.04f;
+        return Seamless(s, 1f);
+    }
+
+    /// <summary>Falling through the horizon: a rising roar, a tone sweeping up, then a deep boom and silence.</summary>
+    private static float[] HorizonRush()
+    {
+        const float len = 7.5f;
+        var s = Buf(len);
+        var n = new Noise(701);
+        var band = new Svf(200, 2f);
+        var lo = new Svf(60, 0.8f);
+        float phase = 0f;
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float rise = MathF.Min(1f, t / 4.3f);
+            band.Set(150f + 3000f * rise * rise, 2.5f);
+            float roar = band.Band(n.Next()) * rise * rise * (t < 4.4f ? 1f : MathF.Exp(-(t - 4.4f) * 9f));
+            phase += (80f + 900f * rise * rise * rise) / Rate;
+            float tone = MathF.Sin(phase * MathF.Tau) * rise * 0.35f * (t < 4.4f ? 1f : MathF.Exp(-(t - 4.4f) * 12f));
+            float boom = t > 4.35f ? (lo.Low(n.Next()) * 6f + MathF.Sin((t - 4.35f) * 38f * MathF.Tau) * 0.8f) * MathF.Exp(-(t - 4.35f) * 1.1f) : 0f;
+            s[i] = roar * 0.7f + tone + boom;
+        }
+        FadeEdges(s, 20f);
+        return s;
+    }
+
+    /// <summary>The tesseract folding shut: a chord swelling up out of nothing, then one clear chime.</summary>
+    private static float[] Fold()
+    {
+        const float len = 5.5f;
+        var s = Buf(len);
+        float[] chord = { 220f, 277.18f, 329.63f, 440f, 554.37f };
+        for (int i = 0; i < s.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float swell = t < 3.2f ? MathF.Pow(t / 3.2f, 2.5f) : MathF.Exp(-(t - 3.2f) * 2.5f);
+            float v = 0f;
+            for (int k = 0; k < chord.Length; k++) v += MathF.Sin(t * chord[k] * (1f + 0.02f * swell) * MathF.Tau + k) / (k + 1.5f);
+            float chime = t > 3.2f ? (MathF.Sin((t - 3.2f) * 1760f * MathF.Tau) + 0.4f * MathF.Sin((t - 3.2f) * 2640f * MathF.Tau)) * MathF.Exp(-(t - 3.2f) * 1.6f) * 0.5f : 0f;
+            s[i] = v * swell * 0.5f + chime;
+        }
+        FadeEdges(s, 20f);
+        return s;
     }
 
     // --- rockets --------------------------------------------------------------------------

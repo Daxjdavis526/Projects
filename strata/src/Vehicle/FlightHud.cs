@@ -172,7 +172,8 @@ public sealed partial class FlightHud : Control
     /// Looking down the rocket's axis from above: the centre is straight up,
     /// the rings are 30 and 60 degrees of tilt, the edge is level. The nose
     /// is the solid marker and the flight path the hollow one, both turned so
-    /// the top of the dial is the way the camera faces.
+    /// the top of the dial is the way the camera faces. In a Gargantua world a
+    /// ring-and-dot marks the direction of the black hole, to steer for.
     /// </summary>
     private void DrawTilt(Rocket r, Vector2 c, float rad)
     {
@@ -204,8 +205,16 @@ public sealed partial class FlightHud : Control
             var vpnt = Place(r.Body.Vel);
             DrawArc(vpnt, 8, 0, MathF.Tau, 16, r.Body.Vel.Y >= 0 ? UiStyle.Good : Alarm, 2f);
         }
+        bool hole = Game.World.Gargantua != null;
+        if (hole)
+        {
+            var gp = Place(Game.World.Gargantua.Centre - r.Body.Position);
+            var amber = new Color(1f, 0.72f, 0.3f);
+            DrawArc(gp, 9, 0, MathF.Tau, 20, amber, 2f);
+            DrawCircle(gp, 3.5f, Colors.Black);
+        }
         float tiltDeg = Mathf.RadToDeg(MathF.Acos(Math.Clamp(nose.Y, -1f, 1f)));
         Text(new Vector2(c.X - rad, c.Y + rad + 30), $"TILT {tiltDeg:0}°", 17, tiltDeg > 60 ? Warn : Ink, HorizontalAlignment.Center, rad * 2);
-        Text(new Vector2(c.X - rad, c.Y - rad - 14), "nose ●   path ○", 14, Dim, HorizontalAlignment.Center, rad * 2);
+        Text(new Vector2(c.X - rad - 40, c.Y - rad - 14), hole ? "nose ●   path ○   Gargantua ◉" : "nose ●   path ○", 14, Dim, HorizontalAlignment.Center, rad * 2 + 80);
     }
 }

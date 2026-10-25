@@ -8,7 +8,9 @@ namespace Strata;
 /// Development aid: flies a camera to viewpoints in a fixed world, waits for
 /// the terrain to finish streaming at each, and saves a screenshot. With
 /// --tour it goes looking for every biome, a cave, a ruin and a mountain range.
-/// Run with: godot --path strata -- --shots [outdir] [--seed S] [--tour]
+/// With --gargantua it makes a Gargantua world and looks at the black hole
+/// from the observatory at four times of day, then from ever closer in.
+/// Run with: godot --path strata -- --shots [outdir] [--seed S] [--tour | --landmarks | --gargantua]
 /// </summary>
 public partial class ShotDirector : Node3D
 {
@@ -27,7 +29,7 @@ public partial class ShotDirector : Node3D
     public override void _Ready()
     {
         var args = OS.GetCmdlineUserArgs();
-        bool tour = false, landmarks = false;
+        bool tour = false, landmarks = false, gargantua = false;
         int radius = 10;
         string only = null;
         for (int i = 0; i < args.Length; i++)
@@ -36,6 +38,7 @@ public partial class ShotDirector : Node3D
             if (args[i] == "--seed" && i + 1 < args.Length) _seed = Hash.StringSeed(args[i + 1]);
             if (args[i] == "--tour") tour = true;
             if (args[i] == "--landmarks") landmarks = true;
+            if (args[i] == "--gargantua") gargantua = true;
             if (args[i] == "--radius" && i + 1 < args.Length) radius = int.Parse(args[i + 1]);
             if (args[i] == "--only" && i + 1 < args.Length) only = args[i + 1];
             if (args[i] == "--settle" && i + 1 < args.Length) _settle = double.Parse(args[i + 1], System.Globalization.CultureInfo.InvariantCulture);
@@ -49,7 +52,8 @@ public partial class ShotDirector : Node3D
 
         _cam = new Camera3D { Fov = 75, Far = 2400, Near = 0.05f };
         AddChild(_cam);
-        _world = new World(_seed, landmarks);
+        _world = new World(_seed, landmarks, gargantua);
+        Gargantua.Publish(_world.Gargantua);
         _view = new WorldView();
         AddChild(_view);
         _view.Init(_world, null, _cam, radius);
@@ -65,6 +69,12 @@ public partial class ShotDirector : Node3D
         {
             _shots.Add(("look", _look.Value.from, _look.Value.to, _lookTime, 1f));
             tour = true;   // no creatures
+        }
+        else if (gargantua)
+        {
+            GargantuaShots(_world.Gen.Landmarks, _world.Gargantua);
+            if (only != null) _shots.RemoveAll(s => !s.name.Contains(only));
+            tour = true;
         }
         else if (landmarks)
         {
@@ -137,6 +147,28 @@ public partial class ShotDirector : Node3D
         _shots.Add(("village", L(-30, 80, 170), L(0, 72, 140), 0.12f, 1f));
         _shots.Add(("complex", L(170, 110, 110), L(236, 80, 34), 0.24f, 1f));
         _shots.Add(("complex_night", L(190, 90, 90), L(236, 90, 34), 0.72f, 1f));
+    }
+
+    /// <summary>Gargantua from the observatory's deck by day and night, then on the way in.</summary>
+    private void GargantuaShots(LandmarkSite site, Gargantua bh)
+    {
+        var eye = site.Spawn + new Vector3(0, 1.62f, 0);
+        var c = bh.Centre;
+        var low = eye + (c - eye) * 0.55f + new Vector3(0, -(c.Y - eye.Y) * 0.25f, 0);   // a little below the centre, to keep the land in view
+        _shots.Add(("deck_morning", eye, low, 0.08f, 1f));
+        _shots.Add(("deck_noon", eye, low, 0.25f, 1f));
+        _shots.Add(("deck_dusk", eye, low, 0.47f, 1f));
+        _shots.Add(("deck_night", eye, low, 0.72f, 1f));
+        _shots.Add(("deck_night_full", eye, c, 0.75f, 1f));
+        var toward = (c - eye).Normalized();
+        float m = Gargantua.M;
+        _shots.Add(("approach_25M", c - toward * 25f * m, c, 0.75f, 1f));
+        _shots.Add(("approach_12M", c - toward * 12f * m + bh.Normal * 1.5f * m, c, 0.75f, 1f));
+        _shots.Add(("above_disk", c + bh.Normal * 18f * m + bh.DiskU * 6f * m, c, 0.75f, 1f));
+        _shots.Add(("in_disk_plane", c + bh.DiskV * 9f * m + bh.Normal * 0.3f * m, c, 0.75f, 1f));
+        _shots.Add(("photon_sphere", c - toward * 3.2f * m, c, 0.75f, 1f));
+        _shots.Add(("looking_out_at_2_3M", c - toward * 2.3f * m, c - toward * 10f * m, 0.75f, 1f));
+        _shots.Add(("deck_day_toward_pad", eye, new Vector3(site.PadWorld.X, site.PadWorld.Y + 20, site.PadWorld.Z), 0.2f, 1f));
     }
 
     private void BuildTour(WorldGen gen, int sx, int sz)

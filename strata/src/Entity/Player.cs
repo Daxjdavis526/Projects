@@ -114,8 +114,8 @@ public sealed partial class Player : Node3D
             Pitch -= mm.Relative.Y * s * (G.Settings.InvertY ? -1f : 1f);
             Pitch = Math.Clamp(Pitch, -89.5f, 89.5f);
         }
-        // Aboard, the mouse only looks around; the vehicle takes the keys.
-        if (Riding != null) return;
+        // Aboard, the mouse only looks around; the vehicle takes the keys. In the tesseract, the tesseract does.
+        if (Riding != null || G.InTesseract) return;
         if (e is InputEventMouseButton mb && mb.Pressed)
         {
             if (mb.ButtonIndex == MouseButton.WheelUp) SelectSlot((Selected + 8) % 9);
@@ -263,6 +263,12 @@ public sealed partial class Player : Node3D
                 if (Sprinting) { v.X += fwd.X * 1.4f; v.Z += fwd.Z * 1.4f; }
                 Vitals.Exhaust(Sprinting ? 0.2f : 0.05f);
             }
+        }
+        // Near Gargantua its pull adds to everything else: lighter on the ground beneath it, dragged in close to it.
+        if (W.Gargantua is Gargantua bh)
+        {
+            var pull = bh.Pull(b.Position + new Vector3(0, 0.9f, 0));
+            if (pull != Vector3.Zero) v += pull * dt;
         }
         b.Vel = v;
 

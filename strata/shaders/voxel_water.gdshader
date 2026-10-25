@@ -18,6 +18,7 @@ void vertex() {
 }
 
 void fragment() {
+    if (behind_gargantua(v_world, CAMERA_POSITION_WORLD)) discard;
     vec2 uv = UV;
     uv += vec2(sin(TIME * 0.4 + UV.y * 3.0), cos(TIME * 0.33 + UV.x * 3.0)) * 0.03 + vec2(TIME * 0.015, TIME * 0.01);
     vec4 tex = texture(blocks, vec3(uv, v_layer));
