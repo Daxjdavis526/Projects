@@ -89,7 +89,8 @@ function inspiral(g, t, A, a) {
     circle(g, cx, cy, 30, { fill: '#000', stroke: COL.gold, width: 2, alpha: a });
   }
   waveformPlot(g, 360, 720, 1200, 90, tt, a);
-  note(g, `slowed about ${Math.round(slow)}×: the last quarter-second before merger (leading-order inspiral; merger sketched)`, 960, 160, a);
+  note(g, `slowed about ${Math.round(slow)}×: the last quarter-second before merger`, 640, 150, a);
+  note(g, '(leading-order inspiral; merger and ring-down sketched)', 640, 184, a);
 }
 
 function interferometer(g, t, A, a) {
