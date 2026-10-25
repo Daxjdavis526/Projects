@@ -297,13 +297,16 @@ tiers, armour, a hunting bow, crafting, cooking, smelting, farming, crates,
 building, lumen circuits that work lamps and doors, death and respawn, and
 worlds that save and load, with a soundtrack of seven original pieces for a
 synthesised piano. Every texture, model, sound and note of music is generated
-by the game's own code.
+by the game's own code. Two special maps: a showcase world with a gothic castle
+and a flyable rocket, and a Gargantua world with a ray-traced supermassive
+black hole in the sky. Fly through its event horizon and you fall into a
+tesseract, an endless lattice sliced from four-dimensional space.
 
 Unlike everything else here, this one is a **desktop game** — a Godot 4 project
 in C# — so there is no live link. Open `strata/project.godot` in Godot 4.7
 (.NET edition), or export a standalone build for Windows or Linux with the
-included presets. 636 headless checks plus a scripted play-through that plays
-the whole survival loop, from the first tree to saving and reloading.
+included presets. 727 headless checks plus scripted play-throughs: the whole
+survival loop, a rocket flight, and a trip through Gargantua and back.
 
 See [strata/README.md](strata/README.md) for controls, how to build and play,
 how it works, and what it approximates.

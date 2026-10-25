@@ -117,3 +117,27 @@ moon_phase={
 "type": "float",
 "value": 0.5
 }
+bh_on={
+"type": "float",
+"value": 0.0
+}
+bh_centre={
+"type": "vec3",
+"value": Vector3(0, 600, -1000)
+}
+bh_m={
+"type": "float",
+"value": 40.0
+}
+bh_normal={
+"type": "vec3",
+"value": Vector3(0, 1, 0)
+}
+bh_u={
+"type": "vec3",
+"value": Vector3(1, 0, 0)
+}
+bh_v={
+"type": "vec3",
+"value": Vector3(0, 0, 1)
+}

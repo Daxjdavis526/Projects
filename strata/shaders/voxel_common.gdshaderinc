@@ -13,6 +13,9 @@ global uniform float brightness;    // player setting
 global uniform float underwater;    // 1 while the camera is submerged
 global uniform vec4 dyn_light_pos;  // a moving light (a rocket's flame, a blast): xyz, and its reach in w (0: none)
 global uniform vec4 dyn_light_col;  // its colour times its strength, linear
+global uniform float bh_on;         // a Gargantua world: the black hole's place and size (see gargantua.gdshaderinc)
+global uniform vec3 bh_centre;
+global uniform float bh_m;
 
 uniform sampler2DArray blocks : source_color, filter_nearest_mipmap, repeat_enable;
 
@@ -93,6 +96,19 @@ vec3 limit_glow(vec3 col, int flags, vec3 world, vec3 cam) {
 vec3 safe_color(vec3 c, float hi) {
     if (any(isnan(c)) || any(isinf(c))) return vec3(0.0);
     return clamp(c, vec3(0.0), vec3(hi));
+}
+
+// True for ground that lies beyond Gargantua, close to its line of sight (from
+// high up near it, looking down past it). The hole would hide or bend that
+// light; the sky shader draws what is seen there, so the ground gives way.
+bool behind_gargantua(vec3 world, vec3 cam) {
+    if (bh_on < 0.5) return false;
+    vec3 d = world - cam;
+    float len = length(d);
+    d /= len;
+    vec3 oc = bh_centre - cam;
+    float tc = dot(oc, d);
+    return tc > 0.0 && tc < len && length(oc - d * tc) < 26.0 * bh_m;
 }
 
 float fog_amount(vec3 world, vec3 cam) {

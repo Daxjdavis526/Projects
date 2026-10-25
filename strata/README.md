@@ -71,6 +71,7 @@ downloads (Actions tab → "STRATA builds" → the latest run → Artifacts).
 | F3 | debug overlay |
 
 Aboard a rocket the keys change: see [Flying the rocket](#flying-the-rocket).
+In the tesseract they change again: see [The tesseract](#the-tesseract).
 
 **In the inventory:** left-click picks up, puts down, swaps or merges a stack;
 right-click takes half, or puts down one; shift-click moves a stack straight
@@ -306,6 +307,143 @@ it but `Rocket.cs` and its drawing knows about rockets.
 | burn time at full throttle · Δv | 20 s · 1,070 m/s |
 | straight up at full throttle | apex about 5.5 km |
 
+## The Gargantua world
+
+![Gargantua from the observatory deck at night and by day; closer in, from above the disk and from inside the disk's orbits; falling through the horizon; inside the tesseract](doc/gargantua.jpg)
+
+**Create Gargantua World** on the title screen makes a world with a
+supermassive black hole hanging over its northern sky, modelled on Gargantua
+from *Interstellar*. The terrain, biomes and creatures are normal; a broad
+plain is cleared round the launch complex (the same one as in the showcase
+world, without the castle) and an observatory south-west of it. You arrive on
+the observatory's deck: a concrete tower with a low parapet, a telescope
+trained on the hole, benches, and a launch console wired to the pad. The hole
+is about 1.3 km away and 23° up, beyond the launch tower. Its disk spans some
+50° of sky, nearly edge-on, with the far side of the disk bent up over the
+top of the shadow and down under it. By day the shadow is a dark disc in the
+blue; by night the disk lights the sky. The clouds part round it.
+
+**How it is drawn.** The sky shader traces every pixel's ray of light through
+the curved space round the hole (`shaders/gargantua.gdshaderinc`). In the
+hole's own units, lengths in M = GM/c², a photon's path obeys
+x'' = −3h²x/r⁵ with h = |x × x'| constant, which is exactly the Schwarzschild
+orbit equation u'' + u = 3u² written in flat-looking coordinates. Each ray is
+stepped by velocity Verlet, in steps proportional to r, for up to 220 steps
+inside a sphere of 30M:
+
+- rays that reach r = 2M, the horizon, are lost, which makes the **shadow**.
+  Its edge sits at an impact parameter of 3√3 M = 5.196 M, two and a half
+  times the horizon's own size;
+- rays that skim the **photon sphere** at 3M wind part of the way round and
+  come out going somewhere quite different. That makes the thin bright ring
+  hugging the shadow, and the rings of distorted stars round it;
+- rays that cross the disk's plane between 4M and 15M pick up its light. The
+  far half of the disk is seen both above the hole (light bent over the top)
+  and below it (light bent under), so the edge-on disk wears the familiar
+  hat and collar;
+- rays that leave again carry the colour of whatever lies in the direction
+  they finally travel: the sun, the moon and the stars are lensed (the air in
+  front is not).
+
+M is 40 blocks: the horizon has a radius of 80 blocks, the shadow looks 415
+blocks across from afar, and the disk runs out to 600 blocks. The disk's
+brightness and colour follow a thin disk's temperature,
+T ∝ r^−3/4 (1 − √(4M/r))^1/4, from white-gold at the inner edge to deep
+orange, with streaks that turn at their Keplerian rate (about 40 seconds a
+turn at the inner edge), so the pattern shears into spirals.
+
+A C# copy of the tracer (`src/Beyond/Gargantua.cs`) is what the unit tests
+check: the shadow's rim comes out at 5.196 M, a ray just outside it turns at
+the radius the orbit equation predicts, and far out the bending matches the
+weak-field result 4M/b + 15π/4 (M/b)² to within 4%.
+
+**Its pull.** Close in, it pulls you, your rocket and its wreckage toward it
+as GM/(r − 2M)², the Paczyński–Wiita law. Unlike a plain inverse square,
+that law has an innermost stable orbit at 6M, and anything falling in from
+afar with less angular momentum than 4Mc is swallowed rather than slung
+round, both as in general relativity. The pull fades out between 8M and
+16M, so the pad and the observatory feel none of it; standing on the ground
+under the hole you are nearly a third lighter. Inside about 5M it beats
+creative flight, and there is no flying back out. There is no air within 14M
+of it, so a rocket diving in is not torn apart by the airflow.
+
+**Its clocks.** Near the hole a readout gives your distance to the horizon,
+your radius in M and how fast your clock runs against the world's,
+√(1 − 2M/r): 0.82× at 6M, 0.58× at 3M, zero at the horizon. The world does
+not wait for you. Its clock runs that much faster while you are near, so the
+sun and stars speed up across the sky as you fall in (up to 400 times, in
+the last moments). The tesseract stands outside time altogether: when you
+come back, the world's clock has moved on a minute for every second you
+spent inside.
+
+**Getting in.** Fly through the horizon. In creative mode, take off and fly
+north toward it (about a minute at full speed). In survival, take the
+rocket: from the pad the hole is 1.2 km away and 25° above the horizon. Lift
+off, tip over early while you are still slow, and keep the flight-path
+marker (○) on Gargantua's marker (◉), which the tilt dial shows in this
+world. Turning gently matters while the air is thick. A rocket that crosses
+the horizon is never seen again, and its pilot goes on into the tesseract.
+The console rolls out a new rocket. A test flies exactly this, from the pad,
+with nothing but the stick: it gets there about eleven seconds after
+lift-off with a third of its propellant left.
+
+## The tesseract
+
+Beyond the horizon is a place outside the world, made of four-dimensional
+space. First comes a few seconds' fall: the sky drawn out into streaks
+rushing past, the photon ring closing in, a white flash. Then the lattice
+opens round you, and you go on falling slowly through it, for as long as
+you like.
+
+| Key | In the tesseract |
+|---|---|
+| mouse | look round (there is no up; the view tumbles slowly) |
+| W A S D | drift |
+| Space · Shift | rise · sink |
+| Q · E · wheel | move along the fourth axis: everything changes |
+| F | let it fold shut and put you back in the world |
+
+Everything you see is a three-dimensional slice of a four-dimensional world,
+traced by marching each pixel's ray through a distance field
+(`shaders/tesseract.gdshader`). A point p of the space you fall through is
+the 4D point R(t)·(p, w): R turns the slice slowly through 4-space, and w is
+how far along the fourth axis you are. The 4D world is a lattice of
+hypercube cells, 7 units on a side:
+
+- **the beams** are where the slice cuts the cells' square faces. A plane in
+  four dimensions meets a three-dimensional slice in a line, so they look
+  like a lattice of girders, but as the slice turns they shear, split, cross
+  and merge in ways no three-dimensional lattice can. Light runs along them
+  in slats;
+- **the sparks** are where the cells' edges, lines in 4D, pierce the slice:
+  points that slide along the beams and wink in and out;
+- **in every cell a four-dimensional solid** turns on its own: a tesseract, a
+  tesseract's frame, a 16-cell, a Clifford torus or a duocylinder. Sliced,
+  the tesseract is a cube only now and then, and otherwise prisms, hexagons
+  and shapes without names. Different cells hold different versions of the
+  same few things at different moments of their turning, and some of the
+  solid tesseracts are painted like the blocks of the world above (grass,
+  stone, gold, lumen), so a grass block tumbles through 4-space;
+- **the great hypercube** is projected rather than sliced: its sixteen
+  corners are turned by a double rotation (two planes at once, at different
+  rates, a motion only four dimensions allow) and seen in perspective from
+  along w. That gives the cube within a cube, its inner cube turning out
+  through its outer one around you;
+- **threads of light** run straight down through everything, the way you are
+  falling.
+
+F lets the tesseract fold shut: space contracts toward you, whites out, and
+you are back on the observatory deck (or at your bedroll), days later. A
+synthesised drone plays inside: an organ-like chord on A with every voice
+beating slowly against a twin, and a high shimmer. Music and the world's
+sounds wait outside. Saving while inside puts you back where you began.
+
+The film's tesseract was a lattice of copies of one bedroom, strung along
+world lines through time. This one keeps the idea of looking along a fourth
+direction at many versions of the same things, but it is geometry, not a
+room: nothing in it is borrowed from the film except the name and the
+feeling.
+
 ## Creatures
 
 | Creature | Kind | Where and when | Behaviour | Drops |
@@ -435,6 +573,7 @@ of a save cannot leave a world unloadable.
     src/Render/                  procedural textures and icons, sky and atmosphere, particles, weather, overlays
     src/UI/                      HUD, inventory and crafting screens, menus
     src/Audio/                   synthesised sound effects and ambience; the piano, the hall and the soundtrack
+    src/Beyond/                  Gargantua (its geometry, pull, clocks and light), the tesseract, four-dimensional maths
 
 **Data-driven registries.** Blocks, items, recipes, smelting, creatures, loot
 tables and biomes are tables in `src/Data`, `src/Entity/MobDefs.cs` and
@@ -555,9 +694,10 @@ can set it off.
 
 Nothing here needs a person to check it.
 
-    godot --headless --path . -- --test                # 692 checks, in a few seconds
+    godot --headless --path . -- --test                # 727 checks, in a few seconds
     godot --path . -- --selftest OUTDIR                # plays the game; 79 checks and screenshots
     godot --path . -- --flighttest OUTDIR              # flies rockets at the launch complex; checks and screenshots
+    godot --path . -- --tesseracttest OUTDIR           # into Gargantua, through the tesseract and back, then by rocket
     godot --headless --path . -- --bench               # pipeline costs per column
     godot --headless --path . -- --music OUTDIR        # the soundtrack as WAV files (--stems: melody, accompaniment, pad apart)
 
@@ -584,6 +724,16 @@ holding the new attitude, flame-out when dry, the apex of a vertical flight,
 a short drop surviving and a long one not, a leaning rocket toppling, a
 broadside break-up in the airflow, a crater, and a whole flight under uneven
 frames never going not-a-number.
+Gargantua and the tesseract are checked too: the tracer against the
+textbook numbers (the shadow's rim at 3√3 M, the turning point of a grazing
+ray, weak-field bending), the Gargantua world's site (deck, pad, no castle,
+the same hole every time, its disk above the clouds), the pull's direction
+and law, clocks at √(1 − 2M/r), no air close in, a rocket climbing into the
+hole swallowed whole, a dead one at 5M falling in, a rocket flown from the
+pad by stick alone getting there, and the four-dimensional geometry (every
+orientation a true rotation, a hypercube's 16 corners, 32 equal edges and
+four edges to a corner, its projection, and the matrix reaching the shader
+the right way round).
 
 `--selftest` starts a real world with real rendering and plays the core loop
 with scripted input, the way a person would: hear a title piece start and fade
@@ -605,7 +755,16 @@ throttle and climbs out, and then switches to creative mode: takes off with
 a double tap, climbs, hovers and flies, breaks a block with one click (no
 drop), opens the block palette and places a block that is not used up.
 
-`--shots OUTDIR [--tour] [--landmarks]` flies a camera through fixed viewpoints — every
+`--tesseracttest` makes a Gargantua world in creative mode and checks the
+arrival on the deck facing the hole, flies to 9M (it draws you in, and your
+clock slows), dives through the horizon, watches the fall and the flash,
+looks round the lattice, moves along the fourth axis and drifts, saves from
+inside (the save keeps you out of the hole), lets it fold shut and checks
+you are back on the deck with the world's clock moved on. Then it boards a
+rocket, flies it into the hole, rides on through the tesseract and has the
+console roll out another.
+
+`--shots OUTDIR [--tour] [--landmarks] [--gargantua]` flies a camera through fixed viewpoints — every
 biome, a structure, a cave, dawn, dusk, night, the creatures up close — and
 saves pictures. Screenshots found several bugs that no test could have.
 
@@ -688,6 +847,32 @@ copied.
 - **Exhaust and smoke** are soft billboards, not a fluid; they are stopped
   and deflected by whole blocks only, and the flame's light is one moving
   point light added to the baked voxel light, without shadows.
+- **Gargantua** is a Schwarzschild (non-spinning) black hole. The film's
+  renders used one spinning at 0.6 of the maximum, which flattens one side
+  of the shadow and drags the disk's image a little to the side. Following
+  Kerr geodesics in a shader is a much bigger job, so the shadow here is a
+  perfect circle. The disk's inner edge is put at 4M, about where a hole
+  spinning at 0.6 has its innermost stable orbit; round a non-spinning one
+  it would be 6M. As in the film, the disk is painted at rest: the Doppler
+  shift and beaming that would make its approaching side blue-white and
+  blinding and its receding side dim and red, and the gravitational redshift,
+  are left out. The disk is an infinitely thin sheet (thickened only for
+  the angle you see it at) with noise for turbulence, not a simulated flow.
+  Light is bent only within 30M, so stars far from the hole are not
+  displaced at all, where a real one bends light, a little, everywhere. The
+  pull is the Paczyński–Wiita approximation at the game's own strength, not
+  general relativity and not a hundred million suns; the world's own
+  downward gravity still acts beside it. Time dilation only speeds up the
+  sky's clock (the sun, the moon, the stars, day and night): creatures,
+  water, crops and furnaces carry on at the usual rate. The clouds part
+  round the hole, where real ones would cross it. Nothing tears you apart
+  on the way in, which for a hole this heavy is true: the tidal forces at
+  the horizon of a hundred-million-sun hole are gentle.
+- **The tesseract** is a slice of a four-dimensional lattice, honestly
+  computed: every shape in it is what a 3D slice through that 4D object
+  looks like. But "falling into a tesseract behind the horizon" is fiction,
+  borrowed in spirit from the film. General relativity says nothing comes
+  back out; the game lets you.
 - **The music** is written in the calm, sparse piano style that block games
   made familiar, but every melody and chord progression here is new. None of
   it is an arrangement of, or borrowed from, any existing soundtrack.
@@ -699,7 +884,10 @@ copied.
   switches, plates, traces, lamps and doors: there are no pistons, timers or
   logic gates, and a network is capped at 4,096 traces.
 - The showcase buildings exist only in a showcase world, and only one of
-  each. The rocket is the only vehicle; the vehicle code would take others
+  each. Gargantua exists only in a Gargantua world. The tesseract's shader
+  is heavy: each pixel marches up to 110 steps (60 on Fast graphics) through
+  the 4D distance field. It has only been run on a software renderer, so
+  there are no frame rate figures. The rocket is the only vehicle; the vehicle code would take others
   (a cart, a glider) but none are built.
 - A vehicle over ground that has not loaded yet collides with the terrain
   the generator would make there (buildings, caves and player changes not

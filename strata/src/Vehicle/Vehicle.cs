@@ -53,6 +53,10 @@ public abstract class Vehicle
     public Vector3 ProperAccel;                          // what an accelerometer aboard reads (m/s^2, world frame), smoothed
     public float GForce => ProperAccel.Length() / PhysicsWorld.Gravity;
     public bool Asleep;
+    /// <summary>The black hole whose pull it feels (and whose empty neighbourhood thins its air), if the world has one.</summary>
+    public Gargantua Well;
+    /// <summary>Gone through the event horizon: nothing of it will be seen again.</summary>
+    public bool Swallowed;
 
     private readonly List<Vector3> _hullCom = new();
     private bool _reported;
@@ -144,10 +148,11 @@ public abstract class Vehicle
     public void Step(World w, float dt)
     {
         FrameImpact = 0f;
-        if (Destroyed) return;
+        if (Destroyed || Swallowed) return;
+        Well = w.Gargantua;
         int n = Math.Clamp((int)MathF.Ceiling(dt / SubStep), 1, 24);
         float h = dt / n;
-        for (int i = 0; i < n && !Destroyed; i++) SubStepOnce(w, h);
+        for (int i = 0; i < n && !Destroyed && !Swallowed; i++) SubStepOnce(w, h);
     }
 
     private void SubStepOnce(World w, float h)
@@ -167,12 +172,18 @@ public abstract class Vehicle
         }
 
         Body.AddForce(new Vector3(0, -PhysicsWorld.Gravity * Body.Mass, 0));
+        if (Well != null)
+        {
+            var pull = Well.Pull(Body.Position);
+            if (pull != Vector3.Zero) Body.AddForce(pull * Body.Mass);
+        }
         foreach (var p in Parts) p.Step(this, h);
         var net = Body.PendingForce;
         var v0 = Body.Vel;
         var before = (Body.X, Body.Y, Body.Z, Body.Rot, Body.AngVel, Body.Vel);
         var torque = Body.PendingTorque;
         Body.Integrate(h);
+        if (Well != null && Well.Inside(Body.Position)) { Swallowed = true; return; }
         if (!Body.Finite)
         {
             // Should never happen; if it does, say what led to it and put the body back as it was.

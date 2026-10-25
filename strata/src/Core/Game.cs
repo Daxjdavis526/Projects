@@ -29,6 +29,9 @@ public sealed partial class Game : Node3D
     public FlightHud FlightHud;
     public Fluids Fluids;
     public Signals Signals;
+    public GargantuaView Hole;               // a Gargantua world only
+    public Tesseract Tesseract;              // a Gargantua world only
+    public bool InTesseract => Tesseract?.Active == true;
     private readonly List<Vector3> _feet = new();
     public Weather Weather;
     public BlockOverlay Overlay;
@@ -50,6 +53,7 @@ public sealed partial class Game : Node3D
     public float Fps => _fps;
     private Ambience _ambience;
     private bool _renderNote;
+    private bool _resettle;                  // put the player on the ground when the area has loaded
 
     public bool Paused => PauseMenu != null;
     public bool Creative => Meta?.Creative == true;
@@ -73,7 +77,7 @@ public sealed partial class Game : Node3D
     public override void _Ready()
     {
         I = this;
-        World = new World(Meta.Seed, Meta.Landmarks);
+        World = new World(Meta.Seed, Meta.Landmarks, Meta.Gargantua);
         Fluids = new Fluids(World);
         Signals = new Signals(World);
         Store = new ChunkStore(WorldSave.ChunkDir(Meta.Folder));
@@ -106,6 +110,13 @@ public sealed partial class Game : Node3D
         Ui.AddChild(Hud);
         FlightHud = new FlightHud { Game = this };
         Ui.AddChild(FlightHud);
+        if (World.Gargantua != null)
+        {
+            Hole = new GargantuaView { Name = "Gargantua", Game = this };
+            AddChild(Hole);
+            Tesseract = new Tesseract { Name = "Tesseract", Game = this };
+            AddChild(Tesseract);
+        }
 
         World.BlockBroken += OnBlockBroken;
         World.EntityRemoved += OnEntityRemoved;
@@ -130,7 +141,14 @@ public sealed partial class Game : Node3D
         }
         else
         {
-            if (World.Gen.Landmarks is LandmarkSite site)
+            if (World.Gargantua != null)
+            {
+                // On the observatory's deck, looking north over the launch complex at the black hole.
+                Player.Spawn = World.Gen.Landmarks.Spawn;
+                Player.Teleport(Player.Spawn + new Vector3(0, 1, 0));
+                FaceGargantua(0.45f);
+            }
+            else if (World.Gen.Landmarks is LandmarkSite site)
             {
                 // At the head of the village street, looking up at the castle.
                 Player.Spawn = site.Spawn;
@@ -219,7 +237,9 @@ public sealed partial class Game : Node3D
         {
             View.Sky.Update(dt, Player.Camera.GlobalPosition, View.Chunks.Radius * 16f, View.Brightness);
             Mobs.Daylight = View.Sky.Sun;
-            if (State == GameState.Playing) Player.Step(dt);
+            if (InTesseract) Tesseract.Step(dt);
+            else if (State == GameState.Playing) Player.Step(dt);
+            Hole?.Step(dt);
             Mobs.Step(dt, State == GameState.Playing ? Player : null);
             Vehicles.Step(dt);
             Drops.Step(dt, World, Player);
@@ -256,7 +276,8 @@ public sealed partial class Game : Node3D
         if (!View.Chunks.AreaReady(Player.Body.Position, 2)) return;
 
         // Settle the player on solid ground if the saved spot is buried or in the air.
-        if (!Meta.HasPlayer || Player.Body.Colliding(World)) PlaceOnSurface();
+        if (!Meta.HasPlayer || _resettle || Player.Body.Colliding(World)) PlaceOnSurface();
+        _resettle = false;
         Player.Frozen = false;
         State = GameState.Playing;
         LoadingScreen?.QueueFree();
@@ -265,7 +286,12 @@ public sealed partial class Game : Node3D
         if (!Meta.HasPlayer)
         {
             Hud.Toast($"Welcome to {Meta.Name}", UiStyle.Accent);
-            if (Meta.Landmarks)
+            if (Meta.Gargantua)
+            {
+                Hud.Toast("Gargantua hangs over the northern sky: a black hole of a hundred million suns, its disk lensed over and under its shadow.", UiStyle.TextDim);
+                Hud.Toast("A rocket stands on the pad to the north-east; the console here can roll out another. Fly it through the event horizon" + (Creative ? ", or fly yourself." : "."), UiStyle.TextDim);
+            }
+            else if (Meta.Landmarks)
             {
                 Hud.Toast("Castle Vorhaal stands on the crag ahead; the road winds up the rock spur to its bridge.", UiStyle.TextDim);
                 Hud.Toast("The launch complex lies east, along the paved road.", UiStyle.TextDim);
@@ -373,6 +399,36 @@ public sealed partial class Game : Node3D
         Meta.HasPlayer = false; // settle on the surface when the area is ready
     }
 
+    /// <summary>
+    /// Out of the tesseract: back at your bedroll or the world's spawn, with
+    /// the clock moved on by the time that passed outside while you were gone.
+    /// </summary>
+    public void ReturnFromTesseract(double outsideSeconds)
+    {
+        var p = Player;
+        p.Flying = false;
+        p.Frozen = true;
+        p.Teleport(p.Spawn + new Vector3(0, 0.5f, 0));
+        FaceGargantua(0.3f);
+        View.Sky.Time += outsideSeconds / Atmosphere.DayLengthSeconds;
+        State = GameState.Loading;
+        _loadTime = 0;
+        _resettle = true;
+        double days = outsideSeconds / Atmosphere.DayLengthSeconds;
+        string gone = days >= 1.5 ? $"{days:0} days have" : days >= 0.75 ? "a day has" : $"{Math.Max(1, Math.Round(days * 24)):0} hours have";
+        Hud.Toast("The tesseract folds shut and lets you go, back where you began.", UiStyle.Accent);
+        Hud.Toast($"Your clock says minutes. Out here, {gone} passed.", UiStyle.TextDim);
+    }
+
+    /// <summary>Turns the player toward the black hole, looking a little below its centre (fraction of the way up from level).</summary>
+    public void FaceGargantua(float up)
+    {
+        if (World.Gargantua is not Gargantua bh) return;
+        var d = bh.Centre - (Player.Body.Position + new Vector3(0, Player.EyeHeight, 0));
+        Player.Yaw = Mathf.RadToDeg(MathF.Atan2(-d.X, -d.Z));
+        Player.Pitch = Mathf.RadToDeg(MathF.Atan2(d.Y, new Vector2(d.X, d.Z).Length())) * up;
+    }
+
     public void Toast(string text) => Hud?.Toast(text);
 
     public Vector3 WorldSpawn()
@@ -449,7 +505,7 @@ public sealed partial class Game : Node3D
             GetViewport().SetInputAsHandled();
             return;
         }
-        if (e.IsActionPressed("inventory") && State == GameState.Playing && !Paused && Player.Riding == null)
+        if (e.IsActionPressed("inventory") && State == GameState.Playing && !Paused && Player.Riding == null && !InTesseract)
         {
             if (Screen != null) CloseScreen();
             else OpenScreen(ScreenKind.Inventory, default);
@@ -463,7 +519,7 @@ public sealed partial class Game : Node3D
         if (e is InputEventMouseButton mb && mb.Pressed && !InputBlocked && Input.MouseMode != Input.MouseModeEnum.Captured && AutoCapture)
             Input.MouseMode = Input.MouseModeEnum.Captured;
         // Feeding livestock.
-        if (e.IsActionPressed("use") && !InputBlocked && Player.Riding == null && Player.TargetMob != null && Player.HeldStack.Id == Items.Grain)
+        if (e.IsActionPressed("use") && !InputBlocked && Player.Riding == null && !InTesseract && Player.TargetMob != null && Player.HeldStack.Id == Items.Grain)
         {
             if (Mobs.Feed(Player.TargetMob))
             {
@@ -541,6 +597,8 @@ public sealed partial class Game : Node3D
         ps.SpawnX = Player.Spawn.X; ps.SpawnY = Player.Spawn.Y; ps.SpawnZ = Player.Spawn.Z;
         ps.BedSpawn = Player.HasBedSpawn;
         if (State == GameState.Dead) { ps.X = Player.Spawn.X; ps.Y = Player.Spawn.Y + 0.5; ps.Z = Player.Spawn.Z; ps.Health = 20; }
+        // Saved from inside the tesseract (or past the horizon): back where you began, as if it had let you go.
+        if (InTesseract || World.Gargantua?.Inside(Player.Body.Position) == true) { ps.X = Player.Spawn.X; ps.Y = Player.Spawn.Y + 0.5; ps.Z = Player.Spawn.Z; }
         Meta.Time = View.Sky.Time;
         Meta.WeatherState = Weather.State; Meta.WeatherTimer = Weather.Timer; Meta.Rain = Weather.Intensity;
         Meta.Drops.Clear();
@@ -577,6 +635,7 @@ public sealed partial class Game : Node3D
 
     public void Shutdown()
     {
+        Gargantua.Publish(null);
         View.Chunks.Jobs.Clear();
         View.Chunks.Jobs.Drain(5000);
         Store.Dispose();

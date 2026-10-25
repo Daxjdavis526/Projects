@@ -216,6 +216,13 @@ public sealed partial class VehicleManager : Node3D
         {
             var v = All[i];
             v.Step(w, dt);
+            if (v.Swallowed)
+            {
+                // Through Gargantua's horizon: whoever is aboard goes on into the tesseract; the craft is never seen again.
+                if (Riding == v) { Unseat(); g.Tesseract?.Enter(); }
+                Remove(v);
+                continue;
+            }
             if (v is Rocket r)
             {
                 r.CheckDestroyed();

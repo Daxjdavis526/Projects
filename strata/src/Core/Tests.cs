@@ -132,6 +132,9 @@ public static partial class Tests
         Test("rocket: mass burns off, steering turns it, flight arcs", RocketFlight);
         Test("rocket: hard landings, topples and blasts", RocketCrash);
         Test("rocket: a rough flight stays finite", RocketRough);
+        Test("Gargantua: the shadow, the bending, the disk over the top", GargantuaLight);
+        Test("Gargantua world: the site, the pull, clocks, air, a rocket swallowed", GargantuaWorld);
+        Test("the tesseract's four-dimensional geometry", FourDimensions);
         GD.Print($"\n{_pass} checks passed, {_fail} failed");
         foreach (var f in _failures) GD.Print("  - " + f);
         return _fail;

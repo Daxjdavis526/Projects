@@ -26,11 +26,21 @@ public sealed class World
     /// <summary>A crate or furnace was removed with items inside.</summary>
     public event Action<int, int, int, BlockEntity> EntityRemoved;
 
-    public World(long seed, bool landmarks = false)
+    /// <summary>The black hole in a Gargantua world's sky, or null.</summary>
+    public readonly Gargantua Gargantua;
+
+    /// <param name="landmarks">A showcase world: Castle Vorhaal and the launch complex.</param>
+    /// <param name="gargantua">A Gargantua world: the launch complex, an observatory, and the black hole (overrides landmarks).</param>
+    public World(long seed, bool landmarks = false, bool gargantua = false)
     {
         Seed = seed;
         Gen = new WorldGen(seed);
-        if (landmarks) Gen.Landmarks = new LandmarkSite(Gen);
+        if (gargantua)
+        {
+            Gen.Landmarks = new LandmarkSite(Gen, SiteKind.Gargantua);
+            Gargantua = Gargantua.ForSite(Gen.Landmarks);
+        }
+        else if (landmarks) Gen.Landmarks = new LandmarkSite(Gen);
     }
 
     // --- chunk lookup ------------------------------------------------------------

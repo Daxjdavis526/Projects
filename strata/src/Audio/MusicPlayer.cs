@@ -68,6 +68,12 @@ public sealed partial class MusicPlayer : Node
         Restart(firstWait >= 0f ? firstWait : 30f + (float)_rng.NextDouble() * 45f);
     }
 
+    /// <summary>Somewhere music does not belong (the tesseract): whatever plays fades out, and nothing follows until released.</summary>
+    public void Hold() => Restart(float.MaxValue);
+
+    /// <summary>Back in the world after a hold: the next piece comes after a while.</summary>
+    public void Release(float wait) => Restart(wait);
+
     private void Restart(float wait)
     {
         _pending = null;                    // a piece still rendering for the old place is dropped when done

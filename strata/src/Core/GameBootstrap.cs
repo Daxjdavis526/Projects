@@ -14,6 +14,7 @@ namespace Strata;
 ///                          adds each piece's melody, accompaniment and pad apart, at the mix's level
 ///   --selftest [dir]       play through the core loop with scripted input
 ///   --flighttest [dir]     board, launch, fly and crash a rocket at the showcase launch complex
+///   --tesseracttest [dir]  fly into Gargantua, through the tesseract and back, then again by rocket
 ///   --shots [dir]          fly a camera through viewpoints and save pictures
 ///   --capture SECS PATH    save a screenshot after SECS seconds and quit
 /// </summary>
@@ -88,6 +89,11 @@ public partial class GameBootstrap : Node
         if (args.Contains("--flighttest"))
         {
             AddChild(new FlightTest { Name = "FlightTest" });
+            return;
+        }
+        if (args.Contains("--tesseracttest"))
+        {
+            AddChild(new TesseractTest { Name = "TesseractTest" });
             return;
         }
         if (args.Contains("--selftest"))

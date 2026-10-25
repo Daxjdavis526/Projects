@@ -46,6 +46,7 @@ public sealed partial class Ambience : Node
         bool under = b.HeadInWater;
         float vol = g.Settings.MasterVolume;
         float rain = g.Weather.Kind == Precip.Rain ? g.Weather.Intensity : 0f;
+        if (g.InTesseract) { vol = 0f; rain = 0f; under = false; open = 1f; }
         Fade(_wind, under ? 0f : (0.12f + 0.25f * Math.Clamp((float)(b.Y - 70) / 60f, 0f, 1f) + 0.2f * g.View.Sky.Storm) * open * vol, dt);
         Fade(_rain, under ? 0f : rain * (0.25f + 0.55f * open) * vol, dt);
         Fade(_cave, under ? 0f : (1f - open) * (b.Y < 55 ? 0.35f : 0.1f) * vol, dt);

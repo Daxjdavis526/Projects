@@ -116,9 +116,9 @@ vec3 safe_color(vec3 c, float hi) {
     return clamp(c, vec3(0.0), vec3(hi));
 }
 
-void fragment() {
-    vec3 d = normalize(v_dir);
-    float pix = max(length(fwidth(d)), 1e-5);   // radians per pixel, taken before anything branches
+// The air itself: its colour from the zenith to below the horizon, and the sun's
+// glow in it. This lies in front of everything beyond the sky, so it is never bent.
+vec3 sky_air(vec3 d) {
     float h = d.y;
     vec3 col = mix(sky_horizon.rgb, sky_top.rgb, smoothstep(-0.02, 0.55, h));
     // Below the horizon: the same haze, a little darker.
@@ -129,10 +129,19 @@ void fragment() {
     float low = 1.0 - smoothstep(0.0, 0.5, abs(sun_dir.y));
     col += sun_glow.rgb * pow(max(sd, 0.0), 6.0) * (0.25 + 0.6 * low) * smoothstep(-0.35, 0.05, sun_dir.y);
     col += sun_glow.rgb * pow(max(sd, 0.0), 64.0) * 0.6;
+    return col;
+}
 
+// What lies beyond the air in direction d: the sun, the moon and the night sky.
+// rgb is their light; a is how much of the air's colour the sun's and moon's
+// discs hide. `h` is the height above the horizon of the direction the light
+// arrives from (the air dims and reddens stars low down).
+vec4 sky_space(vec3 d, float h, float pix) {
     // The sun: a hot disc with a soft rim.
+    float sd = dot(d, sun_dir);
     float disc = smoothstep(0.99955, 0.99975, sd);
-    col = mix(col, vec3(1.9, 1.75, 1.45), disc);
+    vec3 col = vec3(1.9, 1.75, 1.45) * disc;
+    float cover = disc;
 
     // The night sky, in its own frame, turning with the sun and moon.
     vec3 night = vec3(0.0);
@@ -179,9 +188,25 @@ void fragment() {
             float crater = 0.85 + 0.15 * sin(q.x * 9.0 + 1.3) * sin(q.y * 7.0 - 0.4);
             float inside = 1.0 - smoothstep(0.92, 1.0, r2);
             col = mix(col, vec3(0.95, 0.95, 1.0) * crater * (0.18 + 0.9 * lit), inside);
+            cover = mix(cover, 1.0, inside);
             night *= 1.0 - inside;
         }
     }
     col += pow(max(md, 0.0), 300.0) * vec3(0.25, 0.28, 0.35) * star_alpha;
-    ALBEDO = safe_color(underwater > 0.5 ? fog_color.rgb : col + night, 2.0);
+    return vec4(col + night, cover);
+}
+
+#include "res://shaders/gargantua.gdshaderinc"
+
+void fragment() {
+    vec3 d = normalize(v_dir);
+    float pix = max(length(fwidth(d)), 1e-5);   // radians per pixel, taken before anything branches
+    vec3 air = sky_air(d);
+    vec3 col;
+    if (bh_on > 0.5 && underwater < 0.5) col = gargantua_sky(CAMERA_POSITION_WORLD, d, air, pix);
+    else {
+        vec4 space = sky_space(d, d.y, pix);
+        col = air * (1.0 - space.a) + space.rgb;
+    }
+    ALBEDO = safe_color(underwater > 0.5 ? fog_color.rgb : col, 2.0);
 }

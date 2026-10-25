@@ -20,6 +20,7 @@ void vertex() {
 }
 
 void fragment() {
+    if (behind_gargantua(v_world, CAMERA_POSITION_WORLD)) discard;
     vec4 tex = texture(blocks, vec3(UV, v_layer));
     vec3 col = tex.rgb;
     if ((v_flags & FLAG_TINT) != 0) col *= v_tint * 1.8;

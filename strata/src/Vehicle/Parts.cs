@@ -169,7 +169,7 @@ public sealed class AeroBody : VehiclePart
         var cp = v.PointWorld(Local);
         var air = -b.PointVelocity(cp);                // the wind the body feels
         float speed = air.Length();
-        Density = PhysicsWorld.AirDensity(cp.Y);
+        Density = PhysicsWorld.AirDensity(cp.Y) * (v.Well?.AirFactor(cp) ?? 1f);
         DynamicPressure = 0.5f * Density * speed * speed;
         if (speed < 0.05f) { AngleOfAttack = 0f; return; }
         var axis = b.DirToWorld(Axis);

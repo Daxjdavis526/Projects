@@ -12,6 +12,7 @@ void vertex() {
 }
 
 void fragment() {
+    if (behind_gargantua(v_world, CAMERA_POSITION_WORLD)) discard;
     vec2 uv = UV;
     if ((v_flags & FLAG_LIQUID) != 0) uv += vec2(TIME * 0.02, TIME * 0.013);   // lava creeps
     vec4 tex = texture(blocks, vec3(uv, v_layer));
