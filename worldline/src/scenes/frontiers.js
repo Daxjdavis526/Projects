@@ -62,12 +62,12 @@ function pageCurve(g, t, a) {
   const hawk = [], page = [];
   for (let u = 0; u <= k; u += 0.01) {
     hawk.push([ox + u * w, oy - u * h * 0.95]);
-    page.push([ox + u * w, oy - h * 0.95 * Math.min(u, 1 - u) * 1.9]);
+    page.push([ox + u * w, oy - h * 0.95 * Math.min(u, 1 - u)]);   // min(radiation, black hole) entropy
   }
   path(g, hawk, { color: COL.coral, width: 3, alpha: a, dash: [8, 6] });
   path(g, page, { color: COL.green, width: 4, alpha: a });
-  text(g, 'Hawking (1976): keeps rising — information lost', ox + w - 10, oy - h * 0.55, { size: 22, color: COL.coral, alpha: a, align: 'right' });
-  text(g, 'Page curve: rises, then falls — information escapes', ox + w / 2, oy - h * 0.95 - 30, { size: 22, color: COL.green, alpha: a });
+  text(g, 'Hawking (1976): keeps rising — information lost', ox + w - 10, oy - h * 0.95 - 22, { size: 22, color: COL.coral, alpha: a, align: 'right' });
+  text(g, 'Page curve: rises, then falls — information escapes', ox + w / 2, oy - h * 0.18, { size: 22, color: COL.green, alpha: a });
   note(g, 'sketch; derived since 2019 only in simplified model universes', ox + w / 2, oy + 80, a);
 }
 
@@ -103,7 +103,7 @@ function verdict(g, t, a) {
     rows.forEach((r, i) => text(g, r, x, 340 + i * 70, { size: 28, color: COL.ink, alpha: a * ramp(t, 0.5 + i * 0.5, 1 + i * 0.5) }));
   };
   col(560, 'serious, unconfirmed research', COL.green, ['quantum gravity', 'black-hole information', 'cosmic censorship', 'modified gravity vs. dark sector', 'gravity and entanglement']);
-  col(1360, 'science fiction (so far)', COL.coral, ['traversable wormholes', 'warp drives', '— both need negative energy', 'nobody knows how to supply']);
+  col(1360, 'science fiction (so far)', COL.coral, ['traversable wormholes', 'warp drives', '— both need large negative energy,', 'which quantum theory allows', 'only in tiny, fleeting amounts']);
 }
 
 export default function draw(g, t, s) {

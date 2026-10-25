@@ -117,7 +117,7 @@ function ball(g, t, a, cx, cy, mode) {
     const p = (i / RING) * TAU;
     let x = Math.cos(p), y = Math.sin(p);
     if (mode === 'ricci') { const f = 1 - 0.32 * k * k; x *= f; y *= f; }
-    else { const e = 0.22 * k * k; x *= 1 - e; y *= 1 + 2 * e; }
+    else { const e = 0.15 * k * k; x *= 1 - e; y *= 1 / (1 - e) ** 2; }   // volume kept: (1−e)² · 1/(1−e)²
     pts.push([cx + 150 * x, cy + 150 * y]);
   }
   for (const [x, y] of pts) circle(g, x, y, 7, { fill: COL.gold, alpha: a });

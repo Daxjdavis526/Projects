@@ -51,7 +51,7 @@ function collapse(g, t, a) {
   const R = lerp(300, S * 0.2, k);
   glow(g, CX, CY, R * 1.6, '#ffb35c', a * (1 - k) * 0.8);
   circle(g, CX, CY, R, { fill: k < 0.75 ? '#ffcf8a' : '#3a2a1a', alpha: a * (1 - k * 0.6) });
-  const h = ramp(t, 6.5, 8.5) * a;
+  const h = ramp(t, 7.3, 8.3) * a;            // as the surface crosses r_s
   if (h > 0) { circle(g, CX, CY, S, { fill: '#000', alpha: h }); ring(g, 1, COL.light, h, 'a horizon forms', [4, 6]); }
   text(g, 'core heavier than about 2–2.3 Suns', 1420, 470, { size: 30, color: COL.ink, alpha: a });
   text(g, 'nothing known can stop the collapse', 1420, 515, { size: 26, color: COL.dim, alpha: a });
@@ -106,7 +106,7 @@ function precess(g, t, A, a) {
   circle(g, CX, ORB_CY, ORB_S, { fill: '#000', stroke: '#2a3350', width: 2, alpha: a });
   circle(g, CX, ORB_CY, 1.5 * ORB_S, { stroke: COL.light, width: 1.5, alpha: a * 0.7, dash: [3, 6] });
   circle(g, CX, ORB_CY, 3 * ORB_S, { stroke: COL.gold, width: 2, alpha: a, dash: [8, 6] });
-  text(g, 'innermost stable orbit, 3 rₛ', CX, ORB_CY + 3 * ORB_S + 34, { size: 22, color: COL.gold, alpha: a });
+  text(g, 'innermost stable circular orbit, 3 rₛ', CX, ORB_CY + 3 * ORB_S + 34, { size: 22, color: COL.gold, alpha: a });
   for (let j = back; j <= i; j += 8) pts.push([OX(s[j].r * Math.cos(s[j].phi)), OY(s[j].r * Math.sin(s[j].phi))]);
   path(g, pts, { color: COL.gold, width: 2.5, alpha: a * 0.8 });
   const [x, y] = [OX(s[i].r * Math.cos(s[i].phi)), OY(s[i].r * Math.sin(s[i].phi))];
@@ -130,7 +130,7 @@ function disk(g, t, a) {
   }
   g.restore();
   glow(g, CX, CY, 3.5 * S, '#ff9a3c', a * 0.25);
-  const bars = [[efficiencySchwarzschild * 100, 'non-spinning hole', COL.gold], [efficiencyMaxKerr * 100, 'fastest-spinning hole', COL.coral], [0.7, 'hydrogen fusion', COL.blue]];
+  const bars = [[efficiencySchwarzschild * 100, 'non-spinning hole', COL.gold], [efficiencyMaxKerr * 100, 'maximally spinning hole', COL.coral], [0.7, 'hydrogen fusion', COL.blue]];
   text(g, 'rest-mass energy radiated', 1560, 640, { size: 26, color: COL.dim, alpha: a });
   bars.forEach(([v, lab, col], k) => {
     const y = 700 + k * 64;
@@ -157,7 +157,7 @@ function kerr(g, t, a) {
     const ph = hash(i, 13) * TAU + om * t;
     circle(g, X(r * Math.cos(ph)), CY - r * S * 0.3 * Math.sin(ph), 2.5, { fill: COL.violet, alpha: a * 0.8 });
   }
-  text(g, 'ergosphere: nothing can stay still here', CX, Y(2.4) - 10, { size: 24, color: COL.violet, alpha: a });
+  text(g, 'ergosphere: nothing can stay still relative to the distant stars', CX, Y(2.4) - 10, { size: 24, color: COL.violet, alpha: a });
   note(g, 'spin 0.9 of the maximum, horizon and ergosphere drawn 2.2× larger', CX, Y(-2.6), a);
   text(g, 'Gravity Probe B (2011), frame dragging by Earth:', 1440, 640, { size: 26, color: COL.ink, alpha: a });
   text(g, 'measured −37.2 ± 7.2 mas/yr', 1440, 690, { size: 30, color: COL.green, alpha: a });
@@ -228,8 +228,8 @@ export default function draw(g, t, s) {
   if (sg > 0) {
     hole(g, sg, 1.6);
     glow(g, CX, CY, 40, '#ffffff', sg * (0.5 + 0.3 * Math.sin(t * 3)));
-    text(g, 'r = 0', CX, CY + 8, { size: 26, color: COL.ink, alpha: sg });
-    text(g, 'the singularity: GR stops making predictions', 1440, 480, { size: 30, color: COL.ink, alpha: sg });
+    text(g, 'r → 0', CX, CY + 8, { size: 26, color: COL.ink, alpha: sg });
+    text(g, 'the singularity: GR predicts its own breakdown', 1440, 480, { size: 30, color: COL.ink, alpha: sg });
     text(g, 'what replaces it? (quantum gravity)', 1440, 530, { size: 28, color: COL.violet, alpha: sg });
     note(g, 'inside the horizon, r = 0 is a moment in the infaller’s future, not a place', 1440, 580, sg);
   }

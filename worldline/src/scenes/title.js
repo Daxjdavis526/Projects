@@ -22,7 +22,7 @@ export function lightConeGlyph(g, cx, cy, R, a, draw = 1) {
   for (let i = 0; i <= n; i++) {
     const k = i / 80;
     const y = cy + h * 1.1 - k * h * 2.2;
-    const x = cx + Math.sin(k * 5.2) * R * 0.12;
+    const x = cx + Math.sin((k - 0.5) * 5.2) * R * 0.12;   // through the apex at k = 0.5
     pts.push([x, y]);
   }
   path(g, pts, { color: COL.gold, width: 3.5, alpha: a });

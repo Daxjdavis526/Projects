@@ -29,13 +29,15 @@ function cone(g, cx, cy, R, a) {
   text(g, 'here and now', cx + 22, cy + 8, { size: 24, color: COL.ink, alpha: a, align: 'left' });
 }
 
-// A wiggly worldline x(ct) = 0.8 sin(0.9 ct) (never faster than light) and
-// the ct values where its own clock completes each half unit of proper time.
+// A wiggly worldline x(ct) = 0.8 sin(π ct / 3) between the same two events
+// as the straight one, (0, 0) and (0, 6) — top speed 0.84c — and the ct
+// values where its own clock completes each half unit of proper time.
+const wig = (ct) => 0.8 * Math.sin((Math.PI * ct) / 3);
 const WIGGLE = (() => {
   const ticks = [];
   let tau = 0, next = 0.5;
   for (let ct = 0; ct <= 6; ct += 0.001) {
-    const v = 0.72 * Math.cos(0.9 * ct);
+    const v = ((0.8 * Math.PI) / 3) * Math.cos((Math.PI * ct) / 3);
     tau += Math.sqrt(1 - v * v) * 0.001;
     if (tau >= next) { ticks.push(ct); next += 0.5; }
   }
@@ -47,15 +49,16 @@ function odometer(g, t, a) {
   const P = stPt(ox, oy, s);
   stAxes(g, ox, oy, s, { xmin: -3, xmax: 3, tmin: -0.2, tmax: 6.2, alpha: a });
   const pts = [];
-  for (let ct = 0; ct <= 6; ct += 0.05) pts.push(P(0.8 * Math.sin(0.9 * ct), ct));
+  for (let ct = 0; ct <= 6.001; ct += 0.05) pts.push(P(wig(ct), ct));
+  seg(g, ...P(0, 0), ...P(0, 6), { color: COL.blue, width: 3, alpha: a * 0.8 });
+  for (let k = 1; k <= 12; k++) circle(g, ...P(0, k * 0.5), 5, { fill: COL.blue, alpha: a * 0.8 });
   path(g, pts, { color: COL.gold, width: 3.5, alpha: a });
-  for (const ct of WIGGLE) circle(g, ...P(0.8 * Math.sin(0.9 * ct), ct), 6, { fill: COL.gold, alpha: a });
-  seg(g, ...P(-2, 0), ...P(-2, 6), { color: COL.blue, width: 3, alpha: a * 0.8 });
-  for (let k = 1; k <= 12; k++) circle(g, ...P(-2, k * 0.5), 5, { fill: COL.blue, alpha: a * 0.8 });
-  text(g, `${WIGGLE.length} ticks`, ...P(0.95, 6.1), { size: 24, color: COL.gold, alpha: a, align: 'left' });
-  text(g, '12 ticks', ...P(-2.1, 6.1), { size: 24, color: COL.blue, alpha: a, align: 'right' });
-  note(g, 'dots: every half unit of each clock’s own proper time', 1300, 760, a, 'left');
-  note(g, 'the wandering clock records less time between the same two events', 1300, 795, a, 'left');
+  for (const ct of WIGGLE) circle(g, ...P(wig(ct), ct), 6, { fill: COL.gold, alpha: a });
+  for (const ct of [0, 6]) circle(g, ...P(0, ct), 9, { fill: COL.ink, alpha: a });
+  text(g, `wandering clock: ${WIGGLE.length} ticks`, ...P(0.95, 1.5), { size: 24, color: COL.gold, alpha: a, align: 'left' });
+  text(g, 'straight clock: 12 ticks', ...P(0.2, 4.1), { size: 24, color: COL.blue, alpha: a, align: 'left' });
+  note(g, 'dots: every half unit of each clock’s own proper time', 1150, 760, a, 'left');
+  note(g, 'the wandering clock records less time between the same two events', 1150, 795, a, 'left');
 }
 
 function twins(g, t, A, D, beta, a) {

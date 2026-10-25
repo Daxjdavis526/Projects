@@ -103,7 +103,8 @@ Computed from the equations, and checked by `test/physics.test.mjs`:
   own clock (6 for the traveller, 10 at home), from `travellerAt`.
 - **Muons.** Each muon decays at its own exponential lifetime (mean 2.2 μs); one
   lane runs clocks at the rest rate (about 5% arrive), the other at the
-  measured 8.8× slower (about 72% arrive).
+  measured 8.8× slower (about 72% arrive). The muon's own view contracts the
+  mountain by the same 8.8, so both stories give the same count.
 - **GPS.** +45.8, −7.2 and +38.6 μs/day and 10.22999999543 MHz are computed
   from Ashby's formulas; the orbit is drawn to scale with Earth.
 - **The thrown ball.** The proper time each candidate path collects is the
@@ -126,13 +127,14 @@ Computed from the equations, and checked by `test/physics.test.mjs`:
 
 Drawn, approximated or exaggerated — each labelled on screen:
 
-- **Mercury's precession** is shown about 300,000 times too fast (the real
-  shift is 0.10″ per orbit). Its ellipse and its Kepler motion are real.
+- **Mercury's precession** is shown about 300,000 times too fast (GR's real
+  excess over Newton is 0.10″ per orbit). Its ellipse and its Kepler motion
+  are real.
 - **Tiny effects are blown up**: the redshift in the rocket and the tower, the
   rate difference between the tower clocks, the light bending in the rocket,
   the tidal convergence of the falling balls, the deformations of the ball of
   particles, the stretching by a gravitational wave (about 10²⁰ times), and
-  LIGO's arm changes (about 10¹⁹ times).
+  LIGO's arm changes (about 10²⁰ times).
 - **The merger and ring-down** of the chirp are sketched — they need numerical
   relativity — and joined in phase to the computed inspiral. The neutron-star
   waveform in the GW170817 timeline is schematic.

@@ -48,7 +48,7 @@ function mercury(g, t, a, A) {
   glow(g, mx, my, 26, '#c9b8a6', 0.5 * a);
   circle(g, mx, my, 9, { fill: '#c9b8a6', alpha: a });
   text(g, 'Mercury', mx + 18, my - 14, { size: 22, color: COL.dim, alpha: a, align: 'left' });
-  note(g, `precession exaggerated about ${Math.round(EXAGGERATION / 1e5) * 100},000 times — the real shift is ${REAL.toFixed(2)}″ per orbit`, 960, 860, a * 0.9);
+  note(g, `precession exaggerated about ${Math.round(EXAGGERATION / 1e5) * 100},000 times — the real excess over Newton is ${REAL.toFixed(2)}″ per orbit`, 960, 860, a * 0.9);
 
   // Vulcan: a dotted inner orbit that was never there
   const v = win(t, A[3] - 0.3, A[4] + 2, 0.8, 1);

@@ -103,7 +103,7 @@ export default function draw(g, t, s) {
   // the muon's view: the same mountain, contracted along the motion
   const mv = ramp(t, A[4] - 0.2, A[4] + 1);
   if (mv > 0) {
-    const g10 = gamma(0.995);
+    const g10 = FACTS.muonDilation.value;          // the measured factor, so both stories agree
     const hGround = BOT - TOP, hMuon = hGround / g10;
     const yb = 820;
     panel(g, 330, 170, 520, 720, { alpha: mv * 0.7 });
@@ -122,7 +122,7 @@ export default function draw(g, t, s) {
     circle(g, 1330, yy - hMuon - 220, 7, { fill: COL.gold, alpha: mv });
     text(g, 'muon (at rest in its own frame)', 1330, yy - hMuon - 260, { size: 22, color: COL.dim, alpha: mv });
     arrow(g, 1540, yb - 10, 1540, yb - 110, { color: COL.dim, width: 3, alpha: mv });
-    text(g, `≈ 0.19 km`, 1330, yb + 44, { size: 28, color: COL.ink, alpha: mv });
-    text(g, `contracted by γ ≈ ${g10.toFixed(0)} at 0.995c`, 1330, yb + 84, { size: 24, color: COL.gold, alpha: mv });
+    text(g, `≈ ${(1.9 / g10).toFixed(2)} km`, 1330, yb + 44, { size: 28, color: COL.ink, alpha: mv });
+    text(g, `contracted ${g10}×, the factor that slows its clock`, 1330, yb + 84, { size: 24, color: COL.gold, alpha: mv });
   }
 }

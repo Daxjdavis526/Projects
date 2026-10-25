@@ -82,7 +82,7 @@ const ALLOWED = {
   dates: ['14'],                                       // 14 September 2015
   definitions: ['0', '1', '2', '10', '45', '9.8'],     // r = 0, "one tick", "two rules", powers of ten, light at 45°, standard gravity
   inputs: ['60', '0.6', '99', '99.5', '80', '4', '100', '1.1', '1.5', '3', '8'],   // speeds, distances and radii the film chooses
-  calculations: ['25.8', '43', '11.6', '26,600', '10.23', '6', '2.6', '300,000', '16', '36', '29', '62', '13.8', '67', '73', '50', '0.19'],
+  calculations: ['25.8', '43', '11.6', '26,600', '10.23', '6', '2.6', '300,000', '16', '36', '29', '62', '13.8', '67', '73', '50', '0.2'],   // 0.2%: Hulse–Taylor 0.9983 ± 0.0016
 };
 const allowed = new Set([...sourced, ...Object.values(ALLOWED).flat()]);
 const SUP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', '⁻': '-' };

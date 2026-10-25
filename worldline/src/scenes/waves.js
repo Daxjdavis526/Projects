@@ -95,7 +95,8 @@ function inspiral(g, t, A, a) {
 function interferometer(g, t, A, a) {
   const bx = 640, by = 640, xEnd = 1560, yEnd = 170;
   const wv = Math.sin((t - A[6]) * 2.4) * ramp(t, A[6] + 2, A[6] + 3);
-  const dx = 28 * wv, dy = -28 * wv;               // exaggerated arm changes
+  // the x arm lengthens while the y arm shortens (y mirror moves down), and back
+  const dx = 28 * wv, dy = 28 * wv;                // exaggerated arm changes
   // vacuum tubes
   panel(g, bx, by - 14, xEnd - bx + dx + 20, 28, { r: 14, alpha: a * 0.6, fill: 'rgba(40,56,90,0.6)', stroke: null });
   panel(g, bx - 14, yEnd + dy - 20, 28, by - yEnd - dy + 20, { r: 14, alpha: a * 0.6, fill: 'rgba(40,56,90,0.6)', stroke: null });
@@ -112,12 +113,12 @@ function interferometer(g, t, A, a) {
   text(g, '4 km', (bx + xEnd) / 2, by + 60, { size: 28, color: COL.ink, alpha: a });
   text(g, '4 km', bx + 40, (by + yEnd) / 2, { size: 28, color: COL.ink, alpha: a, align: 'left' });
   // the detector: dark while the arms are equal, light leaks out when they differ
-  const leak = Math.sin(((dx - dy) / 56) * Math.PI / 2) ** 2;
+  const leak = Math.sin(((dx + dy) / 56) * Math.PI / 2) ** 2;   // arm-length difference
   seg(g, bx, by, bx, by + 130, { color: COL.coral, width: 3, alpha: a * leak });
   panel(g, bx - 50, by + 130, 100, 50, { r: 8, alpha: a, fill: '#16202f' });
   glow(g, bx, by + 155, 70, '#ffffff', a * leak);
   text(g, 'detector', bx + 70, by + 165, { size: 24, color: COL.ink, alpha: a, align: 'left' });
-  note(g, 'arm changes exaggerated by a factor of about 10¹⁹', 1240, 820, a);
+  note(g, 'arm changes exaggerated by a factor of about 10²⁰', 1240, 820, a);
 }
 
 function scaleRuler(g, t, a) {
