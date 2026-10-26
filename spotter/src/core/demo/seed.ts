@@ -41,6 +41,8 @@ export async function clearDemoData(db: Database, profileId: string): Promise<vo
   await db.execute(sql`DELETE FROM platform_accounts WHERE creator_profile_id = ${profileId} AND mode = 'mock'`)
   await db.execute(sql`DELETE FROM platform_connector_health WHERE creator_profile_id = ${profileId} AND mode = 'mock'`)
   await db.execute(sql`DELETE FROM creator_content_performance WHERE creator_profile_id = ${profileId} AND data_mode = 'demo'`)
+  // The simulated quota too: a rebuild replays the same days, which the first build already spent.
+  await db.execute(sql`DELETE FROM api_quota_usage WHERE bucket LIKE 'demo:%'`)
 }
 
 /**

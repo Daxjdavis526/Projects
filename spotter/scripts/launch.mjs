@@ -166,8 +166,8 @@ say('  • Starting SPOTTER…')
 const server = spawn(process.execPath, [nextBin(), 'start', '--port', String(PORT), '--hostname', HOST], {
   cwd: ROOT,
   stdio: ['ignore', 'inherit', 'inherit'],
-  // Quiet, readable output in this window: problems only.
-  env: { ...childEnv, NODE_ENV: 'production', LOG_FORMAT: 'pretty', LOG_LEVEL: process.env.LOG_LEVEL ?? 'warn', NEXT_TELEMETRY_DISABLED: '1' },
+  // A quiet window: errors only. Warnings (a quota reached, a connection to renew) are on the Collection status and Connections pages.
+  env: { ...childEnv, NODE_ENV: 'production', LOG_FORMAT: 'pretty', LOG_LEVEL: process.env.LOG_LEVEL ?? 'error', NEXT_TELEMETRY_DISABLED: '1' },
 })
 let stopping = false
 const stop = () => {
