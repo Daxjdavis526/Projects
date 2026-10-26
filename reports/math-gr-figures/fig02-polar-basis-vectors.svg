@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="400" viewBox="0 0 680 400" font-family="DejaVu Sans, Inter, sans-serif">
+<title>Figure 3.1. Polar basis vectors turn from point to point.</title>
+<defs>
+<marker id="ah-navy" viewBox="0 0 10 8" refX="5.00" refY="4" markerWidth="9" markerHeight="7.2" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#1f4e8c"/></marker>
+<marker id="ah-coral" viewBox="0 0 10 8" refX="5.00" refY="4" markerWidth="9" markerHeight="7.2" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#b5473a"/></marker>
+<marker id="ah-ink" viewBox="0 0 10 8" refX="5.00" refY="4" markerWidth="9" markerHeight="7.2" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#1d2025"/></marker>
+</defs>
+<rect width="680" height="400" fill="#ffffff"/>
+<path d="M54,386.72 L54,9.28" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M110,386.72 L110,9.28" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M166,386.72 L166,9.28" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M222,386.72 L222,9.28" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M278,386.72 L278,9.28" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M334,386.72 L334,9.28" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M390,386.72 L390,9.28" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,352 L418,352" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,296 L418,296" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,240 L418,240" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,184 L418,184" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,128 L418,128" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,72 L418,72" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,16 L418,16" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M26,184 L418,184" fill="none" stroke="#5b616b" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M222,386.72 L222,9.28" fill="none" stroke="#5b616b" stroke-width="1.2" stroke-linejoin="round"/>
+<text x="423" y="188" font-size="12" fill="#5b616b"><tspan font-style="italic">x</tspan></text>
+<text x="228" y="18.28" font-size="12" fill="#5b616b"><tspan font-style="italic">y</tspan></text>
+<circle cx="222" cy="184" r="56" fill="none" stroke="#9aa0a8" stroke-width="0.9"/>
+<circle cx="222" cy="184" r="112" fill="none" stroke="#9aa0a8" stroke-width="0.9"/>
+<circle cx="222" cy="184" r="168" fill="none" stroke="#9aa0a8" stroke-width="0.9"/>
+<path d="M222,184 L409.6,184" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L384.47,90.2" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L315.8,21.53" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L222,-3.6" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L128.2,21.53" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L59.53,90.2" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L34.4,184" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L59.53,277.8" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L128.2,346.47" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L222,371.6" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L315.8,346.47" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L384.47,277.8" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<text x="240.49" y="250.09" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic">r</tspan> = 1</text>
+<text x="254.99" y="304.18" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic">r</tspan> = 2</text>
+<text x="269.48" y="358.28" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic">r</tspan> = 3</text>
+<circle cx="222" cy="184" r="2.6" fill="#1d2025"/>
+<text x="207" y="199" font-size="12" fill="#1d2025" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">O</text>
+<path d="M334,184 L385.5,184" fill="none" stroke="#1f4e8c" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-navy)"/>
+<path d="M334,184 L334,132.5" fill="none" stroke="#b5473a" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="334" cy="184" r="3" fill="#1d2025"/>
+<path d="M278,87.01 L184.9,33.26" fill="none" stroke="#b5473a" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="5 3.5" marker-end="url(#ah-coral)"/>
+<path d="M278,87.01 L303.75,42.4" fill="none" stroke="#1f4e8c" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-navy)"/>
+<path d="M278,87.01 L233.4,61.26" fill="none" stroke="#b5473a" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="278" cy="87.01" r="3" fill="#1d2025"/>
+<path d="M125.01,128 L80.4,102.25" fill="none" stroke="#1f4e8c" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-navy)"/>
+<path d="M125.01,128 L99.26,172.6" fill="none" stroke="#b5473a" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="125.01" cy="128" r="3" fill="#1d2025"/>
+<path d="M138,329.49 L112.25,374.09" fill="none" stroke="#1f4e8c" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-navy)"/>
+<path d="M138,329.49 L182.6,355.24" fill="none" stroke="#b5473a" stroke-width="2.2" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="138" cy="329.49" r="3" fill="#1d2025"/>
+<text x="400.36" y="186.6" font-size="13" text-anchor="middle" fill="#1f4e8c" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">r</tspan></text>
+<text x="345.31" y="130.6" font-size="13" text-anchor="middle" fill="#b5473a" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">θ</tspan></text>
+<text x="316.28" y="39.05" font-size="13" text-anchor="middle" fill="#1f4e8c" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">r</tspan></text>
+<text x="259.3" y="65.99" font-size="13" text-anchor="middle" fill="#b5473a" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">θ</tspan></text>
+<text x="68.84" y="92.38" font-size="13" text-anchor="middle" fill="#1f4e8c" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">r</tspan></text>
+<text x="86.04" y="174.16" font-size="13" text-anchor="middle" fill="#b5473a" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">θ</tspan></text>
+<text x="99.66" y="381.62" font-size="13" text-anchor="middle" fill="#1f4e8c" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">r</tspan></text>
+<text x="188.69" y="371.03" font-size="13" text-anchor="middle" fill="#b5473a" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9.5" font-style="italic">θ</tspan></text>
+<text x="340" y="199" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">(2, 0°)</text>
+<text x="285" y="100.01" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">(2, 60°)</text>
+<text x="133.01" y="144" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">(2, 150°)</text>
+<text x="131" y="323.49" font-size="10" text-anchor="end" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">(3, 240°)</text>
+<text x="171.01" y="32.01" font-size="12" text-anchor="end" fill="#b5473a" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-weight="bold">e</tspan><tspan baseline-shift="sub" font-size="9" font-style="italic">θ</tspan> = ∂<tspan font-style="italic" font-weight="bold">x</tspan>/∂<tspan font-style="italic">θ</tspan></text>
+<text x="171.01" y="46.01" font-size="10.5" text-anchor="end" fill="#b5473a" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">length <tspan font-style="italic">r</tspan> = 2</text>
+<path d="M125.01,128 L176.51,128" fill="none" stroke="#1d2025" stroke-width="2" stroke-linejoin="round" marker-end="url(#ah-ink)"/>
+<path d="M138,329.49 L189.5,329.49" fill="none" stroke="#1d2025" stroke-width="2" stroke-linejoin="round" marker-end="url(#ah-ink)"/>
+<text x="183.01" y="122" font-size="13" fill="#1d2025" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic" font-weight="bold">x̂</tspan></text>
+<text x="198" y="334.49" font-size="13" fill="#1d2025" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic" font-weight="bold">x̂</tspan></text>
+<path d="M466,40 L517.5,40" fill="none" stroke="#1d2025" stroke-width="2" stroke-linejoin="round" marker-end="url(#ah-ink)"/>
+<text x="466" y="64" font-size="12" fill="#1d2025"><tspan font-style="italic" font-weight="bold">x̂</tspan>, the same arrow everywhere</text>
+<text x="466" y="92" font-size="11" fill="#5b616b">Its polar components</text>
+<text x="466" y="107" font-size="11" fill="#5b616b">(<tspan font-style="italic" font-weight="bold">x̂</tspan>·<tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9" font-style="italic">r</tspan>, <tspan font-style="italic" font-weight="bold">x̂</tspan>·<tspan font-weight="bold">ê</tspan><tspan baseline-shift="sub" font-size="9" font-style="italic">θ</tspan>) differ:</text>
+<text x="466" y="128" font-size="11.5" fill="#1d2025">at (2, 150°):</text>
+<text x="562" y="128" font-size="11.5" fill="#1d2025">(−0.87, −0.50)</text>
+<text x="466" y="146" font-size="11.5" fill="#1d2025">at (3, 240°):</text>
+<text x="562" y="146" font-size="11.5" fill="#1d2025">(−0.50, +0.87)</text>
+</svg>
