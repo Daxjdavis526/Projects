@@ -156,8 +156,9 @@ export default async function SettingsPage() {
                 <input type="checkbox" name="enabled" defaultChecked={settings.schedule.enabled} className="size-4 accent-[var(--accent)]" />
                 Collect automatically
               </label>
-              <Field label="Run times (24-hour)" hint="Leave a box empty to remove it. Default: morning, afternoon, evening.">
-                <div className="grid grid-cols-4 gap-2">
+              <Field label="Run times" hint="Leave a box empty to remove it. Default: morning, afternoon, evening.">
+                {/* Two per row: a 12-hour clock ("07:00 AM") needs the width. */}
+                <div className="grid grid-cols-2 gap-2">
                   {times.map((t, i) => (
                     <input key={i} name="time" type="time" defaultValue={t} className={compactInputClass} aria-label={`Run time ${i + 1}`} />
                   ))}

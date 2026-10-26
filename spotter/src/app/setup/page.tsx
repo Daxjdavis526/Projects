@@ -261,8 +261,9 @@ export default async function SetupPage({ searchParams }: { searchParams: Promis
             </div>
           </fieldset>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Collection times" hint="Morning, afternoon and evening by default">
-              <div className="grid grid-cols-4 gap-2">
+            <Field label="Collection times" hint="Morning, afternoon and evening by default" className="sm:col-span-2">
+              {/* Full width: a 12-hour clock ("07:00 AM") does not fit four to a half-width column. */}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {times.map((t, i) => (
                   <input key={i} name="time" type="time" defaultValue={t} className={compactInputClass} aria-label={`Collection time ${i + 1}`} />
                 ))}
