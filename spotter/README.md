@@ -127,6 +127,7 @@ docker compose up -d --build   # PostgreSQL + SPOTTER on 127.0.0.1:3000
 | `npm run worker` | the scheduler and collector as a separate process |
 | `npm run collect` | run one collection now and print each platform's steps (good for testing credentials) |
 | `npm run demo:seed [-- --days 14]` | build the demo workspace from the command line |
+| `npm run reset-password [-- you@example.com]` | set a new password for a forgotten account (close SPOTTER first when it uses the embedded database) |
 | `npm run calibrate:embeddings` | suggest clustering thresholds for a remote embedding model from your collected posts |
 | `npm run db:migrate` / `npm run db:generate` | apply / generate database migrations |
 | `npm run typecheck`, `npm run lint`, `npm test` | checks; `npm run check` runs all three |

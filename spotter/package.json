@@ -17,6 +17,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "demo:seed": "tsx scripts/seed-demo.ts",
+    "reset-password": "tsx scripts/reset-password.ts",
     "calibrate:embeddings": "tsx scripts/calibrate-embeddings.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

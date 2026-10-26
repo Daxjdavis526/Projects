@@ -178,6 +178,8 @@ access. [README.md](README.md#running-in-production) covers that.
   **Reconnect**.
 - **A number looks surprising:** open the trend. Every score shows its parts
   and the posts behind it.
+- **You forgot your password:** close SPOTTER, open a terminal in the
+  `spotter` folder and run `npm run reset-password`. It asks for a new one.
 
 For how SPOTTER works inside, see [ARCHITECTURE.md](ARCHITECTURE.md). For
 what each platform does and doesn't allow, see

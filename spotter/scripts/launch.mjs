@@ -61,14 +61,26 @@ if (!existsSync(envPath)) {
 }
 
 // Helpers ---------------------------------------------------------------------
+// Child processes find this same Node.js first, so an older one elsewhere on PATH cannot get in the way.
+const childEnv = { ...process.env }
+const pathKey = Object.keys(childEnv).find((k) => k.toUpperCase() === 'PATH') ?? 'PATH'
+childEnv[pathKey] = [path.dirname(process.execPath), childEnv[pathKey]].filter(Boolean).join(path.delimiter)
+
 function run(command, args, label) {
   return new Promise((resolve) => {
     say(`  • ${label}`)
-    // npm is a script on Windows (npm.cmd), so it needs a shell; the arguments are fixed, never user input.
-    const child = spawn(command, args, { cwd: ROOT, stdio: 'inherit', shell: process.platform === 'win32' && command === 'npm' })
+    // A bare `npm` is a script on Windows (npm.cmd), so it needs a shell; the arguments are fixed, never user input.
+    const child = spawn(command, args, { cwd: ROOT, stdio: 'inherit', env: childEnv, shell: process.platform === 'win32' && command === 'npm' })
     child.on('exit', (code) => resolve(code ?? 1))
     child.on('error', () => resolve(1))
   })
+}
+
+/** The npm that came with this Node.js (Windows keeps it beside node.exe, Mac and Linux under lib/), else whatever `npm` is. */
+function npm(args) {
+  const dir = path.dirname(process.execPath)
+  const cli = [path.join(dir, 'node_modules', 'npm', 'bin', 'npm-cli.js'), path.join(dir, '..', 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js')].find((f) => existsSync(f))
+  return cli ? [process.execPath, [cli, ...args]] : ['npm', args]
 }
 
 const nextBin = () => path.join(ROOT, 'node_modules', 'next', 'dist', 'bin', 'next')
@@ -131,7 +143,7 @@ const installed = path.join(ROOT, 'node_modules', '.package-lock.json')
 if (!existsSync(nextBin()) || !existsSync(installed) || statSync(lock).mtimeMs > statSync(installed).mtimeMs) {
   say('  • First-time setup: downloading the parts SPOTTER needs. This takes a few minutes…')
   say()
-  const code = await run('npm', ['install', '--no-audit', '--no-fund'], 'Installing')
+  const code = await run(...npm(['install', '--no-audit', '--no-fund']), 'Installing')
   if (code !== 0) fail('The download did not finish. Check the internet connection and start SPOTTER again.')
 }
 
@@ -155,7 +167,7 @@ const server = spawn(process.execPath, [nextBin(), 'start', '--port', String(POR
   cwd: ROOT,
   stdio: ['ignore', 'inherit', 'inherit'],
   // Quiet, readable output in this window: problems only.
-  env: { ...process.env, NODE_ENV: 'production', LOG_FORMAT: 'pretty', LOG_LEVEL: process.env.LOG_LEVEL ?? 'warn', NEXT_TELEMETRY_DISABLED: '1' },
+  env: { ...childEnv, NODE_ENV: 'production', LOG_FORMAT: 'pretty', LOG_LEVEL: process.env.LOG_LEVEL ?? 'warn', NEXT_TELEMETRY_DISABLED: '1' },
 })
 let stopping = false
 const stop = () => {

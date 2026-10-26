@@ -4,7 +4,7 @@
 import { eq, sql } from 'drizzle-orm'
 import { defaultSettings } from '../config/settings'
 import type { Database } from '../db/client'
-import { creatorProfiles, users } from '../db/schema'
+import { creatorProfiles, sessions, users } from '../db/schema'
 import { hashPassword, validatePasswordStrength } from '../security/passwords'
 
 export class UserInputError extends Error {}
@@ -46,4 +46,13 @@ export async function createUserWithProfile(
       .returning({ id: creatorProfiles.id })
     return { userId: user!.id, profileId: profile!.id }
   })
+}
+
+/** Replace a user's password and end all their sessions (the forgotten-password path, from the command line). */
+export async function setPassword(db: Database, userId: string, password: string): Promise<void> {
+  const weak = validatePasswordStrength(password)
+  if (weak) throw new UserInputError(weak)
+  const passwordHash = await hashPassword(password)
+  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, userId))
+  await db.delete(sessions).where(eq(sessions.userId, userId))
 }
