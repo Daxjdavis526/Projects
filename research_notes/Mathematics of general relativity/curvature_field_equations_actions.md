@@ -475,3 +475,224 @@ Step 4: compare with the Newtonian $g_{tt}\approx-(1+2\Phi/c^2)c^2$, $\Phi=-GM/r
 - The first successful binary-black-hole simulations (2005) and specific numerical-relativity milestones were not researched.
 
 ---
+
+## 2. How do Carroll, Schutz, Hartle, Wald, MTW, Zee and Baez & Bunn (plus Tong and MIT 8.962) present these topics to beginners?
+
+### Takeaway
+Two pedagogical routes dominate. **Geometry-first** books (Carroll, Schutz, MTW, Wald) build Riemann → Ricci → Bianchi → Einstein tensor, then "guess" the field equation, rule out $R_{\mu\nu}=\kappa T_{\mu\nu}$, and fix $8\pi G$ with the Newtonian limit; the action principle comes afterwards as a confirmation. **Physics-first** books (Hartle; Tong's notes open this way too) do geodesics, Schwarzschild orbits, black holes and waves *before* the field equations. Baez & Bunn offer the most beginner-friendly *statement* of the field equation: the volume of a falling ball of coffee grains.
+
+### Cited Findings
+- **Carroll (lecture notes, 1997; basis of *Spacetime and Geometry*, 2004).**
+  - Ch. 3 introduces Riemann *first* heuristically, through parallel transport around an infinitesimal loop (3.63), *then* defines it by the commutator (3.66–3.67). It notes that equivalence of the two is "true (see Wald for a believable if tortuous demonstration)".
+  - It then covers symmetries and counting (3.76–3.85), Bianchi identities (3.87–3.96) and the Weyl tensor (3.97). Examples run from the flat plane, cylinder and torus ("unroll it"), to the cone (curvature concentrated at the tip), the 2-sphere (3.100–3.106) and geodesic deviation (3.107–3.113).
+  - Ch. 4 motivates minimal coupling ("comma-goes-to-semicolon"), tries $R_{\mu\nu}=\kappa T_{\mu\nu}$, rejects it via the Bianchi identity, introduces $G_{\mu\nu}$, fixes $\kappa=8\pi G$ by the Newtonian limit, *then* derives the equations from the Hilbert action (4.54–4.70), then discusses the initial-value problem (4.81–4.83).
+  - Killing vectors come in ch. 5 (5.41–5.46), Birkhoff in ch. 7, cosmology in ch. 8.
+  - — [Carroll, arXiv gr-qc/9712019](https://arxiv.org/abs/gr-qc/9712019); chapter PDFs [ch. 3](https://www.preposterousuniverse.com/wp-content/uploads/grnotes-three.pdf), [ch. 4](https://www.preposterousuniverse.com/wp-content/uploads/grnotes-four.pdf)
+- **Schutz, *A First Course in General Relativity* (2nd ed., CUP).**
+  - Ch. 6 "Curved manifolds": 6.4 "Parallel-transport, geodesics, and curvature"; 6.5 "The curvature tensor"; 6.6 "Bianchi identities: Ricci and Einstein tensors"; 6.7 "Curvature in perspective".
+  - Ch. 7 "Physics in a curved spacetime": 7.1 "The transition from differential geometry to gravity"; 7.2 "Physics in slightly curved spacetimes"; 7.3 "Curved intuition"; 7.4 "Conserved quantities".
+  - Ch. 8 "The Einstein field equations": 8.1 "Purpose and justification of the field equations"; 8.2 "Einstein's equations"; 8.3 "…for weak gravitational fields"; 8.4 "Newtonian gravitational fields".
+  - — [Cambridge University Press table of contents](https://assets.cambridge.org/97805218/87052/toc/9780521887052_toc.pdf). Carroll notes that "Schutz defines a perfect fluid to be one with no heat conduction and no viscosity, while Weinberg defines it as a fluid which looks isotropic in its rest frame; these two viewpoints turn out to be equivalent." — [Carroll notes §1](https://arxiv.org/abs/gr-qc/9712019)
+- **Hartle, *Gravity: An Introduction to Einstein's General Relativity*.** Described as "physics first": it begins with the essential physical applications using a minimum of new mathematics. Part I covers Newtonian physics and special relativity. Part II, "The Curved Spacetimes of General Relativity", runs from "Gravitational Physics" and "Geometry as Physics" through "Geodesics", "Black Holes" and "Gravitational Waves" (ending at ch. 17), all before the chapters on the Einstein equation. — [British Library catalogue record](https://eld.bl.uk/catalog/020812036); [ComPADRE description](https://www.compadre.org/portal/items/detail.cfm?ID=8528); [Physics Today review](https://physicstoday.aip.org/reviews/gravity-an-introduction-to-einsteins-general-relativity)
+- **Baez & Bunn, "The Meaning of Einstein's Equation"** (Am. J. Phys. 73 (2005) 644–652).
+  - The aim is to state "the whole content of Einstein's equation in plain English", in units $c=8\pi G=1$, as $\ddot V/V|_{t=0}=-\tfrac12(\rho+P_x+P_y+P_z)$ for a small ball of free-falling test particles initially at rest.
+  - From this they derive tidal forces and gravitational waves (no volume change in vacuum), Newton's law ($a=-GM/r^2$), and the Big Bang equation with $\rho+3P$ and $\Lambda$.
+  - Only at the end do they connect to the tensor form: $\ddot V/V\to-R_{tt}$, Ricci = volume change, Weyl = shape change.
+  - — [arXiv gr-qc/0103044](https://arxiv.org/abs/gr-qc/0103044); [web version](https://math.ucr.edu/home/baez/einstein/node3.html)
+- **MTW, *Gravitation*.** Ch. 15, "Bianchi Identities and the Boundary of a Boundary", is Track-2 material using differential forms/Cartan calculus. The "boundary of a boundary" idea goes back to Cartan (1928) and was "excavated" for physicists by Misner and Wheeler (1971). — [UW Physics 544 lecture 20](https://faculty.washington.edu/seattle/physics544/2011-lectures/lecture-20.pdf); [Preskill–Thorne foreword via PhysicsOverflow](https://www.physicsoverflow.org/36083)
+- **Wald, *General Relativity*.** Uses the $(-,+,+,+)$ signature but "changes signature to the timelike convention for Chapter 13 only". — [Wikipedia, Sign convention (cross-check)](https://en.wikipedia.org/wiki/Sign_convention). Carroll points to Wald for the rigorous equivalence of the loop and commutator definitions of Riemann. — [Carroll notes §3](https://arxiv.org/abs/gr-qc/9712019)
+- **Tong (Cambridge lecture notes).** Ch. 1 "Geodesics" already treats the Schwarzschild metric, perihelion precession and light bending. Ch. 2–3 develop differential and Riemannian geometry (curvature, Levi-Civita connection, parallel transport, Ricci and Einstein tensors). Ch. 4 "The Einstein Equations" *opens with* the Einstein–Hilbert action, then the cosmological constant, "diffeomorphisms and the Bianchi identity", Killing vectors, the energy-momentum tensor, energy conditions and cosmology. This is an action-first route to the field equations. — [David Tong, General Relativity lecture notes](https://davidtong.org/teaching/general-relativity/)
+- **MIT 8.962 (Scott Hughes).** Lecture 11 "More on spacetime curvature" covers variants of the curvature tensor (Ricci as the trace on the 1st and 3rd indices), "Breakdown of parallelism: geodesic deviation" ("the hallmark of a tidal effect") and "A differential curvature rule: The Bianchi identity", described as "the last major ingredient that we need to turn our theory of spacetime curvature into a fully fledged theory of gravity". Hughes writes the commutator on a one-form as $[\nabla_\lambda,\nabla_\sigma]p_\alpha=-R^\mu{}_{\alpha\lambda\sigma}p_\mu$, the same convention as Carroll. — [MIT OCW 8.962](https://ocw.mit.edu/courses/8-962-general-relativity-spring-2020/). The lecture PDF consulted is labelled "Spring 2024". The OCW link is the course's published (2020) page.
+- **Gourgoulhon, *3+1 Formalism and Bases of Numerical Relativity*.** The standard pedagogical source for the ADM/3+1 split: lapse, shift, constraint equations, ADM Hamiltonian formulation, constraint-violating modes, hyperbolic formulations. — [arXiv gr-qc/0703035](https://arxiv.org/abs/gr-qc/0703035)
+
+### Inferences
+- For a Calc II audience, a blend works best: Baez–Bunn's ball as the *headline meaning*, Carroll's commutator derivation and 2-sphere computation as the *mechanics*, Carroll's "why not $R_{\mu\nu}=\kappa T_{\mu\nu}$?" argument as the *motivation for the ½*, and Tong/Carroll's action derivation as the *capstone*.
+- Every geometry-first source fixes the coupling constant the same way, by the Newtonian limit, so the document can present $8\pi G/c^4$ as derived rather than postulated.
+
+### Gaps
+- **Zee** (*Einstein Gravity in a Nutshell*) and **Blau**'s lecture notes were not consulted this session. Their presentation choices and conventions are unverified.
+- Hartle's chapter titles for the Einstein-equation chapters (believed to be ch. 21–22) could not be confirmed from the fetched catalogue entries.
+- MTW's own text, including its "sign conventions" table on the endpapers, was not accessible. Statements about MTW come from secondary sources.
+
+## 3. What are the exact formulas under $(-,+,+,+)$ and Carroll's Riemann convention, and how do other books' conventions differ?
+
+### Takeaway
+Using Carroll/MTW conventions with $(-,+,+,+)$, every formula in §1 is internally consistent and sympy-checked: positively curved spheres get $R>0$, and the field equation carries a $+8\pi G/c^4$. Other books flip the metric signature (Landau–Lifshitz and others use $(+,-,-,-)$), the Riemann index order or sign, or the Ricci contraction. Einstein's own 1915 equations carry a minus sign, $G_{im}=-\kappa(T_{im}-\tfrac12g_{im}T)$, because his "$G_{im}$" is the Ricci tensor with the opposite sign convention.
+
+### Cited Findings
+**Master formula sheet** (SI unless stated; sources: Carroll notes ch. 3–5, verified in §4):
+- Christoffel: $\Gamma^\rho_{\mu\nu}=\tfrac12g^{\rho\sigma}(\partial_\mu g_{\nu\sigma}+\partial_\nu g_{\mu\sigma}-\partial_\sigma g_{\mu\nu})$.
+- Riemann (Carroll 3.67): $R^\rho{}_{\sigma\mu\nu}=\partial_\mu\Gamma^\rho_{\nu\sigma}-\partial_\nu\Gamma^\rho_{\mu\sigma}+\Gamma^\rho_{\mu\lambda}\Gamma^\lambda_{\nu\sigma}-\Gamma^\rho_{\nu\lambda}\Gamma^\lambda_{\mu\sigma}$. Commutator: $[\nabla_\mu,\nabla_\nu]V^\rho=R^\rho{}_{\sigma\mu\nu}V^\sigma$. For one-forms: $[\nabla_\mu,\nabla_\nu]\omega_\sigma=-R^\lambda{}_{\sigma\mu\nu}\omega_\lambda$ (Carroll 3.68; Hughes 11.19).
+- Loop: $\delta V^\rho=(\delta a)(\delta b)A^\nu B^\mu R^\rho{}_{\sigma\mu\nu}V^\sigma$ (Carroll 3.63).
+- Symmetries: $R_{\rho\sigma\mu\nu}=-R_{\sigma\rho\mu\nu}=-R_{\rho\sigma\nu\mu}=R_{\mu\nu\rho\sigma}$, and $R_{\rho[\sigma\mu\nu]}=0$. Independent components: $n^2(n^2-1)/12$.
+- Maximally symmetric space of radius $a$: $R_{\rho\sigma\mu\nu}=a^{-2}(g_{\rho\mu}g_{\sigma\nu}-g_{\rho\nu}g_{\sigma\mu})$ (Carroll 3.106).
+- Ricci: $R_{\mu\nu}=R^\lambda{}_{\mu\lambda\nu}$. Scalar: $R=g^{\mu\nu}R_{\mu\nu}$. Einstein: $G_{\mu\nu}=R_{\mu\nu}-\tfrac12Rg_{\mu\nu}$.
+- Weyl (Carroll 3.97): $C_{\rho\sigma\mu\nu}=R_{\rho\sigma\mu\nu}-\tfrac{2}{n-2}\big(g_{\rho[\mu}R_{\nu]\sigma}-g_{\sigma[\mu}R_{\nu]\rho}\big)+\tfrac{2}{(n-1)(n-2)}R\,g_{\rho[\mu}g_{\nu]\sigma}$.
+- Bianchi: $R^\rho{}_{[\sigma\mu\nu]}=0$; $\nabla_{[\lambda}R_{\rho\sigma]\mu\nu}=0$; $\nabla^\mu R_{\rho\mu}=\tfrac12\nabla_\rho R$; $\nabla^\mu G_{\mu\nu}=0$.
+- Geodesic deviation (Carroll 3.113): $\dfrac{D^2S^\mu}{d\tau^2}=R^\mu{}_{\nu\rho\sigma}T^\nu T^\rho S^\sigma$.
+- Stress-energy: dust $T^{\mu\nu}=\rho u^\mu u^\nu$; perfect fluid $T^{\mu\nu}=(\rho+p/c^2)u^\mu u^\nu+pg^{\mu\nu}$, with $u_\mu u^\mu=-c^2$; EM $T^{\mu\nu}=\mu_0^{-1}(F^{\mu\alpha}F^\nu{}_\alpha-\tfrac14g^{\mu\nu}F_{\alpha\beta}F^{\alpha\beta})$; conservation $\nabla_\mu T^{\mu\nu}=0$.
+- Field equations: $G_{\mu\nu}+\Lambda g_{\mu\nu}=\frac{8\pi G}{c^4}T_{\mu\nu}$, equivalently $R_{\mu\nu}=\frac{8\pi G}{c^4}\big(T_{\mu\nu}-\tfrac12Tg_{\mu\nu}\big)+\Lambda g_{\mu\nu}$. Vacuum: $R_{\mu\nu}=0$.
+- Geodesic: $\ddot x^\mu+\Gamma^\mu_{\alpha\beta}\dot x^\alpha\dot x^\beta=0$. Wave operator: $\Box\phi=\frac1{\sqrt{-g}}\partial_\mu(\sqrt{-g}\,g^{\mu\nu}\partial_\nu\phi)$.
+- Killing: $\nabla_\mu\xi_\nu+\nabla_\nu\xi_\mu=0$, and $\xi_\mu u^\mu$ is constant on geodesics.
+- Euler–Lagrange: $\partial L/\partial y-\frac{d}{dx}(\partial L/\partial y')=0$.
+- Action: $S=\frac{c^4}{16\pi G}\int(R-2\Lambda)\sqrt{-g}\,dt\,d^3x+S_M$, with $\delta\sqrt{-g}=-\tfrac12\sqrt{-g}\,g_{\mu\nu}\delta g^{\mu\nu}$ and $\delta(g^{\mu\nu}R_{\mu\nu})=R_{\mu\nu}\delta g^{\mu\nu}+\nabla_\sigma(\ldots)^\sigma$. Matter: $T_{\mu\nu}=-\frac{2}{\sqrt{-g}}\frac{\delta S_M}{\delta g^{\mu\nu}}$.
+- Key results: sphere $R^\theta{}_{\phi\theta\phi}=\sin^2\theta$, $R_{\mu\nu}=g_{\mu\nu}/a^2$, $R=2/a^2$, $G_{\mu\nu}=0$; 3-sphere $R=6/a^2$; Schwarzschild $R_{\mu\nu}=0$ and $R_{\alpha\beta\gamma\delta}R^{\alpha\beta\gamma\delta}=12r_s^2/r^6=48G^2M^2/(c^4r^6)$; FLRW $R=\frac6{c^2}(\frac{\ddot a}a+\frac{\dot a^2}{a^2})+\frac{6k}{a^2}$; de Sitter $R=12H^2/c^2=4\Lambda$; Friedmann $(\dot a/a)^2=\frac{8\pi G}3\rho-\frac{kc^2}{a^2}+\frac{\Lambda c^2}3$ and $\ddot a/a=-\frac{4\pi G}3(\rho+3p/c^2)+\frac{\Lambda c^2}3$; $\rho\propto a^{-3(1+w)}$; Schwarzschild $V_{\rm eff}=-\frac{GM}r+\frac{L^2}{2r^2}-\frac{GML^2}{c^2r^3}$.
+
+**How conventions differ:**
+- **Metric signature.** $(-,+,+,+)$ ("East coast", "mostly plus", "Pauli convention"): MTW, Carroll, Wald (except Wald ch. 13). $(+,-,-,-)$ ("West coast", "mostly minus", "Landau–Lifshitz sign convention"): Landau & Lifshitz, Chandrasekhar's *Mathematical Theory of Black Holes*, D'Inverno, Hobson–Efstathiou–Lasenby. — [Wikipedia, Sign convention (cross-check)](https://en.wikipedia.org/wiki/Sign_convention)
+- **Ricci contraction.** The Ricci tensor can be defined by contracting different index pairs. "These two definitions differ by a minus sign", which is usually compensated by the Riemann sign convention so that the Ricci tensor's sign does not actually change. — [Wikipedia, Sign convention](https://en.wikipedia.org/wiki/Sign_convention). Carroll's Ricci is "the only independent contraction (modulo conventions for the sign, which of course change from place to place)". — [Carroll notes §3](https://arxiv.org/abs/gr-qc/9712019)
+- **Riemann index order.** "There is no agreement at all on what this convention should be, so be careful." — [Carroll notes §3](https://arxiv.org/abs/gr-qc/9712019)
+- **Einstein 1915.** The 25 Nov 1915 equations read $G_{im}=-\varkappa\big(T_{im}-\tfrac12g_{im}T\big)$ (Wikisource translation, eq. 2a), with "$G_{im}$ the Ricci tensor" in Einstein's notation. — [Wikisource translation of "Die Feldgleichungen der Gravitation"](https://en.wikisource.org/wiki/Translation:The_Field_Equations_of_Gravitation); [Janssen & Renn, Physics Today 2015](https://physicstoday.aip.org/features/arch-and-scaffold-how-einstein-found-his-field-equations)
+- **Unit systems.** Carroll's notes set $c=1$ (keeping $G$): $G_{\mu\nu}=8\pi GT_{\mu\nu}$. Baez–Bunn set $c=8\pi G=1$: $G_{\alpha\beta}=T_{\alpha\beta}$. Geometric units set $G=c=1$: $G_{\mu\nu}=8\pi T_{\mu\nu}$. — [Carroll notes §4](https://arxiv.org/abs/gr-qc/9712019); [Baez & Bunn](https://arxiv.org/abs/gr-qc/0103044)
+- **Action normalization.** Carroll's notes use $S=\frac{1}{8\pi G}S_H+S_M$ with $S_H=\int\sqrt{-g}R\,d^nx$ and $T_{\mu\nu}=-\frac1{\sqrt{-g}}\frac{\delta S_M}{\delta g^{\mu\nu}}$, noting "the proper normalization is somewhat convention-dependent". — [Carroll notes §4](https://arxiv.org/abs/gr-qc/9712019)
+
+### Inferences
+- **In $(+,-,-,-)$ signature** the same physics reads $u_\mu u^\mu=+c^2$, $T^{\mu\nu}=(\rho+p/c^2)u^\mu u^\nu-pg^{\mu\nu}$, and trace $T=\rho c^2-3p$. The overall signs of $R_{\mu\nu}$ and $R$ for a given geometry then depend on the Riemann convention chosen alongside. The writer should warn readers to check three signs (metric, Riemann, Einstein) before copying formulas between books.
+- **SI units of the action.** $\frac{c^4}{16\pi G}R$ has units of energy density, J/m³: $c^4/G$ is a force (N = J/m) and $R$ is in m⁻². Integrating over $dt\,d^3x$ gives J·s, an action. If instead $d^4x=d(ct)\,d^3x$ (the usual $x^0=ct$ measure), the prefactor must be $\frac{c^3}{16\pi G}$. The field equations are unaffected as long as $S_M$ uses the same measure. (Unit analysis done in this session.)
+- **$T_{\mu\nu}$ factor.** With gravity normalized as $\frac{1}{16\pi G}$ (or $\frac{c^4}{16\pi G}$), consistency requires $T_{\mu\nu}=-\frac{2}{\sqrt{-g}}\frac{\delta S_M}{\delta g^{\mu\nu}}$. With Carroll-notes normalization $\frac1{8\pi G}$, it is $-\frac1{\sqrt{-g}}\frac{\delta S_M}{\delta g^{\mu\nu}}$. Both give $G_{\mu\nu}=8\pi GT_{\mu\nu}$, provided the matter action is normalized consistently. The common modern choice, used in these notes, is the first.
+
+### Gaps
+- Weinberg's (1972) and Zee's sign conventions, and MTW's three-sign classification table, were not verified from primary text. A comparison table naming each textbook's (metric, Riemann, Einstein) signs should be built only from the books themselves.
+- Whether Schutz and Hartle follow MTW's sign conventions exactly was not verified this session.
+
+## 4. Which computations were verified with sympy, and what did the verification show?
+
+### Takeaway
+Every curvature result requested was reproduced symbolically with sympy 1.14.0, using an independent implementation of Carroll's conventions: the sphere's Riemann/Ricci/scalar/Einstein, Schwarzschild's Ricci $=0$ and Kretschmann $12r_s^2/r^6$, the FLRW Ricci scalar, and the Euler–Lagrange straight line. So were the supporting results: the commutator definition, the contracted Bianchi identity, the Friedmann equations, the fluid conservation law, the Killing vectors, the orbit equation, the EM stress tensor, the Newtonian limit, and the $\delta\sqrt{-g}$ formula.
+
+### Cited Findings
+All entries below are results produced in this session by running sympy (scripts kept at `/tmp/claude-0/-home-user-Projects/6e512a3f-ee96-5ca2-92f4-5fdb7ef00825/scratchpad/gr/`; the self-contained core script is reproduced below). Conventions as in §3.
+- **2-sphere** $a^2(d\theta^2+\sin^2\theta d\phi^2)$:
+  - $\Gamma^\theta_{\phi\phi}=-\tfrac12\sin2\theta$ and $\Gamma^\phi_{\theta\phi}=\cot\theta$.
+  - $R^\theta{}_{\phi\theta\phi}-\sin^2\theta=0$, $R^\phi{}_{\theta\phi\theta}=1$, $R^\phi{}_{\theta\theta\phi}=-1$.
+  - Ricci $=\mathrm{diag}(1,\sin^2\theta)$, $R=2/a^2$, $G_{\mu\nu}=0$, $R_{\theta\phi\theta\phi}/\det g=1/a^2$.
+  - Kretschmann $=4/a^4$.
+  - $[\nabla_\mu,\nabla_\nu]V^\rho=R^\rho{}_{\sigma\mu\nu}V^\sigma$ holds for arbitrary $V(\theta,\phi)$: **True**.
+- **Cylinder** $dz^2+a^2d\phi^2$: all Riemann components zero. **Flat polar** $dr^2+r^2d\phi^2$: $\Gamma^r_{\phi\phi}=-r$, $\Gamma^\phi_{r\phi}=1/r$, all Riemann components zero.
+- **Generic 2D metric** $E(u,v)du^2+H(u,v)dv^2$: $G_{\mu\nu}=0$ identically and $R-2K=0$ identically.
+- **3-sphere**: $R_{ij}/g_{ij}=2/a^2$ for each $i$, and $R=6/a^2$.
+- **Counting**: $n^2(n^2-1)/12=1,6,20,50$ for $n=2,3,4,5$. Ricci has $n(n+1)/2=3,6,10$ components, and 4D Weyl has $20-10=10$.
+- **Schwarzschild** (with $c$, $r_s$):
+  - Christoffels: $\Gamma^t_{tr}=\frac{r_s}{2r(r-r_s)}$, $\Gamma^r_{tt}=\frac{c^2r_s(r-r_s)}{2r^3}$, $\Gamma^r_{rr}=-\frac{r_s}{2r(r-r_s)}$, $\Gamma^r_{\theta\theta}=-(r-r_s)$, $\Gamma^r_{\phi\phi}=-(r-r_s)\sin^2\theta$, $\Gamma^\theta_{r\theta}=\Gamma^\phi_{r\phi}=1/r$, $\Gamma^\theta_{\phi\phi}=-\tfrac12\sin2\theta$, $\Gamma^\phi_{\theta\phi}=\cot\theta$.
+  - **Ricci tensor = zero matrix.**
+  - **Kretschmann $=12r_s^2/r^6=48G^2M^2/(c^4r^6)$**; $12/r_s^4$ at $r=r_s$; $\lim_{r\to0}=\infty$.
+  - Coordinate Riemann components: $R^t{}_{rtr}=\frac{r_s}{r^2(r-r_s)}$, $R^t{}_{\theta t\theta}=R^r{}_{\theta r\theta}=-\frac{r_s}{2r}$, $R^t{}_{\phi t\phi}=R^r{}_{\phi r\phi}=-\frac{r_s\sin^2\theta}{2r}$, $R^\theta{}_{\phi\theta\phi}=\frac{r_s\sin^2\theta}{r}$.
+  - Orthonormal-frame components: $R_{\hat t\hat r\hat t\hat r}=-r_s/r^3$, $R_{\hat t\hat\theta\hat t\hat\theta}=R_{\hat t\hat\phi\hat t\hat\phi}=r_s/(2r^3)$, $R_{\hat r\hat\theta\hat r\hat\theta}=R_{\hat r\hat\phi\hat r\hat\phi}=-r_s/(2r^3)$, $R_{\hat\theta\hat\phi\hat\theta\hat\phi}=r_s/r^3$, with no other independent nonzero components.
+- **Schwarzschild from $R_{\mu\nu}=0$**: the static ansatz gives the $R_{tt}$, $R_{rr}$, $R_{\theta\theta}$ shown in §1.9. Then $e^{2(\beta-\alpha)}R_{tt}/c^2+R_{rr}=\frac2r(\alpha'+\beta')$; with $\beta=-\alpha$, $R_{\theta\theta}=1-e^{2\alpha}(2r\alpha'+1)$; and `dsolve((r h)'=1)` gives $h=(C_1+r)/r$.
+- **Geodesics/orbits**: $\frac{d}{d\tau}[(1-r_s/r)\dot t]$ equals $(1-r_s/r)\times$ the $t$-geodesic equation exactly, and $\frac{d}{d\tau}[r^2\dot\phi]$ equals $r^2\times$ the $\phi$-geodesic equation. $\tfrac12\dot r^2+V_{\rm eff}-\frac{E^2-c^4}{2c^2}=0$ is an identity. The circular-orbit roots merge at $L^2=12G^2M^2/c^2$.
+- **FLRW** (with $k$, $c$):
+  - $R_{tt}=-3\ddot a/a$ and $R=\frac{6}{c^2}(\frac{\ddot a}a+\frac{\dot a^2}{a^2})+\frac{6k}{a^2}$ (difference from target $=0$).
+  - de Sitter $R=12H^2/c^2$; radiation ($a=t^{1/2}$) $R=0$; matter ($a=t^{2/3}$) $R=4/(3c^2t^2)$.
+  - $G^t{}_t=-\frac{3(\dot a^2+kc^2)}{c^2a^2}$.
+  - Friedmann equations exactly as in §1.9.
+  - Perfect fluid: $T^\mu{}_\nu=\mathrm{diag}(-c^2\rho,p,p,p)$ and trace $-c^2\rho+3p$. $\nabla_\mu T^{\mu t}=\dot\rho+3\frac{\dot a}a(\rho+p/c^2)$ (difference $=0$), with spatial components zero. `dsolve` gives $\rho=C_1a^{-3w-3}$.
+- **Contracted Bianchi**: for $-e^{2\alpha(t,r)}dt^2+e^{2\beta(t,r)}dr^2+r^2d\Omega^2$, $\nabla_\mu G^{\mu\nu}=[0,0,0,0]$, while $\nabla_\mu R^{\mu\nu}\neq0$ in the $t$ and $r$ components.
+- **Newtonian limit**: $g=\mathrm{diag}(-(1+2\epsilon\Phi/c^2)c^2,(1-2\epsilon\Phi/c^2)\delta_{ij})$ gives $R_{tt}=\epsilon\nabla^2\Phi+O(\epsilon^2)$. For dust the right side is $4\pi G\rho$, hence $\nabla^2\Phi=4\pi G\rho$.
+- **EM tensor**: $F_{ab}F^{ab}=2(B^2-E^2/c^2)$; $T^{00}=\tfrac12(\epsilon_0E^2+B^2/\mu_0)$; $T^{0i}=S_i/c$; trace $0$; $T^{xx}=-\epsilon_0E_x^2/2$ and $T^{yy}=+\epsilon_0E_x^2/2$ for $\vec E=E_x\hat x$.
+- **Killing vectors on $S^2$**: $\partial_\phi$, $-\sin\phi\,\partial_\theta-\cot\theta\cos\phi\,\partial_\phi$ and $\cos\phi\,\partial_\theta-\cot\theta\sin\phi\,\partial_\phi$ all satisfy Killing's equation (all components 0). $\partial_\theta$ fails, with $\phi\phi$ component $a^2\sin2\theta$.
+- **Wave operator**: flat spherical $\Box\phi$ equals the spherical-Laplacian wave operator. In flat FLRW, $\Box\psi=-\frac1{c^2}(\ddot\psi+3\frac{\dot a}a\dot\psi)+\frac{\nabla^2\psi}{a^2}$. $\sqrt{-g}=c\,r^2\sin\theta$ for both Minkowski (spherical) and Schwarzschild.
+- **Variational checks**:
+  - Straight line: E–L gives $y''/(1+y'^2)^{3/2}=0$, so $y=C_1+C_2x$.
+  - Cycloid: $(1+y'^2)y=2R$.
+  - Sphere geodesic Lagrangian: $\ddot\theta-\sin\theta\cos\theta\,\dot\phi^2=0$ and $\ddot\phi+2\cot\theta\,\dot\theta\dot\phi=0$.
+  - Jacobi formula: $\frac{d}{d\epsilon}\sqrt{-g}=-0.3458773468469416$ vs $-\tfrac12\sqrt{-g}g_{\mu\nu}h^{\mu\nu}=-0.3458773468469415$ on a random Lorentzian 4×4 metric.
+- **Numbers**: $8\pi G/c^4=2.0766\times10^{-43}$ m/J. Earth circle and triangle numbers as in §1.1. Black-hole $\mathcal K(r_s)$ as in §1.2. $p/\rho c^2$ table as in §1.6.
+
+**Core script** (runs in about 6 s; output reproduced in comments):
+```python
+# Self-contained sympy checks. Conventions: signature (-,+,+,+), Carroll/MTW Riemann
+# R^r_{s m n} = d_m G^r_{n s} - d_n G^r_{m s} + G^r_{m l} G^l_{n s} - G^r_{n l} G^l_{m s};  R_{mn} = R^l_{m l n}
+import sympy as sp
+from itertools import product
+
+def curvature(g, x):
+    n = len(x); gi = g.inv()
+    Gam = [[[sp.simplify(sum(gi[r, s]*(sp.diff(g[nu, s], x[m]) + sp.diff(g[m, s], x[nu])
+              - sp.diff(g[m, nu], x[s])) for s in range(n))/2) for nu in range(n)] for m in range(n)] for r in range(n)]
+    Riem = [[[[sp.simplify(sp.diff(Gam[r][nu][s], x[m]) - sp.diff(Gam[r][m][s], x[nu])
+              + sum(Gam[r][m][l]*Gam[l][nu][s] - Gam[r][nu][l]*Gam[l][m][s] for l in range(n)))
+              for nu in range(n)] for m in range(n)] for s in range(n)] for r in range(n)]
+    Ric = sp.Matrix(n, n, lambda m, nu: sp.simplify(sum(Riem[l][m][l][nu] for l in range(n))))
+    Rs = sp.simplify(sum(gi[i, j]*Ric[i, j] for i in range(n) for j in range(n)))
+    return Gam, Riem, Ric, Rs
+
+def kretschmann(g, Riem):                      # diagonal metrics only
+    n = g.shape[0]; gi = g.inv()
+    Rl = lambda a, b, c, d: sum(g[a, e]*Riem[e][b][c][d] for e in range(n))
+    return sp.simplify(sum(Rl(a, b, c, d)**2*gi[a, a]*gi[b, b]*gi[c, c]*gi[d, d]
+                           for a, b, c, d in product(range(n), repeat=4)))
+
+th, ph, t, r, chi = sp.symbols('theta phi t r chi')
+a, c, rs = sp.symbols('a c r_s', positive=True)
+
+g = sp.diag(a**2, a**2*sp.sin(th)**2)                        # 2-sphere
+Gam, Riem, Ric, Rs = curvature(g, [th, ph])
+print(sp.simplify(Riem[0][1][0][1] - sp.sin(th)**2))          # 0   -> R^th_{ph th ph} = sin^2(th)
+print(Ric[0, 0], sp.simplify(Ric[1, 1] - sp.sin(th)**2), Rs)  # 1 0 2/a**2
+print(sp.simplify(Ric - Rs*g/2))                              # zero matrix (G = 0 in 2D)
+
+g3 = sp.diag(a**2, a**2*sp.sin(chi)**2, a**2*sp.sin(chi)**2*sp.sin(th)**2)
+print(curvature(g3, [chi, th, ph])[3])                        # 6/a**2
+
+f = 1 - rs/r                                                  # Schwarzschild, r_s = 2GM/c^2
+gS = sp.diag(-f*c**2, 1/f, r**2, r**2*sp.sin(th)**2)
+_, RiemS, RicS, _ = curvature(gS, [t, r, th, ph])
+print(RicS == sp.zeros(4, 4))                                 # True
+print(kretschmann(gS, RiemS))                                 # 12*r_s**2/r**6
+
+k = sp.symbols('k'); A = sp.Function('a')(t)                  # FLRW
+gF = sp.diag(-c**2, A**2/(1 - k*r**2), A**2*r**2, A**2*r**2*sp.sin(th)**2)
+RF = curvature(gF, [t, r, th, ph])[3]
+print(sp.simplify(RF - (6/c**2*(sp.diff(A, t, 2)/A + sp.diff(A, t)**2/A**2) + 6*k/A**2)))  # 0
+H = sp.symbols('H', positive=True)
+print(sp.simplify(RF.subs(k, 0).subs(A, sp.exp(H*t)).doit()))  # 12*H**2/c**2  (de Sitter)
+
+x = sp.symbols('x'); y = sp.Function('y')(x)                  # Euler-Lagrange, shortest path
+from sympy.calculus.euler import euler_equations
+print(sp.simplify(euler_equations(sp.sqrt(1 + sp.diff(y, x)**2), y, x)[0]))  # y''/(1+y'^2)^(3/2) = 0
+print(sp.dsolve(sp.diff(y, x, 2), y))                         # y = C1 + C2*x
+```
+
+### Inferences
+- The sympy runs confirm that Carroll's index conventions, as transcribed in this document, are self-consistent: the commutator check and the positive sphere curvature both pass. The writer can quote every formula in §3 without sign worries.
+- Sympy prints $R^\theta{}_{\phi\theta\phi}$ as `sin(2θ)/(2tanθ) - cos(2θ)`, which equals $\sin^2\theta$ ($\cos^2\theta-\cos2\theta=\sin^2\theta$). Students running the code should be told to `simplify(expr - sin(theta)**2)` rather than expect the printed form.
+
+### Gaps
+- The Palatini identity itself was not symbolically verified (only cited from Carroll 4.57–4.61). The $\delta\sqrt{-g}$ formula was checked numerically, not symbolically.
+- The Newtonian limit of $\nabla_\mu T^{\mu\nu}=0$ (continuity and Euler) was derived by hand, not by sympy.
+
+## 5. What are the historically accurate facts about Einstein's November 1915 papers and Hilbert's action?
+
+### Takeaway
+Einstein presented four short communications to the Prussian Academy on the Thursdays 4, 11, 18 and 25 November 1915. The last, "Die Feldgleichungen der Gravitation" (Sitzungsberichte pp. 844–847), contains the final field equations with the trace term. Hilbert presented his action-based paper in Göttingen on 20 November 1915, but it was published only on 31 March 1916. Its surviving proofs show that the version first submitted was not generally covariant and lacked the explicit field equations. Most historians therefore credit Einstein with the field equations and Hilbert with the action, though a minority dispute the reading of the proofs.
+
+### Cited Findings
+- **Background (1912–13).** Einstein and Marcel Grossmann first considered field equations based on the Riemann/Ricci tensor in 1912–13 and abandoned them "with a heavy heart" over problems with their physical interpretation (documented in Einstein's Zurich notebook). Instead they published the *Entwurf* ("outline") field equations of limited covariance in June 1913. In September 1915 Einstein discovered that the rotation metric is "not a matter-free solution of the Entwurf field equations." — [Janssen & Renn, "Arch and scaffold: How Einstein found his field equations", Physics Today 68(11), 30 (2015), doi:10.1063/PT.3.2979](https://physicstoday.aip.org/features/arch-and-scaffold-how-einstein-found-his-field-equations)
+- **The four November papers** (submitted "on four consecutive Thursdays"):
+  1. **4 Nov**: replaced the Entwurf equations with $R_{im}=-\kappa T_{im}$, covariant under unimodular transformations (broad but not general covariance).
+  2. **11 Nov**: a "highly speculative" hypothesis that all matter is electromagnetic, so $T=0$, allowed generally covariant equations.
+  3. **18 Nov**: used those equations to explain the anomalous 43″ per century of Mercury's perihelion advance.
+  4. **25 Nov**: added a trace term to the right-hand side, giving the final field equations and removing the need for $T=0$.
+  - The trace term also ensured that matter's energy-momentum enters the equations the same way as the gravitational field's, a "powerful independent argument" for it.
+  - — [Janssen & Renn, Physics Today 2015](https://physicstoday.aip.org/features/arch-and-scaffold-how-einstein-found-his-field-equations); see also [Janssen & Renn, *How Einstein Found His Field Equations: Sources and Interpretation* (Springer, 2022)](https://www.springer.com/book/9783030979546). An arXiv excerpt of that book states that the Mercury paper was presented and submitted on 18 Nov and published a week later ([arXiv 2111.11238](https://www.arxiv.org/pdf/2111.11238)).
+- **The 25 November paper.** Einstein, "Die Feldgleichungen der Gravitation", *Sitzungsberichte der Königlich Preußischen Akademie der Wissenschaften* 1915 (part 2), pp. 844–847, presented 25 Nov, published 2 Dec 1915.
+  - It opens by recalling that he had "shown in two recently published reports" how to obtain field equations consistent with general relativity.
+  - It notes that the vacuum equations "upon which I based the explanation of the perihelion motion of mercury, remain untouched".
+  - It gives $G_{im}=-\varkappa(T_{im}-\tfrac12g_{im}T)$.
+  - It uses coordinates with $\sqrt{-g}=1$.
+  - It concludes that "the general theory of relativity as a logical building is eventually finished."
+  - The earlier reports are cited as Sitzungsber. XLIV p. 778 (4 Nov) and XLVI p. 799 (11 Nov).
+  - — [Wikisource English translation](https://en.wikisource.org/wiki/Translation:The_Field_Equations_of_Gravitation); [original scan, ADS 1915SPAW…844E](https://articles.adsabs.harvard.edu/pdf/1915SPAW.......844E); the Einstein Papers Project's translation is Vol. 6, Doc. 25 ([einsteinpapers.press.princeton.edu/vol6-trans/129](https://einsteinpapers.press.princeton.edu/vol6-trans/129); the page fetched this session showed only the portal landing page).
+- **Hilbert.** Hilbert presented his field equations to the Göttingen Academy on 20 November 1915, five days before Einstein's final paper. "At first glance, Hilbert, following a purely mathematical approach, beat Einstein to the punch." Page proofs that surfaced in the late 1990s show that Hilbert used the Riemann curvature scalar but imposed a coordinate restriction (his "energy theorem"), which was dropped from the version published in March 1916. Janssen & Renn conclude: "Einstein need not have worried about Hilbert in November 1915." — [Janssen & Renn, Physics Today 2015](https://physicstoday.aip.org/features/arch-and-scaffold-how-einstein-found-his-field-equations)
+- **Corry, Renn & Stachel (1997).** "Belated Decision in the Hilbert-Einstein Priority Dispute", *Science* 278, 1270–1273. From archival material they conclude that Hilbert did not anticipate Einstein. The first proofs (dated 6 December 1915) show a theory that is not generally covariant and does not contain the explicit field equations. The published paper still bears the 20 Nov 1915 submission date but appeared on 31 March 1916. — [Corry publication page](https://www.tau.ac.il/~corry/publications/articles/science.html); [Open University of Israel record](https://cris.openu.ac.il/en/publications/belated-decision-in-the-hilbert-einstein-priority-dispute/). Note: Corry's page lists the date as "November 14, 1998", but Science vol. 278 is the 1997 volume. The year 1997 is used elsewhere and appears correct, which suggests a typo on that page.
+- **Dissent.** Winterberg (2004) argued that the conclusion rests on proofs from which part of a sheet had been cut off. Logunov et al. and Sauer also challenged aspects of the paper, and the authors defended their reading. — summarized from [Leo Corry (Wikipedia, cross-check)](https://en.wikipedia.org/wiki/Leo_Corry) and related search results; [Wuensch/Winterberg discussion via arXiv physics/0610154](https://arxiv.org/pdf/physics/0610154). These secondary summaries were not read in full.
+- **Textbook framing.** Carroll's notes say the equations "were first derived by Hilbert, not Einstein, and Hilbert did it using the action principle… Einstein himself derived the equations independently, so they are rightly named after Einstein. The action, however, is rightly called the Hilbert action." — [Carroll notes §4](https://arxiv.org/abs/gr-qc/9712019)
+
+### Inferences
+- The document should say: Einstein completed the field equations in his paper of 25 November 1915. Hilbert independently introduced the variational (action) formulation, presented on 20 November 1915 and published in 1916. The surviving proofs indicate that the explicit field equations were added to Hilbert's paper after Einstein's work. Carroll's 1997-era wording ("first derived by Hilbert") predates or does not reflect that scholarship.
+- Einstein's November 4 equation ($R_{im}\propto T_{im}$) is exactly the "first guess" that Carroll's pedagogy rules out with the Bianchi identity. This gives the document a historically grounded hook: Einstein's own 11 Nov fix ($T=0$) is the only way that guess can be consistent, and the 25 Nov trace term is the ½ in $G_{\mu\nu}$.
+
+### Gaps
+- The Einstein Papers Project pages for Vol. 6 Docs. 21, 22, 24, 25 could not be read (landing page only). Quotes come from the Wikisource translation.
+- The text of Hilbert's "Die Grundlagen der Physik" and the exact page numbers in *Nachrichten… Göttingen* (1915) were not retrieved.
+- The detailed arguments of the Winterberg, Logunov and Sauer critiques were not read. Only search-level summaries are reported.
