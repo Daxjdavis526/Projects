@@ -95,8 +95,21 @@ export async function backfillDemoHistory(
   const start = new Date(now.getTime() - days * DAY)
   const slots = slotsBetween(settings, profile.timezone, start, now)
   const total = slots.length + 1
+  // A build cut short (SPOTTER closed part-way) resumes: slots already collected are skipped.
+  const done = new Set(
+    (
+      await db
+        .select({ clockAt: collectionRuns.clockAt })
+        .from(collectionRuns)
+        .where(and(eq(collectionRuns.creatorProfileId, profileId), eq(collectionRuns.trigger, 'backfill'), inArray(collectionRuns.status, ['succeeded', 'partial'])))
+    ).map((r) => r.clockAt?.getTime()),
+  )
   for (let i = 0; i < slots.length; i++) {
     const t = slots[i]!
+    if (done.has(t.getTime())) {
+      options.onProgress?.(i + 1, total)
+      continue
+    }
     const [run] = await db
       .insert(collectionRuns)
       .values({ creatorProfileId: profileId, dataMode: 'demo', trigger: 'backfill', status: 'queued', requestedAt: t, clockAt: t })

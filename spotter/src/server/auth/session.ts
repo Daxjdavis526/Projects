@@ -3,8 +3,10 @@
  *
  * The cookie carries 32 random bytes; the database stores only their SHA-256,
  * so a leaked database cannot be replayed as a login. Cookies are HttpOnly,
- * SameSite=Lax and, in production, Secure with the __Host- prefix (pinned to
- * this origin, path /). Mutations go through Server Actions, which Next.js
+ * SameSite=Lax and, whenever SPOTTER is served over https (APP_URL), Secure
+ * with the __Host- prefix (pinned to this origin, path /). On a plain
+ * http://localhost install the cookie cannot be Secure: some browsers
+ * (Safari among them) refuse Secure cookies there, and sign-in would fail. Mutations go through Server Actions, which Next.js
  * only accepts as same-origin POSTs.
  */
 import 'server-only'
@@ -12,7 +14,7 @@ import { cache } from 'react'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { and, eq, gt, lt } from 'drizzle-orm'
-import { getEnv, isProduction } from '@/core/config/env'
+import { getEnv } from '@/core/config/env'
 import { getDb } from '@/core/db/client'
 import { creatorProfiles, sessions, users } from '@/core/db/schema'
 import { sha256Hex } from '@/core/security/crypto'
@@ -20,8 +22,13 @@ import { randomToken } from '@/core/security/random'
 
 const SESSION_DAYS = 30
 
+/** Secure cookies need https; a local install runs on plain http://localhost. */
+function secureCookies(): boolean {
+  return getEnv().APP_URL.startsWith('https://')
+}
+
 export function sessionCookieName(): string {
-  return isProduction(getEnv()) ? '__Host-spotter_session' : 'spotter_session'
+  return secureCookies() ? '__Host-spotter_session' : 'spotter_session'
 }
 
 export async function createSession(userId: string): Promise<void> {
@@ -37,7 +44,7 @@ export async function createSession(userId: string): Promise<void> {
   ;(await cookies()).set(sessionCookieName(), token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: isProduction(getEnv()),
+    secure: secureCookies(),
     path: '/',
     expires: expiresAt,
   })

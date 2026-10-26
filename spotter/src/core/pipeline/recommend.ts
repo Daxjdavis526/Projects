@@ -44,6 +44,30 @@ export async function recommendationsDue(rc: RunContext): Promise<boolean> {
   return day(latest.createdAt) !== day(rc.now)
 }
 
+type RecommendationStatus = (typeof recommendations.$inferSelect)['status']
+
+/** Each trend's status in the most recent batch that included it. */
+async function latestDecisions(rc: RunContext, clusterIds: string[]): Promise<Map<string, RecommendationStatus>> {
+  const decided = new Map<string, RecommendationStatus>()
+  if (clusterIds.length === 0) return decided
+  const rows = await rc.db
+    .select({ clusterId: recommendations.clusterId, status: recommendations.status })
+    .from(recommendations)
+    .where(
+      and(
+        eq(recommendations.creatorProfileId, rc.profile.id),
+        eq(recommendations.dataMode, rc.dataMode),
+        eq(recommendations.source, 'batch'),
+        inArray(recommendations.clusterId, clusterIds),
+      ),
+    )
+    .orderBy(desc(recommendations.createdAt))
+  for (const row of rows) if (row.clusterId && !decided.has(row.clusterId)) decided.set(row.clusterId, row.status)
+  return decided
+}
+
+const carriedStatus = (status: RecommendationStatus | undefined): RecommendationStatus => (status === 'saved' || status === 'used' ? status : 'new')
+
 async function ownPriorPost(
   rc: RunContext,
   centroid: number[],
@@ -111,7 +135,14 @@ export async function runRecommendationStage(
   }
   if (!(await recommendationsDue(rc))) return { batchId: null, count: 0, excluded: 0 }
 
-  const { ranked, excluded } = rankOpportunities(candidates, rc.settings)
+  // A decision about a trend outlives the batch it was made in: a dismissed trend stays out of
+  // later lists (its slot goes to the next one), and a saved or filmed one keeps its mark.
+  const decided = await latestDecisions(rc, candidates.map((c) => c.clusterId))
+  const { ranked, excluded } = rankOpportunities(
+    candidates.filter((c) => decided.get(c.clusterId) !== 'dismissed'),
+    rc.settings,
+  )
+  for (const c of candidates) if (decided.get(c.clusterId) === 'dismissed') excluded.push({ clusterId: c.clusterId, reason: 'dismissed by you' })
   if (ranked.length === 0) {
     await recordEvent(rc.db, {
       profileId: rc.profile.id,
@@ -214,6 +245,7 @@ export async function runRecommendationStage(
       generatedBy,
       promptVersion: PROMPT_VERSION,
       generationNote: note,
+      status: carriedStatus(decided.get(r.clusterId)),
       createdAt: rc.now,
     })
     count++

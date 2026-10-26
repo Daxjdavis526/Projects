@@ -8,7 +8,7 @@
  * FOR UPDATE SKIP LOCKED so two workers never take the same run.
  */
 import { Cron } from 'croner'
-import { and, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, lt, or, sql } from 'drizzle-orm'
 import { parseSettings, type AppSettings } from '../config/settings'
 import type { Database } from '../db/client'
 import { rowsOf } from '../db/client'
@@ -104,6 +104,27 @@ export async function claimNextRun(db: Database, workerId: string, now: Date): P
         FOR UPDATE SKIP LOCKED)
     RETURNING id`)
   return rowsOf<{ id: string }>(result)[0]?.id ?? null
+}
+
+/**
+ * With embedded PGlite only one process can open the database, so at startup
+ * a run still marked running was cut short when SPOTTER last stopped (window
+ * closed, computer shut down): no need to wait out the staleness window. A
+ * demo build goes back in the queue and resumes where it stopped; anything
+ * else is marked failed now and runs again at the next slot.
+ */
+export async function recoverOrphanedRuns(db: Database, now: Date): Promise<number> {
+  const resumed = await db
+    .update(collectionRuns)
+    .set({ status: 'queued', startedAt: null, heartbeatAt: null, workerId: null })
+    .where(and(eq(collectionRuns.status, 'running'), eq(collectionRuns.trigger, 'demo_setup')))
+    .returning({ id: collectionRuns.id })
+  const failed = await db
+    .update(collectionRuns)
+    .set({ status: 'failed', finishedAt: now, error: 'SPOTTER stopped before finishing this run. It will run again at the next slot.' })
+    .where(or(eq(collectionRuns.status, 'running'), and(eq(collectionRuns.status, 'queued'), eq(collectionRuns.trigger, 'backfill'))))
+    .returning({ id: collectionRuns.id })
+  return resumed.length + failed.length
 }
 
 /** Runs whose worker vanished mid-run are marked failed, so they do not block new runs. */

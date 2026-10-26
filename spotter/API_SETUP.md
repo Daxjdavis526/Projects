@@ -41,7 +41,7 @@ For live data, SPOTTER needs a fixed public address that starts with `https://`,
 
 - Give the scheme and host only (plus a port, if it isn't the standard one). Add no path: SPOTTER must be served from the root of that address.
 - Every registration below is built from this address. Decide it first. If it changes later, you must update every registration.
-- Use HTTPS in production. SPOTTER's sign-in cookie only works over HTTPS in production (or on `localhost`).
+- Use HTTPS for any address other people or the platforms can reach. On your own computer, the address the launcher sets up (`http://127.0.0.1:3000`) is plain `http`, which is fine there and only there.
 - YouTube: Google's own examples use an `http://localhost` redirect, so you can try YouTube on a local copy (with its own Google Cloud project, see 2.2).
 - Instagram: Meta's deauthorize and data deletion callbacks must reach SPOTTER from the internet. Whether Meta accepts a `localhost` redirect URI is not confirmed in the docs as of 2026-09-29.
 - TikTok: redirect URIs must start with `https`, and the webhook must reach SPOTTER from the internet.
@@ -184,7 +184,7 @@ More: [Unverified apps](https://support.google.com/cloud/answer/7454865) · [Whe
 
 1. On the Clients page, create an OAuth client. Application type: **Web application**.
 2. Add one authorized redirect URI: `APP_URL` followed by `/api/oauth/youtube/callback`. For example: `https://spotter.example.com/api/oauth/youtube/callback`.
-3. For a local test project, use `http://localhost:3000/api/oauth/youtube/callback` with `APP_URL=http://localhost:3000`.
+3. For a local test project, use `http://127.0.0.1:3000/api/oauth/youtube/callback`: that matches `APP_URL=http://127.0.0.1:3000`, which the Start SPOTTER launcher writes into `.env`. Google exempts local addresses like this one from its `https` rule.
 4. Copy the **client ID** into `GOOGLE_CLIENT_ID` and the **client secret** into `GOOGLE_CLIENT_SECRET`.
 
 SPOTTER needs nothing else on the client.

@@ -16,7 +16,7 @@ function StatusButton({ id, status, current, label, icon: Icon }: { id: string; 
       <input type="hidden" name="status" value={on ? 'new' : status} />
       <button type="submit" className={buttonClass('ghost', 'sm', cn(on && 'bg-accent-soft text-accent-text'))} aria-pressed={on}>
         <Icon aria-hidden className="size-3.5" />
-        {on && status === 'saved' ? 'Saved' : on && status === 'used' ? 'Used' : label}
+        {on && status === 'saved' ? 'Saved' : on && status === 'used' ? 'Filmed' : label}
       </button>
     </form>
   )

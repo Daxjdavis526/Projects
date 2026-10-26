@@ -12,7 +12,7 @@
 import { hostname } from 'node:os'
 import { randomUUID } from 'node:crypto'
 import type { Env } from '../config/env'
-import { getDb } from '../db/client'
+import { getDb, getDbHandle } from '../db/client'
 import type { Database } from '../db/client'
 import type { Logger } from '../observability/logger'
 import { eq } from 'drizzle-orm'
@@ -20,7 +20,7 @@ import { collectionRuns } from '../db/schema'
 import { runDemoSetupJob } from '../demo/seed'
 import { runRetention } from './retention'
 import { executeRun } from './runner'
-import { claimNextRun, enqueueDueRuns, recoverStaleRuns } from './scheduler'
+import { claimNextRun, enqueueDueRuns, recoverOrphanedRuns, recoverStaleRuns } from './scheduler'
 
 export interface WorkerHandle {
   readonly id: string
@@ -41,11 +41,18 @@ export function startWorker(options: { env: Env; logger: Logger; db?: Database; 
   let lastError: string | null = null
   let currentRunId: string | null = null
   let lastRetention = 0
+  let started = false
 
   const tick = async () => {
     const db = options.db ?? (await getDb())
     const now = new Date()
     lastTickAt = now
+    if (!started) {
+      started = true
+      // PGlite is single-process: whatever is still "running" belongs to a previous start.
+      const orphaned = !options.db && (await getDbHandle()).kind === 'pglite' ? await recoverOrphanedRuns(db, now) : 0
+      if (orphaned) logger.info('Recovered runs interrupted by the last shutdown', { count: orphaned })
+    }
     const recovered = await recoverStaleRuns(db, now)
     if (recovered) logger.warn('Recovered stale runs', { count: recovered })
     const queued = await enqueueDueRuns(db, now)

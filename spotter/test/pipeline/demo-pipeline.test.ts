@@ -5,7 +5,7 @@
  * endpoints (no network, no keys) to show that a working provider is picked
  * up and that a failing one never costs the dashboard its trends.
  */
-import { and, count, eq, like } from 'drizzle-orm'
+import { and, count, desc, eq, like } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { embedLocally, LocalEmbeddingProvider } from '@/core/ai/local/embedder'
 import { resetProviderPauses } from '@/core/ai/registry'
@@ -86,6 +86,29 @@ describe('demo pipeline', () => {
     const [analysed] = await handle.db.select({ n: count() }).from(aiAnalysis).where(eq(aiAnalysis.status, 'succeeded'))
     expect(Number(local!.n)).toBeGreaterThan(0)
     expect(Number(local!.n)).toBeLessThanOrEqual(Number(analysed!.n))
+  })
+
+  it('keeps the creator’s decisions in later batches: a dismissed trend stays out, a saved one keeps its mark', async () => {
+    const latestBatch = async () => {
+      const rows = await handle.db
+        .select()
+        .from(recommendations)
+        .where(and(eq(recommendations.creatorProfileId, profileId), eq(recommendations.source, 'batch')))
+        .orderBy(desc(recommendations.createdAt), recommendations.rank)
+      return rows.filter((r) => r.batchId === rows[0]!.batchId)
+    }
+    const first = await latestBatch()
+    const [dismissed, saved] = [first[0]!, first[1]!]
+    await handle.db.update(recommendations).set({ status: 'dismissed' }).where(eq(recommendations.id, dismissed.id))
+    await handle.db.update(recommendations).set({ status: 'saved' }).where(eq(recommendations.id, saved.id))
+
+    await runAt(parseEnv({}), new Date(NOW.getTime() + HOUR / 2))
+    const second = await latestBatch()
+    expect(second[0]!.batchId).not.toBe(first[0]!.batchId)
+    expect(second.map((r) => r.clusterId)).not.toContain(dismissed.clusterId)
+    expect(second.find((r) => r.clusterId === saved.clusterId)?.status).toBe('saved')
+    expect(second.filter((r) => r.clusterId !== saved.clusterId).every((r) => r.status === 'new')).toBe(true)
+    expect(second.length).toBeGreaterThanOrEqual(5)
   })
 
   it('falls back to local analysis once, not per post, when the AI provider rejects its key', async () => {

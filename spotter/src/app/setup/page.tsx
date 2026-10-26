@@ -40,14 +40,14 @@ const OAUTH_ERRORS: Record<string, string> = {
 
 function Stepper({ current, reached }: { current: number; reached: number }) {
   return (
-    <ol className="mb-8 flex items-center gap-1 overflow-x-auto">
+    <ol className="mb-8 flex flex-wrap items-center gap-x-0.5 gap-y-1">
       {STEPS.map((label, i) => {
         const n = i + 1
         const done = n < current
         const active = n === current
         const reachable = n >= 2 && n <= reached && n !== current
         const body = (
-          <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium whitespace-nowrap', active ? 'bg-ink text-plane' : done ? 'text-ink' : 'text-muted')}>
+          <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[12px] font-medium whitespace-nowrap', active ? 'bg-ink text-plane' : done ? 'text-ink' : 'text-muted')}>
             <span className={cn('grid size-4 place-items-center rounded-full text-[10px]', active ? 'bg-plane text-ink' : done ? 'bg-good text-white' : 'border border-line-strong')}>
               {done ? <Check aria-hidden className="size-3" /> : n}
             </span>

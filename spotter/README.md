@@ -42,6 +42,14 @@ serves nothing usable from this folder; run it locally or on a server.
 
 Requires Node.js 22.12 or newer.
 
+**Easiest:** double-click `Start SPOTTER (Mac).command` or
+`Start SPOTTER (Windows).bat`, or run `npm run app`. On first start it
+writes a `.env` with a fresh encryption key, installs, builds, and opens
+http://127.0.0.1:3000 in production mode; later starts take seconds. It
+listens on this computer only. Close the window to stop it.
+
+**For development:**
+
 ```sh
 cd spotter
 npm install
@@ -99,7 +107,7 @@ docker compose up -d --build   # PostgreSQL + SPOTTER on 127.0.0.1:3000
 
 - Put it behind HTTPS (a reverse proxy such as Caddy or nginx) and set
   `APP_URL` to the public https URL: OAuth redirect URIs are derived from it,
-  and session cookies are `Secure` in production.
+  and session cookies are `Secure` whenever it is https.
 - `TOKEN_ENCRYPTION_KEY` is required in production. Losing it means
   reconnecting every platform; rotating it is supported
   (`TOKEN_ENCRYPTION_KEY_PREVIOUS`).
@@ -113,6 +121,7 @@ docker compose up -d --build   # PostgreSQL + SPOTTER on 127.0.0.1:3000
 
 | | |
 |---|---|
+| `npm run app` | the one-step local launcher (what the Start SPOTTER files run) |
 | `npm run dev` | development server with the in-process worker |
 | `npm run build` / `npm start` | production build / server |
 | `npm run worker` | the scheduler and collector as a separate process |
@@ -178,7 +187,7 @@ Blunt, because the numbers drive decisions:
   everything collected through that account.
 - Local accounts use scrypt password hashing; sessions are random tokens
   (stored hashed) in `HttpOnly`, `SameSite=Lax` cookies, `Secure` with the
-  `__Host-` prefix in production; sign-in is rate limited. Server actions
+  `__Host-` prefix whenever `APP_URL` is https; sign-in is rate limited. Server actions
   verify the request origin.
 - Logs and stored events pass through a redactor that strips tokens, codes,
   signatures and API keys.

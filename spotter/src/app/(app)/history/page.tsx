@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Bookmark, Check, History as HistoryIcon, Wand2 } from 'lucide-react'
 import { requireProfile } from '@/server/auth/session'
 import { getHistory } from '@/server/queries/history'
+import { setRecommendationStatus } from '@/server/actions/recommendations'
 import { Badge, Card, CardHeader, EmptyState, PageHeader, StageBadge } from '@/components/ui/primitives'
 import { dateTime, relativeTime } from '@/lib/format'
 
@@ -12,7 +13,28 @@ export default async function HistoryPage() {
   const { batches, pastTrends } = await getHistory(profile)
   const tz = profile.timezone
   const now = new Date()
-  const kept = batches.flatMap((b) => b.items.filter((i) => i.status === 'saved' || i.status === 'used').map((i) => ({ ...i, createdAt: b.createdAt })))
+  // A trend's decision carries into later batches, so its newest entry is the one that counts:
+  // list each kept trend once, and offer Restore only where restoring changes what comes next.
+  const newest = new Set<string>()
+  const seen = new Set<string>()
+  for (const b of batches) {
+    for (const i of b.items) {
+      const key = i.clusterId ?? i.id
+      if (b.source === 'batch' && !seen.has(key)) {
+        seen.add(key)
+        newest.add(i.id)
+      }
+    }
+  }
+  const keptKeys = new Set<string>()
+  const kept = batches
+    .flatMap((b) => b.items.filter((i) => i.status === 'saved' || i.status === 'used').map((i) => ({ ...i, createdAt: b.createdAt })))
+    .filter((i) => {
+      const key = i.clusterId ?? i.id
+      if (keptKeys.has(key)) return false
+      keptKeys.add(key)
+      return true
+    })
 
   return (
     <>
@@ -56,6 +78,15 @@ export default async function HistoryPage() {
                             </Badge>
                           ) : null}
                           {i.status === 'dismissed' ? <Badge>Dismissed</Badge> : null}
+                          {i.status === 'dismissed' && newest.has(i.id) ? (
+                            <form action={setRecommendationStatus}>
+                              <input type="hidden" name="id" value={i.id} />
+                              <input type="hidden" name="status" value="new" />
+                              <button type="submit" className="text-[12px] font-medium text-accent-text hover:underline" title="Bring this trend back into your ideas">
+                                Restore
+                              </button>
+                            </form>
+                          ) : null}
                         </div>
                         <p className="mt-1 truncate text-[13px] text-ink-2">“{i.suggestedHook}”</p>
                       </div>

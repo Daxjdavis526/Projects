@@ -11,6 +11,7 @@
  */
 import { mkdirSync } from 'node:fs'
 import path from 'node:path'
+import type { PGlite } from '@electric-sql/pglite'
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import { getEnv } from '../config/env'
 import { getLogger } from '../observability/logger'
@@ -58,8 +59,30 @@ async function openPglite(dataDir: string | null): Promise<DbHandle> {
   const { drizzle } = await import('drizzle-orm/pglite')
   if (dataDir) mkdirSync(dataDir, { recursive: true })
   const client = dataDir ? await PGlite.create(dataDir) : await PGlite.create()
+  yieldPeriodically(client)
   const db = drizzle({ client, schema }) as unknown as Database
   return { db, kind: 'pglite', close: () => client.close() }
+}
+
+/**
+ * PGlite runs PostgreSQL on this thread and usually answers without touching
+ * the event loop, so a long burst of queries (the demo backfill, a collection
+ * run) is one unbroken chain of promise callbacks: timers and incoming
+ * requests wait until it ends, and the app looks frozen for a minute. Handing
+ * the event loop a turn every few milliseconds keeps pages responsive.
+ */
+function yieldPeriodically(client: PGlite, everyMs = 20): void {
+  let since = performance.now()
+  for (const method of ['query', 'exec'] as const) {
+    const original = client[method].bind(client) as (...args: unknown[]) => Promise<unknown>
+    ;(client as unknown as Record<string, unknown>)[method] = async (...args: unknown[]) => {
+      if (performance.now() - since > everyMs) {
+        await new Promise((resolve) => setImmediate(resolve))
+        since = performance.now()
+      }
+      return original(...args)
+    }
+  }
 }
 
 export async function migrate(handle: DbHandle): Promise<void> {

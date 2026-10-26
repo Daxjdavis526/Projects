@@ -43,15 +43,16 @@ Start with the demo.
 
 ## Try the demo
 
-You need a computer with **Node.js 22** or newer
-([nodejs.org](https://nodejs.org)).
+You need a computer with **Node.js 22.12** or newer: install the "LTS"
+version from [nodejs.org](https://nodejs.org).
 
-1. Open a terminal in the `spotter` folder and run:
-   ```sh
-   npm install
-   npm run dev
-   ```
-2. Open **http://localhost:3000** in your browser.
+1. **Start SPOTTER.** In the `spotter` folder, double-click
+   **Start SPOTTER (Mac).command** or **Start SPOTTER (Windows).bat**
+   (or run `npm run app` in a terminal there). The first start downloads
+   what SPOTTER needs and prepares it, which takes a few minutes; later
+   starts take seconds. A window shows its progress: keep it open while you
+   use SPOTTER.
+2. Your browser opens **http://127.0.0.1:3000** by itself. Bookmark it.
 3. **Create your account.** Your name, email and a password. This account
    lives only on your computer.
 4. **Choose "Demo data"**, then click **Connect** for YouTube, Instagram and
@@ -61,8 +62,8 @@ You need a computer with **Node.js 22** or newer
 6. Click **Open my dashboard**. SPOTTER builds ten days of pretend history, which takes
    about a minute, and then your dashboard fills in.
 
-To stop SPOTTER, press `Ctrl+C` in the terminal. Run `npm run dev` again to
-start it later; everything is kept.
+To stop SPOTTER, close its window (or press `Ctrl+C` in it). Start it the
+same way next time; everything is kept.
 
 ## Using it day to day
 
@@ -103,7 +104,8 @@ Underneath each idea:
 
 - **Save** keeps it for later.
 - **Mark filmed** records that you made it.
-- **Dismiss** hides it.
+- **Dismiss** hides it and keeps that trend out of later lists. Changed your
+  mind? **Restore** it from History.
 
 **Open trend** shows the full detail, explained further down.
 

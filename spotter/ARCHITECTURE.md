@@ -241,6 +241,9 @@ the strongest ones become the "Why you" of a brief.
 a breakout (≥ 6× its creator's normal). **Diversity**: a second trend on the
 same topic key, or with a near-identical centroid, is skipped in favour of the
 next distinct idea. Excluded trends are recorded with the reason.
+**Your decisions carry over**: a trend you dismissed stays out of later
+batches (its slot goes to the next idea) until you restore it from History,
+and one you saved or filmed keeps that mark in each new batch.
 
 ## AI layer
 
@@ -307,7 +310,14 @@ pairs in your own data and suggests values for `EMBEDDING_THRESHOLDS`
 - **Claiming** uses `FOR UPDATE SKIP LOCKED`: one run, one worker.
 - **Heartbeats** every 30 s; a run whose heartbeat is older than 15 minutes
   (the worker restarted or crashed) is marked failed with that reason, and the
-  next slot runs normally.
+  next slot runs normally. With embedded PGlite, which only one process can
+  open, the worker settles these at startup instead: anything still marked
+  running was cut short by the last shutdown, and an interrupted demo build is
+  queued again and resumes from the slots it had not collected.
+- **Responsiveness on PGlite**: PGlite answers on the server's own thread,
+  often without touching the event loop, so a long run would be one unbroken
+  chain of promise callbacks that keeps every page waiting. The client hands
+  the event loop a turn every 20 ms of queries (`db/client.ts`).
 - **Manual refresh** ("Refresh now") queues a run that may use the quota
   reserve; scheduled runs may not.
 - **Retention** runs daily: compacts snapshots older than 45 days to one per
@@ -342,7 +352,7 @@ pairs in your own data and suggests values for `EMBEDDING_THRESHOLDS`
 - Tokens: AES-256-GCM with a key id per ciphertext; key rotation via
   `TOKEN_ENCRYPTION_KEY_PREVIOUS`; never sent to the browser or logged.
 - Sessions: 32 random bytes in an `HttpOnly`, `SameSite=Lax` cookie
-  (`__Host-` prefixed and `Secure` in production), stored hashed; sign-in
+  (`__Host-` prefixed and `Secure` whenever `APP_URL` is https), stored hashed; sign-in
   rate limited; a constant-time dummy hash check for unknown emails.
 - CSRF: state changes go through Server Actions (origin checked by Next.js)
   or verified webhooks.

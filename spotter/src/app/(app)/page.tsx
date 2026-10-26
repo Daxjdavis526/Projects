@@ -59,9 +59,21 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
             today.cards.map((card) => <OpportunityCardView key={card.id} card={card} timeZone={tz} />)
           ) : (
             <Card>
-              {today.batch ? (
+              {today.batch && today.hiddenByFilters ? (
                 <EmptyState icon={Lightbulb} title="No opportunities match these filters">
                   {today.hiddenByFilters} of today’s ideas are hidden by the filters above.
+                </EmptyState>
+              ) : today.batch ? (
+                <EmptyState
+                  icon={Lightbulb}
+                  title="You’ve been through today’s ideas"
+                  action={
+                    <Link href="/history" className={buttonClass('secondary', 'sm')}>
+                      History
+                    </Link>
+                  }
+                >
+                  You dismissed all {plural(today.dismissed, 'idea')} in today’s list. New ideas arrive with the next batch; dismissed ones stay in History.
                 </EmptyState>
               ) : (
                 <EmptyState
@@ -79,9 +91,18 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
               )}
             </Card>
           )}
-          {today.batch && today.cards.length > 0 && today.cards.length < 5 && !today.hiddenByFilters ? (
+          {today.batch && today.cards.length > 0 && today.cards.length < 5 && !today.hiddenByFilters && !today.dismissed ? (
             <p className="text-[13px] text-ink-2">
               Only {plural(today.cards.length, 'trend')} passed the evidence gates today. SPOTTER shows fewer ideas rather than weaker ones.
+            </p>
+          ) : null}
+          {today.cards.length > 0 && today.dismissed ? (
+            <p className="text-[13px] text-ink-2">
+              {plural(today.dismissed, 'dismissed idea')} not shown.{' '}
+              <Link href="/history" className="underline decoration-line-strong underline-offset-4 hover:text-ink">
+                See them in History
+              </Link>
+              .
             </p>
           ) : null}
         </div>

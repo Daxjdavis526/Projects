@@ -45,6 +45,8 @@ export interface TodayData {
   batch: { id: string; createdAt: Date; generatedBy: string } | null
   cards: OpportunityCard[]
   hiddenByFilters: number
+  /** Ideas in today's batch the creator dismissed. */
+  dismissed: number
   totals: { activeTrends: number; postsTracked: number; creatorsTracked: number }
   insights: string[]
 }
@@ -60,6 +62,7 @@ export async function getToday(profile: Profile, filters: Filters): Promise<Toda
 
   let cards: OpportunityCard[] = []
   let hidden = 0
+  let dismissed = 0
   if (latest) {
     const rows = await db
       .select({ rec: recommendations, topicKey: trendClusters.topicKey, platforms: trendClusters.platforms })
@@ -102,15 +105,16 @@ export async function getToday(profile: Profile, filters: Filters): Promise<Toda
       status: rec.status,
       history: scores.filter((s) => s.clusterId === rec.clusterId).map((s) => ({ t: s.t.getTime(), score: Math.round(s.score * 10) / 10 })),
     }))
-    cards = all.filter(
+    const kept = all.filter((c) => c.status !== 'dismissed')
+    cards = kept.filter(
       (c) =>
-        c.status !== 'dismissed' &&
         (!filters.platform || c.platforms.includes(filters.platform)) &&
         (!filters.stage || c.stage === filters.stage) &&
         (!filters.topic || c.topicKey === filters.topic) &&
         c.confidence >= filters.minConfidence,
     )
-    hidden = all.length - cards.length
+    dismissed = all.length - kept.length
+    hidden = kept.length - cards.length
   }
 
   const origins = originsFor(profile.dataMode)
@@ -143,6 +147,7 @@ export async function getToday(profile: Profile, filters: Filters): Promise<Toda
     batch: latest ? { id: latest.batchId, createdAt: latest.createdAt, generatedBy: latest.generatedBy } : null,
     cards,
     hiddenByFilters: hidden,
+    dismissed,
     totals: {
       activeTrends: Number(trendCount[0]?.n ?? 0),
       postsTracked: Number(tracked[0]?.posts ?? 0),
