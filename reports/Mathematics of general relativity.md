@@ -20,7 +20,7 @@ Three tags say how far to trust a result: **EXACT** (it follows from the definit
 
 **Indices.** Greek indices $\mu,\nu,\rho,\sigma,\lambda,\alpha,\beta$ run over $0,1,2,3$ (time and three space directions); Latin indices $i,j,k$ run over $1,2,3$ (space only). A superscript on a coordinate is a label, not a power: $x^2$ is the coordinate $y$. The sign $\equiv$ means "is defined as", $\approx$ "is approximately" and $\propto$ "is proportional to". An index repeated once up and once down in a term is summed over (the Einstein summation convention, Section 11).
 
-**Curvature signs (Carroll/MTW).** The Riemann tensor is $R^\rho{}_{\sigma\mu\nu}=\partial_\mu\Gamma^\rho_{\nu\sigma}-\partial_\nu\Gamma^\rho_{\mu\sigma}+\Gamma^\rho_{\mu\lambda}\Gamma^\lambda_{\nu\sigma}-\Gamma^\rho_{\nu\lambda}\Gamma^\lambda_{\mu\sigma}$, the Ricci tensor is the contraction $R_{\mu\nu}=R^\lambda{}_{\mu\lambda\nu}$, and the field equations carry $+8\pi G/c^4$ ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eqs. 3.67, 3.90, 4.52). With these choices a sphere has positive curvature. A dot over a symbol means a derivative with respect to proper time $\tau$ or a path parameter $\lambda$, never coordinate time, unless the text says otherwise.
+**Curvature signs (Carroll/MTW).** The Riemann tensor is $R^\rho{}_{\sigma\mu\nu}=\partial_\mu\Gamma^\rho_{\nu\sigma}-\partial_\nu\Gamma^\rho_{\mu\sigma}+\Gamma^\rho_{\mu\lambda}\Gamma^\lambda_{\nu\sigma}-\Gamma^\rho_{\nu\lambda}\Gamma^\lambda_{\mu\sigma}$, the Ricci tensor is the contraction $R_{\mu\nu}=R^\lambda{}_{\mu\lambda\nu}$, and the field equations carry $+8\pi G/c^4$ ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eqs. 3.67, 3.90, 4.52). With these choices a sphere has positive curvature. A dot over a symbol means a derivative with respect to proper time $\tau$ or a path parameter $\lambda$, except in Newtonian formulas (such as $m\ddot x=-kx$ or $\ddot{\mathbf x}=-\nabla\Phi$) and in cosmology ($\dot a$, $\dot\rho$), where it means $d/dt$ as in Physics I.
 
 Textbooks differ in up to three independent signs, which MTW label [S1] (metric signature), [S2] (sign of the Riemann tensor) and [S3] (sign in the field equation). The physics is identical; only bookkeeping changes ([Wikipedia: Einstein field equations, reporting MTW's classification](https://en.wikipedia.org/wiki/Einstein_field_equations)).
 
@@ -265,7 +265,7 @@ $$
 \tag{2.7}
 $$
 
-Curvature takes one more derivative, so the field equations are second-order in $g_{\mu\nu}$. With indices, Eq. (2.4) becomes $\partial f/\partial x'^\mu=(\partial x^\nu/\partial x'^\mu)\,\partial f/\partial x^\nu$, the transformation law of a gradient ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eq. 1.41), which Section 13 extends to every tensor.
+(Here $g^{\sigma\rho}$ is the inverse metric, Section 4, and an index repeated in a term, such as $\rho$, is summed over its four values, Section 11; for now, notice only that every term holds one first derivative of the metric.) Curvature takes one more derivative, so the field equations are second-order in $g_{\mu\nu}$. With indices, Eq. (2.4) becomes $\partial f/\partial x'^\mu=(\partial x^\nu/\partial x'^\mu)\,\partial f/\partial x^\nu$, the transformation law of a gradient ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eq. 1.41), which Section 13 extends to every tensor.
 
 ### 6. What I Should Remember
 
@@ -406,7 +406,7 @@ $\det A=1\cdot4-2\cdot3=-2$: $A$ doubles areas and flips orientation. By Eq. (4.
 
 #### Worked Example 4.3 — Metric matrices from GR
 
-The polar metric is $g=\mathrm{diag}(1,r^2)$, with inverse $\mathrm{diag}(1,1/r^2)$ and determinant $r^2$. The Minkowski metric $\eta=\mathrm{diag}(-1,1,1,1)$ is its own inverse, with determinant $-1$. The Schwarzschild metric (Equation 12 of Part IV) in coordinates $(ct,r,\theta,\phi)$, writing $f=1-r_s/r$, is diagonal:
+The polar metric is $g=\mathrm{diag}(1,r^2)$, with inverse $\mathrm{diag}(1,1/r^2)$ and determinant $r^2$. The Minkowski metric $\eta=\mathrm{diag}(-1,1,1,1)$ is its own inverse, with determinant $-1$. The Schwarzschild metric (Equation 12 of Part IV) in coordinates $(ct,r,\theta,\phi)$, writing $f=1-r_s/r$, where $r_s=2GM/c^2$ (the Schwarzschild radius) is a fixed length set by the mass $M$, is diagonal:
 
 $$
 \begin{aligned}
@@ -691,7 +691,7 @@ With Earth's mean radius $a=6371.0$ km ([NASA Earth Fact Sheet](https://nssdc.gs
 
 #### Worked Example 8.2 — Parallels are not straight
 
-From longitude 0° to 90°E along the 60°N parallel, $L=a\sin\theta\,\Delta\phi=6371\times0.5\times1.5708=5003.8$ km. The great circle between the same points has angular length $\Delta\sigma$ with $\cos\Delta\sigma=\sin^260^\circ+\cos^260^\circ\cos90^\circ=0.75$, so $\Delta\sigma=0.72273$ rad and $L=4604.5$ km, 399 km shorter.
+From longitude 0° to 90°E along the 60°N parallel, $L=a\sin\theta\,\Delta\phi=6371\times0.5\times1.5708=5003.8$ km. The great circle between the same points has angular length $\Delta\sigma$, the angle between the two points' position vectors, so by the dot product (3.1) and the coordinates above, $\cos\Delta\sigma=\cos\theta_1\cos\theta_2+\sin\theta_1\sin\theta_2\cos\Delta\phi=\cos^230^\circ+\sin^230^\circ\cos90^\circ=0.75$ (colatitude $30^\circ$ is latitude $60^\circ$N), so $\Delta\sigma=0.72273$ rad and $L=4604.5$ km, 399 km shorter.
 
 #### Worked Example 8.3 — Curvature from inside
 
@@ -815,7 +815,7 @@ $$
 \tag{10.2}
 $$
 
-so $ct'=\gamma(ct-\beta x)$ and $x'=\gamma(x-\beta ct)$. The row label is the upper index $\mu$ and the column label the lower index $\nu$, so $x'^\mu=\Lambda^\mu{}_\nu x^\nu$ is matrix times column. Interval invariance, written as a matrix statement, is the defining property (compare rotations, $R^TR=I$):
+so $ct'=\gamma(ct-\beta x)$ and $x'=\gamma(x-\beta ct)$. The row label is the upper index $\mu$ and the column label the lower index $\nu$, so $x'^\mu=\Lambda^\mu{}_\nu x^\nu$, with the repeated $\nu$ summed from 0 to 3 (the summation convention of Section 11), is matrix times column. Interval invariance, written as a matrix statement, is the defining property (compare rotations, $R^TR=I$):
 
 $$
 \Lambda^T\eta\,\Lambda=\eta .
@@ -1043,7 +1043,7 @@ Mnemonic: the primed coordinate sits where the index on the left sits. Why "true
 
 #### Worked Example 13.1 — Outer product and its parts
 
-With $A^i=(1,2)$ and $B^j=(3,-1)$, $T^{ij}=A^iB^j$ has $T^{11}=3$, $T^{12}=-1$, $T^{21}=6$, $T^{22}=-2$. It is not symmetric. By Eq. (13.1) its symmetric part has entries $3$, $2.5$, $2.5$, $-2$ and its antisymmetric part $0$, $-3.5$, $3.5$, $0$; adding them returns $T$. A symmetric and an antisymmetric tensor always contract to zero: $3(0)+2.5(-3.5)+2.5(3.5)+(-2)(0)=0$.
+With $A^i=(1,2)$ and $B^j=(3,-1)$, $T^{ij}=A^iB^j$ has $T^{11}=3$, $T^{12}=-1$, $T^{21}=6$, $T^{22}=-2$. It is not symmetric. By Eq. (13.1) its symmetric part has entries $3$, $2.5$, $2.5$, $-2$ and its antisymmetric part $0$, $-3.5$, $3.5$, $0$; adding them returns $T$. A symmetric and an antisymmetric tensor always contract to zero, $S^{ij}A_{ij}=0$; with Cartesian components, where lowering an index changes nothing: $3(0)+2.5(-3.5)+2.5(3.5)+(-2)(0)=0$.
 
 #### Worked Example 13.2 — An invariant contraction
 
@@ -1051,14 +1051,14 @@ At $(x,y)=(1,1)$, so $r=\sqrt2$, $\theta=\pi/4$, take $V=\hat{\mathbf x}$, $(V^x
 
 #### Worked Example 13.3 — The trace of a perfect fluid
 
-A perfect fluid (Section 22) has $T^{\mu\nu}=(\rho+p/c^2)u^\mu u^\nu+p\,g^{\mu\nu}$, with $u_\mu u^\mu=-c^2$ (Section 14) and $\delta^\mu_\mu=4$. Its trace is
+Looking ahead, a perfect fluid (Section 22) has $T^{\mu\nu}=(\rho+p/c^2)u^\mu u^\nu+p\,g^{\mu\nu}$, where $\rho$ is its mass density, $p$ its pressure and $u^\mu$ its four-velocity (Section 14), a four-vector whose squared length is always $u_\mu u^\mu=-c^2$. Only that fact and $g_{\mu\nu}g^{\mu\nu}=\delta^\mu_\mu=4$ are needed. The fluid's trace is
 
 $$
 T=g_{\mu\nu}T^{\mu\nu}=(\rho+p/c^2)(-c^2)+4p=-\rho c^2+3p .
 \tag{13.3}
 $$
 
-For dust ($p=0$), $T=-\rho c^2$; for radiation ($p=\rho c^2/3$), $T=0$. (Carroll's notes say "$T>0$ in matter" here; with $(-,+,+,+)$ dust has $T<0$, a sign slip that does not affect his argument.)
+For dust ($p=0$), $T=-\rho c^2$; for radiation ($p=\rho c^2/3$), $T=0$. (Carroll's notes, just after his eq. 4.41, say "$T>0$ in matter"; with $(-,+,+,+)$ dust has $T<0$, a sign slip that does not affect his argument.)
 
 ### 5. Connection to Einstein's Equations
 
@@ -1135,7 +1135,7 @@ With constant proper acceleration $\alpha$ the rapidity grows linearly, $\phi=\a
 
 #### Worked Example 14.4 — The GPS clock budget
 
-Use Eq. (14.4) for a satellite and a ground clock and subtract. The satellite's speed term is $-8.3485\times10^{-11}$ (Worked Example 1.3). The gravitational term compares the satellite's potential, $-GM/a$, with the ground clock's, fixed by the rotating geoid at $\Phi_0/c^2=-6.969290\times10^{-10}$ ([Ashby 2003](https://pmc.ncbi.nlm.nih.gov/articles/PMC5253894/)):
+Use Eq. (14.4) for a satellite and a ground clock and subtract. The satellite's speed term is $-8.3485\times10^{-11}$ (Worked Example 1.3). The gravitational term compares the satellite's potential, $-GM/a$, with the ground clock's, fixed by the rotating geoid (the sea-level surface on which all ground clocks tick at the same rate) at $\Phi_0/c^2=-6.969290\times10^{-10}$ ([Ashby 2003](https://pmc.ncbi.nlm.nih.gov/articles/PMC5253894/)):
 
 $$
 \begin{aligned}
@@ -1155,7 +1155,7 @@ The geodesic equation sets the four-acceleration to zero while accounting for cu
 
 ### 6. What I Should Remember
 
-- Proper time is wristwatch time, $d\tau^2=-ds^2/c^2$, and the unaccelerated worldline has the most of it.
+- Proper time is wristwatch time, $d\tau^2=-ds^2/c^2$, and in flat spacetime the unaccelerated worldline has the most of it.
 - $u^\mu=dx^\mu/d\tau=\gamma(c,\mathbf v)$ always has $u_\mu u^\mu=-c^2$ ($p^\mu=(E/c,\mathbf p)$ has $p_\mu p^\mu=-m^2c^2$), and the four-acceleration, which an accelerometer reads, is perpendicular to it.
 - In weak gravity $d\tau/dt\approx1+\Phi/c^2-v^2/2c^2$: for GPS, +45.8 − 7.2 = +38.6 μs/day.
 
@@ -1234,7 +1234,7 @@ To ask whether a vector field is changing, you compare arrows at neighbouring po
 
 ### 2. Why Does General Relativity Need It?
 
-Physical laws must be tensor equations, and the partial derivative of a vector's components is not a tensor in curved coordinates; $\nabla$ is. Special-relativistic laws carry over by replacing $\partial$ with $\nabla$, Carroll's "comma-goes-to-semicolon rule" (in the notation $V^\nu{}_{,\mu}\equiv\partial_\mu V^\nu$, $V^\nu{}_{;\mu}\equiv\nabla_\mu V^\nu$): energy conservation $\partial_\mu T^{\mu\nu}=0$ becomes $\nabla_\mu T^{\mu\nu}=0$ ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eq. 4.23).
+Physical laws must be tensor equations, and the partial derivative of a vector's components is not a tensor in curved coordinates; $\nabla$ is. Most special-relativistic laws carry over by replacing $\partial$ with $\nabla$, Carroll's "comma-goes-to-semicolon rule" (in the notation $V^\nu{}_{,\mu}\equiv\partial_\mu V^\nu$, $V^\nu{}_{;\mu}\equiv\nabla_\mu V^\nu$): energy conservation $\partial_\mu T^{\mu\nu}=0$ becomes $\nabla_\mu T^{\mu\nu}=0$ ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eq. 4.23). The rule needs care where two derivatives act, because covariant derivatives do not commute (Section 19); in Carroll's words, "life is not always so easy".
 
 ### 3. How Does the Mathematics Work?
 
@@ -1315,7 +1315,7 @@ For $ds^2=a^2(d\theta^2+\sin^2\theta\,d\phi^2)$, the only nonzero derivative is 
 
 #### Worked Example 16.4 — The divergence formula
 
-Contracting Eq. (16.5) gives $\Gamma^\mu_{\mu\lambda}=\partial_\lambda\ln\sqrt{|g|}$, so $\nabla_\mu V^\mu=\frac{1}{\sqrt{|g|}}\partial_\mu(\sqrt{|g|}\,V^\mu)$ ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eqs. 3.26–3.28). The field $x\hat{\mathbf x}+y\hat{\mathbf y}$ has Cartesian divergence 2 and polar components $V^r=r$, $V^\theta=0$: the naive $\partial_rV^r=1$ is wrong, while with $\sqrt{g}=r$, $\frac1r\partial_r(r\cdot r)=2$ is right.
+Contracting Eq. (16.5) (set $\sigma=\mu$ and sum: the first and third terms cancel after swapping the dummy names $\mu$ and $\rho$ in one of them, and for a diagonal metric what is left is $\tfrac12\sum_\mu\partial_\lambda g_{\mu\mu}/g_{\mu\mu}=\tfrac12\partial_\lambda\ln\prod_\mu\lvert g_{\mu\mu}\rvert$, where the product is $|g|$) gives $\Gamma^\mu_{\mu\lambda}=\partial_\lambda\ln\sqrt{|g|}$, so $\nabla_\mu V^\mu=\frac{1}{\sqrt{|g|}}\partial_\mu(\sqrt{|g|}\,V^\mu)$ ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eqs. 3.26–3.28). The field $x\hat{\mathbf x}+y\hat{\mathbf y}$ has Cartesian divergence 2 and polar components $V^r=r$, $V^\theta=0$: the naive $\partial_rV^r=1$ is wrong, while with $\sqrt{g}=r$, $\frac1r\partial_r(r\cdot r)=2$ is right.
 
 ### 5. Connection to Einstein's Equations
 
@@ -1323,7 +1323,7 @@ Christoffel symbols enter the geodesic equation (Section 18), every covariant de
 
 ### 6. What I Should Remember
 
-- $\nabla=\partial+\Gamma$-correction, $+\Gamma$ for each upper index and $-\Gamma$ for each lower; "comma goes to semicolon", $\partial\to\nabla$, carries special-relativistic laws into GR.
+- $\nabla=\partial+\Gamma$-correction, $+\Gamma$ for each upper index and $-\Gamma$ for each lower; "comma goes to semicolon", $\partial\to\nabla$, carries most special-relativistic laws into GR.
 - $\Gamma^\sigma_{\mu\nu}=\tfrac12g^{\sigma\rho}(\partial_\mu g_{\nu\rho}+\partial_\nu g_{\rho\mu}-\partial_\rho g_{\mu\nu})$ follows from symmetry and $\nabla g=0$.
 - Christoffel symbols are not tensors: nonzero in flat polar coordinates, zero at any chosen point in curved space.
 
@@ -1369,7 +1369,7 @@ $$
 \tag{17.2}
 $$
 
-Differentiate the first and substitute the second: $d^2V^\theta/d\lambda^2=-\cos^2\theta_0\,V^\theta$, simple harmonic motion with angular frequency $\cos\theta_0$. Starting due south ($V^\theta=1$, $V^\phi=0$), the solution is $V^\theta=\cos(\lambda\cos\theta_0)$: relative to local south and east the arrow turns steadily, and after one loop it has rotated by
+Differentiate the first and substitute the second: $d^2V^\theta/d\lambda^2=-\cos^2\theta_0\,V^\theta$, simple harmonic motion with angular frequency $\cos\theta_0$. Starting due south ($V^\theta=1$, $V^\phi=0$), the solution is $V^\theta=\cos(\lambda\cos\theta_0)$, and the first equation gives $V^\phi$. Along unit arrows pointing south and east, the arrow's components are proportional to $(\cos(\lambda\cos\theta_0),\,-\sin(\lambda\cos\theta_0))$: relative to these local directions, which return unchanged, it turns at the rate $\cos\theta_0$, by $2\pi\cos\theta_0$ per loop. A full turn changes nothing, so that equals a turn of $2\pi-2\pi\cos\theta_0$ the other way: after one loop the arrow has rotated by
 
 $$
 \Delta\alpha=2\pi\left(1-\cos\theta_0\right),
@@ -1380,7 +1380,7 @@ the enclosed polar-cap area $2\pi a^2(1-\cos\theta_0)$ divided by $a^2$: 48.2° 
 
 #### Worked Example 17.3 — A gyroscope in orbit
 
-Gravity Probe B's gyroscopes, in a 642 km polar orbit from 2004 to 2005, measured a geodetic drift of $-6601.8\pm18.3$ milliarcseconds per year against GR's $-6606.1$ ([Everitt et al. 2011](https://arxiv.org/abs/1105.3456)): agreement to 0.07%, within the 0.28% uncertainty. A Foucault pendulum's turning is the same geometry on Earth's curved surface, but only an **ANALOGY**: Earth's rotation, not spacetime curvature, causes it.
+Gravity Probe B's gyroscopes, in a 642 km polar orbit from 2004 to 2005, measured a geodetic drift, from parallel transport along an orbit that closes in space but not in spacetime (each lap happens later), of $-6601.8\pm18.3$ milliarcseconds per year against GR's $-6606.1$ ([Everitt et al. 2011](https://arxiv.org/abs/1105.3456)): agreement to 0.07%, within the 0.28% uncertainty. A Foucault pendulum's turning is the same geometry on Earth's curved surface, but only an **ANALOGY**: Earth's rotation, not spacetime curvature, causes it.
 
 ### 5. Connection to Einstein's Equations
 
@@ -1568,7 +1568,7 @@ $$
 
 **APPROXIMATE** (weak field, slow motion). Its trace, $\nabla^2\Phi/c^2$, is the part that Poisson's equation ties to matter.
 
-> **Common confusion.** Books order the indices of Eq. (20.1) differently (Wikipedia's geodesic-deviation article has a line that clashes with Carroll's). A reliable check in any convention: meridians on a sphere must *converge*.
+> **Common confusion.** Books order the indices of Eq. (20.1) differently, so never mix lines from a source with another ordering into a calculation that uses Carroll's. A reliable check in any convention: meridians on a sphere must *converge*.
 
 <!-- FIGURE SPEC: Two panels side by side. Left panel: a sphere with the equator and two meridians starting at equator points A and B separated by a short arc ξ0; both meridians drawn as solid blue lines heading north and converging at the north pole N; small double-headed arrows between them at three latitudes labelled "ξ0", "ξ0 cos(s/a)", "0", showing the separation shrinking. Right panel: Earth (a large circle at the bottom) with a freely falling elevator (dashed box) above it; inside, four small balls arranged in a cross: the top and bottom balls have arrows pointing apart vertically labelled "+2GM ξ / r^3 (stretch)", the left and right balls have arrows pointing toward each other horizontally labelled "−GM ξ / r^3 (squeeze)"; faint dashed lines from each ball to Earth's centre show they all fall toward the centre. The reader should notice that parallel starts do not stay parallel, and that tides stretch along the radial direction and squeeze across it. -->
 ![Figure 20.1. Geodesic deviation. Left: meridians that start parallel at the equator converge at the pole with no force acting. Right: in a freely falling elevator, test balls separate vertically and approach horizontally, the tidal pattern that is spacetime curvature.](math-gr-figures/fig09-geodesic-deviation.svg)
@@ -1592,7 +1592,7 @@ At $\mathbf x=(r,0,0)$ the radial entry is $\tfrac{GM}{r^3}(1-3)=-\tfrac{2GM}{r^
 
 #### Worked Example 20.3 — The same tides in GR
 
-For Schwarzschild spacetime, in the orthonormal frame of a static observer, the curvature components are $R^{\hat r}{}_{\hat t\hat r\hat t}=-r_s/r^3$ and $R^{\hat\theta}{}_{\hat t\hat\theta\hat t}=R^{\hat\phi}{}_{\hat t\hat\phi\hat t}=+r_s/2r^3$ (hats mark components along unit vectors). With $u\approx(c,0,0,0)$, Eq. (20.1) gives radial acceleration $+c^2r_s\xi/r^3=+2GM\xi/r^3$ and transverse $-GM\xi/r^3$, **EXACT** for static or radially falling observers, with $r$ the areal radius ([Dray, *Geometry of General Relativity*](https://sites.science.oregonstate.edu/physics/coursewikis/GGR/book/ggr/tidal.html)). Newton's tidal formula survives unchanged.
+For Schwarzschild spacetime, in the orthonormal frame of a static observer, the curvature components are $R^{\hat r}{}_{\hat t\hat r\hat t}=-r_s/r^3$ and $R^{\hat\theta}{}_{\hat t\hat\theta\hat t}=R^{\hat\phi}{}_{\hat t\hat\phi\hat t}=+r_s/2r^3$ (hats mark components along unit vectors). A particle released from rest beside the static observer has exactly $u=(c,0,0,0)$ in this frame, and Eq. (20.1) gives radial acceleration $+c^2r_s\xi/r^3=+2GM\xi/r^3$ and transverse $-GM\xi/r^3$, **EXACT** for small separations between freely falling neighbours momentarily at rest or falling radially (a radial boost leaves these components unchanged), with $r$ the areal radius ([Dray, *Geometry of General Relativity*](https://sites.science.oregonstate.edu/physics/coursewikis/GGR/book/ggr/tidal.html)). Newton's tidal formula survives unchanged. Two observers hovering at fixed $r$ are not in free fall, so this is not their relative acceleration.
 
 ### 5. Connection to Einstein's Equations
 
@@ -1627,7 +1627,7 @@ $$
 
 Other contractions give nothing new (the first or last pair gives zero by antisymmetry). $R_{\mu\nu}$ is symmetric, so in four dimensions Riemann's 20 components split into 10 (Ricci) plus 10 (Weyl). Taking the trace of $G_{\mu\nu}$ with $g^{\mu\nu}g_{\mu\nu}=4$ gives $G\equiv g^{\mu\nu}G_{\mu\nu}=R-2R=-R$. So $G_{\mu\nu}$ is the **trace-reverse** of $R_{\mu\nu}$, and reversing again gets you back: $R_{\mu\nu}=G_{\mu\nu}-\tfrac12G\,g_{\mu\nu}$.
 
-In Baez and Bunn's units ($c=8\pi G=1$), Einstein's equation applied to the small ball reads $\ddot V/V=-\tfrac12(\rho+P_x+P_y+P_z)$, where $\rho$ is the energy density and $P_x,P_y,P_z$ the pressures at the ball's centre ([Baez & Bunn 2005](https://arxiv.org/abs/gr-qc/0103044)). In SI units, for isotropic pressure $p$ and mass density $\rho$, it becomes $\ddot V/V=-4\pi G(\rho+3p/c^2)$ **EXACT** (for an infinitesimal ball initially at rest, in local inertial coordinates). Pressure gravitates.
+In Baez and Bunn's units ($c=8\pi G=1$), Einstein's equation applied to the small ball reads $\ddot V/V=-\tfrac12(\rho+P_x+P_y+P_z)$, where $\rho$ is the energy density and $P_x,P_y,P_z$ the pressures at the ball's centre ([Baez & Bunn 2005](https://arxiv.org/abs/gr-qc/0103044)). In SI units, for isotropic pressure $p$ and mass density $\rho$, it becomes $\ddot V/V=-4\pi G(\rho+3p/c^2)$ **EXACT** (for an infinitesimal ball initially at rest, in local inertial coordinates, with $\Lambda=0$; a cosmological constant adds $+\Lambda c^2$ to the right side). Pressure gravitates.
 
 <!-- FIGURE SPEC: Three side-by-side panels showing a small sphere of test particles (drawn as a ring of 12 dots around a central dot) at time zero (dashed outline) and a short time later (solid outline). Panel 1, "Ricci (inside matter)": the ball shrinks uniformly to a smaller sphere, arrows pointing inward from every dot, label "volume decreases: V''/V = −4πG(ρ + 3p/c^2)". Panel 2, "Weyl (empty space near a mass)": the ball deforms into a prolate ellipsoid, stretched vertically and squeezed horizontally, with the same volume, arrows outward at top and bottom and inward at the sides, label "shape changes, volume does not (tides)". Panel 3, "Weyl (gravitational wave)": the ball deforms into an ellipse stretched horizontally and squeezed vertically, then (thin dotted outline) the opposite, label "plus-polarized wave". Under the panels a single line: "Riemann (20) = Ricci (10, volume) + Weyl (10, shape)". The reader should notice that matter changes volume while empty-space curvature only changes shape. -->
 ![Figure 21.1. Ricci versus Weyl curvature. A small ball of freely falling particles shrinks in volume where there is matter (Ricci curvature), but in empty space only changes shape, stretching along one direction and squeezing across it (Weyl curvature: tides and gravitational waves).](math-gr-figures/fig10-ricci-weyl-ball.svg)
@@ -1753,7 +1753,7 @@ $T_{\mu\nu}$ is the entire right-hand side, multiplied by $8\pi G/c^4$. Because 
 
 ### 1. What Is This Mathematics?
 
-The **Bianchi identities** are statements about curvature that hold for every metric whatsoever, like $\nabla\cdot(\nabla\times\mathbf F)=0$ in vector calculus. MTW's slogan for them is "the boundary of a boundary is zero" ([UW Physics 544 notes on MTW ch. 15](https://faculty.washington.edu/seattle/physics544/2011-lectures/lecture-20.pdf)). Their twice-contracted form says the Einstein tensor has zero divergence.
+The **Bianchi identities** are statements about curvature that hold for every metric whatsoever, like the vector-calculus identity $\nabla\cdot(\nabla\times\mathbf F)=0$: the divergence of a curl is always zero (the curl $\nabla\times\mathbf F$, met in Calculus III, measures how much a field circulates). MTW's slogan for them is "the boundary of a boundary is zero" ([UW Physics 544 notes on MTW ch. 15](https://faculty.washington.edu/seattle/physics544/2011-lectures/lecture-20.pdf)). Their twice-contracted form says the Einstein tensor has zero divergence.
 
 ### 2. Why Does General Relativity Need It?
 
@@ -1771,7 +1771,7 @@ $$
 \tag{23.1}
 $$
 
-On the sphere the first identity reads $\sin^2\theta+0-\sin^2\theta=0$ for $\rho=\theta$, $(\sigma\mu\nu)=(\phi\theta\phi)$. Now contract the second identity with $g^{\nu\sigma}$. Because $\nabla g=0$, the metric slides through the derivatives, and the symmetries (19.3) turn each Riemann term into a Ricci tensor; contracting again with $g^{\mu\lambda}$ turns them into Ricci tensors and the scalar:
+On the sphere the first identity reads $\sin^2\theta+0-\sin^2\theta=0$ for $\rho=\theta$, $(\sigma\mu\nu)=(\phi\theta\phi)$. Now contract the second identity with $g^{\nu\sigma}$. Because $\nabla g=0$, the metric slides through the derivatives, and the symmetries (19.3) turn the first two Riemann terms into Ricci tensors (the third stays a Riemann tensor, now under a raised derivative $\nabla^\nu$); contracting again with $g^{\mu\lambda}$ turns every term into a Ricci tensor or the Ricci scalar:
 
 $$
 \begin{aligned}
@@ -1794,7 +1794,7 @@ $$
 
 > **History aside.** Einstein's November 1915 papers to the Prussian Academy proposed, in effect, Ricci proportional to $T$ (4 November), made it consistent by assuming $T=0$ for all matter (11 November), and added the trace term, giving the final field equations (25 November) ([Janssen & Renn 2015](https://physicstoday.aip.org/features/arch-and-scaffold-how-einstein-found-his-field-equations)). Hilbert's action-based paper, presented on 20 November and published on 31 March 1916, survives in proofs that are not generally covariant and lack explicit field equations; most historians, though not all, conclude he did not derive them first ([Corry, Renn & Stachel 1997](https://doi.org/10.1126/science.278.5341.1270); [Janssen & Renn 2015](https://physicstoday.aip.org/features/arch-and-scaffold-how-einstein-found-his-field-equations)).
 
-**The field equations as PDEs.** $G_{\mu\nu}$ contains second derivatives of $g$ (through $\partial\Gamma$) and products of first derivatives with inverse metrics (through $\Gamma\Gamma$), so Einstein's equations are second-order, nonlinear and coupled. Of the ten (both sides symmetric), the four identities (23.3) leave "only six truly independent equations", matching the four free functions in a choice of coordinates ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), after eq. 4.52). The four $G^{0\nu}=\kappa T^{0\nu}$ contain no second time derivatives: they are **constraints** on the initial data, while the six $G^{ij}=\kappa T^{ij}$ are **evolution** equations. Numerical relativity slices spacetime into spatial sheets, with a lapse function (proper time between sheets) and a shift vector (how coordinates slide), keeping the constraints satisfied as errors accumulate ([Gourgoulhon 2007](https://arxiv.org/abs/gr-qc/0703035)).
+**The field equations as PDEs.** $G_{\mu\nu}$ contains second derivatives of $g$ (through $\partial\Gamma$) and products of first derivatives with inverse metrics (through $\Gamma\Gamma$), so Einstein's equations are second-order, nonlinear and coupled. Of the ten (both sides symmetric), the four identities (23.3) leave "only six truly independent equations", matching the four free functions in a choice of coordinates ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), after eq. 4.52). The four $G^{0\nu}=\kappa T^{0\nu}$ (here $\kappa=8\pi G/c^4$ and $\Lambda=0$) contain no second time derivatives: they are **constraints** on the initial data, while the six $G^{ij}=\kappa T^{ij}$ are **evolution** equations. Numerical relativity slices spacetime into spatial sheets, with a lapse function (proper time between sheets) and a shift vector (how coordinates slide), keeping the constraints satisfied as errors accumulate ([Gourgoulhon 2007](https://arxiv.org/abs/gr-qc/0703035)).
 
 ### 4. Worked Examples
 
@@ -1923,7 +1923,7 @@ A **functional** eats a whole function or path and returns a number, such as a c
 
 ### 2. Why Does General Relativity Need It?
 
-Geodesics are paths of stationary proper time, and Einstein's equations follow from making one number, the **Einstein–Hilbert action**, stationary under changes of the metric. The same calculation defines the stress-energy tensor of any matter field, and the action is the starting point for every attempt at quantum gravity ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), §4).
+Geodesics are paths of stationary proper time, and Einstein's equations follow from making one number, the **Einstein–Hilbert action**, stationary under changes of the metric. The same calculation defines the stress-energy tensor of any matter field, and the action is the starting point of many approaches to quantum gravity ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), §4).
 
 ### 3. How Does the Mathematics Work?
 
@@ -1955,7 +1955,7 @@ $$
 
 Units: $R$ is in m⁻², $\sqrt{-g}$ is dimensionless when $x^0=ct$, and $c^4/16\pi G=2.408\times10^{42}$ N, so the integral over seconds and cubic metres gives J·s, the units of action. Why $\sqrt{-g}$: it makes $\sqrt{-g}\,d^4x$ the invariant volume element, the Jacobian of Section 5 in four dimensions (the minus sign because $\det g<0$). Why $R$: any useful scalar must involve second derivatives of the metric, since first derivatives can be set to zero at a point, and $R$ is the simplest.
 
-Vary the inverse metric, $g^{\mu\nu}\to g^{\mu\nu}+\delta g^{\mu\nu}$, writing $R\sqrt{-g}=g^{\mu\nu}R_{\mu\nu}\sqrt{-g}$. Three pieces appear ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eqs. 4.56–4.70): $R_{\mu\nu}\sqrt{-g}\,\delta g^{\mu\nu}$; a term $g^{\mu\nu}\delta R_{\mu\nu}$ that is a total divergence and integrates to a boundary term that vanishes; and $R\,\delta\sqrt{-g}$, using
+Vary the inverse metric, $g^{\mu\nu}\to g^{\mu\nu}+\delta g^{\mu\nu}$, writing $R\sqrt{-g}=g^{\mu\nu}R_{\mu\nu}\sqrt{-g}$. Three pieces appear ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eqs. 4.56–4.70; his notes, with $c=1$, put the factor of 2 elsewhere, $S=\frac{1}{8\pi G}\int R\sqrt{-g}\,d^4x+S_M$ and $T_{\mu\nu}=-\frac{1}{\sqrt{-g}}\frac{\delta S_M}{\delta g^{\mu\nu}}$, which gives the same field equations): $R_{\mu\nu}\sqrt{-g}\,\delta g^{\mu\nu}$; a term $g^{\mu\nu}\delta R_{\mu\nu}$ that is a total divergence and integrates to a boundary term that vanishes; and $R\,\delta\sqrt{-g}$, using
 
 $$
 \delta\sqrt{-g}=-\tfrac12\sqrt{-g}\,g_{\mu\nu}\,\delta g^{\mu\nu}.
@@ -2006,7 +2006,7 @@ Eq. (25.5) derives the field equations, cosmological constant included, from one
 
 # Part IV: Anatomy of the Great Equations
 
-This Part dissects twenty equations, each needing only those before it: the geometry of flat and curved spacetime, curvature, the field equations with their famous solutions and consequences, and finally the action from which everything can be derived. Each is taken apart in the same seven steps, A to G, with section numbers pointing back to where the mathematics was taught.
+This Part dissects twenty equations, each equation needing only those before it (a few worked examples borrow a metric from later in this Part, and say so): the geometry of flat and curved spacetime, curvature, the field equations with their famous solutions and consequences, and finally the action from which everything can be derived. Each is taken apart in the same seven steps, A to G, with section numbers pointing back to where the mathematics was taught.
 
 ## 26. Anatomy of the Great Equations of General Relativity
 
@@ -2144,7 +2144,7 @@ Evaluate the line element along the path, take a square root, integrate (Section
 
 #### E. Physical interpretation
 
-Proper time is what clocks measure; coordinate time is a label. A freely falling clock records the most proper time between two events, and the GPS budget, $+45.8-7.2=+38.6$ μs/day, is Eq. (26.5) applied twice (Worked Example 14.4).
+Proper time is what clocks measure; coordinate time is a label. Between two events not too far apart, a freely falling clock records more proper time than any clock on a nearby path. The maximum is only local: a satellite completing one orbit and a clock launched straight up from the same event that falls back to meet it are both in free fall, yet record different proper times (Section 18). The GPS budget, $+45.8-7.2=+38.6$ μs/day, is Eq. (26.5) applied twice (Worked Example 14.4).
 
 #### F. Worked example
 
@@ -2159,7 +2159,7 @@ dropping the tiny product $\Phi v^2/c^4$; then $\sqrt{1+\epsilon}\approx1+\epsil
 
 #### G. Connections to other equations
 
-**EXACT**: making $\tau$ stationary gives the geodesic equation, Equation 5 (Section 25). **APPROXIMATE**: the weak-field form uses Equation 11's metric. **ANALOGY**: a car's odometer, recording the length of road actually driven.
+**EXACT**: making $\tau$ stationary gives the geodesic equation, Equation 5 (Section 25). **APPROXIMATE** ($|\Phi|/c^2\ll1$ and $v\ll c$): the weak-field form uses Equation 11's metric. **ANALOGY**: a car's odometer, recording the length of road actually driven.
 
 ### Equation 4: The Christoffel symbols
 
@@ -2205,7 +2205,7 @@ $$
 \tag{26.8}
 $$
 
-At Earth's surface ($GM/R^2=9.820$ m/s², $r_s/R=1.39\times10^{-9}$), $\Gamma^r_{tt}=9.820$ m/s² to nine digits: the familiar $g$.
+At Earth's surface ($GM/R^2=9.820$ m/s², $r_s/R=1.39\times10^{-9}$), $\Gamma^r_{tt}=9.820$ m/s², equal to $GM/R^2$ to about one part in a billion: the familiar $g$.
 
 #### G. Connections to other equations
 
@@ -2247,7 +2247,7 @@ There is no gravitational force: free fall *is* inertial motion, which is why as
 
 #### F. Worked example
 
-For a circular equatorial orbit in Schwarzschild spacetime ($\dot r=\ddot r=0$), the $r$ component of Eq. (26.9) keeps only $\Gamma^r_{tt}\dot t^2+\Gamma^r_{\phi\phi}\dot\phi^2=0$. With $\Gamma^r_{tt}=c^2r_s(r-r_s)/2r^3$ and $\Gamma^r_{\phi\phi}=-(r-r_s)$,
+For a circular equatorial orbit in Schwarzschild spacetime ($\dot r=\ddot r=0$), the $r$ component of Eq. (26.9) keeps only $\Gamma^r_{tt}\dot t^2+\Gamma^r_{\phi\phi}\dot\phi^2=0$. With the time coordinate $t$ in seconds (as in Equation 4's worked example), $\Gamma^r_{tt}=c^2r_s(r-r_s)/2r^3$ and, at $\theta=\pi/2$, $\Gamma^r_{\phi\phi}=-(r-r_s)$,
 
 $$
 \left(\frac{d\phi}{dt}\right)^2=-\frac{\Gamma^r_{tt}}{\Gamma^r_{\phi\phi}}=\frac{c^2r_s}{2r^3}=\frac{GM}{r^3},
@@ -2258,7 +2258,7 @@ Kepler's third law, exact in Schwarzschild coordinate time. Light circles where 
 
 #### G. Connections to other equations
 
-**EXACT**: paths of stationary proper time (Equation 3; Section 25), and neighbouring geodesics give Equation 17. **APPROXIMATE**: reduces to $\ddot{\mathbf x}=-\nabla\Phi$ (Equation 11). **ANALOGY**: Newton's first law.
+**EXACT**: paths of stationary proper time (Equation 3; Section 25), and neighbouring geodesics give Equation 17. **APPROXIMATE** (weak, static field; speeds much less than $c$): reduces to $d^2\mathbf x/dt^2=-\nabla\Phi$ (Equation 11). **ANALOGY**: Newton's first law.
 
 ### Equation 6: The Riemann curvature tensor
 
@@ -2299,11 +2299,11 @@ Curvature is tidal acceleration, the part of gravity no frame removes. Invariant
 
 #### F. Worked example
 
-In a static observer's orthonormal frame in Schwarzschild spacetime there are exactly six independent nonzero components: $R_{\hat t\hat r\hat t\hat r}=-r_s/r^3$, $R_{\hat t\hat\theta\hat t\hat\theta}=R_{\hat t\hat\phi\hat t\hat\phi}=r_s/2r^3$, $R_{\hat r\hat\theta\hat r\hat\theta}=R_{\hat r\hat\phi\hat r\hat\phi}=-r_s/2r^3$ and $R_{\hat\theta\hat\phi\hat\theta\hat\phi}=r_s/r^3$. Each appears four times, squared, in the **Kretschmann scalar**:
+In a static observer's orthonormal frame in Schwarzschild spacetime there are exactly six independent nonzero components: $R_{\hat t\hat r\hat t\hat r}=-r_s/r^3$, $R_{\hat t\hat\theta\hat t\hat\theta}=R_{\hat t\hat\phi\hat t\hat\phi}=r_s/2r^3$, $R_{\hat r\hat\theta\hat r\hat\theta}=R_{\hat r\hat\phi\hat r\hat\phi}=-r_s/2r^3$ and $R_{\hat\theta\hat\phi\hat\theta\hat\phi}=r_s/r^3$. Each appears four times, squared, in the **Kretschmann scalar** (every term is positive, since raising a $\hat t$ index flips a sign and each component has two or none; the two $\hat t$–angle and the two $\hat r$–angle components are grouped):
 
 $$
 \begin{aligned}
-R_{\alpha\beta\gamma\delta}R^{\alpha\beta\gamma\delta}&=4\left[\frac{r_s^2}{r^6}+\frac{r_s^2}{2r^6}+\frac{r_s^2}{2r^6}+\frac{r_s^2}{r^6}\right]\\
+R_{\alpha\beta\gamma\delta}R^{\alpha\beta\gamma\delta}&=4\left[\frac{r_s^2}{r^6}+2\cdot\frac{r_s^2}{4r^6}+2\cdot\frac{r_s^2}{4r^6}+\frac{r_s^2}{r^6}\right]\\
 &=\frac{12\,r_s^2}{r^6}=\frac{48\,G^2M^2}{c^4r^6}.
 \end{aligned}
 \tag{26.12}
@@ -2394,7 +2394,7 @@ Written out in the metric, each of the ten field equations is a long sum of prod
 
 #### D. The mathematical operations
 
-Matrix inversion, first and second partial derivatives, the product rule, contractions and a trace. A computer-algebra count for a general metric (inverse metric kept as separate symbols) gives 7 terms in one Christoffel symbol, 417 in $R_{00}$, 2262 in $R$ and **2679** in $G_{00}$.
+Matrix inversion, first and second partial derivatives, the product rule, contractions and a trace. A computer-algebra count for a general metric (inverse metric kept as separate symbols) gives 7 or 8 terms in a single Christoffel symbol (7 in $\Gamma^0_{00}$), 417 in $R_{00}$, 2262 in $R$ and **2679** in $G_{00}$.
 
 #### E. Physical interpretation
 
@@ -2504,7 +2504,7 @@ Spacetime is stiff: $1/\kappa=c^4/8\pi G=4.8\times10^{42}$ N, so noticeable curv
 
 #### F. Worked example
 
-With Planck 2018 values $H_0=67.4$ km/s/Mpc and $\Omega_\Lambda=0.6847$ ([Planck 2018](https://arxiv.org/abs/1807.06209)), flat-universe cosmology gives $\Lambda=3\Omega_\Lambda H_0^2/c^2=1.09\times10^{-52}$ m⁻², and a vacuum energy density
+With Planck 2018 values of the Hubble constant (today's expansion rate, Equation 19), $H_0=67.4$ km/s/Mpc, where 1 Mpc (megaparsec) $=3.086\times10^{22}$ m, and of $\Omega_\Lambda=0.6847$, the fraction of the flat universe's energy density carried by $\Lambda$ ([Planck 2018](https://arxiv.org/abs/1807.06209)), flat-universe cosmology gives $\Lambda=3\Omega_\Lambda H_0^2/c^2=1.09\times10^{-52}$ m⁻², and a vacuum energy density
 
 $$
 u_\Lambda=\frac{\Lambda}{\kappa}=\frac{1.09\times10^{-52}\ \mathrm{m^{-2}}}{2.0766\times10^{-43}\ \mathrm{N^{-1}}}=5.25\times10^{-10}\ \mathrm{J/m^3},
@@ -2526,7 +2526,7 @@ g_{00}\approx-\left(1+\frac{2\Phi}{c^2}\right),\qquad\frac{d^2x^i}{dt^2}=-\parti
 \tag{26.21}
 $$
 
-**APPROXIMATE**: valid for speeds small compared with $c$, a weak ($|\Phi|/c^2\ll1$), static field, and pressure small compared with $\rho c^2$ ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), §4.1).
+**APPROXIMATE**: valid for speeds small compared with $c$, a weak ($|\Phi|/c^2\ll1$), static field, pressure small compared with $\rho c^2$, and $\Lambda$ negligible ([Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), §4.1).
 
 #### B. What it says in plain English
 
@@ -2567,11 +2567,11 @@ At Earth's surface $|\Phi|/c^2$ is about $7\times10^{-10}$: Newtonian gravity is
 
 #### F. Worked example
 
-Where the limit holds: $GM/rc^2$ is $1.67\times10^{-10}$ at GPS altitude, $6.95\times10^{-10}$ at Earth's surface (equatorial radius) and $2.12\times10^{-6}$ at the Sun's surface. Where it fails: 0.17 at the surface of a 1.4-solar-mass, 12 km neutron star; and for light, which also feels the spatial part $g_{ij}\approx(1-2\Phi/c^2)\delta_{ij}$, so starlight grazing the Sun bends by $4GM_\odot/(c^2R_\odot)=1.75''$, twice the value from $g_{00}$ alone ([Will 2014](https://arxiv.org/abs/1403.7377)).
+Where the limit holds: $GM/rc^2$ is $1.67\times10^{-10}$ at GPS altitude, $6.95\times10^{-10}$ at Earth's surface (equatorial radius) and $2.12\times10^{-6}$ at the Sun's surface. Where it fails: 0.17 at the surface of a 1.4-solar-mass, 12 km neutron star; and for light, which also feels the spatial part $g_{ij}\approx(1-2\Phi/c^2)\delta_{ij}$, so starlight grazing the Sun bends by $4GM_\odot/(c^2R_\odot)=1.75''$ (arcseconds; $1''=1/3600$ of a degree), twice the value from $g_{00}$ alone ([Will 2014](https://arxiv.org/abs/1403.7377)).
 
 #### G. Connections to other equations
 
-**APPROXIMATE**: the weak-field limits of Equations 5 and 10. **EXACT** within linearised theory: $g_{00}$ also gives clock rates, $d\tau/dt\approx1+\Phi/c^2$ (Equation 3). **ANALOGY**: electrostatics, $\nabla^2V=-\rho_q/\varepsilon_0$, whose $4\pi$ also comes from Gauss's law.
+**APPROXIMATE**: the weak-field limits of Equations 5 and 10. **EXACT**: a clock at rest in a static field ticks at $d\tau/dt=\sqrt{-g_{00}}$ (Equation 3). **APPROXIMATE** (first order in $|\Phi|/c^2\ll1$): $d\tau/dt\approx1+\Phi/c^2$. **ANALOGY**: electrostatics, $\nabla^2V=-\rho_q/\varepsilon_0=-4\pi k\rho_q$, with Coulomb's constant $k=1/(4\pi\varepsilon_0)$; its $4\pi$, hidden inside $\varepsilon_0$ in SI units, also comes from Gauss's law.
 
 ### Equation 12: The Schwarzschild metric
 
@@ -2617,11 +2617,11 @@ At $r=r_s$, $g_{rr}$ blows up but curvature stays finite (Equation 6): a horizon
 
 #### F. Worked example
 
-At the surface of an illustrative 1.4-solar-mass neutron star of radius 12 km, $r_s=4.135$ km and $r_s/R=0.3445$, so $\sqrt{-g_{tt}}/c=\sqrt{0.6555}=0.8096$ (surface clocks run at 81% of the far-away rate) and $\sqrt{g_{rr}}=1/0.8096=1.235$ (radial rulers stretched by 23.5%). The weak-field estimates $1-r_s/2r=0.828$ and $1+r_s/2r=1.172$ are off by 2% and 5%; on Earth, where $r_s/r=1.4\times10^{-9}$, they are perfect.
+At the surface of an illustrative 1.4-solar-mass neutron star of radius 12 km, $r_s=4.135$ km and $r_s/R=0.3445$, so $\sqrt{-g_{tt}}/c=\sqrt{0.6555}=0.8096$ (surface clocks run at 81% of the far-away rate) and $\sqrt{g_{rr}}=1/0.8096=1.235$ (radial rulers stretched by 23.5%). The weak-field estimates $1-r_s/2r=0.828$ and $1+r_s/2r=1.172$ are off by 2% and 5%; on Earth, where $r_s/r=1.4\times10^{-9}$, they agree with the exact values to within $10^{-18}$.
 
 #### G. Connections to other equations
 
-**EXACT**: the unique spherically symmetric solution of $R_{\mu\nu}=0$ (Birkhoff's theorem; derived in Worked Example 23.1), the non-rotating case of the Kerr metric, with Equations 13–17 as exact consequences. **APPROXIMATE**: for $r\gg r_s$, $g_{tt}\approx-(1+2\Phi/c^2)c^2$ with $\Phi=-GM/r$.
+**EXACT**: the unique spherically symmetric solution of $R_{\mu\nu}=0$ (Birkhoff's theorem; derived in Worked Example 23.1), the non-rotating case of the Kerr metric (the exact solution for a spinning black hole), with Equations 13–16 (bar the approximate perihelion formula) and the Schwarzschild tidal values of Equation 17 as exact consequences. **APPROXIMATE**: for $r\gg r_s$, $g_{rr}\approx1+r_s/r=1-2\Phi/c^2$ with $\Phi=-GM/r$, giving Equation 11's weak field once $r$ is read as Newton's distance; $g_{tt}=-(1+2\Phi/c^2)c^2$ holds exactly.
 
 ### Equation 13: The Schwarzschild radius
 
@@ -2713,7 +2713,7 @@ At Earth the exact and approximate forms agree to about $10^{-19}$; at the neutr
 
 #### G. Connections to other equations
 
-**EXACT**: a special case of Equation 12, whose ratio at two radii gives Equation 15; a clock on a circular geodesic orbit, which also moves, ticks at $\sqrt{1-3GM/rc^2}$ (**EXACT**), the origin of the $3GM/2ac^2$ term in GPS bookkeeping. **APPROXIMATE**: $1+\Phi/c^2$. **ANALOGY**: in an accelerating rocket, a clock at the nose runs fast by $gh/c^2$.
+**EXACT**: a special case of Equation 12, whose ratio at two radii gives Equation 15; a clock on a circular geodesic orbit, which also moves, ticks at $\sqrt{1-3GM/rc^2}$ (**EXACT**), the origin of the $3GM/2ac^2$ term in GPS bookkeeping. **APPROXIMATE** ($GM/rc^2\ll1$): $1+\Phi/c^2$. **ANALOGY**: in an accelerating rocket, a clock at the nose runs fast by $gh/c^2$.
 
 ### Equation 15: Gravitational redshift
 
@@ -2754,7 +2754,7 @@ Pound and Rebka's Harvard tower: $gh/c^2=9.81\times22.5/8.98755\times10^{16}=2.4
 
 #### G. Connections to other equations
 
-**EXACT**: the ratio of Equation 14 at two radii, via the photon energy conserved because Schwarzschild spacetime has the time symmetry of Section 24. **APPROXIMATE**: $\Delta\Phi/c^2$ and $gh/c^2$. **ANALOGY**: the Doppler shift of a signal sent up an accelerating rocket.
+**EXACT**: the ratio of Equation 14 at two radii, via the photon energy conserved because Schwarzschild spacetime has the time symmetry of Section 24. **APPROXIMATE** (weak field; small $h$ for the second): $\Delta\Phi/c^2$ and $gh/c^2$. **ANALOGY**: the Doppler shift of a signal sent up an accelerating rocket.
 
 ### Equation 16: Orbits in Schwarzschild spacetime
 
@@ -2810,7 +2810,7 @@ With $36\,525/87.969=415.20$ orbits per century, that is **42.98″ per century*
 
 #### G. Connections to other equations
 
-**EXACT**: from Equations 5 and 12 with Killing vectors (Section 24). **APPROXIMATE**: the precession formula. The same physics gives 4.23° per year of periastron advance in the Hulse–Taylor binary pulsar and shapes the orbit of the star S2 around Sagittarius A* ([GRAVITY 2022](https://arxiv.org/abs/2112.07478)).
+**EXACT**: from Equations 5 and 12 with Killing vectors (Section 24). **APPROXIMATE** (first order in $GM/c^2a$): the precession formula. The same physics gives 4.23° per year of periastron advance in the Hulse–Taylor binary pulsar (a pulsar orbiting another neutron star, discovered in 1974) and shapes the orbit of the star S2 around Sagittarius A* ([GRAVITY 2022](https://arxiv.org/abs/2112.07478)).
 
 ### Equation 17: The geodesic deviation equation
 
@@ -2822,7 +2822,7 @@ $$
 \tag{26.31}
 $$
 
-The first is **EXACT** (Carroll/MTW convention, [Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eq. 3.113). The second, its Newtonian form with $R^i{}_{0j0}\approx\partial_i\partial_j\Phi/c^2$, is **APPROXIMATE** (weak field, slow motion).
+The first is **EXACT** for an infinitesimal separation (Carroll/MTW convention, [Carroll 1997](https://arxiv.org/abs/gr-qc/9712019), eq. 3.113); being linear in $\xi^\mu$, for two particles a finite distance apart it is the leading term, accurate while $\xi$ is small compared with the distance over which the curvature changes. The second, its Newtonian form with $R^i{}_{0j0}\approx\partial_i\partial_j\Phi/c^2$, is **APPROXIMATE** (weak field, slow motion).
 
 #### B. What it says in plain English
 
@@ -2856,7 +2856,7 @@ The radial stretch across a 2 m body is $2GM(2\ \mathrm m)/r^3$: standing on Ear
 
 #### G. Connections to other equations
 
-**EXACT**: follows from Equations 5 and 6; in Schwarzschild spacetime $2GM\xi/r^3$ is exact for static or radially falling observers (Worked Example 20.3); and the detectors of Equation 18 respond through it. **APPROXIMATE**: the Newtonian tidal law. **ANALOGY**: ocean tides.
+**EXACT**: follows from Equations 5 and 6; in Schwarzschild spacetime $2GM\xi/r^3$ is exact (for small $\xi$) for freely falling neighbours momentarily at rest or falling radially (Worked Example 20.3); and the detectors of Equation 18 respond through it. **APPROXIMATE** (weak field, slow motion): the Newtonian tidal law. **ANALOGY**: ocean tides.
 
 ### Equation 18: Gravitational waves: the linearised field equations
 
@@ -2897,7 +2897,7 @@ Far from their sources, small metric ripples obey the same wave equation as ligh
 
 #### D. The mathematical operations
 
-Linearisation (keep first order in $h$), a gauge choice (a use of coordinate freedom), and second partial derivatives forming the wave operator. With sources, far away and for slow sources, the solution is the quadrupole formula $h_{ij}\approx\frac{2G}{c^4r}\ddot I_{ij}(t-r/c)$, where $I_{ij}=\int\rho\,x^ix^j\,d^3x$.
+Linearisation (keep first order in $h$), a gauge choice (a use of coordinate freedom), and second partial derivatives forming the wave operator. With sources, far away and for slow sources, the solution is the quadrupole formula $h_{ij}\approx\frac{2G}{c^4r}\ddot I_{ij}(t-r/c)$, where $I_{ij}=\int\rho\,x^ix^j\,d^3x$ and the dots mean $d/dt$.
 
 #### E. Physical interpretation
 
@@ -3061,7 +3061,7 @@ Figure 27.1 shows how the great equations feed one another: read it top to botto
 | Einstein tensor, stress-energy (Eq. 9) | set proportional | Field equations (Eq. 10) | **EXACT** |
 | Field equations | weak, static, slow | Newtonian limit (Eq. 11) | **APPROXIMATE** |
 | Field equations | spherical symmetry, vacuum | Schwarzschild (Eqs. 12–16) | **EXACT** |
-| Riemann, geodesics | neighbouring paths | Geodesic deviation (Eq. 17) | **EXACT** |
+| Riemann, geodesics | neighbouring paths | Geodesic deviation (Eq. 17) | **EXACT** (to first order in the separation) |
 | Field equations | first order in $h$ | Gravitational waves (Eq. 18) | **APPROXIMATE** |
 | Field equations | homogeneity, isotropy | Friedmann (Eq. 19) | **EXACT** |
 | Einstein–Hilbert action (Eq. 20) | vary the metric | Field equations | **EXACT** |
@@ -3080,8 +3080,8 @@ Signature $(-,+,+,+)$; SI units with $x^0=ct$; Carroll/MTW curvature signs.
 | $\partial_\mu$, $A_{,\mu}$ | partial derivative $\partial/\partial x^\mu$ | 2 |
 | $\nabla_\mu$, $A_{;\mu}$ | covariant derivative | 16 |
 | $D/d\tau$ | covariant derivative along a curve, $u^\alpha\nabla_\alpha$ | 17, 20 |
-| $\dot x$ | $dx/d\tau$ or $dx/d\lambda$ (not $d/dt$, unless stated) | 1 |
-| $\nabla$, $\nabla^2$, $\Box$ | gradient; Laplacian; d'Alembertian $-c^{-2}\partial_t^2+\nabla^2$ | 7, 26 |
+| $\dot x$ | $dx/d\tau$ or $dx/d\lambda$; $dx/dt$ in Newtonian formulas and cosmology | 1 |
+| $\nabla$, $\nabla^2$, $\Box$ | gradient; Laplacian; d'Alembertian $-c^{-2}\partial_t^2+\nabla^2$ | 7; 7; 26 |
 | $T_{(\mu\nu)}$, $T_{[\mu\nu]}$ | symmetric and antisymmetric parts | 13 |
 | $\eta_{\mu\nu}$ | Minkowski metric $\mathrm{diag}(-1,1,1,1)$ | 9 |
 | $g_{\mu\nu}$, $g^{\mu\nu}$ | metric and inverse metric; $g^{\mu\lambda}g_{\lambda\nu}=\delta^\mu_\nu$ | 12 |
@@ -3092,7 +3092,7 @@ Signature $(-,+,+,+)$; SI units with $x^0=ct$; Carroll/MTW curvature signs.
 | $R_{\mu\nu}$, $R$ | Ricci tensor $R^\lambda{}_{\mu\lambda\nu}$; Ricci scalar $g^{\mu\nu}R_{\mu\nu}$ | 21 |
 | $G_{\mu\nu}$ | Einstein tensor $R_{\mu\nu}-\tfrac12Rg_{\mu\nu}$ | 21 |
 | $T^{\mu\nu}$, $T$ | stress-energy tensor; its trace | 22 |
-| $\kappa$ | Einstein's constant $8\pi G/c^4=2.0766\times10^{-43}$ N⁻¹ | 26 |
+| $\kappa$ | Einstein's constant $8\pi G/c^4=2.0766\times10^{-43}$ N⁻¹ | 23, 26 |
 | $\Lambda$ | cosmological constant, about $1.1\times10^{-52}$ m⁻² | 26 |
 | $\tau$, $u^\mu$, $p^\mu$, $a^\mu$ | proper time; four-velocity, -momentum, -acceleration | 14 |
 | $\xi^\mu$ | separation vector (Section 20) or Killing vector (Section 24) | 20, 24 |
@@ -3104,7 +3104,7 @@ Some symbols carry more than one meaning; the text says which at each use.
 
 | Symbol | Meanings |
 |---|---|
-| $\rho$ | an index (Greek rho) in tensor formulas; mass density in physics formulas |
+| $\rho$ | an index (Greek rho) in tensor formulas; mass density in physics formulas; distance from the pole along a sphere (Worked Example 15.2) |
 | $\Lambda$ | cosmological constant; with indices, $\Lambda^\mu{}_\nu$, a Lorentz matrix |
 | $G$ | Newton's constant; with indices, $G_{\mu\nu}$, the Einstein tensor |
 | $R$ vs $r$ | Ricci scalar vs radial coordinate |
@@ -3112,7 +3112,12 @@ Some symbols carry more than one meaning; the text says which at each use.
 | $\theta$ | colatitude (angle from the pole), not latitude |
 | $\delta$ | Kronecker delta $\delta^\mu_\nu$; "small variation of" in $\delta S$ |
 | $T$ | trace of $T_{\mu\nu}$; also a time interval in worked examples |
-| $a$ | sphere radius (Sections 8, 19); scale factor $a(t)$ (Section 22, Eq. 19); semi-major axis (Eq. 16) |
+| $a$ | sphere radius (Sections 8, 19); GPS orbit radius (Sections 1, 14); scale factor $a(t)$ (Section 22, Eq. 19); semi-major axis (Eq. 16); $a^\mu$, four-acceleration (Section 14) |
+| $g$ | metric $g_{\mu\nu}$; its determinant (in $\sqrt{-g}$); local gravitational acceleration, 9.81 m/s² (Worked Example 25.2, Eqs. 3, 15) |
+| $L$ | Lagrangian (Section 25); angular momentum per unit mass (Section 24, Eq. 16); a length (Section 8, Eqs. 2, 18) |
+| $\eta$ | Minkowski metric $\eta_{\mu\nu}$; the bump $\eta(x)$ added to a path (Section 25) |
+| $\lambda$, $\nu$ | indices; $\lambda$ also a path parameter (Sections 1, 17, 18); wavelength and frequency in Eq. 15 |
+| $e$, $E$ | $e$: eccentricity (Eq. 16) or energy per unit rest energy (Worked Example 18.3); $\mathbf e_\mu$: basis vectors; $E$: energy (Section 14) or energy per unit mass (Section 24, Eq. 16) |
 
 Geometric units ($G=c=1$) turn masses and times into lengths. To convert a geometric-units formula to SI, replace every mass $M$ by $GM/c^2$, every time $t$ by $ct$, and $8\pi T_{\mu\nu}$ by $(8\pi G/c^4)T_{\mu\nu}$.
 
