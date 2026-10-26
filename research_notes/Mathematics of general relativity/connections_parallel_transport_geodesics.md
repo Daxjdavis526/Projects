@@ -536,7 +536,7 @@ My inference on why one chart can't cover $S^2$: $S^2$ is compact (closed and bo
 2. There is $+\Gamma$ for each upper index and $-\Gamma$ for each lower index.
 3. $\nabla g = 0$ and $\Gamma$ symmetric define GR's unique connection.
 4. Divergence: $\nabla_\mu V^\mu = \frac{1}{\sqrt{|g|}}\partial_\mu(\sqrt{|g|}V^\mu)$, which explains the textbook polar/spherical divergence formulas.
-5. "Comma goes to semicolon" upgrades special-relativistic laws to GR. (Carroll calls this the "comma-goes-to-semicolon rule", applies it to $\partial_\mu T^{\mu\nu}=0\to\nabla_\mu T^{\mu\nu}=0$ (eq. 4.23), and then cautions that "life is not always so easy", for example with Maxwell's equations, where different flat-space forms can generalise differently.)
+5. "Comma goes to semicolon" upgrades special-relativistic laws to GR. (Carroll calls this the "comma-goes-to-semicolon rule", applies it to $\partial_\mu T^{\mu\nu}=0\to\nabla_\mu T^{\mu\nu}=0$ (eq. 4.23), and then cautions that "life is not always so easy". For Maxwell's equations the different routes agree, but in general partial derivatives commute while covariant ones do not, so the order chosen before replacing $\partial\to\nabla$ can add a curvature term, e.g. $Y^\mu\nabla_\mu\nabla_\nu X^\nu - Y^\mu\nabla_\nu\nabla_\mu X^\nu = -R_{\mu\nu}Y^\mu X^\nu$ (eqs. 4.30–4.31); the rule "is ambiguous" about such terms — [Carroll notes, ch. 4, pp. 107–108](https://arxiv.org/abs/gr-qc/9712019).)
 
 *Misconceptions:*
 - "Changing components mean a changing vector". The constant $\hat x$ field has non-constant polar components.
