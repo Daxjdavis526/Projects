@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="330" viewBox="0 0 680 330" font-family="DejaVu Sans, Inter, sans-serif">
+<title>Figure 21.1. Ricci versus Weyl curvature.</title>
+<defs>
+<marker id="ah-coral" viewBox="0 0 10 8" refX="5.00" refY="4" markerWidth="9" markerHeight="7.2" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#b5473a"/></marker>
+</defs>
+<rect width="680" height="330" fill="#ffffff"/>
+<circle cx="116" cy="152" r="54" fill="none" stroke="#5b616b" stroke-width="1.3" stroke-dasharray="4 3"/>
+<path d="M151.64,152 L151.59,150.13 L151.44,148.27 L151.2,146.42 L150.86,144.59 L150.43,142.78 L149.9,140.99 L149.27,139.23 L148.56,137.5 L147.76,135.82 L146.87,134.18 L145.89,132.59 L144.83,131.05 L143.7,129.57 L142.49,128.15 L141.2,126.8 L139.85,125.51 L138.43,124.3 L136.95,123.17 L135.41,122.11 L133.82,121.13 L132.18,120.24 L130.5,119.44 L128.77,118.73 L127.01,118.1 L125.22,117.57 L123.41,117.14 L121.58,116.8 L119.73,116.56 L117.87,116.41 L116,116.36 L114.13,116.41 L112.27,116.56 L110.42,116.8 L108.59,117.14 L106.78,117.57 L104.99,118.1 L103.23,118.73 L101.5,119.44 L99.82,120.24 L98.18,121.13 L96.59,122.11 L95.05,123.17 L93.57,124.3 L92.15,125.51 L90.8,126.8 L89.51,128.15 L88.3,129.57 L87.17,131.05 L86.11,132.59 L85.13,134.18 L84.24,135.82 L83.44,137.5 L82.73,139.23 L82.1,140.99 L81.57,142.78 L81.14,144.59 L80.8,146.42 L80.56,148.27 L80.41,150.13 L80.36,152 L80.41,153.87 L80.56,155.73 L80.8,157.58 L81.14,159.41 L81.57,161.22 L82.1,163.01 L82.73,164.77 L83.44,166.5 L84.24,168.18 L85.13,169.82 L86.11,171.41 L87.17,172.95 L88.3,174.43 L89.51,175.85 L90.8,177.2 L92.15,178.49 L93.57,179.7 L95.05,180.83 L96.59,181.89 L98.18,182.87 L99.82,183.76 L101.5,184.56 L103.23,185.27 L104.99,185.9 L106.78,186.43 L108.59,186.86 L110.42,187.2 L112.27,187.44 L114.13,187.59 L116,187.64 L117.87,187.59 L119.73,187.44 L121.58,187.2 L123.41,186.86 L125.22,186.43 L127.01,185.9 L128.77,185.27 L130.5,184.56 L132.18,183.76 L133.82,182.87 L135.41,181.89 L136.95,180.83 L138.43,179.7 L139.85,178.49 L141.2,177.2 L142.49,175.85 L143.7,174.43 L144.83,172.95 L145.89,171.41 L146.87,169.82 L147.76,168.18 L148.56,166.5 L149.27,164.77 L149.9,163.01 L150.43,161.22 L150.86,159.41 L151.2,157.58 L151.44,155.73 L151.59,153.87 L151.64,152" fill="none" stroke="#1d2025" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M165.8,152 L156.14,152" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="170" cy="152" r="3.6" fill="#1f4e8c"/>
+<path d="M159.13,127.1 L150.76,131.93" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="162.77" cy="125" r="3.6" fill="#1f4e8c"/>
+<path d="M140.9,108.87 L136.07,117.24" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="143" cy="105.23" r="3.6" fill="#1f4e8c"/>
+<path d="M116,102.2 L116,111.86" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="116" cy="98" r="3.6" fill="#1f4e8c"/>
+<path d="M91.1,108.87 L95.93,117.24" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="89" cy="105.23" r="3.6" fill="#1f4e8c"/>
+<path d="M72.87,127.1 L81.24,131.93" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="69.23" cy="125" r="3.6" fill="#1f4e8c"/>
+<path d="M66.2,152 L75.86,152" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="62" cy="152" r="3.6" fill="#1f4e8c"/>
+<path d="M72.87,176.9 L81.24,172.07" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="69.23" cy="179" r="3.6" fill="#1f4e8c"/>
+<path d="M91.1,195.13 L95.93,186.76" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="89" cy="198.77" r="3.6" fill="#1f4e8c"/>
+<path d="M116,201.8 L116,192.14" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="116" cy="206" r="3.6" fill="#1f4e8c"/>
+<path d="M140.9,195.13 L136.07,186.76" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="143" cy="198.77" r="3.6" fill="#1f4e8c"/>
+<path d="M159.13,176.9 L150.76,172.07" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="162.77" cy="179" r="3.6" fill="#1f4e8c"/>
+<circle cx="116" cy="152" r="3.6" fill="#1f4e8c"/>
+<circle cx="340" cy="152" r="54" fill="none" stroke="#5b616b" stroke-width="1.3" stroke-dasharray="4 3"/>
+<path d="M387.36,152 L387.3,148.33 L387.1,144.66 L386.78,141.02 L386.33,137.4 L385.75,133.83 L385.04,130.31 L384.22,126.84 L383.27,123.45 L382.2,120.13 L381.02,116.9 L379.72,113.77 L378.32,110.74 L376.81,107.82 L375.2,105.03 L373.49,102.36 L371.69,99.83 L369.81,97.44 L367.84,95.21 L365.79,93.13 L363.68,91.21 L361.5,89.45 L359.26,87.87 L356.97,86.46 L354.64,85.24 L352.26,84.19 L349.85,83.33 L347.41,82.66 L344.95,82.18 L342.48,81.9 L340,81.8 L337.52,81.9 L335.05,82.18 L332.59,82.66 L330.15,83.33 L327.74,84.19 L325.36,85.24 L323.03,86.46 L320.74,87.87 L318.5,89.45 L316.32,91.21 L314.21,93.13 L312.16,95.21 L310.19,97.44 L308.31,99.83 L306.51,102.36 L304.8,105.03 L303.19,107.82 L301.68,110.74 L300.28,113.77 L298.98,116.9 L297.8,120.13 L296.73,123.45 L295.78,126.84 L294.96,130.31 L294.25,133.83 L293.67,137.4 L293.22,141.02 L292.9,144.66 L292.7,148.33 L292.64,152 L292.7,155.67 L292.9,159.34 L293.22,162.98 L293.67,166.6 L294.25,170.17 L294.96,173.69 L295.78,177.16 L296.73,180.55 L297.8,183.87 L298.98,187.1 L300.28,190.23 L301.68,193.26 L303.19,196.18 L304.8,198.97 L306.51,201.64 L308.31,204.17 L310.19,206.56 L312.16,208.79 L314.21,210.87 L316.32,212.79 L318.5,214.55 L320.74,216.13 L323.03,217.54 L325.36,218.76 L327.74,219.81 L330.15,220.67 L332.59,221.34 L335.05,221.82 L337.52,222.1 L340,222.2 L342.48,222.1 L344.95,221.82 L347.41,221.34 L349.85,220.67 L352.26,219.81 L354.64,218.76 L356.97,217.54 L359.26,216.13 L361.5,214.55 L363.68,212.79 L365.79,210.87 L367.84,208.79 L369.81,206.56 L371.69,204.17 L373.49,201.64 L375.2,198.97 L376.81,196.18 L378.32,193.26 L379.72,190.23 L381.02,187.1 L382.2,183.87 L383.27,180.55 L384.22,177.16 L385.04,173.69 L385.75,170.17 L386.33,166.6 L386.78,162.98 L387.1,159.34 L387.3,155.67 L387.36,152" fill="none" stroke="#1d2025" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M389.8,152 L383.5,152" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="394" cy="152" r="3.6" fill="#1f4e8c"/>
+<path d="M384.02,121.83 L376.72,113.4" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="386.77" cy="125" r="3.6" fill="#1f4e8c"/>
+<path d="M365.84,101.2 L360.75,83.58" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="367" cy="105.23" r="3.6" fill="#1f4e8c"/>
+<path d="M340,93.8 L340,72.5" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="340" cy="98" r="3.6" fill="#1f4e8c"/>
+<path d="M314.16,101.2 L319.25,83.58" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="313" cy="105.23" r="3.6" fill="#1f4e8c"/>
+<path d="M295.98,121.83 L303.28,113.4" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="293.23" cy="125" r="3.6" fill="#1f4e8c"/>
+<path d="M290.2,152 L296.5,152" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="286" cy="152" r="3.6" fill="#1f4e8c"/>
+<path d="M295.98,182.17 L303.28,190.6" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="293.23" cy="179" r="3.6" fill="#1f4e8c"/>
+<path d="M314.16,202.8 L319.25,220.42" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="313" cy="198.77" r="3.6" fill="#1f4e8c"/>
+<path d="M340,210.2 L340,231.5" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="340" cy="206" r="3.6" fill="#1f4e8c"/>
+<path d="M365.84,202.8 L360.75,220.42" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="367" cy="198.77" r="3.6" fill="#1f4e8c"/>
+<path d="M384.02,182.17 L376.72,190.6" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="386.77" cy="179" r="3.6" fill="#1f4e8c"/>
+<circle cx="340" cy="152" r="3.6" fill="#1f4e8c"/>
+<circle cx="564" cy="152" r="54" fill="none" stroke="#5b616b" stroke-width="1.3" stroke-dasharray="4 3"/>
+<path d="M607.2,152 L607.14,148.47 L606.96,144.94 L606.67,141.44 L606.26,137.97 L605.73,134.53 L605.09,131.14 L604.33,127.81 L603.47,124.55 L602.49,121.36 L601.41,118.25 L600.23,115.24 L598.95,112.32 L597.57,109.52 L596.1,106.83 L594.55,104.27 L592.91,101.84 L591.19,99.54 L589.39,97.39 L587.53,95.39 L585.6,93.54 L583.61,91.86 L581.57,90.34 L579.48,88.98 L577.35,87.8 L575.18,86.8 L572.98,85.98 L570.76,85.33 L568.52,84.87 L566.26,84.59 L564,84.5 L561.74,84.59 L559.48,84.87 L557.24,85.33 L555.02,85.98 L552.82,86.8 L550.65,87.8 L548.52,88.98 L546.43,90.34 L544.39,91.86 L542.4,93.54 L540.47,95.39 L538.61,97.39 L536.81,99.54 L535.09,101.84 L533.45,104.27 L531.9,106.83 L530.43,109.52 L529.05,112.32 L527.77,115.24 L526.59,118.25 L525.51,121.36 L524.53,124.55 L523.67,127.81 L522.91,131.14 L522.27,134.53 L521.74,137.97 L521.33,141.44 L521.04,144.94 L520.86,148.47 L520.8,152 L520.86,155.53 L521.04,159.06 L521.33,162.56 L521.74,166.03 L522.27,169.47 L522.91,172.86 L523.67,176.19 L524.53,179.45 L525.51,182.64 L526.59,185.75 L527.77,188.76 L529.05,191.68 L530.43,194.48 L531.9,197.17 L533.45,199.73 L535.09,202.16 L536.81,204.46 L538.61,206.61 L540.47,208.61 L542.4,210.46 L544.39,212.14 L546.43,213.66 L548.52,215.02 L550.65,216.2 L552.82,217.2 L555.02,218.02 L557.24,218.67 L559.48,219.13 L561.74,219.41 L564,219.5 L566.26,219.41 L568.52,219.13 L570.76,218.67 L572.98,218.02 L575.18,217.2 L577.35,216.2 L579.48,215.02 L581.57,213.66 L583.61,212.14 L585.6,210.46 L587.53,208.61 L589.39,206.61 L591.19,204.46 L592.91,202.16 L594.55,199.73 L596.1,197.17 L597.57,194.48 L598.95,191.68 L600.23,188.76 L601.41,185.75 L602.49,182.64 L603.47,179.45 L604.33,176.19 L605.09,172.86 L605.73,169.47 L606.26,166.03 L606.67,162.56 L606.96,159.06 L607.14,155.53 L607.2,152" fill="none" stroke="#1d2025" stroke-width="1" stroke-linejoin="round" stroke-dasharray="1.2 2.6"/>
+<path d="M631.5,152 L631.41,149.74 L631.13,147.48 L630.67,145.24 L630.02,143.02 L629.2,140.82 L628.2,138.65 L627.02,136.52 L625.66,134.43 L624.14,132.39 L622.46,130.4 L620.61,128.47 L618.61,126.61 L616.46,124.81 L614.16,123.09 L611.73,121.45 L609.17,119.9 L606.48,118.43 L603.68,117.05 L600.76,115.77 L597.75,114.59 L594.64,113.51 L591.45,112.53 L588.19,111.67 L584.86,110.91 L581.47,110.27 L578.03,109.74 L574.56,109.33 L571.06,109.04 L567.53,108.86 L564,108.8 L560.47,108.86 L556.94,109.04 L553.44,109.33 L549.97,109.74 L546.53,110.27 L543.14,110.91 L539.81,111.67 L536.55,112.53 L533.36,113.51 L530.25,114.59 L527.24,115.77 L524.32,117.05 L521.52,118.43 L518.83,119.9 L516.27,121.45 L513.84,123.09 L511.54,124.81 L509.39,126.61 L507.39,128.47 L505.54,130.4 L503.86,132.39 L502.34,134.43 L500.98,136.52 L499.8,138.65 L498.8,140.82 L497.98,143.02 L497.33,145.24 L496.87,147.48 L496.59,149.74 L496.5,152 L496.59,154.26 L496.87,156.52 L497.33,158.76 L497.98,160.98 L498.8,163.18 L499.8,165.35 L500.98,167.48 L502.34,169.57 L503.86,171.61 L505.54,173.6 L507.39,175.53 L509.39,177.39 L511.54,179.19 L513.84,180.91 L516.27,182.55 L518.83,184.1 L521.52,185.57 L524.32,186.95 L527.24,188.23 L530.25,189.41 L533.36,190.49 L536.55,191.47 L539.81,192.33 L543.14,193.09 L546.53,193.73 L549.97,194.26 L553.44,194.67 L556.94,194.96 L560.47,195.14 L564,195.2 L567.53,195.14 L571.06,194.96 L574.56,194.67 L578.03,194.26 L581.47,193.73 L584.86,193.09 L588.19,192.33 L591.45,191.47 L594.64,190.49 L597.75,189.41 L600.76,188.23 L603.68,186.95 L606.48,185.57 L609.17,184.1 L611.73,182.55 L614.16,180.91 L616.46,179.19 L618.61,177.39 L620.61,175.53 L622.46,173.6 L624.14,171.61 L625.66,169.57 L627.02,167.48 L628.2,165.35 L629.2,163.18 L630.02,160.98 L630.67,158.76 L631.13,156.52 L631.41,154.26 L631.5,152" fill="none" stroke="#1d2025" stroke-width="1.9" stroke-linejoin="round"/>
+<path d="M622.2,152 L630.5,152" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="618" cy="152" r="3.6" fill="#1f4e8c"/>
+<path d="M614.4,127.1 L621.59,131.25" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="610.77" cy="125" r="3.6" fill="#1f4e8c"/>
+<path d="M593.1,108.87 L597.25,116.06" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="591" cy="105.23" r="3.6" fill="#1f4e8c"/>
+<path d="M564,102.2 L564,110.5" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="564" cy="98" r="3.6" fill="#1f4e8c"/>
+<path d="M534.9,108.87 L530.75,116.06" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="537" cy="105.23" r="3.6" fill="#1f4e8c"/>
+<path d="M513.6,127.1 L506.41,131.25" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="517.23" cy="125" r="3.6" fill="#1f4e8c"/>
+<path d="M505.8,152 L497.5,152" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="510" cy="152" r="3.6" fill="#1f4e8c"/>
+<path d="M513.6,176.9 L506.41,172.75" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="517.23" cy="179" r="3.6" fill="#1f4e8c"/>
+<path d="M534.9,195.13 L530.75,187.94" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="537" cy="198.77" r="3.6" fill="#1f4e8c"/>
+<path d="M564,201.8 L564,193.5" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="564" cy="206" r="3.6" fill="#1f4e8c"/>
+<path d="M593.1,195.13 L597.25,187.94" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="591" cy="198.77" r="3.6" fill="#1f4e8c"/>
+<path d="M614.4,176.9 L621.59,172.75" fill="none" stroke="#b5473a" stroke-width="1.7" stroke-linejoin="round" marker-end="url(#ah-coral)"/>
+<circle cx="610.77" cy="179" r="3.6" fill="#1f4e8c"/>
+<circle cx="564" cy="152" r="3.6" fill="#1f4e8c"/>
+<text x="116" y="26" font-size="13" text-anchor="middle" fill="#1d2025" font-weight="bold">Ricci</text>
+<text x="116" y="42" font-size="11.5" text-anchor="middle" fill="#5b616b">(inside matter)</text>
+<text x="340" y="26" font-size="13" text-anchor="middle" fill="#1d2025" font-weight="bold">Weyl</text>
+<text x="340" y="42" font-size="11.5" text-anchor="middle" fill="#5b616b">(empty space near a mass)</text>
+<text x="564" y="26" font-size="13" text-anchor="middle" fill="#1d2025" font-weight="bold">Weyl</text>
+<text x="564" y="42" font-size="11.5" text-anchor="middle" fill="#5b616b">(gravitational wave)</text>
+<text x="116" y="250" font-size="12" text-anchor="middle" fill="#1d2025">volume decreases:</text>
+<text x="116" y="268" font-size="12" text-anchor="middle" fill="#1d2025"><tspan font-style="italic">V̈</tspan>/<tspan font-style="italic">V</tspan> = −4π<tspan font-style="italic">G</tspan>(<tspan font-style="italic">ρ</tspan> + 3<tspan font-style="italic">p</tspan>/<tspan font-style="italic">c</tspan>²)</text>
+<text x="340" y="250" font-size="12" text-anchor="middle" fill="#1d2025">shape changes,</text>
+<text x="340" y="268" font-size="12" text-anchor="middle" fill="#1d2025">volume does not (tides)</text>
+<text x="564" y="250" font-size="12" text-anchor="middle" fill="#1d2025">plus-polarized wave</text>
+<text x="564" y="268" font-size="10.5" text-anchor="middle" fill="#5b616b">dotted: half a cycle later</text>
+<path d="M228,18 L228,282" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<path d="M452,18 L452,282" fill="none" stroke="#d5d9df" stroke-width="1" stroke-linejoin="round"/>
+<text x="340" y="306" font-size="13" text-anchor="middle" fill="#1d2025" font-weight="bold">Riemann (20) = Ricci (10, volume) + Weyl (10, shape)</text>
+<text x="340" y="324" font-size="10.5" text-anchor="middle" fill="#5b616b">dashed: the ball at time zero   ·   solid: a short time later   ·   arrows: relative acceleration</text>
+</svg>
