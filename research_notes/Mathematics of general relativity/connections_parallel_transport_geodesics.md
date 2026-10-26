@@ -519,7 +519,7 @@ Scripts were run in this session with sympy 1.14.0 and numpy:
 - "A curved manifold must sit inside a higher-dimensional flat space". Spacetime's curvature is intrinsic, and the sphere-in-3D picture is only an aid.
 - "Coordinate singularities are physical". The sphere's poles in $(\theta,\phi)$ are perfectly ordinary points, and the same idea later explains $r=r_s$ in Schwarzschild coordinates.
 
-My inference on why one chart can't cover $S^2$: $S^2$ is compact (closed and bounded), while the image of a chart is an open subset of $\mathbb{R}^2$. A compact space cannot be continuously and invertibly mapped onto a nonempty open subset of the plane. This standard topology fact is not sourced here; Carroll states only that a single chart cannot cover $S^2$.
+My inference on why one chart can't cover $S^2$: $S^2$ is compact (closed and bounded), while the image of a chart is an open subset of $\mathbb{R}^2$. A compact space cannot be continuously and invertibly mapped onto a nonempty open subset of the plane. This standard topology fact is not sourced here. Carroll gives the two-chart stereographic atlas for $S^2$ and says only that "many manifolds cannot be covered with a single coordinate system".
 
 **Tangent spaces — key takeaways**
 1. A vector lives at a point, in that point's tangent space.
@@ -603,7 +603,7 @@ My inference on why one chart can't cover $S^2$: $S^2$ is compact (closed and bo
 ## Key Question 3: What numbers (Gravity Probe B, ISCO, photon sphere, tidal accelerations) are confirmed by primary sources?
 
 ### Takeaway
-Gravity Probe B measured a geodetic precession of $-6601.8\pm18.3$ mas/yr against GR's $-6606.1$ mas/yr (agreement to about 0.3%, uncertainty 0.28%). It measured frame-dragging of $-37.2\pm7.2$ mas/yr against $-39.2$ mas/yr (Everitt et al., PRL 2011). The ISCO at $6GM/c^2$ and the photon sphere at $3GM/c^2$ are textbook results confirmed in Carroll and Tong and re-derived here with sympy. Tidal accelerations are computed from $2GM/r^3$ using NASA constants. LIGO's GW150914 peak strain was $1.0\times10^{-21}$ on 4 km arms.
+Gravity Probe B measured a geodetic precession of $-6601.8\pm18.3$ mas/yr against GR's $-6606.1$ mas/yr: the two differ by 0.07%, well inside the 0.28% measurement uncertainty. It measured frame-dragging of $-37.2\pm7.2$ mas/yr against $-39.2$ mas/yr (Everitt et al., PRL 2011). The ISCO at $6GM/c^2$ and the photon sphere at $3GM/c^2$ are textbook results confirmed in Carroll and Tong and re-derived here with sympy. Tidal accelerations are computed from $2GM/r^3$ using NASA constants. LIGO's GW150914 peak strain was $1.0\times10^{-21}$ on 4 km arms.
 
 ### Cited Findings
 **Gravity Probe B**
@@ -637,7 +637,7 @@ Gravity Probe B measured a geodetic precession of $-6601.8\pm18.3$ mas/yr agains
   - At 48.85°N (approximately Paris, where Foucault's 1851 demonstration was made; latitude not sourced here): 271.1° per sidereal day, a full turn every $23.93\text{ h}/\sin\varphi\approx31.8$ h (my arithmetic).
 
 ### Inferences
-- GP-B is the cleanest "parallel transport is real" experiment for the report. A gyroscope in free fall carries its spin by parallel transport, and after one year around a curved Earth its axis is off by 6.6 arcseconds, in the plane of the orbit, exactly as GR predicts (to 0.3%). The sphere's latitude-circle holonomy is a direct 2D analogue.
+- GP-B is the cleanest "parallel transport is real" experiment for the report. A gyroscope in free fall carries its spin by parallel transport, and after one year around a curved Earth its axis is off by 6.6 arcseconds, in the plane of the orbit, as GR predicts, within the 0.28% measurement uncertainty. The sphere's latitude-circle holonomy is a direct 2D analogue.
 - The Foucault pendulum should be presented as an *analogy* for holonomy on a curved surface, not as a GR effect. Its turning comes from the Earth's rotation, and its geometry is that of the ordinary sphere. GP-B's geodetic precession is the genuine spacetime-curvature version. These are my framing recommendations.
 - The ISCO and photon-sphere radii are best presented as consequences of the geodesic equation with the Schwarzschild Christoffels. Section 6d gives a two-line derivation of $r_{\rm ph}=3GM/c^2$ directly from $\Gamma^r_{tt}$ and $\Gamma^r_{\phi\phi}$ that a Calculus II reader can follow.
 
