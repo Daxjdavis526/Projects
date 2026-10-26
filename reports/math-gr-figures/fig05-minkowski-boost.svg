@@ -8,28 +8,28 @@
 <rect width="680" height="388" fill="#ffffff"/>
 <path d="M190,242.4 L394,38.4 L394,18 L20,18 L20,72.4 Z" fill="#fbf1cf"/>
 <path d="M190,242.4 L71,361.4 L309,361.4 Z" fill="#fbf1cf"/>
-<path d="M20,361.4 L20,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M54,361.4 L54,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M88,361.4 L88,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M122,361.4 L122,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M156,361.4 L156,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M190,361.4 L190,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M224,361.4 L224,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M258,361.4 L258,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M292,361.4 L292,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M326,361.4 L326,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M360,361.4 L360,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M394,361.4 L394,18" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,344.4 L394,344.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,310.4 L394,310.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,276.4 L394,276.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,242.4 L394,242.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,208.4 L394,208.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,174.4 L394,174.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,140.4 L394,140.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,106.4 L394,106.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,72.4 L394,72.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
-<path d="M20,38.4 L394,38.4" fill="none" stroke="#d5d9df" stroke-width="0.7" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,361.4 L20,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M54,361.4 L54,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M88,361.4 L88,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M122,361.4 L122,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M156,361.4 L156,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M190,361.4 L190,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M224,361.4 L224,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M258,361.4 L258,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M292,361.4 L292,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M326,361.4 L326,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M360,361.4 L360,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M394,361.4 L394,18" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,344.4 L394,344.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,310.4 L394,310.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,276.4 L394,276.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,242.4 L394,242.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,208.4 L394,208.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,174.4 L394,174.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,140.4 L394,140.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,106.4 L394,106.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,72.4 L394,72.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
+<path d="M20,38.4 L394,38.4" fill="none" stroke="#d5d9df" stroke-width="0.8" stroke-linejoin="round" opacity="0.8"/>
 <path d="M20,242.4 L401.4,242.4" fill="none" stroke="#1d2025" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#ah-ink)"/>
 <path d="M190,361.4 L190,14" fill="none" stroke="#1d2025" stroke-width="1.4" stroke-linejoin="round" marker-end="url(#ah-ink)"/>
 <text x="403.9" y="260.4" font-size="12" text-anchor="middle" fill="#1d2025"><tspan font-style="italic">x</tspan> (m)</text>
@@ -91,10 +91,10 @@
 <text x="340.28" y="53.7" font-size="11" fill="#b07f0b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic">x</tspan> = <tspan font-style="italic">ct</tspan></text>
 <text x="444" y="118" font-size="12" fill="#1d2025">E: (<tspan font-style="italic">ct</tspan>, <tspan font-style="italic">x</tspan>) = (5, 3) m;</text>
 <text x="444" y="134" font-size="12" fill="#1d2025">(<tspan font-style="italic">ct</tspan>′, <tspan font-style="italic">x</tspan>′) = (4, 0) m</text>
-<path d="M440,124 L298,71.4" fill="none" stroke="#1d2025" stroke-width="0.8" stroke-linejoin="round"/>
+<path d="M440,124 L298,71.4" fill="none" stroke="#1d2025" stroke-width="1" stroke-linejoin="round"/>
 <text x="444" y="50" font-size="12" fill="#b5473a">interval = −16 m², invariant</text>
 <text x="444" y="65" font-size="11" fill="#b5473a">through E and (<tspan font-style="italic">ct</tspan>, <tspan font-style="italic">x</tspan>) = (4, 0)</text>
-<path d="M440,47 L363,26.69" fill="none" stroke="#b5473a" stroke-width="0.8" stroke-linejoin="round"/>
+<path d="M440,47 L363,26.69" fill="none" stroke="#b5473a" stroke-width="1" stroke-linejoin="round"/>
 <circle cx="190" cy="106.4" r="3" fill="#b5473a"/>
 <text x="444" y="190" font-size="11.5" fill="#b5473a">observer at <tspan font-style="italic">v</tspan> = 0.6<tspan font-style="italic">c</tspan> (red):</text>
 <text x="444" y="205" font-size="11.5" fill="#b5473a"><tspan font-style="italic">ct</tspan>′ axis along <tspan font-style="italic">x</tspan> = 0.6 <tspan font-style="italic">ct</tspan></text>

@@ -28,18 +28,18 @@
 <circle cx="222" cy="184" r="56" fill="none" stroke="#9aa0a8" stroke-width="0.9"/>
 <circle cx="222" cy="184" r="112" fill="none" stroke="#9aa0a8" stroke-width="0.9"/>
 <circle cx="222" cy="184" r="168" fill="none" stroke="#9aa0a8" stroke-width="0.9"/>
-<path d="M222,184 L409.6,184" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L384.47,90.2" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L315.8,21.53" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L222,-3.6" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L128.2,21.53" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L59.53,90.2" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L34.4,184" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L59.53,277.8" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L128.2,346.47" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L222,371.6" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L315.8,346.47" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
-<path d="M222,184 L384.47,277.8" fill="none" stroke="#9aa0a8" stroke-width="0.7" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L409.6,184" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L384.47,90.2" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L315.8,21.53" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L222,-3.6" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L128.2,21.53" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L59.53,90.2" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L34.4,184" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L59.53,277.8" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L128.2,346.47" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L222,371.6" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L315.8,346.47" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
+<path d="M222,184 L384.47,277.8" fill="none" stroke="#9aa0a8" stroke-width="0.8" stroke-linejoin="round" stroke-dasharray="2 3"/>
 <text x="240.49" y="250.09" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic">r</tspan> = 1</text>
 <text x="254.99" y="304.18" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic">r</tspan> = 2</text>
 <text x="269.48" y="358.28" font-size="10" fill="#5b616b" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke"><tspan font-style="italic">r</tspan> = 3</text>
