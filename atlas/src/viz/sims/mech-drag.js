@@ -103,7 +103,10 @@ export function mount(F, P0) {
       left.text(P.quiet ? 'mg' : `mg = ${fmtN(W)}`, 0.12, -0.15 - W * k + 0.1, { color: 'ink2', size: 12, weight: 650 });
       if (D * k > 0.04) {
         left.arrow(0, 0.15, 0, 0.15 + D * k, { color: 'warn', width: 2.8, head: 11 });
-        left.text(P.quiet ? 'D' : `D = ${fmtN(D)}`, 0.12, Math.max(0.15 + D * k + 0.14, 0.8), { color: 'warn', size: 12, weight: 650 });   // above the tip, clear of arms and canopy
+        // a short arrow is labelled beside its tip on the left, clear of the arms; a long one above its tip, clear of a canopy
+        const tip = 0.15 + D * k, lbl = P.quiet ? 'D' : `D = ${fmtN(D)}`;
+        if (tip < 0.66) left.text(lbl, -0.12, tip + 0.02, { align: 'right', color: 'warn', size: 12, weight: 650 });
+        else left.text(lbl, 0.12, tip + 0.14, { color: 'warn', size: 12, weight: 650 });
       } else left.text('D ≈ 0', 0.12, 0.8, { color: 'warn', size: 12, weight: 650 });
       if (!P.quiet) left.text(v > 0.995 * e.vt ? 'At terminal speed: D = mg' : t === 0 ? 'Just released: no drag yet' : 'Speeding up: D < mg', left.L, 13, { screen: true, color: 'ink2', size: 12, weight: 600 });
       if (show === 'both') { ctx.save(); ctx.strokeStyle = graph.col.line2; ctx.setLineDash([4, 6]); ctx.beginPath(); ctx.moveTo(split + 0.5, 8); ctx.lineTo(split + 0.5, H - 8); ctx.stroke(); ctx.restore(); }

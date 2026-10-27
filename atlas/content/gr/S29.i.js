@@ -356,11 +356,11 @@ The vertical axis counts powers of ten: $-2$ is a 1% violation, $-4$ is 0.01%.`,
     num({
       id: 'excess', difficulty: 2,
       gen(r) {
-        const [body, GM, gmText, more] = r.pick([
-          ['the Moon', GM_MOON, t`4.905\times10^{12}`, 'a little'],
-          ['Mars', 4.283e13, t`4.283\times10^{13}`, 'somewhat'],
-          ['Jupiter', 1.267e17, t`1.267\times10^{17}`, 'somewhat'],
-          ['the Sun', GM_SUN, t`1.327\times10^{20}`, 'several times'],
+        const [body, name, GM, gmText, more] = r.pick([
+          ['the Moon', 'Moon', GM_MOON, t`4.905\times10^{12}`, 'a little more'],
+          ['Mars', 'Mars', 4.283e13, t`4.283\times10^{13}`, 'somewhat more'],
+          ['Jupiter', 'Jupiter', 1.267e17, t`1.267\times10^{17}`, 'somewhat more'],
+          ['the Sun', 'Sun', GM_SUN, t`1.327\times10^{20}`, 'several times more'],
         ]);
         const ex = GM / (3 * C * C);
         const friendly = ex < 1 ? `${round(ex * 1e3, 3)} mm` : `${round(ex, 3)} m`;
@@ -370,7 +370,7 @@ The vertical axis counts powers of ten: $-2$ is a 1% violation, $-4$ is 0.01%.`,
           errors: [{ value: GM / (C * C), feedback: 'Divide by 3 as well: the excess is GM/(3c²).' }, { value: GM / (3 * C), feedback: 'Divide by c², not c.' }],
           hints: [t`$c^2 = 8.988\times10^{16}\ \text{m}^2/\text{s}^2$.`],
           teach: 'Inside matter space is curved: a uniform ball’s measured radius exceeds its circumference ÷ 2π by GM/(3c²).',
-          explain: t`$GM/(3c^2) = ${sci(ex)}$ m, that is ${friendly}. A real ${body === 'the Sun' ? 'Sun, far denser at its core,' : 'body, denser toward its centre,'} has ${more} more.`,
+          explain: t`$GM/(3c^2) = ${sci(ex)}$ m, that is ${friendly}. The real ${name}, ${name === 'Sun' ? 'far denser at its core' : 'denser toward its centre'}, has ${more}.`,
           visual: rodPic,
         };
       },
