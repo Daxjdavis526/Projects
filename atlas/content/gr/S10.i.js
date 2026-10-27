@@ -151,6 +151,7 @@ Two things spoil the easy way. With curved grid lines, like polar coordinates, a
           hints: [t`$\alpha - \theta = ${alpha - th}^\circ$.`],
           teach: 'An arrow’s outward component is the cosine of the angle between it and the local outward direction.',
           explain: t`$V_r = \cos(${alpha - th}^\circ) = ${fmt(vr, 3)}$.`,
+          visual: fieldPicture({ alpha, a: fromPolar(3, th * DEG), b: fromPolar(3, (th + 120) * DEG), readout: false }, t`Every arrow points at ${alpha}° from east; A sits at polar angle ${th}°.`),
         };
       },
     }),
@@ -168,6 +169,7 @@ Two things spoil the easy way. With curved grid lines, like polar coordinates, a
       hints: ['What happens to an arrow carried around a closed loop on a sphere?', 'If every arrow were the carried copy of every other, carrying one around a loop would bring it back unchanged.'],
       teach: 'On a curved surface parallel transport depends on the path, so no field of arrows is “the same” everywhere.',
       explain: 'Such a field would let you carry an arrow around any loop and get back exactly the arrow you started with. On a sphere, loops turn arrows by the area they enclose (divided by R²), so it cannot exist. On a flat plane it does: the field of identical arrows in the Explore.',
+      visual: { type: 'gr-sphere-transport', params: { mode: 'cap', lat: 50, progress: 0.5, readout: false }, caption: 'An arrow that starts pointing north (black), carried east without turning (red): it no longer points north.' },
     }),
   ],
   sources: [

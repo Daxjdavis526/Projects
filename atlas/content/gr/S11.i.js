@@ -105,6 +105,7 @@ Three facts make it physics. **The metric fixes it**: once you can measure lengt
       hints: ['Astronauts in orbit float: in their own frame, what is the gravitational field?'],
       teach: 'The connection can be made zero at any single point by falling freely — the equivalence principle in mathematical form — but curvature (tides) cannot.',
       explain: 'In freely falling coordinates the connection vanishes at your location: locally, gravity disappears, as Einstein’s equivalence principle says. What cannot be removed is how the connection varies from place to place — the tidal stretching that is curvature.',
+      visual: { type: 'gr-elevator', params: { mode: 'falling', tides: true }, caption: 'A box falling freely near the Earth: inside it, released balls float — no gravitational field there. Over a larger box the balls drift into a stretched diamond: tides, the curvature no choice of frame removes (drift exaggerated).' },
     }),
     num({
       id: 'sphere-drift', difficulty: 3,
@@ -153,6 +154,11 @@ Three facts make it physics. **The metric fixes it**: once you can measure lengt
       hints: ['Which coordinates would the astronauts naturally use, and do they fall?'],
       teach: 'The gravitational field g is a connection: it depends on the coordinates, and vanishes in a freely falling frame.',
       explain: t`For coordinates fixed to the ground, the connection’s main number at the ISS’s height is $GM/r^2 \approx ${fmt(G_ISS, 2)}$ m/s². The station and everything in it fall freely, and in coordinates falling with them the connection vanishes at their location — they feel no gravity. What remains are tides: over the station’s roughly 100 m length, differences of about $${fmt(TIDE_ISS * 1e4, 2)}\times10^{-4}$ m/s².`,
+      visual: {
+        type: 'graph',
+        params: { x: [0, 1000], y: [0, 10.5], xlabel: 'height above the ground (km)', ylabel: 'GM/r² (m/s²)', constants: { gm: GM_EARTH, re: R_EARTH }, curves: [{ fn: 'gm/(re + 1000*x)^2', color: 'accent' }], points: [{ x: 400, y: G_ISS, color: 'gold', label: 'ISS' }] },
+        caption: 'Newton’s g = GM/r² against height: in orbit it is still most of its value at the ground.',
+      },
     }),
     num({
       id: 'cp-step', difficulty: 2,

@@ -152,6 +152,7 @@ At the two endpoints $x = a - R$ and $x = a + R$ the ratio test's limit is exact
       },
       hints: [t`What is the ratio-test limit $L = |x|/R$ at $x = 4$?`, t`$L = 1$, and the ratio test is inconclusive when $L = 1$.`],
       teach: 'At an endpoint the ratio-test limit equals 1, which is inconclusive.',
+      visual: numberLine(-4, 4, 0),
       explain: t`At $x = 4$ the limit is $|x|/R = 1$, the one case the ratio test cannot decide. You must substitute $x = 4$ and test the resulting series directly.`,
     }),
     intervalItem('find-interval', ['geom', 'harm', 'p2', 'alt']),
@@ -231,13 +232,14 @@ At the two endpoints $x = a - R$ and $x = a + R$ the ratio test's limit is exact
           errors: [{ value: 1, feedback: t`The ratio test gives $|${inner}| < 1$, but that is not yet $|x - a| < R$: factor out the $${k}$.` }, { value: k, feedback: t`Dividing $|${inner}| < 1$ by $${k}$ gives $|x - \cdots| < \tfrac{1}{${k}}$, not $${k}$.` }],
           hints: [t`The ratio test gives $|${inner}| < 1$.`, t`Write $${inner} = ${k}\left(${xc}\right)$, then divide by $${k}$.`],
           teach: t`Put the condition in the form $|x - a| < R$ before reading off the radius: $|kx - m| < 1$ means $|x - m/k| < 1/k$.`,
+          visual: { type: 'graph', params: { x: [m / k - 3 / k, m / k + 3 / k], y: [0, 3], curves: [{ fn: `abs(${k}*x - (${m}))`, color: 'accent' }], hlines: [{ y: 1, label: '1', color: 'warn' }] }, caption: t`$y = |${inner}|$. The series converges where the graph dips below the dashed line $y = 1$.` },
           explain: t`$|${inner}| < 1 \iff \left|${xc}\right| < \tfrac1{${k}}$: centre $${frac(m / k)}$, radius $\tfrac{1}{${k}} \approx ${nice(1 / k)}$.`,
         };
       },
     }),
   ],
   checkpoint: [
-    intervalItem('cp-interval', ['harm', 'sqrt', 'p2', 'alt', 'ncoef'], { showLine: false }),
+    intervalItem('cp-interval', ['harm', 'sqrt', 'p2', 'alt', 'ncoef']),
     num({
       id: 'cp-conditional', difficulty: 3,
       gen(r) {
@@ -250,6 +252,7 @@ At the two endpoints $x = a - R$ and $x = a + R$ the ratio test's limit is exact
           errors: [{ value: other, feedback: t`At $x = ${other}$ the series diverges. Substitute it and look at the terms.` }, { value: a, feedback: 'At the centre the series converges absolutely (every term after the first is 0). Conditional convergence happens only at an endpoint.' }],
           hints: ['Conditional convergence can only happen at an endpoint: inside the radius it is absolute.', t`Test $x = ${a - b}$ and $x = ${a + b}$; one gives an alternating series whose absolute values diverge.`],
           teach: 'Inside the radius convergence is absolute, so conditional convergence lives only at an endpoint.',
+          visual: numberLine(a - b, a + b, a),
           explain: t`The endpoints are $${a - b}$ and $${a + b}$. At $x = ${a - b}$ the series is $${K.left}$ and at $x = ${a + b}$ it is $${K.right}$. It converges only at $x = ${x}$, where the absolute values give a divergent series — so the convergence there is conditional.`,
         };
       },
@@ -263,6 +266,7 @@ The bracket is the series $\sum_{n=1}^{\infty} (-1)^{n+1}\frac{x^n}{n}$ for $\ln
       errors: [{ value: Math.LN2, feedback: 'That is the bracket alone; the Madelung constant has a factor of 2 (neighbours on both sides).' }],
       hints: [t`The series for $\ln(1+x)$ has radius 1. At $x = 1$ it is the alternating harmonic series.`, t`The alternating harmonic series converges (alternating series test), and where a power series converges at an endpoint its sum is the function’s value there: $\ln(1 + 1)$.`],
       teach: 'An endpoint where the series converges belongs to the interval, and the series still equals the function there.',
+      visual: { type: 'graph', params: { aspect: 'wide', x: [-5.6, 5.6], y: [-0.6, 0.6], yticks: 1, xlabel: 'distance / d', ylabel: '', points: Array.from({ length: 11 }, (_, k) => ({ x: k - 5, y: 0, color: (k - 5) % 2 === 0 ? 'bad' : 'accent', label: (k - 5) % 2 === 0 ? '+' : '−', r: k === 5 ? 9 : 6 })) }, caption: 'The ion chain: the large ion in the middle feels opposite charges at ±d, like charges at ±2d, and so on — alternating terms 2(−1 + ½ − ⅓ + ⋯).' },
       explain: t`The interval of convergence of the $\ln(1+x)$ series is $(-1, 1]$: $x = 1$ is included, because $1 - \tfrac12 + \tfrac13 - \cdots$ converges by the alternating series test, to $\ln 2$ (Abel’s theorem guarantees the endpoint value). So $\alpha = 2\ln 2 \approx 1.386$.`,
       solution: t`Each ion has neighbours at $\pm d$ (opposite charge), $\pm 2d$ (same charge), $\pm 3d$, … so its energy is $\frac{e^2}{4\pi\varepsilon_0 d}\cdot 2\left(-1 + \tfrac12 - \tfrac13 + \cdots\right) = -\frac{e^2}{4\pi\varepsilon_0 d}\cdot 2\ln 2$. The convergence is only conditional: the order of the terms matters, which is why real three-dimensional Madelung sums need care.`,
     }),

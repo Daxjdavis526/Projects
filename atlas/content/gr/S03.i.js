@@ -3,6 +3,7 @@
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { fmt, nice, tex } from '../../src/core/format.js';
 import { gamma, boost } from '../../src/viz/model/relativity.js';
+import { spacetimeSketch } from './_foundations.js';
 
 const t = String.raw;
 
@@ -94,8 +95,9 @@ A flash of light from an event spreads out at speed $c$. With two directions of 
         const kind = r.pick(['future', 'null', 'space', 'past']);
         const [dt, dx] = r.pick(CLASSES[kind].cases);
         return {
-          prompt: t`Event B happens ${Math.abs(dt)} years ${dt >= 0 ? 'after' : 'before'} event A, ${Math.abs(dx)} light-years away from it. Where does B lie relative to A’s light cone? (Sketching the two events on a diagram in years and light-years helps.)`,
+          prompt: t`Event B happens ${Math.abs(dt)} years ${dt >= 0 ? 'after' : 'before'} event A, ${Math.abs(dx)} light-years away from it. Where does B lie relative to A’s light cone?`,
           answer: CLASSES[kind].answer,
+          visual: spacetimeSketch({ events: [[0, 0, 'A'], [dt, dx, 'B']] }),
         };
       },
       choices: [
@@ -141,6 +143,12 @@ A flash of light from an event spreads out at speed $c$. With two directions of 
           hints: ['The edge of the event’s future light cone moves outward at c.', t`Time = distance ÷ $c$, with $c = 2.998\times10^8$ m/s.`],
           teach: 'The earliest an event can influence a place a distance d away is d/c later — where the light cone reaches it.',
           explain: t`$t = d/c = ${tex(d, 4)}\ \text{m} / (2.998\times10^8\ \text{m/s}) = ${fmt(s, 3)}$ s${s > 120 ? ` (${fmt(s / 60, 3)} minutes)` : ''}. Any Earth event earlier than that lies outside the light cone.`,
+          visual: spacetimeSketch({
+            events: [[0, 0, 'the event'], [s, d / C, 'earliest effect on Earth']],
+            segments: [[-0.25 * s, d / C, 1.35 * s, d / C, 'accent2'], [0, 0, s, d / C, 'warn']],
+            range: 1.25 * s, axes: false,
+            caption: 'Not to scale in time: the event (at the origin), Earth’s worldline (blue), and the edge of the event’s light cone reaching it.',
+          }),
         };
       },
     }),
@@ -215,6 +223,12 @@ A flash of light from an event spreads out at speed $c$. With two directions of 
           hints: ['The command rides the edge of a light cone out; the reply rides the edge of another light cone back.'],
           teach: 'A round trip at light speed takes twice the one-way light time — no faster control is possible, which is why rovers drive themselves.',
           explain: t`${d} minutes out plus ${d} minutes back: ${2 * d} minutes. On a diagram, the command and reply are two 45° lines, out and back.`,
+          visual: spacetimeSketch({
+            events: [[0, 0, 'command sent'], [d, d, 'rover replies'], [2 * d, 0, 'reply arrives']],
+            segments: [[-0.3 * d, 0, 2.4 * d, 0, 'accent2'], [-0.3 * d, d, 2.4 * d, d, 'violet'], [0, 0, d, d, 'warn'], [d, d, 2 * d, 0, 'warn']],
+            range: 1.6 * d, axes: false, cone: false,
+            caption: 'Earth (blue) and Mars (violet) as worldlines; the command and the reply each travel at 45° — the speed of light. Not to scale.',
+          }),
         };
       },
     }),

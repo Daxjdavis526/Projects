@@ -186,6 +186,7 @@ It is spacetime’s version of Pythagoras. Turn a map and the east–west and no
       hints: ['Things built from Δs² are shared; Δt and Δx on their own are not.', 'Proper time is √(−Δs²)/c, and light-cone membership is the sign of Δs².'],
       teach: 'Δt and Δx are frame-dependent pieces; the interval — and everything built from it, such as proper time and causal order — is invariant.',
       explain: 'The interval is invariant, and so are the quantities built from it: proper time (√(−Δs²)/c), the sign of Δs² (inside or outside the light cone), and the speed of light (Δs² = 0 for everyone). Time differences, distances and simultaneity are the frame-dependent parts.',
+      visual: { type: 'spacetime', params: { beta: 0.5, events: [[0, 0], [4, 2]], simultaneity: true, hyperbolae: true, range: 5 }, caption: 'Move the slider to change observers: which numbers in the readout change, and which stay the same?' },
     }),
     mcq({
       id: 'pythagoras', difficulty: 2,
@@ -237,6 +238,15 @@ It is spacetime’s version of Pythagoras. Turn a map and the east–west and no
           hints: [t`Total energy $E = ${E1} + ${E2} = ${E1 + E2}$ GeV. Head-on, the momenta point opposite ways: $pc = ${E2} - ${E1} = ${E2 - E1}$ GeV.`, t`$(Mc^2)^2 = ${E1 + E2}^2 - ${E2 - E1}^2$.`],
           teach: 'Invariant mass, √(E² − (pc)²)/c², is the energy–momentum version of the interval — and two massless photons can make a massive system.',
           explain: t`$(Mc^2)^2 = ${(E1 + E2) ** 2} - ${(E2 - E1) ** 2} = ${(E1 + E2) ** 2 - (E2 - E1) ** 2}$, so $Mc^2 = ${nice(M)}$ GeV. This is how the Higgs boson was found in 2012: as a bump at 125 GeV in the invariant mass of photon pairs.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-E2 - 1.5, E1 + 3], y: [-2.6, 2.4], axes: false, xlabel: '', ylabel: '',
+              arrows: [{ from: [0, 1.4], to: [E1, 1.4], color: 'gold' }, { from: [0, 0], to: [-E2, 0], color: 'violet' }, { from: [0, -1.4], to: [E1 - E2, -1.4], color: 'good' }],
+              points: [{ x: E1 / 2, y: 1.85, label: `photon 1: pc = ${E1} GeV`, color: 'gold', r: 0.5 }, { x: -E2 / 2, y: 0.45, label: `photon 2: pc = ${E2} GeV`, color: 'violet', r: 0.5 }, { x: (E1 - E2) / 2, y: -0.95, label: `total: pc = ${E2 - E1} GeV`, color: 'good', r: 0.5 }],
+            },
+            caption: 'The two photons’ momenta (times c, in GeV) and their sum, drawn to scale. Head-on, they point in opposite directions.',
+          },
         };
       },
     }),

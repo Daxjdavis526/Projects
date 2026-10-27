@@ -97,6 +97,15 @@ It is the slope of the velocity–time graph, measured in metres per second per 
       hints: ['Slowing down means the acceleration points opposite to the velocity.', 'The velocity points in −x.'],
       teach: 'An object slows down when its acceleration and velocity have opposite signs.',
       explain: t`$v < 0$ and the speed is falling, so $v$ is getting less negative: $\Delta v > 0$, so $a > 0$. The acceleration points in $+x$, opposite to the motion.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [11, 33], y: [-1, 1.4], axes: false, grid: false, xlabel: '', ylabel: '',
+          curves: [{ fn: '0', color: 'ink4', width: 1.2 }],
+          points: [{ x: 30, y: 0, color: 'accent' }, { x: 26.25, y: 0, color: 'accent' }, { x: 23, y: 0, color: 'accent' }, { x: 20.25, y: 0, color: 'accent' }, { x: 18, y: 0, color: 'accent' }, { x: 16.25, y: 0, color: 'accent' }, { x: 15, y: 0, color: 'accent' }, { x: 14.25, y: 0, color: 'accent' }, { x: 29.2, y: 0.45, r: 0.1, color: 'ink2', label: 'first image' }],
+        },
+        caption: 'A motion diagram: where the car is every 0.5 s. It moves toward −x and the gaps between images shrink.',
+      },
     }),
     match({
       id: 'sign-table', difficulty: 2,
@@ -107,6 +116,16 @@ It is the slope of the velocity–time graph, measured in metres per second per 
       hints: ['The sign of v gives the direction of motion.', 'Same signs: speeding up. Opposite signs: slowing down.'],
       teach: 'Speeding up or slowing down depends on whether v and a share a sign, not on the sign of a alone.',
       explain: t`Same signs (rows 1 and 3): the speed grows. Opposite signs (rows 2 and 4): the speed shrinks. None of them has constant speed, because $a \ne 0$ is parallel to the motion.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-4.6, 4], y: [-0.7, 3.6], axes: false, grid: false, xlabel: '', ylabel: '',
+          curves: [{ param: ['0', 't'], t: [-0.5, 3.5], color: 'ink4', width: 1 }],
+          arrows: [{ from: [0, 3.15], to: [2.5, 3.15], color: 'good', label: 'v' }, { from: [0, 2.8], to: [1.0, 2.8], color: 'warn', label: 'a' }, { from: [0, 2.15], to: [2.5, 2.15], color: 'good' }, { from: [0, 1.8], to: [-1.0, 1.8], color: 'warn' }, { from: [0, 1.15], to: [-2.5, 1.15], color: 'good' }, { from: [0, 0.8], to: [-1.0, 0.8], color: 'warn' }, { from: [0, 0.15], to: [-2.5, 0.15], color: 'good' }, { from: [0, -0.2], to: [1.0, -0.2], color: 'warn' }],
+          points: [{ x: -4.4, y: 3.2, r: 0.1, color: 'ink2', label: 'row 1' }, { x: -4.4, y: 2.2, r: 0.1, color: 'ink2', label: 'row 2' }, { x: -4.4, y: 1.2, r: 0.1, color: 'ink2', label: 'row 3' }, { x: -4.4, y: 0.2, r: 0.1, color: 'ink2', label: 'row 4' }],
+        },
+        caption: 'The four moments, top to bottom: velocity in green, acceleration in amber (+x to the right).',
+      },
     }),
     {
       type: 'slider', id: 'set-rest', difficulty: 2, param: 'time',
@@ -209,6 +228,15 @@ It is the slope of the velocity–time graph, measured in metres per second per 
           hints: [t`$a_\text{avg} = \Delta v/\Delta t$.`, 'It starts from rest, so Δv is the final speed.'],
           teach: 'Average acceleration is the change in velocity over the time taken, whatever pushes the object.',
           explain: t`$a_\text{avg} = \dfrac{${v} - 0}{${dt}} = ${s3(a)}\ \text{m/s}^2$, about ${s3(a / G)} g. The crew lie on their backs so that this load pushes them into their seats.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, dt * 1.5], y: [0, v * 1.2], xlabel: 't (s)', ylabel: 'v (m/s)',
+              curves: [{ fn: `${v / dt}*x`, domain: [0, dt], color: 'good' }],
+              points: [{ x: 0, y: 0, color: 'gold' }, { x: dt, y: v, color: 'gold', label: `${v} m/s` }],
+            },
+            caption: 'The capsule’s velocity during the abort burn, drawn as if the acceleration were steady.',
+          },
         };
       },
     }),
@@ -238,6 +266,16 @@ It is the slope of the velocity–time graph, measured in metres per second per 
           hints: ['Keep the signs: both velocities are negative.', t`$\Delta v = ${nice(v2)} - ${par(v1)}$.`],
           teach: 'Acceleration comes from the change in velocity with signs kept; its sign is a direction.',
           explain: t`$a = \dfrac{${nice(v2)} - ${par(v1)}}{${dt}} = \dfrac{${nice(v2 - v1)}}{${dt}} = ${nice(a)}\ \text{m/s}^2$. Positive while the craft moves in $-x$: the burn is braking the approach.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-1.5, 10], y: [-1.5, 1.6], axes: false, grid: false, xlabel: '', ylabel: '',
+              curves: [{ fn: '0', color: 'ink4', width: 1.2 }],
+              points: [{ x: 0, y: 0, color: 'ink' }, { x: 8, y: 0, color: 'accent' }, { x: -0.9, y: -0.6, r: 0.1, color: 'ink2', label: 'station' }, { x: 7.6, y: -0.6, r: 0.1, color: 'accent', label: 'craft' }],
+              arrows: [{ from: [8, 0.65], to: [8 + 10 * v1, 0.65], color: 'good', label: 'before' }, { from: [8, 1.25], to: [8 + 10 * v2, 1.25], color: 'teal', label: 'after' }],
+            },
+            caption: 'The craft’s velocity before and after the burn, as arrows (lengths to scale with each other, not with the distance).',
+          },
         };
       },
     }),

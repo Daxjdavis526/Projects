@@ -83,6 +83,21 @@ because turning through a small angle $d\theta$ covers more ground farther out. 
           hints: [t`$ds^2 = ${dx}^2 + ${dy}^2 + ${dz}^2$.`],
           teach: 'With Cartesian axes the metric is Pythagoras in three dimensions.',
           explain: t`$ds^2 = ${dx * dx} + ${dy * dy} + ${dz * dz} = ${ds * ds}$, so $ds = ${ds}$ m.`,
+          visual: (() => {
+            const k = 2.4 / Math.max(dx, dy, dz), X = dx * k, Y = dy * k, Z = dz * k;
+            return {
+              type: 'surface3d',
+              params: {
+                z: '0', domain: [[0, X], [0, Y]], n: 4, colorBy: false, alpha: 0.35, axisLen: 2.9, axisLabels: ['x', 'y', 'z'], dist: 8, target: [X / 2, Y / 2, Z / 2],
+                curves: [
+                  { param: [`${X}*t`, `${Y}*t`, '0'], t: [0, 1], color: 'accent2', width: 2 },
+                  { param: [`${X}`, `${Y}`, `${Z}*t`], t: [0, 1], color: 'violet', width: 2 },
+                  { param: [`${X}*t`, `${Y}*t`, `${Z}*t`], t: [0, 1], color: 'gold', width: 3 },
+                ],
+              },
+              caption: t`The drone’s move as the diagonal of a box (gold) with sides $dx$, $dy$, $dz$: Pythagoras on the floor (blue), then again with the height (violet). Drag to turn it.`,
+            };
+          })(),
         };
       },
     }),
@@ -204,6 +219,11 @@ because turning through a small angle $d\theta$ covers more ground farther out. 
           hints: [t`For a clock at rest only the $dt^2$ term survives, and $d\tau = \sqrt{-ds^2}/c$.`, t`$d\tau/dt = \sqrt{1 - r_s/r}$ with $r_s/r = ${nice(1 / x)}$.`],
           teach: 'Reading a metric: for a clock at rest, the coefficient of c²dt² sets its rate — here √(1 − r_s/r), slower near a black hole.',
           explain: t`$d\tau/dt = \sqrt{1 - ${nice(1 / x)}} = ${fmt(rate, 4)}$. The hovering clock runs slow compared with clocks far away; at the horizon the factor would reach zero. This metric (Schwarzschild’s) is the subject of step 20.`,
+          visual: {
+            type: 'graph',
+            params: { x: [1, 6], y: [0, 1.1], xlabel: 'r / r_s', ylabel: 'clock rate dτ/dt', curves: [{ fn: 'sqrt(1 - 1/x)', color: 'accent', domain: [1, 6] }], hlines: [{ y: 1, label: 'far away', color: 'ink3' }], vlines: [{ x: 1, label: 'horizon', color: 'warn' }], points: [{ x, y: rate, color: 'gold', label: 'the probe' }] },
+            caption: t`How fast a clock held at rest at radius $r$ ticks, compared with clocks far away: $\sqrt{1 - r_s/r}$.`,
+          },
         };
       },
     }),
@@ -237,6 +257,7 @@ because turning through a small angle $d\theta$ covers more ground farther out. 
       hints: ['Is a sheet of paper curved because you draw circles and rays on it?'],
       teach: 'A metric whose numbers vary need not mean curvature: curvature is what remains in every coordinate system, such as triangles whose angles do not add to 180°.',
       explain: 'The polar grid’s lines spread apart, so the rule for converting coordinate steps has to change from place to place — but the plane is the same flat plane. Real curvature, like the sphere’s, shows up in measurements no relabelling can undo: circles shorter than 2πρ, triangle angles adding to more than 180°.',
+      visual: { type: 'gr-coordinates', params: { mode: 'measure', grid: 'polar', shape: 'circle', centre: [1.6, 0.8], radius: 1.5 }, caption: 'One flat plane: switch between the coordinate systems and compare the lengths.' },
     }),
   ],
   sources: [

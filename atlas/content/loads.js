@@ -18,6 +18,7 @@ export const LESSONS = {
   'gr.S13.i': () => import('./gr/S13.i.js'),
   'gr.S20.i': () => import('./gr/S20.i.js'),
   'gr.S21.i': () => import('./gr/S21.i.js'),
+  'gr.S22.i': () => import('./gr/S22.i.js'),
   'gr.S23.i': () => import('./gr/S23.i.js'),
   'gr.S24.i': () => import('./gr/S24.i.js'),
   'gr.S25.i': () => import('./gr/S25.i.js'),

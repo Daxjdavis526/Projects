@@ -13,6 +13,11 @@ const GM_SUN = 1.32712440018e20;
 const GM_SGRA = 4.30e6 * GM_SUN;
 const TIDE_SGRA = (2 * GM_SGRA * 2) / (2 * GM_SGRA / C ** 2) ** 3;
 
+// radial free fall from rest far away (units r_s = 2GM/c² = 1, times in r_s/c): the faller’s own
+// time τ(r) and Schwarzschild’s coordinate time t(r), both zero at r = 4 r_s. dτ/dr = −√r and
+// dt/dr = −r^{3/2}/(r − 1); t grows without limit as r → 1 while τ stays finite.
+const F_T = (r) => -(2 / 3) * r ** 1.5 - 2 * Math.sqrt(r) + Math.log((Math.sqrt(r) + 1) / Math.abs(Math.sqrt(r) - 1));
+const T0 = F_T(4);
 // a picture of a segment between two points on the polar grid, without a readout
 const segmentPicture = (p, q, caption) => ({
   type: 'gr-coordinates',
@@ -131,6 +136,18 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
       hints: ['Compare it with the origin of polar coordinates: is the geometry bad there, or the labels?', 'Which number is physical: Schwarzschild’s t, or the reading on her own watch?'],
       teach: 'r = 2GM/c² is a coordinate singularity of Schwarzschild’s labels — smooth in other coordinates — and also a real horizon, a surface light cannot climb back out of.',
       explain: 'Eddington–Finkelstein and Kruskal coordinates (steps 20–22) describe the same spacetime with nothing infinite at r = 2GM/c². What stays true in every coordinate system is that the horizon is a one-way surface. The genuine singularity, where tidal curvature blows up in every coordinate system, is at r = 0.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 4], y: [0, 6], xlabel: 'r / (2GM/c²)', ylabel: '',
+          curves: [
+            { fn: '1/(1 - 1/x)', color: 'bad', domain: [1.19, 4], label: 'a Schwarzschild metric term, 1/(1 − 2GM/rc²)', labelAt: 1.6, labelDx: 8, labelDy: -6 },
+            { fn: '1/x^3', color: 'good', domain: [0.55, 4], label: 'tidal stretching, ∝ 1/r³', labelAt: 0.8, labelDx: 8, labelDy: 2 },
+          ],
+          vlines: [{ x: 1, label: 'horizon', color: 'warn' }],
+        },
+        caption: 'Both drawn relative to their values far away (the metric term → 1) or at the horizon (the tide = 1). The metric term blows up at the horizon only because of the coordinates; the tidal stretching — real curvature — is finite there and grows without limit only at r = 0.',
+      },
     }),
   ],
   checkpoint: [
@@ -164,6 +181,18 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
       hints: ['Which of the two numbers could you read off an instrument carried by the probe?'],
       teach: 'Coordinate time is not what a clock reads; a clock reads its own proper time, which is physical.',
       explain: t`Schwarzschild’s $t$ is tied to clocks far away; light from the falling probe reaches them ever more slowly, which is why $t$ grows without limit. The probe’s own proper time is finite — it crosses the horizon and continues inward.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 4], y: [0, 12], xlabel: 'r / (2GM/c²)', ylabel: 'time since r = 4 (units of 2GM/c³)',
+          curves: [
+            { fn: `-(2/3)*x^1.5 - 2*sqrt(x) + ln((sqrt(x)+1)/abs(sqrt(x)-1)) - (${T0})`, color: 'bad', domain: [1.0004, 4], label: 'Schwarzschild’s t', labelAt: 1.6, labelDx: 8, labelDy: -10 },
+            { fn: '(2/3)*(8 - x^1.5)', color: 'good', domain: [0, 4], label: 'the probe’s own clock τ', labelAt: 0.4, labelDx: 8, labelDy: -12 },
+          ],
+          vlines: [{ x: 1, label: 'horizon', color: 'warn' }],
+        },
+        caption: 'A probe falling straight in from rest far away, from r = 4 (right) inward. Schwarzschild’s t runs off to infinity at the horizon; the probe’s own clock reaches it, and r = 0, after a finite time.',
+      },
     }),
     num({
       id: 'cp-convert', difficulty: 1,

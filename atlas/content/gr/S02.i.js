@@ -177,6 +177,19 @@ Every kind of clock must slow by the same factor, or you could tell who is "real
       hints: ['Does an approaching clock’s signal delay grow or shrink?', 'Think of the muons: does a signal delay change how many reach the ground?'],
       teach: 'Time dilation is what remains after light-travel delays are accounted for; it is a real difference in elapsed time.',
       explain: 'Signal delays make an approaching clock look fast and a receding one look slow (the Doppler effect). Time dilation is what is left once those delays are removed, and it makes both run slow by γ. Its effects are physical: more muons reach the ground, and atomic clocks flown around the world (Hafele and Keating, 1971) came back out of step with ground clocks by the amounts relativity predicts.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 0.95], y: [0, 3.2], xlabel: 'speed v / c', ylabel: 'apparent tick rate ÷ rate at rest',
+          curves: [
+            { fn: 'sqrt((1+x)/(1-x))', color: 'warn', label: 'approaching: looks fast', labelAt: 0.5, labelDx: 8, labelDy: -14 },
+            { fn: 'sqrt((1-x)/(1+x))', color: 'violet', label: 'receding: looks slow', labelAt: 0.62, labelDx: 6, labelDy: 14 },
+            { fn: 'sqrt(1-x^2)', color: 'good', label: 'delays removed: slow either way', labelAt: 0.1, labelDx: 4, labelDy: -14 },
+          ],
+          hlines: [{ y: 1, color: 'ink3' }],
+        },
+        caption: 'What you see (Doppler-shifted by the light-travel delay) depends on the direction of motion; what remains after the delay is removed is the same slowing, √(1 − v²/c²), for approaching and receding clocks alike.',
+      },
     }),
     num({
       id: 'cern', difficulty: 3,
@@ -190,6 +203,11 @@ Every kind of clock must slow by the same factor, or you could tell who is "real
           hints: ['The lab sees the muon’s internal clock running slow by γ.', t`Lab lifetime $= \gamma\tau = ${G}\times${fmt(TAU_MU * 1e6, 4)}\ \mu\text{s}$.`],
           teach: 'An unstable particle moving with Lorentz factor γ lives γ times its rest lifetime in the lab.',
           explain: t`$\gamma\tau = ${G}\times${fmt(TAU_MU * 1e6, 4)} = ${fmt(life, 3)}\ \mu\text{s}$. CERN’s 1970s ring ran at $\gamma = 29.3$, where this gives ${fmt(29.3 * TAU_MU * 1e6, 3)} μs; the measured lifetimes agreed to about 0.1%, even though the muons were moving in a circle — only their speed mattered.`,
+          visual: {
+            type: 'graph',
+            params: { x: [0, 32], y: [0, 75], xlabel: 'Lorentz factor γ', ylabel: 'lifetime in the lab (μs)', constants: { tau: TAU_MU * 1e6 }, curves: [{ fn: 'tau*x', color: 'accent', domain: [1, 32] }], points: [{ x: G, y: life, color: 'gold', label: `γ = ${G}` }] },
+            caption: t`A moving particle’s lifetime, as the lab measures it, is $\gamma$ times its lifetime at rest: a straight line through $\gamma = 1$.`,
+          },
         };
       },
     }),
@@ -207,6 +225,11 @@ Every kind of clock must slow by the same factor, or you could tell who is "real
       hints: ['In the muon’s frame the clock is fine, so something else must change.', 'Lengths along the direction of motion are shorter by γ for the observer who sees them moving.'],
       teach: 'What one observer calls time dilation, another calls length contraction; both predict the same events.',
       explain: t`In the muon’s frame the ground races up at $0.995c$ and the atmosphere is contracted to $15/${fmt(g(0.995), 3)} = ${fmt(H_ATM / g(0.995) / 1000, 3)}$ km, which passes in about ${fmt(H_ATM / g(0.995) / (0.995 * C) * 1e6, 2)} μs — a couple of lifetimes. The two frames tell different stories but agree on every event: the muon reaching the ground, or not.`,
+      visual: {
+        type: 'graph',
+        params: { x: [0.9, 1], y: [0, 17], xlabel: 'muon speed v / c', ylabel: 'thickness of the atmosphere (km)', constants: { h: H_ATM / 1000 }, curves: [{ fn: 'h*sqrt(1 - x^2)', color: 'accent', domain: [0.9, 0.9999], label: 'in the muon’s frame', labelAt: 0.92 }], hlines: [{ y: H_ATM / 1000, label: 'in Earth’s frame', color: 'ink3' }], points: [{ x: 0.995, y: H_ATM / g(0.995) / 1000, color: 'gold' }] },
+        caption: t`The ${H_ATM / 1000} km of atmosphere above the ground, measured in the falling muon’s frame: shorter by the factor $\gamma$. Gold: a muon at $0.995c$.`,
+      },
     }),
   ],
   checkpoint: [

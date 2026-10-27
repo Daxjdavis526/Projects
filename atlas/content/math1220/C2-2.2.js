@@ -2,7 +2,7 @@
 // integral that comes back around.
 import { lesson, mcq, num, expr, order } from '../../src/core/content.js';
 import { nice, fmt } from '../../src/core/format.js';
-import { fterm, fpoly, ptext, kx } from './_integration.js';
+import { fterm, fpoly, ptext, kx, fgraph } from './_integration.js';
 
 const t = String.raw;
 
@@ -15,6 +15,24 @@ function polyExpCoefs(n, k) {
     deriv *= n - j;
   }
   return c;
+}
+
+// The polynomial factor and its derivative after each round of parts, drawn together.
+function ladder(n) {
+  const sup = (k) => (k === 1 ? '' : String(k).replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]));
+  const colors = ['accent', 'warn', 'good', 'violet', 'teal'];
+  const curves = [];
+  let c = 1, ymax = 0;
+  for (let j = 0; j <= n; j++) {
+    const p = n - j;
+    curves.push({ fn: p === 0 ? String(c) : `${c}*x^${p}`, color: colors[j % colors.length], label: `${c === 1 ? '' : c}${p === 0 ? '' : 'x' + sup(p)}`, labelAt: 1.5 });
+    ymax = Math.max(ymax, c * 1.5 ** p);
+    c *= p || 1;
+  }
+  return {
+    type: 'graph', params: { x: [0, 1.75], y: [0, ymax * 1.15], curves },
+    caption: `The polynomial factor before the first round and after each round of parts. After ${n} rounds it is the constant ${curves[n].label}, and the integral left over needs no more parts.`,
+  };
 }
 
 export default lesson({
@@ -100,6 +118,7 @@ Swapping roles here (taking $u = e^{x}$) would simply undo round one.` },
           hints: [t`Each round replaces $u$ by $du/dx$: the degree drops by one.`, t`Count the steps from $x^{${n}}$ down to a constant.`],
           teach: t`A degree-$n$ polynomial times ${g[1]} takes $n$ rounds of integration by parts.`,
           explain: t`Each round differentiates the polynomial once: $x^{${n}}$ becomes a constant after ${n} rounds, and the integral left over needs no more parts.`,
+          visual: ladder(n),
         };
       },
     }),
@@ -125,6 +144,7 @@ Swapping roles here (taking $u = e^{x}$) would simply undo round one.` },
           ],
           teach: 'For a polynomial times an exponential, differentiate the polynomial to zero, integrate the exponential each time, and alternate the signs.',
           explain: t`Tabular parts gives $\int x^2${E}\,dx = ${E}\left(${fpoly(c)}\right) + C$. Differentiating it returns $x^2${E}$: the product rule’s extra terms cancel in pairs.`,
+          visual: fgraph({ f: `x^2*e^(${kx(k)})`, F: `e^(${kx(k)})*(${ptext(c)})`, x: k > 0 ? [-3 / k, 1.2 / k] : [-1.2 / -k, 3 / -k] }),
         };
       },
     }),
@@ -161,6 +181,7 @@ Swapping roles here (taking $u = e^{x}$) would simply undo round one.` },
           teach: 'With a trig factor the integrate column cycles through sine and cosine, so track two kinds of sign: the table’s and the trig antiderivatives’.',
           explain: t`$\int x^2${Tr}(${kx(k)})\,dx = ${answerTeX} + C$.`,
           solution: t`Check by differentiating: the product rule produces $x^2${Tr}(${kx(k)})$ plus four further terms that cancel in pairs.`,
+          visual: fgraph({ f: `x^2*${trig}(${kx(k)})`, F: answer, x: [-2.5, 2.5] }),
         };
       },
     }),
@@ -228,6 +249,7 @@ What went wrong?`,
       hints: [t`Compare which factor plays $u$ in round one and in round two.`, t`Round two with $u = e^{x}$ just reverses the step that produced $\int e^{x}\cos x\,dx$.`],
       teach: 'In a cyclic integral, keep the same kind of factor as u in every round, or the second round undoes the first.',
       explain: t`Round two must keep $u$ = the trig factor: $u = \cos x$, $dv = e^{x}dx$ gives $\int e^{x}\cos x\,dx = e^{x}\cos x + I$, and then $2I = e^{x}(\sin x - \cos x)$.`,
+      visual: fgraph({ f: 'exp(x)*sin(x)', F: 'exp(x)*(sin(x) - cos(x))/2', x: [-3, 2.4], caption: t`The integrand $e^x\sin x$ (blue) and the antiderivative a correct second round produces, $\tfrac12e^x(\sin x - \cos x)$ (dashed): its slope matches the blue curve everywhere.` }),
     }),
     num({
       id: 'def-x2-exp', difficulty: 2,
@@ -264,6 +286,7 @@ What went wrong?`,
       hints: ['Two rounds of parts come first, with the same roles each time.', 'Only once I reappears can you solve for it.'],
       teach: 'Cyclic integration by parts: two rounds with the same roles, spot I, solve the equation, check.',
       explain: t`Two rounds give $I = \tfrac12e^{2x}\cos x + \tfrac14e^{2x}\sin x - \tfrac14 I$, so $\tfrac54 I = \tfrac14e^{2x}(2\cos x + \sin x)$ and $I = \tfrac15e^{2x}(2\cos x + \sin x) + C$.`,
+      visual: fgraph({ f: 'exp(2x)*cos(x)', F: 'exp(2x)*(2cos(x) + sin(x))/5', x: [-3, 1.2] }),
     }),
   ],
   checkpoint: [
@@ -281,6 +304,7 @@ What went wrong?`,
           hints: ['Three rounds — use the table.', t`Differentiate $x^3 \to 3x^2 \to 6x \to 6 \to 0$ and integrate $${E}$ four times; signs $+,-,+,-$.`],
           teach: 'A cubic times an exponential needs three rounds; the table keeps them straight.',
           explain: t`$\int x^3${E}\,dx = ${E}\left(${fpoly(c)}\right) + C$.`,
+          visual: fgraph({ f: `x^3*e^(${kx(k)})`, F: `e^(${kx(k)})*(${ptext(c)})`, x: k > 0 ? [-4 / k, 1 / k] : [-1 / -k, 4 / -k] }),
         };
       },
     }),
@@ -298,6 +322,7 @@ What went wrong?`,
           hints: [t`Two rounds of parts with $dv = ${E}\,dx$ both times.`, t`Then solve $I\left(1 + \tfrac{${b * b}}{${a * a}}\right) = \dots$ for $I$.`],
           teach: 'Two rounds, the same roles, then solve for the integral that came back.',
           explain: t`$I = ${t`\frac{${E}\left(${fterm(a, S, true)}${fterm(-b, C)}\right)}{${D}}`} + C$.`,
+          visual: fgraph({ f: `e^(${kx(a)})*sin(${kx(b)})`, F: `e^(${kx(a)})*((${a})*sin(${kx(b)}) - (${b})*cos(${kx(b)}))/${D}`, x: a > 0 ? [-3, 1] : [-1, 3] }),
         };
       },
     }),

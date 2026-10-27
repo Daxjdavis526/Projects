@@ -16,6 +16,11 @@ const partialSums = (term, k0, span, y, caption) => ({
   caption,
 });
 
+// the size of the nth term at x = 2 for the four series of 'which-everywhere'
+const fact = (n) => { let p = 1; for (let k = 2; k <= n; k++) p *= k; return p; };
+const TERMS = [[(n) => 2 ** n / fact(n), 'good'], [(n) => fact(n) * 2 ** n, 'bad'], [(n) => 2 ** n, 'warn'], [(n) => (n ? 2 ** n / (n * n) : null), 'violet']]
+  .flatMap(([f, color]) => Array.from({ length: 11 }, (_, n) => ({ x: n, y: f(n), color, r: 4 })).filter((p) => p.y !== null && p.y <= 12));
+
 export default lesson({
   id: 'math1220.C2-5.1',
   title: 'Power series and the radius of convergence',
@@ -93,6 +98,7 @@ $$\left|\frac{a_{n+1}}{a_n}\right| = \frac{(n+2)\,|x+1|^{n+1}/5^{n+1}}{(n+1)\,|x
           },
           hints: [t`Match $(${shift(h)})$ to the pattern $(x - a)$.`, t`The ratio of successive terms is $\frac{|${shift(h)}|}{${b}}$. For which $x$ is it less than 1?`],
           teach: t`A series in powers of $(x - a)$ is centred at $a$, and it converges for $|x - a| < R$.`,
+          visual: { type: 'graph', params: { x: [h - 2 * b, h + 2 * b], y: [-2, 6], curves: [{ sum: `((x - (${h}))/${b})^k`, k: [0, 25], color: 'gold' }] }, caption: 'The partial sum with 26 terms: flat where the series converges, running away where it does not.' },
           explain: t`It is a geometric series with ratio $\frac{${shift(h)}}{${b}}$, so it converges exactly when $|${shift(h)}| < ${b}$: centre $${h}$, radius $${b}$.`,
         };
       },
@@ -123,6 +129,7 @@ $$\left|\frac{a_{n+1}}{a_n}\right| = \frac{(n+2)\,|x+1|^{n+1}/5^{n+1}}{(n+1)\,|x
           errors: [{ value: b, feedback: t`The terms grow by a factor of about $${b}\,|${shift(h)}|$ each time. That is below 1 when $|${shift(h)}| < \tfrac1{${b}}$.` }, { value: h, feedback: t`That is the centre. The radius is the half-width of the interval of convergence.` }],
           hints: [t`Ratio test: compute $\left|\frac{a_{n+1}}{a_n}\right|$ and take $n \to \infty$.`, t`The limit is $${b}\,|${shift(h)}|$. Solve $${b}\,|${shift(h)}| < 1$.`],
           teach: t`A large geometric factor in the coefficients means a small radius: $c_n = b^n$ gives $R = 1/b$.`,
+          visual: { type: 'graph', params: { x: [h - 2 / b, h + 2 / b], y: [-3, 5], curves: [{ sum: `(${b}*(x - (${h})))^k/k`, k: [1, 30], color: 'gold' }] }, caption: 'The partial sum with 30 terms, on a narrow window around the centre.' },
           explain: t`$\left|\frac{a_{n+1}}{a_n}\right| = \frac{n}{n+1}\cdot ${b}\,|${shift(h)}| \to ${b}\,|${shift(h)}|$, which is below 1 when $|${shift(h)}| < \tfrac{1}{${b}}$. So $R = \tfrac{1}{${b}} \approx ${nice(1 / b)}$.`,
         };
       },
@@ -139,6 +146,7 @@ $$\left|\frac{a_{n+1}}{a_n}\right| = \frac{(n+2)\,|x+1|^{n+1}/5^{n+1}}{(n+1)\,|x
       },
       hints: ['Apply the ratio test to each and see which limit is 0 for every x.', t`For $\frac{x^n}{n!}$: $\left|\frac{a_{n+1}}{a_n}\right| = \frac{|x|}{n+1}$.`],
       teach: t`Factorials in the denominator beat any power of $x$, giving $R = \infty$; factorials in the numerator give $R = 0$.`,
+      visual: { type: 'graph', params: { x: [-0.5, 10.5], y: [0, 12], xlabel: 'n', ylabel: '', points: TERMS }, caption: t`The size of the $n$th term at $x = 2$. Green: $\frac{x^n}{n!}$. Red: $n!\,x^n$. Amber: $x^n$. Violet: $\frac{x^n}{n^2}$. Points above 12 are off the chart.` },
       explain: t`For $\sum x^n/n!$, $\left|\frac{a_{n+1}}{a_n}\right| = \frac{|x|}{n+1} \to 0 < 1$ for every $x$, so $R = \infty$. (Its sum is $e^x$.)`,
     }),
     num({
@@ -196,6 +204,7 @@ What went wrong?`,
       },
       hints: ['The ratio test is applied to the terms, which include the power of x.', t`$\left|\frac{a_{n+1}}{a_n}\right| = \frac{|x|}{3}$. When is that less than 1?`],
       teach: t`$\lim |c_{n+1}/c_n|$ is not $R$; it is $1/R$ — the ratio test needs $|x - a|\cdot\lim|c_{n+1}/c_n| < 1$.`,
+      visual: { type: 'graph', params: { x: [-5, 5], y: [-2, 5], curves: [{ fn: '3/(3 - x)', domain: [-5, 2.95], color: 'ink3', width: 1.5 }, { sum: '(x/3)^k', k: [0, 30], color: 'gold' }], vlines: [{ x: -1 / 3, color: 'bad' }, { x: 1 / 3, label: '±1/3', color: 'bad' }, { x: -3, color: 'good' }, { x: 3, label: '±3', color: 'good' }] }, caption: t`The 31-term partial sum (gold) agrees with $\frac{3}{3 - x}$ (grey) far beyond $\pm\tfrac13$ — all the way out to $\pm 3$.` },
       explain: t`With the $x$ included, the ratio is $|x|/3$, below 1 exactly when $|x| < 3$. So $R = 3$, the reciprocal of the student’s $\tfrac13$.`,
     }),
   ],
@@ -238,6 +247,7 @@ For which orbits can you use the series safely? Select all that apply.`,
       why: { 2: 'e ≈ 0.73 is beyond the radius 0.6627: for some positions on the orbit the partial sums do not settle.', 3: 'e = 0.97 is far beyond the radius; orbit codes solve Kepler’s equation iteratively (Newton’s method) instead.' },
       hints: ['Compare each eccentricity with the radius 0.6627.', 'Inside the radius: converges. Beyond it: the series fails somewhere on the orbit.'],
       teach: 'A power series is trustworthy only inside its radius of convergence, whatever the physical context.',
+      visual: { type: 'graph', params: { x: [-8, 2], y: [-4, 4], equal: true, xlabel: '', ylabel: '', curves: [0.017, 0.21, 0.73, 0.97].map((e, k) => ({ polar: `${1 + e}/(1 + ${e}*cos(theta))`, theta: [0, 2 * Math.PI], color: ['accent', 'good', 'warn', 'bad'][k], width: 1.8 })), points: [{ x: 0, y: 0, color: 'gold', r: 5 }] }, caption: 'The four orbits’ shapes, scaled to the same closest approach, with the Sun (gold) at a focus. Blue: e = 0.017. Green: 0.21. Amber: 0.73. Red: 0.97, which runs far off the chart.' },
       explain: t`Earth ($e = 0.017$) and Mercury ($e = 0.21$) are well inside the radius $0.6627$. A transfer orbit ($e \approx 0.73$) and Halley’s Comet ($e = 0.97$) are outside it, so real orbit software solves Kepler’s equation iteratively instead.`,
     }),
   ],
