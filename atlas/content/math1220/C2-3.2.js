@@ -198,7 +198,7 @@ That one move solves radioactive decay, Newton’s law of cooling, a draining ta
   checkpoint: [
     mcq({
       id: 'cp-first-step', difficulty: 2,
-      visual: { type: 'phase', params: { slope: true, f: 'y^2*sin(t)', x: [0, 6], y: [-2, 2], start: [0, 0.5], h: 0.5 }, caption: t`The slope field of $y' = y^2\sin t$: the slopes depend on both $t$ and $y$, but only through the product of a $t$-part and a $y$-part.` },
+      visual: { type: 'phase', params: { slope: true, f: 'y^2*sin(t)', x: [0, 6], y: [-2, 2], start: [0, 0.3], h: 0.5 }, caption: t`The slope field of $y' = y^2\sin t$: the slopes depend on both $t$ and $y$, but only through the product of a $t$-part and a $y$-part.` },
       prompt: t`To solve $\dfrac{dy}{dt} = y^2\sin t$ by separating variables, which first step is right?`,
       choices: [t`$\dfrac{dy}{y^2} = \sin t\,dt$`, t`$y^2\,dy = \sin t\,dt$`, t`$\dfrac{dy}{\sin t} = y^2\,dt$`, t`$y = \int y^2\sin t\,dt = -y^2\cos t + C$`],
       answer: 0,

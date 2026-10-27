@@ -123,11 +123,13 @@ Writing content: see [CONTENT.md](CONTENT.md).
 ## Tests
 
 ```sh
+node atlas/test/all.mjs             # every test file below, one line each
 node atlas/test/check.test.mjs      # expression parser, units, every grader
 node atlas/test/engine.test.mjs     # FSRS-6, mastery, progress replay, planning
 node atlas/test/models.test.mjs     # orbits, relativity and numerics behind the simulations
 node atlas/test/content.test.mjs    # every lesson, every generator over 25 seeds, every visual
 node atlas/test/code.test.mjs       # every coding exercise, run in real Python (Pyodide in Node)
+node atlas/test/gr-*.test.mjs …     # the DOM-free models behind individual simulations
 node atlas/tools/register.mjs --check
 node atlas/tools/shots.mjs /tmp/shots pages      # screenshots (Playwright)
 ```

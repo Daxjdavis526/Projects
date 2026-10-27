@@ -81,7 +81,7 @@ export default lesson({
   id: 'gr.S01.i',
   title: 'Newton’s gravity and the 43 arcseconds it cannot explain',
   minutes: 8, difficulty: 2, mode: 'intuition', badges: ['est-obs'],
-  intro: t`Newton’s law says every two masses attract, with a force that falls off as the square of the distance between them. For two centuries it predicted planets, comets and tides superbly, and it still steers almost every spacecraft. But in 1859 Urbain Le Verrier found a number that would not fit: **the point of Mercury’s orbit closest to the Sun creeps forward faster than Newton allows** — about 43 arcseconds per century more (an arcsecond, $1''$, is $1/3600$ of a degree).
+  intro: t`Newton’s law says every two masses attract, with a force that falls off as the square of the distance between them. For two centuries it predicted planets, comets and tides superbly, and it still steers almost every spacecraft. But in 1859 Urbain Le Verrier found something that would not fit: **the point of Mercury’s orbit closest to the Sun creeps forward faster than Newton allows**. Modern measurements put the excess at 43 arcseconds per century (an arcsecond, $1''$, is $1/3600$ of a degree).
 
 Add two more cracks — Newton’s force acts **instantly** across any distance, and his theory has one universal time, so it says **nothing about clocks** — and you have the gaps Einstein’s theory fills. In 1915 general relativity predicted Mercury’s extra $43''$ per century, all of it.`,
   equation: t`F = \frac{G M m}{r^2}`,
@@ -102,7 +102,7 @@ Add two more cracks — Newton’s force acts **instantly** across any distance,
     caption: t`Distances are in units of $M = GM/c^2$ (${fmt(M_SUN_LEN / 1000, 3)} km for the Sun). Mercury orbits about $${tex(MERC_A_IN_M, 2)}\,M$ from the Sun, where the same effect is only $${fmt(MERC_PER_ORBIT, 3)}''$ per orbit — this picture exaggerates it millions of times. The right panel is a graph of energy against $r$, not a picture of space.`,
   },
   example: {
-    prompt: t`In 1783 John Michell asked how small a star would have to be for light not to escape it, using Newton’s gravity. Find the Sun’s escape speed today, then Michell’s radius for a Sun-mass “dark star”. Use $GM_\odot = 1.327\times10^{20}\ \text{m}^3/\text{s}^2$, $R_\odot = 6.957\times10^{8}$ m and $c = 2.998\times10^{8}$ m/s.`,
+    prompt: t`In 1783 John Michell realised that, by Newton’s gravity, a star massive and compact enough would hold back its own light. Find the Sun’s escape speed today, then the radius a Sun-mass “dark star” would need. Use $GM_\odot = 1.327\times10^{20}\ \text{m}^3/\text{s}^2$, $R_\odot = 6.957\times10^{8}$ m and $c = 2.998\times10^{8}$ m/s.`,
     visual: escapeGraph(),
     steps: [
       { label: 'Escape condition', text: t`To coast away forever, the kinetic energy must pay back the gravitational energy: $\tfrac12 mv^2 = GMm/R$. The mass $m$ cancels, so a rock, a rocket and (Michell guessed) a particle of light all need the same speed: $v_\text{esc} = \sqrt{2GM/R}$.` },
@@ -180,7 +180,7 @@ Add two more cracks — Newton’s force acts **instantly** across any distance,
         const n = r.pick([1, 2, 5, 8, 10, 20]);
         const R = rDark(n * GM_SUN);
         return {
-          prompt: t`Michell’s question: how small must a star of ${n === 1 ? 'one solar mass' : `${n} solar masses`} be for Newton’s escape speed to equal the speed of light? Use $GM_\odot = 1.327\times10^{20}\ \text{m}^3/\text{s}^2$ and $c = 2.998\times10^8$ m/s, and give the radius in kilometres.`,
+          prompt: t`Apply Michell’s idea: how small must a star of ${n === 1 ? 'one solar mass' : `${n} solar masses`} be for Newton’s escape speed to equal the speed of light? Use $GM_\odot = 1.327\times10^{20}\ \text{m}^3/\text{s}^2$ and $c = 2.998\times10^8$ m/s, and give the radius in kilometres.`,
           answer: R / 1000, units: 'km', tol: { rel: 0.01 },
           errors: [{ value: n * GM_SUN / C ** 2 / 1000, feedback: 'Start from ½v² = GM/R with v = c: the radius is 2GM/c², with a factor of 2.' }],
           hints: [t`Set $\tfrac12 c^2 = GM/R$ and solve for $R$.`, t`$R = 2GM/c^2$, with $GM = ${n}\times1.327\times10^{20}\ \text{m}^3/\text{s}^2$.`],
@@ -201,7 +201,7 @@ Add two more cracks — Newton’s force acts **instantly** across any distance,
           errors: [{ value: n * GM_SUN / (Rkm * 1000 * C), feedback: 'Divide by c squared, not c.' }, { value: n * GM_SUN / (Rkm * C ** 2), feedback: 'Put the radius in metres.' }],
           hints: ['Convert the radius to metres and multiply GM☉ by the number of solar masses.', t`$\dfrac{GM}{Rc^2} = \dfrac{${n}\times1.327\times10^{20}}{${tex(Rkm * 1000, 4)}\times(2.998\times10^8)^2}$.`],
           teach: t`Corrections to Newton grow with $GM/(Rc^2)$: about $10^{-9}$ at Earth, $10^{-6}$ at the Sun, and 0.2 at a neutron star.`,
-          explain: t`$GM/(Rc^2) = ${tex(k, 3)}$. For comparison: Earth $${tex(GM_EARTH / (R_EARTH * C * C), 2)}$, the Sun $${tex(GM_SUN / (R_SUN * C * C), 2)}$, a neutron star about 0.2. Newton is superb when this number is tiny; at 0.5 the body would sit inside its own horizon radius $2GM/c^2$ — a black hole.`,
+          explain: t`$GM/(Rc^2) = ${tex(k, 3)}$. For comparison: Earth $${tex(GM_EARTH / (R_EARTH * C * C), 2)}$, the Sun $${tex(GM_SUN / (R_SUN * C * C), 2)}$, a neutron star about 0.2. Newton is superb when this number is tiny; at 0.5 the body’s radius would equal $2GM/c^2$, the horizon radius of a black hole.`,
           visual: ladderVisual(rung),
         };
       },

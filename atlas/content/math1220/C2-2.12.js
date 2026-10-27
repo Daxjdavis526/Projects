@@ -1,6 +1,7 @@
 // Improper integrals with unbounded integrands, and the comparison test.
 import { lesson, mcq, multi, num } from '../../src/core/content.js';
 import { fmt, nice, frac } from '../../src/core/format.js';
+import { fgraph } from './_integration.js';
 
 const t = String.raw;
 
@@ -109,6 +110,7 @@ The benchmark flips: $\int_0^1 x^{-p}\,dx$ converges, to $\frac{1}{1 - p}$, when
           ],
           teach: 'Integrate by parts on [t, 1], then take the limit; any positive power of t beats ln t.',
           explain: t`$\Big[\dfrac{x^{${n + 1}}\ln x}{${n + 1}} - \dfrac{x^{${n + 1}}}{${(n + 1) ** 2}}\Big]_t^1 \to \Big(0 - \dfrac{1}{${(n + 1) ** 2}}\Big) - 0 = ${frac(val)}$.`,
+          visual: fgraph({ f: `x^${n}*ln(x)`, x: [0, 1.25], trim: n === 0 ? 0.05 : 0, shade: { fn: `max(x^${n}*ln(x), -50)`, from: 1e-6, to: 1 }, caption: n === 0 ? t`$\ln x$ plunges to $-\infty$ at $0$, yet the shaded area is finite. It lies below the axis, so the integral is negative.` : t`The integrand is negative on $(0, 1)$, so the integral is negative; near $0$ the factor $x^{${n}}$ tames $\ln x$.` }),
         };
       },
     }),
@@ -130,6 +132,7 @@ The benchmark flips: $\int_0^1 x^{-p}\,dx$ converges, to $\frac{1}{1 - p}$, when
       hints: ['Is the integrand finite everywhere on [−1, 1]?', t`Split at 0: $\int_{-1}^{0} + \int_0^1$, each with a limit.`],
       teach: 'The Fundamental Theorem needs a continuous integrand on the whole interval; a blow-up inside must be split off first.',
       explain: t`$\int_0^1 \frac{dx}{x^2} = \lim_{t\to0^+}\big(\tfrac1t - 1\big) = \infty$ ($p = 2 \ge 1$), so the integral diverges. Applying $[-1/x]$ straight across the asymptote produced the impossible $-2$.`,
+      visual: fgraph({ f: '1/x^2', x: [-1.25, 1.25], y: [0, 12], shade: [{ fn: 'min(1/x^2, 100)', from: -1, to: -0.001 }, { fn: 'min(1/x^2, 100)', from: 0.001, to: 1 }], vlines: [{ x: 0 }], caption: t`The integrand is positive everywhere and infinite at $x = 0$, so the area cannot be $-2$ — and each half is infinite.` }),
     }),
     num({
       id: 'root-endpoint', difficulty: 2,
@@ -145,6 +148,7 @@ The benchmark flips: $\int_0^1 x^{-p}\,dx$ converges, to $\frac{1}{1 - p}$, when
           explain: kind === 'sqrt'
             ? t`$\Big[-2\sqrt{${b} - x}\Big]_0^{s} = 2\sqrt{${b}} - 2\sqrt{${b} - s} \to 2\sqrt{${b}} = ${nice(val)}$.`
             : t`$\Big[-\tfrac32(${b} - x)^{2/3}\Big]_0^{s} = \tfrac32\cdot ${b}^{2/3} - \tfrac32(${b} - s)^{2/3} \to ${nice(val)}$.`,
+          visual: fgraph({ f: kind === 'sqrt' ? `1/sqrt(${b} - x)` : `1/cbrt(${b} - x)`, x: [0, b * 1.12], y: [0, (kind === 'sqrt' ? 6 / Math.sqrt(b) : 5 / Math.cbrt(b))], shade: { fn: kind === 'sqrt' ? `min(1/sqrt(${b} - x), 1000)` : `min(1/cbrt(${b} - x), 1000)`, from: 0, to: b * 0.999999 }, vlines: [{ x: b }], caption: t`The integrand blows up at $x = ${b}$, the upper limit, but the shaded area is finite.` }),
         };
       },
     }),
@@ -185,6 +189,7 @@ The benchmark flips: $\int_0^1 x^{-p}\,dx$ converges, to $\frac{1}{1 - p}$, when
       hints: ['A comparison passes information in one direction only.', 'Small under convergent → convergent; big over divergent → divergent. What about big over convergent?'],
       teach: 'Comparison works only “smaller than convergent” or “bigger than divergent”; any other pairing proves nothing.',
       explain: t`Knowing the smaller area is finite says nothing about the larger one. Examples: $\tfrac1{x^2} \le \tfrac1x$ (the larger diverges) and $\tfrac1{x^3} \le \tfrac1{x^2}$ (the larger converges).`,
+      visual: fgraph({ f: '1/x^2', x: [1, 10], y: [0, 1.1], extra: [{ fn: '1/x', color: 'warn', dash: true, width: 2 }], caption: t`One possibility: $f = 1/x^2$ (blue) has finite area to infinity, while $g = 1/x$ (dashed) lies above it and has infinite area.` }),
     }),
     mcq({
       id: 'compare-root', difficulty: 3,
@@ -207,6 +212,7 @@ The benchmark flips: $\int_0^1 x^{-p}\,dx$ converges, to $\frac{1}{1 - p}$, when
           hints: ['For large x, which power of x does the integrand behave like?', t`Dropping the $${c}$ makes the denominator smaller, so the fraction bigger: $\frac{1}{\sqrt{x^3 + ${c}}} \le \frac{1}{\sqrt{x^3}}$.`],
           teach: 'Find the dominant power, then compare in the direction that proves something.',
           explain: t`$x^3 + ${c} > x^3$, so $\frac{1}{\sqrt{x^3 + ${c}}} < x^{-3/2}$, and $\int_1^\infty x^{-3/2}dx = 2$ converges. So the integral converges (to less than 2).`,
+          visual: fgraph({ f: `1/sqrt(x^3 + ${c})`, x: [1, 10], y: [0, 1.1], extra: [{ fn: 'x^(-1.5)', color: 'warn', dash: true, width: 2 }], caption: t`The integrand (blue) and $x^{-3/2}$ (dashed).` }),
         };
       },
     }),
@@ -223,6 +229,7 @@ The benchmark flips: $\int_0^1 x^{-p}\,dx$ converges, to $\frac{1}{1 - p}$, when
           hints: [t`$\lim_{t\to0^+}\Big[\tfrac32x^{2/3}\Big]_t^{${b}}$.`],
           teach: 'For p < 1 the spike at 0 has finite area.',
           explain: t`$\tfrac32\cdot ${b}^{2/3} = ${nice(val)}$.`,
+          visual: fgraph({ f: 'x^(-1/3)', x: [0, b * 1.1], y: [0, 3], shade: { fn: 'min(x^(-1/3), 1000)', from: 1e-9, to: b }, caption: 'The spike at 0 is infinitely tall but thin enough for a finite area.' }),
         };
       },
     }),
@@ -235,12 +242,13 @@ The benchmark flips: $\int_0^1 x^{-p}\,dx$ converges, to $\frac{1}{1 - p}$, when
       hints: ['Throw away the part that only makes the integrand bigger.', t`$1 + e^{-x} \ge 1$.`],
       teach: 'To prove divergence, find a smaller function whose integral diverges.',
       explain: t`$\frac{1 + e^{-x}}{x} \ge \frac1x \ge 0$ and $\int_1^\infty \frac{dx}{x} = \infty$, so by comparison the integral diverges.`,
+      visual: fgraph({ f: '(1 + exp(-x))/x', x: [1, 12], y: [0, 1.5], extra: [{ fn: '1/x', color: 'warn', dash: true, width: 2 }], caption: t`The integrand (blue) and $1/x$ (dashed).` }),
     }),
     mcq({
       id: 'cp-fall', difficulty: 3, transfer: true,
       prompt: t`A probe released from rest at distance $R$ from a planet’s centre falls straight in. At distance $r$ its speed is $v = \sqrt{2GM\left(\frac1r - \frac1R\right)}$, so the fall time is $T = \displaystyle\int_0^R \frac{dr}{v}$ — and $v = 0$ at the start, so the integrand is infinite at $r = R$. Is $T$ finite?`,
       choices: [
-        t`Yes: near $r = R$, $v \approx \frac{1}{R}\sqrt{2GM(R - r)}$, so the integrand behaves like $(R - r)^{-1/2}$, and $p = \tfrac12 < 1$`,
+        t`Yes: near $r = R$ the integrand grows like $(R - r)^{-1/2}$, and $\tfrac12 < 1$`,
         'No: an integrand that is infinite at an endpoint always gives a divergent integral',
         'No: the probe starts at rest, so it never begins to move',
         t`Yes, because $v$ is finite everywhere except $r = R$`,

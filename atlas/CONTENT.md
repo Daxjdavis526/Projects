@@ -22,7 +22,8 @@ node atlas/test/content.test.mjs math1220.C2-2.3        # 3. validate one lesson
 node atlas/tools/shots.mjs /tmp/x lesson:math1220.C2-2.3 dark   # 4. screenshot every step, then LOOK at them
 ```
 
-The content test runs every generator over 25 seeds and checks, for every
+`node atlas/test/all.mjs` runs every test file at once (do that before you
+report). The content test runs every generator over 25 seeds and checks, for every
 variant: the structure, that every answer key passes the grader and every
 distractor fails it, that all TeX renders in KaTeX, that no backslash was
 eaten by a JavaScript string, and that every visual names a simulation that
@@ -99,6 +100,9 @@ on lines of their own), `- ` lists, `> ` callouts, `[links](https://…)`,
 inline math `$…$` and display math `$$…$$`. Nothing inside code is read as
 math or emphasis. Inside `` t`…` `` a backtick must be typed `` \` `` —
 the markup reads `` \` `` as a plain backtick, so `` t`Use \`x**2\`.` `` works.
+
+Inside math, a comma is punctuation to TeX: `$6,371$` renders "6, 371".
+Write thousands as `$6{,}371$` or with a thin space, `$6\,371$`.
 
 **Write every string that contains a backslash as `` t`…` `` (String.raw).**
 In an ordinary string `'\frac'` silently becomes a form feed plus `rac`; the
@@ -178,7 +182,10 @@ num({ id: 'f-over-m', difficulty: 1,
 - `tol: { rel, abs }` — default is 1% relative. Match the precision you ask
   for: "to 3 significant figures" → `rel: 0.005`.
 - `errors: [{ value, feedback }]` — the numbers a specific slip produces, with
-  feedback naming the slip. The grader also detects sign errors, powers of ten,
+  feedback naming the slip. In a generator, a slip's value can coincide with
+  the answer for some parameters (sin and cos at 45°, a factor of 2 when the
+  answer is 0) — the test fails then; leave such an error out for those
+  variants or choose parameters that keep them apart. The grader also detects sign errors, powers of ten,
   factors of 2 and degree/radian mix-ups by itself.
 - `sigfigs: 3` adds a gentle note when the learner gives a different number.
 
@@ -348,6 +355,12 @@ Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
 **Captions must say what is simplified or not to scale.** "Arrows show
 direction only." "Drag is quadratic with a fixed coefficient; real drag
 varies with speed." That honesty is the house style.
+
+**A problem's picture must not show its answer.** A readout of the very
+quantity asked for, or the point marked where the learner is asked to find
+it, gives the game away — show the setting, not the result (many sims take
+options to hide readouts or labels; read their headers). The answer can
+appear in the explanation's picture instead, by showing it after the attempt.
 
 Expressions in `graph`, `surface3d`, `field2d` and `phase` use the Atlas
 syntax above; the test parses all of them, so a typo fails the test rather

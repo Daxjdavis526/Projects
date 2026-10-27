@@ -32,7 +32,7 @@ export default lesson({
   minutes: 4, difficulty: 2, mode: 'intuition', badges: ['est-der'],
   intro: t`A coordinate system is a way of putting labels on places and events, like house numbers on a street. The same point can be $(x, y) = (3, 4)$ in one system and $(r, \theta) = (5, ${fmt(Math.atan2(4, 3) / DEG, 3)}^\circ)$ in another; relabelling changes nothing physical. **What is physical is what every labelling agrees on**: the distance between two points (each system computing it with its own metric), the time a clock records, whether two worldlines meet, how a falling body is stretched.
 
-A coordinate system can also break down somewhere with nothing wrong there. At the origin of polar coordinates $\theta$ has no value at all, yet the plane is perfectly smooth. General relativity is full of such places — the most famous is the radius $r = 2GM/c^2$ in the coordinates Schwarzschild used for a black hole.`,
+A coordinate system can also break down somewhere with nothing wrong there. At the origin of polar coordinates $\theta$ has no value at all, yet the plane is perfectly smooth. General relativity is full of such places — the most famous is the radius $r = 2GM/c^2$ in Schwarzschild coordinates, the standard labels for a black hole.`,
   equation: t`x = r\cos\theta, \qquad y = r\sin\theta`,
   symbols: [
     { tex: 'x,\\ y', text: 'Cartesian labels: distances along two perpendicular axes, in metres' },
@@ -120,9 +120,9 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
     }),
     mcq({
       id: 'horizon', difficulty: 3, transfer: true,
-      prompt: t`In the coordinates Schwarzschild used for a black hole, one term of the metric becomes infinite at $r = 2GM/c^2$. Yet an astronaut falling through that radius of the giant black hole Sagittarius A* would feel almost nothing there — her body is stretched by a tidal acceleration of only about $${tex(TIDE_SGRA, 1)}\ \text{m/s}^2$. What does this tell you about $r = 2GM/c^2$?`,
+      prompt: t`In Schwarzschild coordinates, the standard labels for a black hole, one term of the metric becomes infinite at $r = 2GM/c^2$. Yet an astronaut falling through that radius of the giant black hole Sagittarius A* would feel almost nothing there — her body is stretched by a tidal acceleration of only about $${tex(TIDE_SGRA, 1)}\ \text{m/s}^2$. What does this tell you about $r = 2GM/c^2$?`,
       choices: [
-        'Schwarzschild’s labels fail there, not spacetime: other coordinates are smooth across it — though it is still a real one-way surface',
+        'Schwarzschild coordinates fail there, not spacetime: other coordinates are smooth across it — though it is still a real one-way surface',
         'Spacetime is torn there, and anything reaching it is destroyed',
         'She never reaches it, because time stops there',
         'Nothing at all is special about that radius',
@@ -134,7 +134,7 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
         3: 'Locally nothing is special, but globally it is: once inside, no signal can ever get back out.',
       },
       hints: ['Compare it with the origin of polar coordinates: is the geometry bad there, or the labels?', 'Which number is physical: Schwarzschild’s t, or the reading on her own watch?'],
-      teach: 'r = 2GM/c² is a coordinate singularity of Schwarzschild’s labels — smooth in other coordinates — and also a real horizon, a surface light cannot climb back out of.',
+      teach: 'r = 2GM/c² is a coordinate singularity of Schwarzschild coordinates — smooth in other coordinates — and also a real horizon, a surface light cannot climb back out of.',
       explain: 'Eddington–Finkelstein and Kruskal coordinates (steps 20–22) describe the same spacetime with nothing infinite at r = 2GM/c². What stays true in every coordinate system is that the horizon is a one-way surface. The genuine singularity, where tidal curvature blows up in every coordinate system, is at r = 0.',
       visual: {
         type: 'graph',
@@ -169,7 +169,7 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
     }),
     mcq({
       id: 'cp-clock', difficulty: 2,
-      prompt: t`In Schwarzschild’s coordinates, a probe falling into a black hole takes an infinite coordinate time $t$ to reach the horizon, but the probe’s own clock reaches it after a finite time. Which statement is physical?`,
+      prompt: t`In Schwarzschild coordinates, a probe falling into a black hole takes an infinite coordinate time $t$ to reach the horizon, but the probe’s own clock reaches it after a finite time. Which statement is physical?`,
       choices: [
         'The reading on the probe’s clock — its proper time — is physical; t is a label (the time of clocks far away)',
         'The infinite t is physical: the probe really never arrives',
@@ -180,18 +180,18 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
       why: { 1: 'Coordinate time is a label. The probe’s clock is a physical object, and it records a finite time to the horizon and beyond.', 2: 'There is no contradiction: one is a label, the other a measurement.', 3: 'Clocks work everywhere; their readings are the physical times.' },
       hints: ['Which of the two numbers could you read off an instrument carried by the probe?'],
       teach: 'Coordinate time is not what a clock reads; a clock reads its own proper time, which is physical.',
-      explain: t`Schwarzschild’s $t$ is tied to clocks far away; light from the falling probe reaches them ever more slowly, which is why $t$ grows without limit. The probe’s own proper time is finite — it crosses the horizon and continues inward.`,
+      explain: t`Schwarzschild time $t$ is the time of clocks far away, extended inward by a rule that breaks down at the horizon: the crossing gets no finite $t$ label at all. (Signals the probe sends near the horizon also reach distant observers later and later.) The probe’s own proper time is finite — it crosses the horizon and continues inward.`,
       visual: {
         type: 'graph',
         params: {
           x: [0, 4], y: [0, 12], xlabel: 'r / (2GM/c²)', ylabel: 'time since r = 4 (units of 2GM/c³)',
           curves: [
-            { fn: `-(2/3)*x^1.5 - 2*sqrt(x) + ln((sqrt(x)+1)/abs(sqrt(x)-1)) - (${T0})`, color: 'bad', domain: [1.0004, 4], label: 'Schwarzschild’s t', labelAt: 1.6, labelDx: 8, labelDy: -10 },
+            { fn: `-(2/3)*x^1.5 - 2*sqrt(x) + ln((sqrt(x)+1)/abs(sqrt(x)-1)) - (${T0})`, color: 'bad', domain: [1.0004, 4], label: 'Schwarzschild time t', labelAt: 1.6, labelDx: 8, labelDy: -10 },
             { fn: '(2/3)*(8 - x^1.5)', color: 'good', domain: [0, 4], label: 'the probe’s own clock τ', labelAt: 0.4, labelDx: 8, labelDy: -12 },
           ],
           vlines: [{ x: 1, label: 'horizon', color: 'warn' }],
         },
-        caption: 'A probe falling straight in from rest far away, from r = 4 (right) inward. Schwarzschild’s t runs off to infinity at the horizon; the probe’s own clock reaches it, and r = 0, after a finite time.',
+        caption: 'A probe falling straight in from rest far away, from r = 4 (right) inward. Schwarzschild time t runs off to infinity at the horizon; the probe’s own clock reaches it, and r = 0, after a finite time.',
       },
     }),
     num({

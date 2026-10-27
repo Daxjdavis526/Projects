@@ -146,7 +146,7 @@ $$|R_n(x)| = |f(x) - P_n(x)| \le \frac{M}{(n+1)!}\,|x - a|^{n+1}$$`,
     }),
     mcq({
       id: 'why-converges', difficulty: 2,
-      prompt: t`Why does the Lagrange bound prove that the Maclaurin series of $\sin x$ converges **to $\sin x$** for every real $x$?`,
+      prompt: t`Why does the Lagrange bound prove that the Maclaurin series of $\sin x$ converges for every real $x$ — and **to the function itself**, not merely to some limit?`,
       choices: [
         t`For each fixed $x$, the bound $\frac{|x|^{n+1}}{(n+1)!} \to 0$ as $n \to \infty$, so $P_n(x) \to \sin x$`,
         t`Because the series has an infinite radius of convergence`,
@@ -197,7 +197,7 @@ But $e^2 - P_3(2) = 7.389 - 6.333 = 1.056$. What went wrong?`,
       answer: 0,
       why: {
         1: t`The remainder after degree 3 does use $4!$ and $2^4$ — that part is right.`,
-        2: t`The bound only needs $|f^{(4)}|$ bounded **between $a$ and $x$**, here on $[0, 2]$, where $e^c \le e^2$.`,
+        2: t`The bound only needs $|f^{(4)}|$ bounded **between the centre and the point**, here on $[0, 2]$, where $e^c \le e^2$.`,
         3: 'A correctly computed Lagrange bound is a guarantee: the actual error can never exceed it.',
       },
       hints: [t`The unknown $c$ lies somewhere in $[0, 2]$. How large can $e^c$ be there?`, t`$M$ has to be the **largest** value of $|f^{(4)}|$ on the interval.`],

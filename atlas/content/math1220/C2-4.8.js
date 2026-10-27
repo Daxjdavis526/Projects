@@ -120,7 +120,7 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
     num({
       id: 'root-L', difficulty: 2,
       gen(r) {
-        const a = r.int(1, 5), c = r.intExcept(2, 7, [a]), b = r.int(1, 9), d = r.int(1, 9);
+        const a = r.int(1, 5), c = r.intExcept(2, 7, [a]), b = r.int(1, 9), d = r.intExcept(1, 9, [(b * c) / a]);   // b/a ≠ d/c, or every root would equal L
         const L = a / c;
         return {
           prompt: t`Use the root test on $\displaystyle\sum_{n=1}^\infty \left(\frac{${a === 1 ? '' : a}n + ${b}}{${c}n + ${d}}\right)^{n}$: find $L = \displaystyle\lim_{n\to\infty}\sqrt[n]{|a_n|}$.`,
@@ -129,7 +129,7 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
           hints: [t`The $n$-th root undoes the power $n$: $\sqrt[n]{|a_n|} = \dfrac{${a === 1 ? '' : a}n + ${b}}{${c}n + ${d}}$.`, 'Now take the limit as n → ∞.'],
           teach: 'For a term that is an n-th power, the root test removes the power in one step.',
           explain: t`$\sqrt[n]{a_n} = \frac{${a === 1 ? '' : a}n + ${b}}{${c}n + ${d}} \to \frac{${a}}{${c}} = ${frac(L)}${L < 1 ? ' < 1' : ' > 1'}$, so the series ${L < 1 ? 'converges absolutely' : 'diverges'}.`,
-          visual: { type: 'calc-series', params: { view: 'root', term: `((${a}n + ${b})/(${c}n + ${d}))^n`, N: 30 }, caption: t`The roots $\sqrt[n]{a_n}$ for $n = 1 \dots 30$.` },
+          visual: { type: 'calc-series', params: { view: 'root', term: `((${a}n + ${b})/(${c}n + ${d}))^n`, N: 6 }, caption: t`The roots $\sqrt[n]{a_n}$ for $n = 1 \dots 6$.` },
         };
       },
     }),

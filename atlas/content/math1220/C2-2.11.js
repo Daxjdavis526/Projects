@@ -1,6 +1,7 @@
 // Improper integrals over infinite intervals: limits of ordinary integrals, p-integrals, escape velocity.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { fmt, nice, frac } from '../../src/core/format.js';
+import { fgraph } from './_integration.js';
 
 const t = String.raw;
 
@@ -83,6 +84,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
           hints: [t`Compare each with $\int_1^\infty x^{-p}\,dx$, which converges only for $p > 1$.`, 'Read off p from each integrand.'],
           teach: t`$\int_1^\infty x^{-p}\,dx$ converges exactly when $p > 1$.`,
           explain: t`Only the first has $p = ${good[0]} > 1$; it equals $\frac{1}{p - 1} = ${nice(1 / (good[0] - 1))}$.`,
+          visual: { type: 'graph', params: { x: [1, 12], y: [0, 1.1], curves: [{ fn: `x^(-${good[0]})`, color: 'accent', label: { 1.5: 'x^(−3/2)', 2: 'x^(−2)', 3: 'x^(−3)', 1.1: 'x^(−1.1)' }[good[0]], labelAt: 2.2, labelDy: 12 }, { fn: '1/x', color: 'warn', label: 'x^(−1)', labelAt: 5 }, { fn: '1/sqrt(x)', color: 'good', label: 'x^(−1/2)', labelAt: 9 }, { fn: 'x^(-0.9)', color: 'violet', label: 'x^(−0.9)', labelAt: 7, labelDy: 14 }] }, caption: 'The four integrands from x = 1 to 12. Curves that look alike can differ in whether their area out to infinity is finite — the picture alone cannot decide it.' },
         };
       },
     }),
@@ -138,6 +140,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
       hints: ['Split at 0 and examine each half separately.', t`$\int_0^t x\,dx = \tfrac{t^2}{2} \to \infty$.`],
       teach: t`$\int_{-\infty}^{\infty}$ converges only if both $\int_{-\infty}^{0}$ and $\int_0^{\infty}$ converge separately.`,
       explain: t`$\int_0^\infty x\,dx = \lim \tfrac{t^2}{2} = \infty$, so the integral diverges. Letting both ends go out together ($\int_{-t}^{t}$) is a different, special construction.`,
+      visual: fgraph({ f: 'x', x: [-6, 6], y: [-6.5, 6.5], shade: [{ from: -6, to: 0 }, { from: 0, to: 6 }], caption: t`The two halves of $\int_{-\infty}^{\infty} x\,dx$. Each grows without bound as its limit moves out; neither has a finite value to cancel.` }),
     }),
     num({
       id: 'x-exp', difficulty: 3,
@@ -154,6 +157,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
           ],
           teach: 'Integrate by parts on [0, t], then take the limit; exponential decay beats any polynomial growth.',
           explain: t`$\Big[-\tfrac{x}{${k}}e^{-${k === 1 ? '' : k}x} - \tfrac{1}{${k * k}}e^{-${k === 1 ? '' : k}x}\Big]_0^{t} \to 0 - \big(-\tfrac{1}{${k * k}}\big) = ${frac(1 / (k * k))}$.`,
+          visual: fgraph({ f: `x*exp(-${k}x)`, x: [0, 8 / k], shade: { from: 0, to: 8 / k }, caption: 'The shaded area runs on to infinity; the exponential decay keeps it finite.' }),
         };
       },
     }),
@@ -186,6 +190,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
       hints: ['Compare each integrand with x^(−p) and read off p.', t`$\sqrt{1 + 1/x^4} \ge 1$, so the area integrand is at least $\frac1x$.`],
       teach: t`The same curve can enclose a convergent integral ($1/x^2$) and a divergent one ($1/x$) — the horn holds finite paint but cannot be painted.`,
       explain: t`$V = \pi\int_1^\infty x^{-2}dx = \pi$ converges, but $S \ge 2\pi\int_1^\infty \frac{dx}{x} = \infty$. The “paradox” is a fact about $p$-integrals, not a contradiction.`,
+      visual: ({ type: 'graph', params: { x: [0, 10], y: [-1.25, 1.25], curves: [{ fn: '1/x', color: 'accent', width: 2.4, domain: [1, 10] }, { fn: '-1/x', color: 'accent', width: 2.4, domain: [1, 10] }], vlines: [{ x: 1 }] }, caption: t`The horn’s profile $y = \pm 1/x$ from $x = 1$ to $10$ (it goes on for ever). Its cross-sections have area $\pi/x^2$, but its rim has length $2\pi/x$.` }),
     }),
   ],
   checkpoint: [
@@ -200,6 +205,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
           hints: [t`$\lim_{t\to\infty}\Big[\frac{x^{1-${p}}}{1 - ${p}}\Big]_{${a}}^{t}$.`],
           teach: 'Integrate to t, then let t → ∞.',
           explain: t`$\dfrac{${a}^{${1 - p}}}{${p - 1}} = ${frac(val)} \approx ${fmt(val, 3)}$.`,
+          visual: fgraph({ f: `x^(-${p})`, x: [0.5, 10], y: [0, 1.2], shade: { from: a, to: 10 }, caption: 'The shaded region continues to infinity.' }),
         };
       },
     }),
@@ -215,6 +221,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
           hints: [t`$p = \tfrac12$.`, t`$\int_{${a}}^{t} x^{-1/2}dx = 2\sqrt t - 2\sqrt{${a}} \to \infty$.`],
           teach: t`With $p = \tfrac12 \le 1$, the area out to infinity is infinite.`,
           explain: t`$2\sqrt t - 2\sqrt{${a}}$ grows without bound, so the integral diverges.`,
+          visual: fgraph({ f: '1/sqrt(x)', x: [0, 20], y: [0, 1.25], shade: { from: a, to: 20 }, caption: t`The area under $1/\sqrt{x}$ from ${a} to the edge of the view. The curve continues for ever.` }),
         };
       },
     }),
@@ -234,6 +241,7 @@ If the limit exists, the integral **converges**; if not, it **diverges**. The be
           hints: [t`Work per kilogram to reach infinity: $\int_R^\infty \frac{GM}{r^2}\,dr = \frac{GM}{R}$.`, t`Set $\tfrac12v^2 = \frac{GM}{R}$ and solve for $v$; convert m/s to km/s.`],
           teach: t`Escape speed comes from a convergent improper integral: $\tfrac12v^2 = \int_R^\infty \frac{GM}{r^2}dr = \frac{GM}{R}$.`,
           explain: t`$v = \sqrt{2GM/R} = \sqrt{2(${GMt})/(${Rt})} = ${fmt(v, 3)}$ km/s.`,
+          visual: fgraph({ f: '1/x^2', x: [0, 10], y: [0, 1.15], shade: { from: 1, to: 10 }, xlabel: 'r / R', ylabel: 'g / g at surface', vlines: [{ x: 1, label: 'surface' }], caption: 'Gravity per unit mass, scaled to 1 at the surface. The shaded area, continued to infinity, is the work per kilogram needed to escape.' }),
         };
       },
     }),

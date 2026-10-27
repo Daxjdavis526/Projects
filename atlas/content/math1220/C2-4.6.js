@@ -101,7 +101,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
           hints: [t`$\dfrac{a_n}{b_n} = a_n \cdot n^2 = \dfrac{${a}n^4 + ${k}n^2}{${b}n^4 - n + ${m}}$.`, 'Divide top and bottom by n⁴.'],
           teach: 'Limit comparison: divide the terms, take the limit, and check that it is finite and positive.',
           explain: t`$c = \frac{${a}}{${b}} = ${frac(c)}$, which is finite and positive. Since $\sum\frac1{n^2}$ converges, so does $\sum a_n$.`,
-          visual: { type: 'calc-series', params: { view: 'terms', term: `(${a}n^2 + ${k})/(${b}n^4 - n + ${m})*n^2`, N: 30, termLabel: 'aₙ / bₙ' }, caption: 'The ratio of the terms for n = 1 … 30.' },
+          visual: { type: 'calc-series', params: { view: 'terms', term: `(${a}n^2 + ${k})/(${b}n^4 - n + ${m})*n^2`, N: 6, termLabel: 'aₙ / bₙ' }, caption: 'The ratio of the terms for n = 1 … 6.' },
         };
       },
     }),
@@ -171,7 +171,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
           hints: [t`Sum the benchmark: $\displaystyle\sum_{n=1}^\infty \frac{1}{${b}^n}$ is geometric.`, t`First term $\frac{1}{${b}}$, ratio $\frac{1}{${b}}$.`],
           teach: 'A comparison does more than decide convergence: the benchmark’s sum bounds the sum you could not compute.',
           explain: t`$\displaystyle\sum_{n=1}^\infty \frac{1}{${b}^n} = \frac{1/${b}}{1 - 1/${b}} = \frac{1}{${b - 1}}$, so the sum is less than $${frac(bound)}$.`,
-          visual: { type: 'calc-series', params: { view: 'sums', term: `1/(${b}^n + ${k})`, compare: { term: `1/${b}^n`, label: `benchmark Σ 1/${b}ⁿ` }, N: 15 }, caption: 'The series (blue) under its geometric benchmark (dashed).' },
+          visual: { type: 'calc-series', params: { view: 'sums', term: `1/(${b}^n + ${k})`, compare: { term: `1/${b}^n`, label: `benchmark Σ 1/${b}ⁿ` }, N: 4 }, caption: 'The series (blue) under its geometric benchmark (dashed).' },
         };
       },
     }),

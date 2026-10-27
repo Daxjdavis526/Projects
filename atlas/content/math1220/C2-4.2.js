@@ -116,7 +116,7 @@ This **monotone convergence theorem** (and its mirror image for decreasing seque
           hints: [t`Let $n \to \infty$ on both sides: $L = \sqrt{${c} + L}$.`, t`Square: $L^2 - L - ${c} = 0$. Keep the root that fits the terms.`],
           teach: 'Once convergence is known, the limit of a recursion a_{n+1} = f(a_n) solves L = f(L).',
           explain: t`$L^2 = ${c} + L \Rightarrow L^2 - L - ${c} = 0 \Rightarrow L = \frac{1 \pm ${Math.sqrt(1 + 4 * c)}}{2}$. The terms are positive, so $L = ${fmt(L, 4)}$.`,
-          visual: { type: 'calc-series', params: { view: 'cobweb', rec: `sqrt(${c} + a)`, a1: 1, N: 8, x: [0, Math.ceil(L + 1.5)] }, caption: t`The cobweb of $a_{n+1} = \sqrt{${c} + a_n}$ from $a_1 = 1$.` },
+          visual: { type: 'calc-series', params: { view: 'cobweb', rec: `sqrt(${c} + a)`, a1: 1, N: 3, x: [0, Math.ceil(L + 1.5)] }, caption: t`The cobweb of $a_{n+1} = \sqrt{${c} + a_n}$ from $a_1 = 1$.` },
         };
       },
     }),
@@ -153,7 +153,7 @@ This **monotone convergence theorem** (and its mirror image for decreasing seque
           hints: [t`$x_2 = \tfrac12\left(${x1} + \tfrac{${A}}{${x1}}\right) = ${fmt(x2, 6)}$.`, t`Now $x_3 = \tfrac12\left(x_2 + \tfrac{${A}}{x_2}\right)$.`],
           teach: 'A recursion is computed one step at a time, each new term from the one before.',
           explain: t`$x_2 = ${fmt(x2, 6)}$, $x_3 = \tfrac12\left(${fmt(x2, 6)} + \tfrac{${A}}{${fmt(x2, 6)}}\right) = ${x3.toFixed(4)}$. Compare $\sqrt{${A}} = ${Math.sqrt(A).toFixed(6)}$: after the first step the terms decrease towards it and are bounded below by it, so the sequence converges.`,
-          visual: { type: 'calc-series', params: { view: 'cobweb', rec: `(a + ${A}/a)/2`, a1: x1, N: 4, x: [0, Math.max(4.5, Math.ceil(x2 + 1))] }, caption: t`The cobweb of Heron’s rule: the curve touches the diagonal at $x = \sqrt{${A}}$.` },
+          visual: { type: 'calc-series', params: { view: 'cobweb', rec: `(a + ${A}/a)/2`, a1: x1, N: 2, x: [0, Math.max(4.5, Math.ceil(x2 + 1))] }, caption: t`The cobweb of Heron’s rule: the curve touches the diagonal at $x = \sqrt{${A}}$.` },
         };
       },
     }),

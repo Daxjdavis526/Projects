@@ -194,3 +194,45 @@ export function dimBars(quantities, { caption } = {}) {
     caption: caption ?? 'Each group shows one quantity’s dimensions: the heights of its M (violet), L (blue) and T (green) bars are the powers of mass, length and time. A missing bar is a power of zero.',
   };
 }
+
+/**
+ * A horizontal log₁₀ axis from 10^from to 10^to. Dashed lines mark √10 × 10ᵏ,
+ * where rounding to the nearest power of ten switches; `examples` are
+ * [value, text] pairs to mark on it.
+ */
+export function logAxis({ from, to, examples = [], caption }) {
+  const halves = [];
+  for (let k = Math.ceil(from - 0.5); k + 0.5 < to; k++) if (k + 0.5 > from) halves.push(k + 0.5);
+  return {
+    type: 'graph',
+    params: {
+      aspect: 'wide', x: [from, to], y: [0.02, 1], xticks: Math.min(12, to - from), yticks: 0.001, xlabel: 'log₁₀ x', ylabel: '',
+      alt: 'A logarithmic number line with the rounding boundaries marked',
+      vlines: halves.map((h, i) => ({ x: h, color: 'warn', label: i === 0 ? '√10 × 10ᵏ' : undefined })),
+      points: examples.map(([v, text], i) => ({ x: +Math.log10(v).toFixed(4), y: 0.3 + 0.25 * (i % 2), r: 5, color: 'gold', label: text })),
+    },
+    caption: caption ?? 'On a logarithmic axis the point halfway between 10ᵏ and 10ᵏ⁺¹ is √10 × 10ᵏ ≈ 3.16 × 10ᵏ (dashed), not 5 × 10ᵏ. A number’s order of magnitude is the power of ten it is nearer to on this axis.',
+  };
+}
+
+/** A vertical logarithmic ladder: `items` are { label, value } marked at log₁₀ value, with a labelled rung at every power of ten. */
+export function logLadder(items, { from, to, unit = '', rungs = true, caption } = {}) {
+  const ks = [];
+  for (let k = Math.ceil(from); k <= Math.floor(to); k++) ks.push(k);
+  return {
+    type: 'graph',
+    params: {
+      x: [0.1, 10], y: [from - 0.5, to + 0.5], axes: false, grid: false,
+      alt: 'A logarithmic ladder of values',
+      curves: [
+        ...ks.map((k) => ({ fn: String(k), domain: [0.1, 10], color: 'ink4', width: 1, dash: true })),
+        { param: ['4.2', 't'], t: [from - 0.3, to + 0.3], color: 'ink3', width: 1 },
+      ],
+      points: [
+        ...(rungs ? ks.map((k) => ({ x: 0.2, y: k, r: 0.01, color: 'ink2', label: `${pow10(k)}${unit ? ' ' + unit : ''}` })) : []),
+        ...items.map((it) => ({ x: 4.2, y: +Math.log10(it.value).toFixed(3), color: it.color || 'accent2', label: it.label })),
+      ],
+    },
+    caption: caption ?? 'Logarithmic scale: each dashed rung is ten times the one below. Labels sit just above their dots.',
+  };
+}

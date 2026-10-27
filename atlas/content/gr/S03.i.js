@@ -2,7 +2,7 @@
 // Units on every diagram: years and light-years (c = 1), so light runs at 45°.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { fmt, nice, tex } from '../../src/core/format.js';
-import { gamma, boost } from '../../src/viz/model/relativity.js';
+import { boost } from '../../src/viz/model/relativity.js';
 import { spacetimeSketch } from './_foundations.js';
 
 const t = String.raw;

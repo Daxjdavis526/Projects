@@ -1,7 +1,7 @@
 // Order-of-magnitude (Fermi) estimates: a chain of guessed factors, kept to the nearest power of ten.
 import { lesson, mcq, num, match } from '../../src/core/content.js';
 import { fmt } from '../../src/core/format.js';
-import { staircase } from './_measure.js';
+import { staircase, logAxis, logLadder } from './_measure.js';
 
 const t = String.raw;
 const MIN_PER_YEAR = 60 * 24 * 365.25;    // 525 960
@@ -158,6 +158,7 @@ It works better than it has any right to, because some of your guesses come out 
       answer: [0, 1, 2, 3, 4, 5],
       hints: [t`Write each number in scientific notation, $a\times10^k$. If $a$ is below $\sqrt{10} \approx 3.16$ the order is $10^k$; if it is above, round up to $10^{k+1}$.`, t`$800 = 8\times10^2$ and $8 > 3.16$, so it rounds up to $10^3$; $\log_{10} 800 = 2.90$.`],
       teach: 'The order of magnitude is the nearest power of ten on a logarithmic scale: round log₁₀ x to the nearest whole number.',
+      visual: logAxis({ from: 1, to: 6, examples: [[2.0e3, '2.0 × 10³ → 10³'], [3.5e4, '3.5 × 10⁴ → 10⁵']] }),
       explain: 'log₁₀ 800 = 2.90 → 10³; log₁₀ 0.0042 = −2.38 → 10⁻²; log₁₀(6.0 × 10²³) = 23.78 → 10²⁴; log₁₀ 45 = 1.65 → 10²; log₁₀ 0.25 = −0.60 → 10⁻¹; log₁₀(2.0 × 10⁶) = 6.30 → 10⁶. Whenever the leading figure is above √10 ≈ 3.16, round up.',
     }),
     fermi({
@@ -167,6 +168,7 @@ It works better than it has any right to, because some of your guesses come out 
       errors: [{ value: +Math.log10(15 * MIN_PER_YEAR).toFixed(3), feedback: 'That is about one year of breathing. Multiply by a lifetime of years.' }],
       hints: ['At rest you breathe roughly 12 to 20 times a minute.', t`Breaths per minute × minutes per year × years: $15\times(5.3\times10^{5})\times80$.`],
       teach: 'Chain rates and durations: (events per minute) × (minutes per year) × (years).',
+      visual: staircase([{ factor: 70, label: '70 beats/min' }, { factor: 60, label: '× 60 min/h' }, { factor: 24, label: '× 24 h/day' }, { factor: 365.25, label: '× 365 days/yr' }, { factor: 80, label: '× 80 yr' }], { unit: 'beats', top: 11, caption: 'For comparison, the heartbeat estimate from Explore as a staircase. Build the breathing estimate the same way: only the first step changes.' }),
       explain: t`$15\ \text{min}^{-1}\times5.3\times10^{5}\ \text{min/yr}\times80\ \text{yr} \approx ${sciTeX(15 * MIN_PER_YEAR * 80)}$ breaths, so $\log_{10} N \approx ${fmt(Math.log10(15 * MIN_PER_YEAR * 80), 2)}$ — between $10^{8}$ and $10^{9}$, closer to $10^{9}$.`,
     }),
     fermi({
@@ -176,6 +178,11 @@ It works better than it has any right to, because some of your guesses come out 
       errors: [{ value: +Math.log10(7e4 * 250).toFixed(3), feedback: t`That is $mv$, a momentum. Kinetic energy is $\tfrac12 mv^2$.` }, { value: +Math.log10(0.5 * 7e4 * 250 * 250 * 3.6 * 3.6).toFixed(3), feedback: 'Use the speed in m/s, not km/h, so that the energy comes out in joules.' }],
       hints: [t`Kinetic energy is $\tfrac12 mv^2$. A single-aisle airliner in flight has a mass of about $7\times10^{4}$ kg.`, 'Airliners cruise at about 900 km/h, which is 250 m/s.'],
       teach: 'Estimate each input to within a factor of 2, convert to SI, then compute with powers of ten.',
+      visual: logLadder([
+        { label: 'a sprinter, 70 kg at 10 m/s', value: 0.5 * 70 * 10 * 10 },
+        { label: 'a car, 1500 kg at 30 m/s', value: 0.5 * 1500 * 30 * 30 },
+        { label: '1 litre of jet fuel, burned', value: 3.4e7 },
+      ], { from: 2, to: 11, unit: 'J', caption: 'Energies to compare your estimate with, on a logarithmic scale: ½mv² for the runner and the car; about 34 MJ for a litre of jet fuel. Labels sit just above their dots.' }),
       explain: t`$\tfrac12 mv^2 \approx \tfrac12(7\times10^{4}\ \text{kg})(250\ \text{m/s})^2 \approx ${sciTeX(0.5 * 7e4 * 250 * 250)}$ J, so $\log_{10} \approx ${fmt(Math.log10(0.5 * 7e4 * 250 * 250), 2)}$. A couple of gigajoules — the chemical energy in only about ${Math.round((0.5 * 7e4 * 250 * 250) / 34e6 / 10) * 10} litres of jet fuel (at about 34 MJ per litre).`,
     }),
     fermi({
@@ -186,6 +193,20 @@ It works better than it has any right to, because some of your guesses come out 
       errors: [{ value: +Math.log10(3.84e5 / 1.4).toFixed(3), feedback: 'The Moon is about 384 000 kilometres away — convert that to metres before dividing by a speed in m/s.' }],
       hints: [t`The Moon is about $3.8\times10^{8}$ m away.`, t`A brisk walk is about 5 km/h, or 1.4 m/s; time = distance ÷ speed.`],
       teach: 'Time is distance divided by speed — with both in SI units first.',
+      visual: {
+        type: 'graph',
+        params: {
+          aspect: 'wide', x: [-20000, 405000], y: [-30000, 30000], equal: true, axes: false, grid: false,
+          alt: 'Earth and the Moon drawn to scale',
+          curves: [
+            { param: ['6371*cos(t)', '6371*sin(t)'], t: [0, '2*pi'], color: 'teal', width: 2 },
+            { param: ['384400 + 1737*cos(t)', '1737*sin(t)'], t: [0, '2*pi'], color: 'ink2', width: 2 },
+            { fn: '0', domain: [6371, 382663], color: 'ink4', width: 1, dash: true },
+          ],
+          points: [{ x: -9000, y: 9000, r: 0.01, color: 'teal', label: 'Earth' }, { x: 378000, y: 6000, r: 0.01, color: 'ink2', label: 'Moon' }, { x: 150000, y: 4000, r: 0.01, color: 'ink3', label: '384 000 km' }],
+        },
+        caption: 'Earth and the Moon to scale: about thirty Earth-diameters apart.',
+      },
       explain: t`$t = \dfrac{3.8\times10^{8}\ \text{m}}{1.4\ \text{m/s}} \approx ${sciTeX(3.84e8 / 1.4)}$ s, so $\log_{10} t \approx ${fmt(Math.log10(3.84e8 / 1.4), 2)}$ — about ${Math.round(3.84e8 / 1.4 / 3.156e7)} years of non-stop walking.`,
     }),
     mcq({
@@ -232,6 +253,13 @@ It works better than it has any right to, because some of your guesses come out 
       errors: [{ value: -17.4, feedback: 'That is ΔL itself, in metres. Divide by the arm length, 4000 m.' }, { value: -18, feedback: 'That is ΔL itself, in metres. Divide by the arm length, 4000 m.' }],
       hints: [t`Convert the arm length to metres: $L = 4\times10^{3}$ m.`, t`$\Delta L/L = \dfrac{4\times10^{-18}}{4\times10^{3}}$.`],
       teach: 'Fractional changes are ratios of like quantities, so their order of magnitude is just the difference of the exponents.',
+      visual: logLadder([
+        { label: 'LIGO arm · 4 km', value: 4e3 },
+        { label: 'width of a hair · 0.08 mm', value: 8e-5 },
+        { label: 'an atom · 0.1 nm', value: 1e-10 },
+        { label: 'a proton · 1.7 fm', value: 1.7e-15 },
+        { label: 'the arm’s change · 4 × 10⁻¹⁸ m', value: 4e-18, color: 'gold' },
+      ], { from: -18, to: 4, rungs: false, caption: 'Lengths on a logarithmic scale, one dashed rung per power of ten. Labels sit just above their dots.' }),
       explain: t`$\Delta L/L = \dfrac{4\times10^{-18}\ \text{m}}{4\times10^{3}\ \text{m}} = 10^{-21}$. This ratio is the gravitational-wave *strain*, $h$; GW150914 peaked at $h \approx 1.0\times10^{-21}$, which is why LIGO had to be the most precise length-measuring machine ever built.`,
     }),
     fermi({
@@ -256,6 +284,7 @@ It works better than it has any right to, because some of your guesses come out 
       },
       hints: ['24 h × 3600 s/h = ?', 'Is 86 400 nearer to 10⁴ or to 10⁵ on a logarithmic scale? Compare log₁₀ 86 400 with 4.5.'],
       teach: 'Round the logarithm, not the leading digit: a number like 8.6 × 10⁴ has order of magnitude 10⁵.',
+      visual: logAxis({ from: 2, to: 7 }),
       explain: 'A day has 24 × 3600 = 86 400 s, and log₁₀ 86 400 = 4.94, which rounds to 5: order of magnitude 10⁵.',
     }),
   ],

@@ -1,7 +1,8 @@
 // A rotatable 3D surface: z = f(x, y) or a parametric surface (u, v) ↦ (x, y, z),
 // written as expressions of slider parameters. Optional extras: the tangent
 // plane and gradient at a point you move with sliders, level curves on the
-// floor, curves drawn on the surface, and a parallel-transported vector.
+// floor, and curves drawn on the surface. (For parallel transport on a
+// sphere, see gr-sphere-transport.)
 //
 //   { type: 'surface3d', params: {
 //       z: 'x^2 - y^2', domain: [[-2, 2], [-2, 2]], tangentAt: ['px', 'py'],

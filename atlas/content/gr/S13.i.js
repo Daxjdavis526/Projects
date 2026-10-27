@@ -1,7 +1,7 @@
 // Carrying an arrow around a curved world — Intuition Mode concept lesson.
 // Parallel transport on a sphere: the arrow returns rotated by area/R².
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt, nice } from '../../src/core/format.js';
+import { fmt } from '../../src/core/format.js';
 
 const t = String.raw;
 const DEG = Math.PI / 180;

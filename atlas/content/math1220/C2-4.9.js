@@ -174,7 +174,7 @@ When a test returns “no decision” (a ratio limit of 1, an inequality pointin
           hints: [t`Split: $\left(\frac{${a}}{${c}}\right)^n + \left(\frac{${b}}{${c}}\right)^n$.`, 'Sum each geometric series (first term 1) and add.'],
           teach: 'Spot geometric pieces, split the series, and sum each piece.',
           explain: t`$\dfrac{1}{1 - ${frac(a / c)}} + \dfrac{1}{1 - ${frac(b / c)}} = ${frac(1 / (1 - a / c))} + ${frac(1 / (1 - b / c))} = ${frac(S)}${Number.isInteger(S) ? '' : t` \approx ${fmt(S, 4)}`}$.`,
-          visual: { type: 'calc-series', params: { view: 'sums', showTerms: false, term: `(${a}^n + ${b}^n)/${c}^n`, n0: 0, compare: [{ term: `(${a}/${c})^n`, label: `Σ (${a}/${c})ⁿ` }, { term: `(${b}/${c})^n`, label: `Σ (${b}/${c})ⁿ`, color: 'teal' }], N: 20 }, caption: 'The series (blue) and its two geometric pieces (dashed): at every N the blue sum is the two dashed sums added.' },
+          visual: { type: 'calc-series', params: { view: 'sums', showTerms: false, term: `(${a}^n + ${b}^n)/${c}^n`, n0: 0, compare: [{ term: `(${a}/${c})^n`, label: `Σ (${a}/${c})ⁿ` }, { term: `(${b}/${c})^n`, label: `Σ (${b}/${c})ⁿ`, color: 'teal' }], N: 6 }, caption: 'The series (blue) and its two geometric pieces (dashed): at every N the blue sum is the two dashed sums added.' },
         };
       },
     }),

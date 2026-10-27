@@ -66,7 +66,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: [t`Identify the first term $a$ (the $n = 0$ term) and the ratio $r$.`, t`$a = ${a}$, $r = ${frac(ratio)}$, and $|r| < 1$, so the sum is $\frac{a}{1 - r}$.`],
           teach: 'A geometric series with |r| < 1 sums to (first term)/(1 − ratio).',
           explain: t`$\dfrac{${a}}{1 - (${frac(ratio)})} = ${frac(S)}${Number.isInteger(S) ? '' : t` \approx ${fmt(S, 4)}`}$.`,
-          visual: { type: 'calc-series', params: { view: 'sums', term: `${a}*(${ratio})^n`, n0: 0, N: 12, showTerms: true }, caption: 'The first 12 partial sums.' },
+          visual: { type: 'calc-series', params: { view: 'sums', term: `${a}*(${ratio})^n`, n0: 0, N: 6, showTerms: true }, caption: 'The first 6 partial sums.' },
         };
       },
     }),
@@ -82,7 +82,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: [t`The formula is (first term)/(1 − ratio) — whatever index the series starts at.`, t`The first term is $${c}(${ratio})^{${k}} = ${nice(first)}$.`],
           teach: 'For a geometric series starting anywhere, the sum is (first term actually present)/(1 − r).',
           explain: t`First term $${c}(${ratio})^{${k}} = ${nice(first)}$, ratio ${ratio}: $\;\dfrac{${nice(first)}}{1 - ${ratio}} = ${fmt(S, 4)}$.`,
-          visual: { type: 'calc-series', params: { view: 'sums', term: `${c}*${ratio}^n`, n0: k, N: 10 }, caption: t`Partial sums starting from the $n = ${k}$ term.` },
+          visual: { type: 'calc-series', params: { view: 'sums', term: `${c}*${ratio}^n`, n0: k, N: 4 }, caption: t`Partial sums starting from the $n = ${k}$ term.` },
         };
       },
     }),
@@ -115,7 +115,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: [t`$0.${dd}${dd}\ldots = \dfrac{${d}}{100} + \dfrac{${d}}{100^2} + \dfrac{${d}}{100^3} + \cdots$`, t`A geometric series with first term $\frac{${d}}{100}$ and ratio $\frac{1}{100}$.`],
           teach: 'A repeating decimal is a geometric series in disguise, with ratio 1/10 to the length of the repeating block.',
           explain: t`$\dfrac{${d}/100}{1 - 1/100} = \dfrac{${d}}{99}${g > 1 ? t` = \dfrac{${p}}{${q}}` : ''}$. (Type it as ${p}/${q}; a decimal has to be exact to 7 digits.)`,
-          visual: { type: 'calc-series', params: { view: 'sums', term: `${d}/100^n`, N: 6, showTerms: false, y: [0, 1] }, caption: 'Partial sums 0.dd, 0.dddd, …: they settle after a couple of terms.' },
+          visual: { type: 'calc-series', params: { view: 'sums', term: `${d}/100^n`, N: 2, showTerms: true, y: [0, 1] }, caption: 'The first two partial sums, 0.dd and 0.dddd: each new block adds a hundredth as much as the one before.' },
         };
       },
     }),
@@ -147,7 +147,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: [t`Just after the $N$-th dose the amount is $${D} + ${D}(${f}) + ${D}(${f})^2 + \cdots + ${D}(${f})^{N-1}$.`, t`As $N \to \infty$ that is a geometric series with first term ${D} and ratio ${f}.`],
           teach: 'Repeated doses with first-order elimination build up to a steady level given by a geometric series.',
           explain: t`$${D}\left(1 + ${f} + ${f}^2 + \cdots\right) = \dfrac{${D}}{1 - ${f}} = ${fmt(peak, 4)}$ mg. The level rises dose by dose towards this value but never exceeds it.`,
-          visual: { type: 'calc-series', params: { view: 'sums', term: `${D}*${f}^(n-1)`, N: 10 }, caption: 'Dots: the amount just after doses 1, 2, 3, …; bars: what is left of each separate dose.' },
+          visual: { type: 'calc-series', params: { view: 'sums', term: `${D}*${f}^(n-1)`, N: 3 }, caption: 'Dots: the amount just after doses 1, 2 and 3; bars: what is left of each separate dose.' },
         };
       },
     }),

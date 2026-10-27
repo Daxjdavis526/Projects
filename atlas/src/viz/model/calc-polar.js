@@ -152,11 +152,11 @@ export function fromApsides(q, Q) {
 
 /** Solve Kepler's equation M = E − e sin E for the eccentric anomaly E (0 ≤ e < 1). */
 export function eccentricAnomaly(M, e) {
-  let E = e < 0.8 ? M : Math.PI * Math.sign(Math.sin(M) || 1) + (M - Math.PI * Math.sign(Math.sin(M) || 1)) * 0;
-  if (e >= 0.8) E = M + e * Math.sin(M) / (1 - Math.sin(M + e) + Math.sin(M));
+  // Newton's method from E = π (which converges for every M in [0, 2π] and
+  // e < 1), or from E = M for a nearly circular orbit
+  let E = e < 0.8 ? M : Math.PI;
   for (let i = 0; i < 60; i++) {
-    const f = E - e * Math.sin(E) - M, d = 1 - e * Math.cos(E);
-    const step = f / d;
+    const step = (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
     E -= step;
     if (Math.abs(step) < 1e-14) break;
   }

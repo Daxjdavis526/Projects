@@ -18,7 +18,7 @@ import { restTick, movingTick, halfTickTriangle } from '../model/gr-clock.js';
 export const defaults = { beta: 0.6, triangle: true, slider: true, readout: true, labels: true, titles: null };
 
 export function mount(F, P) {
-  const { canvas } = F.canvas({ aspect: 'wide', label: P.alt || 'Two light clocks: one at rest beside you, one moving sideways' });
+  const { canvas, box } = F.canvas({ aspect: 'wide', label: P.alt || 'Two light clocks: one at rest beside you, one moving sideways' });
   if (P.slider !== false) F.slider({ key: 'beta', label: 'Speed of the moving clock $v/c$', min: 0, max: 0.99, step: 0.01, value: P.beta, explain: 'The two clocks are identical; only their motion relative to you differs.' });
   else F.params.beta = P.beta;
   F.toggle({ key: 'triangle', label: 'Show the half-tick triangle', value: P.triangle, explain: 'Up $L$, across $v\\,\\Delta t/2$, and along the light path $c\\,\\Delta t/2$.' });
@@ -53,8 +53,11 @@ export function mount(F, P) {
     g.clearRect(0, 0, W, H);
     const beta = F.params.beta, gam = gamma(beta);
     const small = W < 520;
+    // narrow screens: a taller canvas, so labels and counters have room
+    const want = small ? '4 / 3' : '';
+    if (box.style.aspectRatio !== want) { box.style.aspectRatio = want; return requestAnimationFrame(draw); }
     const font = (px, w = 500) => `${w} ${px}px Inter, system-ui, sans-serif`;
-    const top = small ? 34 : 42, bot = H - (small ? 34 : 42);
+    const top = small ? 34 : 42, bot = H - (small ? 46 : 42);
     const s = bot - top;                        // pixels per unit of L
     const WL = Math.round(W * 0.27);            // the rest clock's panel
     const xR0 = WL + 14, xR1 = W - 10, WR = xR1 - xR0;
@@ -73,6 +76,12 @@ export function mount(F, P) {
     const label = (text, x, y, o = {}) => {
       g.save(); g.font = font(o.size || (small ? 11 : 12.5), o.weight || 500); g.fillStyle = o.color || C.ink2;
       g.textAlign = o.align || 'left'; g.textBaseline = o.baseline || 'middle';
+      if (o.within) {                     // keep the text inside [lo, hi] horizontally
+        const w = g.measureText(text).width, [lo, hi] = o.within, a = o.align || 'left';
+        const left = a === 'right' ? x - w : a === 'center' ? x - w / 2 : x;
+        const shift = left < lo ? lo - left : left + w > hi ? hi - (left + w) : 0;
+        x += shift;
+      }
       if (o.halo) { g.lineWidth = 4; g.strokeStyle = C.bg; g.strokeText(text, x, y); }
       g.fillText(text, x, y); g.restore();
     };
@@ -85,7 +94,7 @@ export function mount(F, P) {
     g.beginPath(); g.moveTo(cx, bot); g.lineTo(cx, top); g.stroke(); g.restore();
     mirror(cx, top, false); mirror(cx, bot, ph0 < 0.06 && t > 0.06);
     photon(cx, bot - s * (ph0 < 0.5 ? 2 * ph0 : 2 * (1 - ph0)));
-    label(P.titles?.[0] || 'at rest beside you', 8, 14, { color: C.ink2 });
+    label(P.titles?.[0] || (small ? 'at rest' : 'at rest beside you'), 8, 14, { color: C.ink2, size: small && P.titles ? 9.5 : undefined, within: [4, WL - 4] });
     label(`ticks: ${Math.floor(t / T0)}`, cx, H - 12, { align: 'center', color: C.ink, weight: 650 });
     label('L', cx + 10, (top + bot) / 2, { color: C.ink3 });
     g.save(); g.strokeStyle = C.line2; g.lineWidth = 1; g.beginPath(); g.moveTo(WL, 6); g.lineTo(WL, H - 6); g.stroke(); g.restore();
@@ -97,7 +106,7 @@ export function mount(F, P) {
     const off = xR0 - wraps * Math.max(1, WR - 40);
     const X = (tt) => off + ux(tt);
     const Y = (h) => bot - h * s;
-    label(P.titles?.[1] || (beta > 0 ? `moving at v = ${beta.toFixed(2)}c` : 'not moving (v = 0)'), xR0 + 4, 14, { color: C.ink2 });
+    label(P.titles?.[1] || (beta > 0 ? `${small ? 'v' : 'moving at v'} = ${beta.toFixed(2)}c` : 'not moving (v = 0)'), xR0 + 4, 14, { color: C.ink2, size: small && P.titles ? 9.5 : undefined });
     g.save();
     g.beginPath(); g.rect(xR0, 0, WR, H); g.clip();
     // the path ahead in this tick (dashed), then the path already travelled
@@ -119,8 +128,8 @@ export function mount(F, P) {
       poly([A, B], C.gold, 3, []);
       const tri = halfTickTriangle(L, beta);
       label(`L`, Cc[0] + 7, (Cc[1] + B[1]) / 2, { color: C.accent, weight: 650, halo: true });
-      label(P.labels === false ? 'v·Δt/2' : `v·Δt/2 = ${(tri.across / L).toFixed(2)} L`, (A[0] + Cc[0]) / 2, Cc[1] + 14, { color: C.accent, align: 'center', weight: 650, halo: true, size: small ? 10.5 : 12 });
-      label(P.labels === false ? 'c·Δt/2' : `c·Δt/2 = ${(tri.slant / L).toFixed(2)} L`, (A[0] + B[0]) / 2 - 8, (A[1] + B[1]) / 2, { color: C.gold, align: 'right', weight: 650, halo: true, size: small ? 10.5 : 12 });
+      label(P.labels === false ? 'v·Δt/2' : `v·Δt/2 = ${(tri.across / L).toFixed(2)} L`, (A[0] + Cc[0]) / 2, Cc[1] + 13, { color: C.accent, align: 'center', weight: 650, halo: true, size: small ? 10.5 : 12, within: [xR0 + 2, xR1 - 2] });
+      label(P.labels === false ? 'c·Δt/2' : `c·Δt/2 = ${(tri.slant / L).toFixed(2)} L`, (A[0] + B[0]) / 2 - 8, (A[1] + B[1]) / 2, { color: C.gold, align: 'right', weight: 650, halo: true, size: small ? 10.5 : 12, within: [xR0 + 2, xR1 - 2] });
     }
     const xc = X(t);
     mirror(xc, top, false); mirror(xc, bot, (t % T) / T < 0.06 && t > 0.06);

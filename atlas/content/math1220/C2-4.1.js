@@ -83,7 +83,7 @@ means: for every tolerance $\varepsilon > 0$, however small, there is an index $
           hints: [t`Divide the top and the bottom by $n^2$, the highest power.`, t`Every term with $n$ left in a denominator goes to 0.`],
           teach: 'For a ratio of polynomials in n, the limit is decided by the highest powers top and bottom.',
           explain: t`Dividing by $n^2$: $\dfrac{${a} ${b < 0 ? '-' : '+'} ${Math.abs(b)}/n}{${c} + ${d}/n^2} \to \dfrac{${a}}{${c}} = ${frac(L)} \approx ${fmt(L, 4)}$.`,
-          visual: { type: 'calc-series', params: { view: 'terms', term: `(${a}n^2 + (${b})n)/(${c}n^2 + ${d})`, N: 40, limit: null }, caption: 'The first 40 terms. Where are they heading?' },
+          visual: { type: 'calc-series', params: { view: 'terms', term: `(${a}n^2 + (${b})n)/(${c}n^2 + ${d})`, N: [12, 11, 10, 9].find((n) => Math.abs((a * n * n + b * n) / (c * n * n + d) - L) > 0.006 * L) ?? 8, limit: null }, caption: 'The first few terms. Where are they heading?' },
         };
       },
     }),
@@ -201,7 +201,6 @@ means: for every tolerance $\varepsilon > 0$, however small, there is an index $
           hints: [t`Divide everything by $n^3$.`],
           teach: 'Equal degrees top and bottom: the limit is the ratio of the leading coefficients, sign included.',
           explain: t`Dividing by $n^3$: $\dfrac{${a} - ${b}/n^2}{${d}/n^3 - ${c}} \to \dfrac{${a}}{-${c}} = ${frac(L)} \approx ${fmt(L, 4)}$.`,
-          visual: { type: 'calc-series', params: { view: 'terms', term: `(${a}n^3 - ${b}n)/(${d} - ${c}n^3)`, n0: 2, N: 40 }, caption: 'The terms from n = 2 to 41.' },
         };
       },
     }),
@@ -231,7 +230,7 @@ means: for every tolerance $\varepsilon > 0$, however small, there is an index $
           hints: [t`Use $\left(1 + \frac{k}{n}\right)^n \to e^k$.`, t`Here $k = -${nice(m)}$.`],
           teach: 'Euler’s method for exponential decay converges, as the step count grows, to the exact exponential: (1 − k/n)ⁿ → e^{−k}.',
           explain: t`$\left(1 - \frac{${nice(m)}}{n}\right)^n \to e^{-${nice(m)}} \approx ${fmt(L, 4)}$ — exactly $Q(t)/Q_0$ for the true solution $Q = Q_0e^{-t/\tau}$. More steps, less error.`,
-          visual: { type: 'calc-series', params: { view: 'terms', term: `(1 - ${m}/n)^n`, n0: 4, N: 40 }, caption: 'The Euler estimates Qₙ/Q₀ for n = 4 to 43 steps.' },
+          visual: { type: 'calc-series', params: { view: 'terms', term: `(1 - ${m}/n)^n`, n0: 4, N: 30 }, caption: 'The Euler estimates Qₙ/Q₀ for n = 4 to 33 steps.' },
         };
       },
     }),
