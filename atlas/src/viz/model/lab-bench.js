@@ -541,7 +541,7 @@ export const EXPERIMENTS = {
     series: [{ key: 't10', sym: 't₁₀', label: 'time for 10 oscillations', unit: 's', res: 0.01, sigma: (m, P) => P.react }],
     axes: {
       T2m: {
-        label: 'T² against M', slopeUnit: 's²/kg', x: { sym: 'M = m + hanger', unit: 'kg', of: (m, R, P, sys) => m + (sys === 'hanger' ? 0 : P.mh) },
+        label: 'T² against M', slopeUnit: 's²/kg', x: { sym: 'M', unit: 'kg', of: (m, R, P, sys) => m + (sys === 'hanger' ? 0 : P.mh) },
         ys: [{ sym: 'T²', unit: 's²', of: (m, R) => (R[0] / 10) ** 2, sigma: (m, R, P) => (2 * (R[0] / 10) * P.react) / 10 }],
         expect: (P) => ({ a: (4 * Math.PI ** 2 * P.ms) / (3 * P.k), b: (4 * Math.PI ** 2) / P.k }),
         results: [{ sym: 'k', name: 'spring constant', unit: 'N/m', of: (f) => (4 * Math.PI ** 2) / f.b, sigma: (f) => ((4 * Math.PI ** 2) / f.b ** 2) * f.sb, accepted: (P) => P.k, acceptedLabel: 'true k' }],

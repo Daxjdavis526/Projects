@@ -50,7 +50,7 @@ const PREFIX = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6,
 function scaleOf(x, unit) {
   const a = Math.abs(x);
   if (unit === 'F') return a >= 1 ? [1, ''] : a >= 0.0099995 ? [1e-3, 'm'] : a >= 0.9995e-6 ? [1e-6, 'µ'] : a >= 0.9995e-9 ? [1e-9, 'n'] : [1e-12, 'p'];
-  if (a >= 0.0995 && a < 1) return [1, ''];
+  if ((a >= 0.0995 || (unit === 'Ω' && a >= 0.001)) && a < 1) return [1, ''];      // 0.50 A, 0.05 Ω
   return PREFIX.find(([f]) => a >= f * 0.9995) || PREFIX[PREFIX.length - 1];
 }
 const trimNum = (v, n) => String(+v.toPrecision(n));
@@ -191,11 +191,17 @@ export function mount(F, P0) {
   const restart = () => { newSegment(startV(swNow(), valuesNow())); if (still) S.seg.t = P.t; };
   restart();
   // a lamp's full brightness: the power it would take alone across the largest emf
-  const lampRef = () => {
-    const v = valuesNow(), Emax = Math.max(...pre.elements.filter((e) => e.kind === 'B').map((e) => v[e.id]));
+  // a bulb's full brightness, fixed at the start so the glow follows the power as values change:
+  // the power it would take alone across the largest emf, or the most a battery with internal
+  // resistance r could deliver to any load, ℰ²/4r, if that is more
+  const LREF = (() => {
+    const v = valuesNow(), bats = pre.elements.filter((e) => e.kind === 'B');
+    const Emax = Math.max(...bats.map((e) => Math.abs(v[e.id]))), rs = bats.map((e) => v[e.rKey] || 0).filter((x) => x > 0);
     const lamps = pre.elements.filter((e) => e.kind === 'L');
-    return lamps.length ? Math.max(...lamps.map((e) => (Emax * Emax) / v[e.id])) : 1;
-  };
+    if (!lamps.length || !(Emax > 0)) return 1;
+    return Math.max(...lamps.map((e) => (Emax * Emax) / v[e.id]), rs.length ? (Emax * Emax) / (4 * Math.min(...rs)) : 0);
+  })();
+  const lampRef = () => LREF;
 
   F.onChange((key) => {
     if (key === 'carriers' || key === 'loop') return draw();
@@ -665,8 +671,10 @@ export function mount(F, P0) {
     if (nq > 0) {
       const pos = vC >= 0 ? [g.p, -1] : [g.q, 1], neg = vC >= 0 ? [g.q, 1] : [g.p, -1];
       ctx.save(); ctx.font = `700 ${Math.max(10, u * 0.22)}px Inter, system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      // slots either side of the centre, where the lead wire meets the plate
+      const SLOTS = [0.22, -0.22, 0.52, -0.52, 0.82, -0.82];
       for (let k = 0; k < nq; k++) {
-        const s = ((k + 0.5) / nq - 0.5) * 1.7 * half;
+        const s = SLOTS[k] * half;
         ctx.fillStyle = C.bad; ctx.fillText('+', pos[0][0] + g.nx * s + g.dx * 8 * pos[1], pos[0][1] + g.ny * s + g.dy * 8 * pos[1]);
         ctx.fillStyle = C.accent; ctx.fillText('−', neg[0][0] + g.nx * s + g.dx * 8 * neg[1], neg[0][1] + g.ny * s + g.dy * 8 * neg[1]);
       }
@@ -749,7 +757,8 @@ export function mount(F, P0) {
     const seg = S.seg, vals = seg.vals, rows = [];
     const bats = pre.elements.filter((e) => e.kind === 'B');
     if (P.circuit === 'twoloop') {
-      rows.push(['$I_1$ (through $R_1$)', texEng(st.I.R1, 'A')], ['$I_2$ (through $R_2$)', texEng(st.I.R2, 'A')], ['$I_3$ (through $R_3$)', texEng(st.I.R3, 'A')]);
+      // signed along the directions the lessons guess: I₁ and I₂ toward the top junction, I₃ down
+      rows.push(['$I_1$ (→ through $R_1$)', texEng(st.I.R1, 'A')], ['$I_2$ (← through $R_2$)', texEng(-st.I.R2, 'A')], ['$I_3$ (↓ through $R_3$)', texEng(st.I.R3, 'A')]);
       const loopName = loopNow();
       if (loopName) {
         const L = pre.loops[loopName];
@@ -765,7 +774,7 @@ export function mount(F, P0) {
         });
         rows.push([`changes round the ${loopName} loop`, `${terms.join(' ')} = ${trimNum(Math.abs(sum) < 1e-9 ? 0 : sum, 3)}\\,\\mathrm{V}`]);
       }
-      if (P.junction) rows.push(['into the top junction', `${texEng(st.I.R1, 'A')} = ${texEng(st.I.R2, 'A')} + ${texEng(st.I.R3, 'A')}`]);
+      if (P.junction) rows.push(['top junction: $I_1 + I_2 = I_3$', `${texEng(st.I.R1, 'A')} ${-st.I.R2 < 0 ? '-' : '+'} ${texEng(Math.abs(st.I.R2), 'A')} = ${texEng(st.I.R3, 'A')}`]);
     } else if (hasCaps) {
       const tau = seg.tau, t = seg.t;
       rows.push(['$t$', `${texEng(t, 's')}${tau ? ` = ${trimNum(t / tau, 3)}\\,\\tau` : ''}`]);

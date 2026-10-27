@@ -82,7 +82,7 @@ export function qvGraph({ C, Vmax, qUnit = 'µC', qScale = 1e6, vUnit = 'V', vSc
 }
 
 /** An RC curve on a graph: V(t) charging toward Vf from 0, or discharging from V0; time in the given unit. */
-export function rcGraph({ tau, V0 = 0, Vf, tmax = 5 * tau, tUnit = 's', tScale = 1, vLabel = 'V_C (V)', marks = [], tauLine = true, caption, extra = {} }) {
+export function rcGraph({ tau, V0 = 0, Vf, tmax = 5 * tau, tUnit = 's', tScale = 1, vLabel = 'V (V)', marks = [], tauLine = true, caption, extra = {} }) {
   const T = tau / tScale, ymax = Math.max(V0, Vf) * 1.15;
   return {
     type: 'graph',
@@ -93,6 +93,30 @@ export function rcGraph({ tau, V0 = 0, Vf, tmax = 5 * tau, tUnit = 's', tScale =
       vlines: tauLine ? [{ x: T, label: 'τ', color: 'gold' }] : [],
       points: marks,
       ...extra,
+    },
+    ...(caption ? { caption } : {}),
+  };
+}
+
+/**
+ * A stretch of wire seen from the side: the free electrons inside, a cross-section of
+ * area A, and arrows for the field E, the current I and the electrons' drift (opposite to I).
+ */
+export function wirePicture({ caption, notes = [] } = {}) {
+  const ell = (x, dash = false, color = 'ink2', width = 2) => ({ param: [`${x} + 0.28*cos(t)`, '0.8*sin(t)'], t: [0, 6.2832], color, width, dash });
+  // the electrons: a fixed scatter inside the wire
+  const pts = [[-2.6, 0.35], [-2.1, -0.4], [-1.6, 0.1], [-1.1, 0.55], [-0.7, -0.5], [-0.2, 0.25], [0.3, -0.2], [0.9, 0.5], [1.3, -0.55], [1.8, 0.05], [2.3, 0.45], [2.6, -0.35], [-2.9, -0.1], [0.1, 0.62]];
+  return {
+    type: 'graph',
+    params: {
+      x: [-4.2, 4.2], y: [-1.75, 1.75], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', alt: 'A length of wire with free electrons drifting through a cross-section',
+      curves: [seg(-3, 0.8, 3, 0.8, 'ink2', 2), seg(-3, -0.8, 3, -0.8, 'ink2', 2), ell(-3), ell(3), ell(0.6, true, 'gold', 1.6)],
+      points: [...pts.map(([x, y]) => ({ x, y, r: 3.2, color: 'accent' })), label(0.6, 0.95, 'area A', 'gold', -18, -6), ...notes],
+      arrows: [
+        { from: [-2.6, 1.3], to: [-0.9, 1.3], color: 'violet', label: 'field E' },
+        { from: [1.4, 1.3], to: [3.1, 1.3], color: 'gold', label: 'current I', labelDx: -60, labelDy: -12 },
+        { from: [1.6, -1.3], to: [-0.6, -1.3], color: 'accent', label: 'electrons drift', labelDx: -10, labelDy: 14, labelAlign: 'right' },
+      ],
     },
     ...(caption ? { caption } : {}),
   };

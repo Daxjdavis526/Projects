@@ -31,12 +31,13 @@
 //       shapes: ['sphere', 'cube', 'lumpy'],  // offer a choice of the Gaussian surface's shape
 //       normals: false,                     // arrows of E·n̂ around the Gaussian surface
 //       patch: { shape: 'square'|'disk', x, y, angle, size, move: true, rotate: true },   // an open surface; angle: its normal
-//       particle: { kind: 'electron'|'proton'|'alpha'|'xenon', q, m, x, y, speed, angle, fieldLine: false, drag: true },
+//       particle: { kind: 'electron'|'proton'|'alpha'|'xenon' (or a choice key), q (in e), m (kg), x, y, speed (m/s), angle (deg),
+//                   fieldLine: false, drag: true, path },   // path: true shows the whole path in a static picture
 //       profile: false,                     // a graph of V along the horizontal line through the probe
 //       edit: false,                        // buttons to add and remove charges
 //       presets: [{ id, label, charges: […], … }], preset: 'id',   // a choice of arrangements (each may also set probe, gauss, …)
 //       toggles: ['arrows', 'fieldLines', 'equip'],                 // checkboxes for the layers
-//       readouts: ['E', 'V'],               // any of E Ex Ey Edir V F flux Qenc Qeps Eexact Vc speed K deflect time dVdx
+//       readouts: ['E', 'V'],               // any of E Ex Ey Edir V F flux Qenc Qeps Esurf Eexact Vc speed K deflect time dVdx
 //       labels: true,                       // label charges with their values
 //       notes: { arrows: [{ from, to, label, color }], points: [{ x, y, label, color }], lines: [{ from, to, color, dash }] },   // extra marks, in `unit`
 //       static: false,                      // no dragging (a picture for a problem)
@@ -64,7 +65,7 @@ const UNIT_TEX = { m: 'm', cm: 'cm', mm: 'mm', um: 'μm', km: 'km' };
 const QUNIT = { C: 1, mC: 1e-3, uC: 1e-6, nC: 1e-9, pC: 1e-12, e: M.E_CHARGE };
 const QUNIT_TEX = { C: '\\mathrm{C}', mC: '\\mathrm{mC}', uC: '\\mu\\mathrm{C}', nC: '\\mathrm{nC}', pC: '\\mathrm{pC}', e: 'e' };
 const QUNIT_TEXT = { C: 'C', mC: 'mC', uC: 'μC', nC: 'nC', pC: 'pC', e: 'e' };
-const READOUTS = ['E', 'Ex', 'Ey', 'Edir', 'V', 'F', 'flux', 'Qenc', 'Qeps', 'Eexact', 'Vc', 'speed', 'K', 'deflect', 'time', 'dVdx'];
+const READOUTS = ['E', 'Ex', 'Ey', 'Edir', 'V', 'F', 'flux', 'Qenc', 'Qeps', 'Esurf', 'Eexact', 'Vc', 'speed', 'K', 'deflect', 'time', 'dVdx'];
 const SHAPES = { sphere: 'Sphere', cube: 'Cube', box: 'Box', cylinder: 'Cylinder', lumpy: 'Lumpy blob' };
 const TOGGLES = { arrows: 'Field vectors', fieldLines: 'Field lines', equip: 'Equipotentials', normals: 'Flux arrows on the surface' };
 const KINDS = ['electron', 'proton', 'alpha', 'xenon'];
@@ -472,6 +473,12 @@ export function mount(F, P0) {
         }
       }
       const want = P.readouts || [];
+      if (want.includes('Esurf')) {
+        // the field's size where the surface crosses the +x direction from its centre (marked)
+        const [mx, my] = gaussGrip(st.gauss, 0), em = M.field(S, mx * L, my * L, 0, Ev);
+        plot.point(mx, my, { color: 'good', r: 4 });
+        rows.push(['$|\\vec E|$ on the surface (at the dot)', qty(Math.hypot(em[0], em[1], em[2]), 'N/C')]);
+      }
       if (want.includes('flux') || want.includes('Qenc') || want.includes('Qeps')) {
         const onSurf = S.charges.some((q) => surf.outline.some(([x, y]) => Math.hypot(x - q.x, y - q.y) < 0.012 * (v.x1 - v.x0) * L));
         const gsig = sig + JSON.stringify([st.gauss, currentShape()]);
@@ -498,7 +505,8 @@ export function mount(F, P0) {
 
     // the particle
     if (st.particle) {
-      const pa = st.particle, kind = M.PARTICLES[pa.kind] || M.PARTICLES.electron;
+      const pa = st.particle, kindName = (P.choices || []).some((c) => c.key === pa.kind) ? F.params[pa.kind] : pa.kind;
+      const kind = M.PARTICLES[kindName] || M.PARTICLES.electron;
       const q = pa.q !== undefined ? num(pa.q, E) * M.E_CHARGE : kind.q, m = pa.m !== undefined ? num(pa.m, E) : kind.m;
       const sp = num(pa.speed ?? 0, E), an = (num(pa.angle ?? 0, E) * Math.PI) / 180;
       const tr = memo('path', sig + JSON.stringify([pa.x, pa.y, sp, an, q, m]), () => M.trajectory(S, { x: pa.x * L, y: pa.y * L, vx: sp * Math.cos(an), vy: sp * Math.sin(an), q, m }, { box, tmax: pa.tmax }));
@@ -726,7 +734,9 @@ export function validate(P0) {
     if (pa) { if (!['square', 'disk', undefined].includes(pa.shape)) out.push(`${where}: a patch is a square or a disk`); if (!(expr(pa.size, `${where} patch size`) > 0)) out.push(`${where}: a patch needs size > 0`); expr(pa.angle, `${where} patch angle`); }
     const pt = S.particle;
     if (pt) {
-      if (pt.kind && !KINDS.includes(pt.kind)) out.push(`${where}: particle kind must be one of ${KINDS.join(', ')}`);
+      const choiceKind = (P.choices || []).find((c) => c.key === pt.kind);
+      if (choiceKind) { for (const [v] of choiceKind.options) if (!KINDS.includes(v)) out.push(`${where}: particle choice option “${v}” must be one of ${KINDS.join(', ')}`); }
+      else if (pt.kind && !KINDS.includes(pt.kind)) out.push(`${where}: particle kind must be one of ${KINDS.join(', ')} (or a choice key)`);
       if (!pt.kind && (pt.q === undefined || pt.m === undefined)) out.push(`${where}: a particle needs a kind, or q (in e) and m (kg)`);
       expr(pt.speed, `${where} particle speed`); expr(pt.angle, `${where} particle angle`); expr(pt.q, `${where} particle q`); expr(pt.m, `${where} particle m`);
     }

@@ -100,7 +100,8 @@ export function mount(F, P0) {
     const narrow = W < 520, fs = compact || narrow ? 11 : 12.5;
     const txt = (t, x, y, o = {}) => {
       ctx.save(); ctx.font = `${o.w || 600} ${o.size || fs}px Inter, system-ui, sans-serif`; ctx.textAlign = o.align || 'center'; ctx.textBaseline = o.base || 'middle';
-      ctx.lineWidth = 3.5; ctx.strokeStyle = C.bg; ctx.globalAlpha = 0.9; ctx.strokeText(t, x, y); ctx.globalAlpha = 1; ctx.fillStyle = o.color || C.ink; ctx.fillText(t, x, y); ctx.restore();
+      if (o.halo !== false) { ctx.lineWidth = 3.5; ctx.strokeStyle = C.bg; ctx.globalAlpha = 0.9; ctx.strokeText(t, x, y); ctx.globalAlpha = 1; }
+      ctx.fillStyle = o.color || C.ink; ctx.fillText(t, x, y); ctx.restore();
     };
     const line = (x0, y0, x1, y1, col, w = 2.4, dash = []) => { ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.restore(); };
     const hid = (k) => P.hide.includes(k);
@@ -166,8 +167,8 @@ export function mount(F, P0) {
       const n = Math.max(1, Math.floor((x1 - xs) / sp));
       for (let k = 0; k < n; k++) {
         const x = xs + ((k + 0.5) * (x1 - xs)) / n;
-        txt('−', x, yt + 8, { color: C.accent2, w: 700, size: fs - 1 });
-        txt('+', x, yb - 8, { color: C.warn, w: 700, size: fs - 1 });
+        txt('−', x, yt + 8, { color: C.accent2, w: 800, size: fs, halo: false });
+        txt('+', x, yb - 8, { color: C.warn, w: 800, size: fs, halo: false });
       }
     }
     // the battery and its switch, on the left

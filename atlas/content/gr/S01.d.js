@@ -88,7 +88,7 @@ const cubePicture = {
       { param: ['3.844 + 0.06*cos(t)', '0.06*sin(t)'], t: [0, 6.2832], color: 'ink2', width: 2 },
     ],
     arrows: [[1.35, 0, 1.05, 0], [-1.35, 0, -1.05, 0], [0, 1.35, 0, 1.05], [0, -1.35, 0, -1.05]].map(([a, b, c, d]) => ({ from: [a, b], to: [c, d], color: 'gold' })),
-    points: [{ x: 0, y: 0.12, r: 0.01, color: 'teal', label: 'Earth', labelDx: -14, labelDy: -12 }, { x: 3.844, y: 0.06, r: 0.01, color: 'ink2', label: 'Moon', labelDx: -14, labelDy: -12 }, { x: -1, y: -1, r: 0.01, color: 'violet', label: 'cube, 200 000 km across', labelDx: 0, labelDy: 14 }],
+    points: [{ x: 0, y: 0.12, r: 0.01, color: 'teal', label: 'Earth', labelDx: -14, labelDy: -12 }, { x: 3.844, y: 0.06, r: 0.01, color: 'ink2', label: 'Moon', labelDx: -14, labelDy: -12 }, { x: -1, y: -1, r: 0.01, color: 'violet', label: 'cube, 200 000 km across', labelDx: 8, labelDy: -10 }],
   },
   caption: 'Seen edge-on: the cube around Earth, with the Moon outside it. Distances to scale; Earth and the Moon are drawn larger than scale. Gold: the field pointing into the cube’s faces.',
 };

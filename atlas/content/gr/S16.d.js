@@ -27,16 +27,17 @@ const restFluid = stressTable([['ρc²', '', '', ''], ['', 'p', '', ''], ['', ''
 });
 
 // w = p/ρc² against particle speed, both on log scales: a straight line of slope 2
-const REFS = [[-5.78, 'air'], [-2.68, 'Sun’s centre'], [-0.22, 'white-dwarf electrons']];
+const REFS = [[-5.78, 'air', {}], [-2.68, 'Sun’s centre', {}], [-0.22, 'white dwarf', { labelDx: -12, labelDy: 6, labelAlign: 'right' }]];
+const refPoints = [
+  ...REFS.map(([x, label, o]) => ({ x, y: +(2 * x - LOG3).toFixed(3), r: 3.5, color: 'ink3', label, ...o })),
+  { x: 0, y: +(-LOG3).toFixed(3), r: 4.5, color: 'gold', label: 'light: ⅓', labelDx: -10, labelDy: -14, labelAlign: 'right' },
+];
 const wGraph = (extra = {}) => ({
   type: 'graph',
   params: {
-    x: [-6.3, 0.4], y: [-13.2, 0.8], xlabel: 'log₁₀(v/c)', ylabel: 'log₁₀(p/ρc²)',
+    x: [-6.3, 0.4], y: [-13.2, 0.8], axesAt: 'edge', xlabel: 'log₁₀(v/c)', ylabel: 'log₁₀(p/ρc²)',
     curves: [{ fn: `2*x - ${LOG3.toFixed(5)}`, domain: [-6.3, 0], color: 'accent' }],
-    points: [
-      ...REFS.map(([x, label]) => ({ x, y: +(2 * x - LOG3).toFixed(3), r: 3.5, color: 'ink3', label })),
-      { x: 0, y: +(-LOG3).toFixed(3), r: 4.5, color: 'gold', label: 'light: ⅓' },
-    ],
+    points: refPoints,
     ...extra,
   },
 });
@@ -61,7 +62,7 @@ const fieldBox = (forces, caption) => ({
     ],
     points: [
       { x: 2.75, y: 2.3, r: 0.01, color: 'accent', label: 'B' },
-      ...(forces ? [{ x: 1.25, y: 0.3, r: 0.01, color: 'gold', label: 'tension' }, { x: 0.15, y: 1.45, r: 0.01, color: 'violet', label: 'pressure' }] : []),
+      ...(forces ? [{ x: 1.95, y: 0, r: 0.01, color: 'gold', label: 'tension', labelDx: 6, labelDy: 4 }, { x: 0.15, y: 1.45, r: 0.01, color: 'violet', label: 'pressure' }] : []),
     ],
   },
   caption,
@@ -85,7 +86,7 @@ const rolling = {
     x: [-4, 4], y: [0, 3], xlabel: 'field value φ', ylabel: 'potential energy density V',
     curves: [{ fn: '0.6 + 0.12*x^2', domain: [-4, 4], color: 'accent' }],
     points: [{ x: 2.6, y: 1.411, r: 7, color: 'gold' }],
-    arrows: [{ from: [2.5, 1.75], to: [1.6, 1.42], color: 'gold' }],
+    arrows: [{ from: [2.35, 1.6], to: [1.45, 1.13], color: 'gold' }],
   },
   caption: t`A field that is the same everywhere, rolling down its potential: its value $\phi$ changes in time at the rate $\dot\phi$. Its energy is kinetic, $\tfrac12\dot\phi^2$, plus potential, $V$.`,
 };
@@ -154,8 +155,7 @@ Here it is built from the bottom up: for **dust** (particles all moving together
         { label: '$p/\\rho c^2 = v^2/3c^2$', expr: '10^(2*lv)/3', digits: 3 },
       ],
       points: [
-        ...REFS.map(([x, label]) => ({ x, y: +(2 * x - LOG3).toFixed(3), r: 3.5, color: 'ink3', label })),
-        { x: 0, y: +(-LOG3).toFixed(3), r: 4.5, color: 'gold', label: 'light: ⅓' },
+        ...refPoints,
         { x: 'lv', y: `2*lv - ${LOG3.toFixed(5)}`, r: 6, color: 'accent' },
       ],
     }).params,
@@ -346,7 +346,7 @@ Here it is built from the bottom up: for **dust** (particles all moving together
       hints: [t`Add the four diagonal entries, keeping the sign of the tension.`, t`$u + (-u) + u + u$.`],
       teach: t`Every component of $T^{\mu\nu}$ gravitates: a magnetic field's tension and pressures add up to a source of $2u$, just like light.`,
       explain: t`$u - u + u + u = 2u$ — twice what its energy alone would give, exactly as for a gas of light ($\rho c^2 + 3p = 2\rho c^2$). Both have a traceless stress–energy tensor, $-T^{00} + T^{xx} + T^{yy} + T^{zz} = 0$, so the stresses always add up to $T^{00}$.`,
-      visual: fieldBox(true, t`On a box of field (black), the field outside pulls each end face outward — tension along the lines (gold) — and pushes each side face inward — pressure across them (violet).`),
+      visual: fieldBox(true, t`On a box drawn in the field, the field outside pulls each end face outward — tension along the lines (gold) — and pushes each side face inward — pressure across them (violet).`),
     }),
   ],
   sources: [

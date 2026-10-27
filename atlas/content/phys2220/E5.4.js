@@ -9,7 +9,7 @@ import { EPS0, sf, apart, plates } from './_circuits.js';
 
 const t = String.raw;
 const MAT = {
-  teflon: ['Teflon', 2.1, 60e6], polystyrene: ['polystyrene', 2.56, 24e6], mylar: ['Mylar', 3.2, 7e6],
+  teflon: ['Teflon', 2.1, 60e6], polystyrene: ['polystyrene', 2.56, 24e6], mylar: ['Mylar', 3.2, null],
   nylon: ['nylon', 3.4, 14e6], paper: ['paper', 3.7, 16e6], pyrex: ['Pyrex glass', 5.6, 14e6], neoprene: ['neoprene rubber', 6.7, 12e6],
 };
 
@@ -102,7 +102,7 @@ What happens next depends on the battery. **Connected**, the voltage is held fix
           hints: ['Disconnected: Q is fixed.', t`$V = Q/C = Q/(\kappa C_0) = V_0/\kappa$.`],
           teach: t`With the charge trapped, a dielectric lowers the voltage (and the field) by $\kappa$.`,
           explain: t`$V = V_0/\kappa = ${V0}/${k} = ${nice(sf(V0 / k))}$ V. The bound charge on the slab’s faces cancels all but $1/\kappa$ of the plates’ field.`,
-          visual: plates({ A: 0.02, d: 2e-3, V: 12, material: key, f: 0.7, Q: 4e-10, connected: false, hide: ['V'] }, 'The capacitor disconnected, slab sliding in.'),
+          visual: plates({ A: 0.02, d: 2e-3, V: V0, material: key, f: 0.7, Q: 4e-10, connected: false, hide: ['Q'] }, 'The capacitor, charged and then disconnected, with the slab sliding in.'),
         };
       },
     }),
@@ -196,7 +196,7 @@ What happens next depends on the battery. **Connected**, the voltage is held fix
           errors: apart([{ value: (EPS0 * L * w * 1e-2) / (th * 1e-6) * 1e9, feedback: t`Include the film’s dielectric constant: $C = \kappa\varepsilon_0A/d$.` }], C * 1e9),
           hints: [t`$A = (${w}\times10^{-2}\ \text{m})(${L}\ \text{m})$ and $d = ${th}\times10^{-6}$ m.`, t`$C = \kappa\varepsilon_0A/d$.`],
           teach: 'Thin films with a dielectric are how real capacitors pack large capacitance into small volumes.',
-          explain: t`$C = \dfrac{(3.2)(8.854\times10^{-12})(${nice(w * 1e-2 * L)})}{${th}\times10^{-6}} = ${tex(C)}$ F $= ${nice(sf(C * 1e9))}$ nF. The film’s strength (about 7 MV/m) lets this ${th} µm gap stand roughly ${nice(sf(7e6 * th * 1e-6))} V.`,
+          explain: t`$C = \dfrac{(3.2)(8.854\times10^{-12})(${nice(w * 1e-2 * L)})}{${th}\times10^{-6}} = ${tex(C)}$ F $= ${nice(sf(C * 1e9))}$ nF. Rolling it up with a second film doubles that, and packs metres of foil into a can a few centimetres long.`,
           visual: plates({ A: w * 1e-2 * L, d: 0.5e-3, V: 12, material: 'mylar', f: 1, hide: ['Q', 'd'] }, 'The capacitor unrolled, seen edge-on: two foils with Mylar between them (the film thickness is drawn hugely exaggerated).'),
         };
       },

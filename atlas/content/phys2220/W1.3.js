@@ -2,11 +2,14 @@
 // other; same-frequency waves combine into one wave whose amplitude depends on
 // the phase difference, which a path difference produces.
 import { lesson, mcq, num } from '../../src/core/content.js';
+import { tex } from '../../src/core/format.js';
 import { tn, s3, r6, curvePicture, label, twoSources, michelson } from './_waves.js';
 
 const t = String.raw;
 const D2R = Math.PI / 180;
 const V_SOUND = 343;                       // m/s, air at 20 °C
+/** A value with floating-point noise near zero removed (cos 90° is 0, not 6e-17). */
+const clean = (x) => (Math.abs(x) < 1e-9 ? 0 : x);
 /** Amplitude of the sum of two same-frequency waves. */
 const res = (A1, A2, deg) => Math.sqrt(A1 * A1 + A2 * A2 + 2 * A1 * A2 * Math.cos(deg * D2R));
 /** Keep only the slips whose value differs from the key. */
@@ -222,7 +225,7 @@ In step ($\phi = 0, 2\pi, \ldots$) they reinforce: **constructive** interference
           prompt: t`Two waves of the same frequency and direction, with amplitudes ${A1} mm and ${A2} mm and a phase difference of $${ph}°$, travel along a string. The amplitude of their sum is $\sqrt{A_1^2 + A_2^2 + 2A_1A_2\cos\phi}$. What is it?`,
           answer: R, units: 'mm', tol: { rel: 0.01 },
           errors: apart([{ value: A1 + A2, feedback: 'Simply adding the amplitudes is the in-step case only.' }, { value: Math.sqrt(A1 * A1 + A2 * A2), feedback: t`Keep the cross term $2A_1A_2\cos\phi$.` }], R),
-          hints: [t`Substitute into $\sqrt{A_1^2 + A_2^2 + 2A_1A_2\cos\phi}$.`, t`$\cos ${ph}° = ${s3(Math.cos(ph * D2R))}$.`],
+          hints: [t`Substitute into $\sqrt{A_1^2 + A_2^2 + 2A_1A_2\cos\phi}$.`, t`$\cos ${ph}° = ${tex(clean(Math.cos(ph * D2R)), 3)}$.`],
           teach: 'Same-frequency waves combine with amplitude √(A₁² + A₂² + 2A₁A₂ cos φ).',
           explain: t`$\sqrt{${A1}^2 + ${A2}^2 + 2(${A1})(${A2})\cos ${ph}°} = ${tn(R)}$ mm.`,
           visual: { type: 'wave-string', params: { mode: 'two', kind: 'waves', A1: A1 / 4, A2: A2 / 4, phase: ph, controls: false, play: false, readout: false }, caption: 'The two waves (dashed), drawn at a quarter of their sizes, and their sum (green).' },

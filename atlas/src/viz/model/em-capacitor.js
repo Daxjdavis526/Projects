@@ -19,7 +19,7 @@ export const DIELECTRICS = {
   air: { label: 'air', kappa: 1.00059, strength: 3.0e6 },
   teflon: { label: 'Teflon', kappa: 2.1, strength: 60e6 },
   polystyrene: { label: 'polystyrene', kappa: 2.56, strength: 24e6 },
-  mylar: { label: 'Mylar', kappa: 3.2, strength: 7e6 },
+  mylar: { label: 'Mylar', kappa: 3.2, strength: null },     // thin films vary too widely with thickness for one figure
   nylon: { label: 'nylon', kappa: 3.4, strength: 14e6 },
   paper: { label: 'paper', kappa: 3.7, strength: 16e6 },
   pyrex: { label: 'Pyrex glass', kappa: 5.6, strength: 14e6 },

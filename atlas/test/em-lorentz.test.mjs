@@ -28,7 +28,7 @@ check('a ¹²C⁺ ion is 12 u less one electron', near(M.particle({ q: 1, m: 12 
   const p = M.particle('proton'), B = 0.5, v = 2e6;
   const cfg = { q: p.q, m: p.m, B, v0: [v, 0, 0] };
   const r = M.radius(p.m, v, p.q, B), T = M.period(p.m, p.q, B);
-  check('r = mv/(qB) = 4.18 cm for the proton', near(r, (M.M_P * v) / (M.E_CHARGE * B), 1e-12) && near(r, 0.041767, 1e-4));
+  check('r = mv/(qB) = 4.18 cm for the proton', near(r, (M.M_P * v) / (M.E_CHARGE * B), 1e-12) && near(r, 0.0417588, 1e-5));
   check('T = 2πm/(qB) = 131 ns', near(T, (2 * Math.PI * M.M_P) / (M.E_CHARGE * B), 1e-12) && near(T, 1.3121e-7, 1e-3));
   const c = M.centre(cfg);
   let worstR = 0, worstV = 0, worstPerp = 0;
@@ -86,7 +86,7 @@ check('a ¹²C⁺ ion is 12 u less one electron', near(M.particle({ q: 1, m: 12 
   const cfg = { q: e.q, m: e.m, B, v0: [vperp, 0, vpar] };
   const T = M.period(e.m, e.q, B), s = M.stateAt(cfg, T);
   check('one turn of the helix advances the pitch v∥T along B', near(s.r[2], M.pitch(e.m, vpar, e.q, B), 1e-12) && Math.hypot(s.r[0], s.r[1]) < 1e-9);
-  check('an auroral electron at 30° to 50 μT: r = 1.14 m, f = 1.40 MHz', near(M.radius(e.m, vperp, e.q, B), 1.1385, 1e-3) && near(1 / T, 1.3996e6, 1e-3));
+  check('an auroral electron at 30° to 50 μT: r = 1.14 m, f = 1.40 MHz', near(M.radius(e.m, vperp, e.q, B), 1.13713, 1e-4) && near(1 / T, 1.3996e6, 1e-3));
 }
 
 // ─── crossed E and B: the drift, the velocity selector ─────────────────────

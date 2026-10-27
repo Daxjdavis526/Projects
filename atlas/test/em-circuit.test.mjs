@@ -364,7 +364,8 @@ check('a floating part is referred to its own node, not an error', (() => { cons
 // ─── formulas ─────────────────────────────────────────────────────────────
 check('series and parallel combinations', near(M.seriesR(2, 3, 5), 10) && near(M.parallelR(3, 6), 2) && near(M.seriesC(2, 2), 1) && near(M.parallelC(1, 2), 3));
 check('wire resistance: 10 m of 1.0 mm copper is about 0.21 Ω', Math.abs(M.wireR(M.MATERIALS.copper.rho, 10, 1e-3) - 0.2139) < 1e-3);
-check('drift speed: 1 A in 1 mm² copper is about 74 µm/s', Math.abs(M.driftSpeed(1, M.MATERIALS.copper.n, 1e-6) - 7.37e-5) < 0.01e-5);
+check('drift speed: 1 A in 1 mm² copper is about 74 µm/s', Math.abs(M.driftSpeed(1, M.MATERIALS.copper.n, 1e-6) - 7.35e-5) < 0.01e-5);
+check('copper: one free electron per atom, n = ρN_A/M', Math.abs(M.MATERIALS.copper.n / ((8960 / 0.06355) * 6.02214076e23) - 1) < 2e-3);
 check('names: R1 → R₁', M.nameOf('R1') === 'R₁' && M.nameOf('C12') === 'C₁₂' && M.nameOf('Rc') === 'Rc');
 
 console.log(`\n${pass} passed, ${fail} failed`);

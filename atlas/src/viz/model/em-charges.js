@@ -78,14 +78,16 @@ export function sphereSigma(theta, { Q, d, a, qNet = 0 }) {
 export const groundedCharge = (Q, d, a) => (-Q * a) / d;
 
 /**
- * The force on the sphere along +x (toward Q is positive), N. For qNet = 0 this is the attraction
+ * The force on the sphere toward Q (positive = attraction), N. For qNet = 0 this is the attraction
  * kQ²a³(2d² − a²)/(d³(d² − a²)²) of a neutral conductor, whatever the sign of Q.
  */
 export function forceOnSphere({ Q, d, a, qNet = 0 }) {
   const { qi, b, qc } = sphereImages({ Q, d, a, qNet });
-  // force on Q from the images, along +x (away from the sphere is +); the sphere feels the opposite
+  // The force on Q from the images, along +x (positive = pushed away from the sphere). By Newton's
+  // third law the sphere feels the same size of force the other way: when Q is pushed away (+),
+  // the sphere is pushed away from Q too, i.e. toward −x. So the sphere's force *toward* Q is −onQ.
   const onQ = K * Q * (qi / ((d - b) ** 2) + qc / (d * d));
-  return onQ;                                // = −(force on the sphere along +x) … so toward Q is +onQ·(−1)·(−1)
+  return -onQ;
 }
 
 /**

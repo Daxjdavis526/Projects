@@ -59,7 +59,7 @@ The slope gives $g = 2/b^2$; the intercept measures the delay instead of spoilin
     visual: plot('freefall', EX.rows, { sys: true, table: true, residuals: true, caption: 'The seven drops: t against √h with ±1σ error bars, the least-squares line, and residuals.' }),
     steps: [
       { label: 'Check the fit', text: t`$\chi^2/\text{dof} = ${EX.f.chi2r.toFixed(2)}$ and the residuals scatter without a pattern: a straight line in $\sqrt h$ describes the data, and the error bars are about right.` },
-      { label: 'g from the slope', text: t`$b = \sqrt{2/g}$, so $g = \dfrac{2}{b^2} = \dfrac{2}{${EX.f.b.toFixed(5)}^2} = ${EX.g.value.toFixed(3)}\ \text{m/s}^2$.` },
+      { label: 'From the slope', text: t`$b = \sqrt{2/g}$, so $g = \dfrac{2}{b^2} = \dfrac{2}{${EX.f.b.toFixed(5)}^2} = ${EX.g.value.toFixed(3)}\ \text{m/s}^2$.` },
       { label: 'Propagate', text: t`$g \propto b^{-2}$, so its relative uncertainty is twice the slope’s: $\dfrac{\sigma_g}{g} = 2\dfrac{\sigma_b}{b} = 2\times\dfrac{${EX.f.sb.toPrecision(2)}}{${EX.f.b.toFixed(4)}} = ${(200 * EX.f.sb / EX.f.b).toFixed(2)}\%$, so $\sigma_g = ${EX.g.sigma.toPrecision(2)}\ \text{m/s}^2$.` },
       { label: 'Compare', text: t`$g = ${pmTeX(EX.g.value, EX.g.sigma, t`\text{m/s}^2`)}$ is $${(Math.abs(EX.g.value - G) / EX.g.sigma).toFixed(1)}\sigma$ from 9.80 m/s²: agreement.` },
       { label: 'The intercept', text: t`At $\sqrt h = 0$ the ball would still take $${ms(EX.f.a)} \pm ${ms(EX.f.sa)}$ ms: the timer starts before the ball falls. That is the release delay — about ${Math.round(EX.f.a / EX.f.sa)} standard errors from zero, so it is real. Because it sits in the intercept, it costs $g$ nothing.` },

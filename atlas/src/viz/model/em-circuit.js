@@ -289,11 +289,15 @@ export const parallelR = (...R) => 1 / R.reduce((a, b) => a + 1 / b, 0);
 export const seriesC = (...C) => 1 / C.reduce((a, b) => a + 1 / b, 0);
 export const parallelC = (...C) => C.reduce((a, b) => a + b, 0);
 
-/** Conductors at 20 °C: resistivity ρ (Ω·m), temperature coefficient α (1/K), free-electron density n (m⁻³). */
+/**
+ * Conductors at 20 °C: resistivity ρ (Ω·m) and temperature coefficient α (1/K), typical
+ * handbook values; free-electron density n (m⁻³) from the density and molar mass,
+ * counting one free electron per copper atom and three per aluminium atom.
+ */
 export const MATERIALS = {
-  copper: { label: 'copper', rho: 1.68e-8, alpha: 0.0039, n: 8.47e28 },
+  copper: { label: 'copper', rho: 1.68e-8, alpha: 0.0039, n: 8.49e28 },
   aluminium: { label: 'aluminium', rho: 2.65e-8, alpha: 0.0039, n: 18.1e28 },
-  tungsten: { label: 'tungsten', rho: 5.6e-8, alpha: 0.0045, n: 6.3e28 },
+  tungsten: { label: 'tungsten', rho: 5.6e-8, alpha: 0.0045, n: null },
   nichrome: { label: 'nichrome', rho: 1.0e-6, alpha: 0.0004, n: null },
 };
 
@@ -356,7 +360,7 @@ export function preset(name, o = {}) {
     const g = B.node(0, 0), p = B.node(0, 4), q = B.node(7, 4), s = B.node(7, 0);
     bat('E', g, p, 'r');
     B.run(p, q, [o.sw && { id: 'S', kind: 'S', lab: 't' }, o.amm && { id: 'A1', kind: 'A', lab: 't' }]);
-    B.el('R1', o.lamp ? 'L' : 'R', q, s, { lab: 'r', wire: !!o.wire, name: o.lamp ? 'bulb' : 'R' });
+    B.el('R1', o.lamp ? 'L' : 'R', q, s, { lab: o.volt ? 'l' : 'r', wire: !!o.wire, name: o.lamp ? 'bulb' : 'R' });
     B.wire(s, g);
     if (o.volt) B.el('V1', 'V', q, s, { lab: 'r', name: 'V', off: 1.6 });
     Object.assign(P.defaults, { E: 12, r: 0, R1: 6 });
