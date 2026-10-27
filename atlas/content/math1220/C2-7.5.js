@@ -2,7 +2,7 @@
 // point plus a normal. Orbital planes, their normals and the line of nodes.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { nice } from '../../src/core/format.js';
-import { QUADS, signed, vecTeX, add, sub, scale, dot, cross, norm, deg } from './_vectors.js';
+import { QUADS, signed, vecTeX, edgeView, add, sub, scale, dot, cross, norm, deg } from './_vectors.js';
 
 const t = String.raw;
 const D = 'pi/180';
@@ -222,8 +222,8 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
           teach: 'Read the normals off the coefficients; the planes meet at the angle between them (taking the acute one).',
           visual: {
             type: 'calc-vectors3d',
-            params: { range: 3, grid: false, planes: [{ normal: n1, d: 0, size: 2.2, color: 'accent', alpha: 0.2, showNormal: true, normalLabel: t`\vec n_1` }, { normal: n2, d: 0, size: 2.2, color: 'violet', alpha: 0.22, showNormal: true, normalLabel: t`\vec n_2` }] },
-            caption: 'Drag to rotate. Both planes are drawn through the origin: shifting a plane does not change its tilt.',
+            params: { range: 3, grid: false, ...edgeView(n1, n2), planes: [{ normal: n1, d: 0, size: 2.2, color: 'accent', alpha: 0.2, showNormal: true, normalLabel: t`\vec n_1` }, { normal: n2, d: 0, size: 2.2, color: 'violet', alpha: 0.22, showNormal: true, normalLabel: t`\vec n_2` }] },
+            caption: 'Drag to rotate. Both planes are drawn through the origin, seen almost along the line where they meet: shifting a plane does not change its tilt.',
           },
           explain: t`$\cos\theta = \frac{${Math.abs(dot(n1, n2))}}{${L1}\cdot${L2}} = ${nice(Math.abs(c), 4)}$, so $\theta = ${nice(th, 4)}^\circ$. The constants on the right do not matter: shifting a plane does not change its tilt.`,
         };
@@ -298,7 +298,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
           errors: [{ value: 2 * v * Math.sin(th), feedback: t`Use half the angle: $\Delta v = 2v\sin\frac{\theta}{2}$.` }],
           hints: [t`$\cos\theta = \vec n_1\cdot\vec n_2$ (both are unit vectors).`, t`$\vec n_1\cdot\vec n_2 = ${nice(dot(n1, n2), 4)}$, so $\theta = ${nice(deg(th), 4)}^\circ$.`],
           teach: 'The angle between two orbital planes is the angle between their normals; turning the velocity through it is a plane change.',
-          visual: { type: 'calc-vectors3d', params: { range: 3, grid: false, planes: [{ normal: n1, d: 0, size: 2.3, color: 'accent', alpha: 0.2, showNormal: true, normalLabel: t`\vec n_1` }, { normal: n2, d: 0, size: 2.3, color: 'violet', alpha: 0.22, showNormal: true, normalLabel: t`\vec n_2` }] }, caption: 'Drag to rotate. The two orbital planes through Earth’s centre and their normals.' },
+          visual: { type: 'calc-vectors3d', params: { range: 3, grid: false, ...edgeView(n1, n2), planes: [{ normal: n1, d: 0, size: 2.3, color: 'accent', alpha: 0.2, showNormal: true, normalLabel: t`\vec n_1` }, { normal: n2, d: 0, size: 2.3, color: 'violet', alpha: 0.22, showNormal: true, normalLabel: t`\vec n_2` }] }, caption: 'Drag to rotate. The two orbital planes through Earth’s centre and their normals, seen almost along the line where they cross.' },
           explain: t`$\theta = \arccos(${nice(dot(n1, n2), 4)}) = ${nice(deg(th), 4)}^\circ$, so $\Delta v = 2(${v})\sin(${nice(deg(th) / 2, 4)}^\circ) = ${nice(dv, 3)}$ km/s. Turning a fast velocity is expensive, which is why launch sites and orbits are chosen to avoid plane changes, and why missions that need one often make it far from Earth, where $v$ is small, or combine it with another burn.`,
         };
       },

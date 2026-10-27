@@ -1,7 +1,7 @@
 // Vectors and components: an arrow becomes two signed numbers once you choose axes.
 import { lesson, mcq, multi, num } from '../../src/core/content.js';
 import { fmt } from '../../src/core/format.js';
-import { vectorPicture, polar, DEG } from './_vectors.js';
+import { vectorPicture, polar, segment, DEG } from './_vectors.js';
 
 const t = String.raw;
 const deg = (x) => (x * 180) / Math.PI;
@@ -14,6 +14,86 @@ const AX = `(px*${C} + py*${S})`, AY = `(-px*${S} + py*${C})`;
 const EX = { v: 340, a: 62 };
 EX.vx = EX.v * Math.cos(EX.a * DEG);
 EX.vy = EX.v * Math.sin(EX.a * DEG);
+
+const r4 = (v) => +(+v).toFixed(4);
+
+// A rocket partway up its climb: a scene to test each listed quantity against.
+const CLIMB = {
+  type: 'graph',
+  params: {
+    aspect: 'wide', equal: true, x: [-1.5, 8], y: [-0.8, 6.4], axes: false, grid: false,
+    alt: 'A rocket partway along a curved climb from its launch pad',
+    curves: [
+      segment([-1.2, 0], [7.5, 0], { color: 'ink3', dash: false }),
+      { param: ['5*t^2', '7*t'], t: [0, 0.75], color: 'ink3', width: 1.5, dash: true },
+    ],
+    points: [
+      { x: 0, y: 0, r: 5, color: 'ink2', label: 'launch pad' },
+      { x: 2.8125, y: 5.25, r: 6, color: 'gold', label: 'the rocket' },
+    ],
+  },
+  caption: 'A rocket partway up its climb. Test each quantity: could you draw it as an arrow on this picture — does it point somewhere? If so, it is a vector.',
+};
+
+// Runway axes: the wind (length to scale, w = 1) splits into a headwind along the
+// centreline and a crosswind across it. The aircraft lands moving to the right.
+function runway(w, a) {
+  const c = Math.cos(a * DEG), s = Math.sin(a * DEG);
+  const T = [r4(c), r4(s)], R = 0.32;
+  return {
+    type: 'graph',
+    params: {
+      aspect: 'wide', equal: true, x: [-1.9, 1.75], y: [-0.45, 1.15], axes: false, grid: false,
+      alt: 'A runway seen from above, with the wind arrow split into components along and across it',
+      curves: [
+        segment([-1.85, 0.07], [1.7, 0.07], { color: 'ink3', dash: false }),
+        segment([-1.85, -0.07], [1.7, -0.07], { color: 'ink3', dash: false }),
+        segment([-1.85, 0], [1.7, 0], { color: 'ink4', width: 1 }),
+        { param: [`${R}*cos(t)`, `${R}*sin(t)`], t: [0, r4(a * DEG)], color: 'gold', width: 1.8 },
+      ],
+      arrows: [
+        { from: T, to: [0, 0], color: 'accent' },
+        { from: T, to: [0, T[1]], color: 'warn' },
+        { from: [0, T[1]], to: [0, 0], color: 'good' },
+      ],
+      points: [
+        { x: -1.5, y: 0, r: 4.5, color: 'ink2', label: 'landing →' },
+        { x: r4(c + 0.01), y: r4(s - 0.02), r: 0.01, color: 'accent', label: `wind, ${w} km/h` },
+        { x: r4(c / 2 - 0.15), y: r4(s + 0.07), r: 0.01, color: 'warn', label: 'headwind' },
+        { x: -0.62, y: r4(s / 2), r: 0.01, color: 'good', label: 'crosswind = ?' },
+        { x: r4(1.25 * R * Math.cos((a * DEG) / 2)), y: r4(1.25 * R * Math.sin((a * DEG) / 2) - 0.03), r: 0.01, color: 'gold', label: `${a}°` },
+      ],
+    },
+    caption: 'The runway from above, with axes along and across it. The wind arrow splits into a headwind along the centreline and a crosswind across it. Drawn to scale, without numbers: compute, don’t read off.',
+  };
+}
+
+// A gimballed engine: thrust tilted g degrees off the rocket's axis, drawn to scale (T = 1).
+function gimbal(T, g) {
+  const sx = Math.sin(g * DEG), cy = Math.cos(g * DEG), R = 0.45;
+  return {
+    type: 'graph',
+    params: {
+      aspect: 'wide', equal: true, x: [-0.9, 0.9], y: [-0.22, 1.12], axes: false, grid: false,
+      alt: 'A thrust arrow tilted a few degrees off the rocket axis, with its sideways component',
+      curves: [
+        segment([0, -0.15], [0, 1.08], { color: 'ink3' }),
+        segment([sx, cy], [0, cy], { color: 'ink4', width: 1 }),
+        { param: [`${R}*cos(t)`, `${R}*sin(t)`], t: [r4((90 - g) * DEG), r4(Math.PI / 2)], color: 'gold', width: 1.8 },
+      ],
+      arrows: [
+        { from: [0, 0], to: [r4(sx), r4(cy)], color: 'accent', label: `thrust, ${T} kN` },
+        { from: [0, 0], to: [r4(sx), 0], color: 'warn' },
+      ],
+      points: [
+        { x: -0.36, y: 1.02, r: 0.01, color: 'ink3', label: 'rocket axis' },
+        { x: -0.16, y: 0.5, r: 0.01, color: 'gold', label: `${g}°` },
+        { x: 0.02, y: -0.1, r: 0.01, color: 'warn', label: 'sideways = ?' },
+      ],
+    },
+    caption: 'Drawn to scale: a tilt of a few degrees moves only a small part of the thrust sideways. Compute it — the picture carries no numbers.',
+  };
+}
 
 export default lesson({
   id: 'phys2210.M2.1',
@@ -95,6 +175,7 @@ Components turn arrows into ordinary numbers you can add, subtract and feed into
         4: 'Speed is the size of the velocity with the direction thrown away — a scalar.',
       },
       hints: ['For each one, ask: does it make sense to say which way it points?'],
+      visual: CLIMB,
       teach: 'A vector has a magnitude and a direction (force, velocity, displacement); a scalar has only a magnitude (mass, temperature, speed, time).',
       explain: 'Thrust, velocity and displacement all point somewhere. Mass, temperature and speed are amounts with no direction.',
     }),
@@ -225,6 +306,7 @@ Components turn arrows into ordinary numbers you can add, subtract and feed into
           answer: cross, units: 'km/h', tol: { rel: 0.01 },
           errors: [{ value: w * Math.cos(a * DEG), feedback: 'That is the headwind component, along the runway. The crosswind is the part perpendicular to it.' }, { value: w * Math.sin(a), feedback: 'Your calculator is in radians; the angle is in degrees.' }],
           hints: ['Put one axis along the runway and the other across it.', t`The crosswind is opposite the ${a}° angle: $w\sin ${a}^\circ$.`],
+          visual: runway(w, a),
           teach: 'Choose axes that match the problem — along and across the runway — and the components answer the question directly.',
           explain: t`Crosswind $= w\sin\theta = ${w}\sin ${a}^\circ = ${fmt(cross, 3)}$ km/h, and the headwind is $w\cos\theta = ${fmt(w * Math.cos(a * DEG), 3)}$ km/h. Pilots work this out (in knots) before landing: every aircraft type has a maximum demonstrated crosswind.`,
         };
@@ -240,6 +322,7 @@ Components turn arrows into ordinary numbers you can add, subtract and feed into
           answer: side, units: 'kN', tol: { rel: 0.01 },
           errors: [{ value: T * Math.cos(g * DEG), feedback: 'That is the component along the axis — almost all of the thrust. The sideways part is opposite the small angle.' }, { value: T * Math.sin(g), feedback: 'Your calculator is in radians; the angle is in degrees.' }],
           hints: [t`Sideways component $= T\sin\theta$, with $\theta$ the gimbal angle.`],
+          visual: gimbal(T, g),
           teach: 'A small tilt moves only a small fraction of a vector into the perpendicular direction: about sin θ of it.',
           explain: t`$T\sin\theta = ${T}\sin ${g}^\circ = ${fmt(side, 3)}$ kN sideways, while $T\cos\theta = ${fmt(T * Math.cos(g * DEG), 4)}$ kN still pushes along the axis. A few degrees of gimbal give a steering force of a few percent of the thrust.`,
         };

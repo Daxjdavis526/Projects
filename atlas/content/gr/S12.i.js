@@ -19,6 +19,32 @@ const gain = (T, g = g0) => freeFall.gain(T, g, C);
 const meterT = 2;
 const meterExpr = `(9.81*(2/3)*x*${meterT} - 16*x^2/(3*${meterT})/2)/(2.998e8)^2/1e-16`;
 
+// cp-curvature: the ball's and the bullet's worldlines as arcs of equal circles (not to scale)
+const arcPair = () => {
+  const L = -1.35, Rt = 1.35, a = -0.95;
+  const ring = (cx) => ({ param: [`${cx} + cos(t)`, 'sin(t)'], t: [0, 6.2832], color: 'ink4', width: 1.2, dash: true });
+  const tip = (cx) => [round(cx + Math.cos(a), 4), round(Math.sin(a), 4)];
+  return {
+    type: 'graph',
+    params: {
+      x: [-2.75, 2.75], y: [-1.3, 1.55], equal: true, grid: false, axes: false,
+      curves: [
+        ring(L), ring(Rt),
+        { param: [`${L} + cos(t)`, 'sin(t)'], t: [0.87, 2.27], color: 'gold', width: 4.5 },
+        { param: [`${Rt} + cos(t)`, 'sin(t)'], t: [1.5, 1.64], color: 'violet', width: 4.5 },
+      ],
+      arrows: [{ from: [L, 0], to: tip(L), color: 'ink2', label: 'c²/g' }, { from: [Rt, 0], to: tip(Rt), color: 'ink2', label: 'c²/g' }],
+      points: [
+        { x: L, y: 0, r: 2.5, color: 'ink2' }, { x: Rt, y: 0, r: 2.5, color: 'ink2' },
+        { x: L - 0.75, y: 1.2, r: 0.5, color: 'gold', label: 'tossed ball: 2 s' },
+        { x: Rt - 0.62, y: 1.2, r: 0.5, color: 'violet', label: 'bullet: 0.2 s' },
+      ],
+    },
+    caption: 'Not to scale. On a diagram of height against ct, the worldlines of a tossed ball and of a rifle bullet are pieces of circles of the same radius; the bullet’s piece is shorter only because it is in the air for less time. Really that radius is about a light-year, and both pieces look perfectly straight.',
+  };
+};
+const CURVATURE_PICTURE = arcPair();
+
 export default lesson({
   id: 'gr.S12.i',
   title: 'Free fall is the path of maximal aging',
@@ -72,6 +98,19 @@ export default lesson({
       hints: ['Height speeds a clock up; speed slows it down. Which path balances the two best?'],
       teach: 'Of all worldlines between two nearby events, the free-fall one has the most proper time: the principle of maximal aging.',
       explain: 'The aging meter peaks exactly on the free-fall parabola, apex gT²/8 = 4.9 m for T = 2 s. Any other path — lower, higher, or a different shape — records less.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-0.15, 2.25], y: [-1.6, 14.2], xlabel: 'time (s)', ylabel: 'height (m)',
+          curves: [
+            { fn: '12*x*(2 - x)', domain: [0, 2], color: 'violet', label: 'high and fast', labelAt: 1 },
+            { fn: '4.905*x*(2 - x)', domain: [0, 2], color: 'accent', label: 'tossed', labelAt: 1 },
+            { fn: '0', domain: [0, 2], color: 'teal', label: 'stays put', labelAt: 1 },
+          ],
+          points: [{ x: 0, y: 0, color: 'ink' }, { x: 2, y: 0, color: 'ink' }, { x: -0.13, y: -1.5, r: 0.5, color: 'ink', label: 'A' }, { x: 1.87, y: -1.5, r: 0.5, color: 'ink', label: 'B' }],
+        },
+        caption: 'Three worldlines joining the same two events: leave the ground at A, be back on it at B two seconds later.',
+      },
     }),
     mcq({
       id: 'longest', difficulty: 2,
@@ -94,6 +133,23 @@ export default lesson({
         const T = r.pick([1, 1.5, 2.5, 3, 4]);
         const H = freeFall.apex(T);
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [round(-0.12 * T, 3), round(1.12 * T, 3)], y: [round(-0.3 * H, 3), round(1.25 * H, 3)], grid: false, axes: false,
+              curves: [
+                { fn: '0', domain: [round(-0.1 * T, 3), round(1.1 * T, 3)], color: 'ink3', width: 1.5 },
+                { fn: `4.905*x*(${T} - x)`, domain: [0, T], color: 'gold' },
+              ],
+              arrows: [{ from: [T / 2, 0], to: [T / 2, round(H, 4)], color: 'accent' }],
+              points: [
+                { x: 0, y: 0, color: 'ink', label: 'A' }, { x: T, y: 0, color: 'ink', label: 'B' },
+                { x: T / 2, y: round(H / 2, 4), r: 0.5, color: 'accent', label: 'H = ?' },
+                { x: round(0.3 * T, 3), y: round(-0.17 * H, 4), r: 0.5, color: 'ink2', label: `in the air for ${T} s` },
+              ],
+            },
+            caption: 'The free-fall worldline: height against time, from A on the ground to B back on it.',
+          },
           prompt: t`The aging meter for paths that leave the ground and return after $T = ${T}$ s peaks at the apex $H = gT^2/8$. What is that apex height? ($g = 9.81\ \text{m/s}^2$)`,
           answer: H, units: 'm', tol: { rel: 0.01 },
           errors: [{ value: (g0 * T * T) / 2, feedback: 'That is ½gT² — the fall in the whole time T. The ball spends only T/2 coming down: gT²/8.' }, { value: (g0 * T * T) / 4, feedback: 'Check the 8: the ball falls for T/2, so H = ½g(T/2)² = gT²/8.' }],
@@ -138,7 +194,21 @@ export default lesson({
       gen(r) {
         const v0 = r.pick([5, 10, 15, 20, 30]);
         const T = (2 * v0) / g0, H = (v0 * v0) / (2 * g0), b = budget('arc', H, T);
+        const k = 1 / (C * C * 1e-16), top = (k * v0 * v0) / 2;   // rates in parts in 10¹⁶; both peak at v₀²/2c²
+        const bonusRate = `${round(k * g0, 6)}*(${v0}*x - 4.905*x^2)`, penaltyRate = `${round(k / 2, 6)}*(${v0} - 9.81*x)^2`;
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, round(T, 4)], y: [0, round(1.3 * top, 3)], xlabel: 'time in flight (s)', ylabel: 'parts in 10¹⁶',
+              shade: [{ fn: bonusRate, from: 0, to: round(T, 4), color: 'gold', alpha: 0.28 }, { fn: penaltyRate, from: 0, to: round(T, 4), color: 'violet', alpha: 0.22 }],
+              curves: [
+                { fn: bonusRate, color: 'gold', label: 'height bonus', labelAt: round(T / 2, 4) },
+                { fn: penaltyRate, color: 'violet', label: 'speed penalty', labelAt: round(0.02 * T, 4) },
+              ],
+            },
+            caption: 'How fast the thrown clock runs ahead (gold: it is high up) and behind (violet: it is moving) during the flight. Each shaded area is that effect’s total.',
+          },
           prompt: t`A clock is thrown straight up at ${v0} m/s and caught where it was thrown. Its height bonus is $\dfrac{g\,(\tfrac23 H)\,T}{c^2}$ and its speed penalty is exactly half the bonus. How much more time does it record than a clock left on the ground, in units of $10^{-16}$ s?`,
           answer: b.net / 1e-16, tol: { rel: 0.01 },
           errors: [{ value: b.bonus / 1e-16, feedback: 'That is the height bonus alone. Subtract the speed penalty, which is half of it.' }, { value: (b.bonus + b.penalty) / 1e-16, feedback: 'The speed penalty slows the clock: subtract it, don’t add it.' }, { value: b.net, feedback: 'That is in seconds. The answer is asked in units of 10⁻¹⁶ s: divide by 10⁻¹⁶.' }],
@@ -191,6 +261,22 @@ export default lesson({
       hints: [t`What does $d\tau^2 = dt^2 - dx^2$ give when $dx = dt$ (with $c = 1$)?`],
       teach: 'Light follows null geodesics — worldlines along which no proper time passes.',
       explain: t`For light $dx = c\,dt$, so $d\tau = 0$ all along the ray: it follows a "null" geodesic. Gravity still bends those geodesics, which is why starlight bends near the Sun.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-0.1, 6.4], y: [0, 4.45], equal: true, xlabel: 'x (light-seconds)', ylabel: 't (s)',
+          curves: [
+            { fn: 'x', domain: [0, 4.3], color: 'gold', label: 'light', labelAt: 3.6, labelDx: 10, labelDy: 10 },
+            { fn: '2*x', domain: [0, 2.15], color: 'accent', label: 'ball at c/2', labelAt: 2.15, labelDx: 8, labelDy: 0 },
+          ],
+          points: [
+            { x: 0.5774, y: 1.1547, color: 'accent', label: '1 s' },
+            { x: 1.1547, y: 2.3094, color: 'accent', label: '2 s' },
+            { x: 1.7321, y: 3.4641, color: 'accent', label: '3 s' },
+          ],
+        },
+        caption: 'Two worldlines from the same event, drawn with c = 1 so that light runs at 45°. The dots mark each second on the ball’s own clock.',
+      },
     }),
     num({
       id: 'cp-gain', difficulty: 2,
@@ -198,6 +284,15 @@ export default lesson({
         const T = r.pick([1, 1.5, 2.5, 3, 4]);
         const d = gain(T);
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 4.4], y: [0, 31], xlabel: 'time in the air T (s)', ylabel: 'gain (10⁻¹⁶ s)',
+              curves: [{ fn: `${round(gain(1) / 1e-16, 6)}*x^3`, color: 'gold' }],
+              vlines: [{ x: T, label: `T = ${T} s` }],
+            },
+            caption: 'The free-fall clock’s gain over a clock left on the ground, for flights of every length: it grows as T³.',
+          },
           prompt: t`A clock is tossed so that it spends $T = ${T}$ s in free flight. Free fall gains $\Delta\tau = \dfrac{g^2T^3}{24c^2}$ over a clock left on the ground. Find $\Delta\tau$ in units of $10^{-16}$ s.`,
           answer: d / 1e-16, tol: { rel: 0.01 },
           errors: [{ value: d, feedback: 'That is in seconds. The answer is asked in units of 10⁻¹⁶ s: divide by 10⁻¹⁶.' }],
@@ -219,6 +314,7 @@ export default lesson({
           hints: [t`$c^2/g = (2.998\times10^{8})^2/${g}$ m.`, 'Divide the result by 9.461×10¹⁵ m to get light-years.'],
           teach: 'In spacetime, every freely falling worldline near a planet bends with radius c²/g — about a light-year at Earth’s surface — which is why gravity looks so gentle.',
           explain: t`$c^2/g = ${sci((C * C) / g)}$ m $= ${sci(R)}$ ly. Ball and bullet differ hugely in space, but in spacetime they bend alike: they are both geodesics of the same geometry.`,
+          visual: CURVATURE_PICTURE,
         };
       },
     }),

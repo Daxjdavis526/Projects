@@ -46,7 +46,9 @@ export function mount(F, P) {
   const env = () => { const e = { ...(P.constants || {}) }; for (const k of keys) if (F.params[k] !== undefined) e[k] = +F.params[k]; return e; };
   // default camera: the textbook view (x toward the lower left, y to the right,
   // z up), aimed so that the floor grid, the z-axis and the scene's own highest
-  // and lowest points (at the starting slider values) all fit
+  // and lowest points (at the starting slider values) all fit; then framed so
+  // that nothing the scene draws at those values (plane corners, labelled tips,
+  // curves, spheres) falls outside the picture
   const E0 = env(), z0 = (s) => (typeof s === 'number' ? s : fn(s, keys)(E0));
   const zs = [...(P.vectors || []).flatMap((v) => [v.to[2], v.from ? v.from[2] : 0]), ...(P.points || []).map((p) => p.at[2]),
     ...(P.segments || []).flatMap((sg) => [sg.from[2], sg.to[2]]), ...(P.components || []).map((c) => c.to[2])].map(z0).filter(Number.isFinite);
@@ -58,7 +60,13 @@ export function mount(F, P) {
     zs.push(cz + reach, cz - reach);
   }
   const tz = (Math.max(R, ...zs) - Math.max(0.55 * R, ...zs.map((z) => -z))) / 2;
-  const view = new View3D(canvas, { yaw: P.yaw ?? 0.55, pitch: P.pitch ?? 0.38, dist: P.dist ?? R * 3.6, scale: P.scale ?? 1.35, target: P.target || [0, 0, tz] });
+  const yaw = P.yaw ?? 0.55, pitch = P.pitch ?? 0.38, zoom = P.scale ?? 1.35;
+  const across = P.aspect === 'square' ? 1 : P.aspect === 'wide' ? 2 : 1.6;   // the canvas's width : height
+  const framed = G.frameScene(scenePoints(P, R, keys, E0), {
+    yaw, pitch, target: P.target || [0, 0, tz], dist: P.dist ?? R * 3.6,
+    halfH: 0.92 / (2.2 * zoom), halfW: (0.95 * across) / (2.2 * zoom), fixTarget: !!P.target, fixDist: P.dist != null,
+  });
+  const view = new View3D(canvas, { yaw, pitch, dist: framed.dist, scale: zoom, target: framed.target });
   view.onChange = () => draw();
   F.onChange(() => draw());
 
@@ -184,6 +192,39 @@ export function mount(F, P) {
   }
   F.draw(draw);
   F.caption(P.caption || 'Drag to rotate; scroll or pinch to zoom; arrow keys also turn it. Arrows are to scale in the units of the axes.');
+}
+
+// Every point the scene draws at the parameter values E (lines only by their
+// anchor point: they are infinite, and may leave the picture), for framing.
+export function scenePoints(P, R, keys, E) {
+  const num = (s) => (typeof s === 'number' ? s : fn(s, keys)(E)), V = (a) => a.map(num);
+  const tip = (from, to) => { const d = G.sub(to, from), L = G.length(d); return L > 1e-9 ? G.add(to, G.scale(d, (0.13 * R) / L)) : to; };
+  const pts = [[0, 0, R * 1.12], [0, 0, -0.55 * R]];
+  if (P.axes !== false) pts.push([R * 1.12, 0, 0], [0, R * 1.12, 0]);
+  if (P.grid !== false) pts.push([R, R, 0], [R, -R, 0], [-R, R, 0], [-R, -R, 0]);
+  for (const v of P.vectors || []) { const f = V(v.from || [0, 0, 0]), t = V(v.to); pts.push(f, v.label ? tip(f, t) : t); }
+  for (const p of P.points || []) pts.push(V(p.at));
+  for (const sg of P.segments || []) pts.push(V(sg.from), V(sg.to));
+  for (const c of P.components || []) pts.push(V(c.from || [0, 0, 0]), V(c.to));
+  for (const ln of P.lines || []) pts.push(V(ln.point));
+  for (const pl of P.planes || []) {
+    const n = V(pl.normal);
+    if (!(G.length(n) > 1e-12)) continue;
+    const c = pl.centre ? V(pl.centre) : pl.point ? V(pl.point) : G.footOfPlane(n, num(pl.d ?? 0)), half = num(pl.size ?? R * 0.8);
+    pts.push(...G.planeCorners(n, c, half));
+    if (pl.showNormal) pts.push(tip(c, G.add(c, G.scale(G.unit(n), half * 0.7))));
+  }
+  for (const pg of P.parallelograms || []) { const at = V(pg.at || [0, 0, 0]), u = V(pg.u), v = V(pg.v); pts.push(at, G.add(at, u), G.add(at, v), G.add(at, G.add(u, v))); }
+  for (const tr of P.triangles || []) pts.push(...tr.pts.map(V));
+  for (const cv of P.curves || []) {
+    const [t0, t1] = (cv.t || [0, 2 * Math.PI]).map(num), f = cv.param.map((s) => fn(s, [...keys, 't']));
+    for (let k = 0; k <= 48; k++) { const Et = { ...E, t: t0 + ((t1 - t0) * k) / 48 }; pts.push(f.map((g) => g(Et))); }
+  }
+  for (const sp of P.spheres || []) {
+    const c = V(sp.centre), r = num(sp.radius);
+    for (let k = 0; k < 12; k++) { const a = (k * Math.PI) / 6, co = r * Math.cos(a), si = r * Math.sin(a); pts.push(G.add(c, [co, si, 0]), G.add(c, [co, 0, si]), G.add(c, [0, co, si])); }
+  }
+  return pts.filter((p) => p.every(Number.isFinite));
 }
 
 function numTeX(v, digits = 3) {

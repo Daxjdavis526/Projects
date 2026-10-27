@@ -40,8 +40,8 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
       x: [-14, 14], y: [-11, 11], equal: true, xlabel: 'x (m)', ylabel: 'y (m)',
       sliders: [
         { key: 'phi', label: 'Position on the circle', min: 0, max: 360, step: 1, value: 30, unit: '^\\circ', explain: 'The angle from the $+x$ axis, counter-clockwise.' },
-        { key: 'v', label: 'Speed $v$', min: 1, max: 8, step: 0.5, value: 4, unit: '\\mathrm{m/s}', explain: 'Constant around the circle.' },
-        { key: 'r', label: 'Radius $r$', min: 3, max: 10, step: 0.5, value: 6, unit: '\\mathrm{m}', explain: 'Distance from the centre.' },
+        { key: 'v', label: 'Speed $v$', min: 1, max: 6, step: 0.5, value: 5, unit: '\\mathrm{m/s}', explain: 'Constant around the circle.' },
+        { key: 'r', label: 'Radius $r$', min: 3, max: 10, step: 0.5, value: 5, unit: '\\mathrm{m}', explain: 'Distance from the centre.' },
       ],
       curves: [
         { param: ['r*cos(t)', 'r*sin(t)'], t: [0, 6.2832], color: 'ink3', width: 1.6 },
@@ -50,7 +50,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
       arrows: [
         { from: [0, 0], to: ['r*cos(phi*pi/180)', 'r*sin(phi*pi/180)'], color: 'ink4' },
         { from: ['r*cos(phi*pi/180)', 'r*sin(phi*pi/180)'], to: ['r*cos(phi*pi/180) - 0.5*v*sin(phi*pi/180)', 'r*sin(phi*pi/180) + 0.5*v*cos(phi*pi/180)'], color: 'gold', label: 'v' },
-        { from: ['r*cos(phi*pi/180)', 'r*sin(phi*pi/180)'], to: ['(r - 0.12*v^2/r)*cos(phi*pi/180)', '(r - 0.12*v^2/r)*sin(phi*pi/180)'], color: 'bad', label: 'a' },
+        { from: ['r*cos(phi*pi/180)', 'r*sin(phi*pi/180)'], to: ['(r - 0.25*v^2/r)*cos(phi*pi/180)', '(r - 0.25*v^2/r)*sin(phi*pi/180)'], color: 'bad', label: 'a' },
       ],
       points: [{ x: 'r*cos(phi*pi/180)', y: 'r*sin(phi*pi/180)', color: 'accent' }, { x: 0, y: 0, color: 'ink3' }],
       readouts: [
@@ -60,7 +60,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
         { label: '$\\omega = v/r$', expr: 'v/r', unit: '\\mathrm{rad/s}', digits: 3 },
       ],
     },
-    caption: 'Seen from above. The arrows use separate scales — velocity 0.5 m per m/s, acceleration 0.12 m per m/s² — so compare lengths only within each kind.',
+    caption: 'Seen from above. The arrows use separate scales — velocity 0.5 m per m/s, acceleration 0.25 m per m/s² — so compare lengths only within each kind.',
   },
   example: {
     prompt: t`A centrifuge for training astronauts has an 8.0 m arm. How fast must the cabin move for a centripetal acceleration of 5.0g, and how many revolutions per minute is that?`,

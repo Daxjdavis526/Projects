@@ -50,3 +50,13 @@ export function arrows3D(vectors, { caption, range, extra = {} } = {}) {
     caption: caption || 'Drag to rotate. Arrows are to scale in the units of the axes.',
   };
 }
+
+// A camera for calc-vectors3d that looks nearly along the line where two
+// planes (normals n1, n2) meet, so the angle between them is seen almost
+// edge-on; `turn` keeps a little perspective. {} if the planes are parallel.
+export function edgeView(n1, n2, turn = 0.35) {
+  const L = cross(n1, n2), l = norm(L);
+  if (l < 1e-9) return {};
+  const e = scale(L, (L[2] < 0 ? -1 : 1) / l);
+  return { yaw: Math.atan2(e[1], e[0]) + turn, pitch: Math.min(1.1, Math.max(0.15, Math.asin(e[2]))) };
+}

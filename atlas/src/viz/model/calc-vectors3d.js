@@ -63,3 +63,51 @@ export function linePlaneT(p0, dir, n, d) {
   const den = dot(n, dir);
   return Math.abs(den) < 1e-12 ? null : (d - dot(n, p0)) / den;
 }
+
+/** The orbiting camera's directions for a yaw and pitch, exactly as View3D builds them (z up; fwd runs from the eye to the target). */
+export function cameraBasis(yaw, pitch) {
+  const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const fwd = [-cp * cy, -cp * sy, -sp], right = [-sy, cy, 0];
+  return { fwd, right, up: cross(right, fwd) };
+}
+
+/** Where points land in the frame, as tangents x/z and y/z from the view axis: { top, bot, lft, rgt }, or null if one is behind the eye. */
+export function frameExtent(points, basis, target, dist) {
+  let top = -Infinity, bot = Infinity, lft = Infinity, rgt = -Infinity;
+  for (const p of points) {
+    const d = sub(p, target), z = dot(d, basis.fwd) + dist;
+    if (!(z > 1e-6)) return null;
+    const x = dot(d, basis.right) / z, y = dot(d, basis.up) / z;
+    top = Math.max(top, y); bot = Math.min(bot, y); lft = Math.min(lft, x); rgt = Math.max(rgt, x);
+  }
+  return { top, bot, lft, rgt };
+}
+
+/**
+ * Frame a scene so every point is in view: starting from `target` and `dist`,
+ * slide the aim (along z, and sideways only if needed) and back the camera off
+ * until all points lie within ±halfW across and ±halfH up and down (tangents
+ * of the half-angles of the frame). A scene that already fits is returned
+ * unchanged. fixTarget / fixDist keep a lesson's own choice of either.
+ */
+export function frameScene(points, { yaw, pitch, target, dist, halfW, halfH, fixTarget = false, fixDist = false }) {
+  const B = cameraBasis(yaw, pitch);
+  let t = [...target], D = dist, recentred = 0;
+  for (let k = 0; k < 80; k++) {
+    const e = frameExtent(points, B, t, D);
+    if (e && e.top <= halfH && e.bot >= -halfH && e.rgt <= halfW && e.lft >= -halfW) break;
+    const spanFits = e && e.top - e.bot <= 2 * halfH && e.rgt - e.lft <= 2 * halfW;
+    if (spanFits && !fixTarget && recentred < 8) {
+      recentred++;
+      const cy = (e.top + e.bot) / 2;
+      if (e.top > halfH || e.bot < -halfH) {
+        // slide the aim along z when that moves the picture up and down; from overhead, along the camera's up
+        const cp = Math.cos(pitch);
+        t = Math.abs(cp) > 0.3 ? add(t, [0, 0, (cy * D) / cp]) : add(t, scale(B.up, cy * D));
+      }
+      if (e.rgt > halfW || e.lft < -halfW) t = add(t, scale(B.right, ((e.lft + e.rgt) / 2) * D));
+    } else if (!fixDist) { D *= 1.06; recentred = 0; }
+    else break;
+  }
+  return { target: t, dist: D };
+}

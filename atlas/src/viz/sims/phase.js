@@ -18,7 +18,8 @@ export function mount(F, P) {
   let seeds = (P.seeds || []).map((s) => s.slice());
   const start = { t: P.start?.[0] ?? P.x[0], y: P.start?.[1] ?? 1 };
   if (P.slope) {
-    F.slider({ key: 'h', label: 'Euler step $h$', min: 0.05, max: 1, step: 0.05, value: P.h ?? 0.5, unit: '', explain: 'Smaller steps follow the true curve more closely; Euler’s error shrinks in proportion to $h$.' });
+    const [hMin, hMax] = P.hRange || [0.05, 1];          // match the step to the time span shown
+    F.slider({ key: 'h', label: 'Euler step $h$', min: hMin, max: hMax, step: (hMax - hMin) / 40, value: P.h ?? (hMin + hMax) / 2, unit: '', explain: 'Smaller steps follow the true curve more closely; Euler’s error shrinks in proportion to $h$.' });
     plot.handle(() => [start.t, start.y], (t, y) => { start.t = t; start.y = y; });
     plot.onDrag = () => draw();
   } else {

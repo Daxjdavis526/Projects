@@ -180,7 +180,9 @@ num({ id: 'f-over-m', difficulty: 1,
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
   makes typing a unit compulsory. Omit `units` for pure numbers.
 - `tol: { rel, abs }` — default is 1% relative. Match the precision you ask
-  for: "to 3 significant figures" → `rel: 0.005`.
+  for: "to 3 significant figures" → `rel: 0.005`. The two add: giving only
+  `abs` keeps the default 1% relative part, so an exact integer answer wants
+  `tol: { rel: 0, abs: 0.5 }` (or `rel: 1e-9`).
 - `errors: [{ value, feedback }]` — the numbers a specific slip produces, with
   feedback naming the slip. In a generator, a slip's value can coincide with
   the answer for some parameters (sin and cos at 45°, a factor of 2 when the
@@ -212,8 +214,8 @@ equivalent form is accepted. **Choose `vars` ranges where the answer is
 defined** (positive for `ln x`, away from poles). `mode: 'equation'` compares
 equations up to a nonzero multiple (`y = 2x + 1` ≡ `2y - 4x = 2`).
 Other fields: `forbid: ['sqrt']` (the answer must not use a function),
-`lhs: 'v(t)'` (shown before the box), `keys: [['ω', 'omega']]` (extra keypad
-buttons).
+`lhs: 'v(t)'` (TeX shown before the box — the `=` is added for you, so do not
+write `'y ='`), `keys: [['ω', 'omega']]` (extra keypad buttons).
 
 **Atlas expression syntax** (what learners type, and what you write in
 `answer`): `+ - * / ^`, brackets, implicit multiplication (`2x`, `x(x+1)`,
@@ -336,7 +338,7 @@ The library (read the header comment of a sim's file for its full options):
 | `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks`, `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, color, when }]`, `arrows: [{ from: [x, y], to: [x, y], label }]`, `vlines: [{ x, label }]`, `hlines: [{ y, label }]`, `drag`, `readouts: [{ label, expr, unit, digits }]`. Positions, ranges and `when` may be expressions; `x0` is the tangent point; readouts may also use `slope`, `secant`, `riemann`, `integral` |
 | `surface3d` | a rotatable surface z = f(x, y) or parametric (u, v) ↦ (x, y, z); tangent plane and gradient; level curves; curves on the surface | `z` or `surface`, `domain`, `sliders`, `tangentAt: ['px','py']`, `levels`, `curves: [{ param: [x, y, z], t: [a, b] }]`, `colorBy`, `zscale`, `target: [x, y, z]` (what the camera looks at), `yaw`, `pitch`, `dist`, `readouts` |
 | `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }` |
-| `phase` | a phase portrait of x′ = f, y′ = g (click to add trajectories; equilibrium type from a matrix), or `slope: true` for a slope field of y′ = f(t, y) with Euler vs RK4 | `fx`, `fy`, `matrix`, `seeds` / `slope`, `f`, `start`, `h` |
+| `phase` | a phase portrait of x′ = f, y′ = g (click to add trajectories; equilibrium type from a matrix), or `slope: true` for a slope field of y′ = f(t, y) with Euler vs RK4 | `fx`, `fy`, `matrix`, `seeds` / `slope`, `f`, `start`, `h`, `hRange: [min, max]` (the Euler-step slider; default [0.05, 1]) |
 | `diagram` | static force diagrams: a block with labelled force arrows, a block on an incline | `kind: 'block' \| 'incline'`, `mass`, `forces: [{ dir (deg), label, size (0–1) }]`, `angle` |
 | `force-cart` | a cart pushed by a force with friction; v–t graph | `F`, `m`, `mu` |
 | `projectile` | projectile motion with optional quadratic drag | `v0`, `angle`, `h0`, `g`, `drag`, `k` |

@@ -3,7 +3,8 @@
 //   node atlas/test/calc-vectors3d.test.mjs
 
 import * as G from '../src/viz/model/calc-vectors3d.js';
-import { validate } from '../src/viz/sims/calc-vectors3d.js';
+import { validate, scenePoints } from '../src/viz/sims/calc-vectors3d.js';
+import { View3D } from '../src/viz/three-d.js';
 
 let pass = 0, fail = 0;
 function check(name, ok, detail = '') {
@@ -52,6 +53,35 @@ for (const n of [[0, 0, 1], [0, 1, 0], [1, 0, 0], [1, 1, 1], [0.3, -2, 0.01], [1
   check('a parallel line never meets the plane', G.linePlaneT([0, 0, 1], [1, -1, 0], [1, 1, 1], 6) === null);
   const pts = G.linePoints([0, 0, 0], [1, 2, 3], -1, 1, 4);
   check('line points run from t0 to t1', nearV(pts[0], [-1, -2, -3]) && nearV(pts[4], [1, 2, 3]));
+}
+
+// framing: the camera the sim builds keeps everything it draws in the picture
+for (const [yaw, pitch] of [[0.55, 0.38], [-1.2, 0.9], [2.5, -0.3]]) {
+  const mine = G.cameraBasis(yaw, pitch), theirs = View3D.prototype.basis.call({ yaw, pitch, target: [0, 0, 0], dist: 9 });
+  check(`camera basis matches View3D at yaw ${yaw}, pitch ${pitch}`, ['fwd', 'right', 'up'].every((k) => nearV(mine[k], theirs[k], 1e-12)));
+}
+{
+  const R = 3, frame = { yaw: 0.55, pitch: 0.38, target: [0, 0, 0], dist: R * 3.6, halfH: 0.92 / (2.2 * 1.35), halfW: (0.95 * 1.6) / (2.2 * 1.35) };
+  const inside = (pts, f) => { const e = G.frameExtent(pts, G.cameraBasis(f.yaw, f.pitch), f.target, f.dist); return e && e.top <= frame.halfH + 1e-9 && e.bot >= -frame.halfH - 1e-9 && e.rgt <= frame.halfW + 1e-9 && e.lft >= -frame.halfW - 1e-9; };
+  const bare = scenePoints({}, R, [], {});
+  const aimed = { ...frame, target: [0, 0, (R - 0.55 * R) / 2] };   // the sim's first aim for a scene of just grid and axes
+  const f0 = G.frameScene(bare, aimed);
+  check('a scene that already fits keeps its camera', nearV(f0.target, aimed.target) && f0.dist === aimed.dist);
+  // a plane through (0, 1, −2) with normal ⟨1, 1, 2⟩: its near corner used to drop out of the bottom of the picture
+  const low = scenePoints({ planes: [{ normal: [1, 1, 2], point: [0, 1, -2], size: 2.2 }], points: [{ at: [0, 1, -2] }] }, R, [], {});
+  check('the low plane starts out of frame (so the test means something)', !inside(low, frame));
+  const f1 = G.frameScene(low, frame);
+  check('framing brings the low plane into the picture', inside(low, { ...frame, ...f1 }));
+  check('framing slides the aim along z only', near(f1.target[0], 0) && near(f1.target[1], 0));
+  // a big orbit circle and a sphere: the camera backs off
+  const big = scenePoints({ curves: [{ param: ['5*cos(t)', '5*sin(t)', '1.5*sin(t)'], t: [0, '2*pi'] }], spheres: [{ centre: [0, 0, 0], radius: 2 }] }, R, ['pi'], { pi: Math.PI });
+  const f2 = G.frameScene(big, frame);
+  check('a scene larger than the frame is backed off until it fits', f2.dist > frame.dist && inside(big, { ...frame, ...f2 }));
+  const f3 = G.frameScene(big, { ...frame, fixTarget: true, fixDist: true });
+  check('a lesson’s own target and distance are kept', nearV(f3.target, frame.target) && f3.dist === frame.dist);
+  // the slider expressions are evaluated at the values given
+  const sl = scenePoints({ vectors: [{ to: ['ax', 0, 'az'] }] }, R, ['ax', 'az'], { ax: 2, az: -1 });
+  check('scene points evaluate expressions', sl.some((p) => nearV(p, [2, 0, -1])));
 }
 
 // the validator: a good scene passes, typos and malformed pieces are caught

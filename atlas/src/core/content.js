@@ -11,7 +11,7 @@
 
 import { makeRng, hashString } from './rng.js';
 import { grade } from './check.js';
-import { mathIn, escapeDamage } from './markup.js';
+import { mathIn, escapeDamage, bareCommand } from './markup.js';
 
 export const ITEM_TYPES = ['mcq', 'multi', 'numeric', 'expression', 'order', 'match', 'label', 'point', 'slider', 'code'];
 export const LESSON_KINDS = ['lesson', 'concept', 'dissection'];
@@ -229,7 +229,7 @@ export function validateLesson(L, tex) {
   const bare = [[L.equation && stripParts(L.equation), true], ...(L.symbols || []).map((s) => [s.tex, false]), ...(L.parts || []).map((q) => [q.tex, false])];
   for (const [src, display] of bare) {
     if (!src) continue;
-    const dmg = escapeDamage(src);
+    const dmg = escapeDamage(src) || (bareCommand(src) && `contains “${bareCommand(src)}” without its backslash — write it with String.raw`);
     if (dmg) p.push(`TeX “${String(src).slice(0, 40)}…” ${dmg}`);
     if (tex) { try { tex(src, display); } catch (e) { p.push(`bad TeX “${src}”: ${e.message}`); } }
   }

@@ -48,15 +48,16 @@ function inline(text, math) {
   // code spans first, so `x**2` or `$HOME` inside them stays literal
   return unescapeTicks(text).split(CODE_SPAN).map((part, k) => {
     if (k % 2 === 1) return `<code>${esc(part.slice(1, -1))}</code>`;
-    return segments(part).map((g) => {
-      if (g.t === 'math') return math(g.v, false);
-      if (g.t === 'display') return math(g.v, true);
-      return esc(g.v)
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, '$1<em>$2</em>')
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|#[^)\s]*)\)/g, (m, label, url) =>
-          `<a href="${url}"${url.startsWith('#') ? '' : ' target="_blank" rel="noopener"'}>${label}</a>`);
-    }).join('');
+    // math becomes a placeholder while emphasis and links are applied, so
+    // **bold with $x$ inside** works; then the rendered math goes back in
+    const maths = [];
+    const text = segments(part).map((g) => (g.t === 'text' ? esc(g.v) : `\u0002${maths.push(math(g.v, g.t === 'display')) - 1}\u0002`)).join('');
+    return text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, '$1<em>$2</em>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|#[^)\s]*)\)/g, (m, label, url) =>
+        `<a href="${url}"${url.startsWith('#') ? '' : ' target="_blank" rel="noopener"'}>${label}</a>`)
+      .replace(/\u0002(\d+)\u0002/g, (m, k) => maths[+k]);
   }).join('');
 }
 
@@ -93,10 +94,24 @@ export function render(text, math = (t) => `<code>${esc(t)}</code>`) {
 /** Render a single line without wrapping it in a paragraph. */
 export const renderInline = (text, math) => inline(String(text ?? ''), math);
 
+// TeX command names that never appear in math without their backslash: in an
+// ordinary JS string '\int' silently becomes 'int' and '\sqrt' 'sqrt'
+const BARE_COMMAND = /(?<![\\A-Za-z])(frac|dfrac|tfrac|sqrt|int|iint|oint|sum|prod|lim|vec|hat|cdot|times|infty|partial|nabla|alpha|beta|gamma|delta|epsilon|varepsilon|theta|lambda|sigma|omega|Omega|Delta|Gamma|Sigma|Lambda|displaystyle|left|right|mathrm|mathbf|approx|equiv|propto|rightarrow|Rightarrow|leq|geq|neq|quad|qquad)(?![A-Za-z])/;
+
 /** Characters that betray a TeX command eaten by a JS string escape (\theta → TAB + "heta"). */
 export function escapeDamage(text) {
   const s = String(text);
   if (/[\t\f\v\b\r]/.test(s)) return 'contains a control character — a TeX command like \\theta, \\frac, \\vec or \\rho lost its backslash to a JS escape; use String.raw';
   if (/\n(abla|u\b|eq\b|eq\s|ot\b|ewline|i\b|orm)/.test(s) && /\$/.test(s)) return 'a newline sits where \\nabla, \\nu, \\neq or \\not was probably meant; use String.raw';
+  for (const m of mathIn(s)) {
+    const bare = bareCommand(m.tex);
+    if (bare) return `the math “${m.tex.slice(0, 40)}” contains “${bare}” without its backslash — a JS string ate it; write the string with String.raw (t\`…\`)`;
+  }
   return null;
+}
+
+/** A TeX command name that lost its backslash, in bare TeX (words inside \text{…} are prose). */
+export function bareCommand(tex) {
+  const m = BARE_COMMAND.exec(String(tex).replace(/\\(?:text|mathrm|textrm|textbf|textit|operatorname|texttt|mbox)\s*\{[^{}]*\}/g, ''));
+  return m ? m[1] : null;
 }

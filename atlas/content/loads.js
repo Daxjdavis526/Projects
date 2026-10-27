@@ -65,6 +65,7 @@ export const LESSONS = {
   'math1220.C2-5.5': () => import('./math1220/C2-5.5.js'),
   'math1220.C2-5.6': () => import('./math1220/C2-5.6.js'),
   'math1220.C2-5.7': () => import('./math1220/C2-5.7.js'),
+  'math1220.C2-6.1': () => import('./math1220/C2-6.1.js'),
   'math1220.C2-7.1': () => import('./math1220/C2-7.1.js'),
   'math1220.C2-7.2': () => import('./math1220/C2-7.2.js'),
   'math1220.C2-7.3': () => import('./math1220/C2-7.3.js'),
@@ -89,6 +90,7 @@ export const LESSONS = {
   'phys2210.M4.2': () => import('./phys2210/M4.2.js'),
   'phys2210.M4.3': () => import('./phys2210/M4.3.js'),
   'phys2210.M4.4': () => import('./phys2210/M4.4.js'),
+  'phys2210.M4.5': () => import('./phys2210/M4.5.js'),
   'phys2210.M5.3': () => import('./phys2210/M5.3.js'),
   'prog.P0.1': () => import('./prog/P0.1.js'),
 };

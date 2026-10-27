@@ -101,6 +101,11 @@ $$\vec R = \vec A + \vec B \quad\Longleftrightarrow\quad R_x = A_x + B_x, \qquad
         3: 'Meeting tip to tip reverses one of the arrows, which again gives a difference.',
       },
       hints: ['A displacement is a trip: do the first one, then start the second where the first ended.'],
+      visual: vectorPicture({
+        arrows: [{ to: [3, 1.2], label: 'A' }, { from: [4.2, -1.4], to: [5.4, 1.4], color: 'violet', label: 'B' }],
+        numbers: false,
+        caption: 'Two displacements, drawn apart. An arrow may be slid anywhere, as long as it is not turned or stretched: it is still the same vector.',
+      }),
       teach: 'Vectors add tip to tail: start each one where the previous one ends.',
       explain: 'Walking along A and then along B takes you from A’s tail to B’s tip, so that arrow is A + B. (The other diagonal of the parallelogram, from tip to tip, is A − B.)',
     }),
@@ -184,6 +189,13 @@ $$\vec R = \vec A + \vec B \quad\Longleftrightarrow\quad R_x = A_x + B_x, \qquad
         3: 'Point them the same way: 6 + 8 = 14 N.',
       },
       hints: ['What are the largest and smallest resultants two forces can make?'],
+      visual: vectorPicture({
+        arrows: [{ to: [8, 0] }, { from: [8, 0], to: polar(6, 60).map((c, i) => c + [8, 0][i]), color: 'violet', label: '6 N' }, { to: polar(6, 60).map((c, i) => c + [8, 0][i]), color: 'gold' }],
+        points: [{ x: 3.4, y: -1, r: 0.01, color: 'accent', label: '8 N' }, { x: 2.2, y: 3.2, r: 0.01, color: 'gold', label: 'resultant' }],
+        curves: [{ param: ['8 + 6*cos(t)', '6*sin(t)'], t: [0, '2*pi'], color: 'ink4', width: 1.2, dash: true }],
+        extent: [[2, -6], [14, 6]], numbers: false, pad: 0.12,
+        caption: 'One arrangement, tip to tail. Swing the 6 N arrow round and its tip traces the dashed circle: the resultant always runs from the start to a point on that circle.',
+      }),
       teach: 'Two vectors add to anything between the difference and the sum of their magnitudes — never more, never less.',
       explain: 'The resultant of 6 N and 8 N lies between 8 − 6 = 2 N (opposed) and 8 + 6 = 14 N (aligned). 15 N is out of reach.',
     }),
@@ -223,6 +235,12 @@ $$\vec R = \vec A + \vec B \quad\Longleftrightarrow\quad R_x = A_x + B_x, \qquad
           answer: Math.hypot(va, w), units: 'km/h', tol: { rel: 0.005 },
           errors: [{ value: va + w, feedback: 'The wind is perpendicular to the heading: the velocities add as vectors, not as numbers.' }, { value: va - w, feedback: 'A crosswind neither adds to nor subtracts from the speed directly; the two velocities are perpendicular.' }],
           hints: ['Ground velocity = air velocity + wind velocity.', 'The two are perpendicular.'],
+          visual: vectorPicture({
+            arrows: [{ to: [0, va], label: 'air velocity' }, { to: [w, 0], color: 'teal', label: 'wind' }],
+            points: [{ x: 0, y: 0, r: 5, color: 'ink2' }],
+            numbers: false, xlabel: 'east', ylabel: 'north',
+            caption: 'The aircraft’s velocity through the air, and the velocity of the air itself, both drawn to scale from the aircraft.',
+          }),
           teach: 'Velocities add as vectors: an aircraft’s ground velocity is its air velocity plus the wind’s.',
           explain: t`$v_\text{ground} = \sqrt{${va}^2 + ${w}^2} = ${fmt(Math.hypot(va, w), 4)}$ km/h, drifting ${fmt(deg(Math.atan(w / va)), 3)}° east of north.`,
         };
@@ -238,6 +256,12 @@ $$\vec R = \vec A + \vec B \quad\Longleftrightarrow\quad R_x = A_x + B_x, \qquad
           answer: mag(S), units: 'N', tol: { rel: 0.01 },
           errors: [{ value: set.reduce((s, [F]) => s + F, 0), feedback: 'You added the magnitudes. Resolve each force into components first.' }],
           hints: ['Resolve each force into x- and y-components.', 'Add the three x-components, add the three y-components, then use Pythagoras.'],
+          visual: vectorPicture({
+            arrows: set.map(([F, a], i) => ({ to: polar(F, a), color: ['accent', 'violet', 'teal'][i], label: `${F} N, ${a}°`, left: Math.cos(a * DEG) < -0.2 })),
+            points: [{ x: 0, y: 0, r: 5, color: 'ink2' }],
+            numbers: false,
+            caption: 'The three pulls on the ring, drawn to scale.',
+          }),
           teach: 'Any number of vectors add the same way: resolve each, add the components, then recombine.',
           explain: t`$R_x = ${fmt(S[0], 4)}$ N and $R_y = ${fmt(S[1], 4)}$ N, so $|\vec R| = ${fmt(mag(S), 3)}$ N.`,
         };
