@@ -847,3 +847,369 @@ Rigged-Hilbert-space and operator-domain rigor goes only in an optional "fine pr
 - Current HTML5 availability and parameter ranges of PhET's Quantum Bound States and Stern–Gerlach simulations were not verified.
 - The QuVis simulation list could not be opened. Only the named examples above are confirmed.
 
+## Key question 8 — QM II (PHYS 4710): what a typical second semester covers (near-universal vs. instructor-dependent), module tree, math skills, prerequisites, hidden foundations
+
+### Takeaway
+Across the sampled syllabi (UVA, Kansas State, William & Mary, MIT 8.06 in several years, UGA, CU Boulder, RIC, plus graduate comparators), the second semester is overwhelmingly "Griffiths Part II".
+
+- **Near-universal:** the approximation methods (perturbation theory with its atomic applications, variational, WKB), time-dependent perturbation theory with Fermi's golden rule and radiative transitions, identical particles, and scattering (partial waves, Born).
+- **Common but instructor-dependent:** the adiabatic approximation and Berry phase (strong at MIT), and symmetries and conservation laws (new as Griffiths 3e ch. 6).
+- **Instructor-dependent:** density matrices, entanglement and Bell.
+- **Rare at the undergraduate level:** relativistic QM (Dirac); it was absent from every sampled syllabus.
+
+### Cited Findings
+- **UVA Physics 356 (Quantum II, Griffiths):** scattering theory, perturbation theories, the variational method, time-dependent transitions including Fermi's golden rule and absorption and spontaneous emission of radiation, identical particles, and WKB with tunneling. — [UVA Physics 356](http://galileo.phys.virginia.edu/classes/356/HOME.HTM)
+- **Kansas State QM II (Fall 2020):** identical particles and symmetrization, time-dependent perturbation theory with transition rates, Fermi's golden rule, resonances and 1D scattering matrices. — [KSU QM II syllabus](https://www.phys.ksu.edu/personal/thumm/TEACHING/qm2-lecture_fall20/QM2-F20-syllabus+topics.pdf)
+- **William & Mary Physics 314 (Spring 2023):** Griffiths' application chapters, namely perturbation theory, the variational principle, identical particles and scattering. — [W&M Physics 314](http://physics.wm.edu/~evmik/classes/2023.spring_Quantum_Mechanics_II_Physics_314/)
+- **MIT 8.06 (Spring 2018)**, in three parts:
+  1. Time-independent perturbation theory, including hydrogen fine structure, plus WKB.
+  2. Time-dependent perturbation theory and the adiabatic approximation, with Landau–Zener transitions, Berry's phase and the Born–Oppenheimer approximation.
+  3. Scattering (partial waves, phase shifts), then identical particles.
+  — [MIT OCW 8.06 2018 lectures](https://ocw.mit.edu/courses/8-06-quantum-physics-iii-spring-2018/pages/video-lectures/)
+- **Earlier MIT 8.06 (2005/2006/2008)** treated scattering and the adiabatic approximation/Berry phase as separate units, and also covered degenerate Fermi systems, charged particles in magnetic fields and quantum computing. The 2008 outline places the adiabatic theorem, Berry's phase and resonant transitions (including the MSW solar-neutrino mechanism) in its adiabatic unit. — [8.06 2008 outline](https://stuff.mit.edu/afs/athena/course/8/8.06/spring08/outline.pdf); [8.06 2006 syllabus](https://stuff.mit.edu/afs/athena/course/8/8.06/spring06/syllabus.html); [8.06 2005 syllabus](https://ocw.mit.edu/courses/8-06-quantum-physics-iii-spring-2005/pages/syllabus). In 2016 Griffiths was the required text, with Cohen-Tannoudji strongly recommended. — [8.06 2016 readings](https://ocw.mit.edu/courses/physics/8-06-quantum-physics-iii-spring-2016/readings)
+- **Catalog-level descriptions.**
+  - UGA PHYS 4702 Introductory QM II: "Perturbation theory and applications of quantum mechanics". — [UGA bulletin](https://bulletin.uga.edu/CoursesHome.aspx?cid=3875)
+  - CU Boulder PHYS 4410 (2012–13) extends QM to perturbation theory and its applications to atomic fine structure. — [CU catalog archive](https://catalog-archive.colorado.edu/2012-13/node/34723.html)
+  - Rhode Island College PHYS 407 covers the structure of solids, approximation techniques, nuclear physics and particle physics. — [RIC PHYS 407](https://ric.smartcatalogiq.com/en/2022-2023/catalog/courses/phys-physics/400/phys-407)
+- **Graduate comparators.**
+  - University of Queensland PHYS7042 (postgraduate QM II): formalism, time-dependent dynamics, entanglement, perturbation theory, scattering. — [UQ PHYS7042](https://course-profiles.uq.edu.au/course-profiles/PHYS7042-20568-7520)
+  - UC Davis 215B (graduate): variational methods with WKB, and time-dependent perturbation theory in the interaction picture. — [UC Davis 215B](https://physics.sf.ucdavis.edu/sites/g/files/dgvnsk16581/files/media/documents/215B.pdf)
+- **Textbook support.**
+  - Griffiths & Schroeter 3e Part II chapters: 7 Time-Independent Perturbation Theory, 8 Variational Principle, 9 WKB, 10 Scattering, 11 Quantum Dynamics, 12 Afterword. Part I includes 5 Identical Particles and 6 Symmetries & Conservation Laws. — [Cambridge listing](https://prod-drupal.cambridge.org/th/universitypress/subjects/physics/quantum-physics-quantum-information-and-quantum-computation/introduction-quantum-mechanics-3rd-edition)
+  - Townsend 2e adds the density operator, teleportation, coherent states and cavity QED. — [University Science Books](https://uscibooks.aip.org/?p=2633)
+  - McIntyre's later chapters cover perturbation theory, identical particles, periodic systems and modern applications. — [OSU Paradigms page](https://sites.science.oregonstate.edu/portfolioswiki/texts_quantumbook_start.html)
+  - QuVis offers simulations on superposition vs. mixed states, entanglement and quantum cryptography. — [QuVis news](https://www.st-andrews.ac.uk/physics/quvis/news.html)
+
+### Inferences
+**Coverage classification for the Atlas QM II.** Based on ~8 sampled courses; "✓" counts how many of the sampled undergraduate syllabi above name the topic.
+
+| Topic | Status | Evidence |
+|---|---|---|
+| Identical particles, exchange, helium, periodic table, Fermi gas | **Near-universal** | UVA, KSU, W&M, MIT 2018 (✓✓✓✓) |
+| Time-dependent PT, Fermi's golden rule, absorption/emission, selection rules | **Near-universal** | UVA, KSU, MIT, UQ (grad) |
+| Scattering: partial waves, phase shifts, Born | **Near-universal** | UVA, W&M, MIT; KSU (1D S-matrix) |
+| Variational principle (helium, H₂⁺, H₂) | **Near-universal** | UVA, W&M; UC Davis (grad) |
+| WKB (tunneling, α decay, connection formulas) | **Near-universal** | UVA, MIT; UC Davis (grad) |
+| Time-independent PT plus fine/hyperfine/Zeeman | Near-universal *somewhere* in the sequence: in QM I at USU (4700 lists perturbation theory), in QM II at UGA, CU, MIT | listed above |
+| Adiabatic approximation, Berry phase, Landau–Zener, Born–Oppenheimer | **Common, instructor-dependent** | MIT 2008, 2018 |
+| Symmetries & conservation laws (translation/rotation generators, parity, selection rules, Heisenberg picture) | **Instructor-dependent** (new Griffiths 3e chapter; not named in sampled syllabi) | Griffiths 3e ch. 6 |
+| Addition of angular momentum | Usually QM I; **revisited** in QM II through fine and hyperfine structure | Griffiths ch. 4 vs. 7 |
+| Density matrices, entanglement, Bell, no-cloning, quantum information | **Instructor-dependent** at the undergraduate level | Townsend 2e; UQ (grad); MIT earlier "quantum computing" |
+| Charged particles in B (Landau levels), degenerate Fermi systems | Instructor-dependent | MIT 2005–06 |
+| Solids/nuclear/particle applications | Instructor-dependent | RIC |
+| Relativistic QM (Klein–Gordon, Dirac) | **Rare / enrichment only** | no sampled syllabus |
+
+**Module tree for QM II** (★ core / ◇ enrichment; [G x] = Griffiths & Schroeter 3e chapter):
+- **M0 Bridge** ★. Recap of the postulates, Dirac notation, angular-momentum algebra, spin and hydrogen. New tool: tensor-product Hilbert spaces for two particles.
+- **M1 Identical particles** [G 5] ★
+  - 1.1 ψ(r₁, r₂); the exchange operator P̂₁₂ (swaps the two particles' labels); bosons, fermions and the symmetrization postulate.
+  - 1.2 "Exchange forces": ⟨(x₁ − x₂)²⟩ for symmetric, antisymmetric and distinguishable cases. A statistical effect, not a force.
+  - 1.3 Spin plus space: the total state is antisymmetric for fermions; singlet ↔ symmetric spatial part.
+  - 1.4 Atoms.
+    - Helium: para/ortho, exchange splitting.
+    - The periodic table; Hund's rules; term symbols ^{2S+1}L_J.
+  - 1.5 Solids.
+    - Free-electron gas: Fermi energy and degeneracy pressure. A white-dwarf/neutron-star hook toward relativistic astrophysics.
+    - Bloch's theorem; Dirac-comb/Kronig–Penney band gaps.
+  - 1.6 ◇ A second-quantization glimpse.
+- **M2 Symmetries and conservation laws** [G 6] ◇ (★ for the GR-bound learner)
+  - 2.1 The translation operator T̂(a) = e^{−iap̂/ħ}: momentum is the *generator* of translations. How operators transform.
+  - 2.2 Symmetry ⇔ [Q̂, Ĥ] = 0 ⇔ conservation (the quantum Noether idea).
+  - 2.3 Parity in 1D and 3D; parity selection rules.
+  - 2.4 Rotations R̂ = e^{−iφL̂_z/ħ}, with angular momentum as the generator. Scalar and vector operators. ◇ The flavor of Wigner–Eckart.
+  - 2.5 Degeneracy from symmetry. ◇ Hydrogen's "accidental" degeneracy and the Runge–Lenz vector.
+  - 2.6 Rotational selection rules (Δl = ±1, Δm = 0, ±1).
+  - 2.7 Time translations: the Heisenberg picture; energy conservation.
+- **M3 Perturbation-theory applications** [G 7.3–7.5] ★ (move here if USU's 4700 covers only the formalism)
+  - Fine structure; Zeeman (weak, strong, intermediate); hyperfine and the 21-cm line.
+  - ◇ Stark effect. ◇ Lamb shift as a QED pointer.
+- **M4 Variational principle** [G 8] ★
+  - 4.1 The theorem ⟨Ĥ⟩_trial ≥ E_gs; one-parameter trial functions, tested on the HO and δ-well.
+  - 4.2 Helium ground state with an effective nuclear charge Z_eff.
+  - 4.3 The H₂⁺ ion (bonding/antibonding orbitals from a linear combination of atomic orbitals, LCAO).
+  - 4.4 The H₂ molecule (Heitler–London covalent bond). ◇ Linear (Rayleigh–Ritz) variational matrices.
+- **M5 WKB** [G 9] ★
+  - 5.1 Classical region: ψ ≈ (C/√p)e^{±(i/ħ)∫p dx}. Valid when the local wavelength changes slowly.
+  - 5.2 Tunneling: T ≈ e^{−2γ} with γ = (1/ħ)∫|p| dx; Gamow theory of α decay and the Geiger–Nuttall trend.
+  - 5.3 Connection formulas: Airy functions at turning points; Bohr–Sommerfeld ∮p dx = (n + ½)h.
+- **M6 Scattering** [G 10] ★
+  - 6.1 Classical scattering: impact parameter b; dσ/dΩ = |b/sin θ · db/dθ|; hard sphere; Rutherford.
+  - 6.2 Quantum setup: ψ ~ e^{ikz} + f(θ)e^{ikr}/r, giving dσ/dΩ = |f(θ)|².
+  - 6.3 Partial waves.
+    - Rayleigh expansion of the plane wave (spherical Bessel functions j_l plus Legendre P_l).
+    - Phase shifts δ_l; σ = (4π/k²)Σ(2l + 1)sin²δ_l.
+    - Low-energy s-wave dominance; hard-sphere σ → 4πa².
+    - ◇ Optical theorem.
+  - 6.4 Born approximation.
+    - Integral SE with the Green's function −e^{ikr}/(4πr).
+    - First Born f ∝ the Fourier transform of V at momentum transfer q.
+    - Yukawa → Rutherford; validity conditions; ◇ Born series.
+  - 6.5 1D scattering: S-matrix and transfer matrix; resonances (KSU-style). ◇ Breit–Wigner.
+- **M7 Quantum dynamics** [G 11] ★
+  - 7.1 Two-level systems: coefficient equations; first-order time-dependent perturbation theory (TDPT); sinusoidal driving and resonance. ◇ Exact Rabi flopping.
+  - 7.2 Radiation: the dipole Hamiltonian −qE·r; absorption, stimulated emission, incoherent driving.
+  - 7.3 Spontaneous emission: Einstein A and B coefficients (via Planck); lifetimes; selection rules.
+  - 7.4 Fermi's golden rule R = (2π/ħ)|V_fi|²ρ(E_f). Here V_fi is the transition matrix element and ρ the density of final states. sin²(x)/x² → δ is the key limit.
+  - 7.5 Adiabatic theorem; Berry (geometric) phase.
+    - ◇ Landau–Zener; ◇ Born–Oppenheimer.
+    - ◇ Sudden approximation; ◇ interaction picture.
+- **M8 Foundations and quantum information** [G 12; Townsend] ◇ (instructor-dependent; high value)
+  - EPR; Bell/CHSH, with the quantum maximum 2√2.
+  - Density matrix ρ: Tr ρ = 1, Tr ρ² ≤ 1, the Bloch ball; reduced density matrix via partial trace; entanglement.
+  - No-cloning; decoherence and Schrödinger's cat; ◇ teleportation and BB84 cryptography.
+- **M9 Relativistic QM teaser** ◇ (rare)
+  - Klein–Gordon and its negative-energy problem.
+  - Dirac equation (gamma matrices; spin and g = 2 emerge; antiparticles).
+  - Spinors as Lorentz-group representations: the GR/QFT doorway.
+- **M10 Fields-and-horizons teaser** ◇. Field modes as harmonic oscillators, the Unruh effect and Hawking radiation (Key question 10).
+- **Course boss battle: "The Approximation Arena".** Each encounter is a Hamiltonian. The learner must name the small parameter, choose perturbation / variational / WKB / adiabatic / sudden / Born / partial waves, defend the choice with a validity check, and then compute. Final round: a two-level system driven at resonance, with Fermi's-golden-rule decay into a continuum.
+
+**Mathematical skills.**
+- Perturbation series and matrix diagonalization.
+- Tensor products and permutation symmetry.
+- Parameter minimization (variational).
+- Asymptotics: WKB, Airy functions, stationary-phase intuition.
+- Green's functions and 3D Fourier transforms.
+- Spherical Bessel functions and the Rayleigh expansion.
+- ◇ Contour integration (Griffiths derives the scattering Green's function this way).
+- δ-function limits and density of states.
+- Time integrals in first-order TDPT.
+- Trace and partial trace.
+- Group theory lite: generators, operator exponentials, ◇ BCH.
+
+**Prerequisites.**
+- Complete QM I.
+- E&M II: dipole coupling, plane waves, vector potential and minimal coupling, radiation (Larmor ↔ spontaneous emission).
+- Thermal/statistical physics: Planck spectrum, Boltzmann factors (Einstein coefficients; Fermi gas).
+- Classical scattering and action.
+
+**Hidden foundations.** Each needs a micro-lesson.
+- Every approximation needs a stated small parameter and a validity check.
+- Exchange symmetry is not a force; Pauli exclusion = antisymmetry.
+- Density of states is what turns oscillation into a rate.
+- Time–energy uncertainty in line widths.
+- Selection rules come from symmetry.
+- A cross-section is an effective area.
+- Partial waves are angular-momentum channels (l_max ~ ka).
+- The classical limit appears as ħ → 0 in WKB.
+- Geometric vs. dynamical phase.
+- Entanglement vs. mixture; decoherence.
+
+### Gaps
+- No USU PHYS 4710 syllabus or catalog text was found, so the USU-specific coverage cannot be confirmed. Ask the catalog verifier for the official text.
+- Several more QM II syllabi (Berkeley 137B, Caltech, Colorado's current course, Oregon State Paradigms) were planned but not searched after the shared search budget was exhausted. The near-universal/instructor-dependent table rests on about eight courses.
+- Whether Griffiths & Schroeter 3e still contains a Berry's-phase subsection inside 11.5 (as the 2nd edition's ch. 10 did) was not verified.
+- Numerical values in the variational module (helium Z_eff and energies) are textbook-standard but were not sourced this session.
+
+## Key question 9 — QM II (PHYS 4710): problem-solving techniques, problem archetypes, visualizations, depth and rigor, misconceptions
+
+### Takeaway
+QM II is a course about *choosing and validating approximations*. Its visual vocabulary carries over from QM I: Bloch sphere, phasor wave functions, level diagrams. It adds configuration-space plots for exchange symmetry, phase-space areas for WKB, polar cross-section plots for scattering, and Bloch-sphere loops for Berry phase.
+
+Published, research-validated misconception data are much thinner for QM II topics than for QM I formalism. Distractor banks here are mostly expert-anticipated and should be flagged for later PER validation.
+
+### Cited Findings
+- **QuVis** provides research-based simulations relevant to QM II: two-level systems, superposition vs. mixed states, entanglement, single-photon interferometers, quantum cryptography (BB84-style eavesdropping) and a "Quantum Bomb Detection" interaction-free-measurement game. — [QuVis news](https://www.st-andrews.ac.uk/physics/quvis/news.html); [Kohnle et al., two-level systems, arXiv:1501.07905](https://arxiv.org/pdf/1501.07905)
+- **Falstad** offers quantum transitions and quantum crystal applets. — [Falstad applets](https://falstad.com/mathphysics.html). **PhET** Quantum Tunneling and Wave Packets includes double barriers for resonant tunneling. — [ComPADRE listing](https://www.compadre.org/Quantum/items/detail.cfm?ID=7461)
+- MIT 8.06 (2018) explicitly includes Landau–Zener transitions, Berry's phase and Born–Oppenheimer inside the adiabatic unit. — [MIT OCW 8.06 2018](https://ocw.mit.edu/courses/8-06-quantum-physics-iii-spring-2018/pages/video-lectures/)
+- **Singh & Marshman's review** covers upper-level QM broadly and attributes many difficulties to overgeneralization and to blurring closely related concepts. That mechanism also describes QM II slips such as using a nondegenerate formula in a degenerate case. — [ERIC record](https://eric.ed.gov/?id=EJ1076748)
+- PER has also characterized and monitored student *discomfort* in upper-division QM, which matters for pacing and affect in a self-study product. — [arXiv:2007.06688](https://arxiv.org/pdf/2007.06688)
+
+### Inferences
+**Technique ladder (the "approximation decision tree" the boss battle tests).**
+- Is there a solvable Ĥ₀ plus a small Ĥ′? → perturbation theory. Degenerate? → diagonalize Ĥ′ in the degenerate subspace.
+- Only the ground state needed, with no small parameter? → variational, as an upper bound.
+- Slowly varying potential, or near-classical high quantum numbers? → WKB.
+- Slowly varying Ĥ(t)? → adiabatic. Abruptly changing? → sudden.
+- Weak, time-dependent coupling? → first-order TDPT. Coupling into a continuum? → Fermi's golden rule.
+- Scattering at low energy (ka ≲ 1)? → a few partial waves. Weak potential or high energy? → Born.
+
+Always state the small parameter and check it at the end.
+
+**Representative archetypes per module.**
+- **M1 Identical particles**
+  - Two non-interacting particles in an infinite well: ground and first-excited energies and degeneracies for distinguishable particles, bosons and fermions (with spin).
+  - ⟨(x₁ − x₂)²⟩ exchange correlation.
+  - Helium ground state to first order in electron–electron repulsion.
+  - Fermi energy of copper; degeneracy pressure of a white dwarf.
+- **M2 Symmetry**
+  - Show that a periodic V commutes with T̂(a), giving Bloch's theorem.
+  - Parity and angular-momentum selection rules for ⟨n′l′m′|z|nlm⟩.
+  - A 2π rotation of a spinor gives −1, observable as a relative phase (the neutron-interferometry archetype).
+  - Heisenberg-picture x̂(t) for the oscillator.
+- **M3 Perturbation applications**
+  - n = 2 hydrogen fine-structure pattern.
+  - Weak vs. strong Zeeman effect.
+  - The 21-cm frequency.
+- **M4 Variational**
+  - Gaussian trial for the HO (exact) and for the δ-well (an upper bound).
+  - Helium with Z_eff.
+  - H₂⁺ binding curve; why the bonding orbital binds.
+- **M5 WKB**
+  - Energies for V = α|x| (compare with the exact Airy result).
+  - Gamow factor and the Geiger–Nuttall trend.
+  - Bohr–Sommerfeld for the HO (exact with the ½).
+  - ◇ Field emission through a triangular barrier.
+- **M6 Scattering**
+  - Low-energy hard sphere: σ = 4πa², four times the geometric cross-section. This counter-intuitive result is an excellent multiple-choice item.
+  - First Born for Yukawa, taking the Rutherford limit.
+  - s-wave phase shift of a spherical well; Ramsauer–Townsend transparency.
+  - 1D S-matrix for a double-barrier resonance.
+- **M7 Dynamics**
+  - Rabi oscillation of a driven two-level system; its first-order limit.
+  - Transition probability of an oscillator kicked by a Gaussian pulse.
+  - Golden-rule rate into a continuum (photo-ionization archetype); hydrogen 2p→1s rate from A coefficients.
+  - Berry phase of spin-½ in a slowly rotating B: −½ × enclosed solid angle.
+- **M8 Foundations**
+  - CHSH for the singlet, reaching 2√2.
+  - Reduced density matrix of a Bell state (maximally mixed).
+  - Purity Tr ρ²; no-cloning from linearity.
+
+**Visualization specs (QM II).** Format: drawn | parameters (units) | teaches | simplified.
+1. **Exchange-symmetry configuration space.** A heat-map of |ψ(x₁, x₂)|² on the (x₁, x₂) plane for two particles in a box. | n_a, n_b; symmetric / antisymmetric / distinguishable; spin singlet or triplet. | Bosons bunch on the x₁ = x₂ diagonal and fermions have a node there: exchange "force" = correlation. Singlet spin allows a symmetric spatial part. | Non-interacting particles.
+2. **Atom builder.** Orbital filling with Hund's rules and exchange energy. | Z (1–36). | Shell structure; why parallel spins are favored. | Aufbau heuristics.
+3. **Fermi sea and degenerate stars.** A k-space sphere fills up. | N; volume (m³); stellar mass (M☉). | E_F, degeneracy pressure, and the radius of a white dwarf. ◇ The relativistic-electron limit (Chandrasekhar teaser, a GR/astro hook). | Ideal gas, uniform density.
+4. **Band-structure lab** (Dirac comb / Kronig–Penney). E(k) with gaps and Bloch waves. | Barrier strength (eV·nm); lattice spacing (nm). | Gaps arise from Bragg-like interference; reduced zone. | 1D.
+5. **Variational optimizer.** ⟨Ĥ⟩ plotted against the trial parameter, with the exact level as a floor. | Trial family; width b (nm). | Upper-bound principle; a good energy does not imply a good wave function. | 1D or helium-like.
+6. **WKB and phase space.** V(x), turning points, the 1/√p amplitude, exact vs. WKB ψ, and the shaded ∮p dx area. | Potential shape; E (eV); n. | Semiclassics; Bohr–Sommerfeld (n + ½)h; where WKB fails (near turning points). | 1D.
+7. **Gamow α-decay.** A Coulomb barrier with a nuclear well. | E_α (MeV); Z; nuclear radius (fm). | Log-lifetime vs. energy (Geiger–Nuttall); exponential sensitivity. | l = 0, 1D radial.
+8. **Partial-wave scattering.** A plane wave decomposed into l-channels; phase-shift dials; a polar plot of dσ/dΩ. | ka (0.1–10); well depth V₀ (MeV or eV); radius a (fm or nm). | Low-energy isotropy; l_max ~ ka; resonance when δ_l passes π/2. | Spherical potentials.
+9. **Born as a Fourier transform.** V(r) beside Ṽ(q), with q = 2k sin(θ/2) mapped onto θ. | Yukawa range μ⁻¹ (fm); strength; k. | f(θ) ∝ Ṽ(q); the Rutherford limit; form-factor intuition. | First order.
+10. **Rabi lab.** A Bloch sphere under resonant driving, with P₂(t). | Detuning Δ (MHz); Rabi frequency Ω (MHz); damping (MHz). | Resonance width; first-order TDPT as the small-time limit of the exact result. | Rotating-wave approximation. Benchmark: QuVis two-level systems.
+11. **Golden-rule emergence.** A discrete level coupled to N closely spaced levels; the sin²(Δωt/2)/Δω² window narrowing in time. | N; level spacing (μeV); coupling (μeV). | Why a constant rate appears, and why the density of states matters. | Flat continuum.
+12. **Radiative transitions.** A hydrogen level diagram with Δl = ±1 arrows, lifetimes, and the dipole pattern from E&M II. | Initial and final states. | Selection rules from symmetry; lifetime scaling. Ties back to Larmor. | Electric-dipole approximation.
+13. **Landau–Zener sweep.** Two energy levels plotted against a parameter, with an avoided crossing. | Gap (μeV); sweep rate (μeV/ns). | The adiabatic vs. diabatic outcome and its exponential probability. | Two levels.
+14. **Berry-phase loop.** The B-field direction traces a loop on a sphere while the spin follows it. | Loop shape; cone angle (deg); traversal time. | Geometric phase = −½ × solid angle, independent of speed (dynamical phase subtracted). Same mathematics as parallel transport and holonomy on a curved surface: a direct GR link (Key question 10). | Adiabatic limit.
+15. **Entanglement and Bell lab.** A two-qubit source with analyzer angles a, a′, b, b′ and a correlation plot. | Angles (deg); Werner mixing p (0–1). | CHSH S up to 2√2; the classical bound of 2; no signaling; when violation disappears. | Ideal detectors. Benchmark: QuVis entanglement.
+16. **Density-matrix Bloch ball.** Pure states on the surface, mixed states inside; decoherence shrinks the Bloch vector. | Dephasing rate (s⁻¹). | Superposition vs. mixture; purity Tr ρ². | Single qubit.
+
+**Depth and rigor target.** Griffiths & Schroeter Part II level, including derivations of:
+- first- and second-order perturbation theory and degenerate perturbation theory;
+- the variational theorem;
+- WKB with connection formulas (Airy-based, heuristic);
+- the partial-wave formalism and the first Born approximation (with the Green's function);
+- first-order TDPT, the golden rule via the δ-limit, and Einstein coefficients;
+- the adiabatic theorem and the spin-½ Berry phase.
+
+Sakurai/Shankar-level material goes in optional panels: the interaction picture, Lippmann–Schwinger, S-matrix unitarity, Wigner–Eckart, path integrals. Relativistic QM is a teaser only.
+
+**Distractor bank (QM II).** All items are expert-anticipated (not PER-validated this session) unless noted.
+- **Identical particles**
+  - "Exchange force is a real fifth force."
+  - "Pauli exclusion is only for electrons."
+  - Antisymmetrizing only the spatial part and forgetting spin.
+  - "Two fermions can never be at the same point" (they can, with a singlet spin and a symmetric spatial part).
+  - Miscounting states for identical vs. distinguishable particles.
+- **Perturbation theory**
+  - Using perturbed states in the first-order energy.
+  - "The second-order ground-state shift can be positive" (it never is).
+  - Applying the nondegenerate formula to degenerate levels (matches the overgeneralization mechanism in the Singh & Marshman review).
+- **Variational**
+  - "The variational energy can fall below E_gs."
+  - "A good energy means a good wave function."
+- **WKB**
+  - "WKB is valid at turning points."
+  - "Tunneling probability is linear in barrier width."
+  - Dropping the ½ in Bohr–Sommerfeld.
+- **Scattering**
+  - "σ always equals the geometric area" (the low-energy hard sphere gives 4πa²).
+  - "Born works for strong potentials at low energy."
+  - "f(θ) is dimensionless" (it has units of length).
+- **Time-dependent PT**
+  - "The first-order transition probability can grow without bound."
+  - "The golden rule applies to a single discrete final state."
+  - "Forbidden transitions never happen." They proceed via magnetic-dipole or electric-quadrupole channels: the 21-cm line is a magnetic-dipole transition. Good link to E&M II multipoles.
+- **Adiabatic**
+  - "Adiabatic means no heat flow" (confusing the thermodynamic meaning).
+  - "A closed-loop Berry phase is gauge-dependent" (it is gauge-invariant mod 2π).
+- **Foundations**
+  - "A mixed state is a superposition."
+  - "The reduced state of an entangled pair is pure."
+  - "Bell violation allows faster-than-light signaling."
+  - "Any correlation is entanglement."
+  - "A spinor's −1 under 2π rotation is unobservable" (relative phase is measurable in interferometers).
+
+### Gaps
+- No QM II-specific PER misconception studies (scattering, WKB, identical particles, TDPT) were retrieved. The search budget ran out before these could be checked; candidate literature includes Singh group QuILTs on identical particles and perturbation theory.
+- Current availability of the Falstad quantum-transitions applet, and of QuVis Bell/entanglement simulations as HTML5, was not verified.
+
+## Key question 10 — Connections to general relativity (all four courses): what to bridge, where, and how to visualize it
+
+### Takeaway
+E&M II is the main structural rehearsal for GR. The same moves recur:
+- covariant field equations from a tensor (F^{μν});
+- gauge freedom fixed by a "Lorenz/harmonic" condition that turns the field equations into wave equations with retarded solutions;
+- radiation set by conservation laws: EM's lowest radiating multipole is the dipole, gravity's is the quadrupole because mass and momentum are conserved;
+- a stress-energy tensor as source.
+
+QM contributes the language of symmetry generators, spin and representations, geometric (Berry) phase as holonomy, and oscillator modes for a QFT-in-curved-spacetime teaser.
+
+Graduate GR courses state this dependence outright: MIT's 8.962 lists 8.07 E&M II as a prerequisite.
+
+### Cited Findings
+- **Gauge analogy (EM ↔ linearized gravity).**
+  - The gauge can always be chosen so that the divergence of the trace-reversed metric perturbation vanishes. This condition is called the Lorenz or harmonic gauge by analogy with the electromagnetic condition.
+  - In that gauge the linearized Einstein equation becomes a wave equation for the trace-reversed perturbation, sourced by the stress-energy tensor.
+  - Gauge transformations shift the perturbation by a symmetrized derivative of a generator vector. The gauge is reached by solving a wave equation for that generator, the counterpart of reaching Lorenz gauge in electrodynamics.
+  — [Theory of Gravitational Waves, arXiv:1607.04202](https://arxiv.org/pdf/1607.04202)
+- In harmonic gauge, □γ̄ = −16πG T. The condition is also called de Donder, harmonic or Hilbert gauge. — [Gravitation: from Newton to Einstein, arXiv:1902.07287](https://arxiv.org/pdf/1902.07287). The Lorentz (Lorenz) gauge is the linearized form of the harmonic gauge, which can be defined by requiring each coordinate function to satisfy the covariant wave equation. — [UMD Physics 675 problem set](https://physics.umd.edu/grt/taj/675a/homework.html). "Lorenz" refers to Ludvig Lorenz, not Hendrik Lorentz. — [arXiv:2412.08026](https://arxiv.org/pdf/2412.08026)
+- **Gravitomagnetism.** The analogy with Maxwell–Lorentz electrodynamics holds even for time-dependent potentials when the harmonic gauge is applied correctly. There is a factor of 4 in the gravitomagnetic force term that differs from electrodynamics. — [The harmonic gauge condition in the gravitomagnetic equations, gr-qc/0010075](https://arxiv.org/pdf/gr-qc/0010075)
+- **Why gravity radiates quadrupole, not dipole.**
+  - Conservation of mass forbids monopole gravitational radiation, and conservation of linear momentum forbids dipole radiation.
+  - In EM the charge (monopole) is conserved but the electric dipole moment is not, so EM radiation is predominantly dipolar.
+  - The mass dipole's time derivative is the total momentum, which is constant, so the quadrupole is the lowest radiating moment. This brings an extra v/c suppression relative to EM dipole radiation.
+  — [Gravitational Radiation, gr-qc/0003069](https://arxiv.org/pdf/gr-qc/0003069); [Ferrari, quadrupole GW radiation notes (KU)](https://crossfield.ku.edu/8901_2019A/readings/Quadrupole-GWradiation-Ferrari.pdf). A minority 1982 paper (Vlasov & Denisov) disputes that the quadrupole formula follows from GR. — [Theor. Math. Phys. 53 (1982)](https://mathnet.ru/eng/tmf2629)
+- **Carroll's lecture notes** (via in-repo GR notes).
+  - The wave equation □h̄_μν = −16πG T_μν (eq. 6.22, c = 1).
+  - The quadrupole formula (eq. 6.85): the wave is proportional to the second time derivative of the quadrupole moment of the energy density, evaluated at the *retarded time*.
+  - "Oscillation of the center of mass of an isolated system violates conservation of momentum."
+  - GWs are weaker than EM radiation because the quadrupole is smaller than the dipole and gravity couples weakly.
+  — [Carroll, Lecture Notes on GR, gr-qc/9712019](https://arxiv.org/abs/gr-qc/9712019)
+- GW polarizations "plus" and "cross" are 45° apart, versus 90° for light polarizations. — [Wikipedia: Gravitational wave](https://en.wikipedia.org/wiki/Gravitational_wave) (via in-repo GR notes)
+- The double pulsar validates GR's quadrupole radiation-damping prediction to about 1.3×10⁻⁴ (95% confidence). — [Kramer et al. 2021, arXiv:2112.06795](https://arxiv.org/abs/2112.06795) (via in-repo GR notes)
+- **Courses state the dependency directly.**
+  - MIT 8.962 General Relativity (graduate, Spring 2020) lists 18.03, 18.06 and **8.07 (Electromagnetism II)** as prerequisites. — [MIT OCW 8.962 syllabus](https://ocw.mit.edu/courses/8-962-general-relativity-spring-2020/pages/syllabus) (via in-repo GR notes)
+  - Caltech Ph 236 asks for "mastery of special relativity at the level of Goldstein's Classical Mechanics, or of Jackson's Classical Electrodynamics." — [Caltech catalog Ph 236](https://catalog.caltech.edu/current/2025-26/ph-236-abc) (via in-repo GR notes)
+- **Hawking radiation teaser facts.**
+  - T_H = ħc³/(8πGMk_B), about 60 nK for one solar mass. It has never been directly observed from a real black hole. — [Wikipedia: Hawking radiation](https://en.wikipedia.org/wiki/Hawking_radiation); [Carroll ch. 7](https://arxiv.org/abs/gr-qc/9712019) (via in-repo GR notes)
+  - Analog "sonic black holes" in Bose–Einstein condensates show Hawking-like, entangled phonon pairs, with a thermal spectrum measured in 2019. — [Steinhauer, arXiv:1510.00621](https://arxiv.org/abs/1510.00621); [Muñoz de Nova et al., arXiv:1809.00913](https://arxiv.org/abs/1809.00913) (via in-repo GR notes)
+- **Covariant EM is standard undergraduate content.** Griffiths 12.3 (relativistic electrodynamics: field tensor, tensor notation, relativistic potentials) — [U. Florida PHY4324 notes](https://www.phys.ufl.edu/~pjh/teaching/phy4324/notes.html). The EM tensor appears in E&M II at UCM Madrid — [UCM Electromagnetism II](https://www.ucm.es/data/cont/docs/18-2025-05-10-800502%20-%20Electromagnetism%20II.pdf). Purcell & Morin derive magnetism as a relativistic effect — [Cambridge, Purcell & Morin 3e](https://www.cambridge.org/ca/titles/electricity-and-magnetism-3rd-edition).
+- Coupled Einstein–Maxwell(–charged scalar) systems are an active research setting. For example, Kehle & Unger's construction of collapse to an exactly extremal black hole disproved the 1973 "third law" of black-hole thermodynamics. — [arXiv:2211.15742](https://arxiv.org/abs/2211.15742) (via in-repo GR notes)
+
+### Inferences
+**Bridge map ("Road to Spacetime" cards).** Each row is one optional 5–8-minute lesson placed at the end of the named module. Most rows are standard physics; the ones marked † rest on the citations above.
+
+| Atlas placement | E&M / QM concept | GR counterpart | Visualization idea |
+|---|---|---|---|
+| E&M I M1–M2 | Gauss/Poisson: ∇·E = ρ/ε₀, ∇²V = −ρ/ε₀ | Newtonian gravity as "electrostatics of mass" with the sign flipped: ∇²Φ = 4πGρ; the shell theorem. This is the Newtonian limit GR must reproduce. | Toggle the Gauss-lab charges into masses: field arrows reverse, flux = −4πGM |
+| E&M I M4 | Multipole expansion | Mass quadrupoles (Earth's oblateness J₂); the quadrupole moment Q_ij as the GW source | The multipole zoom-out with a "mass mode" (no negative mass, so the dipole can be removed by choosing the center of mass) |
+| E&M I M6 / QM I M7 | A ≠ 0 where B = 0; Aharonov–Bohm phase ∮A·dl | Holonomy: a connection (A is the EM connection; Γ is gravity's) gives a "phase" around loops | The AB interferometer next to a parallel-transport loop on a sphere |
+| E&M II M2 | Poynting u, S; Maxwell stress T_ij | The stress-energy tensor T^{μν} as the source in G_μν = 8πG T_μν. EM's T^{μν} is traceless, giving radiation pressure P = u/3 (the radiation era in cosmology). | A 4×4 T^{μν} grid lighting up for a plane wave or a capacitor |
+| E&M II M4 † | Gauge A → A + ∇λ; Lorenz gauge ⇒ □A^μ = −μ₀J^μ | Diffeomorphism gauge h_μν → h_μν + ∂_μξ_ν + ∂_νξ_μ; harmonic gauge ⇒ □h̄_μν = −16πG T_μν | Gauge playground with an "EM / gravity" switch: the same wave equation and the same retarded solution |
+| E&M II M4 | Retarded potentials and the light cone | Retarded h̄_μν ∝ ∫T_μν(t_r)/𝓇; causal structure; light cones tilting in curved spacetime (preview) | The retarded-time light-cone visual, reused |
+| E&M II M5 † | Dipole radiation (Larmor, ω⁴); multipole hierarchy | Quadrupole formula; no monopole or dipole GWs because mass and momentum are conserved; binaries emit at twice the orbital frequency; double-pulsar test | Side-by-side: an oscillating charge dipole vs. a spinning mass dumbbell. Power-vs-frequency scaling; "why can't you dipole-radiate gravity?" quiz |
+| E&M II M3 † | EM plane-wave polarizations (spin-1, 90°) | GW + and × polarizations (spin-2, 45°); a ring of test masses | A ring of free particles under an EM wave (charges oscillate) vs. a GW (ring stretches and squeezes) |
+| E&M II M6 | F^{μν}, field transformations, invariants, ∂_μJ^μ = 0 guaranteed by antisymmetry | Tensors, index gymnastics, the metric η_μν → g_μν. Antisymmetry-plus-Bianchi ⇒ conservation, mirrored by the contracted Bianchi identity ⇒ ∇_μT^{μν} = 0. Einstein–Maxwell (charged black holes). | Lorentz-boost field transformer with the F^{μν} matrix |
+| E&M II M6 | Hyperbolic motion of a charge in uniform E | Uniform acceleration, Rindler observers, the equivalence principle | A spacetime diagram of a hyperbolic worldline with its horizon |
+| E&M II M6.9 | Field Lagrangian −¼F_μνF^{μν} | Einstein–Hilbert action; field theory as the shared language | A "same structure" card |
+| QM I M1/M6 | Spin-½, SU(2), −1 under 2π rotation | Spinors and Lorentz-group representations; photon helicity ±1 vs. graviton helicity ±2 | The Bloch sphere with a 2π rotation that flips the sign (visible in interference) |
+| QM II M2 | Generators: momentum ↔ translations, L ↔ rotations, H ↔ time; conservation ⇔ symmetry | Killing vectors ⇒ conserved energy and angular momentum of geodesics (Schwarzschild orbits) | A "symmetry → conserved quantity" card deck |
+| QM II M7 / M2 | Berry phase = −½ solid angle | Parallel transport on a sphere rotates a vector by the enclosed solid angle (curvature, Gauss–Bonnet) | The *same* sphere shown twice: spin phase and a transported arrow |
+| QM II M1 | Fermi degeneracy pressure | White dwarfs and neutron stars: the compact-object path to black holes | The Fermi-sea visual with a stellar-mass slider |
+| QM II M10 † | Field modes as harmonic oscillators; vacuum | Unruh effect and Hawking radiation: T_H ∝ 1/M, ~60 nK per solar mass, never observed astrophysically; BEC analogs | Oscillator-mode "vacuum seen by an accelerating detector" cartoon, carrying an honesty tag: theory, unobserved |
+
+**Depth guidance for the bridges.** Keep them qualitatively exact and quantitatively light:
+- Write the equations side by side (□A^μ = −μ₀J^μ vs. □h̄_μν = −16πG T_μν) without deriving linearized GR.
+- State the honest caveats. The gravitomagnetic analogy carries a factor of 4. Hawking radiation is unobserved. The quadrupole formula is confirmed to ~10⁻⁴ by the double pulsar, with a minority dissent on derivations.
+- Explain every new symbol the moment it appears (□, h̄_μν, ξ_μ, T^{μν}, G_μν), as the learner profile requires.
+
+**Boss-battle tie-in.** End the Maxwell's Equations Challenge with a "Road to Spacetime" bonus round:
+1. Rewrite Maxwell as ∂_νF^{μν} = μ₀J^μ.
+2. Impose Lorenz gauge to obtain □A^μ = −μ₀J^μ.
+3. Predict the lowest radiating multipole for charge vs. mass, and say why.
+
+### Gaps
+- No session source was retrieved specifically for the EM stress-energy tensor T^{μν}_EM (its components, tracelessness, P = u/3). That row rests on standard textbook physics and in-repo stress-energy material, not on a fetched source.
+- The photon/graviton helicity statement (±1 vs. ±2) and the Killing-vector and Berry-phase/parallel-transport correspondences are standard but were not sourced this session.
+- QFT-in-curved-spacetime teaching resources at the undergraduate level (e.g., Carroll's textbook ch. 9) could not be searched. Only Carroll's lecture notes (via in-repo notes) are cited.
+- Several GR citations come from in-repo notes written in an earlier research round. They were not re-fetched in this session because all page fetches were blocked.
