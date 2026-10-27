@@ -199,7 +199,7 @@ The **second law of thermodynamics**, in Kelvin and Planck's form, says $Q_c$ ca
         3: 'A ratio of two energies has no units: joules and kilojoules give the same answer.',
       },
       hints: ['Efficiency = what you get / what you pay for.', t`What you get is $W = Q_h - Q_c$.`],
-      teach: 'Efficiency is the work out divided by the heat in: e = 1 − Q_c/Q_h.',
+      teach: t`Efficiency is the work out divided by the heat in: $e = 1 - Q_c/Q_h$.`,
       explain: t`$W = 1500 - 1050 = 450$ J, so $e = 450/1500 = 0.30$. The student's 70 % is the fraction of the heat *wasted*, $Q_c/Q_h$.`,
     }),
   ],
