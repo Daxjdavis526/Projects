@@ -368,6 +368,12 @@ export function mount(F, P) {
   }
 
   F.draw(draw);
-  F.caption('Each grain falls freely; the arrows show how it accelerates relative to the centre. Shapes are to scale, with time in units of the time scale $T$ in the readout. The tidal field is held fixed while the ball falls (fine while the ball moves little compared with its distance from the mass), and the grains do not pull on one another.');
+  const notes = ['Each grain falls freely; the arrows show how it accelerates relative to the centre.'];
+  if (modes.includes('wave')) notes.push('The drawn strain is exaggerated about $10^{20}$ times; real waves change the shape by parts in $10^{21}$.');
+  else notes.push('Shapes are to scale, with time in units of the time scale $T$ in the readout.');
+  if (usesBody) notes.push('The tidal field is held fixed while the ball falls (fine while the ball moves little compared with its distance from the mass).');
+  if (usesMatter) notes.push('Inside matter the grains are test particles that feel only gravity and pass freely through the matter around them.');
+  notes.push('The grains do not pull on one another.');
+  F.caption(notes.join(' '));
   return { get: (k) => F.params[k] };
 }

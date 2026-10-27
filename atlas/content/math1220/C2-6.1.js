@@ -325,6 +325,6 @@ Think of $t$ as time and $(x, y)$ as a moving point. The curve is its path; the 
   ],
   sources: [
     { label: 'OpenStax Calculus Vol. 2, §7.1 Parametric Equations', url: 'https://openstax.org/books/calculus-volume-2/pages/7-1-parametric-equations' },
-    { label: 'GPS.gov: Space Segment (orbit radius and period)', url: 'https://www.gps.gov/systems/gps/space/' },
+    { label: 'GPS.gov: Space Segment (orbit altitude and period)', url: 'https://www.gps.gov/systems/gps/space/' },
   ],
 });

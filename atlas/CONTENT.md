@@ -114,7 +114,10 @@ Write thousands as `$6{,}371$` or with a thin space, `$6\,371$`.
 In an ordinary string `'\frac'` silently becomes a form feed plus `rac`; the
 test catches this ("escape damage"), but it is easier not to make the mistake.
 Inside `` t`…` `` you can still interpolate: `` t`$\frac{${a}}{${b}}$` ``.
-`$${x}$` is a dollar sign followed by an interpolation — it works.
+`$${x}$` is a dollar sign followed by an interpolation — it works. But
+`\${x}` is *not* an interpolation (the backslash escapes it): to put a TeX
+command held in a variable after a backslash, put the backslash in the value
+(`const fn = '\\cos'; t`$${fn}x$``) or write `${'\\'}${name}`.
 
 `symbols[].tex`, `equation` and dissection `parts[].tex` are **bare TeX**
 (no dollar signs). `symbols[].text` is markup.
@@ -381,6 +384,33 @@ The library (read the header comment of a sim's file for its full options):
 | `ibp-area` | integration by parts as two areas | `pair: 'xcos' \| 'ln'` |
 | `code-runner` | an editable, runnable Python snippet with its output and figures (atlas.plot or Matplotlib) — the Explore step of a programming lesson | `code`, `rows` |
 
+Simulations written for particular courses — reuse them anywhere they fit
+(their header comments list every option):
+
+| type | what it shows |
+|---|---|
+| `calc-polar` | polar and parametric curves, swept areas as thin wedges (½∫r²dθ), tangents, arc length, conics with focus and directrix, Kepler's equation with equal-time sectors |
+| `calc-quadrature` | midpoint, trapezoid and Simpson approximations on a function or sampled data, with the error, the error bound and a log–log error panel |
+| `calc-series` | partial sums with error bands, sequences with an ε-band, ratio and root tests, cobwebs, integral-test rectangles (`readout: false` hides the numbers) |
+| `calc-vectors3d` | a rotatable 3D scene: vectors with components, points, lines, planes and normals, parallelograms, curves, spheres — all driven by sliders |
+| `mech-graphlink` | one motion as a moving body above linked x–t, v–t and a–t graphs |
+| `mech-fbd` | free-body diagrams beside their situations: blocks, slopes, ropes, pulleys, Atwood machines, elevators |
+| `mech-frames` | Newton's first law seen from the ground and from an accelerating train car |
+| `mech-drag` | falling with quadratic drag: forces to scale, v–t approaching terminal speed |
+| `mech-energy` | a potential-energy landscape with a draggable total-energy line, turning points and equilibria |
+| `mech-collide` | 1D and 2D collisions with momentum and kinetic-energy charts, restitution, the centre of mass |
+| `mech-rotor` | a rigid body about a fixed axis: moments of inertia, the parallel-axis theorem, torques with lever arms |
+| `mech-kepler` | Kepler orbits with real data (ISS, GPS, the Moon, Mercury, Halley, S2) and Newton's cannon |
+| `gr-light-clock` | two light clocks, one moving: time dilation from the constancy of c |
+| `gr-coordinates` | one flat plane under different coordinate labels: lengths agree, components do not |
+| `gr-sphere-transport` | parallel transport around a loop on a sphere: the arrow returns rotated by area/R² |
+| `gr-elevator` | Einstein's elevator in four situations, with the tides a small box cannot hide |
+| `gr-timewarp` | a thrown clock's proper time: height speeds it, speed slows it, free fall ages most |
+| `gr-lensing` | a ray-traced point-mass lens: drag a galaxy behind it, make an Einstein ring |
+| `gr-dustball` | a freely falling ball of dust: tidal stretching and squeezing, the Ricci volume change |
+| `gr-friedmann` | solutions a(t) of the Friedmann equation for matter plus Λ: the universe's possible fates |
+| `gr-chirp` | a gravitational-wave chirp and what it does to a detector's arms |
+
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
 `label` and `explain` are markup, `unit` is TeX. Every slider needs an
 `explain` — one line saying what the parameter means physically.
@@ -521,7 +551,7 @@ export default boss({
     { title: 'Converge or diverge', story: t`…`, items: [
       num({ id: 'r1-sum', skill: 'math1220.C2-4.3', difficulty: 3, … }),   // skill: the lesson it draws on
       … ] },
-    …                                                                        // 3+ rounds, 8–12 items in all
+    …                                                                        // 3+ rounds, 9–12 items in all
   ],
 });
 ```

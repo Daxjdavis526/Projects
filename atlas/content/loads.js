@@ -3,6 +3,8 @@
 
 export const LESSONS = {
   'gr.EQ.1': () => import('./gr/EQ.1.js'),
+  'gr.EQ.2': () => import('./gr/EQ.2.js'),
+  'gr.EQ.3': () => import('./gr/EQ.3.js'),
   'gr.S01.i': () => import('./gr/S01.i.js'),
   'gr.S02.i': () => import('./gr/S02.i.js'),
   'gr.S03.i': () => import('./gr/S03.i.js'),
@@ -17,6 +19,9 @@ export const LESSONS = {
   'gr.S12.i': () => import('./gr/S12.i.js'),
   'gr.S13.i': () => import('./gr/S13.i.js'),
   'gr.S14.i': () => import('./gr/S14.i.js'),
+  'gr.S15.i': () => import('./gr/S15.i.js'),
+  'gr.S16.i': () => import('./gr/S16.i.js'),
+  'gr.S17.i': () => import('./gr/S17.i.js'),
   'gr.S20.i': () => import('./gr/S20.i.js'),
   'gr.S21.i': () => import('./gr/S21.i.js'),
   'gr.S22.i': () => import('./gr/S22.i.js'),
@@ -24,6 +29,7 @@ export const LESSONS = {
   'gr.S24.i': () => import('./gr/S24.i.js'),
   'gr.S25.i': () => import('./gr/S25.i.js'),
   'gr.S26.i': () => import('./gr/S26.i.js'),
+  'gr.S27.i': () => import('./gr/S27.i.js'),
   'math1220.C2-0.1': () => import('./math1220/C2-0.1.js'),
   'math1220.C2-0.2': () => import('./math1220/C2-0.2.js'),
   'math1220.C2-1.1': () => import('./math1220/C2-1.1.js'),
@@ -82,6 +88,7 @@ export const LESSONS = {
   'phys2210.M1.2': () => import('./phys2210/M1.2.js'),
   'phys2210.M1.3': () => import('./phys2210/M1.3.js'),
   'phys2210.M1.4': () => import('./phys2210/M1.4.js'),
+  'phys2210.M11.1': () => import('./phys2210/M11.1.js'),
   'phys2210.M2.1': () => import('./phys2210/M2.1.js'),
   'phys2210.M2.2': () => import('./phys2210/M2.2.js'),
   'phys2210.M2.3': () => import('./phys2210/M2.3.js'),
@@ -98,9 +105,16 @@ export const LESSONS = {
   'phys2210.M4.3': () => import('./phys2210/M4.3.js'),
   'phys2210.M4.4': () => import('./phys2210/M4.4.js'),
   'phys2210.M4.5': () => import('./phys2210/M4.5.js'),
+  'phys2210.M5.1': () => import('./phys2210/M5.1.js'),
+  'phys2210.M5.2': () => import('./phys2210/M5.2.js'),
   'phys2210.M5.3': () => import('./phys2210/M5.3.js'),
+  'phys2210.M5.4': () => import('./phys2210/M5.4.js'),
+  'phys2210.M7.1': () => import('./phys2210/M7.1.js'),
+  'phys2210.M7.2': () => import('./phys2210/M7.2.js'),
+  'phys2210.M7.3': () => import('./phys2210/M7.3.js'),
   'prog.P0.1': () => import('./prog/P0.1.js'),
 };
 
 export const BOSSES = {
+  'math1220': () => import('./math1220/boss.js'),
 };

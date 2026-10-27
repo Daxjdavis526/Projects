@@ -26,7 +26,7 @@ const trim = (x, n = 3) => String(+(+x).toPrecision(n));
 export function mount(F, P0) {
   const P = { ...defaults, ...P0 };
   const { canvas, box } = F.canvas({ aspect: 'wide', label: 'A train car with a ball on its floor and a pendulum, seen from the ground or from inside the car' });
-  const plot = new Plot(canvas, { x: [-1.5, 16.5], y: [-1.6, 4.2], equal: true, grid: false, axes: false });
+  const plot = new Plot(canvas, { x: [-1.5, 16.5], y: [-1.3, 4.7], equal: true, grid: false, axes: false, pad: { l: 8, r: 8, t: 8, b: 8 } });
   const live = !!P.sliders;
   if (live) {
     F.choice({ key: 'motion', label: 'The car', options: [['speed-up', 'Speeds up'], ['steady', 'Cruises'], ['brake', 'Brakes']], value: P.motion, explain: 'Speeds up from rest; cruises at a steady 4 m/s; or brakes from 4 m/s to a stop.' });
@@ -58,12 +58,12 @@ export function mount(F, P0) {
     plot.clear();
     const X0 = plot.vx0, X1 = plot.vx1;
     // the ground, with posts every 2 m so motion relative to it shows
-    plot.rect(X0, -1.6, X1 - X0, 1.0, { color: 'ink4', alpha: 0.18, stroke: false });
+    plot.rect(X0, -1.3, X1 - X0, 0.7, { color: 'ink4', alpha: 0.18, stroke: false });
     plot.line(X0, -0.6, X1, -0.6, { color: 'ink3', width: 2 });
     for (let k = Math.floor((X0 + shift) / 2) * 2; k <= X1 + shift; k += 2) {
       const x = k - shift;
-      plot.line(x, -0.6, x, -1.0, { color: 'ink4', width: 1.5 });
-      if (k % 4 === 0) plot.text(`${k} m`, x, -1.25, { color: 'ink4', size: 10, align: 'center' });
+      plot.line(x, -0.6, x, -0.85, { color: 'ink4', width: 1.5 });
+      if (k % 4 === 0) plot.text(`${k} m`, x, -1.05, { color: 'ink4', size: 10, align: 'center' });
     }
     // the car
     const cx = car.x - shift;
@@ -81,7 +81,7 @@ export function mount(F, P0) {
     plot.circle(ballX, 0.25, 0.25, { fill: 'accent', color: 'accent', width: 1 });
     // velocity arrows (in this view): the car's and the ball's
     const vCar = inCar ? 0 : car.v, vBall = inCar ? ball.v - car.v : ball.v, k = 0.55;
-    arrowV(cx + LEN / 2, HGT + 0.55, vCar * k, 'good', `car: ${speed(vCar)}`);
+    arrowV(cx + LEN / 2, HGT + 0.42, vCar * k, 'good', `car: ${speed(vCar)}`, true);
     arrowV(ballX, 1.0, vBall * k, 'accent', `ball: ${speed(vBall)}`);
     // the view's label
     plot.text(inCar ? 'Seen from inside the car' : 'Seen from the ground', plot.L + 6, plot.T + 12, { screen: true, color: 'ink2', size: 12.5, weight: 650 });
@@ -98,10 +98,12 @@ export function mount(F, P0) {
       ['pendulum tilt', `${trim(Math.abs(tilt) * 180 / Math.PI)}^\\circ`],
     ]);
   }
-  function arrowV(x, y, dx, color, label) {
+  // a velocity arrow centred on x; its label above it, or beside its head (`beside`) where there is no room above
+  function arrowV(x, y, dx, color, label, beside = false) {
     if (Math.abs(dx) < 0.05) { plot.text(label, x, y, { color, size: 11.5, weight: 650, align: 'center' }); return; }
     plot.arrow(x - dx / 2, y, x + dx / 2, y, { color, width: 2.4, head: 9 });
-    plot.text(label, x, y + 0.32, { color, size: 11.5, weight: 650, align: 'center' });
+    if (beside) plot.text(label, x + dx / 2 + Math.sign(dx) * 0.15, y, { color, size: 11.5, weight: 650, align: dx > 0 ? 'left' : 'right' });
+    else plot.text(label, x, y + 0.32, { color, size: 11.5, weight: 650, align: 'center' });
   }
   const speed = (v) => (Math.abs(v) < 0.005 ? 'at rest' : `${trim(Math.abs(v))} m/s ${v > 0 ? '→' : '←'}`);
 

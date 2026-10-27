@@ -50,7 +50,7 @@ This is exactly the path that Newton’s inverse-square gravity produces. Every 
         { label: 'Halley’s comet', set: { e: 0.967 }, x: [-32, 3], y: [-7, 7], rstep: 5 },
         { label: 'ʻOumuamua', set: { e: 1.2 }, x: [-4.6, 2.4], y: [-2.8, 2.8], rstep: 1 },
       ],
-      choices: [{ key: 'mode', label: 'Show', options: [[0, 'Focus and directrix'], [1, 'Equal times (Kepler’s second law)']], value: 0 }],
+      choices: [{ key: 'mode', label: 'Show', options: [[0, 'Focus and directrix'], [1, 'Equal times']], value: 0, explain: 'Equal times: Kepler’s second law, sectors swept in equal times.' }],
       sliders: [
         { key: 'e', label: 'Eccentricity $e$', min: 0, max: 1.6, step: 0.0001, value: 0.6, explain: t`$0$ circle, below $1$ ellipse, $1$ parabola, above $1$ hyperbola.` },
         { key: 'th', label: 'Angle $\\theta$ of $P$', min: -3.1, max: 3.1, step: 0.01, value: 1.2, unit: t`\text{rad}`, explain: 'Measured from the direction of closest approach (perihelion).' },
@@ -80,8 +80,8 @@ This is exactly the path that Newton’s inverse-square gravity produces. Every 
       texts: [{ text: 'Neptune’s orbit', x: -20, y: 6.6, color: 'violet', size: 11.5 }, { text: 'Sun, Earth’s orbit', x: 1.5, y: -2.4, color: 'teal', size: 11.5 }],
     }, t`Halley’s orbit to scale (AU), with Earth’s orbit (teal, radius 1) and Neptune’s (violet dashed, radius 30.07).`),
     steps: [
-      { label: 'Perihelion is θ = 0', text: t`$r(0) = \dfrac{p}{1 + e} = q$, so $p = q(1 + e) = 0.586 \times 1.967 = 1.153$ AU.` },
-      { label: 'Aphelion is θ = π', text: t`$Q = r(\pi) = \dfrac{p}{1 - e} = \dfrac{1.153}{0.033} \approx 34.9$ AU.` },
+      { label: 'Closest point', text: t`Perihelion is at $\theta = 0$: $r(0) = \dfrac{p}{1 + e} = q$, so $p = q(1 + e) = 0.586 \times 1.967 = 1.153$ AU.` },
+      { label: 'Farthest point', text: t`Aphelion is at $\theta = \pi$: $Q = r(\pi) = \dfrac{p}{1 - e} = \dfrac{1.153}{0.033} \approx 34.9$ AU.` },
       { label: 'Semi-major axis', text: t`The long axis runs from perihelion to aphelion, so $a = \tfrac12(q + Q) \approx 17.8$ AU — the same as $p/(1 - e^2)$.` },
       { label: 'Sense check', text: t`$Q$ lies beyond Neptune’s orbit (30.1 AU), as observed. Kepler’s third law (period in years $= a^{3/2}$ with $a$ in AU) gives $17.76^{3/2} \approx 75$ years — Halley returned in 1910 and 1986 and is due in 2061 ✓. (With the more precise $e = 0.96714$, $Q = 35.1$ AU.)` },
     ],
@@ -240,8 +240,8 @@ This is exactly the path that Newton’s inverse-square gravity produces. Every 
         const alt = r.pick([185, 250, 300]), rp = RE + alt, ra = 42164;
         const e = (ra - rp) / (ra + rp), p = (2 * rp * ra) / (rp + ra), S = 1 / 1000;
         return {
-          prompt: t`A satellite bound for geostationary orbit is first put into a transfer orbit with perigee ${alt} km above the ground and apogee at the geostationary radius, ${'42\\,164'} km from the Earth’s centre. Taking the Earth’s radius as ${RE} km, how far from the Earth’s centre is the satellite when it is $90^\circ$ past perigee? Give 3 significant figures.`,
-          visual: polar([-46, 10], [-14, 14], {
+          prompt: t`A satellite bound for geostationary orbit is first put into a transfer orbit with perigee ${alt} km above the ground and apogee at the geostationary radius, $42\,164$ km from the Earth’s centre. Taking the Earth’s radius as ${RE} km, how far from the Earth’s centre is the satellite when it is $90^\circ$ past perigee? Give 3 significant figures.`,
+          visual: polar([-50, 12], [-19, 19], {
             rstep: 10, angles: 'none',
             curves: [{ conic: [round(e, 6), round(p * S, 4)], color: 'accent' }, { polar: '42.164', theta: [0, '2*pi'], color: 'violet', width: 1.3, dash: true }, { polar: '6.371', theta: [0, '2*pi'], color: 'teal', width: 2 }],
             segments: [{ from: [0, 0], to: [0, round(p * S, 3)], color: 'gold', width: 2.2, label: '?', labelDx: 8, labelDy: 0 }],

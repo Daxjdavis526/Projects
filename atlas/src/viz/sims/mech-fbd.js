@@ -86,7 +86,7 @@ const SCENES = {
       if (P.F > 0) agentLine(pl, P.phi >= 0 ? [w / 2, h / 2] : [-w / 2, h * 0.72], P.phi, P.phi >= 0 ? 'rope' : 'pole');
       const st = sol.info.state;
       if (st === 'sliding') motion(pl, -0.45, h + 0.35, 0.9, 0, 'v');
-      const status = { rest: 'At rest: no push, so no friction', static: 'At rest: static friction matches the push', sliding: sol.info.a > 1e-6 ? 'Sliding, speeding up' : sol.info.a < -1e-6 ? 'Sliding, slowing down' : 'Sliding at constant velocity', lifts: 'Lifted off the floor: N = 0' }[st];
+      const status = { rest: 'At rest: no push, so no friction', static: 'At rest: static friction balances the applied force', sliding: sol.info.a > 1e-6 ? 'Sliding, speeding up' : sol.info.a < -1e-6 ? 'Sliding, slowing down' : 'Sliding at constant velocity', lifts: 'Lifted off the floor: N = 0' }[st];
       return { anchors: [[0, h / 2]], sizes: [[w / 2, h / 2]], status };
     },
     readout: (P, s) => [['normal force $N$', tN(s.info.N)], ['friction', `${tN(Math.abs(s.info.f))}${s.info.kinetic ? '\\ (\\mu_k N)' : ''}`], ['max static friction $\\mu_s N$', tN(s.info.fsMax)], ['acceleration', tA(s.info.a)]],
@@ -417,7 +417,7 @@ const SCENES = {
       if (P.ground) ground(pl, -2.6, 2.6, -ext[1]);
       if (P.wall) wall(pl, P.wall === 'left' ? -ext[0] : ext[0], -1.2, 1.2, P.wall === 'left' ? -1 : 1);
       if (P.agent) { const d = [Math.cos(P.agent.dir * D2R), Math.sin(P.agent.dir * D2R)], e = Math.min(Math.abs(d[0]) > 1e-9 ? ext[0] / Math.abs(d[0]) : Infinity, Math.abs(d[1]) > 1e-9 ? ext[1] / Math.abs(d[1]) : Infinity); const pull = P.agent.kind === 'rope'; agentLine(pl, [(pull ? 1 : -1) * d[0] * e, (pull ? 1 : -1) * d[1] * e], P.agent.dir, pull ? 'rope' : 'pole', 1.3); }
-      if (P.v) { const L = Math.hypot(...P.v) || 1, d = [P.v[0] / L, P.v[1] / L], mid = [ext[0] + 0.5 + 0.45 * Math.abs(d[0]), 0]; motion(pl, mid[0] - 0.45 * d[0], mid[1] - 0.45 * d[1], 0.9 * d[0], 0.9 * d[1], 'v'); }
+      if (P.v) { const L = Math.hypot(...P.v) || 1, d = [P.v[0] / L, P.v[1] / L], mid = ext[0] > 1.2 ? [0, ext[1] + 0.25 + 0.45 * Math.abs(d[1])] : [ext[0] + 0.5 + 0.45 * Math.abs(d[0]), 0]; motion(pl, mid[0] - 0.45 * d[0], mid[1] - 0.45 * d[1], 0.9 * d[0], 0.9 * d[1], 'v'); }
       return { anchors: [[0, 0]], sizes: [ext], status: P.status || '' };
     },
     readout: () => [],

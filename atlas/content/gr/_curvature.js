@@ -69,3 +69,31 @@ export function tidalField({ caption, label = 'Moon', ellipse = true } = {}) {
     caption: caption ?? `The ${label}’s tide over the Earth: at each point, how the ${label}’s pull differs from its pull on Earth’s centre. Arrows hugely exaggerated, and the ${label} is far off to the right.${ellipse ? ' Dashed: the stretched shape oceans would take if they could follow the tide freely.' : ''}`,
   };
 }
+
+/**
+ * The stress–energy tensor as a 4 × 4 table of coloured cells (rows and
+ * columns t, x, y, z). `cells` is a 4 × 4 array of labels: '' for a zero
+ * entry (drawn faint), a string for a non-zero one; `colors` optionally
+ * colours non-zero cells ('gold' by default; 'bad' marks a negative entry).
+ */
+export function stressTable(cells, { caption, colors = null } = {}) {
+  const shade = [], points = [];
+  const names = ['t', 'x', 'y', 'z'];
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      const v = cells[r][c], on = v !== '' && v !== 0 && v !== '0';
+      const col = (colors && colors[r][c]) || 'gold';
+      shade.push({ fn: `${-r - 0.04}`, lower: `${-r - 0.96}`, from: c + 0.54, to: c + 1.46, color: on ? col : 'ink4', alpha: on ? 0.32 : 0.1 });
+      // a point's label starts about 9 px right of it and sits 9 px above it: shift the (invisible) point so the label is centred
+      const label = on ? String(v) : '0';
+      points.push({ x: round(c + 0.9 - 0.035 * label.length, 4), y: -r - 0.6, r: 0.01, color: on ? 'ink' : 'ink3', label });
+    }
+    points.push({ x: 0.12, y: -r - 0.6, r: 0.01, color: 'ink3', label: names[r] });
+    points.push({ x: r + 0.865, y: 0.08, r: 0.01, color: 'ink3', label: names[r] });
+  }
+  return {
+    type: 'graph',
+    params: { x: [0, 4.6], y: [-4.15, 0.4], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', shade, points },
+    ...(caption ? { caption } : {}),
+  };
+}

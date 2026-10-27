@@ -45,7 +45,7 @@ export const PRESETS = {
   gps: { body: 'earth', name: 'GPS satellite', label: 'GPS', a: 26560e3, e: 0 },
   geo: { body: 'earth', name: 'geostationary satellite', label: 'Geostationary', a: 42164e3, e: 0 },
   gto: { body: 'earth', name: 'satellite on a transfer orbit', label: 'Transfer orbit', rp: R_EARTH + 250e3, ra: 42164e3 },
-  moon: { body: 'earth', name: 'Moon', label: 'Moon', a: 384400e3, e: 0.0549, GM: GM_EARTH + GM_MOON, R: R_MOON },
+  moon: { body: 'earth', name: 'the Moon', label: 'Moon', a: 384400e3, e: 0.0549, GM: GM_EARTH + GM_MOON, R: R_MOON },
   earth: { body: 'sun', name: 'Earth', label: 'Earth', a: AU, e: 0.0167 },
   mercury: { body: 'sun', name: 'Mercury', label: 'Mercury', a: 0.38710 * AU, e: 0.2056 },
   halley: { body: 'sun', name: 'Halley’s comet', label: 'Halley’s comet', a: 17.83 * AU, e: 0.967 },

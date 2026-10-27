@@ -58,7 +58,7 @@ Curves that wind round a centre — roses, spirals, cardioids, and the orbit of 
     title: 'Sweep the angle, trace the curve',
     lead: t`The gold ray turns to the angle $\theta$; the point sits at distance $r(\theta)$ along it. The bold curve is what has been traced from $\theta = 0$ so far. When $r$ is negative the point is on the **opposite** side of the pole from the ray.`,
     tasks: [
-      t`**Rose:** with $k = 3$, sweep $\theta$ from $0$ to $2\pi$. Three petals appear in the first half-turn, then $r < 0$ retraces them: an odd $k$ gives $k$ petals. Try $k = 2$: an even $k$ gives $2k$.`,
+      t`**Rose:** with $k = 3$, sweep $\theta$ from $0$ to $2\pi$. All three petals are drawn in the first half-turn (watch the point jump across the pole whenever $r < 0$); the second half-turn traces them again. An odd $k$ gives $k$ petals. Try $k = 2$: an even $k$ gives $2k$.`,
       t`**Limaçon:** $b = 1$ is the **cardioid**, with a cusp at the pole. Push $b$ above $1$ and an inner loop appears — it is traced while $r < 0$.`,
       t`**Spiral:** every full turn adds $2$ to the radius, so the coils are evenly spaced — an Archimedean spiral, like a coiled hose or a record groove.`,
     ],

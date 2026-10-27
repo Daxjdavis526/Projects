@@ -216,7 +216,8 @@ export function mount(F, P) {
       custom(Q, rows, { N, SN, aN: last.a, L: L ?? NaN }, env);
     }
     drawLegend(legend);
-    F.readout(rows);
+    // readout: false hides the numbers (a problem's picture must not show its answer)
+    F.readout(P.readout === false ? [] : rows);
   }
 
   function clip(body) {
