@@ -16,6 +16,7 @@ EX.Vg = (EX.n * R * EX.T) / ATM;                    // 0.692 m³
 
 // U.S. Standard Atmosphere 1976 (geometric altitude): pressure (kPa) and temperature (K)
 const STD = { 0: [101.325, 288.15], 20: [5.5293, 216.65], 25: [2.5492, 221.55], 30: [1.197, 226.51] };
+const ATM_PTS = [[0, 101.325], [5, 54.048], [10, 26.5], [15, 12.111], [20, 5.5293], [25, 2.5492], [30, 1.197]];   // [km, kPa]
 
 /** Pressure against absolute temperature at fixed n and V: a straight line through absolute zero. */
 function ptGraph(marks, caption) {
@@ -240,12 +241,12 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
           visual: {
             type: 'graph',
             params: {
-              x: [0, 120], y: [0, 36], aspect: 'wide', xlabel: 'pressure (kPa)', ylabel: 'altitude (km)',
-              alt: 'Atmospheric pressure falling with altitude',
-              curves: [{ fn: '-7.4*ln(x/101.325)', domain: [0.8, 101.325], color: 'accent', width: 2.4 }],
-              points: [{ x: 101.325, y: 0, r: 5, color: 'warn', label: 'launch', labelDx: -50, labelDy: -12 }, { x: P2, y: h, r: 5, color: 'gold', label: `${h} km`, labelDx: 10, labelDy: 0 }],
+              x: [0, 110], y: [0, 33], aspect: 'wide', xlabel: 'pressure (kPa)', ylabel: 'altitude (km)',
+              alt: 'Atmospheric pressure falling with altitude, from the standard atmosphere',
+              curves: ATM_PTS.slice(1).map(([z, p], i) => ({ param: [`${ATM_PTS[i][1]} + t*(${p - ATM_PTS[i][1]})`, `${ATM_PTS[i][0]} + t*${z - ATM_PTS[i][0]}`], t: [0, 1], color: 'accent', width: 2.2 })),
+              points: [...ATM_PTS.map(([z, p]) => ({ x: p, y: z, r: 3, color: 'accent' })), { x: 101.325, y: 0, r: 5.5, color: 'warn', label: 'launch', labelDx: -50, labelDy: -12 }, { x: P2, y: h, r: 5.5, color: 'gold', label: `${h} km`, labelDx: 10, labelDy: 0 }],
             },
-            caption: 'Pressure against altitude, sketched as an exponential with a 7.4 km scale height — a rough fit to the standard atmosphere, which the prompt’s numbers come from.',
+            caption: 'Pressure against altitude in the U.S. Standard Atmosphere (1976), every 5 km, joined by straight lines. Half the air lies below about 5.5 km.',
           },
         };
       },

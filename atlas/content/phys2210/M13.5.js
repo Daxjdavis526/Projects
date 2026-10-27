@@ -199,19 +199,19 @@ That $1/r^3$ is why the Moon raises bigger tides on Earth than the Sun does, tho
         const n = r.pick([5, 10, 20]), k = r.pick([10, 30]);
         const GM = n * GM_SUN, da = k * 9.81, L = 2;
         const rr = Math.cbrt((2 * GM * L) / da), rs = (2 * GM) / C ** 2;
+        const GMs = 4.3e6 * GM_SUN, rrS = Math.cbrt((2 * GMs * L) / da), rsS = (2 * GMs) / C ** 2;   // the same for Sagittarius A*
         return {
           prompt: t`An astronaut 2 m tall falls feet first toward a black hole of ${n} solar masses ($GM = ${n}\times1.327\times10^{20}\ \text{m}^3/\text{s}^2$). At what distance from its centre does the head-to-feet stretch reach ${k}$g (${s3(da)}\ \text{m/s}^2$)? Give it in km.`,
           answer: rr / 1000, units: 'km', tol: { rel: 0.01 },
           errors: [{ value: Math.cbrt((GM * L) / da) / 1000, feedback: 'Keep the factor 2 in 2GMd/r³.' }, { value: Math.sqrt((2 * GM * L) / da) / 1000, feedback: 'The stretch goes as 1/r³: take a cube root, not a square root.' }],
           hints: [t`Set $\dfrac{2GML}{r^3} = ${s3(da)}\ \text{m/s}^2$ and solve for $r$.`, t`$r = \left(\dfrac{2GML}{\Delta a}\right)^{1/3}$, with $L = 2$ m.`],
           teach: 'Near a stellar-mass black hole tides become deadly thousands of kilometres out — “spaghettification”.',
-          explain: t`$r = \left(\dfrac{2(${tex(GM, 4)})(2)}{${s3(da)}}\right)^{1/3} = ${s3(rr / 1000)}$ km — far outside the event horizon at $2GM/c^2 = ${s3(rs / 1000)}$ km. For the 4.3-million-solar-mass black hole at the galaxy's centre the same stretch occurs only about 160 times closer to it than its horizon is far... in fact it never occurs outside the horizon at all: big black holes have gentle tides at their edge.`,
+          explain: t`$r = \left(\dfrac{2(${tex(GM, 4)})(2)}{${s3(da)}}\right)^{1/3} = ${s3(rr / 1000)}$ km — far outside the event horizon, at $2GM/c^2 = ${s3(rs / 1000)}$ km. Around Sagittarius A* (4.3 million solar masses) the same stretch would be reached only ${Math.round(rrS / 1e6) * 1000 > 0 ? (Math.round(rrS / 1e7) * 10000).toLocaleString('en-US') : ''} km from the centre — deep inside its ${s3(rsS / 1e9)}-million-km horizon. Big black holes have gentle tides at their edge.`,
           visual: {
             type: 'graph',
             params: {
               x: [1, 5], y: [-2, 10], xlabel: 'log₁₀(distance in km)', ylabel: 'log₁₀(stretch in m/s²)', aspect: 'wide',
               curves: [{ fn: `${r4(Math.log10(2 * GM * L))} - 3*(x + 3)`, domain: [r4(Math.log10(rs / 1000)), 5], color: 'accent' }],
-              hlines: [{ y: r4(Math.log10(da)), label: `${k}g`, color: 'bad' }],
               vlines: [{ x: r4(Math.log10(rs / 1000)), label: 'horizon' }],
             },
             caption: `The head-to-feet stretch on a 2 m body against distance from a ${n}-solar-mass black hole, both in powers of ten: a straight line of slope −3.`,
@@ -237,7 +237,7 @@ That $1/r^3$ is why the Moon raises bigger tides on Earth than the Sun does, tho
       hints: ['What matters for pulling something apart: the total pull on it, or the difference in pull between its parts?'],
       teach: 'Inside a planet’s Roche limit, tides overcome a loosely bound body’s self-gravity and tear it apart — what gave Saturn its rings, by one hypothesis.',
       explain: 'The comet came within about 40 000 km of Jupiter’s cloud tops, well inside the zone where Jupiter’s tidal stretch beats the comet’s own feeble gravity. Its pieces then followed the orbit as a “string of pearls” — an observed, and spectacular, demonstration of tidal disruption.',
-      visual: tidalArrows({ d: 2.5, view: 'tidal', X: 1.5, moonLabel: 'Jupiter', caption: 'The tidal pattern across a small body close to a big one (not to scale): stretched along the line, squeezed across it.' }),
+      visual: tidalArrows({ d: 3.5, view: 'tidal', X: 1.5, moonLabel: 'Jupiter', caption: 'The tidal pattern across a small body close to a big one (not to scale): stretched along the line, squeezed across it.' }),
     }),
   ],
   checkpoint: [
@@ -286,7 +286,7 @@ That $1/r^3$ is why the Moon raises bigger tides on Earth than the Sun does, tho
           visual: {
             type: 'graph',
             params: {
-              x: [0, 10.5], y: [-12, 10], xlabel: 'log₁₀(mass in solar masses)', ylabel: 'log₁₀(stretch at the horizon, m/s²)', aspect: 'wide',
+              x: [0, 10.5], y: [-12, 11], xlabel: 'log₁₀(mass in solar masses)', ylabel: 'log₁₀(stretch at the horizon, m/s²)', aspect: 'wide',
               curves: [{ fn: `${r4(Math.log10((2 * GM_SUN * 2) / ((2 * GM_SUN) / C ** 2) ** 3))} - 2x`, color: 'accent' }],
               hlines: [{ y: r4(Math.log10(9.81)), label: 'g on Earth', color: 'bad' }],
             },

@@ -150,7 +150,8 @@ export function mount(F, P0) {
 
   // the hanging block: half-width, its string's length at t = 0, and (with tension) the force arrows' lengths
   function hangGeom(md) {
-    const R = md.half, bw = 0.1 + 0.08 * Math.cbrt(md.hang);
+    // the block is sized to the drum it starts on (not to a radius slider, so it keeps its size while R changes)
+    const R = md.half, bw = (P.R > 0 ? P.R : R) * (0.45 + 0.3 * Math.cbrt(md.hang));
     const lmg = Math.max(0.9 * R, 1.5 * bw), lT = Mo.block ? lmg * (Mo.block.T / (md.hang * P.g)) : 0;
     const gap = P.tension ? Math.max(0.6 * R + 0.15, 2.6 * lT + 0.04) : 0.6 * R + 0.15;
     return { R, bw, lmg, lT, gap };

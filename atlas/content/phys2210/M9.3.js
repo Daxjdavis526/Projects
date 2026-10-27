@@ -230,7 +230,7 @@ $$m_1v_{1i} + m_2v_{2i} = m_1v_{1f} + m_2v_{2f}, \qquad e = \frac{v_{2f} - v_{1f
         const r4 = (x) => +x.toFixed(4);
         const ang = Math.acos(1 - h / 1.02);            // a 1.02 m string, so the drawing is to scale
         return {
-          prompt: t`A ballistic pendulum: a ${nice(m * 1000)} g bullet buries itself in a ${M} kg wooden block hanging from light strings, and the block swings up until it is ${nice(h * 100)} cm higher. How fast was the bullet moving? ($g = 9.8\ \text{m/s}^2$.)`,
+          prompt: t`A ballistic pendulum: a ${nice(m * 1000)} g bullet buries itself in a ${M} kg wooden block hanging from light strings, and the block swings up until it is ${nice(h * 100)} cm higher. How fast was the bullet moving? Take $g = 9.8\ \text{m/s}^2$.`,
           answer: v, units: 'm/s', tol: { rel: 0.01 },
           errors: [
             { value: vb, feedback: 'That is the block’s speed just after the impact. The bullet was much faster: use momentum to go back through the collision.' },

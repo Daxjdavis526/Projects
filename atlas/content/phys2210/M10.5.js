@@ -100,7 +100,7 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
         const m = r.pick([0.5, 1, 2]), M = r.pick([2, 3, 4]), R = r.pick([0.1, 0.15, 0.2]);
         const a = (m * G) / (m + 0.5 * M);
         return {
-          prompt: t`A ${m} kg block hangs from a light string wound round a ${M} kg solid-disk pulley of radius ${R} m on a frictionless axle. The block is released. What is its acceleration? ($g = 9.8\ \text{m/s}^2$.)`,
+          prompt: t`A ${m} kg block hangs from a light string wound round a ${M} kg solid-disk pulley of radius ${R} m on a frictionless axle. The block is released. What is its acceleration? Take $g = 9.8\ \text{m/s}^2$.`,
           answer: a, units: 'm/s^2', tol: { rel: 0.01 },
           errors: [
             { value: G, feedback: 'That would be free fall: the drum’s moment of inertia resists, through the string’s tension.' },

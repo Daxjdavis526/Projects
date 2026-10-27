@@ -140,7 +140,7 @@ The same change of momentum can come from **a big force for a short time or a sm
         const m = r.pick([70, 80, 90]), v = r.pick([4, 5, 6]), dt = r.pick([0.15, 0.2, 0.25, 0.3]);
         const net = (m * v) / dt, N = net + m * G;
         return {
-          prompt: t`A parachutist of mass ${m} kg (with gear) lands at ${v} m/s and, bending her knees, comes to rest in ${dt} s. What average force does the ground exert on her? ($g = 9.8\ \text{m/s}^2$.)`,
+          prompt: t`A parachutist of mass ${m} kg (with gear) lands at ${v} m/s and, bending her knees, comes to rest in ${dt} s. What average force does the ground exert on her? Take $g = 9.8\ \text{m/s}^2$.`,
           answer: N, units: 'N', tol: { rel: 0.01 },
           errors: [
             { value: net, feedback: 'That is the net force. The ground must also hold up her weight while it stops her: N − mg = mv/Δt.' },
