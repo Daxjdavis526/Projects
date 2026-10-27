@@ -147,6 +147,7 @@ for (const c of COURSES) {
 
 check('gallery ids are unique', new Set(GALLERY.map((g) => g.id)).size === GALLERY.length, GALLERY.filter((g, i) => GALLERY.findIndex((x) => x.id === g.id) !== i).map((g) => g.id).join(', '));
 if (!only) for (const g of GALLERY) {
+  check(`gallery ${g.id}: track is math, physics or gr`, ['math', 'physics', 'gr'].includes(g.track), String(g.track));
   if (!g.lesson) { await checkVisual(`gallery ${g.id}`, g.spec); continue; }
   const L0 = CATALOG.lessons[g.lesson];
   check(`gallery ${g.id}: lesson ${g.lesson} is built`, !!L0?.ready);

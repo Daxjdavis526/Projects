@@ -59,7 +59,7 @@ apart — the one farther along the direction of motion later.
   visual: {
     type: 'spacetime',
     title: 'Two flashes, two verdicts',
-    lead: t`Your frame’s axes are black; the gold axes belong to a rocket moving along $x$ at the speed the slider sets. Events A and B are two flashes that are **simultaneous for you** — both at $t = 0$. The gold dashed line through each event joins everything the rocket calls simultaneous with it.`,
+    lead: t`Your frame’s axes are the plain grey ones; the gold axes belong to a rocket moving along $x$ at the speed the slider sets. Events A and B are two flashes that are **simultaneous for you** — both at $t = 0$. The gold dashed line through each event joins everything the rocket calls simultaneous with it.`,
     tasks: [
       'At β = 0.5 the readout gives t′ = 0 for A but t′ = −1.73 for B: the rocket, moving toward B, says B flashed first.',
       'Slide β to −0.5: now the rocket moves toward A and says A flashed first. Observers moving along x disagree with you, and with each other.',
@@ -82,7 +82,7 @@ apart — the one farther along the direction of motion later.
     }),
     steps: [
       { label: 'The tail', text: t`In the station’s frame the light still moves at $c$ both ways (second postulate), but the tail moves *toward* it. The tail starts $L/2 = 150$ m behind the lamp and the gap closes at $c + v$: $t_\text{tail} = \dfrac{L/2}{c + v} = \dfrac{150\ \text{m}}{1.6c} = ${fmt(ns(EX_TAIL), 4)}$ ns.` },
-      { label: 'The nose', text: t`The nose runs *away* from the light, so that gap closes at only $c - v$: $t_\text{nose} = \dfrac{150\ \text{m}}{0.4c} = ${fmt(ns(EX_NOSE), 5)}$ ns. The station sees the tail lit first, ${fmt(ns(EX_NOSE - EX_TAIL), 3)} ns earlier.` },
+      { label: 'The nose', text: t`The nose runs *away* from the light, so that gap closes at only $c - v$: $t_\text{nose} = \dfrac{150\ \text{m}}{0.4c} = ${fmt(ns(EX_NOSE), 5)}$ ns. In the station’s frame the tail is lit first, ${fmt(ns(EX_NOSE - EX_TAIL), 3)} ns earlier.` },
       { label: 'Where they happen', text: t`The tail is reached at $x = -150 + v\,t_\text{tail} = ${nice(EX_XT)}$ m and the nose at $x = 150 + v\,t_\text{nose} = ${nice(EX_XN)}$ m, so $\Delta x = ${nice(EX_DX)}$ m.` },
       { label: 'Check the formula', text: t`$\dfrac{v\,\Delta x}{c^2} = 0.6 \times \dfrac{${nice(EX_DX)}\ \text{m}}{c} = ${fmt(ns(EX.b * EX_DX), 3)}$ ns ✓. In symbols, $\Delta t = \dfrac{Lv}{c^2 - v^2}$ and $\Delta x = L + v\,\Delta t$; rearranging the first, $c^2\Delta t = v(L + v\,\Delta t) = v\,\Delta x$ — exactly.` },
       { label: 'Who is right', text: t`Both. For the crew the two arrivals are simultaneous; for the station the tail is lit first. Neither frame is privileged (first postulate), so simultaneity at a distance is **relative**. Sense check: at an airliner’s 300 m/s the same ship would disagree with the station by only ${fmt(EX_SLOW * 1e12, 2)} ps.` },
@@ -155,7 +155,7 @@ apart — the one farther along the direction of motion later.
           visual: st({
             range: 4.2, top: 4.6, bottom: -0.8, cone: false, numbers: false, xlabel: 'x (station)', ylabel: 't (station)',
             lines: [[-0.6, -0.6 * b, 4.4, 4.4 * b, 'accent'], [-0.6, 3 - (3 * b + 0.6) * b, 4.4, 3 + (4.4 - 3 * b) * b, 'accent'], [-0.75 * b, -0.75, 3.9 * b, 3.9, 'gold', true, 1.8]],
-            events: [[0, 0, 'P: tail flash', 'warn', -40, 18], [3 * b, 3, 'Q: nose flash', 'warn', -96, -2]],
+            events: [[0, 0, 'P: tail flash', 'warn', -92, 14], [3 * b, 3, 'Q: nose flash', 'warn', 12, 10]],
             caption: 'The station’s frame, c = 1. Blue: the ship’s tail and nose. Gold dashed: the ship’s line of simultaneity through the two flashes. Not to scale.',
           }),
         };
@@ -192,7 +192,7 @@ apart — the one farther along the direction of motion later.
       visual: {
         type: 'graph',
         params: {
-          x: [-0.6, 9.4], y: [-1.6, 1.6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+          x: [-0.6, 9.4], y: [-1.6, 1.6], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
           curves: [...shipCurves(0, 2.2, 0, 0.7), seg(7.7, -0.7, 8.9, -0.7, 'ink2'), seg(7.7, 0.7, 8.9, 0.7, 'ink2'), seg(7.7, -0.7, 7.7, 0.7, 'ink2'), seg(8.9, -0.7, 8.9, 0.7, 'ink2')],
           arrows: [{ from: [0.3, -1.05], to: [2.3, -1.05], color: 'accent', label: '0.5c', labelDx: 6, labelDy: 0 }, { from: [2.4, 0], to: [5.6, 0], color: 'gold', label: 'laser pulse', labelDx: -70, labelDy: -16 }],
           points: [label(8.3, 0.7, 'station', 'ink2', -22, -14)],
@@ -225,10 +225,10 @@ apart — the one farther along the direction of motion later.
       prompt: 'Put the steps of Einstein’s train argument in order.',
       items: [
         'Lightning strikes both ends of the train at the same moment in the ground’s frame.',
-        'In the ground’s frame the passenger moves toward the front flash, so it reaches her first.',
-        'Which flash reaches her first is decided at one place, so every observer agrees on it.',
-        'In her own frame she sits midway between the ends, and both flashes move at c.',
-        'So in her frame the front strike happened first: the strikes were not simultaneous.',
+        'In the ground’s frame the passenger moves toward the front flash, which reaches her first.',
+        'She agrees that the front flash reached her first: that is a single event at one place.',
+        'In her frame she sits midway between the ends and both flashes move at c, so the flash that arrived first must have set off first.',
+        'Conclusion: strikes simultaneous for the ground are not simultaneous for the train.',
       ],
       hints: ['Start with what the ground observes, and end with what the passenger concludes.', 'The bridge between the two frames is an event both agree on: the order in which the flashes reach her.'],
       teach: 'Events at one place are agreed by everyone; the order of distant events is what frames can disagree about.',
@@ -252,7 +252,7 @@ apart — the one farther along the direction of motion later.
           visual: st({
             range: 5, xr: [-1.4, 5.6], top: 4.4, bottom: -1.2, cone: false, numbers: false, xlabel: 'distance toward Andromeda', ylabel: 'Sun’s time',
             lines: [[-1, 0, 4.2, 0, 'accent', false, 2.4], [-1, 4, 4.2, 4, 'violet', false, 2.4], [0, -0.6, 0, 4.9, 'ink3', true, 1.4], [-0.15, -0.6, 1.2, 4.8, 'gold', true, 1.6]],
-            events: [[0, 4, 'Andromeda now, for the Sun', 'ink2', -170, 18], [1, 4, 'Andromeda now, for the probe', 'gold', 8, -6]],
+            events: [[0, 4, 'Andromeda now, for the Sun', 'ink2', -170, 18], [1, 4, 'Andromeda now, for the probe', 'gold', 14, -10]],
             extra: { points: [label(0, 3.6, 'Sun', 'accent', 8, 0), label(4, 3.6, 'Andromeda', 'violet', 8, 0)] },
             caption: 'Not to scale: the probe’s line of simultaneity (gold) really tilts by only about one part in ten thousand. Grey dashed: the Sun’s “now”.',
           }),
@@ -290,7 +290,7 @@ apart — the one farther along the direction of motion later.
       visual: {
         type: 'graph',
         params: {
-          x: [-2.6, 4.4], y: [-1.5, 1.5], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+          x: [-2.6, 4.4], y: [-1.5, 1.5], aspect: 'wide', equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
           curves: [seg(-2, -1, 2, -1, 'ink2', 2.4), seg(-2, 1, 2, 1, 'ink2', 2.4), seg(-2, -1, -2, 1, 'ink2', 2.4), seg(2, -1, 2, 1, 'ink2', 2.4),
             seg(-1.3, 0.95, -0.95, 0.05, 'ink3', 1.6), seg(0.6, 0.8, 1.4, 0.8, 'ink', 3), seg(0.6, -0.8, 1.4, -0.8, 'ink', 3), seg(1, -0.72, 1, 0.72, 'gold', 2)],
           points: [{ x: -0.95, y: 0.05, r: 7, color: 'accent', label: 'pendulum', labelDx: -24, labelDy: 22 }, label(1.05, 0, 'light pulse', 'gold', 8, 0)],

@@ -859,6 +859,63 @@ const APPARATUS = {
       if (!lag) sysTag(pl, 9.9, 9.5, 'no lagging: heat leaks to the room');
     }
   },
+
+  // ─── PHYS 2225 ───────────────────────────────────────────────────────────
+
+  // conductive paper with two bars or two dots: field lines (solid), equipotentials (dashed), the probe
+  fieldmap(pl, E, P, st, o) {
+    const contact = st.sys === 'contact';
+    const dots = E === B.EXPERIMENTS['fieldmap-dots'];
+    const X0 = 2.0, Y0 = 5.2, k = 100;                  // the + electrode at X0; 1 world unit per cm
+    const px0 = 0.6, px1 = 14.0, py0 = 1.0, py1 = 9.4;
+    pl.rect(px0, py0, px1 - px0, py1 - py0, { fill: 'ink3', alpha: 0.16, stroke: 'ink4', width: 1 });
+    for (let gx = Math.ceil(px0); gx < px1; gx++) pl.line(gx, py0, gx, py1, { color: 'ink4', width: 0.6, alpha: 0.4 });
+    for (let gy = Math.ceil(py0); gy < py1; gy++) pl.line(px0, gy, px1, gy, { color: 'ink4', width: 0.6, alpha: 0.4 });
+    const inside = (x, y) => x > px0 + 0.02 && x < px1 - 0.02 && y > py0 + 0.02 && y < py1 - 0.02;
+    const circlePts = (cx, cy, r) => Array.from({ length: 721 }, (_, i) => { const t = (i / 720) * 2 * Math.PI, x = cx + r * Math.cos(t), y = cy + r * Math.sin(t); return inside(x, y) ? [x, y] : [NaN, NaN]; });
+    const X1 = X0 + (dots ? P.D : P.d) * k;              // the − electrode
+    const labelled = [2, 4, 6, 8];
+    if (dots) {
+      const g = B.dotsGeom(P, contact), c = g.c * k, mid = (X0 + X1) / 2;
+      for (const yc of [0.35, 1.1, 2.6]) for (const s of [1, -1]) pl.path(circlePts(mid, Y0 + s * yc * c, Math.hypot(c, yc * c)), { color: 'accent', width: 1, alpha: 0.55 });
+      pl.line(X0, Y0, X1, Y0, { color: 'accent', width: 1, alpha: 0.55 });
+      for (let V = 1; V <= 9; V++) {
+        const kk = Math.exp((V - P.V0 / 2) / g.K);
+        let cross;
+        if (Math.abs(kk - 1) < 1e-9) { pl.line(mid, py0, mid, py1, { color: 'violet', width: 1.2, dash: [4, 3] }); cross = mid; }
+        else {
+          const xc = (c * (1 + kk * kk)) / (1 - kk * kk), rho = (2 * c * kk) / Math.abs(1 - kk * kk);
+          pl.path(circlePts(mid + xc, Y0, rho), { color: 'violet', width: 1.2, dash: [4, 3] });
+          cross = mid + xc + (kk > 1 ? rho : -rho);
+        }
+        if (labelled.includes(V) && st.labels) pl.text(`${V} V`, cross, Y0 - 0.5, { color: 'violet', size: 10.5, weight: 600, align: 'center' });
+      }
+      for (const [x, col] of [[X0, contact ? 'warn' : 'ink2'], [X1, contact ? 'warn' : 'ink2']]) pl.circle(x, Y0, 0.24, { fill: 'ink2', color: col, width: contact ? 2.2 : 1.2 });
+    } else {
+      const f = contact ? P.loss : 0;
+      for (let y = 1.8; y < py1 - 0.3; y += 1.2) { pl.line(X0, y, X1, y, { color: 'accent', width: 1, alpha: 0.55 }); pl.arrow(X0 + 6.4, y, X0 + 7.0, y, { color: 'accent', width: 1, alpha: 0.7, head: 7 }); }
+      for (let V = 1; V <= 9; V++) {
+        const x = X0 + ((P.V0 * (1 - f) - V) / (P.V0 * (1 - 2 * f))) * P.d * k;
+        pl.line(x, py0, x, py1, { color: 'violet', width: 1.2, dash: [4, 3] });
+        if (labelled.includes(V) && st.labels) pl.text(`${V} V`, x, py0 + 0.45, { color: 'violet', size: 10.5, weight: 600, align: 'center' });
+      }
+      pl.rect(X0 - 0.35, py0, 0.35, py1 - py0, { fill: 'ink2', alpha: 0.9, stroke: contact ? 'warn' : 'ink2', width: contact ? 2.2 : 1 });
+      pl.rect(X1, py0, 0.35, py1 - py0, { fill: 'ink2', alpha: 0.9, stroke: contact ? 'warn' : 'ink2', width: contact ? 2.2 : 1 });
+    }
+    pl.text(`+${P.V0.toFixed(1)} V`, X0, py1 + 0.32, { color: 'bad', size: 11, weight: 650, align: 'center' });
+    pl.text('0 V', X1, py1 + 0.32, { color: 'ink2', size: 11, weight: 650, align: 'center' });
+    // the probe at the knob's setting, wired to the voltmeter
+    const s = st.setting ?? E.setting.value, xp = X0 + s;
+    pl.line(xp, Y0, 15.0, 6.6, { color: 'ink3', width: 1.1, dash: [3, 3] });
+    pl.circle(xp, Y0, 0.2, { fill: 'gold', color: 'gold', width: 1.4 });
+    if (st.labels) {
+      const V = st.row?.R?.[0];
+      display(pl, 15.0, 6.6, [`x = ${s.toFixed(1)} cm`, `V = ${Number.isFinite(V) ? V.toFixed(2) : '—'} V`], { compact: o.compact, title: 'probe and voltmeter' });
+      pl.text('field lines', 15.0, 3.9, { color: 'accent', size: 11, weight: 600 });
+      pl.text('equipotentials', 15.0, 3.1, { color: 'violet', size: 11, weight: 600 });
+      if (contact) sysTag(pl, 15.0, 2.0, '0.30 V lost at each contact', { size: 10.5 });
+    }
+  },
 };
 
 /** Node-side check used by the content tests. */

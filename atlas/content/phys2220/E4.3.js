@@ -29,6 +29,19 @@ const STRONG = SPOTS.map(([, x, y]) => {
   return Math.hypot(ex, ey);
 });
 
+// four candidate directions at P, on the −400 V equipotential of a −2.0 nC charge (cm)
+const DIR = (() => {
+  const r = (K * 2e-9) / 400 * 100, u = [0.8, 0.6], P = [r6(r * u[0]), r6(r * u[1])], L = 1.8;
+  const tip = (d, k = L) => [r6(P[0] + k * d[0]), r6(P[1] + k * d[1])];
+  const slant = [Math.cos(-0.23), Math.sin(-0.23)];
+  return { P, arrows: [
+    { from: P, to: tip([-u[1], u[0]]), label: 'A', color: 'gold' },
+    { from: P, to: tip(u), label: 'B', color: 'gold' },
+    { from: P, to: tip([-u[0], -u[1]]), label: 'C', color: 'gold', ldx: -16, ldy: 12 },
+    { from: P, to: tip(slant, 1.9), label: 'D', color: 'gold', ldx: 6, ldy: 12 },
+  ] };
+})();
+
 // the proton in an electrostatic analyser: a line charge of −10 nC/m on the axis, an orbit of 4 cm
 const AN = { lam: -10e-9, r: 0.04 };
 AN.v = Math.sqrt((2 * K * -AN.lam * QE) / MP);
@@ -151,7 +164,7 @@ Where they crowd together the field is strong; where they spread out it is weak.
       hints: ['The force on the proton is qE. Which way does E point relative to the equipotentials?'],
       teach: 'Released from rest, a charge starts moving along the field: straight across the equipotentials, toward lower V if it is positive.',
       explain: 'The force qE points along the field, which crosses the equipotential at right angles, toward lower V. So the proton sets off straight across the equipotentials, downhill in V, gaining kinetic energy as it goes. (Its path then curves, following the field lines only roughly once it has speed.)',
-      visual: field({ unit: 'cm', x: [-10, 10], y: [-6, 6], charges: [{ x: -3, y: 0, q: 2 }, { x: 3, y: 0, q: -2 }], equip: true, fieldLines: false, probe: { x: -1, y: 3.2, label: 'P' }, probeArrow: false }, 'A dipole’s equipotentials (violet, labelled in volts) and the point P.'),
+      visual: field({ unit: 'cm', x: [-10, 10], y: [-6, 6], charges: [{ x: -3, y: 0, q: 2 }, { x: 3, y: 0, q: -2 }], equip: true, fieldLines: false, probe: { x: -5.063, y: 2.063, label: 'P' }, probeArrow: false }, 'A dipole’s equipotentials (violet, every 200 V; some labelled) and the point P, on the 400 V equipotential.'),
     }),
     mcq({
       id: 'direction', difficulty: 2, fixedOrder: true,
@@ -166,7 +179,7 @@ Where they crowd together the field is strong; where they spread out it is weak.
       hints: ['The field is perpendicular to the equipotentials.', 'It points toward lower V. Near a negative charge, where is V lowest?'],
       teach: 'The field at a point is perpendicular to the equipotential there and points toward lower V.',
       explain: 'The field crosses the equipotential at a right angle, toward lower V. Near a negative charge V is most negative close in, so the field points inward, toward the charge: arrow C.',
-      visual: field({ unit: 'cm', x: [-10, 10], y: [-6, 6], charges: [{ x: 0, y: 0, q: -2 }], equip: true, dV: 100, fieldLines: false, probe: { x: 4, y: 3, label: 'P' }, probeArrow: false, notes: { arrows: [{ from: [4, 3], to: [2.92, 4.44], label: 'A', color: 'gold' }, { from: [4, 3], to: [5.44, 4.08], label: 'B', color: 'gold' }, { from: [4, 3], to: [2.56, 1.92], label: 'C', color: 'gold', ldx: -16, ldy: 12 }, { from: [4, 3], to: [5.85, 2.52], label: 'D', color: 'gold', ldx: 6, ldy: 12 }] } }, 'A −2.0 nC charge, its equipotentials (violet, labelled), and four candidate directions at P.'),
+      visual: field({ unit: 'cm', x: [-10, 10], y: [-6, 6], charges: [{ x: 0, y: 0, q: -2 }], equip: true, levels: [-1000, -800, -600, -400, -200], fieldLines: false, probe: { x: DIR.P[0], y: DIR.P[1], label: 'P' }, probeArrow: false, notes: { arrows: DIR.arrows } }, 'A −2.0 nC charge, its equipotentials every 200 V (violet, labelled), and four candidate directions at P, on the −400 V equipotential.'),
     }),
     mcq({
       id: 'conductor', difficulty: 2,
@@ -200,7 +213,7 @@ Where they crowd together the field is strong; where they spread out it is weak.
           hints: [t`Each equipotential is a sphere of radius $r = kq/V$.`],
           teach: 'A point charge’s equipotentials are spheres of radius kq/V: equal steps in V give ever wider gaps further out.',
           explain: t`$r_{${V1}} = \dfrac{kq}{${V1}} = ${tn(r1 * 100)}$ cm and $r_{${V2}} = \dfrac{kq}{${V2}} = ${tn(r2 * 100)}$ cm, so they are $${tn(d * 100)}$ cm apart. The field there is about $${V1 - V2}\ \text{V}/${s3(d, 3)}\ \text{m} = ${tn((V1 - V2) / d)}$ V/m.`,
-          visual: field({ unit: 'cm', x: [-2.2 * r2 * 100, 2.2 * r2 * 100], y: [-1.375 * r2 * 100, 1.375 * r2 * 100], charges: [{ x: 0, y: 0, q }], equip: true, levels: [V2, V1], fieldLines: true, density: 12 }, 'The charge and its two equipotentials (violet, labelled), with field lines (grey).'),
+          visual: field({ unit: 'cm', x: [-2.2 * r2 * 100, 2.2 * r2 * 100], y: [-1.375 * r2 * 100, 1.375 * r2 * 100], axes: false, grid: false, charges: [{ x: 0, y: 0, q }], equip: true, levels: [V2, V1], fieldLines: true, density: 12 }, 'The charge and its two equipotentials (violet, labelled), with field lines (grey).'),
         };
       },
     }),
@@ -239,7 +252,7 @@ Where they crowd together the field is strong; where they spread out it is weak.
       hints: ['A human body conducts electricity, if poorly. What does a conductor in equilibrium do to the potential?'],
       teach: 'A grounded conductor joins the ground’s equipotential; the equipotentials of the field outside bend around it.',
       explain: 'A person standing on the ground is a (poor) conductor connected to it: a little charge flows until their whole body is at the ground’s potential, 0 V. Their surface is now part of the 0 V equipotential, so the others bend up and over them, crowding above the head — where the field is several times stronger than over flat ground. That is also why lightning rods and tall masts, with sharp tops, see the strongest fields.',
-      visual: field({ unit: 'm', x: [-5, 5], y: [0, 6.25], conductor: { x: 0, y: 0, R: 1.8, Q: 0 }, uniform: [0, -120], ref: [0, 0], equip: true, levels: [1, 2, 3, 4, 5, 6, 7].map((k) => k * 100), fieldLines: true, density: 14, notes: { lines: [{ from: [-5, 0.03], to: [5, 0.03], color: 'ink2', width: 3 }] } }, 'A grounded conducting dome, 1.8 m high — a rough stand-in for a person, a tree or a building — in a fair-weather field of 120 V/m. The equipotentials (violet, every 100 V) bend over it and crowd at its top, where the field is three times as strong as over flat ground.'),
+      visual: field({ unit: 'm', x: [-5, 5], y: [0.02, 6.27], conductor: { x: 0, y: 0, R: 1.8, Q: 0 }, uniform: [0, -120], ref: [0, 0], equip: true, levels: [1, 2, 3, 4, 5, 6, 7].map((k) => k * 100), fieldLines: true, density: 14, notes: { lines: [{ from: [-5, 0.05], to: [5, 0.05], color: 'ink2', width: 3 }] } }, 'A grounded conducting dome, 1.8 m high — a rough stand-in for a person, a tree or a building — in a fair-weather field of 120 V/m. The equipotentials (violet, every 100 V) bend over it and crowd at its top, where the field is three times as strong as over flat ground.'),
     }),
     mcq({
       id: 'cp-analyser', difficulty: 2, transfer: true,
@@ -272,7 +285,7 @@ Where they crowd together the field is strong; where they spread out it is weak.
           hints: [t`$E \approx \Delta V/\Delta s$, with $\Delta s$ in metres.`],
           teach: 'Crowded equipotentials mark a strong field: E ≈ ΔV/Δs, largest at sharp edges.',
           explain: t`$E \approx \dfrac{${dV}\ \text{V}}{${ds / 1000}\ \text{m}} = ${tn(E)}$ V/m. ${E >= 3e6 ? 'That is above the breakdown field: the air at the edge would ionise and spark or glow (corona).' : 'That is below the breakdown field, but not by a wide margin.'} Designers round off electrode edges to spread the equipotentials out.`,
-          visual: field({ unit: 'mm', x: [-10, 10], y: [-6.25, 6.25], sheets: [{ x: 0, y: 1.2, angle: 0, sigma: 20000, width: 10 }, { x: 0, y: -1.2, angle: 0, sigma: -20000, width: 10 }], equip: true, equipLabels: false, dV: 500, fieldLines: false }, 'Two thin electrodes edge-on, with equipotentials (violet) at equal steps: spread evenly between the electrodes, crowded tightly around their edges.'),
+          visual: field({ unit: 'mm', x: [-10, 10], y: [-6.25, 6.25], sheets: [{ x: 0, y: 1.2, angle: 0, sigma: 20000, width: 10 }, { x: 0, y: -1.2, angle: 0, sigma: -20000, width: 10 }], equip: true, equipLabels: false, levels: Array.from({ length: 11 }, (_, k) => -2500 + 500 * k), fieldLines: false }, 'Two thin electrodes edge-on, with equipotentials (violet) at equal steps: spread evenly between the electrodes, crowded tightly around their edges.'),
         };
       },
     }),

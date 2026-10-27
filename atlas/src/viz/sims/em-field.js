@@ -287,7 +287,7 @@ export function mount(F, P0) {
       g.save(); g.font = `500 ${fs - 1.5}px Inter, system-ui, sans-serif`;
       const widthOf = (t) => g.measureText(t).width; g.restore();
       const clearOf = (px, py, w) => {
-        if (placed.some(([qx, qy, qw]) => Math.abs(qx - px) < (qw + w) / 2 + 6 && Math.abs(qy - py) < 15)) return false;
+        if (placed.some(([qx, qy, qw]) => Math.abs(qx - px) < (qw + w) / 2 + 6 && Math.abs(qy - py) < 19)) return false;
         if (S.charges.some((q) => Math.hypot(plot.X(q.x / L) - px, plot.Y(q.y / L) - py) < 22 + w / 2)) return false;
         for (const sh of S.sheets) {
           const Lw = sh.w === Infinity ? 1e6 : sh.w / 2, wx = (px - plot.X(sh.x / L)) / pxPer * L, wy = -(py - plot.Y(sh.y / L)) / pxPer * L;
@@ -429,7 +429,9 @@ export function mount(F, P0) {
           const t = (2 * Math.PI * (k + 0.5)) / n, rr = inner ? rad - 7 / pxPer : rad + 7 / pxPer;
           const keep = (Math.abs(s) / smax) ** 0.7;
           if ((k * 0.618034) % 1 > keep + 0.02) return;        // thin the marks where |σ| is small
-          sign(cx + rr * Math.cos(t), cy + rr * Math.sin(t), s, 3);
+          const mx = cx + rr * Math.cos(t), my = cy + rr * Math.sin(t);
+          if (mx < v.x0 || mx > v.x1 || my < v.y0 || my > v.y1) return;   // off the picture
+          sign(mx, my, s, 3);
         });
       };
       rim(R, false);
