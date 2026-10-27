@@ -159,7 +159,7 @@ export function mount(F, P0) {
 
   // ─── controls ───────────────────────────────────────────────────────────
   if (bench) {
-    if (ids.length > 1) F.choice({ key: 'method', label: 'Method', options: ids.map((id) => [id, B.EXPERIMENTS[id].title.split(':')[0]]), value: ids[0], explain: 'Two ways to measure the same thing: each keeps its own data table.' });
+    if (ids.length > 1) F.choice({ key: 'method', label: 'Method', options: ids.map((id) => [id, B.EXPERIMENTS[id].method || B.EXPERIMENTS[id].title]), value: ids[0], explain: 'Two ways to measure the same thing: each keeps its own data table.' });
     const E0 = B.EXPERIMENTS[ids[0]];
     if (!isRepeat(ids[0]) && E0.setting) {
       const st = E0.setting;
@@ -389,9 +389,9 @@ export function mount(F, P0) {
       const cells = [String(i + 1)];
       if (E.setting && !rep) cells.push(setTxt(E, r.s));
       r.R.forEach((v, k) => cells.push(readTxt(v, E.series[k].res)));
-      if (rep && E.repeat.sym !== E.series[0].sym) cells.push(numTxt(E.repeat.of(r.s, r.R, PP), 4));
-      if (showX) cells.push(numTxt(A.x.of(r.s, r.R, PP, sysOn()), 4));
-      if (showY) A.ys.forEach((Y) => cells.push(numTxt(Y.of(r.s, r.R, PP, sysOn()), 4)));
+      if (rep && E.repeat.sym !== E.series[0].sym) cells.push(keepTxt(E.repeat.of(r.s, r.R, PP), 4));
+      if (showX) cells.push(keepTxt(A.x.of(r.s, r.R, PP, sysOn()), 4));
+      if (showY) A.ys.forEach((Y) => cells.push(keepTxt(Y.of(r.s, r.R, PP, sysOn()), 4)));
       return tr(cells);
     });
     const table = h('table.t', { 'aria-label': 'Data table' }, h('thead', tr(head, true)), h('tbody', body.length ? body : [tr([h('span', { style: { color: 'var(--ink-3)' } }, 'No readings yet.')])]));
@@ -409,7 +409,7 @@ export function mount(F, P0) {
       if (rs.n >= 2) {
         rows.push(['SD', `${numTxt(rs.sd, 2)}${u ? `\\ ${u}` : ''}`]);
         rows.push(['SEM = SD/$\\sqrt N$', `${numTxt(rs.sem, 2)}${u ? `\\ ${u}` : ''}`]);
-        if (Number.isFinite(rs.accepted)) rows.push([`mean is from ${E.repeat.acceptedLabel || 'accepted'} ${keepTxt(rs.accepted, 4)}`, `${numTxt(Math.abs(rs.mean - rs.accepted) / rs.sem, 2)}\\ \\text{SEM}`]);
+        if (Number.isFinite(rs.accepted)) rows.push([`mean vs ${E.repeat.acceptedLabel || 'accepted'} ${keepTxt(rs.accepted, 4)} ${E.repeat.unit}`, `${numTxt(Math.abs(rs.mean - rs.accepted) / rs.sem, 2)}\\ \\text{SEM apart}`]);
       }
       F.readout(rows);
       return;
@@ -432,7 +432,7 @@ export function mount(F, P0) {
       rows.push([`$${symTeX(r.res.sym)}$`, pmTeX(r.value, r.sigma, r.res.unit)]);
       if (Number.isFinite(r.accepted)) {
         const lab = typeof r.res.acceptedLabel === 'function' ? r.res.acceptedLabel(PP) : r.res.acceptedLabel || 'accepted';
-        rows.push([`from ${lab} ${keepTxt(r.accepted, 3)}`, `${numTxt(r.z, 2)}\\,\\sigma`]);
+        rows.push([`vs ${lab} ${keepTxt(r.accepted, 3)} ${r.res.unit}`, `${numTxt(r.z, 2)}\\,\\sigma\\ \\text{apart}`]);
       }
     }
     if (A.curved && an.series[0].fit) rows.push(['', '\\text{curved — no slope to interpret}']);
@@ -514,7 +514,7 @@ const APPARATUS = {
     const sys = st.sys;
     const L = stopwatch ? P.L : st.setting ?? 0.8;
     const Ltrue = L + (sys === 'knot' ? P.rb : 0);
-    const k = 5.0, piv = [8, 9.2];
+    const k = stopwatch ? 6.8 : 5.0, piv = [8, 9.2];
     pl.line(5.5, 9.25, 11, 9.25, { color: 'ink3', width: 4 });
     block(pl, 7.6, 9.2, 0.8, 0.45, 'ink3', 0.8);
     const amp = Math.max(sys === 'amplitude' ? P.ampBig : P.amp ?? 5, 7) * D2R;
@@ -527,7 +527,8 @@ const APPARATUS = {
     pl.circle(piv[0] - len * Math.sin(amp), by, bob, { fill: 'accent', alpha: 0.18, stroke: false });
     if (st.labels) {
       if (sys === 'knot') {
-        dim(pl, 5.6, piv[1], 5.6, piv[1] - L * k, `recorded ${fx(L, 2)} m`, { color: 'warn', dx: -0.2, align: 'right' });
+        dim(pl, 5.6, piv[1], 5.6, piv[1] - Ltrue * k + 0.34, `recorded ${fx(L, 2)} m`, { color: 'warn', dx: -0.2, align: 'right' });
+        pl.line(5.6, piv[1] - Ltrue * k + 0.34, 7.6, piv[1] - Ltrue * k + 0.34, { color: 'warn', width: 1, dash: [3, 3] });
         dim(pl, 6.4, piv[1], 6.4, piv[1] - Ltrue * k, `true ${fx(Ltrue, 3)} m`, { dx: 0.25 });
         sysTag(pl, 10.4, piv[1] - Ltrue * k - 0.9, 'measured to the top of the bob');
       } else dim(pl, 6.2, piv[1], 6.2, piv[1] - L * k, `L = ${fx(L, stopwatch ? 3 : 2)} m`, { dx: -0.2, align: 'right' });
@@ -600,10 +601,10 @@ const APPARATUS = {
 
   launcher(pl, E, P, st, o) {
     const sys = st.sys;
-    const th = (st.setting ?? 30) * D2R, k = 7.0;
-    const piv = [2.0, 2.2], M = [piv[0] + 1.0 * Math.cos(th), piv[1] + 1.0 * Math.sin(th)];
-    floor(pl, 0.5, 19.5, 1.2);
-    block(pl, 0.9, 1.2, 1.6, 0.7, 'ink3', 0.7);
+    const th = (st.setting ?? 30) * D2R, k = 6.0;
+    const piv = [2.0, 3.0], M = [piv[0] + 1.0 * Math.cos(th), piv[1] + 1.0 * Math.sin(th)];
+    floor(pl, 0.5, 19.5, 1.0);
+    block(pl, 0.9, 1.0, 1.6, 2.0, 'ink3', 0.7);
     pl.line(M[0], M[1], 19.3, M[1], { color: 'ink3', width: 2 });
     pl.text('landing table, level with the muzzle', 10.5, M[1] - 0.45, { color: 'ink3', size: 10.5 });
     pl.line(piv[0], piv[1], M[0], M[1], { color: 'violet', width: 7 });
@@ -614,10 +615,10 @@ const APPARATUS = {
     const land = M[0] + Rt * k;
     pl.rect(land - 0.6, M[1], 1.2, 0.08, { fill: 'ink', alpha: 0.6, stroke: false });
     pl.circle(land, M[1] + 0.16, 0.16, { fill: 'accent', stroke: false });
-    pl.text(`θ = ${Math.round(th / D2R)}°`, M[0] + 0.5, M[1] + 0.5, { color: 'violet', size: 12, weight: 600 });
+    pl.text(`θ = ${Math.round(th / D2R)}°`, piv[0] - 0.2, piv[1] + 1.6, { color: 'violet', size: 12, weight: 600, align: 'right' });
     if (st.labels) {
       const z0 = M[0] + (sys === 'zero' ? P.offset * k : 0);
-      dim(pl, z0, M[1] - 1.0, land, M[1] - 1.0, `R = ${fx(R, 3)} m`, { dy: -0.4, dx: -1.2 });
+      dim(pl, z0, M[1] - 0.9, land, M[1] - 0.9, `R = ${fx(R, 3)} m`, { dy: -0.45, dx: -1.2 });
       display(pl, 13.6, 8.4, [`θ = ${Math.round(th / D2R)}°`, `R = ${fx(R, 3)} m`], { compact: o.compact, title: st.rep ? 'mean of the shots' : 'latest shot' });
       if (sys === 'zero') sysTag(pl, 0.7, 9.4, 'tape zero 6.0 cm ahead of the launch point');
     }
@@ -661,7 +662,7 @@ const APPARATUS = {
     block(pl, 4.6, y, 3.4, 1.3, 'accent', 0.85);
     const discs = Math.round(m / 0.25);
     for (let i = 0; i < discs; i++) block(pl, 5.1, y + 1.3 + 0.42 * i, 2.4, 0.36, 'ink3', 0.9);
-    pl.text(`${fx(P.mb, 3)} kg + ${fx(m, 2)} kg`, 6.3, y - 1.05, { color: 'ink2', size: 11.5, align: 'center' });
+    pl.text(`block ${fx(P.mb, 3)} kg + load ${fx(m, 2)} kg`, 4.4, y + 1.1, { color: 'ink2', size: 11.5, align: 'right' });
     const al = sys === 'angle' ? P.angle * D2R : 0;
     const hook = [8.0, y + 0.65], end = [8.0 + 4.6 * Math.cos(al), y + 0.65 + 4.6 * Math.sin(al)];
     pl.line(hook[0], hook[1], end[0], end[1], { color: 'ink2', width: 1.3 });
@@ -672,7 +673,6 @@ const APPARATUS = {
     if (st.labels) {
       const R = st.row?.R;
       display(pl, 13.2, 8.6, [`peak  ${R ? R[0].toFixed(2) : '—'} N`, `slide ${R ? R[1].toFixed(2) : '—'} N`], { compact: o.compact, title: 'force sensor' });
-      pl.arrow(6.3, y + 0.2, 6.3, y - 0.6 - 0.6, { color: 'ink3', width: 1.2 });
       if (sys === 'angle') sysTag(pl, 8.6, y + 3.3, 'string pulled 20° above horizontal');
     }
   },
@@ -792,9 +792,10 @@ const APPARATUS = {
     pl.rect(12.4, 1.0, 0.7, top - 1.3, { fill: 'gold', alpha: 0.2, stroke: 'gold', width: 1 });
     for (let j = 0; j <= 7; j++) pl.line(12.4, top - 0.3 - j * 1.2, 12.75, top - 0.3 - j * 1.2, { color: 'gold', width: 1 });
     pl.line(8.8, yb - 0.6, 12.4, yb - 0.6, { color: 'ink4', width: 1, dash: [3, 3] });
-    if (dynamic) { pl.arrow(6.2, yb - 0.4, 6.2, yb + 0.8, { color: 'gold', width: 1.8 }); pl.arrow(6.2, yb - 0.4, 6.2, yb - 1.6, { color: 'gold', width: 1.8 }); }
+    if (dynamic) { pl.arrow(6.0, yb - 0.4, 6.0, yb + 0.8, { color: 'gold', width: 1.8 }); pl.arrow(6.0, yb - 0.4, 6.0, yb - 1.6, { color: 'gold', width: 1.8 }); }
     if (st.labels) {
-      pl.text(`hanger ${fx(P.mh, 3)} kg + ${fx(m, 3)} kg`, 3.4, yb - 1.1, { color: 'ink2', size: 11, align: 'right' });
+      pl.text(`hanger ${fx(P.mh, 3)} kg`, 5.2, yb - 0.6, { color: sys === 'hanger' ? 'warn' : 'ink2', size: 11, align: 'right' });
+      pl.text(`+ ${fx(m, 3)} kg`, 5.2, yb - 1.25, { color: 'violet', size: 11, align: 'right' });
       const r = st.row?.R?.[0];
       if (dynamic) display(pl, 14.0, 6.4, [`t₁₀ = ${Number.isFinite(r) ? r.toFixed(2) : '—'} s`], { compact: o.compact, title: 'stopwatch, 10 bounces' });
       else display(pl, 14.0, 6.4, [`x = ${Number.isFinite(r) ? r.toFixed(3) : '—'} m`], { compact: o.compact, title: 'extension on the stick' });
@@ -820,7 +821,7 @@ const APPARATUS = {
       display(pl, 12.5, 6.9, [`V = ${P.V.toFixed(1)} V`, `I = ${P.I.toFixed(2)} A`], { compact: o.compact });
       const T = st.row?.R?.[0];
       display(pl, 12.5, 2.4, [`t = ${Number.isFinite(st.setting) ? st.setting : '—'} s`, `T = ${Number.isFinite(T) ? T.toFixed(1) : '—'} °C`], { compact: o.compact, title: 'clock and thermometer' });
-      if (!lag) sysTag(pl, 1.8, 8.2, 'no lagging: heat leaks to the room');
+      if (!lag) sysTag(pl, 9.9, 9.5, 'no lagging: heat leaks to the room');
     }
   },
 };

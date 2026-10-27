@@ -171,7 +171,7 @@ export const EXPERIMENTS = {
     nz: 1,
     read: (s, P, sys, z) => [P.n * pendulumT(P.L, P.g) + (sys === 'reaction' ? P.bias : 0) + P.react * z[0]],
     series: [{ key: 't', sym: 't', label: 'stopwatch reading', unit: 's', res: 0.01, sigma: (s, P) => P.react }],
-    repeat: { sym: 'T', label: 'period', unit: 's', of: (s, R, P) => R[0] / P.n, sigma: (s, R, P) => P.react / P.n, accepted: (P) => pendulumT(P.L, P.g), acceptedLabel: 'expected 2.000 s' },
+    repeat: { sym: 'T', label: 'period', unit: 's', of: (s, R, P) => R[0] / P.n, sigma: (s, R, P) => P.react / P.n, accepted: (P) => pendulumT(P.L, P.g), acceptedLabel: 'expected' },
     systematics: { reaction: { label: 'Reaction bias: you stop the watch late (+0.10 s per timing)', short: 'late stop', explain: 'You anticipate the start but react to the stop, so every timing is 0.10 s too long.' } },
     defaultSys: 'reaction',
   },
@@ -465,7 +465,7 @@ export const EXPERIMENTS = {
 
   // L.11 — a spring: stretch against load (static) …
   'spring-static': {
-    title: 'Hooke’s law: stretching a spring with weights',
+    title: 'Hooke’s law: stretching a spring with weights', method: 'Static: stretch',
     apparatus: 'spring',
     note: 'An ideal linear spring; extensions read off a metre stick to ±1.5 mm (parallax).',
     defaults: { k: 15.0, mh: 0.050, ms: 0.040, g: G_LOCAL, sx: 0.0015, react: 0.05 },
@@ -489,7 +489,7 @@ export const EXPERIMENTS = {
 
   // … and its period against mass (dynamic)
   'spring-dynamic': {
-    title: 'Timing a mass bouncing on a spring',
+    title: 'Timing a mass bouncing on a spring', method: 'Dynamic: period',
     apparatus: 'spring',
     note: 'Ten oscillations timed by hand to ±0.05 s. The spring’s own 0.040 kg moves too: about a third of it adds to the bouncing mass.',
     defaults: { k: 15.0, mh: 0.050, ms: 0.040, g: G_LOCAL, sx: 0.0015, react: 0.05 },
