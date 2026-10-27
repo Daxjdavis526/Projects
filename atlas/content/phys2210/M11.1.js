@@ -20,7 +20,7 @@ const contestants = (caption, order = KINDS) => {
   });
   return {
     type: 'graph',
-    params: { x: [-1.2, 8.1], y: [-1.6, 1.5], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', alt: 'Four round objects with their moments of inertia', curves, shade, points },
+    params: { x: [-1.2, 8.1], y: [-1.6, 1.5], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', aspect: 'wide', alt: 'Four round objects with their moments of inertia', curves, shade, points },
     caption,
   };
 };
@@ -33,7 +33,7 @@ const rolling = (kind, caption) => {
   return {
     type: 'graph',
     params: {
-      x: [-2.2, 2.8], y: [-0.4, 2.6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', alt: 'A round object rolling to the right',
+      x: [-2.2, 2.8], y: [-0.4, 2.6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', aspect: 'wide', alt: 'A round object rolling to the right',
       curves: [{ fn: '0', color: 'ink3', width: 2 }, ...p.curves, { param: ['1.3cos(t)', '1 + 1.3sin(t)'], t: [t0, 1.35], color: 'warn', width: 1.8 }],
       shade: p.shade,
       arrows: [{ from: [0, 1], to: [1.6, 1], color: 'gold', label: 'v' }, { from: tail, to: tip.map((v) => +v.toFixed(4)), color: 'warn', label: 'ω', labelDx: 8, labelDy: 4 }],
@@ -50,8 +50,8 @@ const twoRamps = (() => {
     curves.push({ param: [`${W}t`, `${y0 + H} - ${H}t`], t: [0, 1], color: 'ink', width: 2.4 }, { param: [`${W}t`, `${y0}`], t: [0, 1], color: 'ink3', width: 1.4 });
     const cx0 = 0.55, cy0 = y0 + H - (H / W) * cx0;                      // the contact point on the slope
     const cx = cx0 + rad * Math.sin(th), cy = cy0 + rad * Math.cos(th);
-    const p = shapeAt('disk', cx, cy, rad);
-    curves.push(...p.curves); shade.push(...p.shade);
+    const p = shapeAt('disk', cx, cy, rad), lead = y0 === 0;
+    curves.push(...p.curves.map((c) => (lead ? { ...c, color: 'ink2' } : c))); shade.push(...p.shade.map((sh) => (lead ? { ...sh, color: 'ink2', alpha: 0.7 } : sh)));
     points.push({ x: +(cx + 0.6).toFixed(3), y: +(cy + 0.25).toFixed(3), r: 0.01, color: 'ink2', label: name });
   });
   return {
@@ -94,7 +94,7 @@ Mass and size cancel out of every rolling race: **only the shape factor $\beta$*
       'Compare the teal strip with the turn: the road covered always equals the length of rim rolled out, Rθ — which is v = Rω.',
     ],
     params: {
-      x: [-1.7, 9.3], y: [-0.7, 3.4], equal: true, xlabel: '', ylabel: '', axes: false, grid: false,
+      x: [-1.7, 9.3], y: [-0.7, 3.4], equal: true, xlabel: '', ylabel: '', axes: false, grid: false, aspect: 'wide',
       alt: 'A wheel rolling along a road, with velocity arrows at five points and the path traced by one rim point',
       sliders: [{ key: 'phi', label: 'Angle turned, $\\theta$', min: 0, max: 6.2, step: 0.02, value: 2.4, unit: '\\mathrm{rad}', explain: 'The centre has moved $R\\theta$ to the right.' }],
       choices: [{ key: 'f', label: 'Velocities measured', options: [[0, 'Over the road'], [1, 'Relative to the centre']], value: 0, explain: 'Rolling = moving with the centre + spinning about it.' }],
@@ -132,7 +132,7 @@ Mass and size cancel out of every rolling race: **only the shape factor $\beta$*
   },
   example: {
     prompt: t`A solid ball rolls without slipping down a ramp, starting from rest ${EX.h} m above the bottom. How fast is its centre moving at the bottom? Compare a block sliding down a frictionless ramp of the same height. ($g = 9.8\ \text{m/s}^2$)`,
-    visual: rampPicture({ angle: 22, shapes: [{ kind: 'sphere', s: 0.06, label: 'ball' }, { kind: 'block', s: 0.3, label: 'block' }], height: `h = ${EX.h} m`, caption: 'Both start from rest at the same height. A sketch, not to scale.' }),
+    visual: rampPicture({ angle: 22, shapes: [{ kind: 'sphere', s: 0.1, label: 'ball' }, { kind: 'block', s: 0.3, label: 'block' }], height: `h = ${EX.h} m`, caption: 'Both start from rest at the same height. A sketch, not to scale.' }),
     steps: [
       { label: 'Energy, with a spin term', text: t`Gravity's energy $Mgh$ ends up as kinetic energy of **both** kinds: $Mgh = \tfrac12 Mv^2 + \tfrac12 I\omega^2$.` },
       { label: 'Lock the spin to the speed', text: t`Rolling without slipping: $\omega = v/R$. A solid sphere has $I = \tfrac25 MR^2$, so $\tfrac12 I\omega^2 = \tfrac12\cdot\tfrac25 MR^2\cdot\dfrac{v^2}{R^2} = \tfrac15 Mv^2$.` },
@@ -204,7 +204,7 @@ Mass and size cancel out of every rolling race: **only the shape factor $\beta$*
           hints: [t`$Mgh = \tfrac12 Mv^2 + \tfrac12 I\omega^2$ with $\omega = v/R$.`, t`That is $Mgh = \tfrac12(1 + \beta)Mv^2$ with $\beta = ${S.betaTeX}$, so $v = \sqrt{2gh/(1 + \beta)}$.`],
           teach: 'For rolling from rest down a height h, v = √(2gh/(1 + β)): mass and radius cancel.',
           explain: t`$v = \sqrt{\dfrac{2(9.8)(${h})}{1 + ${nice(S.beta, 3)}}} = ${s3(v)}$ m/s, against $${s3(Math.sqrt(2 * G * h))}$ m/s for a frictionless slide.`,
-          visual: rampPicture({ angle: 24, shapes: [{ kind: k, s: 0.07, label: S.name }], height: `h = ${h} m`, caption: 'Starting from rest at the top; a sketch, not to scale.' }),
+          visual: rampPicture({ angle: 24, shapes: [{ kind: k, s: 0.1, label: S.name }], height: `h = ${h} m`, caption: 'Starting from rest at the top; a sketch, not to scale.' }),
         };
       },
     }),
@@ -293,7 +293,7 @@ Mass and size cancel out of every rolling race: **only the shape factor $\beta$*
           hints: [t`$Mgh = \tfrac12(1 + \beta)Mv^2$.`],
           teach: 'Rolling from rest down a height h: v = √(2gh/(1 + β)).',
           explain: t`$\beta = ${S.betaTeX}$: $v = \sqrt{2(9.8)(${h})/(1 + ${nice(S.beta, 3)})} = ${s3(v)}$ m/s.`,
-          visual: rampPicture({ angle: 18, shapes: [{ kind: k, s: 0.07 }], height: `h = ${h} m`, caption: 'Starting from rest at the top; a sketch, not to scale.' }),
+          visual: rampPicture({ angle: 18, shapes: [{ kind: k, s: 0.1 }], height: `h = ${h} m`, caption: 'Starting from rest at the top; a sketch, not to scale.' }),
         };
       },
     }),

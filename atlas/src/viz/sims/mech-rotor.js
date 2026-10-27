@@ -134,7 +134,7 @@ export function mount(F, P0) {
   function bodyPts(md) {
     const { d } = md;
     if (ROUND.includes(md.shape)) return [[d - md.R, -md.R], [d + md.R, md.R]];
-    if (md.shape === 'rod') { const hw = Math.max(0.025, 0.035 * md.L); return [[d - md.L / 2, -hw], [d + md.L / 2, hw]]; }
+    if (md.shape === 'rod') { const hw = Math.max(0.018, 0.022 * md.L); return [[d - md.L / 2, -hw], [d + md.L / 2, hw]]; }
     if (md.shape === 'plate') return [[d - md.L / 2, -md.W / 2], [d + md.L / 2, md.W / 2], [d - md.L / 2, md.W / 2], [d + md.L / 2, -md.W / 2]];
     const rr = dumbR(md);
     return [[d - md.s - rr, -rr], [d + md.s + rr, rr]];
@@ -210,7 +210,7 @@ export function mount(F, P0) {
         break;
       }
       case 'rod': {
-        const hw = Math.max(0.025, 0.035 * md.L);
+        const hw = Math.max(0.018, 0.022 * md.L);
         poly(pl, [[md.d - md.L / 2, -hw], [md.d + md.L / 2, -hw], [md.d + md.L / 2, hw], [md.d - md.L / 2, hw]].map(([x, y]) => rot(x, y)), 'accent', 0.6);
         break;
       }
@@ -279,7 +279,7 @@ export function mount(F, P0) {
       if (rp > 1e-9) {
         const tang = [-Math.sin(th), Math.cos(th)], radial = [Math.cos(th), Math.sin(th)];
         const vmax = Math.max(1e-9, Math.abs(rp) * Math.max(Math.abs(Mo.omega0), Math.abs(Mo.omega0 + Mo.alpha * runT())));
-        const amax = Math.max(1e-9, Math.abs(rp) * Math.max(Math.abs(Mo.alpha), (Mo.omega0 + Mo.alpha * runT()) ** 2, Mo.omega0 ** 2));
+        const amax = Math.max(1e-9, Math.abs(kin.at), Math.abs(kin.ac));       // rescaled each instant: the larger part keeps its length
         const kv = (0.7 * rch) / vmax, ka = (0.6 * rch) / amax;
         const vv = rp * now.omega;
         if (Math.abs(vv) > 1e-9) pl.arrow(Q[0], Q[1], Q[0] + tang[0] * vv * kv, Q[1] + tang[1] * vv * kv, { color: 'good', width: 2.4, label: P.values ? `v = ${trim(Math.abs(vv))} m/s` : 'v' });
@@ -377,7 +377,7 @@ export function mount(F, P0) {
   cap.push('Seen along the axis (⊙, pointing out of the screen); anticlockwise counts as positive.');
   if (P.hang > 0 || sliders.some((s) => s.key === 'hang')) cap.push('The string is light and does not slip; the axle is frictionless.');
   else if (P.F > 0 || P.F2 > 0 || sliders.some((s) => s.key === 'F')) cap.push('The axle is frictionless and holds the axis still; each force stays fixed to the body as it turns.');
-  if (P.point !== null) cap.push('Velocity and acceleration arrows use separate scales.');
+  if (P.point !== null) cap.push('Velocity and acceleration arrows use separate scales; the two acceleration arrows are redrawn at each instant so the larger keeps the same length.');
   F.caption(cap.join(' '));
   return { get: (k) => (F.params[k] !== undefined ? F.params[k] : P[k]) };
 }

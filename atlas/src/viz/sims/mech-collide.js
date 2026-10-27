@@ -90,7 +90,7 @@ export function mount(F, P0) {
   const compact = F.compact;
   const two = P.dim === 2, snaps = P.view === 'snapshots', before = P.show === 'before';
   const bars = before ? [] : P.bars || [];
-  const trackH = two ? (compact ? 230 : 290) : snaps ? (before ? 1 : 2) * (compact ? 96 : 104) + 6 : compact ? 112 : 128;
+  const trackH = two ? (compact ? 230 : 290) : snaps ? (before ? 1 : 2) * (compact ? 104 : 112) + 6 : compact ? 124 : 138;
   const barsH = bars.length ? (compact ? 150 : 166) : 0;
   const { canvas } = F.canvas({ label: P.alt || (two ? 'Two pucks colliding on an air table, seen from above' : 'Two carts on a track, before and after they interact'), height: `${trackH + barsH}px` });
   const ctx = canvas.getContext('2d');
@@ -178,11 +178,13 @@ export function mount(F, P0) {
     const vals = values(cmf), kv = vScale(vals);
     const ex = mode() === 'explode';
     if (ex && !now.after) spring(c, X(now.x[0] - shift) + (w[0] * k) / 2, X(now.x[1] - shift) - (w[1] * k) / 2, y - 22, true);
+    const cxs = [0, 1].map((i) => X(now.x[i] - shift)), vels = [0, 1].map((i) => now.v[i] - (cmf ? TL.vcm : 0));
+    const lab = (i) => (P.values ? vtxt(vels[i]) : `v${i + 1}`);
+    const ya = y - 7 - 34 - 26, step = clash(cxs, vels.map((q) => q * kv), [lab(0), lab(1)]) ? 15 : 0;
     for (let i = 0; i < 2; i++) {
-      const cx = X(now.x[i] - shift), cw = w[i] * k, ch = Math.max(20, Math.min(34, cw * 0.42));
-      cart(c, cx, y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i]);
-      const vel = now.v[i] - (cmf ? TL.vcm : 0);
-      velArrow(c, cx, y - ch - 33, vel * kv, c[COL[i]], P.values ? vtxt(vel) : `v${i + 1}`, vel);
+      const cw = w[i] * k, ch = Math.max(20, Math.min(34, cw * 0.42));
+      cart(c, cxs[i], y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i]);
+      velArrow(c, cxs[i], ya - i * step, vels[i] * kv, c[COL[i]], lab(i), vels[i]);
     }
     if (P.cm) cmMark(c, X(cm0 - shift), y + 2);
     if (!TL.hit) note(c, W / 2, 11, 'They never meet: cart 2 is not slower than cart 1.');
@@ -200,12 +202,14 @@ export function mount(F, P0) {
       text(c, row === 'before' ? 'Before' : 'After', 14, y + 11, { color: c.ink2, weight: 650, size: 11.5 });
       const pos = ex && row === 'before' ? [-w[0] / 2, w[1] / 2] : [-1.9, 1.9];
       if (ex && row === 'before') spring(c, X(pos[0]) + (w[0] * k) / 2, X(pos[1]) - (w[1] * k) / 2, y - 18, true);
+      const rv = row === 'before' ? vals.ub : vals.va, lab = (i) => (P.values ? vtxt(rv[i]) : `v${i + 1}`);
+      const step = clash(pos.map(X), rv.map((q) => q * kv), [lab(0), lab(1)]) ? 15 : 0;
       for (let i = 0; i < 2; i++) {
         const cx = X(pos[i]), cw = w[i] * k, ch = Math.max(18, Math.min(30, cw * 0.4));
         cart(c, cx, y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i]);
-        const vel = row === 'before' ? vals.ub[i] : vals.va[i];
+        const vel = rv[i];
         const unknown = row === 'after' && (P.unknown || []).includes(`v${i + 1}`);
-        const ya = (ex && row === 'before' ? y - 30 : y - ch) - 31;
+        const ya = y - 30 - 31 - i * step;
         if (unknown) text(c, '?', cx, ya, { color: c[COL[i]], weight: 700, size: 16, align: 'center' });
         else if (ex && row === 'before' && Math.abs(vel) < 1e-9 && i === 1) text(c, 'both at rest', (cx + X(pos[0])) / 2, ya, { color: c.ink2, size: 11.5, align: 'center' });
         else if (!(ex && row === 'before' && Math.abs(vel) < 1e-9)) velArrow(c, cx, ya, vel * kv, c[COL[i]], P.values ? vtxt(vel) : `v${i + 1}`, vel);
@@ -229,11 +233,12 @@ export function mount(F, P0) {
         ...(before ? [] : [[q[0] + vals.va[i][0] * kv, q[1] + vals.va[i][1] * kv]])]);
     } else {
       const ts = TL.tc === null ? [0, TL.T] : [0, TL.tc, TL.T];
-      pts = ts.flatMap((tt) => { const s = TL.at(tt), sh = shiftAt(tt); return s.p.map((q) => [q[0] - sh[0], q[1] - sh[1]]); });
+      const sub = cmf ? TL.vcm : [0, 0];
+      pts = ts.flatMap((tt) => { const s = TL.at(tt), sh = shiftAt(tt); return s.p.flatMap((q, i) => [[q[0] - sh[0], q[1] - sh[1]], [q[0] - sh[0] + (s.v[i][0] - sub[0]) * kv, q[1] - sh[1] + (s.v[i][1] - sub[1]) * kv]]); });
     }
     const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
     if (snaps) pl.setView([Math.min(...xs) - 1.5, Math.max(...xs) + 1.5], [Math.min(...ys) - 0.6, Math.max(...ys) + 0.6]);
-    else pl.setView([Math.min(...xs, -2) - 0.9, Math.max(...xs, 2) + 0.9], [Math.min(...ys, -1.2) - 0.9, Math.max(...ys, 1.2) + 0.9]);
+    else pl.setView([Math.min(...xs, -2) - 0.9, Math.max(...xs, 2) + 0.9 + (P.values ? 1.4 : 0.4)], [Math.min(...ys, -1.2) - 0.9, Math.max(...ys, 1.2) + 0.9]);
     pl.refreshTheme();
     const g = ctx;
     g.save(); g.fillStyle = c.panel; g.globalAlpha = 0.5; g.fillRect(4, 4, W - 8, trackH - 8); g.restore();
@@ -414,6 +419,13 @@ export function mount(F, P0) {
     if (Math.abs(len) < 10) len = 10 * Math.sign(len || vel);
     arrowPx(c, [x, y], [x + len, y], color, 2.4);
     text(c, label, len > 0 ? x + len + 5 : x + len - 5, y, { color, size: 11, weight: 600, align: len > 0 ? 'left' : 'right' });
+  }
+  // would two velocity labels on one row overlap? (arrows start at the cart centres; labels follow the tips)
+  function clash(xs, lens, labels) {
+    ctx.save(); ctx.font = '600 11px Inter, system-ui, sans-serif';
+    const box = xs.map((x, i) => { const L = Math.abs(lens[i]) < 10 ? 10 * Math.sign(lens[i] || 1) : lens[i], tw = ctx.measureText(labels[i]).width + 8; return L >= 0 ? [Math.min(x, x + L), x + L + tw] : [x + L - tw, Math.max(x, x + L)]; });
+    ctx.restore();
+    return box[0][1] > box[1][0] - 4 && box[1][1] > box[0][0] - 4;
   }
   function cmMark(c, x, y) {
     const g = ctx;

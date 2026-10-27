@@ -242,9 +242,12 @@ export function mount(F, P) {
     }
     if (st.m === 'wave') pl.text('face-on: the wave comes toward you', pl.vx0 + 0.08, pl.vy1 - 0.14, { color: 'ink3', size: narrow ? 10 : 11 });
     pl.circle(0, 0, 1, { color: 'ink3', width: 1.2, dash: [4, 4] });
+    // a wave: the shape half a period later, as a ghost (arrows would point back toward rest, which reads backwards)
+    if (st.m === 'wave') outline(pl, deform(st, tau + 0.5), 0, 1, { color: 'violet', width: 1.4, dash: [3, 4] });
     outline(pl, M, 0, 1, { color: 'accent', width: 2, fill: 'accent', fillAlpha: 0.07 });
     dust(pl, M, 0, 1, 2, narrow);
-    if (P.arrows) arrows(pl, st, tau, M, narrow);
+    if (P.arrows && st.m !== 'wave') arrows(pl, st, tau, M, narrow);
+    if (st.m === 'wave' && !narrow) pl.text('dashed: half a period later', pl.vx0 + 0.08, pl.vy0 + 0.18, { color: 'violet', size: 11 });
     if (st.m !== 'wave' && P.play) pl.text(`t = ${tau.toFixed(2)} T`, pl.vx1 - 0.08, pl.vy1 - 0.14, { color: 'ink2', size: 11, align: 'right' });
   }
 
@@ -368,7 +371,7 @@ export function mount(F, P) {
   }
 
   F.draw(draw);
-  const notes = ['Each grain falls freely; the arrows show how it accelerates relative to the centre.'];
+  const notes = [modes.includes('wave') ? 'Each grain floats freely; the wave alone moves them, and the dashed outline is the shape half a period later.' : 'Each grain falls freely; the arrows show how it accelerates relative to the centre.'];
   if (modes.includes('wave')) notes.push('The drawn strain is exaggerated about $10^{20}$ times; real waves change the shape by parts in $10^{21}$.');
   else notes.push('Shapes are to scale, with time in units of the time scale $T$ in the readout.');
   if (usesBody) notes.push('The tidal field is held fixed while the ball falls (fine while the ball moves little compared with its distance from the mass).');

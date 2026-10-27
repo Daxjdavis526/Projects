@@ -5,6 +5,7 @@ export const LESSONS = {
   'gr.EQ.1': () => import('./gr/EQ.1.js'),
   'gr.EQ.2': () => import('./gr/EQ.2.js'),
   'gr.EQ.3': () => import('./gr/EQ.3.js'),
+  'gr.EQ.4': () => import('./gr/EQ.4.js'),
   'gr.S01.i': () => import('./gr/S01.i.js'),
   'gr.S02.i': () => import('./gr/S02.i.js'),
   'gr.S03.i': () => import('./gr/S03.i.js'),
@@ -30,6 +31,7 @@ export const LESSONS = {
   'gr.S25.i': () => import('./gr/S25.i.js'),
   'gr.S26.i': () => import('./gr/S26.i.js'),
   'gr.S27.i': () => import('./gr/S27.i.js'),
+  'gr.S30.i': () => import('./gr/S30.i.js'),
   'math1220.C2-0.1': () => import('./math1220/C2-0.1.js'),
   'math1220.C2-0.2': () => import('./math1220/C2-0.2.js'),
   'math1220.C2-1.1': () => import('./math1220/C2-1.1.js'),
@@ -109,9 +111,11 @@ export const LESSONS = {
   'phys2210.M5.2': () => import('./phys2210/M5.2.js'),
   'phys2210.M5.3': () => import('./phys2210/M5.3.js'),
   'phys2210.M5.4': () => import('./phys2210/M5.4.js'),
+  'phys2210.M5.5': () => import('./phys2210/M5.5.js'),
   'phys2210.M7.1': () => import('./phys2210/M7.1.js'),
   'phys2210.M7.2': () => import('./phys2210/M7.2.js'),
   'phys2210.M7.3': () => import('./phys2210/M7.3.js'),
+  'phys2210.M7.4': () => import('./phys2210/M7.4.js'),
   'prog.P0.1': () => import('./prog/P0.1.js'),
 };
 

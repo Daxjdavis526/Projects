@@ -125,7 +125,7 @@ export function wheelPicture({ arrows = 'ground', labels = true, caption, mark, 
   return {
     type: 'graph',
     params: {
-      x: [-2.4, 2.6], y: [-0.45, 2.55], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+      x: [-2.4, 2.6], y: [-0.45, 2.55], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', aspect: 'wide',
       alt: 'A wheel rolling to the right, with velocity arrows', curves, arrows: arrowList, points, ...extra,
     },
     caption: caption ?? 'A wheel rolling to the right without slipping. Arrows to scale for each point’s velocity over the road.',

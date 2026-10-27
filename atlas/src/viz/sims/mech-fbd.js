@@ -27,6 +27,7 @@
 //       labels: { N: 'n' },           // relabel forces by key; ask: ['T'] prints "T = ?"
 //       names: ['the crate'],         // titles over the diagrams
 //       play: false,                  // atwood, table: Play runs the motion
+//       reading: true,                // elevator: show the scale’s reading in the picture
 //       readout: true,                // live numbers under the picture (on by default when there are sliders)
 //   } }
 //
@@ -210,7 +211,7 @@ const SCENES = {
       pl.line(0, 3.2, 0, 4.25, { color: 'ink2', width: 2 });
       pl.rect(-0.5, 0, 1.0, 0.17, { color: 'ink3', alpha: 0.8, width: 1 });
       person(pl, 0, 0.17, 'accent');
-      pl.text(`scale: ${trim(sol.info.reading)} kg`, -1.3, 3.0, { color: 'ink2', size: 11.5 });
+      if (P.reading !== false) pl.text(`scale: ${trim(sol.info.reading)} kg`, -1.3, 3.0, { color: 'ink2', size: 11.5 });
       const a = sol.bodies[0].a[1];
       if (Math.abs(a) > 1e-6) motion(pl, 2.0, 1.6 - 0.45 * Math.sign(a), 0, Math.sign(a) * Math.min(1.5, 0.45 + Math.abs(a) / 8), 'a', 'gold');
       else pl.text('a = 0', 1.7, 1.6, { color: 'gold', size: 12, weight: 650 });

@@ -15,24 +15,34 @@ const riemann = (n) => (n * n * (n * n - 1)) / 12;
 const ricci = (n) => (n * (n + 1)) / 2;
 const weyl = (n) => (n >= 3 ? riemann(n) - ricci(n) : 0);
 
-// independent curvature numbers in 2 and 3 dimensions: Riemann and Ricci coincide there
+// independent curvature numbers: in 3 dimensions Riemann and Ricci coincide (practice: no answer shown)
 const countGraph = {
   type: 'graph',
   params: {
-    x: [1.5, 6.5], y: [0, 9], xlabel: 'number of spacetime dimensions n', ylabel: 'independent numbers', xticks: 5, yticks: 5,
-    points: [
-      { x: 2, y: riemann(2), color: 'gold', label: 'Riemann = Ricci = 1' },
-      { x: 3, y: riemann(3), color: 'gold', label: 'Riemann = Ricci = 6' },
-    ],
+    x: [2.5, 6.5], y: [0, 9], xlabel: 'number of spacetime dimensions n', ylabel: 'independent numbers', xticks: 4, yticks: 5,
+    points: [{ x: 3, y: riemann(3), color: 'gold', label: 'Riemann = Ricci = 6' }],
   },
-  caption: t`In 2 and 3 dimensions the Ricci part already contains all of the curvature, so the Weyl part is zero. From 4 dimensions up, Riemann has more numbers than Ricci: $n^2(n^2-1)/12$ against $n(n+1)/2$.`,
+  caption: t`In 3 dimensions (two of space, one of time) the Ricci part already holds all of the curvature, so the Weyl part is zero. From 4 dimensions up, Riemann has more numbers than Ricci: $n^2(n^2-1)/12$ against $n(n+1)/2$.`,
+};
+// the worked example's picture: both counts against n, with the gap that is the Weyl part
+const countCurves = {
+  type: 'graph',
+  params: {
+    x: [2.5, 5.5], y: [0, 55], xlabel: 'number of spacetime dimensions n', ylabel: 'independent numbers', xticks: 3, yticks: 6,
+    curves: [
+      { fn: 'x^2(x^2 - 1)/12', color: 'gold', domain: [3, 5.5], label: 'Riemann', labelAt: 5.05, labelDx: -70, labelDy: -6 },
+      { fn: 'x(x + 1)/2', color: 'accent', domain: [3, 5.5], label: 'Ricci', labelAt: 5.05, labelDx: 4, labelDy: 14 },
+    ],
+    points: [3, 4, 5].flatMap((n) => [{ x: n, y: riemann(n), color: 'gold', label: String(riemann(n)) }, { x: n, y: ricci(n), color: 'accent', label: n === 3 ? '' : String(ricci(n)) }]),
+  },
+  caption: t`Independent curvature numbers against the number of spacetime dimensions: Riemann (gold) and its Ricci part (blue). They coincide at $n = 3$; the gap above is the Weyl part — 10 numbers in our 4 dimensions.`,
 };
 
 // two satellites in empty space above a melting ice sheet (not to scale)
 const gracePicture = {
   type: 'graph',
   params: {
-    x: [-2.2, 2.2], y: [-0.2, 1.75], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+    x: [-2.2, 2.2], y: [-0.1, 1.55], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [
       { param: ['8sin(t)', '8cos(t) - 8'], t: [-0.28, 0.28], color: 'teal', width: 2.4 },
       { param: ['9.3sin(t)', '9.3cos(t) - 8'], t: [-0.22, 0.22], color: 'ink4', width: 1.2, dash: true },
@@ -51,9 +61,9 @@ const gracePicture = {
 const conePicture = {
   type: 'surface3d',
   params: {
-    surface: ['v cos(u)', 'v sin(u)', '-1.6 + 0.62v'], domain: [[0, 6.2832], [0, 2.4]], n: 30, axes: false, alpha: 0.7,
-    yaw: -0.6, pitch: 0.42, dist: 7.5,
-    curves: [{ param: ['1.4cos(t)', '1.4sin(t)', '-1.6 + 0.868'], t: [0, 6.2832], color: 'gold', width: 2.4 }],
+    surface: ['v cos(u)', 'v sin(u)', '-1.2 + 0.9v'], domain: [[0, 6.2832], [0, 2]], n: 30, axes: false, alpha: 0.75,
+    yaw: -0.6, pitch: 0.28, dist: 8,
+    curves: [{ param: ['1.2cos(t)', '1.2sin(t)', '-0.12'], t: [0, 6.2832], color: 'gold', width: 2.4 }],
   },
   caption: 'Space around a point mass in a universe with two space dimensions: a cone, drawn in an extra dimension that is not physical. It is flat everywhere except at the tip — like the paper cone of step 13 — so empty space there has no curvature at all. Drag to rotate.',
 };
@@ -91,7 +101,7 @@ So matter controls the Ricci part. Einstein packaged it as the **Einstein tensor
   },
   example: {
     prompt: t`Count the curvature numbers in a universe with two space dimensions (a 3-dimensional spacetime), and in ours (4 dimensions). How many are fixed by local matter, and how many are left for tides and waves? Riemann has $n^2(n^2-1)/12$ independent numbers in $n$ dimensions, Ricci $n(n+1)/2$.`,
-    visual: countGraph,
+    visual: countCurves,
     steps: [
       { label: 'Three dimensions', text: t`Riemann: $3^2(3^2 - 1)/12 = ${riemann(3)}$. Ricci: $3\times4/2 = ${ricci(3)}$. They are equal: the Ricci part *is* all the curvature, and the Weyl part is zero.` },
       { label: 'What that means', text: t`There, Einstein's equation fixes all the curvature from the local matter. Wherever there is no matter, spacetime is flat: no tides, no gravitational waves. Around a point mass, space is a cone — flat everywhere but the tip, like the paper cone of step 13.` },
@@ -149,7 +159,7 @@ So matter controls the Ricci part. Einstein packaged it as the **Einstein tensor
     mcq({
       id: 'wave', difficulty: 2,
       prompt: 'A gravitational wave passes through the vacuum of a LIGO arm. Which part of the curvature does it carry?',
-      visual: ball({ mode: 'wave', t: 0, views: 'all' }, 'A ball of dust as a gravitational wave passes (strain hugely exaggerated): stretched one way, squeezed the other, its area unchanged.'),
+      visual: ball({ mode: 'wave', t: 0, views: 'all' }, 'A ball of dust as a gravitational wave passes (strain hugely exaggerated): stretched one way, squeezed the other, its area unchanged to first order.'),
       choices: ['The Weyl part: a shape change at constant volume', 'The Ricci part: the wave’s energy shrinks the ball', 'Both parts equally', 'Neither: the wave is just a wobble of the coordinates'],
       answer: 0,
       why: {

@@ -101,7 +101,7 @@ Positive net work speeds an object up, negative net work slows it down, and zero
           hints: [t`$K = \tfrac12 mv^2$, with $m$ in kg and $v$ in m/s.`],
           teach: 'Kinetic energy is ½mv²: it grows with the square of the speed.',
           explain: t`$K = \tfrac12(${m})(${v})^2 = ${sci(K, 3)}$ J.`,
-          visual: kvPic(m, [v], `The kinetic energy of ${what.replace(/^a /, 'the ')} against its speed, $K = \tfrac12 mv^2$, with this speed marked. The energy scale is hidden: compute, don’t read off.`, { numbers: false }),
+          visual: kvPic(m, [v], t`The kinetic energy of ${what.replace(/^a /, 'the ')} against its speed, $K = \tfrac12 mv^2$, with this speed marked. The energy scale is hidden: compute, don’t read off.`, { numbers: false }),
         };
       },
     }),

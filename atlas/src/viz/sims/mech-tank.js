@@ -45,7 +45,7 @@ import * as MF from '../model/mech-fluids.js';
 const SCENES = ['vessels', 'utube', 'buoy'];
 const SHAPES = ['column', 'wide', 'flare', 'flask', 'slant', 'tank'];
 const SETS = {
-  vessels: ['depth', 'H', 'fluid', 'p0', 'g', 'tilt'],
+  vessels: ['depth', 'H', 'fluid', 'p0', 'g', 'tilt', 'gauge'],
   utube: ['p', 'patm', 'fluid'],
   buoy: ['rhoObj', 'V', 'depth', 'fluid', 'hold'],
 };
@@ -95,6 +95,7 @@ export function mount(F, P0) {
       if (k === 'H') F.slider({ key: 'H', label: 'Liquid level $H$', min: 0.5, max: Math.max(12, P.H), step: 0.1, value: P.H, unit: '\\mathrm{m}', explain: 'Height of the surface above the base — the same in every joined vessel.' });
       if (k === 'p0') F.slider({ key: 'p0', label: P.closed ? 'Gas pressure $p_0$' : 'Surface pressure $p_0$', min: 0, max: P.closed ? Math.max(600, kp(P.p0)) : Math.max(150, kp(P.p0)), step: 0.1, value: kp(P.p0), unit: '\\mathrm{kPa}', explain: P.closed ? 'The pressure of the gas above the liquid: in a propellant tank, the ullage pressure.' : 'The air’s pressure on the surface: 101.3 kPa at sea level, about 0.6 kPa on Mars.' });
       if (k === 'g') F.slider({ key: 'g', label: 'Effective gravity $g$', min: 0, max: Math.max(50, P.g), step: 0.1, value: P.g, unit: '\\mathrm{m/s^2}', explain: 'On the pad, 9.8. On a rocket accelerating upward at $a$, the liquid presses as if $g$ were $9.8 + a$; in free fall, zero.' });
+      if (k === 'gauge') F.toggle({ key: 'gauge', label: 'Gauge pressure', value: !!P.gauge, explain: 'Show $p - p_\\text{atm}$, the pressure above the atmosphere’s — what most gauges read.' });
       if (k === 'tilt') F.slider({ key: 'tilt', label: 'Sensor angle', min: 0, max: 180, step: 1, value: P.tilt, unit: '^\\circ', explain: 'Turn the sensor membrane: the pressure on it does not change.' });
     }
     if (P.scene === 'utube') {
@@ -104,7 +105,7 @@ export function mount(F, P0) {
     if (P.scene === 'buoy') {
       if (k === 'rhoObj') F.slider({ key: 'rhoObj', label: 'Block density $\\rho_\\text{block}$', min: 100, max: 20000, value: P.rhoObj, logScale: true, unit: '\\mathrm{kg/m^3}', fmt: (v) => String(Math.round(v)), explain: 'Cork about 240, ice 917, aluminium 2700, steel 7800, gold 19 300.' });
       if (k === 'V') F.slider({ key: 'V', label: 'Block volume $V$', min: 0.1, max: 10, step: 0.1, value: +(P.V * 1000).toFixed(1), unit: '\\mathrm{L}', explain: 'One litre is $10^{-3}\\ \\text{m}^3$: a cube 10 cm on a side.' });
-      if (k === 'depth') F.slider({ key: 'depth', label: 'Lowered to depth', min: -0.1, max: +tankOf(P, true).D.toFixed(2), step: 0.005, value: P.depth, unit: '\\mathrm{m}', explain: 'On the scale: how far the block’s bottom face is below the surface (negative: still in the air).' });
+      if (k === 'depth') F.slider({ key: 'depth', label: 'Lowered to depth', min: -0.1, max: +tankOf(P, wanted.includes('V')).D.toFixed(2), step: 0.005, value: P.depth, unit: '\\mathrm{m}', explain: 'On the scale: how far the block’s bottom face is below the surface (negative: still in the air).' });
       if (k === 'hold') F.choice({ key: 'hold', label: 'The block is', options: [['scale', 'on a spring scale'], ['free', 'let go']], value: P.hold, explain: 'Let go, it floats if it is less dense than the liquid and sinks if it is denser.' });
     }
   }
@@ -118,7 +119,7 @@ export function mount(F, P0) {
     const pa = (k) => (val(k) !== undefined ? val(k) * 1000 : P[k]);
     return {
       fl, rho, g: val('g') ?? P.g, H: val('H') ?? P.H, depth: val('depth') ?? P.depth, p0: pa('p0'), p: pa('p'), patm: pa('patm'),
-      tilt: val('tilt') ?? P.tilt, rhoObj: val('rhoObj') ?? P.rhoObj, V: val('V') !== undefined ? val('V') / 1000 : P.V, hold: val('hold') ?? P.hold,
+      tilt: val('tilt') ?? P.tilt, gauge: val('gauge') ?? P.gauge, rhoObj: val('rhoObj') ?? P.rhoObj, V: val('V') !== undefined ? val('V') / 1000 : P.V, hold: val('hold') ?? P.hold,
     };
   };
 
@@ -152,7 +153,8 @@ export function mount(F, P0) {
     const tint = TINT[e.fl] || 'accent';
     const alpha = e.fl === 'mercury' ? 0.55 : 0.32;
     const pAt = (d) => MF.pressureAt(e.p0, e.rho, d, e.g);
-    const shown = (p) => (P.gauge ? p - MF.P_ATM : p);
+    const gauge = e.gauge;
+    const shown = (p) => (gauge ? p - MF.P_ATM : p);
 
     // the connecting pipe along the base
     if (pipe) {
@@ -189,14 +191,17 @@ export function mount(F, P0) {
       A.path(L, { color: 'ink2', width: 2.2 });
       A.path(R, { color: 'ink2', width: 2.2 });
       const [l0] = L, [r0] = R;
-      if (pipe) { A.line(l0[0], -H, k + 0.4, -H, { color: 'ink2', width: 2.2 }); A.line(k + 0.6, -H, r0[0], -H, { color: 'ink2', width: 2.2 }); }
+      if (pipe) {
+        if (l0[0] < k + 0.4) A.line(l0[0], -H, k + 0.4, -H, { color: 'ink2', width: 2.2 });
+        if (r0[0] > k + 0.6) A.line(k + 0.6, -H, r0[0], -H, { color: 'ink2', width: 2.2 });
+      }
       else A.line(l0[0], -H, r0[0], -H, { color: 'ink2', width: 2.2 });
       if (closed) A.line(L[L.length - 1][0], top, R[R.length - 1][0], top, { color: 'ink2', width: 3 });
       if (pipe && k < n - 1) A.line(r0[0], -H, k + 1.5 + SHAPE[shapes[k + 1]](0)[0], -H, { color: 'ink2', width: 2 });
     }
     // what is above the surface
     if (P.values) {
-      const txt = closed ? `gas at p₀ = ${kPa(shown(e.p0))}${P.gauge ? ' (gauge)' : ''}` : `air: p₀ = ${kPa(shown(e.p0))}${P.gauge ? ' (gauge)' : ''}`;
+      const txt = closed ? `gas at p₀ = ${kPa(shown(e.p0))}${gauge ? ' (gauge)' : ''}` : `air: p₀ = ${kPa(shown(e.p0))}${gauge ? ' (gauge)' : ''}`;
       A.text(txt, n / 2, closed ? top / 2 : top + 0.07 * H, { align: 'center', color: 'ink2', size: compact ? 11.5 : 12.5, weight: 600 });
     }
     // the probes
@@ -213,7 +218,7 @@ export function mount(F, P0) {
       const xd = 0.07;
       A.arrow(xd, 0, xd, y, { color: 'ink3', width: 1.4, head: 7 });
       if (P.values) A.text(`h = ${len(-y)}`, xd, y / 2, { dx: 5, color: 'ink2', size: compact ? 11 : 12, weight: 600 });
-      if (P.sensor) sensor(A, 0.5 + (SHAPE[shapes[0]]((H + y) / (H + top))[0] + SHAPE[shapes[0]]((H + y) / (H + top))[1]) / 2, y, pAt(-y), pAt(H), e.tilt);
+      if (P.sensor) sensor(A, 0.5 + (SHAPE[shapes[0]]((H + y) / (H + top))[0] + SHAPE[shapes[0]]((H + y) / (H + top))[1]) / 2, y, pAt(-y), pAt(H), e.tilt, gauge);
     }
     if (graph) {
       const pTop = shown(e.p0), pBot = shown(pAt(H));
@@ -225,12 +230,15 @@ export function mount(F, P0) {
       B.setView([lo / 1000, hi / 1000], [yLo, yHi]);
       B.grid(); B.axes();
       ctx.save(); ctx.fillStyle = B.col.ink2; ctx.font = `600 ${compact ? 11 : 12}px Inter, system-ui, sans-serif`;
-      ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText(P.gauge ? 'gauge p (kPa)' : 'p (kPa)', B.R, 4);
+      ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText(gauge ? 'gauge p (kPa)' : 'p (kPa)', B.R, 4);
       ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText('depth (m)', split + 6, B.h - 4);
       ctx.restore();
       B.line(pTop / 1000, 0, pTop / 1000, top, { color: 'violet', width: 2, dash: [4, 4] });
       B.line(pTop / 1000, 0, pBot / 1000, -H, { color: tint === 'ink3' ? 'ink2' : tint, width: 2.6 });
-      if (!P.gauge && MF.P_ATM / 1000 < hi / 1000 && Math.abs(e.p0 - MF.P_ATM) > 50) B.line(MF.P_ATM / 1000, yLo, MF.P_ATM / 1000, top, { color: 'ink4', width: 1, dash: [3, 4] });
+      if (!gauge && MF.P_ATM < hi && Math.abs(e.p0 - MF.P_ATM) > 50) {
+        B.line(MF.P_ATM / 1000, yLo, MF.P_ATM / 1000, top, { color: 'ink3', width: 1, dash: [3, 4] });
+        B.text('1 atm', MF.P_ATM / 1000, top, { dx: -3, dy: -2, align: 'right', color: 'ink3', size: 11 });
+      }
       if (d !== null && d !== undefined && Number.isFinite(d)) {
         const y = -Math.max(0, Math.min(H, d)), p = shown(pAt(-y));
         B.line(B.vx0, y, p / 1000, y, { color: 'gold', width: 1.2, dash: [5, 5] });
@@ -248,7 +256,7 @@ export function mount(F, P0) {
   }
 
   // a sensor membrane at (x, y) turned by `tilt` degrees, with the pressure force on each face
-  function sensor(pl, x, y, p, pMax, tilt) {
+  function sensor(pl, x, y, p, pMax, tilt, gauge) {
     const g = ctx, X = pl.X(x), Y = pl.Y(y), th = (tilt * Math.PI) / 180;
     const ux = Math.cos(th), uy = -Math.sin(th);          // along the membrane (screen)
     const nx = -uy, ny = ux;                               // its normal
@@ -261,7 +269,7 @@ export function mount(F, P0) {
       const sx = X + s * nx * (L + 3), sy = Y + s * ny * (L + 3), ex = X + s * nx * 3, ey = Y + s * ny * 3;
       pl.arrow(pl.ix(sx), pl.iy(sy), pl.ix(ex), pl.iy(ey), { color: 'bad', width: 2.4, head: 8 });
     }
-    if (P.values) pl.text(kPa(P.gauge ? p - MF.P_ATM : p), pl.ix(X + 18), pl.iy(Y - L - 10), { color: 'bad', size: compact ? 11 : 12, weight: 650 });
+    if (P.values) pl.text(kPa(gauge ? p - MF.P_ATM : p), pl.ix(X + 18), pl.iy(Y - L - 10), { color: 'bad', size: compact ? 11 : 12, weight: 650 });
   }
 
   // ─── U-tube and barometer ────────────────────────────────────────────────
@@ -272,9 +280,9 @@ export function mount(F, P0) {
     if (P.mode === 'barometer') return drawBarometer(e);
     // the level difference, and a view steady over the slider's range
     const dh = MF.manometerRise(e.p - e.patm, e.rho, e.g);
-    const span = wanted.includes('p') || wanted.includes('fluid')
-      ? Math.max(...(wanted.includes('fluid') ? fluidList : [e.fl]).map((f) => MF.manometerRise(Math.max(Math.abs((P.sliders === true || wanted.includes('p') ? 200e3 : e.p) - e.patm), Math.abs(50e3 - e.patm)), MF.FLUIDS[f].rho, e.g)))
-      : Math.max(Math.abs(dh), 0.02);
+    // steady while the pressure slider moves; refitted when the liquid changes
+    const pr = wanted.includes('p') ? [50e3, Math.max(200e3, e.p)] : [e.p, e.p];
+    const span = Math.max(MF.manometerRise(Math.max(Math.abs(pr[0] - e.patm), Math.abs(pr[1] - e.patm)), e.rho, e.g), 0.02);
     const yb = -span / 2 - 0.25 * span, yt = span / 2 + 0.22 * span;
     A.setView([-3.2, 3.2], [yb - 0.32 * span, yt + 0.36 * span]);
     const tint = TINT[e.fl] || 'accent';
@@ -300,7 +308,7 @@ export function mount(F, P0) {
     const fs = compact ? 11.5 : 12.5;
     if (P.values) {
       A.text(`gas: p = ${kPa(e.p)}`, (bx0 + bx1) / 2, (by0 + by1) / 2, { align: 'center', color: 'violet', size: fs, weight: 650 });
-      A.text(`open: p_atm = ${kPa(e.patm)}`, 1, yt, { align: 'center', dy: -12, color: 'ink2', size: fs, weight: 600 });
+      A.text(`open to air at ${kPa(e.patm)}`, 1, yt, { align: 'center', dy: -12, color: 'ink2', size: fs, weight: 600 });
     } else {
       A.text('gas', (bx0 + bx1) / 2, (by0 + by1) / 2, { align: 'center', color: 'violet', size: fs, weight: 650 });
       A.text('open to the air', 1, yt, { align: 'center', dy: -12, color: 'ink2', size: fs, weight: 600 });
@@ -321,7 +329,7 @@ export function mount(F, P0) {
 
   function drawBarometer(e) {
     const h = MF.headOf(e.patm, e.rho, e.g);
-    const hmax = wanted.length ? Math.max(...(wanted.includes('fluid') ? fluidList : [e.fl]).map((f) => MF.headOf(wanted.includes('patm') ? 110e3 : e.patm, MF.FLUIDS[f].rho, e.g))) : h;
+    const hmax = wanted.includes('patm') ? MF.headOf(Math.max(110e3, e.patm), e.rho, e.g) : h;   // steady while the air-pressure slider moves
     const top = hmax * 1.12;
     A.setView([-3.2, 3.2], [-0.16 * hmax, top + 0.1 * hmax]);
     const tint = TINT[e.fl] || 'accent', al = e.fl === 'mercury' ? 0.7 : 0.4;
@@ -336,10 +344,10 @@ export function mount(F, P0) {
     const fs = compact ? 11.5 : 12.5;
     A.text('vacuum', 0, (h + top) / 2, { align: 'center', color: 'ink3', size: fs - 1 });
     for (const x of [-1.5, 1.5]) A.arrow(x, 0.16 * hmax, x, 0.01 * hmax, { color: 'violet', width: 2, head: 7 });
-    A.text(P.values ? `p_atm = ${kPa(e.patm)}` : 'p_atm', 1.5, 0.2 * hmax, { align: 'center', dy: -6, color: 'violet', size: fs, weight: 650 });
-    A.line(-1.2, h, 1.6, h, { color: 'gold', width: 1.2, dash: [4, 4] });
-    A.arrow(1.2, 0, 1.2, h, { color: 'gold', width: 1.8, head: 7 });
-    A.text(P.values ? `h = ${len(h)}` : 'h', 1.32, h * 0.55, { color: 'gold', size: fs, weight: 650 });
+    A.text(P.values ? `air at ${kPa(e.patm)}` : 'air pressure', 1.5, 0.2 * hmax, { align: 'center', dy: -6, color: 'violet', size: fs, weight: 650 });
+    A.line(-1.0, h, 0.5, h, { color: 'gold', width: 1.2, dash: [4, 4] });
+    A.arrow(-0.75, 0, -0.75, h, { color: 'gold', width: 1.8, head: 7 });
+    A.text(P.values ? `h = ${len(h)}` : 'h', -0.87, h * 0.55, { align: 'right', color: 'gold', size: fs, weight: 650 });
     if (showReadout) F.readout([['air pressure $p_\\text{atm}$', texkPa(e.patm)], ['column height $h$', texLen(h)], ['in mm of this liquid', `${Math.round(h * 1000)}\\,\\mathrm{mm}`], ['liquid density $\\rho$', `${e.rho.toLocaleString('en-US')}\\,\\mathrm{kg/m^3}`]]);
   }
 
@@ -417,7 +425,7 @@ const SHAPE = {
   wide: () => [-0.4, 0.4],
   flare: (u) => [-(0.09 + 0.33 * u), 0.09 + 0.33 * u],
   flask: (u) => { const w = 0.4 - 0.31 * ease(u / 0.62); return [-w, w]; },
-  slant: (u) => [-0.08 + 0.6 * (u - 0.5), 0.08 + 0.6 * (u - 0.5)],
+  slant: (u) => [-0.08 + 0.32 * u, 0.08 + 0.32 * u],
   tank: () => [-0.36, 0.36],
 };
 
