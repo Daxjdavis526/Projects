@@ -291,7 +291,7 @@ It follows from two postulates — the laws of physics are the same in every ine
             type: 'graph',
             params: {
               x: [0, 90], y: [0, 7.5], xlabel: 'angle to the line of sight θ (degrees)', ylabel: 'apparent speed / c',
-              curves: [0.9, 0.95, 0.99].map((b, k) => ({ fn: `${b}*sin(x*pi/180)/(1 - ${b}*cos(x*pi/180))`, domain: [0.5, 90], color: ['accent', 'violet', 'gold'][k], label: `β = ${b}`, labelAt: [40, 25, 13][k], labelDx: 6, labelDy: -10 })),
+              curves: [0.9, 0.95, 0.99].map((b, k) => ({ fn: `${b}*sin(x*pi/180)/(1 - ${b}*cos(x*pi/180))`, domain: [0.5, 90], color: ['accent', 'violet', 'gold'][k], label: `β = ${b}`, labelAt: [62, 25, 13][k], labelDx: 6, labelDy: [16, -10, -10][k] })),
               hlines: [{ y: 1, label: 'c', color: 'ink3' }],
             },
             caption: t`Apparent sideways speed against viewing angle for three true speeds. Each curve peaks at $\beta\gamma$, at the angle where $\cos\theta = \beta$.`,
