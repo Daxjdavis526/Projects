@@ -37,7 +37,7 @@ export function buildCatalog(courses) {
       cat.modules[mid] = mod;
       (m.lessons || []).forEach((l, li) => {
         const id = l.id || `${mid}.${l.n ?? li + 1}`;
-        const prev = li > 0 ? mod.lessonIds[li - 1] : null;
+        const prev = li > 0 && !m.independent ? mod.lessonIds[li - 1] : null;
         const lesson = {
           minutes: 6, difficulty: 2, ...l, id, course: course.id, module: mid, index: cat.order.length,
           // a lesson needs the lesson before it in its module, plus whatever it lists
@@ -51,8 +51,27 @@ export function buildCatalog(courses) {
       });
     });
   }
+  // alias modules (refs) borrow the lessons of the modules they point at
+  for (const mod of Object.values(cat.modules)) {
+    if (!mod.refs) continue;
+    for (const r of mod.refs) {
+      const target = cat.modules[r];
+      if (!target) continue;
+      mod.lessonIds.push(...target.lessonIds);
+      cat.byId[mod.course].lessonIds.push(...target.lessonIds);
+    }
+  }
+  // a lesson may name a whole module as a prerequisite: that means its last lesson
+  for (const lesson of Object.values(cat.lessons)) {
+    lesson.prereqs = lesson.prereqs.map((p) => {
+      if (cat.lessons[p]) return p;
+      const m = cat.modules[p];
+      return m && m.lessonIds.length ? m.lessonIds[m.lessonIds.length - 1] : p;
+    });
+  }
   // first lessons of a module inherit the module's prerequisites (their last lessons)
   for (const mod of Object.values(cat.modules)) {
+    if (mod.independent || mod.refs) continue;
     const first = cat.lessons[mod.lessonIds[0]];
     if (!first) continue;
     for (const pm of mod.prereqs) {

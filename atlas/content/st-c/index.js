@@ -1,0 +1,32 @@
+import { mod } from '../_util.js';
+
+export default {
+  id: 'st-c', track: 'spacetime', code: 'Advanced Math C', title: 'Differential Geometry',
+  provenance: 'usu-course', evidence: 'C', credits: 3,
+  catalog: 'USU offers MATH 5110 Differential Geometry (curves and surfaces) and the graduate MATH 6110 (manifolds, tensors, forms, Riemannian geometry), neither required by this B.S.',
+  source: { label: 'Coursicle: USU MATH 5110 (third-party)', url: 'https://www.coursicle.com/usu/courses/MATH/5110/' },
+  note: 'A four-phase spiral, led by Needham’s Visual Differential Geometry and do Carmo: classical curves and surfaces → abstract manifolds and Lorentzian metrics → connections and curvature → symmetry. Every fact that holds only in two dimensions is flagged.',
+  summary: 'The mathematics GR is written in, built from pictures up: curves and surfaces, intrinsic versus extrinsic curvature, manifolds, forms, metrics, connections, parallel transport, geodesics, Riemann and Ricci curvature, Bianchi identities, geodesic deviation and Killing vectors.',
+  prereqs: ['st-a', 'math2210'],
+  boss: { title: 'The Curvature Challenge', blurb: 'Compute the Christoffels, the Riemann tensor and the holonomy of a surface you have never seen — and say what a traveller would notice.' },
+  modules: [
+    mod('C1', 'Curves', ['Parameterized curves', 'Arc length and reparameterization', 'Curvature of plane curves']),
+    mod('C2', 'Space curves', ['The Frenet–Serret frame', 'Torsion', 'Helices and the fundamental theorem of curves']),
+    mod('C3', 'Surfaces', ['Parameterized surfaces', 'Tangent planes and normals', 'A gallery: sphere, torus, saddle, cylinder']),
+    mod('C4', 'The first fundamental form', ['The metric of a surface', 'Lengths, angles and areas on a surface', 'Isometries: why a cylinder is flat']),
+    mod('C5', 'Curvature of surfaces', ['Normal curvature and the second fundamental form', 'Principal curvatures', 'Gaussian and mean curvature', 'Intrinsic versus extrinsic curvature']),
+    mod('C6', 'Intrinsic geometry', ['Gauss’s Theorema Egregium', 'Geodesics on surfaces', 'Parallel transport and holonomy on the sphere', 'The Gauss–Bonnet theorem']),
+    mod('C7', 'Topology for manifolds', ['Open sets and continuity', 'Hausdorff, compact and connected']),
+    mod('C8', 'Manifolds', ['Charts and atlases', 'Smooth manifolds', 'Examples: spheres, tori and spacetime']),
+    mod('C9', 'Tangent and cotangent spaces', ['Tangent vectors as derivations', 'Cotangent vectors and differentials', 'Pushforwards and pullbacks']),
+    mod('C10', 'Differential forms', ['The wedge product', 'The exterior derivative', 'Integrating forms and Stokes’ theorem', 'Maxwell’s equations as dF = 0 and d⋆F = ⋆J']),
+    mod('C11', 'Metrics on manifolds', ['Riemannian metrics', 'Pseudo-Riemannian (Lorentzian) metrics', 'Two-dimensional spacetimes']),
+    mod('C12', 'Connections and parallel transport', ['Affine connections', 'Parallel transport along a curve', 'Torsion-free and metric-compatible: the Levi-Civita connection']),
+    mod('C13', 'Christoffel symbols and covariant derivatives', ['Computing Christoffel symbols', 'Covariant derivatives of tensors']),
+    mod('C14', 'Geodesics', ['The geodesic equation', 'Geodesics extremize length — and proper time', 'Geodesics on the sphere, cylinder and torus']),
+    mod('C15', 'The Riemann tensor', ['Curvature from transport around a loop', 'The Riemann tensor of the 2-sphere', 'Symmetries of Riemann and counting components']),
+    mod('C16', 'Ricci curvature and the Bianchi identities', ['The Ricci tensor and scalar', 'Sectional curvature', 'The Bianchi identities and the Einstein tensor']),
+    mod('C17', 'Geodesic deviation', ['Tidal acceleration from curvature']),
+    mod('C18', 'Symmetry and the capstone', ['The Lie derivative', 'Killing vectors and conserved quantities', 'Capstone: the curvature of a two-dimensional spacetime']),
+  ],
+};

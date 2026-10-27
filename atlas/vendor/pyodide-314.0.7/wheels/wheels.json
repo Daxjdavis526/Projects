@@ -1,0 +1,12 @@
+{
+  "sympy-1.14.0-py3-none-any.whl": {
+    "sha256": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5",
+    "source": "https://pypi.org/project/sympy/1.14.0/",
+    "license": "BSD-3-Clause"
+  },
+  "mpmath-1.4.1-py3-none-any.whl": {
+    "sha256": "dc4f0ea2304480d4a9a48a94c1020571558ade522b44a6912efac63a586e140f",
+    "source": "https://pypi.org/project/mpmath/1.4.1/",
+    "license": "BSD-3-Clause"
+  }
+}

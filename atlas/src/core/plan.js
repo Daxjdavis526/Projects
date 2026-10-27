@@ -15,9 +15,14 @@ const atLeast = (st, id, s) => RANK[stateOf(st, id)] >= RANK[s];
 /** A prerequisite counts as met once its lesson is finished or its skill is Developing. */
 export const prereqMet = (st, id) => completed(st, id) || atLeast(st, id, 'developing');
 
+// A prerequisite that is only planned (not built yet) cannot be studied, so
+// it never blocks; it is still listed so the learner knows what it builds on.
 export function prereqStatus(cat, st, lessonId) {
   const L = cat.lessons[lessonId];
-  return (L?.prereqs || []).map((id) => ({ id, title: cat.lessons[id]?.title ?? id, met: prereqMet(st, id) }));
+  return (L?.prereqs || []).map((id) => {
+    const built = !!cat.lessons[id]?.ready;
+    return { id, title: cat.lessons[id]?.title ?? id, planned: !built, met: !built || prereqMet(st, id) };
+  });
 }
 
 export const isUnlocked = (cat, st, id) => prereqStatus(cat, st, id).every((p) => p.met);
@@ -50,7 +55,9 @@ export function recommendNext(cat, st, profile = {}) {
     }
   }
   const f = frontier(cat, st).filter((id) => !skippable(st, id));
-  return f[0] ?? null;
+  if (f[0]) return f[0];
+  // nothing unlocked: any built lesson not yet done (exploration is always allowed)
+  return cat.order.find((id) => cat.lessons[id].ready && !completed(st, id) && !skippable(st, id)) ?? null;
 }
 
 // A placed or already-proficient skill does not need its lesson again.
