@@ -277,6 +277,7 @@ a.lesson-row:hover{background:var(--panel-2);text-decoration:none}
 .viz-canvas .overlay{position:absolute;inset:0;pointer-events:none}
 .viz-canvas .overlay .lbl{position:absolute;transform:translate(-50%,-50%);font-size:.85rem;color:var(--ink);white-space:nowrap;text-shadow:0 0 6px var(--bg)}
 .viz-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem 1.2rem;padding:.9rem 1rem;border-top:1px solid var(--line);background:var(--panel)}
+[hidden]{display:none!important}
 .viz-readout{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;padding:.6rem 1rem;border-top:1px solid var(--line);font-size:.86rem;color:var(--ink-2);background:var(--panel)}
 .viz-readout b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 .viz-caption{padding:.7rem 1rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--ink-3);background:var(--panel)}

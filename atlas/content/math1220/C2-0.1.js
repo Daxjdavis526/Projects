@@ -9,7 +9,7 @@ export default lesson({
   id: 'math1220.C2-0.1',
   title: 'Antiderivatives and the Fundamental Theorem',
   minutes: 9, difficulty: 2,
-  intro: t`An **antiderivative** of $f$ is any function $F$ with $F' = f$. Antiderivatives of the same function differ only by a constant, which is why an indefinite integral carries a $+\,C$. The **Fundamental Theorem of Calculus** says that a definite integral — an accumulated, signed area — can be computed from any antiderivative:
+  intro: t`An **antiderivative** of $f$ is any function $F$ with $F' = f$. On an interval, any two antiderivatives of the same function differ only by a constant, which is why an indefinite integral carries a $+\,C$. The **Fundamental Theorem of Calculus** says that a definite integral — an accumulated, signed area — can be computed from any antiderivative:
 
 $$\int_a^b f(x)\,dx = F(b) - F(a)$$
 
@@ -70,7 +70,7 @@ It also runs the other way: the area function $A(x) = \int_a^x f(t)\,dt$ has slo
       { label: 'Antidifferentiate', text: t`$F(x) = 3\cdot\dfrac{x^{3/2}}{3/2} + \dfrac{x^{-1}}{-1} = 2x^{3/2} - \dfrac{1}{x}$. No $+C$ is needed: it would cancel in $F(4) - F(1)$.` },
       { label: 'Check by differentiating', text: t`$F'(x) = 2\cdot\tfrac32 x^{1/2} + x^{-2} = 3\sqrt{x} + \dfrac{1}{x^2}$ ✓` },
       { label: 'Evaluate', text: t`$F(4) - F(1) = \left(2\cdot 8 - \tfrac14\right) - \left(2 - 1\right) = 15.75 - 1 = 14.75$.` },
-      { label: 'Sense check', text: t`On $[1, 4]$ the integrand runs from $4$ up to about $6.06$, so the area lies between $3 \times 4 = 12$ and $3 \times 6.06 \approx 18.2$. $14.75$ fits.` },
+      { label: 'Sense check', text: t`On $[1, 4]$ the integrand stays between about $3.97$ (its low point, near $x = 1.12$) and $6.06$ (at $x = 4$), so the area lies between $3 \times 3.97 \approx 11.9$ and $3 \times 6.06 \approx 18.2$. $14.75$ fits.` },
     ],
     answer: t`$\displaystyle\int_1^4 \left(3\sqrt{x} + \frac{1}{x^2}\right)dx = \frac{59}{4} = 14.75$`,
   },
@@ -96,6 +96,10 @@ It also runs the other way: the area function $A(x) = \int_a^x f(t)\,dt$ has slo
           hints: [t`An antiderivative $F$ must satisfy $F' = f$ — differentiate each choice and compare.`, t`Power rule backwards: $\int x^n\,dx = \dfrac{x^{n+1}}{n+1}$.`],
           teach: 'To antidifferentiate a polynomial, raise each power by one and divide by the new power.',
           explain: t`$\dfrac{d}{dx}\left(${polyTeX([0, c, b, a])}\right) = ${polyTeX([c, 2 * b, 3 * a])} = f(x)$. Adding any constant gives another antiderivative.`,
+          visual: (() => {
+            const f = (x) => 3 * a * x * x + 2 * b * x + c, lo = Math.min(0, f(-b / (3 * a))), hi = Math.max(f(-1.6), f(1.6));
+            return { type: 'graph', params: { aspect: 'wide', x: [-1.8, 1.8], y: [lo - 0.12 * (hi - lo), hi + 0.12 * (hi - lo)], curves: [{ fn: `${3 * a}*x^2 + ${2 * b}*x + ${c}`, color: 'accent', label: 'f(x)', labelAt: 1.2 }] }, caption: t`The graph of $f$. Any antiderivative $F$ has slope $f(x)$: it climbs wherever this curve is above the axis.` };
+          })(),
         };
       },
     }),
@@ -115,6 +119,11 @@ It also runs the other way: the area function $A(x) = \int_a^x f(t)\,dt$ has slo
           hints: [t`Write each term as a power of $x$: $\sqrt{x} = x^{1/2}$ and $\dfrac{1}{x^2} = x^{-2}$.`, t`Apply $\int x^n\,dx = \dfrac{x^{n+1}}{n+1}$ with $n = \tfrac12$ and with $n = -2$.`],
           teach: 'Rewrite roots and reciprocals as powers of x before applying the power rule.',
           explain: t`$${a}\cdot\dfrac{x^{3/2}}{3/2} + ${b}\cdot\dfrac{x^{-1}}{-1} = ${k}x^{3/2} - \dfrac{${b}}{x} + C$. Differentiate to check: $${k}\cdot\tfrac32 x^{1/2} + ${b}x^{-2}$ ✓`,
+          visual: (() => {
+            const F = (x) => k * x ** 1.5 - b / x, lo = F(0.45) - 4, hi = F(3) + 4;
+            const fam = (C, dash) => ({ fn: `${k}*x^1.5 - ${b}/x + ${C}`, color: 'violet', dash, domain: [0.45, 3] });
+            return { type: 'graph', params: { aspect: 'wide', x: [0, 3.3], y: [lo - 1, hi + 1], curves: [fam(-4, true), fam(0, false), fam(4, true)] }, caption: t`Three antiderivatives of the integrand. Each is the others shifted up or down — that is the $+C$. Their common shape is what you are finding.` };
+          })(),
         };
       },
     }),
@@ -134,6 +143,10 @@ It also runs the other way: the area function $A(x) = \int_a^x f(t)\,dt$ has slo
           hints: [t`Read the derivative table backwards: $(e^x)' = e^x$, $(\sin x)' = \cos x$, $(\ln x)' = \tfrac1x$.`, t`Integrate term by term; constant factors come along unchanged.`],
           teach: t`The basic antiderivatives — of $e^x$, $\cos x$, $\sin x$ and $1/x$ — are the derivative table read backwards.`,
           explain: t`$\int ${a}e^x\,dx = ${a}e^x$, $\int ${b}\cos x\,dx = ${b}\sin x$, $\int \tfrac{${c}}{x}\,dx = ${c}\ln|x| = ${c}\ln x$ for $x > 0$. Add $+C$.`,
+          visual: (() => {
+            const F = (x) => a * Math.exp(x) + b * Math.sin(x) + c * Math.log(x), lo = Math.min(F(0.3), F(0.6)), hi = F(3);
+            return { type: 'graph', params: { aspect: 'wide', x: [0, 3.2], y: [lo - 0.1 * (hi - lo), hi * 1.1], curves: [{ fn: `${a}*e^x + ${b}*sin(x) + ${c}*ln(x)`, color: 'violet', domain: [0.3, 3.2] }], tangent: { fn: `${a}*e^x + ${b}*sin(x) + ${c}*ln(x)`, at: 1.5 }, readouts: [{ label: t`slope of $F$ at $x_0$`, expr: 'slope', digits: 4 }, { label: t`integrand at $x_0$`, expr: `${a}*e^x0 + ${b}*cos(x0) + ${c}/x0`, digits: 4 }] }, caption: t`An antiderivative $F$ (violet). Drag the gold point: the slope of $F$ always equals the integrand there.` };
+          })(),
         };
       },
     }),
@@ -189,6 +202,7 @@ It also runs the other way: the area function $A(x) = \int_a^x f(t)\,dt$ has slo
           ],
           teach: t`When the upper limit is a function $g(x)$, the derivative of $\int_a^{g(x)} f(t)\,dt$ is $f(g(x))\,g'(x)$.`,
           explain: t`$\dfrac{d}{dx}\int_0^{x^{${n}}}\cos t\,dt = \cos\left(x^{${n}}\right)\cdot ${n}${n === 2 ? 'x' : 'x^2'}$. Check: the integral equals $\sin(x^{${n}})$, whose derivative is the same thing.`,
+          visual: { type: 'graph', params: { aspect: 'wide', x: [-0.1, 2], y: [-0.4, 1.25], xlabel: 't', curves: [{ fn: 'cos(x)', color: 'accent', label: 'cos t', labelAt: 0.25 }], shade: [{ fn: 'cos(x)', from: 0, to: 1.1 ** n, color: 'accent', alpha: 0.25 }], vlines: [{ x: 1.1, color: 'ink3', label: 'x' }, { x: 1.1 ** n, color: 'gold', label: n === 2 ? 'x²' : 'x³' }] }, caption: t`The integral for $x = 1.1$: the shaded area ends at $t = x^{${n}}$, not at $t = x$.` },
         };
       },
     }),

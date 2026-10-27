@@ -4,11 +4,22 @@ import { nice } from '../../src/core/format.js';
 
 const t = String.raw;
 
+// the integrand as a picture: its curve, and the signed area a definite
+// integral would measure (above the axis in blue, below in red)
+const integrand = (fn, x, y, from, to, caption) => ({
+  type: 'graph',
+  params: {
+    x, y, aspect: 'wide',
+    curves: [{ fn, color: 'accent' }],
+    shade: [{ fn: `max(${fn}, 0)`, from, to, color: 'accent', alpha: 0.22 }, { fn: `min(${fn}, 0)`, from, to, color: 'bad', alpha: 0.22 }],
+  },
+  caption,
+});
+
 export default lesson({
   id: 'math1220.C2-2.1',
   title: 'Integration by parts',
   minutes: 8, difficulty: 2,
-  prereqs: ['math1220.C2-0.2'],
   intro: t`Integration by parts is the product rule run backwards. When the integrand is a product of two different kinds of function — a polynomial times a sine or an exponential, or a lone logarithm — it trades the integral you have for one you can do:
 
 $$\int u\,dv = uv - \int v\,du$$
@@ -42,6 +53,7 @@ You will use it constantly: for Fourier coefficients, for expectation values in 
     mcq({
       id: 'choose-u', difficulty: 1,
       prompt: t`To evaluate $\displaystyle\int x\,e^{3x}\,dx$ by parts, which choice works best?`,
+      visual: integrand('x*e^(3x)', [-1.2, 0.75], [-0.25, 2.4], 0, 0.5, t`The integrand $x e^{3x}$: a polynomial factor times an exponential one.`),
       choices: [t`$u = x$, $dv = e^{3x}\,dx$`, t`$u = e^{3x}$, $dv = x\,dx$`, t`$u = x e^{3x}$, $dv = dx$`, t`$u = 3x$, $dv = e^{x}\,dx$`],
       answer: 0,
       why: {
@@ -59,6 +71,7 @@ You will use it constantly: for Fourier coefficients, for expectation values in 
         const k = r.int(2, 5);
         return {
           prompt: t`Find $\displaystyle\int x\,e^{${k}x}\,dx$.`,
+          visual: integrand(`x*e^(${k}x)`, [-3 / k, 1.5 / k], [-0.6 / k, 7 / k], 0, 1 / k, t`$y = x e^{${k}x}$. Any antiderivative $F$ gives the shaded area as $F(\tfrac1{${k}}) - F(0)$.`),
           answer: `(x/${k} - 1/${k * k}) e^(${k}x)`,
           answerTeX: t`\left(\frac{x}{${k}} - \frac{1}{${k * k}}\right)e^{${k}x}`,
           vars: { x: [-1.5, 1.5] }, mode: 'constant',
@@ -76,6 +89,7 @@ You will use it constantly: for Fourier coefficients, for expectation values in 
         const k = r.int(2, 4);
         return {
           prompt: t`Find $\displaystyle\int x\sin(${k}x)\,dx$.`,
+          visual: integrand(`x*sin(${k}x)`, [-2, 2], [-2.1, 2.1], 0, Math.PI / k, t`$y = x\sin(${k}x)$, with the first hump, from $0$ to $\pi/${k}$, shaded.`),
           answer: `-x cos(${k}x)/${k} + sin(${k}x)/${k * k}`,
           answerTeX: t`-\frac{x\cos(${k}x)}{${k}} + \frac{\sin(${k}x)}{${k * k}}`,
           vars: { x: [-2, 2] }, mode: 'constant',
@@ -89,6 +103,7 @@ You will use it constantly: for Fourier coefficients, for expectation values in 
     expr({
       id: 'ln-x', difficulty: 2,
       prompt: t`Find $\displaystyle\int \ln x\,dx$.`,
+      visual: { type: 'graph', params: { x: [-0.2, 4.2], y: [-2.2, 1.8], aspect: 'wide', curves: [{ fn: 'ln(x)', color: 'accent', domain: [0.06, 4.2], label: 'y = ln x', labelAt: 3.3 }], shade: [{ fn: 'ln(x)', from: 1, to: 'e', color: 'accent', alpha: 0.25 }], vlines: [{ x: 'e', label: 'e' }] }, caption: t`The shaded area from $1$ to $e$ is exactly $1$ — check it with your answer once you have it.` },
       answer: 'x ln(x) - x', answerTeX: t`x\ln x - x`,
       vars: { x: [0.3, 4] }, mode: 'constant',
       errors: [{ answer: '1/x', feedback: t`That is the *derivative* of $\ln x$, not an antiderivative.` }, { answer: 'x ln(x)', feedback: t`Close — you dropped the $-\int v\,du = -\int 1\,dx$ term.` }],
@@ -104,6 +119,7 @@ You will use it constantly: for Fourier coefficients, for expectation values in 
         const val = b * Math.sin(b) + Math.cos(b) - 1;
         return {
           prompt: t`Evaluate $\displaystyle\int_0^{${bt}} x\cos x\,dx$. Give a decimal to 3 significant figures.`,
+          visual: integrand('x*cos(x)', [-0.2, 3.4], [-3.3, 1], 0, b, t`$y = x\cos x$ from $0$ to $${bt}$. Area below the axis (red) counts as negative.`),
           answer: val, tol: { rel: 0.005, abs: 0.002 },
           hints: [t`You found $\int x\cos x\,dx = x\sin x + \cos x$ in the worked example.`, t`Evaluate $x\sin x + \cos x$ at $${bt}$ and at $0$, then subtract.`],
           teach: t`For a definite integral, evaluate the antiderivative at both limits — the $uv$ term too.`,
@@ -149,6 +165,7 @@ Where is the mistake?`,
         const k = r.int(2, 5);
         return {
           prompt: t`Find $\displaystyle\int x\cos(${k}x)\,dx$.`,
+          visual: integrand(`x*cos(${k}x)`, [-2, 2], [-2.1, 2.1], 0, Math.PI / (2 * k), t`$y = x\cos(${k}x)$; the shaded area runs from $0$ to $\pi/${2 * k}$.`),
           answer: `x sin(${k}x)/${k} + cos(${k}x)/${k * k}`,
           answerTeX: t`\frac{x\sin(${k}x)}{${k}} + \frac{\cos(${k}x)}{${k * k}}`,
           vars: { x: [-2, 2] }, mode: 'constant',
@@ -161,6 +178,7 @@ Where is the mistake?`,
     num({
       id: 'cp-def', difficulty: 2,
       prompt: t`Evaluate $\displaystyle\int_0^1 x\,e^{x}\,dx$ exactly.`,
+      visual: integrand('x*e^x', [-0.3, 1.3], [-0.4, 3.6], 0, 1, t`The area under $y = x e^x$ from $0$ to $1$.`),
       answer: 1, tol: { rel: 1e-3 },
       hints: [t`$\int xe^x\,dx = xe^x - e^x$.`],
       teach: 'Evaluate uv − ∫v du between the limits.',
@@ -168,6 +186,7 @@ Where is the mistake?`,
     }),
     mcq({
       id: 'cp-boundary', difficulty: 3, transfer: true,
+      visual: { type: 'graph', params: { x: [-0.3, 3.5], y: [-0.35, 1.45], aspect: 'wide', curves: [{ fn: 'sin(x)', color: 'accent', domain: [0, 'pi'], label: 'f', labelAt: 1.2 }, { fn: 'x*(pi - x)/2', color: 'gold', domain: [0, 'pi'], label: 'g', labelAt: 2.2, labelDy: -16 }], points: [{ x: 0, y: 0, label: 'a' }, { x: 'pi', y: 0, label: 'b' }] }, caption: t`Two functions that both vanish at the ends of $[a, b]$, so $[fg]_a^b = 0$.` },
       prompt: t`On an interval $[a, b]$, integration by parts reads $\int_a^b f\,g'\,dx = \big[f g\big]_a^b - \int_a^b f'\,g\,dx$. If $f$ and $g$ both vanish at $a$ and $b$ (as wave functions do at infinity in quantum mechanics), then $\int_a^b f\,g'\,dx$ equals:`,
       choices: [t`$-\int_a^b f'\,g\,dx$`, t`$\int_a^b f'\,g\,dx$`, '0', t`$f(b)g(b)$`],
       answer: 0,

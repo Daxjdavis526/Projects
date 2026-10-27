@@ -21,3 +21,16 @@ export function span(values, margin = 0.12) {
   const pad = (hi - lo || 1) * margin;
   return [lo - pad, hi + pad];
 }
+
+/**
+ * The part of [t0, t1] where the straight line y = y1 + m (t − tp) stays inside
+ * [lo, hi] — a domain for drawing a tangent or secant without leaving the plot.
+ */
+export function lineDomain(y1, m, tp, [t0, t1], [lo, hi]) {
+  if (m === 0) return [t0, t1];
+  const ta = tp + (lo - y1) / m, tb = tp + (hi - y1) / m;
+  return [Math.max(t0, Math.min(ta, tb)), Math.min(t1, Math.max(ta, tb))];
+}
+
+/** A coefficient for TeX in front of a symbol: 1 → '', −1 → '-', else the number. */
+export const co = (c) => (c === 1 ? '' : c === -1 ? '-' : nice(c));

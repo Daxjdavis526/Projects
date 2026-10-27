@@ -87,7 +87,9 @@ export default lesson({
 });
 ```
 
-Prerequisites live in the course index, not in the lesson file.
+Prerequisites live in the course index (`content/<course>/index.js`): the
+catalog, the skill map and the "builds on" note all read them from there. Do
+not put `prereqs` in a lesson file — it would be ignored.
 
 ### Markup
 
@@ -230,10 +232,25 @@ Optional `diagram`: an inline SVG string shown above the rows.
 
 ### Slider and point (answer *in* the picture)
 
-`type: 'slider'`: the visual has a slider `param`; the learner sets it and
-checks; `answer: [lo, hi]` is the accepted range. `type: 'point'`: a `graph`
-visual with one draggable point (`drag: [{ key: 'p', x, y }]`); `answer: { x, y }`
-with `tol: { x, y }`. Write these as plain objects (`{ type: 'slider', … }`).
+Write these as plain objects. `instruction` replaces the line under the
+picture ("Drag the point to …").
+
+```js
+{ type: 'slider', id: 'set-angle', difficulty: 2, prompt: '…',
+  visual: { type: 'projectile', params: { … } },     // any sim with a slider
+  param: 'angle',                                      // the slider key the answer is read from
+  answer: [44, 46],                                    // accepted range
+  instruction: 'Set the launch angle for the longest range, then check.', hints: […], teach: '…', explain: '…' }
+
+{ type: 'point', id: 'centroid', difficulty: 3, prompt: '…',
+  visual: { type: 'graph', params: { x: [0, 3], y: [0, 2], curves: […],
+    drag: [{ key: 'p', x: 0.5, y: 0.5, snap: 0.05 }] } },   // the first drag point is the answer
+  answer: { x: 1.2, y: 0.6 }, tol: { x: 0.1, y: 0.1 },
+  instruction: 'Drag the point to the centre of mass.', hints: […], teach: '…', explain: '…' }
+```
+
+The drag point's coordinates are available to the graph's other expressions
+as `px` and `py` (for `key: 'p'`), so a readout can show them.
 
 ### Coding exercise — `code`
 
@@ -296,18 +313,21 @@ fraction: 0.75 → `\frac{3}{4}`), `polyTeX([a0, a1, a2])` (a polynomial),
 A visual is `{ type, params, caption, … }`, where `type` names a simulation in
 `src/viz/sims/<type>.js`. The lesson's `visual` is the big interactive one; an
 item's `visual` is drawn small above the problem (no "Try this" tasks).
-**Aim for a meaningful visual on at least 80% of problems where a picture
-helps** — a graph of the function being integrated, the force diagram, the
-spacetime diagram, the circuit — and a visual for every lesson. The test
-prints the share of items with a visual; a lesson with none is rarely as good
-as it could be.
+**Give at least 80% of problems a meaningful visual** — the graph of the
+function being integrated or differentiated, the force diagram, the region
+being revolved, the partial sums, the spacetime diagram, the circuit, the
+field lines — and every lesson an Explore visual. This learner learns
+visually, and the brief sets 80% as the bar. Only problems with genuinely
+nothing to draw (a definition, a reading of an error message) go without.
+The test prints each lesson's share and lists lessons below 60%; a static
+`graph` with one curve and a few points is often all a problem needs.
 
 The library (read the header comment of a sim's file for its full options):
 
 | type | what it draws | key params |
 |---|---|---|
-| `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, dash, label, labelAt, when }]`, `shade`, `riemann`, `tangent`, `points`, `arrows`, `vlines`, `hlines`, `drag`, `readouts: [{ label, expr, unit, digits }]`, `equal`, `xlabel`, `ylabel` |
-| `surface3d` | a rotatable surface z = f(x, y) or parametric (u, v) ↦ (x, y, z); tangent plane and gradient; level curves; curves on the surface | `z` or `surface`, `domain`, `sliders`, `tangentAt: ['px','py']`, `levels`, `curves`, `colorBy`, `zscale` |
+| `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks`, `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, color, when }]`, `arrows: [{ from: [x, y], to: [x, y], label }]`, `vlines: [{ x, label }]`, `hlines: [{ y, label }]`, `drag`, `readouts: [{ label, expr, unit, digits }]`. Positions, ranges and `when` may be expressions; `x0` is the tangent point; readouts may also use `slope`, `secant`, `riemann`, `integral` |
+| `surface3d` | a rotatable surface z = f(x, y) or parametric (u, v) ↦ (x, y, z); tangent plane and gradient; level curves; curves on the surface | `z` or `surface`, `domain`, `sliders`, `tangentAt: ['px','py']`, `levels`, `curves: [{ param: [x, y, z], t: [a, b] }]`, `colorBy`, `zscale`, `target: [x, y, z]` (what the camera looks at), `yaw`, `pitch`, `dist`, `readouts` |
 | `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }` |
 | `phase` | a phase portrait of x′ = f, y′ = g (click to add trajectories; equilibrium type from a matrix), or `slope: true` for a slope field of y′ = f(t, y) with Euler vs RK4 | `fx`, `fy`, `matrix`, `seeds` / `slope`, `f`, `start`, `h` |
 | `diagram` | static force diagrams: a block with labelled force arrows, a block on an incline | `kind: 'block' \| 'incline'`, `mass`, `forces: [{ dir (deg), label, size (0–1) }]`, `angle` |

@@ -171,7 +171,7 @@ $$\left|\frac{a_{n+1}}{a_n}\right| = \frac{(n+2)\,|x+1|^{n+1}/5^{n+1}}{(n+1)\,|x
       explain: t`Converging at $x = 4$ forces $R \ge 4$; diverging at $x = -6$ forces $R \le 6$. Only $x = -3$ satisfies $|x| < 4 \le R$, so only there is convergence guaranteed.`,
       visual: {
         type: 'graph',
-        params: { x: [-7, 7], y: [-1, 1], yticks: 2, points: [{ x: 4, y: 0, color: 'good', label: 'converges' }, { x: -6, y: 0, color: 'bad', label: 'diverges' }, { x: 0, y: 0, color: 'ink3', label: 'centre' }] },
+        params: { aspect: 'wide', x: [-7, 7], y: [-0.6, 0.6], yticks: 1, points: [{ x: 4, y: 0, color: 'good', label: 'converges' }, { x: -6, y: 0, color: 'bad', label: 'diverges' }, { x: 0, y: 0, color: 'ink3', label: 'centre' }] },
         caption: 'The two facts you are given, on the number line.',
       },
     }),

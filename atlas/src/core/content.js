@@ -108,6 +108,11 @@ export function keyResponse(item) {
 
 const TEXT_FIELDS = ['prompt', 'teach', 'explain', 'solution'];
 
+// sentences in a line of prose: abbreviations (e.g., i.e., vs.) and the dots
+// inside $math$ and `code` do not end one
+const sentences = (s) => String(s).replace(/\$[^$]*\$|`[^`]*`/g, 'X')
+  .replace(/\b(e\.g|i\.e|etc|vs|cf|approx|Eq|Eqs|Fig|No|Dr|St)\./gi, '$1').split(/(?<=[.!?])\s+/).filter((x) => x.trim()).length;
+
 /**
  * Check one instantiated item; returns a list of problems (empty = good).
  * `tex` is an optional function (tex, display) => throws on bad TeX.
@@ -122,7 +127,7 @@ export function validateItem(item, tex) {
   need(item.teach && item.teach.length > 10, 'needs a one-sentence micro-teaching line (teach)');
   need(item.explain && item.explain.length > 10, 'needs an explanation of why the answer is right');
   need([1, 2, 3, 4].includes(item.difficulty ?? 2), 'difficulty must be 1–4');
-  if (item.teach) need(item.teach.split(/(?<=[.!?])\s+/).filter(Boolean).length <= 2, 'teach should be one sentence (two at most)');
+  if (item.teach) need(sentences(item.teach) <= 2, 'teach should be one sentence (two at most)');
   // strings: escape damage and TeX
   const strings = [...TEXT_FIELDS.map((f) => item[f]), ...(item.hints || []), ...(item.choices || []),
     ...(item.items || []), ...(item.left || []), ...(item.right || []), ...Object.values(item.why || {}),

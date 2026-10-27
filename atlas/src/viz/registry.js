@@ -114,7 +114,9 @@ function makeFrame(el, spec, opts) {
     onChange(fn) { listeners.push(fn); },
     /** Readout rows: [[label, value-as-TeX], ...] */
     readout(rows) {
-      readout.replaceChildren(...rows.filter(Boolean).map(([k, v]) => h('span', h('span', { html: renderLabel(k) }), ' ', h('b', { html: tex(String(v)) }))));
+      const live = rows.filter(Boolean);
+      readout.hidden = !live.length;
+      readout.replaceChildren(...live.map(([k, v]) => h('span', h('span', { html: renderLabel(k) }), ' ', h('b', { html: tex(String(v)) }))));
     },
     caption(text) { caption.replaceChildren(mdi(text)); },
     /**
@@ -145,6 +147,7 @@ function makeFrame(el, spec, opts) {
       if (!caption.textContent.trim()) caption.remove();
       if (spec.tasks?.length && !opts.compact) root.after(h('div.callout', h('b', 'Try this: '), h('span', mdi(spec.tasks.join(' · ')))));
       F._redraw?.();
+      if (!readout.childElementCount) readout.hidden = true;     // a static picture has no readout bar
     },
     _destroy() { destroyers.forEach((d) => { try { d(); } catch { /* ignore */ } }); root.remove(); },
   };

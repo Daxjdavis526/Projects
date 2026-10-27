@@ -188,6 +188,7 @@ export function answerText(item) {
     case 'mcq': return mdi(item.choices[item.answer]);
     case 'multi': return h('span', item.answer.map((i) => item.choices[i]).join('; '));
     case 'slider': return h('span', `between ${item.answer[0]} and ${item.answer[1]}`);
+    case 'point': return h('span', { html: tex(`(${fmtNum(item.answer.x)},\\ ${fmtNum(item.answer.y)})`) });
     case 'code': return h('pre.code-answer', item.answer);
     default: return h('span', '');
   }

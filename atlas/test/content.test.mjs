@@ -74,9 +74,13 @@ for (const c of COURSES) {
   }
 }
 
-if (!only) for (const g of GALLERY) await checkVisual(`gallery ${g.id}`, g.spec);
+if (!only) for (const g of GALLERY) {
+  if (g.lesson) check(`gallery ${g.id}: lesson ${g.lesson} is built`, !!CATALOG.lessons[g.lesson]?.ready);
+  else await checkVisual(`gallery ${g.id}`, g.spec);
+}
 
 let lessons = 0, items = 0, instances = 0, withVisual = 0;
+const lowVisual = [];
 for (const L0 of Object.values(CATALOG.lessons)) {
   if (!L0.ready) continue;
   if (only && L0.course !== only && L0.id !== only) continue;
@@ -86,6 +90,7 @@ for (const L0 of Object.values(CATALOG.lessons)) {
   check(`${L0.id}: module id matches its catalog entry`, L.id === L0.id, `module says ${L.id}`);
   const lp = validateLesson(L, tex);
   check(`${L0.id}: lesson structure`, lp.length === 0, lp.join('; '));
+  let lessonItems = 0, lessonVisual = 0;
   await checkVisual(`${L0.id} visual`, L.visual);
   await checkVisual(`${L0.id} example`, L.example?.visual);
   for (const { def, context } of itemsOf(L)) {
@@ -104,9 +109,11 @@ for (const L0 of Object.values(CATALOG.lessons)) {
       if (v < 3) await checkVisual(`${L0.id}/${def.id} variant ${v}`, item.visual);
     }
     if (hasVisual) withVisual++;
+    lessonItems++; if (hasVisual) lessonVisual++;
     check(`${L0.id}/${def.id} (${context})`, !firstProblem, firstProblem || '');
     if (def.gen && n > 5) check(`${L0.id}/${def.id}: generator varies`, seen.size > 1, 'every variant was identical');
   }
+  if (lessonItems && lessonVisual / lessonItems < 0.6) lowVisual.push(`${L0.id} ${lessonVisual}/${lessonItems}`);
 }
 
 // authored boss battles: content/<course>/boss.js
@@ -131,6 +138,7 @@ for (const c of CATALOG.courses) {
   }
 }
 
+if (lowVisual.length) console.log(`note: problems with a visual below 60% in ${lowVisual.length} lesson(s): ${lowVisual.join(', ')}`);
 console.log(`${lessons} lessons, ${items} items (${items ? Math.round((100 * withVisual) / items) : 0}% with a visual), ${instances} instances checked`);
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

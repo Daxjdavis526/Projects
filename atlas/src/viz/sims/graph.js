@@ -19,7 +19,7 @@ export const defaults = { x: [-5, 5], y: [-3, 3] };
 
 export function mount(F, P) {
   const { canvas } = F.canvas({ aspect: P.aspect || '', label: P.alt || 'Interactive graph' });
-  const plot = new Plot(canvas, { x: P.x, y: P.y, equal: !!P.equal, xlabel: P.xlabel || 'x', ylabel: P.ylabel || 'y', xticks: P.xticks, yticks: P.yticks });
+  const plot = new Plot(canvas, { x: P.x, y: P.y, equal: !!P.equal, xlabel: P.xlabel ?? 'x', ylabel: P.ylabel ?? 'y', xticks: P.xticks, yticks: P.yticks, grid: P.grid ?? true, axes: P.axes ?? true });
   const sliders = P.sliders || [];
   for (const s of sliders) F.slider(s);
   for (const c of P.choices || []) F.choice(c);
@@ -97,7 +97,7 @@ export function mount(F, P) {
       if (c.label && c.labelAt !== undefined) {
         const lx = ev(c.labelAt, E, vars);
         const ly = c.fn ? fn(c.fn, vars)({ ...E, x: lx }) : 0;
-        plot.text(c.label, lx, ly, { color, dx: 6, dy: -12, weight: 650 });
+        plot.text(c.label, lx, ly, { color, dx: c.labelDx ?? 6, dy: c.labelDy ?? -12, weight: 650 });
       }
     });
     for (const l of P.vlines || []) { const x = ev(l.x, E, vars); plot.line(x, plot.vy0, x, plot.vy1, { color: l.color || 'ink3', width: 1.2, dash: [5, 5] }); if (l.label) plot.text(l.label, x, plot.vy1, { dx: 4, dy: 10, color: l.color || 'ink3' }); }
@@ -155,7 +155,11 @@ export function validate(P) {
   for (const s of P.shade || []) { tryParse(s.fn, [], 'shade'); tryParse(s.from); tryParse(s.to); if (s.lower) tryParse(s.lower); }
   if (P.riemann) { tryParse(P.riemann.fn, [], 'riemann'); tryParse(P.riemann.from); tryParse(P.riemann.to); tryParse(P.riemann.n); }
   if (P.tangent) { tryParse(P.tangent.fn, [], 'tangent'); if (P.tangent.secant) tryParse(P.tangent.secant); }
-  for (const p of P.points || []) { tryParse(p.x, [], 'point'); tryParse(p.y, [], 'point'); }
+  for (const p of P.points || []) { tryParse(p.x, [], 'point'); tryParse(p.y, [], 'point'); if (p.when) tryParse(p.when, [], 'point when'); }
+  for (const l of P.vlines || []) tryParse(l.x, [], 'vline');
+  for (const l of P.hlines || []) tryParse(l.y, [], 'hline');
+  for (const a of P.arrows || []) [...a.from, ...a.to].forEach((v) => tryParse(v, [], 'arrow'));
+  for (const c of P.curves || []) { if (c.when) tryParse(c.when, [], 'curve when'); (c.domain || []).forEach((v) => tryParse(v, [], 'curve domain')); if (c.labelAt !== undefined) tryParse(c.labelAt, [], 'curve labelAt'); }
   for (const r of P.readouts || []) tryParse(r.expr, ['slope', 'secant', 'riemann', 'integral', 'y0'], 'readout');
   return problems;
 }

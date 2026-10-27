@@ -2,7 +2,7 @@
 // changes, and velocity as the slope of the position–time graph.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { nice } from '../../src/core/format.js';
-import { par, s3, span } from './_kinematics.js';
+import { par, s3, span, lineDomain, co } from './_kinematics.js';
 
 const t = String.raw;
 
@@ -84,6 +84,15 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
       hints: ['What is her displacement when she finishes where she started?', 'Displacement is final position minus initial position.'],
       teach: 'Average velocity is displacement over elapsed time, so a round trip has zero average velocity however far it goes.',
       explain: t`$\Delta x = 0$, so $v_\text{avg} = 0/60\ \text{s} = 0$. Her average speed is $100\ \text{m}/60\ \text{s} \approx 1.7$ m/s.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 72], y: [0, 60], xlabel: 't (s)', ylabel: 'x (m)',
+          curves: [{ fn: '50 - abs(50 - 5*x/3)', domain: [0, 60], color: 'accent' }],
+          points: [{ x: 0, y: 0, color: 'gold', label: 'start' }, { x: 60, y: 0, color: 'gold', label: 'finish' }],
+        },
+        caption: 'Her distance from the starting wall against time, drawn with a steady speed.',
+      },
     }),
     num({
       id: 'avg-velocity', difficulty: 1,
@@ -127,6 +136,11 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
           hints: ['Find the displacement first: the two legs point in opposite directions.', t`$\Delta x = (+${d1}\ \text{m}) + (-${d2}\ \text{m})$; then divide by the total time.`],
           teach: 'Displacements in opposite directions subtract; distances always add.',
           explain: t`$\Delta x = ${d1} - ${d2} = ${d1 - d2}$ m east, so $v_\text{avg} = ${d1 - d2}/${T} = ${s3(v)}$ m/s. (The average speed is $${d1 + d2}/${T} = ${s3((d1 + d2) / T)}$ m/s.)`,
+          visual: {
+            type: 'mech-graphlink',
+            params: { v: `${(d1 + d2) / T}*sgn(${(d1 * T) / (d1 + d2)} - t)`, breaks: [(d1 * T) / (d1 + d2)], T, panels: ['x'], readouts: ['t'] },
+            caption: 'The trip drawn with the same speed on both legs (the question does not say; the answer does not depend on it). Press Play.',
+          },
         };
       },
     }),
@@ -157,8 +171,9 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
         const v = b - 2 * c * t1, x1 = b * t1 - c * t1 * t1;
         const T = Math.max(t1 + 2, 6);
         const xs = []; for (let k = 0; k <= 40; k++) { const tt = (T * k) / 40; xs.push(b * tt - c * tt * tt); }
+        const yr = span(xs, 0.15);
         return {
-          prompt: t`A cart’s position is $x(t) = ${b}t - ${nice(c)}t^2$, with $x$ in metres and $t$ in seconds. What is its velocity at $t = ${t1}$ s?`,
+          prompt: t`A cart’s position is $x(t) = ${b}t - ${co(c)}t^2$, with $x$ in metres and $t$ in seconds. What is its velocity at $t = ${t1}$ s?`,
           answer: v, units: 'm/s', tol: { rel: 0.01 },
           errors: [
             { value: b - c * t1, feedback: t`That is the *average* velocity from $t = 0$ to $t = ${t1}$ s, the slope of a secant from the origin. The velocity at one instant is the derivative.` },
@@ -170,8 +185,8 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
           visual: {
             type: 'graph',
             params: {
-              x: [0, T], y: span(xs, 0.15), xlabel: 't (s)', ylabel: 'x (m)',
-              curves: [{ fn: `${b}*x - ${c}*x^2`, color: 'accent' }, { fn: `${x1} + ${v}*(x - ${t1})`, color: 'gold', dash: true }],
+              x: [0, T], y: yr, xlabel: 't (s)', ylabel: 'x (m)',
+              curves: [{ fn: `${b}*x - ${c}*x^2`, color: 'accent' }, { fn: `${x1} + ${v}*(x - ${t1})`, domain: lineDomain(x1, v, t1, [0, T], yr), color: 'gold', dash: true }],
               points: [{ x: t1, y: x1, color: 'gold' }],
             },
             caption: t`The cart’s $x$–$t$ graph, with the tangent at $t = ${t1}$ s dashed.`,
@@ -216,6 +231,19 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
       hints: [t`Write $\Delta x = x_f - x_i$ and substitute the values with their signs.`, 'Subtracting a negative number adds its size.'],
       teach: 'Displacement is final minus initial position, with every sign kept.',
       explain: t`$\Delta x = x_f - x_i = 10 - (-30) = +40$ m: the car moved 40 m in the $+x$ direction.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-40, 22], y: [-1.3, 1.5], axes: false, grid: false, xlabel: '', ylabel: '',
+          curves: [{ fn: '0', color: 'ink3', width: 1.5 }],
+          points: [
+            { x: -30, y: 0, color: 'accent' }, { x: 0, y: 0, color: 'ink3' }, { x: 10, y: 0, color: 'gold' },
+            { x: -32, y: -0.55, r: 0.1, color: 'accent', label: 'start, −30 m' }, { x: -1, y: -0.55, r: 0.1, color: 'ink3', label: '0' }, { x: 8, y: -0.55, r: 0.1, color: 'gold', label: 'end, 10 m' },
+          ],
+          arrows: [{ from: [-30, 0.6], to: [10, 0.6], color: 'warn', label: 'Δx' }],
+        },
+        caption: 'The car’s start and end positions on the x axis.',
+      },
     }),
     {
       type: 'slider', id: 'zero-average', difficulty: 2, param: 'h',
@@ -238,7 +266,7 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
               sliders: [{ key: 'h', label: 'Interval $\\Delta t$', min: 0.5, max: 5.5, step: 0.05, value: start, unit: '\\mathrm{s}', explain: 'The end of the interval is at $t_1 + \\Delta t$.' }],
               curves: [
                 { fn: '12*x - 2*x^2', color: 'accent' },
-                { fn: `${x1} + ((${xe} - ${x1})/h)*(x - ${t1})`, color: 'violet', dash: true },
+                { fn: `${x1} + ((${xe} - ${x1})/h)*(x - ${t1})`, domain: [Math.max(0, t1 - 0.6), `${t1} + h + 0.6`], color: 'violet', dash: true },
               ],
               points: [{ x: t1, y: x1, color: 'gold' }, { x: `${t1} + h`, y: xe, color: 'violet' }],
             },
@@ -264,6 +292,15 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
           hints: [t`Velocity is $v = dh/dt$.`, t`Differentiate term by term: $\dfrac{d}{dt}t^n = n\,t^{n-1}$.`],
           teach: 'The vertical velocity is the time derivative of the altitude.',
           explain: t`$v = \dfrac{dh}{dt} = ${nice(2 * A)}t + ${nice(3 * B)}t^2$, so $v(${t1}) = ${nice(2 * A * t1)} + ${nice(3 * B * t1 * t1)} = ${nice(v)}$ m/s. (The altitude then is ${nice(h1)} m.)`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, t1 + 3], y: [0, (A * (t1 + 3) ** 2 + B * (t1 + 3) ** 3) * 1.08], xlabel: 't (s)', ylabel: 'h (m)',
+              curves: [{ fn: `${A}*x^2 + ${B}*x^3`, color: 'accent' }],
+              points: [{ x: t1, y: h1, color: 'gold' }],
+            },
+            caption: 'The rocket’s altitude against time in the first seconds of flight (a fit, valid only early in the burn).',
+          },
         };
       },
     }),
@@ -280,6 +317,15 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
       hints: [t`Compare the distance $d$ with $|\Delta x|$.`, t`Average speed $= d/\Delta t$ and $d \ge |\Delta x|$.`],
       teach: 'Distance travelled is never less than the size of the displacement, so average speed is never less than the size of the average velocity.',
       explain: t`$d \ge |\Delta x|$, so the average speed is at least $|v_\text{avg}| = 3$ m/s. 5 m/s is possible, for example if the object doubled back during the interval.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 4.3], y: [-9, 10], xlabel: 't (s)', ylabel: 'x (m)',
+          curves: [{ fn: '6 - 3*x + 4*sin(pi*x/2)', domain: [0, 4], color: 'accent' }, { fn: '6 - 3*x', domain: [0, 4], color: 'violet', dash: true }],
+          points: [{ x: 0, y: 6, color: 'gold' }, { x: 4, y: -6, color: 'gold' }],
+        },
+        caption: 'One motion with an average velocity of −3 m/s over 4 s: the dashed secant has slope −3 m/s, but the object doubles back along the way.',
+      },
     }),
     num({
       id: 'cp-approach', difficulty: 2,
@@ -293,6 +339,19 @@ On a graph of $x$ against $t$, the average velocity is the slope of a **secant**
           hints: ['Find Δx in metres, keeping its sign.', t`$v_\text{avg} = \Delta x/\Delta t$ with $\Delta x = (${xb} - ${xa})\times 1000$ m.`],
           teach: 'Average velocity is Δx/Δt in consistent units, and its sign shows the direction of travel.',
           explain: t`$\Delta x = (${xb} - ${xa})$ km $= ${nice((xb - xa) * 1000)}$ m, so $v_\text{avg} = ${nice((xb - xa) * 1000)}/${T} = ${s3(v)}$ m/s. The minus sign means it is closing on the runway.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-0.8, 6.8], y: [-1.3, 1.4], axes: false, grid: false, xlabel: '', ylabel: '',
+              curves: [{ fn: '0', color: 'ink3', width: 1.5 }],
+              points: [
+                { x: 0, y: 0, color: 'ink' }, { x: xa, y: 0, color: 'accent' }, { x: xb, y: 0, color: 'gold' },
+                { x: -0.45, y: -0.55, r: 0.1, color: 'ink2', label: 'runway, x = 0' }, { x: xa - 0.3, y: 0.55, r: 0.1, color: 'accent', label: 't = 0' }, { x: xb - 0.3, y: 0.55, r: 0.1, color: 'gold', label: `t = ${T} s` },
+              ],
+              arrows: [{ from: [xa, -0.55], to: [xb, -0.55], color: 'warn' }],
+            },
+            caption: 'The approach path, with positions measured from the runway threshold (horizontal scale only).',
+          },
         };
       },
     }),

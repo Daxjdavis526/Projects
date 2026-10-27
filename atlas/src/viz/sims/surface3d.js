@@ -15,7 +15,7 @@ export const defaults = { domain: [[-2, 2], [-2, 2]], n: 36 };
 
 export function mount(F, P) {
   const { canvas } = F.canvas({ aspect: P.aspect || '', label: P.alt || 'A rotatable 3D surface — drag to turn it' });
-  const view = new View3D(canvas, { yaw: P.yaw, pitch: P.pitch, dist: P.dist ?? 9, scale: P.scale ?? 1 });
+  const view = new View3D(canvas, { yaw: P.yaw, pitch: P.pitch, dist: P.dist ?? 9, scale: P.scale ?? 1, target: P.target });
   view.onChange = () => draw();
   for (const s of P.sliders || []) F.slider(s);
   for (const c of P.choices || []) F.choice(c);
@@ -115,7 +115,9 @@ export function validate(P) {
   if (P.z) tryParse(P.z, ['x', 'y'], 'z');
   else if (P.surface) P.surface.forEach((s) => tryParse(s, ['u', 'v'], 'surface'));
   else problems.push('surface3d needs z or surface');
-  for (const c of P.curves || []) c.param.forEach((s) => tryParse(s, ['t'], 'curve'));
+  for (const c of P.curves || []) { c.param.forEach((s) => tryParse(s, ['t'], 'curve')); (c.t || []).forEach((s) => tryParse(s, [], 'curve t range')); }
+  for (const r of P.readouts || []) tryParse(r.expr, [], 'readout');
+  if (P.target && !(P.target.length === 3 && P.target.every(Number.isFinite))) problems.push('surface3d target must be [x, y, z] numbers');
   if (P.tangentAt) P.tangentAt.forEach((s) => tryParse(s, [], 'tangentAt'));
   for (const s of P.sliders || []) if (!(s.min < s.max) || s.value < s.min || s.value > s.max) problems.push(`slider ${s.key}: value must lie in [min, max]`);
   return problems;

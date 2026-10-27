@@ -1,5 +1,6 @@
 // The simulation gallery: every interactive model in the Atlas, free to play
-// with outside a lesson. Each entry is an ordinary visual spec.
+// with outside a lesson. Each entry is an ordinary visual spec, or names a
+// lesson (`lesson: 'math1220.C2-1.2'`) whose Explore visual it shows.
 
 const t = String.raw;
 
@@ -24,6 +25,7 @@ export default [
   { id: 'pendulum', title: 'The pendulum, exactly', track: 'physics', blurb: 'Large angles slow the pendulum down; compare with the small-angle formula.', spec: { type: 'oscillator', params: { kind: 'pendulum', theta0: 60 } } },
   { id: 'waves', title: 'Waves on a string', track: 'physics', blurb: 'Travelling waves, superposition and standing waves.', spec: { type: 'wave', params: {} } },
   { id: 'ibp', title: 'Integration by parts as areas', track: 'math', blurb: 'Two areas that always add up to uv.', spec: { type: 'ibp-area', params: {} } },
+  { id: 'revolve', title: 'Solids of revolution', track: 'math', blurb: 'Sweep a flat region around an axis into a solid; see its disks, washers and shells.', lesson: 'math1220.C2-1.2' },
   { id: 'minkowski', title: 'Minkowski diagram and Lorentz boosts', track: 'gr', blurb: 'Boost the frame; drag events; the interval never changes.', spec: { type: 'spacetime', params: {} } },
   { id: 'twins', title: 'Proper time and the twin paradox', track: 'gr', blurb: 'The straight worldline ages the most.', spec: { type: 'worldlines', params: {} } },
   { id: 'orbit', title: 'Orbits around a black hole', track: 'gr', blurb: 'Newton versus Einstein: precession, the ISCO and plunging orbits.', spec: { type: 'orbit', params: {} } },

@@ -17,12 +17,12 @@ export const defaults = { mode: 'rocket', tides: false };
 const L = 3, HB = 3;                         // box width and height, m
 const RB = 0.13;                             // ball radius, m
 const PAIR = [[1.0, 1.8], [2.0, 1.8]];       // where the two balls are released, m (inside the box)
-const RING = [[0.5, 1.5], [2.5, 1.5], [1.5, 2.5], [1.5, 0.5]];   // the tidal diamond, about the box centre
+const RING = [[0.5, 1.5], [2.5, 1.5], [1.5, 2.3], [1.5, 0.7]];   // the tidal diamond, about the box centre
 const LASER = 2.4, MUZZLE = 0.14;            // laser height and muzzle, m
 const DROP_SHOWN = 0.6;                      // how far the slowed light falls across the box on screen, m
 const T_HIT = Math.sqrt((2 * DROP_SHOWN) / G_EARTH);   // s
 const V_LIGHT = (L - MUZZLE) / T_HIT;        // the slowed light, m/s
-const T_END = 0.7;                           // physical seconds animated
+const T_END = 0.62;                          // physical seconds animated (the balls land at 0.58 s)
 const SLOW = 0.35;                           // playback rate
 const TIDE_X = 4e5;                          // tidal exaggeration
 const BALL_COLORS = ['accent', 'teal', 'violet', 'good'];
@@ -33,7 +33,7 @@ export function validate(P) {
 
 export function mount(F, P) {
   const { canvas } = F.canvas({ aspect: 'wide', label: 'A closed box seen from inside and from outside, with two dropped balls and a light pulse' });
-  F.choice({ key: 'mode', label: 'Where is the box?', options: [['rocket', 'Rocket, deep space'], ['earth', 'On Earth'], ['falling', 'Falling'], ['space', 'Floating']], value: P.mode, explain: 'Compare the pairs: rocket with Earth, falling with floating. Watch the left panel.' });
+  F.choice({ key: 'mode', label: 'Where is the box?', options: [['rocket', 'Rocket'], ['earth', 'Earth'], ['falling', 'Fall'], ['space', 'Float']], value: P.mode, explain: 'Rocket: accelerating at g far from any star. Earth: standing on the ground. Fall: falling freely near Earth. Float: drifting in deep space.' });
   F.toggle({ key: 'tides', label: 'Show tides (falling box)', value: P.tides, explain: `Four balls in the falling box, each falling toward Earth's centre. Drift exaggerated ×${(TIDE_X).toLocaleString('en-US')} — as if Earth were that much smaller, with the same surface gravity.` });
   const S = { t: 0, running: false };
   F.button({ label: 'Release', primary: true, onClick: () => { S.t = 0; S.running = true; anim.start(); } });
@@ -83,16 +83,19 @@ export function mount(F, P) {
     // the setting
     if (mode === 'rocket' || mode === 'space') stars(pl, outside ? 7 : 3);
     if (mode === 'earth') {
-      pl.rect(-1.6, -3.4, 7.2, 1.9, { color: 'ink4', alpha: 0.18, stroke: false });
-      for (let x = -1.4; x < 5; x += 0.35) pl.line(x, -1.5, x - 0.3, -1.85, { color: 'ink4', width: 1 });
-      pl.line(-1.6, -1.5, 5.6, -1.5, { color: 'ink3', width: 2 });
+      pl.rect(pl.vx0, pl.vy0 - 0.5, pl.vx1 - pl.vx0, -1.0 - pl.vy0, { color: 'ink4', alpha: 0.18, stroke: false });
+      for (let x = pl.vx0 + 0.3; x < pl.vx1 + 0.3; x += 0.35) pl.line(x, -1.5, x - 0.3, -1.85, { color: 'ink4', width: 1 });
+      pl.line(pl.vx0, -1.5, pl.vx1, -1.5, { color: 'ink3', width: 2 });
       pl.text('ground', -0.9, -2.2, { color: 'ink3', size: 11 });
     }
     if (mode === 'rocket') rocket(pl, y0);
     if (mode === 'falling') {
-      const cut = outside ? 0.45 + HB : y0 + HB;   // the cable was cut where the box hung at the start
-      pl.line(L / 2, 3.8, L / 2, cut + 0.35, { color: 'ink3', width: 2 });
-      pl.text('cable cut', L / 2 + 0.15, Math.min(3.45, cut + 0.55), { color: 'ink3', size: 11 });
+      // the cut cable stays with the building; inside, the box falls away from it
+      const end = outside ? 0.45 + HB + 0.12 : y0 + HB + 0.12 + 0.5 * G_EARTH * t * t;
+      if (end < pl.vy1) {
+        pl.line(L / 2, pl.vy1 + 1, L / 2, end, { color: 'ink3', width: 2 });
+        pl.text('cut cable', L / 2 + 0.15, Math.min(end + 0.25, pl.vy1 - 0.25), { color: 'ink3', size: 11 });
+      }
     }
     // the box
     pl.rect(0, y0, L, HB, { color: 'ink4', alpha: 0.12, stroke: false });
@@ -115,12 +118,13 @@ export function mount(F, P) {
     // arrows: what accelerates, in this panel
     const aBox = outside ? boxAcceleration(mode) : 0;
     const aBall = outside ? (SCENES[mode].field * G_EARTH) : relativeAcceleration(mode);
-    if (aBox) pl.arrow(L + 0.45, y0 + HB / 2 - 0.55 * Math.sign(aBox), L + 0.45, y0 + HB / 2 + 0.55 * Math.sign(aBox), { color: 'good', width: 2.4, label: 'box: g', ldx: 6, ldy: aBox > 0 ? -2 : 4 });
-    if (aBall && !tidal()) pl.arrow(-0.45, y0 + 1.9, -0.45, y0 + 1.9 - 0.95, { color: 'accent2', width: 2.4, label: 'balls: g', lalign: 'right', ldx: -6, ldy: 4 });
+    const narrow = (canvas.clientWidth || 600) < 480;
+    if (aBox) pl.arrow(L + 0.45, y0 + HB / 2 - 0.55 * Math.sign(aBox), L + 0.45, y0 + HB / 2 + 0.55 * Math.sign(aBox), { color: 'good', width: 2.4, label: narrow ? 'g' : 'box: g', ldx: 6, ldy: aBox > 0 ? -2 : 4 });
+    if (aBall && !tidal()) pl.arrow(-0.45, y0 + 1.9, -0.45, y0 + 1.9 - 0.95, { color: 'accent2', width: 2.4, label: narrow ? 'g' : 'balls: g', lalign: 'right', ldx: -6, ldy: 4 });
     if (tidal() && !outside) {
       for (const b of RING) {
         const [x, y] = ballIn(b, t), [ax, ay] = tidalAcceleration(b[0] - L / 2, b[1] - HB / 2);
-        const k = 0.45 / (2 * G_EARTH / R_EARTH);   // arrow length per unit tidal acceleration
+        const k = 0.42 / (G_EARTH / R_EARTH);   // arrow length per unit tidal acceleration (m per m/s²)
         pl.arrow(x, y0 + y, x + ax * k, y0 + y + ay * k, { color: 'bad', width: 2 });
       }
     }
@@ -142,6 +146,14 @@ export function mount(F, P) {
     for (let i = 0; i < 40; i++) pl.point(pl.vx0 + rnd() * (pl.vx1 - pl.vx0), pl.vy0 + rnd() * (pl.vy1 - pl.vy0), { color: 'ink4', r: 0.6 + rnd() * 1.1 });
   }
 
+  // draw one panel, clipped to its half of the canvas
+  function clipped(pl, outside, x0, x1) {
+    const ctx = pl.ctx;
+    ctx.save(); ctx.beginPath(); ctx.rect(x0, 0, x1 - x0, pl.h); ctx.clip();
+    panel(pl, outside);
+    ctx.restore();
+  }
+
   function draw() {
     const W = canvas.clientWidth || 600, gap = 10;
     left.o.pad = { l: 6, r: W / 2 + gap / 2, t: 6, b: 6 };
@@ -149,11 +161,11 @@ export function mount(F, P) {
     left.resize(); left.refreshTheme(); right.resize(); right.refreshTheme();
     const ctx = left.ctx;
     ctx.clearRect(0, 0, left.w, left.h);
-    panel(left, false);
+    clipped(left, false, 0, W / 2);
     // divider
     ctx.save(); ctx.strokeStyle = left.col.line2; ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
     ctx.beginPath(); ctx.moveTo(left.w / 2 + 0.5, 8); ctx.lineTo(left.w / 2 + 0.5, left.h - 8); ctx.stroke(); ctx.restore();
-    panel(right, true);
+    clipped(right, true, W / 2, W);
     const mode = F.params.mode, a = relativeAcceleration(mode);
     const twin = { rocket: 'standing on Earth', earth: 'a rocket accelerating at g', falling: 'floating in deep space', space: 'falling freely' }[mode];
     const rows = [
@@ -165,7 +177,7 @@ export function mount(F, P) {
     if (F.params.tides) {
       if (mode === 'falling') {
         const side = 0.5 * Math.abs(tidalAcceleration(1, 0)[0]) * T_END ** 2, up = 0.5 * tidalAcceleration(0, 1)[1] * T_END ** 2;
-        rows.push(['real tidal drift in 0.7 s (balls 1 m from centre)', `${sci(side)}\\,\\mathrm{m}\\ \\text{in},\\ ${sci(up)}\\,\\mathrm{m}\\ \\text{out}`]);
+        rows.push([`real tidal drift in ${T_END} s (balls 1 m from centre)`, `${sci(side)}\\,\\mathrm{m}\\ \\text{in},\\ ${sci(up)}\\,\\mathrm{m}\\ \\text{out}`]);
       } else rows.push(['tides', mode === 'earth' ? '\\text{present, but the balls hit the floor first}' : '\\text{none: no mass nearby}']);
     }
     F.readout(rows);
