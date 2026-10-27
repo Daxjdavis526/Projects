@@ -238,7 +238,7 @@ The new term also says that a changing electric field makes a magnetic field, ev
     mcq({
       id: 'cp-steady', difficulty: 2,
       prompt: t`A capacitor has been fully charged and disconnected; its charge no longer changes. What magnetic field is there between its plates?`,
-      visual: gapPic({ at: 'gap', r: 3, t: 7.9 }, 'Plates holding their charge and the field between them. The magnetic field markers belong to a capacitor still charging; is that still the case?'),
+      visual: gapPic({ at: 'gap', r: 3, steady: true }, 'The plates holding their charge, with the steady field between them, and a loop between the plates. Not to scale.'),
       choices: ['None: the electric field is steady, so there is no displacement current', 'The same as while it was charging, since the field is still there', 'A field that grows with the stored charge', 'Twice the charging value, since all the current has now arrived'],
       answer: 0,
       why: {
@@ -248,7 +248,7 @@ The new term also says that a changing electric field makes a magnetic field, ev
       },
       hints: [t`$I_d = \varepsilon_0\,d\Phi_E/dt$. What is $d\Phi_E/dt$ now?`],
       teach: 'Only a changing electric flux acts as a current; a steady field, however strong, makes no magnetic field.',
-      explain: t`With $Q$ constant, $E$ and $\Phi_E$ are constant: $I_d = 0$ and $I_c = 0$, so $\oint\vec B\cdot d\vec l = 0$ for every loop — no magnetic field. (The markers in the picture belong to a capacitor that is still charging.)`,
+      explain: t`With $Q$ constant, $E$ and $\Phi_E$ are constant: $I_d = 0$ and $I_c = 0$, so $\oint\vec B\cdot d\vec l = 0$ for every loop — no magnetic field.`,
     }),
     num({
       id: 'cp-ppt', difficulty: 3, transfer: true,

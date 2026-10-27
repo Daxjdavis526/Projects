@@ -237,7 +237,7 @@ export async function mount(F, P0) {
 
   F.onChange((k) => {
     if (k === 'kind' && mode === 'lens') F.params.f = (F.params.kind === 'conv' ? 1 : -1) * F.params.fabs;
-    if (k === 'kind' && mode === 'mirror') F.params.f = F.params.kind === 'plane' ? Infinity : (F.params.kind === 'concave' ? 1 : -1) * F.params.fabs;
+    if (k === 'kind' && mode === 'mirror') { F.params.f = F.params.kind === 'plane' ? Infinity : (F.params.kind === 'concave' ? 1 : -1) * F.params.fabs; F.caption(F.params.kind === 'plane' ? PLANE_CAPTION : MIRROR_CAPTION); }
     if (k === 'fabs') F.params.f = mode === 'mirror' && F.params.kind === 'plane' ? Infinity : (mode === 'lens' ? (F.params.kind === 'conv' ? 1 : -1) : F.params.kind === 'concave' ? 1 : -1) * F.params.fabs;
     draw();
   });
@@ -619,7 +619,6 @@ export async function mount(F, P0) {
     const mirror = mode === 'mirror';
     const p = F.params, f = p.f, star = P.obj === 'star';
     const plane = mirror && !Number.isFinite(f);
-    if (mirror && !P.caption) F.caption(plane ? PLANE_CAPTION : MIRROR_CAPTION);
     if (fCtl) fCtl.node.hidden = plane;
     const unit = P.unit;
     frame(main, { l: 6, r: 6, t: 8, b: 8 });
@@ -902,7 +901,7 @@ export async function mount(F, P0) {
     fibre: 'A step-index fibre in cross-section, enormously widened: real cores are 9–62.5 µm across and run for kilometres. Leaked light is absorbed in the jacket; the reflected part that stays in the core fades with each bounce.',
     surface: 'Rays traced exactly with Snell’s law; the dashed lines are where the bent rays seem to come from. A narrow bundle of rays reaches one eye; the image is where their backward extensions meet.',
     lens: 'Ideal thin lens (paraxial): every ray bends at the lens’s central plane, so all rays from one point meet at one image point. Rays beyond the lens’s drawn edge bend at its dashed, extended plane, as in textbook diagrams. Lengths to scale.',
-    mirror: MIRROR_CAPTION,
+    mirror: Number.isFinite(P.f) ? MIRROR_CAPTION : PLANE_CAPTION,
     system: 'Ideal thin lenses (paraxial). Angles are exaggerated to be visible; lengths are to scale.',
   }[mode]);
   return { get: (k) => F.params[k] };
@@ -913,7 +912,7 @@ export function validate(P0) {
   const problems = [];
   const mode = P0.mode ?? 'lens';
   if (!MODES.includes(mode)) return [`optics-rays: mode must be one of ${MODES.join(', ')}`];
-  const P = { ...defaults, ...MODE_DEFAULTS[mode], ...P0 };
+  const P = { ...defaults, ...MODE_DEFAULTS[mode], ...(mode === 'system' ? SYSTEM_PRESETS[P0.kind] || {} : {}), ...P0 };
   const num = (k, lo, hi) => { if (!(typeof P[k] === 'number' && P[k] >= lo && P[k] <= hi)) problems.push(`optics-rays: ${k} must lie in [${lo}, ${hi}] (got ${P[k]})`); };
   if (!(P.controls === true || P.controls === false || Array.isArray(P.controls))) problems.push('optics-rays: controls must be true, false or a list of keys');
   if (!Array.isArray(P.hide)) problems.push('optics-rays: hide must be a list');
@@ -937,7 +936,7 @@ export function validate(P0) {
     if (P.obj === 'star') num('tilt', 0, 15);
     else { num('dO', 0.5, 120); num('hO', 0.2, 20); }
     if (!['arrow', 'star'].includes(P.obj)) problems.push('optics-rays: obj must be arrow or star');
-    num('mask', 0, 1);
+    if (mode === 'lens') num('mask', 0, 1);
     if (!['principal', 'fan', 'both', 'none'].includes(P.rays)) problems.push('optics-rays: rays must be principal, fan, both or none');
     if (P.view !== null && !(Array.isArray(P.view) && P.view.length === 2 && P.view[0] < 0 && P.view[1] > 0)) problems.push('optics-rays: view must be [x0 < 0, x1 > 0]');
     if (!['cm', 'mm', 'm'].includes(P.unit)) problems.push('optics-rays: unit must be cm, mm or m');

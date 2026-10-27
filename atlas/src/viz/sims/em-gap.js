@@ -20,12 +20,13 @@
 //       readouts: null,        // a list of: Ic Id sum circ B (default all; readout: false hides the bar)
 //       t: null,               // a still picture t seconds into the charging (the picture loops every 8 s)
 //       labels: true,
+//       steady: false,         // the capacitor fully charged and disconnected: no current, a steady field, no B
 //   } }
 
 import { themeColors } from '../plot.js';
 import * as M from '../model/em-light.js';
 
-export const defaults = { I: 2, R: 5, at: 'wire', r: 3, surface: 'flat', controls: null, readouts: null, readout: null, t: null, labels: true };
+export const defaults = { I: 2, R: 5, at: 'wire', r: 3, surface: 'flat', controls: null, readouts: null, readout: null, t: null, labels: true, steady: false };
 const CONTROLS = ['at', 'surface', 'r', 'I'];
 const READOUTS = ['Ic', 'Id', 'sum', 'circ', 'B'];
 const LOOP_X = { wire: -8.5, gap: 0 };
@@ -88,7 +89,7 @@ export function mount(F, P0) {
     line(-xEnd, 0, -half, 0, wcol, 2.6); line(half, 0, xEnd, 0, wcol, 2.6);
     line(-half, -R, -half, R, C.ink, 4); line(half, -R, half, R, C.ink, 4);
     // the charge so far (loops every 8 s of animation) and the field between the plates
-    const tq = still ? Math.min(1, S.t / 8) : (S.t % 8) / 8, f = 0.08 + 0.92 * tq;
+    const tq = P.steady ? 1 : still ? Math.min(1, S.t / 8) : (S.t % 8) / 8, f = 0.08 + 0.92 * tq;
     const nE = Math.max(1, Math.round(9 * f));
     for (let k = 0; k < nE; k++) {
       const y = -R + ((k + 0.5) * 2 * R) / nE;
@@ -99,7 +100,7 @@ export function mount(F, P0) {
     // the charge sits on the plates’ inner faces, facing each other
     for (let k = 0; k < nQ; k++) { const y = -R + ((k + 0.5) * 2 * R) / nQ; text('+', -half + 0.38, y, { color: C.bad, w: 800, size: FS }); text('−', half - 0.38, y, { color: C.accent, w: 800, size: FS }); }
     // moving charges in the wires
-    if (!still) {
+    if (!still && !P.steady) {
       ctx.save(); ctx.fillStyle = C.ink;
       const sp = 1.6, ph = (S.phase % sp + sp) % sp;
       for (let x = -xEnd + ph; x < -half - 0.2; x += sp) { ctx.beginPath(); ctx.arc(X(x), Y(0), 2.4, 0, 2 * Math.PI); ctx.fill(); }
@@ -116,17 +117,19 @@ export function mount(F, P0) {
       else { const d = s * 0.62; ctx.beginPath(); ctx.moveTo(px - d, py - d); ctx.lineTo(px + d, py + d); ctx.moveTo(px - d, py + d); ctx.lineTo(px + d, py - d); ctx.stroke(); }
       ctx.restore();
     };
-    for (const x of [-12, -5, 5, 12]) for (const y of [2, 4.4, 6.6, 8.6]) { mark(x, y, g.Bwire(y / 100)); mark(x, -y, g.Bwire(y / 100)); }
-    for (const y of [1.6, 3.3, 5, 6.8, 8.6]) { const B = g.Bgap(y / 100); mark(0, y, B); mark(0, -y, B); }
+    if (!P.steady) {
+      for (const x of [-12, -5, 5, 12]) for (const y of [2, 4.4, 6.6, 8.6]) { mark(x, y, g.Bwire(y / 100)); mark(x, -y, g.Bwire(y / 100)); }
+      for (const y of [1.6, 3.3, 5, 6.8, 8.6]) { const B = g.Bgap(y / 100); mark(0, y, B); mark(0, -y, B); }
+    }
     // the loop itself, in front
     ctx.save(); ctx.strokeStyle = C.gold; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.ellipse(X(lx), Y(0), ex * sc, rr * sc, 0, -Math.PI / 2, Math.PI / 2, false); ctx.stroke(); ctx.globalAlpha = 0.55; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.ellipse(X(lx), Y(0), ex * sc, rr * sc, 0, Math.PI / 2, 1.5 * Math.PI, false); ctx.stroke(); ctx.restore();
     // labels
     if (P.labels) {
       // current arrows on the wires
-      for (const x0 of [-12.8, 9.2]) { line(x0, 0.9, x0 + 2.2, 0.9, C.accent, 2.4); ctx.save(); ctx.fillStyle = C.accent; ctx.beginPath(); ctx.moveTo(X(x0 + 2.6), Y(0.9)); ctx.lineTo(X(x0 + 2.0), Y(0.9) - 4.5); ctx.lineTo(X(x0 + 2.0), Y(0.9) + 4.5); ctx.closePath(); ctx.fill(); ctx.restore(); text('I', x0 + 1.1, 1.75, { color: C.accent, w: 700 }); }
+      if (!P.steady) for (const x0 of [-12.8, 9.2]) { line(x0, 0.9, x0 + 2.2, 0.9, C.accent, 2.4); ctx.save(); ctx.fillStyle = C.accent; ctx.beginPath(); ctx.moveTo(X(x0 + 2.6), Y(0.9)); ctx.lineTo(X(x0 + 2.0), Y(0.9) - 4.5); ctx.lineTo(X(x0 + 2.0), Y(0.9) + 4.5); ctx.closePath(); ctx.fill(); ctx.restore(); text('I', x0 + 1.1, 1.75, { color: C.accent, w: 700 }); }
       text('loop', lx, rr + 1.0, { color: C.gold, w: 700, size: FS - 1 });
       text(bag ? 'bag surface' : 'flat surface', bag ? -3.5 : lx, bag ? -(R + 2.6) : -rr - 1.1, { color: C.gold, w: 600, size: FS - 1.5 });
-      text('B: ⊙ out of the page, ⊗ into it', xEnd - 0.3, 10.2, { color: C.teal, align: 'right', size: FS - 2, w: 600 });
+      if (!P.steady) text('B: ⊙ out of the page, ⊗ into it', xEnd - 0.3, 10.2, { color: C.teal, align: 'right', size: FS - 2, w: 600 });
       text('E between the plates', xEnd - 0.3, -10.2, { color: C.violet, align: 'right', size: FS - 2, w: 600 });
     }
     // readout: what crosses the surface, and the loop's circulation
