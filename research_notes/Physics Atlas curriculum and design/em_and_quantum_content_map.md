@@ -717,3 +717,133 @@ Textbooks split into two pedagogies. Griffiths is "wave-first". McIntyre (the Or
 - USU's PHYS 4700 prerequisites were not found.
 - Whether USU's 4700 covers fine structure, Zeeman and hyperfine, or only perturbation-theory basics, is unknown.
 
+## Key question 7 — QM I (PHYS 4700): problem-solving techniques, problem archetypes, visualizations, depth and rigor, misconceptions
+
+### Takeaway
+QM I's hardest ideas are representational: the complex phase and time dependence, measurement vs. expectation vs. operator action, and basis change. PER documents persistent errors on exactly these, even among incoming graduate students. There are mature research-based visualizations to benchmark against (PhET Bound States and Tunneling, QuVis, Falstad). The Atlas should make phase visible (color or phasor) everywhere, and make every measurement an animated sampling event.
+
+### Cited Findings
+- **Phase factors and time dependence (UW group: Passante, Emigh, Shaffer, citing Singh).**
+  - About one third of incoming graduate students wrote a *common* time-dependent phase factor for a superposition of energy eigenstates.
+  - 31% did the same in a first-semester graduate course survey.
+  - About 10% of students believed some states have no time dependence at all.
+  - Interviews suggest the root difficulty is telling the time dependence of stationary and non-stationary states apart.
+  — [Surveying Students' Understanding of QM, arXiv:1602.06172](https://arxiv.org/pdf/1602.06172); [PERC paper 3727](https://www.per-central.org/items/perc/3727.pdf)
+- About 5% of students on one problem treated a stationary-state wave function as time-independent. The same paper warns that a single transcript is hard to interpret. — [Framing Difficulties in QM, arXiv:1706.04896](https://arxiv.org/pdf/1706.04896)
+- Students' reasoning about the period of quantum states using phasors informed *Tutorials in Physics: Quantum Mechanics*. — [Wan, Emigh, Passante & Shaffer, PERC 2016](https://www.per-central.org/perc/2016/Detail.cfm?id=6590). A combined simulation and tutorial shows how the time dependence of the probability density arises from that of the wave function. — [Passante & Kohnle, PRPER 2019 (DOAJ)](https://doaj.org/article/d4866dd1c84d4b2aaf68d32dcc74a704)
+- **Singh & Marshman's review (PRST-PER 11, 020117, 2015).** Upper-level QM performance varies widely across universities, textbooks and instructors, and many students lack functional understanding of the fundamentals. Difficulties often come from overgeneralizing concepts and from trouble separating closely related concepts and reasoning about the formalism. — [ERIC record](https://eric.ed.gov/?id=EJ1076748); [Semantic Scholar](https://www.semanticscholar.org/paper/A-Review-of-Student-Difficulties-in-Upper-Level-Singh-Marshman/50a0f0a2f7cde4fcc74dd893fed98e3db20d954b). Upper-level undergraduates and PhD students both struggle to compute expectation values from eigenstates and eigenvalues, especially in Dirac notation. — [same review listing](https://www.researchgate.net/publication/274729995_A_Review_of_Student_Difficulties_in_Upper-Level_Quantum_Mechanics)
+- A research-based multiple-choice *question sequence* has been developed to improve understanding of quantum measurement in infinite-dimensional Hilbert space. — [arXiv:2502.06074](https://arxiv.org/pdf/2502.06074)
+- **QMFPS results.** On the formalism survey, undergraduates taught with research-validated tools outperformed others after one semester, but both undergraduates and graduate students struggled on many items (over 400 students, six institutions). — [arXiv:2006.04030](https://arxiv.org/pdf/2006.04030)
+- **Assessment landscape (PhysPort).** Junior-level instruments are the QMCA, QMAT, QMS and QMFPS. The QMCI covers wave functions, probability and 1D tunneling. The QMCS targets sophomore modern physics. — [PhysPort assessment recommendations](https://www.physport.org/recommendations/Entry.cfm?ID=124932)
+- **PhET.** *Quantum Tunneling and Wave Packets* shows wave packets and plane waves at barriers, steps and flat potentials, including double barriers for resonant tunneling. — [ComPADRE listing](https://www.compadre.org/Quantum/items/detail.cfm?ID=7461). The PhET quantum design paper describes students seeing the electron as a partly delocalized object that partly reflects and partly transmits. With *Quantum Bound States* they watch the real and imaginary parts interchange, superpositions oscillate, and the state collapse on a position measurement. — [McKagan et al., arXiv:0709.4503](https://arxiv.org/pdf/0709.4503). PhET's quantum set includes a Stern–Gerlach simulation. — [ComPADRE PhET collection](https://www.compadre.org/quantum/items/detail.cfm?ID=4210)
+- **QuVis** (St Andrews) is a research-based collection of more than 90 simulations, from advanced high-school to advanced-undergraduate level, licensed CC-BY-NC-SA. It includes two-level-system simulations, spin, entanglement and linear-algebra animations. — [QuVis about](https://www.st-andrews.ac.uk/physics/quvis/de/index-about.php); [Kohnle et al., two-level systems, arXiv:1501.07905](https://arxiv.org/pdf/1501.07905); [Coe College QuVis summary](https://chemistry.coe.edu/piper/posts/quvis/)
+- **Falstad** offers a 1-D Quantum Mechanics applet, a Hydrogen Atom (orbitals) applet, a Molecular Orbitals applet, and quantum crystal and transitions applets. — [Falstad applets](https://falstad.com/mathphysics.html)
+
+### Inferences
+**Technique ladder.**
+- Expand in the energy eigenbasis first: c_n by inner products, then attach the phase factors e^{−iE_nt/ħ}.
+- Use symmetry and parity to kill integrals.
+- Ladder operators beat integrals (HO, angular momentum).
+- Commutator algebra beats explicit wave functions.
+- Match boundary conditions (ψ and ψ′ continuous; the ψ′ jump at a δ).
+- Use dimensional analysis and natural units to sanity-check.
+- Diagonalize in the degenerate subspace (degenerate perturbation theory).
+
+**Representative archetypes per module.**
+- **M1 Spin**
+  - Sequential Stern–Gerlach probabilities (z+ → x → z).
+  - For (|+⟩ + i|−⟩)/√2: probabilities along x, y and z.
+  - ⟨S_x⟩ and ΔS_x.
+  - Larmor precession: P(S_x = +ħ/2) as a function of t.
+- **M2 Wave function**
+  - Normalize Ψ = Ax(a − x).
+  - Compute ⟨x⟩, ⟨p⟩ and σ_x·σ_p.
+  - Prove normalization is conserved.
+  - Show ⟨p⟩ = m d⟨x⟩/dt.
+- **M3 1D potentials**
+  - Infinite well: c_n of Ax(a − x), ⟨H⟩, and the revival time.
+  - Harmonic oscillator: ⟨x²⟩ in |n⟩ via a±; the virial check ⟨V⟩ = E_n/2.
+  - Gaussian packet: φ(k), Ψ(x, t), and the spreading law.
+  - δ-well: bound state, R(E) and T(E). Also: number of finite-well bound states from z₀; tunneling estimate for an electron through 1 eV × 1 nm (the STM order of magnitude).
+- **M4 Formalism**
+  - Hermiticity checks (x̂p̂, i d/dx, d²/dx²).
+  - Commutators [x̂, p̂], [x̂², p̂], [L_x, L_y].
+  - Generalized uncertainty for spin components.
+  - Basis change (position ↔ momentum ↔ energy); two-level Hamiltonian dynamics (ammonia-molecule archetype).
+- **M5 3D**
+  - Degeneracy of the cubical box.
+  - Hydrogen ground state: ⟨r⟩, and P(r < a₀).
+  - Balmer wavelengths.
+  - Allowed L_z outcomes and probabilities for a mix of Y_l^m.
+- **M6 Spin addition**
+  - Eigenvectors of S·n̂.
+  - ⟨S₁·S₂⟩ for the singlet and triplet.
+  - Clebsch–Gordan decomposition of 1 ⊗ ½.
+  - Electron spin resonance frequency at 1 T (≈ 28 GHz).
+- **M7 Aharonov–Bohm**
+  - Fringe shift vs. enclosed flux, in units of h/e.
+  - Gauge invariance of the phase difference.
+- **M8 Perturbation theory**
+  - Infinite well with V₀ over half the width.
+  - Oscillator with λx² (compare with the exact result) or λx⁴.
+  - 2D box with an xy perturbation (degenerate case).
+  - Weak-field Zeeman with Landé g; the 21-cm frequency.
+
+**Visualization specs (QM I).** Format: drawn | parameters (units) | teaches | simplified.
+1. **Stern–Gerlach analyzer chain.** Draggable analyzers and atom counters, with histograms. | Analyzer angles θ, φ (deg); N atoms; input state. | Born rule; incompatibility; each measurement resets the state. | Ideal spin-½ and perfect analyzers. Benchmarks: PhET Stern–Gerlach; the OSU simulations paired with McIntyre.
+2. **Bloch sphere and precession.** The state as a point on a sphere, with the B field shown. | B (T); direction; the initial state's polar and azimuthal angles. | Relative phase = longitude; overall phase is invisible; precession at ω = γB. | Pure states. ◇ Mixed states inside the ball (QuVis "superposition vs. mixed").
+3. **Phasor wave-function viewer** (the anti-misconception core). ψ(x, t) drawn as a ribbon: height |ψ|, color = phase; toggles for Re, Im and |ψ|². | Mix coefficients c₁, c₂, c₃ (complex); well width a (nm); mass (m_e). | A stationary state's |ψ|² is frozen while its phase rotates. A superposition sloshes at ω₂₁ = (E₂ − E₁)/ħ. Each term carries its *own* e^{−iE_nt/ħ}. | Infinite well and HO only. Benchmarks: PhET Quantum Bound States; Passante & Kohnle sim–tutorial.
+4. **Well Fourier builder.** The user draws Ψ(x, 0); c_n bars appear; the state evolves with revivals; "measure energy" draws a random sample and collapses the state. | a (nm); N terms (1–60). | Expansion; probabilities |c_n|²; revivals at T_rev = 4ma²/(πħ). | 1D infinite well.
+5. **Oscillator ladder.** An energy ladder with a± buttons, ψ_n with turning points, and the classical density overlaid. | ħω (eV); n (0–30). | Ladder algebra; correspondence at large n. ◇ Coherent states. | Ideal HO.
+6. **Wave-packet lab.** Packet ψ(x, t) with a φ(k) side panel and phase- vs. group-velocity markers. | k₀ (nm⁻¹); σ₀ (nm); mass. | Δx·Δk trade-off; dispersion; v_g = 2v_p for a free particle. | Free 1D particle. Benchmark: PhET Tunneling and Wave Packets.
+7. **Scattering and tunneling lab.** Step, barrier, δ or double barrier; plane-wave or packet input; R(E) and T(E) plots; current arrows. | E (eV); V₀ (eV); width a (nm). | Tunneling is not energy loss; T depends exponentially on a√V₀; resonances. | 1D, time-independent, or a numerical packet.
+8. **Finite-well graphical solver.** tan z plotted against √(z₀²/z² − 1), with the matching bound-state wave functions. | V₀ (eV); a (nm). | The number of bound states grows with z₀; penetration into forbidden regions. | Symmetric well.
+9. **Operator matrix playground.** Editable 2×2 or 3×3 Hermitian matrices shown as eigen-axes, plus a commutator heat-map. | Matrix entries. | Hermitian ⇒ real eigenvalues and orthogonal eigenvectors; commuting ⇒ a shared eigenbasis *exists*. | Finite dimensions.
+10. **Uncertainty explorer.** Wave-function presets with a σ_x·σ_p readout against ħ/2. | Shape parameters. | The Gaussian saturates the bound; the uncertainty is intrinsic, not measurement noise. | 1D.
+11. **Hydrogen orbital explorer.** 3D probability clouds or isosurfaces, plus radial P(r) = r²|R_nl|². | n (1–6), l, m; real vs. complex orbitals. | Nodes; degeneracy; superpositions of n,l states give an oscillating charge dipole, linking to E&M II radiation and selection rules. | Non-relativistic, spinless. Benchmark: Falstad Hydrogen Atom.
+12. **Spherical-harmonic sculptor.** Y_l^m colored by phase, with lobe size = |Y|². | l (0–6), m. | m = phase winding around z = L_z/ħ; the vector-model cone, with its caveat. | Fixed axis.
+13. **Angular-momentum adder.** Combines j₁ and j₂ into |j m⟩ via a live Clebsch–Gordan table; singlet/triplet visual. | j₁, j₂ (½–3). | Counting states; symmetric vs. antisymmetric combinations. | No dynamics.
+14. **Aharonov–Bohm interferometer.** Two electron paths around a solenoid; fringes shift with enclosed flux while B = 0 on both paths. | Φ (units of h/e). | Potentials are physical in QM. Direct E&M bridge. | Ideal solenoid.
+15. **Perturbation sandbox.** Exact (numerically diagonalized) levels vs. 1st- and 2nd-order estimates as λ grows; rotation to the good basis in degenerate cases; n = 2 hydrogen Zeeman/fine-structure diagram. | λ (eV); B (T, weak → strong). | When perturbation theory works or fails; how degeneracy lifts; the Paschen–Back crossover. | Truncated basis.
+
+**Depth and rigor target.** Griffiths & Schroeter level, with proofs of:
+- real eigenvalues and orthogonal eigenvectors for Hermitian operators;
+- the generalized uncertainty principle;
+- ladder algebra for the HO and for angular momentum from commutators alone;
+- spin-½ matrices from the algebra.
+
+Rigged-Hilbert-space and operator-domain rigor goes only in an optional "fine print" panel (e.g., why p̂ has no normalizable eigenvectors). Calibrate checkpoints against QMFPS-style formalism items and QMCA/QMAT-style junior items.
+
+**Distractor bank (QM I).**
+- PER-documented (cited):
+  - A common phase factor for a superposition.
+  - "Some states have no time dependence"; "a stationary-state wave function is time-independent".
+  - Expectation-value errors in Dirac notation.
+  - Overgeneralizing from one context to another.
+- Expert-anticipated, widely discussed in the PER literature but *not retrieved* this session:
+  - "Ĥ|ψ⟩ = E|ψ⟩ for any state"; treating Ĥ|ψ⟩ as "the state after measuring energy".
+  - "An energy measurement collapses to the ground state."
+  - "After a position measurement the energy is definite."
+  - "Time evolution changes the eigenvalues."
+  - "The expectation value is the most probable outcome."
+  - Confusing ψ with |ψ|².
+  - "A tunneling particle loses energy" (it is the *amplitude* that drops).
+  - "Uncertainty comes from clumsy instruments."
+  - Applying ΔxΔp ≥ ħ/2 to x and p_y.
+  - "A superposition of stationary states is stationary."
+  - "Global phase matters."
+  - "Any combination of eigenstates is an eigenstate" (true only within a degenerate subspace).
+  - "Commuting operators share *every* eigenvector."
+  - "Spin-up means the spin vector points exactly along z."
+  - "S_x measured on |z+⟩ gives 0."
+  - "Hermitian ⇒ real matrix entries."
+  - "l can equal n."
+  - Hydrogen degeneracy n vs. n² vs. 2n².
+  - Using (m_l, m_s) instead of (j, m_j) for weak-field fine structure.
+  - Applying the nondegenerate formula to degenerate levels.
+
+### Gaps
+- No PER item statistics were retrieved for spin/Stern–Gerlach, angular-momentum addition or perturbation theory. The Zhu & Singh Stern–Gerlach work and Larmor-precession studies could not be searched after the budget ran out.
+- Current HTML5 availability and parameter ranges of PhET's Quantum Bound States and Stern–Gerlach simulations were not verified.
+- The QuVis simulation list could not be opened. Only the named examples above are confirmed.
+
