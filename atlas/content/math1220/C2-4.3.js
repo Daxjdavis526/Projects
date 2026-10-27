@@ -201,7 +201,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: [t`$D = ${h} + 2\left(${h}(${f}) + ${h}(${f})^2 + \cdots\right)$.`, t`The bracket is geometric: first term $${nice(h * f)}$, ratio ${f}.`],
           teach: 'In a bouncing problem, every height after the first drop is travelled twice.',
           explain: t`$D = ${h} + 2\cdot\dfrac{${nice(h * f)}}{1 - ${f}} = ${fmt(D, 4)}$ m.`,
-          visual: { type: 'calc-series', params: { view: 'terms', term: `${h}*${f}^(n-1)`, N: 12, zero: true, termLabel: 'height of rise n (rise 1 = the drop)' }, caption: 'The height of each fall: the first is the drop, the rest are the rebounds.' },
+          visual: { type: 'calc-series', params: { view: 'terms', term: `${h}*${f}^(n-1)`, N: 12, zero: true, termLabel: 'height of fall n (fall 1 = the drop)' }, caption: 'The height of each fall: the first is the drop, the rest are the rebounds.' },
         };
       },
     }),
