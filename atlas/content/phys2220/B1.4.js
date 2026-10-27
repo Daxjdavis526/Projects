@@ -9,7 +9,7 @@ const t = String.raw;
 // the coil between pole pieces, still, at angle θ (degrees between μ and B)
 const coilPic = (angle, caption, extra = {}) => ({
   type: 'em-generator',
-  params: { mode: 'motor', N: 50, I: 2, B: 0.3, ring: 'split', play: false, angle, graph: false, readouts: [], ...extra },
+  params: { mode: 'motor', N: 50, I: 2, B: 0.3, ring: 'slip', play: false, angle, graph: false, readouts: [], ...extra },
   caption,
 });
 
@@ -156,7 +156,7 @@ The moment $\vec\mu$ stands perpendicular to the loop: curl your right-hand fing
     mcq({
       id: 'commutator', difficulty: 2,
       prompt: 'In a simple DC motor, what does the split-ring commutator do?',
-      visual: coilPic(70, 'A DC motor’s coil with its split-ring commutator (the two half-rings on the axle) and the brushes that touch it. Schematic.'),
+      visual: coilPic(70, 'A DC motor’s coil with its split-ring commutator (the two half-rings on the axle) and the brushes that touch it. Schematic.', { ring: 'split' }),
       choices: [
         'Reverses the current in the coil every half turn, so the torque keeps turning the coil the same way',
         'Turns the supply’s direct current into alternating current, so the coil is pushed back and forth',

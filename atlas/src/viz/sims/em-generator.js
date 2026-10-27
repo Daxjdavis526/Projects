@@ -15,7 +15,7 @@
 //       sliders: ['rpm', 'N', 'B', 'I', 'angle'],   // built-in sliders, or objects { key, min, max, step, value, label, explain }
 //       play: true, angle: null,           // animate (slowed: one turn ≈ 3.5 s); or a still at this angle (degrees, θ between μ and B)
 //       graph: true,                       // the flux and emf (generator) or torque (motor) against time
-//       arrows: ['B', 'mu', 'F', 'I'],     // field, the normal/moment, forces on the long sides, current along them
+//       arrows: ['B', 'mu', 'F', 'I'],     // field, the normal/moment (gold), forces on the long sides, current along them
 //       readouts: ['peak', 'f', 'emf'] } } // any of peak f emf flux torque tmax mu angle avg
 //
 // The coil is drawn the same size whatever a and b; the readouts and graphs
@@ -57,7 +57,7 @@ function sliderSpec(s, P) {
     N: { label: 'Turns of wire $N$', min: 1, max: 2 * P.N, step: 1, value: P.N, unit: '', explain: 'Each turn adds its own emf (or its own torque).' },
     B: { label: 'Field $B$', min: 0, max: Math.max(0.5, 2 * P.B), step: 0.01, value: P.B, unit: '\\mathrm{T}', explain: 'Between the pole pieces.' },
     I: { label: 'Current $I$', min: 0, max: Math.max(5, 2 * P.I), step: 0.1, value: P.I, unit: '\\mathrm{A}', explain: 'The current fed to the coil.' },
-    angle: { label: 'Angle $\\theta$ of the coil', min: 0, max: 360, step: 1, value: P.angle ?? 0, unit: '^\\circ', explain: 'θ = 0 when the coil faces the field (its normal along B), so the flux through it is greatest.' },
+    angle: { label: 'Angle $\\theta$ of the coil', min: 0, max: 360, step: 1, value: P.angle ?? 0, unit: '^\\circ', explain: P.mode === 'motor' ? 'The angle between the coil’s magnetic moment (gold) and the field. θ = 0 when the coil faces the field squarely.' : 'θ = 0 when the coil faces the field (its normal along B), so the flux through it is greatest.' },
   }[key] || {};
   return typeof s === 'string' ? { ...base, key } : { ...base, ...s };
 }
@@ -90,7 +90,7 @@ export async function mount(F, P0) {
   F.onChange((key) => { if (key === 'angle') S.th = val('angle') * DEG; draw(); });
 
   // the 3D view: axle along x (toward the viewer), B along +y (left pole N, right pole S), z up
-  const view = new View3D(canvas, { yaw: P.yaw ?? 0.62, pitch: P.camPitch ?? 0.38, dist: P.dist ?? 10, scale: P.scale ?? 1.35, target: [0.35, 0, 0] });
+  const view = new View3D(canvas, { yaw: P.yaw ?? 0.62, pitch: P.camPitch ?? 0.38, dist: P.dist ?? 10, scale: P.scale ?? (compact ? 1.6 : 1.35), target: [0.35, 0, 0] });
   view.onChange = () => draw();
   const hint = document.createElement('div');
   hint.textContent = 'drag to rotate';
@@ -160,7 +160,7 @@ export async function mount(F, P0) {
       for (const dx of [-0.2, 0.2]) view.line([[ringX + dx, 0, -0.27], [ringX + dx, 0, -0.62]], { color: 'ink2', width: 5 });
     }
     // the coil
-    view.line([...corners, corners[0]], { color: 'warn', width: 3.4 });
+    view.line([...corners, corners[0]], { color: 'ink2', width: 3.4 });
     const centre = [0, 0, 0];
     // the current: fed (motor) or induced (generator), drawn along the two long sides
     const fed = motor ? (s.ring === 'split' ? M.commutator(s.th) : 1) : 0;
@@ -224,7 +224,9 @@ export async function mount(F, P0) {
 
   function readouts(s) {
     const want = P.readouts || [], rows = [];
-    const folded = Math.acos(Math.cos(s.th)) / DEG;
+    // the angle between the actual moment (reversed by a commutator for half of each turn) and B
+    const sgn = motor && s.ring === 'split' ? M.commutator(s.th) : 1;
+    const folded = Math.acos(Math.max(-1, Math.min(1, sgn * Math.cos(s.th)))) / DEG;
     if (want.includes('peak')) rows.push(['peak emf $\\mathcal{E}_0 = NBA\\omega$', qty(M.peakEmf(s.N, s.B, s.A, s.w), 'V')]);
     if (want.includes('f')) rows.push(['frequency $f$', qty(s.rpm / 60, 'Hz')]);
     if (want.includes('emf')) rows.push([s.ring === 'split' ? 'output now' : 'emf now', qty(M.output(s.N, s.B, s.A, s.w, s.t, s.ring), 'V')]);

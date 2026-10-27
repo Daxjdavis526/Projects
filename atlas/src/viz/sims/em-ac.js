@@ -23,7 +23,8 @@
 //       //        graphs: ['I', 'emf'] (drop 'emf' to show the current alone)
 //       // rl:    E (V), R (Ω), L (H), on: true (switch to the battery; false: to the short, decaying from ℰ/R),
 //       //        panel: 'v' | 'energy' (what the lower graph shows), graphs: ['i', 'v'] (fewer, or [] for the circuit alone)
-//       // lc:    L (H), C (F), R (Ω, default 0), V0 (V, the capacitor's starting voltage), analog: true (the spring–mass twin)
+//       // lc:    L (H), C (F), R (Ω, default 0), V0 (V, the capacitor's starting voltage), analog: true (the spring–mass twin),
+//       //        graphs: ['q', 'i'] (fewer, or []), bars: true (the energy bars)
 //       // ac:    elements: 'R' | 'L' | 'C' | 'RL' | 'RC' | 'LC' | 'RLC', elementChoice: false (offer R / L / C),
 //       //        V0 (V, amplitude), f (Hz), R, L, C, phasors / traces: lists of v i R L C (default: all that apply),
 //       //        stack: true (the element phasors head to tail, summing to v)
@@ -569,19 +570,27 @@ export function mount(F, P0) {
     const Qref = sticky('Q', axisUp(1.08 * Q0)), Iref = sticky('I', axisUp(1.08 * I0));
     const showR = (val('R') ?? 0) > 0 || CONTROLS.lc.includes('R') && wanted.includes('R');
     const analog = P.analog && !compact;
+    const gs = P.graphs ?? ['q', 'i'], showBars = P.bars ?? true;
     // layout: picture (schematic + analog) | graphs | energy bars
     let pic, gr, bars;
-    if (narrow) {
+    if (!gs.length && !showBars) {
+      pic = narrow ? { x: 6, y: 4, w: W - 12, h: H - 8 } : { x: W * 0.2, y: 6, w: W * 0.6, h: H - 12 };
+    } else if (!gs.length) {
+      const wb = 96;
+      pic = { x: narrow ? 6 : W * 0.12, y: 6, w: (narrow ? W - 12 : W * 0.66) - wb, h: H - 12 };
+      bars = { x: pic.x + pic.w + 14, y: 6, w: wb - 8, h: H - 12 };
+    } else if (narrow) {
       const h1 = Math.round(H * (analog ? 0.4 : 0.34));
       pic = { x: 6, y: 4, w: W - 12, h: h1 };
       bars = { x: W - 74, y: h1 + 4, w: 70, h: H - h1 - 8 };
       gr = { x: 4, y: h1 + 4, w: W - 84, h: H - h1 - 8 };
     } else {
-      const wp = Math.round(W * 0.38), wb = 88;
+      const wp = Math.round(W * 0.38), wb = showBars ? 88 : 0;
       pic = { x: 8, y: 6, w: wp - 12, h: H - 12 };
       gr = { x: wp, y: 6, w: W - wp - wb - 8, h: H - 12 };
-      bars = { x: W - wb, y: 6, w: wb - 6, h: H - 12 };
+      bars = showBars ? { x: W - wb, y: 6, w: wb - 6, h: H - 12 } : null;
     }
+    if (narrow && gs.length && !showBars) { gr.w = W - 8; bars = null; }
     const sch = analog && !narrow ? { x: pic.x, y: pic.y, w: pic.w, h: pic.h * 0.62 } : analog ? { x: pic.x, y: pic.y, w: pic.w * 0.56, h: pic.h } : pic;
     const xl = sch.x + (narrow ? 66 : 76), xr = sch.x + sch.w - (narrow ? 60 : 80), yt = sch.y + 22, yb = sch.y + sch.h - 22, ym = (yt + yb) / 2;
     const wcol = C.ink2, gap = 12;
@@ -619,20 +628,24 @@ export function mount(F, P0) {
     }
     // graphs
     const [tf, tu] = timeUnit(windowT);
-    const half = (gr.h - 6) / 2;
-    const top = { x: gr.x, y: gr.y, w: gr.w, h: half }, bot = { x: gr.x, y: gr.y + half + 6, w: gr.w, h: half };
     const qf = (Qref >= 1e-3 ? [1e-3, 'mC'] : Qref >= 1e-6 ? [1e-6, 'µC'] : [1e-9, 'nC']), If = Iref >= 1 ? [1, 'A'] : Iref >= 1e-3 ? [1e-3, 'mA'] : [1e-6, 'µA'];
-    graph(top, { x0: 0, x1: windowT, xfac: tf, xunit: '', y0: -Qref / qf[0], y1: Qref / qf[0], noX: true, title: `charge q (${qf[1]})`, curves: [{ f: (x) => c.q(x) / qf[0], color: C.violet, width: 2.4 }], cursor: t });
-    graph(bot, { x0: 0, x1: windowT, xfac: tf, xunit: `t (${tu})`, y0: -Iref / If[0], y1: Iref / If[0], title: `current i (${If[1]})`, curves: [{ f: (x) => c.i(x) / If[0], color: C.accent, width: 2.4 }], cursor: t });
+    if (gs.length) {
+      const both = gs.includes('q') && gs.includes('i'), half = both ? (gr.h - 6) / 2 : gr.h;
+      const top = { x: gr.x, y: gr.y, w: gr.w, h: half }, bot = both ? { x: gr.x, y: gr.y + half + 6, w: gr.w, h: half } : top;
+      if (gs.includes('q')) graph(top, { x0: 0, x1: windowT, xfac: tf, xunit: both ? '' : `t (${tu})`, y0: -Qref / qf[0], y1: Qref / qf[0], noX: both, title: `charge q (${qf[1]})`, curves: [{ f: (x) => c.q(x) / qf[0], color: C.violet, width: 2.4 }], cursor: t });
+      if (gs.includes('i')) graph(bot, { x0: 0, x1: windowT, xfac: tf, xunit: `t (${tu})`, y0: -Iref / If[0], y1: Iref / If[0], title: `current i (${If[1]})`, curves: [{ f: (x) => c.i(x) / If[0], color: C.accent, width: 2.4 }], cursor: t });
+    }
     // energy bars
     const U0 = c.U0, UE = c.UE(t), UB = c.UB(t), heat = Math.max(0, c.heat(t));
-    const bx = bars.x, by = bars.y + 18, bh = bars.h - 44, bwid = Math.min(16, (bars.w - 10) / 3 - 4);
-    text('energy', bx + bars.w / 2, bars.y + 6, { color: C.ink2, size: FS - 1.5, weight: 600 });
-    [[UE, C.violet, ['U', 'E']], [UB, C.teal, ['U', 'B']], [heat, C.warn, ['heat', '']]].forEach(([u, col, [a, b]], k) => {
-      const x = bx + 6 + k * (bwid + 8), hh = (bh * Math.min(1, u / (U0 || 1)));
-      ctx.save(); ctx.strokeStyle = C.line3; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, by + 0.5, bwid, bh); ctx.fillStyle = col; ctx.globalAlpha = 0.85; ctx.fillRect(x, by + bh - hh, bwid, hh); ctx.restore();
-      if (b) rich([[a, 0], [b, 1]], x + bwid / 2, by + bh + 12, { color: col, size: FS - 1.5, weight: 700 }); else text(a, x + bwid / 2, by + bh + 12, { color: col, size: FS - 2.5, weight: 700 });
-    });
+    if (bars) {
+      const bx = bars.x, by = bars.y + 18, bh = bars.h - 44, bwid = Math.min(16, (bars.w - 10) / 3 - 4);
+      text('energy', bx + bars.w / 2, bars.y + 6, { color: C.ink2, size: FS - 1.5, weight: 600 });
+      [[UE, C.violet, ['U', 'E']], [UB, C.teal, ['U', 'B']], [heat, C.warn, ['heat', '']]].forEach(([u, col, [a, b]], k) => {
+        const x = bx + 6 + k * (bwid + 8), hh = (bh * Math.min(1, u / (U0 || 1)));
+        ctx.save(); ctx.strokeStyle = C.line3; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, by + 0.5, bwid, bh); ctx.fillStyle = col; ctx.globalAlpha = 0.85; ctx.fillRect(x, by + bh - hh, bwid, hh); ctx.restore();
+        if (b) rich([[a, 0], [b, 1]], x + bwid / 2, by + bh + 12, { color: col, size: FS - 1.5, weight: 700 }); else text(a, x + bwid / 2, by + bh + 12, { color: col, size: FS - 2.5, weight: 700 });
+      });
+    }
     if (wantReadout()) readout({ f0: ['natural frequency $f_0 = \\dfrac{1}{2\\pi\\sqrt{LC}}$', tx(c.f0, 'Hz')], q: ['charge $q$', tx(q, 'C')], i: ['current $i$', tx(i, 'A')], UE: ['$U_E = q^2/2C$', tx(UE, 'J')], UB: ['$U_B = \\tfrac12 Li^2$', tx(UB, 'J')] }, ['f0', 'q', 'i']);
   }
 
@@ -848,7 +861,10 @@ export function validate(P0) {
     ['E', 'R', 'L'].forEach(pos); if (!['v', 'energy'].includes(P.panel)) p.push('panel must be v or energy');
     if (P.graphs && (!Array.isArray(P.graphs) || P.graphs.some((g) => !['i', 'v'].includes(g)))) p.push('graphs is a list of i and v');
   }
-  if (mode === 'lc') { ['L', 'C', 'V0'].forEach(pos); if (!(P.R >= 0)) p.push('R must be ≥ 0'); }
+  if (mode === 'lc') {
+    ['L', 'C', 'V0'].forEach(pos); if (!(P.R >= 0)) p.push('R must be ≥ 0');
+    if (P.graphs && (!Array.isArray(P.graphs) || P.graphs.some((g) => !['q', 'i'].includes(g)))) p.push('graphs is a list of q and i');
+  }
   if (mode === 'ac') {
     if (!ELEMENTS.includes(P.elements)) p.push(`elements must be one of ${ELEMENTS.join(', ')}`);
     ['f', 'V0'].forEach(pos);
