@@ -52,7 +52,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
     lead: t`A proton bent round a ring by a magnetic field $B$ reaches energy $E \approx 0.3\,BR$ (in GeV, with $B$ in tesla and the bending radius $R$ in metres). Slide the radius and the field and see how far the Planck energy is.`,
     tasks: ['At the LHC’s bending radius, 2.8 km, with its 8.3 T magnets, you get about 7 TeV — the real machine’s design beam energy.', 'Slide the radius until the point reaches the Planck energy: with LHC magnets the ring must be about 500 light-years in radius.', 'Even with magnets twice as strong, it is hundreds of light-years. Quantum gravity will have to be tested indirectly — through the early universe, black holes, or exquisitely precise experiments.'],
     params: {
-      x: [2, 21], y: [1, 21], xlabel: 'log₁₀(bending radius in m)', ylabel: 'log₁₀(proton energy in GeV)',
+      x: [2, 23], y: [1, 22], xlabel: 'log₁₀(bending radius in m)', ylabel: 'log₁₀(proton energy in GeV)',
       sliders: [
         { key: 'R', label: 'Bending radius $R$', min: 100, max: 1e21, value: 2804, logScale: true, unit: '\\mathrm{m}', explain: 'The radius of the ring’s curved sections. The LHC’s is about 2.8 km.' },
         { key: 'B', label: 'Magnetic field $B$', min: 1, max: 20, step: 0.01, value: 8.33, unit: '\\mathrm{T}', explain: 'The LHC’s superconducting dipoles reach 8.3 T.' },
@@ -71,7 +71,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
   },
   example: {
     prompt: t`The cosmological-constant problem. Observations give dark energy a density $\rho_\Lambda = \Omega_\Lambda\rho_c$. A naive quantum estimate adds up the zero-point energy of quantum fields up to the Planck scale, giving the Planck density $c^5/(\hbar G^2)$. How badly do the two disagree?`,
-    visual: logDots([['observed dark energy', RHO_L, 'gold'], ['estimate cut off at 100 GeV', vacuum(100), 'teal'], ['cut off at 10¹⁶ GeV', vacuum(1e16), 'violet'], ['cut off at the Planck energy', RHO_P, 'bad']], { xlabel: 'density in kg/m³ (powers of ten)', range: [-30, 130], every: 20, caption: 'The observed density of dark energy and naive estimates of the vacuum’s, in powers of ten. Every estimate misses by at least 54 powers of ten.' }),
+    visual: logDots([['observed dark energy', RHO_L, 'gold'], ['estimate cut off at 100 GeV', vacuum(100), 'teal'], ['cut off at 10¹⁶ GeV', vacuum(1e16), 'violet'], ['cut off at the Planck energy', RHO_P, 'bad']], { xlabel: 'density in kg/m³ (powers of ten)', range: [-30, 150], every: 30, caption: 'The observed density of dark energy and naive estimates of the vacuum’s, in powers of ten. Every estimate misses by at least 54 powers of ten.' }),
     steps: [
       { label: 'Observed', text: t`$\rho_\Lambda = 0.685\times${sci(rhoCrit(67.4))} = ${sci(RHO_L)}$ kg/m³ — about the mass of three protons per cubic metre.` },
       { label: 'Naive estimate', text: t`$c^5/(\hbar G^2) = (2.998\times10^{8})^5/(1.0546\times10^{-34}\times(6.674\times10^{-11})^2) = ${sci(RHO_P)}$ kg/m³.` },
@@ -102,7 +102,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
       hints: ['For each, ask: has it been measured, or is it a prediction or a theory?'],
       teach: 'Keep three piles: measured, derived but unmeasured, and speculative — and say which pile each claim is in.',
       explain: 'GW170817’s gamma rays arrived 1.7 s after its gravitational waves, after 130 million years of travel; the Event Horizon Telescope’s images of M87* and Sgr A* match the predicted shadow sizes to within 10–20%; supernovae, the cosmic microwave background and galaxy surveys show the acceleration. The rest are open questions.',
-      visual: logDots([['free fall of different materials (MICROSCOPE)', 1e-15, 'good'], ['speed of gravitational waves vs light (GW170817)', 1e-15, 'good'], ['light bending by the Sun (radio)', 1e-4, 'good'], ['black-hole shadows (EHT)', 0.1, 'good']], { xlabel: 'precision of the test (powers of ten; smaller is sharper)', range: [-17, 3], every: 2, caption: 'How precisely some predictions of general relativity have been tested, in powers of ten.' }),
+      visual: logDots([['free fall of different materials (MICROSCOPE)', 1e-15, 'good'], ['speed of gravitational waves vs light (GW170817)', 1e-15, 'good'], ['light bending by the Sun (radio)', 1e-4, 'good'], ['black-hole shadows (EHT)', 0.1, 'good']], { xlabel: 'precision of the test (powers of ten; smaller is sharper)', range: [-17, 7], every: 2, caption: 'How precisely some predictions of general relativity have been tested, in powers of ten.' }),
     }),
     num({
       id: 'planck-units', difficulty: 2,
@@ -157,7 +157,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
             ? {
               type: 'graph',
               params: {
-                x: [8, 32], y: [-4, 76], xlabel: 'log₁₀(mass in kg)', ylabel: 'log₁₀(evaporation time in years)',
+                x: [8, 36], y: [-4, 76], xlabel: 'log₁₀(mass in kg)', ylabel: 'log₁₀(evaporation time in years)',
                 curves: [{ fn: `${round(Math.log10(LIFE / YEAR), 5)} + 3x`, color: 'violet' }],
                 hlines: [{ y: round(Math.log10(13.8e9), 4), label: 'age of the universe', color: 'gold' }],
                 vlines: [{ x: round(Math.log10(M_SUN), 4), label: 'the Sun’s mass' }],
@@ -167,7 +167,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
             : {
               type: 'graph',
               params: {
-                x: [8, 32], y: [-8, 16], xlabel: 'log₁₀(mass in kg)', ylabel: 'log₁₀(temperature in K)',
+                x: [8, 36], y: [-8, 16], xlabel: 'log₁₀(mass in kg)', ylabel: 'log₁₀(temperature in K)',
                 curves: [{ fn: `${round(Math.log10(K), 5)} - x`, color: 'bad' }],
                 hlines: [{ y: round(Math.log10(2.725), 4), label: 'cosmic microwave background, 2.7 K', color: 'gold' }],
                 vlines: [{ x: round(Math.log10(M_SUN), 4), label: 'the Sun’s mass' }],

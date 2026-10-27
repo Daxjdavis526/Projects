@@ -28,7 +28,7 @@ const escapeBars = (asked) => {
   return {
     type: 'graph',
     params: {
-      x: [0, 12.5], y: [-0.6, rows.length - 0.3], xlabel: 'escape speed from the surface (km/s)', ylabel: '', yticks: 0.001, aspect: 'wide',
+      x: [0, 15.5], y: [-0.6, rows.length - 0.3], xlabel: 'escape speed from the surface (km/s)', ylabel: '', yticks: 0.001, aspect: 'wide',
       shade: rows.filter((q) => q.v).map((q, i) => ({ fn: String(rows.length - 1 - i + 0.3), lower: String(rows.length - 1 - i - 0.3), from: 0, to: q.v, color: 'accent', alpha: 0.55 })),
       points: rows.map((q, i) => ({ x: q.v ?? 0.2, y: rows.length - 1 - i, r: 0.01, color: q.v ? 'ink2' : 'gold', label: q.v ? `${q.n}: ${q.v} km/s` : `${q.n}: ?`, labelDx: 8, labelDy: 0 })),
     },
