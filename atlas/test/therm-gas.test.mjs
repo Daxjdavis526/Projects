@@ -33,7 +33,7 @@ for (const [T, M] of [[77.355, N2], [300, N2], [300, He], [1000, Xe]]) {
     check(`MB tail above ${v.toFixed(0)} m/s equals the integral`, near(G.mbTail(v, T, M), simpson(f, v, top, 4000) + 0, 3e-6, 1e-8));
   }
 }
-check('MB tail: 1.06 % of N2 at 300 K is faster than 1000 m/s', near(G.mbTail(1000, 300, N2), 0.01059, 0.01), G.mbTail(1000, 300, N2));
+check('MB tail: 1.05 % of N2 at 300 K is faster than 1000 m/s', near(G.mbTail(1000, 300, N2), 0.010541, 1e-4), G.mbTail(1000, 300, N2));
 check('ideal gas: 0.04 mol at 300 K in a litre is 99.8 kPa', near(G.idealPressure(0.04, 300, 1e-3), 99774, 1e-4));
 
 // ─── the box: set-up ───────────────────────────────────────────────────────

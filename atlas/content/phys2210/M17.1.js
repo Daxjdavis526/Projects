@@ -26,8 +26,8 @@ function ptGraph(marks, caption) {
       x: [-20, 420], y: [-0.06, 1.15], aspect: 'wide', xlabel: 'T (K)', ylabel: 'P', yticks: 0.001,
       alt: 'Pressure of a sealed gas against absolute temperature: a straight line through absolute zero',
       curves: [{ fn: 'x/400', domain: [0, 400], color: 'accent', width: 2.8 }],
-      vlines: marks.map(([T, label]) => ({ x: T, label, color: 'ink3' })),
-      points: [{ x: 0, y: 0, r: 5, color: 'violet', label: 'absolute zero', labelDx: 8, labelDy: -12 }],
+      vlines: marks.map(([T]) => ({ x: T, color: 'ink3' })),
+      points: [{ x: 0, y: 0, r: 5, color: 'violet', label: 'absolute zero', labelDx: 8, labelDy: -12 }, ...marks.map(([T, label], i) => ({ x: T, y: T / 400, r: 5, color: 'gold', label, labelDx: i ? 10 : -52, labelDy: i ? 12 : -12 }))],
     },
     caption: caption ?? 'A sealed, rigid tank: pressure is proportional to the absolute temperature, so the line runs back to zero at 0 K (pressure axis without numbers).',
   };
@@ -175,7 +175,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
     }),
     mcq({
       id: 'gauge-absolute', difficulty: 2,
-      prompt: 'A nitrogen tank’s gauge reads 200 kPa at sea level, where the atmosphere is 101 kPa. Which pressure belongs in PV = nRT?',
+      prompt: t`A nitrogen tank’s gauge reads 200 kPa at sea level, where the atmosphere is 101 kPa. Which pressure belongs in $PV = nRT$?`,
       choices: ['301 kPa', '200 kPa', '99 kPa', '101 kPa'],
       answer: 0,
       why: {

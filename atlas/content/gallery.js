@@ -24,6 +24,8 @@ export default [
   { id: 'fbd', title: 'Free-body diagrams', track: 'physics', blurb: 'Push, pull, hang, tilt and turn: every force on each body, drawn to scale.', lesson: 'phys2210.M5.1' },
   { id: 'frames', title: 'Inertial frames', track: 'physics', blurb: 'The same ball from the ground and from an accelerating train: what makes a frame inertial.', lesson: 'phys2210.M5.2' },
   { id: 'drag', title: 'Terminal velocity', track: 'physics', blurb: 'A skydiver speeds up until drag equals weight: terminal velocity, from the ground to the stratosphere.', lesson: 'phys2210.M6.5' },
+  { id: 'tank', title: 'Pressure, depth and buoyancy', track: 'physics', blurb: 'Pressure at depth in vessels of any shape, manometers and barometers, and a block weighed in water: the hydrostatic paradox and Archimedes.', lesson: 'phys2210.M14.2' },
+  { id: 'flow', title: 'Continuity and Bernoulli', track: 'physics', blurb: 'Liquid speeds up through a narrowing pipe while its pressure drops; a Pitot-static probe turns ½ρv² into airspeed.', lesson: 'phys2210.M14.5' },
   { id: 'projectile', title: 'Projectile motion', track: 'physics', blurb: 'Launch speed, angle, height, gravity — with or without air drag.', spec: { type: 'projectile', params: {} } },
   { id: 'cart', title: 'Newton’s second law on a cart', track: 'physics', blurb: 'Force, mass and friction set the slope of the velocity graph.', spec: { type: 'force-cart', params: {} } },
   { id: 'spring', title: 'Damped, driven oscillator', track: 'physics', blurb: 'Energy bars, damping regimes and resonance.', spec: { type: 'oscillator', params: { kind: 'spring', b: 0.3 } } },

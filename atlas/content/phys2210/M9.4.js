@@ -87,7 +87,7 @@ Choose axes, split every momentum into components, and conserve each sum on its 
           answer: ang, units: 'deg', tol: { rel: 0.01 },
           errors: [
             { value: Math.atan2(v2, v1) / DEG, feedback: 'Use the momenta, not the velocities: the heavier car counts for more.' },
-            ...(Math.abs(90 - 2 * ang) > 2 ? [{ value: 90 - ang, feedback: 'That angle is measured from north. The question asks for degrees north of east: tan θ = p_north / p_east.' }] : []),
+            ...(Math.abs(90 - 2 * ang) > 2 ? [{ value: 90 - ang, feedback: t`That angle is measured from north. The question asks for degrees north of east: $\tan\theta = p_\text{north}/p_\text{east}$.` }] : []),
           ],
           hints: ['The wreck’s momentum is the vector sum of the two cars’ momenta.', t`$\tan\theta = \dfrac{p_\text{north}}{p_\text{east}} = \dfrac{m_2v_2}{m_1v_1}$.`],
           teach: 'The direction of a stuck-together wreck is the direction of the total momentum.',

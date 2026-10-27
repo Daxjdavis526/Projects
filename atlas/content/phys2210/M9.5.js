@@ -179,7 +179,7 @@ and the same for $y$ and $z$. It is the point that moves **as if all the mass we
           answer: x, units: 'm', tol: { rel: 0.005 },
           errors: [{ value: L / 2, feedback: 'The middle is the centre of mass only for a uniform rod. The heavier end pulls it over.' }],
           hints: [t`$x_\text{cm} = \dfrac{\int x\,dm}{\int dm}$ with $dm = \lambda\,dx$.`, t`$M = \int_0^{${L}}(${a} + ${b}x)\,dx$ and $\int_0^{${L}} x(${a} + ${b}x)\,dx$.`, t`$M = ${a}L + \tfrac{${b}}{2}L^2$; the top integral is $\tfrac{${a}}{2}L^2 + \tfrac{${b}}{3}L^3$, with $L = ${L}$.`],
-          teach: 'For a continuous body, sum x dm with an integral: x_cm = ∫x λ dx / ∫λ dx.',
+          teach: t`For a continuous body, sum $x\,dm$ with an integral: $x_\text{cm} = \int x\lambda\,dx \big/ \int\lambda\,dx$.`,
           explain: t`$M = ${a}(${L}) + \tfrac{${b}}{2}(${L})^2 = ${nice(M)}$ kg and $\int_0^{${L}}x\lambda\,dx = \tfrac{${a}}{2}(${L})^2 + \tfrac{${b}}{3}(${L})^3 = ${s3(M * x)}$ kg·m, so $x_\text{cm} = ${s3(x)}$ m — past the midpoint ${L / 2} m, toward the dense end.`,
           visual: {
             type: 'graph',
@@ -261,7 +261,7 @@ and the same for $y$ and $z$. It is the point that moves **as if all the mass we
         { value: (7.785e8 * 1.898e27) / 1.989e30 / 6.96e5 / 1e3, feedback: 'Check the powers of ten: keep the distance in km and divide by the Sun’s radius in km.' },
         { value: 7.785e8 / 6.96e5 / 2, feedback: 'The centre of mass is not half-way: weight each position by its mass. The Sun is a thousand times heavier.' },
       ],
-      hints: ['Put the Sun’s centre at the origin: x_cm = m_J d / (m_S + m_J).', 'Then divide by the Sun’s radius.'],
+      hints: [t`Put the Sun’s centre at the origin: $x_\text{cm} = m_J d/(m_S + m_J)$.`, 'Then divide by the Sun’s radius.'],
       teach: 'A planet and its star circle their common centre of mass; for Jupiter and the Sun it lies just outside the Sun.',
       explain: t`$x_\text{cm} = 7.785\times10^{8}\ \text{km}\times\dfrac{1.898\times10^{27}}{1.991\times10^{30}} = 7.42\times10^{5}$ km $= 1.07$ solar radii — just outside the Sun’s surface. The Sun circles that point every 11.9 years at about 12.5 m/s: the kind of wobble that has revealed hundreds of planets around other stars.`,
       visual: {
@@ -284,7 +284,7 @@ and the same for $y$ and $z$. It is the point that moves **as if all the mass we
           prompt: t`On a frictionless track, a ${m1} kg cart moving at ${u1} m/s and a ${m2} kg cart moving at ${-u2} m/s the other way are about to collide. What will the velocity of their centre of mass be **after** the collision? (Positive: the ${m1} kg cart’s direction.)`,
           answer: v, units: 'm/s', tol: { rel: 0.01, abs: 0.005 },
           errors: [{ value: (m1 * u1 - m2 * u2) / (m1 + m2), feedback: 'The second cart moves the other way: its momentum enters with a negative sign.' }],
-          hints: [t`$\vec v_\text{cm} = \vec P/M$.`, 'The collision’s forces are internal: they cannot change P, so v_cm is the same before and after — whatever kind of collision it is.'],
+          hints: [t`$\vec v_\text{cm} = \vec P/M$.`, t`The collision’s forces are internal: they cannot change $\vec P$, so $\vec v_\text{cm}$ is the same before and after — whatever kind of collision it is.`],
           teach: 'The centre-of-mass velocity is P/M, which no internal force can change.',
           explain: t`$v_\text{cm} = \dfrac{(${m1})(${u1}) + (${m2})(${u2})}{${m1 + m2}} = ${s3(v)}$ m/s — before, during and after the collision, elastic or not.`,
           visual: { type: 'mech-collide', params: { view: 'snapshots', show: 'before', m1, m2, u1, u2, e: 0.5, bars: [] }, caption: 'The carts before they meet.' },

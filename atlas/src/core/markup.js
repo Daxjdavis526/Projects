@@ -100,14 +100,22 @@ export const renderInline = (text, math) => inline(String(text ?? ''), math);
 // ordinary JS string '\int' silently becomes 'int' and '\sqrt' 'sqrt'
 const BARE_COMMAND = /(?<![\\A-Za-z])(frac|dfrac|tfrac|sqrt|int|iint|oint|sum|prod|lim|vec|hat|cdot|times|infty|partial|nabla|alpha|beta|gamma|delta|epsilon|varepsilon|theta|lambda|sigma|omega|Omega|Delta|Gamma|Sigma|Lambda|displaystyle|left|right|mathrm|mathbf|approx|equiv|propto|rightarrow|Rightarrow|leq|geq|neq|quad|qquad)(?![A-Za-z])/;
 
-/** Characters that betray a TeX command eaten by a JS string escape (\theta → TAB + "heta"). */
-export function escapeDamage(text) {
+/**
+ * Characters that betray a TeX command eaten by a JS string escape (\theta → TAB + "heta"),
+ * and, in prose (`prose: false` for bare TeX fields), TeX commands left outside $…$.
+ */
+export function escapeDamage(text, { prose = true } = {}) {
   const s = String(text);
   if (/[\t\f\v\b\r]/.test(s)) return 'contains a control character — a TeX command like \\theta, \\frac, \\vec or \\rho lost its backslash to a JS escape; use String.raw';
   if (/\n(abla|u\b|eq\b|eq\s|ot\b|ewline|i\b|orm)/.test(s) && /\$/.test(s)) return 'a newline sits where \\nabla, \\nu, \\neq or \\not was probably meant; use String.raw';
   for (const m of mathIn(s)) {
     const bare = bareCommand(m.tex);
     if (bare) return `the math “${m.tex.slice(0, 40)}” contains “${bare}” without its backslash — a JS string ate it; write the string with String.raw (t\`…\`)`;
+  }
+  // a TeX command in prose prints literally: it belongs inside $…$
+  if (prose) for (const g of segments(withoutCode(s))) {
+    const cmd = g.t === 'text' && /\\([A-Za-z]{2,})/.exec(g.v);
+    if (cmd) return `“\\${cmd[1]}” sits outside $…$, so it would print literally — put it inside math`;
   }
   return null;
 }

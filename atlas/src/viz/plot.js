@@ -186,12 +186,13 @@ export class Plot {
 
   /** Fill between y = f(x) and y = g(x) (default g = 0) over [a, b]. */
   area(f, a, b, o = {}) {
+    // (drawn inside the frame: see _clip)
     const gfn = o.lower || (() => 0);
     const n = o.samples || 200;
     const top = [], bot = [];
     for (let i = 0; i <= n; i++) { const x = a + ((b - a) * i) / n; top.push([x, f(x)]); bot.push([x, gfn(x)]); }
     const g = this.ctx;
-    g.save();
+    g.save(); this._clip();
     g.beginPath();
     top.forEach(([x, y], i) => (i ? g.lineTo(this.X(x), this.Y(y)) : g.moveTo(this.X(x), this.Y(y))));
     for (let i = bot.length - 1; i >= 0; i--) g.lineTo(this.X(bot[i][0]), this.Y(bot[i][1]));

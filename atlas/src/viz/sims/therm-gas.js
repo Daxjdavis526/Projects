@@ -24,7 +24,7 @@
 //       tag: null,              // the line over the box (default "N₂ · 300 K"); false hides it
 //       readouts: null,         // live numbers, any of 'T' 'n' 'V' 'P' 'Pideal' 'vrms' 'KE' 'KEsp' 'KEth'
 //                               // (default: T, P, nRT/V when there are controls; none otherwise)
-//       vmax: null,             // the histogram's top speed, m/s (default: fitted to every gas and T on offer)
+//       vmax: null,             // the histogram's top speed, m/s (default: fitted to the gas at Tmax, so heating moves the curve)
 //       seed: 1,
 //   } }
 
@@ -55,9 +55,9 @@ export function mount(F, P0) {
   const controls = P.controls === true ? ALL : P.controls || [];
   const gases = P.gases || [P.gas];
   const Tlo = controls.includes('T') ? P.Tmin : P.T, Thi = controls.includes('T') ? P.Tmax : P.T;
-  // one speed axis for every gas and temperature on offer, so changes show as moves, not rescalings
-  const allSpecies = gases.flatMap((g) => G.speciesOf(g));
-  const vmax = P.vmax ?? niceUp(G.histTop(allSpecies, Thi));
+  // one speed axis per gas, fitted to the hottest temperature on offer, so heating shows as a move, not a rescaling
+  const axisFor = (gas) => P.vmax ?? niceUp(G.histTop(G.speciesOf(gas), Thi));
+  let vmax = axisFor(P.gas);
   const readouts = P.readouts ?? (controls.length ? ['T', 'P', 'Pideal'] : []);
   const reduced = () => document.documentElement.getAttribute('data-motion') === 'reduce' || !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
@@ -78,6 +78,7 @@ export function mount(F, P0) {
   let S, bins, ymax, lastRead = -1, running = !reduced();
   function build(start, warm) {
     const gas = F.params.gas, T = F.params.T;
+    vmax = axisFor(gas);
     const heavy = Math.max(...G.speciesOf(gas).map((s) => s.M));
     bins = Math.max(28, Math.min(84, Math.round((6 * vmax) / G.vmp(T, heavy))));
     S = G.createGas({ N: F.params.N, T, V: F.params.V, gas, start, seed: P.seed, bins, vmax });
@@ -192,8 +193,8 @@ export function mount(F, P0) {
       const yi = gy0 - Math.min(1, Pi / top) * hh; ctx.beginPath(); ctx.moveTo(gx - 4, yi); ctx.lineTo(gx + 16, yi); ctx.stroke();
       ctx.fillStyle = c.ink2; ctx.font = font(11, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
       ctx.fillText('P', gx + 6, gy1 - 3);
-      ctx.font = font(10); ctx.textBaseline = 'top'; ctx.fillText('0', gx + 6, gy0 + 3);
-      ctx.textBaseline = 'bottom'; ctx.fillText(`${trim(top / 1000)} kPa`, gx + 6, gy1 - 15);
+      ctx.font = font(10); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText('0', gx + 16, gy0); ctx.fillText(`${trim(top / 1000)} kPa`, gx + 16, gy1);
       ctx.restore();
     }
 
@@ -222,7 +223,7 @@ export function mount(F, P0) {
         });
       }
       ctx.fillStyle = c.ink2; ctx.font = font(11.5, 500); ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-      ctx.fillText(single ? 'bars: the box’s molecules · line: Maxwell–Boltzmann' : S.species.map((sp) => sp.formula).join(' and ') + ': bars measured · lines Maxwell–Boltzmann', W - 14, hp.T - 18);
+      ctx.fillText(single ? (P.curve ? 'bars: the box’s molecules · line: Maxwell–Boltzmann' : 'the speeds of the box’s molecules') : S.species.map((sp) => sp.formula).join(' and ') + (P.curve ? ': bars measured · lines Maxwell–Boltzmann' : ': speeds measured'), W - 14, hp.T - 18);
     }
 
     // live numbers, a few times a second

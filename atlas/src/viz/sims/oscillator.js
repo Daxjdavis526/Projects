@@ -43,13 +43,13 @@ export function mount(F, P) {
       if (pend) S.lost += Math.max(0, before - energy(S.y));
     }
     S.hist.push([S.t, pend ? S.y[0] * 180 / Math.PI : S.y[0]]);
-    if (pend) { const w0 = Math.sqrt(9.8 / F.params.L); S.small.push([S.t, F.params.theta0 * Math.cos(w0 * S.t) * Math.exp(-F.params.b * S.t / 2)]); }
+    if (pend) { const w0 = Math.sqrt((F.params.g ?? P.g) / F.params.L); S.small.push([S.t, F.params.theta0 * Math.cos(w0 * S.t) * Math.exp(-F.params.b * S.t / 2)]); }
     if (S.hist.length > 2000) { S.hist.shift(); S.small.shift(); }
     draw();
   }, { force: false });
 
   function energy(y) {
-    if (pend) { const g = 9.8, L = F.params.L; return 0.5 * L * L * y[1] * y[1] + g * L * (1 - Math.cos(y[0])); }
+    if (pend) { const g = F.params.g ?? P.g, L = F.params.L; return 0.5 * L * L * y[1] * y[1] + g * L * (1 - Math.cos(y[0])); }
     return 0.5 * F.params.m * y[1] * y[1] + 0.5 * F.params.k * y[0] * y[0];
   }
 
@@ -80,7 +80,7 @@ export function mount(F, P) {
     }
     // energy bars
     const KE = pend ? 0.5 * F.params.L ** 2 * S.y[1] ** 2 : 0.5 * F.params.m * S.y[1] ** 2;
-    const PE = pend ? 9.8 * F.params.L * (1 - Math.cos(S.y[0])) : 0.5 * F.params.k * S.y[0] ** 2;
+    const PE = pend ? (F.params.g ?? P.g) * F.params.L * (1 - Math.cos(S.y[0])) : 0.5 * F.params.k * S.y[0] ** 2;
     const tot = Math.max(1e-9, KE + PE + S.lost);
     const bars = [['K', KE, c.accent], ['U', PE, c.good], ['lost', S.lost, c.warn]];
     const bx0 = 18, by0 = H - 18, bw = (panel - 40) / 3, bh = H * 0.36;
@@ -100,10 +100,11 @@ export function mount(F, P) {
     plot.setView([t0, t0 + 10], [-amp, amp]); plot.refreshTheme(); plot.grid(); plot.axes();
     if (pend) plot.path(S.small, { color: 'ink3', width: 1.2, dash: [5, 5] });
     plot.path(S.hist, { color: 'accent', width: 2 });
-    const w0 = pend ? Math.sqrt(9.8 / F.params.L) : Math.sqrt(F.params.k / F.params.m);
+    const w0 = pend ? Math.sqrt((F.params.g ?? P.g) / F.params.L) : Math.sqrt(F.params.k / F.params.m);
+    if (P.readout === false) return;          // a problem's picture can hide the numbers
     F.readout(pend ? [
       ['small-angle period', `${(2 * Math.PI / w0).toFixed(3)}\\,\\mathrm{s}`],
-      ['exact period (θ₀)', `${exactPeriod(F.params.L, F.params.theta0).toFixed(3)}\\,\\mathrm{s}`],
+      ['exact period (θ₀)', `${exactPeriod(F.params.L, F.params.theta0, F.params.g ?? P.g).toFixed(3)}\\,\\mathrm{s}`],
       ['angle now', `${(S.y[0] * 180 / Math.PI).toFixed(1)}^\\circ`],
     ] : [
       ['$\\omega_0 = \\sqrt{k/m}$', `${w0.toFixed(3)}\\,\\mathrm{rad/s}`],
@@ -117,9 +118,9 @@ export function mount(F, P) {
 }
 
 // exact pendulum period via the complete elliptic integral (AGM)
-function exactPeriod(L, theta0Deg) {
+function exactPeriod(L, theta0Deg, g = 9.8) {
   const k = Math.sin((theta0Deg * Math.PI) / 360);
   let a = 1, b = Math.sqrt(1 - k * k);
   for (let i = 0; i < 30; i++) { const an = (a + b) / 2; b = Math.sqrt(a * b); a = an; }
-  return (2 * Math.PI * Math.sqrt(L / 9.8)) / a;
+  return (2 * Math.PI * Math.sqrt(L / g)) / a;
 }

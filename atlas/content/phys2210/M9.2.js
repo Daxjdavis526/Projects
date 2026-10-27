@@ -86,7 +86,7 @@ This is **conservation of momentum**. You do not need to know anything about the
           answer: vB, units: 'm/s', tol: { rel: 0.01 },
           errors: [
             { value: vA, feedback: 'Equal and opposite are the momenta, not the speeds: the heavier skater moves more slowly.' },
-            { value: (mB * vA) / mA, feedback: 'The ratio is upside down: the heavier skater gets the smaller speed, v_B = m_A v_A / m_B.' },
+            { value: (mB * vA) / mA, feedback: t`The ratio is upside down: the heavier skater gets the smaller speed, $v_B = m_A v_A/m_B$.` },
           ],
           hints: ['The total momentum is zero before the push, so it is zero after it.', t`$m_A v_A = m_B v_B$ in size, with the velocities opposite.`],
           teach: 'Starting from rest, the pieces of a push or an explosion have equal and opposite momenta.',

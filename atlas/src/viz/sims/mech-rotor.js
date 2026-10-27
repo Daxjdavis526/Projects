@@ -160,12 +160,14 @@ export function mount(F, P0) {
   // the view: what is drawn, plus the circle it sweeps if it turns
   function fitView(pl, md, extra = []) {
     const pts = [[0, 0], ...bodyPts(md), ...extra.flatMap((e) => (animated ? circlePts(e) : bodyPts(e)))];
-    let right = 0;
+    // room beside the drawing for labels: a force's name sits on the side its arrow points to
+    let right = 0, left = 0;
     const angleSlider = sliders.some((q) => q.key === 'phi' || q.key === 'phi2');
     for (const f of md.forces) {
       const u = [Math.cos(forceDir0(f)), Math.sin(forceDir0(f))], L = forceLen(md, f);
       pts.push([f.r, 0], [f.r + u[0] * L, u[1] * L]);
-      right = Math.max(right, P.values ? 0.25 : 0.1);
+      if (f.r + u[0] * L < -1e-9) left = Math.max(left, P.values ? 0.25 : 0.1);
+      else right = Math.max(right, P.values ? 0.25 : 0.1);
       if (P.lever) {
         // the foot of the lever arm; with an adjustable angle it can be anywhere within |r| of the axis
         const s = -(f.r * u[0]);
@@ -182,13 +184,13 @@ export function mount(F, P0) {
       // a still picture shows the block where it starts; an animated one leaves room for its fall
       const { R, bw, lmg, gap } = hangGeom(md), drop = animated ? maxDrop() : 0;
       pts.push([R, R], [-R - bw, -(gap + drop + 2 * bw)]);
-      if (P.tension) pts.push([-R, -(gap + drop + bw + lmg)]);
+      if (P.tension) { pts.push([-R, -(gap + drop + bw + lmg)]); left = Math.max(left, P.values ? 0.3 : 0.12); }
       right = Math.max(right, 0.12);
     }
     const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
     const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 1e-3);
     const m = 0.1 * span;
-    pl.setView([Math.min(...xs) - m, Math.max(...xs) + m + right * span], [Math.min(...ys) - m, Math.max(...ys) + m]);
+    pl.setView([Math.min(...xs) - m - left * span, Math.max(...xs) + m + right * span], [Math.min(...ys) - m, Math.max(...ys) + m]);
     return rB;
   }
 
@@ -299,7 +301,8 @@ export function mount(F, P0) {
           label(c, `r⊥ (${P.flabels[i]})`, pl.X(mid[0]) + 6, pl.Y(mid[1]) - 8, { color: c.gold, weight: 650, size: 11.5 });
         }
       }
-      pl.arrow(A[0], A[1], A[0] + u[0] * len, A[1] + u[1] * len, { color: i ? 'good' : 'bad', width: 2.8, label: P.values ? `${P.flabels[i]} = ${trim(f.F)} N` : P.flabels[i] });
+      const onLeft = A[0] + u[0] * len < -1e-9;
+      pl.arrow(A[0], A[1], A[0] + u[0] * len, A[1] + u[1] * len, { color: i ? 'good' : 'bad', width: 2.8, label: P.values ? `${P.flabels[i]} = ${trim(f.F)} N` : P.flabels[i], ...(onLeft ? { ldx: -8, lalign: 'right' } : {}) });
       pl.point(A[0], A[1], { color: i ? 'good' : 'bad', r: 3.5 });
     });
     // angular velocity: a curved arrow round the axis
@@ -341,7 +344,8 @@ export function mount(F, P0) {
       let lo = Math.min(0, w0, w1), hi = Math.max(0, w0, w1);
       if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
       const padv = (hi - lo) * 0.12;
-      p.setView([0, T], [lo - (lo < 0 ? padv : 0), hi + (hi > 0 ? padv : 0)]);
+      // always some room above: with ω ≤ 0 throughout, the time axis must not sit on the plot's top edge, under the title
+      p.setView([0, T], [lo - (lo < 0 ? padv : 0), hi + padv]);
       p.refreshTheme(); p.grid(); p.axes();
       const area = [[0, 0], [0, w0], [t, now.omega], [t, 0]];
       p.path(area, { close: true, fill: 'good', fillAlpha: 0.2, stroke: false });
@@ -349,7 +353,8 @@ export function mount(F, P0) {
       p.line(t, p.vy0, t, p.vy1, { color: 'ink3', width: 1, dash: [4, 4] });
       p.point(t, now.omega, { color: 'good', r: 4 });
       label(c, 'ω (rad/s) — shaded area = angle turned', p.L + 4, y0 + 8, { color: c.good, size: 11.5, weight: 650 });
-      label(c, 't (s)', p.R - 24, p.B + 18, { color: c.ink2, size: 11.5 });
+      // the axis name sits just above the time axis at its right end, clear of the tick labels below it
+      label(c, 't (s)', p.R - 2, (lo < 0 ? p.Y(0) : p.B) - 9, { color: c.ink2, size: 11.5, align: 'right' });
     } else if (P.plot === 'axis') {
       const sl = sliders.find((s) => s.key === 'd'), dmax = sl ? sl.max : Math.max(md.half, Math.abs(md.d)) * 1.1;
       const In = RM.inertia({ ...md, d: 0 }), M = In.M, Imax = In.Icm + M * dmax * dmax;

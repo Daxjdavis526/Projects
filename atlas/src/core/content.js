@@ -191,6 +191,7 @@ export function validateLesson(L, tex) {
   need(LESSON_KINDS.includes(L.kind), `unknown lesson kind ${L.kind}`);
   if (L.kind === 'lesson') {
     need(L.example && L.example.steps?.length >= 1, 'needs a worked example with steps');
+    if (L.visual) need(L.visual.title && L.visual.lead && L.visual.tasks?.length >= 1, 'the Explore visual needs a title, a lead and tasks (things to try)');
     need(L.practice.length >= 4, `needs at least 4 practice items (has ${L.practice.length})`);
     need(L.checkpoint.length >= 2, `needs at least 2 checkpoint items (has ${L.checkpoint.length})`);
   }
@@ -229,7 +230,7 @@ export function validateLesson(L, tex) {
   const bare = [[L.equation && stripParts(L.equation), true], ...(L.symbols || []).map((s) => [s.tex, false]), ...(L.parts || []).map((q) => [q.tex, false])];
   for (const [src, display] of bare) {
     if (!src) continue;
-    const dmg = escapeDamage(src) || (bareCommand(src) && `contains “${bareCommand(src)}” without its backslash — write it with String.raw`);
+    const dmg = escapeDamage(src, { prose: false }) || (bareCommand(src) && `contains “${bareCommand(src)}” without its backslash — write it with String.raw`);
     if (dmg) p.push(`TeX “${String(src).slice(0, 40)}…” ${dmg}`);
     if (tex) { try { tex(src, display); } catch (e) { p.push(`bad TeX “${src}”: ${e.message}`); } }
   }

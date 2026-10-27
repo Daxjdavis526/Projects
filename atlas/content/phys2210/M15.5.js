@@ -2,7 +2,7 @@
 // e^(−bt/2m), slows the oscillation slightly, and — at b = 2√(km) — stops it
 // oscillating at all.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { s3, tn, springPic, dampedGraph } from './_osc.js';
+import { s3, tn, pn, springPic, dampedGraph } from './_osc.js';
 
 const t = String.raw;
 const LN2 = Math.LN2;
@@ -141,7 +141,7 @@ The oscillation keeps its rhythm, a little slower than the undamped $\omega_0 = 
           hints: [t`$b_c = 2\sqrt{km}$.`],
           teach: 'Critical damping is b_c = 2√(km) = 2mω₀.',
           explain: t`$b_c = 2\sqrt{(${tn(k)})(${m})} = ${tn(bc)}\ \text{kg/s}$. Real cars are tuned below this, at roughly 20–40% of critical: a little overshoot buys a softer ride.`,
-          visual: springPic({ damper: true, m: `${m} kg`, k: `k = ${tn(k)} N/m`, b: 'shock absorber: b = ?', arrow: null, x: 0.4 }),
+          visual: springPic({ damper: true, m: `${m} kg`, k: `k = ${pn(k)} N/m`, b: 'shock absorber: b = ?', arrow: null, x: 0.4 }),
         };
       },
     }),

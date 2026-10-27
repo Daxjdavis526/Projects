@@ -97,6 +97,7 @@ const RANGE = {
 };
 const PROC_NAME = { isothermal: 'Isothermal', isobaric: 'Isobaric', isochoric: 'Isochoric', adiabatic: 'Adiabatic', line: 'Straight line' };
 const CYCLE_NAME = { carnot: 'Carnot', otto: 'Otto', brayton: 'Brayton', rect: 'Rectangle' };
+const CYCLE_TIP = { carnot: 'Carnot: two isotherms and two adiabats.', otto: 'Otto: the petrol engine — heat added at constant volume.', brayton: 'Brayton: the gas turbine — heat added at constant pressure.', rect: 'Rectangle: two isochores and two isobars.' };
 const LEG_NAME = { isothermal: 'isothermal', isobaric: 'isobaric', isochoric: 'isochoric', adiabatic: 'adiabatic', line: 'straight line', free: 'free expansion' };
 
 const trim = (x, n = 3) => String(+(+x).toPrecision(n));
@@ -174,7 +175,7 @@ export function mount(F, P0) {
     else F.params.path = P.show;
   } else if (P.mode === 'cycle') {
     const cyc = P.cycles || [P.cycle];
-    if (has('cycle') && cyc.length > 1) F.choice({ key: 'cycle', label: 'Cycle', options: cyc.map((k) => [k, CYCLE_NAME[k]]), value: P.cycle, explain: 'Carnot: two isotherms and two adiabats. Otto: the petrol engine. Brayton: the gas turbine. Rectangle: two isochores and two isobars.' });
+    if (has('cycle') && cyc.length > 1) F.choice({ key: 'cycle', label: 'Cycle', options: cyc.map((k) => [k, CYCLE_NAME[k]]), value: P.cycle, explain: cyc.map((k) => CYCLE_TIP[k]).join(' ') });
     else F.params.cycle = P.cycle;
     if (has('Th')) slide('Th', 'Hot reservoir $T_h$', '\\mathrm{K}', 'The temperature at which the engine takes in heat.', RANGE.Th);
     if (has('Tc')) slide('Tc', 'Cold reservoir $T_c$', '\\mathrm{K}', 'The temperature at which it gives heat out.', RANGE.Tc);
@@ -190,43 +191,66 @@ export function mount(F, P0) {
   }
   for (const k of ['Th', 'Tc', 'ratio', 'r', 'rp', 'T1', 'T3', 'V2', 'P2']) if (!(k in F.params)) F.params[k] = P[k];
 
-  // ── the process mode's moving end ───────────────────────────────────────────
+  // ── the process mode: a fixed start, an end that moves ─────────────────────
   const n0 = P.n;
   const gam = () => M.gammaOf(F.params.gas);
   const toSI = (s) => { const o = {}; if (s.P !== undefined) o.P = s.P * pf; if (s.V !== undefined) o.V = s.V * vf; if (s.T !== undefined) o.T = s.T; return o; };
-  let A0 = null;
-  const E = { V: null, P: null, T: null };            // the end, SI
+  const nice = (x) => { const m = 10 ** Math.floor(Math.log10(x)); return [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].map((k) => k * m).find((v) => v >= x * 0.999); };
+  const niceStep = (x) => { const m = 10 ** Math.floor(Math.log10(x)); return [1, 2, 5, 10].map((k) => k * m).find((v) => v >= x * 0.999); };
+  let fixedV = P.vrange, fixedP = P.prange;     // process mode and explicit ranges keep their axes
+  let A0 = null, lastB = null;
+  const E = { V: null, P: null, T: null };      // the end state (SI): V fixes it, or T (isochoric), or V and P (a line)
+  const endState = () => {
+    const kind = F.params.process;
+    if (kind === 'isochoric') return M.state({ V: A0.V, T: E.T }, n0);
+    if (kind === 'line') return M.state({ V: E.V, P: E.P }, n0);
+    return M.reach(kind, A0, { V: E.V }, n0, gam());
+  };
+  const settle = () => { lastB = endState(); E.V = lastB.V; E.P = lastB.P; E.T = lastB.T; };
   if (P.mode === 'process') {
     A0 = M.state(toSI(P.start), n0);
-    const B = M.reach(P.process === 'line' ? 'line' : P.process, A0, P.process === 'line' ? M.state(toSI(P.end), n0) : toSI(P.end), n0, gam());
+    const B = P.process === 'line' ? M.state(toSI(P.end), n0) : M.reach(P.process, A0, toSI(P.end), n0, gam());
     E.V = B.V; E.P = B.P; E.T = B.T;
+    settle();
+    if (!fixedV) fixedV = [0, nice(1.5 * Math.max(A0.V, B.V) / vf)];
+    if (!fixedP) fixedP = [0, nice(1.4 * Math.max(A0.P, B.P) / pf)];
     if (has('end')) {
-      const vr = P.vrange || [0, 0];
-      const vmax = P.vrange ? vr[1] : 1.6 * Math.max(A0.V, B.V) / vf;
-      const [lo, hi, st] = P.ranges.V2 || [+(A0.V / vf / 4).toPrecision(2), +vmax.toPrecision(2), +(vmax / 100).toPrecision(1)];
+      const [lo, hi, st] = P.ranges.V2 || [niceStep(fixedV[1] / 40), fixedV[1], niceStep(fixedV[1] / 100)];
       nodes.V2 = F.slider({ key: 'V2', label: 'Final volume $V_2$', min: lo, max: hi, step: st, value: Math.min(hi, Math.max(lo, B.V / vf)), unit: `\\mathrm{${vname.replace('³', '^3')}}`, explain: 'Or drag the end point along the curve.' }).node;
       const [tlo, thi, tst] = P.ranges.T2 || [Math.round(A0.T / 3), Math.round(3 * A0.T), 1];
-      nodes.T2 = F.slider({ key: 'T2', label: 'Final temperature $T_2$', min: tlo, max: thi, step: tst, value: Math.min(thi, Math.max(tlo, B.T)), unit: '\\mathrm{K}', explain: 'At constant volume, heating raises the pressure in proportion.' }).node;
+      nodes.T2 = F.slider({ key: 'T2', label: 'Final temperature $T_2$', min: tlo, max: thi, step: tst, value: Math.min(thi, Math.max(tlo, B.T)), unit: '\\mathrm{K}', explain: 'At constant volume the pressure rises in proportion to the temperature. Or drag the end point.' }).node;
     }
   }
+  // only the sliders that mean something for the current process or cycle are shown
+  const showSliders = () => {
+    if (P.mode === 'process') {
+      if (nodes.V2) nodes.V2.style.display = F.params.process === 'isochoric' ? 'none' : '';
+      if (nodes.T2) nodes.T2.style.display = F.params.process === 'isochoric' ? '' : 'none';
+    }
+    if (P.mode === 'cycle') for (const k of Object.keys(nodes)) nodes[k].style.display = CYCLE_KEYS[F.params.cycle].includes(k) ? '' : 'none';
+  };
+  showSliders();
+  let quiet = false;
+  /** Move the end sliders to the end state without re-entering onChange. */
+  const sync = () => {
+    quiet = true;
+    if (nodes.V2 && F.params.process !== 'isochoric') F.set('V2', +(lastB.V / vf).toPrecision(4));
+    else if (nodes.T2 && F.params.process === 'isochoric') F.set('T2', +lastB.T.toPrecision(4));
+    else F.notify('end');
+    quiet = false;
+  };
 
   const { canvas, box } = F.canvas({ aspect: P.aspect ?? (compact || P.ts ? 'wide' : ''), label: P.alt || (P.mode === 'flow' ? 'An energy-flow diagram' : 'A pressure–volume diagram of a gas') });
   const ctx = canvas.getContext('2d');
   const pv = new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: `V (${vname})`, ylabel: `P (${pname})` });
-  const tsp = P.ts ? new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: 'S − S₀ (J/K)', ylabel: 'T (K)' }) : null;
+  const tsp = P.ts ? new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: 'S (J/K), zero arbitrary', ylabel: 'T (K)' }) : null;
 
   // ── build the picture's legs from the current parameters ───────────────────
   function build() {
     const g = gam();
     if (P.mode === 'process') {
-      const kind = F.params.process;
-      let B;
-      if (kind === 'isochoric') B = M.state({ V: A0.V, T: E.T }, n0);
-      else if (kind === 'line') B = M.state({ V: E.V, P: E.P }, n0);
-      else B = M.reach(kind, A0, { V: E.V }, n0, g);
-      const L = M.leg(kind, A0, B, n0, g);
-      const names = { start: '1', end: '2' };
-      return { g, n: n0, paths: [{ legs: [L], names: [names.start, names.end], closed: false }], focus: 0, named: { 1: A0, 2: B } };
+      const kind = F.params.process, B = endState();
+      return { g, n: n0, paths: [{ legs: [M.leg(kind, A0, B, n0, g)], names: ['1', '2'], closed: false }], focus: 0, named: { 1: A0, 2: B } };
     }
     if (P.mode === 'paths') {
       const named = {};
@@ -261,23 +285,14 @@ export function mount(F, P0) {
     return null;
   }
 
-  // ── fixed views: process mode and explicit ranges keep their axes ──────────
-  const nice = (x) => { const m = 10 ** Math.floor(Math.log10(x)); return [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].map((k) => k * m).find((v) => v >= x * 0.999); };
-  let fixedV = P.vrange, fixedP = P.prange;
-  if (P.mode === 'process' && P.mode !== 'flow') {
-    const B0 = build().paths[0].legs[0].B;
-    if (!fixedV) fixedV = [0, nice(1.5 * Math.max(A0.V, B0.V) / vf)];
-    if (!fixedP) fixedP = [0, nice(1.4 * Math.max(A0.P, B0.P) / pf)];
-  }
-
   // ── dragging the end state ──────────────────────────────────────────────────
-  let dragging = false;
   if (P.mode === 'process' && P.drag) {
-    pv.handle(() => { const b = build().paths[0].legs[0].B; return [b.V / vf, b.P / pf]; }, (x, y) => {
+    pv.handle(() => [lastB.V / vf, lastB.P / pf], (x, y) => {
       const kind = F.params.process, g = gam();
       const vlo = Math.max(pv.vx0, 1e-6 * pv.vx1), vhi = pv.vx1, plo = Math.max(pv.vy0, 1e-6 * pv.vy1), phi = pv.vy1;
-      if (kind === 'line') { E.V = Math.min(vhi, Math.max(vlo + 0.01 * (vhi - vlo), x)) * vf; E.P = Math.min(phi, Math.max(plo + 0.01 * (phi - plo), y)) * pf; }
-      else if (kind === 'isochoric') { const Pn = Math.min(phi, Math.max(plo + 0.01 * (phi - plo), y)) * pf; E.T = (Pn * A0.V) / (n0 * M.R); }
+      const cx = (v) => Math.min(vhi, Math.max(vlo + 0.01 * (vhi - vlo), v)), cy = (p) => Math.min(phi, Math.max(plo + 0.01 * (phi - plo), p));
+      if (kind === 'line') { E.V = cx(x) * vf; E.P = cy(y) * pf; }
+      else if (kind === 'isochoric') E.T = (cy(y) * pf * A0.V) / (n0 * M.R);
       else {
         // the nearest point of the curve, in screen space
         let best = Infinity, bv = E.V;
@@ -291,31 +306,30 @@ export function mount(F, P0) {
         }
         E.V = bv;
       }
-      dragging = true;
-      const b = build().paths[0].legs[0].B;
-      if (nodes.V2 && kind !== 'isochoric') F.set('V2', +(b.V / vf).toPrecision(4));
-      else if (nodes.T2 && kind === 'isochoric') F.set('T2', +b.T.toPrecision(4));
-      else F.notify('end');
-      dragging = false;
+      settle();
+      sync();
     });
     pv.onDrag = () => draw();
   }
 
   F.onChange((key) => {
+    if (quiet) return;
     if (P.mode === 'process') {
       const kind = F.params.process;
-      if (key === 'V2' && !dragging) { E.V = F.params.V2 * vf; const B = kind === 'line' ? null : M.reach(kind, A0, { V: E.V }, n0, gam()); if (B) E.T = B.T; }
-      if (key === 'T2' && !dragging) E.T = F.params.T2;
+      if (key === 'V2') E.V = F.params.V2 * vf;
+      if (key === 'T2') E.T = F.params.T2;
       if (key === 'process') {
-        if (kind === 'isochoric' && Math.abs(E.T / A0.T - 1) < 0.01) E.T = A0.T * (Math.abs(E.V / A0.V - 1) > 0.01 ? E.V / A0.V : 1.5);
-        if (kind === 'line') E.P = M.pressureOn('isothermal', A0, E.V, n0, gam());
-        if (kind !== 'isochoric' && Math.abs(E.V / A0.V - 1) < 0.01) E.V = A0.V * 2;
+        // start the new process from where the old one ended, unless that is no move at all
+        E.V = lastB.V; E.P = lastB.P; E.T = lastB.T;
+        const rT = E.T / A0.T, rV = E.V / A0.V;
+        if (kind === 'isochoric' && Math.abs(rT - 1) < 0.01) E.T = A0.T * (Math.abs(rV - 1) > 0.01 ? rV : 1.5);
+        if (kind !== 'isochoric' && Math.abs(rV - 1) < 0.01) E.V = A0.V * (Math.abs(rT - 1) > 0.01 ? rT : 2);
+        if (kind === 'line' && Math.abs(E.V / A0.V - 1) < 0.01 && Math.abs(E.P / A0.P - 1) < 0.01) { E.V = 2 * A0.V; E.P = A0.P / 2; }
       }
-      if (key === 'process' || key === 'gas') {
-        const b = build().paths[0].legs[0].B;
-        if (kind !== 'isochoric') E.T = b.T;
-      }
+      if (['V2', 'T2', 'process', 'gas'].includes(key)) settle();
+      if (key === 'process') { showSliders(); sync(); }
     }
+    if (P.mode === 'cycle' && key === 'cycle') showSliders();
     draw();
   });
 
@@ -356,18 +370,11 @@ export function mount(F, P0) {
     pv.clear();
 
     // reference curves
-    const Ts = isothermList(m);
-    for (const T of Ts) {
-      pv.fn((v) => (n * M.R * T) / (v * vf) / pf, { color: 'ink3', width: 1.1, dash: [5, 5], domain: [Math.max(pv.vx0, pv.vx1 * 1e-3), pv.vx1] });
-      if (P.isoLabels) {
-        const vEnd = pv.vx1, pEnd = (n * M.R * T) / (vEnd * vf) / pf;
-        const [lx, ly, al] = pEnd > pv.vy0 + 0.06 * (pv.vy1 - pv.vy0) ? [pv.X(vEnd) - 4, pv.Y(pEnd) - 9, 'right'] : [pv.X((n * M.R * T) / (pv.vy0 + 0.06 * (pv.vy1 - pv.vy0)) / pf / vf) + 4, pv.Y(pv.vy0 + 0.06 * (pv.vy1 - pv.vy0)) - 9, 'left'];
-        rich(ctx, c, `${trim(T, 4)} K`, lx, ly, { color: 'ink3', size: fs - 1, align: al });
-      }
-    }
-    for (const s of adiabatStates(m)) {
-      pv.fn((v) => (s.P * (s.V / (v * vf)) ** g) / pf, { color: 'violet', width: 1.1, dash: [2, 4], alpha: 0.8, domain: [Math.max(pv.vx0, pv.vx1 * 1e-3), pv.vx1] });
-    }
+    const Ts = isothermList(m, samp);
+    const dom = [Math.max(pv.vx0, pv.vx1 * 1e-3), pv.vx1];
+    for (const T of Ts) pv.fn((v) => (n * M.R * T) / (v * vf) / pf, { color: 'ink3', width: 1.1, dash: [5, 5], domain: dom });
+    const adi = adiabatStates(m);
+    for (const s of adi) pv.fn((v) => (s.P * (s.V / (v * vf)) ** g) / pf, { color: 'violet', width: 1.1, dash: [2, 4], alpha: 0.8, domain: dom });
 
     // the work as area
     const heatOf = (L) => (Math.abs(L.Q) < 1e-9 * (Math.abs(L.W) + Math.abs(L.dU) + 1) ? 0 : Math.sign(L.Q));
@@ -387,45 +394,62 @@ export function mount(F, P0) {
       });
     });
 
-    // the legs, then their arrows, then the states
+    // the legs and their arrows
     paths.forEach((p, i) => p.legs.forEach((L, k) => {
       const pts = samp[i][k].map((s) => [s.V / vf, s.P / pf]);
       const col = legColor(L, p);
       if (L.kind === 'free') pv.path(pts, { color: col, width: 1.8, dash: [3, 5] });
       else pv.path(pts, { color: col, width: isFocus(i) ? 2.8 : 1.8, alpha: isFocus(i) ? 1 : 0.55 });
-      if (P.arrows && L.kind !== 'free') arrowOn(pv, pts, col, small ? 7 : 9, isFocus(i) ? 1 : 0.6);
+      if (P.arrows && L.kind !== 'free') arrowOn(pv, pts, col, small ? 10 : 12, isFocus(i) ? 1 : 0.6);
     }));
-    drawStates(pv, m, (s) => [s.V / vf, s.P / pf], c, fs);
-    if (P.areaLabel && areaAt.length) rich(ctx, c, P.areaLabel, pv.X(areaAt[0][0]), pv.Y(areaAt[0][1]), { color: 'ink', size: fs + 0.5, weight: 650, align: 'center' });
-    if (P.note) rich(ctx, c, P.note, pv.L + 8, pv.T + 10, { color: 'ink2', size: fs });
-    pv.drawHandles();
 
-    // the heat key
-    const coloured = P.heat && paths.some((p) => p.legs.length > 1 || p.closed || P.mode !== 'process' || true);
-    if ((P.legend === true || (P.legend === 'auto' && !small)) && coloured && P.heat) {
+    // words: the heat key first, then the states, then the isotherms, each kept clear of what is already placed
+    const lab = placer(pv, c);
+    if (P.heat && (P.legend === true || (P.legend === 'auto' && !small))) {
       const kinds = new Set(paths.flatMap((p) => p.legs.map((L) => (L.kind === 'free' ? 'free' : heatOf(L)))));
       const items = [[1, 'bad', 'heat in'], [-1, 'accent', 'heat out'], [0, 'violet', 'no heat']].filter(([k]) => kinds.has(k));
-      let y = pv.T + 10;
+      let y = pv.T + 10, wmax = 0;
       const xr = pv.R - 8;
       for (const [, col, text] of items) {
         const w = rich(ctx, c, text, 0, 0, { size: fs - 1, measure: true });
+        wmax = Math.max(wmax, w);
         rich(ctx, c, text, xr, y, { color: 'ink2', size: fs - 1, align: 'right' });
         ctx.save(); ctx.strokeStyle = c[col]; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(xr - w - 24, y); ctx.lineTo(xr - w - 6, y); ctx.stroke(); ctx.restore();
         y += fs + 5;
       }
+      if (items.length) lab.reserve({ x0: xr - wmax - 26, y0: pv.T, x1: pv.R, y1: y - fs / 2 });
     }
+    if (P.note) { const w = rich(ctx, c, P.note, pv.L + 8, pv.T + 10, { color: 'ink2', size: fs }); lab.reserve({ x0: pv.L, y0: pv.T, x1: pv.L + 10 + w, y1: pv.T + 18 }); }
+    drawStates(pv, m, (s) => [s.V / vf, s.P / pf], c, fs, lab);
+    if (P.isoLabels) for (const T of Ts) {
+      const pAt = (v) => (n * M.R * T) / (v * vf) / pf, vAt = (p) => (n * M.R * T) / (p * pf) / vf;
+      const tries = [];
+      const pr = pAt(pv.vx1);
+      if (pr > pv.vy0 + 0.02 * (pv.vy1 - pv.vy0)) tries.push([pv.X(pv.vx1) - 4, pv.Y(pr), -10, 'right'], [pv.X(pv.vx1) - 4, pv.Y(pr), 10, 'right']);
+      const vt = vAt(pv.vy1);
+      if (vt > pv.vx0 && vt < pv.vx1) tries.push([pv.X(vt) + 6, pv.Y(pv.vy1) + 9, 0, 'left']);
+      const ylow = pv.vy0 + 0.06 * (pv.vy1 - pv.vy0), vl = vAt(ylow);
+      if (vl > pv.vx0 && vl < pv.vx1) tries.push([pv.X(vl) + 4, pv.Y(ylow), -9, 'left']);
+      const v1 = vAt(pv.vy0 + 0.5 * (pv.vy1 - pv.vy0));
+      if (v1 > pv.vx0 && v1 < pv.vx1) tries.push([pv.X(v1) + 6, pv.Y(pv.vy0 + 0.5 * (pv.vy1 - pv.vy0)), 0, 'left']);
+      lab.text(`${trim(T, 4)} K`, tries.map(([x, y, dy, al]) => ({ x, y: y + dy, align: al })), { color: 'ink3', size: fs - 1 });
+    }
+    if (P.areaLabel && areaAt.length) rich(ctx, c, P.areaLabel, pv.X(areaAt[0][0]), pv.Y(areaAt[0][1]), { color: 'ink', size: fs + 0.5, weight: 650, align: 'center' });
+    pv.drawHandles();
 
     // the temperature–entropy diagram
     if (tsp) {
+      // entropy's zero is arbitrary: put it a little left of the lowest entropy drawn, so the T axis sits at the left edge
       const ref = paths[0].legs[0].A;
-      const Ssamp = samp.map((sp) => sp.map((pts) => pts.map((s) => ({ S: M.entropy(s, ref, n, g), T: s.T }))));
       let smin = Infinity, smax = -Infinity, tmax = 0;
-      Ssamp.flat(2).forEach((q) => { smin = Math.min(smin, q.S); smax = Math.max(smax, q.S); tmax = Math.max(tmax, q.T); });
-      const span = Math.max(smax - smin, 1e-6 * Math.max(1, Math.abs(smax)));
-      tsp.setView([smin - 0.15 * span, smax + 0.15 * span], [0, nice(1.15 * tmax)]);
+      samp.flat(2).forEach((s) => { const S = M.entropy(s, ref, n, g); smin = Math.min(smin, S); smax = Math.max(smax, S); tmax = Math.max(tmax, s.T); });
+      const span = Math.max(smax - smin, 0.2 * n * M.R), zero = smin - 0.15 * span - (span - (smax - smin)) / 2;
+      const Sof = (s) => M.entropy(s, ref, n, g) - zero;
+      const Ssamp = samp.map((sp) => sp.map((pts) => pts.map((s) => ({ S: Sof(s), T: s.T }))));
+      tsp.setView([0, 1.3 * span], [0, nice(1.15 * tmax)]);
       tsp.resize(); tsp.refreshTheme(); tsp.grid(); tsp.axes();
       for (const T of Ts) tsp.line(tsp.vx0, T, tsp.vx1, T, { color: 'ink3', width: 1.1, dash: [5, 5] });
-      for (const s of adiabatStates(m)) { const S = M.entropy(s, ref, n, g); tsp.line(S, tsp.vy0, S, tsp.vy1, { color: 'violet', width: 1.1, dash: [2, 4] }); }
+      for (const s of adi) { const S = Sof(s); tsp.line(S, tsp.vy0, S, tsp.vy1, { color: 'violet', width: 1.1, dash: [2, 4] }); }
       if (P.shade) paths.forEach((p, i) => {
         if (!isFocus(i)) return;
         if (p.closed) tsp.path(Ssamp[i].flat().map((q) => [q.S, q.T]), { close: true, fill: 'gold', fillAlpha: 0.26, stroke: false });
@@ -440,23 +464,29 @@ export function mount(F, P0) {
         const col = legColor(L, p);
         if (L.kind === 'free') tsp.path(pts, { color: col, width: 1.8, dash: [3, 5] });
         else tsp.path(pts, { color: col, width: isFocus(i) ? 2.8 : 1.8, alpha: isFocus(i) ? 1 : 0.55 });
-        if (P.arrows && L.kind !== 'free') arrowOn(tsp, pts, col, small ? 7 : 9, isFocus(i) ? 1 : 0.6);
+        if (P.arrows && L.kind !== 'free') arrowOn(tsp, pts, col, small ? 10 : 12, isFocus(i) ? 1 : 0.6);
       }));
-      drawStates(tsp, m, (s) => [M.entropy(s, ref, n, g), s.T], c, fs);
-      rich(ctx, c, P.shade ? (paths.some((p) => p.closed) ? 'area inside = net work = net heat' : 'area under the path = heat Q') : 'reversible paths', tsp.L + 8, tsp.T + 10, { color: 'ink2', size: fs - 1 });
+      const tl = placer(tsp, c);
+      const head = P.shade ? (paths.some((p) => p.closed) ? 'area inside = net work' : 'area under the path = heat Q') : 'reversible paths only';
+      const hw = rich(ctx, c, head, tsp.L + 8, tsp.T + 10, { color: 'ink2', size: fs - 1 });
+      tl.reserve({ x0: tsp.L, y0: tsp.T, x1: tsp.L + 12 + hw, y1: tsp.T + 20 });
+      drawStates(tsp, m, (s) => [Sof(s), s.T], c, fs, tl);
     }
 
     // numbers
     readout(readoutRows(m));
   }
 
-  /** Temperatures of the reference isotherms. */
-  function isothermList(m) {
+  /** Temperatures of the reference isotherms: through the states of an open path; a cycle's lowest and highest. */
+  function isothermList(m, samp) {
     if (P.isotherms === false) return [];
     if (Array.isArray(P.isotherms)) return P.isotherms;
     const out = [];
-    for (const p of m.paths) for (const L of p.legs) for (const s of [L.A, L.B]) if (!out.some((T) => Math.abs(T - s.T) < 1e-3 * s.T)) out.push(s.T);
-    // an isothermal leg is its own isotherm, but the guide still shows where it continues
+    const add = (T) => { if (!out.some((u) => Math.abs(u - T) < 1e-3 * T)) out.push(T); };
+    m.paths.forEach((p, i) => {
+      if (p.closed) { const Ts = samp[i].flat().map((s) => s.T); add(Math.min(...Ts)); add(Math.max(...Ts)); }
+      else for (const L of p.legs) { add(L.A.T); add(L.B.T); }
+    });
     return out;
   }
   function adiabatStates(m) {
@@ -467,41 +497,60 @@ export function mount(F, P0) {
     return out;
   }
 
-  function drawStates(plot, m, xy, c, fs) {
-    if (!P.stateLabels && P.mode !== 'process') return;
+  function drawStates(plot, m, xy, c, fs, lab) {
     const all = [];
     m.paths.forEach((p) => p.legs.forEach((L, k) => { if (k === 0) all.push([L.A, p.names[0]]); all.push([L.B, p.names[k + 1]]); }));
-    // label positions push away from the middle of everything drawn
     const pts = all.map(([s]) => xy(s).map(Number));
+    // labels push away from the middle of everything drawn
     const cx = pts.reduce((a, q) => a + plot.X(q[0]), 0) / pts.length, cy = pts.reduce((a, q) => a + plot.Y(q[1]), 0) / pts.length;
-    const seen = new Set();
+    const seen = new Set(), todo = [];
     all.forEach(([s, name], i) => {
       const key = `${trim(s.P, 6)}|${trim(s.V, 6)}`;
       if (seen.has(key)) return;
       seen.add(key);
       const [x, y] = pts[i];
-      if (P.mode === 'process' && name === '2' && P.drag) return;   // the handle marks it
-      plot.point(x, y, { color: 'ink', r: compact ? 3.5 : 4.5 });
-      if (!P.stateLabels) return;
+      // in process mode the end is the drag handle (on the PV diagram), not a dot
+      if (!(P.mode === 'process' && name === '2' && P.drag && plot === pv)) plot.point(x, y, { color: 'ink', r: compact ? 3.5 : 4.5 });
+      lab.reserve({ x0: plot.X(x) - 6, y0: plot.Y(y) - 6, x1: plot.X(x) + 6, y1: plot.Y(y) + 6 });
+      todo.push([s, name, x, y]);
+    });
+    if (!P.stateLabels) return;
+    for (const [s, name, x, y] of todo) {
       const spec = (P.mode === 'paths' && name && P.states[name]) || {};
       let text = spec.label ?? name ?? '';
       if (P.stateT && text !== '') text += ` · ${trim(s.T, 3)} K`;
-      if (!text) return;
+      if (!text) continue;
       const sx = plot.X(x), sy = plot.Y(y);
-      let dx = spec.dx, dy = spec.dy;
-      if (dx === undefined || dy === undefined) {
-        const ux = sx - cx, uy = sy - cy, len = Math.hypot(ux, uy) || 1;
-        dx = dx ?? (ux / len) * 13; dy = dy ?? (uy / len) * 13;
-        if (pts.length < 2) { dx = 9; dy = -12; }
+      const tries = [];
+      if (spec.dx !== undefined || spec.dy !== undefined) tries.push([spec.dx ?? 0, spec.dy ?? 0]);
+      let ux = sx - cx, uy = sy - cy;
+      const len = Math.hypot(ux, uy);
+      if (len < 1 || todo.length < 2) { ux = 0.6; uy = -0.8; } else { ux /= len; uy /= len; }
+      for (const a of [0, 0.7, -0.7, 1.4, -1.4, Math.PI]) {
+        const ca = Math.cos(a), sa = Math.sin(a);
+        tries.push([13 * (ux * ca - uy * sa), 13 * (ux * sa + uy * ca)]);
       }
-      const w = rich(ctx, c, text, 0, 0, { size: fs, weight: 650, measure: true });
-      const align = dx < -3 ? 'right' : dx > 3 ? 'left' : 'center';
-      let tx = sx + dx;
-      // keep labels inside the plot
-      if (align === 'left') tx = Math.min(tx, plot.R + 12 - w);
-      if (align === 'right') tx = Math.max(tx, plot.L - 30 + w);
-      rich(ctx, c, text, tx, Math.min(plot.B - 6, Math.max(plot.T + 6, sy + dy)), { color: 'ink', size: fs, weight: 650, align });
-    });
+      tries.push([0, -15], [0, 15], [12, 0], [-12, 0]);
+      lab.text(text, tries.map(([dx, dy]) => ({ x: sx + dx, y: sy + dy, align: dx < -3 ? 'right' : dx > 3 ? 'left' : 'center' })), { color: 'ink', size: fs, weight: 650 });
+    }
+  }
+
+  /** Words on a plot, each at the first of its candidate places that is inside the frame and clear of the others. */
+  function placer(plot, c) {
+    const boxes = [];
+    const hit = (b) => boxes.some((q) => !(b.x1 < q.x0 || b.x0 > q.x1 || b.y1 < q.y0 || b.y0 > q.y1));
+    return {
+      reserve(b) { boxes.push(b); },
+      text(s, tries, o) {
+        const w = rich(ctx, c, s, 0, 0, { ...o, measure: true }), h = (o.size || 12.5) + 2;
+        const boxOf = (t) => { const x0 = t.align === 'left' ? t.x : t.align === 'right' ? t.x - w : t.x - w / 2; return { x0, y0: t.y - h / 2, x1: x0 + w, y1: t.y + h / 2 }; };
+        const inside = (b) => b.x0 >= plot.L + 2 && b.x1 <= plot.R - 2 && b.y0 >= plot.T - 2 && b.y1 <= plot.B + 2;
+        let pick = tries.find((t) => { const b = boxOf(t); return inside(b) && !hit(b); }) || tries.find((t) => inside(boxOf(t))) || tries[0];
+        if (!pick) return;
+        boxes.push(boxOf(pick));
+        rich(ctx, c, s, pick.x, pick.y, { ...o, align: pick.align });
+      },
+    };
   }
 
   function readoutRows(m) {
@@ -542,6 +591,9 @@ export function mount(F, P0) {
 
   // ── the energy-flow diagram ────────────────────────────────────────────────
   function drawFlow(c) {
+    const W0 = canvas.clientWidth || 600;
+    const want = W0 < 480 ? '4 / 3' : '';
+    if (box.style.aspectRatio !== want) { box.style.aspectRatio = want; requestAnimationFrame(draw); return; }
     const W = canvas.clientWidth || 600, H = canvas.clientHeight || 300;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
@@ -550,7 +602,8 @@ export function mount(F, P0) {
     const fs = compact || W < 420 ? 11.5 : 13;
     const engine = P.device === 'engine';
     const lab = { hot: 'hot reservoir', cold: 'cold reservoir', device: engine ? 'engine' : P.device === 'fridge' ? 'refrigerator' : 'heat pump', Qh: 'Q_h', Qc: 'Q_c', W: 'W', ...P.labels };
-    const cx = Math.round(W * 0.38), cy = Math.round(H * 0.5), rad = Math.min(H * 0.13, W * 0.09);
+    const cx = Math.round(W * 0.38), cy = Math.round(H * 0.5);
+    const rad = Math.max(Math.min(H * 0.13, W * 0.09), rich(ctx, c, lab.device, 0, 0, { size: fs, weight: 650, measure: true }) / 2 + 9);
     const bw = Math.min(W * 0.62, 420), bh = Math.max(26, H * 0.15);
     const hotY = H * 0.04, coldY = H * 0.96 - bh;
     const roundRect = (x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
@@ -577,7 +630,7 @@ export function mount(F, P0) {
     else { band(cx, yTop, cx, yHotB, width(P.Qh), 'bad'); band(cx, yColdT, cx, yBot, width(P.Qc), 'accent'); band(W * 0.86, cy, cx + rad + 3, cy, width(P.W), 'gold'); }
     ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 2 * Math.PI); ctx.fillStyle = c.panel; ctx.fill(); ctx.strokeStyle = c.ink2; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
     rich(ctx, c, lab.device, cx, cy, { color: 'ink', size: fs, weight: 650, align: 'center', halo: false });
-    const off = (e) => width(e) / 2 + 12;
+    const off = (e) => Math.max(width(e) * 0.95 + 5, 9) + 8;      // clear of the arrowhead
     rich(ctx, c, lab.Qh, cx + Math.max(off(P.Qh), 14), (yHotB + yTop) / 2, { color: 'bad', size: fs + 0.5, weight: 650 });
     rich(ctx, c, lab.Qc, cx + Math.max(off(P.Qc), 14), (yBot + yColdT) / 2, { color: 'accent', size: fs + 0.5, weight: 650 });
     rich(ctx, c, lab.W, (cx + rad + W * 0.86) / 2, cy - width(P.W) / 2 - 16, { color: 'gold', size: fs + 0.5, weight: 650, align: 'center' });
@@ -608,11 +661,13 @@ function arrowOn(plot, pts, col, size, alpha) {
   const x = scr[i][0] + f * (scr[i + 1][0] - scr[i][0]), y = scr[i][1] + f * (scr[i + 1][1] - scr[i][1]);
   const ux = (scr[i + 1][0] - scr[i][0]) / (seg[i] || 1), uy = (scr[i + 1][1] - scr[i][1]) / (seg[i] || 1);
   const g = plot.ctx;
-  g.save(); g.globalAlpha = alpha; g.fillStyle = plot.color(col); g.beginPath();
+  g.save(); g.globalAlpha = alpha; g.beginPath();
   g.moveTo(x + ux * size * 0.7, y + uy * size * 0.7);
-  g.lineTo(x - ux * size * 0.6 - uy * size * 0.55, y - uy * size * 0.6 + ux * size * 0.55);
-  g.lineTo(x - ux * size * 0.6 + uy * size * 0.55, y - uy * size * 0.6 - ux * size * 0.55);
-  g.closePath(); g.fill(); g.restore();
+  g.lineTo(x - ux * size * 0.6 - uy * size * 0.5, y - uy * size * 0.6 + ux * size * 0.5);
+  g.lineTo(x - ux * size * 0.6 + uy * size * 0.5, y - uy * size * 0.6 - ux * size * 0.5);
+  g.closePath();
+  g.lineWidth = 2; g.strokeStyle = plot.col.bg; g.stroke();     // a thin outline of the background, so it reads on its own line
+  g.fillStyle = plot.color(col); g.fill(); g.restore();
 }
 
 /** The average of a polygon's vertices (good enough to place a label). */

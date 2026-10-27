@@ -174,8 +174,9 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
           prompt: t`A cylindrical satellite (a solid cylinder of mass ${M} kg and radius ${R} m) is spun up about its axis by two thrusters on opposite sides of its rim, each pushing ${F} N tangentially, in opposite directions. How long do they need to fire to spin it from rest to ${N} rpm?`,
           answer: tt, units: 's', tol: { rel: 0.01 },
           errors: [
-            { value: (I * w) / (F * R), feedback: 'Both thrusters turn it the same way: the torque is 2FR.' },
-            { value: (M * R * R * w) / tau, feedback: 'A solid cylinder about its axis has I = ½MR².' },
+            // two different slips give the same number (twice the answer), so one message names both
+            { value: (I * w) / (F * R), feedback: t`That is twice the answer. Both thrusters turn the satellite the same way, so the torque is $2FR$ — and a solid cylinder about its axis has $I = 	frac12 MR^2$, not $MR^2$.` },
+            { value: (I * N) / tau, feedback: 'Convert rpm to rad/s first (× 2π/60).' },
           ],
           hints: [t`The thrusters form a couple: $\tau = 2FR$. A solid cylinder: $I = \tfrac12 MR^2$.`, t`$\alpha = \tau/I$, then $t = \omega/\alpha$ with $\omega$ in rad/s.`],
           teach: 'A couple of thrusters gives torque 2FR; the time to reach a spin rate is Iω/τ.',
@@ -223,7 +224,7 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
           prompt: t`A space telescope turns using a reaction wheel. The wheel (moment of inertia ${Iw} kg·m²) is spun up steadily by its motor from rest to ${N.toLocaleString('en-US')} rpm in ${T} s. By Newton’s third law, the motor twists the telescope the other way with an equal torque. If the telescope’s moment of inertia about the same axis is ${Is} kg·m², what is its angular acceleration?`,
           answer: as, units: 'rad/s^2', tol: { rel: 0.01 },
           errors: [
-            { value: (N * RPM) / T, feedback: 'That is the wheel’s angular acceleration. The telescope, far heavier to turn, gets I_w α_w / I_s.' },
+            { value: (N * RPM) / T, feedback: t`That is the wheel’s angular acceleration. The telescope, far harder to turn, gets $I_w\alpha_w/I_s$.` },
             { value: (Iw * N) / T / Is, feedback: 'Convert rpm to rad/s first.' },
           ],
           hints: [t`The wheel’s angular acceleration: $\alpha_w = \omega/t$. The torque on it: $\tau = I_w\alpha_w$.`, t`The telescope feels $-\tau$: $\alpha_s = \tau/I_s$.`],
@@ -239,7 +240,7 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
                 { param: ['0.55*cos(t)', '0.55*sin(t)'], t: [0.3, 2.6], color: 'accent', width: 2 },
                 { param: ['1.25*cos(t)', '1.25*sin(t)'], t: [-0.4, -2.2], color: 'violet', width: 2 },
               ],
-              arrows: [{ from: [r4(0.55 * Math.cos(2.45)), r4(0.55 * Math.sin(2.45))], to: [r4(0.55 * Math.cos(2.65)), r4(0.55 * Math.sin(2.65))], color: 'accent', label: 'wheel', labelDx: -46 }, { from: [r4(1.25 * Math.cos(-2.05)), r4(1.25 * Math.sin(-2.05))], to: [r4(1.25 * Math.cos(-2.25)), r4(1.25 * Math.sin(-2.25))], color: 'violet', label: 'telescope', labelDx: -70, labelDy: 8 }],
+              arrows: [{ from: [r4(0.55 * Math.cos(2.45)), r4(0.55 * Math.sin(2.45))], to: [r4(0.55 * Math.cos(2.65)), r4(0.55 * Math.sin(2.65))], color: 'accent', label: 'wheel', labelDx: -46 }, { from: [r4(1.25 * Math.cos(-2.05)), r4(1.25 * Math.sin(-2.05))], to: [r4(1.25 * Math.cos(-2.25)), r4(1.25 * Math.sin(-2.25))], color: 'violet', label: 'telescope', labelDx: -75, labelDy: 26 }],
             },
             caption: 'The telescope (grey) and its reaction wheel (blue), seen along the wheel’s axle: the wheel spins up one way, the telescope turns the other. A sketch.',
           },

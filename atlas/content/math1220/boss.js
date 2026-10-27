@@ -88,7 +88,7 @@ export default boss({
               errors: [{ value: b ** 4 / 24, feedback: t`That uses the $n$-th term. The remainder after degree $4$ involves the 5th derivative: $\dfrac{M}{5!}|\theta|^5$.` }],
               hints: [t`$|R_4(\theta)| \le \dfrac{M}{5!}|\theta|^5$, and every derivative of $\cos$ is at most $1$ in size.`, t`Evaluate $\dfrac{${b}^5}{120}$.`],
               teach: 'The Lagrange bound after degree n is M|x − a|^(n+1)/(n+1)!, with M bounding the (n+1)-th derivative.',
-              explain: t`$\dfrac{${b}^5}{120} = ${texNum(B, 3)}$. The true worst error is smaller still (about ${texNum(Math.abs(Math.cos(b) - (1 - b * b / 2 + b ** 4 / 24)), 2)}), because the $\theta^5$ term of the series is zero.`,
+              explain: t`$\dfrac{${b}^5}{120} = ${texNum(B, 3)}$. The true worst error is smaller still (about $${texNum(Math.abs(Math.cos(b) - (1 - b * b / 2 + b ** 4 / 24)), 2)}$), because the $\theta^5$ term of the series is zero.`,
               visual: { type: 'graph', params: { x: [-2.6, 2.6], y: [-0.8, 1.3], curves: [{ fn: 'cos(x)', color: 'ink3', width: 1.6 }, { fn: '1 - x^2/2 + x^4/24', color: 'gold' }], vlines: [{ x: -b }, { x: b, label: `±${b}` }] }, caption: t`$\cos\theta$ (grey) and $P_4$ (gold): indistinguishable inside $|\theta| \le ${b}$.` },
             };
           },

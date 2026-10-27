@@ -99,6 +99,9 @@ Every text field is markup — `prompt`, `hints`, `teach`, `explain`,
 the right-hand options of a matching problem (plain text in a drop-down) and
 labels that a simulation draws on its canvas (plain text; Unicode is fine).
 A list must be its own paragraph: leave a blank line before it.
+Formatting helpers that return TeX (`tex(x)`, `frac(x)`, `polyTeX`, a
+`×10ⁿ` number) must land inside `$…$` (`t\`about $${tex(x)}$ m\``); labels that
+a simulation draws on its canvas are plain text, so give them plain numbers.
 Outside `$…$` nothing is TeX: `U_g`, `v^2` or `\,` in prose print exactly
 as typed — put every symbol, subscript and thin space inside math.
 Show the lesson's main equation once: either as `equation` (the large

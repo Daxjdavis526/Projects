@@ -201,12 +201,12 @@ That $1/r^3$ is why the Moon raises bigger tides on Earth than the Sun does, tho
         const rr = Math.cbrt((2 * GM * L) / da), rs = (2 * GM) / C ** 2;
         const GMs = 4.3e6 * GM_SUN, rrS = Math.cbrt((2 * GMs * L) / da), rsS = (2 * GMs) / C ** 2;   // the same for Sagittarius A*
         return {
-          prompt: t`An astronaut 2 m tall falls feet first toward a black hole of ${n} solar masses ($GM = ${n}\times1.327\times10^{20}\ \text{m}^3/\text{s}^2$). At what distance from its centre does the head-to-feet stretch reach ${k}$g (${s3(da)}\ \text{m/s}^2$)? Give it in km.`,
+          prompt: t`An astronaut 2 m tall falls feet first toward a black hole of ${n} solar masses ($GM = ${n}\times1.327\times10^{20}\ \text{m}^3/\text{s}^2$). At what distance from its centre does the head-to-feet stretch reach ${k}g ($${s3(da)}\ \text{m/s}^2$)? Give it in km.`,
           answer: rr / 1000, units: 'km', tol: { rel: 0.01 },
           errors: [{ value: Math.cbrt((GM * L) / da) / 1000, feedback: 'Keep the factor 2 in 2GMd/r³.' }, { value: Math.sqrt((2 * GM * L) / da) / 1000, feedback: 'The stretch goes as 1/r³: take a cube root, not a square root.' }],
           hints: [t`Set $\dfrac{2GML}{r^3} = ${s3(da)}\ \text{m/s}^2$ and solve for $r$.`, t`$r = \left(\dfrac{2GML}{\Delta a}\right)^{1/3}$, with $L = 2$ m.`],
           teach: 'Near a stellar-mass black hole tides become deadly thousands of kilometres out — “spaghettification”.',
-          explain: t`$r = \left(\dfrac{2(${tex(GM, 4)})(2)}{${s3(da)}}\right)^{1/3} = ${s3(rr / 1000)}$ km — far outside the event horizon, at $2GM/c^2 = ${s3(rs / 1000)}$ km. Around Sagittarius A* (4.3 million solar masses) the same stretch would be reached only ${Math.round(rrS / 1e6) * 1000 > 0 ? (Math.round(rrS / 1e7) * 10000).toLocaleString('en-US') : ''} km from the centre — deep inside its ${s3(rsS / 1e9)}-million-km horizon. Big black holes have gentle tides at their edge.`,
+          explain: t`$r = \left(\dfrac{2(${tex(GM, 4)})(2)}{${s3(da)}}\right)^{1/3} = ${s3(rr / 1000)}$ km — far outside the event horizon, at $2GM/c^2 = ${s3(rs / 1000)}$ km. Around Sagittarius A* (4.3 million solar masses) the same stretch would be reached only ${(Math.round(rrS / 1e7) * 10000).toLocaleString('en-US')} km from the centre — deep inside its ${s3(rsS / 1e9)}-million-km horizon. Big black holes have gentle tides at their edge.`,
           visual: {
             type: 'graph',
             params: {

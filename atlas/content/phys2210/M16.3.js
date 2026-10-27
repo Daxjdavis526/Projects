@@ -159,8 +159,8 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
           prompt: t`A ${ms} kg metal sample at 100.0 °C is dropped into ${mw} kg of water at ${Tw}.0 °C in an insulated cup of negligible heat capacity. The final temperature is ${Tf.toFixed(1)} °C. What is the metal’s specific heat?`,
           answer: c, units: 'J/(kg K)', tol: { rel: 0.02 },
           errors: apart([
-            { value: (mw * CW * (Tf - Tw)) / (ms * 100), feedback: 'Use the sample’s temperature *drop*, 100 − T_f, not its starting temperature.' },
-            { value: (mw * CW * (Tf - Tw)) / (ms * (100 - Tw)), feedback: 'The sample ends at T_f, not at the water’s starting temperature: its drop is 100 − T_f.' },
+            { value: (mw * CW * (Tf - Tw)) / (ms * 100), feedback: 'Use the sample’s temperature *drop*, $100 - T_f$, not its starting temperature.' },
+            { value: (mw * CW * (Tf - Tw)) / (ms * (100 - Tw)), feedback: 'The sample ends at $T_f$, not at the water’s starting temperature: its drop is $100 - T_f$.' },
           ], c),
           hints: ['Heat lost by the sample = heat gained by the water.', t`$c_s = \dfrac{m_wc_w(T_f - T_w)}{m_s(100 - T_f)}$.`],
           teach: 'Calorimetry finds an unknown specific heat by balancing the heat lost against the heat gained.',

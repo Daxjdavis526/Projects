@@ -125,10 +125,10 @@ Water needs 334 kJ/kg to melt and 2257 kJ/kg to boil — over five times the 418
           answer: m, units: 'kg', tol: { rel: 0.01 },
           errors: apart([
             { value: (P * 3600) / LOX.Lv, feedback: 'That is one hour’s boil-off. A day is 86 400 s.' },
-            { value: (P * 86400) / LN2.Lv, feedback: 'That uses nitrogen’s latent heat. For oxygen, L_v = 213 kJ/kg.' },
+            { value: (P * 86400) / LN2.Lv, feedback: 'That uses nitrogen’s latent heat. For oxygen, $L_v = 213$ kJ/kg.' },
           ], m),
           hints: ['A watt is a joule per second, so first find the heat delivered in a day.', t`$m = \dfrac{P\,t}{L_v}$ with $t = 86\,400$ s.`],
-          teach: 'Steady heat leak P boils off liquid at a rate P/L_v.',
+          teach: 'A steady heat leak $P$ boils off liquid at a rate $P/L_v$.',
           explain: t`In a day $Q = (${P}\ \text{W})(86\,400\ \text{s}) = ${fmt(P * 86400, 3)}$ J, so $m = Q/L_v = ${fmt(P * 86400, 3)}/(213\times10^{3}) = ${fmt(m, 3)}$ kg. Long-duration missions fight every watt with vacuum and multilayer insulation (lesson M16.5).`,
           visual: vesselPic({ kind: 'tank', liquid: 'LOX, 90 K', leak: true, vent: 'O₂ gas out', level: 0.7, caption: 'Heat leaking into a LOX tank boils it; the vapour is vented. Cross-section, not to scale.' }),
         };
@@ -224,7 +224,7 @@ Water needs 334 kJ/kg to melt and 2257 kJ/kg to boil — over five times the 418
             { value: (P * 1000 * tm * 60) / LN2.Lv, feedback: 'That is nitrogen’s latent heat; oxygen’s is 213 kJ/kg.' },
           ], m),
           hints: ['Energy absorbed = power × time, with the time in seconds.', t`$m = Pt/L_v$.`],
-          teach: 'Heat flowing steadily into a boiling propellant removes mass at a rate P/L_v.',
+          teach: 'Heat flowing steadily into a boiling propellant removes mass at a rate $P/L_v$.',
           explain: t`$Q = (${P}\times10^{3}\ \text{W})(${tm * 60}\ \text{s}) = ${fmt(P * 1000 * tm * 60, 3)}$ J, so $m = Q/L_v = ${fmt(m, 3)}$ kg — which is why a fuelled launcher vents a steady plume of oxygen and is topped up until the final minutes.`,
           visual: vesselPic({ kind: 'tank', liquid: 'LOX, 90 K', leak: true, leakLabel: 'sunlight and warm air', vent: 'O₂ vented', level: 0.75, caption: 'A propellant tank on the pad. Cross-section, not to scale.' }),
         };

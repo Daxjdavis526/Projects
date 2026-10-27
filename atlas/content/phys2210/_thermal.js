@@ -527,3 +527,108 @@ export function shieldsPic({ N = 0, Th = '293 K', Tc = '90 K', eps = 'ε = 0.05'
     caption: caption ?? 'A vacuum gap stops conduction and convection; only radiation crosses it. Not to scale.',
   };
 }
+
+/** Most probable speed √(2RT/M), m/s (M in g/mol). */
+export const vpOf = (T, M) => Math.sqrt((2 * R * T) / (M / 1000));
+
+/**
+ * Maxwell–Boltzmann speed distributions, as the share of molecules per 100 m/s.
+ *   curves  [{ T, M, label, color, labelAt }]
+ *   marks   [{ v, label, color }] vertical lines; shadeFrom: shade the first curve's tail above this speed
+ */
+export function mbGraph({ curves, vmax = null, marks = [], shadeFrom = null, numbers = true, kms = false, caption, alt }) {
+  const k = kms ? 1000 : 1;                                       // kms: the speed axis in km/s
+  const top = vmax ?? Math.ceil((3.2 * Math.max(...curves.map((c) => vpOf(c.T, c.M)))) / 100) * 100;
+  const peak = Math.max(...curves.map((c) => (100 * (4 / Math.sqrt(Math.PI)) * Math.exp(-1)) / vpOf(c.T, c.M)));
+  const f = (c) => { const a = r4(vpOf(c.T, c.M)); const v = kms ? '(1000*x)' : 'x'; return `100*(4/sqrt(pi))*${v}^2/${a}^3*exp(-${v}^2/${a}^2)`; };
+  return {
+    type: 'graph',
+    params: {
+      x: [0, r4(top / k)], y: [0, r4(1.18 * peak)], aspect: 'wide', xlabel: kms ? 'speed v (km/s)' : 'speed v (m/s)', ylabel: 'share per 100 m/s', ...(numbers ? {} : { yticks: 0.001 }),
+      alt: alt || 'Maxwell–Boltzmann speed distributions',
+      curves: curves.map((c, i) => ({ fn: f(c), domain: [0, r4(top / k)], color: c.color || ['accent', 'warn', 'teal', 'violet'][i], width: 2.6, label: c.label, labelAt: r4((c.labelAt ?? 1.1 * vpOf(c.T, c.M)) / k), labelDx: c.labelDx ?? 8, labelDy: c.labelDy ?? -12 })),
+      shade: shadeFrom === null ? [] : [{ fn: f(curves[0]), from: r4(shadeFrom / k), to: r4(top / k), color: 'gold', alpha: 0.45 }],
+      vlines: marks.map((m) => ({ x: r4(m.v / k), label: m.label, color: m.color || 'ink3' })),
+    },
+    caption: caption ?? 'Maxwell–Boltzmann distributions: the height is the share of molecules per 100 m/s of speed; the area under each curve is 1 (all the molecules).',
+  };
+}
+
+/**
+ * Equipartition as bars: one bar of height ½k_BT for each active quadratic degree of
+ * freedom of one molecule — translation (blue), rotation (teal), vibration (violet).
+ *   frozen  draw these extra degrees of freedom as empty outlines (e.g. { vib: 2 })
+ */
+export function dofBars({ trans = 3, rot = 0, vib = 0, frozen = {}, title = '', caption, alt } = {}) {
+  const shade = [], points = [], curves = [];
+  const groups = [['trans', trans, 'accent', 'translation'], ['rot', rot, 'teal', 'rotation'], ['vib', vib, 'violet', 'vibration']];
+  let x = 0;
+  for (const [key, n, color, name] of groups) {
+    const nf = frozen[key] || 0;
+    if (!n && !nf) continue;
+    const x0 = x;
+    for (let k = 0; k < n + nf; k++) {
+      const a = x + 0.12, b = x + 0.88;
+      if (k < n) shade.push({ fn: '1', lower: '0', from: r4(a), to: r4(b), color, alpha: 0.65 });
+      else curves.push({ param: [`${r4(a)} + ${r4(b - a)}*min(max(4*t, 0), 1) - ${r4(b - a)}*min(max(4*t - 2, 0), 1)`, `min(max(4*t - 1, 0), 1) - min(max(4*t - 3, 0), 1)`], t: [0, 1], color, width: 1.2, dash: true });
+      x += 1;
+    }
+    points.push(tag((x0 + x) / 2, -0.16, nf && !n ? `${name} (frozen)` : name, color, 0, 0, true));
+    x += 0.4;
+  }
+  points.push(tag(-0.15, 1, '½ k_B T', 'ink2', -48, 0));
+  if (title) points.push(tag(x / 2, 1.42, title, 'ink', 0, 0, true));
+  return {
+    type: 'graph',
+    params: { x: [-1.2, r4(x + 0.3)], y: [-0.4, 1.6], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'Bars of energy per degree of freedom', shade, curves, points },
+    caption: caption ?? 'Equipartition: each active quadratic degree of freedom holds $\\tfrac12k_BT$ on average. Dashed outlines are degrees of freedom frozen out at this temperature.',
+  };
+}
+
+/** A diatomic molecule with its three translation directions and two rotation axes. */
+export function dumbbellPic({ caption } = {}) {
+  const circ = (cx, cy, r, color, width) => ({ param: [`${cx} + ${r}*cos(t)`, `${cy} + ${r}*sin(t)`], t: [0, 6.2832], color, width });
+  return {
+    type: 'graph',
+    params: {
+      x: [-3.2, 3.2], y: [-1.6, 1.6], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: 'A diatomic molecule with its axes of motion',
+      shade: [{ fn: 'sqrt(max(0, 0.16 - (x + 0.7)^2))', lower: '-sqrt(max(0, 0.16 - (x + 0.7)^2))', from: -1.1, to: -0.3, color: 'accent', alpha: 0.8 }, { fn: 'sqrt(max(0, 0.16 - (x - 0.7)^2))', lower: '-sqrt(max(0, 0.16 - (x - 0.7)^2))', from: 0.3, to: 1.1, color: 'accent', alpha: 0.8 }],
+      curves: [{ fn: '0', domain: [-0.3, 0.3], color: 'ink2', width: 4 }, { fn: '0', domain: [-2.4, 2.4], color: 'ink4', width: 1, dash: true }, { param: ['0', 't'], t: [-1.3, 1.3], color: 'teal', width: 1.4, dash: true }, { param: ['0.45*cos(t)', '1.05 + 0.15*sin(t)'], t: [0.3, 5.6], color: 'teal', width: 1.8 }, { param: ['1.9 + 0.15*cos(t)', '0.4*sin(t)'], t: [-2.7, 2.7], color: 'violet', width: 1.6 }],
+      arrows: [{ from: [-2.2, -1.1], to: [-1.4, -1.1], color: 'gold', label: 'x' }, { from: [-2.2, -1.1], to: [-2.2, -0.3], color: 'gold', label: 'y' }, { from: [-2.2, -1.1], to: [-2.65, -1.4], color: 'gold', label: 'z', labelDx: -14, labelDy: 6 }],
+      points: [{ x: 0.5, y: 1.25, r: 0.01, color: 'teal', label: 'rotation about a perpendicular axis', labelDx: 6, labelDy: 0 }, { x: 1.4, y: -0.75, r: 0.01, color: 'violet', label: 'spin about the bond', labelDx: 0, labelDy: 6 }],
+    },
+    caption: caption ?? 'A diatomic molecule and the ways it might move: along x, y and z; rotating about axes through its centre; spinning about its own bond. Not to scale.',
+  };
+}
+
+/** Molar heat capacities of solid elements near 25 °C (c × M), against the Dulong–Petit value 3R. */
+export function molarBars({ caption } = {}) {
+  const data = [['Al', 897, 26.982], ['Fe', 449, 55.845], ['Cu', 385, 63.546], ['Ag', 235, 107.87], ['Au', 129, 196.97], ['Pb', 129, 207.2]];
+  const shade = [], points = [];
+  data.forEach(([sym, c, M], i) => {
+    const C = (c * M) / 1000;
+    shade.push({ fn: String(r4(C)), lower: '0', from: r4(i + 0.2), to: r4(i + 0.8), color: 'accent', alpha: 0.6 });
+    points.push(tag(i + 0.5, -2.2, sym, 'ink', 0, 0, true), tag(i + 0.5, C + 1.7, fmt(C, 3), 'accent', 0, 0, true));
+  });
+  return {
+    type: 'graph',
+    params: { x: [0, data.length + 1.1], y: [-4, 32], aspect: 'wide', xticks: 0.001, xlabel: ' ', ylabel: 'C (J/(mol·K))', alt: 'Molar heat capacities of metals, all close to 3R', shade, points, hlines: [{ y: r4(3 * R), label: '3R = 24.9', color: 'gold' }] },
+    caption: caption ?? 'Molar heat capacities of metals near 25 °C (specific heat × molar mass, CRC data): all close to 3R, as equipartition predicts for atoms that both move and are held by springs.',
+  };
+}
+
+/** C_V/R of hydrogen gas against temperature (logarithmic axis), as a schematic of freeze-out. */
+export function h2Graph({ caption } = {}) {
+  const cv = '1.5 + 1/(1 + (140/10^x)^3) + 1/(1 + (4500/10^x)^2.5)';
+  return {
+    type: 'graph',
+    params: {
+      x: [1, 4], y: [0, 4], aspect: 'wide', xticks: 0.001, xlabel: 'temperature (logarithmic)', ylabel: 'C_V / R',
+      alt: 'The molar heat capacity of hydrogen rising in steps as rotation and then vibration switch on',
+      curves: [{ fn: cv, color: 'accent', width: 2.8 }],
+      hlines: [{ y: 1.5, label: '3/2: translation only', color: 'ink3' }, { y: 2.5, label: '5/2: + rotation', color: 'ink3' }, { y: 3.5, label: '7/2: + vibration', color: 'ink3' }],
+      points: [1, 2, 3, 4].map((k) => ({ x: k, y: 0, r: 3, color: 'ink3', label: `${10 ** k} K`, labelDx: -12, labelDy: 12 })),
+    },
+    caption: caption ?? 'A schematic of hydrogen’s molar heat capacity: rotation switches on around 100 K, vibration only above a few thousand kelvin (real hydrogen starts to break apart there). Steps smoothed; the details of hydrogen’s two spin forms are left out.',
+  };
+}

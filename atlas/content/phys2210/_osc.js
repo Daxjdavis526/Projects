@@ -10,6 +10,8 @@ export { tn } from './_fluids.js';
 /** The Atlas's g, m/s² (the oscillator simulation uses the same value). */
 export const G = 9.8;
 export const s3 = (x) => fmt(x, 3);
+/** A whole number for plain canvas text (labels are not TeX): 200000 → "200 000", with thin spaces. */
+export const pn = (x) => String(Math.round(x)).replace(/\B(?=(\d{3})+(?!\d))/g, '\u2009');
 const r4 = (v) => +(+v).toPrecision(6);
 const seg = (a, b, color = 'ink2', width = 2, dash = false) => ({ param: [`${r4(a[0])} + t*${r4(b[0] - a[0])}`, `${r4(a[1])} + t*${r4(b[1] - a[1])}`], t: [0, 1], color, width, dash });
 const text = (x, y, label, color = 'ink2', dx = 0, dy = 0) => ({ x: r4(x), y: r4(y), r: 0.01, color, label, labelDx: dx, labelDy: dy });

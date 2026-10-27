@@ -90,7 +90,7 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
           answer: I, units: 'kg m^2', tol: { rel: 0.01 },
           errors: [
             { value: 0.5 * M * R * R, feedback: 'That is about the centre: add Md² with d = R.' },
-            { value: M * R * R, feedback: 'You added Md² to nothing: start from the disk’s own I_cm = ½MR².' },
+            { value: M * R * R, feedback: t`You added $Md^2$ to nothing: start from the disk’s own $I_\text{cm} = \tfrac12 MR^2$.` },
           ],
           hints: [t`$I_\text{cm} = \tfrac12 MR^2$ for a disk, and $d = R$.`],
           teach: 'For a disk about a point on its rim, I = ½MR² + MR² = 3/2 MR².',
@@ -107,7 +107,7 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
       why: {
         1: 'A corner is the farthest any axis on the plate can be from the centre of mass: the largest Md².',
         2: 'An edge axis is d away from the centre of mass, and adds Md².',
-        3: 'Moment of inertia depends on the axis. I = I_cm + Md² is smallest when d = 0.',
+        3: t`Moment of inertia depends on the axis. $I = I_\text{cm} + Md^2$ is smallest when $d = 0$.`,
       },
       hints: [t`$I = I_\text{cm} + Md^2$. For which axis is $d$ smallest?`],
       teach: 'Among parallel axes, the one through the centre of mass has the least moment of inertia.',
@@ -131,7 +131,7 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
         return {
           prompt: t`An engine’s connecting rod (mass ${M} kg) is hung from a pin ${d} m from its centre of mass and swung; the measured moment of inertia about the pin is ${s3(I)} kg·m². What is its moment of inertia about its centre of mass?`,
           answer: Icm, units: 'kg m^2', tol: { rel: 0.01 },
-          errors: [{ value: I + M * d * d, feedback: 'Going toward the centre of mass removes Md²: I_cm = I − Md².' }],
+          errors: [{ value: I + M * d * d, feedback: t`Going toward the centre of mass removes $Md^2$: $I_\text{cm} = I - Md^2$.` }],
           hints: [t`$I = I_\text{cm} + Md^2$, so $I_\text{cm} = I - Md^2$.`],
           teach: 'Engineers measure I about a convenient pin, then subtract Md² to get I about the centre of mass.',
           explain: t`$I_\text{cm} = ${s3(I)} - (${M})(${d})^2 = ${s3(I)} - ${s3(M * d * d)} = ${s3(Icm)}\ \text{kg·m}^2$.`,
@@ -150,7 +150,7 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
         t`So $I = I_\text{cm} + Md^2$.`,
       ],
       hints: ['Start by choosing where the origin goes — that is what makes one term vanish.', 'Write the squared distance to the new axis, expand it, then recognise each sum.'],
-      teach: 'The cross term vanishes because the origin is at the centre of mass — that is why the theorem only works from I_cm.',
+      teach: t`The cross term vanishes because the origin is at the centre of mass — that is why the theorem only works from $I_\text{cm}$.`,
       explain: t`With the origin at the centre of mass, $\sum m_i x_i = Mx_\text{cm} = 0$, so the cross term disappears and $I = I_\text{cm} + Md^2$. From any other starting axis the cross term would not vanish.`,
       visual: {
         type: 'graph',
@@ -174,10 +174,10 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
       answer: 0,
       why: {
         1: t`$I = I_\text{cm} + Md^2$ needs one of the axes through the centre of mass; between two other axes the cross term $2d\sum m x$ does not vanish.`,
-        2: 'B is farther from the centre of mass than A, so I_B must be larger than I_A, not smaller.',
+        2: t`B is farther from the centre of mass than A, so $I_B$ must be larger than $I_A$, not smaller.`,
         3: 'd is always between the two parallel axes, one of them through the centre of mass — the rod’s ends play no part.',
       },
-      hints: ['The theorem is I = I_cm + Md². Is either A or B through the centre of mass?', 'Go back to the centre of mass first, then out to B.'],
+      hints: [t`The theorem is $I = I_\text{cm} + Md^2$. Is either A or B through the centre of mass?`, 'Go back to the centre of mass first, then out to B.'],
       teach: 'Use the parallel-axis theorem only from (or to) an axis through the centre of mass; to go between two others, pass through the centre of mass.',
       explain: t`Back to the centre: $I_\text{cm} = I_A - M(0.10)^2 = 0.08\ \text{kg·m}^2$. Out to B: $I_B = 0.08 + 2.0(0.30)^2 = 0.26\ \text{kg·m}^2$ — not 0.18.`,
       visual: {
@@ -199,7 +199,7 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
         return {
           prompt: t`A solid ball of radius ${R} m is fixed at the end of a light arm, its centre ${d} m from the axis. By what percentage does treating the ball as a point mass at its centre underestimate the moment of inertia? (Solid sphere: $I_\text{cm} = \tfrac25 MR^2$.)`,
           answer: pct, units: '%', tol: { rel: 0.02 },
-          errors: extra / (d * d) > 0.025 ? [{ value: (100 * extra) / (d * d), feedback: 'Close — but compare the missing part with the true moment of inertia, I_cm + Md², not with Md² alone.' }] : [],
+          errors: extra / (d * d) > 0.025 ? [{ value: (100 * extra) / (d * d), feedback: t`Close — but compare the missing part with the true moment of inertia, $I_\text{cm} + Md^2$, not with $Md^2$ alone.` }] : [],
           hints: [t`True: $I = \tfrac25 MR^2 + Md^2$. Point mass: $Md^2$.`, t`The fraction missed is $\dfrac{\tfrac25 R^2}{\tfrac25 R^2 + d^2}$ — the mass cancels.`],
           teach: 'A body counts as a point mass when its size is small next to its distance from the axis: the error is about (2/5)(R/d)² for a ball.',
           explain: t`Missing part: $\tfrac25 R^2 = ${s3(extra)}\ \text{m}^2$ (per kg); total $${s3(extra + d * d)}$; so the point mass is low by ${s3(pct)}%.`,
@@ -226,11 +226,11 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
           prompt: t`A spinning satellite carries a solar-array wing: treat it as a uniform ${m} kg beam ${L} m long, lying along a line through the spin axis, with its centre ${d} m from that axis. What is the wing’s moment of inertia about the spin axis?`,
           answer: I, units: 'kg m^2', tol: { rel: 0.01 },
           errors: [
-            { value: m * d * d, feedback: 'That treats the wing as a point at its centre. Add the beam’s own I_cm = ML²/12.' },
+            { value: m * d * d, feedback: t`That treats the wing as a point at its centre. Add the beam’s own $I_\text{cm} = ML^2/12$.` },
             { value: (m * L * L) / 12, feedback: 'That is about the wing’s own centre. The spin axis is d away: add Md².' },
           ],
           hints: ['The wing turns about the spacecraft’s spin axis, not its own centre.', t`$I = \tfrac1{12}mL^2 + md^2$.`],
-          teach: 'For a part mounted away from the axis, add its own I_cm to m d².',
+          teach: t`For a part mounted away from the axis, add its own $I_\text{cm}$ to $md^2$.`,
           explain: t`$I = \tfrac1{12}(${m})(${L})^2 + (${m})(${d})^2 = ${s3((m * L * L) / 12)} + ${s3(m * d * d)} = ${s3(I)}\ \text{kg·m}^2$. Most of it is the $md^2$ term: deploying arrays multiplies a spacecraft’s moment of inertia — and slows its spin, as lesson M11 explains.`,
           visual: {
             type: 'graph',
@@ -258,7 +258,7 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
             { value: (M * L * L) / 12 + M * (0.75 * L) ** 2, feedback: 'd is measured from the centre of mass (the middle of the rod), not from the far end: L/4.' },
           ],
           hints: [t`The quarter point is $L/4$ from the centre.`, t`$I = \tfrac1{12}ML^2 + M(L/4)^2$.`],
-          teach: 'With I = I_cm + Md², d is always measured from the centre of mass.',
+          teach: t`With $I = I_\text{cm} + Md^2$, $d$ is always measured from the centre of mass.`,
           explain: t`$I = \tfrac1{12}(${M})(${L})^2 + (${M})(${L / 4})^2 = ${s3(I)}\ \text{kg·m}^2$ $= \tfrac7{48}ML^2$.`,
           visual: body({ shape: 'rod', M, L, d: L / 4 }, 'The rod and its axis (gold), a quarter of the way along; ✕ marks the centre of mass.'),
         };
@@ -267,15 +267,15 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
     mcq({
       id: 'cp-curve', difficulty: 2,
       prompt: 'You measure a rod’s moment of inertia about a series of parallel axes at distances d along it, on both sides of its centre of mass. Plotted against d, the results lie on…',
-      choices: ['a parabola, lowest at d = 0, where it equals I_cm', 'a straight line through the origin', 'a parabola, lowest at the end of the rod', 'a horizontal line: I is a fixed property of the rod'],
+      choices: [t`a parabola, lowest at $d = 0$, where it equals $I_\text{cm}$`, 'a straight line through the origin', 'a parabola, lowest at the end of the rod', 'a horizontal line: I is a fixed property of the rod'],
       answer: 0,
       why: {
-        1: 'I = I_cm + Md² is quadratic in d, and it is I_cm (not zero) at d = 0.',
+        1: t`$I = I_\text{cm} + Md^2$ is quadratic in $d$, and it is $I_\text{cm}$ (not zero) at $d = 0$.`,
         2: 'The Md² term is smallest at d = 0, the centre of mass, and grows toward the ends.',
         3: 'I depends on the axis: it grows by Md² as the axis moves away from the centre of mass.',
       },
       hints: [t`$I(d) = I_\text{cm} + Md^2$: what kind of curve is that?`],
-      teach: 'I against axis offset is a parabola with its minimum, I_cm, at the centre of mass.',
+      teach: t`$I$ against axis offset is a parabola with its minimum, $I_\text{cm}$, at the centre of mass.`,
       explain: t`$I(d) = I_\text{cm} + Md^2$ is a parabola opening upward, symmetric about $d = 0$, with minimum value $I_\text{cm}$. Fitting such a plot is how labs measure both $I_\text{cm}$ and $M$.`,
       visual: {
         type: 'graph',

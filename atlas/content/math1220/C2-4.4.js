@@ -211,7 +211,7 @@ It works **one way only**. The harmonic series $1 + \frac12 + \frac13 + \cdots$ 
         const k = r.pick([2, 2.5, 3]);
         const N = firstAbove(2 * k);
         return {
-          prompt: t`Identical books of length $L$ are stacked at the edge of a table, each pushed out as far as the centre of mass of everything above it allows. With $N$ books the top one overhangs the table edge by $\dfrac{L}{2}\left(1 + \dfrac12 + \cdots + \dfrac1N\right)$. What is the smallest $N$ for an overhang of at least ${nice(k)}L$? (Use $H_N \approx \ln N + 0.5772$ if you like.)`,
+          prompt: t`Identical books of length $L$ are stacked at the edge of a table, each pushed out as far as the centre of mass of everything above it allows. With $N$ books the top one overhangs the table edge by $\dfrac{L}{2}\left(1 + \dfrac12 + \cdots + \dfrac1N\right)$. What is the smallest $N$ for an overhang of at least $${nice(k)}L$? (Use $H_N \approx \ln N + 0.5772$ if you like.)`,
           answer: N, tol: { rel: 0.025 },
           errors: [{ value: firstAbove(k), feedback: t`The overhang is $\frac{L}{2}H_N$, so you need $H_N \ge ${nice(2 * k)}$, not $${nice(k)}$.` }],
           hints: [t`You need $\frac12 H_N \ge ${nice(k)}$, that is $H_N \ge ${nice(2 * k)}$.`, t`$\ln N + 0.5772 \approx ${nice(2 * k)}$ gives $N \approx e^{${fmt(2 * k - GAMMA, 4)}}$.`],
