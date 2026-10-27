@@ -249,7 +249,7 @@ A horizon exists only if $a \le M$. The same **frame dragging**, vastly weaker, 
           visual: {
             type: 'graph',
             params: {
-              x: [0, 1.05], y: [0, 0.55], xlabel: 'spin χ = a/M', ylabel: 'Ω_H in units of c³/GM',
+              x: [0, 1.05], y: [0, 0.55], xlabel: 'spin χ = a/M', ylabel: 'Ωₕ in units of c³/GM',
               curves: [{ fn: 'x/(2(1 + sqrt(1 - x^2)))', domain: [0, 1], color: 'accent' }],
               vlines: [{ x: chi, label: `χ = ${chi}`, color: 'accent' }],
             },
@@ -301,7 +301,7 @@ A horizon exists only if $a \le M$. The same **frame dragging**, vastly weaker, 
           curves: [{ fn: '100*(1 - sqrt((1 + sqrt(1 - x^2))/2))', domain: [0, 1], color: 'gold' }],
           hlines: [{ y: round(100 * (1 - kerr.mIrr(1)), 5), label: '29.3%' }],
         },
-        caption: 'The most energy that could ever be extracted from a spinning black hole, as a percentage of its mass: 1 − M_irr/M, where M_irr is the irreducible mass. All of it is rotational energy.',
+        caption: 'The most energy that could ever be extracted from a spinning black hole, as a percentage of its mass: $1 - M_\\text{irr}/M$, where $M_\\text{irr}$ is the irreducible mass. All of it is rotational energy.',
       },
     }),
     mcq({

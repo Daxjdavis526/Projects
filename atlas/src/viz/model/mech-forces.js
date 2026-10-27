@@ -275,6 +275,21 @@ export function airDensity(km) {
   return A[A.length - 1][1];
 }
 
+/**
+ * Temperature of the 1976 US Standard Atmosphere (K) from 0 to 47 km: falling
+ * 6.5 K/km to 11 km, constant to 20 km, then rising 1 K/km to 32 km and
+ * 2.8 K/km above.
+ */
+export function airTemperature(km) {
+  const h = Math.max(0, Math.min(47, km));
+  if (h <= 11) return 288.15 - 6.5 * h;
+  if (h <= 20) return 216.65;
+  if (h <= 32) return 216.65 + (h - 20);
+  return 228.65 + 2.8 * (h - 32);
+}
+/** Speed of sound in air at that altitude, √(γRT) with γ = 1.4 and R = 287.05 J/(kg·K), m/s. */
+export const soundSpeed = (km) => Math.sqrt(1.4 * 287.05 * airTemperature(km));
+
 // ─── frames ────────────────────────────────────────────────────────────────
 
 /**

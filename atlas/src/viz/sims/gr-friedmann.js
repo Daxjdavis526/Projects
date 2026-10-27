@@ -9,21 +9,25 @@
 //   { type: 'gr-friedmann', params: { Om: 0.315, OL: 0.685, H0: 67.4 } }
 //   sliders: false fixes the model; models: [[Om, OL, label, color], …]
 //   draws several fixed models at once; readout: false hides the numbers
-//   (so a question does not print its own answer); t and a set the ranges.
+//   (so a question does not print its own answer); t and a set the ranges;
+//   lock: ['OL'] keeps that parameter fixed at its value (no slider).
 
 import { Plot } from '../plot.js';
 import { history, hubbleTime, q0, fate } from '../model/gr-cosmology.js';
 
-export const defaults = { Om: 0.315, OL: 0.685, H0: 67.4, sliders: true, readout: true, reference: true, tangent: true, models: null, t: [-20, 30], a: [0, 3] };
+export const defaults = { Om: 0.315, OL: 0.685, H0: 67.4, sliders: true, readout: true, reference: true, tangent: true, models: null, t: [-20, 30], a: [0, 3], lock: [] };
 
 export function mount(F, P) {
   const { canvas } = F.canvas({ label: P.alt || 'The size of the universe (scale factor) against time, for the chosen contents' });
   if (P.sliders !== false) {
-    F.slider({ key: 'Om', label: 'Matter $\\Omega_m$', min: 0, max: 3, step: 0.005, value: P.Om, explain: 'Matter, ordinary and dark, as a fraction of the critical density today. It dilutes as $1/a^3$ and slows the expansion.' });
-    F.slider({ key: 'OL', label: 'Dark energy $\\Omega_\\Lambda$', min: -1, max: 2.5, step: 0.005, value: P.OL, explain: 'A cosmological constant, as a fraction of the critical density. It never dilutes, and it speeds the expansion up.' });
-    F.choice({ key: 'H0', label: 'Expansion rate today $H_0$', options: [[67.4, '67.4 (from the CMB)'], [73, '73.0 (local ladder)']], value: P.H0, explain: 'In km/s/Mpc. Two measurements that disagree — the Hubble tension, an open question. It only rescales the time axis.' });
-    F.button({ label: 'Planck 2018', onClick: () => { F.set('Om', 0.315); F.set('OL', 0.685); } });
-    F.button({ label: 'Matter only', onClick: () => { F.set('Om', 1); F.set('OL', 0); } });
+    const locked = new Set(P.lock || []);
+    if (locked.has('Om')) F.params.Om = P.Om; else F.slider({ key: 'Om', label: 'Matter $\\Omega_m$', min: 0, max: 3, step: 0.005, value: P.Om, explain: 'Matter, ordinary and dark, as a fraction of the critical density today. It dilutes as $1/a^3$ and slows the expansion.' });
+    if (locked.has('OL')) F.params.OL = P.OL; else F.slider({ key: 'OL', label: 'Dark energy $\\Omega_\\Lambda$', min: -1, max: 2.5, step: 0.005, value: P.OL, explain: 'A cosmological constant, as a fraction of the critical density. It never dilutes, and it speeds the expansion up.' });
+    if (locked.has('H0')) F.params.H0 = P.H0; else F.choice({ key: 'H0', label: 'Expansion rate today $H_0$', options: [[67.4, '67.4 (from the CMB)'], [73, '73.0 (local ladder)']], value: P.H0, explain: 'In km/s/Mpc. Two measurements that disagree — the Hubble tension, an open question. It only rescales the time axis.' });
+    if (!locked.size) {
+      F.button({ label: 'Planck 2018', onClick: () => { F.set('Om', 0.315); F.set('OL', 0.685); } });
+      F.button({ label: 'Matter only', onClick: () => { F.set('Om', 1); F.set('OL', 0); } });
+    }
   } else Object.assign(F.params, { Om: P.Om, OL: P.OL, H0: P.H0 });
   F.onChange(() => draw());
 
@@ -67,7 +71,7 @@ export function mount(F, P) {
     }
   }
   F.draw(draw);
-  F.caption('Solutions of the Friedmann equation for matter and a cosmological constant, with whatever spatial curvature makes the total come out: Ω_k = 1 − Ω_m − Ω_Λ. Radiation, important only in the first few hundred thousand years, is left out. Every curve passes through today (a = 1) with the same slope — the measured expansion rate H₀, grey dashed line — and differs in its past (red dot: the Big Bang) and its future (violet dot: a Big Crunch). Dashed curve: the Planck 2018 best fit.');
+  F.caption('Solutions of the Friedmann equation for matter and a cosmological constant, with whatever spatial curvature makes the total come out: $\\Omega_k = 1 - \\Omega_m - \\Omega_\\Lambda$. Radiation, important only in the first few hundred thousand years, is left out. Every curve passes through today ($a = 1$) with the same slope — the measured expansion rate $H_0$, grey dashed line — and differs in its past (red dot: the Big Bang) and its future (violet dot: a Big Crunch). Dashed curve: the Planck 2018 best fit.');
   return { get: (k) => F.params[k] };
 }
 
@@ -79,6 +83,7 @@ export function validate(P0) {
   if (!(P.OL >= -1 && P.OL <= 2.5)) problems.push('gr-friedmann: OL must lie in [−1, 2.5]');
   if (!(typeof P.H0 === 'number' && P.H0 > 0)) problems.push('gr-friedmann: H0 must be a positive number, in km/s/Mpc');
   else if (P.sliders !== false && ![67.4, 73].includes(P.H0)) problems.push('gr-friedmann: with sliders, H0 must be 67.4 or 73 (the two choices)');
+  for (const k of P.lock || []) if (!['Om', 'OL', 'H0'].includes(k)) problems.push(`gr-friedmann: cannot lock ${k}`);
   for (const m of P.models || []) if (!(Array.isArray(m) && m[0] >= 0 && Number.isFinite(m[1]))) problems.push('gr-friedmann: each model is [Om, OL, label?, color?] with Om ≥ 0');
   if (!(P.t[0] < 0 && P.t[1] > 0 && P.a[0] < 1 && P.a[1] > 1)) problems.push('gr-friedmann: the ranges t and a must contain today, (0, 1)');
   return problems;

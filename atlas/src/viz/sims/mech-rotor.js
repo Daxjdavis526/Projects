@@ -139,14 +139,16 @@ export function mount(F, P0) {
     const rr = dumbR(md);
     return [[d - md.s - rr, -rr], [d + md.s + rr, rr]];
   }
+  // the square a body sweeps as it turns about the axis
+  const circlePts = (md) => { const r = rBodyOf(md); return [[-r, -r], [r, r]]; };
   const dumbR = (md) => Math.max(0.035, 0.05 * Math.cbrt(md.m)) * Math.max(0.6, md.s / 0.4);
   const rBodyOf = (md) => Math.max(1e-3, ...(ROUND.includes(md.shape) ? [Math.abs(md.d) + md.R] : bodyPts(md).map((q) => Math.hypot(q[0], q[1]))), md.shape === 'plate' ? Math.hypot(Math.abs(md.d) + md.L / 2, md.W / 2) : 0);
   const forceLen = (md, f) => 0.42 * rBodyOf(md) * (0.4 + (0.6 * f.F) / Math.max(...md.forces.map((q) => q.F)));
   const forceDir0 = (f) => (f.r < 0 ? Math.PI : 0) + f.phi * D2R;      // direction at θ = 0
 
   // the view: what is drawn, plus the circle it sweeps if it turns
-  function fitView(pl, md) {
-    const pts = [[0, 0], ...bodyPts(md)];
+  function fitView(pl, md, extra = []) {
+    const pts = [[0, 0], ...bodyPts(md), ...extra.flatMap((e) => (animated ? circlePts(e) : bodyPts(e)))];
     let right = 0;
     for (const f of md.forces) {
       const u = [Math.cos(forceDir0(f)), Math.sin(forceDir0(f))], L = forceLen(md, f);
@@ -188,7 +190,11 @@ export function mount(F, P0) {
   function drawBody(c, W, md, now, t) {
     const pl = body;
     pl.w = W; pl.h = bodyH; pl.o.pad = { l: 8, r: 8, t: 8, b: 8 };
-    const rch = fitView(pl, md);
+    // fit the view to the largest body the sliders allow, so that resizing shows as resizing
+    const SIZE = ['M', 'R', 'L', 'W', 'm', 's', 'd', 'rF', 'rF2', 'F', 'F2'];
+    const big = modelOf(P, (k) => { const sl = SIZE.includes(k) && sliders.find((q) => q.key === k); return sl ? (k === 'rF2' ? -sl.max : sl.max) : v(k); });
+    const shapesBig = P.shapes ? P.shapes.map((sh) => modelOf(P, (k) => (k === 'shape' ? sh : big[k] ?? v(k)))) : [big];
+    const rch = fitView(pl, md, shapesBig);
     pl.refreshTheme();
     const th = now.theta, cs = Math.cos(th), sn = Math.sin(th);
     const rot = (x, y) => [x * cs - y * sn, x * sn + y * cs];
@@ -278,13 +284,15 @@ export function mount(F, P0) {
       pl.point(Q[0], Q[1], { color: 'gold', r: 4.5 });
       if (rp > 1e-9) {
         const tang = [-Math.sin(th), Math.cos(th)], radial = [Math.cos(th), Math.sin(th)];
-        const vmax = Math.max(1e-9, Math.abs(rp) * Math.max(Math.abs(Mo.omega0), Math.abs(Mo.omega0 + Mo.alpha * runT())));
+        const vmax = Math.max(1e-9, Math.abs(rp) * (animated ? Math.max(Math.abs(Mo.omega0), Math.abs(Mo.omega0 + Mo.alpha * runT())) : Math.abs(now.omega)));
         const amax = Math.max(1e-9, Math.abs(kin.at), Math.abs(kin.ac));       // rescaled each instant: the larger part keeps its length
-        const kv = (0.7 * rch) / vmax, ka = (0.6 * rch) / amax;
+        const kv = (0.7 * rch) / vmax, ka = (0.42 * rch) / amax;
         const vv = rp * now.omega;
         if (Math.abs(vv) > 1e-9) pl.arrow(Q[0], Q[1], Q[0] + tang[0] * vv * kv, Q[1] + tang[1] * vv * kv, { color: 'good', width: 2.4, label: P.values ? `v = ${trim(Math.abs(vv))} m/s` : 'v' });
         if (Math.abs(kin.ac) > 1e-9) pl.arrow(Q[0], Q[1], Q[0] - radial[0] * kin.ac * ka, Q[1] - radial[1] * kin.ac * ka, { color: 'bad', width: 2.2, label: 'a_c' });
-        if (Math.abs(kin.at) > 1e-9) pl.arrow(Q[0], Q[1], Q[0] + tang[0] * kin.at * ka, Q[1] + tang[1] * kin.at * ka, { color: 'warn', width: 2.2, label: 'a_t' });
+        // a_t runs along the same line as v: draw it just outside, side by side
+        const off = 0.07 * rch, B = [Q[0] + radial[0] * off, Q[1] + radial[1] * off];
+        if (Math.abs(kin.at) > 1e-9) pl.arrow(B[0], B[1], B[0] + tang[0] * kin.at * ka, B[1] + tang[1] * kin.at * ka, { color: 'warn', width: 2.2, label: 'a_t' });
       }
     }
   }

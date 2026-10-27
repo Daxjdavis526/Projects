@@ -37,12 +37,12 @@ export const areaUnder = (pts) => pts.slice(1).reduce((s, [t1, f1], i) => s + 0.
  * Momentum as an area: each body a rectangle of width m (kg) and height v
  * (m/s), so its momentum mv is the rectangle's area. bodies [{ m, v, label, color }].
  */
-export function momentumBoxes(bodies, { caption, x, y } = {}) {
+export function momentumBoxes(bodies, { caption, x, y, ylabel = 'speed v (m/s)' } = {}) {
   const mmax = Math.max(...bodies.map((b) => b.m)), vmax = Math.max(...bodies.map((b) => b.v));
   return {
     type: 'graph',
     params: {
-      aspect: 'wide', x: x || [0, r4(mmax * 1.25)], y: y || [0, r4(vmax * 1.2)], xlabel: 'mass m (kg)', ylabel: 'speed v (m/s)',
+      aspect: 'wide', x: x || [0, r4(mmax * 1.25)], y: y || [0, r4(vmax * 1.2)], xlabel: 'mass m (kg)', ylabel,
       alt: 'Rectangles whose width is a mass and whose height is a speed',
       shade: bodies.map((b) => ({ fn: String(r4(b.v)), from: 0, to: r4(b.m), color: b.color || 'accent', alpha: 0.28 })),
       curves: bodies.flatMap((b) => [seg([0, b.v], [b.m, b.v], b.color || 'accent', 2.2), seg([b.m, 0], [b.m, b.v], b.color || 'accent', 2.2)]),
@@ -63,11 +63,11 @@ export function lineArrows(rows, { x, xlabel = 'p (kg·m/s)', caption, numbers =
   return {
     type: 'graph',
     params: {
-      aspect: 'wide', x: x || [r4(lo - pad), r4(hi + pad)], y: [-0.6, n - 0.2], xlabel, ylabel: '', yticks: 0.001,
+      aspect: 'wide', x: x || [r4(lo - pad), r4(hi + pad)], y: [-0.25, n + 0.35], xlabel, ylabel: '', yticks: 0.001,
       ...(numbers ? {} : { xticks: 0.001 }),
       alt: 'Arrows along a number line',
-      arrows: rows.map((r, i) => ({ from: [r4(r.from ?? 0), n - 1 - i], to: [r4(r.to), n - 1 - i], color: r.color || 'accent' })),
-      points: rows.map((r, i) => ({ x: r4(((r.from ?? 0) + r.to) / 2), y: n - 1 - i + 0.32, r: 0.01, color: r.color || 'accent', label: r.label, labelDx: -24 })),
+      arrows: rows.map((r, i) => ({ from: [r4(r.from ?? 0), n - i - 0.3], to: [r4(r.to), n - i - 0.3], color: r.color || 'accent' })),
+      points: rows.map((r, i) => ({ x: r4(((r.from ?? 0) + r.to) / 2), y: n - i - 0.3 + 0.3, r: 0.01, color: r.color || 'accent', label: r.label, labelDx: -24 })),
     },
     caption,
   };
@@ -78,7 +78,7 @@ export function lineArrows(rows, { x, xlabel = 'p (kg·m/s)', caption, numbers =
  * leaving to the left. Optional arrows: thrust on the rocket, push on the
  * exhaust, their labels.
  */
-export function rocketSide({ caption, thrust = 'force on the rocket', exhaust = 'force on the exhaust', parcels = 5, air = false } = {}) {
+export function rocketSide({ caption, thrust = 'force on the rocket', exhaust = 'force on the exhaust', parcels = 5 } = {}) {
   const h = 0.42;
   const shade = [
     { fn: String(h), lower: String(-h), from: 0, to: 3.2, color: 'ink3', alpha: 0.45 },
@@ -96,7 +96,6 @@ export function rocketSide({ caption, thrust = 'force on the rocket', exhaust = 
       aspect: 'wide', x: [-4.4, 5], y: [-1.6, 1.6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
       alt: 'A rocket pushing exhaust out of its nozzle',
       shade, points, arrows,
-      curves: air ? [] : [],
     },
     caption: caption ?? 'A sketch, not to scale. The engine pushes the exhaust backward; by Newton’s third law the exhaust pushes the engine — and the rocket — forward. Nothing outside is needed.',
   };
@@ -106,7 +105,7 @@ export function rocketSide({ caption, thrust = 'force on the rocket', exhaust = 
  * Point masses along a line (or in a plane): masses [{ x, y = 0, m, label, color }],
  * drawn as dots whose area grows with the mass. `cm` marks the centre of mass.
  */
-export function massDots(masses, { x, y, cm = false, equal = true, caption, xlabel = 'x (m)', ylabel = '', numbers = true, rod = true, extra = {} } = {}) {
+export function massDots(masses, { x, y, cm = false, equal = true, caption, xlabel = 'x (m)', ylabel = '', numbers = true, rod = true, axes = true, extra = {} } = {}) {
   const mmax = Math.max(...masses.map((q) => q.m));
   const M = masses.reduce((s, q) => s + q.m, 0);
   const xc = masses.reduce((s, q) => s + q.m * q.x, 0) / M, yc = masses.reduce((s, q) => s + q.m * (q.y || 0), 0) / M;
@@ -120,7 +119,7 @@ export function massDots(masses, { x, y, cm = false, equal = true, caption, xlab
   return {
     type: 'graph',
     params: {
-      aspect: 'wide', x: X, y: Y, equal, xlabel, ylabel, ...(numbers ? {} : { xticks: 0.001, yticks: 0.001 }), ...(flat ? { yticks: 0.001 } : {}),
+      aspect: 'wide', x: X, y: Y, equal, xlabel, ylabel, ...(numbers ? {} : { xticks: 0.001, yticks: 0.001 }), ...(flat ? { yticks: 0.001 } : {}), ...(axes ? {} : { axes: false, grid: false }),
       alt: 'Point masses, drawn as dots whose size grows with the mass',
       curves, shade: extra.shade || [], arrows: extra.arrows || [],
       points: [

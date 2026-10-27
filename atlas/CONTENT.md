@@ -99,6 +99,10 @@ Every text field is markup — `prompt`, `hints`, `teach`, `explain`,
 the right-hand options of a matching problem (plain text in a drop-down) and
 labels that a simulation draws on its canvas (plain text; Unicode is fine).
 A list must be its own paragraph: leave a blank line before it.
+Outside `$…$` nothing is TeX: `U_g`, `v^2` or `\,` in prose print exactly
+as typed — put every symbol, subscript and thin space inside math.
+Show the lesson's main equation once: either as `equation` (the large
+display above the intro) or as a `$$…$$` line inside `intro`, not both.
 
 All prose fields use a small Markdown: paragraphs (blank line), `**bold**`,
 `*italic*`, `` `code` ``, fenced code blocks (```` ```python ```` … ```` ``` ````,

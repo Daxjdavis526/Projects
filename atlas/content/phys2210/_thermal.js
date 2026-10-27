@@ -1,0 +1,305 @@
+// Constants and picture builders for the PHYS 2210 thermal lessons (modules
+// M16 and M17). Every picture builder returns an ordinary `graph` spec, so the
+// content test validates it like any other visual.
+// Not a lesson: the leading underscore keeps it out of the lesson registry.
+
+import { fmt } from '../../src/core/format.js';
+export { sci, thou } from './_energy.js';
+export { s3 } from './_kinematics.js';
+
+// ─── constants ─────────────────────────────────────────────────────────────
+// Exact SI values (2019 redefinition), as tabulated by NIST (CODATA 2022).
+export const KB = 1.380649e-23;          // J/K
+export const NA = 6.02214076e23;         // 1/mol
+export const R = KB * NA;                // 8.314 462 618… J/(mol K)
+export const SIGMA = 5.670374419e-8;     // W/(m² K⁴), Stefan–Boltzmann
+export const C0 = 273.15;                // K at 0 °C, by definition
+export const ATM = 101325;               // Pa, one standard atmosphere
+
+/** Kelvin ↔ Celsius ↔ Fahrenheit. */
+export const toC = (K) => K - C0;
+export const toK = (C) => C + C0;
+export const cToF = (C) => 1.8 * C + 32;
+export const kToF = (K) => cToF(toC(K));
+
+/** Molar masses, g/mol (IUPAC standard atomic weights). */
+export const MOLAR = { H2: 2.01588, He: 4.002602, N2: 28.0134, O2: 31.9988, Ar: 39.948, Xe: 131.293, CO2: 44.0095, O: 15.999 };
+
+// Cryogens at one standard atmosphere, from the NIST Chemistry WebBook's fluid
+// properties (Span et al. 2000 for N₂, Schmidt & Wagner 1985 for O₂), rounded:
+// normal boiling point Tb (K), latent heat of vaporization Lv (J/kg), density of
+// the boiling liquid (kg/m³), specific heat of the liquid and of the gas (J/(kg K)).
+export const LN2 = { Tb: 77.36, Lv: 199e3, rho: 806, c: 2040, cGas: 1040, Tm: 63.15, Lf: 25.7e3 };
+export const LOX = { Tb: 90.19, Lv: 213e3, rho: 1141, c: 1700 };
+
+// Water near atmospheric pressure (OpenStax University Physics Vol. 2, Tables 1.3 and 1.4).
+export const WATER = { c: 4184, cIce: 2090, cSteam: 2010, Lf: 334e3, Lv: 2257e3 };
+
+// Specific heats near 25 °C, J/(kg K) (CRC Handbook); 304 stainless from NIST's fit at 293 K.
+export const SPECIFIC = { water: 4184, aluminium: 897, copper: 385, iron: 449, steel: 470, lead: 129, silver: 235, titanium: 523, gold: 129 };
+
+// 304 stainless steel at cryogenic temperatures: NIST's curve fits (cryogenic
+// material properties database, trc.nist.gov/cryogenics), valid 4–300 K, ±5 %.
+const SS_DL = [-2.9554e2, -3.9811e-1, 9.2683e-3, -2.0261e-5, 1.7127e-8];
+const SS_CP = [22.0061, -127.5528, 303.647, -381.0098, 274.0328, -112.9212, 24.7593, -2.239153, 0];
+/** 304 stainless: (L − L₂₉₃)/L₂₉₃ at T (K); constant below 23 K. */
+export const ssContraction = (T) => (T < 23 ? -300.04e-5 : SS_DL.reduce((s, c, i) => s + c * T ** i, 0) * 1e-5);
+/** 304 stainless: specific heat c(T), J/(kg K). */
+export const ssSpecificHeat = (T) => { const x = Math.log10(T); return 10 ** SS_CP.reduce((s, c, i) => s + c * x ** i, 0); };
+/** 304 stainless: heat to cool 1 kg from T1 down to T0 (J/kg) — the integral of c dT, by Simpson's rule. */
+export function ssEnthalpy(T0, T1, n = 400) {
+  const h = (T1 - T0) / n;
+  let s = ssSpecificHeat(T0) + ssSpecificHeat(T1);
+  for (let i = 1; i < n; i++) s += (i % 2 ? 4 : 2) * ssSpecificHeat(T0 + i * h);
+  return (s * h) / 3;
+}
+/** The same fits as expression text of T (for graph curves). */
+export const ssContractionExpr = (L = 1) => `${L}*(${SS_DL.map((c, i) => `(${c})*x^${i}`).join(' + ')})*1e-5`;
+export const ssSpecificHeatExpr = () => `10^(${SS_CP.map((c, i) => `(${c})*(log10(x))^${i}`).join(' + ')})`;
+
+// ─── small text helpers ────────────────────────────────────────────────────
+const r4 = (v) => +(+v).toFixed(4);
+/** A number with n significant figures and a true minus sign, for canvas labels. */
+export const lab = (x, n = 4) => fmt(x, n).replace('-', '−');
+/** TeX for a signed number: a real minus sign in math mode works as-is; this keeps “−” for prose. */
+export const neg = (x, n = 4) => fmt(x, n).replace('-', '−');
+/** A label-only point (no visible dot). Centred when `centre` (by an estimate of the text width). */
+export const tag = (x, y, text, color = 'ink2', dx = 0, dy = 0, centre = false) => ({ x: r4(x), y: r4(y), r: 0.01, color, label: text, labelDx: centre ? dx - 3.3 * [...text].length : dx, labelDy: dy });
+
+// ─── pictures ──────────────────────────────────────────────────────────────
+
+const SCALES = {
+  K: { head: 'kelvin', text: (K) => `${lab(K)} K` },
+  C: { head: 'Celsius', text: (K) => `${lab(toC(K))} °C` },
+  F: { head: 'Fahrenheit', text: (K) => `${lab(kToF(K))} °F` },
+};
+
+/**
+ * Thermometer scales side by side: one vertical line per scale, with marked
+ * temperatures read across. The vertical position is the temperature itself.
+ *   marks    [{ K, name, color, cells: { K: 'text' | '?' | false, … } }] — a cell defaults to the value
+ *   cols     which scales, left to right: 'K', 'C', 'F'
+ *   bracket  { from: K1, to: K2, label } — a two-headed arrow beside the first scale
+ */
+export function scalesPic({ marks, cols = ['K', 'C'], bracket = null, range = null, caption, alt }) {
+  const xs = cols.map((_, i) => 1.5 * i);
+  const Ks = marks.map((m) => m.K);
+  const lo0 = range ? range[0] : Math.min(...Ks), hi0 = range ? range[1] : Math.max(...Ks);
+  const span = Math.max(hi0 - lo0, 40);
+  const y0 = lo0 - 0.1 * span, y1 = hi0 + 0.2 * span;
+  const curves = [], points = [], arrows = [];
+  xs.forEach((x, i) => {
+    curves.push({ param: [String(x), 't'], t: [r4(y0), r4(y1 - 0.06 * span)], color: 'ink3', width: 2 });
+    points.push(tag(x, y1 - 0.02 * span, SCALES[cols[i]].head, 'ink2', 0, 0, true));
+  });
+  for (const m of marks) {
+    const color = m.color || 'accent';
+    curves.push({ fn: String(r4(m.K)), domain: [-0.1, r4(xs[xs.length - 1] + 0.1)], color: 'ink4', width: 1, dash: true });
+    if (m.name) points.push(tag(-1.65, m.K, m.name, color, 0, 0));
+    cols.forEach((col, i) => {
+      const cell = m.cells?.[col];
+      if (cell === false) return;
+      points.push({ x: xs[i], y: r4(m.K), r: 4.5, color, label: cell ?? SCALES[col].text(m.K), labelDx: 8, labelDy: 0 });
+    });
+  }
+  if (bracket) {
+    const bx = -0.28;
+    arrows.push({ from: [bx, r4((bracket.from + bracket.to) / 2)], to: [bx, r4(bracket.to)], color: 'gold' }, { from: [bx, r4((bracket.from + bracket.to) / 2)], to: [bx, r4(bracket.from)], color: 'gold' });
+    points.push(tag(bx, (bracket.from + bracket.to) / 2, bracket.label, 'gold', -10 - 6.6 * [...bracket.label].length, 0));
+  }
+  return {
+    type: 'graph',
+    params: { x: [-1.7, r4(xs[xs.length - 1] + 1.25)], y: [r4(y0), r4(y1)], aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'Temperature scales side by side', curves, points, arrows },
+    caption: caption ?? 'Each vertical line is a thermometer scale; a dashed line joins the readings of one temperature on each. Heights are temperatures, drawn to scale.',
+  };
+}
+
+/**
+ * Bodies side by side, with temperatures over them and arrows for heat flow.
+ *   bodies  [{ name, temp, w = 1, h = 1, color = 'accent' }]
+ *   flows   [{ from, to, label = 'Q' }] between adjacent bodies, by index
+ */
+export function bodiesPic({ bodies, flows = [], gap = 1.1, caption, alt }) {
+  let x = 0;
+  const shade = [], points = [], arrows = [];
+  const at = bodies.map((b) => { const p = { x0: x, x1: x + (b.w ?? 1), h: b.h ?? 1 }; x += (b.w ?? 1) + gap; return p; });
+  const H = Math.max(...at.map((p) => p.h));
+  bodies.forEach((b, i) => {
+    const p = at[i], cx = (p.x0 + p.x1) / 2;
+    shade.push({ fn: String(r4(p.h)), lower: '0', from: r4(p.x0), to: r4(p.x1), color: b.color || 'accent', alpha: b.alpha ?? 0.5 });
+    if (b.name) points.push(tag(cx, -0.14 * H, b.name, 'ink', 0, 0, true));
+    if (b.temp) points.push(tag(cx, p.h + 0.14 * H, b.temp, b.color || 'accent', 0, 0, true));
+  });
+  for (const f of flows) {
+    const a = at[f.from], b = at[f.to], y = 0.5 * Math.min(a.h, b.h);
+    const [xa, xb] = f.from < f.to ? [a.x1 + 0.12, b.x0 - 0.12] : [a.x0 - 0.12, b.x1 + 0.12];
+    arrows.push({ from: [r4(xa), r4(y)], to: [r4(xb), r4(y)], color: f.color || 'gold', label: f.label ?? 'Q', labelDx: f.from < f.to ? -24 - 3 * (f.label ?? 'Q').length : 6, labelDy: -14 });
+  }
+  const W = x - gap;
+  return {
+    type: 'graph',
+    params: { x: [-0.6, r4(W + 0.6)], y: [r4(-0.42 * H), r4(1.45 * H)], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'Bodies with their temperatures', shade, points, arrows },
+    caption: caption ?? 'Not to scale. Arrows show the direction heat flows.',
+  };
+}
+
+/**
+ * Two bodies in thermal contact, insulated from everything else: temperature
+ * against time. Heat flow ∝ the temperature difference, so both approach the
+ * common temperature exponentially, with time constant tau (minutes).
+ *   r  = C_B / C_A, the ratio of the heat capacities
+ */
+export function equilibriumGraph({ TA, TB, r = 1, tau = 2, tmax = 10, names = ['A', 'B'], showEq = true, y = null, caption, alt }) {
+  const Teq = (TA + r * TB) / (1 + r);
+  const lo = Math.min(TA, TB), hi = Math.max(TA, TB), pad = 0.12 * (hi - lo);
+  return {
+    type: 'graph',
+    params: {
+      x: [0, tmax], y: y || [r4(lo - pad), r4(hi + pad)], aspect: 'wide', xlabel: 't (min)', ylabel: 'T (K)',
+      alt: alt || 'Two temperatures approaching each other over time',
+      curves: [
+        { fn: `${r4(Teq)} + ${r4(TA - Teq)}*exp(-x/${tau})`, color: 'warn', width: 2.6, label: names[0], labelAt: 0.3, labelDy: TA > TB ? -12 : 14 },
+        { fn: `${r4(Teq)} + ${r4(TB - Teq)}*exp(-x/${tau})`, color: 'accent', width: 2.6, label: names[1], labelAt: 0.3, labelDy: TB > TA ? -12 : 14 },
+      ],
+      hlines: showEq ? [{ y: r4(Teq), label: 'equilibrium', color: 'ink3' }] : [],
+    },
+    caption: caption ?? 'Each body is taken to have one uniform temperature, and the pair is insulated from everything else.',
+  };
+}
+
+/**
+ * A pipe seen end-on: a cold fluid inside a steel wall, with an optional layer
+ * outside it (frost, or insulation of a given thickness as a fraction of the radius).
+ */
+export function pipePic({ inside = 'LOX, 90 K', outside = 'humid air, 293 K', layer = 'frost', layerT = 0.3, caption, alt }) {
+  const circle = (r, color, width, dash = false) => ({ param: [`${r}*cos(t)`, `${r}*sin(t)`], t: [0, 6.2832], color, width, dash });
+  const curves = [circle(1, 'ink2', 5)];
+  if (layer) for (let k = 1; k <= 4; k++) curves.push(circle(r4(1.04 + (k * layerT) / 4), layer === 'frost' ? 'ink3' : 'warn', layer === 'frost' ? 1.4 : 2, layer === 'frost'));
+  const points = [tag(0, 0, inside, 'accent', 0, 0, true), tag(0.62, -1.02, 'steel wall', 'ink2', 10, 6)];
+  if (layer) points.push(tag(0.78, 0.98, layer, layer === 'frost' ? 'ink2' : 'warn', 12, -6));
+  points.push(tag(-2.9, 1.25, outside, 'warn', 0, 0));
+  return {
+    type: 'graph',
+    params: {
+      x: [-3, 3], y: [-1.5, 1.5], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'A cold pipe seen end-on',
+      shade: [{ fn: 'sqrt(max(0, 0.9 - x^2))', lower: '-sqrt(max(0, 0.9 - x^2))', from: -0.9487, to: 0.9487, color: 'accent', alpha: 0.28 }],
+      curves, points,
+    },
+    caption: caption ?? 'A cold line seen end-on, not to scale.',
+  };
+}
+
+// 6061-T6 aluminium: NIST's fit for (L − L₂₉₃)/L₂₉₃, valid 4–300 K (constant below 18 K).
+const AL_DL = [-4.1277e2, -3.0389e-1, 8.7696e-3, -9.9821e-6, 0];
+export const alContraction = (T) => (T < 18 ? -415.45e-5 : AL_DL.reduce((s, c, i) => s + c * T ** i, 0) * 1e-5);
+/** NIST contraction polynomials as expression text in variable v, scaled by k (k = 1000 gives mm per metre). */
+const polyExpr = (C, v, k) => `${k}*(${C.map((c, i) => `(${c})*${v}^${i}`).join(' + ')})*1e-5`;
+export const ssDLExpr = (v = 'x', k = 1000) => polyExpr(SS_DL, v, k);
+export const alDLExpr = (v = 'x', k = 1000) => polyExpr(AL_DL, v, k);
+/** Linear expansion coefficients at 293 K from the same fits (the slopes there), 1/K. */
+export const ALPHA_SS = 1.54e-5, ALPHA_AL = 2.26e-5;
+
+/**
+ * NIST's measured contraction of 304 stainless (and 6061 aluminium) on cooling from 293 K,
+ * in mm per metre, against temperature.
+ *   mats    ['ss'] or ['ss', 'al']
+ *   linear  also draw ΔL = αL₀ΔT with the room-temperature α (dashed)
+ *   vline   a temperature to mark; chord: draw the chord from 293 K to this temperature
+ */
+export function contractionGraph({ mats = ['ss'], linear = false, vline = null, chord = null, caption, alt }) {
+  const curves = [];
+  const M = { ss: { name: '304 stainless', expr: ssDLExpr, low: 23, f: -3.0004, color: 'accent', alpha: ALPHA_SS, labelAt: 150 }, al: { name: '6061 aluminium', expr: alDLExpr, low: 18, f: -4.1545, color: 'warn', alpha: ALPHA_AL, labelAt: 120 } };
+  for (const k of mats) {
+    const m = M[k];
+    curves.push({ fn: m.expr(), domain: [m.low, 300], color: m.color, width: 2.6, label: m.name, labelAt: m.labelAt, labelDx: 8, labelDy: k === 'al' ? 16 : -12 });
+    curves.push({ fn: String(m.f), domain: [4, m.low], color: m.color, width: 2.6 });
+    if (linear) curves.push({ fn: `${m.alpha * 1000}*(x - 293)`, domain: [4, 300], color: m.color, width: 1.4, dash: true });
+  }
+  const points = [], vlines = [];
+  if (vline) vlines.push({ x: vline.T, label: vline.label, color: 'ink3' });
+  if (chord) {
+    const y = ssContraction(chord) * 1000;
+    curves.push({ param: [`293 + t*(${r4(chord - 293)})`, `t*${r4(y)}`], t: [0, 1], color: 'gold', width: 2 });
+    points.push({ x: 293, y: 0, r: 4, color: 'gold' }, { x: r4(chord), y: r4(y), r: 4, color: 'gold' });
+  }
+  return {
+    type: 'graph',
+    params: { x: [0, 310], y: [mats.includes('al') ? -4.6 : -3.4, 0.5], aspect: 'wide', xlabel: 'T (K)', ylabel: 'ΔL/L₀ (mm per m)', alt: alt || 'Measured thermal contraction of metals against temperature', curves, points, vlines },
+    caption: caption ?? 'Change in length per metre on cooling from 293 K, from NIST’s fits to measurements (±5 %).' + (linear ? ' Dashed: the straight line ΔL = αL₀ΔT with the room-temperature α.' : ''),
+  };
+}
+
+/**
+ * A bar before and after a temperature change, the change exaggerated.
+ *   before, after   labels for the two bars; dL the label of the change ('ΔL = ?')
+ *   grow            true if it lengthens; clamped: the bar is held between rigid walls instead
+ */
+export function expansionPic({ before, after, dL = 'ΔL', grow = true, clamped = false, caption, alt }) {
+  const L = 4, d = grow ? 0.55 : -0.55;
+  const rect = (x0, x1, y0, y1, color, dash = false) => ({ param: [`${x0} + (${x1 - x0})*min(max(4*t, 0), 1) - (${x1 - x0})*min(max(4*t - 2, 0), 1)`, `${y0} + (${y1 - y0})*min(max(4*t - 1, 0), 1) - (${y1 - y0})*min(max(4*t - 3, 0), 1)`], t: [0, 1], color, width: 1.6, dash });
+  const shade = [], curves = [], arrows = [], points = [];
+  if (clamped) {
+    shade.push({ fn: '0.75', lower: '0.25', from: 0, to: L, color: 'accent', alpha: 0.55 });
+    for (const xw of [0, L]) {
+      const s = xw === 0 ? -1 : 1;
+      curves.push({ param: [String(xw), 't'], t: [-0.25, 1.25], color: 'ink2', width: 4 });
+      for (let k = 0; k < 6; k++) curves.push({ param: [`${xw} + ${s}*0.22*t`, `${-0.2 + k * 0.28} + 0.22*t`], t: [0, 1], color: 'ink3', width: 1.2 });
+    }
+    points.push(tag(L / 2, 0.5, before, 'ink', 0, 0, true), tag(L / 2, -0.05, after, 'ink2', 0, 0, true));
+    return { type: 'graph', params: { x: [-0.9, L + 0.9], y: [-0.5, 1.5], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'A bar held between two rigid walls', shade, curves, points }, caption: caption ?? 'The bar is held between rigid walls, so it cannot change length. Not to scale.' };
+  }
+  shade.push({ fn: '1.6', lower: '1.15', from: 0, to: L, color: 'accent', alpha: 0.35 });
+  shade.push({ fn: '0.6', lower: '0.15', from: 0, to: r4(L + d), color: grow ? 'warn' : 'teal', alpha: 0.5 });
+  curves.push({ param: [String(L), 't'], t: [0, 1.6], color: 'ink3', width: 1, dash: true });
+  arrows.push({ from: [L, 0.86], to: [r4(L + d), 0.86], color: 'gold' }, { from: [r4(L + d), 0.86], to: [L, 0.86], color: 'gold' });
+  points.push(tag(0.05, 1.82, before, 'ink2', 0, 0), tag(0.05, -0.08, after, 'ink2', 0, 0), tag(Math.max(L, L + d) + 0.15, 0.86, dL, 'gold', 4, 0));
+  return {
+    type: 'graph',
+    params: { x: [-0.4, L + 1.9], y: [-0.4, 2.05], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'A bar before and after a temperature change', shade, curves, arrows, points },
+    caption: caption ?? 'The change in length is exaggerated hugely so you can see it.',
+  };
+}
+
+/** A plate with a circular hole (the setting for “does the hole grow?”). */
+export function plateHolePic({ caption } = {}) {
+  return {
+    type: 'graph',
+    params: {
+      x: [-3, 3], y: [-1.5, 1.5], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: 'A metal plate with a round hole',
+      shade: [{ fn: '1.1', lower: '-1.1', from: -2, to: 2, color: 'ink3', alpha: 0.6 }, { fn: 'sqrt(max(0, 0.36 - x^2))', lower: '-sqrt(max(0, 0.36 - x^2))', from: -0.6, to: 0.6, color: 'bg', alpha: 1 }],
+      curves: [{ param: ['0.6*cos(t)', '0.6*sin(t)'], t: [0, 6.2832], color: 'ink2', width: 1.6 }],
+      points: [tag(-1.9, 1.3, 'steel plate', 'ink2'), tag(0, 0, 'hole', 'ink2', 0, 0, true)],
+    },
+    caption: caption ?? 'A steel plate with a round hole, before it is heated.',
+  };
+}
+
+/** A cube and the same cube after warming, front views, the change exaggerated. */
+export function cubePic({ caption } = {}) {
+  const sq = (x0, s, color, width) => ({ param: [`${x0} + ${s}*min(max(4*t, 0), 1) - ${s}*min(max(4*t - 2, 0), 1)`, `${s}*min(max(4*t - 1, 0), 1) - ${s}*min(max(4*t - 3, 0), 1)`], t: [0, 1], color, width });
+  return {
+    type: 'graph',
+    params: {
+      x: [-0.6, 5.2], y: [-0.55, 2.3], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: 'A cube before and after warming',
+      shade: [{ fn: '1.5', lower: '0', from: 0, to: 1.5, color: 'accent', alpha: 0.4 }, { fn: '1.8', lower: '0', from: 2.6, to: 4.4, color: 'warn', alpha: 0.45 }],
+      curves: [sq(0, 1.5, 'accent', 1.5), sq(2.6, 1.8, 'warn', 1.5)],
+      points: [tag(0.75, -0.25, 'side L', 'ink2', 0, 0, true), tag(3.5, -0.25, 'side L(1 + αΔT)', 'ink2', 0, 0, true), tag(0.75, 1.75, 'before', 'accent', 0, 0, true), tag(3.5, 2.05, 'warmer by ΔT', 'warn', 0, 0, true)],
+    },
+    caption: caption ?? 'Every side of the cube grows by the same fraction αΔT. The growth is exaggerated.',
+  };
+}
+
+/** A bearing ring and a shaft, end-on: the shaft is a little too big for the bore. */
+export function ringShaftPic({ caption } = {}) {
+  const circ = (cx, r, color, width) => ({ param: [`${cx} + ${r}*cos(t)`, `${r}*sin(t)`], t: [0, 6.2832], color, width });
+  return {
+    type: 'graph',
+    params: {
+      x: [-2.6, 2.6], y: [-1.3, 1.3], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: 'A ring and a shaft that is slightly too large for it',
+      shade: [{ fn: 'sqrt(max(0, 0.5329 - (x - 1.1)^2))', lower: '-sqrt(max(0, 0.5329 - (x - 1.1)^2))', from: 0.37, to: 1.83, color: 'ink3', alpha: 0.7 }],
+      curves: [circ(-1.1, 1.0, 'accent', 3), circ(-1.1, 0.7, 'accent', 3), circ(1.1, 0.73, 'ink2', 1.6)],
+      points: [tag(-1.1, -1.17, 'ring: bore 0.70', 'accent', 0, 0, true), tag(1.1, -1.0, 'shaft: 0.73', 'ink2', 0, 0, true)],
+    },
+    caption: caption ?? 'End views. The shaft is a little wider than the ring’s bore, so it will not go in at room temperature. The difference is exaggerated.',
+  };
+}

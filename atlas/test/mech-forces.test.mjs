@@ -106,6 +106,19 @@ check('linear drag approaches the same terminal speed', near(M.fallSpeedLinear(1
 check('sea-level density 1.225 kg/m³', M.airDensity(0) === 1.225);
 check('density at 30 km from the table', near(M.airDensity(30), 0.01841));
 check('density falls with height', [0, 1, 3, 7, 12, 18, 27, 33, 39].every((h, k, A) => k === 0 || M.airDensity(h) < M.airDensity(A[k - 1])));
+check('speed of sound 340 m/s at sea level', near(M.soundSpeed(0), 340.3, 1e-3));
+check('speed of sound 295 m/s in the cold layer from 11 to 20 km', near(M.soundSpeed(11), 295.1, 1e-3) && near(M.soundSpeed(18), 295.1, 1e-3));
+check('speed of sound 302 m/s at 30 km', near(M.soundSpeed(30), 301.7, 1e-3));
+check('temperature profile is continuous', [11, 20, 32].every((h) => Math.abs(M.airTemperature(h - 1e-9) - M.airTemperature(h + 1e-9)) < 1e-6));
+{
+  // a stratospheric jump: falling from 39 km through ever denser air, the speed peaks where it meets the local terminal speed
+  const vt0 = 55, k = (2 * g) / (1.225 * vt0 * vt0);
+  let h = 38969, v = 0, best = { v: 0, h };
+  for (let i = 0; i < 400000 && h > 1000; i++) { const a = g - 0.5 * M.airDensity(h / 1000) * k * v * v; v += a * 0.005; h -= v * 0.005; if (v > best.v) best = { v, h }; }
+  const vtThere = vt0 * Math.sqrt(1.225 / M.airDensity(best.h / 1000));
+  check('high-altitude jump: speed peaks where drag equals weight', near(best.v, vtThere, 2e-3));
+  check('high-altitude jump: peak faster than sound there', best.v > M.soundSpeed(best.h / 1000));
+}
 
 // frames
 check('train speeding up from rest', near(M.trainAt('speed-up', 2, 0, 3).x, 9) && near(M.trainAt('speed-up', 2, 0, 3).v, 6));

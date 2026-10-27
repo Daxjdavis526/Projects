@@ -18,8 +18,8 @@ const PH = comovingDistance(Infinity, { Om: 0.315 - 9.1e-5, OL: 0.685, Or: 9.1e-
 // Davis & Lineweaver's "teardrop": how far away (proper distance, then) the light reaching us today was emitted,
 // against the time it set out — flat ΛCDM, Planck 2018, computed point by point
 const PLANCK = { Om: 0.315, OL: 0.685 }, AGE = ageFlat(0.315, H_CMB);
-const TEAR = Array.from({ length: 70 }, (_, k) => {
-  const a = 10 ** (-2.5 + (2.5 * k) / 69), z = 1 / a - 1;
+const TEAR = Array.from({ length: 80 }, (_, k) => {
+  const a = k < 40 ? 10 ** (-2.5 + (2.5 + Math.log10(0.3)) * (k / 40)) : 0.3 + (0.7 * (k - 40)) / 39, z = 1 / a - 1;
   return [AGE - lookbackTime(z, PLANCK, H_CMB, 2000), (a * comovingDistance(z, PLANCK, H_CMB, 2000) * LY_PER_MPC) / 1e9];
 });
 const teardrop = {
@@ -38,7 +38,7 @@ const flow = ({ drag = false, home = [0, 0], s = 1.3 } = {}) => {
   const HX = drag ? 'max(-2, min(2, px))' : String(home[0]), HY = drag ? 'max(-2, min(2, py))' : String(home[1]);
   const nx = (i) => `${i} + (s - 1)*(${i} - ${HX})`, ny = (j) => `${j} + (s - 1)*(${j} - ${HY})`;
   return {
-    x: [-4.7, 4.7], y: [-4.7, 4.7], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+    x: [-3.95, 3.95], y: [-3.95, 3.95], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
     ...(drag ? { drag: [{ key: 'p', x: home[0], y: home[1], snap: 1 }] } : { constants: { s } }),
     curves: [
       ...L.flatMap((i) => [
@@ -100,7 +100,8 @@ Distant galaxies recede at speeds proportional to their distance (the Hubble–L
     tasks: ['From the centre galaxy, every arrow points away from you, and a galaxy twice as far has moved twice as far.', 'Drag home to a corner galaxy: from there the pattern is exactly the same — everything flees from it. No galaxy is special.', 'Watch the grids: the blue grid is the grey grid stretched. Each galaxy stays on its own grid lines — its comoving labels never change.'],
     params: {
       ...flow({ drag: true }),
-      sliders: [{ key: 's', label: 'Stretch $a_2/a_1$', min: 1, max: 1.6, step: 0.01, value: 1.3, explain: 'How much every distance between the galaxies has grown between the two moments.' }],
+      aspect: 'square',
+      sliders: [{ key: 's', label: 'Stretch $a_2/a_1$', min: 1, max: 1.45, step: 0.01, value: 1.3, explain: 'How much every distance between the galaxies has grown between the two moments.' }],
       readouts: [
         { label: 'a neighbour one step away moved', expr: 's - 1', unit: '\\text{ step}', digits: 3 },
         { label: 'a galaxy two steps away moved', expr: '2(s - 1)', unit: '\\text{ steps}', digits: 3 },

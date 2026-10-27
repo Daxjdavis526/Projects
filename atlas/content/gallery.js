@@ -20,6 +20,7 @@ export default [
   { id: 'slope', title: 'Slope fields and Euler’s method', track: 'math', blurb: 'Drag the start point and change the step; see Euler drift from the true solution.',
     spec: { type: 'phase', params: { slope: true, f: 'y - t^2/4', x: [0, 4], y: [-2, 6], start: [0, 1], h: 0.5 } } },
   { id: 'graphlink', title: 'One motion, three graphs', track: 'physics', blurb: 'One motion, three graphs: slopes go down, areas come back up.', lesson: 'phys2210.M3.3' },
+  { id: 'energy', title: 'Energy diagrams', track: 'physics', blurb: 'Drag the total-energy line over a potential landscape or a track: see where the particle can go, where it turns, and where it can rest.', lesson: 'phys2210.M8.5' },
   { id: 'projectile', title: 'Projectile motion', track: 'physics', blurb: 'Launch speed, angle, height, gravity — with or without air drag.', spec: { type: 'projectile', params: {} } },
   { id: 'cart', title: 'Newton’s second law on a cart', track: 'physics', blurb: 'Force, mass and friction set the slope of the velocity graph.', spec: { type: 'force-cart', params: {} } },
   { id: 'spring', title: 'Damped, driven oscillator', track: 'physics', blurb: 'Energy bars, damping regimes and resonance.', spec: { type: 'oscillator', params: { kind: 'spring', b: 0.3 } } },

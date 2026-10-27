@@ -28,12 +28,14 @@
 //       names: ['the crate'],         // titles over the diagrams
 //       play: false,                  // atwood, table: Play runs the motion
 //       reading: true,                // elevator: show the scale’s reading in the picture
+//       plot: 'friction',             // floor: an inset graph of friction against the push, from rest
 //       readout: true,                // live numbers under the picture (on by default when there are sliders)
 //   } }
 //
 // body scene: forces: [{ label, mag (N), dir (degrees from +x), kind }], icon: block ball puck rocket
 // person car plane capsule skydiver drone probe, ground: true, wall: 'left' | 'right', v: [vx, vy] (a direction), a: [ax, ay],
-// agent: { dir, kind: 'pole' | 'rope' } (a pole pushing, or a rope pulling, in direction dir).
+// agent: { dir, kind: 'pole' | 'rope' } (a pole pushing, or a rope pulling, in direction dir), chute: true (capsule,
+// skydiver: under a parachute), flame: true (rocket), status: 'a line over the picture'.
 
 import { Plot } from '../plot.js';
 import * as MF from '../model/mech-forces.js';
@@ -86,8 +88,9 @@ const SCENES = {
       block(pl, 0, h / 2, w, h, 0, massText(P.m), 'accent');
       if (P.F > 0) agentLine(pl, P.phi >= 0 ? [w / 2, h / 2] : [-w / 2, h * 0.72], P.phi, P.phi >= 0 ? 'rope' : 'pole');
       const st = sol.info.state;
-      if (st === 'sliding') motion(pl, -0.45, h + 0.35, 0.9, 0, 'v');
+      if (st === 'sliding') { if (P.plot === 'friction') motion(pl, -2.45, h + 0.2, 0.9, 0, 'v'); else motion(pl, -0.45, h + 0.35, 0.9, 0, 'v'); }
       const status = { rest: 'At rest: no push, so no friction', static: 'At rest: static friction balances the applied force', sliding: sol.info.a > 1e-6 ? 'Sliding, speeding up' : sol.info.a < -1e-6 ? 'Sliding, slowing down' : 'Sliding at constant velocity', lifts: 'Lifted off the floor: N = 0' }[st];
+      if (P.plot === 'friction') frictionInset(pl, P, sol);
       return { anchors: [[0, h / 2]], sizes: [[w / 2, h / 2]], status };
     },
     readout: (P, s) => [['normal force $N$', tN(s.info.N)], ['friction', `${tN(Math.abs(s.info.f))}${s.info.kinetic ? '\\ (\\mu_k N)' : ''}`], ['max static friction $\\mu_s N$', tN(s.info.fsMax)], ['acceleration', tA(s.info.a)]],
@@ -425,6 +428,32 @@ const SCENES = {
   },
 };
 
+// floor scene, plot: 'friction' — friction against the horizontal push for a block starting from rest:
+// equal to the push up to μs N (static), then μk N once it slides; the dot is the present state
+function frictionInset(pl, P, sol) {
+  const ctx = pl.ctx, c = pl.col;
+  const w = Math.min(240, (pl.R - pl.L) * 0.5), h = Math.min(132, (pl.B - pl.T) * 0.5);
+  const x0 = pl.R - w, y0 = pl.T;
+  const N = sol.info.N, fs = P.mus * N, fk = P.muk * N, Fx = Math.max(0, P.F * Math.cos(P.phi * D2R));
+  const Fmax = Math.max(1.6 * fs, 1.15 * Fx, 1e-6), fmax = Math.max(fs, fk, 1e-6) * 1.3;
+  const X = (F) => x0 + 14 + (F / Fmax) * (w - 26), Y = (f) => y0 + h - 16 - (f / fmax) * (h - 34);
+  ctx.save();
+  ctx.fillStyle = c.panel; ctx.globalAlpha = 0.9; ctx.fillRect(x0, y0, w, h); ctx.globalAlpha = 1;
+  ctx.strokeStyle = c.line2; ctx.lineWidth = 1; ctx.strokeRect(x0 + 0.5, y0 + 0.5, w - 1, h - 1);
+  ctx.strokeStyle = c.line3; ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(Fmax), Y(0)); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(0), Y(fmax)); ctx.stroke();
+  ctx.strokeStyle = c.bad; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(fs), Y(fs)); ctx.stroke();
+  ctx.setLineDash([3, 3]); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(X(fs), Y(fs)); ctx.lineTo(X(fs), Y(fk)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(X(fs), Y(fk)); ctx.lineTo(X(Fmax), Y(fk)); ctx.stroke();
+  ctx.restore();
+  pl.text('friction against your push', x0 + 8, y0 + 10, { screen: true, color: 'ink2', size: 11, weight: 650 });
+  if (fs > 0) pl.text('μs N', X(fs) - 4, Y(fs) - 2, { screen: true, color: 'bad', size: 11, weight: 650, align: 'right' });
+  if (fk > 0) pl.text('μk N', X(Fmax) - 2, Y(fk) - 9, { screen: true, color: 'bad', size: 11, weight: 650, align: 'right' });
+  pl.text('static', X(fs * 0.5) + 6, Y(fs * 0.5) + 8, { screen: true, color: 'ink3', size: 10.5, align: 'left' });
+  pl.text('sliding', X((fs + Fmax) / 2), Y(fk) + 9, { screen: true, color: 'ink3', size: 10.5, align: 'center' });
+  pl.point(pl.ix(X(Fx)), pl.iy(Y(Math.abs(sol.info.f))), { color: 'gold', r: 5 });
+}
+
 // geometry shared by a scene's drawing and its animation limits
 function inclineGeom(theta) {
   const L = 5.2, th = theta * D2R, b = L * Math.cos(th), h = L * Math.sin(th);
@@ -574,6 +603,15 @@ function icon(pl, kind, P) {
       return [0.8, 0.55];
     case 'skydiver': {
       const c = 'accent';
+      if (P.chute) {                                     // upright under a canopy that is opening
+        pl.path([[-1.2, 1.12], [-0.95, 1.48], [-0.45, 1.64], [0, 1.67], [0.45, 1.64], [0.95, 1.48], [1.2, 1.12], [0.6, 1.24], [0, 1.18], [-0.6, 1.24]], { close: true, color: 'warn', width: 1.5, fill: 'warn', fillAlpha: 0.35 });
+        for (const [x, y] of [[-1.2, 1.12], [-0.6, 1.24], [0.6, 1.24], [1.2, 1.12]]) pl.line(x, y, x < 0 ? -0.26 : 0.26, 0.42, { color: 'ink3', width: 1 });
+        pl.path([[-0.16, -1.1], [0, -0.5], [0.16, -1.1]], { color: c, width: 4 });
+        pl.path([[0, -0.5], [0, 0.08]], { color: c, width: 6.5 });
+        pl.path([[-0.26, 0.42], [0, 0.0], [0.26, 0.42]], { color: c, width: 3.5 });
+        pl.circle(0, 0.25, 0.14, { fill: c, color: c, width: 1 });
+        return [0.35, 1.1];
+      }
       pl.path([[-0.75, 0.05], [0.5, 0.05]], { color: c, width: 9 });
       pl.circle(0.75, 0.08, 0.2, { fill: c, color: c, width: 1 });
       pl.path([[0.35, 0.05], [0.55, 0.45], [0.9, 0.55]], { color: c, width: 4 });
@@ -853,7 +891,8 @@ export function mount(F, P0) {
       ctx.moveTo(ox - nn[0] * reachPx, oy + nn[1] * reachPx); ctx.lineTo(ox + nn[0] * reachPx, oy - nn[1] * reachPx); ctx.stroke(); ctx.restore();
       const par = W * Math.sin(th) * k, perp = W * Math.cos(th) * k, wc = plot.color('ink3');
       if (par > 3) { arrowPx(ctx, ox, oy, ox - u[0] * par, oy + u[1] * par, wc, { width: 2, dash: [5, 4] }); placeLabel(ctx, `mg sin θ${p.values ? ' = ' + fmtN(W * Math.sin(th)) : ''}`, ox - u[0] * par, oy + u[1] * par, -u[0], u[1], wc, bg, [x, x + w], 11.5); marks.push([ox - u[0] * par, oy + u[1] * par]); }
-      if (perp > 3) { arrowPx(ctx, ox, oy, ox - nn[0] * perp, oy + nn[1] * perp, wc, { width: 2, dash: [5, 4] }); placeLabel(ctx, `mg cos θ${p.values ? ' = ' + fmtN(W * Math.cos(th)) : ''}`, ox - nn[0] * perp, oy + nn[1] * perp, -nn[0], nn[1], wc, bg, [x, x + w], 11.5); marks.push([ox - nn[0] * perp, oy + nn[1] * perp]); }
+      // the label of mg cos θ sits beside the middle of its arrow, away from mg
+      if (perp > 3) { arrowPx(ctx, ox, oy, ox - nn[0] * perp, oy + nn[1] * perp, wc, { width: 2, dash: [5, 4] }); placeLabel(ctx, `mg cos θ${p.values ? ' = ' + fmtN(W * Math.cos(th)) : ''}`, ox - nn[0] * perp * 0.55 + Math.cos(th) * 6, oy + nn[1] * perp * 0.55 - Math.sin(th) * 6, Math.cos(th), -Math.sin(th), wc, bg, [x, x + w], 11.5); marks.push([ox - nn[0] * perp, oy + nn[1] * perp]); }
     }
     ctx.restore();
   }

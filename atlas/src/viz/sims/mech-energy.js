@@ -27,6 +27,7 @@
 //       levels: [{ E: 3, label: 'E₁' }],          // extra energy lines (labelled at the right)
 //       readouts: ['E', 'U', 'K', 'F'],           // any of E U K F x v h th turning
 //       xlabel: 'x (m)', ylabel: 'energy (J)', unit: 'J', lunit: 'm', rate: 1,   // rate: simulated seconds per second
+//       xticks, yticks,                          // tick density, as in graph (0.001 hides the numbers)
 //   } }
 //
 // Problems that ask for a turning point, an equilibrium or an energy should
@@ -74,7 +75,9 @@ export function build(P, env) {
 export function mount(F, P0) {
   const P = { ...defaults, ...P0 };
   const compact = !!F.compact;
-  const { canvas } = F.canvas({ aspect: P.aspect, label: P.alt || (P.h ? 'A ball on a track with energy bars' : 'An energy diagram: potential energy against position, with the total-energy line') });
+  // on a phone the 2:1 canvas is too short for a diagram with bars beside it: use 16:10 there
+  const narrow = typeof window !== 'undefined' && window.innerWidth < 560;
+  const { canvas } = F.canvas({ aspect: narrow && P.aspect === 'wide' ? '' : P.aspect, label: P.alt || (P.h ? 'A ball on a track with energy bars' : 'An energy diagram: potential energy against position, with the total-energy line') });
   const ctx = canvas.getContext('2d');
   const keys = keysOf(P);
   const sliders = P.sliders || [];
@@ -148,7 +151,7 @@ export function mount(F, P0) {
     F.button({ label: 'Reset', onClick: () => { restart(); draw(); } });
   }
 
-  const plot = new Plot(canvas, { x: P.x, y: [0, 1], xlabel: P.xlabel, ylabel: P.ylabel ?? (P.h ? 'height (m)' : `energy (${P.unit})`), yticks: compact ? 5 : 6 });
+  const plot = new Plot(canvas, { x: P.x, y: [0, 1], xlabel: P.xlabel, ylabel: P.ylabel ?? (P.h ? 'height (m)' : `energy (${P.unit})`), xticks: P.xticks, yticks: P.yticks ?? (compact ? 5 : 6) });
   const fitY = () => {
     if (P.y) return P.y;
     const n = 200, vals = [];
@@ -202,7 +205,7 @@ export function mount(F, P0) {
     const c = themeColors();
     plot.resize();
     const W = plot.w, H = plot.h;
-    const barW = showBars ? (compact ? 92 : Math.min(150, Math.max(104, W * 0.17))) : 0;
+    const barW = showBars ? (W < 480 ? Math.max(66, W * 0.21) + (B.friction ? 18 : 0) : compact ? 92 : Math.min(150, Math.max(104, W * 0.17))) : 0;
     plot.o.pad = { l: 50, r: 16 + barW, t: 14, b: 34 };
     plot.setView(P.x, fitY());
     plot.refreshTheme();
@@ -253,21 +256,28 @@ export function mount(F, P0) {
         if (P.labels) plot.text(stable ? 'stable' : 'unstable', q.x, y, { color: stable ? 'good' : 'bad', dy: stable ? 15 : -14, align: 'center', size: 11 });
       }
     }
-    // turning points
+    // turning points, labelled just below the energy line on the side where the particle may be
     if (P.turning && P.particle && !S.none) {
-      const spaced = tps.every((x, i) => i === 0 || plot.X(x) - plot.X(tps[i - 1]) > 84);
-      const axisY = Math.max(plot.vy0, Math.min(plot.vy1, 0));
+      const s = S.s, axisY = Math.max(plot.vy0, Math.min(plot.vy1, 0)), dx = (xb - xa) * 0.01;
+      // label only the particle's own turning points — the ends of the allowed stretch it is in — if they are far enough apart
+      const home = s ? iv.find(([a, b]) => s.x >= a - dx && s.x <= b + dx) : null;
+      const ownTps = home ? tps.filter((x) => Math.abs(x - home[0]) < dx || Math.abs(x - home[1]) < dx) : [];
+      const spaced = ownTps.length < 2 || plot.X(ownTps[ownTps.length - 1]) - plot.X(ownTps[0]) > 150;
       for (const x of tps) {
         plot.line(x, yE, x, axisY, { color: 'gold', width: 1, dash: [2, 4] });
         plot.point(x, yE, { color: 'panel', r: 4.5, ring: 'gold' });
-        if (P.labels && spaced && tps.length <= 4) plot.text('turning point', x, yE, { color: 'gold', dy: -12, align: 'center', size: 10.5 });
+        if (P.labels && spaced && ownTps.includes(x)) {
+          const inside = U(Math.min(xb, x + dx)) <= Em ? 1 : -1;
+          plot.text('turning point', x, yE, { color: 'gold', dx: inside * 9, dy: 13, align: inside > 0 ? 'left' : 'right', size: 10.5 });
+        }
       }
     }
-    // labelled marks
+    // labelled marks (their labels are drawn after the clip, so they are never cut off)
+    const markLabels = [];
     for (const mk of P.marks || []) {
       const y = mk.y ?? yCurve(mk.x);
       plot.point(mk.x, y, { color: mk.color || 'ink', r: 4.5 });
-      if (mk.label) plot.text(mk.label, mk.x, y, { color: mk.color || 'ink', dx: mk.dx ?? 0, dy: mk.dy ?? -14, align: 'center', weight: 650 });
+      if (mk.label) markLabels.push([mk, y]);
     }
     // the particle
     if (P.particle && s) {
@@ -289,6 +299,13 @@ export function mount(F, P0) {
     }
     ctx.restore();
 
+    for (const [mk, y] of markLabels) {
+      const X = plot.X(mk.x), w = mk.label.length * 7;   // about 7 px a character
+      const align = X - w / 2 < plot.L + 2 ? 'left' : X + w / 2 > plot.R - 2 ? 'right' : 'center';
+      const dx = (mk.dx ?? 0) + (align === 'left' ? -4 : align === 'right' ? 4 : 0);
+      plot.text(mk.label, mk.x, Math.min(y, plot.vy1), { color: mk.color || 'ink', dx, dy: mk.dy ?? -14, align, weight: 650 });
+    }
+
     // the energy-line handle and its label (outside the clip, so it is never cut)
     if (P.particle && !S.none && !B.track) {
       const hx = plot.X(plot.vx1 - 0.035 * (plot.vx1 - plot.vx0)), hy = plot.Y(yE);
@@ -300,7 +317,7 @@ export function mount(F, P0) {
         if (P.labels) plot.text('E', hx, hy, { screen: true, color: 'gold', dx: -12, dy: -11, align: 'right', weight: 700 });
       }
     }
-    if (P.particle && B.track && P.labels && !S.none) plot.text('release level', plot.R - 4, plot.Y(yE), { screen: true, color: 'gold', dy: -10, align: 'right', size: 11 });
+    if (P.particle && B.track && P.labels && !S.none) plot.text('release level', (plot.L + plot.R) / 2, plot.Y(yE), { screen: true, color: 'gold', dy: -10, align: 'center', size: 11 });
     if (S.none && P.labels) plot.text('E is below U everywhere here: no motion is possible', (plot.L + plot.R) / 2, plot.T + 14, { screen: true, color: 'bad', align: 'center', size: 12 });
 
     if (showBars) bars(c, Em, th);
@@ -316,7 +333,7 @@ export function mount(F, P0) {
         E: [B.friction ? 'mechanical energy $K + U$' : 'total energy $E$', num(Em) + unit],
         U: [B.track ? '$U = mgh$' : '$U(x)$', num(U(s.x)) + unit],
         K: ['$K = E - U$', num(K) + unit],
-        F: ['force $F = -dU/dx$', num(ME.force(B.sys, s.x)) + fu],
+        F: ['force $F = -dU/dx$', num(Math.abs(ME.force(B.sys, s.x)) < 1e-4 * forceScale() ? 0 : ME.force(B.sys, s.x)) + fu],
         x: ['$x$', num(s.x) + lu],
         v: ['speed $v$', num(S.none ? 0 : B.track ? Math.sqrt((2 * K) / B.m) : Math.sqrt((2 * K) / B.m)) + '\\,\\mathrm{m/s}'],
         h: ['height $h$', num(yCurve(s.x)) + lu],
@@ -346,7 +363,7 @@ export function mount(F, P0) {
     const K = S.none ? 0 : Math.max(0, Em - U(s.x)), Ux = U(s.x);
     const list = [['K', K, c.accent], [B.track ? 'U_g' : 'U', Ux, c.good]];
     if (B.friction) list.push(['E_th', th, c.warn]);
-    list.push(['total', K + Ux + th, c.gold]);
+    list.push([plot.w < 480 ? 'Σ' : 'total', K + Ux + th, c.gold]);
     const x0 = plot.R + 22, x1 = plot.w - 8, slot = (x1 - x0) / list.length, bw = Math.min(26, slot * 0.62);
     const base = Math.max(plot.T, Math.min(plot.B, plot.Y(Y(0))));
     g.save();
@@ -355,10 +372,11 @@ export function mount(F, P0) {
     list.forEach(([lab, v, col], i) => {
       const cx = x0 + slot * (i + 0.5), top = Math.max(plot.T, Math.min(plot.B, plot.Y(Y(v))));
       const y0 = Math.min(base, top), hgt = Math.abs(base - top);
-      if (lab === 'total') { g.strokeStyle = col; g.lineWidth = 2; g.strokeRect(cx - bw / 2, y0, bw, Math.max(1, hgt)); }
+      const tot = lab === 'total' || lab === 'Σ';
+      if (tot) { g.strokeStyle = col; g.lineWidth = 2; g.strokeRect(cx - bw / 2, y0, bw, Math.max(1, hgt)); }
       else { g.fillStyle = col; g.globalAlpha = 0.85; g.fillRect(cx - bw / 2, y0, bw, Math.max(hgt, 0.5)); g.globalAlpha = 1; }
-      sym(g, lab, cx, plot.B + 14, lab === 'total' ? c.ink2 : col);
-      if (!compact && Math.abs(v) > 1e-9) {
+      sym(g, lab, cx, plot.B + 14, tot ? c.ink2 : col, plot.w < 480 ? 0.82 : 1);
+      if (!compact && plot.w >= 480 && Math.abs(v) > 1e-9) {
         g.fillStyle = c.ink3; g.font = '10px Inter, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = v >= 0 ? 'bottom' : 'top';
         g.fillText(short(v), cx, v >= 0 ? y0 - 3 : y0 + hgt + 3);
       }
@@ -374,18 +392,19 @@ export function mount(F, P0) {
 }
 
 // a symbol with an optional subscript: 'U_g', 'E_th'
-function sym(g, lab, x, y, color) {
+function sym(g, lab, x, y, color, k = 1) {
   const [base, sub] = lab.split('_');
+  const big = `650 ${12.5 * k}px Inter, system-ui, sans-serif`, small = `600 ${9.5 * k}px Inter, system-ui, sans-serif`;
   g.fillStyle = color; g.textBaseline = 'middle';
-  if (!sub) { g.font = `${base.length > 2 ? 500 : 650} ${base.length > 2 ? 10.5 : 12.5}px Inter, system-ui, sans-serif`; g.textAlign = 'center'; g.fillText(base, x, y); return; }
-  g.font = '650 12.5px Inter, system-ui, sans-serif';
+  if (!sub) { g.font = base.length > 2 ? `500 ${10.5 * k}px Inter, system-ui, sans-serif` : big; g.textAlign = 'center'; g.fillText(base, x, y); return; }
+  g.font = big;
   const wb = g.measureText(base).width;
-  g.font = '600 9.5px Inter, system-ui, sans-serif';
+  g.font = small;
   const ws = g.measureText(sub).width;
   const left = x - (wb + ws) / 2;
   g.textAlign = 'left';
-  g.font = '650 12.5px Inter, system-ui, sans-serif'; g.fillText(base, left, y);
-  g.font = '600 9.5px Inter, system-ui, sans-serif'; g.fillText(sub, left + wb, y + 4);
+  g.font = big; g.fillText(base, left, y);
+  g.font = small; g.fillText(sub, left + wb, y + 4 * k);
 }
 
 const trim = (v, n = 3) => String(+(+v).toPrecision(n));

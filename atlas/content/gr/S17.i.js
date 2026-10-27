@@ -30,7 +30,7 @@ const countCurves = {
   params: {
     x: [2.5, 5.5], y: [0, 55], xlabel: 'number of spacetime dimensions n', ylabel: 'independent numbers', xticks: 3, yticks: 6,
     curves: [
-      { fn: 'x^2(x^2 - 1)/12', color: 'gold', domain: [3, 5.5], label: 'Riemann', labelAt: 5.05, labelDx: -70, labelDy: -6 },
+      { fn: 'x^2(x^2 - 1)/12', color: 'gold', domain: [3, 5.11], label: 'Riemann', labelAt: 4.75, labelDx: -66, labelDy: -4 },
       { fn: 'x(x + 1)/2', color: 'accent', domain: [3, 5.5], label: 'Ricci', labelAt: 5.05, labelDx: 4, labelDy: 14 },
     ],
     points: [3, 4, 5].flatMap((n) => [{ x: n, y: riemann(n), color: 'gold', label: String(riemann(n)) }, { x: n, y: ricci(n), color: 'accent', label: n === 3 ? '' : String(ricci(n)) }]),

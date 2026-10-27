@@ -110,8 +110,8 @@ export function history(P, H0, { tPast = 30, tFuture = 40, aMax = 5 } = {}) {
 
 /** A one-line verdict on a model's fate (plain text). */
 export function fate(P, H0) {
-  const hst = history(P, H0, { tFuture: 1e5, tPast: 1e3, aMax: 1e6 });
-  if (hst.crunch !== null) return { kind: 'crunch', text: `recollapses: Big Crunch ${hst.crunch.toFixed(0)} Gyr from now`, hst };
+  const hst = history(P, H0, { tFuture: 1e8, tPast: 1e3, aMax: 1e6 });
+  if (hst.crunch !== null) return { kind: 'crunch', text: `recollapses: Big Crunch ${hst.crunch < 1e4 ? hst.crunch.toFixed(0) : `${(hst.crunch / 10 ** Math.floor(Math.log10(hst.crunch))).toFixed(1)}×10${String(Math.floor(Math.log10(hst.crunch))).replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])}`} billion years from now`, hst };
   if (P.OL > 0) return { kind: 'forever-accel', text: 'expands forever, ever faster', hst };
   if (P.Om === 0 && !(P.Or > 0)) return { kind: 'forever', text: 'expands forever at a steady rate', hst };
   return { kind: 'forever', text: 'expands forever, slowing down', hst };

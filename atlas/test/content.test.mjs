@@ -11,7 +11,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { CATALOG, COURSES } from '../content/catalog.js';
 import { validateCatalog } from '../src/core/catalog.js';
 import { validateLesson, validateItem, instantiate, itemsOf } from '../src/core/content.js';
-import { mathIn } from '../src/core/markup.js';
+import { mathIn, escapeDamage } from '../src/core/markup.js';
 import { scan, render as renderLoads } from '../tools/register.mjs';
 import ACHIEVEMENTS from '../content/achievements.js';
 import GALLERY from '../content/gallery.js';
@@ -53,8 +53,10 @@ async function checkVisual(where, spec) {
     try { p = mod.validate({ ...(mod.defaults || {}), ...(spec.params || {}) }); } catch (e) { p = [`validate threw: ${e.message}`]; }
     check(`${where}: ${spec.type} parameters`, p.length === 0, p.slice(0, 3).join('; '));
   }
-  for (const s of [spec.lead, spec.caption, spec.explain, spec.note, ...(spec.tasks || [])]) {
+  for (const s of [spec.lead, spec.caption, spec.explain, spec.note, spec.title, ...(spec.tasks || [])]) {
     if (!s) continue;
+    const dmg = escapeDamage(s);
+    if (dmg) check(`${where}: visual text`, false, `“${String(s).slice(0, 40)}…” ${dmg}`);
     for (const m of mathIn(s)) { try { tex(m.tex, m.display); } catch (e) { check(`${where}: visual text TeX`, false, `${m.tex}: ${e.message}`); } }
   }
 }

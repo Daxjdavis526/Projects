@@ -135,26 +135,32 @@ export function wheelPicture({ arrows = 'ground', labels = true, caption, mark, 
 /**
  * A gyroscope seen in 3D: a pivot on a stand, a horizontal axle of length 1.6
  * at azimuth `phi` (degrees, or a slider key), a wheel at its end, and chosen
- * vectors: L (along the axle, `inward` reverses it), the weight W, the support
- * force N, the torque τ about the pivot, and dL (the change in L).
+ * vectors: L (drawn from the wheel's centre along the axle; `inward` points it
+ * back toward the pivot; its length may be a number or an expression), the
+ * weight W, the support force N, the torque τ about the pivot, dL (the change
+ * in L, along τ) and the circle traced by L's tip.
  */
-export function gyroScene({ phi = 30, show = ['L', 'W', 'tau'], inward = false, Lsize = 2.4, sliders, readouts, caption, labels = {}, extra = {} } = {}) {
+export function gyroScene({ phi = 30, show = ['L', 'W', 'tau'], inward = false, Lsize = 1.2, sliders, readouts, caption, labels = {}, extra = {} } = {}) {
   const a = typeof phi === 'number' ? String(r4(phi * DEG)) : `(${phi})*pi/180`;
   const c = `cos(${a})`, s = `sin(${a})`, rr = 1.6, rw = 0.55;
   const axle = [`${rr}*${c}`, `${rr}*${s}`, '0'];
-  const sign = inward ? -1 : 1;
+  const tipR = `(${rr} ${inward ? '-' : '+'} (${Lsize}))`;            // distance of L's tip from the pivot
+  const tip = [`${tipR}*${c}`, `${tipR}*${s}`, '0'];
   const vectors = [];
   const lab = (k, d) => labels[k] ?? d;
-  if (show.includes('L')) vectors.push({ to: [`${sign * Lsize}*${c}`, `${sign * Lsize}*${s}`, '0'], color: 'accent', label: lab('L', '\\vec L') });
+  // pointing back along the axle, L is drawn a little above it so the axle does not hide it
+  const lift = (p) => (inward ? [p[0], p[1], '0.22'] : p);
+  if (show.includes('L')) vectors.push({ from: lift(axle), to: lift(tip), color: 'accent', label: lab('L', '\\vec L') });
   if (show.includes('W')) vectors.push({ from: axle, to: [axle[0], axle[1], '-1.3'], color: 'ink2', label: lab('W', 'M\\vec g') });
   if (show.includes('N')) vectors.push({ from: [0, 0, 0], to: [0, 0, 1.3], color: 'teal', label: lab('N', '\\vec N') });
   if (show.includes('tau')) vectors.push({ to: [`-1.3*${s}`, `1.3*${c}`, '0'], color: 'bad', label: lab('tau', '\\vec\\tau') });
-  if (show.includes('dL')) vectors.push({ from: [`${sign * Lsize}*${c}`, `${sign * Lsize}*${s}`, '0'], to: [`${sign * Lsize}*${c} - 0.7*${s}`, `${sign * Lsize}*${s} + 0.7*${c}`, '0'], color: 'gold', label: lab('dL', 'd\\vec L') });
+  // dL = τ dt points along the torque, whichever way L points
+  if (show.includes('dL')) vectors.push({ from: tip, to: [`${tip[0]} - 0.7*${s}`, `${tip[1]} + 0.7*${c}`, '0'], color: 'gold', label: lab('dL', 'd\\vec L') });
   const curves = [
     // the wheel: a circle about the axle's end, in the plane perpendicular to the axle
     { param: [`${rr}*${c} - ${rw}*${s}*cos(t)`, `${rr}*${s} + ${rw}*${c}*cos(t)`, `${rw}*sin(t)`], t: [0, 6.2832], color: 'ink', width: 2.4 },
   ];
-  if (show.includes('circle')) curves.push({ param: [`${Lsize}*cos(t)`, `${Lsize}*sin(t)`, '0'], t: [0, 6.2832], color: 'accent', width: 1.1, dash: true });
+  if (show.includes('circle')) curves.push({ param: [`${tipR}*cos(t)`, `${tipR}*sin(t)`, '0'], t: [0, 6.2832], color: 'accent', width: 1.1, dash: true });
   return {
     type: 'calc-vectors3d',
     params: {

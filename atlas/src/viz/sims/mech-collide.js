@@ -183,7 +183,7 @@ export function mount(F, P0) {
     const ya = y - 7 - 34 - 26, step = clash(cxs, vels.map((q) => q * kv), [lab(0), lab(1)]) ? 15 : 0;
     for (let i = 0; i < 2; i++) {
       const cw = w[i] * k, ch = Math.max(20, Math.min(34, cw * 0.42));
-      cart(c, cxs[i], y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i]);
+      cart(c, cxs[i], y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i], i && namesClash(cxs) ? 13 : 0);
       velArrow(c, cxs[i], ya - i * step, vels[i] * kv, c[COL[i]], lab(i), vels[i]);
     }
     if (P.cm) cmMark(c, X(cm0 - shift), y + 2);
@@ -193,25 +193,35 @@ export function mount(F, P0) {
   const cmAt = (t) => { const s = TL.at(t); return (v('m1') * s.x[0] + v('m2') * s.x[1]) / (v('m1') + v('m2')); };
 
   function drawSnapshots(c, W, vals) {
-    const rowH = compact ? 96 : 104, kv = vScale(vals), { X, k } = trackMap(W), wd = widths(), w = [wd.w1, wd.w2];
+    const rowH = compact ? 104 : 112, kv = vScale(vals), { X, k } = trackMap(W), wd = widths(), w = [wd.w1, wd.w2];
     const ex = mode() === 'explode';
     const rows = before ? ['before'] : ['before', 'after'];
     rows.forEach((row, r) => {
       const y = 6 + r * rowH + rowH - 22;
       rail(c, W, y);
       text(c, row === 'before' ? 'Before' : 'After', 14, y + 11, { color: c.ink2, weight: 650, size: 11.5 });
-      const pos = ex && row === 'before' ? [-w[0] / 2, w[1] / 2] : [-1.9, 1.9];
-      if (ex && row === 'before') spring(c, X(pos[0]) + (w[0] * k) / 2, X(pos[1]) - (w[1] * k) / 2, y - 18, true);
       const rv = row === 'before' ? vals.ub : vals.va, lab = (i) => (P.values ? vtxt(rv[i]) : `v${i + 1}`);
+      // stuck together after a perfectly inelastic collision: one coupled pair, one arrow
+      const stuck = !ex && row === 'after' && Math.abs(rv[0] - rv[1]) <= 1e-9 * Math.max(1, Math.abs(rv[0]));
+      const pos = (ex && row === 'before') || stuck ? [-w[0] / 2, w[1] / 2] : [-1.9, 1.9];
+      if (ex && row === 'before') spring(c, X(pos[0]) + (w[0] * k) / 2, X(pos[1]) - (w[1] * k) / 2, y - 18, true);
       const step = clash(pos.map(X), rv.map((q) => q * kv), [lab(0), lab(1)]) ? 15 : 0;
       for (let i = 0; i < 2; i++) {
         const cx = X(pos[i]), cw = w[i] * k, ch = Math.max(18, Math.min(30, cw * 0.4));
-        cart(c, cx, y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i]);
+        cart(c, cx, y, cw, ch, COL[i], `${trim(v(i ? 'm2' : 'm1'))} kg`, P.names[i], i && namesClash(pos.map(X)) ? 13 : 0);
         const vel = rv[i];
+        if (stuck) {
+          if (i === 1) {
+            const unk = (P.unknown || []).length > 0;
+            if (unk) text(c, '?', X(0), y - 61, { color: c.gold, weight: 700, size: 16, align: 'center' });
+            else velArrow(c, X(0), y - 61, vel * kv, c.gold, P.values ? `${vtxt(vel)}, together` : 'v', vel);
+          }
+          continue;
+        }
         const unknown = row === 'after' && (P.unknown || []).includes(`v${i + 1}`);
         const ya = y - 30 - 31 - i * step;
         if (unknown) text(c, '?', cx, ya, { color: c[COL[i]], weight: 700, size: 16, align: 'center' });
-        else if (ex && row === 'before' && Math.abs(vel) < 1e-9 && i === 1) text(c, 'both at rest', (cx + X(pos[0])) / 2, ya, { color: c.ink2, size: 11.5, align: 'center' });
+        else if (ex && row === 'before' && Math.abs(vel) < 1e-9 && i === 1) text(c, 'both at rest', (cx + X(pos[0])) / 2, y - 76, { color: c.ink2, size: 11.5, align: 'center' });
         else if (!(ex && row === 'before' && Math.abs(vel) < 1e-9)) velArrow(c, cx, ya, vel * kv, c[COL[i]], P.values ? vtxt(vel) : `v${i + 1}`, vel);
       }
     });
@@ -302,24 +312,34 @@ export function mount(F, P0) {
     charts.forEach((kind, i) => {
       const [x, w] = boxes[i];
       if (kind === 'p' && two) vectorChart(c, x, y0 + 4, w, h - 10, vals);
-      else if (kind === 'p') barChart(c, x, y0 + 4, w, h - 10, 'momentum p (kg·m/s)', [vals.pb, vals.pa], true);
-      else barChart(c, x, y0 + 4, w, h - 10, 'kinetic energy K (J)', [vals.Kb, vals.Ka], false);
+      else if (kind === 'p') barChart(c, x, y0 + 4, w, h - 10, 'momentum p', [vals.pb, vals.pa], true);
+      else barChart(c, x, y0 + 4, w, h - 10, 'kinetic energy K', [vals.Kb, vals.Ka], false);
     });
   }
 
-  function barChart(c, x, y, w, h, title, [b, a], signed) {
+  function barChart(c, x, y, w, h, title, [b0, a0], signed) {
     const g = ctx;
-    text(c, title, x, y + 7, { color: c.ink2, size: 11.5, weight: 600 });
+    // big numbers: show them in thousands (or millions), and say so in the title
+    const big = Math.max(...b0.map(Math.abs), ...a0.map(Math.abs), Math.abs(b0[0] + b0[1]), Math.abs(a0[0] + a0[1]));
+    const f = big >= 1e7 ? 1e6 : big >= 1e4 ? 1e3 : 1;
+    const b = b0.map((q) => q / f), a = a0.map((q) => q / f);
+    const unit = signed ? (f === 1 ? 'kg·m/s' : f === 1e3 ? '10³ kg·m/s' : '10⁶ kg·m/s') : f === 1 ? 'J' : f === 1e3 ? 'kJ' : 'MJ';
+    text(c, `${title} (${unit})`, x, y + 7, { color: c.ink2, size: 11.5, weight: 600 });
     const rows = [['before'], [P.names[0], b[0], COL[0]], [P.names[1], b[1], COL[1]], ['total', b[0] + b[1], 'gold'],
       ['after'], [P.names[0], a[0], COL[0]], [P.names[1], a[1], COL[1]], ['total', a[0] + a[1], 'gold']];
+    const data = rows.filter((r) => r.length > 1);
     g.save(); g.font = '650 10.5px Inter, system-ui, sans-serif';
-    const need = Math.max(...rows.filter((r) => r.length > 1).map((r) => g.measureText(r[0]).width));
+    const need = Math.max(...data.map((r) => g.measureText(r[0]).width));
+    g.font = '500 10px Inter, system-ui, sans-serif';
+    const valW = P.values ? Math.max(...data.map((r) => g.measureText(fmt2(r[1])).width)) + 8 : 3;
+    const K0 = b[0] + b[1], K1 = a[0] + a[1], lost = !signed && K0 - K1 > 0.01 * Math.max(K0, 1e-9);
+    const lostW = lost ? g.measureText(`lost ${fmt2(K0 - K1)}`).width + 8 : 0;
     g.restore();
     const lw = Math.max(34, Math.min(w * 0.42, need + 12)), bx = x + lw, bw = w - lw - 6;
     const top = y + 17, rh = (h - 19) / 8;
-    const max = Math.max(1e-9, ...rows.filter((r) => r.length > 1).map((r) => Math.abs(r[1])));
+    const max = Math.max(1e-9, ...data.map((r) => Math.abs(r[1])));
     const z = signed ? bx + bw / 2 : bx;
-    const scale = (signed ? bw / 2 - (P.values ? 26 : 3) : bw - (P.values ? 52 : 46)) / max;
+    const scale = Math.max(4, signed ? bw / 2 - valW : bw - Math.max(valW, lostW)) / max;
     g.save();
     g.strokeStyle = c.line3; g.lineWidth = 1;
     for (const k0 of [1, 5]) { g.beginPath(); g.moveTo(Math.round(z) + 0.5, top + k0 * rh); g.lineTo(Math.round(z) + 0.5, top + (k0 + 3) * rh); g.stroke(); }
@@ -332,20 +352,19 @@ export function mount(F, P0) {
       const bh = Math.max(5, rh - 4);
       if (Math.abs(len) > 0.4) g.fillRect(len >= 0 ? z : z + len, ry + (rh - bh) / 2, Math.abs(len), bh);
       g.globalAlpha = 1;
-      if (P.values) {
+      // the after-total of a lossy collision is labelled by its "lost" note instead
+      if (P.values && !(lost && k === 7)) {
         const tx = signed ? (len >= 0 ? z + len + 4 : z + len - 4) : z + Math.max(0, len) + 4;
         text(c, fmt2(val), tx, ry + rh / 2, { color: c.ink2, size: 10, align: signed && len < 0 ? 'right' : 'left' });
       }
     });
-    // kinetic energy lost (or released) in the interaction
-    if (!signed) {
-      const K0 = b[0] + b[1], K1 = a[0] + a[1], ry = top + 7 * rh, bh = Math.max(5, rh - 4);
-      if (K0 - K1 > 0.01 * Math.max(K0, 1e-9)) {
-        g.strokeStyle = c.bad; g.setLineDash([3, 3]); g.lineWidth = 1.3;
-        g.strokeRect(z + K1 * scale, ry + (rh - bh) / 2, (K0 - K1) * scale, bh);
-        g.setLineDash([]);
-        text(c, `lost ${fmt2(K0 - K1)}`, z + K0 * scale + 4, ry + rh / 2, { color: c.bad, size: 10, weight: 600 });
-      }
+    // kinetic energy lost in the interaction: a dashed box from what is left to what there was
+    if (lost) {
+      const ry = top + 7 * rh, bh = Math.max(5, rh - 4);
+      g.strokeStyle = c.bad; g.setLineDash([3, 3]); g.lineWidth = 1.3;
+      g.strokeRect(z + K1 * scale, ry + (rh - bh) / 2, (K0 - K1) * scale, bh);
+      g.setLineDash([]);
+      text(c, `lost ${fmt2(K0 - K1)}`, z + K0 * scale + 4, ry + rh / 2, { color: c.bad, size: 10, weight: 600 });
     }
     g.restore();
   }
@@ -394,7 +413,7 @@ export function mount(F, P0) {
     ctx.save(); ctx.strokeStyle = c.line3; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(8, y); ctx.lineTo(W - 8, y); ctx.stroke(); ctx.restore();
   }
-  function cart(c, cx, y, cw, ch, col, mass, name) {
+  function cart(c, cx, y, cw, ch, col, mass, name, lift = 0) {
     const g = ctx;
     g.save();
     g.fillStyle = c[col]; g.globalAlpha = 0.9;
@@ -404,7 +423,14 @@ export function mount(F, P0) {
     for (const wx of [-cw * 0.3, cw * 0.3]) { g.beginPath(); g.arc(cx + wx, y - 4, 3.6, 0, Math.PI * 2); g.fill(); g.stroke(); }
     g.restore();
     text(c, mass, cx, y - 7 - ch / 2, { color: '#fff', size: cw > 64 ? 11.5 : 10, weight: 650, align: 'center', halo: false });
-    text(c, name, cx, y - ch - 16, { color: c[col], size: 11, weight: 700, align: 'center' });
+    text(c, name, cx, y - ch - 16 - lift, { color: c[col], size: 11, weight: 700, align: 'center' });
+  }
+  // do the two carts' names, centred above them, run into each other?
+  function namesClash(xs) {
+    ctx.save(); ctx.font = '700 11px Inter, system-ui, sans-serif';
+    const w = P.names.map((n) => ctx.measureText(n).width);
+    ctx.restore();
+    return Math.abs(xs[1] - xs[0]) < (w[0] + w[1]) / 2 + 6;
   }
   function spring(c, x0, x1, y, compressed) {
     const g = ctx, n = 8, amp = compressed ? 6 : 3;

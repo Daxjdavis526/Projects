@@ -33,9 +33,9 @@ const BAR = {
  * Energy bar charts ("LOL diagrams"): one group of bars per snapshot.
  *   snaps    [{ title: 'A: at rest', K: 0, Ug: 12, … }]
  *   keys     which bars, in order: K Ki Kf Ug Us U Eth W E (Ki, W, Kf in one snapshot draw the work–energy theorem)
- *   numbers  false hides the energy scale (a qualitative chart)
+ *   numbers  false hides the energy scale (a qualitative chart); names renames bars ({ E: 'battery' })
  */
-export function energyBars(snaps, { keys = ['K', 'Ug', 'Us', 'Eth'], numbers = true, values = false, unit = 'J', caption, alt } = {}) {
+export function energyBars(snaps, { keys = ['K', 'Ug', 'Us', 'Eth'], numbers = true, values = false, unit = 'J', caption, alt, names = {} } = {}) {
   const m = keys.length, gap = 1.3;
   const all = snaps.flatMap((s) => keys.map((k) => s[k] ?? 0));
   const lo0 = Math.min(0, ...all), hi0 = Math.max(0, ...all, 1e-9);
@@ -45,7 +45,7 @@ export function energyBars(snaps, { keys = ['K', 'Ug', 'Us', 'Eth'], numbers = t
     const x0 = g * (m + gap);
     if (s.title) points.push(label(x0 + 0.1, hi0 + 0.16 * span, s.title, 'ink', -4, 0));
     keys.forEach((k, j) => {
-      const v = s[k] ?? 0, [name, color] = BAR[k];
+      const v = s[k] ?? 0, [name0, color] = BAR[k], name = names[k] ?? name0;
       const cx = x0 + 0.5 + j;
       if (Math.abs(v) > 1e-12) shade.push({ fn: String(r4(v)), lower: '0', from: r4(cx - 0.36), to: r4(cx + 0.36), color, alpha: 0.75 });
       points.push(label(cx, lo0 - 0.1 * span, name, color, -4 - 3.5 * (name.length - 1), 0));
@@ -131,5 +131,35 @@ export function blockPic({ forces = [], d = 'Δr', dDeg = 0, angle = null, floor
       curves, arrows, points,
     },
     caption: caption ?? 'Not to scale: the arrows show directions only. The green arrow is the displacement.',
+  };
+}
+
+/**
+ * A spring between a wall and a block, compressed (c < 0) or stretched (c > 0)
+ * from its natural length — c is a fraction of the natural length as drawn.
+ *   label  the displacement label ('' hides the arrow); v: a velocity arrow on the block ('' none, or a label)
+ */
+export function springPic({ c = -0.3, label = 'x', v = '', vDir = -1, caption, alt, coils = 9, blockLabel = '' }) {
+  const L0 = 3.4, L = r4(L0 * (1 + c)), bw = 0.7;
+  const curves = [
+    { param: [`${L}*t`, `0.22*asin(sin(${2 * coils}*pi*t))*2/pi`], t: [0, 1], color: 'ink2', width: 1.8 },
+    { param: ['0', 't'], t: [-0.5, 0.9], color: 'ink2', width: 3 },
+    { fn: '-0.5', domain: [-0.3, r4(Math.max(L0, L) + 1.4)], color: 'ink3', width: 2 },
+    { param: [String(L0), 't'], t: [-0.5, 0.95], color: 'ink3', width: 1.1, dash: true },
+  ];
+  const arrows = [], points = [];
+  if (label && Math.abs(L - L0) > 1e-9) arrows.push({ from: [L0, 1.0], to: [L, 1.0], color: 'gold', label, labelDx: c < 0 ? -10 - 6.5 * [...label].length : 8, labelDy: -12 });
+  if (v) arrows.push({ from: [r4(L + bw / 2), 0.75], to: [r4(L + bw / 2 + vDir * 1.1), 0.75], color: 'good', label: v });
+  points.push({ x: L0, y: -0.75, r: 0.01, color: 'ink3', label: 'natural length', labelDx: -40, labelDy: 0 });
+  if (blockLabel) points.push({ x: r4(L + bw / 2), y: 0, r: 0.01, color: 'ink', label: blockLabel, labelDx: -4 * blockLabel.length, labelDy: 0 });
+  return {
+    type: 'graph',
+    params: {
+      x: [-0.4, r4(Math.max(L0, L) + 1.5)], y: [-1.0, 1.45], equal: true, aspect: 'wide', grid: false, axes: false, xlabel: '', ylabel: '',
+      alt: alt || 'A spring between a wall and a block',
+      shade: [{ fn: '0.5', lower: '-0.5', from: L, to: r4(L + bw), color: 'accent', alpha: 0.55 }],
+      curves, arrows, points,
+    },
+    caption: caption ?? 'The spring and the block, not to scale. The dashed line marks where the block’s face sits when the spring has its natural length.',
   };
 }

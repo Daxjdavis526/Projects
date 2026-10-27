@@ -148,7 +148,12 @@ export function mount(F, P0) {
     const split = graph ? Math.round(W * (W < 520 ? 0.5 : n > 2 ? 0.6 : 0.5)) : W;
     const yLo = -H - pipe - 0.04 * H, yHi = top + 0.16 * H;
     const padT = 24, padB = 26;
-    A.o.pad = { l: 10, r: W - split + 10, t: padT, b: padB };
+    // the vessels' region; a lone vessel or two without the graph stays tall rather than stretched.
+    // A margin on its left holds the depth arrow and its label.
+    const lab = P.values ? 76 : 18;
+    let x0 = 0, x1 = split;
+    if (!graph && n <= 2) { const want = n * (A.h - padT - padB) * 0.95 + lab + 30; if (want < W) { x0 = (W - want) / 2; x1 = x0 + want; } }
+    A.o.pad = { l: x0 + lab + 6, r: W - x1 + 10, t: padT, b: padB };
     A.setView([0, n], [yLo, yHi]);
     const tint = TINT[e.fl] || 'accent';
     const alpha = e.fl === 'mercury' ? 0.55 : 0.32;
@@ -208,16 +213,16 @@ export function mount(F, P0) {
     const d = e.depth;
     if (d !== null && d !== undefined && Number.isFinite(d)) {
       const y = -Math.max(0, Math.min(H, d));
-      A.line(0, y, n, y, { color: 'gold', width: 1.2, dash: [5, 5] });
+      const xd = A.ix(A.L - 10);   // the depth arrow, in the left margin
+      A.line(xd, y, n, y, { color: 'gold', width: 1.2, dash: [5, 5] });
       for (let k = 0; k < n; k++) {
         const f = SHAPE[shapes[k]], [a, b] = f((H + y) / (H + top)), cx = k + 0.5 + (a + b) / 2;
         A.point(cx, y, { color: 'gold', r: 4.5 });
         if (P.values && !(P.sensor && k === 0)) A.text(kPa(shown(pAt(-y))), cx, y, { dx: 0, dy: -12, align: 'center', color: 'gold', size: compact ? 11 : 12, weight: 650 });
       }
-      // the depth, marked down the left edge
-      const xd = 0.07;
+      // the depth, marked in the left margin
       A.arrow(xd, 0, xd, y, { color: 'ink3', width: 1.4, head: 7 });
-      if (P.values) A.text(`h = ${len(-y)}`, xd, y / 2, { dx: 5, color: 'ink2', size: compact ? 11 : 12, weight: 600 });
+      if (P.values) A.text(`h = ${len(-y)}`, xd, y / 2, { dx: -5, align: 'right', color: 'ink2', size: compact ? 11 : 12, weight: 600 });
       if (P.sensor) sensor(A, 0.5 + (SHAPE[shapes[0]]((H + y) / (H + top))[0] + SHAPE[shapes[0]]((H + y) / (H + top))[1]) / 2, y, pAt(-y), pAt(H), e.tilt, gauge);
     }
     if (graph) {
@@ -387,11 +392,16 @@ export function mount(F, P0) {
     const minLen = 0.012 * D;
     if (st.W * k > minLen) { A.arrow(0, yb + s / 2, 0, yb + s / 2 - st.W * k, { color: 'ink', width: 2.6, head: 9 }); A.text(lab('W', st.W), 0, yb + s / 2 - st.W * k, { dx: 7, dy: 2, color: 'ink', size: fs, weight: 650 }); }
     const xb = -0.3 * s, ycb = yb + (st.sub * s) / 2;
-    if (st.B * k > minLen) { A.arrow(xb, ycb, xb, ycb + st.B * k, { color: 'accent', width: 2.6, head: 9 }); A.text(lab('B', st.B), xb, ycb + st.B * k, { dx: -7, dy: -2, align: 'right', color: 'accent', size: fs, weight: 650 }); }
+    if (st.B * k > minLen) {
+      A.arrow(xb, ycb, xb, ycb + st.B * k, { color: 'accent', width: 2.6, head: 9 });
+      // a short arrow ends inside the block: label it beside the block instead
+      const inside = ycb + st.B * k < yt;
+      A.text(lab('B', st.B), inside ? -s / 2 : xb, ycb + st.B * k, { dx: -7, dy: -2, align: 'right', color: 'accent', size: fs, weight: 650 });
+    }
     if (st.T * k > minLen) { A.arrow(0.3 * s, yt, 0.3 * s, yt + st.T * k, { color: 'good', width: 2.6, head: 9 }); A.text(lab('T', st.T), 0.3 * s, yt + st.T * k, { dx: 7, dy: 2, color: 'good', size: fs, weight: 650 }); }
     if (st.N * k > minLen) { A.arrow(0.3 * s, yb, 0.3 * s, yb + st.N * k, { color: 'teal', width: 2.6, head: 9 }); A.text(lab('N', st.N), 0.3 * s, yb + st.N * k, { dx: 7, dy: 2, color: 'teal', size: fs, weight: 650 }); }
     const status = st.floats ? `floating: ${Math.round(st.sub * 100)}% under` : st.onFloor ? 'resting on the floor' : st.sub >= 1 ? 'fully under' : st.sub > 0 ? `${Math.round(st.sub * 100)}% under` : 'in the air';
-    A.text(status, -Wt / 2 + 0.03 * D, -D + 0.06 * D, { color: 'ink2', size: fs, weight: 600 });
+    if (P.values) A.text(status, -Wt / 2 + 0.03 * D, -D + 0.06 * D, { color: 'ink2', size: fs, weight: 600 });
     if (showReadout) F.readout([
       ['weight $W$', texN(st.W)], ['buoyant force $B$', texN(st.B)], [e.hold === 'scale' && !st.onFloor ? 'scale reads $T$' : 'floor pushes $N$', texN(e.hold === 'scale' && !st.onFloor ? st.T : st.N)],
       ['under the surface', `${Math.round(st.sub * 1000) / 10}\\,\\%`], ['$\\rho_\\text{block}/\\rho_\\text{liquid}$', trim(e.rhoObj / e.rho, 3)],
