@@ -246,25 +246,25 @@ export const EXPERIMENTS = {
   freefall: {
     title: 'A steel ball dropped from an electromagnet',
     apparatus: 'freefall',
-    note: 'No air resistance (for a steel ball over a metre it changes t by less than 0.01 %). Timer jitter 1.5 ms; the timer reads to 1 ms.',
-    defaults: { g: G_LOCAL, delay: 0.012, st: 0.0015 },
-    setting: { key: 'h', sym: 'h', label: 'Drop height $h$', unit: 'm', min: 0.1, max: 1.5, step: 0.05, value: 0.6, series: [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3], explain: 'From the bottom of the ball to the trapdoor.' },
-    nz: 1,
-    read: (h, P, sys, z) => [Math.sqrt((2 * h) / P.g) + (sys === 'delay' ? P.delay : 0) + P.st * z[0]],
+    note: 'Air resistance is left out: for a 2 cm steel ball it lengthens a 1.3 m fall by about 0.06 % (0.3 ms). Heights are read to ±1 mm; the timer scatters by 1.5 ms and reads to 1 ms.',
+    defaults: { g: G_LOCAL, delay: 0.012, st: 0.0015, sh: 0.001 },
+    setting: { key: 'h', sym: 'h', label: 'Drop height $h$', unit: 'm', min: 0.1, max: 1.5, step: 0.05, value: 0.7, series: [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3], explain: 'From the bottom of the ball to the trapdoor, read off a metre rule to ±1 mm.' },
+    nz: 2,
+    read: (h, P, sys, z) => [Math.sqrt((2 * (h + P.sh * z[0])) / P.g) + (sys === 'delay' ? P.delay : 0) + P.st * z[1]],
     series: [{ key: 't', sym: 't', label: 'fall time', unit: 's', res: 0.001, sigma: (s, P) => Math.hypot(P.st, resolutionU(0.001)) }],
     axes: {
       sqrt: {
-        label: 't against √h', slopeUnit: 's/√m', x: { sym: '√h', unit: '√m', of: (h) => Math.sqrt(h) }, ys: [{ sym: 't', unit: 's', of: (h, R) => R[0], sigma: (h, R, P) => Math.hypot(P.st, resolutionU(0.001)) }],
+        label: 't against √h', slopeUnit: 's/√m', x: { sym: '√h', unit: '√m', of: (h) => Math.sqrt(h), sigma: (h, R, P) => P.sh / (2 * Math.sqrt(h)) }, ys: [{ sym: 't', unit: 's', of: (h, R) => R[0], sigma: (h, R, P) => Math.hypot(P.st, resolutionU(0.001)) }],
         expect: (P) => ({ a: 0, b: Math.sqrt(2 / P.g) }),
         results: [{ sym: 'g', name: 'free-fall acceleration', unit: 'm/s²', of: (f) => 2 / f.b ** 2, sigma: (f) => (4 / f.b ** 3) * f.sb, accepted: (P) => P.g, acceptedLabel: 'local g' }],
         intercept: { sym: 'δ', name: 'timer delay', unit: 's' },
       },
       square: {
-        label: 't² against h', slopeUnit: 's²/m', x: { sym: 'h', unit: 'm', of: (h) => h }, ys: [{ sym: 't²', unit: 's²', of: (h, R) => R[0] ** 2, sigma: (h, R, P) => 2 * R[0] * Math.hypot(P.st, resolutionU(0.001)) }],
+        label: 't² against h', slopeUnit: 's²/m', x: { sym: 'h', unit: 'm', of: (h) => h, sigma: (h, R, P) => P.sh }, ys: [{ sym: 't²', unit: 's²', of: (h, R) => R[0] ** 2, sigma: (h, R, P) => 2 * R[0] * Math.hypot(P.st, resolutionU(0.001)) }],
         expect: (P) => ({ a: 0, b: 2 / P.g }),
         results: [{ sym: 'g', name: 'free-fall acceleration', unit: 'm/s²', of: (f) => 2 / f.b, sigma: (f) => (2 / f.b ** 2) * f.sb, accepted: (P) => P.g, acceptedLabel: 'local g' }],
       },
-      raw: { label: 't against h', slopeUnit: 's/m', x: { sym: 'h', unit: 'm', of: (h) => h }, ys: [{ sym: 't', unit: 's', of: (h, R) => R[0], sigma: (h, R, P) => Math.hypot(P.st, resolutionU(0.001)) }], curved: true },
+      raw: { label: 't against h', slopeUnit: 's/m', x: { sym: 'h', unit: 'm', of: (h) => h, sigma: (h, R, P) => P.sh }, ys: [{ sym: 't', unit: 's', of: (h, R) => R[0], sigma: (h, R, P) => Math.hypot(P.st, resolutionU(0.001)) }], curved: true },
     },
     defaultAxes: 'sqrt',
     systematics: { delay: { label: 'Release delay: the magnet holds the ball 12 ms after the timer starts', short: 'release delay', explain: 'The timer starts when the magnet’s current is cut, but the fading field holds the ball for another 12 ms.' } },
@@ -327,14 +327,14 @@ export const EXPERIMENTS = {
     title: 'A loaded block pulled across a board',
     apparatus: 'friction',
     note: 'Friction is modelled as exactly proportional to the normal force; the peak (static) force scatters by 4 % from pull to pull, the sliding (kinetic) force by 2 %. Real surfaces wear and vary more.',
-    defaults: { mb: 0.250, mus: 0.42, muk: 0.30, g: G_LOCAL, angle: 20 },
+    defaults: { mb: 0.250, mus: 0.42, muk: 0.30, g: G_LOCAL, angle: 20, zero: 0.20 },
     setting: { key: 'm', sym: 'm', label: 'Load on the block $m$', unit: 'kg', min: 0, max: 1.5, step: 0.05, value: 0.5, series: [0, 0.25, 0.5, 0.75, 1.0, 1.25], explain: 'Added to the 0.250 kg block.' },
     nz: 2,
     read: (m, P, sys, z) => {
       const W = (P.mb + m) * P.g, al = sys === 'angle' ? P.angle * D2R : 0;
       const pull = (mu) => (mu * W) / (Math.cos(al) + mu * Math.sin(al));
-      const Fs = pull(P.mus), Fk = pull(P.muk);
-      return [Fs * (1 + 0.04 * z[0]), Fk + Math.hypot(0.02 * Fk, 0.02) * z[1]];
+      const Fs = pull(P.mus), Fk = pull(P.muk), off = sys === 'zero' ? P.zero : 0;
+      return [Fs * (1 + 0.04 * z[0]) + off, Fk + Math.hypot(0.02 * Fk, 0.02) * z[1] + off];
     },
     series: [
       { key: 'Fs', sym: 'F_peak', label: 'peak force', unit: 'N', res: 0.01, sigma: (m, P) => 0.04 * P.mus * (P.mb + m) * P.g },
@@ -355,7 +355,10 @@ export const EXPERIMENTS = {
       },
     },
     defaultAxes: 'FN',
-    systematics: { angle: { label: 'String pulled 20° above the horizontal', short: 'tilted pull', explain: 'The force sensor is held high, so the string rises at 20°: it lifts the block a little and only part of the pull is horizontal.' } },
+    systematics: {
+      angle: { label: 'String pulled 20° above the horizontal', short: 'tilted pull', explain: 'The force sensor is held high, so the string rises at 20°: it lifts the block a little and only part of the pull is horizontal.' },
+      zero: { label: 'Force sensor never zeroed: it reads 0.20 N with nothing attached', short: 'zero offset', explain: 'Every force reading is 0.20 N too high.' },
+    },
     defaultSys: 'angle',
   },
 
@@ -380,7 +383,7 @@ export const EXPERIMENTS = {
     apparatus: 'energy',
     note: 'Rolling friction (μ = 0.004) is the only loss; the wheels’ spin energy is ignored. The gate times the 2.50 cm flag to ±0.1 ms; the release point varies by ±2 mm along the track.',
     defaults: { theta: 10, mu: 0.004, w: 0.025, wTrue: 0.026, g: G_LOCAL, st: 0.0001, sd: 0.002 },
-    setting: { key: 'h', sym: 'h', label: 'Release height $h$', unit: 'm', min: 0.02, max: 0.20, step: 0.01, value: 0.10, series: [0.03, 0.06, 0.09, 0.12, 0.15, 0.18], explain: 'Height of the release point above the photogate, h = d sin θ.' },
+    setting: { key: 'h', sym: 'h', label: 'Release height $h$', unit: 'm', min: 0.02, max: 0.20, step: 0.01, value: 0.12, series: [0.03, 0.06, 0.09, 0.12, 0.15, 0.18], explain: 'Height of the release point above the photogate, h = d sin θ.' },
     nz: 2,
     read: (h, P, sys, z) => {
       const th = P.theta * D2R, d = h / Math.sin(th) + P.sd * z[0];
@@ -441,7 +444,7 @@ export const EXPERIMENTS = {
     apparatus: 'rotary',
     note: 'The string is light and does not slip; the pulley’s own inertia is ignored. The rotary sensor gives α to 1 %.',
     defaults: { M: 1.400, R: 0.1140, r: 0.0240, ring: false, Mr: 0.470, R1: 0.0540, R2: 0.0640, g: G_LOCAL, tf: 0.0015, sa: 0.01 },
-    setting: { key: 'm', sym: 'm', label: 'Hanging mass $m$', unit: 'kg', min: 0.01, max: 0.15, step: 0.005, value: 0.05, series: [0.02, 0.04, 0.06, 0.08, 0.10, 0.12], explain: 'On a string wound round the 2.40 cm step of the pulley.' },
+    setting: { key: 'm', sym: 'm', label: 'Hanging mass $m$', unit: 'kg', min: 0.01, max: 0.15, step: 0.005, value: 0.06, series: [0.02, 0.04, 0.06, 0.08, 0.10, 0.12], explain: 'On a string wound round the 2.40 cm step of the pulley.' },
     nz: 1,
     read: (m, P, sys, z) => {
       const I = inertiaRotary(P), tf = sys === 'friction' ? P.tf : 0;
@@ -470,7 +473,7 @@ export const EXPERIMENTS = {
     apparatus: 'pendulum',
     note: 'Small swings (5°), no air drag, and the bob treated as a point; ten swings are timed by hand to ±0.05 s.',
     defaults: { g: G_LOCAL, rb: 0.025, amp: 5, ampBig: 40, react: 0.05 },
-    setting: { key: 'L', sym: 'L', label: 'Length $L$', unit: 'm', min: 0.2, max: 1.6, step: 0.05, value: 0.8, series: [0.3, 0.5, 0.7, 0.9, 1.1, 1.3], explain: 'From the pivot to the centre of the bob, as you measured it.' },
+    setting: { key: 'L', sym: 'L', label: 'Length $L$', unit: 'm', min: 0.2, max: 1.6, step: 0.05, value: 0.9, series: [0.3, 0.5, 0.7, 0.9, 1.1, 1.3], explain: 'From the pivot to the centre of the bob, as you measured it.' },
     nz: 1,
     read: (L, P, sys, z) => {
       const Lt = L + (sys === 'knot' ? P.rb : 0);
@@ -554,7 +557,7 @@ export const EXPERIMENTS = {
     apparatus: 'heater',
     note: 'Heat leaks to the room by Newton’s law of cooling — time constant about 8 hours with the lagging on, 40 minutes without. The heater’s and thermometer’s own heat capacities are ignored.',
     defaults: { m: 1.000, c: 897, V: 12.0, I: 4.20, sV: 0.1, sI: 0.02, sm: 0.001, T0: 20.0, tau: 30000, tauBare: 2500, sT: 0.05 },
-    setting: { key: 't', sym: 't', label: 'Time since switch-on $t$', unit: 's', min: 0, max: 900, step: 30, value: 300, series: [0, 120, 240, 360, 480, 600], explain: 'Read the thermometer at this moment.' },
+    setting: { key: 't', sym: 't', label: 'Time since switch-on $t$', unit: 's', min: 0, max: 900, step: 30, value: 360, series: [0, 120, 240, 360, 480, 600], explain: 'Read the thermometer at this moment.' },
     nz: 1,
     read: (t, P, sys, z) => {
       const C = P.m * P.c, pw = P.V * P.I, tau = sys === 'leak' ? P.tauBare : P.tau;

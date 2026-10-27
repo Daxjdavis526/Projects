@@ -236,7 +236,7 @@ A column of liquid of height $h$ and area $A$ weighs $\rho (Ah) g$; spread over 
             params: {
               aspect: 'wide', x: [0, 32], y: [0, 4], xticks: 0.001, yticks: 0.001, xlabel: 'depth', ylabel: 'absolute p',
               curves: [{ fn: `1 + x/10.33`, color: 'accent' }],
-              hlines: [{ y: 1, label: 'p_atm' }, { y: k, label: `${k} p_atm`, color: 'gold' }],
+              hlines: [{ y: 1, label: 'pₐₜₘ' }, { y: k, label: `${k} pₐₜₘ`, color: 'gold' }],
             },
             caption: 'Absolute pressure against depth (no numbers): it starts at the atmosphere’s value at the surface and climbs in a straight line.',
           },
@@ -255,7 +255,7 @@ A column of liquid of height $h$ and area $A$ weighs $\rho (Ah) g$; spread over 
           prompt: t`A turbopump must see at least ${preq} kPa (absolute) at its inlet, or the liquid oxygen boils inside it (cavitation). The LOX ($1141\ \text{kg/m}^3$) stands ${h} m above the inlet. What is the lowest ullage pressure that keeps the inlet at ${preq} kPa ${when}? ($g = 9.8\ \text{m/s}^2$; ignore losses in the feed line.)`,
           answer: pu, units: 'kPa', tol: { rel: 0.005 },
           errors,
-          hints: [t`$p_\text{inlet} = p_\text{ullage} + \rho g_\text{eff} h$; solve for $p_\text{ullage}$.`, 'Accelerating upward, g_eff = g + a.'],
+          hints: [t`$p_\text{inlet} = p_\text{ullage} + \rho g_\text{eff} h$; solve for $p_\text{ullage}$.`, t`Accelerating upward, $g_\text{eff} = g + a$.`],
           teach: 'The ullage gas only has to supply the inlet pressure the liquid head does not.',
           explain: t`$\rho g_\text{eff} h = 1141\times${tn(geff)}\times${h} = ${tn((RHO.lox * geff * h) / 1000)}$ kPa, so $p_\text{ullage} = ${preq} - ${tn((RHO.lox * geff * h) / 1000)} = ${tn(pu)}\ \text{kPa}$. Real feed lines lose some pressure to friction, so real tanks carry a margin above this.`,
           visual: tank({ scene: 'vessels', closed: true, fluid: 'lox', H: h, depth: h, p0: pu * 1000, g: geff, graph: false, values: false }, 'The LOX tank cut open; the probe marks the pump inlet at the bottom. Not to scale across.'),

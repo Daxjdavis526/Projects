@@ -99,7 +99,7 @@ This **monotone convergence theorem** (and its mirror image for decreasing seque
           answer: m, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: m + 1, feedback: 'Compare the two neighbouring terms at your answer minus one: the drop already starts there.' }, { value: m - 1, feedback: t`At that $n$ the next term is still larger. Check $\frac{a_{n+1}}{a_n} < 1$.` }],
           hints: [t`Use the ratio: $\dfrac{a_{n+1}}{a_n} = \dfrac{(n+1)^{${k}}}{${b}\,n^{${k}}} = \dfrac{1}{${b}}\left(1 + \dfrac1n\right)^{${k}}$.`, t`The sequence decreases once $\left(1 + \frac1n\right)^{${k}} < ${b}$, that is, $1 + \frac1n < ${b}^{1/${k}} \approx ${fmt(b ** (1 / k), 4)}$.`],
-          teach: 'For positive terms, a ratio a_{n+1}/a_n below 1 means the next term is smaller; a sequence that is eventually monotone and bounded still converges.',
+          teach: t`For positive terms, a ratio $a_{n+1}/a_n$ below 1 means the next term is smaller; a sequence that is eventually monotone and bounded still converges.`,
           explain: t`$\frac{a_{n+1}}{a_n} = \frac{1}{${b}}\left(1 + \frac1n\right)^{${k}} < 1 \iff n > \frac{1}{${fmt(b ** (1 / k), 4)} - 1} \approx ${fmt(1 / (b ** (1 / k) - 1), 3)}$, so the terms decrease from $n = ${m}$ on: $a_{${m}} = ${fmt(a(m), 4)} > a_{${m + 1}} = ${fmt(a(m + 1), 4)}$. What happens to the first few terms never affects convergence.`,
           visual: { type: 'calc-series', params: { view: 'terms', term: `n^${k}/${b}^n`, N: 15, zero: true }, caption: 'The first 15 terms: a hump, then a steady decline to 0.' },
         };
@@ -114,7 +114,7 @@ This **monotone convergence theorem** (and its mirror image for decreasing seque
           answer: L, tol: { rel: 0.001 },
           errors: [{ value: Math.sqrt(c), feedback: t`$\sqrt{${c}}$ leaves out the term inside the root: the limit satisfies $L = \sqrt{${c} + L}$.` }, { value: (1 - Math.sqrt(1 + 4 * c)) / 2, feedback: 'That root is negative, but every term is positive — so the limit cannot be negative.' }],
           hints: [t`Let $n \to \infty$ on both sides: $L = \sqrt{${c} + L}$.`, t`Square: $L^2 - L - ${c} = 0$. Keep the root that fits the terms.`],
-          teach: 'Once convergence is known, the limit of a recursion a_{n+1} = f(a_n) solves L = f(L).',
+          teach: t`Once convergence is known, the limit of a recursion $a_{n+1} = f(a_n)$ solves $L = f(L)$.`,
           explain: t`$L^2 = ${c} + L \Rightarrow L^2 - L - ${c} = 0 \Rightarrow L = \frac{1 \pm ${Math.sqrt(1 + 4 * c)}}{2}$. The terms are positive, so $L = ${fmt(L, 4)}$.`,
           visual: { type: 'calc-series', params: { view: 'cobweb', rec: `sqrt(${c} + a)`, a1: 1, N: 3, x: [0, Math.ceil(L + 1.5)] }, caption: t`The cobweb of $a_{n+1} = \sqrt{${c} + a_n}$ from $a_1 = 1$.` },
         };

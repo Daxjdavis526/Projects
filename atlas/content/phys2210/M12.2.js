@@ -32,8 +32,8 @@ function ladderPicture({ th = 65, L = 5, person = 0.7, forces = false, caption }
   if (person !== null) S.dot([person * L * c, person * L * s + 0.25], 'climber', { color: 'accent', r: 7, dx: -58 });
   if (forces) {
     const Nw = ((147 * L / 2 + 686 * person * L) * c) / (L * s);
-    S.force([L * c, L * s], Nw, { deg: 180, color: 'teal', label: 'N_wall' })
-      .force([0, 0], 833, { deg: 90, color: 'teal', label: 'N_floor' })
+    S.force([L * c, L * s], Nw, { deg: 180, color: 'teal', label: 'N (wall)' })
+      .force([0, 0], 833, { deg: 90, color: 'teal', label: 'N (floor)' })
       .force([0, 0], Nw, { deg: 0, color: 'bad', label: 'f', labelDy: 14 })
       .force([L * c / 2, L * s / 2], 147, { deg: -90, color: 'ink2' })
       .force([person * L * c, person * L * s], 686, { deg: -90, color: 'ink2' });
@@ -86,8 +86,8 @@ $$\tau = rF\sin\theta = r_\perp F$$`,
         { param: ['5*cos(th*pi/180)*t', '5*sin(th*pi/180)*t'], t: [0, 1], color: 'gold', width: 5 },
       ],
       arrows: [
-        { from: ['5*cos(th*pi/180)', '5*sin(th*pi/180)'], to: [`5*cos(th*pi/180) - ${NW}/400`, '5*sin(th*pi/180)'], color: 'teal', label: 'N_wall', labelAlign: 'right', labelDx: -6 },
-        { from: [0, 0], to: [0, 833 / 400], color: 'teal', label: 'N_floor' },
+        { from: ['5*cos(th*pi/180)', '5*sin(th*pi/180)'], to: [`5*cos(th*pi/180) - ${NW}/400`, '5*sin(th*pi/180)'], color: 'teal', label: 'N (wall)', labelAlign: 'right', labelDx: -6 },
+        { from: [0, 0], to: [0, 833 / 400], color: 'teal', label: 'N (floor)' },
         { from: [0, 0], to: [`${NW}/400`, 0], color: 'bad', label: 'f', labelDy: 14 },
         { from: ['2.5*cos(th*pi/180)', '2.5*sin(th*pi/180)'], to: ['2.5*cos(th*pi/180)', `2.5*sin(th*pi/180) - ${147 / 400}`], color: 'ink2' },
         { from: ['5*f*cos(th*pi/180)', '5*f*sin(th*pi/180)'], to: ['5*f*cos(th*pi/180)', `5*f*sin(th*pi/180) - ${686 / 400}`], color: 'ink2', label: '686 N' },
@@ -231,7 +231,7 @@ $$\tau = rF\sin\theta = r_\perp F$$`,
             t`First the cable's tension, from torques about the hinge: $T L\sin\theta = mgL$.`,
             t`Then horizontal forces: the hinge's push must balance the cable's horizontal pull, $T\cos\theta$.`,
           ],
-          teach: 'A hinge pushes in whatever direction balances the other forces: find its components from ΣFₓ = 0 and ΣF_y = 0.',
+          teach: t`A hinge pushes in whatever direction balances the other forces: find its components from $\sum F_x = 0$ and $\sum F_y = 0$.`,
           explain: t`$T = \dfrac{(${mL})(9.8)}{\sin${th}^\circ} = ${s3(T)}$ N; the hinge pushes outward, away from the wall, with $H = T\cos${th}^\circ = ${s3(H)}$ N. Vertically the cable holds up the whole load, so here the hinge pushes only horizontally.`,
           visual: boomPicture({ L: 3, th, load: `${mL} kg`, caption: 'A light boom hinged at the wall, held by the cable. Arrows show directions only.' }),
         };

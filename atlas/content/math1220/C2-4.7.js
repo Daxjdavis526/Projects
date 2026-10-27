@@ -29,7 +29,7 @@ That error bound is the most practical result in this module: the error of stopp
     lead: t`Blue dots are the partial sums. Each one overshoots the sum and the next pulls back. The gold band runs from $S_N$ to $S_{N+1}$, and the sum (green line) must lie inside it — so its height, $b_{N+1}$, bounds the error.`,
     tasks: [
       'Slide N: the gold band always contains the green line, and narrows as the terms shrink.',
-      'Compare the readouts: the true error |S − S_N| always comes out smaller than the bound, the first term left out.',
+      t`Compare the readouts: the true error $|S - S_N|$ always comes out smaller than the bound, the first term left out.`,
       'Leibniz’s series for π/4 crawls (error about 1/(2N)); the 1/n! series is done in a handful of terms; n/(n+1) never settles, because its terms do not go to 0.',
     ],
     params: {

@@ -145,7 +145,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
           answer: m, units: 'kg', tol: { rel: 0.005 },
           errors: [{ value: F * a, feedback: 'Solve F = ma for m: divide the force by the acceleration.' }],
           hints: ['Rearrange F = ma to isolate m.'],
-          teach: 'Mass measures inertia: m = F_net / a.',
+          teach: t`Mass measures inertia: $m = F_\text{net} / a$.`,
           explain: t`$m = F/a = ${nice(F)}/${a} = ${m}$ kg.`,
           visual: bodyFBD([force(`net force ${nice(F)} N`, F, 0)], { a: [a, 0], accel: true, name: 'The object', caption: 'The net force on the object and the acceleration it produces (gold). The mass is what you are finding.' }),
         };

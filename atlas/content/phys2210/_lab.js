@@ -93,3 +93,30 @@ export const SOURCES = {
   polyfit: { label: 'NumPy documentation: numpy.polyfit (weights w = 1/σ; cov=True rescales by χ²/dof)', url: 'https://numpy.org/doc/stable/reference/generated/numpy.polyfit.html' },
   openstax: (sec, slug, title) => ({ label: `OpenStax University Physics Vol. 1, §${sec}${title ? ` — ${title}` : ''}`, url: `https://openstax.org/books/university-physics-volume-1/pages/${slug}` }),
 };
+
+/**
+ * A few labelled results as horizontal ±1σ bars on one axis, e.g. a
+ * prediction against a measurement. rows: [{ v, s, label, color }].
+ */
+export function compare(rows, { xlabel = '', caption, xr, truth } = {}) {
+  const n = rows.length;
+  const lo = Math.min(...rows.map((q) => q.v - 2.2 * q.s), truth ?? Infinity), hi = Math.max(...rows.map((q) => q.v + 2.2 * q.s), truth ?? -Infinity);
+  const pad = 0.08 * (hi - lo);
+  const r5 = (x) => +x.toPrecision(7);
+  const curves = [], points = [];
+  rows.forEach((q, i) => {
+    const y = n - i, col = q.color || (i ? 'violet' : 'accent');
+    curves.push({ param: [`${r5(q.v - q.s)} + ${r5(2 * q.s)}*t`, String(y)], t: [0, 1], color: col, width: 3 });
+    curves.push({ param: [`${r5(q.v - 2 * q.s)} + ${r5(4 * q.s)}*t`, String(y)], t: [0, 1], color: col, width: 1, dash: true });
+    points.push({ x: r5(q.v), y, r: 4.5, color: col, label: q.label, labelDx: -30, labelDy: -16 });
+  });
+  return {
+    type: 'graph',
+    params: {
+      aspect: 'wide', x: xr || [r5(lo - pad), r5(hi + pad)], y: [0.3, n + 0.9], xlabel, ylabel: ' ', yticks: 0.001, xticks: 6,
+      alt: 'Results drawn as bars: solid ±1σ, dashed ±2σ', curves, points,
+      ...(truth !== undefined ? { vlines: [{ x: r5(truth), color: 'good' }] } : {}),
+    },
+    caption: caption ?? 'Each result with its ±1σ bar (solid) and ±2σ (dashed).',
+  };
+}

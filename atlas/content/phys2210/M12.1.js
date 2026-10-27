@@ -21,8 +21,8 @@ function beamOnSupports({ Lp, xc, labels = {}, crateW = 0.7, ask = 'R', caption 
     .box([xc - crateW / 2, 0.05], [xc + crateW / 2, 0.05 + crateW], { color: 'gold', alpha: 0.35 })
     .dim([0, 0], [xc, 0], labels.xc ?? `${xc} m`, { off: [0, -0.6] })
     .dim([0, 0], [Lp, 0], labels.L ?? `${Lp} m`, { off: [0, -1.05] })
-    .force([0, 0.05], 0.75, { deg: 90, label: ask === 'L' ? 'N_L = ?' : 'N_L', color: 'teal' })
-    .force([Lp, 0.05], 0.75, { deg: 90, label: ask === 'R' ? 'N_R = ?' : 'N_R', color: 'teal' })
+    .force([0, 0.05], 0.75, { deg: 90, label: ask === 'L' ? 'N (left) = ?' : 'N (left)', color: 'teal' })
+    .force([Lp, 0.05], 0.75, { deg: 90, label: ask === 'R' ? 'N (right) = ?' : 'N (right)', color: 'teal' })
     .text([xc, 0.05 + crateW + 0.15], 'crate', { dx: -14 })
     .include([Lp + 0.9, 0], [-0.5, 1.2]);
   return S.spec(caption ?? 'The beam on its two supports; arrows show directions only.', { alt: 'A beam on two supports with a crate on it' });
@@ -66,9 +66,9 @@ Once the forces balance, the torque sum comes out the same about every point —
     title: 'Two balances, and a pivot you can put anywhere',
     lead: t`A 4.0 m, 20 kg plank rests on two sawhorses, A and B. Move the person with the sliders; the teal arrows are the sawhorses' upward pushes, the grey ones the weights. Then **drag the gold point**: the readout adds up every torque about it.`,
     tasks: [
-      'Walk the person from A to B: N_B grows as N_A shrinks, and together they always carry the full 196 N + mg.',
+      t`Walk the person from A to B: $N_B$ grows as $N_A$ shrinks, and together they always carry the full $196\ \text{N} + mg$.`,
       'Drag the gold point anywhere — on the plank, above it, far off to the side: each torque changes, but their sum stays zero.',
-      'Walk past B to the end of the plank: N_A goes negative. Sawhorse A would have to pull down; in reality the plank tips about B.',
+      t`Walk past B to the end of the plank: $N_A$ goes negative. Sawhorse A would have to pull down; in reality the plank tips about B.`,
     ],
     params: {
       x: [-0.6, 4.6], y: [-1.6, 2.4], equal: true, xlabel: 'x (m)', ylabel: '', aspect: 'wide',
@@ -86,8 +86,8 @@ Once the forces balance, the torque sum comes out the same about every point —
         { param: ['s + 0.09cos(t)', '0.75 + 0.09sin(t)'], t: [0, 6.2832], color: 'gold', width: 2 },
       ],
       arrows: [
-        { from: [0.6, 0.1], to: [0.6, `0.1 + ${K}*${NA}`], color: 'teal', label: 'N_A' },
-        { from: [3.4, 0.1], to: [3.4, `0.1 + ${K}*${NB}`], color: 'teal', label: 'N_B' },
+        { from: [0.6, 0.1], to: [0.6, `0.1 + ${K}*${NA}`], color: 'teal', label: 'N (A)' },
+        { from: [3.4, 0.1], to: [3.4, `0.1 + ${K}*${NB}`], color: 'teal', label: 'N (B)' },
         { from: [2, 0], to: [2, -196 * K], color: 'ink2', label: 'plank, 196 N' },
         { from: ['s', 0], to: ['s', `-${K}*9.8*m`], color: 'ink2', label: 'mg' },
       ],
@@ -107,7 +107,7 @@ Once the forces balance, the torque sum comes out the same about every point —
     visual: (() => {
       const S = scene({ perN: 1 / 500 });
       S.bar([0, 0.05], [4, 0.05], { width: 7 }).pin([0.6, -0.02]).pin([3.4, -0.02])
-        .force([0.6, 0.1], EX.NA, { deg: 90, label: 'N_A', color: 'teal' }).force([3.4, 0.1], EX.NB, { deg: 90, label: 'N_B', color: 'teal' })
+        .force([0.6, 0.1], EX.NA, { deg: 90, label: 'N (A)', color: 'teal' }).force([3.4, 0.1], EX.NB, { deg: 90, label: 'N (B)', color: 'teal' })
         .force([2, 0], 196, { deg: -90, label: '196 N', color: 'ink2' }).force([EX.s, 0], G * EX.m, { deg: -90, label: `${s3(G * EX.m)} N`, color: 'ink2' })
         .dim([0.6, 0], [2, 0], '1.4 m', { off: [0, -0.9] }).dim([0.6, 0], [EX.s, 0], '2.4 m', { off: [0, -1.35] }).dim([0.6, 0], [3.4, 0], '2.8 m', { off: [0, -1.8] })
         .text([0.6, -0.25], 'A', { dx: -4, dy: 10 }).text([3.4, -0.25], 'B', { dx: -4, dy: 10 });
@@ -196,7 +196,7 @@ Once the forces balance, the torque sum comes out the same about every point —
       visual: (() => {
         const S = scene({ perN: 1 / 500 });
         S.bar([0, 0.05], [4, 0.05], { width: 7 }).pin([0.6, -0.02]).pin([3.4, -0.02])
-          .force([0.6, 0.1], 196 + 588 - (274.4 + 588 * 2) / 2.8, { deg: 90, label: 'N_A', color: 'teal' }).force([3.4, 0.1], (274.4 + 588 * 2) / 2.8, { deg: 90, label: 'N_B', color: 'teal' })
+          .force([0.6, 0.1], 196 + 588 - (274.4 + 588 * 2) / 2.8, { deg: 90, label: 'N (A)', color: 'teal' }).force([3.4, 0.1], (274.4 + 588 * 2) / 2.8, { deg: 90, label: 'N (B)', color: 'teal' })
           .force([2, 0], 196, { deg: -90, color: 'ink2' }).force([2.6, 0], 588, { deg: -90, color: 'ink2' })
           .dot([0.6, 0.05], 'P₁', { color: 'gold', dx: -20 }).dot([2, 0.05], 'P₂', { color: 'gold', dy: 14, dx: 8 }).dot([3.2, 1.3], 'P₃', { color: 'gold' });
         return S.spec('A plank in equilibrium and three possible pivot points (gold). Forces to scale, 1 m per 500 N.');
@@ -257,7 +257,7 @@ Once the forces balance, the torque sum comes out the same about every point —
         return {
           prompt: t`A uniform ${Lr} m rod of mass ${mr} kg sticks out horizontally from a wall, on a hinge. A vertical rope ${s3(ds)} m from the hinge holds it up, and a ${mL} kg load hangs from its far end. What is the tension in the rope?`,
           answer: T, units: 'N', tol: { rel: 0.01 },
-          errors: [{ value: (mL * G * Lr) / ds, feedback: 'The rod’s own weight also has a torque about the hinge: (m_rod g)(L/2).' }, { value: (mr * G * (Lr / 2) + mL * G * Lr) / Lr, feedback: 'The rope’s lever arm is its distance from the hinge, not the rod’s length.' }],
+          errors: [{ value: (mL * G * Lr) / ds, feedback: t`The rod’s own weight also has a torque about the hinge: $(m_\text{rod}\,g)(L/2)$.` }, { value: (mr * G * (Lr / 2) + mL * G * Lr) / Lr, feedback: 'The rope’s lever arm is its distance from the hinge, not the rod’s length.' }],
           hints: [
             t`The hinge pushes on the rod with an unknown force. Take torques about the hinge so that force drops out.`,
             t`Lever arms about the hinge: rope ${s3(ds)} m, rod's weight ${Lr / 2} m, load ${Lr} m.`,

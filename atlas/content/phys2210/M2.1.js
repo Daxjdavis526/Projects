@@ -242,7 +242,7 @@ Components turn arrows into ordinary numbers you can add, subtract and feed into
           answer: ans, units: '°', tol: { rel: 0.005 },
           errors: [{ value: naive, feedback: t`That is what $\tan^{-1}$ on a calculator returns, but it only gives angles between −90° and 90°. This vector points left ($A_x < 0$), so add 180°.` }],
           hints: ['Sketch it first: which quarter of the plane does the arrow point into?', t`$\tan^{-1}(A_y/A_x) = ${fmt(naive, 3)}°$ points the wrong way for a vector with $A_x < 0$; add 180°.`],
-          teach: 'tan⁻¹(A_y/A_x) only covers −90° to 90°; when A_x < 0, add 180° to point the arrow the right way.',
+          teach: t`$\tan^{-1}(A_y/A_x)$ only covers −90° to 90°; when $A_x < 0$, add 180° to point the arrow the right way.`,
           explain: t`$\tan^{-1}\!\left(\dfrac{${ay}}{${ax}}\right) = ${fmt(naive, 3)}°$, but $A_x < 0$, so $\theta = ${fmt(naive, 3)}° + 180° = ${fmt(ans, 4)}°$.`,
           visual: vectorPicture({ arrows: [{ to: [ax, ay], label: 'A' }], comps: { of: [ax, ay], labels: ['', ''] }, arc: { from: 0, to: ans, label: 'θ', r: 0.45 }, xlabel: 'x (m)', ylabel: 'y (m)' }),
         };
@@ -254,7 +254,7 @@ Components turn arrows into ordinary numbers you can add, subtract and feed into
       choices: ['Its components change; its magnitude and the arrow itself do not', 'Its components and its magnitude both change', 'Nothing: the components belong to the vector, not to the axes', 'Only its magnitude changes'],
       answer: 0,
       why: {
-        1: 'The length of an arrow does not depend on the grid laid over it: √(Aₓ² + A_y²) comes out the same in every rotated frame.',
+        1: t`The length of an arrow does not depend on the grid laid over it: $\sqrt{A_x^2 + A_y^2}$ comes out the same in every rotated frame.`,
         2: 'Components are shadows on the axes, so tilting the axes changes them. The arrow is what stays fixed.',
         3: 'The magnitude is the one thing a rotation cannot change.',
       },

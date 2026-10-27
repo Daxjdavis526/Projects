@@ -50,6 +50,7 @@
 //
 //       controls: [],               // any of process gas end path cycle Th Tc ratio r rp T1 T3 V2 P2 reverse; true: all that apply
 //       ranges: {},                 // slider ranges: { Th: [min, max, step], V2: […], … } (display units)
+//       sliderText: {},             // your own slider words: { T3: { label: 'Turbine inlet $T_3$', explain: '…' } }
 //       readouts: null,             // any of W Q dU dS Qh Qc Wnet e carnot COP COPhp bwr legs, or T/P/V + a state name
 //                                   // (T1 T2 in process mode; TA…TD, T1…T4 for cycles); default: a few when there are controls
 //       ts: false,                  // a temperature–entropy diagram beside (or below) the PV diagram
@@ -78,7 +79,7 @@ export const defaults = {
   states: null, paths: null, show: 0,
   cycle: 'carnot', cycles: null, Th: 600, Tc: 300, VA: 1, ratio: 2, r: 8, T1: 300, P1: 100, V1: 0.5, T3: 1800, rp: 10, V2: 3, P2: 300, reverse: false,
   device: 'engine', Qh: 1000, Qc: 600, W: 400, labels: {},
-  controls: [], ranges: {}, readouts: null, ts: false, isotherms: 'auto', isoLabels: true, adiabats: false,
+  controls: [], ranges: {}, sliderText: {}, readouts: null, ts: false, isotherms: 'auto', isoLabels: true, adiabats: false,
   shade: true, heat: true, arrows: true, legend: 'auto', stateLabels: true, stateT: false, areaLabel: null, note: null, aspect: null, alt: null,
 };
 
@@ -163,7 +164,8 @@ export function mount(F, P0) {
   const nodes = {};
   const slide = (key, label, unit, explain, def) => {
     const [lo, hi, st] = P.ranges[key] || def;
-    nodes[key] = F.slider({ key, label, min: lo, max: hi, step: st, value: Math.min(hi, Math.max(lo, P[key])), unit, explain }).node;
+    const own = P.sliderText?.[key] || {};
+    nodes[key] = F.slider({ key, label: own.label ?? label, min: lo, max: hi, step: st, value: Math.min(hi, Math.max(lo, P[key])), unit, explain: own.explain ?? explain }).node;
   };
 
   if (P.mode === 'process') {
@@ -240,7 +242,7 @@ export function mount(F, P0) {
     quiet = false;
   };
 
-  const { canvas, box } = F.canvas({ aspect: P.aspect ?? (compact || P.ts ? 'wide' : ''), label: P.alt || (P.mode === 'flow' ? 'An energy-flow diagram' : 'A pressure–volume diagram of a gas') });
+  const { canvas, box } = F.canvas({ aspect: P.aspect ?? (P.mode === 'flow' ? '' : compact || P.ts ? 'wide' : ''), label: P.alt || (P.mode === 'flow' ? 'An energy-flow diagram' : 'A pressure–volume diagram of a gas') });
   const ctx = canvas.getContext('2d');
   const pv = new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: `V (${vname})`, ylabel: `P (${pname})` });
   const tsp = P.ts ? new Plot(canvas, { x: [0, 1], y: [0, 1], xlabel: 'S (J/K), zero arbitrary', ylabel: 'T (K)' }) : null;
@@ -567,11 +569,11 @@ export function mount(F, P0) {
       else if (k === 'dS') rows.push(['entropy change $\\Delta S$', Math.abs(A.dS) < 1e-12 ? '0' : `${trim(A.dS)}\\,\\mathrm{J/K}`]);
       else if (k === 'Qh') rows.push([fridge ? 'heat out, hot side $Q_h$' : 'heat in $Q_h$', eTeX(fridge ? A.Qout : A.Qin)]);
       else if (k === 'Qc') rows.push([fridge ? 'heat in, cold side $Q_c$' : 'heat out $Q_c$', eTeX(fridge ? A.Qin : A.Qout)]);
-      else if (k === 'Wnet') rows.push([fridge ? 'net work done on the gas' : 'net work $W$', eTeX(Math.abs(A.W))]);
+      else if (k === 'Wnet') rows.push([fridge ? 'work put in $W$' : 'net work $W$', eTeX(Math.abs(A.W))]);
       else if (k === 'e') rows.push(['efficiency $e = W/Q_h$', A.e !== undefined ? `${(100 * A.e).toFixed(1)}\\,\\%` : '\\text{—}']);
       else if (k === 'carnot') rows.push(['Carnot limit $1 - T_\\text{min}/T_\\text{max}$', p.closed ? `${(100 * A.carnot).toFixed(1)}\\,\\%` : '\\text{—}']);
-      else if (k === 'COP') rows.push(['cooling COP $Q_c/|W|$', A.copRef !== undefined ? trim(A.copRef) : '\\text{—}']);
-      else if (k === 'COPhp') rows.push(['heating COP $Q_h/|W|$', A.copHP !== undefined ? trim(A.copHP) : '\\text{—}']);
+      else if (k === 'COP') rows.push(['cooling COP $K_R = Q_c/W$', A.copRef !== undefined ? trim(A.copRef) : '\\text{—}']);
+      else if (k === 'COPhp') rows.push(['heating COP $K_P = Q_h/W$', A.copHP !== undefined ? trim(A.copHP) : '\\text{—}']);
       else if (k === 'bwr') {
         const ad = p.legs.filter((L) => L.kind === 'adiabatic');
         const wc = ad.filter((L) => L.W < 0).reduce((s, L) => s - L.W, 0), wt = ad.filter((L) => L.W > 0).reduce((s, L) => s + L.W, 0);
@@ -602,9 +604,9 @@ export function mount(F, P0) {
     const fs = compact || W < 420 ? 11.5 : 13;
     const engine = P.device === 'engine';
     const lab = { hot: 'hot reservoir', cold: 'cold reservoir', device: engine ? 'engine' : P.device === 'fridge' ? 'refrigerator' : 'heat pump', Qh: 'Q_h', Qc: 'Q_c', W: 'W', ...P.labels };
-    const cx = Math.round(W * 0.38), cy = Math.round(H * 0.5);
-    const rad = Math.max(Math.min(H * 0.13, W * 0.09), rich(ctx, c, lab.device, 0, 0, { size: fs, weight: 650, measure: true }) / 2 + 9);
-    const bw = Math.min(W * 0.62, 420), bh = Math.max(26, H * 0.15);
+    const cx = Math.round(W * 0.36), cy = Math.round(H * 0.5);
+    const rad = Math.max(Math.min(H * 0.11, W * 0.09), rich(ctx, c, lab.device, 0, 0, { size: fs, weight: 650, measure: true }) / 2 + 9);
+    const bw = Math.min(W * 0.62, 420), bh = Math.max(26, H * 0.12);
     const hotY = H * 0.04, coldY = H * 0.96 - bh;
     const roundRect = (x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
     const box2 = (y, col, text) => {
@@ -626,14 +628,16 @@ export function mount(F, P0) {
       ctx.closePath(); ctx.fill(); ctx.restore();
     };
     const yHotB = hotY + bh + 3, yTop = cy - rad - 3, yBot = cy + rad + 3, yColdT = coldY - 3;
-    if (engine) { band(cx, yHotB, cx, yTop, width(P.Qh), 'bad'); band(cx, yBot, cx, yColdT, width(P.Qc), 'accent'); band(cx + rad + 3, cy, W * 0.86, cy, width(P.W), 'gold'); }
-    else { band(cx, yTop, cx, yHotB, width(P.Qh), 'bad'); band(cx, yColdT, cx, yBot, width(P.Qc), 'accent'); band(W * 0.86, cy, cx + rad + 3, cy, width(P.W), 'gold'); }
+    // the work arrow is about as long as the heat arrows, so that width (to scale) is what the eye compares
+    const xW0 = cx + rad + 3, xW1 = xW0 + Math.max(90, Math.min(W * 0.4, 1.7 * (yTop - yHotB)));
+    if (engine) { band(cx, yHotB, cx, yTop, width(P.Qh), 'bad'); band(cx, yBot, cx, yColdT, width(P.Qc), 'accent'); band(xW0, cy, xW1, cy, width(P.W), 'gold'); }
+    else { band(cx, yTop, cx, yHotB, width(P.Qh), 'bad'); band(cx, yColdT, cx, yBot, width(P.Qc), 'accent'); band(xW1, cy, xW0, cy, width(P.W), 'gold'); }
     ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 2 * Math.PI); ctx.fillStyle = c.panel; ctx.fill(); ctx.strokeStyle = c.ink2; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
     rich(ctx, c, lab.device, cx, cy, { color: 'ink', size: fs, weight: 650, align: 'center', halo: false });
     const off = (e) => Math.max(width(e) * 0.95 + 5, 9) + 8;      // clear of the arrowhead
     rich(ctx, c, lab.Qh, cx + Math.max(off(P.Qh), 14), (yHotB + yTop) / 2, { color: 'bad', size: fs + 0.5, weight: 650 });
     rich(ctx, c, lab.Qc, cx + Math.max(off(P.Qc), 14), (yBot + yColdT) / 2, { color: 'accent', size: fs + 0.5, weight: 650 });
-    rich(ctx, c, lab.W, (cx + rad + W * 0.86) / 2, cy - width(P.W) / 2 - 16, { color: 'gold', size: fs + 0.5, weight: 650, align: 'center' });
+    rich(ctx, c, lab.W, xW1 + 10, cy, { color: 'gold', size: fs + 0.5, weight: 650 });
     F.readout([]);
   }
 
@@ -696,6 +700,7 @@ export function validate(P0) {
   const controls = P.controls === true ? allControls(P) : P.controls;
   if (!Array.isArray(controls) || !controls.every((k) => CONTROLS.includes(k))) bad(`controls must be true or a list of ${CONTROLS.join(', ')}`);
   for (const [k, r] of Object.entries(P.ranges || {})) if (!(Array.isArray(r) && r.length >= 2 && r[0] < r[1] && (r[2] === undefined || r[2] > 0))) bad(`ranges.${k} must be [min, max, step]`);
+  for (const [k, o] of Object.entries(P.sliderText || {})) if (!CONTROLS.includes(k) || typeof o !== 'object') bad(`sliderText.${k}: give { label, explain } for a slider control`);
   if (P.readouts !== null && !(Array.isArray(P.readouts) && P.readouts.every((k) => READOUTS.includes(k) || /^[TPV]./.test(k)))) bad(`readouts must be a list of ${READOUTS.join(', ')} or T/P/V followed by a state name`);
   if (P.isotherms !== false && P.isotherms !== 'auto' && !(Array.isArray(P.isotherms) && P.isotherms.every((T) => T > 0))) bad('isotherms must be auto, false or a list of temperatures (K)');
   if (P.mode === 'flow') {

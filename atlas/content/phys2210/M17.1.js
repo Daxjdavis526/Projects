@@ -211,7 +211,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
           prompt: t`A space-simulation vacuum chamber is pumped down to $10^{${e}}$ Pa at 20 °C. How many gas molecules are still in each cubic centimetre?`,
           answer: ncm3, units: 'cm^-3', tol: { rel: 0.01 },
           hints: [t`Divide $PV = Nk_BT$ by $V$: the number per volume is $N/V = P/(k_BT)$.`, t`That gives molecules per m³; a cubic centimetre is $10^{-6}$ m³.`],
-          teach: 'The number density of an ideal gas is N/V = P/(k_BT), whatever the gas.',
+          teach: t`The number density of an ideal gas is $N/V = P/(k_BT)$, whatever the gas.`,
           explain: t`$N/V = \dfrac{10^{${e}}}{(1.381\times10^{-23})(293.15)} = ${sci(ncm3 * 1e6, 3)}\ \text{m}^{-3} = ${sci(ncm3, 3)}$ per cm³. Even “high vacuum” is crowded by everyday standards; the solar wind near Earth carries only about five particles per cm³.`,
           visual: logLadder([
             { label: 'air at sea level, 2.5 × 10²⁵ m⁻³', value: 2.5e25 },

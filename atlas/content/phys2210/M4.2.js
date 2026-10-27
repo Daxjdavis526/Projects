@@ -32,7 +32,7 @@ The usual method: solve the vertical motion for the time, then use that time in 
     title: 'Two motions, one clock',
     lead: t`Set a launch speed, angle and height, then press **Launch**. The gold arrow is the velocity; the green arrows are its horizontal and vertical components. Watch the readouts as it flies.`,
     tasks: [
-      'Launch and watch the readouts: vₓ stays the same all the way, while v_y falls by 9.8 m/s every second.',
+      t`Launch and watch the readouts: $v_x$ stays the same all the way, while $v_y$ falls by 9.8 m/s every second.`,
       'At the top the velocity arrow is horizontal: its vertical part is zero, its horizontal part is not.',
       'Turn on air drag: now the horizontal velocity shrinks too and the path is no longer a parabola — the no-air model of this lesson is an idealisation.',
     ],
@@ -108,7 +108,7 @@ The usual method: solve the vertical motion for the time, then use that time in 
           answer: vy, units: 'm/s', tol: { rel: 0.01 },
           errors: [{ value: v0 * Math.cos(th * D2R), feedback: t`That is the horizontal component. The vertical one is opposite the angle: $v_0\sin\theta$.` }],
           hints: [t`The vertical component is $v_0\sin\theta$ when $\theta$ is measured from the horizontal.`],
-          teach: 'With the angle measured from the horizontal, vₓ = v₀ cos θ and v_y = v₀ sin θ.',
+          teach: t`With the angle measured from the horizontal, $v_x = v_0\cos\theta$ and $v_y = v_0\sin\theta$.`,
           explain: t`$v_{0y} = ${v0}\sin ${th}^\circ = ${s3(vy)}$ m/s (and $v_x = ${v0}\cos ${th}^\circ = ${s3(v0 * Math.cos(th * D2R))}$ m/s).`,
           visual: {
             type: 'graph',
@@ -137,7 +137,7 @@ The usual method: solve the vertical motion for the time, then use that time in 
             { value: tt, feedback: 'That is the time of the fall, in seconds. Multiply by the horizontal speed.' },
             { value: u * Math.sqrt(h / G), feedback: t`Check the fall time: $h = \tfrac12 g t^2$ gives $t = \sqrt{2h/g}$.` },
           ],
-          hints: ['The vertical motion starts from rest: v_y = 0 at the edge.', t`Fall time $t = \sqrt{2h/g}$; then $x = v_x t$.`],
+          hints: [t`The vertical motion starts from rest: $v_y = 0$ at the edge.`, t`Fall time $t = \sqrt{2h/g}$; then $x = v_x t$.`],
           teach: 'For a horizontal launch, the fall time comes from the height alone; the distance is the horizontal speed times that time.',
           explain: t`$t = \sqrt{2(${nice(h)})/9.8} = ${s3(tt)}$ s, so $x = (${nice(u)})(${s3(tt)}) = ${s3(d)}$ m.`,
           visual: {

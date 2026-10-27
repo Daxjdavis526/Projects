@@ -216,7 +216,7 @@ When a test returns “no decision” (a ratio limit of 1, an inequality pointin
         2: t`$E_n < \frac{50}{n}$ is true, but $\sum\frac{50}{n}$ diverges: smaller than divergent proves nothing.`,
         3: t`$E_n \to 0$, so the divergence test is silent.`,
       },
-      hints: ['What does E_n look like for large n?', t`Limit-compare $E_n$ with $\frac1n$.`],
+      hints: [t`What does $E_n$ look like for large $n$?`, t`Limit-compare $E_n$ with $\frac1n$.`],
       teach: 'Power-law decay like 1/n is too slow for a finite total; decay faster than 1/n^p with p > 1 is needed.',
       explain: t`$\frac{E_n}{1/n} = \frac{50n^2}{n^2 + 1} \to 50$, and $\sum\frac1n$ diverges, so $\sum E_n$ diverges: with this (idealised) model, a panel that never dies delivers unbounded energy — but only logarithmically, about $50\ln N$ kWh after $N$ orbits.`,
     }),

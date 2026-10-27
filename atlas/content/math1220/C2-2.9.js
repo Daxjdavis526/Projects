@@ -41,7 +41,7 @@ Concavity decides the sign of the error: where $f$ curves upward, the trapezoids
     tasks: [
       'On the concave-down arch, pick Trapezoid: every trapezoid sits under the curve, so the error is negative.',
       'Switch to Midpoint: it overestimates instead, by about half as much.',
-      'Watch the ratio E_n / E_2n: close to 4 for both rules. In the lower panel both lines fall with slope −2.',
+      t`Watch the ratio $E_n / E_{2n}$: close to 4 for both rules. In the lower panel both lines fall with slope $-2$.`,
     ],
     params: {
       functions: [

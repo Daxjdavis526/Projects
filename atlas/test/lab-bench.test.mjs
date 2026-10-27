@@ -166,6 +166,8 @@ const exact = (id, opts = {}) => B.analyse(id, B.makeData(id, { noiseless: true,
   check('friction: slopes are μs and μk', near(r.results[0].value, 0.42, 1e-9) && near(r.results[1].value, 0.30, 1e-9));
   const fac = (mu) => 1 / (Math.cos(20 * D2R) + mu * Math.sin(20 * D2R));
   check('friction: a 20° pull scales each slope by 1/(cos α + μ sin α), intercept still 0', near(a.results[1].value, 0.3 * fac(0.3), 1e-9) && near(a.results[0].value, 0.42 * fac(0.42), 1e-9) && Math.abs(a.series[1].fit.a) < 1e-12);
+  const z = exact('friction', { sys: 'zero' });
+  check('friction: an unzeroed sensor is a +0.20 N intercept on both lines, slopes unchanged', near(z.series[0].fit.a, 0.2, 1e-9) && near(z.series[1].fit.a, 0.2, 1e-9) && near(z.results[1].value, 0.3, 1e-9));
 }
 {
   const r = exact('energy'), f = exact('energy', { sys: 'flag' });

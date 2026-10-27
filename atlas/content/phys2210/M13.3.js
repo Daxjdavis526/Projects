@@ -169,7 +169,7 @@ $U$ is negative everywhere: anything near a planet sits in a well it must climb 
           answer: vinf, units: 'km/s', tol: { rel: 0.01 },
           errors: [{ value: v - VE / 1000, feedback: t`Energies add, not speeds: $\tfrac12 v_\infty^2 = \tfrac12 v^2 - \tfrac12 v_\text{esc}^2$.` }],
           hints: [t`Energy per kg: $\tfrac12 v^2 - \dfrac{GM}{R} = \tfrac12 v_\infty^2 - 0$, and $\dfrac{GM}{R} = \tfrac12 v_\text{esc}^2$.`],
-          teach: 'Leaving faster than the escape speed, a body keeps v∞ = √(v² − v_esc²) far away: the well takes its toll in energy.',
+          teach: t`Leaving faster than the escape speed, a body keeps $v_\infty = \sqrt{v^2 - v_\text{esc}^2}$ far away: the well takes its toll in energy.`,
           explain: t`$v_\infty = \sqrt{${v}^2 - ${s3(VE / 1000)}^2} = ${s3(vinf)}$ km/s. A little extra launch speed buys a lot of speed at infinity — the reason upper stages are so valuable.`,
           visual: { type: 'mech-kepler', params: { launch: { body: 'earth', h: 0, v, vRange: [3, 20], view: 3 }, sectors: 0, controls: false, readout: false }, caption: 'The probe’s path, seen from above, if it left Earth sideways (the speed it keeps far away does not depend on the direction). To scale.' },
         };

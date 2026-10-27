@@ -132,7 +132,7 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
           errors: [
             { value: Math.hypot(a, b * t1), feedback: t`Check $v_y$: the derivative of $${nice(b)}t^2$ is $${nice(2 * b)}t$.` },
             { value: Math.hypot(a * t1, b * t1 * t1) / t1, feedback: 'That is the average speed from t = 0, along the chord. The speed at an instant comes from the derivative.' },
-            { value: a + vy, feedback: 'Speeds in perpendicular directions do not add: use √(vₓ² + v_y²).' },
+            { value: a + vy, feedback: t`Speeds in perpendicular directions do not add: use $\sqrt{v_x^2 + v_y^2}$.` },
           ].filter((e) => Math.abs(e.value - v) > 0.02 * v),
           hints: ['Differentiate each component separately.', t`$v_x = ${a}$ m/s and $v_y = ${nice(2 * b)}t$; then the speed is $\sqrt{v_x^2 + v_y^2}$.`],
           teach: 'Differentiate each component of the position to get the velocity components, then combine them for the speed.',
@@ -213,7 +213,7 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
           answer: th, units: 'deg', tol: { rel: 0.01, abs: 0.2 },
           errors: [{ value: Math.atan2(vx, Math.abs(vy)) / D2R * Math.sign(vy), feedback: t`That angle is measured from the north–south line. From east, $\theta = \arctan(v_y/v_x)$.` }].filter((e) => Math.abs(e.value - th) > 1),
           hints: [t`$\tan\theta = v_y/v_x$.`, t`$\theta = \arctan(${vy}/${vx})$ — negative because the motion is ${vy < 0 ? 'south' : 'north'} of east.`],
-          teach: 'The direction of a velocity follows from its components: tan θ = v_y / vₓ.',
+          teach: t`The direction of a velocity follows from its components: $\tan\theta = v_y / v_x$.`,
           explain: t`$\theta = \arctan\dfrac{${vy}}{${vx}} = ${nice(Math.round(th * 10) / 10)}^\circ$${th < 0 ? ', south of east' : ', north of east'}.`,
           visual: {
             type: 'graph',
@@ -237,7 +237,7 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
           errors: [
             { answer: `${p}`, feedback: 'That is vₓ. The y-component comes from differentiating y(t).' },
             { answer: `${q} - ${c}*t^2`, feedback: t`Differentiate $t^3$ properly: $3t^2$.` },
-            { answer: `${p} + ${q} - ${3 * c}*t^2`, feedback: 'Keep the components separate: v_y depends only on y(t).' },
+            { answer: `${p} + ${q} - ${3 * c}*t^2`, feedback: t`Keep the components separate: $v_y$ depends only on $y(t)$.` },
           ],
           hints: [t`$v_y = dy/dt$ with $y(t) = ${q}t - ${nice(c)}t^3$.`],
           teach: 'Each velocity component is the derivative of its own coordinate.',
@@ -260,8 +260,8 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
       answer: 0,
       why: {
         1: 'Only one component is zero. With vₓ = 3 m/s it is still moving.',
-        2: 'v_y = 0 means y is not changing at that instant. That could be a highest point, a lowest point, or just a pause in a climb — not necessarily a peak.',
-        3: 'A zero velocity component says nothing about the acceleration: a ball at the top of a throw has v_y = 0 and a = −g.',
+        2: t`$v_y = 0$ means $y$ is not changing at that instant. That could be a highest point, a lowest point, or just a pause in a climb — not necessarily a peak.`,
+        3: t`A zero velocity component says nothing about the acceleration: a ball at the top of a throw has $v_y = 0$ and $a = -g$.`,
       },
       hints: ['Build the velocity vector from its components.'],
       teach: 'A zero component only removes that direction from the velocity; the other component still sets the motion.',

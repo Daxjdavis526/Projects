@@ -204,7 +204,7 @@ A faster spin means a slower precession. Nothing defies gravity: the support pus
             t`$I_\text{w}\omega_\text{w} + I_\text{sc}\omega_\text{sc} = 0$, so the telescope turns the other way at $\omega_\text{sc} = I_\text{w}\omega_\text{w}/I_\text{sc}$.`,
             t`$\omega_\text{w} = ${n}\times2\pi/60$ rad/s; multiply the result by $180/\pi$ for degrees.`,
           ],
-          teach: 'With no external torque, spinning a reaction wheel one way turns the spacecraft the other way: I_w ω_w = −I_sc ω_sc.',
+          teach: t`With no external torque, spinning a reaction wheel one way turns the spacecraft the other way: $I_\text{w}\omega_\text{w} = -I_\text{sc}\omega_\text{sc}$.`,
           explain: t`$\omega_\text{w} = ${s3(n * RPM)}$ rad/s, so $\omega_\text{sc} = (${Iw})(${s3(n * RPM)})/${Isc} = ${s3(wsc)}$ rad/s $= ${s3(wsc * DEG)}$° per second, opposite to the wheel. Stop the wheel and the telescope stops — no propellant used.`,
           visual: {
             type: 'calc-vectors3d',

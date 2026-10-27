@@ -15,7 +15,7 @@ const log = Math.log10;
 const coeffs = (slider) => ({
   type: 'graph',
   params: {
-    x: [0, 6], y: [-4, 4], xlabel: 'r / r_s', ylabel: 'coefficient',
+    x: [0, 6], y: [-4, 4], xlabel: 'r / rₛ', ylabel: 'coefficient',
     ...(slider ? {
       sliders: [{ key: 'R', label: 'Position $r/r_s$', min: 0.2, max: 6, step: 0.01, value: 3, explain: 'Inside the horizon for values below 1.' }],
       points: [{ x: 'R', y: '-(1 - 1/R)', color: 'gold' }, { x: 'R', y: '1/(1 - 1/R)', color: 'accent' }],
@@ -29,7 +29,7 @@ const coeffs = (slider) => ({
       { fn: '1/(1 - 1/x)', domain: [1.18, 6], color: 'accent', label: 'gᵣᵣ', labelAt: 4.6, labelDy: -12 },
       { fn: '1/(1 - 1/x)', domain: [0.2, 0.83], color: 'accent' },
     ],
-    vlines: [{ x: 1, label: 'r = r_s' }],
+    vlines: [{ x: 1, label: 'r = rₛ' }],
     hlines: [{ y: 0 }],
   },
   caption: t`The two coefficients of the Schwarzschild metric against $r$, in units of $r_s$. Outside the horizon $g_{tt} < 0$ and $g_{rr} > 0$, as in flat spacetime; at $r = r_s$ both change sign. Far away they approach the flat values $-1$ and $+1$.`,
@@ -46,10 +46,10 @@ const radiusMap = {
       { x: round(log(M_EARTH / M_SUN), 4), y: round(log(R_EARTH / 1e3), 4), color: 'accent', label: 'Earth' },
       { x: round(log(1.898e27 / M_SUN), 4), y: round(log(6.991e4), 4), color: 'gold', label: 'Jupiter' },
       { x: 0, y: round(log(R_SUN / 1e3), 4), color: 'gold', label: 'Sun' },
-      { x: round(log(1.4), 4), y: round(log(12), 4), color: 'violet', label: 'neutron star' },
+      { x: round(log(1.4), 4), y: round(log(12), 4), color: 'violet', label: 'neutron star', labelDx: -9, labelAlign: 'right' },
     ],
   },
-  caption: 'Radius against mass, both in powers of ten. The red line is r = r_s: squeezed onto it, a body would be a black hole. The vertical gap between a body and the line is how far it is from that, in powers of ten.',
+  caption: t`Radius against mass, both in powers of ten. The red line is $r = r_s$: squeezed onto it, a body would be a black hole. The vertical gap between a body and the line is how far it is from that, in powers of ten.`,
 };
 
 // one slice of space around a black hole (Flamm's paraboloid, r_s = 1) with two circles and the radial ruler between them
@@ -71,9 +71,9 @@ const flamm = (a, b) => ({
 const clockRate = (k) => ({
   type: 'graph',
   params: {
-    x: [0, 10], y: [0, 1.15], xlabel: 'r / r_s', ylabel: 'clock rate dτ/dt',
+    x: [0, 10], y: [0, 1.15], xlabel: 'r / rₛ', ylabel: 'clock rate dτ/dt',
     curves: [{ fn: 'sqrt(1 - 1/x)', domain: [1, 10], color: 'gold' }],
-    vlines: [{ x: 1, label: 'r = r_s' }, ...(k ? [{ x: k, label: `r = ${k} r_s`, color: 'accent' }] : [])],
+    vlines: [{ x: 1, label: 'r = rₛ' }, ...(k ? [{ x: k, label: `r = ${k} rₛ`, color: 'accent' }] : [])],
     hlines: [{ y: 1, label: 'far away' }],
   },
   caption: t`How fast a clock hovering at $r$ ticks, per unit of the coordinate time $t$: $\sqrt{1 - r_s/r}$.`,
@@ -159,9 +159,9 @@ For the Sun and the planets $r_s$ lies deep inside the body, where this vacuum m
         return {
           prompt: t`The metric's corrections are set by $r_s/r$. Find $r_s = 2GM/c^2$ for ${name} ($M = ${mTeX}$ kg) and divide it by the surface radius, $R = ${rTeX}$ m. What is $r_s/R$ — how close is the surface to being a horizon? ($G = 6.674\times10^{-11}$ SI, $c = 2.998\times10^{8}$ m/s)`,
           answer: k, tol: { rel: 0.01 },
-          errors: [{ value: k / 2, feedback: 'Use r_s = 2GM/c², with the factor 2.' }, { value: R / rs(M), feedback: 'Upside down: divide r_s by R.' }],
+          errors: [{ value: k / 2, feedback: t`Use $r_s = 2GM/c^2$, with the factor 2.` }, { value: R / rs(M), feedback: t`Upside down: divide $r_s$ by $R$.` }],
           hints: [t`$r_s = 2GM/c^2 = ${sci(rs(M), 4)}$ m.`, t`Divide by $R = ${rTeX}$ m.`],
-          teach: 'The ratio r_s/R measures how strongly relativistic a body is: a billionth for Earth, a few millionths for the Sun, a third for a neutron star.',
+          teach: t`The ratio $r_s/R$ measures how strongly relativistic a body is: a billionth for Earth, a few millionths for the Sun, a third for a neutron star.`,
           explain: t`$r_s = ${sci(rs(M), 3)}$ m, so $r_s/R = ${sci(k, 3)}$. The time part of the metric differs from flat by that fraction at the surface: ${k > 0.1 ? 'a neutron star is genuinely relativistic — its surface clocks run at only $\\sqrt{1 - r_s/R}$ of the far-away rate.' : 'tiny, which is why Newton works so well in the Solar System.'}`,
           visual: radiusMap,
         };
@@ -237,9 +237,9 @@ For the Sun and the planets $r_s$ lies deep inside the body, where this vacuum m
           prompt: t`How far apart, measured with a ruler at one instant, are the spheres $r = ${a}\,r_s$ and $r = ${b}\,r_s$ around a black hole? Work in units of $r_s$: the proper distance is $\displaystyle\int_{${a}}^{${b}} \frac{dr}{\sqrt{1 - 1/r}}$.`,
           answer: L, tol: { rel: 0.005 },
           integrand: '1/sqrt(1 - 1/r)', limits: [a, b], vars: ['r'],
-          errors: [{ value: b - a, feedback: 'That is the difference in r. Radial rulers are stretched: integrate 1/√(1 − r_s/r).' }],
+          errors: [{ value: b - a, feedback: t`That is the difference in $r$. Radial rulers are stretched: integrate $1/\sqrt{1 - r_s/r}$.` }],
           hints: [t`An antiderivative is $\sqrt{r(r-1)} + \ln\!\left(\sqrt r + \sqrt{r - 1}\right)$.`, t`Evaluate it at $${b}$ and at $${a}$ and subtract.`],
-          teach: 'Radial distances near a mass are longer than the difference in r: integrate the stretched ruler, 1/√(1 − r_s/r).',
+          teach: t`Radial distances near a mass are longer than the difference in $r$: integrate the stretched ruler, $1/\sqrt{1 - r_s/r}$.`,
           explain: t`$\left[\sqrt{r(r-1)} + \ln(\sqrt r + \sqrt{r-1})\right]_{${a}}^{${b}} = ${fmt(L, 4)}\,r_s$, against a difference in $r$ of $${b - a}\,r_s$. The stretch is largest near the horizon and fades far out.`,
           visual: flamm(a, b),
         };
@@ -258,7 +258,7 @@ For the Sun and the planets $r_s$ lies deep inside the body, where this vacuum m
           answer: R / 1e3, units: 'km', tol: { rel: 0.01 },
           errors: [{ value: GM / (C * C) / 1e3, feedback: 'You found GM/c². The Schwarzschild radius is twice that.' }, { value: (2 * GM) / C / 1e3, feedback: 'Divide by c², not c.' }],
           hints: [t`$T = ${Tdays}\times86\,400 = ${sci(T, 4)}$ s, so $GM = 4\pi^2(${sci(a, 4)})^3/(${sci(T, 4)})^2 = ${sci(GM, 4)}\ \text{m}^3/\text{s}^2$.`, t`$r_s = 2GM/c^2$ with $c^2 = 8.988\times10^{16}\ \text{m}^2/\text{s}^2$.`],
-          teach: 'Orbits measure GM directly — far more precisely than G or M separately — and GM is all the metric needs: r_s = 2GM/c².',
+          teach: t`Orbits measure $GM$ directly — far more precisely than $G$ or $M$ separately — and $GM$ is all the metric needs: $r_s = 2GM/c^2$.`,
           explain: t`$GM_\odot = ${sci(GM, 4)}\ \text{m}^3/\text{s}^2$, so $r_s = ${sci(R / 1e3, 4)}$ km. No knowledge of $G$ or of the Sun's mass in kilograms was needed — only an orbit, a clock and $c$.`,
           visual: orbitPic,
         };
@@ -280,7 +280,7 @@ For the Sun and the planets $r_s$ lies deep inside the body, where this vacuum m
         3: t`Near the horizon $\sqrt{1 - r_s/r} \to 0$: such a clock ticks far slower than $t$ advances.`,
       },
       hints: [t`For a clock at rest at $r$, the metric gives $d\tau = \sqrt{1 - r_s/r}\,dt$. Where does $d\tau = dt$?`],
-      teach: 'Schwarzschild t is the time of observers far away; a clock hovering at r ticks slower by √(1 − r_s/r).',
+      teach: t`Schwarzschild $t$ is the time of observers far away; a clock hovering at $r$ ticks slower by $\sqrt{1 - r_s/r}$.`,
       explain: t`Only as $r \to \infty$ does $\sqrt{1 - r_s/r} \to 1$. Treating $t$ as anyone's clock reading near a black hole is a classic error: the infinite $t$ for reaching the horizon says nothing about the finite time on the infaller's own clock.`,
       visual: clockRate(null),
     }),
@@ -305,9 +305,9 @@ For the Sun and the planets $r_s$ lies deep inside the body, where this vacuum m
       visual: {
         type: 'graph',
         params: {
-          x: [0, 8], y: [0, 1.15], xlabel: 'r / r_s', ylabel: '(dr/dt) ÷ c',
+          x: [0, 8], y: [0, 1.15], xlabel: 'r / rₛ', ylabel: '(dr/dt) ÷ c',
           curves: [{ fn: '1 - 1/x', domain: [1, 8], color: 'gold' }],
-          vlines: [{ x: 1, label: 'r = r_s' }],
+          vlines: [{ x: 1, label: 'r = rₛ' }],
           hlines: [{ y: 1, label: 'c' }],
         },
         caption: t`The coordinate speed of radial light, $dr/dt = c(1 - r_s/r)$, against $r$. It uses the far-away time $t$ and the areal radius $r$ — not what anyone measures on the spot.`,

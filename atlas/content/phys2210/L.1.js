@@ -73,7 +73,7 @@ An error that is the same every time — a watch you always stop late — is **s
       { label: 'Resolution', text: t`The watch shows hundredths, so a reading could be anywhere in a 0.01 s window. Taking every place in that window as equally likely gives the **Type B** standard uncertainty $u_B = \dfrac{0.01\ \text{s}}{2\sqrt3} = ${sf(EX.uB, 2)}\ \text{s}$ — small next to the SEM.` },
       { label: 'Combine', text: t`Independent uncertainties add in quadrature: $u = \sqrt{${sf(EX.st.sem, 3)}^2 + ${sf(EX.uB, 2)}^2} = ${sf(EX.uc, 3)}\ \text{s}$. Round it to two figures (it starts with a 1) and the value to the same decimal place: $T = ${sf(EX.st.mean, 4)} \pm ${sf(EX.uc, 2)}\ \text{s}$.` },
       { label: 'Compare', text: t`$|${sf(EX.st.mean, 4)} - 2.000|/${sf(EX.uc, 2)} = ${(Math.abs(EX.st.mean - T0) / EX.uc).toFixed(1)}$ standard uncertainties: well within 2, so the result **agrees** with 2.000 s.` },
-      { label: 'Sense check', text: t`The SEM, 0.02 s, is about 1 % of the period. Timing ten swings at once would cut it tenfold, because the same two reactions are then spread over ten periods.` },
+      { label: 'Sense check', text: t`The SEM, 0.02 s, is about 1% of the period. Timing ten swings at once would cut it tenfold, because the same two reactions are then spread over ten periods.` },
     ],
     answer: t`$T = ${sf(EX.st.mean, 4)} \pm ${sf(EX.uc, 2)}\ \text{s}$, ${(Math.abs(EX.st.mean - T0) / EX.uc).toFixed(1)} standard uncertainties from 2.000 s: in agreement.`,
   },
@@ -256,13 +256,13 @@ An error that is the same every time — a watch you always stop late — is **s
       ],
       answer: 0,
       why: {
-        1: 'A ±1σ interval of a Gaussian error covers the true value only 68 % of the time. If every bar touched the truth, the bars would be too wide.',
+        1: 'A ±1σ interval of a Gaussian error covers the true value only 68% of the time. If every bar touched the truth, the bars would be too wide.',
         2: '±2σ bars miss about one time in twenty — rarely, but not never. No finite error bar is a guarantee.',
         3: 'They can: each bar is a standard uncertainty, so each miss can be judged in units of σ — and none here is more than about 2σ out.',
       },
-      hints: ['What fraction of a normal distribution lies within ±1 standard deviation of its centre?', 'About 68 % inside means about 32 % — one in three — outside.'],
+      hints: ['What fraction of a normal distribution lies within ±1 standard deviation of its centre?', 'About 68% inside means about 32% — one in three — outside.'],
       teach: 'Honest ±1σ error bars miss the true value about a third of the time; only misses of several σ signal a mistake.',
-      explain: t`With Gaussian errors, a ±1σ bar contains the true value 68 % of the time, so about $0.32 \times 20 \approx 6$–7 bars should miss it. ${MISSES} misses, none by more than about 2σ, is exactly what twenty honest groups look like.`,
+      explain: t`With Gaussian errors, a ±1σ bar contains the true value 68% of the time, so about $0.32 \times 20 \approx 6$–7 bars should miss it. ${MISSES} misses, none by more than about 2σ, is exactly what twenty honest groups look like.`,
       visual: forest(FOREST.map((q) => ({ v: q.mean, s: q.sem })), T0, { xlabel: 'T (s)', unit: 's' }),
     }),
   ],
@@ -293,7 +293,7 @@ An error that is the same every time — a watch you always stop late — is **s
         } while (Math.min(uA, uB) / Math.max(uA, uB) < 0.35);
         const uc = Math.hypot(uA, uB);
         return {
-          prompt: t`In a static fire of a small rocket motor, ${n} repeated burns give a mean thrust of ${F} N with a standard deviation of ${sd} N. The load cell’s calibration certificate gives a standard uncertainty of ${pct.toFixed(1)} % of reading. What is the combined standard uncertainty of the mean thrust?`,
+          prompt: t`In a static fire of a small rocket motor, ${n} repeated burns give a mean thrust of ${F} N with a standard deviation of ${sd} N. The load cell’s calibration certificate gives a standard uncertainty of ${pct.toFixed(1)}% of reading. What is the combined standard uncertainty of the mean thrust?`,
           answer: +uc.toPrecision(3), units: 'N', tol: { rel: 0.03 },
           errors: [
             { value: uA + uB, feedback: 'Independent uncertainties add in quadrature, √(a² + b²), not linearly: they rarely push the same way at once.' },
@@ -320,7 +320,7 @@ An error that is the same every time — a watch you always stop late — is **s
       id: 'cp-not-averaged', difficulty: 2,
       prompt: 'Which of these errors would taking many more readings and averaging them NOT reduce?',
       choices: [
-        'A load cell that reads 2 % high on every reading',
+        'A load cell that reads 2% high on every reading',
         'Electrical noise that makes each reading jitter up or down',
         'Your reaction time, which differs at each start and stop',
         'The last digit of a display flickering between two values',

@@ -26,16 +26,17 @@ const piDecayPicture = {
     ],
     arrows: [
       { from: [0, 0], to: [round(-PI_MU.p), round(PI_MU.E)], color: 'violet', label: 'muon', labelDx: -48, labelDy: -6 },
-      { from: [round(-PI_MU.p), round(PI_MU.E)], to: [0, round(M_PI)], color: 'gold', label: 'neutrino', labelDx: 6, labelDy: 10 },
+      { from: [round(-PI_MU.p), round(PI_MU.E)], to: [0, round(M_PI)], color: 'gold' },
       { from: [0, 0], to: [0, round(M_PI)], color: 'accent', label: 'pion at rest', labelDx: 8, labelDy: 0 },
     ],
+    points: [{ x: round(-PI_MU.p / 2), y: round((PI_MU.E + M_PI) / 2), r: 0.01, color: 'gold', label: 'neutrino', labelDx: -62, labelDy: -8 }],
   },
   caption: t`Four-momenta add like arrows. In the $(pc, E)$ plane the pion at rest points straight up; the muon’s arrow ends on its mass shell and the neutrino’s runs at 45°, along the light line. Drawn to scale, in MeV.`,
 };
 
 // four-velocities (divided by c) of two speeds, both ending on the hyperbola (ct)² − x² = 1
 const uPicture = (betas, caption) => {
-  const v = frames({ range: 3, xlabel: 'x', ylabel: 'ct', caption, cone: true });
+  const v = frames({ range: 3, xlabel: 'x', ylabel: 'ct', caption, cone: true, segments: betas.map((b) => [0, 0, 4.2, round(4.2 * b), 'ink3']) });
   v.params.curves.push({ param: ['sinh(t)', 'cosh(t)'], t: [-1.9, 1.9], color: 'ink3', width: 1.4 });
   v.params.arrows = betas.map((b, k) => {
     const g = 1 / Math.sqrt(1 - b * b);
@@ -49,7 +50,7 @@ const shellPicture = (points = [], caption, extra = {}) => ({
   type: 'graph',
   params: {
     x: [-0.4, 3.6], y: [0, 3.8], equal: true, xlabel: 'pc / (mc²)', ylabel: 'E / (mc²)',
-    curves: [{ fn: 'sqrt(1 + x^2)', color: 'accent', label: 'massive: E² − (pc)² = (mc²)²', labelAt: 1.1, labelDx: -40, labelDy: -16 }, { fn: 'abs(x)', color: 'warn', dash: true, label: 'massless: E = pc', labelAt: 2.6, labelDx: 8, labelDy: 10 }],
+    curves: [{ fn: 'sqrt(1 + x^2)', color: 'accent', label: 'mass shell', labelAt: 2.5, labelDx: -84, labelDy: -10 }, { fn: 'abs(x)', color: 'warn', dash: true, label: 'massless: E = pc', labelAt: 2.6, labelDx: 8, labelDy: 10 }],
     points, ...extra,
   },
   caption,
@@ -130,7 +131,7 @@ Energy and momentum are the time and space parts of one four-vector, conserved t
       { label: 'Use the invariants', text: t`$q\cdot q = 0$ (massless; real neutrino masses are under 1 eV), $P\cdot P = -m_\pi^2c^2$ and $k\cdot k = -m_\mu^2c^2$. In the pion’s rest frame $P = (m_\pi c, \vec 0)$, so $P\cdot k = -m_\pi c\cdot E_\mu/c = -m_\pi E_\mu$.` },
       { label: 'Solve', text: t`$0 = -m_\pi^2c^2 + 2m_\pi E_\mu - m_\mu^2c^2$, so $E_\mu = \dfrac{(m_\pi^2 + m_\mu^2)c^2}{2m_\pi} = ${fmt(PI_MU.E, 6)}$ MeV.` },
       { label: 'Momentum and kinetic energy', text: t`$p_\mu c = \sqrt{E_\mu^2 - (m_\mu c^2)^2} = ${fmt(PI_MU.p, 4)}$ MeV, and the kinetic energy is $E_\mu - m_\mu c^2 = ${fmt(PI_MU.E - M_MU, 3)}$ MeV.` },
-      { label: 'Sense check', text: t`The neutrino carries the opposite momentum, so $E_\nu = p_\mu c = ${fmt(PI_MU.p, 4)}$ MeV, and $E_\mu + E_\nu = ${fmt(PI_MU.E + PI_MU.p, 6)}$ MeV $= m_\pi c^2$ ✓. Every pion decaying at rest gives a muon of exactly this energy — the sharp 4.1 MeV line seen in early emulsion photographs.` },
+      { label: 'Sense check', text: t`The neutrino carries the opposite momentum, so $E_\nu = p_\mu c = ${fmt(PI_MU.p, 4)}$ MeV, and $E_\mu + E_\nu = ${fmt(PI_MU.E + PI_MU.p, 6)}$ MeV $= m_\pi c^2$ ✓. Every pion decaying at rest gives a muon of exactly this energy — which is why the muons from stopped pions all leave tracks of the same length in photographic emulsion, as Powell’s group saw in 1947.` },
     ],
     answer: t`$E_\mu = \dfrac{(m_\pi^2 + m_\mu^2)c^2}{2m_\pi} = ${fmt(PI_MU.E, 5)}$ MeV: kinetic energy ${fmt(PI_MU.E - M_MU, 3)} MeV, momentum ${fmt(PI_MU.p, 3)} MeV/$c$.`,
   },

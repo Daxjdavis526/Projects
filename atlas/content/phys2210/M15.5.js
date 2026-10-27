@@ -139,7 +139,7 @@ The oscillation keeps its rhythm, a little slower than the undamped $\omega_0 = 
           answer: bc, units: 'kg/s', tol: { rel: 0.005 },
           errors: [{ value: Math.sqrt(k * m), feedback: t`Critical damping is $2\sqrt{km}$: keep the 2.` }, { value: 2 * Math.sqrt(k / m), feedback: t`That is $2\omega_0$, in s⁻¹. Critical damping is $b_c = 2m\omega_0 = 2\sqrt{km}$.` }],
           hints: [t`$b_c = 2\sqrt{km}$.`],
-          teach: 'Critical damping is b_c = 2√(km) = 2mω₀.',
+          teach: t`Critical damping is $b_c = 2\sqrt{km} = 2m\omega_0$.`,
           explain: t`$b_c = 2\sqrt{(${tn(k)})(${m})} = ${tn(bc)}\ \text{kg/s}$. Real cars are tuned below this, at roughly 20–40% of critical: a little overshoot buys a softer ride.`,
           visual: springPic({ damper: true, m: `${m} kg`, k: `k = ${pn(k)} N/m`, b: 'shock absorber: b = ?', arrow: null, x: 0.4 }),
         };

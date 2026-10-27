@@ -154,7 +154,7 @@ Read $A_x\hat\imath$ as “$A_x$ units along $x$”. Dividing any vector by its 
           answer: m, units: 'm', tol: { rel: 0.005 },
           errors: [{ value: Math.hypot(v[0], v[1]), feedback: 'You left out the z-component. In three dimensions, all three components go under the square root.' }, { value: Math.abs(v[0]) + Math.abs(v[1]) + Math.abs(v[2]), feedback: 'The components are perpendicular steps, so they combine by Pythagoras, not by adding.' }],
           hints: [t`$|\vec d| = \sqrt{d_x^2 + d_y^2 + d_z^2}$.`],
-          teach: 'In three dimensions the magnitude is √(A_x² + A_y² + A_z²): Pythagoras applied twice.',
+          teach: t`In three dimensions the magnitude is $\sqrt{A_x^2 + A_y^2 + A_z^2}$: Pythagoras applied twice.`,
           explain: t`$|\vec d| = \sqrt{${v[0] ** 2} + ${v[1] ** 2} + ${v[2] ** 2}} = \sqrt{${v[0] ** 2 + v[1] ** 2 + v[2] ** 2}} = ${fmt(m, 3)}$ m.`,
           visual: scene3d(v, { label: '\\vec d', unit: false, caption: 'The displacement and its three perpendicular steps. Drag to rotate.' }),
         };
@@ -171,7 +171,7 @@ Read $A_x\hat\imath$ as “$A_x$ units along $x$”. Dividing any vector by its 
           answer: v[k] / m, tol: { rel: 0.005, abs: 0.002 },
           errors: [
             { value: v[k], feedback: 'That is a component of A itself. Divide by |A| to make a unit vector.' },
-            { value: v[k] / (Math.abs(v[0]) + Math.abs(v[1]) + Math.abs(v[2])), feedback: 'Divide by the magnitude, √(A_x² + A_y² + A_z²), not by the sum of the components.' },
+            { value: v[k] / (Math.abs(v[0]) + Math.abs(v[1]) + Math.abs(v[2])), feedback: t`Divide by the magnitude, $\sqrt{A_x^2 + A_y^2 + A_z^2}$, not by the sum of the components.` },
           ],
           hints: [t`First find $|\vec A| = \sqrt{${v[0] ** 2} + ${v[1] ** 2} + ${v[2] ** 2}}$.`, t`$\hat A = \vec A/|\vec A|$, so its $${axis}$-component is $A_${axis}/|\vec A|$.`],
           teach: 'Each component of a unit vector is the matching component of the vector divided by its magnitude — a number between −1 and 1.',

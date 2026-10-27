@@ -99,4 +99,20 @@ export function textRows(rows, { caption, width = 6, colors = [] } = {}) {
   };
 }
 
+// the upper half-plane: its geodesics are semicircles centred on the x axis and vertical lines
+export const halfPlane = (caption) => ({
+  type: 'graph',
+  params: {
+    x: [-3.2, 3.2], y: [0, 3], equal: true, xlabel: 'x', ylabel: 'y',
+    curves: [
+      { param: ['-1 + 1.4*cos(t)', '1.4*sin(t)'], t: [0, 3.1416], color: 'accent' },
+      { param: ['1.2 + 0.8*cos(t)', '0.8*sin(t)'], t: [0, 3.1416], color: 'accent' },
+      { param: ['0.6 + 2.2*cos(t)', '2.2*sin(t)'], t: [0, 3.1416], color: 'violet' },
+      { param: ['-2.6', 't'], t: [0, 3], color: 'accent' },
+    ],
+    hlines: [{ y: 0, color: 'warn' }],
+  },
+  caption: caption ?? 'The upper half-plane with ds² = (dx² + dy²)/y²: a surface of constant negative curvature drawn on flat paper. Distances shrink as 1/y going up, so its straight lines (geodesics) are the semicircles and the vertical line; the x axis is infinitely far away.',
+});
+
 export { t };

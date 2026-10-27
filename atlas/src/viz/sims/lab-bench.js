@@ -286,7 +286,7 @@ export function mount(F, P0) {
       P.expected && exs.length ? ['dash', 'good', 'expected, no systematic'] : null,
     ]);
     if (!pts.length) pl.text('Take a measurement to start the table', (pl.L + pl.R) / 2, (pl.T + pl.B) / 2, { screen: true, align: 'center', color: 'ink3', size: 12.5 });
-    else if (A.curved && P.fit) pl.text('Curved: a straight line is the wrong model on these axes', pl.R - 6, pl.T + 12, { screen: true, align: 'right', color: 'ink3', size: 11.5 });
+    else if (A.curved && P.fit && bench) pl.text('Curved: a straight line is the wrong model on these axes', pl.R - 6, pl.T + 12, { screen: true, align: 'right', color: 'ink3', size: 11.5 });
     void g;
   }
 
@@ -491,8 +491,8 @@ function slopeUnit(A, k) {
 // a static picture with no reading at its setting hides the instrument’s empty lines
 let HIDE_EMPTY = false;
 function display(pl, x, y, lines0, o = {}) {
-  const lines = HIDE_EMPTY ? lines0.filter((l) => !l.includes('—')) : lines0;
-  if (!lines.length) return;
+  let lines = HIDE_EMPTY ? lines0.filter((l) => !l.includes('—')) : lines0;
+  if (!lines.length) lines = ['· · ·'];
   const g = pl.ctx, c = pl.col;
   const fs = o.compact ? 11 : 12.5;
   g.save();
@@ -588,7 +588,8 @@ const APPARATUS = {
     pl.text('sensor', 0.6, A[1] + 1.0, { color: 'ink3', size: 11 });
     const s0 = 0.25;                                  // release point, metres from the sensor
     const t = st.setting ?? 1.5;
-    const x = st.row?.R?.[0] ?? 0.5 * P.g * Math.sin(P.theta * D2R) * t * t;
+    const xRead = st.row?.R?.[0];
+    const x = xRead ?? 0.5 * P.g * Math.sin(P.theta * D2R) * t * t;
     const pos = (m) => [A[0] + u[0] * k * m, A[1] + u[1] * k * m];
     const rel = pos(s0), cart = pos(s0 + Math.max(0, x - (sys === 'zero' ? P.x0 : 0)));
     pl.circle(rel[0], rel[1] + 0.35, 0.12, { fill: 'ink3', stroke: false });
@@ -598,8 +599,8 @@ const APPARATUS = {
     if (st.labels) {
       const off = 1.1;
       const p0 = [rel[0] + nrm[0] * off, rel[1] + nrm[1] * off], p1 = [cart[0] + nrm[0] * off, cart[1] + nrm[1] * off];
-      dim(pl, p0[0], p0[1], p1[0], p1[1], `x = ${fx(x, 3)} m`, { dy: 0.45, dx: -0.6 });
-      display(pl, 13.2, 8.4, [`t = ${fx(t, 2)} s`, `x = ${fx(x, 3)} m`], { compact: o.compact, title: 'motion sensor' });
+      dim(pl, p0[0], p0[1], p1[0], p1[1], xRead !== undefined ? `x = ${fx(xRead, 3)} m` : 'x', { dy: 0.45, dx: -0.6 });
+      display(pl, 13.2, 8.4, [`t = ${fx(t, 2)} s`, `x = ${xRead !== undefined ? fx(xRead, 3) : '—'} m`], { compact: o.compact, title: 'motion sensor' });
       pl.text('angle exaggerated', 14.6, 1.5, { color: 'ink3', size: 10.5 });
       if (sys === 'zero') sysTag(pl, 2.4, 9.3, 'sensor zero 5.0 cm behind the release point');
     }
@@ -640,8 +641,9 @@ const APPARATUS = {
     pl.line(M[0], M[1], 19.3, M[1], { color: 'ink3', width: 2 });
     pl.text('landing table, level with the muzzle', 10.5, M[1] - 0.45, { color: 'ink3', size: 10.5 });
     pl.line(piv[0], piv[1], M[0], M[1], { color: 'violet', width: 7 });
-    const R = st.rep ? (st.rs?.mean ?? (P.v0 ** 2 * Math.sin(2 * th)) / P.g) : st.row?.R?.[0] ?? (P.v0 ** 2 * Math.sin(2 * th)) / P.g;
-    const Rt = R + (sys === 'zero' ? P.offset : 0);
+    const Rread = st.rep ? (st.rs?.n ? st.rs.mean : undefined) : st.row?.R?.[0];       // what the tape says (none yet: undefined)
+    const R = Rread ?? (P.v0 ** 2 * Math.sin(2 * th)) / P.g;
+    const Rt = R + (Rread !== undefined && sys === 'zero' ? P.offset : 0);
     const v0 = P.v0, tf = (2 * v0 * Math.sin(th)) / P.g;
     pl.curve((t) => M[0] + k * v0 * Math.cos(th) * t * (Rt / ((v0 * v0 * Math.sin(2 * th)) / P.g)), (t) => M[1] + k * (v0 * Math.sin(th) * t - 0.5 * P.g * t * t), 0, tf, { color: 'accent', width: 1.6, dash: [5, 4] });
     const land = M[0] + Rt * k;
@@ -650,8 +652,8 @@ const APPARATUS = {
     pl.text(`θ = ${Math.round(th / D2R)}°`, piv[0] - 0.2, piv[1] + 1.6, { color: 'violet', size: 12, weight: 600, align: 'right' });
     if (st.labels) {
       const z0 = M[0] + (sys === 'zero' ? P.offset * k : 0);
-      dim(pl, z0, M[1] - 0.9, land, M[1] - 0.9, `R = ${fx(R, 3)} m`, { dy: -0.45, dx: -1.2 });
-      display(pl, 13.6, 8.4, [`θ = ${Math.round(th / D2R)}°`, `R = ${fx(R, 3)} m`], { compact: o.compact, title: st.rep ? 'mean of the shots' : 'latest shot' });
+      dim(pl, z0, M[1] - 0.9, land, M[1] - 0.9, Rread !== undefined ? `R = ${fx(Rread, 3)} m` : 'R = ?', { dy: -0.45, dx: -1.2 });
+      display(pl, 13.6, 8.4, [`θ = ${Math.round(th / D2R)}°`, `R = ${Rread !== undefined ? fx(Rread, 3) : '—'} m`], { compact: o.compact, title: Rread === undefined ? 'launcher' : st.rep ? 'mean of the shots' : 'latest shot' });
       if (sys === 'zero') sysTag(pl, 0.7, 9.4, 'tape zero 6.0 cm ahead of the launch point');
     }
   },
@@ -706,6 +708,7 @@ const APPARATUS = {
       const R = st.row?.R;
       display(pl, 13.2, 8.6, [`peak  ${R ? R[0].toFixed(2) : '—'} N`, `slide ${R ? R[1].toFixed(2) : '—'} N`], { compact: o.compact, title: 'force sensor' });
       if (sys === 'angle') sysTag(pl, 8.6, y + 3.3, 'string pulled 20° above horizontal');
+      if (sys === 'zero') sysTag(pl, 10.6, y + 2.2, 'sensor reads 0.20 N with no pull');
     }
   },
 

@@ -174,7 +174,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
             { value: (rad / T) ** 2 / rad, feedback: t`The speed is $2\pi r/T$ — the distance round the rim per turn, not $r/T$.` },
           ],
           hints: [t`First the rim speed: $v = 2\pi r/T$.`, t`Then $a_c = v^2/r = 4\pi^2 r/T^2$.`],
-          teach: 'From the period: v = 2πr/T, so a_c = 4π²r/T².',
+          teach: t`From the period: $v = 2\pi r/T$, so $a_c = 4\pi^2 r/T^2$.`,
           explain: t`$v = 2\pi(${rad})/${T} = ${s3((2 * Math.PI * rad) / T)}$ m/s, so $a_c = v^2/r = ${s3(a)}\ \text{m/s}^2$ — about ${s3(a / G)} g.`,
           visual: {
             type: 'graph',
@@ -304,7 +304,7 @@ The speed is constant but the velocity is not: the velocity is tangent to the ci
         { value: (4 * Math.PI * Math.PI * 6.79e6) / 92.7 ** 2, feedback: 'Convert the period to seconds.' },
       ],
       hints: [t`$v = 2\pi r/T$ with $r$ in metres and $T$ in seconds.`, t`$a_c = 4\pi^2 r/T^2$.`],
-      teach: 'An orbit is uniform circular motion: a_c = 4π²r/T², with r from the planet’s centre.',
+      teach: t`An orbit is uniform circular motion: $a_c = 4\pi^2 r/T^2$, with $r$ from the planet’s centre.`,
       explain: t`$a_c = \dfrac{4\pi^2(6.79\times10^6)}{(5562)^2} = 8.67\ \text{m/s}^2$ — essentially the strength of Earth’s gravity at that height ($9.8 \times (6371/6790)^2 \approx 8.6\ \text{m/s}^2$). The station is in free fall; its crew float because they fall with it.`,
       visual: {
         type: 'graph',

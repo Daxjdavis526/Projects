@@ -204,8 +204,9 @@ export function mount(F, P) {
         for (const r of upper) mark(r.x0, r.h);
       });
       const SN = shown.reduce((s, p) => s + p.a, 0), b = n0 + N - 1;
-      if (which !== 'lower') legend.push(['above: area S_N', 'warn']);
-      if (which !== 'upper') legend.push(['below: area S_N − first term', 'good']);
+      // (canvas text is plain: no TeX subscripts)
+      if (which !== 'lower') legend.push(['above: area = partial sum S(N)', 'warn']);
+      if (which !== 'upper') legend.push(['below: area = S(N) − first term', 'good']);
       legend.push([Q.curveLabel || 'y = f(x)', 'accent']);
       rows.push(['$N$', String(N)], ['$S_N$', num(SN)], [`$\\int_{${n0}}^{${b + 1}} f\\,dx$`, num(simpson(f, n0, b + 1, 600))]);
       if (Q.integralInf !== undefined) {

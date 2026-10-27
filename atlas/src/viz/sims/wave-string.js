@@ -54,6 +54,8 @@ export async function mount(F, P0) {
   const { canvas, box } = F.canvas({ aspect: mode === 'standing' && P.show === 'drive' ? '' : 'wide', label: P.alt || 'Waves on a string, drawn as beads' });
   const ctx = canvas.getContext('2d');
   const S = { t: P.time, running: !!P.play && !reduced, pulses: (P.pulses || []).map((q) => ({ ...q })), start: 0 };
+  // an explorable rope starts with one pulse on its way
+  if (mode === 'medium' && ctl && !S.pulses.length && P.drive === 'pulse') S.pulses.push({ t0: 0.2, h: P.h, dur: P.dur });
 
   // ─── controls ──────────────────────────────────────────────────────────
   const slider = (o) => (ctl ? F.slider(o) : (F.params[o.key] = o.value));
@@ -315,7 +317,7 @@ export async function mount(F, P0) {
   showGroups();
   const caps = {
     travel: 'A sinusoidal wave on an ideal string (small amplitude, no damping). The vertical scale is in centimetres and the horizontal in metres, so the wave’s height is exaggerated about 100 times. The red bead stays at its own x.',
-    medium: 'An ideal rope (small amplitude, no damping), 20 m long; its far end is joined to more of the same rope, so nothing reflects. The speed comes from the rope alone: v = √(F_T/μ).',
+    medium: 'An ideal rope (small amplitude, no damping), 20 m long; its far end is joined to more of the same rope, so nothing reflects. The speed comes from the rope alone: $v = \\sqrt{F_T/\\mu}$.',
     two: 'Ideal string, small amplitudes: the displacements simply add (linear superposition). Pulses move at 2 m/s; the waves have λ = 4 m and f = 0.5 Hz.',
     standing: P.show === 'drive'
       ? `A 1 m string fixed at the right, its left end shaken by a tiny amount, with light damping chosen so that every resonance reaches ${GAIN} times the shaking. μ = 5 g/m. The oscillation is drawn slowed down to about one cycle a second.`

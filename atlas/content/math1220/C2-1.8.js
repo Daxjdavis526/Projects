@@ -127,7 +127,7 @@ where $A = \int_a^b [f - g]\,dx$. The uniform density cancels, so the centroid d
             { value: (3 * b) / 5, feedback: t`That is $\bar x$. For $\bar y$, weight each strip by the height of its centre, $\tfrac12\sqrt{x}$.` },
           ],
           hints: [t`$M_x = \int_0^{${b}}\tfrac12\left(\sqrt{x}\right)^2dx = \int_0^{${b}}\tfrac{x}{2}\,dx$.`, t`$A = \tfrac23(${b})^{3/2}$ and $\bar y = M_x/A$.`],
-          teach: 'For ȳ each vertical strip counts at its own centre height, half way up: M_x = ∫ ½(f² − g²) dx.',
+          teach: t`For $\bar y$ each vertical strip counts at its own centre height, half way up: $M_x = \int \tfrac12\left(f^2 - g^2\right)dx$.`,
           explain: t`$M_x = \tfrac{${b * b}}{4}$ and $A = \tfrac23(${b})^{3/2} = ${nice((2 / 3) * b ** 1.5)}$, so $\bar y = ${fmt(yb, 4)}$ — less than half of the plate’s greatest height $${Math.sqrt(b)}$, because the plate is thin on the left.`,
           visual: { type: 'graph', params: { aspect: 'wide', x: [-0.08 * b, b * 1.12], y: [-0.06 * Math.sqrt(b), Math.sqrt(b) * 1.2], curves: [{ fn: 'sqrt(x)', color: 'accent', domain: [0, b] }], shade: [{ fn: 'sqrt(x)', from: 0, to: b, color: 'accent', alpha: 0.22 }] } },
         };

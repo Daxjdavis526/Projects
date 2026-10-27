@@ -124,7 +124,7 @@ Velocities add as vectors. For an aircraft: its velocity over the ground is its 
         3: 'Nothing here doubles. The speed is the same 30 m/s; only the direction reverses.',
       },
       hints: [t`$\vec v_{PT} = -\vec v_{TP}$.`],
-      teach: 'Reversing the subscripts of a relative velocity reverses its direction: v_AB = −v_BA.',
+      teach: t`Reversing the subscripts of a relative velocity reverses its direction: $\vec v_{AB} = -\vec v_{BA}$.`,
       explain: t`$\vec v_{PT} = -\vec v_{TP} = -30$ m/s: seen from the train, the platform slides west at 30 m/s.`,
       visual: {
         type: 'graph',

@@ -250,13 +250,13 @@ Its size is the momentum times the **perpendicular distance from O to the line o
         let x, y, px, py, Lz;
         do { x = r.int(1, 4); y = r.int(1, 3); px = r.intExcept(-3, 3, [0]); py = r.intExcept(-3, 3, [0]); Lz = x * py - y * px; } while (Lz === 0);
         const errs = [{ value: x * py + y * px, feedback: t`Watch the sign: $L_z = xp_y - yp_x$, a difference.` }];
-        if (x * px + y * py !== Lz) errs.push({ value: x * px + y * py, feedback: 'That is the dot product r · p, a scalar. The cross product’s z-component is x p_y − y p_x.' });
+        if (x * px + y * py !== Lz) errs.push({ value: x * px + y * py, feedback: t`That is the dot product $\vec r\cdot\vec p$, a scalar. The cross product’s $z$-component is $x\,p_y - y\,p_x$.` });
         return {
           prompt: t`A particle at $\vec r = (${x},\ ${y},\ 0)$ m has momentum $\vec p = (${px},\ ${py},\ 0)$ kg·m/s. What is the $z$-component of its angular momentum about the origin, $L_z$? (A negative answer means $\vec L$ points down.)`,
           answer: Lz, units: 'kg m^2/s', tol: { rel: 1e-6, abs: 0.01 },
           errors: errs,
           hints: [t`$\vec L = \vec r\times\vec p$. With both vectors in the $xy$-plane, only $L_z$ survives.`, t`$L_z = x\,p_y - y\,p_x$.`, t`$L_z = (${x})(${py}) - (${y})(${px})$.`],
-          teach: 'For motion in the xy-plane, L = r × p points along z, with L_z = x p_y − y p_x.',
+          teach: t`For motion in the $xy$-plane, $\vec L = \vec r\times\vec p$ points along $z$, with $L_z = x\,p_y - y\,p_x$.`,
           explain: t`$L_z = (${x})(${py}) - (${y})(${px}) = ${Lz}\ \text{kg·m}^2/\text{s}$: ${Lz > 0 ? 'positive, so the particle is going round the origin anticlockwise seen from above' : 'negative, so the particle is going round the origin clockwise seen from above'}.`,
           visual: {
             type: 'calc-vectors3d',

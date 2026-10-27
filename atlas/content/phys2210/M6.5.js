@@ -104,7 +104,7 @@ A body dropped from rest speeds up until the drag matches its weight; from then 
             { value: v * v, feedback: t`That is $v_t^2$. Take the square root.` },
           ]),
           hints: [t`At terminal speed, drag balances weight: $\tfrac12\rho C_D A v_t^2 = mg$.`],
-          teach: 'Terminal speed comes from setting drag equal to weight: v_t = √(2mg/(ρC_D A)).',
+          teach: t`Terminal speed comes from setting drag equal to weight: $v_t = \sqrt{2mg/(\rho C_D A)}$.`,
           explain: t`$v_t = \sqrt{\dfrac{2mg}{\rho C_D A}} = \sqrt{\dfrac{2(${m})(9.8)}{(1.2)(${CdA})}} = ${s3(v)}$ m/s, about ${Math.round(v * 3.6)} km/h.`,
         };
       },

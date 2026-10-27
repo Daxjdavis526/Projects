@@ -165,7 +165,7 @@ The **second law of thermodynamics**, in Kelvin and Planck's form, says $Q_c$ ca
     mcq({
       id: 'kelvin-planck', difficulty: 2,
       prompt: 'Which of these would violate the second law of thermodynamics?',
-      visual: flowPic({ Qh: 1000, Qc: 0, W: 1000, labels: { Qh: 'Q_h', Qc: 'Q_c = 0', W: 'W = Q_h', hot: 'the ocean, 290 K', cold: '(nothing colder used)', device: 'ship’s engine' }, caption: 'One of the proposals, drawn as an energy-flow diagram.' }),
+      visual: flowPic({ Qh: 1000, Qc: 700, W: 300, labels: { Qh: 'Q_h = 1000 J', Qc: 'Q_c = 700 J', W: 'W = 300 J' }, caption: 'One of the proposals, drawn as an energy-flow diagram: an engine taking in 1000 J per cycle.' }),
       choices: [
         'A ship’s engine that runs by taking heat from the ocean and turning all of it into work, cycle after cycle',
         'A gas that expands isothermally once, turning all the heat it absorbs into work',

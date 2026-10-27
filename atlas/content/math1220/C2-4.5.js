@@ -27,8 +27,8 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
     title: 'Rectangles above and below the curve',
     lead: t`The blue curve is $f(x) = 1/x^p$. Orange rectangles have heights $a_1, a_2, \dots, a_N$ on $[n, n + 1]$, so their total area is $S_N$ and they lie **above** the curve. Green ones are shifted left onto $[n - 1, n]$ and lie **below** it.`,
     tasks: [
-      'At p = 1 the area under 1/x out to N + 1 is ln(N + 1), which grows without bound — and the orange rectangles hold even more area, so S_N does too.',
-      'Set p = 2 and choose “Below”: the green rectangles (area S_N − 1) fit under a curve of finite total area 1, so S_N stays below 2 forever.',
+      t`At $p = 1$ the area under $1/x$ out to $N + 1$ is $\ln(N + 1)$, which grows without bound — and the orange rectangles hold even more area, so $S_N$ does too.`,
+      t`Set $p = 2$ and choose “Below”: the green rectangles (area $S_N - 1$) fit under a curve of finite total area 1, so $S_N$ stays below 2 forever.`,
       'Slide p across 1 and watch the readout for the area to infinity jump between finite and ∞.',
     ],
     params: {
@@ -123,14 +123,15 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
         let N = 1;
         while (!(N ** (1 - p) / (p - 1) < tol)) N++;
         const tolT = tol >= 0.001 ? String(tol) : tex(tol, 1);
+        const den = p - 1 === 1 ? 'N' : `${p - 1}N^{${p - 1}}`;     // 1/N, not 1/(1N¹)
         return {
           prompt: t`How many terms of $\displaystyle\sum_{n=1}^\infty \frac{1}{n^{${p}}}$ guarantee, by the integral bound $R_N \le \int_N^\infty x^{-${p}}\,dx$, that the remainder is less than $${tolT}$? Give the smallest such $N$.`,
           answer: N, tol: { rel: 0, abs: 0.01 },
           errors: [{ value: N - 1, feedback: 'At that N the bound is still at least the tolerance. You need it strictly smaller.' }, { value: N + 1, feedback: 'One fewer term already works.' }],
-          hints: [t`$\displaystyle\int_N^\infty x^{-${p}}\,dx = \frac{1}{${p - 1}N^{${p - 1}}}$.`, t`Solve $\dfrac{1}{${p - 1}N^{${p - 1}}} < ${tolT}$ for $N$, then take the next whole number.`],
+          hints: [t`$\displaystyle\int_N^\infty x^{-${p}}\,dx = \frac{1}{${den}}$.`, t`Solve $\dfrac{1}{${den}} < ${tolT}$ for $N$, then take the next whole number.`],
           teach: 'The integral remainder bound turns an accuracy requirement into a number of terms.',
-          explain: t`$\dfrac{1}{${p - 1}N^{${p - 1}}} < ${tolT} \iff N^{${p - 1}} > ${fmt(1 / ((p - 1) * tol), 5)} \iff N > ${fmt((1 / ((p - 1) * tol)) ** (1 / (p - 1)), 5)}$, so $N = ${N}$ terms.`,
-          visual: { type: 'graph', params: { x: [1, Math.ceil(1.6 * N)], y: [Math.floor(Math.log10(tol)) - 1, 0.5], xlabel: 'N', ylabel: 'log₁₀ of the bound', curves: [{ fn: `log10(x^(${1 - p})/${p - 1})`, color: 'accent', label: 'the bound on R_N', labelAt: Math.ceil(0.25 * N) }], hlines: [{ y: Math.log10(tol), label: 'tolerance', color: 'gold' }] }, caption: 'The integral bound on the remainder, on a logarithmic scale, against the number of terms: you need the first whole N past the crossing.' },
+          explain: t`$\dfrac{1}{${den}} < ${tolT} \iff N^{${p - 1}} > ${fmt(1 / ((p - 1) * tol), 5)} \iff N > ${fmt((1 / ((p - 1) * tol)) ** (1 / (p - 1)), 5)}$, so $N = ${N}$ terms.`,
+          visual: { type: 'graph', params: { x: [1, Math.ceil(1.6 * N)], y: [Math.floor(Math.log10(tol)) - 1, 0.5], xlabel: 'N', ylabel: 'log₁₀ of the bound', curves: [{ fn: `log10(x^(${1 - p})/${p - 1})`, color: 'accent', label: 'the bound on the remainder', labelAt: Math.ceil(0.25 * N) }], hlines: [{ y: Math.log10(tol), label: 'tolerance', color: 'gold' }] }, caption: 'The integral bound on the remainder, on a logarithmic scale, against the number of terms: you need the first whole N past the crossing.' },
         };
       },
     }),
@@ -152,7 +153,7 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
       hints: ['Add the first two terms. Is the sum already past the integral?', 'What do the rectangles above the curve say?'],
       teach: 'The integral test decides convergence; it does not give the value of the sum.',
       explain: t`$1 + \frac14 = 1.25$ already exceeds 1. The integral test gives $\int_1^\infty f \le S \le f(1) + \int_1^\infty f$, here $1 \le S \le 2$; the exact sum $\frac{\pi^2}{6}$ needs other methods.`,
-      visual: { type: 'calc-series', params: { view: 'integral', term: '1/n^2', integralInf: 1, N: 12, y: [0, 1.15], rects: 'upper' }, caption: 'The rectangles (total S_N) stick out above the area under the curve.' },
+      visual: { type: 'calc-series', params: { view: 'integral', term: '1/n^2', integralInf: 1, N: 12, y: [0, 1.15], rects: 'upper' }, caption: t`The rectangles (total $S_N$) stick out above the area under the curve.` },
     }),
     mcq({
       id: 'n-log-n', difficulty: 2,

@@ -252,7 +252,7 @@ Spins are measured — from gravitational waves and from X-rays reflected off ac
         3: t`$g_{t\phi}$ is largest near the hole, not zero; it is what forces everything inside the ergosphere to co-rotate.`,
       },
       hints: [t`An observer at rest has $dr = d\theta = d\phi = 0$, so $ds^2 = g_{tt}\,dt^2$. For a real clock $ds^2$ must be negative.`, t`Where does $g_{tt}$ change sign?`],
-      teach: 'The ergosphere’s edge is where g_tt = 0: inside, staying still is impossible, but leaving is not.',
+      teach: t`The ergosphere’s edge is where $g_{tt} = 0$: inside, staying still is impossible, but leaving is not.`,
       explain: t`A clock at rest needs $ds^2 = g_{tt}\,dt^2 < 0$. Where $g_{tt} > 0$ that is impossible, so everything inside $r_E = M + \sqrt{M^2 - a^2\cos^2\theta}$ must move round with the hole. The horizon, where escape becomes impossible, is the smaller surface $\Delta = 0$.`,
       visual: kerrSlice({ a: 0.7, caption: t`A hole with $a = 0.7M$, spin axis vertical. Thick solid curve: the surface where $\Delta = 0$; dashed: the inner root; red: the outer boundary of the ergosphere. Boyer–Lindquist coordinates drawn as if space were flat.` }),
     }),

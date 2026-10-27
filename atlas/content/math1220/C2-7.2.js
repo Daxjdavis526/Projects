@@ -34,7 +34,7 @@ The distance between two points is the length of the vector joining them. One su
     tasks: [
       'Set v = ⟨2, 3, 6⟩: |v| = 7, by Pythagoras twice — √(2² + 3²) across the floor, then the height 6.',
       'Turn the picture: from some angles a long vector looks short. Only the components tell the truth.',
-      'Make v_z negative: the arrow dips below the floor.',
+      t`Make $v_z$ negative: the arrow dips below the floor.`,
     ],
     params: {
       range: 6.5,
