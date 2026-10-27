@@ -5,7 +5,7 @@
 // first success (November 1915). Carried into strong fields by S2 and binary
 // pulsars.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { G, C, M_SUN, AU, ARCSEC, YEAR, mLen, sci, round } from './_fasttrack.js';
+import { G, C, M_SUN, AU, ARCSEC, DAY as DAY_S, YEAR, mLen, sci, round } from './_fasttrack.js';
 import { advanceWeak } from '../../src/viz/model/gravity.js';
 
 const t = String.raw;
@@ -22,6 +22,48 @@ const perOrbit = ([, a, e]) => adv(M_SUN, a, e) / ARCSEC;            // arcsec p
 const perCentury = (pl) => perOrbit(pl) * (36525 / pl[3]);          // arcsec per century
 const MERC = PLANETS[0], P_MERC = MERC[1] * (1 - MERC[2] ** 2);
 const SGR = 4.30e6;
+
+// relativistic advance per century against orbit size: circular orbits (curve) and the planets (dots)
+const P1 = (2 * Math.PI * Math.sqrt(AU ** 3 / (G * M_SUN))) / DAY_S;           // days, circular orbit at 1 AU
+const K_CY = ((6 * Math.PI * M1) / AU / ARCSEC) * (36525 / P1);                // ″ per century there
+const centuryGraph = (only) => ({
+  type: 'graph',
+  params: {
+    x: [0, 1.95], y: [0, 52], xlabel: 'orbit size a (AU)', ylabel: 'advance per century (″)',
+    curves: [{ fn: `${round(K_CY, 5)}/x^2.5`, domain: [0.365, 1.95], color: 'accent' }],
+    points: PLANETS.filter((pl) => !only || pl === MERC).map((pl, k) => ({ x: round(pl[1] / AU, 4), y: round(perCentury(pl), 4), color: ['gold', 'teal', 'good', 'bad'][k], label: `${pl[0]}: ${round(perCentury(pl), 3)}″` })),
+    vlines: only ? [{ x: round(only[1] / AU, 4), label: only[0], color: 'violet' }] : [],
+  },
+  caption: 'Relativistic advance per century. Curve: circular orbits — per orbit the advance falls as 1/a, and farther orbits are also slower, so per century it falls as a^(−5/2). Dots: the planets’ real orbits.',
+});
+
+// an orbit and a later one, turned by an (exaggerated) angle w about the focus, with their long axes
+const turningOrbit = (e, w, caption) => {
+  const rp = 1 / (1 + e), ra = 1 / (1 - e), a = 1 / (1 - e * e), b = a * Math.sqrt(1 - e * e);
+  const box = (th) => {
+    const cx = -a * e * Math.cos(th), cy = -a * e * Math.sin(th);
+    const hx = Math.hypot(a * Math.cos(th), b * Math.sin(th)), hy = Math.hypot(a * Math.sin(th), b * Math.cos(th));
+    return [cx - hx, cx + hx, cy - hy, cy + hy];
+  };
+  const [p, q] = [box(0), box(w)], pad = 0.06 * ra;
+  return {
+    type: 'graph',
+    params: {
+      x: [round(Math.min(p[0], q[0]) - pad, 3), round(Math.max(p[1], q[1]) + 3 * pad, 3)], y: [round(Math.min(p[2], q[2]) - pad, 3), round(Math.max(p[3], q[3]) + pad, 3)],
+      equal: true, grid: false, axes: false,
+      curves: [
+        { param: ['t', '0'], t: [round(-ra, 4), round(rp, 4)], color: 'gold', width: 1, dash: true },
+        { param: [`t*cos(${w})`, `t*sin(${w})`], t: [round(-ra, 4), round(rp, 4)], color: 'accent', width: 1, dash: true },
+        { polar: `1/(1 + ${e}cos(theta))`, theta: [0, 6.2832], color: 'gold', width: 2.4 },
+        { polar: `1/(1 + ${e}cos(theta - ${w}))`, theta: [0, 6.2832], color: 'accent', width: 2 },
+      ],
+      points: [{ x: 0, y: 0, color: 'ink', r: 4.5 }, { x: round(rp, 4), y: 0, color: 'gold' }, { x: round(rp * Math.cos(w), 4), y: round(rp * Math.sin(w), 4), color: 'accent' }],
+    },
+    caption,
+  };
+};
+
+const S2_PICTURE = turningOrbit(0.88, 0.3, 'S2’s orbit (gold) and its next one (blue), drawn in their own plane, with their long axes dashed; Sgr A* sits at the focus. Each orbit the point nearest Sgr A* moves on by the advance — here exaggerated about 85 times.');
 
 export default lesson({
   id: 'gr.S25.i',
@@ -70,6 +112,26 @@ export default lesson({
       hints: ['Subtract the two Newtonian contributions from the total.'],
       teach: 'Only about 43″ of Mercury’s ≈5600″ per century is relativistic; the rest is the observing frame and the other planets.',
       explain: '5600 − 5025 − 532 ≈ 43″ per century. That small remainder, measured to within about 1%, is what general relativity predicts with no adjustable parameters.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 4.2], y: [-350, 6500], grid: false, axes: false,
+          curves: [{ fn: '0', domain: [0.1, 3.0], color: 'ink3', width: 1.2 }],
+          shade: [
+            { fn: '5600', from: 0.3, to: 1.1, color: 'ink3', alpha: 0.35 },
+            { fn: '5025', from: 1.7, to: 2.5, color: 'accent', alpha: 0.55 },
+            { fn: '5557', lower: '5025', from: 1.7, to: 2.5, color: 'teal', alpha: 0.7 },
+            { fn: '5600', lower: '5557', from: 1.7, to: 2.5, color: 'gold', alpha: 0.95 },
+          ],
+          points: [
+            { x: 0.3, y: 5600, r: 0.5, color: 'ink2', label: 'total: 5600″' },
+            { x: 2.5, y: 2500, r: 0.5, color: 'accent', label: 'Earth’s axis: 5025″' },
+            { x: 2.5, y: 5250, r: 0.5, color: 'teal', label: 'planets: 532″' },
+            { x: 2.5, y: 5800, r: 0.5, color: 'gold', label: 'relativity: ?' },
+          ],
+        },
+        caption: 'Mercury’s perihelion advance seen from Earth, in arcseconds per century: the total (left) and its parts stacked (right).',
+      },
     }),
     num({
       id: 'per-orbit', difficulty: 2,
@@ -101,6 +163,7 @@ export default lesson({
         const pl = r.pick(PLANETS.slice(1)), [name, a, e, P] = pl;
         const x = perCentury(pl);
         return {
+          visual: centuryGraph(pl),
           prompt: t`${name} has $a = ${sci(a, 5)}$ m, $e = ${e}$ and an orbital period of ${P} days. How many arcseconds per century does general relativity advance its perihelion? ($GM_\odot/c^2 = ${sci(M1, 4)}$ m)`,
           answer: x, units: 'arcsec', tol: { rel: 0.01 },
           errors: [{ value: perOrbit(pl), feedback: 'That is per orbit. Multiply by the number of orbits in a century, 36 525 days ÷ the period.' }, { value: x / 100, feedback: 'That is per year. A century is 100 years: 36 525 days.' }],
@@ -172,6 +235,7 @@ export default lesson({
         const [rp, e] = r.pick([[120, 0.88], [120, 0.884], [118, 0.885]]);
         const p = rp * AU * (1 + e), d = advanceWeak(p, mLen(SGR * M_SUN));
         return {
+          visual: S2_PICTURE,
           prompt: t`The star S2 orbits Sagittarius A* (4.30 million solar masses) with closest approach $r_p = ${rp}$ AU and eccentricity $e = ${e}$. Using $a(1 - e^2) = r_p(1 + e)$, by how many arcminutes does its pericentre advance each orbit? (1 AU $= 1.496\times10^{11}$ m; 1 rad $= 3438$ arcmin)`,
           answer: d * (180 * 60) / Math.PI, units: 'arcmin', tol: { rel: 0.01 },
           errors: [{ value: (d * 180) / Math.PI, feedback: 'That is in degrees. One degree is 60 arcminutes.' }, { value: d, feedback: 'That is in radians. Multiply by 3438 to get arcminutes.' }],
@@ -194,6 +258,22 @@ export default lesson({
       hints: [t`Look at $\Delta\phi = 6\pi GM/[c^2 a(1 - e^2)]$: what happens when $a$ halves?`],
       teach: 'The advance per orbit is inversely proportional to the orbit’s size, a(1 − e²).',
       explain: t`Halving $a$ doubles $\Delta\phi$ per orbit. Per century the gain is bigger still: by Kepler's third law the period shrinks by $2^{3/2}$, so there are 2.8 times as many orbits.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-2.1, 1.25], y: [-1.15, 1.2], equal: true, grid: false, axes: false,
+          curves: [
+            { polar: '0.91/(1 + 0.4cos(theta))', theta: [0, 6.2832], color: 'accent', width: 2.2 },
+            { polar: '0.455/(1 + 0.4cos(theta))', theta: [0, 6.2832], color: 'gold', width: 2.2 },
+          ],
+          points: [
+            { x: 0, y: 0, color: 'ink', r: 5, label: 'star' },
+            { x: -1.1, y: 1.0, r: 0.5, color: 'accent', label: 'size a' },
+            { x: -0.62, y: 0.42, r: 0.5, color: 'gold', label: 'size a/2' },
+          ],
+        },
+        caption: 'Two orbits of the same shape (same eccentricity) around the same star, one half the size of the other.',
+      },
     }),
   ],
   checkpoint: [
@@ -201,7 +281,17 @@ export default lesson({
       id: 'cp-century', difficulty: 2,
       gen(r) {
         const pl = r.pick(PLANETS.slice(0, 2)), [name, , , P] = pl;
+        const step = round(perOrbit(pl), 4), X1 = round(5.4 * P, 1);
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, X1], y: [0, round(5.7 * step, 4)], xlabel: 'days', ylabel: 'total advance (″)',
+              curves: [{ fn: `${step}*floor(x/${P})`, domain: [0, X1], color: 'gold' }],
+              points: [1, 2, 3, 4, 5].map((k) => ({ x: round(k * P, 2), y: round(k * step, 4), color: 'gold', r: 3.5 })),
+            },
+            caption: `Each perihelion passage, every ${P} days, adds one more step of ${step}″. The first five orbits are shown.`,
+          },
           prompt: t`General relativity advances ${name}'s perihelion by $${sci(perOrbit(pl), 4)}''$ each orbit, and ${name} orbits the Sun every ${P} days. What is the advance per century (36 525 days)?`,
           answer: perCentury(pl), units: 'arcsec', tol: { rel: 0.01 },
           hints: ['Multiply the advance per orbit by the number of orbits in a century.'],
@@ -228,6 +318,7 @@ export default lesson({
       hints: [t`Which quantities appear in $6\pi GM/[c^2 a(1 - e^2)]$? Which belong to the planet’s orbit, not the planet?`],
       teach: 'The advance per orbit grows as the orbit shrinks, and small orbits are also completed more often.',
       explain: 'The advance per orbit goes as 1/[a(1 − e²)], so it is largest for the innermost, fairly eccentric orbit; Mercury also completes over 400 orbits a century. The planet’s own mass, spin and moons play no part.',
+      visual: centuryGraph(null),
     }),
     num({
       id: 'cp-pulsar', difficulty: 3, transfer: true,
@@ -238,6 +329,7 @@ export default lesson({
         const d = adv(M, a, e), perYear = (d * 180) / Math.PI * (YEAR / Pb);
         const ask = r.pick(['year', 'decade']), k = ask === 'year' ? 1 : 10;
         return {
+          visual: turningOrbit(0.617, 0.6, 'The pulsar’s orbit now (gold) and some years later (blue), each with its long axis dashed: the whole ellipse slowly turns. The angle is not to scale.'),
           prompt: t`The Hulse–Taylor binary pulsar: two neutron stars with total mass ${m} solar masses orbit each other every 7.75 hours on an orbit with $a = ${sci(a, 3)}$ m and $e = ${e}$. Treating it as one body orbiting the total mass, by how many degrees does its periastron advance per ${ask}?`,
           answer: perYear * k, units: 'deg', tol: { rel: 0.02 },
           errors: [{ value: ((d * 180) / Math.PI) * k, feedback: 'That is per orbit. A year holds about 1130 orbits of 7.75 hours.' }],

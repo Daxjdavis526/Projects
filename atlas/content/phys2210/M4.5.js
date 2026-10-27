@@ -46,9 +46,10 @@ Velocities add as vectors. For an aircraft: its velocity over the ground is its 
       curves: [{ param: ['0', 't'], t: [-6, 88], color: 'ink4', width: 6 }],
       arrows: [
         { from: [0, 0], to: AIR, color: 'accent', label: 'air' },
-        { from: AIR, to: GROUND, color: 'teal', label: 'wind' },
+        { from: AIR, to: GROUND, color: 'teal' },
         { from: [0, 0], to: GROUND, color: 'gold', label: 'ground' },
       ],
+      points: [{ x: 'va*sin(h*pi/180) + w/2 - 3', y: 'va*cos(h*pi/180) - 5', r: 0.1, color: 'teal', label: 'wind' }],
       readouts: [
         { label: 'groundspeed', expr: 'sqrt((va*sin(h*pi/180) + w)^2 + (va*cos(h*pi/180))^2)', unit: '\\mathrm{m/s}', digits: 3 },
         { label: 'track (east of north)', expr: 'atan2(va*sin(h*pi/180) + w, va*cos(h*pi/180))*180/pi', unit: '^\\circ', digits: 3 },
@@ -66,9 +67,10 @@ Velocities add as vectors. For an aircraft: its velocity over the ground is its 
         curves: [{ param: ['0', 't'], t: [-5, 78], color: 'ink4', width: 6 }],
         arrows: [
           { from: [0, 0], to: [-15, 68.37], color: 'accent', label: 'air, 70 m/s' },
-          { from: [-15, 68.37], to: [0, 68.37], color: 'teal', label: 'wind' },
+          { from: [-15, 68.37], to: [0, 68.37], color: 'teal' },
           { from: [0, 0], to: [0, 68.37], color: 'gold', label: 'ground' },
         ],
+        points: [{ x: -11, y: 63, r: 0.1, color: 'teal', label: 'wind' }],
       },
       caption: 'The wind triangle for the crabbed approach, to scale.',
     },
@@ -210,7 +212,8 @@ Velocities add as vectors. For an aircraft: its velocity over the ground is its 
             type: 'graph',
             params: {
               x: [-10, 40], y: [-5, va * 1.12], equal: true, xlabel: 'east (m/s)', ylabel: 'north (m/s)',
-              arrows: [{ from: [0, 0], to: [0, va], color: 'accent', label: 'air' }, { from: [0, va], to: [w, va], color: 'teal', label: 'wind' }, { from: [0, 0], to: [w, va], color: 'gold', label: 'ground' }],
+              arrows: [{ from: [0, 0], to: [0, va], color: 'accent', label: 'air' }, { from: [0, va], to: [w, va], color: 'teal' }, { from: [0, 0], to: [w, va], color: 'gold', label: 'ground' }],
+              points: [{ x: w / 2 - 3, y: va + 6, r: 0.1, color: 'teal', label: 'wind' }],
             },
             caption: 'The wind triangle, to scale.',
           },
@@ -285,9 +288,10 @@ Velocities add as vectors. For an aircraft: its velocity over the ground is its 
           curves: [{ param: ['0', 't'], t: [-4, 66], color: 'ink4', width: 6 }],
           arrows: [
             { from: [0, 0], to: AIR, color: 'accent', label: 'air' },
-            { from: AIR, to: GROUND, color: 'teal', label: 'wind' },
+            { from: AIR, to: GROUND, color: 'teal' },
             { from: [0, 0], to: GROUND, color: 'gold', label: 'ground' },
           ],
+          points: [{ x: 'va*sin(h*pi/180) + w/2 - 3', y: 'va*cos(h*pi/180) - 5', r: 0.1, color: 'teal', label: 'wind' }],
         },
         caption: 'The wind triangle seen from above; the grey band is the runway direction.',
       },

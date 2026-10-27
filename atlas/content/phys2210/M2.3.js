@@ -1,7 +1,7 @@
 // Unit vectors: î, ĵ, k̂ as building blocks, and Â = A/|A| as a pure direction.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { fmt, frac } from '../../src/core/format.js';
-import { vectorPicture, polar } from './_vectors.js';
+import { vectorPicture, polar, DEG } from './_vectors.js';
 
 const t = String.raw;
 const mag3 = (v) => Math.hypot(v[0], v[1], v[2]);
@@ -35,6 +35,25 @@ function scene3d(v0, { label = '\\vec A', unit = true, fit = 3.2, caption } = {}
     caption: (caption ?? 'Dashed: the path along x, then y, then z that the components describe. Drag to rotate.')
       + (shrink < 1 ? ' The long vector is drawn shrunk to fit; its direction is exact, and the unit vectors are to scale.' : ' Arrows are to scale.'),
   };
+}
+
+// The vertical plane through a ground station and a satellite at v: the pointing direction
+// r̂ (length 1, to scale), its upward component and the elevation angle.
+function dishPlane(v) {
+  const h = Math.hypot(v[0], v[1]), m = mag3(v), u = [h / m, v[2] / m];
+  const th = Math.atan2(u[1], u[0]), far = [1.4 * u[0], 1.4 * u[1]];
+  return vectorPicture({
+    arrows: [{ to: u, color: 'gold' }],
+    comps: { of: u, labels: ['', 'upward part = ?'] },
+    segments: [{ from: u, to: far, color: 'ink3' }],
+    arc: { from: 0, to: th / DEG, label: 'elevation', r: 0.22 },
+    extent: [far], numbers: false, xlabel: 'horizontal', ylabel: 'up',
+    points: [
+      { x: +(u[0] / 2 - 0.12 * Math.sin(th)).toFixed(4), y: +(u[1] / 2 + 0.12 * Math.cos(th)).toFixed(4), r: 0.01, color: 'gold', label: 'r̂' },
+      { x: +far[0].toFixed(4), y: +far[1].toFixed(4), r: 0.01, color: 'ink3', label: 'toward the satellite' },
+    ],
+    caption: 'The vertical plane through the dish and the satellite. The dish points along r̂ (gold, length 1); its upward component is the vertical side of the triangle. To scale, without numbers; the satellite itself is far off the picture.',
+  });
 }
 
 // the worked example: a thrust direction
@@ -112,6 +131,16 @@ Read $A_x\hat\imath$ as “$A_x$ units along $x$”. Dividing any vector by its 
         3: 'î and ĵ point in different directions, so they cannot cancel.',
       },
       hints: [t`$\hat\imath + \hat\jmath$ has components $(1,\ 1,\ 0)$.`],
+      visual: vectorPicture({
+        arrows: [{ to: [1, 0], color: 'bad' }, { from: [1, 0], to: [1, 1], color: 'good' }, { to: [1, 1] }],
+        segments: [{ from: [0, 1], to: [1, 1] }, { from: [0, 0], to: [0, 1] }],
+        points: [
+          { x: 0.45, y: 0.02, r: 0.01, color: 'bad', label: 'î' },
+          { x: 1.02, y: 0.5, r: 0.01, color: 'good', label: 'ĵ' },
+          { x: 0.14, y: 0.6, r: 0.01, color: 'accent', label: 'î + ĵ' },
+        ],
+        caption: 'î, then ĵ from its tip: the sum runs across the unit square (dashed).',
+      }),
       teach: 'Unit vectors add like any vectors — by components — so î + ĵ is the diagonal of a unit square.',
       explain: t`$|\hat\imath + \hat\jmath| = \sqrt{1^2 + 1^2} = \sqrt2 \approx 1.41$: the diagonal of a square with sides of length 1.`,
     }),
@@ -162,6 +191,25 @@ Read $A_x\hat\imath$ as “$A_x$ units along $x$”. Dividing any vector by its 
         3: t`Its length is $\sqrt3 \approx 1.73$.`,
       },
       hints: ['A unit vector has length 1: check √(sum of the squares of the components).'],
+      visual: {
+        type: 'graph',
+        params: {
+          aspect: 'wide', equal: true, x: [-0.25, 1.45], y: [-0.2, 1.2], xticks: 4, yticks: 4,
+          alt: 'The unit circle and the straight line x + y = 1, which meet only on the axes',
+          curves: [
+            { param: ['cos(t)', 'sin(t)'], t: [0, 'pi/2'], color: 'gold', width: 2.2 },
+            { fn: '1 - x', domain: [0, 1], color: 'ink3', width: 1.6, dash: true },
+          ],
+          arrows: [{ from: [0, 0], to: [0.866, 0.5], color: 'gold' }],
+          points: [
+            { x: 0.5, y: 0.5, r: 4.5, color: 'ink2', label: '(0.5, 0.5)' },
+            { x: 0.72, y: 0.86, r: 0.01, color: 'gold', label: 'x² + y² = 1: length 1' },
+            { x: 0.04, y: 0.6, r: 0.01, color: 'ink3', label: 'x + y = 1' },
+            { x: 0.9, y: 0.43, r: 0.01, color: 'gold', label: 'a unit vector' },
+          ],
+        },
+        caption: 'In a plane, every unit vector’s tip lies on the circle x² + y² = 1. The dashed line is where the components add to 1: it touches the circle only on the axes. In 3D the circle becomes a sphere.',
+      },
       teach: 'A vector is a unit vector when the squares of its components add to 1.',
       explain: t`$\sqrt{0.6^2 + 0.8^2} = \sqrt{0.36 + 0.64} = 1$.`,
     }),
@@ -209,6 +257,18 @@ Read $A_x\hat\imath$ as “$A_x$ units along $x$”. Dividing any vector by its 
         3: 'A unit vector has the same direction as A, so it keeps all of A’s components in proportion.',
       },
       hints: ['Check the length of the student’s answer.', t`$|\vec A| = \sqrt{3^2 + 4^2} = 5$.`],
+      visual: vectorPicture({
+        arrows: [{ to: [3 / 7, 4 / 7], color: 'bad' }],
+        segments: [{ from: [0, 0], to: [0.78, 1.04], color: 'ink3' }],
+        curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 'pi/2'], color: 'gold', width: 2 }],
+        extent: [[1, 0], [0, 1], [0.78, 1.04]], pad: 0.12,
+        points: [
+          { x: 0.45, y: 0.36, r: 0.01, color: 'bad', label: 'student’s answer' },
+          { x: 0.8, y: 0.9, r: 0.01, color: 'ink3', label: 'direction of A' },
+          { x: 0.93, y: 0.3, r: 0.01, color: 'gold', label: 'length 1' },
+        ],
+        caption: 'The student’s vector, drawn to scale against the unit circle (gold) and the direction of A (dashed).',
+      }),
       teach: 'Normalise by the magnitude: Â = A/|A|, never by the sum of the components.',
       explain: t`$|\vec A| = 5$, so $\hat A = \tfrac35\,\hat\imath + \tfrac45\,\hat\jmath$, whose length is $\sqrt{0.36 + 0.64} = 1$. The student’s vector points the right way but is only $5/7$ long.`,
     }),
@@ -224,6 +284,7 @@ Read $A_x\hat\imath$ as “$A_x$ units along $x$”. Dividing any vector by its 
           answer: v[2] / m, tol: { rel: 0.005, abs: 0.002 },
           errors: [{ value: v[2], feedback: 'That is the satellite’s height in km. The pointing direction is the unit vector: divide by |r|.' }],
           hints: [t`$|\vec r| = \sqrt{${v[0]}^2 + ${v[1]}^2 + ${v[2]}^2}$ km.`, t`The upward component of $\hat r$ is $r_z/|\vec r|$.`],
+          visual: dishPlane(v),
           teach: 'A pointing direction is a unit vector: the position divided by its distance.',
           explain: t`$|\vec r| = ${m}$ km, so the upward component of $\hat r$ is $${v[2]}/${m} = ${fmt(v[2] / m, 3)}$ — the sine of the dish’s elevation angle, $${fmt((Math.asin(v[2] / m) * 180) / Math.PI, 3)}°$ above the horizon.`,
         };
@@ -238,6 +299,7 @@ Read $A_x\hat\imath$ as “$A_x$ units along $x$”. Dividing any vector by its 
           answer: mag3(v), units: 'cm/s', tol: { rel: 0.005 },
           errors: [{ value: Math.abs(v[0]) + Math.abs(v[1]) + Math.abs(v[2]), feedback: 'The components are perpendicular: combine them by Pythagoras.' }],
           hints: [t`Speed $= |\vec v| = \sqrt{v_x^2 + v_y^2 + v_z^2}$.`],
+          visual: scene3d(v, { label: '\\vec v', unit: false, caption: 'The drone’s velocity and its three perpendicular components. Drag to rotate.' }),
           teach: 'Speed is the magnitude of the velocity vector.',
           explain: t`$|\vec v| = \sqrt{${v[0] ** 2} + ${v[1] ** 2} + ${v[2] ** 2}} = ${fmt(mag3(v), 4)}$ cm/s.`,
         };

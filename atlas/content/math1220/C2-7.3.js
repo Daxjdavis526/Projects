@@ -65,7 +65,7 @@ So it measures how much two vectors point the same way: positive when the angle 
     caption: 'Handles snap to half-units. Equal scales on both axes, so right angles look right. The angle θ is found from the directions of the two arrows alone, so the two readouts are independent calculations that agree.',
   },
   example: {
-    prompt: t`Find the angle between $\vec a = \langle 1, 2, 2\rangle$ and $\vec b = \langle 3, 0, 4\rangle$, and the vector projection of $\vec a$ onto $\vec b$.`,
+    prompt: t`Find the angle between $\vec a = \langle 1, 2, 2\rangle$ and $\vec b = \langle 3, 0, 4\rangle$, and the vector projection of $\vec a$ onto $\vec b.$`,
     visual: {
       type: 'calc-vectors3d',
       params: {
@@ -114,7 +114,7 @@ So it measures how much two vectors point the same way: positive when the angle 
         const th = deg(Math.acos(c));
         return {
           prompt: t`Find the angle between $\vec a = ${vecTeX(a)}$ and $\vec b = ${vecTeX(b)}$, in degrees to one decimal place.`,
-          answer: th, units: '°', tol: { rel: 0.002, abs: 0.1 },
+          answer: th, units: '°', tol: { rel: 0, abs: 0.1 },
           errors: c < 0 ? [{ value: 180 - th, feedback: 'Keep the sign of the dot product: a negative dot product means an obtuse angle.' }] : [],
           hints: [t`$\cos\theta = \dfrac{\vec a\cdot\vec b}{|\vec a||\vec b|}$.`, t`$\vec a\cdot\vec b = ${dot(a, b)}$, $|\vec a| = ${La}$, $|\vec b| = ${Lb}$.`],
           teach: t`$\cos\theta = \frac{\vec a\cdot\vec b}{|\vec a||\vec b|}$, and the sign of the dot product decides acute or obtuse.`,
@@ -221,7 +221,7 @@ What went wrong?`,
         const th = deg(Math.acos(c));
         return {
           prompt: t`Find the angle between $${vecTeX(a)}$ and $${vecTeX(b)}$, to one decimal place.`,
-          answer: th, units: '°', tol: { rel: 0.002, abs: 0.1 },
+          answer: th, units: '°', tol: { rel: 0, abs: 0.1 },
           hints: [t`$\cos\theta = \frac{\vec a\cdot\vec b}{|\vec a||\vec b|}$.`],
           teach: 'Angle from the dot product divided by both lengths.',
           visual: pair3D(a, b),

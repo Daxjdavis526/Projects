@@ -259,7 +259,10 @@ picture ("Drag the point to …").
 ```
 
 The drag point's coordinates are available to the graph's other expressions
-as `px` and `py` (for `key: 'p'`), so a readout can show them.
+as `px` and `py` (for `key: 'p'`), so a readout can show them — but a readout
+that shows the answer gives it away, so think before adding one. A slider
+item's `answer` range must contain values the slider can actually reach (its
+`min`, `max` and `step` grid), or the problem cannot be solved.
 
 ### Coding exercise — `code`
 
@@ -335,12 +338,13 @@ The library (read the header comment of a sim's file for its full options):
 
 | type | what it draws | key params |
 |---|---|---|
-| `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks`, `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, color, when }]`, `arrows: [{ from: [x, y], to: [x, y], label }]`, `vlines: [{ x, label }]`, `hlines: [{ y, label }]`, `drag`, `readouts: [{ label, expr, unit, digits }]`. Positions, ranges and `when` may be expressions; `x0` is the tangent point; readouts may also use `slope`, `secant`, `riemann`, `integral` |
+| `graph` | functions, parametric/polar curves, series partial sums, shaded areas, Riemann sums, a draggable tangent/secant, points, arrows, h/v lines, readouts — all from expressions of `x` and slider keys | `x`, `y` (ranges), `aspect` (`'wide'`, `'square'`), `equal`, `xlabel`, `ylabel` (`''` hides), `xticks`, `yticks`, `grid`, `axes` (false hides), `sliders`, `choices`, `constants`, `curves: [{ fn \| param+t \| polar+theta \| sum+k, color, width, dash, domain, label, labelAt, labelDx, labelDy, when }]`, `shade: [{ fn, lower, from, to, color, alpha }]`, `riemann`, `tangent: { fn, at, secant }`, `points: [{ x, y, label, labelDx, labelDy, color, r, when }]`, `arrows: [{ from: [x, y], to: [x, y], label, labelDx, labelDy, labelAlign }]`, `vlines: [{ x, label }]`, `hlines: [{ y, label }]`, `drag`, `readouts: [{ label, expr, unit, digits }]`. Positions, ranges and `when` may be expressions; `x0` is the tangent point; readouts may also use `slope`, `secant`, `riemann`, `integral` |
 | `surface3d` | a rotatable surface z = f(x, y) or parametric (u, v) ↦ (x, y, z); tangent plane and gradient; level curves; curves on the surface | `z` or `surface`, `domain`, `sliders`, `tangentAt: ['px','py']`, `levels`, `curves: [{ param: [x, y, z], t: [a, b] }]`, `colorBy`, `zscale`, `target: [x, y, z]` (what the camera looks at), `yaw`, `pitch`, `dist`, `readouts` |
 | `field2d` | a vector field (P, Q) with arrows, tracer particles, a draggable probe (divergence, curl), optional potential contours and a loop for Green's theorem | `P`, `Q`, `x`, `y`, `sliders`, `potential`, `loop: { r }` |
 | `phase` | a phase portrait of x′ = f, y′ = g (click to add trajectories; equilibrium type from a matrix), or `slope: true` for a slope field of y′ = f(t, y) with Euler vs RK4 | `fx`, `fy`, `matrix`, `seeds` / `slope`, `f`, `start`, `h`, `hRange: [min, max]` (the Euler-step slider; default [0.05, 1]) |
 | `diagram` | static force diagrams: a block with labelled force arrows, a block on an incline | `kind: 'block' \| 'incline'`, `mass`, `forces: [{ dir (deg), label, size (0–1) }]`, `angle` |
 | `force-cart` | a cart pushed by a force with friction; v–t graph | `F`, `m`, `mu` |
+| `mech-graphlink` | one motion, three linked graphs: a cart (or ball) with strobe trail and v, a arrows above x–t, v–t and a–t on one time axis; tangents and signed areas; Play; a `time` slider for "set the moment when…" slider items | read its header: motion as x(t), v(t), a(t) or constant-acceleration segments |
 | `projectile` | projectile motion with optional quadratic drag | `v0`, `angle`, `h0`, `g`, `drag`, `k` |
 | `oscillator` | spring or pendulum; damping, driving, energy bars; exact vs small-angle pendulum | `kind: 'spring' \| 'pendulum'`, `m`, `k`, `b`, `F0`, `wd`, `x0`, `L`, `theta0` |
 | `wave` | travelling, superposed and standing waves on a string | `mode: 'travel' \| 'super' \| 'standing'`, `A`, `lambda`, `f`, `n` |

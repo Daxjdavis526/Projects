@@ -55,6 +55,20 @@ const budgetGraph = (extra = {}) => ({
   caption: 'A clock in a circular orbit compared with a clock on the ground: it gains from being higher (GM/c² · (1/R − 1/r)) and loses from moving (v²/2c²). Earth’s rotation and shape are ignored, a few-tenths-of-a-percent effect.',
 });
 
+// 1 + z against r/rₛ for a static emitter: exact, and the weak-field rule, with the emitter marked
+const redshiftGraph = (k, label) => ({
+  type: 'graph',
+  params: {
+    x: [1, 6], y: [1, 2.6], xlabel: 'r / rₛ', ylabel: '1 + z',
+    curves: [
+      { fn: '1/sqrt(1 - 1/x)', domain: [1.18, 6], color: 'bad', label: 'exact', labelAt: 3 },
+      { fn: '1 + 1/(2x)', domain: [1, 6], color: 'ink3', dash: true, width: 1.6, label: 'weak field', labelAt: 4.6, labelDy: 14 },
+    ],
+    vlines: [{ x: k, label, color: 'accent' }],
+  },
+  caption: 'Redshift of light sent from a hovering emitter at r and received far away: exact, 1/√(1 − rₛ/r), and the weak-field rule 1 + rₛ/2r that works so well around ordinary stars.',
+});
+
 export default lesson({
   id: 'gr.S23.i',
   title: 'Clocks run slow low down: GPS and Pound–Rebka',
@@ -97,6 +111,17 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
         const [name, m, rad] = r.pick([['the Sun', 1, R_SUN], ['Sirius A (2.06 solar masses, radius 1.19 million km)', 2.06, 1.19e9], ['Proxima Centauri (0.122 solar masses, radius 107 000 km)', 0.122, 1.07e8]]);
         const zz = z(m * M_SUN, rad);
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 10.5], y: [-1.3, 0.3], xlabel: 'distance from the centre ÷ the star’s radius', ylabel: 'clock rate − 1 (units of GM/Rc²)',
+              shade: [{ fn: '0.3', lower: '-1.3', from: 0, to: 1, color: 'gold', alpha: 0.14 }],
+              curves: [{ fn: '-1/x', domain: [1, 10.5], color: 'gold' }],
+              hlines: [{ y: 0, label: 'received far away' }],
+              points: [{ x: 1, y: -1, color: 'bad' }, { x: 1.15, y: -1.13, r: 0.5, color: 'bad', label: 'emitted here' }, { x: 0.08, y: -1.22, r: 0.5, color: 'gold', label: 'star' }],
+            },
+            caption: 'How far a hovering clock runs behind a far-away one — the depth of the gravitational well — in units of its value at the star’s surface. Light climbing out is redshifted by the depth it climbs.',
+          },
           prompt: t`Light leaves the surface of ${name}${name === 'the Sun' ? ' (radius 696 000 km)' : ''} and is received far away. By what fraction $z$ is it redshifted by gravity? (1 solar mass $= 1.989\times10^{30}$ kg)`,
           answer: zz, tol: { rel: 0.01 },
           errors: [{ value: 2 * zz, feedback: 'That is r_s/R. The redshift is half of that in a weak field: z ≈ GM/(Rc²) = rₛ/(2R).' }],
@@ -112,6 +137,7 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
         const [m, rk] = r.pick([[1.4, 12], [1.4, 10], [2.0, 12], [1.2, 11]]);
         const oneZ = 1 + z(m * M_SUN, rk * 1e3);
         return {
+          visual: redshiftGraph(round((rk * 1e3) / rs(m * M_SUN), 4), 'surface'),
           prompt: t`A neutron star has ${m} solar masses packed into a radius of ${rk} km. Light from its surface reaches us with what factor $1 + z$ (emitted frequency ÷ received frequency)?`,
           answer: oneZ, tol: { rel: 0.003 },
           errors: [{ value: 1 + (G * m * M_SUN) / (rk * 1e3 * C * C), feedback: 'That is the weak-field approximation. Here r_s/R is large: use 1/√(1 − rₛ/R).' }, { value: Math.sqrt(1 - rs(m * M_SUN) / (rk * 1e3)), feedback: 'Flip it: 1 + z = 1/√(1 − rₛ/R), which is larger than 1.' }],
@@ -164,6 +190,23 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
       hints: ['The crests arrive at the top at the same rate they left the bottom — counted in far-away time. What differs between the two places?'],
       teach: 'Gravitational redshift is a comparison of clocks: higher clocks tick faster, so they measure lower frequencies for the same light.',
       explain: 'Nothing happens to the light on the way: the set-up is static, so crests arrive at the rate they were sent, in far-away time. But the top clock ticks faster than the bottom one, so it counts fewer crests per tick — a lower frequency. Saying the photon "lost energy climbing" is a fair description for hovering observers, but it is not a statement every observer would make.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-0.3, 1.6], y: [0, 6.6], xlabel: 'height', ylabel: 'far-away time', grid: false,
+          curves: [
+            { param: ['0', 't'], t: [0, 6.3], color: 'accent', width: 2 },
+            { param: ['1', 't'], t: [0, 6.3], color: 'violet', width: 2 },
+            ...[0, 1, 2, 3, 4, 5].map((k) => ({ fn: `x + ${k}`, domain: [0, 1], color: 'gold', width: 1.6, ...(k === 5 ? { label: 'wave crests', labelAt: 0.22, labelDy: 14 } : {}) })),
+          ],
+          points: [
+            ...[0, 1, 2, 3, 4, 5, 6].map((k) => ({ x: 0, y: k, color: 'accent', r: 3.5 })),
+            ...[0, 1, 2, 3, 4, 5, 6, 7].map((k) => ({ x: 1, y: round(0.8 * k, 2), color: 'violet', r: 3.5 })),
+            { x: -0.02, y: 6.35, r: 0.5, color: 'accent', label: 'bottom clock' }, { x: 0.98, y: 6.35, r: 0.5, color: 'violet', label: 'top clock' },
+          ],
+        },
+        caption: 'Spacetime picture, hugely exaggerated: far-away time runs up the page. Dots are the ticks of a clock at the bottom of the tower (blue) and at the top (violet); gold lines are successive wave crests climbing from one to the other.',
+      },
     }),
     mcq({
       id: 'centre', difficulty: 3,
@@ -183,6 +226,22 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
       hints: ['Is the centre higher or lower in the gravitational well than the surface? You would have to do work to climb from the centre to the surface.', t`The rate is $1 + \Phi/c^2$, where $\Phi$ is the potential — the depth of the well — not its slope $g$.`],
       teach: 'Gravitational time dilation follows the potential Φ (how deep in the well), not the field g (how steep).',
       explain: 'To climb from the centre to the surface you must do work against gravity, so the centre is lower in the well. For a uniform Earth the centre is 1.5 times as deep as the surface, and a clock there would lose about 30 μs a day against a surface clock — even though nothing pulls on it.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 3.05], y: [-1.75, 1.3], xlabel: 'distance from the centre ÷ Earth’s radius', ylabel: '',
+          curves: [
+            { fn: '-(3 - x^2)/2', domain: [0, 1], color: 'gold' },
+            { fn: '-1/x', domain: [1, 3.05], color: 'gold', label: 'depth of the well', labelAt: 2, labelDy: 14 },
+            { fn: 'x', domain: [0, 1], color: 'accent' },
+            { fn: '1/x^2', domain: [1, 3.05], color: 'accent', label: 'pull g', labelAt: 2 },
+          ],
+          vlines: [{ x: 1, label: 'surface' }],
+          hlines: [{ y: 0 }],
+          points: [{ x: 0, y: -1.5, color: 'gold', label: 'centre' }, { x: 0, y: 0, color: 'accent' }],
+        },
+        caption: 'A uniform Earth, each curve in units of its value at the surface. Gold: the depth of the gravitational well (the potential). Blue: the pull g, its slope. The real Earth is denser in the middle, which makes its centre deeper still.',
+      },
     }),
   ],
   checkpoint: [
@@ -192,6 +251,7 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
         const k = r.pick([1.5, 2, 3, 5]);
         const zz = 1 / Math.sqrt(1 - 1 / k) - 1;
         return {
+          visual: redshiftGraph(k, 'probe'),
           prompt: t`A probe hovers at $r = ${k}\,r_s$ above a black hole and beams radio signals to a distant station. What is the redshift $z$ of the signal received far away?`,
           answer: zz, tol: { rel: 0.005 },
           errors: [{ value: 1 / Math.sqrt(1 - 1 / k), feedback: 'That is 1 + z. Subtract 1 to get z.' }, { value: 1 - Math.sqrt(1 - 1 / k), feedback: 'Use 1 + z = 1/√(1 − rₛ/r), not 1 − √(1 − rₛ/r).' }],
@@ -219,13 +279,38 @@ $$1 + z = \frac{f_\text{em}}{f_\text{rec}} = \sqrt{\frac{1 - r_s/r_\text{rec}}{1
       hints: ['The offset is steady and predictable. How would you cancel a clock that always runs fast by the same fraction?'],
       teach: `GPS clocks are set to ${FACTORY} MHz on the ground so that, after relativity, they tick at 10.23 MHz in orbit.`,
       explain: t`The fractional offset ($${sci(GPS.net)}$) is built in before launch: the clocks are tuned to ${FACTORY} MHz so that, in orbit, they run at the nominal 10.23 MHz as seen from the ground. Small extra corrections for slightly eccentric orbits are made in the receivers.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 10.4], y: [-25, 430], xlabel: 'days in orbit', ylabel: 'clock error (μs)',
+          curves: [
+            { fn: `${round(GPS.net * PER_DAY, 4)}*x`, domain: [0, 10], color: 'bad', label: 'uncorrected', labelAt: 6, labelDx: -84, labelDy: -6 },
+            { fn: '0', domain: [0, 10], color: 'good', label: 'corrected', labelAt: 7 },
+          ],
+        },
+        caption: `A GPS clock’s error if its relativistic gain were left alone: ${sci(GPS.net * PER_DAY)} μs a day, and every microsecond is 300 m of light travel — ${(C * GPS.net * DAY / 1e3).toFixed(1)} km after one day.`,
+      },
     }),
     num({
       id: 'cp-white-dwarf', difficulty: 3, transfer: true,
       gen(r) {
         const [m, rk] = r.pick([[1.0, 5800], [0.6, 8700], [1.02, 5640]]);
         const zz = z(m * M_SUN, rk * 1e3), v = (zz * C) / 1e3;
+        const LS = round(Math.log10(R_SUN / 1e3), 4), LW = round(Math.log10(rk), 4), deep = (m * R_SUN) / 1e3 / rk;   // depths in units of the Sun's surface depth
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [3.4, 7.1], y: [round(-1.15 * deep, 2), round(0.12 * deep, 2)], xlabel: 'log₁₀(distance from the centre in km)', ylabel: 'clock rate − 1 (Sun’s surface = −1)',
+              curves: [
+                { fn: `-${m}*10^(${LS} - x)`, domain: [LW, 7.1], color: 'teal', label: 'white dwarf', labelAt: 4.4, labelDy: 14 },
+                { fn: `-10^(${LS} - x)`, domain: [LS, 7.1], color: 'gold', width: 3, label: 'Sun', labelAt: 6.2 },
+              ],
+              hlines: [{ y: 0 }],
+              points: [{ x: LW, y: round(-deep, 3), color: 'teal' }, { x: LS, y: -1, color: 'gold' }],
+            },
+            caption: 'The gravitational well outside the Sun and outside this white dwarf, each drawn from its surface outward. The white dwarf has about the Sun’s mass, but its surface sits far closer to the centre, so light leaving it climbs out of a far deeper well.',
+          },
           prompt: t`A white dwarf packs ${m} solar masses into a radius of ${rk.toLocaleString('en-US')} km — about the size of Earth. Astronomers quote its gravitational redshift as a Doppler speed, $zc$. What is $zc$, in km/s?`,
           answer: v, units: 'km/s', tol: { rel: 0.01 },
           errors: [{ value: 2 * v, feedback: 'z ≈ GM/(Rc²), which is rₛ/(2R), not rₛ/R.' }],

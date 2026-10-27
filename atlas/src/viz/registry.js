@@ -111,6 +111,8 @@ function makeFrame(el, spec, opts) {
       return b;
     },
     set(key, v) { params[key] = v; ctrls[key]?.set(v); changed(key); },
+    /** Announce a change that is not a control — a dragged point — so a question re-reads its answer. */
+    notify(key) { changed(key); },
     onChange(fn) { listeners.push(fn); },
     /** Readout rows: [[label, value-as-TeX], ...] */
     readout(rows) {

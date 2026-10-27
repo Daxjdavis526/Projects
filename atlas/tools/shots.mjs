@@ -119,6 +119,7 @@ for (const theme of themes) {
       else {
         const input = await page.$('.stage .answer input');
         if (input) await input.fill('1');
+        for (const sel of await page.$$('.stage .match-row select')) await sel.selectOption({ index: 1 });
       }
       const check = await page.$('.stage button.btn.primary:has-text("Check")');
       if (check && await check.isEnabled()) {

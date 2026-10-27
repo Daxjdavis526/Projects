@@ -418,7 +418,7 @@ function polarGrid(plot, S) {
   const every = step * unit < 26 ? 2 : 1;
   for (let k = every; k * step <= Rmax && k < 400; k += every) {
     const r = k * step, x = plot.X(r);
-    if (x > plot.R - 10 || x < plot.L) continue;
+    if (x > plot.R - 30 || x < plot.L) continue;
     if (oy < plot.T || oy > plot.B - 12) continue;
     plot.text(fmtTick(r), r, 0, { color: 'ink3', size: 10.5, dx: 0, dy: 9, align: 'center' });
   }
@@ -432,9 +432,10 @@ function polarGrid(plot, S) {
     let s = Infinity;
     if (ux > 1e-9) s = Math.min(s, (plot.R - mx - ox) / ux); else if (ux < -1e-9) s = Math.min(s, (plot.L + mx - ox) / ux);
     if (uy > 1e-9) s = Math.min(s, (plot.B - my - oy) / uy); else if (uy < -1e-9) s = Math.min(s, (plot.T + my - oy) / uy);
-    if (!(s > 40)) continue;
+    if (!(s > 56)) continue;
     const label = S.angles === 'deg' ? `${Math.round(deg)}°` : piLabel(deg);
-    plot.text(label, ox + s * ux, oy + s * uy, { screen: true, color: 'ink3', size: 11, align: 'center' });
+    const onAxis = Math.abs(uy) < 1e-9;   // 0 and π sit just above the polar axis, clear of the ring labels
+    plot.text(label, ox + s * ux, oy + s * uy + (onAxis ? -9 : 0), { screen: true, color: 'ink3', size: 11, align: 'center' });
   }
 }
 

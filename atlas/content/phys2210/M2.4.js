@@ -123,6 +123,7 @@ It is largest when the vectors are parallel, zero when they are perpendicular, a
           answer: dot(A, B), tol: { rel: 0, abs: 0.01 },
           errors: [{ value: A[0] * B[0] + A[1] * B[1], feedback: 'You left out the z-terms: in three dimensions there are three products to add.' }],
           hints: [t`Multiply matching components and add: $A_xB_x + A_yB_y + A_zB_z$.`],
+          visual: pair3d(A, B),
           teach: 'The dot product in components: multiply x by x, y by y, z by z, and add — the result is a single number.',
           explain: t`$(${A[0]})(${B[0]}) + (${A[1]})(${B[1]}) + (${A[2]})(${B[2]}) = ${A[0] * B[0]} + ${A[1] * B[1]} + ${A[2] * B[2]} = ${dot(A, B)}$.`,
         };
@@ -170,6 +171,15 @@ It is largest when the vectors are parallel, zero when they are perpendicular, a
         3: t`$3 - 2 + 1 = 2 \ne 0$.`,
       },
       hints: ['Perpendicular means the dot product is zero.', 'Compute A · v for each option.'],
+      visual: {
+        type: 'calc-vectors3d',
+        params: {
+          range: 3, aspect: 'wide',
+          planes: [{ normal: [3, -2, 1], point: [0, 0, 0], size: 1.9, color: 'violet', alpha: 0.22 }],
+          vectors: [{ to: [3, -2, 1].map((c) => +((2.4 * c) / Math.sqrt(14)).toFixed(4)), color: 'accent', label: '\\vec A' }],
+        },
+        caption: 'A (blue, scaled to fit) and the plane through the origin perpendicular to it (violet). Every vector perpendicular to A lies in that plane. Drag to rotate.',
+      },
       teach: 'Two nonzero vectors are perpendicular exactly when their dot product is zero — the quickest right-angle test there is.',
       explain: t`$(3)(2) + (-2)(3) + (1)(0) = 6 - 6 + 0 = 0$, so $(2,\ 3,\ 0)$ is perpendicular to $\vec A$.`,
     }),
@@ -216,6 +226,19 @@ It is largest when the vectors are parallel, zero when they are perpendicular, a
           answer: c, tol: { rel: 0.002, abs: 0.002 },
           errors: [{ value: (a1 * b1 + a3 * b3) / b2, feedback: 'Check the sign when you move the other terms across the equals sign.' }],
           hints: ['Perpendicular means A · B = 0.', t`$(${a1})(${b1}) + c(${b2}) + (${a3})(${b3}) = 0$; solve for $c$.`],
+          visual: {
+            type: 'calc-vectors3d',
+            params: {
+              range: 6, aspect: 'wide',
+              // a patch of the plane through the origin perpendicular to B, big enough to hold the origin and the crossing point
+              planes: [{ normal: [b1, b2, b3], centre: [a1 / 2, c / 2, a3 / 2], size: +(Math.hypot(a1, c, a3) / 2 + 1).toFixed(3), color: 'violet', alpha: 0.2 }],
+              vectors: [{ to: [b1, b2, b3], color: 'accent', label: '\\vec B' }],
+              // the line's label sits at its far end: run the line away from the crossing so the two labels stay apart
+              lines: [{ point: [a1, 0, a3], dir: [0, c > 0 ? -1 : 1, 0], t: [-6.5, 6.5], color: 'gold', label: `(${a1},\\ c,\\ ${a3})` }],
+              points: [{ at: [a1, +c.toFixed(4), a3], color: 'gold', label: '\\vec A\\perp\\vec B' }],
+            },
+            caption: 'B (blue) and part of the plane through the origin perpendicular to it (violet). As c changes, the tip of A slides along the gold line, parallel to the y-axis; A is perpendicular to B where the line pierces the plane (gold dot). Drag to rotate.',
+          },
           teach: 'Setting a dot product to zero turns “perpendicular” into an equation you can solve.',
           explain: t`$${a1 * b1} + ${b2}c + ${a3 * b3} = 0$, so $c = ${fmt(c, 4)}$.`,
         };
@@ -258,6 +281,7 @@ It is largest when the vectors are parallel, zero when they are perpendicular, a
           answer: dot(F, d), units: 'J', tol: { rel: 0.005 },
           errors: [{ value: len(F) * len(d), feedback: t`$Fd$ assumes the force and the motion are parallel. Use $\vec F\cdot\vec d$ in components.` }],
           hints: [t`$W = F_xd_x + F_yd_y + F_zd_z$.`],
+          visual: pair3d(F, d, { la: '\\vec F', lb: '\\vec d', separate: true, caption: 'The force (blue) and the displacement (violet), each scaled to fit; their directions are exact. Drag to rotate.' }),
           teach: 'With vectors in components, work is just the dot product: no angle needed.',
           explain: t`$W = (${F[0]})(${d[0]}) + (${F[1]})(${d[1]}) + (${F[2]})(${d[2]}) = ${dot(F, d)}$ J.`,
         };

@@ -30,11 +30,12 @@ export function mount(F, P) {
   const T = P.tangent ? { x: typeof P.tangent.at === 'number' ? P.tangent.at : 1 } : null;
   if (T) {
     plot.handle(() => [T.x, tanFn()(T.x)], (x) => { T.x = Math.max(plot.vx0, Math.min(plot.vx1, x)); });
-    plot.onDrag = () => draw();
+    plot.onDrag = () => { draw(); F.notify('x0'); };
   }
   const pointsDrag = (P.drag || []).map((d) => ({ ...d, x: d.x, y: d.y }));
   for (const d of pointsDrag) plot.handle(() => [d.x, d.y], (x, y) => { d.x = d.lockY ? x : x; d.y = d.lockY ? d.y : y; if (d.snap) { d.x = Math.round(d.x / d.snap) * d.snap; d.y = Math.round(d.y / d.snap) * d.snap; } });
-  if (pointsDrag.length) plot.onDrag = () => draw();
+  // a dragged point is a point item's answer: tell the question to re-read it
+  if (pointsDrag.length) plot.onDrag = () => { draw(); F.notify('point'); };
 
   function tanFn() { const f = fn(P.tangent.fn, ['x', ...keys]); return (x) => f({ ...env(), x }); }
 
@@ -121,9 +122,9 @@ export function mount(F, P) {
     }
     for (const p of P.points || []) {
       if (p.when && !ev(p.when, E, vars)) continue;
-      plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r });
+      plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy });
     }
-    for (const a of P.arrows || []) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: 2.2, label: a.label });
+    for (const a of P.arrows || []) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: 2.2, label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
     plot.drawHandles();
     if (P.readouts) F.readout(P.readouts.map((r) => [r.label, fmtVal(ev(r.expr, E, ['slope', 'secant', 'riemann', 'integral', 'y0', ...vars]), r)]));
   }

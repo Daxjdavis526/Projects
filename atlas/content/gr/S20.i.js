@@ -36,6 +36,38 @@ const radiusMap = {
   caption: 'Radius against mass, both in powers of ten. Ordinary bodies sit far above the red line r = rₛ; squeezed onto it, they would be black holes. Neutron stars come within a factor of 3.',
 };
 
+// replace-sun: the pull of one solar mass against distance, for the Sun and for a black hole
+const LOG_RSUN = round(log(R_SUN / 1e3), 4), LOG_AU = round(log(AU / 1e3), 4);
+const pullLine = `${round(log(G * M_SUN) - 6, 5)} - 2*x`;          // log₁₀(GM/r²) with r in km
+const pullMap = {
+  type: 'graph',
+  params: {
+    x: [4, 8.6], y: [-3.4, 7], xlabel: 'log₁₀(distance from the centre in km)', ylabel: 'log₁₀(GM/r² in m/s²)',
+    curves: [
+      { fn: pullLine, domain: [LOG_RSUN, 8.6], color: 'gold', width: 6, label: 'the Sun', labelAt: 6.7 },
+      { fn: pullLine, domain: [4, 8.6], color: 'ink', dash: true, width: 1.8, label: 'black hole of the same mass', labelAt: 4.15 },
+    ],
+    vlines: [{ x: LOG_RSUN, label: 'Sun’s surface' }],
+    points: [{ x: LOG_AU, y: round(log(G * M_SUN) - 6 - 2 * LOG_AU, 4), color: 'accent', label: 'Earth' }],
+  },
+  caption: 'How hard one solar mass pulls, against distance, both in powers of ten. Outside the Sun’s surface the Sun and a black hole of the same mass give one and the same line; they differ only inside it — and Earth is 215 solar radii out.',
+};
+
+// areal-r: one slice of space around a black hole (Flamm's paraboloid), rₛ = 1
+const sliceOfSpace = {
+  type: 'surface3d',
+  params: {
+    surface: ['u*cos(v)', 'u*sin(v)', '2*sqrt(u - 1) - 4'], domain: [[1, 5], [0, 6.2832]], n: 30, axes: false, alpha: 0.4, colorBy: false,
+    yaw: 0.5, pitch: 0.42, dist: 15, target: [0, 0, -2.2],
+    curves: [
+      { param: ['cos(t)', 'sin(t)', '-4'], t: [0, 6.2832], color: 'accent', width: 2.6 },
+      { param: ['2cos(t)', '2sin(t)', '-2'], t: [0, 6.2832], color: 'accent', width: 2.6 },
+      { param: ['t', '0', '2*sqrt(t - 1) - 4'], t: [1, 2], color: 'gold', width: 4 },
+    ],
+    caption: 'Not a rubber sheet — nothing rolls on it. This is one slice of space around a black hole at one moment, bent into an imaginary extra dimension so that lengths along the surface are true lengths; the height means nothing. Blue: the circles r = rₛ and r = 2rₛ, of circumference 2πrₛ and 4πrₛ. Gold: the radial ruler between them, longer than 1 rₛ. Drag to rotate.',
+  },
+};
+
 export default lesson({
   id: 'gr.S20.i',
   title: 'The spacetime outside any round mass',
@@ -129,6 +161,7 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
       hints: [t`Look at the last term: $r^2(d\theta^2 + \sin^2\theta\,d\phi^2)$ is the geometry of an ordinary sphere of radius $r$.`],
       teach: 'Schwarzschild r is the areal radius: you measure it by walking round a circle and dividing by 2π, not with a radial ruler.',
       explain: t`The angular part of the metric is exactly that of a sphere of radius $r$, so a circle at fixed $r$ has circumference $2\pi r$ and the sphere has area $4\pi r^2$. Radial distances, though, are stretched: between $r_s$ and $2r_s$ a ruler measures $${sci(Math.SQRT2 + Math.log(Math.SQRT2 + 1))}\,r_s$, not $1\,r_s$.`,
+      visual: sliceOfSpace,
     }),
     num({
       id: 'clock-rate', difficulty: 2,
@@ -192,18 +225,29 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
       hints: ['The Schwarzschild metric outside a mass depends on just one number about it. Which one?'],
       teach: 'Far from a black hole, its gravity is the same as any body’s of the same mass: black holes do not suck.',
       explain: t`Earth is at $1\ \text{AU} = ${sci(AU / RS_SUN, 3)}\,r_s$ from the Sun, where the metric depends only on $M$. Earth would keep orbiting just as before — in the dark and cold, but on the same orbit.`,
+      visual: pullMap,
     }),
     num({
       id: 'density', difficulty: 3,
       gen(r) {
-        const [name, m, compare] = r.pick([
-          ['a 1-solar-mass black hole', 1, 'about 80 times the density of an atomic nucleus (2.3×10¹⁷ kg/m³)'],
-          ['a 10-solar-mass black hole', 10, 'close to the density of an atomic nucleus (2.3×10¹⁷ kg/m³)'],
-          ['Sagittarius A* (4.30 million solar masses)', SGR, 'about a hundred times denser than lead'],
-          ['M87* (6.5 billion solar masses)', M87, 'less than the density of air (1.2 kg/m³)'],
+        const [name, m, compare, short] = r.pick([
+          ['a 1-solar-mass black hole', 1, 'about 80 times the density of an atomic nucleus (2.3×10¹⁷ kg/m³)', '1 M☉'],
+          ['a 10-solar-mass black hole', 10, 'close to the density of an atomic nucleus (2.3×10¹⁷ kg/m³)', '10 M☉'],
+          ['Sagittarius A* (4.30 million solar masses)', SGR, 'about a hundred times denser than lead', 'Sgr A*'],
+          ['M87* (6.5 billion solar masses)', M87, 'less than the density of air (1.2 kg/m³)', 'M87*'],
         ]);
         const M = m * M_SUN, rho = density(M);
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-0.6, 10.6], y: [-2.5, 21], xlabel: 'log₁₀(mass in solar masses)', ylabel: 'log₁₀(kg/m³)',
+              curves: [{ fn: `${round(log(density(M_SUN)), 5)} - 2*x`, color: 'bad', label: 'falls as 1/M²', labelAt: 2.5 }],
+              hlines: [{ y: round(log(2.3e17), 3), label: 'atomic nucleus' }, { y: round(log(11340), 3), label: 'lead' }, { y: round(log(1.2), 3), label: 'air' }],
+              vlines: [{ x: round(log(m), 4), label: short, color: 'accent' }],
+            },
+            caption: 'Mass divided by the volume (4/3)πrₛ³, against mass, both in powers of ten, with some everyday densities for scale.',
+          },
           prompt: t`A rough comparison number: the mass of ${name} divided by the volume $\tfrac43\pi r_s^3$. What is it, in kg/m³? (1 solar mass $= 1.989\times10^{30}$ kg)`,
           answer: rho, units: 'kg/m^3', tol: { rel: 0.01 },
           errors: [{ value: M / (4 * Math.PI * rs(M) ** 3), feedback: 'The volume of a sphere is (4/3)πr³, not 4πr³.' }, { value: M / ((4 / 3) * Math.PI * ((G * M) / (C * C)) ** 3), feedback: 'Use rₛ = 2GM/c², with the factor 2.' }],
@@ -231,6 +275,18 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
       hints: ['A map of the Earth in latitude and longitude goes wrong at the poles. Is anything physically strange at the North Pole?', 'Ask whether a quantity that does not depend on coordinates — such as the size of tides — blows up at r = rₛ.'],
       teach: 'r = rₛ is a coordinate singularity — the coordinates fail, not spacetime — while r = 0 is a real curvature singularity.',
       explain: 'Like longitude at the North Pole, Schwarzschild’s t and r go bad at r = rₛ, but measurable curvature stays finite there and other coordinates pass smoothly through it. What r = rₛ really is — a one-way surface — is the subject of the event-horizon lesson. At r = 0 the curvature itself becomes infinite.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 4.2], y: [0, 6.3], xlabel: 'r / rₛ', ylabel: '',
+          curves: [
+            { fn: 'x/(x - 1)', domain: [1.2, 4.2], color: 'accent', label: 'metric factor 1/(1 − rₛ/r)', labelAt: 1.5 },
+            { fn: '1/x^3', domain: [0.55, 4.2], color: 'bad', label: 'tides', labelAt: 0.62 },
+          ],
+          vlines: [{ x: 1, label: 'r = rₛ' }],
+        },
+        caption: 'Blue: the factor in the metric that blows up at r = rₛ. Red: the tidal stretching of a falling body, 2GM/r³ — something every observer agrees on — in units of its value at rₛ. It is finite at r = rₛ and becomes infinite only at r = 0.',
+      },
     }),
   ],
   checkpoint: [
@@ -245,6 +301,7 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
           hints: [t`$r_s = 2GM/c^2$, or about 2.95 km per solar mass.`],
           teach: 'rₛ scales in proportion to the mass: about 2.95 km per solar mass.',
           explain: t`$r_s = 2GM/c^2 = ${sci(R / 1e3)}$ km.`,
+          visual: radiusMap,
         };
       },
     }),
@@ -258,6 +315,16 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
           hints: [t`$d\ell/dr = 1/\sqrt{1 - r_s/r}$.`],
           teach: 'Radial distances outside a mass are stretched by 1/√(1 − rₛ/r) compared with differences in r.',
           explain: t`$1/\sqrt{1 - 1/${k}} = ${sci(stretch(k), 4)}$.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 10], y: [0, 3], xlabel: 'r / rₛ', ylabel: 'radial stretch',
+              curves: [{ fn: '1/sqrt(1 - 1/x)', domain: [1.125, 10], color: 'accent' }],
+              vlines: [{ x: 1 }, { x: k, label: `r = ${k} rₛ`, color: 'accent' }],
+              hlines: [{ y: 1 }],
+            },
+            caption: 'The ruler map 1/√(1 − rₛ/r) outside a black hole. Grey dashed lines: r = rₛ, and a stretch of 1 (flat space).',
+          },
         };
       },
     }),
@@ -272,6 +339,16 @@ $$ds^2 = -\left(1 - \frac{r_s}{r}\right)c^2\,dt^2 + \frac{dr^2}{1 - r_s/r} + r^2
           errors: [{ value: (au * AU) / ((G * SGR * M_SUN) / (C * C)), feedback: 'Use rₛ = 2GM/c², with the factor 2.' }],
           hints: [t`First $r_s = 2GM/c^2$ for $M = 4.30\times10^{6}\times1.989\times10^{30}$ kg.`, t`$r_s = ${sci(rs(SGR * M_SUN))}$ m; divide ${au} AU in metres by it.`],
           teach: 'Even the closest-orbiting stars stay over a thousand Schwarzschild radii from Sgr A*, in the weak field.',
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 4.3], y: [0, 1.12], xlabel: 'log₁₀(r / rₛ)', ylabel: 'clock rate',
+              curves: [{ fn: 'sqrt(1 - 10^(-x))', domain: [0, 4.3], color: 'gold' }],
+              points: [{ x: 0, y: 0, color: 'ink', label: 'horizon' }, { x: round(log(ratio), 4), y: round(Math.sqrt(1 - 1 / ratio), 6), color: 'accent', label: 'S2 at its closest' }],
+              hlines: [{ y: 1 }],
+            },
+            caption: 'The clock-rate map √(1 − rₛ/r), with distance in powers of ten; the dashed line is the far-away rate. Even at its closest, S2 sits where clocks run at almost the far-away rate: the weak field.',
+          },
           explain: t`$r_s = ${sci(rs(SGR * M_SUN))}$ m $= ${sci(rs(SGR * M_SUN) / AU, 2)}$ AU, so ${au} AU is $${sci(ratio)}\,r_s$. There $r_s/2r = ${sci(1 / (2 * ratio), 2)}$: S2's light is redshifted by about that fraction by gravity — and the GRAVITY collaboration detected it, together with the slowing of S2's clock by its speed, in 2018.`,
         };
       },

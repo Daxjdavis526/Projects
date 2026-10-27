@@ -216,7 +216,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
         const th = deg(Math.acos(Math.abs(c)));
         return {
           prompt: t`Find the (acute) angle between the planes $${planeEq(n1, r.int(-5, 5))}$ and $${planeEq(n2, r.int(-5, 5))}$, to one decimal place.`,
-          answer: th, units: '°', tol: { rel: 2e-3, abs: 0.1 },
+          answer: th, units: '°', tol: { rel: 0, abs: 0.1 },
           errors: [{ value: 180 - th, feedback: 'The angle between planes is reported as the acute one: if the normals make an obtuse angle, subtract it from 180°.' }],
           hints: ['The angle between two planes is the angle between their normals.', t`$\cos\theta = \frac{|\vec n_1\cdot\vec n_2|}{|\vec n_1||\vec n_2|}$, with $\vec n_1\cdot\vec n_2 = ${dot(n1, n2)}$, $|\vec n_1| = ${L1}$, $|\vec n_2| = ${L2}$.`],
           teach: 'Read the normals off the coefficients; the planes meet at the angle between them (taking the acute one).',

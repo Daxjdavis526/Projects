@@ -258,8 +258,8 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
         const V = [-v0 * Math.sin(u * Dg) * Math.cos(inc * Dg), v0 * Math.cos(u * Dg) * Math.cos(inc * Dg), v0 * Math.sin(inc * Dg)].map((x) => +x.toFixed(3));
         const h = cross(R, V), i = deg(Math.acos(h[2] / norm(h)));
         return {
-          prompt: t`A satellite crosses the equator with position $\vec r = ${vecTeX(R)}$ km and velocity $\vec v = ${vecTeX(V)}$ km/s in an Earth-centred frame ($\hat k$ along Earth’s axis). Its orbit lies in the plane of $\vec r$ and $\vec v$, so it is perpendicular to $\vec h = \vec r\times\vec v$. The **inclination** is the angle between $\vec h$ and $\hat k$. Find it, in degrees.`,
-          answer: i, units: '°', tol: { rel: 2e-3, abs: 0.1 },
+          prompt: t`A satellite crosses the equator with position $\vec r = ${vecTeX(R)}$ km and velocity $\vec v = ${vecTeX(V)}$ km/s in an Earth-centred frame ($\hat k$ along Earth’s axis). Its orbit lies in the plane of $\vec r$ and $\vec v$, so it is perpendicular to $\vec h = \vec r\times\vec v$. The **inclination** is the angle between $\vec h$ and $\hat k$. Find it, in degrees to one decimal place.`,
+          answer: i, units: '°', tol: { rel: 0, abs: 0.1 },
           errors: [{ value: 90, feedback: t`That is the angle between $\vec r$ and $\vec v$. The inclination is the angle between $\vec h = \vec r\times\vec v$ and $\hat k$.` }, { value: 180 - i, feedback: t`Use $\vec r\times\vec v$ in that order: $\vec v\times\vec r$ points the opposite way.` }],
           hints: [t`Compute $\vec h = \vec r\times\vec v$, then $\cos i = \frac{h_z}{|\vec h|}$.`, t`$\vec h = \langle ${h.map((x) => nice(x, 5)).join(',\\ ')}\rangle$ km²/s.`],
           teach: 'An orbit’s plane is fixed by its angular momentum h = r × v; the inclination is the angle between h and Earth’s axis.',

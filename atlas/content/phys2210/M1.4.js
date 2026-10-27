@@ -241,6 +241,11 @@ It works better than it has any right to, because some of your guesses come out 
       value: 8e9 * 60,
       errors: [{ value: +Math.log10(8e9).toFixed(3), feedback: 'That is the number of people. Multiply by a typical mass per person.' }],
       hints: ['There are about 8 billion people.', 'Including children, a typical body mass is about 60 kg.'],
+      visual: logLadder([
+        { label: 'one adult, about 70 kg', value: 70 },
+        { label: 'an A380 airliner at take-off, 575 t', value: 5.75e5 },
+        { label: 'the Great Pyramid of Giza, about 6 million t', value: 6e9 },
+      ], { from: 1, to: 13, unit: 'kg', caption: 'Masses to compare your estimate with, on a logarithmic scale (1 t = 1000 kg). Labels sit just above their dots.' }),
       teach: 'An estimate of a total is (how many) × (typical size of each).',
       explain: t`$8\times10^{9}\times60\ \text{kg} \approx 5\times10^{11}$ kg, so $\log_{10} \approx 11.7$.`,
     }),

@@ -94,7 +94,7 @@ Vectors **add component by component** — geometrically, tip to tail — and a 
         if (ang > 180) errors.push({ value: ang - 360, feedback: 'That is the same direction measured clockwise. Give the counterclockwise angle, between 0° and 360°.' });
         return {
           prompt: t`What is the direction angle of $\vec v = ${vecTeX(v)}$, measured counterclockwise from the positive $x$-axis, between $0^\circ$ and $360^\circ$? (Give it to the nearest tenth of a degree.)`,
-          answer: ang, units: '°', tol: { rel: 0.002, abs: 0.1 },
+          answer: ang, units: '°', tol: { rel: 0, abs: 0.1 },
           errors,
           hints: [t`Sketch it first: $v_x < 0$ and $v_y ${v[1] > 0 ? '> 0' : '< 0'}$ puts it in quadrant ${v[1] > 0 ? 'II' : 'III'}.`, t`$\arctan\frac{${v[1]}}{${v[0]}} = ${nice(naive, 3)}^\circ$ points the wrong way; add $180^\circ$.`],
           teach: t`$\arctan(v_y/v_x)$ cannot tell $\langle 1, 1\rangle$ from $\langle -1, -1\rangle$: check the quadrant and add $180^\circ$ when $v_x < 0$.`,
@@ -225,7 +225,7 @@ Vectors **add component by component** — geometrically, tip to tail — and a 
         const ang = angleOf(v);
         return {
           prompt: t`Find the direction angle of $${vecTeX(v)}$, counterclockwise from the positive $x$-axis, between $0^\circ$ and $360^\circ$, to the nearest tenth of a degree.`,
-          answer: ang, units: '°', tol: { rel: 0.002, abs: 0.1 },
+          answer: ang, units: '°', tol: { rel: 0, abs: 0.1 },
           errors: [
             ...(v[0] < 0 ? [{ value: deg(Math.atan(v[1] / v[0])), feedback: 'Check the quadrant: arctan alone returns an angle between −90° and 90°, and this vector points left, so add 180°.' }] : []),
             { value: ang - 360, feedback: 'Same direction, measured clockwise: add 360°.' },
