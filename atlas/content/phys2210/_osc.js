@@ -52,7 +52,7 @@ export function springPic({ x = 0.8, m = 'm', k = 'k', arrow = 'x', v = null, vd
   return {
     type: 'graph',
     params: { aspect: 'wide', x: [-0.4, 7.6], y: [-1.05, 1.25], equal: true, xlabel: '', ylabel: '', axes: false, grid: false, curves, arrows, points, shade: [{ fn: String(y1), lower: String(y0), from: r4(xb - w), to: r4(xb + w), color: 'accent', alpha: 0.25 }] },
-    caption: caption ?? 'A block on a spring on a frictionless floor, seen from the side. Not to scale.',
+    caption: caption ?? (damper ? 'A block on a spring, with a damper (a piston in oil) whose drag force is −bv; frictionless floor, seen from the side. Not to scale.' : 'A block on a spring on a frictionless floor, seen from the side. Not to scale.'),
   };
 }
 
