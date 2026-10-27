@@ -20,6 +20,7 @@ const ROUTES = [
   [/^\/progress$/, () => import('./pages/progress.js')],
   [/^\/manifest$/, () => import('./pages/manifest.js')],
   [/^\/lab$/, () => import('./pages/codelab.js')],
+  [/^\/explore(?:\/([\w-]+))?$/, () => import('./pages/explore.js'), ['sim']],
   [/^\/settings$/, () => import('./pages/settings.js')],
 ];
 
@@ -31,6 +32,7 @@ const NAV = [
   ['/gr', 'Road to Einstein', 'orbit'],
   ['/progress', 'Progress', 'trophy'],
   null,
+  ['/explore', 'Simulations', 'atom'],
   ['/lab', 'Code lab', 'code'],
   ['/manifest', 'Coverage', 'list'],
   ['/settings', 'Settings', 'gear'],
