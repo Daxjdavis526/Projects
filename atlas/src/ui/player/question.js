@@ -377,7 +377,7 @@ function plainText(s) { return String(s).replace(/\$([^$]+)\$/g, '$1').replace(/
 
 function sliderControl(item, box, changed) {
   // the slider lives in the item's visual; this control reads it
-  box.append(h('p.small.faint', item.instruction || 'Adjust the control in the picture, then check.'));
+  box.append(h('p.small.faint', mdi(item.instruction || 'Adjust the control in the picture, then check.')));
   return { value: (vizCtl) => (vizCtl?.get ? vizCtl.get(item.param) : null), lock: () => {} };
 }
 
@@ -402,6 +402,6 @@ function codeControl(item, box, changed) {
 }
 
 function pointControl(item, box, changed) {
-  box.append(h('p.small.faint', item.instruction || 'Drag the point to the right place, then check.'));
+  box.append(h('p.small.faint', mdi(item.instruction || 'Drag the point to the right place, then check.')));
   return { value: (vizCtl) => (vizCtl?.get ? vizCtl.get('point') : null), lock: () => {} };
 }

@@ -137,7 +137,8 @@ for (const theme of themes) {
       const give = await page.$('.stage button:has-text("Show solution")');
       if (give) { await give.click(); await page.waitForTimeout(400); }
       await shot(`practice-${q + 1}-answered`);
-      const nxt = await page.$('button:has-text("Next question"), button:has-text("On to the checkpoint"), button:has-text("Finish")');
+      // the question's own continue button (an answer choice may contain the word "next")
+      const nxt = await page.$('.q-actions button.btn.primary:has-text("Next question"), .q-actions button.btn.primary:has-text("On to the checkpoint"), .q-actions button.btn.primary:has-text("Finish")');
       if (!nxt) break;
       await nxt.click(); await page.waitForTimeout(900);
     }
@@ -156,7 +157,7 @@ for (const theme of themes) {
       if (!dunno) break;
       await dunno.click(); await page.waitForTimeout(400);
       await shot(`checkpoint-${q + 1}-answered`);
-      const nxt = await page.$('.stage button:has-text("Next"), .stage button:has-text("See results")');
+      const nxt = await page.$('.q-actions button.btn.primary:has-text("Next"), .q-actions button.btn.primary:has-text("See results")');
       if (!nxt) break;
       await nxt.click(); await page.waitForTimeout(900);
     }

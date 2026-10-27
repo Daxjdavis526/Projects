@@ -21,6 +21,7 @@
 //                                  //   body's length; negative: the other side); angle (°) from the outward radial line
 //       F2: 0, rF2: 0, phi2: 90,   // an optional second force
 //       hang: 0,                   // a block (kg) on a string wound round the rim (round shapes, axis at the centre)
+//       tension: false,            // with hang: draw the string's pull T on the rim and on the block, and the block's weight mg
 //       point: 0.25,               // mark a point this far from the axis (m): its v, a_t and a_c
 //       plot: false,               // 'omega' (ω–t), 'axis' (I against d) or false
 //       sliders: ['F', 'phi'],     // adjustable keys, or objects overriding { key, min, max, step, label, explain }
@@ -37,7 +38,7 @@ import * as RM from '../model/mech-rotor.js';
 
 export const defaults = {
   shape: 'disk', M: 2, R: 0.3, L: 1.2, W: 0.5, m: 1, s: 0.4, d: 0, shapes: null,
-  omega0: 0, alpha: null, F: 0, rF: null, phi: 90, F2: 0, rF2: null, phi2: 90, hang: 0, g: 9.8,
+  omega0: 0, alpha: null, F: 0, rF: null, phi: 90, F2: 0, rF2: null, phi2: 90, hang: 0, tension: false, g: 9.8,
   point: null, plot: false, sliders: [], T: 5, time: 0, play: true, values: true, lever: true, readouts: null, cm: true, flabels: ['F', 'F₂'],
 };
 
@@ -147,6 +148,14 @@ export function mount(F, P0) {
   const forceLen = (md, f) => 0.42 * rBodyOf(md) * (0.4 + (0.6 * f.F) / Math.max(...md.forces.map((q) => q.F)));
   const forceDir0 = (f) => (f.r < 0 ? Math.PI : 0) + f.phi * D2R;      // direction at θ = 0
 
+  // the hanging block: half-width, its string's length at t = 0, and (with tension) the force arrows' lengths
+  function hangGeom(md) {
+    const R = md.half, bw = 0.1 + 0.08 * Math.cbrt(md.hang);
+    const lmg = Math.max(0.9 * R, 1.5 * bw), lT = Mo.block ? lmg * (Mo.block.T / (md.hang * P.g)) : 0;
+    const gap = P.tension ? Math.max(0.6 * R + 0.15, 2.6 * lT + 0.04) : 0.6 * R + 0.15;
+    return { R, bw, lmg, lT, gap };
+  }
+
   // the view: what is drawn, plus the circle it sweeps if it turns
   function fitView(pl, md, extra = []) {
     const pts = [[0, 0], ...bodyPts(md), ...extra.flatMap((e) => (animated ? circlePts(e) : bodyPts(e)))];
@@ -169,8 +178,10 @@ export function mount(F, P0) {
       pts.push([-r, -r], [r, r]);
     }
     if (md.hang > 0) {
-      const R = md.half, bw = 0.1 + 0.08 * Math.cbrt(md.hang);
-      pts.push([R, R], [-R - bw, -(0.6 * R + 0.15 + maxDrop() + 2 * bw)]);
+      // a still picture shows the block where it starts; an animated one leaves room for its fall
+      const { R, bw, lmg, gap } = hangGeom(md), drop = animated ? maxDrop() : 0;
+      pts.push([R, R], [-R - bw, -(gap + drop + 2 * bw)]);
+      if (P.tension) pts.push([-R, -(gap + drop + bw + lmg)]);
       right = Math.max(right, 0.12);
     }
     const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
@@ -249,13 +260,27 @@ export function mount(F, P0) {
     // the hanging block
     if (md.hang > 0 && Mo.block) {
       // the string leaves the left of the rim, so the drum turns anticlockwise (positive) as the block falls
-      const xr = -md.half, ytop = -(0.6 * md.half + 0.15 + now.drop), bw = 0.1 + 0.08 * Math.cbrt(md.hang);
+      const { bw, lmg, lT, gap } = hangGeom(md);
+      const xr = -md.half, ytop = -(gap + now.drop);
       pl.line(xr, 0, xr, ytop, { color: 'ink2', width: 1.4 });
-      g.save(); g.fillStyle = c.violet; g.globalAlpha = 0.9;
+      g.save(); g.fillStyle = c.violet; g.globalAlpha = P.tension ? 0.55 : 0.9;
       const px = pl.X(xr - bw), py = pl.Y(ytop), pw = pl.X(xr + bw) - px, ph = pl.Y(ytop - 2 * bw) - py;
       g.fillRect(px, py, pw, ph); g.restore();
       label(c, `${trim(md.hang)} kg`, pl.X(xr + bw) + 6, pl.Y(ytop - bw), { color: c.violet, weight: 650 });
       if (P.values && t > 0) label(c, `v = ${trim(now.vBlock)} m/s`, pl.X(xr + bw) + 6, pl.Y(ytop - bw) + 15, { color: c.ink2, size: 11 });
+      if (P.tension) {
+        // the string pulls the rim down and the block up with the same T; the block's weight acts at its centre
+        const Tn = Mo.block.T, mg = md.hang * P.g;
+        const tl = (name, x) => (P.values ? `${name} = ${trim(x)} N` : name);
+        // each name beside the middle of its arrow, so that the two T's, which point at each other, stay apart
+        const name = (s, y, color) => pl.text(s, xr, y, { dx: -10, align: 'right', color, weight: 650 });
+        pl.arrow(xr, 0, xr, -lT, { color: 'warn', width: 2.8 });
+        name(tl('T', Tn), -lT / 2, 'warn');
+        pl.arrow(xr, ytop, xr, ytop + lT, { color: 'warn', width: 2.8 });
+        name(tl('T', Tn), ytop + lT / 2, 'warn');
+        pl.arrow(xr, ytop - bw, xr, ytop - bw - lmg, { color: 'bad', width: 2.8 });
+        name(tl('mg', mg), ytop - bw - lmg, 'bad');
+      }
     }
     // forces, their lines of action and lever arms
     md.forces.forEach((f, i) => {
@@ -410,6 +435,7 @@ export function validate(P0) {
   if (P.d < 0) p.push('d is a distance: give it as zero or positive');
   if (P.hang > 0 && !ROUND.includes(P.shape)) p.push('a hanging block needs a round drum (disk, ring, sphere or shell)');
   if (P.hang > 0 && P.d !== 0) p.push('a hanging block needs the axis at the centre (d = 0)');
+  if (P.tension && !(P.hang > 0)) p.push('tension needs a hanging block (hang)');
   if (![false, 'omega', 'axis'].includes(P.plot)) p.push(`plot must be false, 'omega' or 'axis'`);
   if (P.readouts && P.readouts !== false) for (const r of P.readouts) if (!READOUTS.includes(r)) p.push(`unknown readout “${r}”`);
   for (const k of P.sliders || []) {

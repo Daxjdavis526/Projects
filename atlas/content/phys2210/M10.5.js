@@ -11,6 +11,8 @@ const r4 = (x) => +x.toFixed(4);
 
 // a static drum with a hanging block, from the rotor simulation
 const drum = (M, R, m, shape = 'disk', caption) => ({ type: 'mech-rotor', params: { shape, M, R, hang: m, values: false }, caption: caption ?? 'The drum seen along its axle (gold), with the block hanging from a light string wound round it.' });
+// the same, with the forces that matter: the string's pull T on the rim and on the block, and the block's weight
+const drumForces = (M, R, m, caption) => ({ type: 'mech-rotor', params: { shape: 'disk', M, R, hang: m, tension: true, values: false }, caption });
 
 export default lesson({
   id: 'phys2210.M10.5',
@@ -36,13 +38,14 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
     tasks: [
       'Switch the drum from a solid disk to a ring of the same mass: its moment of inertia doubles and the block falls more slowly.',
       'Make the drum very light: the block falls almost freely (a → 9.8 m/s²) and the string tension drops toward zero.',
-      'Compare the tension with the block’s weight in the readout: while the block accelerates downward, the string always pulls up less than mg.',
+      'Compare the two arrows on the block (and the readout): while the block accelerates downward, the string pulls up with less than its weight mg.',
+      'Change only the radius R. The block’s acceleration does not change: a bigger disk has more moment of inertia (I ∝ R²), but the string also pulls with a longer lever arm.',
     ],
-    params: { shape: 'disk', shapes: ['disk', 'ring'], M: 4, R: 0.2, hang: 2, plot: 'omega', sliders: ['M', { key: 'R', max: 0.4 }, 'hang'] },
+    params: { shape: 'disk', shapes: ['disk', 'ring'], M: 4, R: 0.2, hang: 2, tension: true, plot: 'omega', sliders: ['M', { key: 'R', max: 0.4 }, 'hang'] },
   },
   example: {
     prompt: t`A 2.0 kg block hangs from a light string wound round a solid disk of mass 4.0 kg and radius 0.20 m, free to turn on a frictionless axle. Find the block’s acceleration, the disk’s angular acceleration and the string’s tension.`,
-    visual: drum(4, 0.2, 2),
+    visual: drumForces(4, 0.2, 2, 'The forces that matter, arrow lengths in proportion: the string pulls the drum’s rim down and the block up with the same tension T, and the block’s weight mg pulls it down. (The axle’s push on the drum acts through the axis, so it has no torque.) The sizes of drum and block are a sketch.'),
     steps: [
       { label: 'Block', text: t`Take down as positive: $mg - T = ma$.` },
       { label: 'Drum', text: t`The tension pulls tangentially at radius $R$: $TR = I\alpha$, with $I = \tfrac12 MR^2$.` },

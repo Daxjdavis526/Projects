@@ -196,7 +196,7 @@ A faster spin means a slower precession. Nothing defies gravity: the support pus
         const Isc = r.pick([800, 1500, 2500]), Iw = r.pick([0.05, 0.08, 0.12]), n = r.pick([2000, 3000, 4000]);
         const wsc = (Iw * n * RPM) / Isc;
         return {
-          prompt: t`A space telescope ($I = ${Isc.toLocaleString('en-US')}\ \text{kg·m}^2$ about an axis) is at rest. A reaction wheel aligned with that axis ($I = ${Iw}\ \text{kg·m}^2$) is spun up from rest to ${n.toLocaleString('en-US')} rpm by a motor inside the telescope. How fast does the telescope turn, in degrees per second?`,
+          prompt: t`A space telescope ($I = ${Isc.toLocaleString('en-US').replace(/,/g, '{,}')}\ \text{kg·m}^2$ about an axis) is at rest. A reaction wheel aligned with that axis ($I = ${Iw}\ \text{kg·m}^2$) is spun up from rest to ${n.toLocaleString('en-US')} rpm by a motor inside the telescope. How fast does the telescope turn, in degrees per second?`,
           answer: wsc * DEG, units: 'deg/s', tol: { rel: 0.01 },
           errors: [{ value: ((Iw * n) / Isc), feedback: 'Convert rpm to rad/s (× 2π/60) before using the angular momenta, then convert the answer to degrees.' }, { value: ((Isc * n * RPM) / Iw) * DEG, feedback: t`The ratio is the other way up: $\omega_\text{sc} = \omega_\text{w}I_\text{w}/I_\text{sc}$ — the big telescope turns slowly.` }],
           hints: [

@@ -96,15 +96,15 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
           aspect: 'wide', x: [-2.7, 2.7], y: [-0.95, 0.95], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
           alt: 'Before: force F on mass m. After: force 2F on mass m/2.',
           points: [
-            { x: -2.3, y: 0.72, r: 0.01, color: 'ink2', label: 'before', labelDx: 0, labelDy: 0 },
-            { x: -0.1, y: 0.72, r: 0.01, color: 'ink2', label: 'after', labelDx: 0, labelDy: 0 },
-            { x: -2.1, y: 0, r: 13, color: 'accent', label: 'm', labelDx: -4, labelDy: -24 },
-            { x: 0.1, y: 0, r: 9, color: 'accent', label: 'm/2', labelDx: -12, labelDy: -20 },
-            { x: 0.0, y: -0.55, r: 0.01, color: 'gold', label: 'a′ = ?', labelDx: 0, labelDy: 0 },
+            { x: -2.25, y: 0.72, r: 0.01, color: 'ink2', label: 'before', labelDx: 0, labelDy: 0 },
+            { x: 0.2, y: 0.72, r: 0.01, color: 'ink2', label: 'after', labelDx: 0, labelDy: 0 },
+            { x: -2.1, y: 0, r: 13, color: 'accent', label: 'm', labelDx: -28, labelDy: 0 },
+            { x: 0.35, y: 0, r: 9, color: 'accent', label: 'm/2', labelDx: -40, labelDy: 0 },
+            { x: 0.25, y: -0.55, r: 0.01, color: 'gold', label: 'a′ = ?', labelDx: 0, labelDy: 0 },
           ],
           arrows: [
-            { from: [-1.85, 0], to: [-0.85, 0], color: 'accent', label: 'F', labelDx: 6, labelDy: 0 },
-            { from: [0.3, 0], to: [2.3, 0], color: 'accent', label: '2F', labelDx: 6, labelDy: 0 },
+            { from: [-1.85, 0], to: [-1.15, 0], color: 'accent', label: 'F', labelDx: 6, labelDy: 0 },
+            { from: [0.55, 0], to: [1.95, 0], color: 'accent', label: '2F', labelDx: 6, labelDy: 0 },
             { from: [-2.1, -0.5], to: [-1.6, -0.5], color: 'gold', label: 'a', labelDx: 6, labelDy: 0 },
           ],
         },
@@ -159,7 +159,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
         const m = r.pick([400, 500, 650, 800]), ratio = r.pick([1.4, 1.6, 1.8, 2.2]);
         const T = Math.round(m * G * ratio / 100) * 100;
         return {
-          prompt: t`A ${m} kg sounding rocket sits on the pad. Its motor produces ${T.toLocaleString('en-US')} N of thrust straight up. What is its acceleration just after ignition? ($g = 9.8\ \text{m/s}^2$; ignore the small mass of propellant burned so far.)`,
+          prompt: t`${m === 800 ? 'An' : 'A'} ${m} kg sounding rocket sits on the pad. Its motor produces ${T.toLocaleString('en-US')} N of thrust straight up. What is its acceleration just after ignition? ($g = 9.8\ \text{m/s}^2$; ignore the small mass of propellant burned so far.)`,
           answer: (T - m * G) / m, units: 'm/s^2', tol: { rel: 0.01 },
           errors: [{ value: T / m, feedback: 'Gravity still acts: the net force is thrust minus weight.' }],
           hints: ['Draw two forces: thrust up and weight down.', t`$F_\text{net} = T - mg$; divide by $m$.`],

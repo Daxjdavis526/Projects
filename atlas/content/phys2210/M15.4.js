@@ -20,7 +20,7 @@ function refCircle({ deg = 30, P = true, ghost = [], vel = false, arc = false, s
     { param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'ink3', width: 1.6 },
     { param: ['t', '0'], t: [-1.45, 1.45], color: 'ink4', width: 1.2 },
   ];
-  const points = [{ x: 0, y: 0, color: 'ink3', r: 3 }, { x: -1, y: -0.14, r: 0.01, color: 'ink3', label: '−A', labelDx: -10 }, { x: 1, y: -0.14, r: 0.01, color: 'ink3', label: 'A', labelDx: -4 }];
+  const points = [{ x: 0, y: 0, color: 'ink3', r: 3 }, { x: -1.45, y: 0.13, r: 0.01, color: 'ink3', label: '−A', labelDx: 0, labelDy: 0 }, { x: 1.08, y: 0.13, r: 0.01, color: 'ink3', label: 'A', labelDx: 0, labelDy: 0 }];
   const arrows = [];
   if (P) {
     curves.push({ param: [`${r4(c)}*t`, `${r4(s)}*t`], t: [0, 1], color: 'ink4', width: 1.2 });
@@ -259,7 +259,7 @@ $$x = A\cos(\omega t + \phi)$$
         const [name, R, Td] = r.pick([['Io', 421700, 1.769], ['Europa', 671000, 3.551], ['Ganymede', 1070000, 7.155], ['Callisto', 1883000, 16.69]]);
         const v = (TAU * R) / (Td * 86400);
         return {
-          prompt: t`Through a telescope, Jupiter’s moon ${name} seems to slide back and forth beside the planet, because we see its nearly circular orbit almost edge-on. Its orbit has a radius of ${tn(R)} km and a period of ${Td} days. How fast does ${name} move across our line of sight as it passes in front of Jupiter, in km/s?`,
+          prompt: t`Through a telescope, Jupiter’s moon ${name} seems to slide back and forth beside the planet, because we see its nearly circular orbit almost edge-on. Its orbit has a radius of $${tn(R)}$ km and a period of ${Td} days. How fast does ${name} move across our line of sight as it passes in front of Jupiter, in km/s?`,
           answer: v, units: 'km/s', tol: { rel: 0.005 },
           errors: [{ value: R / (Td * 86400), feedback: t`The shadow’s greatest speed is $A\omega$ with $\omega = 2\pi/T$: keep the $2\pi$.` }, { value: (TAU * R) / Td, feedback: 'Convert the period to seconds: 1 day = 86 400 s.' }],
           hints: ['Seen edge-on, the moon’s position across the sky is the shadow of its circular motion.', t`Its greatest apparent speed, at the centre, is its full orbital speed $A\omega = 2\pi A/T$.`],

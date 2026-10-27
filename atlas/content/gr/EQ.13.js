@@ -9,7 +9,7 @@
 // radiated, Earth–Sun power, Hulse–Taylor decay) and gr.S21.i (the ISCO frequency).
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { G, C, PC, MPC, sci, round } from './_eq.js';
-import { chirpMass, tauOfF, phaseOfTau, fContact } from '../../src/viz/model/gr-waves.js';
+import { fISCO, fContact } from '../../src/viz/model/gr-waves.js';
 
 const t = String.raw;
 
@@ -89,7 +89,7 @@ const binaryCM = {
 const qxx = {
   type: 'graph',
   params: {
-    x: [0, 2.08], y: [-0.5, 0.9], xlabel: 'time (orbits)', ylabel: 'Qₓₓ ÷ μa²',
+    x: [0, 2.32], y: [-0.5, 0.9], xlabel: 'time (orbits)', ylabel: 'Qₓₓ ÷ μa²',
     curves: [{ fn: 'cos(6.28319*x)^2 - 1/3', domain: [0, 2], color: 'accent', width: 2.4 }],
     vlines: [{ x: 1, label: 'one orbit' }, { x: 2, label: 'two orbits' }],
   },
@@ -119,7 +119,8 @@ const shrink = (k) => ({
     curves: [circle(0, 0, 1, 'ink4', 1.4, true), circle(0, 0, round(1 / k, 4), 'accent', 1.8)],
     points: [
       { x: 1, y: 0, r: 6, color: 'gold', label: 'before', labelDx: 12, labelDy: 0 }, { x: -1, y: 0, r: 6, color: 'gold' },
-      { x: round(1 / k, 4), y: 0, r: 5, color: 'accent' }, { x: -round(1 / k, 4), y: 0, r: 5, color: 'accent', label: 'after', labelDx: -12, labelDy: -16 },
+      { x: round(1 / k, 4), y: 0, r: 5, color: 'accent' }, { x: -round(1 / k, 4), y: 0, r: 5, color: 'accent' },
+      { x: 0, y: round(1 / k, 4), r: 0.01, color: 'accent', label: 'after', labelDx: -14, labelDy: -12 },
     ],
   },
   caption: `The same two stars before (dashed) and after (solid) their orbit has shrunk by a factor of ${k}.`,
@@ -160,17 +161,21 @@ const crabPic = (() => {
 })();
 
 // GW150914 as seen at the Earth: masses 1.09 × (36, 29) M☉, so G𝓜/c² ≈ 45.2 km
-const DET = [36 * 1.09, 29 * 1.09];
-const MC_DET = chirpMass(...DET);
 const GMC2 = 45.2e3, R150914 = 410 * MPC;
 const hCirc = (f, gm = GMC2, r = R150914) => (4 / r) * gm ** (5 / 3) * ((Math.PI * f) / C) ** (2 / 3);
-/** where gr-chirp's playhead sits when the frequency is f, for its default window */
-function playhead(f, m1, m2) {
-  const Mc = chirpMass(m1, m2), tauEnd = tauOfF(fContact(m1 + m2), Mc);
-  const tau0 = Math.max(Math.min(tauOfF(30, Mc), 1), 4 * tauEnd);
-  const phi0 = phaseOfTau(tau0, Mc), phiEnd = phaseOfTau(tauEnd, Mc);
-  return round((phi0 - phaseOfTau(tauOfF(f, Mc), Mc)) / (phi0 - phiEnd), 4);
-}
+const F_ISCO = fISCO(65 * 1.09), F_END = fContact(65 * 1.09);
+// the strain along the chirp, with no vertical scale, so the question does not print its answer
+const chirpStrain = (f) => ({
+  type: 'graph',
+  params: {
+    x: [0, 340], y: [0, 2.6], xlabel: 'gravitational-wave frequency f (Hz)', ylabel: 'strain h (scale left off)', yticks: 0,
+    shade: [{ fn: '2.6', lower: '0', from: round(F_ISCO, 1), to: round(F_END, 1), color: 'warn', alpha: 0.1 }],
+    curves: [{ fn: '(x/100)^(2/3)', domain: [20, round(F_END, 1)], color: 'accent', width: 2.4 }],
+    vlines: [{ x: f, label: `${f} Hz`, color: 'gold' }],
+    points: [{ x: 205, y: 2.4, r: 0.01, color: 'warn', label: 'last orbits: formula rough', labelDx: -72, labelDy: 0 }],
+  },
+  caption: t`The strain along GW150914's chirp grows as $f^{2/3}$ while the frequency climbs. Shaded: inside the innermost stable orbit of the total mass (above about ${Math.round(F_ISCO)} Hz) the leading-order formula is only a rough guide; it is left off where the horizons would touch.`,
+});
 
 // the Crab pulsar with ε = 10⁻⁴
 const CRAB = { f: 29.6, I: 1e38, eps: 1e-4, r: 2000 * PC };
@@ -365,12 +370,8 @@ Removing the trace makes $Q_{ij}$ zero for any spherical body, however it moves:
           ],
           hints: [t`$G\mathcal{M}/c^2 = 4.52\times10^{4}$ m and $r = 410\times3.086\times10^{22} = ${sci(R150914)}$ m.`, t`$\pi f/c = ${sci((Math.PI * f) / C)}\ \text{m}^{-1}$; raise it to the power $2/3$, and $(4.52\times10^{4})^{5/3} = ${sci(GMC2 ** (5 / 3))}$.`],
           teach: 'Applied to two black holes, the quadrupole formula gives strains near 10⁻²¹ at hundreds of megaparsecs — the size LIGO was built to measure.',
-          explain: t`$h = 4\times${sci(GMC2 ** (5 / 3))}\times${sci(((Math.PI * f) / C) ** (2 / 3))}/${sci(R150914)} = ${sci(h)}$. That is the best case, face-on. GW150914 was not face-on, and a detector feels only part of a passing wave, so LIGO recorded less: a peak of about $1.0\times10^{-21}$ at the merger itself, where this formula is only a rough guide. Still, a formula derived for slow sources gets the size of the loudest signal yet seen about right.`,
-          visual: {
-            type: 'gr-chirp',
-            params: { m1: round(DET[0], 3), m2: round(DET[1], 3), D: 410, p: playhead(f, ...DET), sliders: false, play: false, readout: false },
-            caption: `GW150914 at leading order, as seen from the Earth (chirp mass ${MC_DET.toFixed(1)} M☉): the gold line marks the moment the frequency reaches ${f} Hz.`,
-          },
+          explain: t`$h = 4\times${sci(GMC2 ** (5 / 3))}\times${sci(((Math.PI * f) / C) ** (2 / 3))}/${sci(R150914)} = ${sci(h)}$. That is the best case, face-on. GW150914 was not face-on, and a detector feels only part of a passing wave, so the strain LIGO recorded was smaller than this best case at every frequency: it peaked at about $1.0\times10^{-21}$ at the merger itself, near 150 Hz, where the face-on estimate is $${sci(hCirc(150))}$. A formula derived for slow sources still gets the size of the first signal ever detected right to within a factor of a few.`,
+          visual: chirpStrain(f),
         };
       },
     }),

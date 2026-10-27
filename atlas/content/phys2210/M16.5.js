@@ -50,7 +50,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
       'With 25 mm of foam, change h: it hardly matters. Without foam, h controls everything.',
     ],
     params: {
-      x: [-60, 150], y: [50, 330], aspect: 'wide', xticks: 0.001, xlabel: 'position through the wall (layers not to scale)', ylabel: 'T (K)',
+      x: [0, 210], y: [50, 330], aspect: 'wide', xticks: 0.001, xlabel: 'position through the wall (layers not to scale)', ylabel: 'T (K)',
       alt: 'The temperature profile through an insulated tank wall, from outside air to liquid oxygen',
       sliders: [
         { key: 'Lf', label: 'Foam thickness $L$', min: 0, max: 100, step: 1, value: 25, unit: '\\mathrm{mm}', explain: 'Spray-on foam of the kind used on cryogenic tanks.' },
@@ -58,25 +58,25 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
         { key: 'h', label: 'Air-film coefficient $h$', min: 4, max: 50, step: 1, value: 10, unit: '\\mathrm{W/(m^2\\,K)}', explain: 'About 5–10 in still air; a breeze raises it.' },
       ],
       shade: [
-        { fn: '330', lower: '50', from: -30, to: 0, color: 'teal', alpha: 0.07 },
-        { fn: '330', lower: '50', from: 0, to: 'Lf', color: 'warn', alpha: 0.15 },
-        { fn: '330', lower: '50', from: 'Lf', to: 'Lf + 6', color: 'ink3', alpha: 0.4 },
-        { fn: '330', lower: '50', from: 'Lf + 6', to: 'Lf + 45', color: 'accent', alpha: 0.22 },
+        { fn: '330', lower: '50', from: 30, to: 60, color: 'teal', alpha: 0.07 },
+        { fn: '330', lower: '50', from: 60, to: '60 + Lf', color: 'warn', alpha: 0.15 },
+        { fn: '330', lower: '50', from: '60 + Lf', to: '66 + Lf', color: 'ink3', alpha: 0.4 },
+        { fn: '330', lower: '50', from: '66 + Lf', to: '105 + Lf', color: 'accent', alpha: 0.22 },
       ],
       curves: [
-        { fn: '293.15', domain: [-60, -30], color: 'gold', width: 3 },
-        { fn: `293.15 + (${T1} - 293.15)*(x + 30)/30`, domain: [-30, 0], color: 'gold', width: 3 },
-        { fn: `${T1} + (${T2} - ${T1})*x/max(Lf, 0.001)`, domain: [0, 'Lf'], color: 'gold', width: 3 },
-        { fn: `${T2} + (90.19 - ${T2})*(x - Lf)/6`, domain: ['Lf', 'Lf + 6'], color: 'gold', width: 3 },
-        { fn: '90.19', domain: ['Lf + 6', 'Lf + 45'], color: 'gold', width: 3 },
+        { fn: '293.15', domain: [0, 30], color: 'gold', width: 3 },
+        { fn: `293.15 + (${T1} - 293.15)*(x - 30)/30`, domain: [30, 60], color: 'gold', width: 3 },
+        { fn: `${T1} + (${T2} - ${T1})*(x - 60)/max(Lf, 0.001)`, domain: [60, '60 + Lf'], color: 'gold', width: 3 },
+        { fn: `${T2} + (90.19 - ${T2})*(x - 60 - Lf)/6`, domain: ['60 + Lf', '66 + Lf'], color: 'gold', width: 3 },
+        { fn: '90.19', domain: ['66 + Lf', '105 + Lf'], color: 'gold', width: 3 },
       ],
       points: [
-        { x: -58, y: 312, r: 0.01, color: 'warn', label: 'outside air' },
-        { x: -27, y: 64, r: 0.01, color: 'teal', label: 'air film' },
-        { x: 'Lf/2 - 8', y: 64, r: 0.01, color: 'warn', label: 'foam', when: 'step(Lf - 18)' },
-        { x: 'Lf + 1', y: 316, r: 0.01, color: 'ink2', label: 'steel' },
-        { x: 'Lf + 12', y: 112, r: 0.01, color: 'accent', label: 'LOX, 90 K' },
-        { x: 0, y: T1, r: 5, color: 'gold' },
+        { x: 2, y: 312, r: 0.01, color: 'warn', label: 'outside air' },
+        { x: 33, y: 64, r: 0.01, color: 'teal', label: 'air film' },
+        { x: '60 + Lf/2 - 8', y: 64, r: 0.01, color: 'warn', label: 'foam', when: 'step(Lf - 18)' },
+        { x: '61 + Lf', y: 316, r: 0.01, color: 'ink2', label: 'steel' },
+        { x: '72 + Lf', y: 112, r: 0.01, color: 'accent', label: 'LOX, 90 K' },
+        { x: 60, y: T1, r: 5, color: 'gold' },
       ],
       readouts: [
         { label: 'heat flux $P/A$', expr: q, unit: '\\mathrm{W/m^2}', digits: 3 },
@@ -164,7 +164,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
         const L1 = r.pick([20, 30, 40, 50]);
         const R = L1 / 1000 / 0.03 + 0.004 / 167, qf = (293 - 90) / R;
         return {
-          prompt: t`A LOX tank wall is 4 mm of aluminium ($k = 167$ W/(m·K)) covered by ${L1} mm of foam ($k = 0.030$ W/(m·K)). The foam’s outer surface is at 293 K and the aluminium’s inner surface at 90 K. What is the heat flux through the wall?`,
+          prompt: t`A LOX tank wall is 4 mm of aluminium, with $k = 167$ W/(m·K), covered by ${L1} mm of foam with $k = 0.030$ W/(m·K). The foam’s outer surface is at 293 K and the aluminium’s inner surface at 90 K. What is the heat flux through the wall?`,
           answer: qf, units: 'W/m^2', tol: { rel: 0.01 },
           errors: apart([
             { value: (167 * 203) / 0.004, feedback: 'That is the aluminium alone. The layers are in series: their resistances L/k add.' },
@@ -252,7 +252,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
             { value: P / (eps * SIGMA * Tc ** 4), feedback: 'Use the absolute temperature in the Stefan–Boltzmann law: add 273.15.' },
             { value: P / (SIGMA * T ** 4), feedback: 'Include the emissivity: a real panel radiates only ε times a black body.' },
           ], A),
-          hints: [t`Set $P = \varepsilon\sigma AT^4$ and solve for $A$.`],
+          hints: [t`Set $P = \varepsilon\sigma AT^4$ and solve for $A$.`, t`Use $T = ${Tc} + 273.15$ K.`],
           teach: 'A spacecraft radiator must be big enough that εσAT⁴ matches the heat it must reject.',
           explain: t`$A = \dfrac{P}{\varepsilon\sigma T^4} = \dfrac{${P}}{(${eps})(5.67\times10^{-8})(${T.toFixed(2)})^4} = ${fmt(A, 3)}$ m². Sunlight landing on it would demand more area still — which is why radiators are painted white and turned away from the Sun.`,
           visual: radiationGraph({ eps, Tmax: 400, marks: [{ T, label: `${Tc} °C` }], caption: 'Emitted power per square metre against absolute temperature (power axis without numbers), for ε = 0.9.' }),
@@ -296,7 +296,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
       teach: 'A vacuum stops conduction and convection, but radiation crosses it freely — hence shiny shields.',
       hints: ['Which kind of heat transfer brings sunlight to Earth across 150 million kilometres of vacuum?'],
       explain: t`Only radiation crosses a vacuum — the same way sunlight reaches Earth. That is why dewars are silvered and why vacuum jackets are packed with multilayer insulation. (The tank’s supports and pipes also conduct some heat in.)`,
-      visual: shieldsPic({ N: 0, Th: '293 K', Tc: '77 K', eps: 'ε = ?', caption: 'A warm jacket, a vacuum gap and a cold tank wall. Not to scale.' }),
+      visual: shieldsPic({ N: 0, Th: '293 K', Tc: '77 K', eps: 'silvered', caption: 'A warm jacket, a vacuum gap and a cold tank wall. Not to scale.' }),
     }),
   ],
   sources: [

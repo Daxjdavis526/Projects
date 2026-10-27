@@ -88,7 +88,11 @@ export function mount(F, P) {
       view.line(pts, { color: c.color || 'gold', width: c.width || 2.6, bias: 0.04 });
     }
     view.end();
-    if (P.readouts) readout = P.readouts.map((r) => [r.label, fmt(num(r.expr, E))]);
+    if (P.readouts) readout = P.readouts.map((r) => {
+      const v = num(r.expr, E);
+      const s = r.digits ? String(+v.toPrecision(r.digits)) : fmt(v);
+      return [r.label, r.unit ? `${s}\\,${r.unit}` : s];
+    });
     if (readout.length) F.readout(readout);
   }
   const num = (src, E) => (typeof src === 'number' ? src : fn(src, Object.keys(E))(E));

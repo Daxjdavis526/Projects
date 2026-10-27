@@ -109,7 +109,7 @@ Gravity at the height of the International Space Station is still nearly 90% of 
           errors: [{ value: GM_EARTH / (h * 1000) ** 2, feedback: 'r is measured from Earth’s centre: R + h, not h.' }, { value: gN, feedback: 'That is the surface value. Gravity weakens with height: use r = R + h.' }],
           hints: [t`$r = R + h = (6371 + ${h})$ km, in metres.`, t`$g = GM/r^2$.`],
           teach: 'Gravity at height h is GM/(R + h)², with the distance from Earth’s centre.',
-          explain: t`$r = ${(RK + h).toLocaleString('en-US')}$ km, so $g = \dfrac{3.986\times10^{14}}{(${tex((RK + h) * 1000, 5)})^2} = ${s3(g)}\ \text{m/s}^2$ — ${Math.round((100 * g) / gN)}% of the surface value.`,
+          explain: t`$r = ${(RK + h).toLocaleString('en-US').replace(/,/g, '{,}')}$ km, so $g = \dfrac{3.986\times10^{14}}{(${tex((RK + h) * 1000, 5)})^2} = ${s3(g)}\ \text{m/s}^2$ — ${Math.round((100 * g) / gN)}% of the surface value.`,
           visual: gProfile({ xmax: 1.3, marks: [{ x: r4(1 + h / RK), y: r4(g), color: 'gold', label: '?', labelDx: 8 }], inside: false, caption: 'Earth’s gravity just above the surface (outside only).' }),
         };
       },
@@ -176,7 +176,7 @@ Gravity at the height of the International Space Station is still nearly 90% of 
           errors: [{ value: gN * (RK / (RK - d)) ** 2, feedback: 'GM/r² applies outside. Inside, the shell above you pulls nothing, and the mass below you shrinks as r³: g ∝ r.' }],
           hints: [t`The shell above you exerts no net pull. The ball below has mass $M(r/R)^3$.`, t`So $g = G\,M(r/R)^3/r^2 = g_0\,r/R$, with $r = R - d$.`],
           teach: 'Inside a uniform ball, only the mass below you pulls, so g grows in proportion to the distance from the centre.',
-          explain: t`$r = ${(RK - d).toLocaleString('en-US')}$ km, so $g = ${s3(gN)}\times\dfrac{${(RK - d).toLocaleString('en-US')}}{6371} = ${s3(g)}\ \text{m/s}^2$. The real Earth is not uniform: its iron core is so dense that g actually *rises* a little going down through the mantle, to about 10.7 m/s² at the core–mantle boundary 2890 km down, before falling to zero at the centre.`,
+          explain: t`$r = ${(RK - d).toLocaleString('en-US').replace(/,/g, '{,}')}$ km, so $g = ${s3(gN)}\times\dfrac{${(RK - d).toLocaleString('en-US').replace(/,/g, '{,}')}}{6371} = ${s3(g)}\ \text{m/s}^2$. The real Earth is not uniform: its iron core is so dense that g actually *rises* a little going down through the mantle, to about 10.7 m/s² at the core–mantle boundary 2890 km down, before falling to zero at the centre.`,
           visual: gProfile({ xmax: 2.2, marks: [{ x: r4(1 - d / RK), y: r4(g), color: 'gold', label: '?', labelDx: 8 }], caption: 'The uniform-density model: g ∝ r inside (dashed), GM/r² outside.' }),
         };
       },

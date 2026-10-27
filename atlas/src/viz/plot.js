@@ -86,7 +86,7 @@ export class Plot {
     g.lineWidth = 1;
     g.strokeStyle = c.line;
     for (const t of this.o.xticks === 0 ? [] : Plot.ticks(this.vx0, this.vx1, this.o.xticks || 8)) { const x = Math.round(this.X(t)) + 0.5; g.beginPath(); g.moveTo(x, this.T); g.lineTo(x, this.B); g.stroke(); }
-    for (const t of Plot.ticks(this.vy0, this.vy1, this.o.yticks || 6)) { const y = Math.round(this.Y(t)) + 0.5; g.beginPath(); g.moveTo(this.L, y); g.lineTo(this.R, y); g.stroke(); }
+    for (const t of this.o.yticks === 0 ? [] : Plot.ticks(this.vy0, this.vy1, this.o.yticks || 6)) { const y = Math.round(this.Y(t)) + 0.5; g.beginPath(); g.moveTo(this.L, y); g.lineTo(this.R, y); g.stroke(); }
     g.restore();
   }
 

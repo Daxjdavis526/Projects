@@ -22,23 +22,31 @@ const text = (x, y, label, color = 'ink2', dx = 0, dy = 0) => ({ x: r4(x), y: r4
  *   v       a label for a velocity arrow on the block (null for none); vdir ±1
  *   ghost   another displacement to show as a dashed outline (an earlier or later position)
  */
-export function springPic({ x = 0.8, m = 'm', k = 'k', arrow = 'x', v = null, vdir = 1, ghost = null, caption } = {}) {
+export function springPic({ x = 0.8, m = 'm', k = 'k', arrow = 'x', v = null, vdir = 1, ghost = null, damper = false, b = 'b', caption } = {}) {
   const xe = 4.2, xb = xe + x, w = 0.5, y0 = -0.6, y1 = 0.3;
   const zig = [];
-  const n = 14, x0 = 0, x1 = xb - w;
-  for (let i = 0; i <= n; i++) zig.push([x0 + ((x1 - x0) * i) / n, i === 0 || i === n ? -0.15 : -0.15 + (i % 2 ? 0.18 : -0.18)]);
+  const n = 14, x0 = 0, x1 = xb - w, ys = damper ? 0.12 : -0.15;   // with a damper the spring rides higher
+  for (let i = 0; i <= n; i++) zig.push([x0 + ((x1 - x0) * i) / n, i === 0 || i === n ? ys : ys + (i % 2 ? 0.16 : -0.16)]);
+  const arrows = [];
+  const points = [text(xe + 0.06, -0.86, 'x = 0', 'ink3', 2, 0), text(1.2, damper ? 0.48 : 0.42, k, 'ink2'), text(xb - w + 0.08, -0.15, m, 'accent', 0, 0)];
   const curves = [
     seg([0, -0.75], [0, 0.85], 'ink3', 5), seg([0, y0], [7.6, y0], 'ink3', 1.6),
     ...zig.slice(1).map((p, i) => seg(zig[i], p, 'ink2', 1.8)),
     seg([xe, -0.8], [xe, 0.75], 'ink4', 1.2, true),
     seg([xb - w, y0], [xb + w, y0], 'accent', 2.4), seg([xb + w, y0], [xb + w, y1], 'accent', 2.4), seg([xb + w, y1], [xb - w, y1], 'accent', 2.4), seg([xb - w, y1], [xb - w, y0], 'accent', 2.4),
   ];
+  if (damper) {
+    // a dashpot: a cylinder fixed to the wall, a piston on a rod from the block
+    const yd = -0.4, c0 = 0.9, c1 = 2.5, px = Math.max(c0 + 0.25, Math.min(c1 - 0.1, xb - w - 1.3));
+    curves.push(seg([0, yd], [c0, yd], 'ink2', 1.8), seg([c0, yd - 0.13], [c1, yd - 0.13], 'teal', 2), seg([c0, yd + 0.13], [c1, yd + 0.13], 'teal', 2), seg([c0, yd - 0.13], [c0, yd + 0.13], 'teal', 2),
+      seg([px, yd - 0.1], [px, yd + 0.1], 'teal', 3), seg([px, yd], [xb - w, yd], 'ink2', 1.8));
+    points.push(text(c0 + 0.1, yd - 0.3, b, 'teal'));
+  }
   if (ghost !== null) {
     const g = xe + ghost;
     curves.push(seg([g - w, y0], [g + w, y0], 'ink3', 1.4, true), seg([g + w, y0], [g + w, y1], 'ink3', 1.4, true), seg([g + w, y1], [g - w, y1], 'ink3', 1.4, true), seg([g - w, y1], [g - w, y0], 'ink3', 1.4, true));
   }
-  const arrows = [];
-  const points = [text(xe + 0.06, -0.86, 'x = 0', 'ink3', 2, 0), text(1.2, 0.42, k, 'ink2'), text(xb - w + 0.08, -0.15, m, 'accent', 0, 0)];
+
   if (arrow && Math.abs(x) > 0.05) { arrows.push({ from: [xe, 0.62], to: [r4(xb), 0.62], color: 'gold' }); points.push(text(xe + Math.min(x, 0) - (x < 0 ? 0.1 : -0.1), 0.92, arrow, 'gold', x < 0 ? -10 : 0, 0)); }
   if (v) { arrows.push({ from: [r4(xb + vdir * 0.7), -0.15], to: [r4(xb + vdir * 1.6), -0.15], color: 'good' }); points.push(text(xb + vdir * 1.0 - (vdir < 0 ? 0.5 : 0), 0.08, v, 'good')); }
   return {
@@ -77,5 +85,26 @@ export function pendulumPic({ deg = 20, L = 'L', m = 'm', angle = 'θ', caption 
       points: [{ x: r4(bx), y: r4(by), color: 'accent', r: 9 }, text(bx / 2 + 0.12, by / 2, L, 'ink2'), text(0.25 * Math.sin(th / 2) + 0.12, -0.95, angle, 'gold'), text(bx + 0.22, by - 0.1, m, 'accent')],
     },
     caption: caption ?? 'A simple pendulum: a small bob on a light string. Not to scale.',
+  };
+}
+
+/**
+ * A damped oscillation x = A e^(−γt) cos(ω₁t) with its envelope ±A e^(−γt) (dashed), from 0 to tmax.
+ * marks: [{ t, label }] points on the curve; hl: [{ y, label }] horizontal lines; numbers: false hides the ticks.
+ */
+export function dampedGraph({ A = 1, gamma, w1, tmax, ylabel = 'x (m)', marks = [], hl = [], numbers = true, envelope = true, caption }) {
+  const f = (tt) => A * Math.exp(-gamma * tt) * Math.cos(w1 * tt);
+  return {
+    type: 'graph',
+    params: {
+      aspect: 'wide', x: [0, r4(tmax)], y: [r4(-1.2 * A), r4(1.2 * A)], xlabel: 't (s)', ylabel, ...(numbers ? {} : { xticks: 0.001, yticks: 0.001 }),
+      curves: [
+        { fn: `${r4(A)}*exp(-${r4(gamma)}*x)*cos(${r4(w1)}*x)`, color: 'accent', width: 2.4 },
+        ...(envelope ? [{ fn: `${r4(A)}*exp(-${r4(gamma)}*x)`, color: 'gold', width: 1.4, dash: true }, { fn: `-${r4(A)}*exp(-${r4(gamma)}*x)`, color: 'gold', width: 1.4, dash: true }] : []),
+      ],
+      points: marks.map((m) => ({ x: r4(m.t), y: r4(f(m.t)), color: 'gold', label: m.label })),
+      hlines: hl,
+    },
+    caption: caption ?? 'A damped oscillation (blue) inside its exponentially shrinking envelope (dashed).',
   };
 }

@@ -484,7 +484,7 @@ export function wallPic({ layers, temps, show = null, hot = 'outside', cold = 'i
   });
   const W = x;
   curves.push({ fn: String(r4(temps[0])), domain: [r4(-0.18 * W), 0], color: 'gold', width: 3 }, { fn: String(r4(temps[temps.length - 1])), domain: [r4(W), r4(1.18 * W)], color: 'gold', width: 3 });
-  (show ?? [0, temps.length - 1]).forEach((k) => points.push({ x: r4(xs[k]), y: r4(temps[k]), r: 4.5, color: 'gold', label: typeof k === 'number' ? `${lab(temps[k], 4)} K` : String(k), labelDx: 8, labelDy: -10 }));
+  (show ?? [0, temps.length - 1]).forEach((k) => points.push({ x: r4(xs[k]), y: r4(temps[k]), r: 4.5, color: 'gold', label: `${lab(temps[k], 5)} K`, labelDx: 8, labelDy: -10 }));
   points.push(tag(-0.17 * W, hi + 0.55 * pad, hot, 'warn', 0, 0), tag(1.02 * W, lo + 0.75 * pad, cold, 'accent', 0, 0));
   if (ask) arrows.push({ from: [r4(0.15 * W), r4(hi + 0.6 * pad)], to: [r4(0.85 * W), r4(hi + 0.6 * pad)], color: 'bad', label: ask, labelDx: -40, labelDy: -12 });
   return {

@@ -84,12 +84,12 @@ For a circular orbit, gravity supplies exactly the centripetal force, $GMm/r^2 =
     visual: keplerPicture('geo', { t: 0.15, caption: 'The geostationary orbit and the Earth, to scale.' }),
     steps: [
       { label: 'Why 86 164 s, not 86 400', text: t`A 24-hour solar day includes the extra quarter-degree turn the Earth makes each day because it has moved along its orbit. Relative to the stars, one turn takes ${(86164 / 3600).toFixed(4)} h.` },
-      { label: 'Kepler III for the radius', text: t`$r = \left(\dfrac{GM\,T^2}{4\pi^2}\right)^{1/3} = \left(\dfrac{(3.986\times10^{14})(86\,164)^2}{4\pi^2}\right)^{1/3} = ${tex(GEO.r, 5)}$ m $= ${Math.round(GEO.r / 1000).toLocaleString('en-US')}$ km.` },
-      { label: 'Height', text: t`$${Math.round(GEO.r / 1000).toLocaleString('en-US')} - 6378 = ${Math.round(GEO.r / 1000 - 6378).toLocaleString('en-US')}$ km above the equator.` },
+      { label: 'Kepler III for the radius', text: t`$r = \left(\dfrac{GM\,T^2}{4\pi^2}\right)^{1/3} = \left(\dfrac{(3.986\times10^{14})(86\,164)^2}{4\pi^2}\right)^{1/3} = ${tex(GEO.r, 5)}$ m $= ${Math.round(GEO.r / 1000).toLocaleString('en-US').replace(/,/g, '{,}')}$ km.` },
+      { label: 'Height', text: t`$${Math.round(GEO.r / 1000).toLocaleString('en-US').replace(/,/g, '{,}')} - 6378 = ${Math.round(GEO.r / 1000 - 6378).toLocaleString('en-US').replace(/,/g, '{,}')}$ km above the equator.` },
       { label: 'Speed', text: t`$v = 2\pi r/T = ${s3(GEO.v / 1000)}$ km/s — or $\sqrt{GM/r}$, the same.` },
       { label: 'Sense check', text: t`The centripetal acceleration $v^2/r = ${s3(GEO.v ** 2 / GEO.r)}\ \text{m/s}^2$ equals $GM/r^2$ there, as it must. Communications satellites sit on this one circle; their dishes on the ground never need to move.` },
     ],
-    answer: t`$r = ${Math.round(GEO.r / 1000).toLocaleString('en-US')}$ km from the centre, ${Math.round(GEO.r / 1000 - 6378).toLocaleString('en-US')} km up, moving at $${s3(GEO.v / 1000)}$ km/s.`,
+    answer: t`$r = ${Math.round(GEO.r / 1000).toLocaleString('en-US').replace(/,/g, '{,}')}$ km from the centre, ${Math.round(GEO.r / 1000 - 6378).toLocaleString('en-US')} km up, moving at $${s3(GEO.v / 1000)}$ km/s.`,
   },
   practice: [
     num({
@@ -155,7 +155,7 @@ For a circular orbit, gravity supplies exactly the centripetal force, $GMm/r^2 =
             type: 'graph',
             params: {
               x: [-2.6e6, 2.6e6], y: [-1.95e6, 1.95e6], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', aspect: 'wide',
-              shade: [{ fn: 'sqrt(max(0, 4.888e15 - x^2))', lower: '-sqrt(max(0, 4.888e15 - x^2))', from: -69911, to: 69911, color: 'warn', alpha: 0.6 }],
+              shade: [{ fn: 'sqrt(max(0, 4.8875e9 - x^2))', lower: '-sqrt(max(0, 4.8875e9 - x^2))', from: -69911, to: 69911, color: 'warn', alpha: 0.6 }],
               curves: MOONS.map(([n, ak2]) => ({ param: [`${ak2}*cos(t)`, `${ak2}*sin(t)`], t: [0, 6.2832], color: n === name ? 'gold' : 'ink4', width: n === name ? 2 : 1, dash: n !== name })),
               points: [{ x: r4(ak * Math.cos(0.6)), y: r4(ak * Math.sin(0.6)), color: 'gold', r: 4.5, label: name }],
             },
@@ -205,7 +205,7 @@ For a circular orbit, gravity supplies exactly the centripetal force, $GMm/r^2 =
           errors: [{ value: a * (1 + e), feedback: 'That is the farthest distance, a(1 + e). The closest is a(1 − e).' }],
           hints: [t`The focus is $ae$ from the ellipse's centre, so the closest point is $a - ae = a(1 - e)$ from it.`],
           teach: 'An ellipse’s closest and farthest distances from the focus are a(1 − e) and a(1 + e).',
-          explain: t`$r_\text{min} = a(1 - e) = ${a.toLocaleString('en-US')}(1 - ${e}) = ${s3(rp)}$ ${unit}; the farthest is $a(1 + e) = ${s3(a * (1 + e))}$ ${unit}.`,
+          explain: t`$r_\text{min} = a(1 - e) = ${a.toLocaleString('en-US').replace(/,/g, '{,}')}(1 - ${e}) = ${s3(rp)}$ ${unit}; the farthest is $a(1 + e) = ${s3(a * (1 + e))}$ ${unit}.`,
           visual: keplerPicture(preset, { t: 0.3, sectors: 0, caption: `The orbit of ${name}, to scale.` }),
         };
       },

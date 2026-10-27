@@ -580,11 +580,12 @@ function icon(pl, kind, P) {
     case 'ball': pl.circle(0, 0, 0.5, { fill: 'accent', color: 'accent', width: 1.4 }); if (P.m) pl.text(massText(P.m), 0, 0, { color: '#fff', size: 11, weight: 650, align: 'center', halo: false }); return [0.5, 0.5];
     case 'puck': fill([[-0.65, -0.14], [0.65, -0.14], [0.65, 0.14], [-0.65, 0.14]], 'ink2', 1); return [0.65, 0.14];
     case 'rocket':
-      if (P.flame) fill([[-0.16, -0.95], [0.16, -0.95], [0, -1.6]], 'warn', 0.9);
+      if (P.flame && P.ground) fill([[-0.16, -0.95], [0.16, -0.95], [1.0, -1.1], [-1.0, -1.1]], 'warn', 0.8);   // on the pad: the exhaust spreads sideways
+      else if (P.flame) fill([[-0.16, -0.95], [0.16, -0.95], [0, -1.6]], 'warn', 0.9);
       fill([[-0.24, -0.95], [0.24, -0.95], [0.24, 0.55], [-0.24, 0.55]]);
       fill([[-0.24, 0.55], [0.24, 0.55], [0, 1.1]]);
       fill([[-0.24, -0.95], [-0.5, -1.1], [-0.24, -0.45]], 'accent', 0.6); fill([[0.24, -0.95], [0.5, -1.1], [0.24, -0.45]], 'accent', 0.6);
-      return [0.3, 1.0];
+      return [0.5, 1.1];
     case 'person': person(pl, 0, -1.05, 'accent'); return [0.4, 1.05];
     case 'car': { carSide(pl, [0, -0.55], false); return [1.0, 0.55]; }
     case 'plane':
