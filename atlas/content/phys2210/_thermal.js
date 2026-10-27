@@ -59,8 +59,8 @@ export const ssSpecificHeatExpr = () => `10^(${SS_CP.map((c, i) => `(${c})*(log1
 
 // ─── small text helpers ────────────────────────────────────────────────────
 const r4 = (v) => +(+v).toFixed(4);
-/** A number with n significant figures and a true minus sign, for canvas labels. */
-export const lab = (x, n = 4) => fmt(x, n).replace('-', '−');
+/** A number with up to n significant figures (trailing zeros dropped) and a true minus sign, for canvas labels. */
+export const lab = (x, n = 5) => String(+(+x).toPrecision(n)).replace('-', '−');
 /** TeX for a signed number: a real minus sign in math mode works as-is; this keeps “−” for prose. */
 export const neg = (x, n = 4) => fmt(x, n).replace('-', '−');
 /** A label-only point (no visible dot). Centred when `centre` (by an estimate of the text width). */
@@ -370,5 +370,96 @@ export function flowPic({ Tin, Tout, mdot, caption, alt }) {
       points: [tag(3, 1.6, 'hot combustion gas: heat flows in through the wall', 'bad', 0, 0, true), tag(3, 0, `cooling water, ${mdot}`, 'ink', 0, 0, true), tag(3, -1.0, 'chamber wall (cut away)', 'ink3', 0, 0, true)],
     },
     caption: caption ?? 'Not to scale. All the heat that crosses the wall is carried away by the water.',
+  };
+}
+
+/** Keep only the error values that sit clearly apart from the answer (and from each other) — a slip that lands on the key is no slip. */
+export function apart(errors, answer, rel = 0.03) {
+  const out = [];
+  for (const e of errors) {
+    if (!Number.isFinite(e.value)) continue;
+    const far = (v) => Math.abs(e.value - v) > rel * Math.max(Math.abs(v), Math.abs(e.value));
+    if (far(answer) && out.every((o) => far(o.value))) out.push(e);
+  }
+  return out;
+}
+
+/**
+ * A heating curve: temperature against heat added, built from segments in
+ * order. A segment with T0 = T1 is a phase change (a plateau).
+ *   segs     [{ dQ (kJ), T0, T1, label, letter }]
+ *   numbers  false hides the heat axis's numbers
+ *   hi       index of a segment to highlight (shaded under)
+ */
+export function heatingCurve({ segs, unit = '°C', numbers = true, hi = null, letters = false, labels = true, y = null, caption, alt }) {
+  let x = 0;
+  const curves = [], points = [], shade = [];
+  const Ts = segs.flatMap((s) => [s.T0, s.T1]);
+  const lo = Math.min(...Ts), top = Math.max(...Ts), pad = 0.12 * (top - lo);
+  segs.forEach((s, i) => {
+    const x0 = x, x1 = x + s.dQ, slope = (s.T1 - s.T0) / s.dQ;
+    const fn = `${r4(s.T0)} + ${r4(slope)}*(x - ${r4(x0)})`;
+    curves.push({ fn, domain: [r4(x0), r4(x1)], color: s.T0 === s.T1 ? 'warn' : 'accent', width: 3 });
+    if (hi === i) shade.push({ fn, lower: String(r4(lo - pad)), from: r4(x0), to: r4(x1), color: 'gold', alpha: 0.18 });
+    const mx = (x0 + x1) / 2, my = (s.T0 + s.T1) / 2;
+    if (letters && s.letter) points.push(tag(mx, my, s.letter, 'gold', s.T0 === s.T1 ? -4 : -18, s.T0 === s.T1 ? -14 : -6));
+    if (labels && s.label) points.push(tag(mx, my, s.label, 'ink2', s.dx ?? 8, s.dy ?? (s.T0 === s.T1 ? 14 : 12), s.T0 === s.T1));
+    x = x1;
+  });
+  return {
+    type: 'graph',
+    params: { x: [0, r4(x * 1.04)], y: y || [r4(lo - pad), r4(top + pad)], aspect: 'wide', xlabel: 'heat added, Q (kJ)', ylabel: `T (${unit})`, ...(numbers ? {} : { xticks: 0.001 }), alt: alt || 'A heating curve: temperature against heat added, with flat steps where the substance melts or boils', curves, points, shade },
+    caption: caption ?? 'Heat added slowly, so the whole sample keeps one temperature. Flat steps (orange): the phase is changing and the temperature does not rise. Specific heats taken as constant within each phase.',
+  };
+}
+
+/** One kilogram of water from ice at T0 (°C) to steam at T1 (°C), as heating-curve segments (kJ). */
+export function waterSegs(T0 = -20, T1 = 120, m = 1) {
+  return [
+    { dQ: (m * 2.09 * (0 - T0)), T0, T1: 0, label: 'ice warms', letter: 'A', dx: 10, dy: 12 },
+    { dQ: m * 334, T0: 0, T1: 0, label: 'melts at 0 °C', letter: 'B' },
+    { dQ: m * 4.184 * 100, T0: 0, T1: 100, label: 'water warms', letter: 'C', dx: 10, dy: 14 },
+    { dQ: m * 2257, T0: 100, T1: 100, label: 'boils at 100 °C', letter: 'D' },
+    { dQ: m * 2.01 * (T1 - 100), T0: 100, T1, label: '', letter: 'E' },
+  ].filter((s) => s.dQ > 0);
+}
+
+/**
+ * A vessel of cryogenic liquid in cross-section: a vacuum-jacketed dewar or a propellant tank.
+ *   kind     'dewar' | 'tank'
+ *   leak     draw heat-leak arrows through the wall
+ *   heater   a heater coil at the bottom, labelled with this text; bolt: a warm bolt dropped in
+ */
+export function vesselPic({ kind = 'dewar', liquid = 'LN₂, 77 K', level = 0.6, leak = false, heater = null, bolt = false, vent = 'N₂ gas out', leakLabel = 'heat leak', caption, alt }) {
+  const curves = [], shade = [], arrows = [], points = [];
+  const W = kind === 'tank' ? 1.3 : 1, H = kind === 'tank' ? 3.2 : 2.2, top = H;
+  // walls: a U (dewar, with an inner wall: the vacuum jacket) or a capsule (tank)
+  const U = (w, b, color, width) => ({ param: [`${r4(-w)} + ${r4(2 * w)}*min(max(3*t - 1, 0), 1)`, `${top} - ${r4(top - b)}*min(max(3*t, 0), 1) + ${r4(top - b)}*min(max(3*t - 2, 0), 1)`], t: [0, 1], color, width });
+  if (kind === 'dewar') {
+    curves.push(U(W, 0, 'ink2', 2.4), U(W - 0.14, 0.14, 'ink3', 1.6));
+    shade.push({ fn: String(r4(0.14 + level * (H - 0.3))), lower: '0.14', from: r4(-W + 0.14), to: r4(W - 0.14), color: 'accent', alpha: 0.4 });
+    points.push(tag(W + 0.08, r4(H - 0.35), 'vacuum jacket', 'ink3', 8, 0));
+  } else {
+    const d = 0.35;
+    curves.push({ param: [String(-W), 't'], t: [d, r4(H - d)], color: 'ink2', width: 2.4 }, { param: [String(W), 't'], t: [d, r4(H - d)], color: 'ink2', width: 2.4 });
+    curves.push({ param: [`${W}*cos(t)`, `${r4(H - d)} + ${d}*sin(t)`], t: [0, 3.1416], color: 'ink2', width: 2.4 }, { param: [`${W}*cos(t)`, `${d} + ${d}*sin(t)`], t: [3.1416, 6.2832], color: 'ink2', width: 2.4 });
+    shade.push({ fn: String(r4(level * H)), lower: `${d} - ${d}*sqrt(max(0, 1 - x^2/${r4(W * W)}))`, from: -W, to: W, color: 'accent', alpha: 0.4 });
+  }
+  points.push(tag(0, Math.max(0.4, level * H * 0.45), liquid, 'ink', 0, 0, true));
+  // bubbles rising through the liquid
+  [[-0.45, 0.5], [0.3, 0.8], [-0.1, 1.05], [0.5, 0.35], [-0.6, 1.0]].forEach(([bx, by]) => { if (by < level * H) points.push({ x: r4(bx * W), y: r4(by), r: 3, color: 'ink2' }); });
+  if (bolt) shade.push({ fn: '0.42', lower: '0.17', from: -0.18, to: 0.18, color: 'ink', alpha: 0.65 });
+  if (bolt) points.push(tag(0.2, 0.3, typeof bolt === 'string' ? bolt : 'warm bolt', 'ink2', 6, 0));
+  if (heater) {
+    curves.push({ param: ['-0.5 + t', '0.24 + 0.06*sin(18.85*t)'], t: [0, 1], color: 'bad', width: 2 });
+    points.push(tag(0.55, 0.24, heater, 'bad', 6, 0));
+  }
+  if (leak) for (const yy of [0.45, 1.1, 1.75].filter((v) => v < H - 0.2)) arrows.push({ from: [r4(-W - 0.75), yy], to: [r4(-W - 0.08), yy], color: 'warn' }, { from: [r4(W + 0.75), yy], to: [r4(W + 0.08), yy], color: 'warn' });
+  if (leak) points.push(tag(-W - 0.8, Math.min(H - 0.1, 2.15), leakLabel, 'warn', 0, 0));
+  if (vent) { arrows.push({ from: [0, r4(top + 0.05)], to: [0, r4(top + 0.65)], color: 'ink2' }); points.push(tag(0.1, top + 0.45, vent, 'ink2', 8, 0)); }
+  return {
+    type: 'graph',
+    params: { x: [-2.6, 2.6], y: [-0.3, r4(top + 0.85)], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'A vessel of boiling cryogenic liquid in cross-section', curves, shade, arrows, points },
+    caption: caption ?? 'Cross-section, not to scale. The liquid boils at constant temperature; the vapour escapes through the vent, so the pressure stays at one atmosphere.',
   };
 }

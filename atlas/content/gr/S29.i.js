@@ -64,7 +64,7 @@ function drift(lam, dt) {
   return { pts, crash: null };
 }
 const LAMS = [0, 2, -2];
-const STEPS = [[0.2, 'warn'], [0.1, 'gold'], [0.05, 'accent']];
+const STEPS = [[0.2, 'violet'], [0.1, 'gold'], [0.05, 'teal']];
 const RUNS = LAMS.flatMap((lam) => STEPS.map(([dt, color]) => ({ lam, dt, color, ...drift(lam, dt) })));
 const runOf = (lam, dt) => RUNS.find((u) => u.lam === lam && u.dt === dt);
 const first = (u) => u.pts[0][1], last = (u) => u.pts[u.pts.length - 1][1];
@@ -75,35 +75,44 @@ const CONVERGE = Math.floor(Math.min(last(runOf(0, 0.2)) / last(runOf(0, 0.1)), 
 const GROWTH = Math.min(last(runOf(2, 0.1)) / first(runOf(2, 0.1)), last(runOf(2, 0.05)) / first(runOf(2, 0.05)));
 const isF = (lam) => `1 - abs(sgn(f - (${lam})))`;
 
+const digitsOf = (v) => round(Math.max(0, -Math.log10(v)), 4);     // the constraint's correct digits
 function driftGraph({ f = null, caption } = {}) {
   const points = [];
-  for (const u of RUNS) {
-    if (f !== null && u.lam !== f) continue;
-    u.pts.forEach(([x, v], k) => {
-      const end = k === u.pts.length - 1;
-      points.push({
-        x, y: round(Math.log10(v), 4), color: u.color, r: 2.3,
-        ...(f === null ? { when: isF(u.lam) } : {}),
-        ...(end ? { label: u.crash ? `Δt = ${u.dt}: crashes` : `Δt = ${u.dt}`, ...(u.crash ? { labelDy: -16 } : {}) } : {}),
+  for (const lam of LAMS) {
+    if (f !== null && lam !== f) continue;
+    const when = f === null ? { when: isF(lam) } : {};
+    // end labels, lowest first; one that would sit within 0.7 digits of the label below it is lifted
+    const ends = RUNS.filter((u) => u.lam === lam && !u.crash).map((u) => [u, digitsOf(last(u))]).sort((a, b) => a[1] - b[1]);
+    const lift = new Map(ends.map(([u, y], k) => [u, k > 0 && y - ends[k - 1][1] < 0.7 ? -19 : -9]));
+    for (const u of RUNS.filter((w) => w.lam === lam)) {
+      u.pts.forEach(([x, v], k) => {
+        const end = !u.crash && k === u.pts.length - 1;
+        points.push({ x, y: digitsOf(v), color: u.color, r: 2.3, ...when, ...(end ? { label: `Δt = ${u.dt}`, labelDy: lift.get(u) } : {}) });
       });
-    });
+      if (u.crash) {
+        // a dotted guide up from the crash, labelled where the plot is empty
+        const x = round(u.crash, 4);
+        for (let y = 0.45; y < 2.9; y += 0.35) points.push({ x, y: round(y, 3), color: u.color, r: 1.2, ...when });
+        points.push({ x, y: 3.2, r: 0.01, color: u.color, label: `Δt = ${u.dt}: the code crashes`, labelDx: -40, ...when });
+      }
+    }
   }
   return {
     type: 'graph',
     params: {
-      x: [0, 24.5], y: [-8, 1], xlabel: 'time (starting Hubble times)', ylabel: 'log₁₀ of the constraint violation', grid: false,
-      hlines: [{ y: 0, color: 'bad', label: '100%' }, { y: -2, color: 'ink3', label: '1%' }],
+      x: [0, 24.5], y: [0, 8.6], xlabel: 'time (starting Hubble times)', ylabel: 'correct digits in the constraint', grid: false,
+      hlines: [{ y: 2, color: 'ink3', label: '1% violation' }],
       points,
       ...(f === null ? {
         choices: [{ key: 'f', label: 'Add λ × the constraint', options: [[0, 'λ = 0: plain'], [2, 'λ = +2'], [-2, 'λ = −2: damping']], value: 0, explain: 'The added term is zero for every true solution.' }],
         readouts: STEPS.map(([dt]) => ({
-          label: `violation at the end, Δt = ${dt}`,
+          label: `final violation, Δt = ${dt}`,
           expr: LAMS.map((lam) => `(${isF(lam)})*${round(last(runOf(lam, dt)) * 100, 3)}`).join(' + '),
           digits: 3, unit: '\\%',
         })),
       } : { constants: { f } }),
     },
-    caption: caption ?? 'Three time steps (in starting Hubble times), on a scale of powers of ten. The violation |1 − 8πGρ/(3H²)| is exactly the fake curvature Ω_k the errors have slipped in (step 31): the computed universe drifts away from flat. Every choice of λ has the same exact solution.',
+    caption: caption ?? t`Three time steps, in starting Hubble times. The violation $|1 - 8\pi G\rho/(3H^2)|$ is exactly the fake curvature $\Omega_k$ the errors have slipped in (step 31): the computed universe drifts away from flat. Every choice of $\lambda$ has the same exact solution, with no violation at all.`,
   };
 }
 
@@ -117,7 +126,7 @@ const EMB_S = EMB_A * Math.asin(EMB_R / EMB_A);                  // the radius m
 const embedPic = (caption) => ({
   type: 'graph',
   params: {
-    x: [-8.2, 8.2], y: [-1.9, 5], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+    aspect: 'wide', x: [-8.2, 8.2], y: [-1.9, 5], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [
       { fn: `${round(EMB_A, 7)} - sqrt(${round(EMB_A ** 2, 7)} - x^2)`, domain: [-EMB_R, EMB_R], color: 'gold', width: 3.2 },
       { fn: `sqrt(8*(x - 2)) + ${round(EMB_Z0, 7)}`, domain: [EMB_R, 8], color: 'accent', width: 2.4 },
@@ -142,7 +151,7 @@ const rodPic = {
     shade: [{ fn: 'sqrt(1 - x^2)', lower: '-sqrt(1 - x^2)', from: -1, to: 1, color: 'teal', alpha: 0.12 }],
     curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'teal', width: 2.4, dash: true, label: 'string round the equator', labelAt: 0.75, labelDx: 8, labelDy: -6 }],
     arrows: [{ from: [0, 0], to: [0.98, 0], color: 'gold' }],
-    points: [{ x: 0, y: 0, color: 'gold', r: 4 }, { x: 0.22, y: 0, r: 0.01, color: 'gold', label: 'rod from the centre', labelDx: 0, labelDy: 13 }],
+    points: [{ x: 0, y: 0, color: 'gold', r: 4 }, { x: 0.05, y: 0, r: 0.01, color: 'gold', label: 'rod from the centre', labelDx: -24, labelDy: 14 }],
   },
   caption: 'Two ways to measure a ball’s radius: a rod from the centre to the surface, or a string round the equator divided by 2π. In flat space they agree. Inside matter space is curved, and the rod comes out longer.',
 };
@@ -179,7 +188,7 @@ const slotTables = (() => {
   points.push({ x: 4.2, y: 0.42, r: 0.01, color: 'violet', label: 'rates of change: 6', labelDx: 0, labelDy: 0 });
   return {
     type: 'graph',
-    params: { x: [-0.2, 7.4], y: [-3.2, 0.9], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', shade, points },
+    params: { aspect: 'wide', x: [-0.2, 7.4], y: [-3.2, 0.9], equal: true, axes: false, grid: false, xlabel: '', ylabel: '', shade, points },
     caption: 'What a simulation stores at each point of a slice: the metric of space, γ (symmetric, so the faint cells repeat others: 6 numbers), and its rate of change, K (6 more).',
   };
 })();
@@ -203,7 +212,7 @@ const conePic = {
       { fn: 'abs(x)', domain: [-3.4, 3.4], color: 'gold', width: 2 },
     ],
     points: [
-      { x: 0, y: 0.06, color: 'bad', r: 6, label: 'a star collapses' },
+      { x: 0, y: 0.06, color: 'bad', r: 6, label: 'a star collapses', labelDx: -112, labelDy: -2 },
       { x: -0.95, y: 2.55, r: 0.01, color: 'warn', label: 'news has arrived' },
       { x: 1.75, y: 0.75, r: 0.01, color: 'ink2', label: 'no news yet' },
     ],
@@ -223,7 +232,7 @@ const gridLines = (x0, step, color) => {
 const gridPic = {
   type: 'graph',
   params: {
-    x: [-0.3, 9.3], y: [-0.4, 4.9], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+    aspect: 'wide', x: [-0.3, 9.3], y: [-0.4, 4.9], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
     curves: [...gridLines(0, 1, 'accent'), ...gridLines(5, 0.5, 'teal')],
     points: [{ x: 0, y: 4.42, r: 0.01, color: 'accent', label: 'spacing Δx', labelDx: 0, labelDy: 0 }, { x: 5, y: 4.42, r: 0.01, color: 'teal', label: 'spacing Δx ÷ 2', labelDx: 0, labelDy: 0 }],
   },
@@ -296,13 +305,13 @@ Electromagnetism splits the same way: Gauss's law, $\nabla\cdot\mathbf E = \rho_
   visual: {
     ...driftGraph(),
     title: 'Constraint drift in a toy universe',
-    lead: t`A real calculation on a toy: a flat universe of dust, the simplest solution of Einstein's equations, whose Friedmann equation $H^2 = 8\pi G\rho/3$ (step 31) is its energy constraint. The code steps the expansion rate $H$ and the density $\rho$ forward by RK4, as many real codes do, adding $\lambda$ times the constraint:
+    lead: t`A real calculation on a toy: a flat universe of dust, one of the simplest solutions of Einstein's equations, whose Friedmann equation $H^2 = 8\pi G\rho/3$ (step 31) is its energy constraint. The code steps the expansion rate $H$ and the density $\rho$ forward by RK4, as many real codes do, adding $\lambda$ times the constraint:
 
 $$\dot H = -H^2 - \tfrac{4\pi G}{3}\rho + \lambda\left(H^2 - \tfrac{8\pi G}{3}\rho\right), \qquad \dot\rho = -3H\rho$$
 
-The vertical axis counts powers of ten: $-2$ is a 1% violation, $-4$ is 0.01%.`,
+The vertical axis counts the constraint's correct digits: 2 means a 1% violation, 4 means 0.01%, and 0 means the violation is as big as the solution itself.`,
     tasks: [
-      t`With $\lambda = 0$, compare the three runs: each halving of the time step cuts the violation by ${CONVERGE} times or more. Errors break the constraint a little, and finer steps break it less — the code converges.`,
+      t`With $\lambda = 0$, compare the three runs: each halving of the time step cuts the final violation by ${CONVERGE} times or more. Errors break the constraint a little, and finer steps break it less — the code converges.`,
       t`Choose $\lambda = +2$. For every true solution the added term is exactly zero — yet now the violation of the two smaller steps grows more than ${Math.floor(GROWTH / 1000) * 1000}-fold, and with $\Delta t = 0.2$ the code crashes at $t \approx ${CRASH_T}$. Smaller steps only postpone the failure.`,
       t`Choose $\lambda = -2$: the violation dies away as the run goes on. Adding the constraints with the right sign — **constraint damping** — was one ingredient of the first stable black-hole simulations (step 32).`,
     ],
@@ -312,12 +321,12 @@ The vertical axis counts powers of ten: $-2$ is a 1% violation, $-4$ is 0.01%.`,
     visual: embedPic(),
     steps: [
       { label: 'The curvature', text: t`$${R3} = \dfrac{16\pi G\rho}{c^2} = \dfrac{16\pi\times6.674\times10^{-11}\times5{,}514}{(2.998\times10^{8})^2} = ${sci(R3_EARTH)}\ \text{m}^{-2}$.` },
-      { label: 'A sphere in disguise', text: t`Inside a uniform ball, space is exactly a piece of a **three-sphere**, whose curvature is $6/a^2$. So $a = \sqrt{6/${R3}} = ${sci(A_EARTH)}$ m — about ${round(A_EARTH / AU, 2)} AU, a little more than the radius of the Earth’s orbit.` },
+      { label: 'A sphere in disguise', text: t`Inside a uniform ball, space is exactly a piece of a **three-sphere**, whose curvature is $6/a^2$. So $a = \sqrt{6/${R3}} = ${sci(A_EARTH)}$ m — about ${round(A_EARTH / AU, 3)} AU, a little more than the radius of the Earth’s orbit.` },
       { label: 'The excess radius', text: t`On such a sphere a rod from the centre to a circle of circumference $2\pi r$ measures $a\arcsin(r/a) \approx r + r^3/(6a^2)$. With $r = 6.371\times10^{6}$ m the excess is $r^3/(6a^2) = ${mm(EXCESS_EARTH)}$ mm.` },
       { label: 'Feynman’s rule', text: t`Since $a^2 = 3c^2/(8\pi G\rho)$ and $M = \tfrac43\pi\rho r^3$, the excess is $GM/(3c^2) = 3.986\times10^{14}/(3\times8.988\times10^{16}) = ${mm(GM_EARTH / (3 * C * C))}$ mm for any uniform ball — the “excess radius” of Feynman’s lectures.` },
-      { label: 'Sense check', text: t`As a fraction of the radius that is $${sci(EXCESS_EARTH / R_EARTH, 3)}$, one sixth of the ripple $h = 2GM/(rc^2) = ${sci(H_EARTH, 3)}$ of step 28 — weak gravity, as it should be. The real Earth, denser at its core, gives about ${round(EXCESS_2LAYER * 1e3, 2)} mm.` },
+      { label: 'Sense check', text: t`As a fraction of the radius that is $${sci(EXCESS_EARTH / R_EARTH, 3)}$, one sixth of the ripple $h = 2GM/(rc^2) = ${sci(H_EARTH, 3)}$ of step 28 — weak gravity, as it should be. The real Earth, denser at its core, gives about ${(EXCESS_2LAYER * 1e3).toFixed(1)} mm.` },
     ],
-    answer: t`$${R3} = ${sci(R3_EARTH)}\ \text{m}^{-2}$, the curvature of a three-sphere of radius $${sci(A_EARTH)}$ m; the measured radius beats circumference $\div\,2\pi$ by $GM/(3c^2) = ${mm(EXCESS_EARTH)}$ mm (about ${round(EXCESS_2LAYER * 1e3, 2)} mm for the real, centrally dense Earth).`,
+    answer: t`$${R3} = ${sci(R3_EARTH)}\ \text{m}^{-2}$, the curvature of a three-sphere of radius $${sci(A_EARTH)}$ m; the measured radius beats circumference $\div\,2\pi$ by $GM/(3c^2) = ${mm(EXCESS_EARTH)}$ mm (about ${(EXCESS_2LAYER * 1e3).toFixed(1)} mm for the real, centrally dense Earth).`,
   },
   practice: [
     mcq({
@@ -433,7 +442,7 @@ The vertical axis counts powers of ten: $-2$ is a 1% violation, $-4$ is 0.01%.`,
       },
       hints: ['What is the added term equal to for an exact solution?'],
       teach: 'Versions of Einstein’s equations that differ by multiples of the constraints share every exact solution but behave very differently on a computer.',
-      explain: 'Off the true solution — where every computation sits, slightly — the added term feeds the violation back: growth for one sign, decay for the other. Choosing such additions well is much of what the BSSN formulation and constraint damping did, and they are why black-hole codes finally ran stably in 2005 (step 32).',
+      explain: 'Off the true solution — where every computation sits, slightly — the added term feeds the violation back: growth for one sign, decay for the other. Choosing such additions well is much of what the BSSN formulation and constraint damping do — two of the ingredients that let black-hole codes run stably from 2005 on (step 32).',
     }),
     num({
       id: 'cfl-cost', difficulty: 2,
@@ -488,7 +497,7 @@ The vertical axis counts powers of ten: $-2$ is a 1% violation, $-4$ is 0.01%.`,
           answer: R, units: 'm^-2', tol: { rel: 0.01 },
           errors: [{ value: R / 2, feedback: 'It is 16πG, not 8πG: the energy constraint is twice the time–time part of Einstein’s equation.' }, { value: R * C, feedback: 'Divide by c², not c.' }],
           hints: [t`$16\pi G/c^2 = ${sci((16 * Math.PI * G) / (C * C))}$ m/kg.`],
-          teach: 'The energy constraint ties space’s curvature to the density at each instant — exactly, even in strong gravity.',
+          teach: 'At an instant when nothing moves, the energy constraint fixes space’s curvature from the density — exactly, even in strong gravity.',
           explain: t`$${R3} = ${sci(R)}\ \text{m}^{-2}$, the curvature of a three-sphere of radius $a = \sqrt{6/${R3}} = ${sci(a / 1e3)}$ km. Compare ${size}.`,
           visual: embedPic(),
         };

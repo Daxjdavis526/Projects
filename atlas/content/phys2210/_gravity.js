@@ -116,6 +116,6 @@ export function tidalArrows({ d = 60.3, view = 'tidal', X = 15, n = 12, caption,
 /** A static Kepler-orbit picture of a preset (no controls, no readout), drawn at fraction t of a period after periapsis. */
 export const keplerPicture = (preset, { t = 0.12, sectors = 12, caption } = {}) => ({
   type: 'mech-kepler',
-  params: { presets: [preset], readout: false, play: false, time: false, sweep: false, sectors, t },
+  params: { presets: [preset], readout: false, controls: false, sectors, t },
   ...(caption ? { caption } : {}),
 });

@@ -35,7 +35,7 @@ export function mount(F, P0) {
   const P = { ...defaults, ...P0 };
   const compact = F.compact;
   const altView = P.show === 'altitude';
-  const { canvas } = F.canvas({ aspect: P.aspect ?? (compact ? 'wide' : ''), label: P.alt_text || (altView ? 'A graph of terminal speed against altitude' : 'A falling body with its weight and drag forces, and a graph of its speed against time') });
+  const { canvas, box } = F.canvas({ aspect: P.aspect ?? (compact ? 'wide' : ''), label: P.alt_text || (altView ? 'A graph of terminal speed against altitude' : 'A falling body with its weight and drag forces, and a graph of its speed against time') });
   const ctx = canvas.getContext('2d');
   const graph = new Plot(canvas, { x: [0, 10], y: [0, 10], xlabel: 't (s)', ylabel: '' });
   const left = new Plot(canvas, { x: [-1.5, 1.5], y: [-2, 2], equal: true, grid: false, axes: false });
@@ -86,15 +86,20 @@ export function mount(F, P0) {
   function draw() {
     const e = env(), t = F.params.time ?? 0, T = span();
     const v = MF.fallSpeed(t, e.vt), D = MF.dragForce(v, e.CdA, e.rho), W = e.m * G;
+    const show = P.show;
+    // on a narrow screen the body goes above the graph instead of beside it
+    const stacked = show === 'both' && (canvas.clientWidth || 600) < 480;
+    if (!altView) box.style.aspectRatio = stacked ? '4 / 5' : '';
     graph.resize(); graph.refreshTheme();
     const Wd = graph.w, H = graph.h;
     ctx.clearRect(0, 0, Wd, H);
     if (altView) { drawAltitude(e); return; }
-    const show = P.show;
-    const split = show === 'both' ? Math.round(Wd * (Wd < 560 ? 0.38 : 0.34)) : show === 'body' ? Wd : 0;
+    const split = stacked ? 0 : show === 'both' ? Math.round(Wd * (Wd < 560 ? 0.38 : 0.34)) : show === 'body' ? Wd : 0;
+    const splitY = stacked ? Math.round(H * 0.4) : 0;
     // the body and its two forces
     if (show !== 'graph') {
-      left.o.pad = { l: 6, r: Wd - split + 6, t: 26, b: 10 };
+      left.resize();                                          // follow the canvas size (the graph's resize set it)
+      left.o.pad = stacked ? { l: 6, r: 6, t: 24, b: H - splitY + 4 } : { l: 6, r: Wd - split + 6, t: 26, b: 10 };
       left.setView([-1.5, 1.5], [-2.1, 2.1]);
       left.refreshTheme();
       body(left, P.icon);
@@ -105,15 +110,19 @@ export function mount(F, P0) {
         left.arrow(0, 0.15, 0, 0.15 + D * k, { color: 'warn', width: 2.8, head: 11 });
         // a short arrow is labelled beside its tip on the left, clear of the arms; a long one above its tip, clear of a canopy
         const tip = 0.15 + D * k, lbl = P.quiet ? 'D' : `D = ${fmtN(D)}`;
-        if (tip < 0.66) left.text(lbl, -0.12, tip + 0.02, { align: 'right', color: 'warn', size: 12, weight: 650 });
-        else left.text(lbl, 0.12, tip + 0.14, { color: 'warn', size: 12, weight: 650 });
+        if (tip < 0.66) left.text(lbl, -0.12, tip, { dy: -2, align: 'right', color: 'warn', size: 12, weight: 650 });
+        else left.text(lbl, 0.12, tip, { dy: -14, color: 'warn', size: 12, weight: 650 });
       } else left.text('D ≈ 0', 0.12, 0.8, { color: 'warn', size: 12, weight: 650 });
       if (!P.quiet) left.text(v > 0.995 * e.vt ? 'At terminal speed: D = mg' : t === 0 ? 'Just released: no drag yet' : 'Speeding up: D < mg', left.L, 13, { screen: true, color: 'ink2', size: 12, weight: 600 });
-      if (show === 'both') { ctx.save(); ctx.strokeStyle = graph.col.line2; ctx.setLineDash([4, 6]); ctx.beginPath(); ctx.moveTo(split + 0.5, 8); ctx.lineTo(split + 0.5, H - 8); ctx.stroke(); ctx.restore(); }
+      if (show === 'both') {
+        ctx.save(); ctx.strokeStyle = graph.col.line2; ctx.setLineDash([4, 6]); ctx.beginPath();
+        if (stacked) { ctx.moveTo(8, splitY + 0.5); ctx.lineTo(Wd - 8, splitY + 0.5); } else { ctx.moveTo(split + 0.5, 8); ctx.lineTo(split + 0.5, H - 8); }
+        ctx.stroke(); ctx.restore();
+      }
     }
     // speed against time
     if (show !== 'body') {
-      graph.o.pad = { l: split + (P.ask ? 22 : 50), r: 18, t: 18, b: 34 };
+      graph.o.pad = { l: split + (P.ask ? 22 : 50), r: 18, t: splitY + 18, b: 34 };
       graph.o.yfmt = P.ask ? () => '' : undefined;
       const vmax = Math.max(e.vt * 1.18, 1);
       graph.setView([0, T], [0, vmax]);

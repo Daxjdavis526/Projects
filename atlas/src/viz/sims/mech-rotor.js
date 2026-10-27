@@ -28,6 +28,7 @@
 //       values: true,              // numbers on the arrows
 //       lever: true,               // draw each force's line of action and lever arm
 //       cm: true,                  // mark the centre of mass when the axis is not at it
+//       flabels: ['F', 'F₂'],      // names of the two forces on the picture
 //       readouts: ['I', 'tau'],    // I Icm Md2 tau alpha omega theta K v at ac a T — or false (default: a set to suit)
 //   } }
 
@@ -37,7 +38,7 @@ import * as RM from '../model/mech-rotor.js';
 export const defaults = {
   shape: 'disk', M: 2, R: 0.3, L: 1.2, W: 0.5, m: 1, s: 0.4, d: 0, shapes: null,
   omega0: 0, alpha: null, F: 0, rF: null, phi: 90, F2: 0, rF2: null, phi2: 90, hang: 0, g: 9.8,
-  point: null, plot: false, sliders: [], T: 5, time: 0, play: true, values: true, lever: true, readouts: null, cm: true,
+  point: null, plot: false, sliders: [], T: 5, time: 0, play: true, values: true, lever: true, readouts: null, cm: true, flabels: ['F', 'F₂'],
 };
 
 const D2R = Math.PI / 180;
@@ -150,10 +151,17 @@ export function mount(F, P0) {
   function fitView(pl, md, extra = []) {
     const pts = [[0, 0], ...bodyPts(md), ...extra.flatMap((e) => (animated ? circlePts(e) : bodyPts(e)))];
     let right = 0;
+    const angleSlider = sliders.some((q) => q.key === 'phi' || q.key === 'phi2');
     for (const f of md.forces) {
       const u = [Math.cos(forceDir0(f)), Math.sin(forceDir0(f))], L = forceLen(md, f);
       pts.push([f.r, 0], [f.r + u[0] * L, u[1] * L]);
       right = Math.max(right, P.values ? 0.25 : 0.1);
+      if (P.lever) {
+        // the foot of the lever arm; with an adjustable angle it can be anywhere within |r| of the axis
+        const s = -(f.r * u[0]);
+        pts.push([f.r + s * u[0], s * u[1]]);
+        if (angleSlider) { const rr = Math.abs(f.r); pts.push([-rr * 0.2, -rr], [rr, rr]); }
+      }
     }
     const rB = rBodyOf(md);
     if (animated && !md.hang) {
@@ -261,10 +269,10 @@ export function mount(F, P0) {
         if (Math.hypot(...foot) > 1e-6) {
           pl.line(0, 0, foot[0], foot[1], { color: 'gold', width: 2.2 });
           const mid = [foot[0] / 2, foot[1] / 2];
-          label(c, i ? 'r⊥₂' : 'r⊥', pl.X(mid[0]) + 6, pl.Y(mid[1]) - 8, { color: c.gold, weight: 650, size: 11.5 });
+          label(c, `r⊥ (${P.flabels[i]})`, pl.X(mid[0]) + 6, pl.Y(mid[1]) - 8, { color: c.gold, weight: 650, size: 11.5 });
         }
       }
-      pl.arrow(A[0], A[1], A[0] + u[0] * len, A[1] + u[1] * len, { color: i ? 'good' : 'bad', width: 2.8, label: P.values ? `${i ? 'F₂' : 'F'} = ${trim(f.F)} N` : i ? 'F₂' : 'F' });
+      pl.arrow(A[0], A[1], A[0] + u[0] * len, A[1] + u[1] * len, { color: i ? 'good' : 'bad', width: 2.8, label: P.values ? `${P.flabels[i]} = ${trim(f.F)} N` : P.flabels[i] });
       pl.point(A[0], A[1], { color: i ? 'good' : 'bad', r: 3.5 });
     });
     // angular velocity: a curved arrow round the axis

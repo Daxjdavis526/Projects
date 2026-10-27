@@ -112,6 +112,8 @@ math or emphasis. Inside `` t`…` `` a backtick must be typed `` \` `` —
 the markup reads `` \` `` as a plain backtick, so `` t`Use \`x**2\`.` `` works.
 
 Inside math, a comma is punctuation to TeX: `$6,371$` renders "6, 371".
+Brace multi-letter subscripts and commands in them: `v_{\max}`, `T_{\text{eff}}`
+(KaTeX rejects `v_\max`).
 Write thousands as `$6{,}371$` or with a thin space, `$6\,371$`.
 
 **Write every string that contains a backslash as `` t`…` `` (String.raw).**

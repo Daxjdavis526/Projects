@@ -7,7 +7,7 @@
 // [open: ~10¹²³ with a Planck cutoff, ~10⁵⁵ with others]; dark matter's nature
 // and dark energy's [open; effects est-obs]; the Hubble tension [open].
 import { lesson, mcq, multi, num } from '../../src/core/content.js';
-import { G, C, M_SUN, HBAR, KB, GEV, sci, round, T_SUN, logDots } from './_frontier.js';
+import { G, C, M_SUN, HBAR, KB, GEV, YEAR, sci, round, logDots } from './_frontier.js';
 import { rhoCrit } from '../../src/viz/model/gr-cosmology.js';
 
 const t = String.raw;
@@ -21,6 +21,7 @@ const HBARC = (HBAR * C) / GEV;                              // GeV m
 const vacuum = (E) => (E ** 4 / HBARC ** 3) * GEV / (C * C); // kg/m³ for a cutoff energy E (GeV): E⁴/((ħc)³c²)
 const hawkingT = (M) => (HBAR * C ** 3) / (8 * Math.PI * G * M * KB);   // K
 const entropy = (M) => (4 * Math.PI * G * M * M) / (HBAR * C);         // in units of k_B
+const LIFE = (5120 * Math.PI * G * G) / (HBAR * C ** 4);                // s/kg³: evaporation time ÷ M³ (simplest estimate: the horizon area radiating light as a black body)
 const RING = (B) => E_P / (0.2998 * B);                      // m: bending radius for a Planck-energy proton
 
 export default lesson({
@@ -49,7 +50,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
     type: 'graph',
     title: 'How big a collider for quantum gravity?',
     lead: t`A proton bent round a ring by a magnetic field $B$ reaches energy $E \approx 0.3\,BR$ (in GeV, with $B$ in tesla and the bending radius $R$ in metres). Slide the radius and the field and see how far the Planck energy is.`,
-    tasks: ['At the LHC’s bending radius, 2.8 km, with its 8.3 T magnets, you get about 7 TeV — the real machine.', 'Slide the radius until the point reaches the Planck energy: with LHC magnets the ring must be about 500 light-years in radius.', 'Even with magnets twice as strong, it is hundreds of light-years. Quantum gravity will have to be tested indirectly — through the early universe, black holes, or exquisitely precise experiments.'],
+    tasks: ['At the LHC’s bending radius, 2.8 km, with its 8.3 T magnets, you get about 7 TeV — the real machine’s design beam energy.', 'Slide the radius until the point reaches the Planck energy: with LHC magnets the ring must be about 500 light-years in radius.', 'Even with magnets twice as strong, it is hundreds of light-years. Quantum gravity will have to be tested indirectly — through the early universe, black holes, or exquisitely precise experiments.'],
     params: {
       x: [2, 21], y: [1, 21], xlabel: 'log₁₀(bending radius in m)', ylabel: 'log₁₀(proton energy in GeV)',
       sliders: [
@@ -70,6 +71,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
   },
   example: {
     prompt: t`The cosmological-constant problem. Observations give dark energy a density $\rho_\Lambda = \Omega_\Lambda\rho_c$. A naive quantum estimate adds up the zero-point energy of quantum fields up to the Planck scale, giving the Planck density $c^5/(\hbar G^2)$. How badly do the two disagree?`,
+    visual: logDots([['observed dark energy', RHO_L, 'gold'], ['estimate cut off at 100 GeV', vacuum(100), 'teal'], ['cut off at 10¹⁶ GeV', vacuum(1e16), 'violet'], ['cut off at the Planck energy', RHO_P, 'bad']], { xlabel: 'density in kg/m³ (powers of ten)', range: [-30, 130], every: 20, caption: 'The observed density of dark energy and naive estimates of the vacuum’s, in powers of ten. Every estimate misses by at least 54 powers of ten.' }),
     steps: [
       { label: 'Observed', text: t`$\rho_\Lambda = 0.685\times${sci(rhoCrit(67.4))} = ${sci(RHO_L)}$ kg/m³ — about the mass of three protons per cubic metre.` },
       { label: 'Naive estimate', text: t`$c^5/(\hbar G^2) = (2.998\times10^{8})^5/(1.0546\times10^{-34}\times(6.674\times10^{-11})^2) = ${sci(RHO_P)}$ kg/m³.` },
@@ -85,7 +87,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
       prompt: 'Which of these are established by observation? Select every one.',
       choices: [
         'Gravitational waves travel at the speed of light, to about one part in 10¹⁵',
-        'Black holes cast shadows of the size general relativity predicts, to about 10%',
+        'Black holes cast shadows of the size general relativity predicts, to within 10–20%',
         'The expansion of the universe is speeding up',
         'Gravity is quantised, as string theory or loop quantum gravity describe',
         'Dark matter is made of a particular new particle',
@@ -99,7 +101,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
       },
       hints: ['For each, ask: has it been measured, or is it a prediction or a theory?'],
       teach: 'Keep three piles: measured, derived but unmeasured, and speculative — and say which pile each claim is in.',
-      explain: 'GW170817’s gamma rays arrived 1.7 s after its gravitational waves, after 130 million years of travel; the Event Horizon Telescope’s images of M87* and Sgr A* match predicted shadows to about 10%; supernovae, the cosmic microwave background and galaxy surveys show the acceleration. The rest are open questions.',
+      explain: 'GW170817’s gamma rays arrived 1.7 s after its gravitational waves, after 130 million years of travel; the Event Horizon Telescope’s images of M87* and Sgr A* match the predicted shadow sizes to within 10–20%; supernovae, the cosmic microwave background and galaxy surveys show the acceleration. The rest are open questions.',
       visual: logDots([['free fall of different materials (MICROSCOPE)', 1e-15, 'good'], ['speed of gravitational waves vs light (GW170817)', 1e-15, 'good'], ['light bending by the Sun (radio)', 1e-4, 'good'], ['black-hole shadows (EHT)', 0.1, 'good']], { xlabel: 'precision of the test (powers of ten; smaller is sharper)', range: [-17, 3], every: 2, caption: 'How precisely some predictions of general relativity have been tested, in powers of ten.' }),
     }),
     num({
@@ -125,29 +127,53 @@ Where gravity and quantum physics must meet, the constants of both point to one 
     num({
       id: 'hawking', difficulty: 2,
       gen(r) {
-        const ask = r.pick(['mass-cmb', 'temp']);
-        const M = 1e12;
-        const x = ask === 'mass-cmb' ? (HBAR * C ** 3) / (8 * Math.PI * G * KB * 2.725) : hawkingT(M);
+        const ask = r.pick(['mass-cmb', 'temp', 'life']);
+        const M = ask === 'life' ? M_SUN : 1e12;
+        const K = (HBAR * C ** 3) / (8 * Math.PI * G * KB);      // K kg
+        const x = ask === 'mass-cmb' ? K / 2.725 : ask === 'temp' ? hawkingT(M) : (LIFE * M ** 3) / YEAR;
+        const tempLaw = t`A black hole's predicted Hawking temperature is $T = \hbar c^3/(8\pi G M k_B)$.`;
         return {
           prompt: ask === 'mass-cmb'
-            ? t`A black hole's predicted Hawking temperature is $T = \hbar c^3/(8\pi G M k_B)$. What mass of black hole would be exactly as warm as the cosmic microwave background, 2.725 K? ($k_B = 1.381\times10^{-23}$ J/K)`
-            : t`A black hole's predicted Hawking temperature is $T = \hbar c^3/(8\pi G M k_B)$. How hot would a black hole of $10^{12}$ kg — the mass of a mountain — be? ($k_B = 1.381\times10^{-23}$ J/K)`,
-          answer: x, units: ask === 'mass-cmb' ? 'kg' : 'K', tol: { rel: 0.01 },
-          errors: [{ value: x * 8 * Math.PI, feedback: 'Keep the 8π in the denominator.' }],
-          hints: [t`$\hbar c^3/(8\pi G k_B) = ${sci((HBAR * C ** 3) / (8 * Math.PI * G * KB))}$ K kg.`, ask === 'mass-cmb' ? 'Divide that by 2.725 K to get the mass.' : 'Divide that by the mass.'],
-          teach: 'Hawking temperature falls as 1/M: only black holes lighter than the Moon would be warmer than the cosmic background.',
+            ? t`${tempLaw} What mass of black hole would be exactly as warm as the cosmic microwave background, 2.725 K? ($k_B = 1.381\times10^{-23}$ J/K)`
+            : ask === 'temp'
+              ? t`${tempLaw} How hot would a black hole of $10^{12}$ kg — about the mass of a small mountain — be? ($k_B = 1.381\times10^{-23}$ J/K)`
+              : t`In the simplest estimate — the horizon glowing like a black body at the Hawking temperature, in light alone — a black hole takes $t = 5120\pi G^2M^3/(\hbar c^4)$ to evaporate completely. How many years would a black hole of one solar mass ($1.989\times10^{30}$ kg) take? (1 yr $= 3.156\times10^{7}$ s)`,
+          answer: x, units: ask === 'mass-cmb' ? 'kg' : ask === 'temp' ? 'K' : 'yr', tol: { rel: 0.01 },
+          errors: ask === 'life'
+            ? [{ value: x * YEAR, feedback: 'That is in seconds; divide by 3.156×10⁷ s per year.' }, { value: x / M_SUN, feedback: 'The time grows as M³: cube the mass.' }]
+            : [{ value: x * 8 * Math.PI, feedback: 'Keep the 8π in the denominator.' }],
+          hints: ask === 'life'
+            ? [t`$5120\pi G^2/(\hbar c^4) = ${sci(LIFE)}$ s per kg³.`, t`Multiply by $M^3 = (1.989\times10^{30})^3$, then divide by $3.156\times10^{7}$ s per year.`]
+            : [t`$\hbar c^3/(8\pi G k_B) = ${sci(K)}$ K kg.`, ask === 'mass-cmb' ? 'Divide that by 2.725 K to get the mass.' : 'Divide that by the mass.'],
+          teach: ask === 'life'
+            ? 'Evaporation time grows as M³: real black holes would outlast the present universe by an absurd margin — which is why Hawking radiation has never been seen.'
+            : 'Hawking temperature falls as 1/M: only black holes lighter than the Moon would be warmer than the cosmic background.',
           explain: ask === 'mass-cmb'
-            ? t`$M = ${sci(x)}$ kg — about ${sci(x / 7.35e22, 2)} Moon masses. Every black hole known is millions of times heavier, so colder than its surroundings: it absorbs more than it emits. Hawking radiation is derived, never observed.`
-            : t`$T = ${sci(x)}$ K. Such small black holes — “primordial” ones from the early universe — are speculative: searches for their final bursts have found none.`,
-          visual: {
-            type: 'graph',
-            params: {
-              x: [8, 32], y: [-8, 16], xlabel: 'log₁₀(mass in kg)', ylabel: 'log₁₀(temperature in K)',
-              curves: [{ fn: `${round(Math.log10((HBAR * C ** 3) / (8 * Math.PI * G * KB)), 5)} - x`, color: 'bad' }],
-              vlines: [{ x: round(Math.log10(M_SUN), 4), label: 'the Sun’s mass' }],
+            ? t`$M = ${sci(x)}$ kg — about ${sci(x / 7.35e22, 2)} Moon masses. Every black hole known is at least $10^8$ times heavier, so colder than its surroundings: it absorbs more than it emits. Hawking radiation is derived, never observed.`
+            : ask === 'temp'
+              ? t`$T = ${sci(x)}$ K. Such small black holes — “primordial” ones from the early universe — are speculative: searches for their final bursts have found none.`
+              : t`$t = ${sci(LIFE * M ** 3)}\ \text{s} = ${sci(x)}$ yr — about $10^{57}$ times the present age of the universe. And while it is colder than the cosmic microwave background, a real black hole absorbs more than it emits, so it is not evaporating at all yet. Hawking radiation is derived, never observed.`,
+          visual: ask === 'life'
+            ? {
+              type: 'graph',
+              params: {
+                x: [8, 32], y: [-4, 76], xlabel: 'log₁₀(mass in kg)', ylabel: 'log₁₀(evaporation time in years)',
+                curves: [{ fn: `${round(Math.log10(LIFE / YEAR), 5)} + 3x`, color: 'violet' }],
+                hlines: [{ y: round(Math.log10(13.8e9), 4), label: 'age of the universe', color: 'gold' }],
+                vlines: [{ x: round(Math.log10(M_SUN), 4), label: 'the Sun’s mass' }],
+              },
+              caption: 'Predicted evaporation time against mass (the simplest black-body estimate), both in powers of ten: it grows as M³ (slope 3).',
+            }
+            : {
+              type: 'graph',
+              params: {
+                x: [8, 32], y: [-8, 16], xlabel: 'log₁₀(mass in kg)', ylabel: 'log₁₀(temperature in K)',
+                curves: [{ fn: `${round(Math.log10(K), 5)} - x`, color: 'bad' }],
+                hlines: [{ y: round(Math.log10(2.725), 4), label: 'cosmic microwave background, 2.7 K', color: 'gold' }],
+                vlines: [{ x: round(Math.log10(M_SUN), 4), label: 'the Sun’s mass' }],
+              },
+              caption: 'Predicted Hawking temperature against mass, both in powers of ten: it falls as 1/M.',
             },
-            caption: 'Predicted Hawking temperature against mass, both in powers of ten: it falls as 1/M.',
-          },
         };
       },
     }),
@@ -162,7 +188,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
           errors: [{ value: x / m, feedback: 'The entropy grows as M², not M.' }, { value: x / (4 * Math.PI), feedback: 'Keep the 4π.' }].filter((e) => Math.abs(e.value - x) > 0.02 * x),
           hints: [t`$4\pi G/(\hbar c) = ${sci((4 * Math.PI * G) / (HBAR * C))}\ \text{kg}^{-2}$.`, t`Multiply by $M^2 = (${sci(m * M_SUN)})^2$.`],
           teach: 'Black-hole entropy grows as the horizon area, M² — a clue that the information content of a region may be set by its boundary.',
-          explain: t`$S/k_B = ${sci(x)}$ — vastly more than the star that collapsed held. Where these microscopic states are, and how they encode what fell in, is part of the open information question.`,
+          explain: t`$S/k_B = ${sci(x)}$ — vastly more, by many powers of ten, than the stars and gas that formed it ever held. Where these microscopic states are, and how they encode what fell in, is part of the open information question.`,
           visual: {
             type: 'graph',
             params: {
@@ -195,11 +221,11 @@ Where gravity and quantum physics must meet, the constants of both point to one 
       visual: {
         type: 'graph',
         params: {
-          x: [62, 80], y: [-0.7, 3.7], axes: false, grid: false, xlabel: '', ylabel: '',
-          curves: [[67.4, 0.5, 0, 'gold'], [70.39, 1.94, 1, 'violet'], [71.0, 8, 2, 'teal'], [73.04, 1.04, 3, 'accent']].map(([v, e, k, color]) => ({ param: [`${round(v - e, 4)} + ${round(2 * e, 4)}t`, String(k)], t: [0, 1], color, width: 2.6 })),
-          points: [[67.4, 0, 'Planck CMB, 67.4 ± 0.5', 'gold'], [70.39, 1, 'CCHP red giants, 70.4 ± 1.9', 'violet'], [71.0, 2, 'GW sirens, 71 (±8)', 'teal'], [73.04, 3, 'SH0ES Cepheids, 73.0 ± 1.0', 'accent']].map(([v, y, label, color]) => ({ x: v, y, color, label })),
+          x: [60, 82], y: [0.4, 4.7], xlabel: 'H₀ (km/s/Mpc)', ylabel: '', yticks: 0,
+          curves: [[67.4, 0.5, 0.5, 1, 'gold'], [70.39, 1.94, 1.94, 2, 'violet'], [71.0, 7, 9, 3, 'teal'], [73.04, 1.04, 1.04, 4, 'accent']].map(([v, lo, hi, k, color]) => ({ param: [`${round(v - lo, 4)} + ${round(lo + hi, 4)}t`, String(k)], t: [0, 1], color, width: 2.6 })),
+          points: [[67.4, 1, 'Planck CMB, 67.4 ± 0.5', 'gold'], [70.39, 2, 'CCHP red giants, 70.4 ± 1.9', 'violet'], [71.0, 3, 'GW sirens, 71 (+9/−7)', 'teal'], [73.04, 4, 'SH0ES Cepheids, 73.0 ± 1.0', 'accent']].map(([v, y, label, color]) => ({ x: v, y, color, label })),
         },
-        caption: 'Four measurements of H₀ in km/s/Mpc with error bars (the sirens’ asymmetric range simplified). Status October 2026: open.',
+        caption: 'Four measurements of H₀ in km/s/Mpc with their error bars, as summarised in 2026. Status October 2026: open.',
       },
     }),
     mcq({
@@ -219,7 +245,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
       },
       hints: ['Separate the gravitational evidence from the question of what the stuff is.'],
       teach: 'Dark matter’s existence, through its gravity, is established; its nature is an open question.',
-      explain: 'The cosmic microwave background alone requires a matter density about five times that of ordinary atoms, and the Bullet Cluster shows lensing mass offset from its gas. What dark matter is — a particle, something else — is unknown.',
+      explain: 'The cosmic microwave background alone requires about five times as much dark matter as ordinary atoms, and the Bullet Cluster shows lensing mass offset from its gas. What dark matter is — a particle, something else — is unknown.',
       visual: {
         type: 'graph',
         params: {
@@ -241,13 +267,13 @@ Where gravity and quantum physics must meet, the constants of both point to one 
       ],
       answer: 0,
       why: {
-        1: 'Hawking radiation from astrophysical black holes is far too faint ever to detect; it has been seen only in laboratory analogues.',
+        1: 'Hawking radiation from astrophysical black holes is far too faint ever to detect; only laboratory analogues of it, such as sound in ultracold atoms, have been studied.',
         2: 'That was Hawking’s 1976 view; he later changed his mind, and most theorists now expect information to be preserved — without agreeing on how.',
         3: 'Black holes are observed: gravitational waves, shadows, stars orbiting Sgr A*.',
       },
       hints: ['Look at the picture: which curve do the newer calculations support, and in what kind of model?'],
       teach: 'The information paradox is open: toy-model calculations support information being preserved, but the real mechanism is unknown.',
-      explain: 'Hawking’s calculation gives radiation whose entropy keeps rising until the hole is gone — information lost. If information is preserved, the entropy must turn over halfway (the Page curve). “Island” calculations since 2019 reproduce the Page curve in simplified models; whether and how this carries over to real black holes is unsettled.',
+      explain: 'Hawking’s calculation gives radiation whose entropy keeps rising until the hole is gone — information lost. If information is preserved, the entropy must peak — around the time the hole has lost half its entropy — and fall back to zero: the Page curve. “Island” calculations since 2019 reproduce the Page curve in simplified models; whether and how this carries over to real black holes is unsettled.',
       visual: {
         type: 'graph',
         params: {
@@ -285,7 +311,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
     num({
       id: 'cp-vacuum', difficulty: 2,
       gen(r) {
-        const [E, txt, name] = r.pick([[E_P, t`1.22\times10^{19}`, 'the Planck energy'], [1e16, t`10^{16}`, 'a “grand unification” energy'], [100, '100', 'the energy of the heaviest known particles']]);
+        const [E, txt, name] = r.pick([[E_P, t`1.22\times10^{19}`, 'the Planck energy'], [1e16, t`10^{16}`, 'a “grand unification” energy'], [100, '100', 'about the energy of the heaviest known particles']]);
         const x = vacuum(E) / RHO_L;
         return {
           prompt: t`If the zero-point energy of quantum fields is summed up to ${name}, $E = ${txt}$ GeV, the vacuum gets a mass density of about $E^4/((\hbar c)^3c^2)$, with $\hbar c = ${sci(HBARC, 4)}$ GeV m. How many times larger is that than the observed $\rho_\Lambda = ${sci(RHO_L)}$ kg/m³? (1 GeV $= 1.602\times10^{-10}$ J)`,
@@ -317,8 +343,25 @@ Where gravity and quantum physics must meet, the constants of both point to one 
       },
       hints: ['Which of these have been measured, and which are still being argued about?'],
       teach: 'Open questions sit next to established facts; part of understanding physics is knowing which is which.',
-      explain: 'Dark energy’s nature, the information paradox and the Hubble tension are open. Gravitational waves, black holes and cosmic acceleration are established by observation — the open questions are about what lies behind them.',
-      visual: logDots([['gravitational waves detected (2015)', 2015, 'good'], ['accelerating expansion found (1998)', 1998, 'good'], ['first black-hole shadow imaged (2019)', 2019, 'good']], { xlabel: 'year of discovery', range: [3.29, 3.32], every: 1, caption: 'Some discoveries that turned questions into established facts (dots by year; the axis is uninformative here).' }),
+      explain: 'Dark energy’s nature (DESI’s hint that it changes with time is below the 5σ standard for a discovery), the information paradox and the Hubble tension are open. Gravitational waves, black holes and cosmic acceleration are established by observation — the open questions are about what lies behind them.',
+      visual: {
+        type: 'graph',
+        params: {
+          aspect: 'wide', x: [1900, 2040], y: [0.4, 4.8], xlabel: 'year', ylabel: '', yticks: 0,
+          curves: [
+            ...[[1915, 1919, 4, 'light bending by the Sun: predicted 1915, measured 1919'], [1911, 1959, 3, 'gravitational redshift: 1911 → 1959 (Pound and Rebka)'], [1918, 2011, 2, 'frame dragging: 1918 → 2011 (Gravity Probe B)']]
+              .map(([a, b, y, label]) => ({ param: [`${a} + ${b - a}t`, String(y)], t: [0, 1], color: 'good', width: 4, label, labelAt: 0, labelDx: 0, labelDy: -15 })),
+            { param: ['1974 + 52t', '1'], t: [0, 1], color: 'bad', width: 4, dash: true, label: 'Hawking radiation: predicted 1974 — not yet observed', labelAt: 0, labelDx: 0, labelDy: -15 },
+          ],
+          points: [
+            ...[[1915, 4], [1911, 3], [1918, 2], [1974, 1]].map(([x, y]) => ({ x, y, color: 'ink3', r: 5 })),
+            ...[[1919, 4], [1959, 3], [2011, 2]].map(([x, y]) => ({ x, y, color: 'good', r: 5 })),
+          ],
+          arrows: [{ from: [2026, 1], to: [2038, 1], color: 'bad' }],
+          vlines: [{ x: 2026, label: 'now' }],
+        },
+        caption: 'From prediction (grey dot) to a convincing measurement (green dot): some predictions waited the best part of a century, and Hawking radiation is still waiting.',
+      },
     }),
     mcq({
       id: 'cp-headline', difficulty: 3, transfer: true,

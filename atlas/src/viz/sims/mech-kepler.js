@@ -23,6 +23,7 @@
 //       orbitSeconds: 9,      // seconds of animation per orbit (Newton's cannon: per circular orbit)
 //       readout: true,        // true, false, or a list of keys from READOUTS below
 //       labels: true,         // apsis, focus and scale labels
+//       controls: true,       // false: a still picture with no controls at all (for a problem)
 //   } }
 
 import { Plot } from '../plot.js';
@@ -30,7 +31,7 @@ import * as K from '../model/mech-kepler.js';
 
 export const defaults = {
   presets: ['iss', 'gps', 'geo', 'moon'], preset: null, launch: null, sectors: 12, sweep: true, velocity: true,
-  play: true, autoplay: false, time: true, t: 0.12, orbitSeconds: 9, readout: true, labels: true,
+  play: true, autoplay: false, time: true, t: 0.12, orbitSeconds: 9, readout: true, labels: true, controls: true,
 };
 
 export const READOUTS = ['r', 'alt', 'v', 'T', 'a', 'e', 'rp', 'ra', 'vp', 'va', 'E', 'h', 'fate', 'vc', 'vesc'];
@@ -92,21 +93,22 @@ export async function mount(F, P) {
 
   // ─── controls ────────────────────────────────────────────────────────────
   if (launchMode) {
-    F.slider({ key: 'v', label: 'Launch speed $v_0$', min: L.vRange[0], max: L.vRange[1], step: 0.01, value: L.v, unit: '\\mathrm{km/s}', explain: 'Fired sideways — parallel to the ground — from the marked point.' });
-    if (L.hSlider) F.slider({ key: 'hkm', label: 'Launch height $h$', min: 0, max: 2000, step: 10, value: L.h / 1e3, unit: '\\mathrm{km}', explain: 'Above the surface. The launch speed needed for each kind of path falls with height.' });
+    if (P.controls) F.slider({ key: 'v', label: 'Launch speed $v_0$', min: L.vRange[0], max: L.vRange[1], step: 0.01, value: L.v, unit: '\\mathrm{km/s}', explain: 'Fired sideways — parallel to the ground — from the marked point.' });
+    else F.params.v = L.v;
+    if (L.hSlider && P.controls) F.slider({ key: 'hkm', label: 'Launch height $h$', min: 0, max: 2000, step: 10, value: L.h / 1e3, unit: '\\mathrm{km}', explain: 'Above the surface. The launch speed needed for each kind of path falls with height.' });
     else F.params.hkm = L.h / 1e3;
   } else {
-    if (P.presets.length > 1) F.choice({ key: 'preset', label: 'Orbit', options: P.presets.map((k) => [k, K.PRESETS[k].label]), value: P.preset ?? P.presets[0], explain: 'Real orbits, each drawn to its own scale.' });
-    else F.params.preset = P.presets[0];
-    if (P.time && !F.compact) F.slider({ key: 'tf', label: 'Time since the closest point, $t/T$', min: 0, max: 1, step: 0.005, value: P.t, unit: '', explain: 'As a fraction of the period $T$. Play moves it on at the true relative rate.' });
+    if (P.presets.length > 1 && P.controls) F.choice({ key: 'preset', label: 'Orbit', options: P.presets.map((k) => [k, K.PRESETS[k].label]), value: P.preset ?? P.presets[0], explain: 'Real orbits, each drawn to its own scale.' });
+    else F.params.preset = P.preset ?? P.presets[0];
+    if (P.time && P.controls && !F.compact) F.slider({ key: 'tf', label: 'Time since the closest point, $t/T$', min: 0, max: 1, step: 0.005, value: P.t, unit: '', explain: 'As a fraction of the period $T$. Play moves it on at the true relative rate.' });
     else F.params.tf = P.t;
   }
-  if (P.sweep && P.sectors > 0) F.toggle({ key: 'sweep', label: `Equal-time sectors (${P.sectors} per orbit)`, value: true, explain: 'Each sector is swept by the radius line in the same time. Kepler’s second law: their areas are equal.' });
+  if (P.sweep && P.controls && P.sectors > 0) F.toggle({ key: 'sweep', label: `Equal-time sectors (${P.sectors} per orbit)`, value: true, explain: 'Each sector is swept by the radius line in the same time. Kepler’s second law: their areas are equal.' });
   else F.params.sweep = P.sectors > 0;
 
   const S = { running: !!P.autoplay && !reduced, tl: 0, pause: 0 };
   let playBtn = null;
-  if (P.play) {
+  if (P.play && P.controls) {
     playBtn = F.button({ label: S.running ? 'Pause' : 'Play', primary: true, onClick: () => {
       S.running = !S.running; playBtn.textContent = S.running ? 'Pause' : 'Play';
       if (S.running) anim.start();

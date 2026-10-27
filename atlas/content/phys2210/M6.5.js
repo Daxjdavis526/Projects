@@ -48,7 +48,7 @@ A body dropped from rest speeds up until the drag matches its weight; from then 
   visual: {
     type: 'mech-drag',
     title: 'A skydiver falling from rest',
-    lead: t`A skydiver steps out of a plane. On the left: her weight and the air’s drag on her, drawn to one scale. On the right: her speed against time. Press **Play** and watch the drag arrow grow until it matches her weight.`,
+    lead: t`A skydiver steps out of a plane. One panel shows her weight and the air’s drag on her, drawn to one scale; the other, her speed against time. Press **Play** and watch the drag arrow grow until it matches her weight.`,
     tasks: [
       'Press Play: the speed climbs ever more slowly toward about 55 m/s (200 km/h), where the drag arrow has grown to match the weight.',
       'Switch to Head down: with less drag area she falls faster, about 76 m/s. Then open the canopy: under 6 m/s.',
@@ -96,7 +96,7 @@ A body dropped from rest speeds up until the drag matches its weight; from then 
         const v = vtOf(m, CdA);
         return {
           prompt: t`A skydiver of mass ${m} kg (with gear) falls belly to earth with a drag area $C_D A = ${CdA}$ m². The air density is 1.2 kg/m³. What is her terminal speed?`,
-          visual: fall({ m, CdA, ask: true }, 'At terminal speed: drag balances weight (left, to scale) and the speed has levelled off (right).'),
+          visual: fall({ m, CdA, ask: true }, 'At terminal speed the drag balances the weight (arrows to scale), and the speed has levelled off.'),
           answer: v, units: 'm/s', tol: { rel: 0.01 },
           errors: keep(v, [
             { value: v / Math.SQRT2, feedback: t`Keep the 2: setting $\tfrac12\rho C_D A v_t^2 = mg$ gives $v_t^2 = 2mg/(\rho C_D A)$.` },
@@ -116,7 +116,7 @@ A body dropped from rest speeds up until the drag matches its weight; from then 
         const v = +(f * vt).toFixed(4), a = G * (1 - f * f);
         return {
           prompt: t`A skydiver’s terminal speed is ${vt} m/s. What is her acceleration at the moment she is falling at ${v} m/s?`,
-          visual: fall({ m: 80, CdA: (2 * 80 * G) / (RHO * vt * vt), q: f, quiet: true }, 'That moment: her weight and the drag, to scale (left), and her place on the speed curve (right).'),
+          visual: fall({ m: 80, CdA: (2 * 80 * G) / (RHO * vt * vt), q: f, quiet: true }, 'That moment: her weight and the drag, to scale, and her place on the speed curve.'),
           answer: a, units: 'm/s²', tol: { rel: 0.01, abs: 0.01 },
           errors: keep(a, [
             { value: G * (1 - f), feedback: t`Drag grows as $v^2$, not $v$: at ${f} of the terminal speed it is $${f}^2 = ${s3(f * f)}$ of the weight.` },

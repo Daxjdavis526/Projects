@@ -124,7 +124,7 @@ directed along the line joining them. The two pulls are equal and opposite — t
         const [name, m, a] = r.pick(PLANETS);
         const F = (G * M_SUN * m) / (a * a);
         return {
-          prompt: t`How hard does the Sun ($M = 1.989\times10^{30}$ kg) pull on ${name} ($m = ${tex(m, 4)}$ kg), ${tex(a, 4)} m away?`,
+          prompt: t`How hard does the Sun ($M = 1.989\times10^{30}$ kg) pull on ${name} ($m = ${tex(m, 4)}$ kg), $${tex(a, 4)}$ m away?`,
           answer: F, units: 'N', tol: { rel: 0.01 },
           errors: [{ value: (G * M_SUN * m) / a, feedback: 'Square the distance.' }],
           hints: [t`$F = GMm/r^2$ with $G = 6.674\times10^{-11}$.`],
