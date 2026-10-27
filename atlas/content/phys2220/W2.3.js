@@ -69,7 +69,7 @@ with $v_o$ positive when the listener moves toward the source and $v_s$ positive
     visual: dop(0.3, { time: 0.55 }, 'Wavefronts from a source moving to the right, drawn at Mach 0.3 so the crowding shows. At 25 m/s (Mach 0.07) the effect is much smaller. Scaled picture, still air.'),
     steps: [
       { label: 'Approaching', text: t`The source moves toward you: $v_s = +25$ m/s, $v_o = 0$. $f_o = 700 \times \dfrac{343}{343 - 25} = 755$ Hz.` },
-      { label: 'Receding', text: t`Moving away: $v_s = -25$ m/s. $f_o = 700 \times \dfrac{343}{343 + 25} = 652$ Hz. As it passes, the pitch drops by 103 Hz — about a whole tone in music.` },
+      { label: 'Receding', text: t`Moving away: $v_s = -25$ m/s. $f_o = 700 \times \dfrac{343}{343 + 25} = 652$ Hz. As it passes, the pitch drops by 103 Hz — a fall of about two and a half semitones in music.` },
       { label: 'You move instead', text: t`Now $v_o = +25$ m/s and $v_s = 0$: $f_o = 700 \times \dfrac{343 + 25}{343} = 751$ Hz — close to 755 Hz, but not the same.` },
       { label: 'Why not the same', text: t`Sound travels through the air, so it matters which of you moves *relative to the air*. A moving source shortens the wavelength in the air; a moving listener keeps the wavelength but meets the fronts faster. For small speeds the two agree to first order in $v_s/v$.` },
     ],
@@ -151,7 +151,7 @@ with $v_o$ positive when the listener moves toward the source and $v_s$ positive
           hints: ['In time t the sound spreads vt while the aircraft flies Mvt.', t`$\sin\theta = \dfrac{vt}{Mvt} = \dfrac{1}{M}$.`],
           teach: 'The Mach cone’s half-angle obeys sin θ = 1/M: the faster, the narrower.',
           explain: t`$\theta = \sin^{-1}(1/${M}) = ${tn(th)}°$. At Mach 1 the cone opens out flat (90°); the faster the aircraft, the narrower the cone.`,
-          visual: dop(M, { time: 0.62 }, 'Wavefronts from a supersonic source: they pile up along a cone trailing behind it (scaled picture; angle not labelled).'),
+          visual: dop(M, { time: 0.62, ask: true }, 'Wavefronts from a supersonic source: they pile up along a cone trailing behind it (scaled picture; angle not labelled).'),
         };
       },
     }),
@@ -184,7 +184,7 @@ with $v_o$ positive when the listener moves toward the source and $v_s$ positive
           hints: [t`Write $f_\text{up} = f\,v/(v - u)$ and $f_\text{down} = f\,v/(v + u)$, then divide one by the other.`, t`$\dfrac{f_\text{up}}{f_\text{down}} = \dfrac{v + u}{v - u}$, which gives $u = v\,\dfrac{f_\text{up} - f_\text{down}}{f_\text{up} + f_\text{down}}$.`],
           teach: 'The ratio of the approaching and receding pitches gives the speed, without knowing the emitted frequency.',
           explain: t`$u = 343 \times \dfrac{${fu} - ${fd}}{${fu} + ${fd}} = ${tn(u)}$ m/s (about $${tn(u * 3.6)}$ km/h). The car’s own note, $f = ${f}$ Hz, cancels out.`,
-          visual: dop(r6((vs / V) * 3), { time: 0.6, trace: true, mics: true, ask: true }, 'A scaled picture (speed exaggerated three times): the graph shows the pitch a roadside microphone hears, sliding from high to low as the car passes.'),
+          visual: dop(r6(vs / V), { f, time: 0.6, trace: true, mics: true, ask: true }, 'The car’s wavefronts (scaled picture) and, below, the pitch a roadside microphone hears, sliding from high to low as the car passes.'),
         };
       },
     }),

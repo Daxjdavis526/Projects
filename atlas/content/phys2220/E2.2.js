@@ -15,6 +15,7 @@ WX.p = WX.q * 0.06;
 WX.far = (K * WX.p) / 0.04 ** 3;
 
 const MOLECULES = [['water', 6.2e-30], ['ammonia', 4.9e-30], ['hydrogen chloride', 3.6e-30]];
+const an = (w) => (/^[aeiou]/.test(w) ? 'an' : 'a');
 
 export default lesson({
   id: 'phys2220.E2.2',
@@ -145,13 +146,13 @@ An equal and opposite pair of charges a small distance apart is an **electric di
       gen(r) {
         const [name, p] = r.pick(MOLECULES), rn = r.pick([2.0, 3.0, 5.0]), E = (2 * K * p) / (rn * 1e-9) ** 3;
         return {
-          prompt: t`Treat a ${name} molecule as a point dipole with $p = ${tn(p, 2)}$ C·m. How strong is its field at a point on its axis ${rn} nm away? (On the axis, far from a dipole, $E = 2kp/r^3$.)`,
+          prompt: t`Treat ${an(name)} ${name} molecule as a point dipole with $p = ${tn(p, 2)}$ C·m. How strong is its field at a point on its axis ${rn} nm away? (On the axis, far from a dipole, $E = 2kp/r^3$.)`,
           answer: E, units: 'N/C', tol: { rel: 0.01 },
           errors: [{ value: (K * p) / (rn * 1e-9) ** 3, feedback: t`On the axis the far field is $2kp/r^3$; $kp/r^3$ is the field on the perpendicular bisector.` }, { value: (2 * K * p) / (rn * 1e-9) ** 2, feedback: t`A dipole's far field falls off as $1/r^3$, not $1/r^2$.` }],
           hints: [t`$E = 2kp/r^3$ with $r = ${rn}\times10^{-9}$ m.`],
           teach: 'Far from a dipole its field falls off as 1/r³: on the axis E = 2kp/r³, on the bisector kp/r³.',
           explain: t`$E = \dfrac{2(8.988\times10^{9})(${tn(p, 2)})}{(${rn}\times10^{-9})^3} = ${tn(E)}$ N/C. Huge by everyday standards — but it dies away so fast that a few nanometres further it is tiny. (So close to a molecule the point-dipole model is only a rough picture.)`,
-          visual: field({ x: [-4, 12], y: [-3.5, 3.5], charges: [{ x: -0.4, y: 0, q: -1 }, { x: 0.4, y: 0, q: 1 }], probe: { x: 9, y: 0, label: 'P' }, probeArrow: false, fieldLines: true, density: 10, notes: { arrows: [{ from: [-1.4, -1.6], to: [1.4, -1.6], label: 'p', color: 'gold' }] } }, 'A dipole (− on the left, + on the right) and the point P on its axis. Not to scale.'),
+          visual: field({ x: [-4, 12], y: [-3.5, 3.5], axes: false, grid: false, charges: [{ x: -0.4, y: 0, q: -1 }, { x: 0.4, y: 0, q: 1 }], probe: { x: 9, y: 0, label: 'P' }, probeArrow: false, fieldLines: true, density: 10, notes: { arrows: [{ from: [-1.4, -1.6], to: [1.4, -1.6], label: 'p', color: 'gold' }] } }, 'A dipole (− on the left, + on the right) and the point P on its axis. Not to scale.'),
         };
       },
     }),
@@ -184,13 +185,13 @@ An equal and opposite pair of charges a small distance apart is an **electric di
         const [name, p] = r.pick(MOLECULES), E = r.pick([2.0e5, 5.0e5, 1.0e6]), th = r.pick([30, 45, 60, 90]);
         const tau = p * E * Math.sin(deg(th));
         return {
-          prompt: t`A ${name} molecule ($p = ${tn(p, 2)}$ C·m) sits in a uniform field of $${tn(E)}$ N/C, its dipole moment at ${th}° to the field. How large is the torque on it?`,
+          prompt: t`${an(name) === 'an' ? 'An' : 'A'} ${name} molecule ($p = ${tn(p, 2)}$ C·m) sits in a uniform field of $${tn(E)}$ N/C, its dipole moment at ${th}° to the field. How large is the torque on it?`,
           answer: tau, units: 'N m', tol: { rel: 0.01 },
           errors: Math.abs(Math.sin(deg(th)) - Math.cos(deg(th))) < 0.05 ? [] : [{ value: p * E * Math.cos(deg(th)), feedback: t`The torque is $pE\sin\theta$: largest when $\vec p$ is at right angles to $\vec E$, zero when they line up.` }],
           hints: [t`The two charges feel equal and opposite forces $\pm qE$, a couple. Its torque is $\tau = pE\sin\theta$.`],
           teach: 'A uniform field exerts no net force on a dipole, only a torque τ = pE sin θ that turns it to line up with the field.',
           explain: t`$\tau = pE\sin\theta = (${tn(p, 2)})(${tn(E)})\sin ${th}^\circ = ${tn(tau)}$ N·m. It turns $\vec p$ toward $\vec E$. This is how a microwave oven's oscillating field keeps water molecules twisting back and forth.`,
-          visual: field({ x: [-6, 6], y: [-3.5, 3.5], uniform: [E, 0], fieldLines: true, density: 8, notes: {
+          visual: field({ x: [-6, 6], y: [-3.5, 3.5], axes: false, grid: false, uniform: [E, 0], fieldLines: true, density: 8, notes: {
             points: [{ x: -1.6 * Math.cos(deg(th)), y: -1.6 * Math.sin(deg(th)), color: 'accent', r: 7, label: '−', ldx: -16 }, { x: 1.6 * Math.cos(deg(th)), y: 1.6 * Math.sin(deg(th)), color: 'bad', r: 7, label: '+', ldx: 9 }],
             arrows: [{ from: [-1.1 * Math.cos(deg(th)), -1.1 * Math.sin(deg(th))], to: [1.1 * Math.cos(deg(th)), 1.1 * Math.sin(deg(th))], label: 'p', color: 'gold' },
               { from: [1.6 * Math.cos(deg(th)), 1.6 * Math.sin(deg(th))], to: [1.6 * Math.cos(deg(th)) + 2, 1.6 * Math.sin(deg(th))], label: '+qE', color: 'bad' },
