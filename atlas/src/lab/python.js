@@ -31,14 +31,22 @@ export function start() {
   return ready;
 }
 
-/** Run code; resolves with { ok, result, error, figures, checks, ms }. */
-export async function run(code, { onOutput, check, timeoutMs = 20000 } = {}) {
+/**
+ * Run code; resolves with { ok, result, error, figures, images, checks, ms }.
+ * `figures` are atlas.plot figures (drawn by the page); `images` are PNG data
+ * URLs of Matplotlib figures. The first import of NumPy, SciPy or Matplotlib
+ * downloads them (up to ~28 MB), so the time limit starts after loading.
+ */
+export async function run(code, { onOutput, check, timeoutMs = 20000, theme } = {}) {
   await start();
   const id = nextId++;
+  const heavy = /^\s*(import|from)\s+(numpy|scipy|matplotlib)\b/m.test(code);
   return new Promise((resolve) => {
-    const timer = setTimeout(() => { stop(); resolve({ ok: false, error: `Stopped after ${timeoutMs / 1000} s — is there an infinite loop?`, figures: [] }); }, timeoutMs);
+    const limit = heavy ? timeoutMs + 90000 : timeoutMs;
+    const timer = setTimeout(() => { stop(); resolve({ ok: false, error: `Stopped after ${Math.round(limit / 1000)} s — is there an infinite loop?`, figures: [], images: [] }); }, limit);
     pending.set(id, { onOutput, resolve: (m) => { clearTimeout(timer); resolve(m); } });
-    worker.postMessage({ type: 'run', id, code, check });
+    const th = theme || document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    worker.postMessage({ type: 'run', id, code, check, theme: th });
   });
 }
 
@@ -46,7 +54,7 @@ export async function run(code, { onOutput, check, timeoutMs = 20000 } = {}) {
 export function stop() {
   if (worker) worker.terminate();
   worker = null; ready = null;
-  for (const [, p] of pending) p.resolve({ ok: false, error: 'Stopped.', figures: [] });
+  for (const [, p] of pending) p.resolve({ ok: false, error: 'Stopped.', figures: [], images: [] });
   pending.clear();
   status({ state: 'stopped', text: 'Stopped. Python will restart on the next run.' });
 }

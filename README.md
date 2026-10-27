@@ -48,6 +48,27 @@ Live: https://daxjdavis526.github.io/Projects/worldline/
 See [worldline/README.md](worldline/README.md) for the controls, how it is
 built, and what in it is computed versus drawn.
 
+## atlas/
+
+**THE PHYSICS ATLAS** — an interactive academy for the mathematics and physics
+of a physics degree, from algebra to Einstein's field equations, built around
+Utah State University's B.S. in Physics (Professional Emphasis) and extended
+with a graduate-level route to general relativity. Thirty courses in six
+tracks; every lesson has an interactive simulation, a worked example revealed
+step by step, generated practice problems with hints and instant feedback,
+and an unassisted checkpoint. Spaced review (FSRS-6), evidence-based mastery
+estimates, XP, achievements, boss battles, a skill map, a Python code lab
+running in the browser, and a coverage page that says exactly which of the
+planned lessons are built. The Road to Einstein runs 37 steps in Intuition
+and Derivation modes, with every claim badged observed, derived,
+mathematically allowed, speculative or open.
+
+Live: https://daxjdavis526.github.io/Projects/atlas/
+
+See [atlas/README.md](atlas/README.md) for how it works and what is
+approximated, and [atlas/CONTENT.md](atlas/CONTENT.md) for how lessons are
+written. Tests: `node atlas/test/*.test.mjs`.
+
 ## blackhole/
 
 **BLACK HOLE EXPLORER** — a real-time Kerr black hole rendered by tracing

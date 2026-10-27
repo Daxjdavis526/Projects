@@ -1,5 +1,6 @@
-// The code lab: real Python in the browser (Pyodide), with SymPy, mpmath and
-// the atlas.plot bridge. Programs run in a worker; Stop really stops them.
+// The code lab: real Python in the browser (Pyodide), with NumPy, SciPy,
+// Matplotlib, SymPy, mpmath and the atlas.plot bridge. Programs run in a
+// worker; Stop really stops them.
 
 import { h, icon } from '../dom.js';
 import { run, stop, start, onStatus, pythonInfo } from '../../lab/python.js';
@@ -66,6 +67,49 @@ for k in range(1, 9):
 plt.plot(ns, errs, label="Simpson")
 plt.xlabel("log10 n"); plt.ylabel("log10 error"); plt.title("Error falls like n^-4"); plt.legend(); plt.show()
 `],
+  drag: ['NumPy + SciPy + Matplotlib: a rocket stage with drag', `# A sounding rocket: constant thrust for 12 s, then coast, with quadratic drag
+# in an exponential atmosphere. SciPy's solve_ivp integrates; Matplotlib plots.
+import numpy as np
+from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
+
+g0, H = 9.81, 8500.0             # gravity (m/s²), atmospheric scale height (m)
+m0, mdot, T, tb = 120.0, 4.0, 6000.0, 12.0   # mass (kg), burn rate (kg/s), thrust (N), burn time (s): Isp ≈ 153 s
+CdA, rho0 = 0.012, 1.225         # drag area (m²), sea-level density (kg/m³)
+
+def rhs(t, s):
+    h, v = s
+    m = m0 - mdot * min(t, tb)
+    thrust = T if t < tb else 0.0
+    drag = 0.5 * rho0 * np.exp(-h / H) * CdA * v * abs(v)
+    return [v, (thrust - drag) / m - g0]
+
+def apogee(t, s): return s[1]          # stop when the vertical speed reaches zero
+apogee.terminal, apogee.direction = True, -1
+
+for label, cda in [("with drag", CdA), ("no drag", 0.0)]:
+    CdA = cda
+    sol = solve_ivp(rhs, [0, 400], [0.0, 0.0], events=apogee, max_step=0.5, rtol=1e-8)
+    print(f"{label:>9}: apogee {sol.y[0, -1] / 1000:6.2f} km at t = {sol.t[-1]:5.1f} s")
+    plt.plot(sol.t, sol.y[0] / 1000, label=label)
+
+plt.axvline(tb, ls="--", lw=1, color="gray")
+plt.xlabel("time (s)"); plt.ylabel("altitude (km)"); plt.title("Burn, then coast to apogee")
+plt.legend(); plt.show()
+`],
+  numpy: ['NumPy: a vectorised Riemann sum', `import numpy as np
+
+# ∫₀^π sin x dx = 2, by midpoint rule, with arrays instead of loops
+for n in [4, 16, 64, 256]:
+    x = (np.arange(n) + 0.5) * np.pi / n
+    approx = np.sum(np.sin(x)) * np.pi / n
+    print(f"n = {n:4d}   midpoint sum = {approx:.8f}   error = {abs(approx - 2):.2e}")
+
+# a matrix: the eigenvalues of a symmetric 3×3 (a coupled-oscillator stiffness matrix)
+K = np.array([[2, -1, 0], [-1, 2, -1], [0, -1, 2]], dtype=float)
+w2, modes = np.linalg.eigh(K)
+print("ω² =", np.round(w2, 4), "  (exact: 2 − √2, 2, 2 + √2)")
+`],
   pendulum: ['Pendulum: small-angle vs. exact (RK4)', `import math
 import atlas.plot as plt
 
@@ -122,12 +166,13 @@ export function render(main) {
     else if (r.result !== undefined) out.append(h('span.faint', `\n→ ${r.result}`));
     if (r.ms) out.append(h('div.tiny.faint', { style: { marginTop: '.4rem' } }, `finished in ${(r.ms / 1000).toFixed(2)} s`));
     if (r.figures?.length) renderFigures(plots, r.figures);
+    (r.images || []).forEach((src, i) => plots.append(h('img.mpl', { src, alt: `Matplotlib figure ${i + 1}` })));
   }
 
   main.append(h('div.page',
     h('header.page-head', h('h1', 'Code lab'),
-      h('p', 'Real Python 3.14, running in your browser through Pyodide — nothing is sent to a server. SymPy and mpmath load when you import them; atlas.plot draws figures with a pyplot-like API (plot, scatter, xlabel, legend, show).'),
-      h('p.small.faint', 'NumPy, SciPy and Matplotlib are compiled packages the Atlas could not bundle yet (their official builds are only distributed from hosts this environment could not reach), so programs here use plain Python, math, statistics, fractions, random, SymPy and mpmath. Runaway programs stop after 20 seconds or when you press Stop.')),
+      h('p', 'Real Python 3.14, running in your browser through Pyodide — nothing is sent to a server. NumPy, SciPy, Matplotlib, SymPy and mpmath load the first time a program imports them; atlas.plot is a lighter pyplot-like helper drawn by the Atlas itself.'),
+      h('p.small.faint', 'The first import of NumPy, SciPy or Matplotlib downloads them once (NumPy about 3 MB; SciPy 14 MB; Matplotlib and its helpers about 11 MB), then the browser keeps them. Runaway programs stop after 20 seconds or when you press Stop.')),
     h('div.row.between', { style: { marginBottom: '.6rem' } }, h('div.row', runBtn, stopBtn, pick), statusLine),
     h('div.code-cell', code, out, plots),
     h('p.tiny.faint', { style: { marginTop: '.6rem' } }, 'Ctrl/⌘ + Enter runs. Tab inserts four spaces.')));
