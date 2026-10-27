@@ -185,22 +185,18 @@ export function banked({ m, v, R, theta = 0, mus = 0, g = G }) {
   const th = theta * D2R, c = Math.cos(th), s = Math.sin(th);
   const u = [c, s], n = [-s, c];
   const ac = (v * v) / R;
-  let N = m * (g * c + ac * s), f = m * (g * s - ac * c);
-  const fMax = mus * N, holds = Math.abs(f) <= fMax + TINY;
+  // perpendicular to the road nothing accelerates except the centripetal part, so N is the same slipping or not
+  const N = m * (g * c + ac * s), need = m * (g * s - ac * c);
+  const fMax = mus * N, holds = Math.abs(need) <= fMax + TINY;
   const v0 = Math.sqrt(R * g * Math.tan(th));
   const den = c - mus * s, num = s - mus * c;
   const vmax = den > TINY ? Math.sqrt((R * g * (s + mus * c)) / den) : Infinity;
   const vmin = num > 0 ? Math.sqrt((R * g * num) / (c + mus * s)) : 0;
-  let a = [-ac, 0];
-  if (!holds) {
-    // sliding: friction at its maximum, opposing the slip; N still balances the motion perpendicular to the road
-    N = m * g * c + m * ac * s;            // the car stays on the road surface; this is an approximation for the picture only
-    f = Math.sign(f) * mus * N;
-    const Fx = -N * s + f * c, Fy = N * c + f * s - m * g;
-    a = [Fx / m, Fy / m];
-  }
-  const forces = keep([force('W', 'weight', 'mg', 0, -m * g), force('N', 'normal', 'N', N * n[0], N * n[1]), force('f', 'friction', 'fₛ', f * u[0], f * u[1])]);
-  return { bodies: [{ key: 'car', label: 'car', m, forces, a }], info: { N, f, fMax, holds, v0, vmax, vmin, ac, need: m * ac } };
+  // when friction cannot supply what is needed, it sits at its maximum and the car slips along the slope
+  const f = holds ? need : Math.sign(need) * fMax;
+  const a = [(-N * s + f * c) / m, (N * c + f * s - m * g) / m];
+  const forces = keep([force('W', 'weight', 'mg', 0, -m * g), force('N', 'normal', 'N', N * n[0], N * n[1]), force('f', 'friction', holds ? 'fₛ' : 'f', f * u[0], f * u[1])]);
+  return { bodies: [{ key: 'car', label: 'car', m, forces, a }], info: { N, f, need, fMax, holds, v0, vmax, vmin, ac, slides: holds ? 0 : -Math.sign(need) } };
 }
 
 /**

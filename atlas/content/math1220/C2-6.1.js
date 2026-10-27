@@ -88,7 +88,7 @@ Think of $t$ as time and $(x, y)$ as a moving point. The curve is its path; the 
       t`**Orbit:** run $t$ from $0$ to $2\pi$. The point goes round once, counter-clockwise, and the check $\tfrac{x^2}{9} + \tfrac{y^2}{4}$ stays exactly $1$.`,
       t`**Rolling wheel:** set $t = 2\pi$. The marked point touches the ground and the velocity arrow vanishes — it stops dead for an instant, although the wheel never stops.`,
     ],
-    params: { grid: 'cartesian', x: [-3, 43], y: [-2, 16], ...EXPLORE },
+    params: { grid: 'cartesian', aspect: 'wide', x: [-3, 43], y: [-2, 16], ...EXPLORE },
     caption: t`The ball has no air resistance ($g = 9.8$ m/s²). The ellipse is traced at a steady rate in $t$; a real planet speeds up near the Sun (lesson C2-6.6). The wheel has radius 1 and rolls without slipping. Velocity arrows are scaled to fit.`,
   },
   example: {

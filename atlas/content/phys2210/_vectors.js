@@ -62,8 +62,9 @@ export function vectorPicture({ arrows = [], comps, arc, segments = [], numbers 
   }
   for (const a of A) {
     // a label at the tip by default; `mid: true` puts it beside the middle of the arrow instead
-    arrowsOut.push({ from: a.from.map(r4), to: a.to.map(r4), color: a.color || 'accent', label: a.mid || a.left ? undefined : a.label });
-    if (a.left && a.label) curves.push(textAt(a.to[0], a.to[1], a.label, { color: a.color || 'accent', dx: leftOf(a.label), dy: -8 }));
+    const asText = a.left !== undefined; // left: true or false sets every such label in the same (bold) text style
+    arrowsOut.push({ from: a.from.map(r4), to: a.to.map(r4), color: a.color || 'accent', label: a.mid || asText ? undefined : a.label });
+    if (asText && a.label) curves.push(textAt(a.to[0], a.to[1], a.label, { color: a.color || 'accent', dx: a.left ? leftOf(a.label) : 8, dy: -8 }));
     if (a.mid && a.label) labels.push({ x: r4((a.from[0] + a.to[0]) / 2 + 0.03 * span), y: r4((a.from[1] + a.to[1]) / 2), r: 0.01, color: a.color || 'accent', label: a.label });
   }
   return {
