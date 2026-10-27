@@ -7,6 +7,8 @@ import { seg } from './_momentum.js';
 const t = String.raw;
 const s3 = (x) => fmt(x, 3);
 const comma = (x) => x.toLocaleString('en-US');
+// the same inside math, where a bare comma would be spaced as punctuation
+const cm = (x) => comma(x).replace(/,/g, '{,}');
 const DEG = Math.PI / 180;
 const r4 = (x) => +x.toFixed(4);
 
@@ -91,7 +93,7 @@ Choose axes, split every momentum into components, and conserve each sum on its 
           ],
           hints: ['The wreck’s momentum is the vector sum of the two cars’ momenta.', t`$\tan\theta = \dfrac{p_\text{north}}{p_\text{east}} = \dfrac{m_2v_2}{m_1v_1}$.`],
           teach: 'The direction of a stuck-together wreck is the direction of the total momentum.',
-          explain: t`$\tan\theta = \dfrac{${comma(m2)}\times${v2}}{${comma(m1)}\times${v1}} = ${s3((m2 * v2) / (m1 * v1))}$, so $\theta = ${s3(ang)}°$ north of east.`,
+          explain: t`$\tan\theta = \dfrac{${cm(m2)}\times${v2}}{${cm(m1)}\times${v1}} = ${s3((m2 * v2) / (m1 * v1))}$, so $\theta = ${s3(ang)}°$ north of east.`,
           visual: momenta([m1 * v1, 0], [0, m2 * v2], { tipToTail: false, caption: 'The two momenta before the crash, tails together, to scale.' }),
         };
       },
@@ -188,7 +190,7 @@ Choose axes, split every momentum into components, and conserve each sum on its 
           ],
           hints: ['Conserve x and y separately.'],
           teach: 'Two-dimensional momentum conservation is two one-dimensional problems, recombined at the end.',
-          explain: t`$v_x = \dfrac{${comma(m1 * v1)}}{${comma(m1 + m2)}} = ${s3(vx)}$ m/s, $v_y = \dfrac{${comma(m2 * v2)}}{${comma(m1 + m2)}} = ${s3(vy)}$ m/s, so $v = ${s3(v)}$ m/s.`,
+          explain: t`$v_x = \dfrac{${cm(m1 * v1)}}{${cm(m1 + m2)}} = ${s3(vx)}$ m/s, $v_y = \dfrac{${cm(m2 * v2)}}{${cm(m1 + m2)}} = ${s3(vy)}$ m/s, so $v = ${s3(v)}$ m/s.`,
           visual: momenta([m1 * v1, 0], [0, m2 * v2], { tipToTail: false, labels: ['car', 'pickup'], caption: 'The momenta before the crash, to scale.' }),
         };
       },
@@ -207,7 +209,7 @@ Choose axes, split every momentum into components, and conserve each sum on its 
           ],
           hints: ['Equal masses: momentum conservation reads u = v₁ cos θ₁ + v₂ cos θ₂ (along the track) and 0 = v₁ sin θ₁ − v₂ sin θ₂ (across it).', `With θ₁ = ${th}° and θ₂ = ${90 - th}°: the second equation gives v₂ = v₁ tan ${th}°.`, 'Substitute: u = v₁ (cos²θ₁ + sin²θ₁)/cos θ₁, so v₁ = u cos θ₁.'],
           teach: 'For equal masses colliding elastically, the paths are perpendicular and each speed is the incoming speed times the cosine of its own deflection.',
-          explain: t`Across the track: $v_1\sin${th}° = v_2\sin${90 - th}°$; along it: $u = v_1\cos${th}° + v_2\cos${90 - th}°$. Together: $v_1 = u\cos${th}° = ${comma(Math.round(v1))}$ km/s (and $v_2 = u\sin${th}° = ${comma(Math.round(u * s))}$ km/s). The 90° opening angle is how physicists in the 1950s recognised proton–proton elastic scattering at a glance.`,
+          explain: t`Across the track: $v_1\sin${th}° = v_2\sin${90 - th}°$; along it: $u = v_1\cos${th}° + v_2\cos${90 - th}°$. Together: $v_1 = u\cos${th}° = ${cm(Math.round(v1))}$ km/s (and $v_2 = u\sin${th}° = ${cm(Math.round(u * s))}$ km/s). The 90° opening angle is how physicists in the 1950s recognised proton–proton elastic scattering at a glance.`,
           visual: {
             type: 'graph',
             params: {

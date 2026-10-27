@@ -127,7 +127,7 @@ $$C_V = \frac{f}{2}R$$
           ], c),
           hints: [t`Per mole: $3R = 24.94$ J/(mol·K).`, t`Per kilogram: divide by the molar mass in kg/mol, $${M / 1000}$.`],
           teach: 'Near room temperature most solid elements have molar heat capacity close to 3R.',
-          explain: t`$c = 3R/M = 24.94/${M / 1000} = ${fmt(c, 3)}$ J/(kg·K). The measured value at 25 °C is about ${cm} — within a few per cent.`,
+          explain: t`$c = 3R/M = 24.94/${M / 1000} = ${fmt(c, 3)}$ J/(kg·K). The measured value at 25 °C is about ${cm} — within a few per cent.`,
           visual: molarBars(),
         };
       },
@@ -177,7 +177,7 @@ $$C_V = \frac{f}{2}R$$
         const V = r.pick([40, 60, 90]), dT = r.pick([3, 5, 8]);
         const n = (100e3 * V) / (R * 288.15), Q = n * 2.5 * R * dT;
         return {
-          prompt: t`A sealed ${V} m³ room holds air (nearly all N₂ and O₂) at 100 kPa and 15 °C. How much heat warms the air by ${dT} K? (Treat the air as an ideal diatomic gas and ignore the walls and furniture.)`,
+          prompt: t`A sealed ${V} m³ room holds air (nearly all N₂ and O₂) at 100 kPa and 15 °C. How much heat warms the air by ${dT} K? (Treat the air as an ideal diatomic gas and ignore the walls and furniture.)`,
           answer: Q / 1000, units: 'kJ', tol: { rel: 0.01 },
           errors: apart([
             { value: (n * 1.5 * R * dT) / 1000, feedback: 'N₂ and O₂ are diatomic: their rotations take a share too, so $C_V = \\tfrac52R$.' },
@@ -213,7 +213,7 @@ $$C_V = \frac{f}{2}R$$
     }),
     mcq({
       id: 'cp-hydrogen', difficulty: 3,
-      prompt: 'The graph is a sketch of the molar heat capacity of hydrogen gas. At 50 K it is close to (3/2)R, the value for a monatomic gas, though H₂ is a two-atom molecule. Why?',
+      prompt: t`The graph is a sketch of the molar heat capacity of hydrogen gas. At 50 K it is close to $\tfrac32R$, the value for a monatomic gas, though H₂ is a two-atom molecule. Why?`,
       choices: [
         'At 50 K, $k_BT$ is too small to excite even the first rotational level, so the rotations are frozen out',
         'At 50 K the hydrogen molecules have split into single atoms',

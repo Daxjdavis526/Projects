@@ -7,6 +7,8 @@ import { G, G0, rocketSide } from './_momentum.js';
 const t = String.raw;
 const s3 = (x) => fmt(x, 3);
 const comma = (x) => x.toLocaleString('en-US');
+// the same inside math, where a bare comma would be spaced as punctuation
+const cm = (x) => comma(x).replace(/,/g, '{,}');
 const r4 = (x) => +x.toFixed(4);
 
 // ideal Δv (km/s) against mass ratio for one exhaust speed (km/s)
@@ -193,7 +195,7 @@ The engine’s **thrust** is $F = \dot m\,v_e$, and engineers quote the exhaust 
           ],
           hints: [t`Thrust $F = \dot m\,v_e$, with $v_e = I_\text{sp}\,g_0$.`, t`$\dot m = \dfrac{F}{I_\text{sp}\,g_0}$ — thrust in newtons.`],
           teach: t`Thrust is mass flow times exhaust speed, so the propellant flow is $F/(I_\text{sp}\,g_0)$.`,
-          explain: t`$\dot m = \dfrac{${comma(F * 1000)}\ \text{N}}{${Isp}\times9.80665\ \text{m/s}} = ${s3(mdot)}$ kg/s.${Isp === 263 ? ' Five of them burned about 13 tonnes of kerosene and oxygen every second.' : Isp === 282 ? ' Nine of them drain a Falcon 9 first stage in about two and a half minutes.' : ' A gentle flow — upper-stage engines trade thrust for efficiency.'}`,
+          explain: t`$\dot m = \dfrac{${cm(F * 1000)}\ \text{N}}{${Isp}\times9.80665\ \text{m/s}} = ${s3(mdot)}$ kg/s.${Isp === 263 ? ' Five of them burned about 13 tonnes of kerosene and oxygen every second.' : Isp === 282 ? ' Nine of them drain a Falcon 9 first stage in about two and a half minutes.' : ' A gentle flow — upper-stage engines trade thrust for efficiency.'}`,
           visual: rocketSide({ caption: 'A sketch: each second the engine throws ṁ kilograms of gas backward at vₑ — that momentum flow is the thrust.' }),
         };
       },
@@ -276,15 +278,15 @@ The engine’s **thrust** is $F = \dot m\,v_e$, and engineers quote the exhaust 
         const m0 = r.pick([1000, 1200, 1500]), xe = r.pick([300, 400, 450]), Isp = r.pick([2500, 3000, 3100]);
         const dv = (Isp * G0 * Math.log(m0 / (m0 - xe))) / 1000;
         return {
-          prompt: t`A deep-space probe of ${comma(m0)} kg carries ${xe} kg of xenon for an ion engine with $I_\text{sp} \approx ${comma(Isp)}$ s. What ideal $\Delta v$ can it reach by using all its xenon?`,
+          prompt: t`A deep-space probe of ${comma(m0)} kg carries ${xe} kg of xenon for an ion engine with $I_\text{sp} \approx ${cm(Isp)}$ s. What ideal $\Delta v$ can it reach by using all its xenon?`,
           answer: dv, units: 'km/s', tol: { rel: 0.01 },
           errors: [
             { value: (Isp * G0 * Math.log(m0 / xe)) / 1000, feedback: t`The final mass is the probe without its xenon: $m_f = m_0 - m_\text{xenon}$.` },
             { value: (Isp * Math.log(m0 / (m0 - xe))) / 1000, feedback: t`Convert specific impulse to exhaust speed: $v_e = I_\text{sp}\,g_0$.` },
           ],
-          hints: [t`$v_e = I_\text{sp}\,g_0$ — about ten times a chemical rocket’s.`, t`$m_f = ${comma(m0)} - ${xe}$ kg.`],
+          hints: [t`$v_e = I_\text{sp}\,g_0$ — about ten times a chemical rocket’s.`, t`$m_f = ${cm(m0)} - ${xe}$ kg.`],
           teach: t`$\Delta v$ grows in proportion to exhaust speed, so high-$I_\text{sp}$ electric engines reach a $\Delta v$ no chemical stage of the same mass can.`,
-          explain: t`$v_e = ${comma(Isp)}\times9.81 = ${s3((Isp * G0) / 1000)}$ km/s; $\Delta v = ${s3((Isp * G0) / 1000)}\ln\dfrac{${comma(m0)}}{${comma(m0 - xe)}} = ${s3(dv)}$ km/s. A chemical engine at 320 s would manage only ${s3((320 * G0 * Math.log(m0 / (m0 - xe))) / 1000)} km/s with the same mass ratio. The catch: an ion engine’s thrust is a fraction of a newton, so the burn lasts years.`,
+          explain: t`$v_e = ${cm(Isp)}\times9.81 = ${s3((Isp * G0) / 1000)}$ km/s; $\Delta v = ${s3((Isp * G0) / 1000)}\ln\dfrac{${cm(m0)}}{${cm(m0 - xe)}} = ${s3(dv)}$ km/s. A chemical engine at 320 s would manage only ${s3((320 * G0 * Math.log(m0 / (m0 - xe))) / 1000)} km/s with the same mass ratio. The catch: an ion engine’s thrust is a fraction of a newton, so the burn lasts years.`,
           visual: dvCurve((Isp * G0) / 1000, 2.2, t`Ideal $\Delta v$ against mass ratio at $I_\text{sp} = {}$${comma(Isp)} s. (A chemical engine’s curve would be about ten times lower.)`),
         };
       },

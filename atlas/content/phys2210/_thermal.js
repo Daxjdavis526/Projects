@@ -623,11 +623,11 @@ export function h2Graph({ caption } = {}) {
   return {
     type: 'graph',
     params: {
-      x: [1, 4], y: [0, 4], aspect: 'wide', xticks: 0.001, xlabel: 'temperature (logarithmic)', ylabel: 'C_V / R',
+      x: [0.9, 4.25], y: [-0.25, 4], aspect: 'wide', xticks: 0.001, xlabel: 'temperature (logarithmic)', ylabel: 'C_V / R',
       alt: 'The molar heat capacity of hydrogen rising in steps as rotation and then vibration switch on',
       curves: [{ fn: cv, color: 'accent', width: 2.8 }],
       hlines: [{ y: 1.5, label: '3/2: translation only', color: 'ink3' }, { y: 2.5, label: '5/2: + rotation', color: 'ink3' }, { y: 3.5, label: '7/2: + vibration', color: 'ink3' }],
-      points: [1, 2, 3, 4].map((k) => ({ x: k, y: 0, r: 3, color: 'ink3', label: `${10 ** k} K`, labelDx: -12, labelDy: 12 })),
+      points: [1, 2, 3, 4].map((k) => ({ x: k, y: 0, r: 3, color: 'ink3', label: k === 4 ? '10 000 K' : `${10 ** k} K`, labelDx: k === 4 ? -48 : -14, labelDy: -12 })),
     },
     caption: caption ?? 'A schematic of hydrogen’s molar heat capacity: rotation switches on around 100 K, vibration only above a few thousand kelvin (real hydrogen starts to break apart there). Steps smoothed; the details of hydrogen’s two spin forms are left out.',
   };

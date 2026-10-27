@@ -8,7 +8,7 @@ import { logLadder } from './_measure.js';
 
 const t = String.raw;
 
-// the worked example: one litre of liquid nitrogen, boiled and warmed to 20 °C at one atmosphere
+// the worked example: one litre of liquid nitrogen, boiled and warmed to 20 °C at one atmosphere
 const EX = { V: 1, T: 293.15 };
 EX.m = LN2.rho * 1e-3 * EX.V;                       // 0.806 kg
 EX.n = (EX.m * 1000) / MOLAR.N2;                    // 28.77 mol
@@ -41,7 +41,7 @@ export default lesson({
 
 $$PV = nRT = Nk_BT$$
 
-It holds to within a percent or so for air, nitrogen or helium at everyday conditions, and fails only when a gas is squeezed hard or cooled close to liquefying. Two rules make it work: **$T$ must be absolute (kelvin)** — in Celsius the law would predict zero pressure at 0 °C — and **$P$ must be absolute pressure**, not the gauge reading above the atmosphere.`,
+It holds to within a percent or so for air, nitrogen or helium at everyday conditions, and fails only when a gas is squeezed hard or cooled close to liquefying. Two rules make it work: **$T$ must be absolute (kelvin)** — in Celsius the law would predict zero pressure at 0 °C — and **$P$ must be absolute pressure**, not the gauge reading above the atmosphere.`,
   symbols: [
     { tex: 'P', text: 'the **absolute** pressure of the gas, in pascals (Pa). A gauge reads the excess over the atmosphere: absolute = gauge + 101.3 kPa at sea level' },
     { tex: 'V', text: 'the volume the gas fills, in m³ (1 litre = 10⁻³ m³)' },
@@ -58,14 +58,14 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
     lead: t`Each dot stands for $2\times10^{-4}$ mol of molecules flying about a box of up to one litre. The gold bar is the pressure measured from their impacts on the walls; the white tick is $nRT/V$. Change the volume, the temperature, the number of molecules or the kind of gas, and watch the two agree.`,
     tasks: [
       'Halve the volume (1 L → 0.5 L): impacts come twice as often and the pressure doubles — Boyle’s law.',
-      'Double the absolute temperature (150 K → 300 K): the pressure doubles. Then go from 283 K to 293 K (10 °C to 20 °C): it rises only 3.5 %.',
+      'Double the absolute temperature (150 K → 300 K): the pressure doubles. Then go from 283 K to 293 K (10 °C to 20 °C): it rises only 3.5 %.',
       'Switch from helium to xenon at the same n, T and V: the pressure stays the same, though a xenon atom is 33 times heavier.',
     ],
     params: { gas: 'N2', gases: ['He', 'N2', 'Xe'], controls: ['T', 'V', 'N', 'gas', 'play'], Tmin: 100, Tmax: 600, hist: false, readouts: ['n', 'V', 'T', 'P', 'Pideal'] },
     caption: 'Each dot stands for about 1.2 × 10²⁰ molecules, enormously enlarged and slowed — all in proportion. Collisions are perfectly elastic. The dots’ own size pushes the measured pressure 1–4 % above nRT/V (the van der Waals b effect); real gases near room conditions miss it by under 0.1 %. Moving the wall here leaves the molecules’ speeds alone, as a slow move in contact with a bath at T would.',
   },
   example: {
-    prompt: t`One litre of liquid nitrogen (density ${LN2.rho} kg/m³) spills in a lab, boils and warms to ${EX.T - 273.15} °C at one atmosphere (101.3 kPa). What volume of gas does it make?`,
+    prompt: t`One litre of liquid nitrogen (density ${LN2.rho} kg/m³) spills in a lab, boils and warms to ${EX.T - 273.15} °C at one atmosphere (101.3 kPa). What volume of gas does it make?`,
     visual: {
       type: 'graph',
       params: {
@@ -91,7 +91,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
         const V = r.pick([10, 20, 40]), P = r.pick([1, 2, 3, 5]), Tc = r.pick([15, 20, 25]);
         const n = (P * 1e6 * V * 1e-3) / (R * (Tc + 273.15));
         return {
-          prompt: t`A ${V} L helium bottle holds gas at ${P} MPa (absolute) and ${Tc} °C. How many moles of helium are in it? (Treat helium as ideal: at these pressures that is good to about 2 %.)`,
+          prompt: t`A ${V} L helium bottle holds gas at ${P} MPa (absolute) and ${Tc} °C. How many moles of helium are in it? (Treat helium as ideal: at these pressures that is good to about 2 %.)`,
           answer: n, units: 'mol', tol: { rel: 0.01 },
           errors: apart([{ value: (P * 1e6 * V * 1e-3) / (R * Tc), feedback: 'The gas law needs the absolute temperature: add 273.15 to the Celsius value.' }], n),
           hints: [t`$n = PV/(RT)$ in SI units: $P$ in Pa, $V$ in m³, $T$ in K.`, t`$${P}$ MPa $= ${P}\times10^{6}$ Pa; ${V} L $= ${V / 1000}$ m³; $T = ${(Tc + 273.15).toFixed(2)}$ K.`],
@@ -103,7 +103,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
     }),
     mcq({
       id: 'celsius-trap', difficulty: 2,
-      prompt: 'A sealed, rigid tank of nitrogen at 20 °C warms in the sun to 40 °C. Its pressure:',
+      prompt: 'A sealed, rigid tank of nitrogen at 20 °C warms in the sun to 40 °C. Its pressure:',
       choices: ['Rises by about 7 %', 'Doubles', 'Rises by 20 kPa, one kilopascal per degree', 'Stays the same, because the tank is sealed'],
       answer: 0,
       why: {
@@ -114,7 +114,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
       hints: ['With n and V fixed, P is proportional to T. Which T?'],
       teach: 'At fixed n and V, pressure is proportional to the absolute temperature — never to the Celsius number.',
       explain: t`$P_2/P_1 = T_2/T_1 = 313.15/293.15 = 1.068$: a 6.8 % rise. A propellant tank’s pressure-relief valve must allow for it.`,
-      visual: ptGraph([[293.15, '20 °C'], [313.15, '40 °C']]),
+      visual: ptGraph([[293.15, '20 °C'], [313.15, '40 °C']]),
     }),
     num({
       id: 'warm-ullage', difficulty: 2,
@@ -122,13 +122,13 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
         const P1 = r.pick([250, 300, 350]), T1 = r.pick([10, 15, 20]), T2 = r.pick([40, 45, 50]);
         const P2 = (P1 * (T2 + 273.15)) / (T1 + 273.15);
         return {
-          prompt: t`The helium in a sealed tank’s ullage is at ${P1} kPa (absolute) and ${T1} °C. Sunlight warms it to ${T2} °C. What is its pressure now?`,
+          prompt: t`The helium in a sealed tank’s ullage is at ${P1} kPa (absolute) and ${T1} °C. Sunlight warms it to ${T2} °C. What is its pressure now?`,
           answer: P2, units: 'kPa', tol: { rel: 0.005 },
           errors: apart([{ value: (P1 * T2) / T1, feedback: 'Celsius temperatures can’t go in a ratio: convert both to kelvin.' }], P2),
           hints: [t`$P_2 = P_1\,T_2/T_1$ with both temperatures in kelvin.`],
           teach: 'For a sealed rigid container, P₂/P₁ = T₂/T₁ with absolute temperatures.',
           explain: t`$P_2 = ${P1}\times\dfrac{${(T2 + 273.15).toFixed(2)}}{${(T1 + 273.15).toFixed(2)}} = ${fmt(P2, 4)}$ kPa — a ${fmt((P2 / P1 - 1) * 100, 2)} % rise for a ${T2 - T1}-kelvin warm-up.`,
-          visual: ptGraph([[T1 + 273.15, `${T1} °C`], [T2 + 273.15, `${T2} °C`]]),
+          visual: ptGraph([[T1 + 273.15, `${T1} °C`], [T2 + 273.15, `${T2} °C`]]),
         };
       },
     }),
@@ -138,7 +138,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
         const V1 = r.pick([2, 3, 4]), V2 = r.pick([0.25, 0.4, 0.5]), P1 = 101;
         const P2 = (P1 * V1) / V2;
         return {
-          prompt: t`A ${V1}.0 L sample of nitrogen at ${P1} kPa is compressed slowly, so that it stays at 20 °C, to ${V2} L. What is its pressure now?`,
+          prompt: t`A ${V1}.0 L sample of nitrogen at ${P1} kPa is compressed slowly, so that it stays at 20 °C, to ${V2} L. What is its pressure now?`,
           answer: P2, units: 'kPa', tol: { rel: 0.005 },
           errors: [{ value: (P1 * V2) / V1, feedback: 'Squeezing a gas raises its pressure: at fixed n and T, PV is constant, so P₂ = P₁V₁/V₂.' }],
           hints: ['At fixed n and T, PV stays constant (Boyle’s law).'],
@@ -154,7 +154,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
         const Tc = r.pick([15, 20, 25]);
         const ratio = (Tc + 273.15) / LN2.Tb;
         return {
-          prompt: t`Nitrogen gas boiling off a dewar leaves at 77.4 K. At the same pressure, how many times denser is it than nitrogen at the room’s ${Tc} °C?`,
+          prompt: t`Nitrogen gas boiling off a dewar leaves at 77.4 K. At the same pressure, how many times denser is it than nitrogen at the room’s ${Tc} °C?`,
           answer: ratio, tol: { rel: 0.01 },
           errors: [{ value: 1 / ratio, feedback: 'Upside down: colder gas at the same pressure is *denser*, because the same molecules are packed into less volume.' }],
           hints: [t`Density $\rho = m/V = PM/(RT)$: at fixed $P$ and $M$, $\rho \propto 1/T$.`, 'Use absolute temperatures for both.'],
@@ -166,7 +166,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
               x: [0, 320], y: [0, 6], aspect: 'wide', xlabel: 'T (K)', ylabel: 'ρ (kg/m³)',
               alt: 'Density of nitrogen gas at one atmosphere against temperature',
               curves: [{ fn: '101325*0.0280134/(8.314*x)', domain: [50, 320], color: 'accent', width: 2.6, label: 'N₂ at 1 atm (ideal gas)', labelAt: 150, labelDx: 8, labelDy: -12 }],
-              vlines: [{ x: 77.36, label: '77.4 K', color: 'ink3' }, { x: Tc + 273.15, label: `${Tc} °C`, color: 'ink3' }],
+              vlines: [{ x: 77.36, label: '77.4 K', color: 'ink3' }, { x: Tc + 273.15, label: `${Tc} °C`, color: 'ink3' }],
             },
             caption: 'At fixed pressure, density falls as 1/T. The two dashed lines mark the boil-off gas and the room.',
           },
@@ -208,7 +208,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
         const e = r.pick([-3, -5, -7]), P = 10 ** e;
         const ncm3 = (P / (KB * 293.15)) * 1e-6;
         return {
-          prompt: t`A space-simulation vacuum chamber is pumped down to $10^{${e}}$ Pa at 20 °C. How many gas molecules are still in each cubic centimetre?`,
+          prompt: t`A space-simulation vacuum chamber is pumped down to $10^{${e}}$ Pa at 20 °C. How many gas molecules are still in each cubic centimetre?`,
           answer: ncm3, units: 'cm^-3', tol: { rel: 0.01 },
           hints: [t`Divide $PV = Nk_BT$ by $V$: the number per volume is $N/V = P/(k_BT)$.`, t`That gives molecules per m³; a cubic centimetre is $10^{-6}$ m³.`],
           teach: 'The number density of an ideal gas is N/V = P/(k_BT), whatever the gas.',
@@ -229,7 +229,7 @@ It holds to within a percent or so for air, nitrogen or helium at everyday condi
         const [P2, T2] = STD[h], [P1, T1] = STD[0];
         const ratio = (P1 / P2) * (T2 / T1);
         return {
-          prompt: t`A stratospheric research balloon is partly filled with helium at sea level (101.3 kPa, 15 °C). It rises to ${h} km, where the standard atmosphere has ${P2} kPa and ${T2} K, and its helium settles to the surrounding pressure and temperature. By what factor has the helium’s volume grown?`,
+          prompt: t`A stratospheric research balloon is partly filled with helium at sea level (101.3 kPa, 15 °C). It rises to ${h} km, where the standard atmosphere has ${P2} kPa and ${T2} K, and its helium settles to the surrounding pressure and temperature. By what factor has the helium’s volume grown?`,
           answer: ratio, tol: { rel: 0.01 },
           errors: apart([
             { value: P1 / P2, feedback: 'That is Boyle’s law alone. The gas has also cooled, which shrinks it: multiply by T₂/T₁.' },

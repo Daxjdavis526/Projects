@@ -31,8 +31,9 @@ export function mount(F, P) {
     // orbit panel (left 55%)
     const pl = new Plot(canvas, { x: [-R, R], y: [-R, R], equal: true, grid: true, axes: false, pad: { l: 10, r: W * 0.45 + 10, t: 10, b: 10 } });
     pl.w = W; pl.h = H; pl.ctx = ctx; pl._fit(); pl.refreshTheme(); pl.grid();
-    pl.circle(0, 0, 2, { fill: '#000', stroke: 'ink3', width: 1 });
-    pl.text('horizon 2M', 0, -2.6, { color: 'ink3', align: 'center', size: 10 });
+    // a black hole has a horizon; Newton's central mass is just a point mass
+    if (schw) { pl.circle(0, 0, 2, { fill: '#000', stroke: 'ink3', width: 1 }); pl.text('horizon 2M', 0, -2.6, { color: 'ink3', align: 'center', size: 10 }); }
+    else { pl.circle(0, 0, 1.2, { fill: 'gold', stroke: 'gold', width: 1 }); pl.text('mass M', 0, -2.2, { color: 'ink3', align: 'center', size: 10 }); }
     if (schw) pl.circle(0, 0, 6, { stroke: 'ink4', width: 1, dash: [3, 4] });
     if (F.params.compare && schw) pl.path(orbitSchwarzschild({ r0, L, turns: P.turns, steps: 4000, newtonian: true }).pts, { color: 'ink3', width: 1.2, dash: [5, 5] });
     pl.path(res.pts, { color: schw ? 'gold' : 'accent', width: 2 });

@@ -121,7 +121,8 @@ export function mount(F, P0) {
     if (P.data) {
       rows = P.data.map((d) => (isRepeat(id) && !E.setting ? { s: null, R: d.slice() } : isRepeat(id) ? { s: P.at, R: d.slice() } : { s: d[0], R: d.slice(1) }));
     } else {
-      const list = isRepeat(id)
+      const list = P.view === 'apparatus' ? []
+        : isRepeat(id)
         ? Array(bench ? (typeof P.prefill === 'number' ? P.prefill : P.prefill ? 5 : 0) : P.n).fill(E.setting ? P.at : null)
         : bench
           ? (P.prefill === 'series' ? E.setting.series : typeof P.prefill === 'number' ? E.setting.series.slice(0, P.prefill) : [])
@@ -211,8 +212,10 @@ export function mount(F, P0) {
     const an = !rep && E.axes ? B.analyse(state.id, rows, { axes: axesKey, sys: sysOn(), params: params(), origin: false }) : null;
     const anO = !rep && origin && E.axes ? B.analyse(state.id, rows, { axes: axesKey, sys: sysOn(), params: params(), origin: true }) : null;
     const rs = rep ? repeatOf(E, PP, rows) : null;
-    const latestRow = rows[state.latest >= 0 ? Math.min(state.latest, rows.length - 1) : rows.length - 1];
-    if (appPlot) drawApparatus(appPlot, E, PP, { row: latestRow, setting: bench && E.setting && !rep ? F.params.set : latestRow?.s ?? (E.setting ? (rep ? P.at : E.setting.value) : null), sys: sysOn(), labels: P.labels, rs, rep });
+    // the instrument shows the newest reading taken at the knob’s current setting (none yet: a dash)
+    const knob = E.setting ? (rep ? P.at : bench ? F.params.set : P.at ?? E.setting.value) : null;
+    const latestRow = E.setting && !rep ? [...rows].reverse().find((r) => Math.abs(r.s - knob) < 1e-9) : rows[rows.length - 1];
+    if (appPlot) drawApparatus(appPlot, E, PP, { row: latestRow, setting: knob, sys: sysOn(), labels: P.labels, rs, rep });
     if (dataPlot) { if (rep) drawRepeat(dataPlot, E, PP, rs); else drawFit(dataPlot, E, PP, an, anO, axesKey); }
     if (resPlot && an) drawResiduals(resPlot, an);
     if (tableBox) drawTable(tableBox, E, PP, rows, rep, an);

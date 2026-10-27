@@ -36,7 +36,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
   visual: {
     type: 'graph',
     title: 'The same heat, very different temperature rises',
-    lead: t`Each line is a body warming from 20 °C as heat flows in. Its slope is $1/(mc)$: a large mass or a large specific heat makes a shallow line. Choose the material and the mass, and slide the heat added.`,
+    lead: t`Each line is a body warming from 20 °C as heat flows in. Its slope is $1/(mc)$: a large mass or a large specific heat makes a shallow line. Choose the material and the mass, and slide the heat added.`,
     tasks: [
       'Choose water, then copper: the same 20 kJ warms a kilogram of copper nearly eleven times as much (4184 / 385 ≈ 10.9).',
       'Double the mass: the line’s slope halves — the same heat spread over twice as much material.',
@@ -66,8 +66,8 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
     caption: 'The gold line is the material you chose; the dashed lines are the others at the same mass. Specific heats are taken as constant, which is good near room temperature; nothing melts or boils, and no heat escapes.',
   },
   example: {
-    prompt: t`To identify a metal, you heat a ${EX.ms.toFixed(3)} kg sample in boiling water to ${EX.Ts.toFixed(1)} °C, then drop it into ${EX.mw.toFixed(3)} kg of water at ${EX.Tw.toFixed(1)} °C held in a ${EX.mc.toFixed(3)} kg aluminium calorimeter cup. Everything settles at ${EX.Tf.toFixed(1)} °C. What is the sample’s specific heat? Ignore heat lost to the surroundings.`,
-    visual: bodiesPic({ bodies: [{ name: 'metal sample', temp: '100 °C', color: 'warn', w: 0.8, h: 0.8 }, { name: 'water + aluminium cup', temp: '20 °C', color: 'accent', w: 2.2, h: 1.4 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Heat flows from the hot sample into the water and the cup until all three share one temperature. Not to scale.' }),
+    prompt: t`To identify a metal, you heat a ${EX.ms.toFixed(3)} kg sample in boiling water to ${EX.Ts.toFixed(1)} °C, then drop it into ${EX.mw.toFixed(3)} kg of water at ${EX.Tw.toFixed(1)} °C held in a ${EX.mc.toFixed(3)} kg aluminium calorimeter cup. Everything settles at ${EX.Tf.toFixed(1)} °C. What is the sample’s specific heat? Ignore heat lost to the surroundings.`,
+    visual: bodiesPic({ bodies: [{ name: 'metal sample', temp: '100 °C', color: 'warn', w: 0.8, h: 0.8 }, { name: 'water + aluminium cup', temp: '20 °C', color: 'accent', w: 2.2, h: 1.4 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Heat flows from the hot sample into the water and the cup until all three share one temperature. Not to scale.' }),
     steps: [
       { label: 'Bookkeeping', text: t`The calorimeter is insulated, so energy only moves around inside it: **heat lost by the sample = heat gained by the water and the cup.** Every term below is a positive amount of energy.` },
       { label: 'What the cold parts gained', text: t`Water: $m_wc_w\Delta T = (${EX.mw})(4184)(${EX.Tf - EX.Tw}) = ${fmt(EX.Qw, 4)}$ J. Cup: $(${EX.mc})(897)(${EX.Tf - EX.Tw}) = ${fmt(EX.Qc, 4)}$ J. Together $${fmt(EX.Qw + EX.Qc, 4)}$ J. The cup is small, but leaving it out would bias the answer by ${Math.round((100 * EX.Qc) / (EX.Qw + EX.Qc))} %.` },
@@ -80,7 +80,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
   practice: [
     mcq({
       id: 'heat-vs-temp', difficulty: 1,
-      prompt: 'A bathtub holds 150 kg of water at 40 °C; a mug holds 0.25 kg of coffee at 80 °C. Both are left to cool to the room’s 20 °C. Which statement is right?',
+      prompt: 'A bathtub holds 150 kg of water at 40 °C; a mug holds 0.25 kg of coffee at 80 °C. Both are left to cool to the room’s 20 °C. Which statement is right?',
       choices: [
         'The coffee is at the higher temperature, but the bath gives far more heat to the room as it cools',
         'The coffee contains more heat, because it is hotter',
@@ -96,7 +96,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
       hints: [t`Work out $Q = mc\Delta T$ for each, with $c = 4184$ J/(kg·K) for both.`],
       teach: 'Temperature is a state of a body; heat is energy that flows because of a temperature difference, and how much flows depends on the mass too.',
       explain: t`Bath: $150 \times 4184 \times 20 = 12.6$ MJ. Coffee: $0.25 \times 4184 \times 60 = 63$ kJ. The bath releases about 200 times as much heat, though its temperature is lower.`,
-      visual: bodiesPic({ bodies: [{ name: 'bath: 150 kg', temp: '40 °C', color: 'accent', w: 3.2, h: 1.1 }, { name: 'mug: 0.25 kg', temp: '80 °C', color: 'warn', w: 0.45, h: 0.55 }], gap: 1.6, caption: 'The two bodies, roughly to scale in width. Both cool to the room’s 20 °C.' }),
+      visual: bodiesPic({ bodies: [{ name: 'bath: 150 kg', temp: '40 °C', color: 'accent', w: 3.2, h: 1.1 }, { name: 'mug: 0.25 kg', temp: '80 °C', color: 'warn', w: 0.45, h: 0.55 }], gap: 1.6, caption: 'The two bodies, roughly to scale in width. Both cool to the room’s 20 °C.' }),
     }),
     num({
       id: 'heat-to-warm', difficulty: 1,
@@ -104,7 +104,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
         const m = r.pick([0.5, 1.2, 2, 3.5, 5]), T1 = r.pick([12, 15, 18, 20]), T2 = r.pick([60, 75, 85, 95]);
         const Q = (m * CW * (T2 - T1)) / 1000;
         return {
-          prompt: t`How much heat warms ${m} kg of water from ${T1} °C to ${T2} °C? (Use $c = 4184$ J/(kg·K).)`,
+          prompt: t`How much heat warms ${m} kg of water from ${T1} °C to ${T2} °C? (Use $c = 4184$ J/(kg·K).)`,
           answer: Q, units: 'kJ', tol: { rel: 0.01 },
           errors: [{ value: (m * CW * T2) / 1000, feedback: t`Use the *change* in temperature, $\Delta T = ${T2} - ${T1}$ K, not the final temperature.` }],
           hints: [t`$Q = mc\Delta T$ with $\Delta T = ${T2 - T1}$ K.`],
@@ -120,7 +120,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
         const [name, cm] = r.pick(METALS), mm = r.pick([0.5, 1, 1.5, 2]), Tm = r.pick([80, 90, 100]), mw = r.pick([2, 3, 4, 5]), Tw = r.pick([10, 15, 20]);
         const Tf = (mm * cm * Tm + mw * CW * Tw) / (mm * cm + mw * CW);
         return {
-          prompt: t`A ${mm} kg ${name} part at ${Tm} °C is dropped into ${mw} kg of water at ${Tw} °C in an insulated tank. What temperature do they reach? (Specific heats: ${name} ${cm}, water 4184 J/(kg·K).)`,
+          prompt: t`A ${mm} kg ${name} part at ${Tm} °C is dropped into ${mw} kg of water at ${Tw} °C in an insulated tank. What temperature do they reach? (Specific heats: ${name} ${cm}, water 4184 J/(kg·K).)`,
           answer: Tf, tol: { rel: 0.005, abs: 0.05 },
           errors: [
             { value: (Tm + Tw) / 2, feedback: 'Halfway is right only for bodies with equal heat capacities mc. Water’s is far larger here.' },
@@ -128,8 +128,8 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
           ],
           hints: ['Heat lost by the metal = heat gained by the water.', t`$m_mc_m(T_m - T_f) = m_wc_w(T_f - T_w)$. Solve for $T_f$.`],
           teach: 'In an insulated system the final temperature is the heat-capacity-weighted average of the starting temperatures.',
-          explain: t`$T_f = \dfrac{m_mc_mT_m + m_wc_wT_w}{m_mc_m + m_wc_w} = \dfrac{(${mm})(${cm})(${Tm}) + (${mw})(4184)(${Tw})}{(${mm})(${cm}) + (${mw})(4184)} = ${fmt(Tf, 4)}$ °C. The water’s heat capacity dominates, so the final temperature sits close to the water’s.`,
-          visual: bodiesPic({ bodies: [{ name: `${name}, ${mm} kg`, temp: `${Tm} °C`, color: 'warn', w: 0.8, h: 0.8 }, { name: `water, ${mw} kg`, temp: `${Tw} °C`, color: 'accent', w: 2, h: 1.3 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Insulated: heat only moves from the hot part to the water. Not to scale.' }),
+          explain: t`$T_f = \dfrac{m_mc_mT_m + m_wc_wT_w}{m_mc_m + m_wc_w} = \dfrac{(${mm})(${cm})(${Tm}) + (${mw})(4184)(${Tw})}{(${mm})(${cm}) + (${mw})(4184)} = ${fmt(Tf, 4)}$ °C. The water’s heat capacity dominates, so the final temperature sits close to the water’s.`,
+          visual: bodiesPic({ bodies: [{ name: `${name}, ${mm} kg`, temp: `${Tm} °C`, color: 'warn', w: 0.8, h: 0.8 }, { name: `water, ${mw} kg`, temp: `${Tw} °C`, color: 'accent', w: 2, h: 1.3 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Insulated: heat only moves from the hot part to the water. Not to scale.' }),
         };
       },
     }),
@@ -156,7 +156,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
         const Tf = +((ms * ctrue * 100 + mw * CW * Tw) / (ms * ctrue + mw * CW)).toFixed(1);
         const c = (mw * CW * (Tf - Tw)) / (ms * (100 - Tf));
         return {
-          prompt: t`A ${ms} kg metal sample at 100.0 °C is dropped into ${mw} kg of water at ${Tw}.0 °C in an insulated cup of negligible heat capacity. The final temperature is ${Tf.toFixed(1)} °C. What is the metal’s specific heat?`,
+          prompt: t`A ${ms} kg metal sample at 100.0 °C is dropped into ${mw} kg of water at ${Tw}.0 °C in an insulated cup of negligible heat capacity. The final temperature is ${Tf.toFixed(1)} °C. What is the metal’s specific heat?`,
           answer: c, units: 'J/(kg K)', tol: { rel: 0.02 },
           errors: apart([
             { value: (mw * CW * (Tf - Tw)) / (ms * 100), feedback: 'Use the sample’s temperature *drop*, $100 - T_f$, not its starting temperature.' },
@@ -165,7 +165,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
           hints: ['Heat lost by the sample = heat gained by the water.', t`$c_s = \dfrac{m_wc_w(T_f - T_w)}{m_s(100 - T_f)}$.`],
           teach: 'Calorimetry finds an unknown specific heat by balancing the heat lost against the heat gained.',
           explain: t`$c_s = \dfrac{(${mw})(4184)(${fmt(Tf - Tw, 3)})}{(${ms})(${fmt(100 - Tf, 3)})} = ${fmt(c, 3)}$ J/(kg·K) — close to the handbook value for ${name}, ${ctrue}.`,
-          visual: bodiesPic({ bodies: [{ name: `sample, ${ms} kg`, temp: '100.0 °C', color: 'warn', w: 0.7, h: 0.7 }, { name: `water, ${mw} kg`, temp: `${Tw}.0 °C`, color: 'accent', w: 1.6, h: 1.2 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: `Both end at ${Tf.toFixed(1)} °C. Not to scale.` }),
+          visual: bodiesPic({ bodies: [{ name: `sample, ${ms} kg`, temp: '100.0 °C', color: 'warn', w: 0.7, h: 0.7 }, { name: `water, ${mw} kg`, temp: `${Tw}.0 °C`, color: 'accent', w: 1.6, h: 1.2 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: `Both end at ${Tf.toFixed(1)} °C. Not to scale.` }),
         };
       },
     }),
@@ -187,9 +187,9 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
     }),
     mcq({
       id: 'cold-can', difficulty: 2,
-      prompt: 'A can of soda from the fridge, at 5 °C, sits on a table in a 22 °C room. A student says: “The can is giving off cold to the air around it.” Which description is physically right?',
+      prompt: 'A can of soda from the fridge, at 5 °C, sits on a table in a 22 °C room. A student says: “The can is giving off cold to the air around it.” Which description is physically right?',
       choices: [
-        'Heat flows from the warmer air and table into the can, raising its internal energy until it reaches 22 °C',
+        'Heat flows from the warmer air and table into the can, raising its internal energy until it reaches 22 °C',
         'Cold flows out of the can into the air until the can has run out of cold',
         'Heat flows out of the can into the air, because the can is losing its coldness',
         'No heat flows: the can warms up because the room’s temperature spreads into it',
@@ -197,13 +197,13 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
       answer: 0,
       why: {
         1: 'There is no substance called “cold”. A cold object is simply one with less internal energy; it gains energy from its warmer surroundings.',
-        2: 'Heat flows from hotter to colder — here, from the 22 °C room into the 5 °C can.',
+        2: 'Heat flows from hotter to colder — here, from the 22 °C room into the 5 °C can.',
         3: 'Temperature does not spread; energy does. The energy that flows because of a temperature difference *is* heat.',
       },
-      hints: ['Which way does heat always flow, between a 22 °C body and a 5 °C one?'],
+      hints: ['Which way does heat always flow, between a 22 °C body and a 5 °C one?'],
       teach: 'Heat is energy flowing from hot to cold; “cold” is not a thing that flows.',
-      explain: t`The air and table, at 22 °C, are hotter than the can, so heat flows **into** the can. Its internal energy, and so its temperature, rise until it reaches 22 °C — and the nearby air cools a little, which is what the student felt.`,
-      visual: bodiesPic({ bodies: [{ name: 'room air', temp: '22 °C', color: 'warn', w: 2.4, h: 1.2 }, { name: 'soda can', temp: '5 °C', color: 'accent', w: 0.5, h: 0.9 }], gap: 0.9, caption: 'The can and the air around it. Not to scale.' }),
+      explain: t`The air and table, at 22 °C, are hotter than the can, so heat flows **into** the can. Its internal energy, and so its temperature, rise until it reaches 22 °C — and the nearby air cools a little, which is what the student felt.`,
+      visual: bodiesPic({ bodies: [{ name: 'room air', temp: '22 °C', color: 'warn', w: 2.4, h: 1.2 }, { name: 'soda can', temp: '5 °C', color: 'accent', w: 0.5, h: 0.9 }], gap: 0.9, caption: 'The can and the air around it. Not to scale.' }),
     }),
   ],
   checkpoint: [
@@ -213,20 +213,20 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
         const mdot = r.pick([1.5, 2, 2.5, 3]), Tin = r.pick([15, 18, 20]), Tout = r.pick([38, 45, 52, 60]);
         const P = (mdot * CW * (Tout - Tin)) / 1000;
         return {
-          prompt: t`On a rocket test stand, a small “calorimeter” combustion chamber is cooled by water flowing through a jacket around it at ${mdot} kg/s. The water enters at ${Tin} °C and leaves at ${Tout} °C. How much heat per second is the hot gas pushing through the chamber walls?`,
+          prompt: t`On a rocket test stand, a small “calorimeter” combustion chamber is cooled by water flowing through a jacket around it at ${mdot} kg/s. The water enters at ${Tin} °C and leaves at ${Tout} °C. How much heat per second is the hot gas pushing through the chamber walls?`,
           answer: P, units: 'kW', tol: { rel: 0.01 },
           errors: [{ value: (mdot * CW * Tout) / 1000, feedback: t`The water carries away heat according to how much it *warms*: $\Delta T = ${Tout} - ${Tin}$ K.` }],
           hints: ['Each second, a mass ṁ of water warms by ΔT.', t`Heat per second $= \dot m\,c\,\Delta T$.`],
           teach: 'A flowing coolant carries heat away at a rate ṁcΔT — which is how test stands measure the heat flowing into chamber walls.',
           explain: t`$P = \dot m c\Delta T = (${mdot}\ \text{kg/s})(4184\ \text{J/(kg·K)})(${Tout - Tin}\ \text{K}) = ${fmt(P * 1000, 3)}$ W $\approx ${fmt(P, 3)}$ kW. Divide by the wall area and you have the heat flux that a regeneratively cooled engine must survive.`,
-          visual: flowPic({ Tin: `${Tin} °C`, Tout: `${Tout} °C`, mdot: `${mdot} kg/s` }),
+          visual: flowPic({ Tin: `${Tin} °C`, Tout: `${Tout} °C`, mdot: `${mdot} kg/s` }),
         };
       },
     }),
     mcq({
       id: 'cp-water-copper', difficulty: 2,
-      prompt: 'Equal masses of water at 80 °C and copper at 20 °C are put in thermal contact, insulated from everything else. The temperature they end at is:',
-      choices: ['About 75 °C', '50 °C, exactly halfway', 'About 25 °C', 'About 30 °C, because copper conducts heat so well that it sets the final temperature'],
+      prompt: 'Equal masses of water at 80 °C and copper at 20 °C are put in thermal contact, insulated from everything else. The temperature they end at is:',
+      choices: ['About 75 °C', '50 °C, exactly halfway', 'About 25 °C', 'About 30 °C, because copper conducts heat so well that it sets the final temperature'],
       answer: 0,
       why: {
         1: 'Halfway needs equal heat capacities. With equal masses, water’s c is eleven times copper’s.',
@@ -235,8 +235,8 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
       },
       teach: 'The final temperature is the heat-capacity-weighted average, so it lands near the body with the larger mc.',
       hints: [t`$T_f = \dfrac{c_wT_w + c_{Cu}T_{Cu}}{c_w + c_{Cu}}$ for equal masses.`],
-      explain: t`$T_f = \dfrac{4184\times80 + 385\times20}{4184 + 385} = ${fmt((4184 * 80 + 385 * 20) / (4184 + 385), 3)}$ °C. The water cools by only 5 K while the copper warms by 55 K.`,
-      visual: bodiesPic({ bodies: [{ name: 'water, 1 kg', temp: '80 °C', color: 'accent', w: 1.4, h: 1.2 }, { name: 'copper, 1 kg', temp: '20 °C', color: 'warn', w: 0.6, h: 0.5 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Equal masses — the copper is much smaller because it is nine times denser. Not to scale.' }),
+      explain: t`$T_f = \dfrac{4184\times80 + 385\times20}{4184 + 385} = ${fmt((4184 * 80 + 385 * 20) / (4184 + 385), 3)}$ °C. The water cools by only 5 K while the copper warms by 55 K.`,
+      visual: bodiesPic({ bodies: [{ name: 'water, 1 kg', temp: '80 °C', color: 'accent', w: 1.4, h: 1.2 }, { name: 'copper, 1 kg', temp: '20 °C', color: 'warn', w: 0.6, h: 0.5 }], flows: [{ from: 0, to: 1, label: 'Q' }], caption: 'Equal masses — the copper is much smaller because it is nine times denser. Not to scale.' }),
     }),
     num({
       id: 'cp-heater', difficulty: 2,
@@ -244,7 +244,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
         const P = r.pick([1.2, 1.5, 2, 2.4]), m = r.pick([0.8, 1, 1.2, 1.5]), T1 = r.pick([10, 15, 20]);
         const tsec = (m * CW * (100 - T1)) / (P * 1000);
         return {
-          prompt: t`A ${P} kW electric kettle heats ${m} kg of water from ${T1} °C to the boil, 100 °C. Ignoring heat lost to the kettle and the room, how long does it take?`,
+          prompt: t`A ${P} kW electric kettle heats ${m} kg of water from ${T1} °C to the boil, 100 °C. Ignoring heat lost to the kettle and the room, how long does it take?`,
           answer: tsec, units: 's', tol: { rel: 0.01 },
           errors: [{ value: (m * CW * 100) / (P * 1000), feedback: t`The water warms by $100 - ${T1}$ K, not 100 K.` }],
           hints: ['First find the heat needed, Q = mcΔT.', 'Then time = energy ÷ power.'],

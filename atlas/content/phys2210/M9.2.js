@@ -7,6 +7,8 @@ import { collide1d } from '../../src/viz/model/mech-collide.js';
 const t = String.raw;
 const s3 = (x) => fmt(x, 3);
 const comma = (x) => x.toLocaleString('en-US');
+// the same inside math, where a bare comma would be spaced as punctuation
+const cm = (x) => comma(x).replace(/,/g, '{,}');
 
 // a static before/after picture of two carts from the collision simulation
 const snaps = (params, caption) => ({ type: 'mech-collide', params: { view: 'snapshots', bars: [], ...params }, caption });
@@ -71,7 +73,7 @@ This is **conservation of momentum**. You do not need to know anything about the
           ],
           hints: ['The momentum before is all in the moving wagon.', t`After coupling: $(m_1 + m_2)\,v = m_1 u$.`],
           teach: 'When bodies stick together, they share the total momentum: v = P / (total mass).',
-          explain: t`$v = \dfrac{m_1 u}{m_1 + m_2} = \dfrac{${comma(m1)}\times${u}}{${comma(m1 + m2)}} = ${s3(v)}$ m/s.`,
+          explain: t`$v = \dfrac{m_1 u}{m_1 + m_2} = \dfrac{${cm(m1)}\times${u}}{${cm(m1 + m2)}} = ${s3(v)}$ m/s.`,
           visual: snaps({ m1, m2, u1: u, u2: 0, e: 0, show: 'before', names: ['1', '2'] }, 'The wagons just before they meet.'),
         };
       },
@@ -208,7 +210,7 @@ What is wrong?`,
           ],
           hints: ['Work in the station’s frame: before docking only the capsule moves.', t`They move off together: $(m + M)\,v' = m v$.`],
           teach: 'A docking is a perfectly inelastic collision: the pair shares the capsule’s momentum.',
-          explain: t`$v' = \dfrac{m v}{m + M} = \dfrac{${comma(m)}\times${v}}{${comma(m + M)}} = ${s3(dv)}$ m/s $= ${s3(dv * 1000)}$ mm/s. The station’s thrusters later trim this out.`,
+          explain: t`$v' = \dfrac{m v}{m + M} = \dfrac{${cm(m)}\times${v}}{${cm(m + M)}} = ${s3(dv)}$ m/s $= ${s3(dv * 1000)}$ mm/s. The station’s thrusters later trim this out.`,
           visual: snaps({ m1: m, m2: M, u1: v, u2: 0, e: 0, show: 'before', names: ['capsule', 'station'] }, 'Just before docking, in the station’s frame (sizes not to scale).'),
         };
       },

@@ -8,6 +8,8 @@ import { shapeAt } from './_spin.js';
 const t = String.raw;
 const s3 = (x) => fmt(x, 3);
 const comma = (x) => x.toLocaleString('en-US');
+// the same inside math, where a bare comma would be spaced as punctuation
+const cm = (x) => comma(x).replace(/,/g, '{,}');
 const r4 = (x) => +x.toFixed(4);
 
 // two round bodies side by side (keys of the rolling-shapes helper: hoop, disk, sphere, shell)
@@ -219,7 +221,7 @@ The **moment of inertia** $I$ is rotation’s stand-in for mass: it measures how
           ],
           hints: [t`Total $I = ${N}\times\tfrac13 mL^2$.`, t`$\omega = ${rpm}\times2\pi/60$; then $K = \tfrac12 I\omega^2$.`],
           teach: 'Moments of inertia about one axis add, and rotational energy is ½Iω².',
-          explain: t`$I = ${N}\times\tfrac13(${m})(${L})^2 = ${comma(Math.round(I))}\ \text{kg·m}^2$; $\omega = ${s3(w)}$ rad/s; $K = \tfrac12 I\omega^2 = ${s3(K)}$ MJ. That stored energy is what lets a helicopter whose engine fails flare and land: the pilot spends the rotor’s spin to cushion the touchdown.`,
+          explain: t`$I = ${N}\times\tfrac13(${m})(${L})^2 = ${cm(Math.round(I))}\ \text{kg·m}^2$; $\omega = ${s3(w)}$ rad/s; $K = \tfrac12 I\omega^2 = ${s3(K)}$ MJ. That stored energy is what lets a helicopter whose engine fails flare and land: the pilot spends the rotor’s spin to cushion the touchdown.`,
           visual: {
             type: 'graph',
             params: {

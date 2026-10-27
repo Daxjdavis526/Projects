@@ -70,6 +70,7 @@ const FUNCS = {
   sgn: { f: Math.sign, tex: '\\operatorname{sgn}' },
   step: { f: (x) => (x >= 0 ? 1 : 0), tex: '\\Theta' },          // Heaviside: step(a − b) is 1 when a ≥ b
   floor: { f: Math.floor, tex: 'floor' },
+  round: { f: Math.round, tex: 'round' },
   ceil: { f: Math.ceil, tex: 'ceil' },
   gamma: { f: gammaFn, tex: '\\Gamma' },
   erf: { f: erf, tex: '\\operatorname{erf}' },

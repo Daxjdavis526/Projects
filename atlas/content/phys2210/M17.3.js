@@ -200,8 +200,8 @@ $f(v)\,dv$ is the fraction of molecules with speeds between $v$ and $v + dv$. Th
       answer: 0,
       why: {
         1: t`At 1000 K nitrogen’s $v_\text{rms}$ is 944 m/s; the escape speed is 11 times that. Hardly any molecules in the tail are fast enough.`,
-        2: t`Oxygen ($v_\text{rms}$ = 883 m/s) is even heavier and slower than nitrogen: the escape speed is 12 times its rms speed.`,
-        3: t`Argon is the heaviest of the four ($v_\text{rms}$ = 791 m/s): 14 times below escape speed.`,
+        2: t`Oxygen, with $v_\text{rms} = 883$ m/s, is even heavier and slower than nitrogen: the escape speed is 12 times its rms speed.`,
+        3: t`Argon is the heaviest of the four, with $v_\text{rms} = 791$ m/s: 14 times below escape speed.`,
       },
       hints: [t`$v_\text{rms} = \sqrt{3RT/M}$ at 1000 K.`, t`Find the ratio 10.8 km/s ÷ $v_\text{rms}$ for each gas, and compare it with 6.`],
       teach: 'Light gases escape because a planet’s escape speed sits in the fast tail of their speed distribution.',

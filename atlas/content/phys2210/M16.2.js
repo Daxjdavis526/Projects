@@ -8,10 +8,10 @@ import { C0, toK, ssContraction, alContraction, ssDLExpr, alDLExpr, ALPHA_SS, AL
 const t = String.raw;
 const E_SS = 193e9;                // Pa, Young's modulus of 304 stainless at room temperature
 const ALPHA_STEEL = 1.2e-5;        // 1/K, carbon steel and iron (OpenStax Table 1.2)
-const ALPHA_ALU = 2.3e-5;          // 1/K, aluminium near 20 °C (CRC: 23.1e-6)
+const ALPHA_ALU = 2.3e-5;          // 1/K, aluminium near 20 °C (CRC: 23.1e-6)
 const BETA_FUEL = 9.5e-4;          // 1/K, gasoline (OpenStax Table 1.2)
 
-// the worked example: a 12.0 m stainless LOX line cooled from 20 °C to LOX temperature
+// the worked example: a 12.0 m stainless LOX line cooled from 20 °C to LOX temperature
 const EX = { L: 12.0, T0: toK(20), T1: 90.19 };
 EX.dT = EX.T1 - EX.T0;                                   // −202.96 K
 EX.lin = ALPHA_SS * EX.L * EX.dT;                        // −0.0375 m
@@ -50,7 +50,7 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
       x: [0, 310], y: [-4.6, 0.5], aspect: 'wide', xlabel: 'T (K)', ylabel: 'ΔL/L₀ (mm per m)',
       alt: 'Measured contraction of stainless steel and aluminium as they cool, with straight-line approximations',
       sliders: [
-        { key: 'T', label: 'Final temperature $T$', min: 30, max: 300, step: 1, value: 77, unit: '\\mathrm{K}', explain: 'The line starts at 293 K (20 °C) and cools to this temperature.' },
+        { key: 'T', label: 'Final temperature $T$', min: 30, max: 300, step: 1, value: 77, unit: '\\mathrm{K}', explain: 'The line starts at 293 K (20 °C) and cools to this temperature.' },
         { key: 'L', label: 'Length of the line $L_0$', min: 1, max: 30, step: 0.5, value: 10, unit: '\\mathrm{m}', explain: 'Only the readouts use it: every metre shrinks by the same amount.' },
       ],
       curves: [
@@ -72,7 +72,7 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
     caption: 'Measured curves: NIST’s fits to data for 304 stainless steel and 6061-T6 aluminium (±5 %), relative to the length at 293 K. Dashed: the straight-line rule with α taken at 293 K (1.54 and 2.26 × 10⁻⁵ K⁻¹). Below about 20 K the metals hardly change at all.',
   },
   example: {
-    prompt: t`A 304 stainless steel LOX feed line runs ${EX.L.toFixed(1)} m between two anchors. It is installed at 20 °C and then chilled to the temperature of boiling liquid oxygen, 90.19 K. (a) Predict its contraction with the room-temperature $\alpha = 1.54\times10^{-5}\ \text{K}^{-1}$. (b) NIST’s measurements give a total contraction of ${s3(-EX.frac * 100)} % between 293 K and 90.19 K. What does that give? (c) If the anchors held the line rigidly, what tensile stress would build up? ($E = 193$ GPa.)`,
+    prompt: t`A 304 stainless steel LOX feed line runs ${EX.L.toFixed(1)} m between two anchors. It is installed at 20 °C and then chilled to the temperature of boiling liquid oxygen, 90.19 K. (a) Predict its contraction with the room-temperature $\alpha = 1.54\times10^{-5}\ \text{K}^{-1}$. (b) NIST’s measurements give a total contraction of ${s3(-EX.frac * 100)} % between 293 K and 90.19 K. What does that give? (c) If the anchors held the line rigidly, what tensile stress would build up? (Use $E = 193$ GPa.)`,
     visual: contractionGraph({ mats: ['ss'], linear: true, vline: { T: EX.T1, label: '90.19 K' }, caption: 'NIST’s measured contraction of 304 stainless (solid) and the straight-line rule with the room-temperature α (dashed). At 90 K the line overshoots the measurement.' }),
     steps: [
       { label: 'The straight-line rule', text: t`$\Delta T = 90.19 - 293.15 = ${fmt(EX.dT, 5)}$ K, so $\Delta L = \alpha L_0\Delta T = (1.54\times10^{-5}\ \text{K}^{-1})(${EX.L.toFixed(1)}\ \text{m})(${fmt(EX.dT, 5)}\ \text{K}) = ${fmt(EX.lin * 1000, 3)}$ mm.` },
@@ -89,13 +89,13 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
         const L = r.pick([18, 20, 25, 30, 36, 40]), T1 = r.pick([-10, -5, 0, 5]), T2 = r.pick([35, 40, 45]);
         const dL = ALPHA_STEEL * L * (T2 - T1) * 1000;
         return {
-          prompt: t`A steel rail is ${L}.0 m long on a winter morning at $${T1}$ °C. How much longer is it on a summer afternoon at ${T2} °C? ($\alpha = 1.2\times10^{-5}\ \text{K}^{-1}$.)`,
+          prompt: t`A steel rail is ${L}.0 m long on a winter morning at $${T1}$ °C. How much longer is it on a summer afternoon at ${T2} °C? (Use $\alpha = 1.2\times10^{-5}\ \text{K}^{-1}$.)`,
           answer: dL, units: 'mm', tol: { rel: 0.01 },
           errors: T1 === 0 ? [] : [{ value: ALPHA_STEEL * L * T2 * 1000, feedback: t`$\Delta T$ is the *change* in temperature: ${T2} − (${T1}).` }],
           hints: [t`$\Delta L = \alpha L_0\Delta T$, with $\Delta T = ${T2} - (${T1}) = ${T2 - T1}$ K.`],
           teach: 'The change in length is the coefficient times the original length times the change in temperature.',
           explain: t`$\Delta L = (1.2\times10^{-5})(${L}\ \text{m})(${T2 - T1}\ \text{K}) = ${fmt(dL / 1000, 3)}$ m $= ${fmt(dL, 3)}$ mm — which is why rails need expansion gaps or are laid pre-stretched.`,
-          visual: expansionPic({ before: `${L}.0 m at ${String(T1).replace('-', '−')} °C`, after: `at ${T2} °C`, dL: 'ΔL = ?' }),
+          visual: expansionPic({ before: `${L}.0 m at ${String(T1).replace('-', '−')} °C`, after: `at ${T2} °C`, dL: 'ΔL = ?' }),
         };
       },
     }),
@@ -153,7 +153,7 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
         const dT = r.pick([20, 30, 40, 50, 60]);
         const sigma = E_SS * 1.5e-5 * dT / 1e6;
         return {
-          prompt: t`A 304 stainless steel tie rod is clamped, unstressed, between two rigid supports at 20 °C. The whole assembly then cools by ${dT} K. What tensile stress develops in the rod? ($E = 193$ GPa; $\alpha = 1.5\times10^{-5}\ \text{K}^{-1}$ over this range.)`,
+          prompt: t`A 304 stainless steel tie rod is clamped, unstressed, between two rigid supports at 20 °C. The whole assembly then cools by ${dT} K. What tensile stress develops in the rod? (Use $E = 193$ GPa; $\alpha = 1.5\times10^{-5}\ \text{K}^{-1}$ over this range.)`,
           answer: sigma, units: 'MPa', tol: { rel: 0.01 },
           errors: [{ value: 1.5e-5 * dT, feedback: 'That is the strain the rod is denied. Stress is Young’s modulus times that strain.' }],
           hints: ['If it were free, the rod would shrink by the fraction αΔT. The supports stop it, so it is stretched by exactly that strain.', t`$\sigma = E\varepsilon = E\alpha\Delta T$.`],
@@ -184,7 +184,7 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
         const V0 = r.pick([60, 80, 100, 120]), T1 = r.pick([5, 10, 15]), T2 = r.pick([30, 35, 40]);
         const dT = T2 - T1, spill = (BETA_FUEL - 3 * ALPHA_ALU) * V0 * dT;
         return {
-          prompt: t`A light aircraft’s aluminium wing tank is filled to the brim with ${V0} L of fuel at ${T1} °C, then the aircraft sits on a sunny apron until tank and fuel reach ${T2} °C. How much fuel overflows from the vent? (Fuel: $\beta = 9.5\times10^{-4}\ \text{K}^{-1}$; aluminium: $\alpha = 2.3\times10^{-5}\ \text{K}^{-1}$.)`,
+          prompt: t`A light aircraft’s aluminium wing tank is filled to the brim with ${V0} L of fuel at ${T1} °C, then the aircraft sits on a sunny apron until tank and fuel reach ${T2} °C. How much fuel overflows from the vent? (Fuel: $\beta = 9.5\times10^{-4}\ \text{K}^{-1}$; aluminium: $\alpha = 2.3\times10^{-5}\ \text{K}^{-1}$.)`,
           answer: spill, units: 'L', tol: { rel: 0.01 },
           errors: [
             { value: BETA_FUEL * V0 * dT, feedback: 'The tank expands too: its volume grows by 3αV₀ΔT, which makes room for part of the extra fuel.' },
@@ -215,13 +215,13 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
         'Too large: α falls as the steel cools, so the real contraction is smaller',
         'Too small: steel contracts faster and faster as it gets colder',
         'Exactly right: α is a fixed property of the material',
-        'Right only if she converts both temperatures to °C first',
+        'Right only if she converts both temperatures to °C first',
       ],
       answer: 0,
       why: {
         1: 'It is the reverse: at low temperature the atoms’ jiggling dies away and so does the expansion. α drops toward zero near absolute zero.',
         2: 'α is a property of the material *at a given temperature*. Over a 200-kelvin range it changes a lot.',
-        3: 'A temperature *difference* is the same in K and in °C, so the scale makes no difference here.',
+        3: 'A temperature *difference* is the same in K and in °C, so the scale makes no difference here.',
       },
       hints: ['Look again at the Explore graph: how does the slope of the measured curve change as T falls?'],
       teach: 'The linear rule assumes a constant α, but α itself shrinks at cryogenic temperatures.',
@@ -235,13 +235,13 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
         const L = r.pick([58, 60, 62]), Tg = r.pick([10, 15, 20]), Tc = r.pick([90, 100, 110]);
         const dL = ALPHA_ALU * L * (Tc - Tg) * 100;
         return {
-          prompt: t`At Mach 2, air friction heats a supersonic airliner’s aluminium skin from about ${Tg} °C on the ground to about ${Tc} °C. If the whole ${L} m fuselage followed its skin temperature, how much longer would it get? ($\alpha = 2.3\times10^{-5}\ \text{K}^{-1}$.)`,
+          prompt: t`At Mach 2, air friction heats a supersonic airliner’s aluminium skin from about ${Tg} °C on the ground to about ${Tc} °C. If the whole ${L} m fuselage followed its skin temperature, how much longer would it get? (Use $\alpha = 2.3\times10^{-5}\ \text{K}^{-1}$.)`,
           answer: dL, units: 'cm', tol: { rel: 0.01 },
           errors: [{ value: ALPHA_ALU * L * Tc * 100, feedback: t`Use the *change* in temperature, ${Tc} − ${Tg} = ${Tc - Tg} K.` }],
           hints: [t`$\Delta L = \alpha L_0\Delta T$.`],
           teach: 'ΔL = αL₀ΔT applies to an airframe as it does to a rail.',
           explain: t`$\Delta L = (2.3\times10^{-5})(${L}\ \text{m})(${Tc - Tg}\ \text{K}) = ${fmt(dL / 100, 3)}$ m, about ${fmt(dL, 2)} cm. Supersonic airliners such as Concorde had to be designed to let their structure grow by about this much in every flight.`,
-          visual: expansionPic({ before: `${L} m fuselage at ${Tg} °C`, after: `at ${Tc} °C`, dL: 'ΔL = ?' }),
+          visual: expansionPic({ before: `${L} m fuselage at ${Tg} °C`, after: `at ${Tc} °C`, dL: 'ΔL = ?' }),
         };
       },
     }),
@@ -271,7 +271,7 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
         const T1 = r.pick([-10, -5, 0]), T2 = r.pick([30, 35, 40]);
         const dL = ALPHA_STEEL * 300 * (T2 - T1) * 100;
         return {
-          prompt: t`The Eiffel Tower’s wrought-iron structure is 300 m tall. Assuming the iron follows the air temperature, how much taller is it on a ${T2} °C summer afternoon than on a $${T1}$ °C winter night? ($\alpha = 1.2\times10^{-5}\ \text{K}^{-1}$.)`,
+          prompt: t`The Eiffel Tower’s wrought-iron structure is 300 m tall. Assuming the iron follows the air temperature, how much taller is it on a ${T2} °C summer afternoon than on a $${T1}$ °C winter night? (Use $\alpha = 1.2\times10^{-5}\ \text{K}^{-1}$.)`,
           answer: dL, units: 'cm', tol: { rel: 0.01 },
           errors: T1 === 0 ? [] : [{ value: ALPHA_STEEL * 300 * T2 * 100, feedback: t`$\Delta T$ is the change: ${T2} − (${T1}).` }],
           hints: [t`$\Delta T = ${T2} - (${T1}) = ${T2 - T1}$ K.`],

@@ -103,7 +103,7 @@ $$\tfrac12 m\overline{v^2} = \tfrac32 k_BT.$$`,
         const v = r.pick([300, 400, 500, 600]);
         const J = 2 * mOf(MOLAR.N2) * v;
         return {
-          prompt: t`A nitrogen molecule ($m = 4.65\times10^{-26}$ kg) moving at ${v} m/s hits a wall head-on and bounces straight back at the same speed. What impulse does it deliver to the wall?`,
+          prompt: t`A nitrogen molecule, of mass $m = 4.65\times10^{-26}$ kg, moving at ${v} m/s hits a wall head-on and bounces straight back at the same speed. What impulse does it deliver to the wall?`,
           answer: J, units: 'N s', tol: { rel: 0.01 },
           errors: [{ value: J / 2, feedback: 'The momentum doesn’t just drop to zero: it reverses, from +mv to −mv. The change is 2mv.' }],
           hints: ['Impulse = change of momentum.', t`Before: $+mv$; after: $-mv$. The change has size $2mv$.`],
@@ -138,7 +138,7 @@ $$\tfrac12 m\overline{v^2} = \tfrac32 k_BT.$$`,
         const Tc = r.pick([-40, 0, 25, 100]);
         const KE = 1.5 * KB * (Tc + 273.15);
         return {
-          prompt: t`What is the mean translational kinetic energy of a gas molecule at $${Tc}$ °C?`,
+          prompt: t`What is the mean translational kinetic energy of a gas molecule at $${Tc}$ °C?`,
           answer: KE, units: 'J', tol: { rel: 0.01 },
           errors: apart([
             { value: KB * (Tc + 273.15), feedback: t`That is $k_BT$. The mean translational kinetic energy is $\tfrac32k_BT$.` },
@@ -147,7 +147,7 @@ $$\tfrac12 m\overline{v^2} = \tfrac32 k_BT.$$`,
           hints: [t`$\langle\tfrac12mv^2\rangle = \tfrac32k_BT$ with $T$ in kelvin.`],
           teach: 'The mean translational kinetic energy per molecule is (3/2)k_BT, for every gas.',
           explain: t`$\tfrac32(1.381\times10^{-23})(${(Tc + 273.15).toFixed(2)}) = ${sci(KE, 3)}$ J — the same for helium, nitrogen or xenon at this temperature.`,
-          visual: { type: 'therm-gas', params: { gas: 'N2', T: Tc + 273.15, hist: false, gauge: false, tag: `a gas at ${String(Tc).replace('-', '−')} °C` }, caption: 'Gas molecules in a box (a model: enlarged and slowed, all in proportion).' },
+          visual: { type: 'therm-gas', params: { gas: 'N2', T: Tc + 273.15, hist: false, gauge: false, tag: `a gas at ${String(Tc).replace('-', '−')} °C` }, caption: 'Gas molecules in a box (a model: enlarged and slowed, all in proportion).' },
         };
       },
     }),
@@ -177,7 +177,7 @@ $$\tfrac12 m\overline{v^2} = \tfrac32 k_BT.$$`,
         const n = r.pick([2e14, 5e14, 1e15]), T = 1000, m = mOf(MOLAR.O);
         const v = vrms(T, MOLAR.O), P = (n * m * v * v) / 3;
         return {
-          prompt: t`At the International Space Station’s altitude, about 400 km, the thin air is mostly oxygen atoms ($m = 2.66\times10^{-26}$ kg) at roughly 1000 K, with a number density of about $${sci(n, 1)}$ m⁻³, depending on solar activity. Their rms speed is ${Math.round(v)} m/s. What pressure do they exert?`,
+          prompt: t`At the International Space Station’s altitude, about 400 km, the thin air is mostly oxygen atoms, of mass $m = 2.66\times10^{-26}$ kg, at roughly 1000 K, with a number density of about $${sci(n, 1)}$ m⁻³, depending on solar activity. Their rms speed is ${Math.round(v)} m/s. What pressure do they exert?`,
           answer: P, units: 'Pa', tol: { rel: 0.01 },
           errors: apart([
             { value: n * m * v * v, feedback: t`Don’t forget the $\tfrac13$: only the motion along one direction pushes on a given wall.` },

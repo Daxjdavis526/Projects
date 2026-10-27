@@ -7,6 +7,8 @@ import { RPM, omegaGraph, wheel } from './_rotation.js';
 const t = String.raw;
 const s3 = (x) => fmt(x, 3);
 const comma = (x) => x.toLocaleString('en-US');
+// the same inside math, where a bare comma would be spaced as punctuation
+const cm = (x) => comma(x).replace(/,/g, '{,}');
 
 // a static picture of a turning disk (or ring) from the rotor simulation
 const disk = (params, caption) => ({ type: 'mech-rotor', params: { shape: 'disk', M: 1, R: 0.3, values: false, ...params }, caption });
@@ -71,7 +73,7 @@ Every point of the body shares the same $\theta$, $\omega$ and $\alpha$. But a p
           ],
           hints: ['One revolution is 2π radians; one minute is 60 s.', t`$\omega = N\times\dfrac{2\pi}{60}$ rad/s.`],
           teach: 'To convert rpm to rad/s, multiply by 2π/60 (about 0.105).',
-          explain: t`$\omega = ${comma(N)}\times\dfrac{2\pi}{60} = ${s3(w)}$ rad/s.`,
+          explain: t`$\omega = ${cm(N)}\times\dfrac{2\pi}{60} = ${s3(w)}$ rad/s.`,
           visual: disk({ omega0: 2 }, 'Turning anticlockwise; the green arrow shows the sense of rotation.'),
         };
       },
@@ -205,7 +207,7 @@ Every point of the body shares the same $\theta$, $\omega$ and $\alpha$. But a p
           ],
           hints: [t`$\omega = N\times\dfrac{2\pi}{60}$; then $v = r\omega$ with $r$ in metres.`],
           teach: 'Tip speed is rω, with ω in rad/s and r in metres.',
-          explain: t`$\omega = ${comma(N)}\times\dfrac{2\pi}{60} = ${s3(N * RPM)}$ rad/s, so $v = (${R})(${s3(N * RPM)}) = ${s3(v)}$ m/s. Tip speeds of hundreds of metres per second are why turbopump design is an exercise in materials strength.`,
+          explain: t`$\omega = ${cm(N)}\times\dfrac{2\pi}{60} = ${s3(N * RPM)}$ rad/s, so $v = (${R})(${s3(N * RPM)}) = ${s3(v)}$ m/s. Tip speeds of hundreds of metres per second are why turbopump design is an exercise in materials strength.`,
           visual: disk({ omega0: 3, alpha: 0, point: 0.3, R: 0.3 }, 'The impeller seen along its shaft (a sketch): a blade tip (gold) with its velocity and inward acceleration.'),
         };
       },

@@ -104,7 +104,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
         const A = r.pick([1.2, 1.5, 2]), L = r.pick([3, 4, 6]), Ti = r.pick([12, 15, 18]), To = r.pick([-5, 0, 5]);
         const P = (0.84 * A * (Ti - To)) / (L / 1000);
         return {
-          prompt: t`A single pane of glass ($k = 0.84$ W/(m·K)) has an area of ${A} m² and is ${L} mm thick. Its inner surface is at ${Ti} °C and its outer surface at $${To}$ °C. How much heat flows through it?`,
+          prompt: t`A single pane of glass, with $k = 0.84$ W/(m·K), has an area of ${A} m² and is ${L} mm thick. Its inner surface is at ${Ti} °C and its outer surface at $${To}$ °C. How much heat flows through it?`,
           answer: P, units: 'W', tol: { rel: 0.01 },
           errors: apart([{ value: (0.84 * A * (Ti - To) * L) / 1000, feedback: 'The thickness goes in the denominator: a thicker pane lets *less* heat through.' }], P),
           hints: [t`$P = kA\Delta T/L$, with $L$ in metres: ${L} mm = ${L / 1000} m.`],
@@ -130,7 +130,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
         const A = r.pick([0.5, 1, 2]), eps = r.pick([0.8, 0.85, 0.9]), Tc = r.pick([0, 10, 20, 30]);
         const P = eps * SIGMA * A * (Tc + 273.15) ** 4;
         return {
-          prompt: t`A spacecraft radiator panel of area ${A} m² and emissivity ${eps} sits at ${Tc} °C, facing deep space. How much power does it radiate? (Ignore the little it absorbs from space.)`,
+          prompt: t`A spacecraft radiator panel of area ${A} m² and emissivity ${eps} sits at ${Tc} °C, facing deep space. How much power does it radiate? (Ignore the little it absorbs from space.)`,
           answer: P, units: 'W', tol: { rel: 0.01 },
           errors: apart([
             { value: eps * SIGMA * A * Tc ** 4, feedback: 'The Stefan–Boltzmann law needs the absolute temperature: add 273.15 first. In Celsius the law gives nonsense.' },
@@ -139,7 +139,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
           hints: [t`$P = \varepsilon\sigma AT^4$ with $T$ in kelvin: $${Tc} + 273.15 = ${(Tc + 273.15).toFixed(2)}$ K.`],
           teach: 'Radiated power goes as the fourth power of the absolute temperature, so T must be in kelvin.',
           explain: t`$P = (${eps})(5.67\times10^{-8})(${A})(${(Tc + 273.15).toFixed(2)})^4 = ${fmt(P, 3)}$ W. A radiator is how a spacecraft dumps its waste heat: there is nothing to conduct or convect into.`,
-          visual: radiationGraph({ eps, Tmax: 400, marks: [{ T: Tc + 273.15, label: `${Tc} °C` }], caption: 'Emitted power per square metre against absolute temperature (power axis without numbers). The dashed line marks the panel’s temperature.' }),
+          visual: radiationGraph({ eps, Tmax: 400, marks: [{ T: Tc + 273.15, label: `${Tc} °C` }], caption: 'Emitted power per square metre against absolute temperature (power axis without numbers). The dashed line marks the panel’s temperature.' }),
         };
       },
     }),
@@ -218,7 +218,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
         const h = r.pick([15, 25, 40]), A = r.pick([0.2, 0.5, 0.8]), Ts = r.pick([45, 55, 65]), Ta = r.pick([20, 25]);
         const P = h * A * (Ts - Ta);
         return {
-          prompt: t`A fan blows ${Ta} °C air across an electronics box whose surface, of area ${A} m², is at ${Ts} °C. The convection coefficient is ${h} W/(m²·K). How much heat does the air carry away?`,
+          prompt: t`A fan blows ${Ta} °C air across an electronics box whose surface, of area ${A} m², is at ${Ts} °C. The convection coefficient is ${h} W/(m²·K). How much heat does the air carry away?`,
           answer: P, units: 'W', tol: { rel: 0.01 },
           errors: apart([{ value: h * A * Ts, feedback: `Use the temperature *difference* between the surface and the air, ${Ts} − ${Ta} K.` }], P),
           hints: [t`$P = hA\Delta T$.`],
@@ -231,7 +231,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
               alt: 'Air blowing across a warm box',
               shade: [{ fn: '0.6', lower: '0', from: 1, to: 5, color: 'warn', alpha: 0.5 }],
               arrows: [{ from: [0, 1.0], to: [1.6, 1.0], color: 'accent' }, { from: [0, 1.5], to: [1.6, 1.5], color: 'accent' }, { from: [4.4, 1.0], to: [6, 1.25], color: 'warn' }, { from: [4.4, 1.5], to: [6, 1.75], color: 'warn' }],
-              points: [{ x: 0, y: 1.9, r: 0.01, color: 'accent', label: `air in, ${Ta} °C` }, { x: 3, y: 0.3, r: 0.01, color: 'ink', label: `surface ${Ts} °C, ${A} m²`, labelDx: -60, labelDy: 0 }, { x: 4.6, y: 2.05, r: 0.01, color: 'warn', label: 'warmed air out' }],
+              points: [{ x: 0, y: 1.9, r: 0.01, color: 'accent', label: `air in, ${Ta} °C` }, { x: 3, y: 0.3, r: 0.01, color: 'ink', label: `surface ${Ts} °C, ${A} m²`, labelDx: -60, labelDy: 0 }, { x: 4.6, y: 2.05, r: 0.01, color: 'warn', label: 'warmed air out' }],
             },
             caption: 'Air blown across a warm surface carries heat away. Not to scale.',
           },
@@ -246,7 +246,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
         const P = r.pick([500, 800, 1200, 2000]), Tc = r.pick([7, 17, 27]), eps = 0.9;
         const T = Tc + 273.15, A = P / (eps * SIGMA * T ** 4);
         return {
-          prompt: t`A satellite’s electronics produce ${P} W of waste heat, which must leave through a radiator facing deep space. The radiator runs at ${Tc} °C and has emissivity ${eps}. What area does it need? (Ignore heat it absorbs from the Sun and Earth.)`,
+          prompt: t`A satellite’s electronics produce ${P} W of waste heat, which must leave through a radiator facing deep space. The radiator runs at ${Tc} °C and has emissivity ${eps}. What area does it need? (Ignore heat it absorbs from the Sun and Earth.)`,
           answer: A, units: 'm^2', tol: { rel: 0.01 },
           errors: apart([
             { value: P / (eps * SIGMA * Tc ** 4), feedback: 'Use the absolute temperature in the Stefan–Boltzmann law: add 273.15.' },
@@ -255,7 +255,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
           hints: [t`Set $P = \varepsilon\sigma AT^4$ and solve for $A$.`, t`Use $T = ${Tc} + 273.15$ K.`],
           teach: 'A spacecraft radiator must be big enough that εσAT⁴ matches the heat it must reject.',
           explain: t`$A = \dfrac{P}{\varepsilon\sigma T^4} = \dfrac{${P}}{(${eps})(5.67\times10^{-8})(${T.toFixed(2)})^4} = ${fmt(A, 3)}$ m². Sunlight landing on it would demand more area still — which is why radiators are painted white and turned away from the Sun.`,
-          visual: radiationGraph({ eps, Tmax: 400, marks: [{ T, label: `${Tc} °C` }], caption: 'Emitted power per square metre against absolute temperature (power axis without numbers), for ε = 0.9.' }),
+          visual: radiationGraph({ eps, Tmax: 400, marks: [{ T, label: `${Tc} °C` }], caption: 'Emitted power per square metre against absolute temperature (power axis without numbers), for ε = 0.9.' }),
         };
       },
     }),
@@ -265,7 +265,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
         const A = r.pick([1.5, 2, 3]), L = r.pick([50, 75, 100]);
         const P = (0.03 * A * (293.15 - LN2.Tb)) / (L / 1000), m = (P * 86400) / LN2.Lv;
         return {
-          prompt: t`A foam box (walls ${L} mm thick, $k = 0.030$ W/(m·K), total wall area ${A} m²) holds liquid nitrogen at 77.4 K in a 20 °C lab. Treating the walls as flat and ignoring the air films, how many kilograms of LN₂ boil away per day? ($L_v = 199$ kJ/kg.)`,
+          prompt: t`A foam box (walls ${L} mm thick, $k = 0.030$ W/(m·K), total wall area ${A} m²) holds liquid nitrogen at 77.4 K in a 20 °C lab. Treating the walls as flat and ignoring the air films, how many kilograms of LN₂ boil away per day? (Use $L_v = 199$ kJ/kg.)`,
           answer: m, units: 'kg', tol: { rel: 0.01 },
           errors: apart([
             { value: (P * 3600) / LN2.Lv, feedback: 'That is one hour. A day is 86 400 s.' },
@@ -274,7 +274,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
           hints: [t`First the heat leak: $P = kA\Delta T/L$, with $\Delta T = 293.15 - 77.4$ K.`, t`Then the boil-off: $m = Pt/L_v$ with $t = 86\,400$ s.`],
           teach: 'Conduction sets the heat leak; latent heat turns it into a boil-off rate.',
           explain: t`$P = \dfrac{(0.030)(${A})(215.8)}{${L / 1000}} = ${fmt(P, 3)}$ W, so a day delivers $${fmt(P * 86400, 3)}$ J and boils $${fmt(m, 3)}$ kg — why serious dewars use a vacuum jacket instead.`,
-          visual: wallPic({ layers: [{ name: 'foam', w: 1, color: 'warn' }], temps: [293.15, LN2.Tb], hot: 'lab, 20 °C', cold: 'LN₂', ask: 'P = ?', caption: 'The temperature falls straight across the foam. Not to scale.' }),
+          visual: wallPic({ layers: [{ name: 'foam', w: 1, color: 'warn' }], temps: [293.15, LN2.Tb], hot: 'lab, 20 °C', cold: 'LN₂', ask: 'P = ?', caption: 'The temperature falls straight across the foam. Not to scale.' }),
         };
       },
     }),
