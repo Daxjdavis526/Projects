@@ -108,9 +108,9 @@ They satisfy $\cosh^2 x - \sinh^2 x = 1$, so the point $(\cosh t, \sinh t)$ runs
       gen(r) {
         const which = r.int(0, 2);
         const cases = [
-          { f: t`\ln(\cosh x)`, answer: 'tanh x', tex: t`\tanh x`, errors: [{ answer: '1/cosh x', feedback: t`Chain rule: multiply $\tfrac{1}{\cosh x}$ by the derivative of $\cosh x$, which is $\sinh x$.` }] },
-          { f: t`\sinh\left(x^2\right)`, answer: '2x cosh(x^2)', tex: t`2x\cosh\left(x^2\right)`, errors: [{ answer: 'cosh(x^2)', feedback: t`Chain rule: multiply by the derivative of the inside, $2x$.` }, { answer: '-2x cosh(x^2)', feedback: t`No minus sign: $(\sinh u)' = +\cosh u$.` }] },
-          { f: t`x\cosh x`, answer: 'cosh x + x sinh x', tex: t`\cosh x + x\sinh x`, errors: [{ answer: 'sinh x', feedback: 'Product rule: (uv)′ = u′v + uv′ — two terms.' }, { answer: 'cosh x - x sinh x', feedback: t`$(\cosh x)' = +\sinh x$ — unlike $(\cos x)' = -\sin x$.` }] },
+          { f: t`\ln(\cosh x)`, g: 'ln(cosh(x))', X: 2.2, Y: [-0.2, 1.8], answer: 'tanh x', tex: t`\tanh x`, errors: [{ answer: '1/cosh x', feedback: t`Chain rule: multiply $\tfrac{1}{\cosh x}$ by the derivative of $\cosh x$, which is $\sinh x$.` }] },
+          { f: t`\sinh\left(x^2\right)`, g: 'sinh(x^2)', X: 1.55, Y: [-0.4, 5.6], answer: '2x cosh(x^2)', tex: t`2x\cosh\left(x^2\right)`, errors: [{ answer: 'cosh(x^2)', feedback: t`Chain rule: multiply by the derivative of the inside, $2x$.` }, { answer: '-2x cosh(x^2)', feedback: t`No minus sign: $(\sinh u)' = +\cosh u$.` }] },
+          { f: t`x\cosh x`, g: 'x*cosh(x)', X: 2.1, Y: [-9, 9], answer: 'cosh x + x sinh x', tex: t`\cosh x + x\sinh x`, errors: [{ answer: 'sinh x', feedback: 'Product rule: (uv)′ = u′v + uv′ — two terms.' }, { answer: 'cosh x - x sinh x', feedback: t`$(\cosh x)' = +\sinh x$ — unlike $(\cos x)' = -\sin x$.` }] },
         ][which];
         return {
           prompt: t`Differentiate $y = ${cases.f}$.`,
@@ -119,6 +119,7 @@ They satisfy $\cosh^2 x - \sinh^2 x = 1$, so the point $(\cosh t, \sinh t)$ runs
           hints: [t`$(\sinh x)' = \cosh x$ and $(\cosh x)' = \sinh x$ — no minus signs anywhere.`, 'Use the chain or product rule exactly as with trigonometric functions.'],
           teach: 'Hyperbolic derivatives follow the trig pattern, except that the derivative of cosh is +sinh.',
           explain: t`$\dfrac{d}{dx}\,${cases.f} = ${cases.tex}$.`,
+          visual: { type: 'graph', params: { aspect: 'wide', x: [-cases.X, cases.X], y: cases.Y, curves: [{ fn: cases.g, color: 'accent' }], tangent: { fn: cases.g, at: 0.8 }, readouts: [{ label: t`$x_0$`, expr: 'x0', digits: 3 }, { label: 'slope there', expr: 'slope', digits: 4 }] }, caption: t`Drag the gold point: the readout is the slope of $y = ${cases.f}$ there. Your derivative should give the same number at that $x_0$.` },
         };
       },
     }),
@@ -137,6 +138,7 @@ They satisfy $\cosh^2 x - \sinh^2 x = 1$, so the point $(\cosh t, \sinh t)$ runs
           hints: [t`$\dfrac{d}{dx}\cosh(${k}x) = ${k}\sinh(${k}x)$.`],
           teach: 'Integrating sinh gives +cosh (and cosh gives +sinh); a linear inside contributes 1/k.',
           explain: t`$\int\sinh(${k}x)\,dx = \tfrac1{${k}}\cosh(${k}x) + C$. Check: differentiating gives $\sinh(${k}x)$ ✓`,
+          visual: { type: 'graph', params: { aspect: 'wide', x: [-1.3, 1.3], y: [-Math.sinh(1.25 * k) * 1.1, Math.sinh(1.25 * k) * 1.1], curves: [{ fn: `sinh(${k}*x)`, color: 'accent', domain: [-1.25, 1.25] }] }, caption: t`The integrand is odd, so its antiderivatives are even functions — check that yours is.` },
         };
       },
     }),
@@ -192,6 +194,7 @@ They satisfy $\cosh^2 x - \sinh^2 x = 1$, so the point $(\cosh t, \sinh t)$ runs
           hints: [t`$\tanh = \sinh/\cosh$; the quotient rule and $\cosh^2 - \sinh^2 = 1$ give $(\tanh u)' = \dfrac{1}{\cosh^2 u}$.`],
           teach: 'The derivative of tanh u is sech² u = 1/cosh² u, times u′.',
           explain: t`$\dfrac{d}{dx}\tanh(${k}x) = \dfrac{${k}}{\cosh^2(${k}x)} = ${k}\operatorname{sech}^2(${k}x)$.`,
+          visual: { type: 'graph', params: { aspect: 'wide', x: [-2, 2], y: [-1.3, 1.3], curves: [{ fn: `tanh(${k}*x)`, color: 'accent' }], hlines: [{ y: 1, color: 'ink3' }, { y: -1, color: 'ink3' }] }, caption: t`$y = \tanh(${k}x)$: steepest at the origin, levelling off toward $\pm 1$.` },
         };
       },
     }),

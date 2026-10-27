@@ -89,6 +89,7 @@ means: for every tolerance $\varepsilon > 0$, however small, there is an index $
     }),
     multi({
       id: 'geometric', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'terms', N: { min: 5, max: 60, value: 30 }, presetLabel: 'Sequence', presets: [{ label: '0.9ⁿ', term: '0.9^n' }, { label: '(−0.9)ⁿ', term: '(-0.9)^n' }, { label: '(−1)ⁿ', term: '(-1)^n' }, { label: '1.01ⁿ', term: '1.01^n' }, { label: '(−1)ⁿ/n', term: '(-1)^n/n' }] }, caption: 'Each choice, term by term. A picture of finitely many terms suggests an answer; the rule for rⁿ decides it.' },
       prompt: 'Which of these sequences converge? Select all that do.',
       choices: [t`$a_n = 0.9^n$`, t`$a_n = (-0.9)^n$`, t`$a_n = (-1)^n$`, t`$a_n = 1.01^n$`, t`$a_n = \dfrac{(-1)^n}{n}$`],
       answer: [0, 1, 4],
@@ -200,6 +201,7 @@ means: for every tolerance $\varepsilon > 0$, however small, there is an index $
           hints: [t`Divide everything by $n^3$.`],
           teach: 'Equal degrees top and bottom: the limit is the ratio of the leading coefficients, sign included.',
           explain: t`Dividing by $n^3$: $\dfrac{${a} - ${b}/n^2}{${d}/n^3 - ${c}} \to \dfrac{${a}}{-${c}} = ${frac(L)} \approx ${fmt(L, 4)}$.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `(${a}n^3 - ${b}n)/(${d} - ${c}n^3)`, n0: 2, N: 40 }, caption: 'The terms from n = 2 to 41.' },
         };
       },
     }),
@@ -229,6 +231,7 @@ means: for every tolerance $\varepsilon > 0$, however small, there is an index $
           hints: [t`Use $\left(1 + \frac{k}{n}\right)^n \to e^k$.`, t`Here $k = -${nice(m)}$.`],
           teach: 'Euler’s method for exponential decay converges, as the step count grows, to the exact exponential: (1 − k/n)ⁿ → e^{−k}.',
           explain: t`$\left(1 - \frac{${nice(m)}}{n}\right)^n \to e^{-${nice(m)}} \approx ${fmt(L, 4)}$ — exactly $Q(t)/Q_0$ for the true solution $Q = Q_0e^{-t/\tau}$. More steps, less error.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `(1 - ${m}/n)^n`, n0: 4, N: 40 }, caption: 'The Euler estimates Qₙ/Q₀ for n = 4 to 43 steps.' },
         };
       },
     }),

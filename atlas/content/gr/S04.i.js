@@ -208,7 +208,7 @@ It is spacetime’s version of Pythagoras. Turn a map and the east–west and no
       hints: [t`In your frame $\Delta x = 0$, so $\Delta s^2 = -c^2(3\ \text{s})^2$. For another observer $\Delta x' \neq 0$.`, t`$-c^2\Delta t'^2 + \Delta x'^2 = -c^2(3\ \text{s})^2$ — so is $\Delta t'$ bigger or smaller than 3 s?`],
       teach: 'The proper time — measured where the events happen at one place — is the shortest time any observer measures between them.',
       explain: t`For any other observer $c^2\Delta t'^2 = c^2(3\ \text{s})^2 + \Delta x'^2$, so $\Delta t' \ge 3$ s, equal only when $\Delta x' = 0$. The frame in which both events happen at one place measures the least time: the proper time.`,
-      visual: spacetimeSketch({ events: [[0, 0, '1st beep'], [3, 0, '2nd beep']], segments: [[0, 0, 3, 0, 'gold']], hyperbola: { through: [3, 0] }, caption: 'Grey: every event with the same interval from the first beep. Any observer’s coordinates for the second beep lie on it, and its lowest point — the smallest time — is your own 3 s. Here one unit is a second (up) or a light-second (across).' }),
+      visual: spacetimeSketch({ events: [[0, 0, '1st beep'], [3, 0, '2nd beep']], segments: [[0, 0, 3, 0, 'gold']], hyperbola: { through: [3, 0] }, xlabel: 'x (light-seconds)', ylabel: 't (seconds)', caption: 'Grey: every event with the same interval from the first beep. Any observer’s coordinates for the second beep lie on it, and its lowest point — the smallest time — is your own 3 s.' }),
     }),
   ],
   checkpoint: [
@@ -243,7 +243,7 @@ It is spacetime’s version of Pythagoras. Turn a map and the east–west and no
             params: {
               x: [-E2 - 1.5, E1 + 3], y: [-2.6, 2.4], axes: false, xlabel: '', ylabel: '',
               arrows: [{ from: [0, 1.4], to: [E1, 1.4], color: 'gold' }, { from: [0, 0], to: [-E2, 0], color: 'violet' }, { from: [0, -1.4], to: [E1 - E2, -1.4], color: 'good' }],
-              points: [{ x: E1 / 2, y: 1.85, label: `photon 1: pc = ${E1} GeV`, color: 'gold', r: 0.5 }, { x: -E2 / 2, y: 0.45, label: `photon 2: pc = ${E2} GeV`, color: 'violet', r: 0.5 }, { x: (E1 - E2) / 2, y: -0.95, label: `total: pc = ${E2 - E1} GeV`, color: 'good', r: 0.5 }],
+              points: [{ x: E1 / 2, y: 1.85, label: 'photon 1', color: 'gold', r: 0.5 }, { x: -E2 / 2, y: 0.45, label: 'photon 2', color: 'violet', r: 0.5 }, { x: (E1 - E2) / 2, y: -0.95, label: 'total momentum', color: 'good', r: 0.5 }],
             },
             caption: 'The two photons’ momenta (times c, in GeV) and their sum, drawn to scale. Head-on, they point in opposite directions.',
           },

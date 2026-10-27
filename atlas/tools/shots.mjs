@@ -81,7 +81,8 @@ for (const theme of themes) {
   }
   if (what.startsWith('lesson:')) {
     // every step up to the first practice question, then each practice
-    // question in turn (answered with nothing — just shown)
+    // question with a hint and then its solution, then each checkpoint
+    // question and its worked answer
     const id = what.slice(7);
     const page = await newPage(theme);
     await page.goto(BASE + '#/lesson/' + id); await page.waitForTimeout(1000);
@@ -131,6 +132,19 @@ for (const theme of themes) {
       if (give) { await give.click(); await page.waitForTimeout(400); }
       await shot(`practice-${q + 1}-answered`);
       const nxt = await page.$('button:has-text("Next question"), button:has-text("On to the checkpoint"), button:has-text("Finish")');
+      if (!nxt) break;
+      await nxt.click(); await page.waitForTimeout(900);
+    }
+    // the checkpoint: each question, then its worked answer ("I don't know" reveals it)
+    for (let q = 0; q < 6; q++) {
+      const crumb = await page.$eval('.crumb', (e) => e.textContent).catch(() => '');
+      if (crumb !== 'Checkpoint') break;
+      await shot(`checkpoint-${q + 1}`);
+      const dunno = await page.$('.stage button:has-text("I don’t know")');
+      if (!dunno) break;
+      await dunno.click(); await page.waitForTimeout(400);
+      await shot(`checkpoint-${q + 1}-answered`);
+      const nxt = await page.$('.stage button:has-text("Next"), .stage button:has-text("See results")');
       if (!nxt) break;
       await nxt.click(); await page.waitForTimeout(900);
     }

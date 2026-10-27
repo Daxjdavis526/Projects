@@ -1,7 +1,7 @@
 // Trigonometric integrals: powers of sine and cosine.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { fmt, frac } from '../../src/core/format.js';
-import { fterm, kx } from './_integration.js';
+import { fterm, kx, fgraph } from './_integration.js';
 
 const t = String.raw;
 
@@ -83,6 +83,7 @@ These identities are why the square of a sine wave averages to exactly one half 
           explain: sinOdd
             ? t`$\sin^{${m}}x = (1 - \cos^2 x)^{${(m - 1) / 2}}\sin x$, so $u = \cos x$, $du = -\sin x\,dx$ turns the integral into a polynomial in $u$.`
             : t`$\cos^{${n}}x = (1 - \sin^2 x)^{${(n - 1) / 2}}\cos x$, so $u = \sin x$, $du = \cos x\,dx$ turns the integral into a polynomial in $u$.`,
+          visual: fgraph({ f: `sin(x)^${m}*cos(x)^${n}`, x: [-3.2, 3.2], caption: t`The integrand $\sin^{${m}}x\cos^{${n}}x$. Its antiderivative turns out to be a polynomial in $\cos x$ or $\sin x$ — whichever one the odd power lets you substitute.` }),
         };
       },
     }),
@@ -102,6 +103,7 @@ These identities are why the square of a sine wave averages to exactly one half 
           hints: [t`The power 3 is odd: write $\cos^3(${kx(k)}) = \big(1 - \sin^2(${kx(k)})\big)\cos(${kx(k)})$.`, t`Let $u = ${S}$, so $du = ${k === 1 ? '' : k}\cos(${kx(k)})\,dx$.`],
           teach: t`An odd power of cosine: keep one $\cos$ for $du$, convert the rest to sines with $\cos^2 = 1 - \sin^2$.`,
           explain: t`With $u = ${S}$: $\tfrac{1}{${k}}\int (1 - u^2)\,du = \tfrac{1}{${k}}\big(u - \tfrac13u^3\big)$, so the answer is ${k === 1 ? t`$\sin x - \tfrac13\sin^3 x + C$` : t`$\tfrac{1}{${k}}${S} - \tfrac{1}{${3 * k}}\sin^3(${kx(k)}) + C$`}.`,
+          visual: fgraph({ f: `cos(${kx(k)})^3`, F: `(sin(${kx(k)}) - sin(${kx(k)})^3/3)/${k}`, x: [-3.2, 3.2] }),
         };
       },
     }),
@@ -153,6 +155,7 @@ These identities are why the square of a sine wave averages to exactly one half 
           explain: oddSin
             ? t`With $u = \cos x$: $\;-\int (u^{${p}} - u^{${p + 2}})\,du = -\frac{u^{${p + 1}}}{${p + 1}} + \frac{u^{${p + 3}}}{${p + 3}}$, so the answer is $${answerTeX} + C$.`
             : t`With $u = \sin x$: $\;\int (u^{${p}} - u^{${p + 2}})\,du = \frac{u^{${p + 1}}}{${p + 1}} - \frac{u^{${p + 3}}}{${p + 3}}$, so the answer is $${answerTeX} + C$.`,
+          visual: fgraph({ f: oddSin ? `sin(x)^3*cos(x)^${p}` : `sin(x)^${p}*cos(x)^3`, F: answer, x: [-3.2, 3.2] }),
         };
       },
     }),
@@ -226,6 +229,7 @@ These identities are why the square of a sine wave averages to exactly one half 
       hints: ['Check the answer by differentiating it.', t`The power rule $\int u^2\,du = u^3/3$ needs $du = \cos x\,dx$ in the integrand.`],
       teach: t`$\int u^n\,du$ needs $du$: a power of $\sin x$ integrates by the power rule only when a $\cos x$ factor is there to be $du$.`,
       explain: t`With no $\cos x$ to act as $du$, use the half-angle identity: $\int \sin^2 x\,dx = \tfrac{x}{2} - \tfrac{\sin 2x}{4} + C$.`,
+      visual: fgraph({ f: 'sin(x)^2', x: [-3.2, 3.2], extra: [{ fn: 'sin(x)^2*cos(x)', color: 'bad', dash: true, width: 2 }], caption: t`The integrand $\sin^2 x$ (blue) and the derivative of the student’s answer, $\sin^2 x\cos x$ (red, dashed). They are different functions, so $\tfrac13\sin^3 x$ is not an antiderivative.` }),
     }),
   ],
   checkpoint: [
@@ -243,6 +247,7 @@ These identities are why the square of a sine wave averages to exactly one half 
           hints: [t`$\sin^3\theta = (1 - \cos^2\theta)\sin\theta$; let $u = \cos(${kx(k)})$.`],
           teach: 'An odd power of sine: keep one sine for du, convert the rest to cosines.',
           explain: t`$u = ${C}$, $du = -${k === 1 ? '' : k}\sin(${kx(k)})\,dx$: $\;-\tfrac{1}{${k}}\int (1 - u^2)\,du = -\tfrac{1}{${k}}\big(u - \tfrac{u^3}{3}\big) + C$.`,
+          visual: fgraph({ f: `sin(${kx(k)})^3`, F: `(-${c} + ${c}^3/3)/${k}`, x: [-3.2, 3.2] }),
         };
       },
     }),
@@ -259,6 +264,7 @@ These identities are why the square of a sine wave averages to exactly one half 
           hints: [t`$\cos^2\theta = \tfrac12(1 + \cos 2\theta)$.`],
           teach: 'An even power alone: lower it with the half-angle identity.',
           explain: t`$\int \tfrac12\big(1 + \cos(${kx(2 * k)})\big)\,dx = \tfrac{x}{2} + \tfrac{\sin(${kx(2 * k)})}{${4 * k}} + C$.`,
+          visual: fgraph({ f: `cos(${kx(k)})^2`, F: `x/2 + sin(${kx(2 * k)})/${4 * k}`, x: [-2, 2], hlines: [{ y: 0.5 }] }),
         };
       },
     }),

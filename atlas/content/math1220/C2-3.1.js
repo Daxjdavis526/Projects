@@ -79,6 +79,7 @@ A **solution** is a function $y(t)$ that obeys the rule at every instant, and an
   practice: [
     mcq({
       id: 'order', difficulty: 1,
+      visual: { type: 'oscillator', params: { kind: 'spring', b: 0.4 }, caption: 'The damped spring this equation describes: the spring force −kx and the damping force −b dx/dt together produce the acceleration d²x/dt².' },
       prompt: t`A mass on a spring with damping obeys $m\dfrac{d^2x}{dt^2} + b\dfrac{dx}{dt} + kx = 0$. What is the **order** of this differential equation?`,
       choices: ['Second order', 'First order', 'Third order', 'Zeroth order, because t never appears explicitly'],
       answer: 0,
@@ -106,6 +107,17 @@ A **solution** is a function $y(t)$ that obeys the rule at every instant, and an
           hints: [t`Substitute $y = e^{rt}$, $y' = re^{rt}$ and $y'' = r^2e^{rt}$ into the equation.`, t`Every term then carries a factor $e^{rt}$, which is never zero. Divide it out and solve the quadratic in $r$.`],
           teach: 'To test a proposed solution, substitute it and its derivatives into the equation and check that both sides agree for every t.',
           explain: t`Substituting gives $(${polyT})\,e^{rt} = 0$. Since $e^{rt} \neq 0$, we need $${polyT} = (r - ${r1})(r + ${-r2}) = 0$, so $r = ${r1}$ or $r = ${r2}$. The positive one is $r = ${r1}$.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-1, 1], y: [0, 6], xlabel: 't', ylabel: 'y',
+              curves: [
+                { fn: `exp(${r1}x)`, domain: [-1, Math.min(1, Math.log(6) / r1)], color: 'accent', label: 'a growing solution', labelAt: Math.min(0.9, Math.log(4) / r1), labelDx: -150 },
+                { fn: `exp(${r2}x)`, domain: [Math.max(-1, Math.log(6) / r2), 1], color: 'warn', label: 'a decaying solution', labelAt: Math.max(-0.95, Math.log(4) / r2), labelDx: 10 },
+              ],
+            },
+            caption: t`Both exponential solutions of the equation: one grows and one decays. Every solution is a combination of the two.`,
+          },
         };
       },
     }),
@@ -196,6 +208,7 @@ A **solution** is a function $y(t)$ that obeys the rule at every instant, and an
     }),
     mcq({
       id: 'add-constant', difficulty: 3, kind: 'error',
+      visual: { type: 'graph', params: { x: [-1, 1], y: [0, 36], xlabel: 't', ylabel: '', curves: [{ fn: '4*exp(2x)', color: 'accent', label: 'left side y″', labelAt: 0.55, labelDy: 14 }, { fn: '4*exp(2x) + 4', color: 'warn', dash: true, label: 'right side 4y', labelAt: 0.2, labelDx: -100 }] }, caption: t`For the candidate $y = e^{2t} + 1$: the two sides of $y'' = 4y$, plotted against $t$.` },
       prompt: t`A student checks that $y = e^{2t}$ solves $y'' = 4y$, then writes: “So $y = e^{2t} + 1$ is a solution too, because adding a constant never changes a derivative.” What is wrong?`,
       choices: [
         t`The constant leaves $y''$ unchanged but adds 4 to the right side $4y$, so the two sides no longer match`,
@@ -217,6 +230,7 @@ A **solution** is a function $y(t)$ that obeys the rule at every instant, and an
   checkpoint: [
     mcq({
       id: 'cp-long-run', difficulty: 2,
+      visual: { type: 'graph', params: { x: [-1, 5], y: [-5, 5], xlabel: 'y', ylabel: 'dy/dt', curves: [{ fn: 'x*(4 - x)', color: 'accent' }], points: [{ x: 1, y: 3, color: 'gold', label: 'start: y = 1' }] }, caption: t`The rate $\frac{dy}{dt} = y(4 - y)$ as a function of $y$ (not of $t$).` },
       prompt: t`A solution of $\dfrac{dy}{dt} = y\,(4 - y)$ starts at $y(0) = 1$. What does it do as $t \to \infty$?`,
       choices: [
         t`It rises and levels off towards $y = 4$`,
@@ -264,6 +278,7 @@ A **solution** is a function $y(t)$ that obeys the rule at every instant, and an
           hints: [t`Step 1, from $v_0 = 0$: $v_1 = 0 + 1\times(9.8 - ${c}\times 0)$.`, t`Step 2 uses the slope at $v_1$: $v_2 = v_1 + 1\times(9.8 - ${c}\,v_1)$.`],
           teach: 'Euler’s method needs only the rule for the slope: recompute it from the latest value at every step.',
           explain: t`$v_1 = 9.8$ m/s; $v_2 = 9.8 + (9.8 - ${c}\times9.8) = ${nice(v2)}$ m/s. The exact solution gives $v(2) = \frac{9.8}{${c}}(1 - e^{-${nice(2 * c)}}) \approx ${fmt(exact, 3)}$ m/s: Euler overestimates, because the true slope keeps falling during each step while Euler holds it at its starting value.`,
+          visual: { type: 'graph', params: { x: [0, Math.ceil((1.25 * g) / c)], y: [0, 10.5], xlabel: 'v (m/s)', ylabel: 'dv/dt', curves: [{ fn: `9.8 - ${c}*x`, color: 'accent' }], vlines: [{ x: g / c, label: 'terminal speed', color: 'ink3' }], points: [{ x: 0, y: g, color: 'gold', label: 'start' }] }, caption: t`The slope rule $\frac{dv}{dt} = 9.8 - ${c}v$ as a function of $v$: Euler’s method reads it at the start of each step.` },
         };
       },
     }),

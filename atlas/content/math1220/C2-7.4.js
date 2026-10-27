@@ -2,13 +2,15 @@
 // parallelogram they span: torque, angular momentum, the normal to an orbit.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { nice } from '../../src/core/format.js';
-import { vecTeX, add, sub, scale, dot, cross, norm, deg } from './_vectors.js';
+import { vecTeX, arrows2D, add, sub, scale, dot, cross, norm, deg } from './_vectors.js';
 
 const t = String.raw;
 const D = 'pi/180';
 const BX = `B*cos(th*${D})*cos(ph*${D})`, BY = `B*sin(th*${D})*cos(ph*${D})`, BZ = `B*sin(ph*${D})`;
 const pointTeX = (p) => `(${p.join(', ')})`;
 const rand3 = (r, lo = -4, hi = 4) => [r.int(lo, hi), r.int(lo, hi), r.int(lo, hi)];
+const fit = (...vs) => Math.max(3, Math.ceil(Math.max(...vs.flat().map(Math.abs))) + 0.5);
+const scene = (params, caption = 'Drag to rotate.') => ({ type: 'calc-vectors3d', params, caption });
 
 export default lesson({
   id: 'math1220.C2-7.4',
@@ -100,6 +102,7 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
       },
       hints: [t`$\hat\imath\times\hat\jmath = \hat k$, and the pattern cycles: $\hat\jmath\times\hat k$, $\hat k\times\hat\imath$.`],
       teach: t`Cyclic order gives $+$: $\hat\imath\times\hat\jmath = \hat k$, $\hat\jmath\times\hat k = \hat\imath$, $\hat k\times\hat\imath = \hat\jmath$; reversing the order flips the sign.`,
+      visual: scene({ range: 1.6, vectors: [{ to: [1, 0, 0], color: 'accent', label: t`\hat\imath` }, { to: [0, 1, 0], color: 'warn', label: t`\hat\jmath` }, { to: [0, 0, 1], color: 'good', label: t`\hat k` }] }, 'Drag to rotate. Curl the fingers of your right hand from ĵ toward k̂ and see where your thumb points.'),
       explain: t`$\hat\jmath\times\hat k = \hat\imath$ — the same cycle as $\hat\imath\times\hat\jmath = \hat k$. With the formula: $\langle 0,1,0\rangle\times\langle 0,0,1\rangle = \langle 1\cdot1 - 0,\ 0 - 0,\ 0 - 0\rangle = \langle 1, 0, 0\rangle$.`,
     }),
     mcq({
@@ -121,6 +124,7 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
           },
           hints: [t`$\vec a\times\vec b = \langle a_yb_z - a_zb_y,\ a_zb_x - a_xb_z,\ a_xb_y - a_yb_x\rangle$.`, t`The $x$-component is $(${a[1]})(${b[2]}) - (${a[2]})(${b[1]}) = ${c[0]}$.`],
           teach: 'Each component of a × b uses the other two coordinates; check your answer is perpendicular to a and b.',
+          visual: scene({ range: fit(a, b), parallelograms: [{ u: a, v: b, color: 'gold', alpha: 0.25 }], vectors: [{ to: a, color: 'accent', label: t`\vec a` }, { to: b, color: 'warn', label: t`\vec b` }] }, 'Drag to rotate. The cross product will stand perpendicular to this gold parallelogram.'),
           explain: t`$\vec a\times\vec b = \langle (${a[1]})(${b[2]}) - (${a[2]})(${b[1]}),\ (${a[2]})(${b[0]}) - (${a[0]})(${b[2]}),\ (${a[0]})(${b[1]}) - (${a[1]})(${b[0]})\rangle = ${vecTeX(c)}$. Check: $${vecTeX(c)}\cdot\vec a = ${dot(c, a)}$ and $${vecTeX(c)}\cdot\vec b = ${dot(c, b)}$.`,
         };
       },
@@ -170,6 +174,7 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
           errors: [{ value: L * F * Math.cos((th * Math.PI) / 180), feedback: t`Torque uses the sine of the angle between $\vec r$ and $\vec F$: only the part of the force perpendicular to the handle turns the bolt.` }, { value: L * F, feedback: t`That would need the force at $90^\circ$ to the handle. Multiply by $\sin${th}^\circ$.` }],
           hints: [t`$|\vec\tau| = |\vec r||\vec F|\sin\theta$.`],
           teach: 'Only the force component perpendicular to the lever arm produces torque.',
+          visual: arrows2D([{ to: [3, 0], color: 'ink3', label: 'r' }, { from: [3, 0], to: [3 + 2 * Math.cos((th * Math.PI) / 180), 2 * Math.sin((th * Math.PI) / 180)], color: 'warn', label: 'F' }], { caption: t`The handle $\vec r$ (grey) and the pull $\vec F$ (amber) at $${th}^\circ$ to it. Directions are true; lengths are not to scale.` }),
           explain: t`$|\vec\tau| = (${L})(${F})\sin${th}^\circ = ${nice(tau, 4)}$ N·m.`,
         };
       },
@@ -191,6 +196,7 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
       },
       hints: [t`The $z$-component of $\vec a\times\vec b$ is $a_xb_y - a_yb_x$.`, 'Check the direction with your right hand: is a → b clockwise or counterclockwise seen from above?'],
       teach: 'The cross product is anticommutative, so the order of subtraction inside each component decides the sign.',
+      visual: scene({ range: 5.5, parallelograms: [{ u: [1, 2, 0], v: [3, 1, 0], color: 'gold', alpha: 0.25 }], vectors: [{ to: [1, 2, 0], color: 'accent', label: t`\vec a` }, { to: [3, 1, 0], color: 'warn', label: t`\vec b` }, { to: [0, 0, -5], color: 'good', label: t`\vec a\times\vec b` }] }, 'Drag to rotate. The correct cross product, to scale: length 5 (the gold area), pointing down.'),
       explain: t`$z$-component: $(1)(1) - (2)(3) = -5$, so the answer is $\langle 0, 0, -5\rangle$. Its length, 5, is the area of the parallelogram; its direction, down, comes from the right-hand rule.`,
     }),
     mcq({
@@ -205,6 +211,7 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
       },
       hints: ['Use your right hand: curl from b toward a instead of from a toward b.'],
       teach: t`$\vec b\times\vec a = -\,\vec a\times\vec b$: same length, opposite direction.`,
+      visual: scene({ range: 3.5, vectors: [{ to: [2, -1, 3], color: 'good', label: t`\vec a\times\vec b` }] }, 'Drag to rotate. a × b, as given.'),
       explain: t`Swapping the order flips the right-hand rule, so $\vec b\times\vec a = -\langle 2, -1, 3\rangle = \langle -2, 1, -3\rangle$.`,
     }),
   ],
@@ -221,6 +228,7 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
           errors: [{ value: 2 * A, feedback: 'Halve it: a triangle is half the parallelogram.' }],
           hints: [t`Area $= \tfrac12|\overrightarrow{AB}\times\overrightarrow{AC}|$.`],
           teach: 'Triangle area = ½|AB × AC|.',
+          visual: scene({ range: fit(P, Q, R), triangles: [{ pts: [P, Q, R], color: 'gold' }], points: [{ at: P, label: 'A' }, { at: Q, label: 'B' }, { at: R, label: 'C' }] }),
           explain: t`$\overrightarrow{AB}\times\overrightarrow{AC} = ${vecTeX(c)}$; area $= \tfrac12(${nice(norm(c), 4)}) = ${nice(A, 4)}$.`,
         };
       },
@@ -236,6 +244,7 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
           errors: [{ value: -tz, feedback: t`Check the order: $\tau_z = r_xF_y - r_yF_x$.` }],
           hints: [t`$\tau_z = r_xF_y - r_yF_x$.`, t`$(${rv[0]})(${F[1]}) - (${rv[1]})(${F[0]})$.`],
           teach: 'The torque about an axis is the component of r × F along that axis.',
+          visual: scene({ range: 2.5, lines: [{ point: [0, 0, 0], dir: [0, 0, 1], t: [-2, 2], color: 'ink2', dash: true, label: t`\text{shaft}` }], vectors: [{ to: scale(rv, 5), color: 'accent', label: t`\vec r` }, { from: scale(rv, 5), to: add(scale(rv, 5), scale(F, 1.5 / norm(F))), color: 'warn', label: t`\vec F` }] }, 'Drag to rotate. r is drawn five times longer and F at length 1.5, so only directions are to scale.'),
           explain: t`$\tau_z = (${rv[0]})(${F[1]}) - (${rv[1]})(${F[0]}) = ${nice(tz, 4)}$ N·m. Neither $r_z$ nor $F_z$ can turn the shaft.`,
         };
       },
@@ -254,6 +263,10 @@ so $\vec\tau = \langle 960, -240, 0\rangle$ N·m.` },
           errors: [{ value: 90, feedback: t`That is the angle between $\vec r$ and $\vec v$. The inclination is the angle between $\vec h = \vec r\times\vec v$ and $\hat k$.` }, { value: 180 - i, feedback: t`Use $\vec r\times\vec v$ in that order: $\vec v\times\vec r$ points the opposite way.` }],
           hints: [t`Compute $\vec h = \vec r\times\vec v$, then $\cos i = \frac{h_z}{|\vec h|}$.`, t`$\vec h = \langle ${h.map((x) => nice(x, 5)).join(',\\ ')}\rangle$ km²/s.`],
           teach: 'An orbit’s plane is fixed by its angular momentum h = r × v; the inclination is the angle between h and Earth’s axis.',
+          visual: (() => {
+            const ru = scale(R, 1 / norm(R)), vu = scale(V, 1 / norm(V)), s = 2.3;
+            return scene({ range: 3, grid: false, planes: [{ normal: [0, 0, 1], d: 0, size: 2.6, color: 'accent', alpha: 0.12 }], curves: [{ param: [0, 1, 2].map((k) => `${s * ru[k]}*cos(t) + ${s * vu[k]}*sin(t)`), t: [0, 2 * Math.PI], color: 'violet', width: 1.8 }], vectors: [{ to: scale(ru, s), color: 'accent', label: t`\vec r` }, { from: scale(ru, s), to: add(scale(ru, s), scale(vu, 1.4)), color: 'warn', label: t`\vec v` }] }, 'Drag to rotate. The orbit (violet) through the satellite’s position, crossing the equatorial plane (blue). Distances not to scale.');
+          })(),
           explain: t`$\vec h = \vec r\times\vec v = \langle ${h.map((x) => nice(x, 5)).join(',\\ ')}\rangle$ km²/s, $|\vec h| = ${nice(norm(h), 5)}$, so $\cos i = ${nice(h[2] / norm(h), 4)}$ and $i = ${nice(i, 4)}^\circ$${inc > 90 ? ' — over 90°: a retrograde orbit, typical of sun-synchronous satellites' : ''}.`,
         };
       },

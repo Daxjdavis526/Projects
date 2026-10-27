@@ -10,6 +10,7 @@ const R_EARTH = 6371;                  // km
 const T_SIDEREAL = 23.9344696;         // hours: one turn of the Earth relative to the stars
 const PARIS = 48.85;                   // latitude of Foucault’s 1851 pendulum (degrees north)
 
+const grp = (x) => x.toLocaleString('en-US').replace(/,/g, '{,}');   // thousands separator safe inside $…$
 const cap = (lat) => 2 * Math.PI * (1 - Math.sin(lat * DEG));        // cap area above latitude λ, unit sphere
 
 const trianglePicture = (dphi, caption) => ({
@@ -101,7 +102,7 @@ That dependence on the path *is* curvature, and you can detect it without leavin
           errors: [{ value: A / R_EARTH / ARCSEC, feedback: 'Divide by R squared: α = A/R².' }],
           hints: [t`$\alpha = A/R^2$ in radians, with $A$ in km² and $R$ in km.`, t`$\alpha = ${A}/${R_EARTH}^2 = ${fmt(a, 3)}$ rad; multiply by 206 265.`],
           teach: 'Even on the Earth the turn is measurable for a large enough loop: α = A/R².',
-          explain: t`$\alpha = ${A.toLocaleString('en-US')}/${R_EARTH}^2 = ${fmt(a, 3)}$ rad $= ${fmt(a / ARCSEC, 3)}''$${a / DEG > 0.5 ? ` (${fmt(a / DEG, 3)}°)` : ''}. Small loops turn arrows very little: curvature only shows over areas comparable with $R^2$.`,
+          explain: t`$\alpha = ${grp(A)}/${grp(R_EARTH)}^2 = ${fmt(a, 3)}$ rad $= ${fmt(a / ARCSEC, 3)}''$${a / DEG > 0.5 ? ` (${fmt(a / DEG, 3)}°)` : ''}. Small loops turn arrows very little: curvature only shows over areas comparable with $R^2$.`,
           visual: { type: 'gr-sphere-transport', params: { mode: 'triangle', dphi: 30, colat: 25, colatSlider: false, progress: 1, readout: false }, caption: 'Not to scale: a small triangle on a large sphere turns the arrow only a little — the turn is the area divided by R².' },
         };
       },

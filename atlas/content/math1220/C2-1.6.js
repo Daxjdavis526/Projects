@@ -218,6 +218,7 @@ For **pumping** a liquid, slice the liquid instead: every thin layer has its own
           ],
           teach: 'Pumping work depends on where each layer starts and finishes: here every layer starts at ground level and ends at its own height.',
           explain: t`$\int_{${b}}^{${b + h}} y\,dy = \tfrac{${b + h}^2 - ${b}^2}{2} = ${((b + h) ** 2 - b * b) / 2}$, so $W = ${RHO_LOX}(9.81)\pi(${rad})^2(${((b + h) ** 2 - b * b) / 2}) \approx ${fmt(W)}$ MJ — the tank’s weight lifted to its mid-height, ${b + h / 2} m. (Pipe friction and the liquid’s speed are ignored.)`,
+          visual: { type: 'graph', params: { aspect: 'wide', x: [-rad * 5, rad * 5], y: [-2, b + h + 3], xlabel: ' ', ylabel: 'height (m)', shade: [{ fn: `${b + h}`, lower: `${b}`, from: -rad, to: rad, color: 'teal', alpha: 0.16 }, { fn: `${b + 0.45 * h}`, lower: `${b + 0.38 * h}`, from: -rad, to: rad, color: 'gold', alpha: 0.85 }], curves: [{ param: [`${-rad}`, 't'], t: [b, b + h], color: 'ink2' }, { param: [`${rad}`, 't'], t: [b, b + h], color: 'ink2' }, { param: ['t', `${b}`], t: [-rad, rad], color: 'ink2' }, { param: ['t', `${b + h}`], t: [-rad, rad], color: 'ink2' }], hlines: [{ y: 0, color: 'ink3', label: 'ground' }], points: [{ x: 0, y: 0, color: 'warn', label: 'pump' }], arrows: [{ from: [rad * 1.7, 0], to: [rad * 1.7, b + 0.41 * h], color: 'gold', label: 'y' }] }, caption: 'Side view (widths not to scale): the pump at ground level and the tank on the vehicle. The gold layer is lifted y metres.' },
         };
       },
     }),

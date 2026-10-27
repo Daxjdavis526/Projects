@@ -108,6 +108,7 @@ While $P$ is small compared with $K$ the bracket is close to 1 and growth is exp
     }),
     mcq({
       id: 'which-model', difficulty: 1,
+      visual: { type: 'graph', params: { x: [0, 50], y: [0, 600], xlabel: 't', ylabel: 'P', curves: [{ fn: '500/(1 + 99*exp(-0.2x))', color: 'accent' }], hlines: [{ y: 500, label: 'levels off at 500', color: 'good' }] }, caption: 'The behaviour described: slow, exponential-looking growth at first, then a steady approach to 500.' },
       prompt: 'A population grows exponentially at first but levels off at 500. Which equation models it?',
       choices: [t`$\dfrac{dP}{dt} = 0.2P\left(1 - \dfrac{P}{500}\right)$`, t`$\dfrac{dP}{dt} = 0.2P$`, t`$\dfrac{dP}{dt} = 0.2\,(500 - P)$`, t`$\dfrac{dP}{dt} = 0.2P\left(\dfrac{P}{500} - 1\right)$`],
       answer: 0,
@@ -228,6 +229,7 @@ While $P$ is small compared with $K$ the bracket is close to 1 and growth is exp
     }),
     num({
       id: 'cp-altitude', difficulty: 2, transfer: true,
+      visual: { type: 'graph', params: { x: [0, 4], y: [0, 1.1], xlabel: 'altitude z / H', ylabel: 'p/p₀', curves: [{ fn: 'exp(-x)', color: 'accent' }], points: [{ x: 1, y: Math.exp(-1), label: '1/e at one scale height', color: 'gold' }, { x: 2, y: Math.exp(-2), label: '1/e² at two', color: 'gold' }] }, caption: 'The isothermal atmosphere in units of the scale height H: every climb of H divides the pressure by e. (The real atmosphere is colder aloft, so its pressure falls a little faster.)' },
       gen(r) {
         const z = r.pick([3, 5, 8, 10]), H = 8.4, p0 = 101.3;
         const p = p0 * Math.exp(-z / H);
@@ -243,6 +245,7 @@ While $P$ is small compared with $K$ the bracket is close to 1 and growth is exp
     }),
     num({
       id: 'cp-drug', difficulty: 2, transfer: true,
+      visual: { type: 'graph', params: { x: [0, 5], y: [0, 1.1], xlabel: 'time / half-life', ylabel: 'fraction left', curves: [{ fn: '2^(-x)', color: 'accent' }], points: [1, 2, 3, 4].map((k) => ({ x: k, y: 2 ** -k, color: 'gold' })) }, caption: 'First-order elimination in units of the half-life: each half-life halves whatever is left.' },
       gen(r) {
         const T = r.pick([4, 6, 8, 12]), frac = r.pick([0.1, 0.05, 0.2]);
         const time = T * Math.log(1 / frac) / LN2;

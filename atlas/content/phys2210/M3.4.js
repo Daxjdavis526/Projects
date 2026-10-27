@@ -87,6 +87,24 @@ Each one links four of the five quantities $x - x_0$, $v_0$, $v$, $a$ and $t$: c
       hints: ['List what you know (v₀, v, Δx) and what you want (a).', 'Which equation contains exactly those four, and not t?'],
       teach: 'Choose the constant-acceleration equation that leaves out the quantity you neither know nor want.',
       explain: t`Only $v^2 = v_0^2 + 2a\,\Delta x$ links $v_0$, $v$, $\Delta x$ and $a$ without $t$: $a = (900 - 100)/(2 \times 100) = 4.0\ \text{m/s}^2$.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-0.4, 6.4], y: [-4, 34], axes: false, grid: false, xlabel: '', ylabel: '',
+          curves: [
+            { fn: '10 + 4*x', domain: [0, 5], color: 'good' },
+            { fn: '0', domain: [0, 6], color: 'ink3', width: 1.2 },
+            { param: ['0', 't'], t: [0, 33], color: 'ink3', width: 1.2 },
+          ],
+          shade: [{ fn: '10 + 4*x', from: 0, to: 5, color: 'warn', alpha: 0.22 }],
+          points: [
+            { x: 0, y: 10, color: 'gold' }, { x: 5, y: 30, color: 'gold', label: '30 m/s' },
+            { x: 0.05, y: 5.5, r: 0.1, color: 'gold', label: '10 m/s' }, { x: 1.4, y: 13, r: 0.1, color: 'ink', label: 'area = 100 m' },
+            { x: 4.55, y: -2.6, r: 0.1, color: 'ink2', label: 't = ?' }, { x: 6, y: -1.6, r: 0.1, color: 'ink2', label: 't' }, { x: 0.1, y: 32.5, r: 0.1, color: 'ink2', label: 'v' },
+          ],
+        },
+        caption: 'Velocity against time: the area under the line is the 100 m covered. How long it takes is not given.',
+      },
     }),
     num({
       id: 'v-after-t', difficulty: 1,
@@ -155,6 +173,15 @@ Each one links four of the five quantities $x - x_0$, $v_0$, $v$, $a$ and $t$: c
           hints: [t`No time is given, so use $v^2 = v_0^2 + 2a\,\Delta x$.`, t`$a = \dfrac{v^2 - v_0^2}{2\,\Delta x}$; expect a negative answer.`],
           teach: 'Without the time, v² = v₀² + 2aΔx connects the speeds, the distance and the acceleration.',
           explain: t`$a = \dfrac{${v}^2 - ${v0}^2}{2(${d})} = \dfrac{${v * v - v0 * v0}}{${2 * d}} = ${nice(a)}\ \text{m/s}^2$. Negative: it points against the motion, so the car slows.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, d * 1.12], y: [0, v0 * 1.15], xlabel: 'x (m)', ylabel: 'v (m/s)',
+              curves: [{ fn: `sqrt(${v0 * v0} - ${-2 * a}*x)`, domain: [0, d], color: 'good' }],
+              points: [{ x: 0, y: v0, color: 'gold', label: `${v0} m/s` }, { x: d, y: v, color: 'gold', label: `${v} m/s` }],
+            },
+            caption: 'Speed against position — not time — as the car slows steadily: v² falls in proportion to the distance covered.',
+          },
         };
       },
     }),
@@ -255,6 +282,15 @@ Each one links four of the five quantities $x - x_0$, $v_0$, $v$, $a$ and $t$: c
       hints: ['Does the car start from rest?', t`Which term of $\Delta x = v_0 t + \tfrac12 a t^2$ did the student use?`],
       teach: 'The ½at² term alone is the displacement only for a start from rest; otherwise add v₀t.',
       explain: t`$\Delta x = v_0 t + \tfrac12 a t^2 = 50 + 25 = 75$ m. Check: average speed 15 m/s for 5.0 s is 75 m.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 6], y: [0, 23], xlabel: 't (s)', ylabel: 'v (m/s)',
+          curves: [{ fn: '10 + 2*x', domain: [0, 5], color: 'good' }],
+          shade: [{ fn: '10', from: 0, to: 5, color: 'accent', alpha: 0.25 }, { fn: '10 + 2*x', lower: '10', from: 0, to: 5, color: 'warn', alpha: 0.35 }],
+        },
+        caption: 'The car’s velocity against time while it speeds up from 10 m/s to 20 m/s.',
+      },
     }),
   ],
   checkpoint: [
@@ -270,6 +306,15 @@ Each one links four of the five quantities $x - x_0$, $v_0$, $v$, $a$ and $t$: c
           hints: [t`From rest, $v^2 = 2a\,\Delta x$.`],
           teach: 'From rest with constant acceleration, the distance to reach speed v is v²/2a.',
           explain: t`$\Delta x = \dfrac{v^2}{2a} = \dfrac{${v}^2}{2(${nice(a)})} = ${s3(d)}$ m. Real runways add a large safety margin, including room to abort the take-off and stop.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, (v / a) * 1.15], y: [0, v * 1.2], xlabel: 't (s)', ylabel: 'v (m/s)',
+              curves: [{ fn: `${a}*x`, domain: [0, v / a], color: 'good' }],
+              shade: [{ fn: `${a}*x`, from: 0, to: v / a, color: 'warn', alpha: 0.25 }],
+            },
+            caption: 'Velocity against time during the take-off run; the shaded area is the runway it uses.',
+          },
         };
       },
     }),
@@ -288,6 +333,15 @@ Each one links four of the five quantities $x - x_0$, $v_0$, $v$, $a$ and $t$: c
           hints: ['From rest relative to the booster: d = ½at².', t`$t = \sqrt{2d/a}$.`],
           teach: 'Starting from rest with constant acceleration, the time to cover d is √(2d/a).',
           explain: t`$t = \sqrt{\dfrac{2d}{a}} = \sqrt{\dfrac{2(${d})}{${nice(a)}}} = ${s3(tt)}$ s. This treats the relative acceleration as constant; a real escape motor’s thrust and the vehicle’s drag both change during the burn.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, tt * 1.35], y: [0, d * 1.6], xlabel: 't (s)', ylabel: 'separation (m)',
+              curves: [{ fn: `${a / 2}*x^2`, domain: [0, tt * 1.3], color: 'accent' }],
+              hlines: [{ y: d, label: `${d} m`, color: 'warn' }],
+            },
+            caption: 'The capsule’s distance from the booster against time, for a constant relative acceleration.',
+          },
         };
       },
     }),
@@ -304,6 +358,18 @@ Each one links four of the five quantities $x - x_0$, $v_0$, $v$, $a$ and $t$: c
       hints: [t`Stopping from speed $v$: $\Delta x = v^2/(2a)$.`, 'What happens to v² when v doubles?'],
       teach: 'Braking distance at constant deceleration is proportional to the square of the speed.',
       explain: t`$\Delta x = v^2/(2a)$, so doubling $v$ multiplies $\Delta x$ by 4: $4 \times 14 = 56$ m.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 4.6], y: [0, 31], xlabel: 't (s)', ylabel: 'v (m/s)',
+          curves: [
+            { fn: '13.889 - 6.889*x', domain: [0, 2.016], color: 'accent', label: '50 km/h', labelAt: 0.3 },
+            { fn: '27.778 - 6.889*x', domain: [0, 4.032], color: 'warn', label: '100 km/h', labelAt: 0.3 },
+          ],
+          shade: [{ fn: '27.778 - 6.889*x', from: 0, to: 4.032, color: 'warn', alpha: 0.16 }, { fn: '13.889 - 6.889*x', from: 0, to: 2.016, color: 'accent', alpha: 0.3 }],
+        },
+        caption: 'Velocity against time while braking from each speed with the same deceleration. Each braking distance is the area of its triangle.',
+      },
     }),
   ],
   sources: [{ label: 'OpenStax University Physics Vol. 1, §3.4', url: 'https://openstax.org/books/university-physics-volume-1/pages/3-4-motion-with-constant-acceleration' }],

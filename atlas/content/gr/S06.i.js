@@ -5,7 +5,7 @@
 // frame removes. Two teaching models, labelled as such: walkers on a sphere
 // (useful) and the rubber sheet (misleading).
 import { lesson, mcq, multi, num } from '../../src/core/content.js';
-import { C, g0, GM_EARTH, R_EARTH, M_SUN, G, DAY, YEAR, sci, round } from './_fasttrack.js';
+import { C, g0, GM_EARTH, R_EARTH, M_SUN, G, DAY, YEAR, rs, sci, round } from './_fasttrack.js';
 
 const t = String.raw;
 
@@ -15,6 +15,36 @@ const tidal = (M, L, r) => (2 * G * M * L) / r ** 3;  // head-to-foot difference
 const M_EARTH_KG = GM_EARTH / G;
 const SPEEDS = [['A ball thrown at 10 m/s', 10], ['The ISS (7.66 km/s)', 7660], ['Earth around the Sun (29.8 km/s)', 29780]];
 const LOG_C = Math.log10(C);
+
+// the apple's worldline across bands of faster-ticking clocks (schematic shading)
+const appleWorldline = {
+  type: 'graph',
+  params: {
+    x: [0, 1], y: [0, 3.6], xlabel: 'time (s)', ylabel: 'height (m)',
+    shade: [0, 1, 2, 3, 4, 5].map((k) => ({ fn: `${round((k + 1) * 0.6, 2)}`, lower: `${round(k * 0.6, 2)}`, from: 0, to: 1, color: 'gold', alpha: round(0.03 + 0.035 * k, 3) })),
+    curves: [{ fn: '3 - 4.905x^2', domain: [0, 0.782], color: 'accent', width: 3, label: 'the apple', labelAt: 0.35 }],
+    points: [{ x: 0, y: 3, color: 'accent', label: 'let go' }, { x: 0.782, y: 0, color: 'accent', label: 'lands' }, { x: 0.55, y: 3.35, r: 0.5, color: 'gold', label: 'clocks tick faster higher up' }],
+  },
+  caption: 'Time runs left to right. The shading only marks the direction of faster clocks (by gh/c², far too little to draw to scale). The apple’s curving worldline is the most-aging path between letting go and landing.',
+};
+
+// head-to-feet tides on an astronaut, schematic and exaggerated
+const tidalPicture = {
+  type: 'graph',
+  params: {
+    x: [-3.2, 3.2], y: [-2.6, 3.2], equal: true, grid: false, axes: false, xlabel: '', ylabel: '',
+    curves: [
+      { param: ['8sin(t)', '-10 + 8cos(t)'], t: [-0.5, 0.5], color: 'teal', width: 3 },
+      { param: ['0', 't'], t: [0, 2], color: 'ink', width: 4 },
+    ],
+    arrows: [
+      { from: [0.5, 2], to: [0.5, 0.95], color: 'bad' }, { from: [0.5, 0], to: [0.5, -1.4], color: 'bad', label: 'pull' },
+      { from: [-0.5, 2], to: [-0.5, 2.7], color: 'gold' }, { from: [-0.5, 0], to: [-0.5, -0.7], color: 'gold', label: 'stretch' },
+    ],
+    points: [{ x: 0, y: 2, color: 'ink', label: 'head' }, { x: 0, y: 0, color: 'ink', label: 'feet' }, { x: 1.5, y: -2.2, r: 0.5, color: 'teal', label: 'Earth' }],
+  },
+  caption: 'Hugely exaggerated. Red: Earth pulls the feet a little harder than the head. Gold: what is left in free fall — a stretch along the line to Earth.',
+};
 
 export default lesson({
   id: 'gr.S06.i',
@@ -69,6 +99,7 @@ export default lesson({
       hints: ['Which part of spacetime’s geometry acts on an object even when it is at rest?'],
       teach: 'Near Earth, almost all of gravity is the curvature of time: free objects follow the path along which their clocks tick the most.',
       explain: 'Clocks run fast by gh/c² with height. Of all the worldlines from release to landing, the free-fall one gives the apple’s own clock the most time; that path is the falling one. Curved space contributes only at the level of (v/c)².',
+      visual: appleWorldline,
     }),
     num({
       id: 'v-over-c', difficulty: 2,
@@ -111,6 +142,15 @@ export default lesson({
           hints: [t`The head runs fast by the fraction $gh/c^2$.`, t`Multiply that fraction by ${yrs} years in seconds, $${yrs}\times3.156\times10^{7}$ s, then convert to ns.`],
           teach: 'A height difference h makes clocks differ in rate by gh/c², which adds up — slowly — over time.',
           explain: t`$gh/c^2 = ${sci(f)}$; over $${sci(yrs * YEAR)}$ s that is $${sci(ns)}$ ns — less than a microsecond in a lifetime, but real: optical clocks detect height differences of centimetres.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 95], y: [0, round(ns * 1.25, 3)], xlabel: 'age (years)', ylabel: 'head’s lead (ns)',
+              curves: [{ fn: `${round(f * YEAR * 1e9, 6)}x`, color: 'accent' }],
+              points: [{ x: yrs, y: round(ns, 3), color: 'gold', label: `${yrs} years` }],
+            },
+            caption: `The head’s clock pulls ahead of the feet’s steadily, at the rate gh/c² (for h = ${h} m).`,
+          },
         };
       },
     }),
@@ -162,6 +202,14 @@ export default lesson({
       hints: ['Ask what makes the marble move in the model — and what the model leaves out entirely.', 'Two options describe things the sheet gets right.'],
       teach: 'The rubber sheet gets the slogan right but the mechanism wrong: it relies on gravity to work, and it omits curved time.',
       explain: 'The sheet’s marbles need real gravity to roll, so the model is circular; it has no time in it at all, though curved time causes the fall of apples; and measured marble orbits on spandex sheets do not match planetary orbits. What it gets right: effects fade with distance and are carried locally by geometry.',
+      visual: {
+        type: 'surface3d',
+        params: {
+          z: '-1.2/sqrt(x^2 + y^2 + 0.35)', domain: [[-3, 3], [-3, 3]], n: 34, axes: false, pitch: 0.55, dist: 9,
+          curves: [{ param: ['(2.6 - 0.12t)cos(t)', '(2.6 - 0.12t)sin(t)', '-1.2/sqrt((2.6 - 0.12t)^2 + 0.35) + 0.06'], t: [0, 14], color: 'gold' }],
+          caption: 'The rubber sheet, drawn only so you can critique it: a teaching model, not a picture of spacetime. It has no time in it, and its marble rolls only because something pulls it down.',
+        },
+      },
     }),
     num({
       id: 'tidal', difficulty: 3,
@@ -176,6 +224,7 @@ export default lesson({
           hints: [t`$r$ is the distance from Earth's centre: $6371$ km plus the altitude, in metres.`, t`$\Delta g = 2GML/r^3 = 2(${sci(GM_EARTH, 4)})(${L})/r^3$.`],
           teach: 'Tides — differences in gravity across a body — are the part of gravity that free fall cannot remove: they are spacetime curvature you can feel.',
           explain: t`$r = ${sci(rr, 4)}$ m, so $\Delta g = 2(${sci(GM_EARTH, 4)})(${L})/(${sci(rr, 4)})^3 = ${sci(a)}\ \text{m/s}^2$ — less than a millionth of $g$. Unlike $g$ itself, no falling frame removes it.`,
+          visual: tidalPicture,
         };
       },
     }),
@@ -211,6 +260,15 @@ export default lesson({
           hints: [t`The rate difference is $gh/c^2$; multiply by 86 400 s and convert to ns.`],
           teach: 'A clock h higher gains gh/c² of time — about 9.4 ns per day per kilometre at Earth’s surface.',
           explain: t`$gh/c^2 = ${sci((g0 * h) / (C * C))}$; per day that is $${sci(ns)}$ ns. (Using $g = 9.81$ throughout ignores that gravity weakens slightly with height — a 0.3% effect here.)`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 9500], y: [0, 95], xlabel: 'altitude (m)', ylabel: 'gain (ns per day)',
+              curves: [{ fn: `${round((g0 / (C * C)) * DAY * 1e9, 8)}x`, color: 'accent' }],
+              points: [['Everest', 8849], ['K2', 8611], ['Denali', 6190], ['Kilimanjaro', 5895]].map(([n, x]) => ({ x, y: round(((g0 * x) / (C * C)) * DAY * 1e9, 3), color: n === peak ? 'gold' : 'ink3', label: n === peak ? n : '' })),
+            },
+            caption: 'A summit clock’s daily gain over sea level, (gh/c²) × 86 400 s, in proportion to the altitude.',
+          },
         };
       },
     }),
@@ -226,6 +284,17 @@ export default lesson({
           hints: [t`$M = ${M}\times1.989\times10^{30}$ kg and $r = ${rk}\times10^{3}$ m.`, t`$\Delta g = 2(6.674\times10^{-11})(${sci(M * M_SUN)})(2)/(${sci(rk * 1e3)})^3$.`],
           teach: 'Tidal stretching grows as M/r³, so near a stellar-mass black hole it becomes deadly — the same curvature that only nudges you on Earth.',
           explain: t`$\Delta g = ${sci(a)}\ \text{m/s}^2$, about ${Math.round(a / g0).toLocaleString('en-US')} times $g$${a > 30 * g0 ? ' — enough to pull a body apart (“spaghettification”)' : ' — a dangerous stretch, and it grows fast closer in'}. For a feet-first fall toward a non-spinning black hole, general relativity gives exactly this $2GML/r^3$, all the way to the horizon.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [1.4, 4.2], y: [-2, 7], xlabel: 'log₁₀(distance in km)', ylabel: 'log₁₀(stretch in m/s²)',
+              curves: [{ fn: `${round(Math.log10(4 * G * M * M_SUN), 6)} - 3(x + 3)`, color: 'accent', domain: [round(Math.log10(rs(M * M_SUN) / 1e3), 4), 4.2] }],
+              hlines: [{ y: round(Math.log10(g0), 4), label: 'g on Earth', color: 'bad' }],
+              vlines: [{ x: round(Math.log10(rs(M * M_SUN) / 1e3), 4), label: 'horizon' }],
+              points: [{ x: round(Math.log10(rk), 4), y: round(Math.log10(a), 4), color: 'gold', label: 'the astronaut' }],
+            },
+            caption: `Feet-to-head stretch on a 2 m body against distance from a ${M}-solar-mass black hole, both in powers of ten: it grows as 1/r³.`,
+          },
         };
       },
     }),

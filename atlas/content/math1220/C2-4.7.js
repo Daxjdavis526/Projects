@@ -61,6 +61,7 @@ That error bound is the most practical result in this module: the error of stopp
   practice: [
     mcq({
       id: 'conditions', difficulty: 1,
+      visual: { type: 'calc-series', params: { view: 'sums', showTerms: false, term: '(-1)^(n+1)/n', limit: 'ln(2)', limitLabel: 'ln 2', compare: { term: '(-1)^(n+1)*(1 + 1/n)', label: 'sizes 1 + 1/n: decreasing, but not to 0' }, N: 30, y: [0, 2.2] }, caption: 'Blue: sizes 1/n, decreasing to 0 — the partial sums settle. Dashed: sizes 1 + 1/n, also decreasing, but towards 1 — the partial sums never settle.' },
       prompt: t`What does the alternating series test require of $b_n$ in $\sum (-1)^{n+1} b_n$?`,
       choices: [t`$b_n > 0$, $b_n$ decreasing, and $b_n \to 0$`, t`Only $b_n \to 0$`, t`That $\sum b_n$ converges`, t`Only that $b_n$ is decreasing`],
       answer: 0,
@@ -75,6 +76,7 @@ That error bound is the most practical result in this module: the error of stopp
     }),
     multi({
       id: 'which-converge', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'sums', showTerms: false, N: { min: 5, max: 60, value: 40 }, presetLabel: 'Series', presets: [{ label: '(−1)ⁿ/√n', term: '(-1)^n/sqrt(n)' }, { label: '(−1)ⁿ n/(n+1)', term: '(-1)^n*n/(n + 1)' }, { label: '(−1)ⁿ/ln n', term: '(-1)^n/ln(n)', n0: 2 }, { label: '(−1)ⁿ(1 + 1/n)', term: '(-1)^n*(1 + 1/n)' }, { label: '(−1)ⁿ/n³', term: '(-1)^n/n^3' }] }, caption: 'The partial sums of each series: a zig-zag that narrows, or one that does not.' },
       prompt: 'Which of these series converge? Select all that do.',
       choices: [t`$\displaystyle\sum_{n=1}^\infty \frac{(-1)^n}{\sqrt n}$`, t`$\displaystyle\sum_{n=1}^\infty (-1)^n\frac{n}{n + 1}$`, t`$\displaystyle\sum_{n=2}^\infty \frac{(-1)^n}{\ln n}$`, t`$\displaystyle\sum_{n=1}^\infty (-1)^n\left(1 + \frac1n\right)$`, t`$\displaystyle\sum_{n=1}^\infty \frac{(-1)^n}{n^3}$`],
       answer: [0, 2, 4],
@@ -99,6 +101,7 @@ That error bound is the most practical result in this module: the error of stopp
           hints: [t`The error is at most the size of the first omitted term, $b_{N+1}$.`, t`Here that is $b_{${N + 1}}$.`],
           teach: 'For an alternating series that passes the test, the error after N terms is at most the next term’s size.',
           explain: t`$|S - S_{${N}}| \le b_{${N + 1}} = ${tex(bound, 3)}$.`,
+          visual: { type: 'graph', params: { x: [0, N + 5], y: [Math.floor(Math.log10(b(N + 4))) - 0.5, 0.4], xlabel: 'n', ylabel: 'log₁₀ bₙ', points: [...Array.from({ length: N }, (_, j) => ({ x: j + 1, y: Math.log10(b(j + 1)), color: 'accent' })), ...Array.from({ length: 4 }, (_, j) => ({ x: N + 1 + j, y: Math.log10(b(N + 1 + j)), color: 'gold', label: j === 0 ? 'first term left out' : undefined }))] }, caption: t`The sizes $b_n$ on a logarithmic scale: blue, the ${N} terms kept; gold, the terms left out.` },
         };
       },
     }),
@@ -106,10 +109,10 @@ That error bound is the most practical result in this module: the error of stopp
       id: 'terms-needed', difficulty: 3,
       gen(r) {
         const C = r.pick([
-          { bT: t`\frac{1}{n^2}`, b: (n) => 1 / n ** 2, tol: 0.001, tolT: '0.001' },
-          { bT: t`\frac{1}{n^3}`, b: (n) => 1 / n ** 3, tol: 1e-4, tolT: t`10^{-4}` },
-          { bT: t`\frac{1}{n!}`, b: (n) => 1 / fact(n), tol: 1e-6, tolT: t`10^{-6}` },
-          { bT: t`\frac{1}{2n - 1}`, b: (n) => 1 / (2 * n - 1), tol: 0.001, tolT: '0.001' },
+          { bT: t`\frac{1}{n^2}`, b: (n) => 1 / n ** 2, tol: 0.001, tolT: '0.001', lg: '-2*log10(x)' },
+          { bT: t`\frac{1}{n^3}`, b: (n) => 1 / n ** 3, tol: 1e-4, tolT: t`10^{-4}`, lg: '-3*log10(x)' },
+          { bT: t`\frac{1}{n!}`, b: (n) => 1 / fact(n), tol: 1e-6, tolT: t`10^{-6}`, lg: '-log10(gamma(x + 1))' },
+          { bT: t`\frac{1}{2n - 1}`, b: (n) => 1 / (2 * n - 1), tol: 0.001, tolT: '0.001', lg: '-log10(2x - 1)' },
         ]);
         let N = 0;
         while (!(C.b(N + 1) < C.tol)) N++;
@@ -120,6 +123,7 @@ That error bound is the most practical result in this module: the error of stopp
           hints: [t`You need $b_{N+1} < ${C.tolT}$.`, 'Solve for N + 1 first, then subtract 1.'],
           teach: 'To reach a tolerance, find the first index whose term is below it — then stop one term before it.',
           explain: t`$b_{${N + 1}} = ${tex(C.b(N + 1), 3)} < ${C.tolT}$ but $b_{${N}} = ${tex(C.b(N), 3)}$ is not, so $N = ${N}$ terms are needed.`,
+          visual: { type: 'graph', params: { x: [1, Math.ceil(1.6 * (N + 1))], y: [Math.floor(Math.log10(C.tol)) - 1, 0.3], xlabel: 'n', ylabel: 'log₁₀ bₙ', curves: [{ fn: C.lg, color: 'accent' }], hlines: [{ y: Math.log10(C.tol), label: 'tolerance', color: 'gold' }] }, caption: t`The size of the $n$-th term on a logarithmic scale. The bound uses the first term left out, $b_{N+1}$.` },
         };
       },
     }),
@@ -201,6 +205,7 @@ That error bound is the most practical result in this module: the error of stopp
           hints: [t`The first omitted term is $\dfrac{\theta^5}{5!}$.`, t`$5! = 120$; compute $\dfrac{${th}^5}{120}$.`],
           teach: 'The alternating series bound turns a truncated series into a guaranteed accuracy — how small-angle approximations are justified.',
           explain: t`Error $\le \dfrac{${th}^5}{120} = ${tex(bound, 3)}$. The actual error is $${tex(err, 3)}$, just under the bound.`,
+          visual: { type: 'graph', params: { x: [0, 1.4], y: [0, 1.05], xlabel: 'θ (rad)', ylabel: '', curves: [{ fn: 'sin(x)', color: 'accent', label: 'sin θ', labelAt: 1.25, labelDy: -14 }, { fn: 'x - x^3/6', color: 'warn', dash: true, label: 'θ − θ³/6', labelAt: 1.3, labelDy: 14 }], vlines: [{ x: th, label: `θ = ${th}`, color: 'gold' }] }, caption: t`$\sin\theta$ and its two-term approximation: indistinguishable at small angles, parting company near 1 rad.` },
         };
       },
     }),
@@ -217,6 +222,7 @@ That error bound is the most practical result in this module: the error of stopp
           hints: [t`The error of $2S_N$ is at most $2b_{N+1} = \dfrac{2}{N + 1}$.`, t`Solve $\dfrac{2}{N + 1} < ${tol}$.`],
           teach: 'Conditionally convergent series converge slowly: their error bounds shrink only like 1/N.',
           explain: t`$\frac{2}{N + 1} < ${tol} \iff N + 1 > ${fmt(2 / tol, 5)}$, so $N = ${N}$ — hundreds of terms for three decimal places of $\alpha = 2\ln 2 \approx ${fmt(2 * Math.log(2), 5)}$. Physicists sum such lattice series by smarter methods (Ewald summation) for exactly this reason.`,
+          visual: { type: 'graph', params: { x: [-4.6, 4.6], y: [-1, 1], grid: false, axes: false, xlabel: '', ylabel: '', points: [-4, -3, -2, -1, 0, 1, 2, 3, 4].map((k) => ({ x: k, y: 0, color: k % 2 === 0 ? 'bad' : 'accent', label: k === 0 ? 'this ion (+)' : k % 2 === 0 ? '+' : '−', r: k === 0 ? 7 : 6 })), arrows: [{ from: [0, -0.45], to: [1, -0.45], label: 'd', color: 'ink3' }] }, caption: t`A one-dimensional ionic crystal: ions of alternating charge, spaced $d$ apart and continuing forever both ways. The marked ion feels neighbours at $d, 2d, 3d, \dots$ with alternating signs, hence the alternating series.` },
         };
       },
     }),

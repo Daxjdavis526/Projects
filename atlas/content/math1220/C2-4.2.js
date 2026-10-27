@@ -73,6 +73,7 @@ This **monotone convergence theorem** (and its mirror image for decreasing seque
     }),
     multi({
       id: 'which-true', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'terms', join: true, N: 30, presetLabel: 'Test case', presets: [{ label: '(−1)ⁿ', term: '(-1)^n', y: [-1.3, 1.3] }, { label: '(−1)ⁿ/n', term: '(-1)^n/n', y: [-1.1, 0.6] }, { label: 'n/(n+1)', term: 'n/(n + 1)', y: [0, 5.5], compare: { term: '5 + 0*n', label: 'the bound 5', join: true } }] }, caption: 'Three test cases to check each statement against: bounded but not convergent; convergent but not monotone; increasing, bounded by 5, with a limit of 1.' },
       prompt: 'Which statements are true? Select all that are.',
       choices: ['Every bounded, monotone sequence converges', 'Every convergent sequence is bounded', 'Every bounded sequence converges', 'Every convergent sequence is monotone', 'An increasing sequence whose terms are all below 5 converges to 5'],
       answer: [0, 1],
@@ -189,6 +190,7 @@ This **monotone convergence theorem** (and its mirror image for decreasing seque
           hints: [t`Solve $L = \sqrt{${k}L}$ and keep the root consistent with $a_n \ge 1$.`],
           teach: 'Choose among the solutions of L = f(L) using what you know about the terms.',
           explain: t`$L^2 = ${k}L \Rightarrow L = 0$ or $L = ${k}$. The terms increase from 1, so $L = ${k}$.`,
+          visual: { type: 'calc-series', params: { view: 'cobweb', rec: `sqrt(${k}*a)`, a1: 1, N: 8, x: [0, k + 2] }, caption: t`The cobweb of $a_{n+1} = \sqrt{${k}a_n}$ from $a_1 = 1$.` },
         };
       },
     }),

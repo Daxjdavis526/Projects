@@ -103,6 +103,7 @@ Dams, ship hulls, submarine portholes and propellant-tank walls are all designed
       hints: [t`How does $p = \rho g h$ behave from the top of the dam to the bottom?`],
       teach: 'Use force = pressure × area only where the pressure is uniform — on a thin horizontal strip.',
       explain: t`Pressure varies with depth, so each strip $dh$ has its own pressure $\rho g h$; the integral adds them.`,
+      visual: { type: 'graph', params: { aspect: 'wide', x: [-3.8, 1], y: [-6.6, 0.7], axes: false, grid: false, shade: [{ fn: '0', lower: '-6', from: -3.6, to: 0, color: 'teal', alpha: 0.16 }], curves: [{ param: ['0', 't'], t: [-6.4, 0.6], color: 'ink2', width: 3.5 }, { param: ['-3.6*t', '0'], t: [0, 1], color: 'teal' }, { param: ['-2.52*t', '-6*t'], t: [0, 1], color: 'warn', dash: true }], arrows: [1, 2, 3, 4, 5].map((k) => ({ from: [-0.504 * k, -1.2 * k], to: [0, -1.2 * k], color: 'warn' })) }, caption: 'Side view of water against a dam wall. Arrow lengths show the pressure, which grows in proportion to depth.' },
     }),
     num({
       id: 'rect-gate', difficulty: 2,
@@ -213,6 +214,7 @@ Dams, ship hulls, submarine portholes and propellant-tank walls are all designed
           hints: [t`$F = 9810\displaystyle\int_{${a}}^{${nice(a + H)}} ${W}h\,dh$.`],
           teach: 'For a rectangle, F = ρgw(b² − a²)/2, between the depths of its edges.',
           explain: t`$F = 9810(${W})\tfrac{${nice(a + H)}^2 - ${a}^2}{2} \approx ${fmt(F)}$ N.`,
+          visual: front([{ fn: `${-a}`, lower: `${-(a + H)}`, from: -W / 2, to: W / 2, color: 'accent', alpha: 0.3 }], { x: [-Math.max(2, a), Math.max(2, a)], y: [-(a + H) - 0.4, 0.5], arrows: [{ from: [W / 2 + 0.3, 0], to: [W / 2 + 0.3, -a], color: 'ink2', label: `${a} m` }] }),
         };
       },
     }),

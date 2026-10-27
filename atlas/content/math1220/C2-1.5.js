@@ -181,6 +181,7 @@ Using $dx$ instead of $ds$ — pretending every band is a short cylinder — giv
       hints: ['Compare a thin slice of a cone with a thin slice of a cylinder.', 'How wide is a slanted band, measured along the surface?'],
       teach: 'A band’s area is circumference × slant width; the slant width is ds, not dx.',
       explain: t`Volumes are forgiving — a slanted slab and a straight one differ by a negligible sliver — but areas are not: the slanted band really is $\sqrt{1 + f'^2}$ times wider. That factor survives in the limit.`,
+      visual: { type: 'graph', params: { aspect: 'wide', x: [-0.2, 2.3], y: [-0.25, 2.3], equal: true, curves: [{ fn: '0.5 + 0.8*x', color: 'accent', domain: [0, 2] }, { param: ['1 + 0.3*t', '1.3 + 0.24*t'], t: [0, 1], color: 'gold', width: 6 }], arrows: [{ from: [1, 0.12], to: [1.3, 0.12], color: 'ink2', label: 'dx' }, { from: [0.85, 1.42], to: [1.15, 1.66], color: 'gold', label: 'ds' }], vlines: [{ x: 1, color: 'ink3' }, { x: 1.3, color: 'ink3' }], hlines: [{ y: 0, color: 'bad', label: 'axis' }] }, caption: t`Side view of a sloped profile. One band (gold) is the slanted width $ds$ along the curve — longer than its step $dx$ along the axis.` },
     }),
   ],
   checkpoint: [
@@ -195,6 +196,7 @@ Using $dx$ instead of $ds$ — pretending every band is a short cylinder — giv
           hints: [t`As in the worked example, $f\sqrt{1 + f'^2} = \sqrt{x + \tfrac14}$.`],
           teach: 'For y = √x, the slant factor turns the integrand into √(x + 1/4).',
           explain: t`$S = 2\pi\cdot\tfrac23\left[\left(x + \tfrac14\right)^{3/2}\right]_0^{${b}} = \tfrac{4\pi}{3}\left(${b + 0.25}^{3/2} - \tfrac18\right) \approx ${fmt(S)}$.`,
+          visual: { type: 'surface3d', params: { aspect: 'wide', surface: revolve([along(dish, 0, b)], { axis: 'x', at: 0, sweep: '360' }), domain: [[0, 1], [0, 1]], n: 36, colorBy: false, alpha: 0.85, axes: false, target: [b / 2, 0, 0], yaw: -1.05, pitch: 0.32, dist: 1.25 * b + 6, curves: [{ param: ['t', '0', '0'], t: [-0.1 * b, 1.15 * b], color: 'bad', width: 2 }] }, caption: 'The surface, seen from the side; the red line is the axis. Drag to turn it.' },
         };
       },
     }),

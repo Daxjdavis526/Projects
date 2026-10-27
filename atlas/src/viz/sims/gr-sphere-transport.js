@@ -76,6 +76,8 @@ export function mount(F, P) {
       ref = 'north';
     }
     cache.arrows = transport(path, v0);
+    let per = 0; for (let k = 0; k + 1 < path.length; k++) per += Math.hypot(path[k + 1][0] - path[k][0], path[k + 1][1] - path[k][1], path[k + 1][2] - path[k][2]);
+    cache.arrowLen = Math.min(ARROW, per / 9);         // short arrows on small loops
     cache.ref = ref;
     cache.turn = wrap2pi(tangentAngle(path[0], v0, cache.arrows[cache.arrows.length - 1]));
     return cache;
@@ -92,7 +94,8 @@ export function mount(F, P) {
     if (tri) L.verts.slice(1).forEach((v) => view.point(v, { color: 'gold', r: 4 }));
     const n = L.path.length - 1;
     const idx = Math.round(F.params.progress * n);
-    const tip = (k, v) => [L.path[k][0] + ARROW * v[0], L.path[k][1] + ARROW * v[1], L.path[k][2] + ARROW * v[2]];
+    const A = L.arrowLen;
+    const tip = (k, v) => [L.path[k][0] + A * v[0], L.path[k][1] + A * v[1], L.path[k][2] + A * v[2]];
     if (moving) {
       // faint copies of the arrow along the way
       for (let j = 1; j < 16; j++) { const k = Math.round((j / 16) * n); if (k < idx) view.arrow(L.path[k], tip(k, L.arrows[k]), { color: 'gold', width: 1.4, bias: 0.06 }); }

@@ -1,7 +1,7 @@
 // Trigonometric integrals: powers of tangent and secant (and the Mercator map).
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { fmt } from '../../src/core/format.js';
-import { kx } from './_integration.js';
+import { kx, fgraph } from './_integration.js';
 
 const t = String.raw;
 // '\tan^{3}(2x)' or '\sec x' for TeX; 'tan(2x)^3' for answer text
@@ -89,6 +89,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
           explain: tanRoute
             ? (n === 2 ? t`Save $\sec^2 x$ as $du$; what is left, $\tan^{${m}} x$, is already a power of $u = \tan x$.` : t`Save $\sec^2 x$; the remaining $\sec^{${n - 2}} x = (1 + \tan^2 x)^{${(n - 2) / 2}}$ is a polynomial in $u = \tan x$.`)
             : (m === 1 ? t`Save $\sec x\tan x$ as $du$; what is left, $\sec^{${n - 1}} x$, is already a power of $u = \sec x$.` : t`Save $\sec x\tan x$; the remaining $\tan^{${m - 1}} x = (\sec^2 x - 1)^{${(m - 1) / 2}}$ is a polynomial in $u = \sec x$.`),
+          visual: fgraph({ f: `tan(x)^${m}*sec(x)^${n}`, x: [-1.3, 1.3], trim: 0.06, caption: t`The integrand $\tan^{${m}}x\sec^{${n}}x$. It blows up at $x = \pm\tfrac{\pi}{2}$, where $\cos x = 0$ (the curve is cut off there).` }),
         };
       },
     }),
@@ -136,6 +137,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
           hints: [t`The secant’s power is even: save $\sec^2(${kx(k)})$ and write the other $\sec^2 = 1 + \tan^2$.`, t`With $u = \tan(${kx(k)})$, $du = ${k === 1 ? '' : k}\sec^2(${kx(k)})\,dx$, the integral is $${over(k)}\int (1 + u^2)\,du$.`],
           teach: t`Even secant power: keep $\sec^2$ as $du$, convert the rest to tangents, and integrate a polynomial in $\tan$.`,
           explain: t`With $u = ${k === 1 ? t`\tan x` : t`\tan(${kx(k)})`}$ the integral is $${over(k)}\int(1 + u^2)\,du = ${over(k)}\big(u + \tfrac13u^3\big)$, so the answer is $${k === 1 ? t`\tan x + \tfrac13\tan^3 x` : t`\tfrac{1}{${k}}\tan(${kx(k)}) + \tfrac{1}{${3 * k}}\tan^3(${kx(k)})`} + C$.`,
+          visual: fgraph({ f: `sec(${kx(k)})^4`, F: `(${tn} + ${tn}^3/3)/${k}`, x: [-1.3 / k, 1.3 / k], trim: 0.06 }),
         };
       },
     }),
@@ -160,6 +162,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
           explain: n === 1
             ? t`$\int (u^2 - 1)\,du = \tfrac13u^3 - u$ with $u = \sec x$: $\;\tfrac13\sec^3 x - \sec x + C$.`
             : t`$\int (u^{${n + 1}} - u^{${n - 1}})\,du = \tfrac{u^{${n + 2}}}{${n + 2}} - \tfrac{u^{${n}}}{${n}}$ with $u = \sec x$.`,
+          visual: fgraph({ f: `tan(x)^3*sec(x)^${n}`, F: `sec(x)^${n + 2}/${n + 2} - sec(x)^${n}/${n}`, x: [-1.2, 1.2], trim: 0.06 }),
         };
       },
     }),
@@ -184,6 +187,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
           explain: k === 1
             ? t`$\int\tan^3 x\,dx = \tfrac12\tan^2 x - \ln\lvert\sec x\rvert + C = \tfrac12\tan^2 x + \ln\lvert\cos x\rvert + C$.`
             : t`$\int\tan^3\theta\,d\theta = \tfrac12\tan^2\theta + \ln\lvert\cos\theta\rvert$; with $\theta = 2x$, $d\theta = 2\,dx$, so divide by 2: $\tfrac14\tan^2(2x) + \tfrac12\ln\lvert\cos(2x)\rvert + C$.`,
+          visual: fgraph({ f: `tan(${kx(k)})^3`, F: `(${tn}^2/2 + ln(abs(${c})))/${k}`, x: [-1.3 / k, 1.3 / k], trim: 0.06 }),
         };
       },
     }),
@@ -200,6 +204,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
       hints: ['Both routes are allowed here — why?', t`Write $\tan^2 x = \sec^2 x - 1$ in Ana’s answer and simplify.`],
       teach: 'Two correct antiderivatives may look different; they can differ only by a constant.',
       explain: t`With $s = \sec^2 x$, Ana’s answer is $\tfrac14(s-1)^2 + \tfrac16(s-1)^3 = \tfrac16s^3 - \tfrac14s^2 + \tfrac1{12}$, which is Ben’s plus $\tfrac1{12}$. Both are right.`,
+      visual: fgraph({ f: 'tan(x)^4/4 + tan(x)^6/6', x: [-1, 1], extra: [{ fn: 'sec(x)^6/6 - sec(x)^4/4', color: 'warn', dash: true, width: 2 }], caption: t`Ana’s answer (blue) and Ben’s (dashed). Compare their shapes, and where each one crosses the vertical axis.` }),
     }),
     num({
       id: 'definite', difficulty: 2,
@@ -237,6 +242,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
       hints: [t`$\tan^4 x = \tan^2 x\,(\sec^2 x - 1) = \tan^2 x\sec^2 x - \tan^2 x$.`, t`Then $\tan^2 x = \sec^2 x - 1$ once more.`],
       teach: t`Peel off $\tan^2 = \sec^2 - 1$ repeatedly until every piece is $\tan^n\sec^2$ or a constant.`,
       explain: t`$\int\tan^2 x\sec^2 x\,dx - \int(\sec^2 x - 1)\,dx = \tfrac13\tan^3 x - \tan x + x + C$.`,
+      visual: fgraph({ f: 'tan(x)^4', F: 'tan(x)^3/3 - tan(x) + x', x: [-1.25, 1.25], trim: 0.06 }),
     }),
     expr({
       id: 'cp-sec-sixth', difficulty: 3,
@@ -248,6 +254,7 @@ $$\frac{d}{dx}\tan x = \sec^2 x, \qquad \frac{d}{dx}\sec x = \sec x\tan x, \qqua
       hints: [t`Save $\sec^2 x$; write $\sec^4 x = (1 + \tan^2 x)^2$.`, t`With $u = \tan x$: $\int (1 + u^2)^2\,du = \int(1 + 2u^2 + u^4)\,du$.`],
       teach: 'Even secant power: one sec² for du, the rest as powers of (1 + tan²).',
       explain: t`$\int(1 + 2u^2 + u^4)\,du = u + \tfrac23u^3 + \tfrac15u^5$ with $u = \tan x$.`,
+      visual: fgraph({ f: 'sec(x)^6', F: 'tan(x) + 2tan(x)^3/3 + tan(x)^5/5', x: [-1.1, 1.1], trim: 0.06 }),
     }),
     num({
       id: 'cp-mercator', difficulty: 3, transfer: true,

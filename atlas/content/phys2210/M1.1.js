@@ -52,6 +52,24 @@ const ladder = {
   explain: t`**The prefixes you will use most:** pico (p) $10^{-12}$, nano (n) $10^{-9}$, micro (μ) $10^{-6}$, milli (m) $10^{-3}$, centi (c) $10^{-2}$, kilo (k) $10^{3}$, mega (M) $10^{6}$, giga (G) $10^{9}$, tera (T) $10^{12}$. Capitals are big (M, G, T) and lower case is small (m, μ, n, p) — except k. A prefix attaches to a unit, never to another prefix: write ns, not mμs. The kilogram is the odd one out: it is the base unit of mass, yet its name already holds a prefix, so 1 mg is $10^{-3}$ g $= 10^{-6}$ kg.`,
 };
 
+// a static ladder for the prefix-matching item: rungs carry only powers of ten
+const ladderByPower = {
+  type: 'graph',
+  params: {
+    x: [0.1, 10], y: [-16.5, 13.5], xticks: 0.001, xlabel: '', ylabel: 'power of ten, in metres',
+    alt: 'A logarithmic ladder of lengths from a proton to the Sun',
+    curves: [
+      ...PREFIXES.filter(([p]) => p <= 12).map(([p]) => ({ fn: String(p), domain: [0.1, 10], color: 'ink4', width: 1, dash: true })),
+      { param: ['4.2', 't'], t: [-15.5, 12.5], color: 'ink3', width: 1 },
+    ],
+    points: [
+      ...PREFIXES.filter(([p]) => p <= 12).map(([p]) => ({ x: 0.2, y: p, r: 0.01, color: 'ink2', label: pow10(p) + ' m' })),
+      ...OBJECTS.slice(0, 10).map(([label, size]) => ({ x: 4.2, y: +Math.log10(size).toFixed(3), color: 'accent2', label })),
+    ],
+  },
+  caption: 'Logarithmic scale; each rung is a power of ten that is a multiple of 3. Every size is written with the prefix whose rung lies just below it. Labels sit just above their dots.',
+};
+
 export default lesson({
   id: 'phys2210.M1.1',
   title: 'SI units and prefixes',
@@ -92,18 +110,19 @@ Miles cancel miles and hours cancel hours, leaving m/s. Write the units in every
       hints: ['The prefixes climb in steps of three powers of ten: kilo, mega, giga going up; milli, micro, nano going down.', 'Capital M is a million (10⁶); lower-case m is a thousandth (10⁻³).'],
       teach: 'Each SI prefix is a fixed power of ten, mostly in steps of 10³ — and case matters: M is mega, m is milli.',
       explain: 'Up: k = 10³, M = 10⁶, G = 10⁹. Down: m = 10⁻³, μ = 10⁻⁶, n = 10⁻⁹. The two left over are centi (10⁻²) and tera (10¹²).',
+      visual: ladderByPower,
     }),
     num({
       id: 'strip-prefix', difficulty: 1,
       gen(r) {
         const c = r.pick([
-          { ctx: t`A load cell on the test stand reads $4.7\ \mathrm{kN}$.`, v: 4.7, p: 3, pt: 'k', u: 'N', word: 'newtons' },
-          { ctx: t`The combustion chamber runs at $6.9\ \mathrm{MPa}$.`, v: 6.9, p: 6, pt: 'M', u: 'Pa', word: 'pascals' },
-          { ctx: t`A pressure sensor is sampled every $250\ \mu\mathrm{s}$.`, v: 250, p: -6, pt: '\\mu ', u: 's', word: 'seconds' },
-          { ctx: t`The throat of a small nozzle is $38\ \mathrm{mm}$ across.`, v: 38, p: -3, pt: 'm', u: 'm', word: 'metres' },
-          { ctx: t`A GPS signal takes about $67\ \mathrm{ms}$ to reach you from a satellite overhead.`, v: 67, p: -3, pt: 'm', u: 's', word: 'seconds' },
-          { ctx: t`Each F-1 engine of the Saturn V produced about $6.8\ \mathrm{MN}$ of thrust at liftoff.`, v: 6.8, p: 6, pt: 'M', u: 'N', word: 'newtons' },
-          { ctx: t`A spacecraft radio link runs at $2.2\ \mathrm{GHz}$.`, v: 2.2, p: 9, pt: 'G', u: 'Hz', word: 'hertz' },
+          { ctx: t`A load cell on the test stand reads $4.7\ \mathrm{kN}$.`, v: 4.7, p: 3, pt: 'k', u: 'N', word: 'newtons', pu: 'kN', step: 1 },
+          { ctx: t`The combustion chamber runs at $6.9\ \mathrm{MPa}$.`, v: 6.9, p: 6, pt: 'M', u: 'Pa', word: 'pascals', pu: 'MPa', step: 1 },
+          { ctx: t`A pressure sensor is sampled every $250\ \mu\mathrm{s}$.`, v: 250, p: -6, pt: '\\mu ', u: 's', word: 'seconds', pu: 'μs', step: 50 },
+          { ctx: t`The throat of a small nozzle is $38\ \mathrm{mm}$ across.`, v: 38, p: -3, pt: 'm', u: 'm', word: 'metres', pu: 'mm', step: 10 },
+          { ctx: t`A GPS signal takes about $67\ \mathrm{ms}$ to reach you from a satellite overhead.`, v: 67, p: -3, pt: 'm', u: 's', word: 'seconds', pu: 'ms', step: 10 },
+          { ctx: t`Each F-1 engine of the Saturn V produced about $6.8\ \mathrm{MN}$ of thrust at liftoff.`, v: 6.8, p: 6, pt: 'M', u: 'N', word: 'newtons', pu: 'MN', step: 1 },
+          { ctx: t`A spacecraft radio link runs at $2.2\ \mathrm{GHz}$.`, v: 2.2, p: 9, pt: 'G', u: 'Hz', word: 'hertz', pu: 'GHz', step: 0.5 },
         ]);
         const ans = clean(c.v * 10 ** c.p), wrong = clean(c.v * 10 ** -c.p);
         return {
@@ -113,6 +132,7 @@ Miles cancel miles and hours cancel hours, leaving m/s. Write the units in every
           hints: [t`$\mathrm{${c.pt}}$ stands for $10^{${c.p}}$: replace the prefix by that factor.`],
           teach: t`To remove a prefix, replace it by its power of ten: $6.9\ \mathrm{MPa} = 6.9\times10^{6}\ \mathrm{Pa}$.`,
           explain: t`$${c.v}\ \mathrm{${c.pt}${c.u}} = ${c.v}\times10^{${c.p}}\ \mathrm{${c.u}}${c.v >= 1 && c.v < 10 ? '' : t` = ${sci(ans)}\ \mathrm{${c.u}}`}$.`,
+          visual: dualScale({ value: c.v, perA: 10 ** c.p, unitA: c.pu, unitB: c.u, stepA: c.step }),
         };
       },
     }),
@@ -184,6 +204,7 @@ Miles cancel miles and hours cancel hours, leaving m/s. Write the units in every
       },
       hints: ['Which is bigger: 1 lbf or 1 N?', 'A firing of 1 lbf·s is really 4.45 N·s. If the software reads the “1” as 1 N·s, is the reading bigger or smaller than the truth?'],
       teach: 'A number means nothing without its unit: the same impulse is 1 lbf·s or 4.45 N·s.',
+      visual: dualScale({ value: 1, perA: LBF, unitA: 'lbf·s', unitB: 'N·s', stepA: 0.25, maxA: 1.5, caption: 'One impulse, two scales: 1 lbf·s reaches about 4.45 on the newton-second scale. Read as N·s, the same number “1” is a far smaller impulse.' }),
       explain: 'An impulse of 1 lbf·s is 4.45 N·s. Reading the number 1 as 1 N·s underestimated every small thruster firing by a factor of 4.45, so the navigators’ model of the trajectory drifted. In September 1999 the spacecraft reached Mars about 57 km above the surface, far too deep in the atmosphere, and was lost.',
     }),
     num({
@@ -205,6 +226,7 @@ Miles cancel miles and hours cancel hours, leaving m/s. Write the units in every
             t`The units reduce to kg: $1\ \text{slug} = \dfrac{4.448}{0.3048}\ \text{kg} = 14.59\ \text{kg}$. Now multiply by ${m}.`,
           ],
           teach: 'A derived unit converts by converting each base piece inside it: 1 slug = (4.448 N)(1 s²)/(0.3048 m) ≈ 14.59 kg.',
+          visual: dualScale({ value: m, perA: 4.448 / FT, unitA: 'slug', unitB: 'kg', stepA: m > 7 ? 5 : 1 }),
           explain: t`$1\ \text{slug} = \dfrac{4.448\ \text{kg}\cdot\text{m/s}^2\cdot\text{s}^2}{0.3048\ \text{m}} = 14.59\ \text{kg}$, so ${m} slugs $= ${m}\times14.59\ \text{kg} = ${sig(kg, 3)}\ \text{kg}$.`,
         };
       },
@@ -222,6 +244,7 @@ Miles cancel miles and hours cancel hours, leaving m/s. Write the units in every
           errors: [{ value: (p / 6.894757) / 1000, feedback: 'You divided by 6.895. A psi is bigger than a kilopascal, so the pressure has a bigger number in kPa than in psi.' }, { value: p * 6.894757, feedback: 'That is the pressure in kilopascals. The answer box is in megapascals: divide by 1000.' }],
           hints: ['Convert psi to kPa, then kPa to MPa.', t`$${comma(p)}\ \text{psi}\times\dfrac{6.895\ \text{kPa}}{1\ \text{psi}}\times\dfrac{1\ \text{MPa}}{1000\ \text{kPa}}$.`],
           teach: 'Chain the conversions — psi to kPa to MPa — so each unwanted unit cancels.',
+          visual: dualScale({ value: p, perA: PSI / 1e6, unitA: 'psi', unitB: 'MPa', stepA: p >= 1000 ? 500 : 100 }),
           explain: t`$${comma(p)}\times6.895\ \text{kPa} = ${comma(Math.round(p * 6.894757))}\ \text{kPa} = ${sig(MPa, 3)}\ \text{MPa}$.`,
         };
       },
@@ -237,6 +260,20 @@ Miles cancel miles and hours cancel hours, leaving m/s. Write the units in every
           errors: [{ value: us * 1e-6 * 3.00e8, feedback: 'That is the distance in metres; the box asks for kilometres.' }, { value: (us * 1e-3 * 3.00e8) / 1000, feedback: 'μ (micro) is 10⁻⁶, not 10⁻³ — that would be milli.' }],
           hints: [t`Convert the time to seconds first: $1\ \mu\text{s} = 10^{-6}\ \text{s}$.`, t`Distance $= c\,t = (3.00\times10^{8}\ \text{m/s})(${us}\times10^{-6}\ \text{s})$, then divide by 1000 for kilometres.`],
           teach: 'Convert every quantity to base SI units before multiplying, then convert the result to the unit asked for.',
+          visual: {
+            type: 'graph',
+            params: {
+              aspect: 'wide', x: [-30000, 30000], y: [-8000, 29000], equal: true, xticks: 0.001, yticks: 0.001, xlabel: '', ylabel: '',
+              alt: 'Earth and the orbit of a GPS satellite, drawn to scale',
+              curves: [
+                { param: ['6371*cos(t)', '6371*sin(t)'], t: [0, '2*pi'], color: 'teal', width: 2 },
+                { param: ['26571*cos(t)', '26571*sin(t)'], t: [0.35, 2.8], color: 'ink3', width: 1.2, dash: true },
+                { param: ['0', 't'], t: [6371, 26571], color: 'gold', width: 1.4, dash: true },
+              ],
+              points: [{ x: 0, y: 26571, r: 5, color: 'gold', label: 'GPS satellite, 20 200 km up' }, { x: 0, y: 6371, r: 4, color: 'accent', label: 'receiver' }, { x: -4200, y: -1500, r: 0.01, color: 'teal', label: 'Earth' }],
+            },
+            caption: 'Earth and part of a GPS orbit, to scale. The receiver turns the signal’s travel time into a distance — so a clock error becomes a position error.',
+          },
           explain: t`$d = c\,t = (3.00\times10^{8}\ \text{m/s})(${sci(us * 1e-6)}\ \text{s}) = ${sci(us * 1e-6 * 3.00e8)}\ \text{m} \approx ${sig(km, 3)}\ \text{km}$. A positioning error of kilometres per day is why GPS corrects for relativity.`,
         };
       },

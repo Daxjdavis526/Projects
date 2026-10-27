@@ -90,14 +90,14 @@ $$|\vec A\times\vec B| = AB\sin\theta, \qquad \vec A\times\vec B = (A_yB_z - A_z
       readouts: [
         { label: 'area $= AB\\,|\\sin\\theta|$', expr: 'a*b*abs(sin(th*pi/180))', digits: 3 },
         { label: 'the red arrow', vec: C3, digits: 3 },
-        { label: 'its length', expr: `sqrt(${C3[1]}^2 + ${C3[2]}^2)`, digits: 3 },
+        { label: 'its length', expr: `sqrt((${C3[1]})^2 + (${C3[2]})^2)`, digits: 3 },
       ],
     },
     caption: 'Drag to rotate; arrow keys turn it too. Lengths are in arbitrary units; the red arrow’s length equals the gold area. With the order reversed, the sweep runs from B back to A and the arrow flips.',
   },
   example: {
     prompt: t`Find $\vec A\times\vec B$ for $\vec A = ${vecTeX(EXA)}$ and $\vec B = ${vecTeX(EXB)}$, and check that it is perpendicular to both.`,
-    visual: crossScene(EXA, EXB, { caption: 'A, B, their parallelogram and A × B (red). A × B is drawn at about a third of its true length so it fits. Drag to rotate.' }),
+    visual: crossScene(EXA, EXB, { caption: 'A, B, their parallelogram and A × B (red). To fit, A and B are drawn at three-quarters scale and A × B at about a third of its true length. Drag to rotate.' }),
     steps: [
       { label: 'The pattern', text: t`Each component uses the *other* two axes, in cyclic order: the $x$-component is $A_yB_z - A_zB_y$, then shift every letter one step round $x \to y \to z \to x$ to get the next.` },
       { label: 'Components', text: t`$x$: $(1)(2) - (0)(3) = ${EXC[0]}$. $y$: $(0)(-1) - (2)(2) = ${EXC[1]}$. $z$: $(2)(3) - (1)(-1) = ${EXC[2]}$. So $\vec A\times\vec B = ${vecTeX(EXC)}$.` },
@@ -241,7 +241,7 @@ $$|\vec A\times\vec B| = AB\sin\theta, \qquad \vec A\times\vec B = (A_yB_z - A_z
           hints: [t`$|\vec r\times\vec F| = rF\sin\theta$, with θ the angle between the handle and the force.`, t`$\tau = (${L}\ \text{m})(${F}\ \text{N})\sin ${a}^\circ$.`],
           teach: 'Torque is the cross product of the lever arm and the force: τ = rF sin θ, largest for a perpendicular pull.',
           visual: vectorPicture({
-            arrows: [{ to: [3, 0], label: 'r (handle)' }, { from: [3, 0], to: [3 + 2 * Math.cos(a * DEG), 2 * Math.sin(a * DEG)], color: 'violet', label: 'F' }],
+            arrows: [{ to: [3, 0], label: 'r (handle)', mid: true }, { from: [3, 0], to: [3 + 2 * Math.cos(a * DEG), 2 * Math.sin(a * DEG)], color: 'violet', label: 'F' }],
             arc: { at: [3, 0], from: 0, to: a, r: 0.6, label: `${a}°` },
             points: [{ x: 0, y: 0, r: 5, color: 'ink2', label: 'bolt' }],
             numbers: false, caption: 'The wrench seen from above: the handle runs from the bolt to your hand. Directions to scale; lengths not.',

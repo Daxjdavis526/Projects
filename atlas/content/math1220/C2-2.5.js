@@ -1,6 +1,7 @@
 // Trigonometric substitution: square roots of quadratics are right triangles in disguise.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { fmt, nice } from '../../src/core/format.js';
+import { fgraph } from './_integration.js';
 
 const t = String.raw;
 
@@ -130,6 +131,7 @@ and the sector’s angle $\theta$ is the substitution angle of $x = a\sin\theta$
           hints: [t`Write the radicand as ${kind === 2 ? t`$x^2 - a^2$` : kind === 1 ? t`$a^2 + x^2$` : t`$a^2 - x^2$`} with $a = ${a}$.`, t`Which identity turns it into a perfect square? ${ident[kind]}.`],
           teach: t`Match the root to an identity: $\sqrt{a^2 - x^2}$ takes $x = a\sin\theta$, $\sqrt{a^2 + x^2}$ takes $x = a\tan\theta$, and $\sqrt{x^2 - a^2}$ takes $x = a\sec\theta$.`,
           explain: t`$${sub(kind).slice(1, -1)}$ gives ${[t`$${A} - ${A}\sin^2\theta = ${A}\cos^2\theta$`, t`$${A} + ${A}\tan^2\theta = ${A}\sec^2\theta$`, t`$${A}\sec^2\theta - ${A} = ${A}\tan^2\theta$`][kind]}, so the root is $${a}${['\\cos', '\\sec', '\\tan'][kind]}\theta$.`,
+          visual: fgraph({ f: [`sqrt(${A} - x^2)`, `sqrt(${A} + x^2)`, `sqrt(x^2 - ${A})`][kind], x: [-2.2 * a, 2.2 * a], caption: [t`The integrand exists only for $\lvert x\rvert \le ${a}$ — exactly the values $${a}\sin\theta$ can take.`, t`The integrand exists for every $x$ — and $${a}\tan\theta$ takes every value.`, t`The integrand exists only for $\lvert x\rvert \ge ${a}$ — exactly the values $${a}\sec\theta$ can take.`][kind] }),
         };
       },
     }),
@@ -177,6 +179,7 @@ and the sector’s angle $\theta$ is the substitution angle of $x = a\sin\theta$
           hints: [t`Let $x = ${a}\sin\theta$, so $dx = ${a}\cos\theta\,d\theta$ and $\sqrt{${A} - x^2} = ${a}\cos\theta$.`, t`The integral becomes $\int d\theta = \theta + C$; then $\theta = \arcsin(x/${a})$.`],
           teach: t`$\int \dfrac{dx}{\sqrt{a^2 - x^2}} = \arcsin\dfrac{x}{a} + C$: the root and the $dx$ cancel completely.`,
           explain: t`$\int\dfrac{${a}\cos\theta\,d\theta}{${a}\cos\theta} = \theta + C = \arcsin\dfrac{x}{${a}} + C$.`,
+          visual: fgraph({ f: `1/sqrt(${A} - x^2)`, F: `asin(x/${a})`, x: [-0.98 * a, 0.98 * a], trim: 0.04 }),
         };
       },
     }),
@@ -223,6 +226,7 @@ and the sector’s angle $\theta$ is the substitution angle of $x = a\sin\theta$
           hints: [t`$x = ${a === 1 ? '' : a}\tan\theta$: then $dx = ${a === 1 ? '' : a}\sec^2\theta\,d\theta$ and $x^2 + ${A} = ${A === 1 ? '' : A}\sec^2\theta$.`, t`The integral becomes $${A === 1 ? '' : t`\tfrac{1}{${A}}`}\int\cos\theta\,d\theta = ${A === 1 ? '' : t`\tfrac{1}{${A}}`}\sin\theta$, and $\sin\theta = x/\sqrt{x^2 + ${A}}$.`],
           teach: t`For $(x^2 + a^2)^{3/2}$, the substitution $x = a\tan\theta$ leaves $\tfrac{1}{a^2}\int\cos\theta\,d\theta$.`,
           explain: t`$${A === 1 ? '' : t`\dfrac{1}{${A}}`}\sin\theta + C = \dfrac{x}{${A === 1 ? '' : A}\sqrt{x^2 + ${A}}} + C$.`,
+          visual: fgraph({ f: `1/(x^2 + ${A})^(3/2)`, F: `x/(${A}*sqrt(x^2 + ${A}))`, x: [-4 * a, 4 * a] }),
         };
       },
     }),
@@ -245,6 +249,7 @@ and the sector’s angle $\theta$ is the substitution angle of $x = a\sin\theta$
           ],
           teach: t`For $\sqrt{x^2 - a^2}$, $x = a\sec\theta$ makes the root $a\tan\theta$; $\operatorname{arcsec}(x/a)$ is the same as $\arccos(a/x)$ for $x > a$.`,
           explain: t`$${a}(\tan\theta - \theta) + C = \sqrt{x^2 - ${A}} - ${a}\operatorname{arcsec}\tfrac{x}{${a}} + C$ (equivalently $- ${a}\arccos\tfrac{${a}}{x}$).`,
+          visual: fgraph({ f: `sqrt(x^2 - ${A})/x`, F: `sqrt(x^2 - ${A}) - ${a}*asec(x/${a})`, x: [a, 4 * a] }),
         };
       },
     }),
@@ -291,6 +296,7 @@ and the sector’s angle $\theta$ is the substitution angle of $x = a\sin\theta$
       hints: ['Every piece of the integral must be converted to θ — including dx.', t`Differentiate $x = 2\sin\theta$.`],
       teach: t`Substitution replaces $dx$ too: $x = a\sin\theta$ brings $dx = a\cos\theta\,d\theta$.`,
       explain: t`With $dx = 2\cos\theta\,d\theta$: $\displaystyle\int\frac{2\cos\theta\,d\theta}{2\cos\theta} = \theta + C = \arcsin\frac{x}{2} + C$.`,
+      visual: fgraph({ f: '1/sqrt(4 - x^2)', F: 'asin(x/2)', x: [-1.95, 1.95], trim: 0.04, extra: [{ fn: 'ln((2 + x)/sqrt(4 - x^2))/2', color: 'bad', dash: true, width: 1.8 }], caption: t`The integrand (blue), the correct antiderivative $\arcsin\tfrac{x}{2}$ (amber dashes), and the student’s answer rewritten in $x$, $\tfrac12\ln\frac{2 + x}{\sqrt{4 - x^2}}$ (red dashes). Only the amber curve’s slope matches the blue height.` }),
     }),
   ],
   checkpoint: [
@@ -307,6 +313,7 @@ and the sector’s angle $\theta$ is the substitution angle of $x = a\sin\theta$
           hints: [t`$x = ${a}\sin\theta$ gives $\tfrac{1}{${A}}\int\csc^2\theta\,d\theta$.`, t`$\int\csc^2\theta\,d\theta = -\cot\theta$, and $\cot\theta = \sqrt{${A} - x^2}/x$.`],
           teach: 'Substitute, integrate in θ, and read the answer back off the reference triangle.',
           explain: t`$\displaystyle\int\frac{${a}\cos\theta\,d\theta}{${A}\sin^2\theta\cdot ${a}\cos\theta} = \frac{1}{${A}}\int\csc^2\theta\,d\theta = -\frac{\cot\theta}{${A}} + C = -\frac{\sqrt{${A} - x^2}}{${A}x} + C$.`,
+          visual: fgraph({ f: `1/(x^2*sqrt(${A} - x^2))`, F: `-sqrt(${A} - x^2)/(${A}*x)`, x: [0.15 * a, 0.97 * a], trim: 0.05 }),
         };
       },
     }),
@@ -321,6 +328,7 @@ and the sector’s angle $\theta$ is the substitution angle of $x = a\sin\theta$
           hints: [t`An antiderivative is $\dfrac{x}{${A}\sqrt{x^2 + ${A}}}$ (substitute $x = ${a}\tan\theta$).`],
           teach: 'Find the antiderivative by trig substitution, then evaluate at the limits in x.',
           explain: t`$\left[\dfrac{x}{${A}\sqrt{x^2 + ${A}}}\right]_0^{${a}} = \dfrac{${a}}{${A}\cdot ${a}\sqrt2} = \dfrac{1}{${A}\sqrt2} = ${fmt(val, 3)}$.`,
+          visual: fgraph({ f: `1/(x^2 + ${A})^(3/2)`, x: [-0.5 * a, 2.5 * a], shade: { from: 0, to: a }, caption: 'The shaded area is the integral.' }),
         };
       },
     }),

@@ -114,6 +114,7 @@ The distance between two points is the length of the vector joining them. One su
           },
           hints: ['A vector from P to Q is “end minus start”.'],
           teach: t`$\overrightarrow{PQ} = Q - P$: end minus start, component by component.`,
+          visual: { type: 'calc-vectors3d', params: { range: fitRange([P, Q]), points: [{ at: P, label: 'P' }, { at: Q, label: 'Q' }], vectors: [{ from: P, to: Q, color: 'accent' }] }, caption: 'Drag to rotate. The arrow runs from P to Q.' },
           explain: t`$\overrightarrow{PQ} = \langle ${Q[0]} - (${P[0]}),\ ${Q[1]} - (${P[1]}),\ ${Q[2]} - (${P[2]})\rangle = ${vecTeX(d)}$.`,
         };
       },
@@ -147,6 +148,7 @@ The distance between two points is the length of the vector joining them. One su
           errors,
           hints: [t`Complete the square in $x$, $y$ and $z$ separately.`, t`For example $x^2 ${c[0] > 0 ? '-' : '+'} ${2 * Math.abs(c[0])}x = ${shift(c[0], 'x')} - ${c[0] ** 2}$.`, t`Collect the constants: $r^2 = ${k} + ${c[0] ** 2} + ${c[1] ** 2} + ${c[2] ** 2}$.`],
           teach: t`Completing the square turns the equation into $(x-a)^2 + (y-b)^2 + (z-c)^2 = r^2$: centre $(a, b, c)$, radius $r$.`,
+          visual: { type: 'calc-vectors3d', params: { range: fitRange([c.map((x) => Math.abs(x) + R)]), spheres: [{ centre: c, radius: R, color: 'teal' }], points: [{ at: c, color: 'teal' }] }, caption: 'Drag to rotate: the sphere, drawn as three great circles around its centre.' },
           explain: t`$${shift(c[0], 'x')} + ${shift(c[1], 'y')} + ${shift(c[2], 'z')} = ${k} + ${c[0] ** 2 + c[1] ** 2 + c[2] ** 2} = ${R * R}$: centre $${pointTeX(c)}$, radius $${R}$.`,
         };
       },
@@ -162,6 +164,7 @@ The distance between two points is the length of the vector joining them. One su
           errors: [{ value: dist, feedback: 'That is its distance from Earth’s centre. Subtract Earth’s radius for the altitude.' }],
           hints: [t`$|\vec r| = \sqrt{r_x^2 + r_y^2 + r_z^2}$ is the distance from Earth’s centre.`, t`Altitude $= |\vec r| - 6371$ km.`],
           teach: 'A position vector from a planet’s centre has the distance to that centre as its magnitude.',
+          visual: { type: 'calc-vectors3d', params: { range: 8, grid: false, spheres: [{ centre: [0, 0, 0], radius: 6.371, color: 'teal' }], vectors: [{ to: v.map((x) => x / 1000), color: 'warn', label: t`\vec r` }] }, caption: 'Drag to rotate. Earth (teal circles) and the satellite’s position vector; axes in thousands of km.' },
           explain: t`$|\vec r| = ${k}\sqrt{${a * a} + ${b * b} + ${c * c}} = ${k}\times${L} = ${dist}$ km, so the altitude is $${dist} - 6371 = ${dist - R_EARTH}$ km.`,
         };
       },
@@ -193,6 +196,7 @@ The distance between two points is the length of the vector joining them. One su
           answer: L, tol: { rel: 1e-4 },
           hints: [t`Find $\overrightarrow{AB}$, then its length.`],
           teach: 'Distance = |end − start|.',
+          visual: { type: 'calc-vectors3d', params: { range: fitRange([P, Q]), points: [{ at: P, label: 'A' }, { at: Q, label: 'B' }], segments: [{ from: P, to: Q, color: 'gold', dash: true }] }, caption: 'Drag to rotate.' },
           explain: t`$\overrightarrow{AB} = ${vecTeX(d)}$ and $|\overrightarrow{AB}| = ${L}$.`,
         };
       },
@@ -224,6 +228,7 @@ The distance between two points is the length of the vector joining them. One su
           errors: [{ value: (Math.abs(v[0]) + Math.abs(v[1]) + Math.abs(v[2])) / speed / 60, feedback: 'Adding the component sizes overestimates the distance; the straight-line distance is the magnitude.' }],
           hints: [t`The distance to go is $|\vec r|$.`, t`$|\vec r| = ${s}\sqrt{${a * a} + ${b * b} + ${c * c}} = ${dist}$ m. Time $=$ distance $/$ speed.`],
           teach: 'A straight-line distance in space is the magnitude of the relative position vector.',
+          visual: { type: 'calc-vectors3d', params: { range: fitRange([v.map((x) => x / 10)]), points: [{ at: [0, 0, 0], label: t`\text{port}`, color: 'good' }, { at: v.map((x) => x / 10), label: t`\text{craft}`, color: 'warn' }], vectors: [{ from: v.map((x) => x / 10), to: [0, 0, 0], color: 'warn' }] }, caption: 'Drag to rotate. The approach path straight to the docking port; axes in tens of metres.' },
           explain: t`$|\vec r| = ${dist}$ m, so the approach takes $\frac{${dist}}{${speed}} = ${nice(dist / speed)}$ s $= ${nice(dist / speed / 60, 3)}$ min. (Real final approaches are this slow, around 0.1 m/s.)`,
         };
       },

@@ -58,7 +58,7 @@ export const kx = (k, v = 'x') => (k === 1 ? v : k === -1 ? `-${v}` : `${k}${v}`
 const compiled = (src) => compile(parse(String(src), { vars: ['x'] }));
 
 /** A y-range that fits the given curves on [x0, x1], ignoring the extreme tails near asymptotes. */
-export function fitY(srcs, [x0, x1], { zero = true, trim = 0.03 } = {}) {
+export function fitY(srcs, [x0, x1], { zero = true, trim = 0 } = {}) {
   const vals = [];
   for (const src of srcs) {
     const g = compiled(src);
@@ -85,13 +85,14 @@ function anchored(F, [x0, x1]) {
 /**
  * A question graph: the integrand f (solid blue), optionally an antiderivative F (dashed
  * amber, shifted through 0), extra curves, shading under f, and h/v lines and points.
+ * Pass trim (e.g. 0.03) to ignore the extreme values next to a vertical asymptote.
  */
-export function fgraph({ f, F, x = [-2, 2], y, extra = [], shade, vlines, hlines, points, caption, xlabel, ylabel, equal }) {
+export function fgraph({ f, F, x = [-2, 2], y, extra = [], shade, vlines, hlines, points, caption, xlabel, ylabel, equal, trim = 0 }) {
   const curves = [{ fn: f, color: 'accent', width: 2.4 }];
   const Fs = F ? anchored(F, x) : null;
   if (Fs) curves.push({ fn: Fs, color: 'warn', dash: true, width: 2 });
   curves.push(...extra);
-  const params = { x, y: y || fitY([f, Fs, ...extra.map((c) => c.fn)].filter(Boolean), x), curves };
+  const params = { x, y: y || fitY([f, Fs, ...extra.map((c) => c.fn)].filter(Boolean), x, { trim }), curves };
   if (shade) params.shade = (Array.isArray(shade) ? shade : [shade]).map((s) => ({ fn: f, color: 'accent', alpha: 0.25, ...s }));
   if (vlines) params.vlines = vlines;
   if (hlines) params.hlines = hlines;

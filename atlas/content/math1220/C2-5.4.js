@@ -6,6 +6,12 @@ import { ratPoly, fact } from './_powerseries.js';
 
 const t = String.raw;
 const ind = (k) => `1 - min(1, abs(s - ${k}))`;   // 1 when the choice s equals k, else 0
+// a y-range that frames f on [x0, x1], with some padding
+const yRange = (f, x0, x1) => {
+  const ys = Array.from({ length: 81 }, (_, k) => f(x0 + ((x1 - x0) * k) / 80)).filter(Number.isFinite);
+  const lo = Math.min(...ys), hi = Math.max(...ys), pad = 0.15 * (hi - lo || 1);
+  return [lo - pad, hi + pad];
+};
 
 export default lesson({
   id: 'math1220.C2-5.4',
@@ -94,6 +100,10 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
           errors: [{ value: d3, feedback: t`Divide the derivative by $3! = 6$.` }, { value: d3 / 3, feedback: t`Divide by $3! = 3\cdot2\cdot1 = 6$, not by $3$.` }],
           hints: [t`$c_3 = \dfrac{f'''(${a})}{3!}$.`],
           teach: t`The coefficient of $(x-a)^n$ is the $n$th derivative at $a$ divided by $n!$.`,
+          visual: (() => {
+            const P3 = (x) => f0 + d1 * (x - a) + (d2 / 2) * (x - a) ** 2 + (d3 / 6) * (x - a) ** 3;
+            return { type: 'graph', params: { x: [a - 2, a + 2], y: yRange(P3, a - 2, a + 2), curves: [{ fn: `${f0} + ${d1}*(x - (${a})) + ${d2 / 2}*(x - (${a}))^2 + ${d3 / 6}*(x - (${a}))^3`, color: 'gold' }], points: [{ x: a, y: f0, color: 'gold' }] }, caption: t`The cubic Taylor polynomial built from these four numbers: through $(${a}, ${f0})$ with slope $${d1}$, bending as $f''$ and $f'''$ dictate.` };
+          })(),
           explain: t`$c_3 = \dfrac{f'''(${a})}{3!} = \dfrac{${d3}}{6} = ${frac(d3 / 6)}$. The other values set the lower coefficients: $c_0 = ${f0}$, $c_1 = ${d1}$, $c_2 = ${frac(d2 / 2)}$.`,
         };
       },
@@ -110,6 +120,7 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
           errors: [{ answer: ratPoly([1, k, k * k, k ** 3]).text, feedback: t`Divide the $n$th derivative by $n!$: the $x^2$ term needs $\tfrac{1}{2!}$ and the $x^3$ term $\tfrac{1}{3!}$.` }],
           hints: [t`Each derivative of $e^{${k}x}$ brings down a factor $${k}$: $f^{(n)}(0) = ${k < 0 ? `(${k})` : k}^n$.`, t`Or substitute $u = ${k}x$ into $e^u = 1 + u + \frac{u^2}{2!} + \frac{u^3}{3!} + \cdots$`],
           teach: t`Substituting into a known series is usually faster than differentiating: $e^{kx} = \sum \frac{(kx)^n}{n!}$.`,
+          visual: { type: 'graph', params: { x: [-1, 1], y: [-1, 6], curves: [{ fn: `exp(${k}*x)`, color: 'ink3', width: 1.8 }, { fn: `1 + ${k}*x`, color: 'gold', dash: true }], points: [{ x: 0, y: 1, color: 'gold' }] }, caption: t`$e^{${k}x}$ (grey) with its tangent line at $0$ (gold): the first two terms. The $x^2$ and $x^3$ terms supply the bend.` },
           explain: t`$e^{${k}x} = \sum_{n=0}^{\infty} \frac{(${k}x)^n}{n!}$, so $P_3(x) = ${key.tex}$.`,
         };
       },
@@ -149,6 +160,7 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
       },
       hints: ['Even powers only, so an even function. Alternating signs.', t`Which function has $f(0) = 1$, $f''(0) = -1$ and $f^{(4)}(0) = 1$?`],
       teach: t`$\cos x$: even powers, factorials $(2n)!$, alternating signs; $\sin x$: the odd-power version.`,
+      visual: { type: 'graph', params: { x: [-7, 7], y: [-2, 2], curves: [{ sum: '(-1)^k x^(2k)/(2k)!', k: [0, 6], color: 'gold' }] }, caption: 'The mystery series, summed to n = 6 (up to x¹²). What does it look like near the origin?' },
       explain: t`The derivatives of $\cos x$ at $0$ cycle $1, 0, -1, 0, 1, \ldots$, which gives exactly $\sum (-1)^n \frac{x^{2n}}{(2n)!}$.`,
     }),
     num({
@@ -169,6 +181,11 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
             ? [t`$\sin u = u - \frac{u^3}{3!} + \frac{u^5}{5!} - \cdots$ with $u = ${k}x$.`, t`$\sin(${k}x) - ${k}x = -\frac{${k ** 3}x^3}{6} + (\text{terms in } x^5, x^7, \ldots)$. Divide by $x^3$.`]
             : [t`$\cos u = 1 - \frac{u^2}{2!} + \frac{u^4}{4!} - \cdots$ with $u = ${k}x$.`, t`$1 - \cos(${k}x) = \frac{${k * k}x^2}{2} - (\text{terms in } x^4, \ldots)$. Divide by $x^2$.`],
           teach: 'Replacing a function by its series turns a 0/0 limit into reading off the first surviving coefficient.',
+          visual: (() => {
+            const g = sin ? (x) => (Math.sin(k * x) - k * x) / x ** 3 : (x) => (1 - Math.cos(k * x)) / (x * x);
+            const src = sin ? `(sin(${k}*x) - ${k}*x)/x^3` : `(1 - cos(${k}*x))/x^2`;
+            return { type: 'graph', params: { x: [-1.5 / k, 1.5 / k], y: yRange(g, -1.5 / k, 1.5 / k), curves: [{ fn: src, color: 'accent' }] }, caption: t`The function in the limit, near $x = 0$. At $x = 0$ itself the formula is $\frac00$ and undefined — but the curve plainly heads for one height.` };
+          })(),
           explain: sin
             ? t`$\frac{\sin(${k}x) - ${k}x}{x^3} = \frac{-\frac{${k ** 3}}{6}x^3 + O(x^5)}{x^3} \to -\frac{${k ** 3}}{6} = ${frac(ans)}$.`
             : t`$\frac{1 - \cos(${k}x)}{x^2} = \frac{\frac{${k * k}}{2}x^2 - O(x^4)}{x^2} \to \frac{${k * k}}{2} = ${frac(ans)}$.`,
@@ -185,6 +202,7 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
           errors: [{ value: 1 / fact(m - 2), feedback: t`That is the coefficient $c_{${m}}$. The derivative is $f^{(${m})}(0) = ${m}!\,c_{${m}}$.` }],
           hints: [t`$x^2 e^x = x^2 \sum \frac{x^n}{n!} = \sum \frac{x^{n+2}}{n!}$.`, t`The coefficient of $x^{${m}}$ comes from $n = ${m - 2}$: $c_{${m}} = \frac{1}{${m - 2}!}$.`, t`$f^{(${m})}(0) = ${m}!\,c_{${m}}$.`],
           teach: t`Read derivatives off a series backwards: $f^{(n)}(a) = n!\,c_n$.`,
+          visual: { type: 'graph', params: { x: [-4, 1.4], y: [-0.5, 6], curves: [{ fn: 'x^2 exp(x)', color: 'accent' }, { sum: 'x^(k+2)/k!', k: [0, m - 2], color: 'gold', dash: true }] }, caption: t`$x^2e^x$ (blue) and its Maclaurin series up to $x^{${m}}$ (gold, dashed). Every derivative at $0$ is stored in those coefficients.` },
           explain: t`$c_{${m}} = \frac{1}{${m - 2}!}$, so $f^{(${m})}(0) = \frac{${m}!}{${m - 2}!} = ${m}\cdot${m - 1} = ${m * (m - 1)}$ — no product rule needed.`,
         };
       },
@@ -203,6 +221,7 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
           errors: [{ answer: ratPoly([1, 0, -(k * k), 0, k ** 4]).text, feedback: 'Keep the factorials: 2! and 4!.' }],
           hints: [t`Substitute $u = ${k}x$ into $\cos u = 1 - \frac{u^2}{2!} + \frac{u^4}{4!} - \cdots$`],
           teach: t`Substitute into the known $\cos u$ series rather than differentiating.`,
+          visual: { type: 'graph', params: { x: [-Math.PI, Math.PI], y: [-1.6, 1.6], curves: [{ fn: `cos(${k}*x)`, color: 'accent' }] }, caption: t`$y = \cos(${k}x)$: an even function, so only even powers appear.` },
           explain: t`$\cos(${k}x) = 1 - \frac{(${k}x)^2}{2} + \frac{(${k}x)^4}{24} - \cdots = ${key.tex} - \cdots$`,
         };
       },
@@ -217,6 +236,7 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
           errors: [{ value: 2 ** (m - 1) / fact(m - 1), feedback: t`That is the coefficient $c_{${m}}$; multiply by $${m}!$.` }],
           hints: [t`$x e^{2x} = \sum \frac{2^n x^{n+1}}{n!}$, so the $x^{${m}}$ term comes from $n = ${m - 1}$.`, t`So $c_{${m}} = \frac{2^{${m - 1}}}{${m - 1}!}$, and $f^{(${m})}(0) = ${m}!\,c_{${m}}$.`],
           teach: t`$f^{(n)}(0) = n!\,c_n$.`,
+          visual: { type: 'graph', params: { x: [-3, 1], y: [-0.5, 3], curves: [{ fn: 'x exp(2x)', color: 'accent' }] }, caption: t`$f(x) = x\,e^{2x}$, whose Maclaurin coefficients you need.` },
           explain: t`$c_{${m}} = \frac{2^{${m - 1}}}{${m - 1}!}$, so $f^{(${m})}(0) = ${m}!\cdot\frac{2^{${m - 1}}}{${m - 1}!} = ${m}\cdot 2^{${m - 1}} = ${m * 2 ** (m - 1)}$.`,
         };
       },
@@ -236,6 +256,7 @@ Centred at $a = 0$ it is called a **Maclaurin series**. Everything about $f$ nea
           ],
           hints: [t`$P_3(t) = h(0) + h'(0)t + \frac{h''(0)}{2!}t^2 + \frac{h'''(0)}{3!}t^3$.`, t`$P_3(${T}) = \frac{${a0}}{2}(${T})^2 + \frac{${j}}{6}(${T})^3$.`],
           teach: t`The constant-acceleration formula $\tfrac12at^2$ is a degree-2 Taylor polynomial; the jerk is the next term.`,
+          visual: { type: 'graph', params: { x: [0, T], y: [0, (a0 + j * T) * 1.25], xlabel: 't (s)', ylabel: 'a (m/s²)', curves: [{ fn: `${a0} + ${j}*x`, color: 'warn' }, { fn: `${a0}`, color: 'ink3', dash: true }] }, caption: t`The net acceleration $h''(t) \approx ${a0} + ${j}t$ (amber) climbs as propellant burns off; the dashed line is the constant-acceleration assumption.` },
           explain: t`$h(${T}) \approx \frac{${a0}}{2}\cdot ${T * T} + \frac{${j}}{6}\cdot ${T ** 3} = ${nice((a0 * T * T) / 2)} + ${nice((j * T ** 3) / 6, 3)} \approx ${nice(h, 4)}$ m. The jerk term adds about ${Math.round((100 * (j * T ** 3) / 6) / ((a0 * T * T) / 2))}% to the constant-acceleration answer. It is still an approximation: the jerk itself changes as the burn goes on.`,
         };
       },

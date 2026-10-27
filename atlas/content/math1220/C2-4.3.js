@@ -88,6 +88,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
     }),
     mcq({
       id: 'which-diverges', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'sums', N: { min: 5, max: 40, value: 20 }, presetLabel: 'Series', presets: [{ label: '(3/e)ⁿ', term: '(3/e)^n', n0: 0 }, { label: '(−0.99)ⁿ', term: '(-0.99)^n', n0: 0 }, { label: '5(π/4)ⁿ', term: '5*(pi/4)^n', n0: 0 }, { label: '10/2ⁿ', term: '10/2^n' }] }, caption: 'Terms (bars) and partial sums (dots) for each choice. A slowly growing ratio is easy to miss in a picture; |r| decides.' },
       prompt: 'Which of these geometric series diverges?',
       choices: [t`$\displaystyle\sum_{n=0}^{\infty}\left(\frac{3}{e}\right)^n$`, t`$\displaystyle\sum_{n=0}^{\infty}(-0.99)^n$`, t`$\displaystyle\sum_{n=0}^{\infty}5\left(\frac{\pi}{4}\right)^n$`, t`$\displaystyle\sum_{n=1}^{\infty}\frac{10}{2^n}$`],
       answer: 0,
@@ -130,6 +131,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: [t`Use $S_N = a\dfrac{1 - r^N}{1 - r}$, or simply add the ${N} terms.`, t`Here $a = ${a}$, $r = ${ratio}$, $N = ${N}$.`],
           teach: 'Every partial sum is finite — even of a divergent series; divergence is about the limit of the partial sums.',
           explain: t`$S_{${N}} = ${a}\cdot\dfrac{1 - (${ratio})^{${N}}}{1 - (${ratio})} = ${nice(S)}$.${Math.abs(ratio) >= 1 ? t` The partial sums are perfectly good numbers, but they grow without bound: the series itself diverges.` : ''}`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `${a}*(${ratio})^(n-1)`, N, zero: true }, caption: t`The ${N} terms you are adding.` },
         };
       },
     }),
@@ -183,6 +185,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: ['First term over one minus the ratio — the first term is the n = 1 term.'],
           teach: 'Find the first term that is actually present before using a/(1 − r).',
           explain: t`First term $${frac(first)}$, ratio $${frac(ratio)}$: $\;\dfrac{${frac(first)}}{1 - (${frac(ratio)})} = ${frac(S)}${Number.isInteger(S) ? '' : t` \approx ${fmt(S, 4)}`}$.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `${c}*(${ratio})^n`, N: 12, zero: true }, caption: 'The first 12 terms, from n = 1.' },
         };
       },
     }),
@@ -198,6 +201,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: [t`$D = ${h} + 2\left(${h}(${f}) + ${h}(${f})^2 + \cdots\right)$.`, t`The bracket is geometric: first term $${nice(h * f)}$, ratio ${f}.`],
           teach: 'In a bouncing problem, every height after the first drop is travelled twice.',
           explain: t`$D = ${h} + 2\cdot\dfrac{${nice(h * f)}}{1 - ${f}} = ${fmt(D, 4)}$ m.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `${h}*${f}^(n-1)`, N: 12, zero: true, termLabel: 'height of rise n (rise 1 = the drop)' }, caption: 'The height of each fall: the first is the drop, the rest are the rebounds.' },
         };
       },
     }),
@@ -213,6 +217,7 @@ For $|r| \ge 1$ it diverges. Geometric series give the total distance of a bounc
           hints: ['The burn times form a geometric series.', t`First term ${t1} s, ratio ${q}.`],
           teach: 'Infinitely many steps can take a finite total time when the durations form a convergent geometric series — Zeno’s paradox resolved.',
           explain: t`$${t1} + ${t1}(${q}) + ${t1}(${q})^2 + \cdots = \dfrac{${t1}}{1 - ${q}} = ${nice(T)}$ s. (Real autopilots stop after a few burns, once the gap is inside the docking tolerance.)`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `${t1}*${q}^(n-1)`, N: 12, zero: true, termLabel: 'duration of burn n (s)' }, caption: 'The duration of each burn.' },
         };
       },
     }),

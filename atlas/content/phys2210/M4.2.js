@@ -243,6 +243,16 @@ The usual method: solve the vertical motion for the time, then use that time in 
           hints: ['The package leaves with the aircraft’s horizontal velocity and zero vertical velocity.', t`$t = \sqrt{2H/g}$, then $d = ut$.`],
           teach: 'A released object keeps the carrier’s horizontal velocity and falls freely from rest vertically.',
           explain: t`$t = \sqrt{2(${H})/9.8} = ${s3(tt)}$ s and $d = (${u})(${s3(tt)}) = ${s3(d)}$ m. Real drops use parachutes and drag-corrected release points.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-0.1 * d, d * 1.25], y: [0, H * 1.4], equal: true, xlabel: 'x (m)', ylabel: 'y (m)',
+              hlines: [{ y: 0, color: 'ink3' }],
+              points: [{ x: 0, y: H, color: 'accent', r: 6, label: 'release' }],
+              arrows: [{ from: [0, H], to: [u * 1.5, H], color: 'gold', label: `${u} m/s` }],
+            },
+            caption: 'The aircraft at the moment of release; the velocity arrow shows 1.5 s of travel.',
+          },
         };
       },
     }),
@@ -259,6 +269,16 @@ The usual method: solve the vertical motion for the time, then use that time in 
       hints: ['Compare the horizontal velocities of the aircraft and the package after release.'],
       teach: 'A released object shares its carrier’s horizontal velocity, so (without air) it stays directly below a carrier flying at constant velocity.',
       explain: t`The package’s horizontal velocity stays equal to the aircraft’s, so it is always directly beneath it, falling. From the cockpit it would seem to drop straight down.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-30, 420], y: [0, 210], equal: true, xlabel: 'x (m)', ylabel: 'y (m)',
+          hlines: [{ y: 0, color: 'ink3' }],
+          points: [{ x: 0, y: 150, color: 'accent', r: 6, label: 'release' }],
+          arrows: [{ from: [0, 150], to: [105, 150], color: 'gold', label: 'v' }],
+        },
+        caption: 'The moment of release: aircraft and package have the same velocity.',
+      },
     }),
     num({
       id: 'cp-height', difficulty: 2,
@@ -272,6 +292,15 @@ The usual method: solve the vertical motion for the time, then use that time in 
           hints: [t`Use the vertical motion only: $h = \dfrac{(v_0\sin\theta)^2}{2g}$.`],
           teach: 'A projectile’s maximum height depends only on the vertical part of its launch velocity.',
           explain: t`$h = \dfrac{(${v0}\sin ${th}^\circ)^2}{2(9.8)} = ${s3(H)}$ m.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-2, v0 + 4], y: [-1.5, v0 * 0.95], equal: true, xlabel: 'horizontal (m/s)', ylabel: 'vertical',
+              arrows: [{ from: [0, 0], to: [v0 * Math.cos(th * D2R), v0 * Math.sin(th * D2R)], color: 'gold', label: `${v0} m/s` }],
+              points: [{ x: 0, y: 0, color: 'ink', r: 5 }, { x: 1.4, y: -1.2, r: 0.1, color: 'ink2', label: `${th}°` }],
+            },
+            caption: 'The jet’s velocity as it leaves the nozzle.',
+          },
         };
       },
     }),

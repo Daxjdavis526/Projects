@@ -135,6 +135,7 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
     }),
     multi({
       id: 'which-absolute', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'sums', showTerms: false, N: { min: 5, max: 60, value: 40 }, presetLabel: 'Series of |aₙ|', presets: [{ label: 'n^(−3/2)', term: 'n^(-1.5)' }, { label: '1/√n', term: '1/sqrt(n)' }, { label: '2ⁿ/n!', term: '2^n/n!', n0: 0 }, { label: '|sin n|/n²', term: 'abs(sin(n))/n^2' }, { label: 'n/(n²+1)', term: 'n/(n^2 + 1)' }] }, caption: 'Partial sums of the absolute values |aₙ| for each choice — the series that decides absolute convergence.' },
       prompt: 'Which of these series converge absolutely? Select all that do.',
       choices: [t`$\displaystyle\sum_{n=1}^\infty \frac{(-1)^n}{n^{3/2}}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{(-1)^n}{\sqrt n}$`, t`$\displaystyle\sum_{n=0}^\infty \frac{(-2)^n}{n!}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{\sin n}{n^2}$`, t`$\displaystyle\sum_{n=1}^\infty (-1)^n\frac{n}{n^2 + 1}$`],
       answer: [0, 2, 3],
@@ -148,6 +149,7 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
     }),
     mcq({
       id: 'which-test', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'root', term: '(n/(3n - 1))^(2n)', limit: '1/9', N: 30 }, caption: 'The n-th roots of the terms settle quickly.' },
       prompt: t`Which test settles $\displaystyle\sum_{n=1}^\infty \left(\frac{n}{3n - 1}\right)^{2n}$ most directly?`,
       choices: ['The root test', 'The ratio test', 'The integral test', 'The alternating series test'],
       answer: 0,
@@ -194,6 +196,7 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
           hints: [t`$\dfrac{a_{n+1}}{a_n} = \dfrac{n + 1}{n}\cdot\dfrac{${p}}{${q}}$.`],
           teach: 'Polynomial factors tend to 1 in the ratio test; the exponential factors set L.',
           explain: t`$\frac{n+1}{n}\cdot\frac{${p}}{${q}} \to \frac{${p}}{${q}} = ${fmt(L, 4)}$, so the series ${L < 1 ? 'converges absolutely' : 'diverges'}.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `n*${p}^n/${q}^n`, N: 25, zero: true }, caption: 'The first 25 terms.' },
         };
       },
     }),
@@ -219,6 +222,7 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
           hints: [t`$\dfrac{a_{n+1}}{a_n} = \dfrac{(n+1)e^{-(n+1)x}}{n\,e^{-nx}} = \dfrac{n+1}{n}e^{-x}$.`, t`Let $n \to \infty$.`],
           teach: 'Boltzmann factors e^{−nx} make thermal sums behave like geometric series, which the ratio test confirms converge for any x > 0.',
           explain: t`$L = e^{-${x}} \approx ${fmt(L, 4)} < 1$, so the sum converges for every temperature (any $x > 0$). In fact $\sum n e^{-nx} = \frac{e^{-x}}{(1 - e^{-x})^2}$, which leads to Planck’s mean energy $\frac{\hbar\omega}{e^{x} - 1}$.`,
+          visual: { type: 'graph', params: { x: [-0.5, 10.5], y: [0, 1.1], xlabel: 'n (number of quanta)', ylabel: 'weight', points: Array.from({ length: 11 }, (_, n) => ({ x: n, y: Math.exp(-n * x), color: 'accent' })) }, caption: t`The Boltzmann weights $e^{-nx}$ of the oscillator’s levels for $x = ${x}$: each is a fixed fraction of the one before.` },
         };
       },
     }),

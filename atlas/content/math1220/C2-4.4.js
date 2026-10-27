@@ -61,6 +61,7 @@ It works **one way only**. The harmonic series $1 + \frac12 + \frac13 + \cdots$ 
   practice: [
     mcq({
       id: 'one-way', difficulty: 1,
+      visual: { type: 'calc-series', params: { view: 'sums', term: '1/n', compare: { term: '1/n^2', label: 'Σ 1/n² (terms also → 0)' }, N: 40, y: [0, 4.6] }, caption: 'Two series whose terms both go to 0: the harmonic sums (blue) keep growing, while the sums of 1/n² (dashed) settle.' },
       prompt: t`For a series $\sum a_n$ you find $\lim_{n\to\infty} a_n = 0$. What does the divergence test tell you?`,
       choices: ['Nothing: the series may converge or diverge', 'The series converges', 'The series diverges', 'The series converges to 0'],
       answer: 0,
@@ -75,6 +76,7 @@ It works **one way only**. The harmonic series $1 + \frac12 + \frac13 + \cdots$ 
     }),
     multi({
       id: 'which-fail', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'terms', N: 40, presetLabel: 'Terms of', presets: [{ label: 'cos(1/n)', term: 'cos(1/n)' }, { label: '(1+1/n)ⁿ', term: '(1 + 1/n)^n' }, { label: 'n sin(1/n)', term: 'n*sin(1/n)' }, { label: '1/√n', term: '1/sqrt(n)', zero: true }, { label: 'e⁻ⁿ', term: 'exp(-n)', zero: true }] }, caption: 'Where do the terms themselves go? Only that matters for the divergence test.' },
       prompt: 'Which of these series does the divergence test show to diverge? Select all.',
       choices: [t`$\displaystyle\sum_{n=1}^\infty \cos\frac1n$`, t`$\displaystyle\sum_{n=1}^\infty \left(1 + \frac1n\right)^n$`, t`$\displaystyle\sum_{n=1}^\infty n\sin\frac1n$`, t`$\displaystyle\sum_{n=1}^\infty \frac{1}{\sqrt n}$`, t`$\displaystyle\sum_{n=1}^\infty e^{-n}$`],
       answer: [0, 1, 2],
@@ -168,6 +170,7 @@ It works **one way only**. The harmonic series $1 + \frac12 + \frac13 + \cdots$ 
           hints: [t`Divide the top and bottom by $n^2$.`],
           teach: 'Terms with equal degrees top and bottom approach a nonzero constant, so such a series diverges by the divergence test.',
           explain: t`$a_n \to \frac{${a}}{${c}} = ${frac(a / c)} \neq 0$, so the series **diverges** by the divergence test: its partial sums grow by roughly ${fmt(a / c, 3)} per term.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `(${a}n^2 + ${b})/(${c}n^2 + ${d}n)`, N: 30 }, caption: 'The first 30 terms of the series.' },
         };
       },
     }),
@@ -198,6 +201,7 @@ It works **one way only**. The harmonic series $1 + \frac12 + \frac13 + \cdots$ 
           hints: [t`$\dfrac{1}{n^2 - 1} = \dfrac12\left(\dfrac{1}{n - 1} - \dfrac{1}{n + 1}\right)$.`, t`Write out the terms from $n = 2$: which pieces never cancel?`],
           teach: 'Factor, split into partial fractions, then telescope.',
           explain: t`$${c / 2}\left[\left(1 - \tfrac13\right) + \left(\tfrac12 - \tfrac14\right) + \left(\tfrac13 - \tfrac15\right) + \cdots\right] = ${c / 2}\left(1 + \tfrac12\right) = ${nice((3 * c) / 4)}$.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `${c}/(n^2 - 1)`, n0: 2, N: 15, zero: true }, caption: 'The terms from n = 2 on.' },
         };
       },
     }),
@@ -213,6 +217,7 @@ It works **one way only**. The harmonic series $1 + \frac12 + \frac13 + \cdots$ 
           hints: [t`You need $\frac12 H_N \ge ${nice(k)}$, that is $H_N \ge ${nice(2 * k)}$.`, t`$\ln N + 0.5772 \approx ${nice(2 * k)}$ gives $N \approx e^{${fmt(2 * k - GAMMA, 4)}}$.`],
           teach: 'The harmonic series diverges, so a stack of books can overhang as far as you like — at the price of exponentially many books.',
           explain: t`$H_N \ge ${nice(2 * k)}$ first happens at $N = ${N}$ ($H_{${N}} \approx ${fmt(harmonic(N), 5)}$). Because $\sum \frac1n$ diverges, any overhang is possible in principle — in practice friction, wobble and the size of the table win long before.`,
+          visual: { type: 'graph', params: { x: [-2.2, 1.6], y: [-0.4, 1.15], grid: false, axes: false, xlabel: '', ylabel: '', shade: [{ fn: '0', lower: '-0.35', from: -2.2, to: 0, color: 'ink3', alpha: 0.45 }, { fn: '0.17', lower: '0', from: -0.875000, to: 0.125000, color: 'violet', alpha: 0.6 }, { fn: '0.37', lower: '0.2', from: -0.708333, to: 0.291667, color: 'violet', alpha: 0.6 }, { fn: '0.57', lower: '0.4', from: -0.458333, to: 0.541667, color: 'violet', alpha: 0.6 }, { fn: '0.77', lower: '0.6', from: 0.041667, to: 1.041667, color: 'violet', alpha: 0.6 }], vlines: [{ x: 0, label: 'table edge', color: 'ink3' }], arrows: [{ from: [0, 0.95], to: [1.041667, 0.95], label: 'overhang', color: 'gold' }] }, caption: 'Four books, each pushed out as far as balance allows: from the top down they overhang the book below by 1/2, 1/4, 1/6 and 1/8 of a length — so the top book already lies entirely beyond the table edge. Side view; book thickness not to scale.' },
         };
       },
     }),

@@ -10,6 +10,17 @@ const t = String.raw;
 const expTeX = (r) => { const [p, q] = rational(r); return q === 1 ? String(p) : `${p}/${q}`; };
 const POWERS = [1 / 2, -1 / 2, 1 / 3, -1 / 3, 3 / 2, -3 / 2];
 const coef = 'gamma(r + 1)/(gamma(k + 1) gamma(r - k + 1))';   // C(r, k) for r not a negative integer
+// a y-range that frames f on [x0, x1]
+const yRange = (f, x0, x1) => {
+  const ys = Array.from({ length: 81 }, (_, k) => f(x0 + ((x1 - x0) * k) / 80)).filter(Number.isFinite);
+  const lo = Math.min(...ys), hi = Math.max(...ys), pad = 0.15 * (hi - lo || 1);
+  return [lo - pad, hi + pad];
+};
+// (1 + c·x)^p drawn on the part of |c·x| < 1 where it is defined, with the edges of the interval marked
+const powerPlot = (p, c, caption) => {
+  const w = 1 / Math.abs(c), f = (x) => (1 + c * x) ** p;
+  return { type: 'graph', params: { x: [-1.15 * w, 1.15 * w], y: yRange(f, -0.9 * w, 0.9 * w), curves: [{ fn: `(1 + (${c})*x)^(${p})`, domain: [-0.97 * w, 0.97 * w], color: 'accent' }], vlines: [{ x: -w, label: `−1/${Math.abs(c)}` }, { x: w, label: `1/${Math.abs(c)}` }] }, caption };
+};
 
 export default lesson({
   id: 'math1220.C2-5.6',
@@ -73,6 +84,7 @@ When $r$ is a whole number the coefficients eventually hit a factor of zero and 
           errors: [{ value: p * (p - 1), feedback: t`Divide by $2! = 2$.` }, { value: (p * (p + 1)) / 2, feedback: t`The second factor is $r - 1$, not $r + 1$: the factors fall, $r(r-1)(r-2)\cdots$` }],
           hints: [t`$\binom{r}{2} = \frac{r(r-1)}{2!}$, even when $r$ is a fraction.`],
           teach: t`The generalised binomial coefficient uses falling factors: $\binom{r}{2} = \frac{r(r-1)}{2}$.`,
+          visual: { type: 'graph', params: { x: [-0.6, 1.5], y: yRange((x) => (1 + x) ** p, -0.6, 1.5), curves: [{ fn: `(1 + x)^(${p})`, color: 'ink3', width: 1.8 }, { fn: `1 + (${p})*x`, color: 'gold', dash: true }] }, caption: t`$(1+x)^{${expTeX(p)}}$ (grey) and its first two terms $1 + rx$ (gold). The $x^2$ coefficient says how the curve bends away from that line.` },
           explain: t`$\binom{${expTeX(p)}}{2} = \frac{(${ratTeX(p)})(${ratTeX(p - 1)})}{2} = ${ratTeX(c)}$.`,
         };
       },
@@ -93,6 +105,7 @@ When $r$ is a whole number the coefficients eventually hit a factor of zero and 
           ],
           hints: [t`Use $(1+u)^r = 1 + ru + \frac{r(r-1)}{2}u^2 + \cdots$ with $u = ${k}x$ and $r = ${expTeX(p)}$.`, t`$\binom{${expTeX(p)}}{2} = ${ratTeX(binom(p, 2))}$; multiply it by $(${k}x)^2$.`],
           teach: t`Substitute the whole small quantity, coefficient and all, for $u$ in $(1+u)^r$.`,
+          visual: powerPlot(p, k, t`$(${inner})^{${expTeX(p)}}$, with dashed lines where its series stops converging, $|x| = \tfrac1{${Math.abs(k)}}$.`),
           explain: t`With $u = ${k}x$: $1 + (${ratTeX(p)})(${k}x) + (${ratTeX(binom(p, 2))})(${k}x)^2 = ${key.tex}$, valid for $|x| < \tfrac1{${Math.abs(k)}}$.`,
         };
       },
@@ -166,6 +179,7 @@ When $r$ is a whole number the coefficients eventually hit a factor of zero and 
           errors: [{ value: (b * b) / 8, feedback: 'That is the last term you kept. The bound is the first term you left out.' }],
           hints: [t`For an alternating series with terms decreasing in size, the error is less than the first omitted term.`, t`The first omitted term is $\frac{x^3}{16}$ at $x = ${b}$.`],
           teach: 'When a binomial series alternates, the first omitted term bounds the error — no derivatives needed.',
+          visual: { type: 'graph', params: { x: [-0.2, 0.6], y: [0.85, 1.3], curves: [{ fn: 'sqrt(1 + x)', color: 'ink3', width: 1.8 }, { fn: '1 + x/2 - x^2/8', color: 'gold', dash: true }], vlines: [{ x: b, label: t`x = ${b}` }] }, caption: t`$\sqrt{1+x}$ (grey) and its three-term series (gold): too close to separate by eye at $x = ${b}$ — hence the bound.` },
           explain: t`The error is less than $\frac{${b}^3}{16} = ${texNum(B, 3)}$. Indeed $\sqrt{${1 + b}} - \left(1 + ${b / 2} - ${nice((b * b) / 8)}\right) = ${texNum(Math.sqrt(1 + b) - (1 + b / 2 - (b * b) / 8), 3)}$.`,
         };
       },
@@ -186,6 +200,7 @@ When $r$ is a whole number the coefficients eventually hit a factor of zero and 
           ],
           hints: [t`Write it as $(1 + u)^{-1/2}$ with $u = -${inner}$.`, t`$(1+u)^{-1/2} = 1 - \frac{u}{2} + \frac{3u^2}{8} - \cdots$`],
           teach: t`Substituting $u = -x^2$ into $(1+u)^{-1/2}$ gives only even powers, all with positive signs.`,
+          visual: { type: 'graph', params: { x: [-1.25 / Math.sqrt(k), 1.25 / Math.sqrt(k)], y: [0, 4], curves: [{ fn: `1/sqrt(1 - ${k}*x^2)`, color: 'accent' }], vlines: [{ x: -1 / Math.sqrt(k) }, { x: 1 / Math.sqrt(k), label: 'edge' }] }, caption: t`$\frac{1}{\sqrt{1 - ${inner}}}$: it blows up at the dashed lines, which is also where its series stops converging.` },
           explain: t`$(1+u)^{-1/2} = 1 - \frac12u + \frac38u^2 - \cdots$ with $u = -${inner}$ gives $${key.tex} + \cdots$, valid for $|x| < ${{ 1: '1', 2: t`\tfrac{1}{\sqrt2}`, 4: t`\tfrac12` }[k]}$. With $x = v/c$ and $k = 1$ this is the Lorentz factor — the next lesson.`,
         };
       },
@@ -204,6 +219,7 @@ When $r$ is a whole number the coefficients eventually hit a factor of zero and 
           errors: [{ answer: ratPoly([1, p * k, binom(p, 2) * k * k]).text, feedback: t`Here $u = -${k}x$, so the $x$ term changes sign.` }],
           hints: [t`$u = -${k}x$ in $(1+u)^r = 1 + ru + \frac{r(r-1)}{2}u^2 + \cdots$`, t`With $r = ${expTeX(p)}$: $\binom{r}{2} = ${ratTeX(binom(p, 2))}$, and $u^2 = ${k * k}x^2$.`],
           teach: 'A minus sign inside the bracket flips the odd powers.',
+          visual: powerPlot(p, -k, t`$(1 - ${k}x)^{${expTeX(p)}}$, with dashed lines at $|x| = \tfrac1{${k}}$, the edge of its interval of convergence.`),
           explain: t`$1 + (${ratTeX(p)})(-${k}x) + (${ratTeX(binom(p, 2))})(${k * k}x^2) = ${key.tex}$.`,
         };
       },
@@ -218,6 +234,7 @@ When $r$ is a whole number the coefficients eventually hit a factor of zero and 
           errors: [{ value: p * (p - 1) * (p - 2), feedback: t`Divide by $3! = 6$.` }, { value: (p * (p + 1) * (p + 2)) / 6, feedback: t`The factors fall: $r(r-1)(r-2)$.` }],
           hints: [t`$\binom{r}{3} = \frac{r(r-1)(r-2)}{3!}$.`, t`Here $r = ${ratTeX(p)}$, $r - 1 = ${ratTeX(p - 1)}$, $r - 2 = ${ratTeX(p - 2)}$.`],
           teach: t`$\binom{r}{n}$ has $n$ falling factors over $n!$, for any real $r$.`,
+          visual: { type: 'graph', params: { x: [-0.8, 1.5], y: yRange((x) => (1 + x) ** p, -0.8, 1.5), curves: [{ fn: `(1 + x)^(${p})`, color: 'accent' }], vlines: [{ x: -1 }, { x: 1, label: 'x = ±1' }] }, caption: t`$y = (1+x)^{${expTeX(p)}}$, whose series you are expanding.` },
           explain: t`$\frac{(${ratTeX(p)})(${ratTeX(p - 1)})(${ratTeX(p - 2)})}{6} = ${ratTeX(c)}$.`,
         };
       },
@@ -233,6 +250,7 @@ When $r$ is a whole number the coefficients eventually hit a factor of zero and 
           errors: [{ value: R * (pct / 100 / 3), feedback: t`Solve $3\left(\frac hR\right)^2 = ${pct / 100}$ for $h$: it needs a square root.` }, { value: R * Math.sqrt(pct / 100), feedback: t`The coefficient of $x^2$ in $(1+x)^{-2}$ is $\binom{-2}{2} = \frac{(-2)(-3)}{2} = 3$.` }],
           hints: [t`$(1+x)^{-2} = 1 - 2x + 3x^2 - 4x^3 + \cdots$ with $x = h/R$.`, t`The first neglected term is $3x^2$. Set $3x^2 = ${pct / 100}$.`, t`$x = \sqrt{${pct / 100}/3}$, then $h = xR$.`],
           teach: 'The error of a truncated binomial series is roughly the first term you dropped; set it equal to your tolerance.',
+          visual: { type: 'graph', params: { x: [0, 0.15], y: [0.7, 1.02], xlabel: 'h/R', ylabel: 'g/g₀', curves: [{ fn: '(1 + x)^(-2)', color: 'ink3', width: 1.8 }, { fn: '1 - 2x', color: 'gold', dash: true }] }, caption: t`Exact $g/g_0 = (1 + h/R)^{-2}$ (grey) against the linear approximation (gold): the gap grows like $3(h/R)^2$.` },
           explain: t`$3\left(\frac{h}{R}\right)^2 = ${pct / 100}$ gives $\frac hR = ${nice(Math.sqrt(pct / 100 / 3), 3)}$ and $h \approx ${Math.round(h)}$ km${pct === 1 ? ' — a little below the International Space Station, which orbits at about 420 km' : ''}. Solving the exact equation instead gives ${pct === 1 ? 382 : 267} km; the first neglected term is an estimate, not a bound.`,
         };
       },

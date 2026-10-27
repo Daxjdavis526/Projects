@@ -6,6 +6,11 @@ import { QUADS, signed, vecTeX, arrows2D, add, sub, scale, dot, norm, deg } from
 
 const t = String.raw;
 const pick3 = (r) => { const [a, b, c, L] = r.pick(QUADS); return [signed(r, [a, b, c]), L]; };
+const fit = (...vs) => Math.max(3, Math.ceil(Math.max(...vs.flat().map(Math.abs))) + 0.5);
+// two vectors from the origin, to scale, in a rotatable 3D view
+const pair3D = (a, b, extra = {}, caption = 'Drag to rotate. Both vectors drawn from the origin, to scale.') => ({
+  type: 'calc-vectors3d', params: { range: fit(a, b), vectors: [{ to: a, color: 'accent', label: t`\vec a` }, { to: b, color: 'warn', label: t`\vec b` }], ...extra }, caption,
+});
 
 // projection of a onto b, in the graph's expression syntax
 const K = '(ax*bx + ay*by)/(bx^2 + by^2)';
@@ -96,6 +101,7 @@ So it measures how much two vectors point the same way: positive when the angle 
           errors: [{ value: a[0] * b[0] + a[1] * b[1], feedback: 'Include the z-components too: three products, added.' }].filter((e) => e.value !== d),
           hints: [t`Multiply matching components: $a_xb_x$, $a_yb_y$, $a_zb_z$ — then add.`],
           teach: 'The dot product multiplies matching components and adds; the result is a number, not a vector.',
+          visual: pair3D(a, b),
           explain: t`$(${a[0]})(${b[0]}) + (${a[1]})(${b[1]}) + (${a[2]})(${b[2]}) = ${a[0] * b[0]} + ${a[1] * b[1]} + ${a[2] * b[2]} = ${d}$.`,
         };
       },
@@ -129,6 +135,7 @@ So it measures how much two vectors point the same way: positive when the angle 
       },
       hints: ['Perpendicular means the dot product is zero.', t`Check each: for example $\langle 1, 5, 1\rangle\cdot\langle 2, -1, 3\rangle = 2 - 5 + 3$.`],
       teach: 'Two nonzero vectors are perpendicular exactly when their dot product is zero.',
+      visual: { type: 'calc-vectors3d', params: { range: 3.5, planes: [{ normal: [2, -1, 3], d: 0, size: 2.6, color: 'violet', alpha: 0.25 }], vectors: [{ to: [2, -1, 3], color: 'accent', label: t`\langle 2, -1, 3\rangle` }] }, caption: 'Drag to rotate. Every vector perpendicular to ⟨2, −1, 3⟩ lies in the violet plane through the origin.' },
       explain: t`$\langle 1, 5, 1\rangle\cdot\langle 2, -1, 3\rangle = 2 - 5 + 3 = 0$, so the angle is $90^\circ$.`,
     }),
     num({
@@ -146,6 +153,7 @@ So it measures how much two vectors point the same way: positive when the angle 
           errors: [{ value: norm(F) * norm(d), feedback: t`That assumes the force points along the displacement. Only the component along $\vec d$ does work: $W = \vec F\cdot\vec d$.` }],
           hints: [t`$W = \vec F\cdot\vec d = F_xd_x + F_yd_y + F_zd_z$.`],
           teach: 'Work is the dot product of force and displacement: only the part of the force along the motion counts.',
+          visual: { type: 'calc-vectors3d', params: { range: fit(d), vectors: [{ to: d, color: 'accent', label: t`\vec d` }, { to: scale(F, 3 / norm(F)), color: 'warn', label: t`\vec F` }] }, caption: 'Drag to rotate. The displacement (blue, in metres) and the direction of the force (amber, drawn at length 3): they are far from parallel.' },
           explain: t`$W = (${F[0]})(${d[0]}) + (${F[1]})(${d[1]}) + (${F[2]})(${d[2]}) = ${W}$ J — less than $|\vec F||\vec d| = ${nice(norm(F) * norm(d), 4)}$ J, because the force is not parallel to the motion.`,
         };
       },
@@ -185,6 +193,7 @@ What went wrong?`,
       },
       hints: ['Compare the length of the answer with the length of a.', t`$\frac{\vec a\cdot\vec b}{|\vec b|}$ is the scalar projection, a length; it must multiply the **unit** vector $\vec b/|\vec b|$.`],
       teach: t`$\operatorname{proj}_{\vec b}\vec a = \frac{\vec a\cdot\vec b}{|\vec b|^2}\vec b$ — one $|\vec b|$ for the scalar projection, one to make $\vec b$ a unit vector.`,
+      visual: arrows2D([{ to: [12, 16], color: 'bad' }, { to: [3, 4], color: 'warn' }, { to: [4, 2], color: 'accent' }, { to: [2.4, 3.2], color: 'good' }], { caption: 'Blue: a. Amber: b. Green: the true projection of a onto b. Red: the student’s answer — far longer than a itself.' }),
       explain: t`$\operatorname{proj}_{\vec b}\vec a = \frac{20}{25}\langle 3, 4\rangle = \langle 2.4, 3.2\rangle$, of length $4$, the scalar projection — shorter than $|\vec a| = 4.47$, as a shadow must be.`,
     }),
     num({
@@ -215,6 +224,7 @@ What went wrong?`,
           answer: th, units: '°', tol: { rel: 0.002, abs: 0.1 },
           hints: [t`$\cos\theta = \frac{\vec a\cdot\vec b}{|\vec a||\vec b|}$.`],
           teach: 'Angle from the dot product divided by both lengths.',
+          visual: pair3D(a, b),
           explain: t`$\cos\theta = \frac{${dot(a, b)}}{${La * Lb}}$, $\theta = ${nice(th, 4)}^\circ$.`,
         };
       },
@@ -232,6 +242,7 @@ What went wrong?`,
           errors: [{ value: dot(a, b) / (Lb * Lb), feedback: t`Divide by $|\vec b|$ once: $\frac{\vec a\cdot\vec b}{|\vec b|}$.` }, { value: dot(a, b), feedback: 'Divide the dot product by the length of b.' }].filter((e) => Math.abs(e.value - comp) > 1e-3),
           hints: [t`$\operatorname{comp}_{\vec b}\vec a = \frac{\vec a\cdot\vec b}{|\vec b|}$.`, t`$|\vec b| = ${Lb}$.`],
           teach: 'The scalar projection is the dot product with the unit vector along b.',
+          visual: pair3D(a, b, { lines: [{ point: [0, 0, 0], dir: b, t: [-1.2, 1.2], color: 'ink3', dash: true }] }, 'Drag to rotate. The dashed line is the line of b; the scalar projection is how far a reaches along it.'),
           explain: t`$\frac{${dot(a, b)}}{${Lb}} = ${nice(comp, 4)}$${comp < 0 ? ' — negative, so a has a component pointing against b' : ''}.`,
         };
       },
@@ -248,6 +259,7 @@ What went wrong?`,
           errors: [{ value: Pmax * dot(n, s), feedback: t`$\cos\theta$ needs unit vectors: divide $\vec n\cdot\vec s$ by $|\vec n||\vec s|$.` }],
           hints: [t`$\cos\theta = \frac{\vec n\cdot\vec s}{|\vec n||\vec s|}$.`, t`$\vec n\cdot\vec s = ${dot(n, s)}$, $|\vec n| = ${Ln}$, $|\vec s| = ${Ls}$.`],
           teach: 'The cosine of the angle between two directions is the dot product of their unit vectors.',
+          visual: { type: 'calc-vectors3d', params: { range: 3, planes: [{ normal: n, d: 0, size: 1.6, color: 'accent', alpha: 0.35, showNormal: true, normalLabel: t`\vec n` }], vectors: [{ to: scale(s, 2.6 / Ls), color: 'gold', label: t`\text{Sun}` }] }, caption: 'Drag to rotate. The solar array (blue) with its normal, and the direction to the Sun (gold), both scaled to fit.' },
           explain: t`$\cos\theta = \frac{${dot(n, s)}}{${Ln}\cdot${Ls}} = ${nice(c, 4)}$ ($\theta = ${nice(deg(Math.acos(c)), 3)}^\circ$), so $P = ${Pmax}\times${nice(c, 4)} = ${nice(Pmax * c, 4)}$ W.`,
         };
       },

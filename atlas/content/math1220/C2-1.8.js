@@ -193,6 +193,7 @@ A toroidal (doughnut-shaped) propellant tank is made by revolving a circle of ra
           hints: [t`$A = \tfrac{${b ** 3}}{3}$ and $M_x = \int_0^{${b}}\tfrac12 x^4\,dx$.`],
           teach: 'ȳ = (1/A) ∫ ½ f(x)² dx for a plate between y = f(x) and the x-axis.',
           explain: t`$M_x = \tfrac{${b ** 5}}{10}$, so $\bar y = \dfrac{${b ** 5}/10}{${b ** 3}/3} = \tfrac{3(${b * b})}{10} = ${nice(yb)}$.`,
+          visual: { type: 'graph', params: { aspect: 'wide', x: [-0.1 * b, b * 1.15], y: [-0.06 * b * b, b * b * 1.15], curves: [{ fn: 'x^2', color: 'accent', domain: [0, b * 1.05] }], shade: [{ fn: 'x^2', from: 0, to: b, color: 'accent', alpha: 0.22 }] } },
         };
       },
     }),

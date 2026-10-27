@@ -1,7 +1,7 @@
 // Partial fractions with repeated linear factors and irreducible quadratics: logs, arctangents, and the Lorentzian.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { fmt, polyTeX } from '../../src/core/format.js';
-import { fterm, q as qt } from './_integration.js';
+import { fterm, q as qt, fgraph } from './_integration.js';
 
 const t = String.raw;
 const lin = (r) => (r === 0 ? 'x' : r > 0 ? `x - ${r}` : `x + ${-r}`);
@@ -88,6 +88,7 @@ Complete the square to bring any irreducible quadratic to the form $(x + h)^2 + 
           hints: ['One term for each power of the repeated factor.', 'Over an irreducible quadratic, the numerator is linear.'],
           teach: 'Repeated factor: a term for every power. Irreducible quadratic: a linear numerator.',
           explain: t`Four unknowns for a degree-4 denominator: $A$ and $B$ for the repeated factor, and $Cx + D$ over $x^2 + ${C2}$.`,
+          visual: fgraph({ f: `1/((${L})^2*(x^2 + ${C2}))`, x: [rr - 3, rr + 3], trim: 0.12, vlines: [{ x: rr }], caption: t`With $P = 1$: the repeated factor makes a pole that keeps its sign on both sides, and $x^2 + ${C2}$ adds no pole at all.` }),
         };
       },
     }),
@@ -164,6 +165,7 @@ Complete the square to bring any irreducible quadratic to the form $(x + h)^2 + 
           ],
           teach: 'Over an irreducible quadratic, the x part of the numerator gives a logarithm and the constant part an arctangent.',
           explain: t`$\int\frac{x\,dx}{x^2 + ${A}} = \tfrac12\ln(x^2 + ${A})$ and $\int\frac{${c}\,dx}{x^2 + ${A}} = ${fterm(c / a, atanTeX, true)}$, so the answer is $\tfrac12\ln(x^2 + ${A})${fterm(c / a, atanTeX)} + C$.`,
+          visual: fgraph({ f: `(x + ${c})/(x^2 + ${A})`, F: `ln(x^2 + ${A})/2 + ${qt(c / a)}*atan(x/${a})`, x: [-6 * a, 6 * a] }),
         };
       },
     }),
@@ -186,6 +188,7 @@ Complete the square to bring any irreducible quadratic to the form $(x + h)^2 + 
           ],
           teach: t`Over a repeated factor, $\int\frac{dx}{x - r}$ is a logarithm but $\int\frac{dx}{(x - r)^2} = -\frac{1}{x - r}$ is not.`,
           explain: t`$\dfrac{1}{${lin(rr)}} ${m > 0 ? '+' : '-'} \dfrac{${Math.abs(m)}}{(${lin(rr)})^2}$ integrates to $${lnAbs(rr)} ${m > 0 ? '-' : '+'} \dfrac{${Math.abs(m)}}{${lin(rr)}} + C$.`,
+          visual: fgraph({ f: `(x + ${q})/(${lin(rr)})^2`, F: `ln(abs(${lin(rr)})) - (${m})/(${lin(rr)})`, x: [rr - 3, rr + 4], trim: 0.1, vlines: [{ x: rr }] }),
         };
       },
     }),
@@ -211,6 +214,7 @@ Complete the square to bring any irreducible quadratic to the form $(x + h)^2 + 
           ],
           teach: 'Cover-up finds the constants over the highest power and over the other factors; one more condition (large x, or any other x value) gives the rest.',
           explain: t`$A = ${t`${A < 0 ? '-' : ''}\tfrac{1}{${s * s}}`}$, $B = ${t`${B < 0 ? '-' : ''}\tfrac{1}{${Math.abs(s)}}`}$, $C = \tfrac{1}{${s * s}}$, so the integral is $${fterm(A, t`\ln\lvert x\rvert`, true)}${invTerm}${fterm(C, lnAbs(s))} + C'$.`,
+          visual: fgraph({ f: `1/(x^2*(${lin(s)}))`, x: [Math.min(0, s) - 2, Math.max(0, s) + 3], trim: 0.12, vlines: [{ x: 0 }, { x: s }], caption: t`A double pole at $x = 0$, where the integrand keeps its sign, and a simple pole at $x = ${s}$, where it changes sign.` }),
         };
       },
     }),
@@ -254,6 +258,7 @@ Complete the square to bring any irreducible quadratic to the form $(x + h)^2 + 
       hints: ['Count unknowns: the denominator has degree 3, so you need 3 constants.', 'What numerator goes over an irreducible quadratic?'],
       teach: 'An irreducible quadratic factor always gets a linear numerator — one constant too few makes the system unsolvable.',
       explain: t`With $\dfrac{A}{x - 1} + \dfrac{Bx + C}{x^2 + 1}$: cover-up gives $A = \tfrac32$, and matching coefficients gives $B = -\tfrac12$, $C = -\tfrac12$.`,
+      visual: fgraph({ f: '(x^2 + 2)/((x - 1)*(x^2 + 1))', x: [-3, 4], trim: 0.1, vlines: [{ x: 1 }], caption: t`One real pole, at $x = 1$. The quadratic $x^2 + 1$ adds no pole, but its partial fraction still needs a linear numerator.` }),
     }),
   ],
   checkpoint: [
@@ -271,6 +276,7 @@ Complete the square to bring any irreducible quadratic to the form $(x + h)^2 + 
           hints: [t`$x^3 + ${A === 1 ? '' : A}x = x(x^2 + ${A})$: set up $\dfrac{A}{x} + \dfrac{Bx + C}{x^2 + ${A}}$.`, t`Cover-up gives $A = \tfrac{1}{${A}}$; matching coefficients gives $B = -\tfrac{1}{${A}}$, $C = 0$.`],
           teach: 'Factor out x, give the quadratic a linear numerator, then log plus log.',
           explain: t`$\dfrac{1}{x(x^2 + ${A})} = \dfrac{1}{${A}}\left(\dfrac{1}{x} - \dfrac{x}{x^2 + ${A}}\right)$, which integrates to $\tfrac{1}{${A}}\ln x - \tfrac{1}{${2 * A}}\ln(x^2 + ${A}) + C$.`,
+          visual: fgraph({ f: `1/(x^3 + ${A}*x)`, F: `ln(x)/${A} - ln(x^2 + ${A})/${2 * A}`, x: [0.15, 4], trim: 0.06 }),
         };
       },
     }),
@@ -288,6 +294,7 @@ Complete the square to bring any irreducible quadratic to the form $(x + h)^2 + 
           hints: [t`$x = (x + ${a}) - ${a}$, so $\dfrac{x}{(x + ${a})^2} = \dfrac{1}{x + ${a}} - \dfrac{${a}}{(x + ${a})^2}$.`],
           teach: 'Rewrite the numerator in powers of the repeated factor.',
           explain: t`$\int\frac{dx}{x + ${a}} - ${a}\int\frac{dx}{(x + ${a})^2} = \ln\lvert x + ${a}\rvert + \frac{${a}}{x + ${a}} + C$.`,
+          visual: fgraph({ f: `x/(x + ${a})^2`, F: `ln(abs(x + ${a})) + ${a}/(x + ${a})`, x: [-a + 0.15, -a + 6], trim: 0.06 }),
         };
       },
     }),

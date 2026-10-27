@@ -165,3 +165,32 @@ export function staircase(steps, { reference, unit = '', caption, top } = {}) {
     caption: caption ?? 'Logarithmic scale: multiplying by a factor adds a step of height log₁₀(factor), so the top of the staircase is the order of magnitude of the product.',
   };
 }
+
+/**
+ * Dimension fingerprints: for each quantity, three bars giving its powers of
+ * mass (violet), length (blue) and time (green).
+ *   quantities [{ name: 'a (acceleration)', dims: [0, 1, -2] }]   // powers of M, L, T
+ */
+export function dimBars(quantities, { caption } = {}) {
+  const W = 4, colors = ['violet', 'accent', 'good'], letters = ['M', 'L', 'T'];
+  const lo = Math.min(-2.5, ...quantities.flatMap((q) => q.dims)) - 1, hi = Math.max(2.5, ...quantities.flatMap((q) => q.dims)) + 0.6;
+  const shade = [], points = [];
+  quantities.forEach((q, i) => {
+    const c = i * W + W / 2;
+    q.dims.forEach((p, k) => {
+      const x = c + (k - 1) * 1.05;
+      if (p !== 0) shade.push({ fn: String(p), lower: '0', from: +(x - 0.42).toFixed(2), to: +(x + 0.42).toFixed(2), color: colors[k], alpha: 0.7 });
+      points.push({ x: +(x - 0.3).toFixed(2), y: p >= 0 ? -0.35 : 0.55, r: 0.01, color: colors[k], label: letters[k] + (p === 0 ? '⁰' : '') });
+    });
+    points.push({ x: +(c - 1.6).toFixed(2), y: +(lo + 0.3).toFixed(2), r: 0.01, color: 'ink', label: q.name });
+  });
+  return {
+    type: 'graph',
+    params: {
+      aspect: 'wide', x: [-0.2, quantities.length * W], y: [+lo.toFixed(2), +hi.toFixed(2)], xticks: 0.001, xlabel: '', ylabel: 'power',
+      alt: 'Bar charts of the powers of mass, length and time in each quantity',
+      shade, points,
+    },
+    caption: caption ?? 'Each group shows one quantity’s dimensions: the heights of its M (violet), L (blue) and T (green) bars are the powers of mass, length and time. A missing bar is a power of zero.',
+  };
+}

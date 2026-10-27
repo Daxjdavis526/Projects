@@ -26,7 +26,7 @@ const tidesPicture = (() => {
   return {
     type: 'graph',
     params: {
-      x: [-3.4, 3.4], y: [-3.3, 2.6], equal: true, xlabel: ' ', ylabel: ' ',
+      x: [-3.4, 3.4], y: [-3.3, 2.6], equal: true, grid: false, axes: false, xlabel: '', ylabel: '',
       curves: [
         { fn: '2.2', domain: [-2.2, 2.2], color: 'ink2', width: 2 }, { fn: '-2.2', domain: [-2.2, 2.2], color: 'ink2', width: 2 },
         { param: ['-2.2', 't'], t: [-2.2, 2.2], color: 'ink2', width: 2 }, { param: ['2.2', 't'], t: [-2.2, 2.2], color: 'ink2', width: 2 },
@@ -37,6 +37,44 @@ const tidesPicture = (() => {
     caption: 'Seen from the ground: Earth’s pull on each ball (red) points at Earth’s centre and is stronger closer to it. The differences between the arrows are exaggerated enormously — across a 3 m box they are about a millionth of g.',
   };
 })();
+
+// what you measure in the box: a released ball's height against time
+const dropGraph = {
+  type: 'graph',
+  params: {
+    x: [0, 0.75], y: [0, 2.0], xlabel: 'time after release (s)', ylabel: 'height (m)',
+    curves: [{ fn: '1.8 - 4.905x^2', domain: [0, 0.6058], color: 'accent' }],
+    points: [{ x: 0, y: 1.8, color: 'accent', label: 'let go' }, { x: 0.6058, y: 0, color: 'accent', label: 'hits the floor' }],
+  },
+  caption: 'Your measurement inside the box: the ball’s height above the floor against time — a parabola, with a downward acceleration of 9.81 m/s².',
+};
+
+// a higher clock's daily gain against height
+const towerGraph = (h) => ({
+  type: 'graph',
+  params: {
+    x: [0, 1750], y: [0, 17], xlabel: 'height difference (m)', ylabel: 'gain (ns per day)',
+    curves: [{ fn: `${round((g0 / (C * C)) * DAY * 1e9, 8)}x`, color: 'accent' }],
+    points: [[330, 'Eiffel Tower'], [553, 'CN Tower'], [828, 'Burj Khalifa'], [1609, 'mile high']].map(([x, n]) => ({ x, y: round(shift(x) * DAY * 1e9, 4), color: x === h ? 'gold' : 'ink3', label: n })),
+  },
+  caption: 'A higher clock’s daily gain, (gh/c²) × 86 400 s, grows in proportion to the height difference.',
+});
+
+// the accelerating starship, schematic
+const starshipPicture = {
+  type: 'graph',
+  params: {
+    x: [-3, 3], y: [-1.2, 5.3], equal: true, grid: false, axes: false, xlabel: '', ylabel: '',
+    curves: [
+      { param: ['-0.5', 't'], t: [0, 4], color: 'ink2' }, { param: ['0.5', 't'], t: [0, 4], color: 'ink2' }, { fn: '0', domain: [-0.5, 0.5], color: 'ink2' },
+      { param: ['-0.5 + 0.5t', '4 + 0.8t'], t: [0, 1], color: 'ink2' }, { param: ['0.5 - 0.5t', '4 + 0.8t'], t: [0, 1], color: 'ink2' },
+      { param: ['-0.3 + 0.3t', '-0.9t'], t: [0, 1], color: 'warn' }, { param: ['0.3 - 0.3t', '-0.9t'], t: [0, 1], color: 'warn' },
+    ],
+    arrows: [{ from: [1.5, 1.4], to: [1.5, 3.4], color: 'good', label: 'a = g' }, { from: [-1.2, 2.0], to: [-1.2, 3.5], color: 'ink3', label: 'h' }, { from: [-1.2, 2.0], to: [-1.2, 0.5], color: 'ink3' }],
+    points: [{ x: 0, y: 3.5, color: 'gold', label: 'nose clock: runs fast' }, { x: 0, y: 0.5, color: 'accent', label: 'tail clock' }],
+  },
+  caption: 'Schematic, not to scale. In the accelerating ship the nose is “upstairs”: by the equivalence principle its clock runs fast by gh/c², just as on a tower on Earth.',
+};
 
 export default lesson({
   id: 'gr.S05.i',
@@ -94,6 +132,7 @@ $$\frac{\Delta f}{f} = \frac{gh}{c^2}$$`,
       hints: ['What would the same experiment look like in a rocket accelerating at 9.81 m/s², far from any star?'],
       teach: 'A uniform gravitational field and a uniform acceleration are indistinguishable from inside a small box.',
       explain: 'In a rocket accelerating at g, the released ball floats while the floor rushes up to meet it; inside, that looks exactly like falling at g. Only a look outside — or tides, in a large box — could tell the two apart.',
+      visual: dropGraph,
     }),
     num({
       id: 'orbit-g', difficulty: 2,
@@ -217,6 +256,7 @@ $$\frac{\Delta f}{f} = \frac{gh}{c^2}$$`,
           hints: [t`The higher clock runs fast by the fraction $gh/c^2$.`, t`Multiply that fraction by the 86 400 seconds in a day, then convert to ns ($1\ \text{ns} = 10^{-9}$ s).`],
           teach: 'A higher clock runs fast by the fraction gh/c², which adds up to nanoseconds per day for a tall building.',
           explain: t`$gh/c^2 = ${sci(f)}$; times 86 400 s that is $${sci(sec)}$ s $= ${sci(ns)}$ ns per day. Today’s best optical clocks can sense the difference across a single millimetre.`,
+          visual: towerGraph(h),
         };
       },
     }),
@@ -284,6 +324,15 @@ $$\frac{\Delta f}{f} = \frac{gh}{c^2}$$`,
           hints: ['Convert the height to metres first.', t`$gh/c^2$ with $g = 9.81\ \text{m/s}^2$.`],
           teach: 'Clocks a height h apart differ in rate by gh/c² — about 10⁻¹⁶ per metre at Earth’s surface.',
           explain: t`$gh/c^2 = (9.81)(${cm / 100})/(2.998\times10^{8})^2 = ${sci(s)}$ — a gain of one second every $${sci(1 / s / YEAR, 2)}$ years.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 80], y: [0, 9], xlabel: 'height difference (cm)', ylabel: 'rate difference (10⁻¹⁷)',
+              curves: [{ fn: `${round(g0 / (C * C) / 100 / 1e-17, 6)}x`, color: 'accent' }],
+              points: [{ x: 33, y: round(shift(0.33) / 1e-17, 4), color: 'good', label: 'NIST, 2010' }],
+            },
+            caption: 'Fractional rate difference between two clocks against their height difference, in units of 10⁻¹⁷.',
+          },
         };
       },
     }),
@@ -299,6 +348,7 @@ $$\frac{\Delta f}{f} = \frac{gh}{c^2}$$`,
           hints: [t`By the equivalence principle the accelerating ship is like a tower on Earth with the nose at the top: the nose runs fast by $gh/c^2$.`, 'Multiply that fraction by 3.156×10⁷ s, then convert to ns.'],
           teach: 'In an accelerating rocket the front clock runs fast by ah/c², exactly like a higher clock in a gravitational field.',
           explain: t`$gh/c^2 = ${sci(shift(h))}$; over $3.156\times10^{7}$ s the nose gains $${sci(ns)}$ ns. Light signals between the two ends would show it: the tail’s ticks arrive at the nose redshifted.`,
+          visual: starshipPicture,
         };
       },
     }),

@@ -69,6 +69,7 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
     }),
     multi({
       id: 'hypotheses', difficulty: 2,
+      visual: { type: 'graph', params: { x: [1, 8], y: [0, 0.78], xlabel: 'x', ylabel: '', curves: [{ fn: '1/(1 + x^2)', color: 'accent', label: '1/(x²+1)', labelAt: 2.6 }, { fn: 'x*exp(-x^2)', color: 'good', label: 'x e^(−x²)', labelAt: 1.4, labelDx: 4 }, { fn: 'sin(x)^2/x^2', color: 'warn', label: 'sin²x / x²', labelAt: 4.75, labelDy: -14 }, { fn: '1/(x*ln(x))', domain: [2, 8], color: 'violet', label: '1/(x ln x)', labelAt: 3.5 }] }, caption: 'The functions behind four of the series (the alternating one has no positive f). Which are positive and decreasing for large x?' },
       prompt: t`For which series can the integral test be applied directly (the terms come from a positive, continuous, decreasing $f$)? Select all.`,
       choices: [t`$\displaystyle\sum_{n=1}^\infty \frac{1}{n^2 + 1}$`, t`$\displaystyle\sum_{n=1}^\infty n\,e^{-n^2}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{\sin^2 n}{n^2}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{(-1)^n}{n}$`, t`$\displaystyle\sum_{n=2}^\infty \frac{1}{n\ln n}$`],
       answer: [0, 1, 4],
@@ -84,10 +85,10 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
       id: 'improper', difficulty: 2,
       gen(r) {
         const F = r.pick([
-          { s: t`\int_1^\infty \frac{dx}{x^{3}}`, v: 0.5, ser: t`\sum \frac{1}{n^3}`, how: t`\left[-\frac{1}{2x^2}\right]_1^\infty = \frac12` },
-          { s: t`\int_1^\infty x\,e^{-x^2}\,dx`, v: Math.exp(-1) / 2, ser: t`\sum n e^{-n^2}`, how: t`\left[-\tfrac12 e^{-x^2}\right]_1^\infty = \tfrac{1}{2e}` },
-          { s: t`\int_2^\infty \frac{dx}{x(\ln x)^2}`, v: 1 / Math.log(2), ser: t`\sum_{n\ge2} \frac{1}{n(\ln n)^2}`, how: t`\left[-\frac{1}{\ln x}\right]_2^\infty = \frac{1}{\ln 2}` },
-          { s: t`\int_1^\infty \frac{dx}{1 + x^2}`, v: Math.PI / 4, ser: t`\sum \frac{1}{1 + n^2}`, how: t`\left[\arctan x\right]_1^\infty = \frac{\pi}{2} - \frac{\pi}{4}` },
+          { s: t`\int_1^\infty \frac{dx}{x^{3}}`, v: 0.5, fx: 'x^(-3)', a0: 1, ser: t`\sum \frac{1}{n^3}`, how: t`\left[-\frac{1}{2x^2}\right]_1^\infty = \frac12` },
+          { s: t`\int_1^\infty x\,e^{-x^2}\,dx`, v: Math.exp(-1) / 2, fx: 'x*exp(-x^2)', a0: 1, ser: t`\sum n e^{-n^2}`, how: t`\left[-\tfrac12 e^{-x^2}\right]_1^\infty = \tfrac{1}{2e}` },
+          { s: t`\int_2^\infty \frac{dx}{x(\ln x)^2}`, v: 1 / Math.log(2), fx: '1/(x*ln(x)^2)', a0: 2, ser: t`\sum_{n\ge2} \frac{1}{n(\ln n)^2}`, how: t`\left[-\frac{1}{\ln x}\right]_2^\infty = \frac{1}{\ln 2}` },
+          { s: t`\int_1^\infty \frac{dx}{1 + x^2}`, v: Math.PI / 4, fx: '1/(1 + x^2)', a0: 1, ser: t`\sum \frac{1}{1 + n^2}`, how: t`\left[\arctan x\right]_1^\infty = \frac{\pi}{2} - \frac{\pi}{4}` },
         ]);
         return {
           prompt: t`To test $${F.ser}$ with the integral test, evaluate $\displaystyle${F.s}$. Give a decimal.`,
@@ -95,6 +96,7 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
           hints: ['Find an antiderivative, evaluate at the lower limit and take the limit at infinity.', t`$${F.how}$.`],
           teach: 'An improper integral is the limit of ordinary integrals; when it is finite, the integral test says the matching series converges too.',
           explain: t`$${F.how} \approx ${fmt(F.v, 4)}$. Finite, so $${F.ser}$ converges — though its sum is not this number.`,
+          visual: { type: 'graph', params: { x: [0, 10], y: [0, 1.15], xlabel: 'x', ylabel: '', curves: [{ fn: F.fx, domain: [F.a0, 10], color: 'accent' }], shade: [{ fn: F.fx, from: F.a0, to: 10, color: 'accent', alpha: 0.22 }] }, caption: 'The integrand from the lower limit on; the shaded area, continued to infinity, is the improper integral.' },
         };
       },
     }),
@@ -110,6 +112,7 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
           hints: [t`$R_N \le \displaystyle\int_N^\infty \frac{dx}{x^{${p}}}$.`, t`$\displaystyle\int_N^\infty x^{-${p}}\,dx = \frac{N^{${1 - p}}}{${p - 1}}$.`],
           teach: 'The tail of a decreasing series is trapped between two integrals of the same function, starting at N + 1 and at N.',
           explain: t`$R_{${N}} \le \displaystyle\int_{${N}}^\infty x^{-${p}}\,dx = \frac{1}{${p - 1}\cdot ${N}^{${p - 1}}} = ${tex(up, 3)}$ (and $R_{${N}} \ge ${tex(lo, 3)}$). The true remainder is $${tex((p === 2 ? Math.PI ** 2 / 6 : p === 4 ? Math.PI ** 4 / 90 : 1.2020569031595942) - pSum(p, N), 3)}$.`,
+          visual: { type: 'graph', params: { x: [N - 1, N + 12], y: [0, 1.25 * N ** -p], xlabel: 'x', ylabel: '', curves: [{ fn: `x^(-${p})`, domain: [N - 1, N + 12], color: 'accent' }], shade: [{ fn: `x^(-${p})`, from: N, to: N + 12, color: 'good', alpha: 0.25 }], points: Array.from({ length: 10 }, (_, j) => ({ x: N + 1 + j, y: (N + 1 + j) ** -p, color: 'warn' })), vlines: [{ x: N, label: `N = ${N}`, color: 'ink3' }] }, caption: t`Orange: the terms left out, $a_{N+1}, a_{N+2}, \dots$ Each is the height of a width-1 rectangle that fits under the curve to its left, so their total is at most the green area from $N$ to infinity (drawn out to $N + 12$).` },
         };
       },
     }),
@@ -127,6 +130,7 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
           hints: [t`$\displaystyle\int_N^\infty x^{-${p}}\,dx = \frac{1}{${p - 1}N^{${p - 1}}}$.`, t`Solve $\dfrac{1}{${p - 1}N^{${p - 1}}} < ${tolT}$ for $N$, then take the next whole number.`],
           teach: 'The integral remainder bound turns an accuracy requirement into a number of terms.',
           explain: t`$\dfrac{1}{${p - 1}N^{${p - 1}}} < ${tolT} \iff N^{${p - 1}} > ${fmt(1 / ((p - 1) * tol), 5)} \iff N > ${fmt((1 / ((p - 1) * tol)) ** (1 / (p - 1)), 5)}$, so $N = ${N}$ terms.`,
+          visual: { type: 'graph', params: { x: [1, Math.ceil(1.6 * N)], y: [Math.floor(Math.log10(tol)) - 1, 0.5], xlabel: 'N', ylabel: 'log₁₀ of the bound', curves: [{ fn: `log10(x^(${1 - p})/${p - 1})`, color: 'accent', label: 'the bound on R_N', labelAt: Math.ceil(0.25 * N) }], hlines: [{ y: Math.log10(tol), label: 'tolerance', color: 'gold' }] }, caption: 'The integral bound on the remainder, on a logarithmic scale, against the number of terms: you need the first whole N past the crossing.' },
         };
       },
     }),
@@ -194,6 +198,7 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
           hints: [t`$R_N \le \int_N^\infty x^{-4}\,dx = \frac{1}{3N^3}$.`, t`Put $N = ${N}$.`],
           teach: 'Upper bound on the remainder: integrate from N to infinity.',
           explain: t`$R_{${N}} \le \dfrac{1}{3\cdot ${N}^3} = ${tex(up, 3)}$.`,
+          visual: { type: 'graph', params: { x: [N - 1, N + 12], y: [0, 1.25 * N ** -4], xlabel: 'x', ylabel: '', curves: [{ fn: `x^(-4)`, domain: [N - 1, N + 12], color: 'accent' }], shade: [{ fn: `x^(-4)`, from: N, to: N + 12, color: 'good', alpha: 0.25 }], points: Array.from({ length: 10 }, (_, j) => ({ x: N + 1 + j, y: (N + 1 + j) ** -4, color: 'warn' })), vlines: [{ x: N, label: `N = ${N}`, color: 'ink3' }] }, caption: t`Orange: the terms left out, $a_{N+1}, a_{N+2}, \dots$ Each is the height of a width-1 rectangle that fits under the curve to its left, so their total is at most the green area from $N$ to infinity (drawn out to $N + 12$).` },
         };
       },
     }),
@@ -209,6 +214,7 @@ $$\sum_{n=1}^{\infty} f(n) \text{ converges} \iff \int_1^{\infty} f(x)\,dx \text
           hints: [t`The $n$-th mass is $nd$ away and pulls with $\dfrac{Gm^2}{(nd)^2}$.`, t`$F = \dfrac{Gm^2}{d^2}\displaystyle\sum_{n=1}^\infty \frac{1}{n^2} = \frac{Gm^2}{d^2}\cdot\frac{\pi^2}{6}$.`],
           teach: 'An inverse-square law summed over an infinite chain is a p-series with p = 2, so the total force is finite.',
           explain: t`$F = \dfrac{(6.674\times10^{-11})(${m})^2}{${d}^2}\times${fmt(Math.PI ** 2 / 6, 4)} \approx ${tex(F, 3)}$ N. The potential energy, $-\sum \frac{Gm^2}{nd}$, is a harmonic series ($p = 1$) and diverges: the force converges but the energy does not.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: '1/n^2', N: 10, zero: true, termLabel: 'pull of mass n ÷ (Gm²/d²)' }, caption: t`The pull of each mass, in units of $Gm^2/d^2$: the $n$-th mass is $nd$ away, so its pull falls like $1/n^2$.` },
         };
       },
     }),

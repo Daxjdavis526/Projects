@@ -1,6 +1,6 @@
 // A strategy for integration: classify, try, combine — and check by differentiating.
 import { lesson, mcq, expr, match } from '../../src/core/content.js';
-import { kx } from './_integration.js';
+import { kx, fgraph } from './_integration.js';
 
 const t = String.raw;
 
@@ -81,6 +81,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
           hints: ['Before classifying, look for a substitution.', t`What is the derivative of $x^2 + ${a}$?`],
           teach: 'Always check for an inside function whose derivative is present before reaching for a heavier method.',
           explain: t`$u = x^2 + ${a}$, $du = 2x\,dx$: $\;\int\frac{x\,dx}{x^2 + ${a}} = \tfrac12\ln(x^2 + ${a}) + C$.`,
+          visual: fgraph({ f: `x/(x^2 + ${a})`, F: `ln(x^2 + ${a})/2`, x: [-6, 6] }),
         };
       },
     }),
@@ -108,6 +109,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
           hints: [t`The derivative of $\ln x$, namely $\tfrac1x$, is sitting right there.`, t`Let $u = \ln x$, $du = \tfrac{dx}{x}$: $\;\int u^{${n}}\,du$.`],
           teach: 'A substitution is hiding whenever the derivative of an inside function multiplies the integrand — check before trying parts.',
           explain: t`$u = \ln x$ gives $\int u^{${n}}\,du = \dfrac{u^{${n + 1}}}{${n + 1}} = \dfrac{(\ln x)^{${n + 1}}}{${n + 1}} + C$.`,
+          visual: fgraph({ f: `ln(x)^${n}/x`, F: `ln(x)^${n + 1}/${n + 1}`, x: [0.2, 6], trim: 0.04 }),
         };
       },
     }),
@@ -130,6 +132,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
           ],
           teach: 'When one method leaves a familiar form, finish with a second: here substitution, then parts.',
           explain: t`$\tfrac12 e^{${kx(k, 'w')}}\left(\tfrac{w}{${k}} - \tfrac{1}{${k * k}}\right)$ with $w = x^2$: $\;${k === 1 ? t`\tfrac12(x^2 - 1)\,e^{x^2}` : k === 2 ? t`\tfrac18(2x^2 - 1)\,e^{2x^2}` : t`-\tfrac12(x^2 + 1)\,e^{-x^2}`} + C$.`,
+          visual: fgraph({ f: `x^3*${e}`, F: `${e}*(x^2/(${2 * k}) - 1/${2 * k * k})`, x: k > 0 ? [-1.3 / Math.sqrt(k), 1.3 / Math.sqrt(k)] : [-3, 3] }),
         };
       },
     }),
@@ -171,6 +174,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
       hints: ['Three of these yield to a method from this module.', t`Which one has no $x$ outside to act as $du$, and no product to integrate by parts?`],
       teach: t`$e^{-x^2}$ has an antiderivative, but it is not elementary; you evaluate its integrals numerically or with the special function erf.`,
       explain: t`Liouville’s theorem shows that no elementary $F$ has $F' = e^{-x^2}$. Its antiderivative is written $\tfrac{\sqrt\pi}{2}\operatorname{erf}(x)$ and computed numerically or by series.`,
+      visual: { type: 'graph', params: { x: [0, 3.2], y: [-0.1, 1.1], curves: [{ fn: 'exp(-x^2)', color: 'accent', label: 'e^(−x²)', labelAt: 0.25 }, { fn: 'x*exp(-x^2)', color: 'warn', label: 'x e^(−x²)', labelAt: 1.25 }, { fn: 'x^2*exp(-x)', color: 'good', label: 'x² e^(−x)', labelAt: 2.4 }, { fn: 'exp(-x)*sin(x)', color: 'violet', label: 'e^(−x) sin x', labelAt: 0.75, labelDy: 14 }] }, caption: 'All four integrands are smooth, gentle curves: whether an elementary antiderivative exists cannot be seen in a graph. Every one of them has an antiderivative.' },
     }),
     mcq({
       id: 'cas-check', difficulty: 3,
@@ -185,6 +189,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
       hints: ['Differentiate both answers.', t`Use $\cos 2x = 1 - 2\sin^2 x$ to compare them directly.`],
       teach: 'Different-looking antiderivatives are both right if their derivatives agree; then they differ by a constant.',
       explain: t`$-\tfrac14\cos 2x = -\tfrac14(1 - 2\sin^2 x) = \tfrac12\sin^2 x - \tfrac14$: the same function shifted by $\tfrac14$, absorbed into $C$.`,
+      visual: fgraph({ f: '-cos(2x)/4', x: [-3.2, 3.2], extra: [{ fn: 'sin(x)^2/2', color: 'warn', dash: true, width: 2 }], caption: t`The CAS answer (blue) and yours (dashed), each drawn with $C = 0$.` }),
     }),
   ],
   checkpoint: [
@@ -198,6 +203,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
       hints: [t`Parts with $u = x$, $dv = \sec^2 x\,dx$, so $v = \tan x$.`, t`$\int\tan x\,dx = -\ln\lvert\cos x\rvert$.`],
       teach: 'A polynomial times a function you can integrate: parts, then a known trig integral.',
       explain: t`$x\tan x - \int\tan x\,dx = x\tan x + \ln\lvert\cos x\rvert + C$.`,
+      visual: fgraph({ f: 'x*sec(x)^2', F: 'x*tan(x) + ln(abs(cos(x)))', x: [-1.3, 1.3], trim: 0.06 }),
     }),
     expr({
       id: 'cp-cos-root', difficulty: 3,
@@ -209,6 +215,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
       hints: [t`Let $w = \sqrt x$: $dx = 2w\,dw$.`, t`Then $\int 2w\cos w\,dw$ by parts.`],
       teach: 'Substitute away the root, then integrate by parts.',
       explain: t`$\int 2w\cos w\,dw = 2(w\sin w + \cos w)$, so the answer is $2\sqrt x\sin\sqrt x + 2\cos\sqrt x + C$.`,
+      visual: fgraph({ f: 'cos(sqrt(x))', F: '2sqrt(x)*sin(sqrt(x)) + 2cos(sqrt(x))', x: [0, 40] }),
     }),
     mcq({
       id: 'cp-gps-gaussian', difficulty: 3, transfer: true,

@@ -166,6 +166,7 @@ Estimate the total impulse $I = \int_0^{2} F\,dt$ with the trapezoid rule.`,
           hints: [t`The trapezoid error is roughly proportional to $1/n^2$.`, 'Doubling n multiplies 1/n² by ¼.'],
           teach: 'Trapezoid and midpoint errors scale like 1/n²: double n, quarter the error.',
           explain: t`$E \propto 1/n^2$, so doubling $n$ divides the error by $4$: about ${nice(e / 4)}.`,
+          visual: { type: 'calc-quadrature', params: { functions: [{ fn: 'exp(x)', a: 0, b: 1, exact: Math.E - 1, label: 'eˣ' }], rules: ['trap'], n: 10, nSlider: false, errorPlot: true, readout: false }, caption: t`The trapezoid rule on $\int_0^1 e^x\,dx$ with $n = 10$ (top), and its error for every $n$ on log–log axes (bottom): a straight line of slope $-2$.` },
         };
       },
     }),
@@ -181,13 +182,14 @@ Estimate the total impulse $I = \int_0^{2} F\,dt$ with the trapezoid rule.`,
           hints: [t`Absolute error $= \lvert T_{${n}} - (e - 1)\rvert$, with $e - 1 \approx 1.718282$.`, 'Relative error = absolute error ÷ exact value, × 100%.'],
           teach: 'Relative error compares the error with the size of the answer itself.',
           explain: t`$\lvert ${T6} - 1.718282\rvert / 1.718282 \times 100\% = ${fmt(rel, 3)}\%$. (It overestimates: $e^x$ is concave up.)`,
+          visual: { type: 'graph', params: { x: [-0.1, 1.15], y: [0, 3], curves: [{ fn: 'exp(x)', color: 'accent' }], riemann: { fn: 'exp(x)', from: 0, to: 1, n, rule: 'trap' } }, caption: t`The ${n} trapezoids poke above the concave-up curve $e^x$, so $T_{${n}}$ overestimates.` },
         };
       },
     }),
     num({
       id: 't2n', difficulty: 3,
       gen(r) {
-        const n = r.pick([4, 8]), [ftex, f, a, b] = r.pick([[t`e^{-x^2}`, (x) => Math.exp(-x * x), 0, 1], [t`\frac{1}{1 + x^2}`, (x) => 1 / (1 + x * x), 0, 1], [t`\sqrt{1 + x^3}`, (x) => Math.sqrt(1 + x ** 3), 0, 1]]);
+        const n = r.pick([4, 8]), [ftex, f, a, b, ftxt] = r.pick([[t`e^{-x^2}`, (x) => Math.exp(-x * x), 0, 1, 'exp(-x^2)'], [t`\frac{1}{1 + x^2}`, (x) => 1 / (1 + x * x), 0, 1, '1/(1 + x^2)'], [t`\sqrt{1 + x^3}`, (x) => Math.sqrt(1 + x ** 3), 0, 1, 'sqrt(1 + x^3)']]);
         const T = +trap(f, a, b, n).toFixed(6), M = +mid(f, a, b, n).toFixed(6), ans = (T + M) / 2;
         return {
           prompt: t`For $\displaystyle\int_{${a}}^{${b}} ${ftex}\,dx$ you already have $T_{${n}} = ${T}$ and $M_{${n}} = ${M}$. Without evaluating $f$ again, find $T_{${2 * n}}$.`,
@@ -196,6 +198,7 @@ Estimate the total impulse $I = \int_0^{2} F\,dt$ with the trapezoid rule.`,
           hints: [t`$T_{${2 * n}}$ uses the old sample points plus the midpoints of the old strips, with spacing $\tfrac{\Delta x}{2}$.`, t`Write $T_{${2 * n}} = \tfrac12\cdot\tfrac{\Delta x}{2}\big[\text{old trapezoid sum}\big] + \tfrac{\Delta x}{2}\big[\text{midpoint sum}\big]$.`, t`So $T_{${2 * n}} = \tfrac12(T_{${n}} + M_{${n}})$.`],
           teach: 'Halving the step reuses every old sample: T₂ₙ = (Tₙ + Mₙ)/2.',
           explain: t`$T_{${2 * n}} = \tfrac12(T_{${n}} + M_{${n}}) = \tfrac12(${T} + ${M}) = ${nice(+ans.toFixed(7))}$ — exactly what a fresh ${2 * n}-strip calculation gives, for half the work.`,
+          visual: { type: 'graph', params: { x: [a - 0.08, b + 0.08], y: [0, Math.max(f(a), f(b), 1) * 1.25], curves: [{ fn: ftxt, color: 'accent' }], points: [...Array.from({ length: n + 1 }, (_, i) => ({ x: a + ((b - a) * i) / n, y: f(a + ((b - a) * i) / n), color: 'accent2' })), ...Array.from({ length: n }, (_, i) => ({ x: a + ((b - a) * (i + 0.5)) / n, y: f(a + ((b - a) * (i + 0.5)) / n), color: 'gold' }))] }, caption: t`$T_{${2 * n}}$ needs $f$ at the old sample points (blue) and at the midpoints (gold) — exactly the values $T_{${n}}$ and $M_{${n}}$ already used.` },
         };
       },
     }),
@@ -204,7 +207,7 @@ Estimate the total impulse $I = \int_0^{2} F\,dt$ with the trapezoid rule.`,
     num({
       id: 'cp-trapezoid', difficulty: 2,
       gen(r) {
-        const [ftex, f, a, b, bTeX] = r.pick([[t`\frac{1}{1 + x^2}`, (x) => 1 / (1 + x * x), 0, 1, '1'], [t`\sin x`, Math.sin, 0, Math.PI, t`\pi`], [t`\ln x`, Math.log, 1, 3, '3']]);
+        const [ftex, f, a, b, bTeX, ftxt] = r.pick([[t`\frac{1}{1 + x^2}`, (x) => 1 / (1 + x * x), 0, 1, '1', '1/(1 + x^2)'], [t`\sin x`, Math.sin, 0, Math.PI, t`\pi`, 'sin(x)'], [t`\ln x`, Math.log, 1, 3, '3', 'ln(x)']]);
         const n = 4, T = trap(f, a, b, n);
         return {
           prompt: t`Estimate $\displaystyle\int_{${a}}^{${bTeX}} ${ftex}\,dx$ with the trapezoid rule, $n = 4$, to 3 significant figures.`,
@@ -212,6 +215,7 @@ Estimate the total impulse $I = \int_0^{2} F\,dt$ with the trapezoid rule.`,
           hints: [t`$\Delta x = (b - a)/4$; weights $1, 2, 2, 2, 1$; multiply by $\Delta x/2$.`],
           teach: 'Trapezoid rule: Δx/2 times (ends once, interior twice).',
           explain: t`$T_4 = ${fmt(T, 4)}$.`,
+          visual: { type: 'graph', params: { x: [a - 0.1 * (b - a), b + 0.1 * (b - a)], y: [Math.min(0, f(a)) - 0.1, Math.max(...Array.from({ length: 21 }, (_, i) => f(a + ((b - a) * i) / 20))) * 1.2], curves: [{ fn: ftxt, color: 'accent' }], riemann: { fn: ftxt, from: a, to: b, n: 4, rule: 'trap' } }, caption: 'Four trapezoids under the curve.' },
         };
       },
     }),

@@ -7,11 +7,11 @@ const t = String.raw;
 
 // integrands with exact bounds K2 ≥ |f″| and K4 ≥ |f⁗| on [a, b] (checked numerically)
 const BOUNDED = [
-  { txt: 'exp(x)', tex: t`e^{x}`, f: Math.exp, a: 0, b: 1, bTeX: '1', K2: Math.E, K2TeX: 'e', K4: Math.E, K4TeX: 'e', why2: t`f'' = e^x \le e`, why4: t`f^{(4)} = e^x \le e` },
-  { txt: 'sin(2x)', tex: t`\sin 2x`, f: (x) => Math.sin(2 * x), a: 0, b: Math.PI, bTeX: t`\pi`, K2: 4, K2TeX: '4', K4: 16, K4TeX: '16', why2: t`f'' = -4\sin 2x`, why4: t`f^{(4)} = 16\sin 2x` },
-  { txt: 'x^4', tex: t`x^4`, f: (x) => x ** 4, a: 0, b: 2, bTeX: '2', K2: 48, K2TeX: '48', K4: 24, K4TeX: '24', why2: t`f'' = 12x^2 \le 48`, why4: t`f^{(4)} = 24` },
-  { txt: '1/x', tex: t`\frac1x`, f: (x) => 1 / x, a: 1, b: 2, bTeX: '2', K2: 2, K2TeX: '2', K4: 24, K4TeX: '24', why2: t`f'' = 2/x^3 \le 2`, why4: t`f^{(4)} = 24/x^5 \le 24` },
-  { txt: 'cos(x)', tex: t`\cos x`, f: Math.cos, a: 0, b: 1, bTeX: '1', K2: 1, K2TeX: '1', K4: 1, K4TeX: '1', why2: t`\lvert f''\rvert = \lvert\cos x\rvert \le 1`, why4: t`\lvert f^{(4)}\rvert = \lvert\cos x\rvert \le 1` },
+  { txt: 'exp(x)', tex: t`e^{x}`, f: Math.exp, a: 0, b: 1, bTeX: '1', K2: Math.E, K2TeX: 'e', K4: Math.E, K4TeX: 'e', why2: t`f'' = e^x \le e`, why4: t`f^{(4)} = e^x \le e`, d2: 'exp(x)', d4: 'exp(x)' },
+  { txt: 'sin(2x)', tex: t`\sin 2x`, f: (x) => Math.sin(2 * x), a: 0, b: Math.PI, bTeX: t`\pi`, K2: 4, K2TeX: '4', K4: 16, K4TeX: '16', why2: t`f'' = -4\sin 2x`, why4: t`f^{(4)} = 16\sin 2x`, d2: 'abs(4sin(2x))', d4: 'abs(16sin(2x))' },
+  { txt: 'x^4', tex: t`x^4`, f: (x) => x ** 4, a: 0, b: 2, bTeX: '2', K2: 48, K2TeX: '48', K4: 24, K4TeX: '24', why2: t`f'' = 12x^2 \le 48`, why4: t`f^{(4)} = 24`, d2: '12x^2', d4: '24' },
+  { txt: '1/x', tex: t`\frac1x`, f: (x) => 1 / x, a: 1, b: 2, bTeX: '2', K2: 2, K2TeX: '2', K4: 24, K4TeX: '24', why2: t`f'' = 2/x^3 \le 2`, why4: t`f^{(4)} = 24/x^5 \le 24`, d2: '2/x^3', d4: '24/x^5' },
+  { txt: 'cos(x)', tex: t`\cos x`, f: Math.cos, a: 0, b: 1, bTeX: '1', K2: 1, K2TeX: '1', K4: 1, K4TeX: '1', why2: t`\lvert f''\rvert = \lvert\cos x\rvert \le 1`, why4: t`\lvert f^{(4)}\rvert = \lvert\cos x\rvert \le 1`, d2: 'abs(cos(x))', d4: 'abs(cos(x))' },
 ];
 const SIMPLE = [
   ['x^4', t`x^4`, (x) => x ** 4, 0, 2],
@@ -20,6 +20,13 @@ const SIMPLE = [
   ['exp(-x^2)', t`e^{-x^2}`, (x) => Math.exp(-x * x), 0, 2],
   ['1/(1 + x^2)', t`\frac{1}{1 + x^2}`, (x) => 1 / (1 + x * x), 0, 2],
 ];
+
+// |f″| or |f⁗| across [a, b], with its maximum K dashed — what an error bound needs
+const boundGraph = (expr, a, b, K, which, KTeX) => ({
+  type: 'graph',
+  params: { x: [a, b], y: [0, Math.max(K, 1e-9) * 1.3], ylabel: which === 2 ? '|f″|' : '|f⁗|', curves: [{ fn: expr, color: 'violet' }], hlines: [{ y: K, label: which === 2 ? 'K₂' : 'K₄' }] },
+  caption: which === 2 ? t`$\lvert f''(x)\rvert$ across the interval; its largest value is $K_2 = ${KTeX}$ (dashed).` : t`$\lvert f^{(4)}(x)\rvert$ across the interval; its largest value is $K_4 = ${KTeX}$ (dashed).`,
+});
 
 export default lesson({
   id: 'math1220.C2-2.10',
@@ -102,6 +109,7 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
       hints: ['How many points determine a parabola?', 'Three equally spaced points span two strips.'],
       teach: 'Three points fix a parabola, so Simpson’s rule works in pairs of strips.',
       explain: 'A parabola needs three points, x₀, x₁, x₂ — two strips. Covering [a, b] with such pairs needs an even number of strips.',
+      visual: { type: 'calc-quadrature', params: { functions: [{ fn: '1 + sin(2x)/2', a: 0, b: 3, label: 'f' }], rules: ['simpson'], n: 4, nSlider: false, errorPlot: false, readout: false }, caption: 'Each gold parabola passes through three sample points and spans two strips.' },
     }),
     num({
       id: 'trap-bound', difficulty: 2,
@@ -115,13 +123,14 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
           hints: [t`Find $K_2$: $${g.why2}$, so $K_2 = ${g.K2TeX}$ on $[${g.a}, ${g.bTeX}]$.`, t`$\dfrac{${g.K2TeX}\,(${g.bTeX} - ${g.a})^3}{12\cdot ${n}^2}$.`],
           teach: 'An error bound needs the largest size of f″ on the interval — then it is arithmetic.',
           explain: t`$K_2 = ${g.K2TeX}$, so $\lvert E_T\rvert \le \dfrac{${g.K2TeX}(${g.bTeX} - ${g.a})^3}{12\cdot${n * n}} = ${tex(B, 3)}$.`,
+          visual: boundGraph(g.d2, g.a, g.b, g.K2, 2, g.K2TeX),
         };
       },
     }),
     num({
       id: 'n-trap', difficulty: 3,
       gen(r) {
-        const [ftex, a, b, K, kwhy] = r.pick([[t`5x^2 + 8`, 1, 4, 10, t`f'' = 10`], [t`\frac1x`, 1, 2, 2, t`f'' = 2/x^3 \le 2`], [t`e^{x}`, 0, 1, Math.E, t`f'' = e^x \le e`], [t`\sin x`, 0, Math.PI, 1, t`\lvert f''\rvert \le 1`]]);
+        const [ftex, a, b, K, kwhy, d2] = r.pick([[t`5x^2 + 8`, 1, 4, 10, t`f'' = 10`, '10'], [t`\frac1x`, 1, 2, 2, t`f'' = 2/x^3 \le 2`, '2/x^3'], [t`e^{x}`, 0, 1, Math.E, t`f'' = e^x \le e`, 'exp(x)'], [t`\sin x`, 0, Math.PI, 1, t`\lvert f''\rvert \le 1`, 'abs(sin(x))']]);
         // avoid tolerances where the bound lands exactly on an integer n (then "round up" would mislead)
         const tol = r.pick([1e-3, 1e-4, 1e-5].filter((e) => { const x = Math.sqrt((K * (b - a) ** 3) / (12 * e)); return Math.abs(x - Math.round(x)) > 1e-6; }));
         const n = nForTolerance('trap', K, a, b, tol);
@@ -133,6 +142,7 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
           hints: [t`Here $${kwhy}$, so $K_2 = ${K === Math.E ? 'e' : K}$. Solve $\dfrac{K_2(b - a)^3}{12n^2} \le ${tex(tol, 1)}$ for $n$.`, t`$n \ge \sqrt{\dfrac{K_2(b - a)^3}{12\times ${tex(tol, 1)}}} = ${fmt(Math.sqrt((K * (b - a) ** 3) / (12 * tol)), 4)}$; round up.`],
           teach: 'Choosing n for a tolerance: solve the error bound for n and round up.',
           explain: t`$n \ge ${fmt(Math.sqrt((K * (b - a) ** 3) / (12 * tol)), 4)}$, so $n = ${n}$.${ftex === t`5x^2 + 8` && tol === 1e-4 ? ' (This is the textbook’s n = 475.)' : ''}`,
+          visual: boundGraph(d2, a, b, K, 2, K === Math.E ? 'e' : String(K)),
         };
       },
     }),
@@ -148,6 +158,7 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
           hints: [t`$${g.why4}$, so $K_4 = ${g.K4TeX}$. Solve $\dfrac{K_4(b - a)^5}{180n^4} \le ${tex(tol, 1)}$.`, t`$n \ge \left(\dfrac{K_4(b - a)^5}{180\times${tex(tol, 1)}}\right)^{1/4} = ${fmt(raw, 4)}$; round up to an even number.`],
           teach: 'For Simpson, solve the bound for n, round up, and make n even.',
           explain: t`$n \ge ${fmt(raw, 4)}$, and the next even integer is $${n}$. For the same guarantee the trapezoid bound would need $n = ${nForTolerance('trap', g.K2, g.a, g.b, tol)}$.`,
+          visual: boundGraph(g.d4, g.a, g.b, g.K4, 4, g.K4TeX),
         };
       },
     }),
@@ -163,13 +174,14 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
           hints: [t`Simpson’s bound involves $f^{(4)}$.`, t`What is the fourth derivative of a cubic?`],
           teach: 'Simpson’s rule integrates every polynomial of degree 3 or less exactly.',
           explain: t`$f^{(4)} = 0$ for a cubic, so $\lvert E_S\rvert \le 0$: $S_2$ is exact. (Surprisingly, parabolas integrate cubics exactly — the cubic’s extra area cancels across each pair of strips.)`,
+          visual: { type: 'calc-quadrature', params: { functions: [{ fn: `x^3 - ${c}*x + ${d}`, a: 0, b, label: 'cubic' }], rules: ['simpson'], n: 2, nSlider: false, errorPlot: false, readout: false }, caption: 'The gold parabola is not the cubic — it crosses it three times — yet the two areas are equal: the cubic’s excess over one strip exactly cancels its shortfall over the other.' },
         };
       },
     }),
     num({
       id: 'combine', difficulty: 3,
       gen(r) {
-        const n = r.pick([2, 4]), [ftex, f, a, b] = r.pick([[t`e^{-x^2}`, (x) => Math.exp(-x * x), 0, 1], [t`\frac{1}{1 + x^2}`, (x) => 1 / (1 + x * x), 0, 1], [t`\sqrt{1 + x^3}`, (x) => Math.sqrt(1 + x ** 3), 0, 1]]);
+        const n = r.pick([2, 4]), [ftex, f, a, b, ftxt] = r.pick([[t`e^{-x^2}`, (x) => Math.exp(-x * x), 0, 1, 'exp(-x^2)'], [t`\frac{1}{1 + x^2}`, (x) => 1 / (1 + x * x), 0, 1, '1/(1 + x^2)'], [t`\sqrt{1 + x^3}`, (x) => Math.sqrt(1 + x ** 3), 0, 1, 'sqrt(1 + x^3)']]);
         const M = +midpoint(f, a, b, n).toFixed(6), T = +trapezoid(f, a, b, n).toFixed(6), S = (2 * M + T) / 3;
         return {
           prompt: t`For $\displaystyle\int_{${a}}^{${b}} ${ftex}\,dx$ you have $M_{${n}} = ${M}$ and $T_{${n}} = ${T}$. Find $S_{${2 * n}}$ without evaluating $f$ again.`,
@@ -178,6 +190,7 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
           hints: [t`The midpoint rule’s error is about $-\tfrac12$ the trapezoid rule’s, so a weighted average cancels the leading error.`, t`Weight $M_n$ twice and $T_n$ once: $S_{2n} = \tfrac{2M_n + T_n}{3}$.`],
           teach: 'Simpson’s rule is the weighted average (2M + T)/3 that cancels the midpoint and trapezoid errors.',
           explain: t`$S_{${2 * n}} = \tfrac{2(${M}) + ${T}}{3} = ${nice(+S.toFixed(7))}$. (Exact: $${reference(f, a, b).toFixed(6)}$.)`,
+          visual: { type: 'calc-quadrature', params: { functions: [{ fn: ftxt, a, b, label: 'f' }], rules: ['mid', 'trap'], rule: 'mid', n, nSlider: false, errorPlot: false, readout: false }, caption: 'Switch between the midpoint rectangles and the trapezoids: they err in opposite directions, the trapezoids by about twice as much — so the weighted average (2M + T)/3 cancels most of both errors.' },
         };
       },
     }),
@@ -194,6 +207,7 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
           hints: [t`Simpson’s error is roughly proportional to $1/n^4$.`, t`$2^4 = 16$.`],
           teach: 'Simpson’s error scales like 1/n⁴: double n, divide the error by 16.',
           explain: t`$E \propto 1/n^4$: doubling $n$ divides the error by $2^4 = 16$, giving about $${tex(val / 16, 2)}$.`,
+          visual: { type: 'calc-quadrature', params: { functions: [{ fn: 'exp(x)', a: 0, b: 1, exact: Math.E - 1, label: 'eˣ' }], rules: ['simpson'], n: 10, nSlider: false, errorPlot: true, readout: false }, caption: t`Simpson’s rule on $\int_0^1 e^x\,dx$ at $n = 10$ (top) and its error for every $n$ on log–log axes (bottom): a straight line of slope $-4$.` },
         };
       },
     }),
@@ -202,13 +216,14 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
     num({
       id: 'cp-simpson', difficulty: 2,
       gen(r) {
-        const [, ftex, f, a, b] = r.pick(SIMPLE.slice(1)), S = simpsonRule(f, a, b, 4);
+        const [ftxt, ftex, f, a, b] = r.pick(SIMPLE.slice(1)), S = simpsonRule(f, a, b, 4);
         return {
           prompt: t`Estimate $\displaystyle\int_{${a}}^{${b}} ${ftex}\,dx$ with Simpson’s rule, $n = 4$, to 3 significant figures.`,
           answer: S, tol: { rel: 0.005 },
           hints: [t`Weights $1, 4, 2, 4, 1$; multiply by $\Delta x/3$.`],
           teach: 'Simpson: Δx/3 × (1, 4, 2, 4, 1)-weighted samples.',
           explain: t`$S_4 = ${fmt(S, 4)}$ (exact $${fmt(reference(f, a, b), 5)}$).`,
+          visual: { type: 'calc-quadrature', params: { functions: [{ fn: ftxt, a, b, label: 'f' }], rules: ['simpson'], n: 4, nSlider: false, errorPlot: false, readout: false }, caption: 'The two parabolic arcs Simpson’s rule integrates, with each sample’s weight.' },
         };
       },
     }),
@@ -223,6 +238,7 @@ Simpson’s rule is the workhorse for integrals with no formula — arc lengths,
           hints: [t`$${g.why4}$, so $K_4 = ${g.K4TeX}$.`, t`Solve $\dfrac{K_4(b - a)^5}{180n^4} \le ${tex(tol, 1)}$ for $n$, then round up to an even integer.`],
           teach: 'Solve the bound for n, round up, make it even.',
           explain: t`$n \ge \left(\dfrac{${g.K4TeX}(${g.bTeX} - ${g.a})^5}{180\times${tex(tol, 1)}}\right)^{1/4} = ${fmt(((g.K4 * (g.b - g.a) ** 5) / (180 * tol)) ** 0.25, 4)}$, so $n = ${n}$.`,
+          visual: boundGraph(g.d4, g.a, g.b, g.K4, 4, g.K4TeX),
         };
       },
     }),

@@ -1,7 +1,7 @@
 // Partial fractions with distinct linear factors: split, cover up, integrate to logarithms.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { fmt, nice, polyTeX, polyText } from '../../src/core/format.js';
-import { fterm } from './_integration.js';
+import { fterm, fgraph } from './_integration.js';
 
 const t = String.raw;
 const lin = (r) => (r === 0 ? 'x' : r > 0 ? `x - ${r}` : `x + ${-r}`);          // x − r, as TeX or as text
@@ -101,6 +101,7 @@ Each piece integrates to a logarithm, $\int \frac{A}{x - r}\,dx = A\ln\lvert x -
           hints: [t`Factor the denominator: a difference of squares.`, t`$x^2 - ${A} = (x - ${a})(x + ${a})$ — one constant over each factor.`],
           teach: 'Factor the denominator completely; each distinct linear factor gets its own constant over it.',
           explain: t`$x^2 - ${A} = (x - ${a})(x + ${a})$, two distinct linear factors, so the form is $\dfrac{A}{x - ${a}} + \dfrac{B}{x + ${a}}$.`,
+          visual: fgraph({ f: `(${p}*x + ${q})/(x^2 - ${A})`, x: [-2.5 * a, 2.5 * a], trim: 0.08, vlines: [{ x: a }, { x: -a }], caption: t`Two vertical asymptotes, at $x = \pm${a}$: one simple fraction for each.` }),
         };
       },
     }),
@@ -138,6 +139,7 @@ Each piece integrates to a logarithm, $\int \frac{A}{x - r}\,dx = A\ln\lvert x -
           hints: [t`Cover-up: $A = \dfrac{1}{${a} - (${b})}$ for $\dfrac{A}{${lin(a)}}$ and $B = \dfrac{1}{${b} - (${a})}$ for $\dfrac{B}{${lin(b)}}$.`, t`Each $\dfrac{k}{x - r}$ integrates to $k\ln\lvert x - r\rvert$.`],
           teach: t`$\dfrac{1}{(x - a)(x - b)} = \dfrac{1}{a - b}\left(\dfrac{1}{x - a} - \dfrac{1}{x - b}\right)$.`,
           explain: t`$A = \tfrac{1}{${a} - (${b})} = ${d < 0 ? '-' : ''}\tfrac{1}{${Math.abs(d)}}$ and $B = -A$, so the integral is $${d < 0 ? '-' : ''}\tfrac{1}{${Math.abs(d)}}\big(${lnAbs(a)} - ${lnAbs(b)}\big) + C$.`,
+          visual: fgraph({ f: `1/((${lin(a)})*(${lin(b)}))`, F: `(ln(abs(${lin(a)})) - ln(abs(${lin(b)})))/(${d})`, x: [Math.min(a, b) - 1.5, hi + 2.5], trim: 0.08, vlines: [{ x: a }, { x: b }] }),
         };
       },
     }),
@@ -158,6 +160,7 @@ Each piece integrates to a logarithm, $\int \frac{A}{x - r}\,dx = A\ln\lvert x -
           hints: [t`Cover-up at $x = ${rr}$ gives the constant over $(${lin(rr)})$; at $x = ${s}$ the constant over $(${lin(s)})$.`, t`$A = ${A}$, $B = ${B}$; integrate each simple fraction to a logarithm.`],
           teach: 'Split with the cover-up rule, then every simple fraction integrates to a logarithm.',
           explain: t`$\dfrac{${polyTeX([q, p])}}{(${lin(rr)})(${lin(s)})} = \dfrac{${A}}{${lin(rr)}} + \dfrac{${B}}{${lin(s)}}$, so the integral is $${fterm(A, lnAbs(rr), true)}${fterm(B, lnAbs(s))} + C$.`,
+          visual: fgraph({ f: `(${p}*x + ${q})/((${lin(rr)})*(${lin(s)}))`, F: `${A}*ln(abs(${lin(rr)})) + (${B})*ln(abs(${lin(s)}))`, x: [Math.min(rr, s) - 1.5, hi + 2.5], trim: 0.08, vlines: [{ x: rr }, { x: s }] }),
         };
       },
     }),
@@ -180,6 +183,7 @@ Each piece integrates to a logarithm, $\int \frac{A}{x - r}\,dx = A\ln\lvert x -
           ],
           teach: 'When the numerator’s degree is not lower than the denominator’s, divide first; the quotient integrates as a polynomial.',
           explain: t`$\dfrac{x^2}{(${lin(rr)})(${lin(s)})} = 1 + \dfrac{${A}}{${lin(rr)}} ${B < 0 ? '-' : '+'} \dfrac{${Math.abs(B)}}{${lin(s)}}$, so the integral is $x${fterm(A, lnAbs(rr))}${fterm(B, lnAbs(s))} + C$.`,
+          visual: fgraph({ f: `x^2/((${lin(rr)})*(${lin(s)}))`, x: [Math.min(rr, s) - 4, hi + 5], y: [-6, 8], vlines: [{ x: rr }, { x: s }], hlines: [{ y: 1, label: 'y = 1' }], caption: t`Far from the asymptotes the integrand levels off at $y = 1$ — the quotient from the division, which integrates to $x$.` }),
         };
       },
     }),
@@ -226,6 +230,7 @@ Each piece integrates to a logarithm, $\int \frac{A}{x - r}\,dx = A\ln\lvert x -
           hints: ['Check any decomposition by recombining it over a common denominator.', t`Cover-up for $\dfrac{A}{x - ${a}}$: $A = \dfrac{1}{${a} + ${a}}$.`],
           teach: 'Always recombine a decomposition — a missing constant factor shows up at once.',
           explain: t`$\dfrac{1}{x^2 - ${A}} = \dfrac{1}{${2 * a}}\left(\dfrac{1}{x - ${a}} - \dfrac{1}{x + ${a}}\right)$: cover-up gives $A = \tfrac{1}{${2 * a}}$ and $B = -\tfrac{1}{${2 * a}}$.`,
+          visual: fgraph({ f: `1/(x^2 - ${A})`, x: [-2.5 * a, 2.5 * a], trim: 0.08, extra: [{ fn: `1/(x - ${a}) - 1/(x + ${a})`, color: 'bad', dash: true, width: 1.8 }], vlines: [{ x: a }, { x: -a }], caption: t`$\frac{1}{x^2 - ${A}}$ (blue) and the student’s right-hand side (red dashes): the same shape, ${2 * a} times too tall.` }),
         };
       },
     }),
@@ -246,6 +251,7 @@ Each piece integrates to a logarithm, $\int \frac{A}{x - r}\,dx = A\ln\lvert x -
           hints: [t`Factor: $${polyTeX([rr * s, -(rr + s), 1])} = (${lin(rr)})(${lin(s)})$.`, 'Then cover up each factor in turn.'],
           teach: 'Factor the denominator, cover up for the constants, integrate to logarithms.',
           explain: t`$${polyTeX([rr * s, -(rr + s), 1])} = (${lin(rr)})(${lin(s)})$, the constants are $${A}$ and $${B}$, so the integral is $${fterm(A, lnAbs(rr), true)}${fterm(B, lnAbs(s))} + C$.`,
+          visual: fgraph({ f: `(${p}*x + ${q})/((${lin(rr)})*(${lin(s)}))`, x: [Math.min(rr, s) - 1.5, hi + 2.5], trim: 0.08, vlines: [{ x: rr }, { x: s }], caption: t`The integrand, with its two vertical asymptotes (dashed): one simple fraction each.` }),
         };
       },
     }),
@@ -260,6 +266,7 @@ Each piece integrates to a logarithm, $\int \frac{A}{x - r}\,dx = A\ln\lvert x -
           hints: [t`$\dfrac{1}{(x + ${a})(x + ${a + 1})} = \dfrac{1}{x + ${a}} - \dfrac{1}{x + ${a + 1}}$.`],
           teach: 'Decompose, integrate to a log of a ratio, then evaluate.',
           explain: t`$\Big[\ln\tfrac{x + ${a}}{x + ${a + 1}}\Big]_0^1 = \ln\tfrac{${a + 1}}{${a + 2}} - \ln\tfrac{${a}}{${a + 1}} = \ln\tfrac{${(a + 1) ** 2}}{${a * (a + 2)}} = ${fmt(val, 3)}$.`,
+          visual: fgraph({ f: `1/((x + ${a})*(x + ${a + 1}))`, x: [-0.3, 1.6], shade: { from: 0, to: 1 }, caption: 'The shaded area is the integral; the asymptotes lie off to the left.' }),
         };
       },
     }),

@@ -119,6 +119,7 @@ Vectors **add component by component** — geometrically, tip to tail — and a 
           },
           hints: [t`A unit vector is $\frac{\vec v}{|\vec v|}$.`, t`$|\vec v| = ${c}$.`],
           teach: 'Divide a vector by its magnitude to get a unit vector pointing the same way.',
+          visual: { type: 'graph', params: { x: [-2.6, 2.6], y: [-2.3, 2.3], equal: true, curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 2 * Math.PI], color: 'ink3', width: 1.4 }], arrows: [{ from: [0, 0], to: [(2 * v[0]) / c, (2 * v[1]) / c], color: 'accent', label: 'v' }] }, caption: t`The direction of $\vec v$ (drawn at length 2, not to scale) and the unit circle: the unit vector ends where the arrow crosses the circle.` },
           explain: t`$|\vec v| = ${c}$, so $\hat v = \frac{\vec v}{${c}} = \left\langle ${frac(v[0] / c)}, ${frac(v[1] / c)} \right\rangle$, whose length is $\frac{${c}}{${c}} = 1$.`,
         };
       },
@@ -195,6 +196,7 @@ Vectors **add component by component** — geometrically, tip to tail — and a 
       },
       hints: [t`Parallel vectors are scalar multiples: $\vec u = k\vec v$ for some number $k$.`],
       teach: t`Two vectors are parallel when one is a scalar multiple of the other; a negative $k$ points the opposite way, but along the same line.`,
+      visual: { type: 'graph', params: { x: [-6, 6], y: [-6, 6], equal: true, curves: [{ param: ['2t', '-3t'], t: [-3, 3], color: 'ink3', width: 1.2, dash: true }], arrows: [{ from: [0, 0], to: [2, -3], color: 'accent', label: '⟨2, −3⟩' }] }, caption: 'Every vector parallel to ⟨2, −3⟩ lies along the dashed line through the origin, pointing either way along it.' },
       explain: t`$\langle -4, 6\rangle = -2\langle 2, -3\rangle$: a scalar multiple with $k = -2$, so it lies along the same line, pointing the other way.`,
     }),
   ],
@@ -211,6 +213,7 @@ Vectors **add component by component** — geometrically, tip to tail — and a 
           errors,
           hints: [t`$2\vec a - \vec b = \langle 2a_x - b_x,\ 2a_y - b_y\rangle$.`],
           teach: 'Scale and add component by component; take the magnitude last.',
+          visual: arrows2D([{ to: a, color: 'accent', label: 'a' }, { to: b, color: 'warn', label: 'b' }], { caption: 'The two vectors, to scale.' }),
           explain: t`$2\vec a - \vec b = ${vecTeX(S)}$, with magnitude $\sqrt{${S[0] ** 2} + ${S[1] ** 2}} = ${c}$.`,
         };
       },
@@ -229,6 +232,7 @@ Vectors **add component by component** — geometrically, tip to tail — and a 
           ],
           hints: [t`Which quadrant is $${vecTeX(v)}$ in?`],
           teach: 'Find the quadrant first; arctan gives the right angle only for vectors pointing right.',
+          visual: arrows2D([{ to: v, label: 'v' }]),
           explain: t`The vector is in quadrant ${v[0] > 0 ? 'IV' : 'III'}, so $\theta = ${nice(ang, 4)}^\circ$.`,
         };
       },
@@ -244,6 +248,7 @@ Vectors **add component by component** — geometrically, tip to tail — and a 
           errors: [{ value: d * 1000, feedback: 'Speeds only add like that when the vectors are parallel. These are perpendicular: use Pythagoras.' }],
           hints: [t`New velocity $= \langle ${v}, ${d}\rangle$ km/s in a frame with $x$ along the old velocity.`, t`New speed $\sqrt{${v}^2 + ${d}^2}$; subtract $${v}$ and convert to m/s.`],
           teach: 'A burn perpendicular to the velocity mostly turns it; the speed changes only by about Δv²/(2v).',
+          visual: arrows2D([{ to: [v, 0], color: 'accent' }, { from: [v, 0], to: [v, 5 * d], color: 'warn' }, { to: [v, 5 * d], color: 'good' }], { pad: 0.5, aspect: 'wide', caption: 'Blue: velocity before the burn. Amber: the burn, at right angles (drawn five times longer so it shows). Green: velocity after — turned, and only slightly longer.' }),
           explain: t`$\sqrt{${v}^2 + ${d}^2} = ${nice(Math.sqrt(v * v + d * d), 6)}$ km/s, a gain of only $${nice(gain, 3)}$ m/s from a $${d * 1000}$ m/s burn — the burn mostly rotates the velocity, by $\arctan\frac{${d}}{${v}} = ${nice(deg(Math.atan(d / v)), 3)}^\circ$. The binomial series agrees: $\sqrt{v^2 + d^2} \approx v + \frac{d^2}{2v}$.`,
         };
       },

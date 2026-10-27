@@ -20,23 +20,31 @@ const SGR = 4.30e6, M87 = 6.5e9;
 const log = Math.log10;
 
 // light cones in ingoing Eddington–Finkelstein coordinates (G = c = 1, r and t* in units of M)
-const OUT = [2.15, 2.5, 3, 4, 6].map((x0) => -x0 - 4 * Math.log(x0 - 2));   // outgoing rays through (x0, 0), outside
-const INN = [0.5, 1, 1.5, 1.9, 1.98].map((x0) => -x0 - 4 * Math.log(2 - x0));   // and inside
+const TOP = 8.2;                                   // trim rays to the visible window (the plotter does not clip)
+const solve = (f, lo, hi) => { for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if ((f(lo) - TOP) * (f(m) - TOP) <= 0) hi = m; else lo = m; } return (lo + hi) / 2; };
+const OUT = [2.15, 2.5, 3, 4, 6].map((x0) => {        // outgoing rays through (x0, 0), outside: rise to the right
+  const c = -x0 - 4 * Math.log(x0 - 2), f = (x) => x + 4 * Math.log(x - 2) + c;
+  return { c, dom: [x0, f(8) > TOP ? round(solve(f, x0, 8), 5) : 8] };
+});
+const INN = [0.5, 1, 1.5, 1.9, 1.98].map((x0) => {    // and inside: rise to the left
+  const c = -x0 - 4 * Math.log(2 - x0), f = (x) => x + 4 * Math.log(2 - x) + c;
+  return { c, dom: [f(1e-4) > TOP ? round(solve(f, 1e-4, x0), 5) : 1e-4, x0] };
+});
 const coneGraph = (flash) => ({
   type: 'graph',
   params: {
-    x: [0, 8], y: [0, 12], xlabel: 'r / M', ylabel: 'time t* / M',
-    ...(flash ? { sliders: [{ key: 'R', label: 'A flash of light at $r$', min: 0.3, max: 7.5, step: 0.05, value: 4, unit: 'M', explain: 'At time t* = 4M. The two arrows show the two directions its light can go.' }] } : {}),
+    x: [0, 8], y: [0, 8], equal: true, aspect: 'square', xlabel: 'r / M', ylabel: 'time t* / M',
+    ...(flash ? { sliders: [{ key: 'R', label: 'A flash of light at $r$', min: 0.3, max: 7.5, step: 0.05, value: 4, unit: 'M', explain: 'At time t* = 3M. The two arrows show the two directions its light can go.' }] } : {}),
     curves: [
-      ...[2, 4, 6, 8, 10, 12, 14, 16, 18, 20].map((c) => ({ fn: `${c} - x`, color: 'ink3', width: 1 })),
-      ...OUT.map((c) => ({ fn: `x + 4ln(x - 2) + ${round(c, 6)}`, domain: [2.0001, 8], color: 'gold', width: 1.6 })),
-      ...INN.map((c) => ({ fn: `x + 4ln(2 - x) + ${round(c, 6)}`, domain: [0.0001, 1.9999], color: 'gold', width: 1.6 })),
+      ...[1, 2.5, 4, 5.5, 7, 8.5, 10, 11.5, 13, 14.5].map((c) => ({ fn: `${c} - x`, domain: [Math.max(0, round(c - TOP, 3)), Math.min(8, c)], color: 'ink3', width: 1 })),
+      ...OUT.map(({ c, dom }) => ({ fn: `x + 4ln(x - 2) + ${round(c, 6)}`, domain: dom, color: 'gold', width: 1.6 })),
+      ...INN.map(({ c, dom }) => ({ fn: `x + 4ln(2 - x) + ${round(c, 6)}`, domain: dom, color: 'gold', width: 1.6 })),
     ],
     vlines: [{ x: 2, label: 'horizon', color: 'bad' }],
     ...(flash ? {
       arrows: [
-        { from: ['R', 4], to: ['max(R - 1.1, 0)', '4 + R - max(R - 1.1, 0)'], color: 'accent2' },
-        { from: ['R', 4], to: ['max(R + 1.5(R - 2)/sqrt((R - 2)^2 + (R + 2)^2), 0)', '4 + 1.5(R + 2)/sqrt((R - 2)^2 + (R + 2)^2)'], color: 'gold' },
+        { from: ['R', 3], to: ['max(R - 1.1, 0)', '3 + R - max(R - 1.1, 0)'], color: 'accent2' },
+        { from: ['R', 3], to: ['max(R + 1.5(R - 2)/sqrt((R - 2)^2 + (R + 2)^2), 0)', '3 + 1.5(R + 2)/sqrt((R - 2)^2 + (R + 2)^2)'], color: 'gold' },
       ],
       readouts: [{ label: '“outgoing” light moves at $dr/dt^*$ =', expr: '(R - 2)/(R + 2)', digits: 3 }, { label: 'ingoing light', expr: '-1', digits: 2 }],
     } : {}),
@@ -57,7 +65,7 @@ const infallGraph = {
     points: [
       { x: 13.57, y: 2, color: 'gold', label: 'her clock: crosses' },
       { x: 14.91, y: 0, color: 'gold', label: 'r = 0' },
-      { x: 21, y: 2.02, color: 'accent', label: 'far-away time: never quite', r: 0.5 },
+      { x: 25, y: 2.45, color: 'accent', label: 'far-away time: never quite', r: 0.5 },
     ],
   },
   caption: 'A fall from rest far away into a non-spinning black hole (G = c = 1). Gold: r against the faller’s own clock — she reaches the horizon and r = 0 in finite time. Blue: r against the far-away bookkeeping time t, which runs to infinity at the horizon. Same fall, two clocks.',
@@ -230,9 +238,9 @@ $$\tau_\text{max} = \frac{\pi GM}{c^3}$$`,
           visual: {
             type: 'graph',
             params: {
-              x: [0, 75], y: [0, 7e5], xlabel: 'mass (solar masses)', ylabel: 'area (km²)',
-              curves: [{ fn: `${round((4 * Math.PI * rs(M_SUN) ** 2) / 1e6, 6)}x^2`, color: 'accent' }],
-              points: [{ x: m1, y: round(area(m1 * M_SUN) / 1e6, 1), color: 'gold', label: `${m1} and ${m2} M☉` }, { x: m2, y: round(area(m2 * M_SUN) / 1e6, 1), color: 'teal' }],
+              x: [0, 75], y: [0, 700], xlabel: 'mass (solar masses)', ylabel: 'area (thousand km²)',
+              curves: [{ fn: `${round((4 * Math.PI * rs(M_SUN) ** 2) / 1e9, 8)}x^2`, color: 'accent' }],
+              points: [{ x: m1, y: round(area(m1 * M_SUN) / 1e9, 3), color: 'gold', label: `${m1} and ${m2} M☉` }, { x: m2, y: round(area(m2 * M_SUN) / 1e9, 3), color: 'teal' }],
             },
             caption: 'Horizon area of a non-spinning black hole, 4π(2GM/c²)², against its mass: it grows as M².',
           },

@@ -183,7 +183,7 @@ Every kind of clock must slow by the same factor, or you could tell who is "real
           x: [0, 0.95], y: [0, 3.2], xlabel: 'speed v / c', ylabel: 'apparent tick rate ÷ rate at rest',
           curves: [
             { fn: 'sqrt((1+x)/(1-x))', color: 'warn', label: 'approaching: looks fast', labelAt: 0.5, labelDx: 8, labelDy: -14 },
-            { fn: 'sqrt((1-x)/(1+x))', color: 'violet', label: 'receding: looks slow', labelAt: 0.62, labelDx: 6, labelDy: 14 },
+            { fn: 'sqrt((1-x)/(1+x))', color: 'violet', label: 'receding: looks slow', labelAt: 0.45, labelDx: 4, labelDy: 18 },
             { fn: 'sqrt(1-x^2)', color: 'good', label: 'delays removed: slow either way', labelAt: 0.1, labelDx: 4, labelDy: -14 },
           ],
           hlines: [{ y: 1, color: 'ink3' }],

@@ -1,6 +1,7 @@
 // Dimensional analysis: both sides of a valid equation have the same dimensions.
 import { lesson, mcq, num, match } from '../../src/core/content.js';
 import { fmt } from '../../src/core/format.js';
+import { dimBars } from './_measure.js';
 
 const t = String.raw;
 const G0 = 9.80665;   // standard gravity, m/s², exact by definition
@@ -85,6 +86,7 @@ That makes dimensions a free check on every formula you write — and, used clev
       },
       hints: [t`$[m] = \mathsf{M}$ and $[a] = \mathsf{L\,T^{-2}}$ (metres per second per second).`],
       teach: 'Dimensions multiply like the quantities do: [F] = [m][a] = M × L T⁻².',
+      visual: dimBars([{ name: 'mass m', dims: [1, 0, 0] }, { name: 'acceleration a', dims: [0, 1, -2] }]),
       explain: t`$[F] = [m][a] = \mathsf{M}\times\mathsf{L\,T^{-2}} = \mathsf{M\,L\,T^{-2}}$ — in SI units, $1\ \text{N} = 1\ \text{kg}\cdot\text{m/s}^2$.`,
     }),
     match({
@@ -109,6 +111,7 @@ That makes dimensions a free check on every formula you write — and, used clev
       },
       hints: ['Find the dimensions of every term separately; all the terms of a sum must match.', t`$[a\,\Delta x] = \mathsf{L\,T^{-2}}\cdot\mathsf{L} = \mathsf{L^2\,T^{-2}}$. Which equation has a speed squared on the other side?`],
       teach: 'Every term in a sum must have the same dimensions — check them one at a time.',
+      visual: dimBars([{ name: 'speed v', dims: [0, 1, -1] }, { name: 'acceleration a', dims: [0, 1, -2] }, { name: 'time t', dims: [0, 0, 1] }, { name: 'distance Δx', dims: [0, 1, 0] }]),
       explain: t`In $v^2 = v_0^2 + 2a\,\Delta x$ every term is $\mathsf{L^2\,T^{-2}}$: $[v^2] = (\mathsf{L\,T^{-1}})^2$ and $[a\,\Delta x] = \mathsf{L\,T^{-2}}\cdot\mathsf{L}$. Passing the test does not prove an equation right; it only means it *could* be.`,
     }),
     mcq({
@@ -123,6 +126,7 @@ That makes dimensions a free check on every formula you write — and, used clev
       },
       hints: [t`Solve for $G$ first: $G = \dfrac{F r^2}{m_1 m_2}$.`, t`$[G] = \dfrac{\mathsf{M\,L\,T^{-2}}\cdot\mathsf{L^2}}{\mathsf{M^2}}$.`],
       teach: 'To find the dimensions of a constant, solve its equation for the constant and substitute the dimensions of everything else.',
+      visual: dimBars([{ name: 'force F', dims: [1, 1, -2] }, { name: 'distance r', dims: [0, 1, 0] }, { name: 'mass m', dims: [1, 0, 0] }]),
       explain: t`$[G] = \dfrac{[F][r]^2}{[m]^2} = \dfrac{\mathsf{M\,L\,T^{-2}}\cdot\mathsf{L^2}}{\mathsf{M^2}} = \mathsf{L^3\,M^{-1}\,T^{-2}}$, which is why $G = 6.674\times10^{-11}\ \text{m}^3\,\text{kg}^{-1}\,\text{s}^{-2}$.`,
     }),
     num({
@@ -136,6 +140,11 @@ That makes dimensions a free check on every formula you write — and, used clev
           errors: [{ value: Isp / G0, feedback: t`You divided by $g_0$. Check the units: s ÷ (m/s²) is s³/m, not a speed.` }],
           hints: [t`Check the units first: $\text{s}\times\text{m/s}^2 = \text{m/s}$, a speed.`, t`$v_e = ${Isp}\ \text{s}\times9.80665\ \text{m/s}^2$.`],
           teach: 'Units multiply and cancel like numbers: seconds times metres per second squared is metres per second.',
+          visual: {
+            type: 'graph',
+            params: { aspect: 'wide', x: [0, 500], y: [0, 5000], xticks: 5, yticks: 5, xlabel: 'specific impulse (s)', ylabel: 'exhaust velocity (m/s)', curves: [{ fn: '9.80665*x', color: 'accent' }], vlines: [{ x: Isp, label: `${Isp} s`, color: 'gold' }] },
+            caption: 'Exhaust velocity is specific impulse times a constant, g₀ — a straight line through the origin. Read it to check the size of your answer; compute the value.',
+          },
           explain: t`$v_e = I_\text{sp}\,g_0 = ${Isp}\ \text{s}\times9.80665\ \text{m/s}^2 = ${Math.round(ve)}\ \text{m/s}$, about ${fmt(ve / 1000, 2)} km/s.`,
           solution: 'Why quote seconds at all? In US units, thrust is in pounds-force and propellant flow in pounds of mass per second. One pound of mass weighs one pound-force at standard gravity, so thrust ÷ weight flow comes out as the same number of seconds. Quoted in seconds, specific impulse is the same number in every unit system.',
         };
@@ -202,6 +211,7 @@ Without redoing any algebra, what can you say?`,
       },
       hints: [t`$[p] = \mathsf{M\,L^{-1}\,T^{-2}}$ (a force per area) and $[\rho] = \mathsf{M\,L^{-3}}$.`, t`Divide to cancel the mass: $[p/\rho] = \mathsf{L^2\,T^{-2}}$.`],
       teach: 'Dimensional analysis finds the only combination of the inputs with the right dimensions — the physics, up to a pure number.',
+      visual: dimBars([{ name: 'pressure p', dims: [1, -1, -2] }, { name: 'density ρ', dims: [1, -3, 0] }]),
       explain: t`$[p/\rho] = \dfrac{\mathsf{M\,L^{-1}\,T^{-2}}}{\mathsf{M\,L^{-3}}} = \mathsf{L^2\,T^{-2}}$, so $\sqrt{p/\rho}$ is a speed. The full theory agrees: the speed of sound in a gas is $\sqrt{\gamma p/\rho}$ with $\gamma \approx 1.4$ for air, and nozzle exhaust speeds are a few times this. Dimensions found everything except the number.`,
     }),
     num({
@@ -218,6 +228,11 @@ Without redoing any algebra, what can you say?`,
           ],
           hints: [t`$G$ and $M$ do not change, so $T \propto r^{3/2}$.`, t`The factor is $${k}^{3/2} = ${k}\sqrt{${k}}$.`],
           teach: 'In a power law, multiplying the input by k multiplies the output by k raised to the same power.',
+          visual: {
+            type: 'graph',
+            params: { aspect: 'wide', x: [0, 10], y: [0, 32], xticks: 0.001, yticks: 0.001, xlabel: 'orbit radius', ylabel: 'period', curves: [{ fn: 'x^1.5', color: 'accent', label: 'T ∝ r^(3/2)', labelAt: 6 }, { fn: 'x', color: 'ink3', dash: true, label: 'T ∝ r', labelAt: 9 }] },
+            caption: 'The period grows faster than the radius (solid) — compare a straight proportion (dashed). The axes carry no numbers; compute the factor.',
+          },
           explain: t`$T \propto r^{3/2}$, so the period grows by $${k}^{3/2} = ${fmt(k ** 1.5, 3)}$. That is Kepler’s third law, $T^2 \propto r^3$, found without solving a single equation of motion.`,
         };
       },
@@ -234,6 +249,7 @@ Without redoing any algebra, what can you say?`,
       },
       hints: [t`Solve for $k$: $k = F/x$.`],
       teach: 'k = F/x, so its dimensions are those of a force divided by a length: N/m.',
+      visual: dimBars([{ name: 'force F', dims: [1, 1, -2] }, { name: 'stretch x', dims: [0, 1, 0] }]),
       explain: t`$[k] = [F]/[x] = \mathsf{M\,L\,T^{-2}}/\mathsf{L} = \mathsf{M\,T^{-2}}$. In SI units, $\text{N/m} = \text{kg/s}^2$.`,
     }),
   ],

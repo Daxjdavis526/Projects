@@ -186,6 +186,10 @@ $$x = x_\text{best} \pm \delta x, \qquad \text{relative uncertainty} = \frac{\de
           },
           hints: ['In a quotient, the result keeps as many significant figures as the least precise input.', `${d} m has four significant figures; ${tt} s has two.`],
           teach: 'A product or quotient keeps as many significant figures as its least precise factor.',
+          visual: (() => {
+            const lo = (d - 0.5) / (tt + 0.05), hi = (d + 0.5) / (tt - 0.05), half = Math.max(v - lo, hi - v);
+            return intervals([{ best: v, delta: half, label: 'speeds the data allow' }], { x: [v - 3 * half, v + 3.6 * half], xlabel: 'average speed (m/s)', xticks: 5, caption: `Reading ${tt} s as anything from ${(tt - 0.05).toFixed(2)} s to ${(tt + 0.05).toFixed(2)} s, the speed could lie anywhere in this bar — so only its first two figures mean anything.` });
+          })(),
           explain: t`$${d}/${tt} = ${fmt(v, 6)}$ on a calculator, but ${tt} s limits the result to two significant figures: ${sci(v, 2)}. Scientific notation makes the two figures unambiguous.`,
         };
       },
@@ -202,6 +206,7 @@ $$x = x_\text{best} \pm \delta x, \qquad \text{relative uncertainty} = \frac{\de
       },
       hints: ['For sums and differences, the rule is about decimal places, not significant figures.', 'Which length has the fewest decimal places?'],
       teach: 'A sum or difference keeps the fewest decimal places among the quantities added.',
+      visual: intervals([{ best: 15.876, delta: 0.0555, label: 'the true total lies in here' }], { x: [15.7, 16.08], xlabel: 'total length (m)', xticks: 8, caption: 'Each length is uncertain by half its last digit (±0.005, ±0.05 and ±0.0005 m), so the total is uncertain by about ±0.06 m: a second decimal place would mean nothing.' }),
       explain: 'The exact sum is 15.876 m, but 3.1 m is only known to the nearest 0.1 m, so the total is too: 15.9 m.',
     }),
     mcq({
@@ -246,6 +251,7 @@ $$x = x_\text{best} \pm \delta x, \qquad \text{relative uncertainty} = \frac{\de
           ],
           hints: [t`$\dfrac{\delta g}{g} = \dfrac{\delta L}{L} + \dfrac{\delta T}{T} + \dfrac{\delta T}{T}$ — the $4\pi^2$ is exact.`, t`$\dfrac{\delta L}{L} = ${pct(dL / L)}\%$ and $\dfrac{\delta T}{T} = ${pct(dT / T)}\%$.`],
           teach: 'A squared quantity contributes twice its relative uncertainty, because x² = x · x.',
+          visual: { type: 'oscillator', params: { kind: 'pendulum', L, theta0: 8 }, caption: 'A pendulum of the measured length. The period readout uses g = 9.8 m/s²; the drawing is not to scale.' },
           explain: t`$\dfrac{\delta g}{g} = ${pct(dL / L)}\% + 2\times${pct(dT / T)}\% = ${pct(rel / 100)}\%$. The timing dominates: measuring 10 swings and dividing by 10 is the classic way to shrink $\delta T$.`,
         };
       },
@@ -267,6 +273,7 @@ $$x = x_\text{best} \pm \delta x, \qquad \text{relative uncertainty} = \frac{\de
       },
       hints: ['To which decimal place is the uncertainty given?'],
       teach: 'Round the uncertainty to one or two significant figures, then round the value to the same decimal place.',
+      visual: intervals([{ best: 0.5234, delta: 0.03, label: '± 0.03 kg/s' }], { x: [0.45, 0.62], xlabel: 'mass flow (kg/s)', xticks: 6, caption: 'With an uncertainty of ±0.03 kg/s the true value could be anywhere in this bar — the digits after 0.52 are noise.' }),
       explain: 'The uncertainty, 0.03 kg/s, is in the second decimal place, so the value should end there too: 0.52 ± 0.03 kg/s.',
     }),
     num({
@@ -279,6 +286,10 @@ $$x = x_\text{best} \pm \delta x, \qquad \text{relative uncertainty} = \frac{\de
           errors: [{ value: Math.abs(d1 - d2), feedback: 'Uncertainties never cancel: each part could be off in either direction, so the worst cases add.' }, { value: Math.hypot(d1, d2), feedback: 'That is the quadrature sum for independent errors. Here, use the simple rule: absolute uncertainties add for a sum.' }],
           hints: ['For a sum, add the absolute uncertainties.'],
           teach: 'For a sum or a difference, the absolute uncertainties add.',
+          visual: (() => {
+            const lo = Math.min(m1, m2), hi = Math.max(m1, m2), span = hi - lo;
+            return intervals([{ best: m1, delta: d1, label: `${m1} ± ${d1} kg` }, { best: m2, delta: d2, label: `${m2} ± ${d2} kg`, color: 'violet' }], { x: [lo - 0.3 * span, hi + 0.45 * span], xlabel: 'mass (kg)', xticks: 6, caption: 'The two parts as ranges. Each could be off in either direction, independently of the other.' });
+          })(),
           explain: t`$\delta m = ${d1} + ${d2} = ${fmt(d1 + d2, 2)}$ kg, so the total is $${report(m1 + m2, d1 + d2).v} \pm ${report(m1 + m2, d1 + d2).d}$ kg.`,
         };
       },

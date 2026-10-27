@@ -88,8 +88,11 @@ because turning through a small angle $d\theta$ covers more ground farther out. 
             return {
               type: 'surface3d',
               params: {
-                z: '0', domain: [[0, X], [0, Y]], n: 4, colorBy: false, alpha: 0.35, axisLen: 2.9, axisLabels: ['x', 'y', 'z'], dist: 8, target: [X / 2, Y / 2, Z / 2],
+                z: '0', domain: [[0, X], [0, Y]], n: 4, colorBy: false, alpha: 0.35, axisLen: 2.9, axisLabels: ['x', 'y', 'z'], dist: 6, target: [X / 2, Y / 2, Z / 2],
                 curves: [
+                  // the box's twelve edges, thin
+                  ...[[0, 0], [X, 0], [X, Y], [0, Y]].map(([a, b]) => ({ param: [`${a}`, `${b}`, `${Z}*t`], t: [0, 1], color: 'ink3', width: 1 })),
+                  ...[0, Z].flatMap((h) => [[[0, 0], [X, 0]], [[X, 0], [X, Y]], [[X, Y], [0, Y]], [[0, Y], [0, 0]]].map(([[a0, b0], [a1, b1]]) => ({ param: [`${a0} + ${a1 - a0}*t`, `${b0} + ${b1 - b0}*t`, `${h}`], t: [0, 1], color: 'ink3', width: 1 }))),
                   { param: [`${X}*t`, `${Y}*t`, '0'], t: [0, 1], color: 'accent2', width: 2 },
                   { param: [`${X}`, `${Y}`, `${Z}*t`], t: [0, 1], color: 'violet', width: 2 },
                   { param: [`${X}*t`, `${Y}*t`, `${Z}*t`], t: [0, 1], color: 'gold', width: 3 },
@@ -221,7 +224,7 @@ because turning through a small angle $d\theta$ covers more ground farther out. 
           explain: t`$d\tau/dt = \sqrt{1 - ${nice(1 / x)}} = ${fmt(rate, 4)}$. The hovering clock runs slow compared with clocks far away; at the horizon the factor would reach zero. This metric (Schwarzschild’s) is the subject of step 20.`,
           visual: {
             type: 'graph',
-            params: { x: [1, 6], y: [0, 1.1], xlabel: 'r / r_s', ylabel: 'clock rate dτ/dt', curves: [{ fn: 'sqrt(1 - 1/x)', color: 'accent', domain: [1, 6] }], hlines: [{ y: 1, label: 'far away', color: 'ink3' }], vlines: [{ x: 1, label: 'horizon', color: 'warn' }], points: [{ x, y: rate, color: 'gold', label: 'the probe' }] },
+            params: { x: [1, 6], y: [0, 1.1], xlabel: 'r / r_s', ylabel: 'clock rate dτ/dt', curves: [{ fn: 'sqrt(1 - 1/x)', color: 'accent', domain: [1, 6] }], hlines: [{ y: 1, label: 'far away', color: 'ink3' }], vlines: [{ x: 1, label: 'horizon', color: 'warn' }] },
             caption: t`How fast a clock held at rest at radius $r$ ticks, compared with clocks far away: $\sqrt{1 - r_s/r}$.`,
           },
         };

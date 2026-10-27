@@ -218,6 +218,7 @@ What went wrong?`,
           hints: [t`Let $u = x^3 + ${k}$; then $x^2\,dx = \tfrac13\,du$ and you need $\int \tfrac{du}{u}$.`],
           teach: t`When the numerator is a multiple of the denominator’s derivative, the integral is a logarithm.`,
           explain: t`$\tfrac13\int\dfrac{du}{u} = \tfrac13\ln|u| = \tfrac13\ln\left(x^3 + ${k}\right) + C$ (the argument is positive here).`,
+          visual: { type: 'graph', params: { aspect: 'wide', x: [-0.1, 3.2], y: [-0.05, 1.05 * Math.max(...[0.5, 1, 1.5, 2, 2.5, 3].map((x) => (x * x) / (x ** 3 + k)))], curves: [{ fn: `x^2/(x^3 + ${k})`, color: 'accent', domain: [0, 3.2] }] }, caption: 'The integrand is positive for x > 0, so every antiderivative increases there.' },
         };
       },
     }),

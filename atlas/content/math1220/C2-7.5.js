@@ -112,6 +112,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
           },
           hints: [t`The direction vector is made of the coefficients of $t$.`],
           teach: t`In $\vec r(t) = \vec r_0 + t\vec v$, the constants give a point and the coefficients of $t$ give the direction.`,
+          visual: { type: 'calc-vectors3d', params: { range: fit(P, add(P, v)), lines: [{ point: P, dir: v, t: [-1.5, 1.5], color: 'teal' }], points: [{ at: P, label: t`t = 0`, color: 'teal' }], vectors: [{ from: P, to: add(P, v), color: 'accent' }] }, caption: 'Drag to rotate. The line, its point at t = 0, and the step it takes as t increases by 1.' },
           explain: t`The coefficients of $t$ are $${v.join(', ')}$, so the line runs along $${vecTeX(v)}$ through the point $${pointTeX(P)}$.`,
         };
       },
@@ -200,6 +201,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
       },
       hints: ['Parallel planes have parallel normals: the coefficients must be in proportion.', 'Then check that the constant is not in the same proportion, or it is the same plane.'],
       teach: 'Planes are parallel when their normals are; they are the same plane when the whole equations are proportional.',
+      visual: { type: 'calc-vectors3d', params: { range: 3.5, planes: [{ normal: [2, -1, 3], d: 5, size: 2.4, color: 'violet', alpha: 0.25, showNormal: true, normalLabel: t`\vec n` }] }, caption: 'Drag to rotate. The plane 2x − y + 3z = 5 and its normal ⟨2, −1, 3⟩. A parallel plane shares that normal direction.' },
       explain: t`$4x - 2y + 6z = 1$ has normal $\langle 4, -2, 6\rangle = 2\langle 2, -1, 3\rangle$, so it is parallel, and since $1 \ne 2\times5$ it is a different plane.`,
     }),
     num({
@@ -239,6 +241,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
       },
       hints: ['The line lies in both planes, so it is perpendicular to both normals.', t`Compute $\langle 1, 1, 1\rangle\times\langle 1, -1, 0\rangle$.`],
       teach: t`The line where two planes meet runs along $\vec n_1\times\vec n_2$, the direction perpendicular to both normals.`,
+      visual: { type: 'calc-vectors3d', params: { range: 4.5, planes: [{ normal: [1, 1, 1], d: 6, centre: [2, 2, 2], size: 2.2, color: 'accent', alpha: 0.2 }, { normal: [1, -1, 0], d: 0, centre: [2, 2, 2], size: 2.2, color: 'violet', alpha: 0.22 }], lines: [{ point: [2, 2, 2], dir: [1, 1, -2], t: [-1.2, 1.2], color: 'gold', width: 2.6 }] }, caption: 'Drag to rotate. The two planes and the gold line where they cross.' },
       explain: t`$\langle 1, 1, 1\rangle\times\langle 1, -1, 0\rangle = \langle (1)(0) - (1)(-1),\ (1)(1) - (1)(0),\ (1)(-1) - (1)(1)\rangle = \langle 1, 1, -2\rangle$. Check: it satisfies both $1 + 1 - 2 = 0$ and $1 - 1 = 0$ as a direction.`,
     }),
   ],
@@ -259,6 +262,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
           keys: [['=', '=']],
           hints: [t`A normal is $\overrightarrow{PQ}\times\overrightarrow{PR}$ — take any two sides from the same point.`, t`$\vec n = ${vecTeX(n)}$; the constant is $\vec n$ dotted with any of the points.`],
           teach: 'Plane through three points: normal from a cross product of two sides, constant from one point.',
+          visual: { type: 'calc-vectors3d', params: { range: fit(P, Q, R), triangles: [{ pts: [P, Q, R], color: 'gold' }], points: [{ at: P }, { at: Q }, { at: R }] }, caption: 'Drag to rotate. The three points and the triangle they make; the plane you want contains it.' },
           explain: t`$\vec n = ${vecTeX(n)}$ and $\vec n\cdot${pointTeX(P)} = ${d}$, so $${planeEq(n, d)}$. All three points satisfy it.`,
         };
       },
@@ -275,6 +279,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
           errors: [{ value: Math.abs(val), feedback: t`Divide by $|\vec n| = ${L}$.` }].filter((x) => Math.abs(x.value - Math.abs(val) / L) > 1e-6),
           hints: [t`$\dfrac{|ax_1 + by_1 + cz_1 - d|}{|\vec n|}$.`],
           teach: 'Point-to-plane distance: plug the point in, take the absolute value, divide by |n|.',
+          visual: { type: 'calc-vectors3d', params: { range: fit(Q, sub(Q, scale(n, val / (L * L)))), planes: [{ normal: n, point: sub(Q, scale(n, val / (L * L))), size: 2.4, color: 'violet', alpha: 0.22 }], points: [{ at: Q, label: 'Q' }] }, caption: 'Drag to rotate. The plane and the point.' },
           explain: t`$\frac{|${val}|}{${L}} = ${nice(Math.abs(val) / L, 4)}$.`,
         };
       },
@@ -293,6 +298,7 @@ Written out, the plane is $a(x - x_0) + b(y - y_0) + c(z - z_0) = 0$, or $ax + b
           errors: [{ value: 2 * v * Math.sin(th), feedback: t`Use half the angle: $\Delta v = 2v\sin\frac{\theta}{2}$.` }],
           hints: [t`$\cos\theta = \vec n_1\cdot\vec n_2$ (both are unit vectors).`, t`$\vec n_1\cdot\vec n_2 = ${nice(dot(n1, n2), 4)}$, so $\theta = ${nice(deg(th), 4)}^\circ$.`],
           teach: 'The angle between two orbital planes is the angle between their normals; turning the velocity through it is a plane change.',
+          visual: { type: 'calc-vectors3d', params: { range: 3, grid: false, planes: [{ normal: n1, d: 0, size: 2.3, color: 'accent', alpha: 0.2, showNormal: true, normalLabel: t`\vec n_1` }, { normal: n2, d: 0, size: 2.3, color: 'violet', alpha: 0.22, showNormal: true, normalLabel: t`\vec n_2` }] }, caption: 'Drag to rotate. The two orbital planes through Earth’s centre and their normals.' },
           explain: t`$\theta = \arccos(${nice(dot(n1, n2), 4)}) = ${nice(deg(th), 4)}^\circ$, so $\Delta v = 2(${v})\sin(${nice(deg(th) / 2, 4)}^\circ) = ${nice(dv, 3)}$ km/s. Turning a fast velocity is expensive, which is why launch sites and orbits are chosen to avoid plane changes, and why missions that need one often make it far from Earth, where $v$ is small, or combine it with another burn.`,
         };
       },

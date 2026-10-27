@@ -147,7 +147,7 @@ A flash of light from an event spreads out at speed $c$. With two directions of 
             events: [[0, 0, 'the event'], [s, d / C, 'earliest effect on Earth']],
             segments: [[-0.25 * s, d / C, 1.35 * s, d / C, 'accent2'], [0, 0, s, d / C, 'warn']],
             range: 1.25 * s, axes: false,
-            caption: 'Not to scale in time: the event (at the origin), Earth’s worldline (blue), and the edge of the event’s light cone reaching it.',
+            caption: 'The event (at the origin), Earth’s worldline (blue) and the edge of the event’s light cone reaching it: light moves at 45°.',
           }),
         };
       },

@@ -156,6 +156,7 @@ Shells let you keep $x$ as the variable even though the axis is vertical — no 
       hints: ['The axis is vertical. Which slices keep x as the variable?', 'A shell at x has radius x and height x³ + x.'],
       teach: 'Shells keep x as the variable when the axis is vertical, so you never have to invert the function.',
       explain: t`$V = 2\pi\int_0^1\left(x^4 + x^2\right)dx = 2\pi\left(\tfrac15 + \tfrac13\right) = \tfrac{16\pi}{15}$.`,
+      visual: { type: 'graph', params: { aspect: 'wide', x: [-0.6, 1.5], y: [-0.2, 2.3], curves: [{ fn: 'x^3 + x', color: 'accent', label: 'y = x³ + x', labelAt: 0.45, domain: [0, 1.15] }], shade: [{ fn: 'x^3 + x', from: 0, to: 1, color: 'accent', alpha: 0.22 }], vlines: [{ x: 0, color: 'bad', label: 'axis' }] }, caption: 'The region and the axis of rotation (red).' },
     }),
     num({
       id: 'horizontal-shells', difficulty: 3,
@@ -248,6 +249,7 @@ Shells let you keep $x$ as the variable even though the axis is vertical — no 
       hints: ['How is each kind of slice oriented relative to the axis?'],
       teach: 'Washers are perpendicular to the axis; shells are parallel to it — both give the same volume.',
       explain: 'Washers slice across the axis, shells along it. Pick whichever makes the radii and heights easy to write down.',
+      visual: { type: 'graph', params: { aspect: 'wide', x: [-0.6, 2.4], y: [-0.15, 1.2], curves: [{ fn: '2*x - x^2', color: 'accent', domain: [0, 2] }], shade: [{ fn: '2*x - x^2', from: 0, to: 2, color: 'accent', alpha: 0.18 }, { fn: '2*x - x^2', from: 1.4, to: 1.46, color: 'gold', alpha: 0.9 }, { fn: '0.56', lower: '0.5', from: '1 - sqrt(0.47)', to: '1 + sqrt(0.47)', color: 'teal', alpha: 0.85 }], vlines: [{ x: 0, color: 'bad', label: 'axis' }] }, caption: 'A region beside the axis of rotation (red), with one vertical strip (gold) and one horizontal strip (teal).' },
     }),
   ],
   sources: [{ label: 'OpenStax Calculus Vol. 2, §2.3 Volumes of Revolution: Cylindrical Shells', url: 'https://openstax.org/books/calculus-volume-2/pages/2-3-volumes-of-revolution-cylindrical-shells' }],

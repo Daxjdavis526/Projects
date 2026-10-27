@@ -79,6 +79,15 @@ At the top of a throw the velocity is zero **for an instant**, but the accelerat
       hints: ['What force acts on the ball once it has left the hand?', 'Is the velocity changing at the top?'],
       teach: 'Gravity never switches off: at the top only the velocity is zero, and the acceleration is still g downward.',
       explain: t`Only gravity acts, so $a = -9.8\ \text{m/s}^2$ throughout. At the top $v$ passes through zero on its way from positive to negative — if $a$ were zero there, the ball would hang in the air.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 2.8], y: [0, 10.5], xlabel: 't (s)', ylabel: 'y (m)',
+          curves: [{ fn: '1.5 + 12*x - 4.9*x^2', domain: [0, 2.568], color: 'accent' }],
+          points: [{ x: 1.2245, y: 8.847, color: 'warn', label: 'top' }],
+        },
+        caption: 'Height against time for a ball thrown straight up at 12 m/s from 1.5 m.',
+      },
     }),
     mcq({
       id: 'heavy-light', difficulty: 1,
@@ -93,6 +102,19 @@ At the top of a throw the velocity is zero **for an instant**, but the accelerat
       hints: ['Does the free-fall acceleration depend on mass?', t`The drop time from height $h$ is $\sqrt{2h/g}$ — where is the mass?`],
       teach: 'Without air resistance every object falls with the same acceleration g, whatever its mass.',
       explain: t`Both accelerate at $g$, so both take $\sqrt{2(2)/9.8} = 0.64$ s. (In real air the difference for two dense balls over 2 m is far too small to see.)`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 4], y: [-0.4, 2.8], axes: false, grid: false, xlabel: '', ylabel: '',
+          curves: [{ fn: '0', color: 'ink3', width: 2 }, { fn: '2', color: 'ink4', width: 1, dash: true }],
+          points: [
+            { x: 1.2, y: 2, color: 'warn', r: 9 }, { x: 2.8, y: 2, color: 'accent', r: 9 },
+            { x: 0.75, y: 2.5, r: 0.1, color: 'warn', label: '5 kg iron' }, { x: 2.35, y: 2.5, r: 0.1, color: 'accent', label: '1 kg wood' },
+            { x: 0.1, y: 0.3, r: 0.1, color: 'ink2', label: 'the ground, 2 m below' },
+          ],
+        },
+        caption: 'Two balls of the same size, released together from the same height.',
+      },
     }),
     num({
       id: 'drop-time', difficulty: 1,
@@ -209,6 +231,16 @@ At the top of a throw the velocity is zero **for an instant**, but the accelerat
       hints: [t`Use $v^2 = v_0^2 - 2g\,\Delta y$ with $\Delta y = 0$.`, 'Which sign of v fits a ball moving down?'],
       teach: 'Without air resistance, a thrown object passes its launch height with the launch speed, moving the opposite way.',
       explain: t`With $\Delta y = 0$, $v^2 = v_0^2$, so $|v| = 12$ m/s; it is falling, so $v = -12$ m/s. The flight up and the flight down are mirror images.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 3.4], y: [-12.5, 9.5], xlabel: 't (s)', ylabel: 'y (m)',
+          curves: [{ fn: '12*x - 4.9*x^2', domain: [0, 3.2], color: 'accent' }],
+          hlines: [{ y: 0, label: 'roof edge', color: 'ink3' }],
+          points: [{ x: 0, y: 0, color: 'gold', label: 'thrown' }, { x: 2.449, y: 0, color: 'gold', label: 'returns' }],
+        },
+        caption: 'Height relative to the roof edge against time (up positive).',
+      },
     }),
     mcq({
       id: 'sign-error', difficulty: 2, kind: 'error',
@@ -228,6 +260,15 @@ At the top of a throw the velocity is zero **for an instant**, but the accelerat
       hints: ['Which way does the acceleration point?', 'With up positive, a downward acceleration is negative.'],
       teach: 'Choose a positive direction and give every quantity its sign: with up positive, a = −g.',
       explain: t`$v = v_0 - gt = 10 - 19.6 = -9.6$ m/s: the ball reached the top at about 1.0 s and is now falling at 9.6 m/s.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 2.4], y: [-15, 34], xlabel: 't (s)', ylabel: 'v (m/s)',
+          curves: [{ fn: '10 + 9.8*x', domain: [0, 2.2], color: 'violet', dash: true, label: 'the student’s v(t)', labelAt: 0.5 }],
+          points: [{ x: 2, y: 29.6, color: 'violet' }],
+        },
+        caption: 'The student’s formula drawn as a velocity–time graph, with up positive.',
+      },
     }),
   ],
   checkpoint: [
@@ -243,6 +284,16 @@ At the top of a throw the velocity is zero **for an instant**, but the accelerat
           hints: [t`Take down as positive: $v^2 = v_0^2 + 2gh$.`],
           teach: 'Without the time, v² = v₀² + 2gh links the speeds to the height fallen.',
           explain: t`$v = \sqrt{${nice(v0)}^2 + 2(9.8)(${h})} = \sqrt{${nice(v0 * v0)} + ${nice(2 * G * h)}} = ${s3(v)}$ m/s.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 4], y: [-0.08 * h, h * 1.15], axes: false, grid: false, xlabel: '', ylabel: '',
+              curves: [{ fn: '0', color: 'ink3', width: 2 }, { param: ['0.8', 't'], t: [0, h], color: 'ink4', width: 1, dash: true }],
+              points: [{ x: 2, y: h, color: 'accent', r: 6 }, { x: 0.85, y: h / 2, r: 0.1, color: 'ink2', label: `${h} m` }, { x: 2.3, y: h * 0.9, r: 0.1, color: 'good', label: `${v0} m/s` }],
+              arrows: [{ from: [2, h], to: [2, h * 0.72], color: 'good' }],
+            },
+            caption: 'The set-up: the tool leaves the scaffold moving straight down.',
+          },
         };
       },
     }),
@@ -258,6 +309,16 @@ At the top of a throw the velocity is zero **for an instant**, but the accelerat
           hints: ['After burnout the rocket is in free fall — even while it is still going up.', t`It climbs a further $v_b^2/(2g)$ above the burnout altitude.`],
           teach: 'After burnout a rocket is a projectile: it coasts upward with a = −g until its velocity reaches zero.',
           explain: t`Extra climb: $\dfrac{${vb}^2}{2(9.8)} = ${s3((vb * vb) / (2 * G))}$ m, so the peak is $${hb} + ${s3((vb * vb) / (2 * G))} = ${s3(H)}$ m. In reality air drag at these speeds would cut this noticeably.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 4], y: [0, hb * 1.5], axes: false, grid: false, xlabel: '', ylabel: '',
+              curves: [{ fn: '0', color: 'ink3', width: 2 }, { param: ['0.8', 't'], t: [0, hb], color: 'ink4', width: 1, dash: true }],
+              points: [{ x: 2, y: hb, color: 'accent', r: 6 }, { x: 0.85, y: hb / 2, r: 0.1, color: 'ink2', label: `${hb} m` }, { x: 2.3, y: hb * 1.22, r: 0.1, color: 'good', label: `${vb} m/s` }, { x: 2.3, y: hb * 0.97, r: 0.1, color: 'ink2', label: 'burnout' }],
+              arrows: [{ from: [2, hb], to: [2, hb * 1.3], color: 'good' }],
+            },
+            caption: 'The rocket at burnout (a sketch: only the height is to scale).',
+          },
         };
       },
     }),
@@ -274,6 +335,15 @@ At the top of a throw the velocity is zero **for an instant**, but the accelerat
       hints: ['What acts on the hammer once it has left the hand?'],
       teach: 'In free fall the acceleration is the local g, downward, at every point of the flight — including the top.',
       explain: t`Only the Moon’s gravity acts, so the acceleration is $1.62\ \text{m/s}^2$ downward throughout the flight, including the instant at the top.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 6.6], y: [0, 9.5], xlabel: 't (s)', ylabel: 'y (m)',
+          curves: [{ fn: '5*x - 0.81*x^2', domain: [0, 6.173], color: 'accent' }],
+          points: [{ x: 3.086, y: 7.716, color: 'warn', label: 'top' }],
+        },
+        caption: 'The hammer’s height above the astronaut’s hand against time, tossed up at 5 m/s on the Moon.',
+      },
     }),
   ],
   sources: [

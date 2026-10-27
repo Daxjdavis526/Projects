@@ -56,6 +56,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
   practice: [
     mcq({
       id: 'direction', difficulty: 1,
+      visual: { type: 'calc-series', params: { view: 'sums', showTerms: false, term: '1/n^2', compare: [{ term: '1/n', label: 'a larger series that diverges' }, { term: '2/n^2', label: 'a larger series that converges', color: 'teal' }], N: 40, y: [0, 4.6] }, caption: t`$\sum\frac{1}{n^2}$ (blue) converges, and two different larger series sit above it: one diverges, one converges. A convergent smaller series pins down nothing.` },
       prompt: t`Suppose $0 \le a_n \le b_n$ for all $n$, and $\sum a_n$ converges. What can you conclude about $\sum b_n$?`,
       choices: ['Nothing', t`$\sum b_n$ converges`, t`$\sum b_n$ diverges`, t`$\sum b_n \le \sum a_n$`],
       answer: 0,
@@ -84,6 +85,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
           hints: ['Keep only the highest power of n on the top and on the bottom.', t`$\dfrac{n}{${c}n^3} = \dfrac{1}{${c}n^2}$.`],
           teach: 'Choose the benchmark by keeping only the dominant power of n on top and bottom.',
           explain: t`$a_n \approx \frac{n}{${c}n^3} = \frac{1}{${c}n^2}$, so take $b_n = \frac1{n^2}$: $\frac{a_n}{b_n} \to \frac{1}{${c}}$, a finite positive number, and $\sum\frac{1}{n^2}$ converges — so the series converges.`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: `(n + ${a})/(${c}n^3 + ${d})*n^2`, termLabel: 'aₙ ÷ (1/n²)', compare: [{ term: `(n + ${a})/(${c}n^3 + ${d})*n`, label: 'aₙ ÷ (1/n)' }, { term: `(n + ${a})/(${c}n^3 + ${d})*n^3`, label: 'aₙ ÷ (1/n³)', color: 'teal' }], N: 40, y: [0, 1.5] }, caption: 'Each sequence divides aₙ by a candidate benchmark. The right benchmark gives a ratio that levels off at a positive number; the others head to 0 or run off the top.' },
         };
       },
     }),
@@ -105,6 +107,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
     }),
     multi({
       id: 'verdicts', difficulty: 2,
+      visual: { type: 'calc-series', params: { view: 'sums', N: { min: 5, max: 60, value: 40 }, presetLabel: 'Series', presets: [{ label: '1/(2ⁿ+n)', term: '1/(2^n + n)' }, { label: 'ln n / n', term: 'ln(n)/n' }, { label: '1/(n²+5n)', term: '1/(n^2 + 5n)' }, { label: 'sin²n / n²', term: 'sin(n)^2/n^2' }, { label: '1/(√n+1)', term: '1/(sqrt(n) + 1)' }] }, caption: 'Partial sums of each series — suggestive, never proof: the comparisons decide.' },
       prompt: 'Which of these series converge? Select all that do.',
       choices: [t`$\displaystyle\sum_{n=1}^\infty \frac{1}{2^n + n}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{\ln n}{n}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{1}{n^2 + 5n}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{\sin^2 n}{n^2}$`, t`$\displaystyle\sum_{n=1}^\infty \frac{1}{\sqrt n + 1}$`],
       answer: [0, 2, 3],
@@ -168,6 +171,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
           hints: [t`Sum the benchmark: $\displaystyle\sum_{n=1}^\infty \frac{1}{${b}^n}$ is geometric.`, t`First term $\frac{1}{${b}}$, ratio $\frac{1}{${b}}$.`],
           teach: 'A comparison does more than decide convergence: the benchmark’s sum bounds the sum you could not compute.',
           explain: t`$\displaystyle\sum_{n=1}^\infty \frac{1}{${b}^n} = \frac{1/${b}}{1 - 1/${b}} = \frac{1}{${b - 1}}$, so the sum is less than $${frac(bound)}$.`,
+          visual: { type: 'calc-series', params: { view: 'sums', term: `1/(${b}^n + ${k})`, compare: { term: `1/${b}^n`, label: `benchmark Σ 1/${b}ⁿ` }, N: 15 }, caption: 'The series (blue) under its geometric benchmark (dashed).' },
         };
       },
     }),
@@ -205,6 +209,7 @@ $$0 \le a_n \le b_n \ \text{ and } \ \sum b_n \text{ converges} \;\Longrightarro
           hints: [t`$\dfrac{1}{R_n} = \dfrac{1}{${R0}}\cdot\dfrac{1}{n^2 + 1} < \dfrac{1}{${R0}}\cdot\dfrac{1}{n^2}$.`, t`So $G < \dfrac{1}{${R0}}\cdot\dfrac{\pi^2}{6}$ siemens.`],
           teach: 'Comparison turns an infinite sum you cannot do into a guaranteed bound — here, a finite conductance for an infinite network.',
           explain: t`$G < \dfrac{1}{${R0}}\cdot\dfrac{\pi^2}{6} \approx ${tex(bound, 3)}$ S, so the equivalent resistance is more than $${fmt(1 / bound, 3)}\ \Omega$. (The exact sum, $\frac{\pi\coth\pi - 1}{2${R0 === 1 ? '' : '\\cdot ' + R0}} \approx ${tex((Math.PI / Math.tanh(Math.PI) - 1) / 2 / R0, 3)}$ S, needs more than comparison.)`,
+          visual: { type: 'calc-series', params: { view: 'terms', term: '1/(n^2 + 1)', termLabel: 'conductance of resistor n, × R₀', compare: { term: '1/n^2', label: 'comparison 1/n²' }, N: 10, zero: true }, caption: t`The conductance of each resistor in units of $1/R_0$, each below the comparison value $1/n^2$.` },
         };
       },
     }),

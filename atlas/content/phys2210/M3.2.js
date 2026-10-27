@@ -107,26 +107,6 @@ It is the slope of the velocity–time graph, measured in metres per second per 
         caption: 'A motion diagram: where the car is every 0.5 s. It moves toward −x and the gaps between images shrink.',
       },
     }),
-    match({
-      id: 'sign-table', difficulty: 2,
-      prompt: 'Match each moment to what the object is doing.',
-      left: [t`$v = +5$ m/s, $a = +2$ m/s²`, t`$v = +5$ m/s, $a = -2$ m/s²`, t`$v = -5$ m/s, $a = -2$ m/s²`, t`$v = -5$ m/s, $a = +2$ m/s²`],
-      right: ['speeding up, moving in +x', 'slowing down, moving in +x', 'speeding up, moving in −x', 'slowing down, moving in −x', 'moving at constant speed'],
-      answer: [0, 1, 2, 3],
-      hints: ['The sign of v gives the direction of motion.', 'Same signs: speeding up. Opposite signs: slowing down.'],
-      teach: 'Speeding up or slowing down depends on whether v and a share a sign, not on the sign of a alone.',
-      explain: t`Same signs (rows 1 and 3): the speed grows. Opposite signs (rows 2 and 4): the speed shrinks. None of them has constant speed, because $a \ne 0$ is parallel to the motion.`,
-      visual: {
-        type: 'graph',
-        params: {
-          x: [-4.6, 4], y: [-0.7, 3.6], axes: false, grid: false, xlabel: '', ylabel: '',
-          curves: [{ param: ['0', 't'], t: [-0.5, 3.5], color: 'ink4', width: 1 }],
-          arrows: [{ from: [0, 3.15], to: [2.5, 3.15], color: 'good', label: 'v' }, { from: [0, 2.8], to: [1.0, 2.8], color: 'warn', label: 'a' }, { from: [0, 2.15], to: [2.5, 2.15], color: 'good' }, { from: [0, 1.8], to: [-1.0, 1.8], color: 'warn' }, { from: [0, 1.15], to: [-2.5, 1.15], color: 'good' }, { from: [0, 0.8], to: [-1.0, 0.8], color: 'warn' }, { from: [0, 0.15], to: [-2.5, 0.15], color: 'good' }, { from: [0, -0.2], to: [1.0, -0.2], color: 'warn' }],
-          points: [{ x: -4.4, y: 3.2, r: 0.1, color: 'ink2', label: 'row 1' }, { x: -4.4, y: 2.2, r: 0.1, color: 'ink2', label: 'row 2' }, { x: -4.4, y: 1.2, r: 0.1, color: 'ink2', label: 'row 3' }, { x: -4.4, y: 0.2, r: 0.1, color: 'ink2', label: 'row 4' }],
-        },
-        caption: 'The four moments, top to bottom: velocity in green, acceleration in amber (+x to the right).',
-      },
-    }),
     {
       type: 'slider', id: 'set-rest', difficulty: 2, param: 'time',
       instruction: 'Drag the time slider to the right moment, then check.',
@@ -212,6 +192,26 @@ It is the slope of the velocity–time graph, measured in metres per second per 
             caption: 'Up is positive, so her velocity is negative while she falls; its slope is her acceleration. Drawn with the acceleration held at its average value — the real opening is jerkier.',
           },
         };
+      },
+    }),
+    match({
+      id: 'sign-table', difficulty: 2,
+      prompt: 'Match each moment to what the object is doing.',
+      left: [t`$v = +5$ m/s, $a = +2$ m/s²`, t`$v = +5$ m/s, $a = -2$ m/s²`, t`$v = -5$ m/s, $a = -2$ m/s²`, t`$v = -5$ m/s, $a = +2$ m/s²`],
+      right: ['speeding up, moving in +x', 'slowing down, moving in +x', 'speeding up, moving in −x', 'slowing down, moving in −x', 'moving at constant speed'],
+      answer: [0, 1, 2, 3],
+      hints: ['The sign of v gives the direction of motion.', 'Same signs: speeding up. Opposite signs: slowing down.'],
+      teach: 'Speeding up or slowing down depends on whether v and a share a sign, not on the sign of a alone.',
+      explain: t`Same signs (rows 1 and 3): the speed grows. Opposite signs (rows 2 and 4): the speed shrinks. None of them has constant speed, because $a \ne 0$ is parallel to the motion.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-4.6, 4], y: [-0.7, 3.6], axes: false, grid: false, xlabel: '', ylabel: '',
+          curves: [{ param: ['0', 't'], t: [-0.5, 3.5], color: 'ink4', width: 1 }],
+          arrows: [{ from: [0, 3.15], to: [2.5, 3.15], color: 'good', label: 'v' }, { from: [0, 2.8], to: [1.0, 2.8], color: 'warn', label: 'a' }, { from: [0, 2.15], to: [2.5, 2.15], color: 'good' }, { from: [0, 1.8], to: [-1.0, 1.8], color: 'warn' }, { from: [0, 1.15], to: [-2.5, 1.15], color: 'good' }, { from: [0, 0.8], to: [-1.0, 0.8], color: 'warn' }, { from: [0, 0.15], to: [-2.5, 0.15], color: 'good' }, { from: [0, -0.2], to: [1.0, -0.2], color: 'warn' }],
+          points: [{ x: -4.4, y: 3.2, r: 0.1, color: 'ink2', label: 'row 1' }, { x: -4.4, y: 2.2, r: 0.1, color: 'ink2', label: 'row 2' }, { x: -4.4, y: 1.2, r: 0.1, color: 'ink2', label: 'row 3' }, { x: -4.4, y: 0.2, r: 0.1, color: 'ink2', label: 'row 4' }],
+        },
+        caption: 'The four moments, top to bottom: velocity in green, acceleration in amber (+x to the right).',
       },
     }),
   ],

@@ -142,7 +142,7 @@ A coordinate system can also break down somewhere with nothing wrong there. At t
           x: [0, 4], y: [0, 6], xlabel: 'r / (2GM/c²)', ylabel: '',
           curves: [
             { fn: '1/(1 - 1/x)', color: 'bad', domain: [1.19, 4], label: 'a Schwarzschild metric term, 1/(1 − 2GM/rc²)', labelAt: 1.6, labelDx: 8, labelDy: -6 },
-            { fn: '1/x^3', color: 'good', domain: [0.55, 4], label: 'tidal stretching, ∝ 1/r³', labelAt: 0.8, labelDx: 8, labelDy: 2 },
+            { fn: '1/x^3', color: 'good', domain: [0.55, 4], label: 'tidal stretching, ∝ 1/r³', labelAt: 2.1, labelDx: 6, labelDy: -14 },
           ],
           vlines: [{ x: 1, label: 'horizon', color: 'warn' }],
         },

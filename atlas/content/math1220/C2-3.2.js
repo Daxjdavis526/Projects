@@ -198,6 +198,7 @@ That one move solves radioactive decay, Newton’s law of cooling, a draining ta
   checkpoint: [
     mcq({
       id: 'cp-first-step', difficulty: 2,
+      visual: { type: 'phase', params: { slope: true, f: 'y^2*sin(t)', x: [0, 6], y: [-2, 2], start: [0, 0.5], h: 0.5 }, caption: t`The slope field of $y' = y^2\sin t$: the slopes depend on both $t$ and $y$, but only through the product of a $t$-part and a $y$-part.` },
       prompt: t`To solve $\dfrac{dy}{dt} = y^2\sin t$ by separating variables, which first step is right?`,
       choices: [t`$\dfrac{dy}{y^2} = \sin t\,dt$`, t`$y^2\,dy = \sin t\,dt$`, t`$\dfrac{dy}{\sin t} = y^2\,dt$`, t`$y = \int y^2\sin t\,dt = -y^2\cos t + C$`],
       answer: 0,
@@ -239,6 +240,7 @@ That one move solves radioactive decay, Newton’s law of cooling, a draining ta
           hints: [t`Separate: $v\,dv = -GM\,r^{-2}\,dr$, then integrate: $\tfrac12 v^2 = \dfrac{GM}{r} + C$.`, t`Fix $C$ with $v = ${v0}$ km/s at $r = R_E$ (work in m and m/s), so $v^2 = v_0^2 - 2GM\left(\dfrac{1}{R_E} - \dfrac{1}{${m}R_E}\right)$.`],
           teach: 'Separating v dv = −GM r⁻² dr is energy conservation in disguise: ½v² − GM/r stays constant.',
           explain: t`$v^2 = (${v0 * 1e3})^2 - 2(3.986\times10^{14})\left(1 - \tfrac1{${m}}\right)/(6.371\times10^{6}) = ${fmt((v * 1e3) ** 2, 4)}\ \text{m}^2/\text{s}^2$, so $v \approx ${fmt(v, 3)}$ km/s. Multiplying $\tfrac12 v^2 - \frac{GM}{r} = \text{const}$ by the mass gives kinetic plus gravitational potential energy: conserved.`,
+          visual: { type: 'graph', params: { x: [0.8, 4.6], y: [-70, 5], xlabel: 'r / R_E', ylabel: 'MJ/kg', curves: [{ fn: '-62.57/x', domain: [1, 4.5], color: 'accent', label: 'potential energy per kg, −GM/r', labelAt: 2.2, labelDy: 18 }], vlines: [{ x: 1, label: 'surface', color: 'ink3' }, { x: m, label: `r = ${m}R_E`, color: 'gold' }] }, caption: t`The gravitational potential energy per kilogram, $-GM/r$. The probe climbs this hill from the surface to the gold line, paying for it with kinetic energy.` },
         };
       },
     }),

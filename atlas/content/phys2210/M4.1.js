@@ -2,7 +2,7 @@
 // one-dimensional motion, and the velocity is tangent to the path.
 import { lesson, mcq, num, expr } from '../../src/core/content.js';
 import { nice } from '../../src/core/format.js';
-import { s3, D2R } from './_kinematics.js';
+import { s3, D2R, span } from './_kinematics.js';
 
 const t = String.raw;
 
@@ -266,6 +266,16 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
       hints: ['Build the velocity vector from its components.'],
       teach: 'A zero component only removes that direction from the velocity; the other component still sets the motion.',
       explain: t`$\vec v = 3\,\hat\imath + 0\,\hat\jmath$ m/s: horizontal, speed 3 m/s. Nothing more is guaranteed about $y$ or the acceleration.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [0, 12.5], y: [-2.5, 6.5], equal: true, xlabel: 'x (m)', ylabel: 'y (m)',
+          curves: [{ param: ['3*t', '2 + (t - 2)^3/2'], t: [0, 4], color: 'ink3', width: 1.8 }],
+          points: [{ x: 6, y: 2, color: 'ink' }],
+          arrows: [{ from: [6, 2], to: [9, 2], color: 'gold', label: 'v' }],
+        },
+        caption: t`One path on which $v_y = 0$ at the marked point: the object pauses its climb there, then climbs again.`,
+      },
     }),
   ],
   checkpoint: [
@@ -281,6 +291,15 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
           hints: ['Differentiate each component, then combine.'],
           teach: 'Speed is the size of the velocity vector, built from the derivatives of the coordinates.',
           explain: t`$v_x = ${a}$, $v_y = ${b} - ${nice(2 * c)}t = ${nice(vy)}$ m/s at $t = ${t1}$ s, so $|\vec v| = \sqrt{${a}^2 + (${nice(vy)})^2} = ${s3(v)}$ m/s.`,
+          visual: {
+            type: 'graph',
+            params: {
+              x: [-1, a * (t1 + 1) + 1], y: span([...Array(21)].map((_, k) => { const tt = ((t1 + 1) * k) / 20; return b * tt - c * tt * tt; }), 0.15), equal: true, xlabel: 'x (m)', ylabel: 'y (m)',
+              curves: [{ param: [`${a}*t`, `${b}*t - ${c}*t^2`], t: [0, t1 + 1], color: 'ink3', width: 1.8 }],
+              points: [{ x: a * t1, y: b * t1 - c * t1 * t1, color: 'gold', label: `t = ${t1} s` }],
+            },
+            caption: 'The puck’s path across the ice, seen from above.',
+          },
         };
       },
     }),
@@ -324,6 +343,16 @@ Each component is a one-dimensional motion of its own: $v_x$ depends only on how
       hints: ['What is the satellite’s displacement after one full orbit?'],
       teach: 'Average velocity is displacement over time, so any closed path gives zero, however fast the motion.',
       explain: t`After one orbit $\Delta\vec r = \vec 0$, so $\vec v_\text{avg} = \vec 0$. The average speed is still 7.7 km/s.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-2, 2], y: [-1.8, 1.8], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+          curves: [{ param: ['cos(t)', 'sin(t)'], t: [0, 6.2832], color: 'accent', width: 2 }, { param: ['1.5*cos(t)', '1.5*sin(t)'], t: [0, 6.2832], color: 'ink3', width: 1.4, dash: true }],
+          points: [{ x: 1.5, y: 0, color: 'gold', label: 'start = end' }],
+          arrows: [{ from: [1.5, 0], to: [1.5, 0.75], color: 'gold', label: 'v' }],
+        },
+        caption: 'One orbit, drawn schematically: the real orbit is only about 6% wider than the Earth.',
+      },
     }),
   ],
   sources: [{ label: 'OpenStax University Physics Vol. 1, §4.1', url: 'https://openstax.org/books/university-physics-volume-1/pages/4-1-displacement-and-velocity-vectors' }],
