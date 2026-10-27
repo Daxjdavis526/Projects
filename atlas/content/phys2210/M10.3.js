@@ -199,7 +199,7 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
         return {
           prompt: t`A solid ball of radius ${R} m is fixed at the end of a light arm, its centre ${d} m from the axis. By what percentage does treating the ball as a point mass at its centre underestimate the moment of inertia? (Solid sphere: $I_\text{cm} = \tfrac25 MR^2$.)`,
           answer: pct, units: '%', tol: { rel: 0.02 },
-          errors: [{ value: (100 * extra) / (d * d), feedback: 'Close — but compare the missing part with the true moment of inertia, I_cm + Md², not with Md² alone.' }],
+          errors: extra / (d * d) > 0.025 ? [{ value: (100 * extra) / (d * d), feedback: 'Close — but compare the missing part with the true moment of inertia, I_cm + Md², not with Md² alone.' }] : [],
           hints: [t`True: $I = \tfrac25 MR^2 + Md^2$. Point mass: $Md^2$.`, t`The fraction missed is $\dfrac{\tfrac25 R^2}{\tfrac25 R^2 + d^2}$ — the mass cancels.`],
           teach: 'A body counts as a point mass when its size is small next to its distance from the axis: the error is about (2/5)(R/d)² for a ball.',
           explain: t`Missing part: $\tfrac25 R^2 = ${s3(extra)}\ \text{m}^2$ (per kg); total $${s3(extra + d * d)}$; so the point mass is low by ${s3(pct)}%.`,

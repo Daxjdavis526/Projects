@@ -298,8 +298,77 @@ export function ringShaftPic({ caption } = {}) {
       x: [-2.6, 2.6], y: [-1.3, 1.3], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: 'A ring and a shaft that is slightly too large for it',
       shade: [{ fn: 'sqrt(max(0, 0.5329 - (x - 1.1)^2))', lower: '-sqrt(max(0, 0.5329 - (x - 1.1)^2))', from: 0.37, to: 1.83, color: 'ink3', alpha: 0.7 }],
       curves: [circ(-1.1, 1.0, 'accent', 3), circ(-1.1, 0.7, 'accent', 3), circ(1.1, 0.73, 'ink2', 1.6)],
-      points: [tag(-1.1, -1.17, 'ring: bore 0.70', 'accent', 0, 0, true), tag(1.1, -1.0, 'shaft: 0.73', 'ink2', 0, 0, true)],
+      points: [tag(-1.1, -1.17, 'bearing ring', 'accent', 0, 0, true), tag(1.1, -1.0, 'shaft (a little too wide)', 'ink2', 0, 0, true)],
     },
     caption: caption ?? 'End views. The shaft is a little wider than the ring’s bore, so it will not go in at room temperature. The difference is exaggerated.',
+  };
+}
+
+/**
+ * Temperature against heat added for one body: a straight line of slope 1/(mc),
+ * from T1 to T2. The heat axis carries no numbers (it is what a question asks for).
+ */
+export function tqPic({ T1, T2, name = 'water', unit = '°C', xlabel = 'heat added, Q', ask = 'Q = ?', caption, alt }) {
+  const lo = Math.min(T1, T2), hi = Math.max(T1, T2), pad = 0.18 * (hi - lo);
+  return {
+    type: 'graph',
+    params: {
+      x: [-0.08, 1.25], y: [r4(lo - pad), r4(hi + pad)], aspect: 'wide', xlabel, ylabel: `T (${unit})`, xticks: 0.001,
+      alt: alt || 'Temperature rising steadily as heat is added',
+      curves: [{ fn: `${r4(T1)} + ${r4(T2 - T1)}*x`, domain: [0, 1], color: 'accent', width: 2.8, label: name, labelAt: 0.5, labelDx: -18, labelDy: -14 }],
+      points: [{ x: 0, y: r4(T1), r: 5, color: 'accent', label: `${lab(T1)} ${unit}`, labelDx: 10, labelDy: 12 }, { x: 1, y: r4(T2), r: 5, color: 'warn', label: `${lab(T2)} ${unit}`, labelDx: 10, labelDy: 0 }],
+      arrows: [{ from: [0, r4(lo - 0.09 * (hi - lo))], to: [1, r4(lo - 0.09 * (hi - lo))], color: 'gold', label: ask, labelDx: -60, labelDy: -12 }],
+    },
+    caption: caption ?? 'With no melting or boiling, the temperature rises in proportion to the heat added: the slope is 1/(mc).',
+  };
+}
+
+/** Specific heats as bars, J/(kg·K). items: [[name, c, color?]] */
+export function cBars(items, { caption, alt } = {}) {
+  const top = Math.max(...items.map((it) => it[1]));
+  const shade = [], points = [];
+  items.forEach(([name, c, color], i) => {
+    shade.push({ fn: String(c), lower: '0', from: r4(i + 0.2), to: r4(i + 0.8), color: color || 'accent', alpha: 0.6 });
+    points.push(tag(i + 0.5, -0.07 * top, name, 'ink', 0, 0, true), tag(i + 0.5, c + 0.06 * top, String(c), color || 'accent', 0, 0, true));
+  });
+  return {
+    type: 'graph',
+    params: { x: [0, items.length], y: [r4(-0.16 * top), r4(1.18 * top)], aspect: 'wide', xticks: 0.001, xlabel: ' ', ylabel: 'c (J/(kg·K))', alt: alt || 'Specific heats of several materials', shade, points },
+    caption: caption ?? 'Specific heats near room temperature: the energy that warms 1 kg by 1 K.',
+  };
+}
+
+/** NIST's specific heat of 304 stainless against temperature, with the area from T1 to T2 shaded (that area is Q/m). */
+export function cpGraph({ T1 = 77, T2 = 293, room = true, caption, alt } = {}) {
+  const f = ssSpecificHeatExpr();
+  return {
+    type: 'graph',
+    params: {
+      x: [0, 310], y: [0, 560], aspect: 'wide', xlabel: 'T (K)', ylabel: 'c (J/(kg·K))',
+      alt: alt || 'Specific heat of stainless steel falling at low temperature',
+      curves: [{ fn: f, domain: [4, 300], color: 'accent', width: 2.6, label: '304 stainless (NIST)', labelAt: 60, labelDx: 6, labelDy: -14 }, ...(room ? [{ fn: '470', domain: [4, 300], color: 'ink3', width: 1.2, dash: true, label: 'its value at 293 K', labelAt: 10, labelDx: 0, labelDy: -12 }] : [])],
+      shade: [{ fn: f, from: T1, to: T2, color: 'accent', alpha: 0.22 }],
+      vlines: [{ x: T1, label: `${T1} K`, color: 'ink3' }, { x: T2, label: `${T2} K`, color: 'ink3' }],
+    },
+    caption: caption ?? 'The specific heat of 304 stainless steel from NIST’s fit to measurements (±5 %). The shaded area, ∫c dT, is the heat per kilogram to cool it between the two temperatures.',
+  };
+}
+
+/** A cooling channel: coolant enters at Tin and leaves at Tout, heat Q̇ flowing in through the wall. */
+export function flowPic({ Tin, Tout, mdot, caption, alt }) {
+  return {
+    type: 'graph',
+    params: {
+      x: [-0.6, 6.6], y: [-1.6, 1.9], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'Coolant flowing through a heated channel',
+      shade: [{ fn: '0.5', lower: '-0.5', from: 0, to: 6, color: 'accent', alpha: 0.35 }, { fn: '1.35', lower: '0.62', from: 1, to: 5, color: 'bad', alpha: 0.28 }],
+      curves: [{ fn: '0.55', domain: [0, 6], color: 'ink2', width: 2.5 }, { fn: '-0.55', domain: [0, 6], color: 'ink2', width: 2.5 }],
+      arrows: [
+        { from: [-0.5, 0], to: [0.6, 0], color: 'accent', label: `${Tin}`, labelDx: -40, labelDy: -16 },
+        { from: [5.4, 0], to: [6.5, 0], color: 'warn', label: `${Tout}`, labelDx: -52, labelDy: -16 },
+        { from: [2.2, 1.25], to: [2.2, 0.62], color: 'bad' }, { from: [3, 1.25], to: [3, 0.62], color: 'bad' }, { from: [3.8, 1.25], to: [3.8, 0.62], color: 'bad' },
+      ],
+      points: [tag(3, 1.6, 'hot combustion gas: heat flows in through the wall', 'bad', 0, 0, true), tag(3, 0, `cooling water, ${mdot}`, 'ink', 0, 0, true), tag(3, -1.0, 'chamber wall (cut away)', 'ink3', 0, 0, true)],
+    },
+    caption: caption ?? 'Not to scale. All the heat that crosses the wall is carried away by the water.',
   };
 }
