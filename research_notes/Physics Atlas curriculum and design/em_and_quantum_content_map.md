@@ -563,3 +563,157 @@ Zangwill/Jackson-level material goes in optional panels: the retarded Green's fu
 - No item-level PER statistics were retrieved for Poynting, gauge or radiation topics. Most E&M II distractors above are expert-anticipated, not PER-validated.
 - The contents and HTML5 status of PhET "Radiating Charge" were not verified.
 
+## Key question 6 — QM I (PHYS 4700): major subjects, module tree, math skills, prerequisites, hidden foundations
+
+### Takeaway
+QM I covers:
+- the postulates and wave mechanics: the wave function, Born rule, stationary states;
+- the canonical 1D problems: infinite and finite wells, harmonic oscillator via ladder operators, free-particle wave packets, δ potentials, steps, barriers and tunneling;
+- the Hilbert-space/Dirac formalism: Hermitian operators, eigenproblems, commutators, generalized uncertainty, matrix mechanics;
+- 3D problems: angular momentum, spherical harmonics, hydrogen, spin and its addition;
+- at USU, time-independent perturbation theory.
+
+Textbooks split into two pedagogies. Griffiths is "wave-first". McIntyre (the Oregon State Paradigms text) and Townsend are "spins-first". A visual, GR-bound learner benefits from a short spins-first on-ramp, then Griffiths-order wave mechanics.
+
+### Cited Findings
+- USU PHYS 4700 content as listed: "principles of quantum mechanics, operators in Hilbert space, matrix mechanics, angular momentum, spin, perturbation theory, and applications". — [Coursicle, USU PHYS 4700](https://www.coursicle.com/usu/courses/PHYS/4700/)
+- **Griffiths & Schroeter 3e, Part I** (ch. 1 Wave Function, 2 Time-Independent SE, 3 Formalism, 4 QM in 3D, 5 Identical Particles, 6 Symmetries & Conservation Laws), with ch. 7 Time-Independent Perturbation Theory opening Part II and a Linear Algebra appendix. — [Cambridge listing](https://prod-drupal.cambridge.org/th/universitypress/subjects/physics/quantum-physics-quantum-information-and-quantum-computation/introduction-quantum-mechanics-3rd-edition)
+- **McIntyre, *Quantum Mechanics: A Paradigms Approach*** (Pearson 2012; Cambridge reprint).
+  - Chapter order: 1 Stern–Gerlach Experiments, 2 Operators and Measurement, 3 Schrödinger Time Evolution, 4 Quantum Spookiness, 5 Quantized Energies: Particle in a Box, 6 Unbound States, 7 Angular Momentum, 8 Hydrogen Atom, 9 Harmonic Oscillator, then perturbation theory, identical particles, periodic systems and modern applications.
+  - Oregon State's spins course uses ch. 1–4, and the book is paired with online Stern–Gerlach simulations.
+  — [OSU Paradigms quantum book page](https://sites.science.oregonstate.edu/portfolioswiki/texts_quantumbook_start.html); [OSU QM activities](https://www.physics.oregonstate.edu/qmactivities); [Cambridge bookshop listing](https://www.cambridgebookshop.co.uk/products/quantum-mechanics)
+- **Townsend, *A Modern Approach to Quantum Mechanics*, 2nd ed.** (University Science Books, 592 pp.).
+  - Organized around intrinsic spin: Dirac notation, operators, eigenstates/eigenvalues, time evolution and entanglement are introduced through spin systems.
+  - Ch. 6–10 cover wave mechanics: the SE in position space, the harmonic oscillator, orbital angular momentum, central potentials.
+  - The 2nd edition adds sections on quantum teleportation, the density operator, coherent states and cavity QED.
+  — [University Science Books](https://uscibooks.aip.org/?p=2633); [Harvey Mudd page](https://www.hmc.edu/physics/?p=4789)
+- **Other QM I course descriptions.**
+  - UIC PHYS 411: 1-D potentials, harmonic oscillator, 3-D SE, wave–particle duality, wave functions, matrix representation, operators and observables. — [UIC catalog PHYS 411](https://catalog.uic.edu/search/?P=PHYS+411)
+  - UMass: begins with 1D systems, then 3D including hydrogen, angular momentum and spin. — [UMass QM I](https://www.umass.edu/natural-sciences/class/33399/quantum-mechanics-i)
+- **QMFPS scope.** The research-validated survey for upper-level QM targets Dirac notation, Hilbert space, state vectors, observables and Hermitian operators, compatible vs. incompatible observables, measurement, time dependence of states and expectation values, and spin. This is a PER-derived list of the formalism core. — [PhysPort QMFPS](https://physport.org/assessments/QMFPS); [Marshman & Singh, PRPER 15, 020128 (2019)](https://link.aps.org/doi/10.1103/PhysRevPhysEducRes.15.020128)
+- QuVis offers simulations on "Superposition States and Mixed States" and "Spin 1 Particles", among more than 90. — [QuVis news](https://www.st-andrews.ac.uk/physics/quvis/news.html); [APS 2015 abstract](https://meetings-archive.aps.org/apr/2015/r8/2/)
+
+### Inferences
+**Module tree for QM I** ([G x.y] = Griffiths & Schroeter 3e section; [Mc n] = McIntyre chapter):
+- **M0 Math bridge** ★ (diagnostic-gated)
+  - Complex numbers: modulus and phase; e^{iθ}.
+  - Linear algebra in ℂⁿ: inner products, orthonormal bases, Hermitian and unitary matrices, eigenproblems, diagonalization, commutators, change of basis.
+  - Functions as vectors: L² inner product; orthogonality of sin(nπx/a).
+  - Fourier series and transforms; Gaussian integrals.
+  - Probability: mean, variance, σ; continuous densities.
+  - 2nd-order ODEs and power series; separation of variables; Dirac δ (reuse from E&M).
+- **M1 Spin-½ on-ramp ("spins-first")** ★ for the Atlas [Mc 1–4]
+  - 1.1 Sequential Stern–Gerlach analyzers (z → x → z).
+  - 1.2 Kets |±⟩; superposition; Born rule P = |⟨a|ψ⟩|². Overall phase is unobservable; relative phase is not.
+  - 1.3 Bras, inner products, the x/y/z bases.
+  - 1.4 Operators as matrices (S_x, S_y, S_z via the Pauli matrices σ_i); eigenvalues are the possible outcomes; projection on measurement.
+  - 1.5 Expectation values and uncertainties; [S_x, S_y] = iħS_z.
+  - 1.6 Time evolution in B: spin (Larmor) precession.
+  - 1.7 ◇ Entanglement teaser ([Mc 4] "Quantum Spookiness": EPR, Bell).
+- **M2 The wave function** [G 1] ★
+  - 2.1 The Schrödinger equation.
+  - 2.2 Statistical interpretation: |Ψ|² is a probability *density*.
+  - 2.3 Discrete and continuous probability; ⟨x⟩; σ.
+  - 2.4 Normalization is preserved in time.
+  - 2.5 Momentum: ⟨p⟩ = m d⟨x⟩/dt; p̂ = −iħ∂/∂x.
+  - 2.6 Heuristic uncertainty: localized packet vs. well-defined de Broglie λ = h/p.
+- **M3 Stationary states and 1D potentials** [G 2; Mc 5–6, 9] ★
+  - 3.1 Stationary states: Ψ = ψe^{−iEt/ħ}; general solution Σc_nψ_ne^{−iE_nt/ħ}; P(E_n) = |c_n|².
+  - 3.2 Infinite square well: ψ_n = √(2/a) sin(nπx/a), E_n = n²π²ħ²/(2ma²); orthonormality; completeness; Fourier's trick for c_n.
+  - 3.3 Harmonic oscillator.
+    - Ladder operators a± with [a₋, a₊] = 1; E_n = (n + ½)ħω.
+    - ψ_n = (a₊)ⁿψ₀/√(n!) with a Gaussian ψ₀.
+    - Analytic method: power series and Hermite polynomials.
+    - Comparison with the classical probability density and turning points.
+  - 3.4 Free particle.
+    - Plane waves are non-normalizable, so build packets via φ(k) (the Fourier transform).
+    - Phase vs. group velocity (v_g = 2v_p).
+    - Gaussian packet spreading.
+  - 3.5 δ-function potential: one bound state E = −mα²/(2ħ²); kink in ψ′; scattering R and T.
+  - 3.6 Finite square well: even and odd bound states via a graphical transcendental equation; the wide/deep and shallow/narrow limits; transmission resonances.
+  - 3.7 Step and barrier: probability current J; T ≈ e^{−2κa} for thick barriers. ◇ Double-barrier resonant tunneling.
+- **M4 Formalism** [G 3; Mc 2–3] ★
+  - 4.1 Hilbert space L²; inner product; the Schwarz inequality.
+  - 4.2 Observables = Hermitian operators. Determinate states (σ = 0) are eigenstates.
+  - 4.3 Discrete spectra (real eigenvalues, orthogonal eigenvectors, completeness) vs. continuous spectra (Dirac orthonormality ⟨p|p′⟩ = δ(p − p′); e^{ipx/ħ}/√(2πħ); position eigenfunctions δ(x − y)).
+  - 4.4 Generalized statistical interpretation: P(q_n) = |⟨f_n|Ψ⟩|²; collapse; momentum-space wave function Φ(p, t).
+  - 4.5 Generalized uncertainty principle σ_Aσ_B ≥ |⟨[Â, B̂]⟩/(2i)|; the minimum-uncertainty Gaussian; energy–time uncertainty, read correctly as "time for ⟨Q⟩ to change by σ_Q".
+  - 4.6 Dirac notation: kets, bras, outer products, projectors, completeness Σ|n⟩⟨n| = 1, matrix elements, change of basis, the x- and p-representations.
+  - 4.7 Matrix mechanics: two-level Hamiltonians; diagonalization; the spin matrices revisited.
+  - 4.8 Time evolution: the Ehrenfest theorem d⟨Q⟩/dt = (i/ħ)⟨[Ĥ, Q̂]⟩ + ⟨∂Q̂/∂t⟩; conserved quantities commute with Ĥ. ◇ U(t) = e^{−iĤt/ħ}; ◇ Heisenberg picture.
+- **M5 QM in three dimensions** [G 4.1–4.3; Mc 7–8] ★
+  - 5.1 Cubical box and 3D oscillator: degeneracy as a symmetry signal.
+  - 5.2 Separation in spherical coordinates.
+    - Angular equation → spherical harmonics Y_l^m(θ, φ), built from associated Legendre functions (reuse from E&M I).
+    - Radial equation with u = rR; effective potential V + l(l + 1)ħ²/(2mr²).
+    - ◇ Infinite spherical well and spherical Bessel functions.
+  - 5.3 Hydrogen.
+    - Power series → Laguerre polynomials.
+    - E_n = −13.6 eV/n²; Bohr radius a₀ ≈ 0.529 Å; degeneracy n².
+    - Rydberg formula; Lyman and Balmer series.
+  - 5.4 Orbital angular momentum.
+    - [L_x, L_y] = iħL_z; L² commutes with each component.
+    - Ladder operators L± give eigenvalues ħ²l(l + 1) and ħm.
+    - The "vector-model cone" and why it is only a cartoon.
+- **M6 Spin and addition of angular momentum** [G 4.4; Mc 7, 11] ★
+  - 6.1 Spinors χ = (a, b)ᵀ; Pauli matrices; eigenstates along an arbitrary n̂(θ, φ); measurement probabilities.
+  - 6.2 Electron in B: Ĥ = −γB·Ŝ (γ = gyromagnetic ratio); Larmor precession; Stern–Gerlach gradient force; g-factor.
+  - 6.3 Two spin-½ particles: triplet and singlet; Clebsch–Gordan coefficients; the general rule j₁ ⊗ j₂ → |j₁ − j₂| … j₁ + j₂.
+  - 6.4 ◇ Spin-1 matrices (QuVis "Spin 1 Particles").
+- **M7 EM interactions (E&M ↔ QM bridge)** ◇ [G 4.5]
+  - Minimal coupling Ĥ = (p̂ − qA)²/(2m) + qφ.
+  - A gauge transformation multiplies Ψ by e^{iqλ/ħ}.
+  - The Aharonov–Bohm phase ∮A·dl: A matters even where B = 0. This reuses the E&M I solenoid visual.
+- **M8 Time-independent perturbation theory** [G 7] ★ at USU (listed in 4700)
+  - 8.1 Nondegenerate: E¹ = ⟨n⁰|Ĥ′|n⁰⟩; first-order states; E² = Σ_{m≠n} |⟨m⁰|Ĥ′|n⁰⟩|²/(E_n − E_m).
+  - 8.2 Degenerate: "good" states diagonalize Ĥ′ in the degenerate subspace (found via a commuting Hermitian operator).
+  - 8.3 Fine structure of hydrogen: relativistic p⁴ correction plus spin–orbit L·S, giving an α²-order dependence on j.
+  - 8.4 Zeeman effect: weak field (Landé g), strong field (Paschen–Back), intermediate.
+  - 8.5 Hyperfine splitting and the 21-cm line (a cosmology hook).
+  - Placement note: if USU puts 8.3–8.5 in 4710, move them to QM II.
+- **Course boss battle: "The Quantum State Challenge".** Given a state in some basis, the learner must:
+  - normalize it;
+  - predict measurement outcomes and probabilities for several observables, including incompatible ones;
+  - evolve it in time and predict which probabilities oscillate;
+  - compute ⟨Q⟩ and σ_Q and check the uncertainty bound;
+  - change basis (position ↔ momentum ↔ energy);
+  - identify the error in a flawed derivation (e.g., a common phase factor for a superposition).
+
+**Mathematical skills.**
+- Linear algebra in Hilbert spaces: spectral decomposition, commutators, simultaneous diagonalization, tensor products for spin addition.
+- Fourier transforms (Plancherel's theorem).
+- Series solutions of ODEs (Hermite, Laguerre).
+- Legendre and associated Legendre functions, spherical harmonics.
+- Separation of variables in spherical coordinates.
+- δ-normalization.
+- Gaussian integrals.
+- Root-finding for transcendental equations.
+- Matrix exponentials.
+- Natural scales: ħc ≈ 197 eV·nm, a₀, Rydberg.
+
+**Prerequisites.**
+- Modern physics (PHYS 2710): de Broglie, Bohr model, a first look at the SE.
+- PHYS 3750 waves (USU explicitly includes the Schrödinger equation).
+- Classical mechanics (PHYS 3550): oscillator, central forces, energy and Hamiltonian ideas.
+- Linear algebra and ODEs.
+- E&M I: magnetic dipoles for the Zeeman effect; Legendre and separation methods.
+
+**Hidden foundations.** Each needs a micro-lesson.
+- The postulates stated explicitly: state, observable, Born rule, collapse, unitary evolution.
+- Overall vs. relative phase.
+- Superposition vs. mixture.
+- Stationary ≠ static.
+- Eigenvalue vs. expectation value vs. a single outcome.
+- Normalizable vs. scattering states.
+- The probability current.
+- The classical limit (Ehrenfest).
+- Tunneling as the quantum cousin of the evanescent wave from E&M II total internal reflection: the same math (a reusable visual).
+- Spin is intrinsic, not literal rotation.
+- Units and scales (eV, nm).
+
+### Gaps
+- MIT 8.04/8.05 syllabi could not be retrieved (OCW blocked; search budget exhausted).
+- Griffiths & Schroeter 3e section-level titles above (e.g., 2.3.1 algebraic vs. 2.3.2 analytic, 4.4.3 addition of angular momenta, 4.5 EM interactions) come from the researcher's knowledge of the 3rd edition. Only the chapter level was confirmed this session.
+- USU's PHYS 4700 prerequisites were not found.
+- Whether USU's 4700 covers fine structure, Zeeman and hyperfine, or only perturbation-theory basics, is unknown.
+

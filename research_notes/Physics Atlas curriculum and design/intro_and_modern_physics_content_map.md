@@ -2249,3 +2249,267 @@ Design-inferred (standard errors; PER sources not verified this session):
   - Wallace, Prather & Duncan's cosmology-misconception series;
   - Real Time Relativity (ANU) and MIT Game Lab's A Slower Speed of Light as benchmark relativity visualizers.
 - **Benchmark syllabi not reached:** MIT 8.20 and 8.033.
+
+---
+
+## 6. Standard constants and canonical numeric results for verified answer keys
+
+### Takeaway
+Anchor every Atlas answer key to the CODATA 2022 recommended values (NIST; *Rev. Mod. Phys.* 97, 025002, 2025). The 2019 SI fixed c, h, e, k_B and N_A exactly, so constants derived only from them (ħ, R, F, σ, Wien's b, hc, ħc) are exact.
+
+Measured constants used in these courses (m_e, m_p, m_n, u, α, R∞, ε₀, a₀) are given below at their verified CODATA 2022 values. Do not mix in CODATA 2018 values, which still appear in the PDG 2022 review.
+
+Astrophysical anchors (GW150914, Planck 2018 H₀ and Ω_m, the muon lifetime) are confirmed from primary or authoritative sources. Several others (G, the IAU solar parameters, T_CMB, the Planck age, Mercury's precession) need verification before they become answer keys.
+
+### Cited Findings
+**CODATA 2022 itself**
+- The 2022 values come from a least-squares adjustment of data available through the end of 2022, by Mohr, Newell, Taylor and Tiesinga. They are published in *Rev. Mod. Phys.* 97, 025002 (30 April 2025) and in *J. Phys. Chem. Ref. Data* 54 (2025), with an arXiv preprint (2409.03787) from September 2024. This is the second adjustment since the 2019 SI redefinition fixed h, e, k and N_A exactly. NIST hosts the values at physics.nist.gov/constants. — [CODATA 2022 (arXiv 2409.03787)](https://arxiv.org/pdf/2409.03787); [NIST JPCRD 2022 PDF](https://physics.nist.gov/cuu/pdf/JPCRD2022CODATA.pdf); [NIST RMP 2022 PDF](https://physics.nist.gov/cuu/pdf/RevModPhys.97.025002.pdf); [NIST publication record](https://www.nist.gov/publications/codata-internationally-reconmmended-2022-values-fundamental-physical-constants)
+
+**Values verified in this session**
+- m_e = 9.109 383 7139(28) × 10⁻³¹ kg, relative uncertainty 3.1 × 10⁻¹⁰ — [NIST CODATA 2022 (tsapps)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=958143); [NIST JPCRD 2022 PDF](https://physics.nist.gov/cuu/pdf/JPCRD2022CODATA.pdf)
+- m_p = 1.672 621 925 95(52) × 10⁻²⁷ kg — [NIST CODATA 2022 (tsapps)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=958143)
+- α⁻¹ = 137.035 999 177(21), relative uncertainty 1.6 × 10⁻¹⁰; α = 7.297 352 5643(11) × 10⁻³ — [NIST CODATA 2022 (tsapps)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=958143)
+- R∞ = 10 973 731.568 157(12) m⁻¹ — [NIST JPCRD 2022 PDF](https://physics.nist.gov/cuu/pdf/JPCRD2022CODATA.pdf); [NIST all-values PDF](https://physics.nist.gov/cgi-bin/cuu/Category?view=pdf&All+values.x=57&All+values.y=9)
+- ε₀ = 8.854 187 8188(14) × 10⁻¹² F m⁻¹ — [NIST JPCRD 2022 PDF](https://physics.nist.gov/cuu/pdf/JPCRD2022CODATA.pdf); [arXiv 2409.03787](https://arxiv.org/pdf/2409.03787)
+- a₀ = 5.291 772 105 44(82) × 10⁻¹¹ m — [NIST all-values PDF](https://physics.nist.gov/cgi-bin/cuu/Category?view=pdf&All+values.x=57&All+values.y=9)
+- m_n = 1.674 927 500 56(85) × 10⁻²⁷ kg, relative uncertainty 5.1 × 10⁻¹⁰; m_n c² = 939.565 421 94(48) MeV; m_e c² = 0.510 998 950 69(16) MeV — [NIST atomic & nuclear constants (2022 adjustment)](https://physics.nist.gov/cgi-bin/cuu/Category?view=pdf&Atomic+and+nuclear.x=79&Atomic+and+nuclear.y=17)
+- u = 1.660 539 068 92(52) × 10⁻²⁷ kg — [arXiv 2409.03787](https://arxiv.org/pdf/2409.03787)
+
+**Edition cautions**
+- The PDG 2022 physical-constants review still lists CODATA 2018 values: m_e = 9.109 383 7015(28) × 10⁻³¹ kg, α⁻¹ = 137.035 999 084(21), and u c² = 931.494 102 42(28) MeV. Do not mix editions. — [PDG 2022 constants review](https://pdg.lbl.gov/2022/reviews/rpp2022-rev-phys-constants.pdf)
+- One third-party paper quotes α = 1/137.035 999 11 "from CODATA 2022". That is a rounded or truncated value, not the official one. — [ResearchGate CODATA 2022 record](https://www.researchgate.net/publication/383863890_CODATA_Recommended_Values_of_the_Fundamental_Physical_Constants_2022)
+
+**Particle and astrophysical anchors**
+- **Muon (PDG live listing):** mass 105.658 375 5 ± 0.000 002 3 MeV; mean life (2.196 981 1 ± 0.000 002 2) × 10⁻⁶ s. Earlier editions quote older averages. — [PDG Live muon (S004)](https://pdgprod.lbl.gov/pdgprod/pdgLiveJson/Particle.action?node=S004); [PDG 2020 muon listing](https://pdg.web.cern.ch/2020/listings/rpp2020-list-muon.pdf)
+- **GW150914.** The detection paper is *PRL* 116, 061102 (2016). The parameters come from the companion paper, "Properties of the Binary Black Hole Merger GW150914", *PRL* 116, 241102:
+  - component masses 36^{+5}_{−4} and 29^{+4}_{−4} M☉;
+  - final mass 62^{+4}_{−4} M☉ with spin 0.67^{+0.05}_{−0.07};
+  - luminosity distance 410^{+160}_{−180} Mpc, z ≈ 0.09;
+  - the primary's spin below 0.7 (90% probability).
+  A secondary review gives 3.0 ± 0.5 M☉c² radiated in gravitational waves.
+  — [Detection paper (arXiv 1602.03837)](https://arxiv.org/abs/1602.03837); [Properties paper (arXiv 1602.03840)](https://arxiv.org/pdf/1602.03840); [PubMed 27367378](https://pubmed.ncbi.nlm.nih.gov/27367378/); [GW astronomy review (arXiv 1804.06308)](https://arxiv.org/pdf/1804.06308)
+- **Planck 2018 (base ΛCDM):** H₀ = 67.4 ± 0.5 km s⁻¹ Mpc⁻¹; Ω_m = 0.315 ± 0.007; σ₈ = 0.811 ± 0.006. The age was not confirmed in this session. — [Planck 2018 VI (ADS)](https://ui.adsabs.harvard.edu/abs/2020A%26A...641A...6P/abstract); [arXiv 1807.06209](https://arxiv.org/pdf/1807.06209v3)
+- **GPS (secondary sources).** Satellite clocks gain about 38 µs/day relative to ground clocks: roughly +45 µs/day from weaker gravity and −7 µs/day from orbital speed (about 3.87 km/s). Left uncorrected, the error would accumulate by roughly 10 km per day. Clocks are reportedly set to 10.229 999 995 43 MHz instead of 10.23 MHz. — [GPS World, "Inside the Box: GPS and Relativity"](https://www.gpsworld.com/inside-the-box-gps-and-relativity/); [TechForSpace](https://www.techforspace.com/missions/galileo/gps-and-relativity/)
+- **Pound–Rebka (1960, Jefferson Laboratory tower, Harvard).** The tower height is given as 22.6 m in one review and 22.5 m elsewhere. The predicted shift gh/c² is about 2.46 × 10⁻¹⁵ for 22.5 m. The experiment used the 14.4-keV Mössbauer line of ⁵⁷Fe. Pound–Snider (1965) improved agreement to about 1%. HyperPhysics's figure of 4.92 × 10⁻¹⁵ is twice gh/c², probably a factor-of-two error or a different convention. — [Tests of GR review (arXiv 1705.04397)](https://arxiv.org/pdf/1705.04397); [IHP lecture on gravitational redshift](https://luth.obspm.fr/IHP06/lectures/mester-vinet/IHP-2GravRedshift.pdf); [HyperPhysics](https://hyperphysics.gsu.edu/hbase/Relativ/gratim.html)
+
+### Inferences
+#### A. Exact constants (2019 SI) and constants derived exactly from them
+I computed the derived values in Python from the exact inputs. They are exact to the digits shown.
+
+| Quantity | Value | Status |
+|---|---|---|
+| c | 299 792 458 m s⁻¹ | exact |
+| h | 6.626 070 15 × 10⁻³⁴ J s | exact |
+| ħ = h/2π | 1.054 571 817… × 10⁻³⁴ J s | exact (derived) |
+| e | 1.602 176 634 × 10⁻¹⁹ C (so 1 eV = 1.602 176 634 × 10⁻¹⁹ J) | exact |
+| k_B | 1.380 649 × 10⁻²³ J K⁻¹ = 8.617 333 262… × 10⁻⁵ eV K⁻¹ | exact |
+| N_A | 6.022 140 76 × 10²³ mol⁻¹ | exact |
+| R = N_A k_B | 8.314 462 618… J mol⁻¹ K⁻¹ | exact (derived) |
+| F = N_A e | 96 485.332 12… C mol⁻¹ | exact (derived) |
+| σ (Stefan–Boltzmann) | 5.670 374 419… × 10⁻⁸ W m⁻² K⁻⁴ | exact (derived) |
+| b (Wien, wavelength form; x = 4.965 114 23) | 2.897 771 955… × 10⁻³ m K | exact (derived) |
+| Wien, frequency form (x = 2.821 439 37) | ν_max/T = 5.878 925 76 × 10¹⁰ Hz K⁻¹ | exact (derived) |
+| hc | 1239.841 984 eV nm | exact (derived) |
+| ħc | 197.326 980 4 MeV fm | exact (derived) |
+
+#### B. Constants derived from the verified CODATA 2022 values
+I computed these. They agree with the CODATA 2022 tabulations where those were seen (λ_C, μ_B, r_e, μ₀), but should still be checked digit by digit against NIST before publication.
+
+| Quantity | Value |
+|---|---|
+| m_p c² | 938.272 089 4 MeV |
+| u c² | 931.494 103 7 MeV |
+| (m_n − m_p)c² | 1.293 332 5 MeV |
+| m_p/m_e | 1836.152 673 4 |
+| μ₀ = 1/(ε₀c²) | 1.256 637 061 27 × 10⁻⁶ N A⁻² |
+| k_e = 1/(4πε₀) | 8.987 551 786 × 10⁹ N m² C⁻² |
+| λ_C = h/(m_e c) | 2.426 310 235 4 × 10⁻¹² m |
+| R∞hc | 13.605 693 123 eV |
+| μ_B | 9.274 010 066 × 10⁻²⁴ J T⁻¹ = 5.788 381 798 × 10⁻⁵ eV T⁻¹ |
+| r_e (classical electron radius) | 2.817 940 320 fm |
+| 1 MeV/c² | 1.782 662 × 10⁻³⁰ kg |
+| m_e c² | 8.187 106 × 10⁻¹⁴ J |
+| Planck length, time, mass (with G = 6.674 30 × 10⁻¹¹, unverified) | ℓ_P = 1.616 255 × 10⁻³⁵ m; t_P = 5.391 246 × 10⁻⁴⁴ s; m_P = 2.176 434 × 10⁻⁸ kg |
+
+#### C. Canonical numeric results for answer keys
+All computed in this session. The inputs marked † are unverified (see Gaps).
+
+**Mechanics and orbits** (GM⊕ = 3.986 004 418 × 10¹⁴ m³/s²†; R⊕ = 6371 km†; g₀ = 9.806 65 m/s²†)
+- Escape speed from Earth: 11.19 km/s.
+- A 400-km circular orbit: 7.673 km/s, period 92.4 min; g there is 0.885 times its surface value.
+- Rocket with Isp = 450 s and mass ratio 5: Δv = 7.10 km/s.
+
+**Thermal**
+- kT at 300 K = 0.025 85 eV (about 1/38.7 eV).
+
+**Light and atoms**
+- Photon energies: 3.100 eV at 400 nm; 2.480 eV at 500 nm; 1.771 eV at 700 nm.
+- Hydrogen with the reduced-mass correction:
+  - R_H = 1.096 775 834 × 10⁷ m⁻¹;
+  - E₁ = −13.598 eV (−13.606 eV for an infinitely heavy nucleus, an identify-the-error item);
+  - vacuum wavelengths: Hα 656.470 nm, Hβ 486.274 nm, Lyman-α 121.568 nm, Balmer limit 364.705 nm, Lyman limit 91.176 nm. Air wavelengths are about 0.18 nm shorter for Hα†.
+- Maximum Compton shift 2λ_C = 4.853 pm.
+- Electron de Broglie wavelength (nonrelativistic): 0.1669 nm at 54 eV, 0.1226 nm at 100 eV, 0.0388 nm at 1 keV.
+- An electron at 1 eV moves at 5.93 × 10⁵ m/s.
+- An electron in a 1-nm infinite well: E₁ = 0.376 eV.
+- Moseley estimate for Cu Kα: 8.00 keV.
+- Copper Fermi energy (n = 8.47 × 10²⁸ m⁻³†): 7.03 eV; T_F = 8.2 × 10⁴ K; v_F = 1.57 × 10⁶ m/s.
+
+**Blackbody**
+- The Sun (T_eff = 5772 K†): λ_max = 502 nm.
+- The CMB (2.7255 K†): λ_max = 1.063 mm and ν_max = 160.2 GHz. Their product is 1.70 × 10⁸ m/s, about 0.57c, not c. This makes an identify-the-error item: the wavelength and frequency peaks of a distribution are different points.
+
+**Special relativity**
+- Muon at 0.998c (γ = 15.82) created at 15 km:
+  - lab-frame flight time 50.13 µs;
+  - dilated mean life 34.75 µs;
+  - 23.6% survive, versus 1.2 × 10⁻¹⁰ without dilation;
+  - in the muon frame the distance is 0.948 km.
+- 0.8c ⊕ 0.8c = 0.9756c.
+- Doppler factor for recession at 0.6c: 0.5.
+- A trip of 4.37 ly† at 0.8c: 5.46 yr Earth time, 3.28 yr ship time.
+- Proton at 0.99c: γ = 7.089, K = 5.713 GeV, pc = 6.585 GeV.
+- Fixed-target antiproton production threshold: K = 6m_p c² = 5.630 GeV.
+- Pair-production threshold: 2m_e c² = 1.022 MeV (near a nucleus).
+- Photon rocket with mass ratio 10: 0.980c. With v_e = 0.1c and mass ratio 10: 0.226c.
+- One year of proper time at 1 g: 0.775c, 1.19 yr of coordinate time, 0.564 ly travelled.
+
+**Gravity and GR** (GM☉ = 1.327 124 4 × 10²⁰ m³/s²†; R☉ = 6.957 × 10⁸ m†)
+- Pound–Rebka gH/c²: 2.456 × 10⁻¹⁵ for 22.5 m and 2.467 × 10⁻¹⁵ for 22.6 m, using g = 9.81. In general gh/c² = 1.09 × 10⁻¹⁶ per metre.
+- Earth's surface potential: GM/(Rc²) = 6.96 × 10⁻¹⁰, or 60.1 µs/day relative to infinity. The Sun's surface: 2.12 × 10⁻⁶.
+- GPS at r = 26 561.75 km†: v = 3.874 km/s; +45.7 µs/day (gravity), −7.2 µs/day (speed), net +38.5 µs/day. This ignores Earth's rotation and orbital eccentricity, and matches the published ~38 µs/day.
+- Schwarzschild radius r_s: Sun 2.953 km; Earth 8.870 mm; 10 M☉ 29.53 km; 4 × 10⁶ M☉ 1.181 × 10⁷ km (about 0.08 au).
+- Light deflection at the solar limb, 4GM/(Rc²): 1.751″.
+- Mercury's perihelion advance, from a = 5.7909 × 10¹⁰ m†, e = 0.2056† and P = 87.969 d†: 42.98″ per century.
+- ISCO (6GM/c²) coordinate-time orbital period and GW frequency f_GW = 2/T:
+  - 1 M☉: 0.455 ms;
+  - 10 M☉: 4.55 ms, f_GW ≈ 440 Hz;
+  - 4 × 10⁶ M☉: 1819 s (about 30 min), f_GW ≈ 1.1 mHz, the band of the LISA space detector.
+- A 1.4-M☉, 12-km neutron star: dτ/dt = 0.810 at the surface, z = 0.235.
+- A static clock at r = 2r_s: dτ/dt = 0.707.
+- Tidal acceleration across 2 m at the horizon: 2.06 × 10⁸ m/s² for 10 M☉; 1.29 × 10⁻³ m/s² for 4 × 10⁶ M☉.
+- Hawking temperature of a 1-M☉ black hole: 6.17 × 10⁻⁸ K.
+- GW150914: chirp mass 28.1 M☉ from the 36 and 29 M☉ component masses; 3.0 M☉c² = 5.36 × 10⁴⁷ J; ΔL = 4 × 10⁻¹⁸ m for h = 10⁻²¹ on a 4-km† arm, about 1/200 of a proton radius.
+
+**Cosmology** (H₀ = 67.4 km/s/Mpc, Ω_m = 0.315; Mpc = 3.085 677 58 × 10²² m†)
+- 1/H₀ = 14.51 Gyr; c/H₀ = 4.448 Gpc.
+- ρ_c = 8.53 × 10⁻²⁷ kg/m³, equivalent to 5.1 proton masses per m³.
+- Age of a matter-only universe, 2/(3H₀): 9.67 Gyr.
+- Age of flat ΛCDM without radiation: 13.80 Gyr. Planck's own figure, computed with full parameters and radiation, is about 13.79 Gyr† (unverified).
+- q₀ = −0.53.
+- Matter and Λ densities were equal at z = 0.30; the expansion began accelerating at z = 0.63.
+- T(z = 1089) = 2971 K.
+- Recession speed at 100 Mpc: 6740 km/s.
+
+**Nuclear and particle**
+- Nuclear density with R₀ = 1.2 fm†: 2.29 × 10¹⁷ kg/m³.
+- Yukawa range ħc/(m_π c²) with m_π = 139.57 MeV†: 1.414 fm.
+
+#### D. Answer-key policy recommendations
+- Use CODATA 2022 everywhere, and display the constant set in each lesson's info panel.
+- Use g = 9.81 m/s² for problems set "near Earth's surface". Reserve 9.806 65 m/s² (standard gravity) for unit definitions such as Isp.
+- Numeric-input tolerance:
+  - ±1% for single-step problems;
+  - ±2% for multi-step problems;
+  - logarithmic tolerance (within a factor of 1.1) for order-of-magnitude items.
+  Always accept answers computed with rounded constants such as hc = 1240 eV nm.
+- State relativity conventions explicitly: the metric signature, given as s² = c²Δt² − Δx² in 3710 lessons; whether "mass" means invariant mass (always, in the Atlas); and Schwarzschild coordinates versus shell-frame measurements.
+- Distinguish vacuum from air wavelengths in spectroscopy items.
+- Distinguish source-frame from detector-frame masses in GW items (see Gaps).
+
+### Gaps
+Values not verified this session (the NIST host was blocked and the search budget ran out):
+- G = 6.674 30(15) × 10⁻¹¹ m³ kg⁻¹ s⁻². I believe CODATA 2022 left it unchanged from 2018; verify.
+- Standard gravity g_n = 9.806 65 m s⁻² and the standard atmosphere, 101 325 Pa (both exact by convention).
+- IAU 2015 Resolution B3 nominal solar values: GM☉ = 1.327 124 4 × 10²⁰ m³ s⁻², R☉ = 6.957 × 10⁸ m, T_eff☉ = 5772 K.
+- The astronomical unit, 149 597 870 700 m (IAU 2012, exact); the parsec; the light-year.
+- GM⊕ = 3.986 004 418 × 10¹⁴ m³ s⁻² (IERS/WGS 84); R⊕ = 6371 km.
+- The GPS semi-major axis of about 26 561.75 km.
+- T_CMB = 2.725 48(57) K (Fixsen 2009).
+- The Planck 2018 age, 13.787 ± 0.020 Gyr.
+- SH0ES H₀ ≈ 73 km s⁻¹ Mpc⁻¹.
+- Mercury's orbit elements.
+- The nuclear and particle masses not listed above. Use AME2020/NUBASE2020 and PDG.
+- Whether the GW150914 masses are source-frame or detector-frame. I believe the PRL 116, 241102 values quoted here are source-frame.
+- The 2022 CODATA tabulations of λ_C, μ_B, r_e, m_p c² and u c² were not seen directly; they were computed here from verified inputs.
+
+---
+
+## 7. Cross-course design inputs: assessment instruments, simulation benchmarks, lab standards, and the GR thread
+
+### Takeaway
+Physics education research supplies validated instruments for every course in this map:
+- FCI and FMCE (forces);
+- TUG-K (kinematics graphs);
+- EMCS (energy and momentum);
+- CSEM and BEMA (E&M);
+- RCI (special relativity);
+- QMCS (introductory QM).
+
+Davis & Lineweaver and Kersting's GR-education work cover cosmology and curved spacetime.
+
+These instruments, together with the PhET Quantum Phenomena collection and the AAPT 2014 lab outcomes, should set the Atlas's checkpoint items, its simulation conventions and its lab strand. Hartle's physics-first argument sets the shape of the GR spine that runs from Physics I through 3710.
+
+### Cited Findings
+- A resource letter catalogs research-based assessment instruments in physics and astronomy. — [Resource Letter RBAI-1 (arXiv 1605.02703)](https://arxiv.org/pdf/1605.02703)
+- The FCI taxonomy was built from qualitative interview studies, and a misconception is diagnosed when its matching item is chosen. The FMCE probes only some of the FCI misconceptions. — [arXiv 1905.06176](https://arxiv.org/pdf/1905.06176); [arXiv 2001.00967](https://arxiv.org/pdf/2001.00967)
+- The RCI's confidence ratings let high-confidence wrong answers mark misconceptions. PhysPort describes it as a pre/post test built from course learning goals, textbooks and the research literature. — [PhysPort RCI](https://www.physport.org/assessments/RCI); [PRST-PER 9, 010118](https://link.aps.org/doi/10.1103/PhysRevSTPER.9.010118)
+- CSEM baselines (31% before, 47% after, calculus-based) give a realistic difficulty calibration for E&M checkpoints. — [ERIC EJ652852](https://eric.ed.gov/?id=EJ652852)
+- PhET's quantum sims were developed and studied with research methods, and the PhET quantum collection spans the core of 2710. — [arXiv 0709.4503](https://arxiv.org/pdf/0709.4503); [PSRC PhET Quantum Phenomena](https://psrc.aapt.org/items/detail.cfm?ID=7461)
+- Drawing E and ψ on the same axes is implicated in the tunneling energy-loss misconception. — [arXiv physics/0608244](https://arxiv.org/html/physics/0608244)
+- Students treat a wave pulse as an object; the correct model is a disturbance of a medium. — [arXiv physics/0207092](https://arxiv.org/pdf/physics/0207092)
+- The rubber-sheet model addresses only spatial curvature; Kersting proposes a free-fall and warped-time model instead. — [UiO DUO thesis record](https://duo.uio.no/handle/10852/71817)
+- The AAPT 2014 lab outcomes cover six areas and do not target content understanding. — [arXiv 1809.00059](https://arxiv.org/pdf/1809.00059)
+- Physics-first GR: solutions first, consequences through test particles and light. — [arXiv gr-qc/0506075](https://arxiv.org/abs/gr-qc/0506075)
+
+### Inferences
+**Checkpoint items mapped to instruments.** Use instruments as item models, not verbatim; check the licensing of secure items before adapting.
+
+| Instrument | Atlas checkpoints |
+|---|---|
+| FCI and FMCE | Physics I M3–M6, M13 |
+| TUG-K | M3 |
+| EMCS | M7–M9 |
+| CSEM and BEMA | Physics II E1–B6 |
+| RCI | Physics II R1, 2710 MP2, 3710 R1–R2 |
+| QMCS | 2710 MP4–MP8 |
+| Davis & Lineweaver-based items | 3710 C1 |
+| Kersting-informed items | 3710 G1–G2 |
+
+**Item-design rules derived from the cited research:**
+1. Every multiple-choice distractor maps to a named misconception, either PER-cited or design-inferred and labelled as such, and carries its micro-teaching line.
+2. Key concept items carry a confidence slider, following the RCI method; a confident wrong answer schedules a targeted re-teach lesson.
+3. Each sim lesson runs predict → manipulate → explain, with the prediction recorded before the sim unlocks. This suits the classic PER traps: the half-covered lens, wave speed against the driver, current in series, intensity against frequency.
+4. Quantum sims always plot ψ on its own axis, offset from the energy line.
+5. Wave sims show individual medium elements moving in place.
+6. GR visuals lead with clock-rate (warped-time) pictures and local elevator frames. Rubber-sheet imagery is used only with an explicit "what this model gets wrong" card.
+7. Cosmology visuals show comoving grids and light cones, never an explosion into empty space.
+8. Every sim displays "simplified or not to scale" badges for its idealizations, such as exaggerated strain, non-rotating black holes, or a 2D slice of a 3D field.
+
+**The special-relativity spiral across courses:**
+- Physics II R1 introduces the effects: postulates, dilation, contraction, E = γmc².
+- 2710 MP2–MP3 makes it algebraic: Lorentz transformations, paradoxes, dynamics.
+- 3710 R1–R4 makes it geometric: interval, rapidity, four-vectors, accelerated frames.
+- Each pass should reuse the same muon, train and twin scenarios at increasing depth, so a learner sees one story deepen.
+
+**The GR spine:**
+1. Physics I: frames, the equivalence of inertial and gravitational mass, tides, effective potential, escape speed → r_s.
+2. Physics II: Gauss's law for gravity, c from ε₀ and μ₀, the relativity of E and B, EM versus GW polarization, interferometry.
+3. 2710: SR dynamics, photon redshift, blackbody radiation → CMB, degeneracy pressure → compact stars.
+4. 3710: the equivalence principle, metric geodesics, Schwarzschild, black holes, gravitational waves, cosmology.
+5. The dedicated GR course: tensors and Einstein's equations.
+Tag every lesson on this spine [GR], so the learner's "path to black holes" view can be filtered.
+
+**Lab-skills progression:**
+- Physics I lab (2215): uncertainty, linear fits, sensors.
+- Physics II lab (2225): oscilloscope work, exponential and sinusoidal fits, Poisson counting.
+- Modern-physics demonstrations, run virtually in the Atlas: photoelectric h/e, Franck–Hertz, e/m, the hydrogen spectrum to R_H, electron diffraction, gamma counting. These need verification against a USU modern-physics lab course if one exists.
+- Each lab lesson should state which AAPT focus area it trains.
+
+### Gaps
+- PhysPort and PER-Central misconception databases and assessment pages were not reachable, except the RCI page through search.
+- No source was found on licensing and reuse terms for FCI, CSEM, BEMA and QMCS items.
+- Not verified:
+  - non-PhET benchmarks: Falstad applets, Real Time Relativity, A Slower Speed of Light and OpenRelativity, the Einstein-First materials beyond one paper title, and sector models (Zahn & Kraus);
+  - whether USU offers a modern-physics lab that pairs with 2710 or 3710;
+  - MIT OCW 8.01, 8.02, 8.04, 8.20 and 8.033 syllabi, which were not reached because of the proxy and the search budget.
