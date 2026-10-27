@@ -1,7 +1,7 @@
 // Carrying an arrow around a curved world — Intuition Mode concept lesson.
 // Parallel transport on a sphere: the arrow returns rotated by area/R².
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 
 const t = String.raw;
 const DEG = Math.PI / 180;
@@ -100,9 +100,9 @@ That dependence on the path *is* curvature, and you can detect it without leavin
           prompt: t`A surveyor carries an arrow, never turning it, around a triangle enclosing ${A.toLocaleString('en-US')} km² of a round Earth of radius ${R_EARTH.toLocaleString('en-US')} km. By how many arcseconds does it come back turned? (1 radian = 206 265″.)`,
           answer: a / ARCSEC, units: 'arcsec', tol: { rel: 0.01 },
           errors: [{ value: A / R_EARTH / ARCSEC, feedback: 'Divide by R squared: α = A/R².' }],
-          hints: [t`$\alpha = A/R^2$ in radians, with $A$ in km² and $R$ in km.`, t`$\alpha = ${A}/${R_EARTH}^2 = ${fmt(a, 3)}$ rad; multiply by 206 265.`],
+          hints: [t`$\alpha = A/R^2$ in radians, with $A$ in km² and $R$ in km.`, t`$\alpha = ${A}/${R_EARTH}^2 = ${tex(a, 3)}$ rad; multiply by 206 265.`],
           teach: 'Even on the Earth the turn is measurable for a large enough loop: α = A/R².',
-          explain: t`$\alpha = ${grp(A)}/${grp(R_EARTH)}^2 = ${fmt(a, 3)}$ rad $= ${fmt(a / ARCSEC, 3)}''$${a / DEG > 0.5 ? ` (${fmt(a / DEG, 3)}°)` : ''}. Small loops turn arrows very little: curvature only shows over areas comparable with $R^2$.`,
+          explain: t`$\alpha = ${grp(A)}/${grp(R_EARTH)}^2 = ${tex(a, 3)}$ rad $= ${fmt(a / ARCSEC, 3)}''$${a / DEG > 0.5 ? ` (${fmt(a / DEG, 3)}°)` : ''}. Small loops turn arrows very little: curvature only shows over areas comparable with $R^2$.`,
           visual: { type: 'gr-sphere-transport', params: { mode: 'triangle', dphi: 30, colat: 25, colatSlider: false, progress: 1, readout: false }, caption: 'Not to scale: a small triangle on a large sphere turns the arrow only a little — the turn is the area divided by R².' },
         };
       },

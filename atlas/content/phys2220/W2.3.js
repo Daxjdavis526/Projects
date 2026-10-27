@@ -86,7 +86,7 @@ with $v_o$ positive when the listener moves toward the source and $v_s$ positive
           answer: fo, units: 'Hz', tol: { rel: 0.003 },
           errors: apart([{ value: doppler(f, 0, -vs), feedback: 'An approaching source sounds higher, not lower: the fronts are crowded together ahead of it.' }, { value: doppler(f, vs, 0), feedback: t`That is the formula for a *moving listener*. Here the source moves: $f_o = f_s\,v/(v - v_s)$.` }], fo, 0.006),
           hints: [t`$f_o = f_s\,\dfrac{v}{v - v_s}$ for a source moving toward a listener at rest.`],
-          teach: 'A source approaching at v_s is heard at f_s·v/(v − v_s): higher than it emits.',
+          teach: t`A source approaching at $v_s$ is heard at $f_s v/(v - v_s)$: higher than it emits.`,
           explain: t`$f_o = ${f} \times \dfrac{343}{343 - ${vs}} = ${tn(fo, 4)}$ Hz.`,
           visual: dop(r6(vs / V * 3), { time: 0.5 }, 'Wavefronts crowding ahead of a moving source (exaggerated: drawn at three times the real Mach number). Scaled picture.'),
         };
@@ -102,7 +102,7 @@ with $v_o$ positive when the listener moves toward the source and $v_s$ positive
           answer: fo, units: 'Hz', tol: { rel: 0.003 },
           errors: apart([{ value: doppler(f, 0, vs), feedback: 'Moving away, the source leaves its fronts spread out behind it: the pitch is lower.' }, { value: doppler(f, -vs, 0), feedback: 'That would be you moving away from a parked bike. Here the source moves.' }], fo, 0.006),
           hints: [t`Moving away means $v_s$ is negative: $f_o = f_s\,\dfrac{v}{v + |v_s|}$.`],
-          teach: 'A receding source is heard at f_s·v/(v + |v_s|): lower than it emits.',
+          teach: t`A receding source is heard at $f_s v/(v + |v_s|)$: lower than it emits.`,
           explain: t`$f_o = ${f} \times \dfrac{343}{343 + ${vs}} = ${tn(fo, 4)}$ Hz.`,
           visual: dop(r6(vs / V * 3), { time: 0.82 }, 'Wavefronts spread out behind a moving source (exaggerated: three times the real Mach number). Scaled picture.'),
         };
@@ -118,7 +118,7 @@ with $v_o$ positive when the listener moves toward the source and $v_s$ positive
           answer: fo, units: 'Hz', tol: { rel: 0.003 },
           errors: apart([{ value: doppler(f, toward ? -vo : vo, 0), feedback: t`Check the direction: moving ${toward ? 'toward' : 'away from'} the source means you meet the fronts ${toward ? 'more' : 'less'} often.` }, { value: doppler(f, 0, toward ? vo : -vo), feedback: t`That treats the speaker as moving. For a moving listener, $f_o = f_s(v + v_o)/v$.` }], fo, 0.006),
           hints: [t`A moving listener: $f_o = f_s\,\dfrac{v + v_o}{v}$, with $v_o$ positive toward the source.`],
-          teach: 'A listener moving toward a source meets more wavefronts per second: f_o = f_s(v + v_o)/v.',
+          teach: t`A listener moving toward a source meets more wavefronts per second: $f_o = f_s(v + v_o)/v$.`,
           explain: t`$v_o = ${toward ? '+' : '-'}${vo}$ m/s, so $f_o = ${f} \times \dfrac{343 ${toward ? '+' : '-'} ${vo}}{343} = ${tn(fo, 4)}$ Hz. The wavelength in the air is unchanged; only the rate at which the cyclist meets the fronts changes.`,
           visual: dop(0, { time: 0.5 }, 'A stationary source: its fronts are evenly spaced circles. A moving listener crosses them more or less often. Scaled picture.'),
         };
@@ -252,7 +252,7 @@ with $v_o$ positive when the listener moves toward the source and $v_s$ positive
         2: 'Transverse waves on a string still have a medium, and show the same source-or-listener difference as sound.',
         3: 'Experiments confirm it: the speed of light is the same for every observer, and the Doppler shift of light depends only on the relative velocity.',
       },
-      hints: ['In each case, what is the wave moving through — and is there anything to be “at rest” relative to?'],
+      hints: ['In each case, what is the wave moving through — and is there anything to be “at rest” relative to?', 'Light needs no medium at all, and every observer measures the same speed of light.'],
       teach: 'Sound’s Doppler shift depends on motion relative to the air; light has no medium, so its shift depends only on relative velocity.',
       explain: t`For sound, the air is a physical reference: a source moving through it changes the wavelength in the air, while a listener moving through it changes how fast the fronts arrive, and the two effects differ. Light has no medium, its speed is the same for every observer, and its Doppler shift — worked out in special relativity, $f_o = f_s\sqrt{(1 + \beta)/(1 - \beta)}$ for approach at speed $\beta c$ — depends only on the relative velocity.`,
       visual: dop(0.5, { time: 0.6 }, 'Sound fronts from a source moving at Mach 0.5 through still air (scaled picture). The air itself is the reference the fronts spread in.'),

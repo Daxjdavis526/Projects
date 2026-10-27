@@ -113,7 +113,7 @@ export async function mount(F, P) {
       graph.o.pad = { l: 46, r: 16, t: split + 14, b: 34 };
       graph.o.xfmt = () => '';
       const T = crossing(), fmax = M < 1 ? Math.min(f / (1 - Math.min(M, 0.92)), 5 * f) : 5 * f;
-      graph.setView([0, T], [0, Math.max(2.2 * f, fmax * 1.12)]);
+      graph.setView([0, T], [0, Math.max(2.2 * f, fmax * 1.35)]);
       graph.grid(); graph.axes();
       if (M < 0.98) {
         const pts = [];

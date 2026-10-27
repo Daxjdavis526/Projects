@@ -2,7 +2,7 @@
 // at a surface, εσAT⁴ across empty space — and why a cryogenic tank is wrapped
 // in foam, vacuum and shiny multilayer blankets.
 import { lesson, mcq, num, match } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { SIGMA, LN2, LOX, wallPic, radiationGraph, shieldsPic, apart, sci } from './_thermal.js';
 
 const t = String.raw;
@@ -172,7 +172,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
           ], qf),
           hints: ['In series the same heat flux crosses both layers, and the resistances add: R = L₁/k₁ + L₂/k₂.', t`$q = \dfrac{\Delta T}{L_1/k_1 + L_2/k_2}$.`],
           teach: 'Layers in series add their thermal resistances L/k, and the largest resistance controls the flow.',
-          explain: t`$R = \dfrac{${L1 / 1000}}{0.030} + \dfrac{0.004}{167} = ${fmt(L1 / 1000 / 0.03, 3)} + ${fmt(0.004 / 167, 2)}$ m²K/W, so $q = 203/${fmt(R, 3)} = ${fmt(qf, 3)}$ W/m². The aluminium’s share of the resistance is about one part in ${fmt(Math.round(L1 / 1000 / 0.03 / (0.004 / 167) / 1000) * 1000, 2)}: almost the whole temperature drop sits in the foam.`,
+          explain: t`$R = \dfrac{${L1 / 1000}}{0.030} + \dfrac{0.004}{167} = ${fmt(L1 / 1000 / 0.03, 3)} + ${tex(0.004 / 167, 2)}$ m²K/W, so $q = 203/${fmt(R, 3)} = ${fmt(qf, 3)}$ W/m². The aluminium’s share of the resistance is about one part in ${fmt(Math.round(L1 / 1000 / 0.03 / (0.004 / 167) / 1000) * 1000, 2)}: almost the whole temperature drop sits in the foam.`,
           visual: wallPic({ layers: [{ name: 'foam', w: 1, color: 'warn' }, { name: 'aluminium', w: 0.25, color: 'ink3' }], temps: [293, 90 + 203 * (0.004 / 167) / R, 90], show: [0, 2], hot: 'outside', cold: 'LOX', ask: 'q = ?', caption: 'Temperature through the two layers. Widths not to scale: the aluminium is drawn far thicker than it is.' }),
         };
       },
@@ -273,7 +273,7 @@ In **convection**, a moving fluid carries energy with it; at a surface the rate 
           ], m),
           hints: [t`First the heat leak: $P = kA\Delta T/L$, with $\Delta T = 293.15 - 77.4$ K.`, t`Then the boil-off: $m = Pt/L_v$ with $t = 86\,400$ s.`],
           teach: 'Conduction sets the heat leak; latent heat turns it into a boil-off rate.',
-          explain: t`$P = \dfrac{(0.030)(${A})(215.8)}{${L / 1000}} = ${fmt(P, 3)}$ W, so a day delivers $${fmt(P * 86400, 3)}$ J and boils $${fmt(m, 3)}$ kg — why serious dewars use a vacuum jacket instead.`,
+          explain: t`$P = \dfrac{(0.030)(${A})(215.8)}{${L / 1000}} = ${fmt(P, 3)}$ W, so a day delivers $${tex(P * 86400, 3)}$ J and boils $${fmt(m, 3)}$ kg — why serious dewars use a vacuum jacket instead.`,
           visual: wallPic({ layers: [{ name: 'foam', w: 1, color: 'warn' }], temps: [293.15, LN2.Tb], hot: 'lab, 20 °C', cold: 'LN₂', ask: 'P = ?', caption: 'The temperature falls straight across the foam. Not to scale.' }),
         };
       },

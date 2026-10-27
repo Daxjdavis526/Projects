@@ -2,7 +2,7 @@
 // body holds), and calorimetry — with a cryogenic chill-down and a test-stand
 // calorimeter.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { SPECIFIC, ssEnthalpy, bodiesPic, tqPic, cBars, cpGraph, flowPic, apart } from './_thermal.js';
 
 const t = String.raw;
@@ -109,7 +109,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
           errors: [{ value: (m * CW * T2) / 1000, feedback: t`Use the *change* in temperature, $\Delta T = ${T2} - ${T1}$ K, not the final temperature.` }],
           hints: [t`$Q = mc\Delta T$ with $\Delta T = ${T2 - T1}$ K.`],
           teach: 'With no phase change, the heat needed is mass times specific heat times temperature change.',
-          explain: t`$Q = (${m}\ \text{kg})(4184\ \text{J/(kg·K)})(${T2 - T1}\ \text{K}) = ${fmt(Q * 1000, 3)}$ J $= ${fmt(Q, 3)}$ kJ.`,
+          explain: t`$Q = (${m}\ \text{kg})(4184\ \text{J/(kg·K)})(${T2 - T1}\ \text{K}) = ${tex(Q * 1000, 3)}$ J $= ${fmt(Q, 3)}$ kJ.`,
           visual: tqPic({ T1, T2, name: `${m} kg of water`, caption: 'Temperature against heat added: a straight line while nothing boils. The heat axis has no numbers — finding Q is the question.' }),
         };
       },
@@ -180,7 +180,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
           errors: [{ value: (m * 470 * 216) / 1000, feedback: 'That uses the room-temperature specific heat, 470 J/(kg·K). The steel’s c falls as it cools; use the average over the range.' }],
           hints: [t`$Q = mc\Delta T$ still works with the *average* specific heat over the range.`, t`$\Delta T = 293 - 77 = 216$ K.`],
           teach: 'When c changes with temperature, Q = m∫c dT — which equals m times the average c times ΔT.',
-          explain: t`$Q = (${m})(${CBAR})(216) = ${fmt(Q * 1000, 3)}$ J $\approx ${fmt(Q, 3)}$ kJ — the shaded area under the c(T) curve, times the mass. Using the room-temperature value would overestimate by ${Math.round((470 / CBAR - 1) * 100)} %.`,
+          explain: t`$Q = (${m})(${CBAR})(216) = ${tex(Q * 1000, 3)}$ J $\approx ${fmt(Q, 3)}$ kJ — the shaded area under the c(T) curve, times the mass. Using the room-temperature value would overestimate by ${Math.round((470 / CBAR - 1) * 100)} %.`,
           visual: cpGraph({ T1: 77, T2: 293 }),
         };
       },
@@ -218,7 +218,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
           errors: [{ value: (mdot * CW * Tout) / 1000, feedback: t`The water carries away heat according to how much it *warms*: $\Delta T = ${Tout} - ${Tin}$ K.` }],
           hints: ['Each second, a mass ṁ of water warms by ΔT.', t`Heat per second $= \dot m\,c\,\Delta T$.`],
           teach: 'A flowing coolant carries heat away at a rate ṁcΔT — which is how test stands measure the heat flowing into chamber walls.',
-          explain: t`$P = \dot m c\Delta T = (${mdot}\ \text{kg/s})(4184\ \text{J/(kg·K)})(${Tout - Tin}\ \text{K}) = ${fmt(P * 1000, 3)}$ W $\approx ${fmt(P, 3)}$ kW. Divide by the wall area and you have the heat flux that a regeneratively cooled engine must survive.`,
+          explain: t`$P = \dot m c\Delta T = (${mdot}\ \text{kg/s})(4184\ \text{J/(kg·K)})(${Tout - Tin}\ \text{K}) = ${tex(P * 1000, 3)}$ W $\approx ${fmt(P, 3)}$ kW. Divide by the wall area and you have the heat flux that a regeneratively cooled engine must survive.`,
           visual: flowPic({ Tin: `${Tin} °C`, Tout: `${Tout} °C`, mdot: `${mdot} kg/s` }),
         };
       },
@@ -249,7 +249,7 @@ The **specific heat** $c$ says how much energy one kilogram needs per kelvin. Wa
           errors: [{ value: (m * CW * 100) / (P * 1000), feedback: t`The water warms by $100 - ${T1}$ K, not 100 K.` }],
           hints: ['First find the heat needed, Q = mcΔT.', 'Then time = energy ÷ power.'],
           teach: 'A heater of power P supplies Q = Pt, so the time is mcΔT divided by P.',
-          explain: t`$Q = (${m})(4184)(${100 - T1}) = ${fmt(m * CW * (100 - T1), 3)}$ J, so $t = Q/P = ${fmt(m * CW * (100 - T1), 3)}/${P * 1000} = ${fmt(tsec, 3)}$ s, about ${fmt(tsec / 60, 2)} minutes. Real kettles take a little longer: some heat goes into the kettle and the air.`,
+          explain: t`$Q = (${m})(4184)(${100 - T1}) = ${tex(m * CW * (100 - T1), 3)}$ J, so $t = Q/P = ${tex(m * CW * (100 - T1), 3)}/${P * 1000} = ${fmt(tsec, 3)}$ s, about ${fmt(tsec / 60, 2)} minutes. Real kettles take a little longer: some heat goes into the kettle and the air.`,
           visual: tqPic({ T1, T2: 100, name: `${m} kg of water`, xlabel: 'time (heat = power × time)', ask: 't = ?', caption: 'Steady power means heat flows in at a steady rate, so the temperature climbs in a straight line until boiling starts.' }),
         };
       },

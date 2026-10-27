@@ -1,7 +1,7 @@
 // Phase changes and latent heat: Q = mL, the flat steps of a heating curve,
 // and boil-off — the heat that leaks into a cryogenic tank becomes vapour.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { LN2, LOX, WATER, ssEnthalpy, heatingCurve, waterSegs, vesselPic, bodiesPic, apart } from './_thermal.js';
 
 const t = String.raw;
@@ -129,7 +129,7 @@ Water needs 334 kJ/kg to melt and 2257 kJ/kg to boil — over five times the 418
           ], m),
           hints: ['A watt is a joule per second, so first find the heat delivered in a day.', t`$m = \dfrac{P\,t}{L_v}$ with $t = 86\,400$ s.`],
           teach: 'A steady heat leak $P$ boils off liquid at a rate $P/L_v$.',
-          explain: t`In a day $Q = (${P}\ \text{W})(86\,400\ \text{s}) = ${fmt(P * 86400, 3)}$ J, so $m = Q/L_v = ${fmt(P * 86400, 3)}/(213\times10^{3}) = ${fmt(m, 3)}$ kg. Long-duration missions fight every watt with vacuum and multilayer insulation (lesson M16.5).`,
+          explain: t`In a day $Q = (${P}\ \text{W})(86\,400\ \text{s}) = ${tex(P * 86400, 3)}$ J, so $m = Q/L_v = ${tex(P * 86400, 3)}/(213\times10^{3}) = ${fmt(m, 3)}$ kg. Long-duration missions fight every watt with vacuum and multilayer insulation (lesson M16.5).`,
           visual: vesselPic({ kind: 'tank', liquid: 'LOX, 90 K', leak: true, vent: 'O₂ gas out', level: 0.7, caption: 'Heat leaking into a LOX tank boils it; the vapour is vented. Cross-section, not to scale.' }),
         };
       },
@@ -225,7 +225,7 @@ Water needs 334 kJ/kg to melt and 2257 kJ/kg to boil — over five times the 418
           ], m),
           hints: ['Energy absorbed = power × time, with the time in seconds.', t`$m = Pt/L_v$.`],
           teach: 'Heat flowing steadily into a boiling propellant removes mass at a rate $P/L_v$.',
-          explain: t`$Q = (${P}\times10^{3}\ \text{W})(${tm * 60}\ \text{s}) = ${fmt(P * 1000 * tm * 60, 3)}$ J, so $m = Q/L_v = ${fmt(m, 3)}$ kg — which is why a fuelled launcher vents a steady plume of oxygen and is topped up until the final minutes.`,
+          explain: t`$Q = (${P}\times10^{3}\ \text{W})(${tm * 60}\ \text{s}) = ${tex(P * 1000 * tm * 60, 3)}$ J, so $m = Q/L_v = ${fmt(m, 3)}$ kg — which is why a fuelled launcher vents a steady plume of oxygen and is topped up until the final minutes.`,
           visual: vesselPic({ kind: 'tank', liquid: 'LOX, 90 K', leak: true, leakLabel: 'sunlight and warm air', vent: 'O₂ vented', level: 0.75, caption: 'A propellant tank on the pad. Cross-section, not to scale.' }),
         };
       },

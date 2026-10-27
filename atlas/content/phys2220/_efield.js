@@ -47,3 +47,29 @@ export const fieldLive = (params, caption) => ({ type: 'em-field', params: { rea
 
 /** A uniform field pointing at `deg` degrees (0 = right, 90 = up), of size E (N/C). */
 export const uniformAt = (E, deg) => [r6(E * Math.cos((deg * Math.PI) / 180)), r6(E * Math.sin((deg * Math.PI) / 180))].map((v) => (Math.abs(v) < 1e-9 * E ? 0 : v));
+
+/**
+ * A uniformly charged ring (radius a, in the horizontal plane) and a point P on
+ * its axis at height h, as a rotatable 3D scene: optionally two opposite
+ * pieces dq with their fields dE at P (pair), and the total along the axis (sum).
+ * Lengths are in picture units (the scene is about 3 units across).
+ */
+export function ringPic({ a = 1.8, h = 2.2, pair = true, sum = false, caption, label = 'P' } = {}) {
+  const r = Math.hypot(a, h), s = 1.3 / 1;                   // dE drawn 1.3 units long
+  const d1 = [0, (-a / r) * s, (h / r) * s], d2 = [0, (a / r) * s, (h / r) * s];
+  const P = [0, 0, h];
+  return {
+    type: 'calc-vectors3d',
+    params: {
+      range: 3,
+      curves: [{ param: [`${r6(a)}*cos(t)`, `${r6(a)}*sin(t)`, 0], t: [0, 6.2832], color: 'bad' }],
+      points: [{ at: P, color: 'gold', label }, ...(pair ? [{ at: [0, r6(a), 0], color: 'bad', label: 'dq' }, { at: [0, r6(-a), 0], color: 'bad', label: "dq'" }] : [])],
+      segments: pair ? [{ from: [0, r6(a), 0], to: P, color: 'ink3', dash: true }, { from: [0, r6(-a), 0], to: P, color: 'ink3', dash: true }] : [],
+      vectors: [
+        ...(pair ? [{ from: P, to: P.map((c, i) => r6(c + d1[i])), color: 'accent', label: 'd\\vec E' }, { from: P, to: P.map((c, i) => r6(c + d2[i])), color: 'accent', label: "d\\vec E'" }] : []),
+        ...(sum ? [{ from: P, to: [0, 0, r6(h + 2 * d1[2])], color: 'gold', label: '\\vec E' }] : []),
+      ],
+    },
+    caption,
+  };
+}

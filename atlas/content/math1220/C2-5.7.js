@@ -2,7 +2,7 @@
 // terms of a series in a small number, and the next term that says when the
 // approximation fails. Bridge to relativity: kinetic energy and GPS clocks.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { nice } from '../../src/core/format.js';
+import { nice, tex } from '../../src/core/format.js';
 
 const t = String.raw;
 const C = 299792458;                  // m/s, exact
@@ -147,7 +147,7 @@ Times $86\,400$ s: **+45.7 μs per day**.` },
           hints: [t`A moving clock runs slow by the fraction $1 - \frac{1}{\gamma} \approx \frac{v^2}{2c^2}$.`, t`$\frac{v^2}{2c^2} = \frac{(${v})^2}{2(2.998\times10^8)^2}$; multiply by $86\,400$ s and convert to μs.`],
           teach: t`To first order a moving clock loses the fraction $\frac{v^2}{2c^2}$ of its time.`,
           visual: { type: 'graph', params: { x: [0, 10], y: [0, 50], xlabel: 'speed (km/s)', ylabel: 'μs lost per day', curves: [{ fn: '86400e6*(1000x)^2/(2*299792458^2)', color: 'accent' }], vlines: [{ x: v / 1000, label: `${nice(v / 1000, 3)} km/s` }] }, caption: t`Time lost per day to speed alone, $86\,400\,\text{s}\times\frac{v^2}{2c^2}$, for orbital speeds. It grows as the square of the speed.` },
-          explain: t`$\frac{v^2}{2c^2} = ${nice((v / C) ** 2 / 2, 3)}$, and $${nice((v / C) ** 2 / 2, 3)}\times 86\,400\ \text{s} = ${nice(lag, 3)}$ μs per day. (Gravity works the other way and partly cancels this; the worked example has both.)`,
+          explain: t`$\frac{v^2}{2c^2} = ${tex((v / C) ** 2 / 2, 3)}$, and $${tex((v / C) ** 2 / 2, 3)}\times 86\,400\ \text{s} = ${nice(lag, 3)}$ μs per day. (Gravity works the other way and partly cancels this; the worked example has both.)`,
         };
       },
     }),
@@ -183,7 +183,7 @@ Times $86\,400$ s: **+45.7 μs per day**.` },
           hints: [t`Each clock runs slow by $\frac{GM}{rc^2}$ at its own $r$. The satellite gains the difference.`, t`$\frac{GM}{c^2} = 4.435\times10^{-3}$ m. Compute $\frac{GM}{c^2}\left(\frac{1}{R_\oplus} - \frac{1}{r}\right)$ and multiply by $86\,400$ s.`],
           teach: t`In a weak field a clock’s rate is $1 - \frac{GM}{rc^2}$, so the higher clock gains $\frac{GM}{c^2}\left(\frac{1}{r_1} - \frac{1}{r_2}\right)$.`,
           visual: { type: 'graph', params: { x: [6.371, 45], y: [0, 62], xlabel: 'r (thousand km)', ylabel: 'μs gained per day', curves: [{ fn: '4.435028e-3*(1/6.371e6 - 1/(x*1e6))*86400e6', color: 'accent' }], hlines: [{ y: 4.435028e-3 / 6.371e6 * 86400e6, label: 'clock far from Earth', color: 'ink3' }], vlines: [{ x: rk / 1000, label: name.replace('a geostationary', 'GEO') }] }, caption: t`Gravity’s gain per day for a clock at radius $r$ compared with one on the ground. It levels off towards the dashed line: a clock infinitely far away gains $60$ μs a day.` },
-          explain: t`$4.435\times10^{-3}\left(\frac{1}{6.371\times10^6} - \frac{1}{${nice(rr / 1e6, 5)}\times10^6}\right) = ${nice(gain / DAY / 1e6, 3)}$; times $86\,400$ s that is $${nice(gain, 3)}$ μs per day.`,
+          explain: t`$4.435\times10^{-3}\left(\frac{1}{6.371\times10^6} - \frac{1}{${nice(rr / 1e6, 5)}\times10^6}\right) = ${tex(gain / DAY / 1e6, 3)}$; times $86\,400$ s that is $${nice(gain, 3)}$ μs per day.`,
         };
       },
     }),

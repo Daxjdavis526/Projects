@@ -1,6 +1,6 @@
 // The divergence (n-th term) test, the harmonic series, and telescoping series.
 import { lesson, mcq, multi, num } from '../../src/core/content.js';
-import { nice, fmt, frac } from '../../src/core/format.js';
+import { nice, fmt, frac, tex } from '../../src/core/format.js';
 
 const t = String.raw;
 const GAMMA = 0.5772156649015329;
@@ -154,7 +154,7 @@ It works **one way only**. The harmonic series $1 + \frac12 + \frac13 + \cdots$ 
           errors: [{ value: Math.exp(k), feedback: t`Subtract Euler’s constant first: $\ln N \approx ${k} - 0.5772$.` }, { value: k / 0.5772, feedback: t`Solve $\ln N + 0.5772 = ${k}$ with an exponential: $N = e^{${k} - 0.5772}$.` }],
           hints: [t`Set $\ln N + 0.5772 = ${k}$.`, t`$N = e^{${k} - 0.5772} = e^{${fmt(k - GAMMA, 5)}}$.`],
           teach: 'The harmonic series diverges, but only logarithmically: each extra unit of sum costs about e ≈ 2.7 times as many terms.',
-          explain: t`$N \approx e^{${k} - 0.5772} \approx ${fmt(est, 3)}$ terms. The series does diverge — every number is eventually passed — but astonishingly slowly.`,
+          explain: t`$N \approx e^{${k} - 0.5772} \approx ${tex(est, 3)}$ terms. The series does diverge — every number is eventually passed — but astonishingly slowly.`,
           visual: { type: 'calc-series', params: { view: 'sums', term: '1/n', N: { min: 10, max: 400, value: 400 }, showTerms: false, guide: { fn: 'ln(n) + 0.5772', label: 'ln n + 0.5772' }, y: [0, 7] }, caption: 'The first few hundred partial sums hug ln N + 0.5772.' },
         };
       },

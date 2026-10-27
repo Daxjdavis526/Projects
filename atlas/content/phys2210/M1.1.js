@@ -126,7 +126,7 @@ Miles cancel miles and hours cancel hours, leaving m/s. Write the units in every
         ]);
         const ans = clean(c.v * 10 ** c.p), wrong = clean(c.v * 10 ** -c.p);
         return {
-          prompt: t`${c.ctx} Write this in ${c.word}, the unit with no prefix. (Scientific notation is fine: 4.7e3 means $4.7\times10^3$.)`,
+          prompt: t`${c.ctx} Write this in ${c.word}, the unit with no prefix. (Scientific notation is fine: \`4.7e3\` means $4.7\times10^3$.)`,
           answer: ans, units: c.u, tol: { rel: 0.002 },
           errors: [{ value: wrong, feedback: c.p > 0 ? `You moved the decimal point the wrong way. A big prefix packs many ${c.word} into one unit, so removing it makes the number bigger.` : `You moved the decimal point the wrong way. A small prefix means a tiny fraction of a unit, so removing it makes the number smaller.` }],
           hints: [t`$\mathrm{${c.pt}}$ stands for $10^{${c.p}}$: replace the prefix by that factor.`],

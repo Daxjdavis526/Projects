@@ -1,7 +1,7 @@
 // Conservation of momentum: internal forces cancel in pairs, so an isolated
 // system's total momentum never changes.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { nice, fmt } from '../../src/core/format.js';
+import { nice, fmt, tex } from '../../src/core/format.js';
 import { collide1d } from '../../src/viz/model/mech-collide.js';
 
 const t = String.raw;
@@ -210,7 +210,7 @@ What is wrong?`,
           ],
           hints: ['Work in the station’s frame: before docking only the capsule moves.', t`They move off together: $(m + M)\,v' = m v$.`],
           teach: 'A docking is a perfectly inelastic collision: the pair shares the capsule’s momentum.',
-          explain: t`$v' = \dfrac{m v}{m + M} = \dfrac{${cm(m)}\times${v}}{${cm(m + M)}} = ${s3(dv)}$ m/s $= ${s3(dv * 1000)}$ mm/s. The station’s thrusters later trim this out.`,
+          explain: t`$v' = \dfrac{m v}{m + M} = \dfrac{${cm(m)}\times${v}}{${cm(m + M)}} = ${tex(dv, 3)}$ m/s $= ${s3(dv * 1000)}$ mm/s. The station’s thrusters later trim this out.`,
           visual: snaps({ m1: m, m2: M, u1: v, u2: 0, e: 0, show: 'before', names: ['capsule', 'station'] }, 'Just before docking, in the station’s frame (sizes not to scale).'),
         };
       },

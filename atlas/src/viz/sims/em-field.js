@@ -202,8 +202,16 @@ export function mount(F, P0) {
       balls: st.balls.map((b) => ({ x: b.x * L, y: b.y * L, R: num(b.R, E) * L, Q: num(b.Q, E) * QF, shell: !!b.shell })),
       uniform: u,
       conductor: cd ? { x: cd.x * L, y: cd.y * L, R: num(cd.R, E) * L, a: (num(cd.a ?? 0, E) || 0) * L, Q: (num(cd.Q ?? 0, E) || 0) * QF } : null,
-      ref: st.ref ? [st.ref[0] * L, st.ref[1] * L] : [0, 0],
+      ref: refPoint().map((c) => c * L),
     });
+  }
+  // where V = 0 for a scene with lines, sheets or a uniform field: as given, or the origin unless a line charge sits there
+  function refPoint() {
+    if (st.ref) return st.ref;
+    const busy = (x, y) => st.lines.some((l) => Math.hypot(l.x - x, l.y - y) < 1e-9);
+    if (!busy(0, 0)) return [0, 0];
+    const v = view();
+    return [v.x0 + 0.1 * (v.x1 - v.x0), v.y0 + 0.1 * (v.y1 - v.y0)];
   }
   function gaussSI(E) {
     const g = st.gauss, shape = currentShape();
@@ -437,7 +445,7 @@ export function mount(F, P0) {
     });
     // the zero of potential, when it is not at infinity
     if (S.unbounded && (P.readouts || []).includes('V') && P.showRef !== false) {
-      const [rx, ry] = st.ref || [0, 0];
+      const [rx, ry] = refPoint();
       if (rx >= v.x0 && rx <= v.x1 && ry >= v.y0 && ry <= v.y1) {
         plot.point(rx, ry, { color: 'ink3', r: 3 });
         plot.text('V = 0', rx, ry, { color: 'ink3', size: fs - 1.5, dx: 6, dy: 10 });
@@ -587,7 +595,9 @@ export function mount(F, P0) {
       if (pplot) drawProfile(S, pr, v);
     }
     if (C && (P.readouts || []).includes('Vc')) rows.push(['potential of the conductor', qty(M.conductorPotential(S), 'V')]);
-    if (S.problems.length) rows.push(['note', `\\text{${S.problems[0].replace(/[{}\\$]/g, '')}}`]);
+    const usesV = layer('equip') || P.profile || (P.readouts || []).some((k) => ['V', 'Vc', 'dVdx'].includes(k));
+    const problems = S.problems.filter((m) => usesV || !/reference point/.test(m));
+    if (problems.length) rows.push(['note', `\\text{${problems[0].replace(/[{}\\$]/g, '')}}`]);
 
     for (const l of P.notes?.lines || []) plot.line(l.from[0], l.from[1], l.to[0], l.to[1], { color: l.color || 'ink3', width: l.width || 1.6, dash: l.dash ? [6, 5] : [] });
     for (const a of P.notes?.arrows || []) plot.arrow(a.from[0], a.from[1], a.to[0], a.to[1], { color: a.color || 'ink', width: a.width || 2.2, head: 9, label: a.label, ldx: a.ldx ?? 7, ldy: a.ldy ?? -7 });

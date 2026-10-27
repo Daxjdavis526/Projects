@@ -652,14 +652,16 @@ export function mount(F, P0) {
   function capacitor(e, g, st) {
     const u = A.X(1) - A.X(0), half = 0.46 * u;
     const vC = st.drop[e.id], Cv = S.seg.vals[e.id];
-    const qref = Math.max(...capIds.map((id) => S.seg.vals[id])) * Math.max(1e-9, Vhi - Vlo);
+    // full scale: the most charge any capacitor holds at either end of this charge or discharge
+    const seg = S.seg;
+    const qref = Math.max(1e-30, ...capIds.map((id) => Math.max(Math.abs(seg.vals[id] * (seg.tr.final[id] ?? 0)), Math.abs(seg.vals[id] * (seg.v0[id] ?? 0)))));
     // the field between the plates, fainter as the charge falls
     const f = Math.min(1, Math.abs(vC * Cv) / (qref || 1));
     ctx.save(); ctx.fillStyle = C.violet; ctx.globalAlpha = 0.1 + 0.35 * f;
     ctx.beginPath(); ctx.moveTo(g.p[0] - g.nx * half, g.p[1] - g.ny * half); ctx.lineTo(g.p[0] + g.nx * half, g.p[1] + g.ny * half); ctx.lineTo(g.q[0] + g.nx * half, g.q[1] + g.ny * half); ctx.lineTo(g.q[0] - g.nx * half, g.q[1] - g.ny * half); ctx.closePath(); ctx.fill(); ctx.restore();
     for (const [c, V] of [[g.p, st.V[e.a]], [g.q, st.V[e.b]]]) line(c[0] - g.nx * half, c[1] - g.ny * half, c[0] + g.nx * half, c[1] + g.ny * half, potOn ? potColor(V) : C.ink, 3.2);
     // charges on the plates: + on the higher-potential plate
-    const nq = Math.round(5 * f);
+    const nq = f > 0.02 ? Math.max(1, Math.round(5 * f)) : 0;
     if (nq > 0) {
       const pos = vC >= 0 ? [g.p, -1] : [g.q, 1], neg = vC >= 0 ? [g.q, 1] : [g.p, -1];
       ctx.save(); ctx.font = `700 ${Math.max(10, u * 0.22)}px Inter, system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -814,7 +816,7 @@ export function mount(F, P0) {
   }
 
   F.draw(draw);
-  F.caption(captionOf(P, pre, flowOn, potOn, hasCaps));
+  F.caption(captionOf(P, pre, flowOn, potOn, hasCaps, hasCaps && !still && (flowOn || (graphMode && graphMode !== 'static'))));
   return { get: (k) => F.params[k], destroy: () => anim?.stop() };
 }
 
@@ -822,12 +824,12 @@ function altOf(name) {
   return { single: 'a battery and one resistor', series: 'resistors in series with a battery', parallel: 'resistors in parallel across a battery', combo: 'one resistor in series with two in parallel', ladder: 'a resistor ladder', bridge: 'a Wheatstone bridge', twoloop: 'two batteries in a two-loop circuit', rc: 'a battery charging a capacitor through a resistor, with a two-way switch', firing: 'a capacitor-discharge firing circuit: a bus charges a capacitor bank that is then switched across an igniter' }[name] || name;
 }
 
-function captionOf(P, pre, flowOn, potOn, hasCaps) {
+function captionOf(P, pre, flowOn, potOn, hasCaps, animatedCaps) {
   const parts = ['Ideal wires; every resistor obeys $V = IR$ with a fixed $R$.'];
   if (pre.elements.some((e) => e.kind === 'L')) parts.push('Bulbs are drawn as fixed resistors glowing with their power; a real filament’s resistance rises several-fold as it heats.');
   if (flowOn) parts.push(`The moving dots are ${P.carriers === 'electrons' ? 'electrons' : 'charge carriers'} at a speed proportional to the current, enormously exaggerated: real drift speeds are below a millimetre per second, while the signal that sets them moving crosses the circuit at nearly the speed of light.`);
   if (potOn) parts.push('Wire colour shows potential, from the lowest node (blue) to the highest (red).');
-  if (hasCaps) parts.push('Capacitors are ideal (no leakage); time runs slowed down so that one time constant $\\tau$ takes about a second and a half.');
+  if (hasCaps) parts.push(animatedCaps ? 'Capacitors are ideal (no leakage); time runs slowed down so that one time constant $\\tau$ takes about a second and a half.' : 'Capacitors are ideal (no leakage).');
   return parts.join(' ');
 }
 

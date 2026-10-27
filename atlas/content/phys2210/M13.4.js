@@ -205,7 +205,7 @@ For a circular orbit, gravity supplies exactly the centripetal force, $GMm/r^2 =
           errors: [{ value: a * (1 + e), feedback: 'That is the farthest distance, a(1 + e). The closest is a(1 − e).' }],
           hints: [t`The focus is $ae$ from the ellipse's centre, so the closest point is $a - ae = a(1 - e)$ from it.`],
           teach: 'An ellipse’s closest and farthest distances from the focus are a(1 − e) and a(1 + e).',
-          explain: t`$r_\text{min} = a(1 - e) = ${a.toLocaleString('en-US').replace(/,/g, '{,}')}(1 - ${e}) = ${s3(rp)}$ ${unit}; the farthest is $a(1 + e) = ${s3(a * (1 + e))}$ ${unit}.`,
+          explain: t`$r_\text{min} = a(1 - e) = ${a.toLocaleString('en-US').replace(/,/g, '{,}')}(1 - ${e}) = ${tex(rp, 3)}$ ${unit}; the farthest is $a(1 + e) = ${tex(a * (1 + e), 3)}$ ${unit}.`,
           visual: keplerPicture(preset, { t: 0.3, sectors: 0, caption: `The orbit of ${name}, to scale.` }),
         };
       },

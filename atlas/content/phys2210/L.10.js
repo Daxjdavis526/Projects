@@ -18,9 +18,13 @@ const EX = (() => {
   return { rows, f, q, o: o.results[0], dL, sdL, r3: rows[2] };
 })();
 
-const swings = (r, sys = null, params = {}) => {
-  const rows = B.makeData('pendulum', { seed: r.int(1, 999999), sys, params }).rows;
-  return { rows, an: B.analyse('pendulum', rows, { sys, params }) };
+// one seeded run; `ok` can reject runs whose fit would read oddly in a prompt
+const swings = (r, sys = null, params = {}, ok = () => true) => {
+  for (let k = 0; ; k++) {
+    const rows = B.makeData('pendulum', { seed: r.int(1, 999999), sys, params }).rows;
+    const an = B.analyse('pendulum', rows, { sys, params });
+    if (k > 40 || ok(an)) return { rows, an };
+  }
 };
 
 export default lesson({
@@ -120,7 +124,7 @@ Plot $T^2$ against $L$, fit, and $g = 4\pi^2/\text{slope}$. The intercept is a f
     mcq({
       id: 'amplitude', difficulty: 2,
       gen(r) {
-        const { rows, an } = swings(r, 'amplitude');
+        const { rows, an } = swings(r, 'amplitude', {}, (a) => a.series[0].fit.chi2r > 0.4 && a.series[0].fit.chi2r < 1.8);
         const q = an.results[0];
         return {
           prompt: t`A group released their pendulum at 40° every time. Their $T^2$–$L$ plot is a fine straight line through the origin ($\chi^2/\text{dof} = ${an.series[0].fit.chi2r.toFixed(2)}$), but gives $g = ${pmTeX(q.value, q.sigma, t`\text{m/s}^2`)}$. Why is it low?`,
@@ -163,14 +167,14 @@ Plot $T^2$ against $L$, fit, and $g = 4\pi^2/\text{slope}$. The intercept is a f
       gen(r) {
         const { rows, an } = swings(r);
         const f = an.series[0].fit;
-        const b = +f.b.toFixed(3), sb = +f.sb.toPrecision(2), g = K / b;
+        const b = +f.b.toFixed(3), sbS = f.sb.toPrecision(2), sb = +sbS, g = K / b;
         return {
-          prompt: t`The slope is $${b.toFixed(3)} \pm ${sb}\ \text{s}^2/\text{m}$, so $g = ${g.toFixed(3)}\ \text{m/s}^2$. What is $\sigma_g$?`,
+          prompt: t`The slope is $${b.toFixed(3)} \pm ${sbS}\ \text{s}^2/\text{m}$, so $g = ${g.toFixed(3)}\ \text{m/s}^2$. What is $\sigma_g$?`,
           answer: +(g * sb / b).toPrecision(3), units: 'm/s^2', tol: { rel: 0.03 },
           errors: [{ value: sb, feedback: t`That is the slope’s uncertainty in s²/m. Since $g \propto 1/\text{slope}$, the *relative* uncertainty carries over: $\sigma_g = g\,\sigma_b/b$.` }, { value: (2 * g * sb) / b, feedback: t`$g \propto b^{-1}$ — the power is 1, not 2.` }],
           hints: [t`For $g = 4\pi^2 b^{-1}$: $\sigma_g/g = \sigma_b/b$.`],
           teach: 'A reciprocal keeps the relative uncertainty of the quantity it inverts.',
-          explain: t`$\sigma_g = ${g.toFixed(3)}\times${sb}/${b.toFixed(3)} = ${(g * sb / b).toFixed(3)}\ \text{m/s}^2$ — about ${(100 * sb / b).toFixed(1)}%, from ten-swing timings.`,
+          explain: t`$\sigma_g = ${g.toFixed(3)}\times${sbS}/${b.toFixed(3)} = ${(g * sb / b).toFixed(3)}\ \text{m/s}^2$ — about ${(100 * sb / b).toFixed(1)}%, from ten-swing timings.`,
           visual: plot('pendulum', rows, { caption: 'T² against L with the least-squares line.' }),
         };
       },
@@ -245,7 +249,22 @@ print(f"g = {g:.3f} m/s², length offset = {100 * dL:.1f} cm")
           hints: [t`Rearrange $T = 2\pi\sqrt{L/g}$ for $L$.`, t`$L = gT^2/4\pi^2$.`],
           teach: 'The pendulum law works on any world: L = gT²/(4π²).',
           explain: t`$L = ${g}\times${T.toFixed(1)}^2/39.48 = ${L.toFixed(3)}$ m — ${(L / ((9.8 * T * T) / K)).toFixed(2)} of the Earth length, because gravity there is weaker.`,
-          visual: apparatus('pendulum', { at: Math.min(1.6, Math.max(0.2, +L.toFixed(2))), labels: false }, 'A simple pendulum. Not to scale.'),
+          visual: (() => {
+            const Le = (9.8 * T * T) / K, r4 = (x) => +x.toFixed(4);
+            return {
+              type: 'graph',
+              params: {
+                aspect: 'wide', x: [0, r4(1.4 * Le)], y: [0, r4(1.6 * T * T)], xlabel: 'L (m)', ylabel: 'T² (s²)',
+                alt: `T squared against L for a pendulum on Earth and on ${planet}`,
+                curves: [
+                  { fn: `${r4(K / 9.8)}*x`, color: 'accent', label: 'Earth, g = 9.80', labelAt: r4(0.55 * Le), labelDy: 18 },
+                  { fn: `${r4(K / g)}*x`, color: 'gold', label: `${planet[0].toUpperCase()}${planet.slice(1)}, g = ${g}`, labelAt: r4((1.25 * T * T * g) / K), labelDx: 10, labelDy: 4 },
+                ],
+                hlines: [{ y: T * T, label: `T² = ${(T * T).toFixed(2)} s²`, color: 'good' }],
+              },
+              caption: `T² = 4π²L/g: the weaker the gravity, the steeper the line — and the shorter the pendulum that gives the same period.`,
+            };
+          })(),
         };
       },
     }),

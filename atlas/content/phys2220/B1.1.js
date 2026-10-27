@@ -75,7 +75,7 @@ So a charge at rest feels nothing, and a charge moving along the field feels not
         { to: [0, 0, `q*0.6*v*B*sin(${TH})`], color: COL.F, label: '\\vec F' },
       ],
       points: [{ at: [0, 0, 0], color: COL.pos, r: 6.5, when: 'step(q)' }, { at: [0, 0, 0], color: COL.neg, r: 6.5, when: 'step(-q)' }],
-      readouts: [{ label: '$|\\vec F| = |q|vB\\sin\\theta$', expr: `e0*v*1e6*B*sin(${TH})`, unit: '\\mathrm{N}', digits: 3 }],
+      readouts: [{ label: '$|\\vec F| = |q|vB\\sin\\theta$', expr: `e0*1e19*v*B*sin(${TH})`, unit: '\\times10^{-13}\\ \\mathrm{N}', digits: 3 }],
     },
     caption: 'v and B are to scale (v in 10⁶ m/s, B in tesla); the force arrow’s length is proportional to |F|, which the readout gives for a proton or an electron — they carry the same size of charge. The field is drawn as one arrow: only its value at the charge matters. Drag to rotate.',
   },
@@ -218,7 +218,7 @@ So a charge at rest feels nothing, and a charge moving along the field feels not
       prompt: 'The picture shows the field lines of a bar magnet, outside it and inside it. Which statement about magnetic field lines is right?',
       visual: (() => {
         const m = barMagnetParts({});
-        return page({ x: [-4.4, 4.4], y: [-2.5, 2.5], ...m, caption: 'Field lines of a bar magnet (teal), drawn as if its poles sat at its ends — a fair picture outside a long, thin magnet. Inside, the field runs from S back to N.' });
+        return page({ x: [-3.4, 3.4], y: [-1.8, 1.8], ...m, caption: 'Field lines of a bar magnet (teal), drawn as if its poles sat at its ends — a fair picture outside a long, thin magnet. Inside, the field runs from S back to N.' });
       })(),
       choices: [
         'They never end: each one is a closed loop, running from N to S outside the magnet and from S back to N inside it',
@@ -248,7 +248,7 @@ So a charge at rest feels nothing, and a charge moving along the field feels not
         } while (Math.abs(E - v * B) < 0.25 * Math.max(E, v * B));
         const q = P.q, Fy = q * (E - v * B);
         return {
-          prompt: t`${P.An} moves along $+x$ at $${tn(v)}$ m/s through a region where an electric field of $${tn(E)}$ V/m points along $+y$ and a magnetic field of $${B}$ T points along $+z$. What is the $y$-component of the total force on it? ($e = 1.602\times10^{-19}$ C)`,
+          prompt: t`${P.An} moves along $+x$ at $${tn(v)}$ m/s through a region where an electric field of $${tn(E)}$ V/m points along $+y$ and a magnetic field of $${B.toPrecision(2)}$ T points along $+z$. What is the $y$-component of the total force on it? ($e = 1.602\times10^{-19}$ C)`,
           visual: scene3({
             charge: Math.sign(q),
             vectors: [arrow3([2.2, 0, 0], COL.v, '\\vec v'), arrow3([0, 0, 1.9], COL.B, '\\vec B'), arrow3([0, 1.9, 0], COL.E, '\\vec E')],
@@ -348,25 +348,25 @@ So a charge at rest feels nothing, and a charge moving along the field feels not
       id: 'cp-no-force', difficulty: 2,
       prompt: 'In a uniform magnetic field pointing to the right, six particles are at rest or moving as shown. Which of them feel **no** magnetic force? Select every one.',
       visual: page({
-        x: [-3.6, 3.6], y: [-2.1, 2.1],
-        curves: [-1.8, -0.6, 0.6, 1.8].map((y) => seg2([-3.5, y], [3.5, y], { color: COL.B, width: 1.3 })),
+        x: [-3.6, 3.6], y: [-2.3, 2.3],
+        curves: [2.05, 0.2, -2.05].map((y) => seg2([-3.5, y], [3.5, y], { color: COL.B, width: 1.3 })),
         arrows: [
-          ...[-1.8, -0.6, 0.6, 1.8].map((y) => ({ from: [3.0, y], to: [3.4, y], color: COL.B })),
-          { from: [-1.5, 1.2], to: [-0.5, 1.2], color: COL.v },
-          { from: [1.5, 1.2], to: [0.5, 1.2], color: COL.v },
-          { from: [-2.4, -1.2], to: [-2.4, -0.25], color: COL.v },
-          { from: [0, -1.2], to: [0, -0.25], color: COL.v },
-          { from: [2.2, -1.2], to: [2.85, -0.55], color: COL.v },
+          ...[2.05, 0.2, -2.05].map((y) => ({ from: [3.0, y], to: [3.4, y], color: COL.B })),
+          { from: [-1.5, 1.15], to: [-0.5, 1.15], color: COL.v },
+          { from: [1.5, 1.15], to: [0.5, 1.15], color: COL.v },
+          { from: [-2.4, -1.55], to: [-2.4, -0.6], color: COL.v },
+          { from: [0, -1.55], to: [0, -0.6], color: COL.v },
+          { from: [2.2, -1.55], to: [2.85, -0.9], color: COL.v },
         ],
         points: [
-          { x: -2.6, y: 1.2, r: 7, color: COL.pos, label: 'A', labelDx: -6, labelDy: -16 },
-          { x: -1.5, y: 1.2, r: 7, color: COL.neg, label: 'B', labelDx: -6, labelDy: -16 },
-          { x: 1.5, y: 1.2, r: 7, color: COL.pos, label: 'C', labelDx: -6, labelDy: -16 },
-          { x: -2.4, y: -1.2, r: 7, color: COL.pos, label: 'D', labelDx: -22, labelDy: 0 },
-          { x: 0, y: -1.2, r: 7, color: 'ink3', label: 'E', labelDx: -22, labelDy: 0 },
-          { x: 2.2, y: -1.2, r: 7, color: COL.neg, label: 'F', labelDx: -22, labelDy: 0 },
+          { x: -2.6, y: 1.15, r: 7, color: COL.pos, label: 'A', labelDx: -6, labelDy: -16 },
+          { x: -1.5, y: 1.15, r: 7, color: COL.neg, label: 'B', labelDx: -6, labelDy: -16 },
+          { x: 1.5, y: 1.15, r: 7, color: COL.pos, label: 'C', labelDx: -6, labelDy: -16 },
+          { x: -2.4, y: -1.55, r: 7, color: COL.pos, label: 'D', labelDx: -22, labelDy: 0 },
+          { x: 0, y: -1.55, r: 7, color: 'ink3', label: 'E', labelDx: -22, labelDy: 0 },
+          { x: 2.2, y: -1.55, r: 7, color: COL.neg, label: 'F', labelDx: -22, labelDy: 0 },
         ],
-        caption: 'The field (teal) points to the right. Red: protons; blue: electrons; grey: a neutron. Green arrows are velocities; A has none.',
+        caption: 'The field (teal) points to the right everywhere in the region. Red: protons; blue: electrons; grey: a neutron. Green arrows are velocities; A has none.',
       }),
       choices: [
         'A — a proton at rest',

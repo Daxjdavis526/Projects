@@ -1,6 +1,6 @@
 // The dot product: one number that says how much of one vector lies along another.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { vectorPicture, polar, DEG } from './_vectors.js';
 
 const t = String.raw;
@@ -194,7 +194,7 @@ It is largest when the vectors are parallel, zero when they are perpendicular, a
           errors: [{ value: F * d, feedback: 'Only the component of the force along the motion does work: include cos θ.' }, { value: F * d * Math.sin(a * DEG), feedback: 'The angle is between the force and the motion, so the component along the motion uses the cosine.' }],
           hints: [t`$W = \vec F\cdot\vec d = Fd\cos\theta$, where θ is the angle between the force and the displacement.`],
           teach: 'Work is the dot product of force and displacement: W = Fd cos θ.',
-          explain: t`$W = (${F}\ \text{N})(${d}\ \text{m})\cos ${a}^\circ = ${fmt(W, 3)}$ J. The downward part of the push presses the aircraft into the ground and does no work.`,
+          explain: t`$W = (${F}\ \text{N})(${d}\ \text{m})\cos ${a}^\circ = ${tex(W, 3)}$ J. The downward part of the push presses the aircraft into the ground and does no work.`,
           visual: vectorPicture({ arrows: [{ to: polar(1, -a), color: 'violet', label: 'F' }, { to: [1.25, 0], label: 'd' }], arc: { from: -a, to: 0, label: `${a}°` }, numbers: false, caption: 'The force and the displacement, tail to tail (directions only; lengths not to scale).' }),
         };
       },

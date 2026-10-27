@@ -1,6 +1,6 @@
 // Newton's second law for rotation: net torque = moment of inertia × angular acceleration.
 import { lesson, mcq, num, match } from '../../src/core/content.js';
-import { nice, fmt } from '../../src/core/format.js';
+import { nice, fmt, tex } from '../../src/core/format.js';
 import { G, RPM, wheel } from './_rotation.js';
 import { seg } from './_momentum.js';
 import { shapeAt } from './_spin.js';
@@ -229,7 +229,7 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
           ],
           hints: [t`The wheel’s angular acceleration: $\alpha_w = \omega/t$. The torque on it: $\tau = I_w\alpha_w$.`, t`The telescope feels $-\tau$: $\alpha_s = \tau/I_s$.`],
           teach: 'A reaction wheel turns a spacecraft by pushing back on it: the torque spinning the wheel up twists the craft the other way.',
-          explain: t`$\alpha_w = ${s3(N * RPM)}/${T} = ${s3((N * RPM) / T)}\ \text{rad/s}^2$; $\tau = I_w\alpha_w = ${s3(tw)}$ N·m; $\alpha_s = \tau/I_s = ${s3(as)}\ \text{rad/s}^2$, opposite to the wheel. No propellant is spent: that is why telescopes like Hubble point with wheels, not thrusters.`,
+          explain: t`$\alpha_w = ${s3(N * RPM)}/${T} = ${s3((N * RPM) / T)}\ \text{rad/s}^2$; $\tau = I_w\alpha_w = ${s3(tw)}$ N·m; $\alpha_s = \tau/I_s = ${tex(as, 3)}\ \text{rad/s}^2$, opposite to the wheel. No propellant is spent: that is why telescopes like Hubble point with wheels, not thrusters.`,
           visual: {
             type: 'graph',
             params: {

@@ -1,6 +1,6 @@
 // Torque: the turning effect of a force — force times lever arm.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { nice, fmt } from '../../src/core/format.js';
+import { nice, fmt, tex } from '../../src/core/format.js';
 import { seg } from './_momentum.js';
 
 const t = String.raw;
@@ -232,7 +232,7 @@ where $r$ is the distance from the axis to the point where the force acts and $\
           ],
           hints: [t`$\tau = rF\sin\varphi$ with $r = ${d}$ m and $\varphi = ${ang}°$.`, 'Keep the thrust in newtons.'],
           teach: 'A small gimbal angle times a long lever and a large thrust gives the big torque that steers a rocket.',
-          explain: t`$r_\perp = ${d}\sin${ang}° = ${s3(d * Math.sin(ang * DEG))}$ m, so $\tau = (${s3(d * Math.sin(ang * DEG))})(${cm(T * 1000)}) = ${s3(tau)}$ N·m.`,
+          explain: t`$r_\perp = ${d}\sin${ang}° = ${s3(d * Math.sin(ang * DEG))}$ m, so $\tau = (${s3(d * Math.sin(ang * DEG))})(${cm(T * 1000)}) = ${tex(tau, 3)}$ N·m.`,
           visual: gimbalPicture(ang, ang >= 5 ? 2 : 4),
         };
       },

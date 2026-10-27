@@ -169,7 +169,7 @@ Steel's $Y$ is about 200 GPa, so a stress of 200 MPa stretches it by just 0.1%. 
           errors: [{ value: s / e / 1000, feedback: 'The strain must be a fraction, not a percentage: divide the percentage by 100.' }],
           hints: [t`$Y = \sigma/\varepsilon$ on the straight (elastic) part.`, t`Convert the strain: ${+e.toPrecision(3)}% $= ${+(e / 100).toPrecision(3)}$.`],
           teach: 'Young’s modulus is the slope of the elastic part of the stress–strain curve: Y = σ/ε.',
-          explain: t`$Y = \dfrac{${s}\ \text{MPa}}{${+(e / 100).toPrecision(3)}} = ${s3(s / (e / 100))}$ MPa $= ${s3(s / (e / 100) / 1000)}$ GPa — the value for ${M.name}.`,
+          explain: t`$Y = \dfrac{${s}\ \text{MPa}}{${+(e / 100).toPrecision(3)}} = ${tex(s / (e / 100), 3)}$ MPa $= ${s3(s / (e / 100) / 1000)}$ GPa — the value for ${M.name}.`,
           visual: {
             type: 'graph',
             params: {

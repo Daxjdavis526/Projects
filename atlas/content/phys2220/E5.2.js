@@ -144,7 +144,7 @@ Notice that this is **the reverse of the rules for resistors**. Capacitors in se
       visual: {
         type: 'graph',
         params: {
-          x: [0, 30], y: [0, 16], aspect: 'wide', axesAt: 'edge', xlabel: 'C₂ (µF)', ylabel: 'C_eq (µF)',
+          x: [0, 30], y: [0, 16], aspect: 'wide', axesAt: 'edge', xlabel: 'C₂ (µF)', ylabel: 'Ceq (µF)',
           curves: [{ fn: '5 + x', color: 'accent', label: 'parallel: C₁ + C₂', labelAt: 6.5, labelDx: 8, labelDy: 6 }, { fn: '5*x/(5 + x)', color: 'warn', label: 'series: C₁C₂/(C₁ + C₂)', labelAt: 18, labelDy: 14 }],
           hlines: [{ y: 5, label: 'C₁ = 5 µF', color: 'ink3' }],
         },
@@ -245,7 +245,7 @@ What is wrong?`,
             params: {
               x: [0, S], y: [0, Math.ceil(S * S / 4 * 1.15)], aspect: 'wide', axesAt: 'edge', xlabel: 'C₁ (µF), with C₂ = sum − C₁', ylabel: 'C₁C₂ (µF²)',
               curves: [{ fn: `x*(${S} - x)`, color: 'accent', domain: [0, S] }],
-              hlines: [{ y: a * b, label: 'C₁C₂ = C_ser × C_par', color: 'gold' }],
+              hlines: [{ y: a * b, label: 'C₁C₂ = Cser × Cpar', color: 'gold' }],
             },
             caption: `Every pair adding to ${S} µF lies on the blue curve; the series value fixes their product (gold line). The two crossings are the same pair, swapped.`,
           },

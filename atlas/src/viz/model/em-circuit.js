@@ -468,7 +468,7 @@ export function preset(name, o = {}) {
     } else if (net === 'parallel') {
       let top = k, bot = kb;
       for (let i = 1; i <= nc; i++) {
-        if (i > 1) { const t2 = B.node(6.4 + 2.3 * (i - 1), 4), b2 = B.node(6.4 + 2.3 * (i - 1), 0); B.wire(top, t2); B.wire(b2, bot); top = t2; bot = b2; }
+        if (i > 1) { const t2 = B.node(6.4 + 3.2 * (i - 1), 4), b2 = B.node(6.4 + 3.2 * (i - 1), 0); B.wire(top, t2); B.wire(b2, bot); top = t2; bot = b2; }
         B.el(`C${i}`, 'C', top, bot, { lab: 'r' });
         P.defaults[`C${i}`] = cdef[i - 1];
       }

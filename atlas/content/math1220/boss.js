@@ -209,7 +209,7 @@ export default boss({
               ],
               hints: [t`A thin layer at height $y$ has volume $\pi(${R})^2\,dy$ and must rise $${H} - y$ metres.`, t`$W = \displaystyle\int_0^{${H}} 810\cdot 9.8\cdot\pi(${R})^2\,(${H} - y)\,dy$.`],
               teach: 'Pumping work: slice the liquid into layers, each lifted its own distance, and integrate ρg·(area)·(distance) dy.',
-              explain: t`$W = 810\cdot9.8\cdot\pi(${R})^2\cdot\dfrac{${H}^2}{2} \approx ${fmt(W * 1000, 4)}$ J $\approx ${fmt(W)}$ kJ — the same as lifting the whole mass by half the tank’s height, to where its centre of mass sits.`,
+              explain: t`$W = 810\cdot9.8\cdot\pi(${R})^2\cdot\dfrac{${H}^2}{2} \approx ${texNum(W * 1000, 4)}$ J $\approx ${fmt(W)}$ kJ — the same as lifting the whole mass by half the tank’s height, to where its centre of mass sits.`,
               visual: {
                 type: 'calc-polar',
                 params: {

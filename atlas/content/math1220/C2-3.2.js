@@ -1,6 +1,6 @@
 // Separable equations: gather the y's with dy, the t's with dt, integrate both sides.
 import { lesson, mcq, multi, num, expr } from '../../src/core/content.js';
-import { nice, fmt } from '../../src/core/format.js';
+import { nice, fmt, tex } from '../../src/core/format.js';
 
 const t = String.raw;
 const GM = 3.986004418e14, RE = 6.371e6;   // Earth: GM in m^3/s^2 and mean radius in m (NASA fact sheet)
@@ -239,7 +239,7 @@ That one move solves radioactive decay, Newton’s law of cooling, a draining ta
           errors: [{ value: half, feedback: t`$\int v\,dv = \tfrac12 v^2$: the $\tfrac12$ doubles the gravity term when you solve for $v^2$.` }, { value: v0 / m, feedback: t`Speed does not fall like $1/r$; integrate the equation.` }].filter((e) => Math.abs(e.value - v) > 0.03 * v),
           hints: [t`Separate: $v\,dv = -GM\,r^{-2}\,dr$, then integrate: $\tfrac12 v^2 = \dfrac{GM}{r} + C$.`, t`Fix $C$ with $v = ${v0}$ km/s at $r = R_E$ (work in m and m/s), so $v^2 = v_0^2 - 2GM\left(\dfrac{1}{R_E} - \dfrac{1}{${m}R_E}\right)$.`],
           teach: 'Separating v dv = −GM r⁻² dr is energy conservation in disguise: ½v² − GM/r stays constant.',
-          explain: t`$v^2 = (${v0 * 1e3})^2 - 2(3.986\times10^{14})\left(1 - \tfrac1{${m}}\right)/(6.371\times10^{6}) = ${fmt((v * 1e3) ** 2, 4)}\ \text{m}^2/\text{s}^2$, so $v \approx ${fmt(v, 3)}$ km/s. Multiplying $\tfrac12 v^2 - \frac{GM}{r} = \text{const}$ by the mass gives kinetic plus gravitational potential energy: conserved.`,
+          explain: t`$v^2 = (${v0 * 1e3})^2 - 2(3.986\times10^{14})\left(1 - \tfrac1{${m}}\right)/(6.371\times10^{6}) = ${tex((v * 1e3) ** 2, 4)}\ \text{m}^2/\text{s}^2$, so $v \approx ${fmt(v, 3)}$ km/s. Multiplying $\tfrac12 v^2 - \frac{GM}{r} = \text{const}$ by the mass gives kinetic plus gravitational potential energy: conserved.`,
           visual: { type: 'graph', params: { x: [0.8, 4.6], y: [-70, 5], xlabel: 'r / R_E', ylabel: 'MJ/kg', curves: [{ fn: '-62.57/x', domain: [1, 4.5], color: 'accent', label: 'potential energy per kg, −GM/r', labelAt: 2.2, labelDy: 18 }], vlines: [{ x: 1, label: 'surface', color: 'ink3' }, { x: m, label: `r = ${m}R_E`, color: 'gold' }] }, caption: t`The gravitational potential energy per kilogram, $-GM/r$. The probe climbs this hill from the surface to the gold line, paying for it with kinetic energy.` },
         };
       },

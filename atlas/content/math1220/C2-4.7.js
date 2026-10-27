@@ -54,7 +54,7 @@ That error bound is the most practical result in this module: the error of stopp
       { label: 'Solve for N', text: t`$\frac{1}{(N + 1)^2} < 0.001 \iff (N + 1)^2 > 1000 \iff N + 1 \ge 32$, since $31^2 = 961$ and $32^2 = 1024$. So $N = 31$.` },
       { label: 'Compute', text: t`$S_{31} = 1 - \frac14 + \frac19 - \cdots + \frac{1}{961} \approx ${fmt(altSum((n) => 1 / n ** 2, 31), 6)}$.` },
       { label: 'Sign of the error', text: t`The first term left out, $-\frac{1}{1024}$, is negative, so $S_{31}$ is an **over**-estimate: $\;${fmt(altSum((n) => 1 / n ** 2, 31) - 1 / 1024, 6)} \le S \le ${fmt(altSum((n) => 1 / n ** 2, 31), 6)}$.` },
-      { label: 'Compare', text: t`$\frac{\pi^2}{12} \approx ${fmt(Math.PI ** 2 / 12, 6)}$: the actual error is $${fmt(altSum((n) => 1 / n ** 2, 31) - Math.PI ** 2 / 12, 2)}$, about half the bound — typical, because the sum sits near the middle of the band.` },
+      { label: 'Compare', text: t`$\frac{\pi^2}{12} \approx ${fmt(Math.PI ** 2 / 12, 6)}$: the actual error is $${tex(altSum((n) => 1 / n ** 2, 31) - Math.PI ** 2 / 12, 2)}$, about half the bound — typical, because the sum sits near the middle of the band.` },
     ],
     answer: t`$N = 31$ terms; $S_{31} \approx ${fmt(altSum((n) => 1 / n ** 2, 31), 5)}$, within $0.001$ of (and just above) $\pi^2/12 \approx ${fmt(Math.PI ** 2 / 12, 5)}$.`,
   },

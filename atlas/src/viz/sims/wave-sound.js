@@ -17,7 +17,7 @@
 //       // travel: f (Hz) 343, gas 'air' | 'helium' | 'co2', T (°C) 20, view (m) 2
 //       // pipe:   ends 'open-open' | 'closed-open' | 'closed-closed', k 1 (the k-th resonance), L (m) 0.5, T (°C) 20,
 //       //         ask: false (hide the frequencies)
-//       // beats:  f1 (Hz) 440, f2 (Hz) 444, listen: true (offer a Listen button)
+//       // beats:  f1 (Hz) 440, f2 (Hz) 444, listen: true (offer a Listen button), ask: false (hide the beat count)
 //   } }
 
 import { Plot } from '../plot.js';
@@ -28,7 +28,7 @@ const ENDS = ['open-open', 'closed-open', 'closed-closed'];
 const MODE_DEFAULTS = {
   travel: { f: 343, gas: 'air', T: 20, view: 2 },
   pipe: { ends: 'open-open', k: 1, L: 0.5, T: 20, ask: false },
-  beats: { f1: 440, f2: 444, listen: true },
+  beats: { f1: 440, f2: 444, listen: true, ask: false },
 };
 export const defaults = { mode: 'travel', controls: true, play: true, readout: true };
 const ENDS_TEXT = { 'open-open': 'open at both ends', 'closed-open': 'closed at the left, open at the right', 'closed-closed': 'closed at both ends' };
@@ -163,7 +163,7 @@ export async function mount(F, P0) {
     const c = Math.cos(ph);
     const kn = (n * Math.PI) / (ends === 'closed-open' ? 2 * L : L), D = Math.min(0.5 / kn, 0.1 * L);
     parcels(top, 0, L, (x) => D * M.s(x) * c, { cols: 56, tracers: [0.18 * L, 0.5 * L] });
-    top.text(`${ENDS_TEXT[ends]} — resonance ${kk}: harmonic n = ${n} (slowed down)`, top.L + 2, 12, { screen: true, color: 'ink2', size: 12, weight: 600 });
+    top.text(P.ask ? `${ENDS_TEXT[ends]} — resonance ${kk} (slowed down)` : `${ENDS_TEXT[ends]} — resonance ${kk}: harmonic n = ${n} (slowed down)`, top.L + 2, 12, { screen: true, color: 'ink2', size: 12, weight: 600 });
     bot.o.pad = { l: 46, r: 16, t: split + 14, b: 34 };
     bot.o.yfmt = () => '';
     bot.setView([-0.04 * L, 1.04 * L], [-1.3, 1.3]);
@@ -176,7 +176,7 @@ export async function mount(F, P0) {
     bot.fn((x) => (-ds(x) / pmax) * c, { color: 'warn', width: 2.4, dash: [7, 5], domain: [0, L] });
     bot.text('displacement (solid; envelope dotted)', bot.L + 6, bot.T + 2, { screen: true, color: 'accent', size: 11.5, weight: 650, baseline: 'top' });
     bot.text('pressure (dashed)', bot.L + 240, bot.T + 2, { screen: true, color: 'warn', size: 11.5, weight: 650, baseline: 'top' });
-    if (P.readout !== false) F.readout(P.ask ? [['harmonic number $n$', String(n)], ['speed of sound $v$', `${trim(v)}\\,\\mathrm{m/s}`]] : [
+    if (P.readout !== false) F.readout(P.ask ? [['speed of sound $v$', `${trim(v)}\\,\\mathrm{m/s}`]] : [
       ['harmonic number $n$', String(n)], ['frequency $f_n$', `${trim(M.f)}\\,\\mathrm{Hz}`], ['fundamental $f_1$', `${trim(f1)}\\,\\mathrm{Hz}`],
       ['wavelength $\\lambda_n$', `${trim(M.lambda)}\\,\\mathrm{m}`], ['speed of sound $v$', `${trim(v)}\\,\\mathrm{m/s}`],
     ]);
@@ -193,7 +193,7 @@ export async function mount(F, P0) {
     const env = (t) => W.beatEnvelope(t, f1, f2);
     top.area(env, 0, 1, { color: 'accent', alpha: 0.35, lower: (t) => -env(t), samples: 600 });
     top.fn(env, { color: 'accent', width: 1.8 }); top.fn((t) => -env(t), { color: 'accent', width: 1.8 });
-    top.text(`one second of the sum: the loudness swells ${trim(fb)} times (the tones themselves are too fast to draw here)`, top.L + 2, 12, { screen: true, color: 'ink2', size: 11.5, weight: 600 });
+    top.text(P.ask ? 'one second of the sum: its loudness (the tones themselves are too fast to draw here)' : `one second of the sum: the loudness swells ${trim(fb)} times (the tones themselves are too fast to draw here)`, top.L + 2, 12, { screen: true, color: 'ink2', size: 11.5, weight: 600 });
     // bottom: a 20 ms zoom on the waveform
     bot.o.pad = { l: 46, r: 16, t: split + 16, b: 34 };
     bot.o.xlabel = 't (ms)'; bot.o.yfmt = () => '';

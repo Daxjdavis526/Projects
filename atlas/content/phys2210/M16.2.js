@@ -2,7 +2,7 @@
 // stress when expansion is blocked — and NIST's measured contraction of
 // stainless steel on its way down to cryogenic temperatures, where α itself fades.
 import { lesson, mcq, num } from '../../src/core/content.js';
-import { fmt } from '../../src/core/format.js';
+import { fmt, tex } from '../../src/core/format.js';
 import { C0, toK, ssContraction, alContraction, ssDLExpr, alDLExpr, ALPHA_SS, ALPHA_AL, contractionGraph, expansionPic, plateHolePic, cubePic, ringShaftPic, s3 } from './_thermal.js';
 
 const t = String.raw;
@@ -158,7 +158,7 @@ Every length grows by the same fraction — so areas grow by about $2\alpha\Delt
           errors: [{ value: 1.5e-5 * dT, feedback: 'That is the strain the rod is denied. Stress is Young’s modulus times that strain.' }],
           hints: ['If it were free, the rod would shrink by the fraction αΔT. The supports stop it, so it is stretched by exactly that strain.', t`$\sigma = E\varepsilon = E\alpha\Delta T$.`],
           teach: 'A bar prevented from contracting carries the stress that would stretch it by the strain it was denied: σ = EαΔT.',
-          explain: t`$\varepsilon = \alpha\Delta T = (1.5\times10^{-5})(${dT}) = ${fmt(1.5e-5 * dT, 3)}$, so $\sigma = (193\times10^{9}\ \text{Pa})(${fmt(1.5e-5 * dT, 3)}) = ${fmt(sigma, 3)}$ MPa. The rod’s length never mattered: a long rod and a short one carry the same stress.`,
+          explain: t`$\varepsilon = \alpha\Delta T = (1.5\times10^{-5})(${dT}) = ${tex(1.5e-5 * dT, 3)}$, so $\sigma = (193\times10^{9}\ \text{Pa})(${tex(1.5e-5 * dT, 3)}) = ${fmt(sigma, 3)}$ MPa. The rod’s length never mattered: a long rod and a short one carry the same stress.`,
           visual: expansionPic({ clamped: true, before: 'stainless rod', after: `held fixed while it cools by ${dT} K` }),
         };
       },
