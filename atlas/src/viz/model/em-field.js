@@ -1123,9 +1123,17 @@ export function potentialGrid(S, box, nx, ny) {
   return { v, nx, ny, box };
 }
 
-/** Marching squares: the segments [[x0, y0, x1, y1], …] of the contour V = level. */
+/**
+ * Marching squares: the segments [[x0, y0, x1, y1], …] of the contour V = level.
+ * A value within rounding of the level counts as above it, so a region where V
+ * is constant at exactly that level (beside a charged sheet, inside a conductor)
+ * gives no contour of rounding noise.
+ */
 export function contour(grid, level) {
   const { v, nx, ny, box } = grid, segs = [];
+  if (grid.scale === undefined) { let m = 0; for (const u of v) if (Number.isFinite(u)) m = Math.max(m, Math.abs(u)); grid.scale = m; }
+  const tol = 1e-9 * Math.max(grid.scale, Math.abs(level));
+  const below = (u) => u < -tol;
   const X = (i) => box.x0 + ((box.x1 - box.x0) * i) / nx, Y = (j) => box.y0 + ((box.y1 - box.y0) * j) / ny;
   const at = (i, j) => v[j * (nx + 1) + i];
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
@@ -1135,8 +1143,8 @@ export function contour(grid, level) {
     const cut = [];
     for (let k = 0; k < 4; k++) {
       const a = c[k] - level, b = c[(k + 1) % 4] - level;
-      if ((a < 0) !== (b < 0)) {
-        const t = a / (a - b), P = xy[k], Q = xy[(k + 1) % 4];
+      if (below(a) !== below(b)) {
+        const t = Math.min(1, Math.max(0, a / (a - b))), P = xy[k], Q = xy[(k + 1) % 4];
         cut.push([P[0] + t * (Q[0] - P[0]), P[1] + t * (Q[1] - P[1]), k]);
       }
     }
@@ -1144,7 +1152,7 @@ export function contour(grid, level) {
     else if (cut.length === 4) {
       // a saddle: decide by the value at the centre
       const mid = (c[0] + c[1] + c[2] + c[3]) / 4 - level, first = c[0] - level;
-      if ((mid < 0) === (first < 0)) { segs.push([cut[0][0], cut[0][1], cut[1][0], cut[1][1]], [cut[2][0], cut[2][1], cut[3][0], cut[3][1]]); }
+      if (below(mid) === below(first)) { segs.push([cut[0][0], cut[0][1], cut[1][0], cut[1][1]], [cut[2][0], cut[2][1], cut[3][0], cut[3][1]]); }
       else { segs.push([cut[0][0], cut[0][1], cut[3][0], cut[3][1]], [cut[1][0], cut[1][1], cut[2][0], cut[2][1]]); }
     }
   }

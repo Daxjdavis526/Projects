@@ -337,15 +337,15 @@ export const EXPERIMENTS = {
       return [Fs * (1 + 0.04 * z[0]) + off, Fk + Math.hypot(0.02 * Fk, 0.02) * z[1] + off];
     },
     series: [
-      { key: 'Fs', sym: 'F_peak', label: 'peak force', unit: 'N', res: 0.01, sigma: (m, P) => 0.04 * P.mus * (P.mb + m) * P.g },
-      { key: 'Fk', sym: 'F_slide', label: 'sliding force', unit: 'N', res: 0.01, sigma: (m, P) => Math.hypot(0.02 * P.muk * (P.mb + m) * P.g, 0.02) },
+      { key: 'Fs', sym: 'F peak', label: 'peak force', unit: 'N', res: 0.01, sigma: (m, P) => 0.04 * P.mus * (P.mb + m) * P.g },
+      { key: 'Fk', sym: 'F slide', label: 'sliding force', unit: 'N', res: 0.01, sigma: (m, P) => Math.hypot(0.02 * P.muk * (P.mb + m) * P.g, 0.02) },
     ],
     axes: {
       FN: {
         label: 'F against N', slopeUnit: '', x: { sym: 'N', unit: 'N', of: (m, R, P) => (P.mb + m) * P.g },
         ys: [
-          { sym: 'F_peak', name: 'static (peak)', unit: 'N', of: (m, R) => R[0], sigma: (m, R) => 0.04 * R[0] },
-          { sym: 'F_slide', name: 'kinetic (sliding)', unit: 'N', of: (m, R) => R[1], sigma: (m, R) => Math.hypot(0.02 * R[1], 0.02) },
+          { sym: 'F peak', name: 'static (peak)', unit: 'N', of: (m, R) => R[0], sigma: (m, R) => 0.04 * R[0] },
+          { sym: 'F slide', name: 'kinetic (sliding)', unit: 'N', of: (m, R) => R[1], sigma: (m, R) => Math.hypot(0.02 * R[1], 0.02) },
         ],
         expect: (P) => [{ a: 0, b: P.mus }, { a: 0, b: P.muk }],
         results: [

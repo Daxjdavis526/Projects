@@ -36,7 +36,7 @@ const keplerLog = (hide) => ({
     curves: [{ fn: '1.5x', color: 'ink3', width: 1.2, dash: true }],
     points: PLANETS.filter(([n]) => n !== hide).map(([n, a, T]) => ({ x: r4(Math.log10(a)), y: r4(Math.log10(T)), color: 'accent', label: n, labelDx: 8, labelDy: 10 })),
   },
-  caption: 'The planets’ periods against their orbit sizes on logarithmic axes: a straight line of slope 3/2, which is T² ∝ a³. (Measured values; the dashed line is T = a^1.5 in years and AU.)',
+  caption: t`The planets’ periods against their orbit sizes on logarithmic axes: a straight line of slope 3/2, which is $T^2 \propto a^3$. (Measured values; the dashed line is $T = a^{3/2}$ in years and AU.)`,
 });
 
 // Galilean moons: name, semi-major axis (km), period (days)

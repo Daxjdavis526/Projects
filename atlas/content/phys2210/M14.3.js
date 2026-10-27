@@ -57,7 +57,7 @@ For a block of height $h$ and top area $A$: the bottom is pushed up by $\rho g h
           answer: B, units: 'N', tol: { rel: 0.005 },
           errors: [{ value: rho * VL * G, feedback: 'Convert the volume to cubic metres first: 1 L = 10⁻³ m³.' }],
           hints: [t`$B = \rho_\text{fluid} V g$ with the whole canister under.`, t`$V = ${VL.toFixed(1)}\ \text{L} = ${tn(VL / 1000)}\ \text{m}^3$.`],
-          teach: 'The buoyant force is the weight of the displaced fluid, ρ_fluid V g — what the body is made of does not matter.',
+          teach: t`The buoyant force is the weight of the displaced fluid, $\rho_\text{fluid} V g$ — what the body is made of does not matter.`,
           explain: t`$B = ${tn(rho)}\times${tn(VL / 1000)}\times9.8 = ${tn(B)}\ \text{N}$: exactly the weight of ${VL.toFixed(1)} L of ${fname}.`,
           visual: hung(7800, VL / 1000, fname === 'mercury' ? 'mercury' : fname === 'seawater' ? 'seawater' : 'water', { rhoObj: fname === 'mercury' ? 15000 : 7800 }),
         };
@@ -193,7 +193,7 @@ For a block of height $h$ and top area $A$: the bottom is pushed up by $\rho g h
           prompt: t`${mat[0].toUpperCase() + mat.slice(1)} weighs ${W.toFixed(1)} N in air and ${Ww} N hanging fully under water. What is its density?`,
           answer: rho, units: 'kg/m^3', tol: { rel: 0.01 },
           errors: [{ value: (1000 * W) / Ww, feedback: 'Divide the weight by the buoyant force — the weight lost in water — not by the reading in water.' }],
-          hints: ['The weight lost in water is the buoyant force, ρ_water V g.'],
+          hints: [t`The weight lost in water is the buoyant force, $\rho_\text{water} V g$.`],
           teach: 'Weighing in air and in water gives W/B = ρ/ρ_water.',
           explain: t`$B = ${W.toFixed(1)} - ${Ww} = ${tn(W - Ww)}$ N, and $\dfrac{\rho}{\rho_\text{water}} = \dfrac{W}{B} = \dfrac{${W.toFixed(1)}}{${tn(W - Ww)}} = ${tn(W / (W - Ww))}$, so $\rho = ${tn(rho)}\ \text{kg/m}^3$.`,
           visual: hung(rho0, W / G / rho0, 'water'),

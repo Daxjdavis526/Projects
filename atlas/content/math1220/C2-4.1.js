@@ -228,7 +228,7 @@ means: for every tolerance $\varepsilon > 0$, however small, there is an index $
           answer: L, tol: { rel: 0.002 },
           errors: [{ value: 1, feedback: t`“$1^\infty = 1$” is the trap: the base tends to 1 while the exponent grows without bound.` }, { value: 0, feedback: t`Each factor is less than 1, but they approach 1 as $n$ grows; the product settles at a positive number.` }],
           hints: [t`Use $\left(1 + \frac{k}{n}\right)^n \to e^k$.`, t`Here $k = -${nice(m)}$.`],
-          teach: 'Euler’s method for exponential decay converges, as the step count grows, to the exact exponential: (1 − k/n)ⁿ → e^{−k}.',
+          teach: t`Euler’s method for exponential decay converges, as the step count grows, to the exact exponential: $(1 - k/n)^n \to e^{-k}$.`,
           explain: t`$\left(1 - \frac{${nice(m)}}{n}\right)^n \to e^{-${nice(m)}} \approx ${fmt(L, 4)}$ — exactly $Q(t)/Q_0$ for the true solution $Q = Q_0e^{-t/\tau}$. More steps, less error.`,
           visual: { type: 'calc-series', params: { view: 'terms', term: `(1 - ${m}/n)^n`, n0: 4, N: 30 }, caption: 'The Euler estimates Qₙ/Q₀ for n = 4 to 33 steps.' },
         };

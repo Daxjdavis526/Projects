@@ -14,7 +14,7 @@ const coilPic = (angle, caption, extra = {}) => ({
 });
 
 // a flat square loop in a 3D scene with its magnetic moment and the field
-function loopScene({ mu, B, caption, axisLabels, loopColor = 'warn' }) {
+function loopScene({ mu, B, caption, axisLabels, loopColor = 'ink2' }) {
   const m = mu.map((c) => c / Math.hypot(...mu));
   const u = Math.abs(m[2]) > 0.9 ? [1, 0, 0] : [0, 0, 1];
   const e1 = [m[1] * u[2] - m[2] * u[1], m[2] * u[0] - m[0] * u[2], m[0] * u[1] - m[1] * u[0]];
@@ -67,7 +67,7 @@ The moment $\vec\mu$ stands perpendicular to the loop: curl your right-hand fing
   visual: {
     type: 'em-generator',
     title: 'Two equal forces, one twist',
-    lead: t`The coil (gold) carries a current (blue) between the poles of a magnet. The field pushes one long side up and the other down (violet): equal and opposite, so no net force — but they twist the coil, swinging its magnetic moment $\vec\mu$ toward $\vec B$. The graph is the torque as the coil turns.`,
+    lead: t`The coil (grey) carries a current (blue) between the poles of a magnet. The field pushes one long side up and the other down (violet): equal and opposite, so no net force — but they twist the coil, swinging its magnetic moment $\vec\mu$ toward $\vec B$. The graph is the torque as the coil turns.`,
     tasks: [
       'Pause with the coil facing the poles (θ = 0°): the forces still act, but along one line through the axle — no torque.',
       'Set θ = 90°: the forces have their full lever arm and the torque is largest, NIAB.',
@@ -218,7 +218,7 @@ The moment $\vec\mu$ stands perpendicular to the loop: curl your right-hand fing
         const mu = N * (ImA / 1000) * (side / 100) ** 2, tq = mu * BuT * 1e-6;
         return {
           prompt: t`A CubeSat steers itself with a **magnetorquer**: a coil of ${N} turns wound on a ${side} cm × ${side} cm frame, carrying ${ImA} mA. In low Earth orbit the field is about $${BuT}\ \mu\text{T}$. What is the largest torque the coil can exert on the satellite?`,
-          visual: loopScene({ mu: [0, 0, 1], B: [1, 0, 0], caption: 'The magnetorquer coil (gold), its magnetic moment (gold arrow) and Earth’s field (teal), at right angles for the largest torque. Drag to rotate.' }),
+          visual: loopScene({ mu: [0, 0, 1], B: [1, 0, 0], caption: 'The magnetorquer coil (grey), its magnetic moment (gold) and Earth’s field (teal), at right angles for the largest torque. Drag to rotate.' }),
           answer: tq, units: 'N m', tol: { rel: 0.01 },
           errors: [{ value: N * ImA * (side / 100) ** 2 * BuT * 1e-6, feedback: 'Convert the current to amperes: 1 mA = 10⁻³ A.' }, { value: mu * BuT, feedback: 'Convert the field to tesla: 1 μT = 10⁻⁶ T.' }],
           hints: [t`$\tau_{\max} = \mu B$ with $\mu = NIA$.`, t`$\mu = (${N})(${ImA}\times10^{-3}\ \text{A})(${side / 100}\ \text{m})^2 = ${tn(mu)}\ \text{A·m}^2$.`],
@@ -230,7 +230,7 @@ The moment $\vec\mu$ stands perpendicular to the loop: curl your right-hand fing
     mcq({
       id: 'cp-which-way', difficulty: 2,
       prompt: t`A small current loop lies flat (horizontal), with its magnetic moment pointing straight up. A uniform field points east. How does the torque turn the loop?`,
-      visual: loopScene({ mu: [0, 0, 1], B: [1, 0, 0], axisLabels: ['east', 'north', 'up'], caption: 'The flat loop (gold) with its moment pointing up, in a field pointing east (teal). Drag to rotate.' }),
+      visual: loopScene({ mu: [0, 0, 1], B: [1, 0, 0], axisLabels: ['east', 'north', 'up'], caption: 'The flat loop (grey) with its moment (gold) pointing up, in a field pointing east (teal). Drag to rotate.' }),
       choices: [
         'It tips its moment over toward the east, turning about a north–south axis',
         'It tips its moment over toward the west, turning about a north–south axis',

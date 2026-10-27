@@ -61,7 +61,7 @@ You will use it constantly: for Fourier coefficients, for expectation values in 
         2: t`Then $du$ is a product again and nothing simplifies.`,
         3: t`This split does not reproduce the integrand: $3x \cdot e^{x} \ne x e^{3x}$.`,
       },
-      hints: ['Pick u to be the factor that gets simpler when you differentiate it.', 'Differentiating x gives 1; integrating e^{3x} just rescales it.'],
+      hints: ['Pick u to be the factor that gets simpler when you differentiate it.', t`Differentiating $x$ gives 1; integrating $e^{3x}$ just rescales it.`],
       teach: t`Choose $u$ to be the factor that simplifies when differentiated and $dv$ the factor you can integrate.`,
       explain: t`With $u = x$, $du = dx$, and $v = \tfrac13 e^{3x}$, so the leftover integral $\int \tfrac13 e^{3x}\,dx$ is elementary.`,
     }),

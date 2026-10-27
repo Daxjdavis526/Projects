@@ -70,8 +70,8 @@ No charge blocks, weakens or shares out another’s force: the force between any
   example: {
     prompt: t`Three point charges sit at the corners of a right triangle: $q_1 = +2.0$ µC at the origin, $q_2 = -3.0$ µC at $(0.30\ \text{m}, 0)$ and $q_3 = +1.0$ µC at $(0, 0.40\ \text{m})$. Find the size and direction of the net electric force on $q_3$. ($k = 8.99\times10^9$ N·m²/C²)`,
     visual: chargesPic({
-      unit: 'cm', x: [-22, 52], y: [-8, 60], target: 2, components: true, scale: 0.008,
-      charges: [{ x: 0, y: 0, q: 2, label: 'q₁' }, { x: 30, y: 0, q: -3, label: 'q₂' }, { x: 0, y: 40, q: 1, label: 'q₃' }],
+      unit: 'cm', x: [-24, 48], y: [-8, 68], target: 2, components: true, scale: 0.005,
+      charges: [{ x: 0, y: 0, q: 2, label: 'q₁' }, { x: 30, y: 0, q: -3, label: 'q₂' }, { x: 0, y: 40, q: 1, label: 'q₃', side: 'left' }],
     }, 'The forces on q₃ from q₁ (violet) and q₂ (teal), their sum (gold) and its components (dashed), all to one scale. Positions in cm.'),
     steps: [
       { label: 'Force from q₁', text: t`$q_1$ and $q_3$ are both positive, $0.40$ m apart, so $q_1$ pushes $q_3$ straight up, along $+y$: $F_1 = \dfrac{(8.99\times10^9)(2.0\times10^{-6})(1.0\times10^{-6})}{0.40^2} = ${tn(EX.F1)}$ N.` },
@@ -113,7 +113,7 @@ No charge blocks, weakens or shares out another’s force: the force between any
       gen(r) {
         const q0 = 20, qa = r.pick([30, -30, 45]), qb = r.pick([-25, 40]), a = r.pick([3, 4]), b = r.pick([5, 6]);
         const Fa = (K * Math.abs(q0 * qa) * NC * NC) / (a * CM) ** 2, Fb = (K * Math.abs(q0 * qb) * NC * NC) / (b * CM) ** 2;
-        const F = Math.hypot(Fa, Fb), scale = Math.max(Fa, Fb) / 3.2;
+        const F = Math.hypot(Fa, Fb), scale = Math.max(Fa, Fb) / 2.4;
         return {
           prompt: t`A $+${q0}$ nC charge sits at the origin, a $${signed(qa)}$ nC charge at $(${a}\ \text{cm}, 0)$ and a $${signed(qb)}$ nC charge at $(0, ${b}\ \text{cm})$. How large is the net electric force on the charge at the origin? ($k = 8.99\times10^9$ N·m²/C²)`,
           answer: F * 1e3, units: 'mN', tol: { rel: 0.01 },
@@ -167,7 +167,7 @@ No charge blocks, weakens or shares out another’s force: the force between any
           hints: [t`At the balance point $k\dfrac{|q_1|\,q}{x^2} = k\dfrac{|q_2|\,q}{(d - x)^2}$: the third charge $q$ cancels.`, t`Take square roots: $\dfrac{d - x}{x} = \sqrt{|q_2|/|q_1|}$.`],
           teach: 'Between two like charges the balance point lies nearer the smaller one, where x/(d − x) = √(q₁/q₂).',
           explain: t`Setting the two forces equal, $\dfrac{|q_1|}{x^2} = \dfrac{|q_2|}{(d - x)^2}$, so $\dfrac{d - x}{x} = \sqrt{|q_2|/|q_1|} = ${tn(ratio)}$ and $x = \dfrac{d}{1 + ${tn(ratio)}} = ${tn(x)}$ cm. The third charge’s size and sign drop out. It is a balance, not a trap: nudge the charge sideways — or, for a charge of the opposite sign, along the line — and it drifts away. No arrangement of fixed charges can hold a charge stably (Earnshaw’s theorem).`,
-          visual: linePic([{ x: 0, y: 0, q: q1, label: 'q₁' }, { x: d, y: 0, q: q2, label: 'q₂' }, { x: d / 2, y: 0, q: 2, label: 'test' }], { target: 2, net: false, values: false, scale: r6(big / (0.3 * d)) }, 'A small test charge at the midpoint, with the forces on it from q₁ and q₂ (to scale): they do not balance there.'),
+          visual: linePic([{ x: 0, y: 0, q: q1, label: 'q₁', side: 'below' }, { x: d, y: 0, q: q2, label: 'q₂', side: 'below' }, { x: d / 2, y: 0, q: 2, label: 'test', side: 'above' }], { target: 2, net: false, values: false, scale: r6(big / (0.3 * d)) }, 'A small test charge at the midpoint, with the forces on it from q₁ and q₂ (to scale): they do not balance there.'),
         };
       },
     }),
@@ -216,7 +216,7 @@ No charge blocks, weakens or shares out another’s force: the force between any
         const ratio = Math.sqrt(Math.abs(q2 / q1)), x = d / (1 - ratio);
         const smaller = Math.abs(q2) < Math.abs(q1) ? t`$q_2$` : t`$q_1$`;
         // a +2 nC test charge between them, a little off the axis so both arrows show
-        const yT = r6(0.12 * d), r1 = Math.hypot(d / 2, yT) * CM;
+        const yT = r6(0.2 * d), r1 = Math.hypot(d / 2, yT) * CM;
         const big = (K * Math.max(Math.abs(q1), Math.abs(q2)) * 2 * NC * NC) / r1 ** 2;
         return {
           prompt: t`Charges $q_1 = ${signed(q1)}$ nC at $x = 0$ and $q_2 = ${signed(q2)}$ nC at $x = ${d}$ cm are held in place. Where on the $x$-axis would a third charge feel no net electric force? Give its $x$ in cm (it may be negative).`,
@@ -228,7 +228,7 @@ No charge blocks, weakens or shares out another’s force: the force between any
           hints: ['Between unlike charges both forces point the same way. Look outside the pair, on the side of the smaller charge, where being nearer makes up for being smaller.', t`Write each distance in terms of $x$ and set $|q_1|/r_1^2 = |q_2|/r_2^2$; taking square roots gives $r_2/r_1 = \sqrt{|q_2|/|q_1|}$.`],
           teach: 'Outside a pair of unlike charges, the balance point lies beyond the smaller charge.',
           explain: t`Between the charges both forces point the same way, so the balance point is outside, beyond the smaller charge, ${smaller}. There $r_2/r_1 = \sqrt{|q_2|/|q_1|} = ${tn(ratio)}$, which gives $x = ${tn(x)}$ cm: ${tn(Math.abs(x))} cm from $q_1$ and ${tn(Math.abs(x - d))} cm from $q_2$. Check: $|q_1|/r_1^2 = ${tn(Math.abs(q1) / x ** 2)}$ and $|q_2|/r_2^2 = ${tn(Math.abs(q2) / (x - d) ** 2)}$ nC/cm², equal.`,
-          visual: linePic([{ x: 0, y: 0, q: q1, label: 'q₁' }, { x: d, y: 0, q: q2, label: 'q₂' }, { x: r6(d / 2), y: yT, q: 2, label: 'test' }], { target: 2, net: false, values: false, scale: r6(big / (0.3 * d)) }, 'A test charge between the two (drawn a little off the axis so both arrows show), with the forces on it to scale: they point the same way.'),
+          visual: linePic([{ x: 0, y: 0, q: q1, label: 'q₁', side: 'below' }, { x: d, y: 0, q: q2, label: 'q₂', side: 'below' }, { x: r6(d / 2), y: yT, q: 2, label: 'test', side: 'above' }], { target: 2, net: false, values: false, scale: r6(big / (0.28 * d)) }, 'A test charge between the two (drawn a little off the axis so both arrows show), with the forces on it to scale: they point the same way.'),
         };
       },
     }),
@@ -316,7 +316,7 @@ No charge blocks, weakens or shares out another’s force: the force between any
       explain: t`$kQq\left[\dfrac{1}{(r - s/2)^2} - \dfrac{1}{(r + s/2)^2}\right] = kQq\,\dfrac{2rs}{(r^2 - s^2/4)^2} \approx \dfrac{2kQqs}{r^3}$, so doubling $r$ divides the force by about $2^3 = 8$. This is why neutral molecules affect each other only weakly and at short range — and why a polarized neutral object, like the one in the last lesson, still feels and exerts electric forces.`,
       visual: chargesPic({
         unit: 'cm', qunit: 'nC', aspect: 'wide', x: [-2.5, 11.5], y: [-2, 2], target: 2, ask: true, scale: r6((K * NC * NC) / (7.5 * CM) ** 2 / 3.2),
-        charges: [{ x: -0.5, y: 0, q: 1, label: '+Q' }, { x: 0.5, y: 0, q: -1, label: '−Q' }, { x: 8, y: 0, q: 1, label: 'q' }],
+        charges: [{ x: -0.5, y: 0, q: 1, label: '+Q', side: 'left' }, { x: 0.5, y: 0, q: -1, label: '−Q' }, { x: 8, y: 0, q: 1, label: 'q', side: 'below' }],
       }, 'A neutral pair and the charge q: the push from +Q, the pull from −Q, and their small sum (gold), to scale. Not drawn with r ≫ s.'),
     }),
   ],

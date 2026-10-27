@@ -281,7 +281,7 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
       },
       hints: ['Drag the galaxy in the picture until the two images merge.'],
       teach: 'An Einstein ring needs perfect alignment: by symmetry, light then reaches you equally from every side of the lens.',
-      explain: 'With the source exactly behind the lens, every direction around the lens is equivalent, so the two images spread into a full circle of angular radius θ_E. Slightly off line, the ring breaks into two arcs.',
+      explain: t`With the source exactly behind the lens, every direction around the lens is equivalent, so the two images spread into a full circle of angular radius $\theta_E$. Slightly off line, the ring breaks into two arcs.`,
       visual: { type: 'gr-lensing', params: { beta: 0.6, size: 0.14, system: 'galaxy' } },
     }),
     num({

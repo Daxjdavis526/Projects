@@ -243,7 +243,7 @@ with $g = M/r^2$ the surface gravity. Restoring $c$: a fractional shift $gh/c^2$
             { value: Math.sqrt(1 - 2 / em), feedback: 'That is the ratio for a receiver far away. This receiver hovers too, and its clock also runs slow.' },
           ],
           hints: [t`$\omega = E\,u^t$ at each station, with the same $E$.`, t`$\dfrac{\omega_\text{rec}}{\omega_\text{em}} = \sqrt{\dfrac{1 - 2/${em}}{1 - 2/${rec}}}$.`],
-          teach: 'Between two static observers the frequency ratio is the ratio of their u^t: the conserved E cancels.',
+          teach: t`Between two static observers the frequency ratio is the ratio of their $u^t$: the conserved $E$ cancels.`,
           explain: t`$\sqrt{(1 - 2/${em})/(1 - 2/${rec})} = ${sci(x, 4)}$: ${x < 1 ? 'redshifted, because the signal climbs to a station whose clock runs faster' : 'blueshifted, because the signal falls to a station whose clock runs slower'}.`,
           visual: clockMap(em, rec),
         };
@@ -413,7 +413,7 @@ def frequency(u, p):
         { value: S2.kms(2 * S2.zg + S2.zd), feedback: t`The gravitational part is $GM/(rc^2) = r_s/(2r)$, not $r_s/r$.` },
       ],
       hints: [t`$GM/c^2 = 4.30\times10^{6}\times1476.6$ m $= ${sci(SGR * M_SUN, 4)}$ m; divide by $r = 120\times1.496\times10^{11}$ m.`, t`$v^2/(2c^2) = (7.65\times10^{6})^2/(2\times(2.998\times10^{8})^2)$; add the two and multiply by $c$.`],
-      teach: 'For a fast star deep in a black hole’s well, u^t − 1 adds the gravitational redshift and the transverse Doppler shift, about equal for a bound orbit.',
+      teach: t`For a fast star deep in a black hole’s well, $u^t - 1$ adds the gravitational redshift and the transverse Doppler shift, about equal for a bound orbit.`,
       explain: t`Gravity: $${sci(S2.zg)}$, or $${sci(S2.kms(S2.zg))}$ km/s; transverse Doppler: $${sci(S2.zd)}$, or $${sci(S2.kms(S2.zd))}$ km/s; together $zc \approx ${sci(S2.kms(S2.zg + S2.zd))}$ km/s. The GRAVITY collaboration measured $f = 0.90 \pm 0.09\,(\text{stat}) \pm 0.15\,(\text{sys})$ times this (2018): the first redshift test near a supermassive black hole.`,
       visual: s2Pic,
     }),

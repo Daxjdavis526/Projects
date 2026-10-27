@@ -232,7 +232,7 @@ The engine’s **thrust** is $F = \dot m\,v_e$, and engineers quote the exhaust 
           ],
           hints: ['Apply the rocket equation to each burn separately, then add the two Δv’s.', t`Burn 1: $m_0$ is everything; $m_f$ is everything minus the first stage’s propellant.`, t`Burn 2 starts after the empty first stage is dropped: $m_0 = ${nice(pay + p2 + d2)}$ t and $m_f = ${nice(pay + d2)}$ t.`],
           teach: 'With staging, each burn has its own mass ratio, and dropping empty tanks makes the later ratios large.',
-          explain: t`Burn 1: $\Delta v_1 = 2{,}942\ln\dfrac{${nice(m0)}}{${nice(m0 - p1)}} = ${s3(dv1 / 1000)}$ km/s. Burn 2: $\Delta v_2 = 3{,}334\ln\dfrac{${nice(pay + p2 + d2)}}{${nice(pay + d2)}} = ${s3(dv2 / 1000)}$ km/s. Total ${s3(dv)}$ km/s — against ${s3((v1 * Math.log(m0 / (m0 - p1 - p2))) / 1000)} km/s for the same masses as a single stage at 300 s.`,
+          explain: t`Burn 1: $\Delta v_1 = 2{,}942\ln\dfrac{${nice(m0)}}{${nice(m0 - p1)}} = ${s3(dv1 / 1000)}$ km/s. Burn 2: $\Delta v_2 = 3{,}334\ln\dfrac{${nice(pay + p2 + d2)}}{${nice(pay + d2)}} = ${s3(dv2 / 1000)}$ km/s. Total $${s3(dv)}$ km/s — against ${s3((v1 * Math.log(m0 / (m0 - p1 - p2))) / 1000)} km/s for the same masses as a single stage at 300 s.`,
           visual: massStack([
             { m: p1, label: 'stage 1 propellant', color: 'warn' }, { m: d1, label: 'stage 1 empty', color: 'ink3' },
             { m: p2, label: 'stage 2 propellant', color: 'accent' }, { m: d2, label: 'stage 2 empty', color: 'ink2' }, { m: pay, label: 'payload', color: 'good' },

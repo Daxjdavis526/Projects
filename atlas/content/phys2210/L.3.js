@@ -289,7 +289,7 @@ print(f"g = {g:.3f} m/s², delay = {delay_ms:.1f} ms")
 `,
           tests: [
             { name: `g is 2/slope² (${g.toFixed(3)} m/s²)`, code: `abs(g - ${g}) < 1e-6` },
-            { name: `delay_ms is the intercept in ms (${(1000 * f.a).toFixed(1)} ms)`, code: `abs(delay_ms - ${1000 * f.a}) < 1e-6` },
+            { name: `\`delay_ms\` is the intercept in ms (${(1000 * f.a).toFixed(1)} ms)`, code: `abs(delay_ms - ${1000 * f.a}) < 1e-6` },
           ],
           hints: [t`\`b, a = np.polyfit(np.sqrt(h), t, 1)\` returns the slope first, then the intercept.`, t`\`g = 2 / b**2\` and \`delay_ms = 1000 * a\`.`],
           teach: 'One straight-line fit, two results: the slope gives the physics, the intercept the systematic offset.',

@@ -105,7 +105,7 @@ with $\gamma = C_P/C_V$. Because the temperature changes along the way, an adiab
           answer: P2, units: 'kPa', tol: { rel: 0.01 },
           errors: [{ value: P1 * k, feedback: t`That is the isothermal answer, $P_1V_1 = P_2V_2$. With no heat flowing out the gas also heats up, so the pressure climbs faster: $PV^\gamma$ is constant.` }, { value: P1 * k ** (G.He - 1), feedback: t`For pressure and volume the exponent is $\gamma$ itself; $\gamma - 1$ goes with temperature.` }],
           hints: [t`$P_1V_1^\gamma = P_2V_2^\gamma$, so $P_2 = P_1(V_1/V_2)^\gamma$.`],
-          teach: 'Along an adiabat PV^γ is constant, so the pressure rises faster than on an isotherm.',
+          teach: t`Along an adiabat $PV^\gamma$ is constant, so the pressure rises faster than on an isotherm.`,
           explain: t`$P_2 = ${P1}\times${k}^{5/3} = ${fmt(P2, 3)}$ kPa, against ${P1 * k} kPa for a slow isothermal squeeze — the extra comes from the temperature rise.`,
           visual: pvPic({ gas: 'He', n: molesOf(P1, 1, 300), states: { A: { P: P1, V: 1 }, B: { P: P2, V: 1 / k } }, paths: one('A', ['adiabatic', 'B']), shade: false, vrange: [0, 1.4], prange: [0, Math.ceil((P2 * 1.25) / 100) * 100], caption: 'The adiabatic compression; the final pressure is what is asked.' }),
         };

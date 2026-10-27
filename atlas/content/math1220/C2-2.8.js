@@ -151,7 +151,7 @@ Some integrals, such as $\int e^{-x^2}dx$, have no elementary antiderivative at 
             t`Rewrite: $\dfrac{1}{1 + e^{${kx(k)}}} = 1 - \dfrac{e^{${kx(k)}}}{1 + e^{${kx(k)}}}$.`,
             t`The second piece is a substitution: $u = 1 + e^{${kx(k)}}$, $du = ${k === 1 ? '' : k}e^{${kx(k)}}dx$.`,
           ],
-          teach: 'Add and subtract to manufacture a substitution: 1/(1 + e^u) = 1 − e^u/(1 + e^u).',
+          teach: t`Add and subtract to manufacture a substitution: $1/(1 + e^u) = 1 - e^u/(1 + e^u)$.`,
           explain: t`$\int 1\,dx - \int\dfrac{e^{${kx(k)}}}{1 + e^{${kx(k)}}}dx = x - \tfrac{1}{${k}}\ln(1 + e^{${kx(k)}}) + C$.`,
           visual: {
             type: 'graph',

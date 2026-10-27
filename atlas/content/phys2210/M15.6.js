@@ -51,7 +51,7 @@ Near the natural frequency $\omega_0 = \sqrt{k/m}$ the first term in the root va
     title: 'Push at the right rhythm',
     lead: t`A 1 kg mass on a 4 N/m spring ($\omega_0 = 2$ rad/s), lightly damped, driven by a force $F_0\cos\omega_d t$. Change the driving frequency and watch the amplitude grow — or not. Press **Restart** after each change to see the start-up from rest.`,
     tasks: [
-      'Drive at ω_d = 2.0 rad/s, right at ω₀: the swings build up over many cycles to a large steady amplitude.',
+      t`Drive at $\omega_d = 2.0$ rad/s, right at $\omega_0$: the swings build up over many cycles to a large steady amplitude.`,
       'Drive at 1.0 or 4.0 rad/s: after a messy start the mass settles into small swings at the driving frequency.',
       'At resonance, double the damping b: the final amplitude halves, and it gets there sooner.',
     ],

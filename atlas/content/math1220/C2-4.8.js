@@ -220,7 +220,7 @@ and $L = 1$ **decides nothing**. The **root test** uses $L = \lim \sqrt[n]{|a_n|
           answer: L, tol: { rel: 2e-3 },
           errors: [{ value: Math.exp(x), feedback: t`Upside down: $\frac{a_{n+1}}{a_n} = \frac{n+1}{n}e^{-x}$.` }, { value: 1, feedback: t`The factor $\frac{n+1}{n} \to 1$, but $e^{-x}$ stays.` }],
           hints: [t`$\dfrac{a_{n+1}}{a_n} = \dfrac{(n+1)e^{-(n+1)x}}{n\,e^{-nx}} = \dfrac{n+1}{n}e^{-x}$.`, t`Let $n \to \infty$.`],
-          teach: 'Boltzmann factors e^{−nx} make thermal sums behave like geometric series, which the ratio test confirms converge for any x > 0.',
+          teach: t`Boltzmann factors $e^{-nx}$ make thermal sums behave like geometric series, which the ratio test confirms converge for any $x > 0$.`,
           explain: t`$L = e^{-${x}} \approx ${fmt(L, 4)} < 1$, so the sum converges for every temperature (any $x > 0$). In fact $\sum n e^{-nx} = \frac{e^{-x}}{(1 - e^{-x})^2}$, which leads to Planck’s mean energy $\frac{\hbar\omega}{e^{x} - 1}$.`,
           visual: { type: 'graph', params: { x: [-0.5, 10.5], y: [0, 1.1], xlabel: 'n (number of quanta)', ylabel: 'weight', points: Array.from({ length: 11 }, (_, n) => ({ x: n, y: Math.exp(-n * x), color: 'accent' })) }, caption: t`The Boltzmann weights $e^{-nx}$ of the oscillator’s levels for $x = ${x}$: each is a fixed fraction of the one before.` },
         };

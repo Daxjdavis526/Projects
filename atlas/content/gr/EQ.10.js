@@ -239,9 +239,9 @@ In cosmology it is quoted as $\Omega_k = -kc^2/H_0^2$. Planck with galaxy survey
         return {
           prompt: t`The curvature radius of space today is $R_c = 1/\sqrt{|k|}$, and the measured density parameter is $\Omega_k = -kc^2/H_0^2$, so $R_c = \dfrac{c/H_0}{\sqrt{|\Omega_k|}}$. With $c/H_0 = ${fmt(RH, 4)}$ Gpc (for $H_0 = ${H0}$ km/s/Mpc), how large must $R_c$ be if $|\Omega_k| < ${ok}$? Give the smallest value, in Gpc.`,
           answer: Rc, units: 'Gpc', tol: { rel: 0.01 },
-          errors: [{ value: RH / ok, feedback: 'Take the square root of |Ω_k|.' }, { value: RH * Math.sqrt(ok), feedback: 'Divide by √|Ω_k|, do not multiply: a small Ω_k means a huge curvature radius.' }],
+          errors: [{ value: RH / ok, feedback: t`Take the square root of $|\Omega_k|$.` }, { value: RH * Math.sqrt(ok), feedback: t`Divide by $\sqrt{|\Omega_k|}$, do not multiply: a small $\Omega_k$ means a huge curvature radius.` }],
           hints: [t`A small $|\Omega_k|$ means a large curvature radius: $R_c$ grows as $1/\sqrt{|\Omega_k|}$.`, t`$R_c = ${fmt(RH, 4)}\ \text{Gpc}/\sqrt{${ok}}$.`],
-          teach: 'Because |Ω_k| is tiny, the curvature radius of space is many times the size of the observable universe: on what we can see, space is flat.',
+          teach: t`Because $|\Omega_k|$ is tiny, the curvature radius of space is many times the size of the observable universe: on what we can see, space is flat.`,
           explain: t`$R_c > ${fmt(RH, 4)}/\sqrt{${ok}} = ${fmt(Rc, 3)}$ Gpc — over ${Math.floor(Rc / 14.3)} times the 14 Gpc to the edge of the observable universe. Whether space is exactly flat, slightly closed or slightly open, we cannot yet tell.`,
           visual: ratioGraph(false),
         };

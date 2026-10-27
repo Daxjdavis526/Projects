@@ -215,7 +215,7 @@ Below, both are written out from the Christoffel symbols and computed for a sphe
           ],
           hints: [t`$\dfrac{R\,r^2}{24} = \dfrac{2}{a^2}\cdot\dfrac{r^2}{24} = \dfrac{r^2}{12a^2}$.`, t`$r/a = ${rk}/${A_EARTH} = ${fmt(x, 4)}$.`],
           teach: 'The Ricci scalar measures the area (or volume) a small ball is missing compared with flat space: A ≈ πr²(1 − Rr²/24) on a surface.',
-          explain: t`$\dfrac{r^2}{12a^2} = ${fmt(pct, 3)}$%. The cap's exact area, $2\pi a^2\left(1 - \cos(r/a)\right)$, falls short by ${fmt(exact, 3)}$%: the formula is the first term of that series. A surveyor who measured both the radius and the area of a large region could find the Earth's curvature without ever leaving its surface.`,
+          explain: t`$\dfrac{r^2}{12a^2} = ${fmt(pct, 3)}$%. The cap's exact area, $2\pi a^2\left(1 - \cos(r/a)\right)$, falls short by $${fmt(exact, 3)}$%: the formula is the first term of that series. A surveyor who measured both the radius and the area of a large region could find the Earth's curvature without ever leaving its surface.`,
           visual: capCircle(t`A circle (blue) drawn around a point of a sphere, with its radius measured along the surface (gold); not to scale. It encloses less area than a flat circle of the same radius, and its circumference is less than $2\pi r$.`),
         };
       },

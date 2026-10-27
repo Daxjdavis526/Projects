@@ -300,6 +300,12 @@ const tangent = (S, lines) => {
   check('point charge: the 60 V equipotential is a circle of radius kq/V', segs.length > 30 && radii.every((r) => Math.abs(r - r0) < 0.01 * r0), `r0 = ${r0}, range ${Math.min(...radii)}–${Math.max(...radii)}`);
   const step = M.niceStep(grid);
   check('a tidy equipotential step', [1, 2, 2.5, 5].some((m) => near(step / 10 ** Math.floor(Math.log10(step)), m, 1e-9)), String(step));
+  // two plates: V is constant beyond each, and a level equal to that constant must not trace rounding noise
+  const sig = 1e-7, P = M.scene({ sheets: [{ x: -0.04, y: 0, angle: 90, sigma: sig }, { x: 0.04, y: 0, angle: 90, sigma: -sig }], ref: [0.04, 0] });
+  const pg = M.potentialGrid(P, box, 160, 100), Vp = (sig / M.EPS0) * 0.08;
+  const zero = M.contour(pg, 0), top = M.contour(pg, Vp), mid = M.contour(pg, Vp / 2);
+  check('plates: no contour of noise where V is constant at the level', zero.length === 0 && top.every(([x0, , x1]) => Math.abs(x0 + 0.04) < 0.007 && Math.abs(x1 + 0.04) < 0.007), `${zero.length} segments at 0 V; ${top.length} at the + plate`);
+  check('plates: the halfway equipotential is the midplane', mid.length > 10 && mid.every(([x0, , x1]) => Math.abs(x0) < 1e-6 && Math.abs(x1) < 1e-6));
 }
 
 // ─── a charged particle ───────────────────────────────────────────────────

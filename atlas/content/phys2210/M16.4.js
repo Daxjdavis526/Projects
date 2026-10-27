@@ -109,7 +109,7 @@ Water needs 334 kJ/kg to melt and 2257 kJ/kg to boil — over five times the 418
           answer: m * LF, units: 'kJ', tol: { rel: 0.01 },
           errors: [{ value: m * LVW, feedback: t`That uses the latent heat of *vaporization*. Melting needs $L_f = 334$ kJ/kg.` }],
           hints: [t`$Q = mL_f$.`],
-          teach: 'Melting a solid at its melting point takes Q = mL_f, with no change of temperature.',
+          teach: t`Melting a solid at its melting point takes $Q = mL_f$, with no change of temperature.`,
           explain: t`$Q = mL_f = (${m}\ \text{kg})(334\ \text{kJ/kg}) = ${fmt(m * LF, 3)}$ kJ — and the result is water still at 0 °C.`,
           visual: heatingCurve({ segs: waterSegs(), hi: 1, caption: 'The heating curve of 1 kg of water. Highlighted: melting, at 0 °C. Specific heats taken as constant within each phase.' }),
         };

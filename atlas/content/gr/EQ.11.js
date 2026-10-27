@@ -130,8 +130,8 @@ With $p = w\rho c^2$ the solution is $\rho \propto a^{-3(1+w)}$: matter as $a^{-
     lead: t`Every curve passes through today with the same slope, the measured $H_0$ — that is the first equation at work. The contents decide the rest: the matter term bends the curve down, $\Lambda$ bends it up (the second equation). Move the sliders; the dashed curve is Planck 2018.`,
     tasks: [
       'Press “Matter only”: no Λ, so the curve bends down everywhere and the age is only 2/(3H₀) ≈ 9.7 billion years.',
-      'Raise Ω_Λ: the curve bends upward today — accelerating — and the universe is older.',
-      'Raise Ω_m well above 1 with no Λ: the first equation’s curvature term turns the expansion round into a Big Crunch.',
+      t`Raise $\Omega_\Lambda$: the curve bends upward today — accelerating — and the universe is older.`,
+      t`Raise $\Omega_m$ well above 1 with no $\Lambda$: the first equation’s curvature term turns the expansion round into a Big Crunch.`,
     ],
     params: { Om: OM, OL, H0 },
   },
@@ -276,7 +276,7 @@ With $p = w\rho c^2$ the solution is $\rho \propto a^{-3(1+w)}$: matter as $a^{-
         return {
           prompt: t`For a flat universe ($k = 0$) of matter and $\Lambda$, the Friedmann equation reads $H^2 = H_0^2\left[\Omega_m a^{-3} + \Omega_\Lambda\right]$ with $a = 1/(1+z)$. With $H_0 = ${H0}$ km/s/Mpc, $\Omega_m = ${OM}$ and $\Omega_\Lambda = ${OL}$, what was the expansion rate $H$ when the light we see from $z = ${z}$ set out, in km/s/Mpc?`,
           answer: H0 * E, units: 'km/s/Mpc', tol: { rel: 0.01 },
-          errors: [{ value: H0 * (OM * (1 + z) ** 3 + OL), feedback: 'Take the square root: the equation gives H², not H.' }, { value: H0 * Math.sqrt(OM * (1 + z) ** 3), feedback: 'Keep the Λ term, Ω_Λ, inside the square root.' }],
+          errors: [{ value: H0 * (OM * (1 + z) ** 3 + OL), feedback: 'Take the square root: the equation gives H², not H.' }, { value: H0 * Math.sqrt(OM * (1 + z) ** 3), feedback: t`Keep the $\Lambda$ term, $\Omega_\Lambda$, inside the square root.` }],
           hints: [t`$a^{-3} = (1 + ${z})^3 = ${(1 + z) ** 3}$.`, t`$H = ${H0}\sqrt{${OM}\times${(1 + z) ** 3} + ${OL}}$.`],
           teach: 'Each term of the Friedmann equation scales with its own power of a, so the expansion rate in the past follows from today’s numbers.',
           explain: t`$H = ${H0}\times\sqrt{${fmt(OM * (1 + z) ** 3 + OL, 4)}} = ${fmt(H0 * E, 4)}$ km/s/Mpc. Then matter's term was $${fmt((OM * (1 + z) ** 3) / (OM * (1 + z) ** 3 + OL) * 100, 3)}\%$ of the total; today it is 31.5%.`,

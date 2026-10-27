@@ -413,7 +413,9 @@ export function mount(F, P0) {
     const dpr = Math.min(2, devicePixelRatio || 1);
     W = canvas.clientWidth || 600; H = canvas.clientHeight || 300;
     narrow = W < 520;
-    const want = narrow ? (mode === 'resonance' ? '4 / 4.6' : mode === 'coil' || mode === 'rl' ? '4 / 4.4' : '4 / 5.2') : '';
+    // a circuit drawn alone (no graphs) gets a wide, short canvas
+    const alone = (mode === 'rl' || mode === 'lc') && Array.isArray(P.graphs) && !P.graphs.length && !(mode === 'lc' && P.analog === 'always');
+    const want = alone ? (narrow ? '4 / 3' : '2.4 / 1') : narrow ? (mode === 'resonance' ? '4 / 4.6' : mode === 'coil' || mode === 'rl' ? '4 / 4.4' : '4 / 5.2') : '';
     if (box.style.aspectRatio !== want) { box.style.aspectRatio = want; requestAnimationFrame(draw); return; }
     if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

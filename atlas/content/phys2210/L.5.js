@@ -170,7 +170,7 @@ The slope gives $M$; the intercept gives the friction. (Lab skills trained: desi
       answer: Math.sqrt(17.5 / (2 * (0.2 ** 2 + 0.6 ** 2 + 1))), tol: { rel: 0.02 },
       errors: [{ value: 17.5 / 2.8, feedback: t`That is the ratio of the sums of squares. The uncertainty goes as one over its *square root*.` }],
       hints: [t`For equal error bars, $\sigma_b = \sigma/\sqrt{\sum (F_i - \bar F)^2}$.`, t`In units of 0.098 N, A uses $F = 1, 2, \ldots, 6$ ($\sum (F_i - \bar F)^2 = 17.5$) and B uses $4, 4.4, 4.8, 5.2, 5.6, 6$ ($\sum = 2(1^2 + 0.6^2 + 0.2^2) = 2.8$).`],
-      teach: 'Spreading the independent variable widely makes the slope much better determined: σ_slope ∝ 1/√Σ(x − x̄)².',
+      teach: t`Spreading the independent variable widely pins the slope down much better: $\sigma_b \propto 1/\sqrt{\sum (x - \bar x)^2}$.`,
       explain: t`$\sigma_b \propto 1/\sqrt{\sum (F_i - \bar F)^2}$, so the ratio is $\sqrt{17.5/2.8} = ${Math.sqrt(17.5 / 2.8).toFixed(2)}$ — for evenly spaced points, simply the ratio of the ranges, 0.49 N to 0.196 N. Design B would need about ${(17.5 / 2.8).toFixed(1)} times as many runs to pin the slope down as well.`,
       visual: {
         type: 'graph',

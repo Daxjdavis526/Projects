@@ -57,7 +57,7 @@ function sliderSpec(s, P) {
     N: { label: 'Turns of wire $N$', min: 1, max: 2 * P.N, step: 1, value: P.N, unit: '', explain: 'Each turn adds its own emf (or its own torque).' },
     B: { label: 'Field $B$', min: 0, max: Math.max(0.5, 2 * P.B), step: 0.01, value: P.B, unit: '\\mathrm{T}', explain: 'Between the pole pieces.' },
     I: { label: 'Current $I$', min: 0, max: Math.max(5, 2 * P.I), step: 0.1, value: P.I, unit: '\\mathrm{A}', explain: 'The current fed to the coil.' },
-    angle: { label: 'Angle $\\theta$ of the coil', min: 0, max: 360, step: 1, value: P.angle ?? 0, unit: '^\\circ', explain: P.mode === 'motor' ? 'The angle between the coil’s magnetic moment (gold) and the field. θ = 0 when the coil faces the field squarely.' : 'θ = 0 when the coil faces the field (its normal along B), so the flux through it is greatest.' },
+    angle: { label: 'Angle $\\theta$ of the coil', min: 0, max: 360, step: 1, value: P.angle ?? 0, unit: '^\\circ', explain: P.mode === 'motor' ? 'How far the coil has turned from facing the field squarely (θ = 0). With slip rings it is the angle between μ (gold) and B; a commutator reverses μ for half of each turn.' : 'θ = 0 when the coil faces the field (its normal along B), so the flux through it is greatest.' },
   }[key] || {};
   return typeof s === 'string' ? { ...base, key } : { ...base, ...s };
 }

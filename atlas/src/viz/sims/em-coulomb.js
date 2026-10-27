@@ -15,7 +15,7 @@
 //       unit: 'cm', qunit: 'uC',           // positions in m | cm | mm; charges in uC | nC
 //       x: [-10, 10], y: [-6, 6],          // the view (free mode), in `unit`
 //       aspect: '',                        // free: the picture's shape, '' (16:10) | wide (2:1) | square
-//       charges: [{ x, y, q, label: 'A', drag: true }],   // free mode
+//       charges: [{ x, y, q, label: 'A', drag: true, side: 'right' }],   // free mode; side: where the label sits (right | left | above | below)
 //       target: 0,                         // free: the charge whose forces are shown ('all': the net force on every charge)
 //       q1: 3, q2: -2, r: 10,              // pair mode (qunit, unit)
 //       sliders: true,                     // pair: q1, q2, r; free: one slider per charge
@@ -37,7 +37,7 @@ const UNITS = { m: 1, cm: 0.01, mm: 0.001 };
 const QUNITS = { uC: 1e-6, nC: 1e-9 };
 const QTEXT = { uC: 'µC', nC: 'nC' };
 const QTEX = { uC: '\\mu\\mathrm{C}', nC: '\\mathrm{nC}' };
-const SOURCE_COLORS = ['violet', 'teal', 'good', 'ink2'];   // never gold (the net force), red or blue (the charges)
+const SOURCE_COLORS = ['violet', 'teal', 'ink', 'good'];   // never gold (the net force), red or blue (the charges)
 export const defaults = {
   mode: 'free', unit: 'cm', qunit: 'uC', x: [-10, 10], y: [-6, 6], aspect: '', target: 0, q1: 3, q2: -2, r: 10,
   charges: [{ x: -5, y: -2, q: 2, label: 'A' }, { x: 4, y: -2, q: -3, label: 'B' }, { x: -1, y: 3.5, q: 1, label: 'C' }],
@@ -106,6 +106,15 @@ export function mount(F, P0) {
     plot.arrow(x, y, x + (Fx / scale) * k, y + (Fy / scale) * k, o);
     if (len > cap) plot.text('off scale', x + (Fx / scale) * k, y + (Fy / scale) * k, { dx: 6, dy: 14, color: o.color, size: 11 });
   }
+  // a label just beyond an arrow's tip, along its direction, so it never sits on the arrow or its charge
+  function tipLabel(text, x0, y0, Fx, Fy, o) {
+    const m = Math.hypot(Fx, Fy);
+    if (!(m > 0)) return;
+    const len = m / scale, k = Math.min(len, 0.42 * (plot.vx1 - plot.vx0)) / len;
+    const ux = Fx / m, uy = -Fy / m;                       // on screen, y points down
+    const align = ux > 0.35 ? 'left' : ux < -0.35 ? 'right' : 'center';
+    plot.text(text, x0 + (Fx / scale) * k, y0 + (Fy / scale) * k, { dx: 8 * ux, dy: 12 * uy, align, ...o });
+  }
   function ring(x, y) {
     const g = plot.ctx;
     g.save();
@@ -113,11 +122,12 @@ export function mount(F, P0) {
     g.beginPath(); g.arc(plot.X(x), plot.Y(y), 16, 0, 2 * Math.PI); g.stroke();
     g.restore();
   }
-  function disc(x, y, q, label) {
+  const SIDES = { right: { dx: 14, dy: -14, align: 'left' }, left: { dx: -14, dy: -14, align: 'right' }, above: { dx: 0, dy: -22, align: 'center' }, below: { dx: 0, dy: 26, align: 'center' } };
+  function disc(x, y, q, label, side = 'right') {
     const col = q > 0 ? 'bad' : q < 0 ? 'accent' : 'ink3';
     plot.point(x, y, { color: col, r: 11 });
     plot.text(q > 0 ? '+' : q < 0 ? '−' : '0', x, y, { color: 'bg', size: 15, weight: 800, align: 'center', dy: 0.5, halo: false });
-    if (label) plot.text(label, x, y, { dx: 14, dy: -14, color: col, size: 12.5, weight: 700 });
+    if (label) plot.text(label, x, y, { ...(SIDES[side] || SIDES.right), color: col, size: 12.5, weight: 700 });
   }
 
   function draw() {
@@ -155,8 +165,8 @@ export function mount(F, P0) {
       const nets = ch.map((c, i) => {
         const { net } = C.forcesOn(i, ch);
         arrowTo(c.x / L, c.y / L, net[0], net[1], { color: 'gold', width: 2.8, head: 10 });
-        const m = Math.hypot(...net), k2 = m > 0 ? Math.min(m / scale, 0.42 * (plot.vx1 - plot.vx0)) / (m / scale) : 0;
-        if (!P.ask && m > 0) plot.text(P.values ? fmtF(m) : 'net', c.x / L + (net[0] / scale) * k2, c.y / L + (net[1] / scale) * k2, { dx: 8, dy: -10, color: 'gold', size: 12, weight: 650 });
+        const m = Math.hypot(...net);
+        if (!P.ask) tipLabel(P.values ? fmtF(m) : 'net', c.x / L, c.y / L, net[0], net[1], { color: 'gold', size: 12, weight: 650 });
         sx += net[0]; sy += net[1]; big = Math.max(big, m);
         return m;
       });
@@ -172,16 +182,13 @@ export function mount(F, P0) {
         const col = SOURCE_COLORS[p.j % SOURCE_COLORS.length];
         if (F.params.sum && k > 0) { arrowTo(ax, ay, p.F[0], p.F[1], { color: col, width: 1.6, head: 8, dash: [5, 4] }); }
         arrowTo(c0.x, c0.y, p.F[0], p.F[1], { color: col, width: 1.8, head: 8 });
-        const m = Math.hypot(...p.F) / scale, k2 = m > 0 ? Math.min(m, 0.42 * (plot.vx1 - plot.vx0)) / m : 0;
-        if (P.values && !P.ask) plot.text(`from ${st.charges[p.j].label}: ${fmtF(Math.hypot(...p.F))}`, c0.x + (p.F[0] / scale) * k2, c0.y + (p.F[1] / scale) * k2, { dx: 6, dy: 12, color: col, size: 11.5 });
-        else if (!P.ask) plot.text(`from ${st.charges[p.j].label}`, c0.x + (p.F[0] / scale) * k2, c0.y + (p.F[1] / scale) * k2, { dx: 6, dy: 12, color: col, size: 11.5 });
+        if (!P.ask) tipLabel(P.values ? `from ${st.charges[p.j].label}: ${fmtF(Math.hypot(...p.F))}` : `from ${st.charges[p.j].label}`, c0.x, c0.y, p.F[0], p.F[1], { color: col, size: 11.5 });
         if (F.params.sum) { ax += p.F[0] / scale; ay += p.F[1] / scale; }
       });
       const Fn = Math.hypot(...net);
       if (parts.length > 1 && P.net) {
         arrowTo(c0.x, c0.y, net[0], net[1], { color: 'gold', width: 3.2, head: 12 });
-        const m = Fn / scale, k2 = m > 0 ? Math.min(m, 0.42 * (plot.vx1 - plot.vx0)) / m : 0;
-        if (!P.ask && Fn > 0) plot.text(P.values ? `net: ${fmtF(Fn)}` : 'net', c0.x + (net[0] / scale) * k2, c0.y + (net[1] / scale) * k2, { dx: 8, dy: -10, color: 'gold', size: 12.5, weight: 700 });
+        if (!P.ask) tipLabel(P.values ? `net: ${fmtF(Fn)}` : 'net', c0.x, c0.y, net[0], net[1], { color: 'gold', size: 12.5, weight: 700 });
       }
       if (F.params.components && P.net && Fn > 0) {
         arrowTo(c0.x, c0.y, net[0], 0, { color: 'ink2', width: 1.6, head: 7, dash: [3, 3] });
@@ -198,7 +205,7 @@ export function mount(F, P0) {
     }
     // a dashed ring marks each charge you can drag (the plot's own handle marker would hide the charge)
     if (live) st.charges.forEach((c) => { if (c.drag !== false) ring(c.x, c.y); });
-    st.charges.forEach((c, i) => disc(c.x, c.y, F.params[`q${i}`], P.ask ? c.label : `${c.label}: ${signed(F.params[`q${i}`])} ${QTEXT[P.qunit]}`));
+    st.charges.forEach((c, i) => disc(c.x, c.y, F.params[`q${i}`], P.ask ? c.label : `${c.label}: ${signed(F.params[`q${i}`])} ${QTEXT[P.qunit]}`, c.side));
   }
   F.draw(draw);
   F.caption(pair
@@ -228,6 +235,7 @@ export function validate(P0) {
         // live charges get a slider over [−10, 10]; a fixed picture may show any charge up to 1000 units
         const lim = !P.static && P.sliders ? 10 : 1000;
         if (!(c.q >= -lim && c.q <= lim)) problems.push(`charge ${i}: q must lie in [−${lim}, ${lim}]`);
+        if (c.side !== undefined && !['right', 'left', 'above', 'below'].includes(c.side)) problems.push(`charge ${i}: side must be right, left, above or below`);
       });
       for (let i = 0; i < P.charges.length; i++) for (let j = 0; j < i; j++) if (Math.hypot(P.charges[i].x - P.charges[j].x, P.charges[i].y - P.charges[j].y) < 1e-9) problems.push(`charges ${j} and ${i} sit on top of each other`);
       if (P.target !== 'all' && !(Number.isInteger(P.target) && P.target >= 0 && P.target < P.charges.length)) problems.push('target must be the index of a charge, or all');

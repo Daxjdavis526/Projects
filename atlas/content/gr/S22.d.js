@@ -538,7 +538,7 @@ print(g_new)
             { value: (2 * TM * Math.log(N)) / per, feedback: t`From $u = -4M\ln(-U)$ each factor of $e$ takes $4M$, not $2M$.` },
           ],
           hints: [t`$\dfrac{du}{d\tau} = -4M\,\dfrac{dU/d\tau}{U} = \dfrac{4M}{\tau_h - \tau}$, and $\tau_h - \tau = e^{-u/4M}/k$.`, t`So the stretch is $4Mk\,e^{u/4M}$: it grows by $e$ every $4M$ of telescope time, and by ${N} in $4M\ln ${N}$. Then $M = ${sci(m, 2)} \times GM_\odot/c^3$.`],
-          teach: 'A smooth coordinate along the faller, seen through the logarithm that defines far-away time, gives an exponential: the redshift grows as e^{t/4M}.',
+          teach: t`A smooth coordinate along the faller, seen through the logarithm that defines far-away time, gives an exponential: the redshift grows as $e^{t/4M}$.`,
           explain: t`$du/d\tau = 4M/(\tau_h - \tau) = 4Mk\,e^{u/4M}$, so the stretch grows as $e^{t/4M}$. A factor of ${N} takes $4M\ln ${N} = ${round(4 * Math.log(N), 4)}M$; with $M = ${sci(TM, 4)}$ s that is $${sci(dt, 3)}$ s, or ${round(dt / per, 3)} ${units === 'day' ? 'days' : 'minutes'}. Its brightness falls faster still, and the last signal it sends before crossing never arrives at all: the probe fades and freezes, though by its own clock it crosses in finite time. The rate $1/4M$ is the surface gravity $\kappa$.`,
           visual: fadePic,
         };

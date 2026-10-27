@@ -222,7 +222,7 @@ print(f"a = {a:.4f} ± {sigma_a:.4f} m/s²")
 `,
           tests: [
             { name: `a is twice the slope of x against t² (${(2 * f.b).toFixed(4)} m/s²)`, code: `abs(a - ${2 * f.b}) < 1e-6` },
-            { name: `sigma_a is twice the slope’s standard error (${(2 * f.sb).toPrecision(2)} m/s²)`, code: `abs(sigma_a - ${2 * f.sb}) < 1e-7` },
+            { name: `\`sigma_a\` is twice the slope’s standard error (${(2 * f.sb).toPrecision(2)} m/s²)`, code: `abs(sigma_a - ${2 * f.sb}) < 1e-7` },
             { name: 'the program prints the result', code: `"${(2 * f.b).toFixed(4)}" in _stdout` },
           ],
           hints: [t`\`p, C = np.polyfit(t**2, x, 1, cov=True)\` — \`p[0]\` is the slope, \`C[0, 0]\` its variance.`, t`\`a = 2 * p[0]\` and \`sigma_a = 2 * np.sqrt(C[0, 0])\`.`],
