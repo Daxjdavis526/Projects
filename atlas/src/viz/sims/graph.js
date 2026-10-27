@@ -19,7 +19,7 @@ export const defaults = { x: [-5, 5], y: [-3, 3] };
 
 export function mount(F, P) {
   const { canvas } = F.canvas({ aspect: P.aspect || '', label: P.alt || 'Interactive graph' });
-  const plot = new Plot(canvas, { x: P.x, y: P.y, equal: !!P.equal, xlabel: P.xlabel ?? 'x', ylabel: P.ylabel ?? 'y', xticks: P.xticks, yticks: P.yticks, grid: P.grid ?? true, axes: P.axes ?? true });
+  const plot = new Plot(canvas, { x: P.x, y: P.y, equal: !!P.equal, xlabel: P.xlabel ?? 'x', ylabel: P.ylabel ?? 'y', xticks: P.xticks, yticks: P.yticks, grid: P.grid ?? true, axes: P.axes ?? true, axesAt: P.axesAt });
   const sliders = P.sliders || [];
   for (const s of sliders) F.slider(s);
   for (const c of P.choices || []) F.choice(c);
@@ -48,7 +48,9 @@ export function mount(F, P) {
     for (const d of pointsDrag) { E[d.key + 'x'] = d.x; E[d.key + 'y'] = d.y; }
     const vars = ['x', 'x0', ...keys, ...pointsDrag.flatMap((d) => [d.key + 'x', d.key + 'y'])];
     // shaded areas under curves
+    const shown = (o) => !o.when || ev(o.when, E, vars);     // `when`: draw only while the expression is nonzero
     for (const s of P.shade || []) {
+      if (!shown(s)) continue;
       const f = fn(s.fn, vars), lo = s.lower ? fn(s.lower, vars) : () => 0;
       const a = ev(s.from, E, vars), b = ev(s.to, E, vars);
       if (b > a) plot.area((x) => f({ ...E, x }), a, b, { color: s.color || 'accent', alpha: s.alpha ?? 0.2, lower: (x) => lo({ ...E, x }) });
@@ -111,8 +113,8 @@ export function mount(F, P) {
         plot.text(c.label, lx, ly, { color, dx: c.labelDx ?? 6, dy: c.labelDy ?? -12, weight: 650 });
       }
     });
-    for (const l of P.vlines || []) { const x = ev(l.x, E, vars); plot.line(x, plot.vy0, x, plot.vy1, { color: l.color || 'ink3', width: 1.2, dash: [5, 5] }); if (l.label) plot.text(l.label, x, plot.vy1, { dx: 4, dy: 10, color: l.color || 'ink3' }); }
-    for (const l of P.hlines || []) { const y = ev(l.y, E, vars); plot.line(plot.vx0, y, plot.vx1, y, { color: l.color || 'ink3', width: 1.2, dash: [5, 5] }); if (l.label) plot.text(l.label, plot.vx1, y, { dx: -4, dy: -10, align: 'right', color: l.color || 'ink3' }); }
+    for (const l of P.vlines || []) { if (!shown(l)) continue; const x = ev(l.x, E, vars); plot.line(x, plot.vy0, x, plot.vy1, { color: l.color || 'ink3', width: 1.2, dash: [5, 5] }); if (l.label) plot.text(l.label, x, plot.vy1, { dx: 4, dy: 10, color: l.color || 'ink3' }); }
+    for (const l of P.hlines || []) { if (!shown(l)) continue; const y = ev(l.y, E, vars); plot.line(plot.vx0, y, plot.vx1, y, { color: l.color || 'ink3', width: 1.2, dash: [5, 5] }); if (l.label) plot.text(l.label, plot.vx1, y, { dx: -4, dy: -10, align: 'right', color: l.color || 'ink3' }); }
     // tangent and secant
     if (T) {
       const f = tanFn();
@@ -132,9 +134,9 @@ export function mount(F, P) {
     }
     for (const p of P.points || []) {
       if (p.when && !ev(p.when, E, vars)) continue;
-      plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy });
+      plot.point(ev(p.x, E, vars), ev(p.y, E, vars), { color: p.color || 'accent2', label: p.label, r: p.r, ldx: p.labelDx, ldy: p.labelDy, lalign: p.labelAlign });
     }
-    for (const a of P.arrows || []) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: 2.2, label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
+    for (const a of (P.arrows || []).filter(shown)) plot.arrow(ev(a.from[0], E, vars), ev(a.from[1], E, vars), ev(a.to[0], E, vars), ev(a.to[1], E, vars), { color: a.color || 'accent', width: 2.2, label: a.label, ldx: a.labelDx, ldy: a.labelDy, lalign: a.labelAlign });
     plot.drawHandles();
     if (P.readouts) F.readout(P.readouts.map((r) => [r.label, fmtVal(ev(r.expr, E, ['slope', 'secant', 'riemann', 'integral', 'y0', ...vars]), r)]));
   }
@@ -168,6 +170,7 @@ export function validate(P) {
   if (P.integral) { tryParse(P.integral.fn, [], 'integral'); tryParse(P.integral.from); tryParse(P.integral.to); }
   if (P.tangent) { tryParse(P.tangent.fn, [], 'tangent'); if (P.tangent.secant) tryParse(P.tangent.secant); }
   for (const p of P.points || []) { tryParse(p.x, [], 'point'); tryParse(p.y, [], 'point'); if (p.when) tryParse(p.when, [], 'point when'); }
+  for (const o of [...(P.shade || []), ...(P.vlines || []), ...(P.hlines || []), ...(P.arrows || [])]) if (o.when) tryParse(o.when, [], 'when');
   for (const l of P.vlines || []) tryParse(l.x, [], 'vline');
   for (const l of P.hlines || []) tryParse(l.y, [], 'hline');
   for (const a of P.arrows || []) [...a.from, ...a.to].forEach((v) => tryParse(v, [], 'arrow'));

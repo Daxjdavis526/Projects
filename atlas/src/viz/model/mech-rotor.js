@@ -65,8 +65,8 @@ export const spinAt = ({ theta0 = 0, omega0 = 0, alpha = 0 }, t) => ({
  *     forces: [{ F, r, phi }], hang (block mass, kg), g }
  * With a prescribed alpha the forces are ignored (pure kinematics). With a
  * hanging block the drum must turn about its centre (d = 0); its string
- * leaves the right-hand side of the rim, so the drum turns clockwise
- * (negative α) as the block falls.
+ * leaves the left-hand side of the rim, so the drum turns anticlockwise
+ * (positive α) as the block falls.
  */
 export function motion(P) {
   const In = inertia(P);
@@ -77,7 +77,7 @@ export function motion(P) {
     const R = SHAPES[P.shape].half(P);
     const h = hang({ I: In.I, R, m: P.hang, g });
     block = { ...h, m: P.hang, R };
-    tau = -h.T * R;
+    tau = h.T * R;
     alpha = tau / In.I;
   } else {
     tau = (P.forces || []).reduce((s, f) => s + torque(f), 0);

@@ -141,7 +141,13 @@ for (const theme of themes) {
       if (!nxt) break;
       await nxt.click(); await page.waitForTimeout(900);
     }
-    // the checkpoint: each question, then its worked answer ("I don't know" reveals it)
+    // the checkpoint: missed practice problems come back as fresh variants, so the
+    // walk may not have reached it — start again and take "I know this — test me"
+    if ((await page.$eval('.crumb', (e) => e.textContent).catch(() => '')) !== 'Checkpoint') {
+      await page.goto(BASE + '#/settings'); await page.goto(BASE + '#/lesson/' + id); await page.waitForTimeout(1000);
+      const test = await page.$('button:has-text("test me")');
+      if (test) { await test.click(); await page.waitForTimeout(900); }
+    }
     for (let q = 0; q < 6; q++) {
       const crumb = await page.$eval('.crumb', (e) => e.textContent).catch(() => '');
       if (crumb !== 'Checkpoint') break;

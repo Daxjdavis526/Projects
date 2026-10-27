@@ -438,16 +438,17 @@ export function vesselPic({ kind = 'dewar', liquid = 'LN₂, 77 K', level = 0.6,
   if (kind === 'dewar') {
     curves.push(U(W, 0, 'ink2', 2.4), U(W - 0.14, 0.14, 'ink3', 1.6));
     shade.push({ fn: String(r4(0.14 + level * (H - 0.3))), lower: '0.14', from: r4(-W + 0.14), to: r4(W - 0.14), color: 'accent', alpha: 0.4 });
-    points.push(tag(W + 0.08, r4(H - 0.35), 'vacuum jacket', 'ink3', 8, 0));
+    if (!leak) points.push(tag(W + 0.08, r4(H - 0.35), 'vacuum jacket', 'ink3', 8, 0));
   } else {
     const d = 0.35;
     curves.push({ param: [String(-W), 't'], t: [d, r4(H - d)], color: 'ink2', width: 2.4 }, { param: [String(W), 't'], t: [d, r4(H - d)], color: 'ink2', width: 2.4 });
     curves.push({ param: [`${W}*cos(t)`, `${r4(H - d)} + ${d}*sin(t)`], t: [0, 3.1416], color: 'ink2', width: 2.4 }, { param: [`${W}*cos(t)`, `${d} + ${d}*sin(t)`], t: [3.1416, 6.2832], color: 'ink2', width: 2.4 });
     shade.push({ fn: String(r4(level * H)), lower: `${d} - ${d}*sqrt(max(0, 1 - x^2/${r4(W * W)}))`, from: -W, to: W, color: 'accent', alpha: 0.4 });
   }
-  points.push(tag(0, Math.max(0.4, level * H * 0.45), liquid, 'ink', 0, 0, true));
+  points.push(tag(0, Math.max(0.4, level * H * 0.45), liquid, 'ink', 0, 0, true));  // ly below matches this
   // bubbles rising through the liquid
-  [[-0.45, 0.5], [0.3, 0.8], [-0.1, 1.05], [0.5, 0.35], [-0.6, 1.0]].forEach(([bx, by]) => { if (by < level * H) points.push({ x: r4(bx * W), y: r4(by), r: 3, color: 'ink2' }); });
+  const ly = Math.max(0.4, level * H * 0.45);
+  [[-0.55, 0.5], [0.45, 0.8], [-0.7, 1.05], [0.6, 0.35], [-0.5, 1.35], [0.55, 1.5]].forEach(([bx, by]) => { if (by < level * H - 0.1 && Math.abs(by - ly) > 0.15) points.push({ x: r4(bx * W), y: r4(by), r: 3, color: 'ink2' }); });
   if (bolt) shade.push({ fn: '0.42', lower: '0.17', from: -0.18, to: 0.18, color: 'ink', alpha: 0.65 });
   if (bolt) points.push(tag(0.2, 0.3, typeof bolt === 'string' ? bolt : 'warm bolt', 'ink2', 6, 0));
   if (heater) {
@@ -461,5 +462,68 @@ export function vesselPic({ kind = 'dewar', liquid = 'LN₂, 77 K', level = 0.6,
     type: 'graph',
     params: { x: [-2.6, 2.6], y: [-0.3, r4(top + 0.85)], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'A vessel of boiling cryogenic liquid in cross-section', curves, shade, arrows, points },
     caption: caption ?? 'Cross-section, not to scale. The liquid boils at constant temperature; the vapour escapes through the vent, so the pressure stays at one atmosphere.',
+  };
+}
+
+/**
+ * Steady conduction through a flat wall of layers: the temperature profile.
+ *   layers  [{ name, w (drawn width), color }] from the hot side to the cold side
+ *   temps   the temperatures at the n + 1 faces, hot side first (K); '?' entries in `show` hide labels
+ *   show    which face temperatures to label (indices), default the two outer faces
+ */
+export function wallPic({ layers, temps, show = null, hot = 'outside', cold = 'inside', ask = null, caption, alt }) {
+  let x = 0;
+  const shade = [], curves = [], points = [], arrows = [];
+  const lo = Math.min(...temps), hi = Math.max(...temps), pad = 0.18 * (hi - lo);
+  const xs = [0];
+  layers.forEach((L, i) => {
+    shade.push({ fn: String(r4(hi + pad)), lower: String(r4(lo - pad)), from: r4(x), to: r4(x + L.w), color: L.color || 'accent', alpha: 0.16 });
+    curves.push({ fn: `${r4(temps[i])} + ${r4((temps[i + 1] - temps[i]) / L.w)}*(x - ${r4(x)})`, domain: [r4(x), r4(x + L.w)], color: 'gold', width: 3 });
+    points.push(tag(x + L.w / 2, lo - 0.1 * pad, L.name, 'ink2', 0, 0, true));
+    x += L.w; xs.push(x);
+  });
+  const W = x;
+  curves.push({ fn: String(r4(temps[0])), domain: [r4(-0.18 * W), 0], color: 'gold', width: 3 }, { fn: String(r4(temps[temps.length - 1])), domain: [r4(W), r4(1.18 * W)], color: 'gold', width: 3 });
+  (show ?? [0, temps.length - 1]).forEach((k) => points.push({ x: r4(xs[k]), y: r4(temps[k]), r: 4.5, color: 'gold', label: typeof k === 'number' ? `${lab(temps[k], 4)} K` : String(k), labelDx: 8, labelDy: -10 }));
+  points.push(tag(-0.17 * W, hi + 0.55 * pad, hot, 'warn', 0, 0), tag(1.02 * W, lo + 0.75 * pad, cold, 'accent', 0, 0));
+  if (ask) arrows.push({ from: [r4(0.15 * W), r4(hi + 0.6 * pad)], to: [r4(0.85 * W), r4(hi + 0.6 * pad)], color: 'bad', label: ask, labelDx: -40, labelDy: -12 });
+  return {
+    type: 'graph',
+    params: { x: [r4(-0.2 * W), r4(1.2 * W)], y: [r4(lo - pad), r4(hi + pad)], aspect: 'wide', xlabel: 'position through the wall', ylabel: 'T (K)', xticks: 0.001, alt: alt || 'Temperature falling through the layers of a wall', shade, curves, points, arrows },
+    caption: caption ?? 'Steady conduction through a flat wall: the temperature falls in a straight line across each layer, steepest where the material conducts worst. Layer widths are not to scale.',
+  };
+}
+
+/** Radiated power per square metre, εσT⁴, against absolute temperature. */
+export function radiationGraph({ eps = 1, Tmax = 600, marks = [], numbers = false, caption, alt }) {
+  const top = eps * SIGMA * Tmax ** 4;
+  return {
+    type: 'graph',
+    params: {
+      x: [0, Tmax], y: [0, r4(1.12 * top)], aspect: 'wide', xlabel: 'T (K)', ylabel: 'P/A (W/m²)', ...(numbers ? {} : { yticks: 0.001 }),
+      alt: alt || 'Radiated power per area rising as the fourth power of temperature',
+      curves: [{ fn: `${eps}*${SIGMA}*x^4`, color: 'warn', width: 2.8, label: `εσT⁴, ε = ${eps}`, labelAt: Tmax * 0.55, labelDx: -100, labelDy: -10 }],
+      vlines: marks.map((m) => ({ x: m.T, label: m.label, color: 'ink3' })),
+    },
+    caption: caption ?? 'Emitted power per square metre of surface against absolute temperature: εσT⁴. Doubling T multiplies it by sixteen.',
+  };
+}
+
+/**
+ * Radiation shields in a vacuum gap: a warm wall, N thin shiny shields, a cold wall.
+ *   N  the number of shields (drawn up to 12; more are labelled)
+ */
+export function shieldsPic({ N = 0, Th = '293 K', Tc = '90 K', eps = 'ε = 0.05', caption, alt }) {
+  const shade = [{ fn: '1', lower: '-1', from: -0.35, to: 0, color: 'warn', alpha: 0.5 }, { fn: '1', lower: '-1', from: 4, to: 4.35, color: 'accent', alpha: 0.5 }];
+  const curves = [], points = [tag(-0.17, 1.15, `warm wall, ${Th}`, 'warn', 0, 0, true), tag(4.17, 1.15, `cold wall, ${Tc}`, 'accent', 0, 0, true)];
+  const n = Math.min(N, 12);
+  for (let k = 1; k <= n; k++) curves.push({ param: [String(r4((4 * k) / (n + 1))), 't'], t: [-0.95, 0.95], color: 'ink2', width: 1.6 });
+  points.push(tag(2, -1.2, N ? `${N} shiny shields (${eps}), vacuum between` : `vacuum gap; both surfaces ${eps}`, 'ink2', 0, 0, true));
+  const arrows = [{ from: [0.1, 0], to: [3.9, 0], color: 'bad' }];
+  points.push(tag(2, 0.12, 'radiation', 'bad', 0, -10, true));
+  return {
+    type: 'graph',
+    params: { x: [-0.9, 4.9], y: [-1.5, 1.45], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '', alt: alt || 'Radiation crossing a vacuum gap between a warm wall and a cold wall', shade, curves, arrows, points },
+    caption: caption ?? 'A vacuum gap stops conduction and convection; only radiation crosses it. Not to scale.',
   };
 }

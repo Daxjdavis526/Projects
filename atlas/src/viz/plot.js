@@ -95,8 +95,10 @@ export class Plot {
     g.save();
     g.strokeStyle = c.line3; g.lineWidth = 1.2; g.fillStyle = c.ink3;
     g.font = '11px Inter, system-ui, sans-serif';
-    const y0 = this.vy0 <= 0 && this.vy1 >= 0 ? this.Y(0) : this.B;
-    const x0 = this.vx0 <= 0 && this.vx1 >= 0 ? this.X(0) : this.L;
+    // axes through the origin when it is in view, unless axesAt: 'edge' keeps them on the frame
+    const edge = this.o.axesAt === 'edge';
+    const y0 = !edge && this.vy0 <= 0 && this.vy1 >= 0 ? this.Y(0) : this.B;
+    const x0 = !edge && this.vx0 <= 0 && this.vx1 >= 0 ? this.X(0) : this.L;
     g.beginPath(); g.moveTo(this.L, Math.round(y0) + 0.5); g.lineTo(this.R, Math.round(y0) + 0.5); g.stroke();
     g.beginPath(); g.moveTo(Math.round(x0) + 0.5, this.T); g.lineTo(Math.round(x0) + 0.5, this.B); g.stroke();
     g.textAlign = 'center'; g.textBaseline = 'top';
@@ -257,7 +259,7 @@ export class Plot {
     g.beginPath(); g.arc(this.X(x), this.Y(y), o.r || 4.5, 0, Math.PI * 2); g.fill();
     if (o.ring) { g.strokeStyle = this.color(o.ring); g.lineWidth = 2; g.stroke(); }
     g.restore();
-    if (o.label) this.text(o.label, x, y, { dx: o.ldx ?? 9, dy: o.ldy ?? -9, color: o.lcolor || o.color, size: o.lsize });
+    if (o.label) this.text(o.label, x, y, { dx: o.ldx ?? 9, dy: o.ldy ?? -9, color: o.lcolor || o.color, size: o.lsize, align: o.lalign });
     return this;
   }
 

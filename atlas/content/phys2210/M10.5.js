@@ -82,7 +82,7 @@ It is Newton’s second law dressed for rotation — **torque plays force, momen
           answer: tt, units: 's', tol: { rel: 0.01 },
           errors: [
             { value: (I * N) / tau, feedback: 'Convert rpm to rad/s first (× 2π/60).' },
-            { value: (tau * w) / I, feedback: 'The time is ω/α, with α = τ/I: t = Iω/τ.' },
+            ...(I !== tau ? [{ value: (tau * w) / I, feedback: 'The time is ω/α, with α = τ/I: t = Iω/τ.' }] : []),
           ],
           hints: [t`$\alpha = \tau/I$; then $\omega = \alpha t$.`, t`$t = \dfrac{I\omega}{\tau}$ with $\omega$ in rad/s.`],
           teach: 'Constant torque gives constant α = τ/I, so the spin-up time is Iω/τ.',

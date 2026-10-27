@@ -1,6 +1,7 @@
 // Newton's second law: net force causes acceleration.
 import { lesson, mcq, num } from '../../src/core/content.js';
 import { nice, fmt } from '../../src/core/format.js';
+import { force, bodyFBD, scene } from './_forces.js';
 
 const t = String.raw;
 const G = 9.8;
@@ -65,7 +66,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
           hints: [t`Friction is $f = \mu_k N$, and on a level floor $N = mg$.`, t`$F_\text{net} = F - \mu_k m g$; then divide by $m$.`],
           teach: 'Kinetic friction opposes sliding with magnitude μₖN; on a level floor with no other vertical forces, N = mg.',
           explain: t`$f = ${mu}\times${m}\times9.8 = ${fmt(mu * m * G)}$ N, so $a = (${F} - ${fmt(mu * m * G)})/${m} = ${fmt(a)}\ \text{m/s}^2$.`,
-          visual: { type: 'diagram', params: { kind: 'block', mass: m, forces: [{ dir: 0, label: `${F} N`, size: 1 }, { dir: 180, label: 'f', size: (mu * m * G) / F }, { dir: 90, label: 'N', size: 0.8 }, { dir: 270, label: 'mg', size: 0.8 }] } },
+          visual: scene('floor', { m, F, phi: 0, mus: mu, muk: mu, moving: true, accel: false }, 'The crate sliding to the right and its free-body diagram, forces to scale.'),
         };
       },
     }),
@@ -78,6 +79,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
       hints: ['Is the velocity changing?', 'Zero acceleration means zero net force.'],
       teach: 'Constant velocity means zero acceleration, so the net force is zero.',
       explain: t`$a = 0$ because the velocity is constant, so $F_\text{net} = ma = 0$. Gravity and the ice’s normal force cancel.`,
+      visual: bodyFBD([], { icon: 'puck', show: 'picture', ground: true, v: [1, 0], caption: 'The puck gliding to the right across frictionless ice at a steady 8 m/s.' }),
     }),
     mcq({
       id: 'scaling', difficulty: 2,
@@ -88,6 +90,26 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
       hints: ['Write a = F/m and change both.'],
       teach: 'Acceleration is proportional to net force and inversely proportional to mass.',
       explain: t`$a' = \dfrac{2F}{m/2} = 4\dfrac{F}{m} = 4a$.`,
+      visual: {
+        type: 'graph',
+        params: {
+          aspect: 'wide', x: [-2.7, 2.7], y: [-0.95, 0.95], equal: true, axes: false, grid: false, xlabel: '', ylabel: '',
+          alt: 'Before: force F on mass m. After: force 2F on mass m/2.',
+          points: [
+            { x: -2.3, y: 0.72, r: 0.01, color: 'ink2', label: 'before', labelDx: 0, labelDy: 0 },
+            { x: -0.1, y: 0.72, r: 0.01, color: 'ink2', label: 'after', labelDx: 0, labelDy: 0 },
+            { x: -2.1, y: 0, r: 13, color: 'accent', label: 'm', labelDx: -4, labelDy: -24 },
+            { x: 0.1, y: 0, r: 9, color: 'accent', label: 'm/2', labelDx: -12, labelDy: -20 },
+            { x: 0.0, y: -0.55, r: 0.01, color: 'gold', label: 'a′ = ?', labelDx: 0, labelDy: 0 },
+          ],
+          arrows: [
+            { from: [-1.85, 0], to: [-0.85, 0], color: 'accent', label: 'F', labelDx: 6, labelDy: 0 },
+            { from: [0.3, 0], to: [2.3, 0], color: 'accent', label: '2F', labelDx: 6, labelDy: 0 },
+            { from: [-2.1, -0.5], to: [-1.6, -0.5], color: 'gold', label: 'a', labelDx: 6, labelDy: 0 },
+          ],
+        },
+        caption: 'Before: a force F gives mass m an acceleration a. After: twice the force acts on half the mass. Force arrows to scale.',
+      },
     }),
     num({
       id: 'opposing', difficulty: 2,
@@ -112,7 +134,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
       hints: ['The forces are perpendicular — find the magnitude of their vector sum.', t`$|F_\text{net}| = \sqrt{3^2 + 4^2}$ N.`],
       teach: 'Newton’s second law is a vector equation: the acceleration points along the vector sum of the forces.',
       explain: t`$|F_\text{net}| = \sqrt{3.0^2 + 4.0^2} = 5.0$ N, so $a = 5.0/2.0 = 2.5\ \text{m/s}^2$, about 53° north of east.`,
-      visual: { type: 'diagram', params: { kind: 'block', mass: 2, forces: [{ dir: 0, label: '3.0 N', size: 0.6 }, { dir: 90, label: '4.0 N', size: 0.8 }] } },
+      visual: bodyFBD([force('3.0 N east', 3, 0), force('4.0 N north', 4, 90)], { name: 'Forces on the object, seen from above', caption: 'Top view, forces to scale: east is to the right, north is up the page.' }),
     }),
     num({
       id: 'find-mass', difficulty: 2,
@@ -125,6 +147,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
           hints: ['Rearrange F = ma to isolate m.'],
           teach: 'Mass measures inertia: m = F_net / a.',
           explain: t`$m = F/a = ${nice(F)}/${a} = ${m}$ kg.`,
+          visual: bodyFBD([force(`net force ${nice(F)} N`, F, 0)], { a: [a, 0], accel: true, name: 'The object', caption: 'The net force on the object and the acceleration it produces (gold). The mass is what you are finding.' }),
         };
       },
     }),
@@ -142,6 +165,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
           hints: ['Draw two forces: thrust up and weight down.', t`$F_\text{net} = T - mg$; divide by $m$.`],
           teach: 'For a vertical launch, the net force is thrust minus weight.',
           explain: t`$a = (T - mg)/m = (${T} - ${fmt(m * G, 4)})/${m} = ${fmt((T - m * G) / m)}\ \text{m/s}^2$ upward.`,
+          visual: bodyFBD([force('thrust', T, 90, 'thrust'), force('mg', m * G, 270, 'weight')], { icon: 'rocket', flame: true, ground: true, show: 'both', name: 'Forces on the rocket', caption: 'The rocket just after ignition and its free-body diagram, forces to scale. Once the thrust exceeds the weight, the pad no longer pushes on it.' }),
         };
       },
     }),
@@ -154,6 +178,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
       hints: ['What does constant velocity tell you about the net force?'],
       teach: 'Constant velocity means the forces balance exactly.',
       explain: t`$a = 0$, so friction must equal the push: 10 N, opposite to it.`,
+      visual: bodyFBD([], { icon: 'block', m: 2, show: 'picture', ground: true, v: [1, 0], agent: { dir: 0, kind: 'pole' }, caption: 'The 2.0 kg box pushed to the right with a steady 10 N, sliding at constant velocity across the rough floor.' }),
     }),
     num({
       id: 'cp-braking', difficulty: 2,
@@ -165,6 +190,7 @@ Force causes *acceleration* — a change in velocity — not velocity itself. Ev
           hints: ['Find the acceleration first, then use F = ma.'],
           teach: 'Find the acceleration from the change in velocity, then multiply by mass.',
           explain: t`$a = ${v}/${tt} = ${nice(v / tt)}\ \text{m/s}^2$, so $F = ${m}\times${nice(v / tt)} = ${fmt(m * v / tt, 3)}$ N, opposite the motion.`,
+          visual: bodyFBD([force('f (road)', (m * v) / tt, 180, 'friction'), force('N', m * G, 90, 'normal'), force('mg', m * G, 270, 'weight')], { icon: 'car', ground: true, v: [1, 0], show: 'both', name: 'Forces on the car', caption: 'The braking car (moving right) and its free-body diagram, forces to scale. The road’s friction on the tyres stops it; air drag is ignored.' }),
         };
       },
     }),

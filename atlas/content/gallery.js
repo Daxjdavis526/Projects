@@ -42,6 +42,8 @@ export default [
   { id: 'elevator', title: 'Einstein’s elevator', track: 'gr', blurb: 'Rocket, Earth, falling and floating boxes — and the tides no small box can hide.', spec: { type: 'gr-elevator', params: {} } },
   { id: 'timewarp', title: 'Throw a clock', track: 'gr', blurb: 'Height speeds a clock up, speed slows it down — free fall ages the most.', spec: { type: 'gr-timewarp', params: {} } },
   { id: 'lensing', title: 'Gravitational lensing', track: 'gr', blurb: 'A ray-traced gravitational lens: drag a galaxy behind a mass and make an Einstein ring.', spec: { type: 'gr-lensing', params: {} } },
+  { id: 'dustball', title: 'A falling ball of dust', track: 'gr', blurb: 'Release a ball of dust near a planet, a black hole or inside matter: tides change its shape, matter and Λ its volume — Ricci and Weyl curvature you can see.', spec: { type: 'gr-dustball', params: {} } },
+  { id: 'friedmann', title: 'The fate of the universe', track: 'gr', blurb: 'Solutions of the Friedmann equation: what the universe is made of decides how it expands.', lesson: 'gr.S31.i' },
   { id: 'minkowski', title: 'Minkowski diagram and Lorentz boosts', track: 'gr', blurb: 'Boost the frame; drag events; the interval never changes.', spec: { type: 'spacetime', params: {} } },
   { id: 'twins', title: 'Proper time and the twin paradox', track: 'gr', blurb: 'The straight worldline ages the most.', spec: { type: 'worldlines', params: {} } },
   { id: 'orbit', title: 'Orbits around a black hole', track: 'gr', blurb: 'Newton versus Einstein: precession, the ISCO and plunging orbits.', spec: { type: 'orbit', params: {} } },

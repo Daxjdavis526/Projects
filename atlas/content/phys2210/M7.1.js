@@ -256,7 +256,7 @@ What is wrong?`,
       hints: ['For each force, compare its direction with the displacement (down).', 'Forces pointing up while she moves down do negative work.'],
       teach: 'Each force does its own work; constant speed only says the works add up to zero.',
       explain: 'The motion is downward. Gravity (down) does positive work; the line tension and the air drag (both up) do negative work, and together they cancel gravity’s work exactly.',
-      visual: { type: 'mech-fbd', params: { scene: 'body', icon: 'skydiver', v: [0, -1], forces: [{ label: 'mg', mag: 700, dir: 270, kind: 'weight' }, { label: 'T (lines)', mag: 640, dir: 90, kind: 'tension' }, { label: 'D (drag)', mag: 60, dir: 90, kind: 'drag' }] }, caption: 'The skydiver (canopy not drawn) and her free-body diagram; she moves down at constant speed. Forces to scale; values illustrative.' },
+      visual: { type: 'mech-fbd', params: { scene: 'body', icon: 'skydiver', chute: true, v: [0, -1], forces: [{ label: 'mg', mag: 700, dir: 270, kind: 'weight' }, { label: 'T (lines)', mag: 640, dir: 90, kind: 'tension' }, { label: 'D (drag)', mag: 60, dir: 90, kind: 'drag' }] }, caption: 'The skydiver under her canopy, and her own free-body diagram; she moves down at constant speed. Forces to scale; values illustrative.' },
     }),
   ],
   checkpoint: [

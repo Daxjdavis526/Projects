@@ -71,7 +71,7 @@ Where gravity and quantum physics must meet, the constants of both point to one 
   },
   example: {
     prompt: t`The cosmological-constant problem. Observations give dark energy a density $\rho_\Lambda = \Omega_\Lambda\rho_c$. A naive quantum estimate adds up the zero-point energy of quantum fields up to the Planck scale, giving the Planck density $c^5/(\hbar G^2)$. How badly do the two disagree?`,
-    visual: logDots([['observed dark energy', RHO_L, 'gold'], ['estimate cut off at 100 GeV', vacuum(100), 'teal'], ['cut off at 10¹⁶ GeV', vacuum(1e16), 'violet'], ['cut off at the Planck energy', RHO_P, 'bad']], { xlabel: 'density in kg/m³ (powers of ten)', range: [-30, 150], every: 30, caption: 'The observed density of dark energy and naive estimates of the vacuum’s, in powers of ten. Every estimate misses by at least 54 powers of ten.' }),
+    visual: logDots([['observed dark energy', RHO_L, 'gold'], ['estimate cut off at 100 GeV', vacuum(100), 'teal'], ['cut off at 10¹⁶ GeV', vacuum(1e16), 'violet'], ['cut off at the Planck energy', RHO_P, 'bad']], { xlabel: 'density in kg/m³ (powers of ten)', range: [-30, 148], every: 30, caption: 'The observed density of dark energy and naive estimates of the vacuum’s, in powers of ten. Every estimate misses by at least 54 powers of ten.' }),
     steps: [
       { label: 'Observed', text: t`$\rho_\Lambda = 0.685\times${sci(rhoCrit(67.4))} = ${sci(RHO_L)}$ kg/m³ — about the mass of three protons per cubic metre.` },
       { label: 'Naive estimate', text: t`$c^5/(\hbar G^2) = (2.998\times10^{8})^5/(1.0546\times10^{-34}\times(6.674\times10^{-11})^2) = ${sci(RHO_P)}$ kg/m³.` },

@@ -154,7 +154,7 @@ export function mount(F, P) {
       for (let k = 0; k < 16; k++) { const [x, y] = pos((k / 16) * 2 * Math.PI); g.beginPath(); g.arc(x, y, 3.6, 0, 2 * Math.PI); g.fill(); }
       g.font = font(small ? 10.5 : 11.5); g.fillStyle = C.ink2; g.textBaseline = 'middle';
       g.textAlign = 'left'; g.fillText('x arm', Math.min(xa + 8, ringW - 34), ya + 14);
-      g.textAlign = 'left'; g.fillText('y arm', xb + 9, Math.max(yb - 2, 10));
+      g.textAlign = 'center'; g.fillText('y arm', xb, Math.max(yb - 15, 8));
       g.textAlign = 'center'; g.fillStyle = C.ink3;
       g.fillText(`stretch shown ×${plainSci(ex)}`, cx, Math.min(cy + R0 * 1.25 + 14, (small ? ringH : H0) - 10));
       g.restore();

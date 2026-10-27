@@ -170,8 +170,8 @@ export function mount(F, P0) {
     }
     if (md.hang > 0) {
       const R = md.half, bw = 0.1 + 0.08 * Math.cbrt(md.hang);
-      pts.push([-R, R], [R + bw, -(0.6 * R + 0.15 + maxDrop() + 2 * bw)]);
-      right = Math.max(right, 0.35);
+      pts.push([R, R], [-R - bw, -(0.6 * R + 0.15 + maxDrop() + 2 * bw)]);
+      right = Math.max(right, 0.12);
     }
     const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
     const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 1e-3);
@@ -248,7 +248,8 @@ export function mount(F, P0) {
     g.beginPath(); g.arc(ax, ay, 2.2, 0, Math.PI * 2); g.fill(); g.restore();
     // the hanging block
     if (md.hang > 0 && Mo.block) {
-      const xr = md.half, ytop = -(0.6 * md.half + 0.15 + now.drop), bw = 0.1 + 0.08 * Math.cbrt(md.hang);
+      // the string leaves the left of the rim, so the drum turns anticlockwise (positive) as the block falls
+      const xr = -md.half, ytop = -(0.6 * md.half + 0.15 + now.drop), bw = 0.1 + 0.08 * Math.cbrt(md.hang);
       pl.line(xr, 0, xr, ytop, { color: 'ink2', width: 1.4 });
       g.save(); g.fillStyle = c.violet; g.globalAlpha = 0.9;
       const px = pl.X(xr - bw), py = pl.Y(ytop), pw = pl.X(xr + bw) - px, ph = pl.Y(ytop - 2 * bw) - py;

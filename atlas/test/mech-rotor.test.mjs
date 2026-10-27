@@ -80,7 +80,7 @@ check('2 kg on a 4 kg, 0.20 m disk: a = g/2', near(R.hang({ I: 0.5 * 4 * 0.04, R
   check('disk pushed at its rim: α = τ/I = 5/0.25 = 20 rad/s²', near(M.alpha, 20));
   check('work–energy: K after t equals the work τθ', near(M.at(1.3).K, M.tau * M.at(1.3).theta));
   const H = R.motion({ shape: 'disk', M: 4, R: 0.2, hang: 2 });
-  check('hanging block: the drum turns clockwise', H.alpha < 0 && near(H.alpha, -24.5));
+  check('hanging block (string on the left of the rim): the drum turns anticlockwise', H.alpha > 0 && near(H.alpha, 24.5));
   const t = 0.6, st = H.at(t);
   check('hanging block: energy is conserved (mg·drop = ½mv² + ½Iω²)', near(2 * R.G * st.drop, 0.5 * 2 * st.vBlock ** 2 + st.K, 1e-9));
   const P = R.pointKinematics(0.4, 3, 2);

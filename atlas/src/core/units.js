@@ -25,6 +25,7 @@ export const UNITS = {
   eV: [E_CHARGE, D(2, 1, -2)], L: [1e-3, D(3)], l: [1e-3, D(3)],
   min: [60, D(0, 0, 1)], h: [3600, D(0, 0, 1)], hr: [3600, D(0, 0, 1)], day: [DAY, D(0, 0, 1)],
   d: [DAY, D(0, 0, 1)], yr: [JULIAN_YEAR, D(0, 0, 1)], y: [JULIAN_YEAR, D(0, 0, 1)],
+  kyr: [1e3 * JULIAN_YEAR, D(0, 0, 1)], Myr: [1e6 * JULIAN_YEAR, D(0, 0, 1)], Gyr: [1e9 * JULIAN_YEAR, D(0, 0, 1)],
   au: [1.495978707e11, D(1)], AU: [1.495978707e11, D(1)], ly: [9.4607304725808e15, D(1)],
   pc: [3.0856775814913673e16, D(1)], Å: [1e-10, D(1)], angstrom: [1e-10, D(1)],
   rad: [1, ZERO], sr: [1, ZERO], deg: [Math.PI / 180, ZERO], '°': [Math.PI / 180, ZERO],
@@ -44,7 +45,7 @@ export const UNITS = {
 };
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
-const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'rev', 'rpm',
+const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'rev', 'rpm',
   'atm', 'mmHg', 'psi', 'mph', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
   'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l']);
 
