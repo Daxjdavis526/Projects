@@ -223,7 +223,7 @@ $$\theta_E = \sqrt{\frac{4GM}{c^2}\,\frac{D_{LS}}{D_L\,D_S}}$$`,
       hints: ['In general relativity, what replaces the force of gravity for anything moving freely?'],
       teach: 'Light bends because it follows null geodesics of curved spacetime, not because a force acts on a mass.',
       explain: 'Everything moving freely follows geodesics; for light they are the ones with zero proper time. Near a mass those geodesics are bent — by curved time and curved space equally — giving 4GM/(c²b).',
-      visual: bendPic({ rays: [{ ...GRAZE, label: 'starlight' }], observer: true, caption: 'Starlight grazing the Sun, with the bending exaggerated about 18 000 times. Grey dashed: its path if the Sun were not there. You see the star along the direction the light finally arrives from.' }),
+      visual: bendPic({ rays: [{ ...GRAZE, label: 'starlight' }], observer: true, caption: 'Starlight grazing the Sun, with the bending exaggerated about 19 000 times. Grey dashed: its path if the Sun were not there. You see the star along the direction the light finally arrives from.' }),
     }),
     num({
       id: 'grazing', difficulty: 2,

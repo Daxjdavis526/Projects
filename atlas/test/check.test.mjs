@@ -181,6 +181,11 @@ check('k_B T shows as k_{B} T', toTeX(parse('k_B T', { vars: ['k_B', 'T'] })) ==
 check('omega_0 shows as ω₀', toTeX(parse('ω_0 t', { vars: ['omega_0', 't'] })) === '\\omega_{0}\\,t');
 check('a subscripted name grades like any other', grade({ type: 'expression', answer: 'r_s/r', vars: { r_s: [1, 2], r: [3, 9] } }, 'rs/r').correct);
 
+// a micro prefix typed as the Greek letter
+check('3 μm reads as 3e-6 m', Math.abs(parseQuantity('3 μm').si - 3e-6) < 1e-18);
+check('20 µas (micro sign) reads as microarcseconds', Math.abs(parseQuantity('20 µas').si - 20 * Math.PI / 648e9) < 1e-20);
+check('5 μs graded against an answer in s', grade({ type: 'numeric', answer: 5e-6, units: 's', tol: { rel: 0.01 } }, '5 μs').correct);
+
 // angles on the sky and reciprocal units
 check('43 arcsec in radians', Math.abs(parseQuantity('43 arcsec').si - 43 * Math.PI / 648000) < 1e-15);
 check('1 mas = 1e-3 arcsec', Math.abs(parseUnit('mas').factor * 1000 - parseUnit('arcsec').factor) < 1e-20);

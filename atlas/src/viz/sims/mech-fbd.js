@@ -15,7 +15,9 @@
 //       sliders: ['F', 'phi'],        // keys to make adjustable, or true for the scene's usual set;
 //                                     //   an entry may be an object overriding { key, min, max, step, label, explain }
 //       toggles: ['sum', 'values'],   // offer these switches: sum, values, components (incline)
-//       show: 'both',                 // 'both': picture + diagrams; 'fbd': diagrams only; 'scene': forces drawn on the picture
+//       show: 'both',                 // 'both': picture + diagrams; 'fbd': diagrams only; 'scene': forces drawn on the picture;
+//                                     //   'picture': the situation alone, no forces (to ask which forces act)
+//       quiet: false,                 // hide the one-line status over the picture
 //       values: false,                // print each force's size
 //       sum: false,                   // add the forces tip to tail and draw the net force ΣF
 //       accel: true,                  // show each body's acceleration beside its diagram
@@ -29,7 +31,8 @@
 //   } }
 //
 // body scene: forces: [{ label, mag (N), dir (degrees from +x), kind }], icon: block ball puck rocket
-// person car plane capsule skydiver drone probe, ground: true, wall: 'left' | 'right', v: [vx, vy] (a direction), a: [ax, ay].
+// person car plane capsule skydiver drone probe, ground: true, wall: 'left' | 'right', v: [vx, vy] (a direction), a: [ax, ay],
+// agent: { dir, kind: 'pole' | 'rope' } (a pole pushing, or a rope pulling, in direction dir).
 
 import { Plot } from '../plot.js';
 import * as MF from '../model/mech-forces.js';
@@ -37,7 +40,7 @@ import * as MF from '../model/mech-forces.js';
 const D2R = Math.PI / 180;
 const G = MF.G;
 const COLORS = { weight: 'ink2', normal: 'teal', friction: 'bad', tension: 'good', applied: 'accent', thrust: 'accent', contact: 'violet', drag: 'warn', lift: 'accent2' };
-const SHOWS = ['both', 'fbd', 'scene'];
+const SHOWS = ['both', 'fbd', 'scene', 'picture'];
 const TOGGLES = ['sum', 'values', 'components'];
 const ICONS = ['block', 'ball', 'puck', 'rocket', 'person', 'car', 'plane', 'capsule', 'skydiver', 'drone', 'probe', 'none'];
 
@@ -84,7 +87,7 @@ const SCENES = {
       const st = sol.info.state;
       if (st === 'sliding') motion(pl, -0.45, h + 0.35, 0.9, 0, 'v');
       const status = { rest: 'At rest: no push, so no friction', static: 'At rest: static friction matches the push', sliding: sol.info.a > 1e-6 ? 'Sliding, speeding up' : sol.info.a < -1e-6 ? 'Sliding, slowing down' : 'Sliding at constant velocity', lifts: 'Lifted off the floor: N = 0' }[st];
-      return { anchors: [[0, h / 2]], status };
+      return { anchors: [[0, h / 2]], sizes: [[w / 2, h / 2]], status };
     },
     readout: (P, s) => [['normal force $N$', tN(s.info.N)], ['friction', `${tN(Math.abs(s.info.f))}${s.info.kinetic ? '\\ (\\mu_k N)' : ''}`], ['max static friction $\\mu_s N$', tN(s.info.fsMax)], ['acceleration', tA(s.info.a)]],
   },
@@ -114,7 +117,7 @@ const SCENES = {
       const st = sol.info.state;
       if (st !== 'static') { const s0 = [c[0] - g.u[0] * 0.45 + g.n[0] * (bh / 2 + 0.32), c[1] - g.u[1] * 0.45 + g.n[1] * (bh / 2 + 0.32)]; const d = st === 'up' ? 1 : -1; motion(pl, s0[0] - (d < 0 ? -0.9 * g.u[0] : 0), s0[1] - (d < 0 ? -0.9 * g.u[1] : 0), d * 0.9 * g.u[0], d * 0.9 * g.u[1], 'v'); }
       const status = st === 'static' ? (Math.abs(sol.info.f) < 1e-9 ? 'At rest: nothing to resist' : 'At rest: static friction holds it') : `Sliding ${st} the slope${Math.abs(sol.info.a) < 1e-6 ? ' at constant velocity' : (sol.info.a > 0) === (st === 'up') ? ', speeding up' : ', slowing down'}`;
-      return { anchors: [c], status };
+      return { anchors: [c], sizes: [[0.45, 0.45]], status };
     },
     readout: (P, s) => [['$mg\\sin\\theta$ (down the slope)', tN(s.info.Wpar)], ['normal force $N = mg\\cos\\theta$', tN(s.info.N)], ['friction', `${tN(Math.abs(s.info.f))}${s.info.kinetic ? '\\ (\\mu_k N)' : ''}`], ['acceleration along the slope', tA(s.info.a)]],
   },
@@ -145,7 +148,7 @@ const SCENES = {
         if (P.th2 > 0.5 && P.th2 < 89.5) angleArc(pl, hook, 0, P.th2, 0.62, `θ₂ = ${trim(P.th2)}°`);
       }
       if (Math.abs(P.a) > 1e-9) motion(pl, 1.05, 0.78 - 0.4 * Math.sign(P.a), 0, 0.8 * Math.sign(P.a), 'a', 'gold');
-      return { anchors: [[0, 0.78]], status: Math.abs(P.a) > 1e-9 ? `Accelerating ${P.a > 0 ? 'up' : 'down'} at ${trim(Math.abs(P.a))} m/s²` : 'Hanging still' };
+      return { anchors: [[0, 0.78]], sizes: [[0.5, 0.42]], status: Math.abs(P.a) > 1e-9 ? `Accelerating ${P.a > 0 ? 'up' : 'down'} at ${trim(Math.abs(P.a))} m/s²` : 'Hanging still' };
     },
     readout: (P, s) => (P.ropes === 1 ? [['tension $T$', tN(s.info.T)], ['weight $mg$', tN(P.m * G)]] : [['tension $T_1$', tN(s.info.T1)], ['tension $T_2$', tN(s.info.T2)], ['weight $mg$', tN(P.m * G)], ['$T_1 / mg$', trim(s.info.T1 / (P.m * G))]]),
   },
@@ -413,8 +416,9 @@ const SCENES = {
       const ext = icon(pl, P.icon, P);
       if (P.ground) ground(pl, -2.6, 2.6, -ext[1]);
       if (P.wall) wall(pl, P.wall === 'left' ? -ext[0] : ext[0], -1.2, 1.2, P.wall === 'left' ? -1 : 1);
+      if (P.agent) { const d = [Math.cos(P.agent.dir * D2R), Math.sin(P.agent.dir * D2R)], e = Math.min(Math.abs(d[0]) > 1e-9 ? ext[0] / Math.abs(d[0]) : Infinity, Math.abs(d[1]) > 1e-9 ? ext[1] / Math.abs(d[1]) : Infinity); const pull = P.agent.kind === 'rope'; agentLine(pl, [(pull ? 1 : -1) * d[0] * e, (pull ? 1 : -1) * d[1] * e], P.agent.dir, pull ? 'rope' : 'pole', 1.3); }
       if (P.v) { const L = Math.hypot(...P.v) || 1, d = [P.v[0] / L, P.v[1] / L], mid = [ext[0] + 0.5 + 0.45 * Math.abs(d[0]), 0]; motion(pl, mid[0] - 0.45 * d[0], mid[1] - 0.45 * d[1], 0.9 * d[0], 0.9 * d[1], 'v'); }
-      return { anchors: [[0, 0]], status: P.status || '' };
+      return { anchors: [[0, 0]], sizes: [ext], status: P.status || '' };
     },
     readout: () => [],
   },
@@ -631,6 +635,16 @@ function chainBox(chain) {
   return [lo, hi];
 }
 
+// a label beyond an arrow's tip; if it would leave the panel [bx0, bx1], beside the tip instead (above it, or below a downward arrow)
+function placeLabel(ctx, text, x, y, ux, uy, color, bg, [bx0, bx1], size = 12.5) {
+  ctx.save(); ctx.font = `650 ${size}px Inter, system-ui, sans-serif`; const tw = ctx.measureText(text).width; ctx.restore();
+  const px = x + ux * 7, left = ux > 0.35 ? px : ux < -0.35 ? px - tw : px - tw / 2;
+  if (left >= bx0 + 2 && left + tw <= bx1 - 2) { labelPx(ctx, text, x, y, ux, uy, color, bg, size); return; }
+  const down = uy > 0.35 || (uy > -0.35 && ux < 0);     // sideways arrows: leftward labels below, rightward above
+  const cx = Math.min(bx1 - 3 - tw / 2, Math.max(bx0 + 3 + tw / 2, x - ux * 6));
+  labelPx(ctx, text, cx, y + (down ? 6 : -6), 0, down ? 1 : -1, color, bg, size);
+}
+
 // ─── mount ─────────────────────────────────────────────────────────────────
 export const defaults = { scene: 'floor', show: 'both', values: false, sum: false, accel: true, components: false };
 
@@ -702,10 +716,10 @@ export function mount(F, P0) {
     ctx.clearRect(0, 0, W, H);
     // panels
     let sceneRect = null, fbdRect = null;
-    if (show === 'scene') sceneRect = [0, 0, W, H];
+    if (show === 'scene' || show === 'picture') sceneRect = [0, 0, W, H];
     else if (show === 'fbd') fbdRect = [0, 0, W, H];
     else if (stacked) { sceneRect = [0, 0, W, H * 0.5]; fbdRect = [0, H * 0.5, W, H * 0.5]; }
-    else { sceneRect = [0, 0, W * 0.56, H]; fbdRect = [W * 0.56, 0, W * 0.44, H]; }
+    else { const f = bodies.length > 1 && scene.layout !== 'rows' ? 0.46 : 0.56; sceneRect = [0, 0, W * f, H]; fbdRect = [W * f, 0, W * (1 - f), H]; }
     let drawn = null;
     if (sceneRect) {
       const [x, y, w, h] = sceneRect;
@@ -716,10 +730,10 @@ export function mount(F, P0) {
       drawn = scene.draw(plot, p, sol, S);
       if (show === 'scene') {
         ctx.save(); ctx.globalAlpha = 0.5; ctx.fillStyle = col.bg; ctx.fillRect(x, y, w, h); ctx.restore();
-        forcesOnScene(drawn.anchors, bodies, p);
+        forcesOnScene(drawn.anchors, drawn.sizes, bodies, p);
       }
       ctx.restore();
-      if (drawn.status) plot.text(drawn.status, x + 10, y + 13, { screen: true, color: 'ink2', size: 12, weight: 600 });
+      if (drawn.status && !p.quiet) plot.text(drawn.status, x + 10, y + 13, { screen: true, color: 'ink2', size: 12, weight: 600 });
     }
     if (fbdRect) {
       if (sceneRect) {
@@ -736,28 +750,48 @@ export function mount(F, P0) {
   function diagrams([x, y, w, h], bodies, p) {
     const n = bodies.length, cols = scene.layout === 'rows' ? 1 : n, rows = scene.layout === 'rows' ? n : 1;
     const cw = w / cols, ch = h / rows;
+    const head = headRows(bodies, cw, p), areaH = ch - head - 6;
     let k;
     if (p.sum) {
       // fit each tip-to-tail polygon (and its dot) inside its panel
-      k = Math.min(...bodies.map((b) => { const [lo, hi] = chainBox(chainOrder(b.forces)); return Math.min((cw * 0.7) / Math.max(1e-9, hi[0] - lo[0]), ((ch - 40) * 0.72) / Math.max(1e-9, hi[1] - lo[1])); }));
+      k = Math.min(...bodies.map((b) => { const [lo, hi] = chainBox(chainOrder(b.forces)); return Math.min((cw * 0.7) / Math.max(1e-9, hi[0] - lo[0]), ((areaH - 34) * 0.9) / Math.max(1e-9, hi[1] - lo[1])); }));
     } else {
       const fmax = Math.max(1e-9, ...bodies.flatMap((b) => b.forces.map((f) => Math.hypot(f.fx, f.fy))));
-      k = (Math.min(cw, ch - 26) * 0.37) / fmax;
+      k = Math.min(cw * 0.36, areaH / 2 - 22) / fmax;
     }
     bodies.forEach((b, i) => {
       const cx = x + (i % cols) * cw, cy = y + Math.floor(i / cols) * ch;
-      oneDiagram(b, [cx, cy, cw, ch], k, p, i);
+      oneDiagram(b, [cx, cy, cw, ch], k, p, i, head);
     });
   }
 
-  function oneDiagram(b, [x, y, w, h], k, p, i) {
+  // the header of a diagram: its title, then its acceleration — beside the title if it fits, else on a second row
+  const named = (l) => (/^[a-z]+$/.test(l) ? `the ${l}` : l);
+  const titleOf = (b, p, i) => p.names?.[i] ?? `Forces on ${named(b.label)}`;
+  const accText = (b) => { const am = b.a ? Math.hypot(b.a[0], b.a[1]) : 0; return am > 1e-6 ? `a = ${trim(am)} m/s²` : 'a = 0'; };
+  function textW(t, size = 12) { ctx.save(); ctx.font = `650 ${size}px Inter, system-ui, sans-serif`; const w = ctx.measureText(t).width; ctx.restore(); return w; }
+  function headRows(bodies, w, p) {
+    const two = p.accel !== false && bodies.some((b, i) => b.a && textW(titleOf(b, p, i)) + textW(accText(b), 11.5) + 62 > w);
+    return two ? 50 : 30;
+  }
+
+  function oneDiagram(b, [x, y, w, h], k, p, i, head) {
     const col = plot.col, bg = col.bg;
     ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
-    const named = (l) => (/^[a-z]/.test(l) ? `the ${l}` : l);
-    plot.text(p.names?.[i] ?? `Forces on ${named(b.label)}`, x + 12, y + 14, { screen: true, color: 'ink2', size: 12, weight: 650 });
+    const title = titleOf(b, p, i);
+    plot.text(title, x + 12, y + 14, { screen: true, color: 'ink2', size: 12, weight: 650 });
+    if (p.accel !== false && b.a) {
+      const am = Math.hypot(b.a[0], b.a[1]), at = accText(b), gold = plot.color('gold');
+      const ax = head > 30 ? x + 12 : x + 12 + textW(title) + 18, ay = head > 30 ? y + 34 : y + 14;
+      plot.text(at, ax, ay, { screen: true, color: 'gold', size: 11.5, weight: 650 });
+      if (am > 1e-6) {
+        const ux = b.a[0] / am, uy = -b.a[1] / am, cx0 = ax + textW(at, 11.5) + 16;
+        arrowPx(ctx, cx0 - ux * 9, ay - uy * 9, cx0 + ux * 9, ay + uy * 9, gold, { width: 2.2, dash: [3, 2], head: 7 });
+      }
+    }
     const chain = chainOrder(b.forces);
-    // where the dot goes: centred, or so the tip-to-tail polygon is centred
-    let ox = x + w / 2, oy = y + h / 2 + 8;
+    // where the dot goes: the middle of the area under the header, or so the tip-to-tail polygon is centred
+    let ox = x + w / 2, oy = y + head + (h - head - 6) / 2;
     if (p.sum) {
       const [lo, hi] = chainBox(chain);
       ox -= ((lo[0] + hi[0]) / 2) * k; oy += ((lo[1] + hi[1]) / 2) * k;
@@ -802,7 +836,7 @@ export function mount(F, P0) {
           marks.push([tx, ty]);
           if (same && j < n - 1) return;
           const text = same && n > 1 ? `${labelText(f, p)} (×${n})` : labelText(f, p);
-          if (same || n === 1) labelPx(ctx, text, tx, ty, ux, uy, color, bg);
+          if (same || n === 1) placeLabel(ctx, text, tx, ty, ux, uy, color, bg, [x, x + w]);
           else { const sgn = Math.sign(off) || 1; labelPx(ctx, text, tx - ux * 6, ty - uy * 6, -uy * sgn, ux * sgn, color, bg); }
         });
       }
@@ -817,21 +851,8 @@ export function mount(F, P0) {
       ctx.beginPath(); ctx.moveTo(ox - u[0] * reachPx, oy + u[1] * reachPx); ctx.lineTo(ox + u[0] * reachPx, oy - u[1] * reachPx);
       ctx.moveTo(ox - nn[0] * reachPx, oy + nn[1] * reachPx); ctx.lineTo(ox + nn[0] * reachPx, oy - nn[1] * reachPx); ctx.stroke(); ctx.restore();
       const par = W * Math.sin(th) * k, perp = W * Math.cos(th) * k, wc = plot.color('ink3');
-      if (par > 3) { arrowPx(ctx, ox, oy, ox - u[0] * par, oy + u[1] * par, wc, { width: 2, dash: [5, 4] }); labelPx(ctx, `mg sin θ${p.values ? ' = ' + fmtN(W * Math.sin(th)) : ''}`, ox - u[0] * par, oy + u[1] * par, -u[0], u[1], wc, bg, 11.5); marks.push([ox - u[0] * par, oy + u[1] * par]); }
-      if (perp > 3) { arrowPx(ctx, ox, oy, ox - nn[0] * perp, oy + nn[1] * perp, wc, { width: 2, dash: [5, 4] }); labelPx(ctx, `mg cos θ${p.values ? ' = ' + fmtN(W * Math.cos(th)) : ''}`, ox - nn[0] * perp, oy + nn[1] * perp, -nn[0], nn[1], wc, bg, 11.5); marks.push([ox - nn[0] * perp, oy + nn[1] * perp]); }
-    }
-    // the acceleration, in a free corner beside the diagram (it is not a force)
-    if (p.accel !== false && b.a) {
-      const a = b.a, am = Math.hypot(a[0], a[1]), half = Math.min(58, w / 2 - 4);
-      const spots = [[x + w - half - 4, y + 34], [x + w - half - 4, y + h - 42], [x + half + 4, y + h - 42], [x + half + 4, y + 46]];
-      const score = ([sx, sy]) => Math.min(...marks.map(([tx, ty]) => Math.hypot(tx - sx, (ty - sy) * 1.3)));
-      const [sx, sy] = spots.reduce((best, s) => (score(s) > score(best) + 1 ? s : best), spots[0]);
-      const gold = plot.color('gold');
-      if (am > 1e-6) {
-        const L = Math.min(30, 12 + (18 * am) / G), ux = a[0] / am, uy = -a[1] / am;
-        arrowPx(ctx, sx - (ux * L) / 2, sy - 4 - (uy * L) / 2, sx + (ux * L) / 2, sy - 4 + (uy * L) / 2, gold, { width: 2.4, dash: [4, 3], head: 9 });
-        plot.text(`a = ${trim(am)} m/s²`, sx, sy + 20, { screen: true, color: 'gold', size: 11.5, weight: 650, align: 'center' });
-      } else plot.text('a = 0', sx, sy, { screen: true, color: 'gold', size: 12, weight: 650, align: 'center' });
+      if (par > 3) { arrowPx(ctx, ox, oy, ox - u[0] * par, oy + u[1] * par, wc, { width: 2, dash: [5, 4] }); placeLabel(ctx, `mg sin θ${p.values ? ' = ' + fmtN(W * Math.sin(th)) : ''}`, ox - u[0] * par, oy + u[1] * par, -u[0], u[1], wc, bg, [x, x + w], 11.5); marks.push([ox - u[0] * par, oy + u[1] * par]); }
+      if (perp > 3) { arrowPx(ctx, ox, oy, ox - nn[0] * perp, oy + nn[1] * perp, wc, { width: 2, dash: [5, 4] }); placeLabel(ctx, `mg cos θ${p.values ? ' = ' + fmtN(W * Math.cos(th)) : ''}`, ox - nn[0] * perp, oy + nn[1] * perp, -nn[0], nn[1], wc, bg, [x, x + w], 11.5); marks.push([ox - nn[0] * perp, oy + nn[1] * perp]); }
     }
     ctx.restore();
   }
@@ -842,20 +863,21 @@ export function mount(F, P0) {
   }
 
   // show: 'scene' — the forces drawn on the picture itself, from each body's centre
-  function forcesOnScene(anchors, bodies, p) {
+  function forcesOnScene(anchors, sizes, bodies, p) {
     const fmax = Math.max(1e-9, ...bodies.flatMap((b) => b.forces.map((f) => Math.hypot(f.fx, f.fy))));
     const span = Math.min(plot.vx1 - plot.vx0, plot.vy1 - plot.vy0);
-    const k = (0.4 * span) / fmax;
+    const k = (0.3 * span) / fmax;
     bodies.forEach((b, i) => {
-      const [ax, ay] = anchors[i] || anchors[0];
+      const [ax, ay] = anchors[i] || anchors[0], [hx, hy] = sizes?.[i] || [0, 0];
       for (const f of b.forces) {
-        const mag = Math.hypot(f.fx, f.fy), L = Math.max(mag * k, 0.16 * span);
+        const mag = Math.hypot(f.fx, f.fy), L = Math.max(mag * k, 0.1 * span);
         const ux = f.fx / mag, uy = f.fy / mag;
+        const e = Math.min(Math.abs(ux) > 1e-9 ? hx / Math.abs(ux) : Infinity, Math.abs(uy) > 1e-9 ? hy / Math.abs(uy) : Infinity);
+        const sx = ax + ux * (Number.isFinite(e) ? e : 0), sy = ay + uy * (Number.isFinite(e) ? e : 0);
         const color = COLORS[f.kind] || 'accent';
-        plot.arrow(ax, ay, ax + ux * L, ay + uy * L, { color, width: 2.6, head: 10, dash: f.extra ? [6, 4] : [] });
-        labelPx(ctx, labelText(f, p), plot.X(ax + ux * L), plot.Y(ay + uy * L), ux, -uy, plot.color(color), plot.col.bg);
+        plot.arrow(sx, sy, sx + ux * L, sy + uy * L, { color, width: 2.6, head: 10, dash: f.extra ? [6, 4] : [] });
+        labelPx(ctx, labelText(f, p), plot.X(sx + ux * L), plot.Y(sy + uy * L), ux, -uy, plot.color(color), plot.col.bg);
       }
-      plot.point(ax, ay, { color: 'ink', r: 3.5 });
     });
   }
 
@@ -866,7 +888,8 @@ export function mount(F, P0) {
 
 function defaultCaption(P) {
   const ideal = ['hang', 'pulley', 'atwood', 'table', 'pair'].includes(P.scene) ? ' Ropes and pulleys are ideal: massless, and the pulleys frictionless.' : '';
-  if (P.show === 'scene') return `Forces drawn to scale from each body’s centre; the gold dashed arrows are accelerations, not forces.${ideal}`;
+  if (P.show === 'picture') return 'The situation only — the forces are for you to find.';
+  if (P.show === 'scene') return `Forces drawn to scale, starting at the edge of each object (not where each one acts); the gold dashed arrows are accelerations, not forces.${ideal}`;
   return `Each body is shown as a dot with every force on it, to one common scale; the gold dashed arrow is its acceleration, not a force. $g = 9.8\\ \\text{m/s}^2$.${ideal}`;
 }
 
@@ -893,7 +916,8 @@ export function validate(P0) {
   if (P.scene === 'pair' && !['push', 'pull'].includes(P.link)) problems.push('pair link must be push or pull');
   if (P.scene === 'body') {
     if (!ICONS.includes(P.icon)) problems.push(`unknown icon “${P.icon}” (use ${ICONS.join(', ')})`);
-    if (!Array.isArray(P.forces) || !P.forces.length) problems.push('body needs forces: [{ label, mag, dir }]');
+    if (!Array.isArray(P.forces) || (!P.forces.length && P.show !== 'picture')) problems.push('body needs forces: [{ label, mag, dir }]');
+    if (P.agent && !(Number.isFinite(P.agent.dir) && ['pole', 'rope'].includes(P.agent.kind))) problems.push('body agent needs { dir (degrees), kind: pole | rope }');
     for (const f of P.forces || []) if (!(f.mag >= 0) || !Number.isFinite(f.dir) || (f.kind && !COLORS[f.kind])) problems.push(`body force ${f.label}: needs mag ≥ 0, a dir in degrees and a known kind`);
   }
   for (const e of P.extra || []) if (!(e.mag > 0) || !Number.isFinite(e.dir)) problems.push('extra forces need mag > 0 and dir');

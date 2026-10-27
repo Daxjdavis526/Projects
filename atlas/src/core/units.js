@@ -29,6 +29,7 @@ export const UNITS = {
   pc: [3.0856775814913673e16, D(1)], Å: [1e-10, D(1)], angstrom: [1e-10, D(1)],
   rad: [1, ZERO], sr: [1, ZERO], deg: [Math.PI / 180, ZERO], '°': [Math.PI / 180, ZERO],
   arcmin: [Math.PI / 10800, ZERO], arcsec: [Math.PI / 648000, ZERO], mas: [Math.PI / 648000000, ZERO],
+  uas: [Math.PI / 648000000000, ZERO], 'μas': [Math.PI / 648000000000, ZERO], 'µas': [Math.PI / 648000000000, ZERO],
   rev: [2 * Math.PI, ZERO], rpm: [2 * Math.PI / 60, D(0, 0, -1)],
   atm: [101325, D(-1, 1, -2)], bar: [1e5, D(-1, 1, -2)], torr: [101325 / 760, D(-1, 1, -2)],
   mmHg: [133.322387415, D(-1, 1, -2)], psi: [6894.757293168361, D(-1, 1, -2)],
@@ -43,7 +44,7 @@ export const UNITS = {
 };
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
-const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'rev', 'rpm',
+const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'rev', 'rpm',
   'atm', 'mmHg', 'psi', 'mph', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
   'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l']);
 
@@ -159,7 +160,10 @@ export function describeDims(dims) {
  * @returns {{value:number, unit:{factor,dims}|null, si:number, numberText:string, unitText:string}}
  */
 export function parseQuantity(src) {
-  const text = normalise(String(src).trim());
+  // the unit is read from the text as typed (normalising would turn μm into "mum");
+  // only the number is normalised, inside the expression parser
+  const raw = String(src).trim();
+  const text = normalise(raw);
   if (!text) throw new ParseError('Empty answer');
   // candidate split points: before the first letter that starts a valid unit tail
   const tryNumber = (t) => {
@@ -173,14 +177,14 @@ export function parseQuantity(src) {
     const v = tryNumber(text);
     return { value: v, unit: null, si: v, numberText: text, unitText: '' };
   } catch (e) { /* fall through to number + unit */ }
-  for (let k = 1; k < text.length; k++) {
-    const ch = text[k];
-    const prev = text[k - 1];
-    const reciprocal = ch === '1' && text[k + 1] === '/' && prev === ' ';   // "2.1e-43 1/N"
+  for (let k = 1; k < raw.length; k++) {
+    const ch = raw[k];
+    const prev = raw[k - 1];
+    const reciprocal = ch === '1' && raw[k + 1] === '/' && prev === ' ';   // "2.1e-43 1/N"
     if (!/[A-Za-zμµΩÅ°%☉(]/.test(ch) && !reciprocal) continue;
     if (ch === '(' && prev !== ' ') continue;
-    const numPart = text.slice(0, k).trim();
-    const unitPart = text.slice(k).trim();
+    const numPart = raw.slice(0, k).trim();
+    const unitPart = raw.slice(k).trim();
     if (!numPart || !unitPart) continue;
     let unit, value;
     try { unit = parseUnit(unitPart); } catch { continue; }

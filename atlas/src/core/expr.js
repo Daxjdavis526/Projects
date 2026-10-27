@@ -68,6 +68,7 @@ const FUNCS = {
   cbrt: { f: Math.cbrt, tex: 'cbrt' },
   abs: { f: Math.abs, tex: 'abs' },
   sgn: { f: Math.sign, tex: '\\operatorname{sgn}' },
+  step: { f: (x) => (x >= 0 ? 1 : 0), tex: '\\Theta' },          // Heaviside: step(a − b) is 1 when a ≥ b
   floor: { f: Math.floor, tex: 'floor' },
   ceil: { f: Math.ceil, tex: 'ceil' },
   gamma: { f: gammaFn, tex: '\\Gamma' },
@@ -79,7 +80,7 @@ const FUNCS = {
 const ALIASES = {
   arcsin: 'asin', arccos: 'acos', arctan: 'atan', arcsec: 'asec', arccsc: 'acsc', arccot: 'acot',
   arsinh: 'asinh', arcsinh: 'asinh', arcosh: 'acosh', arccosh: 'acosh', artanh: 'atanh', arctanh: 'atanh',
-  sign: 'sgn', Gamma: 'gamma',
+  sign: 'sgn', Gamma: 'gamma', heaviside: 'step',
 };
 const CONSTS = {
   pi: { v: Math.PI, tex: '\\pi' },

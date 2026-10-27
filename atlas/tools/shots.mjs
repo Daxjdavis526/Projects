@@ -108,7 +108,7 @@ for (const theme of themes) {
     }
     // walk the practice questions: show one with its first hint, then make a
     // throwaway attempt and open the solution, which ends the question
-    for (let q = 0; q < 10; q++) {
+    for (let q = 0; q < 20; q++) {
       const crumb = await page.$eval('.crumb', (e) => e.textContent).catch(() => '');
       if (crumb !== 'Practice') break;
       const hint = await page.$('button:has-text("Hint")');

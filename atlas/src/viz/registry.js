@@ -145,7 +145,9 @@ function makeFrame(el, spec, opts) {
     onDestroy(fn) { destroyers.push(fn); },
     _finish() {
       if (!controls.children.length) controls.remove();
-      if (spec.caption || spec.note) caption.replaceChildren(spec.caption ? mdi(spec.caption) : '', spec.note ? h('span.note', ' ', mdi(spec.note)) : '');
+      // a caption replaces the simulation's own; a note is added to whichever caption there is
+      if (spec.caption) caption.replaceChildren(mdi(spec.caption));
+      if (spec.note) caption.append(h('span.note', ' ', mdi(spec.note)));
       if (!caption.textContent.trim()) caption.remove();
       if (spec.tasks?.length && !opts.compact) root.after(h('div.callout', h('b', 'Try this: '), h('span', mdi(spec.tasks.join(' · ')))));
       F._redraw?.();

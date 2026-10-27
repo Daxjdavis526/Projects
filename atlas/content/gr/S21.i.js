@@ -29,6 +29,66 @@ const vEffGraph = {
   caption: 'The Schwarzschild effective potential for a massive particle, (1 − 2M/r)(1 + L²/r²), with G = c = 1. A stable circular orbit sits at the bottom of the dip; an unstable one on top of the hump.',
 };
 
+// the three radii of a non-spinning black hole, to scale (units of GM/c²)
+const RADII = {
+  type: 'graph',
+  params: {
+    x: [-7.4, 7.4], y: [-6.7, 6.7], equal: true, grid: false, axes: false,
+    shade: [{ fn: 'sqrt(max(4 - x^2, 0))', lower: '-sqrt(max(4 - x^2, 0))', from: -2, to: 2, color: '#000000', alpha: 0.9 }],
+    curves: [
+      { param: ['2cos(t)', '2sin(t)'], t: [0, 6.2832], color: 'bad', width: 1.8 },
+      { param: ['3cos(t)', '3sin(t)'], t: [0, 6.2832], color: 'accent', dash: true, width: 1.6 },
+      { param: ['6cos(t)', '6sin(t)'], t: [0, 6.2832], color: 'good', width: 2.6 },
+    ],
+    points: [
+      { x: -0.95, y: -0.2, r: 0.5, color: 'bad', label: 'horizon' },
+      { x: -1.5, y: 3.55, r: 0.5, color: 'accent', label: 'photon sphere: 3GM/c²' },
+      { x: 4.25, y: 4.55, r: 0.5, color: 'good', label: 'ISCO: 6GM/c²' },
+    ],
+  },
+  caption: 'Seen from above, to scale: the horizon (2GM/c²), the photon sphere (3GM/c²) and the innermost stable circular orbit (6GM/c²) of a non-spinning black hole.',
+};
+
+// the ISCO beside distances in the Solar System, to scale (AU)
+const iscoBeside = (m) => {
+  const iscoAU = round(iscoM(m * M_SUN) / AU, 4), hAU = round(iscoAU / 3, 4);
+  const sgr = m < 1e9;
+  const refs = sgr ? [['Mercury’s orbit', 0.387, true], ['Earth’s orbit', 1, true]] : [['Pluto’s orbit', 39.5, false], ['Voyager 1 in 2026', 172, true]];
+  const R = Math.max(iscoAU, refs[1][1]) * 1.18;
+  const ring = (r, color, extra = {}) => ({ param: [`${r}cos(t)`, `${r}sin(t)`], t: [0, 6.2832], color, ...extra });
+  return {
+    type: 'graph',
+    params: {
+      x: [round(-R, 3), round(R, 3)], y: [round(-R, 3), round(R, 3)], equal: true, grid: false, axes: false,
+      shade: [{ fn: `sqrt(max(${hAU}^2 - x^2, 0))`, lower: `-sqrt(max(${hAU}^2 - x^2, 0))`, from: -hAU, to: hAU, color: '#000000', alpha: 0.9 }],
+      curves: [...refs.map(([, r]) => ring(r, sgr ? 'ink3' : 'gold', { dash: true, width: 1.3 })), ring(iscoAU, 'good', { width: 2.6 }), ring(hAU, 'bad', { width: 1.6 })],
+      points: [
+        ...refs.filter(([, , lab]) => lab).map(([name, r]) => ({ x: round(r * 0.6, 4), y: round(r * 0.8, 4), r: 0.5, color: sgr ? 'ink2' : 'gold', label: name })),
+        { x: round(-iscoAU * 0.5, 4), y: round(iscoAU * 0.4, 4), r: 0.5, color: 'good', label: 'ISCO' },
+      ],
+    },
+    caption: sgr
+      ? 'Seen from above, to scale: the black hole’s horizon (black) and its innermost stable orbit (green), beside the orbits of Mercury and Earth around the Sun.'
+      : 'Seen from above, to scale: the black hole’s horizon (black) and its innermost stable orbit (green). Dashed: the distance of Voyager 1, the farthest spacecraft, and — the small circle inside the horizon — Pluto’s orbit.',
+  };
+};
+
+// the share of a fuel's rest energy released, on a log scale
+const FUEL_BARS = (() => {
+  const fuels = [['coal: 3×10⁻¹⁰', 3.3e-10, 'ink3'], ['fusion: 0.7%', 0.0071, 'gold'], [`black-hole disk: ${round(100 * ETA, 2)}%`, ETA, 'accent'], ['antimatter: 100%', 1, 'violet']];
+  const base = -10.5;
+  return {
+    type: 'graph',
+    params: {
+      x: [0, 10], y: [-11, 1.4], grid: false, axes: false,
+      curves: [{ fn: String(base), domain: [0.2, 9.8], color: 'ink3', width: 1.2 }],
+      shade: fuels.map(([, v, color], i) => ({ fn: String(round(Math.log10(v), 4)), lower: String(base), from: round(0.4 + 2.4 * i, 3), to: round(1.9 + 2.4 * i, 3), color, alpha: 0.7 })),
+      points: fuels.map(([label, v, color], i) => ({ x: round(0.4 + 2.4 * i, 3), y: round(Math.log10(v) + 0.25, 4), r: 0.5, color, label })),
+    },
+    caption: 'How much of a fuel’s mass ends up as energy. The bar heights are on a logarithmic scale — on an ordinary one the coal bar would be invisible. Gas spiralling down to the ISCO beats nuclear fusion eight times over.',
+  };
+})();
+
 export default lesson({
   id: 'gr.S21.i',
   title: 'Orbits, the photon sphere and the innermost stable orbit',
@@ -70,7 +130,7 @@ export default lesson({
   practice: [
     mcq({
       id: 'no-suck', difficulty: 1,
-      prompt: 'A spacecraft coasts in a circular orbit at 20 times the horizon radius of a black hole, engines off. What happens to it?',
+      prompt: 'A spacecraft coasts in a circular orbit at 15 times the horizon radius of a black hole (30GM/c²), engines off. What happens to it?',
       choices: [
         'It keeps orbiting, as it would around any star of the same mass',
         'It slowly spirals in, because black holes suck everything toward them',
@@ -80,12 +140,13 @@ export default lesson({
       answer: 0,
       why: {
         1: 'Black holes do not suck. A circular orbit well outside 6GM/c² is stable, just as around a star.',
-        2: 'Circular orbits are stable down to the ISCO, 3 horizon radii out. At 20 it coasts freely.',
+        2: 'Circular orbits are stable down to the ISCO, 3 horizon radii out. At 15 it coasts freely.',
         3: 'Outside the horizon nothing special traps you; only orbits closer than the ISCO become unstable.',
       },
       hints: ['Where does the ISCO sit, in horizon radii?'],
       teach: 'Outside the ISCO, orbits around a black hole are as stable as orbits around any other mass.',
-      explain: 'The ISCO is at 6GM/c², three times the horizon radius (2GM/c²). At 20 horizon radii a circular orbit is stable: the spacecraft coasts indefinitely (losing energy to gravitational waves far too slowly to matter).',
+      explain: 'The ISCO is at 6GM/c², three times the horizon radius (2GM/c²). At 15 horizon radii a circular orbit is stable: the spacecraft coasts indefinitely (losing energy to gravitational waves far too slowly to matter).',
+      visual: { type: 'orbit', params: { mode: 'schwarzschild', r0: 30, L: 5.774, compare: false } },
     }),
     num({
       id: 'isco-km', difficulty: 2,
@@ -93,6 +154,7 @@ export default lesson({
         const m = r.pick([5, 10, 30, 62]);
         const x = iscoM(m * M_SUN) / 1e3;
         return {
+          visual: RADII,
           prompt: t`What is the ISCO radius, $6GM/c^2$, of a black hole of ${m} solar masses? ($GM_\odot/c^2 = ${sci(mLen(M_SUN), 4)}$ m)`,
           answer: x, units: 'km', tol: { rel: 0.01 },
           errors: [{ value: x / 3, feedback: 'That is the horizon radius, 2GM/c². The ISCO is three times farther out: 6GM/c².' }, { value: x / 2, feedback: 'That is the photon sphere, 3GM/c². The ISCO is at 6GM/c².' }],
@@ -157,6 +219,18 @@ export default lesson({
         const k = r.pick([6, 8, 10, 20]);
         const v = vLocal(k);
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [2, 24], y: [0, 1.1], xlabel: 'r / M', ylabel: 'v / c',
+              curves: [
+                { fn: 'sqrt(1/(x - 2))', domain: [3, 24], color: 'gold', label: 'measured by a hovering observer', labelAt: 9 },
+                { fn: 'sqrt(1/x)', domain: [2, 24], color: 'ink3', dash: true, width: 1.5, label: 'Newton', labelAt: 17, labelDy: 14 },
+              ],
+              vlines: [{ x: 3, label: '3M' }, { x: 6, label: 'ISCO' }, ...(k === 6 ? [] : [{ x: k, label: `${k}M`, color: 'accent' }])],
+            },
+            caption: 'Speed of gas on a circular orbit, as measured by an observer hovering at that radius (G = c = 1, r in units of M). Dashed: Newton’s √(GM/r).',
+          },
           prompt: t`A hovering observer at $r = ${k}GM/c^2$ watches gas go by on a circular orbit. Its speed, as the observer measures it, is $v = c\sqrt{\dfrac{GM/c^2}{r - 2GM/c^2}}$. What fraction of $c$ is that?`,
           answer: v, tol: { rel: 0.005 },
           errors: [{ value: Math.sqrt(1 / k), feedback: 'That is the Newtonian √(GM/r). Here use √(M/(r − 2M)).' }, { value: 1 / (k - 2), feedback: 'Take the square root.' }],
@@ -171,7 +245,19 @@ export default lesson({
       gen(r) {
         const m = r.pick([10, 30, 62, 100]);
         const f = 2 * fOrb(m * M_SUN);
+        const F1 = Math.log10(2 * fOrb(M_SUN));
         return {
+          visual: {
+            type: 'graph',
+            params: {
+              x: [0, 3], y: [0.4, 4.1], xlabel: 'log₁₀(total mass in solar masses)', ylabel: 'log₁₀(frequency in Hz)',
+              shade: [{ fn: '3.7', lower: '1', from: 0, to: 3, color: 'teal', alpha: 0.12 }],
+              curves: [{ fn: `${round(F1, 5)} - x`, color: 'gold', label: 'waves at the ISCO', labelAt: 0.35 }],
+              vlines: [{ x: round(Math.log10(m), 4), label: `${m} M☉`, color: 'accent' }],
+              points: [{ x: 0.03, y: 1.12, r: 0.5, color: 'teal', label: 'LIGO’s band' }],
+            },
+            caption: 'Gravitational-wave frequency (twice the orbital frequency) at the ISCO of the total mass, in powers of ten. Shaded: roughly where LIGO listens, 10 Hz to 5 kHz.',
+          },
           prompt: t`Two black holes spiral together; the inspiral roughly ends when they reach the ISCO of their total mass. If the total is ${m} solar masses, what is the gravitational-wave frequency then — twice the orbital frequency $\dfrac{1}{2\pi}\sqrt{GM/r^3}$ at $r = 6GM/c^2$?`,
           answer: f, units: 'Hz', tol: { rel: 0.02 },
           errors: [{ value: f / 2, feedback: 'That is the orbital frequency. Gravitational waves come out at twice it.' }],
@@ -199,6 +285,19 @@ export default lesson({
       hints: [t`On a circular orbit at $r$, clocks tick at $\sqrt{1 - 3GM/(c^2 r)}$ of the far-away rate. Put in $r = 6GM/c^2$.`, 'Is a factor of 1/0.71 ≈ 1.4 anywhere near 61 000?'],
       teach: 'Around a non-spinning black hole no stable orbit slows clocks by more than a factor of √2.',
       explain: t`At the ISCO, $\sqrt{1 - 3/6} = ${sci(clockCirc(6), 3)}$: an hour on the orbit is only 1.4 hours far away. The film's factor needs a planet orbiting very close to the horizon of a black hole spinning almost as fast as possible — where stable orbits reach much deeper.`,
+      visual: {
+        type: 'graph',
+        params: {
+          x: [2, 30], y: [0, 1.08], xlabel: 'orbit radius r / M', ylabel: 'clock rate',
+          curves: [
+            { fn: 'sqrt(1 - 3/x)', domain: [6, 30], color: 'gold', label: 'stable orbits', labelAt: 15 },
+            { fn: 'sqrt(1 - 3/x)', domain: [3, 6], color: 'gold', dash: true, width: 1.6 },
+          ],
+          points: [{ x: 6, y: round(clockCirc(6), 5), color: 'bad' }, { x: 6.3, y: 0.6, r: 0.5, color: 'bad', label: 'ISCO' }],
+          hlines: [{ y: round(1 / 61000, 4), label: 'the film: 1/61 000', color: 'bad' }],
+        },
+        caption: 'How fast a clock on a circular orbit ticks compared with one far away, √(1 − 3GM/c²r), with G = c = 1. Solid: stable orbits. Dashed: unstable ones, between the photon sphere and the ISCO.',
+      },
     }),
   ],
   checkpoint: [
@@ -208,6 +307,7 @@ export default lesson({
         const [name, m] = r.pick([['Sagittarius A* (4.30 million solar masses)', 4.30e6], ['M87* (6.5 billion solar masses)', 6.5e9]]);
         const x = iscoM(m * M_SUN) / AU;
         return {
+          visual: iscoBeside(m),
           prompt: t`How far from ${name} is its innermost stable circular orbit, $6GM/c^2$, in AU? ($GM_\odot/c^2 = ${sci(mLen(M_SUN), 4)}$ m, 1 AU $= 1.496\times10^{11}$ m)`,
           answer: x, units: 'AU', tol: { rel: 0.01 },
           errors: [{ value: x / 3, feedback: 'That is the horizon radius, 2GM/c². The ISCO is three times farther.' }],
@@ -235,6 +335,20 @@ export default lesson({
       hints: ['What does the ISCO mark?'],
       teach: 'The ISCO is the inner edge of a thin accretion disk: inside it, gas plunges.',
       explain: 'Friction in the disk slowly drains orbital energy, moving gas inward through stable circular orbits. At the ISCO the stable orbits run out, and the gas plunges into the hole. X-ray observations of disks around black holes are interpreted with inner edges at or near the ISCO.',
+      visual: {
+        type: 'graph',
+        params: {
+          x: [-17, 17], y: [-16.8, 16.8], equal: true, grid: false, axes: false,
+          shade: [
+            { fn: 'sqrt(max(256 - x^2, 0))', lower: 'sqrt(max(36 - x^2, 0))', from: -16, to: 16, color: 'gold', alpha: 0.45 },
+            { fn: '-sqrt(max(36 - x^2, 0))', lower: '-sqrt(max(256 - x^2, 0))', from: -16, to: 16, color: 'gold', alpha: 0.45 },
+            { fn: 'sqrt(max(4 - x^2, 0))', lower: '-sqrt(max(4 - x^2, 0))', from: -2, to: 2, color: '#000000', alpha: 0.9 },
+          ],
+          curves: [{ param: ['6cos(t)', '6sin(t)'], t: [0, 6.2832], color: 'good', width: 2.2 }],
+          points: [{ x: 2.6, y: 2.2, r: 0.5, color: 'ink', label: '?' }, { x: 4.6, y: -5.4, r: 0.5, color: 'good', label: 'ISCO' }, { x: 7.2, y: 10.2, r: 0.5, color: 'ink', label: 'disk' }],
+        },
+        caption: 'A thin disk of gas around a non-spinning black hole, seen from above and to scale (units of GM/c²). Its inner edge is the ISCO, at 6GM/c²; black is the horizon, at 2GM/c².',
+      },
     }),
     num({
       id: 'cp-quasar', difficulty: 3, transfer: true,
@@ -242,6 +356,7 @@ export default lesson({
         const k = r.pick([1, 3, 10]);
         const mdot = (k * M_SUN) / YEAR, P = ETA * mdot * C * C;
         return {
+          visual: FUEL_BARS,
           prompt: t`A quasar's black hole swallows ${k} solar mass${k > 1 ? 'es' : ''} of gas per year through a thin disk. If the gas radiates the ${sci(100 * ETA, 3)}% of its rest energy released by the time it reaches the ISCO, what is the quasar's power, in watts? (1 solar mass $= 1.989\times10^{30}$ kg, 1 year $= 3.156\times10^{7}$ s)`,
           answer: P, units: 'W', tol: { rel: 0.01 },
           errors: [{ value: mdot * C * C, feedback: 'Only 5.7% of the rest energy is released, not all of it.' }, { value: ETA * k * M_SUN * C * C, feedback: 'That is energy per year. Divide by the seconds in a year to get power.' }],

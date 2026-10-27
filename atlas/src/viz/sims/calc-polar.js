@@ -20,7 +20,7 @@
 //       wedges: { polar, theta: [α, β], n: 'n', rule: 'mid' }, // n circular wedges: the Riemann sum of ½∫r²dθ
 //       rays: [{ polar | conic, at: 'th', arc: true, color, label }],      // pole → the point at θ = at, with the angle marked
 //       tangents: [{ param | polar | conic, at: 'T', len: 1, velocity: 0.5, color }],   // tangent line; velocity arrow scaled by `velocity`
-//       kepler: { e, p, n: 8, at: 'tau', play: true },       // a body a fraction `at` of a period past perihelion; n equal-time sectors
+//       kepler: { e, p, n: 8, at: 'tau', play: true, when },   // a body a fraction `at` of a period past perihelion; n equal-time sectors
 //       points: [{ x, y } | { r, theta }  + label, color, when, size], segments: [{ from, to, color, dash, label, when }],
 //       arrows: [{ from, to, color, label }], vlines: [{ x, label }], hlines: [{ y, label }], texts: [{ text, x, y, color, align }],
 //       drag: [{ key: 'p', x, y, snap, polarSnap: [dr, dθ] }],   // the first drag point is an item's answer (get('point'))
@@ -127,7 +127,7 @@ export function mount(F, P0) {
     if (tan && shown(tan)) Object.assign(E, tangentAt(curveOf(tan, ev, vars, E), ev(tan.at)));
     const K = S.kepler;
     let orbit = null;
-    if (K) {
+    if (K && shown(K)) {
       const e = ev(K.e), p = ev(K.p);
       if (e >= 0 && e < 0.995 && p > 0) {
         const at = K.at !== undefined ? ev(K.at) : 0;
@@ -302,7 +302,7 @@ function curveOf(c, ev, vars, E) {
     return { X, Y, a, b, at: (t) => [X(t), Y(t)], sample: (n) => sampleParam(X, Y, a, b, n), length: () => paramLength(X, Y, a, b) };
   }
   if (c.fn !== undefined) {
-    const f = fn(c.fn, vars);
+    const f = fn(c.fn, ['x', ...vars]);
     const Y = (x) => f({ ...E, x });
     const [a, b] = c.domain ? c.domain.map(ev) : [-1e3, 1e3];
     return { X: (x) => x, Y, a, b, at: (x) => [x, Y(x)], sample: (n) => sampleParam((x) => x, Y, a, b, n), length: () => paramLength((x) => x, Y, a, b) };
@@ -326,7 +326,7 @@ function tangentAt(C, t) {
 function drawFill(plot, f, ev, vars, E) {
   const color = f.color || 'accent', alpha = f.alpha ?? 0.22;
   if (f.fn !== undefined) {
-    const g = fn(f.fn, vars), lo = f.lower !== undefined ? fn(f.lower, vars) : () => 0;
+    const g = fn(f.fn, ['x', ...vars]), lo = f.lower !== undefined ? fn(f.lower, ['x', ...vars]) : () => 0;
     const a = ev(f.from), b = ev(f.to);
     const top = (x) => g({ ...E, x }), bot = (x) => lo({ ...E, x });
     if (b > a) plot.area(top, a, b, { color, alpha, lower: bot });
@@ -527,6 +527,7 @@ export function validate(P) {
       if (K.e === undefined || K.p === undefined) out.push(`${where} kepler: needs e and p`);
       if (typeof K.e === 'number' && !(K.e >= 0 && K.e < 0.995)) out.push(`${where} kepler: e must lie in [0, 0.995)`);
       if (K.play && !(typeof K.at === 'string' && keys.includes(K.at))) out.push(`${where} kepler: play needs at to name a slider`);
+      if (K.when) tryF(K.when, [], 'kepler when');
     }
     for (const p of S.points || []) {
       if (p.r !== undefined) { tryF(p.r, [], 'point r'); tryF(p.theta, [], 'point theta'); if (p.theta === undefined) out.push(`${where} point: r needs theta`); }

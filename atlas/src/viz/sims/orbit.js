@@ -13,7 +13,7 @@ export function mount(F, P) {
   const { canvas } = F.canvas({ aspect: 'wide', label: 'An orbit seen from above and its effective potential' });
   F.choice({ key: 'mode', label: 'Gravity', options: [['newton', 'Newton'], ['schwarzschild', 'Einstein (Schwarzschild)']], value: P.mode, explain: 'Same starting point and angular momentum; only the law of gravity changes.' });
   F.slider({ key: 'r0', label: 'Starting radius $r_0$ (apoapsis)', min: 7, max: 40, step: 0.5, value: P.r0, unit: 'M', explain: 'In units of the mass $M$ ($GM/c^2$). The event horizon is at $2M$.' });
-  F.slider({ key: 'L', label: 'Angular momentum $L$ per unit mass', min: 3.0, max: 6, step: 0.01, value: P.L, unit: 'M', explain: 'Lower $L$ means a more eccentric orbit. Below $L = 2\\sqrt3 M \\approx 3.46M$ no stable circular orbit exists.' });
+  F.slider({ key: 'L', label: 'Angular momentum $L$ per unit mass', min: 3.0, max: 8, step: 0.01, value: P.L, unit: 'M', explain: 'Lower $L$ means a more eccentric orbit. Below $L = 2\\sqrt3 M \\approx 3.46M$ no stable circular orbit exists.' });
   F.toggle({ key: 'compare', label: 'Overlay the Newtonian orbit', value: P.compare, explain: 'Dashed: what Newton predicts from the same start.' });
   F.onChange(() => draw());
 

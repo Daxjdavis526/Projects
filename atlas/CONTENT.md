@@ -94,6 +94,12 @@ not put `prereqs` in a lesson file — it would be ignored.
 
 ### Markup
 
+Every text field is markup — `prompt`, `hints`, `teach`, `explain`,
+`solution`, `choices`, `why`, `errors[].feedback`, `intro`, captions — except
+the right-hand options of a matching problem (plain text in a drop-down) and
+labels that a simulation draws on its canvas (plain text; Unicode is fine).
+A list must be its own paragraph: leave a blank line before it.
+
 All prose fields use a small Markdown: paragraphs (blank line), `**bold**`,
 `*italic*`, `` `code` ``, fenced code blocks (```` ```python ```` … ```` ``` ````,
 on lines of their own), `- ` lists, `> ` callouts, `[links](https://…)`,
@@ -175,7 +181,8 @@ num({ id: 'f-over-m', difficulty: 1,
 ```
 
 - `answer` is a number **in `units`** (an SI or common unit string: `'m/s^2'`,
-  `'kN'`, `'J/(kg K)'`, `'eV'`, `'ly'`, `'arcsec'`, `'N^-1'`, `'yr'`, `'Msun'`…).
+  `'kN'`, `'J/(kg K)'`, `'eV'`, `'ly'`, `'arcsec'`, `'mas'`, `'uas'`, `'N^-1'`, `'yr'`, `'Msun'`…;
+  the full table is `UNITS` in `src/core/units.js`).
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
   makes typing a unit compulsory. Omit `units` for pure numbers.

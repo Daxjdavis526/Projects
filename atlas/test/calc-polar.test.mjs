@@ -116,5 +116,69 @@ check('validate rejects a ray on a parametric curve', validate({ rays: [{ param:
 check('validate checks presets', validate({ presets: [{ label: 'ok', curves: [{ polar: '2' }] }, { label: 'bad', curves: [{ polar: 'zz' }] }] }).length === 1);
 check('validate checks preset set values', validate({ sliders: [{ key: 'e', label: 'e', min: 0, max: 1, value: 0.5 }], presets: [{ label: 'Mercury', set: { e: 0.2056 } }, { label: 'bad', set: { f: 1 } }] }).length === 1);
 
+// mount and draw headlessly, with a stub canvas: every kind of element, every
+// preset, a drag point, the Kepler orbit and the readouts must draw without
+// throwing (a typo in a variable list only shows up when the sim draws)
+{
+  globalThis.window ??= { devicePixelRatio: 1 };
+  globalThis.document ??= { documentElement: {} };
+  globalThis.getComputedStyle ??= () => ({ getPropertyValue: () => '' });
+  const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : () => {}), set: (o, k, v) => { o[k] = v; return true; } });
+  const mountSpec = async (P) => {
+    const { mount, defaults } = await import('../src/viz/sims/calc-polar.js');
+    const params = {}, listeners = [];
+    let redraw = null, rows = null;
+    const node = () => ({ style: {}, querySelector: () => null });
+    const F = {
+      params,
+      canvas: () => ({ canvas: { getContext: () => ctx, clientWidth: 640, clientHeight: 320, addEventListener() {}, setPointerCapture() {}, style: {} } }),
+      slider: (s) => { params[s.key] = s.value; return { node: node(), set: (v) => { params[s.key] = v; } }; },
+      choice: (c) => { params[c.key] = c.value; return { node: node(), set: (v) => { params[c.key] = v; } }; },
+      toggle: (c) => { params[c.key] = c.value; return { node: node(), set() {} }; },
+      button: () => ({ textContent: '' }),
+      onChange: (fn) => listeners.push(fn),
+      draw: (fn) => { redraw = fn; },
+      readout: (r) => { rows = r; },
+      caption() {}, animate: () => ({ stop() {}, start() {} }), onDestroy() {},
+      set: (k, v) => { params[k] = v; listeners.forEach((fn) => fn(k)); },
+    };
+    const ctl = mount(F, { ...defaults, ...P });
+    redraw();
+    return { F, ctl, rows: () => rows, redraw };
+  };
+  try {
+    const m = await mountSpec(good);
+    check('mount and draw: a spec with every element', Array.isArray(m.rows()) && m.rows().length === good.readouts.length);
+    const A = m.rows()[0][1];
+    check('the area readout is a number', /^[0-9.]+$/.test(A), A);
+  } catch (e) { check('mount and draw: a spec with every element', false, e.stack); }
+  try {
+    const m = await mountSpec({
+      grid: 'cartesian', x: [-2, 2], y: [-1, 3],
+      curves: [{ fn: 'x^2', domain: [-1.5, 1.5] }, { param: ['t', '2 - t^2/2'], t: [-2, 2] }],
+      fills: [{ fn: '2 - x^2/2', lower: 'x^2', from: -1.1547, to: 1.1547 }],
+      drag: [{ key: 'p', x: 0.5, y: 0.5, snap: 0.1 }],
+      points: [{ x: 'px', y: 'py' }],
+      readouts: [{ label: 'area', expr: 'area' }],
+    });
+    const A = +m.rows()[0][1];
+    check('Cartesian fn curves and fills draw (the area between two graphs)', Math.abs(A - (2 * 1.1547 * 2 - (1.5 * 2 * 1.1547 ** 3) / 3)) < 1e-3, String(A));
+    check('the drag point is the answer', m.ctl.get('point').x === 0.5);
+  } catch (e) { check('Cartesian fn curves and fills draw', false, e.stack); }
+  try {
+    const m = await mountSpec({
+      sliders: [{ key: 'e', label: 'e', min: 0, max: 0.9, value: 0.2 }, { key: 'tau', label: 'τ', min: 0, max: 1, value: 0.5 }],
+      presets: [{ label: 'Mercury', set: { e: 0.2056 } }, { label: 'Halley', set: { e: 0.967 }, x: [-40, 4], y: [-10, 10] }],
+      curves: [{ conic: ['e', 1] }], kepler: { e: 'e', p: 1, n: 8, at: 'tau', play: true },
+      readouts: [{ label: 'r', expr: 'kr', digits: 9 }, { label: 'shape', classify: 'e' }],
+    });
+    m.F.set('preset', 1);
+    check('a preset sets its slider values', m.F.params.e === 0.967);
+    const r = +m.rows()[0][1];
+    check('half a period on, the body is at aphelion p/(1 − e)', Math.abs(r - 1 / (1 - 0.967)) < 1e-6 * 31, String(r));
+    check('the classify readout names the conic', m.rows()[1][1] === '\\text{ellipse}');
+  } catch (e) { check('Kepler presets draw', false, e.stack); }
+}
+
 console.log(`${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

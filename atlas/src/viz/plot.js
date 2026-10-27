@@ -85,7 +85,7 @@ export class Plot {
     g.save();
     g.lineWidth = 1;
     g.strokeStyle = c.line;
-    for (const t of Plot.ticks(this.vx0, this.vx1, this.o.xticks || 8)) { const x = Math.round(this.X(t)) + 0.5; g.beginPath(); g.moveTo(x, this.T); g.lineTo(x, this.B); g.stroke(); }
+    for (const t of this.o.xticks === 0 ? [] : Plot.ticks(this.vx0, this.vx1, this.o.xticks || 8)) { const x = Math.round(this.X(t)) + 0.5; g.beginPath(); g.moveTo(x, this.T); g.lineTo(x, this.B); g.stroke(); }
     for (const t of Plot.ticks(this.vy0, this.vy1, this.o.yticks || 6)) { const y = Math.round(this.Y(t)) + 0.5; g.beginPath(); g.moveTo(this.L, y); g.lineTo(this.R, y); g.stroke(); }
     g.restore();
   }
@@ -107,19 +107,25 @@ export class Plot {
       g.fillText(this.o.xfmt ? this.o.xfmt(t) : fmt(t), this.X(t), ly);
     }
     g.textAlign = 'right'; g.textBaseline = 'middle';
-    for (const t of Plot.ticks(this.vy0, this.vy1, this.o.yticks || 6)) {
+    let tickW = 0;   // the widest y tick label, so a rotated y label can stand clear of it
+    for (const t of this.o.yticks === 0 ? [] : Plot.ticks(this.vy0, this.vy1, this.o.yticks || 6)) {
       if (Math.abs(t) < 1e-12 && y0 < this.B) continue;
       const lx = Math.max(this.L - 4, Math.min(this.R, x0 - 4));
-      g.fillText(this.o.yfmt ? this.o.yfmt(t) : fmt(t), lx, this.Y(t));
+      const text = this.o.yfmt ? this.o.yfmt(t) : fmt(t);
+      if (lx <= this.L) tickW = Math.max(tickW, g.measureText(text).width);
+      g.fillText(text, lx, this.Y(t));
     }
     g.fillStyle = c.ink2; g.font = '12px Inter, system-ui, sans-serif';
     if (this.o.xlabel) { g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText(this.o.xlabel, this.R, this.B + 30); }
     if (this.o.ylabel && this.o.ylabel.length <= 3) { g.textAlign = 'left'; g.textBaseline = 'top'; g.fillText(this.o.ylabel, 6, this.T); }
-    else if (this.o.ylabel) { g.save(); g.translate(14, this.T); g.rotate(-Math.PI / 2); g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillText(this.o.ylabel, 0, 0); g.restore(); }
+    else if (this.o.ylabel) { g.save(); g.translate(Math.max(8, this.L - 4 - tickW - 9), this.T); g.rotate(-Math.PI / 2); g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillText(this.o.ylabel, 0, 0); g.restore(); }
     g.restore();
   }
 
   color(name) { return this.col[name] || name; }
+
+  /** Restrict drawing to the plotting frame (call between save and restore). */
+  _clip() { const g = this.ctx; g.beginPath(); g.rect(this.L - 1, this.T - 1, this.R - this.L + 2, this.B - this.T + 2); g.clip(); }
 
   /** Plot y = f(x), sampling adaptively and breaking at jumps and NaN. */
   fn(f, o = {}) {
@@ -128,6 +134,7 @@ export class Plot {
     const n = o.samples || Math.max(200, Math.round(this.R - this.L));
     const jump = (this.vy1 - this.vy0) * 1.5;
     g.save();
+    this._clip();
     this._stroke(o);
     g.beginPath();
     let pen = false, prev = null;
@@ -147,7 +154,7 @@ export class Plot {
   /** Parametric curve (x(t), y(t)). */
   curve(fx, fy, t0, t1, o = {}) {
     const g = this.ctx, n = o.samples || 400;
-    g.save(); this._stroke(o); g.beginPath();
+    g.save(); this._clip(); this._stroke(o); g.beginPath();
     let pen = false;
     for (let i = 0; i <= n; i++) {
       const t = t0 + ((t1 - t0) * i) / n;

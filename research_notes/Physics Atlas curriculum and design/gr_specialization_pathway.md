@@ -144,7 +144,7 @@ Every one of the 37 steps can be anchored to something it *accomplishes physical
 - **Derivation Mode** uses calculus, index notation and PDEs, gated by the math track.
 
 Each card below gives 2–5 problem archetypes. All their answers were recomputed or symbolically verified for these notes (tags [C]/[V]); where a measured value exists, the computed prediction is set against it. The verifications caught one trap worth building into the question bank:
-- the solar deflection of a star seen at **90° elongation from Earth** is **4.07 mas**, not 8.14 mas. The observer is at 1 AU, not at infinity, which brings in the (1 + cos Φ)/2 factor in Will's formula.
+- the solar deflection of a star seen at **90° elongation from Earth** is **4.07 mas**, not 8.14 mas. The observer is at 1 AU, not at infinity, which brings in the (1 + cos Φ)/2 factor in Will's formula. *(Erratum, added while building the Atlas: in that formula d is the ray's closest-approach distance b = (1 AU)·sin Φ, not 1 AU — δθ = (2GM/c²b)(1 + cos Φ). At 90° elongation b = 1 AU, so 4.07 mas stands; at other elongations the 1/sin Φ matters.)*
 
 Two of the misconception-busting numbers come out especially well, to be used deliberately:
 - tidal stretching at the horizon of a 10 M☉ hole is ≈2×10⁸ m/s², versus ≈1×10⁻³ m/s² for Sgr A*;
@@ -748,7 +748,7 @@ Suggested answer tolerance is ±1% for computed numbers unless stated, because i
 - **Prereqs:** steps 12, 20.
 - **Practice archetypes:**
   1. Grazing the solar limb: **1.751″**; Newtonian half **0.876″** [C]. Will gives 1.7505″ with R☉ = 6.96×10⁸ m.
-  2. Star at 90° elongation seen from Earth: **4.07 mas**, using δθ = (4GM/c²d)(1 + cos Φ)/2 with d = 1 AU [C]. This matches Will's "~4 mas". *Micro-teach:* a common error is to use 4GM/(c²·1 AU) = 8.14 mas, which assumes an observer at infinity.
+  2. Star at 90° elongation seen from Earth: **4.07 mas**, using δθ = (4GM/c²b)(1 + cos Φ)/2 with b = (1 AU)·sin Φ the closest-approach distance (= 1 AU at Φ = 90°) [C]. *(Corrected: an earlier version wrote d = 1 AU, which is right only at 90°.)* This matches Will's "~4 mas". *Micro-teach:* a common error is to use 4GM/(c²·1 AU) = 8.14 mas, which assumes an observer at infinity.
   3. Einstein radius of a 0.5 M☉ lens at 4 kpc, source at 8 kpc: **0.71 mas** (2.85 AU at the lens) [C]. This is why microlensing images are unresolved.
   4. Shadow diameter 2√27 GM/(c²D) [C, compared with the EHT rings]:
 

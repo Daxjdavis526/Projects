@@ -191,7 +191,7 @@ export function mount(F, P) {
   }
 
   // ── drawing ───────────────────────────────────────────────────────────────
-  const side = new Plot(canvas, { x: [-2.3, 1.9], y: [-1.8, 1.8], equal: true, grid: false, axes: false });
+  const side = new Plot(canvas, { x: [-2.4, 2.35], y: [-1.8, 1.8], equal: true, grid: false, axes: false });
   const end = new Plot(canvas, { x: [-1.8, 1.8], y: [-1.9, 1.7], equal: true, grid: false, axes: false });
   const vol = new Plot(canvas, { x: [0, 1], y: [0, 2], grid: true, axes: true, xlabel: '', ylabel: '', yticks: 4, xticks: 4 });
 
@@ -211,12 +211,13 @@ export function mount(F, P) {
     pl.path(pts, { close: true, ...o });
   }
   // the grains projected onto the plane of axes (i, j); depth along axis d, toward the viewer = +
-  function dust(pl, M, i, j, d) {
+  function dust(pl, M, i, j, d, small = false) {
     const qs = DUST.map((p) => apply(M, p)).sort((a, b) => a[d] - b[d]);
+    const k = small ? 0.65 : 1;
     for (const q of qs) {
       const s = Math.max(0, Math.min(1, (q[d] + 1.4) / 2.8));
       pl.ctx.globalAlpha = 0.3 + 0.6 * s;
-      pl.point(q[i], q[j], { color: 'accent2', r: 1.3 + 1.5 * s });
+      pl.point(q[i], q[j], { color: 'accent2', r: k * (1.3 + 1.5 * s) });
     }
     pl.ctx.globalAlpha = 1;
   }
@@ -234,13 +235,15 @@ export function mount(F, P) {
       else pl.circle(cx, 0, R, { fill: 'teal', alpha: 0.28, color: 'teal', width: 2 });
       const name = B.hole ? (B.name === 'Sagittarius A*' ? 'Sgr A*' : 'black hole') : 'Earth';
       pl.text(name, pl.vx0 + 0.5, pl.vy0 + 0.18, { color: B.hole ? 'ink2' : 'teal', size: narrow ? 10 : 11.5 });
-      pl.line(pl.vx0 + 0.5, 0, -1.15, 0, { color: 'ink4', width: 1.2, dash: [4, 4] });
-      if (!narrow) pl.text('to the centre', pl.vx0 + 0.55, -0.16, { color: 'ink3', size: 10.5 });
+      if (!P.arrows) {                     // the line to the centre (the arrows would sit on it)
+        pl.line(pl.vx0 + 0.5, 0, -1.15, 0, { color: 'ink4', width: 1.2, dash: [4, 4] });
+        if (!narrow) pl.text('to the centre', pl.vx0 + 0.55, -0.16, { color: 'ink3', size: 10.5 });
+      }
     }
     if (st.m === 'wave') pl.text('face-on: the wave comes toward you', pl.vx0 + 0.08, pl.vy1 - 0.14, { color: 'ink3', size: narrow ? 10 : 11 });
     pl.circle(0, 0, 1, { color: 'ink3', width: 1.2, dash: [4, 4] });
     outline(pl, M, 0, 1, { color: 'accent', width: 2, fill: 'accent', fillAlpha: 0.07 });
-    dust(pl, M, 0, 1, 2);
+    dust(pl, M, 0, 1, 2, narrow);
     if (P.arrows) arrows(pl, st, tau, M, narrow);
     if (st.m !== 'wave' && P.play) pl.text(`t = ${tau.toFixed(2)} T`, pl.vx1 - 0.08, pl.vy1 - 0.14, { color: 'ink2', size: 11, align: 'right' });
   }
@@ -263,28 +266,29 @@ export function mount(F, P) {
       const gap = out ? 0.06 : 0.08 + len;
       const base = [q[0] + ux * gap, q[1] + uy * gap], tip = [base[0] + a[0] * s, base[1] + a[1] * s];
       pl.arrow(base[0], base[1], tip[0], tip[1], { color: 'warn', width: 2.2 });
-      if (n !== 0 && n !== 2) return;
-      if (narrow && n === 2) return;
+      if ((n !== 0 && n !== 2) || narrow) return;
       const word = st.m === 'matter' ? (out ? 'grow' : 'shrink') : (out ? 'stretch' : 'squeeze');
-      const at = out ? tip : base;
-      pl.text(word, at[0] + ux * 0.1, at[1] + uy * 0.1 + (Math.abs(uy) > 0.5 ? 0.04 : 0.17), { color: 'warn', size: narrow ? 10 : 11.5, align: ux > 0.5 ? 'left' : ux < -0.5 ? 'right' : 'center' });
+      // beside the middle of the arrow: above a level arrow, to the right of an upright one
+      const mid = [(base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2];
+      if (Math.abs(ux) > 0.5) pl.text(word, mid[0], mid[1] + 0.2, { color: 'warn', size: narrow ? 10 : 11.5, align: 'center' });
+      else pl.text(word, mid[0] + 0.12, mid[1], { color: 'warn', size: narrow ? 10 : 11.5, align: 'left' });
     });
   }
 
   function drawEnd(st, tau, narrow) {
     const pl = end, M = deform(st, tau);
-    const title = st.m === 'wave' ? 'edge-on: the wave moves →' : st.m === 'matter' ? 'end-on view (the same)' : 'end-on, looking toward the mass';
+    const title = narrow ? (st.m === 'wave' ? 'edge-on' : 'end-on') : st.m === 'wave' ? 'edge-on: the wave moves →' : st.m === 'matter' ? 'end-on view (the same)' : 'end-on, looking toward the mass';
     pl.text(title, pl.L + 2, pl.T + 8, { screen: true, color: 'ink2', size: narrow ? 9.5 : 11, weight: 650 });
     pl.circle(0, 0, 1, { color: 'ink3', width: 1.2, dash: [4, 4] });
     if (st.m === 'wave') {
       // across: the direction of travel z (unchanged); up: x
       const Mz = [[M[2][2], M[2][0], 0], [M[0][2], M[0][0], 0], [0, 0, 1]];
       outline(pl, Mz, 0, 1, { color: 'accent', width: 2, fill: 'accent', fillAlpha: 0.07 });
-      for (const p of DUST) { const q = apply(M, p); pl.point(q[2], q[0], { color: 'accent2', r: 1.4 }); }
+      for (const p of DUST) { const q = apply(M, p); pl.point(q[2], q[0], { color: 'accent2', r: narrow ? 1 : 1.4 }); }
     } else {
       // looking along −x from the +x side: across is z, up is y, depth toward the viewer is +x
       outline(pl, M, 2, 1, { color: 'accent', width: 2, fill: 'accent', fillAlpha: 0.07 });
-      dust(pl, M, 2, 1, 0);
+      dust(pl, M, 2, 1, 0, narrow);
     }
   }
 
@@ -303,7 +307,7 @@ export function mount(F, P) {
     const tau = F.params.t;
     const W = canvas.clientWidth || 600, H = canvas.clientHeight || 375;
     const narrow = W < 480, sideOnly = P.views === 'side';
-    const split = sideOnly ? W : Math.round(W * 0.6);
+    const split = sideOnly ? W : Math.round(W * (narrow ? 0.64 : 0.6));
     // the volume axis grows to fit the curve
     const tm = TMAX[st.m];
     let vmax = 1;
