@@ -69,7 +69,7 @@ $V$ falls along the direction of the field: in a uniform field, a step $d$ along
   },
   example: {
     prompt: t`In an electron gun, electrons leave a hot cathode almost at rest and are pulled toward an anode 1.5 cm away, held 2500 V above the cathode. Find (a) the change in an electron's potential energy, (b) its speed at the anode, (c) the field between them, taken as uniform.`,
-    visual: field({ ...plates(-2500, 15, 'mm'), ref: [-7.5, 0], x: [-10, 10], y: [-6.25, 6.25], equip: true, levels: [500, 1000, 1500, 2000], fieldLines: false, arrows: 'linear', particle: { kind: 'electron', x: -7.3, y: 0, speed: 0, path: true }, notes: { points: [{ x: -7.5, y: 5, label: 'cathode 0 V', color: 'ink2', r: 0.1, ldx: -30, ldy: -2 }, { x: 7.5, y: 5, label: 'anode 2500 V', color: 'ink2', r: 0.1, ldx: -40, ldy: -2 }] } }, 'The cathode (left) and anode (right), the field between them (arrows, pointing from high V to low V), the equipotentials every 500 V, and the electron’s path. A real anode has a hole for the beam to pass through.'),
+    visual: field({ ...plates(-2500, 15, 'mm'), ref: [-7.5, 0], x: [-10, 10], y: [-6.25, 6.25], equip: true, levels: [500, 1000, 1500, 2000], fieldLines: false, arrows: 'linear', particle: { kind: 'electron', x: -7.3, y: 0, speed: 0, path: true }, notes: { points: [{ x: -7.5, y: 4.6, label: 'cathode, 0 V', color: 'ink2', r: 0.1, ldx: 8, ldy: -2 }, { x: 7.5, y: 4.6, label: 'anode, 2500 V', color: 'ink2', r: 0.1, ldx: -98, ldy: -2 }] } }, 'The cathode (left) and anode (right), the field between them (arrows, pointing from high V to low V), the equipotentials every 500 V, and the electron’s path. A real anode has a hole for the beam to pass through.'),
     steps: [
       { label: 'Potential energy', text: t`The electron's charge is $q = -e$, and it moves from 0 V to $+2500$ V: $\Delta U = q\,\Delta V = (-1.602\times10^{-19}\ \text{C})(+2500\ \text{V}) = ${tn(-WX.K)}$ J. Its potential energy falls — by 2500 eV.` },
       { label: 'Speed', text: t`The potential energy lost becomes kinetic energy: $\tfrac12mv^2 = ${tn(WX.K)}$ J, so $v = \sqrt{\dfrac{2K}{m}} = \sqrt{\dfrac{2(${tn(WX.K, 4)})}{9.109\times10^{-31}}} = ${tn(WX.v)}$ m/s — a tenth of the speed of light, reached in 1.5 cm. (Relativity lowers this by ${s3((100 * (WX.v - relSpeed(WX.K, ME))) / relSpeed(WX.K, ME), 1)}%.)` },
@@ -140,12 +140,12 @@ $V$ falls along the direction of the field: in a uniform field, a step $d$ along
         const errs = [{ value: Math.sqrt(Kj / m), feedback: t`Kinetic energy is $\tfrac12mv^2$: $v = \sqrt{2K/m}$.` }];
         if (q === 2) errs.push({ value: Math.sqrt((2 * QE * dV) / m), feedback: 'An alpha particle carries 2e, so it gains 2 eV for every volt.' });
         return {
-          prompt: t`${an(name).replace(/^a/, 'A')} starts from rest and is accelerated through a potential difference of ${dV} V. How fast is it then moving?`,
+          prompt: t`${an(name).replace(/^a/, 'A')} starts from rest and is accelerated through a potential difference of ${dV >= 1e4 ? `${dV / 1000} kV` : `${dV} V`}. How fast is it then moving?`,
           answer: v, units: 'm/s', tol: { rel: 0.01 },
           errors: errs,
           hints: [t`Kinetic energy gained: $K = |q|\,\Delta V$.`, t`$\tfrac12mv^2 = |q|\Delta V$, so $v = \sqrt{2|q|\Delta V/m}$.`],
           teach: 'Accelerated from rest through ΔV, a charge reaches v = √(2|q|ΔV/m).',
-          explain: t`$K = |q|\Delta V = ${q === 2 ? '2' : ''}(1.602\times10^{-19})(${dV}) = ${tn(Kj)}$ J, so $v = \sqrt{2K/m} = ${tn(v)}$ m/s.${pct > 0.5 ? ` That is ${s3(v / C, 2)} of the speed of light: relativity lowers it by ${s3(pct, 2)}%.` : ''}`,
+          explain: t`$K = |q|\Delta V = ${q === 2 ? '2' : ''}(1.602\times10^{-19})(${dV}) = ${tn(Kj)}$ J, so $v = \sqrt{2K/m} = ${tn(v)}$ m/s.${pct > 0.5 ? ` That is ${Math.round((100 * v) / C)}% of the speed of light, where relativity starts to matter: it lowers the answer by ${s3(pct, 2)}%.` : ''}`,
           visual: field({ ...plates(dV, 6), x: [-5, 5], y: [-3.125, 3.125], fieldLines: false, arrows: 'linear', particle: { kind, x: kind === 'electron' ? 2.9 : -2.9, y: 0, speed: 0, path: true } }, `The ${kind === 'alpha' ? 'alpha particle' : kind} starts at rest beside one plate and is accelerated across the gap (its path in gold).`),
         };
       },
@@ -219,7 +219,7 @@ $V$ falls along the direction of the field: in a uniform field, a step $d$ along
           hints: [t`Each ion gains $K = e\,\Delta V$.`, t`$v = \sqrt{2e\Delta V/m}$.`],
           teach: 'An ion engine turns voltage straight into exhaust speed: v = √(2qΔV/m).',
           explain: t`$K = e\Delta V = (1.602\times10^{-19})(${dV}) = ${tn(QE * dV)}$ J, so $v = \sqrt{\dfrac{2(${tn(QE * dV)})}{2.181\times10^{-25}}} = ${tn(v)}$ m/s $= ${tn(v / 1000)}$ km/s — about ${Math.round(v / 4500)} times the 4.5 km/s exhaust of the best chemical rockets. The price is thrust: the beam is a trickle, a fraction of a newton.`,
-          visual: field({ ...plates(dV, 1, 'mm'), x: [-1.2, 1.2], y: [-0.75, 0.75], fieldLines: false, arrows: 'linear', particle: { kind: 'xenon', x: -0.48, y: 0.1, speed: 0, path: true }, notes: { points: [{ x: -0.5, y: 0.62, label: 'screen grid', color: 'ink2', r: 0.1, ldx: -60, ldy: -2 }, { x: 0.5, y: 0.62, label: 'accelerator grid', color: 'ink2', r: 0.1, ldx: 6, ldy: -2 }] } }, 'An ion (gold path) accelerated across the 1 mm gap between the grids, drawn as plates. In a thruster it flies on through holes in the second grid.'),
+          visual: field({ ...plates(dV, 1, 'mm'), x: [-1.2, 1.2], y: [-0.75, 0.75], fieldLines: false, arrows: 'linear', particle: { kind: 'xenon', x: -0.48, y: 0.1, speed: 0, path: true }, notes: { points: [{ x: -0.5, y: 0.62, label: 'screen grid', color: 'ink2', r: 0.1, ldx: -76, ldy: -2 }, { x: 0.5, y: 0.62, label: 'accelerator grid', color: 'ink2', r: 0.1, ldx: 6, ldy: -2 }] } }, 'An ion (gold path) accelerated across the 1 mm gap between the grids, drawn as plates. In a thruster it flies on through holes in the second grid.'),
         };
       },
     }),
@@ -234,7 +234,7 @@ $V$ falls along the direction of the field: in a uniform field, a step $d$ along
           hints: [t`Its kinetic energy all turns into potential energy: $\tfrac12mv^2 = e\,\Delta V$.`, t`Over a distance $d$ against the field, $V$ rises by $Ed$.`],
           teach: 'A charge moving against a uniform field stops when its kinetic energy equals |q|Ed.',
           explain: t`$K = \tfrac12(1.673\times10^{-27})(${tn(v0)})^2 = ${tn(Kj)}$ J $= ${tn(Kj / QE)}$ eV. It stops when $eEd = K$: $d = \dfrac{K}{eE} = \dfrac{${tn(Kj / QE)}\ \text{V}}{${E}\ \text{V/m}} = ${tn(d)}$ m — then the field sends it back the way it came.`,
-          visual: field({ ...plates(-E * (g / 100), g), x: [-0.58 * g, 0.58 * g], y: [-0.36 * g, 0.36 * g], fieldLines: false, arrows: 'linear', particle: { kind: 'proton', x: r6(-0.49 * g), y: 0, speed: v0, angle: 0, path: true, tmax: r6(((MP * v0) / (QE * E)) * 0.999) } }, 'The proton (gold path) enters the field from the left, through a hole in the plate (not drawn); the field (arrows) points against its motion.'),
+          visual: field({ ...plates(-E * (g / 100), g), x: [-0.58 * g, 0.58 * g], y: [-0.36 * g, 0.36 * g], axes: false, grid: false, fieldLines: false, arrows: 'linear', particle: { kind: 'proton', x: r6(-0.49 * g), y: 0, speed: v0, angle: 0, path: true, tmax: r6(((MP * v0) / (QE * E)) * 0.999) } }, 'The proton (gold path) enters the field from the left, through a hole in the plate (not drawn); the field (arrows) points against its motion.'),
         };
       },
     }),

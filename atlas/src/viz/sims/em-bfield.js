@@ -10,11 +10,11 @@
 //       unit: 'cm', x: [-6, 6], y: [-4, 4],      // positions in m|cm|mm; the view (equal scales)
 //       wires: [{ x, y, I, label, drag }],       // straight wires across the page; I in A (> 0 out of the page)
 //       loops: [{ x, R, I }],                    // circular loops on the x-axis, seen edge-on (I > 0: B along +x inside)
-//       solenoid: { x0, x1, R, N, I },           // N such loops, evenly spaced from x0 to x1
+//       solenoid: { x0, x1, R, N, I },           // N such loops filling x0…x1 evenly (one per slice of length (x1 − x0)/N)
 //       toroid: { x, y, a, b, N, I },            // a toroid cut through its middle: N wires on radius a (out), N on b (in)
 //       uniform: [Bx, By],                       // a uniform field, T
 //       lines: true, density: 1, arrows: false,  // field lines (more or fewer with density); field vectors
-//       probe: { x, y, label } | null,           // drag it; reads B
+//       probe: { x, y, label } | null,           // drag it; reads B (probeArrow: false hides the B arrow drawn on it)
 //       loop: { shape: 'circle', x, y, r, move: true, resize: true } | null,   // an Amperian loop
 //       shapes: ['circle', 'square', 'lumpy'],   // offer a choice of its shape
 //       forces: false, forceOn: 0,               // force-per-length arrows on the wires; which wire the readout follows
@@ -249,16 +249,17 @@ export function mount(F, P0) {
         if (k >= st.wires.length) return;
         const m = Math.hypot(...f);
         if (!(m > 1e-6 * Fmax)) return;
-        const len = (0.16 * (v.x1 - v.x0) * Math.sqrt(m / Fmax)), w = S.wires[k];
+        const w = S.wires[k], gap = Math.min(...S.wires.filter((_, j) => j !== k).map((o) => Math.hypot(o.x - w.x, o.y - w.y) / L));
+        const len = Math.min(0.12 * (v.x1 - v.x0), 0.42 * gap) * Math.sqrt(m / Fmax);
         plot.arrow(w.x / L + (f[0] / m) * 0.02 * (v.x1 - v.x0), w.y / L + (f[1] / m) * 0.02 * (v.x1 - v.x0), w.x / L + (f[0] / m) * len, w.y / L + (f[1] / m) * len, { color: 'violet', width: 2.6, head: 10, label: k === 0 ? 'F' : '', ldx: 6, ldy: -8 });
       });
-      if (want.includes('F')) { const k = P.forceOn ?? 0, f = Fs[k]; if (f) rows.push([`force per metre on ${S.wires[k].label || 'the wire'}`, `${texNum(Math.hypot(...f))}\\ \\mathrm{N/m}`]); }
+      if (want.includes('F')) { const k = P.forceOn ?? 0, f = Fs[k], lb = S.wires[k]?.label; if (f) rows.push([`force per metre on ${lb ? (lb.length <= 2 ? `wire ${lb}` : lb) : 'the wire'}`, `${texNum(Math.hypot(...f))}\\ \\mathrm{N/m}`]); }
     }
 
     // the probe
     if (st.probe) {
       const pr = st.probe, b = M.field(S, pr.x * L, pr.y * L), m = Math.hypot(...b);
-      if (m > 0 && Number.isFinite(m)) {
+      if (m > 0 && Number.isFinite(m) && P.probeArrow !== false) {
         const len = 0.11 * (v.x1 - v.x0);
         plot.arrow(pr.x, pr.y, pr.x + (b[0] / m) * len, pr.y + (b[1] / m) * len, { color: 'teal', width: 2.8, head: 10, label: 'B', ldx: 6, ldy: -8 });
       }
@@ -300,8 +301,8 @@ export function mount(F, P0) {
 
 function defaultCaption(P) {
   const parts = [];
-  if ((P.wires || []).length || P.toroid) parts.push('⊙ current out of the page, ⊗ into it. Each wire is long and straight, perpendicular to the page.');
-  if ((P.loops || []).length || P.solenoid) parts.push('The loops are cut through their axis: each crosses the page twice (⊙ and ⊗), and the field is that of real circular loops, computed exactly.');
+  if ((P.wires || []).length || P.toroid) parts.push('A dot in a circle: current out of the page; a cross: into it. Each wire is long and straight, perpendicular to the page.');
+  if ((P.loops || []).length || P.solenoid) parts.push('The loops are cut through their axis: each crosses the page twice (current out at the dot, in at the cross), and the field is that of real circular loops, computed exactly.');
   if (P.lines) parts.push('Field lines are drawn closer where the field is stronger.');
   if (P.loop) parts.push('The Amperian loop is green where B points along it, amber where against it; ∮B·dl is summed numerically.');
   return parts.join(' ');

@@ -403,7 +403,7 @@ export async function mount(F, P0) {
   F.draw(draw);
   F.caption(P.caption || (is3D
     ? 'Exact non-relativistic motion in a uniform field. The picture keeps one scale while you move the sliders and rescales when you change the particle; the arrows show directions, with lengths in proportion to |v| and |F|. Drag to rotate.'
-    : `Looking along B, which points ${P.bdir === 'in' ? 'into' : 'out of'} the page (${P.bdir === 'in' ? '⊗' : '⊙'}). Exact non-relativistic motion; arrow lengths are in proportion to |v| and |F|, not in the axes’ units.`));
+    : `Looking along B, which points ${P.bdir === 'in' ? 'into the page (the crossed circles)' : 'out of the page (the dotted circles)'}. Exact non-relativistic motion; arrow lengths are in proportion to |v| and |F|, not in the axes’ units.`));
   return { get: (k) => (k === 'species' ? vals().species : F.params[k]) };
 }
 

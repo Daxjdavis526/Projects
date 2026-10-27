@@ -329,7 +329,7 @@ export function mount(F, P0) {
 
     // field vectors
     const arrowsOn = layer('arrows');
-    const nxA = P.grid === false ? 0 : (P.gridN ?? (compact ? 13 : 18));
+    const nxA = P.gridN ?? (compact ? 13 : 18);
     let Eref = 1;
     if (arrowsOn) {
       const dx = (v.x1 - v.x0) / nxA, nyA = Math.max(2, Math.round((v.y1 - v.y0) / dx));

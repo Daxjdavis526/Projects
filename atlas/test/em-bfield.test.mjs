@@ -94,7 +94,7 @@ function biotSavartLoop(I, a, z0, x, y, n = 20000) {
 // ─── Ampère's law ───────────────────────────────────────────────────────────
 {
   const S = M.scene({ wires: [{ x: 0.01, y: 0.005, I: 4 }, { x: -0.03, y: 0.02, I: -2.5 }, { x: 0.05, y: -0.04, I: 7 }], uniform: [3e-5, -1e-5] });
-  for (const [shape, cx, cy, r, inc] of [['circle', 0, 0, 0.025, 4], ['square', -0.005, 0.01, 0.04, 1.5], ['lumpy', 0.02, -0.01, 0.05, 11], ['circle', 0.1, 0.1, 0.02, 0]]) {
+  for (const [shape, cx, cy, r, inc] of [['circle', 0, 0, 0.025, 4], ['square', -0.005, 0.01, 0.04, 1.5], ['lumpy', 0.02, -0.01, 0.05, 1.5], ['circle', 0.1, 0.1, 0.02, 0]]) {
     const path = M.pathOf(shape, cx, cy, r, 2000), C = M.circulation(S, path), Ienc = M.enclosed(S, path);
     check(`Ampère, ${shape} round ${inc} A: ∮B·dl = μ₀I_enc`, near(Ienc, inc, 1e-12) && near(C, MU0 * Ienc, 1e-5, 1e-12 * MU0), `C/μ₀ = ${C / MU0}, I_enc = ${Ienc}`);
   }

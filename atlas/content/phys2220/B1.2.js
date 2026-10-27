@@ -303,7 +303,7 @@ Faster particles make bigger circles, but **every particle of the same kind take
           particles: [{ species: 'proton', v: 0, at: [-0.8, 0.5], label: 'proton', labelAt: 0, labelDy: 18 }, { species: 'electron', v: 0, at: [0.8, -0.5], label: 'electron', labelAt: 0, labelDy: -16 }],
           arrows: ['F'], arrowsOn: [0, 1], readouts: [], axes: false, grid: false,
         },
-        caption: 'The two particles at the moment they are released, with the force on each (violet): only the electric force, qE, since neither is moving yet. Gold arrows: E; ⊙: B out of the page.',
+        caption: 'The two particles at the moment they are released, with the force on each (violet): only the electric force, qE, since neither is moving yet. Gold arrows: E; dotted circles: B, out of the page.',
       },
       choices: [
         'Both drift to the right, at the same average speed E/B',

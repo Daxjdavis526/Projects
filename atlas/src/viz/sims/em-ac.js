@@ -27,7 +27,7 @@
 //       //        graphs: ['q', 'i'] (fewer, or []), bars: true (the energy bars)
 //       // ac:    elements: 'R' | 'L' | 'C' | 'RL' | 'RC' | 'LC' | 'RLC', elementChoice: false (offer R / L / C),
 //       //        V0 (V, amplitude), f (Hz), R, L, C, phasors / traces: lists of v i R L C (default: all that apply),
-//       //        stack: true (the element phasors head to tail, summing to v)
+//       //        stack: true (the element phasors head to tail, summing to v), strip: the circuit strip on top (default: not in a problem's picture)
 //       // resonance: V0, R, L, C, f (the drive), y: 'I' | 'P', band: true (shade the half-power band)
 //       controls: true,          // or a list of: L Imax tr wave · E R L switch · L C R V0 · element f R L C · f R L C y
 //       ranges: {},              // slider ranges in SI units: { L: [min, max] }
@@ -668,7 +668,7 @@ export function mount(F, P0) {
     const NAME = { v: [['v', 0]], i: [['i', 0]], R: [['v', 0], ['R', 1]], L: [['v', 0], ['L', 1]], C: [['v', 0], ['C', 1]] };
     const value = { v: s.v, i: s.i, R: s.vR, L: s.vL, C: s.vC };
     // layout
-    const stripH = compact ? 0 : narrow ? 66 : 54;
+    const stripH = !(P.strip ?? !compact) ? 0 : narrow ? 66 : 54;
     const legendH = shownTr.length > 1 ? 18 : 0;
     let cx, cy, Rp, tr;
     if (narrow) {

@@ -183,7 +183,7 @@ No charge blocks, weakens or shares out another’s force: the force between any
       },
       hints: ['Coulomb’s law for q₁ and q₂ contains only q₁, q₂ and the distance between them.', 'The net force on q₂ does change. Is that the question?'],
       teach: 'The force between two charges does not depend on other charges nearby; the net force is that force plus the others.',
-      explain: t`Superposition: $q_1$ still pushes $q_2$ with 2.0 mN, and $q_3$ adds its own force; the **net** force on $q_2$ is the sum of the two. Even a metal sheet between them does not block the force: charges in the metal move, and their forces add to $q_1$’s until the sum on the far side cancels — “shielding” is superposition too.`,
+      explain: t`Superposition: $q_1$ still pushes $q_2$ with 2.0 mN, and $q_3$ adds its own force; the **net** force on $q_2$ is the sum of the two. Even a large grounded metal wall between them would not block $q_1$’s force: charges in the metal move until their forces, added to $q_1$’s, cancel on the far side — “shielding” is superposition too.`,
       visual: linePic([{ x: 0, y: 0, q: 4, label: 'q₁' }, { x: 7, y: 0, q: -2, label: 'q₃' }, { x: 10, y: 0, q: 3, label: 'q₂' }], { forces: false, ask: true }, 'The three charges (positions in cm). Force arrows not drawn.'),
     }),
     num({
@@ -293,7 +293,7 @@ No charge blocks, weakens or shares out another’s force: the force between any
           ],
           hints: [t`For B to balance, the forces from A and C on it must be equal and opposite: $k\dfrac{q_A q_B}{d_1^2} = k\dfrac{q_C q_B}{d_2^2}$.`, 'B’s own charge cancels from both sides: you do not need it.'],
           teach: 'For a charge to balance between two others, each one’s charge over distance squared must match; the balancing charge’s own size never matters.',
-          explain: t`$q_C = q_A\,(d_2/d_1)^2 = ${qa}\times(${d2}/${d1})^2 = ${tn(qc)}$ µC, positive like A, whatever B carries: if B is positive both push it, if negative both pull it, in opposite directions either way. A and C are not balanced, though — each feels a net force from the other two — so a real formation also leans on orbital dynamics or thrusters to hold its shape. Treating the craft as point charges is fair here: at geostationary altitude the thin plasma screens charges only beyond about 100 m or more, whereas in low orbit it screens them within millimetres.`,
+          explain: t`$q_C = q_A\,(d_2/d_1)^2 = ${qa}\times(${d2}/${d1})^2 = ${tn(qc)}$ µC, positive like A, whatever B carries: if B is positive both push it, if negative both pull it, in opposite directions either way. B’s charge does matter for A and C: they balance too only if B carries one particular charge of the opposite sign, and even then the balance is unstable, so a real formation needs its charges actively controlled and leans on orbital dynamics as well. Treating the craft as point charges is fair here: at geostationary altitude the thin plasma screens charges only beyond about 100 m or more, whereas in low orbit it screens them within millimetres.`,
           visual: chargesPic({
             unit: 'm', aspect: 'wide', x: [-6, d1 + d2 + 6], y: [-6, 6], forces: false, ask: true,
             charges: [{ x: 0, y: 0, q: qa, label: 'A' }, { x: d1, y: 0, q: 1, label: 'B' }, { x: d1 + d2, y: 0, q: r6(qc), label: 'C' }],

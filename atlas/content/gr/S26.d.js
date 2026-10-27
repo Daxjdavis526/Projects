@@ -61,11 +61,11 @@ const omegaBand = (a, { labels = true, caption } = {}) => {
 const topView = ({ a, r, what, against = false, caption }) => {
   const rp = round(kerr.rPlus(a), 6), R = round(r, 6), col = against ? 'violet' : 'accent';
   const at = (ang, rad = 0.62) => [round(rad * Math.cos(ang), 5), round(rad * Math.sin(ang), 5)];
-  const key = (y, label, color) => ({ x: -5.8, y, r: 0.01, color, label, labelDx: 0, labelDy: 0, labelAlign: 'left' });
+  const key = (y, label, color) => ({ x: -9.6, y, r: 0.01, color, label, labelDx: 0, labelDy: 0, labelAlign: 'left' });
   return {
     type: 'graph',
     params: {
-      x: [-6, 6], y: [-3.4, 3.4], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
+      x: [-10, 4], y: [-3.4, 3.4], equal: true, aspect: 'wide', axes: false, grid: false, xlabel: '', ylabel: '',
       shade: [{ fn: `sqrt(${rp}^2 - x^2)`, lower: `-sqrt(${rp}^2 - x^2)`, from: -rp, to: rp, color: 'ink3', alpha: 0.35 }],
       curves: [
         { polar: `${rp}`, theta: [0, 6.2832], color: 'ink', width: 1.8 },
@@ -387,7 +387,7 @@ print(condition, r_isco, efficiency)
   checkpoint: [
     expr({
       id: 'cp-omega-h', difficulty: 3,
-      prompt: t`In the equatorial plane, observers with zero angular momentum turn at $\omega = \dfrac{2Ma}{r^3 + a^2r + 2Ma^2}$ ($G = c = 1$). Evaluate it on the horizon, where $r_+^2 + a^2 = 2Mr_+$, and write $\Omega_H$ in terms of $M$ and $a$ alone.`,
+      prompt: t`In the equatorial plane, observers with zero angular momentum turn at $$\omega = \frac{2Ma}{r^3 + a^2r + 2Ma^2}$$ ($G = c = 1$). Evaluate it on the horizon, where $r_+^2 + a^2 = 2Mr_+$, and write $\Omega_H$ in terms of $M$ and $a$ alone.`,
       answer: 'a/(2M(M + sqrt(M^2 - a^2)))',
       answerTeX: t`\frac{a}{2M\left(M + \sqrt{M^2 - a^2}\right)}`,
       lhs: '\\Omega_H',

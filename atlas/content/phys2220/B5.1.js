@@ -19,7 +19,7 @@ const EX = (() => {
 function reactanceGraph({ L, C, fmax, Xmax, show = ['L', 'C'], numbers = true, vl = [], caption }) {
   const curves = [];
   if (show.includes('L')) curves.push({ fn: `${r6(TAU * L)}*x`, color: COL.L, width: 2.6, label: 'coil: ωL', labelAt: r6(fmax * 0.62), labelDx: 6, labelDy: -14 });
-  if (show.includes('C')) curves.push({ fn: `1/(${r6(TAU * C)}*x)`, color: COL.C, width: 2.6, domain: [r6(fmax * 0.01), r6(fmax)], label: 'capacitor: 1/ωC', labelAt: r6(fmax * 0.1), labelDx: 8, labelDy: -6 });
+  if (show.includes('C')) curves.push({ fn: `1/(${r6(TAU * C)}*x)`, color: COL.C, width: 2.6, domain: [r6(fmax * 0.01), r6(fmax)], label: 'capacitor: 1/ωC', labelAt: r6(Math.min(fmax * 0.8, 1 / (TAU * C * 0.6 * Xmax))), labelDx: 8, labelDy: -8 });
   return {
     type: 'graph',
     params: { x: [0, r6(fmax)], y: [0, r6(Xmax)], aspect: 'wide', axesAt: 'edge', xlabel: 'f (Hz)', ylabel: 'reactance (Ω)', ...(numbers ? {} : { xticks: 0.001, yticks: 0.001 }), curves, vlines: vl },
@@ -120,7 +120,7 @@ A **phasor** is an arrow as long as the amplitude, turning counter-clockwise at 
     mcq({
       id: 'which-element', difficulty: 2,
       prompt: t`An unknown single element in the box is driven by an AC source. Its phasors and graphs are shown. What is in the box?`,
-      visual: acPic({ mode: 'ac', elements: 'C', V0: 10, f: 100, C: 20e-6, phase: 40, hide: ['element', 'C'] }, 'The source voltage v (gold) and the current i (blue), as phasors and against time. The current is drawn to its own scale.'),
+      visual: acPic({ mode: 'ac', elements: 'C', V0: 10, f: 100, C: 20e-6, phase: 40, hide: ['element', 'C'], strip: true }, 'The source voltage v (gold) and the current i (blue), as phasors and against time. The current is drawn to its own scale.'),
       choices: ['A capacitor', 'A coil', 'A resistor', 'You cannot tell without knowing the frequency'],
       answer: 0,
       why: {

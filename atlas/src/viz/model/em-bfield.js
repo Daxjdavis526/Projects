@@ -71,9 +71,9 @@ export function loopPsi(I, a, z0, z, rho) {
 }
 
 // ─── scenes ─────────────────────────────────────────────────────────────────
-/** N loops evenly spaced from x0 to x1 (a solenoid), each of radius R and current I. */
+/** A solenoid from x0 to x1: N loops of radius R and current I, each centred in its own slice of length (x1 − x0)/N, so n = N/(x1 − x0). */
 export function solenoidLoops({ x0, x1, R, N, I }) {
-  return Array.from({ length: N }, (_, k) => ({ x: N === 1 ? (x0 + x1) / 2 : x0 + ((x1 - x0) * k) / (N - 1), R, I }));
+  return Array.from({ length: N }, (_, k) => ({ x: x0 + ((x1 - x0) * (k + 0.5)) / N, R, I }));
 }
 /** A toroid cut through its middle: N wires out of the page on radius a, N into it on radius b. */
 export function toroidWires({ x = 0, y = 0, a, b, N, I }) {
