@@ -140,6 +140,7 @@ export const LESSONS = {
   'phys2210.M16.2': () => import('./phys2210/M16.2.js'),
   'phys2210.M16.3': () => import('./phys2210/M16.3.js'),
   'phys2210.M16.4': () => import('./phys2210/M16.4.js'),
+  'phys2210.M16.5': () => import('./phys2210/M16.5.js'),
   'phys2210.M2.1': () => import('./phys2210/M2.1.js'),
   'phys2210.M2.2': () => import('./phys2210/M2.2.js'),
   'phys2210.M2.3': () => import('./phys2210/M2.3.js'),
