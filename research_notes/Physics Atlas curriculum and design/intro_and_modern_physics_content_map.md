@@ -1709,3 +1709,543 @@ Design-inferred (standard error patterns; PER sources not verified this session,
   - the McKagan, Perkins & Wieman tunneling paper (arXiv 0802.3194), which was referenced but not opened.
 - **Unverified preset values:** Franck–Hertz mercury 4.9 eV; Davisson–Germer 54 eV and 50° with the measured λ; metal work functions; superconductor T_c values (Hg 4.2 K, Nb 9.2 K, YBCO about 92 K); copper electron density 8.47 × 10²⁸ m⁻³.
 - **Missing benchmarks:** the MIT OCW 8.04 syllabus was not reached. PhET titles outside the Quantum Phenomena list (Band Structure, Semiconductors, Davisson–Germer) were not re-verified.
+
+---
+
+## 5. Intermediate Modern Physics (PHYS 3710): SR in depth, the GR bridge, cosmology, nuclear and particle physics
+
+### Takeaway
+David Peak's USU PHYS 3710 has four parts: Background (including "Rudiments of Quantum Mechanics"), Special Relativity, General Relativity, and Structure of Matter (nuclear and sub-nuclear, through QED Feynman diagrams).
+
+The right level of GR for this bridge course is the "physics-first" level argued by Hartle and used by Taylor, Wheeler & Bertschinger. Simple exact metrics (weak-field, Schwarzschild, flat Friedmann–Robertson–Walker) are given, not derived, and their consequences are explored through clocks, test particles and light rays, with no tensors. Tensor calculus and the Einstein field equations are left to the dedicated GR course.
+
+Cosmology is not visible in Peak's published outline. The Atlas should still include it as a GR-pathway module, built on the Friedmann equation in Newtonian form.
+
+The documented misconceptions to design against:
+- simultaneity treated as absolute (Scherr et al.);
+- relativity kinematics errors held with high confidence (RCI);
+- cosmic expansion read as galaxies moving through space, and cosmological redshift read as a Doppler shift (Davis & Lineweaver);
+- the rubber-sheet model's purely spatial curvature, and time dilation attributed to "being in space" (Kersting; Monash study).
+
+### Cited Findings
+**USU course structure**
+- USU PHYS 3710 consists of Background, Special Relativity, General Relativity and Structure of Matter. It has Structure-of-matter notes 1–9, a "Rudiments of Quantum Mechanics" document, problem sets #1–#13 (with #11 on QED Feynman diagrams), and 2013 exams. — [Peak PHYS 3710 page](https://www.physics.usu.edu/peak/phys_3710/index.htm); [Structure of Matter notes](https://digitalcommons.usu.edu/intermediate_modernphysics_matter/); [Problem Set #11](https://digitalcommons.usu.edu/intermediate_modernphysics_problems/11/); [3710 exams](https://digitalcommons.usu.edu/intermediate_modernphysics_exams)
+
+**The physics-first case for undergraduate GR**
+- Hartle, "General Relativity in the Undergraduate Physics Curriculum", *AJP* 74, 14–21 (2006), argues for a "physics first" approach:
+  - the simplest physically relevant solutions of the Einstein equation (black holes, simple cosmologies, gravitational waves) are presented first without derivation;
+  - their observational consequences are explored through the motion of test particles and light rays;
+  - the Einstein equation comes later.
+  A junior/senior course built this way has run at UC Santa Barbara for decades. Citing a survey by William Hiscock, Hartle reports that only a handful of 32 mid-western research universities offered an intermediate GR course. — [arXiv gr-qc/0506075](https://arxiv.org/abs/gr-qc/0506075); [APS 2005 abstract](https://meetings-archive.aps.org/apr/2005/e5/3/); [AAPT TGRU talk, "The Case for GR for Undergrads"](https://aapt.org/doorway/TGRUTalks/Hartle/HartleTalk5of5.htm)
+
+**Textbook structures for the bridge**
+- **Hartle, *Gravity*.**
+  - Part I, Space and Time in Newtonian Physics and Special Relativity: gravitational physics, geometry as physics, Newtonian physics, the principles of special relativity, special-relativistic mechanics.
+  - Part II, The Curved Spacetimes of General Relativity: gravity as geometry, the description of curved spacetime, geodesics, the geometry outside a spherical star, solar-system tests, black holes, astrophysical black holes, "A Little Rotation", rotating black holes, gravitational waves.
+  - The catalog record is truncated at chapter 17, so the later chapters and Part III were not visible.
+  — [British Library record](https://eld.bl.uk/catalog/020812036); [Physics Today review](https://physicstoday.aip.org/reviews/gravity-an-introduction-to-einsteins-general-relativity); [ComPADRE record](https://www.compadre.org/portal/items/detail.cfm?ID=8528)
+- **Taylor, Wheeler & Bertschinger, *Exploring Black Holes* (2nd ed.).** Free under CC BY 4.0. It avoids tensors and differential geometry and is designed for a lower-undergraduate GR course. It analyzes measurements in local inertial frames, so most situations can be handled with special relativity. — [Exploring Black Holes site](https://www.eftaylor.com/exploringblackholes); [README PDF](https://www.eftaylor.com/exploringblackholes/AAAAREADME180423v1.pdf)
+- **Taylor & Wheeler, *Spacetime Physics* (2nd ed., 1992).** Free. ch1 "Spacetime: Overview"; ch2 "Floating Free" (inertial frames, locating events with clocks); ch3 "Same Laws for All" (invariance of the interval); a Special Topic on the Lorentz transformation; "Trekking Through Spacetime"; "Regions of Spacetime"; "Momenergy". — [Spacetime Physics TOC PDF](https://www.eftaylor.com/spacetimephysics/00_cover_toc.pdf); [eftaylor.com Spacetime Physics](https://www.eftaylor.com/spacetimephysics/); [LibreTexts copy](https://phys.libretexts.org/Bookshelves/Relativity/Spacetime_Physics_(Taylor_and_Wheeler))
+- **Thornton & Rex** put GR in ch15 (4th ed.) or "Modern Astrophysics and General Relativity" (5th ed.: tenets and tests, black holes, gravitational waves), and cosmology in ch16. **Krane** puts GR, its tests, stellar evolution and black holes inside the cosmology chapter. — [WebAssign T&R 5e](https://www.webassign.net/features/textbooks/trmodphys5/details.html); [WebAssign T&R 4e](https://www.webassign.net/features/textbooks/tr4/details.html); [WebAssign Krane 3e](https://www.webassign.net/features/textbooks/krane3/details.html)
+- **Ryden, *Introduction to Cosmology* (2nd ed.).** 12 chapters: introduction; fundamental observations; Newton versus Einstein; cosmic dynamics; model universes; measuring cosmological parameters; dark matter; the CMB; nucleosynthesis and the early universe; inflation; and two chapters on structure formation. This edition adds a chapter on baryonic matter and fuller special- and general-relativity background. — [Cambridge front matter](https://assets.cambridge.org/97811071/54834/frontmatter/9781107154834_frontmatter.pdf); [Kinokuniya listing](https://www.kinokuniya.co.jp/f/dsg-12-EY00156291)
+- **OpenStax Vol 3** ch10 is Nuclear Physics and ch11 is Particle Physics and Cosmology. — [UPI library TOC](https://oalib-perpustakaan.upi.edu/Record/OTLid0000380/TOC?print=1)
+
+**Misconceptions documented by physics education research**
+- Scherr, Shaffer & Vokos on simultaneity and observers are covered in Section 3, as is the follow-up curriculum. — [AAPT-hosted PDF](https://aapt.org/doorway/TGRU/articles/Vokos-time.pdf); [follow-up, arXiv physics/0207081](https://arxiv.org/pdf/physics/0207081)
+- The Relativity Concept Inventory (special-relativity kinematics, with confidence ratings) is covered in Section 4. — [PhysPort RCI](https://www.physport.org/assessments/RCI)
+- **Davis & Lineweaver, "Expanding Confusion"**, *PASA* 21, 97–109 (2004):
+  - common misconceptions about the particle horizon, the event horizon, the "observable universe" and the Hubble sphere (the distance at which recession speed equals c) appear even in the professional literature;
+  - galaxies receding faster than light can be observed, and this does not violate special relativity;
+  - supernova data reject the special-relativistic Doppler interpretation of cosmological redshift (the search summary reports 23σ).
+  — [arXiv astro-ph/0310808](https://arxiv.org/abs/astro-ph/0310808); [PASA/CSIRO](https://publish.csiro.au/as/AS03040); [ANU research portal](https://researchportalplus.anu.edu.au/en/publications/expanding-confusion-common-misconceptions-of-cosmological-horizon/)
+- **GR education research (Kersting):**
+  - a thesis on GR teaching with an online learning environment, *PRPER* (2018);
+  - Kersting & Steier (2018), on the role of the rubber-sheet analogy, *Science & Education*;
+  - a 2019 *Physics Education* paper arguing that most popular GR models, the rubber sheet among them, address only spatial curvature, and proposing a model built on free fall and warped time.
+  — [UiO DUO thesis record](https://duo.uio.no/handle/10852/71817); [ReleKvant project](https://mn.uio.no/fysikk/forskning/prosjekter/relekvant/)
+- **Curved-spacetime conceptions (2025 study).** Students with accurate conceptions used imagery tied to the rubber-sheet analogy. Students with limited conceptions attributed spatial phenomena to forces and linked time dilation to "being in outer space". — [Monash research portal](https://research.monash.edu/en/publications/conceptions-of-curved-spacetime-relating-students-mental-represen/)
+- A 2018 study tested a short intervention on gravitational waves and quantum physics; only the title was seen. — [arXiv 1807.02995](https://arxiv.org/pdf/1807.02995)
+
+### Inferences
+#### (2) Major subjects
+1. Background: geometric and natural units, hyperbolic functions, metrics on curved surfaces, rudiments of QM.
+2. Special relativity as spacetime geometry: the interval, Lorentz transformations, Minkowski diagrams, paradoxes, Doppler effect and aberration.
+3. Four-vectors and relativistic dynamics, including collisions, thresholds, the relativistic rocket and uniform acceleration.
+4. The equivalence principle, gravitational redshift and time dilation.
+5. Gravity as geometry: metrics, geodesics and extremal aging, curvature as tides.
+6. Schwarzschild spacetime: orbits, light bending, perihelion precession, the photon sphere and the ISCO.
+7. Black holes, including the astrophysical ones.
+8. Gravitational waves at an introductory level.
+9. Cosmology: the Hubble–Lemaître law, the Friedmann equation, model universes, the CMB, nucleosynthesis, dark matter and dark energy, horizons.
+10. Nuclear structure.
+11. Radioactivity.
+12. Nuclear reactions, fission and fusion.
+13. Elementary particles and the Standard Model, including Feynman diagrams.
+
+#### (3) Module → submodule → lesson tree
+Sources reconciled: Peak's four-part outline; Taylor & Wheeler, *Spacetime Physics*; Hartle, *Gravity* Parts I–II; Taylor, Wheeler & Bertschinger, *Exploring Black Holes*; Ryden ch1–10; Thornton & Rex ch2 and ch12–16; Krane ch2 and ch12–15; OpenStax Vol 3 ch5 and ch10–11. The section-level detail is my synthesis.
+
+*Part A: Background*
+
+**R0 Toolkit [P/C]**
+- 0.1 Geometric and natural units: c = 1 (years and light-years); G = c = 1, so mass is a length (GM☉/c² ≈ 1.477 km, half of r_s(☉) ≈ 2.953 km); ħc ≈ 197.3 MeV·fm
+- 0.2 Hyperbolic functions and identities (cosh² − sinh² = 1)
+- 0.3 Transformations as matrices: rotations versus boosts
+- 0.4 Index notation and the summation convention (light); dot products through a metric
+- 0.5 Metrics on curved 2D surfaces (plane in polar coordinates, sphere): ds² as "the rule for distance"
+- 0.6 Rudiments of QM for the structure-of-matter part: confinement energies, tunneling, spin, Pauli exclusion (mirrors Peak's "Rudiments" note)
+
+*Part B: Special relativity in depth*
+
+**R1 Spacetime and the interval [C][GR] (Taylor & Wheeler ch1–3)**
+- 1.1 Events and worldlines; a lattice of clocks synchronized by light signals
+- 1.2 Free-float (inertial) frames
+- 1.3 The invariant interval s² = c²Δt² − Δx² (state the sign convention); timelike, spacelike and lightlike separations
+- 1.4 Proper ("wristwatch") time, τ = ∫√(1 − v²/c²) dt
+- 1.5 Light cones and causality: spacelike pairs can change order between frames; timelike pairs cannot
+- 1.6 Invariance of transverse lengths and of the interval (proof sketch)
+
+**R2 Lorentz transformations and Minkowski diagrams [C]**
+- 2.1 Deriving the LT from the postulates, or from interval invariance plus linearity
+- 2.2 The LT as a hyperbolic rotation: rapidity η with tanh η = v/c and γ = cosh η
+- 2.3 Two-observer diagrams: tilted axes, lines of simultaneity, calibration hyperbolae
+- 2.4 Time dilation and length contraction read from the diagram, including reciprocity
+- 2.5 Velocity composition as rapidity addition
+- 2.6 Paradoxes: the twin paradox with a turnaround; the pole in the barn; [E] Bell's spaceships
+- 2.7 The relativistic Doppler effect (longitudinal and transverse); aberration and the "headlight" effect
+- 2.8 [E] Visual appearance: the Terrell–Penrose rotation
+
+**R3 Four-vectors and relativistic dynamics [C] (Taylor & Wheeler "Momenergy")**
+- 3.1 Four-vectors and the Minkowski dot product; four-velocity with norm c²
+- 3.2 Four-momentum (E/c, p); invariant mass, m²c² = E²/c² − p²
+- 3.3 Four-momentum conservation in decays (π⁰ → γγ) and collisions; system mass is not additive
+- 3.4 Threshold energies on a fixed target versus a collider (antiproton production at KE = 6m_p c² ≈ 5.63 GeV)
+- 3.5 Compton scattering and the Doppler shift derived with four-vectors
+- 3.6 [GR bridge] Four-acceleration; uniform proper acceleration gives a hyperbolic worldline and a Rindler horizon
+- 3.7 [AERO] The relativistic rocket: rapidity = (v_e/c) ln(m₀/m_f); the photon rocket; a 1 g voyage
+- 3.8 [E] Four-force; how E and B transform; a preview of F^μν
+
+**R4 Experimental foundations [C]**
+- 4.1 The Michelson–Morley and Kennedy–Thorndike experiments
+- 4.2 Muons in flight and in storage rings
+- 4.3 Hafele–Keating and GPS, separating the SR and GR parts [GR]
+- 4.4 Accelerators, and E = mc² in nuclear reactions
+
+*Part C: General relativity at bridge level*
+
+**G1 The equivalence principle [C][GR] (Hartle ch6; T&R GR chapter)**
+- 1.1 Inertial versus gravitational mass: Galileo, Newton, Eötvös
+- 1.2 Einstein's elevator: free fall is locally inertial; acceleration is locally equivalent to gravity
+- 1.3 The weak and the Einstein equivalence principles; "local" means tidal effects are negligible
+- 1.4 Light bending in an accelerating elevator implies light bends in gravity
+- 1.5 Gravitational redshift from the EP, Δf/f = gh/c²; Pound–Rebka (2.46 × 10⁻¹⁵ over 22.5 m)
+- 1.6 Gravitational time dilation, dτ/dt ≈ 1 + Φ/c²; the GPS budget (+45.7, −7.2, net +38.5 µs/day; Section 6)
+- 1.7 Tides are what the equivalence principle cannot remove, and so they are curvature
+
+**G2 Gravity as geometry [C][GR] (Hartle ch2, ch6–8; *Exploring Black Holes*; Taylor & Wheeler ch9)**
+- 2.1 Geometry from the metric (polar plane, sphere); coordinates versus measured distances
+- 2.2 Intrinsic curvature: triangle angle sums, parallel transport, great-circle geodesics; a cylinder is intrinsically flat
+- 2.3 Spacetime metrics: Minkowski, and the static weak field ds² = −(1 + 2Φ/c²)c²dt² + (1 − 2Φ/c²)(dx² + dy² + dz²)
+- 2.4 Free fall as a geodesic: the principle of extremal (maximal) aging; recovering Newtonian free fall in the weak field
+- 2.5 Everyday gravity is mostly warped time (the g_tt term), not warped space. This is where to confront the rubber-sheet picture (Kersting).
+- 2.6 Geodesic deviation is tides (qualitative), linking back to Physics I S14
+- 2.7 [E] What the Einstein equation says in words ("matter tells spacetime how to curve") and why its machinery waits for the GR course
+
+**G3 Schwarzschild spacetime: orbits and tests [C][GR] (Hartle ch9–10; *Exploring Black Holes*)**
+- 3.1 The Schwarzschild metric (given); r as the "reduced circumference" (circumference/2π)
+- 3.2 Shell observers versus far-away "bookkeeper" observers; local versus coordinate measurements
+- 3.3 Redshift and time dilation at radius r, √(1 − r_s/r); at a neutron-star surface z ≈ 0.24 (Section 6)
+- 3.4 Conserved energy and angular momentum per unit mass; the effective potential for massive particles
+- 3.5 Orbits: precessing ellipses (Mercury, computed 42.98″ per century from the orbit elements in Section 6); the ISCO at 6GM/c² = 3r_s
+- 3.6 Light: its effective potential; the photon sphere at 3GM/c² = 1.5r_s; critical impact parameter b_c = 3√3 GM/c² ≈ 2.6r_s
+- 3.7 Light deflection (1.75″ at the solar limb); Einstein rings and lensing [astro]
+- 3.8 [E] The Shapiro delay
+- 3.9 [E] Geodetic and frame-dragging precession (Gravity Probe B)
+
+**G4 Black holes [C][GR] (Hartle ch12–15; *Exploring Black Holes*; T&R GR chapter)**
+- 4.1 Collapse beyond the degeneracy-pressure limits (from 2710 MP10)
+- 4.2 The horizon at r_s = 2GM/c². It is a coordinate singularity of Schwarzschild coordinates, and nothing locally special happens there for a large black hole.
+- 4.3 Radial plunge: finite proper time to the horizon and to r = 0, but infinite Schwarzschild coordinate time; the "frozen star" appearance and diverging redshift
+- 4.4 Tides and spaghettification: Δa ≈ 2GML/r³, so at the horizon it scales as 1/M². Across 2 m: about 2 × 10⁸ m/s² for 10 M☉, about 1.3 × 10⁻³ m/s² for 4 × 10⁶ M☉ (Section 6).
+- 4.5 Inside the horizon r becomes timelike (qualitative); the central singularity
+- 4.6 Astrophysical black holes: X-ray binaries; Sgr A* weighed by stellar orbits (Kepler III); the Event Horizon Telescope shadows of M87* and Sgr A*; accretion and ISCO-limited efficiency [E]
+- 4.7 [E] Rotating (Kerr) black holes qualitatively: frame dragging, the ergosphere, spin inferred from the ISCO
+- 4.8 [E] Hawking radiation (T_H ∝ 1/M; about 6.2 × 10⁻⁸ K for 1 M☉) and black-hole thermodynamics
+
+**G5 Gravitational waves [C/E][GR] (Hartle ch16; T&R 5e)**
+- 5.1 GWs as ripples of curvature moving at c; strain h = ΔL/L
+- 5.2 The + and × polarizations acting on a ring of free particles
+- 5.3 Sources: quadrupole, not dipole, radiation; binary inspiral; the chirp; chirp mass (about 28 M☉ for 36 + 29; Section 6)
+- 5.4 Interferometric detection: ΔL ≈ 4 × 10⁻¹⁸ m for h = 10⁻²¹ on a 4-km arm
+- 5.5 GW150914: 36 and 29 M☉ merging to 62 M☉; about 3 M☉c² radiated (≈ 5 × 10⁴⁷ J) at about 410 Mpc
+- 5.6 [E] The Hulse–Taylor binary pulsar; GW170817 and the speed of gravity; pulsar timing arrays
+
+**C1 Cosmology and Big Bang models [Atlas extension; C for the learner's goals][GR] (Ryden ch1–10; Krane and T&R cosmology chapters; OS3 ch11)**
+- 1.1 Olbers' paradox; the cosmological principle
+- 1.2 The Hubble–Lemaître law; H₀; Hubble time 1/H₀ = 14.5 Gyr for H₀ = 67.4 km/s/Mpc
+- 1.3 Comoving coordinates; the scale factor a(t); proper distance; no center (with caveats about the balloon analogy)
+- 1.4 Cosmological redshift, 1 + z = a_obs/a_emit, which is not a Doppler shift (Davis & Lineweaver)
+- 1.5 The Friedmann equation from Newtonian energy, then its GR reading; critical density (about 5 proton masses per m³); the Ω parameters; curvature k
+- 1.6 Model universes: radiation (a ∝ t^{1/2}); matter (a ∝ t^{2/3}, t₀ = 2/(3H₀) = 9.7 Gyr); Λ (exponential); flat ΛCDM (t₀ ≈ 13.8 Gyr for H₀ = 67.4 and Ω_m = 0.315); acceleration (q₀ ≈ −0.53)
+- 1.7 The CMB: a 2.7255 K blackbody; recombination and decoupling (T ≈ 3000 K at z ≈ 1100); anisotropies (qualitative)
+- 1.8 [E→C] Big Bang nucleosynthesis: light-element abundances, roughly 25% helium by mass
+- 1.9 Evidence for dark matter (rotation curves, clusters, lensing, CMB) and for dark energy (Type Ia supernovae)
+- 1.10 Horizons: the particle horizon, the Hubble sphere (c/H₀ ≈ 4.45 Gpc) and the event horizon; superluminal recession is allowed
+- 1.11 [E] Inflation (the horizon and flatness problems); the "Hubble tension" as live research
+
+*Part D: Structure of matter*
+
+**N1 Nuclear structure [C] (Krane ch12; T&R ch12; OS3 ch10)**
+- 1.1 Z, N, A; isotopes, isobars, isotones; the nuclide chart
+- 1.2 R = R₀A^{1/3} with R₀ ≈ 1.2 fm; nuclear density ≈ 2.3 × 10¹⁷ kg/m³, roughly the same for all nuclei
+- 1.3 Binding energy and mass defect (u and MeV); the binding-energy-per-nucleon curve and its peak near iron
+- 1.4 The nuclear force: short-range, charge-independent, saturating; Yukawa range ħ/(m_π c) ≈ 1.4 fm
+- 1.5 The semi-empirical mass formula (volume, surface, Coulomb, asymmetry and pairing terms); the valley of stability
+- 1.6 The liquid-drop versus the shell model; magic numbers 2, 8, 20, 28, 50, 82, 126
+- 1.7 [E] Nuclear spin and moments; NMR and MRI
+
+**N2 Radioactivity [C] (Krane ch12; T&R ch12–13; OS3 ch10)**
+- 2.1 N = N₀e^{−λt}; t½ = ln 2/λ; τ = 1/λ; activity in Bq and Ci
+- 2.2 α decay: Q-value, recoil sharing, Gamow tunneling, the Geiger–Nuttall law
+- 2.3 β⁻, β⁺ and electron capture; the continuous spectrum requires a neutrino; Q-values from atomic masses
+- 2.4 γ decay and isomers; [E] internal conversion
+- 2.5 Decay chains; secular and transient equilibrium; the natural series
+- 2.6 Dating with ¹⁴C, U–Pb and K–Ar
+- 2.7 Radiation interactions and dosimetry (Gy, Sv); biological effects; shielding [AERO: the space radiation environment]
+- 2.8 Applications: RTGs powered by ²³⁸Pu decay heat [AERO]; medical isotopes
+
+**N3 Nuclear reactions [C] (Krane ch13; T&R ch13; OS3 ch10)**
+- 3.1 Conservation laws; Q-values; thresholds in the lab and center-of-mass frames
+- 3.2 Cross sections in barns; reaction rates; neutron activation
+- 3.3 Fission: about 200 MeV per ²³⁵U fission; the liquid-drop barrier; chain reactions and criticality; reactors; [E] delayed neutrons
+- 3.4 Fusion: the Coulomb barrier and tunneling; the pp chain and CNO cycle; stellar nucleosynthesis up to Fe ([E] the s- and r-processes); tokamak and inertial-confinement reactors
+- 3.5 [AERO][E] Nuclear thermal and nuclear electric propulsion; fusion-propulsion concepts
+
+**P1 Elementary particles [C] (Krane ch14; T&R ch14; OS3 ch11)**
+- 1.1 The four interactions: strengths, ranges, mediators
+- 1.2 Leptons and hadrons (baryons, mesons); antiparticles
+- 1.3 Conservation laws: charge, baryon number, lepton-family numbers; strangeness, conserved in strong and EM interactions but violated by the weak interaction
+- 1.4 The quark model: flavors and color; the eightfold way; quark content of p, n, π, K, Λ, Ω⁻
+- 1.5 Feynman diagrams: the QED vertex; e⁺e⁻ annihilation; Compton and Møller scattering; couplings scale with α (aligned with Peak's Problem Set #11)
+- 1.6 QCD: gluons, confinement, asymptotic freedom (qualitative); jets
+- 1.7 The weak interaction: W± and Z⁰; β decay at the quark level; [E] parity violation (the Wu experiment)
+- 1.8 The Standard Model table; the Higgs mechanism (qualitative) and the Higgs boson
+- 1.9 [E] Neutrino oscillations and neutrino mass
+- 1.10 Accelerators and detectors: cyclotron, synchrotron, LHC; tracking in a B field, calorimetry; invariant-mass peaks (links to R3)
+- 1.11 [E][GR] Particle physics in the early universe: baryon asymmetry, dark-matter candidates, the thermal history
+
+**Coverage check against the required 3710 list:**
+
+| Required topic | Module |
+|---|---|
+| Lorentz transformations | R2 |
+| Minkowski diagrams | R2.3–2.6 |
+| Relativistic momentum and energy | R3 |
+| Four-vectors | R3 |
+| Intervals | R1 |
+| Equivalence principle | G1 |
+| Gravity and geometry | G2 |
+| Introductory curved spacetime | G2–G3 |
+| Gravitational time dilation | G1.6, G3.3 |
+| Black holes | G4 |
+| Introductory cosmology and Big Bang models | C1 |
+| Nuclear structure | N1 |
+| Radioactivity | N2 |
+| Nuclear reactions | N3 |
+| Elementary particle physics | P1 |
+
+#### What level of GR belongs in 3710, and what belongs in a dedicated GR course
+
+| Topic | 3710 bridge level (physics-first, no tensors) | Dedicated GR course (e.g. Hartle Part III, Schutz, Carroll) |
+|---|---|---|
+| Equivalence principle | Full conceptual and quantitative treatment: elevator arguments, redshift gh/c², GPS | Formalized as local Lorentz frames, the tangent space, minimal coupling |
+| Metric | Given line elements (2D surfaces, weak field, Schwarzschild, flat FRW), used to compute distances, times and redshifts | The metric tensor g_μν in general; coordinate transformations; tensor algebra |
+| Geodesics | Extremal aging, conserved E and L, effective potentials, numerical orbit integration in sims | The geodesic equation with Christoffel symbols; Killing vectors |
+| Curvature | Intrinsic curvature on surfaces; tides as geodesic deviation (qualitative) | Riemann, Ricci and Einstein tensors; the geodesic-deviation equation |
+| Field equations | In words only; the Newtonian limit ∇²Φ = 4πGρ | Derivation of G_μν = 8πG T_μν/c⁴; stress-energy tensors; the Schwarzschild derivation; the TOV equation |
+| Black holes | Horizon, plunge, photon sphere, ISCO, shadows, tides; Kerr qualitatively | Kruskal–Szekeres and Eddington–Finkelstein coordinates; Penrose diagrams; Kerr geodesics; the Penrose process; horizon theorems |
+| Gravitational waves | Strain, polarizations, chirp, detectors, energy scale, GW150914 | Linearized gravity; gauge; the quadrupole-formula derivation; waveform modelling |
+| Cosmology | The Friedmann equation from Newtonian energy; a(t) models; redshift and horizons | Friedmann equations from Einstein's equations with a perfect fluid; curvature; perturbations |
+| Math | Algebra, single-variable calculus, hyperbolic functions, simple matrices, light index notation | Multilinear algebra, tensor calculus, differential geometry |
+
+This boundary follows Hartle's physics-first argument (solutions first, without derivation, explored through test particles and light) and the tensor-free design of *Exploring Black Holes*. It also matches the single-chapter GR treatments in Thornton & Rex and Krane. Cited findings above.
+
+#### (4) Mathematical skills
+- Algebra with γ and β; hyperbolic functions and rapidity.
+- 2×2 and 4×4 matrices for boosts and their composition.
+- Light index notation; Minkowski dot products.
+- Proper-time integrals along worldlines.
+- Reading a metric to extract physical distances and times.
+- Taylor expansions for weak-field and low-velocity limits.
+- Simple extremization (calculus of variations at a heuristic level, or discretized "maximal aging").
+- Energy-conservation-style ODEs for orbits; the effective potential.
+- Logarithms (relativistic rocket, decay).
+- Exponential decay and simple coupled linear ODEs (decay chains).
+- Poisson counting statistics.
+- Order-of-magnitude reasoning in natural units (MeV, fm, geometric units).
+
+#### (5) Prerequisite knowledge
+- PHYS 2710: SR kinematics and dynamics; photons; the Schrödinger equation; spin; Pauli exclusion; Fermi gases.
+- Physics I gravitation, orbits and energy diagrams; Physics II E&M (Maxwell, c, interferometry).
+- Calc II.
+- Calc III and linear algebra are helpful.
+- The Atlas should run a "readiness check" of SR-in-2710 skills before R1.
+
+#### (6) Foundational concepts that short catalog descriptions leave implicit
+- **Events and invariants are the physics; coordinates are labels.** Proper time and the interval are frame-independent; Δt and Δx are not.
+- **Simultaneity at a distance is a convention fixed by synchronization.** Its relativity is the root of most paradoxes.
+- **Local versus global:** inertial frames are only local in the presence of gravity.
+- **Gravity is not a force in GR.** Free fall is unforced, geodesic motion, and "weight" is the floor pushing you off your geodesic.
+- **Most Newtonian gravity comes from the time–time part of the metric (warped time).**
+- **Coordinate singularity (r = r_s in Schwarzschild coordinates) versus physical singularity (r = 0).**
+- **Expansion of space versus motion through space;** redshift as a stretching of wavelength with a(t).
+- **Geometric units** (G = c = 1) as a way of thinking.
+- **Mass is energy content, and system mass is not additive.**
+- **Conservation laws from symmetries:** energy and L along Schwarzschild geodesics; baryon and lepton number in particle reactions.
+- **Cross sections and decay rates are probabilities**, the bridge between QM amplitudes and counts.
+- **Virtual-particle language is a picture of a perturbation expansion**, not a literal trajectory.
+
+#### (7) Problem-solving techniques and representative archetypes
+Techniques:
+- Draw the spacetime diagram first; list events with coordinates in one frame; transform them.
+- Compute invariants to cross-check.
+- Use rapidities for composition.
+- Use four-momentum conservation with squared invariants to kill unknowns.
+- Work in the center-of-mass frame for thresholds.
+- In GR: read the metric for the measurement in question (shell versus far-away observer); use the conserved E and L with an effective potential; use the weak-field limit for Earth problems; use geometric units.
+- In cosmology: work with the scale factor and density scalings (ρ_m ∝ a⁻³, ρ_r ∝ a⁻⁴, ρ_Λ constant).
+- In nuclear physics: Q-values from atomic masses (keeping track of electrons), and decay-law algebra.
+- In particle physics: conservation-law tables, quark-content bookkeeping, and identifying the interaction from the conserved quantities.
+
+Archetypes by module:
+- **R1–R2:**
+  - order reversal for spacelike events: find the frame speed where they are simultaneous;
+  - a trip to a star 4.37 ly away at 0.8c: Earth time 5.46 yr, ship time 3.28 yr;
+  - 0.8c ⊕ 0.8c = 0.976c;
+  - the pole in the barn with door events;
+  - the Doppler factor for 0.6c recession (= 0.5).
+- **R3:**
+  - invariant mass of a two-photon decay;
+  - threshold energy of p + p → p + p + p + p̄;
+  - a Compton shift derived from four-vectors;
+  - final speed of a photon rocket with mass ratio 10 (0.980c);
+  - a 1 g voyage lasting 1 year of proper time: v = 0.775c, 1.19 yr of coordinate time, 0.56 ly.
+- **G1:**
+  - Pound–Rebka shift;
+  - GPS drift per day, and the position error it would cause;
+  - clock-rate difference between Denver and sea level;
+  - light bending in a 1 g elevator over 1 km.
+- **G2:**
+  - circumference versus radius on a sphere;
+  - triangle angle excess;
+  - extremal proper time for a thrown ball (qualitative, discretized);
+  - the weak-field metric giving g.
+- **G3:**
+  - redshift from a neutron-star surface;
+  - ISCO radius and orbital period for 10 M☉ (88.6 km, 4.55 ms, f_GW ≈ 440 Hz);
+  - photon-sphere radius;
+  - light deflection by the Sun;
+  - Mercury's precession.
+- **G4:**
+  - r_s for Earth, the Sun and Sgr A*;
+  - tidal acceleration at the horizon for stellar-mass versus supermassive black holes;
+  - proper time to fall from rest at 10r_s (enrichment, or done numerically in a sim);
+  - Sgr A* mass from a stellar orbit (Kepler III).
+- **G5:**
+  - ΔL for a given strain;
+  - chirp mass from component masses;
+  - GW frequency at the ISCO (twice the orbital frequency);
+  - energy radiated in joules.
+- **C1:**
+  - recession speed at 100 Mpc (6740 km/s);
+  - Hubble time;
+  - critical density;
+  - scale factor at z = 1100 and the CMB temperature then;
+  - age of a matter-only versus a ΛCDM universe;
+  - whether a galaxy with recession speed above c can be seen.
+- **N1–N3:**
+  - nuclear radius and density;
+  - binding energy of ⁴He from masses;
+  - an SEMF estimate of B for ⁵⁶Fe;
+  - the α-decay Q-value and α kinetic energy;
+  - activity of a sample;
+  - a ¹⁴C age;
+  - RTG power after 20 years [AERO];
+  - fission energy per kilogram of ²³⁵U compared with chemical fuel;
+  - the pp-chain energy budget of the Sun.
+- **P1:**
+  - is p → e⁺ + γ allowed? (no: baryon and lepton number);
+  - quark content of the Λ;
+  - identify the interaction in K⁻ + p → Ω⁻ + K⁺ + K⁰;
+  - draw the lowest-order QED diagram for e⁺e⁻ → μ⁺μ⁻;
+  - range of a force from the mediator's mass.
+
+#### (8) Simulation specifications
+**S1 Two-Observer Minkowski Diagram (R1–R2)**
+- Drawn: draggable events; the axes of a second frame, tilted by its speed; calibration hyperbolae; light cones; lines of simultaneity; clock ticks along worldlines; a readout showing the interval unchanged across frames.
+- Parameters: v (−0.99c to 0.99c) or rapidity.
+- Teaches: the geometry of the Lorentz transformation; simultaneity; invariants.
+- Simplified: one space dimension.
+
+**S2 Boost Composer (R2.5)**
+- Drawn: event-coordinate tables under successive boosts; velocity addition displayed as rapidity addition; [E] non-collinear boosts showing Thomas–Wigner rotation.
+
+**S3 Proper-Time Integrator / Twin Lab (R1.4, R2.6, R3.7) [GR seed][AERO]**
+- Drawn: a worldline the learner sketches, or a preset profile (cruise, or constant 1 g proper acceleration); τ integrated along it; side-by-side twin clocks.
+- Parameters: speed (0–0.99c); distance (1–20 ly); acceleration (0.1–3 g).
+- Teaches: the straight worldline maximizes proper time, the seed of "geodesics extremize aging".
+
+**S4 Paradox Theatre (R2.6)**
+- Drawn: the pole-in-barn and Bell's-spaceship scenes, with a frame toggle and event timestamps.
+
+**S5 Relativistic Flight View (R2.7–2.8) [E]**
+- Drawn: a starfield and a city grid seen at speed β, with aberration, Doppler color shift, the searchlight effect and Terrell rotation.
+- Parameters: β (0–0.99).
+- Benchmark ideas: Real Time Relativity and A Slower Speed of Light (unverified; see Gaps).
+
+**S6 Momenergy Collider (R3)**
+- Drawn: energy–momentum diagrams; particle presets (e, µ, π, p, γ); decay and collision builders; an invariant-mass readout; fixed-target versus collider threshold comparison.
+- Parameters: masses; kinetic energy (0–10 GeV); angles.
+- Teaches: invariant mass is conserved; system mass is not additive.
+
+**S7 Einstein's Elevator (G1)**
+- Drawn: a box in four states (at rest on Earth, in free fall, accelerating in deep space, drifting inertially); balls and light beams inside; clocks at the floor and ceiling exchanging signals (frequency shift gh/c², exaggerated by a scale slider); a "make the box big" toggle that reveals tidal convergence.
+- Teaches: the equivalence principle and its locality; gravitational redshift.
+
+**S8 Clock Tower and GPS (G1.6, R4.3) [AERO]**
+- Drawn: Earth with clocks at chosen altitudes; bar charts of the GR (+) and SR (−) rate offsets and their net in µs/day; the position error that grows if the offset is left uncorrected.
+- Parameters: altitude (0–40,000 km); circular-orbit speed computed automatically; a planet-mass multiplier.
+- Teaches: the +45.7, −7.2 and +38.5 µs/day budget at GPS altitude (Section 6).
+- Simplified: circular orbits; Earth's rotation ignored.
+
+**S9 Curved Surfaces Lab (G2)**
+- Drawn: a sphere, a saddle and a cylinder; geodesic drawing; triangles with angle sums; parallel transport of a vector around a loop; initially parallel geodesics converging.
+- Parameters: curvature radius; loop size.
+- Teaches: intrinsic curvature, and geodesic deviation as tides.
+
+**S10 Warped-Time Free Fall (G2.4–2.5)**
+- Drawn: a spacetime diagram with a "clock-rate landscape" g_tt(z) near Earth. The learner tries worldlines of a thrown ball between two fixed events, and the one with maximal proper time matches the parabola.
+- Teaches: free fall comes from warped time. This is the deliberate alternative to the rubber sheet (Kersting).
+- Simplified: weak field, 1+1 dimensions.
+
+**S11 Schwarzschild Orbit Lab (G3)**
+- Drawn: Newtonian and GR effective potentials overlaid; orbits integrated in Schwarzschild proper time, showing precession, the ISCO and plunges; photon orbits, the photon sphere and capture.
+- Parameters: M (1–10¹⁰ M☉); specific E and L, or r₀ and v₀.
+- Teaches: precession, the ISCO and photon-sphere instability.
+- Simplified: equatorial plane, test particle, non-rotating black hole.
+
+**S12 Plunge (G4.3–4.4)**
+- Drawn: the infaller's proper time alongside far-observer Schwarzschild time; outgoing light signals stretching in period (redshift); a tidal-stretch gauge on a 2-m body.
+- Parameters: M (3 M☉ to 6.5 × 10⁹ M☉); release radius.
+- Teaches: coordinate versus proper time; that the horizon is not a wall; the tidal scaling ∝ 1/M².
+
+**S13 Lensing and Shadow (G3.7, G4.6)**
+- Drawn: a ray-traced Schwarzschild lens in front of a starfield; Einstein-ring formation; the photon ring and shadow (radius b_c ≈ 2.6r_s); an overlay comparing the angular size with EHT targets.
+- Simplified: no spin; a thin, schematic emission model.
+
+**S14 GW Detector and Chirp (G5)**
+- Drawn: a ring of particles under the + and × polarizations (strain exaggerated, up to 0.3); an L-shaped interferometer whose arms change length; a photodetector trace; a chirp generator using the leading-order Newtonian quadrupole inspiral.
+- Parameters: m₁ and m₂ (1–100 M☉); distance (10–2000 Mpc); a GW150914 preset.
+- Teaches: the quadrupole pattern; chirp mass; why interferometers work. The true strain scale (~10⁻²¹) is shown on a separate log axis.
+
+**S15 Expanding Universe Grid (C1)**
+- Drawn: a comoving grid of galaxies that expands, so that every observer sees a Hubble law; a photon wave stretching with a(t); a Davis–Lineweaver-style light-cone diagram showing the particle horizon, Hubble sphere and event horizon; an age readout.
+- Parameters: H₀ (50–80 km/s/Mpc); Ω_m, Ω_Λ and Ω_r (flat or curved); a Planck 2018 preset (67.4, Ω_m = 0.315).
+- Teaches: space expanding rather than galaxies moving through it; how superluminal recession and observability fit together.
+
+**S16 Thermal History Timeline (C1.7–1.8)**
+- Drawn: T against t on log–log axes; a recombination marker; today's CMB spectrum; [E] the helium mass fraction against baryon density.
+
+**S17 Nuclide Chart and Binding Curve (N1)**
+- Drawn: an interactive N–Z chart colored by half-life and decay mode; the B/A curve with adjustable SEMF terms; fission and fusion energy arrows.
+- Teaches: the stability valley; why both fission and fusion release energy.
+
+**S18 Decay Chains and Dating (N2) [AERO]**
+- Drawn: parent and daughter N(t); activity; secular equilibrium; a ¹⁴C dating tool; RTG power against time.
+- Parameters: half-lives; initial amounts.
+
+**S19 Gamow Tunneling (N2.2)**
+- Drawn: a Coulomb barrier plus a nuclear well; a Q-value slider; the resulting half-life on a log axis spanning about 30 orders of magnitude.
+
+**S20 Chain Reaction (N3.3)**
+- Drawn: neutron generations; a multiplication factor k (0.9–1.1); control rods; an [E] delayed-neutron toggle.
+
+**S21 Stellar Fusion (N3.4)**
+- Drawn: pp-chain steps with their energy releases; the Coulomb barrier against temperature; [E] the Gamow peak.
+
+**S22 Feynman Diagram Builder and Event Display (P1)**
+- Drawn: vertex palettes for QED, QCD and the weak interaction; a checker for charge, baryon number and lepton numbers; allowed and forbidden verdicts; a detector event display in which track curvature in B gives momentum and charge, and calorimeter deposits identify particles.
+- Teaches: conservation-law bookkeeping; the meaning of diagrams. Aligned with Peak's Problem Set #11.
+
+#### (9) Connections to advanced physics and GR
+3710 is the bridge itself. Its natural next steps:
+- **A dedicated GR course** (see the boundary table).
+- **Relativistic astrophysics:** neutron stars via the TOV equation; accretion; jets.
+- **Gravitational-wave astronomy:** waveforms, parameter estimation.
+- **Cosmology:** perturbations, CMB anisotropies, inflation.
+- **Quantum field theory** in the particle-physics line, with Feynman rules and gauge theories (Griffiths' *Introduction to Elementary Particles* sets the scope; see Gaps).
+- **Nuclear astrophysics:** nucleosynthesis.
+- **Propulsion:** nuclear thermal rockets; the relativistic-rocket limits [AERO].
+
+#### (10) Depth and rigor
+- SR: fully quantitative (Lorentz transformations, diagrams, four-vectors, collisions), at the level of *Spacetime Physics* exercises.
+- GR: quantitative only where a metric is supplied (weak field, Schwarzschild), with numerical sims standing in for ODE solutions. Rigor target: *Exploring Black Holes*, and Hartle Parts I–II simplified.
+- Cosmology: the Friedmann equation with analytic single-component solutions and numerical ΛCDM, at the level of Ryden ch1–6, with ch7–10 qualitative.
+- Nuclear: SEMF, decay law, Q-values, cross sections at Krane ch12–13 level.
+- Particles: conservation laws, the quark model and qualitative Feynman diagrams at Krane ch14 or Thornton & Rex ch14 level, with a Griffiths ch1–2 flavor as enrichment.
+
+#### (11) Distractor and identify-the-error bank
+PER-documented:
+- **Absolute simultaneity coexisting with relative simultaneity; "the observer is the person who sees the light"** (Scherr et al.). *Micro-teaching:* "An 'observer' is a whole frame of synchronized clocks; record when events happen there, not when their light reaches you."
+- **High-confidence errors on relativity kinematics** (RCI). Design note: pair key items with a confidence slider, and treat "confident and wrong" as a misconception flag (Section 7).
+- **"Galaxies fly apart through space from a central explosion", "recession faster than c violates relativity", and "cosmological redshift is a Doppler shift"** (Davis & Lineweaver). *Micro-teaching:* "Space itself stretches: distant galaxies can recede faster than light and still be seen, and their redshift measures how much the universe has grown, 1 + z = a_now/a_then."
+- **Rubber-sheet-only intuition (curvature as purely spatial; "gravity pulls the ball into the dent")** (Kersting & Steier; Kersting 2019). *Micro-teaching:* "Near Earth, gravity is almost entirely warped time: clocks lower down run slower, and free fall follows the path of maximal aging."
+- **"Time dilation happens because you are out in space"** and **spatial gravitational effects attributed to forces** (2025 curved-spacetime study). *Micro-teaching:* "Clocks run slow deeper in a gravitational potential or at higher relative speed, not because they are 'in space'."
+
+Design-inferred (standard errors; PER sources not verified this session):
+- **"Moving objects get heavier until they become black holes."** *Micro-teaching:* "Mass is invariant; a fast object's energy and momentum grow, but it does not collapse in its own frame."
+- **"Length contraction means you would see a squashed object."** *Micro-teaching:* "Light-travel-time effects make a fast cube look rotated (Terrell), not flattened."
+- **"Black holes suck in everything around them."** *Micro-teaching:* "Far from a black hole, its gravity is the same as that of any object of equal mass."
+- **"Crossing the horizon you'd hit something", or "your clock stops at the horizon".** *Micro-teaching:* "An infalling clock ticks normally and crosses in finite proper time; only far-away bookkeepers assign infinite coordinate time."
+- **"Light bends because photons have mass."** *Micro-teaching:* "Light follows the straightest paths in curved spacetime, and those paths bend."
+- **"GPS needs only special relativity" (or only GR).** *Micro-teaching:* "At GPS altitude the GR speed-up (+45.7 µs/day) beats the SR slow-down (−7.2 µs/day)."
+- **"Gravitational waves are sound or EM waves", or "they squeeze in one direction only".** *Micro-teaching:* "A GW stretches one axis while squeezing the perpendicular one, then swaps, and it travels at c through empty space."
+- **"The Big Bang happened at a point in pre-existing space."** *Micro-teaching:* "The Big Bang happened everywhere; every point was once much closer to every other."
+- **"Binding energy is energy stored inside the nucleus."** *Micro-teaching:* "Binding energy is what you must add to pull a nucleus apart, so the bound nucleus weighs less than its parts."
+- **"After two half-lives nothing is left", or "older atoms are more likely to decay".** *Micro-teaching:* "Each nucleus has the same decay chance per unit time, regardless of age."
+- **"Irradiated food or objects become radioactive."** *Micro-teaching:* "Gamma irradiation does not make nuclei unstable; neutron activation can."
+- **"Virtual particles are real particles flying between charges", or "quarks can be isolated".** *Micro-teaching:* "Feynman diagrams are terms in a calculation, and color confinement means quarks always appear bound in hadrons."
+
+### Gaps
+- **USU materials not read:** Peak's GR notes, problem sets and syllabus, because the USU and DigitalCommons hosts were blocked. Whether USU 3710 covers cosmology, and which GR topics and texts it uses, remain unknown.
+- **Book contents not verified:**
+  - Hartle *Gravity* chapters 17 onward and Part III ("The Einstein Equation"). Recalled: the universe observed; cosmological models; a little more math; curvature and the Einstein equation; the source of curvature; gravitational-wave emission; relativistic stars.
+  - Chapter numbers of *Exploring Black Holes* 2nd ed.
+  - The table of contents of Griffiths, *Introduction to Elementary Particles* (2nd ed.); recalled: historical introduction; elementary particle dynamics; relativistic kinematics; symmetries; bound states; the Feynman calculus; QED; electrodynamics and chromodynamics of quarks; weak interactions; gauge theories; neutrino oscillations; Higgs afterword.
+- **Unverified anchor values** (verify against PDG, NUBASE2020/AME2020, IAU and the original papers before use as answer keys):
+  - Mercury perihelion 43″/century; orbit elements a = 5.7909 × 10¹⁰ m, e = 0.2056, P = 87.969 d;
+  - the Pound–Rebka measured value (2.57 ± 0.26) × 10⁻¹⁵ (from a low-reliability site);
+  - Planck 2018 age 13.787 ± 0.020 Gyr;
+  - T_CMB = 2.72548 ± 0.00057 K (Fixsen 2009);
+  - recombination z ≈ 1090;
+  - the SH0ES H₀ value;
+  - the BBN helium fraction;
+  - SEMF coefficients;
+  - magic numbers (standard);
+  - deuteron 2.224 MeV and ⁴He 28.3 MeV binding energies;
+  - about 200 MeV per ²³⁵U fission;
+  - the pp chain's 26.7 MeV;
+  - ¹⁴C half-life 5730 or 5700 yr;
+  - ²³⁸Pu half-life about 87.7 yr;
+  - pion mass 139.57 MeV; W, Z, Higgs and top masses;
+  - the LIGO arm length of 4 km;
+  - the Sgr A* mass of about 4 × 10⁶ M☉;
+  - the M87* mass of about 6.5 × 10⁹ M☉.
+- **Unverified PER and pedagogy items:**
+  - the Ubben, Hartmann & Pusch (2022) black-hole study, which a search summary reported but which could not be tied to a URL;
+  - Okun, *Physics Today* 42(6), 31 (1989), on relativistic mass;
+  - Alstein et al., *PRPER* 17, 023101 (2021), a special-relativity teaching review;
+  - Zahn & Kraus, *Eur. J. Phys.* 35, 055020 (2014), sector models for teaching GR;
+  - Wallace, Prather & Duncan's cosmology-misconception series;
+  - Real Time Relativity (ANU) and MIT Game Lab's A Slower Speed of Light as benchmark relativity visualizers.
+- **Benchmark syllabi not reached:** MIT 8.20 and 8.033.
