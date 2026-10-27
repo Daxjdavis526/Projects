@@ -22,11 +22,13 @@ const ROUTES = {
 
 // the worked example: air round A → B (straight) → C (constant pressure) → A (constant volume)
 const EX = { A: [300, 1], B: [200, 3], C: [200, 1] };
-EX.W1 = 0.5 * (EX.A[0] + EX.B[0]) * (EX.B[1] - EX.A[1]);                // 500 J
-EX.dU = dUof(AIR, ...EX.A, ...EX.B);                                     // 750 J
+EX.W1 = Math.round(0.5 * (EX.A[0] + EX.B[0]) * (EX.B[1] - EX.A[1]));    // 500 J (these are whole joules by design)
+EX.dU = Math.round(dUof(AIR, ...EX.A, ...EX.B));                         // 750 J
 EX.Q1 = EX.dU + EX.W1;                                                   // 1250 J
-EX.W2 = EX.B[0] * (EX.C[1] - EX.B[1]);                                   // −400 J
+EX.W2 = Math.round(EX.B[0] * (EX.C[1] - EX.B[1]));                       // −400 J
 EX.Q2 = -EX.dU + EX.W2;                                                  // −1150 J
+EX.QBC = Math.round((AIR / (AIR - 1)) * EX.B[0] * (EX.C[1] - EX.B[1])); // −1400 J: B → C at constant pressure
+EX.QCA = Math.round(dUof(AIR, ...EX.C, ...EX.A));                        // +250 J: C → A at constant volume
 
 export default lesson({
   id: 'phys2210.M18.2',
@@ -50,7 +52,7 @@ That is the **first law of thermodynamics**. Internal energy is a property of th
     tasks: [
       'Switch between the three paths: W and Q change every time, yet ΔE_int stays at +150 J.',
       'A → C → B takes in 2250 J along A → C and gives out 1200 J along C → B: heat flows both ways on one path, and only the net 1050 J enters the first law.',
-      'Compare W with the gold-free picture of M18.1: the work is still just the area under each path — 900 J, 300 J and 600 J.',
+      'Watch W: it is still just the area under each path, as in M18.1 — 900 J, 300 J and 600 J.',
     ],
     params: { mode: 'paths', gas: 'He', n: N0, ...ROUTES, controls: ['path'], readouts: ['Q', 'W', 'dU', 'legs'], vrange: [0, 5], prange: [0, 400], isotherms: [300, 400] },
     caption: 'Helium as an ideal gas, every path quasi-static. Shaded: the work done by the gas, the area under the chosen path. Dashed: the isotherms of A (300 K) and B (400 K). The legs are coloured by the sign of the heat; a straight leg can take heat in on part of its length and give some out on the rest — the colour shows the net.',
@@ -61,7 +63,7 @@ That is the **first law of thermodynamics**. Internal energy is a property of th
     steps: [
       { label: 'First law, A to B', text: t`$\Delta E_\text{int} = Q - W = ${EX.Q1}\ \text{J} - ${EX.W1}\ \text{J} = +${EX.dU}$ J. The gas took in more energy as heat than it gave out as work, so its internal energy — and its temperature — rose.` },
       { label: 'A property of the state', text: t`Going back from B to A, $\Delta E_\text{int} = -${EX.dU}$ J, **whatever the path**, because internal energy depends only on the state the gas is in.` },
-      { label: 'First law, B to A', text: t`Work done on the gas means $W = -${-EX.W2}$ J. So $Q = \Delta E_\text{int} + W = -${EX.dU} + (-${-EX.W2}) = ${EX.Q2}$ J: ${-EX.Q2} J of heat flows **out**. (On B → C ${1400} J leaves and on C → A ${250} J comes back in; the first law only needs the total.)` },
+      { label: 'First law, B to A', text: t`Work done on the gas means $W = -${-EX.W2}$ J. So $Q = \Delta E_\text{int} + W = -${EX.dU} + (-${-EX.W2}) = ${EX.Q2}$ J: ${-EX.Q2} J of heat flows **out**. (On B → C ${-EX.QBC} J leaves and on C → A ${EX.QCA} J comes back in; the first law only needs the total.)` },
       { label: 'Check the cycle', text: t`Net heat in: $${EX.Q1} - ${-EX.Q2} = ${EX.Q1 + EX.Q2}$ J. Net work out: $${EX.W1} - ${-EX.W2} = ${EX.W1 + EX.W2}$ J. Equal, as they must be when $\Delta E_\text{int} = 0$ — and ${EX.W1 + EX.W2} J is the triangle’s area, $\tfrac12(2\ \text{L})(100\ \text{kPa})$.` },
     ],
     answer: t`(a) $\Delta E_\text{int} = +${EX.dU}$ J; (b) ${-EX.Q2} J of heat flows out; (c) over the cycle, net heat in = net work out = ${EX.W1 + EX.W2} J.`,
@@ -122,7 +124,7 @@ That is the **first law of thermodynamics**. Internal energy is a property of th
           errors: [{ value: Q1, feedback: 'Heat depends on the path. What is the same on both paths is ΔE_int = Q − W.' }, { value: dU, feedback: t`That is $\Delta E_\text{int}$. Now add the work done along path 2: $Q_2 = \Delta E_\text{int} + W_2$.` }],
           hints: [t`Find $\Delta E_\text{int}$ from path 1: $Q_1 - W_1$.`, t`Path 2 has the same $\Delta E_\text{int}$, so $Q_2 = \Delta E_\text{int} + W_2$.`],
           teach: 'Use one path to find ΔE_int, which every path between the same states shares, then apply the first law along the other.',
-          explain: t`$\Delta E_\text{int} = ${fmt(Q1, 4)} - ${W1} = ${fmt(dU, 4)}$ J on either path. Along path 2, $Q_2 = ${fmt(dU, 4)} + ${W2} = ${fmt(Q2, 4)}$ J.`,
+          explain: t`$\Delta E_\text{int} = ${fmt(Q1, 4)} - ${W1} = ${fmt(dU, 4)}$ J on either path. Along path 2, $Q_2 = ${fmt(dU, 4)} + ${W2} = ${fmt(Q2, 4)}$ J${Q2 < 0 ? ' — negative: along path 2 the gas gives out heat overall' : ''}.`,
           visual: pvPic({ gas: 'He', n: 0.1, states: { A: { P: PA, V: VA }, B: { P: PB, V: VB }, C: { P: PA, V: VB }, D: { P: PB, V: VA } }, paths: [{ from: 'A', legs: [['isobaric', 'C'], ['isochoric', 'B']] }, { from: 'A', legs: [['isochoric', 'D'], ['isobaric', 'B']] }], show: 'all', shade: false, vrange: [0, VB + 1], prange: [0, PA * 1.3], caption: 'Path 1: A → C → B. Path 2: A → D → B.' }),
         };
       },
@@ -222,7 +224,7 @@ That is the **first law of thermodynamics**. Internal energy is a property of th
         const n = molesOf(P1, V1, 300), c = TD.rect({ V1: V1 * 1e-3, V2: V2 * 1e-3, P1: P1 * 1e3, P2: P2 * 1e3, n });
         const A = TD.analyse(TD.cycleLegs(c, n, AIR), n, AIR);
         return {
-          prompt: t`Air goes once round the cycle shown, taking in ${fmt(A.Qin, 4)} J of heat on the red legs. Read the net work from the diagram. How much heat does it give out on the blue legs?`,
+          prompt: t`Air goes once round the rectangular cycle shown — corners at ${V1}.0 L and ${V2}.0 L, ${P1} kPa and ${P2} kPa — taking in ${fmt(A.Qin, 4)} J of heat on the red legs. How much heat does it give out on the blue legs?`,
           answer: A.Qout, units: 'J', tol: { rel: 0.005 },
           errors: [{ value: A.Qin, feedback: 'If it gave out all the heat it took in, it would do no net work — but the loop encloses an area.' }, { value: A.Qin + A.W, feedback: t`Net heat in equals net work: $Q_\text{in} - Q_\text{out} = W$, so subtract.` }],
           hints: [t`Net work = enclosed area = $(P_2 - P_1)(V_2 - V_1)$.`, t`Over a cycle $Q_\text{in} - Q_\text{out} = W_\text{net}$.`],

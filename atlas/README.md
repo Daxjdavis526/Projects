@@ -164,6 +164,13 @@ simulation that exists with parameters it accepts.
   against the SHA-256 hashes in Pyodide's lock file. Matplotlib draws off
   screen (Agg) and figures come back as images; it cannot animate or take
   mouse input in the lab.
+- **Material data**: cryogenic properties (boiling points and latent heats
+  of LN₂ and LOX, the contraction and specific heat of 304 stainless and
+  6061 aluminium) were taken from standard references and checked where a
+  source could be reached; the NIST cryogenics and WebBook pages could not
+  be reached while building, so the fit coefficients in
+  `content/phys2210/_thermal.js` reproduce the published values at 77 K
+  and 293 K but have not been checked against NIST line by line.
 - **USU's program**: the degree's structure is verified, but several catalog
   pages could not be read during research; those placements are marked
   "reconstructed" with their evidence grade, and the report explains each.

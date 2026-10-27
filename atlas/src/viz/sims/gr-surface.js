@@ -112,13 +112,14 @@ export function mount(F, P) {
     if (key === 'cone') return (1.2 - p[2] / 0.995) / Math.cos(S.alpha);
     return p[2] / 0.995;
   };
-  const tint = (K, S) => 0.5 + 0.5 * Math.tanh(K / S.kScale);
+  const tint = (K, S) => 0.5 + 0.5 * Math.tanh((2.5 * K) / S.kScale);
 
   function draw() {
     const key = F.params.surface, S = SURFACES[key];
     const [a, b] = S.vRange;
     const v0 = fixedV ? P.v : a + (b - a) * F.params.pos;
-    const u0 = U0;
+    // on the torus's inner half the near wall faces away from the camera: use the far one, seen through the hole
+    const u0 = key === 'torus' && Math.cos(v0) < 0 ? U0 + Math.PI : U0;
     view.begin();
     const M = mesh(S, key);
     view.surface(M.grid, { color: 'accent', alpha: 0.82, wireAlpha: 0.08, ...(P.colorK !== false ? { colorBy: (p, q) => tint(curvature(S, vOf(S, key, [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2, (p[2] + q[2]) / 2])), S) } : {}) });
@@ -186,7 +187,7 @@ export function mount(F, P) {
     ? 'Blue and violet: the coordinate basis vectors $\\mathbf e_u$ and $\\mathbf e_v$ at P — not unit vectors: their lengths are $\\sqrt{g_{uu}}$ and $\\sqrt{g_{vv}}$. Grey: the same two arrows a step away along each coordinate line; how they turn and stretch is what the Christoffel symbols record. Dashed: the coordinate lines through P. Colour: Gaussian curvature (gold positive, teal zero, blue negative). Drag to turn the surface.'
     : P.mode === 'geodesic'
       ? 'Gold: the geodesic from P, found by integrating $\\ddot x^a + \\Gamma^a{}_{bc}\\dot x^b\\dot x^c = 0$ step by step from the metric; red: its starting direction; dashed: the circle through P, for comparison. Colour: Gaussian curvature. Drag to turn the surface.'
-      : 'Black: a vector at the loop’s first corner. Gold: the same vector carried around the coordinate rectangle without turning (parallel transport, computed from the Christoffel symbols). Red: what comes back. Colour: Gaussian curvature. Drag to turn the surface.'));
+      : 'Black: a vector at the point where the loop starts and ends. Gold: the same vector carried around the coordinate rectangle without turning (parallel transport, computed from the Christoffel symbols). Red: what comes back. Colour: Gaussian curvature. Drag to turn the surface.'));
   return { get: (k) => F.params[k] };
 }
 

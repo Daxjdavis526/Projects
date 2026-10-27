@@ -27,6 +27,7 @@ export default [
   { id: 'tank', title: 'Pressure, depth and buoyancy', track: 'physics', blurb: 'Pressure at depth in vessels of any shape, manometers and barometers, and a block weighed in water: the hydrostatic paradox and Archimedes.', lesson: 'phys2210.M14.2' },
   { id: 'flow', title: 'Continuity and Bernoulli', track: 'physics', blurb: 'Liquid speeds up through a narrowing pipe while its pressure drops; a Pitot-static probe turns ½ρv² into airspeed.', lesson: 'phys2210.M14.5' },
   { id: 'kepler', title: 'Kepler orbits, from the ISS to S2', track: 'physics', blurb: 'Real orbits to scale, from the ISS to the star S2, with equal-area sweeps — or fire Newton’s cannon until it orbits or escapes.', spec: { type: 'mech-kepler', params: {} } },
+  { id: 'gas', title: 'Molecules in a box', track: 'physics', blurb: 'Pressure from impacts, and a single speed relaxing into the Maxwell–Boltzmann curve.', lesson: 'phys2210.M17.3' },
   { id: 'projectile', title: 'Projectile motion', track: 'physics', blurb: 'Launch speed, angle, height, gravity — with or without air drag.', spec: { type: 'projectile', params: {} } },
   { id: 'cart', title: 'Newton’s second law on a cart', track: 'physics', blurb: 'Force, mass and friction set the slope of the velocity graph.', spec: { type: 'force-cart', params: {} } },
   { id: 'spring', title: 'Damped, driven oscillator', track: 'physics', blurb: 'Energy bars, damping regimes and resonance.', spec: { type: 'oscillator', params: { kind: 'spring', b: 0.3 } } },

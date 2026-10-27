@@ -92,11 +92,47 @@ export function fitLine(x, y, sy = null, sx = null) {
     const scale = sy || sx ? 1 : (dof > 0 ? chi2 / dof : NaN);   // unweighted: σ² estimated from the scatter
     out = { a, b, sa: Math.sqrt((Sxx / D) * scale), sb: Math.sqrt((S / D) * scale), cov: (-Sx / D) * scale, chi2, dof, n, weighted: !!(sy || sx) };
   }
+  if (sx) Object.assign(out, exactXY(x, y, sy, sx, out, false));
   out.chi2r = out.dof > 0 ? out.chi2 / out.dof : NaN;
   const k = out.weighted && out.dof > 0 ? Math.sqrt(out.chi2r) : 1;
   out.saScaled = out.sa * k; out.sbScaled = out.sb * k;
   out.residuals = x.map((xi, i) => y[i] - (out.a + out.b * xi));
   return out;
+}
+
+/**
+ * Errors in x as well as y: minimise χ²(a, b) = Σ (y − a − bx)² / (σy² + b²σx²)
+ * exactly — the intercept profiled out, the slope found by golden-section
+ * search around the re-weighted estimate — and take the covariance from the
+ * curvature of χ² (Cov = 2H⁻¹), since the weights themselves depend on b.
+ */
+function exactXY(x, y, sy, sx, est, origin) {
+  const n = x.length;
+  const v = (b, i) => (sy ? sy[i] ** 2 : 0) + b * b * sx[i] ** 2;
+  const aOf = (b) => {
+    if (origin) return 0;
+    let Sw = 0, Swr = 0;
+    for (let i = 0; i < n; i++) { const w = 1 / v(b, i); Sw += w; Swr += w * (y[i] - b * x[i]); }
+    return Swr / Sw;
+  };
+  const chi = (a, b) => { let c = 0; for (let i = 0; i < n; i++) c += (y[i] - a - b * x[i]) ** 2 / v(b, i); return c; };
+  const prof = (b) => chi(aOf(b), b);
+  let lo = est.b - 8 * est.sb, hi = est.b + 8 * est.sb;
+  const gr = (Math.sqrt(5) - 1) / 2;
+  let c1 = hi - gr * (hi - lo), c2 = lo + gr * (hi - lo), f1 = prof(c1), f2 = prof(c2);
+  for (let k = 0; k < 200 && hi - lo > 1e-13 * Math.max(1, Math.abs(est.b)); k++) {
+    if (f1 < f2) { hi = c2; c2 = c1; f2 = f1; c1 = hi - gr * (hi - lo); f1 = prof(c1); }
+    else { lo = c1; c1 = c2; f1 = f2; c2 = lo + gr * (hi - lo); f2 = prof(c2); }
+  }
+  const b = (lo + hi) / 2, a = aOf(b), chi2 = chi(a, b);
+  // the Hessian of χ²(a, b) by central differences
+  const hb = Math.max(1e-6 * Math.abs(b), est.sb * 1e-3), ha = Math.max(1e-6 * Math.abs(a), (est.sa || est.sb) * 1e-3);
+  const Hbb = (chi(a, b + hb) - 2 * chi2 + chi(a, b - hb)) / hb ** 2;
+  if (origin) return { a: 0, b, chi2, sb: Math.sqrt(2 / Hbb) };
+  const Haa = (chi(a + ha, b) - 2 * chi2 + chi(a - ha, b)) / ha ** 2;
+  const Hab = (chi(a + ha, b + hb) - chi(a + ha, b - hb) - chi(a - ha, b + hb) + chi(a - ha, b - hb)) / (4 * ha * hb);
+  const det = Haa * Hbb - Hab * Hab;
+  return { a, b, chi2, sa: Math.sqrt((2 * Hbb) / det), sb: Math.sqrt((2 * Haa) / det), cov: (-2 * Hab) / det };
 }
 
 /** The same with the line forced through the origin, y = b x (dof = n − 1). */
@@ -120,6 +156,7 @@ export function fitOrigin(x, y, sy = null, sx = null) {
     const scale = sy || sx ? 1 : (dof > 0 ? chi2 / dof : NaN);
     out = { a: 0, b, sa: 0, sb: Math.sqrt(scale / Sxx), chi2, dof, n, weighted: !!(sy || sx), origin: true };
   }
+  if (sx) Object.assign(out, exactXY(x, y, sy, sx, out, true));
   out.chi2r = out.dof > 0 ? out.chi2 / out.dof : NaN;
   out.residuals = x.map((xi, i) => y[i] - out.b * xi);
   return out;
@@ -563,11 +600,12 @@ export function readRow(E, P, s, z, sys) {
  * rows at its single setting (`at`).
  *   → { rows: [{ s, z, R }], P }
  */
-export function makeData(id, { seed = 1, settings, repeats = 1, n, at = null, sys = null, params = {} } = {}) {
+export function makeData(id, { seed = 1, settings, repeats = 1, n, at = null, sys = null, params = {}, noiseless = false } = {}) {
   const { E, P } = experiment(id, params);
   const rng = makeRng(seed);
-  const list = E.setting ? (settings || E.setting.series).flatMap((s) => Array(repeats).fill(s)) : Array(n ?? 10).fill(at);
+  const list = E.setting && at === null ? (settings || E.setting.series).flatMap((s) => Array(repeats).fill(s)) : Array(n ?? 10).fill(at);
   const rows = list.map((s) => {
+    if (noiseless) { const z = Array(E.nz).fill(0); return { s, z, R: E.read(s, P, sys || null, z) }; }   // the truth: no scatter, no rounding
     const z = Array.from({ length: E.nz }, () => gaussian(rng));
     return { s, z, R: readRow(E, P, s, z, sys) };
   });

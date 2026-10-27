@@ -266,8 +266,8 @@ where $d$ is the distance between the two axes. The extra $Md^2$ is what the bod
     }),
     mcq({
       id: 'cp-curve', difficulty: 2,
-      prompt: 'You measure a rod’s moment of inertia about a series of parallel axes at distances d along it, on both sides of its centre of mass. Plotted against d, the results lie on…',
-      choices: [t`a parabola, lowest at $d = 0$, where it equals $I_\text{cm}$`, 'a straight line through the origin', 'a parabola, lowest at the end of the rod', 'a horizontal line: I is a fixed property of the rod'],
+      prompt: t`You measure a rod’s moment of inertia about a series of parallel axes at distances $d$ along it, on both sides of its centre of mass. Plotted against $d$, the results lie on…`,
+      choices: [t`a parabola, lowest at $d = 0$, where it equals $I_\text{cm}$`, 'a straight line through the origin', 'a parabola, lowest at the end of the rod', t`a horizontal line: $I$ is a fixed property of the rod`],
       answer: 0,
       why: {
         1: t`$I = I_\text{cm} + Md^2$ is quadratic in $d$, and it is $I_\text{cm}$ (not zero) at $d = 0$.`,

@@ -122,7 +122,13 @@ export function gradeNumeric(item, input) {
       value = q.si;
     } else if (!sameDims(q.unit.dims, expectedUnit.dims)) {
       return no(`That unit measures ${describeDims(q.unit.dims)}, but the answer is ${describeDims(expectedUnit.dims)}.`, { unitError: true });
-    } else value = q.si / expectedUnit.factor;
+    } else {
+      value = q.si / expectedUnit.factor;
+      // a temperature, not a difference: °C and K differ by an offset as well as a name
+      const isC = (u) => /^\s*(°C|degC)\s*$/.test(u || ''), isK = (u) => /^\s*K\s*$/.test(u || '');
+      if (isC(q.unitText) && isK(item.units)) value += 273.15;
+      else if (isK(q.unitText) && isC(item.units)) value -= 273.15;
+    }
   } else {
     if (mode === 'typed') return bad(`Include a unit — the answer is ${describeDims(expectedUnit.dims) === 'dimensionless' ? 'a ratio' : 'a ' + describeDims(expectedUnit.dims)}.`);
     value = q.value;

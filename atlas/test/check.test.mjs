@@ -186,6 +186,13 @@ check('3 μm reads as 3e-6 m', Math.abs(parseQuantity('3 μm').si - 3e-6) < 1e-1
 check('20 µas (micro sign) reads as microarcseconds', Math.abs(parseQuantity('20 µas').si - 20 * Math.PI / 648e9) < 1e-20);
 check('5 μs graded against an answer in s', grade({ type: 'numeric', answer: 5e-6, units: 's', tol: { rel: 0.01 } }, '5 μs').correct);
 
+// Celsius: degree-sized, with the offset applied only to a bare temperature
+check('20 °C typed for an answer of 20 °C', grade({ type: 'numeric', answer: 20, units: '°C', tol: { rel: 0.001 } }, '20 °C').correct);
+check('293.15 K typed for an answer of 20 °C', grade({ type: 'numeric', answer: 20, units: '°C', tol: { rel: 0.001 } }, '293.15 K').correct);
+check('−196 °C typed for an answer of 77.15 K', grade({ type: 'numeric', answer: 77.15, units: 'K', tol: { rel: 0.001 } }, '-196 °C').correct);
+check('a specific heat in J/(kg °C) equals one in J/(kg K)', grade({ type: 'numeric', answer: 4186, units: 'J/(kg K)', tol: { rel: 0.001 } }, '4186 J/(kg °C)').correct);
+check('a temperature change in °C needs no offset', grade({ type: 'numeric', answer: 15, units: 'K', tol: { rel: 0.001 } }, '15').correct);
+
 // angles on the sky and reciprocal units
 check('43 arcsec in radians', Math.abs(parseQuantity('43 arcsec').si - 43 * Math.PI / 648000) < 1e-15);
 check('1 mas = 1e-3 arcsec', Math.abs(parseUnit('mas').factor * 1000 - parseUnit('arcsec').factor) < 1e-20);

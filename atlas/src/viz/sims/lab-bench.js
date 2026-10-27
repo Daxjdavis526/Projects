@@ -152,7 +152,7 @@ export function mount(F, P0) {
 
   let tableBox = null;
   if (showTable && P.view !== 'apparatus') {
-    tableBox = h('div.table-wrap', { style: { maxHeight: compact ? '180px' : '232px', overflowY: 'auto', margin: '.6rem 0 .2rem' } });
+    tableBox = h('div.table-wrap', { style: bench ? { maxHeight: '292px', overflowY: 'auto', margin: '.6rem 0 .2rem' } : { margin: '.5rem 0 .2rem' } });
     const ctl = F.el.querySelector('.viz-controls');
     F.el.insertBefore(tableBox, ctl);
   }
@@ -278,6 +278,11 @@ export function mount(F, P0) {
       // a small legend for two series
       an.series.forEach((s, k) => pl.text(`● ${s.Y.name}`, pl.L + 10, pl.T + 12 + 16 * k, { screen: true, color: SERIES_COL[k], size: 11.5, weight: 600 }));
     }
+    if (an && an.series.length === 1 && (P.expected || anO) && pts.length) legend(pl, [
+      P.fit ? ['line', 'gold', 'least-squares line'] : null,
+      anO && P.fit ? ['dot', 'warn', 'line forced through (0, 0)'] : null,
+      P.expected && exs.length ? ['dash', 'good', 'expected, no systematic'] : null,
+    ]);
     if (!pts.length) pl.text('Take a measurement to start the table', (pl.L + pl.R) / 2, (pl.T + pl.B) / 2, { screen: true, align: 'center', color: 'ink3', size: 12.5 });
     else if (A.curved && P.fit) pl.text('Curved: a straight line is the wrong model on these axes', pl.R - 6, pl.T + 12, { screen: true, align: 'right', color: 'ink3', size: 11.5 });
     void g;
@@ -345,10 +350,7 @@ export function mount(F, P0) {
     pl.setView([lo, hi], [0, top]);
     pl.o.axesAt = 'edge';
     pl.clear();
-    if (vals.length >= 2 && Number.isFinite(rs.sd)) {
-      pl.area(() => top, rs.mean - rs.sd, rs.mean + rs.sd, { color: 'accent', alpha: 0.1 });
-      pl.text('±1 SD', pl.X(rs.mean + rs.sd) + 4, pl.T + 12, { screen: true, color: 'accent2', size: 11 });
-    }
+    if (vals.length >= 2 && Number.isFinite(rs.sd)) pl.area(() => top, rs.mean - rs.sd, rs.mean + rs.sd, { color: 'accent', alpha: 0.1 });
     // the dots, stacked in their bins
     const counted = new Map();
     vals.forEach((v, i) => {
@@ -356,10 +358,7 @@ export function mount(F, P0) {
       counted.set(b, k);
       pl.point(b * bw, k - 0.45, { color: i === vals.length - 1 && bench && state.latest >= 0 ? 'gold' : 'accent', r: compact ? 3.6 : 4.2 });
     });
-    if (Number.isFinite(rs.accepted)) {
-      pl.line(rs.accepted, 0, rs.accepted, top, { color: 'good', width: 1.6, dash: [6, 5] });
-      pl.text(R.acceptedLabel || 'accepted', pl.X(rs.accepted) + 5, pl.T + 26, { screen: true, color: 'good', size: 11 });
-    }
+    if (Number.isFinite(rs.accepted)) pl.line(rs.accepted, 0, rs.accepted, top, { color: 'good', width: 1.6, dash: [6, 5] });
     if (vals.length) {
       pl.line(rs.mean, 0, rs.mean, top - 0.4, { color: 'gold', width: 2 });
       if (vals.length >= 2 && Number.isFinite(rs.sem)) {
@@ -368,9 +367,13 @@ export function mount(F, P0) {
         g.beginPath(); g.moveTo(pl.X(rs.mean - rs.sem), pl.Y(y)); g.lineTo(pl.X(rs.mean + rs.sem), pl.Y(y));
         g.moveTo(pl.X(rs.mean - rs.sem), pl.Y(y) - 5); g.lineTo(pl.X(rs.mean - rs.sem), pl.Y(y) + 5);
         g.moveTo(pl.X(rs.mean + rs.sem), pl.Y(y) - 5); g.lineTo(pl.X(rs.mean + rs.sem), pl.Y(y) + 5); g.stroke(); g.restore();
-        pl.text('mean ± SEM', pl.X(rs.mean) - 6, pl.Y(y) - 11, { screen: true, color: 'gold', size: 11, align: 'right', weight: 600 });
       }
     } else pl.text('Take a measurement to start the table', (pl.L + pl.R) / 2, (pl.T + pl.B) / 2, { screen: true, align: 'center', color: 'ink3', size: 12.5 });
+    legend(pl, [
+      vals.length ? ['line', 'gold', vals.length >= 2 ? 'mean, with ±1 SEM bar' : 'mean'] : null,
+      Number.isFinite(rs.accepted) ? ['dash', 'good', `${R.acceptedLabel || 'accepted'} ${keepTxt(rs.accepted, 4)} ${R.unit}`] : null,
+      vals.length >= 2 ? ['band', 'accent', '±1 SD of the readings'] : null,
+    ]);
   }
 
   // the data table: raw readings, then the plotted quantities
@@ -443,13 +446,30 @@ export function mount(F, P0) {
   function drawApparatus(pl, E, PP, st) {
     pl.clear();
     const fn = APPARATUS[E.apparatus];
+    HIDE_EMPTY = !bench && !st.row && !st.rs?.n;
     if (fn) fn(pl, E, PP, st, { compact });
+    HIDE_EMPTY = false;
   }
 
   F.draw(redraw);
   const { E } = expOf(state.id);
   F.caption(`${E.note} Error bars are ±1 standard uncertainty.${P.view === 'apparatus' ? ' Not to scale.' : ''} A simulation: the readings are computed, not measured.`);
   return { get: (k) => F.params[k] };
+}
+
+/** A small key in the plot’s top-left corner: [kind ('line' | 'dash' | 'dot' | 'band'), colour, text]. */
+function legend(pl, items) {
+  const list = items.filter(Boolean);
+  if (!list.length) return;
+  const g = pl.ctx, x = pl.L + 10;
+  list.forEach(([kind, col, text], i) => {
+    const y = pl.T + 12 + 16 * i, c = pl.color(col);
+    g.save();
+    if (kind === 'band') { g.fillStyle = c; g.globalAlpha = 0.25; g.fillRect(x, y - 5, 22, 10); }
+    else { g.strokeStyle = c; g.lineWidth = 2; g.setLineDash(kind === 'dash' ? [6, 4] : kind === 'dot' ? [3, 4] : []); g.beginPath(); g.moveTo(x, y); g.lineTo(x + 22, y); g.stroke(); }
+    g.restore();
+    pl.text(text, x + 28, y, { screen: true, color: 'ink2', size: 11 });
+  });
 }
 
 function slopeUnit(A, k) {
@@ -465,13 +485,22 @@ function slopeUnit(A, k) {
 // Each draws the set-up for the current setting and the latest reading, with
 // the cause of the systematic error (when it is on) marked in amber.
 
-function display(pl, x, y, lines, o = {}) {
+// a static picture with no reading at its setting hides the instrument’s empty lines
+let HIDE_EMPTY = false;
+function display(pl, x, y, lines0, o = {}) {
+  const lines = HIDE_EMPTY ? lines0.filter((l) => !l.includes('—')) : lines0;
+  if (!lines.length) return;
   const g = pl.ctx, c = pl.col;
   const fs = o.compact ? 11 : 12.5;
   g.save();
   g.font = `600 ${fs}px ui-monospace, SFMono-Regular, Menlo, monospace`;
   const w = Math.max(...lines.map((s) => g.measureText(s).width)) + 16, hh = lines.length * (fs + 5) + 8;
-  const X = pl.X(x) - (o.align === 'right' ? w : o.align === 'center' ? w / 2 : 0), Y = pl.Y(y) - hh / 2;
+  g.font = `500 ${fs - 1.5}px Inter, system-ui, sans-serif`;
+  const tw = o.title ? g.measureText(o.title).width : 0;
+  g.font = `600 ${fs}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+  let X = pl.X(x) - (o.align === 'right' ? w : o.align === 'center' ? w / 2 : 0);
+  X = Math.max(4, Math.min(X, pl.w - 4 - Math.max(w, tw)));          // keep the box and its title inside the canvas
+  const Y = pl.Y(y) - hh / 2;
   g.fillStyle = c.panel; g.strokeStyle = c.line3; g.lineWidth = 1.2;
   roundRect(g, X, Y, w, hh, 6); g.fill(); g.stroke();
   g.fillStyle = o.color ? pl.color(o.color) : c.good; g.textBaseline = 'top'; g.textAlign = 'left';
@@ -662,7 +691,7 @@ const APPARATUS = {
     block(pl, 4.6, y, 3.4, 1.3, 'accent', 0.85);
     const discs = Math.round(m / 0.25);
     for (let i = 0; i < discs; i++) block(pl, 5.1, y + 1.3 + 0.42 * i, 2.4, 0.36, 'ink3', 0.9);
-    pl.text(`block ${fx(P.mb, 3)} kg + load ${fx(m, 2)} kg`, 4.4, y + 1.1, { color: 'ink2', size: 11.5, align: 'right' });
+    pl.text(`block ${fx(P.mb, 3)} kg + load ${fx(m, 2)} kg`, 6.3, y - 1.1, { color: 'ink2', size: 11.5, align: 'center' });
     const al = sys === 'angle' ? P.angle * D2R : 0;
     const hook = [8.0, y + 0.65], end = [8.0 + 4.6 * Math.cos(al), y + 0.65 + 4.6 * Math.sin(al)];
     pl.line(hook[0], hook[1], end[0], end[1], { color: 'ink2', width: 1.3 });

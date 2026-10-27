@@ -15,7 +15,7 @@ const r4 = (x) => +x.toFixed(4);
 const dvCurve = (ve, R, caption) => ({
   type: 'graph',
   params: {
-    aspect: 'wide', x: [1, R], y: [0, r4(ve * Math.log(R) * 1.15)], xlabel: 'mass ratio m₀/m_f', ylabel: 'Δv (km/s)',
+    aspect: 'wide', x: [1, R], y: [0, r4(ve * Math.log(R) * 1.15)], xlabel: 'mass ratio (full ÷ burnt out)', ylabel: 'Δv (km/s)',
     curves: [{ fn: `${r4(ve)}*ln(x)`, domain: [1, R], color: 'accent' }],
   },
   caption,
@@ -25,7 +25,7 @@ const dvCurve = (ve, R, caption) => ({
 const ratioCurve = (Isp, dvMax, caption, marks = []) => ({
   type: 'graph',
   params: {
-    aspect: 'wide', x: [0, dvMax], y: [0, r4(Math.exp(dvMax / ((Isp * G0) / 1000)) * 1.1)], xlabel: 'Δv (km/s)', ylabel: 'm₀/m_f',
+    aspect: 'wide', x: [0, dvMax], y: [0, r4(Math.exp(dvMax / ((Isp * G0) / 1000)) * 1.1)], xlabel: 'Δv (km/s)', ylabel: 'mass ratio (full ÷ burnt out)',
     curves: [{ fn: `exp(x/${r4((Isp * G0) / 1000)})`, domain: [0, dvMax], color: 'accent' }],
     vlines: marks,
   },
@@ -83,14 +83,14 @@ The engine’s **thrust** is $F = \dot m\,v_e$, and engineers quote the exhaust 
       t`Raise $I_\text{sp}$ to 465 s: the same 9.4 km/s now needs a mass ratio under 8. Exhaust speed is worth more than almost anything.`,
     ],
     params: {
-      aspect: 'wide', x: [0, 12], y: [0, 30], xlabel: 'Δv (km/s)', ylabel: 'm₀/m_f',
+      aspect: 'wide', x: [0, 12], y: [0, 30], xlabel: 'Δv (km/s)', ylabel: 'mass ratio (full ÷ burnt out)',
       sliders: [
         { key: 'Isp', label: 'Specific impulse $I_\\text{sp}$', min: 200, max: 470, step: 1, value: 311, unit: '\\mathrm{s}', explain: 'Solid motors about 250–290 s; kerosene–oxygen about 280–350 s; hydrogen–oxygen about 450–465 s.' },
         { key: 'dv', label: 'The $\\Delta v$ you need', min: 0.5, max: 12, step: 0.1, value: 9.4, unit: '\\mathrm{km/s}', explain: 'Low Earth orbit costs about 9.3–9.5 km/s from the ground, losses included.' },
       ],
       curves: [
-        { fn: 'exp(x/(282*0.00980665))', color: 'warn', width: 1.8, dash: true, label: 'Merlin, sea level (282 s)', labelAt: 7.6, labelDx: 8, labelDy: 2 },
-        { fn: 'exp(x/(465*0.00980665))', color: 'good', width: 1.8, dash: true, label: 'RL10 (465 s)', labelAt: 11.2, labelDx: -82, labelDy: -12 },
+        { fn: 'exp(x/(282*0.00980665))', color: 'warn', width: 1.8, dash: true, label: 'Merlin, sea level (282 s)', labelAt: 7.6, labelDx: -164, labelDy: -6 },
+        { fn: 'exp(x/(465*0.00980665))', color: 'good', width: 1.8, dash: true, label: 'RL10 (465 s)', labelAt: 12, labelDx: -80, labelDy: 55 },
         { fn: 'exp(x/(Isp*0.00980665))', color: 'accent' },
       ],
       vlines: [{ x: 'dv', color: 'gold' }],

@@ -140,7 +140,7 @@ Every item, of every type, has:
 | field | |
 |---|---|
 | `id` | unique within the lesson, short and stable (`'x-exp-kx'`) |
-| `difficulty` | 1–4; difficulty 3+ needs **two or more hints** (a hint ladder) |
+| `difficulty` | 1–4; difficulty 3+ needs **two or more hints** (a hint ladder) — checkpoint items too: they come back in later reviews, where hints are offered |
 | `prompt` | markup — the question |
 | `hints` | 1+ strings, each **stronger** than the last; the last nearly gives the method away |
 | `teach` | **one sentence** of micro-teaching shown after the first try: the idea this problem tests |
@@ -196,7 +196,10 @@ num({ id: 'f-over-m', difficulty: 1,
 
 - `answer` is a number **in `units`** (an SI or common unit string: `'m/s^2'`,
   `'kN'`, `'J/(kg K)'`, `'eV'`, `'ly'`, `'arcsec'`, `'mas'`, `'uas'`, `'N^-1'`, `'yr'`, `'Msun'`…;
-  the full table is `UNITS` in `src/core/units.js`).
+  the full table is `UNITS` in `src/core/units.js`). Temperatures may be in
+  `'K'` or `'°C'`: a learner may type either, and a bare temperature is
+  converted with the 273.15 offset (a temperature *change* in K or °C is the
+  same number).
   The unit is printed beside the box; a learner may also type any compatible
   unit (`4 km` for an answer in m) and it is converted. `unitMode: 'typed'`
   makes typing a unit compulsory. Omit `units` for pure numbers.
@@ -422,6 +425,8 @@ Simulations written for particular courses — reuse them anywhere they fit
 | `gr-dustball` | a freely falling ball of dust: tidal stretching and squeezing, the Ricci volume change |
 | `gr-friedmann` | solutions a(t) of the Friedmann equation for matter plus Λ: the universe's possible fates |
 | `gr-chirp` | a gravitational-wave chirp and what it does to a detector's arms |
+| `mech-tank`, `mech-flow` | pressure in vessels of any shape, manometers, buoyancy; flow through a narrowing pipe, Bernoulli, a Pitot-static probe |
+| `therm-gas` | a 3D hard-sphere gas: pressure from wall impacts against nRT/V, a live speed histogram against Maxwell–Boltzmann, mixtures |
 
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
 `label` and `explain` are markup, `unit` is TeX. Every slider needs an

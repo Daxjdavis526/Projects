@@ -17,6 +17,9 @@ const JULIAN_YEAR = 365.25 * DAY;           // IAU light-year convention
 // symbol → [factor to SI, dims]. Order matters only for documentation.
 export const UNITS = {
   m: [1, D(1)], g: [1e-3, D(0, 1)], s: [1, D(0, 0, 1)], A: [1, D(0, 0, 0, 1)], K: [1, D(0, 0, 0, 0, 1)],
+  // a Celsius degree is a kelvin in size; the grader adds the 273.15 offset when a
+  // bare temperature is converted between °C and K (check.js)
+  '°C': [1, D(0, 0, 0, 0, 1)], degC: [1, D(0, 0, 0, 0, 1)],
   mol: [1, D(0, 0, 0, 0, 0, 1)], cd: [1, D(0, 0, 0, 0, 0, 0, 1)],
   N: [1, D(1, 1, -2)], J: [1, D(2, 1, -2)], W: [1, D(2, 1, -3)], Pa: [1, D(-1, 1, -2)], Hz: [1, D(0, 0, -1)],
   C: [1, D(0, 0, 1, 1)], V: [1, D(2, 1, -3, -1)], ohm: [1, D(2, 1, -3, -2)], Ω: [1, D(2, 1, -3, -2)],
@@ -46,7 +49,7 @@ export const UNITS = {
 };
 
 // Units that never take prefixes (min is not milli-in, cd is candela, etc.)
-const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'kly', 'Mly', 'Gly', 'rev', 'rpm',
+const NO_PREFIX = new Set(['min', 'h', 'hr', 'day', 'd', 'yr', 'y', 'au', 'AU', 'ly', 'deg', '°', 'arcmin', 'arcsec', 'mas', 'uas', 'μas', 'µas', 'kyr', 'Myr', 'Gyr', 'kly', 'Mly', 'Gly', '°C', 'degC', 'rev', 'rpm',
   'atm', 'mmHg', 'psi', 'mph', 'kph', 'ft', 'in', 'mi', 'lb', 'lbf', 'percent', '%', 'Msun', 'M☉', 'Mearth',
   'Å', 'angstrom', 'c', 'G', 'u', 'torr', 'cal', 'dyn', 'erg', 'l']);
 

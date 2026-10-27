@@ -175,18 +175,21 @@ export function angleBetween(S, u, v, A, B) {
 
 /**
  * A small coordinate rectangle centred on (u0, v0), half-widths du and dv,
- * travelled anticlockwise as seen from outside, sampled with n points per side.
+ * travelled anticlockwise as seen from outside, sampled with n points per
+ * side. It starts (and ends) at the middle of the side v = v0 − dv.
  */
 export function rectangle(S, u0, v0, du, dv, n = 60) {
   const c = S.orient > 0
     ? [[u0 - du, v0 - dv], [u0 + du, v0 - dv], [u0 + du, v0 + dv], [u0 - du, v0 + dv]]
     : [[u0 - du, v0 - dv], [u0 - du, v0 + dv], [u0 + du, v0 + dv], [u0 + du, v0 - dv]];
-  const path = [];
+  const loop = [];
   for (let s = 0; s < 4; s++) {
     const p = c[s], q = c[(s + 1) % 4];
-    for (let k = 0; k < n; k++) path.push([p[0] + ((q[0] - p[0]) * k) / n, p[1] + ((q[1] - p[1]) * k) / n]);
+    for (let k = 0; k < n; k++) loop.push([p[0] + ((q[0] - p[0]) * k) / n, p[1] + ((q[1] - p[1]) * k) / n]);
   }
-  path.push(c[0].slice());
+  const start = S.orient > 0 ? n / 2 : 3 * n + n / 2;          // the middle of the side v = v0 − dv
+  const path = [...loop.slice(start), ...loop.slice(0, start)];
+  path.push(path[0].slice());
   return path;
 }
 
