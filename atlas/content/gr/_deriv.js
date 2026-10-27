@@ -6,6 +6,8 @@
 
 import { tex } from '../../src/core/format.js';
 
+const t = String.raw;
+
 export const C = 299792458;              // m/s, exact
 export const G = 6.6743e-11;             // m³ kg⁻¹ s⁻² (CODATA 2018)
 export const GM_EARTH = 3.986004418e14;  // m³/s² (IERS)
@@ -77,5 +79,41 @@ export function matrix(cells, { colors, rowLabels, colLabels, caption, left, w =
       curves, points, ...(alt ? { alt } : {}),
     },
     ...(caption ? { caption } : {}),
+  };
+}
+
+/**
+ * A static spacetime diagram drawn with the graph simulation (c = 1): time up,
+ * one direction of space across, the light cone of the origin dashed. With
+ * `beta`, the gold axes of a frame moving at β: its time axis x = βt and its
+ * space axis t = βx (its line of simultaneity through the origin). No readout,
+ * so it can sit above a question without printing the question’s answer.
+ *   events:   [[t, x, label, color?], …]
+ *   segments: [[t0, x0, t1, x1, color?, dashed?], …]
+ */
+export function frames({ beta = null, events = [], segments = [], range = 5, caption, xlabel = 'x (light-seconds)', ylabel = 't (seconds)', cone = true, axes = true, prime = true } = {}) {
+  const curves = [], points = [];
+  if (cone) curves.push({ fn: 'x', color: 'warn', dash: true, width: 1.4 }, { fn: '-x', color: 'warn', dash: true, width: 1.4 });
+  if (beta !== null) {
+    const R = range * 2;
+    curves.push({ param: [`${beta}*t`, 't'], t: [-R, R], color: 'gold', width: 2 });
+    curves.push({ param: ['t', `${beta}*t`], t: [-R, R], color: 'gold', width: 2 });
+    if (prime) {
+      const tt = range * 1.28, xx = range * 0.9;
+      points.push({ x: round(beta * tt), y: round(tt), r: 0.01, color: 'gold', label: 't′', labelDx: 8, labelDy: 0 });
+      points.push({ x: round(xx), y: round(beta * xx), r: 0.01, color: 'gold', label: 'x′', labelDx: -4, labelDy: -14 });
+    }
+  }
+  for (const [t0, x0, t1, x1, color = 'accent', dashed = false] of segments) {
+    curves.push({ param: [`${x0} + (${round(x1 - x0)})*t`, `${t0} + (${round(t1 - t0)})*t`], t: [0, 1], color, width: 2.2, dash: dashed });
+  }
+  for (const [T, X, label, color = 'accent2'] of events) points.push({ x: X, y: T, label, color });
+  return {
+    type: 'graph',
+    params: {
+      x: [-range, range], y: [round(-range * 0.25), round(range * 1.4)], equal: true,
+      xlabel: axes ? xlabel : '', ylabel: axes ? ylabel : '', axes, curves, points,
+    },
+    caption: caption ?? t`Time up, distance across, in units with $c = 1$: light runs along the dashed 45° lines.${beta !== null ? ` Gold: the axes of a frame moving at $\\beta = ${beta}$.` : ''}`,
   };
 }
