@@ -1,6 +1,6 @@
 // The small markup lessons are written in: paragraphs, **bold**, *italic*,
-// `code`, [links](url), "- " lists, "> " callouts, $inline$ and $$display$$
-// TeX. Rendering is a pure string → HTML function with the math renderer
+// `code`, ```fenced code blocks```, [links](url), "- " lists, "> " callouts,
+// $inline$ and $$display$$ TeX. Nothing inside code is math or emphasis. Rendering is a pure string → HTML function with the math renderer
 // passed in, so the browser uses KaTeX and the Node tests can extract every
 // TeX fragment and compile it.
 
@@ -31,19 +31,32 @@ export function segments(text) {
   return out;
 }
 
+const FENCE = /```[^\n]*\n([\s\S]*?)\n?```/g;
+const CODE_SPAN = /(`[^`\n]+`)/;
+
+// Inside String.raw (how lessons are written) a backtick has to be typed \`,
+// and String.raw keeps the backslash; markup reads \` as a plain backtick.
+const unescapeTicks = (text) => String(text).replace(/\\`/g, '`');
+
+/** Text with code (fenced blocks and `spans`) removed — code is never math. */
+const withoutCode = (text) => unescapeTicks(text).replace(FENCE, ' ').split(CODE_SPAN).filter((p, i) => i % 2 === 0).join(' ');
+
 /** Every TeX fragment in a string (for validation). */
-export const mathIn = (text) => segments(text).filter((g) => g.t !== 'text').map((g) => ({ tex: g.v, display: g.t === 'display' }));
+export const mathIn = (text) => segments(withoutCode(text)).filter((g) => g.t !== 'text').map((g) => ({ tex: g.v, display: g.t === 'display' }));
 
 function inline(text, math) {
-  return segments(text).map((g) => {
-    if (g.t === 'math') return math(g.v, false);
-    if (g.t === 'display') return math(g.v, true);
-    return esc(g.v)
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, '$1<em>$2</em>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|#[^)\s]*)\)/g, (m, label, url) =>
-        `<a href="${url}"${url.startsWith('#') ? '' : ' target="_blank" rel="noopener"'}>${label}</a>`);
+  // code spans first, so `x**2` or `$HOME` inside them stays literal
+  return unescapeTicks(text).split(CODE_SPAN).map((part, k) => {
+    if (k % 2 === 1) return `<code>${esc(part.slice(1, -1))}</code>`;
+    return segments(part).map((g) => {
+      if (g.t === 'math') return math(g.v, false);
+      if (g.t === 'display') return math(g.v, true);
+      return esc(g.v)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, '$1<em>$2</em>')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|#[^)\s]*)\)/g, (m, label, url) =>
+          `<a href="${url}"${url.startsWith('#') ? '' : ' target="_blank" rel="noopener"'}>${label}</a>`);
+    }).join('');
   }).join('');
 }
 
@@ -54,8 +67,13 @@ function inline(text, math) {
  */
 export function render(text, math = (t) => `<code>${esc(t)}</code>`) {
   if (!text) return '';
-  const blocks = String(text).replace(/\r/g, '').split(/\n\s*\n/);
+  // fenced code blocks are lifted out first and put back verbatim
+  const fences = [];
+  const src = unescapeTicks(text).replace(/\r/g, '').replace(FENCE, (m, body) => `\n\n\u0000${fences.push(body) - 1}\u0000\n\n`);
+  const blocks = src.split(/\n\s*\n/).filter((b) => b.trim());
   return blocks.map((block) => {
+    const f = /^\s*\u0000(\d+)\u0000\s*$/.exec(block);
+    if (f) return `<pre class="code-block"><code>${esc(fences[+f[1]])}</code></pre>`;
     const lines = block.split('\n');
     if (lines.every((l) => /^\s*[-•]\s+/.test(l))) {
       return `<ul>${lines.map((l) => `<li>${inline(l.replace(/^\s*[-•]\s+/, ''), math)}</li>`).join('')}</ul>`;

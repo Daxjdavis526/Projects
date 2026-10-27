@@ -97,6 +97,12 @@ for (const theme of themes) {
       const all = await page.$('button:has-text("Show all")');
       if (all) { await all.click(); await page.waitForTimeout(300); }
       const now = await page.$eval('.crumb', (e) => e.textContent).catch(() => 'step');
+      const runBtn = await page.$('.stage button:has-text("Run ▶")');
+      if (runBtn) {
+        await runBtn.click();
+        await page.waitForFunction(() => ![...document.querySelectorAll('.stage button')].some((b) => b.textContent.includes('Running')), null, { timeout: 120000 }).catch(() => {});
+        await page.waitForTimeout(300);
+      }
       await shot(now.toLowerCase().replace(/\W+/g, '-'));
     }
     // walk the practice questions: show one with its first hint, then make a
@@ -118,6 +124,8 @@ for (const theme of themes) {
         await check.click(); await page.waitForTimeout(150);
         const conf = await page.$('.stage .confidence button');
         if (conf) { await conf.click(); await page.waitForTimeout(150); }
+        // a coding exercise runs Python: wait for it to finish
+        await page.waitForFunction(() => ![...document.querySelectorAll('.stage button')].some((b) => b.textContent.includes('Running')), null, { timeout: 120000 }).catch(() => {});
       }
       const give = await page.$('.stage button:has-text("Show solution")');
       if (give) { await give.click(); await page.waitForTimeout(400); }

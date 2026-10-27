@@ -6,6 +6,7 @@ export const LESSONS = {
   'gr.S09.i': () => import('./gr/S09.i.js'),
   'math1220.C2-2.1': () => import('./math1220/C2-2.1.js'),
   'phys2210.M5.3': () => import('./phys2210/M5.3.js'),
+  'prog.P0.1': () => import('./prog/P0.1.js'),
 };
 
 export const BOSSES = {

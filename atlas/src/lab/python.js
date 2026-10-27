@@ -32,21 +32,23 @@ export function start() {
 }
 
 /**
- * Run code; resolves with { ok, result, error, figures, images, checks, ms }.
+ * Run code; resolves with { ok, result, error, figures, images, checks, tests, stdout, ms }.
+ * With `fresh`, the program runs in a namespace of its own; `tests` (see
+ * harness.js) are then evaluated in it.
  * `figures` are atlas.plot figures (drawn by the page); `images` are PNG data
  * URLs of Matplotlib figures. The first import of NumPy, SciPy or Matplotlib
  * downloads them (up to ~28 MB), so the time limit starts after loading.
  */
-export async function run(code, { onOutput, check, timeoutMs = 20000, theme } = {}) {
+export async function run(code, { onOutput, check, tests, fresh = false, timeoutMs = 20000, theme } = {}) {
   await start();
   const id = nextId++;
-  const heavy = /^\s*(import|from)\s+(numpy|scipy|matplotlib)\b/m.test(code);
+  const heavy = /^\s*(import|from)\s+(numpy|scipy|matplotlib)\b/m.test(code + '\n' + (tests || []).map((t) => t.code).join('\n'));
   return new Promise((resolve) => {
     const limit = heavy ? timeoutMs + 90000 : timeoutMs;
     const timer = setTimeout(() => { stop(); resolve({ ok: false, error: `Stopped after ${Math.round(limit / 1000)} s — is there an infinite loop?`, figures: [], images: [] }); }, limit);
     pending.set(id, { onOutput, resolve: (m) => { clearTimeout(timer); resolve(m); } });
     const th = theme || document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    worker.postMessage({ type: 'run', id, code, check, theme: th });
+    worker.postMessage({ type: 'run', id, code, check, tests, fresh, theme: th });
   });
 }
 

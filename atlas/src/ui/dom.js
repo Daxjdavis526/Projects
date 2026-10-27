@@ -40,7 +40,7 @@ export const clear = (el) => { while (el.firstChild) el.removeChild(el.firstChil
 // (`cond ? el : null`, arrays of rows). The DOM would print those as the text
 // "null" or "[object HTMLDivElement]", so these methods flatten arrays and drop
 // null, undefined and false for every element in the app.
-for (const name of ['append', 'prepend', 'replaceChildren', 'before', 'after']) {
+for (const name of typeof Element === 'undefined' ? [] : ['append', 'prepend', 'replaceChildren', 'before', 'after']) {   // (no DOM in Node tests)
   for (const proto of [Element.prototype, DocumentFragment.prototype]) {
     const native = proto[name];
     if (!native || native.__atlas) continue;

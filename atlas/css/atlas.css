@@ -449,3 +449,10 @@ table.t tr:last-child td{border-bottom:0}
 @media print{.side,.topbar,.tabbar,.player-nav,.q-actions{display:none !important}.app{display:block}}
 
 .code-plot img.mpl{display:block;max-width:100%;height:auto;margin:.6rem 0;border-radius:10px;border:1px solid var(--line)}
+.code-input{width:100%;min-height:8rem;resize:vertical;font:500 .9rem/1.5 var(--mono,'JetBrains Mono',ui-monospace,monospace);background:var(--bg-2);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:.8rem .9rem;tab-size:4;white-space:pre;overflow:auto}
+.code-input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.code-run{margin:.6rem 0 0;max-height:14rem;overflow:auto;font:500 .82rem/1.45 var(--mono,'JetBrains Mono',ui-monospace,monospace);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;white-space:pre-wrap}
+.code-run .err{color:var(--bad)}
+pre.code-answer{margin:.4rem 0 0;font:500 .82rem/1.45 var(--mono,'JetBrains Mono',ui-monospace,monospace);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;overflow:auto;white-space:pre;color:var(--ink)}
+pre.code-block{margin:.8rem 0;font:500 .84rem/1.5 var(--mono);background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:.75rem .9rem;overflow:auto;white-space:pre;color:var(--ink);tab-size:4}
+pre.code-block code{background:none;border:0;padding:0;font-size:inherit}

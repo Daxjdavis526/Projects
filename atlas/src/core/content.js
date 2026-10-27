@@ -13,7 +13,7 @@ import { makeRng, hashString } from './rng.js';
 import { grade } from './check.js';
 import { mathIn, escapeDamage } from './markup.js';
 
-export const ITEM_TYPES = ['mcq', 'multi', 'numeric', 'expression', 'order', 'match', 'label', 'point', 'slider'];
+export const ITEM_TYPES = ['mcq', 'multi', 'numeric', 'expression', 'order', 'match', 'label', 'point', 'slider', 'code'];
 export const LESSON_KINDS = ['lesson', 'concept', 'dissection'];
 
 /** A dissected equation marks its parts as \part{n}{…}; for plain rendering they are just groups. */
@@ -49,6 +49,8 @@ export const num = (f) => ({ type: 'numeric', ...f });
 export const expr = (f) => ({ type: 'expression', ...f });
 export const order = (f) => ({ type: 'order', ...f });
 export const match = (f) => ({ type: 'match', ...f });
+/** A coding exercise: Python checked by running it (src/lab/harness.js). */
+export const code = (f) => ({ type: 'code', ...f });
 
 /**
  * A concrete question: run the generator (if any) with a seed derived from the
@@ -99,6 +101,7 @@ export function keyResponse(item) {
     case 'match': case 'label': return Object.fromEntries(item.answer.map((r, l) => [l, r]));
     case 'point': return item.answer;
     case 'slider': return (item.answer[0] + item.answer[1]) / 2;
+    case 'code': return item.answer;
     default: return null;
   }
 }
@@ -122,7 +125,8 @@ export function validateItem(item, tex) {
   if (item.teach) need(item.teach.split(/(?<=[.!?])\s+/).filter(Boolean).length <= 2, 'teach should be one sentence (two at most)');
   // strings: escape damage and TeX
   const strings = [...TEXT_FIELDS.map((f) => item[f]), ...(item.hints || []), ...(item.choices || []),
-    ...(item.items || []), ...(item.left || []), ...(item.right || []), ...Object.values(item.why || {})];
+    ...(item.items || []), ...(item.left || []), ...(item.right || []), ...Object.values(item.why || {}),
+    ...(item.tests || []).map((x) => x.name)];
   for (const s of strings) {
     if (s === undefined || s === null) continue;
     const dmg = escapeDamage(s);
@@ -130,6 +134,13 @@ export function validateItem(item, tex) {
     if (tex) for (const m of mathIn(s)) {
       try { tex(m.tex, m.display); } catch (e) { p.push(`bad TeX “${m.tex}”: ${e.message}`); }
     }
+  }
+  if (item.type === 'code') {
+    // run by test/code.test.mjs in real Python: the reference passes, the starter does not
+    need(typeof item.starter === 'string', 'a coding exercise needs starter code (it may be empty)');
+    need(typeof item.answer === 'string' && item.answer.trim().length > 0, 'a coding exercise needs a reference solution in answer');
+    need(Array.isArray(item.tests) && item.tests.length >= 1 && item.tests.every((x) => x.name && x.code), 'a coding exercise needs tests: [{ name, code }]');
+    return p;
   }
   // the key must pass; distractors must fail
   try {

@@ -8,6 +8,7 @@ finished lessons as models:
 - `content/phys2210/M5.3.js` — a physics lesson with diagram visuals
 - `content/gr/S09.i.js` — a Road to Einstein lesson (Intuition Mode)
 - `content/gr/EQ.1.js` — an equation dissection
+- `content/prog/P0.1.js` — a programming lesson with coding exercises
 
 **Never open anything under `atlas/vendor/`** (KaTeX, Pyodide, fonts). They
 are downloaded libraries, some of them megabytes on one line.
@@ -91,8 +92,11 @@ Prerequisites live in the course index, not in the lesson file.
 ### Markup
 
 All prose fields use a small Markdown: paragraphs (blank line), `**bold**`,
-`*italic*`, `` `code` ``, `- ` lists, `> ` callouts, `[links](https://…)`,
-inline math `$…$` and display math `$$…$$`.
+`*italic*`, `` `code` ``, fenced code blocks (```` ```python ```` … ```` ``` ````,
+on lines of their own), `- ` lists, `> ` callouts, `[links](https://…)`,
+inline math `$…$` and display math `$$…$$`. Nothing inside code is read as
+math or emphasis. Inside `` t`…` `` a backtick must be typed `` \` `` —
+the markup reads `` \` `` as a plain backtick, so `` t`Use \`x**2\`.` `` works.
 
 **Write every string that contains a backslash as `` t`…` `` (String.raw).**
 In an ordinary string `'\frac'` silently becomes a form feed plus `rac`; the
@@ -231,6 +235,35 @@ checks; `answer: [lo, hi]` is the accepted range. `type: 'point'`: a `graph`
 visual with one draggable point (`drag: [{ key: 'p', x, y }]`); `answer: { x, y }`
 with `tol: { x, y }`. Write these as plain objects (`{ type: 'slider', … }`).
 
+### Coding exercise — `code`
+
+Python, checked by running it — in the browser's Python worker for the
+learner, and in Node (Pyodide, the same build) by `test/code.test.mjs`, which
+requires the reference solution to pass every test and the starter not to.
+
+```js
+code({ id: 'ke-function', difficulty: 2,
+  prompt: t`Write a function \`kinetic_energy(m, v)\` that **returns** $\tfrac12 m v^2$.`,
+  starter: t`def kinetic_energy(m, v):
+    pass
+`,
+  answer: t`def kinetic_energy(m, v):
+    return 0.5 * m * v**2`,                      // the reference solution
+  tests: [                                        // Python expressions, evaluated after the program runs
+    { name: 'kinetic_energy(2, 3) is 9 J', code: 'abs(kinetic_energy(2, 3) - 9) < 1e-12' },
+    { name: 'the program prints the result', code: '"300000" in _stdout' },   // _stdout = everything printed
+  ],
+  hints: ['…', '…'], teach: '…', explain: '…' })
+```
+
+The program runs in a fresh namespace; each test is a Python expression
+evaluated in it, and passes if truthy. Test names are what a learner sees next
+to ✓ or ✗, so make them say what is being checked. Compare floats with a
+tolerance. Programs may import `numpy`, `scipy`, `matplotlib`, `sympy`,
+`mpmath` (loaded on demand — the first NumPy import costs a few seconds).
+Write code with `` t`…` `` so `\n` inside Python strings survives. Run
+`node atlas/test/code.test.mjs <lesson-id>` after `content.test.mjs`.
+
 ### Generators
 
 A generator `gen(r)` returns the fields that vary, and **computes the numbers
@@ -286,6 +319,7 @@ The library (read the header comment of a sim's file for its full options):
 | `worldlines` | proper time along two worldlines between the same events (twin paradox) | `T`, `tx`, `tt` |
 | `orbit` | Newtonian vs Schwarzschild orbits, effective potential, ISCO, plunge | `mode`, `r0`, `L`, `turns`, `compare` |
 | `ibp-area` | integration by parts as two areas | `pair: 'xcos' \| 'ln'` |
+| `code-runner` | an editable, runnable Python snippet with its output and figures (atlas.plot or Matplotlib) — the Explore step of a programming lesson | `code`, `rows` |
 
 Sliders take `{ key, label, min, max, step, value, unit, explain, logScale }`;
 `label` and `explain` are markup, `unit` is TeX. Every slider needs an
@@ -431,7 +465,8 @@ result moves the right mastery estimate. Boss items follow all the item rules
 
 ## Before you call a lesson done
 
-- [ ] `node atlas/test/content.test.mjs <lesson-id>` passes.
+- [ ] `node atlas/test/content.test.mjs <lesson-id>` passes (and
+      `node atlas/test/code.test.mjs <lesson-id>` if it has coding exercises).
 - [ ] Screenshots of every step (`tools/shots.mjs … lesson:<id> dark`) look
       right: no clipped equations, no overlapping labels, nothing empty.
       Check one in `light` too.

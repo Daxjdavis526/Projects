@@ -127,6 +127,7 @@ node atlas/test/check.test.mjs      # expression parser, units, every grader
 node atlas/test/engine.test.mjs     # FSRS-6, mastery, progress replay, planning
 node atlas/test/models.test.mjs     # orbits, relativity and numerics behind the simulations
 node atlas/test/content.test.mjs    # every lesson, every generator over 25 seeds, every visual
+node atlas/test/code.test.mjs       # every coding exercise, run in real Python (Pyodide in Node)
 node atlas/tools/register.mjs --check
 node atlas/tools/shots.mjs /tmp/shots pages      # screenshots (Playwright)
 ```

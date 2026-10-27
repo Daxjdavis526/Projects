@@ -8,10 +8,12 @@
 // worker from the page — no SharedArrayBuffer needed.
 
 import { loadPyodide } from '../../vendor/pyodide-314.0.7/pyodide.mjs';
+import { testScript, SCIENTIFIC, imports } from './harness.js';
 
 const BASE = new URL('../../vendor/pyodide-314.0.7/', import.meta.url).href;
 let py = null;
 let currentId = null;
+let captured = '';            // what the current program has printed
 const installed = new Set();
 
 const PLOT_MODULE = `
@@ -122,7 +124,7 @@ async function boot() {
     'if "/home/pyodide" not in sys.path: sys.path.insert(0, "/home/pyodide")',
     'os.environ["MPLBACKEND"] = "Agg"',
     'warnings.filterwarnings("ignore", message=".*non-interactive.*")'].join('\n'));
-  py.setStdout({ batched: (s) => postMessage({ type: 'stdout', id: currentId, text: s + '\n' }) });
+  py.setStdout({ batched: (s) => { captured += s + '\n'; postMessage({ type: 'stdout', id: currentId, text: s + '\n' }); } });
   py.setStderr({ batched: (s) => postMessage({ type: 'stderr', id: currentId, text: s + '\n' }) });
   postMessage({ type: 'ready', version: py.version, python: py.runPython('import sys; sys.version.split()[0]') });
 }
@@ -132,10 +134,8 @@ async function sha256Hex(buf) {
   return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-// the compiled scientific stack, loaded through Pyodide (dependencies and
-// SHA-256 checks come from pyodide-lock.json)
-const SCIENTIFIC = ['numpy', 'scipy', 'matplotlib'];
-const imports = (code, mod) => new RegExp(`^\\s*(import|from)\\s+${mod}\\b`, 'm').test(code);
+// the compiled scientific stack (SCIENTIFIC) is loaded through Pyodide:
+// dependencies and SHA-256 checks come from pyodide-lock.json
 
 async function ensurePackages(code, theme) {
   const sci = SCIENTIFIC.filter((m) => imports(code, m) && !installed.has(m));
@@ -172,25 +172,37 @@ self.onmessage = async (e) => {
   }
   if (m.type === 'run') {
     currentId = m.id;
+    captured = '';
     const t0 = performance.now();
+    // an exercise (m.fresh) runs in its own namespace, so nothing from an
+    // earlier attempt can make it pass
+    const ns = m.fresh ? py.globals.get('dict')() : null;
+    const opts = ns ? { globals: ns } : {};
     try {
-      await ensurePackages(m.code, m.theme);
-      if (m.globals) for (const [k, v] of Object.entries(m.globals)) py.globals.set(k, v);
-      const result = await py.runPythonAsync(m.code);
+      await ensurePackages(m.code + '\n' + (m.tests || []).map((t) => t.code).join('\n'), m.theme);
+      if (m.globals) for (const [k, v] of Object.entries(m.globals)) (ns || py.globals).set(k, v);
+      const result = await py.runPythonAsync(m.code, opts);
       let shown = undefined;
       if (result !== undefined && result !== null) {
         try { shown = String(result); } finally { result?.destroy?.(); }
       }
+      let tests = null;
+      if (m.tests?.length) {
+        (ns || py.globals).set('_stdout', captured);
+        tests = JSON.parse(await py.runPythonAsync(testScript(m.tests), opts));
+      }
       const figs = JSON.parse(py.runPython('import atlas.plot as _ap\n_ap._take()'));
       const images = JSON.parse(py.runPython('import atlas._mpl as _m\n_m.take()'));
       let checks = null;
-      if (m.check) checks = JSON.parse(await py.runPythonAsync(m.check));
-      postMessage({ type: 'done', id: m.id, ok: true, result: shown, figures: figs, images, checks, ms: performance.now() - t0 });
+      if (m.check) checks = JSON.parse(await py.runPythonAsync(m.check, opts));
+      ns?.destroy();
+      postMessage({ type: 'done', id: m.id, ok: true, result: shown, figures: figs, images, checks, tests, stdout: captured, ms: performance.now() - t0 });
     } catch (err) {
       let figs = [], images = [];
       try { figs = JSON.parse(py.runPython('import atlas.plot as _ap\n_ap._take()')); } catch { /* ignore */ }
       try { images = JSON.parse(py.runPython('import atlas._mpl as _m\n_m.take()')); } catch { /* ignore */ }
-      postMessage({ type: 'done', id: m.id, ok: false, error: String(err?.message || err), figures: figs, images, ms: performance.now() - t0 });
+      ns?.destroy();
+      postMessage({ type: 'done', id: m.id, ok: false, error: String(err?.message || err), figures: figs, images, stdout: captured, ms: performance.now() - t0 });
     }
   }
 };

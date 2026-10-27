@@ -80,13 +80,25 @@ export function mountQuestion(el, item, o = {}) {
     paintActions();
   }
 
+  let running = false;
   async function submit() {
-    if (S.resolved) return;
-    const r = grade(item, S.value);
-    if (r.status === 'invalid') { showInvalid(r.feedback); return; }
-    if (askConfidence && S.tries === 0 && !S.confidence) {
-      const choice = await askSure();
-      S.confidence = choice;
+    if (S.resolved || running) return;
+    let r;
+    if (item.type === 'code') {
+      // a program is graded by running it, which takes time: ask first, then run
+      if (!String(S.value || '').trim()) { showInvalid('Write some code first.'); return; }
+      if (askConfidence && S.tries === 0 && !S.confidence) S.confidence = await askSure();
+      running = true; checkBtn.disabled = true; checkBtn.textContent = 'Running…';
+      ctl.clearOutput?.();
+      try {
+        const { gradeCode } = await import('../../lab/grade-code.js');
+        r = await gradeCode(item, S.value, { onOutput: (m) => ctl.output?.(m) });
+      } finally { running = false; checkBtn.textContent = 'Check'; refreshValue(); }
+      if (r.status === 'invalid') { showInvalid(r.feedback); return; }
+    } else {
+      r = grade(item, S.value);
+      if (r.status === 'invalid') { showInvalid(r.feedback); return; }
+      if (askConfidence && S.tries === 0 && !S.confidence) S.confidence = await askSure();
     }
     S.tries += 1;
     S.lastResult = r;
@@ -120,7 +132,7 @@ export function mountQuestion(el, item, o = {}) {
       // opening the solution is not a failure to scold: it gets a neutral heading
       parts.push(h('div.head', { html: S.solution ? `${icon('info')}Here’s how it goes` : `${icon('x')}${final ? 'Not this time' : 'Not quite'}` }));
       const msg = r.feedback || (item.type === 'mcq' ? '' : 'That doesn’t match. Check each step against the hint.');
-      if (msg) parts.push(mdi(msg, 'small'));
+      if (msg) parts.push(item.type === 'code' ? md(msg, 'small') : mdi(msg, 'small'));
       if (!final && assisted) parts.push(h('div.small.faint', { style: { marginTop: '.3rem' } }, item.hints?.length > S.hints ? 'Try again, or take a hint.' : 'Try again, or open the solution.'));
     }
     const box = h(`div.feedback.${ok ? 'good' : S.solution ? 'info' : 'bad'}`, parts);
@@ -128,7 +140,7 @@ export function mountQuestion(el, item, o = {}) {
     if (S.resolved) {
       if (item.teach) feedbackBox.append(h('div.teach', h('span', { html: icon('bulb') }), mdi(item.teach)));
       if (item.explain) feedbackBox.append(h('div.feedback.info', h('div.tiny.eyebrow', 'Why'), md(item.explain, 'small')));
-      if (!ok && item.type !== 'mcq') feedbackBox.append(h('div.small.muted', { style: { marginTop: '.5rem' } }, 'Answer: ', answerText(item)));
+      if (!ok && item.type !== 'mcq') feedbackBox.append(h('div.small.muted', { style: { marginTop: '.5rem' } }, item.type === 'code' ? 'One solution:' : 'Answer: ', answerText(item)));
       if (item.solution) feedbackBox.append(h('details.solution', { open: !ok && S.solution ? '' : null }, h('summary', 'Full solution'), md(item.solution, 'small')));
     } else if (!ok && item.teach && S.tries === 1) {
       feedbackBox.append(h('div.teach', h('span', { html: icon('bulb') }), mdi(item.teach)));
@@ -176,6 +188,7 @@ export function answerText(item) {
     case 'mcq': return mdi(item.choices[item.answer]);
     case 'multi': return h('span', item.answer.map((i) => item.choices[i]).join('; '));
     case 'slider': return h('span', `between ${item.answer[0]} and ${item.answer[1]}`);
+    case 'code': return h('pre.code-answer', item.answer);
     default: return h('span', '');
   }
 }
@@ -199,6 +212,7 @@ function buildControl(item, box, changed) {
     case 'match': case 'label': return matchControl(item, box, changed);
     case 'slider': return sliderControl(item, box, changed);
     case 'point': return pointControl(item, box, changed);
+    case 'code': return codeControl(item, box, changed);
     default: box.append(h('p.muted', `Unsupported item type ${item.type}`)); return { value: () => null };
   }
 }
@@ -362,6 +376,26 @@ function sliderControl(item, box, changed) {
   // the slider lives in the item's visual; this control reads it
   box.append(h('p.small.faint', item.instruction || 'Adjust the control in the picture, then check.'));
   return { value: (vizCtl) => (vizCtl?.get ? vizCtl.get(item.param) : null), lock: () => {} };
+}
+
+function codeControl(item, box, changed) {
+  const ta = h('textarea.code-input', { spellcheck: 'false', autocapitalize: 'off', autocomplete: 'off', 'aria-label': 'Your Python code', rows: Math.min(18, Math.max(6, (item.starter || '').split('\n').length + 2)) });
+  ta.value = item.starter || '';
+  const out = h('pre.code-run', { 'aria-live': 'polite', hidden: true });
+  ta.addEventListener('input', () => changed());
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); const a = ta.selectionStart, b = ta.selectionEnd; ta.value = ta.value.slice(0, a) + '    ' + ta.value.slice(b); ta.selectionStart = ta.selectionEnd = a + 4; changed(); }
+  });
+  box.append(ta, h('div.tiny.faint', { style: { margin: '.35rem 0 0' } }, 'Python 3.14 runs in your browser. Check runs your program and then the exercise’s tests. Tab inserts four spaces.'), out);
+  return {
+    value: () => ta.value,
+    output: (m) => { if (m.type === 'status') return; out.hidden = false; out.append(m.type === 'stderr' ? h('span.err', m.text) : m.text); },
+    mark: () => {},
+    lock: () => { ta.readOnly = true; },
+    reveal: () => {},
+    focus: () => ta.focus({ preventScroll: true }),
+    clearOutput: () => { out.replaceChildren(); out.hidden = true; },
+  };
 }
 
 function pointControl(item, box, changed) {
